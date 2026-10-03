@@ -466,7 +466,10 @@ def main():
         for tk, detail in sorted(credited.items()):
             px_new, why = exdate_frame.verify_post_event_price(
                 prices.get(tk), (positions[tk] or {}).get("marketPrice"),
-                1.0 + float(detail["exercise_ratio"]))
+                1.0 + float(detail["exercise_ratio"]),
+                # chỉ khác 0 khi sự kiện lấy từ registry (exdate_frame fallback) có chân tiền
+                # mặt — đường lịch vendor không mang khoá này ⇒ 0.0, hành vi cũ giữ nguyên
+                float(detail.get("cash_leg_vnd_per_share", 0.0) or 0.0))
             if px_new is None:
                 blocked[tk] = (
                     f"broker ĐÃ credit sớm {detail['residual']:+,.0f}cp (khớp tỉ lệ "

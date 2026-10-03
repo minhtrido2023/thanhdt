@@ -31,6 +31,7 @@ VÌ SAO PHẢI ĐỐI SOÁT chứ không tin thẳng `marketPrice`: `price_frame
 TẠO ĐƯỢC giá cum đã biết qua chính hệ số sự kiện — bằng chứng cơ khí, §29.
 """
 import math
+import os
 
 # Sai số cho phép giữa `marketPrice` broker và giá tham chiếu tự dựng `px_cum / multiplier`.
 # Hai nguồn sai số, cả hai đều NHỎ và có cận trên cơ khí:
@@ -103,6 +104,53 @@ def verify_post_event_price(px_cum, market_price, multiplier, cash_per_share=0.0
                           f"dung sai {tol:,.1f})")
 
 
+REGISTRY_FALLBACK_ENV = "MIKE_EXDATE_REGISTRY_FALLBACK"
+_REGISTRY_CODE = {"SPLIT": "SPLIT"}        # BONUS_ISSUE/STOCK_DIVIDEND ⇒ "ISS" (mã vendor cùng loại)
+
+
+def registry_fallback_enabled():
+    """Công tắc lùi — MẶC ĐỊNH TẮT ("1" mới bật). Bật cần user duyệt (job Taylor_20261003_033512)."""
+    return os.environ.get(REGISTRY_FALLBACK_ENV, "0").strip() == "1"
+
+
+def registry_event_next_session(ticker, asof, path=None):
+    """Sự kiện CONFIRMED trong `data/corp_actions.json` của `ticker` có ex_date = phiên KẾ TIẾP
+    `asof`, dựng theo đúng hình dạng `upcoming_events_held` để `classify_qty_residual` kiểm.
+
+    CHỈ dùng khi lịch vendor KHÔNG có sự kiện cho mã (feed đứng — ca TPB 2026-10-01: user đã ký
+    CONFIRMED mà compute_active_nav vẫn chặn vì cổng chỉ đọc lịch vendor). KHÔNG nới cổng: phần
+    dư KL vẫn phải khớp đúng hệ số (dung sai cũ), và giá vẫn phải qua `verify_post_event_price`
+    ở caller. Record chưa CONFIRMED (PROPOSED/REVOKED) và record provenance=broker không bao giờ
+    được trả về.
+
+    `event_code` dùng mã VENDOR cùng loại ("ISS"/"SPLIT") chứ không phải nhãn riêng: khoá chống
+    cộng-hai-lần của `discretionary_accumulation_inject` là (ticker, ex_date, event_code) — nhãn
+    khác sẽ khiến cùng sự kiện bị quy đổi baseline lần 2 nếu feed vendor sống lại giữa chừng.
+    """
+    import datetime as _dt
+    import json as _json
+    import corp_actions
+    from trading_bot.vn_market import next_trading_day
+    path = path or corp_actions.REGISTRY
+    nxt = next_trading_day(_dt.date.fromisoformat(asof)).isoformat()
+    if not os.path.exists(path):                     # sổ vắng mặt = không có sự kiện (như load_all)
+        return None
+    # Record do CHÍNH broker suy ra (provenance=broker) KHÔNG được làm "nguồn thứ hai" cho cổng
+    # này: cổng đối chiếu KL broker với một nguồn ĐỘC LẬP; broker xác nhận broker = 1 nguồn
+    # (arch-review v1 M6). `validate()` bỏ khoá provenance ⇒ đọc thô để lọc theo id.
+    with open(path, encoding="utf-8") as f:
+        broker_ids = {r.get("id") for r in (_json.load(f).get("actions") or [])
+                      if str(r.get("provenance", "")).lower() == "broker"}
+    for a in corp_actions.load_corp_actions(path=path, ticker=ticker):
+        if a["ex_date"] == nxt and a["id"] not in broker_ids:
+            return {"ticker": a["ticker"], "date": nxt, "price_adjusting": True,
+                    "event_code": _REGISTRY_CODE.get(a["event_type"], "ISS"),
+                    "exercise_ratio": a["qty_multiplier"] - 1.0,
+                    "cash_leg_vnd_per_share": a["cash_leg_vnd_per_share"],
+                    "source": f"corp_actions.json:{a['id']}"}
+    return None
+
+
 def classify_positions(account_label, account_no, asof, positions):
     """Mã nào đang ở hệ SAU sự kiện trong khi giá đóng cửa còn ở hệ TRƯỚC.
 
@@ -155,8 +203,17 @@ def classify_positions(account_label, account_no, asof, positions):
                                           missing_out=journal_gaps).get(tk)
                     if prev_d else None)
         ev = dns.held_event_next_session(snap, asof, tk)
+        if ev is None and registry_fallback_enabled():
+            try:
+                ev = registry_event_next_session(tk, asof)
+            except Exception as e:   # registry hỏng ⇒ KHÔNG đoán, chặn đúng mã này (§29: lỗi thật)
+                blocked[tk] = f"không đọc được data/corp_actions.json để tra sự kiện: {e}"
+                continue
         verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
         if verdict == "share_event_credit":
+            if ev and ev.get("source"):
+                detail["event_source"] = ev["source"]
+                detail["cash_leg_vnd_per_share"] = ev.get("cash_leg_vnd_per_share", 0.0)
             credited[tk] = detail
         elif verdict == "qty_unexplained":
             blocked[tk] = (
