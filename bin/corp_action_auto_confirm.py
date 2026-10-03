@@ -268,9 +268,12 @@ def run(date_str, dry_run=False):
               f"chạy; KHÔNG chạy nhánh nào.")
         _ask_lock_unavailable(date_str, mode)
         return 1
+    global _LOCK_HELD
+    _LOCK_HELD = lk is not None   # cả đời run(): 2 nhánh dùng chung khoá này, run_broker không xin lại
     try:
         return _run_both(date_str, dry_run, mode)
     finally:
+        _LOCK_HELD = False
         if lk:
             lk.close()
 
@@ -281,8 +284,6 @@ def _run_branch(name, fn, date_str, dry_run, mode):
     rc bị bỏ qua — cùng lớp #3 vòng 4) + rc=1, nhánh còn lại VẪN chạy (r5 M-C: hai nhánh đọc
     nguồn khác nhau, chỉ chung khoá + registry; vendor nổ không có lý do làm mất lượt broker).
     SandboxMismatch KHÔNG bị nuốt (đang trỏ lệch production ⇒ dừng hẳn)."""
-    global _LOCK_HELD
-    _LOCK_HELD = True
     try:
         return fn()
     except SandboxMismatch:
@@ -299,8 +300,6 @@ def _run_branch(name, fn, date_str, dry_run, mode):
                            "error": f"{type(e).__name__}: {e}", "traceback_tail": tb[-1500:],
                            "mode": mode, "urgency": "high"})
         return 1
-    finally:
-        _LOCK_HELD = False
 
 
 def _run_both(date_str, dry_run, mode):
@@ -980,7 +979,7 @@ def run_broker(date_str, dry_run=False, mode="shadow"):
                   f"{r.get('qty_multiplier', '-')}: {r['why'][:300]}")
         return 0
     _sandbox_guard()
-    if False:
+    if _LOCK_HELD:
         return _run_broker_locked(date_str, mode, results)
     lk = _lock(LEDGER_FILE)
     if lk is None:
