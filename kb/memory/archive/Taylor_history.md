@@ -866,3 +866,6 @@
 
 ## Archived 2026-10-03 (keep=12 days=0 require_done=False)
 - [2026-10-02T10:07:04Z] [oddlot-full-exit VONG 3] XONG job Taylor_20261002_094032: commit 817f0614 (branch fix/oddlot-full-exit-20261002, wt-oddlot-1002) — park_holdings.aggregate_position_rows chung live/jsonl, selfcheck 64/0, mutation 35/35, 19 selfcheck x5 TZ == base. CHO arch-review/quant-skeptic + Mike merge; user quyet brokers.py:729-731 (con anh huong executor.py:2021/2208).
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-10-02T11:42:57Z] [2026-10-02] [brokers-tradequantity-zero] XONG job Taylor_20261002_103812: branch fix/brokers-tradequantity-zero-20261002@ba2e0a47 (wt-tq0-1002), _sellable_qty 3 site, selfcheck+mutation+89 selfcheck x3TZ == base. CHO quant-skeptic + Mike merge.
