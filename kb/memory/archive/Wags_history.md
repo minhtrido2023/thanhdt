@@ -348,3 +348,6 @@ BÀI HỌC: pre-commit 'Stashing unstaged files' ở repo dùng chung nuốt fil
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-09-14T05:47:19Z] [2026-09-14] coord-2026-09-14 (job 054508): dong Q TV1 (user duyet plan qua Discord). CHO USER: aria-K-landed-before-schedule (A giu/B revert), da notify trading_daily + ack 2 ngay. NEXT: sau 14:55 14/09 kiem journal ZaloPay co ATC_POSTCLOSE_* khong; tripwire fail-loud arch-review yeu cau van CHUA xay.
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-09-23T01:22:17Z] [2026-09-23] coord-2026-09-23: question retro-pattern-recurring-plan-approval-gate-3days KHONG phai loi dieu phoi — la quyet dinh USER (A lop nhac 08:45 / B giu nguyen / C doi bot 09:15), ca A lan C cham duong thuc thi => ngoai ranh gioi Wags. Da ack triaged-needs-human suppress_days=7 + post A/B/C vao trading_daily. CHO USER tra loi; het 7 ngay ack het han, cau hoi tu noi lai. Khong sua file nao (files_changed=[]).

@@ -15,3 +15,5 @@
 ## Backlog
 - 9 topic selfcheck-red; VNM exright note cho Winston; ack SCL bán tay 09-30; production_manifest ROOT_TIER thiếu 3 cron; context_pack/current_ops phình (trim).
 
+- [2026-10-03T05:31:20Z] 10-03 12:35: Taylor broker-corp-action DONE ở round-3 cap (branch feat/broker-corp-action-source-20261003, 9ab1cf5f, shadow mặc định). CHỜ USER: (a) merge shadow? (b) dispatch Sonnet-medium sửa N9 + 11 đột biến sống trước live; (c) 4 dòng quote_unmapped ZZZ/AAA/BBB/CCC trong dnse_raw_2026-10-03.jsonl dòng 21-24 — giữ hay xoá. Wags audit merge: chờ duyệt port prompt investor-grade + dọn 2 test mồ côi.
+- [2026-10-03T06:49:06Z] 10-03 13:50 USER DUYỆT: merge broker-corp-action ở SHADOW (sau vòng verify), giao vòng verify Sonnet (Taylor_20261003_064854), giữ 4 dòng quote_unmapped, duyệt port prompt investor-grade+dọn 2 test (Wags_20261003_064857, branch fix/report-prompt-port-20261003, arch-review bắt buộc). Mike MERGE cả 2 sau khi đọc kết quả; poll ScheduleWakeup.
