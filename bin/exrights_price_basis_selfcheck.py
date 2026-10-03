@@ -227,7 +227,8 @@ check("cổng 5% vẫn còn nguyên trong daily_nav_snapshot.py (bản vá KHÔN
 
 # [9b] ĐÃ RETIRE 2026-10-03: test `early_corp_action_price` (BID broker-credit sớm) — hàm bị XOÁ CÓ Ý ở
 # 7ed14edc (thay bằng corp_action_gate_v2 / classify_qty_residual trong daily_nav_snapshot.py);
-# hợp đồng mới được khoá ở paper_report_render_selfcheck mục 0.
+# wiring gate v2 khoá ở paper_report_render_selfcheck mục 0; test HÀNH VI ca BID thật ở
+# daily_nav_snapshot_from_raw_selfcheck.py §5.
 
 print("\n[10] CỬA SỔ GIỮA PHIÊN (09:00–14:45): closePrice=0 mọi board — nửa đồng hồ quant-skeptic")
 # Bản vá ĐẦU chỉ phủ tiền phiên. Giữa phiên DNSE trả closePrice=0 ở MỌI board (retro-2026-08-07
