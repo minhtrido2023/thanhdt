@@ -1,26 +1,26 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Ưu tiên hiện tại (cập nhật 2026-10-03 10:40 ICT)
-- User duyệt 10-03 10:34: (1) corp-action phương án B broker-làm-nguồn → Taylor_20261003_033512 (opus/high, cần user duyệt trước khi BẬT THẬT); (2) NAV SpaceX 10-01 đã backfill (estimate); (3) audit merge 9311ac03 → Wags_20261003_033514.
-- Định nghĩa XU HƯỚNG HẠ lãi suất (user chốt 10-03): Big-4 12M HOẶC CCTG 6M thấp hơn tuần thống kê trước → chỉ CẢNH BÁO, không tự khôi phục park. Code deposit_cctg_trend_check.py so 2 anchor gần nhất mỗi chuỗi (tương đương).
-- rating_8l/DCF dùng effective rate: user DUYỆT 10-03 (đã LIVE từ 10-01).
-## Đang chờ
-- Taylor_20261003_033512 (broker corp-action), Wags_20261003_033514 (audit merge) — kết quả tự báo vào thread 1555778271369494598; Mike ScheduleWakeup poll.
-- Cron mới 08:00 ICT daily_decision_topic.py: lần chạy thật đầu 10-04 — kiểm log/ topic 04.10 có tạo không.
-## Chờ user
-- Discretionary DRI/TV1.
-- Trứng vàng vượt trần đề xuất legal-vn (sleeve ≤10% NAV) — chưa chốt.
-- Cổ tức TPB: BQ 531.300đ lệch tiền thật 100.000đ — cần người kiểm nguyên nhân.
-## Backlog
-- 9 topic selfcheck-red; VNM exright note cho Winston; ack SCL bán tay 09-30; production_manifest ROOT_TIER thiếu 3 cron; context_pack/current_ops phình (trim).
+## Ưu tiên hiện tại (cập nhật 2026-10-04 00:35 ICT)
+- Broker corp-action là nguồn CHÍNH (user duyệt 10-03 23:27): `Taylor_20261003_162814` (Opus high, branch feat/broker-primary-20261003) đang chạy attempt 2/2 (max-turns 160). CHƯA merge — chờ log shadow T2 05/10 + T3 06/10 19:25 ICT VÀ user duyệt lại.
+- Feed vendor `corp_action_daily` DEAD (asof 10-02, tuổi 6 ngày). Log asof 10-03 CHƯA xác minh.
+- Retro 10-03 đã ghi (`kb/incidents/retro/retro-2026-10-03.md`, commit f32ec27f). Wags verify GAPS FOUND → đã sửa.
 
-- [2026-10-03T05:31:20Z] 10-03 12:35: Taylor broker-corp-action DONE ở round-3 cap (branch feat/broker-corp-action-source-20261003, 9ab1cf5f, shadow mặc định). CHỜ USER: (a) merge shadow? (b) dispatch Sonnet-medium sửa N9 + 11 đột biến sống trước live; (c) 4 dòng quote_unmapped ZZZ/AAA/BBB/CCC trong dnse_raw_2026-10-03.jsonl dòng 21-24 — giữ hay xoá. Wags audit merge: chờ duyệt port prompt investor-grade + dọn 2 test mồ côi.
-- [2026-10-03T06:49:06Z] 10-03 13:50 USER DUYỆT: merge broker-corp-action ở SHADOW (sau vòng verify), giao vòng verify Sonnet (Taylor_20261003_064854), giữ 4 dòng quote_unmapped, duyệt port prompt investor-grade+dọn 2 test (Wags_20261003_064857, branch fix/report-prompt-port-20261003, arch-review bắt buộc). Mike MERGE cả 2 sau khi đọc kết quả; poll ScheduleWakeup.
-- [2026-10-03T07:02:58Z] 10-03 14:10 ĐÃ MERGE master: Wags report-prompt-port (db357342) + Taylor broker-corp-action SHADOW (9d15a6e7). Cron có sẵn 19:25 ICT T2-T6 corp_action_auto_confirm.py sẽ chạy nhánh broker ở shadow từ T2 05/10 — kiểm log logs/corp_action_auto_confirm.log + data/corp_action_broker_ledger.jsonl + bus finding corp-action-broker-shadow-*. CHƯA bật: live, MIKE_EXDATE_REGISTRY_FALLBACK, cron 21:00. Knob lùi: MIKE_CA_BROKER_SOURCE=off. Còn mở trước live: xác minh DNSE marketId sau 19:00; BID gói vay credit muộn; E5/E5b paper_report_render; report_delivery_ledger notify.log.
-- [2026-10-03T08:26:34Z] 10-03 15:27 USER DUYỆT sửa tiếp theo arch-review độc lập: Taylor_20261003_082621 (Opus high, branch fix/broker-ca-r4-20261003, 12 mục: BLOCKER _exchange_fn thiếu connect() ⇒ shadow toàn AMBIGUOUS) + Wags_20261003_082623 (Sonnet medium, fix/report-prompt-r2-20261003: sửa comment xuất xứ sai 7ed14edc→merge 9311ac03 + guard prompt). Mike MERGE sau khi tự kiểm; HẠN: broker fix phải merge TRƯỚC 19:25 ICT T2 05/10 (cron corp_action_auto_confirm chạy shadow). Cầu chì: broker reviewer vòng mới ra lỗi MỚI khác loại ⇒ dừng báo user.
-- [2026-10-03T08:30:10Z] 10-03 15:40 ĐÃ MERGE Wags report-prompt-r2 (56c38165; checkpoint cadence 52/52). CÒN: Taylor_20261003_082621 (broker fix r4, branch fix/broker-ca-r4-20261003) — merge trước 19:25 ICT T2 05/10 nếu reviewer APPROVED/MINOR. Wakeup poll đang đặt.
-- [2026-10-03T09:03:14Z] 10-03 16:10 Taylor r4 (fix/broker-ca-r4-20261003, c187bc94) DONE nhưng STOPPED_NEW_BUG_CLASS: 12/12 đã sửa, reviewer NEEDS_CHANGES không chặn shadow; lỗi MAJOR mới M-A (sửa #5 coi corp_action_daily_*_FAILED/feed_dead = VENDOR_UNREADABLE ⇒ feed chết >5 ngày thì broker AMBIGUOUS 100%, trái ý user 10-01). CHƯA merge — CHỜ USER: (1) merge c187bc94 shadow trước 19:25 T2 05/10? (2) ngữ nghĩa _FAILED feed_dead (A: tách feed_dead khỏi unreadable; B: giữ). Mike đề xuất merge ngay + chốt M-A.
-- [2026-10-03T09:15:13Z] 10-03 16:20 USER ĐỒNG Ý cả 3: MERGED broker r4 (8b436975, shadow). Giao Taylor Taylor_20261003_091511 (Sonnet medium, fix/broker-ca-r5-20261003): M-A phương án A (feed_dead ⇒ lịch vendor [] + cờ VENDOR_FEED_DEAD; thiếu file/hỏng/gate khác giữ UNREADABLE), M-B bus question, M-D marker, M-C, 9 đột biến sống, số đo mốc positions 19:03-19:14. Mike merge trước 19:25 T2 05/10.
-- [2026-10-03T10:47:50Z] 10-03 17:55 XONG: merged broker r5 (2c2abc63, shadow). Master hiện có: report-prompt r2 (56c38165), broker r4 (8b436975), broker r5 (2c2abc63). Cron 19:25 ICT T2 05/10 chạy nhánh broker SHADOW lần đầu ⇒ KIỂM sau 19:30: logs/corp_action_auto_confirm.log, data/corp_action_broker_ledger.jsonl, bus finding/question corp-action-*, dnse_raw không phát sinh quote_unmapped. Knob lùi MIKE_CA_BROKER_SOURCE=off. CHƯA bật: live, MIKE_EXDATE_REGISTRY_FALLBACK, cron 21:00, timeout 900 cho dòng cron (đề xuất). Cron 08:00 daily_decision_topic.py chạy thật đầu 04/10 — kiểm topic 04.10.
-- [2026-10-03T16:28:17Z] 10-03 23:30 USER DUYỆT đổi thứ tự: broker PRIMARY, vendor chỉ xác nhận chéo (lệch ⇒ UNVERIFIED+báo Winston). Giao Taylor Taylor_20261003_162814 (Opus high, branch feat/broker-primary-20261003, 1 arch-review cuối). KHÔNG merge trước khi xem log shadow T2 05/10 + T3 06/10 19:25 ICT và user duyệt lại. Kèm 2 mục báo cáo: plan 21:00 đọc broker sau cập nhật chưa (BID 20:15) & nav_exdate_forecast mất cảnh báo khi vendor chết.
+## Đang chờ
+- Taylor_20261003_162814: kết quả broker PRIMARY + 2 mục báo cáo (plan 21:00 đọc broker sau cập nhật chưa; nav_exdate_forecast mất cảnh báo khi vendor chết).
+- Cron 19:25 ICT T2 05/10 `corp_action_auto_confirm` chạy nhánh broker SHADOW lần đầu → kiểm log, `data/corp_action_broker_ledger.jsonl`, bus `corp-action-broker-shadow-*`, dnse_raw không phát sinh quote_unmapped.
+- Cron 08:00 ICT `daily_decision_topic.py` chạy thật đầu 04/10 → kiểm topic 04.10 có tạo không.
+
+## Chờ user
+- Port P1 report-prompt (Wags): duyệt; merge `1b9d4d46`, `1afc0c59` chưa merge. Kiểm 6 file mất sau merge `9311ac03` (daily_nav_snapshot, check_report_cadence, eod_trading_report, send_report_email, render_report_html, paper_programs_daily_report).
+- Cổ tức TPB: BQ 531.300đ lệch tiền thật 100.000đ — cần người kiểm nguyên nhân; `cash_leg_vnd_per_share` chưa có trong record ⇒ commit 877c79d0 chưa verify trong production.
+- Discretionary DRI/TV1. Trứng vàng vượt trần đề xuất legal-vn (sleeve ≤10% NAV) — chưa chốt.
+
+## Quyết định hôm nay (10-03)
+- Broker r4 (8b436975) + r5 (2c2abc63) merged SHADOW; knob lùi `MIKE_CA_BROKER_SOURCE=off`. Chưa bật live, chưa `MIKE_EXDATE_REGISTRY_FALLBACK`, chưa cron 21:00.
+- Đính chính TPB (Mike, 10-02): gate hết chặn vì ex-date đã qua, KHÔNG phải nhờ 877c79d0.
+- NAV SpaceX 10-01 backfill = estimate.
+
+## Backlog
+- 9 topic selfcheck-red; VNM exright note cho Winston; ack SCL bán tay 09-30; production_manifest ROOT_TIER thiếu 3 cron; context_pack/current_ops phình (trim); `paper_report_render` E5/E5b rc=1 (Wags: lỗi có sẵn, chưa xác minh).
+

@@ -1185,3 +1185,6 @@
 ## Consolidation 2026-10-03T17:34:06Z
 - [2026-10-03T17:34:04Z] Mike/heartbeat — Mike_20261003_173303: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261003_173303", "source": "watcher"}
 - [2026-10-03T17:33:27Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 65, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+
+## Consolidation 2026-10-03T17:34:24Z
+- [2026-10-03T17:34:18Z] Mike/finding — retro-2026-10-03: {"status": "DONE", "entry": "kb/incidents/retro/retro-2026-10-03.md", "commit": "f32ec27f", "incidents": 8, "new_prod": 0, "patterns": ["A: nguyên nhân/xuất xứ khẳng định trước bằng chứng", "B: nhánh broker fallback lỗi qua review, shadow 0 lần chạy thật"], "verified_by": "Wags GAPS FOUND → đã sửa", "open": ["feed corp_action_daily DEAD asof 10-02", "merge 9311ac03 mất 6 file", "Taylor_20261003_162814 running"]}
