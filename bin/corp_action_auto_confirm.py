@@ -22,9 +22,16 @@ Công tắc `MIKE_CA_BROKER_SOURCE`:
   off    — không chạy nhánh broker (hành vi trước 2026-10-03, byte-identical).
   shadow — MẶC ĐỊNH: phát hiện + ghi sổ `data/corp_action_broker_ledger.jsonl` + 1 bus finding
            tóm tắt; KHÔNG ghi `data/corp_actions.json`, KHÔNG hỏi user.
-  live   — ghi record CONFIRMED provenance=broker vào registry (validate() + atomic); MƠ HỒ /
-           CHƯA ĐỦ / vendor có sự kiện mà không xác nhận ⇒ bus question (1 lần / mã / phiên /
-           verdict), KHÔNG ghi.
+  live   — BROKER LÀ NGUỒN CHÍNH (user nâng cấp 2026-10-03 23:08): nhánh broker chạy TRƯỚC và là
+           nơi DUY NHẤT ghi — CONFIRMABLE ⇒ record CONFIRMED provenance=broker (validate() + atomic)
+           BẤT KỂ vendor có sự kiện hay không; vendor chỉ đối chiếu (`vendor_check`): LỆCH (>1% hệ
+           số / >1đ/cp / ex khác) ⇒ UNVERIFIED, KHÔNG ghi, bus question gọi tên Winston kèm CẢ HAI
+           số; MƠ HỒ / CHƯA ĐỦ ⇒ question (1 lần / mã / phiên / verdict). Cổ tức tiền đã khớp
+           cashDividendReceiving ⇒ finding (sổ không chứa cổ tức tiền). Nhánh vendor chạy SAU ở
+           chế độ CHỈ-XÁC-NHẬN (`confirm_only`): không bao giờ ghi; lệch record broker ⇒ hỏi; vendor có
+           sự kiện mà broker không thấy gì ⇒ hỏi (không im lặng, không tự ghi).
+  shadow/off giữ NGUYÊN nhánh vendor là bên ghi như trước (chưa được duyệt bật live); shadow chỉ
+           ghi sổ quyết định broker-primary SẼ làm để người so sánh.
 Sổ 2 pha (intent → tác dụng ngoài → done khi bus rc=0): kill/bus lỗi ⇒ lượt sau GỬI BÙ.
 ⚠️ Phụ thuộc NGẦM: nhánh broker chỉ đọc dnse_raw do tiến trình khác ghi (EOD/park/verify chạy
 19:0x–19:1x); không có bản ghi positions nào sau credit ⇒ INSUFFICIENT/không thấy.
@@ -303,6 +310,13 @@ def _run_branch(name, fn, date_str, dry_run, mode):
 
 
 def _run_both(date_str, dry_run, mode):
+    if mode == "live":
+        # Broker là nguồn chính ⇒ ghi TRƯỚC; vendor sau, chỉ xác nhận (không bao giờ ghi).
+        rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
+                           date_str, dry_run, mode)
+        rc = _run_branch("vendor", lambda: run_vendor(date_str, dry_run=dry_run, confirm_only=True),
+                         date_str, dry_run, mode)
+        return rc_b or rc
     rc = _run_branch("vendor", lambda: run_vendor(date_str, dry_run=dry_run),
                      date_str, dry_run, mode)
     rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
@@ -310,12 +324,12 @@ def _run_both(date_str, dry_run, mode):
     return rc or rc_b
 
 
-def run_vendor(date_str, dry_run=False):
-    """Nhánh vendor. Lỗi ở đường hỏi người (N9 / tỉ lệ lệch broker) KHÔNG được làm mất lô vendor
+def run_vendor(date_str, dry_run=False, confirm_only=False):
+    """Nhánh vendor. `confirm_only` (live, broker-primary) ⇒ KHÔNG ghi registry, chỉ đối chiếu/hỏi. Lỗi ở đường hỏi người (N9 / tỉ lệ lệch broker) KHÔNG được làm mất lô vendor
     (arch-review v4 #6: bản cũ để ngoại lệ ledger_append/_bus thoát ⇒ mất cả lô, 0 bus event):
     gom lỗi, chạy hết lô, rồi báo 1 bus question (urgency high) + rc=1."""
     ask_failed = []
-    rc = _run_vendor(date_str, dry_run, ask_failed)
+    rc = _run_vendor(date_str, dry_run, ask_failed, confirm_only)
     if ask_failed:
         print(f"  ❌ {len(ask_failed)} lần hỏi người lỗi trong nhánh vendor: {ask_failed}")
         try:
@@ -343,13 +357,15 @@ def _ask_guarded(failed, fn, *args):
                        "error": f"{type(e).__name__}: {e}"})
 
 
-def _run_vendor(date_str, dry_run, ask_failed):
-    print(f"[corp_action_auto_confirm] date={date_str} dry_run={dry_run}")
+def _run_vendor(date_str, dry_run, ask_failed, confirm_only=False):
+    print(f"[corp_action_auto_confirm] date={date_str} dry_run={dry_run} confirm_only={confirm_only}")
 
     candidates = get_candidate_events(date_str)
     if not candidates:
         print("  → không có sự kiện nào trong upcoming_events_held cần kiểm.")
         return 0
+    if confirm_only:
+        return _vendor_confirm_only(date_str, dry_run, ask_failed, candidates)
 
     confirmed_set = already_confirmed_set()
     accounts = _get_account_nos(date_str)
@@ -572,6 +588,69 @@ def _run_vendor(date_str, dry_run, ask_failed):
     return 0
 
 
+def _vendor_confirm_only(date_str, dry_run, ask_failed, candidates):
+    """LIVE broker-primary: nhánh vendor KHÔNG BAO GIỜ ghi registry. Mỗi sự kiện CP vendor sắp ex:
+      · registry đã có (mã, ex) ⇒ record broker CONFIRMED lệch tỉ lệ >1% ⇒ hỏi (không đè);
+      · record broker ĐANG CONFIRMED cùng mã ở ex KHÁC gần đó ⇒ hỏi (N9);
+      · nhánh broker đã có mục sổ cho mã ở phiên này (đã ghi/hỏi theo verdict của nó) ⇒ thôi;
+      · còn lại, mã đang giữ ⇒ vendor có sự kiện mà broker KHÔNG thấy gì ⇒ hỏi (không im lặng).
+    Sổ broker đọc hỏng ⇒ coi như broker chưa thấy (hỏi thừa an toàn hơn im)."""
+    actions_raw = load_corp_actions_raw()
+    reg = {(str(r.get("ticker", "")).upper(), str(r.get("ex_date", ""))[:10]): r for r in actions_raw}
+    try:
+        intents, _done = BD.ledger_state(LEDGER_FILE)
+    except BD.CorpActionLedgerError as e:       # §29: nói lỗi thật
+        print(f"  ⚠ sổ broker đọc hỏng ({e}) ⇒ coi như nhánh broker chưa thấy mã nào")
+        intents = {}
+    broker_seen = {e.get("ticker") for e in intents.values()
+                   if e.get("mode") == "live" and e.get("credit_day") == date_str}
+    accounts = _get_account_nos(date_str)
+    for ev in candidates:
+        ticker = ev.get("ticker", "").upper()
+        ex_date = str(ev.get("date") or "")[:10]
+        try:
+            ratio = float(ev.get("exercise_ratio") or 0)
+        except (TypeError, ValueError):
+            ratio = 0.0
+        mult = 1.0 + ratio
+        if (ticker, ex_date) in reg:
+            _bratio = _broker_record_ratio_diff(actions_raw, ticker, ex_date, mult)
+            if _bratio:
+                print(f"  [{ticker}] ⚠ {_bratio[0]} — registry giữ số BROKER, hỏi người.")
+                if not dry_run:
+                    _ask_guarded(ask_failed, _ask_ratio_vs_broker, ticker, ex_date, *_bratio)
+            else:
+                print(f"  [{ticker}] registry đã có ({ticker}, {ex_date}) — vendor khớp/không phải record broker.")
+            continue
+        _bdup = _broker_record_near(actions_raw, ticker, ex_date)
+        if _bdup:
+            print(f"  [{ticker}] ❌ {_bdup[0]} — hỏi người.")
+            if not dry_run:
+                _ask_guarded(ask_failed, _ask_vendor_vs_broker, ticker, ex_date, *_bdup)
+            continue
+        if ticker in broker_seen:
+            print(f"  [{ticker}] nhánh broker đã có mục sổ phiên {date_str} (đã ghi/hỏi theo verdict) — vendor không hỏi lặp.")
+            continue
+        if not any(_get_ticker_snapshots(a, ticker, date_str)[0] is not None for a, _ in accounts):
+            print(f"  [{ticker}] không tài khoản nào giữ mã — bỏ qua.")
+            continue
+        print(f"  [{ticker}] vendor {ev.get('event_code')} ×{mult} ex {ex_date} nhưng broker KHÔNG thấy gì "
+              f"⇒ KHÔNG ghi (broker là nguồn chính), hỏi người.")
+        if not dry_run:
+            _ask_guarded(ask_failed, _ask_vendor_only, ticker, ex_date, mult, ev.get("event_code"), date_str)
+    return 0
+
+
+def _ask_vendor_only(ticker, ex_date, mult, code, date_str):
+    """Vendor có sự kiện CP sắp ex cho mã đang giữ, broker không có ứng viên — 1 lần / (mã, ex)."""
+    _ask_once(["vendor-only", ticker, ex_date, "ASKED"], f"corp-action-vendor-only-{ticker}-{ex_date}",
+              {"question": (f"{ticker}: lịch vendor có {code} ×{mult} ex {ex_date} cho mã đang giữ nhưng "
+                            f"broker DNSE KHÔNG cho thấy credit nào ở phiên {date_str}. Broker là nguồn chính "
+                            f"⇒ KHÔNG tự ghi. Kiểm DNSE sau 21:00 / xác nhận tay; nếu vendor sai ⇒ Winston."),
+               "ticker": ticker, "vendor_ex_date": ex_date, "vendor_qty_multiplier": mult,
+               "vendor_event_code": code, "credit_day": date_str, "urgency": "normal"})
+
+
 # ── Nhánh BROKER ───────────────────────────────────────────────────────────
 
 BROKER_MODES = ("off", "shadow", "live")
@@ -580,7 +659,7 @@ _LOCK_HELD = False        # run() đã giữ khoá ⇒ run_broker không xin l�
 # Gốc PRODUCTION tính ĐỘC LẬP với các biến module selfcheck hay đổi (LEDGER_FILE/EXEC_DIR/
 # BD.LEDGER_FILE) — guard sandbox so với cái này (arch-review v2 N4).
 _PROD_DATA = os.path.realpath(os.path.join(WC_ROOT, "data"))
-BROKER_VENDOR_MULT_TOL = 1e-3   # hệ số vendor vs record broker CÙNG ex: lệch >0,1% ⇒ hỏi (D3 replay ≤0,1%)
+BROKER_VENDOR_MULT_TOL = BD.VENDOR_MULT_TOL_PCT   # vendor vs record broker CÙNG ex: lệch >1% ⇒ hỏi (quy ước 09-24)
 NEAR_DUP_DAYS = 10        # record CÙNG MÃ có ex_date cách credit_day ≤ N ngày lịch ⇒ không ghi, hỏi
 LOCK_WAIT_S = 120
 FEED_DEAD_TAG = "VENDOR_FEED_DEAD: vendor feed chết, broker là nguồn xác định"
@@ -607,7 +686,8 @@ def _vendor_events_fn(date_str):
         sổ/log): đúng ý user 10-01 "vendor feed đứng thì broker là nguồn xác định" (r5 M-A, user
         chốt phương án A; vòng 4 #5 đã gộp ca này vào UNREADABLE ⇒ shadow chỉ ra AMBIGUOUS).
       · THIẾU file hoàn toàn / `_FAILED` gate KHÁC feed_dead (vd selfcheck) / file hỏng ⇒
-        VENDOR_UNREADABLE + in lý do thật (§29) — fail-closed, KHÔNG coi là "vendor không có sự kiện"."""
+        VENDOR_UNREADABLE + in lý do thật (§29) — KHÔNG coi là "vendor không có sự kiện" (status
+        UNREADABLE ≠ NO_EVENT), nhưng từ broker-primary (2026-10-03) cũng KHÔNG chặn broker."""
     path = os.path.join(CA_DAILY_DIR, f"corp_action_daily_{date_str}.json")
     if not os.path.exists(path):
         failed = os.path.join(CA_DAILY_DIR, f"corp_action_daily_{date_str}_FAILED.json")
@@ -617,7 +697,7 @@ def _vendor_events_fn(date_str):
                     gate = json.load(f).get("failed_gate")
             except (OSError, json.JSONDecodeError, AttributeError) as e:
                 print(f"  ❌ lịch vendor {os.path.basename(failed)} đọc hỏng: {type(e).__name__}: {e}"
-                      f" ⇒ mọi ứng viên broker MƠ HỒ (VENDOR_UNREADABLE)")
+                      f" ⇒ VENDOR_UNREADABLE: không đối chiếu được — broker vẫn là nguồn chính, ghi 'chưa được vendor xác nhận'")
                 return lambda tk: BD.VENDOR_UNREADABLE
             if gate == "feed_dead":
                 print(f"  ⚠ VENDOR_FEED_DEAD: {os.path.basename(failed)} failed_gate=feed_dead ⇒ "
@@ -630,13 +710,15 @@ def _vendor_events_fn(date_str):
             why = f"chỉ có {os.path.basename(failed)} với failed_gate={gate!r} (không phải feed_dead)"
         else:
             why = "không có file"
-        print(f"  ❌ lịch vendor {path}: {why} ⇒ mọi ứng viên broker MƠ HỒ (VENDOR_UNREADABLE)")
+        print(f"  ❌ lịch vendor {path}: {why} ⇒ VENDOR_UNREADABLE: không đối chiếu được — broker vẫn là "
+          f"nguồn chính, ghi 'chưa được vendor xác nhận'")
         return lambda tk: BD.VENDOR_UNREADABLE
     try:
         with open(path, encoding="utf-8") as f:
             held = json.load(f).get("upcoming_events_held") or []
     except (OSError, json.JSONDecodeError, AttributeError) as e:
-        print(f"  ❌ lịch vendor {path} đọc hỏng: {type(e).__name__}: {e} ⇒ mọi ứng viên broker MƠ HỒ")
+        print(f"  ❌ lịch vendor {path} đọc hỏng: {type(e).__name__}: {e} ⇒ VENDOR_UNREADABLE: không đối "
+              f"chiếu được — broker vẫn là nguồn chính")
         return lambda tk: BD.VENDOR_UNREADABLE
     return lambda tk: [e for e in held if str(e.get("ticker", "")).upper() == tk]
 
@@ -684,8 +766,30 @@ def _exchange_fn():
 def _px_cum_fn(date_str):
     """Giá đóng cửa CÒN QUYỀN của phiên credit. Hôm nay ⇒ DNSE G1 (§6, BẮT BUỘC nguồn
     'dnse_g1_today' — giá phiên khác là sai hệ); ngày quá khứ ⇒ BQ `Price` chưa điều chỉnh.
-    Lỗi/thiếu ⇒ None ⇒ detector trả INSUFFICIENT, KHÔNG đoán."""
+    Lỗi/thiếu ⇒ None ⇒ detector trả INSUFFICIENT, KHÔNG đoán. `fn.prefetch(tickers, day)` — một lời
+    gọi cho cả lô mã cần sàng lọc CHỈ-GIÁ (thay vì ~30 lời gọi lẻ)."""
+    cache = {}
+
+    def prefetch(tickers, day):
+        try:
+            if day == today_ict():
+                from verify_account_snapshot import dnse_close_prices
+                px, src = dnse_close_prices(list(tickers), with_source=True)
+                for t in tickers:
+                    ok = src.get(t) == "dnse_g1_today"
+                    if not ok:
+                        print(f"  [{t}] giá DNSE nguồn {src.get(t)!r} ≠ dnse_g1_today ⇒ không dùng")
+                    cache[(t, day)] = px.get(t) if ok else None
+            else:
+                got = BD.bq_unadjusted_close({(t, day) for t in tickers})
+                for t in tickers:
+                    cache[(t, day)] = got.get((t, day))
+        except Exception as e:  # §29: lỗi thật; mã chưa có trong cache sẽ thử lẻ ở fn()
+            print(f"  không lấy được giá cum lô {len(tickers)} mã {day}: {type(e).__name__}: {e}")
+
     def fn(ticker, day):
+        if (ticker, day) in cache:
+            return cache[(ticker, day)]
         try:
             if day == today_ict():
                 from verify_account_snapshot import dnse_close_prices
@@ -698,6 +802,7 @@ def _px_cum_fn(date_str):
         except Exception as e:  # mạng/bq lỗi ⇒ INSUFFICIENT, nói rõ lỗi thật (§29)
             print(f"  [{ticker}] không lấy được giá cum {day}: {type(e).__name__}: {e}")
             return None
+    fn.prefetch = prefetch
     return fn
 
 
@@ -925,7 +1030,7 @@ def _close_stale_questions(e, intents):
     for k, old in intents.items():
         if (old.get("mode") == "live" and old.get("ticker") == e["ticker"]
                 and old.get("credit_day") == e["credit_day"]
-                and old.get("verdict") in (BD.INSUFFICIENT, BD.AMBIGUOUS, BD.DEFER_VENDOR)):
+                and old.get("verdict") in (BD.INSUFFICIENT, BD.AMBIGUOUS, BD.DEFER_VENDOR, BD.UNVERIFIED)):
             _bus("answer", f"corp-action-broker-{old['verdict'].lower()}-{e['ticker']}-{e['credit_day']}",
                  {"resolution": (f"lượt sau đã CONFIRMED {e['record']['id']} ×{e['qty_multiplier']} "
                                  f"ex {e['ex_date']} (provenance=broker)"),
@@ -936,6 +1041,7 @@ def _close_stale_questions(e, intents):
 def _finish_live(e, registry_ids):
     """Gửi thông báo cho MỘT mục sổ ở live. Trả rc bus. Không khẳng định điều chưa kiểm (§29)."""
     tk, day, v = e["ticker"], e["credit_day"], e["verdict"]
+    vc = e.get("vendor_check") or {}
     if v == BD.CONFIRMABLE:
         rid = e["record"]["id"]
         if rid in registry_ids:
@@ -943,14 +1049,36 @@ def _finish_live(e, registry_ids):
                         {"status": "AUTO_CONFIRMED_BROKER", "event_id": rid, "ticker": tk,
                          "ex_date": e["ex_date"], "qty_multiplier": e["qty_multiplier"],
                          "cash_leg_vnd_per_share": e["cash_leg"],
+                         "vendor_check": vc.get("status"), "vendor_why": vc.get("why"),
+                         "verified_by_vendor": vc.get("status") == BD.V_VERIFIED,
                          "evidence": e["record"]["evidence"], "decided_by": "agent",
-                         "note": "provenance=broker (vendor feed không có sự kiện); thu hồi: _status REVOKED"})
+                         "note": "provenance=broker (nguồn chính); vendor chỉ xác nhận chéo; thu hồi: _status REVOKED"})
         return _bus("question", f"corp-action-broker-write-incomplete-{tk}-{day}",
                     {"question": (f"{tk}: nhánh broker đã quyết CONFIRMABLE ×{e['qty_multiplier']} "
                                   f"ex {e['ex_date']} nhưng load_corp_actions() KHÔNG thấy record "
                                   f"{rid} trong registry (ghi dở/bị kill/đọc lại hỏng). Cần người "
                                   f"kiểm data/corp_actions.json."),
                      "ticker": tk, "credit_day": day, "record": e["record"], "urgency": "high"})
+    if v == BD.CASH_DIVIDEND:
+        return _bus("finding", f"corp-action-broker-cashdiv-{tk}-{day}",
+                    {"status": "CASH_DIVIDEND_BROKER", "ticker": tk, "credit_day": day,
+                     "ex_date": e["ex_date"], "cash_vnd_per_share": e["cash_leg"],
+                     "vendor_check": vc.get("status"), "vendor_why": vc.get("why"),
+                     "accounts": e["accounts"], "decided_by": "agent",
+                     "note": ("giá vốn DNSE giảm đúng KL×tiền + cashDividendReceiving tăng khớp; KHÔNG ghi "
+                              "data/corp_actions.json (sổ chỉ chứa sự kiện đổi KL)")})
+    if v == BD.UNVERIFIED:
+        return _bus("question", f"corp-action-broker-unverified-{tk}-{day}",
+                    {"question": (f"[Winston] {tk} phiên {day}: broker DNSE (nguồn chính) kết luận "
+                                  f"{e.get('event_kind')} ×{e.get('qty_multiplier') or 1} chân tiền "
+                                  f"{e.get('cash_leg') or 0:,.0f}đ/cp ex {e['ex_date']} nhưng LỆCH lịch "
+                                  f"vendor: {vc.get('why')}. Đã hạ UNVERIFIED — KHÔNG ghi registry, KHÔNG "
+                                  f"lấy số vendor đè. Winston kiểm nguồn vendor; người chốt: ghi "
+                                  f"record_proposed (đổi _status thành CONFIRMED, giữ số broker) hoặc bỏ."),
+                     "assignee": "Winston", "ticker": tk, "credit_day": day, "ex_date": e["ex_date"],
+                     "broker": {"qty_multiplier": e.get("qty_multiplier"), "cash_leg": e.get("cash_leg")},
+                     "vendor_check": vc, "record_proposed": e.get("record_proposed"),
+                     "accounts": e["accounts"], "urgency": "high"})
     urgency = "normal" if v == BD.INSUFFICIENT else "high"
     hint = {BD.INSUFFICIENT: "chưa đủ bản ghi/giá để quyết (cron 19:25 có thể chạy trước khi DNSE "
                              "credit xong mọi gói vay) — chạy lại tay sau 21:00 hoặc xác nhận tay",
@@ -958,10 +1086,12 @@ def _finish_live(e, registry_ids):
                              "nhận (MISMATCH/không khớp ngày) — nhánh vendor không tự hỏi",
             BD.AMBIGUOUS: "không đủ điều kiện tự xác nhận (lý do cụ thể ở 'Chi tiết')"}.get(v, v)
     return _bus("question", f"corp-action-broker-{v.lower()}-{tk}-{day}",
-                {"question": (f"{tk} phiên {day}: broker cho thấy KL tăng với tổng giá vốn không "
-                              f"tăng, nhánh broker trả {v} — {hint}. Chi tiết: {e['why']}. Cần người "
+                {"question": (f"{tk} phiên {day}: nhánh broker ({e.get('event_kind') or 'SHARE_EVENT'}) "
+                              f"trả {v} — {hint}. Chi tiết: {e['why']}. Lịch vendor (chỉ tham khảo, "
+                              f"KHÔNG tự ghi): {vc.get('status', '-')} {vc.get('vendor') or ''}. Cần người "
                               f"xác nhận sự kiện + ex-date trước khi ghi data/corp_actions.json."),
                  "ticker": tk, "credit_day": day, "ex_date_if_event": e["ex_date"],
+                 "event_kind": e.get("event_kind"), "vendor_check": vc,
                  "verdict": v, "accounts": e["accounts"], "urgency": urgency})
 
 
@@ -972,11 +1102,17 @@ def run_broker(date_str, dry_run=False, mode="shadow"):
                                       exec_dir=EXEC_DIR, exchange_fn=_exchange_fn())
                if r["verdict"] != BD.NOT_CANDIDATE]
     if getattr(vfn, "feed_dead", False):     # r5 M-A: cờ đi vào log + sổ + record + bus
-        results = [dict(r, vendor_feed_dead=True, why=f"{FEED_DEAD_TAG}; {r['why']}") for r in results]
+        results = [dict(r, vendor_feed_dead=True, why=f"{FEED_DEAD_TAG}; {r['why']}",
+                        vendor_check=(dict(r["vendor_check"], status=BD.V_FEED_DEAD,
+                                           why=f"{FEED_DEAD_TAG} — chưa được vendor xác nhận")
+                                      if (r.get("vendor_check") or {}).get("status") == BD.V_NO_EVENT
+                                      else r.get("vendor_check")))
+                   for r in results]
     if dry_run:
         for r in results:
             print(f"  [DRY-RUN] {r['ticker']} ex {r['ex_date']} {r['verdict']} ×"
-                  f"{r.get('qty_multiplier', '-')}: {r['why'][:300]}")
+                  f"{r.get('qty_multiplier', '-')} vendor={(r.get('vendor_check') or {}).get('status', '-')}"
+                  f": {r['why'][:300]}")
         return 0
     _sandbox_guard()
     if _LOCK_HELD:
@@ -1003,28 +1139,37 @@ def _run_broker_locked(date_str, mode, results):
     new = []
     for r in results:
         tk, ex, v = r["ticker"], r["ex_date"], r["verdict"]
-        print(f"  [{tk}] ex {ex} {v}: {r['why']}")
-        if (tk, ex) in in_registry:
-            print(f"  [{tk}] registry ĐÃ có ({tk}, {ex}) — {in_registry[(tk, ex)]!r} ⇒ không ghi/hỏi lại")
+        vc = r.get("vendor_check") or {}
+        print(f"  [{tk}] ex {ex} {v} (vendor {vc.get('status', '-')}): {r['why']}")
+        reg_has = in_registry.get((tk, ex))
+        if reg_has is not None and mode == "live":
+            print(f"  [{tk}] registry ĐÃ có ({tk}, {ex}) — {reg_has!r} ⇒ không ghi/hỏi lại")
             continue
-        dup = _near_duplicate(actions_raw, tk, date_str, ex)
-        if dup:
-            r = dict(r, verdict=BD.AMBIGUOUS, why=f"{dup}; detector: {v} — {r['why']}")
-            v = BD.AMBIGUOUS
+        if reg_has is not None:     # shadow: vẫn ghi sổ quyết định broker-primary để người so sánh
+            print(f"  [{tk}] (shadow) registry đã có ({tk}, {ex}) — {reg_has!r}; vẫn ghi sổ để so sánh")
+        if r.get("kind") is None:   # chỉ sự kiện KL mới có thể thành record ⇒ chỉ nó cần chặn ×2 lần
+            dup = _near_duplicate(actions_raw, tk, date_str, ex)
+            if dup:
+                r = dict(r, verdict=BD.AMBIGUOUS, why=f"{dup}; detector: {v} — {r['why']}")
+                v = BD.AMBIGUOUS
         entry = {"kind": "intent", "at": now_ict, "mode": mode, "ticker": tk,
                  "credit_day": date_str, "ex_date": ex, "verdict": v, "why": r["why"],
+                 "event_kind": r.get("kind") or "SHARE_EVENT",
                  "qty_multiplier": r.get("qty_multiplier"), "cash_leg": r.get("cash_leg"),
                  "px_cum": r.get("px_cum"), "vendor_feed_dead": bool(r.get("vendor_feed_dead")),
+                 "vendor_check": r.get("vendor_check"), "registry_has": reg_has,
                  "accounts": {k: {kk: vv for kk, vv in a.items() if kk != "lots"}
                               for k, a in r["accounts"].items()}}
         entry["key"] = BD.ledger_key(entry)
         if tuple(entry["key"]) in intents:
             print(f"  [{tk}] sổ broker đã có {entry['key']} ⇒ không lặp (idempotent)")
             continue
-        if v == BD.CONFIRMABLE:
-            entry["record"] = BD.build_record(r, now_ict)
+        if v == BD.CONFIRMABLE or (v == BD.UNVERIFIED and r.get("qty_multiplier")):
+            rec = BD.build_record(r, now_ict)
             if r.get("vendor_feed_dead"):
-                entry["record"]["evidence"].append(FEED_DEAD_TAG)
+                rec["evidence"].append(FEED_DEAD_TAG)
+            # UNVERIFIED: record chỉ là ĐỀ XUẤT trong câu hỏi cho người — KHÔNG BAO GIỜ ghi registry
+            entry["record" if v == BD.CONFIRMABLE else "record_proposed"] = rec
         new.append(entry)
     new_recs = [e["record"] for e in new if mode == "live" and e["verdict"] == BD.CONFIRMABLE]
     rc = 0
@@ -1081,8 +1226,10 @@ def _run_broker_locked(date_str, mode, results):
     else:
         if _bus("finding", f"corp-action-broker-shadow-{date_str}",
                 {"mode": "shadow", "note": "KHÔNG ghi registry — cửa sổ quan sát chờ user duyệt bật live",
-                 "results": [{k: e.get(k) for k in ("ticker", "credit_day", "ex_date", "verdict",
-                                                     "qty_multiplier", "cash_leg", "why")}
+                 "results": [dict({k: e.get(k) for k in ("ticker", "credit_day", "ex_date", "verdict",
+                                                          "event_kind", "qty_multiplier", "cash_leg",
+                                                          "registry_has", "why")},
+                                  vendor_check=(e.get("vendor_check") or {}).get("status"))
                              for e in todo]}) == 0:
             finished = todo
         else:
