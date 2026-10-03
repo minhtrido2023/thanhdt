@@ -225,8 +225,11 @@ src_txt = open(os.path.join(MIKE_BIN, "daily_nav_snapshot.py"), encoding="utf-8"
 check("cổng 5% vẫn còn nguyên trong daily_nav_snapshot.py (bản vá KHÔNG gỡ lưới an toàn)",
       "PRICE_XCHECK_TOLERANCE_PCT = 5.0" in src_txt)
 
-# [9b] ĐÃ RETIRE 2026-10-03: test `early_corp_action_price` (BID broker-credit sớm) — hàm bị XOÁ CÓ Ý ở
-# 7ed14edc (thay bằng corp_action_gate_v2 / classify_qty_residual trong daily_nav_snapshot.py);
+# [9b] ĐÃ RETIRE 2026-10-03: test `early_corp_action_price` (BID broker-credit sớm) — hàm RỚI khỏi master
+# trong lúc auto-resolve merge 9311ac03 (thêm ở 9f8c8da5, 08-14; còn ở 9311ac03^1, mất ở 9311ac03^2 và
+# 9311ac03; master chưa từng có lại). Gate v2 (65caea08/7ed14edc: corp_action_gate_v2 /
+# classify_qty_residual trong daily_nav_snapshot.py) là thiết kế SONG SONG, không phải "xoá có ý".
+# Bỏ test vẫn đúng chính sách hiện hành (sự kiện cổ phiếu: chặn, cần người xử lý);
 # wiring gate v2 khoá ở paper_report_render_selfcheck mục 0; test HÀNH VI ca BID thật ở
 # daily_nav_snapshot_from_raw_selfcheck.py §5.
 

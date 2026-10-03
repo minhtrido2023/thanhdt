@@ -365,18 +365,45 @@ check("#17 không có gì để đóng ⇒ im lặng, không gọi append_event"
       and "stub append_event" not in se, (so + se).strip())
 
 # ---- PROMPT regression guard (merge 9311ac03 từng làm rơi đoạn investor-grade mà không ai biết) ----
+# Số hiệu #22-#25+ (các #18-#21 phía trên đã dùng cho content-completeness / vendor reason).
 _src = SRC.read_text(encoding="utf-8")
 _wk = re.search(r'if \[ "\$KIND" = "weekly" \]; then(.*?)\n  else\n(.*?)\n  fi\n', _src, re.S)
-check("#18 trích được 2 nhánh PROMPT weekly/monthly từ check_report_cadence.sh", bool(_wk))
+check("#22 trích được 2 nhánh PROMPT weekly/monthly từ check_report_cadence.sh", bool(_wk))
 if _wk:
+    # Biến bash được phép nội suy trong thân PROMPT; còn lại (backtick, $(…), ${khác}) là command
+    # substitution âm thầm làm rơi/đổi chữ — `bash -n` không bắt được (mutation M10/M11).
+    _ALLOWED = ("${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}", "${DELEGATE_STEP}",
+                "${DESC}", "${TRADING_REPORT_THREAD}")
     for _nm, _body in (("weekly", _wk.group(1)), ("monthly", _wk.group(2))):
         _need = ["Toàn cảnh thị trường", "Outlook", "${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}"]
         _miss = [n for n in _need if n not in _body]
-        check(f"#19 PROMPT {_nm} đủ investor-grade + SPLIT/CHART/EMAIL step", not _miss, str(_miss))
-        check(f"#20 PROMPT {_nm}: nguồn file SpaceX dùng tên công khai (cấm tên bảng nội bộ)",
+        check(f"#23 PROMPT {_nm} đủ investor-grade + SPLIT/CHART/EMAIL step", not _miss, str(_miss))
+        check(f"#24 PROMPT {_nm}: nguồn file SpaceX dùng tên công khai (cấm tên bảng nội bộ)",
               "TUYỆT ĐỐI không nêu tên bảng/hệ thống nội bộ" in _body)
-    check("#21 monthly: 'Paper signals' đi cùng 'TRONG FILE ZALOPAY'",
+        _pm = re.search(r'PROMPT="(.*)"\s*$', _body, re.M)
+        check(f"#25 PROMPT {_nm}: trích được dòng PROMPT=\"…\"", bool(_pm))
+        _ptxt = _pm.group(1) if _pm else ""
+        for _v in _ALLOWED:
+            _ptxt = _ptxt.replace(_v, "")
+        check(f"#25b PROMPT {_nm}: không backtick / $( / ${{…}} lạ ngoài biến cho phép",
+              "`" not in _ptxt and "$(" not in _ptxt and "${" not in _ptxt,
+              str([t for t in ("`", "$(", "${") if t in _ptxt]))
+        check(f"#25c PROMPT {_nm}: caption nguồn/as-of ngay dưới ảnh",
+              "caption markdown" in _body and "as-of" in _body)
+        check(f"#25d PROMPT {_nm}: 'rủi ro/giới hạn' là giới hạn thị trường/phương pháp",
+              "'rủi ro/giới hạn' là giới hạn thị trường/phương pháp" in _body)
+        check(f"#25e PROMPT {_nm}: danh sách tên công khai HOSE/HNX cho nguồn",
+              "HOSE/HNX" in _body)
+        check(f"#25f PROMPT {_nm}: Value Radar/DT gate lấy từ dna_report (không tự tính P/E ad-hoc)",
+              "dna_report.build_value_radar_line()" in _body
+              and "build_dt_gate_line()" in _body and "ad-hoc" in _body)
+    check("#26 monthly: 'Paper signals' đi cùng 'TRONG FILE ZALOPAY'",
           "Paper signals" in _wk.group(2) and "TRONG FILE ZALOPAY" in _wk.group(2))
+    check("#26b monthly: Paper signals KHÔNG đưa vào file SpaceX client-facing",
+          "KHÔNG đưa vào file SpaceX" in _wk.group(2))
+check("#27 dispatch.sh gọi với --thread \"$TRADING_REPORT_THREAD\" tường minh (M16)",
+      re.search(r'dispatch\.sh"\s+Taylor\s+"\$PROMPT"\s+--thread\s+"\$TRADING_REPORT_THREAD"', _src)
+      is not None)
 
 print()
 if fails:
