@@ -72,9 +72,9 @@ def main():
     D = "2026-07-31"
 
     # Corporate actions have two different failure modes and therefore two different
-    # consumers: live NAV must accept a broker's early adjusted mark only when an
-    # announced event explains it, while the paper report must rebase a frozen entry
-    # before comparing it with BQ's retro-adjusted Close.  Keep this small wiring
+    # consumers: live NAV must accept a broker's early adjusted mark only through the
+    # corp_action_gate_v2 qty-residual classifier (early_corp_action_price retired, 7ed14edc), while the
+    # paper report must rebase a frozen entry before comparing it with BQ's retro-adjusted Close.  Keep this small wiring
     # contract here so a later refactor cannot land one half and silently drop the
     # other (BID broker-early case, 2026-08-14; MBB paper-entry case, 2026-08-11).
     print("== 0. Đồng bộ corporate-action live ↔ paper-report ==")
@@ -83,9 +83,8 @@ def main():
     check("paper report gọi paper_entry_adjust trước khi tính AlphaLens return",
           "import paper_entry_adjust" in report_src
           and "paper_entry_adjust.adjust_entries(" in report_src)
-    check("live NAV giữ bypass broker-credit sớm có kiểm ratio/event (BID)",
-          "def early_corp_action_price(" in nav_src
-          and "upcoming_corp_events(" in nav_src
+    check("live NAV giữ cổng corp-action v2 (classify_qty_residual) + lưới 5% (BID)",
+          "def classify_qty_residual(" in nav_src
           and "PRICE_XCHECK_TOLERANCE_PCT = 5.0" in nav_src)
 
     # ---- fixtures ----
