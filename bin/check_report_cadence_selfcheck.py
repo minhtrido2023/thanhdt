@@ -364,6 +364,20 @@ check("#17 không có gì để đóng ⇒ im lặng, không gọi append_event"
       so != "__BLOCK_DID_NOT_RUN__" and "auto-closed" not in so
       and "stub append_event" not in se, (so + se).strip())
 
+# ---- PROMPT regression guard (merge 9311ac03 từng làm rơi đoạn investor-grade mà không ai biết) ----
+_src = SRC.read_text(encoding="utf-8")
+_wk = re.search(r'if \[ "\$KIND" = "weekly" \]; then(.*?)\n  else\n(.*?)\n  fi\n', _src, re.S)
+check("#18 trích được 2 nhánh PROMPT weekly/monthly từ check_report_cadence.sh", bool(_wk))
+if _wk:
+    for _nm, _body in (("weekly", _wk.group(1)), ("monthly", _wk.group(2))):
+        _need = ["Toàn cảnh thị trường", "Outlook", "${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}"]
+        _miss = [n for n in _need if n not in _body]
+        check(f"#19 PROMPT {_nm} đủ investor-grade + SPLIT/CHART/EMAIL step", not _miss, str(_miss))
+        check(f"#20 PROMPT {_nm}: nguồn file SpaceX dùng tên công khai (cấm tên bảng nội bộ)",
+              "TUYỆT ĐỐI không nêu tên bảng/hệ thống nội bộ" in _body)
+    check("#21 monthly: 'Paper signals' đi cùng 'TRONG FILE ZALOPAY'",
+          "Paper signals" in _wk.group(2) and "TRONG FILE ZALOPAY" in _wk.group(2))
+
 print()
 if fails:
     print(f"❌ FAIL {len(fails)}/{len(fails) + len(oks)}")
