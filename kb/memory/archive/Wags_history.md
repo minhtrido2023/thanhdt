@@ -351,3 +351,6 @@ BÀI HỌC: pre-commit 'Stashing unstaged files' ở repo dùng chung nuốt fil
 
 ## Archived 2026-10-03 (keep=12 days=0 require_done=False)
 - [2026-09-23T01:22:17Z] [2026-09-23] coord-2026-09-23: question retro-pattern-recurring-plan-approval-gate-3days KHONG phai loi dieu phoi — la quyet dinh USER (A lop nhac 08:45 / B giu nguyen / C doi bot 09:15), ca A lan C cham duong thuc thi => ngoai ranh gioi Wags. Da ack triaged-needs-human suppress_days=7 + post A/B/C vao trading_daily. CHO USER tra loi; het 7 ngay ack het han, cau hoi tu noi lai. Khong sua file nao (files_changed=[]).
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-09-25T01:21:38Z] [2026-09-25] coord-2026-09-25: question retro-pattern-recurring-fpt-vendor-backfill-2days KHONG phai loi dieu phoi — vendor/ETL hoi to he so FPT vao tav2_bq.ticker chua day du (xac minh BQ 09-24: van gay 72400->66090 giua 09-14/09-15, 7 ngay sau GDKHQ). Lua chon A/B/C can USER; B cham tang du lieu/bao cao => ngoai ranh gioi Wags. Da ack triaged-needs-human suppress_days=7 + post A/B/C vao trading_daily. files_changed=[]. CHO USER; het 7 ngay tu noi lai.
