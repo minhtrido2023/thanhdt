@@ -72,9 +72,12 @@ def main():
     D = "2026-07-31"
 
     # Corporate actions have two different failure modes and therefore two different
-    # consumers: live NAV must BLOCK (rc=5, qty_change_block) a broker's early adjusted mark
-    # unless the corp_action_gate_v2 qty-residual classifier explains it (early_corp_action_price
-    # retired, 7ed14edc), while the paper report must rebase a frozen entry before comparing
+    # consumers: live NAV must ALWAYS BLOCK (rc=5, qty_change_block) when quantity changes
+    # outside a matched order, EVEN when classify_qty_residual returns share_event_credit
+    # (daily_nav_snapshot.py ~1236-1241, ~1323); only --from-raw + a CONFIRMED qty_multiplier can
+    # rebuild the pre-event quantity. (early_corp_action_price dropped out of master during the
+    # 9311ac03 auto-resolve merge; gate v2 is a parallel design, not a deliberate deletion.)
+    # The paper report must rebase a frozen entry before comparing
     # it with BQ's retro-adjusted Close.  Keep this small wiring
     # contract here so a later refactor cannot land one half and silently drop the
     # other (BID broker-early case, 2026-08-14; MBB paper-entry case, 2026-08-11).
