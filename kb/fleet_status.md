@@ -1,18 +1,17 @@
-# Fleet status — 2026-10-03T10:07:03 UTC
+# Fleet status — 2026-10-03T16:07:01 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-02T12:10:01Z | 1317 |  |
-| Mike | Mike | child | working | 2026-10-03T09:52:11Z | 14 |  |
-| Mike_3069835 | mike-8e | child | dead | 2026-10-01T16:40:01Z | 2487 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | taylor-fb | child | busy | 2026-10-03T10:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_3060323 | taylor-a5 | child | dead | 2026-10-01T16:00:01Z | 2527 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_3109761 | taylor-c8 | child | dead | 2026-10-01T16:30:01Z | 2497 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_3269076 | taylor-a1 | child | dead | 2026-10-01T16:50:01Z | 2477 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_3269514 | taylor-1d | child | dead | 2026-10-01T16:50:01Z | 2477 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_3269963 | taylor-a1 | child | dead | 2026-10-01T16:50:01Z | 2477 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | dead | 2026-10-03T08:28:43Z | 98 |  |
-| Winston | Winston | child | dead | 2026-10-03T01:15:24Z | 531 |  |
-| cliproxyapi-0b | cliproxyapi-0b | external | dead | 2026-10-02T06:40:02Z | 1647 | interactive · cwd=/home/trido/cliproxyapi |
-| mike-paseo-ad | mike-paseo-ad | external | running | 2026-10-03T10:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
-| workingclaude-fb | workingclaude-fb | child | dead | 2026-10-02T01:23:51Z | 1963 |  |
+| DollarBill | DollarBill | child | dead | 2026-10-02T12:10:01Z | 1677 |  |
+| Mike | Mike | child | dead | 2026-10-03T10:48:03Z | 318 |  |
+| Mike_3069835 | mike-8e | child | dead | 2026-10-01T16:40:01Z | 2847 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-10-03T10:45:13Z | 321 |  |
+| Taylor_3109761 | taylor-c8 | child | dead | 2026-10-01T16:30:01Z | 2857 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_3269076 | taylor-a1 | child | dead | 2026-10-01T16:50:01Z | 2837 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_3269514 | taylor-1d | child | dead | 2026-10-01T16:50:01Z | 2837 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_3269963 | taylor-a1 | child | dead | 2026-10-01T16:50:01Z | 2837 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-10-03T08:28:43Z | 458 |  |
+| Winston | Winston | child | dead | 2026-10-03T01:15:24Z | 891 |  |
+| cliproxyapi-0b | cliproxyapi-0b | external | dead | 2026-10-02T06:40:02Z | 2006 | interactive · cwd=/home/trido/cliproxyapi |
+| mike-paseo-ad | mike-paseo-ad | external | running | 2026-10-03T16:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
+| workingclaude-fb | workingclaude-fb | child | dead | 2026-10-02T01:23:51Z | 2323 |  |
