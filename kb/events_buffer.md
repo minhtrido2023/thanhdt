@@ -719,3 +719,17 @@
 - [2026-10-03T01:14:42Z] Winston/heartbeat — Winston_20261003_011002: {"status": "done", "note": "append_deposit_rate.py OK, notify tiep theo"}
 - [2026-10-03T01:15:03Z] Winston/heartbeat — Winston_20261003_011002: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20261003_011002", "source": "watcher"}
 - [2026-10-03T01:15:19Z] Winston/finding — deposit-rate-refresh-complete: {"rate": 6.8, "effective": "2026-10-03", "changed": false, "sources": ["VnEconomy 2026-09-03", "CafeF 2026-10-01"], "note": "notify_thread.sh gui trading_daily OK; luu y: thu nghiem notify.sh --help truoc do da vo tinh gui chuoi literal \"--help\" vao topic update-task #mikefleet (notify.sh khong co --help, dung argv lam msg) - khong anh huong du lieu, chi la noise 1 dong."}
+
+## Consolidation 2026-10-03T02:07:02Z
+- [2026-10-03T02:00:04Z] Mike/finding — report-cadence-scheduled-weekly_2026-09-28_2026-10-02: {"kind": "weekly", "period": "tuần 2026-09-28 → 2026-10-02", "target_file_spacex": "/home/trido/thanhdt/WorkingClaude/mike/reports/SpaceX_weekly_report_2026-09-28_to_2026-10-02.md", "target_file_zalopay": "/home/trido/thanhdt/WorkingClaude/mike/reports/ZaloPay_weekly_report_2026-09-28_to_2026-10-02.md"}
+- [2026-10-03T02:00:14Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "in_progress", "note": "bat dau: doc mau + pipeline"}
+- [2026-10-03T02:00:41Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "in_progress", "note": "thu thap VNINDEX/DT5G/fills"}
+- [2026-10-03T02:01:05Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261003_020004", "source": "watcher"}
+- [2026-10-03T02:02:05Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261003_020004", "source": "watcher"}
+- [2026-10-03T02:03:05Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261003_020004", "source": "watcher"}
+- [2026-10-03T02:04:05Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261003_020004", "source": "watcher"}
+- [2026-10-03T02:04:24Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "in_progress", "note": "da co du so lieu; dang dung chart + 2 file md"}
+- [2026-10-03T02:05:05Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261003_020004", "source": "watcher"}
+- [2026-10-03T02:05:44Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "in_progress", "note": "SpaceX md xong; dang viet ZaloPay"}
+- [2026-10-03T02:06:05Z] Taylor/heartbeat — Taylor_20261003_020004: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261003_020004", "source": "watcher"}
+- [2026-10-03T01:30:59Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53666}
