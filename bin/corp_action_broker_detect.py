@@ -336,6 +336,11 @@ def account_evidence(series, ticker, day, fills=()):
                                  .astimezone(dt.timezone.utc).replace(tzinfo=None)
                                  .isoformat(timespec="seconds"))
     ev["modified_post"] = sorted(s1["mods"])          # chỉ tham khảo, KHÔNG phải bằng chứng
+    if len(s1["mkts"]) != 1:
+        # Các lô của CÙNG tài khoản mang marketPrice khác nhau ⇒ giá chưa nhất quán (gói vay đang
+        # điều chỉnh dở, hoặc 1 lô nói "chưa điều chỉnh giá"). decide() cần ĐÚNG 1 giá; không
+        # được chọn lọc giá nhỏ nhất (arch-review v2 N1 — bản v2 lỡ xoá chốt này).
+        soft.append(f"các lô mang marketPrice khác nhau {s1['mkts']} — giá sau credit chưa nhất quán")
     if set(s0["lots"]) != set(s1["lots"]):
         hard.append(f"id lô đổi {sorted(s0['lots'])}→{sorted(s1['lots'])}")
     else:
@@ -391,7 +396,11 @@ def simplest_in(lo, hi):
 VENDOR_UNREADABLE = "VENDOR_UNREADABLE"   # lịch vendor CÓ file nhưng đọc hỏng ⇒ không biết vendor nói gì
 
 
-def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vendor_events=()):
+PRICE_GATE_EXCHANGES = ("HOSE", "HNX")    # giá tham chiếu GDKHQ = f(giá ĐÓNG CỬA) chỉ ở 2 sàn này
+
+
+def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vendor_events=(),
+           exchange=None):
     """PURE. Gộp bằng chứng mọi tài khoản → quyết định cấp mã.
 
     per_account           {label: account_evidence(...)} — chỉ tài khoản có ứng viên (≠ NOT_CANDIDATE)
@@ -401,6 +410,10 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
     vendor_events         MỌI sự kiện của mã trên lịch vendor (list, rỗng = vendor không có gì), hoặc
                           VENDOR_UNREADABLE. Không lấy "sự kiện khớp đầu tiên" — thứ tự [DIV, ISS] vs
                           [ISS, DIV] từng đổi kết quả (arch-review v1 M1).
+    exchange              sàn của mã (HOSE/HNX/UPCOM) hoặc None = không xác định. Chỉ HOSE/HNX
+                          được tự xác nhận: UPCOM lấy tham chiếu = BÌNH QUÂN gia quyền phiên trước,
+                          cổng giá dựng từ đóng cửa sai cơ sở ⇒ giả thuyết không-sự-kiện mất tác
+                          dụng (arch-review v2 N7: ×1,03 giá cum 10.000 / tham chiếu 9.700 lọt).
     """
     from exdate_frame import FRAME_TOL_PCT, FRAME_TOL_VND, verify_post_event_price
     out = {"ticker": ticker, "credit_day": day, "ex_date": ex_date, "accounts": per_account,
@@ -422,6 +435,10 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
                          f"{[(e.get('event_code'), str(e.get('date'))[:10]) for e in share_ev]} ⇒ "
                          f"nhánh vendor quyết, broker không ghi đè"))
     cal = calendar_guard(day, ex_date)
+    if exchange not in PRICE_GATE_EXCHANGES:
+        cal = "; ".join(x for x in (cal, (
+            f"sàn {exchange or 'KHÔNG xác định được'} — cổng giá dựng từ giá đóng cửa chỉ đúng "
+            f"HOSE/HNX (UPCOM tham chiếu = bình quân gia quyền)")) if x)
     if holders_not_credited:
         reasons.append(f"tài khoản {holders_not_credited} đang giữ mã mà CHƯA được credit cùng đêm")
     if cal:                                                        # lịch không tin được ⇒ người
@@ -494,11 +511,12 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
 
 # ──────────────────────────────────────────────────────────── điều phối 1 phiên (đọc file) ──
 
-def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, cutoff=None):
+def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, cutoff=None,
+             exchange_fn=lambda tk: None):
     """Mọi mã có ứng viên credit quyền ở phiên `day`, mọi tài khoản. Trả [decide(...)].
 
     px_cum_fn(ticker, day) → giá đóng cửa cum hoặc None. vendor_events_fn(ticker) → [ev] |
-    VENDOR_UNREADABLE.
+    VENDOR_UNREADABLE. exchange_fn(ticker) → "HOSE"/"HNX"/"UPCOM"/None (None ⇒ MƠ HỒ).
     `cutoff` ("HH:MM", chỉ cho replay) — bỏ bản ghi của `day` sau giờ đó, để mô phỏng đúng cái
     cron 19:25 nhìn thấy.
     """
@@ -542,7 +560,8 @@ def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, 
     for tk, per in sorted(per_ticker.items()):
         holders = [lbl for lbl in held_before.get(tk, []) if lbl not in per]
         px = px_cum_fn(tk, day)
-        out.append(decide(tk, day, ex_date, per, holders, px, vendor_events_fn(tk)))
+        out.append(decide(tk, day, ex_date, per, holders, px, vendor_events_fn(tk),
+                          exchange_fn(tk)))
     return out
 
 
@@ -676,14 +695,18 @@ def replay(start, end, exec_dir=EXEC_DIR, px_map=None, cutoff=None):
     days = sorted(os.path.basename(p)[len("dnse_raw_"):-len(".jsonl")]
                   for p in glob.glob(os.path.join(exec_dir, "dnse_raw_*.jsonl")))
     days = [d for d in days if start <= d <= end]
-    first = {d: scan_day(d, lambda t, dd: None, exec_dir=exec_dir, cutoff=cutoff) for d in days}
+    # REPLAY giả định sàn HOSE cho mọi mã (không có nguồn sàn lịch sử offline) — chỉ để đo bộ
+    # phát hiện; đường live hỏi sàn thật qua DNSE marketId (corp_action_auto_confirm).
+    exch = lambda t: "HOSE"  # noqa: E731
+    first = {d: scan_day(d, lambda t, dd: None, exec_dir=exec_dir, cutoff=cutoff, exchange_fn=exch)
+             for d in days}
     if px_map is None:
         px_map = bq_unadjusted_close({(r["ticker"], d) for d, rs in first.items() for r in rs})
     out = []
     for d in days:
         if first[d]:
             out.extend(scan_day(d, lambda t, dd: px_map.get((t, dd)), exec_dir=exec_dir,
-                                cutoff=cutoff))
+                                cutoff=cutoff, exchange_fn=exch))
     return days, out
 
 
@@ -697,7 +720,8 @@ def main():
     if a.json:
         print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
         return 0
-    print(f"replay {a.replay[0]}→{a.replay[1]}: {len(days)} phiên có dnse_raw, {len(res)} ứng viên")
+    print(f"replay {a.replay[0]}→{a.replay[1]}: {len(days)} phiên có dnse_raw, {len(res)} ứng viên "
+          f"(GIẢ ĐỊNH sàn HOSE mọi mã — live hỏi DNSE marketId)")
     for r in res:
         print(f"  {r['credit_day']} {r['ticker']:4s} ex {r['ex_date']} {r['verdict']:12s} "
               f"×{r.get('qty_multiplier', '-')} cash {r.get('cash_leg', '-')} — {r['why'][:220]}")

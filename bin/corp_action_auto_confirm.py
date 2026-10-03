@@ -255,11 +255,34 @@ def post_bus(ticker, event_id, ex_date, multiplier, acct_evidence, dry_run=False
 # ── Main ───────────────────────────────────────────────────────────────────
 
 def run(date_str, dry_run=False):
-    rc = run_vendor(date_str, dry_run=dry_run)
     mode = broker_mode()
     if mode == "off":
-        return rc
+        return run_vendor(date_str, dry_run=dry_run)
+    if not dry_run:
+        _sandbox_guard()
+    # Khoá bao CẢ nhánh vendor: hai nhánh cùng đọc-sửa-ghi data/corp_actions.json; cron + chạy tay
+    # song song không được đè record của nhau (arch-review v2 N3). off ⇒ không khoá (như cũ).
+    lk = None if dry_run else _lock(LEDGER_FILE)
+    if not dry_run and lk is None:
+        print(f"❌ không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — tiến trình khác đang "
+              f"chạy; KHÔNG chạy nhánh nào.")
+        return 1
     try:
+        return _run_both(date_str, dry_run, mode)
+    finally:
+        if lk:
+            lk.close()
+
+
+def _run_both(date_str, dry_run, mode):
+    global _LOCK_HELD
+    _LOCK_HELD = True
+    try:
+        rc = run_vendor(date_str, dry_run=dry_run)
+    finally:
+        _LOCK_HELD = False
+    try:
+        _LOCK_HELD = True
         rc_b = run_broker(date_str, dry_run=dry_run, mode=mode)
     except Exception as e:   # crash nhánh broker KHÔNG được chỉ nằm trong log cron (§29: lỗi thật)
         import traceback
@@ -269,6 +292,8 @@ def run(date_str, dry_run=False):
             _bus("error", f"corp-action-broker-crash-{date_str}",
                  {"error": f"{type(e).__name__}: {e}", "traceback_tail": tb[-1500:], "mode": mode})
         rc_b = 1
+    finally:
+        _LOCK_HELD = False
     return rc or rc_b
 
 
@@ -309,6 +334,17 @@ def run_vendor(date_str, dry_run=False):
 
         if (ticker, ex_date) in confirmed_set:
             print(f"  [{ticker}] đã CONFIRMED rồi — bỏ qua.")
+            continue
+        _bdup = _broker_record_near(actions_raw, ticker, ex_date)
+        if _bdup:
+            # Chỉ chạm tới được khi registry có record provenance=broker (từ 2026-10-03) — mọi
+            # registry cũ đi đúng đường cũ. Vendor sống lại với ex ≠ ex broker suy ra ⇒ ghi thêm
+            # là áp hệ số 2 lần (arch-review v2 N9) ⇒ không ghi, hỏi người.
+            print(f"  [{ticker}] ❌ {_bdup} — không tự xác nhận, cần người kiểm.")
+            _bus("question", f"corp-action-vendor-vs-broker-{ticker}-{ex_date}",
+                 {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {_bdup}. Cần người xác "
+                              f"nhận ex thật và thu hồi (REVOKED) record sai.",
+                  "ticker": ticker, "vendor_ex_date": ex_date, "urgency": "high"})
             continue
 
         print(f"  [{ticker}] ex_date={ex_date}, ratio={ratio} (×{mult}) — kiểm broker ...")
@@ -487,6 +523,11 @@ def run_vendor(date_str, dry_run=False):
 # ── Nhánh BROKER ───────────────────────────────────────────────────────────
 
 BROKER_MODES = ("off", "shadow", "live")
+BUS_TIMEOUT_S = 60
+_LOCK_HELD = False        # run() đã giữ khoá ⇒ run_broker không xin lại (flock 2 fd cùng tiến trình = tự khoá)
+# Gốc PRODUCTION tính ĐỘC LẬP với các biến module selfcheck hay đổi (LEDGER_FILE/EXEC_DIR/
+# BD.LEDGER_FILE) — guard sandbox so với cái này (arch-review v2 N4).
+_PROD_DATA = os.path.realpath(os.path.join(WC_ROOT, "data"))
 NEAR_DUP_DAYS = 10        # record CÙNG MÃ có ex_date cách credit_day ≤ N ngày lịch ⇒ không ghi, hỏi
 LOCK_WAIT_S = 120
 
@@ -516,6 +557,24 @@ def _vendor_events_fn(date_str):
     return lambda tk: [e for e in held if str(e.get("ticker", "")).upper() == tk]
 
 
+def _exchange_fn():
+    """ticker → sàn THẬT qua DNSE `marketId` (STO/STX/UPX). Không xác định được ⇒ None ⇒ detector
+    MƠ HỒ (fail-closed; không mặc định HOSE như `Quote.exchange`)."""
+    cache = {}
+
+    def fn(tk):
+        if tk not in cache:
+            try:
+                from trading_bot.brokers import get_quote_source
+                q = get_quote_source("dnse").get_quote(tk)
+                cache[tk] = q.exchange if getattr(q, "exchange_known", False) else None
+            except Exception as e:  # §29: nói lỗi thật
+                print(f"  [{tk}] không xác định được sàn qua DNSE: {type(e).__name__}: {e}")
+                cache[tk] = None
+        return cache[tk]
+    return fn
+
+
 def _px_cum_fn(date_str):
     """Giá đóng cửa CÒN QUYỀN của phiên credit. Hôm nay ⇒ DNSE G1 (§6, BẮT BUỘC nguồn
     'dnse_g1_today' — giá phiên khác là sai hệ); ngày quá khứ ⇒ BQ `Price` chưa điều chỉnh.
@@ -539,9 +598,13 @@ def _px_cum_fn(date_str):
 def _bus(kind, topic, payload):
     """rc của append_event.sh (0 = bus đã nhận). rc≠0 ⇒ in lỗi THẬT, caller KHÔNG đánh dấu done."""
     import subprocess
-    r = subprocess.run([APPEND_EVENT, "Mike", kind, topic,
-                        json.dumps(payload, ensure_ascii=False, default=str)],
-                       capture_output=True, text=True)
+    try:
+        r = subprocess.run([APPEND_EVENT, "Mike", kind, topic,
+                            json.dumps(payload, ensure_ascii=False, default=str)],
+                           capture_output=True, text=True, timeout=BUS_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        print(f"  ❌ append_event {kind} {topic} treo > {BUS_TIMEOUT_S}s — coi như CHƯA gửi")
+        return 124
     if r.returncode != 0:
         print(f"  ❌ append_event {kind} {topic} rc={r.returncode}: "
               f"{(r.stderr or r.stdout or '').strip()[:300]}")
@@ -584,6 +647,53 @@ def _near_duplicate(raw_actions, tk, credit_day, ex):
     return None
 
 
+def _sandbox_guard():
+    """Sổ là PRODUCTION mà dữ liệu vào/registry KHÔNG ⇒ đúng lớp lỗi B2 (selfcheck quên đổi
+    LEDGER_FILE ghi rác vào sổ thật). Gọi TRƯỚC khi tạo bất kỳ file nào (kể cả .lock)."""
+    def _in_prod(p):
+        return os.path.realpath(p).startswith(_PROD_DATA + os.sep)
+    if _in_prod(LEDGER_FILE) and not (_in_prod(EXEC_DIR) and _in_prod(CORP_ACTIONS_FILE)):
+        # Sandbox LỆCH: dữ liệu vào/registry là sandbox mà sổ là PRODUCTION ⇒ đúng lớp lỗi B2
+        # (selfcheck quên đổi LEDGER_FILE ghi rác vào sổ thật). Từ chối thay vì ghi.
+        raise RuntimeError(f"LEDGER_FILE={LEDGER_FILE} là sổ PRODUCTION nhưng EXEC_DIR={EXEC_DIR} / "
+                           f"CORP_ACTIONS_FILE={CORP_ACTIONS_FILE} đã bị đổi (sandbox?) — từ chối ghi")
+
+
+def _broker_record_near(raw_actions, tk, ex):
+    """Record provenance=broker CÙNG mã, ex ≠ `ex`, cách ≤ NEAR_DUP_DAYS ngày (cho nhánh vendor)."""
+    try:
+        d0 = dt.date.fromisoformat(ex)
+    except ValueError:
+        return None
+    for r in raw_actions:
+        if (str(r.get("ticker", "")).upper() != tk
+                or str(r.get("provenance", "")).lower() != "broker"):
+            continue
+        try:
+            rex = dt.date.fromisoformat(str(r.get("ex_date", ""))[:10])
+        except ValueError:
+            return f"record broker {r.get('id')!r} có ex_date không đọc được"
+        if rex != d0 and abs((rex - d0).days) <= NEAR_DUP_DAYS:
+            return (f"registry đã có record BROKER {r.get('id')!r} ex {rex} (cách {abs((rex - d0).days)}"
+                    f" ngày) — có thể CÙNG sự kiện với ex khác")
+    return None
+
+
+def _close_stale_questions(e, intents):
+    """§26: lượt trước (cùng mã, cùng phiên, live) đã HỎI vì INSUFFICIENT/AMBIGUOUS/DEFER, nay
+    record đã CONFIRMED ⇒ đóng các câu hỏi đó bằng `answer` đúng topic, kèm bằng chứng record id.
+    Lỗi gửi chỉ in ra (question vẫn mở = an toàn, người đọc thấy record ở finding confirm)."""
+    for k, old in intents.items():
+        if (old.get("mode") == "live" and old.get("ticker") == e["ticker"]
+                and old.get("credit_day") == e["credit_day"]
+                and old.get("verdict") in (BD.INSUFFICIENT, BD.AMBIGUOUS, BD.DEFER_VENDOR)):
+            _bus("answer", f"corp-action-broker-{old['verdict'].lower()}-{e['ticker']}-{e['credit_day']}",
+                 {"resolution": (f"lượt sau đã CONFIRMED {e['record']['id']} ×{e['qty_multiplier']} "
+                                 f"ex {e['ex_date']} (provenance=broker)"),
+                  "evidence": f"data/corp_actions.json id={e['record']['id']}",
+                  "decided_by": "agent"})
+
+
 def _finish_live(e, registry_ids):
     """Gửi thông báo cho MỘT mục sổ ở live. Trả rc bus. Không khẳng định điều chưa kiểm (§29)."""
     tk, day, v = e["ticker"], e["credit_day"], e["verdict"]
@@ -607,7 +717,7 @@ def _finish_live(e, registry_ids):
                              "credit xong mọi gói vay) — chạy lại tay sau 21:00 hoặc xác nhận tay",
             BD.DEFER_VENDOR: "lịch vendor có sự kiện cổ phiếu cho mã nhưng nhánh vendor KHÔNG xác "
                              "nhận (MISMATCH/không khớp ngày) — nhánh vendor không tự hỏi",
-            BD.AMBIGUOUS: "bằng chứng broker không nhất quán"}.get(v, v)
+            BD.AMBIGUOUS: "không đủ điều kiện tự xác nhận (lý do cụ thể ở 'Chi tiết')"}.get(v, v)
     return _bus("question", f"corp-action-broker-{v.lower()}-{tk}-{day}",
                 {"question": (f"{tk} phiên {day}: broker cho thấy KL tăng với tổng giá vốn không "
                               f"tăng, nhánh broker trả {v} — {hint}. Chi tiết: {e['why']}. Cần người "
@@ -619,20 +729,16 @@ def _finish_live(e, registry_ids):
 def run_broker(date_str, dry_run=False, mode="shadow"):
     print(f"[corp_action_auto_confirm] NHÁNH BROKER mode={mode} date={date_str} dry_run={dry_run}")
     results = [r for r in BD.scan_day(date_str, _px_cum_fn(date_str), _vendor_events_fn(date_str),
-                                      exec_dir=EXEC_DIR)
+                                      exec_dir=EXEC_DIR, exchange_fn=_exchange_fn())
                if r["verdict"] != BD.NOT_CANDIDATE]
     if dry_run:
         for r in results:
             print(f"  [DRY-RUN] {r['ticker']} ex {r['ex_date']} {r['verdict']} ×"
                   f"{r.get('qty_multiplier', '-')}: {r['why'][:300]}")
         return 0
-    if (os.path.abspath(LEDGER_FILE) == os.path.abspath(BD.LEDGER_FILE)
-            and (os.path.abspath(EXEC_DIR) != os.path.abspath(BD.EXEC_DIR)
-                 or os.path.abspath(CORP_ACTIONS_FILE) != os.path.abspath(CA.REGISTRY))):
-        # Sandbox LỆCH: dữ liệu vào/registry là sandbox mà sổ là PRODUCTION ⇒ đúng lớp lỗi B2
-        # (selfcheck quên đổi LEDGER_FILE ghi rác vào sổ thật). Từ chối thay vì ghi.
-        raise RuntimeError(f"LEDGER_FILE={LEDGER_FILE} là sổ PRODUCTION nhưng EXEC_DIR={EXEC_DIR} / "
-                           f"CORP_ACTIONS_FILE={CORP_ACTIONS_FILE} đã bị đổi (sandbox?) — từ chối ghi")
+    _sandbox_guard()
+    if _LOCK_HELD:
+        return _run_broker_locked(date_str, mode, results)
     lk = _lock(LEDGER_FILE)
     if lk is None:
         print(f"❌ không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — tiến trình khác đang "
@@ -677,26 +783,44 @@ def _run_broker_locked(date_str, mode, results):
             entry["record"] = BD.build_record(r, now_ict)
         new.append(entry)
     new_recs = [e["record"] for e in new if mode == "live" and e["verdict"] == BD.CONFIRMABLE]
+    rc = 0
     if new_recs:
-        try:   # validate TRƯỚC mọi ghi — hỏng ⇒ 0 ghi (sổ lẫn registry), lượt sau thử lại sau khi sửa
+        try:   # validate TRƯỚC mọi ghi — hỏng ⇒ 0 ghi registry, 0 intent cho mục CONFIRMABLE
             for i, rec in enumerate(actions_raw + new_recs):
                 CA.validate(rec, i)
         except CA.CorpActionError as e:
-            print(f"\n❌ NHÁNH BROKER KHÔNG GHI — validate() từ chối: {e}")
-            _bus("question", "corp-action-broker-validate-reject",
-                 {"error": str(e), "candidates": [x["ticker"] for x in new_recs],
-                  "urgency": "high", "decided_by": "agent"})
-            return 1
+            # Cron lượt sau quét PHIÊN KHÁC ⇒ sẽ KHÔNG tự thử lại ca này; chỉ chạy tay
+            # `--date <D>` sau khi sửa registry mới thử lại (arch-review v2 N2). Các mục KHÔNG
+            # phải CONFIRMABLE của lượt vẫn đi tiếp (không nuốt câu hỏi của mã khác).
+            print(f"\n❌ NHÁNH BROKER KHÔNG GHI registry — validate() từ chối: {e}")
+            _bus("question", f"corp-action-broker-validate-reject-{date_str}",
+                 {"question": (f"validate() từ chối khi ghi record broker: {e}. Sửa "
+                               f"data/corp_actions.json rồi chạy lại TAY: python3 "
+                               f"mike/bin/corp_action_auto_confirm.py --date {date_str} "
+                               f"(cron lượt sau quét phiên khác, không tự thử lại)."),
+                  "error": str(e), "candidates": [x["ticker"] for x in new_recs],
+                  "urgency": "high"})
+            new = [x for x in new if x["verdict"] != BD.CONFIRMABLE]
+            new_recs = []
+            rc = 1
     if new:
         BD.ledger_append(new, LEDGER_FILE)              # pha 1: intent TRƯỚC mọi tác dụng ngoài
-    rc = 0
     if new_recs:
         write_corp_actions(actions_raw + new_recs)
     todo = pending + new
+    for e in todo:
+        e.setdefault("key", BD.ledger_key(e))          # dòng sổ định dạng cũ (không có key)
     if not todo:
         print("  → không mục mới / không việc dở.")
-        return 0
-    registry_ids = {a["id"] for a in CA.load_corp_actions(CORP_ACTIONS_FILE)}
+        return rc
+    try:
+        registry_ids = {a["id"] for a in CA.load_corp_actions(CORP_ACTIONS_FILE)}
+    except CA.CorpActionError as e:
+        # Registry hỏng (đã hỏi ở validate-reject) ⇒ KHÔNG đọc lại được: mục CONFIRMABLE dở (nếu
+        # có) bị báo write-incomplete — đúng sự thật "không xác minh được", không giả là đã ghi.
+        print(f"  ❌ load_corp_actions() lỗi khi đọc lại: {e}")
+        registry_ids = set()
+        rc = 1
     if pending:
         print(f"  ↻ gửi bù {len(pending)} mục sổ chưa có 'done' (lượt trước bị kill/bus lỗi)")
     finished = []
@@ -706,6 +830,8 @@ def _run_broker_locked(date_str, mode, results):
                 rc = 1                                       # §6 verify artifact: không thấy ⇒ lỗi
             if _finish_live(e, registry_ids) == 0:
                 finished.append(e)
+                if e["verdict"] == BD.CONFIRMABLE and e["record"]["id"] in registry_ids:
+                    _close_stale_questions(e, intents)
             else:
                 rc = 1
     else:

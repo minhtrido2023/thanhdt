@@ -25,13 +25,20 @@ chân tiền âm hoặc >50.000đ/cp.
     phiên D (không phải `modifiedDate` — DNSE refresh mỗi tối) ⇒ ex = phiên kế tiếp theo
     `trading_bot/vn_market.py`. Record có `provenance: "broker"`, id `<TK>-<ex>-BROKER-SHARE-EVENT`,
     `event_type` luôn `BONUS_ISSUE` (broker không phân biệt thưởng / cổ tức CP / chia tách).
-    Công tắc `MIKE_CA_BROKER_SOURCE` = off | **shadow (mặc định)** | live. Ở live: MƠ HỒ / CHƯA ĐỦ
-    / vendor có sự kiện mà không xác nhận ⇒ bus question, KHÔNG ghi.
+    Chỉ sàn HOSE/HNX (sàn hỏi DNSE `marketId`; không xác định ⇒ MƠ HỒ). Công tắc
+    `MIKE_CA_BROKER_SOURCE` = off | **shadow (mặc định)** | live. Ở live: MƠ HỒ / CHƯA ĐỦ / vendor
+    có sự kiện mà không xác nhận ⇒ bus question, KHÔNG ghi; lượt sau CONFIRMED ⇒ `answer` đóng
+    question cũ cùng mã + phiên.
+  - nhánh vendor KHÔNG ghi nếu registry đã có record `provenance: broker` cùng mã, ex khác, cách
+    ≤ 10 ngày (hỏi `corp-action-vendor-vs-broker-*`) — tránh áp hệ số 2 lần khi feed sống lại.
 
 ## Sổ phụ `data/corp_action_broker_ledger.jsonl`
 Append-only, 2 pha: dòng `kind=intent` ghi TRƯỚC mọi tác dụng ngoài (registry, bus), dòng
 `kind=done` ghi SAU khi `append_event.sh` trả rc=0. Intent không có done (kill / bus lỗi) ⇒ lượt
-sau GỬI BÙ. Khoá `(mode, mã, phiên credit, verdict)`; khoá fcntl `<ledger>.lock` quanh đọc-sửa-ghi.
+sau GỬI BÙ. Khoá `(mode, mã, phiên credit, verdict)`; khoá fcntl ĐỘC QUYỀN `<ledger>.lock` bao
+CẢ nhánh vendor lẫn broker khi mode ≠ off (mode off: như cũ, không khoá). validate() từ chối ⇒
+không ghi registry, các mã khác vẫn được hỏi; chạy lại TAY `--date <D>` sau khi sửa (cron lượt
+sau quét phiên khác).
 Ở shadow đây là nơi DUY NHẤT xem được nhánh broker "sẽ ghi gì". Dòng hỏng ⇒ nhánh broker DỪNG
 (không im lặng coi như chưa có). Chạy với EXEC_DIR/registry sandbox mà sổ là production ⇒
 RuntimeError (chặn lớp lỗi selfcheck ghi rác vào sổ thật, arch-review v1 B2).
@@ -56,5 +63,8 @@ tiếp — **trừ record `provenance: "broker"`** (broker không được làm 
    bản ghi sau credit (MBB 2026-08-10 credit 19:32) ⇒ không thấy; gói vay credit dở tới sau 19:25
    (BID 2026-08-14, ZaloPay xong 20:15) ⇒ INSUFFICIENT ở lượt 19:25 (ở live: question normal).
    ĐỀ XUẤT (chưa cài, §11): thêm lượt `corp_action_auto_confirm.py` ~21:00 ICT T2–T6.
-6. UPCOM: giá tham chiếu = bình quân gia quyền, không phải giá đóng cửa ⇒ cổng giá dùng đóng cửa
-   sẽ ra MƠ HỒ (fail-closed, hỏi người) — chưa hỗ trợ tự động.
+6. UPCOM: giá tham chiếu = bình quân gia quyền, không phải giá đóng cửa ⇒ cổng giá dựng từ đóng
+   cửa SAI cơ sở (probe ×1,03 lọt) ⇒ nhánh broker CHẶN theo sàn: chỉ HOSE/HNX được tự xác nhận,
+   UPCOM / sàn không xác định (DNSE quote lỗi, cuối tuần) ⇒ MƠ HỒ, hỏi người. Replay CLI GIẢ ĐỊNH
+   HOSE (không có nguồn sàn lịch sử offline).
+7. Gửi bus có timeout 60s; treo ⇒ coi như chưa gửi, lượt sau gửi bù.
