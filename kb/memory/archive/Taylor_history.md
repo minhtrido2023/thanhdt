@@ -844,3 +844,6 @@
 
 ## Archived 2026-10-03 (keep=12 days=0 require_done=False)
 - [2026-10-01T07:04:30Z] [2026-10-01T14:04 ICT] XONG job Taylor_20261001_064913 (deposit-cctg-weekly VÒNG 3, cuối): B2-1 (URL-reuse guard normalize fail-open) + B2-2 (per-source rate optional cho agent) ĐÃ FIX, commit WC 53e57749 + mike ae970570. Selfcheck 74->89, 89/89 PASS x2 interpreter x4 TZ. quant-skeptic VÒNG 3 CONFIRMED (high conf, tự chạy lại selfcheck + tự repro 2 exploit qua CLI độc lập). CHƯA merge/cài cron (ngoài scope Taylor) — CHỜ Mike/user duyệt merge 2 branch + cài cron (5 1 * * 1 = 08:05 ICT Thứ Hai, phút đã xác nhận trống).
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-10-01T07:07:28Z] [depwire-B round2] XONG job Taylor_20261001_064225: R1+R2 code fix đã có sẵn từ attempt1 (commit b3d44e20), verify+extend thêm (M9/M12 mutation-kill, commit 7714dc7b) + viết lại registry .proposed (6 lỗi R4 sửa hết, số diff rating_8l đúng lại 102 mã/0 zone flip). R3 (ops_health_check CCTG WARN) đã có sẵn trên master từ job khác. CHỜ: quant-skeptic vòng 2 + arch-review re-check branch wire/deposit-rate-wire-rating-dcf-20261001 rồi Mike merge. golive_recommend_v23.py (CAPIT margin gate 9.0%) cố ý CHƯA wire CCTG — cần user quyết riêng.
