@@ -266,9 +266,7 @@ def run(date_str, dry_run=False):
     if not dry_run and lk is None:
         print(f"❌ không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — tiến trình khác đang "
               f"chạy; KHÔNG chạy nhánh nào.")
-        _bus("error", f"corp-action-lock-unavailable-{date_str}",
-             {"error": f"không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — nhánh vendor "
-                       f"VÀ broker đều KHÔNG chạy lượt này", "mode": mode})
+        _ask_lock_unavailable(date_str, mode)
         return 1
     try:
         return _run_both(date_str, dry_run, mode)
@@ -301,6 +299,39 @@ def _run_both(date_str, dry_run, mode):
 
 
 def run_vendor(date_str, dry_run=False):
+    """Nhánh vendor. Lỗi ở đường hỏi người (N9 / tỉ lệ lệch broker) KHÔNG được làm mất lô vendor
+    (arch-review v4 #6: bản cũ để ngoại lệ ledger_append/_bus thoát ⇒ mất cả lô, 0 bus event):
+    gom lỗi, chạy hết lô, rồi báo 1 bus question (urgency high) + rc=1."""
+    ask_failed = []
+    rc = _run_vendor(date_str, dry_run, ask_failed)
+    if ask_failed:
+        print(f"  ❌ {len(ask_failed)} lần hỏi người lỗi trong nhánh vendor: {ask_failed}")
+        try:
+            _bus("question", f"corp-action-vendor-ask-failed-{date_str}",
+                 {"question": (f"Nhánh vendor KHÔNG gửi được câu hỏi đối chiếu record broker "
+                               f"({len(ask_failed)} mục) — lô vendor vẫn chạy hết. Cần người kiểm "
+                               f"tay các mã dưới đây trong data/corp_actions.json."),
+                  "failed": ask_failed, "urgency": "high"})
+        except Exception as e:  # §29: kênh báo lỗi cũng hỏng ⇒ chỉ còn log cron, nói thật
+            print(f"  ❌ không gửi được cả bus question báo lỗi: {type(e).__name__}: {e}")
+        rc = 1
+    return rc
+
+
+def _ask_guarded(failed, fn, *args):
+    """Gọi 1 hàm hỏi người; lỗi (trừ SandboxMismatch) ⇒ in traceback + ghi vào `failed`, không ném."""
+    try:
+        fn(*args)
+    except SandboxMismatch:
+        raise
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        failed.append({"call": fn.__name__, "ticker": args[0], "ex_date": args[1],
+                       "error": f"{type(e).__name__}: {e}"})
+
+
+def _run_vendor(date_str, dry_run, ask_failed):
     print(f"[corp_action_auto_confirm] date={date_str} dry_run={dry_run}")
 
     candidates = get_candidate_events(date_str)
@@ -336,16 +367,24 @@ def run_vendor(date_str, dry_run=False):
         mult = 1.0 + ratio
 
         if (ticker, ex_date) in confirmed_set:
-            print(f"  [{ticker}] đã CONFIRMED rồi — bỏ qua.")
+            _bratio = _broker_record_ratio_diff(actions_raw, ticker, ex_date, mult)
+            if _bratio:
+                # arch-review v4 #12: CÙNG ex nhưng vendor khai tỉ lệ khác record broker — bản cũ
+                # im lặng "đã CONFIRMED rồi". Không ghi gì (record đã có), hỏi người đối chiếu.
+                print(f"  [{ticker}] ⚠ WARNING {_bratio[0]} — cần người đối chiếu tỉ lệ.")
+                if not dry_run:
+                    _ask_guarded(ask_failed, _ask_ratio_vs_broker, ticker, ex_date, *_bratio)
+            else:
+                print(f"  [{ticker}] đã CONFIRMED rồi — bỏ qua.")
             continue
         _bdup = _broker_record_near(actions_raw, ticker, ex_date)
         if _bdup:
             # Chỉ chạm tới được khi registry có record provenance=broker (từ 2026-10-03) — mọi
             # registry cũ đi đúng đường cũ. Vendor sống lại với ex ≠ ex broker suy ra ⇒ ghi thêm
             # là áp hệ số 2 lần (arch-review v2 N9) ⇒ không ghi, hỏi người.
-            print(f"  [{ticker}] ❌ {_bdup} — không tự xác nhận, cần người kiểm.")
+            print(f"  [{ticker}] ❌ {_bdup[0]} — không tự xác nhận, cần người kiểm.")
             if not dry_run:
-                _ask_vendor_vs_broker(ticker, ex_date, _bdup)
+                _ask_guarded(ask_failed, _ask_vendor_vs_broker, ticker, ex_date, *_bdup)
             continue
 
         print(f"  [{ticker}] ex_date={ex_date}, ratio={ratio} (×{mult}) — kiểm broker ...")
@@ -529,6 +568,7 @@ _LOCK_HELD = False        # run() đã giữ khoá ⇒ run_broker không xin l�
 # Gốc PRODUCTION tính ĐỘC LẬP với các biến module selfcheck hay đổi (LEDGER_FILE/EXEC_DIR/
 # BD.LEDGER_FILE) — guard sandbox so với cái này (arch-review v2 N4).
 _PROD_DATA = os.path.realpath(os.path.join(WC_ROOT, "data"))
+BROKER_VENDOR_MULT_TOL = 1e-3   # hệ số vendor vs record broker CÙNG ex: lệch >0,1% ⇒ hỏi (D3 replay ≤0,1%)
 NEAR_DUP_DAYS = 10        # record CÙNG MÃ có ex_date cách credit_day ≤ N ngày lịch ⇒ không ghi, hỏi
 LOCK_WAIT_S = 120
 
@@ -544,11 +584,17 @@ def broker_mode():
 
 def _vendor_events_fn(date_str):
     """ticker → MỌI sự kiện của mã trong `upcoming_events_held` lịch vendor ngày `date_str`.
-    Không có file (feed đứng) ⇒ [] (đúng ca nhánh broker sinh ra để lo). File CÓ mà đọc hỏng ⇒
-    VENDOR_UNREADABLE cho mọi mã + in lỗi thật (§29) — không coi là "vendor không có sự kiện"."""
+    Feed đứng vẫn ra file (feed_status STALE, ca TPB 10-01) ⇒ đọc bình thường. KHÔNG có file /
+    chỉ có `_FAILED.json` (pipeline vendor không chạy hoặc trượt cổng) hay file đọc hỏng ⇒
+    VENDOR_UNREADABLE cho mọi mã + in lý do thật (§29) — fail-closed, KHÔNG coi là "vendor không
+    có sự kiện" (arch-review v4 #5: bản cũ coi file thiếu là [] ⇒ live có thể CONFIRM)."""
     path = os.path.join(CA_DAILY_DIR, f"corp_action_daily_{date_str}.json")
     if not os.path.exists(path):
-        return lambda tk: []
+        failed = os.path.join(CA_DAILY_DIR, f"corp_action_daily_{date_str}_FAILED.json")
+        why = ("chỉ có " + os.path.basename(failed) if os.path.exists(failed)
+               else "không có file")
+        print(f"  ❌ lịch vendor {path}: {why} ⇒ mọi ứng viên broker MƠ HỒ (VENDOR_UNREADABLE)")
+        return lambda tk: BD.VENDOR_UNREADABLE
     try:
         with open(path, encoding="utf-8") as f:
             held = json.load(f).get("upcoming_events_held") or []
@@ -560,14 +606,36 @@ def _vendor_events_fn(date_str):
 
 def _exchange_fn():
     """ticker → sàn THẬT qua DNSE `marketId` (STO/STX/UPX). Không xác định được ⇒ None ⇒ detector
-    MƠ HỒ (fail-closed; không mặc định HOSE như `Quote.exchange`)."""
-    cache = {}
+    MƠ HỒ (fail-closed; không mặc định HOSE như `Quote.exchange`).
+
+    PHẢI `connect()` (arch-review v4 #1): `get_quote_source()` trả nguồn client=None; `get_quote`
+    khi chưa connect nuốt AttributeError của từng lời gọi API ⇒ Quote rỗng ⇒ exchange_known=False
+    ⇒ MỌI ứng viên MƠ HỒ (TPB 10-01 thật). Connect 1 lần/lượt như `bot_execute.py --probe` /
+    `opening_window_l2_poll.py`; lỗi ⇒ None cho mọi mã. `_raw_log=None`: script này chỉ ĐỌC
+    dnse_raw — không ghi quote_unmapped/quote_l2 vào file kế toán production (kể cả --dry-run)."""
+    cache, src = {}, []
+
+    def _source():
+        if not src:
+            try:
+                from trading_bot.brokers import get_quote_source
+                s = get_quote_source("dnse")
+                s._raw_log = None
+                s.connect()
+                src.append(s)
+            except Exception as e:  # §29: nói lỗi thật
+                print(f"  không kết nối được nguồn quote DNSE: {type(e).__name__}: {e} ⇒ sàn None")
+                src.append(None)
+        return src[0]
 
     def fn(tk):
         if tk not in cache:
+            s = _source()
+            if s is None:
+                cache[tk] = None
+                return None
             try:
-                from trading_bot.brokers import get_quote_source
-                q = get_quote_source("dnse").get_quote(tk)
+                q = s.get_quote(tk)
                 cache[tk] = q.exchange if getattr(q, "exchange_known", False) else None
             except Exception as e:  # §29: nói lỗi thật
                 print(f"  [{tk}] không xác định được sàn qua DNSE: {type(e).__name__}: {e}")
@@ -648,6 +716,10 @@ def _near_duplicate(raw_actions, tk, credit_day, ex):
     return None
 
 
+class SandboxMismatch(RuntimeError):
+    """Sổ PRODUCTION + dữ liệu sandbox — KHÔNG bao giờ bị nuốt (kể cả bởi _ask_guarded)."""
+
+
 def _sandbox_guard():
     """Sổ là PRODUCTION mà dữ liệu vào/registry KHÔNG ⇒ đúng lớp lỗi B2 (selfcheck quên đổi
     LEDGER_FILE ghi rác vào sổ thật). Gọi TRƯỚC khi tạo bất kỳ file nào (kể cả .lock)."""
@@ -656,7 +728,7 @@ def _sandbox_guard():
     if _in_prod(LEDGER_FILE) and not (_in_prod(EXEC_DIR) and _in_prod(CORP_ACTIONS_FILE)):
         # Sandbox LỆCH: dữ liệu vào/registry là sandbox mà sổ là PRODUCTION ⇒ đúng lớp lỗi B2
         # (selfcheck quên đổi LEDGER_FILE ghi rác vào sổ thật). Từ chối thay vì ghi.
-        raise RuntimeError(f"LEDGER_FILE={LEDGER_FILE} là sổ PRODUCTION nhưng EXEC_DIR={EXEC_DIR} / "
+        raise SandboxMismatch(f"LEDGER_FILE={LEDGER_FILE} là sổ PRODUCTION nhưng EXEC_DIR={EXEC_DIR} / "
                            f"CORP_ACTIONS_FILE={CORP_ACTIONS_FILE} đã bị đổi (sandbox?) — từ chối ghi")
 
 
@@ -676,18 +748,80 @@ def _broker_record_near(raw_actions, tk, ex):
         try:
             rex = dt.date.fromisoformat(str(r.get("ex_date", ""))[:10])
         except ValueError:
-            return f"record broker {r.get('id')!r} có ex_date không đọc được"
+            return f"record broker {r.get('id')!r} có ex_date không đọc được", str(r.get("id"))
         if rex != d0 and abs((rex - d0).days) <= NEAR_DUP_DAYS:
             return (f"registry đã có record BROKER {r.get('id')!r} ex {rex} (cách {abs((rex - d0).days)}"
-                    f" ngày) — có thể CÙNG sự kiện với ex khác")
+                    f" ngày) — có thể CÙNG sự kiện với ex khác"), str(r.get("id"))
     return None
 
 
-def _ask_vendor_vs_broker(ticker, ex_date, why):
-    """Hỏi người MỘT lần cho mỗi (mã, ex vendor): bus rc=0 ⇒ ghi dòng `done` vào sổ ⇒ lượt sau im
-    (trước đây hỏi lại mỗi 19:30 cho đến khi người thu hồi record). Bus lỗi ⇒ không đánh dấu."""
+def _broker_record_ratio_diff(raw_actions, tk, ex, mult):
+    """Record provenance=broker ĐANG CONFIRMED CÙNG (mã, ex) mà hệ số lệch hệ số vendor `mult` quá
+    BROKER_VENDOR_MULT_TOL (tương đối) ⇒ (lý do, id). Record người ký ⇒ None (đường cũ)."""
+    for r in raw_actions:
+        if (str(r.get("ticker", "")).upper() != tk or str(r.get("ex_date", ""))[:10] != ex
+                or str(r.get("provenance", "")).lower() != "broker"
+                or not str(r.get("_status", "")).upper().startswith("CONFIRMED")):
+            continue
+        try:
+            bm = float(r.get("qty_multiplier"))
+        except (TypeError, ValueError):
+            bm = None
+        if bm is None or abs(bm - mult) > BROKER_VENDOR_MULT_TOL * mult:
+            return (f"vendor khai ×{mult} nhưng record BROKER {r.get('id')!r} cùng ex {ex} là "
+                    f"×{r.get('qty_multiplier')}"), str(r.get("id"))
+    return None
+
+
+def _ask_vendor_vs_broker(ticker, ex_date, why, rid):
+    """Vendor ex ≠ ex record broker gần đó (N9). Khoá hỏi có id record broker (arch-review v4 #9):
+    người REVOKE record cũ rồi broker ghi record MỚI cho cùng (mã, ex vendor) ⇒ hỏi lại."""
+    _ask_once(["vendor-vs-broker", ticker, ex_date, rid, "ASKED"],
+              f"corp-action-vendor-vs-broker-{ticker}-{ex_date}",
+              {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {why}. Cần người xác "
+                           f"nhận ex thật và thu hồi (REVOKED) record sai.",
+               "ticker": ticker, "vendor_ex_date": ex_date, "broker_record_id": rid,
+               "urgency": "high"})
+
+
+def _ask_ratio_vs_broker(ticker, ex_date, why, rid):
+    """CÙNG (mã, ex) với record broker nhưng tỉ lệ khác (arch-review v4 #12) — hỏi 1 lần/record."""
+    _ask_once(["vendor-ratio-vs-broker", ticker, ex_date, rid, "ASKED"],
+              f"corp-action-vendor-ratio-vs-broker-{ticker}-{ex_date}",
+              {"question": f"{ticker} ex {ex_date}: {why}. Registry giữ hệ số BROKER (không ghi đè). "
+                           f"Cần người đối chiếu tỉ lệ thật; sai ⇒ REVOKED record rồi ghi tay.",
+               "ticker": ticker, "ex_date": ex_date, "broker_record_id": rid, "urgency": "high"})
+
+
+def _ask_lock_unavailable(date_str, mode):
+    """Không lấy được khoá ⇒ CẢ nhánh vendor lẫn broker không chạy. Bus `question` urgency high
+    (ops_health_check leo thang question, KHÔNG leo thang `error` — arch-review v4 #3), 1 lần/ngày:
+    marker tạo nguyên tử O_EXCL cạnh sổ (không cần khoá — chính khoá đang bị giữ); bus lỗi ⇒ xoá
+    marker để lượt sau hỏi lại."""
+    marker = f"{LEDGER_FILE}.lockfail-{date_str}"
+    try:
+        os.close(os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+    except FileExistsError:
+        print(f"  đã hỏi người về khoá ngày {date_str} ⇒ không hỏi lại")
+        return
+    try:
+        rc = _bus("question", f"corp-action-lock-unavailable-{date_str}",
+                  {"question": (f"Không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — nhánh "
+                                f"vendor VÀ broker đều KHÔNG chạy lượt {date_str}. Kiểm tiến trình "
+                                f"corp_action_auto_confirm đang treo rồi chạy lại tay --date {date_str}."),
+                   "mode": mode, "urgency": "high"})
+    except Exception as e:  # §29
+        print(f"  ❌ không gửi được bus question khoá: {type(e).__name__}: {e}")
+        rc = 1
+    if rc != 0:
+        os.remove(marker)
+
+
+def _ask_once(key, topic, payload):
+    """Hỏi người MỘT lần cho mỗi `key`: bus rc=0 ⇒ ghi dòng `done` vào sổ ⇒ lượt sau im. Bus lỗi ⇒
+    không đánh dấu (lượt sau hỏi lại). Sổ đọc hỏng ⇒ vẫn hỏi (an toàn), nói lỗi thật."""
     from zoneinfo import ZoneInfo
-    key = ["vendor-vs-broker", ticker, ex_date, "ASKED"]
+    ticker = key[1]
     _sandbox_guard()
     try:
         _intents, done = BD.ledger_state(LEDGER_FILE)
@@ -695,12 +829,9 @@ def _ask_vendor_vs_broker(ticker, ex_date, why):
         print(f"  ⚠ sổ broker đọc hỏng ({e}) ⇒ không kiểm được đã hỏi chưa, hỏi lại")
         done = set()
     if tuple(key) in done:
-        print(f"  [{ticker}] đã hỏi người về vendor-vs-broker ex {ex_date} ⇒ không hỏi lại")
+        print(f"  [{ticker}] đã hỏi người {key} ⇒ không hỏi lại")
         return
-    rc = _bus("question", f"corp-action-vendor-vs-broker-{ticker}-{ex_date}",
-              {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {why}. Cần người xác "
-                           f"nhận ex thật và thu hồi (REVOKED) record sai.",
-               "ticker": ticker, "vendor_ex_date": ex_date, "urgency": "high"})
+    rc = _bus("question", topic, payload)
     if rc == 0:
         now_ict = dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%dT%H:%M:%S+07:00")
         BD.ledger_append([{"kind": "done", "key": key, "at": now_ict}], LEDGER_FILE)

@@ -670,6 +670,9 @@ def ledger_append(entries, path=LEDGER_FILE):
 
 # ───────────────────────────────────────────────────────────────────────────── replay CLI ──
 
+BQ_TIMEOUT_S = 180
+
+
 def bq_unadjusted_close(pairs):
     """{(ticker, day): Price} — cột `Price` CHƯA điều chỉnh (Close đã điều chỉnh hồi tố sẽ nằm
     ở hệ SAU sự kiện ⇒ sai hệ). CHỈ cho replay ngày QUÁ KHỨ (§6)."""
@@ -682,9 +685,12 @@ def bq_unadjusted_close(pairs):
            f"WHERE t.ticker IN ({','.join(repr(t) for t in tks)}) "
            f"AND t.time IN ({','.join(f'DATE {d!r}' for d in days)})")
     env = dict(os.environ)
-    r = subprocess.run(["bq", "query", "--use_legacy_sql=false", "--format=json",
-                        "--project_id=lithe-record-440915-m9", "--max_rows=100000", sql],
-                       capture_output=True, text=True, env=env)
+    try:   # treo mạng/bq không được giữ khoá sổ của cron 19:25 vô hạn (arch-review v4 #10)
+        r = subprocess.run(["bq", "query", "--use_legacy_sql=false", "--format=json",
+                            "--project_id=lithe-record-440915-m9", "--max_rows=100000", sql],
+                           capture_output=True, text=True, env=env, timeout=BQ_TIMEOUT_S)
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(f"bq treo > {BQ_TIMEOUT_S}s") from e
     if r.returncode != 0:
         raise RuntimeError(f"bq lỗi: {(r.stderr or r.stdout).strip()[:300]}")
     return {(x["ticker"], x["d"]): _f(x["Price"]) for x in json.loads(r.stdout or "[]")}
