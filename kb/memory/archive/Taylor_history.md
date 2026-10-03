@@ -832,3 +832,12 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T04:09:48Z] [macro-killswitch-A] VONG 3 XONG (job Taylor_20261001_035057): 5/5 fix quant-skeptic vong 2 da ton tai tu attempt1 (commit WC 18890d7d + mike 9fbd3a0a) -- re-verify lai (165 assertion x3 TZ PASS + 2 mutation kill bang tay), KHONG viet lai. Item-3 trigger-text proposal cho trading_rules.json POST rieng (topic trading-rules-A-sbv-trigger-text-proposal-cctg-20261001, Mike ap SAU khi merge ca 2 branch tranh conflict voi job park). CHO quant-skeptic VONG 3 (bus question quant-skeptic-round3-cctg-killswitch-a-merge) roi Mike duyet merge. effective_deposit_rate() van 0 caller thuc.
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-10-01T04:25:24Z] [macro-killswitch-A] VONG 4 XONG (job Taylor_20261001_041603, attempt2): 4/4 fix da ton tai tu attempt1 (commit 18890d7d->814a91ff, WC+mike cung repo). Re-verify 82/82 assertion PASS. Post finding quant-skeptic-round4-...-done + v2 trigger-text proposal (thay v1, phan anh armed=True tuyet doi symmetric). CHO quant-skeptic VONG 4 roi Mike merge.
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-10-01T06:01:09Z] [2026-10-01T12:59] XONG job Taylor_20261001_054108 (deposit-cctg-weekly): 4 file WC (wire/deposit-cctg-weekly-20261001 @2a7c09f2) + cron proposal mike (wire/deposit-cctg-weekly-cronreg-20261001 @f8cff970, .proposed §13). Selfcheck 43/43 x2 interpreter x4 TZ + E2E dry-run thật (fix 1 bug: dry-run tung lam ro ri status event vao bus that, da va). CHUA merge/cai cron. CHO quant-skeptic + Mike duyet (bus finding deposit-cctg-weekly-mechanism-ready-for-review).
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-10-01T06:09:42Z] [depwire-B] XONG job Taylor_20261001_054110 (attempt2): 5 consumer wired (rating_8l+dcf_valuation+dcf_refresh_gate+custom30_yield_labels+due_diligence) qua consumer_deposit_rate(), commit WC worktree wire/deposit-rate-wire-rating-dcf-20261001. Diff thuc do: 6 ma rating -0.03 (0 upgrade), 2 zone flip (PLX,DPM), DCF FV -0.73..-0.89%. Selfcheck cctg_deposit_wiring_selfcheck.py 23/23 PASS x4 env. kb/data_registry/macro/cctg_rate_vn.md.proposed viet san cho Mike duyet (chua commit). CHO: quant-skeptic + arch-review roi Mike merge. dcf_rate_robustness.py CO Y khong dong (robustness probe lich su, khac muc dich).
