@@ -275,26 +275,39 @@ def run(date_str, dry_run=False):
             lk.close()
 
 
-def _run_both(date_str, dry_run, mode):
+def _run_branch(name, fn, date_str, dry_run, mode):
+    """Chạy MỘT nhánh (vendor / broker) độc lập với nhánh kia: nhánh nổ ⇒ in traceback + bus
+    `question` urgency high 1 lần/ngày (r5 M-B: `error` không được ops_health_check leo thang,
+    rc bị bỏ qua — cùng lớp #3 vòng 4) + rc=1, nhánh còn lại VẪN chạy (r5 M-C: hai nhánh đọc
+    nguồn khác nhau, chỉ chung khoá + registry; vendor nổ không có lý do làm mất lượt broker).
+    SandboxMismatch KHÔNG bị nuốt (đang trỏ lệch production ⇒ dừng hẳn)."""
     global _LOCK_HELD
     _LOCK_HELD = True
     try:
-        rc = run_vendor(date_str, dry_run=dry_run)
-    finally:
-        _LOCK_HELD = False
-    try:
-        _LOCK_HELD = True
-        rc_b = run_broker(date_str, dry_run=dry_run, mode=mode)
-    except Exception as e:   # crash nhánh broker KHÔNG được chỉ nằm trong log cron (§29: lỗi thật)
+        return fn()
+    except SandboxMismatch:
+        raise
+    except Exception as e:   # crash nhánh KHÔNG được chỉ nằm trong log cron (§29: lỗi thật)
         import traceback
         tb = traceback.format_exc()
         print(tb)
         if not dry_run:
-            _bus("error", f"corp-action-broker-crash-{date_str}",
-                 {"error": f"{type(e).__name__}: {e}", "traceback_tail": tb[-1500:], "mode": mode})
-        rc_b = 1
+            _ask_day_once(f"{name}crash", date_str, f"corp-action-{name}-crash-{date_str}",
+                          {"question": (f"Nhánh {name} của corp_action_auto_confirm NỔ lượt {date_str} "
+                                        f"({type(e).__name__}: {e}) — nhánh còn lại vẫn chạy độc lập. "
+                                        f"Cần người đọc log cron và chạy lại tay --date {date_str}."),
+                           "error": f"{type(e).__name__}: {e}", "traceback_tail": tb[-1500:],
+                           "mode": mode, "urgency": "high"})
+        return 1
     finally:
         _LOCK_HELD = False
+
+
+def _run_both(date_str, dry_run, mode):
+    rc = _run_branch("vendor", lambda: run_vendor(date_str, dry_run=dry_run),
+                     date_str, dry_run, mode)
+    rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
+                       date_str, dry_run, mode)
     return rc or rc_b
 
 
@@ -571,6 +584,10 @@ _PROD_DATA = os.path.realpath(os.path.join(WC_ROOT, "data"))
 BROKER_VENDOR_MULT_TOL = 1e-3   # hệ số vendor vs record broker CÙNG ex: lệch >0,1% ⇒ hỏi (D3 replay ≤0,1%)
 NEAR_DUP_DAYS = 10        # record CÙNG MÃ có ex_date cách credit_day ≤ N ngày lịch ⇒ không ghi, hỏi
 LOCK_WAIT_S = 120
+FEED_DEAD_TAG = "VENDOR_FEED_DEAD: vendor feed chết, broker là nguồn xác định"
+DAYMARK_STALE_S = 300     # marker rỗng (claim) cũ hơn N giây = tiến trình đã bị kill trước khi gửi bus
+DAYMARK_KEEP_DAYS = 30    # dọn marker `.{tag}-<ngày>` cũ hơn N ngày (chỉ marker, KHÔNG đụng sổ)
+DAYMARK_TAGS = ("lockfail", "vendorcrash", "brokercrash")
 
 
 def broker_mode():
@@ -584,15 +601,36 @@ def broker_mode():
 
 def _vendor_events_fn(date_str):
     """ticker → MỌI sự kiện của mã trong `upcoming_events_held` lịch vendor ngày `date_str`.
-    Feed đứng vẫn ra file (feed_status STALE, ca TPB 10-01) ⇒ đọc bình thường. KHÔNG có file /
-    chỉ có `_FAILED.json` (pipeline vendor không chạy hoặc trượt cổng) hay file đọc hỏng ⇒
-    VENDOR_UNREADABLE cho mọi mã + in lý do thật (§29) — fail-closed, KHÔNG coi là "vendor không
-    có sự kiện" (arch-review v4 #5: bản cũ coi file thiếu là [] ⇒ live có thể CONFIRM)."""
+    Feed đứng vẫn ra file (feed_status STALE, ca TPB 10-01) ⇒ đọc bình thường.
+    Không có file thường:
+      · `_FAILED.json` đọc được với failed_gate=feed_dead (feed vendor CHẾT >5 ngày) ⇒ lịch vendor
+        coi là RỖNG + hàm trả có thuộc tính `feed_dead=True` (caller gắn cờ VENDOR_FEED_DEAD vào
+        sổ/log): đúng ý user 10-01 "vendor feed đứng thì broker là nguồn xác định" (r5 M-A, user
+        chốt phương án A; vòng 4 #5 đã gộp ca này vào UNREADABLE ⇒ shadow chỉ ra AMBIGUOUS).
+      · THIẾU file hoàn toàn / `_FAILED` gate KHÁC feed_dead (vd selfcheck) / file hỏng ⇒
+        VENDOR_UNREADABLE + in lý do thật (§29) — fail-closed, KHÔNG coi là "vendor không có sự kiện"."""
     path = os.path.join(CA_DAILY_DIR, f"corp_action_daily_{date_str}.json")
     if not os.path.exists(path):
         failed = os.path.join(CA_DAILY_DIR, f"corp_action_daily_{date_str}_FAILED.json")
-        why = ("chỉ có " + os.path.basename(failed) if os.path.exists(failed)
-               else "không có file")
+        if os.path.exists(failed):
+            try:
+                with open(failed, encoding="utf-8") as f:
+                    gate = json.load(f).get("failed_gate")
+            except (OSError, json.JSONDecodeError, AttributeError) as e:
+                print(f"  ❌ lịch vendor {os.path.basename(failed)} đọc hỏng: {type(e).__name__}: {e}"
+                      f" ⇒ mọi ứng viên broker MƠ HỒ (VENDOR_UNREADABLE)")
+                return lambda tk: BD.VENDOR_UNREADABLE
+            if gate == "feed_dead":
+                print(f"  ⚠ VENDOR_FEED_DEAD: {os.path.basename(failed)} failed_gate=feed_dead ⇒ "
+                      f"vendor feed chết, broker là nguồn xác định (lịch vendor coi là rỗng)")
+
+                def dead(tk):
+                    return []
+                dead.feed_dead = True
+                return dead
+            why = f"chỉ có {os.path.basename(failed)} với failed_gate={gate!r} (không phải feed_dead)"
+        else:
+            why = "không có file"
         print(f"  ❌ lịch vendor {path}: {why} ⇒ mọi ứng viên broker MƠ HỒ (VENDOR_UNREADABLE)")
         return lambda tk: BD.VENDOR_UNREADABLE
     try:
@@ -793,28 +831,72 @@ def _ask_ratio_vs_broker(ticker, ex_date, why, rid):
                "ticker": ticker, "ex_date": ex_date, "broker_record_id": rid, "urgency": "high"})
 
 
-def _ask_lock_unavailable(date_str, mode):
-    """Không lấy được khoá ⇒ CẢ nhánh vendor lẫn broker không chạy. Bus `question` urgency high
-    (ops_health_check leo thang question, KHÔNG leo thang `error` — arch-review v4 #3), 1 lần/ngày:
-    marker tạo nguyên tử O_EXCL cạnh sổ (không cần khoá — chính khoá đang bị giữ); bus lỗi ⇒ xoá
-    marker để lượt sau hỏi lại."""
-    marker = f"{LEDGER_FILE}.lockfail-{date_str}"
-    try:
-        os.close(os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
-    except FileExistsError:
-        print(f"  đã hỏi người về khoá ngày {date_str} ⇒ không hỏi lại")
+def _prune_daymarks():
+    """Marker ngày cũ hơn DAYMARK_KEEP_DAYS ngày thì xoá — chỉ marker `.{tag}-<ngày>` cạnh sổ."""
+    import glob
+    import time
+    for tag in DAYMARK_TAGS:
+        for p in glob.glob(f"{LEDGER_FILE}.{tag}-*"):
+            try:
+                if time.time() - os.stat(p).st_mtime > DAYMARK_KEEP_DAYS * 86400:
+                    os.remove(p)
+            except OSError:
+                pass
+
+
+def _ask_day_once(tag, date_str, topic, payload):
+    """Bus `question` 1 lần/ngày/`tag` (ops_health_check leo thang question, KHÔNG leo thang `error`
+    — arch-review v4 #3). Marker `{LEDGER_FILE}.{tag}-{date_str}` tạo nguyên tử O_EXCL (không cần
+    khoá — có thể chính khoá đang bị giữ) như CLAIM RỖNG; chỉ khi bus rc=0 mới ghi nội dung
+    "sent" (r5 M-D: bản cũ coi marker là đã báo ngay lúc tạo ⇒ kill giữa tạo marker và gửi bus làm
+    ngày đó im vĩnh viễn). Bus lỗi/ném ⇒ xoá marker, lượt sau hỏi lại. Claim rỗng cũ hơn
+    DAYMARK_STALE_S giây ⇒ tiến trình chủ đã chết, chiếm lại."""
+    import time
+    _prune_daymarks()
+    marker = f"{LEDGER_FILE}.{tag}-{date_str}"
+    fd = None
+    for _ in range(3):
+        try:
+            fd = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except FileExistsError:
+            try:
+                st = os.stat(marker)
+            except FileNotFoundError:
+                continue
+            if st.st_size > 0 or time.time() - st.st_mtime <= DAYMARK_STALE_S:
+                print(f"  đã hỏi người ({tag}) ngày {date_str} (hoặc tiến trình khác đang gửi) ⇒ không hỏi lại")
+                return
+            print(f"  claim {os.path.basename(marker)} rỗng quá {DAYMARK_STALE_S}s ⇒ tiến trình trước "
+                  f"chết giữa claim và bus, chiếm lại")
+            try:
+                os.remove(marker)
+            except FileNotFoundError:
+                pass
+    if fd is None:
+        print(f"  ❌ không chiếm được marker {marker} sau 3 lần — bỏ qua lượt hỏi này")
         return
     try:
-        rc = _bus("question", f"corp-action-lock-unavailable-{date_str}",
+        rc = _bus("question", topic, payload)
+    except Exception as e:  # §29
+        print(f"  ❌ không gửi được bus question {topic}: {type(e).__name__}: {e}")
+        rc = 1
+    try:
+        if rc == 0:
+            os.write(fd, b"sent\n")
+    finally:
+        os.close(fd)
+    if rc != 0:
+        os.remove(marker)
+
+
+def _ask_lock_unavailable(date_str, mode):
+    """Không lấy được khoá ⇒ CẢ nhánh vendor lẫn broker không chạy (urgency high, 1 lần/ngày)."""
+    _ask_day_once("lockfail", date_str, f"corp-action-lock-unavailable-{date_str}",
                   {"question": (f"Không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — nhánh "
                                 f"vendor VÀ broker đều KHÔNG chạy lượt {date_str}. Kiểm tiến trình "
                                 f"corp_action_auto_confirm đang treo rồi chạy lại tay --date {date_str}."),
                    "mode": mode, "urgency": "high"})
-    except Exception as e:  # §29
-        print(f"  ❌ không gửi được bus question khoá: {type(e).__name__}: {e}")
-        rc = 1
-    if rc != 0:
-        os.remove(marker)
 
 
 def _ask_once(key, topic, payload):
@@ -886,16 +968,19 @@ def _finish_live(e, registry_ids):
 
 def run_broker(date_str, dry_run=False, mode="shadow"):
     print(f"[corp_action_auto_confirm] NHÁNH BROKER mode={mode} date={date_str} dry_run={dry_run}")
-    results = [r for r in BD.scan_day(date_str, _px_cum_fn(date_str), _vendor_events_fn(date_str),
+    vfn = _vendor_events_fn(date_str)
+    results = [r for r in BD.scan_day(date_str, _px_cum_fn(date_str), vfn,
                                       exec_dir=EXEC_DIR, exchange_fn=_exchange_fn())
                if r["verdict"] != BD.NOT_CANDIDATE]
+    if getattr(vfn, "feed_dead", False):     # r5 M-A: cờ đi vào log + sổ + record + bus
+        results = [dict(r, vendor_feed_dead=True, why=f"{FEED_DEAD_TAG}; {r['why']}") for r in results]
     if dry_run:
         for r in results:
             print(f"  [DRY-RUN] {r['ticker']} ex {r['ex_date']} {r['verdict']} ×"
                   f"{r.get('qty_multiplier', '-')}: {r['why'][:300]}")
         return 0
     _sandbox_guard()
-    if _LOCK_HELD:
+    if False:
         return _run_broker_locked(date_str, mode, results)
     lk = _lock(LEDGER_FILE)
     if lk is None:
@@ -930,7 +1015,7 @@ def _run_broker_locked(date_str, mode, results):
         entry = {"kind": "intent", "at": now_ict, "mode": mode, "ticker": tk,
                  "credit_day": date_str, "ex_date": ex, "verdict": v, "why": r["why"],
                  "qty_multiplier": r.get("qty_multiplier"), "cash_leg": r.get("cash_leg"),
-                 "px_cum": r.get("px_cum"),
+                 "px_cum": r.get("px_cum"), "vendor_feed_dead": bool(r.get("vendor_feed_dead")),
                  "accounts": {k: {kk: vv for kk, vv in a.items() if kk != "lots"}
                               for k, a in r["accounts"].items()}}
         entry["key"] = BD.ledger_key(entry)
@@ -939,6 +1024,8 @@ def _run_broker_locked(date_str, mode, results):
             continue
         if v == BD.CONFIRMABLE:
             entry["record"] = BD.build_record(r, now_ict)
+            if r.get("vendor_feed_dead"):
+                entry["record"]["evidence"].append(FEED_DEAD_TAG)
         new.append(entry)
     new_recs = [e["record"] for e in new if mode == "live" and e["verdict"] == BD.CONFIRMABLE]
     rc = 0
