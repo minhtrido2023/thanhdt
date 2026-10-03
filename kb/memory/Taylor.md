@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-02T10:07:04Z] [oddlot-full-exit VONG 3] XONG job Taylor_20261002_094032: commit 817f0614 (branch fix/oddlot-full-exit-20261002, wt-oddlot-1002) — park_holdings.aggregate_position_rows chung live/jsonl, selfcheck 64/0, mutation 35/35, 19 selfcheck x5 TZ == base. CHO arch-review/quant-skeptic + Mike merge; user quyet brokers.py:729-731 (con anh huong executor.py:2021/2208).
 - [2026-10-02T11:42:57Z] [2026-10-02] [brokers-tradequantity-zero] XONG job Taylor_20261002_103812: branch fix/brokers-tradequantity-zero-20261002@ba2e0a47 (wt-tq0-1002), _sellable_qty 3 site, selfcheck+mutation+89 selfcheck x3TZ == base. CHO quant-skeptic + Mike merge.
 - [2026-10-03T04:44:10Z] ĐANG DỞ: job Taylor_20261003_033512 broker-corp-action, wt-brokerca-1003 branch feat/broker-corp-action-source-20261003 @07706719; arch-review v1 NEEDS_CHANGES (B1 gia-khong-roi/modifiedDate refresh dem; B2 selfcheck cu ghi ledger prod - DA XOA file) | NEXT: sua tron bo required_changes roi arch-review v2 (tran 3 vong)
 - [2026-10-03T04:45:25Z] ĐANG DỞ: job Taylor_20261003_033512 attempt2, wt-brokerca-1003 @07706719 + diff dở account_evidence; arch-review v1 full ở /tmp/brokerca/archrev_v1.md (B1,B2,M1-M6,minor) | NEXT: sửa hết required_changes → selfcheck → arch-review v2
@@ -26,3 +25,4 @@
 - [2026-10-03T10:45:05Z] [2026-10-03 ICT] [broker-CA r5] XONG job Taylor_20261003_091511: fix/broker-ca-r5-20261003@e38c808e (wt-brokerca-r5-1003), 161/161 mutant, matrix 102/102. CHỜ Mike merge trước 19:25 T2 05/10.
 - [2026-10-03T16:28:34Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY (đảo thứ tự vendor→broker), wt agents/Taylor/wt-brokerprimary-1003 branch feat/broker-primary-20261003 từ 2c2abc63 | NEXT: đọc code auto_confirm+broker_detect, thiết kế đảo thứ tự
 - [2026-10-03T16:43:48Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 (feat/broker-primary-20261003 từ 2c2abc63), design /tmp/brokerprim/design.md, mục 5+6 xong /tmp/brokerprim/q56.md | NEXT: code broker_detect (vendor_crosscheck, price-only) + auto_confirm (live order) + selfcheck
+- [2026-10-03T17:07:59Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 WIP commit (selfcheck 338/0 kèm replay) | NEXT: mutation (sửa mẫu cũ + thêm mẫu mới), matrix 17 selfcheck x2 interp x3 TZ, arch-reviewer 1 lần, bus finding broker-primary-20261003

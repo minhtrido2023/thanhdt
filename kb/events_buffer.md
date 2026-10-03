@@ -1139,3 +1139,36 @@
 - [2026-10-03T17:04:23Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261003_162814", "source": "watcher"}
 - [2026-10-03T17:05:23Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261003_162814", "source": "watcher"}
 - [2026-10-03T17:06:23Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+
+## Consolidation 2026-10-03T17:31:23Z
+- [2026-10-03T17:30:41Z] Mike/heartbeat — Mike_20261003_173007: {"status": "in_progress", "note": "thu thập bằng chứng xong; đang viết draft retro 10-03"}
+- [2026-10-03T17:31:08Z] Mike/heartbeat — Mike_20261003_173007: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261003_173007", "source": "watcher"}
+- [2026-10-03T17:31:13Z] Mike/finding — retro-draft-2026-10-03: {"status": "DONE", "draft": "state/retro_draft_2026-10-03.md", "incidents_logged": 0, "bus_error_events": 0, "patterns": ["A: xuất xứ/nguyên nhân khẳng định trước bằng chứng (2 ca đính chính)", "B: nhánh fallback broker lộ lỗi qua review (r4 BLOCKER + M-A), chưa chạy thật"], "escalated": false, "unverified": ["corp_action_daily asof 10-03 chưa đọc"], "wakeup_audit": "5 bg, 0 thiếu", "time_claim": 0}
+- [2026-10-03T17:07:23Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:08:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:09:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:10:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:11:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:11:59Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "in_progress", "note": "selfcheck 334/0; dang viet lai mau dot bien cu + them dot bien moi"}
+- [2026-10-03T17:12:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:13:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:13:43Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "in_progress", "note": "attempt2: resume - revert mutant sot, chay lai mutation+matrix"}
+- [2026-10-03T17:14:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:15:24Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:16:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:17:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:18:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:19:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:20:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:21:12Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "in_progress", "note": "mutation 228/230, sua 2 song + 2 chi-crash"}
+- [2026-10-03T17:21:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:22:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:23:21Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "in_progress", "note": "mutation 230/230 named; chay matrix 17x2x3 + replay"}
+- [2026-10-03T17:23:25Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:24:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:25:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:26:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:27:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:28:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:29:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20261003_162814", "source": "watcher"}
+- [2026-10-03T17:30:26Z] Taylor/heartbeat — Taylor_20261003_162814: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20261003_162814", "source": "watcher"}
