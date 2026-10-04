@@ -138,3 +138,23 @@ Probe/kết quả reviewer: /tmp/archrev_r3/ (probe/p1–p7.py, mut3.py, mut4.py
 2. Record người ký/vendor không re-verify sau ex (giữ quy ước "người đã chốt").
 3. Câu hỏi vendor-vs-registry / vendor-near-record không tự `answer` (giải quyết = người sửa record ⇒ người đóng).
 4. N39 tương đương (ghi trên); phạm vi `run_broker` dry-run: cờ `_dry_scope` là phòng thủ chiều sâu.
+
+### Arch-review v4 @696797c0 — NEEDS_CHANGES, KHÔNG có lỗi loại mới (review duy nhất r4; KHÔNG vá tiếp — chờ log shadow T2 05/10 + T3 06/10)
+**Đã đóng thật (reviewer kiểm bằng artifact, bản sao /tmp/rv4 có stub bus, BUS_LEAK.log rỗng):** MAJOR-1 v3 (0 đường gửi/ghi
+ngoài cổng `_effects_blocked`, kiểm grep+AST+runtime 10 giá trị env, `_dry_scope` try/finally), MAJOR-2 v3 (mọi khoá registry từ
+CA.validate trong `cac`), I1 ở 16 kịch bản cả 2 writer; m1 m2 m3 m5/m6 m7 m8 m9 open#1. Selfcheck tái hiện 639/641 × 3 TZ; 2 lời
+khai đột biến (`parse 5 chữ số` tương đương ở 3.12, N39 tương đương) xác nhận đúng. Đột biến reviewer: 48 mẫu, 34 giết bởi assertion
+có tên, 0 chỉ-crash, 10 sống do thiếu test, 4 tương đương.
+
+| # | Mức | Loại | Lỗi |
+|---|---|---|---|
+| 1 | MAJOR | cùng M2 v2 / m1 v3 (lần lọt I2 thứ 3) | writer vendor (off/shadow) phát `vendor-conflict` / `vendor-cash-leg` TRƯỚC vòng ghi (`_existing_id` tính trước vòng, auto_confirm :481-484, :578-582, :641-642) ⇒ câu hỏi khẳng định "registry chưa có record quanh ex" trong khi cùng lô ghi record cùng mã ở ex kề ⇒ người làm theo tạo record hiệu lực thứ 2 (×hệ số 2 lần). Trigger: lịch vendor cùng mã ở 2 ex trong [hôm nay, phiên kế] — đúng hình dạng test m7b; feed vendor đang chết ⇒ chưa cấp bách |
+| 2 | minor | cùng MAJOR-2 v3 | detector gom theo symbol DNSE THÔ (broker_detect :175, :224, :896-898, :917-919, :928); `_norm_ticker` chỉ ở biên `cac` ⇒ A1 'TPB' credit + A2 'tpb ' chưa credit ⇒ CONFIRMABLE thay vì INSUFFICIENT. DNSE thật trả mã chuẩn |
+| 3 | minor | cùng m4 v3 | `_resolve_asks` chỉ chạy ở live; `vendor-cash-leg` chỉ phát ở off/shadow ⇒ không bao giờ được answer (nhánh resolver đó là code chết); test m4 dựng ở live |
+| 4 | minor | cùng họ M5 v2 / MAJOR-1 v3 (có từ trước r2) | dry-run nhánh broker vẫn là đường riêng (:1735-1749), không chạy quyết định near-dup/I2 ⇒ in "CONFIRMABLE" trong khi lượt thật hỏi `broker-ambiguous`. Không tác dụng phụ. ⇒ artifact "dry-run thật 10-01" KHÔNG phủ near-dup/I2 |
+| 5 | minor | cùng m7 v3 (ở writer broker) | lưới cuối writer broker từ chối CẢ LÔ khi 1 record validate() hỏng (detector chặn QTY_MULT_MAX nhưng không CASH_LEG_MAX 50.000) ⇒ mã hợp lệ cùng lô mất ghi đêm đó (có bus question, không im) |
+| 6 | minor | test thiếu | đột biến sống G4 (thứ tự `_prune_daymarks` vs cổng) C3 R3 K7 K4 R2 G1 X2 (+K2 N3 bán tương đương) |
+
+Ghi thêm: selfcheck check F0 đọc file production `corp_action_daily_2026-10-02_FAILED.json` (thiếu ⇒ 638 thay vì 639) — phụ thuộc
+môi trường. AST D0 không bắt `from subprocess import run` / `os.system` / `open(mode=…)` / `Path.write_text` (code hiện không dùng).
+Probe tái hiện + bộ đột biến reviewer: /tmp/rv4/probe/p1-p7.py, /tmp/rv4/mut/ (tạm, có thể mất).
