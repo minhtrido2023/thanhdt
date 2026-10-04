@@ -1,0 +1,36 @@
+---
+# PROPOSED (2026-10-04, Taylor) — chỉ đề xuất, CHƯA áp dụng. Cần xác nhận ở báo cáo tuần sau
+# (2026-10-11) trước khi merge vào kb/mike_model_routing.md (coding_guidelines §13).
+# Nguồn: reports/spend_report_weekly_2026-10-04.md + state/spend_history.csv.
+---
+
+## Đề xuất 1 — Bảng phân loại nhanh: thêm 2 dòng ops-autofix mặc định Sonnet
+
+Bối cảnh: tuần 09-27→10-04, nhóm "Ops" (Wags+Winston+Spyros+Wendy) có Opus 47% (~15/32 job).
+Phần lớn là việc vận hành cơ học theo runbook có sẵn — đúng loại đã ghi là Sonnet medium —
+nhưng chưa có dòng nào trong bảng gọi tên đúng loại việc này.
+
+Thêm vào bảng "Bảng phân loại nhanh — audit/fix là nguồn drift chính":
+
+| Task type | Model | Effort | Lý do |
+|---|---|---|---|
+| Winston OPS-AUTOFIX (checker báo lỗi → sửa theo `kb/ops_runbook.md`) | Sonnet | medium | Theo runbook đã có, kết quả kiểm bằng artifact |
+| Wags WAGS-AUTOFIX từ `coord-<date>` đã có verdict arch-review | Sonnet | medium | Đã có ở dòng "Wags autofix theo verdict có sẵn" — chỉ nêu rõ tên dispatch |
+
+Điều kiện nâng lên Opus high (giữ nguyên quy tắc hiện có): lỗi chưa rõ nguyên nhân, hoặc
+arch-review trả về phát hiện MỚI khác loại (chế độ B).
+
+## Đề xuất 2 — Đo đúng granularity trước khi kết luận "drift" (áp cho spend_report, không sửa file này)
+
+Báo cáo tuần chỉ gom theo AGENT (`AGENT_CATEGORY`), nên Opus của Wendy/Spyros (câu hỏi diễn giải,
+được phép Opus theo bảng gợi ý) bị tính chung với Winston/Wags (ops-autofix cơ học, nên Sonnet).
+Trước khi coi là vi phạm ladder, cần tách 2 nhóm này. Đây là việc của `bin/spend_report.py`
+(không thuộc phạm vi Taylor) — chuyển cho Mike/Wags nếu muốn làm.
+
+## Không đề xuất (đã xem xét)
+- Fable: 0 job tuần này và tuần trước → không drift; giữ nguyên trần "hiếm".
+- Retry 48/214 job (22%): báo cáo đã tự cảnh báo; nhưng `spend_history.csv` chỉ có cột retry từ
+  2026-08-23 trở đi, chưa đủ chuỗi để kết luận "mãn tính". Không đổi chính sách model/effort vì
+  retry không do chọn model gây ra (chưa có bằng chứng).
+- "Claude default" 129 job: model thực = `agents/<id>/.claude/settings.json` = claude-sonnet-5
+  (đã kiểm theo mục "Omit --model" trong kb/mike_model_routing.md) → không phải Opus lén.
