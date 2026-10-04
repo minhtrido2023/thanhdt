@@ -877,3 +877,6 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T05:29:46Z] [broker-corp-action] DỪNG ở cầu chì vòng 3 (job Taylor_20261003_033512): branch feat/broker-corp-action-source-20261003 @9ab1cf5f (wt-brokerca-1003), shadow an toàn để merge; TRƯỚC live còn MAJOR N9 (_broker_record_near không xét _status) + 11 đột biến sống — CHỜ Mike quyết dispatch chế độ A. 4 dòng rác quote_unmapped trong dnse_raw_2026-10-03.jsonl do mình, chưa xoá.
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T07:01:44Z] [2026-10-03T14:0X ICT] [broker-corp-action FIX] XONG job Taylor_20261003_064854: commit 846dfcd6 trên feat/broker-corp-action-source-20261003 (N9 + 19 đột biến, 105/105). CHỜ user: merge, bật live, exdate fallback, cron 21:00.
