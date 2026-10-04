@@ -165,7 +165,8 @@
         "NGUỒN 3 — mẫu lặp 6 lần (VHM/MBB/BID/VIX/MSB/VPB): DNSE credit cổ phiếu và điều chỉnh giá vào tối T−1 (~18:30–19:00 ICT) trước ex-date 1 phiên ⇒ credit tối 2026-10-01 ⇒ ex_date = phiên giao dịch kế tiếp 2026-10-02 (Thứ Sáu). BQ ticker TPB Close 2026-10-01 vẫn 14.400 (giá cum), phù hợp ex-date 2026-10-02."
       ],
       "verify_against_bq": "PENDING — chạy sau khi feed corporate_action được nạp lại: python3 mike/bin/corp_actions.py --verify TPB-2026-10-02-STOCK-DIVIDEND",
-      "note": "Ngày ex-date SUY RA từ mẫu broker, không phải từ công bố sàn — đối chiếu lại khi vendor có exright_date. Cổ tức tiền mặt 500đ/cp xử lý ở lớp dividend_adjusted_return, không ở sổ KL này."
+      "note": "Ngày ex-date SUY RA từ mẫu broker, không phải từ công bố sàn — đối chiếu lại khi vendor có exright_date. Cổ tức tiền mặt 500đ/cp xử lý ở lớp dividend_adjusted_return, không ở sổ KL này.",
+      "cash_leg_vnd_per_share": 500
     }
   ]
 }
