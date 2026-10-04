@@ -1,0 +1,32 @@
+{
+ "asof": "2026-09-25",
+ "status": "OK",
+ "usable": true,
+ "feed_fresh_today": true,
+ "feed_status": "FRESH",
+ "feed": {
+  "max_ingested_utc": "2026-09-24 18:17:31.347900+00",
+  "max_ingested_ict": "2026-09-25T01:17:31+07:00",
+  "max_public_date": "2026-09-23",
+  "rows": "36414",
+  "age_days": 0,
+  "prev_trading_day": "2026-09-24"
+ },
+ "feed_stale_streak": 0,
+ "upcoming_events_held": [
+  {
+   "ticker": "VIX",
+   "date": "2026-09-28",
+   "date_field": "effective_date",
+   "event_code": "AIS",
+   "event_status": "announced",
+   "days_ahead": 3,
+   "price_adjusting": false,
+   "value_per_share": null,
+   "exercise_ratio": null,
+   "issue_method_vi": null,
+   "title": "VIX - Niêm yết bổ sung 122.500.761 cổ phiếu"
+  }
+ ],
+ "generated_at": "2026-09-25T07:30:01+07:00"
+}

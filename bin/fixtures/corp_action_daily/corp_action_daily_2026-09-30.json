@@ -1,0 +1,33 @@
+{
+ "asof": "2026-09-30",
+ "status": "OK",
+ "usable": true,
+ "feed_fresh_today": false,
+ "feed_status": "STALE",
+ "feed": {
+  "max_ingested_utc": "2026-09-26 15:43:40.417516+00",
+  "max_ingested_ict": "2026-09-26T22:43:40+07:00",
+  "max_public_date": "2026-09-25",
+  "rows": "36428",
+  "age_days": 4,
+  "prev_trading_day": "2026-09-29",
+  "reason": "chưa có lần nạp nào kể từ phiên 2026-09-29"
+ },
+ "feed_stale_streak": 2,
+ "upcoming_events_held": [
+  {
+   "ticker": "BID",
+   "date": "2026-10-05",
+   "date_field": "effective_date",
+   "event_code": "AIS",
+   "event_status": "announced",
+   "days_ahead": 5,
+   "price_adjusting": false,
+   "value_per_share": null,
+   "exercise_ratio": null,
+   "issue_method_vi": null,
+   "title": "BID - Niêm yết bổ sung 498.164.263 cổ phiếu"
+  }
+ ],
+ "generated_at": "2026-09-30T07:30:01+07:00"
+}

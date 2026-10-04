@@ -189,6 +189,46 @@ def case_lastmod_missing_lastmodified_warns():
         check("lastmod-missing-field-does-not-block", "FAILED=0 WARNED=1" in out, extra=out)
 
 
+def extract_pipeline0():
+    """Đoạn [pipeline-0] → hết cổng FAILED (trước '=== ALL FRESH'), lấy từ bản CÙNG THƯ MỤC với
+    selfcheck này (không phải REAL cứng) để test được cả worktree."""
+    lines = Path(__file__).with_name("bq_freshness_check.sh").read_text().splitlines()
+    start = next((i for i, ln in enumerate(lines) if ln.startswith('echo; echo "--- [pipeline-0]')), None)
+    end = next((i for i, ln in enumerate(lines) if ln.startswith('echo "=== ALL FRESH')), None)
+    if start is None or end is None:
+        print("FAIL: anchors [pipeline-0] / '=== ALL FRESH' not found — selfcheck stale", file=sys.stderr)
+        sys.exit(1)
+    return "\n".join(lines[start:end])
+
+
+def case_pipeline0_exdate_forecast_runs_before_failed_gate():
+    """nav_exdate_forecast (lịch corp-action + trạng thái feed, 2026-10-04) phải chạy với --alert,
+    TRƯỚC cổng BQ-FAILED (BQ stale không được nuốt cảnh báo), và lỗi/crash của nó KHÔNG chặn pipeline.
+    Stub ghi lại args; stub thoát rc=1 để chứng minh nhánh '|| echo [WARN]' không chặn."""
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        (root / "bin").mkdir(parents=True)
+        (root / "bin" / "nav_exdate_forecast.py").write_text(
+            'import sys\nprint("STUB_EXDATE_CALLED", " ".join(sys.argv[1:]))\nsys.exit(1)\n')
+        harness_fail = 'FAILED=1\n'
+        out, _err = run_bash(harness_fail + extract_pipeline0(), "return 0", ":", root)
+        check("pipeline0-exdate-called-with---alert", "STUB_EXDATE_CALLED --alert" in out, extra=out)
+        check("pipeline0-exdate-crash-is-nonblocking-WARN", "nav_exdate_forecast.py lỗi" in out, extra=out)
+        i_call, i_gate = out.find("STUB_EXDATE_CALLED"), out.find("BQ STALE")
+        check("pipeline0-exdate-runs-BEFORE-bq-failed-gate (stale BQ không nuốt cảnh báo)",
+              0 <= i_call < i_gate, extra=out)
+        check("pipeline0-failed-gate-still-blocks-after-exdate-crash",
+              "=== FAILED" in out and "FAILED=" not in out.split("=== FAILED")[-1], extra=out)
+
+
+def case_exdate_forecast_selfcheck_green():
+    """Selfcheck của chính nav_exdate_forecast (gồm ca feed STALE/_FAILED/khoẻ/không-đọc-được) phải xanh."""
+    r = subprocess.run([sys.executable, str(Path(__file__).with_name("nav_exdate_forecast_selfcheck.py"))],
+                       capture_output=True, text=True, timeout=120)
+    check("exdate-forecast-selfcheck-green-incl-feed-status-cases",
+          r.returncode == 0 and "FAIL=0" in r.stdout, extra=r.stdout[-300:] + r.stderr[-300:])
+
+
 if __name__ == "__main__":
     case_query_fail_multiline_error()
     case_rc0_null_result_is_data_not_connection()
@@ -197,5 +237,7 @@ if __name__ == "__main__":
     case_warn_mode_query_fail_does_not_block()
     case_lastmod_show_fail_distinct_message()
     case_lastmod_missing_lastmodified_warns()
+    case_pipeline0_exdate_forecast_runs_before_failed_gate()
+    case_exdate_forecast_selfcheck_green()
     print(f"\nbq_freshness_check_selfcheck: {PASS} PASS, {FAIL} FAIL")
     sys.exit(1 if FAIL else 0)

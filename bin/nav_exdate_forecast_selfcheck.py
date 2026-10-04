@@ -71,7 +71,7 @@ ASOF = "2026-09-22"
 DRI_TODAY = {**DRI_DIV, "date": ASOF}                       # HÔM NAY — luôn trong cửa sổ
 VPB_NEXT_SESSION = {**VPB_ISS, "date": "2026-09-23"}        # đúng 1 PHIÊN kế tiếp — phải lọt
 FAR_2_SESSIONS = {**VPB_ISS, "ticker": "FAR", "date": "2026-09-24"}  # 2 phiên kế tiếp — phải bị loại
-snap = {"upcoming_events_held": [DRI_TODAY, VPB_NEXT_SESSION, FAR_2_SESSIONS]}
+snap = {"feed_status": "FRESH", "upcoming_events_held": [DRI_TODAY, VPB_NEXT_SESSION, FAR_2_SESSIONS]}
 ev1 = m.relevant_events(snap, ASOF, days_ahead_max=1)
 check("trading-day window<=1: giữ DRI (hôm nay) + VPB (1 phiên sau), loại FAR (2 phiên sau)",
       {e["ticker"] for e in ev1} == {"DRI", "VPB"}, sorted(e["ticker"] for e in ev1))
@@ -231,7 +231,7 @@ try:
     FAKE_ASOF = "2026-01-15"
     _orig_read_json_inner = m._read_json
     m._read_json = lambda path, default=None: (
-        {"upcoming_events_held": [{**DRI_DIV, "date": FAKE_ASOF}]}
+        {"feed_status": "FRESH", "upcoming_events_held": [{**DRI_DIV, "date": FAKE_ASOF}]}
         if f"corp_action_daily_{FAKE_ASOF}" in path else default)
     try:
         lines_fake, _snap_fake, _events_fake = m.build_report(asof=FAKE_ASOF, days_ahead_max=1)
@@ -278,7 +278,7 @@ finally:
 # sự kiện" (:302-303) về "ngày" vẫn qua 50/0 nếu không có test nào thật sự đi nhánh này.
 _orig_read_json6, _orig_positions6, _orig_argv4 = m._read_json, m.read_active_nav_positions, sys.argv
 try:
-    snap_empty = {"upcoming_events_held": []}
+    snap_empty = {"feed_status": "FRESH", "upcoming_events_held": []}
     m._read_json = lambda path, default=None: snap_empty if "corp_action_daily_2026-09-22" in path else default
     m.read_active_nav_positions = lambda *a, **k: POSITIONS
     sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-09-22", "--days-ahead-max", "1"]
@@ -321,7 +321,7 @@ _orig_read_json5, _orig_positions5, _orig_notify2, _orig_bus, _orig_argv3 = (
 _bus_calls = []
 with tempfile.TemporaryDirectory() as tmpdir:
     try:
-        snap_next = {"upcoming_events_held": [{**DRI_DIV, "date": "2026-09-23"}]}
+        snap_next = {"feed_status": "FRESH", "upcoming_events_held": [{**DRI_DIV, "date": "2026-09-23"}]}
         m.ALERT_MARKER = os.path.join(tmpdir, "nav_exdate_forecast_alerted.json")
         m._read_json = lambda path, default=None: (
             snap if "corp_action_daily_2026-09-22" in path
@@ -370,6 +370,181 @@ with tempfile.TemporaryDirectory() as tmpdir:
           real_pos.get("SpaceX") == {"DRI": {"qty": 3700, "price": 14900.0}}, real_pos)
     check("R5: file JSON hỏng → bỏ qua, không crash toàn hàm",
           "Broken" not in real_pos, real_pos)
+
+# ── 8. FEED STATUS (2026-10-04, Taylor finding broker-primary-20261003 q6) ─────────────────
+# Lịch corp-action từ feed STALE/FAILED KHÔNG được in "không có sự kiện" như thể yên ả. Fixture là
+# BẢN SAO THẬT của data/corp_action_daily/ (bin/fixtures/corp_action_daily/): _FAILED 10-02 nguyên
+# bản; 09-25 (FRESH) + 09-29/09-30/10-01 (STALE streak 1/2/3) chỉ lược bớt field module không đọc.
+import contextlib  # noqa: E402,F811
+import io  # noqa: E402,F811
+
+FIXDIR = os.path.join(MIKE_BIN, "fixtures", "corp_action_daily")
+ALL_CLEAR = "không có sự kiện corp-action nào"
+
+
+def _run(argv, snapdir, positions=POSITIONS):
+    """Chạy main() HERMETIC: snapshot_path → snapdir, notify/bus/marker bị chặn. Trả (rc, stdout, notify, bus)."""
+    saved = (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv)
+    nots, buses = [], []
+    with tempfile.TemporaryDirectory() as td:
+        try:
+            m.snapshot_path = lambda asof, failed=False: os.path.join(
+                snapdir, f"corp_action_daily_{asof}{'_FAILED' if failed else ''}.json")
+            m.read_active_nav_positions = lambda *a, **k: positions
+            m.notify = lambda msg, channel=None: nots.append((msg, channel))
+            m.bus = lambda *a, **k: buses.append(a)
+            m.ALERT_MARKER = os.path.join(td, "alerted.json")
+            sys.argv = ["nav_exdate_forecast.py"] + argv
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = m.main()
+            return rc, buf.getvalue(), nots, buses
+        finally:
+            (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv) = saved
+
+
+def _note(account, asof, snapdir, positions=POSITIONS):
+    saved = (m.snapshot_path, m.read_active_nav_positions)
+    try:
+        m.snapshot_path = lambda a, failed=False: os.path.join(
+            snapdir, f"corp_action_daily_{a}{'_FAILED' if failed else ''}.json")
+        m.read_active_nav_positions = lambda *a, **k: positions
+        return m.prompt_note(account, asof=asof)
+    finally:
+        m.snapshot_path, m.read_active_nav_positions = saved
+
+
+# 8a. STALE thật (fixture 10-01, streak 3), không có sự kiện trong cửa sổ — ca TPB 10-01
+rc, out, nots, buses = _run(["--asof", "2026-10-01", "--alert"], FIXDIR)
+check("FEED-STALE: rc=0 (không đổi exit code)", rc == 0)
+check("FEED-STALE: dòng ĐẦU stdout là cảnh báo 'LỊCH CORP-ACTION KHÔNG TIN CẬY'",
+      out.splitlines()[0].startswith("⚠️ LỊCH CORP-ACTION KHÔNG TIN CẬY"), out)
+check("FEED-STALE: nêu đúng streak 3 ngày + asof + thời điểm nạp gần nhất + 'bỏ sót'",
+      "feed stale 3 ngày" in out and "asof 2026-10-01" in out
+      and "2026-09-26T22:43:40+07:00" in out and "có thể bị bỏ sót" in out, out)
+check("FEED-STALE no-events: dòng 2 nói rõ 'KHÔNG phải all-clear' (cảnh báo không bị đọc như yên ả)",
+      len(out.splitlines()) == 2 and "NHƯNG lịch không đáng tin" in out.splitlines()[1]
+      and "không phải all-clear" in out.splitlines()[1], out)
+check("FEED-STALE: KHÔNG in câu all-clear 'không có sự kiện corp-action nào'", ALL_CLEAR not in out, out)
+check("FEED-STALE: --alert notify ĐÚNG 1 lần, cảnh báo ở ĐẦU message, đúng kênh",
+      len(nots) == 1 and nots[0][0].startswith("⚠️ LỊCH CORP-ACTION KHÔNG TIN CẬY")
+      and nots[0][1] == m.CHANNEL, nots)
+check("FEED-STALE no-events: không bắn bus finding (tránh spam KB hằng ngày)", buses == [], buses)
+rc_ns, out_ns, nots_ns, _b = _run(["--asof", "2026-10-01"], FIXDIR)
+check("FEED-STALE: KHÔNG --alert → vẫn in cảnh báo ra stdout nhưng không notify",
+      out_ns.startswith("⚠️ LỊCH CORP-ACTION") and nots_ns == [], (out_ns, nots_ns))
+for dt, n in (("2026-09-29", 1), ("2026-09-30", 2)):
+    _rc, _o, _n, _b = _run(["--asof", dt], FIXDIR)
+    check(f"FEED-STALE fixture {dt}: streak {n} đọc đúng từ feed_stale_streak",
+          f"feed stale {n} ngày" in _o and ALL_CLEAR not in _o, _o)
+
+# 8b. STALE + CÓ sự kiện: cảnh báo ĐẦU message, rồi header, rồi dòng sự kiện; bus mang feed_status
+with tempfile.TemporaryDirectory() as td:
+    d = json.load(open(os.path.join(FIXDIR, "corp_action_daily_2026-09-29.json"), encoding="utf-8"))
+    d["upcoming_events_held"] = [{**DRI_DIV, "date": "2026-09-29"}]
+    json.dump(d, open(os.path.join(td, "corp_action_daily_2026-09-29.json"), "w", encoding="utf-8"))
+    rc, out, nots, buses = _run(["--asof", "2026-09-29", "--alert"], td)
+    ls = out.splitlines()
+    check("FEED-STALE+event: dòng 1=cảnh báo, dòng 2=header, dòng 3=sự kiện DRI",
+          len(ls) == 3 and ls[0].startswith("⚠️ LỊCH CORP-ACTION KHÔNG TIN CẬY")
+          and ls[1].startswith("📆") and "DRI" in ls[2], out)
+    check("FEED-STALE+event: notify 1 lần, message bắt đầu bằng cảnh báo",
+          len(nots) == 1 and nots[0][0].startswith("⚠️ LỊCH CORP-ACTION KHÔNG TIN CẬY"), nots)
+    check("FEED-STALE+event: bus payload mang feed_status=STALE",
+          len(buses) == 1 and buses[0][2].get("feed_status") == "STALE", buses)
+    note = _note("SpaceX", "2026-09-29", td)
+    check("FEED-STALE+event: --note bắt đầu bằng cảnh báo rồi tới CẢNH BÁO CORP-ACTION",
+          note.startswith(" ⚠️ LỊCH CORP-ACTION KHÔNG TIN CẬY") and "CẢNH BÁO CORP-ACTION" in note
+          and note.index("⚠️") < note.index("CẢNH BÁO CORP-ACTION"), note)
+
+# 8c. STALE + --note, account không dính sự kiện nào: VẪN phải mang cảnh báo (không '')
+note = _note("ZaloPay", "2026-10-01", FIXDIR)
+check("FEED-STALE: --note KHÔNG rỗng dù account không dính sự kiện", note != "", repr(note))
+check("FEED-STALE: --note nêu cảnh báo + giữ ranh giới 'KHÔNG đổi quyết định mua/bán'",
+      "LỊCH CORP-ACTION KHÔNG TIN CẬY" in note and "KHÔNG đổi quyết định mua/bán" in note, note)
+
+# 8d. FAILED thật (fixture 10-02 nguyên bản)
+rc, out, nots, buses = _run(["--asof", "2026-10-02", "--alert"], FIXDIR)
+check("FEED-FAILED: rc=0", rc == 0)
+check("FEED-FAILED: nêu 'calendar UNAVAILABLE (feed_dead)'", "calendar UNAVAILABLE (feed_dead)" in out, out)
+check("FEED-FAILED: nêu failed_gate + max_ingested_utc thật của file",
+      "failed_gate=feed_dead" in out and "2026-09-26 15:43:40.417516+00" in out, out)
+check("FEED-FAILED: KHÔNG rơi về câu chung chung 'KHÔNG có snapshot'", "KHÔNG có snapshot" not in out, out)
+check("FEED-FAILED: --alert notify 1 lần với cùng nội dung",
+      len(nots) == 1 and "calendar UNAVAILABLE (feed_dead)" in nots[0][0], nots)
+note = _note("SpaceX", "2026-10-02", FIXDIR)
+check("FEED-FAILED: --note trả 'calendar UNAVAILABLE (feed_dead)', KHÔNG phải chuỗi rỗng",
+      "calendar UNAVAILABLE (feed_dead)" in note, repr(note))
+
+# 8e. FEED KHOẺ (fixture 09-25 thật) → đầu ra BYTE-IDENTICAL bản cũ
+rc, out, nots, buses = _run(["--asof", "2026-09-25", "--alert"], FIXDIR)
+check("FEED-FRESH no-events: stdout BYTE-IDENTICAL câu cũ, không notify/bus",
+      out == "[nav_exdate_forecast] 2026-09-25: không có sự kiện corp-action nào trong ≤1 PHIÊN tới "
+             "trên mã đang giữ.\n" and nots == [] and buses == [], (out, nots, buses))
+check("FEED-FRESH: --note rỗng như cũ (account không dính)", _note("SpaceX", "2026-09-25", FIXDIR) == "")
+with tempfile.TemporaryDirectory() as td:
+    d = json.load(open(os.path.join(FIXDIR, "corp_action_daily_2026-09-25.json"), encoding="utf-8"))
+    d["upcoming_events_held"] = [{**DRI_DIV, "date": "2026-09-25"}, {**VPB_ISS, "date": "2026-09-28"}]
+    json.dump(d, open(os.path.join(td, "corp_action_daily_2026-09-25.json"), "w", encoding="utf-8"))
+    rc, out, nots, buses = _run(["--asof", "2026-09-25", "--alert"], td)
+    _lines = [m.build_event_line(e, POSITIONS, asof="2026-09-25") for e in d["upcoming_events_held"]]
+    _expect = "\n".join(["📆 **Corp-action sắp tới ≤1 PHIÊN, mã đang giữ** (2026-09-25):"] + _lines) + "\n"
+    check("FEED-FRESH+event: stdout BYTE-IDENTICAL (header+dòng sự kiện, không dòng cảnh báo nào)",
+          out == _expect and "⚠️" not in out, out)
+    check("FEED-FRESH+event: notify message KHÔNG có tiền tố cảnh báo; bus payload KHÔNG có feed_status",
+          len(nots) == 1 and nots[0][0] == _expect.rstrip("\n")
+          and len(buses) == 1 and "feed_status" not in buses[0][2], (nots, buses))
+    note = _note("SpaceX", "2026-09-25", td)
+    check("FEED-FRESH+event: --note không chứa cảnh báo feed", "⚠️" not in note
+          and note.startswith(" CẢNH BÁO CORP-ACTION"), note)
+
+# 8f. FAIL-CLOSED: không đọc được trạng thái feed ⇒ 'không xác định được', không bao giờ all-clear
+for label, mut in (("thiếu feed_status", lambda d: d.pop("feed_status")),
+                   ("feed_status=DEAD", lambda d: d.update(feed_status="DEAD")),
+                   ("feed_status='fresh' (sai hoa/thường)", lambda d: d.update(feed_status="fresh")),
+                   ("feed_status=None", lambda d: d.update(feed_status=None))):
+    with tempfile.TemporaryDirectory() as td:
+        d = json.load(open(os.path.join(FIXDIR, "corp_action_daily_2026-09-25.json"), encoding="utf-8"))
+        mut(d)
+        json.dump(d, open(os.path.join(td, "corp_action_daily_2026-09-25.json"), "w", encoding="utf-8"))
+        rc, out, nots, buses = _run(["--asof", "2026-09-25", "--alert"], td)
+        check(f"FEED-UNKNOWN [{label}]: nói 'không xác định được', KHÔNG all-clear, có notify",
+              "không xác định được trạng thái feed" in out and ALL_CLEAR not in out and len(nots) == 1, out)
+        check(f"FEED-UNKNOWN [{label}]: --note mang cảnh báo",
+              "không xác định được trạng thái feed" in _note("SpaceX", "2026-09-25", td))
+with tempfile.TemporaryDirectory() as td:   # không có CẢ snapshot lẫn _FAILED
+    check("FEED-MISSING: --note nói 'không xác định được' (không ''), main vẫn câu 'KHÔNG có snapshot'",
+          "không xác định được trạng thái feed" in _note("SpaceX", "2099-01-01", td)
+          and "KHÔNG có snapshot" in _run(["--asof", "2099-01-01"], td)[1])
+    open(os.path.join(td, "corp_action_daily_2099-01-02_FAILED.json"), "w").write("{hỏng")
+    check("FEED-MISSING: file _FAILED hỏng JSON → coi như không đọc được, KHÔNG crash, rc=0",
+          _run(["--asof", "2099-01-02"], td)[0] == 0
+          and "KHÔNG có snapshot" in _run(["--asof", "2099-01-02"], td)[1])
+    open(os.path.join(td, "corp_action_daily_2099-01-03_FAILED.json"), "w").write("[]")
+    try:
+        _rc3 = _run(["--asof", "2099-01-03"], td)[0]
+    except Exception as exc:  # noqa: BLE001 — biến crash thành assertion CÓ TÊN
+        _rc3 = repr(exc)
+    check("FEED-MISSING: _FAILED không phải object → không crash, rc=0", _rc3 == 0, _rc3)
+
+# 8g. dedupe: STALE no-events chạy --alert 2 lần cùng asof → notify 1 lần (§5)
+_saved = (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv)
+with tempfile.TemporaryDirectory() as td:
+    _n2 = []
+    try:
+        m.snapshot_path = lambda a, failed=False: os.path.join(
+            FIXDIR, f"corp_action_daily_{a}{'_FAILED' if failed else ''}.json")
+        m.read_active_nav_positions = lambda *a, **k: POSITIONS
+        m.notify = lambda msg, channel=None: _n2.append(msg)
+        m.bus = lambda *a, **k: None
+        m.ALERT_MARKER = os.path.join(td, "alerted.json")
+        sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-10-01", "--alert"]
+        with contextlib.redirect_stdout(io.StringIO()):
+            m.main()
+            m.main()
+        check("FEED-STALE: --alert 2 lần cùng asof → notify chỉ 1 lần (dedupe theo ngày)", len(_n2) == 1, _n2)
+    finally:
+        (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv) = _saved
 
 print(f"PASS={len(PASS)} FAIL={len(FAIL)}")
 for f in FAIL:
