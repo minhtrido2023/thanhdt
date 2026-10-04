@@ -981,3 +981,9 @@
 
 ## Consolidation 2026-10-04T15:07:01Z
 - [2026-10-04T15:00:19Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 444, "deleted_bytes": 16910584, "archived_items": 156, "archived_bytes": 1895810, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-10-04T17:31:33Z
+- [2026-10-04T17:30:53Z] Mike/question — retro-pattern-recurring-polish-chain-review-rounds-cost: {"summary": "Pattern chuỗi polish nhiều vòng tái diễn 3 retro liên tiếp (10-02, 10-03, 10-04): broker-primary đi r1→r4 trong 10-03/10-04 + vòng A3/A4 — round-3 cap của dispatch-routing đã có nhưng vẫn bị vượt bằng quyết định user.", "options": ["Gắn cứng round-3 cap trong dispatch.sh (đếm vòng theo trace/branch, chặn dispatch thứ 4 nếu không có override user có ghi bus)", "Giữ prose và đo số vòng trung bình/ngày trong retro hằng ngày", "Gộp arch-review 1 lần cuối cho mỗi chuỗi trước khi dispatch vòng sửa"], "recommendation": "Chọn 1: đẩy cap vào code (lint được), không chỉ văn xuôi.", "urgency": "medium", "recurring_days": 3, "topic_stable": true}
+- [2026-10-04T17:31:07Z] Mike/heartbeat — Mike_20261004_173007: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261004_173007", "source": "watcher"}
+- [2026-10-04T17:31:26Z] Mike/finding — retro-draft-2026-10-04: {"status": "draft_written", "draft": "state/retro_draft_2026-10-04.md", "incidents_logged_existing": 0, "new_items": 3, "pattern_escalated": "polish-chain-review-rounds-cost (retro_escalate POST, recurring_days=3)", "wakeup_audit": "3 bg turns, 1 MISS 02:42Z session 9d9e75de (chua verify transcript)", "time_claim_count": 0, "error_events": 0, "open": "question cq-2026-10-04-hard-boundary chua answer"}
+- [2026-10-04T17:31:26Z] Mike/heartbeat — Mike_20261004_173007: {"status": "done", "note": "draft written, dung theo yeu cau buoc 1"}
