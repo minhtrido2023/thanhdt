@@ -52,6 +52,29 @@ os.environ.update({"MIKE_DRIFT_SELFCHECK": "1", "MIKE_DRIFT_EXEC_DIR": EXEC,
                    "MIKE_DRIFT_PLAN_DIR": PLANS, "MIKE_DRIFT_STATE_DIR": STATE,
                    "MIKE_DRIFT_APPEND_EVENT": FAKE_BUS})
 
+# DÂY BẪY (sau sự cố 2026-10-04 10:22-10:28: đột biến `selfcheck_live_guard_off` gọi DNSE THẬT, ghi 3
+# bản positions SpaceX vào dnse_raw production). Mọi đường tới broker/quote thật trong tiến trình
+# selfcheck — kể cả khi code đích bị đột biến tắt cổng — đều nổ ở đây, KHÔNG chạm mạng/file.
+sys.path.insert(0, os.environ.get("WC_ROOT") or os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(ROOT)))))
+REAL_CALLS = []
+
+
+class _Tripwire:
+    def __init__(self, *a, **k):
+        REAL_CALLS.append("DNSEBroker")
+        raise RuntimeError("TRIPWIRE: selfcheck chạm DNSEBroker THẬT")
+
+
+def _tripwire_quote(*a, **k):
+    REAL_CALLS.append("get_quote_source")
+    raise RuntimeError("TRIPWIRE: selfcheck chạm quote source THẬT")
+
+
+import trading_bot.brokers as _TB  # noqa: E402
+_TB.DNSEBroker = _Tripwire
+_TB.get_quote_source = _tripwire_quote
+
 spec = importlib.util.spec_from_file_location("drift_mod", TARGET)
 M = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(M)
@@ -434,6 +457,13 @@ def t_live_stdout():
     r = run()
     check("live.selfcheck_refuses_real_dnse", r["status"] == "CANNOT_CHECK" and
           "không được gọi DNSE thật" in r["reason"], r)
+    M.EXCHANGE_FN = None
+    try:
+        M.live_exchange_fn()("X")
+        ok = False
+    except Exception as e:
+        ok = "không được gọi DNSE thật" in str(e)
+    check("live.selfcheck_refuses_real_quote", ok)
 
 
 def t_retention():
@@ -785,6 +815,7 @@ def run_mutations():
 if __name__ == "__main__":
     try:
         main_tests()
+        check("tripwire.no_real_broker_call", not REAL_CALLS, REAL_CALLS)
         print("checks:", " ".join(sorted({x.split(".")[0] for x in PASSED})))
         print(f"PASS {len(PASSED)} / FAIL {len(FAILS)}  (python {sys.version.split()[0]}, "
               f"TZ={os.environ.get('TZ', '<unset>')})")

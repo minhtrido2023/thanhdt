@@ -14,9 +14,9 @@ CHỈ CỜ / BÁO — không đụng `bot_execute.py` / `executor.py` / `exdate_
   - KL lệch trừ phần khớp lệnh thật (diff `fillQuantity` sổ lệnh); không loại trừ được ⇒ vẫn cờ + ghi chú.
 - `bin/send_plan_report.sh` — nhúng khối kết quả (kiểm lại NGAY lúc 21:00; lỗi mà lần 20:50 kiểm được ⇒ in
   cả hai). Fail-soft nhưng không im lặng: script lỗi/treo/in rỗng ⇒ dòng "KHÔNG KIỂM ĐƯỢC" + stderr thật.
-- `bin/plan_position_drift_check_selfcheck.py` — 96 assertion có tên + 52 đột biến (43 trên script, 9 trên
+- `bin/plan_position_drift_check_selfcheck.py` — 98 assertion có tên + 52 đột biến (43 trên script, 9 trên
   khối shell), 52/52 bị giết dưới python3 3.10 (TZ unset, host UTC) và `$DNA_PYEXE` 3.12 (TZ New_York).
-  Ma trận 2 interpreter × 3 TZ: 96/96 ở cả 6 ô; selfcheck send_plan cũ aei 11/11, park_jit 44/44,
+  Ma trận 2 interpreter × 3 TZ: 98/98 ở cả 6 ô (đo lại 2026-10-04 sau tripwire); selfcheck send_plan cũ aei 11/11, park_jit 44/44,
   state_gate 7/9 (2 FAIL CÓ SẴN trên master, đối chứng chạy bản master cho y hệt).
 
 ## Arch-review (1 lần, NEEDS_CHANGES) — đã sửa trọn
@@ -33,6 +33,15 @@ CHỈ CỜ / BÁO — không đụng `bot_execute.py` / `executor.py` / `exdate_
   selfcheck TỪ CHỐI gọi DNSE thật; bản đột biến shell ghi vào thư mục tạm (không vào `bin/`); câu chữ §29 chỉ nêu
   bằng chứng đang cầm; khoá fcntl giữa lượt 20:50 và 21:00; dọn state > 30 ngày; CANNOT_CHECK lên bus dạng
   `finding` (không phải `error` — ngày batch DNSE trễ là vận hành bình thường).
+
+## Sự cố trong lúc test (2026-10-04 10:21–10:28 ICT) — đã chặn
+Bản selfcheck trước tripwire: đột biến `selfcheck_live_guard_off` (tắt cổng "selfcheck không gọi DNSE thật") ⇒
+`DNSEBroker` THẬT chạy, ghi **4 bản `positions` SpaceX** (10:21:06, 10:22:48, 10:24:33, 10:28:37) vào
+`data/execution_logs/dnse_raw_2026-10-04.jsonl` production. Chỉ ĐỌC (không lệnh, không đổi broker), dữ liệu là vị thế
+thật Chủ Nhật ⇒ không sai số liệu; KHÔNG xoá (không sửa file log dùng chung). Ảnh hưởng tiềm ẩn duy nhất: thêm mốc
+"bản cuối" của ngày 04/10 (không phải ngày giao dịch). Chặn: selfcheck vá `trading_bot.brokers.DNSEBroker` +
+`get_quote_source` thành dây bẫy TRƯỚC khi nạp script; assertion `tripwire.no_real_broker_call` +
+`live.selfcheck_refuses_real_quote`. Chạy lại 52 đột biến + ma trận 6 ô: md5 dnse_raw không đổi (`e86c297a`).
 
 ## Phát hiện đo được (đổi thiết kế)
 `marketPrice` của positions KHÔNG đổi trong phiên — chỉ đổi khi DNSE chạy **batch cuối ngày**, batch đó cập
@@ -62,7 +71,7 @@ bản cuối 19:10) ⇒ CANNOT_CHECK, đúng thiết kế.
 
 ## Đề xuất cron (Mike cài SAU khi tự kiểm — host UTC)
 ```
-50 13 * * 1-5 timeout 600 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/plan_position_drift_check.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_position_drift.log 2>&1   # 20:50 ICT T2-T6 - co "vi the doi sau khi lap plan" (Q5 huong nhe, CHI CO/BAO): DNSE song vs ban doc dau cua plan (~19:03) + moc phien; bus finding khi co, error khi khong kiem duoc. SAU auto_exit_inject 20:40, TRUOC send_plan_report 21:00 (send_plan_report tu kiem lai luc 21:00). Ghi 1 ban positions vao dnse_raw cho luot corp_action_auto_confirm 21:05. User duyet 2026-10-04 (Taylor_20261004_024243).
+50 13 * * 1-5 timeout 600 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/plan_position_drift_check.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_position_drift.log 2>&1   # 20:50 ICT T2-T6 - co "vi the doi sau khi lap plan" (Q5 huong nhe, CHI CO/BAO): DNSE song vs ban doc dau cua plan (~19:03) + moc phien; bus finding khi co va khi khong kiem duoc. SAU auto_exit_inject 20:40, TRUOC send_plan_report 21:00 (send_plan_report tu kiem lai luc 21:00). Ghi 1 ban positions vao dnse_raw cho luot corp_action_auto_confirm 21:05. User duyet 2026-10-04 (Taylor_20261004_024243).
 5 14 * * 1-5 timeout 900 /home/trido/thanhdt/WorkingClaude/mike/bin/corp_action_auto_confirm.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/corp_action_auto_confirm.log 2>&1   # 21:05 ICT T2-T6 - LUOT 2 cung ngay (luot 1 19:25): bat credit corp-action muon sau plan (BID 08-14 lo 2 20:15). Idempotent: so broker key (mode,ticker,credit_day,verdict) + vendor already_confirmed_set; khoa fcntl chung. Mode theo MIKE_CA_BROKER_SOURCE (mac dinh shadow). Lech 5' khoi send_plan_report 21:00 theo _adding-cron-policy. (Taylor_20261004_024243)
 ```
 **Lệch so với dispatch (21:00 → 21:05):** `_adding-cron-policy.md` cấm 2 job gọi mạng trùng phút; 21:00 đã có
@@ -87,5 +96,5 @@ hại (idempotent), nhưng đừng coi nó là lớp bảo vệ đang chạy.
   broker-primary merge thì phân tích idempotency trên phải kiểm lại (đặc biệt MAJOR-3 "không re-verify sau ex").
 
 ## Dòng `kb/cron_registry.md` (dán cùng commit cài crontab + 1 dòng CHANGELOG)
-| **20:50 (T2-T6)** — ĐỀ XUẤT 2026-10-04 (`Taylor_20261004_024243`, user duyệt hướng nhẹ Q5) | `for_each_live_account.sh` → `mike/bin/plan_position_drift_check.py --account <acct>` | (1) DNSE **LIVE** positions + orders (§6, không BQ); (2) `data/execution_logs/dnse_raw_<D>.jsonl` bản ghi `positions`/`orders` — producer: mọi lần đọc broker (DollarBill/EOD ~19:03-19:15, `compute_active_nav_all` 20:15); (3) `data/trade_plans/plan_<acct>_<T+1>.json` (chỉ để gợi ý hành động) | `mike/state/plan_position_drift/<acct>_<D>.json` (atomic) + 1 bản `positions` vào dnse_raw + bus `finding plan-position-drift-<acct>-<D>` / `error plan-position-drift-cannot-check-<acct>-<D>` (1 lần/nội dung) | `send_plan_report.sh` 21:00 (kiểm lại + nhúng) · `corp_action_auto_confirm` 21:05 (bản positions) · user | cần T; sau batch cuối ngày DNSE (đo 18:52-20:15) ⇒ 20:50; trước 21:00. Runtime: 2 lệnh gọi DNSE/account | rc 2 = KHÔNG KIỂM ĐƯỢC (log + bus error); không có đường all-clear im lặng; selfcheck `plan_position_drift_check_selfcheck.py` |
+| **20:50 (T2-T6)** — ĐỀ XUẤT 2026-10-04 (`Taylor_20261004_024243`, user duyệt hướng nhẹ Q5) | `for_each_live_account.sh` → `mike/bin/plan_position_drift_check.py --account <acct>` | (1) DNSE **LIVE** positions + orders (§6, không BQ); (2) `data/execution_logs/dnse_raw_<D>.jsonl` bản ghi `positions`/`orders` — producer: mọi lần đọc broker (DollarBill/EOD ~19:03-19:15, `compute_active_nav_all` 20:15); (3) `data/trade_plans/plan_<acct>_<T+1>.json` (chỉ để gợi ý hành động) | `mike/state/plan_position_drift/<acct>_<D>.json` (atomic) + 1 bản `positions` vào dnse_raw + bus `finding plan-position-drift-<acct>-<D>` / `finding plan-position-drift-cannot-check-<acct>-<D>` (1 lần/nội dung) | `send_plan_report.sh` 21:00 (kiểm lại + nhúng) · `corp_action_auto_confirm` 21:05 (bản positions) · user | cần T; sau batch cuối ngày DNSE (đo 18:52-20:15) ⇒ 20:50; trước 21:00. Runtime: 2 lệnh gọi DNSE/account | rc 2 = KHÔNG KIỂM ĐƯỢC (log + bus finding cannot-check); không có đường all-clear im lặng; selfcheck `plan_position_drift_check_selfcheck.py` |
 | **21:05 (T2-T6)** — ĐỀ XUẤT 2026-10-04 (cùng job) — LƯỢT 2 của dòng 19:25 | `mike/bin/corp_action_auto_confirm.py` (bọc `timeout 900`) | như dòng 19:25 + bản `positions` 20:15/20:50 sau credit muộn | như dòng 19:25 (sổ 2 pha, khoá chung) | như dòng 19:25 | sau 20:50 (bản positions mới), lệch 5' khỏi `send_plan_report` 21:00 | idempotent theo `ledger_key` (gồm verdict) + `already_confirmed_set`; xem dòng 19:25 |
