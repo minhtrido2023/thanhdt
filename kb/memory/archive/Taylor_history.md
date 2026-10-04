@@ -889,3 +889,6 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T10:45:05Z] [2026-10-03 ICT] [broker-CA r5] XONG job Taylor_20261003_091511: fix/broker-ca-r5-20261003@e38c808e (wt-brokerca-r5-1003), 161/161 mutant, matrix 102/102. CHỜ Mike merge trước 19:25 T2 05/10.
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T16:28:34Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY (đảo thứ tự vendor→broker), wt agents/Taylor/wt-brokerprimary-1003 branch feat/broker-primary-20261003 từ 2c2abc63 | NEXT: đọc code auto_confirm+broker_detect, thiết kế đảo thứ tự
