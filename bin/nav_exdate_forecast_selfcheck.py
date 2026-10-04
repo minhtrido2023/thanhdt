@@ -546,6 +546,103 @@ with tempfile.TemporaryDirectory() as td:
     finally:
         (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv) = _saved
 
+# 8h. arch-review 2026-10-04 — các ca reviewer đề xuất
+def _wr(td, name, obj):
+    with open(os.path.join(td, name), "w", encoding="utf-8") as f:
+        (f.write(obj) if isinstance(obj, str) else json.dump(obj, f))
+
+
+def _load(name):
+    return json.load(open(os.path.join(FIXDIR, name), encoding="utf-8"))
+
+
+# (1) dedupe CHÉO NHÁNH: cảnh báo feed_warn (không sự kiện) KHÔNG được nuốt alert sự kiện cùng asof
+_saved = (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv)
+with tempfile.TemporaryDirectory() as td:
+    _n3, _b3 = [], []
+    try:
+        m.snapshot_path = lambda a, failed=False: os.path.join(
+            td, f"corp_action_daily_{a}{'_FAILED' if failed else ''}.json")
+        m.read_active_nav_positions = lambda *a, **k: POSITIONS
+        m.notify = lambda msg, channel=None: _n3.append(msg)
+        m.bus = lambda *a, **k: _b3.append(a)
+        m.ALERT_MARKER = os.path.join(td, "alerted.json")
+        sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-10-01", "--alert"]
+        _d = _load("corp_action_daily_2026-10-01.json")
+        _wr(td, "corp_action_daily_2026-10-01.json", _d)          # STALE, không sự kiện
+        with contextlib.redirect_stdout(io.StringIO()):
+            m.main()
+        _d["upcoming_events_held"] = [{**DRI_DIV, "date": "2026-10-01"}]
+        _wr(td, "corp_action_daily_2026-10-01.json", _d)          # chạy lại snapshot: nay CÓ sự kiện
+        with contextlib.redirect_stdout(io.StringIO()):
+            m.main()
+            m.main()                                                # lần 3: events đã alert → dedupe
+        check("DEDUPE-CROSS-BRANCH: feed_warn rồi alert SỰ KIỆN cùng asof vẫn bắn (notify=2, bus=1)",
+              len(_n3) == 2 and "DRI" in _n3[1] and len(_b3) == 1, (_n3, _b3))
+        check("DEDUPE-CROSS-BRANCH: lần chạy thứ 3 (events đã alert) vẫn dedupe", len(_n3) == 2, _n3)
+        check("DEDUPE-CROSS-BRANCH: marker lưu cả 2 kind", sorted(json.load(open(m.ALERT_MARKER))["kinds"])
+              == ["events", "feed_warn"], open(m.ALERT_MARKER).read())
+        _wr(td, "alerted.json", {"asof": "2026-10-01"})            # marker CŨ (không kinds) = events
+        check("DEDUPE-LEGACY-MARKER: marker cũ {asof} coi là đã alert events, chưa alert feed_warn",
+              m._already_alerted_today("2026-10-01") and not m._already_alerted_today("2026-10-01", "feed_warn"))
+    finally:
+        (m.snapshot_path, m.read_active_nav_positions, m.notify, m.bus, m.ALERT_MARKER, sys.argv) = _saved
+
+# (2) _FAILED dạng DEAD-parse-error: chỉ có `max_ingested` (corp_action_daily.py:1510-1515)
+with tempfile.TemporaryDirectory() as td:
+    _f = _load("corp_action_daily_2026-10-02_FAILED.json")
+    _f["feed"] = {"max_ingested": "2026-09-26 15:43:40+00", "reason": "parse"}
+    _wr(td, "corp_action_daily_2026-10-02_FAILED.json", _f)
+    check("FEED-FAILED DEAD-parse: dùng fallback `max_ingested`, không 'không rõ'",
+          "2026-09-26 15:43:40+00" in _run(["--asof", "2026-10-02"], td)[1], _run(["--asof", "2026-10-02"], td)[1])
+    # (5) failed_gate khác feed_dead vẫn ra thông điệp FAILED cụ thể
+    _f["failed_gate"] = "selfcheck"
+    _wr(td, "corp_action_daily_2026-10-02_FAILED.json", _f)
+    _o = _run(["--asof", "2026-10-02"], td)[1]
+    check("FEED-FAILED gate=selfcheck: nêu 'calendar UNAVAILABLE (selfcheck)' + failed_gate=selfcheck",
+          "calendar UNAVAILABLE (selfcheck)" in _o and "failed_gate=selfcheck" in _o, _o)
+
+# (3) snapshot hợp lệ JSON nhưng KHÔNG phải object → UNKNOWN, không crash (main + note)
+for _label, _raw in (("[]", "[]"), ("[1]", "[1]"), ('"x"', '"x"'), ("5", "5")):
+    with tempfile.TemporaryDirectory() as td:
+        _wr(td, "corp_action_daily_2026-09-25.json", _raw)
+        try:
+            _r = _run(["--asof", "2026-09-25", "--alert"], td)
+            _nt = _note("SpaceX", "2026-09-25", td)
+            _ok = (_r[0] == 0 and "không xác định được trạng thái feed" in _r[1] and len(_r[2]) == 1
+                   and "không xác định được trạng thái feed" in _nt)
+            _det = (_r[1], _nt)
+        except Exception as exc:  # noqa: BLE001 — crash thành assertion CÓ TÊN
+            _ok, _det = False, repr(exc)
+        check(f"FEED-UNKNOWN non-object snapshot {_label}: rc=0, cảnh báo, notify, note — không crash", _ok, _det)
+
+# (4) feed_status=FRESH nhưng usable=False → UNKNOWN
+with tempfile.TemporaryDirectory() as td:
+    _d = _load("corp_action_daily_2026-09-25.json"); _d["usable"] = False
+    _wr(td, "corp_action_daily_2026-09-25.json", _d)
+    _o = _run(["--asof", "2026-09-25"], td)[1]
+    check("FEED-UNKNOWN FRESH+usable=False: KHÔNG all-clear",
+          ALL_CLEAR not in _o and "không xác định được trạng thái feed" in _o, _o)
+    _d["usable"] = True
+    _wr(td, "corp_action_daily_2026-09-25.json", _d)
+    check("FEED-FRESH usable=True: vẫn all-clear cũ (không báo nhầm)", ALL_CLEAR in _run(["--asof", "2026-09-25"], td)[1])
+
+# (M2/M14) STALE thiếu feed_stale_streak → '?', KHÔNG 'None'/'0'
+with tempfile.TemporaryDirectory() as td:
+    _d = _load("corp_action_daily_2026-10-01.json"); _d.pop("feed_stale_streak")
+    _wr(td, "corp_action_daily_2026-10-01.json", _d)
+    _o = _run(["--asof", "2026-10-01"], td)[1]
+    check("FEED-STALE thiếu streak: 'feed stale ? ngày' (không 'None'/'0')",
+          "feed stale ? ngày" in _o and "None" not in _o and "stale 0" not in _o, _o)
+
+# _FAILED + snapshot cùng tồn tại → snapshot thắng (bản chạy lại thành công), không cảnh báo FAILED
+with tempfile.TemporaryDirectory() as td:
+    _wr(td, "corp_action_daily_2026-09-25.json", _load("corp_action_daily_2026-09-25.json"))
+    _wr(td, "corp_action_daily_2026-09-25_FAILED.json", _load("corp_action_daily_2026-10-02_FAILED.json"))
+    _o = _run(["--asof", "2026-09-25"], td)[1]
+    check("COEXIST _FAILED+snapshot FRESH cùng asof: snapshot thắng (all-clear cũ, không 'UNAVAILABLE')",
+          ALL_CLEAR in _o and "UNAVAILABLE" not in _o, _o)
+
 print(f"PASS={len(PASS)} FAIL={len(FAIL)}")
 for f in FAIL:
     print(f"  FAIL: {f}")

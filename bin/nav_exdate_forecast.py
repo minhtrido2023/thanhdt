@@ -31,7 +31,7 @@ Usage:
     python3 mike/bin/nav_exdate_forecast.py [--asof YYYY-MM-DD]      # in báo cáo ra stdout
     python3 mike/bin/nav_exdate_forecast.py --alert                 # + gửi Discord/bus khi có gì
     python3 mike/bin/nav_exdate_forecast.py --note ACCOUNT           # chuỗi bơm vào prompt DollarBill
-                                                                     # (rỗng nếu account không dính)
+                                                                     # (rỗng CHỈ khi account không dính VÀ feed khoẻ; feed STALE/FAILED/không xác định ⇒ luôn có cảnh báo)
 Exit: luôn 0 — đây là cảnh báo sớm, không phải cổng chặn.
 """
 from __future__ import annotations
@@ -71,19 +71,30 @@ DAYS_AHEAD_MAX = 1   # hôm nay (0) hoặc PHIÊN GIAO DỊCH kế tiếp (1) �
                      # phải khớp cùng logic để không "cảnh báo sớm" sai cửa sổ mà cổng NAV áp dụng.
 
 
-def _already_alerted_today(asof):
+def _marked_kinds(asof):
+    """Các loại alert đã gửi cho ĐÚNG `asof`. Marker cũ (chỉ có `asof`) = alert sự kiện."""
+    d = _read_json(ALERT_MARKER, {})
+    if not isinstance(d, dict) or d.get("asof") != asof:
+        return []
+    return list(d.get("kinds") or ["events"])
+
+
+def _already_alerted_today(asof, kind="events"):
     """True nếu đã notify+bus cho ĐÚNG `asof` này rồi — tránh gửi Discord/bus trùng khi người
     vận hành chạy lại pipeline-0 cùng ngày sau khi sửa BQ stale (R2 khiến 3b chạy cả ở lần
     abort, §5 idempotent-side-effects). Đọc `ALERT_MARKER` qua tên module-level (không phải
     default-arg) để test monkeypatch `m.ALERT_MARKER` có tác dụng thật — default-arg bind giá
     trị NGAY LÚC ĐỊNH NGHĨA hàm, monkeypatch attribute sau đó sẽ vô hiệu."""
-    return _read_json(ALERT_MARKER, {}).get("asof") == asof
+    return kind in _marked_kinds(asof)
 
 
-def _mark_alerted_today(asof):
+def _mark_alerted_today(asof, kind="events"):
+    """`kind` tách dedupe: cảnh báo feed_warn (không sự kiện) KHÔNG được chặn alert sự kiện thật
+    cùng asof sau khi snapshot được chạy lại (arch-review 2026-10-04)."""
+    kinds = sorted(set(_marked_kinds(asof)) | {kind})
     tmp = ALERT_MARKER + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump({"asof": asof}, f)
+        json.dump({"asof": asof, "kinds": kinds}, f)
     os.replace(tmp, ALERT_MARKER)
 
 
@@ -248,7 +259,7 @@ def build_report(asof=None, days_ahead_max=DAYS_AHEAD_MAX):
     snap = _read_json(snapshot_path(asof))
     if snap is None:
         return [], None, []
-    events = relevant_events(snap, asof, days_ahead_max)
+    events = relevant_events(snap, asof, days_ahead_max) if isinstance(snap, dict) else []
     positions = read_active_nav_positions()
     lines = [ln for ln in (build_event_line(e, positions, asof=asof) for e in events) if ln]
     return lines, snap, events
@@ -263,12 +274,16 @@ def feed_state(asof, snap):
     feed STALE 09-29..10-01 ⇒ all-clear giả im lặng ⇒ mất cảnh báo TPB ⇒ NAV bị chặn rc=5).
     Trả {"kind": FRESH|STALE|FAILED|MISSING|UNKNOWN, ...chi tiết}. Fail-closed: không đọc được
     `feed_status` ⇒ UNKNOWN (không bao giờ FRESH). Chỉ ĐỌC — không đổi exit code/hành vi."""
+    if snap is not None and not isinstance(snap, dict):
+        return {"kind": "UNKNOWN", "asof": asof, "feed_status": f"snapshot không phải object ({type(snap).__name__})"}
     if snap is not None:
         st = snap.get("feed_status")
         feed = snap.get("feed") if isinstance(snap.get("feed"), dict) else {}
         info = {"asof": asof, "feed_status": st, "streak": snap.get("feed_stale_streak"),
                 "max_ingested_ict": feed.get("max_ingested_ict"),
-                "max_ingested_utc": feed.get("max_ingested_utc")}
+                "max_ingested_utc": feed.get("max_ingested_utc") or feed.get("max_ingested")}
+        if st == FEED_FRESH and snap.get("usable") is False:
+            return {"kind": "UNKNOWN", **{**info, "feed_status": "FRESH nhưng usable=False"}}
         if st == FEED_FRESH:
             return {"kind": "FRESH", **info}
         return {"kind": "STALE" if st == "STALE" else "UNKNOWN", **info}
@@ -277,7 +292,7 @@ def feed_state(asof, snap):
         return {"kind": "MISSING", "asof": asof}
     feed = failed.get("feed") if isinstance(failed.get("feed"), dict) else {}
     return {"kind": "FAILED", "asof": asof, "failed_gate": failed.get("failed_gate"),
-            "max_ingested_utc": feed.get("max_ingested_utc"),
+            "max_ingested_utc": feed.get("max_ingested_utc") or feed.get("max_ingested"),
             "max_ingested_ict": feed.get("max_ingested_ict")}
 
 
@@ -303,7 +318,9 @@ def feed_warning(fs):
 def prompt_note(account, asof=None, days_ahead_max=DAYS_AHEAD_MAX):
     """Chuỗi bơm vào prompt DollarBill cho ĐÚNG `account` — rỗng nếu account không giữ mã nào
     dính sự kiện trong cửa sổ. Cùng khuôn `signal_holds.prompt_note` (KHÔNG hardcode kênh Discord
-    ở đây — đây là note cho LLM viết plan, không phải tin nhắn)."""
+    ở đây — đây là note cho LLM viết plan, không phải tin nhắn). Feed không khoẻ (STALE/FAILED/UNKNOWN/
+    thiếu snapshot) ⇒ note KHÔNG rỗng: mang cảnh báo độ tin cậy dù account không dính sự kiện nào.
+    Cảnh báo STALE phát từ streak=1 (producer chỉ warn từ streak>=2 — cố ý, user chỉ định 2026-10-04)."""
     asof = asof or today_ict()
     lines, _snap, events = build_report(asof, days_ahead_max)
     fs = feed_state(asof, _snap)
@@ -372,11 +389,11 @@ def main():
         print(f"[nav_exdate_forecast] {asof}: không thấy sự kiện nào trong ≤{a.days_ahead_max} PHIÊN "
               f"tới — NHƯNG lịch không đáng tin (xem cảnh báo trên), không phải all-clear.")
         if a.alert:
-            if _already_alerted_today(asof):
+            if _already_alerted_today(asof, "feed_warn"):
                 print(f"[nav_exdate_forecast] {asof}: đã alert Discord rồi hôm nay — bỏ qua (tránh trùng, §5).")
             else:
                 notify(warning, channel=CHANNEL)
-                _mark_alerted_today(asof)
+                _mark_alerted_today(asof, "feed_warn")
         return 0
 
     header = f"📆 **Corp-action sắp tới ≤{a.days_ahead_max} PHIÊN, mã đang giữ** ({asof}):"
