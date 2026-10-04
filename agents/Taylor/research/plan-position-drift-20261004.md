@@ -14,8 +14,25 @@ CHỈ CỜ / BÁO — không đụng `bot_execute.py` / `executor.py` / `exdate_
   - KL lệch trừ phần khớp lệnh thật (diff `fillQuantity` sổ lệnh); không loại trừ được ⇒ vẫn cờ + ghi chú.
 - `bin/send_plan_report.sh` — nhúng khối kết quả (kiểm lại NGAY lúc 21:00; lỗi mà lần 20:50 kiểm được ⇒ in
   cả hai). Fail-soft nhưng không im lặng: script lỗi/treo/in rỗng ⇒ dòng "KHÔNG KIỂM ĐƯỢC" + stderr thật.
-- `bin/plan_position_drift_check_selfcheck.py` — 76 assertion có tên + 34 đột biến (29 trên script, 5 trên
-  khối shell), 34/34 bị giết.
+- `bin/plan_position_drift_check_selfcheck.py` — 96 assertion có tên + 52 đột biến (43 trên script, 9 trên
+  khối shell), 52/52 bị giết dưới python3 3.10 (TZ unset, host UTC) và `$DNA_PYEXE` 3.12 (TZ New_York).
+  Ma trận 2 interpreter × 3 TZ: 96/96 ở cả 6 ô; selfcheck send_plan cũ aei 11/11, park_jit 44/44,
+  state_gate 7/9 (2 FAIL CÓ SẴN trên master, đối chứng chạy bản master cho y hệt).
+
+## Arch-review (1 lần, NEEDS_CHANGES) — đã sửa trọn
+- M1 `DNSEBroker.connect()` in "[dnse] kết nối OK"/"chưa có trading-token… đặt lệnh sẽ bị từ chối" ra stdout ⇒
+  lọt vào báo cáo plan mỗi tối: mọi lời gọi client nay chạy dưới `redirect_stdout(stderr)`; test chạy `live_read`
+  THẬT với client giả in nhiễu, khẳng định stdout == đúng các dòng render.
+- M2 ngưỡng giá phẳng 15% ⇒ ✅ im lặng cho điều chỉnh giá 7–15% trên HOSE: nay biên độ THEO SÀN (HOSE 7 / HNX 10 /
+  UPCOM 15 + 0,5% dung sai), sàn hỏi DNSE `marketId` CHỈ cho mã vượt biên HOSE; không biết sàn ⇒ biên HOSE + ghi chú.
+- M3 bất biến "không all-clear im lặng" thiếu test: thêm danh mục nhiều mã 1 lô cũ ⇒ CANNOT, thiếu `modifiedDate` ⇒
+  CANNOT, ghi chú phải render.
+- M4 cổng shell chưa test: fake ghi argv (`--report-block`, `--no-bus --no-state` khi `--dry-run`), test treo ⇒
+  timeout (`SEND_PLAN_DRIFT_TIMEOUT`), stderr luôn chuyển vào log job (`[drift] …`).
+- Minor: bỏ bản ghi positions RỖNG (08-20 19:07 có thật) + lọc `accountNo` mức dòng; `POST_CLOSE` 15:00 (UPCOM);
+  selfcheck TỪ CHỐI gọi DNSE thật; bản đột biến shell ghi vào thư mục tạm (không vào `bin/`); câu chữ §29 chỉ nêu
+  bằng chứng đang cầm; khoá fcntl giữa lượt 20:50 và 21:00; dọn state > 30 ngày; CANNOT_CHECK lên bus dạng
+  `finding` (không phải `error` — ngày batch DNSE trễ là vận hành bình thường).
 
 ## Phát hiện đo được (đổi thiết kế)
 `marketPrice` của positions KHÔNG đổi trong phiên — chỉ đổi khi DNSE chạy **batch cuối ngày**, batch đó cập
@@ -39,18 +56,23 @@ BÁN". Chạy sống, sổ lệnh đọc trực tiếp từ DNSE ⇒ được lo
 bản cuối 19:10) ⇒ CANNOT_CHECK, đúng thiết kế.
 
 ## Chưa đo được — cần xem lượt chạy sống đầu tiên
+- Ngày đầu chạy sống: xem `logs/plan_position_drift.log` + `[drift]` trong `send_plan_report.log` (stderr kết nối DNSE).
 - DNSE `GET /orders` lúc 20:50 trả gì (sổ trong ngày hay rỗng)? Chưa có bản ghi `orders` nào sau 15:00 trong
   dnse_raw. Code phòng thủ: rỗng ⇒ lùi về bản `orders` cuối trong dnse_raw, không có ⇒ cờ kèm ghi chú.
 
 ## Đề xuất cron (Mike cài SAU khi tự kiểm — host UTC)
 ```
-50 13 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/plan_position_drift_check.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_position_drift.log 2>&1   # 20:50 ICT T2-T6 - co "vi the doi sau khi lap plan" (Q5 huong nhe, CHI CO/BAO): DNSE song vs ban doc dau cua plan (~19:03) + moc phien; bus finding khi co, error khi khong kiem duoc. SAU auto_exit_inject 20:40, TRUOC send_plan_report 21:00 (send_plan_report tu kiem lai luc 21:00). Ghi 1 ban positions vao dnse_raw cho luot corp_action_auto_confirm 21:05. User duyet 2026-10-04 (Taylor_20261004_024243).
+50 13 * * 1-5 timeout 600 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/plan_position_drift_check.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_position_drift.log 2>&1   # 20:50 ICT T2-T6 - co "vi the doi sau khi lap plan" (Q5 huong nhe, CHI CO/BAO): DNSE song vs ban doc dau cua plan (~19:03) + moc phien; bus finding khi co, error khi khong kiem duoc. SAU auto_exit_inject 20:40, TRUOC send_plan_report 21:00 (send_plan_report tu kiem lai luc 21:00). Ghi 1 ban positions vao dnse_raw cho luot corp_action_auto_confirm 21:05. User duyet 2026-10-04 (Taylor_20261004_024243).
 5 14 * * 1-5 timeout 900 /home/trido/thanhdt/WorkingClaude/mike/bin/corp_action_auto_confirm.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/corp_action_auto_confirm.log 2>&1   # 21:05 ICT T2-T6 - LUOT 2 cung ngay (luot 1 19:25): bat credit corp-action muon sau plan (BID 08-14 lo 2 20:15). Idempotent: so broker key (mode,ticker,credit_day,verdict) + vendor already_confirmed_set; khoa fcntl chung. Mode theo MIKE_CA_BROKER_SOURCE (mac dinh shadow). Lech 5' khoi send_plan_report 21:00 theo _adding-cron-policy. (Taylor_20261004_024243)
 ```
 **Lệch so với dispatch (21:00 → 21:05):** `_adding-cron-policy.md` cấm 2 job gọi mạng trùng phút; 21:00 đã có
 `send_plan_report` (nay cũng gọi DNSE). Nếu Mike muốn đúng 21:00: `0 14 * * 1-5 ...` — chức năng không đổi.
 
 ## Lượt `corp_action_auto_confirm.py` thứ hai — KHÔNG cần sửa code
+**Giá trị CÓ ĐIỀU KIỆN (arch-review m10):** feed vendor chết từ 09-26 (10-01 log "không có sự kiện nào", 10-02
+`_FAILED`) ⇒ nhánh vendor của lượt 2 hiện không có ứng viên; nhánh broker mặc định `shadow` ⇒ lượt 2 hôm nay CHỈ ra
+finding shadow. Giá trị thật đến khi feed vendor sống lại HOẶC broker-primary được merge + bật `live`. Cài sớm vô
+hại (idempotent), nhưng đừng coi nó là lớp bảo vệ đang chạy.
 - Vendor: `already_confirmed_set()` bỏ qua mã đã CONFIRMED lúc 19:25; "broker chưa credit hôm nay" lúc 19:25 ⇒
   21:05 thấy credit ⇒ CONFIRMED lần đầu (đúng mục đích). Câu hỏi qua `_ask_once` (sổ) ⇒ không hỏi lại.
 - Broker (shadow mặc định): `ledger_key = [mode, ticker, credit_day, verdict]` ⇒ cùng verdict = im lặng; verdict đổi

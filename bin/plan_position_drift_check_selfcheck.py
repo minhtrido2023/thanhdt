@@ -104,7 +104,7 @@ def live(rows, orders=None, raise_=None):
     def _f(acct_no, label):
         if raise_:
             raise raise_
-        return {"positions": rows}, orders
+        return {"positions": rows}, orders, ""
     return _f
 
 
@@ -141,13 +141,16 @@ def t_qty_only():
 def t_price_only():
     reset()
     write_raw([rec("19:05:00", SP, "SpaceX", "positions",
-                   {"positions": [row("HPG", 1000, 21700, FRESH), row("FPT", 300, 100000, FRESH)]})])
+                   {"positions": [row("HPG", 1000, 21700, FRESH), row("FPT", 300, 100000, FRESH),
+                                  row("MWG", 200, 50000, FRESH)]})])
     M.live_read = live([row("HPG", 1000, 19000, z("20:15:00")),
-                        row("FPT", 300, 100300, FRESH)], [])          # 0,3% < 1% ⇒ không cờ
+                        row("FPT", 300, 100300, FRESH),               # 0,3% < 1% ⇒ không cờ
+                        row("MWG", 200, 52000, FRESH)], [])           # 4%: 2 bản đã qua batch ⇒ cờ
+    
     r = run()
     it = items(r)
     check("price_only.status_DRIFT", r["status"] == "DRIFT", r)
-    check("price_only.only_HPG", set(it) == {"HPG"}, list(it))
+    check("price_only.only_HPG_MWG", set(it) == {"HPG", "MWG"}, list(it))
     h = it.get("HPG", {})
     check("price_only.px_flag", h.get("px_flag") is True and h.get("qty_flag") is False, h)
     check("price_only.render_px", "21.700→19.000" in "\n".join(M.render(r)))
@@ -178,10 +181,11 @@ def t_dnse_error():
     check("dnse_err.render_loud", "KHÔNG KIỂM ĐƯỢC" in txt and "HTTP 503 gateway" in txt, txt)
     check("dnse_err.no_green", "✅" not in txt, txt)
     # payload sai dạng / danh mục rỗng khi cơ sở có mã
-    M.live_read = lambda a, b: ("oops", [])
-    check("dnse_err.bad_shape", run()["status"] == "CANNOT_CHECK")
+    M.live_read = lambda a, b: ({"positions": {"A": 1}}, [], "")
+    rb = run()
+    check("dnse_err.bad_shape", rb["status"] == "CANNOT_CHECK" and "sai dạng" in rb["reason"], rb)
     write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": []})])   # account trống
-    M.live_read = lambda a, b: ("oops", [])
+    M.live_read = lambda a, b: ("oops", [], "")
     r3 = run()
     check("dnse_err.bad_shape_empty_base_not_green", r3["status"] == "CANNOT_CHECK", r3)
     write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("A", 1, 1, FRESH)]})])
@@ -219,7 +223,7 @@ def t_two_accounts():
     ])
     lives = {SP: [row("BID", 1175, 35800, z("19:09:00"))],
              ZP: [row("BID", 400, 38850, z("19:09:00"))]}
-    M.live_read = lambda acct_no, label: ({"positions": lives[acct_no]}, [])
+    M.live_read = lambda acct_no, label: ({"positions": lives[acct_no]}, [], "")
     rs, rz = run("SpaceX", SP), run("ZaloPay", ZP)
     check("two_acct.spacex_drift", rs["status"] == "DRIFT" and
           items(rs).get("BID", {}).get("qty_before") == 1100, rs)
@@ -235,7 +239,7 @@ def t_stale_now():
     write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": rows})])
     M.live_read = live(rows, [])
     r = run()
-    check("stale_now.cannot", r["status"] == "CANNOT_CHECK" and "chưa chạy xong" in r["reason"], r)
+    check("stale_now.cannot", r["status"] == "CANNOT_CHECK" and "modifiedDate trước 15:00" in r["reason"], r)
 
 
 # ── 8. mốc trước batch: giá đổi theo phiên (≤ biên độ) KHÔNG cờ; KL đổi vẫn cờ ─────────────
@@ -319,6 +323,132 @@ def t_sim_guard():
     check("sim.no_record_after_base_cannot", r["status"] == "CANNOT_CHECK" and "mô phỏng" in r["reason"], r)
 
 
+def t_partial_stale_and_notes():
+    reset()
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions",
+                   {"positions": [row("A", 100, 10000, FRESH), row("B", 200, 20000, FRESH)]})])
+    M.live_read = live([row("A", 100, 10000, FRESH), row("B", 200, 20000, STALE)], [])
+    r = run()
+    check("partial_stale.one_of_two_cannot", r["status"] == "CANNOT_CHECK", r)
+    M.live_read = live([row("A", 150, 10000, FRESH), row("B", 200, 20000, STALE)], [])
+    r = run()
+    txt = "\n".join(M.render(r))
+    check("partial_stale.drift_with_note_rendered", r["status"] == "DRIFT" and
+          "modifiedDate trước 15:00" in txt, txt)
+    nomod = row("A", 100, 10000, None)
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [nomod]})])
+    M.live_read = live([dict(nomod)], [])
+    check("missing_modified.cannot", run()["status"] == "CANNOT_CHECK")
+
+
+def t_exchange_band():
+    reset()
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("X", 100, 20000, STALE)]})])
+    M.live_read = live([row("X", 100, 18000, FRESH)], [])          # −10%, KL không đổi
+    M.EXCHANGE_FN = lambda tk: "HOSE"
+    check("band.hose_10pct_price_only_flagged", "X" in items(run()))
+    M.EXCHANGE_FN = lambda tk: "UPCOM"
+    check("band.upcom_10pct_not_flagged", run()["status"] == "NO_DRIFT")
+    M.EXCHANGE_FN = lambda tk: None
+    r = run()
+    check("band.unknown_exchange_flagged_with_note", "X" in items(r) and
+          "không xác định được sàn" in "\n".join(M.render(r)), M.render(r))
+    M.live_read = live([row("X", 100, 19000, FRESH)], [])          # −5% trong biên ⇒ không hỏi sàn
+    calls = []
+    M.EXCHANGE_FN = lambda tk: calls.append(tk) or "HOSE"
+    check("band.within_hose_no_lookup", run()["status"] == "NO_DRIFT" and not calls, calls)
+
+
+def t_filters():
+    reset()
+    # bản ghi positions RỖNG đầu cửa sổ bị bỏ; dòng của account khác trong record bị bỏ (§12 dòng)
+    foreign = dict(row("Z", 999, 1000, FRESH), accountNo=ZP)
+    write_raw([rec("19:01:00", SP, "SpaceX", "positions", {"positions": []}),
+               rec("19:03:00", SP, "SpaceX", "positions",
+                   {"positions": [dict(row("A", 100, 10000, FRESH), accountNo=SP), foreign]})])
+    M.live_read = live([row("A", 100, 10000, FRESH)], [])
+    r = run()
+    check("filters.empty_record_skipped_and_row_filter", r["status"] == "NO_DRIFT" and
+          "19:03" in r.get("baseline_source", ""), r)
+    # dòng CLOSED không tính
+    M.live_read = live([row("A", 100, 10000, FRESH), row("Q", 500, 5000, FRESH, status="CLOSED")], [])
+    check("filters.closed_row_ignored", run()["status"] == "NO_DRIFT")
+    # lệnh của NGÀY KHÁC không được dùng để giải thích KL
+    write_raw([rec("11:00:00", SP, "SpaceX", "positions", {"positions": [row("S", 1000, 30000, STALE)]}),
+               rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("S", 1500, 30000, FRESH)]})])
+    other_day = [{"id": 5, "symbol": "S", "side": "NB", "fillQuantity": 500,
+                  "createdDate": z("13:00:00"), "transDate": "2026-10-02"}]
+    M.live_read = live([row("S", 1500, 30000, FRESH)], other_day)
+    check("filters.other_day_orders_ignored", "S" in items(run()))
+
+
+class _FakeClient:
+    def __init__(self, rows, orders_exc=None):
+        self.rows, self.orders_exc = rows, orders_exc
+
+    def positions(self, acct):
+        return {"positions": self.rows}
+
+    def orders(self, acct):
+        if self.orders_exc:
+            raise self.orders_exc
+        return {"orders": []}
+
+
+def _fake_broker(rows, logged, orders_exc=None):
+    class B:
+        def __init__(self, account_id, credentials_file, label):
+            self.client = _FakeClient(rows, orders_exc)
+
+        def connect(self):
+            print("[dnse] ⚠ chưa có trading-token (SpaceX) — đặt lệnh sẽ bị từ chối")
+            print("[dnse] kết nối OK [SpaceX] tiểu khoản 0002023347")
+
+        def _log_raw(self, kind, payload):
+            logged.append(kind)
+    return B
+
+
+def t_live_stdout():
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 20, 50, 0)
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("A", 100, 10000, FRESH)]})])
+    logged = []
+    M.live_read = _orig_live
+    M.BROKER_CLS = _fake_broker([row("A", 100, 10000, FRESH)], logged,
+                                orders_exc=RuntimeError("orders 500"))
+    import io
+    import contextlib
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        _main("--no-bus")
+    st = json.load(open(os.path.join(STATE, f"SpaceX_{D}.json")))
+    check("live.stdout_is_render_only", out.getvalue().strip().splitlines() == st["lines"],
+          (out.getvalue(), st["lines"]))
+    check("live.connect_noise_to_stderr", "kết nối OK" in err.getvalue() and
+          "kết nối OK" not in out.getvalue())
+    check("live.positions_logged_raw", logged == ["positions"], logged)
+    check("live.orderbook_error_in_notes", any("orders 500" in n for n in st["result"]["notes"]),
+          st["result"]["notes"])
+    M.BROKER_CLS = None
+    r = run()
+    check("live.selfcheck_refuses_real_dnse", r["status"] == "CANNOT_CHECK" and
+          "không được gọi DNSE thật" in r["reason"], r)
+
+
+def t_retention():
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 20, 50, 0)
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("A", 1, 1, FRESH)]})])
+    M.live_read = live([row("A", 1, 1, FRESH)], [])
+    old, keep = (os.path.join(STATE, "SpaceX_2026-08-20.json"),
+                 os.path.join(STATE, "SpaceX_2026-09-20.json"))
+    for f_ in (old, keep):
+        open(f_, "w").write("{}")
+    _main("--no-bus")
+    check("retention.old_purged_recent_kept", not os.path.exists(old) and os.path.exists(keep))
+
+
 # ── 11. ngày nghỉ ⇒ SKIP, vẫn in 1 dòng (không rỗng) ───────────────────────────────────────
 def t_weekend():
     r = M.run_check("SpaceX", SP, "2026-10-04", M.paths())
@@ -359,7 +489,7 @@ def t_main_bus_state():
     _main()
     calls = bus_calls()
     check("main.bus_retry_after_fail", calls and calls[-1][1:3] ==
-          ["error", f"plan-position-drift-cannot-check-SpaceX-{D}"], calls[-1:])
+          ["finding", f"plan-position-drift-cannot-check-SpaceX-{D}"], calls[-1:])
 
 
 # ── 13. --report-block: lần này hỏng, lần trước kiểm được ⇒ in CẢ HAI ───────────────────────
@@ -410,8 +540,19 @@ def t_env_guard():
 
 # ── 15. TZ: chuyển modifiedDate UTC→ICT không phụ thuộc TZ host ─────────────────────────────
 def t_tz():
-    check("tz.utc_to_ict", M._utc_z_to_ict("2026-08-14T12:09:09.401943562Z") == "2026-08-14T19:09:09",
-          M._utc_z_to_ict("2026-08-14T12:09:09.401943562Z"))
+    import time
+    old = os.environ.get("TZ")
+    os.environ["TZ"] = "America/New_York"      # ép TZ lạ: host UTC không được che lỗi neo TZ
+    time.tzset()
+    try:
+        got = M._utc_z_to_ict("2026-08-14T12:09:09.401943562Z")
+    finally:
+        if old is None:
+            os.environ.pop("TZ", None)
+        else:
+            os.environ["TZ"] = old
+        time.tzset()
+    check("tz.utc_to_ict", got == "2026-08-14T19:09:09", got)
     n = dt.datetime.now(dt.timezone.utc).astimezone(M.ICT).replace(tzinfo=None)
     check("tz.now_ict_anchored", abs((_orig_now() - n).total_seconds()) < 5, (_orig_now(), n))
 
@@ -446,7 +587,10 @@ def t_replay():
 def t_send_plan():
     if os.environ.get("DRIFT_SC_SKIP_SENDPLAN") == "1":
         return
+    reset()                    # không để dnse_raw ngày D sót lại trong sandbox (arch-review m2)
     sb = tempfile.mkdtemp(prefix="driftsc_sendplan_")
+    argv_log = os.path.join(sb, "argv.jsonl")
+    rec_argv = ("import sys, json; open(%r, 'a').write(json.dumps(sys.argv[1:]) + '\\n'); " % argv_log)
     try:
         plans = os.path.join(sb, "data", "trade_plans")
         os.makedirs(plans)
@@ -455,7 +599,9 @@ def t_send_plan():
                   open(os.path.join(plans, "plan_SpaceX_2026-10-06.json"), "w"))
         fakes = {
             "drift": "print('⚠️ **VỊ THẾ ĐỔI SAU KHI LẬP PLAN** FAKEBID 1.100→1.175')",
-            "ok": "print('✅ Vị thế không đổi sau plan (kiểm 21:00, mốc 19:03)')",
+            "ok": rec_argv + "sys.stderr.write('drift-stderr-marker\\n'); "
+                  "print('✅ Vị thế không đổi sau plan (kiểm 21:00, mốc 19:03)')",
+            "hang": "import time; time.sleep(30)",
             "crash": "import sys; sys.stderr.write('boom-fake-err\\n'); sys.exit(1)",
             "silent": "pass",
             "cannot": "print('⚠️ **Vị thế sau plan (SpaceX): KHÔNG KIỂM ĐƯỢC** — x'); raise SystemExit(2)",
@@ -464,16 +610,24 @@ def t_send_plan():
         for k, code in fakes.items():
             fp = os.path.join(sb, f"fake_{k}.py")
             open(fp, "w").write(code + "\n")
-            env = dict(os.environ, SEND_PLAN_WORKDIR_OVERRIDE=sb,
+            env = dict(os.environ, SEND_PLAN_WORKDIR_OVERRIDE=sb, SEND_PLAN_DRIFT_TIMEOUT="3",
                        SEND_PLAN_MARKER_DIR=os.path.join(sb, "markers"), SEND_PLAN_DRIFT_CMD=fp)
             p = subprocess.run(["bash", SEND_PLAN, "--account", "SpaceX", "--dry-run"],
                                capture_output=True, text=True, env=env, timeout=180)
             outs[k] = p.stdout + p.stderr
         check("sendplan.drift_block_embedded", "FAKEBID 1.100→1.175" in outs["drift"], outs["drift"][-600:])
         check("sendplan.ok_one_line", outs["ok"].count("Vị thế không đổi sau plan") == 1)
-        check("sendplan.crash_failsoft_loud", "KHÔNG KIỂM ĐƯỢC" in outs["crash"] and
-              "boom-fake-err" in outs["crash"] and "Kế hoạch giao dịch" in outs["crash"],
-              outs["crash"][-800:])
+        argv = [json.loads(x) for x in open(argv_log)] if os.path.exists(argv_log) else []
+        check("sendplan.argv_report_block_and_account", bool(argv) and "--report-block" in argv[0]
+              and argv[0][:2] == ["--account", "SpaceX"], argv)
+        check("sendplan.dry_run_no_bus_no_state", bool(argv) and "--no-bus" in argv[0]
+              and "--no-state" in argv[0], argv)
+        check("sendplan.stderr_forwarded", "[drift] drift-stderr-marker" in outs["ok"], outs["ok"][-400:])
+        check("sendplan.hang_timeout_loud", "KHÔNG KIỂM ĐƯỢC" in outs["hang"] and "timeout" in outs["hang"]
+              and "Kế hoạch giao dịch" in outs["hang"], outs["hang"][-500:])
+        _cl = [ln for ln in outs["crash"].splitlines() if "KHÔNG KIỂM ĐƯỢC" in ln]
+        check("sendplan.crash_failsoft_loud", bool(_cl) and "boom-fake-err" in _cl[0]
+              and "Kế hoạch giao dịch" in outs["crash"], outs["crash"][-800:])
         check("sendplan.silent_not_allclear", "KHÔNG KIỂM ĐƯỢC" in outs["silent"] and
               "Vị thế không đổi" not in outs["silent"], outs["silent"][-600:])
         check("sendplan.cannot_rc2_passthrough", outs["cannot"].count("KHÔNG KIỂM ĐƯỢC") == 1 and
@@ -491,11 +645,13 @@ def t_send_plan():
 
 _orig_now = M.now_ict
 _orig_live = M.live_read
+M.EXCHANGE_FN = lambda tk: "HOSE"
 
 
 def main_tests():
     for fn in (t_qty_only, t_price_only, t_no_change, t_dnse_error, t_no_baseline, t_two_accounts,
-               t_stale_now, t_stale_base_daily_move, t_mixed_frame, t_fills, t_sim_guard, t_weekend, t_tz,
+               t_stale_now, t_stale_base_daily_move, t_mixed_frame, t_fills, t_sim_guard, t_weekend,
+               t_partial_stale_and_notes, t_exchange_band, t_filters, t_live_stdout, t_retention, t_tz,
                t_env_guard, t_main_bus_state, lambda: t_report_block_fallback(capture), t_replay,
                t_send_plan):
         try:
@@ -504,6 +660,7 @@ def main_tests():
             check(f"{getattr(fn, '__name__', 'lambda')}.no_exception", False, f"{type(e).__name__}: {e}")
         finally:
             M.now_ict, M.live_read = _orig_now, _orig_live
+            M.BROKER_CLS, M.EXCHANGE_FN = None, (lambda tk: "HOSE")
 
 
 # ── đột biến ────────────────────────────────────────────────────────────────────────────────
@@ -514,10 +671,8 @@ MUTANTS = [
     ("no_session_compare", '("SAU_PHIEN", sess_base)', '("SAU_PHIEN", None)'),
     ("qty_flag_off", "qty_flag = unexpl != 0", "qty_flag = False"),
     ("px_flag_off", "px_flag = dev is not None and dev > px_thr", "px_flag = False"),
-    ("px_thr_always_stale", 'px_thr = PX_THR_FRESH if (b.get("fresh") and n.get("fresh")) else PX_THR_STALE',
-     "px_thr = PX_THR_STALE"),
-    ("px_thr_always_fresh", 'px_thr = PX_THR_FRESH if (b.get("fresh") and n.get("fresh")) else PX_THR_STALE',
-     "px_thr = PX_THR_FRESH"),
+    ("px_thr_always_stale", 'PX_THR_FRESH if (b.get("fresh") and n.get("fresh"))', "PX_THR_FRESH if False"),
+    ("px_thr_always_fresh", 'PX_THR_FRESH if (b.get("fresh") and n.get("fresh"))', "PX_THR_FRESH if True"),
     ("mixed_off", "mixed = len(n[\"px\"]) > 1 and", "mixed = False and"),
     ("stale_now_silent", 'return cannot(why + ", chưa kết luận được")', "pass"),
     ("fills_ignored", "exp, unsure = explained_fills(base[0], ords, final_orders)",
@@ -530,7 +685,7 @@ MUTANTS = [
      "if False:\n            final_orders = ords[-1][1] if ords else None"),
     ("dnse_error_swallowed", 'return cannot(f"đọc DNSE lỗi', 'return res or cannot(f"đọc DNSE lỗi'),
     ("empty_now_trusted", "if base_agg and not now_agg:", "if False:"),
-    ("bad_shape_trusted", "if not isinstance(rows, list):", "if False:"),
+    ("bad_shape_trusted", "    if not isinstance(rows, list):\n        return cannot(", "    if False:\n        return cannot("),
     ("no_base_allclear", 'return cannot("không có cơ sở', 'res["status"]="NO_DRIFT"; return res\n        return cannot("x'),
     ("bus_every_time", "and st[\"bus_posted_hash\"] != h:", ":"),
     ("bus_marked_on_fail", "if post_bus(P, res, lines) == 0:", "if post_bus(P, res, lines) or True:"),
@@ -545,6 +700,22 @@ MUTANTS = [
      'return [f"✅ Vị thế sau plan ({acct}): KHÔNG KIỂM ĐƯỢC** (kiểm {hm})'),
     ("skip_weekend_off", "if d.weekday() >= 5 or is_holiday(d):", "if False:"),
     ("sim_guard_off", "if sim_at and now_ts <= plan_base[0]:", "if False:"),
+    ("n_stale_whole_portfolio_only", "    if n_stale:\n", "    if n_stale == len(now_agg):\n"),
+    ("missing_modified_is_fresh", "if not (mod and mod >= f", "if mod and not (mod >= f"),
+    ("stale_band_flat_50pct", "    hose = EXCHANGE_BAND[\"HOSE\"] + BAND_TOL\n", "    hose = 0.5\n"),
+    ("exchange_band_ignored", "    return EXCHANGE_BAND[ex] + BAND_TOL", "    return 0.5"),
+    ("render_drops_notes", "    for nt in res.get(\"notes\") or []:", "    for nt in []:"),
+    ("transdate_filter_removed", "and str(o.get(\"transDate\") or date_str)[:10] == date_str]", "]"),
+    ("closed_filter_removed", "str(r.get(\"status\") or \"OPEN\").upper() == \"CLOSED\"", "False"),
+    ("log_raw_removed", "        b._log_raw(\"positions\", pos)\n", "\n"),
+    ("stdout_not_redirected", "    with contextlib.redirect_stdout(sys.stderr):\n        cls = BROKER_CLS",
+     "    if True:\n        cls = BROKER_CLS"),
+    ("orderbook_note_dropped", "            note = f\"đọc sổ lệnh DNSE lỗi", "            _x = f\"đọc sổ lệnh DNSE lỗi"),
+    ("empty_record_not_skipped", "elif rows:          # bản ghi RỖNG", "elif True:          # bản ghi RỖNG"),
+    ("row_filter_removed", "and str(r.get(\"accountNo\") or account_no) == str(account_no)]", "]"),
+    ("selfcheck_live_guard_off", "if os.environ.get(\"MIKE_DRIFT_SELFCHECK\") == \"1\" and BROKER_CLS is None:",
+     "if False:"),
+    ("retention_off", "if len(day) == 10 and day[4] == \"-\" and day < cut:", "if False:"),
 ]
 
 
@@ -555,6 +726,11 @@ SHELL_MUTANTS = [
      'for _dl in []:'),
     ("sh_sandbox_calls_real", 'elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then', "else"),
     ("sh_stderr_dropped", '_derr="$(tail -n 2 "$DRIFT_ERR"', '_derr="$(true'),
+    ("sh_dry_run_args_removed", '[ "$DRY_RUN" = "1" ] && DRIFT_ARGS+=(--no-bus --no-state)', 'true'),
+    ("sh_report_block_removed", 'DRIFT_ARGS=(--account "$ACCOUNT" --report-block)',
+     'DRIFT_ARGS=(--account "$ACCOUNT")'),
+    ("sh_timeout_removed", 'timeout "$DRIFT_TMO" python3', 'python3'),
+    ("sh_stderr_not_forwarded", """sed 's/^/[drift] /' "$DRIFT_ERR" >&2""", 'true'),
 ]
 
 
@@ -566,13 +742,15 @@ def run_mutations():
         if sh_src.count(old) != 1:
             alive.append((name, f"mẫu không khớp đúng 1 lần ({sh_src.count(old)})"))
             continue
-        mp = os.path.join(HERE, f".send_plan_report_mut_{name}.sh")   # trong bin/ để $ROOT đúng
+        mdir = tempfile.mkdtemp(prefix="driftshmut_")      # KHÔNG ghi bản đột biến vào bin/ thật
+        os.makedirs(os.path.join(mdir, "bin"))
+        mp = os.path.join(mdir, "bin", "send_plan_report.sh")
         try:
             open(mp, "w").write(sh_src.replace(old, new))
             p = subprocess.run([sys.executable, os.path.abspath(__file__)], capture_output=True,
                                text=True, env=dict(os.environ, DRIFT_SC_SENDPLAN=mp), timeout=600)
         finally:
-            os.remove(mp)
+            shutil.rmtree(mdir, ignore_errors=True)
         killers = [ln.strip()[2:].split(" ")[0] for ln in p.stdout.splitlines()
                    if ln.strip().startswith("✗")]
         (killed.append((name, killers[0])) if p.returncode != 0 and killers

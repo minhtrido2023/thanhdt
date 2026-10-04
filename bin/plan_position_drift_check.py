@@ -13,13 +13,14 @@ tỷ lệ sự kiện lớn (VPB ×1,26) ⇒ giá lệnh nằm ngoài biên đ�
 Cách kiểm (mỗi account, filter `account_no` ở MỌI lần đọc — §12):
   BÂY GIỜ   = đọc DNSE SỐNG (§6 bright-line: dữ liệu cùng ngày PHẢI từ DNSE, KHÔNG BQ). Bản đọc
               được ghi `_log_raw("positions")` như mọi script đọc broker — để lượt
-              `corp_action_auto_confirm.py` 21:00 (đề xuất) thấy credit muộn sau 20:15.
+              `corp_action_auto_confirm.py` 21:05 (đề xuất) thấy credit muộn sau 20:15.
   CƠ SỞ PLAN = bản ghi `positions` SỚM NHẤT của account trong `dnse_raw_<ngày>.jsonl` thuộc cửa sổ
               lập plan [18:50, 19:30] — mọi lần đọc broker (kể cả của DollarBill) đều tự log vào
               file này, nên bản sớm nhất ≈ lần đọc ĐẦU của plan. Plan JSON KHÔNG chứa snapshot vị
               thế (chỉ có tổng NAV) và bị viết lại 20:20-20:40 ⇒ mtime vô dụng làm mốc.
               Không có bản ghi trong cửa sổ ⇒ FALLBACK bản ghi cuối trước 19:30 (ghi rõ nguồn).
-  CƠ SỞ PHIÊN = bản ghi cuối TRƯỚC cửa sổ (thường ~11:5x). So thêm với mốc này để bắt credit xảy
+  CƠ SỞ PHIÊN = bản ghi cuối TRƯỚC cửa sổ (đo thật: phần lớn là bản đọc sáng sớm 04:4x-04:5x,
+              đôi khi trong phiên). So thêm với mốc này để bắt credit xảy
               ra SAU PHIÊN nhưng TRƯỚC/TRONG lúc lập plan (VPB 09-23, TPB 10-01): plan thấy KL mới
               nhưng giá ref của plan vẫn là giá đóng cửa CŨ ⇒ cùng rủi ro lệnh ngoài biên độ.
   Thay đổi KL được trừ phần KHỚP LỆNH thật giữa mốc và bây giờ (diff `fillQuantity` từ sổ lệnh);
@@ -30,18 +31,24 @@ CANNOT_CHECK + dòng "KHÔNG KIỂM ĐƯỢC — <lý do thật>" (§29: lý do 
 
 Chạy:
   plan_position_drift_check.py --account SpaceX                 # cron 20:50 (đề xuất)
-  plan_position_drift_check.py --account SpaceX --report-block  # send_plan_report 21:00/23:00: kiểm
-        # lại NGAY (tươi hơn 20:50); lần này hỏng mà lần trước kiểm được ⇒ in cả hai kết quả
+  plan_position_drift_check.py --account SpaceX --report-block  # send_plan_report 21:00: kiểm lại
+        # NGAY (tươi hơn 20:50); lần này hỏng mà lần trước kiểm được ⇒ in cả hai kết quả.
+        # Lượt 23:00 --second-chance THOÁT SỚM khi plan không đổi ⇒ KHÔNG kiểm lại lúc 23:00.
   plan_position_drift_check.py --account SpaceX --date 2026-08-14 --sim-live-at 20:50 --no-bus --no-state
         # REPLAY: "bây giờ" = bản ghi dnse_raw cuối ≤ giờ đó (in rõ là MÔ PHỎNG)
 rc: 0 = NO_DRIFT/DRIFT/SKIP (đã kiểm), 2 = CANNOT_CHECK, 3 = sai tham số/môi trường.
-State: mike/state/plan_position_drift/<account>_<ngày>.json (atomic). Bus: `finding`
-plan-position-drift-<account>-<ngày> khi DRIFT, `error` …-cannot-check-… khi không kiểm được —
-mỗi nội dung 1 lần/ngày (post rồi mới đánh dấu: kill giữa chừng ⇒ có thể gửi trùng 1 lần, chọn
-trùng thay vì mất cảnh báo).
+State: mike/state/plan_position_drift/<account>_<ngày>.json (atomic, khoá fcntl theo account/ngày
+giữa lượt 20:50 và 21:00; tự dọn file > 30 ngày). Bus `finding` plan-position-drift-<account>-<ngày>
+khi DRIFT, `finding` …-cannot-check-… khi không kiểm được (KHÔNG dùng `error`: ngày batch DNSE trễ
+là chuyện vận hành bình thường, không phải sự cố cho pipeline autofix) — mỗi nội dung 1 lần/ngày
+(post rồi mới đánh dấu: kill giữa chừng ⇒ có thể gửi trùng 1 lần, chọn trùng thay vì mất cảnh báo).
+Mọi output của DNSE client (connect in "[dnse] kết nối OK", cảnh báo trading-token…) bị đẩy sang
+stderr: stdout của script = ĐÚNG các dòng render, vì send_plan_report nhúng nguyên stdout.
 """
 import argparse
+import contextlib
 import datetime as dt
+import fcntl
 import hashlib
 import json
 import os
@@ -61,10 +68,17 @@ from trading_bot.vn_market import is_holiday, next_trading_day  # noqa: E402
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 PLAN_WIN_START = "18:50:00"   # DollarBill pipeline khởi động 19:00; chừa 10' cho EOD/park đọc sớm
 PLAN_WIN_END = "19:30:00"
-POST_CLOSE = "14:46:00"       # sau ATC HOSE 14:45 không còn khớp lệnh thường
+POST_CLOSE = "15:00:00"       # UPCOM liên tục + thoả thuận tới 15:00 — sau mốc này không còn khớp
 BATCH_FRESH_FROM = "15:00:00"  # lô có modifiedDate (ICT) ≥ mốc này HÔM NAY = đã qua batch cuối ngày DNSE
 PX_THR_FRESH = 0.01           # cả 2 bản đều sau batch: giá phải đứng yên; đo VPB 09-23 19:30→19:40 22100→22050 (0,23%)
-PX_THR_STALE = 0.15           # mốc TRƯỚC batch: giá là của phiên trước ⇒ chỉ bắt đổi > biên độ rộng nhất (UPCOM ±15%)
+# Mốc TRƯỚC batch: giá là của phiên trước ⇒ đổi trong biên độ sàn là biến động phiên bình thường;
+# vượt biên độ (+ dung sai bước giá) ⇒ điều chỉnh quyền. Sàn hỏi DNSE `marketId` (chỉ cho mã vượt
+# biên HOSE); không xác định được ⇒ dùng biên HOSE (chặt nhất) + ghi chú — thà ồn hơn im.
+EXCHANGE_BAND = {"HOSE": 0.07, "HNX": 0.10, "UPCOM": 0.15}
+BAND_TOL = 0.005
+STATE_KEEP_DAYS = 30
+BROKER_CLS = None      # chỉ selfcheck gán (client giả); None = DNSEBroker thật
+EXCHANGE_FN = None     # chỉ selfcheck gán; None = hỏi DNSE marketId thật
 BUS_TIMEOUT_S = 30
 
 _PROD_EXEC = os.path.join(WC_ROOT, "data", "execution_logs")
@@ -131,17 +145,24 @@ def load_raw(exec_dir, date_str, account_no):
             payload = rec.get("payload")
             if rec.get("kind") == "positions":
                 rows = payload.get("positions") if isinstance(payload, dict) else None
-                if isinstance(rows, list):
-                    pos.append((ts, rows))
-                else:
+                if not isinstance(rows, list):
                     bad += 1
+                elif rows:          # bản ghi RỖNG = lần đọc hỏng, không phải "không giữ gì" (08-20 19:07)
+                    pos.append((ts, own_rows(rows, account_no)))
             elif rec.get("kind") == "orders":
                 rows = payload.get("orders") if isinstance(payload, dict) else None
                 if isinstance(rows, list):
-                    ords.append((ts, rows))
+                    ords.append((ts, own_rows(rows, account_no)))
     pos.sort(key=lambda x: x[0])
     ords.sort(key=lambda x: x[0])
     return pos, ords, bad
+
+
+def own_rows(rows, account_no):
+    """§12 ở mức DÒNG: dòng mang accountNo của account khác bị bỏ (dòng thiếu accountNo giữ lại —
+    record đã lọc account ở mức trên)."""
+    return [r for r in rows if isinstance(r, dict)
+            and str(r.get("accountNo") or account_no) == str(account_no)]
 
 
 def _hms(ts):
@@ -249,7 +270,24 @@ def _px_dev(px_b, px_n):
     return max(abs(n / b - 1) for n in px_n for b in px_b)
 
 
-def compare(base, now, explained, unsure):
+def _stale_threshold(sym, dev, exch_fn, notes):
+    """Ngưỡng giá khi 1 trong 2 bản chưa qua batch: biên độ sàn + dung sai. Chỉ hỏi sàn khi lệch
+    vượt biên HOSE (mã khác không thể vượt ngưỡng nào ⇒ không cần gọi mạng)."""
+    hose = EXCHANGE_BAND["HOSE"] + BAND_TOL
+    if dev is None or dev <= hose:
+        return hose
+    try:
+        ex = exch_fn(sym) if exch_fn else None
+    except Exception as e:
+        ex = None
+        notes.append(f"{sym}: hỏi sàn lỗi ({type(e).__name__}: {e})")
+    if ex not in EXCHANGE_BAND:
+        notes.append(f"{sym}: không xác định được sàn ⇒ dùng biên độ HOSE ±7% (chặt nhất)")
+        return hose
+    return EXCHANGE_BAND[ex] + BAND_TOL
+
+
+def compare(base, now, explained, unsure, exch_fn=None, notes=None):
     items = []
     for sym in sorted(set(base) | set(now)):
         b = base.get(sym, {"qty": 0, "px": []})
@@ -257,7 +295,8 @@ def compare(base, now, explained, unsure):
         exp = int(round(explained.get(sym, 0)))
         unexpl = n["qty"] - b["qty"] - exp
         dev = _px_dev(b["px"], n["px"])
-        px_thr = PX_THR_FRESH if (b.get("fresh") and n.get("fresh")) else PX_THR_STALE
+        px_thr = (PX_THR_FRESH if (b.get("fresh") and n.get("fresh"))
+                  else _stale_threshold(sym, dev, exch_fn, notes if notes is not None else []))
         mixed = len(n["px"]) > 1 and (n["px"][-1] / n["px"][0] - 1) > PX_THR_FRESH
         qty_flag = unexpl != 0
         px_flag = dev is not None and dev > px_thr
@@ -296,23 +335,59 @@ def plan_orders_for(plan_dir, account, date_str):
 
 
 # ── đọc DNSE sống ───────────────────────────────────────────────────────────────────────────
+def _guard_live():
+    if os.environ.get("MIKE_DRIFT_SELFCHECK") == "1" and BROKER_CLS is None:
+        raise EnvError("selfcheck không được gọi DNSE thật (BROKER_CLS chưa gán client giả)")
+
+
 def live_read(account_no, label):
-    """(positions payload, orders list) từ DNSE SỐNG. Ghi `positions` vào dnse_raw như mọi script
-    đọc broker (corp_action_auto_confirm lượt 21:00 cần bản ghi sau credit muộn). Lỗi ⇒ ném."""
-    from trading_bot.brokers import DNSEBroker
-    b = DNSEBroker(account_id=account_no, credentials_file=None, label=label)
-    b.connect()
-    pos = b.client.positions(account_no)
-    b._log_raw("positions", pos)
-    try:
-        ords = b.client.orders(account_no)
-        ords = ords.get("orders") if isinstance(ords, dict) else ords
-        ords = ords if isinstance(ords, list) else None
-    except Exception as e:   # sổ lệnh lỗi KHÔNG chặn kiểm KL; chỉ mất phần loại trừ khớp lệnh
-        print(f"  ⚠ đọc sổ lệnh DNSE lỗi ({type(e).__name__}: {e}) — không loại trừ được khớp lệnh",
-              file=sys.stderr)
-        ords = None
-    return pos, ords
+    """(positions payload, orders list|None, ghi chú|"") từ DNSE SỐNG. Ghi `positions` vào dnse_raw
+    như mọi script đọc broker (lượt corp_action_auto_confirm 21:05 cần bản ghi sau credit muộn).
+    Mọi print của client → stderr (stdout chỉ dành cho dòng render). Lỗi đọc vị thế ⇒ ném."""
+    _guard_live()
+    note = ""
+    with contextlib.redirect_stdout(sys.stderr):
+        cls = BROKER_CLS
+        if cls is None:
+            from trading_bot.brokers import DNSEBroker as cls
+        b = cls(account_id=account_no, credentials_file=None, label=label)
+        b.connect()
+        pos = b.client.positions(account_no)
+        b._log_raw("positions", pos)
+        try:
+            ords = b.client.orders(account_no)
+            ords = ords.get("orders") if isinstance(ords, dict) else ords
+            ords = ords if isinstance(ords, list) else None
+            if ords is None:
+                note = "sổ lệnh DNSE trả sai dạng — không loại trừ được khớp lệnh"
+        except Exception as e:   # sổ lệnh lỗi KHÔNG chặn kiểm KL; chỉ mất phần loại trừ khớp lệnh
+            ords = None
+            note = f"đọc sổ lệnh DNSE lỗi ({type(e).__name__}: {str(e)[:120]})"
+    return pos, ords, note
+
+
+def live_exchange_fn():
+    """ticker → HOSE/HNX/UPCOM qua DNSE `marketId` (cùng cách corp_action_auto_confirm._exchange_fn);
+    lỗi/không biết ⇒ None. Kết nối lười, chỉ khi có mã vượt biên HOSE; mọi print → stderr."""
+    if EXCHANGE_FN is not None:
+        return EXCHANGE_FN
+    cache, src = {}, []
+
+    def fn(tk):
+        _guard_live()
+        if tk in cache:
+            return cache[tk]
+        with contextlib.redirect_stdout(sys.stderr):
+            if not src:
+                from trading_bot.brokers import get_quote_source
+                q = get_quote_source("dnse")
+                q._raw_log = None          # chỉ đọc — không ghi quote vào dnse_raw kế toán
+                q.connect()
+                src.append(q)
+            qt = src[0].get_quote(tk)
+        cache[tk] = qt.exchange if getattr(qt, "exchange_known", False) else None
+        return cache[tk]
+    return fn
 
 
 def sim_read(pos, ords, sim_at):
@@ -366,7 +441,9 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
             res["now_source"] = (f"MÔ PHỎNG từ bản ghi dnse_raw {_hms(now_ts)} (không có bản đọc "
                                  f"sống lúc {sim_at})")
         else:
-            payload, final_orders = live_read(account_no, account)
+            payload, final_orders, ob_note = live_read(account_no, account)
+            if ob_note:
+                res["notes"].append(ob_note)
             now_ts = res["checked_at"]
             res["now_source"] = f"DNSE sống {_hms(now_ts)[:5]}"
     except Exception as e:
@@ -403,7 +480,8 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
         if base is None:
             continue
         exp, unsure = explained_fills(base[0], ords, final_orders)
-        for it in compare(aggregate(base[1], date_str), now_agg, exp, unsure):
+        for it in compare(aggregate(base[1], date_str), now_agg, exp, unsure,
+                          exch_fn=None if sim_at else live_exchange_fn(), notes=res["notes"]):
             if it["ticker"] in seen:
                 continue
             seen.add(it["ticker"])
@@ -420,8 +498,8 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
     if n_stale:
         # Batch cuối ngày DNSE CHƯA chạy (xong) cho n_stale mã ⇒ credit của các mã đó có thể CHƯA
         # tới. Không được thành "không đổi" (Q6): có cờ ⇒ DRIFT kèm ghi chú; không cờ ⇒ CANNOT_CHECK.
-        why = (f"DNSE chưa chạy xong cập nhật vị thế cuối ngày ({n_stale}/{len(now_agg)} mã còn "
-               f"modifiedDate trước 15:00 hôm nay) — credit corp-action có thể CHƯA tới")
+        why = (f"{n_stale}/{len(now_agg)} mã có lô modifiedDate trước 15:00 hôm nay hoặc thiếu "
+               f"(DNSE chưa cập nhật cuối ngày, hoặc trả dòng cũ) — credit cho các mã đó có thể CHƯA tới")
         if not res["items"]:
             return cannot(why + ", chưa kết luận được")
         res["notes"].append(why)
@@ -472,7 +550,7 @@ def render(res):
             extra.append("đang lẫn 2 hệ giá giữa các lô — credit có thể CHƯA xong")
         if it.get("fills_unsure"):
             extra.append("chưa loại trừ được khớp lệnh trong phiên"
-                         + (" — KL GIẢM: nhiều khả năng do BÁN (kể cả bán tay), không phải credit"
+                         + (" — KL GIẢM mà không có sổ lệnh để loại trừ một lệnh bán"
                             if it["qty_after"] < it["qty_before"] else ""))
         po = it.get("plan_orders")
         if po:
@@ -523,7 +601,7 @@ def post_bus(P, res, lines):
     if res["status"] == "DRIFT":
         kind, topic = "finding", f"plan-position-drift-{acct}-{d}"
     else:
-        kind, topic = "error", f"plan-position-drift-cannot-check-{acct}-{d}"
+        kind, topic = "finding", f"plan-position-drift-cannot-check-{acct}-{d}"
     payload = {"account": acct, "account_no": res.get("account_no"), "date": d,
                "status": res["status"], "reason": res.get("reason"),
                "baseline_source": res.get("baseline_source"), "now_source": res.get("now_source"),
@@ -542,6 +620,39 @@ def post_bus(P, res, lines):
         print(f"  ❌ append_event {kind} {topic} rc={r.returncode}: "
               f"{(r.stderr or r.stdout or '').strip()[:300]}", file=sys.stderr)
     return r.returncode
+
+
+def purge_old_state(P, today):
+    """Xoá state `<acct>_<YYYY-MM-DD>.json` cũ hơn STATE_KEEP_DAYS ngày (chỉ đúng mẫu tên)."""
+    cut = (today - dt.timedelta(days=STATE_KEEP_DAYS)).isoformat()
+    try:
+        names = os.listdir(P["MIKE_DRIFT_STATE_DIR"])
+    except OSError:
+        return
+    for n in names:
+        stem = n[:-5] if n.endswith(".json") else ""
+        day = stem.rsplit("_", 1)[-1] if "_" in stem else ""
+        if len(day) == 10 and day[4] == "-" and day < cut:
+            try:
+                os.remove(os.path.join(P["MIKE_DRIFT_STATE_DIR"], n))
+            except OSError as e:
+                print(f"  ⚠ dọn state {n} lỗi: {e}", file=sys.stderr)
+
+
+@contextlib.contextmanager
+def state_lock(P, account, date_str, enabled):
+    """Khoá fcntl theo (account, ngày): lượt 20:50 và lượt 21:00 không chen nhau giữa đọc state →
+    post bus → ghi state (tránh gửi trùng). --no-state ⇒ không khoá."""
+    if not enabled:
+        yield
+        return
+    os.makedirs(P["MIKE_DRIFT_STATE_DIR"], exist_ok=True)
+    with open(os.path.join(P["MIKE_DRIFT_STATE_DIR"], f".lock-{account}_{date_str}"), "a") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
 
 
 def main(argv=None):
@@ -563,6 +674,14 @@ def main(argv=None):
     date_str = a.date or now_ict().date().isoformat()
     sim_at = (a.sim_live_at + ":59")[:8] if a.sim_live_at else None
 
+    with state_lock(P, a.account, date_str, not a.no_state):
+        rc = _main_locked(a, P, date_str, sim_at)
+    if not a.no_state:
+        purge_old_state(P, dt.date.fromisoformat(date_str))
+    return rc
+
+
+def _main_locked(a, P, date_str, sim_at):
     prev = None if a.no_state else read_state(P, a.account, date_str)
 
     try:

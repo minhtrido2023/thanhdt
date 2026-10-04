@@ -135,11 +135,14 @@ if [ -n "$DRIFT_CMD" ]; then
   DRIFT_ARGS=(--account "$ACCOUNT" --report-block)
   [ "$DRY_RUN" = "1" ] && DRIFT_ARGS+=(--no-bus --no-state)
   DRIFT_ERR="$(mktemp)"
-  DRIFT_BLOCK="$(timeout 120 python3 "$DRIFT_CMD" "${DRIFT_ARGS[@]}" 2>"$DRIFT_ERR")"
+  DRIFT_TMO="${SEND_PLAN_DRIFT_TIMEOUT:-120}"
+  DRIFT_BLOCK="$(timeout "$DRIFT_TMO" python3 "$DRIFT_CMD" "${DRIFT_ARGS[@]}" 2>"$DRIFT_ERR")"
   DRIFT_RC=$?
+  # stderr của bước kiểm (bus/state/sổ lệnh lỗi, log kết nối DNSE) LUÔN vào log của job này.
+  sed 's/^/[drift] /' "$DRIFT_ERR" >&2
   if { [ "$DRIFT_RC" -ne 0 ] && [ "$DRIFT_RC" -ne 2 ]; } || [ -z "$DRIFT_BLOCK" ]; then
     _derr="$(tail -n 2 "$DRIFT_ERR" | tr '\n' ' ' | cut -c1-200)"
-    [ "$DRIFT_RC" = "124" ] && _derr="treo quá 120s (timeout) ${_derr}"
+    [ "$DRIFT_RC" = "124" ] && _derr="treo quá ${DRIFT_TMO}s (timeout) ${_derr}"
     DRIFT_BLOCK="⚠️ **Vị thế sau plan ($ACCOUNT): KHÔNG KIỂM ĐƯỢC** — plan_position_drift_check rc=$DRIFT_RC, ${DRIFT_BLOCK:+in: $(echo "$DRIFT_BLOCK" | head -1 | cut -c1-120), }lỗi: ${_derr:-<không có stderr>}. Tự xem vị thế DNSE các mã có sự kiện quyền trước khi duyệt."
   fi
   rm -f "$DRIFT_ERR"
