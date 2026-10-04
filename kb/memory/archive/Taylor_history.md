@@ -880,3 +880,9 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T07:01:44Z] [2026-10-03T14:0X ICT] [broker-corp-action FIX] XONG job Taylor_20261003_064854: commit 846dfcd6 trên feat/broker-corp-action-source-20261003 (N9 + 19 đột biến, 105/105). CHỜ user: merge, bật live, exdate fallback, cron 21:00.
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T08:45:36Z] ĐANG DỞ: job Taylor_20261003_082621 broker-CA r4, wt-brokerca-r4-1003 branch fix/broker-ca-r4-20261003 @c187bc94 (12 mục sửa, 132/132 mutant, 102/102 matrix, replay 7/7) | NEXT: arch-reviewer 1 lần → bus finding broker-corp-action-source-r4-20261003; KHÔNG merge (Mike merge trước 19:25 T2 05/10)
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T09:02:00Z] [broker-CA r4] DỪNG (lỗi mới khác loại M-A) job Taylor_20261003_082621: fix/broker-ca-r4-20261003 @c187bc94 (wt-brokerca-r4-1003), 12/12 mục sửa, reviewer không chặn merge-shadow. CHỜ Mike merge trước 19:25 T2 05/10 + user chốt ngữ nghĩa _FAILED feed_dead (M-A) trước live.
