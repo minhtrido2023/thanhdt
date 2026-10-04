@@ -440,3 +440,6 @@
 
 ## Consolidation 2026-10-04T17:33:53Z
 - [2026-10-04T17:33:43Z] Mike/finding — retro-2026-10-04: {"status": "logged", "entry": "kb/incidents/retro/retro-2026-10-04.md", "commit": "a27d744d", "incidents": 4, "new_production": 0, "verified_by": "Wags — gaps found and fixed", "escalated": "retro-pattern-recurring-polish-chain-review-rounds-cost", "open": ["cq-2026-10-04-hard-boundary"]}
+
+## Consolidation 2026-10-04T22:07:02Z
+- [2026-10-04T21:52:44Z] Winston/finding — sbv-weekly-check-2026-10-05: {"date": "2026-10-05", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
