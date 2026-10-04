@@ -32,3 +32,33 @@ Reviewer v2 (probe /tmp/archrev_r2/): shadow KHÔNG ghi registry (PASS); off ch�
 MAJOR: M1 (CÙNG loại RC1) record không khai cash_leg ⇒ "không so" ⇒ MATCH im lặng, nhưng validate()/park_holdings đọc vắng = 0 ⇒ cổng giá đêm FAIL (TPB thật: lệch −434,7 > 200) — test B9/RC1m đang khẳng định sai. M2 (LOẠI MỚI) câu hỏi UNVERIFIED vẫn dặn ghi record_proposed (id khác) khi registry đã có record CONFIRMED cùng (mã,ex) ⇒ làm theo = áp ×hệ số 2 lần. M3 (CÙNG loại RC2) held_tickers: tài khoản có mặt hôm nay mà positions toàn rỗng ⇒ coi không giữ. M4 đường cron thật run()→_LOCK_HELD→_all() chưa có test (Y16 sống). M5 dry-run re-verify chưa có test (X10 sống).
 MINOR: m1 (LOẠI MỚI) registry+vendor có sự kiện, broker không credit ⇒ im; m2 ngân sách 90s không chặn prefetch tuần tự N mã×30s; m3 build_record _status luôn "LỆCH vendor"; m4 re-verify không đọc lịch asof < ex (vendor ex sớm hơn); m5 previous_file không giới hạn tuổi; m6 2 record CONFIRMED trùng (mã,ex) không bị bắt; m7 MATCH-continue không đóng câu hỏi cũ (§26).
 Đột biến reviewer sống có ý nghĩa: X1 X2 Y1 (biên dung sai), X6 X7 X8 X12 X16 X17 X23 X24 X34 Y6 Y16 X10.
+
+## r3 (job Taylor_20261004_103554, Opus xhigh) — đọc lại TOÀN BỘ, bảng bất biến, sửa MỘT LẦN
+### Bất biến (mỗi cái có chốt ở ĐIỂM GHI hoặc ở ô bảng trạng thái, không chỉ điểm đọc)
+- I1 ≤1 record HIỆU LỰC (CONFIRMED*)/(mã, ex). Chốt ghi `_validate_for_write` trong `write_corp_actions` (CẢ nhánh vendor shadow/off lẫn broker) + khối validate trước ghi của broker. Lượt này tạo nhóm trùng ⇒ CorpActionError, 0 ghi (ca thật: lịch vendor ghi lặp 1 ISS ⇒ nhánh vendor cũ ghi 2 record). Nhóm trùng CÓ SẴN (người gõ) không chặn ghi mã khác; `_registry_view` coi là LỆCH khi đối chiếu (m6) + `_registry_sweep` hỏi 1 lần/(mã, ex, ids).
+- I2 Registry/near-dup ĐÃ có record cho mã quanh ex ⇒ câu hỏi KHÔNG mang `record_proposed`, mang `registry_update_proposed` {record_id, số broker} + `ONE_RECORD_RULE` (chỉ SỬA/THU HỒI record hiện có hoặc đóng). Cả câu hỏi vendor-vs-registry / vendor-vs-broker / ratio-vs-broker bỏ "REVOKED rồi ghi tay". `record_proposed` CHỈ khi registry trống quanh ex. (M2)
+- I3 Vắng `cash_leg_vnd_per_share` = 0.0 đúng như validate/park_holdings/exdate_frame đọc; đối chiếu chân tiền registry↔broker và record↔vendor dùng giá trị đó, lệch >1đ ⇒ LỆCH; NaN/không phải số ⇒ LỆCH. (M1)
+- I4 Không suy "không giữ" từ vắng mặt: `held_tickers` ⇒ (held, unknown); tài khoản đã biết (dnse_raw 10 ngày) mà positions hôm nay rỗng/thiếu ⇒ file phiên trước CHỈ khi ≥ phiên liền trước, không thì "không xác định" ⇒ hỏi. (M3, m5)
+- I5 Mọi ô kết thúc ở: ghi / hỏi / finding / dòng log trạng thái tường minh. Ô mới phủ: registry hiệu lực + broker không credit ⇒ credit-watch `CHỜ CREDIT` (ex = phiên kế tiếp, log) / `QUÁ HẠN` (ex ≤ hôm nay ≤ ex+1 phiên, sổ broker không có mục ở MỌI mode, mã giữ/không xác định ⇒ question high 1 lần) / `ĐÃ THẤY` / không giữ (log). Registry khớp broker ⇒ ghi 1 dòng sổ `observation_only` (intent+done, 0 bus) làm bằng chứng credit — thiếu nó phiên ex sẽ báo QUÁ HẠN giả. (m1)
+- I6 shadow & dry-run: 0 ghi corp_actions.json, 0 question/answer (shadow: 1 finding tóm tắt). off: chỉ nhánh vendor + đúng 1 thay đổi: chốt I1.
+- I7 Ngân sách chỉ-giá hỏi TRƯỚC TỪNG lời gọi DNSE, kể cả trong prefetch (prefetch hôm nay gọi từng mã). (m2)
+- I8 Registry khớp broker (live) ⇒ đóng câu hỏi cũ cùng mã/phiên (answer 1 lần, khoá sổ); câu hỏi cũ chưa từng gửi ⇒ done `superseded`, không gửi bù. (m7)
+- Khác: m3 `_status` record_proposed ghi đúng nguyên nhân (LỆCH vendor / THIẾU trục KL / lý do detector); m4 re-verify đọc lịch tươi asof ∈ [ex−45 ngày, hôm nay].
+
+### Bảng trạng thái LIVE (R registry × B broker; V vendor ở trong ô)
+| R \ B | CONFIRMABLE | INSUFF/AMBIG | CASH_DIV | không ứng viên |
+|---|---|---|---|---|
+| trống | ghi CONFIRMED (V≠/thiếu KL ⇒ UNVERIFIED + record_proposed) | hỏi | finding (V≠ ⇒ hỏi) | vendor có sự kiện: giữ ⇒ vendor-only; không xác định ⇒ held-unknown; không giữ ⇒ log |
+| 1 hiệu lực | khớp ⇒ log+đóng hỏi cũ+dòng quan sát; khớp & V≠ ⇒ hỏi (sửa record); lệch ⇒ hỏi (sửa record) | hỏi + luật 1 record | lệch "KL không đổi" ⇒ hỏi | credit-watch CHỜ/QUÁ HẠN/ĐÃ THẤY/không giữ |
+| chưa hiệu lực | "CHƯA áp dụng" ⇒ hỏi (sửa record) | hỏi + luật | hỏi | vendor có ⇒ hỏi "CHƯA áp dụng"; vendor không ⇒ không tác động (record không áp) |
+| ≥2 hiệu lực | LỆCH "N record HIỆU LỰC" ⇒ hỏi + registry-dup | + registry-dup | + registry-dup | registry-dup |
+| near-dup | AMBIGUOUS (giữ UNVERIFIED nếu V≠), sửa record gần | hỏi + luật | — | — |
+
+### Verify (artifact)
+selfcheck 498/0 × {python3 3.10, $DNA_PYEXE 3.12} × {ICT, env -u TZ, America/New_York}; ma trận 17 selfcheck ×2 interp ×3 TZ = 102/102 rc=0; `--mutations` 362/362 giết bởi assertion CÓ TÊN (0 chỉ-crash) — gồm 15 đột biến reviewer v2 (X1 X2 Y1 X6 X7 X8 X10 X12 X16 X17 X23 X24 X34 Y6 Y16) + X13 X19 X20 X27 X29; chạy lại mut.py/mut2.py GỐC của reviewer trên bản sao: mọi mẫu còn khớp bị giết trừ X18 (tương đương, đã ghi). Replay `--replay` 92 phiên/15 ứng viên, 515/0 cả 2 interp, sàn THẬT qua `_exchange_fn`. Dry-run THẬT 2026-10-01 (live + shadow): TPB CONFIRMABLE ×1.15 chân tiền 500, đối chiếu registry **MISMATCH** "TPB-2026-10-02-STOCK-DIVIDEND KHÔNG khai (consumer đọc 0)" — đúng thực tế (record production thiếu chân tiền ⇒ cổng giá đêm FAIL), không MATCH im. Dây bẫy DNSE (DNSEBroker/get_dnse_client) trong selfcheck: `tripwire.no_real_dnse_call` PASS. corp_actions.json md5 bfd681e5 không đổi; dnse_raw 10-01 1856 / 10-04 8 dòng không đổi; không tạo ledger production.
+
+### Còn mở (KHÔNG sửa trong r3 — cần user/Mike quyết)
+1. Nhánh VENDOR (writer shadow/off hiện hành) ghi record KHÔNG có `cash_leg_vnd_per_share` dù vendor có DIV cùng ex; `check_ratio` ±2% chỉ chặn khi chân tiền >~2% giá ⇒ chân tiền 0,5–2% giá lọt, cổng giá đêm FAIL. Shadow broker nay ghi sổ UNVERIFIED/MISMATCH cho ca này (L5b) nhưng shadow không hỏi. Đề xuất: writer vendor lấy Σ DIV cùng ex làm chân tiền, hoặc không ghi khi có DIV cùng ex.
+2. Record production TPB-2026-10-02-STOCK-DIVIDEND thiếu chân tiền 500 — live sẽ hỏi Winston (registry_update_proposed: thêm cash_leg 500). Không sửa (ranh giới).
+3. Credit SAU lượt 19:25 không được quét lại (cần lượt 21:00 thứ hai — Q5 cũ, cần duyệt cron); credit-watch QUÁ HẠN nói rõ khả năng này.
+4. Record người ký/vendor không re-verify sau ex (chỉ provenance=broker) — giữ quy ước "người đã chốt".

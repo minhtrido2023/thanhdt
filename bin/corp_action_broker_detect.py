@@ -938,8 +938,10 @@ def scan_qty(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, 
 def scan_price_only(ctx, deadline=None, clock=None):
     """Pha CHỈ-GIÁ (cổ tức tiền / quyền mua) trên ctx của `scan_qty`. `deadline` (giá trị của
     `clock()`, mặc định time.monotonic) — NGÂN SÁCH THỜI GIAN TỔNG cho các lời gọi DNSE: kiểm
-    TRƯỚC prefetch và TRƯỚC mỗi mã; hết ⇒ mã còn lại vào dòng thiếu dữ liệu (INSUFFICIENT, có lý do
-    'hết ngân sách'), KHÔNG chờ thêm (RC4). Trần thực = deadline + 1 lời gọi đang dở (timeout của nó)."""
+    TRƯỚC prefetch, TRƯỚC TỪNG lời gọi bên trong prefetch (`prefetch(tickers, day, over)` — m2 r3:
+    prefetch lô DNSE là N lời gọi tuần tự, kiểm 1 lần trước lô không chặn được N×timeout) và TRƯỚC
+    mỗi mã; hết ⇒ mã còn lại vào dòng thiếu dữ liệu (INSUFFICIENT, có lý do 'hết ngân sách'), KHÔNG
+    chờ thêm (RC4). Trần thực = deadline + lời gọi của 1 mã đang dở (timeout của nó)."""
     import time
     clock = clock or time.monotonic
     day, ex_date = ctx["day"], ctx["ex_date"]
@@ -965,7 +967,7 @@ def scan_price_only(ctx, deadline=None, clock=None):
     def _over():
         return deadline is not None and clock() >= deadline
     if per_price and hasattr(px_cum_fn, "prefetch") and not _over():
-        px_cum_fn.prefetch(sorted(per_price), day)      # 1 lời gọi DNSE cho cả lô (live)
+        px_cum_fn.prefetch(sorted(per_price), day, _over)   # ngân sách kiểm trước TỪNG lời gọi (m2)
     gaps = []
     for tk, per in sorted(per_price.items()):
         if _over():
@@ -986,31 +988,48 @@ def scan_price_only(ctx, deadline=None, clock=None):
     return out
 
 
+HELD_LOOKBACK_DAYS = 10    # tài khoản "đã biết" = có bản ghi positions ở dnse_raw trong N ngày lịch gần nhất
+
+
 def held_tickers(day, exec_dir=EXEC_DIR):
-    """{mã: [nhãn tài khoản]} đang giữ (openQuantity > 0) theo bản ghi positions CUỐI của MỖI tài
-    khoản: file `day`; tài khoản KHÔNG có bản ghi nào ở `day` ⇒ bản ghi cuối file phiên trước
-    (`held_before`, RC2 — bản cũ chỉ đọc file hôm nay ⇒ tài khoản vắng hôm nay bị coi là "không
-    giữ"). Không có file nào đọc được ⇒ None (KHÔNG coi là "không giữ gì")."""
+    """(held {mã: [nhãn tài khoản]}, unknown [nhãn + lý do]) — mã đang giữ (openQuantity > 0) theo
+    bản ghi positions KHÁC RỖNG cuối của MỖI tài khoản đã biết (I4 r3: KHÔNG suy "không giữ" từ vắng
+    mặt). Mỗi tài khoản (xuất hiện ở dnse_raw trong HELD_LOOKBACK_DAYS ngày lịch tới `day`):
+      · có bản ghi khác rỗng ở `day` ⇒ bản ghi cuối của `day`;
+      · không (vắng hôm nay, hoặc có mặt mà positions TOÀN RỖNG — M3: lần đọc hỏng ≠ "không giữ gì")
+        ⇒ bản ghi khác rỗng cuối của file phiên trước, CHỈ khi file đó ≥ phiên liền trước (m5: file
+        cũ hơn = khoảng trống quan sát, tài khoản có thể đã mua);
+      · còn lại ⇒ `unknown` — caller phải hỏi, KHÔNG được coi là không giữ.
+    Không có file dnse_raw nào trong cửa sổ ⇒ None."""
+    d0 = dt.date.fromisoformat(day)
+    lo = (d0 - dt.timedelta(days=HELD_LOOKBACK_DAYS)).isoformat()
+    files = sorted((os.path.basename(p)[len("dnse_raw_"):-len(".jsonl")], p)
+                   for p in glob.glob(os.path.join(exec_dir, "dnse_raw_*.jsonl")))
+    files = [(d, p) for d, p in files if lo <= d <= day]
+    if not files:
+        return None
+    accts = {}
+    for _d, p in files:
+        accts.update(accounts_in(p))                  # nhãn mới nhất thắng
     path = os.path.join(exec_dir, f"dnse_raw_{day}.jsonl")
     prev = previous_file(day, exec_dir)
-    today = dict(accounts_in(path)) if os.path.exists(path) else {}
-    before = dict(accounts_in(prev)) if prev else {}
-    if not today and not before:
-        return None
-    out = {}
-    for acct, label in sorted(today.items()):
-        ser = read_series(path, acct)
-        for tk, rows in (ser[-1][1].items() if ser else []):
-            if aggregate(rows)["qty"] > 0:
-                out.setdefault(tk, []).append(label)
-    for acct, label in sorted(before.items()):
-        if acct in today:
+    prev_day = os.path.basename(prev)[len("dnse_raw_"):-len(".jsonl")] if prev else None
+    prev_ok = prev_day is not None and prev_day >= prev_trading_day(day)
+    held, unknown = {}, []
+    for acct, label in sorted(accts.items()):
+        ser, tag = read_series(path, acct), label
+        if not ser and prev_ok:
+            ser, tag = read_series(prev, acct), f"{label} (bản ghi cuối {os.path.basename(prev)})"
+        if not ser:
+            unknown.append(f"{label} (không có bản ghi positions khác rỗng ở {day}"
+                           + (f" lẫn phiên trước {prev_day})" if prev_ok else
+                              f"; file trước gần nhất {prev_day or 'không có'} cũ hơn phiên liền trước "
+                              f"{prev_trading_day(day)})"))
             continue
-        ser = read_series(prev, acct)
-        for tk, rows in (ser[-1][1].items() if ser else []):
+        for tk, rows in ser[-1][1].items():
             if aggregate(rows)["qty"] > 0:
-                out.setdefault(tk, []).append(f"{label} (bản ghi cuối {os.path.basename(prev)})")
-    return out
+                held.setdefault(tk, []).append(tag)
+    return held, unknown
 
 
 # ─────────────────────────────────────────────────────────────── record + ledger (ghi file) ──
@@ -1037,8 +1056,12 @@ def build_record(dec, now_ict):
                     f"{ex} theo trading_bot/vn_market.py. KHÔNG từ công bố sàn.")
     ev_lines.append(f"VENDOR (chỉ xác nhận chéo): {vc['status']} — {vc['why']}")
     if dec["verdict"] == UNVERIFIED:
+        # m3 r3: ghi ĐÚNG nguyên nhân đã đọc (không mặc định "lệch vendor")
+        cause = (f"LỆCH vendor ({vc['why']})" if vc["status"] == V_MISMATCH else
+                 f"vendor THIẾU trục KL ({vc['why']})" if vc.get("qty_unconfirmed") else
+                 f"bị hạ UNVERIFIED: {str(dec.get('why') or '')[:300]}")
         status = (f"UNVERIFIED — corp_action_auto_confirm.py nhánh BROKER {now_ict}: broker ×{m} "
-                  f"chân tiền {c:,.0f}đ/cp LỆCH vendor ({vc['why']}). Winston kiểm nguồn; người chốt: "
+                  f"chân tiền {c:,.0f}đ/cp — {cause}. Winston kiểm nguồn; người chốt: "
                   f"đổi thành 'CONFIRMED …' (giữ số broker) hoặc bỏ record")
     else:
         status = (f"CONFIRMED — corp_action_auto_confirm.py nhánh BROKER {now_ict} "
