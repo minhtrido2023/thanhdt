@@ -118,6 +118,37 @@ if [ "$SECOND_CHANCE" = "1" ] && [ -n "$MARKER_FILE" ] && [ -f "$MARKER_FILE" ];
   PLAN_CHANGED_AFTER_SEND=1
 fi
 
+# --- Vị thế đổi SAU khi lập plan (rủi ro Q5, HƯỚNG NHẸ — user duyệt 2026-10-04): CHỈ CỜ, KHÔNG chặn.
+# plan_position_drift_check.py đọc DNSE sống, so với bản đọc đầu của plan (~19:03) và mốc phiên —
+# credit corp-action muộn (BID 08-14 lô thứ hai 20:15) ⇒ khối ⚠️ riêng; không đổi ⇒ đúng 1 dòng ✅.
+# FAIL-SOFT nhưng KHÔNG im lặng: script lỗi/treo/in rỗng ⇒ dòng "KHÔNG KIỂM ĐƯỢC" kèm lỗi thật
+# (§29), report vẫn gửi. Sandbox selfcheck (SEND_PLAN_WORKDIR_OVERRIDE) không chạm DNSE thật trừ khi
+# test tự cấp SEND_PLAN_DRIFT_CMD (đường dẫn 1 file thực thi giả).
+DRIFT_BLOCK=""
+DRIFT_CMD=""
+if [ -n "${SEND_PLAN_DRIFT_CMD:-}" ]; then
+  DRIFT_CMD="$SEND_PLAN_DRIFT_CMD"
+elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
+  DRIFT_CMD="$ROOT/bin/plan_position_drift_check.py"
+fi
+if [ -n "$DRIFT_CMD" ]; then
+  DRIFT_ARGS=(--account "$ACCOUNT" --report-block)
+  [ "$DRY_RUN" = "1" ] && DRIFT_ARGS+=(--no-bus --no-state)
+  DRIFT_ERR="$(mktemp)"
+  DRIFT_TMO="${SEND_PLAN_DRIFT_TIMEOUT:-120}"
+  DRIFT_BLOCK="$(timeout "$DRIFT_TMO" python3 "$DRIFT_CMD" "${DRIFT_ARGS[@]}" 2>"$DRIFT_ERR")"
+  DRIFT_RC=$?
+  # stderr của bước kiểm (bus/state/sổ lệnh lỗi, log kết nối DNSE) LUÔN vào log của job này.
+  sed 's/^/[drift] /' "$DRIFT_ERR" >&2
+  if { [ "$DRIFT_RC" -ne 0 ] && [ "$DRIFT_RC" -ne 2 ]; } || [ -z "$DRIFT_BLOCK" ]; then
+    _derr="$(tail -n 2 "$DRIFT_ERR" | tr '\n' ' ' | cut -c1-200)"
+    [ "$DRIFT_RC" = "124" ] && _derr="treo quá ${DRIFT_TMO}s (timeout) ${_derr}"
+    DRIFT_BLOCK="⚠️ **Vị thế sau plan ($ACCOUNT): KHÔNG KIỂM ĐƯỢC** — plan_position_drift_check rc=$DRIFT_RC, ${DRIFT_BLOCK:+in: $(echo "$DRIFT_BLOCK" | head -1 | cut -c1-120), }lỗi: ${_derr:-<không có stderr>}. Tự xem vị thế DNSE các mã có sự kiện quyền trước khi duyệt."
+  fi
+  rm -f "$DRIFT_ERR"
+fi
+export DRIFT_BLOCK
+
 RESULT=$(cd "$WORKDIR" && python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os
 
@@ -1003,6 +1034,10 @@ elif requires or orders:
     lines.append("⏳ Trạng thái: **CHỜ DUYỆT** — chưa duyệt thì preflight 08:45 báo RED và bot KHÔNG đặt lệnh. Duyệt bằng cách nhắn Mike.")
 else:
     lines.append("✅ Trạng thái: HOLD 0 lệnh — không cần duyệt, bot trực phiên đồng bộ trạng thái.")
+
+for _dl in os.environ.get("DRIFT_BLOCK", "").splitlines():   # khối Q5 tính ở shell phía trên
+    if _dl.strip():
+        lines.append(_dl)
 
 lines.append(f"_(DollarBill lập, gửi {today} {now_ict})_")
 
