@@ -895,3 +895,6 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T16:43:48Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 (feat/broker-primary-20261003 từ 2c2abc63), design /tmp/brokerprim/design.md, mục 5+6 xong /tmp/brokerprim/q56.md | NEXT: code broker_detect (vendor_crosscheck, price-only) + auto_confirm (live order) + selfcheck
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T17:07:59Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 WIP commit (selfcheck 338/0 kèm replay) | NEXT: mutation (sửa mẫu cũ + thêm mẫu mới), matrix 17 selfcheck x2 interp x3 TZ, arch-reviewer 1 lần, bus finding broker-primary-20261003
