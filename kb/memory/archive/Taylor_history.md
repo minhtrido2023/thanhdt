@@ -898,3 +898,9 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T17:07:59Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 WIP commit (selfcheck 338/0 kèm replay) | NEXT: mutation (sửa mẫu cũ + thêm mẫu mới), matrix 17 selfcheck x2 interp x3 TZ, arch-reviewer 1 lần, bus finding broker-primary-20261003
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T17:34:35Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY @311c917a (wt-brokerprimary-1003), mutation 230/230, matrix 102/102, replay OK; scratch wt-archrev-bp-1004 (xoá sau) | NEXT: arch-reviewer 1 lần → bus finding broker-primary-20261003
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T17:55:37Z] [broker-PRIMARY] DỪNG (lỗi mới khác loại) job Taylor_20261003_162814: feat/broker-primary-20261003@a1e1923e (wt-brokerprimary-1003), arch-review NEEDS_CHANGES: MAJOR-1 registry-có-sẵn im lặng, MAJOR-3 không re-verify sau ex, MAJOR-4 price-only trước ghi; note agents/Taylor/research/broker-primary-20261004.md. CHỜ Mike/user quyết vòng sửa trước live.

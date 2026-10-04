@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-03T17:34:35Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY @311c917a (wt-brokerprimary-1003), mutation 230/230, matrix 102/102, replay OK; scratch wt-archrev-bp-1004 (xoá sau) | NEXT: arch-reviewer 1 lần → bus finding broker-primary-20261003
-- [2026-10-03T17:55:37Z] [broker-PRIMARY] DỪNG (lỗi mới khác loại) job Taylor_20261003_162814: feat/broker-primary-20261003@a1e1923e (wt-brokerprimary-1003), arch-review NEEDS_CHANGES: MAJOR-1 registry-có-sẵn im lặng, MAJOR-3 không re-verify sau ex, MAJOR-4 price-only trước ghi; note agents/Taylor/research/broker-primary-20261004.md. CHỜ Mike/user quyết vòng sửa trước live.
 - [2026-10-04T02:42:51Z] ĐANG DỞ: job Taylor_20261004_024239 broker-primary r2 (5 RC), wt agents/Taylor/wt-brokerprimary-1003 @a1e1923e | NEXT: đọc note research/broker-primary-20261004.md, sửa RC1-RC5
 - [2026-10-04T02:42:51Z] ĐANG DỞ: job Taylor_20261004_024243 plan-position-drift-flag (HƯỚNG NHẸ) | NEXT: worktree feat/plan-position-drift-flag-20261004, script bin/plan_position_drift_check.py
 - [2026-10-04T02:47:47Z] ĐANG DỞ: job Taylor_20261004_024239 broker-primary r2, wt-brokerprimary-1003 @a1e1923e, design /tmp/brokerprim/r2_design.md | NEXT: code RC1-RC5 + test + mutants
@@ -26,3 +24,5 @@
 - [2026-10-04T12:00:10Z] [broker-primary r3] DỪNG (lỗi loại mới m7) job Taylor_20261004_103554: feat/broker-primary-20261003@ead6a683 (code 58c6dff6), arch-review v3 NEEDS_CHANGES: MAJOR-1 dry-run shadow/off gửi bus, MAJOR-2 ticker khoảng trắng lọt I1, 9 minor, 19 mutant sống. CHỜ Mike/user quyết r4; KHÔNG bật live.
 - [2026-10-04T12:05:18Z] ĐANG DỞ: job Taylor_20261004_120510 broker-primary r4 (MAJOR-1 cổng dry_run, MAJOR-2 khoá registry qua validate, m1-m9, 19 mutant), wt agents/Taylor/wt-brokerprimary-1003 @ead6a683 | NEXT: đọc note r3 + bus finding, lập bảng đường ghi/gửi
 - [2026-10-04T12:12:39Z] ĐANG DỞ: job Taylor_20261004_120510 r4, wt-brokerprimary-1003 @ead6a683; baseline /tmp/brokerprim/r4_prod_before.txt | NEXT: sửa auto_confirm (_effects_blocked/_dry_scope, _reg_rows từ CA.validate, gộp ứng viên vendor, resolver) → test r4 + mutants
+- [2026-10-04T13:15:53Z] ĐANG DỞ: job Taylor_20261004_120510 r4, wt-brokerprimary-1003 CHƯA commit; 639/0, matrix 102/102, replay OK, dry-run 10-01 OK; --mutations 3.10 đang chạy nền (/tmp/brokerprim/r4_mut_py310.txt) — KHÔNG sửa file khi nó chạy | NEXT: soi diff, note r4, commit, arch-reviewer 1 lần, bus finding broker-primary-r4-20261004
+- [2026-10-04T13:50:19Z] ĐANG DỞ: job Taylor_20261004_120510 r4 COMMIT 696797c0 (feat/broker-primary-20261003, wt-brokerprimary-1003), verify xong | NEXT: arch-reviewer 1 lần → note verdict + bus finding broker-primary-r4-20261004
