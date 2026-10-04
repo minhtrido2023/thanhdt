@@ -1104,11 +1104,13 @@ def ledger_key(e):
     return k + [rid] if rid else k
 
 
-def ledger_state(path=LEDGER_FILE):
+def ledger_state(path=LEDGER_FILE, done_meta=None):
     """Sổ 2 pha (at-least-once, arch-review v1 M2): dòng `kind=intent` ghi TRƯỚC mọi tác dụng ngoài
     (registry, bus), dòng `kind=done` ghi SAU khi bus nhận (rc=0). Trả (intents {key: entry},
     done {key}). Intent chưa có done = việc dở (kill / bus lỗi) ⇒ lượt sau GỬI BÙ, không bỏ qua.
-    Dòng hỏng ⇒ CorpActionLedgerError (không im lặng coi như chưa từng có — sẽ ghi/hỏi lặp)."""
+    Dòng hỏng ⇒ CorpActionLedgerError (không im lặng coi như chưa từng có — sẽ ghi/hỏi lặp).
+    `done_meta` (dict) ⇒ điền {key: dòng done} — phân biệt done ĐÃ GỬI với done `superseded`/
+    `observation_only` (không có gì trên bus để trả lời — r4)."""
     intents, done = {}, set()
     if not os.path.exists(path):
         return intents, done
@@ -1123,6 +1125,8 @@ def ledger_state(path=LEDGER_FILE):
             k = tuple(d.get("key") or ledger_key(d))
             if d.get("kind") == "done":
                 done.add(k)
+                if done_meta is not None:
+                    done_meta[k] = d
             else:
                 intents[k] = d
     return intents, done

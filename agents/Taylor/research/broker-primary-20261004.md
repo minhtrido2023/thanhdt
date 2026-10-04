@@ -70,3 +70,71 @@ Probe/kết quả reviewer: /tmp/archrev_r3/ (probe/p1–p7.py, mut3.py, mut4.py
 - MINOR m1 gửi bù câu hỏi cũ mang record_proposed đông cứng (I2 lọt qua đường gửi bù); m2 confirm-only không nêu record NGƯỜI ký ở ex gần (`_broker_record_near` chỉ provenance=broker); m3 câu hỏi UNVERIFIED PRICE_ONLY dặn "ghi record_proposed"; m4 vendor-only/held-unknown/credit-overdue không được answer khi giải quyết + superseded chỉ ở nhánh MATCH; m5 `_record_vs_vendor` coi vendor không khai DIV là "0đ/cp" (vendor_crosscheck coi là PARTIAL); m6 §29 "vendor khai ×1" khi thiếu tỉ lệ, câu QUÁ HẠN liệt kê thiếu nguyên nhân; **m7 LOẠI MỚI: chốt I1 trong writer vendor từ chối CẢ LÔ** (1 ISS lặp chặn ABC hợp lệ; có hỏi người); m8 near-dup neo credit_day không neo ex + writer vendor chỉ chặn near-dup với record broker (có từ trước); m9 docstring off/I5/I6 + shadow phát 2 finding.
 - 19 đột biến mới sống (thiếu test): N38 N42 N01 N06 N05 N27 N26 N59 N28 N29 N32 N34 N10b N08 N09 N15 N17 N46 (+ chi tiết ở /tmp/archrev_r3/mut3_out.txt, mut4_out.txt).
 - required_changes (11 mục) nằm trong bus finding broker-primary-r3-20261004.
+
+
+## r4 (job Taylor_20261004_120510, Opus xhigh, chế độ B) — sửa TRỌN arch-review v3 trong MỘT lượt
+### Rà soát cả NHÓM trước khi sửa (không chỉ 2 điểm reviewer chỉ)
+- **Mọi đường gửi bus / ghi sang (MAJOR-1)**: r3 truyền `dry_run` bằng tay ⇒ 1 chỗ quên (validate-reject writer vendor). Kiểm kê
+  bằng AST: `subprocess.run(APPEND_EVENT…)` ở 3 nơi (`_bus`, `post_bus`, validate-reject writer), notify ở `post_bus`,
+  `BD.ledger_append` ở 6 nơi, marker ngày ở `_ask_day_once`, registry ở `write_corp_actions`. Nay: **MỘT cổng**
+  `_effects_blocked` (cờ `_dry_scope` do `run`/`run_vendor`/`run_broker` đặt); hàm DUY NHẤT chạm từng loại tác dụng:
+  `_bus` (append_event), `_discord` (notify), `_ledger_append` (sổ), `write_corp_actions` (registry), `_ask_day_once`
+  (marker). Selfcheck D0 kiểm bằng AST rằng KHÔNG hàm nào khác chạm append_event/notify/ledger_append/os.replace/ghi file
+  — thêm đường gửi mới vòng qua cổng ⇒ FAIL có tên. Bỏ luôn cờ `dry_run` riêng của `_registry_sweep`/`_reverify` (1 cơ chế);
+  dry-run nay IN câu hỏi lẽ ra gửi ("[DRY-RUN] KHÔNG gửi bus question …").
+- **Mọi chỗ tạo khoá registry (MAJOR-2)**: 9 nơi tự `.upper()`/`[:10]` riêng (`already_confirmed_set`, `_effective_groups`,
+  `_registry_view`, `_near_duplicate`, `_broker_record_near`, `_broker_record_ratio_diff`, `_reverify`, so mã sổ/held/lịch
+  vendor/symbol DNSE). Nay: `_reg_rows` = khoá (mã, ex, id) VÀ giá trị (hệ số, chân tiền, hiệu lực) lấy từ OUTPUT
+  `CA.validate` — đúng cái consumer đọc; record validate() từ chối ⇒ `_invalid` ⇒ LỆCH. Mã KHÔNG từ registry (symbol DNSE,
+  lịch vendor, dòng sổ, held) qua `_norm_ticker` = đúng quy tắc validate (K0 khoá 2 quy tắc vào nhau). Hệ quả: bỏ hẳn các
+  phép đọc số riêng (`_cash_leg_as_read`, parse float NaN) — N08/N09/N14/N15/N17/N46 không còn chỗ để sai.
+- Hợp nhất: writer vendor dùng CHUNG `_record_vs_vendor` (mọi provenance/trạng thái) + `_near_duplicate` (mọi provenance) với
+  nhánh chỉ-xác-nhận ⇒ xoá `_broker_record_near`, `_broker_record_ratio_diff`, `_ask_ratio_vs_broker`,
+  `already_confirmed_set`, `_close_stale_questions` (thay bằng `_close_resolved` có khoá 1-lần).
+
+### Đã sửa (đối chiếu required_changes v3)
+| Mục | Sửa | Test có tên |
+|---|---|---|
+| MAJOR-1 | cổng `_effects_blocked` duy nhất (trên) | D0 D0b D1 D2 D3×(6 đường × 3 mode, kèm đối chứng không-dry) D4 D4b D4c D5 |
+| MAJOR-2 | `_reg_rows`/`_norm_ticker`/`_iso` từ CA.validate | K0 K1 K1b K1e K2 K2b K3 K4 K5 K6 K7 K8 K9 K10 K11 I1w |
+| m1 | gửi bù: `_i2_refresh` tính lại I2 theo registry HIỆN TẠI (cùng ex + near-dup); write-incomplete không mang record khi đã có record khác | m1 ×3, m1b |
+| m2 | confirm-only: `_near_duplicate` mọi provenance, câu hỏi nêu id + ONE_RECORD_RULE | m2, B31b |
+| m3 | dặn ghi record_proposed CHỈ khi câu hỏi mang nó; chỉ-giá nói "không có record nào để ghi" | m3 |
+| m4 | `_resolve_asks` (trong `_registry_sweep`, live) trả lời vendor-only / held-unknown / conflict / cash-leg / QUÁ HẠN khi giải quyết; ghi CONFIRMED ⇒ việc dở cùng mã/phiên superseded + câu đã gửi được answer; câu superseded KHÔNG BAO GIỜ bị "trả lời" (`ledger_state(done_meta=…)`) | m4 ×10, m4b, m4c, N32/N34 |
+| m5/m6 | vendor vắng DIV / vắng tỉ lệ = "không khai" (PARTIAL), không 0đ / ×1; `_vendor_mult`; câu QUÁ HẠN nêu điều đã đọc (số mục sổ phiên credit / sổ ĐỌC HỎNG) + 4 nguyên nhân | m5 m6 m6b m6c, m6 QUÁ HẠN ×2 |
+| m7 (loại mới v3) | `_group_candidates` gộp dòng trùng hệt TRƯỚC vòng ghi; mâu thuẫn ⇒ CHỈ mã đó bị chặn + hỏi [Winston]; mã khác vẫn ghi; record vừa ghi đi vào near-dup của ứng viên sau | I1d m7 ×2 m7b |
+| m8 | near-dup neo ex VÀ phiên credit; mọi provenance ở CẢ writer vendor; REVOKED không khoá (chỉ người sửa tay mới hiệu lực lại), PROPOSED khoá | N41 m8a m8b N42 N42c V1 |
+| m9 | docstring off/shadow/dry-run; shadow ĐÚNG 1 finding/lượt (gom pha KL + chỉ-giá) | m9 m9b |
+| open #1 r3 (chân tiền writer vendor) | ĐÓNG: writer không tự ghi + hỏi `vendor-cash-leg` khi lịch vendor có DIV cùng ex / lịch DIV đọc hỏng / giá vốn broker báo chân tiền ≥1đ/cp; tài khoản MISMATCH chỉ vì giá vốn (KL đúng hệ số — TPB thật 500đ ≈ 3%) nay HỎI thay vì im "MISMATCH" | C ×4, C5 C6 C7, D3 cash-leg |
+
+### Thay đổi hành vi nhánh vendor ở `off`/`shadow` (writer hiện hành) — đều chỉ biến "ghi/im" thành "không ghi + hỏi"
+1. record người ký CÙNG (mã, ex) lệch hệ số/chân tiền vendor ⇒ hỏi (cũ: im "đã CONFIRMED rồi"); record PROPOSED/REVOKED cùng
+   (mã, ex) ⇒ đối chiếu, không ghi CONFIRMED thứ hai cạnh nó; 2. record mọi provenance ở ex gần ⇒ hỏi (cũ: chỉ record broker);
+   3. ứng viên trùng gộp/mâu thuẫn chặn riêng mã đó; 4. dấu hiệu chân tiền ⇒ hỏi; 5. khoá theo CA.validate.
+
+### Verify (artifact, r4)
+- selfcheck broker: **639/0** (python3 3.10) · **641/0** ($DNA_PYEXE 3.12 — thêm biến thể ex dạng gọn mà validate 3.12 đọc
+  được) × {ICT, `env -u TZ`, America/New_York}; ma trận 17 selfcheck × 2 interp × 3 TZ = **102/102 rc=0**
+  (chạy LẠI trên bản cuối md5 07abe615/0b7a1b22/59341f52: /tmp/brokerprim/r4_matrix_final.txt).
+- `--mutations` (chạy lại trên bản cuối, file khôi phục đúng md5 sau lượt): 427 đột biến (362 cũ — 69 mẫu viết lại theo code
+  mới, nhãn `r4↻` — + 65 mới r4). **3.10 (interpreter cron): 427/427 giết bởi assertion CÓ TÊN, 0 chỉ-crash.**
+  3.12: 426/427 giết bởi assertion CÓ TÊN, 0 chỉ-crash; sống duy nhất `parse 5 chữ số` (đột biến CŨ, tương đương DƯỚI 3.12 vì
+  `fromisoformat` 3.12 tự nhận 5 chữ số; cron chạy shebang python3 3.10 nơi nó bị A13 giết).
+- 2 bộ đột biến GỐC reviewer v3 (mut3.py/mut4.py) chạy lại trên bản sao: mọi mẫu còn khớp bị giết trừ N12 (reviewer ghi tương
+  đương) và N39 (CONFIRMABLE + registry đã có ⇒ luôn thành MATCH-continue/UNVERIFIED trước dòng đó — không chạm được); N40
+  nay bị giết (test N40 lưới cuối I1 writer broker). Mẫu không còn khớp (code viết lại) có đột biến tương đương r4 trong MUTANTS.
+- Replay `--replay` 92 phiên / 15 ứng viên, D1 7/7 + D5 chỉ-giá, sàn THẬT qua `_exchange_fn`: 656/0 (3.10), 658/0 (3.12) — chạy lại trên bản cuối, output trùng lượt trước.
+- Dry-run THẬT 2026-10-01 (live/shadow/off): TPB CONFIRMABLE ×1.15 chân tiền 500, đối chiếu registry **MATCH** — KHÁC r3
+  (MISMATCH "KHÔNG khai") vì record production TPB-2026-10-02-STOCK-DIVIDEND đã được thêm cash_leg 500 sau r3 (md5 nay
+  e7ace20b) — đúng, không phải lỗi; off: lịch vendor 10-01 không có ứng viên CP. 0 bus (/tmp/brokerprim/r4f_dry_*_1001.txt).
+- Dây bẫy `tripwire.no_real_dnse_call` PASS; corp_actions.json md5 **e7ace20b** không đổi; dnse_raw 10-01 1856 / 10-04 8 dòng
+  không đổi; không có sổ/khoá production `data/corp_action_broker_ledger.jsonl*`.
+- Sự cố trong lúc verify (đã xử lý): lượt `--mutations` chạy foreground bị trần 10' của tool giết giữa đột biến K-j ⇒ file
+  `corp_action_auto_confirm.py` còn mang đột biến; phát hiện bằng so md5 với bản sao sạch, khôi phục, chạy lại nền (nohup).
+  Soi `git diff` trước commit: không còn dấu vết đột biến.
+
+### Còn mở sau r4
+1. Credit SAU lượt 19:25 không quét lại (cần lượt 21:05 — Q5, user duyệt bỏ qua tới khi merge).
+2. Record người ký/vendor không re-verify sau ex (giữ quy ước "người đã chốt").
+3. Câu hỏi vendor-vs-registry / vendor-near-record không tự `answer` (giải quyết = người sửa record ⇒ người đóng).
+4. N39 tương đương (ghi trên); phạm vi `run_broker` dry-run: cờ `_dry_scope` là phòng thủ chiều sâu.
