@@ -886,3 +886,6 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T09:02:00Z] [broker-CA r4] DỪNG (lỗi mới khác loại M-A) job Taylor_20261003_082621: fix/broker-ca-r4-20261003 @c187bc94 (wt-brokerca-r4-1003), 12/12 mục sửa, reviewer không chặn merge-shadow. CHỜ Mike merge trước 19:25 T2 05/10 + user chốt ngữ nghĩa _FAILED feed_dead (M-A) trước live.
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T10:45:05Z] [2026-10-03 ICT] [broker-CA r5] XONG job Taylor_20261003_091511: fix/broker-ca-r5-20261003@e38c808e (wt-brokerca-r5-1003), 161/161 mutant, matrix 102/102. CHỜ Mike merge trước 19:25 T2 05/10.

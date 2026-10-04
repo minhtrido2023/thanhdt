@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-03T10:45:05Z] [2026-10-03 ICT] [broker-CA r5] XONG job Taylor_20261003_091511: fix/broker-ca-r5-20261003@e38c808e (wt-brokerca-r5-1003), 161/161 mutant, matrix 102/102. CHỜ Mike merge trước 19:25 T2 05/10.
 - [2026-10-03T16:28:34Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY (đảo thứ tự vendor→broker), wt agents/Taylor/wt-brokerprimary-1003 branch feat/broker-primary-20261003 từ 2c2abc63 | NEXT: đọc code auto_confirm+broker_detect, thiết kế đảo thứ tự
 - [2026-10-03T16:43:48Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 (feat/broker-primary-20261003 từ 2c2abc63), design /tmp/brokerprim/design.md, mục 5+6 xong /tmp/brokerprim/q56.md | NEXT: code broker_detect (vendor_crosscheck, price-only) + auto_confirm (live order) + selfcheck
 - [2026-10-03T17:07:59Z] ĐANG DỞ: job Taylor_20261003_162814 broker-PRIMARY, wt agents/Taylor/wt-brokerprimary-1003 WIP commit (selfcheck 338/0 kèm replay) | NEXT: mutation (sửa mẫu cũ + thêm mẫu mới), matrix 17 selfcheck x2 interp x3 TZ, arch-reviewer 1 lần, bus finding broker-primary-20261003
@@ -26,3 +25,4 @@
 - [2026-10-04T03:03:29Z] ĐANG DỞ: job Taylor_20261004_024243 drift-flag Q5, wt agents/Taylor/wt-driftflag-1004 @140874f3 (selfcheck 76, mut 34/34) | NEXT: arch-reviewer 1 lần → sửa → bus finding plan-position-drift-flag-20261004
 - [2026-10-04T03:34:50Z] [broker-primary r2] DỪNG (lỗi mới khác loại M2/m1) job Taylor_20261004_024239: feat/broker-primary-20261003@63a7fd23 (code 4a23a787), arch-review v2 NEEDS_CHANGES (M1 cash_leg vắng=MATCH im, M2 record_proposed khi registry có record, M3 positions rỗng). CHỜ Mike/user quyết r3. Cần kiểm TPB record thiếu cash_leg có làm park chặn không.
 - [2026-10-04T03:34:56Z] [drift-flag Q5] XONG job Taylor_20261004_024243: feat/plan-position-drift-flag-20261004@821179e2 (wt-driftflag-1004), 98/98 x6, mut 52/52. CHỜ Mike merge + cài cron (20:50 + 21:05) trước 20:50 T2 05/10.
+- [2026-10-04T10:36:06Z] ĐANG DỞ: job Taylor_20261004_103554 broker-primary r3 (M1-M5,m1-m7,15 mutant), wt agents/Taylor/wt-brokerprimary-1003 | NEXT: đọc toàn bộ thiết kế, lập bảng trạng thái, sửa 1 lần
