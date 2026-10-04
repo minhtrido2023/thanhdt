@@ -430,6 +430,28 @@ def _vsum(e):
                                   "price_adjusting", "title") if k in e}
 
 
+def _vnum(x):
+    """Số vendor đọc được, hữu hạn, > 0 — ngược lại None (KHÔNG coi là 0: m1 arch-review v1)."""
+    try:
+        v = float(x)
+    except (TypeError, ValueError):
+        return None
+    return v if math.isfinite(v) and v > 0 else None
+
+
+def dedup_vendor(vendor_events):
+    """Bỏ dòng vendor TRÙNG HỆT (cùng mã sự kiện/ngày/tỉ lệ/giá trị/tiêu đề) — feed ghi lặp một
+    sự kiện ⇒ cộng tỉ lệ/DIV 2 lần ⇒ MISMATCH giả (m5). Hai sự kiện thật khác nhau luôn khác ít
+    nhất một trường (tiêu đề) nên không bị gộp."""
+    out, seen = [], set()
+    for e in vendor_events:
+        k = json.dumps(_vsum(e), sort_keys=True, default=str)
+        if k not in seen:
+            seen.add(k)
+            out.append(e)
+    return out
+
+
 def vendor_crosscheck(ex_date, m, cash, vendor_events):
     """PURE. Đối chiếu kết luận BROKER (hệ số KL `m` — 1.0 = KL không đổi —, chân tiền `cash`
     đ/cp, `ex_date`) với MỌI sự kiện vendor của mã. Trả {status, why, vendor}. KHÔNG bao giờ đổi
@@ -448,7 +470,7 @@ def vendor_crosscheck(ex_date, m, cash, vendor_events):
                 "why": "lịch vendor thiếu/đọc hỏng — chưa được vendor xác nhận (không chặn broker)"}
     ex = dt.date.fromisoformat(ex_date)
     near, problems = [], []
-    for e in vendor_events:
+    for e in dedup_vendor(vendor_events):
         code = str(e.get("event_code") or "").upper()
         if not (e.get("price_adjusting") or code == "DIV"):
             continue
@@ -488,8 +510,11 @@ def vendor_crosscheck(ex_date, m, cash, vendor_events):
                 qty_ok = True
     elif m > 1.0:
         qty_ok = False
-    if div_same:
-        v = sum(_f(e.get("value_per_share")) for e in div_same)
+    dvals = [_vnum(e.get("value_per_share")) for e in div_same]
+    if div_same and None in dvals:
+        problems.append(f"giá trị DIV vendor không đọc được {[e.get('value_per_share') for e in div_same]}")
+    elif div_same:
+        v = sum(dvals)
         if abs(v - cash) > VENDOR_CASH_TOL_VND:
             problems.append(f"chân tiền: broker {cash:,.0f}đ/cp vs vendor DIV {v:,.0f}đ/cp "
                             f"(lệch > {VENDOR_CASH_TOL_VND:.0f}đ/cp)")
@@ -506,7 +531,9 @@ def vendor_crosscheck(ex_date, m, cash, vendor_events):
     if qty_ok is not False and cash_ok is not False:
         return {"status": V_VERIFIED, "why": "vendor khớp broker", "vendor": vendor}
     miss = [x for x, ok in (("hệ số KL", qty_ok), ("chân tiền", cash_ok)) if ok is False]
-    return {"status": V_PARTIAL, "vendor": vendor,
+    # Vendor CÓ sự kiện cùng ex (vd chỉ DIV) mà KHÔNG khai sự kiện CP broker thấy ⇒ trục KL — trục
+    # duy nhất registry dùng — chưa ai xác nhận ⇒ `qty_unconfirmed` (caller hạ UNVERIFIED, m2).
+    return {"status": V_PARTIAL, "vendor": vendor, "qty_unconfirmed": qty_ok is False,
             "why": f"vendor KHÔNG khai {miss} (vắng, không phải lệch) — phần còn lại khớp"}
 
 
@@ -528,6 +555,10 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
         if vc["status"] == V_MISMATCH:
             out.update(verdict=UNVERIFIED,
                        why=f"broker {out['why']} — LỆCH VENDOR: {vc['why']} ⇒ hạ UNVERIFIED, Winston kiểm")
+        elif vc.get("qty_unconfirmed"):
+            out.update(verdict=UNVERIFIED,
+                       why=(f"broker {out['why']} — VENDOR THIẾU trục KL: {vc['why']} (vendor có sự kiện "
+                            f"khác cùng ex nhưng không khai sự kiện CP) ⇒ hạ UNVERIFIED, Winston kiểm"))
         return out
     out["vendor_check"] = ({"status": V_UNREADABLE, "vendor": [], "why": "lịch vendor thiếu/hỏng"}
                            if vendor_events == VENDOR_UNREADABLE else
@@ -805,13 +836,22 @@ def decide_price_only(ticker, day, ex_date, per_account, px_cum, exchange, cashd
             hard.append(f"cổng giá: {pwhy}")
         else:
             out["price_evidence"] = pwhy
+    elif exchange in PRICE_GATE_EXCHANGES and not one_px:
+        # HOSE/HNX mà các tài khoản/lô mang giá đêm KHÁC nhau ⇒ không biết giá nào là tham chiếu
+        # mới ⇒ chưa kiểm được cổng giá (DNSE cập nhật dở?) ⇒ chưa đủ, chạy lại sau (arch-review M45).
+        soft.append(f"giá đêm không thống nhất giữa tài khoản/lô {sorted(m1s)} ⇒ không kiểm được cổng giá")
+    if moved is not None:
+        gate = " + giá đêm khớp cum−tiền"
+    elif exchange not in PRICE_GATE_EXCHANGES:
+        gate = f" (sàn {exchange}: giá tham chiếu không phải bằng chứng, không dùng cổng giá)"
+    else:
+        gate = f" (sàn {exchange} nhưng KHÔNG có giá cum {px_cum!r} ⇒ CHƯA kiểm cổng giá)"
     if hard or soft:
         return dict(out, verdict=AMBIGUOUS if hard else INSUFFICIENT, why="; ".join(hard + soft),
                     vendor_check=vendor_crosscheck(ex_date, 1.0, c, vendor_events))
     vc = vendor_crosscheck(ex_date, 1.0, c, vendor_events)
     out["vendor_check"] = vc
-    why = (f"cổ tức tiền {c:,.0f}đ/cp: giá vốn DNSE giảm đúng q×c + cashDividendReceiving tăng khớp"
-           + (" + giá đêm khớp cum−tiền" if moved is not None else " (sàn không dùng cổng giá)"))
+    why = f"cổ tức tiền {c:,.0f}đ/cp: giá vốn DNSE giảm đúng q×c + cashDividendReceiving tăng khớp{gate}"
     if vc["status"] == V_MISMATCH:
         return dict(out, verdict=UNVERIFIED, why=f"{why} — LỆCH VENDOR: {vc['why']} ⇒ Winston kiểm")
     return dict(out, verdict=CASH_DIVIDEND, why=why)
@@ -819,15 +859,28 @@ def decide_price_only(ticker, day, ex_date, per_account, px_cum, exchange, cashd
 
 # ──────────────────────────────────────────────────────────── điều phối 1 phiên (đọc file) ──
 
+PRICE_SCREEN_BUDGET_S = 90       # ngân sách thời gian TỔNG cho sàng lọc chỉ-giá (gọi DNSE) mỗi lượt
+
+
 def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, cutoff=None,
              exchange_fn=lambda tk: None):
-    """Mọi mã có ứng viên credit quyền ở phiên `day`, mọi tài khoản. Trả [decide(...)].
+    """Mọi mã có ứng viên credit quyền ở phiên `day`, mọi tài khoản. Trả [decide(...)] (pha KL)
+    + kết quả sàng lọc CHỈ-GIÁ (không ngân sách — replay/CLI). Cron dùng `scan_qty` rồi
+    `scan_price_only` tách pha (RC4: ghi registry sự kiện KL TRƯỚC khi gọi DNSE cho chỉ-giá).
 
     px_cum_fn(ticker, day) → giá đóng cửa cum hoặc None. vendor_events_fn(ticker) → [ev] |
     VENDOR_UNREADABLE. exchange_fn(ticker) → "HOSE"/"HNX"/"UPCOM"/None (None ⇒ MƠ HỒ).
     `cutoff` ("HH:MM", chỉ cho replay) — bỏ bản ghi của `day` sau giờ đó, để mô phỏng đúng cái
     cron 19:25 nhìn thấy.
     """
+    out, ctx = scan_qty(day, px_cum_fn, vendor_events_fn, exec_dir, cutoff, exchange_fn)
+    return out + scan_price_only(ctx)
+
+
+def scan_qty(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, cutoff=None,
+             exchange_fn=lambda tk: None):
+    """Pha KL: (kết quả decide() mọi mã có ứng viên credit, ctx cho `scan_price_only`). Chỉ gọi
+    px_cum_fn/exchange_fn cho mã ỨNG VIÊN KL (vài mã) — không sàng lọc cả danh mục."""
     from trading_bot.vn_market import next_trading_day
     path = os.path.join(exec_dir, f"dnse_raw_{day}.jsonl")
     prev = previous_file(day, exec_dir)
@@ -876,6 +929,23 @@ def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, 
         px = px_cum_fn(tk, day)
         out.append(decide(tk, day, ex_date, per, holders, px, vendor_events_fn(tk),
                           exchange_fn(tk)))
+    ctx = {"day": day, "ex_date": ex_date, "per_ticker": per_ticker, "per_price": per_price,
+           "cashdiv_pts": cashdiv_pts, "px_cum_fn": px_cum_fn, "vendor_events_fn": vendor_events_fn,
+           "exchange_fn": exchange_fn}
+    return out, ctx
+
+
+def scan_price_only(ctx, deadline=None, clock=None):
+    """Pha CHỈ-GIÁ (cổ tức tiền / quyền mua) trên ctx của `scan_qty`. `deadline` (giá trị của
+    `clock()`, mặc định time.monotonic) — NGÂN SÁCH THỜI GIAN TỔNG cho các lời gọi DNSE: kiểm
+    TRƯỚC prefetch và TRƯỚC mỗi mã; hết ⇒ mã còn lại vào dòng thiếu dữ liệu (INSUFFICIENT, có lý do
+    'hết ngân sách'), KHÔNG chờ thêm (RC4). Trần thực = deadline + 1 lời gọi đang dở (timeout của nó)."""
+    import time
+    clock = clock or time.monotonic
+    day, ex_date = ctx["day"], ctx["ex_date"]
+    per_ticker, per_price, cashdiv_pts = ctx["per_ticker"], ctx["per_price"], ctx["cashdiv_pts"]
+    px_cum_fn, vendor_events_fn, exchange_fn = ctx["px_cum_fn"], ctx["vendor_events_fn"], ctx["exchange_fn"]
+    out = []
     # ── CHỈ-GIÁ: mã KL không đổi ở MỌI tài khoản (mã có ứng viên KL ở bất kỳ tài khoản nào đã do
     # decide() lo — tài khoản chưa được credit nằm ở holders_not_credited, không xét lại ở đây).
     per_price = {tk: per for tk, per in per_price.items() if tk not in per_ticker}
@@ -892,10 +962,15 @@ def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, 
     for lbl, pts in cashdiv_pts.items():
         delta, why = cashdiv_delta(pts, day)
         cashdiv[lbl] = (delta, expected.get(lbl, 0.0), why)
-    if per_price and hasattr(px_cum_fn, "prefetch"):
+    def _over():
+        return deadline is not None and clock() >= deadline
+    if per_price and hasattr(px_cum_fn, "prefetch") and not _over():
         px_cum_fn.prefetch(sorted(per_price), day)      # 1 lời gọi DNSE cho cả lô (live)
     gaps = []
     for tk, per in sorted(per_price.items()):
+        if _over():
+            gaps.append(f"{tk} (hết ngân sách thời gian sàng lọc chỉ-giá — chưa gọi DNSE)")
+            continue
         r = decide_price_only(tk, day, ex_date, per, px_cum_fn(tk, day), exchange_fn(tk),
                               cashdiv, vendor_events_fn(tk))
         if r.get("screen_gap"):
@@ -907,7 +982,34 @@ def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, 
         out.append({"kind": "PRICE_SCREEN_GAP", "ticker": PRICE_SCREEN_GAP, "credit_day": day,
                     "ex_date": ex_date, "accounts": {}, "verdict": INSUFFICIENT,
                     "why": (f"không sàng lọc được biến động CHỈ-GIÁ (cổ tức tiền/quyền mua) cho "
-                            f"{len(gaps)} mã thiếu giá cum/sàn: {'; '.join(gaps)}")})
+                            f"{len(gaps)} mã (thiếu giá cum/sàn hoặc hết ngân sách): {'; '.join(gaps)}")})
+    return out
+
+
+def held_tickers(day, exec_dir=EXEC_DIR):
+    """{mã: [nhãn tài khoản]} đang giữ (openQuantity > 0) theo bản ghi positions CUỐI của MỖI tài
+    khoản: file `day`; tài khoản KHÔNG có bản ghi nào ở `day` ⇒ bản ghi cuối file phiên trước
+    (`held_before`, RC2 — bản cũ chỉ đọc file hôm nay ⇒ tài khoản vắng hôm nay bị coi là "không
+    giữ"). Không có file nào đọc được ⇒ None (KHÔNG coi là "không giữ gì")."""
+    path = os.path.join(exec_dir, f"dnse_raw_{day}.jsonl")
+    prev = previous_file(day, exec_dir)
+    today = dict(accounts_in(path)) if os.path.exists(path) else {}
+    before = dict(accounts_in(prev)) if prev else {}
+    if not today and not before:
+        return None
+    out = {}
+    for acct, label in sorted(today.items()):
+        ser = read_series(path, acct)
+        for tk, rows in (ser[-1][1].items() if ser else []):
+            if aggregate(rows)["qty"] > 0:
+                out.setdefault(tk, []).append(label)
+    for acct, label in sorted(before.items()):
+        if acct in today:
+            continue
+        ser = read_series(prev, acct)
+        for tk, rows in (ser[-1][1].items() if ser else []):
+            if aggregate(rows)["qty"] > 0:
+                out.setdefault(tk, []).append(f"{label} (bản ghi cuối {os.path.basename(prev)})")
     return out
 
 
@@ -972,7 +1074,11 @@ def build_record(dec, now_ict):
 
 
 def ledger_key(e):
-    return [e.get("mode"), e.get("ticker"), e.get("credit_day"), e.get("verdict")]
+    """Khoá idempotent của 1 mục sổ. Mục đối chiếu REGISTRY (RC1) thêm id record ⇒ người thu hồi
+    record cũ rồi ghi record khác cho cùng (mã, ex) ⇒ hỏi lại 1 lần cho record mới."""
+    k = [e.get("mode"), e.get("ticker"), e.get("credit_day"), e.get("verdict")]
+    rid = (e.get("registry_check") or {}).get("record_id")
+    return k + [rid] if rid else k
 
 
 def ledger_state(path=LEDGER_FILE):
