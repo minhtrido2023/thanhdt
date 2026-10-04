@@ -869,3 +869,11 @@
 
 ## Archived 2026-10-03 (keep=12 days=0 require_done=False)
 - [2026-10-02T11:42:57Z] [2026-10-02] [brokers-tradequantity-zero] XONG job Taylor_20261002_103812: branch fix/brokers-tradequantity-zero-20261002@ba2e0a47 (wt-tq0-1002), _sellable_qty 3 site, selfcheck+mutation+89 selfcheck x3TZ == base. CHO quant-skeptic + Mike merge.
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T04:44:10Z] ĐANG DỞ: job Taylor_20261003_033512 broker-corp-action, wt-brokerca-1003 branch feat/broker-corp-action-source-20261003 @07706719; arch-review v1 NEEDS_CHANGES (B1 gia-khong-roi/modifiedDate refresh dem; B2 selfcheck cu ghi ledger prod - DA XOA file) | NEXT: sua tron bo required_changes roi arch-review v2 (tran 3 vong)
+- [2026-10-03T04:45:25Z] ĐANG DỞ: job Taylor_20261003_033512 attempt2, wt-brokerca-1003 @07706719 + diff dở account_evidence; arch-review v1 full ở /tmp/brokerca/archrev_v1.md (B1,B2,M1-M6,minor) | NEXT: sửa hết required_changes → selfcheck → arch-review v2
+- [2026-10-03T05:01:27Z] ĐANG DỞ: job Taylor_20261003_033512 attempt2, wt-brokerca-1003 @bb457b9c (sửa trọn arch-review v1, review v1 lưu /tmp/brokerca/archrev_v1.md) | NEXT: arch-review v2 → nếu APPROVE ghi bus finding broker-corp-action-source-20261003
+
+## Archived 2026-10-04 (keep=12 days=0 require_done=False)
+- [2026-10-03T05:29:46Z] [broker-corp-action] DỪNG ở cầu chì vòng 3 (job Taylor_20261003_033512): branch feat/broker-corp-action-source-20261003 @9ab1cf5f (wt-brokerca-1003), shadow an toàn để merge; TRƯỚC live còn MAJOR N9 (_broker_record_near không xét _status) + 11 đột biến sống — CHỜ Mike quyết dispatch chế độ A. 4 dòng rác quote_unmapped trong dnse_raw_2026-10-03.jsonl do mình, chưa xoá.

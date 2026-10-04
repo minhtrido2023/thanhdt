@@ -32,3 +32,4 @@ BAI HOC 2: bo test 'loai theo SUBSTRING' de tu mo cua thoat — clause 'tail -c 
 - [2026-10-02T01:21:04Z] [2026-10-02] coord-2026-10-02: Q spacex-tpb-reconcile DONG bang answer (Pattern B lan 5). Q tpb-price-frame-gate CHO USER/TAYLOR (A patch price_frame cash_div / B confirm tay / C cho plan 10-03), ack suppress 2d, da post trading_daily. files_changed=[].
 - [2026-10-03T06:54:54Z] Chờ Mike merge branch fix/report-prompt-port-20261003 (1b9d4d46); sau merge: git worktree remove agents/Wags/wt-reportport-1003
 - [2026-10-03T08:28:35Z] [2026-10-03] Chờ Mike merge fix/report-prompt-r2-20261003 (1afc0c59, worktree agents/Wags/wt-reportr2-1003); sau merge: git worktree remove wt-reportr2-1003 (và wt-reportport-1003 nếu port đã merge)
+- [2026-10-04T02:52:44Z] [2026-10-04] Cho Mike merge fix/exdate-forecast-feed-status-20261004 (agents/Wags/wt-exdate-feed-1004) TRUOC 05/10 19:00 ICT; sau merge: git worktree remove wt-exdate-feed-1004
