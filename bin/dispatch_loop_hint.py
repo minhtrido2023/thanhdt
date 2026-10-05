@@ -18,7 +18,7 @@ nằm ở bin/dispatch_round_cap.py (exit 7) — dùng lại đúng các hàm ch
 Token nhánh = `fix|feat|wire|session/<tên>` hoặc `wt-<tên>`. Nguồn "job trước" = bus/jobs/*.json
 (`prompt_summary` 160 BYTE đầu (dispatch.sh `head -c 160`; tiếng Việt chiếm nhiều byte) — token đặt muộn hơn thì đếm hụt, thiên về IM thay vì kêu oan).
 Record có field `chain_tokens` (dispatch.sh ghi từ PROMPT ĐẦY ĐỦ, từ 2026-10-05) thì khớp tuyệt đối
-trên field đó. Job tự sinh `[RESUME`/`[FALLBACK ...` và job `cancelled` bị loại; các dispatch cách nhau <5 phút gộp thành 1
+trên field đó. Job tự sinh `[RESUME`/`[FALLBACK`/`[AUTO-CALLBACK ...` và job `cancelled` bị loại; các dispatch cách nhau <5 phút gộp thành 1
 (bản đúp usage-limit/redispatch cùng vòng). Lời nhắc chỉ nêu SỐ DISPATCH đếm được, không khẳng
 định số vòng (§29: không đoán điều chưa đọc).
 
@@ -42,7 +42,14 @@ WINDOW_S = 24 * 3600
 LOOP_THRESHOLD = 2          # đã có ≥2 dispatch trước ⇒ cầu chì
 DEDUP_S = 300               # dispatch cách nhau <5 phút = cùng một vòng
 
-_BRANCH = re.compile(r"\b((?:fix|feat|wire|session)/[A-Za-z0-9_.-]+|wt-[A-Za-z0-9_.-]+)")
+# Neo (arch-review 2026-10-05, killer): `fix|feat|wire|session/` KHÔNG được đứng sau `/` hay ký tự
+# từ, VÀ tên phải có ít nhất 1 dấu `-` — chuỗi tĩnh "root_cause/fix/verify/commit" của
+# wags_autofix.sh từng khớp `fix/verify` ⇒ mọi dispatch wags_autofix thành 1 chuỗi giả; daily retro
+# khớp `fix/commit`. Tên nhánh thật của fleet luôn có `-` (đo 30 ngày). `wt-<tên>` thì ĐƯỢC đứng sau
+# đường dẫn (agents/Taylor/wt-abc-1001) nên chỉ neo `\b`.
+_BRANCH = re.compile(r"(?<![\w/])(?:fix|feat|wire|session)/[A-Za-z0-9_.]*-[A-Za-z0-9_.-]+"
+                     r"|\bwt-[A-Za-z0-9][A-Za-z0-9_.-]*")   # wt- phải theo sau bởi chữ/số (regex `wt-.*` không tính)
+_AUTO_PREFIX = ("[RESUME", "[FALLBACK", "[AUTO-CALLBACK")   # tự sinh: không phải vòng mới
 _CONTINUE = re.compile(r"tiếp tục|tiep tuc|vòng\s*\d|vong\s*\d|test-only|hoàn tất|hoan tat|"
                        r"redispatch|dọn scope|apply verdict|polish", re.I)
 _NEWWORK = re.compile(r"thiết kế|thiet ke|giả thuyết mới|gia thuyet moi|tại sao|tai sao|"
@@ -90,7 +97,7 @@ def prior_jobs(tokens, now=None, jobs_dir=None, mtime_prefilter=True, agent=None
     `agent` (chỉ round-cap dùng): chỉ đếm job gửi tới ĐÚNG agent đó — để retro/audit tự động
     gửi Mike/Wags mà NHẮC tên nhánh không bị tính thành vòng polish của chuỗi Taylor.
 
-    Bỏ job cancelled, job tự sinh `[RESUME`/`[FALLBACK` (cùng vòng, chạy lại). Ném OSError nếu
+    Bỏ job cancelled, job tự sinh `[RESUME`/`[FALLBACK`/`[AUTO-CALLBACK` (không phải vòng mới). Ném OSError nếu
     thư mục job không đọc được — caller tự quyết fail-open (hint im lặng, round-cap cảnh báo)."""
     now = now or time.time()
     jobs_dir = jobs_dir or JOBS_DIR
@@ -112,7 +119,7 @@ def prior_jobs(tokens, now=None, jobs_dir=None, mtime_prefilter=True, agent=None
             s = d.get("prompt_summary", "") or ""
         except Exception:
             continue
-        if s.lstrip().startswith(("[RESUME", "[FALLBACK")):
+        if s.lstrip().startswith(_AUTO_PREFIX):
             continue
         for t in tokens:
             if job_matches(d, t):

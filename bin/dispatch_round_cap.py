@@ -16,12 +16,22 @@ so với lời nhắc: chỉ đếm job tới CÙNG agent (--to). Lý do đo th�
 retro vừa bị tính thành vòng của chuỗi Taylor vừa có thể bị CHẶN khi nhánh đó đang nóng.
 
 LUẬT. Đã có ≥ DISPATCH_ROUND_CAP_PRIOR (mặc định 3) vòng trước ⇒ đây là vòng ≥4 ⇒ CHẶN CỨNG
-(exit 7). Prompt bắt đầu bằng [RESUME / [FALLBACK (tự sinh, tiếp nối job ĐÃ được nhận) ⇒ miễn.
+(exit 7). Prompt bắt đầu bằng [RESUME / [FALLBACK / [AUTO-CALLBACK (tự sinh: tiếp nối job ĐÃ được
+nhận, hoặc callback báo kết quả cho caller) ⇒ miễn. Exit 7 chạy TRƯỚC routing guard exit 2 (self-
+dispatch / target Mike) của dispatch.sh. Caller cần biết exit 7: bin/wags_autofix.sh (nhánh riêng
+"bị cầu chì vòng", không báo DISPATCH CHẾT); caller tự động khác thấy exit 7 như một lỗi thường —
+nên chính script này ghi bus event `error` khi bị chặn ngoài phiên tương tác (xem dưới).
 
 OVERRIDE — CHỈ phiên tương tác của Mike hoặc user dùng, KHÔNG BAO GIỜ agent headless:
   DISPATCH_ROUND_CAP_OVERRIDE=1 bin/dispatch.sh ...   (lý do tuỳ chọn: DISPATCH_ROUND_CAP_REASON)
 Chốt cơ học: caller đang chạy BÊN TRONG một job dispatch (env JOB_ID kế thừa khác rỗng — dispatch.sh
-export JOB_ID cho mọi agent headless) ⇒ override BỊ TỪ CHỐI, vẫn chặn. dispatch.sh unset biến
+export JOB_ID cho mọi agent headless) ⇒ override BỊ TỪ CHỐI, vẫn chặn. Đây CHỈ là honour system:
+agent cố tình `env -u JOB_ID DISPATCH_ROUND_CAP_OVERRIDE=1 ...` vẫn lách được — chốt chặn sơ suất,
+không phải bảo mật; audit log là thứ để retro bắt lạm dụng.
+
+BỊ CHẶN NGOÀI PHIÊN TƯƠNG TÁC ⇒ KHÔNG chết im ở stderr: ghi 1 bus event `error` topic
+`round-cap-blocked: <chuỗi>` (agent = caller). "Tương tác" = JOB_ID rỗng VÀ DISCORD_THREAD_ID khác
+rỗng (phiên ccdb của Mike; cron không có biến này, agent headless có JOB_ID). dispatch.sh unset biến
 override ngay sau khi gọi script này ⇒ không rò xuống agent con. Mỗi lần override/chặn ghi 1 dòng
 TSV vào logs/dispatch_round_cap.log (retro đo: số vòng override/ngày) + field `round_cap` trên job.
 
@@ -51,7 +61,7 @@ import dispatch_loop_hint as H  # noqa: E402  — MỘT định nghĩa chuỗi d
 ROOT = H.ROOT
 BLOCK_RC = 7
 _ICT = datetime.timezone(datetime.timedelta(hours=7))
-_AUTO_PREFIX = ("[RESUME", "[FALLBACK")
+_AUTO_PREFIX = H._AUTO_PREFIX   # [RESUME / [FALLBACK / [AUTO-CALLBACK — miễn chặn VÀ không đếm
 
 
 def cap_prior():
@@ -104,6 +114,25 @@ def _audit(event, to, frm, token, rounds, reason=""):
         return False
 
 
+def _bus_event(frm, to, tok, rounds, rno, inherited_job):
+    """Bị chặn ngoài phiên tương tác ⇒ để lại dấu vết BỀN trên bus (không ai đọc stderr của cron).
+    Lỗi ghi ⇒ cảnh báo, không đổi verdict. MIKE_ROUND_CAP_EVENT_CMD chỉ để selfcheck cách ly bus."""
+    cmd = os.environ.get("MIKE_ROUND_CAP_EVENT_CMD") or os.path.join(ROOT, "bin", "append_event.sh")
+    payload = json.dumps({"chain": tok, "to": to, "from": frm, "round": rno,
+                          "prior_jobs": [r[0][1] for r in rounds], "caller_job": inherited_job,
+                          "action": "cần Mike/user quyết: chế độ B hoặc DISPATCH_ROUND_CAP_OVERRIDE=1 "
+                                    "từ phiên tương tác"}, ensure_ascii=False)
+    try:
+        import subprocess
+        r = subprocess.run([cmd, frm or "Mike", "error", f"round-cap-blocked: {tok}", payload],
+                           capture_output=True, text=True, timeout=20)
+        if r.returncode != 0:
+            print(f"WARN round-cap: ghi bus event lỗi rc={r.returncode}: {r.stderr.strip()[-200:]}",
+                  file=sys.stderr)
+    except Exception as e:
+        print(f"WARN round-cap: không ghi được bus event ({type(e).__name__}: {e})", file=sys.stderr)
+
+
 def cmd_check(a):
     prompt = sys.stdin.read()
     frm = a.frm or os.environ.get("DISPATCH_FROM") or "Mike"
@@ -150,6 +179,8 @@ def cmd_check(a):
         _audit("override_refused", a.to, frm, tok, rounds, f"inherited JOB_ID={inherited_job}")
     else:
         _audit("block", a.to, frm, tok, rounds)
+    if inherited_job or not os.environ.get("DISCORD_THREAD_ID"):
+        _bus_event(frm, a.to, tok, rounds, rno, inherited_job)
     print(f"{toks}\tblock:{tok}:{rno}")
     return BLOCK_RC
 

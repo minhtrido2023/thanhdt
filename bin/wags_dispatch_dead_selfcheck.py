@@ -326,6 +326,42 @@ def main():
           "🔴" in notify6, notify6[:300])
     check("RED: DỪNG pipeline", "REACHED_END_OF_BLOCK" not in p6.stdout, p6.stdout[:200])
 
+    print("\ncase_exit7_cau_chi_vong_KHONG_phai_dispatch_chet")
+    # Thông báo chặn lấy từ CHÍNH bin/dispatch_round_cap.py chạy thật trên bus giả (không chép tay).
+    import time as _t, datetime as _dt
+    with tempfile.TemporaryDirectory() as jd:
+        for i in range(3):
+            ts = _dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=4 - i)
+            jid = "Wags_" + ts.strftime("%Y%m%d_%H%M%S")
+            with open(os.path.join(jd, jid + ".json"), "w") as f:
+                json.dump({"job_id": jid, "to": "Wags", "status": "done",
+                           "started_at": str(int(_t.time())),
+                           "prompt_summary": f"Vòng {i + 1} branch fix/wags-probe-20261005"}, f)
+        env = {k: v for k, v in os.environ.items() if k not in ("JOB_ID", "DISCORD_THREAD_ID",
+               "DISPATCH_ROUND_CAP_OVERRIDE")}
+        env.update(DISPATCH_LOOP_HINT_JOBS_DIR=jd, MIKE_DISPATCH_ROUND_CAP_LOG=os.path.join(jd, "a.log"),
+                   MIKE_ROUND_CAP_EVENT_CMD="/bin/true")
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "bin", "dispatch_round_cap.py"), "check",
+                            "--to", "Wags"], input="Vòng 4 branch fix/wags-probe-20261005",
+                           capture_output=True, text=True, env=env)
+    check("TIỀN ĐỀ: round-cap thật trả exit 7", r.returncode == 7, f"rc={r.returncode}")
+    p7, notify7, postq7, _ = run_block(block, dispatch_rc=7, out=r.stderr)
+    topic7 = postq7.splitlines()[0] if postq7 else ""
+    check("exit 7 ⇒ topic round-capped, KHÔNG phải dispatch-failed",
+          "wags-autofix-round-capped" in topic7 and "dispatch-failed" not in topic7, topic7)
+    check("exit 7 ⇒ tin báo KHÔNG nói DISPATCH CHẾT, có nêu cầu chì + tên chuỗi",
+          "DISPATCH CHẾT" not in notify7 and "CẦU CHÌ" in notify7 and "fix/wags-probe-20261005" in notify7,
+          notify7[:300])
+    try:
+        ok7 = json.loads(postq7.strip().split("\n")[1])["dispatch_exit"] == "7"
+    except Exception:
+        ok7 = False
+    check("exit 7 ⇒ payload JSON hợp lệ, dispatch_exit=7", ok7, postq7[:300])
+    check("exit 7 ⇒ DỪNG pipeline", "REACHED_END_OF_BLOCK" not in p7.stdout, p7.stdout[:200])
+    p8, _, postq8, _ = run_block(block, dispatch_rc=7, out=REAL_OUT)
+    check("exit 7 KHÔNG có dòng cầu chì trong log ⇒ FAIL-CLOSED về dispatch-failed",
+          "wags-autofix-dispatch-failed" in (postq8.splitlines()[0] if postq8 else ""), postq8[:200])
+
     print("\ncase_CONTROL_dispatch_song_thi_khong_duoc_chan")
     p3, notify3, postq3, posts3 = run_block(block, dispatch_rc=0, out="moi thu binh thuong\n")
     check("CONTROL: dispatch exit=0 ⇒ KHÔNG post question dispatch-failed",

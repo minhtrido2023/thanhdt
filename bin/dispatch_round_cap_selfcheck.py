@@ -54,7 +54,21 @@ def suite(root):
     fails = []
     base_env = {k: v for k, v in os.environ.items()
                 if k not in ("JOB_ID", "DISPATCH_ROUND_CAP_OVERRIDE", "DISPATCH_ROUND_CAP_REASON",
-                             "DISPATCH_ROUND_CAP_PRIOR", "DISPATCH_FROM", "DISCORD_THREAD_ID")}
+                             "DISPATCH_ROUND_CAP_PRIOR", "DISPATCH_FROM", "DISCORD_THREAD_ID",
+                             "DISPATCH_ROUND_CAP_TIMEOUT")}
+    # Bus event của round-cap đi vào STUB ghi file — không bao giờ chạm bus thật.
+    evdir = Path(tempfile.mkdtemp(prefix="rcap_ev_"))
+    evlog = evdir / "events.txt"
+    (evdir / "ev.sh").write_text(f'#!/bin/sh\nprintf "%s|%s|%s\\n" "$1" "$2" "$3" >> "{evlog}"\n')
+    os.chmod(evdir / "ev.sh", 0o755)
+    base_env["MIKE_ROUND_CAP_EVENT_CMD"] = str(evdir / "ev.sh")
+
+    def events():
+        return evlog.read_text() if evlog.exists() else ""
+
+    def ev_reset():
+        if evlog.exists():
+            evlog.unlink()
 
     def check(name, cond, detail=""):
         print(("PASS " if cond else "FAIL ") + name + (f" — {detail}" if detail and not cond else ""))
@@ -67,9 +81,10 @@ def suite(root):
         return e
 
     def run_cap(prompt, jobs, log, to=AGENT, **extra):
-        r = subprocess.run([sys.executable, str(cap), "check", "--to", to], input=prompt,
-                           capture_output=True, text=True, env=env_for(jobs, log, **extra), timeout=60)
-        return r.returncode, r.stdout, r.stderr
+        raw = prompt if isinstance(prompt, bytes) else prompt.encode()
+        r = subprocess.run([sys.executable, str(cap), "check", "--to", to], input=raw,
+                           capture_output=True, env=env_for(jobs, log, **extra), timeout=60)
+        return r.returncode, r.stdout.decode(errors="replace"), r.stderr.decode(errors="replace")
 
     def run_disp(prompt, jobs, log, **extra):
         r = subprocess.run(["bash", str(disp), AGENT, prompt], capture_output=True, text=True,
@@ -96,8 +111,14 @@ def suite(root):
         j4.mkdir()
         ids = seed_rounds(j4, 3)
         log4 = td / "block.log"
+        ev_reset()
         rc, out, err = run_cap(f"Vòng 4 branch {BR}", j4, log4)
         check("round4_blocked_rc7", rc == 7, f"rc={rc}")
+        check("block_noninteractive_posts_bus_event",
+              f"Mike|error|round-cap-blocked: {BR}" in events(), events())
+        ev_reset()
+        rc, _, _ = run_cap(f"Vòng 4 branch {BR}", j4, log4, DISCORD_THREAD_ID="123")
+        check("block_interactive_no_bus_event", rc == 7 and events() == "", events())
         check("round4_msg_lists_prior_jobs", all(i in err for i in ids) and "CHẾ ĐỘ B" in err
               and "DISPATCH_ROUND_CAP_OVERRIDE=1" in err, err[-400:])
         check("round4_audit_block", "\tblock\t" in audit(log4) and f"chain={BR}" in audit(log4), audit(log4))
@@ -117,6 +138,11 @@ def suite(root):
                                JOB_ID="Taylor_20261005_000000")
         check("override_refused_headless", rc == 7 and "TỪ CHỐI" in err
               and "\toverride_refused\t" in audit(log6), f"rc={rc}")
+        ev_reset()
+        rc, _, _ = run_cap(f"Vòng 4 branch {BR}", j4, log6, JOB_ID="Taylor_20261005_000000",
+                           DISCORD_THREAD_ID="123", DISPATCH_FROM="Taylor")
+        check("block_headless_posts_bus_event_even_with_thread",
+              rc == 7 and f"Taylor|error|round-cap-blocked: {BR}" in events(), events())
 
         # 7. Chuỗi khác KHÔNG bị ảnh hưởng; agent khác cùng nhánh KHÔNG bị ảnh hưởng
         rc, _, _ = run_cap("Vòng 1 branch fix/khac-hoan-toan-20261005", j4, td / "o.log")
@@ -129,6 +155,17 @@ def suite(root):
         check("resume_exempt", rc == 0, f"rc={rc}")
         rc, _, _ = run_cap(f"[FALLBACK provider->claude sau usage-limit, job gốc=X] branch {BR}", j4, td / "o.log")
         check("fallback_exempt", rc == 0, f"rc={rc}")
+        rc, _, _ = run_cap(f"[AUTO-CALLBACK job=X] Taylor HOÀN THÀNH branch {BR}", j4, td / "o.log")
+        check("autocallback_exempt", rc == 0, f"rc={rc}")
+        rc, _, _ = run_cap(f"\n  [RESUME sau usage-limit #1, job gốc=X] branch {BR}", j4, td / "o.log")
+        check("resume_exempt_leading_whitespace", rc == 0, f"rc={rc}")
+        j8 = td / "acb"
+        j8.mkdir()
+        seed_rounds(j8, 2)
+        seed(j8, 3600, f"[AUTO-CALLBACK job=Y] Wags HOÀN THÀNH branch {BR}")
+        seed(j8, 1800, f"[AUTO-CALLBACK-FAIL job=Z status=failed] branch {BR}")
+        rc, _, _ = run_cap(f"Vòng 3 branch {BR}", j8, td / "o.log")
+        check("autocallback_priors_not_counted", rc == 0, f"rc={rc}")
 
         # 9. Bản đúp <5 phút của vòng 3 ⇒ vẫn là vòng 3, không chặn
         j9 = td / "dup"
@@ -168,6 +205,31 @@ def suite(root):
               and "failopen" in out,
               f"rc={rc} err={err[-200:]}")
 
+        # 13b. Job TƯƠNG LAI (job_id/started_at sau `now`) không được đếm
+        jf = td / "future"
+        jf.mkdir()
+        for k in range(4):   # 4 (không phải 3): mốc tương lai còn lọt luật "bản đúp <5'" ⇒ 3 sẽ không phân biệt
+            seed(jf, -(3600 + k * 1800), f"Vòng {k} branch {BR}")
+        rc, _, _ = run_cap(f"Vòng 1 branch {BR}", jf, td / "o.log")
+        check("future_jobs_not_counted", rc == 0, f"rc={rc}")
+        # 13c. started_at bị GHI LẠI ở attempt 2 (cùng 1 thời điểm) — vòng phải tính theo job_id
+        js = td / "reset"
+        js.mkdir()
+        for k in range(3):
+            jid = seed(js, 4 * 3600 - k * 1800, f"Vòng {k + 1} branch {BR}")
+            rec = json.loads((js / f"{jid}.json").read_text())
+            rec["started_at"] = str(int(time.time()) - 60)
+            (js / f"{jid}.json").write_text(json.dumps(rec))
+        rc, _, _ = run_cap(f"Vòng 4 branch {BR}", js, td / "o.log")
+        check("rounds_use_jobid_time_not_reset_started_at", rc == 7, f"rc={rc}")
+        # 13d. Lỗi NGOÀI evaluate() (stdin đã đóng ⇒ sys.stdin None ⇒ AttributeError) ⇒ lưới cuối
+        #      main() FAIL-OPEN, không traceback, không chặn.
+        r = subprocess.run(["bash", "-c", f'exec 0<&-; exec "{sys.executable}" "{cap}" check --to {AGENT}'],
+                           capture_output=True, text=True, env=env_for(j4, td / "o.log"), timeout=60)
+        check("unexpected_error_outside_evaluate_fail_open",
+              r.returncode == 0 and "FAIL-OPEN" in r.stderr and "Traceback" not in r.stderr,
+              f"rc={r.returncode} err={r.stderr[-200:]}")
+
         # 14. Ngưỡng đọc từ env (DISPATCH_ROUND_CAP_PRIOR=4 ⇒ vòng 4 qua)
         rc, _, _ = run_cap(f"Vòng 4 branch {BR}", j4, td / "o.log", DISPATCH_ROUND_CAP_PRIOR="4")
         check("threshold_env_knob", rc == 0, f"rc={rc}")
@@ -192,6 +254,17 @@ def suite(root):
                                 PATH=f"{fake}:{os.environ.get('PATH', '')}")
         check("e2e_cap_crash_fail_open", rc == 1 and "not found" in err and "FAIL-OPEN" in err,
               f"rc={rc} err={err[-300:]}")
+        # script cầu chì TREO ⇒ `timeout` cắt, dispatch.sh fail-open (rc=124), không chờ vô hạn.
+        slow = td / "slowbin"
+        slow.mkdir()
+        (slow / "python3").write_text("#!/bin/sh\ncase \"$*\" in *dispatch_round_cap.py*) sleep 6 ;; esac\n"
+                                      f'exec "{real_py}" "$@"\n')
+        os.chmod(slow / "python3", 0o755)
+        t0 = time.time()
+        rc, out, err = run_disp(f"Vòng 4 branch {BR}", j4, td / "e2e_to.log",
+                                PATH=f"{slow}:{os.environ.get('PATH', '')}", DISPATCH_ROUND_CAP_TIMEOUT="2")
+        check("e2e_cap_hang_timeout_fail_open", rc == 1 and "rc=124" in err and time.time() - t0 < 5.5,
+              f"rc={rc} dt={time.time() - t0:.1f} err={err[-300:]}")
         rc, out, err = run_disp(f"Vòng 2 branch {BR}", td / "pass1", td / "e2e_p.log")
         check("e2e_round2_passes_cap", rc == 1 and "not found" in err, f"rc={rc} err={err[-300:]}")
 
@@ -239,6 +312,44 @@ def suite(root):
         rc, rec, err = full_disp(f"Vòng 5 branch {BR}")
         check("full_round5_blocked_no_record", rc == 7 and rec == {}, f"rc={rc} rec={rec}")
 
+    # --- EXTRACT-AND-TEST: prompt tĩnh THẬT của mọi call-site tự động KHÔNG được sinh token chuỗi ---
+    sys.path.insert(0, str(root / "bin"))
+    import importlib
+    H = importlib.import_module("dispatch_loop_hint")
+    importlib.reload(H)
+    old_re = __import__("re").compile(r"\b((?:fix|feat|wire|session)/[A-Za-z0-9_.-]+|wt-[A-Za-z0-9_.-]+)")
+    wsrc = (root / "bin" / "wags_autofix.sh").read_text()
+    a = wsrc.find('bin/dispatch.sh" Wags "NHIỆM VỤ WAGS-AUTOFIX')
+    b = wsrc.find('" --timeout 1500', a)
+    wprompt = wsrc[a:b]
+    check("PREMISE_wags_prompt_extracted_and_old_regex_hit_it",
+          a > 0 and b > a and "fix/verify" in old_re.findall(wprompt), f"a={a} b={b}")
+    check("wags_autofix_real_prompt_no_chain_token", H.branch_tokens(wprompt) == [],
+          str(H.branch_tokens(wprompt)))
+    must = ["wags_autofix.sh", "ops_autofix.sh", "bq_freshness_check.sh", "daily_retro.sh", "kb_nightly.sh",
+            "check_report_cadence.sh", "fearbuy_weekly_scan.sh", "paper_checkpoint_escalation.sh"]
+    callers = sorted({f.name for f in (root / "bin").iterdir()
+                      if f.suffix in (".sh", ".py") and "selfcheck" not in f.name
+                      and f.name not in ("dispatch.sh", "dispatch_loop_hint.py", "dispatch_round_cap.py")
+                      and "dispatch.sh" in f.read_text(errors="replace")})
+    check("cron_callers_inventory_complete", all(m in callers for m in must),
+          str([m for m in must if m not in callers]))
+    leaks = {}
+    for name in callers:
+        txt = "\n".join(ln for ln in (root / "bin" / name).read_text(errors="replace").splitlines()
+                        if not ln.lstrip().startswith("#"))
+        t = H.branch_tokens(txt)
+        if t:
+            leaks[name] = t
+    check(f"static_text_of_{len(callers)}_dispatch_callers_has_no_chain_token", leaks == {}, str(leaks))
+    check("positive_control_real_branch_tokens_still_found",
+          H.branch_tokens("worktree mike/agents/Taylor/wt-brokerprimary-1003; branch feat/broker-primary-20261003")
+          == ["feat/broker-primary-20261003", "wt-brokerprimary-1003"] or
+          sorted(H.branch_tokens("worktree mike/agents/Taylor/wt-brokerprimary-1003; branch "
+                                 "feat/broker-primary-20261003")) == ["feat/broker-primary-20261003",
+                                                                       "wt-brokerprimary-1003"])
+
+    shutil.rmtree(evdir, ignore_errors=True)
     # --- wiring tĩnh: override không rò xuống agent con, field job được ghi ---
     sh = disp.read_text()
     i_call = sh.find('bin/dispatch_round_cap.py" check')
@@ -267,8 +378,26 @@ MUTATIONS = [
      'print(f"WARN round-cap: không đếm được vòng', 'print(f"round-cap: không đếm được vòng'),
     ("bash_moi_rc_khac_0_la_chan", "bin/dispatch.sh",
      'if [ "$_rcap_rc" -eq 7 ]; then', 'if [ "$_rcap_rc" -ne 0 ]; then'),
-    ("bo_mien_resume", "bin/dispatch_round_cap.py",
-     '_AUTO_PREFIX = ("[RESUME", "[FALLBACK")', '_AUTO_PREFIX = ("[KHONG-BAO-GIO",)'),
+    ("bo_mien_resume", "bin/dispatch_loop_hint.py",
+     '_AUTO_PREFIX = ("[RESUME", "[FALLBACK", "[AUTO-CALLBACK")', '_AUTO_PREFIX = ("[KHONG-BAO-GIO",)'),
+    ("bo_mien_autocallback", "bin/dispatch_loop_hint.py",
+     '_AUTO_PREFIX = ("[RESUME", "[FALLBACK", "[AUTO-CALLBACK")', '_AUTO_PREFIX = ("[RESUME", "[FALLBACK")'),
+    ("job_tuong_lai_duoc_dem", "bin/dispatch_loop_hint.py",
+     'if not (0 <= now - t0 <= WINDOW_S):', 'if not (now - t0 <= WINDOW_S):'),
+    ("dispatch_time_khong_uu_tien_job_id", "bin/dispatch_loop_hint.py",
+     'm = _JOBID_TS.search(str(d.get("job_id", "")))', 'm = None'),
+    ("thu_hep_except_cuoi_main", "bin/dispatch_round_cap.py",
+     'except Exception as e:  # lưới cuối', 'except OSError as e:  # lưới cuối'),
+    ("bo_timeout", "bin/dispatch.sh",
+     'timeout "${DISPATCH_ROUND_CAP_TIMEOUT:-15}" python3 "$ROOT/bin/dispatch_round_cap.py"',
+     'python3 "$ROOT/bin/dispatch_round_cap.py"'),
+    ("bo_lstrip_mien_tru", "bin/dispatch_round_cap.py",
+     'if prompt.lstrip().startswith(_AUTO_PREFIX):', 'if prompt.startswith(_AUTO_PREFIX):'),
+    ("regex_nhanh_khong_neo", "bin/dispatch_loop_hint.py",
+     'r"(?<![\\w/])(?:fix|feat|wire|session)/[A-Za-z0-9_.]*-[A-Za-z0-9_.-]+"',
+     'r"\\b(?:fix|feat|wire|session)/[A-Za-z0-9_.-]+"'),
+    ("bo_bus_event_khi_chan", "bin/dispatch_round_cap.py",
+     '        _bus_event(frm, a.to, tok, rounds, rno, inherited_job)\n', '        pass\n'),
     ("bo_rang_buoc_agent", "bin/dispatch_loop_hint.py",
      'if agent and d.get("to") != agent:', 'if False:'),
     ("bo_chain_tokens_field", "bin/dispatch_loop_hint.py",

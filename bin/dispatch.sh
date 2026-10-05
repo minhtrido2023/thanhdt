@@ -78,8 +78,10 @@
 #                  cả (agent vẫn ghi trực tiếp vào shared tree như trước giờ).
 #
 # Exit codes riêng: 1=lỗi/huỷ · 2=routing guard · 4=circuit breaker · 5=đã queue auto-resume ·
-#   6=trùng write-scope · 7=CẦU CHÌ VÒNG POLISH (chuỗi nhánh đã ≥3 vòng/24h, xem
-#   bin/dispatch_round_cap.py; override chỉ phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1).
+#   6=trùng write-scope · 7=CẦU CHÌ VÒNG POLISH (chuỗi nhánh đã ≥3 vòng/24h tới cùng agent, xem
+#   bin/dispatch_round_cap.py; override chỉ phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1 —
+#   honour system; chạy TRƯỚC guard exit 2). Caller tự động phải phân biệt 7 với "dispatch chết":
+#   bin/wags_autofix.sh có nhánh riêng; mọi lần chặn ngoài phiên tương tác đều có bus event.
 # Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
 # own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md
 # §"Context theo vai trò (role-scoped)" for the full table (Mike/Taylor -> full
@@ -358,10 +360,12 @@ printf '%s' "$prompt" | timeout 10 python3 "$ROOT/bin/dispatch_loop_hint.py" --t
 # CẦU CHÌ VÒNG POLISH — CHẶN CỨNG (2026-10-05, user duyệt retro Pattern A phương án 1). Cùng định
 # nghĩa chuỗi với lời nhắc trên; đã có ≥3 vòng trước (24h) ⇒ vòng ≥4 ⇒ exit 7. Override CHỈ cho
 # phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1 (agent headless — có JOB_ID kế thừa —
-# bị từ chối trong script). Fail-OPEN khi không đọc được job records / script lỗi / timeout:
+# bị từ chối trong script; honour system: `env -u JOB_ID` lách được). Chạy TRƯỚC routing guard
+# exit 2. Bị chặn ngoài phiên tương tác ⇒ script ghi bus event `round-cap-blocked: <chuỗi>`.
+# Miễn: prompt [RESUME / [FALLBACK / [AUTO-CALLBACK. Fail-OPEN khi không đọc được job records / script lỗi / timeout:
 # chỉ rc==7 mới chặn. unset ngay để override KHÔNG rò xuống agent con. Xem bin/dispatch_round_cap.py.
 set +e
-_rcap_out="$(printf '%s' "$prompt" | DISPATCH_FROM="${DISPATCH_FROM:-Mike}" timeout 15 python3 "$ROOT/bin/dispatch_round_cap.py" check --to "$id")"
+_rcap_out="$(printf '%s' "$prompt" | DISPATCH_FROM="${DISPATCH_FROM:-Mike}" timeout "${DISPATCH_ROUND_CAP_TIMEOUT:-15}" python3 "$ROOT/bin/dispatch_round_cap.py" check --to "$id")"
 _rcap_rc=$?
 set -e
 unset DISPATCH_ROUND_CAP_OVERRIDE DISPATCH_ROUND_CAP_REASON

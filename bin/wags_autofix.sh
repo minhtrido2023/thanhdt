@@ -279,6 +279,18 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
           "{\"dispatch_exit\":\"5\",\"note\":\"da len lich tu resume/tu fallback (usage-limit / provider-fallback / max-turns) - KHONG phai that bai, vong retry tu chay khong can can thiep\",\"arch_review\":\"CON NO: se KHONG tu chay cho vong resume nay - arch-review van la viec cua nguoi, goi thu cong neu finding cham file rui ro cao\",\"pipelog\":\"'"$PIPELOG"'\"}"
         exit 0
       fi
+      # exit 7 = CAU CHI VONG POLISH cua dispatch.sh (bin/dispatch_round_cap.py, 2026-10-05): chuoi
+      # nhanh trong prompt da >=3 vong/24h toi Wags. Agent KHONG chet, KHONG chay — dispatch bi
+      # CHAN co chu dich, can Mike/user override. Bao "DISPATCH CHET" la sai nguyen nhan (par.29).
+      # Cung ky luat exit 5: KHONG tin rieng con so, doi chieu dong thong bao that trong $out;
+      # khong khop => roi xuong nhanh != 0 (fail-closed ve escalation).
+      if [ "$dispatch_rc" = 7 ] && grep -qE "cầu chì vòng polish|cau chi vong polish" <<< "$out"; then
+        _chain="$(printf "%s" "$out" | grep -oE "chuỗi [^ ]+ đã có [0-9]+ vòng" | head -1 | tr -d "\042\047\134")"
+        _notify_arch "⛔ **[wags-autofix] $LABEL — dispatch.sh exit=7: BỊ CẦU CHÌ VÒNG POLISH chặn, KHÔNG phải dispatch chết.** ${_chain:-（không trích được tên chuỗi, xem log）}. Wags chưa chạy. Cần Mike/user quyết: chuyển chế độ B, hoặc override từ phiên tương tác (DISPATCH_ROUND_CAP_OVERRIDE=1). Log: '"$PIPELOG"'"
+        _post_q "wags-autofix-round-capped: $LABEL" \
+          "{\"dispatch_exit\":\"7\",\"chain\":\"$_chain\",\"note\":\"bi cau chi vong polish chan (bin/dispatch_round_cap.py) - KHONG phai dispatch chet; can Mike/user quyet che do B hoac override tu phien tuong tac\",\"pipelog\":\"'"$PIPELOG"'\"}"
+        exit 0
+      fi
     if [ "$dispatch_rc" != 0 ]; then
       # tr dùng ESCAPE BÁT PHÂN \042 \047 \134 (nháy kép, nháy đơn, backslash) — CỐ Ý.
       # Khối này nằm trong chuỗi nháy đơn của setsid bash -c, nên MỘT dấu nháy đơn gõ
