@@ -82,27 +82,9 @@ if [ -z "$UNIVERSE_BLOCK" ]; then
   BAT BUOC: tu chay lenh do va bao loi trong ket qua. TUYET DOI KHONG tu bia danh sach ma tu tri nho."
 fi
 
-# PHỄU CANDIDATE HỆ THỐNG (chỉ --mode weekly — CHI PHÍ: 1 BQ query nhẹ + N probe DNSE margin cho
-# shortlist đã lọc, khớp đúng cadence tuần của cron). Vá lỗ hổng "TV1/DGC vào sleeve qua quan sát
-# tình cờ, không phễu hệ thống, không lọc marginability" — job
-# discretionary-sleeve-candidate-funnel-20260830. Fail-soft CÙNG KHUÔN UNIVERSE_BLOCK: lỗi thì nói
-# thẳng trong prompt, KHÔNG im lặng bỏ qua.
-CANDIDATE_FUNNEL_SECTION=""
-if [ "$MODE" = "weekly" ]; then
-  CANDIDATE_FUNNEL_BLOCK=$(timeout 240 python3 "$MIKEDIR/bin/discretionary_candidate_funnel.py" --print-block 2>/dev/null || true)
-  if [ -z "$CANDIDATE_FUNNEL_BLOCK" ]; then
-    CANDIDATE_FUNNEL_BLOCK="KHONG SINH DUOC PHEU CANDIDATE (discretionary_candidate_funnel.py loi).
-BAT BUOC: tu chay lenh do va bao loi trong ket qua. TUYET DOI KHONG tu bia danh sach ma tu tri nho."
-  fi
-  CANDIDATE_FUNNEL_SECTION="
---- PHỄU CANDIDATE HỆ THỐNG (sinh tự động lúc chạy — universe fear [PB<1 HOẶC (percentile PB
-<=70% AND PB<1,2, cơ sở universe_pit∩Volume>0 cùng ngày)] + washout>=30%+dd52<=-20% từ
-ticker_prune/universe_pit PIT, quality floor 8L, negative screens insider/redflag, marginability
-DNSE thật + %ADV; FULLY_QUALIFIED = qua đủ cả 4 tầng, VẪN LÀ RECON không phải quyết định. Cảnh báo
-tập trung ngành CTCK/hoá chất-phân bón informational-only, xem CẢNH BÁO trong output nếu có) ---
-$CANDIDATE_FUNNEL_BLOCK
--------------------------------------------------------------------------------"
-fi
+# Phễu candidate KHÔNG còn nằm ở đây (plan discretionary-8l-candidate-funnel-20261006 bước 3):
+# funnel 8L chạy hằng ngày 19:35 (`discretionary_candidate_funnel.py`) và hiện ở khối D topic
+# quyết định 08:00 (`daily_decision_topic.py`). Lượt quét này chỉ còn phần tin xấu/scandal.
 
 PROMPT=$(cat <<EOF
 $SCAN_LABEL — $TODAY. Cửa sổ tin: $WINDOW_DESC.
@@ -120,7 +102,6 @@ và OGC (NON). KHÔNG dựng khung phân loại mới.
 --- DANH MỤC ĐANG GÁC (sinh tự động lúc chạy, không phải danh sách chép tay) ---
 $UNIVERSE_BLOCK
 -------------------------------------------------------------------------------
-$CANDIDATE_FUNNEL_SECTION
 
 VIỆC CẦN LÀM:
 
