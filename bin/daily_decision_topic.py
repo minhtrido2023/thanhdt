@@ -5,6 +5,8 @@ Nguồn (xác định, không LLM — rẻ và tái lập được):
   1. Bus question chưa đóng (`bus_question_audit.py --json`) — lấy summary/options/recommendation
      từ event question gốc. `selfcheck-red` gộp thành 1 dòng đếm (nhiễu, không phải quyết định).
   2. Mục `## Chờ user` trong kb/memory/Mike.md (working memory của Mike).
+  3. Funnel 8L discretionary (`discretionary_candidate_funnel.py --print-block`) — ĐỌC file kết quả
+     cron 19:35 tối trước, KHÔNG chạy lại funnel; kết quả cũ ⇒ khối tự in cảnh báo.
 
 Idempotent: marker state/daily_decision_topic/<YYYY-MM-DD>.json — chạy lại cùng ngày không tạo
 topic thứ hai. `--dry-run` chỉ in nội dung. Tạo topic qua ccdb `/api/notify` + `thread_name`
@@ -117,7 +119,22 @@ def build(now):
         lines.append("Không có câu nào đang mở.")
     lines.append("")
     lines.append(f"**C. Nhiễu tự động**: {len(noise)} câu `selfcheck-red` đang mở (Wags xử lý, không cần anh quyết).")
+    lines.append("")
+    lines.append(funnel_section())
     return "\n".join(lines)
+
+
+def funnel_section():
+    """Khối D. Lỗi ⇒ in nguyên lỗi thật (§29), không bỏ mục im lặng."""
+    try:
+        out = subprocess.run([sys.executable, os.path.join(ROOT, "bin", "discretionary_candidate_funnel.py"),
+                              "--print-block"], capture_output=True, text=True, timeout=120)
+    except Exception as e:
+        return f"**D. Funnel 8L**: ⚠️ không chạy được --print-block: {e}"
+    if out.returncode != 0 or not out.stdout.strip():
+        err = (out.stderr.strip() or "stdout rỗng")[-400:]
+        return f"**D. Funnel 8L**: ⚠️ --print-block lỗi rc={out.returncode}: {err}"
+    return out.stdout.strip()
 
 
 def chunks(text):
