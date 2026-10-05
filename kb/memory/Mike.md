@@ -25,3 +25,4 @@
 ## Backlog
 - 9 topic selfcheck-red; selfcheck-weekly-new-red 05:08 ICT 04/10 chưa xác nhận đóng; VNM exright note cho Winston; production_manifest ROOT_TIER thiếu 3 cron; context_pack/current_ops phình (trim); paper_report_render E5/E5b rc=1 (chưa xác minh).
 
+- [2026-10-05T01:06:38Z] 10-05 08:06 user YÊU CẦU HUỶ MỌI WAKEUP (đã ScheduleWakeup stop:true). KHÔNG đặt wakeup thăm dò khi không có job nền; user tự nhắc. MỐC cần kiểm khi user nhắc: 05/10 19:25 shadow broker lần đầu (logs/corp_action_auto_confirm.log, data/corp_action_broker_ledger.jsonl, bus corp-action-broker-shadow-*, md5 corp_actions.json e7ace20b, dnse_raw không quote_unmapped mới); 20:50 cron plan_position_drift_check lần đầu; 21:00 báo cáo plan khối vị thế; 19:00 nav_exdate_forecast cảnh báo feed; 08:00 topic 05.10 + 08:05 cron lãi suất tuần (chưa kiểm). Sau 19:25 T3 06/10: đề xuất r5 hay merge có điều kiện (branch feat/broker-primary-20261003 HEAD 9e4d24c9). Chưa kiểm topic 05.10 sáng nay.
