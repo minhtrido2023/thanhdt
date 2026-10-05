@@ -516,3 +516,13 @@
 
 ## Consolidation 2026-10-05T06:07:02Z
 - [2026-10-05T06:00:07Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-05", "elapsed_s": 5, "rc": 0}
+
+## Consolidation 2026-10-05T12:04:08Z
+- [2026-10-05T12:03:05Z] DollarBill/heartbeat — DollarBill_20261005_120256: {"status": "in_progress", "note": "start: đọc DT5G, NAV ZaloPay, egg, CAPIT, corp-action"}
+- [2026-10-05T12:03:34Z] DollarBill/heartbeat — DollarBill_20261005_120257: {"status": "in_progress", "note": "DT5G=NEUTRAL, n_bal=0, LAG due=0; active NAV 979.96tr (egg 347.57tr, availableCash 0.03tr); L1 park-trim TRIM; writing plan_SpaceX_2026-10-06"}
+- [2026-10-05T12:03:56Z] DollarBill/heartbeat — DollarBill_20261005_120256: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261005_120256", "source": "watcher"}
+- [2026-10-05T12:03:57Z] DollarBill/heartbeat — DollarBill_20261005_120257: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261005_120257", "source": "watcher"}
+- [2026-10-05T12:03:59Z] DollarBill/decision — plan-2026-10-06: {"account": "SpaceX", "plan_date": "2026-10-06", "decision": "HOLD BAL/LAG (0 lenh mua); park_trim_proposal TRIM: BID 75cp; chua duyet", "state": "DT5G NEUTRAL", "active_nav_vnd": 979961206, "egg_vnd": 347567852, "availableCash_vnd": 33980, "file": "data/trade_plans/plan_SpaceX_2026-10-06.json", "open_issues": ["MBB AIS 10-06 chua xac nhan ngay", "plan_path trade_plans (dispatch ghi data/plan_...)"]}
+- [2026-10-05T12:03:59Z] DollarBill/finding — plan-2026-10-06-corp-action: {"ais_effective_today_held": ["BID"], "mbb_ais_date": "unverified (None in corp_action_daily 10-05)", "exdate_forecast_1_session": "none"}
+- [2026-10-05T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-10-05", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-10-05T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
