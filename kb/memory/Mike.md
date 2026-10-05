@@ -21,3 +21,4 @@
 - ~14 topic Wags/selfcheck-red; production_manifest ROOT_TIER thiếu 3 cron; context_pack/current_ops phình (trim); paper_report_render E5/E5b rc=1; thêm: 4 hiển thị "CCTG 6M" ở comment value_radar/deposit_rate_vn chưa đổi chữ (chỉ comment).
 - Dọn: worktree /home/trido/thanhdt-wt-cr-0510 còn sót (branch session/cr-0510 đã merge) — xoá thủ công nếu chưa.
 
+- [2026-10-05T15:39:50Z] 05/10 22:45 ICT: đã kiểm 4 mốc tối 05/10 — tất cả OK: feed vendor corp_action_daily SỐNG LẠI (05/10 FRESH, chỉ 02/10 FAILED); exdate_forecast 19:00 không sự kiện ≤1 phiên; shadow broker 19:25 lần đầu 'không mục mới', corp_actions.json md5 e7ace20b không đổi, chưa có ledger; drift 20:50 lần đầu OK 2 TK; plan report 21:00 có dòng vị thế, gửi xong 2 TK. Còn: shadow T3 06/10 19:25 → đề xuất r5/merge có điều kiện.
