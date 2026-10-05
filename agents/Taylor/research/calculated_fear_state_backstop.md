@@ -3265,3 +3265,82 @@ mỏ Phước Vĩnh KSB hết hạn 6/2027.**
 [Vietstock — Góc nhìn 02/10](https://vietstock.vn/2026/10/goc-nhin-0210-giu-ty-trong-tien-mat-cao-chua-voi-bat-day-145-1498029.htm)
 
 ---
+### 2026-10-05 — QUÉT SÁNG THỨ HAI (job `Taylor_20261005_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 20 mã gác rà qua (10 NH + 10 ngoài NH)** · ★★ **0 lệnh MUA trên mọi kênh live phiên 05/10 ⇒ không có luận điểm nào để RÚT** (PARK OFF từ 01/10 ⇒ cả 2 plan chỉ còn lệnh BÁN thoát park) · ★ **LPB −13,5%/tuần là biến động THẬT (không phải corp-action), nhưng KHÔNG có trigger** · ★ **TPB −17,4% giá thô 02/10 = ex-right cổ tức cổ phiếu, adjusted chỉ −1,6%**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **watchlist TƯƠI** (`active_nav` computed_at
+**2026-10-02**). Universe 252 mã (H:20 / W:244). Không có cảnh báo QUÁ HẠN. (Khoá NAV SpaceX do TPB
+corp-action ghi ở lượt 10-02 đã được gỡ.)
+
+#### Việc 1 — anomaly_scan: 5 cờ, **cùng 1 mã PNJ, 0 mã MỚI**
+
+```
+[W] 2026-09-28..10-01 PNJ: FLOOR2,IDIOCRASH (4 phiên, đã ghi lượt 10-02)
+[W] 2026-10-02 PNJ: FLOOR2,VOLSPIKE,IDIOCRASH | ret −6,9% (idio −6,2%) vol 10,3× val 1.753,4B close 23.050
+```
+
+Cờ MỚI DUY NHẤT là VOLSPIKE 02/10: sáng hồi lên ~25.200 (bắt đáy nội), chiều **đóng SÀN 23.050** với khớp
+kỷ lục; **khối ngoại bán ròng ~1.300 tỷ** (CafeF). Thanh khoản trở lại = ngoại có lối thoát, **không đổi
+phân loại NON** (phát hành riêng lẻ 550 tr cp > 511 tr đang lưu hành vẫn đứng nguyên). PNJ đã ở
+`excluded_tickers` cả 2 account.
+
+**Hai biến động lớn trên mã ĐANG GÁC mà anomaly_scan không bắt — đã tự kiểm (BQ `ticker`, Price thô vs Close):**
+- **TPB 02/10: Price 14.400 → 11.900 (−17,4%)** nhưng `Close` adjusted 12.090 → 11.900 (**−1,6%**) ⇒ ngày
+  GDKHQ cổ tức cổ phiếu (hệ số ≈1,19), **artifact, không phải sự kiện**. Lần này scan đúng (không cờ) vì
+  BQ đã back-adjust lịch sử; khuyết tật `anomaly_scan.py:212/223` (lượt 09-25) không tái phát ở ca này.
+- **LPB 25/09 → 02/10: 46.450 → 40.200 (−13,5%) vs VN-Index −2,66%** — `Price == Close` mọi phiên ⇒ **THẬT**.
+  Rơi đều 3 phiên −4,4/−4,5/−4,3% (dưới ngưỡng cờ ngày), đỉnh **56.000 (24/06) → −28%**. Tin: chỉ là
+  "điều chỉnh sau nhịp tăng mạnh", LPB lấy −3,75 điểm VN-Index tuần; ông Phạm Nhật Vượng (4,894%) + vợ
+  (4,97%) mua 23/06 dưới dạng "đầu tư tài chính cá nhân" — **0 công bố cầm cố/giải chấp/thanh tra/khởi
+  tố**. ⇒ **Không phải case** (không có trigger §0.5 nào; chỉnh từ đỉnh). Theo dõi thụ động nhánh (c)
+  Vingroup: nếu xuất hiện tin cầm cố/giải chấp cổ phần LPB của gia đình ông Vượng thì mở lại.
+
+#### Việc 2 — read-through 20 mã gác (cửa sổ 03→04/10, + phiên 02/10)
+
+- **10 mã ngân hàng**: **0 sự kiện rủi ro** (0 kiểm soát đặc biệt / chuyển giao bắt buộc / khởi tố lãnh
+  đạo / rút tiền hàng loạt / cho vay sân sau). HDB bị ngoại bán ròng **961 tỷ** 02/10 nhưng giá **+1,6%**
+  (28.000→28.450) và HDB chốt quyền cổ tức tuần 05–09/10 — dòng vốn, không phải trigger. (Ngoài danh mục:
+  Phó TGĐ VCB xin nghỉ hưu trước tuổi — VCB không giữ, không phải sự kiện lõi.)
+- **Vingroup (VPI đang giữ; VHM/VRE không còn trong danh mục gác lượt này)**: **0 sự kiện tín dụng/trái
+  phiếu mới**. VIC lấy −12,45 điểm VN-Index tuần = áp lực vốn hoá lớn, không có tin lõi. Nền TPDN: BĐS
+  5,6 tỷ USD đáo hạn 12 tháng tới (Vietstock 05/10) — áp lực hệ thống đã biết, không phải sự kiện mã.
+- **10 mã ngoài ngân hàng**: **0 sự kiện riêng lẻ**. TV1 / DGC: **0 dữ kiện mới** (cổng TV1 = kết luận điều
+  tra đại án điện; cổng DGC = audit + hạn chế giao dịch — giữ nguyên). VPI −5,5%/tuần, VNM −4,2%, SAB
+  −3,3% = diễn biến nhóm theo VN-Index.
+- **Ngoài danh mục (quét rộng tìm case mới)**: **KOS** sàn **10 phiên liên tiếp** (~30.000 → 14.700, −51%)
+  — xoáy giải chấp, đã không-phải-case từ 09-21, không xét lại. **CTB** bị phạt + truy thu thuế 4,6 tỷ
+  (hành chính, nhỏ) và **TTF** chuyển diện kiểm soát (mãn tính) — **không phải case** (không có cú sốc
+  giá/không đủ chất lượng), không giữ. 0 vụ khởi tố lãnh đạo DN niêm yết mới trong cửa sổ.
+- **Nền**: VN-Index **1.737,71** (02/10, **−2,66% tuần**, thủng 1.750); GDP Q3/2026 ước gần **10%**
+  (công bố cuối tuần); TPCP phát hành kỷ lục nhưng cầu đấu thầu yếu.
+
+#### Việc 4 — ẢNH HƯỞNG TỚI PHÍA MUA: **0 lệnh MUA trên mọi kênh live phiên 05/10**
+
+`plan_SpaceX_2026-10-05` **1 lệnh BÁN** (VIX 20cp, thoát park) · `plan_ZaloPay_2026-10-05` **5 lệnh BÁN**
+(CTG/HDB/LPB/TCB/VIX, thoát park) · `park_trim_*` `TRIM` toàn BÁN · `jit_unpark_*` `NO_TRIGGER` 0. Plan
+ghi `default_park_of_idle_pct = 0.0` (**PARK OFF**, user chốt 01/10). `plan_main` mới nhất 2026-10-02 =
+**PROBE harness** (`state=-1 PROBE`), không phải plan thật. ⇒ **Không có luận điểm mua nào để RÚT.**
+Lưu ý phụ: LPB đang nằm trong lệnh BÁN thoát park của ZaloPay sáng nay — biến động −13,5% không đổi gì
+quyết định đó (thoát park là cơ học theo chính sách, không phải luận điểm).
+
+#### Việc 7 — phễu candidate hệ thống
+
+**KHÔNG có khối "PHỄU CANDIDATE HỆ THỐNG" trong dispatch lượt này** (cadence sáng thứ Hai) ⇒ không rà,
+không suy diễn danh sách.
+
+**Kết luận lượt này:** **20 mã gác rà qua** · 252 mã anomaly_scan × 5 phiên · ~12 truy vấn tin + 7
+WebFetch + 2 truy vấn BQ + 6 lần đọc artifact plan · **0 QUALIFY · 0 case mới · watchlist TƯƠI · 0 lệnh
+mua để RÚT.**
+
+**Mốc phải theo, gần → xa: PNJ ĐHĐCĐ bất thường 21/10 → BCTC Q3/2026 cuối 10/2026 (cổng PAN, PTB, KSB,
+CMG) → kết luận điều tra đại án điện (cổng TV1) → giấy phép mỏ Phước Vĩnh KSB hết hạn 6/2027.**
+
+**Nguồn (cửa sổ 02→05/10/2026):**
+[Vietstock — 05/10: Đọc gì trước giờ giao dịch](https://vietstock.vn/2026/10/0510-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1498735.htm) ·
+[Vietstock — Tuần cuối tháng 9, cổ phiếu vốn hóa lớn đè nặng VN-Index](https://vietstock.vn/2026/10/tuan-cuoi-thang-9-co-phieu-von-hoa-lon-de-nang-vn-index-830-1498684.htm) ·
+[CafeF — PNJ được giải cứu, một nhóm nhà đầu tư tranh thủ thoát hàng](https://cafef.vn/pnj-duoc-giai-cuu-mot-nhom-nha-dau-tu-tranh-thu-thoat-hang-188261002103209111.chn) ·
+[CafeF — 2 cổ phiếu bluechips bị khối ngoại xả 2.300 tỷ phiên cuối tuần](https://cafef.vn/2-co-phieu-bluechips-bi-khoi-ngoai-xa-2300-ty-dong-phien-cuoi-tuan-188261002162342712.chn) ·
+[CafeF — Khoản đầu tư của ông Phạm Nhật Vượng tại LPBank mất giá hàng nghìn tỷ](https://cafef.vn/khoan-dau-tu-cua-ty-phu-pham-nhat-vuong-tai-lpbank-mat-gia-hang-nghin-ty-dong-188261002153910727.chn) ·
+[CafeF — Một cổ phiếu trên HOSE bất ngờ "cụt đôi" chỉ sau 2 tuần (KOS)](https://cafef.vn/mot-co-phieu-tren-hose-bat-ngo-cua-doi-chi-sau-2-tuan-188261004102139627.chn) ·
+[CafeF — Phó TGĐ Vietcombank xin nghỉ hưu trước tuổi](https://cafef.vn/pho-tong-giam-doc-vietcombank-bat-ngo-xin-nghi-huu-truoc-tuoi-188261002150652259.chn)
+
+---
