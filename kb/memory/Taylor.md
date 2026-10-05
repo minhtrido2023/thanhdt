@@ -18,3 +18,4 @@
 - [2026-10-04T14:10:26Z] [broker-primary r4] XONG job Taylor_20261004_120510: feat/broker-primary-20261003@9e4d24c9 (code 696797c0), arch-review v4 NEEDS_CHANGES KHÔNG lỗi loại mới (1 MAJOR I2 hỏi-trước-ghi-sau writer vendor + 5 minor cùng loại). CHỜ log shadow T2/T3 + Mike/user quyết r5; KHÔNG bật live.
 - [2026-10-05T18:09:34Z] [funnel8l] XONG job Taylor_20261005_180152: feat/discretionary-8l-funnel-20261006@7750213f (wt-funnel8l-1006), 53/53 x4TZ, mut 18/18. CHỜ Mike merge + cài cron 19:35 + dòng cron_registry.
 - [2026-10-05T18:12:45Z] [lane-C 10-06] XONG job Taylor_20261005_180155: GARP C1 edge ro t=5.3 (median ma ~peer). CHO Mike/user quyet them lan C vao funnel; quant-skeptic truoc moi wire/size.
+- [2026-10-05T18:28:55Z] [funnel8l r2] XONG job Taylor_20261005_181751: feat/discretionary-8l-funnel-20261006@5c528d5b, 117/117 x4TZ, mut 35/35. CHỜ Mike arch-review lại + merge + cron 19:35 (snapshot r1 data/rating_8l_daily/rating_8l_2026-10-05.csv còn đó).
