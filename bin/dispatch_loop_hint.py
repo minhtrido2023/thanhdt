@@ -7,7 +7,8 @@ dispatch + 1 arch-review, mỗi vòng vá đúng chỗ reviewer vừa chỉ rồ
 trong kb/mike_model_routing.md § "Hai chế độ theo ĐỘ KHÓ + cầu chì" — nhưng nằm trong tài liệu
 không nạp tự động nên lúc nhớ lúc quên. Đây là chốt cơ học tại đúng khoảnh khắc dispatch.
 
-NHẮC, KHÔNG CHẶN (cùng tinh thần nudge fable/effort trong dispatch.sh). Hai tín hiệu:
+NHẮC, KHÔNG CHẶN (cùng tinh thần nudge fable/effort trong dispatch.sh). Phần CHẶN CỨNG vòng ≥4
+nằm ở bin/dispatch_round_cap.py (exit 7) — dùng lại đúng các hàm chuỗi ở file này. Hai tín hiệu:
   · VÒNG ≥3: ≥2 job trước (≤24h) đã nhắc cùng token nhánh/worktree ⇒ nhắc cầu chì (Opus high
     review TOÀN BỘ rồi sửa một lượt, hoặc nếu test-only thì hỏi user).
   · TIẾP NỐI mà effort=high: có job trước cùng nhánh + prompt có từ khoá tiếp nối ("tiếp tục",
@@ -16,7 +17,8 @@ NHẮC, KHÔNG CHẶN (cùng tinh thần nudge fable/effort trong dispatch.sh). 
 
 Token nhánh = `fix|feat|wire|session/<tên>` hoặc `wt-<tên>`. Nguồn "job trước" = bus/jobs/*.json
 (`prompt_summary` 160 BYTE đầu (dispatch.sh `head -c 160`; tiếng Việt chiếm nhiều byte) — token đặt muộn hơn thì đếm hụt, thiên về IM thay vì kêu oan).
-Job tự sinh `[RESUME ...` và job `cancelled` bị loại; các dispatch cách nhau <5 phút gộp thành 1
+Record có field `chain_tokens` (dispatch.sh ghi từ PROMPT ĐẦY ĐỦ, từ 2026-10-05) thì khớp tuyệt đối
+trên field đó. Job tự sinh `[RESUME`/`[FALLBACK ...` và job `cancelled` bị loại; các dispatch cách nhau <5 phút gộp thành 1
 (bản đúp usage-limit/redispatch cùng vòng). Lời nhắc chỉ nêu SỐ DISPATCH đếm được, không khẳng
 định số vòng (§29: không đoán điều chưa đọc).
 
@@ -26,6 +28,7 @@ FAIL-OPEN TUYỆT ĐỐI: mọi lỗi ⇒ im lặng, exit 0. Dispatch không bao
 Selfcheck: python3 bin/dispatch_loop_hint_selfcheck.py
 """
 import argparse
+import datetime
 import glob
 import json
 import os
@@ -55,41 +58,88 @@ def branch_tokens(prompt):
     return seen[:3]
 
 
-def prior_counts(tokens, now=None, jobs_dir=None):
-    """{token: số dispatch ≤24h có prompt_summary chứa token}.
+_JOBID_TS = re.compile(r"_(\d{8}_\d{6})$")
 
-    Bỏ job [RESUME và job cancelled; gộp các dispatch cách nhau <DEDUP_S thành 1."""
+
+def dispatch_time(d):
+    """Giây epoch lúc DISPATCH. Ưu tiên dấu thời gian UTC trong job_id (bất biến) — `started_at`
+    bị GHI LẠI ở attempt 2 (đo thật Taylor_20261004_120510: id 12:05Z, started_at 13:26Z).
+    job_id không đúng khuôn ⇒ rơi về started_at."""
+    m = _JOBID_TS.search(str(d.get("job_id", "")))
+    if m:
+        try:
+            dt = datetime.datetime.strptime(m.group(1), "%Y%m%d_%H%M%S")
+            return int(dt.replace(tzinfo=datetime.timezone.utc).timestamp())
+        except ValueError:
+            pass
+    return int(d.get("started_at", 0))
+
+
+def job_matches(d, token):
+    """Job thuộc chuỗi `token`? `chain_tokens` (dispatch.sh ghi từ PROMPT ĐẦY ĐỦ, 2026-10-05) khớp
+    tuyệt đối; record cũ không có field đó ⇒ tìm chuỗi con trong `prompt_summary` 160 byte."""
+    ct = d.get("chain_tokens") or ""
+    if token in [x for x in str(ct).split(",") if x]:
+        return True
+    return token in (d.get("prompt_summary", "") or "")
+
+
+def prior_jobs(tokens, now=None, jobs_dir=None, mtime_prefilter=True, agent=None):
+    """{token: [(dispatch_time, job_id), ...] đã sắp} — job trong cửa sổ WINDOW_S trước `now`.
+
+    `agent` (chỉ round-cap dùng): chỉ đếm job gửi tới ĐÚNG agent đó — để retro/audit tự động
+    gửi Mike/Wags mà NHẮC tên nhánh không bị tính thành vòng polish của chuỗi Taylor.
+
+    Bỏ job cancelled, job tự sinh `[RESUME`/`[FALLBACK` (cùng vòng, chạy lại). Ném OSError nếu
+    thư mục job không đọc được — caller tự quyết fail-open (hint im lặng, round-cap cảnh báo)."""
     now = now or time.time()
     jobs_dir = jobs_dir or JOBS_DIR
-    times = {t: [] for t in tokens}
+    if not os.path.isdir(jobs_dir):
+        raise OSError(f"không đọc được thư mục job: {jobs_dir}")
+    out = {t: [] for t in tokens}
     for f in glob.glob(os.path.join(jobs_dir, "*.json")):
         try:
-            if now - os.path.getmtime(f) > WINDOW_S * 2:   # lọc nhanh, đệm 2× cho mtime lệch
+            if mtime_prefilter and now - os.path.getmtime(f) > WINDOW_S * 2:   # lọc nhanh, đệm 2×
                 continue
             d = json.load(open(f))
-            started = int(d.get("started_at", 0))
-            if now - started > WINDOW_S:
+            t0 = dispatch_time(d)
+            if not (0 <= now - t0 <= WINDOW_S):
                 continue
             if d.get("status") == "cancelled":
+                continue
+            if agent and d.get("to") != agent:
                 continue
             s = d.get("prompt_summary", "") or ""
         except Exception:
             continue
-        if s.lstrip().startswith("[RESUME"):
+        if s.lstrip().startswith(("[RESUME", "[FALLBACK")):
             continue
         for t in tokens:
-            if t in s:
-                times[t].append(started)
-    counts = {}
-    for t, ts in times.items():
-        ts.sort()
-        n, last = 0, None
-        for x in ts:
-            if last is None or x - last >= DEDUP_S:
-                n += 1
-            last = x
-        counts[t] = n
-    return counts
+            if job_matches(d, t):
+                out[t].append((t0, d.get("job_id") or os.path.basename(f)[:-5]))
+    for t in out:
+        out[t].sort()
+    return out
+
+
+def dedup_rounds(entries):
+    """[(t, job_id)] đã sắp ⇒ danh sách VÒNG; dispatch cách nhau <DEDUP_S gộp vào 1 vòng."""
+    rounds, last = [], None
+    for t, jid in entries:
+        if last is None or t - last >= DEDUP_S:
+            rounds.append([])
+        rounds[-1].append((t, jid))
+        last = t
+    return rounds
+
+
+def prior_counts(tokens, now=None, jobs_dir=None):
+    """{token: số dispatch ≤24h thuộc chuỗi} — bỏ huỷ/resume/fallback, gộp bản đúp <DEDUP_S."""
+    try:
+        pj = prior_jobs(tokens, now=now, jobs_dir=jobs_dir)
+    except OSError:
+        return {t: 0 for t in tokens}
+    return {t: len(dedup_rounds(e)) for t, e in pj.items()}
 
 
 def build_hint(prompt, to, effort, model, now=None, jobs_dir=None):

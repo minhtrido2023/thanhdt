@@ -76,6 +76,10 @@
 #                  khác nhau, cùng sửa 1 file trong 1 phút) mà job-find-dup (chỉ khớp prompt y
 #                  hệt) không thấy được. Opt-in — bỏ cờ này thì không bị chặn, không cách ly gì
 #                  cả (agent vẫn ghi trực tiếp vào shared tree như trước giờ).
+#
+# Exit codes riêng: 1=lỗi/huỷ · 2=routing guard · 4=circuit breaker · 5=đã queue auto-resume ·
+#   6=trùng write-scope · 7=CẦU CHÌ VÒNG POLISH (chuỗi nhánh đã ≥3 vòng/24h, xem
+#   bin/dispatch_round_cap.py; override chỉ phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1).
 # Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
 # own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md
 # §"Context theo vai trò (role-scoped)" for the full table (Mike/Taylor -> full
@@ -350,6 +354,25 @@ fi
 # ĐỘ KHÓ + cầu chì"): cùng nhánh/worktree bị dispatch ≥3 lần trong 24h, hoặc dispatch tiếp nối
 # mà --effort high. Chỉ NHẮC (stderr), fail-open — xem bin/dispatch_loop_hint.py.
 printf '%s' "$prompt" | timeout 10 python3 "$ROOT/bin/dispatch_loop_hint.py" --to "$id" --effort "$EFFORT" --model "$MODEL" >&2 || true
+
+# CẦU CHÌ VÒNG POLISH — CHẶN CỨNG (2026-10-05, user duyệt retro Pattern A phương án 1). Cùng định
+# nghĩa chuỗi với lời nhắc trên; đã có ≥3 vòng trước (24h) ⇒ vòng ≥4 ⇒ exit 7. Override CHỈ cho
+# phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1 (agent headless — có JOB_ID kế thừa —
+# bị từ chối trong script). Fail-OPEN khi không đọc được job records / script lỗi / timeout:
+# chỉ rc==7 mới chặn. unset ngay để override KHÔNG rò xuống agent con. Xem bin/dispatch_round_cap.py.
+set +e
+_rcap_out="$(printf '%s' "$prompt" | DISPATCH_FROM="${DISPATCH_FROM:-Mike}" timeout 15 python3 "$ROOT/bin/dispatch_round_cap.py" check --to "$id")"
+_rcap_rc=$?
+set -e
+unset DISPATCH_ROUND_CAP_OVERRIDE DISPATCH_ROUND_CAP_REASON
+if [ "$_rcap_rc" -eq 7 ]; then
+  exit 7
+elif [ "$_rcap_rc" -ne 0 ]; then
+  echo "WARN: round-cap không chạy được (rc=$_rcap_rc) — FAIL-OPEN, dispatch vẫn tiếp tục." >&2
+fi
+_chain_tokens="${_rcap_out%%$'\t'*}"
+_round_cap_note=""
+case "$_rcap_out" in *$'\t'*) _round_cap_note="${_rcap_out#*$'\t'}" ;; esac
 
 # Binary + env cua provider. `bin` da ap dung bin_env_override (DISPATCH_CLAUDE_BIN...) nen
 # bin/dispatch_discord_topic_selfcheck.sh van lai duoc dispatch qua stub (F11 arch-reviewer).
@@ -1295,7 +1318,8 @@ JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
      model="${MODEL:-default}" effort="$EFFORT" \
      provider="$PROVIDER" turn_cap="$([ "$CLI_SUPPORTS_TURNS" = "true" ] && echo "$MAX_TURNS" || echo unsupported)" \
-     prompt_summary="$_psum" write_scope="$WRITE_SCOPE"
+     prompt_summary="$_psum" write_scope="$WRITE_SCOPE" \
+     chain_tokens="$_chain_tokens" round_cap="$_round_cap_note"
 
 # GHIM BẰNG CHỨNG: tạo sẵn $logfile + $logfile.err và ghi (dev, inode) của chúng lên record,
 # NGAY sau khi record ra đời và TRƯỚC khi có worker nào chạy. Mọi câu hỏi "job này còn sống
