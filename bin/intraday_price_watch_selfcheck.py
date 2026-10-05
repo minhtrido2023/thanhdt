@@ -740,6 +740,10 @@ def test_r2():
     check("(1) dispatch qua stub (argv thật) ⇒ rc 0, nhận job", job == "Taylor_20261006_100000", f"{job} {prompt[:200]}")
     argv = open(rec + ".argv").read().split("\0")[:-1]
     check("(1) argv stub nhận = dispatch_argv() thật", argv == W.dispatch_argv(prompt, False, stub)[1:])
+    check("(1) prompt điều tra CẤM đặt/huỷ lệnh + sửa plan (ghim, arch-review r2 F6)",
+          "KHÔNG đặt/huỷ lệnh" in prompt and "KHÔNG sửa plan" in prompt)
+    check("(1) dispatch gửi về đúng topic Trading Daily (--thread trading_daily)",
+          "--thread" in argv and argv[argv.index("--thread") + 1] == "trading_daily", str(argv))
     check("(1) DISPATCH_FROM = intraday_watch (≠ Taylor ⇒ không bị chặn self-dispatch)",
           open(rec + ".from").read() == "intraday_watch")
     real = open(W.DISPATCH).read()

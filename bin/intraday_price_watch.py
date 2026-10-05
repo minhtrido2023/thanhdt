@@ -1066,6 +1066,10 @@ def _apply_decision(case, now, deps):
     return skipped
 
 
+class RunKilled(Exception):
+    """Lượt chạy bị SIGTERM (vd `timeout 55`) — để crash_alert báo người, không chết im lặng."""
+
+
 def _scan(now, deps, st):
     day = now.date()
     errs = []
@@ -1269,6 +1273,12 @@ def main(argv=None, market_factory=None, notifier=None):
         print(json.dumps(_read_json(state_path(a.state_dir, d), {}), ensure_ascii=False, indent=1))
         return
     notifier = notifier or Notifier(dry=a.dry_notify)
+    # `timeout 55` của cron gửi SIGTERM: biến thành ngoại lệ để đi qua crash_alert (không chết im lặng)
+    import signal
+
+    def _on_term(signum, frame):
+        raise RunKilled(f"nhận tín hiệu {signum} (timeout cron?) — lượt bị cắt giữa chừng")
+    signal.signal(signal.SIGTERM, _on_term)
     try:
         market = (market_factory or LiveMarket)()
     except Exception:       # noqa: BLE001 — khởi tạo DNSE hỏng ⇒ cảnh báo (1 lần/ngày), không im lặng
