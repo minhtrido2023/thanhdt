@@ -59,13 +59,13 @@ if [ "$DRY_RUN" -eq 0 ] && [ -x "$WORKDIR_8L/mike/bin/append_event.sh" ]; then
     "{\"date\":\"${TODAY}\",\"current_deposit\":\"${CUR_DEP}\",\"current_cctg\":\"${CUR_CCTG}\"}" >> "$LOG" 2>&1 || true
 fi
 
-PROMPT="Xác nhận lãi suất HÀNG TUẦN cho 2 chuỗi — Big-4 12 tháng (tiết kiệm, kênh ONLINE) và Big-4 CCTG 6 tháng (chứng chỉ tiền gửi). Ngày ${TODAY}. Giá trị hiện đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG 6M = ${CUR_CCTG}%.
+PROMPT="Xác nhận lãi suất HÀNG TUẦN cho 2 chuỗi — Big-4 12 tháng (tiết kiệm, kênh ONLINE) và Big-4 CCTG 12 tháng cao nhất (chứng chỉ tiền gửi). Ngày ${TODAY}. Giá trị hiện đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG (12M cao nhất; 6M trước 05/10) = ${CUR_CCTG}%.
 
 === CHUỖI 1: Big-4 12 THÁNG (tiết kiệm, kênh online) ===
 TIÊU CHUẨN (CÙNG owner-group/recency guard cơ chế THÁNG hiện có — nhưng chuỗi TUẦN này THÊM yêu
 cầu per-source rate citation giống hệt chuỗi 2, vì chạy 4 lần/tháng thay vì 1 lần nên phơi nhiễm
 cao hơn; cơ chế THÁNG (refresh_deposit_rate_vn.sh) giữ nguyên KHÔNG đổi, prompt riêng của nó):
-1. WebSearch nguồn có NGÀY CỤ THỂ (trong ~25 ngày) nêu lãi suất tiết kiệm 12 tháng Big-4 (Agribank/Vietcombank/BIDV/VietinBank), KÊNH ONLINE.
+1. WebSearch nguồn có NGÀY CỤ THỂ (trong ~25 ngày) nêu lãi suất tiết kiệm 12 tháng Big-4 (Agribank/Vietcombank/BIDV/VietinBank). KÊNH (user chốt 2026-10-05): nguồn nêu cả ONLINE lẫn TẠI QUẦY khác nhau cho cùng ngân hàng ⇒ lấy số CAO NHẤT trong hai kênh làm số của ngân hàng đó (số quầy thấp hơn/lẻ tẻ KHÔNG phải lý do escalate).
 2. Cần >=2 nguồn ĐỘC LẬP (khác nhóm sở hữu — vd cafef/kenh14/soha đều VCCorp tính là 1). append_deposit_rate.py tự soi domain, từ chối nếu không đủ.
 3. MỖI nguồn PHẢI ghi RÕ con số % nó báo (field 'rate' trong --sources bên dưới) — append_deposit_rate.py sẽ TỰ SO các số này, từ chối ghi nếu lệch nhau >0,1 điểm %. Nếu các nguồn cho số khác nhau quá 0,1pp, đó LÀ escalate, không tự chọn 1 số.
 4. --rate bạn truyền PHẢI khớp (gần như tuyệt đối) với MỘT trong các số đã cite trong --sources — không được tự tổng hợp/làm tròn thành số không nguồn nào nói.
@@ -73,9 +73,9 @@ cao hơn; cơ chế THÁNG (refresh_deposit_rate_vn.sh) giữ nguyên KHÔNG đ�
 6. Chỉ escalate khi: không đủ 3/4 đồng thuận, HOẶC 1 ngân hàng có 2 nguồn báo 2 số khác nhau >0,1pp, HOẶC không tìm được nguồn đủ mới.
 Ghi (nếu có số xác nhận): python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
 
-=== CHUỖI 2: Big-4 CCTG 6 THÁNG (chứng chỉ tiền gửi) ===
+=== CHUỖI 2: Big-4 CCTG 12 THÁNG, lấy CAO NHẤT các ngân hàng Big-4 (chứng chỉ tiền gửi) ===
 TIÊU CHUẨN (KHÁC chuỗi 1 — chuỗi này MỚI, guard CHẶT HƠN):
-1. WebSearch nguồn có NGÀY CỤ THỂ (trong ~25 ngày) nêu lãi suất CCTG kỳ hạn 6 THÁNG của nhóm Big-4 (Agribank/Vietcombank/BIDV/VietinBank) — KHÔNG lấy số của ngân hàng cổ phần khác, KHÔNG lấy kỳ hạn khác (3/9/12 tháng).
+1. WebSearch nguồn có NGÀY CỤ THỂ (trong ~25 ngày) nêu lãi suất CCTG kỳ hạn 12 THÁNG của nhóm Big-4 (Agribank/Vietcombank/BIDV/VietinBank). QUY TẮC (user chốt 2026-10-05): ngân hàng Big-4 nào CÓ CCTG 12 tháng thì lấy số của nó; trong các ngân hàng đó lấy lãi suất CAO NHẤT làm chuẩn (KHÔNG cần đủ 4/4 ngân hàng, KHÔNG dùng mode/đồng thuận). Ngân hàng chỉ có kỳ hạn khác (vd VCB chỉ phát 6 tháng) thì KHÔNG tính; bảng nào điền sẵn 12 tháng cho NH mà các nguồn khác nói NH đó không phát 12 tháng thì coi là KHÔNG đáng tin và bỏ số đó. CHỈ khi KHÔNG Big-4 nào có CCTG 12 tháng mới được rơi về 6 tháng cao nhất — và phải ghi rõ trong --note là rơi về 6 tháng. KHÔNG lấy ngân hàng cổ phần khác. --note luôn nêu: ngân hàng nào, kỳ hạn nào, vì sao là cao nhất.
 2. Cần >=2 nguồn ĐỘC LẬP khác nhóm sở hữu — GIỐNG chuỗi 1.
 3. MỖI nguồn PHẢI ghi RÕ con số % nó báo (field 'rate' trong --sources bên dưới) — append_cctg_rate.py sẽ TỰ SO 2 số này, từ chối ghi nếu lệch nhau >0,1 điểm %. Nếu 2 nguồn cho 2 số khác nhau quá 0,1pp, đó LÀ escalate, không tự chọn 1 số.
 4. --rate bạn truyền PHẢI khớp (gần như tuyệt đối) với MỘT trong các số đã cite trong --sources — không được tự tổng hợp/làm tròn thành số không nguồn nào nói.
@@ -90,7 +90,7 @@ BẮT BUỘC HÀNH ĐỘNG CUỐI (để Mike xác minh job này đã xử lý, 
   - Escalate: 'mike/bin/append_event.sh Winston question deposit-cctg-weekly-question \"<JSON tóm tắt chuỗi nào, số nào mâu thuẫn>\"'.
 (Nếu cả 2 chuỗi đều escalate hoặc đều done, vẫn gọi 2 lần riêng — mỗi chuỗi 1 event — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem.)
 
-BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), và với CCTG luôn ghi rõ đây là kỳ hạn 6 THÁNG (khác 12 tháng của chuỗi 1 — đừng gộp lẫn 2 con số khi báo cáo)."
+BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), và với CCTG luôn ghi rõ ngân hàng + kỳ hạn của số được chọn (chuẩn 12 THÁNG cao nhất Big-4 từ 2026-10-05; trước đó chuỗi là 6 tháng — đừng gộp lẫn khi báo cáo)."
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "[--dry-run] skipping real dispatch.sh call; prompt length=${#PROMPT} chars" >> "$LOG"
@@ -149,7 +149,7 @@ elif [ "$DISPATCH_RC" -eq 5 ]; then
   echo "dispatch queued for usage-limit auto-resume (rc=5) — no fallback" >> "$LOG"
 elif [ "$DISPATCH_RC" -ne 0 ] || [ "${CONFIRMED:-no}" != "yes" ]; then
   MSG="⚠️ Tự động xác nhận lãi suất huy động + CCTG tuần này (${TODAY}) KHÔNG có kết quả xác nhận được (dispatch exit=${DISPATCH_RC}, post-condition=${CONFIRMED:-no}) — rơi về nhắc thủ công.
-Giá trị đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG 6M = ${CUR_CCTG}%.
+Giá trị đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG (12M cao nhất; 6M trước 05/10) = ${CUR_CCTG}%.
 Nếu đã đổi, chạy (số phải xác nhận thật):
   python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source manual_verify
   python3 append_cctg_rate.py --rate <X> --effective ${TODAY} --source manual_verify"

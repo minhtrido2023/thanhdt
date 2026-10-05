@@ -545,7 +545,7 @@ def build_macro_killswitch_a_line(html=True):
         " ⚠️STALE→fail-closed" if v["stale"] else "")
     rate_source = v.get("rate_source")
     if rate_source and rate_source.startswith("cctg_6m"):
-        src_label = f"CCTG Big-4 6 tháng ({rate_source.split('(', 1)[-1].rstrip(')')})"
+        src_label = f"CCTG Big-4 (12 tháng cao nhất; 6 tháng trước 05/10) ({rate_source.split('(', 1)[-1].rstrip(')')})"
     elif rate_source == "big4_12m":
         src_label = "Big-4 12 tháng"
     else:
