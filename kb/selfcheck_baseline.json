@@ -22,6 +22,9 @@
       "immutable_publish_selfcheck.py": 720,
       "cli_provider_selfcheck.sh": 240,
       "dispatch_discord_topic_selfcheck.sh": 240
+    },
+    "manual_only": {
+      "mike/bin/orb_pt_appendonly_selfcheck.py": "Tự khai chỉ-chạy-TAY (docstring): mỗi lần gọi vnstock THẬT 4 lần. Weekly/daily baseline BỎ QUA để không đập vendor bên thứ ba mỗi đêm (bus Mike/selfcheck-baseline-checker-no-tier-orb-vnstock-daily, phương án A, 2026-10-05)."
     }
   },
   "known_red": {
