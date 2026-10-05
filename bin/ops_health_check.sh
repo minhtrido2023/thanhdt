@@ -97,6 +97,16 @@ case "$RUNONCE_LABEL" in
     ;;
 esac
 
+# ── Chế độ DRY-RUN (tính SỚM, trước mọi heredoc python) ──
+# Trong job autofix (Wags_*/Winston_*, dispatch.sh export JOB_ID) mặc định DRY-RUN: verify 1 fix
+# không được bắn tin Trading Daily/bus thật (coord-2026-10-01: Wags_20261001_054510 chạy live, 2 event
+# 4a1a3747/3af22f79 là artifact verify chứ không phải checker thật). Ép chạy thật: OPS_HEALTH_DRY_RUN=0.
+case "${JOB_ID:-}" in
+  Wags_*|Winston_*) DRY_RUN="${OPS_HEALTH_DRY_RUN:-1}" ;;
+  *)                DRY_RUN="${OPS_HEALTH_DRY_RUN:-0}" ;;
+esac
+export OPS_HEALTH_DRY_RUN="$DRY_RUN"   # heredoc python (close_plan_approval_questions...) đọc env này
+
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
 
@@ -1864,7 +1874,7 @@ if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$ANOMAL
   timeout 200 python3 "$ANOMALY_SCAN" --status-check --emit-json "$EMIT" >/dev/null 2>&1 \
     || timeout 90 python3 "$ANOMALY_SCAN" --emit-json "$EMIT" >/dev/null 2>&1 || true
   if [ -f "$EMIT" ]; then
-    ESC_OUT="$(python3 "$WC_ROOT/mike/bin/anomaly_escalate.py" --emit-json "$EMIT" 2>&1 || true)"
+    ESC_OUT="$(python3 "$WC_ROOT/mike/bin/anomaly_escalate.py" --emit-json "$EMIT" $([ "$DRY_RUN" = "1" ] && echo --dry-run) 2>&1 || true)"
     # Cổng độ tươi watchlist (§14, 2026-08-14) — kiểm TRƯỚC tier-H: quét sổ cũ thì kết luận
     # "không có tín hiệu" không có giá trị, phải nói ra chứ không được nuốt vào dòng ✅.
     ANOMALY_STALE_NOTE=""
@@ -1966,13 +1976,7 @@ echo "$MSG"
 # autofix (thêm Wags coord-2026-08-03). Trước đây KHÔNG có đường chạy thử: mỗi lần verify 1
 # fix của check này đều bắn 1 tin Trading Daily thật + 1 bus event + có thể spawn job autofix
 # → người sửa hoặc né verify, hoặc gây nhiễu vận hành. Mặc định (biến không set) = y như cũ.
-# Trong job autofix (Wags_*/Winston_*, dispatch.sh export JOB_ID) mặc định DRY-RUN: verify 1 fix
-# không được bắn tin Trading Daily/bus thật (coord-2026-10-01: Wags_20261001_054510 chạy live, 2 event
-# 4a1a3747/3af22f79 là artifact verify chứ không phải checker thật). Ép chạy thật: OPS_HEALTH_DRY_RUN=0.
-case "${JOB_ID:-}" in
-  Wags_*|Winston_*) DRY_RUN="${OPS_HEALTH_DRY_RUN:-1}" ;;
-  *)                DRY_RUN="${OPS_HEALTH_DRY_RUN:-0}" ;;
-esac
+# (DRY_RUN đã tính + export ở ĐẦU script — xem khối "Chế độ DRY-RUN", để heredoc python và anomaly_escalate thừa hưởng.)
 if [ "$DRY_RUN" = "1" ]; then
   echo "[DRY-RUN] bỏ qua: notify_thread (+dự phòng notify_telegram) / append_event / dispatch autofix"
 else
