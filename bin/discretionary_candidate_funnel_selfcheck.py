@@ -389,10 +389,18 @@ def test_run_daily_and_files(tmp):
 
     # asof đi lùi ⇒ không ghi state, cảnh báo, khối ⛔
     st_before = open(P["state"]).read()
+    log_before = open(P["log"], "rb").read() if os.path.exists(P["log"]) else None
+    snaps_before = {f: open(os.path.join(P["snap_dir"], f), "rb").read()
+                    for f in sorted(os.listdir(P["snap_dir"]))} if os.path.isdir(P["snap_dir"]) else {}
     set_mtime_ict(rcsv, 2026, 10, 2, 19, 30)
     r5 = F.run_daily(rcsv, base, True, dt.datetime(2026, 10, 8, 19, 40, tzinfo=ICT), fcsv, INSIDER)
     check(not r5["state_ok"] and any("đi lùi" in w for w in r5["warnings"])
           and open(P["state"]).read() == st_before, f"asof lùi ⇒ không ghi state: {r5['warnings']}")
+    log_after = open(P["log"], "rb").read() if os.path.exists(P["log"]) else None
+    snaps_after = {f: open(os.path.join(P["snap_dir"], f), "rb").read()
+                   for f in sorted(os.listdir(P["snap_dir"]))} if os.path.isdir(P["snap_dir"]) else {}
+    check(log_after == log_before and snaps_after == snaps_before,
+          "asof lùi ⇒ KHÔNG ghi log forward-excess lẫn snapshot PIT của ngày cũ")
     b = F.format_topic_block(r5, dt.date(2026, 10, 9))
     check("⛔" in b and "0 mới" not in b, f"khối khi state không ghi:\n{b}")
 

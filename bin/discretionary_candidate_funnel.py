@@ -832,12 +832,13 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
 
     state = load_state(paths["state"])
     state_ok, new_state, rep_all = not insane, state, []
+    regressed = False
     if state_ok:
         try:
             new_state, rep_all = update_state(state, cands, asof)
         except AsofRegress as e:
             warnings.append(str(e))
-            state_ok = False
+            state_ok, regressed = False, True
     result = {
         "asof": str(asof), "run_at": now.isoformat(), "rating_csv": rating_csv,
         "warnings": warnings,
@@ -851,10 +852,14 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         "excluded": excluded.to_dict(orient="records"),
     }
     if write:
-        snap_status, snap_path = snapshot_rating(data, paths["snap_dir"], asof)
-        result["snapshot"] = {"status": snap_status, "path": snap_path}
-        if not insane:                                       # log đo forward excess: không ghi rác
+        # asof đi lùi hoặc dữ liệu dưới sàn ⇒ KHÔNG đụng snapshot PIT lẫn log đo forward excess
+        # của ngày cũ (ghi đè = rò rỉ tương lai vào lịch sử, arch-review r2 #1/#5).
+        if not insane and not regressed:
+            snap_status, snap_path = snapshot_rating(data, paths["snap_dir"], asof)
+            result["snapshot"] = {"status": snap_status, "path": snap_path}
             result["log_rows"] = append_log(paths["log"], cands, asof, rep_all)
+        else:
+            result["snapshot"] = {"status": "skipped", "path": None}
         _atomic_write_text(paths["result"], json.dumps(result, ensure_ascii=False, indent=1))
         if state_ok:
             _atomic_write_text(paths["state"], json.dumps(new_state, ensure_ascii=False, indent=1))
