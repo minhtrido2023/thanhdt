@@ -54,3 +54,54 @@
 2. **Ngưỡng chất lượng**: `rating ≤ 2` (cổng sleeve hiện hành) hay nới `≤ 3`?
 3. **Ngành trôi chung** (nhãn NGÀNH): vẫn báo làm candidate hay chỉ báo IDIO? (backstop §0.5 cũ nói case chu kỳ/vĩ mô do user tự đưa)
 4. **Size**: backstop §12 nói 0,5-1,5% NAV/mã, sleeve ≤3%; thực tế TV1/DRI đang 5%/mã/TK, margin policy cho sleeve ≤10%. Mã mới theo mức nào?
+
+---
+
+## Bản sửa sau trả lời user 2026-10-06 00:43 ICT
+
+**Đính chính**: con số "lớp 3 còn 2 mã (PNJ, MBS)" ở trên chưa áp golden floor. Áp đủ thì MBS rớt
+(CF_OA_3Y âm — công ty chứng khoán), còn PNJ (đang EXCLUDED).
+
+### Q4 — Size: GIỮ 5% NAV/mã/tài khoản (user chốt). Mục "0,5-1,5%" của backstop §12 hết hiệu lực cho sleeve này.
+
+### Q3 — Nhãn NGÀNH: vẫn là candidate, nhưng BẮT BUỘC Bobby đánh giá triển vọng ngành TRƯỚC Taylor (mù forward return).
+
+### Q2 — Ngưỡng chất lượng: hạ về `rating ≤ 3` (= cổng production), thêm làn giá trị sâu
+Đo trên `data/rating_8l.csv` 05/10: TV1 rating **1**, DRI **2**, PVT **3** (bản live; lịch sử BQ ghi 2 tới 29/07).
+⇒ rating KHÔNG phải thứ chặn 2 mã đã chọn; thứ chặn là **thanh khoản** (TV1 0,47 tỷ/ngày < 3 tỷ) và
+**định nghĩa "rẻ"** (DRI pb_z +0,56, không giảm giá — không bao giờ lọt làn "lệch giá").
+- **Làn A — Lệch giá** (như trên): rating≤3 ∧ golden floor ∧ pb_z≤−1 ∧ drop_pct≤−20% ∧ liq≥0,3 tỷ. Hôm nay: 11 mã
+  (CMG DTD DVM HDG KOS LCG NTL PNJ TCM VGS VSC).
+- **Làn B — Giá trị sâu**: rating≤3 ∧ golden floor ∧ liq≥0,3 tỷ, xếp **earn_yield (1/PE) trong CÙNG route**
+  (không so ngân hàng với sản xuất), lấy top-3/route; chỉ báo mã MỚI vào top. Dùng 1/PE vì là nhân tố trội
+  có bằng chứng (IC +0,125); KHÔNG dùng composite value_score (làm bộ chọn = NO). Hôm nay ra 18 mã, **có TV1
+  (#3 COMPOUNDER) và DRI (#2 CYCLICAL)**, DGC. ⚠️ Đây là kiểm tra trong mẫu (2 mã được chọn một phần VÌ PE thấp)
+  — xác nhận làn không bỏ sót loại mã đã chọn, KHÔNG chứng minh làn có edge.
+- **PVT không lọt làn nào** (PE 8,8, pb_z +0,73, không giảm giá): rating≤3 cho PVT vào vũ trụ nhưng không quy
+  tắc rẻ nào ở đây chọn nó. ⇒ cần biết user thấy PVT hấp dẫn vì đâu (tăng trưởng đội tàu? cổ tức? chu kỳ cước?)
+  rồi mới quyết có làn thứ 3 hay để PVT-loại là đề xuất tay của user.
+- Thanh khoản ≥0,3 tỷ đủ cho size 5% NAV (~50 triệu/TK) với trần 10% ADV/phiên (TV1: ~47 triệu/phiên).
+
+### Q1 — Thay quét thứ Hai bằng cổng giá TRONG PHIÊN cho mã đang giữ/sắp mua
+Đối chiếu giá ngày 07→10/2026 (`data/bq_cache/ticker`) với ngày có tin:
+| Mã | Tin | Biến động giá | Cổng EOD hiện có (IDIOCRASH ret≤−6 ∧ idio≤−5) |
+|---|---|---|---|
+| PNJ | công bố DN 25-27/09 (T6-CN) | **24/09 −5,7% (idio −4,2, đáy −5,8%) — TRƯỚC tin 1 ngày**; 28/09→05/10 sàn 6 phiên liền, KL chỉ 0,3-0,6× (không bán được ở sàn) | 24/09 KHÔNG bắt (−5,7 > −6); 28/09 mới bắt |
+| DGC | vụ án lan sang ban điều hành 23/07 | **23/07 −6,3% (idio −8,1), KL 7,6×** — cùng ngày tin; 22/07 −5,8% nhưng idio −2,2 (cả thị trường) | 23/07 bắt, nhưng báo lúc 08:20 hôm SAU |
+| TV1 | vụ án EVNNPT giữa 07 | **16/07 −5,0% (idio −6,2, đáy −6,4%)**; tin 08/09 (thua phúc thẩm) và 13/09 (khởi tố cựu CT EVNNPT): giá KHÔNG phản ứng | 16/07 KHÔNG bắt (−5,0 > −6) |
+- **Bot KHÔNG đặt lệnh MUA trước 11:00**: 40 journal gần nhất, từ khi HYBRID live 26/08 có **0 lệnh BUY đặt trước 11:00**
+  (khung 11:00/11:15/13:00/13:15/13:30). ⇒ cổng giá chạy từ 09:15 có ~1h45 để rút lệnh mua của mã gãy luận
+  điểm TRƯỚC khi lệnh ra sàn — đúng việc quét thứ Hai 08:00 đang làm, nhưng chạy MỌI phiên chứ không chỉ thứ Hai.
+- **Thiết kế** (`intraday_price_watch.py`, Python, không LLM, 15'/lần 09:15→14:30 T2-T6, giá DNSE sống):
+  vũ trụ = vị thế đang giữ 2 TK + mã có lệnh MUA trong plan hôm nay + watchlist discretionary.
+  Kích hoạt khi **giá ≤ −5% so tham chiếu ∧ idio (so VNINDEX) ≤ −4%**, hoặc chạm sàn. Mỗi mã 1 lần/ngày.
+  Kích hoạt ⇒ (1) Trading Daily + @user; (2) dispatch DD: legal-vn đọc tin + Taylor (Opus) kết luận
+  luận điểm còn/gãy trong ~30-60'; (3) đề xuất HOLD / không mua thêm / bán phiên sau — user quyết.
+  Tuỳ chọn cần user duyệt riêng (chạm logic đặt lệnh): tự hoãn lệnh MUA mã đó trong phiên khi kích hoạt.
+- Ngưỡng −5/−4 bắt cả 3 ca đầu tiên (PNJ 24/09, DGC 23/07, TV1 16/07) mà không bắt DGC 22/07 (cả thị trường giảm).
+  ⚠️ dùng giá ĐÁY ngày làm proxy cho giá trong phiên ⇒ là cận trên của số lần kích hoạt; chưa đo tỉ lệ báo giả trên
+  toàn bộ danh mục — làm khi dựng.
+- **Giới hạn thật**: tin không làm giá động (TV1 08/09, 13/09) thì cổng giá không thấy — chấp nhận, vì giá không
+  phản ứng tức thị trường không coi là gãy luận điểm; mã kẹt sàn (PNJ 28/09+) không bán được trong phiên, quyết
+  định thực tế là ngừng mua và lên kế hoạch phiên sau.
+- Tắt quét thứ Hai SAU KHI cổng giá chạy ổn 2 tuần (không để khoảng trống bảo vệ).
