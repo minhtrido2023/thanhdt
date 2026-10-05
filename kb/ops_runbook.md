@@ -611,3 +611,13 @@ còn lại → Winston.
 MẶC ĐỊNH của Phase 4.6 (mandate 2026-08-19) nên `_ext.md` không có trần tự nhiên. Hành động:
 rà soát/nén tay khi cảnh báo tới, không có auto-fix cho ext (khác core — chưa rõ tách ext
 tiếp về đâu). Không phải arch-review bắt buộc (chỉ đụng nội dung KB, không đụng tooling).
+
+## Classifier chặn headless agent ghi production / git merge (chốt phương án C, 2026-10-05)
+Triệu chứng: Taylor/Wags headless báo "bị classifier chặn" khi `git merge` nhánh đã CONFIRMED, ghi file
+production-adjacent, hoặc BQ `CREATE OR REPLACE` (ca thật 09-27 fa_ratings_8l restore mất ~2h; 09-28
+close_repair merge). KHÔNG thử workaround khác (đổi đường, tách lệnh) — đó là cách đẻ rủi ro.
+Xử lý tại chỗ, không điều tra lại:
+1. Agent ghi bus `finding` có: branch + HEAD, verdict quant-skeptic/arch-review (CONFIRMED/APPROVED), lệnh merge/ghi CHÍNH XÁC cần chạy.
+2. Mike (phiên tương tác) kiểm artifact: `git log main..<branch>`, selfcheck chạy lại, verdict thật trên bus — rồi tự chạy lệnh. Tiền thật/trading_rules vẫn cần user duyệt như thường lệ.
+3. Trần chấp nhận: ~1-2h trễ/lần. Nếu tần suất >2 lần/tuần → xem lại phương án B (git write production dispatch dạng tương tác ngay từ đầu).
+(bus: Mike/retro-pattern-recurring-classifier-blocks-headless-agent-production-write)

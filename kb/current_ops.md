@@ -33,6 +33,7 @@
   per-name**. Quyền yêu cầu sao kê chi tiết: TT121 Đ17-18. DNSE từ chối nêu mã = **red flag**.
   Trần đề xuất (chưa user chốt): ~2% NAV/một TCPH (haircut 50% ⇒ max loss ≤1% NAV), sleeve ≤10% NAV
   — mức hiện tại ~100,9tr / ~102,2tr **đã ở hoặc vượt nhẹ trần tổng**.
+  ✅ **USER CHỐT 2026-10-05 08:3x ICT (`decided_by: user`): Trứng vàng KHÔNG phải sleeve thông thường mà là một dạng của cash, coi tương đương tiền ⇒ KHÔNG có cơ chế "vượt trần"; trần ~2%/TCPH và sleeve ≤10% NAV ở trên KHÔNG áp dụng.** (2 câu hỏi DNSE bằng văn bản về nominee/mã TCPH vẫn là thông tin tham khảo, không chặn.)
 
 - **[2026-10-03 10:34 ICT, user chốt] Định nghĩa XU HƯỚNG HẠ (chính xác hoá)**: ngay khi Big-4 điều chỉnh GIẢM lãi tiết kiệm 12 tháng HOẶC lãi chứng chỉ tiền gửi 6 tháng THẤP HƠN so với tuần thống kê trước ⇒ cảnh báo user (cron tuần `refresh_deposit_cctg_weekly.sh` + `deposit_cctg_trend_check.py`); vẫn CHỈ cảnh báo, không tự khôi phục park. User cũng DUYỆT rating_8l/DCF dùng effective rate (đã LIVE từ 10-01).
 
