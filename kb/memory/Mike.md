@@ -22,3 +22,4 @@
 - Dọn: worktree /home/trido/thanhdt-wt-cr-0510 còn sót (branch session/cr-0510 đã merge) — xoá thủ công nếu chưa.
 
 - [2026-10-05T15:39:50Z] 05/10 22:45 ICT: đã kiểm 4 mốc tối 05/10 — tất cả OK: feed vendor corp_action_daily SỐNG LẠI (05/10 FRESH, chỉ 02/10 FAILED); exdate_forecast 19:00 không sự kiện ≤1 phiên; shadow broker 19:25 lần đầu 'không mục mới', corp_actions.json md5 e7ace20b không đổi, chưa có ledger; drift 20:50 lần đầu OK 2 TK; plan report 21:00 có dòng vị thế, gửi xong 2 TK. Còn: shadow T3 06/10 19:25 → đề xuất r5/merge có điều kiện.
+- [2026-10-05T17:27:43Z] 06/10 00:35: tắt cron fearbuy thứ Sáu (backup state/crontab_backup_20261005T172634Z_fearbuy_off.txt); plan funnel 8L kb/projects/discretionary-8l-candidate-funnel-plan-20261006.md CHỜ user quyết 4 câu (lượt thứ Hai giữ/bỏ, rating≤2/≤3, nhãn NGÀNH, size).

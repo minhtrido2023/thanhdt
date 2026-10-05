@@ -536,3 +536,8 @@
 
 ## Consolidation 2026-10-05T14:07:01Z
 - [2026-10-05T13:40:01Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [], "capped": [{"ticker": "VPB", "book": "LAG", "desired_qty": 282, "capped_qty": 0, "reason": "VPB book=LAG: Σ SELL kế hoạch (282cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+
+## Consolidation 2026-10-05T17:31:14Z
+- [2026-10-05T17:31:07Z] Mike/heartbeat — Mike_20261005_173008: {"status": "in_progress", "note": "draft retro 10-05 đã viết; đang ghi finding lên bus"}
+- [2026-10-05T17:31:07Z] Mike/finding — retro-2026-10-05-draft: {"status": "draft_written", "draft": "state/retro_draft_2026-10-05.md", "incidents_new": 0, "bus_error_events": 0, "wakeup_bg_turns": 0, "time_claim_count": 0, "patterns": ["A polish-chain: da dong bang code round-cap exit 7, theo doi; broker-primary r4+ can override", "B wakeup: khong tai dien"], "escalated": false, "gap_open": ["corp-action feed 03/10 va 04/10 chua verify artifact"]}
+- [2026-10-05T17:31:08Z] Mike/heartbeat — Mike_20261005_173008: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261005_173008", "source": "watcher"}
