@@ -231,6 +231,18 @@ Dấu hiệu đang cần medium, không phải high: "vá đúng chỗ đã xác
 tục sau resume", "check xem đã xong chưa", "apply verdict có sẵn". Nếu không có từ nào như "thiết
 kế", "giả thuyết mới", "tại sao lại hỏng", "chưa hiểu rõ" → mặc định medium.
 
+### Việc THƯỜNG NGÀY vs việc KHÓ (user chốt 2026-10-06 00:15 ICT) — luật gốc, 2 chế độ bên dưới chi tiết hoá
+
+- **Việc thường ngày, đơn giản ⇒ `Sonnet` + `--effort medium`**: soạn/gửi báo cáo (ngày/tuần/THÁNG),
+  nhắc việc hằng ngày, scan/kiểm tra định kỳ, cập nhật số liệu, đồng bộ registry, chạy lại pipeline
+  có sẵn. Dispatch omit `--model` đã rơi về Sonnet (`agents/*/.claude/settings.json`) và effort
+  `medium` (`dispatch.sh`) ⇒ cron nào không ghim là đúng luật.
+- **Điều phối coding task KHÓ + NGHIÊN CỨU ⇒ `Opus`** (effort `high` khi thật sự khó): thiết kế/sửa
+  code chưa rõ nguyên nhân, R&D/backtest/due-diligence, đánh giá checkpoint paper-program.
+- Kiểm kê cron ghim Opus (06/10): `fearbuy_weekly_scan.sh` (due-diligence = nghiên cứu, giữ),
+  `paper_checkpoint_escalation.sh` (đánh giá gate R&D, giữ), `wags_autofix.sh` (sửa lỗi điều phối,
+  giữ). `check_report_cadence.sh` báo cáo THÁNG opus/high ⇒ ĐỔI sang sonnet/medium.
+
 ### Hai chế độ theo ĐỘ KHÓ + cắt vòng lặp polish (user chỉ đạo 2026-10-02 10:43 ICT)
 
 Bối cảnh: audit token 9 ngày (24/9→02/10) — ngoài context phình của phiên Mike, chi phí Taylor tăng
