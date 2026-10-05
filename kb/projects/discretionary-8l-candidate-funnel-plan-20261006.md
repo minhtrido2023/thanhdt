@@ -155,3 +155,41 @@ không nhận trả lời.
 
 **Dựng**: Opus high, 1 dispatch + arch-review + risk-auditor; chạy shadow (chỉ báo, không đặt lệnh bán) 5 phiên
 rồi mới bật auto-bán. Chạm logic đặt lệnh ⇒ cần anh duyệt bản cuối trước khi bật.
+
+---
+
+## User duyệt 2026-10-06 01:12 ICT + KỊCH BẢN BÁN KHI "GÃY" (bản cụ thể)
+
+User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 50% / NHIỄU=giữ) — "dựa trên nghiên cứu của team, không bán theo tâm lý"; **custom30V cũng theo đúng quy trình này** (thay quyết định 2026-07-20 "không stop-loss" cho trường hợp có sự kiện bất thường); discretionary chỉ tự bán khi GÃY; trả lời qua Discord.
+
+### Dữ liệu dùng mỗi phút khi đang bán (đã có trong `DNSEBroker.get_quote()` + sổ lệnh L2)
+`last`, `ref`, `floor`, các mức giá mua (giá, KL), KL khớp trong ngày, KL **bán được** của mình (Q).
+- `room` = (last − floor) / ref — khoảng cách tới giá sàn, % theo giá tham chiếu (HOSE sàn −7%, HNX −10%, UPCOM −15%).
+- `speed` = % thay đổi giá 5 phút gần nhất.
+- `depth2` = tổng KL đặt mua trong khoảng 2% dưới giá khớp gần nhất.
+
+### 4 chế độ — chỉ được LEO thang trong ngày, không lùi về chế độ chậm hơn
+| Chế độ | Khi nào | Cách bán |
+|---|---|---|
+| **1. Bình thường** | room > 3% và speed > −1%/5' | 3 đợt trong ~20': 50% ngay, 25% sau 10', 25% sau 20'. Mỗi lệnh con LO tại giá mua tốt nhất, ≤ 30% `depth2`; 2' chưa khớp ⇒ đặt lại theo giá mua mới. |
+| **2. Nhanh** | speed ≤ −1%/5' **hoặc** 1,5% < room ≤ 3% | Bán TOÀN BỘ phần còn lại ngay: tách lệnh con theo KL 2 mức giá mua tốt nhất, đặt lại mỗi 1', chấp nhận giá xuống. |
+| **3. Khẩn** | room ≤ 1,5% **hoặc** `depth2` < Q | MỘT lệnh LO cho toàn bộ Q **tại giá sàn**. Lệnh bán LO giá sàn khớp ngay với mọi lệnh mua đang chờ **theo giá của bên mua** (không phải bán ở giá sàn), phần dư nằm xếp hàng ở giá sàn và giữ ưu tiên thời gian. |
+| **4. Kẹt sàn** | giá = sàn và không còn bên mua | Giữ nguyên lệnh ở giá sàn cả phiên (thứ tự xếp hàng quý nhất — PNJ sàn 6 phiên liền, KL chỉ 0,3-0,6×). 14:30 ⇒ phần dư vào ATC. Phiên sau: đặt lệnh **ATO** trước 09:15 (ATO được ưu tiên trong phiên mở cửa), không chờ khung bán 09:15 của bot. |
+
+### Bảo vệ khi giá rơi nhanh TRONG lúc đang điều tra (trước phán quyết)
+- room ≤ 3% khi chưa có phán quyết ⇒ **rút gọn**: điều tra tối đa 10' (thay 20'), hạn trả lời 15' (thay 30'), báo cáo ghi rõ "chế độ rút gọn vì sát sàn".
+- Không bán trước khi có phán quyết (đúng nguyên tắc user: không bán theo tâm lý). Chấp nhận rủi ro kẹt sàn nếu tin đến quá nhanh — khi đó áp chế độ 4.
+
+### Quy tắc chung
+- CHƯA RÕ ⇒ cùng 4 chế độ, áp cho 50% KL.
+- Chỉ bán phần KL bán được (mua T+2 bán từ phiên chiều ngày T+2); phần còn lại bán khi về.
+- Nghỉ trưa 11:30-13:00 ⇒ dừng, 13:00 tiếp tục đúng chế độ đang có. Sau 14:30 ⇒ ATC; ngoài giờ ⇒ ATO phiên sau.
+- Tần suất theo dõi: 15' khi bình thường, **1' khi đang bán**.
+- Báo Discord + Telegram mỗi lần khớp và khi đổi chế độ. `data/BOT_STOP` chặn mọi lệnh. Ghi trạng thái trước mỗi lệnh, đối chiếu sổ lệnh broker trước khi đặt (không bán trùng).
+- Sau bán: không mua lại 10 phiên trừ khi user duyệt; mã thuộc custom30V bị loại khỏi rổ tới khi review.
+- ⚠️ Cần xác minh khi dựng: DNSE thật có nhận lệnh ATO/ATC không (code hiện chỉ dùng LO; ATO/ATC mới thấy ở broker giả lập). Không nhận ⇒ thay bằng LO giá sàn đặt lúc 09:00.
+
+### Dựng & kiểm chứng
+- 1 dispatch Opus high (Taylor, cùng engine `intraday_price_watch.py`) + arch-review + risk-auditor.
+- **Replay** kịch bản trên dữ liệu phút nếu có (PNJ 24/09→05/10, DGC 23/07); không có dữ liệu phút ⇒ mô phỏng bằng OHLC ngày, nói rõ giới hạn.
+- Chạy **shadow 5 phiên** (chỉ báo, ghi "đã định bán gì, giá nào"), không đặt lệnh thật; user duyệt bản cuối rồi mới bật.
