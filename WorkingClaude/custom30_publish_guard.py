@@ -13,7 +13,7 @@ import os
 def inconsistencies(table, csv, select):
     v_tab = "custom30v" in str(table).lower()
     v_csv = "custom30v" in str(csv).lower()
-    v_sel = str(select).strip().lower() == "yieldcombo"
+    v_sel = str(select).lower() == "yieldcombo"   # CHỈ .lower(), y hệt custom_basket.py:794 (strip ⇒ lệch consumer)
     if v_tab == v_csv == v_sel:
         return []
     return [f"TABLE={table!r} (custom30V={v_tab}), CSV={csv!r} (custom30V={v_csv}), "

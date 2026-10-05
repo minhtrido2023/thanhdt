@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Selfcheck custom30_publish_guard + wiring trong custom30_history.py (không chạm BQ)."""
-import os, subprocess, sys
+import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import custom30_publish_guard as g
@@ -18,17 +18,30 @@ chk("sự cố 09-30: CSV custom30v + select blend ⇒ CHẶN", bool(g.inconsist
 chk("TABLE custom30v + CSV blend ⇒ CHẶN", bool(g.inconsistencies(T_V, C_B, "yieldcombo")))
 chk("yieldcombo nhưng TABLE/CSV blend ⇒ CHẶN", bool(g.inconsistencies(T_B, C_B, "yieldcombo")))
 chk("select v3comp (audit) + CSV blend ⇒ OK (không phải yieldcombo)", g.inconsistencies(T_B, C_B, "v3comp") == [])
-chk("hoa/thường + khoảng trắng: ' YieldCombo ' ⇒ nhận ra", g.inconsistencies(T_V, C_V, " YieldCombo ") == [])
+chk("hoa/thường: 'YieldCombo' ⇒ nhận ra (consumer chỉ .lower())", g.inconsistencies(T_V, C_V, "YieldCombo") == [])
+chk("khoảng trắng 'yieldcombo ' ⇒ CHẶN (custom_basket không khớp nhánh yieldcombo)", bool(g.inconsistencies(T_V, C_V, "yieldcombo ")))
 try:
     g.enforce({"CUSTOM30_CSV": C_V}); chk("enforce env lệch ⇒ SystemExit", False)
 except SystemExit as e:
     chk("enforce env lệch ⇒ SystemExit có lý do", "TỪ CHỐI" in str(e))
 chk("enforce env mặc định ⇒ không raise", g.enforce({}) is None)
-# wiring: custom30_history.py PHẢI gọi guard trước khi chạm BQ (chạy thật với env lệch, kỳ vọng exit≠0 + thông điệp)
-env = dict(os.environ, CUSTOM30_CSV=C_V); env.pop("BASKET_SELECT", None)
-r = subprocess.run([sys.executable, os.path.join(HERE, "custom30_history.py")], env=env,
-                   capture_output=True, text=True, timeout=120)
-chk("custom30_history.py env lệch ⇒ exit≠0 + 'TỪ CHỐI CHẠY'", r.returncode != 0 and "TỪ CHỐI CHẠY" in (r.stderr + r.stdout))
-chk("... và KHÔNG in dòng 'building 8L custom30' (chưa chạm BQ)", "building 8L custom30" not in r.stdout)
+# wiring (TĨNH, AST — KHÔNG chạy custom30_history.py: chạy thật sẽ ghi đè CSV park production nếu guard bị gỡ)
+import ast
+src = open(os.path.join(HERE, "custom30_history.py")).read()
+tree = ast.parse(src)
+def lineno_of(pred):
+    for n in tree.body:
+        for sub in ast.walk(n):
+            if pred(sub): return sub.lineno
+    return None
+enf = lineno_of(lambda n: isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                and n.func.attr == "enforce" and getattr(n.func.value, "id", "") == "custom30_publish_guard")
+first_side = min(x for x in (
+    lineno_of(lambda n: isinstance(n, ast.Call) and getattr(n.func, "id", "") == "detect_end_date"),
+    lineno_of(lambda n: isinstance(n, ast.Call) and getattr(n.func, "attr", "") == "build_pit"),
+    lineno_of(lambda n: isinstance(n, ast.Call) and getattr(n.func, "attr", "") == "to_csv"),
+) if x)
+chk("custom30_history.py gọi custom30_publish_guard.enforce()", enf is not None)
+chk("enforce() đứng TRƯỚC detect_end_date/build_pit/to_csv (chưa chạm BQ/ghi file)", enf is not None and enf < first_side)
 print(f"{'FAIL' if fails else 'ALL PASS'} ({fails} fail)")
 sys.exit(1 if fails else 0)
