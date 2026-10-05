@@ -105,3 +105,53 @@
   phản ứng tức thị trường không coi là gãy luận điểm; mã kẹt sàn (PNJ 28/09+) không bán được trong phiên, quyết
   định thực tế là ngừng mua và lên kế hoạch phiên sau.
 - Tắt quét thứ Hai SAU KHI cổng giá chạy ổn 2 tuần (không để khoảng trống bảo vệ).
+
+---
+
+## Quyết định user 2026-10-06 01:00 ICT + ĐỀ XUẤT chiến lược cutloss (CHỜ DUYỆT trước khi dựng)
+
+User chốt: giữ quét thứ Hai 2 tuần song song; rating≤3; thêm làn B; hạ thanh khoản. Cổng giá trong phiên:
+mã ĐANG MUA ⇒ dừng mua nếu còn kịp; mã ĐANG GIỮ ⇒ điều tra ngay, báo Telegram + email, **không trả lời
+trong 30 phút ⇒ mặc định bán cutloss**. PVT/DRI: tăng trưởng lợi nhuận nhanh ⇒ Taylor nghiên cứu làn C
+(job `Taylor_20261005_180155`). Funnel A+B đang dựng (job `Taylor_20261005_180152`).
+
+### Chiến lược cutloss đề xuất
+**Dòng thời gian** (T0 = lúc cổng giá kích hoạt, chỉ trong giờ khớp lệnh liên tục):
+| Mốc | Việc |
+|---|---|
+| T0 | Telegram + email + Discord Trading Daily (@user): mã, KL, %NAV, lãi/lỗ, mức giảm, "đang điều tra". Mã đó có lệnh MUA trong plan phiên này ⇒ hoãn ngay (bot chưa đặt mua trước 11:00). |
+| T0 → T0+20' | Điều tra nhanh: legal-vn đọc tin + Taylor (Opus) ⇒ phán quyết **GÃY** (pháp lý dính pháp nhân/tài sản lõi, gian lận, KQKD sụp, mất khả năng thanh toán) / **NHIỄU** (không tìm thấy tin, tin cá nhân không dính lõi, cả ngành) / **CHƯA RÕ**. Quá 20' chưa xong ⇒ coi là CHƯA RÕ. |
+| T0+20' | Báo cáo quyết định (Telegram + email + Discord) kèm hành động mặc định và **hạn chót = gửi báo cáo + 30'**. |
+| Hạn chót | Anh trả lời "GIỮ <MÃ>" / "BÁN <MÃ>" / "BÁN 50% <MÃ>" ⇒ làm theo. Im lặng ⇒ hành động mặc định. |
+
+**Hành động mặc định khi im lặng** — tôi đề xuất THEO PHÁN QUYẾT, không phải luôn bán:
+- **GÃY ⇒ bán toàn bộ.**
+- **CHƯA RÕ ⇒ bán 50%**, giữ 50% chờ anh (giảm rủi ro mà không bán hết ở đáy hoảng loạn).
+- **NHIỄU ⇒ GIỮ, không bán.** Lý do: bán vì cú giảm không có tin là bán đúng lúc sợ hãi — ngược triết lý fear-buy;
+  PNJ 07/2026 có nhiều phiên −7% mà luận điểm khi đó vẫn AMBIGUOUS.
+- Nếu anh muốn đúng "im lặng = bán" cho mọi trường hợp thì chọn phương án đó; tôi nêu rủi ro ở trên.
+
+**Cách bán** (không bán thị trường bằng mọi giá):
+- Lệnh giới hạn tại giá mua tốt nhất hiện tại, chia lệnh con ≤20% khối lượng trung bình 20 phiên; chỉ bán phần
+  KL **bán được** (cổ phiếu mua T+2 chỉ bán được từ phiên chiều ngày T+2).
+- **Kẹt sàn** (không có bên mua): đặt sẵn tại giá sàn để xếp hàng; phần không khớp chuyển sang phiên sau 09:15.
+- **Giờ**: hạn chót rơi vào nghỉ trưa 11:30-13:00 ⇒ thực hiện lúc 13:00; sau 14:15 ⇒ không đặt cuối phiên, chuyển phiên
+  sau 09:15 (anh có thêm thời gian đến sáng). Kích hoạt sau 14:00 ⇒ chỉ báo + điều tra, quyết định cho phiên sau.
+- Sau khi bán: cấm mua lại mã đó 10 phiên trừ khi anh duyệt; plan T+1 tự loại.
+- Mỗi mã kích hoạt tối đa 1 lần/ngày. `data/BOT_STOP` chặn mọi lệnh bán tự động. Ghi trạng thái trước khi đặt lệnh,
+  đối chiếu sổ lệnh broker trước mỗi lần đặt (không bán trùng nếu tiến trình chết giữa chừng).
+
+**Phạm vi** (cần anh xác nhận):
+- Áp cho mọi vị thế cổ phiếu 2 tài khoản. ⚠️ Mâu thuẫn với quyết định 2026-07-20 "custom30V không stop-loss" — park
+  hiện 0% nên rổ custom30V gần như không có vị thế; đề xuất loại custom30V khỏi auto-cutloss (chỉ báo + điều tra).
+- Discretionary sleeve (TV1, DRI…) mua có chủ đích khi giá rẻ/sợ hãi: đề xuất chỉ auto-bán khi phán quyết GÃY;
+  TV1 thanh khoản thấp (~0,47 tỷ/ngày) dễ giảm 5% vì lệnh nhỏ.
+- Kích hoạt cần cả hai: giảm ≥5% so tham chiếu VÀ giảm hơn VNINDEX ≥4 điểm % (hoặc chạm sàn) ⇒ cả thị trường sập
+  không kích hoạt hàng loạt.
+
+**Kênh trả lời**: Discord Trading Daily (tôi đọc được ngay) là kênh chính. Telegram: bot nhận lệnh
+`telegram_8l_bot.py` có sẵn nhưng KHÔNG đang chạy — bật lại để nhận "GIỮ/BÁN" là việc riêng. Email chỉ để báo,
+không nhận trả lời.
+
+**Dựng**: Opus high, 1 dispatch + arch-review + risk-auditor; chạy shadow (chỉ báo, không đặt lệnh bán) 5 phiên
+rồi mới bật auto-bán. Chạm logic đặt lệnh ⇒ cần anh duyệt bản cuối trước khi bật.
