@@ -70,5 +70,12 @@
       "title": "VN macro watch (crisis-trigger research thread)",
       "purpose": "Topic nghien cuu chuoi crisis-trigger + VN real-estate structural risk (2026-08-31). vn_realestate_monthly_check.sh (cron ngay 6 hang thang) post ket qua interim check GSO monthly vao day."
     }
+  },
+  "users": {
+    "owner": {
+      "id": "1488836753182949540",
+      "title": "John Dinh (chủ fleet)",
+      "purpose": "Được @mention trong topic dd.mm do daily_decision_topic.py tạo để Discord tự thêm vào thread (hiện trong thanh bên + có thông báo). User cung cấp 2026-10-05."
+    }
   }
 }

@@ -165,6 +165,13 @@ def main():
         return 1
     for extra in parts[1:]:
         post({"message": extra, "channel_id": int(tid), "format": "text"})
+    # @mention chủ ⇒ Discord tự thêm vào thread (hiện thanh bên + thông báo). Best-effort.
+    try:
+        with open(os.path.join(ROOT, "kb", "discord_channels.json"), encoding="utf-8") as f:
+            owner = json.load(f)["users"]["owner"]["id"]
+        post({"message": f"<@{owner}> topic việc cần quyết {name}", "channel_id": int(tid), "format": "text"})
+    except Exception as e:
+        print(f"CẢNH BÁO: không @mention được chủ: {e}", file=sys.stderr)
     os.makedirs(MARKER_DIR, exist_ok=True)
     tmp = marker + ".tmp"
     with open(tmp, "w") as f:
