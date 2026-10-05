@@ -43,8 +43,8 @@ SERIES = {
         "tenor": "12M",
     },
     "cctg_6m": {
-        "label": "Chứng chỉ tiền gửi (CCTG) 6 tháng Big-4",
-        "tenor": "6M",
+        "label": "Chứng chỉ tiền gửi (CCTG) Big-4 (12 tháng cao nhất từ 05/10/2026; trước đó 6 tháng)",
+        "tenor": "12M",
     },
 }
 

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-cctg_rate_vn.py — Big-4 (VCB/BIDV/CTG/Agribank) CHỨNG CHỈ TIỀN GỬI (CCTG) rate, 6-month tenor.
+cctg_rate_vn.py — Big-4 (VCB/BIDV/CTG/Agribank) CHỨNG CHỈ TIỀN GỬI (CCTG) rate. TENOR: 6-month up to 2026-10-04; from 2026-10-05 (user directive)
+12-month, highest across the Big-4 banks that issue a 12M CCTG (fallback 6M only if none does).
+The 2026-09-30 anchor below is 6M; the series was REBASED to 12M on 2026-10-05 -- a decline across
+that boundary is a tenor artifact, not a rate move (see deposit_cctg_trend_check.py state).
 
 NEW series, bootstrapped 2026-10-01 per user directive ("CCTG đưa vào model làm nguồn lãi proxy
 nếu lãi suất cao hơn gửi tiết kiệm"). SEPARATE from deposit_rate_vn.py's Big-4 12M term-deposit

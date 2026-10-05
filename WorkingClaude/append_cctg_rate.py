@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-append_cctg_rate.py — append ONE new Big-4 CCTG (6-month tenor) rate anchor to the append-only
+append_cctg_rate.py — append ONE new Big-4 CCTG rate anchor (12M highest-of-Big-4 since 2026-10-05; 6M before) to the append-only
 data/cctg_rate_vn_events.csv, read by cctg_rate_vn.py::cctg_events_df().
 
 Sibling of append_deposit_rate.py (Big-4 12M term deposit) — SEPARATE series, SEPARATE CSV, never
@@ -88,8 +88,8 @@ def _valid_date(s):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Append one Big-4 CCTG 6M rate anchor (append-only).")
-    ap.add_argument("--rate", type=float, required=True, help="Big-4 CCTG 6M rate, %%/yr (e.g. 7.6)")
+    ap = argparse.ArgumentParser(description="Append one Big-4 CCTG rate anchor (12M highest, see cctg_rate_vn.py) (append-only).")
+    ap.add_argument("--rate", type=float, required=True, help="Big-4 CCTG rate, %%/yr (12M highest-of-Big-4; e.g. 7.4)")
     ap.add_argument("--effective", required=True, help="effective date YYYY-MM-DD")
     ap.add_argument("--source", required=True, help="one of: " + " | ".join(sorted(VALID_SOURCES)))
     ap.add_argument("--collected", default=None, help="real collection date YYYY-MM-DD (default: today)")
