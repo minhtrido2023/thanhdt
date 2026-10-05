@@ -19,6 +19,9 @@ from pt_dates import detect_end_date
 import custom_basket as cb
 import custom30_yield_labels as yfl
 
+import custom30_publish_guard
+custom30_publish_guard.enforce()   # fail-closed TRƯỚC khi chạm BQ/ghi file (coord-2026-10-01)
+
 NAME_CAP = 0.10
 START = "2014-01-02"; END = detect_end_date()
 # TABLE/CSV env-overridable (2026-06-17). Since 2026-07-11 papertrade_daily.sh runs this TWICE:
