@@ -170,6 +170,14 @@ def main():
     with open(tmp, "w") as f:
         json.dump({"thread_id": str(tid), "name": name, "posted_at": now.isoformat()}, f)
     os.replace(tmp, marker)      # marker ghi SAU khi post thành công
+    # Thread con của #mikefleet do bot tạo KHÔNG sinh thông báo (user không thấy 04/10, 05/10) ⇒
+    # nhắc 1 dòng kèm link <#id> vào Trading Daily — kênh user đang theo dõi. Best-effort.
+    try:
+        daily = int(subprocess.run([os.path.join(ROOT, "bin", "discord_channel.sh"), "trading_daily"],
+                                   capture_output=True, text=True, check=True).stdout.strip())
+        post({"message": f"📋 Việc cần quyết hôm nay ({name}): <#{tid}>", "channel_id": daily, "format": "text"})
+    except Exception as e:
+        print(f"CẢNH BÁO: không nhắc được ở Trading Daily: {e}", file=sys.stderr)
     print(f"OK topic {name} thread_id={tid}")
     return 0
 
