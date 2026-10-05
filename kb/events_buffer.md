@@ -557,3 +557,25 @@
 
 ## Consolidation 2026-10-05T17:36:07Z
 - [2026-10-05T17:36:02Z] Mike/finding — retro-2026-10-05: {"status": "logged", "entry": "kb/incidents/retro/retro-2026-10-05.md", "verified_by": "Wags — GAPS FOUND, fixed", "open": ["selfcheck-red 05:08 ICT x2 question Wags chưa đóng", "corp-action 03/10-04/10 chưa xác minh"], "money_incidents": 0}
+
+## Consolidation 2026-10-05T18:07:01Z
+- [2026-10-05T18:02:00Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "in_progress", "note": "đọc plan + code funnel hiện có"}
+- [2026-10-05T18:02:04Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "in_progress", "note": "start: doc plan + data_registry"}
+- [2026-10-05T18:02:26Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "in_progress", "note": "đọc xong plan + funnel cũ + loader BANNED/forensic; sắp đọc daily_decision_topic + dựng worktree"}
+- [2026-10-05T18:02:33Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "in_progress", "note": "reading ticker_financial cache, PVT/DRI data"}
+- [2026-10-05T18:02:53Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261005_180152", "source": "watcher"}
+- [2026-10-05T18:02:55Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261005_180155", "source": "watcher"}
+- [2026-10-05T18:03:28Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "in_progress", "note": "reconcile prior d_NPR research; next build lane-C backtest"}
+- [2026-10-05T18:03:53Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261005_180152", "source": "watcher"}
+- [2026-10-05T18:03:56Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261005_180155", "source": "watcher"}
+- [2026-10-05T18:03:58Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "in_progress", "note": "tái lập 11 mã làn A khớp Mike; tạo worktree feat/discretionary-8l-funnel-20261006; bắt đầu code"}
+- [2026-10-05T18:04:19Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "in_progress", "note": "preflight MARGINAL (excess Sharpe 0.5 needs ~30y); writing backtest script"}
+- [2026-10-05T18:04:53Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261005_180152", "source": "watcher"}
+- [2026-10-05T18:04:56Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261005_180155", "source": "watcher"}
+- [2026-10-05T18:05:53Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261005_180152", "source": "watcher"}
+- [2026-10-05T18:05:55Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "in_progress", "note": "running lane_c_backtest.py"}
+- [2026-10-05T18:05:56Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261005_180155", "source": "watcher"}
+- [2026-10-05T18:06:54Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261005_180152", "source": "watcher"}
+- [2026-10-05T18:06:56Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261005_180155", "source": "watcher"}
+- [2026-10-05T18:06:56Z] Taylor/heartbeat — Taylor_20261005_180152: {"status": "in_progress", "note": "funnel 2 làn chạy dry-run OK (A=9,B=18); đã nối khối D vào daily_decision_topic; đang viết selfcheck"}
+- [2026-10-05T18:06:58Z] Taylor/heartbeat — Taylor_20261005_180155: {"status": "in_progress", "note": "C1_GARP strong (t=5.3) -> leak/robustness hunt"}

@@ -15,3 +15,5 @@
 - Retro 10-06: đóng feed corp-action 03/10–04/10; đếm exit 7 dispatch.sh; đọc selfcheck-red.
 - KHÔNG đặt wakeup thăm dò khi không có job nền (user 10-05).
 
+- [2026-10-05T17:46:53Z] 06/10 01:0x: user chốt size 5%/mã, nhãn NGÀNH→Bobby trước Taylor; tôi đề xuất rating<=3 + làn B (1/PE top-3/route) + cổng giá trong phiên thay quét thứ Hai (bot 0 lệnh BUY trước 11:00 từ 26/08). Chờ user: duyệt dựng + PVT hấp dẫn vì đâu + tuỳ chọn tự hoãn lệnh mua.
+- [2026-10-05T18:02:51Z] 06/10 01:15: dispatch Taylor_20261005_180152 (dựng funnel A+B, branch, KHÔNG merge) + Taylor_20261005_180155 (nghiên cứu làn C/PVT). Cutloss trong phiên: đề xuất ghi trong plan (mặc định theo phán quyết GÃY=bán/CHƯA RÕ=50%/NHIỄU=giữ; loại custom30V; discretionary chỉ bán khi GÃY; shadow 5 phiên) — CHỜ user duyệt. Sau Taylor: review funnel, arch-review, cài cron 19:35.
