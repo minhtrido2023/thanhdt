@@ -1,48 +1,46 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Phễu candidate hệ thống cho sleeve margin đơn mã discretionary (TV1/DGC-style fear-buy) —
-VIỆC 2 của job discretionary-sleeve-candidate-funnel-20260830.
+"""Funnel 8L hằng ngày cho discretionary sleeve — 2 làn trên `data/rating_8l.csv`
+(plan `kb/projects/discretionary-8l-candidate-funnel-plan-20261006.md`, mục "Bản sửa sau trả lời
+user 2026-10-06"; job Taylor_20261005_180152). Chạy 19:35 ICT T2-T6 SAU `pt_8l_daily` 19:20.
+KHÔNG LLM, KHÔNG BQ — chỉ đọc file 8L đã chấm sẵn.
 
-Lỗ hổng nó vá: TV1/DGC vào sleeve qua quan sát TÌNH CỜ của user, không có phễu quét hệ thống,
-và KHÔNG có bước lọc marginability trong bất kỳ scan nào (TV1 UPCOM không marginable là lý do
-sleeve đang 0 case thật). Script này LẮP RÁP các mảnh đã có, KHÔNG viết lại logic:
-  1. Universe fear = washout>=30% (từ đỉnh cục bộ 400 ngày lịch) + dd52<=-20% (per-ticker, CÙNG
-     công thức capit_margin_lever — rolling 252-session high — áp cho từng mã thay vì VNINDEX)
-     AND [PB<1,0 tuyệt đối HOẶC (percentile PB<=70% AND PB<1,2)] — OR-logic PB thích ứng theo
-     chu kỳ, khoá bằng min-CV mechanical rule qua 7 episode lịch sử, quant-skeptic CONFIRMED
-     (job Taylor_20260830_085015 round 3, verify quant-skeptic_20260830_085357). Cơ sở
-     percentile = `universe_pit ∩ Volume>0` CÙNG NGÀY (không phải toàn bộ mã niêm yết) — xem
-     `research/discretionary_funnel_adaptive_pb_round3_20260830.md`. Washout/dd52 từ
-     `tav2_bq.ticker` JOIN `tav2_mike.universe_pit` (in_universe=True tại phiên gần nhất) —
-     cùng định nghĩa đã validate trong `research/discretionary_sleeve_correlation_risk_20260830.md`
-     (`analyze_corr.py` bước 1).
-  2. Quality floor = `data/rating_8l.csv` (rating_8l.py, 17:45 ICT hàng ngày) — golden floor
-     ROE_Min3Y>=0 AND CF_OA_3Y>0, rating<=3.
-  3. Negative screens = `data/insider_flags.json` (insider_flags.py) + cột `redflag` có sẵn
-     trong rating_8l.csv (NP_TTM<0 / debt/eq>3, forensic exclusion đã bake vào `rating`/`route`).
-  4. Marginability + %ADV = `marginability_check.py` (VIỆC 1, chỉ probe DNSE cho SHORTLIST đã
-     qua bước 1-3, không probe cả universe) + `adv_3m()` tái dùng nguyên hàm từ
-     `discretionary_margin_gate.py` (KHÔNG viết lại công thức ADV).
-  5. Cảnh báo tập trung ngành (informational, KHÔNG phải enforcement) — nếu >=2 mã cùng ICB
-     (CTCK=8777, hoá chất/phân bón=1357) đều fully_qualified, in cảnh báo theo risk-auditor
-     2026-08-30 (job Taylor_20260830_092103 bước 2, CONDITIONAL-APPROVE cả 2 cụm). Funnel này
-     STATELESS (không biết case nào đang armed) nên KHÔNG thể enforce cap "≤1 đồng thời mở" —
-     enforcement thật phải nằm ở `discretionary_margin_gate.py` (chưa làm, xem bus finding
-     discretionary-funnel-adaptive-pb-wire-step2-risk-20260830 + step3).
+Vũ trụ chất lượng (cả 2 làn): rating<=3 ∧ golden floor (ROE_Min3Y>=0 ∧ CF_OA_3Y>0) ∧ redflag rỗng
+∧ liq_bn>=0,3 tỷ ∧ KHÔNG thuộc: BANNED (`lag_forensic_filter.BANNED`) / `data/forensic_flags.csv`
+severity=exclude có hiệu lực (`lag_forensic_filter._load_forensic_excludes`) / cờ nội bộ bán còn
+trong cửa sổ 90 ngày (`anomaly_gate.insider_sell_flagged`). Kiểm CẢ 3, không giả định rating đã bake.
+  Làn A "lệch giá":   pb_z<=-1 ∧ drop_pct<=-20 (drop_pct ĐƠN VỊ %, vd -59.9).
+  Làn B "giá trị sâu": PE>0, xếp earn_yield GIẢM DẦN TRONG CÙNG route, top-3/route (loại trừ trước
+                      khi xếp — mã bị loại không chiếm chỗ). KHÔNG dùng composite value_score.
+Nhãn bối cảnh (KHÔNG loại): IDIO nếu drop_pct <= trung vị drop_pct cùng route (peer = mọi mã
+liq_bn>=0,3) − 15 điểm %; còn lại NGÀNH ⇒ "cần Bobby trước" (macro-strategist, mù forward return).
 
-Output: RECON — bảng xếp hạng ticker, KHÔNG auto-arm bất kỳ case nào. Người (Mike/user) review
-rồi mới đưa qua due-diligence sâu (fundamental-skeptic) và `discretionary_margin_gate.py arm`
-nếu muốn.
+Lớp washout(400d)/dd52 + PB OR-logic + marginability của bản 2026-08-30 KHÔNG nằm trong làn A:
+plan duyệt định nghĩa làn A chỉ bằng pb_z + drop_pct; AND thêm washout<=-30% sẽ cắt mất phần lớn
+11 mã đối chiếu, OR thêm dd52 sẽ nới rộng ra ngoài định nghĩa ⇒ mâu thuẫn ⇒ chọn theo plan. Đường
+cũ (BQ + probe DNSE margin) giữ nguyên sau cờ `--legacy-fear` để không mất code đã CONFIRMED.
+
+Trạng thái `data/discretionary_candidates_state.json` (khoá ticker|làn): chỉ BÁO khi
+  NEW      — chưa từng báo, HOẶC rời làn rồi quay lại khi đã quá cooldown 30 ngày lịch từ lần báo trước;
+  PBZ_DROP — pb_z <= pb_z lần báo trước − 0,5 (xấu đi đáng kể; KHÔNG chịu cooldown — mỗi bậc 0,5
+             là thông tin mới, tự giới hạn tần suất).
+Chạy lại cùng asof ⇒ cùng danh sách báo (mục có last_reported==asof), không ghi đè thông tin.
+Ghi kèm: log `data/discretionary_candidates_log.csv` (MỌI mã trong làn mỗi asof — đo forward excess,
+checkpoint 2027-04-06), snapshot PIT `data/rating_8l_daily/rating_8l_<asof>.csv`, kết quả
+`data/discretionary_funnel_latest.json`. Mọi ghi = tmp + os.replace. asof = ngày ICT của mtime
+`rating_8l.csv` (ngày tri thức 8L có mặt), KHÔNG phải ngày chạy.
 
 DÙNG:
-    python3 mike/bin/discretionary_candidate_funnel.py                  # chạy đầy đủ, in bảng
-    python3 mike/bin/discretionary_candidate_funnel.py --print-block    # khối text để nhúng
-                                                                          # vào prompt LLM khác
-    python3 mike/bin/discretionary_candidate_funnel.py --json out.json  # ghi thêm JSON
+    python3 mike/bin/discretionary_candidate_funnel.py               # chạy funnel, ghi file, in bảng
+    python3 mike/bin/discretionary_candidate_funnel.py --dry-run     # tính + in, KHÔNG ghi gì
+    python3 mike/bin/discretionary_candidate_funnel.py --print-block # topic sáng: ĐỌC file kết quả,
+                                                                       # không chạy lại funnel
+    python3 mike/bin/discretionary_candidate_funnel.py --legacy-fear [--json P --csv P]  # đường cũ
 """
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import subprocess
@@ -65,11 +63,36 @@ CLOUDSDK_CONFIG = "/home/trido/thanhdt/gcloud_dtienthanh"   # dtienthanh@gmail.c
                                                               # source wc_env.sh, đồng bộ
                                                               # insider_flags.py CLOUDSDK_CONFIG
 
-RATING_8L_CSV = os.path.join(WC_ROOT, "data", "rating_8l.csv")
-INSIDER_FLAGS_JSON = os.path.join(WC_ROOT, "data", "insider_flags.json")
+DATA_DIR = os.path.join(WC_ROOT, "data")
+RATING_8L_CSV = os.path.join(DATA_DIR, "rating_8l.csv")
+INSIDER_FLAGS_JSON = os.path.join(DATA_DIR, "insider_flags.json")
+FORENSIC_FLAGS_CSV = os.path.join(DATA_DIR, "forensic_flags.csv")
 RESEARCH_OUT_DIR = os.path.join(MIKE_ROOT, "agents", "Taylor", "research",
                                  "discretionary_sleeve_candidate_funnel_20260830")
 
+# --- Funnel 8L hằng ngày (plan 2026-10-06) ---
+LIQ_MIN_BN = 0.3                  # tỷ VND/ngày — đủ size 5% NAV (~50tr/TK) ở trần 10% ADV
+LANE_A_PBZ_MAX = -1.0
+LANE_A_DROP_MAX = -20.0           # drop_pct đơn vị % (Close vs đỉnh 3 tháng)
+LANE_B_TOP_PER_ROUTE = 3
+IDIO_GAP_PP = 15.0                # IDIO ⇔ drop_pct <= trung vị route − 15 điểm %
+PBZ_DROP_REPORT = 0.5
+COOLDOWN_DAYS = 30
+STALE_RATING_SESSIONS = 1         # kết quả cũ hơn 1 phiên giao dịch ⇒ cảnh báo trong topic
+
+LANE_NAMES = {"A": "lệch giá", "B": "giá trị sâu"}
+
+
+def daily_paths(base_dir=DATA_DIR):
+    """Đường dẫn các file của funnel hằng ngày; `base_dir` khác ⇒ sandbox (selfcheck/--out-dir)."""
+    return {
+        "state": os.path.join(base_dir, "discretionary_candidates_state.json"),
+        "log": os.path.join(base_dir, "discretionary_candidates_log.csv"),
+        "result": os.path.join(base_dir, "discretionary_funnel_latest.json"),
+        "snap_dir": os.path.join(base_dir, "rating_8l_daily"),
+    }
+
+# --- Đường cũ --legacy-fear (bản 2026-08-30, giữ nguyên) ---
 # Cohort thresholds — y hệt analyze_corr.py bước 1 (KHÔNG tự chế lại):
 WASHOUT_MIN_PCT = -0.30           # từ đỉnh cục bộ 400 NGÀY LỊCH (dd_stock)
 DD52_MAX_PCT = -0.20              # per-ticker, rolling 252-SESSION high (công thức capit_margin_lever)
@@ -89,6 +112,42 @@ RATING_MAX = 3                    # golden-floor gate (đồng quy ước discre
 
 # Marginability account — SpaceX, đồng bộ discretionary_margin_gate.py ONLY_ACCOUNT
 MARGIN_ACCOUNT = "0002023347"
+
+
+# Docstring gốc của đường cũ (2026-08-30) — các chú thích "docstring mục N" bên dưới trỏ vào đây:
+# """Phễu candidate hệ thống cho sleeve margin đơn mã discretionary (TV1/DGC-style fear-buy) —
+# VIỆC 2 của job discretionary-sleeve-candidate-funnel-20260830.
+#
+# Lỗ hổng nó vá: TV1/DGC vào sleeve qua quan sát TÌNH CỜ của user, không có phễu quét hệ thống,
+# và KHÔNG có bước lọc marginability trong bất kỳ scan nào (TV1 UPCOM không marginable là lý do
+# sleeve đang 0 case thật). Script này LẮP RÁP các mảnh đã có, KHÔNG viết lại logic:
+#   1. Universe fear = washout>=30% (từ đỉnh cục bộ 400 ngày lịch) + dd52<=-20% (per-ticker, CÙNG
+#      công thức capit_margin_lever — rolling 252-session high — áp cho từng mã thay vì VNINDEX)
+#      AND [PB<1,0 tuyệt đối HOẶC (percentile PB<=70% AND PB<1,2)] — OR-logic PB thích ứng theo
+#      chu kỳ, khoá bằng min-CV mechanical rule qua 7 episode lịch sử, quant-skeptic CONFIRMED
+#      (job Taylor_20260830_085015 round 3, verify quant-skeptic_20260830_085357). Cơ sở
+#      percentile = `universe_pit ∩ Volume>0` CÙNG NGÀY (không phải toàn bộ mã niêm yết) — xem
+#      `research/discretionary_funnel_adaptive_pb_round3_20260830.md`. Washout/dd52 từ
+#      `tav2_bq.ticker` JOIN `tav2_mike.universe_pit` (in_universe=True tại phiên gần nhất) —
+#      cùng định nghĩa đã validate trong `research/discretionary_sleeve_correlation_risk_20260830.md`
+#      (`analyze_corr.py` bước 1).
+#   2. Quality floor = `data/rating_8l.csv` (rating_8l.py, 17:45 ICT hàng ngày) — golden floor
+#      ROE_Min3Y>=0 AND CF_OA_3Y>0, rating<=3.
+#   3. Negative screens = `data/insider_flags.json` (insider_flags.py) + cột `redflag` có sẵn
+#      trong rating_8l.csv (NP_TTM<0 / debt/eq>3, forensic exclusion đã bake vào `rating`/`route`).
+#   4. Marginability + %ADV = `marginability_check.py` (VIỆC 1, chỉ probe DNSE cho SHORTLIST đã
+#      qua bước 1-3, không probe cả universe) + `adv_3m()` tái dùng nguyên hàm từ
+#      `discretionary_margin_gate.py` (KHÔNG viết lại công thức ADV).
+#   5. Cảnh báo tập trung ngành (informational, KHÔNG phải enforcement) — nếu >=2 mã cùng ICB
+#      (CTCK=8777, hoá chất/phân bón=1357) đều fully_qualified, in cảnh báo theo risk-auditor
+#      2026-08-30 (job Taylor_20260830_092103 bước 2, CONDITIONAL-APPROVE cả 2 cụm). Funnel này
+#      STATELESS (không biết case nào đang armed) nên KHÔNG thể enforce cap "≤1 đồng thời mở" —
+#      enforcement thật phải nằm ở `discretionary_margin_gate.py` (chưa làm, xem bus finding
+#      discretionary-funnel-adaptive-pb-wire-step2-risk-20260830 + step3).
+#
+# Output: RECON — bảng xếp hạng ticker, KHÔNG auto-arm bất kỳ case nào. Người (Mike/user) review
+# rồi mới đưa qua due-diligence sâu (fundamental-skeptic) và `discretionary_margin_gate.py arm`
+# nếu muốn.
 
 
 def _now_ict_iso():
@@ -392,28 +451,358 @@ def format_block(cohort, meta):
     return "\n".join(lines)
 
 
+# =============================================================================================
+# Funnel 8L hằng ngày (plan 2026-10-06) — làn A/B, sổ trạng thái, log, snapshot, khối topic
+# =============================================================================================
+
+def _atomic_write_text(path, text):
+    """tmp + os.replace (§5): kill giữa chừng không bao giờ để lại file ghi dở."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    tmp = f"{path}.tmp.{os.getpid()}"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, path)
+
+
+def _file_date_ict(path):
+    return dt.datetime.fromtimestamp(os.path.getmtime(path), tz=ICT).date()
+
+
+def prev_trading_day(d):
+    """Phiên giao dịch gần nhất TRƯỚC ngày d (bỏ T7/CN + lễ của trading_bot.vn_market)."""
+    from trading_bot.vn_market import is_holiday
+    d = d - dt.timedelta(days=1)
+    while d.weekday() >= 5 or is_holiday(d):
+        d -= dt.timedelta(days=1)
+    return d
+
+
+def load_exclusions(asof, forensic_csv=FORENSIC_FLAGS_CSV, insider=None):
+    """(banned:set, forensic:{ticker: ngày cờ}, insider:{ticker: rec}, warnings).
+    Tái dùng loader có sẵn — KHÔNG viết lại danh sách/công thức. Forensic chỉ áp khi
+    ngày cờ <= asof (chống look-ahead khi replay). `insider=None` ⇒ đọc file thật qua
+    `anomaly_gate.insider_sell_flagged` (cửa sổ 2 đầu asof-90d..asof)."""
+    from lag_forensic_filter import BANNED, _load_forensic_excludes
+    warnings = []
+    asof_ts = pd.Timestamp(asof)
+    if not os.path.exists(forensic_csv):
+        raise FileNotFoundError(f"thiếu {forensic_csv} — không lọc được forensic exclude, dừng")
+    forensic = {t: d for t, d in _load_forensic_excludes(forensic_csv).items() if d <= asof_ts}
+    if insider is None:
+        from anomaly_gate import insider_sell_flagged
+        _, i_warn = load_insider_flags()
+        if i_warn:
+            warnings.append(i_warn)
+        insider = insider_sell_flagged(asof, quiet=True)
+    return set(BANNED), forensic, dict(insider), warnings
+
+
+def build_lanes(rating, banned, forensic, insider):
+    """rating: DataFrame rating_8l.csv. Trả (cands, excluded):
+    cands    — 1 dòng / (ticker, làn) với nhãn bối cảnh;
+    excluded — mã ĐÁNG LẼ vào làn nhưng bị loại bởi BANNED/forensic/insider (minh bạch)."""
+    df = rating.copy()
+    df["golden_floor_pass"] = (df["ROE_Min3Y"] >= 0) & (df["CF_OA_3Y"] > 0)
+    quality = ((df["rating"] <= RATING_MAX) & df["golden_floor_pass"] & df["redflag"].isna()
+               & (df["liq_bn"] >= LIQ_MIN_BN))
+
+    def _why(t):
+        why = []
+        if t in banned:
+            why.append("BANNED")
+        if t in forensic:
+            why.append(f"forensic_exclude({forensic[t].date()})")
+        if t in insider:
+            why.append(f"insider_sell({insider[t].get('last_alert')})")
+        return ",".join(why)
+    df["excl_reason"] = df["ticker"].map(_why)
+    clean = df["excl_reason"] == ""
+
+    lane_a = quality & (df["pb_z"] <= LANE_A_PBZ_MAX) & (df["drop_pct"] <= LANE_A_DROP_MAX)
+    b_pool = quality & (df["PE"] > 0) & df["earn_yield"].notna()
+
+    def _top_b(mask):
+        sub = df[mask].sort_values(["route", "earn_yield", "ticker"],
+                                   ascending=[True, False, True])
+        sub = sub.groupby("route", sort=False).head(LANE_B_TOP_PER_ROUTE).copy()
+        sub["lane_rank"] = sub.groupby("route").cumcount() + 1
+        return sub
+
+    a = df[lane_a & clean].assign(lane="A", lane_rank=pd.NA)
+    b = _top_b(b_pool & clean).assign(lane="B")
+    cands = pd.concat([a, b], ignore_index=True)
+
+    # Minh bạch: ai bị loại khỏi làn VÌ danh sách loại trừ (B: so với top-3 khi KHÔNG loại trừ)
+    ex_a = df[lane_a & ~clean].assign(lane="A")
+    b_raw = _top_b(b_pool)
+    ex_b = b_raw[b_raw["excl_reason"] != ""].assign(lane="B")
+    excluded = pd.concat([ex_a, ex_b], ignore_index=True)[["ticker", "lane", "route", "excl_reason"]]
+
+    # Nhãn bối cảnh: trung vị drop_pct cùng route trên peer thanh khoản (liq>=0,3), KHÔNG chỉ
+    # trên mã chất lượng — "cả ngành cùng giảm" là câu hỏi về ngành, không về rổ rating.
+    peers = df[(df["liq_bn"] >= LIQ_MIN_BN) & df["drop_pct"].notna()]
+    med = peers.groupby("route")["drop_pct"].median()
+    cands["route_median_drop"] = cands["route"].map(med)
+    cands["context"] = (cands["drop_pct"] <= cands["route_median_drop"] - IDIO_GAP_PP).map(
+        {True: "IDIO", False: "NGÀNH"})
+    cands = cands.sort_values(["lane", "route", "lane_rank", "ticker"],
+                              na_position="last").reset_index(drop=True)
+    return cands, excluded
+
+
+def _num(x):
+    return None if x is None or pd.isna(x) else float(x)
+
+
+def update_state(state, cands, asof):
+    """state (dict, có thể rỗng) + cands hôm nay ⇒ (state_mới, reported: list[dict]).
+    Xem docstring module cho luật NEW / PBZ_DROP / cooldown. Thuần hàm, không I/O."""
+    asof_s = str(asof)
+    st = json.loads(json.dumps(state or {}))                  # deep copy
+    entries = st.setdefault("entries", {})
+    last_run = st.get("last_run_asof")
+    if last_run == asof_s:                                    # chạy lại cùng asof
+        ref_run = st.get("prev_run_asof")
+    else:
+        ref_run = last_run
+        st["prev_run_asof"] = last_run
+        st["last_run_asof"] = asof_s
+    asof_d = dt.date.fromisoformat(asof_s)
+
+    reported = []
+    for _, r in cands.iterrows():
+        key = f"{r['ticker']}|{r['lane']}"
+        pbz = _num(r.get("pb_z"))
+        e = entries.get(key)
+        reason = None
+        if e is None:
+            reason = "NEW"
+            e = entries[key] = {"ticker": r["ticker"], "lane": r["lane"],
+                                "first_seen": asof_s}
+        elif e.get("last_reported") == asof_s:
+            reason = e.get("last_reason")                    # idempotent: đã báo ở asof này
+        else:
+            continuous = e.get("last_seen") in (asof_s, ref_run)
+            last_rep = e.get("last_reported")
+            cooled = (last_rep is None or
+                      (asof_d - dt.date.fromisoformat(last_rep)).days >= COOLDOWN_DAYS)
+            prev_pbz = e.get("last_reported_pb_z")
+            if pbz is not None and prev_pbz is not None and pbz <= prev_pbz - PBZ_DROP_REPORT:
+                reason = "PBZ_DROP"
+            elif not continuous and cooled:
+                reason = "NEW"
+        if reason and e.get("last_reported") != asof_s:
+            e["prev_reported_pb_z"] = e.get("last_reported_pb_z")
+            e["last_reported"] = asof_s
+            e["last_reported_pb_z"] = pbz
+            e["last_reason"] = reason
+        e["last_seen"] = asof_s
+        if reason:
+            reported.append({"ticker": r["ticker"], "lane": r["lane"], "reason": reason,
+                             "prev_pb_z": e.get("prev_reported_pb_z")
+                             if reason == "PBZ_DROP" else None})
+    return st, reported
+
+
+def load_state(path):
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:                   # hỏng ⇒ raise, KHÔNG reset im lặng
+        return json.load(f)
+
+
+LOG_COLS = ["date", "ticker", "lane", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
+            "liq_bn", "earn_yield", "context", "reported"]
+
+
+def append_log(path, cands, asof, reported):
+    """Ghi MỌI mã trong làn của asof; idempotent theo ngày (xoá dòng cùng date rồi ghi lại)."""
+    rep = {(x["ticker"], x["lane"]): x["reason"] for x in reported}
+    rows = cands.assign(date=str(asof)).copy()
+    rows["reported"] = [rep.get((t, l), "") for t, l in zip(rows["ticker"], rows["lane"])]
+    rows = rows[LOG_COLS]
+    if os.path.exists(path):
+        old = pd.read_csv(path, dtype={"date": str})
+        rows = pd.concat([old[old["date"] != str(asof)], rows], ignore_index=True)
+    _atomic_write_text(path, rows.to_csv(index=False))
+    return len(rows)
+
+
+def snapshot_rating(src, snap_dir, asof):
+    """Chụp rating_8l.csv → snap_dir/rating_8l_<asof>.csv. 'created' | 'unchanged' | 'replaced'
+    (rating chạy lại cùng ngày ⇒ bản cuối ngày thắng)."""
+    dst = os.path.join(snap_dir, f"rating_8l_{asof}.csv")
+    with open(src, "rb") as f:
+        data = f.read()
+    if os.path.exists(dst):
+        with open(dst, "rb") as f:
+            if hashlib.md5(f.read()).hexdigest() == hashlib.md5(data).hexdigest():
+                return "unchanged", dst
+        status = "replaced"
+    else:
+        status = "created"
+    os.makedirs(snap_dir, exist_ok=True)
+    tmp = f"{dst}.tmp.{os.getpid()}"
+    with open(tmp, "wb") as f:
+        f.write(data)
+    os.replace(tmp, dst)
+    return status, dst
+
+
+def _rec(r):
+    keep = ["ticker", "lane", "lane_rank", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
+            "liq_bn", "earn_yield", "context", "route_median_drop"]
+    out = {}
+    for k in keep:
+        v = r.get(k)
+        if k in ("ticker", "lane", "route", "context"):
+            out[k] = v
+        elif k in ("rating", "lane_rank"):
+            out[k] = None if v is None or pd.isna(v) else int(v)
+        else:
+            out[k] = _num(v)
+    return out
+
+
+def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
+              forensic_csv=FORENSIC_FLAGS_CSV, insider=None):
+    """Chạy funnel 1 lần. Trả dict kết quả (đồng thời ghi file nếu write=True)."""
+    now = now or dt.datetime.now(ICT)
+    paths = daily_paths(base_dir)
+    if not os.path.exists(rating_csv):
+        raise FileNotFoundError(f"thiếu {rating_csv} — pt_8l_daily chưa chạy?")
+    asof = _file_date_ict(rating_csv)
+    warnings = []
+    if asof != now.date():
+        warnings.append(f"rating_8l.csv KHÔNG phải của hôm nay: mtime ICT {asof} "
+                        f"(chạy lúc {now:%Y-%m-%d %H:%M}) — pt_8l_daily 19:20 lỗi/trễ?")
+    rating = pd.read_csv(rating_csv)
+    banned, forensic, insider, ex_warn = load_exclusions(asof, forensic_csv, insider)
+    warnings += ex_warn
+    cands, excluded = build_lanes(rating, banned, forensic, insider)
+
+    state = load_state(paths["state"])
+    new_state, reported = update_state(state, cands, asof)
+    result = {
+        "asof": str(asof), "run_at": now.isoformat(), "rating_csv": rating_csv,
+        "warnings": warnings,
+        "n_lane_a": int((cands["lane"] == "A").sum()),
+        "n_lane_b": int((cands["lane"] == "B").sum()),
+        "n_tracking": int(cands["ticker"].nunique()),
+        "reported": reported,
+        "candidates": [_rec(r) for _, r in cands.iterrows()],
+        "excluded": excluded.to_dict(orient="records"),
+    }
+    if write:
+        snap_status, snap_path = snapshot_rating(rating_csv, paths["snap_dir"], asof)
+        result["snapshot"] = {"status": snap_status, "path": snap_path}
+        result["log_rows"] = append_log(paths["log"], cands, asof, reported)
+        _atomic_write_text(paths["state"], json.dumps(new_state, ensure_ascii=False, indent=1))
+        _atomic_write_text(paths["result"], json.dumps(result, ensure_ascii=False, indent=1))
+    return result
+
+
+def _vn(x, nd=1):
+    return "?" if x is None else f"{x:.{nd}f}".replace(".", ",")
+
+
+def candidate_line(c, reason=None, prev_pbz=None):
+    ctx = c["context"] + (" — cần Bobby trước" if c["context"] == "NGÀNH" else "")
+    lane = f"{c['lane']} {LANE_NAMES[c['lane']]}"
+    if c["lane"] == "B":
+        lane += f" #{c['lane_rank']} {c['route']}"
+    tag = ""
+    if reason == "PBZ_DROP":
+        tag = f" [pb_z giảm thêm từ {_vn(prev_pbz, 2)}]"
+    return (f"• {c['ticker']} · làn {lane} · rating {c['rating']} · PE {_vn(c['PE'])} · "
+            f"pb_z {_vn(c['pb_z'], 2)} · drop {_vn(c['drop_pct'])}% · liq {_vn(c['liq_bn'], 2)} tỷ"
+            f" · {ctx}{tag}")
+
+
+def format_topic_block(result, today):
+    """Khối cho daily_decision_topic.py. `result=None` ⇒ thiếu file (vẫn in, không im lặng)."""
+    head = "**D. Funnel 8L (discretionary)**"
+    if result is None:
+        return f"{head}\n⚠️ CHƯA có kết quả funnel ({daily_paths()['result']}) — cron 19:35 chưa chạy?"
+    lines = [f"{head} — dữ liệu 8L ngày {result['asof']}"]
+    asof = dt.date.fromisoformat(result["asof"])
+    expect = prev_trading_day(today)
+    if asof < expect:
+        lines.append(f"⚠️ KẾT QUẢ CŨ: asof {asof} < phiên gần nhất {expect} — funnel/pt_8l_daily "
+                     f"không chạy hoặc lỗi; danh sách dưới đây KHÔNG phải của phiên gần nhất.")
+    for w in result.get("warnings", []):
+        lines.append(f"⚠️ {w}")
+    by_key = {(c["ticker"], c["lane"]): c for c in result["candidates"]}
+    rep = result.get("reported", [])
+    if not rep:
+        lines.append(f"0 mới ({result['n_tracking']} đang theo dõi: A={result['n_lane_a']}, "
+                     f"B={result['n_lane_b']})")
+    else:
+        lines.append(f"{len(rep)} mã mới/xấu đi ({result['n_tracking']} đang theo dõi) — "
+                     f"chọn mã nào đáng làm due diligence (mặc định: không làm gì):")
+        for x in rep:
+            lines.append(candidate_line(by_key[(x["ticker"], x["lane"])], x["reason"],
+                                        x.get("prev_pb_z")))
+    return "\n".join(lines)
+
+
+def print_block(today=None, result_path=None):
+    today = today or dt.datetime.now(ICT).date()
+    path = result_path or daily_paths()["result"]
+    result = None
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            result = json.load(f)
+    return format_topic_block(result, today)
+
+
+def format_run_report(result):
+    lines = [f"=== Funnel 8L asof {result['asof']} (run {result['run_at']}) — "
+             f"A={result['n_lane_a']} B={result['n_lane_b']} theo dõi={result['n_tracking']} "
+             f"báo={len(result['reported'])} ==="]
+    for w in result["warnings"]:
+        lines.append(f"  CẢNH BÁO: {w}")
+    rep = {(x["ticker"], x["lane"]): x for x in result["reported"]}
+    for c in result["candidates"]:
+        x = rep.get((c["ticker"], c["lane"]))
+        mark = f"  <<< {x['reason']}" if x else ""
+        lines.append(candidate_line(c, x and x["reason"], x and x.get("prev_pb_z")) + mark)
+    for e in result["excluded"]:
+        lines.append(f"  LOẠI {e['ticker']} (làn {e['lane']}, {e['route']}): {e['excl_reason']}")
+    if "snapshot" in result:
+        lines.append(f"  snapshot: {result['snapshot']['status']} {result['snapshot']['path']}")
+        lines.append(f"  log: {result['log_rows']} dòng")
+    return "\n".join(lines)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                   formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--print-block", action="store_true",
-                     help="In khối text gọn để nhúng vào prompt (giống anomaly_scan --print-universe)")
-    ap.add_argument("--json", metavar="PATH", help="Ghi thêm JSON đầy đủ ra PATH")
-    ap.add_argument("--csv", metavar="PATH", help="Ghi thêm CSV đầy đủ ra PATH")
+                    help="Khối topic sáng: ĐỌC file kết quả mới nhất, không chạy lại funnel")
+    ap.add_argument("--dry-run", action="store_true", help="Tính + in, KHÔNG ghi file nào")
+    ap.add_argument("--out-dir", metavar="DIR",
+                    help="Ghi state/log/result/snapshot vào DIR thay vì data/ (sandbox)")
+    ap.add_argument("--legacy-fear", action="store_true",
+                    help="Đường cũ 2026-08-30: BQ washout/dd52 + PB OR-logic + probe margin DNSE")
+    ap.add_argument("--json", metavar="PATH", help="(--legacy-fear) ghi thêm JSON đầy đủ ra PATH")
+    ap.add_argument("--csv", metavar="PATH", help="(--legacy-fear) ghi thêm CSV đầy đủ ra PATH")
     args = ap.parse_args()
 
-
-    cohort, meta = run_funnel()
-
     if args.print_block:
-        print(format_block(cohort, meta))
-    else:
-        print(f"[{meta['run_at']}] universe_pit={meta.get('n_universe_pit')} "
-              f"fear_cohort={meta.get('n_fear_cohort')}")
-        for w in meta.get("warnings", []):
-            print(f"  CẢNH BÁO: {w}")
-        if not cohort.empty:
-            print(cohort[COLS_DISPLAY].to_string(index=False))
+        print(print_block(result_path=daily_paths(args.out_dir)["result"]
+                          if args.out_dir else None))
+        return 0
+    if args.legacy_fear:
+        return legacy_main(args)
+    result = run_daily(base_dir=args.out_dir or DATA_DIR, write=not args.dry_run)
+    print(format_run_report(result))
+    return 0
 
+
+def legacy_main(args):
+    cohort, meta = run_funnel()
+    print(format_block(cohort, meta))
     if args.json:
         os.makedirs(os.path.dirname(args.json) or ".", exist_ok=True)
         with open(args.json, "w", encoding="utf-8") as f:
@@ -422,7 +811,6 @@ def main():
     if args.csv:
         os.makedirs(os.path.dirname(args.csv) or ".", exist_ok=True)
         cohort.to_csv(args.csv, index=False)
-
     return 0
 
 
