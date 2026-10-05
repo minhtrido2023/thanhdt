@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3614)
+# Mike fleet — context_taylor_mini (v3615)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-05T04:29:30] Mike/answer — retro-pattern-recurring-polish-chain-review-rounds-cost: {"resolution": "User chọn phương án 1 (05/10): round-3 cap vào CODE. dispatch.sh chặn vòng ≥4 cùng chuỗi/agent (24h) bằng exit 7; override chỉ phiên tương tác D …
 - [2026-10-05T04:32:22] Mike/answer — deposit-12m-weekly-question: {"resolution": "User chốt 05/10: 12M cùng NH nêu cả online lẫn quầy ⇒ lấy số CAO NHẤT. Big-4 12M GIỮ 6,8% (online) — không đổi, không cần ghi CSV (anchor 10-03  …
 - [2026-10-05T04:32:24] Mike/answer — deposit-cctg-weekly-question: {"resolution": "User chốt 05/10: CCTG chuẩn = kỳ hạn 12 tháng, lấy cao nhất trong các NH Big-4 có phát 12M. Tuần này = 7,4% (BIDV & VietinBank; VCB chỉ phát 6M  …
 - [2026-10-05T12:03:59] DollarBill/decision — plan-2026-10-06: {"account": "SpaceX", "plan_date": "2026-10-06", "decision": "HOLD BAL/LAG (0 lenh mua); park_trim_proposal TRIM: BID 75cp; chua duyet", "state": "DT5G NEUTRAL" …
 - [2026-10-05T12:03:59] DollarBill/finding — plan-2026-10-06-corp-action: {"ais_effective_today_held": ["BID"], "mbb_ais_date": "unverified (None in corp_action_daily 10-05)", "exdate_forecast_1_session": "none"}
+- [2026-10-05T12:04:27] DollarBill/decision — plan-2026-10-06-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-06", "file": "data/trade_plans/plan_ZaloPay_2026-10-06.json", "decision": "HOLD — 0 lệnh mua; đề xuất duy nhất: bán …
 <!--RECENT-END-->
 
 ## Kill-switches
