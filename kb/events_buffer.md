@@ -533,3 +533,6 @@
 ## Consolidation 2026-10-05T13:07:02Z
 - [2026-10-05T12:13:09Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-10-05", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-10-05.md"}
 - [2026-10-05T12:16:03Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-10-05", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-10-05.md"}
+
+## Consolidation 2026-10-05T14:07:01Z
+- [2026-10-05T13:40:01Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [], "capped": [{"ticker": "VPB", "book": "LAG", "desired_qty": 282, "capped_qty": 0, "reason": "VPB book=LAG: Σ SELL kế hoạch (282cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
