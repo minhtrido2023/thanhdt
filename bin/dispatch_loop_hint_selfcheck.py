@@ -158,7 +158,9 @@ with tempfile.TemporaryDirectory() as td:
                        input=f"Vòng 3 branch {BR}", capture_output=True, text=True,
                        env=dict(os.environ, DISPATCH_LOOP_HINT_JOBS_DIR=str(td)))
     check("mutation_threshold_killed", "dispatch trước" not in r.stdout)
-    mut.write_text(src.replace("if s.lstrip().startswith(\"[RESUME\"):\n            continue", "pass"))
+    _rf = "if s.lstrip().startswith(_AUTO_PREFIX):\n            continue"
+    assert _rf in src, "mutation target trôi — cập nhật chuỗi _rf"
+    mut.write_text(src.replace(_rf, "pass"))
     with tempfile.TemporaryDirectory() as td5:
         seed(td5, "Taylor_r1", f"[RESUME #1] branch {BR}", age_s=7200)
         seed(td5, "Taylor_r2", f"[RESUME #2] branch {BR}")
