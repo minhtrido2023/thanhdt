@@ -187,7 +187,13 @@ User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 
 - Tần suất theo dõi: 15' khi bình thường, **1' khi đang bán**.
 - Báo Discord + Telegram mỗi lần khớp và khi đổi chế độ. `data/BOT_STOP` chặn mọi lệnh. Ghi trạng thái trước mỗi lệnh, đối chiếu sổ lệnh broker trước khi đặt (không bán trùng).
 - Sau bán: không mua lại 10 phiên trừ khi user duyệt; mã thuộc custom30V bị loại khỏi rổ tới khi review.
-- ⚠️ Cần xác minh khi dựng: DNSE thật có nhận lệnh ATO/ATC không (code hiện chỉ dùng LO; ATO/ATC mới thấy ở broker giả lập). Không nhận ⇒ thay bằng LO giá sàn đặt lúc 09:00.
+- **USER DUYỆT kịch bản 4 chế độ 2026-10-06 01:54 ICT** (`decided_by: user`). User xác nhận DNSE hỗ trợ **ATO, ATC và MP**.
+- **Dùng loại lệnh theo chế độ** (khi dựng vẫn phải gọi thử API DNSE với từng loại ở chế độ không khớp/shadow để xác nhận tham số, và kiểm theo SÀN — UPCOM có thể chỉ nhận LO ⇒ tự rơi về LO):
+  - Chế độ 1 Bình thường: **LO** tại giá mua tốt nhất (kiểm soát giá).
+  - Chế độ 2 Nhanh: **MP** cho từng lệnh con, mỗi lệnh con ≤ KL của 2 mức giá mua tốt nhất (MP không có giá chặn — giới hạn KL để không quét sâu sổ lệnh); phần MP chưa khớp sàn tự chuyển thành LO ⇒ đối chiếu sổ lệnh trước lệnh con kế tiếp.
+  - Chế độ 3 Khẩn: **LO tại giá sàn** cho toàn bộ (tương đương MP về tốc độ, nhưng phần dư giữ ưu tiên xếp hàng ở sàn).
+  - Chế độ 4 Kẹt sàn: giữ LO sàn; 14:30 **ATC** phần dư; phiên sau **ATO** trước 09:15.
+  - Ngoài giờ khớp lệnh liên tục: kích hoạt trong phiên ATO (09:00-09:15) ⇒ ATO; trong phiên ATC (14:30-14:45) ⇒ ATC.
 
 ### Dựng & kiểm chứng
 - 1 dispatch Opus high (Taylor, cùng engine `intraday_price_watch.py`) + arch-review + risk-auditor.
