@@ -37,6 +37,20 @@ NO_REBUY_SESSIONS = 10
 EXCHANGE_BAND = {"HOSE": 0.07, "HNX": 0.10, "UPCOM": 0.15}
 LOT = 100
 
+# ---------------------------------------------------------------- MẶC ĐỊNH AN TOÀN (r2, CHỜ USER CHỐT)
+# (a) Không có phán quyết của agent (hết giờ điều tra / dispatch hỏng / bị trần chặn) ≠ "CHƯA RÕ"
+#     do agent kết luận ⇒ GIỮ + cảnh báo lớn, KHÔNG bán 50%. Hằng số NON_AGENT_DEFAULT ở dưới
+#     (sau định nghĩa HOLD); đổi thành SELL_HALF = quay về hành vi r1.
+# (d) Ngưỡng TƯƠNG ĐỐI theo biên độ sàn (~45% biên) — CHỈ GHI LOG song song để so, hành động vẫn
+#     theo TRIG_RET/TRIG_IDIO. HOSE −5% đã cách sàn −7% ≤2% ⇒ mọi kích hoạt HOSE đều rút gọn.
+REL_TRIG = {"HOSE": -0.03, "HNX": -0.045, "UPCOM": -0.07}
+REL_IDIO = -0.03
+# Cảnh báo GỘP "cả thị trường" (không dispatch từng mã): ≥ N mã cùng kích hoạt trong 1 lượt quét,
+# hoặc ≥ M mã chạm sàn, hoặc thiếu VNINDEX (idio = ret — không tách được riêng/chung).
+MARKET_WIDE_MIN_HITS = 3
+MARKET_WIDE_MIN_FLOOR = 2
+REPLY_PREFIX_SHADOW = "SHADOW"   # trong shadow lệnh trả lời PHẢI có tiền tố này (tránh nhầm lệnh thật)
+
 # Giả định mô hình khớp shadow (KHÔNG phải tham số chính sách):
 PART_RESTING = 0.30       # lệnh LO đang chờ (không ở sàn) ăn ≤30% KL khớp mới phát sinh
 FLOOR_QUEUE_SHARE = 0.10  # lệnh xếp hàng ở giá sàn ăn ≤10% KL khớp tại sàn (vị trí hàng đợi không biết)
@@ -46,6 +60,7 @@ AUCTION_RESULT_WAIT_MIN = 20  # chờ KL phiên ATO/ATC tối đa (phút từ l�
 BROKEN, NOISE, UNCLEAR = "BROKEN", "NOISE", "UNCLEAR"
 VERDICT_VN = {BROKEN: "GÃY", NOISE: "NHIỄU", UNCLEAR: "CHƯA RÕ"}
 SELL_ALL, SELL_HALF, HOLD = "SELL_ALL", "SELL_HALF", "HOLD"
+NON_AGENT_DEFAULT = HOLD          # mặc định an toàn (a) — xem khối MẶC ĐỊNH AN TOÀN ở trên
 ACTION_VN = {SELL_ALL: "BÁN toàn bộ", SELL_HALF: "BÁN 50%", HOLD: "GIỮ"}
 DISCRETIONARY, UNKNOWN = "DISCRETIONARY", "UNKNOWN"
 V24_BOOKS = ("BAL", "LAG", "CAPIT", "CUSTOM30V")
@@ -53,18 +68,20 @@ MODE_VN = {1: "1-Bình thường", 2: "2-Nhanh", 3: "3-Khẩn", 4: "4-Kẹt sàn
 
 
 # ---------------------------------------------------------------- cổng kích hoạt
-def trigger_check(last, ref, floor, vni_last, vni_ref):
+def trigger_check(last, ref, floor, vni_last, vni_ref, ret_thr=None, idio_thr=None):
     """→ dict hoặc None (thiếu last/ref ⇒ KHÔNG phát biểu được, không phải "không kích hoạt").
 
     VNINDEX thiếu ⇒ idio = ret (coi VNINDEX đi ngang) và gắn cờ `vni_missing`: nghiêng về BÁO
     (shadow không đặt lệnh, báo thừa rẻ hơn bỏ sót)."""
     if not last or not ref:
         return None
+    ret_thr = TRIG_RET if ret_thr is None else ret_thr
+    idio_thr = TRIG_IDIO if idio_thr is None else idio_thr
     ret = last / ref - 1
     vni_ret = (vni_last / vni_ref - 1) if (vni_last and vni_ref) else None
     idio = ret - vni_ret if vni_ret is not None else ret
     at_floor = floor is not None and last <= floor + EPS
-    price_hit = ret <= TRIG_RET + EPS and idio <= TRIG_IDIO + EPS
+    price_hit = ret <= ret_thr + EPS and idio <= idio_thr + EPS
     reasons = []
     if at_floor:
         reasons.append("CHẠM SÀN")
@@ -74,12 +91,37 @@ def trigger_check(last, ref, floor, vni_last, vni_ref):
             "at_floor": at_floor, "reason": " + ".join(reasons), "vni_missing": vni_ret is None}
 
 
+def trigger_check_rel(last, ref, floor, vni_last, vni_ref, exchange):
+    """Ngưỡng tương đối theo biên độ sàn — CHỈ để ghi log so sánh (mặc định an toàn d)."""
+    return trigger_check(last, ref, floor, vni_last, vni_ref,
+                         ret_thr=REL_TRIG[(exchange or "HOSE").upper()], idio_thr=REL_IDIO)
+
+
+def market_wide_reason(hits):
+    """hits: các trigger dict ĐÃ kích hoạt trong 1 lượt quét → lý do gộp "cả thị trường" | None."""
+    if not hits:
+        return None
+    if any(h.get("vni_missing") for h in hits):
+        return "thiếu VNINDEX (idio = ret, không tách được riêng/chung)"
+    if len(hits) >= MARKET_WIDE_MIN_HITS:
+        return f"{len(hits)} mã cùng kích hoạt trong 1 lượt quét"
+    if sum(1 for h in hits if h.get("at_floor")) >= MARKET_WIDE_MIN_FLOOR:
+        return "nhiều mã cùng chạm sàn"
+    return None
+
+
 # ---------------------------------------------------------------- phán quyết → hành động
-def default_action(verdict, book):
+def default_action(verdict, book, source="agent", no_auto_sell=False):
     """Mặc định khi user im lặng (user chốt 01:00 + 01:12 ICT 06/10):
     GÃY ⇒ bán hết; CHƯA RÕ ⇒ bán 50%; NHIỄU ⇒ giữ. Discretionary sleeve CHỈ tự bán khi GÃY.
     Book không xác định (UNKNOWN) xử như discretionary — GIẢ ĐỊNH của Taylor (không tự bán khi
-    mơ hồ về nguồn gốc vị thế), báo cáo gắn cờ để user thấy."""
+    mơ hồ về nguồn gốc vị thế), báo cáo gắn cờ để user thấy.
+    r2 (mặc định an toàn, chờ user chốt): `no_auto_sell` (excluded_tickers / hạn chế giao dịch) ⇒
+    GIỮ; phán quyết KHÔNG đến từ agent (`source` ≠ "agent") ⇒ NON_AGENT_DEFAULT (GIỮ)."""
+    if no_auto_sell:
+        return HOLD
+    if source != "agent":
+        return NON_AGENT_DEFAULT
     if verdict == BROKEN:
         return SELL_ALL
     if book in (DISCRETIONARY, UNKNOWN):
@@ -108,7 +150,8 @@ def target_qty(action, qty):
 # ---------------------------------------------------------------- đọc trả lời user
 # Lệnh phải đứng RIÊNG một dòng ("BÁN PNJ", cho phép @mention phía trước và dấu câu cuối) — câu
 # thường như "không bán PNJ" / "hôm qua đã bán PNJ" KHÔNG được hiểu thành lệnh bán.
-_REPLY_RE = re.compile(r"(?m)^\s*(?:<@!?\d+>\s*)*(GIU|BAN\s*50\s*%|BAN)\s+([A-Z0-9]{3})\s*[.!]*\s*$")
+_REPLY_HEAD = r"(?m)^\s*(?:<@!?\d+>\s*)*"
+_REPLY_BODY = r"(GIU|BAN\s*50\s*%|BAN)\s+([A-Z0-9]{3})\s*[.!]*\s*$"
 _REPLY_ACTION = {"GIU": HOLD, "BAN": SELL_ALL}
 
 
@@ -118,19 +161,25 @@ def _fold(s):
     return "".join(ch for ch in s if unicodedata.category(ch) != "Mn").upper()
 
 
-def parse_reply(messages, ticker, since, until=None):
+def _reply_re(prefix):
+    return re.compile(_REPLY_HEAD + (rf"{prefix}\s+" if prefix else "") + _REPLY_BODY)
+
+
+def parse_reply(messages, ticker, since, until=None, prefix=None):
     """Lệnh MỚI NHẤT của user cho đúng `ticker` trong [since, until].
 
     messages: [{"is_bot", "content", "created_at": datetime ICT naive}] (driver đã đổi giờ).
-    Bỏ tin bot, tin trước `since` (= lúc gửi báo cáo/T0), tin sau `until`. → (action, msg) | (None, None)."""
+    Bỏ tin bot, tin trước `since` (= lúc gửi báo cáo/T0), tin sau `until`. → (action, msg) | (None, None).
+    `prefix` (vd "SHADOW"): bắt buộc đứng ngay trước động từ — "BÁN PNJ" trần KHÔNG được hiểu."""
     best = None
+    rx = _reply_re(_fold(prefix) if prefix else None)
     for m in messages:
         if m.get("is_bot"):
             continue
         ts = m.get("created_at")
         if ts is None or ts < since or (until is not None and ts > until):
             continue
-        for verb, tk in _REPLY_RE.findall(_fold(m.get("content"))):
+        for verb, tk in rx.findall(_fold(m.get("content"))):
             if tk != ticker.upper():
                 continue
             act = SELL_HALF if verb.startswith("BAN") and "50" in verb else _REPLY_ACTION[verb.split()[0]]

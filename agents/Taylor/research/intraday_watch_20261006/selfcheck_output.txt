@@ -1,8 +1,9 @@
 intraday_price_watch_selfcheck
+[ipw] ⚠ positions SpaceX: 401 token — TK này chỉ còn plan/watchlist trong lượt quét
 
   REPLAY PNJ discretionary (24/09 NHIỄU ⇒ giữ; 28/09 GÃY ⇒ bán hết)
-    2026-09-24: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=NOISE status=HOLD mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,300
-    2026-09-25: không kích hoạt (đóng cửa 33,000)
+    2026-09-24: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=NOISE status=AWAITING_REPLY mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,300
+    2026-09-25: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=NOISE status=HOLD mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,000
     2026-09-28: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -6.6%] phán quyết=BROKEN status=DONE mode=4 đã bán(mô phỏng) 1,400/1,400 giá TB 30,700 | đóng cửa 30,700
     2026-09-29: T0 09:30 [CHẠM SÀN + ret -6.8% ∧ idio -6.8%] phán quyết=None status=NO_POSITION mode=None đã bán(mô phỏng) 0/0 | đóng cửa 28,600
     2026-09-30: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -7.2%] phán quyết=None status=NO_POSITION mode=None đã bán(mô phỏng) 0/0 | đóng cửa 26,600
@@ -11,8 +12,8 @@ intraday_price_watch_selfcheck
     2026-10-05: T0 10:45 [ret -5.4% ∧ idio -5.7%] phán quyết=None status=NO_POSITION mode=None đã bán(mô phỏng) 0/0 | đóng cửa 21,650
 
   REPLAY PNJ discretionary — CẬN BI QUAN hàng đợi sàn = 0%
-    2026-09-24: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=NOISE status=HOLD mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,300
-    2026-09-25: không kích hoạt (đóng cửa 33,000)
+    2026-09-24: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=NOISE status=AWAITING_REPLY mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,300
+    2026-09-25: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=NOISE status=HOLD mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,000
     2026-09-28: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -6.6%] phán quyết=BROKEN status=EXECUTING mode=4 đã bán(mô phỏng) 0/1,400 | đóng cửa 30,700
     2026-09-29: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -6.6%] phán quyết=BROKEN status=EXECUTING mode=4 đã bán(mô phỏng) 0/1,400 | đóng cửa 28,600
     2026-09-30: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -6.6%] phán quyết=BROKEN status=EXECUTING mode=4 đã bán(mô phỏng) 0/1,400 | đóng cửa 26,600
@@ -21,8 +22,8 @@ intraday_price_watch_selfcheck
     2026-10-05: T0 10:45 [ret -5.4% ∧ idio -5.7%] phán quyết=None status=NO_POSITION mode=None đã bán(mô phỏng) 0/0 | đóng cửa 21,650
 
   REPLAY PNJ GIẢ ĐỊNH book V2.4 BAL (24/09 CHƯA RÕ ⇒ bán 50%)
-    2026-09-24: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=UNCLEAR status=DONE mode=0 đã bán(mô phỏng) 700/700 giá TB 33,300 | đóng cửa 33,300
-    2026-09-25: không kích hoạt (đóng cửa 33,000)
+    2026-09-24: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=UNCLEAR status=AWAITING_REPLY mode=None đã bán(mô phỏng) 0/0 | đóng cửa 33,300
+    2026-09-25: T0 14:15 [ret -5.4% ∧ idio -4.1%] phán quyết=UNCLEAR status=DONE mode=2 đã bán(mô phỏng) 700/700 giá TB 33,550 | đóng cửa 33,000
     2026-09-28: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -6.6%] phán quyết=BROKEN status=DONE mode=4 đã bán(mô phỏng) 700/700 giá TB 30,700 | đóng cửa 30,700
     2026-09-29: T0 09:30 [CHẠM SÀN + ret -6.8% ∧ idio -6.8%] phán quyết=None status=NO_POSITION mode=None đã bán(mô phỏng) 0/0 | đóng cửa 28,600
     2026-09-30: T0 09:30 [CHẠM SÀN + ret -7.0% ∧ idio -7.2%] phán quyết=None status=NO_POSITION mode=None đã bán(mô phỏng) 0/0 | đóng cửa 26,600
@@ -38,11 +39,11 @@ intraday_price_watch_selfcheck
 
   REPLAY TV1 SpaceX 2.300cp discretionary (16/07 NHIỄU ⇒ giữ)
     2026-07-15: không kích hoạt (đóng cửa 22,000)
-    2026-07-16: T0 13:45 [ret -6.4% ∧ idio -5.8%] phán quyết=NOISE status=HOLD mode=None đã bán(mô phỏng) 0/0 | đóng cửa 20,900
+    2026-07-16: T0 13:45 [ret -6.4% ∧ idio -5.8%] phán quyết=NOISE status=AWAITING_REPLY mode=None đã bán(mô phỏng) 0/0 | đóng cửa 20,900
 
-  REPLAY TV1 kịch bản GÃY (UPCOM ⇒ chỉ LO)
+  REPLAY TV1 kịch bản GÃY + user 'SHADOW BÁN TV1' 13:55 (UPCOM ⇒ chỉ LO)
     2026-07-15: không kích hoạt (đóng cửa 22,000)
-    2026-07-16: T0 13:45 [ret -6.4% ∧ idio -5.8%] phán quyết=BROKEN status=DONE mode=3 đã bán(mô phỏng) 2,300/2,300 giá TB 20,753 | đóng cửa 20,900
-    ⇒ giá TB bán 20,753 vs đóng cửa cuối 20,900 (-0.7%)
+    2026-07-16: T0 13:45 [ret -6.4% ∧ idio -5.8%] phán quyết=BROKEN status=DONE mode=3 đã bán(mô phỏng) 2,300/2,300 giá TB 20,855 | đóng cửa 20,900
+    ⇒ giá TB bán 20,855 vs đóng cửa cuối 20,900 (-0.2%)
 
-171/171 PASS
+268/268 PASS

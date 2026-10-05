@@ -1,0 +1,124 @@
+KILLED           trig_ret                 KeyError: 'XYZ'
+KILLED           trig_idio                266/268 PASS — 2 FAIL
+KILLED           trig_and_or              262/268 PASS — 6 FAIL
+KILLED           trig_no_floor            266/268 PASS — 2 FAIL
+KILLED           vni_missing_drop         266/268 PASS — 2 FAIL
+KILLED           disc_sells_unclear       262/268 PASS — 6 FAIL
+KILLED           unclear_sell_all         259/268 PASS — 9 FAIL
+KILLED           broken_hold              KeyError: 'SpaceX'
+KILLED           invest_compressed        263/268 PASS — 5 FAIL
+KILLED           invest_20_30             KeyError: 'verdict'
+KILLED           reply_30                 263/268 PASS — 5 FAIL
+KILLED           reply_compressed         265/268 PASS — 3 FAIL
+KILLED           room_compress            263/268 PASS — 5 FAIL
+KILLED           reply_bot_ok             267/268 PASS — 1 FAIL
+KILLED           reply_any_ticker         267/268 PASS — 1 FAIL
+KILLED           reply_since              267/268 PASS — 1 FAIL
+KILLED           reply_earliest           266/268 PASS — 2 FAIL
+KILLED           reply_unanchored         266/268 PASS — 2 FAIL
+KILLED           reply_half_as_all        265/268 PASS — 3 FAIL
+KILLED           upcom_atc_kept           266/268 PASS — 2 FAIL
+KILLED           hnx_ato_kept             267/268 PASS — 1 FAIL
+KILLED           upcom_atc_api            267/268 PASS — 1 FAIL
+KILLED           upcom_mp_api             266/268 PASS — 2 FAIL
+KILLED           mp_verified_claim        267/268 PASS — 1 FAIL
+KILLED           mode_no_depth            264/268 PASS — 4 FAIL
+KILLED           mode_room_urgent         267/268 PASS — 1 FAIL
+KILLED           mode_speed               265/268 PASS — 3 FAIL
+KILLED           mode_stuck_off           264/268 PASS — 4 FAIL
+KILLED           escalate_off             266/268 PASS — 2 FAIL
+KILLED           botstop_off              266/268 PASS — 2 FAIL
+KILLED           lunch_off                266/268 PASS — 2 FAIL
+KILLED           t2_ignored               266/268 PASS — 2 FAIL
+KILLED           atc_repeat               267/268 PASS — 1 FAIL
+KILLED           ato_off                  264/268 PASS — 4 FAIL
+KILLED           tranche_all              262/268 PASS — 6 FAIL
+KILLED           depth_share              267/268 PASS — 1 FAIL
+KILLED           urgent_at_bid            266/268 PASS — 2 FAIL
+KILLED           floor_requeue            267/268 PASS — 1 FAIL
+KILLED           floor_round_down         262/268 PASS — 6 FAIL
+KILLED           match_any_price          267/268 PASS — 1 FAIL
+KILLED           auction_wrong_kind       267/268 PASS — 1 FAIL
+KILLED           auction_no_wait          266/268 PASS — 2 FAIL
+KILLED           resting_px_floor         267/268 PASS — 1 FAIL
+KILLED           ro_allow_place           267/268 PASS — 1 FAIL
+KILLED           scan_every_min           KeyboardInterrupt: kill giả giữa lúc gửi
+KILLED           retrigger_daily          KeyError: 'verdict'
+KILLED           no_compress_check        267/268 PASS — 1 FAIL
+KILLED           no_timeout               KeyError: 'verdict'
+KILLED           default_early            256/268 PASS — 12 FAIL
+KILLED           ignore_user              KeyError: 'decision'
+KILLED           user_hold_no_stop        267/268 PASS — 1 FAIL
+KILLED           carry_hold               262/268 PASS — 6 FAIL
+KILLED           watch_dispatch           266/268 PASS — 2 FAIL
+KILLED           verdict_overrides_exec   267/268 PASS — 1 FAIL
+KILLED           holiday_run              267/268 PASS — 1 FAIL
+KILLED           no_rebuy_short           267/268 PASS — 1 FAIL
+KILLED           carry_mode_kept          267/268 PASS — 1 FAIL
+KILLED           defer_buys_off           266/268 PASS — 2 FAIL
+KILLED           tag_off                  267/268 PASS — 1 FAIL
+KILLED           R_flock_off              267/268 PASS — 1 FAIL
+KILLED           R_presave_dispatch_off   KeyboardInterrupt: kill giả giữa dispatch
+KILLED           R_acct_filter_off        267/268 PASS — 1 FAIL
+KILLED           R_mention_off            267/268 PASS — 1 FAIL
+KILLED           R_mode2_cancel_off       267/268 PASS — 1 FAIL
+SURVIVED         R_presave_notify_flush_off 268/268 PASS
+SURVIVED         R_presave_notify_both_off 268/268 PASS
+KILLED           R_presave_notify_all_off 267/268 PASS — 1 FAIL
+KILLED           S1_from_taylor           260/268 PASS — 8 FAIL
+KILLED           S1_retries               ValueError: '--retries' is not in list
+KILLED           S2_timeout_uncaught      subprocess.TimeoutExpired: Command '['/tmp/ipw_stub_ib41yn6x/dispatch.sh', 'Taylor', "[INTRADAY-WATCH DD — SHADOW, job cổng giá] Mã XYZ kích hoạt cổng giá trong phiên lúc 10:00 ICT: r (ret -6.0%, VNINDEX +0.0%). Đang giữ: không giữ. HẠN CỨNG 20 phút từ lúc kích hoạt — quá hạn hệ thống tự coi là CHƯA RÕ. Việc: (1) gọi Agent(subagent_type='legal-vn') đọc tin 48h gần nhất về XYZ (công bố thông tin, khởi tố, thanh tra, KQKD, giao dịch nội bộ, tin ngành); (2) kết luận đúng 1 nhãn: BROKEN (= GÃY: pháp lý dính pháp nhân/tài sản lõi, gian lận, KQKD sụp, mất khả năng thanh toán) / NOISE (= NHIỄU: không tìm thấy tin, tin cá nhân không dính lõi, cả ngành) / UNCLEAR (= CHƯA RÕ). Không bán theo tâm lý: không có tin thì là NOISE. (3) GHI phán quyết bằng đúng lệnh sau (sửa LABEL và SUMMARY ≤300 ký tự, có nguồn): CMD --label LABEL --summary 'SUMMARY'. KHÔNG đặt/huỷ lệnh, KHÔNG sửa plan — hệ thống tự áp hành động mặc định theo phán quyết. (Shadow: chạy thử.)", '--bg', '--thread', 'trading_daily', '--timeout', '1500', '--retries', '0', '--model', 'opus', '--effort', 'medium']' timed out after 1 seconds
+KILLED           S2_oserror_uncaught      FileNotFoundError: [Errno 2] No such file or directory: '/tmp/ipw_stub_cttg55pc/missing.sh'
+KILLED           S2_t0_lies               KeyError: 'job'
+KILLED           S2_t0_no_reason          266/268 PASS — 2 FAIL
+KILLED           S2_job_dead_off          267/268 PASS — 1 FAIL
+KILLED           S3_no_t0                 IndexError: list index out of range
+KILLED           S3_t0_mention_off        267/268 PASS — 1 FAIL
+KILLED           S3_flush_ignore_result   265/268 PASS — 3 FAIL
+KILLED           S3_flush_resend_all      262/268 PASS — 6 FAIL
+KILLED           S3_budget_off            267/268 PASS — 1 FAIL
+KILLED           S3_outbox_carry_off      267/268 PASS — 1 FAIL
+KILLED           S4_mw_off                261/268 PASS — 7 FAIL
+KILLED           S4_mw_vni_off            266/268 PASS — 2 FAIL
+KILLED           S4_mw_hits4              262/268 PASS — 6 FAIL
+KILLED           S4_mw_hits2              KeyError: 'BBB'
+KILLED           S4_mw_floor3             266/268 PASS — 2 FAIL
+KILLED           S4_mw_realert            267/268 PASS — 1 FAIL
+KILLED           S4_cap_scan_off          267/268 PASS — 1 FAIL
+KILLED           S4_cap_day_off           267/268 PASS — 1 FAIL
+KILLED           S4_halt_off              267/268 PASS — 1 FAIL
+KILLED           S4_priority_off          267/268 PASS — 1 FAIL
+KILLED           S5_quote_health_off      267/268 PASS — 1 FAIL
+KILLED           S5_ccdb_health_off       267/268 PASS — 1 FAIL
+KILLED           S5_health_ratelimit_off  267/268 PASS — 1 FAIL
+KILLED           S5_init_alert_off        267/268 PASS — 1 FAIL
+KILLED           S5_crash_alert_off       267/268 PASS — 1 FAIL
+KILLED           S5_crash_once_off        266/268 PASS — 2 FAIL
+KILLED           S5_eod_off               267/268 PASS — 1 FAIL
+KILLED           S5_eod_repeat            267/268 PASS — 1 FAIL
+KILLED           S5_pos_err_off           267/268 PASS — 1 FAIL
+KILLED           S5_chfail_off            267/268 PASS — 1 FAIL
+KILLED           S6_reply_no_prefix       KeyError: 'decision'
+KILLED           S6_note_off              267/268 PASS — 1 FAIL
+KILLED           S6_engine_prefix_off     KeyError: 'decision'
+KILLED           Da_non_agent_sells       256/268 PASS — 12 FAIL
+KILLED           Da_const_half            255/268 PASS — 13 FAIL
+KILLED           Da_src_mislabel          259/268 PASS — 9 FAIL
+KILLED           Db_default_off           263/268 PASS — 5 FAIL
+KILLED           Db_exec_off              267/268 PASS — 1 FAIL
+KILLED           Db_restricted_off        267/268 PASS — 1 FAIL
+KILLED           Dc_late_off              267/268 PASS — 1 FAIL
+KILLED           Dc_1415_off              267/268 PASS — 1 FAIL
+KILLED           Dc_reminder_off          267/268 PASS — 1 FAIL
+KILLED           Dc_reminder_dupe         267/268 PASS — 1 FAIL
+KILLED           Dd_alt_off               267/268 PASS — 1 FAIL
+KILLED           Dd_rel_hose              266/268 PASS — 2 FAIL
+KILLED           Dd_rel_idio              267/268 PASS — 1 FAIL
+KILLED           Dd_latency_off           267/268 PASS — 1 FAIL
+KILLED           B_c30v_label             267/268 PASS — 1 FAIL
+KILLED           B_prefixes_plan_only     267/268 PASS — 1 FAIL
+KILLED           B_bootstrap_off          267/268 PASS — 1 FAIL
+KILLED           B_sell_overrides         267/268 PASS — 1 FAIL
+
+119/121 đột biến bị giết; SURVIVED=['R_presave_notify_flush_off', 'R_presave_notify_both_off']; BAD=[]
+tương đương (đã phân tích, chấp nhận): ['R_presave_notify_both_off', 'R_presave_notify_flush_off']
