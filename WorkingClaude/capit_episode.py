@@ -36,6 +36,9 @@ Ledger: data/capit_episode.json — ghi atomic (tmp + os.replace, guidelines §5
 """
 import os, sys, json, glob, argparse
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: không tin TZ của host (cron 00:00-07:00 ICT lệch ngày)
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 LEDGER_PATH = os.path.join(WORKDIR, "data", "capit_episode.json")
@@ -348,7 +351,7 @@ def update(signal_date, signal_today, basket, size, session_dates,
             _try_close(ep, signal_date, signal_today)
             ep["last_update"] = signal_date
 
-        ledger["updated_at"] = datetime.now().isoformat(timespec="seconds")
+        ledger["updated_at"] = datetime.now(_ICT).replace(tzinfo=None).isoformat(timespec="seconds")
         if write:
             _save(ledger_path, ledger)
 
@@ -369,7 +372,7 @@ def close(episode_id, note, ledger_path=LEDGER_PATH):
             if ep.get("status") == "closed":
                 return f"{episode_id} đã đóng từ {ep.get('close_date')}"
             ep["status"] = "closed"
-            ep["close_date"] = datetime.now().strftime("%Y-%m-%d")
+            ep["close_date"] = datetime.now(_ICT).strftime("%Y-%m-%d")
             ep["close_reason"] = f"đóng TAY: {note}"
             _save(ledger_path, ledger)
             return f"{episode_id} -> closed ({note})"
