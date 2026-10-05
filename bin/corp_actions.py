@@ -224,13 +224,22 @@ def verify_against_bq(action, window_days=15):
         return {"verdict": "ERROR", "detail": f"suy hệ số ra số không hợp lệ (P_cum="
                                               f"{e.last_cum_price}, est={e.per_share})"}
     factor = e.last_cum_price / denom
-    ok = abs(factor - action["qty_multiplier"]) <= RATIO_TOL * action["qty_multiplier"]
+    # Sự kiện gộp CP+tiền cùng ex-date (vd TPB 2026-10-02): BQ điều chỉnh Close theo CẢ HAI chân
+    #   ⇒ hệ số kỳ vọng = mult × P_cum / (P_cum − cash). cash=0 ⇒ byte-identical hành vi cũ.
+    cash = float(action.get("cash_leg_vnd_per_share") or 0.0)
+    expected = action["qty_multiplier"]
+    if cash > 0:
+        if e.last_cum_price - cash <= 0:
+            return {"verdict": "ERROR", "detail": f"cash_leg {cash} >= P_cum {e.last_cum_price}"}
+        expected = expected * e.last_cum_price / (e.last_cum_price - cash)
+    ok = abs(factor - expected) <= RATIO_TOL * expected
     return {"verdict": "MATCH" if ok else "MISMATCH", "bq_max_date": max_date,
             "bq_factor": round(factor, 4), "declared_multiplier": action["qty_multiplier"],
+            "expected_factor": round(expected, 4), "cash_leg_vnd_per_share": cash,
             "last_cum_date": e.last_cum_date, "last_cum_price": e.last_cum_price,
             "detail": f"tỉ số Close/Price nhảy hệ số {factor:.4f} tại {ex} "
                       f"(giá cum {e.last_cum_price:,.0f} ngày {e.last_cum_date}) vs khai báo "
-                      f"{action['qty_multiplier']}"}
+                      f"{action['qty_multiplier']} (kỳ vọng gồm chân tiền {cash:,.0f}đ: {expected:.4f})"}
 
 
 def main():
