@@ -26,8 +26,12 @@ with tempfile.TemporaryDirectory() as td:
     ce.close("E1", "selfcheck", ledger_path=lp)
     led = json.load(open(lp))
     chk(f"close_date theo ICT (TZ host={os.environ.get('TZ')}) = 2026-10-05", led["episodes"][0].get("close_date") == "2026-10-05")
-    chk("updated_at (nếu có) ngày ICT 2026-10-05", str(led.get("updated_at", "2026-10-05")).startswith("2026-10-05"))
-    chk("updated_at không mang offset (giữ định dạng cũ)", "+" not in str(led.get("updated_at", "")))
+    # updated_at do update() ghi, KHÔNG phải close() ⇒ gọi update() thật trên sổ sandbox
+    lp2 = os.path.join(td, "ledger2.json")
+    ce.update("2026-10-05", False, [], 0.0, ["2026-10-05"], workdir=td, ledger_path=lp2, write=True)
+    ua = json.load(open(lp2)).get("updated_at")
+    chk(f"update() ghi updated_at (TZ host={os.environ.get('TZ')}) theo ICT: {ua}", isinstance(ua, str) and ua.startswith("2026-10-05T01:00"))
+    chk("updated_at không mang offset (giữ định dạng naive cũ)", isinstance(ua, str) and "+" not in ua and not ua.endswith("Z"))
 
 # ---- (b)(c) bot_execute
 import bot_execute as be
