@@ -116,6 +116,16 @@ mapfile -t SC_FILES < <( { ls -1 *_selfcheck.py *_selfcheck.sh; ls -1 mike/bin/*
 echo "Phạm vi: ${#SC_FILES[@]} selfcheck (gốc WorkingClaude + mike/bin, .py + .sh)."
 
 for f in "${SC_FILES[@]}"; do
+    # manual_only (kb/selfcheck_baseline.json): file TỰ KHAI chỉ-chạy-tay vì gọi dịch vụ ngoài THẬT
+    # (vd orb_pt_appendonly → vnstock x4). Bỏ qua, không đo, không vào known_red.
+    if python3 -c "
+import json,sys
+b=json.load(open('$BASELINE'))
+sys.exit(0 if '$f' in b['required_env'].get('manual_only',{}) else 1)
+"; then
+        echo "  SKIP (manual_only) $f"
+        continue
+    fi
     tmo="$(python3 -c "
 import json
 b=json.load(open('$BASELINE'))

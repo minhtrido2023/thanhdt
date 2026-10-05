@@ -1966,7 +1966,13 @@ echo "$MSG"
 # autofix (thêm Wags coord-2026-08-03). Trước đây KHÔNG có đường chạy thử: mỗi lần verify 1
 # fix của check này đều bắn 1 tin Trading Daily thật + 1 bus event + có thể spawn job autofix
 # → người sửa hoặc né verify, hoặc gây nhiễu vận hành. Mặc định (biến không set) = y như cũ.
-DRY_RUN="${OPS_HEALTH_DRY_RUN:-0}"
+# Trong job autofix (Wags_*/Winston_*, dispatch.sh export JOB_ID) mặc định DRY-RUN: verify 1 fix
+# không được bắn tin Trading Daily/bus thật (coord-2026-10-01: Wags_20261001_054510 chạy live, 2 event
+# 4a1a3747/3af22f79 là artifact verify chứ không phải checker thật). Ép chạy thật: OPS_HEALTH_DRY_RUN=0.
+case "${JOB_ID:-}" in
+  Wags_*|Winston_*) DRY_RUN="${OPS_HEALTH_DRY_RUN:-1}" ;;
+  *)                DRY_RUN="${OPS_HEALTH_DRY_RUN:-0}" ;;
+esac
 if [ "$DRY_RUN" = "1" ]; then
   echo "[DRY-RUN] bỏ qua: notify_thread (+dự phòng notify_telegram) / append_event / dispatch autofix"
 else
