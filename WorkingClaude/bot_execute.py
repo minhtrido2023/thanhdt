@@ -66,12 +66,25 @@ def _notify_gdkhq_shadow(message):
     script = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
     if not os.path.isfile(script):
         return
-    try:
-        for target in (_TRADING_DAILY_THREAD, _GDKHQ_DECISION_THREAD):
+    for target in (_TRADING_DAILY_THREAD, _GDKHQ_DECISION_THREAD):
+        # try/except PER target: lỗi/timeout ở topic đầu không được nuốt thông báo tới
+        # topic user duyệt rollout (_GDKHQ_DECISION_THREAD).
+        try:
             subprocess.run([script, message, target], timeout=20, check=False,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception:
-        pass
+        except Exception:
+            pass
+
+
+def _write_trace_atomic(trace_path, trace):
+    """Ghi trace JSON nguyên tử (tmp + fsync + os.replace): kill giữa chừng không để file nửa vời."""
+    tmp_path = trace_path + f".tmp.{os.getpid()}"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(trace, f, ensure_ascii=False, indent=2, default=str)
+        f.write("\n")
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_path, trace_path)
 
 
 def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
@@ -149,13 +162,7 @@ def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
     trace_dir = os.path.join(_WC_ROOT, "data", "gdkhq_shadow")
     os.makedirs(trace_dir, exist_ok=True)
     trace_path = os.path.join(trace_dir, f"gdkhq_shadow_{plan_date}.json")
-    tmp_path = trace_path + f".tmp.{os.getpid()}"
-    with open(tmp_path, "w", encoding="utf-8") as f:
-        json.dump(trace, f, ensure_ascii=False, indent=2, default=str)
-        f.write("\n")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp_path, trace_path)
+    _write_trace_atomic(trace_path, trace)
 
     trace["promoted"] = False
     stale = sorted({tk for a in trace["accounts"] for tk in (a.get("stale_frames") or [])})
@@ -206,13 +213,7 @@ def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
             verdict = (f"⛔ GDKHQ D1-D3 shadow {plan_date} PASS nhưng GHI SHADOW PASS LỖI — "
                        f"chưa thể nghiệm thu; cần xử lý trước khi bật vốn thật. {record_error}")
 
-    tmp_path = trace_path + f".tmp.{os.getpid()}"
-    with open(tmp_path, "w", encoding="utf-8") as f:
-        json.dump(trace, f, ensure_ascii=False, indent=2, default=str)
-        f.write("\n")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp_path, trace_path)
+    _write_trace_atomic(trace_path, trace)
     print(verdict)
     print(json.dumps(trace, ensure_ascii=False, indent=2, default=str))
     _notify_gdkhq_shadow(verdict)
