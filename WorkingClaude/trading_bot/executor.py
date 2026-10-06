@@ -946,7 +946,53 @@ class Executor:
             return False
         return "invalid ordertype" in str(e).lower()
 
-    def _retry_tick_mismatch(self, o, q, cross, extreme_down, px, qty, err):
+    def _sell_split_leg(self, o, qty):
+        """Lệnh con BÁN `qty` mà KHÔNG deal/gói vay nào đủ hàng một mình ⇒ (qty_chân, gói):
+        đặt CHÂN NÀY như một lệnh con bình thường (≤ sellable của MỘT gói, mang đúng id gói),
+        phần còn lại để các vòng sau tự tính lại trên positions mới. None ⇒ giữ NGUYÊN hành vi
+        cũ (có gói đủ / broker không hỗ trợ / lệnh đòn bẩy CAPIT / lỗi bất kỳ).
+
+        Sự cố 2026-10-06 ZaloPay PARKMERGE-SELL-BID: 27 = 1258:20 + 1826:7, một lệnh 27@1258 ⇒
+        DNSE HTTP 400 "Trade quantity not enough" — từ chối CẢ lệnh, không khớp một phần.
+
+        Vì sao tách ở EXECUTOR, tuần tự từng chân, chứ không bắn N lệnh trong broker:
+        mọi cơ chế an toàn (`_open_child` 1-lệnh-mở/parent, `_cancel_stale`, `cancel_all_open`,
+        CANCEL_FAIL của `_atc_sweep`, `_ghost_tickers`, `_save_state` ngay sau mỗi lệnh) giả định
+        MỘT oid mỗi lần đặt. Mỗi chân = một child bình thường ⇒ kill giữa 2 chân không tạo cửa
+        sổ mới: chân 1 đã ở state (hoặc là "ma" bị ghost-guard chặn), chân 2 chưa tồn tại và
+        sẽ được tính lại từ positions THẬT.
+
+        `o.loan_package_id` (đòn bẩy CAPIT) ≠ None ⇒ KHÔNG tách: tham số đó đi qua
+        `_validate_lever_package`, ngữ nghĩa khác, giữ nguyên đường cũ."""
+        if o.side != "sell" or getattr(o, "loan_package_id", None) is not None:
+            return None
+        fn = getattr(self.broker, "plan_sell_leg", None)
+        if fn is None:
+            return None
+        try:
+            leg = fn(o.ticker, qty)
+        except Exception:
+            return None
+        # Kiểu chặt: stub MagicMock trong selfcheck trả Mock "giống tuple" — không được
+        # để nó lọt thành một lệnh 1cp.
+        if not (isinstance(leg, tuple) and len(leg) == 2 and isinstance(leg[0], int)
+                and leg[1] is not None):
+            return None
+        lq, lp = leg
+        if not (0 < lq < qty) or (lq >= LOT and lq % LOT):
+            return None
+        return lq, lp
+
+    @staticmethod
+    def _split_leg_completed(ps):
+        """Chân tách gần nhất đã khớp ĐỦ ⇒ chân kế tiếp đi ngay, không chờ `slice_interval_min`
+        (8'): đó là MỘT lệnh bán bị cắt vì ràng buộc gói của broker, không phải 2 lát pacing."""
+        if not ps["children"]:
+            return False
+        c = ps["children"][-1]
+        return c.get("sell_lp") is not None and c.get("filled", 0) >= c["qty"]
+
+    def _retry_tick_mismatch(self, o, q, cross, extreme_down, px, qty, err, place_kw=None):
         """Khi place_order lỗi vì SAI BƯỚC GIÁ (xem `_is_invalid_tick_lot`): thử lại NGAY MỘT
         LẦN với quy ước bước giá còn lại (HOSE↔HNX/UPCOM — UPCOM dùng chung tick cố định 100đ
         với HNX nên chỉ cần đảo 2 chiều). Không tự đoán/khẳng định `exchange` thật của DNSE trả
@@ -969,7 +1015,8 @@ class Executor:
         try:
             oid = self.broker.place_order(o.ticker, qty, o.side, price=px_alt,
                                           cash_only=getattr(o, "cash_only", False),
-                                          loan_package_id=getattr(o, "loan_package_id", None))
+                                          loan_package_id=getattr(o, "loan_package_id", None),
+                                          **(place_kw or {}))
         except Exception:
             overrides.pop(o.ticker, None)     # vẫn lỗi ở exchange thay thế → không phải do tick, bỏ học
             return None
@@ -1961,7 +2008,7 @@ class Executor:
                 continue
             if ps["last_slice_ts"]:
                 since = (now - dt.datetime.fromisoformat(ps["last_slice_ts"])).total_seconds()
-                if since < interval and ps["children"]:
+                if since < interval and ps["children"] and not self._split_leg_completed(ps):
                     continue
             q = self.broker.get_quote(o.ticker)
             if q is None or not q.ok():
@@ -2031,6 +2078,13 @@ class Executor:
                             f"chưa đặt lệnh bán, thử lại chu kỳ sau"))
                         continue
                     qty = min(qty, cap)
+            # Không gói vay nào đủ hàng ⇒ chỉ đặt CHÂN đầu (≤ sellable 1 gói, đúng id gói);
+            # có gói đủ ⇒ leg None ⇒ lời gọi place_order byte-identical với trước.
+            place_kw, sell_lp = {}, None
+            leg = self._sell_split_leg(o, qty)
+            if leg is not None:
+                qty, sell_lp = leg
+                place_kw = {"sell_loan_package_id": sell_lp}
             if o.side == "buy":
                 need = qty * px * 1.0025
                 if self.broker.get_cash() < need:
@@ -2062,17 +2116,21 @@ class Executor:
             try:
                 oid = self.broker.place_order(o.ticker, qty, o.side, price=px,
                                               cash_only=getattr(o, "cash_only", False),
-                                              loan_package_id=getattr(o, "loan_package_id", None))
+                                              loan_package_id=getattr(o, "loan_package_id", None),
+                                              **place_kw)
             except Exception as e:
-                retry = self._retry_tick_mismatch(o, q, cross, extreme_down, px, qty, e)
+                retry = self._retry_tick_mismatch(o, q, cross, extreme_down, px, qty, e,
+                                                  place_kw)
                 if retry is None:
                     self._journal("PLACE_FAIL", o, qty=qty, price=px, note=str(e))
                     self._count_place_fail(ps, o, str(e), now)
                     continue
                 oid, px = retry
-            ps["children"].append({"oid": oid, "qty": qty, "price": px, "filled": 0,
-                                   "status": "open",
-                                   "ts": now.isoformat(timespec="seconds")})
+            child = {"oid": oid, "qty": qty, "price": px, "filled": 0, "status": "open",
+                     "ts": now.isoformat(timespec="seconds")}
+            if sell_lp is not None:
+                child["sell_lp"] = sell_lp     # chỉ chân tách mang khoá ⇒ state cũ y nguyên
+            ps["children"].append(child)
             self.shared[o.ticker] = self.shared.get(o.ticker, 0) + qty  # reserve quota
             ps["last_slice_ts"] = now.isoformat(timespec="seconds")
             capped = (o.side == "buy" and cross and q.ask and px < q.ask)
@@ -2092,7 +2150,8 @@ class Executor:
                 ft_note = ("ft:in-window" if ft_mult == 1.0 else f"ft:out×{ft_mult:.0f}")
             notes = [n for n in (dip_note,
                                  "nằm chờ tại trần đuổi" if capped else "",
-                                 gap_note, ft_note) if n]
+                                 gap_note, ft_note,
+                                 f"tách gói vay {sell_lp}" if sell_lp is not None else "") if n]
             baseline_note = "; ".join(notes)
             self._journal("PLACE", o, oid, qty, px, note=baseline_note)
             # Idempotency: ghi state NGAY sau khi broker xác nhận đặt lệnh, không đợi hết
@@ -2213,6 +2272,20 @@ class Executor:
                             f"ATC: chỉ {sellable:,} cp sellable (có thể đang chờ T+2 về) — bỏ qua"))
                         continue
                     remaining = min(remaining, cap)
+            # Không gói vay nào đủ `remaining` ⇒ ATC chỉ MỘT chân lô chẵn ở MỘT gói (ATC không
+            # nhận lô lẻ, và quét ATC là 1 lệnh/parent — `atc_sent`). Phần ở gói khác KHÔNG được
+            # quét ATC hôm nay (bán thiếu, không bao giờ bán vượt hay bị từ chối cả lệnh).
+            atc_kw = {}
+            leg = self._sell_split_leg(o, remaining)
+            if leg is not None:
+                if leg[0] < LOT:
+                    ps["atc_unsupported"] = True   # không chặn lại mỗi chu kỳ (cùng cờ UPCOM)
+                    self._journal("ATC_SPLIT_SKIP", o, note=(
+                        f"ATC: không gói vay nào giữ ≥1 lô chẵn cho {remaining}cp (chân lớn "
+                        f"nhất {leg[0]}cp @gói {leg[1]}) — ATC không nhận lô lẻ, bỏ quét ATC"))
+                    self._save_state()
+                    continue
+                remaining, atc_kw = leg[0], {"sell_loan_package_id": leg[1]}
             if ps.get("place_blocked"):
                 # Tới được đây = ATC THẬT SỰ sắp đi ra cho một lệnh đã bị dừng vòng slice.
                 self._journal("ATC_AFTER_BLOCK", o, qty=remaining, note=(
@@ -2222,12 +2295,17 @@ class Executor:
                 oid = self.broker.place_order(o.ticker, remaining, o.side,
                                               price=None, order_type="ATC",
                                               cash_only=getattr(o, "cash_only", False),
-                                              loan_package_id=getattr(o, "loan_package_id", None))
-                ps["children"].append({"oid": oid, "qty": remaining, "price": None,
-                                       "filled": 0, "status": "open",
-                                       "ts": now_ict().isoformat(timespec="seconds")})
+                                              loan_package_id=getattr(o, "loan_package_id", None),
+                                              **atc_kw)
+                child = {"oid": oid, "qty": remaining, "price": None,
+                         "filled": 0, "status": "open",
+                         "ts": now_ict().isoformat(timespec="seconds")}
+                if atc_kw:
+                    child["sell_lp"] = atc_kw["sell_loan_package_id"]
+                ps["children"].append(child)
                 ps["atc_sent"] = True
-                self._journal("ATC", o, oid, remaining, note="quét ATC phần còn lại")
+                self._journal("ATC", o, oid, remaining, note="quét ATC phần còn lại" + (
+                    f" — tách gói vay {atc_kw['sell_loan_package_id']}" if atc_kw else ""))
                 self._save_state()  # idempotency: ghi ngay, xem note ở _place_slices
             except Exception as e:
                 if self._is_invalid_ordertype(e):

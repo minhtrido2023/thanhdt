@@ -1013,6 +1013,10 @@ class DNSEBroker(BrokerBase):
              là "chọn gói ít tệ nhất", KHÔNG phải cam kết bán được một phần (arch-review
              2026-09-29 vòng 3 F-B: docstring cũ khẳng định fail-safe không có code đỡ, §29).
              Clamp `qty` là ĐỔI HÀNH VI đặt lệnh ⇒ cần bằng chứng hành vi DNSE trước, không đoán.
+             → Bằng chứng đã có 2026-10-06 (BID ZaloPay 1258:20 · 1826:7, bán 27 ⇒ HTTP 400
+             "Trade quantity not enough" — DNSE từ chối CẢ lệnh). Executor nay gọi
+             `plan_sell_leg` TRƯỚC: ca không gói nào đủ đi đường TÁCH (`sell_loan_package_id`),
+             không tới đây nữa. Nhánh này chỉ còn là dự phòng khi caller không tách được.
           3. Trong tập ĐỦ HÀNG đó, gói DEFAULT account được ưu tiên nếu có mặt — tie-break
              GIỮ NGUYÊN HÀNH VI CŨ ở mọi ca hành vi cũ vốn đã đúng. Đo trên snapshot thật
              2026-09-29 04:55: BID (1258:300 · 1826:100), MBB (1258:202 · 1826:400), VCB
@@ -1042,38 +1046,7 @@ class DNSEBroker(BrokerBase):
             print(f"[dnse] ⚠ positions lỗi khi giải gói vay lệnh BÁN {symbol} "
                   f"({type(e).__name__}: {e}) → gói default account (hành vi cũ)")
             return None
-        want_sym = str(symbol).strip().upper()
-        by_pkg = {}
-        for p in rows or []:
-            if str(qget(p, "status", default="OPEN")).upper() == "CLOSED":
-                continue
-            if str(qget(p, "symbol", "instrument", "code", default="")).strip().upper() != want_sym:
-                continue
-            lp = qget(p, "loanpackageid", "loanproductid")
-            if lp is None:
-                continue
-            total_raw = _fnum(qget(p, "openquantity", "quantity", "totalquantity",
-                                   "qty", default=0))
-            # `… or total` như get_positions() là SAI ở đây: `tradeQuantity` = 0 hợp lệ và
-            # có nghĩa (cổ phiếu chưa về T+2) — `0 or total` sẽ biến gói KHÔNG bán được
-            # thành ứng viên. Phân biệt "thiếu trường" (None) với "có trường, giá trị 0".
-            sellable_raw = _fnum(qget(p, "tradequantity", "availablequantity",
-                                      "sellablequantity", "availableqty", default=None))
-            # NaN/Infinity: `json.loads` nhận THẲNG token `NaN`/`Infinity`, và `int(nan)` ném
-            # ValueError / `int(inf)` ném OverflowError NGAY ĐÂY — ngoài `try` vốn chỉ bọc
-            # `positions_raw()` ⇒ ném ra khỏi `place_order` thay vì rơi về gói default như
-            # docstring khẳng định. Tệ hơn: `str(ValueError)` không mang "HTTP <nnn>" nên
-            # `_place_fail_structural` xếp là TẠM THỜI ⇒ retry VÔ HẠN, đúng hình dạng bão
-            # 2.628 lượt vừa vá (arch-review vòng 4 G-2, đo thật). Dòng không hữu hạn là dòng
-            # không dùng được ⇒ bỏ qua như mọi dòng rác khác.
-            if any(v is not None and not math.isfinite(v) for v in (total_raw, sellable_raw)):
-                continue
-            total = int(total_raw or 0)
-            sellable = int(sellable_raw) if sellable_raw is not None else total
-            if sellable <= 0:
-                continue
-            cur = by_pkg.setdefault(str(lp), {"id": lp, "sellable": 0})
-            cur["sellable"] += sellable
+        by_pkg = self._sell_pkg_inventory(rows, symbol)
         if not by_pkg:
             self._log_raw("sell_loan_package_resolve",
                           {"symbol": symbol, "qty": qty, "resolved": None,
@@ -1107,6 +1080,118 @@ class DNSEBroker(BrokerBase):
                        "any_pkg_covers_qty": bool(sufficient),
                        "by_package": {k: v["sellable"] for k, v in by_pkg.items()}})
         return pick["id"]
+
+    @staticmethod
+    def _sell_pkg_inventory(rows, symbol):
+        """Dòng positions THÔ → {str(loanPackageId): {"id", "sellable"}} cho riêng `symbol`,
+        chỉ gói còn hàng bán được (sellable > 0). Dùng chung cho `_resolve_sell_loan_package_id`
+        và `plan_sell_leg` để hai đường KHÔNG BAO GIỜ đếm sellable theo hai cách khác nhau."""
+        want_sym = str(symbol).strip().upper()
+        by_pkg = {}
+        for p in rows or []:
+            if str(qget(p, "status", default="OPEN")).upper() == "CLOSED":
+                continue
+            if str(qget(p, "symbol", "instrument", "code", default="")).strip().upper() != want_sym:
+                continue
+            lp = qget(p, "loanpackageid", "loanproductid")
+            if lp is None:
+                continue
+            total_raw = _fnum(qget(p, "openquantity", "quantity", "totalquantity",
+                                   "qty", default=0))
+            # `… or total` như get_positions() là SAI ở đây: `tradeQuantity` = 0 hợp lệ và
+            # có nghĩa (cổ phiếu chưa về T+2) — `0 or total` sẽ biến gói KHÔNG bán được
+            # thành ứng viên. Phân biệt "thiếu trường" (None) với "có trường, giá trị 0".
+            sellable_raw = _fnum(qget(p, "tradequantity", "availablequantity",
+                                      "sellablequantity", "availableqty", default=None))
+            # NaN/Infinity: `json.loads` nhận THẲNG token `NaN`/`Infinity`, và `int(nan)` ném
+            # ValueError / `int(inf)` ném OverflowError NGAY ĐÂY — ngoài `try` vốn chỉ bọc
+            # `positions_raw()` ⇒ ném ra khỏi `place_order` thay vì rơi về gói default như
+            # docstring khẳng định. Tệ hơn: `str(ValueError)` không mang "HTTP <nnn>" nên
+            # `_place_fail_structural` xếp là TẠM THỜI ⇒ retry VÔ HẠN, đúng hình dạng bão
+            # 2.628 lượt vừa vá (arch-review vòng 4 G-2, đo thật). Dòng không hữu hạn là dòng
+            # không dùng được ⇒ bỏ qua như mọi dòng rác khác.
+            if any(v is not None and not math.isfinite(v) for v in (total_raw, sellable_raw)):
+                continue
+            total = int(total_raw or 0)
+            sellable = int(sellable_raw) if sellable_raw is not None else total
+            if sellable <= 0:
+                continue
+            cur = by_pkg.setdefault(str(lp), {"id": lp, "sellable": 0})
+            cur["sellable"] += sellable
+        return by_pkg
+
+    @staticmethod
+    def _sell_split_legs(sellables, need):
+        """Kế hoạch tách THAM LAM `need` cp theo gói: [(id, qty), …]. `sellables` = list
+        (id, sellable). Mỗi chân lấy từ gói còn nhiều nhất (tie-break id — cùng khoá với
+        `_resolve_sell_loan_package_id` ⇒ chân đầu = đúng gói hàm đó chọn) và hợp lệ LÔ:
+        bội số 100, hoặc lô lẻ < 100 — KHÔNG BAO GIỜ trộn chẵn+lẻ (vd 120; HOSE từ chối).
+        Phần lô chẵn bị làm tròn xuống ở một gói vẫn còn đó cho các vòng sau (thành lô lẻ khi
+        `need` còn lại < 100). Dừng khi hết hàng — tổng chân có thể < `need`."""
+        from .vn_market import LOT, round_lot
+        left = {str(i): [i, int(s)] for i, s in sellables}
+        legs, rem = [], int(need)
+        while rem > 0:
+            cands = [v for v in left.values() if v[1] > 0]
+            if not cands:
+                break
+            v = max(cands, key=lambda x: (x[1], str(x[0])))
+            q = min(rem, v[1])
+            if q >= LOT:
+                q = round_lot(q)   # ≥1 lô ⇒ chỉ phần chẵn; < 1 lô ⇒ lô lẻ nguyên vẹn
+            legs.append((v[0], q))
+            v[1] -= q
+            rem -= q
+        return legs
+
+    def plan_sell_leg(self, symbol, qty):
+        """Lệnh con BÁN `qty` cp mà KHÔNG gói vay nào đủ hàng một mình ⇒ (qty_chân, id_gói)
+        của CHÂN ĐẦU TIÊN cần đặt NGAY; mọi ca khác ⇒ None = caller giữ NGUYÊN hành vi cũ
+        (place_order tự `_resolve_sell_loan_package_id` như trước).
+
+        Sự cố 2026-10-06 (ZaloPay, PARKMERGE-SELL-BID): bán 27 BID, deal 1258:20 + 1826:7.
+        Gửi một lệnh 27@1258 ⇒ DNSE HTTP 400 "Trade quantity not enough" ×5 ⇒
+        PLACE_FAIL_STOPPED. Bằng chứng hành vi: DNSE KHÔNG khớp một phần theo gói — từ chối
+        CẢ lệnh. Nên lệnh bán phải ≤ sellable của MỘT gói và mang đúng id gói đó.
+
+        Chỉ trả CHÂN ĐẦU: executor đặt chân này như một lệnh con BÌNH THƯỜNG (state, ghost
+        guard, fill, huỷ/đặt lại đều y hệt); chân kế tiếp do vòng `_place_slices` sau tính lại
+        trên positions MỚI — không có lô lệnh nào "đã tính trước" mà kill giữa chừng có thể
+        đặt lặp. Toàn bộ kế hoạch tách vẫn được ghi log để audit.
+
+        positions lỗi ⇒ None + log (place_order sẽ tự rơi về gói default như cũ)."""
+        try:
+            need = int(qty)
+        except (TypeError, ValueError):
+            return None
+        if need <= 0:
+            return None
+        try:
+            rows = self.positions_raw()
+        except Exception as e:
+            self._log_raw("sell_loan_package_resolve",
+                          {"symbol": symbol, "qty": need, "resolved": None,
+                           "rule": "TÁCH: LỖI-đọc-positions → không tách (hành vi cũ)",
+                           "error": f"{type(e).__name__}: {e}",
+                           "account_default": self._account_default_lp()})
+            return None
+        by_pkg = self._sell_pkg_inventory(rows, symbol)
+        if not by_pkg or any(v["sellable"] >= need for v in by_pkg.values()):
+            return None   # có gói đủ / không gói nào ⇒ đường cũ quyết, KHÔNG đổi gì
+        legs = self._sell_split_legs([(v["id"], v["sellable"]) for v in by_pkg.values()], need)
+        if not legs:
+            return None
+        lp, q = legs[0]
+        self._log_raw("sell_loan_package_resolve",
+                      {"symbol": symbol, "qty": need, "resolved": lp,
+                       "rule": "TÁCH-theo-gói (KHÔNG gói nào đủ qty — lệnh con ≤ sellable 1 gói)",
+                       "account_default": self._account_default_lp(),
+                       "any_pkg_covers_qty": False,
+                       "by_package": {k: v["sellable"] for k, v in by_pkg.items()},
+                       "split_plan": [[i, n] for i, n in legs],
+                       "leg_now": [lp, q],
+                       "split_uncovered": need - sum(n for _, n in legs)})
+        return q, lp
 
     def _validate_lever_package(self, symbol, want):
         """Gói vay CHỈ ĐỊNH `want` có hợp lệ cho `symbol` không → (id_sẽ_dùng, ok, note).
@@ -1144,8 +1229,15 @@ class DNSEBroker(BrokerBase):
         return res
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    cash_only=False, loan_package_id=None):
+                    cash_only=False, loan_package_id=None, sell_loan_package_id=None):
+        """`sell_loan_package_id`: gói của CHÂN TÁCH do `plan_sell_leg` chọn (chỉ lệnh BÁN,
+        chỉ khi không gói nào đủ hàng). Đường RIÊNG, cố ý KHÔNG đi qua `loan_package_id` —
+        tham số đó là đòn bẩy CAPIT và bị `_validate_lever_package` đối chiếu danh sách SẢN
+        PHẨM vay (ngữ nghĩa khác: "gói được phép vay", không phải "gói đang giữ deal")."""
         lever_note, lever_ok = "", None
+        if sell_loan_package_id is not None and (side != "sell" or loan_package_id is not None):
+            raise ValueError(f"sell_loan_package_id chỉ dùng cho lệnh BÁN không đòn bẩy "
+                             f"(side={side}, loan_package_id={loan_package_id})")
         if loan_package_id is not None:
             # Gói CHỈ ĐỊNH (đòn bẩy CAPIT) — ưu tiên cao nhất, nhưng phải hợp lệ với mã.
             lp, lever_ok, lever_note = self._validate_lever_package(symbol, loan_package_id)
@@ -1168,19 +1260,24 @@ class DNSEBroker(BrokerBase):
             # kb/incidents/2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md).
             # Không resolve được (positions lỗi/rỗng/mã không có vị thế) → None → rơi đúng
             # về gói default như cũ (fail-safe: không bao giờ tệ hơn hành vi trước).
-            lp = self._resolve_sell_loan_package_id(symbol, qty)
+            # Chân tách (2026-10-06): gói đã chọn cùng chu kỳ từ positions_raw ⇒ dùng thẳng.
+            lp = (sell_loan_package_id if sell_loan_package_id is not None
+                  else self._resolve_sell_loan_package_id(symbol, qty))
         # lp None ⇒ gói default CỦA account này, tường minh — trước đây dnse_api tự
         # rơi về client.loan_package_id (dùng chung giữa account, xem _account_default_lp).
         lp_sent = lp if lp is not None else self._account_default_lp()
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
                                     side=side, order_type=order_type, price=price,
                                     loan_package_id=lp_sent)
-        self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
-                                      "cash_only": cash_only, "loan_package_id": lp,
-                                      "loan_package_id_sent": lp_sent,
-                                      "lever_requested": loan_package_id,
-                                      "lever_applied": lever_ok, "lever_note": lever_note,
-                                      "resp": r})
+        log = {"req": [symbol, qty, side, price, order_type],
+               "cash_only": cash_only, "loan_package_id": lp,
+               "loan_package_id_sent": lp_sent,
+               "lever_requested": loan_package_id,
+               "lever_applied": lever_ok, "lever_note": lever_note,
+               "resp": r}
+        if sell_loan_package_id is not None:   # khoá chỉ có ở chân tách ⇒ đường cũ byte-identical
+            log["sell_split_leg"] = True
+        self._log_raw("place_order", log)
         oid = qget(r, "id", "orderid", "orderId")
         if oid is None:
             raise RuntimeError(f"place_order không trả id: {r}")
