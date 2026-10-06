@@ -667,7 +667,7 @@ def test_lane_c_build(tmp):
           "biên YoY 300%: =300% không nhãn, >300% có")
     for g, shown, ext in ((3.004, "+300%", False), (3.006, "+301%", True)):
         check(F._pct(g) == shown and (F.LANE_C_EXTREME_LABEL in F.lane_c_label(g)) == ext
-              and F._c_priority({"ticker": "X", "g_yoy": g})[0] == ext,
+              and F._c_priority({"ticker": "X", "g_yoy": g})[1] == ext,
               f"nhãn >300% khớp SỐ HIỂN THỊ ({g}: {F._pct(g)}, {F.lane_c_label(g)})")
 
 
@@ -728,9 +728,17 @@ def test_lane_c_state():
     check([r["reason"] for r in rep] == ["NEW"], f"đối chứng: rời làn thật ⇒ NEW (test có lực): {rep}")
     # Phiên C lỗi CHỈ kéo dài mục còn liên tục (last_seen == phiên trước): K1 đã rời làn 11-09 ⇒
     # phiên lỗi 11-10 KHÔNG được hồi sinh nó; 11-11 có lại ⇒ NEW
+    # (từ 2026-10-06: K1 rời làn + quá cooldown ⇒ đã bị DỌN ở 11-09; phiên lỗi không dọn/không hồi sinh)
+    check("K1|C" not in s2x["entries"] and [x["reason"] for x in s2x["prune_log"]] == ["STALE"],
+          f"rời làn + quá cooldown ⇒ dọn STALE: {s2x['entries']} {s2x.get('prune_log')}")
     s3x, _ = F.update_state(s2x, c_cands({}), d("2026-11-10"), ("C",))
-    check(s3x["entries"]["K1|C"]["last_seen"] == "2026-10-01",
-          f"phiên lỗi không kéo dài mục đã rời làn: {s3x['entries']['K1|C']}")
+    check("K1|C" not in s3x["entries"], f"phiên lỗi không hồi sinh mục đã dọn: {s3x['entries']}")
+    # Mục rời làn CHƯA hết cooldown (không bị dọn): phiên lỗi KHÔNG kéo dài last_seen của nó
+    t1, _ = F.update_state({}, c_cands({"K2": 0.5}), d("2026-11-01"))
+    t2, _ = F.update_state(t1, c_cands({}), d("2026-11-09"))
+    t3, _ = F.update_state(t2, c_cands({}), d("2026-11-10"), ("C",))
+    check(t3["entries"]["K2|C"]["last_seen"] == "2026-11-01",
+          f"phiên lỗi không kéo dài mục đã rời làn: {t3['entries']['K2|C']}")
     _, rep = F.update_state(s3x, c_cands({"K1": 0.5}), d("2026-11-11"))
     check([r["reason"] for r in rep] == ["NEW"], f"rời làn → phiên lỗi → có lại ⇒ NEW: {rep}")
     # Làn C lỗi ngay phiên đầu ⇒ chưa seed; phiên sau có dữ liệu ⇒ seed (không flood)
@@ -848,7 +856,8 @@ def test_lane_c_isolated(tmp):
     write_fin(fp, c_fin())
     now = dt.datetime(2026, 10, 5, 19, 35, tzinfo=ICT)
     ok = F.run_daily(rcsv, os.path.join(tmp, "iso0"), False, now, fcsv, {}, fp)
-    check(ok["lane_c_ok"] and ok["n_lane_c"] > 0, "đối chứng: fin hợp lệ ⇒ làn C chạy")
+    check(ok["lane_c_ok"] and ok["n_lane_c"] > 0 and ok["n_lane_c_seasonal"] == 0,
+          f"đối chứng: fin hợp lệ ⇒ làn C chạy; fin 1 quý ⇒ 0 mã mùa vụ: {ok.get('n_lane_c_seasonal')}")
 
     def boom(*a, **k):
         raise KeyError("cot_la")
@@ -877,6 +886,361 @@ def test_lane_c_isolated(tmp):
               f"{name} lỗi ⇒ khối nói KHÔNG CHẠY:\n{b}")
 
 
+# ------------------------------------------------------- mùa vụ / FIFO / quý mới nhất / dọn state
+# (job Taylor_20261006_052500)
+def _qs(start, n):
+    y, q = int(start[:4]), int(start[5])
+    out = []
+    for _ in range(n):
+        out.append(f"{y}Q{q}")
+        q += 1
+        if q == 5:
+            y, q = y + 1, 1
+    return out
+
+
+def hist(t, vals, start="2020Q4", last_known="2026-07-30"):
+    """Chuỗi NP quý liên tục từ `start`; NP_P1/NP_P4 lấy từ chính chuỗi. Ngày biết = cuối quý + 30
+    ngày; quý cuối = `last_known`. None trong vals = quý thiếu NP_P0."""
+    qs = _qs(start, len(vals))
+    rows = []
+    for i, (q, v) in enumerate(zip(qs, vals)):
+        qe = F.quarter_end(pd.Series([q])).iloc[0].date()
+        k = (qe + dt.timedelta(days=30)).isoformat() if i < len(vals) - 1 else last_known
+        rows.append(fin_row(t, v, vals[i - 1] if i >= 1 else None, vals[i - 4] if i >= 4 else None,
+                            known=k, quarter=q))
+    return rows
+
+
+SEAS_PAT = (1.0, 0.4, 0.8, 1.5)                      # Q1..Q4 (kiểu cao su: Q2 đáy)
+
+
+def seasonal_vals(q2_qoq=0.81, q1_mult=2.0, pat=SEAS_PAT, start="2020Q4"):
+    """2020Q4..2025Q4 theo mẫu mùa vụ (tăng 5%/năm, nhiễu tất định ±3%), 2026Q1 cao, 2026Q2 = Q1×q2_qoq."""
+    vals = []
+    for i, q in enumerate(_qs(start, 21)):
+        y, qn = int(q[:4]), int(q[5])
+        vals.append(100.0 * pat[qn - 1] * 1.05 ** (y - 2020) * (1 + 0.03 * ((i * 7) % 3 - 1)))
+    q1 = vals[-4] * q1_mult                                    # 2026Q1 = q1_mult × 2025Q1
+    return vals + [q1, q1 * q2_qoq]
+
+
+DRI_REAL = [36.39, 16.34, 29.97, 14.74, 15.75, 20.93, 16.32, -5.86, 28.53, 14.78, 16.98, 10.94, 31.41,
+            20.94, 9.47, 39.92, 38.43, 55.95, 21.87, 38.98, 40.6, 78.42, 63.79]      # 2020Q4..2026Q2, tỷ
+PVT_REAL = [262.45, 136.41, 241.42, 94.3, 196.81, 152.52, 207.1, 270.8, 206.78, 181.87, 309.14, 249.19,
+            230.16, 230.92, 288.28, 364.97, 209.06, 215.06, 294.78, 263.38, 265.9, 319.05, 552.88]
+
+
+def season_fin():
+    rows = [fin_row(f"GB{i}", 100.0, 100.0, 100.0) for i in range(3)]
+    rows += hist("DRS", seasonal_vals())                         # mùa vụ, QoQ −19% < 0 nhưng > chuẩn ⇒ VÀO
+    rows += hist("SNG", seasonal_vals(q2_qoq=0.30))              # mùa vụ, QoQ −70% tệ hơn chuẩn −60% ⇒ RA
+    rows += hist("SUP", seasonal_vals(q2_qoq=1.20, q1_mult=3.0, pat=(1.0, 2.0, 1.0, 1.0)))  # chuẩn +100%, QoQ +20% ⇒ RA
+    rows += hist("SHR", seasonal_vals()[-10:], start="2024Q1")   # mẫu y hệt DRS nhưng 2,5 năm ⇒ luật cũ ⇒ RA
+    gap = seasonal_vals()
+    rows += [r for r in hist("GAP", gap) if r["quarter"] not in ("2022Q1", "2023Q1", "2024Q1")]  # thủng ⇒ <3 năm/cặp
+    rows += hist("MID", seasonal_vals(q2_qoq=0.90, pat=(1.0, 0.83, 1.0, 1.17)))  # η² ≈0,56 < 0,6 ⇒ luật cũ ⇒ RA
+    rows += hist("MD6", seasonal_vals(q2_qoq=0.90, pat=(1.0, 0.80, 1.0, 1.20)))  # η² ≈0,64 ∈ [0,6; 0,7) ⇒ mùa vụ ⇒ VÀO
+    rows += [r for r in hist("NQ4", seasonal_vals()) if not r["quarter"].endswith("Q4")]  # mất 2 cặp ⇒ RA
+    rows += [fin_row("DUP", 200.0, 150.0, 100.0, "2026-07-30", "2026Q2"),     # Q2 bản đầu qua làn C …
+             fin_row("DUP", 100.0, 100.0, 100.0, "2026-09-01", "2026Q2"),     # … bản đính chính (biết sau) thắng ⇒ RA
+             fin_row("BADQ", 200.0, 150.0, 100.0, "2026-07-30", "2026-Q2")]   # quý sai dạng ⇒ bỏ dòng
+    rows += hist("DRI", DRI_REAL)                                # dữ liệu THẬT: η² 0,10 ⇒ không mùa vụ ⇒ RA
+    rows += hist("PVT", PVT_REAL)                                # dữ liệu THẬT: QoQ +73% ⇒ VÀO (luật cũ)
+    rows += [fin_row("LQM", 200.0, 150.0, 100.0, "2026-05-01", "2026Q1"),     # Q1 qua làn C …
+             fin_row("LQM", None, 200.0, 120.0, "2026-07-30", "2026Q2")]      # … nhưng Q2 thiếu NP ⇒ RA
+    rows += [fin_row("LQK", 200.0, 150.0, 100.0, "2026-07-30", "2026Q2"),     # kỳ mới nhất qua làn C
+             fin_row("LQK", 100.0, 100.0, 100.0, "2026-08-15", "2026Q1")]     # Q1 biết MUỘN hơn (đính chính)
+    return rows
+
+
+def season_rating():
+    rows = [row(f"GB{i}", route="GROWTH", pe=2.0, pbz=0.0, drop=-5.0, icb=7777) for i in range(3)]
+    for t in ("DRS", "SNG", "SUP", "SHR", "GAP", "MID", "MD6", "NQ4", "DUP", "BADQ", "DRI", "PVT", "LQM", "LQK"):
+        rows.append(row(t, route="GROWTH", pe=8.0, pbz=0.0, drop=-5.0, icb=7777))
+    return pd.DataFrame(rows)
+
+
+def eta2_ref(vals_by_q):
+    """η² độc lập (1 − SSW/SST) từ {qoy: [log-QoQ]} — đối chiếu seasonal_stats."""
+    allv = [v for vs in vals_by_q.values() for v in vs]
+    mu = sum(allv) / len(allv)
+    sst = sum((v - mu) ** 2 for v in allv)
+    ssw = sum((v - sum(vs) / len(vs)) ** 2 for vs in vals_by_q.values() for v in vs)
+    return 1 - ssw / sst
+
+
+def test_lane_c_season(tmp):
+    import math
+    asof = dt.date(2026, 10, 5)
+    fp = os.path.join(tmp, "fin_season.parquet")
+    write_fin(fp, season_fin())
+    fin, meta, warn = F.load_financials(fp, asof, dt.datetime(2026, 10, 6, 19, 35, tzinfo=ICT))
+    check(fin is not None, f"fin mùa vụ đọc được: {warn}")
+    seas = {t for t in fin.index if fin.loc[t, "seasonal"]}
+    check(seas == {"DRS", "SNG", "SUP", "MD6"}, f"chỉ 4 mã mẫu mùa vụ đủ lịch sử là mùa vụ: {sorted(seas)}")
+    check(F.SEASON_ETA2_MIN <= fin.loc["MD6", "season_eta2"] < 0.7, f"MD6 η² {fin.loc['MD6', 'season_eta2']:.3f}")
+    nf = F.growth_cols(pd.DataFrame({"ticker": ["KHONGFIN"]}), fin)
+    check(not nf["seasonal"].iloc[0] and not nf["np_missing"].iloc[0], "mã không có trong fin ⇒ không mùa vụ")
+    check(0.5 < fin.loc["MID", "season_eta2"] < F.SEASON_ETA2_MIN and not fin.loc["MID", "seasonal"],
+          f"MID η² sát dưới ngưỡng ⇒ KHÔNG mùa vụ: {fin.loc['MID', 'season_eta2']:.3f}")
+    check(meta.get("bad_quarter") == 1 and "BADQ" not in fin.index and fin.loc["DUP", "NP_P0"] == 100.0,
+          f"quý sai dạng bị bỏ + đếm; cùng kỳ 2 bản ⇒ bản biết sau thắng: {meta.get('bad_quarter')}")
+    for t in ("SHR", "GAP", "NQ4"):
+        check(int(fin.loc[t, "season_nmin"]) < F.SEASON_MIN_PER_PAIR and not fin.loc[t, "seasonal"],
+              f"{t}: thiếu lịch sử (<3 năm/cặp) ⇒ KHÔNG mùa vụ: nmin={fin.loc[t, 'season_nmin']}")
+    # η² + chuẩn mùa đối chiếu công thức độc lập trên dữ liệu THẬT DRI (cửa sổ 20 quý trước 2026Q2)
+    qs = _qs("2020Q4", len(DRI_REAL))
+    grp = {}
+    for i in range(len(qs) - 21, len(qs) - 1):
+        a, b = DRI_REAL[i - 1], DRI_REAL[i]
+        if a > 0 and b > 0:
+            grp.setdefault(int(qs[i][5]), []).append(math.log(b / a))
+    ref = eta2_ref(grp)
+    check(abs(fin.loc["DRI", "season_eta2"] - ref) < 1e-9 and 0.05 < ref < 0.2,
+          f"η² DRI = công thức độc lập ({fin.loc['DRI', 'season_eta2']:.4f} vs {ref:.4f})")
+    med = sorted(grp[2])[len(grp[2]) // 2]
+    check(abs(fin.loc["DRI", "season_norm"] - med) < 1e-12 and len(grp[2]) == 5,
+          f"chuẩn mùa DRI = trung vị log-QoQ Q1→Q2 5 năm: {fin.loc['DRI', 'season_norm']} vs {med}")
+    # Quý hiện tại KHÔNG nằm trong lịch sử mùa vụ (η² không đổi khi QoQ quý hiện tại cực đoan)
+    w2 = os.path.join(tmp, "fin_season2.parquet")
+    write_fin(w2, hist("DRS", seasonal_vals(q2_qoq=5.0)) + flat_fin(["GB0", "GB1", "GB2"]))
+    f2, _, _ = F.load_financials(w2, asof, dt.datetime(2026, 10, 6, 19, 35, tzinfo=ICT))
+    check(abs(f2.loc["DRS", "season_eta2"] - fin.loc["DRS", "season_eta2"]) < 1e-12,
+          "η² chỉ dùng quý TRƯỚC quý hiện tại")
+    # Ngưỡng η²: đúng biên VÀO, dưới biên RA (đổi hằng số quanh giá trị thật của DRS)
+    e = float(fin.loc["DRS", "season_eta2"])
+    old = F.SEASON_ETA2_MIN
+    try:
+        F.SEASON_ETA2_MIN = e
+        fa, _, _ = F.load_financials(fp, asof, dt.datetime(2026, 10, 6, 19, 35, tzinfo=ICT))
+        F.SEASON_ETA2_MIN = e + 1e-6
+        fb, _, _ = F.load_financials(fp, asof, dt.datetime(2026, 10, 6, 19, 35, tzinfo=ICT))
+    finally:
+        F.SEASON_ETA2_MIN = old
+    check(bool(fa.loc["DRS", "seasonal"]) and not bool(fb.loc["DRS", "seasonal"]),
+          f"biên η²: = ngưỡng ⇒ mùa vụ, > η² ⇒ không (η²={e:.4f})")
+    # Quý mới nhất THEO KỲ + thiếu NP
+    check(fin.loc["LQK", "quarter"] == "2026Q2" and bool(fin.loc["LQM", "np_missing"])
+          and fin.loc["LQM", "quarter"] == "2026Q2",
+          f"kỳ mới nhất (không theo ngày biết); Q2 thiếu NP KHÔNG lùi về Q1: "
+          f"{fin.loc[['LQK', 'LQM'], ['quarter', 'np_missing']].to_dict('index')}")
+    cands, excluded = F.build_lanes(season_rating(), set(), {}, {}, fin)
+    C = set(cands.loc[cands["lane"] == "C", "ticker"])
+    check(C == {"DRS", "MD6", "PVT", "LQK"}, f"làn C mùa vụ: {sorted(C)} (mong DRS, MD6, PVT, LQK)")
+    ex = dict(zip(excluded["ticker"] + "|" + excluded["lane"], excluded["excl_reason"]))
+    check(ex.get("LQM|C") == "np_missing(2026Q2)", f"LQM ghi loại minh bạch: {ex}")
+    # Đối chứng (test có lực): bỏ mùa vụ ⇒ DRS RA, SUP VÀO (QoQ +20% > 0)
+    nof = fin.assign(seasonal=False)
+    c0, _ = F.build_lanes(season_rating(), set(), {}, {}, nof)
+    check(set(c0.loc[c0["lane"] == "C", "ticker"]) == {"SUP", "PVT", "LQK"},
+          f"đối chứng luật cũ: {sorted(set(c0.loc[c0['lane'] == 'C', 'ticker']))}")
+    rec = {(r["ticker"], r["lane"]): F._rec(r) for _, r in cands.iterrows()}
+    d = rec[("DRS", "C")]
+    check(d["seasonal"] is True and d["g_qoq"] < 0 and d["g_qoq_adj"] > 0
+          and abs((1 + d["g_qoq"]) / (1 + d["season_norm_qoq"]) - 1 - d["g_qoq_adj"]) < 1e-9,
+          f"DRS: QoQ âm, đ/c mùa dương, nhất quán: {d}")
+    ln = F.candidate_line(d)
+    check("mùa vụ η²" in ln and "QoQ chuẩn mùa" in ln and "đ/c mùa +" in ln and F.LANE_C_LABEL in ln,
+          f"dòng C mùa vụ ghi nhãn + cách đ/c: {ln}")
+    lp = F.candidate_line(rec[("PVT", "C")])
+    check("mùa vụ" not in lp and rec[("PVT", "C")]["seasonal"] is False, f"PVT không mùa vụ: {lp}")
+    res = {"asof": "2026-10-05", "warnings": [], "state_ok": True, "lane_c_ok": True, "seeded": 0,
+           "seeded_by_lane": {}, "lanes_seeded_today": [], "lane_c_queued": [],
+           "candidates": [rec[("DRS", "C")], rec[("PVT", "C")]], "n_tracking": 2, "n_lane_a": 0,
+           "n_lane_b": 0, "n_lane_c": 2,
+           "reported": [{"ticker": t, "lane": "C", "reason": "NEW", "merged": False} for t in ("DRS", "PVT")]}
+    b = F.format_topic_block(res, dt.date(2026, 10, 6))
+    check(b.count(F.SEASON_NOTE) == 1, f"khối 08:00 giải thích mùa vụ ĐÚNG 1 lần:\n{b}")
+    res["reported"] = res["reported"][1:]
+    check(F.SEASON_NOTE not in F.format_topic_block(res, dt.date(2026, 10, 6)),
+          "không có dòng mùa vụ ⇒ không in giải thích")
+    # Tương thích ngược: kết quả bản CŨ (không trường mùa vụ) ⇒ in bình thường, không 'mùa vụ'
+    oldc = {k: v for k, v in rec[("DRS", "C")].items()
+            if k not in ("seasonal", "season_eta2", "season_norm_qoq", "g_qoq_adj")}
+    res["candidates"], res["reported"] = [oldc], [{"ticker": "DRS", "lane": "C", "reason": "NEW",
+                                                   "merged": False}]
+    b = F.format_topic_block(res, dt.date(2026, 10, 6))
+    check("DRS" in b and "mùa vụ" not in b and "⚠️" not in b.split("\n", 1)[1].split("Làn C")[0],
+          f"kết quả bản cũ ⇒ không cảnh báo giả:\n{b}")
+    # run_daily: cảnh báo np_missing, log có cột mùa vụ, log CŨ (thiếu cột) vẫn nối được
+    base = os.path.join(tmp, "data_season")
+    os.makedirs(base, exist_ok=True)
+    rcsv, fcsv = os.path.join(tmp, "rating_season.csv"), os.path.join(tmp, "forensic_season.csv")
+    write_forensic(fcsv)
+    season_rating().to_csv(rcsv, index=False)
+    set_mtime_ict(rcsv, 2026, 10, 5, 19, 25)
+    pd.DataFrame([{"date": "2026-10-02", "ticker": "OLD", "lane": "A", "reported": "NEW"}]).to_csv(
+        F.daily_paths(base)["log"], index=False)
+    r = F.run_daily(rcsv, base, True, dt.datetime(2026, 10, 5, 19, 35, tzinfo=ICT), fcsv, {}, fp)
+    check(any("THIẾU NP" in w and "LQM 2026Q2" in w for w in r["warnings"]),
+          f"cảnh báo quý mới nhất thiếu NP: {r['warnings']}")
+    check(r["n_lane_c_seasonal"] == 2 and r["fin_meta"]["coverage"] == round(15 / 17, 3),
+          f"n_lane_c_seasonal + phủ không tính mã thiếu NP: {r['n_lane_c_seasonal']} {r['fin_meta']}")
+    log = pd.read_csv(F.daily_paths(base)["log"], dtype={"date": str})
+    check(list(log.columns) == F.LOG_COLS and set(log["date"]) == {"2026-10-02", "2026-10-05"}
+          and log.loc[log["ticker"] == "DRS", "seasonal"].astype(str).eq("True").all(),
+          f"log nối bản cũ + cột mùa vụ: {list(log.columns)}")
+
+
+def test_fifo():
+    d = dt.date.fromisoformat
+    st, _ = F.update_state({}, c_cands({"S0": 0.5}), d("2026-10-01"))
+    day2 = {"X1": 5.0, "R1": 0.4, "R2": 0.5, "R3": 0.6, "R4": 0.7, "R5": 0.8, "R6": 0.9, "S0": 0.5}
+    st, rep = F.update_state(st, c_cands(day2), d("2026-10-02"))
+    q2 = sorted(r["ticker"] for r in rep if r["reason"] == "QUEUED")
+    check(q2 == ["R1", "X1"], f"ngày 2: cắt trần, R1 (YoY thấp) + X1 (>300%) xếp hàng: {q2}")
+    check(st["entries"]["X1|C"]["queued_since"] == "2026-10-02", "queued_since ghi ngày bắt đầu chờ")
+    day3 = dict(day2, **{f"N{i}": 0.95 + 0.01 * i for i in range(5)})      # 5 mã mới YoY cao hơn
+    st3, rep = F.update_state(st, c_cands(day3), d("2026-10-05"))
+    shown = sorted(r["ticker"] for r in rep if r["reason"] == "NEW")
+    check(shown == ["N2", "N3", "N4", "R1", "X1"],
+          f"FIFO: mã chờ từ hôm trước (kể cả X1 >300%) trước mã mới YoY cao: {shown}")
+    check(st3["entries"]["N0|C"]["queued_since"] == "2026-10-05", "mã mới xếp hàng ghi ngày hôm nay")
+    check("queued_since" not in st3["entries"]["X1|C"] and not st3["entries"]["X1|C"].get("queued"),
+          f"đã báo ⇒ rời hàng chờ: {st3['entries']['X1|C']}")
+    st3b, rep_b = F.update_state(st3, c_cands(day3), d("2026-10-05"))
+    check(rep_b == rep and st3b == st3, "FIFO: chạy lại cùng asof ⇒ y hệt")
+    # rời làn rồi quay lại (chưa từng báo) ⇒ chờ lại TỪ ĐẦU (queued_since mới)
+    day4 = {k: v for k, v in day3.items() if k not in ("N0",)}
+    st4, _ = F.update_state(st3, c_cands(day4, a=["N0"]), d("2026-10-06"))   # còn ở A ⇒ mục C không bị dọn
+    check("N0|C" in st4["entries"] and "queued_since" not in st4["entries"]["N0|C"]
+          and not st4["entries"]["N0|C"].get("queued"),
+          f"N0|C còn trong state (không dọn) nhưng rời làn C ⇒ gỡ chỗ chờ: {st4['entries'].get('N0|C')}")
+    # B1: rời C, CHỈ còn ở A >= 30 ngày ⇒ KHÔNG được QUEUE_EXPIRED (cảnh báo nghẽn sai nguyên nhân)
+    s_far, rep_far = F.update_state(st4, c_cands({k: v for k, v in day4.items()}, a=["N0"]),
+                                    d("2026-11-10"))
+    check(not [x for x in s_far["prune_log"] if x.get("reason") == "QUEUE_EXPIRED"]
+          and "N0|C" in s_far["entries"],
+          f"rời C còn ở A 35 ngày ⇒ không QUEUE_EXPIRED: {s_far['prune_log']}")
+    # làn C lỗi phiên đó ⇒ không biết mã còn trong C không ⇒ GIỮ chỗ chờ
+    st4u, _ = F.update_state(st3, c_cands({}, a=["N0"]), d("2026-10-06"), ("C",))
+    check(st4u["entries"]["N0|C"].get("queued_since") == "2026-10-05",
+          f"làn C lỗi ⇒ giữ chỗ chờ: {st4u['entries'].get('N0|C')}")
+    # kể cả mục không liên tục (state ghi bởi bản trước vá B1): làn C lỗi ⇒ KHÔNG gỡ chỗ chờ
+    lg = json.loads(json.dumps(st3))
+    lg["entries"]["N0|C"]["last_seen"] = "2026-10-02"
+    lg4, _ = F.update_state(lg, c_cands({}, a=["N0"]), d("2026-10-06"), ("C",))
+    check(lg4["entries"]["N0|C"].get("queued_since") == "2026-10-05",
+          f"làn C lỗi + mục không liên tục ⇒ vẫn giữ chỗ chờ: {lg4['entries'].get('N0|C')}")
+    # Z* YoY cao hơn N0: nếu N0 còn giữ chỗ chờ từ 10-05 nó phải đứng đầu; reset ⇒ thua Z* cùng ngày
+    st5, rep = F.update_state(st4, c_cands(dict(day4, N0=0.95, **{f"Z{i}": 0.99 for i in range(6)})),
+                              d("2026-10-07"))
+    shown = sorted(r["ticker"] for r in rep if r["reason"] == "NEW")
+    check("N0" not in shown and st5["entries"]["N0|C"]["queued_since"] == "2026-10-07",
+          f"rời làn ⇒ mất chỗ chờ, quay lại xếp cuối: {shown} {st5['entries'].get('N0|C')}")
+    # state trước FIFO (queued không có queued_since) vẫn chạy
+    legacy = json.loads(json.dumps(st))
+    for e in legacy["entries"].values():
+        e.pop("queued_since", None)
+    _, rep = F.update_state(legacy, c_cands(day3), d("2026-10-05"))
+    check(len([r for r in rep if r["reason"] == "NEW"]) == 5, "state cũ thiếu queued_since vẫn chạy")
+
+
+def test_prune():
+    d = dt.date.fromisoformat
+    st, _ = F.update_state({}, c_cands({"K1": 0.5, "K2": 0.5}, a=["A1", "K3"]), d("2026-09-01"))
+    st["entries"]["K3|C"] = {"ticker": "K3", "lane": "C", "first_seen": "2026-08-01",
+                             "last_seen": "2026-08-01", "last_reported": "2026-08-01"}
+    # 09-25: K1 rời làn (24 ngày < cooldown) ⇒ GIỮ
+    s1, _ = F.update_state(st, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-09-25"))
+    check("K1|C" in s1["entries"], "rời làn nhưng chưa hết cooldown ⇒ giữ")
+    # 10-05: K1 hết cooldown + không còn làn nào ⇒ XOÁ; K3|C hết cooldown nhưng K3 còn ở làn A ⇒ GIỮ
+    s2, rep = F.update_state(s1, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-10-05"))
+    pr = [(x["key"], x["reason"]) for x in s2["prune_log"] if x["asof"] == "2026-10-05"]
+    check(pr == [("K1|C", "STALE")] and "K3|C" in s2["entries"] and "K2|C" in s2["entries"],
+          f"dọn STALE đúng mục (ticker-level): {pr}")
+    s2b, rep_b = F.update_state(s2, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-10-05"))
+    check(s2b == s2 and rep_b == rep, "dọn: chạy lại cùng asof y hệt")
+    _, rep = F.update_state(s2, c_cands({"K1": 0.5, "K2": 0.5}, a=["A1", "K3"]), d("2026-10-06"))
+    check([(r["ticker"], r["reason"]) for r in rep] == [("K1", "NEW")],
+          f"mã đã dọn quay lại ⇒ NEW (như khi còn mục): {rep}")
+    # chưa từng báo (last_reported None) + không còn làn nào ⇒ dọn NGAY phiên đó (không đợi cooldown)
+    sn = json.loads(json.dumps(s1))
+    sn["entries"]["NV|C"] = {"ticker": "NV", "lane": "C", "first_seen": "2026-09-20",
+                             "last_seen": "2026-09-24"}
+    sn2, _ = F.update_state(sn, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-09-26"))
+    check("NV|C" not in sn2["entries"] and any(x["key"] == "NV|C" and x["reason"] == "STALE"
+                                               and x["last_reported"] is None for x in sn2["prune_log"]),
+          f"chưa từng báo + rời mọi làn ⇒ STALE ngay: {sn2['prune_log']}")
+    # phiên có làn lỗi ⇒ KHÔNG dọn
+    s3, _ = F.update_state(s1, c_cands({}, a=["A1"]), d("2026-10-05"), ("C",))
+    check("K1|C" in s3["entries"] and not [x for x in s3["prune_log"] if x["asof"] == "2026-10-05"],
+          "làn lỗi ⇒ không dọn")
+    # hàng chờ >= 30 ngày ⇒ xoá + log, không báo phiên đó; chạy lại cùng asof y hệt; phiên sau vào lại
+    q = {"ticker": "QQ", "lane": "C", "first_seen": "2026-09-01", "last_seen": "2026-10-04",
+         "queued": True, "queued_since": "2026-09-05"}
+    s4 = json.loads(json.dumps(s2))
+    s4["entries"]["QQ|C"] = q
+    s4["entries"]["QY|C"] = dict(q, ticker="QY", queued_since="2026-09-06")
+    s5, rep = F.update_state(s4, c_cands({"K2": 0.5, "QQ": 0.5, "QY": 0.5}, a=["A1", "K3"]),
+                             d("2026-10-05"))
+    pr = [(x["key"], x["reason"]) for x in s5["prune_log"] if x["asof"] == "2026-10-05"]
+    check(("QQ|C", "QUEUE_EXPIRED") in pr and "QQ|C" not in s5["entries"]
+          and not any(r["ticker"] == "QQ" for r in rep), f"hàng chờ 30 ngày ⇒ xoá, không báo: {pr} {rep}")
+    check([r["ticker"] for r in rep if r["reason"] == "NEW"] == ["QY"] and "QY|C" in s5["entries"]
+          and s5["entries"]["QY|C"].get("last_reported") == "2026-10-05",
+          f"29 ngày ⇒ còn trong hàng, được báo: {rep}")
+    s5b, rep_b = F.update_state(s5, c_cands({"K2": 0.5, "QQ": 0.5, "QY": 0.5}, a=["A1", "K3"]),
+                                d("2026-10-05"))
+    check(s5b == s5 and rep_b == rep, "hàng chờ hết hạn: chạy lại cùng asof y hệt")
+    _, rep = F.update_state(s5, c_cands({"K2": 0.5, "QQ": 0.5}, a=["A1", "K3"]), d("2026-10-06"))
+    check([(r["ticker"], r["reason"]) for r in rep] == [("QQ", "NEW")], f"phiên sau QQ vào lại: {rep}")
+    # biên cooldown: báo 09-05 ⇒ 10-05 đúng 30 ngày ⇒ DỌN; báo 09-06 (29 ngày) ⇒ GIỮ
+    sb = {"entries": {f"{t}|C": {"ticker": t, "lane": "C", "last_seen": "2026-09-30", "last_reported": lr}
+                      for t, lr in (("B30", "2026-09-05"), ("B29", "2026-09-06"))},
+          "seeded_lanes": {"A": "2026-09-01", "B": "2026-09-01", "C": "2026-09-01"},
+          "last_run_asof": "2026-10-02"}
+    sb2, _ = F.update_state(sb, c_cands({}, a=["A1"]), d("2026-10-05"))
+    check("B30|C" not in sb2["entries"] and "B29|C" in sb2["entries"], f"biên cooldown 30 ngày: {sb2['entries']}")
+    # phiên có làn lỗi ⇒ hàng chờ quá hạn cũng KHÔNG xoá
+    s4u, _ = F.update_state(s4, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-10-05"), ("C",))
+    check("QQ|C" in s4u["entries"], "làn lỗi ⇒ không xoá hàng chờ quá hạn")
+    # prune_log có trần
+    old = F.PRUNE_LOG_MAX
+    try:
+        F.PRUNE_LOG_MAX = 2
+        s6 = json.loads(json.dumps(s1))
+        s6["prune_log"] = [{"asof": "2026-01-01", "key": f"x{i}|C", "reason": "STALE"} for i in range(5)]
+        s6, _ = F.update_state(s6, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-10-05"))
+    finally:
+        F.PRUNE_LOG_MAX = old
+    check(len(s6["prune_log"]) == 2 and s6["prune_log"][-1]["key"] == "K1|C", f"trần prune_log: {s6['prune_log']}")
+
+
+def test_prune_run_daily(tmp):
+    """run_daily: QUEUE_EXPIRED ⇒ cảnh báo khối 08:00 + `state_pruned`; khoá kết quả bản cũ còn đủ."""
+    base = os.path.join(tmp, "data_prune")
+    rcsv, fcsv, fp = (os.path.join(tmp, x) for x in ("rating_pr.csv", "forensic_pr.csv", "fin_pr.parquet"))
+    write_forensic(fcsv)
+    c_rating().to_csv(rcsv, index=False)
+    write_fin(fp, c_fin())
+    set_mtime_ict(rcsv, 2026, 10, 5, 19, 25)
+    r = F.run_daily(rcsv, base, True, dt.datetime(2026, 10, 5, 19, 35, tzinfo=ICT), fcsv, {}, fp)
+    with open(F.daily_paths(base)["state"], encoding="utf-8") as f:
+        st = json.load(f)
+    st["entries"]["Y30|C"].update(queued=True, queued_since="2026-09-01", last_reported=None)
+    st["entries"]["GONE|A"] = {"ticker": "GONE", "lane": "A", "last_seen": "2026-08-01",
+                               "last_reported": "2026-08-01"}
+    with open(F.daily_paths(base)["state"], "w", encoding="utf-8") as f:
+        json.dump(st, f)
+    set_mtime_ict(rcsv, 2026, 10, 6, 19, 25)
+    r = F.run_daily(rcsv, base, True, dt.datetime(2026, 10, 6, 19, 35, tzinfo=ICT), fcsv, {}, fp)
+    keys = sorted((x["key"], x["reason"]) for x in r["state_pruned"])
+    check(keys == [("GONE|A", "STALE"), ("Y30|C", "QUEUE_EXPIRED")], f"state_pruned: {keys}")
+    b = F.format_topic_block(r, dt.date(2026, 10, 7))
+    check(any("xếp hàng >= 30 ngày" in x and "Y30" in x for x in b.splitlines()),
+          f"khối 08:00 cảnh báo hàng chờ hết hạn:\n{b}")
+    OLD_KEYS = {"asof", "run_at", "rating_csv", "warnings", "state_ok", "sanity_fail", "n_lane_a",
+                "n_lane_b", "n_lane_c", "lane_c_ok", "fin_meta", "n_tracking", "seeded", "seeded_by_lane",
+                "reported", "lanes_seeded_today", "lane_c_queued", "candidates", "excluded", "snapshot",
+                "log_rows"}
+    check(OLD_KEYS <= set(r), f"kết quả giữ ĐỦ khoá bản trước (chỉ thêm): thiếu {OLD_KEYS - set(r)}")
+    OLD_CAND = {"ticker", "lane", "lane_rank", "route", "rating", "PE", "PB", "pb_z", "drop_pct", "liq_bn",
+                "earn_yield", "context", "peer_median_drop", "peer_basis", "g_yoy", "g_qoq", "np_quarter"}
+    check(all(OLD_CAND <= set(c) for c in r["candidates"]), "candidate giữ đủ trường bản trước")
+
+
 def run_once():
     with tempfile.TemporaryDirectory() as tmp:
         fin_default = os.path.join(tmp, "fin_default.parquet")      # F.FIN_CACHE sandbox: NP phẳng
@@ -886,6 +1250,10 @@ def run_once():
         test_lane_c_state()
         test_lane_c_files(tmp)
         test_lane_c_isolated(tmp)
+        test_lane_c_season(tmp)
+        test_fifo()
+        test_prune()
+        test_prune_run_daily(tmp)
         test_lanes(tmp)
         test_insider_file(tmp)
         test_context()
