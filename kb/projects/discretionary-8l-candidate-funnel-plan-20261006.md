@@ -206,3 +206,7 @@ User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 
 - Merge cổng giá + cutloss SHADOW (`26b36f9e`) + cài 2 cron (mỗi phút 09:00-14:59, nhắc 08:30) — shadow 5 phiên.
 - **4 mặc định chốt**: (a) điều tra hết giờ/không dispatch được ⇒ GIỮ + cảnh báo lớn; (b) mã excluded/hạn chế giao dịch ⇒ chỉ báo + điều tra, không bán; (c) kích hoạt ≥14:00 hoặc hạn >14:15 ⇒ quyết định phiên sau (nhắc 08:30, áp 09:15; lệnh SHADOW tường minh vẫn áp ngay); (d) ghi song song ngưỡng tương đối HOSE −3%/HNX −4,5%/UPCOM −7%/idio −3% để so.
 - **Làn C (tăng trưởng lợi nhuận) vào funnel làm NGUỒN Ý TƯỞNG** — nhãn bắt buộc "edge của rổ, không phải của mã" (quant-skeptic REFUTED cho wire/size; dùng làm ý tưởng có DD thì không bị bác).
+
+## USER CHỐT 2026-10-06 13:22 ICT (`decided_by: user`) — làn C mùa vụ
+- Merge `5e9c6057`: mùa vụ (η² ≥ 0,6 ⇒ QoQ so với trung vị cùng cặp quý; còn lại giữ QoQ > 0) + FIFO hàng chờ + quý mới nhất theo kỳ + dọn state.
+- **GIỮ NGUYÊN bản C1S, KHÔNG chuyển C1A** (đ/c mùa cho mọi mã: +DRI −9 mã, bằng chứng IS/OOS lệch dấu). DRI không phải mã mùa vụ theo dữ liệu (η² 0,10) ⇒ đi đường đề xuất tay có due diligence như PVT.
