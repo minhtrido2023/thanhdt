@@ -1,0 +1,12 @@
+{
+ "n_trials": 4,
+ "trials": [
+  "C1_GARP",
+  "C2_PEG",
+  "C3_RUNRATE3",
+  "C4_PEG3"
+ ],
+ "months": 153,
+ "rebal_first": "2014-01-27",
+ "rebal_last": "2026-09-30"
+}

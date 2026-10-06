@@ -1,0 +1,33 @@
+=== Funnel 8L asof 2026-10-05 (run 2026-10-06T01:08:56.604776+07:00) — A=9 B=18 theo dõi=27 báo=27 ===
+  CẢNH BÁO: rating_8l.csv KHÔNG phải của hôm nay: mtime ICT 2026-10-05 (chạy lúc 2026-10-06 01:08) — pt_8l_daily 19:20 lỗi/trễ?
+• CMG · làn A lệch giá · rating 3 · PE 12,4 · pb_z -2,32 · drop -23,4% · liq 2,95 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• DVM · làn A lệch giá · rating 3 · PE 7,7 · pb_z -1,90 · drop -50,8% · liq 0,42 tỷ · IDIO  <<< NEW
+• HDG · làn A lệch giá · rating 3 · PE 6,4 · pb_z -1,56 · drop -24,3% · liq 11,19 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• LCG · làn A lệch giá · rating 3 · PE 8,7 · pb_z -1,32 · drop -24,5% · liq 3,93 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• VGS · làn A lệch giá · rating 2 · PE 3,6 · pb_z -1,34 · drop -32,7% · liq 1,87 tỷ · IDIO  <<< NEW
+• VSC · làn A lệch giá · rating 3 · PE 14,2 · pb_z -1,97 · drop -26,1% · liq 82,87 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• DTD · làn A lệch giá · rating 2 · PE 11,6 · pb_z -1,59 · drop -27,9% · liq 0,84 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• KOS · làn A lệch giá · rating 3 · PE 108,1 · pb_z -9,94 · drop -64,0% · liq 1,05 tỷ · IDIO  <<< NEW
+• NTL · làn A lệch giá · rating 3 · PE 45,3 · pb_z -1,03 · drop -24,5% · liq 3,78 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• TPB · làn B giá trị sâu #1 BANK · rating 3 · PE 4,4 · pb_z -1,51 · drop -14,1% · liq 98,59 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• SHB · làn B giá trị sâu #2 BANK · rating 3 · PE 4,9 · pb_z -0,59 · drop -17,5% · liq 407,01 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• CTG · làn B giá trị sâu #3 BANK · rating 2 · PE 5,7 · pb_z -1,36 · drop -13,2% · liq 211,14 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• HII · làn B giá trị sâu #1 COMPOUNDER · rating 3 · PE 2,8 · pb_z 0,23 · drop -25,6% · liq 7,55 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• DC4 · làn B giá trị sâu #2 COMPOUNDER · rating 2 · PE 3,3 · pb_z -1,09 · drop -15,6% · liq 0,43 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• TV1 · làn B giá trị sâu #3 COMPOUNDER · rating 1 · PE 3,5 · pb_z -0,85 · drop -11,6% · liq 0,47 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• DDV · làn B giá trị sâu #1 CYCLICAL · rating 3 · PE 3,8 · pb_z -0,82 · drop -31,4% · liq 5,72 tỷ · IDIO  <<< NEW
+• DRI · làn B giá trị sâu #2 CYCLICAL · rating 2 · PE 5,5 · pb_z 0,56 · drop 0,0% · liq 16,46 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• DGC · làn B giá trị sâu #3 CYCLICAL · rating 2 · PE 6,2 · pb_z -1,68 · drop -11,7% · liq 23,38 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• MIG · làn B giá trị sâu #1 INSURANCE · rating 2 · PE 10,1 · pb_z -1,32 · drop -4,3% · liq 1,24 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• BIC · làn B giá trị sâu #2 INSURANCE · rating 2 · PE 10,2 · pb_z -0,74 · drop -6,1% · liq 0,32 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• PVI · làn B giá trị sâu #3 INSURANCE · rating 2 · PE 12,8 · pb_z 0,65 · drop -4,5% · liq 1,07 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• QTP · làn B giá trị sâu #1 POWER · rating 2 · PE 4,1 · pb_z -2,30 · drop -6,1% · liq 0,99 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• NT2 · làn B giá trị sâu #2 POWER · rating 3 · PE 5,0 · pb_z -1,50 · drop -2,4% · liq 9,77 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• SJD · làn B giá trị sâu #3 POWER · rating 2 · PE 5,8 · pb_z -0,67 · drop -2,1% · liq 0,57 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• LHG · làn B giá trị sâu #1 REALESTATE · rating 3 · PE 4,7 · pb_z -1,05 · drop -3,6% · liq 1,09 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• IDC · làn B giá trị sâu #2 REALESTATE · rating 2 · PE 6,5 · pb_z -1,28 · drop -4,8% · liq 38,37 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+• VHM · làn B giá trị sâu #3 REALESTATE · rating 2 · PE 7,0 · pb_z 0,72 · drop -16,4% · liq 541,24 tỷ · NGÀNH — cần Bobby trước  <<< NEW
+  LOẠI PNJ (làn A, COMPOUNDER): insider_sell(2026-09-22)
+  LOẠI TCM (làn A, COMPOUNDER): insider_sell(2026-08-24)
+  snapshot: created /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/discretionary_8l_funnel_20261006/rating_8l_daily/rating_8l_2026-10-05.csv
+  log: 27 dòng

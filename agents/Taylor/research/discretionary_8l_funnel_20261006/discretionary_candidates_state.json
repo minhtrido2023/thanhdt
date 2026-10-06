@@ -1,0 +1,276 @@
+{
+ "entries": {
+  "CMG|A": {
+   "ticker": "CMG",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -2.32,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "DVM|A": {
+   "ticker": "DVM",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.9,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "HDG|A": {
+   "ticker": "HDG",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.56,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "LCG|A": {
+   "ticker": "LCG",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.32,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "VGS|A": {
+   "ticker": "VGS",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.34,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "VSC|A": {
+   "ticker": "VSC",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.97,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "DTD|A": {
+   "ticker": "DTD",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.59,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "KOS|A": {
+   "ticker": "KOS",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -9.94,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "NTL|A": {
+   "ticker": "NTL",
+   "lane": "A",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.03,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "TPB|B": {
+   "ticker": "TPB",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.51,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "SHB|B": {
+   "ticker": "SHB",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -0.59,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "CTG|B": {
+   "ticker": "CTG",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.36,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "HII|B": {
+   "ticker": "HII",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": 0.23,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "DC4|B": {
+   "ticker": "DC4",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.09,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "TV1|B": {
+   "ticker": "TV1",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -0.85,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "DDV|B": {
+   "ticker": "DDV",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -0.82,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "DRI|B": {
+   "ticker": "DRI",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": 0.56,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "DGC|B": {
+   "ticker": "DGC",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.68,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "MIG|B": {
+   "ticker": "MIG",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.32,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "BIC|B": {
+   "ticker": "BIC",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -0.74,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "PVI|B": {
+   "ticker": "PVI",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": 0.65,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "QTP|B": {
+   "ticker": "QTP",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -2.3,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "NT2|B": {
+   "ticker": "NT2",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.5,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "SJD|B": {
+   "ticker": "SJD",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -0.67,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "LHG|B": {
+   "ticker": "LHG",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.05,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "IDC|B": {
+   "ticker": "IDC",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": -1.28,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  },
+  "VHM|B": {
+   "ticker": "VHM",
+   "lane": "B",
+   "first_seen": "2026-10-05",
+   "prev_reported_pb_z": null,
+   "last_reported": "2026-10-05",
+   "last_reported_pb_z": 0.72,
+   "last_reason": "NEW",
+   "last_seen": "2026-10-05"
+  }
+ },
+ "prev_run_asof": null,
+ "last_run_asof": "2026-10-05"
+}

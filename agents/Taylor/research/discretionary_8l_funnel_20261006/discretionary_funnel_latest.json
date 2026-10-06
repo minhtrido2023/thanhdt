@@ -1,0 +1,601 @@
+{
+ "asof": "2026-10-05",
+ "run_at": "2026-10-06T01:08:56.604776+07:00",
+ "rating_csv": "/home/trido/thanhdt/WorkingClaude/data/rating_8l.csv",
+ "warnings": [
+  "rating_8l.csv KHÔNG phải của hôm nay: mtime ICT 2026-10-05 (chạy lúc 2026-10-06 01:08) — pt_8l_daily 19:20 lỗi/trễ?"
+ ],
+ "n_lane_a": 9,
+ "n_lane_b": 18,
+ "n_tracking": 27,
+ "reported": [
+  {
+   "ticker": "CMG",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "DVM",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "HDG",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "LCG",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "VGS",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "VSC",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "DTD",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "KOS",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "NTL",
+   "lane": "A",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "TPB",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "SHB",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "CTG",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "HII",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "DC4",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "TV1",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "DDV",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "DRI",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "DGC",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "MIG",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "BIC",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "PVI",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "QTP",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "NT2",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "SJD",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "LHG",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "IDC",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  },
+  {
+   "ticker": "VHM",
+   "lane": "B",
+   "reason": "NEW",
+   "prev_pb_z": null
+  }
+ ],
+ "candidates": [
+  {
+   "ticker": "CMG",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "COMPOUNDER",
+   "rating": 3,
+   "PE": 12.415395098184446,
+   "PB": 1.1664927215876644,
+   "pb_z": -2.32,
+   "drop_pct": -23.4,
+   "liq_bn": 2.95,
+   "earn_yield": 0.0805,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "DVM",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "COMPOUNDER",
+   "rating": 3,
+   "PE": 7.712659911094194,
+   "PB": 0.1877840275789032,
+   "pb_z": -1.9,
+   "drop_pct": -50.8,
+   "liq_bn": 0.42,
+   "earn_yield": 0.1297,
+   "context": "IDIO",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "HDG",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "COMPOUNDER",
+   "rating": 3,
+   "PE": 6.375508906775694,
+   "PB": 0.7013073440725385,
+   "pb_z": -1.56,
+   "drop_pct": -24.3,
+   "liq_bn": 11.19,
+   "earn_yield": 0.1569,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "LCG",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "COMPOUNDER",
+   "rating": 3,
+   "PE": 8.67790825533731,
+   "PB": 0.4900412926886989,
+   "pb_z": -1.32,
+   "drop_pct": -24.5,
+   "liq_bn": 3.93,
+   "earn_yield": 0.1152,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "VGS",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "COMPOUNDER",
+   "rating": 2,
+   "PE": 3.627097469419108,
+   "PB": 0.6625033840871765,
+   "pb_z": -1.34,
+   "drop_pct": -32.7,
+   "liq_bn": 1.87,
+   "earn_yield": 0.2757,
+   "context": "IDIO",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "VSC",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "COMPOUNDER",
+   "rating": 3,
+   "PE": 14.178876978650996,
+   "PB": 0.6702895720006069,
+   "pb_z": -1.97,
+   "drop_pct": -26.1,
+   "liq_bn": 82.87,
+   "earn_yield": 0.0705,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "DTD",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "REALESTATE",
+   "rating": 2,
+   "PE": 11.590978691172465,
+   "PB": 0.451398201525553,
+   "pb_z": -1.59,
+   "drop_pct": -27.9,
+   "liq_bn": 0.84,
+   "earn_yield": 0.0863,
+   "context": "NGÀNH",
+   "route_median_drop": -17.2
+  },
+  {
+   "ticker": "KOS",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "REALESTATE",
+   "rating": 3,
+   "PE": 108.10113330699922,
+   "PB": 1.260530233019354,
+   "pb_z": -9.94,
+   "drop_pct": -64.0,
+   "liq_bn": 1.05,
+   "earn_yield": 0.0093,
+   "context": "IDIO",
+   "route_median_drop": -17.2
+  },
+  {
+   "ticker": "NTL",
+   "lane": "A",
+   "lane_rank": null,
+   "route": "REALESTATE",
+   "rating": 3,
+   "PE": 45.311238258073786,
+   "PB": 0.842841304032419,
+   "pb_z": -1.03,
+   "drop_pct": -24.5,
+   "liq_bn": 3.78,
+   "earn_yield": 0.0221,
+   "context": "NGÀNH",
+   "route_median_drop": -17.2
+  },
+  {
+   "ticker": "TPB",
+   "lane": "B",
+   "lane_rank": 1,
+   "route": "BANK",
+   "rating": 3,
+   "PE": 4.355623569720651,
+   "PB": 0.666005629773495,
+   "pb_z": -1.51,
+   "drop_pct": -14.1,
+   "liq_bn": 98.59,
+   "earn_yield": 0.2296,
+   "context": "NGÀNH",
+   "route_median_drop": -11.9
+  },
+  {
+   "ticker": "SHB",
+   "lane": "B",
+   "lane_rank": 2,
+   "route": "BANK",
+   "rating": 3,
+   "PE": 4.861687937667103,
+   "PB": 0.7840707066970434,
+   "pb_z": -0.59,
+   "drop_pct": -17.5,
+   "liq_bn": 407.01,
+   "earn_yield": 0.2057,
+   "context": "NGÀNH",
+   "route_median_drop": -11.9
+  },
+  {
+   "ticker": "CTG",
+   "lane": "B",
+   "lane_rank": 3,
+   "route": "BANK",
+   "rating": 2,
+   "PE": 5.732489091788814,
+   "PB": 1.1502170733389965,
+   "pb_z": -1.36,
+   "drop_pct": -13.2,
+   "liq_bn": 211.14,
+   "earn_yield": 0.1744,
+   "context": "NGÀNH",
+   "route_median_drop": -11.9
+  },
+  {
+   "ticker": "HII",
+   "lane": "B",
+   "lane_rank": 1,
+   "route": "COMPOUNDER",
+   "rating": 3,
+   "PE": 2.7520041656175187,
+   "PB": 0.5827661549027943,
+   "pb_z": 0.23,
+   "drop_pct": -25.6,
+   "liq_bn": 7.55,
+   "earn_yield": 0.3634,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "DC4",
+   "lane": "B",
+   "lane_rank": 2,
+   "route": "COMPOUNDER",
+   "rating": 2,
+   "PE": 3.323171666256886,
+   "PB": 0.4990693892161564,
+   "pb_z": -1.09,
+   "drop_pct": -15.6,
+   "liq_bn": 0.43,
+   "earn_yield": 0.3009,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "TV1",
+   "lane": "B",
+   "lane_rank": 3,
+   "route": "COMPOUNDER",
+   "rating": 1,
+   "PE": 3.549263264677214,
+   "PB": 1.0840494541593018,
+   "pb_z": -0.85,
+   "drop_pct": -11.6,
+   "liq_bn": 0.47,
+   "earn_yield": 0.2817,
+   "context": "NGÀNH",
+   "route_median_drop": -12.7
+  },
+  {
+   "ticker": "DDV",
+   "lane": "B",
+   "lane_rank": 1,
+   "route": "CYCLICAL",
+   "rating": 3,
+   "PE": 3.7914318243034337,
+   "PB": 1.043335725889225,
+   "pb_z": -0.82,
+   "drop_pct": -31.4,
+   "liq_bn": 5.72,
+   "earn_yield": 0.2638,
+   "context": "IDIO",
+   "route_median_drop": -10.149999999999999
+  },
+  {
+   "ticker": "DRI",
+   "lane": "B",
+   "lane_rank": 2,
+   "route": "CYCLICAL",
+   "rating": 2,
+   "PE": 5.511636252710737,
+   "PB": 1.5175886440437696,
+   "pb_z": 0.56,
+   "drop_pct": 0.0,
+   "liq_bn": 16.46,
+   "earn_yield": 0.1814,
+   "context": "NGÀNH",
+   "route_median_drop": -10.149999999999999
+  },
+  {
+   "ticker": "DGC",
+   "lane": "B",
+   "lane_rank": 3,
+   "route": "CYCLICAL",
+   "rating": 2,
+   "PE": 6.164745762832903,
+   "PB": 0.8211646746621882,
+   "pb_z": -1.68,
+   "drop_pct": -11.7,
+   "liq_bn": 23.38,
+   "earn_yield": 0.1622,
+   "context": "NGÀNH",
+   "route_median_drop": -10.149999999999999
+  },
+  {
+   "ticker": "MIG",
+   "lane": "B",
+   "lane_rank": 1,
+   "route": "INSURANCE",
+   "rating": 2,
+   "PE": 10.108184969711424,
+   "PB": 1.207461828446899,
+   "pb_z": -1.32,
+   "drop_pct": -4.3,
+   "liq_bn": 1.24,
+   "earn_yield": 0.0989,
+   "context": "NGÀNH",
+   "route_median_drop": -4.5
+  },
+  {
+   "ticker": "BIC",
+   "lane": "B",
+   "lane_rank": 2,
+   "route": "INSURANCE",
+   "rating": 2,
+   "PE": 10.208229389580245,
+   "PB": 1.2330214882234565,
+   "pb_z": -0.74,
+   "drop_pct": -6.1,
+   "liq_bn": 0.32,
+   "earn_yield": 0.098,
+   "context": "NGÀNH",
+   "route_median_drop": -4.5
+  },
+  {
+   "ticker": "PVI",
+   "lane": "B",
+   "lane_rank": 3,
+   "route": "INSURANCE",
+   "rating": 2,
+   "PE": 12.815664657293114,
+   "PB": 1.7918607095749937,
+   "pb_z": 0.65,
+   "drop_pct": -4.5,
+   "liq_bn": 1.07,
+   "earn_yield": 0.078,
+   "context": "NGÀNH",
+   "route_median_drop": -4.5
+  },
+  {
+   "ticker": "QTP",
+   "lane": "B",
+   "lane_rank": 1,
+   "route": "POWER",
+   "rating": 2,
+   "PE": 4.061679354091752,
+   "PB": 0.8224747154196289,
+   "pb_z": -2.3,
+   "drop_pct": -6.1,
+   "liq_bn": 0.99,
+   "earn_yield": 0.2462,
+   "context": "NGÀNH",
+   "route_median_drop": -8.3
+  },
+  {
+   "ticker": "NT2",
+   "lane": "B",
+   "lane_rank": 2,
+   "route": "POWER",
+   "rating": 3,
+   "PE": 5.047172628037298,
+   "PB": 1.265957369210654,
+   "pb_z": -1.5,
+   "drop_pct": -2.4,
+   "liq_bn": 9.77,
+   "earn_yield": 0.1981,
+   "context": "NGÀNH",
+   "route_median_drop": -8.3
+  },
+  {
+   "ticker": "SJD",
+   "lane": "B",
+   "lane_rank": 3,
+   "route": "POWER",
+   "rating": 2,
+   "PE": 5.7877495581173966,
+   "PB": 0.9511798666243968,
+   "pb_z": -0.67,
+   "drop_pct": -2.1,
+   "liq_bn": 0.57,
+   "earn_yield": 0.1728,
+   "context": "NGÀNH",
+   "route_median_drop": -8.3
+  },
+  {
+   "ticker": "LHG",
+   "lane": "B",
+   "lane_rank": 1,
+   "route": "REALESTATE",
+   "rating": 3,
+   "PE": 4.712536984166239,
+   "PB": 0.7014649192516724,
+   "pb_z": -1.05,
+   "drop_pct": -3.6,
+   "liq_bn": 1.09,
+   "earn_yield": 0.2122,
+   "context": "NGÀNH",
+   "route_median_drop": -17.2
+  },
+  {
+   "ticker": "IDC",
+   "lane": "B",
+   "lane_rank": 2,
+   "route": "REALESTATE",
+   "rating": 2,
+   "PE": 6.4981377641731255,
+   "PB": 1.5979010572042434,
+   "pb_z": -1.28,
+   "drop_pct": -4.8,
+   "liq_bn": 38.37,
+   "earn_yield": 0.1539,
+   "context": "NGÀNH",
+   "route_median_drop": -17.2
+  },
+  {
+   "ticker": "VHM",
+   "lane": "B",
+   "lane_rank": 3,
+   "route": "REALESTATE",
+   "rating": 2,
+   "PE": 7.019261376929868,
+   "PB": 1.970245964656528,
+   "pb_z": 0.72,
+   "drop_pct": -16.4,
+   "liq_bn": 541.24,
+   "earn_yield": 0.1425,
+   "context": "NGÀNH",
+   "route_median_drop": -17.2
+  }
+ ],
+ "excluded": [
+  {
+   "ticker": "PNJ",
+   "lane": "A",
+   "route": "COMPOUNDER",
+   "excl_reason": "insider_sell(2026-09-22)"
+  },
+  {
+   "ticker": "TCM",
+   "lane": "A",
+   "route": "COMPOUNDER",
+   "excl_reason": "insider_sell(2026-08-24)"
+  }
+ ],
+ "snapshot": {
+  "status": "created",
+  "path": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/discretionary_8l_funnel_20261006/rating_8l_daily/rating_8l_2026-10-05.csv"
+ },
+ "log_rows": 27
+}
