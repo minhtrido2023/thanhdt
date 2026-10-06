@@ -568,10 +568,12 @@ def c_rating():
     rows = [row(f"GB{i}", route="GROWTH", pe=2.0, pbz=0.0, drop=-5.0, icb=7777) for i in range(3)]
     spec = {"Y30": 8.0, "Y29": 8.0, "Q0": 8.0, "QN": 8.0, "PE12": 12.0, "P12X": 12.01, "PE0": 0.0,
             "PEN": -5.0, "N4": 8.0, "PIT": 8.0, "PIT1": 8.0, "RDN": 8.0, "RDF": 8.0, "RDL": 8.0,
-            "CR4": 8.0, "CLQ": 8.0, "CBN": 8.0, "CIN": 8.0, "EXT": 8.0, "Z4": 8.0, "Z1": 8.0}
+            "CR4": 8.0, "CLQ": 8.0, "CBN": 8.0, "CIN": 8.0, "EXT": 8.0, "Z4": 8.0, "Z1": 8.0,
+            "CRF": 8.0}
     for t, pe in spec.items():
         rows.append(row(t, route="GROWTH", pe=pe, pbz=0.0, drop=-5.0, icb=7777,
-                        rating=4 if t == "CR4" else 2, liq=0.29 if t == "CLQ" else 1.0))
+                        rating=4 if t == "CR4" else 2, liq=0.29 if t == "CLQ" else 1.0,
+                        redflag="NP_TTM<0" if t == "CRF" else None))
     rows.append(row("MRG", route="GROWTH", pe=9.0, pbz=-1.5, drop=-30.0, icb=7777))  # A + C
     return pd.DataFrame(rows)
 
@@ -592,7 +594,10 @@ def c_fin():
         fin_row("RDN", 200.0, 150.0, 100.0, "2026-07-30", rd=None),   # Release trống ⇒ time
         fin_row("RDF", 200.0, 150.0, 100.0, "2026-10-05", rd=None),   # time = asof ⇒ RA
         fin_row("RDL", 200.0, 150.0, 100.0, "2026-10-05", time="2026-07-01"),  # Release=asof thắng time
-        g("CR4"), g("CLQ"), g("CBN"), g("CIN"),
+        g("CR4"), g("CLQ"), g("CBN"), g("CIN"), g("CRF"),            # CRF: redflag ⇒ RA làn C
+        # Release <= cuối quý (2026Q2 hết 30/06) = rác ⇒ ngày biết = time (=asof ⇒ RA); 01/07 hợp lệ
+        fin_row("RQE", 200.0, 150.0, 100.0, "2026-10-05", rd=dt.date(2026, 6, 30)),
+        fin_row("RQ1", 200.0, 150.0, 100.0, "2026-10-05", rd=dt.date(2026, 7, 1)),
         fin_row("EXT", 500.0, 400.0, 100.0),                       # YoY 400% ⇒ nhãn nghi nền thấp
         fin_row("Z4", 200.0, 150.0, 0.0),                          # NP_P4 = 0 ⇒ YoY không định nghĩa
         fin_row("Z1", 200.0, 0.0, 100.0),                          # NP_P1 = 0 ⇒ QoQ không định nghĩa
@@ -615,11 +620,14 @@ def test_lane_c_build(tmp):
           f"PIT: quý biết ĐÚNG asof chưa dùng, asof−1 dùng: {fin.loc[['PIT', 'PIT1'], 'quarter'].tolist()}")
     check("RDF" not in fin.index and "RDL" not in fin.index,
           "Release trống ⇒ ngày biết = time (=asof ⇒ loại); Release=asof thắng time sớm hơn")
+    check("RQE" not in fin.index and "RQ1" in fin.index and meta.get("release_le_qend") == 1,
+          f"Release <= cuối quý ⇒ dùng time (asof ⇒ loại); Release = cuối quý+1 dùng được: "
+          f"{meta.get('release_le_qend')}")
     cands, excluded = F.build_lanes(c_rating(), {"CBN"}, {}, {"CIN": {"last_alert": "2026-09-30"}}, fin)
     C = set(cands.loc[cands["lane"] == "C", "ticker"])
     check(C == C_IN, f"làn C sai: {sorted(C)} (mong {sorted(C_IN)})")
     for t in ("Y29", "Q0", "QN", "P12X", "PE0", "PEN", "N4", "PIT", "RDF", "RDL", "CR4", "CLQ",
-              "CBN", "CIN", "Z4", "Z1"):
+              "CBN", "CIN", "Z4", "Z1", "CRF"):
         check(t not in C, f"{t} phải RA khỏi làn C")
     ex = dict(zip(excluded["ticker"] + "|" + excluded["lane"], excluded["excl_reason"]))
     check(ex.get("CBN|C") == "BANNED" and ex.get("CIN|C", "").startswith("insider_sell"),
@@ -636,12 +644,31 @@ def test_lane_c_build(tmp):
     check("+làn C" in ln and F.LANE_C_LABEL in ln, f"dòng A gộp nhãn C: {ln}")
     check(abs(rec[("Y30", "C")]["g_yoy"] - 0.30) < 1e-9 and rec[("Y30", "C")]["np_quarter"] == "2026Q2",
           f"g_yoy/np_quarter mang theo: {rec[('Y30', 'C')]}")
+    # Khối 08:00: MRG đã theo dõi ở A (A không báo hôm nay), C báo NEW gộp ⇒ PHẢI hiện "Làn C cũng
+    # bắt" (không im lặng nuốt), và KHÔNG kèm "Làn C: 0 mới" mâu thuẫn
+    res = {"asof": "2026-10-05", "warnings": [], "state_ok": True, "lane_c_ok": True, "seeded": 0,
+           "seeded_by_lane": {}, "lanes_seeded_today": [], "lane_c_queued": [],
+           "candidates": [rec[("MRG", "A")], rec[("MRG", "C")]],
+           "n_tracking": 1, "n_lane_a": 1, "n_lane_b": 0, "n_lane_c": 1,
+           "reported": [{"ticker": "MRG", "lane": "C", "reason": "NEW", "merged": True}]}
+    b = F.format_topic_block(res, dt.date(2026, 10, 6))
+    cm = [x for x in b.splitlines() if x.startswith("Làn C cũng bắt")]
+    check(len(cm) == 1 and "MRG" in cm[0] and F.LANE_C_LABEL in cm[0] and "Làn C: 0 mới" not in b,
+          f"mã C gộp (A/B không báo hôm nay) phải hiện 1 dòng 'cũng bắt', không '0 mới':\n{b}")
+    res["reported"].append({"ticker": "MRG", "lane": "A", "reason": "NEW", "prev_pb_z": None})
+    b = F.format_topic_block(res, dt.date(2026, 10, 6))
+    check("Làn C cũng bắt" not in b and sum("MRG" in x for x in b.splitlines()) == 1
+          and "+làn C" in b, f"A/B đã báo MRG ⇒ chỉ 1 dòng A gộp nhãn C:\n{b}")
     # fin None ⇒ không có làn C, A/B y nguyên
     c0, _ = F.build_lanes(c_rating(), {"CBN"}, {}, {}, None)
     check("C" not in set(c0["lane"]) and "MRG" in set(c0.loc[c0["lane"] == "A", "ticker"]),
           "fin None ⇒ không làn C, A/B vẫn chạy")
     check(F.lane_c_label(3.0) == F.LANE_C_LABEL and F.LANE_C_EXTREME_LABEL in F.lane_c_label(3.01),
           "biên YoY 300%: =300% không nhãn, >300% có")
+    for g, shown, ext in ((3.004, "+300%", False), (3.006, "+301%", True)):
+        check(F._pct(g) == shown and (F.LANE_C_EXTREME_LABEL in F.lane_c_label(g)) == ext
+              and F._c_priority({"ticker": "X", "g_yoy": g})[0] == ext,
+              f"nhãn >300% khớp SỐ HIỂN THỊ ({g}: {F._pct(g)}, {F.lane_c_label(g)})")
 
 
 def c_cands(spec, a=()):
@@ -699,6 +726,13 @@ def test_lane_c_state():
     s2x, _ = F.update_state(s1, c_cands({}), d("2026-11-09"))          # rời làn THẬT (không lỗi)
     _, rep = F.update_state(s2x, c_cands({"K1": 0.5}), d("2026-11-10"))
     check([r["reason"] for r in rep] == ["NEW"], f"đối chứng: rời làn thật ⇒ NEW (test có lực): {rep}")
+    # Phiên C lỗi CHỈ kéo dài mục còn liên tục (last_seen == phiên trước): K1 đã rời làn 11-09 ⇒
+    # phiên lỗi 11-10 KHÔNG được hồi sinh nó; 11-11 có lại ⇒ NEW
+    s3x, _ = F.update_state(s2x, c_cands({}), d("2026-11-10"), ("C",))
+    check(s3x["entries"]["K1|C"]["last_seen"] == "2026-10-01",
+          f"phiên lỗi không kéo dài mục đã rời làn: {s3x['entries']['K1|C']}")
+    _, rep = F.update_state(s3x, c_cands({"K1": 0.5}), d("2026-11-11"))
+    check([r["reason"] for r in rep] == ["NEW"], f"rời làn → phiên lỗi → có lại ⇒ NEW: {rep}")
     # Làn C lỗi ngay phiên đầu ⇒ chưa seed; phiên sau có dữ liệu ⇒ seed (không flood)
     s1, _ = F.update_state({}, c_cands({}, a=["A0"]), d("2026-10-01"), ("C",))
     check("C" not in s1["seeded_lanes"], f"làn lỗi không seed: {s1['seeded_lanes']}")
@@ -722,6 +756,9 @@ def test_lane_c_files(tmp):
     check(not r["lane_c_ok"] and r["n_lane_c"] == 0 and r["n_lane_a"] > 0 and r["state_ok"],
           f"fin thiếu ⇒ làn C tắt, A/B chạy: {r['warnings']}")
     check(any("LÀN C KHÔNG CHẠY" in w for w in r["warnings"]), f"cảnh báo fin thiếu: {r['warnings']}")
+    log = pd.read_csv(F.daily_paths(base)["log"], dtype={"date": str})
+    check(len(log) and log["lane_c_ok"].astype(str).eq("False").all(),
+          f"log ngày C không chạy: lane_c_ok=False mọi dòng: {log['lane_c_ok'].unique()}")
     b = F.format_topic_block(r, dt.date(2026, 10, 6))
     check("LÀN C (tăng trưởng LN) KHÔNG CHẠY" in b, f"khối khi fin thiếu:\n{b}")
     check("Làn C: 0 mới" not in b and "KHÔNG phải '0 mã mới'" in b, f"không im lặng thành 0 mới:\n{b}")
@@ -766,6 +803,9 @@ def test_lane_c_files(tmp):
     check(len(lc) == len(C_FILE) and lc["label"].str.contains(F.LANE_C_LABEL, regex=False).all()
           and set(F.LOG_COLS) == set(log.columns), "log: mọi dòng C mang nhãn bắt buộc")
     check(lc.set_index("ticker").loc["EXT", "label"].endswith(F.LANE_C_EXTREME_LABEL), "log nhãn nền thấp")
+    ok_by_day = log.groupby(log["date"].astype(str))["lane_c_ok"].agg(lambda x: set(x.astype(str)))
+    check(ok_by_day.get("2026-10-05") == {"False"} and ok_by_day.get("2026-10-06") == {"True"},
+          f"log phân biệt ngày C không chạy / C chạy: {ok_by_day.to_dict()}")
     # ngày 3: 7 mã C mới (1 gộp với A) ⇒ 5 hiện + "còn 1 mã", gộp không báo trùng
     extra = [row(f"W{i}", route="GROWTH", pe=8.0, pbz=0.0, drop=-5.0, icb=7777) for i in range(6)]
     extra.append(row("WA", route="GROWTH", pe=9.0, pbz=-1.5, drop=-30.0, icb=7777))
@@ -797,6 +837,46 @@ def test_lane_c_files(tmp):
           f"ngày 5: chỉ mã đang xếp hàng, không báo lại cả làn: {r['reported']}")
 
 
+def test_lane_c_isolated(tmp):
+    """Lỗi BẤT KỲ khi tính làn C (đọc fin, growth_cols, …) ⇒ C KHÔNG chạy + cảnh báo; A/B vẫn chạy."""
+    rcsv = os.path.join(tmp, "rating_iso.csv")
+    fcsv = os.path.join(tmp, "forensic_iso.csv")
+    fp = os.path.join(tmp, "fin_iso.parquet")
+    write_forensic(fcsv)
+    c_rating().to_csv(rcsv, index=False)
+    set_mtime_ict(rcsv, 2026, 10, 5, 19, 25)
+    write_fin(fp, c_fin())
+    now = dt.datetime(2026, 10, 5, 19, 35, tzinfo=ICT)
+    ok = F.run_daily(rcsv, os.path.join(tmp, "iso0"), False, now, fcsv, {}, fp)
+    check(ok["lane_c_ok"] and ok["n_lane_c"] > 0, "đối chứng: fin hợp lệ ⇒ làn C chạy")
+
+    def boom(*a, **k):
+        raise KeyError("cot_la")
+    for name in ("growth_cols", "load_financials"):
+        orig = getattr(F, name)
+        if name == "growth_cols":
+            setattr(F, name, lambda df, fin: boom() if fin is not None else orig(df, fin))
+        else:
+            setattr(F, name, boom)
+        try:
+            r = F.run_daily(rcsv, os.path.join(tmp, f"iso_{name}"), True, now, fcsv, {}, fp)
+        except Exception as e:                                  # noqa: BLE001
+            r = None
+            check(False, f"{name} lỗi làm chết cả funnel: {type(e).__name__}: {e}")
+        finally:
+            setattr(F, name, orig)
+        if r is None:
+            continue
+        check(not r["lane_c_ok"] and r["n_lane_c"] == 0 and r["n_lane_a"] == ok["n_lane_a"]
+              and r["n_lane_b"] == ok["n_lane_b"] and r["state_ok"],
+              f"{name} lỗi ⇒ C tắt, A/B y nguyên: C={r['n_lane_c']} A={r['n_lane_a']} B={r['n_lane_b']}")
+        check(any("làn C lỗi khi tính" in w and "KeyError" in w for w in r["warnings"]),
+              f"{name} lỗi ⇒ cảnh báo có lỗi thật: {r['warnings']}")
+        b = F.format_topic_block(r, dt.date(2026, 10, 6))
+        check("LÀN C (tăng trưởng LN) KHÔNG CHẠY" in b and "Làn C: 0 mới" not in b,
+              f"{name} lỗi ⇒ khối nói KHÔNG CHẠY:\n{b}")
+
+
 def run_once():
     with tempfile.TemporaryDirectory() as tmp:
         fin_default = os.path.join(tmp, "fin_default.parquet")      # F.FIN_CACHE sandbox: NP phẳng
@@ -805,6 +885,7 @@ def run_once():
         test_lane_c_build(tmp)
         test_lane_c_state()
         test_lane_c_files(tmp)
+        test_lane_c_isolated(tmp)
         test_lanes(tmp)
         test_insider_file(tmp)
         test_context()

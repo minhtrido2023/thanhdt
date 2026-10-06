@@ -573,7 +573,7 @@ def rating_sanity(df):
 
 def load_financials(path, asof, now):
     """ticker_financial cache ⇒ (fin | None, meta, warnings). fin: 1 dòng/ticker = quý MỚI NHẤT có
-    NP_P0 và ngày biết (Release_Date, trống ⇒ `time`) < asof CHẶT (quý công bố đúng ngày asof chưa
+    NP_P0 và ngày biết (Release_Date; trống HOẶC <= cuối quý ⇒ `time`) < asof CHẶT (quý công bố đúng ngày asof chưa
     dùng được — PIT như nghiên cứu). None ⇒ làn C KHÔNG chạy (thiếu/hỏng/thiếu cột/dưới sàn); mọi
     lỗi thành cảnh báo, không raise (A/B vẫn chạy). Đọc pyarrow use_threads=False: `python3` hệ
     thống (pyarrow 24) đọc đa luồng thỉnh thoảng abort lúc thoát (exit 134, đo 2026-10-06)."""
@@ -605,8 +605,11 @@ def load_financials(path, asof, now):
     if age > FIN_MAX_FILE_AGE_DAYS:
         warnings.append(f"{path} cũ {age:.1f} ngày (sync 23:45 chết?) — làn C có thể thiếu quý "
                         f"vừa công bố")
-    known = pd.to_datetime(raw["Release_Date"], errors="coerce").fillna(
-        pd.to_datetime(raw["time"], errors="coerce"))
+    rel = pd.to_datetime(raw["Release_Date"], errors="coerce")
+    qend = quarter_end(raw["quarter"])
+    early = (rel <= qend).to_numpy(dtype=bool)               # công bố TRƯỚC khi quý kết thúc = rác
+    meta["release_le_qend"] = int(early.sum())
+    known = rel.mask(early).fillna(pd.to_datetime(raw["time"], errors="coerce"))
     f = raw.assign(known=known).dropna(subset=["NP_P0", "known"])
     asof_ts = pd.Timestamp(asof)
     f = f[f["known"] < asof_ts]
@@ -619,6 +622,14 @@ def load_financials(path, asof, now):
                         f"trước asof) — ingest BCTC chết?")
     f = f.sort_values(["ticker", "known", "quarter"]).groupby("ticker").tail(1).set_index("ticker")
     return f[["quarter", "known", "NP_P0", "NP_P1", "NP_P4"]], meta, warnings
+
+
+def quarter_end(q):
+    """'2026Q2' ⇒ Timestamp 2026-06-30; sai dạng ⇒ NaT (so sánh với NaT luôn False)."""
+    m = q.astype(str).str.extract(r"^(\d{4})Q([1-4])$")
+    first = pd.to_datetime(m[0] + "-" + (m[1].astype(float) * 3).astype("Int64").astype(str) + "-01",
+                           errors="coerce", format="%Y-%m-%d")
+    return first + pd.offsets.MonthEnd(0)
 
 
 def growth_cols(df, fin):
@@ -804,11 +815,17 @@ class AsofRegress(ValueError):
     """asof < last_run_asof: dữ liệu đi lùi (rating cũ được khôi phục?) — không ghi state."""
 
 
+def _yoy_extreme(g):
+    """YoY > 300% xét trên số HIỂN THỊ (_pct làm tròn tới %): 300,4% hiện "+300%" ⇒ KHÔNG nhãn —
+    nhãn và con số trên cùng dòng không bao giờ mâu thuẫn. Dùng chung cho nhãn lẫn thứ tự trần."""
+    return g is not None and float(f"{g * 100:.0f}") > LANE_C_YOY_EXTREME * 100
+
+
 def _c_priority(r):
     """Thứ tự lấp trần 5 mã C/ngày: YoY trong ngưỡng hợp lý (<= 300%) trước, YoY giảm dần, ticker."""
     g = _num(r.get("g_yoy"))
     g = -1.0 if g is None else g
-    return (g > LANE_C_YOY_EXTREME, -g, str(r["ticker"]))
+    return (_yoy_extreme(g), -g, str(r["ticker"]))
 
 
 def update_state(state, cands, asof, unavailable_lanes=()):
@@ -917,24 +934,27 @@ def load_state(path):
 
 LOG_COLS = ["date", "ticker", "lane", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
             "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis", "reported",
-            "g_yoy", "g_qoq", "np_quarter", "label"]
+            "g_yoy", "g_qoq", "np_quarter", "label", "lane_c_ok"]
 
 
 def lane_c_label(g_yoy):
     """Nhãn bắt buộc của MỌI mã làn C (+ nhãn nghi nền thấp khi YoY > 300%)."""
     g = _num(g_yoy)
     lab = LANE_C_LABEL
-    if g is not None and g > LANE_C_YOY_EXTREME:
+    if _yoy_extreme(g):
         lab += f"; {LANE_C_EXTREME_LABEL}"
     return lab
 
 
-def append_log(path, cands, asof, reported):
-    """Ghi MỌI mã trong làn của asof; idempotent theo ngày (xoá dòng cùng date rồi ghi lại)."""
+def append_log(path, cands, asof, reported, lane_c_ok):
+    """Ghi MỌI mã trong làn của asof; idempotent theo ngày (xoá dòng cùng date rồi ghi lại).
+    `lane_c_ok` ghi trên MỌI dòng của ngày: ngày không có dòng C + lane_c_ok=False = C KHÔNG chạy
+    (dữ liệu lỗi), lane_c_ok=True = C chạy ra 0 mã; trống = log trước khi có cờ."""
     rep = {(x["ticker"], x["lane"]): x["reason"] for x in reported}
     rows = cands.assign(date=str(asof)).copy()
     rows["reported"] = [rep.get((t, l), "") for t, l in zip(rows["ticker"], rows["lane"])]
     rows["label"] = [lane_c_label(g) if l == "C" else "" for g, l in zip(rows["g_yoy"], rows["lane"])]
+    rows["lane_c_ok"] = bool(lane_c_ok)
     rows = rows[LOG_COLS]
     if os.path.exists(path):
         old = pd.read_csv(path, dtype={"date": str})
@@ -996,17 +1016,28 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         warnings.append("DỮ LIỆU 8L DƯỚI SÀN SANITY: " + "; ".join(insane))
     banned, forensic, insider, ex_warn = load_exclusions(asof, forensic_csv, insider)
     warnings += ex_warn
-    fin, fin_meta, fin_warn = load_financials(fin_parquet or FIN_CACHE, asof, now)
-    warnings += fin_warn
-    if fin is not None:
-        pool = rating[(rating["rating"] <= RATING_MAX) & (rating["liq_bn"] >= LIQ_MIN_BN)
-                      & (rating["ROE_Min3Y"] >= 0) & (rating["CF_OA_3Y"] > 0)]["ticker"]
-        cov = float(pool.isin(fin.index).mean()) if len(pool) else 1.0
-        fin_meta["coverage"] = round(cov, 3)
-        if cov < FIN_MIN_COVERAGE:
-            warnings.append(f"ticker_financial chỉ phủ {cov:.0%} vũ trụ chất lượng (< {FIN_MIN_COVERAGE:.0%})"
-                            f" — làn C có thể thiếu mã")
-    cands, excluded = build_lanes(rating, banned, forensic, insider, fin)
+    # TOÀN BỘ làn C (đọc fin + phủ + growth_cols + làn/hậu xử lý trong build_lanes) nằm trong try:
+    # lỗi bất kỳ ⇒ C KHÔNG chạy + cảnh báo, dựng lại A/B với fin=None — làn C không bao giờ làm
+    # chết A/B. Lỗi ở lần dựng fin=None là lỗi của A/B ⇒ để nổ như trước.
+    fin, fin_meta, cands = None, {"path": fin_parquet or FIN_CACHE}, None
+    try:
+        fin, fin_meta, fin_warn = load_financials(fin_parquet or FIN_CACHE, asof, now)
+        warnings += fin_warn
+        if fin is not None:
+            pool = rating[(rating["rating"] <= RATING_MAX) & (rating["liq_bn"] >= LIQ_MIN_BN)
+                          & (rating["ROE_Min3Y"] >= 0) & (rating["CF_OA_3Y"] > 0)]["ticker"]
+            cov = float(pool.isin(fin.index).mean()) if len(pool) else 1.0
+            fin_meta["coverage"] = round(cov, 3)
+            if cov < FIN_MIN_COVERAGE:
+                warnings.append(f"ticker_financial chỉ phủ {cov:.0%} vũ trụ chất lượng "
+                                f"(< {FIN_MIN_COVERAGE:.0%}) — làn C có thể thiếu mã")
+            cands, excluded = build_lanes(rating, banned, forensic, insider, fin)
+    except Exception as e:                                  # noqa: BLE001 — cô lập làn C
+        fin = None
+        warnings.append(f"làn C lỗi khi tính ({type(e).__name__}: {str(e)[:200]}) — LÀN C KHÔNG "
+                        f"CHẠY phiên này (A/B vẫn chạy)")
+    if fin is None:
+        cands, excluded = build_lanes(rating, banned, forensic, insider, None)
     unavailable = () if fin is not None else ("C",)
 
     state = load_state(paths["state"])
@@ -1043,7 +1074,7 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         if not insane and not regressed:
             snap_status, snap_path = snapshot_rating(data, paths["snap_dir"], asof)
             result["snapshot"] = {"status": snap_status, "path": snap_path}
-            result["log_rows"] = append_log(paths["log"], cands, asof, rep_all)
+            result["log_rows"] = append_log(paths["log"], cands, asof, rep_all, fin is not None)
         else:
             result["snapshot"] = {"status": "skipped", "path": None}
         _atomic_write_text(paths["result"], json.dumps(result, ensure_ascii=False, indent=1))
@@ -1146,7 +1177,7 @@ def format_topic_block(result, today):
         lines.append(f"{head_c}: {len(rep_c)} mã mới{since}:")
         for x in rep_c:
             lines.append(candidate_line(by_key[(x["ticker"], "C")]))
-    elif "C" not in seeded_today:
+    elif "C" not in seeded_today and not rep_cm:
         lines.append(f"Làn C: 0 mới{since} (C={n_c} đang theo dõi)")
     if queued:
         lines.append(f"… còn {len(queued)} mã làn C mới chưa hiện (trần {LANE_C_MAX_PER_DAY}/ngày) — "
