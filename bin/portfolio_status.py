@@ -515,6 +515,16 @@ def load_nav_row(account, date):
     return today_row, prior_row
 
 
+def _cash_div_impact(vps_raw):
+    """Producer (corp_action_daily) lưu value_per_share dạng CHUỖI ('1500.0') — ép float như
+    nav_exdate_forecast; rỗng/không parse được ⇒ nói thẳng 'chưa rõ mức', không crash cả mục."""
+    try:
+        vps = float(vps_raw) if vps_raw not in (None, "") else None
+    except (TypeError, ValueError):
+        vps = None
+    return f"{vps:,.0f}đ/cp cổ tức tiền mặt" if vps is not None else "cổ tức tiền mặt (chưa rõ mức)"
+
+
 def build_output(account, date):
     lines = []
     status = _read_json(os.path.join(WC_ROOT, "data", "golive_v23_status.json"), {}) or {}
@@ -716,8 +726,7 @@ def build_output(account, date):
         for e in sorted(mine, key=lambda x: x["date"]):
             kind = classify(e)
             if kind == "CASH_DIV":
-                vps = e.get("value_per_share")
-                impact = f"{vps:,.0f}đ/cp cổ tức tiền mặt" if vps is not None else "cổ tức tiền mặt (chưa rõ mức)"
+                impact = _cash_div_impact(e.get("value_per_share"))
             elif kind == "SHARE_EVENT":
                 ratio = e.get("exercise_ratio")
                 impact = f"{e.get('event_code')}, tỉ lệ {float(ratio) * 100:.2f}%" if ratio else e.get("event_code", "?")

@@ -272,6 +272,16 @@ def run():
     else:
         check("NAV stale: bỏ qua (không có nav_history_ZaloPay.csv nào để test fallback)", True)
 
+    # 18: value_per_share dạng CHUỖI từ producer (ca thật TV1 DIV '1500.0', ex 07/10) — trước đây
+    # f"{vps:,.0f}" ném ValueError, mất cả khối danh mục trong báo cáo ngày 05-06/10.
+    check("cash_div_impact: chuỗi '1500.0' → 1,500đ/cp",
+          ps._cash_div_impact("1500.0") == "1,500đ/cp cổ tức tiền mặt", ps._cash_div_impact("1500.0"))
+    check("cash_div_impact: float 3000.0 → 3,000đ/cp",
+          ps._cash_div_impact(3000.0) == "3,000đ/cp cổ tức tiền mặt")
+    for _bad in (None, "", "abc"):
+        check(f"cash_div_impact: {_bad!r} → chưa rõ mức (không crash)",
+              ps._cash_div_impact(_bad) == "cổ tức tiền mặt (chưa rõ mức)")
+
     print()
     if FAILS:
         print(f"SELFCHECK FAILED: {len(FAILS)} assertion — {FAILS}")
