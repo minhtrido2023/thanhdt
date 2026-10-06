@@ -62,3 +62,9 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T16:47:21Z] 23:50 01/10: lag-exit vòng 4 (ebe45e85) arch-review: logic ĐÚNG, chỉ còn 2 mutation test sống (writer source marker; renderer None crash) -> Taylor vòng 5 test-only dispatch; sau đó arch-review nhẹ -> hỏi user duyệt merge squash. ATC vòng 3 (job 163620) test-only đang chạy -> arch-review ngắn -> merge main nếu APPROVED (user đã duyệt).
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-05T17:46:53Z] 06/10 01:0x: user chốt size 5%/mã, nhãn NGÀNH→Bobby trước Taylor; tôi đề xuất rating<=3 + làn B (1/PE top-3/route) + cổng giá trong phiên thay quét thứ Hai (bot 0 lệnh BUY trước 11:00 từ 26/08). Chờ user: duyệt dựng + PVT hấp dẫn vì đâu + tuỳ chọn tự hoãn lệnh mua.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-05T18:02:51Z] 06/10 01:15: dispatch Taylor_20261005_180152 (dựng funnel A+B, branch, KHÔNG merge) + Taylor_20261005_180155 (nghiên cứu làn C/PVT). Cutloss trong phiên: đề xuất ghi trong plan (mặc định theo phán quyết GÃY=bán/CHƯA RÕ=50%/NHIỄU=giữ; loại custom30V; discretionary chỉ bán khi GÃY; shadow 5 phiên) — CHỜ user duyệt. Sau Taylor: review funnel, arch-review, cài cron 19:35.
