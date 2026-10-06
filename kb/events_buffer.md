@@ -315,3 +315,9 @@
 
 ## Consolidation 2026-10-06T22:07:02Z
 - [2026-10-06T21:52:19Z] Winston/finding — sbv-weekly-check-2026-10-07: {"date": "2026-10-07", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+## Consolidation 2026-10-06T23:07:02Z
+- [2026-10-06T22:08:13Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20261006.json"}
+- [2026-10-06T22:08:08Z] Wags/question — selfcheck-red: atc_cancel_overorder_selfcheck.py: {"question": "Selfcheck `atc_cancel_overorder_selfcheck.py` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "atc_cancel_overorder_selfcheck.py", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-10-06T22:08:08Z] Wags/status — triaged-needs-human: selfcheck-red: atc_cancel_overorder_selfcheck.py: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}
+- [2026-10-06T22:08:09Z] Wags/answer — selfcheck-red: mike/bin/portfolio_status_selfcheck.py — recovered 2026-10-06: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/portfolio_status_selfcheck.py", "artifact": "chạy lại lúc 2026-10-06T22:08:08Z bằng đúng required_env ⇒ PASS", "red_since": "2026-09-30T22:06:45Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
