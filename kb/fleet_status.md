@@ -1,15 +1,15 @@
-# Fleet status — 2026-10-06T17:33:47 UTC
+# Fleet status — 2026-10-06T18:07:02 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-06T12:04:06Z | 329 |  |
-| Mike | Mike | child | working | 2026-10-06T17:31:26Z | 2 |  |
-| Mike_3737746 | mike-6c | child | dead | 2026-10-05T18:20:01Z | 1393 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | dead | 2026-10-06T15:15:30Z | 138 |  |
-| Taylor_3745196 | taylor-37 | child | dead | 2026-10-05T18:20:01Z | 1393 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | working | 2026-10-06T17:32:44Z | 1 |  |
-| Winston | Winston | child | dead | 2026-10-06T05:46:37Z | 707 |  |
-| mike-paseo-ad | mike-paseo-ad | external | running | 2026-10-06T17:30:01Z | 3 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
-| workingclaude-11 | workingclaude-11 | external | dead | 2026-10-05T18:20:01Z | 1393 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| workingclaude-ad | workingclaude-ad | child | dead | 2026-10-05T01:23:01Z | 2410 |  |
-| workingclaude-b1 | workingclaude-b1 | child | dead | 2026-10-05T18:20:04Z | 1393 |  |
+| DollarBill | DollarBill | child | dead | 2026-10-06T12:04:06Z | 362 |  |
+| Mike | Mike | child | dead | 2026-10-06T17:33:55Z | 33 |  |
+| Mike_3737746 | mike-6c | child | dead | 2026-10-05T18:20:01Z | 1427 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-10-06T15:15:30Z | 171 |  |
+| Taylor_3745196 | taylor-37 | child | dead | 2026-10-05T18:20:01Z | 1427 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-10-06T17:32:44Z | 34 |  |
+| Winston | Winston | child | dead | 2026-10-06T05:46:37Z | 740 |  |
+| mike-paseo-ad | mike-paseo-ad | external | running | 2026-10-06T18:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
+| workingclaude-11 | workingclaude-11 | external | dead | 2026-10-05T18:20:01Z | 1427 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| workingclaude-ad | workingclaude-ad | child | dead | 2026-10-05T01:23:01Z | 2444 |  |
+| workingclaude-b1 | workingclaude-b1 | child | dead | 2026-10-05T18:20:04Z | 1426 |  |
