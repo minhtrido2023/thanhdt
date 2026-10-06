@@ -907,3 +907,6 @@
 
 ## Archived 2026-10-06 (keep=12 days=0 require_done=False)
 - [2026-10-04T03:34:56Z] [drift-flag Q5] XONG job Taylor_20261004_024243: feat/plan-position-drift-flag-20261004@821179e2 (wt-driftflag-1004), 98/98 x6, mut 52/52. CHỜ Mike merge + cài cron (20:50 + 21:05) trước 20:50 T2 05/10.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-04T14:10:26Z] [broker-primary r4] XONG job Taylor_20261004_120510: feat/broker-primary-20261003@9e4d24c9 (code 696797c0), arch-review v4 NEEDS_CHANGES KHÔNG lỗi loại mới (1 MAJOR I2 hỏi-trước-ghi-sau writer vendor + 5 minor cùng loại). CHỜ log shadow T2/T3 + Mike/user quyết r5; KHÔNG bật live.
