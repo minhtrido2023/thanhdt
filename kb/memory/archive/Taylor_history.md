@@ -904,3 +904,6 @@
 
 ## Archived 2026-10-04 (keep=12 days=0 require_done=False)
 - [2026-10-03T17:55:37Z] [broker-PRIMARY] DỪNG (lỗi mới khác loại) job Taylor_20261003_162814: feat/broker-primary-20261003@a1e1923e (wt-brokerprimary-1003), arch-review NEEDS_CHANGES: MAJOR-1 registry-có-sẵn im lặng, MAJOR-3 không re-verify sau ex, MAJOR-4 price-only trước ghi; note agents/Taylor/research/broker-primary-20261004.md. CHỜ Mike/user quyết vòng sửa trước live.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-04T03:34:56Z] [drift-flag Q5] XONG job Taylor_20261004_024243: feat/plan-position-drift-flag-20261004@821179e2 (wt-driftflag-1004), 98/98 x6, mut 52/52. CHỜ Mike merge + cài cron (20:50 + 21:05) trước 20:50 T2 05/10.
