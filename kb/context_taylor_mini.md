@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3650)
+# Mike fleet — context_taylor_mini (v3651)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-06T12:03:50] DollarBill/decision — plan-2026-10-07-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-07", "file": "data/trade_plans/plan_ZaloPay_2026-10-07.json", "decision": "HOLD_ALL", "orders": 0, "dt5g": "NEUTRAL …
 - [2026-10-06T12:03:59] DollarBill/decision — plan-2026-10-07-SpaceX: {"account": "SpaceX", "plan_date": "2026-10-07", "file": "data/trade_plans/plan_SpaceX_2026-10-07.json", "action": "1 lệnh BÁN MBB 100cp @19.200 (L1 park-trim,  …
 - [2026-10-06T12:03:59] DollarBill/finding — plan-2026-10-07-SpaceX-blockers: {"park_shortfall_vnd": 10311700, "blocked_sellable0": ["MSB", "TPB", "VIB", "VPB"], "corp_action": ["MBB AIS 10-06 hôm nay", "TV1 DIV ex 10-07"], "note": "corp_ …
 - [2026-10-06T12:00:48] Taylor/finding — nav-exdate-forecast 2026-10-06: {"asof": "2026-10-06", "n_events": 2, "tickers": ["MBB", "TV1"], "kinds": ["CASH_DIV", "INFO"]}
 - [2026-10-06T14:15:50] Taylor/finding — broker-primary-r5: {"status": "built_not_merged", "branch": "feat/broker-primary-20261003", "commit": "26fbc30d", "parent": "9e4d24c9", "worktree": "mike/agents/Taylor/wt-brokerpr …
+- [2026-10-06T15:14:23] Taylor/finding — broker-primary-r6: {"status": "built_not_merged", "branch": "feat/broker-primary-20261003", "commit": "7db42331", "parent": "26fbc30d", "worktree": "mike/agents/Taylor/wt-brokerpr …
 <!--RECENT-END-->
 
 ## Kill-switches
