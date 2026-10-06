@@ -86,3 +86,6 @@
 
 ## Archived 2026-10-06 (keep=12 days=0 require_done=False)
 - [2026-10-05T19:52:29Z] 06/10 02:53: cutloss shadow r1 (7aefa5da) arch NEEDS_CHANGES: killer = DISPATCH_FROM=Taylor tự gọi Taylor bị dispatch.sh chặn; + kill window T0, fan-out cap, lỗi im lặng, tiền tố SHADOW cho trả lời, cron_registry. Dispatch r2 Taylor_20261005_195221 (Opus high) sửa 7 chặn + mặc định an toàn (timeout⇒GIỮ+cảnh báo; excluded/hạn chế GD chỉ báo; sau 14:00 quyết định phiên sau, 08:30 nhắc, áp 09:15; log song song ngưỡng HOSE −3% tương đối). Chờ user quyết 4 chính sách đó. Lần dispatch kế cùng chuỗi = vòng 3 (vẫn được), vòng 4 bị chặn exit 7.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-05T20:39:15Z] 06/10 03:45: cutloss SHADOW r2 arch APPROVED (shadow only). Mike tự vá F4/F6/F8 commit 473dfe1f trên branch feat/intraday-price-watch-20261006 (worktree agents/Taylor/wt-ipw-1006), selfcheck 270/270. CHỜ user duyệt: merge + cài cron (* 2-7 * * 1-5 run + 30 1 * * 1-5 nhắc 08:30) + chốt 4 mặc định a-d. Follow-up F1-F3/F5/F7/F9-F11 trước live; L1-L6 chặn bán thật.

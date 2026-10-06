@@ -611,3 +611,46 @@
 ## Consolidation 2026-10-06T13:07:02Z
 - [2026-10-06T12:12:53Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-10-06", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-10-06.md"}
 - [2026-10-06T12:15:32Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-10-06", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-10-06.md"}
+
+## Consolidation 2026-10-06T14:07:02Z
+- [2026-10-06T13:35:09Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "doc review v4 + code"}
+- [2026-10-06T13:35:46Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:35:58Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "doc writer vendor+broker, thiet ke sua MAJOR-1"}
+- [2026-10-06T13:36:46Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:37:46Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:38:46Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:39:06Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "thiet ke xong, doc selfcheck"}
+- [2026-10-06T13:39:46Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:40:01Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [], "capped": [{"ticker": "VPB", "book": "LAG", "desired_qty": 282, "capped_qty": 0, "reason": "VPB book=LAG: Σ SELL kế hoạch (282cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+- [2026-10-06T13:40:35Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "minor-2 detector norm + CASH_LEG_MAX xong; dang sua MAJOR-1 writer vendor"}
+- [2026-10-06T13:40:46Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:41:47Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:42:47Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:43:20Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "MAJOR-1 2 writer + minor-3/4/5 code xong, 637/2 dang sua test V11/N40"}
+- [2026-10-06T13:43:47Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:44:47Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:45:40Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "cap nhat 15 mau dot bien cu; dang viet test_r5"}
+- [2026-10-06T13:45:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:46:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:47:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:48:17Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "test_r5 665/0, control r4 19 FAIL dung; dang them dot bien + F0"}
+- [2026-10-06T13:48:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:49:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:50:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:51:48Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:52:49Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:53:49Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:54:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:55:34Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "in_progress", "note": "mutation 448/454 lan 1; go code thua + test conflict, chay lai mutation"}
+- [2026-10-06T13:55:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:56:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:57:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:58:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T13:59:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:00:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:01:50Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:02:51Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:03:51Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:04:51Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:05:53Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261006_133445", "source": "watcher"}
+- [2026-10-06T14:06:53Z] Taylor/heartbeat — Taylor_20261006_133445: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261006_133445", "source": "watcher"}
