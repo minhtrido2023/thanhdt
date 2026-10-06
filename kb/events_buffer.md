@@ -585,3 +585,8 @@
 - [2026-10-06T05:45:29Z] Winston/heartbeat — Winston_20261006_054508: {"status": "in_progress", "note": "BID sell 27 PLACE_FAIL Trade quantity not enough; position split 2 deals 20+7"}
 - [2026-10-06T05:46:09Z] Winston/heartbeat — Winston_20261006_054508: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261006_054508", "source": "watcher"}
 - [2026-10-06T05:46:30Z] Winston/question — ops-autofix-unresolved: ops-health-ZaloPay: {"ly_do": "Root cause trong trading_bot/brokers.py (ranh gioi cam). ZaloPay PARKMERGE-SELL-BID sell 27 bi DNSE 400 Trade quantity not enough x5 -> PLACE_FAIL_STOPPED 09:21. sell_loan_package_resolve: by_package {1258:20,1826:7}, any_pkg_covers_qty=false, resolved=1258 -> 20<27. Gioi han da biet cua _resolve_sell_loan_package_id (khong clamp/tach qty).", "de_xuat": "Lenh BAN khi khong goi nao du qty: tach thanh lenh con theo tung goi (20@1258 + 7@1826) trong _place_slices/place_order", "impact": "~934.200 VND chua ban duoc; khong orphan/dup; restart 13:00 se retry <=5 + ATC cung loi", "incident": "kb/incidents/2026-10/2026-10-06-zalopay-bid-sell-split-across-loan-packages.md", "commit": "965dc77f", "urgency": "normal"}
+
+## Consolidation 2026-10-06T06:00:12Z
+- [2026-10-06T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-10-06", "auto_otp": true}
+- [2026-10-06T06:00:04Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-10-06", "auto_otp": true}
+- [2026-10-06T06:00:11Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-06", "elapsed_s": 9, "rc": 0}
