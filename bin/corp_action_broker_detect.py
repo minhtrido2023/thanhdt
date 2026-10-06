@@ -135,6 +135,14 @@ def modified_ict(md):
     return t.astimezone(ICT)
 
 
+def norm_ticker(x):
+    """Mã chuẩn hoá ĐÚNG quy tắc CA.validate (`str().strip().upper()`) — áp NGAY khi đọc symbol DNSE (minor-2
+    r5: bản r4 gom theo symbol THÔ, chỉ chuẩn hoá ở biên auto_confirm ⇒ 'TPB' tài khoản 1 đã credit + 'tpb '
+    tài khoản 2 chưa credit thành 2 mã ⇒ CONFIRMABLE thay vì INSUFFICIENT). auto_confirm._norm_ticker gọi hàm
+    này (MỘT quy tắc); selfcheck K0 khoá nó vào CA.validate."""
+    return str(x if x is not None else "").strip().upper()
+
+
 def aggregate(rows):
     """Gộp các lô (loan package) của MỘT mã trong MỘT bản ghi positions."""
     live = [r for r in rows if _f(r.get("openQuantity")) > 0]
@@ -172,7 +180,7 @@ def read_series(path, account_no):
             for p in pos:
                 if str(p.get("accountNo")) != str(account_no):
                     continue
-                by.setdefault(p.get("symbol"), []).append(p)
+                by.setdefault(norm_ticker(p.get("symbol")), []).append(p)
             out.append((str(d.get("ts") or ""), by))
     out.sort(key=lambda x: x[0])
     return out
@@ -221,7 +229,7 @@ def same_day_fills(path, account_no, ticker, day):
             if d.get("kind") != "orders" or str(d.get("account_no")) != str(account_no):
                 continue
             for o in (d.get("payload") or {}).get("orders") or []:
-                if (o.get("symbol") == ticker and str(o.get("accountNo")) == str(account_no)
+                if (norm_ticker(o.get("symbol")) == norm_ticker(ticker) and str(o.get("accountNo")) == str(account_no)
                         and str(o.get("transDate") or "")[:10] == day
                         and _f(o.get("fillQuantity")) > 0):
                     out[o.get("id")] = (modified_ict(o.get("modifiedDate")),
@@ -632,9 +640,12 @@ def _decide_qty(ticker, day, ex_date, per_account, holders_not_credited, px_cum,
     m = simplest_in(lo2, hi2)
     if m is None or m <= 1.0:
         return dict(out, verdict=AMBIGUOUS, why=f"không chọn được hệ số hợp lý trong [{lo2}, {hi2})")
-    from corp_actions import QTY_MULT_MAX
+    from corp_actions import CASH_LEG_MAX, QTY_MULT_MAX
     if m > QTY_MULT_MAX:
         return dict(out, verdict=AMBIGUOUS, why=f"hệ số {m} > {QTY_MULT_MAX} (biên chặn registry) — người xác nhận")
+    if c > CASH_LEG_MAX:      # minor-5 r5: record vượt biên ⇒ CA.validate từ chối ở writer — chặn ngay ở detector
+        return dict(out, verdict=AMBIGUOUS,
+                    why=f"chân tiền {c:,.0f}đ/cp > {CASH_LEG_MAX:,.0f} (biên chặn registry) — người xác nhận")
     for lbl, ev in per_account.items():
         if int(math.floor(ev["q0"] * m + 1e-9)) != int(ev["q1"]):
             return dict(out, verdict=AMBIGUOUS,

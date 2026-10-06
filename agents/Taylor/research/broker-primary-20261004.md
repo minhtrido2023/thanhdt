@@ -158,3 +158,54 @@ có tên, 0 chỉ-crash, 10 sống do thiếu test, 4 tương đương.
 Ghi thêm: selfcheck check F0 đọc file production `corp_action_daily_2026-10-02_FAILED.json` (thiếu ⇒ 638 thay vì 639) — phụ thuộc
 môi trường. AST D0 không bắt `from subprocess import run` / `os.system` / `open(mode=…)` / `Path.write_text` (code hiện không dùng).
 Probe tái hiện + bộ đột biến reviewer: /tmp/rv4/probe/p1-p7.py, /tmp/rv4/mut/ (tạm, có thể mất).
+
+### r5 (job Taylor_20261006_133445, user DUYỆT phương án A 06/10 20:33 — vượt trần vòng có duyệt) — sửa trọn arch-review v4
+**MAJOR-1 (I2 lọt lần 3) — sửa tận gốc:** câu hỏi khẳng định trạng thái registry quanh ex KHÔNG còn gửi trong vòng quyết.
+- Writer vendor: conflict / cash-leg / near-record gom vào `deferred`, gửi ở `_flush_deferred` SAU khi lô có kết quả, trên
+  registry SAU lô (cũ + record lô đã ghi / dry-run sẽ ghi; lô bị từ chối ⇒ chỉ cũ). Câu cash-leg nay nhận `existing` (nêu
+  record lô + ONE_RECORD_RULE).
+- Writer broker: record lô vào `rows` ngay khi quyết (mục sau cùng mã ex kề ⇒ near-dup; cùng (mã, ex) ⇒ "lô này đã quyết
+  ghi"); I2 (bỏ record_proposed, gắn registry_update_proposed) tính MỘT NƠI — `_i2_refresh` sau vòng cho CẢ mục mới lẫn gửi
+  bù, trên registry + lô. Nhánh I2 trong vòng (tính trên registry TRƯỚC lô) đã gỡ.
+
+**Kiểm kê cùng lớp ("khẳng định trạng thái registry tính trước khi lô ghi") ở CẢ 2 writer:**
+
+| # | Writer | Chỗ | Trạng thái |
+|---|---|---|---|
+| 1 | vendor | vendor-conflict (`_existing_id` trước vòng) | SỬA (deferred) |
+| 2 | vendor | vendor-cash-leg ("registry chưa có record") | SỬA (deferred + `existing`) |
+| 3 | vendor | vendor-near-record: near có thể là record CỦA LÔ, lô bị từ chối ⇒ câu nêu record không tồn tại (chiều ngược) | SỬA (tính lại trên registry sau lô; không còn ⇒ không hỏi, in lý do) |
+| 4 | vendor | vendor-vs-registry (record CÙNG (mã, ex) có sẵn) | KHÔNG thuộc lớp — lô không bao giờ ghi trùng khoá; record có trước và sau lô |
+| 5 | vendor | post_bus AUTO-CONFIRMED | đã sau ghi (B-4) |
+| 6 | vendor live | confirm_only: không ghi; nhánh broker chạy TRƯỚC, vendor đọc registry mới | OK; conflict flush trên registry hiện tại |
+| 7 | broker | `dup` trên `rows` trước lô ⇒ 2 CONFIRMABLE cùng mã ex kề ghi CẢ HAI (×2) | SỬA (batch rows) |
+| 8 | broker | cùng (mã, ex) 2 lần trong lô ⇒ I1 từ chối CẢ LÔ | SỬA (batch_keys) |
+| 9 | broker | upd/record_proposed của mục quyết TRƯỚC record lô | SỬA (`_i2_refresh` sau lô) |
+| 10 | broker | gửi bù `_i2_refresh` trước lô | SỬA (sau lô) |
+| 11 | broker | write-incomplete `upd` | nhận từ #9/#10 |
+| 12 | broker | `registry_has` trong finding shadow | sự thật về registry thật (không khẳng định vắng quanh ex) — giữ |
+| 13 | cả 2 | `_registry_sweep` / re-verify | đọc lại registry SAU ghi — OK |
+
+**minor-2:** `BD.norm_ticker` (quy tắc CA.validate) áp NGAY ở `read_series` (khoá symbol) + `same_day_fills`; mọi chỗ
+reviewer nêu (:896-898, :917-919, :928, held_tickers) dẫn xuất từ `read_series`. `cac._norm_ticker` gọi `BD.norm_ticker` (1
+quy tắc). `_held_info` bỏ chuẩn hoá lặp. Test: A1 'TPB' credit + A2 'tpb ' chưa ⇒ MỘT mã TPB INSUFFICIENT.
+**minor-3:** GỠ nhánh resolver `vendor-cash-leg` (chọn gỡ thay vì cho resolver chạy off/shadow): câu đó chỉ phát ở writer
+vendor (off/shadow), resolver chỉ chạy live và off KHÔNG chạy `_registry_sweep` ⇒ cho resolver chạy ở off/shadow là thêm
+một đường gửi bus answer mới + test cho một câu hiếm, vẫn không phủ off; người ghi record chân tiền đóng câu đó (cùng cách
+vendor-near-record / vendor-vs-registry). vendor-conflict giữ (live cũng hỏi).
+**minor-4:** dry-run nhánh broker gọi CÙNG `_all()` (2 pha `_run_broker_locked`, re-verify, sweep) với lượt thật; tác dụng
+chặn ở `_effects_blocked`; không khoá (0 file .lock); record lô coi như đã ghi (`registry_ids |= lô`) để không báo
+write-incomplete giả; sweep nhận `seen_now`. Dòng `[DRY-RUN] <mã> ex … <verdict detector>` giữ làm tóm tắt.
+**minor-5:** writer broker validate + I1 TỪNG record trên registry + lô tới giờ ⇒ record hỏng bị loại riêng (live: 0 intent +
+question `broker-validate-reject-<mã>-<phiên>`; shadow: mục vẫn vào sổ, why nêu "live sẽ KHÔNG ghi"); registry hỏng TỪ TRƯỚC ⇒
+1 question phiên `bad_record_is_preexisting=True` (B-3). Lưới cuối cả-lô gỡ (lô luôn hợp lệ theo dựng). Detector chặn
+`cash_leg > CASH_LEG_MAX` ⇒ AMBIGUOUS.
+**Test:** `test_r5` 26 assertion có tên (+1 case m4 vendor-conflict, N40 viết lại theo ngữ nghĩa mới, F0 bỏ đọc file production
+⇒ dùng fixture, luôn chạy). Control leg: chạy selfcheck mới trên code r4 (HEAD~ của 2 file) ⇒ 16/16 assertion hành vi r5 FAIL
+(n2c bỏ qua vì r4 không có `BD.norm_ticker`), 8 assertion đột biến-reviewer PASS (canh hành vi sẵn có) — đúng kỳ vọng.
+
+**Verify:** selfcheck 666/0 (3.10) · 668/0 (3.12; +2 check gated theo phiên bản, có từ r4) × Asia/Ho_Chi_Minh / UTC / `env -u TZ`.
+Mutation (bộ đầy đủ trong selfcheck, 449 đột biến; +29 mới r5 gồm G1 G4 C3 R3 R2 K7 K4 X2; cập nhật 15 mẫu cũ theo code mới; bỏ
+7 đột biến code đã gỡ/tương đương: X10, N40, r3 I2×2, N38, K-f, err=base_err): **449/449 (3.10)**, **448/449 (3.12 — `parse 5
+chữ số` tương đương, đã khai từ r4)**, 0 chỉ-crash. ruff F: sạch. Dry-run thật live 10-01 (TPB MATCH registry) và 10-06 (TV1
+PRICE_ONLY INSUFFICIENT — production đang shadow nên không hỏi) rc=0, sha256 registry + sổ y nguyên.

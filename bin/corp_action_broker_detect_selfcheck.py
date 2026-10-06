@@ -799,7 +799,7 @@ def test_B():
         with contextlib.redirect_stdout(io.StringIO()) as o_:
             cac.run_broker(D, dry_run=True, mode="live")
         check("RC1dry dry-run in kết quả đối chiếu registry (MISMATCH ×1.3) — 0 bus, 0 sổ",
-              "đối chiếu registry: MISMATCH" in o_.getvalue() and not _Bus.calls and not _ledger_lines(),
+              "đối chiếu: MISMATCH" in o_.getvalue() and not _Bus.calls and not _ledger_lines(),
               o_.getvalue()[-400:])
         same, qs, _o = _reg_case(dict(manual, qty_multiplier="abc"))
         check("RC1h record có hệ số hỏng ⇒ MISMATCH question (không im)", same and len(qs) == 1, qs)
@@ -1751,12 +1751,13 @@ def test_v6():
         return f"{cac.LEDGER_FILE}.{tag}-{day}"
     try:
         # ── M-A: _FAILED feed_dead ⇒ lịch vendor RỖNG + cờ; gate khác / thiếu / hỏng ⇒ UNREADABLE ──
-        real_fx = os.path.join(REAL_CA_DIR, "corp_action_daily_2026-10-02_FAILED.json")
-        if os.path.exists(real_fx):
-            real = json.load(open(real_fx, encoding="utf-8"))
-            check("F0 fixture feed_dead KHỚP cấu trúc file THẬT 2026-10-02_FAILED (key + failed_gate)",
-                  set(real) == set(FEED_DEAD_FIXTURE) and real["failed_gate"] == "feed_dead"
-                  and set(real["feed"]) == set(FEED_DEAD_FIXTURE["feed"]), sorted(real))
+        # r5: F0 KHÔNG đọc file production nữa (thiếu file ⇒ 638 thay vì 639 — phụ thuộc môi trường, arch-review v4).
+        # Cấu trúc file thật đã chép Y NGUYÊN vào FEED_DEAD_FIXTURE (2026-10-03); ở đây chỉ khoá fixture mang đúng khoá
+        # mà _vendor_events_fn đọc (`failed_gate`) + khối `feed` — luôn chạy, mọi máy.
+        check("F0 fixture feed_dead (bản sao cấu trúc 2026-10-02_FAILED) mang failed_gate=feed_dead + khối feed + status FAILED",
+              FEED_DEAD_FIXTURE.get("failed_gate") == "feed_dead" and FEED_DEAD_FIXTURE.get("status") == "FAILED"
+              and {"max_ingested_ict", "age_days", "reason"} <= set(FEED_DEAD_FIXTURE.get("feed") or {}),
+              sorted(FEED_DEAD_FIXTURE))
         tmp, reg = _sandbox(vendor=MISSING)
         _put_failed(FEED_DEAD_FIXTURE)
         out = io.StringIO()
@@ -2562,6 +2563,278 @@ def test_v7():
               len(bq_seen) == 1 and fn2("CCC", PREV) == 9000.0 and len(bq_seen) == 1, bq_seen)
     finally:
         VAS.dnse_close_prices, BD.bq_unadjusted_close = saved_dcp, saved_bq
+
+
+def test_r5():
+    """Vòng r5 (job Taylor_20261006_133445, arch-review v4 @696797c0): MAJOR-1 câu hỏi khẳng định trạng thái registry
+    quanh ex tính SAU lô ở CẢ 2 writer; minor-2 detector chuẩn hoá mã; minor-3 resolver bỏ cash-leg; minor-4 dry-run
+    broker cùng đường; minor-5 loại riêng record hỏng + CASH_LEG_MAX ở detector; 8 đột biến sống reviewer v4 (G4 C3 R3
+    K7 K4 R2 G1 X2) — mỗi cái 1 assertion CÓ TÊN."""
+    real_run = subprocess.run
+    subprocess.run = _Bus.run
+    saved_env = os.environ.get("MIKE_CA_BROKER_SOURCE")
+    saved_max = CA.CASH_LEG_MAX
+    try:
+        _r5_body()
+    finally:
+        subprocess.run = real_run
+        CA.CASH_LEG_MAX = saved_max
+        cac._px_cum_fn, cac._exchange_fn, cac.CA_DAILY_DIR = REAL_PX_FN, REAL_EXCH_FN, REAL_CA_DIR
+        cac.write_corp_actions = REAL_WRITE
+        _Bus.rc = 0
+        del cac._DRY[:]
+        if saved_env is None:
+            os.environ.pop("MIKE_CA_BROKER_SOURCE", None)
+        else:
+            os.environ["MIKE_CA_BROKER_SOURCE"] = saved_env
+
+
+def _r5_body():
+    import glob as _glob
+    Q = lambda sub="": [(c[3], json.loads(c[4])) for c in _Bus.calls if c[2] == "question" and sub in c[3]]  # noqa: E731
+    A = lambda sub="": [(c[3], json.loads(c[4])) for c in _Bus.calls if c[2] == "answer" and sub in c[3]]  # noqa: E731
+    acts = lambda: json.load(open(cac.CORP_ACTIONS_FILE))["actions"]                                       # noqa: E731
+    nocash = tpb_series(cost1=14608.6957, mkt1=12500)                   # ISS thuần ×1.15, không chân tiền
+    iss = {"ticker": "TPB", "date": EX, "event_code": "ISS", "price_adjusting": True, "exercise_ratio": 0.15,
+           "days_ahead": 1, "title": "CP 15%"}
+    iss_d = dict(iss, date=D, title="CP 15% (ex sớm)", days_ahead=0)
+    div_d = {"ticker": "TPB", "date": D, "event_code": "DIV", "price_adjusting": True, "value_per_share": 500}
+    manual = {"id": "TPB-2026-10-02-STOCK-DIVIDEND", "ticker": "TPB", "event_type": "STOCK_DIVIDEND",
+              "qty_multiplier": 1.15, "ex_date": EX, "broker_effective_ts": "2026-10-01T11:52:12",
+              "_status": "CONFIRMED — user", "cash_leg_vnd_per_share": 500.0}
+    broken = {"id": "X", "ticker": "VHM", "event_type": "STOCK_DIVIDEND", "qty_multiplier": 13,
+              "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05", "_status": "CONFIRMED"}
+
+    def run_(fn, *a, **k):
+        o_ = io.StringIO()
+        with contextlib.redirect_stdout(o_):
+            rc_ = _call(f"r5 gọi {getattr(fn, '__name__', fn)}", fn, *a, **k)
+        return rc_, o_.getvalue()
+
+    # ══════════════ MAJOR-1 writer VENDOR: câu hỏi khẳng định registry tính SAU lô (hình dạng m7b) ══════════════
+    os.environ["MIKE_CA_BROKER_SOURCE"] = "off"
+    # (a) cash-leg ở ex D (DIV vendor cùng ex D) + ISS ex EX hợp lệ ⇒ lô ghi TPB@EX; câu cash-leg D phải nêu record đó.
+    tmp, reg = _sandbox(vendor=[iss_d, div_d, iss], series=nocash)
+    rc_, out_ = run_(cac.run, D)
+    cl = Q("vendor-cash-leg-TPB")
+    rid = acts()[0]["id"] if len(acts()) == 1 else None
+    check("r5 M1a writer vendor: cash-leg (TPB, ex D) + lô ghi TPB ex EX kề ⇒ câu cash-leg nêu registry_record_id = record "
+          "lô vừa ghi + ONE_RECORD_RULE, KHÔNG khẳng định 'chưa có record'",
+          rid and len(cl) == 1 and cl[0][1].get("registry_record_id") == rid and cac.ONE_RECORD_RULE in cl[0][1]["question"]
+          and "chưa có record" not in cl[0][1]["question"], (acts(), cl, out_[-400:]))
+    # (b) conflict ở ex D (2 sự kiện khác nhau) + ISS ex EX hợp lệ ⇒ câu conflict nêu record lô.
+    tmp, reg = _sandbox(vendor=[iss_d, dict(iss_d, exercise_ratio=0.2, title="CP 20%"), iss], series=nocash)
+    rc_, out_ = run_(cac.run, D)
+    cq = Q("vendor-conflict-TPB")
+    rid = acts()[0]["id"] if len(acts()) == 1 else None
+    check("r5 M1b writer vendor: conflict (TPB, ex D) + lô ghi TPB ex EX ⇒ câu conflict registry_record_id = record lô "
+          "(I2: chỉ sửa/thu hồi), không 'người ghi ĐÚNG MỘT record'",
+          rid and len(cq) == 1 and cq[0][1].get("registry_record_id") == rid and cac.ONE_RECORD_RULE in cq[0][1]["question"]
+          and "người ghi ĐÚNG MỘT record" not in cq[0][1]["question"], (acts(), cq, out_[-400:]))
+    # (c) lô bị từ chối (registry hỏng TỪ TRƯỚC) ⇒ near-dup với record CỦA LÔ (không ghi được) KHÔNG được nêu như đã có.
+    tmp, reg = _sandbox([broken], vendor=[iss_d, iss], series=nocash)
+    h0 = _sha(reg)
+    rc_, out_ = run_(cac.run, D)
+    check("r5 M1c writer vendor: lô bị validate từ chối ⇒ KHÔNG câu near-record nêu record lô (không tồn tại), 1 "
+          "validate-reject, registry y nguyên, rc=1",
+          rc_ == 1 and _sha(reg) == h0 and not Q("vendor-near-record") and len(Q("auto-confirm-validate-reject")) == 1,
+          (rc_, _Bus.calls, out_[-400:]))
+    # (d) dry-run cùng ca (a): câu lẽ ra gửi CŨNG nêu record lô (dry-run coi lô như đã ghi), 0 bus, registry y nguyên.
+    tmp, reg = _sandbox(vendor=[iss_d, div_d, iss], series=nocash)
+    h0 = _sha(reg)
+    rc_, out_ = run_(cac.run, D, dry_run=True)
+    check("r5 M1d dry-run writer vendor ca (a): in câu cash-leg lẽ ra gửi, nêu record lô TPB-2026-10-02 + ONE_RECORD_RULE; "
+          "0 bus, registry y nguyên",
+          any("[DRY-RUN] KHÔNG gửi bus question corp-action-vendor-cash-leg-TPB" in ln and "ĐÃ có record "
+              "TPB-2026-10-02-BONUS-ISSUE" in ln for ln in out_.splitlines()) and not _Bus.calls and _sha(reg) == h0,
+          out_[-600:])
+
+    # ══════════════ MAJOR-1 writer BROKER: lô + I2 sau lô ══════════════
+    os.environ["MIKE_CA_BROKER_SOURCE"] = "live"
+    tmp, reg = _sandbox()
+    with contextlib.redirect_stdout(io.StringIO()):
+        q_, _ctx = BD.scan_qty(D, cac._px_cum_fn(D), cac._vendor_events_fn(D), exec_dir=cac.EXEC_DIR,
+                               exchange_fn=cac._exchange_fn())
+    rcf = [r_ for r_ in q_ if r_["verdict"] == BD.CONFIRMABLE]
+    near_ex = "2026-10-05"
+    if rcf:
+        # (e) 2 CONFIRMABLE cùng mã ex KỀ trong 1 lô ⇒ bản r4 ghi CẢ HAI (×hệ số 2 lần).
+        rc_, out_ = run_(cac._run_broker_locked, D, "live", [rcf[0], dict(rcf[0], ex_date=near_ex)])
+        amb = Q("broker-ambiguous-TPB")
+        check("r5 M1e writer broker: 2 CONFIRMABLE cùng mã ex kề trong 1 lô ⇒ ghi ĐÚNG 1, mục 2 AMBIGUOUS near-dup với record "
+              "lô + registry_update_proposed = record đó",
+              len(acts()) == 1 and len(amb) == 1
+              and (amb[0][1].get("registry_update_proposed") or {}).get("record_id") == acts()[0]["id"],
+              (acts(), _Bus.calls, out_[-400:]))
+        # (f) mục quyết TRƯỚC record lô (UNVERIFIED mang record_proposed ex kề) ⇒ tính lại I2 sau lô.
+        tmp, reg = _sandbox()
+        rc_, out_ = run_(cac._run_broker_locked, D, "live",
+                         [dict(rcf[0], ex_date=near_ex, verdict=BD.UNVERIFIED, why="lệch vendor (giả)"), rcf[0]])
+        uq = Q("broker-unverified-TPB")
+        lg = [x for x in _ledger_lines() if x.get("verdict") == BD.UNVERIFIED]
+        check("r5 M1f writer broker: UNVERIFIED (ex kề) quyết TRƯỚC record lô ⇒ câu hỏi + dòng sổ KHÔNG mang record_proposed, "
+              "registry_update_proposed = record lô, không dặn 'ghi record_proposed'",
+              len(acts()) == 1 and len(uq) == 1 and uq[0][1].get("record_proposed") is None
+              and (uq[0][1].get("registry_update_proposed") or {}).get("record_id") == acts()[0]["id"]
+              and "ghi record_proposed" not in uq[0][1]["question"]
+              and len(lg) == 1 and "record_proposed" not in lg[0], (acts(), uq, lg, out_[-400:]))
+        # (g) gửi bù việc dở lượt trước (UNVERIFIED record_proposed ex kề) + lô này ghi CONFIRMED ⇒ gửi bù tính trên lô.
+        tmp, reg = _sandbox()
+        old = dict(rcf[0], ex_date=near_ex)
+        ent = {"kind": "intent", "mode": "live", "ticker": "TPB", "credit_day": PREV, "ex_date": near_ex,
+               "verdict": BD.UNVERIFIED, "why": "dở", "event_kind": "SHARE_EVENT", "accounts": {},
+               "qty_multiplier": 1.15, "cash_leg": 500.0, "record_proposed": BD.build_record(old, "t"),
+               "key": ["live", "TPB", PREV, BD.UNVERIFIED]}
+        _ledger_write([ent])
+        rc_, out_ = run_(cac._run_broker_locked, D, "live", [rcf[0]])
+        uq = Q(f"broker-unverified-TPB-{PREV}")
+        check("r5 M1g gửi bù UNVERIFIED (ex kề, record_proposed đông cứng) + lô ghi CONFIRMED cùng mã ⇒ gửi bù KHÔNG mang "
+              "record_proposed, registry_update_proposed = record lô",
+              len(acts()) == 1 and len(uq) == 1 and uq[0][1].get("record_proposed") is None
+              and (uq[0][1].get("registry_update_proposed") or {}).get("record_id") == acts()[0]["id"],
+              (acts(), uq, out_[-400:]))
+
+        # ══════════════ minor-5 writer broker: loại riêng record hỏng ══════════════
+        tmp, reg = _sandbox()
+        bad = dict(rcf[0], ticker="ABC", cash_leg=60000.0)
+        rc_, out_ = run_(cac._run_broker_locked, D, "live", [rcf[0], bad])
+        vr = Q("broker-validate-reject")
+        check("r5 m5a writer broker: 1 record hỏng (chân tiền 60.000 > CASH_LEG_MAX) + TPB hợp lệ cùng lô ⇒ TPB VẪN ghi, ĐÚNG 1 "
+              "question validate-reject-ABC (record_id, không preexisting), 0 intent ABC, rc=1",
+              rc_ == 1 and [a["ticker"] for a in acts()] == ["TPB"] and len(vr) == 1 and "validate-reject-ABC" in vr[0][0]
+              and vr[0][1].get("bad_record_is_preexisting") is False
+              and not [x for x in _ledger_lines() if x.get("ticker") == "ABC"], (rc_, acts(), _Bus.calls, out_[-400:]))
+        tmp, reg = _sandbox([broken])
+        h0 = _sha(reg)
+        rc_, out_ = run_(cac._run_broker_locked, D, "live", [rcf[0]])
+        vr = Q("broker-validate-reject")
+        check("r5 m5b registry HỎNG TỪ TRƯỚC + CONFIRMABLE ⇒ 1 question validate-reject phiên (preexisting=True), không quy "
+              "kết record mới, registry y nguyên",
+              len(vr) == 1 and vr[0][0].endswith(f"validate-reject-{D}") and vr[0][1].get("bad_record_is_preexisting") is True
+              and _sha(reg) == h0, (_Bus.calls, out_[-400:]))
+        tmp, reg = _sandbox()
+        rc_, out_ = run_(cac._run_broker_locked, D, "shadow", [bad], shadow_out=None)
+        lg = [x for x in _ledger_lines() if x.get("ticker") == "ABC" and x.get("kind") == "intent"]
+        check("r5 m5c shadow + record hỏng ⇒ sổ VẪN ghi mục (why nêu 'live sẽ KHÔNG ghi'), 0 question",
+              len(lg) == 1 and "live sẽ KHÔNG ghi" in lg[0]["why"] and not Q(), (lg, _Bus.calls))
+
+    # ══════════════ minor-4: dry-run nhánh broker CÙNG đường quyết định ══════════════
+    near_rec = dict(manual, id="TPB-NEAR", ex_date=near_ex, _status="CONFIRMED — vendor cũ")
+    tmp, reg = _sandbox([near_rec])
+    h0 = _sha(reg)
+    rc_d, out_d = run_(cac.run_broker, D, dry_run=True, mode="live")
+    n_dry = len(_Bus.calls)
+    rc_r, out_r = run_(cac.run_broker, D, mode="live")
+    check("r5 m4a registry có record cùng mã ex kề: lượt thật hỏi broker-ambiguous ⇒ dry-run IN ĐÚNG câu đó "
+          "('[DRY-RUN] KHÔNG gửi bus question corp-action-broker-ambiguous-TPB'), dry-run 0 bus, registry y nguyên",
+          len(Q("broker-ambiguous-TPB")) == 1 and n_dry == 0
+          and "[DRY-RUN] KHÔNG gửi bus question corp-action-broker-ambiguous-TPB" in out_d and _sha(reg) == h0,
+          (n_dry, _Bus.calls, out_d[-500:]))
+    tmp, reg = _sandbox()
+    rc_d, out_d = run_(cac.run_broker, D, dry_run=True, mode="live")
+    check("r5 m4b dry-run live ca lành: in finding confirm lẽ ra gửi, KHÔNG write-incomplete, rc=0, 0 bus, 0 sổ, 0 file .lock",
+          rc_d == 0 and "[DRY-RUN] KHÔNG gửi bus finding corp-action-broker-confirm-TPB" in out_d
+          and "write-incomplete" not in out_d and not _Bus.calls and not _ledger_lines()
+          and not os.path.exists(cac.LEDGER_FILE + ".lock"), (rc_d, out_d[-500:]))
+
+    # ══════════════ minor-2: detector chuẩn hoá mã ngay khi đọc ══════════════
+    tmpd = _mkdtemp("brokerca_r5n_")
+    low = lambda ser: [(ts, {"tpb ": [dict(r, symbol="tpb ") for r in by["TPB"]]}) for ts, by in ser]  # noqa: E731
+    s1 = tpb_series()
+    s2 = low(tpb_series(acct=A2[0], q1=200, cost1=16800, mkt1=14450, trade1=200))
+    for day in (PREV, D):
+        _write_lines(os.path.join(tmpd, f"dnse_raw_{day}.jsonl"), _pos_lines(*A1, s1, day) + _pos_lines(*A2, s2, day))
+    with contextlib.redirect_stdout(io.StringIO()):
+        res, _c = BD.scan_qty(D, lambda t, dd: {"TPB": 14400}.get(t), lambda t: [], exec_dir=tmpd,
+                              exchange_fn=lambda t: "HOSE")
+    vs = {r_["ticker"]: r_["verdict"] for r_ in res}
+    check("r5 n2a detector: A1 'TPB' đã credit + A2 'tpb ' CHƯA credit ⇒ MỘT mã TPB, INSUFFICIENT (không CONFIRMABLE)",
+          vs == {"TPB": BD.INSUFFICIENT}, vs)
+    fp = os.path.join(tmpd, "orders.jsonl")
+    _write_lines(fp, [{"ts": f"{D}T10:00:00", "kind": "orders", "account_no": A1[0], "payload": {"orders": [
+        {"id": 1, "symbol": "tpb ", "accountNo": A1[0], "transDate": D, "fillQuantity": 100, "side": "NB",
+         "modifiedDate": "2026-10-01T03:00:00Z"}]}}])
+    check("r5 n2b same_day_fills: lệnh symbol 'tpb ' khớp mã 'TPB'", len(BD.same_day_fills(fp, A1[0], "TPB", D)) == 1,
+          BD.same_day_fills(fp, A1[0], "TPB", D))
+    check("r5 n2c BD.norm_ticker = quy tắc CA.validate (' tpb ' ⇒ 'TPB'; None ⇒ ''); cac._norm_ticker dùng chung",
+          BD.norm_ticker(" tpb ") == "TPB" == CA.validate(dict(manual, ticker=" tpb "), 0)["ticker"]
+          and BD.norm_ticker(None) == "" and cac._norm_ticker(" vpb\t") == "VPB", "")
+
+    # ══════════════ minor-5 detector: chặn CASH_LEG_MAX ══════════════
+    ev = BD.account_evidence(tpb_series(), "TPB", D)
+    CA.CASH_LEG_MAX = 400.0                         # TPB chân tiền 500 > biên giả 400
+    try:
+        dec = DEC("TPB", D, EX, {"SpaceX": ev}, [], 14400)
+    finally:
+        CA.CASH_LEG_MAX = 50_000.0
+    check("r5 m5d detector: chân tiền > CASH_LEG_MAX ⇒ AMBIGUOUS 'biên chặn registry' (không CONFIRMABLE để writer từ chối)",
+          dec["verdict"] == BD.AMBIGUOUS and "biên chặn registry" in dec["why"], dec.get("why"))
+
+    # ══════════════ minor-3: cash-leg không có resolver ══════════════
+    check("r5 m3 _RESOLVE_BY_REGISTRY KHÔNG có 'vendor-cash-leg' (câu chỉ phát off/shadow, resolver chỉ live)",
+          "vendor-cash-leg" not in cac._RESOLVE_BY_REGISTRY and "vendor-conflict" in cac._RESOLVE_BY_REGISTRY,
+          cac._RESOLVE_BY_REGISTRY)
+
+    # ══════════════ 8 đột biến sống reviewer v4 ══════════════
+    # G1: cờ dry-run lồng — scope không-dry bên trong scope dry vẫn phải CHẶN.
+    with contextlib.redirect_stdout(io.StringIO()):
+        with cac._dry_scope(True):
+            with cac._dry_scope(False):
+                g1 = cac._effects_blocked("thử")
+    check("r5 G1 _dry_scope lồng (dry ⊃ không-dry) ⇒ _effects_blocked vẫn True", g1 is True, g1)
+    # G4: dry-run _ask_day_once KHÔNG dọn marker cũ (thứ tự cổng trước _prune_daymarks); lượt thật thì dọn.
+    tmp, reg = _sandbox()
+    oldm = f"{cac.LEDGER_FILE}.lockfail-2026-08-01"
+    open(oldm, "w").write("sent\n")
+    os.utime(oldm, (_time.time() - 40 * 86400,) * 2)
+    with contextlib.redirect_stdout(io.StringIO()):
+        with cac._dry_scope(True):
+            cac._ask_day_once("lockfail", D, "t-r5", {"question": "q"})
+    kept = os.path.exists(oldm)
+    with contextlib.redirect_stdout(io.StringIO()):
+        cac._ask_day_once("lockfail", D, "t-r5", {"question": "q"})
+    check("r5 G4 dry-run _ask_day_once KHÔNG xoá marker cũ (>30 ngày); lượt thật xoá (đối chứng)",
+          kept and not os.path.exists(oldm), (kept, _glob.glob(cac.LEDGER_FILE + ".*")))
+    # C3: câu conflict nêu record CÙNG (mã, ex) có sẵn (không qua lô).
+    tmp, reg = _sandbox([dict(manual, ex_date=D, id="TPB-D-REC")], vendor=[iss_d, dict(iss_d, exercise_ratio=0.2, title="x")],
+                        series=nocash)
+    os.environ["MIKE_CA_BROKER_SOURCE"] = "off"
+    rc_, out_ = run_(cac.run, D)
+    cq = Q("vendor-conflict-TPB")
+    check("r5 C3 conflict cùng (mã, ex) với record có sẵn ⇒ registry_record_id = id record đó",
+          len(cq) == 1 and cq[0][1].get("registry_record_id") == "TPB-D-REC", (cq, out_[-300:]))
+    # R3 / R2: resolver không coi registry TRÙNG/hỏng là đã giải quyết; credit-overdue đóng khi id bị thay.
+    def asked(kind, tk, ex, *extra):
+        return {"kind": "done", "key": [kind, tk, ex, *extra, "ASKED"], "at": "2026-09-30T19:30:00+07:00"}
+    abc = dict(manual, id="ABC-REC", ticker="ABC")
+    still = tpb_series(q1=200, cost1=16800, mkt1=14450, trade1=200)
+    for lbl, regs, n_a in (("registry TRÙNG 2 record hiệu lực", [abc, dict(abc, id="ABC-REC2")], 0),
+                           ("record hiệu lực bị validate() từ chối (×13)", [dict(abc, qty_multiplier=13)], 0)):
+        tmp, reg = _sandbox(regs, series=still)
+        _ledger_write([asked("vendor-only", "ABC", EX)])
+        run_(cac._registry_sweep, D, "live")
+        check(f"r5 R3 vendor-only + {lbl} ⇒ KHÔNG trả lời (chưa giải quyết)", len(A("vendor-only-ABC")) == n_a,
+              _Bus.calls)
+    tmp, reg = _sandbox([dict(abc, id="ABC-NEW", ex_date=D)], series=still)
+    _ledger_write([asked("credit-overdue", "ABC", D, "ABC-REC")])
+    run_(cac._registry_sweep, D, "live")
+    an = A("credit-overdue-ABC")
+    check("r5 R2 credit-overdue (id ABC-REC) mà record hiệu lực nay là id KHÁC (ABC-NEW) ⇒ trả lời 1 lần, nêu id mới",
+          len(an) == 1 and "ABC-NEW" in an[0][1]["resolution"], (an, _Bus.calls))
+    # K7: '_status' có khoảng trắng đầu ⇒ consumer KHÔNG áp ⇒ script cũng không coi hiệu lực.
+    tmp, reg = _sandbox([dict(manual, _status=" CONFIRMED — gõ thừa dấu cách")])
+    w = cac._reg_rows(acts())[0]
+    cons = CA.load_corp_actions(cac.CORP_ACTIONS_FILE)
+    check("r5 K7 _status ' CONFIRMED' (dấu cách đầu): consumer load_corp_actions KHÔNG áp ⇒ _reg_rows effective=False",
+          not cons and w["effective"] is False, (cons, w["effective"]))
+    # K4: DIV vendor cùng ex so theo ngày CHUẨN HOÁ (vendor ghi kèm giờ).
+    vfn = lambda tk: [{"ticker": "TPB", "event_code": "DIV", "date": f"{EX}T00:00:00", "value_per_share": 500}]  # noqa: E731
+    k4 = cac._vendor_div_same_ex(vfn, "TPB", EX)
+    check("r5 K4 _vendor_div_same_ex: DIV date '2026-10-02T00:00:00' khớp ex 2026-10-02 ⇒ [500]", k4 == [500], k4)
+    # X2: chân tiền ngụ ý ÂM (giá vốn sau cao hơn hệ số KL thuần) cũng là dấu hiệu ⇒ hỏi.
+    x2 = cac._writer_cash_hint([], {"SpaceX": {"verdict": "MATCH", "qty_before": 200, "qty_after": 230, "qty_ratio": 1.15,
+                                               "cost_before": 16800.0, "cost_after": 14700.0}}, 1.15)
+    check("r5 X2 _writer_cash_hint: giá vốn lệch hệ số KL thuần −105đ/cp (âm) ⇒ có lý do (abs)", bool(x2) and "-105" in x2, x2)
 
 
 def test_px():
@@ -3995,7 +4268,12 @@ def _r4_body():
               "credit_day": D, "ex_date": EX, "verdict": BD.CONFIRMABLE, "key": ["shadow", "ABC", D, BD.CONFIRMABLE]}],
              "live", 0),
             ("vendor-conflict + registry có record", [abc_rec], [asked("vendor-conflict", "ABC", EX)], "live", 1),
-            ("vendor-cash-leg + registry có record", [abc_rec], [asked("vendor-cash-leg", "ABC", EX)], "live", 1),
+            # minor-3 r5: resolver KHÔNG còn nhánh cash-leg (câu đó chỉ phát ở off/shadow, resolver chỉ chạy live)
+            ("vendor-cash-leg + registry có record ⇒ KHÔNG tự trả lời (r5: người ghi record đóng)", [abc_rec],
+             [asked("vendor-cash-leg", "ABC", EX)], "live", 0),
+            ("vendor-conflict + CHỈ sổ broker live (sổ broker không giải quyết conflict)", [],
+             [asked("vendor-conflict", "ABC", EX), {"kind": "intent", "mode": "live", "ticker": "ABC", "credit_day": D,
+              "ex_date": EX, "verdict": BD.INSUFFICIENT, "key": ["live", "ABC", D, BD.INSUFFICIENT]}], "live", 0),
             ("vendor-cash-leg + CHỈ sổ broker live (không giải quyết cash-leg)", [],
              [asked("vendor-cash-leg", "ABC", EX), {"kind": "intent", "mode": "live", "ticker": "ABC", "credit_day": D,
               "ex_date": EX, "verdict": BD.INSUFFICIENT, "key": ["live", "ABC", D, BD.INSUFFICIENT]}], "live", 0),
@@ -4102,20 +4380,22 @@ def _r4_body():
     check("C7 lịch DIV vendor đọc hỏng (đọc lại giữa lượt) ⇒ writer KHÔNG ghi, hỏi cash-leg 'đọc hỏng' (fail-closed)",
           not acts() and len(Q("vendor-cash-leg-TPB")) == 1 and "đọc hỏng" in Q("vendor-cash-leg-TPB")[0][1]["question"],
           (acts(), _Bus.calls))
-    # N40 (reviewer v3 "claimed equiv"): lưới cuối I1 của writer BROKER — 2 kết quả CONFIRMABLE cùng (mã, ex) trong 1 lô
-    # (detector lỗi tương lai; mã 'TPB' và 'tpb ') ⇒ _validate_for_write TỪ CHỐI, 0 ghi, 1 validate-reject.
+    # N40 → r5: 2 kết quả CONFIRMABLE cùng (mã, ex) trong 1 lô (mã 'TPB' + 'tpb ' — detector r5 đã chuẩn hoá nên chỉ
+    # còn đường gọi thẳng) ⇒ bản r4 từ chối CẢ LÔ ở lưới cuối I1; r5: mục 1 ghi, mục 2 gặp "lô này đã quyết ghi" ⇒
+    # AMBIGUOUS, câu hỏi chỉ đề nghị sửa/thu hồi record mục 1 (I2), 0 validate-reject.
     os.environ["MIKE_CA_BROKER_SOURCE"] = "live"
     tmp, reg = _sandbox()
     with contextlib.redirect_stdout(io.StringIO()):
         q_, _ctx = BD.scan_qty(D, cac._px_cum_fn(D), cac._vendor_events_fn(D), exec_dir=cac.EXEC_DIR,
                                exchange_fn=cac._exchange_fn())
     rcf = [r_ for r_ in q_ if r_["verdict"] == BD.CONFIRMABLE]
-    h0 = _sha(reg)
     rc_, out_ = run_(cac._run_broker_locked, D, "live", rcf + [dict(rcf[0], ticker="tpb ")] if rcf else [])
-    check("N40 _run_broker_locked: 2 CONFIRMABLE cùng (TPB, ex) trong 1 lô (mã 'TPB' + 'tpb ') ⇒ lưới cuối I1 TỪ CHỐI: "
-          "registry y nguyên, 1 question broker-validate-reject, rc=1",
-          len(rcf) == 1 and rc_ == 1 and _sha(reg) == h0 and len(Q("broker-validate-reject")) == 1,
-          (len(rcf), rc_, _Bus.calls, out_[-400:]))
+    amb = Q("broker-ambiguous-TPB")
+    check("N40 _run_broker_locked: 2 CONFIRMABLE cùng (TPB, ex) trong 1 lô ('TPB' + 'tpb ') ⇒ ghi ĐÚNG 1 record, mục 2 "
+          "AMBIGUOUS 'lô này đã quyết ghi' + registry_update_proposed = record mục 1, 0 validate-reject",
+          len(rcf) == 1 and len(acts()) == 1 and len(amb) == 1 and "lô này đã quyết ghi" in amb[0][1]["question"]
+          and (amb[0][1].get("registry_update_proposed") or {}).get("record_id") == acts()[0]["id"]
+          and not Q("validate-reject"), (len(rcf), rc_, acts(), _Bus.calls, out_[-400:]))
     os.environ["MIKE_CA_BROKER_SOURCE"] = "off"
     tmp, reg = _sandbox([manual])
     h0 = _sha(reg)
@@ -4193,17 +4473,17 @@ MUTANTS = [
     ('bin/corp_action_broker_detect.py', '            if d.get("kind") != "positions" or str(d.get("account_no")) != str(account_no):', '            if d.get("kind") != "positions":', '§12 read_series bỏ lọc bản ghi'),
     ('bin/corp_action_broker_detect.py', '                if str(p.get("accountNo")) != str(account_no):\n                    continue', '                pass', '§12 read_series bỏ lọc dòng'),
     ('bin/corp_action_broker_detect.py', '            if d.get("kind") != "orders" or str(d.get("account_no")) != str(account_no):', '            if d.get("kind") != "orders":', '§12 fills bỏ lọc bản ghi'),
-    ('bin/corp_action_broker_detect.py', '                if (o.get("symbol") == ticker and str(o.get("accountNo")) == str(account_no)', '                if (o.get("symbol") == ticker', '§12 fills bỏ lọc dòng'),
+    ('bin/corp_action_broker_detect.py', '                if (norm_ticker(o.get("symbol")) == norm_ticker(ticker) and str(o.get("accountNo")) == str(account_no)', '                if (norm_ticker(o.get("symbol")) == norm_ticker(ticker)', '§12 fills bỏ lọc dòng'),
     ('bin/corp_action_broker_detect.py', '        if d < day and (best is None or d > best[0]):', '        if d <= day and (best is None or d > best[0]):', 'previous_file lấy cùng ngày'),
     ('bin/corp_action_broker_detect.py', '        holders = [lbl for lbl in held_before.get(tk, []) if lbl not in per]', '        holders = []', 'scan_day bỏ holders'),
     ('bin/corp_action_broker_detect.py', '            if aggregate(rows)["qty"] > 0:\n                held_before', '            if False:\n                held_before', 'bỏ tài khoản vắng mặt hôm nay'),
     ('bin/corp_action_broker_detect.py', '            fills = same_day_fills(path, acct, tk, day)', '            fills = []', 'scan_day bỏ sổ lệnh'),
     ('bin/corp_action_auto_confirm.py', '        elif rrec is not None:\n            print(', '        elif rrec is not None:\n            continue\n            print(', 'không kiểm registry sẵn có'),
     ('bin/corp_action_auto_confirm.py', '        if tuple(entry["key"]) in intents:', '        if False:', 'bỏ idempotent sổ'),
-    ('bin/corp_action_auto_confirm.py', '        dup = _near_duplicate(rows, tk, ex, date_str) if r.get("kind") is None else None', '        dup = None', 'r4↻ bỏ guard trùng gần (M4)'),
-    ('bin/corp_action_auto_confirm.py', '    new_recs = [e["record"] for e in new if mode == "live" and e["verdict"] == BD.CONFIRMABLE\n', '    new_recs = [e["record"] for e in new if e["verdict"] == BD.CONFIRMABLE\n', 'shadow vẫn ghi registry'),
+    ('bin/corp_action_auto_confirm.py', '                   else _near_duplicate(rows, tk, ex, date_str))', '                   else None)', 'r4↻ bỏ guard trùng gần (M4)'),
+    ('bin/corp_action_auto_confirm.py', '    new_recs = batch if mode == "live" else []', '    new_recs = batch', 'shadow vẫn ghi registry'),
     ('bin/corp_action_auto_confirm.py', '        return "shadow"\n    return raw', '        return "live"\n    return raw', 'mode lạ ⇒ live'),
-    ('bin/corp_action_auto_confirm.py', '            new_recs = []\n            rc = 1', '            rc = 1', 'nuốt lỗi validate (vẫn ghi registry)'),
+    ('bin/corp_action_auto_confirm.py', '                if err is not None:\n                    rejected.append', '                if False:\n                    rejected.append', 'nuốt lỗi validate (vẫn ghi registry)'),
     ('bin/corp_action_auto_confirm.py', '            if _finish_live(e, registry_ids) == 0:', '            if _finish_live(e, registry_ids) is not None:', 'done dù bus lỗi (M2)'),
     ('bin/corp_action_auto_confirm.py', '    pending = ([e for k, e in intents.items() if k not in done and e.get("mode") == mode]', '    pending = ([]', 'không gửi bù (M2)'),
     ('bin/corp_action_auto_confirm.py', '        if rid in registry_ids:', '        if True:', 'báo confirm khi registry không có'),
@@ -4239,7 +4519,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        shadow_out.extend(todo)', '        shadow_out.extend(new)', 'r4↻ shadow không đóng pending (gửi lặp) [shadow bỏ việc dở khỏi finding (gửi bù mãi)]'),
     ('bin/corp_action_auto_confirm.py', '    pending = ([e for k, e in intents.items() if k not in done and e.get("mode") == mode]', '    pending = ([e for k, e in intents.items() if k not in done]', 'pending lấy mọi mode'),
     ('bin/corp_action_auto_confirm.py', '                    _close_resolved(e["ticker"], e["credit_day"], intents, done,\n                                    {"record_id"', '                    (lambda *a, **k: None)(e["ticker"], e["credit_day"], intents, done,\n                                    {"record_id"', 'r4↻ không đóng question cũ (§26) [ghi CONFIRMED không trả lời câu hỏi cũ]'),
-    ('bin/corp_action_auto_confirm.py', '            new = [x for x in new if x["verdict"] != BD.CONFIRMABLE]\n            new_recs = []\n            rc = 1', '            return 1', 'validate-reject nuốt mã khác (v2 N2)'),
+    ('bin/corp_action_auto_confirm.py', '                    if mode == "live":\n                        continue', '                    if mode == "live":\n                        return 1', 'validate-reject nuốt mã khác (v2 N2)'),
     ('bin/corp_action_auto_confirm.py', '        near = _near_duplicate(rows, ticker, ex_date, date_str)\n        if near:\n            # m8 r4', '        near = None\n        if near:\n            # m8 r4', 'r4↻ vendor ghi đè record broker ex khác (v2 N9) [writer bỏ near-dup]'),
     ('bin/corp_action_auto_confirm.py', '    lk = None if dry_run else _lock(LEDGER_FILE)', '    lk = None', 'run() không khoá nhánh vendor (v2 N3)'),
     # ── vòng sửa sau arch-review v3 (job Taylor_20261003_064854): mỗi dòng ↔ assertion V* ──
@@ -4247,7 +4527,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        gap = min(abs((rex - d).days) for d in anchors)', '        gap = min((d - rex).days if rex <= d else 999 for d in anchors)', 'r4↻ N9 chỉ xét ex SAU'),
     ('bin/corp_action_auto_confirm.py', '    if tuple(key) in done:', '    if False:', 'N9 hỏi lặp mỗi lượt'),
     ('bin/corp_action_auto_confirm.py', '    if rc == 0:\n        now_ict', '    if True:\n        now_ict', 'N9 bus lỗi vẫn đánh dấu đã hỏi'),
-    ('bin/corp_action_auto_confirm.py', '    if any(_DRY):', '    if False:', 'r4↻ N9 gửi bus khi --dry-run [_effects_blocked tắt hẳn]'),
+    ('bin/corp_action_auto_confirm.py', '    if any(_DRY):\n        print(f"  [DRY-RUN] KHÔNG', '    if False:\n        print(f"  [DRY-RUN] KHÔNG', 'r4↻ N9 gửi bus khi --dry-run [_effects_blocked tắt hẳn]'),
     ('bin/corp_action_auto_confirm.py', "cache[tk] = q.exchange if getattr(q, \"exchange_known\", False) else None", 'cache[tk] = q.exchange', '_exchange_fn bỏ exchange_known'),
     ('bin/corp_action_auto_confirm.py', '                cache[tk] = None\n        return cache[tk]', '                cache[tk] = "HOSE"\n        return cache[tk]', '_exchange_fn lỗi ⇒ HOSE'),
     ('bin/corp_action_auto_confirm.py', '    if not dry_run and lk is None:', '    if False:', 'run() bỏ chặn khi không lấy được khoá'),
@@ -4366,7 +4646,7 @@ MUTANTS = [
     ('bin/corp_action_broker_detect.py', '        "verified_by_vendor": vc["status"] == V_VERIFIED,', '        "verified_by_vendor": True,', 'br verified_by_vendor luôn True'),
     ('bin/corp_action_auto_confirm.py', '    if mode == "live":\n        # Broker là nguồn chính', '    if False:\n        # Broker là nguồn chính', 'ac live giữ thứ tự vendor trước'),
     ('bin/corp_action_auto_confirm.py', 'run_vendor(date_str, dry_run=dry_run, confirm_only=True),', 'run_vendor(date_str, dry_run=dry_run, confirm_only=False),', 'ac live vendor được ghi'),
-    ('bin/corp_action_auto_confirm.py', '    if confirm_only:\n        return _vendor_confirm_only', '    if False:\n        return _vendor_confirm_only', 'ac bỏ confirm-only'),
+    ('bin/corp_action_auto_confirm.py', '    if confirm_only:      # live: nhánh vendor KHÔNG ghi', '    if False:      # live: nhánh vendor KHÔNG ghi', 'ac bỏ confirm-only'),
     ('bin/corp_action_auto_confirm.py', '        rc = _run_branch("vendor", lambda: run_vendor(date_str, dry_run=dry_run, confirm_only=True),', '        rc = 0 if rc_b else _run_branch("vendor", lambda: run_vendor(date_str, dry_run=dry_run, confirm_only=True),', 'ac live broker lỗi ⇒ bỏ vendor'),
     ('bin/corp_action_auto_confirm.py', '        if ticker in broker_seen:', '        if False:', 'ac vendor hỏi lặp khi broker đã hỏi'),
     ('bin/corp_action_auto_confirm.py', '                   if e.get("mode") == "live" and e.get("credit_day") == date_str}', '                   if e.get("mode") == "live"}', 'ac broker_seen bỏ khớp phiên'),
@@ -4378,8 +4658,8 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '            ok, why, rid = _record_vs_vendor(view[(ticker, ex_date)], mult, _vendor_div_same_ex(vfn, ticker, ex_date))\n            if not ok:', '            ok, why, rid = True, "", ""\n            if not ok:', 'r4↻ ac confirm-only bỏ tỉ lệ lệch'),
     ('bin/corp_action_auto_confirm.py', '    if _effects_blocked(f"hỏi 1 lần/ngày ({tag}) bus question {topic}: {payload.get(\'question\', \'\')}"):\n        return', '    if False:\n        return', 'r4↻ ac confirm-only tỉ lệ hỏi khi dry-run [_ask_day_once bỏ cổng]'),
     ('bin/corp_action_auto_confirm.py', '                if mode == "live":\n                    # m7 r3', '                if True:\n                    # m7 r3', 'ac shadow bỏ qua mã registry đã có'),
-    ('bin/corp_action_auto_confirm.py', '        dup = _near_duplicate(rows, tk, ex, date_str) if r.get("kind") is None else None', '        dup = _near_duplicate(rows, tk, ex, date_str)', 'r4↻ ac chặn ×2 áp cả chỉ-giá'),
-    ('bin/corp_action_auto_confirm.py', '        elif v == BD.CONFIRMABLE or (v == BD.UNVERIFIED and r.get("qty_multiplier")):', '        elif v == BD.CONFIRMABLE:', 'ac UNVERIFIED mất record đề xuất'),
+    ('bin/corp_action_auto_confirm.py', '        dup = None\n        if r.get("kind") is None:', '        dup = None\n        if True:', 'r4↻ ac chặn ×2 áp cả chỉ-giá'),
+    ('bin/corp_action_auto_confirm.py', '        if v == BD.CONFIRMABLE or (v == BD.UNVERIFIED and r.get("qty_multiplier")):', '        if v == BD.CONFIRMABLE:', 'ac UNVERIFIED mất record đề xuất'),
     ('bin/corp_action_auto_confirm.py', '            entry["record" if v == BD.CONFIRMABLE else "record_proposed"] = rec', '            entry["record"] = rec', 'ac UNVERIFIED mang record ghi được'),
     ('bin/corp_action_auto_confirm.py', '    if v == BD.CASH_DIVIDEND:\n        return _bus("finding"', '    if False:\n        return _bus("finding"', 'ac cổ tức tiền thành question'),
     ('bin/corp_action_auto_confirm.py', '    if v == BD.UNVERIFIED:\n        rg = e.get("registry_check") or {}', '    if False:\n        rg = e.get("registry_check") or {}', 'ac UNVERIFIED không gọi Winston'),
@@ -4390,7 +4670,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    fn.prefetch = prefetch', '    pass', 'ac mất prefetch'),
     ('bin/corp_action_auto_confirm.py', 'BROKER_VENDOR_MULT_TOL = BD.VENDOR_MULT_TOL_PCT', 'BROKER_VENDOR_MULT_TOL = 10 * BD.VENDOR_MULT_TOL_PCT', 'ac ngưỡng tỉ lệ record broker 1% → 10%'),
     # ── r2 (job Taylor_20261004_024239): RC1-RC5 + đột biến sống arch-review v1 ──
-    ('bin/corp_action_auto_confirm.py', '            if rrec is not None and r["verdict"] in (BD.CONFIRMABLE, BD.UNVERIFIED, BD.CASH_DIVIDEND):\n                rg = _registry_reconcile(rrec, r)', '            if False:\n                rg = _registry_reconcile(rrec, r)', 'RC1dry dry-run không in đối chiếu registry'),
+    ('bin/corp_action_auto_confirm.py', '            print(f"  [{tk}] registry ĐÃ có ({tk}, {ex}) — đối chiếu: {regc[\'status\']} — {regc[\'why\']}")', '            pass', 'RC1dry dry-run không in đối chiếu registry'),
     ('bin/corp_action_broker_detect.py', '    c = max(cs)\n', '    c = min(cs)\n', 'r2 M21 chân tiền min thay max'),
     ('bin/corp_action_broker_detect.py', '        cashdiv_pts[label] = ((read_cashdiv(prev, acct)[-1:] if prev else []) + read_cashdiv(path, acct))', '        cashdiv_pts[label] = read_cashdiv(path, acct)', 'r2 M27 cashdiv bỏ mốc file trước'),
     ('bin/corp_action_broker_detect.py', '    return last - pre[-1], None', '    return last - pre[0], None', 'r2 M32 mốc cashdiv = điểm đầu'),
@@ -4416,8 +4696,8 @@ MUTANTS = [
     ('bin/corp_action_broker_detect.py', '    if per_price and hasattr(px_cum_fn, "prefetch") and not _over():', '    if per_price and hasattr(px_cum_fn, "prefetch"):', 'RC4 prefetch bỏ kiểm hạn'),
     ('bin/corp_action_broker_detect.py', '        return deadline is not None and clock() >= deadline', '        return deadline is not None and clock() > deadline + 1e9', 'RC4 hạn không bao giờ tới'),
     ('bin/corp_action_auto_confirm.py', '        po = BD.scan_price_only(ctx, deadline=t0 + BD.PRICE_SCREEN_BUDGET_S)', '        po = BD.scan_price_only(ctx, deadline=None)', 'RC4 cron không truyền hạn'),
-    ('bin/corp_action_auto_confirm.py', '        rc = _run_broker_locked(date_str, mode, qty, resend=True, phase="qty", shadow_out=sh)\n        rc = _run_broker_locked(date_str, mode, _price_phase(), resend=False, phase="price_only",', '        po = _price_phase()\n        rc = _run_broker_locked(date_str, mode, qty, resend=True, phase="qty", shadow_out=sh)\n        rc = _run_broker_locked(date_str, mode, po, resend=False, phase="price_only",', 'r4↻ RC4 chỉ-giá chạy TRƯỚC ghi KL'),
-    ('bin/corp_action_auto_confirm.py', '        rc = _run_broker_locked(date_str, mode, _price_phase(), resend=False, phase="price_only",\n                                shadow_out=sh) or rc', '        rc = rc', 'r4↻ RC4 mất pha chỉ-giá'),
+    ('bin/corp_action_auto_confirm.py', '        rc = _run_broker_locked(date_str, mode, qty, resend=True, phase="qty", shadow_out=sh)\n        po = _price_phase()\n', '        po = _price_phase()\n        rc = _run_broker_locked(date_str, mode, qty, resend=True, phase="qty", shadow_out=sh)\n', 'r4↻ RC4 chỉ-giá chạy TRƯỚC ghi KL'),
+    ('bin/corp_action_auto_confirm.py', '        rc = _run_broker_locked(date_str, mode, po, resend=False, phase="price_only", shadow_out=sh) or rc', '        rc = rc', 'r4↻ RC4 mất pha chỉ-giá'),
     ('bin/corp_action_auto_confirm.py', '        if rrec is not None and v in (BD.CONFIRMABLE, BD.UNVERIFIED, BD.CASH_DIVIDEND):', '        if False:', 'RC1 không đối chiếu registry'),
     ('bin/corp_action_auto_confirm.py', '            if regc["status"] == REG_MISMATCH:\n                r = dict(r, verdict=BD.UNVERIFIED,', '            if False:\n                r = dict(r, verdict=BD.UNVERIFIED,', 'RC1 lệch registry không hạ'),
     ('bin/corp_action_auto_confirm.py', '                if mode == "live":\n                    # m7 r3', '                if False:\n                    # m7 r3', 'RC1 khớp registry vẫn đi tiếp'),
@@ -4459,7 +4739,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '                            "price_adjusting": is_price_adjusting(e),', '                            "price_adjusting": True,', 'RC3 bỏ taxonomy price_adjusting'),
     ('bin/corp_action_auto_confirm.py', '        rc = _reverify_broker_records(date_str, mode) or rc\n', '        rc = rc\n', 'RC3 cron không gọi re-verify'),
     ('bin/corp_action_auto_confirm.py', '    d = ex_d - dt.timedelta(days=REVERIFY_LOOKBACK_DAYS)', '    d = end', 'RC3 chỉ đọc lịch ngày chạy'),
-    ('bin/corp_action_auto_confirm.py', '        rc = rc or (0 if ok else 1)\n    return rc\n\n\ndef _upd_proposed', '        rc = 0\n    return rc\n\n\ndef _upd_proposed', 'r4↻ RC3 bus lỗi rc=0'),
+    ('bin/corp_action_auto_confirm.py', '        rc = rc or (0 if ok else 1)\n    return rc\n\n\ndef _broker_reject', '        rc = 0\n    return rc\n\n\ndef _broker_reject', 'r4↻ RC3 bus lỗi rc=0'),
     ('bin/corp_action_auto_confirm.py', '            ok = _notify_once("finding", ["reverify", rid, res], f"corp-action-broker-reverify-{tk}-{ex}",', '            ok = _notify_once("question", ["reverify", rid, res], f"corp-action-broker-reverify-{tk}-{ex}",', 'RC3 VERIFIED gửi question'),
     ('bin/corp_action_auto_confirm.py', '                              dict(base, assignee="Winston", urgency="high",', '                              dict(base, assignee=None, urgency="high",', 'RC3 MISMATCH không gọi Winston'),
     # ── vòng r3 (job Taylor_20261004_103554): mỗi đột biến ⇐ assertion CÓ TÊN trong test_r3 / test_B ──
@@ -4485,8 +4765,6 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        if abs(sum(vals) - rcv) > BD.VENDOR_CASH_TOL_VND:', '        if rec.get("cash_leg_vnd_per_share") is not None and abs(sum(vals) - rcv) > BD.VENDOR_CASH_TOL_VND:', 'r3 M1v vắng chân tiền = không so vendor'),
     ('bin/corp_action_auto_confirm.py', '    elif abs(rm - mult) > BROKER_VENDOR_MULT_TOL * mult:', '    elif abs(rm - mult) > 0.019 * mult:', 'r4↻ r3 Y1 dung sai hệ số vendor 1,9%'),
     ('bin/corp_action_auto_confirm.py', '    return [e.get("value_per_share") for e in BD.dedup_vendor(vev)', '    return [e.get("value_per_share") for e in vev', 'r4↻ r3 Y6 confirm-only không gộp DIV trùng'),
-    ('bin/corp_action_auto_confirm.py', '        if existing is not None and v != BD.CONFIRMABLE:', '        if False:', 'r3 I2 registry có record vẫn record_proposed'),
-    ('bin/corp_action_auto_confirm.py', '        existing = rrec.get("id") if rrec is not None else (dup[1] if dup else None)', '        existing = rrec.get("id") if rrec is not None else None', 'r3 I2 near-dup vẫn record_proposed'),
     ('bin/corp_action_auto_confirm.py', 'f"broker để sửa record đó: {upd[\'broker\']}" if upd else', 'f"broker để sửa record đó: {upd[\'broker\']}" if False else', 'r3 I2 câu hỏi UNVERIFIED dặn ghi record_proposed'),
     ('bin/corp_action_auto_confirm.py', 'cho mã quanh ex này ⇒ {ONE_RECORD_RULE}" if upd else', 'cho mã quanh ex này ⇒ {ONE_RECORD_RULE}" if False else', 'r3 I2 câu hỏi INSUFFICIENT dặn ghi mới'),
     ('bin/corp_action_auto_confirm.py', '                           f"người đối chiếu nguồn thật; record {rid} sai ⇒ {ONE_RECORD_RULE}.",', '                           f"người đối chiếu nguồn thật; record sai ⇒ REVOKED rồi ghi tay.",', 'r3 I2 vendor-vs-registry dặn ghi tay'),
@@ -4512,7 +4790,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        if isinstance(snap, dict) and snap.get("feed_fresh_today") is True:', '        if isinstance(snap, dict) and snap.get("feed_fresh_today") is not False:', 'r3 X6 re-verify nhận lịch thiếu cờ tươi'),
     ('bin/corp_action_auto_confirm.py', '            if isinstance(snap.get("backfilled_events"), list):', '            if False:', 'r3 X7 re-verify bỏ backfilled_events'),
     ('bin/corp_action_auto_confirm.py', '            and w["ex"] <= date_str]', '            and w["ex"] < date_str]', 'r4↻ r3 X8 re-verify bỏ ex == hôm nay'),
-    ('bin/corp_action_auto_confirm.py', '        _reverify_broker_records(date_str, mode)          # dry-run:', '        pass          # dry-run:', 'r4↻ r3 X10 dry-run bỏ đối chiếu lại (không in điều lẽ ra hỏi)'),
+    # r5: bỏ X10 — dry-run nay đi CÙNG dòng re-verify với lượt thật ⇒ trùng 'RC3 cron không gọi re-verify'
     ('bin/corp_action_auto_confirm.py', '            and (w["rec"].get("vendor_check") or {}).get("status") != BD.V_VERIFIED', '            and (w["rec"].get("vendor_check") or {}).get("status") not in (BD.V_VERIFIED, BD.V_PARTIAL)', 'r4↻ r3 X12 re-verify bỏ record PARTIAL'),
     ('bin/corp_action_auto_confirm.py', 'resend=False, phase="price_only"', 'resend=True, phase="price_only"', 'r3 X16 pha chỉ-giá gửi bù lần 2'),
     ('bin/corp_action_auto_confirm.py', '        return _flag_feed_dead([r for r in po if r["verdict"] != BD.NOT_CANDIDATE], vfn)', '        return [r for r in po if r["verdict"] != BD.NOT_CANDIDATE]', 'r3 X17 pha chỉ-giá mất cờ FEED_DEAD'),
@@ -4524,7 +4802,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '            ex_read = ex_read or d == ex_d\n', '', 'r3 X20 log không nói đã đọc lịch ngày ex'),
     ('bin/corp_action_auto_confirm.py', 'for x in ("VERIFIED", "MISMATCH", "GIVEUP")', 'for x in ("VERIFIED", "MISMATCH")', 'r3 X13 GIVEUP không phải kết quả cuối'),
     # ── r4 (job Taylor_20261004_120510, arch-review v3): cổng dry-run, khoá validate, m1–m9, chân tiền writer ──
-    ('bin/corp_action_auto_confirm.py', '            _validate_for_write(actions_raw + new_recs, actions_raw)', '            [CA.validate(r_, i_) for i_, r_ in enumerate(actions_raw + new_recs)]', 'r4 N40 writer broker bỏ lưới cuối I1 (chỉ validate từng record)'),
+    # r5: bỏ N40 — lưới cuối I1 đã gỡ: validate TỪNG record trên registry + lô ⇒ lô luôn hợp lệ (minor-5)
     ('bin/corp_action_auto_confirm.py', '    if dry_run or _effects_blocked(f"ghi {len(actions_list)} record vào {CORP_ACTIONS_FILE}"):', '    if dry_run:', 'r4 G3 write_corp_actions bỏ cổng (chỉ tin tham số dry_run)'),
     ('bin/corp_action_auto_confirm.py', '    if _effects_blocked(f"gửi Discord: {msg}"):', '    if False:', 'r4 G5 Discord bỏ cổng'),
     ('bin/corp_action_auto_confirm.py', '    finally:\n        _DRY.pop()', '    finally:\n        pass', 'r4 G9 cờ dry-run không gỡ (dính sang lượt thật)'),
@@ -4533,9 +4811,8 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        out.append({"i": i, "rec": r, "ticker": v["ticker"], "ex": v["ex_date"], "id": str(v["id"]),', '        out.append({"i": i, "rec": r, "ticker": str(r.get("ticker")).upper(), "ex": v["ex_date"], "id": str(v["id"]),', 'r4 N01/N06 khoá registry chỉ .upper() (không strip như validate)'),
     ('bin/corp_action_auto_confirm.py', '        out.append({"i": i, "rec": r, "ticker": v["ticker"], "ex": v["ex_date"], "id": str(v["id"]),', '        out.append({"i": i, "rec": r, "ticker": v["ticker"], "ex": str(r.get("ex_date")), "id": str(v["id"]),', 'r4 K-b ex khoá registry thô (không ISO như validate)'),
     ('bin/corp_action_auto_confirm.py', '        out.append({"i": i, "rec": r, "ticker": v["ticker"], "ex": v["ex_date"], "id": str(v["id"]),', '        out.append({"i": i, "rec": r, "ticker": v["ticker"], "ex": v["ex_date"], "id": str(r.get("id")),', 'r4 K-c id thô (record không id ⇒ "None")'),
-    ('bin/corp_action_auto_confirm.py', '    return str(x if x is not None else "").strip().upper()', '    return str(x if x is not None else "").upper()', 'r4 K-d _norm_ticker không strip'),
+    ('bin/corp_action_broker_detect.py', '    return str(x if x is not None else "").strip().upper()', '    return str(x if x is not None else "").upper()', 'r4 K-d _norm_ticker không strip'),
     ('bin/corp_action_auto_confirm.py', '        r = dict(r, ticker=_norm_ticker(r["ticker"]))      # MAJOR-2 r4: khoá như CA.validate', '        r = dict(r)', 'r4 K-e symbol DNSE không chuẩn hoá'),
-    ('bin/corp_action_auto_confirm.py', '        held.setdefault(_norm_ticker(k), []).extend(v)', '        held.setdefault(k, []).extend(v)', 'r4 K-f held không chuẩn hoá'),
     ('bin/corp_action_auto_confirm.py', '                   if _norm_ticker(e.get("ticker")) == tk and e.get("ex_date") == ex}', '                   if e.get("ticker") == tk and e.get("ex_date") == ex}', 'r4 K-g credit_state mã sổ không chuẩn hoá'),
     ('bin/corp_action_auto_confirm.py', '            out.append(dict(ev, ticker=_norm_ticker(ev.get("ticker")), date=ex))', '            out.append(dict(ev, ticker=str(ev.get("ticker")).upper(), date=ex))', 'r4 K-h ứng viên vendor không strip'),
     ('bin/corp_action_auto_confirm.py', '    return lambda tk: [e for e in held if _norm_ticker(e.get("ticker")) == _norm_ticker(tk)]', '    return lambda tk: [e for e in held if e.get("ticker") == tk]', 'r4 K-i lịch vendor theo mã thô'),
@@ -4550,12 +4827,11 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '            rc = rc or (0 if ok else 1)\n    ledger_err = None', '            rc = rc\n    ledger_err = None', 'r4 N29 quét trùng: bus lỗi rc nuốt'),
     ('bin/corp_action_auto_confirm.py', '        _notify_once("answer", ["closed", tk, day, old["verdict"], str(regc.get("record_id")), "|".join(map(str, k))],', '        _notify_once("answer", ["closed", tk, day],', 'r4 N34 khoá answer gộp (1 answer/mã/phiên)'),
     ('bin/corp_action_auto_confirm.py', '                           "registry_check": regc, "phase": phase, "observation_only": True,', '                           "registry_check": regc, "phase": phase, "observation_only": True, "mode": "shadow",', 'r4 N35 dòng quan sát mode shadow'),
-    ('bin/corp_action_auto_confirm.py', '        if existing is not None and v != BD.CONFIRMABLE:', '        if existing is not None and v not in (BD.CONFIRMABLE, BD.AMBIGUOUS):', 'r4 N38 AMBIGUOUS near-dup không registry_update_proposed'),
     ('bin/corp_action_auto_confirm.py', '        if gap <= NEAR_DUP_DAYS:', '        if gap < NEAR_DUP_DAYS:', 'r4 N41 biên near-dup 10 loại trừ'),
     ('bin/corp_action_auto_confirm.py', '                or str(w["rec"].get("_status", "")).strip().upper().startswith("REVOKED")):', '                or not w["effective"]):', 'r4 N42 near-dup chỉ record hiệu lực (PROPOSED lọt)'),
     ('bin/corp_action_auto_confirm.py', '                    if over is not None and over():\n                        print(', '                    if over is not None and over() and t != tickers[0]:\n                        print(', 'r4 N43 prefetch mã đầu bỏ qua ngân sách'),
     ('bin/corp_action_auto_confirm.py', '        if tk not in held and not unknown:\n            print(f"  [credit-watch', '        if tk not in held:\n            print(f"  [credit-watch', 'r4 N59 quét bỏ tài khoản không xác định'),
-    ('bin/corp_action_auto_confirm.py', '    pending = [_i2_refresh(e, reg_recs, rows) for e in pending]', '    pending = pending', 'r4 m1 gửi bù không tính lại I2'),
+    ('bin/corp_action_auto_confirm.py', '    pending = [_i2_refresh(e, fview, frows) for e in pending]', '    pending = pending', 'r4 m1 gửi bù không tính lại I2'),
     ('bin/corp_action_auto_confirm.py', '    if existing is None or str(existing) == str(own):\n        return e', '    if True:\n        return e', 'r4 m1 _i2_refresh không bao giờ đổi'),
     ('bin/corp_action_auto_confirm.py', '    if existing is None and e.get("event_kind", "SHARE_EVENT") == "SHARE_EVENT":', '    if False:', 'r4 m1 gửi bù bỏ near-dup'),
     ('bin/corp_action_auto_confirm.py', '                     "ticker": tk, "credit_day": day, "record": None if upd else e["record"],', '                     "ticker": tk, "credit_day": day, "record": e["record"],', 'r4 m1 write-incomplete vẫn mang record để ghi'),
@@ -4589,6 +4865,38 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        qty_only = any_mismatch and all(_qty_ok(v, mult) for v in acct_results.values() if v["verdict"] == "MISMATCH")', '        qty_only = False', 'r4 C4 giá vốn lệch >2% vẫn im MISMATCH'),
     ('bin/corp_action_auto_confirm.py', '    return q is not None and abs(q - mult) <= RATIO_TOL * mult', '    return q is not None', 'r4 C6 KL lệch coi khớp (thành câu chân tiền)'),
     ('bin/corp_action_auto_confirm.py', '    if divs is None:\n        return "lịch DIV vendor', '    if False:\n        return "lịch DIV vendor', 'r4 C7 lịch DIV hỏng ⇒ vẫn ghi'),
+    # r5: bỏ 5 đột biến thành TƯƠNG ĐƯƠNG vì code bị gỡ: 'r3 I2 registry có record/near-dup vẫn record_proposed' + 'r4 N38'
+    # (I2 nay tính 1 nơi — _i2_refresh sau lô; đột biến thay thế: 'r5 M1 broker: mục quyết trước record lô…'), 'r4 K-f'
+    # (_held_info không chuẩn hoá lại — detector đã chuẩn hoá; thay bằng 'r5 n2 read_series symbol THÔ'), 'err = base_err'.
+    # ── r5 (job Taylor_20261006_133445, arch-review v4): MAJOR-1 I2 sau lô cả 2 writer, minor-2..5, 8 đột biến sống v4 ──
+    ('bin/corp_action_auto_confirm.py', '    if any(_DRY):\n        print(f"  [DRY-RUN] KHÔNG', '    if _DRY and _DRY[-1]:\n        print(f"  [DRY-RUN] KHÔNG', 'r5 G1 cổng chỉ xét scope TRONG CÙNG'),
+    ('bin/corp_action_auto_confirm.py', '    if _effects_blocked(f"hỏi 1 lần/ngày ({tag}) bus question {topic}: {payload.get(\'question\', \'\')}"):\n        return\n    _prune_daymarks()', '    _prune_daymarks()\n    if _effects_blocked(f"hỏi 1 lần/ngày ({tag}) bus question {topic}: {payload.get(\'question\', \'\')}"):\n        return', 'r5 G4 dọn marker cũ TRƯỚC cổng (dry-run xoá file)'),
+    ('bin/corp_action_auto_confirm.py', '    if (tk, ex) in view:\n        return str(view[(tk, ex)].get("id"))\n    near = _near_duplicate(rows, tk, ex, credit_day)\n    return near[1] if near else None', '    return None', 'r5 C3 _existing_id luôn None'),
+    ('bin/corp_action_auto_confirm.py', '        eff = (rec is not None and _effective(rec) and not rec.get("_dup_ids") and not rec.get("_invalid"))', '        eff = (rec is not None and _effective(rec))', 'r5 R3 _resolve_asks coi registry TRÙNG/hỏng là đã giải quyết'),
+    ('bin/corp_action_auto_confirm.py', '            elif not (eff and str(rec.get("id")) == k[3]):', '            elif not eff:', 'r5 R2 credit-overdue: id bị thay ⇒ không trả lời'),
+    ('bin/corp_action_auto_confirm.py', '            "effective": v["_status"].upper().startswith(CA.CONFIRMED_PREFIX), "v": v, "invalid": None})', '            "effective": v["_status"].strip().upper().startswith(CA.CONFIRMED_PREFIX), "v": v, "invalid": None})', "r5 K7 hiệu lực strip (' CONFIRMED')"),
+    ('bin/corp_action_auto_confirm.py', '            if str(e.get("event_code") or "").upper() == "DIV" and _iso(e.get("date")) == ex]', '            if str(e.get("event_code") or "").upper() == "DIV" and e.get("date") == ex]', 'r5 K4 DIV vendor cùng ex so ngày THÔ'),
+    ('bin/corp_action_auto_confirm.py', '        if abs(implied) >= BD.CASH_LEG_MIN_VND:', '        if implied >= BD.CASH_LEG_MIN_VND:', 'r5 X2 cash hint bỏ abs'),
+    ('bin/corp_action_auto_confirm.py', '    _flush_deferred(ask_failed, deferred, actions_raw if rc == 0 else actions_raw[:old_count], date_str)', '    _flush_deferred(ask_failed, deferred, actions_raw[:old_count], date_str)', 'r5 M1 vendor: câu hỏi tính trên registry TRƯỚC lô'),
+    ('bin/corp_action_auto_confirm.py', '    _flush_deferred(ask_failed, deferred, actions_raw if rc == 0 else actions_raw[:old_count], date_str)', '    _flush_deferred(ask_failed, deferred, actions_raw, date_str)', 'r5 M1 vendor: lô bị từ chối vẫn coi như đã ghi'),
+    ('bin/corp_action_auto_confirm.py', '            _ask_guarded(ask_failed, _ask_vendor_cash_leg, tk, ex, *extra, _existing_id(view, rows, tk, ex, date_str))', '            _ask_guarded(ask_failed, _ask_vendor_cash_leg, tk, ex, *extra, None)', 'r5 M1 vendor: cash-leg không nêu record'),
+    ('bin/corp_action_auto_confirm.py', '            _ask_guarded(ask_failed, _ask_vendor_conflict, tk, ex, extra, _existing_id(view, rows, tk, ex, date_str))', '            _ask_guarded(ask_failed, _ask_vendor_conflict, tk, ex, extra, None)', 'r5 M1 vendor: conflict không nêu record'),
+    ('bin/corp_action_auto_confirm.py', '            if near:\n                _ask_guarded(ask_failed, _ask_vendor_near_record, tk, ex, *near)', "            if True:\n                _ask_guarded(ask_failed, _ask_vendor_near_record, tk, ex, *(near or ('?', '?')))", 'r5 M1 vendor: near-record hỏi dù record lô không ghi được'),
+    ('bin/corp_action_auto_confirm.py', '    if confirm_only:      # live: nhánh vendor KHÔNG ghi ⇒ registry hiện tại CHÍNH là trạng thái sau lô\n        _flush_deferred(ask_failed, deferred, actions_raw, date_str)', '    if confirm_only:      # live: nhánh vendor KHÔNG ghi ⇒ registry hiện tại CHÍNH là trạng thái sau lô\n        pass', 'r5 M1 vendor live: conflict không hỏi'),
+    ('bin/corp_action_auto_confirm.py', '                rows = rows + _reg_rows([rec])', '                rows = rows', 'r5 M1 broker: record lô không vào near-dup'),
+    ('bin/corp_action_auto_confirm.py', '                   f"⇒ không ghi thêm (×hệ số 2 lần)", batch_keys[(tk, ex)]) if (tk, ex) in batch_keys', '                   f"⇒ không ghi thêm (×hệ số 2 lần)", batch_keys[(tk, ex)]) if False', 'r5 M1 broker: 2 mục cùng (mã, ex) trong lô'),
+    ('bin/corp_action_auto_confirm.py', '    new = [_i2_refresh(e, fview, frows) for e in new]', '    new = new', 'r5 M1 broker: mục quyết trước record lô không tính lại I2'),
+    ('bin/corp_action_auto_confirm.py', '    fin = actions_raw + batch\n', '    fin = actions_raw\n', 'r5 M1 broker: I2 sau lô tính trên registry TRƯỚC lô'),
+    ('bin/corp_action_auto_confirm.py', '                    entry["why"] = f"{entry[\'why\']}; (shadow) live sẽ KHÔNG ghi — validate() từ chối: {err}"\n                    new.append(entry)', '                    entry["why"] = f"{entry[\'why\']}; (shadow) live sẽ KHÔNG ghi — validate() từ chối: {err}"\n                    pass', 'r5 m5 broker shadow: mục record hỏng biến mất khỏi sổ'),
+    ('bin/corp_action_auto_confirm.py', '    if rejected:\n        rc = _broker_reject(date_str, mode, rejected, base_err)', '    if False:\n        rc = _broker_reject(date_str, mode, rejected, base_err)', 'r5 m5 broker: record hỏng im (không hỏi)'),
+    ('bin/corp_action_auto_confirm.py', '    if any(_DRY):       # minor-4 r5', '    if False:       # minor-4 r5', 'r5 m4 dry-run: record lô coi như chưa ghi (write-incomplete)'),
+    ('bin/corp_action_auto_confirm.py', '        # `_effects_blocked`; KHÔNG khoá (không tạo file .lock), không sandbox guard ghi.\n        return _all()', '        # `_effects_blocked`; KHÔNG khoá (không tạo file .lock), không sandbox guard ghi.\n        return 0', 'r5 m4 dry-run không chạy đường quyết định'),
+    ('bin/corp_action_auto_confirm.py', '    if dry_run:\n        # minor-4 r5', '    if False:\n        # minor-4 r5', 'r5 m4 dry-run lấy khoá (tạo .lock)'),
+    ('bin/corp_action_broker_detect.py', '                by.setdefault(norm_ticker(p.get("symbol")), []).append(p)', '                by.setdefault(p.get("symbol"), []).append(p)', 'r5 n2 read_series symbol THÔ'),
+    ('bin/corp_action_broker_detect.py', '                if (norm_ticker(o.get("symbol")) == norm_ticker(ticker) and', '                if (o.get("symbol") == ticker and', 'r5 n2 same_day_fills symbol THÔ'),
+    ('bin/corp_action_auto_confirm.py', '    return BD.norm_ticker(x)', '    return str(x if x is not None else "").upper()', 'r5 n2 _norm_ticker lệch quy tắc detector'),
+    ('bin/corp_action_broker_detect.py', '    if c > CASH_LEG_MAX:', '    if False:', 'r5 m5 detector bỏ chặn CASH_LEG_MAX'),
+    ('bin/corp_action_auto_confirm.py', '_RESOLVE_BY_REGISTRY = ("vendor-only", "vendor-held-unknown", "vendor-conflict")', '_RESOLVE_BY_REGISTRY = ("vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg")', 'r5 m3 resolver lại có nhánh cash-leg chết'),
 ]
 
 
@@ -4676,6 +4984,7 @@ def main():
     test_r2()
     test_r3()
     test_r4()
+    test_r5()
     test_px()
     test_C()
     if "--replay" in sys.argv:
