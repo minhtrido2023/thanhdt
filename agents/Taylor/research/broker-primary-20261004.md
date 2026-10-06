@@ -209,3 +209,98 @@ Mutation (bộ đầy đủ trong selfcheck, 449 đột biến; +29 mới r5 g�
 7 đột biến code đã gỡ/tương đương: X10, N40, r3 I2×2, N38, K-f, err=base_err): **449/449 (3.10)**, **448/449 (3.12 — `parse 5
 chữ số` tương đương, đã khai từ r4)**, 0 chỉ-crash. ruff F: sạch. Dry-run thật live 10-01 (TPB MATCH registry) và 10-06 (TV1
 PRICE_ONLY INSUFFICIENT — production đang shadow nên không hỏi) rc=0, sha256 registry + sổ y nguyên.
+
+**Đính chính câu chữ minor-3 (r6, arch-review v5 #5):** câu "resolver chỉ chạy live ⇒ nhánh trả lời cash-leg là code chết" ở
+trên là SAI. Câu cash-leg hỏi ở off/shadow nằm trong CÙNG sổ broker; `_resolve_asks` chạy ở live ĐỌC được khoá `ASKED` đó và
+sẽ trả lời nó SAU khi bật live ⇒ resolver r4 không chết. Việc gỡ nó vẫn giữ, nhưng vì lý do đúng: tiêu chí "registry có record
+HIỆU LỰC (mã, ex)" KHÔNG chứng minh chân tiền đã đúng (record thiếu chân tiền vẫn hiệu lực) ⇒ tự trả lời có thể đóng sai.
+Hệ quả thật của việc gỡ: câu cash-leg (và vendor-multi-event r6) KHÔNG BAO GIỜ được tự đóng, kể cả sau khi lên live — người
+ghi/sửa record đóng nó. Comment ở `_RESOLVE_BY_REGISTRY` đã sửa theo.
+
+### r6 (job Taylor_20261006_143910, user DUYỆT option (2) 06/10 21:38 — sửa trước rồi mới merge) — I2 đóng bằng CẤU TRÚC
+
+**BƯỚC 0 — kiểm chứng thông tin miền của user bằng dữ liệu** (`tav2_bq.corporate_action`, registry: TRAP — dùng làm thống kê
+lịch sử, không làm feed). Sự kiện điều chỉnh giá: `DIV` (tiền) + `ISS` có `issue_method_name_vi` ∈ {Trả cổ tức bằng CP, CP
+thưởng, Quyền mua CP cho cổ đông hiện hữu} (riêng lẻ/ESOP/chuyển đổi không có ex điều chỉnh giá), bỏ `not_executed`, khoá
+(mã, ex) DISTINCT. 20.636 (mã, ex) / 21.523 chân; **cùng ngày có cả chân KL lẫn tiền: 887 (4,3%)**. Cặp (cùng mã, ex KHÁC nhau):
+
+| Loại cặp | Giai đoạn | ≤7 ngày | ≤10 ngày | ≤30 ngày |
+|---|---|---:|---:|---:|
+| KL–KL | <2015 | 5 | 7 | 15 |
+| KL–KL | ≥2015 | 2 | 3 | 8 |
+| KL–tiền | <2015 | 15 | 19 | 82 |
+| KL–tiền | ≥2015 | 20 | 29 | 133 |
+| tiền–tiền | <2015 | 2 | 2 | 7 |
+| tiền–tiền | ≥2015 | 5 | 7 | 36 |
+| **Tổng** | | **49** | **67** | **281** |
+
+≤10 ngày = 67 / 20.636 ≈ 0,32% sự kiện cả lịch sử; từ 2020: 24 cặp ≈ 4/năm TOÀN thị trường (ví dụ: AIG 07-31→08-04/2026 tiền→KL,
+DSE 01-07→01-09/2026, GEE 04-23→04-28/2025, PNJ 12-29/2022→01-06/2023 KL→tiền, MWG 06-07→06-16/2022, ABW 08-20→08-25/2021 KL–KL).
+⇒ **Xác nhận "hiếm" (nhưng không bằng 0)**; "cùng ngày" phổ biến hơn ~13×. Thiết kế dưới chặn + hỏi người cho ca hiếm, giữ
+nguyên đường cùng-ngày.
+
+**Thiết kế (khuyến nghị arch-review v5).** `_multi_event(rows, tk, cand, credit_day)`: sự kiện trong cửa sổ = ex ứng viên lô ∪ ex
+record registry gần (`_near_rows`: MỌI provenance, mọi trạng thái trừ REVOKED, neo MỌI ex ứng viên + phiên credit, ±NEAR_DUP_DAYS=10,
+ex không đọc được ⇒ tính gần — CÙNG vị từ với `_near_duplicate`, nay dùng chung). Nhiều chân CÙNG ex = 1 sự kiện (đối chiếu /
+conflict như cũ). **≥2 ex KHÁC nhau ⇒ writer KHÔNG ghi gì cho mã, hỏi người ĐÚNG 1 lần, liệt kê đủ** (lô + record registry).
+- Writer vendor (off/shadow): gom theo mã TRƯỚC vòng (ứng viên + chân conflict) ⇒ `vendor-multi-event-<mã>-<phiên>` [Winston]
+  (khoá sổ `[vendor-multi-event, mã, các ex, sha1(danh sách), ASKED]` — tập đổi ⇒ hỏi lại). Mã còn lại có đúng 1 ex và registry
+  không có record của mã ở ex khác trong cửa sổ ⇒ việc lô ghi gì KHÔNG đổi được câu trả lời cho câu hỏi về mã nào ⇒ mọi câu hỏi
+  (conflict / cash-leg / vendor-vs-registry) gửi NGAY trong vòng. **Gỡ:** `deferred`, `_flush_deferred`, nhánh near-record
+  trong writer (mã đó đã vào multi), `rows += record lô`, tham số `existing` của câu cash-leg (luôn None theo cấu trúc).
+- Writer broker: gom kết quả sự kiện KL (kind None) theo mã TRƯỚC vòng; ≥2 ex trong cửa sổ (tính registry) — HOẶC ≥2 kết quả
+  cho 1 mã trong 1 pha (detector hứa ≤1/mã/pha; vi phạm ⇒ không đoán) — ⇒ ĐÚNG 1 mục sổ AMBIGUOUS (UNVERIFIED nếu có chân lệch
+  nguồn ⇒ vẫn gọi Winston), why + `multi_event` liệt kê đủ, KHÔNG record/record_proposed. **Gỡ:** `batch_keys`,
+  `rows = rows + record lô`, `fin = actions_raw + batch` (suy luận "registry sau lô").
+- Câu nào còn gửi SAU khi ghi tính trên registry **ĐỌC LẠI từ đĩa**: `_i2_refresh` cho mục mới + gửi bù (dry-run: + record lô —
+  cổng đã chặn ghi); đọc lại thô hỏng ⇒ `_i2_unknown` (không bao giờ đề xuất ghi record, nói thẳng). Mục mới cũng qua I2 TRƯỚC khi
+  ghi sổ (registry trước lô = sau lô cho mã của mục, theo cấu trúc) ⇒ dòng sổ không mang record_proposed cạnh record có sẵn.
+
+**Danh sách sửa A (arch v5):**
+1. Câu hỏi dời mất khi exception/OSError/kill — **không còn câu dời** ở writer vendor (lý do cấu trúc trên). Writer broker:
+   lỗi ghi (OSError…) được bắt, đọc lại registry quyết (CONFIRMABLE vắng ⇒ write-incomplete CÙNG lượt, không chờ lượt sau);
+   validate-reject gửi trong `finally`. Còn lại (đã biết): SIGKILL đúng giữa ghi và câu validate-reject broker ⇒ câu đó mất
+   (record bị từ chối có 0 dòng sổ) — cửa sổ mili-giây; ở off, exception trong `run_vendor` vẫn lan ra cron như trước (off không
+   có `_run_branch`) — câu hỏi ĐÃ quyết trước đó đã gửi. Test `r6 #1a/#1b` × off/shadow (gồm probe p4 v5).
+2. Đột biến sống v5: N01 (`r6 N01`), N23 (`r6 N23`), N03 (`r6 N03` — write-incomplete khi record của mục ĐÃ trong file mà
+   load_corp_actions() lỗi: không tự trỏ, không mang record; thêm cờ `record_in_file`), N22 (`r6 N22`), N04 (`r6 N04`), N05
+   (`r6 N05` — shadow: record TPB không vào lô khi registry đã có (mã, ex) ⇒ ABC không bị lưới I1 đánh oan). `if rcf:` ⇒ check
+   có tên `r6 tiền đề M1` (thiếu CONFIRMABLE ⇒ FAIL có tên, không im lặng bỏ ca).
+3. Câu broker validate-reject: gửi SAU write + đọc lại (trong `finally`), qua `_i2_refresh`/`_i2_act` trên registry đọc lại;
+   "mã khác cùng lô ĐÃ ghi" chỉ cho id đọc lại xác nhận (`batch_written`); rc bus từng câu kiểm (lỗi ⇒ in mã chưa được hỏi, rc=1).
+   Writer vendor: rc câu validate-reject vào `ask_failed` ⇒ câu vendor-ask-failed. Test `r6 #3a–#3e`, `#3v`.
+4. `_SEEN_NOW[ngày]` = kết quả nhánh broker lượt này ⇒ `_vendor_confirm_only(seen_now=…)` (cả dry-run lẫn live — live: record
+   bị validate từ chối có 0 dòng sổ, thiếu nó vendor hỏi vendor-only trùng). Test `r6 #4/#4b/#4c`.
+5. Đính chính minor-3 ở trên.
+
+**Thay đổi hành vi so với r5 (cố ý):** mã có 2 ex trong cửa sổ — r5 ghi 1 record rồi hỏi (near-record/cash-leg/conflict nêu
+record vừa ghi); r6 KHÔNG ghi gì và hỏi 1 câu multi-event. B17: lỗi ghi broker không còn ném ra (r5: lan ra, câu
+write-incomplete chờ lượt sau). N40: 2 kết quả cùng (mã, ex) trong 1 pha — r5 ghi 1 + AMBIGUOUS; r6 0 record + 1 AMBIGUOUS.
+Gỡ thêm `+ batch` khỏi validate từng record broker (đột biến v5 N08 thành TƯƠNG ĐƯƠNG theo cấu trúc; `write_corp_actions` vẫn
+validate CẢ danh sách lần cuối, lỗi ⇒ bắt + đọc lại). Chốt "chỉ sự kiện KL vào multi" còn MỘT chỗ (`share`), bỏ điều kiện lặp ở
+vòng (đột biến cũ "chặn ×2 áp cả chỉ-giá" sống vì 2 chốt dư — nay bị L1b giết).
+
+**Verify (artifact, r6):**
+- Selfcheck: **705/0 (py3.10) · 707/0 (py3.12)** × Asia/Ho_Chi_Minh / UTC / `env -u TZ` — 6/6 xanh. Mới: `test_r6` (danh sách A +
+  N01 N03 N04 N05 N22 N23), `test_r6b` (biên cửa sổ D−10/EX+10/D−11/EX+11, ex không đọc được, `_SEEN_NOW` cũ, near-record live có
+  id), `r6 S1*` thay M1a–f (mỗi ca chạy CẢ thứ tự xuôi lẫn ngược ⇒ kiểm không phụ thuộc thứ tự lô), N11, M2a+; B17/B31/V*/R4b–R6/
+  Q11/Q21/D3/m7b/N40 viết lại theo ngữ nghĩa mới.
+- Control: selfcheck r6 chạy trên code r5 (`git archive 26fbc30d`) ⇒ **48 FAIL có tên** + crash cuối (`_SEEN_NOW` không có) — các
+  assertion hành vi mới đều FAIL; assertion canh đột biến-reviewer (N04/N05/N22 …) PASS trên r5 đúng kỳ vọng (canh hành vi sẵn có).
+- Mutation (bộ trong selfcheck, chạy song song trên bản sao — KHÔNG chạy selfcheck khác trong worktree lúc đang đột biến tại chỗ):
+  **472/472 (3.10)**, **471/472 (3.12 — `parse 5 chữ số` tương đương, khai từ r4)**, 0 chỉ-crash. 31 neo cũ hết khớp: 20 neo lại
+  (`[r6 neo lại]`), 11 đột biến của cơ chế đã gỡ thay bằng đột biến tương ứng của thiết kế mới (`r6 [thay …]`); +23 đột biến r6
+  (gồm ý v5 N01/N23, N05, N11, N17, N22). Lần chạy đầu 459/467: 8 sống + 1 chỉ-crash (#9 khoá near-record, chặn ×2 chỉ-giá, hậu
+  tố "số broker để sửa", m8 neo ex/credit ×2, I2 trước ghi sổ, `_near_rows` ex hỏng, `_SEEN_NOW` không xoá; crash M2b) ⇒ thêm test
+  có tên/sửa code, 9/9 bị giết.
+- Bộ đột biến reviewer v5 (`/tmp/rv5/mut/muts.py`, 23): **11/11 neo còn khớp bị giết** (N04 N05 N06 N07 N09 N11 N12 N16 N18 N19
+  N20); 12 neo trỏ vào code đã gỡ (N01 N02 N03 N08 N10 N13 N14 N15 N17 N21 N22 N23 — deferred/_flush_deferred, batch, fin suy luận,
+  nhánh near-record writer) — ý của N01/N03/N17/N22/N23 có đột biến tác giả tương ứng, đều bị giết.
+- Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0; sha256 `data/corp_actions.json` (21a88fb5…) y nguyên, sổ broker
+  production vẫn không tồn tại (chỉ có .lock cũ 10-05). 10-01 live: TPB CONFIRMABLE ⇒ MATCH record người ký, không ghi/hỏi;
+  10-06 live: TV1 PRICE_ONLY INSUFFICIENT ⇒ in câu insufficient lẽ ra gửi. Không mã nào rơi vào multi-event trên dữ liệu thật.
+
+**Còn mở / cần Mike–user quyết:** (a) câu `vendor-multi-event` không có resolver tự động (như cash-leg) — người đóng; (b) SIGKILL
+đúng giữa ghi và câu validate-reject broker ⇒ câu đó mất (0 dòng sổ) — nếu muốn bền tuyệt đối thì ghi intent `VALIDATE_REJECT`
+vào sổ (thêm verdict mới, đụng consumer sổ) — chưa làm; (c) KHÔNG merge, KHÔNG đổi crontab, `MIKE_CA_BROKER_SOURCE` mặc định giữ
+shadow.
