@@ -503,3 +503,11 @@
 - [2026-10-06T04:04:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261006_040234", "source": "watcher"}
 - [2026-10-06T04:05:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261006_040234", "source": "watcher"}
 - [2026-10-06T04:06:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261006_040234", "source": "watcher"}
+
+## Consolidation 2026-10-06T04:11:21Z
+- [2026-10-06T04:07:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261006_040234", "source": "watcher"}
+- [2026-10-06T04:08:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261006_040234", "source": "watcher"}
+- [2026-10-06T04:09:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261006_040234", "source": "watcher"}
+- [2026-10-06T04:10:35Z] Taylor/heartbeat — Taylor_20261006_040234: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261006_040234", "source": "watcher"}
+- [2026-10-06T04:11:05Z] Taylor/heartbeat — Taylor_20261006_041048: {"status": "in_progress", "note": "worktree tao, doc funnel"}
+- [2026-10-06T04:11:06Z] Taylor/finding — sell-split-by-loan-package-r2: {"status": "built_not_merged", "branch": "fix/sell-split-by-loan-package-20261006", "commit": "8a669a9a", "parent": "e7715cd0", "fixed": ["NB-3 reset place_fail_streak khi place OK", "NB-4 ATC quyet truoc khi huy LO, khong co atc_unsupported vinh vien, journal 1 lan + thu lai", "NB-5 SPLIT_LEG_ERROR journal", "NB-1 FakeClient: place khong giu tradeQuantity, chi giam khi khop; them ca positions cu"], "tests": "selfcheck ALL OK x (env -u TZ, Kiritimati) x (python3, DNA_PYEXE); mutation 24/24; reviewer X1,X2 killed", "sweep_23": "14/52 selfcheck executor/broker rc!=0, tat ca fail truoc fix (base e829f429 in-place: cash_only_loan_package, loan_package_multi_account cung FAIL; phan con lai moi truong thieu secrets/data) — khong regress moi", "note": "chua merge, chua restart bot, khong goi DNSE"}

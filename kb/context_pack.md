@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3638)
+# Mike fleet — context pack (v3639)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-05T21:52:00] Winston/finding — sbv-weekly-check-2026-10-06: {"date": "2026-10-06", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/hom …
 - [2026-10-05T22:07:28] Wags/answer — selfcheck-red: macro_killswitch_a_selfcheck.py — recovered 2026-10-05: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "macro_killswitch_a_selfcheck.py", "artifact": "chạy lại lúc 2026-10-05T22:07: …
 - [2026-10-05T22:07:28] Wags/answer — selfcheck-red: phs_flash_api_selfcheck.py — recovered 2026-10-05: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "phs_flash_api_selfcheck.py", "artifact": "chạy lại lúc 2026-10-05T22:07:28Z b …
 - [2026-10-06T00:30:21] Taylor/finding — corp-action-daily 2026-10-06 OK: {"asof": "2026-10-06", "feed_status": "FRESH", "n_track": 18, "n_held": 15, "exright_today": ["INC", "PGB"], "ais_today": ["HHP", "MBB"], "cash_dividend_today": …
 - [2026-10-06T03:48:16] Taylor/finding — sell-split-by-loan-package: {"status": "built_not_merged", "branch": "fix/sell-split-by-loan-package-20261006", "commit": "e7715cd0", "parent": "e829f429", "worktree": "/home/trido/thanhdt …
+- [2026-10-06T04:11:06] Taylor/finding — sell-split-by-loan-package-r2: {"status": "built_not_merged", "branch": "fix/sell-split-by-loan-package-20261006", "commit": "8a669a9a", "parent": "e7715cd0", "fixed": ["NB-3 reset place_fail …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -54,6 +54,9 @@
 - ✅ **CCTG + Big-4 12M có auto-fetch HÀNG TUẦN** (cron `5 1 * * 1` = 08:05 ICT thứ Hai, LIVE từ 2026-10-01; 2 nguồn khác chủ + chéo ≤0,1pp + guard URL tái dùng; lệch/thiếu ⇒ KHÔNG ghi, nhắc xác nhận tay `manual_verify`; log `logs/refresh_deposit_cctg_weekly.log`). Rủi ro còn lại không code chặn được: tác tử bịa nhất quán cả URL lẫn rate. (Trước đó nhập tay.) Anchor 2026-09-30 = 7,5%; không cập nhật ⇒ stale >45 ngày ⇒ **ARMED vĩnh viễn từ 2026-11-15**. Big-4 stale ≈ 2026-10-20 (cùng cơ chế fail-closed).
 - Trước khi wire vào gate thật: siết `deposit_rate_vn.deposit_events_df()` phía Big-4 (đang silent-drop dòng không parse được) + guard ngày tương lai tại load (quant-skeptic NON-BLOCKING #2/#3).
 - ✅ **rating_8l NEUTRAL tilt + chuỗi DCF (dcf_valuation, dcf_refresh_gate, custom30_yield_labels, due_diligence) DÙNG effective rate = max(Big-4 12M, CCTG 6M)** — LIVE trên WC main từ 2026-10-01 (merge `d87a6f89`, user duyệt 12:40, quant-skeptic vòng 2 CONFIRMED). Tác động đo thật: rating_8l 6 mã −0,03 value_score (CTR MZG QNS PLX HVN GEE), 0 zone flip, top30 giữ nguyên; DCF discount 13,30%→14,00%, FV −0,7…−0,9% (VNM gần ngưỡng nhất MoS +2,6%→+1,8%; flag CHEAP/RICH trong plan report 21:00 có thể lật với mã sát 0). Lịch sử byte-identical ⇒ KHÔNG đổi số pin R3. **Fail-closed**: CCTG stale >45 ngày hoặc lỗi ⇒ cả 5 consumer rơi về Big-4 6,8% + WARNING (không phải ARMED). **Knob lùi**: env `DEPOSIT_RATE_CCTG_OVERLAY=0` (chỉ nhận đúng chuỗi "0"; lan tới mọi launcher source `wc_env.sh`, NGOẠI LỆ cron `dcf_refresh_gate` không source). `golive_recommend_v23.py:~991` (cổng CAPIT margin PIT, ngưỡng 9,0%) CỐ Ý vẫn Big-4-only — user chốt 2026-10-01 16:42: GIỮ Big-4, chỉ THÊM dòng hiển thị "effective vs 9%" (việc C: MERGED WC `98079284` 2026-10-01 18:10 — 2 field `pit_deposit_rate_effective`/`pit_deposit_effective_driver` trong `capit_lever` của golive_v23_status.json, quyết định BYTE-IDENTICAL, quant-skeptic CONFIRMED 576 kịch bản; nay CÓ dòng hiển thị trong plan markdown: "Cổng PIT: Big-4 X% (dùng cho quyết định, ngưỡng 9%) · effective Y% [driver] — chỉ hiển thị", kèm ⚠️ khi effective ≥ 9% mà Big-4 < 9%; follow-up MERGED WC 2026-10-01 18:20, quant-skeptic CONFIRMED 330 kịch bản). **TRIGGER XEM LẠI đổi sang effective** = CCTG có ≥3 tháng dữ liệu + cron tuần chạy ổn, HOẶC effective ≥ ~8% (lúc đó dispatch Taylor đo khoảng cách CCTG−Big-4 lịch sử rồi quant-skeptic + user duyệt riêng). Follow-up XONG 2026-10-01 (WC `358ad369`, mike `8d2aae54`): registry `cctg_rate_vn.md` đã áp (inventory consumer đúng: due_diligence + custom30_yield_labels chạy HẰNG NGÀY, DCF plan-report 21:00 là consumer user-visible), `ops_health_check` 8b WARN khi CSV CCTG hỏng/ngoài khoảng, selfcheck nạp đúng cây worktree.
+
+## Cổng giá trong phiên + cutloss — SHADOW (cron bật 2026-10-06 11:10 ICT, 5 phiên đánh giá)
+- `bin/intraday_price_watch.py` (chạy thử, KHÔNG đặt lệnh thật). Tin nhắn dạng **"SHADOW GIỮ/BÁN/BÁN 50% <MÃ>"** trong Trading Daily là lệnh cho script chạy thử — **Mike KHÔNG coi là lệnh giao dịch thật, KHÔNG dispatch Mafee/DollarBill theo dòng đó.** Chỉ hành động khi user nói rõ ngoài tiền tố SHADOW.
 
 ## Signal holds
 - Không có hold nào đang mở. VPI/BAL hold (08-19→09-16) đã gỡ 2026-09-16, user duyệt RESUME,
