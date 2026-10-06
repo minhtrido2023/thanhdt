@@ -971,7 +971,11 @@ class Executor:
             return None
         try:
             leg = fn(o.ticker, qty)
-        except Exception:
+        except Exception as e:
+            # Rơi về hành vi cũ (không tách) nhưng KHÔNG im lặng: lỗi ở đây = lệnh bán trải
+            # nhiều gói sẽ lại bị 400 "Trade quantity not enough", cần có dấu vết để biết vì sao.
+            self._journal("SPLIT_LEG_ERROR", o, qty=qty, note=(
+                f"plan_sell_leg lỗi ({type(e).__name__}: {e}) — không tách, đặt như cũ"))
             return None
         # Kiểu chặt: stub MagicMock trong selfcheck trả Mock "giống tuple" — không được
         # để nó lọt thành một lệnh 1cp.
@@ -2131,6 +2135,10 @@ class Executor:
             if sell_lp is not None:
                 child["sell_lp"] = sell_lp     # chỉ chân tách mang khoá ⇒ state cũ y nguyên
             ps["children"].append(child)
+            # Đặt lệnh THÀNH CÔNG ⇒ chuỗi lỗi cấu trúc đứt. Không reset thì "Trade quantity not
+            # enough" ở các lần chuyển chân tách (đã có chân khớp xen giữa) cộng dồn ⇒ chặn oan.
+            ps["place_fail_streak"] = 0
+            ps["place_fail_note"] = ""
             self.shared[o.ticker] = self.shared.get(o.ticker, 0) + qty  # reserve quota
             ps["last_slice_ts"] = now.isoformat(timespec="seconds")
             capped = (o.side == "buy" and cross and q.ask and px < q.ask)
@@ -2162,6 +2170,19 @@ class Executor:
             # đổi lấy một observation nghiên cứu. Lỗi telemetry bị nuốt trong hàm.
             self._order_book_shadow(o, q, oid, qty, px, cross, baseline_note,
                                     order_attempt_epoch_ms)
+
+    def _atc_split_skip(self, o, ps, remaining, leg):
+        """ATC không đặt được vì không gói vay nào giữ ≥1 lô chẵn. KHÔNG đặt cờ vĩnh viễn
+        (positions chỉ là ảnh chụp 1 lần, gói có thể đổi sau khi lệnh khớp): journal ĐÚNG 1 lần
+        rồi thử lại ở vòng sau."""
+        if ps.get("atc_split_skip_noted"):
+            return
+        ps["atc_split_skip_noted"] = True
+        self._journal("ATC_SPLIT_SKIP", o, note=(
+            f"ATC: không gói vay nào giữ ≥1 lô chẵn cho {remaining}cp (chân lớn "
+            f"nhất {leg[0]}cp @gói {leg[1]}) — ATC không nhận lô lẻ, chưa quét ATC "
+            f"(thử lại vòng sau)"))
+        self._save_state()
 
     def _atc_sweep(self, ghost_tickers=(), positions=None):
         for o in self.plan.orders:
@@ -2225,6 +2246,18 @@ class Executor:
                 continue
             c = self._open_child(ps)
             _still_open_qty = 0
+            if c and o.side == "sell":
+                # Quyết định TRƯỚC khi huỷ LO: nếu ATC chắc chắn không đặt được (chân tách < 1 lô
+                # chẵn) thì huỷ LO chỉ làm mất cơ hội khớp cuối. LO đang mở KHÔNG giữ
+                # tradeQuantity (chỉ giảm khi khớp) ⇒ positions hiện tại đã phản ánh đúng.
+                _pre = round_lot(o.qty - ps["filled"])
+                _sell = (positions.get(o.ticker) or {}).get("sellable") if positions else None
+                if _sell is not None:
+                    _pre = min(_pre, round_lot(_sell))
+                _pleg = self._sell_split_leg(o, _pre) if _pre >= LOT else None
+                if _pleg is not None and _pleg[0] < LOT:
+                    self._atc_split_skip(o, ps, _pre, _pleg)
+                    continue
             if c:
                 try:
                     self.broker.cancel_order(c["oid"])
@@ -2279,11 +2312,7 @@ class Executor:
             leg = self._sell_split_leg(o, remaining)
             if leg is not None:
                 if leg[0] < LOT:
-                    ps["atc_unsupported"] = True   # không chặn lại mỗi chu kỳ (cùng cờ UPCOM)
-                    self._journal("ATC_SPLIT_SKIP", o, note=(
-                        f"ATC: không gói vay nào giữ ≥1 lô chẵn cho {remaining}cp (chân lớn "
-                        f"nhất {leg[0]}cp @gói {leg[1]}) — ATC không nhận lô lẻ, bỏ quét ATC"))
-                    self._save_state()
+                    self._atc_split_skip(o, ps, remaining, leg)
                     continue
                 remaining, atc_kw = leg[0], {"sell_loan_package_id": leg[1]}
             if ps.get("place_blocked"):

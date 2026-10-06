@@ -22,8 +22,10 @@ Nhóm ca:
                            sell_loan_package_id sai ngữ cảnh ⇒ ValueError; tick-retry giữ gói
 
 Mô phỏng DNSE (FakeClient): lệnh bán bị từ chối CẢ lệnh nếu qty > tradeQuantity của ĐÚNG gói
-gửi lên (đúng hành vi đo được 10-06). GIẢ ĐỊNH mô phỏng (chưa đo): lệnh mở khoá tradeQuantity
-của gói tới khi huỷ — không ca nào phụ thuộc vào giả định này để PASS.
+gửi lên (đo được 10-06). Đặt lệnh bán KHÔNG giữ tradeQuantity — nó chỉ giảm khi KHỚP (đo được:
+LPB SpaceX 2026-09-29, VPB ZaloPay 2026-07-15 trong dnse_raw); huỷ lệnh không đổi gì.
+`stale_positions=True` ⇒ positions() trả ảnh chụp CŨ tới khi gọi `refresh()` (fill đã thấy ở
+poll lệnh nhưng positions chưa cập nhật) — DNSE vẫn kiểm theo số THẬT.
 
 Chạy: python3 sell_split_by_loan_package_selfcheck.py [--mutations]
   (không mạng; SELLSPLIT_CODE_ROOT=<dir> = import trading_bot từ thư mục khác — dùng nội bộ
@@ -82,9 +84,11 @@ def _row(symbol, lp, q, acc="0001743768"):
 
 class FakeClient:
     def __init__(self, rows, default_lp, raise_positions=False, tick_fail_once=False,
-                 pkg_ids=None):
+                 pkg_ids=None, stale_positions=False):
         self.loan_package_id = default_lp
         self.rows = [dict(r) for r in rows]
+        self.stale = [dict(r) for r in rows] if stale_positions else None
+        self.accepted = []
         self.raise_positions = raise_positions
         self.tick_fail_once = tick_fail_once
         self.pkg_ids = pkg_ids or [default_lp]
@@ -96,7 +100,12 @@ class FakeClient:
         self.n_positions += 1
         if self.raise_positions:
             raise RuntimeError("simulated positions timeout")
-        return {"positions": [dict(r) for r in self.rows]}
+        src = self.stale if self.stale is not None else self.rows
+        return {"positions": [dict(r) for r in src]}
+
+    def refresh(self):
+        if self.stale is not None:
+            self.stale = [dict(r) for r in self.rows]
 
     def loan_packages(self, account_id, market_type="STOCK", symbol=None):
         return {"loanPackages": [{"id": i, "type": "M"} for i in self.pkg_ids]}
@@ -118,7 +127,8 @@ class FakeClient:
                 raise DNSEError("HTTP 400: deal not found", status=400)
             if qty > d["tradeQuantity"]:
                 raise DNSEError("HTTP 400: Trade quantity not enough", status=400)
-            d["tradeQuantity"] -= qty
+            # KHÔNG trừ tradeQuantity ở đây: DNSE chỉ trừ khi KHỚP (xem fill).
+        self.accepted.append((symbol, qty, loan_package_id, order_type, side))
         oid = str(9000 + len(self.calls))
         self.book[oid] = {"symbol": symbol, "qty": qty, "filled": 0, "status": "New",
                           "lp": loan_package_id, "side": side}
@@ -130,13 +140,12 @@ class FakeClient:
         o["filled"] = n
         o["status"] = "Filled" if n >= o["qty"] else "PartiallyFilled"
         if o["side"] == "sell":
-            self._deal(o["symbol"], o["lp"])["openQuantity"] -= n
+            d = self._deal(o["symbol"], o["lp"])
+            d["openQuantity"] -= n
+            d["tradeQuantity"] -= n
 
     def kill(self, oid):
-        o = self.book[oid]
-        o["status"] = "Canceled"
-        if o["side"] == "sell":
-            self._deal(o["symbol"], o["lp"])["tradeQuantity"] += o["qty"] - o["filled"]
+        self.book[oid]["status"] = "Canceled"
 
 
 def make_quote(symbol, px=34550):
@@ -374,9 +383,9 @@ def mutations():
         ("M09 ATC không tách", E,
          "            leg = self._sell_split_leg(o, remaining)\n",
          "            leg = None\n"),
-        ("M10 ATC skip không đặt cờ", E,
-         "                    ps[\"atc_unsupported\"] = True   # không chặn lại",
-         "                    pass   # không chặn lại"),
+        ("M10 ATC skip journal mỗi vòng (bỏ cờ noted)", E,
+         "        if ps.get(\"atc_split_skip_noted\"):\n            return\n",
+         ""),
         ("M11 tách cả lệnh đòn bẩy", E,
          "if o.side != \"sell\" or getattr(o, \"loan_package_id\", None) is not None:\n"
          "            return None\n        fn = getattr(self.broker, \"plan_sell_leg\"",
@@ -407,6 +416,19 @@ def mutations():
          "            if True:\n                child[\"sell_lp\"] = sell_lp"),
         ("M20 log tách thiếu kế hoạch", B,
          "\"split_plan\": [[i, n] for i, n in legs],", "\"split_plan\": None,"),
+        ("M21 place thành công không reset streak", E,
+         "            ps[\"place_fail_streak\"] = 0\n            ps[\"place_fail_note\"] = \"\"\n"
+         "            self.shared[o.ticker]",
+         "            self.shared[o.ticker]"),
+        ("M22 ATC quyết sau khi huỷ LO (bỏ kiểm trước huỷ)", E,
+         "            if c and o.side == \"sell\":\n                # Quyết định TRƯỚC",
+         "            if False:\n                # Quyết định TRƯỚC"),
+        ("M23 plan_sell_leg lỗi không journal", E,
+         "            self._journal(\"SPLIT_LEG_ERROR\", o, qty=qty, note=(",
+         "            (lambda *a, **k: None)(qty, note=("),
+        ("M24 ATC skip lại đặt cờ vĩnh viễn", E,
+         "        ps[\"atc_split_skip_noted\"] = True\n",
+         "        ps[\"atc_split_skip_noted\"] = True\n        ps[\"atc_unsupported\"] = True\n"),
     ]
     killed, survived = [], []
     for name, f, old, new in muts:
@@ -702,6 +724,87 @@ with tempfile.TemporaryDirectory() as tmp:
           and pl and pl[-1].get("sell_split_leg") is True
           and ex.state["parents"]["SELL-BID"]["children"][0].get("sell_lp") == 1826,
           f"tick-retry giữ đúng chân + gói ({s})")
+
+# ═══════════════════════════ H. vòng 2 (arch-review NB-1/3/4/5) ═══════════════════════════
+print("=== H. vòng 2 ===")
+# NB-3: đặt lệnh thành công reset chuỗi lỗi cấu trúc của parent
+with tempfile.TemporaryDirectory() as tmp:
+    cl = FakeClient([_row("BID", 1258, 20), _row("BID", 1826, 7)], 1258)
+    b = make_broker(cl, 1258)
+    ex = make_exec(tmp, [SO(27)], b)
+    ps = ex.state["parents"]["SELL-BID"]
+    ps["place_fail_streak"], ps["place_fail_note"] = 4, "HTTP 400: Trade quantity not enough"
+    cycle(ex, NOW)
+    check(sells(cl) == [(20, 1258)] and ps["place_fail_streak"] == 0 and ps["place_fail_note"] == ""
+          and not ps.get("place_blocked"),
+          f"NB-3 place thành công ⇒ streak reset ({ps.get('place_fail_streak')}, {sells(cl)})")
+
+# NB-4: ATC không đặt được ⇒ KHÔNG huỷ LO, KHÔNG cờ vĩnh viễn, journal 1 lần, thử lại sau
+with tempfile.TemporaryDirectory() as tmp:
+    cl = FakeClient([_row("BID", 1258, 60), _row("BID", 1826, 50)], 1258)
+    b = make_broker(cl, 1258)
+    ex = make_exec(tmp, [SO(110)], b)
+    cycle(ex, NOW)                                    # LO chân 60@1258 đang mở
+    lo = next(iter(cl.book))
+    for _ in range(3):
+        cycle(ex, NOW, atc=True)
+    ps = ex.state["parents"]["SELL-BID"]
+    ev = [r[0] for r in journal(ex)]
+    check(cl.book[lo]["status"] == "New" and cl.accepted == [("BID", 60, 1258, "LO", "sell")]
+          and ev.count("ATC_SPLIT_SKIP") == 1 and not ps.get("atc_unsupported")
+          and not ps["atc_sent"],
+          f"NB-4 ATC bỏ ⇒ LO còn nguyên, không cờ vĩnh viễn, journal 1 lần ({ev}, {cl.accepted})")
+    with tempfile.TemporaryDirectory() as tmp2:   # _atc_sweep TRẦN (không save ké của cycle())
+        cl2 = FakeClient([_row("BID", 1258, 60), _row("BID", 1826, 50)], 1258)
+        b2 = make_broker(cl2, 1258)
+        ex2 = make_exec(tmp2, [SO(110)], b2)
+        ex2._atc_sweep(set(), b2.get_positions())
+        try:
+            with open(ex2.state_file, encoding="utf-8") as fh:
+                on_disk = json.load(fh)["parents"]["SELL-BID"]
+        except FileNotFoundError:                 # không save ⇒ không có file ⇒ FAIL rõ
+            on_disk = {}
+        check(on_disk.get("atc_split_skip_noted") is True and not on_disk.get("atc_unsupported"),
+              "NB-4 cờ noted ghi xuống state.json ngay trong _atc_sweep, không cờ vĩnh viễn")
+    for r in cl.rows:                                  # sau đó gói 1258 đủ lô chẵn ⇒ ATC đi được
+        if r["loanPackageId"] == 1258:
+            r["tradeQuantity"] = r["openQuantity"] = 300
+    cycle(ex, NOW, atc=True)
+    check(("BID", 100, 1258, "ATC", "sell") in cl.accepted and cl.book[lo]["status"] == "Canceled",
+          f"NB-4 vòng sau positions đổi ⇒ thử lại: huỷ LO + đặt ATC ({cl.accepted})")
+
+# NB-5: plan_sell_leg ném ⇒ rơi về hành vi cũ NHƯNG có journal lý do
+class _Boom:
+    def plan_sell_leg(self, s, q):
+        raise RuntimeError("positions boom")
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    ex = make_exec(tmp, [SO(27)], _Boom())
+    try:
+        r = ex._sell_split_leg(SO(27), 27)
+    except Exception as e:                   # ném ra ngoài ⇒ FAIL rõ, không phải crash
+        r = f"NÉM {type(e).__name__}"
+    j = [x for x in journal(ex) if x[0] == "SPLIT_LEG_ERROR"]
+    check(r is None and len(j) == 1 and "positions boom" in j[0][-1],
+          f"NB-5 plan_sell_leg ném ⇒ None + journal SPLIT_LEG_ERROR kèm lý do ({r}, {j})")
+
+# NB-1: fill đã thấy ở poll lệnh nhưng positions CHƯA cập nhật ⇒ chỉ 400 + retry, không bán vượt
+with tempfile.TemporaryDirectory() as tmp:
+    cl = FakeClient([_row("BID", 1258, 20), _row("BID", 1826, 7)], 1258, stale_positions=True)
+    b = make_broker(cl, 1258)
+    ex = make_exec(tmp, [SO(27)], b)
+    cycle(ex, NOW)
+    _fill_last(None, cl)                              # chân 1 khớp; positions vẫn ảnh cũ (20/7)
+    cycle(ex, NOW + dt.timedelta(seconds=20))         # ảnh cũ ⇒ chọn 1258 cho 7cp ⇒ DNSE 400
+    ev = [r[0] for r in journal(ex)]
+    check(cl.accepted == [("BID", 20, 1258, "LO", "sell")] and "PLACE_FAIL" in ev,
+          f"NB-1 positions cũ ⇒ lệnh bị 400 (không khớp thêm), không bán vượt ({cl.accepted})")
+    cl.refresh()
+    cycle(ex, NOW + dt.timedelta(seconds=40))
+    tot = sum(a[1] for a in cl.accepted)
+    check([(a[1], a[2]) for a in cl.accepted] == [(20, 1258), (7, 1826)] and tot == 27,
+          f"NB-1 positions mới ⇒ retry đúng chân 7@1826, tổng đặt 27 ({cl.accepted})")
 
 print()
 if FAILS:
