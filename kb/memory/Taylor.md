@@ -25,3 +25,4 @@
 - [2026-10-06T04:11:06Z] [2026-10-06 sell-split r2] XONG job Taylor_20261006_040234: fix/sell-split-by-loan-package-20261006@8a669a9a, 24/24 mut. CHỜ Mike arch-review + user duyệt merge + restart bot ZaloPay.
 - [2026-10-06T04:25:16Z] [lane-C 10-06] XONG job Taylor_20261006_041048: feat/funnel-lane-c-20261006@9cf42868 (wt-lanec-1006), 193/193 x4TZ x2py, mut 40/40. CHỜ Mike arch-review + user duyệt merge (cron 19:37 dùng lại, không đổi).
 - [2026-10-06T04:43:31Z] [lane-C r2 10-06] XONG job Taylor_20261006_043550: feat/funnel-lane-c-20261006@ce0d4aa8, 210/210 x4TZ x2py, mut 56/56 (tmpdir copy). CHỜ Mike arch-review r2 + merge trước cron 19:37.
+- [2026-10-06T05:46:30Z] [lane-C season 10-06] XONG job Taylor_20261006_052500: feat/funnel-lane-c-season-20261006@05d1d7c2 (wt-season-1006), 263/263 x4TZ x2py, mut 103/103. DRI KHÔNG mùa vụ (η² 0,10) ⇒ vẫn RA; CHỜ user chọn C1S (ship) hay C1A (DRI vào, IS/OOS lệch dấu) + Mike arch-review/merge.

@@ -71,3 +71,9 @@
 
 ## Archived 2026-10-06 (keep=12 days=0 require_done=False)
 - [2026-10-05T18:14:23Z] 06/10 01:20: user DUYỆT cutloss theo phán quyết, custom30V cũng theo quy trình, discretionary chỉ bán khi GÃY, trả lời qua Discord. Kịch bản 4 chế độ (bình thường/nhanh/khẩn/kẹt sàn) ghi trong plan, chờ user duyệt chi tiết. Funnel 180152 xong (branch feat/discretionary-8l-funnel-20261006 7750213f, selfcheck 53/53 tôi chạy lại OK) — arch-review bị ngắt, CHƯA chạy xong; chưa merge, chưa cài cron.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-05T18:20:44Z] 06/10 01:25: funnel arch-review NEEDS_CHANGES (13 mutation sống, nhãn NGÀNH lane B sai, lỗi không tới topic, excluded_tickers…) ⇒ dispatch vòng 2 Taylor_20261005_181909 (sonnet/medium, list cụ thể). Làn C xong: C1 (rating<=3, YoY>=30%, QoQ>0, 0<PE<=12) +1,13%/tháng t=5,3 nhưng edge ở ĐUÔI ~20 mã; PVT lọt, DRI không (QoQ âm). quant-skeptic_20261005_181922 đang verify. Cutloss 4 chế độ chờ user duyệt chi tiết.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-05T18:21:13Z] 06/10 01:25: funnel r1 arch NEEDS_CHANGES → r2 Taylor_20261005_181751 (opus) đang chạy; ⚠️ job trùng Taylor_20261005_181909 (do lượt Mike trùng pid 3737746, đã kill) có thể đã sửa dở bin/discretionary_candidate_funnel.py + fearbuy_weekly_scan.sh trong worktree trước khi bị huỷ — review diff r2 kỹ. Chain round đã 3 dispatch ⇒ lần sau sẽ exit 7, cần user duyệt override. Làn C (C1 GARP, +1,13%/tháng t=5,3) đang quant-skeptic_20261005_181753; KHÔNG đưa vào funnel trước CONFIRMED. Cutloss vẫn chờ user duyệt 4 câu.
