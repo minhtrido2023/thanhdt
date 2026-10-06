@@ -1016,6 +1016,14 @@ def update_state(state, cands, asof, unavailable_lanes=()):
             if r["lane"] == "C":
                 item["merged"] = bool(merged)
             reported.append(item)
+    # Mục C xếp hàng mà hôm nay KHÔNG còn trong làn C ⇒ mất chỗ chờ (quay lại xếp cuối). Không gỡ thì
+    # mục còn sống nhờ làn A/B giữ `queued_since` cũ ⇒ 30 ngày sau QUEUE_EXPIRED + cảnh báo "hàng chờ
+    # nghẽn" SAI nguyên nhân (§29, arch-review r1 B1). Làn C lỗi phiên này ⇒ không biết ⇒ giữ.
+    if "C" not in unavailable_lanes:
+        for e in entries.values():
+            if e.get("lane") == "C" and e.get("last_seen") != asof_s:
+                e.pop("queued", None)
+                e.pop("queued_since", None)
     # Dọn state: mã KHÔNG còn trong làn nào hôm nay + hết cooldown (chưa từng báo = hết) ⇒ xoá. Quay
     # lại sau đó vẫn là NEW như khi còn mục (đã quá cooldown) ⇒ không đổi hành vi báo. Phiên có làn
     # lỗi ⇒ KHÔNG dọn (không biết mã có còn trong làn lỗi không).

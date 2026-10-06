@@ -1104,7 +1104,25 @@ def test_fifo():
     # rời làn rồi quay lại (chưa từng báo) ⇒ chờ lại TỪ ĐẦU (queued_since mới)
     day4 = {k: v for k, v in day3.items() if k not in ("N0",)}
     st4, _ = F.update_state(st3, c_cands(day4, a=["N0"]), d("2026-10-06"))   # còn ở A ⇒ mục C không bị dọn
-    check(st4["entries"]["N0|C"].get("queued_since") == "2026-10-05", "N0|C còn trong state (không dọn)")
+    check("N0|C" in st4["entries"] and "queued_since" not in st4["entries"]["N0|C"]
+          and not st4["entries"]["N0|C"].get("queued"),
+          f"N0|C còn trong state (không dọn) nhưng rời làn C ⇒ gỡ chỗ chờ: {st4['entries'].get('N0|C')}")
+    # B1: rời C, CHỈ còn ở A >= 30 ngày ⇒ KHÔNG được QUEUE_EXPIRED (cảnh báo nghẽn sai nguyên nhân)
+    s_far, rep_far = F.update_state(st4, c_cands({k: v for k, v in day4.items()}, a=["N0"]),
+                                    d("2026-11-10"))
+    check(not [x for x in s_far["prune_log"] if x.get("reason") == "QUEUE_EXPIRED"]
+          and "N0|C" in s_far["entries"],
+          f"rời C còn ở A 35 ngày ⇒ không QUEUE_EXPIRED: {s_far['prune_log']}")
+    # làn C lỗi phiên đó ⇒ không biết mã còn trong C không ⇒ GIỮ chỗ chờ
+    st4u, _ = F.update_state(st3, c_cands({}, a=["N0"]), d("2026-10-06"), ("C",))
+    check(st4u["entries"]["N0|C"].get("queued_since") == "2026-10-05",
+          f"làn C lỗi ⇒ giữ chỗ chờ: {st4u['entries'].get('N0|C')}")
+    # kể cả mục không liên tục (state ghi bởi bản trước vá B1): làn C lỗi ⇒ KHÔNG gỡ chỗ chờ
+    lg = json.loads(json.dumps(st3))
+    lg["entries"]["N0|C"]["last_seen"] = "2026-10-02"
+    lg4, _ = F.update_state(lg, c_cands({}, a=["N0"]), d("2026-10-06"), ("C",))
+    check(lg4["entries"]["N0|C"].get("queued_since") == "2026-10-05",
+          f"làn C lỗi + mục không liên tục ⇒ vẫn giữ chỗ chờ: {lg4['entries'].get('N0|C')}")
     # Z* YoY cao hơn N0: nếu N0 còn giữ chỗ chờ từ 10-05 nó phải đứng đầu; reset ⇒ thua Z* cùng ngày
     st5, rep = F.update_state(st4, c_cands(dict(day4, N0=0.95, **{f"Z{i}": 0.99 for i in range(6)})),
                               d("2026-10-07"))
@@ -1137,6 +1155,14 @@ def test_prune():
     _, rep = F.update_state(s2, c_cands({"K1": 0.5, "K2": 0.5}, a=["A1", "K3"]), d("2026-10-06"))
     check([(r["ticker"], r["reason"]) for r in rep] == [("K1", "NEW")],
           f"mã đã dọn quay lại ⇒ NEW (như khi còn mục): {rep}")
+    # chưa từng báo (last_reported None) + không còn làn nào ⇒ dọn NGAY phiên đó (không đợi cooldown)
+    sn = json.loads(json.dumps(s1))
+    sn["entries"]["NV|C"] = {"ticker": "NV", "lane": "C", "first_seen": "2026-09-20",
+                             "last_seen": "2026-09-24"}
+    sn2, _ = F.update_state(sn, c_cands({"K2": 0.5}, a=["A1", "K3"]), d("2026-09-26"))
+    check("NV|C" not in sn2["entries"] and any(x["key"] == "NV|C" and x["reason"] == "STALE"
+                                               and x["last_reported"] is None for x in sn2["prune_log"]),
+          f"chưa từng báo + rời mọi làn ⇒ STALE ngay: {sn2['prune_log']}")
     # phiên có làn lỗi ⇒ KHÔNG dọn
     s3, _ = F.update_state(s1, c_cands({}, a=["A1"]), d("2026-10-05"), ("C",))
     check("K1|C" in s3["entries"] and not [x for x in s3["prune_log"] if x["asof"] == "2026-10-05"],

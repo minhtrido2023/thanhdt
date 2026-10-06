@@ -92,8 +92,9 @@ NEW = [
     ("F3 không lưu queued_since", '            e["queued_since"] = since\n', '            pass\n'),
     ("F4 báo xong không rời hàng chờ", '            e.pop("queued", None)\n            e.pop("queued_since", None)\n',
      '            e.pop("queued", None)\n'),
-    ("F5 rời làn vẫn giữ chỗ chờ", '        reason, since = None, asof_s',
-     '        reason, since = None, ((e or {}).get("queued_since") or asof_s)'),
+    # F5 ("rời làn vẫn giữ chỗ chờ" qua `since` mặc định) ĐÃ GỠ: sau vá B1 (Mike, arch-review r1) mục C
+    # rời làn bị gỡ queued_since ngay phiên đó ⇒ `since` mặc định chỉ còn gặp mục không có queued_since
+    # ⇒ đột biến TƯƠNG ĐƯƠNG trên mọi state đạt được; ý đột biến nay do Q1 phủ.
     # --- dọn state
     ("P1 bỏ dọn STALE", '    if not unavailable_lanes:\n        today = ', '    if False:\n        today = '),
     ("P2 dọn STALE khi làn lỗi", '    if not unavailable_lanes:\n        today = ', '    if True:\n        today = '),
@@ -117,6 +118,11 @@ NEW = [
     ("P11 prune_log không cắt", "    del plog[:-PRUNE_LOG_MAX]\n", "    pass\n"),
     ("P12 mất cảnh báo hàng chờ hết hạn", "    if qexp:\n", "    if False:\n"),
     ("P13 state_pruned rỗng", '"state_pruned": pruned,', '"state_pruned": [],'),
+    # arch-review r1 (Mike vá B1 + NB-1 X1)
+    ("Q1 rời làn C vẫn giữ chỗ chờ (B1)", 'if e.get("lane") == "C" and e.get("last_seen") != asof_s:', "if False:"),
+    ("Q2 gỡ chỗ chờ cả khi làn C lỗi", '    if "C" not in unavailable_lanes:\n        for e in entries.values():',
+     '    if True:\n        for e in entries.values():'),
+    ("Q3 chưa từng báo không dọn STALE (X1)", "lr is None or (asof_d", "(lr is not None) and (asof_d"),
 ]
 H.M = OLD + NEW
 
