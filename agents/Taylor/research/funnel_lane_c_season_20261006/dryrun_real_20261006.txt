@@ -1,0 +1,69 @@
+=== Funnel 8L asof 2026-10-05 (run 2026-10-06T12:32:04.923433+07:00) — A=9 B=18 C=37 theo dõi=59 báo=0 khởi tạo=64 state=OK ===
+  CẢNH BÁO: rating_8l.csv KHÔNG phải của hôm nay: mtime ICT 2026-10-05 (chạy lúc 2026-10-06 12:32) — pt_8l_daily 19:20 lỗi/trễ?
+• CMG · làn A lệch giá · rating 3 · PE 12,4 · pb_z -2,32 · drop -23,4% · liq 2,95 tỷ · NGÀNH — cần Bobby trước (peer route COMPOUNDER n=196 trung vị -12,7%)
+• DVM · làn A lệch giá · rating 3 · PE 7,7 · pb_z -1,90 · drop -50,8% · liq 0,42 tỷ · IDIO (peer ICB 4577 n=5 trung vị -5,2%)
+• HDG · làn A lệch giá · rating 3 · PE 6,4 · pb_z -1,56 · drop -24,3% · liq 11,19 tỷ · IDIO (peer ICB 7535 n=9 trung vị -8,3%)
+• LCG · làn A lệch giá · rating 3 · PE 8,7 · pb_z -1,32 · drop -24,5% · liq 3,93 tỷ · NGÀNH — cần Bobby trước (peer ICB 2357 n=29 trung vị -18,7%)
+• VGS · làn A lệch giá · rating 2 · PE 3,6 · pb_z -1,34 · drop -32,7% · liq 1,87 tỷ · NGÀNH — cần Bobby trước (peer ICB 1757 n=10 trung vị -19,3%) · +làn C: YoY +66% · QoQ +28% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence
+• VSC · làn A lệch giá · rating 3 · PE 14,2 · pb_z -1,97 · drop -26,1% · liq 82,87 tỷ · IDIO (peer ICB 2777 n=14 trung vị -6,1%)
+• DTD · làn A lệch giá · rating 2 · PE 11,6 · pb_z -1,59 · drop -27,9% · liq 0,84 tỷ · NGÀNH — cần Bobby trước (peer ICB 8633 n=48 trung vị -17,1%)
+• KOS · làn A lệch giá · rating 3 · PE 108,1 · pb_z -9,94 · drop -64,0% · liq 1,05 tỷ · IDIO (peer ICB 8633 n=48 trung vị -17,1%)
+• NTL · làn A lệch giá · rating 3 · PE 45,3 · pb_z -1,03 · drop -24,5% · liq 3,78 tỷ · NGÀNH — cần Bobby trước (peer ICB 8633 n=48 trung vị -17,1%)
+• TPB · làn B giá trị sâu #1 BANK · rating 3 · PE 4,4 · pb_z -1,51 · drop -14,1% · liq 98,59 tỷ · NGÀNH — cần Bobby trước (peer ICB 8355 n=23 trung vị -11,9%)
+• SHB · làn B giá trị sâu #2 BANK · rating 3 · PE 4,9 · pb_z -0,59 · drop -17,5% · liq 407,01 tỷ · NGÀNH — cần Bobby trước (peer ICB 8355 n=23 trung vị -11,9%)
+• CTG · làn B giá trị sâu #3 BANK · rating 2 · PE 5,7 · pb_z -1,36 · drop -13,2% · liq 211,14 tỷ · NGÀNH — cần Bobby trước (peer ICB 8355 n=23 trung vị -11,9%)
+• HII · làn B giá trị sâu #1 COMPOUNDER · rating 3 · PE 2,8 · pb_z 0,23 · drop -25,6% · liq 7,55 tỷ · IDIO (peer ICB 1353 n=10 trung vị -5,5%) · +làn C: YoY +177% · QoQ +116% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence
+• DC4 · làn B giá trị sâu #2 COMPOUNDER · rating 2 · PE 3,3 · pb_z -1,09 · drop -15,6% · liq 0,43 tỷ · NGÀNH — cần Bobby trước (peer ICB 2357 n=29 trung vị -18,7%) · +làn C: YoY +33% · QoQ +15% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence
+• TV1 · làn B giá trị sâu #3 COMPOUNDER · rating 1 · PE 3,5 · pb_z -0,85 · drop -11,6% · liq 0,47 tỷ · NGÀNH — cần Bobby trước (peer route COMPOUNDER n=196 trung vị -12,7%)
+• DDV · làn B giá trị sâu #1 CYCLICAL · rating 3 · PE 3,8 · pb_z -0,82 · drop -31,4% · liq 5,72 tỷ · IDIO (peer ICB 1357 n=10 trung vị -14,7%)
+• DRI · làn B giá trị sâu #2 CYCLICAL · rating 2 · PE 5,5 · pb_z 0,56 · drop 0,0% · liq 16,46 tỷ · KHÔNG-GIẢM
+• DGC · làn B giá trị sâu #3 CYCLICAL · rating 2 · PE 6,2 · pb_z -1,68 · drop -11,7% · liq 23,38 tỷ · NGÀNH — cần Bobby trước (peer ICB 1357 n=10 trung vị -14,7%)
+• MIG · làn B giá trị sâu #1 INSURANCE · rating 2 · PE 10,1 · pb_z -1,32 · drop -4,3% · liq 1,24 tỷ · KHÔNG-GIẢM
+• BIC · làn B giá trị sâu #2 INSURANCE · rating 2 · PE 10,2 · pb_z -0,74 · drop -6,1% · liq 0,32 tỷ · KHÔNG-GIẢM
+• PVI · làn B giá trị sâu #3 INSURANCE · rating 2 · PE 12,8 · pb_z 0,65 · drop -4,5% · liq 1,07 tỷ · KHÔNG-GIẢM
+• QTP · làn B giá trị sâu #1 POWER · rating 2 · PE 4,1 · pb_z -2,30 · drop -6,1% · liq 0,99 tỷ · KHÔNG-GIẢM · +làn C: YoY +71% · QoQ +66% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence
+• NT2 · làn B giá trị sâu #2 POWER · rating 3 · PE 5,0 · pb_z -1,50 · drop -2,4% · liq 9,77 tỷ · KHÔNG-GIẢM
+• SJD · làn B giá trị sâu #3 POWER · rating 2 · PE 5,8 · pb_z -0,67 · drop -2,1% · liq 0,57 tỷ · KHÔNG-GIẢM
+• LHG · làn B giá trị sâu #1 REALESTATE · rating 3 · PE 4,7 · pb_z -1,05 · drop -3,6% · liq 1,09 tỷ · KHÔNG-GIẢM
+• IDC · làn B giá trị sâu #2 REALESTATE · rating 2 · PE 6,5 · pb_z -1,28 · drop -4,8% · liq 38,37 tỷ · KHÔNG-GIẢM · +làn C: YoY +105% · QoQ +125% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence
+• VHM · làn B giá trị sâu #3 REALESTATE · rating 2 · PE 7,0 · pb_z 0,72 · drop -16,4% · liq 541,24 tỷ · NGÀNH — cần Bobby trước (peer ICB 8633 n=48 trung vị -17,1%)
+• ABB · làn C tăng trưởng LN · BANK · rating 3 · PE 7,4 · YoY +48% · QoQ +1% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 9,89 tỷ
+• HDB · làn C tăng trưởng LN · BANK · rating 3 · PE 7,4 · YoY +58% · QoQ +17% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 261,13 tỷ
+• MBB · làn C tăng trưởng LN · BANK · rating 2 · PE 6,4 · YoY +40% · QoQ +9% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 189,45 tỷ
+• VCB · làn C tăng trưởng LN · BANK · rating 1 · PE 11,4 · YoY +65% · QoQ +54% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 230,72 tỷ
+• VPB · làn C tăng trưởng LN · BANK · rating 3 · PE 7,7 · YoY +72% · QoQ +35% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 471,34 tỷ
+• AIG · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 7,9 · YoY +85% · QoQ +16% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,35 tỷ
+• CAP · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 7,3 · YoY +64% · QoQ +36% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,49 tỷ
+• DC4 · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 3,3 · YoY +33% · QoQ +15% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,43 tỷ
+• DHB · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 3,9 · YoY +1383% · QoQ +175% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence; nghi nền thấp/lãi một lần — DD loại trước · liq 0,70 tỷ
+• DHC · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 7,5 · YoY +114% · QoQ +29% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 14,84 tỷ
+• DVP · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 8,3 · YoY +42% · QoQ +55% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,97 tỷ
+• DXP · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 4,5 · YoY +114% · QoQ +23% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 2,18 tỷ
+• HII · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 2,8 · YoY +177% · QoQ +116% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 7,55 tỷ
+• KSB · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 7,2 · YoY +125% · QoQ +204% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 4,77 tỷ
+• KSV · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 9,5 · YoY +177% · QoQ +44% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 4,54 tỷ
+• MWG · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 11,1 · YoY +100% · QoQ +22% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 171,81 tỷ
+• NCT · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 4,8 · YoY +32% · QoQ +7% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,69 tỷ
+• NNC · làn C tăng trưởng LN · COMPOUNDER · rating 1 · PE 4,5 · YoY +46% · QoQ +29% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,96 tỷ
+• NTP · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 9,0 · YoY +49% · QoQ +88% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 8,86 tỷ
+• PAT · làn C tăng trưởng LN · COMPOUNDER · rating 1 · PE 5,8 · YoY +41% · QoQ +136% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 1,14 tỷ
+• PGC · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 6,2 · YoY +126% · QoQ +177% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 1,12 tỷ
+• PVT · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 8,8 · YoY +88% · QoQ +73% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 185,60 tỷ
+• SAS · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 5,4 · YoY +99% · QoQ +39% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,42 tỷ
+• SCL · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 11,2 · YoY +141% · QoQ +116% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 3,18 tỷ
+• VGS · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 3,6 · YoY +66% · QoQ +28% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 1,87 tỷ
+• VGT · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 5,5 · YoY +58% · QoQ +18% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 2,87 tỷ
+• VLB · làn C tăng trưởng LN · COMPOUNDER · rating 3 · PE 3,8 · YoY +373% · QoQ +405% (2026Q2) · mùa vụ η² 0,63: QoQ chuẩn mùa -11% ⇒ đ/c mùa +470% · ⚠️ edge của rổ, không phải của mã — cần due diligence; nghi nền thấp/lãi một lần — DD loại trước · liq 0,56 tỷ
+• VTO · làn C tăng trưởng LN · COMPOUNDER · rating 2 · PE 5,2 · YoY +59% · QoQ +61% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 2,74 tỷ
+• CSV · làn C tăng trưởng LN · CYCLICAL · rating 2 · PE 8,3 · YoY +108% · QoQ +203% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 3,73 tỷ
+• DCM · làn C tăng trưởng LN · CYCLICAL · rating 3 · PE 6,6 · YoY +36% · QoQ +36% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 107,90 tỷ
+• DPM · làn C tăng trưởng LN · CYCLICAL · rating 3 · PE 8,3 · YoY +125% · QoQ +125% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 74,92 tỷ
+• PHR · làn C tăng trưởng LN · CYCLICAL · rating 3 · PE 8,6 · YoY +300% · QoQ +30% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 18,22 tỷ
+• QTP · làn C tăng trưởng LN · POWER · rating 2 · PE 4,1 · YoY +71% · QoQ +66% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 0,99 tỷ
+• IDC · làn C tăng trưởng LN · REALESTATE · rating 2 · PE 6,5 · YoY +105% · QoQ +125% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 38,37 tỷ
+• NTC · làn C tăng trưởng LN · REALESTATE · rating 2 · PE 9,9 · YoY +32% · QoQ +237% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 1,07 tỷ
+• SIP · làn C tăng trưởng LN · REALESTATE · rating 2 · PE 8,3 · YoY +45% · QoQ +24% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 2,76 tỷ
+• VRE · làn C tăng trưởng LN · REALESTATE · rating 2 · PE 7,5 · YoY +30% · QoQ +0% (2026Q2) · ⚠️ edge của rổ, không phải của mã — cần due diligence · liq 91,33 tỷ
+  LOẠI PNJ (làn A, COMPOUNDER): insider_sell(2026-09-22)
+  LOẠI TCM (làn A, COMPOUNDER): insider_sell(2026-08-24)
+  LOẠI PVP (làn C, COMPOUNDER): insider_sell(2026-09-30)

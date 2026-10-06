@@ -1,0 +1,105 @@
+đối chứng (copy không đột biến): SỐNG — discretionary_candidate_funnel_selfcheck TZ=Asia/Ho_Chi_Minh: 263 PASS, 0 FAIL
+CHẾT  YoY biên 30% VÀO
+CHẾT  YoY ngưỡng 30→25%
+CHẾT  QoQ >0 → >=0
+CHẾT  bỏ điều kiện QoQ
+CHẾT  PE<=12 → <12
+CHẾT  PE trần 12→13
+CHẾT  bỏ PE>0 làn C
+CHẾT  bỏ vũ trụ chất lượng làn C
+CHẾT  bỏ loại trừ BANNED/insider làn C
+CHẾT  PIT < → <=
+CHẾT  ngày biết ưu tiên time thay Release
+CHẾT  YoY bỏ NP_P4>0
+CHẾT  QoQ bỏ NP_P1>0
+CHẾT  quý mới nhất → cũ nhất
+CHẾT  trần 5→6
+CHẾT  ưu tiên: bỏ đẩy YoY cực lớn xuống
+CHẾT  ưu tiên: YoY tăng dần
+CHẾT  mã gộp A/B chiếm trần
+CHẾT  không nhận diện gộp A/B
+CHẾT  QUEUED bị đánh dấu đã báo
+CHẾT  hàng chờ không tranh lại
+CHẾT  PBZ_DROP áp cả làn C
+CHẾT  state cũ: C coi như đã seed (flood)
+CHẾT  làn lỗi vẫn seed
+CHẾT  bỏ giữ liên tục qua phiên lỗi
+CHẾT  run_daily không truyền làn lỗi
+CHẾT  nhãn nền thấp > → >=
+CHẾT  nhãn nền thấp theo số THÔ (lệch số hiển thị)
+CHẾT  dòng C mất nhãn bắt buộc
+CHẾT  dòng A/B không gộp nhãn C
+CHẾT  log mất nhãn
+CHẾT  cảnh báo fin không vào kết quả
+CHẾT  khối không báo làn C KHÔNG CHẠY
+CHẾT  bỏ dòng 'còn N mã'
+CHẾT  bỏ sàn số dòng fin
+CHẾT  bỏ sàn số mã fin
+CHẾT  bỏ cảnh báo cache cũ
+CHẾT  bỏ cảnh báo dữ liệu cũ
+CHẾT  bỏ cảnh báo phủ thấp
+CHẾT  fin thiếu cột ⇒ không chặn
+CHẾT  khối seed C in '0 mới'
+CHẾT  r1(a) bỏ dòng 'Làn C cũng bắt'
+CHẾT  r1(b) bỏ redflag khỏi vũ trụ chất lượng
+CHẾT  r1(b') bỏ redflag CHỈ ở làn C
+CHẾT  r1(c) bỏ guard last_seen==ref_run phiên lỗi
+CHẾT  r1(c') guard chỉ còn ref_run
+CHẾT  #3 try chỉ bắt OSError
+CHẾT  #3 except không tắt C
+CHẾT  #3 except nuốt im lặng
+CHẾT  #4 log lane_c_ok luôn True
+CHẾT  #4 run_daily truyền cờ sai
+CHẾT  #5 '0 mới' cùng 'cũng bắt'
+CHẾT  #6 bỏ guard Release<=cuối quý
+CHẾT  #6 guard < thay <=
+CHẾT  #6 cuối quý lệch 1 tháng
+CHẾT  #6 meta đếm sai
+CHẾT  S1 bỏ thay QoQ cho mã mùa vụ
+CHẾT  S2 mã mùa vụ dùng cả QoQ thô (AND)
+CHẾT  S3 ngưỡng η² 0,6→0,5
+CHẾT  S4 ngưỡng η² 0,6→0,7
+CHẾT  S5 >=3 năm/cặp → >=2
+CHẾT  S6 cửa sổ 20→24 quý
+CHẾT  S7 chuẩn mùa trung vị → trung bình
+CHẾT  S8 lịch sử gồm cả quý hiện tại
+CHẾT  S9 bỏ yêu cầu đủ 4 cặp quý
+CHẾT  S10 log-QoQ không cần NP>0
+CHẾT  S11 cặp quý theo quý trước
+CHẾT  S12 chuẩn mùa lấy cặp quý kế
+CHẾT  S13 QoQ đ/c mùa sai chiều
+CHẾT  S14 seasonal tính cả mã không có trong fin
+CHẾT  S15 η² biên >= → >
+CHẾT  S16 dòng C mất nhãn mùa vụ
+CHẾT  S17 không in giải thích mùa vụ
+CHẾT  S18 luôn in giải thích mùa vụ
+CHẾT  S19 _rec mất cờ mùa vụ
+CHẾT  S20 n_lane_c_seasonal sai
+CHẾT  S21 log mất cột mùa vụ
+CHẾT  Q1 quý theo ngày biết (cũ)
+CHẾT  Q2 cùng kỳ: bản biết sớm thắng
+CHẾT  Q3 thiếu NP ⇒ lùi về quý cũ
+CHẾT  Q4 không ghi loại np_missing
+CHẾT  Q5 mất cảnh báo thiếu NP
+CHẾT  Q6 phủ tính cả mã thiếu NP
+CHẾT  Q7 bỏ lọc quý sai dạng
+CHẾT  Q8 meta không đếm quý sai
+CHẾT  F1 bỏ FIFO
+CHẾT  F2 không giữ ngày chờ cũ
+CHẾT  F3 không lưu queued_since
+CHẾT  F4 báo xong không rời hàng chờ
+CHẾT  F5 rời làn vẫn giữ chỗ chờ
+CHẾT  P1 bỏ dọn STALE
+CHẾT  P2 dọn STALE khi làn lỗi
+CHẾT  P3 STALE theo làn C thay vì mọi làn
+CHẾT  P4 STALE bỏ cooldown
+CHẾT  P5 STALE cooldown >= → >
+CHẾT  P6 bỏ hết hạn hàng chờ
+CHẾT  P7 hàng chờ >= → >
+CHẾT  P8 hết hạn hàng chờ cả khi làn lỗi
+CHẾT  P9 mã hết hạn vẫn được xét phiên đó
+CHẾT  P10 chạy lại không đọc prune_log
+CHẾT  P11 prune_log không cắt
+CHẾT  P12 mất cảnh báo hàng chờ hết hạn
+CHẾT  P13 state_pruned rỗng
+đột biến: 103/103 chết, 0 sống

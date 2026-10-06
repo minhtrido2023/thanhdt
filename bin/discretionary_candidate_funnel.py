@@ -15,12 +15,17 @@ trong cửa sổ 90 ngày (file `anomaly_gate` đọc, validate schema — `load
   Làn C "tăng trưởng LN" (user chốt 2026-10-06 11:08 — NGUỒN Ý TƯỞNG, không tự mua/size; nghiên cứu
                       `agents/Taylor/research/discretionary_lane_c_earnings_growth_20261006/`, C1 GARP):
                       NP quý gần nhất YoY >= 30% ∧ QoQ > 0 (cả 2 vế NP > 0) ∧ 0 < PE <= 12. NP từ
-                      `data/bq_cache/ticker_financial.parquet`, PIT: quý mới nhất có ngày biết
-                      (Release_Date, trống ⇒ `time`) < asof (CHẶT). PE = PE ngày asof của rating_8l.
+                      `data/bq_cache/ticker_financial.parquet`, PIT: quý MỚI NHẤT THEO KỲ trong các quý
+                      có ngày biết (Release_Date, trống ⇒ `time`) < asof (CHẶT); quý đó thiếu NP ⇒ mã
+                      bỏ khỏi làn C hôm đó + cảnh báo (KHÔNG lùi về quý cũ). PE = PE ngày asof của rating_8l.
+                      MÙA VỤ (job Taylor_20261006_052500): mã có lợi nhuận quý lặp theo mùa (η² log-QoQ
+                      theo cặp quý >= 0,6, >= 3 năm/cặp trong 5 năm — xem SEASON_*) thay QoQ > 0 bằng
+                      QoQ đ/c mùa > 0 (QoQ năm nay so với trung vị cùng cặp quý); thiếu lịch sử ⇒ luật cũ.
                       Mọi mã làn C mang nhãn "edge của rổ, không phải của mã — cần due diligence"
                       (quant-skeptic REFUTED cho wire/size); YoY > 300% thêm "nghi nền thấp/lãi một lần".
-                      Tối đa 5 mã C mới/ngày (YoY <= 300% trước, YoY giảm dần) — phần bị cắt XẾP HÀNG,
-                      báo các phiên sau. Mã cũng đang ở làn A/B ⇒ gộp nhãn vào dòng A/B, không báo trùng.
+                      Tối đa 5 mã C mới/ngày, FIFO: chờ lâu nhất trước, rồi YoY <= 300% trước, YoY giảm
+                      dần — phần bị cắt XẾP HÀNG (`queued_since`), báo các phiên sau; chờ >= 30 ngày ⇒
+                      xoá khỏi state + cảnh báo. Mã cũng đang ở làn A/B ⇒ gộp nhãn vào dòng A/B, không báo trùng.
                       ticker_financial thiếu/hỏng/dưới sàn ⇒ làn C KHÔNG chạy + cảnh báo ở khối 08:00
                       (không bao giờ hiện thành "0 mới"); mã C đang theo dõi được giữ liên tục qua
                       phiên lỗi (không bị báo lại là "mới" khi dữ liệu về).
@@ -42,6 +47,8 @@ Trạng thái `data/discretionary_candidates_state.json` (khoá ticker|làn): ch
   SEED     — lần chạy đầu CỦA TỪNG LÀN (`seeded_lanes`): mọi mã ghi sổ, khối 08:00 chỉ in "khởi
              tạo: N mã" — làn C thêm vào state đã có A/B vẫn seed, không flood.
   (PBZ_DROP không áp cho làn C — làn C chỉ báo mã MỚI.)
+Dọn state: mã KHÔNG còn trong làn nào + đã quá cooldown 30 ngày (hoặc chưa từng báo) ⇒ xoá, ghi
+`prune_log` (phiên có làn lỗi ⇒ không dọn). Kết quả: `state_pruned` = mục xoá ở asof này.
 Chạy lại cùng asof ⇒ cùng danh sách báo (mục có last_reported==asof), không ghi đè thông tin.
 asof lùi so với lần chạy trước / rating_8l dưới sàn sanity ⇒ KHÔNG ghi state, cảnh báo ở khối 08:00.
 State hỏng ⇒ raise (không reset im lặng). Thứ tự ghi: snapshot → log → kết quả → state SAU CÙNG.
@@ -127,6 +134,17 @@ FIN_MIN_TICKERS = 1000
 FIN_MAX_FILE_AGE_DAYS = 3         # cache sync mỗi đêm; > 3 ngày ⇒ sync chết
 FIN_MAX_DATA_AGE_DAYS = 100       # ngày biết mới nhất toàn bảng; khe giữa 2 mùa BCTC < ~60 ngày
 FIN_MIN_COVERAGE = 0.80           # tỉ lệ mã vũ trụ chất lượng có ít nhất 1 quý đã biết
+# Mùa vụ (job Taylor_20261006_052500, user chỉ ra DRI): thước đo = η² của log-QoQ NP (2 vế > 0, 2 quý
+# liền kề) gom theo cặp quý (Q4→Q1, Q1→Q2, …) trong 20 quý TRƯỚC quý hiện tại. Mã mùa vụ ⇔ đủ 4 cặp,
+# mỗi cặp >= 3 năm, η² >= 0,6 (3 năm/cặp: η² 0,6 ≈ F(3,8)=4 ≈ p 0,05 dưới giả thuyết không mùa vụ;
+# 5 năm/cặp ≈ p 0,002). log-QoQ thay cho tỉ trọng-trong-năm vì xu hướng tăng trưởng cộng ĐỀU vào mọi
+# cặp ⇒ không tạo mùa vụ giả. Mã mùa vụ: QoQ>0 thay bằng "QoQ đ/c mùa" = P0/P1 ÷ exp(trung vị log-QoQ
+# cùng cặp trong cửa sổ) − 1 > 0 (QoQ tốt hơn mức mùa vụ thường lệ). Thiếu lịch sử ⇒ KHÔNG mùa vụ.
+SEASON_WINDOW_Q = 20
+SEASON_MIN_PER_PAIR = 3
+SEASON_ETA2_MIN = 0.6
+QUEUE_MAX_DAYS = 30               # mã làn C xếp hàng >= 30 ngày ⇒ xoá khỏi state + cảnh báo
+PRUNE_LOG_MAX = 500               # state["prune_log"] giữ tối đa N mục gần nhất
 
 
 def daily_paths(base_dir=DATA_DIR):
@@ -572,9 +590,11 @@ def rating_sanity(df):
 
 
 def load_financials(path, asof, now):
-    """ticker_financial cache ⇒ (fin | None, meta, warnings). fin: 1 dòng/ticker = quý MỚI NHẤT có
-    NP_P0 và ngày biết (Release_Date; trống HOẶC <= cuối quý ⇒ `time`) < asof CHẶT (quý công bố đúng ngày asof chưa
-    dùng được — PIT như nghiên cứu). None ⇒ làn C KHÔNG chạy (thiếu/hỏng/thiếu cột/dưới sàn); mọi
+    """ticker_financial cache ⇒ (fin | None, meta, warnings). fin: 1 dòng/ticker = quý MỚI NHẤT THEO
+    KỲ (không theo ngày biết) trong các quý có ngày biết (Release_Date; trống HOẶC <= cuối quý ⇒ `time`)
+    < asof CHẶT (quý công bố đúng ngày asof chưa dùng được — PIT như nghiên cứu). Quý mới nhất mà
+    NP_P0 trống ⇒ `np_missing=True` (KHÔNG lùi âm thầm về quý cũ — build_lanes bỏ mã khỏi làn C và
+    run_daily cảnh báo). Kèm cột mùa vụ (`seasonal_stats`). None ⇒ làn C KHÔNG chạy (thiếu/hỏng/thiếu cột/dưới sàn); mọi
     lỗi thành cảnh báo, không raise (A/B vẫn chạy). Đọc pyarrow use_threads=False: `python3` hệ
     thống (pyarrow 24) đọc đa luồng thỉnh thoảng abort lúc thoát (exit 134, đo 2026-10-06)."""
     stop = "LÀN C KHÔNG CHẠY phiên này"
@@ -610,18 +630,60 @@ def load_financials(path, asof, now):
     early = (rel <= qend).to_numpy(dtype=bool)               # công bố TRƯỚC khi quý kết thúc = rác
     meta["release_le_qend"] = int(early.sum())
     known = rel.mask(early).fillna(pd.to_datetime(raw["time"], errors="coerce"))
-    f = raw.assign(known=known).dropna(subset=["NP_P0", "known"])
+    f = raw.assign(known=known, p=quarter_index(raw["quarter"])).dropna(subset=["known"])
+    meta["bad_quarter"] = int(f["p"].isna().sum())           # sai dạng 'YYYYQn' ⇒ không xếp kỳ được
     asof_ts = pd.Timestamp(asof)
-    f = f[f["known"] < asof_ts]
-    if f.empty:
+    f = f[(f["known"] < asof_ts) & f["p"].notna()]
+    has_np = f["NP_P0"].notna()
+    if not has_np.any():
         return None, meta, [f"ticker_financial không có quý nào biết trước {asof} — {stop}"]
-    meta["max_known"] = str(f["known"].max().date())
-    data_age = (asof_ts - f["known"].max()).days
+    meta["max_known"] = str(f.loc[has_np, "known"].max().date())
+    data_age = (asof_ts - f.loc[has_np, "known"].max()).days
     if data_age > FIN_MAX_DATA_AGE_DAYS:
         warnings.append(f"ticker_financial: quý mới nhất biết từ {meta['max_known']} ({data_age} ngày "
                         f"trước asof) — ingest BCTC chết?")
-    f = f.sort_values(["ticker", "known", "quarter"]).groupby("ticker").tail(1).set_index("ticker")
-    return f[["quarter", "known", "NP_P0", "NP_P1", "NP_P4"]], meta, warnings
+    # 1 dòng / (ticker, kỳ): bản biết muộn nhất (< asof) thắng; quý hiện tại = kỳ LỚN NHẤT.
+    f = f.astype({"p": int}).sort_values(["ticker", "p", "known"]).drop_duplicates(
+        ["ticker", "p"], keep="last")
+    latest = f.groupby("ticker").tail(1).set_index("ticker")
+    out = latest[["quarter", "known", "NP_P0", "NP_P1", "NP_P4"]].join(seasonal_stats(f))
+    out["np_missing"] = out["NP_P0"].isna()
+    return out, meta, warnings
+
+
+def quarter_index(q):
+    """'2026Q2' ⇒ 2026*4+1 (số kỳ liên tục, kỳ kế tiếp = +1); sai dạng ⇒ NaN."""
+    m = q.astype(str).str.extract(r"^(\d{4})Q([1-4])$").astype(float)
+    return m[0] * 4 + m[1] - 1
+
+
+def seasonal_stats(f):
+    """f: 1 dòng/(ticker, p) đã lọc PIT. ⇒ DataFrame theo ticker: season_nmin (số năm ít nhất trong 4
+    cặp quý), season_eta2, season_norm (trung vị log-QoQ cùng cặp với quý hiện tại), seasonal (bool).
+    Xem hằng SEASON_* cho định nghĩa + lý do ngưỡng."""
+    f = f[["ticker", "p", "NP_P0"]]
+    p0 = f.groupby("ticker")["p"].max()
+    out = pd.DataFrame(index=p0.index)
+    prev = f.assign(p=f["p"] + 1).rename(columns={"NP_P0": "np_prev"})
+    h = f.merge(prev, on=["ticker", "p"], how="inner")
+    h = h[(h["p"] < h["ticker"].map(p0)) & (h["p"] >= h["ticker"].map(p0) - SEASON_WINDOW_Q)
+          & (h["NP_P0"] > 0) & (h["np_prev"] > 0)]
+    h = h.assign(r=np.log(h["NP_P0"] / h["np_prev"]), qn=h["p"] % 4)
+    g = h.groupby(["ticker", "qn"])["r"]
+    st = pd.DataFrame({"n": g.size(), "m": g.mean(), "med": g.median()}).reset_index()
+    mu = h.groupby("ticker")["r"].mean()
+    sst = ((h["r"] - h["ticker"].map(mu)) ** 2).groupby(h["ticker"]).sum()
+    ssb = (st["n"] * (st["m"] - st["ticker"].map(mu)) ** 2).groupby(st["ticker"]).sum()
+    npair = st.groupby("ticker").size()
+    nmin = st.groupby("ticker")["n"].min().where(npair == 4, 0)
+    out["season_nmin"] = nmin.reindex(out.index).fillna(0).astype(int)
+    out["season_eta2"] = (ssb / sst.where(sst > 0)).reindex(out.index)
+    med = st.set_index(["ticker", "qn"])["med"]
+    out["season_norm"] = [med.get((t, int(p) % 4), np.nan) for t, p in p0.items()]
+    out["seasonal"] = ((out["season_nmin"] >= SEASON_MIN_PER_PAIR)
+                       & (out["season_eta2"] >= SEASON_ETA2_MIN - 1e-12)
+                       & out["season_norm"].notna())
+    return out
 
 
 def quarter_end(q):
@@ -632,20 +694,31 @@ def quarter_end(q):
     return first + pd.offsets.MonthEnd(0)
 
 
+GROWTH_COLS = ("g_yoy", "g_qoq", "np_quarter", "seasonal", "season_eta2", "season_norm_qoq",
+               "g_qoq_adj", "np_missing")
+
+
 def growth_cols(df, fin):
     """g_yoy = NP_P0/NP_P4 − 1, g_qoq = NP_P0/NP_P1 − 1 (chỉ khi CẢ 2 vế > 0, như nghiên cứu) +
-    np_quarter. fin None ⇒ cột NaN."""
+    np_quarter + mùa vụ (seasonal, season_eta2, season_norm_qoq = QoQ mùa vụ thường lệ của cặp quý,
+    g_qoq_adj = QoQ đ/c mùa — chỉ mã mùa vụ) + np_missing. fin None ⇒ cột None."""
     out = df.copy()
     if fin is None:
-        for c in ("g_yoy", "g_qoq", "np_quarter"):
+        for c in GROWTH_COLS:
             out[c] = None
         return out
     j = fin.reindex(out["ticker"])
-    p0, p1, p4 = (j[c].to_numpy(dtype=float) for c in ("NP_P0", "NP_P1", "NP_P4"))
+    p0, p1, p4, norm = (j[c].to_numpy(dtype=float) for c in ("NP_P0", "NP_P1", "NP_P4", "season_norm"))
+    seas = j["seasonal"].eq(True).to_numpy()                 # mã không có trong fin ⇒ NaN ⇒ False
     with np.errstate(divide="ignore", invalid="ignore"):
         out["g_yoy"] = np.where((p0 > 0) & (p4 > 0), p0 / p4 - 1, np.nan)
         out["g_qoq"] = np.where((p0 > 0) & (p1 > 0), p0 / p1 - 1, np.nan)
+        out["season_norm_qoq"] = np.where(seas, np.exp(norm) - 1, np.nan)
+        out["g_qoq_adj"] = np.where(seas & (p0 > 0) & (p1 > 0), p0 / p1 / np.exp(norm) - 1, np.nan)
     out["np_quarter"] = j["quarter"].to_numpy()
+    out["seasonal"] = seas
+    out["season_eta2"] = j["season_eta2"].to_numpy(dtype=float)
+    out["np_missing"] = j["np_missing"].eq(True).to_numpy()
     return out
 
 
@@ -735,7 +808,8 @@ def build_lanes(rating, banned, forensic, insider, fin=None):
     """rating: DataFrame rating_8l.csv; fin: kết quả load_financials (None ⇒ không có làn C).
     Trả (cands, excluded):
     cands    — 1 dòng / (ticker, làn) với nhãn bối cảnh (+ g_yoy/g_qoq/np_quarter mọi dòng);
-    excluded — mã ĐÁNG LẼ vào làn nhưng bị loại bởi BANNED/forensic/insider (minh bạch)."""
+    excluded — mã ĐÁNG LẼ vào làn nhưng bị loại bởi BANNED/forensic/insider (minh bạch) + mã qua
+               điều kiện chất lượng/PE làn C mà quý mới nhất thiếu NP (`np_missing(<quý>)`)."""
     df = growth_cols(rating, fin)
     df["golden_floor_pass"] = (df["ROE_Min3Y"] >= 0) & (df["CF_OA_3Y"] > 0)
     quality = ((df["rating"] <= RATING_MAX) & df["golden_floor_pass"] & df["redflag"].isna()
@@ -764,9 +838,12 @@ def build_lanes(rating, banned, forensic, insider, fin=None):
         sub["lane_rank"] = sub.groupby("route").cumcount() + 1
         return sub
 
-    lane_c = (quality & (df["PE"] > 0) & (df["PE"] <= LANE_C_PE_MAX)
-              & (df["g_yoy"].astype(float) >= LANE_C_YOY_MIN - 1e-9)   # biên 30% VÀO (sai số float)
-              & (df["g_qoq"].astype(float) > 0))
+    # QoQ: mã mùa vụ dùng QoQ đ/c mùa (so với trung vị cùng cặp quý), mã khác giữ QoQ > 0 như cũ.
+    seas = df["seasonal"].eq(True)
+    qoq_ok = np.where(seas, df["g_qoq_adj"].astype(float) > 0, df["g_qoq"].astype(float) > 0)
+    c_base = quality & (df["PE"] > 0) & (df["PE"] <= LANE_C_PE_MAX)
+    lane_c = (c_base & (df["g_yoy"].astype(float) >= LANE_C_YOY_MIN - 1e-9)   # biên 30% VÀO (float)
+              & qoq_ok)
 
     a = df[lane_a & clean].assign(lane="A", lane_rank=pd.NA)
     b = _top_b(b_pool & clean).assign(lane="B")
@@ -780,8 +857,11 @@ def build_lanes(rating, banned, forensic, insider, fin=None):
     b_raw = _top_b(b_pool)
     ex_b = b_raw[b_raw["excl_reason"] != ""].assign(lane="B")
     ex_c = df[lane_c & ~clean].assign(lane="C")
-    excluded = pd.concat([ex_a, ex_b, ex_c], ignore_index=True)[["ticker", "lane", "route",
-                                                                 "excl_reason"]]
+    # Quý mới nhất (theo kỳ) thiếu NP ⇒ không lùi về quý cũ: mã bỏ khỏi làn C hôm nay, ghi minh bạch.
+    ex_np = df[c_base & df["np_missing"].eq(True)].assign(
+        lane="C", excl_reason=lambda d: "np_missing(" + d["np_quarter"].astype(str) + ")")
+    excluded = pd.concat([ex_a, ex_b, ex_c, ex_np], ignore_index=True)[["ticker", "lane", "route",
+                                                                        "excl_reason"]]
 
     # Nhãn bối cảnh: peer = cùng ICB_Code, thanh khoản liq>=0,3 (KHÔNG chỉ mã chất lượng — "cả ngành
     # cùng giảm" là câu hỏi về ngành, không về rổ rating); ICB < PEER_MIN mã ⇒ fallback cùng route.
@@ -821,11 +901,13 @@ def _yoy_extreme(g):
     return g is not None and float(f"{g * 100:.0f}") > LANE_C_YOY_EXTREME * 100
 
 
-def _c_priority(r):
-    """Thứ tự lấp trần 5 mã C/ngày: YoY trong ngưỡng hợp lý (<= 300%) trước, YoY giảm dần, ticker."""
+def _c_priority(r, since=""):
+    """Thứ tự lấp trần 5 mã C/ngày — FIFO: chờ lâu nhất trước (`since` = ngày bắt đầu xếp hàng, ISO),
+    rồi YoY trong ngưỡng hợp lý (<= 300%) trước, YoY giảm dần, ticker. Mã > 300% chỉ thua mã CÙNG
+    ngày chờ ⇒ không bị dồn cuối mãi (ngày chờ của nó cứ cũ dần)."""
     g = _num(r.get("g_yoy"))
     g = -1.0 if g is None else g
-    return (_yoy_extreme(g), -g, str(r["ticker"]))
+    return (since, _yoy_extreme(g), -g, str(r["ticker"]))
 
 
 def update_state(state, cands, asof, unavailable_lanes=()):
@@ -861,15 +943,29 @@ def update_state(state, cands, asof, unavailable_lanes=()):
     for e in entries.values():                                # làn lỗi phiên này: giữ liên tục
         if e.get("lane") in unavailable_lanes and ref_run and e.get("last_seen") == ref_run:
             e["last_seen"] = asof_s
+    plog = st.setdefault("prune_log", [])
+    # Hàng chờ làn C quá QUEUE_MAX_DAYS ⇒ xoá khỏi state TRƯỚC khi xét, mã đó đứng ngoài phiên này
+    # (chạy lại cùng asof đọc prune_log ⇒ cùng kết quả); phiên sau nó vào lại cuối hàng như mã mới.
+    skip = {x["key"] for x in plog if x.get("asof") == asof_s and x.get("reason") == "QUEUE_EXPIRED"}
+    if not unavailable_lanes:
+        for key, e in list(entries.items()):
+            qs = e.get("queued_since")
+            if e.get("queued") and qs and (asof_d - dt.date.fromisoformat(qs)).days >= QUEUE_MAX_DAYS:
+                del entries[key]
+                skip.add(key)
+                plog.append({"asof": asof_s, "key": key, "reason": "QUEUE_EXPIRED",
+                             "queued_since": qs})
 
     ab_today = set(cands.loc[cands["lane"].isin(["A", "B"]), "ticker"]) if len(cands) else set()
-    decided = []                                              # (row, entry, reason, merged)
+    decided = []                                              # (row, entry, reason, merged, since)
     for _, r in cands.iterrows():
         key = f"{r['ticker']}|{r['lane']}"
+        if key in skip:
+            continue
         lane_c = r["lane"] == "C"
         pbz = _num(r.get("pb_z"))
         e = entries.get(key)
-        reason = None
+        reason, since = None, asof_s
         if e is None:
             reason = "SEED" if seeded.get(r["lane"]) == asof_s else "NEW"
             e = entries[key] = {"ticker": r["ticker"], "lane": r["lane"],
@@ -889,27 +985,30 @@ def update_state(state, cands, asof, unavailable_lanes=()):
                 reason = "NEW"
             elif lane_c and continuous and e.get("queued"):
                 reason = "NEW"                                # hàng chờ trần ngày trước
-        decided.append([r, e, reason, lane_c and r["ticker"] in ab_today])
+                since = e.get("queued_since") or asof_s       # state trước FIFO: coi như chờ từ nay
+        decided.append([r, e, reason, lane_c and r["ticker"] in ab_today, since])
 
     # Trần làn C (không tính mã gộp A/B, không tính SEED): đã báo ở asof này giữ chỗ trước.
     c_new = [d for d in decided if d[1].get("lane") == "C" and d[2] == "NEW" and not d[3]]
     held = [d for d in c_new if d[1].get("last_reported") == asof_s]
     fresh = sorted((d for d in c_new if d[1].get("last_reported") != asof_s),
-                   key=lambda d: _c_priority(d[0]))
+                   key=lambda d: _c_priority(d[0], d[4]))
     for d in fresh[max(0, LANE_C_MAX_PER_DAY - len(held)):]:
         d[2] = "QUEUED"
 
     reported = []
-    for r, e, reason, merged in decided:
+    for r, e, reason, merged, since in decided:
         pbz = _num(r.get("pb_z"))
         if reason == "QUEUED":
             e["queued"] = True
+            e["queued_since"] = since
         elif reason and e.get("last_reported") != asof_s:
             e["prev_reported_pb_z"] = e.get("last_reported_pb_z")
             e["last_reported"] = asof_s
             e["last_reported_pb_z"] = pbz
             e["last_reason"] = reason
             e.pop("queued", None)
+            e.pop("queued_since", None)
         e["last_seen"] = asof_s
         if reason:
             item = {"ticker": r["ticker"], "lane": r["lane"], "reason": reason,
@@ -917,6 +1016,18 @@ def update_state(state, cands, asof, unavailable_lanes=()):
             if r["lane"] == "C":
                 item["merged"] = bool(merged)
             reported.append(item)
+    # Dọn state: mã KHÔNG còn trong làn nào hôm nay + hết cooldown (chưa từng báo = hết) ⇒ xoá. Quay
+    # lại sau đó vẫn là NEW như khi còn mục (đã quá cooldown) ⇒ không đổi hành vi báo. Phiên có làn
+    # lỗi ⇒ KHÔNG dọn (không biết mã có còn trong làn lỗi không).
+    if not unavailable_lanes:
+        today = set(cands["ticker"]) if len(cands) else set()
+        for key, e in list(entries.items()):
+            lr = e.get("last_reported")
+            if e.get("ticker") not in today and (
+                    lr is None or (asof_d - dt.date.fromisoformat(lr)).days >= COOLDOWN_DAYS):
+                del entries[key]
+                plog.append({"asof": asof_s, "key": key, "reason": "STALE", "last_reported": lr})
+    del plog[:-PRUNE_LOG_MAX]
     return st, reported
 
 
@@ -934,7 +1045,8 @@ def load_state(path):
 
 LOG_COLS = ["date", "ticker", "lane", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
             "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis", "reported",
-            "g_yoy", "g_qoq", "np_quarter", "label", "lane_c_ok"]
+            "g_yoy", "g_qoq", "np_quarter", "label", "lane_c_ok",
+            "seasonal", "season_eta2", "season_norm_qoq", "g_qoq_adj"]   # mùa vụ: thêm 2026-10-06
 
 
 def lane_c_label(g_yoy):
@@ -984,11 +1096,13 @@ def snapshot_rating(data, snap_dir, asof):
 def _rec(r):
     keep = ["ticker", "lane", "lane_rank", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
             "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis",
-            "g_yoy", "g_qoq", "np_quarter"]
+            "g_yoy", "g_qoq", "np_quarter", "seasonal", "season_eta2", "season_norm_qoq", "g_qoq_adj"]
     out = {}
     for k in keep:
         v = r.get(k)
-        if k == "np_quarter":
+        if k == "seasonal":
+            out[k] = bool(v is True or v is np.True_)
+        elif k == "np_quarter":
             out[k] = None if v is None or pd.isna(v) else str(v)
         elif k in ("ticker", "lane", "route", "context", "peer_basis"):
             out[k] = v
@@ -1026,12 +1140,18 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         if fin is not None:
             pool = rating[(rating["rating"] <= RATING_MAX) & (rating["liq_bn"] >= LIQ_MIN_BN)
                           & (rating["ROE_Min3Y"] >= 0) & (rating["CF_OA_3Y"] > 0)]["ticker"]
-            cov = float(pool.isin(fin.index).mean()) if len(pool) else 1.0
+            cov = float(pool.isin(fin.index[~fin["np_missing"]]).mean()) if len(pool) else 1.0
             fin_meta["coverage"] = round(cov, 3)
             if cov < FIN_MIN_COVERAGE:
                 warnings.append(f"ticker_financial chỉ phủ {cov:.0%} vũ trụ chất lượng "
                                 f"(< {FIN_MIN_COVERAGE:.0%}) — làn C có thể thiếu mã")
             cands, excluded = build_lanes(rating, banned, forensic, insider, fin)
+            npm = excluded[excluded["excl_reason"].str.startswith("np_missing")]
+            if len(npm):
+                warnings.append(f"làn C: {len(npm)} mã quý mới nhất THIẾU NP ⇒ bỏ khỏi làn C hôm nay "
+                                f"(không lùi về quý cũ): " + ", ".join(
+                                    f"{t} {r[len('np_missing('):-1]}" for t, r in
+                                    zip(npm["ticker"], npm["excl_reason"])))
     except Exception as e:                                  # noqa: BLE001 — cô lập làn C
         fin = None
         warnings.append(f"làn C lỗi khi tính ({type(e).__name__}: {str(e)[:200]}) — LÀN C KHÔNG "
@@ -1049,6 +1169,12 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         except AsofRegress as e:
             warnings.append(str(e))
             state_ok, regressed = False, True
+    pruned = [x for x in new_state.get("prune_log", []) if x.get("asof") == str(asof)] if state_ok else []
+    qexp = sorted(x["key"].split("|")[0] for x in pruned if x["reason"] == "QUEUE_EXPIRED")
+    if qexp:
+        warnings.append(f"làn C: {len(qexp)} mã xếp hàng >= {QUEUE_MAX_DAYS} ngày chưa tới lượt ⇒ xoá "
+                        f"khỏi state ({', '.join(qexp)}); còn trong làn thì phiên sau vào lại cuối hàng "
+                        f"— hàng chờ nghẽn = làn C quá rộng so với trần {LANE_C_MAX_PER_DAY}/ngày")
     result = {
         "asof": str(asof), "run_at": now.isoformat(), "rating_csv": rating_csv,
         "warnings": warnings,
@@ -1067,6 +1193,8 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         "lane_c_queued": sorted(x["ticker"] for x in rep_all if x["reason"] == "QUEUED"),
         "candidates": [_rec(r) for _, r in cands.iterrows()],
         "excluded": excluded.to_dict(orient="records"),
+        "n_lane_c_seasonal": int(((cands["lane"] == "C") & cands["seasonal"].eq(True)).sum()),
+        "state_pruned": pruned,
     }
     if write:
         # asof đi lùi hoặc dữ liệu dưới sàn ⇒ KHÔNG đụng snapshot PIT lẫn log đo forward excess
@@ -1091,10 +1219,23 @@ def _pct(x):
     return "?" if x is None else f"{x * 100:+.0f}%"
 
 
+SEASON_NOTE = (f"mùa vụ = lợi nhuận quý lặp theo mùa (η² log-QoQ theo cặp quý >= {SEASON_ETA2_MIN:g}, "
+               f">= {SEASON_MIN_PER_PAIR} năm/cặp trong {SEASON_WINDOW_Q // 4} năm) ⇒ thay QoQ>0 bằng "
+               f"QoQ đ/c mùa > 0 (QoQ năm nay so với QoQ trung vị cùng cặp quý các năm trước)")
+
+
+def season_tag(c):
+    """'mùa vụ η² 0,72: QoQ chuẩn mùa −45% ⇒ đ/c mùa +47%' — rỗng nếu mã không mùa vụ / kết quả cũ."""
+    if not c.get("seasonal"):
+        return ""
+    return (f" · mùa vụ η² {_vn(c.get('season_eta2'), 2)}: QoQ chuẩn mùa {_pct(c.get('season_norm_qoq'))}"
+            f" ⇒ đ/c mùa {_pct(c.get('g_qoq_adj'))}")
+
+
 def lane_c_tag(c):
-    """Phần làn C (YoY/QoQ/quý + nhãn bắt buộc) — dùng cho dòng C lẫn dòng A/B gộp."""
+    """Phần làn C (YoY/QoQ/quý [+ mùa vụ] + nhãn bắt buộc) — dùng cho dòng C lẫn dòng A/B gộp."""
     return (f"YoY {_pct(c.get('g_yoy'))} · QoQ {_pct(c.get('g_qoq'))} ({c.get('np_quarter') or '?'})"
-            f" · ⚠️ {lane_c_label(c.get('g_yoy'))}")
+            f"{season_tag(c)} · ⚠️ {lane_c_label(c.get('g_yoy'))}")
 
 
 def candidate_line(c, reason=None, prev_pbz=None, also_c=None):
@@ -1185,6 +1326,8 @@ def format_topic_block(result, today):
     if rep_cm:
         lines.append("Làn C cũng bắt (mã đã theo dõi ở làn A/B — gộp, không báo trùng): " + "; ".join(
             f"{x['ticker']} {lane_c_tag(by_key[(x['ticker'], 'C')])}" for x in rep_cm))
+    if any("· mùa vụ η²" in x for x in lines):                # giải thích 1 lần khi có dòng mùa vụ
+        lines.append(f"ℹ️ {SEASON_NOTE}.")
     return "\n".join(lines)
 
 
