@@ -185,11 +185,14 @@ def run():
 
     # 12: lag_exit_hint — trong cửa, đã qua cửa, và None khi không có entry date
     h_in_window = ps.lag_exit_hint("SCL", {"SCL": "2026-09-08"}, "2026-09-29")  # 15 phiên
-    check("lag_exit_hint: trong cửa T+14/T+20 → có text 'còn ~'",
-          h_in_window is not None and "còn ~" in h_in_window, str(h_in_window))
+    # Mốc CỐ ĐỊNH T+25 (khớp backtest pin `hold_days=25`, user xác nhận 2026-10-06) — kỳ vọng
+    # cũ "T+14/T+20, 'còn ~'" là khoảng đã bỏ từ 2026-09-30, không có nguồn backtest.
+    check("lag_exit_hint: 15 phiên → còn 10 phiên tới hạn cố định T+25",
+          h_in_window is not None and "còn 10 phiên tới hạn cố định T+25" in h_in_window,
+          str(h_in_window))
     h_past = ps.lag_exit_hint("SCL", {"SCL": "2026-08-10"}, "2026-09-29")
-    check("lag_exit_hint: đã qua T+20 → 'ĐÃ QUA'",
-          h_past is not None and "ĐÃ QUA" in h_past, str(h_past))
+    check("lag_exit_hint: đã qua T+25 → 'ĐÃ QUA hạn cố định T+25'",
+          h_past is not None and "ĐÃ QUA hạn cố định T+25" in h_past, str(h_past))
     check("lag_exit_hint: không có entry date → None",
           ps.lag_exit_hint("ZZZ", {}, "2026-09-29") is None)
 
@@ -232,9 +235,11 @@ def run():
     rw_bal = ps.risk_warning("BAL", -19.5)
     check("risk_warning: BAL -19.5% (dưới RED_ZONE 18? actually >=18) → 🔴, còn 0.5pp",
           rw_bal is not None and rw_bal[0] == "🔴" and "0.5pp" in rw_bal[1], str(rw_bal))
-    rw_lag = ps.risk_warning("LAG", -15.0)
-    check("risk_warning: LAG -15% == ngưỡng chính nó → còn 0.0pp",
-          rw_lag is not None and "0.0pp" in rw_lag[1], str(rw_lag))
+    # LAG MIỄN stop-loss theo drawdown (backtest pin `stop_loss=-0.99`, user xác nhận
+    # 2026-10-06) — exit chỉ theo mốc T+25 ⇒ không bao giờ cảnh báo gần ngưỡng, kể cả lỗ sâu.
+    for _pp in (-15.0, -19.5, -50.0):
+        check(f"risk_warning: LAG {_pp}% → None (LAG không có ngưỡng stop-loss)",
+              ps.risk_warning("LAG", _pp) is None, str(ps.risk_warning("LAG", _pp)))
 
     # 16: park_next_rebal_estimate — quý VN kế tiếp (3/6/9/12), đầu tuần né T7/CN
     est = ps.park_next_rebal_estimate("2026-09-29")
