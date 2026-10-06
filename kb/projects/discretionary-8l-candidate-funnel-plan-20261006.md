@@ -199,3 +199,10 @@ User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 
 - 1 dispatch Opus high (Taylor, cùng engine `intraday_price_watch.py`) + arch-review + risk-auditor.
 - **Replay** kịch bản trên dữ liệu phút nếu có (PNJ 24/09→05/10, DGC 23/07); không có dữ liệu phút ⇒ mô phỏng bằng OHLC ngày, nói rõ giới hạn.
 - Chạy **shadow 5 phiên** (chỉ báo, ghi "đã định bán gì, giá nào"), không đặt lệnh thật; user duyệt bản cuối rồi mới bật.
+
+---
+
+## USER CHỐT 2026-10-06 11:08 ICT (`decided_by: user`)
+- Merge cổng giá + cutloss SHADOW (`26b36f9e`) + cài 2 cron (mỗi phút 09:00-14:59, nhắc 08:30) — shadow 5 phiên.
+- **4 mặc định chốt**: (a) điều tra hết giờ/không dispatch được ⇒ GIỮ + cảnh báo lớn; (b) mã excluded/hạn chế giao dịch ⇒ chỉ báo + điều tra, không bán; (c) kích hoạt ≥14:00 hoặc hạn >14:15 ⇒ quyết định phiên sau (nhắc 08:30, áp 09:15; lệnh SHADOW tường minh vẫn áp ngay); (d) ghi song song ngưỡng tương đối HOSE −3%/HNX −4,5%/UPCOM −7%/idio −3% để so.
+- **Làn C (tăng trưởng lợi nhuận) vào funnel làm NGUỒN Ý TƯỞNG** — nhãn bắt buộc "edge của rổ, không phải của mã" (quant-skeptic REFUTED cho wire/size; dùng làm ý tưởng có DD thì không bị bác).
