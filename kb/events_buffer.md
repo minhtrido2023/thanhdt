@@ -464,3 +464,7 @@
 
 ## Consolidation 2026-10-06T02:15:02Z
 - [2026-10-06T02:15:01Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-06", "elapsed_s": 599, "rc": 0}
+
+## Consolidation 2026-10-06T03:07:02Z
+- [2026-10-06T02:15:02Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-06", "elapsed_s": 600, "rc": 0}
+- [2026-10-06T02:21:07Z] Mafee/error — PLACE_FAIL_STOPPED: {"account": "ZaloPay", "ticker": "BID", "side": "sell", "parent_id": "PARKMERGE-SELL-BID", "plan_date": "2026-10-06", "attempts": 5, "error": "HTTP 400: Trade quantity not enough", "note": "5 lượt PLACE_FAIL liên tiếp cùng lỗi CẤU TRÚC \"HTTP 400: Trade quantity not enough\" — DỪNG đặt lệnh mã này trong TIẾN TRÌNH này (lỗi không tự lành; thử lại chỉ tốn quota API). GỠ: sửa nguyên nhân rồi khởi động lại bot (cờ tự xoá — xem _clear_place_blocks), hoặc xoá khoá 'place_blocked' của parent PARKMERGE-SELL-BID trong state_ZaloPay_2026-10-06.json. Lệnh BÁN vẫn còn MỘT lần thử ở phiên ATC; lệnh MUA thì không."}
