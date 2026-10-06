@@ -455,9 +455,14 @@ def _run_vendor_outer(date_str, dry_run, confirm_only):
 
 
 def _ask_guarded(failed, fn, *args):
-    """Gọi 1 hàm hỏi người; lỗi (trừ SandboxMismatch) ⇒ in traceback + ghi vào `failed`, không ném."""
+    """Gọi 1 hàm hỏi người; lỗi (trừ SandboxMismatch) ⇒ in traceback + ghi vào `failed`, không ném.
+    Hàm hỏi trả khác True (bus rc≠0 ⇒ `_notify_once` False — arch-review v6 m1) cũng là lỗi: câu hỏi CHƯA tới người."""
     try:
-        fn(*args)
+        ok = fn(*args)
+        if ok is not True:
+            print(f"  ❌ {fn.__name__} {args[0]} {args[1]}: câu hỏi CHƯA gửi được (trả {ok!r})")
+            failed.append({"call": fn.__name__, "ticker": args[0], "ex_date": args[1],
+                           "error": f"câu hỏi chưa gửi được (bus rc≠0, trả {ok!r})"})
     except SandboxMismatch:
         raise
     except Exception as e:
@@ -881,15 +886,15 @@ def _ask_vendor_multi_event(ticker, ex_dates, credit_day, m):
     act = (f"registry đã có record trong danh sách ⇒ {ONE_RECORD_RULE}" if m["has_registry"] else
            "người ghi ĐÚNG MỘT record cho mỗi sự kiện THẬT (cùng một sự kiện bị ghi 2 ngày ⇒ 1 record, đúng ex)")
     dig = hashlib.sha1("\n".join(m["items"]).encode("utf-8")).hexdigest()[:12]
-    _ask_once(["vendor-multi-event", ticker, ex_dates, dig, "ASKED"],
-              f"corp-action-vendor-multi-event-{ticker}-{credit_day}",
-              {"question": (f"[Winston] {ticker} phiên {credit_day}: {len(m['exes'])} sự kiện KHÁC ex trong ±"
-                            f"{NEAR_DUP_DAYS} ngày: {m['items']}. Hai sự kiện cùng mã thường CÙNG NGÀY hoặc cách nhau "
-                            f">1 tháng (khác ex ≤10 ngày ≈ 0,3% sự kiện) ⇒ có thể là CÙNG một sự kiện ghi 2 ngày "
-                            f"(lịch thiếu ngày nghỉ / feed sửa ex) — ghi thêm = áp hệ số 2 lần. KHÔNG ghi gì cho mã "
-                            f"này (mã khác trong lô vẫn chạy). Winston kiểm nguồn, người xác nhận ex thật; {act}."),
-               "assignee": "Winston", "ticker": ticker, "credit_day": credit_day, "ex_dates": m["exes"],
-               "events": m["items"], "urgency": "high"})
+    return _ask_once(["vendor-multi-event", ticker, ex_dates, dig, "ASKED"],
+                     f"corp-action-vendor-multi-event-{ticker}-{credit_day}",
+                     {"question": (f"[Winston] {ticker} phiên {credit_day}: {len(m['exes'])} sự kiện KHÁC ex trong ±"
+                                   f"{NEAR_DUP_DAYS} ngày: {m['items']}. Hai sự kiện cùng mã thường CÙNG NGÀY hoặc cách nhau "
+                                   f">1 tháng (khác ex ≤10 ngày ≈ 0,3% sự kiện) ⇒ có thể là CÙNG một sự kiện ghi 2 ngày "
+                                   f"(lịch thiếu ngày nghỉ / feed sửa ex) — ghi thêm = áp hệ số 2 lần. KHÔNG ghi gì cho mã "
+                                   f"này (mã khác trong lô vẫn chạy). Winston kiểm nguồn, người xác nhận ex thật; {act}."),
+                      "assignee": "Winston", "ticker": ticker, "credit_day": credit_day, "ex_dates": m["exes"],
+                      "events": m["items"], "urgency": "high"})
 
 
 def _existing_id(view, rows, tk, ex, credit_day):
@@ -976,12 +981,12 @@ def _record_vs_vendor(rec, mult, vcash):
 def _ask_registry_vs_vendor(ticker, ex_date, why, rid):
     """CÙNG (mã, ex) với record registry (mọi provenance) nhưng vendor lệch / record chưa áp dụng —
     hỏi 1 lần / record. Gọi tên Winston (quy ước 09-24: lệch nguồn vendor ⇒ Winston kiểm)."""
-    _ask_once(["vendor-vs-registry", ticker, ex_date, rid, "ASKED"],
-              f"corp-action-vendor-vs-registry-{ticker}-{ex_date}",
-              {"question": f"[Winston] {ticker} ex {ex_date}: {why}. Registry KHÔNG bị ghi đè. Cần "
-                           f"người đối chiếu nguồn thật; record {rid} sai ⇒ {ONE_RECORD_RULE}.",
-               "assignee": "Winston", "ticker": ticker, "ex_date": ex_date, "record_id": rid,
-               "urgency": "high"})
+    return _ask_once(["vendor-vs-registry", ticker, ex_date, rid, "ASKED"],
+                     f"corp-action-vendor-vs-registry-{ticker}-{ex_date}",
+                     {"question": f"[Winston] {ticker} ex {ex_date}: {why}. Registry KHÔNG bị ghi đè. Cần "
+                                  f"người đối chiếu nguồn thật; record {rid} sai ⇒ {ONE_RECORD_RULE}.",
+                      "assignee": "Winston", "ticker": ticker, "ex_date": ex_date, "record_id": rid,
+                      "urgency": "high"})
 
 
 def _ask_vendor_only(ticker, ex_date, shown, code, date_str, holders, ledger_note):
@@ -989,41 +994,41 @@ def _ask_vendor_only(ticker, ex_date, shown, code, date_str, holders, ledger_not
     Chỉ nói điều ĐÃ đọc (§29): sổ broker không có mục cho mã phiên này — KHÔNG khẳng định 'DNSE
     không credit' (nhánh broker có thể chưa chạy/nổ, hoặc credit sau 19:25). `shown` = hệ số vendor
     ('×1.15') hoặc 'KHÔNG khai tỉ lệ' (m6 r4). Được `_resolve_asks` trả lời khi giải quyết (m4 r4)."""
-    _ask_once(["vendor-only", ticker, ex_date, "ASKED"], f"corp-action-vendor-only-{ticker}-{ex_date}",
-              {"question": (f"{ticker}: lịch vendor có {code} {shown} ex {ex_date} cho mã đang giữ "
-                            f"({', '.join(holders)}) nhưng {ledger_note} và không có mục nào cho mã ở "
-                            f"phiên {date_str} (nhánh broker chưa thấy ứng viên credit lúc chạy). Broker "
-                            f"là nguồn chính ⇒ KHÔNG tự ghi. Kiểm DNSE sau 21:00 / xác nhận tay; nếu "
-                            f"vendor sai ⇒ Winston."),
-               "ticker": ticker, "vendor_ex_date": ex_date, "vendor_qty_multiplier": shown,
-               "vendor_event_code": code, "credit_day": date_str, "holders": holders,
-               "urgency": "normal"})
+    return _ask_once(["vendor-only", ticker, ex_date, "ASKED"], f"corp-action-vendor-only-{ticker}-{ex_date}",
+                     {"question": (f"{ticker}: lịch vendor có {code} {shown} ex {ex_date} cho mã đang giữ "
+                                   f"({', '.join(holders)}) nhưng {ledger_note} và không có mục nào cho mã ở "
+                                   f"phiên {date_str} (nhánh broker chưa thấy ứng viên credit lúc chạy). Broker "
+                                   f"là nguồn chính ⇒ KHÔNG tự ghi. Kiểm DNSE sau 21:00 / xác nhận tay; nếu "
+                                   f"vendor sai ⇒ Winston."),
+                      "ticker": ticker, "vendor_ex_date": ex_date, "vendor_qty_multiplier": shown,
+                      "vendor_event_code": code, "credit_day": date_str, "holders": holders,
+                      "urgency": "normal"})
 
 
 def _ask_vendor_held_unknown(ticker, ex_date, shown, code, date_str, why_u):
     """Không xác định được mã có đang giữ (không file / tài khoản positions rỗng / file cũ) — hỏi 1 lần
     / (mã, ex) (RC2, M3 r3). `why_u` = điều ĐÃ đọc (§29). Được `_resolve_asks` trả lời khi giải quyết."""
-    _ask_once(["vendor-held-unknown", ticker, ex_date, "ASKED"],
-              f"corp-action-vendor-held-unknown-{ticker}-{ex_date}",
-              {"question": (f"{ticker}: lịch vendor có {code} {shown} ex {ex_date} nhưng {why_u} ⇒ không "
-                            f"xác định được có đang giữ mã — INSUFFICIENT, KHÔNG tự ghi. Kiểm pipeline "
-                            f"positions (phiên {date_str}) rồi xác nhận tay."),
-               "ticker": ticker, "vendor_ex_date": ex_date, "verdict": BD.INSUFFICIENT,
-               "credit_day": date_str, "urgency": "normal"})
+    return _ask_once(["vendor-held-unknown", ticker, ex_date, "ASKED"],
+                     f"corp-action-vendor-held-unknown-{ticker}-{ex_date}",
+                     {"question": (f"{ticker}: lịch vendor có {code} {shown} ex {ex_date} nhưng {why_u} ⇒ không "
+                                   f"xác định được có đang giữ mã — INSUFFICIENT, KHÔNG tự ghi. Kiểm pipeline "
+                                   f"positions (phiên {date_str}) rồi xác nhận tay."),
+                      "ticker": ticker, "vendor_ex_date": ex_date, "verdict": BD.INSUFFICIENT,
+                      "credit_day": date_str, "urgency": "normal"})
 
 
 def _ask_vendor_conflict(ticker, ex_date, evs, existing):
     """m7 r4: ≥2 sự kiện CP vendor KHÁC nhau cùng (mã, ex) — 1 lần / (mã, ex). Chỉ mã này bị chặn."""
     act = (f"registry đã có record {existing} cho mã quanh ex này ⇒ {ONE_RECORD_RULE}" if existing else
            "người ghi ĐÚNG MỘT record theo số thật (hệ số tổng nếu là nhiều sự kiện thật)")
-    _ask_once(["vendor-conflict", ticker, ex_date, "ASKED"], f"corp-action-vendor-conflict-{ticker}-{ex_date}",
-              {"question": (f"[Winston] {ticker} ex {ex_date}: lịch vendor có {len(evs)} sự kiện CP KHÁC NHAU cùng "
-                            f"(mã, ex) {[BD._vsum(e) for e in evs]} — không biết là nhiều sự kiện thật (cộng dồn hệ "
-                            f"số) hay feed ghi trùng sai. KHÔNG tự ghi mã này (mã khác trong lô vẫn chạy). "
-                            f"Winston kiểm nguồn; {act}."),
-               "assignee": "Winston", "ticker": ticker, "ex_date": ex_date,
-               "vendor_events": [BD._vsum(e) for e in evs], "registry_record_id": existing,
-               "urgency": "high"})
+    return _ask_once(["vendor-conflict", ticker, ex_date, "ASKED"], f"corp-action-vendor-conflict-{ticker}-{ex_date}",
+                     {"question": (f"[Winston] {ticker} ex {ex_date}: lịch vendor có {len(evs)} sự kiện CP KHÁC NHAU cùng "
+                                   f"(mã, ex) {[BD._vsum(e) for e in evs]} — không biết là nhiều sự kiện thật (cộng dồn hệ "
+                                   f"số) hay feed ghi trùng sai. KHÔNG tự ghi mã này (mã khác trong lô vẫn chạy). "
+                                   f"Winston kiểm nguồn; {act}."),
+                      "assignee": "Winston", "ticker": ticker, "ex_date": ex_date,
+                      "vendor_events": [BD._vsum(e) for e in evs], "registry_record_id": existing,
+                      "urgency": "high"})
 
 
 def _ask_vendor_cash_leg(ticker, ex_date, mult, why):
@@ -1031,13 +1036,13 @@ def _ask_vendor_cash_leg(ticker, ex_date, mult, why):
     r6: chỉ tới đây khi registry KHÔNG có record nào của mã ở (mã, ex) hay ex khác trong ±NEAR_DUP_DAYS (có ⇒ đã rẽ
     nhánh đối chiếu / `_multi_event`) và lô không ghi gì cho mã (1 sự kiện/mã, mà sự kiện này bị chặn) ⇒ "chưa có
     record" là trạng thái registry CẢ trước lẫn sau lô. Không resolver tự động: người ghi record chân tiền đóng nó."""
-    _ask_once(["vendor-cash-leg", ticker, ex_date, "ASKED"], f"corp-action-vendor-cash-leg-{ticker}-{ex_date}",
-              {"question": (f"{ticker} ex {ex_date}: vendor ×{mult:.7g} và KL broker khớp, nhưng {why}. Writer vendor "
-                            f"chỉ ghi hệ số KL — record thiếu chân tiền ⇒ park_holdings/exdate_frame đọc 0 ⇒ cổng giá "
-                            f"đêm FAIL ⇒ KHÔNG tự ghi. Người ghi 1 record CÓ cash_leg_vnd_per_share đúng (registry "
-                            f"chưa có record nào cho mã trong ±{NEAR_DUP_DAYS} ngày; lượt này không ghi gì cho mã)."),
-               "ticker": ticker, "ex_date": ex_date, "vendor_qty_multiplier": mult, "why": why,
-               "registry_record_id": None, "urgency": "high"})
+    return _ask_once(["vendor-cash-leg", ticker, ex_date, "ASKED"], f"corp-action-vendor-cash-leg-{ticker}-{ex_date}",
+                     {"question": (f"{ticker} ex {ex_date}: vendor ×{mult:.7g} và KL broker khớp, nhưng {why}. Writer vendor "
+                                   f"chỉ ghi hệ số KL — record thiếu chân tiền ⇒ park_holdings/exdate_frame đọc 0 ⇒ cổng giá "
+                                   f"đêm FAIL ⇒ KHÔNG tự ghi. Người ghi 1 record CÓ cash_leg_vnd_per_share đúng (registry "
+                                   f"chưa có record nào cho mã trong ±{NEAR_DUP_DAYS} ngày; lượt này không ghi gì cho mã)."),
+                      "ticker": ticker, "ex_date": ex_date, "vendor_qty_multiplier": mult, "why": why,
+                      "registry_record_id": None, "urgency": "high"})
 
 
 # ── Nhánh BROKER ───────────────────────────────────────────────────────────
@@ -1411,12 +1416,12 @@ def _registry_reconcile(rec, r):
 def _ask_vendor_near_record(ticker, ex_date, why, rid):
     """Vendor ex ≠ ex record registry (MỌI provenance — m2/m8 r4; bản cũ chỉ record broker) cùng mã ở gần đó.
     Khoá hỏi có id record (arch-review v4 #9): người REVOKE record cũ rồi có record MỚI ⇒ hỏi lại."""
-    _ask_once(["vendor-near-record", ticker, ex_date, rid, "ASKED"],
-              f"corp-action-vendor-near-record-{ticker}-{ex_date}",
-              {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {why}. Cần người xác "
-                           f"nhận ex thật; record {rid} sai ex ⇒ {ONE_RECORD_RULE}.",
-               "ticker": ticker, "vendor_ex_date": ex_date, "registry_record_id": rid,
-               "urgency": "high"})
+    return _ask_once(["vendor-near-record", ticker, ex_date, rid, "ASKED"],
+                     f"corp-action-vendor-near-record-{ticker}-{ex_date}",
+                     {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {why}. Cần người xác "
+                                  f"nhận ex thật; record {rid} sai ex ⇒ {ONE_RECORD_RULE}.",
+                      "ticker": ticker, "vendor_ex_date": ex_date, "registry_record_id": rid,
+                      "urgency": "high"})
 
 
 def _prune_daymarks():
@@ -1491,8 +1496,8 @@ def _ask_lock_unavailable(date_str, mode):
 
 
 def _ask_once(key, topic, payload):
-    """Hỏi người MỘT lần cho mỗi `key` (xem `_notify_once`)."""
-    _notify_once("question", key, topic, payload)
+    """Hỏi người MỘT lần cho mỗi `key` (xem `_notify_once`). Trả True khi đã gửi được / đã gửi từ trước."""
+    return _notify_once("question", key, topic, payload)
 
 
 def _notify_once(kind, key, topic, payload):

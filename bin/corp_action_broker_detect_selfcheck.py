@@ -617,12 +617,15 @@ class _Bus:
     calls = []
     rc = 0
 
+    fail_sub = None       # đặt chuỗi ⇒ CHỈ topic chứa chuỗi đó trả rc=1 (các topic khác rc như `rc`)
+
     @staticmethod
     def run(cmd, **kw):
         _Bus.calls.append(list(cmd))
+        bad = _Bus.rc or (_Bus.fail_sub is not None and len(cmd) > 3 and _Bus.fail_sub in cmd[3])
 
         class R:
-            returncode, stdout, stderr = _Bus.rc, "", ("bus giả lỗi" if _Bus.rc else "")
+            returncode, stdout, stderr = (1 if bad else 0), "", ("bus giả lỗi" if bad else "")
         return R()
 
 
@@ -3142,6 +3145,7 @@ def test_r6b():
         cac._px_cum_fn, cac._exchange_fn, cac.CA_DAILY_DIR = REAL_PX_FN, REAL_EXCH_FN, REAL_CA_DIR
         cac.write_corp_actions = REAL_WRITE
         _Bus.rc = 0
+        _Bus.fail_sub = None
         del cac._DRY[:]
         cac._SEEN_NOW.clear()
         if saved_env is None:
@@ -3206,6 +3210,22 @@ def _r6b_body():
     run_(cac.run_vendor, D, confirm_only=True)
     check("r6 S5 live confirm-only near-record: REVOKE + record mới id khác ⇒ hỏi lại đúng 1 lần (tổng 2), lượt 3 im",
           len(Q("vendor-near-record-TPB")) == 2, _Bus.calls)
+    # ══ arch-review v6 m1: bus rc≠0 cho câu hỏi vendor ⇒ ask-failed + rc=1 (không im lặng rc=0) ══
+    for mode in ("off", "shadow"):
+        os.environ["MIKE_CA_BROKER_SOURCE"] = mode
+        tmp, reg = _sandbox([dict(rec, ex_date="2026-10-12")], vendor=[iss], series=nocash)
+        _Bus.fail_sub = "vendor-multi-event"
+        try:
+            rc_, out_ = run_(cac.run, D)
+        finally:
+            _Bus.fail_sub = None
+        af = Q("vendor-ask-failed")
+        check(f"r6 S6 [{mode}] bus lỗi khi gửi vendor-multi-event-TPB ⇒ câu vendor-ask-failed nêu TPB + rc=1",
+              rc_ == 1 and len(af) == 1 and any(f.get("ticker") == "TPB" for f in af[0][1].get("failed", [])),
+              (rc_, _Bus.calls, out_[-400:]))
+        rc2, out2 = run_(cac.run, D)
+        check(f"r6 S6b [{mode}] lượt sau bus khoẻ ⇒ hỏi lại vendor-multi-event-TPB (khoá chưa done), rc=0",
+              rc2 == 0 and len(Q("vendor-multi-event-TPB")) == 2, (rc2, _Bus.calls, out2[-300:]))
 
 
 def test_px():
@@ -4934,12 +4954,15 @@ MUTANTS = [
     ('bin/corp_action_broker_detect_selfcheck.py', '"bin")\n    if os.path.realpath(here) == os.path.realpath(canon):', '"bin")\n    if here == canon:', '#4 guard không realpath'),
     ('bin/corp_action_broker_detect_selfcheck.py', '    why = _mutation_refusal(here, canon)\n    if why:', '    why = None\n    if why:', '#4 run_mutations không gọi guard'),
     ('bin/corp_action_auto_confirm.py', '    except Exception as e:\n        import traceback\n        print(traceback.format_exc())\n        failed.append(', '    except ZeroDivisionError as e:\n        import traceback\n        print(traceback.format_exc())\n        failed.append(', '#6 lỗi N9 làm mất lô vendor'),
-    ('bin/corp_action_auto_confirm.py', '        failed.append({"call"', '        0 and failed.append({"call"', '#6 lỗi N9 không báo'),
+    ('bin/corp_action_auto_confirm.py', '        print(traceback.format_exc())\n        failed.append({"call"', '        print(traceback.format_exc())\n        0 and failed.append({"call"', '#6 lỗi N9 không báo'),
+    ('bin/corp_action_auto_confirm.py', '            failed.append({"call": fn.__name__, "ticker": args[0], "ex_date": args[1],\n                           "error": f"câu hỏi chưa gửi', '            0 and failed.append({"call": fn.__name__, "ticker": args[0], "ex_date": args[1],\n                           "error": f"câu hỏi chưa gửi', 'v6 m1 bus lỗi câu hỏi vendor không báo'),
+    ('bin/corp_action_auto_confirm.py', '        if ok is not True:', '        if ok is False and 0:', 'v6 m1 bỏ qua trả False'),
+    ('bin/corp_action_auto_confirm.py', '    return _notify_once("question", key, topic, payload)', '    _notify_once("question", key, topic, payload)\n    return True', 'v6 m1 _ask_once luôn True'),
     ('bin/corp_action_auto_confirm.py', '            print(f"  ❌ không gửi được cả bus question báo lỗi: {type(e).__name__}: {e}")\n        rc = 1', '            print(f"  ❌ không gửi được cả bus question báo lỗi: {type(e).__name__}: {e}")', '#6 lỗi N9 rc=0'),
     ('bin/corp_action_auto_confirm.py', '    try:\n        return fn()\n    except SandboxMismatch:\n        raise\n', '    try:\n        return fn()\n', '#6 nuốt SandboxMismatch (_run_branch)'),
-    ('bin/corp_action_auto_confirm.py', '    try:\n        fn(*args)\n    except SandboxMismatch:\n        raise\n', '    try:\n        fn(*args)\n', '#6 nuốt SandboxMismatch (_ask_guarded)'),
+    ('bin/corp_action_auto_confirm.py', ' trả {ok!r})"})\n    except SandboxMismatch:\n        raise\n', ' trả {ok!r})"})\n', '#6 nuốt SandboxMismatch (_ask_guarded)'),
     ('bin/corp_action_auto_confirm.py', '        done = set()\n    if tuple(key) in done:', '        return\n    if tuple(key) in done:', '#7 X5 sổ hỏng ⇒ im'),
-    ('bin/corp_action_auto_confirm.py', '    _ask_once(["vendor-near-record", ticker, ex_date, rid, "ASKED"],', '    _ask_once(["vendor-near-record", ticker, ex_date, "ASKED"],', 'r4↻ #9 khoá ASKED không có id record'),
+    ('bin/corp_action_auto_confirm.py', '    return _ask_once(["vendor-near-record", ticker, ex_date, rid, "ASKED"],', '    return _ask_once(["vendor-near-record", ticker, ex_date, "ASKED"],', 'r4↻ #9 khoá ASKED không có id record'),
     ('bin/corp_action_broker_detect.py', 'capture_output=True, text=True, env=env, timeout=BQ_TIMEOUT_S)', 'capture_output=True, text=True, env=env)', '#10 bq không timeout'),
     ('bin/corp_action_auto_confirm.py', '            if ok:\n                print(f"  [{ticker}] registry đã có ({ticker}, {ex_date}) — {why} — không ghi thêm.")', '            if True:\n                print(f"  [{ticker}] registry đã có ({ticker}, {ex_date}) — {why} — không ghi thêm.")', 'r4↻ #12 tỉ lệ lệch im lặng'),
     ('bin/corp_action_auto_confirm.py', '    elif abs(rm - mult) > BROKER_VENDOR_MULT_TOL * mult:', '    elif abs(rm - mult) > 0.02 * mult:', 'r4↻ #12 dung sai 2%'),
@@ -4975,7 +4998,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    rm = rec["_v"]["qty_multiplier"]\n    if mult is None:', '    rm = mult if mult is not None else rec["_v"]["qty_multiplier"]\n    if mult is None:', 'r4↻ r5 Q5 qty_multiplier không parse (coi = vendor) [hệ số record coi = vendor]'),
     ('bin/corp_action_auto_confirm.py', '    if rec.get("_invalid"):\n        return False, (f"record {rid!r} ({prov}) bị CA.validate()', '    if rec.get("_invalid") and False:\n        return False, (f"record {rid!r} ({prov}) bị CA.validate()', 'r4↻ r5 Q5 thiếu qty_multiplier coi = vendor [record validate() từ chối không coi lệch]'),
     ('bin/corp_action_auto_confirm.py', '        by.setdefault((w["ticker"], w["ex"]), []).append((w["effective"], rep))', '        by.setdefault((w["ticker"], "*"), []).append((w["effective"], rep))', 'r4↻ r5 Q6 ratio-diff bỏ khớp ex [view bỏ khớp ex]'),
-    ('bin/corp_action_auto_confirm.py', '    _ask_once(["vendor-vs-registry", ticker, ex_date, rid, "ASKED"],', '    _ask_once(["vendor-vs-registry", ticker, ex_date, "ASKED"],', 'r4↻ r5 Q7 khoá ratio không rid'),
+    ('bin/corp_action_auto_confirm.py', '    return _ask_once(["vendor-vs-registry", ticker, ex_date, rid, "ASKED"],', '    return _ask_once(["vendor-vs-registry", ticker, ex_date, "ASKED"],', 'r4↻ r5 Q7 khoá ratio không rid'),
     ('bin/corp_action_auto_confirm.py', '            continue\n        # (m8 r4 near-record', '            pass\n        # (m8 r4 near-record', 'r4↻ r5 Q8 bỏ continue nhánh confirmed_set [r6 neo lại]'),
     ('bin/corp_action_auto_confirm.py', '        failed.append({"call": fn.__name__, "ticker": args[0], "ex_date": args[1],\n                       "error"', '        failed.append({"call": fn.__name__,\n                       "error"', 'r5 Q11 ask_failed mất ticker/ex'),
     ('bin/corp_action_auto_confirm.py', '    except Exception as e:\n        import traceback\n        print(traceback.format_exc())\n        failed.append(', '    except (OSError, ValueError) as e:\n        import traceback\n        print(traceback.format_exc())\n        failed.append(', 'r5 Q20 _ask_guarded thu hẹp OSError/ValueError'),
