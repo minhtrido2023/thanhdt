@@ -12,6 +12,18 @@ trong cửa sổ 90 ngày (file `anomaly_gate` đọc, validate schema — `load
   Làn A "lệch giá":   pb_z<=-1 ∧ drop_pct<=-20 (drop_pct ĐƠN VỊ %, vd -59.9).
   Làn B "giá trị sâu": PE>0, xếp earn_yield GIẢM DẦN TRONG CÙNG route, top-3/route (loại trừ trước
                       khi xếp — mã bị loại không chiếm chỗ). KHÔNG dùng composite value_score.
+  Làn C "tăng trưởng LN" (user chốt 2026-10-06 11:08 — NGUỒN Ý TƯỞNG, không tự mua/size; nghiên cứu
+                      `agents/Taylor/research/discretionary_lane_c_earnings_growth_20261006/`, C1 GARP):
+                      NP quý gần nhất YoY >= 30% ∧ QoQ > 0 (cả 2 vế NP > 0) ∧ 0 < PE <= 12. NP từ
+                      `data/bq_cache/ticker_financial.parquet`, PIT: quý mới nhất có ngày biết
+                      (Release_Date, trống ⇒ `time`) < asof (CHẶT). PE = PE ngày asof của rating_8l.
+                      Mọi mã làn C mang nhãn "edge của rổ, không phải của mã — cần due diligence"
+                      (quant-skeptic REFUTED cho wire/size); YoY > 300% thêm "nghi nền thấp/lãi một lần".
+                      Tối đa 5 mã C mới/ngày (YoY <= 300% trước, YoY giảm dần) — phần bị cắt XẾP HÀNG,
+                      báo các phiên sau. Mã cũng đang ở làn A/B ⇒ gộp nhãn vào dòng A/B, không báo trùng.
+                      ticker_financial thiếu/hỏng/dưới sàn ⇒ làn C KHÔNG chạy + cảnh báo ở khối 08:00
+                      (không bao giờ hiện thành "0 mới"); mã C đang theo dõi được giữ liên tục qua
+                      phiên lỗi (không bị báo lại là "mới" khi dữ liệu về).
 Nhãn bối cảnh (KHÔNG loại), peer = cùng ICB_Code có liq_bn>=0,3 (ICB < 5 mã ⇒ fallback cùng route):
   KHÔNG-GIẢM — drop_pct > -10% (không cần Bobby);
   IDIO       — drop_pct <= trung vị peer − 15 điểm %;
@@ -27,7 +39,9 @@ Trạng thái `data/discretionary_candidates_state.json` (khoá ticker|làn): ch
   NEW      — chưa từng báo, HOẶC rời làn rồi quay lại khi đã quá cooldown 30 ngày lịch từ lần báo trước;
   PBZ_DROP — pb_z <= pb_z lần báo trước − 0,5 (xấu đi đáng kể; KHÔNG chịu cooldown — mỗi bậc 0,5
              là thông tin mới, tự giới hạn tần suất).
-  SEED     — lần chạy đầu (state rỗng): mọi mã ghi sổ, khối 08:00 chỉ in "khởi tạo: N mã".
+  SEED     — lần chạy đầu CỦA TỪNG LÀN (`seeded_lanes`): mọi mã ghi sổ, khối 08:00 chỉ in "khởi
+             tạo: N mã" — làn C thêm vào state đã có A/B vẫn seed, không flood.
+  (PBZ_DROP không áp cho làn C — làn C chỉ báo mã MỚI.)
 Chạy lại cùng asof ⇒ cùng danh sách báo (mục có last_reported==asof), không ghi đè thông tin.
 asof lùi so với lần chạy trước / rating_8l dưới sàn sanity ⇒ KHÔNG ghi state, cảnh báo ở khối 08:00.
 State hỏng ⇒ raise (không reset im lặng). Thứ tự ghi: snapshot → log → kết quả → state SAU CÙNG.
@@ -55,6 +69,7 @@ import subprocess
 import sys
 from zoneinfo import ZoneInfo
 
+import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -93,7 +108,25 @@ PEER_MIN = 5                      # ICB peer (liq>=0,3) < 5 mã ⇒ fallback tru
 RATING_MIN_ROWS = 500
 RATING_MIN_NONNULL = {"pb_z": 0.80, "drop_pct": 0.90, "earn_yield": 0.75, "liq_bn": 0.90}
 
-LANE_NAMES = {"A": "lệch giá", "B": "giá trị sâu"}
+LANE_NAMES = {"A": "lệch giá", "B": "giá trị sâu", "C": "tăng trưởng LN"}
+LANES = ("A", "B", "C")
+
+# --- Làn C (C1 GARP, nghiên cứu discretionary_lane_c_earnings_growth_20261006 — KHÔNG re-tune) ---
+FIN_CACHE = os.path.join(DATA_DIR, "bq_cache", "ticker_financial.parquet")   # sync 23:45 ICT
+FIN_COLS = ["ticker", "time", "quarter", "Release_Date", "NP_P0", "NP_P1", "NP_P4"]
+LANE_C_YOY_MIN = 0.30             # NP_P0/NP_P4 − 1 >= 30%
+LANE_C_PE_MAX = 12.0              # 0 < PE <= 12
+LANE_C_MAX_PER_DAY = 5            # khối 08:00 tối đa 5 mã C mới/ngày, phần dư xếp hàng
+LANE_C_YOY_EXTREME = 3.0          # YoY > 300% ⇒ nhãn nghi nền thấp, xếp sau khi cắt trần
+LANE_C_LABEL = "edge của rổ, không phải của mã — cần due diligence"
+LANE_C_EXTREME_LABEL = "nghi nền thấp/lãi một lần — DD loại trước"
+# Sàn sanity ticker_financial (thật 2026-10-05: 67.624 dòng / 1.291 mã; ngày biết mới nhất 2026-09-17).
+# Dưới sàn ⇒ làn C KHÔNG chạy. File cache cũ / dữ liệu cũ / phủ thấp ⇒ chỉ cảnh báo, vẫn chạy.
+FIN_MIN_ROWS = 50000
+FIN_MIN_TICKERS = 1000
+FIN_MAX_FILE_AGE_DAYS = 3         # cache sync mỗi đêm; > 3 ngày ⇒ sync chết
+FIN_MAX_DATA_AGE_DAYS = 100       # ngày biết mới nhất toàn bảng; khe giữa 2 mùa BCTC < ~60 ngày
+FIN_MIN_COVERAGE = 0.80           # tỉ lệ mã vũ trụ chất lượng có ít nhất 1 quý đã biết
 
 
 def daily_paths(base_dir=DATA_DIR):
@@ -538,6 +571,73 @@ def rating_sanity(df):
     return bad
 
 
+def load_financials(path, asof, now):
+    """ticker_financial cache ⇒ (fin | None, meta, warnings). fin: 1 dòng/ticker = quý MỚI NHẤT có
+    NP_P0 và ngày biết (Release_Date, trống ⇒ `time`) < asof CHẶT (quý công bố đúng ngày asof chưa
+    dùng được — PIT như nghiên cứu). None ⇒ làn C KHÔNG chạy (thiếu/hỏng/thiếu cột/dưới sàn); mọi
+    lỗi thành cảnh báo, không raise (A/B vẫn chạy). Đọc pyarrow use_threads=False: `python3` hệ
+    thống (pyarrow 24) đọc đa luồng thỉnh thoảng abort lúc thoát (exit 134, đo 2026-10-06)."""
+    stop = "LÀN C KHÔNG CHẠY phiên này"
+    meta = {"path": path}
+    if not os.path.exists(path):
+        return None, meta, [f"thiếu {path} — {stop} (không phải '0 mã mới')"]
+    try:
+        import pyarrow.parquet as pq
+        names = pq.read_schema(path).names
+        missing = [c for c in FIN_COLS if c not in names]
+        if missing:
+            return None, meta, [f"{path} thiếu cột {missing} — {stop}"]
+        raw = pq.read_table(path, columns=FIN_COLS, use_threads=False).to_pandas(use_threads=False)
+    except Exception as e:                                  # noqa: BLE001 — mọi lỗi đọc ⇒ cảnh báo
+        return None, meta, [f"{path} đọc lỗi ({type(e).__name__}: {str(e)[:200]}) — {stop}"]
+    warnings = []
+    mtime = dt.datetime.fromtimestamp(os.path.getmtime(path), tz=ICT)
+    meta.update(rows=int(len(raw)), tickers=int(raw["ticker"].nunique()),
+                mtime=mtime.isoformat())
+    bad = []
+    if len(raw) < FIN_MIN_ROWS:
+        bad.append(f"{len(raw)} dòng < sàn {FIN_MIN_ROWS}")
+    if meta["tickers"] < FIN_MIN_TICKERS:
+        bad.append(f"{meta['tickers']} mã < sàn {FIN_MIN_TICKERS}")
+    if bad:
+        return None, meta, [f"ticker_financial DƯỚI SÀN SANITY: {'; '.join(bad)} — {stop}"]
+    age = (now - mtime).total_seconds() / 86400.0
+    if age > FIN_MAX_FILE_AGE_DAYS:
+        warnings.append(f"{path} cũ {age:.1f} ngày (sync 23:45 chết?) — làn C có thể thiếu quý "
+                        f"vừa công bố")
+    known = pd.to_datetime(raw["Release_Date"], errors="coerce").fillna(
+        pd.to_datetime(raw["time"], errors="coerce"))
+    f = raw.assign(known=known).dropna(subset=["NP_P0", "known"])
+    asof_ts = pd.Timestamp(asof)
+    f = f[f["known"] < asof_ts]
+    if f.empty:
+        return None, meta, [f"ticker_financial không có quý nào biết trước {asof} — {stop}"]
+    meta["max_known"] = str(f["known"].max().date())
+    data_age = (asof_ts - f["known"].max()).days
+    if data_age > FIN_MAX_DATA_AGE_DAYS:
+        warnings.append(f"ticker_financial: quý mới nhất biết từ {meta['max_known']} ({data_age} ngày "
+                        f"trước asof) — ingest BCTC chết?")
+    f = f.sort_values(["ticker", "known", "quarter"]).groupby("ticker").tail(1).set_index("ticker")
+    return f[["quarter", "known", "NP_P0", "NP_P1", "NP_P4"]], meta, warnings
+
+
+def growth_cols(df, fin):
+    """g_yoy = NP_P0/NP_P4 − 1, g_qoq = NP_P0/NP_P1 − 1 (chỉ khi CẢ 2 vế > 0, như nghiên cứu) +
+    np_quarter. fin None ⇒ cột NaN."""
+    out = df.copy()
+    if fin is None:
+        for c in ("g_yoy", "g_qoq", "np_quarter"):
+            out[c] = None
+        return out
+    j = fin.reindex(out["ticker"])
+    p0, p1, p4 = (j[c].to_numpy(dtype=float) for c in ("NP_P0", "NP_P1", "NP_P4"))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        out["g_yoy"] = np.where((p0 > 0) & (p4 > 0), p0 / p4 - 1, np.nan)
+        out["g_qoq"] = np.where((p0 > 0) & (p1 > 0), p0 / p1 - 1, np.nan)
+    out["np_quarter"] = j["quarter"].to_numpy()
+    return out
+
+
 def _insider_path():
     """MỘT nguồn đường dẫn cho cả cờ lẫn cảnh báo: đúng file `anomaly_gate` đọc."""
     import anomaly_gate
@@ -620,11 +720,12 @@ def context_label(drop, peer_med):
     return "NGÀNH"
 
 
-def build_lanes(rating, banned, forensic, insider):
-    """rating: DataFrame rating_8l.csv. Trả (cands, excluded):
-    cands    — 1 dòng / (ticker, làn) với nhãn bối cảnh;
+def build_lanes(rating, banned, forensic, insider, fin=None):
+    """rating: DataFrame rating_8l.csv; fin: kết quả load_financials (None ⇒ không có làn C).
+    Trả (cands, excluded):
+    cands    — 1 dòng / (ticker, làn) với nhãn bối cảnh (+ g_yoy/g_qoq/np_quarter mọi dòng);
     excluded — mã ĐÁNG LẼ vào làn nhưng bị loại bởi BANNED/forensic/insider (minh bạch)."""
-    df = rating.copy()
+    df = growth_cols(rating, fin)
     df["golden_floor_pass"] = (df["ROE_Min3Y"] >= 0) & (df["CF_OA_3Y"] > 0)
     quality = ((df["rating"] <= RATING_MAX) & df["golden_floor_pass"] & df["redflag"].isna()
                & (df["liq_bn"] >= LIQ_MIN_BN))
@@ -652,15 +753,24 @@ def build_lanes(rating, banned, forensic, insider):
         sub["lane_rank"] = sub.groupby("route").cumcount() + 1
         return sub
 
+    lane_c = (quality & (df["PE"] > 0) & (df["PE"] <= LANE_C_PE_MAX)
+              & (df["g_yoy"].astype(float) >= LANE_C_YOY_MIN - 1e-9)   # biên 30% VÀO (sai số float)
+              & (df["g_qoq"].astype(float) > 0))
+
     a = df[lane_a & clean].assign(lane="A", lane_rank=pd.NA)
     b = _top_b(b_pool & clean).assign(lane="B")
-    cands = pd.concat([a, b], ignore_index=True)
+    c = df[lane_c & clean].assign(lane="C", lane_rank=pd.NA)
+    cands = pd.concat([x for x in (a, b, c) if len(x)], ignore_index=True)
+    if cands.empty:
+        cands = df.head(0).assign(lane=None, lane_rank=pd.NA)
 
     # Minh bạch: ai bị loại khỏi làn VÌ danh sách loại trừ (B: so với top-3 khi KHÔNG loại trừ)
     ex_a = df[lane_a & ~clean].assign(lane="A")
     b_raw = _top_b(b_pool)
     ex_b = b_raw[b_raw["excl_reason"] != ""].assign(lane="B")
-    excluded = pd.concat([ex_a, ex_b], ignore_index=True)[["ticker", "lane", "route", "excl_reason"]]
+    ex_c = df[lane_c & ~clean].assign(lane="C")
+    excluded = pd.concat([ex_a, ex_b, ex_c], ignore_index=True)[["ticker", "lane", "route",
+                                                                 "excl_reason"]]
 
     # Nhãn bối cảnh: peer = cùng ICB_Code, thanh khoản liq>=0,3 (KHÔNG chỉ mã chất lượng — "cả ngành
     # cùng giảm" là câu hỏi về ngành, không về rổ rating); ICB < PEER_MIN mã ⇒ fallback cùng route.
@@ -694,10 +804,21 @@ class AsofRegress(ValueError):
     """asof < last_run_asof: dữ liệu đi lùi (rating cũ được khôi phục?) — không ghi state."""
 
 
-def update_state(state, cands, asof):
+def _c_priority(r):
+    """Thứ tự lấp trần 5 mã C/ngày: YoY trong ngưỡng hợp lý (<= 300%) trước, YoY giảm dần, ticker."""
+    g = _num(r.get("g_yoy"))
+    g = -1.0 if g is None else g
+    return (g > LANE_C_YOY_EXTREME, -g, str(r["ticker"]))
+
+
+def update_state(state, cands, asof, unavailable_lanes=()):
     """state (dict, có thể rỗng) + cands hôm nay ⇒ (state_mới, reported: list[dict]).
     Xem docstring module cho luật NEW / PBZ_DROP / cooldown. Thuần hàm, không I/O.
-    Lần chạy đầu (state rỗng) ⇒ mọi mã nhận reason SEED (khởi tạo, KHÔNG phải "mới").
+    Lần chạy đầu CỦA TỪNG LÀN (`seeded_lanes`) ⇒ mã làn đó nhận SEED (khởi tạo, KHÔNG phải "mới");
+    state cũ chỉ có `seeded_on` ⇒ coi A/B đã seed ngày đó. `unavailable_lanes` (vd {"C"} khi
+    ticker_financial lỗi): làn đó không seed, mã đang liên tục được GIỮ liên tục qua phiên lỗi.
+    Làn C: không PBZ_DROP; mã cũng ở A/B hôm nay ⇒ `merged=True` (không chiếm trần); mã C mới vượt
+    trần LANE_C_MAX_PER_DAY ⇒ reason QUEUED (KHÔNG đánh dấu đã báo, phiên sau tranh lại).
     asof < last_run_asof ⇒ raise AsofRegress."""
     asof_s = str(asof)
     st = json.loads(json.dumps(state or {}))                  # deep copy
@@ -706,9 +827,13 @@ def update_state(state, cands, asof):
     if last_run and asof_s < last_run:
         raise AsofRegress(f"asof {asof_s} < lần chạy trước {last_run} — dữ liệu 8L đi lùi; "
                           f"TỪ CHỐI ghi state")
-    if not entries and "seeded_on" not in st:
-        st["seeded_on"] = asof_s
-    seeding = st.get("seeded_on") == asof_s
+    seeded = st.setdefault("seeded_lanes", {})
+    if not seeded and "seeded_on" in st:                      # state trước làn C
+        seeded.update({"A": st["seeded_on"], "B": st["seeded_on"]})
+    st.setdefault("seeded_on", asof_s)
+    for lane in LANES:
+        if lane not in unavailable_lanes:
+            seeded.setdefault(lane, asof_s)
     if last_run == asof_s:                                    # chạy lại cùng asof
         ref_run = st.get("prev_run_asof")
     else:
@@ -716,15 +841,20 @@ def update_state(state, cands, asof):
         st["prev_run_asof"] = last_run
         st["last_run_asof"] = asof_s
     asof_d = dt.date.fromisoformat(asof_s)
+    for e in entries.values():                                # làn lỗi phiên này: giữ liên tục
+        if e.get("lane") in unavailable_lanes and ref_run and e.get("last_seen") == ref_run:
+            e["last_seen"] = asof_s
 
-    reported = []
+    ab_today = set(cands.loc[cands["lane"].isin(["A", "B"]), "ticker"]) if len(cands) else set()
+    decided = []                                              # (row, entry, reason, merged)
     for _, r in cands.iterrows():
         key = f"{r['ticker']}|{r['lane']}"
+        lane_c = r["lane"] == "C"
         pbz = _num(r.get("pb_z"))
         e = entries.get(key)
         reason = None
         if e is None:
-            reason = "SEED" if seeding else "NEW"
+            reason = "SEED" if seeded.get(r["lane"]) == asof_s else "NEW"
             e = entries[key] = {"ticker": r["ticker"], "lane": r["lane"],
                                 "first_seen": asof_s}
         elif e.get("last_reported") == asof_s:
@@ -735,20 +865,41 @@ def update_state(state, cands, asof):
             cooled = (last_rep is None or
                       (asof_d - dt.date.fromisoformat(last_rep)).days >= COOLDOWN_DAYS)
             prev_pbz = e.get("last_reported_pb_z")
-            if pbz is not None and prev_pbz is not None and pbz <= prev_pbz - PBZ_DROP_REPORT:
+            if (not lane_c and pbz is not None and prev_pbz is not None
+                    and pbz <= prev_pbz - PBZ_DROP_REPORT):
                 reason = "PBZ_DROP"
             elif not continuous and cooled:
                 reason = "NEW"
-        if reason and e.get("last_reported") != asof_s:
+            elif lane_c and continuous and e.get("queued"):
+                reason = "NEW"                                # hàng chờ trần ngày trước
+        decided.append([r, e, reason, lane_c and r["ticker"] in ab_today])
+
+    # Trần làn C (không tính mã gộp A/B, không tính SEED): đã báo ở asof này giữ chỗ trước.
+    c_new = [d for d in decided if d[1].get("lane") == "C" and d[2] == "NEW" and not d[3]]
+    held = [d for d in c_new if d[1].get("last_reported") == asof_s]
+    fresh = sorted((d for d in c_new if d[1].get("last_reported") != asof_s),
+                   key=lambda d: _c_priority(d[0]))
+    for d in fresh[max(0, LANE_C_MAX_PER_DAY - len(held)):]:
+        d[2] = "QUEUED"
+
+    reported = []
+    for r, e, reason, merged in decided:
+        pbz = _num(r.get("pb_z"))
+        if reason == "QUEUED":
+            e["queued"] = True
+        elif reason and e.get("last_reported") != asof_s:
             e["prev_reported_pb_z"] = e.get("last_reported_pb_z")
             e["last_reported"] = asof_s
             e["last_reported_pb_z"] = pbz
             e["last_reason"] = reason
+            e.pop("queued", None)
         e["last_seen"] = asof_s
         if reason:
-            reported.append({"ticker": r["ticker"], "lane": r["lane"], "reason": reason,
-                             "prev_pb_z": e.get("prev_reported_pb_z")
-                             if reason == "PBZ_DROP" else None})
+            item = {"ticker": r["ticker"], "lane": r["lane"], "reason": reason,
+                    "prev_pb_z": e.get("prev_reported_pb_z") if reason == "PBZ_DROP" else None}
+            if r["lane"] == "C":
+                item["merged"] = bool(merged)
+            reported.append(item)
     return st, reported
 
 
@@ -765,7 +916,17 @@ def load_state(path):
 
 
 LOG_COLS = ["date", "ticker", "lane", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
-            "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis", "reported"]
+            "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis", "reported",
+            "g_yoy", "g_qoq", "np_quarter", "label"]
+
+
+def lane_c_label(g_yoy):
+    """Nhãn bắt buộc của MỌI mã làn C (+ nhãn nghi nền thấp khi YoY > 300%)."""
+    g = _num(g_yoy)
+    lab = LANE_C_LABEL
+    if g is not None and g > LANE_C_YOY_EXTREME:
+        lab += f"; {LANE_C_EXTREME_LABEL}"
+    return lab
 
 
 def append_log(path, cands, asof, reported):
@@ -773,10 +934,14 @@ def append_log(path, cands, asof, reported):
     rep = {(x["ticker"], x["lane"]): x["reason"] for x in reported}
     rows = cands.assign(date=str(asof)).copy()
     rows["reported"] = [rep.get((t, l), "") for t, l in zip(rows["ticker"], rows["lane"])]
+    rows["label"] = [lane_c_label(g) if l == "C" else "" for g, l in zip(rows["g_yoy"], rows["lane"])]
     rows = rows[LOG_COLS]
     if os.path.exists(path):
         old = pd.read_csv(path, dtype={"date": str})
-        rows = pd.concat([old[old["date"] != str(asof)], rows], ignore_index=True)
+        old = old[old["date"] != str(asof)]
+        if len(old):                                         # log trước làn C: cột mới để trống
+            rows = pd.concat([old.reindex(columns=LOG_COLS).astype(object), rows.astype(object)],
+                             ignore_index=True)       # object: không cảnh báo concat cột all-NA
     _atomic_write_text(path, rows.to_csv(index=False))
     return len(rows)
 
@@ -798,11 +963,14 @@ def snapshot_rating(data, snap_dir, asof):
 
 def _rec(r):
     keep = ["ticker", "lane", "lane_rank", "route", "rating", "PE", "PB", "pb_z", "drop_pct",
-            "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis"]
+            "liq_bn", "earn_yield", "context", "peer_median_drop", "peer_basis",
+            "g_yoy", "g_qoq", "np_quarter"]
     out = {}
     for k in keep:
         v = r.get(k)
-        if k in ("ticker", "lane", "route", "context", "peer_basis"):
+        if k == "np_quarter":
+            out[k] = None if v is None or pd.isna(v) else str(v)
+        elif k in ("ticker", "lane", "route", "context", "peer_basis"):
             out[k] = v
         elif k in ("rating", "lane_rank"):
             out[k] = None if v is None or pd.isna(v) else int(v)
@@ -812,7 +980,7 @@ def _rec(r):
 
 
 def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
-              forensic_csv=FORENSIC_FLAGS_CSV, insider=None):
+              forensic_csv=FORENSIC_FLAGS_CSV, insider=None, fin_parquet=None):
     """Chạy funnel 1 lần. Trả dict kết quả (đồng thời ghi file nếu write=True).
     Thứ tự ghi: snapshot → log → KẾT QUẢ → STATE SAU CÙNG — crash giữa chừng không bao giờ
     đánh dấu "đã báo" cho mã chưa nằm trong file kết quả (chạy lại cùng asof báo lại y hệt)."""
@@ -828,14 +996,25 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         warnings.append("DỮ LIỆU 8L DƯỚI SÀN SANITY: " + "; ".join(insane))
     banned, forensic, insider, ex_warn = load_exclusions(asof, forensic_csv, insider)
     warnings += ex_warn
-    cands, excluded = build_lanes(rating, banned, forensic, insider)
+    fin, fin_meta, fin_warn = load_financials(fin_parquet or FIN_CACHE, asof, now)
+    warnings += fin_warn
+    if fin is not None:
+        pool = rating[(rating["rating"] <= RATING_MAX) & (rating["liq_bn"] >= LIQ_MIN_BN)
+                      & (rating["ROE_Min3Y"] >= 0) & (rating["CF_OA_3Y"] > 0)]["ticker"]
+        cov = float(pool.isin(fin.index).mean()) if len(pool) else 1.0
+        fin_meta["coverage"] = round(cov, 3)
+        if cov < FIN_MIN_COVERAGE:
+            warnings.append(f"ticker_financial chỉ phủ {cov:.0%} vũ trụ chất lượng (< {FIN_MIN_COVERAGE:.0%})"
+                            f" — làn C có thể thiếu mã")
+    cands, excluded = build_lanes(rating, banned, forensic, insider, fin)
+    unavailable = () if fin is not None else ("C",)
 
     state = load_state(paths["state"])
     state_ok, new_state, rep_all = not insane, state, []
     regressed = False
     if state_ok:
         try:
-            new_state, rep_all = update_state(state, cands, asof)
+            new_state, rep_all = update_state(state, cands, asof, unavailable)
         except AsofRegress as e:
             warnings.append(str(e))
             state_ok, regressed = False, True
@@ -845,9 +1024,16 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         "state_ok": state_ok, "sanity_fail": bool(insane),
         "n_lane_a": int((cands["lane"] == "A").sum()),
         "n_lane_b": int((cands["lane"] == "B").sum()),
+        "n_lane_c": int((cands["lane"] == "C").sum()),
+        "lane_c_ok": fin is not None, "fin_meta": fin_meta,
         "n_tracking": int(cands["ticker"].nunique()),
         "seeded": sum(1 for x in rep_all if x["reason"] == "SEED"),
-        "reported": [x for x in rep_all if x["reason"] != "SEED"],
+        "seeded_by_lane": {ln: sum(1 for x in rep_all if x["reason"] == "SEED" and x["lane"] == ln)
+                           for ln in LANES},
+        "reported": [x for x in rep_all if x["reason"] not in ("SEED", "QUEUED")],
+        "lanes_seeded_today": sorted(ln for ln, d in new_state.get("seeded_lanes", {}).items()
+                                     if d == str(asof)) if state_ok else [],
+        "lane_c_queued": sorted(x["ticker"] for x in rep_all if x["reason"] == "QUEUED"),
         "candidates": [_rec(r) for _, r in cands.iterrows()],
         "excluded": excluded.to_dict(orient="records"),
     }
@@ -870,7 +1056,21 @@ def _vn(x, nd=1):
     return "?" if x is None else f"{x:.{nd}f}".replace(".", ",")
 
 
-def candidate_line(c, reason=None, prev_pbz=None):
+def _pct(x):
+    return "?" if x is None else f"{x * 100:+.0f}%"
+
+
+def lane_c_tag(c):
+    """Phần làn C (YoY/QoQ/quý + nhãn bắt buộc) — dùng cho dòng C lẫn dòng A/B gộp."""
+    return (f"YoY {_pct(c.get('g_yoy'))} · QoQ {_pct(c.get('g_qoq'))} ({c.get('np_quarter') or '?'})"
+            f" · ⚠️ {lane_c_label(c.get('g_yoy'))}")
+
+
+def candidate_line(c, reason=None, prev_pbz=None, also_c=None):
+    """also_c: dòng làn C của CÙNG mã khi mã đang ở A/B ⇒ gộp nhãn, không báo dòng C riêng."""
+    if c["lane"] == "C":
+        return (f"• {c['ticker']} · làn C {LANE_NAMES['C']} · {c['route']} · rating {c['rating']} · "
+                f"PE {_vn(c['PE'])} · {lane_c_tag(c)} · liq {_vn(c['liq_bn'], 2)} tỷ")
     ctx = c["context"] + (" — cần Bobby trước" if c["context"] == "NGÀNH" else "")
     if c["context"] != "KHÔNG-GIẢM":
         ctx += f" (peer {c.get('peer_basis')} trung vị {_vn(c.get('peer_median_drop'))}%)"
@@ -880,9 +1080,10 @@ def candidate_line(c, reason=None, prev_pbz=None):
     tag = ""
     if reason == "PBZ_DROP":
         tag = f" [pb_z giảm thêm từ {_vn(prev_pbz, 2)}]"
+    ctag = f" · +làn C: {lane_c_tag(also_c)}" if also_c else ""
     return (f"• {c['ticker']} · làn {lane} · rating {c['rating']} · PE {_vn(c['PE'])} · "
             f"pb_z {_vn(c['pb_z'], 2)} · drop {_vn(c['drop_pct'])}% · liq {_vn(c['liq_bn'], 2)} tỷ"
-            f" · {ctx}{tag}")
+            f" · {ctx}{tag}{ctag}")
 
 
 def format_topic_block(result, today):
@@ -906,22 +1107,53 @@ def format_topic_block(result, today):
         return "\n".join(lines)
     first_view = today == asof + dt.timedelta(days=1)
     since = "" if first_view else f" TỪ PHIÊN {asof} (đã hiện sáng {asof + dt.timedelta(days=1)})"
+    c_ok = result.get("lane_c_ok", False)
+    sbl = result.get("seeded_by_lane") or {}
+    seeded_today = set(result.get("lanes_seeded_today") or [])
+    seeded_ab = bool(seeded_today & {"A", "B"})
     if result.get("seeded"):
-        lines.append(f"Khởi tạo{since}: {result['seeded']} mã đang theo dõi (lần chạy đầu — không "
-                     f"báo hàng loạt là mới; từ phiên sau chỉ báo mã MỚI/xấu đi).")
+        parts = ", ".join(f"{ln}={n}" for ln, n in sbl.items() if n) if sbl else ""
+        lines.append(f"Khởi tạo{since}: {result['seeded']} mã đang theo dõi"
+                     f"{f' ({parts})' if parts else ''} (lần chạy đầu của làn — không báo hàng loạt "
+                     f"là mới; từ phiên sau chỉ báo mã MỚI/xấu đi).")
     by_key = {(c["ticker"], c["lane"]): c for c in result["candidates"]}
+    c_of = {c["ticker"]: c for c in result["candidates"] if c["lane"] == "C"}
     rep = result.get("reported", [])
+    rep_ab = [x for x in rep if x["lane"] != "C"]
+    rep_c = [x for x in rep if x["lane"] == "C" and not x.get("merged")]
+    shown_ab = {x["ticker"] for x in rep_ab}
+    rep_cm = [x for x in rep if x["lane"] == "C" and x.get("merged") and x["ticker"] not in shown_ab]
+    n_c = result.get("n_lane_c", 0) if c_ok else "LỖI DỮ LIỆU"
     tracking = (f"{result['n_tracking']} đang theo dõi: A={result['n_lane_a']}, "
-                f"B={result['n_lane_b']}")
-    if not rep:
-        if not result.get("seeded"):
-            lines.append(f"0 mới{since} ({tracking})")
+                f"B={result['n_lane_b']}, C={n_c}")
+    if not rep_ab:
+        if not seeded_ab:
+            lines.append(f"0 mới làn A/B{since} ({tracking})")
     else:
-        lines.append(f"{len(rep)} mã mới/xấu đi{since} ({tracking}) — chọn mã nào đáng làm due "
+        lines.append(f"{len(rep_ab)} mã mới/xấu đi{since} ({tracking}) — chọn mã nào đáng làm due "
                      f"diligence (mặc định: không làm gì):")
-        for x in rep:
+        for x in rep_ab:
             lines.append(candidate_line(by_key[(x["ticker"], x["lane"])], x["reason"],
-                                        x.get("prev_pb_z")))
+                                        x.get("prev_pb_z"), c_of.get(x["ticker"])))
+    if not c_ok:
+        lines.append("⚠️ LÀN C (tăng trưởng LN) KHÔNG CHẠY phiên này — ticker_financial lỗi/thiếu "
+                     "(xem cảnh báo trên); đây KHÔNG phải '0 mã mới'.")
+        return "\n".join(lines)
+    queued = result.get("lane_c_queued") or []
+    head_c = (f"Làn C tăng trưởng LN — NGUỒN Ý TƯỞNG, KHÔNG tự mua/size, mọi mã là "
+              f"\"{LANE_C_LABEL}\"")
+    if rep_c:
+        lines.append(f"{head_c}: {len(rep_c)} mã mới{since}:")
+        for x in rep_c:
+            lines.append(candidate_line(by_key[(x["ticker"], "C")]))
+    elif "C" not in seeded_today:
+        lines.append(f"Làn C: 0 mới{since} (C={n_c} đang theo dõi)")
+    if queued:
+        lines.append(f"… còn {len(queued)} mã làn C mới chưa hiện (trần {LANE_C_MAX_PER_DAY}/ngày) — "
+                     f"báo các phiên sau nếu còn trong làn.")
+    if rep_cm:
+        lines.append("Làn C cũng bắt (mã đã theo dõi ở làn A/B — gộp, không báo trùng): " + "; ".join(
+            f"{x['ticker']} {lane_c_tag(by_key[(x['ticker'], 'C')])}" for x in rep_cm))
     return "\n".join(lines)
 
 
@@ -937,16 +1169,25 @@ def print_block(today=None, result_path=None):
 
 def format_run_report(result):
     lines = [f"=== Funnel 8L asof {result['asof']} (run {result['run_at']}) — "
-             f"A={result['n_lane_a']} B={result['n_lane_b']} theo dõi={result['n_tracking']} "
+             f"A={result['n_lane_a']} B={result['n_lane_b']} "
+             f"C={result['n_lane_c'] if result.get('lane_c_ok') else 'KHÔNG CHẠY'} "
+             f"theo dõi={result['n_tracking']} "
              f"báo={len(result['reported'])} khởi tạo={result['seeded']} "
              f"state={'OK' if result['state_ok'] else 'KHÔNG GHI'} ==="]
     for w in result["warnings"]:
         lines.append(f"  CẢNH BÁO: {w}")
     rep = {(x["ticker"], x["lane"]): x for x in result["reported"]}
+    queued = set(result.get("lane_c_queued") or [])
+    c_of = {c["ticker"]: c for c in result["candidates"] if c["lane"] == "C"}
     for c in result["candidates"]:
         x = rep.get((c["ticker"], c["lane"]))
         mark = f"  <<< {x['reason']}" if x else ""
-        lines.append(candidate_line(c, x and x["reason"], x and x.get("prev_pb_z")) + mark)
+        if c["lane"] == "C" and c["ticker"] in queued:
+            mark = "  <<< QUEUED (vượt trần ngày)"
+        if x and x.get("merged"):
+            mark += " (gộp A/B)"
+        lines.append(candidate_line(c, x and x["reason"], x and x.get("prev_pb_z"),
+                                    c_of.get(c["ticker"]) if c["lane"] != "C" else None) + mark)
     for e in result["excluded"]:
         lines.append(f"  LOẠI {e['ticker']} (làn {e['lane']}, {e['route']}): {e['excl_reason']}")
     if "snapshot" in result:
