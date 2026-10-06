@@ -68,3 +68,6 @@
 
 ## Archived 2026-10-06 (keep=12 days=0 require_done=False)
 - [2026-10-05T18:02:51Z] 06/10 01:15: dispatch Taylor_20261005_180152 (dựng funnel A+B, branch, KHÔNG merge) + Taylor_20261005_180155 (nghiên cứu làn C/PVT). Cutloss trong phiên: đề xuất ghi trong plan (mặc định theo phán quyết GÃY=bán/CHƯA RÕ=50%/NHIỄU=giữ; loại custom30V; discretionary chỉ bán khi GÃY; shadow 5 phiên) — CHỜ user duyệt. Sau Taylor: review funnel, arch-review, cài cron 19:35.
+
+## Archived 2026-10-06 (keep=12 days=0 require_done=False)
+- [2026-10-05T18:14:23Z] 06/10 01:20: user DUYỆT cutloss theo phán quyết, custom30V cũng theo quy trình, discretionary chỉ bán khi GÃY, trả lời qua Discord. Kịch bản 4 chế độ (bình thường/nhanh/khẩn/kẹt sàn) ghi trong plan, chờ user duyệt chi tiết. Funnel 180152 xong (branch feat/discretionary-8l-funnel-20261006 7750213f, selfcheck 53/53 tôi chạy lại OK) — arch-review bị ngắt, CHƯA chạy xong; chưa merge, chưa cài cron.
