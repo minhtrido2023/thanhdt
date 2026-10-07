@@ -21,3 +21,5 @@
 - Sáng 07/10: khối D topic 08:00 phải hiện 'Khởi tạo' (làn C) — kiểm khi user nhắc.
 - KHÔNG đặt wakeup thăm dò khi không có job nền (user 10-05).
 
+- [2026-10-07T02:20:45Z] 07/10 09:2x: user chọn (a) polish-chain → merged 6daeca8d (override cần REASON; review toàn bộ trước vòng 2), bus question đã đóng decided_by=user. Theo dõi: vòng 3+ còn lặp tuần tới ⇒ đề xuất (b).
+- [2026-10-07T03:05:48Z] 07/10 10:05: user giao r7 broker-primary (test m2/m3 + luật m4: đã hỏi ex A, broker thấy ex B gần ⇒ BQ có đủ 2 sự kiện thì ghi, không thì hỏi lại; BQ lỗi ⇒ hỏi). Job Taylor_20261007_030542 opus high. Xong ⇒ Mike tự selfcheck đa TZ + arch-review 1 lần ⇒ xin user duyệt merge.
