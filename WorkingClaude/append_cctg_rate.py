@@ -61,6 +61,15 @@ CSV_PATH = os.path.join(HERE, "data", "cctg_rate_vn_events.csv")
 LAST_AUTO_SOURCES_NAME = "cctg_rate_last_auto_sources.json"
 
 
+# --series 6m (user duyệt 2026-10-07): chuỗi CCTG 6 THÁNG cao nhất Big-4, thu SONG SONG chuỗi 12M
+# để Bobby đọc đa-proxy. File + sidecar RIÊNG; KHÔNG consumer production nào đọc (không vào
+# effective rate / kill-switch A / DCF). Mốc đông cứng = anchor gốc 2026-09-30 7,5% (VCB 6M, chính
+# là CCTG_EVENTS[0] của cctg_rate_vn.py trước khi rebase sang 12M ngày 05/10).
+CSV_PATH_6M = os.path.join(HERE, "data", "cctg_rate_vn_6m_events.csv")
+LAST_AUTO_SOURCES_NAME_6M = "cctg6m_rate_last_auto_sources.json"
+SEED_6M = ("2026-09-30", 7.5)
+
+
 def _last_auto_sources_path():
     return os.path.join(os.path.dirname(CSV_PATH), LAST_AUTO_SOURCES_NAME)
 HEADER = ["effective_date", "cctg_rate", "collected_date", "source", "note"]
@@ -76,10 +85,11 @@ FLOAT_EPS = 1e-6
 RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 30.0  # matches cctg_rate_vn.py's own sanity fence
 
 
-def _read_rows():
-    if not os.path.exists(CSV_PATH):
+def _read_rows(path=None):
+    path = path or CSV_PATH
+    if not os.path.exists(path):
         return []
-    with open(CSV_PATH, newline="", encoding="utf-8") as f:
+    with open(path, newline="", encoding="utf-8") as f:
         return [r for r in csv.DictReader(f) if r.get("effective_date")]
 
 
@@ -97,10 +107,18 @@ def main():
     ap.add_argument("--sources", default=None,
                     help='JSON array of {"publisher","url","date","rate"} — REQUIRED for '
                          '--source web_crosscheck_auto')
+    ap.add_argument("--series", choices=("12m", "6m"), default="12m",
+                    help="12m (mặc định, chuỗi production) | 6m (chuỗi phụ, file riêng, display-only)")
     ap.add_argument("--force", action="store_true",
                     help="append even if effective_date exists / override delta guard. REFUSED "
                          "when JOB_ID env is set.")
     args = ap.parse_args()
+    is_6m = args.series == "6m"
+    # Locals, không gán lại global: selfcheck gọi main() nhiều lần trong 1 process và monkeypatch
+    # CSV_PATH/CSV_PATH_6M — gán global sẽ làm lượt 12m sau một lượt 6m ghi nhầm file 6m.
+    csv_path = CSV_PATH_6M if is_6m else CSV_PATH
+    sidecar_path = (os.path.join(os.path.dirname(CSV_PATH_6M), LAST_AUTO_SOURCES_NAME_6M)
+                    if is_6m else _last_auto_sources_path())
 
     is_dispatched_agent = os.environ.get("JOB_ID") is not None
     if is_dispatched_agent and args.force:
@@ -145,7 +163,7 @@ def main():
     # (rc=0), firing a false Winston escalate-question every time the cron (or a human) re-ran on
     # a day already confirmed. append_deposit_rate.py never had this ordering bug because it has
     # no equivalent "not newer" pre-check — only this CCTG script does.
-    rows = _read_rows()
+    rows = _read_rows(csv_path)
     existing = {r["effective_date"] for r in rows}
     if args.effective in existing and not args.force:
         print(f"SKIP: effective_date {args.effective} already present (use --force to override). "
@@ -156,8 +174,11 @@ def main():
     # would reject on next load anyway — avoid leaving the CSV in a state nobody notices is broken
     # until the next unrelated reader crashes) ---
     import cctg_rate_vn
-    existing_ev = cctg_rate_vn.cctg_events_df()
-    last_date = existing_ev["time"].max().date()
+    if is_6m:
+        last_date = max([_valid_date(SEED_6M[0])] + [_valid_date(r["effective_date"]) for r in rows])
+    else:
+        existing_ev = cctg_rate_vn.cctg_events_df()
+        last_date = existing_ev["time"].max().date()
     if eff <= last_date:
         sys.exit(f"ERROR: --effective {eff} is not newer than the last anchor {last_date} — "
                  f"cctg_events_df() treats this as corrupt/duplicate data and will raise loudly "
@@ -185,7 +206,7 @@ def main():
         if len(owner_groups) < MIN_DISTINCT_OWNERS:
             sys.exit(f"ERROR: --sources resolve to only {len(owner_groups)} distinct owner "
                      f"group(s) ({sorted(owner_groups)}) — need >= {MIN_DISTINCT_OWNERS}. Refuse.")
-        _check_urls_not_reused(urls, _last_auto_sources_path())
+        _check_urls_not_reused(urls, sidecar_path)
         today_d = _valid_date(real_today)
         src_rates = []
         for s in sources:
@@ -223,12 +244,16 @@ def main():
     # --- delta guard vs current + last human-confirmed anchor ---
     # (rows/existing already loaded by the idempotency check above — nothing has written to disk
     # since, so reusing them here is safe and avoids a second redundant _read_rows() call)
-    current_rate, _ = cctg_rate_vn.current_cctg_rate()
+    if is_6m:
+        _all6 = sorted(rows, key=lambda r: r["effective_date"])
+        current_rate = float(_all6[-1]["cctg_rate"]) if _all6 else SEED_6M[1]
+    else:
+        current_rate, _ = cctg_rate_vn.current_cctg_rate()
     human_rows = sorted(
         (r for r in rows if r.get("source") not in SOURCES_REQUIRING_STRUCTURED_SOURCES),
         key=lambda r: r["effective_date"])
     last_human_rate = (float(human_rows[-1]["cctg_rate"]) if human_rows
-                       else cctg_rate_vn.CCTG_EVENTS[-1][1])
+                       else (SEED_6M[1] if is_6m else cctg_rate_vn.CCTG_EVENTS[-1][1]))
     bases = [b for b in (current_rate, last_human_rate) if b is not None]
     deltas = [abs(args.rate - b) for b in bases]
     if deltas and max(deltas) >= NONINERT_DELTA_PP and not args.force:
@@ -242,22 +267,26 @@ def main():
                "collected_date": collected, "source": args.source, "note": args.note}
     rows.append(new_row)
 
-    os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(CSV_PATH), prefix=".cctg_", suffix=".csv")
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(csv_path), prefix=".cctg_", suffix=".csv")
     try:
         with os.fdopen(fd, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=HEADER)
             w.writeheader()
             w.writerows(rows)
-        os.replace(tmp, CSV_PATH)
+        os.replace(tmp, csv_path)
     except Exception:
         if os.path.exists(tmp):
             os.remove(tmp)
         raise
 
     if args.source in SOURCES_REQUIRING_STRUCTURED_SOURCES:
-        _save_last_auto_urls(_last_auto_sources_path(), args.effective, urls)
+        _save_last_auto_urls(sidecar_path, args.effective, urls)
 
+    if is_6m:
+        print(f"OK: appended [6m] {args.effective} = {args.rate:g}% (source={args.source}, "
+              f"collected={collected}) -> {csv_path}")
+        return 0
     import importlib
     importlib.reload(cctg_rate_vn)
     ev = cctg_rate_vn.cctg_events_df()

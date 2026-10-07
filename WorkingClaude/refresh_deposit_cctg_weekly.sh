@@ -81,16 +81,22 @@ TIÊU CHUẨN (KHÁC chuỗi 1 — chuỗi này MỚI, guard CHẶT HƠN):
 4. --rate bạn truyền PHẢI khớp (gần như tuyệt đối) với MỘT trong các số đã cite trong --sources — không được tự tổng hợp/làm tròn thành số không nguồn nào nói.
 Ghi (nếu có số xác nhận): python3 append_cctg_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
 
-CẢ 2 LỆNH TRÊN tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (CẢ 2 chuỗi — chuỗi 1 mới thêm guard này tuần này, KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
+=== CHUỖI 3: Big-4 CCTG 6 THÁNG, lấy CAO NHẤT các ngân hàng Big-4 (chuỗi PHỤ, user duyệt 2026-10-07) ===
+Mục đích: Bobby đọc đa-proxy chi phí vốn (CCTG 6M vs 12M vs tiết kiệm). Chuỗi này ghi FILE RIÊNG, KHÔNG vào effective rate / kill-switch A / DCF.
+TIÊU CHUẨN: y hệt chuỗi 2 (>=2 nguồn khác chủ, mỗi nguồn ghi rõ số, lệch <=0,1pp, --rate khớp 1 số đã cite) nhưng kỳ hạn 6 THÁNG: trong các ngân hàng Big-4 CÓ phát CCTG 6 tháng (vd VCB 6 tháng), lấy lãi suất CAO NHẤT. Nếu ngân hàng niêm yết theo dải kỳ hạn (vd \"6-11 tháng\"), dải đó tính là có 6 tháng. --note nêu ngân hàng nào, vì sao cao nhất, và liệt kê số 6 tháng của các Big-4 khác nếu nguồn có.
+Ghi (nếu có số xác nhận): python3 append_cctg_rate.py --series 6m --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
+⚠️ Nguồn đã dùng cho chuỗi 2 dùng lại được cho chuỗi 3 (sidecar URL hai chuỗi tách riêng).
+
+CẢ 3 LỆNH TRÊN tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (MỌI chuỗi — chuỗi 1 có guard này KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
 
 Idempotent — nếu hôm nay đã ghi rồi (effective_date trùng), lệnh tự SKIP rc=0, không lỗi, coi là hoàn thành bình thường. Có thể 1 chuỗi ghi được, chuỗi kia escalate — xử lý ĐỘC LẬP, không phải tất-cả-hoặc-không-gì.
 
-BẮT BUỘC HÀNH ĐỘNG CUỐI (để Mike xác minh job này đã xử lý, không treo giữa chừng) — với MỖI chuỗi (1 và 2), chọn ĐÚNG MỘT:
+BẮT BUỘC HÀNH ĐỘNG CUỐI (để Mike xác minh job này đã xử lý, không treo giữa chừng) — với MỖI chuỗi (1, 2 và 3), chọn ĐÚNG MỘT:
   - Chạy thành công (kể cả SKIP idempotent): 'mike/bin/append_event.sh Winston status deposit-cctg-weekly-done \"<JSON: series, rate, changed true/false, note>\"'.
   - Escalate: 'mike/bin/append_event.sh Winston question deposit-cctg-weekly-question \"<JSON tóm tắt chuỗi nào, số nào mâu thuẫn>\"'.
-(Nếu cả 2 chuỗi đều escalate hoặc đều done, vẫn gọi 2 lần riêng — mỗi chuỗi 1 event — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem.)
+(Dù các chuỗi đều escalate hoặc đều done, vẫn gọi riêng mỗi chuỗi 1 event — field series = big4_12m / cctg_12m / cctg_6m — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem.)
 
-BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), và với CCTG luôn ghi rõ ngân hàng + kỳ hạn của số được chọn (chuẩn 12 THÁNG cao nhất Big-4 từ 2026-10-05; trước đó chuỗi là 6 tháng — đừng gộp lẫn khi báo cáo)."
+BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), báo CẢ CCTG 6 tháng (chuỗi 3) cạnh CCTG 12 tháng, và với CCTG luôn ghi rõ ngân hàng + kỳ hạn của số được chọn (chuẩn 12 THÁNG cao nhất Big-4 từ 2026-10-05; trước đó chuỗi là 6 tháng — đừng gộp lẫn khi báo cáo)."
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "[--dry-run] skipping real dispatch.sh call; prompt length=${#PROMPT} chars" >> "$LOG"
