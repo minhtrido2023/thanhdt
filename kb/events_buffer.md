@@ -503,3 +503,36 @@
 
 ## Consolidation 2026-10-07T06:00:07Z
 - [2026-10-07T06:00:06Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-07", "elapsed_s": 5, "rc": 0}
+
+## Consolidation 2026-10-07T06:49:07Z
+- [2026-10-07T06:23:46Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "in_progress", "note": "r10 tao worktree"}
+- [2026-10-07T06:24:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:24:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "in_progress", "note": "r10 tests viet xong, dang chay selfcheck"}
+- [2026-10-07T06:25:06Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "in_progress", "note": "788/0 xanh 3.10; chay mutations tren ban sao co lap"}
+- [2026-10-07T06:25:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:26:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:27:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:28:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:29:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:30:39Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:31:40Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:32:40Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:33:39Z] Taylor/status — Taylor_20261007_062338: {"status": "deadline_extended", "hb_age_s": 513, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-10-07T06:33:40Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:34:41Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:35:41Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:36:41Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:37:41Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:38:42Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:39:42Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:40:42Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:41:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:42:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:43:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:44:19Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "in_progress", "note": "6-run matrix + mutation dang chay"}
+- [2026-10-07T06:44:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:45:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:46:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:47:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:48:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261007_062338", "source": "watcher"}
+- [2026-10-07T06:49:00Z] Taylor/finding — broker-primary-r10: {"commit": "6e26dbe1", "branch": "feat/broker-primary-r10-20261007", "worktree": "mike/agents/Taylor/wt-bp-r10-1007", "base": "master 2563e481", "merged": false, "test_only": true, "selfcheck": "6/6 xanh: 3.10=788/0, 3.12=790/0 x {HCM,UTC,unset TZ}", "mutations": "541/541 (3.10), 540/541 (3.12, parse-5-chu-so tuong duong)", "proof": "2 dot bien moi SONG tren selfcheck cu (785/0), CHET tren moi (m3 2 FAIL, m4 1 FAIL)", "shadow": "giu nguyen; khong cham corp_actions.json/crontab/MIKE_CA_BROKER_SOURCE"}
