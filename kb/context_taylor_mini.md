@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3671)
+# Mike fleet — context_taylor_mini (v3672)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-07T04:36:12] Taylor/finding — broker-primary-r8: {"commit": "58aa852d", "branch": "feat/broker-primary-r7-20261007", "worktree": "mike/agents/Taylor/wt-bp-r7-1007", "base": "179e4686", "merged": false, "cronta …
 - [2026-10-07T05:44:19] Taylor/finding — broker-primary-r9: {"commit": "5c0257a6", "branch": "feat/broker-primary-r7-20261007", "worktree": "mike/agents/Taylor/wt-bp-r7-1007", "base": "58aa852d", "merged": false, "cronta …
 - [2026-10-07T06:49:00] Taylor/finding — broker-primary-r10: {"commit": "6e26dbe1", "branch": "feat/broker-primary-r10-20261007", "worktree": "mike/agents/Taylor/wt-bp-r10-1007", "base": "master 2563e481", "merged": false …
 - [2026-10-07T12:04:33] DollarBill/decision — plan-2026-10-08-SpaceX: {"account": "SpaceX", "plan_date": "2026-10-08", "n_orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "n_bal": 0, "lag_due": 0, "park_trim": "BLOCKED_A …
 - [2026-10-07T12:01:01] Taylor/finding — nav-exdate-forecast 2026-10-07: {"asof": "2026-10-07", "n_events": 1, "tickers": ["TV1"], "kinds": ["CASH_DIV"]}
+- [2026-10-07T12:06:01] DollarBill/decision — plan-ZaloPay-2026-10-08: {"account": "ZaloPay", "plan_date": "2026-10-08", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 599257202, "egg_vnd": 165994387, …
 <!--RECENT-END-->
 
 ## Kill-switches

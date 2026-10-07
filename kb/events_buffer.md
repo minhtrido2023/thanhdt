@@ -544,3 +544,8 @@
 - [2026-10-07T12:01:01Z] Taylor/finding — nav-exdate-forecast 2026-10-07: {"asof": "2026-10-07", "n_events": 1, "tickers": ["TV1"], "kinds": ["CASH_DIV"]}
 - [2026-10-07T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-10-07", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-10-07T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-10-07T12:06:28Z
+- [2026-10-07T12:04:57Z] DollarBill/heartbeat — DollarBill_20261007_120256: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261007_120256", "source": "watcher"}
+- [2026-10-07T12:05:58Z] DollarBill/heartbeat — DollarBill_20261007_120256: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20261007_120256", "source": "watcher"}
+- [2026-10-07T12:06:01Z] DollarBill/decision — plan-ZaloPay-2026-10-08: {"account": "ZaloPay", "plan_date": "2026-10-08", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 599257202, "egg_vnd": 165994387, "l1_park_trim": "BLOCKED_ALL_NAMES", "l2_jit_unpark": "NO_JIT_NEEDED", "n_bal": 0, "n_lag": 0, "capit_sessions_held": 54, "approval": "pending_user"}
