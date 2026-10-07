@@ -55,11 +55,42 @@ statements, government decisions) — was it named at a specific institution/eve
 system-wide macro-stabilization program? Check whether the SAME stress indicator (interbank rate,
 CPI) came back down within months of the policy action, or kept climbing for another year+.
 
+## Đọc lãi suất / thanh khoản VN: KHÔNG BAO GIỜ một con số (user chỉ đạo 2026-10-07)
+
+Ở VN, lãi suất niêm yết Big-4 là con số **bị quản lý hành chính** (trần, công văn chỉ đạo "giảm lãi
+suất huy động mới", NHNN chi nhánh đi kiểm tra; Big-4 quốc doanh giữ mặt bằng). Chính sách áp
+đặt, nhưng ngân hàng và doanh nghiệp **lách qua kênh khác** — giá tiền thật lộ ra ở chỗ kiểm soát
+yếu hơn. Vì vậy số Big-4 tiết kiệm 12M là proxy **ÍT thông tin nhất**; dùng nó một mình là đo đúng
+thứ đang bị neo. Ca thật 2026-10: Big-4 online 6,8% "đi ngang", trong khi CCTG Big-4 7,4-7,5%,
+tại quầy 5,9%, tiền gửi lớn 9-10%, liên NH 6-9M 8-9% — cùng lúc.
+
+Mỗi lần đọc chi phí vốn / thanh khoản phải lấp ĐỦ bảng 5 tầng (ô không có số ⇒ ghi "không có số",
+không suy), rồi nói proxy nào ĐỒNG THUẬN, proxy nào PHÂN KỲ, và cơ chế VN đằng sau mỗi phân kỳ
+(có nguồn thì trích; suy luận thì ghi rõ "suy luận"):
+- **A. Niêm yết hành chính**: Big-4 tiết kiệm 6M + 12M, **online VÀ tại quầy tách riêng** (online
+  6,8% vs quầy 5,9% là 2 kênh thật, không phải "nguồn lệch" để bỏ).
+- **B. Kênh bán-hành-chính**: CCTG Big-4 **6M và 12M từng ngân hàng**; spread CCTG − tiết kiệm cùng
+  kỳ hạn; dạng đường cong trong từng NH và giữa các NH; sự kiện NH **mở/rút** một kỳ hạn CCTG.
+- **C. Ngoài Big-4**: 12M biểu chuẩn của NH tư nhân lớn + top thị trường + số NH ≥7%; cộng lãi /
+  khuyến mãi / tiền gửi lớn (lãi suất "ẩn"); spread tư nhân − Big-4 và xu hướng 1-3 tháng.
+- **D. Thị trường**: liên NH qua đêm/1W/1M/3M (NHNN, báo cáo tuần VBMA), OMO/tín phiếu (lãi suất,
+  lưu hành, bơm/hút ròng), TPCP 10Y **kèm tỷ lệ trúng thầu** (trúng thầu thấp + lãi suất không đổi
+  = Kho bạc đang neo giá, cũng là một con số hành chính), USD/VND chính thức vs tự do.
+- **E. Lượng**: tín dụng YTD vs huy động YTD (cùng phạm vi, cùng mốc ngày — không trừ 2 số khác
+  phạm vi), LDR, và **mỗi văn bản nới LDR / tỷ lệ vốn ngắn hạn / room tín dụng là cơ quan quản lý
+  gián tiếp thừa nhận áp lực vốn** — ghi như một sự kiện.
+
+Phân biệt **HƯỚNG** với **MỨC**: số niêm yết có thể đúng về hướng (đi ngang) nhưng sai về mức
+(chi phí biên thật cao hơn 0,6pp+). Kết luận phải nói cả hai, kèm độ tin cậy. Một proxy kêu khi
+số niêm yết đứng yên là THÔNG TIN, không phải nhiễu cần bỏ; ngược lại cũng không tự nâng nó thành
+escalate — ngưỡng escalate do user chốt, proxy mới chỉ được ĐỀ XUẤT ngưỡng.
+
 ## Method
 1. Get the episode's date range and price action from the caller (VNINDEX drawdown, arm/trigger
    date) — nothing about what happened afterward.
 2. Query `tav2_bq` for anything already computed PIT (deposit rate series via
-   `deposit_rate_vn.py`, `ticker_financial` aggregates for corporate earnings trend as a
+   `deposit_rate_vn.py` AND the CCTG series `cctg_rate_vn.py` — never the deposit series alone,
+   see the multi-proxy section above; `ticker_financial` aggregates for corporate earnings trend as a
    secondary check) — but your PRIMARY evidence is the macro narrative, not a stock-level metric
    (that overlaps with Taylor's job and re-creates the coupling problem this role exists to break).
 3. WebSearch/WebFetch for contemporaneous (or historical-retrospective, but source-cited) coverage
