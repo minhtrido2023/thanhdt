@@ -319,8 +319,16 @@ def get_gated_state(start, end, bq=None, health_path=None, max_health_age_min=14
         live_lag = (datetime.now().date() - pd.Timestamp(end).date()).days
     except Exception:
         live_lag = 0
-    if live_lag <= 10:
-        state_max = pd.Timestamp(m["time"].max()).date()
+    state_max = pd.Timestamp(m["time"].max()) if len(m) else pd.NaT
+    if live_lag <= 10 and pd.isna(state_max):
+        # Empty window: [start, end] holds no state rows yet (e.g. start=end=today before the
+        # overnight BQ / local-cache sync). Nothing is returned, so nothing can be mis-gated.
+        # Not an engine-freeze signal: never interpolate NaT into SQL and never page on it
+        # (false "DT5G FROZEN" alert 2026-10-07 from an ad-hoc today-only call).
+        reason += (f" | no state rows in [{start}, {end}] (window newer than last synced row)"
+                   f" -> empty result, freshness not checked")
+    elif live_lag <= 10:
+        state_max = state_max.date()
         try:
             # VNINDEX (clustered by ticker -> cheap): count trading days the engine is behind.
             vf = bq(f"""SELECT MAX(t.time) AS mx,
