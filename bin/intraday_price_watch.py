@@ -115,6 +115,7 @@ REMINDER_WINDOW = (dt.time(8, 25), dt.time(9, 0))
 EOD_SUMMARY_AT = dt.time(14, 50)
 QUOTE_ERR_ALERT = 0.5              # tỉ lệ lỗi lấy giá trong 1 lượt quét ⇒ cảnh báo sức khoẻ
 HEALTH_ALERT_EVERY_MIN = 60        # cảnh báo sức khoẻ cùng loại tối đa 1 lần/60'
+VNI_MAX_AGE_MIN = 5                # bar VNINDEX cuối cũ hơn ⇒ coi như không đọc được (DNSE cache theo URL)
 REPLY_PREFIX = E.REPLY_PREFIX_SHADOW
 SHADOW_NOTE = "ĐÂY LÀ CHẠY THỬ (SHADOW), KHÔNG CÓ LỆNH THẬT"
 NO_CARRY = TERMINAL + ("HOLD",)          # sang phiên mới: ca HOLD đóng, mã được kích hoạt lại
@@ -207,7 +208,10 @@ class LiveMarket:
         key = (sym, day)
         if key not in self._bars:
             a = dt.datetime.combine(day, dt.time(8, 30)).replace(tzinfo=_ICT)
-            b = dt.datetime.combine(day, dt.time(15, 30)).replace(tzinfo=_ICT)
+            # `to` theo phút hiện tại, KHÔNG cố định 15:30: DNSE cache /price/ohlc theo URL ⇒ URL
+            # cả ngày y hệt trả bản chụp cũ (đo 07/10: rỗng lúc 09:15 hoặc dừng ở bar 09:29 tới 11:20).
+            b = min(dt.datetime.combine(day, dt.time(15, 30)),
+                    _now().replace(second=0, microsecond=0) + dt.timedelta(minutes=1)).replace(tzinfo=_ICT)
             try:
                 r = self.ro.ohlc(sym, resolution="1", bar_type="index" if index else "stock",
                                  **{"from": int(a.timestamp()), "to": int(b.timestamp())})
@@ -223,6 +227,18 @@ class LiveMarket:
         """(vni_last, vni_ref) — ref = đóng cửa 1D phiên trước."""
         bars = self.bars("VNINDEX", now.date(), index=True)
         last = bars[-1][1] if bars else None
+        self.vni_note = None if bars else "không có bar 1 phút nào"
+        if bars:
+            # nghỉ trưa / sau 14:30 không có bar mới — so với mốc cuối phiên đang mở, không với `now`
+            n = now.replace(tzinfo=None)
+            ref_t = n
+            if dt.time(11, 30) <= n.time() < dt.time(13, 0):
+                ref_t = n.replace(hour=11, minute=30, second=0, microsecond=0)
+            elif n.time() >= dt.time(14, 30):
+                ref_t = n.replace(hour=14, minute=30, second=0, microsecond=0)
+            if bars[-1][0] < ref_t - dt.timedelta(minutes=VNI_MAX_AGE_MIN):
+                self.vni_note = f"bar cuối {bars[-1][0]:%H:%M} quá cũ ({bars[-1][1]:.2f})"
+                last = None
         try:
             a = dt.datetime.combine(now.date() - dt.timedelta(days=12), dt.time(0)).replace(tzinfo=_ICT)
             r = self.ro.ohlc("VNINDEX", resolution="1D", bar_type="index",
@@ -1079,7 +1095,9 @@ def _scan(now, deps, st):
         health_alert(st, "positions", e, now, deps)
     vl, vr = deps.market.vni(now)
     if not (vl and vr):
-        health_alert(st, "vnindex", f"không đọc được VNINDEX (last={vl}, ref={vr}) ⇒ idio = ret; mọi kích hoạt "
+        why = getattr(deps.market, "vni_note", None)
+        health_alert(st, "vnindex", f"không đọc được VNINDEX (last={vl}, ref={vr}"
+                                    f"{'; ' + why if why else ''}) ⇒ idio = ret; mọi kích hoạt "
                                     f"lượt này gộp thành cảnh báo cả thị trường", now, deps)
     hits, alt, n_q, n_err = [], [], 0, 0
     for tk, u in sorted(uni.items()):

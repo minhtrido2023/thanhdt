@@ -1213,6 +1213,42 @@ def test_r2():
     check("§12: LiveMarket.positions lọc accountNo trước mọi phép tính",
           set(pos) == {"XYZ"} and pos["XYZ"]["qty"] == 1000 and pos["XYZ"]["cost"] == 100_000, str(pos))
 
+    # 07/10: DNSE cache /price/ohlc theo URL ⇒ `to` phải đổi theo phút; bar VNINDEX cũ ⇒ None
+    class OC:
+        def __init__(self, last_hm):
+            self.last_hm, self.tos = last_hm, []
+
+        def ohlc(self, symbol, resolution="1D", bar_type="stock", **q):
+            self.tos.append(q["to"])
+            d = dt.datetime.fromtimestamp(q["from"], W._ICT).date()
+            if resolution == "1D":
+                t = dt.datetime.combine(d - dt.timedelta(days=1), dt.time(15)).replace(tzinfo=W._ICT)
+                return {"t": [int(t.timestamp())], "c": [1759.08], "v": [0]}
+            t = dt.datetime.combine(d, dt.time(*self.last_hm)).replace(tzinfo=W._ICT)
+            return {"t": [int(t.timestamp())], "c": [1750.0], "v": [0]}
+
+    old_now = W._now
+    try:
+        for now_hm, last_hm, ok, label in (((11, 15, 1), (11, 14), True, "bar tươi"),
+                                           ((11, 15, 1), (9, 29), False, "bar 09:29 lúc 11:15 (ca thật)"),
+                                           ((12, 0, 1), (11, 29), True, "nghỉ trưa, bar 11:29"),
+                                           ((14, 40, 1), (14, 29), True, "ATC, bar 14:29")):
+            now = dt.datetime(2026, 10, 7, *now_hm)
+            W._now = lambda now=now: now
+            oc = OC(last_hm)
+            lm = W.LiveMarket.__new__(W.LiveMarket)
+            lm._q, lm._bars, lm._pos = {}, {}, {}
+            lm.ro = W.ReadOnlyDNSE(oc)
+            vl, vr = lm.vni(now)
+            to = dt.datetime.fromtimestamp(oc.tos[0], W._ICT).replace(tzinfo=None)
+            check(f"VNINDEX {label}: {'đọc được' if ok else 'None + lý do'}",
+                  (vl == 1750.0 and lm.vni_note is None) if ok else
+                  (vl is None and "quá cũ" in (lm.vni_note or "")), f"{vl} {lm.vni_note}")
+            check(f"VNINDEX {label}: `to` = phút hiện tại +1 (chống cache URL)",
+                  to == now.replace(second=0) + dt.timedelta(minutes=1) and vr == 1759.08, f"{to} {vr}")
+    finally:
+        W._now = old_now
+
     tmp = tempfile.mkdtemp(prefix="ipw_sc_")
     W._atomic_json(os.path.join(tmp, "ch.json"), {"users": {"owner": {"id": "4242"}}})
     old = W.CHANNELS
