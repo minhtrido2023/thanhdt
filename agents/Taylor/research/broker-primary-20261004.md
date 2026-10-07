@@ -435,3 +435,11 @@ Cùng nhánh `feat/broker-primary-r7-20261007` (worktree `wt-bp-r7-1007`, trên 
   probe P8: bỏ record_proposed, `registry_update_proposed` = `TPB-2026-09-20-BROKER-SHARE-EVENT`.
 - Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0 cả 6, 0 Traceback; sha256 `data/corp_actions.json` 21a88fb5… y nguyên;
   sổ broker production vẫn không tồn tại (chỉ .lock 10-05). Không làm m3/m4 khác của reviewer (để sau live).
+
+## r10 (2026-10-07) — TEST-ONLY, vá 2 lỗ test arch-review r8 (m3, m4); KHÔNG đổi code production
+- Nhánh `feat/broker-primary-r10-20261007` (từ master 2563e481), worktree `wt-bp-r10-1007`; chỉ sửa `bin/corp_action_broker_detect_selfcheck.py`.
+- m3 (§29): test "BQ THIẾU ex B" + "BQ tra LỖI" ⇒ không ghi B, câu/payload không khẳng định BQ đã xác nhận, mục gửi bù không mang `cross_day_bq`.
+- m4: test trần TỔNG giả 1.0s, mã đầu 0.7s, mã sau treo 5s ⇒ tổng chờ <1.3s, "quá trần TỔNG", mã sau nữa "hết trần TỔNG" và không bị tra.
+- 2 đột biến mới trong MUTANTS. Trên selfcheck CŨ cả 2 SỐNG (785/0); trên MỚI chết (m3 2 FAIL, m4 1 FAIL). Control: test mới PASS trên code đúng.
+- Selfcheck 6/6 xanh: 3.10 = 788/0, 3.12 = 790/0 × {Asia/Ho_Chi_Minh, UTC, env -u TZ}.
+- `--mutations` trên bản sao cô lập: **541/541 (3.10)**, **540/541 (3.12 — `parse 5 chữ số` tương đương, khai từ r4)**.
