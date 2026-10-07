@@ -877,6 +877,119 @@ def _multi_event(rows, tk, cand, credit_day):
     return {"exes": sorted(allx), "items": items, "has_registry": bool(near)}
 
 
+def _asked_topic(e):
+    """Topic bus câu hỏi `_finish_live` đã/sẽ phát cho mục sổ broker `e` (CONFIRMABLE vắng registry = write-incomplete)."""
+    v = str(e.get("verdict"))
+    kind = "write-incomplete" if v == BD.CONFIRMABLE else v.lower()
+    return f"corp-action-broker-{kind}-{e.get('ticker')}-{e.get('credit_day')}"
+
+
+def _asked_rows(intents, mode, rows):
+    """r7 m4 — câu hỏi ĐÃ có trong sổ broker từ lượt trước (cùng `mode`; đã gửi hay còn chờ gửi bù) về (mã, ex) mà ex
+    đó CHƯA thành record registry (mọi trạng thái — có record ⇒ nhánh multi-event registry sẵn có lo; REVOKED ⇒ người đã
+    xử lý ex đó). Câu hỏi = verdict mở + CONFIRMABLE vắng registry (write-incomplete); bỏ dòng chỉ-quan-sát và mục không
+    có ex. Dạng phần tử `_reg_rows` ⇒ dùng CHUNG vị từ `_near_rows` (cửa sổ, ex không đọc được ⇒ tính gần)."""
+    inreg = {(w["ticker"], w["ex"]) for w in rows}
+    out = []
+    for k, e in intents.items():
+        tk, ex = _norm_ticker(e.get("ticker")), e.get("ex_date")
+        if (e.get("mode") != mode or e.get("observation_only") or not ex
+                or e.get("verdict") not in _OPEN_VERDICTS + (BD.CONFIRMABLE,) or (tk, _iso(ex)) in inreg):
+            continue
+        out.append({"i": None, "rec": e, "ticker": tk, "ex": _iso(ex), "id": _asked_topic(e), "effective": False,
+                    "v": None, "invalid": None, "key": list(k)})        # không phải record ⇒ không hiệu lực
+    return out
+
+
+BQ_XDAY_BUDGET_S = 60     # r7 m4: tra BQ chạy TRƯỚC mọi lần ghi của lô ⇒ chặn trần (bq() mặc định 300s × 2 truy vấn)
+
+
+def _bq_event_exes(tk, exes, date_str):
+    """Gọi `_bq_event_exes_raw` trong luồng nền (daemon) với trần BQ_XDAY_BUDGET_S: quá trần ⇒ lỗi (fail-closed ⇒ hỏi),
+    không kéo lần ghi registry của các mã khác qua park_trim 19:30."""
+    import threading
+    box = []
+    th = threading.Thread(target=lambda: box.append(_bq_event_exes_raw(tk, exes, date_str)), daemon=True)
+    th.start()
+    th.join(BQ_XDAY_BUDGET_S)
+    if not box:
+        return None, f"tra BQ quá trần {BQ_XDAY_BUDGET_S}s (chưa trả kết quả)"
+    return box[0]
+
+
+def _bq_event_exes_raw(tk, exes, date_str):
+    """r7 m4 — tập ex có sự kiện ĐIỀU CHỈNH GIÁ của `tk` trong tav2_bq.corporate_action quanh `exes`, qua đường đọc sẵn có
+    `corp_action_lib.pricing_events` (bỏ not_executed, gồm announced) + `is_price_adjusting` (định nghĩa BƯỚC 0 r6).
+    Bảng là TRAP (1 lần nạp/ngày, upsert tại chỗ — kb/data_registry/price-volume/corporate_action_bq.md) ⇒ kiểm tươi
+    MỖI lần đọc: lần nạp gần nhất (ICT) trước phiên liền trước ⇒ STALE (cùng mốc FRESH của
+    corp_action_daily.gate_freshness — không import file đó: nó pop env + có cổng SystemExit lúc import).
+    Trả (set ex, None) hoặc (None, lỗi thật — §29); caller coi lỗi = KHÔNG có thông tin (fail-closed ⇒ hỏi)."""
+    from zoneinfo import ZoneInfo
+    try:
+        import corp_action_lib as cal
+        f = cal.feed_freshness()
+        raw = str(f.get("max_ingested") or "")[:19]
+        ing = dt.datetime.fromisoformat(raw).replace(tzinfo=dt.timezone.utc).astimezone(
+            ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()
+        prev = BD.prev_trading_day(date_str)
+        if ing < prev:
+            return None, (f"feed tav2_bq.corporate_action STALE: lần nạp gần nhất {raw} UTC (ICT {ing}) trước phiên "
+                          f"liền trước {prev}")
+        ds = []
+        for x in exes:
+            try:
+                ds.append(dt.date.fromisoformat(x))
+            except ValueError:
+                pass            # ex không đọc được: BQ không thể khớp nó ⇒ caller thấy thiếu ⇒ hỏi
+        if not ds:
+            return set(), None
+        evs = cal.pricing_events([tk], since=(min(ds) - dt.timedelta(days=1)).isoformat(), until=max(ds).isoformat())
+        return {str(ev.get("exright_date"))[:10] for ev in evs if cal.is_price_adjusting(ev)}, None
+    except Exception as e:      # noqa: BLE001 — BQ CLI/timeout/JSON/parse: mọi lỗi = không có thông tin
+        return None, f"{type(e).__name__}: {e}"
+
+
+def _cross_day(asked, rows, tk, cand, credit_day, mode):
+    """r7 m4 — I2 XUYÊN LƯỢT (luật user 07/10). Lượt trước đã HỎI về mã ở ex A (`asked`), lượt này broker thấy CÙNG mã
+    ở ex B ≠ A trong cửa sổ (`_near_rows` neo MỌI ex ứng viên + phiên credit, như `_multi_event`) ⇒ tra BQ:
+    ĐỦ sự kiện cho MỌI ex ⇒ None (sự kiện khác nhau, xử lý B bình thường); thiếu / tra lỗi / feed stale ⇒ dict như
+    `_multi_event` + `cross_day` ⇒ writer KHÔNG ghi B, hỏi lại người 1 lần / (mode, mã, tập ex) — khoá `ask_key` kiểu
+    sha1 của vendor-multi-event; tập ex đổi ⇒ khoá đổi ⇒ hỏi lại. Registry đã có record (mã, B) ⇒ None: không ghi gì cho B, nhánh
+    đối chiếu registry sẵn có lo."""
+    import hashlib
+    exes = {ex for ex, _ in cand}
+    if any(w["ticker"] == tk and w["ex"] in exes for w in rows):
+        return None
+    near = [w for w in _near_rows(asked, tk, sorted(exes) + [credit_day]) if w["ex"] not in exes]
+    if not near:
+        return None
+    allx = sorted(exes | {w["ex"] for w in near})
+    found, err = _bq_event_exes(tk, allx, credit_day)
+    if err is None and set(allx) <= found:
+        print(f"  [{tk}] lượt trước đã hỏi ex {sorted({w['ex'] for w in near})}; BQ có ĐỦ sự kiện điều chỉnh giá ở "
+              f"{allx} ⇒ sự kiện KHÁC nhau, xử lý ex {sorted(exes)} bình thường")
+        return None
+    bq = (f"tra BQ LỖI ({err}) ⇒ coi như KHÔNG có thông tin" if err is not None else
+          f"BQ tav2_bq.corporate_action (sự kiện điều chỉnh giá) có ex {sorted(found & set(allx))} trong {allx}, "
+          f"THIẾU {sorted(set(allx) - found)}")
+    asked_d = [{"ex_date": w["ex"], "verdict": w["rec"].get("verdict"), "credit_day": w["rec"].get("credit_day"),
+                "topic": w["id"], "key": w["key"]} for w in near]
+    items = ([f"lô: ex {ex} {d}" for ex, d in sorted(cand)]
+             + [f"ĐÃ HỎI lượt trước: ex {a['ex_date']} {a['verdict']} phiên {a['credit_day']} (topic {a['topic']})"
+                for a in asked_d] + [f"BQ: {bq}"])
+    dig = hashlib.sha1("\n".join([mode] + allx).encode("utf-8")).hexdigest()[:12]   # mode: done shadow ≠ đã hỏi live
+    return {"exes": allx, "items": items, "has_registry": False,
+            "cross_day": {"asked": asked_d, "bq": bq, "bq_error": err,
+                          "ask_key": ["broker-cross-day", tk, ",".join(allx), dig, "ASKED"]}}
+
+
+def _done_rows(entries, at):
+    """Dòng `done` cho các mục ĐÃ thông báo — kèm khoá hỏi-1-lần `cross_day.ask_key` (r7 m4) ở CÙNG chỗ."""
+    return ([{"kind": "done", "key": e["key"], "at": at} for e in entries]
+            + [{"kind": "done", "key": e["cross_day"]["ask_key"], "at": at}
+               for e in entries if (e.get("cross_day") or {}).get("ask_key")])
+
+
 def _ask_vendor_multi_event(ticker, ex_dates, credit_day, m):
     """r6: mã có ≥2 sự kiện KHÁC ex trong ±NEAR_DUP_DAYS (ứng viên lô + record registry) — writer vendor KHÔNG ghi gì
     cho mã. Hỏi 1 lần / (mã, tập sự kiện): tập đổi (thêm sự kiện / record đổi trạng thái) ⇒ thông tin mới ⇒ hỏi lại.
@@ -1773,7 +1886,8 @@ def _finish_live(e, registry_ids):
                      "registry_check": rg or None,
                      "broker": {"qty_multiplier": e.get("qty_multiplier"), "cash_leg": e.get("cash_leg")},
                      "vendor_check": vc, "record_proposed": e.get("record_proposed"),
-                     "registry_update_proposed": upd, "multi_event": e.get("multi_event"),
+                     "registry_update_proposed": upd, "registry_unreadable": e.get("registry_unreadable"),
+                     "multi_event": e.get("multi_event"), "cross_day": e.get("cross_day"),
                      "accounts": e["accounts"], "urgency": "high"})
     urgency = "normal" if v == BD.INSUFFICIENT else "high"
     hint = {BD.INSUFFICIENT: "chưa đủ bản ghi/giá để quyết (cron 19:25 có thể chạy trước khi DNSE "
@@ -1789,7 +1903,8 @@ def _finish_live(e, registry_ids):
                               f"KHÔNG tự ghi): {vc.get('status', '-')} {vc.get('vendor') or ''}. {act}."),
                  "ticker": tk, "credit_day": day, "ex_date_if_event": e["ex_date"],
                  "event_kind": e.get("event_kind"), "vendor_check": vc,
-                 "registry_update_proposed": upd, "multi_event": e.get("multi_event"),
+                 "registry_update_proposed": upd, "registry_unreadable": e.get("registry_unreadable"),
+                 "multi_event": e.get("multi_event"), "cross_day": e.get("cross_day"),
                  "verdict": v, "accounts": e["accounts"], "urgency": urgency})
 
 
@@ -2118,7 +2233,7 @@ def _shadow_finding(date_str, entries):
                            for e in entries]})
     if rc != 0:
         return 1
-    _ledger_append([{"kind": "done", "key": e["key"], "at": now_ict} for e in entries])
+    _ledger_append(_done_rows(entries, now_ict))
     print(f"  shadow: 1 finding tóm tắt cho {len(entries)} mục")
     return 0
 
@@ -2151,6 +2266,7 @@ def _run_broker_locked(date_str, mode, results, resend=True, phase="qty", shadow
         if r.get("kind") is None:
             share.setdefault(_norm_ticker(r["ticker"]), []).append(r)
     multi = {}
+    asked = _asked_rows(intents, mode, rows)       # r7 m4: câu hỏi lượt trước — I2 XUYÊN LƯỢT (`_cross_day`)
     for tk, rs in share.items():
         cand = [(r["ex_date"], f"broker {r['verdict']} ×{r.get('qty_multiplier')} chân tiền {r.get('cash_leg')}")
                 for r in rs]
@@ -2158,6 +2274,8 @@ def _run_broker_locked(date_str, mode, results, resend=True, phase="qty", shadow
         if m is None and len(rs) > 1:
             m = {"exes": sorted({ex for ex, _ in cand}), "items": [f"lô: ex {ex} {d}" for ex, d in sorted(cand)],
                  "has_registry": False}
+        if m is None:
+            m = _cross_day(asked, rows, tk, cand, date_str, mode)
         if m:
             multi[tk] = dict(m, verdicts=[r["verdict"] for r in rs])
     batch, rejected, multi_done = [], [], set()
@@ -2169,6 +2287,11 @@ def _run_broker_locked(date_str, mode, results, resend=True, phase="qty", shadow
         dup = multi.get(tk)       # chỉ mã có sự kiện KL mới vào `multi` (một chốt duy nhất ở `share`)
         if dup and tk in multi_done:
             print(f"  [{tk}] đã gộp vào mục nhiều-sự-kiện của mã ở lượt này ⇒ không thêm mục")
+            continue
+        if dup and dup.get("cross_day") and tuple(dup["cross_day"]["ask_key"]) in done:
+            multi_done.add(tk)
+            print(f"  [{tk}] đã hỏi người về (mã, tập ex) {dup['exes']} ({dup['cross_day']['ask_key']}) ⇒ không hỏi "
+                  f"lặp; vẫn KHÔNG ghi gì cho mã")
             continue
         rrec = reg_recs.get((tk, ex))
         reg_has = str(rrec.get("_status", ""))[:40] if rrec is not None else None
@@ -2207,7 +2330,9 @@ def _run_broker_locked(date_str, mode, results, resend=True, phase="qty", shadow
             # m7: UNVERIFIED (lệch vendor/registry) GIỮ verdict ⇒ câu hỏi vẫn gọi tên Winston.
             multi_done.add(tk)
             nv = BD.UNVERIFIED if BD.UNVERIFIED in dup["verdicts"] + [v] else BD.AMBIGUOUS
-            r = dict(r, verdict=nv, why=(f"{len(dup['exes'])} sự kiện KHÁC ex trong ±{NEAR_DUP_DAYS} ngày: "
+            r = dict(r, verdict=nv, why=(("HỎI LẠI (lượt trước đã hỏi mã ở ex khác, BQ không xác nhận đủ sự kiện) — "
+                                          if dup.get("cross_day") else "")
+                                         + f"{len(dup['exes'])} sự kiện KHÁC ex trong ±{NEAR_DUP_DAYS} ngày: "
                                          f"{dup['items']} — có thể CÙNG sự kiện ghi 2 ngày ⇒ KHÔNG ghi gì cho mã (×hệ "
                                          f"số 2 lần); detector: {v} — {r['why']}"))
             v = nv
@@ -2222,6 +2347,8 @@ def _run_broker_locked(date_str, mode, results, resend=True, phase="qty", shadow
                               for k, a in r["accounts"].items()}}
         if dup:
             entry["multi_event"] = dup["items"]
+            if dup.get("cross_day"):
+                entry["cross_day"] = dup["cross_day"]
         entry["key"] = BD.ledger_key(entry)
         if tuple(entry["key"]) in intents:
             print(f"  [{tk}] sổ broker đã có {entry['key']} ⇒ không lặp (idempotent)")
@@ -2347,7 +2474,7 @@ def _run_broker_locked(date_str, mode, results, resend=True, phase="qty", shadow
     else:
         rc = 1
     if finished:
-        _ledger_append([{"kind": "done", "key": e["key"], "at": now_ict} for e in finished])  # pha 2: sau bus
+        _ledger_append(_done_rows(finished, now_ict))  # pha 2: sau bus
     print(f"Xong nhánh broker: {len(new)} mục sổ mới, {len(pending)} gửi bù, {len(new_recs)} "
           f"record ghi registry, {len(finished)}/{len(todo)} đã thông báo.")
     return rc

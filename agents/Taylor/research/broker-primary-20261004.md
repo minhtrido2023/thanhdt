@@ -304,3 +304,57 @@ vòng (đột biến cũ "chặn ×2 áp cả chỉ-giá" sống vì 2 chốt d�
 đúng giữa ghi và câu validate-reject broker ⇒ câu đó mất (0 dòng sổ) — nếu muốn bền tuyệt đối thì ghi intent `VALIDATE_REJECT`
 vào sổ (thêm verdict mới, đụng consumer sổ) — chưa làm; (c) KHÔNG merge, KHÔNG đổi crontab, `MIKE_CA_BROKER_SOURCE` mặc định giữ
 shadow.
+
+### r7 (job Taylor_20261007_030542, user giao 07/10 10:02 — vòng cuối phạm vi hẹp) — m2 + m3 test, m4 I2 XUYÊN LƯỢT
+Nhánh `feat/broker-primary-r7-20261007` (worktree `wt-bp-r7-1007`, từ master 6daeca8d ⊇ dd893add). KHÔNG merge, KHÔNG đổi
+crontab, `MIKE_CA_BROKER_SOURCE` mặc định giữ shadow.
+
+**m2 (V19, V46 — chỉ test).** `test_r7`: "r7 V19" (UNVERIFIED mang record_proposed + đọc lại thô hỏng ⇒ câu KHÔNG mang
+record_proposed, nói "ĐỌC LẠI HỎNG", không dặn ghi), "r7 V46" (p10: ghi OK, đọc lại thô + load_corp_actions EIO ⇒ write-incomplete
+record=None + registry_unreadable; mục GỬI BÙ VPB mang record_proposed cũng bỏ nó), tiền đề có tên (đường lỗi thật sự đi qua).
+Phụ (sửa hẹp, có): key `registry_unreadable` vào payload câu UNVERIFIED VÀ câu chung (INSUFFICIENT/AMBIGUOUS) — test có tên.
+**m3 (V17 — chỉ test).** "r7 V17": p9 (gửi bù UNVERIFIED ex A record_proposed + lô CONFIRMABLE ex B, BQ có đủ 2 sự kiện) — lượt
+thật ghi B + gửi bù bỏ record_proposed; dry-run bắt payload qua `_bus` ⇒ câu gửi bù GIỐNG HỆT lượt thật, registry không đổi.
+
+**m4 — thiết kế (luật user 07/10).**
+- `_asked_rows(intents, mode, rows)`: câu hỏi ĐÃ có trong sổ broker (cùng mode; đã gửi hay chờ gửi bù) = verdict mở
+  (INSUFFICIENT/AMBIGUOUS/DEFER/UNVERIFIED) + CONFIRMABLE mà record VẮNG registry (write-incomplete); bỏ dòng chỉ-quan-sát, CASH_DIVIDEND
+  (finding, không phải câu hỏi), mục không có ex, và ex đã thành record registry (mọi trạng thái: hiệu lực ⇒ nhánh multi-event
+  registry sẵn có giữ nguyên; REVOKED ⇒ người đã xử lý ex đó). Dạng phần tử `_reg_rows` ⇒ dùng CHUNG `_near_rows`.
+- `_cross_day` (chỉ khi `_multi_event` registry/lô = None): câu đã hỏi ex A ≠ ex lô B trong cửa sổ ±10 (neo mọi ex lô + phiên
+  credit, cùng vị từ) ⇒ `_bq_event_exes`: `corp_action_lib.feed_freshness` (nạp gần nhất ICT < phiên liền trước ⇒ STALE — cùng mốc
+  FRESH của `corp_action_daily.gate_freshness`, không import file đó vì pop env + cổng SystemExit) rồi `pricing_events([mã],
+  since=min−1, until=max)` + `is_price_adjusting` (định nghĩa BƯỚC 0). **BQ có sự kiện ở MỌI ex ⇒ xử lý B bình thường; thiếu ≥1 /
+  tra lỗi / stale / quá trần ⇒ KHÔNG ghi B, 1 mục AMBIGUOUS (UNVERIFIED nếu chân lệch nguồn) nêu: câu đã hỏi (ex A, verdict, phiên,
+  topic, khoá sổ) + lô ex B + "BQ: … THIẾU […]" hoặc "tra BQ LỖI (<lỗi thật>)".** Payload thêm `cross_day`.
+- Hỏi 1 lần: khoá done `["broker-cross-day", mã, "exA,exB", sha1(mode+tập ex), "ASKED"]` ghi CÙNG chỗ với done của mục
+  (`_done_rows`: live sau bus, shadow sau finding, gửi bù cũng vậy). Khoá có ⇒ không tạo mục, vẫn không ghi B. Tập ex đổi ⇒ hỏi lại.
+  mode trong sha1 ⇒ done của lượt shadow KHÔNG chặn câu live sau khi bật.
+- Trần thời gian BQ `BQ_XDAY_BUDGET_S=60` (luồng daemon): tra BQ chạy TRƯỚC mọi lần ghi của lô, `bq()` mặc định 300s × 2 truy vấn
+  ⇒ không chặn trần thì BQ treo kéo ghi registry các mã khác qua park_trim 19:30. Quá trần = lỗi ⇒ hỏi.
+- Registry đã có record (mã, B) ⇒ không cross-day (không ghi gì cho B; nhánh đối chiếu registry lo).
+- shadow chạy CÙNG logic trên sổ shadow (finding nêu lý do) — bản xem trước trung thực của live; dry-run đọc BQ (đọc, không tác dụng).
+
+**ĐỀ XUẤT (không làm):** (1) áp ngoại lệ "BQ có đủ sự kiện ở mọi ex" cho nhánh multi-event REGISTRY (A đã là record): hiện vẫn chặn +
+hỏi kể cả khi BQ xác nhận 2 sự kiện thật — ~4 ca/năm toàn thị trường, đổi = thêm đường tự ghi cạnh record có sẵn, cần user chốt.
+(2) Câu hỏi phía vendor (`vendor-*` ASKED, off/shadow + confirm-only live) KHÔNG tính vào `_asked_rows`: vendor_check của detector đã
+đối chiếu lịch vendor mỗi lượt (ex lệch ⇒ UNVERIFIED); thêm thì phải parse khoá done tự do. (3) `_close_resolved` vẫn chỉ đóng câu
+cùng phiên credit — câu cross-day do người đóng (như vendor-multi-event).
+
+**Verify (artifact, r7):**
+- Selfcheck **751/0 (py3.10) · 753/0 (py3.12)** × Asia/Ho_Chi_Minh / UTC / `env -u TZ` — 6/6. Mới: `test_r7` 41 assertion (V19×3,
+  V46×4, V17×2, m4.1–m4.8 gồm 3 nhánh BQ đủ/thiếu×4/lỗi×3 + quá trần + biên tươi ICT, biên cửa sổ D−10/EX+10 hỏi, D−11/EX+11 ghi,
+  idempotent/tập đổi/tách mode, lọc câu đã hỏi ×6, shadow, dry-run) + dây bẫy BQ (`tripwire.no_real_bq_call`). M1g (r5) viết lại theo
+  luật mới: chạy với BQ có đủ 2 sự kiện.
+- Control: selfcheck r7 trên code master ⇒ 11 FAIL có tên (m2 payload ×2, V46 gửi bù, m4.1b/4.2×4/4.3×3) rồi crash
+  (`BQ_XDAY_BUDGET_S` chưa có); V19/V17/V46-mới PASS trên master đúng kỳ vọng (canh hành vi sẵn có — đó là lỗ hổng TEST m2/m3).
+- Mutation (bộ trong selfcheck, song song trên bản sao `/tmp/r7_pmut.py`): **506/506 (3.10)**, **505/506 (3.12 — `parse 5 chữ số`
+  tương đương, khai từ r4)**, 0 chỉ-crash. +31 đột biến r7 (V17/V19/V46 neo Y NGUYÊN của reviewer + V46b + 27 cho m2 payload/m4). Lần
+  chạy đầu: 2 sống ("khoá bỏ tập câu đã hỏi" ⇒ đổi thiết kế khoá sang (mode, tập ex) đúng chữ user + test tách mode; "khoá bỏ mode"
+  ⇒ test dùng khoá do lượt shadow THẬT sinh ra); 2 hồi quy bộ cũ do r7 đụng (r4 m9 neo lại `_done_rows`; r4 N42 crash KeyError
+  'effective' ⇒ phần tử câu-đã-hỏi mang đủ khoá `_reg_rows`). Sau sửa: hết.
+- Probe reviewer r6 trên r7: p8(1) payload có `registry_unreadable`, không record_proposed; p8(2) (hôm qua hỏi TPB ex 10-01, hôm nay
+  CONFIRMABLE ex 10-02) ⇒ registry [] + 1 câu ambiguous (BQ ở probe = dây bẫy ⇒ lỗi ⇒ hỏi); p10 write-incomplete record=None.
+- Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0 cả 6; sha256 `data/corp_actions.json` 21a88fb5… y nguyên; sổ broker
+  production vẫn không tồn tại (chỉ .lock 10-05) ⇒ không câu đã hỏi nào ⇒ không tra BQ. 10-01 live: TPB MATCH record người ký; 10-06
+  live: TV1 PRICE_ONLY INSUFFICIENT (câu lẽ ra gửi).
