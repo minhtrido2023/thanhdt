@@ -536,3 +536,11 @@
 - [2026-10-07T06:47:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261007_062338", "source": "watcher"}
 - [2026-10-07T06:48:43Z] Taylor/heartbeat — Taylor_20261007_062338: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261007_062338", "source": "watcher"}
 - [2026-10-07T06:49:00Z] Taylor/finding — broker-primary-r10: {"commit": "6e26dbe1", "branch": "feat/broker-primary-r10-20261007", "worktree": "mike/agents/Taylor/wt-bp-r10-1007", "base": "master 2563e481", "merged": false, "test_only": true, "selfcheck": "6/6 xanh: 3.10=788/0, 3.12=790/0 x {HCM,UTC,unset TZ}", "mutations": "541/541 (3.10), 540/541 (3.12, parse-5-chu-so tuong duong)", "proof": "2 dot bien moi SONG tren selfcheck cu (785/0), CHET tren moi (m3 2 FAIL, m4 1 FAIL)", "shadow": "giu nguyen; khong cham corp_actions.json/crontab/MIKE_CA_BROKER_SOURCE"}
+
+## Consolidation 2026-10-07T12:04:50Z
+- [2026-10-07T12:03:57Z] DollarBill/heartbeat — DollarBill_20261007_120256: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261007_120256", "source": "watcher"}
+- [2026-10-07T12:03:59Z] DollarBill/heartbeat — DollarBill_20261007_120258: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261007_120258", "source": "watcher"}
+- [2026-10-07T12:04:33Z] DollarBill/decision — plan-2026-10-08-SpaceX: {"account": "SpaceX", "plan_date": "2026-10-08", "n_orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "n_bal": 0, "lag_due": 0, "park_trim": "BLOCKED_ALL_NAMES", "capit_episode": "CAPIT-2026-07-20 open, sessions_held=54, unchanged", "active_nav_vnd": 982786247, "egg_vnd": 347730271, "notes": "0 lenh - khong co BAL/LAG candidate, PARK con lai 10.41tr duoi 1 lo/sellable=0 (T+2)"}
+- [2026-10-07T12:01:01Z] Taylor/finding — nav-exdate-forecast 2026-10-07: {"asof": "2026-10-07", "n_events": 1, "tickers": ["TV1"], "kinds": ["CASH_DIV"]}
+- [2026-10-07T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-10-07", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-10-07T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
