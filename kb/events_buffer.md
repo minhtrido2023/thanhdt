@@ -338,3 +338,6 @@
 
 ## Consolidation 2026-10-07T17:45:56Z
 - [2026-10-07T17:45:31Z] Mike/finding — daily-retro-finalized-2026-10-07: {"status": "logged", "entry": "kb/incidents/retro/retro-2026-10-07.md", "commit": "8a207d01", "wags_verify": "GAPS_FOUND_3_fixed", "gaps_fixed": ["error event count 0->1 (selfcheck-weekly-new-red)", "added 2 missing finding events (sbv-weekly fetch_failed, vn-realestate routine)", "removed blame tone naming DollarBill in incident #1 source row"], "incidents": 0, "false_alarms_patched": 2, "pattern_escalated_first_time": "retro-pattern-recurring-selfcheck-red-backlog-not-closed", "pattern_self_closed": "Pattern D corp-action-feed-weekend-mistaken-for-gap", "working_memory": "cleaned", "consolidate": "ran v3677", "draft_removed": true, "discord_posted": "trading_daily"}
+
+## Consolidation 2026-10-07T22:07:02Z
+- [2026-10-07T21:52:10Z] Winston/finding — sbv-weekly-check-2026-10-08: {"date": "2026-10-08", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
