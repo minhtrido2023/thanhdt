@@ -40,8 +40,18 @@ Q2, cao nhất từ 2020), CPI là điểm sáng (đỉnh 5,60% T5 -> 4,69% T6, 
 
 VIỆC CẦN LÀM cho kỳ kiểm tra tháng {month_label} này:
 1. CPI YoY tháng mới nhất công bố (GSO/Cục Thống kê) — so trần Quốc hội 4,5% + xu hướng 3 tháng
-2. Lãi suất huy động Big-4 tháng này so tháng trước (dùng deposit_rate_vn.py nếu đã cập nhật, hoặc
-   WebSearch xác nhận)
+2. Chi phí vốn / thanh khoản — BẢNG ĐA-PROXY 5 tầng theo charter của bạn (mục "KHÔNG BAO GIỜ một
+   con số"), KHÔNG chỉ Big-4 tiết kiệm 12M (số đó bị neo hành chính, ngân hàng lách qua kênh khác):
+   A. Big-4 tiết kiệm 6M+12M, online VÀ tại quầy tách riêng (deposit_rate_vn.py + WebSearch)
+   B. CCTG Big-4 6M VÀ 12M từng NH (cctg_rate_vn.py + WebSearch), spread CCTG − tiết kiệm cùng kỳ
+      hạn, NH nào mở/rút kỳ hạn CCTG
+   C. NH tư nhân: top-5 12M biểu chuẩn, số NH ≥7%, cộng lãi/khuyến mãi/tiền gửi lớn
+   D. Liên NH qua đêm/1W/1M/3M + OMO lưu hành (báo cáo tuần VBMA), TPCP 10Y + tỷ lệ trúng thầu,
+      USD/VND chính thức vs tự do
+   E. Tín dụng YTD vs huy động YTD (cùng phạm vi + mốc ngày), văn bản nới LDR/room/vốn ngắn hạn
+   Kết luận chi phí vốn thật theo cả HƯỚNG lẫn MỨC (ĐI NGANG / TĂNG NGẦM / GIẢM NGẦM + độ tin cậy),
+   và liệt kê proxy PHÂN KỲ với số niêm yết. So sánh với kỳ trước trong
+   mike/kb/projects/vn_realestate_monthly_checks/ (kỳ 2026-10 là kỳ đầu có bảng này — làm mốc).
 3. Có tin tức chính sách MỚI về tín dụng/BĐS (thông tư/quyết định mới, siết hay nới) trong tháng
    không
 4. Nếu có số liệu tín dụng/BĐS/NPL mới hơn Q2/2026 (thường theo quý, có thể chưa có) thì cập nhật
@@ -50,6 +60,8 @@ NGƯỠNG ESCALATE (đã chốt với user 2026-08-31, đọc {tracker_file} m�
 dùng đúng số mới nhất nếu đã sửa):
 - CPI YoY vượt lại trần 4,5% SAU KHI đã đảo chiều giảm (relapse)
 - Lãi suất huy động Big-4 tăng thêm >=0,3pp trong 1 tháng
+(Bảng đa-proxy ở mục 2 CHƯA có ngưỡng escalate riêng — user chưa chốt. Proxy phân kỳ mạnh thì
+nêu rõ trong phân tích + lý do FINAL_STATUS, nhưng KHÔNG tự coi là ngưỡng bị chạm.)
 - Có thông tư/quyết định SIẾT MỚI (đảo hướng so với xu hướng NỚI đã ghi nhận 30/05/2026)
 - Tin NPL/bank-run cụ thể ngoài chu kỳ công bố quý thường lệ
 
