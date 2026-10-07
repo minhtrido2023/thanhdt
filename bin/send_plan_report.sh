@@ -149,7 +149,7 @@ if [ -n "$DRIFT_CMD" ]; then
 fi
 export DRIFT_BLOCK
 
-RESULT=$(cd "$WORKDIR" && python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
+RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os
 
 plan_file, expected_date, today, now_ict, acct = sys.argv[1:6]
@@ -856,6 +856,40 @@ else:
 # phải hiện ra cho người duyệt, không chỉ nằm trong log stdout của cron (arch-review vòng 3) —
 # `capped` qty>0 đã có note "[CAP ...]" ngay trên dòng lệnh trong orders[], khối này bổ sung cho
 # ca KHÔNG có lệnh nào để hiện (blocked hoàn toàn, hoặc capped về 0) và tổng hợp lại một chỗ.
+# ── CP chờ niêm yết bổ sung (user duyệt 2026-10-07): phần KHOÁ của mã có bằng chứng là CP
+# thưởng/cổ tức CP/quyền mua (bin/locked_shares.py — không có lệnh mua gần đây + có sự kiện ISS)
+# ⇒ lệnh bán bị cắt về trần sellable là chuyện đã biết, tự hết khi niêm yết, người duyệt không
+# phải quyết gì ⇒ GỘP thành 1 dòng ℹ️ thay vì ⚠️ lặp mỗi tối. Không đủ bằng chứng ⇒ giữ ⚠️ cũ.
+# Fail-open: lỗi module/đọc file ⇒ _lk_pending rỗng ⇒ hiển thị y như trước.
+_lk_pending = {}
+try:
+    _lk_bin = os.environ.get("SEND_PLAN_MIKE_BIN")
+    if _lk_bin and _lk_bin not in sys.path:
+        sys.path.insert(1, _lk_bin)
+    if os.getcwd() not in sys.path:
+        sys.path.insert(1, os.getcwd())          # corp_action_lib nằm ở WC root
+    import locked_shares as _lks
+    _lk_acct_no = str(plan.get("account_no") or "")
+    if _lk_acct_no:
+        _lk_res = _lks.classify(_lk_acct_no, today,
+                                os.path.join(os.getcwd(), "data", "execution_logs"),
+                                os.path.join(os.getcwd(), "data", "corp_actions.json"))
+        _lk_pending = _lk_res.get("pending") or {}
+except Exception as _e:
+    print(f"[locked_shares] bỏ qua, hiển thị như cũ: {type(_e).__name__}: {_e}", file=sys.stderr)
+_lk_shown = False
+
+def _lk_info_line(exit_caps):
+    """1 dòng ℹ️ gộp mọi mã chờ niêm yết; exit_caps = {ticker: [(book, desired, capped)]}."""
+    parts = []
+    for _tk, _it in sorted(_lk_pending.items()):
+        _d = _lks.describe(_tk, _it)
+        for _bk, _want, _got in exit_caps.get(_tk, []):
+            _d += f" — lệnh thoát {_bk} {_want}cp chỉ đặt được {_got}cp, phần còn lại tự bán phiên sau"
+        parts.append(_d)
+    return ("ℹ️ CP chờ niêm yết bổ sung, CHƯA bán được (không cần duyệt gì, tự bán khi giao "
+            "dịch được): " + "; ".join(parts) + ".")
+
 _aei_notes = plan.get("auto_exit_inject_notes") or []
 if _aei_notes:
     # §29 vòng 4 (arch-review): `_aei_notes[-1]` một mình bị che khi có entry ghi tay
@@ -901,6 +935,15 @@ if _aei_notes:
         for b in _aei_blocked[:8]:
             _tk_s = b.get("ticker") or "(book-level)"
             lines.append(f"   • {_tk_s} ({b.get('book','?')}): {str(b.get('reason') or '')[:150]}")
+    # Mã cắt do CP chờ niêm yết (bằng chứng ở _lk_pending) ⇒ chuyển sang dòng ℹ️ gộp.
+    _lk_exit = {}
+    for c in [c for c in _aei_capped if c.get("ticker") in _lk_pending]:
+        _lk_exit.setdefault(c.get("ticker"), []).append(
+            (c.get("book", "?"), c.get("desired_qty", "?"), c.get("capped_qty", "?")))
+    _aei_capped = [c for c in _aei_capped if c.get("ticker") not in _lk_pending]
+    if _lk_exit:
+        lines.append(_lk_info_line(_lk_exit))
+        _lk_shown = True
     if _aei_capped or _aei_manual_capped:
         lines.append(f"⚠️ **{len(_aei_capped) + len(_aei_manual_capped)} mã auto-exit BỊ CẮT do trần sellable (Σ SELL mọi book):**")
         for c in _aei_capped[:8]:
@@ -941,6 +984,21 @@ try:
             lines.append(f"   · {_note_text(_n)}")
         lines.append("   ⚠️ Các lệnh BÁN này KHÔNG nằm trong danh sách lệnh chính ở trên — "
                      "duyệt riêng thì Mike/Bill mới đưa vào plan thực thi.")
+    elif (pt_dec == "BLOCKED_ALL_NAMES" and _lk_pending
+          and (_pt_bl_tk := {b.get("ticker") for b in (park_trim.get("blocked") or [])
+                             if isinstance(b, dict)})
+          and _pt_bl_tk <= set(_lk_pending)
+          and _num(park_trim.get("pool_vnd")) > 0
+          and _num(park_trim.get("park_mv_vnd")) <= 0.01 * _num(park_trim.get("pool_vnd"))):
+        # Mọi mã PARK không bán được đều có phần CP chờ niêm yết VÀ phần PARK còn lại ≤1% pool
+        # ⇒ không phải ca cần duyệt; vẫn hiện quy mô để người đọc tự thấy nếu khác thường.
+        if not _lk_shown:
+            lines.append(_lk_info_line({}))
+            _lk_shown = True
+        lines.append(f"🅿️ Trim PARK (L1): phiên này không bán được — PARK còn "
+                     f"{_tr(_num(park_trim.get('park_mv_vnd')))} "
+                     f"({_num(park_trim.get('park_mv_vnd')) / _num(park_trim.get('pool_vnd')) * 100:.2f}% pool), "
+                     f"chỉ gồm {', '.join(sorted(_pt_bl_tk))} (CP chờ niêm yết / lô lẻ ở dòng ℹ️ trên).")
     elif pt_dec.startswith("BLOCKED_") or pt_dec in ("NO_SELL_POSSIBLE",):
         lines.append(f"🅿️ **TRIM PARK (L1) BỊ CHẶN — {pt_dec}**: "
                      + ("; ".join(_note_text(n) for n in (park_trim.get("notes") or [])[:2])
