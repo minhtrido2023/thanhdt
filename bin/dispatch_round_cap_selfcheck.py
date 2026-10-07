@@ -132,6 +132,17 @@ def suite(root):
         check("override_audited", "\toverride\t" in audit(log5) and "user duyệt 10:00" in audit(log5), audit(log5))
         check("override_job_field", f"override:{BR}:4" in out, repr(out))
 
+        # 5b. Override THIẾU lý do (rỗng / chỉ khoảng trắng) ⇒ TỪ CHỐI, vẫn chặn (user chốt 2026-10-07)
+        for tag, rs in (("unset", None), ("empty", ""), ("blank", "  \t ")):
+            log5b = td / f"ov_noreason_{tag}.log"
+            kw = {"DISPATCH_ROUND_CAP_OVERRIDE": "1", "DISCORD_THREAD_ID": "123"}
+            if rs is not None:
+                kw["DISPATCH_ROUND_CAP_REASON"] = rs
+            rc, out, err = run_cap(f"Vòng 4 branch {BR}", j4, log5b, **kw)
+            check(f"override_no_reason_refused_{tag}", rc == 7 and "thiếu lý do" in err
+                  and "\toverride_refused\t" in audit(log5b) and "\toverride\t" not in audit(log5b)
+                  and out.strip().endswith(f"block:{BR}:4"), f"rc={rc} err={err[-200:]}")
+
         # 6. Override từ agent headless (JOB_ID kế thừa) ⇒ TỪ CHỐI, vẫn chặn
         log6 = td / "ovr.log"
         rc, out, err = run_cap(f"Vòng 4 branch {BR}", j4, log6, DISPATCH_ROUND_CAP_OVERRIDE="1",
@@ -237,7 +248,8 @@ def suite(root):
         # --- END-TO-END qua dispatch.sh thật (agent không tồn tại ⇒ không thể có side-effect) ---
         rc, out, err = run_disp(f"Vòng 4 branch {BR}", j4, td / "e2e.log")
         check("e2e_dispatch_exit7", rc == 7 and "CHẶN" in err, f"rc={rc} err={err[-300:]}")
-        rc, out, err = run_disp(f"Vòng 4 branch {BR}", j4, td / "e2e_ov.log", DISPATCH_ROUND_CAP_OVERRIDE="1")
+        rc, out, err = run_disp(f"Vòng 4 branch {BR}", j4, td / "e2e_ov.log", DISPATCH_ROUND_CAP_OVERRIDE="1",
+                                DISPATCH_ROUND_CAP_REASON="user duyệt e2e")
         check("e2e_override_passes_cap", rc == 1 and "not found" in err and "CHẶN" not in err,
               f"rc={rc} err={err[-300:]}")
         rc, out, err = run_disp(f"Vòng 1 branch {BR}", td / "khong-ton-tai", td / "e2e_fo.log")
@@ -303,7 +315,8 @@ def suite(root):
             rec = json.loads((sb / "bus" / "jobs" / new[-1]).read_text()) if new else {}
             return r.returncode, rec, r.stderr
 
-        rc, rec, err = full_disp(f"Vòng 4 branch {BR}", DISPATCH_ROUND_CAP_OVERRIDE="1")
+        rc, rec, err = full_disp(f"Vòng 4 branch {BR}", DISPATCH_ROUND_CAP_OVERRIDE="1",
+                                 DISPATCH_ROUND_CAP_REASON="user duyệt full")
         check("full_override_record_fields", rc == 0 and rec.get("chain_tokens") == BR
               and rec.get("round_cap") == f"override:{BR}:4", f"rc={rc} rec={rec} err={err[-300:]}")
         check("full_override_not_leaked_to_agent",

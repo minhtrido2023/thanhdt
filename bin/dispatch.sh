@@ -79,8 +79,8 @@
 #
 # Exit codes riêng: 1=lỗi/huỷ · 2=routing guard · 4=circuit breaker · 5=đã queue auto-resume ·
 #   6=trùng write-scope · 7=CẦU CHÌ VÒNG POLISH (chuỗi nhánh đã ≥3 vòng/24h tới cùng agent, xem
-#   bin/dispatch_round_cap.py; override chỉ phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1 —
-#   honour system; chạy TRƯỚC guard exit 2). Caller tự động phải phân biệt 7 với "dispatch chết":
+#   bin/dispatch_round_cap.py; override chỉ phiên tương tác Mike/user: DISPATCH_ROUND_CAP_OVERRIDE=1 +
+#   DISPATCH_ROUND_CAP_REASON bắt buộc (2026-10-07) — honour system; chạy TRƯỚC guard exit 2). Caller tự động phải phân biệt 7 với "dispatch chết":
 #   bin/wags_autofix.sh có nhánh riêng; mọi lần chặn ngoài phiên tương tác đều có bus event.
 # Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
 # own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md

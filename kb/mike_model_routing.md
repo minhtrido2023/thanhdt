@@ -263,12 +263,16 @@ diff/nhánh một lượt (không chỉ chỗ reviewer vừa chỉ) và lập da
 sống; (2) sửa hết trong **một** dispatch; (3) arch-review xác nhận **một** lần. Không vá cuốn chiếu.
 
 **Cầu chì cắt vòng (bắt buộc áp khi dispatch lại sau arch-review):**
-- Vòng 1-2 trên cùng một nhánh: theo chế độ A nếu `required_change` đã cụ thể.
+- **Trước vòng 2 (user chốt 2026-10-07, retro Pattern A phương án a): review TOÀN BỘ nhánh MỘT lần** —
+  reviewer liệt kê trọn bộ lỗi + mutation còn sống, vòng 2 sửa hết trong 1 dispatch. Áp cho MỌI đường
+  (`dispatch.sh` lẫn `Agent()` — cầu chì code chỉ đếm `dispatch.sh`). Vòng 2 vẫn chế độ A nếu
+  `required_change` đã cụ thể.
 - **Vòng 3 mà arch-review VẪN trả NEEDS_CHANGES với phát hiện MỚI (không phải lặp lại vòng trước) ⇒ DỪNG
   polish, chuyển sang chế độ B** (Opus high review toàn bộ rồi sửa một lượt). Không dispatch vòng 4 kiểu cũ.
 - **Giờ là CODE (2026-10-05):** `dispatch.sh` CHẶN (exit 7) dispatch vòng ≥4 cùng nhánh/worktree tới cùng agent
   trong 24h (`bin/dispatch_round_cap.py`); user đã duyệt ⇒ phiên tương tác chạy `DISPATCH_ROUND_CAP_OVERRIDE=1
-  bin/dispatch.sh ...` (agent headless bị từ chối — honour system, `env -u JOB_ID` lách được; audit
+  DISPATCH_ROUND_CAP_REASON="user duyệt <giờ>: <vì sao>" bin/dispatch.sh ...` (lý do BẮT BUỘC từ 2026-10-07 —
+  thiếu/rỗng ⇒ vẫn chặn) (agent headless bị từ chối — honour system, `env -u JOB_ID` lách được; audit
   `logs/dispatch_round_cap.log`). Exit 7 chạy trước guard exit 2; miễn `[RESUME`/`[FALLBACK`/`[AUTO-CALLBACK`.
 - Vòng test-only (không đổi logic production) quá 2 vòng ⇒ hỏi user trước khi tiếp, nêu rõ mutation còn sống.
 - Mỗi lần dispatch tiếp theo phải tự trả lời được: "lần này lỗi cùng loại với vòng trước hay khác

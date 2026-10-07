@@ -23,7 +23,9 @@ dispatch / target Mike) của dispatch.sh. Caller cần biết exit 7: bin/wags_
 nên chính script này ghi bus event `error` khi bị chặn ngoài phiên tương tác (xem dưới).
 
 OVERRIDE — CHỈ phiên tương tác của Mike hoặc user dùng, KHÔNG BAO GIỜ agent headless:
-  DISPATCH_ROUND_CAP_OVERRIDE=1 bin/dispatch.sh ...   (lý do tuỳ chọn: DISPATCH_ROUND_CAP_REASON)
+  DISPATCH_ROUND_CAP_OVERRIDE=1 DISPATCH_ROUND_CAP_REASON="user duyệt <giờ>: <vì sao>" bin/dispatch.sh ...
+  Lý do BẮT BUỘC (user chốt 2026-10-07, retro Pattern A phương án a): REASON rỗng/chỉ khoảng trắng
+  ⇒ override BỊ TỪ CHỐI, vẫn chặn (audit `override_refused`).
 Chốt cơ học: caller đang chạy BÊN TRONG một job dispatch (env JOB_ID kế thừa khác rỗng — dispatch.sh
 export JOB_ID cho mọi agent headless) ⇒ override BỊ TỪ CHỐI, vẫn chặn. Đây CHỈ là honour system:
 agent cố tình `env -u JOB_ID DISPATCH_ROUND_CAP_OVERRIDE=1 ...` vẫn lách được — chốt chặn sơ suất,
@@ -156,7 +158,7 @@ def cmd_check(a):
     reason = os.environ.get("DISPATCH_ROUND_CAP_REASON", "")
     inherited_job = os.environ.get("JOB_ID", "")
     n = len(rounds)
-    if ov == "1" and not inherited_job:
+    if ov == "1" and not inherited_job and reason.strip():
         print(f"NOTE round-cap: OVERRIDE vòng {rno} trên '{tok}' ({n} vòng trước) — đã ghi audit.",
               file=sys.stderr)
         _audit("override", a.to, frm, tok, rounds, reason)
@@ -171,8 +173,14 @@ def cmd_check(a):
     print("   Cách xử lý (kb/mike_model_routing.md § cầu chì, skill dispatch-routing §3):", file=sys.stderr)
     print("   (1) DỪNG vá cuốn chiếu; chuyển CHẾ ĐỘ B — Opus high review TOÀN BỘ nhánh rồi sửa MỘT lượt —", file=sys.stderr)
     print("       nhưng vòng này vẫn cần USER DUYỆT; hoặc (2) user đã duyệt ⇒ phiên tương tác chạy lại với", file=sys.stderr)
-    print("       DISPATCH_ROUND_CAP_OVERRIDE=1 [DISPATCH_ROUND_CAP_REASON=\"user duyệt <giờ>\"] bin/dispatch.sh ...", file=sys.stderr)
-    if ov == "1" and inherited_job:
+    print("       DISPATCH_ROUND_CAP_OVERRIDE=1 DISPATCH_ROUND_CAP_REASON=\"user duyệt <giờ>: <vì sao>\" bin/dispatch.sh ...", file=sys.stderr)
+    if ov == "1" and not inherited_job and not reason.strip():
+        print("   OVERRIDE BỊ TỪ CHỐI: thiếu lý do — user chốt 2026-10-07 (retro Pattern A, phương án a):",
+              file=sys.stderr)
+        print("   override BẮT BUỘC kèm DISPATCH_ROUND_CAP_REASON=\"user duyệt <giờ>: <vì sao vòng này>\".",
+              file=sys.stderr)
+        _audit("override_refused", a.to, frm, tok, rounds, "missing DISPATCH_ROUND_CAP_REASON")
+    elif ov == "1" and inherited_job:
         print(f"   OVERRIDE BỊ TỪ CHỐI: caller đang chạy trong job dispatch '{inherited_job}' (headless) —",
               file=sys.stderr)
         print("   chỉ phiên tương tác của Mike/user được override. Escalate bằng event `question`.", file=sys.stderr)
