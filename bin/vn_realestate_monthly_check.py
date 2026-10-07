@@ -60,8 +60,12 @@ NGƯỠNG ESCALATE (đã chốt với user 2026-08-31, đọc {tracker_file} m�
 dùng đúng số mới nhất nếu đã sửa):
 - CPI YoY vượt lại trần 4,5% SAU KHI đã đảo chiều giảm (relapse)
 - Lãi suất huy động Big-4 tăng thêm >=0,3pp trong 1 tháng
-(Bảng đa-proxy ở mục 2 CHƯA có ngưỡng escalate riêng — user chưa chốt. Proxy phân kỳ mạnh thì
-nêu rõ trong phân tích + lý do FINAL_STATUS, nhưng KHÔNG tự coi là ngưỡng bị chạm.)
+- "TĂNG NGẦM" chi phí vốn (user duyệt 2026-10-07; mốc so sánh 2026-10-multiproxy.md), chạm BẤT KỲ:
+  (1) spread CCTG Big-4 cao nhất (6M và 12M, đo riêng) − Big-4 tiết kiệm 12M online ≥1,0pp HOẶC
+      nới ≥0,3pp so với kỳ trước; (2) bình quân top-5 NH tư nhân 12M biểu chuẩn +≥0,3pp trong 3
+      tháng HOẶC ≥15 NH trả ≥7%; (3) liên NH 3 tháng bình quân tháng >7,5%; (4) tín dụng YTD −
+      huy động YTD (cùng phạm vi + mốc ngày) ≥2pp; (5) tiền gửi lớn cao nhất ≥10% kéo dài 2 tháng.
+  Ô thiếu số ⇒ ghi "không có số", KHÔNG coi là chạm và KHÔNG coi là an toàn.
 - Có thông tư/quyết định SIẾT MỚI (đảo hướng so với xu hướng NỚI đã ghi nhận 30/05/2026)
 - Tin NPL/bank-run cụ thể ngoài chu kỳ công bố quý thường lệ
 

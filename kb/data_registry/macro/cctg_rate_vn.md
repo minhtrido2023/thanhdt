@@ -223,3 +223,14 @@ re-verify trong round này — 26 ở đây là số **DEPOSIT_EVENTS anchor Big
    log WARNING thật + `rate_source` ghi rõ nguyên nhân (`big4_12m(cctg_unavailable: <lỗi>)` /
    `big4_12m(cctg_stale: <tuổi>d)`); `rating_8l.py`'s print line + `due_diligence.py`'s
    `deposit_rate_source` field đều hiển thị nguyên nhân thật này.
+
+## Chuỗi phụ CCTG 6 THÁNG — `data/cctg_rate_vn_6m_events.csv` (thêm 2026-10-07, user duyệt)
+- Ghi bằng `append_cctg_rate.py --series 6m` (CÙNG mọi guard của chuỗi 12M; sidecar URL riêng
+  `cctg6m_rate_last_auto_sources.json`), do cron tuần `refresh_deposit_cctg_weekly.sh` (chuỗi 3).
+- Định nghĩa: CCTG 6 tháng cao nhất trong các Big-4 có phát kỳ 6 tháng (dải "6-11 tháng" tính là có).
+  Mốc đông cứng trong writer: 2026-09-30 = 7,5% (VCB 6M — chính anchor gốc trước rebase 12M 05/10).
+- Status: **CANONICAL cho phân tích đa-proxy (Bobby/Macro Watch), DISPLAY-ONLY.** KHÔNG consumer
+  production nào đọc: không vào `effective_deposit_rate()`, kill-switch A, rating_8l, DCF. Muốn
+  wire vào đâu ⇒ quant-skeptic + user duyệt riêng.
+- Chưa có loader Python; đọc thẳng CSV (header `effective_date,cctg_rate,collected_date,source,note`).
+  File chưa tồn tại cho tới lần ghi đầu tiên (sớm nhất cron 12/10/2026).

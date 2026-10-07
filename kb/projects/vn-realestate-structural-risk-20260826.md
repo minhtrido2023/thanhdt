@@ -60,6 +60,19 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
      mỗi lần relapse, chỉ là kèm đủ dữ kiện để quyết nhanh · lãi suất huy động Big-4 tăng thêm ≥0,3pp trong 1 tháng · có
      quyết định/thông tư SIẾT MỚI ban hành (đổi hướng so với xu hướng NỚI đã ghi nhận 30/05/2026) ·
      bất kỳ tin NPL/bank-run cụ thể nào ngoài chu kỳ công bố quý thường lệ.
+   - **Ngưỡng escalate "TĂNG NGẦM" chi phí vốn (user duyệt 2026-10-07)** — vì số Big-4 12M bị neo
+     hành chính (CV 2342/TB 117/CV 3972 năm 2026), ngưỡng "+0,3pp/tháng" ở trên mù về cấu trúc;
+     5 ngưỡng sau đo ở kênh kiểm soát yếu hơn. Mốc so sánh đầu tiên:
+     `vn_realestate_monthly_checks/2026-10-multiproxy.md`. Chạm BẤT KỲ ngưỡng nào ⇒ escalate:
+     1. Spread CCTG Big-4 cao nhất (đo RIÊNG kỳ hạn 6M và 12M) − Big-4 tiết kiệm 12M online
+        ≥1,0pp, HOẶC nới rộng ≥0,3pp so với kỳ trước (mốc 10/2026: 12M 0,6pp · 6M 0,7pp).
+     2. Bình quân top-5 NH tư nhân, 12M biểu chuẩn online (KHÔNG tính khuyến mãi/tiền gửi lớn) tăng
+        ≥0,3pp trong 3 tháng, HOẶC có ≥15 NH trả ≥7% (mốc: ~7,2% · 10 NH).
+     3. Liên ngân hàng kỳ hạn 3 tháng, bình quân tháng >7,5% (mốc: ~6,9%).
+     4. Tín dụng YTD − huy động YTD (CÙNG phạm vi, CÙNG mốc ngày) ≥2pp (mốc 22/08: −0,4pp VND).
+     5. Tiền gửi lớn cao nhất thị trường ≥10% kéo dài 2 tháng liền (mốc: PVcomBank 10% cho khoản từ 2.000 tỷ,
+        nguồn 07/09; tháng 10 chưa xác nhận).
+     Thiếu số liệu một ô ⇒ ghi "không có số", KHÔNG coi là chạm, KHÔNG coi là an toàn.
    - **TỰ ĐỘNG HOÁ XONG 2026-08-31**: cron `0 20 6 * *` = **20:00 UTC ngày 6** (= **03:00 ICT ngày 7**, host là Etc/UTC; dòng `TZ=` đầu crontab chỉ set env cho script, KHÔNG đổi cách cron parse giờ — chỉ `CRON_TZ=` làm việc đó. Bằng chứng: bus event ts `2026-09-06T20:02:38Z`. Ghi chú cũ "20:00 ICT ngày 6" là SAI, sửa 2026-09-09) → `mike/bin/
      vn_realestate_monthly_check.sh` (chi tiết đầy đủ + 2 bug đã bắt qua test end-to-end thật:
      `kb/cron_registry.md` dòng "20:00 (ngày 6 hàng tháng)"). Dispatch `claude -p --agent
