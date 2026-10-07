@@ -1,4 +1,4 @@
-# Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06, CHỜ USER DUYỆT)
+# Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06 — ĐÃ CHỐT, user duyệt 2026-10-06; còn: duyệt bản cutloss cuối sau 5 phiên shadow ~12/10)
 
 ## Vì sao bỏ quét tuần
 - `fearbuy_weekly_scan.sh` (Taylor, Opus/high), 08-14→10-05: **16 lượt (8 thứ Sáu + 8 thứ Hai), 27 "case mới", 0 QUALIFY**.
