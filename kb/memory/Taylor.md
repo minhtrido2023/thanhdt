@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-05T18:12:45Z] [lane-C 10-06] XONG job Taylor_20261005_180155: GARP C1 edge ro t=5.3 (median ma ~peer). CHO Mike/user quyet them lan C vao funnel; quant-skeptic truoc moi wire/size.
 - [2026-10-05T18:28:55Z] [funnel8l r2] XONG job Taylor_20261005_181751: feat/discretionary-8l-funnel-20261006@5c528d5b, 117/117 x4TZ, mut 35/35. CHỜ Mike arch-review lại + merge + cron 19:35 (snapshot r1 data/rating_8l_daily/rating_8l_2026-10-05.csv còn đó).
 - [2026-10-05T19:38:41Z] [intraday-watch shadow] XONG job Taylor_20261005_185546: feat/intraday-price-watch-20261006@7aefa5da (wt-ipw-1006), 171/171 x4TZ, mut 59/59. CHỜ Mike arch-review trọn bộ 1 lần + user duyệt merge/cron mỗi phút 09-14 ICT + 5 phiên shadow.
 - [2026-10-05T20:23:56Z] [intraday-watch r2] XONG job Taylor_20261005_195221: feat/intraday-price-watch-20261006@42d099e8, 268/268 x4TZ x2py, mut 119/121 (2 tuong duong). CHO Mike arch-review + user chot mac dinh a-d + merge/cron (proposed: kb/cron_registry.md.proposed).
@@ -24,5 +23,4 @@
 - [2026-10-06T04:43:31Z] [lane-C r2 10-06] XONG job Taylor_20261006_043550: feat/funnel-lane-c-20261006@ce0d4aa8, 210/210 x4TZ x2py, mut 56/56 (tmpdir copy). CHỜ Mike arch-review r2 + merge trước cron 19:37.
 - [2026-10-06T05:46:30Z] [lane-C season 10-06] XONG job Taylor_20261006_052500: feat/funnel-lane-c-season-20261006@05d1d7c2 (wt-season-1006), 263/263 x4TZ x2py, mut 103/103. DRI KHÔNG mùa vụ (η² 0,10) ⇒ vẫn RA; CHỜ user chọn C1S (ship) hay C1A (DRI vào, IS/OOS lệch dấu) + Mike arch-review/merge.
 - [2026-10-06T15:14:23Z] [broker-primary r6] XONG job Taylor_20261006_143910: feat/broker-primary-20261003@7db42331, 705/707 x3TZ x2py, mut 472/472 (3.12 471, 1 tương đương), BƯỚC0 hiếm (≤10d 67/20.636). Thay dòng r5. CHỜ Mike arch-review r6 + user quyết merge; KHÔNG bật live.
-- [2026-10-07T03:21:59Z] [broker-primary r7 10-07] XONG job Taylor_20261007_030542: feat/broker-primary-r7-20261007@179e4686 (wt-bp-r7-1007), 751/753 x3TZ x2py, mut 506/506 (3.12 505, 1 tương đương). CHỜ Mike arch-review r7 + user duyệt merge; KHÔNG bật live.
-- [2026-10-07T03:56:09Z] ĐANG DỞ [broker-primary r8 job Taylor_20261007_034436]: code+test xong trong wt-bp-r7-1007 (CHƯA commit), mutation chạy /tmp/r8_m310,/tmp/r8_m312 -> /tmp/r8_mut31x.txt | NEXT: điền MUTATION_PLACEHOLDER research note, commit, bus finding broker-primary-r8
+- [2026-10-07T04:36:12Z] [broker-primary r8 10-07] XONG job Taylor_20261007_034436: feat/broker-primary-r7-20261007@58aa852d, 782/784 x3TZ x2py, mut 538/538 (3.12 537, 1 tương đương). Thay dòng r7. CHỜ Mike arch-review r8 + user duyệt merge; KHÔNG bật live.
