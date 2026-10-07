@@ -413,3 +413,25 @@ Cùng nhánh `feat/broker-primary-r7-20261007` (worktree `wt-bp-r7-1007`, trên 
 - Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0 cả 6; sha256 `data/corp_actions.json` 21a88fb5… y nguyên; sổ broker
   production vẫn không tồn tại (chỉ .lock 10-05) ⇒ không câu đã hỏi ⇒ không tra BQ. 10-01 live: TPB MATCH record người ký; 10-06 live:
   TV1 PRICE_ONLY INSUFFICIENT (câu lẽ ra gửi).
+
+## r9 (2026-10-07, job Taylor_20261007_050650) — arch-review r8 MAJOR-r8-1
+
+- **Lỗi (do r8 tạo ra):** `_asked_rows` (`bin/corp_action_auto_confirm.py`, nhánh (b) khoá vendor) loại câu vendor đã có khoá
+  `("closed",)+khoá[:-1]`. Nhưng `_resolve_asks` đóng câu vendor-only khi sổ broker LIVE có mục (mã, ex) với verdict BẤT KỲ, kể cả
+  CASH_DIVIDEND (`decided_by agent`) ⇒ probe2 reviewer: vendor-only hỏi TPB ex A=09-28 → broker thấy chỉ-giá ở (TPB, A) ra
+  CASH_DIVIDEND → câu bị đóng → lượt D broker KL ex B=10-02 CONFIRMABLE được GHI mà không tra BQ (trái luật m4 user "đã HỎI bất
+  kỳ nhánh nào ⇒ tra BQ", không điều kiện câu còn mở).
+- **Sửa:** bỏ điều kiện closed. Đường đóng bằng record registry đã có `inreg` phủ.
+- **Test:** đảo `r8 MAJOR-1c` thành `r9 MAJOR-1c` (câu vendor đã closed VẪN là câu đã hỏi ⇒ tra BQ, không ghi B, đúng 1 câu);
+  `r9 probe2` ×2 (tiền đề: `_resolve_asks` THẬT ghi `['closed','vendor-only','TPB',A]` vì CASH_DIVIDEND; rồi BQ chỉ ISS+DIV ở A ⇒
+  không ghi B, tra BQ, đúng 1 câu ambiguous); `r9 P8` (gửi bù UNVERIFIED ex A ∈ tập BQ {A,B} + record C 09-20 gần A NGOÀI tập ⇒ bỏ
+  record_proposed, đề nghị sửa C).
+- **Đột biến:** +2 — "r9 MAJOR-1 câu vendor đã đóng không tính là đã hỏi (bản r8)" (thay đột biến r8 ngược chiều) và "r9 P8 I2 xday
+  lọc MỌI record của mã" (chỉ `r9 P8` giết). 3 neo r8 (`if (len(k) < 4 …`) neo lại theo dạng `if` một dòng mới.
+- **Control:** selfcheck r9 trên code r8 (58aa852d) ⇒ đúng 2 FAIL có tên (`r9 MAJOR-1c`, `r9 probe2`).
+- Selfcheck **785/0 (py3.10) · 787/0 (py3.12)** × Asia/Ho_Chi_Minh / UTC / `env -u TZ` — 6/6. Mutation (bản sao cô lập
+  `/tmp/tay_r9/wt`, `/tmp/tay_r9/wt312`): **539/539 (3.10)**, **538/539 (3.12 — `parse 5 chữ số` tương đương, khai từ r4)**, 0 chỉ-crash.
+- probe2 reviewer chạy lại trên bản sao code r9: registry `[]`, BQ tra 1 lần, đúng 1 câu `corp-action-broker-ambiguous-TPB-2026-10-01`.
+  probe P8: bỏ record_proposed, `registry_update_proposed` = `TPB-2026-09-20-BROKER-SHARE-EVENT`.
+- Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0 cả 6, 0 Traceback; sha256 `data/corp_actions.json` 21a88fb5… y nguyên;
+  sổ broker production vẫn không tồn tại (chỉ .lock 10-05). Không làm m3/m4 khác của reviewer (để sau live).

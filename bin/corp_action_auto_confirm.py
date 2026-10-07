@@ -901,8 +901,10 @@ def _asked_rows(intents, done, mode, rows):
     record ⇒ nhánh multi-event registry sẵn có lo; REVOKED ⇒ người đã xử lý ex đó). Hai nguồn:
       (a) sổ broker cùng `mode` (đã gửi hay còn chờ gửi bù): verdict mở + CONFIRMABLE vắng registry
           (write-incomplete); bỏ dòng chỉ-quan-sát và mục không có ex;
-      (b) r8 MAJOR-1: khoá done `_ASKED_VENDOR_KINDS` (mọi mode — câu vendor là câu THẬT đã gửi người) chưa có
-          ("closed",)+khoá[:-1] (đã được `_resolve_asks` trả lời ⇒ hết là câu mở).
+      (b) r8 MAJOR-1: khoá done `_ASKED_VENDOR_KINDS` (mọi mode — câu vendor là câu THẬT đã gửi người). r9: KỂ CẢ
+          khi đã có ("closed",)+khoá[:-1] — `_resolve_asks` đóng câu vendor-only khi sổ broker có mục (mã, ex) verdict
+          BẤT KỲ (vd CASH_DIVIDEND), không phải khi người xác nhận sự kiện KL ⇒ luật m4 user "đã HỎI ⇒ tra BQ" không
+          điều kiện câu còn mở; đường đóng bằng record registry đã được `inreg` phủ.
     `need` (r8 minor-1) = loại sự kiện BQ phải có ở ex đó: 'SHARE' (ISS điều chỉnh giá) cho sự kiện KL (event_kind
     SHARE_EVENT/None, mọi câu vendor), 'CASH' (DIV) cho sự kiện tiền. Dạng phần tử `_reg_rows` ⇒ dùng CHUNG vị từ
     `_near_rows` (cửa sổ, ex không đọc được ⇒ tính gần)."""
@@ -917,8 +919,7 @@ def _asked_rows(intents, done, mode, rows):
         out.append({"i": None, "rec": e, "ticker": tk, "ex": _iso(ex), "id": _asked_topic(e), "effective": False,
                     "v": None, "invalid": None, "key": list(k), "need": need})   # không phải record ⇒ không hiệu lực
     for k in sorted(done, key=str):
-        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS
-                or ("closed",) + tuple(k[:-1]) in done):
+        if len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS:
             continue
         tk = _norm_ticker(k[1])
         for ex in str(k[2]).split(","):

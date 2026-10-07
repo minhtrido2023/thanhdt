@@ -5305,9 +5305,50 @@ def _r8_body():
     check("r8 MAJOR-1b vendor-only đã hỏi ex A + BQ có ĐỦ (ISS ở A và B) ⇒ ghi B bình thường, 0 câu hỏi",
           ids == [rid] and not Q() and calls, (ids, calls, _Bus.calls))
     closed = done(["closed", "vendor-only", "TPB", A])
-    rc_, out_, calls, ids = go([done(vkeys[0][1]), closed], [])
-    check("r8 MAJOR-1c câu vendor-only ĐÃ được trả lời (done ['closed', …]) ⇒ không còn là câu mở ⇒ ghi B, không tra BQ",
-          ids == [rid] and not Q() and not calls, (ids, calls, _Bus.calls))
+    rc_, out_, calls, ids = go([done(vkeys[0][1]), closed], [(A, "ISS", BONUS)])
+    check("r9 MAJOR-1c (đảo r8) câu vendor-only ĐÃ đóng (done ['closed', …]) VẪN là câu đã hỏi ⇒ tra BQ; BQ thiếu B ⇒ KHÔNG "
+          "ghi B, ĐÚNG 1 câu ambiguous",
+          ids == [] and bool(calls) and len(Q()) == 1 and len(Q(f"broker-ambiguous-TPB-{D}")) == 1,
+          (ids, calls, _Bus.calls, out_[-300:]))
+
+    # ══ r9 probe2 (arch-review r8 MAJOR-r8-1): vendor-only hỏi ex A → `_resolve_asks` THẬT đóng câu vì sổ broker LIVE có
+    #    (TPB, A) verdict CASH_DIVIDEND (decided_by agent) → lượt D broker KL ex B CONFIRMABLE, BQ chỉ có ISS (+DIV) ở A ⇒
+    #    KHÔNG ghi B, tra BQ, đúng 1 câu ══
+    cdiv = ent(A, verdict=BD.CASH_DIVIDEND, event_kind="PRICE_ONLY", credit_day="2026-09-25")
+    _sandbox()
+    _ledger_write([done(vkeys[0][1]), cdiv, done(cdiv["key"])])
+    it_, dn_ = BD.ledger_state(cac.LEDGER_FILE)
+    run_(cac._resolve_asks, cac._registry_view(cac.load_corp_actions_raw()), it_, dn_)
+    pre = [x["key"] for x in _ledger_lines() if x.get("kind") == "done" and x["key"][0] == "closed"]
+    check("r9 probe2 tiền đề: _resolve_asks đóng câu vendor-only TPB ex A vì sổ broker có mục CASH_DIVIDEND ở (TPB, A)",
+          pre == [["closed", "vendor-only", "TPB", A]], (pre, _Bus.calls))
+    os.environ["MIKE_CA_BROKER_SOURCE"] = "live"
+    lines = _ledger_lines()
+    _Bus.calls.clear()
+    with _bq_fake([(A, "ISS", BONUS), (A, "DIV", None)]) as calls:
+        rc_, out_ = run_(cac._run_broker_locked, D, "live", [tpb])
+    calls = [c_ for c_ in calls if c_ != "fresh"]
+    check("r9 probe2 vendor-only A đóng qua CASH_DIVIDEND ở A + broker KL ex B, BQ chỉ có ISS ở A ⇒ KHÔNG ghi B, tra BQ, "
+          "ĐÚNG 1 câu",
+          acts() == [] and bool(calls) and len(Q()) == 1 and len(Q(f"broker-ambiguous-TPB-{D}")) == 1
+          and len(lines) == 4,
+          (acts(), calls, _Bus.calls, out_[-400:]))
+
+    # ══ r9 P8 (probe arch-review r8): mục gửi bù UNVERIFIED ex A (record_proposed), BQ xác nhận {A, B}; registry có record C
+    #    09-20 gần A nhưng NGOÀI tập BQ ⇒ C vẫn là near-dup của A ⇒ bỏ record_proposed, đề nghị sửa C (bằng chứng BQ chỉ miễn
+    #    record ở ex TRONG tập, không miễn MỌI record của mã) ══
+    rec_c = dict(BD.build_record(dict(tpb, ex_date="2026-09-20"), "t"), _status="CONFIRMED (người)")
+    p8 = ent(A, qty_multiplier=1.15, record_proposed=BD.build_record(dict(tpb, ex_date=A), "t"))
+    _sandbox(registry_actions=[rec_c])
+    _ledger_write([p8])
+    with _bq_fake([(A, "ISS", BONUS), (EX, "ISS", BONUS)]):
+        rc_, out_ = run_(cac._run_broker_locked, D, "live", [tpb])
+    uq = Q(f"corp-action-broker-unverified-TPB-{PREV}")
+    up = uq[0][1] if len(uq) == 1 else {}
+    check("r9 P8 gửi bù ex A ∈ tập BQ {A,B} + record C 09-20 gần A NGOÀI tập ⇒ bỏ record_proposed, đề nghị sửa C",
+          up.get("record_proposed") is None
+          and (up.get("registry_update_proposed") or {}).get("record_id") == rec_c["id"],
+          (up, acts(), out_[-500:]))
     rec_a = dict(BD.build_record(dict(tpb, ex_date=A), "t"), _status="CONFIRMED (người ký)")
     _sandbox(registry_actions=[rec_a])
     rows_a = cac._reg_rows(json.load(open(cac.CORP_ACTIONS_FILE))["actions"])
@@ -5969,7 +6010,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    _ledger_append(_done_rows(entries, now_ict))\n', '    _ledger_append([{"kind": "done", "key": e["key"], "at": now_ict} for e in entries])\n', 'r7 m4 shadow không ghi khoá hỏi-1-lần'),
     ('bin/corp_action_auto_confirm.py', '    th.join(left)', '    th.join()', 'r7 m4 tra BQ không có trần thời gian'),
     # ── r8 (job Taylor_20261007_034436, arch-review r7): MAJOR-1 khoá vendor, minor-1 loại sự kiện, minor-2 gửi bù, minor-3, minor-4 ──
-    ('bin/corp_action_auto_confirm.py', '    for k in sorted(done, key=str):\n        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', '    for k in []:\n        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', 'r8 MAJOR-1 bỏ khoá done nhánh vendor (bản r7)'),
+    ('bin/corp_action_auto_confirm.py', '    for k in sorted(done, key=str):\n        if len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS:\n', '    for k in []:\n        if len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS:\n', 'r8 MAJOR-1 bỏ khoá done nhánh vendor (bản r7)'),
     ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', 'r8 MAJOR-1 bỏ vendor-only'),
     ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-only", "vendor-conflict", "vendor-cash-leg",', 'r8 MAJOR-1 bỏ vendor-held-unknown'),
     ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-only", "vendor-held-unknown", "vendor-cash-leg",', 'r8 MAJOR-1 bỏ vendor-conflict'),
@@ -5980,9 +6021,9 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '("HỎI LẠI (lượt trước đã hỏi mã ở ex khác, BQ không xác nhận đủ sự kiện) — "', '(""', 'r8 [reviewer r7] câu hỏi lại bỏ chữ HỎI LẠI'),
     ('bin/corp_action_auto_confirm.py', 'daemon=True)', 'daemon=False)', 'r8 [reviewer r7] luồng tra BQ không daemon'),
     ('bin/corp_action_auto_confirm.py', '        for ex in str(k[2]).split(","):', '        for ex in [str(k[2])]:', 'r8 MAJOR-1 multi-event không tách ex'),
-    ('bin/corp_action_auto_confirm.py', '                or ("closed",) + tuple(k[:-1]) in done):', '                ):', 'r8 MAJOR-1 tính cả câu vendor đã được trả lời (closed)'),
-    ('bin/corp_action_auto_confirm.py', '        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', '        if (len(k) < 4 or k[0] not in _ASKED_VENDOR_KINDS\n', 'r8 MAJOR-1 không đòi hậu tố ASKED'),
-    ('bin/corp_action_auto_confirm.py', '        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', '        if (len(k) < 4 or k[-1] != "ASKED"\n', 'r8 MAJOR-1 tính mọi loại khoá (credit-overdue, cross-day…)'),
+    ('bin/corp_action_auto_confirm.py', '        if len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS:\n            continue', '        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n                or ("closed",) + tuple(k[:-1]) in done):\n            continue', 'r9 MAJOR-1 câu vendor đã đóng (closed) không tính là đã hỏi (bản r8)'),
+    ('bin/corp_action_auto_confirm.py', '        if len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS:\n', '        if len(k) < 4 or k[0] not in _ASKED_VENDOR_KINDS:\n', 'r8 MAJOR-1 không đòi hậu tố ASKED'),
+    ('bin/corp_action_auto_confirm.py', '        if len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS:\n', '        if len(k) < 4 or k[-1] != "ASKED":\n', 'r8 MAJOR-1 tính mọi loại khoá (credit-overdue, cross-day…)'),
     ('bin/corp_action_auto_confirm.py', '            if not ex or (tk, _iso(ex)) in inreg:', '            if not ex:', 'r8 MAJOR-1 tính câu vendor ở ex đã thành record'),
     ('bin/corp_action_auto_confirm.py', '"id": topic, "effective": False', '"id": "?", "effective": False', 'r8 MAJOR-1 câu vendor không nêu topic'),
     ('bin/corp_action_auto_confirm.py', '        need = "SHARE" if e.get("event_kind", "SHARE_EVENT") in (None, "SHARE_EVENT") else "CASH"\n', '        need = "SHARE"\n', 'r8 minor-1 câu sự kiện tiền đòi ISS'),
@@ -5997,6 +6038,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    if left <= 0:\n        return None, (f"hết trần TỔNG', '    if False:\n        return None, (f"hết trần TỔNG', 'r8 minor-4 hết trần vẫn tra'),
     ('bin/corp_action_auto_confirm.py', '        if confirmed is not None:\n            confirmed[tk] = {"exes": allx, "bq": bq}\n', '', 'r8 minor-2 không lưu bằng chứng BQ (bản r7)'),
     ('bin/corp_action_auto_confirm.py', '        rows = [w for w in rows if not (w["ticker"] == tk and w["ex"] in other)]\n', '', 'r8 minor-2 record ex khác vẫn tính near-dup'),
+    ('bin/corp_action_auto_confirm.py', '        rows = [w for w in rows if not (w["ticker"] == tk and w["ex"] in other)]\n', '        rows = [w for w in rows if w["ticker"] != tk]\n', 'r9 P8 I2 xday lọc MỌI record của mã'),
     ('bin/corp_action_auto_confirm.py', '        pending = [_i2_refresh(e, fview, frows, xday_ok) for e in pending]\n', '        pending = [_i2_refresh(e, fview, frows) for e in pending]\n', 'r8 minor-2 gửi bù không truyền xday'),
     ('bin/corp_action_auto_confirm.py', '    if xd and _iso(ex) in xd["exes"]:', '    if xd:', 'r8 minor-2 bằng chứng áp cả mục ex NGOÀI tập BQ'),
     ('bin/corp_action_auto_confirm.py', 'f"lấy số nguồn khác đè. Winston kiểm nguồn; {act}.{_xday_note(e)} Chi tiết', 'f"lấy số nguồn khác đè. Winston kiểm nguồn; {act}. Chi tiết', 'r8 minor-2 câu UNVERIFIED không nói bằng chứng BQ'),
