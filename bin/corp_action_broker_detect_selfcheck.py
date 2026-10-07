@@ -2703,13 +2703,16 @@ def _r5_body():
                "key": ["live", "TPB", PREV, BD.UNVERIFIED]}
         _ledger_write([ent])
         # r7 m4: câu đã hỏi ex kề lượt trước ⇒ ghi B chỉ khi BQ có ĐỦ 2 sự kiện (ca BQ thiếu/lỗi: test_r7 m4.2/m4.3)
-        with _bq_fake([(near_ex, "ISS", BONUS), (rcf[0]["ex_date"], "DIV", None)]):
+        # r8 minor-1: lô là sự kiện KL ⇒ BQ phải có ISS điều chỉnh giá ở CẢ 2 ex (DIV ở ex lô KHÔNG đủ)
+        with _bq_fake([(near_ex, "ISS", BONUS), (rcf[0]["ex_date"], "ISS", BONUS)]):
             rc_, out_ = run_(cac._run_broker_locked, D, "live", [rcf[0]])
         uq = Q(f"broker-unverified-TPB-{PREV}")
-        check("r5 M1g gửi bù UNVERIFIED (ex kề, record_proposed đông cứng) + lô ghi CONFIRMED cùng mã (r7: BQ có đủ 2 sự kiện) "
-              "⇒ gửi bù KHÔNG mang record_proposed, registry_update_proposed = record lô",
-              len(acts()) == 1 and len(uq) == 1 and uq[0][1].get("record_proposed") is None
-              and (uq[0][1].get("registry_update_proposed") or {}).get("record_id") == acts()[0]["id"],
+        check("r5 M1g → r8 minor-2: gửi bù UNVERIFIED (ex kề, record_proposed) + lô ghi CONFIRMED cùng mã, BQ xác nhận 2 sự "
+              "kiện KHÁC nhau ⇒ gửi bù GIỮ record_proposed, KHÔNG registry_update_proposed, mang cross_day_bq",
+              len(acts()) == 1 and len(uq) == 1 and uq[0][1].get("record_proposed") == ent["record_proposed"]
+              and uq[0][1].get("registry_update_proposed") is None
+              and (uq[0][1].get("cross_day_bq") or {}).get("exes") == sorted([near_ex, rcf[0]["ex_date"]])
+              and "KHÔNG phải cùng sự kiện" in uq[0][1]["question"],
               (acts(), uq, out_[-400:]))
 
         # ══════════════ minor-5 writer broker: loại riêng record hỏng ══════════════
@@ -5007,7 +5010,7 @@ def _r7_body():
 
     # ══ m3 / V17: gửi bù UNVERIFIED (ex A, record_proposed) + lô ghi CONFIRMABLE cùng mã ex B; BQ có ĐỦ 2 sự kiện ⇒
     #    lượt thật ghi B + gửi bù bỏ record_proposed (I2). Dry-run PHẢI nói y hệt (fin_raw + record lô) ══
-    both = [(D, "ISS", BONUS), (EX, "DIV", None)]
+    both = [(D, "ISS", BONUS), (EX, "ISS", BONUS)]          # r8 minor-1: lô KL ⇒ ISS ở cả 2 ex (DIV ở B không đủ)
     got = {}
     for dry in (False, True):
         tmp, reg = _sandbox()
@@ -5031,14 +5034,16 @@ def _r7_body():
         p = [x[2] for x in sent if x[0] == "question" and x[1] == f"corp-action-broker-unverified-TPB-{PREV}"]
         got[dry] = (p[0] if len(p) == 1 else None, [a_["id"] for a_ in acts()], _sha(reg) == h0, out_)
     real_p, dry_p = got[False][0] or {}, got[True][0] or {}
-    check("r7 V17 lượt thật: BQ đủ 2 sự kiện ⇒ ghi record lô; gửi bù KHÔNG mang record_proposed, "
-          "registry_update_proposed = record lô",
-          got[False][1] == [rid] and real_p.get("record_proposed") is None
-          and (real_p.get("registry_update_proposed") or {}).get("record_id") == rid, got[False])
-    check("r7 V17 dry-run TRUNG THỰC: cùng câu gửi bù như lượt thật (record lô coi như đã ghi ⇒ I2: không record_proposed, "
-          "registry_update_proposed = record lô), registry KHÔNG đổi",
-          got[True][2] and dry_p.get("record_proposed") is None
-          and (dry_p.get("registry_update_proposed") or {}).get("record_id") == rid
+    check("r7 V17 → r8 minor-2 lượt thật: BQ xác nhận 2 sự kiện KHÁC nhau ⇒ ghi record lô; gửi bù về A GIỮ "
+          "record_proposed (bằng chứng cross_day_bq), KHÔNG dặn sửa/thu hồi record B",
+          got[False][1] == [rid] and (real_p.get("record_proposed") or {}).get("ex_date") == D
+          and real_p.get("registry_update_proposed") is None
+          and (real_p.get("cross_day_bq") or {}).get("exes") == [D, EX] and rid not in real_p.get("question", ""),
+          got[False])
+    check("r7 V17 dry-run TRUNG THỰC: cùng câu gửi bù như lượt thật (record lô coi như đã ghi; r8: vẫn giữ record_proposed "
+          "nhờ bằng chứng BQ), registry KHÔNG đổi",
+          got[True][2] and (dry_p.get("record_proposed") or {}).get("ex_date") == D
+          and dry_p.get("registry_update_proposed") is None
           and dry_p.get("question") == real_p.get("question"), (got[True][0], got[True][3][-600:]))
 
     # ══ m4: I2 XUYÊN LƯỢT ══
@@ -5067,6 +5072,7 @@ def _r7_body():
           ev_calls == [("events", ("TPB",), PREV, EX)], calls)
     # (2) BQ thiếu ⇒ KHÔNG ghi B, hỏi lại ĐÚNG 1 lần nêu câu đã hỏi (ex A, topic, khoá) + quan sát mới (ex B) + BQ thấy gì
     for lbl, evs in (("BQ chỉ có ex B", [(EX, "ISS", BONUS)]), ("BQ chỉ có ex A", [(D, "ISS", BONUS)]),
+                     ("r8 minor-1 BQ ex B chỉ có DIV (lô là sự kiện KL)", [(D, "ISS", BONUS), (EX, "DIV", None)]),
                      ("BQ trống", []), ("ex A là ESOP (không điều chỉnh giá)", [(D, "ISS", "Phát hành cho CBCNV"),
                                                                                 (EX, "ISS", BONUS)])):
         rc_, out_, calls, ids = m4(prior, evs)
@@ -5115,7 +5121,7 @@ def _r7_body():
     amb = Q(f"broker-ambiguous-TPB-{D}")
     check("r7 m4.3c tra BQ treo quá trần BQ_XDAY_BUDGET_S ⇒ không chờ hết (≤ trần + lề), fail-closed: KHÔNG ghi B, hỏi, "
           "câu nói 'quá trần'",
-          dt_ < 0.9 and not acts() and len(amb) == 1 and "quá trần 0.2s" in amb[0][1]["question"],
+          dt_ < 0.9 and not acts() and len(amb) == 1 and "quá trần TỔNG 0.2s" in amb[0][1]["question"],
           (dt_, acts(), _Bus.calls, out_[-300:]))
     rc_, out_, calls, ids = m4(prior, both, ingested="2026-09-29 17:30:00")   # = 2026-09-30 00:30 ICT
     check("r7 m4.3b biên tươi: nạp 2026-09-29 17:30 UTC = 09-30 00:30 ICT ≥ phiên trước ⇒ FRESH (mốc ICT, không UTC) ⇒ ghi B",
@@ -5199,6 +5205,244 @@ def _r7_body():
     check("r7 m4.8b dry-run live: in câu hỏi cross-day lẽ ra gửi, KHÔNG ghi registry/sổ",
           ids == [] and f"KHÔNG gửi bus question corp-action-broker-ambiguous-TPB-{D}" in out_
           and _ledger_lines() == prior, (ids, out_[-500:]))
+
+
+def test_r8():
+    """Vòng r8 (job Taylor_20261007_034436, arch-review r7 NEEDS_CHANGES): MAJOR-1 (khoá done nhánh VENDOR là câu đã hỏi),
+    minor-1 (BQ đúng LOẠI sự kiện), minor-2 (gửi bù giữ record_proposed khi BQ xác nhận — test ở V17/M1g), minor-3 (verdict
+    AMBIGUOUS/DEFER_VENDOR + ex không đọc được), minor-4 (trần TỔNG tra BQ của lượt). Mỗi ý 1 assertion CÓ TÊN."""
+    real_run = subprocess.run
+    subprocess.run = _Bus.run
+    saved_env = os.environ.get("MIKE_CA_BROKER_SOURCE")
+    keep_budget = cac.BQ_XDAY_BUDGET_S
+    try:
+        _r8_body()
+    finally:
+        subprocess.run = real_run
+        cac.BQ_XDAY_BUDGET_S = keep_budget
+        cac._px_cum_fn, cac._exchange_fn, cac.CA_DAILY_DIR = REAL_PX_FN, REAL_EXCH_FN, REAL_CA_DIR
+        cac.write_corp_actions = REAL_WRITE
+        _Bus.rc = 0
+        _Bus.fail_sub = None
+        del cac._DRY[:]
+        cac._SEEN_NOW.clear()
+        if saved_env is None:
+            os.environ.pop("MIKE_CA_BROKER_SOURCE", None)
+        else:
+            os.environ["MIKE_CA_BROKER_SOURCE"] = saved_env
+
+
+def _r8_body():
+    Q = lambda sub="": [(c[3], json.loads(c[4])) for c in _Bus.calls if c[2] == "question" and sub in c[3]]  # noqa: E731
+    acts = lambda: [a_["id"] for a_ in json.load(open(cac.CORP_ACTIONS_FILE))["actions"]]                   # noqa: E731
+
+    def run_(fn, *a, **k):
+        o_ = io.StringIO()
+        with contextlib.redirect_stdout(o_):
+            rc_ = _call(f"r8 gọi {getattr(fn, '__name__', fn)}", fn, *a, **k)
+        return rc_, o_.getvalue()
+
+    os.environ["MIKE_CA_BROKER_SOURCE"] = "live"
+    tmp, reg = _sandbox()
+    with contextlib.redirect_stdout(io.StringIO()):
+        q_, _ctx = BD.scan_qty(D, cac._px_cum_fn(D), cac._vendor_events_fn(D), exec_dir=cac.EXEC_DIR,
+                               exchange_fn=cac._exchange_fn())
+    rcf = [r_ for r_ in q_ if r_["verdict"] == BD.CONFIRMABLE]
+    check("r8 tiền đề: scan_qty sandbox ⇒ ĐÚNG 1 CONFIRMABLE TPB ex EX", len(rcf) == 1 and rcf[0]["ex_date"] == EX, q_)
+    tpb = rcf[0] if rcf else {"ticker": "TPB", "ex_date": EX, "verdict": BD.CONFIRMABLE, "why": "", "accounts": {},
+                              "qty_multiplier": 1.15, "cash_leg": 500.0}
+    rid = f"TPB-{EX}-BROKER-SHARE-EVENT"
+    A = "2026-09-28"                                 # ex đã hỏi lượt trước (trong ±10 ngày của D/EX)
+
+    def ent(ex, verdict=BD.UNVERIFIED, tk="TPB", **kw):
+        e = {"kind": "intent", "at": f"{PREV}T19:26:00+07:00", "mode": "live", "ticker": tk, "credit_day": PREV,
+             "ex_date": ex, "verdict": verdict, "why": "lượt trước (giả)", "event_kind": "SHARE_EVENT", "accounts": {}}
+        e.update(kw)
+        e["key"] = BD.ledger_key(e)
+        return e
+
+    def done(key):
+        return {"kind": "done", "key": list(key), "at": f"{PREV}T19:26:05+07:00"}
+
+    def go(prior, events=(), res=None, mode="live"):
+        _sandbox()
+        _ledger_write(prior)
+        os.environ["MIKE_CA_BROKER_SOURCE"] = mode
+        with _bq_fake(events) as calls:
+            rc_, out_ = run_(cac._run_broker_locked, D, mode, res or [tpb])
+        os.environ["MIKE_CA_BROKER_SOURCE"] = "live"
+        return rc_, out_, [c_ for c_ in calls if c_ != "fresh"], acts()
+
+    # ══ MAJOR-1: probe reviewer — câu nhánh VENDOR đã hỏi ex A, broker suy ex B, vendor_check NO_EVENT ⇒ CONFIRMABLE.
+    #    BQ chỉ có sự kiện ở A ⇒ KHÔNG ghi B, tra BQ, hỏi lại 1 lần nêu câu vendor đã hỏi ══
+    vkeys = [("vendor-only", ["vendor-only", "TPB", A, "ASKED"], f"corp-action-vendor-only-TPB-{A}"),
+             ("vendor-held-unknown", ["vendor-held-unknown", "TPB", A, "ASKED"],
+              f"corp-action-vendor-held-unknown-TPB-{A}"),
+             ("vendor-conflict", ["vendor-conflict", "TPB", A, "ASKED"], f"corp-action-vendor-conflict-TPB-{A}"),
+             ("vendor-cash-leg", ["vendor-cash-leg", "TPB", A, "ASKED"], f"corp-action-vendor-cash-leg-TPB-{A}"),
+             ("vendor-near-record", ["vendor-near-record", "TPB", A, "TPB-X", "ASKED"],
+              f"corp-action-vendor-near-record-TPB-{A}"),
+             ("vendor-vs-registry (record ex A nay không còn)", ["vendor-vs-registry", "TPB", A, "TPB-X", "ASKED"],
+              f"corp-action-vendor-vs-registry-TPB-{A}"),
+             ("vendor-multi-event (k[2] nối ',', ex gần ở VỊ TRÍ 2)", ["vendor-multi-event", "TPB", f"2026-09-01,{A}", "abc",
+                                                                        "ASKED"],
+              "corp-action-vendor-multi-event-TPB-*")]
+    for lbl, k, topic in vkeys:
+        rc_, out_, calls, ids = go([done(k)], [(A, "ISS", BONUS)])
+        amb = Q(f"broker-ambiguous-TPB-{D}")
+        cd = (amb[0][1].get("cross_day") or {}) if len(amb) == 1 else {}
+        check(f"r8 MAJOR-1 {lbl} đã hỏi ex {A} + broker CONFIRMABLE ex B, BQ thiếu B ⇒ KHÔNG ghi B, tra BQ, ĐÚNG 1 câu "
+              f"nêu câu vendor đã hỏi (topic, khoá)",
+              ids == [] and len(Q()) == 1 and len(amb) == 1 and calls
+              and A in [a_["ex_date"] for a_ in cd.get("asked", [])]
+              and any(a_["topic"] == topic and a_["key"] == k for a_ in cd.get("asked", [])),
+              (lbl, ids, calls, _Bus.calls, out_[-300:]))
+    rc_, out_, calls, ids = go([done(vkeys[0][1])], [(A, "ISS", BONUS)])
+    amb = Q(f"broker-ambiguous-TPB-{D}")
+    check("r8 câu cross-day nói rõ đây là HỎI LẠI (lượt trước đã hỏi mã ở ex khác) — người đọc biết không phải câu mới",
+          len(amb) == 1 and "HỎI LẠI (lượt trước đã hỏi mã ở ex khác" in amb[0][1]["question"], (_Bus.calls, out_[-300:]))
+    rc_, out_, calls, ids = go([done(vkeys[0][1])], [(A, "ISS", BONUS), (EX, "ISS", BONUS)])
+    check("r8 MAJOR-1b vendor-only đã hỏi ex A + BQ có ĐỦ (ISS ở A và B) ⇒ ghi B bình thường, 0 câu hỏi",
+          ids == [rid] and not Q() and calls, (ids, calls, _Bus.calls))
+    closed = done(["closed", "vendor-only", "TPB", A])
+    rc_, out_, calls, ids = go([done(vkeys[0][1]), closed], [])
+    check("r8 MAJOR-1c câu vendor-only ĐÃ được trả lời (done ['closed', …]) ⇒ không còn là câu mở ⇒ ghi B, không tra BQ",
+          ids == [rid] and not Q() and not calls, (ids, calls, _Bus.calls))
+    rec_a = dict(BD.build_record(dict(tpb, ex_date=A), "t"), _status="CONFIRMED (người ký)")
+    _sandbox(registry_actions=[rec_a])
+    rows_a = cac._reg_rows(json.load(open(cac.CORP_ACTIONS_FILE))["actions"])
+    check("r8 MAJOR-1d câu vendor đã hỏi mà ex A ĐÃ thành record registry ⇒ không tính (nhánh registry lo)",
+          cac._asked_rows({}, {tuple(vkeys[0][1])}, "live", rows_a) == []
+          and len(cac._asked_rows({}, {tuple(vkeys[0][1])}, "live", [])) == 1,
+          cac._asked_rows({}, {tuple(vkeys[0][1])}, "live", rows_a))
+    for lbl, k in (("credit-overdue", ["credit-overdue", "TPB", A, "TPB-X", "ASKED"]),
+                   ("registry-dup", ["registry-dup", "TPB", A, "TPB-X+TPB-Y", "ASKED"]),
+                   ("broker-cross-day", ["broker-cross-day", "TPB", f"{A},{EX}", "abc", "ASKED"]),
+                   ("khoá vendor KHÔNG kết thúc 'ASKED'", ["vendor-only", "TPB", A, "SENT"])):
+        rc_, out_, calls, ids = go([done(k)], [])
+        check(f"r8 MAJOR-1e khoá {lbl} KHÔNG tính là câu đã hỏi ⇒ ghi B, không tra BQ",
+              ids == [rid] and not Q() and not calls, (lbl, ids, calls, _Bus.calls))
+    rc_, out_, calls, ids = go([done(vkeys[0][1])], [(A, "ISS", BONUS)], mode="shadow")
+    lg = [x for x in _ledger_lines() if x.get("kind") == "intent" and x.get("credit_day") == D]
+    check("r8 MAJOR-1f shadow: câu vendor-only (thật, mọi mode) đã hỏi ex A ⇒ mục shadow AMBIGUOUS mang cross_day",
+          ids == [] and len(lg) == 1 and lg[0]["verdict"] == BD.AMBIGUOUS and lg[0].get("cross_day"), (lg, calls))
+
+    # ══ minor-2b: bằng chứng BQ chỉ áp cho mục có ex TRONG tập BQ đã xác nhận. Mục gửi bù C (ex 10-13, phiên credit PREV) ngoài
+    #    cửa sổ câu-đã-hỏi của B (neo B/D: cách 11/12 ngày) nhưng B gần phiên credit của C ⇒ I2 thường: bỏ record_proposed, đề nghị
+    #    sửa/thu hồi B. Dry-run phải nói y hệt lượt thật (record lô coi như đã ghi — fin_raw + record lô) ══
+    a_ = ent(D, verdict=BD.AMBIGUOUS)                # khoá sổ khác C (khoá = mode, mã, phiên, verdict)
+    c_ = ent("2026-10-13", tk="TPB", qty_multiplier=1.15,
+             record_proposed=BD.build_record(dict(tpb, ex_date="2026-10-13"), "t"))
+    got = {}
+    for dry in (False, True):
+        _sandbox()
+        _ledger_write([a_, done(a_["key"]), c_])
+        h0 = _sha(cac.CORP_ACTIONS_FILE)
+        sent = []
+        real_bus = cac._bus
+
+        def rec_bus(kind, topic, payload):
+            sent.append((kind, topic, payload))
+            return real_bus(kind, topic, payload)
+        cac._bus = rec_bus
+        try:
+            with _bq_fake([(D, "ISS", BONUS), (EX, "ISS", BONUS)]):
+                if dry:
+                    with cac._dry_scope(True):
+                        rc_, out_ = run_(cac._run_broker_locked, D, "live", [tpb])
+                else:
+                    rc_, out_ = run_(cac._run_broker_locked, D, "live", [tpb])
+        finally:
+            cac._bus = real_bus
+        cq = [x[2] for x in sent if x[0] == "question" and x[1] == f"corp-action-broker-unverified-TPB-{PREV}"]
+        got[dry] = (cq[0] if len(cq) == 1 else {}, acts(), _sha(cac.CORP_ACTIONS_FILE) == h0, out_)
+    rp, dp = got[False][0], got[True][0]
+    check("r8 minor-2b tiền đề: BQ xác nhận {D, EX} (câu đã hỏi ex D) ⇒ lượt thật ghi B và có gửi bù C",
+          "BQ tav2_bq.corporate_action có ĐỦ" in got[False][3] and "gửi bù 1 mục" in got[False][3], got[False][3][-600:])
+    check("r8 minor-2b mục gửi bù ex NGOÀI tập BQ xác nhận (C 10-13) ⇒ I2 thường: bỏ record_proposed, đề nghị sửa/thu hồi record "
+          "lô B, KHÔNG mang cross_day_bq",
+          got[False][1] == [rid] and rp.get("record_proposed") is None
+          and (rp.get("registry_update_proposed") or {}).get("record_id") == rid and rp.get("cross_day_bq") is None,
+          (got[False][0], got[False][3][-500:]))
+    check("r8 minor-2b dry-run TRUNG THỰC: câu gửi bù C giống hệt lượt thật (record lô coi như đã ghi), registry KHÔNG đổi",
+          got[True][2] and dp.get("record_proposed") is None
+          and (dp.get("registry_update_proposed") or {}).get("record_id") == rid
+          and dp.get("question") == rp.get("question"), (got[True][0], got[True][3][-500:]))
+
+    # ══ minor-1: LOẠI sự kiện BQ phải khớp loại đã hỏi ══
+    cash_a = ent(A, verdict=BD.INSUFFICIENT, event_kind="PRICE_ONLY")
+    for lbl, evs, ok in (("câu SỰ KIỆN TIỀN ở A (PRICE_ONLY) + BQ: DIV ở A, ISS ở B ⇒ đủ", [(A, "DIV", None),
+                                                                                       (EX, "ISS", BONUS)], True),
+                         ("câu SỰ KIỆN TIỀN ở A + BQ: ISS ở A và B (không DIV ở A) ⇒ thiếu", [(A, "ISS", BONUS),
+                                                                                            (EX, "ISS", BONUS)], False),
+                         ("câu SỰ KIỆN TIỀN ở A + BQ: DIV ở A, chỉ DIV ở B (lô KL) ⇒ thiếu", [(A, "DIV", None),
+                                                                                           (EX, "DIV", None)], False)):
+        rc_, out_, calls, ids = go([cash_a, done(cash_a["key"])], evs)
+        amb = Q(f"broker-ambiguous-TPB-{D}")
+        check(f"r8 minor-1 {lbl}",
+              (ids == [rid] and not Q()) if ok else (ids == [] and len(amb) == 1 and "THIẾU" in
+                                                     amb[0][1]["cross_day"]["bq"]),
+              (lbl, ids, _Bus.calls, out_[-300:]))
+    sh_a = ent(A)
+    rc_, out_, calls, ids = go([sh_a, done(sh_a["key"])], [(A, "DIV", None), (EX, "ISS", BONUS)])
+    amb = Q(f"broker-ambiguous-TPB-{D}")
+    check("r8 minor-1b câu SỰ KIỆN KL ở A + BQ chỉ có DIV ở A ⇒ thiếu (câu nêu 'ex A: ISS điều chỉnh giá')",
+          ids == [] and len(amb) == 1 and f"ex {A}: ISS điều chỉnh giá" in amb[0][1]["cross_day"]["bq"],
+          (ids, _Bus.calls))
+
+    # ══ minor-3: AMBIGUOUS / DEFER_VENDOR là câu đã hỏi; ex không đọc được ⇒ lỗi (không coi là "BQ có") ══
+    for v in (BD.AMBIGUOUS, BD.DEFER_VENDOR):
+        e_ = ent(A, verdict=v)
+        rc_, out_, calls, ids = go([e_, done(e_["key"])], [(A, "ISS", BONUS)])
+        check(f"r8 minor-3 câu {v} lượt trước ở ex A ⇒ tính là đã hỏi: KHÔNG ghi B, 1 câu hỏi",
+              ids == [] and len(Q(f"broker-ambiguous-TPB-{D}")) == 1, (v, ids, _Bus.calls))
+    bad = ent("2026-1O-01")                          # chữ O thay số 0 ⇒ ex không đọc được (near theo `_near_rows`)
+    rc_, out_, calls, ids = go([bad, done(bad["key"])], [(EX, "ISS", BONUS), ("2026-1O-01", "ISS", BONUS)])
+    amb = Q(f"broker-ambiguous-TPB-{D}")
+    check("r8 minor-3b câu đã hỏi có ex KHÔNG đọc được ⇒ fail-closed: không ghi B, câu trích 'ex không đọc được', "
+          "không gọi BQ events",
+          ids == [] and len(amb) == 1 and "ex không đọc được" in amb[0][1]["question"] and not calls,
+          (ids, calls, _Bus.calls))
+
+    # ══ minor-4: trần TỔNG cho mọi lần tra BQ cross-day trong MỘT lượt ══
+    t0 = _time.monotonic()
+    with _bq_fake([(A, "ISS", BONUS), (EX, "ISS", BONUS)]) as calls:
+        m_ = cac._cross_day(cac._asked_rows({}, {tuple(vkeys[0][1])}, "live", []), [], "TPB", [(EX, "x")], D, "live",
+                            t0 - 1)
+    check("r8 minor-4a hết trần TỔNG trước khi tra ⇒ KHÔNG gọi BQ, fail-closed (hỏi) trích 'hết trần TỔNG'",
+          calls == [] and m_ and "hết trần TỔNG" in (m_["cross_day"]["bq_error"] or ""), (calls, m_))
+    vpb = dict(tpb, ticker="VPB")
+    pe_calls = []
+
+    def slow(tickers, since=None, until=None, codes=("DIV", "ISS")):
+        pe_calls.append(tickers[0])
+        _time.sleep(0.6)
+        return []
+    cac.BQ_XDAY_BUDGET_S = 0.4
+    try:
+        _sandbox()
+        e1, e2 = ent(A), ent(A, tk="VPB")
+        _ledger_write([e1, done(e1["key"]), e2, done(e2["key"])])
+        with _bq_fake([]):
+            keep_pe, _CAL.pricing_events = _CAL.pricing_events, slow
+            try:
+                t0 = _time.monotonic()
+                rc_, out_ = run_(cac._run_broker_locked, D, "live", [tpb, vpb])
+                dt_ = _time.monotonic() - t0
+            finally:
+                _CAL.pricing_events = keep_pe
+        import threading as _thr
+        lingering = [t_ for t_ in _thr.enumerate() if t_ is not _thr.main_thread() and t_.is_alive()]
+    finally:
+        cac.BQ_XDAY_BUDGET_S = 60
+    check("r8 minor-4c luồng tra BQ còn treo sau khi lượt trả về là DAEMON (không giữ tiến trình cron sống tới khi BQ xong)",
+          lingering and all(t_.daemon for t_ in lingering), [(t_.name, t_.daemon) for t_ in lingering])
+    qs = Q("broker-ambiguous-")
+    check("r8 minor-4b 2 mã cần tra, BQ treo: tổng thời gian ≤ trần TỔNG + lề (không N × trần), BQ chỉ được gọi 1 lần, "
+          "mã sau hỏi người với lý do 'hết trần TỔNG'",
+          dt_ < 0.55 and pe_calls == ["TPB"] and acts() == [] and len(qs) == 2
+          and any("hết trần TỔNG" in q[1]["question"] for q in qs)
+          and any("quá trần TỔNG" in q[1]["question"] for q in qs), (dt_, pe_calls, acts(), _Bus.calls, out_[-400:]))
 
 
 MUTANTS = [
@@ -5552,7 +5796,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        _ledger_append(observed + [{"kind": "done", "key": o["key"], "at": now_ict, "observation_only": True}', '        _ledger_append(observed + [{"kind": "x", "key": o["key"], "at": now_ict, "observation_only": True}', 'r4↻ r3 m1 dòng quan sát thiếu done (gửi bù câu hỏi rỗng)'),
     ('bin/corp_action_auto_confirm.py', '                  | ({str((seen_now or {})[(tk, ex)])} if (tk, ex) in (seen_now or {}) else set()))', '                  )', 'r3 m1 dry-run bỏ kết quả chính lượt này'),
     ('bin/corp_action_auto_confirm.py', '        return _registry_sweep(date_str, mode) or rc', '        return rc', 'r3 m1 cron không quét registry'),
-    ('bin/corp_action_auto_confirm.py', '        rc = rc or (0 if ok else 1)\n    return rc\n\n\ndef _finish_live', '        rc = 0\n    return rc\n\n\ndef _finish_live', 'r3 m1 bus lỗi rc=0 (quét registry)'),
+    ('bin/corp_action_auto_confirm.py', '        rc = rc or (0 if ok else 1)\n    return rc\n\n\ndef _xday_note', '        rc = 0\n    return rc\n\n\ndef _xday_note', 'r3 m1 bus lỗi rc=0 (quét registry)'),
     ('bin/corp_action_auto_confirm.py', '                    superseded |= _close_resolved(tk, date_str, intents, done, regc, meta)', '                    pass', 'r4↻ r3 m7 khớp registry không đóng câu hỏi cũ'),
     ('bin/corp_action_auto_confirm.py', '        if k not in done:\n            sup.add(k)\n            continue', '        if False:\n            sup.add(k)\n            continue', 'r3 m7 trả lời câu hỏi chưa từng gửi'),
     ('bin/corp_action_auto_confirm.py', '        pending = [e for e in pending if tuple(e.get("key") or BD.ledger_key(e)) not in superseded]', '        pending = pending', 'r3 m7 vẫn gửi bù câu hỏi hết thời'),
@@ -5601,7 +5845,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '        if w["ticker"] != tk or str(w["rec"].get("_status", "")).strip().upper().startswith("REVOKED"):', '        if w["ticker"] != tk or not w["effective"]:', 'r4 N42 near-dup chỉ record hiệu lực (PROPOSED lọt) [r6 neo lại]'),
     ('bin/corp_action_auto_confirm.py', '                    if over is not None and over():\n                        print(', '                    if over is not None and over() and t != tickers[0]:\n                        print(', 'r4 N43 prefetch mã đầu bỏ qua ngân sách'),
     ('bin/corp_action_auto_confirm.py', '        if tk not in held and not unknown:\n            print(f"  [credit-watch', '        if tk not in held:\n            print(f"  [credit-watch', 'r4 N59 quét bỏ tài khoản không xác định'),
-    ('bin/corp_action_auto_confirm.py', '    pending = [_i2_refresh(e, fview, frows) for e in pending]', '    pending = pending', 'r4 m1 gửi bù không tính lại I2'),
+    ('bin/corp_action_auto_confirm.py', '    pending = [_i2_refresh(e, fview, frows, xday_ok) for e in pending]', '    pending = pending', 'r4 m1 gửi bù không tính lại I2'),
     ('bin/corp_action_auto_confirm.py', '    if existing is None:\n        return e\n    if str(existing) == str(own):', '    if True:\n        return e\n    if str(existing) == str(own):', 'r4 m1 _i2_refresh không bao giờ đổi [r6 neo lại]'),
     ('bin/corp_action_auto_confirm.py', '    if existing is None and e.get("event_kind", "SHARE_EVENT") == "SHARE_EVENT":', '    if False:', 'r4 m1 gửi bù bỏ near-dup'),
     ('bin/corp_action_auto_confirm.py', '"record": None if blocked else e["record"],', '"record": e["record"],', 'r4 m1 write-incomplete vẫn mang record để ghi [r6 neo lại]'),
@@ -5655,7 +5899,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '            _ask_guarded(ask_failed, _ask_vendor_conflict, tk, ex, evs, _existing_id(view, rows, tk, ex, date_str))\n        return _vendor_confirm_only', '            pass\n        return _vendor_confirm_only', 'r6 [neo lại r5 M1] vendor live: conflict không hỏi'),
     ('bin/corp_action_auto_confirm.py', '    allx = exes | {w["ex"] for w in near}', '    allx = set(exes)', 'r6 [thay r5 M1 rows broker] multi bỏ qua record registry'),
     ('bin/corp_action_auto_confirm.py', '        if m is None and len(rs) > 1:', '        if False:', 'r6 [thay r5 batch_keys] broker ≥2 kết quả cùng (mã, ex) không coi là multi'),
-    ('bin/corp_action_auto_confirm.py', '    new = [_i2_refresh(e, fview, frows) for e in new]', '    new = new', 'r5 M1 broker: mục quyết trước record lô không tính lại I2'),
+    ('bin/corp_action_auto_confirm.py', '    new = [_i2_refresh(e, fview, frows, xday_ok) for e in new]', '    new = new', 'r5 M1 broker: mục quyết trước record lô không tính lại I2'),
     ('bin/corp_action_auto_confirm.py', '        fview, frows = _registry_view(fin_raw), _reg_rows(fin_raw)\n        new = [_i2_refresh', '        fview, frows = _registry_view(actions_raw), _reg_rows(actions_raw)\n        new = [_i2_refresh', 'r6 [thay r5 fin suy luận] I2 sau ghi tính trên registry TRƯỚC lô (không đọc lại)'),
     ('bin/corp_action_auto_confirm.py', '                    entry["why"] = f"{entry[\'why\']}; (shadow) live sẽ KHÔNG ghi — validate() từ chối: {err}"\n                    new.append(entry)', '                    entry["why"] = f"{entry[\'why\']}; (shadow) live sẽ KHÔNG ghi — validate() từ chối: {err}"\n                    pass', 'r5 m5 broker shadow: mục record hỏng biến mất khỏi sổ'),
     ('bin/corp_action_auto_confirm.py', '        if rejected:\n            rc = _broker_reject(', '        if False:\n            rc = _broker_reject(', 'r6 [neo lại r5 m5] record hỏng im (không hỏi)'),
@@ -5682,7 +5926,7 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    out = {k: v for k, v in e.items() if k != "record_proposed"}\n    out["registry_unreadable"]', '    return e\n    out["registry_unreadable"]', 'r6 _i2_unknown no-op'),
     ('bin/corp_action_auto_confirm.py', 'blocked = bool(upd or e.get("registry_unreadable") or e.get("record_in_file"))', 'blocked = bool(upd or e.get("registry_unreadable"))', 'r6 write-incomplete mang record dù record đã trong file'),
     ('bin/corp_action_auto_confirm.py', '        return dict(e, record_in_file=True)', '        return e', 'r6 _i2_refresh không gắn record_in_file'),
-    ('bin/corp_action_auto_confirm.py', '    new = [_i2_refresh(e, pv, pr) for e in new]\n', '\n', 'r6 dòng sổ mới không qua I2 trước khi ghi sổ'),
+    ('bin/corp_action_auto_confirm.py', '    new = [_i2_refresh(e, pv, pr, xday_ok) for e in new]\n', '\n', 'r6 dòng sổ mới không qua I2 trước khi ghi sổ'),
     ('bin/corp_action_auto_confirm.py', 'BD.UNVERIFIED in dup["verdicts"] + [v]', 'BD.UNVERIFIED == v', 'r6 multi chỉ xét verdict chân đầu (mất Winston)'),
     ('bin/corp_action_auto_confirm.py', '            out.append(w)\n            continue', '            continue', 'r6 _near_rows bỏ record ex không đọc được'),
     ('bin/corp_action_auto_confirm.py', '    for w in _near_rows(rows, tk, (ex, credit_day)):', '    for w in _near_rows(rows, tk, (ex,)):', 'r6 near-dup (confirm-only/I2) không neo phiên credit'),
@@ -5708,22 +5952,55 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    if any(w["ticker"] == tk and w["ex"] in exes for w in rows):\n        return None\n', '', 'r7 m4 cross-day dù registry đã có (mã, B)'),
     ('bin/corp_action_auto_confirm.py', ' if w["ex"] not in exes]', ']', 'r7 m4 câu đã hỏi CÙNG ex B vẫn tính'),
     ('bin/corp_action_auto_confirm.py', '_near_rows(asked, tk, sorted(exes) + [credit_day])', '_near_rows(asked, tk, sorted(exes))', 'r7 m4 cửa sổ bỏ neo phiên credit'),
-    ('bin/corp_action_auto_confirm.py', '    if err is None and set(allx) <= found:', '    if err is None and found:', 'r7 m4 BQ có 1 sự kiện đã coi là đủ'),
-    ('bin/corp_action_auto_confirm.py', '    if err is None and set(allx) <= found:', '    if err is not None or set(allx) <= found:', 'r7 m4 tra BQ lỗi ⇒ xử lý bình thường (fail-open)'),
+    ('bin/corp_action_auto_confirm.py', '    if err is None and not miss:', '    if err is None and got:', 'r7 m4 BQ có 1 sự kiện đã coi là đủ'),
+    ('bin/corp_action_auto_confirm.py', '    if err is None and not miss:', '    if err is not None or not miss:', 'r7 m4 tra BQ lỗi ⇒ xử lý bình thường (fail-open)'),
     ('bin/corp_action_auto_confirm.py', '        if ing < prev:\n', '        if ing <= prev:\n', 'r7 m4 biên tươi < → <='),
     ('bin/corp_action_auto_confirm.py', '        if ing < prev:\n', '        if False:\n', 'r7 m4 bỏ kiểm feed stale'),
     ('bin/corp_action_auto_confirm.py', 'dt.datetime.fromisoformat(raw).replace(tzinfo=dt.timezone.utc).astimezone(\n            ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()', 'dt.datetime.fromisoformat(raw).date().isoformat()', 'r7 m4 mốc tươi theo ngày UTC (không đổi ICT)'),
     ('bin/corp_action_auto_confirm.py', 'since=(min(ds) - dt.timedelta(days=1)).isoformat()', 'since=min(ds).isoformat()', 'r7 m4 since loại trừ ex nhỏ nhất'),
-    ('bin/corp_action_auto_confirm.py', ' for ev in evs if cal.is_price_adjusting(ev)}', ' for ev in evs}', 'r7 m4 BQ tính cả sự kiện không điều chỉnh giá (ESOP)'),
+    ('bin/corp_action_auto_confirm.py', '            if cal.is_price_adjusting(ev):\n', '            if True:\n', 'r7 m4 BQ tính cả sự kiện không điều chỉnh giá (ESOP)'),
     ('bin/corp_action_auto_confirm.py', '        if dup and dup.get("cross_day") and tuple(dup["cross_day"]["ask_key"]) in done:', '        if False:', 'r7 m4 bỏ khoá hỏi-1-lần (hỏi lặp mỗi lượt)'),
     ('bin/corp_action_auto_confirm.py', '               for e in entries if (e.get("cross_day") or {}).get("ask_key")])', '               for e in entries if False])', 'r7 m4 _done_rows không ghi khoá hỏi-1-lần'),
     ('bin/corp_action_auto_confirm.py', 'hashlib.sha1("\\n".join([mode] + allx)', 'hashlib.sha1("\\n".join(allx)', 'r7 m4 khoá hỏi-1-lần bỏ mode (done shadow chặn câu live)'),
     ('bin/corp_action_auto_confirm.py', '            if dup.get("cross_day"):\n                entry["cross_day"] = dup["cross_day"]\n', '', 'r7 m4 mục sổ không mang cross_day'),
-    ('bin/corp_action_auto_confirm.py', '"multi_event": e.get("multi_event"), "cross_day": e.get("cross_day"),\n                 "verdict": v', '"multi_event": e.get("multi_event"),\n                 "verdict": v', 'r7 m4 payload câu chung bỏ cross_day'),
-    ('bin/corp_action_auto_confirm.py', '        if m is None:\n            m = _cross_day(asked, rows, tk, cand, date_str, mode)\n', '', 'r7 m4 không gọi _cross_day'),
+    ('bin/corp_action_auto_confirm.py', '"multi_event": e.get("multi_event"), "cross_day": e.get("cross_day"),\n                 "cross_day_bq": e.get("cross_day_bq"), "verdict": v', '"multi_event": e.get("multi_event"),\n                 "cross_day_bq": e.get("cross_day_bq"), "verdict": v', 'r7 m4 payload câu chung bỏ cross_day'),
+    ('bin/corp_action_auto_confirm.py', '        if m is None:\n            m = _cross_day(asked, rows, tk, cand, date_str, mode, xday_deadline, xday_ok)\n', '', 'r7 m4 không gọi _cross_day'),
     ('bin/corp_action_auto_confirm.py', '    kind = "write-incomplete" if v == BD.CONFIRMABLE else v.lower()', '    kind = v.lower()', 'r7 m4 topic câu đã hỏi CONFIRMABLE sai'),
     ('bin/corp_action_auto_confirm.py', '    _ledger_append(_done_rows(entries, now_ict))\n', '    _ledger_append([{"kind": "done", "key": e["key"], "at": now_ict} for e in entries])\n', 'r7 m4 shadow không ghi khoá hỏi-1-lần'),
-    ('bin/corp_action_auto_confirm.py', '    th.join(BQ_XDAY_BUDGET_S)', '    th.join()', 'r7 m4 tra BQ không có trần thời gian'),
+    ('bin/corp_action_auto_confirm.py', '    th.join(left)', '    th.join()', 'r7 m4 tra BQ không có trần thời gian'),
+    # ── r8 (job Taylor_20261007_034436, arch-review r7): MAJOR-1 khoá vendor, minor-1 loại sự kiện, minor-2 gửi bù, minor-3, minor-4 ──
+    ('bin/corp_action_auto_confirm.py', '    for k in sorted(done, key=str):\n        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', '    for k in []:\n        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', 'r8 MAJOR-1 bỏ khoá done nhánh vendor (bản r7)'),
+    ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', 'r8 MAJOR-1 bỏ vendor-only'),
+    ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-only", "vendor-conflict", "vendor-cash-leg",', 'r8 MAJOR-1 bỏ vendor-held-unknown'),
+    ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-only", "vendor-held-unknown", "vendor-cash-leg",', 'r8 MAJOR-1 bỏ vendor-conflict'),
+    ('bin/corp_action_auto_confirm.py', '"vendor-only", "vendor-held-unknown", "vendor-conflict", "vendor-cash-leg",', '"vendor-only", "vendor-held-unknown", "vendor-conflict",', 'r8 MAJOR-1 bỏ vendor-cash-leg'),
+    ('bin/corp_action_auto_confirm.py', '                       "vendor-multi-event", "vendor-near-record", "vendor-vs-registry")', '                       "vendor-near-record", "vendor-vs-registry")', 'r8 MAJOR-1 bỏ vendor-multi-event'),
+    ('bin/corp_action_auto_confirm.py', '                       "vendor-multi-event", "vendor-near-record", "vendor-vs-registry")', '                       "vendor-multi-event", "vendor-vs-registry")', 'r8 MAJOR-1 bỏ vendor-near-record'),
+    ('bin/corp_action_auto_confirm.py', '                       "vendor-multi-event", "vendor-near-record", "vendor-vs-registry")', '                       "vendor-multi-event", "vendor-near-record")', 'r8 MAJOR-1 bỏ vendor-vs-registry'),
+    ('bin/corp_action_auto_confirm.py', '("HỎI LẠI (lượt trước đã hỏi mã ở ex khác, BQ không xác nhận đủ sự kiện) — "', '(""', 'r8 [reviewer r7] câu hỏi lại bỏ chữ HỎI LẠI'),
+    ('bin/corp_action_auto_confirm.py', 'daemon=True)', 'daemon=False)', 'r8 [reviewer r7] luồng tra BQ không daemon'),
+    ('bin/corp_action_auto_confirm.py', '        for ex in str(k[2]).split(","):', '        for ex in [str(k[2])]:', 'r8 MAJOR-1 multi-event không tách ex'),
+    ('bin/corp_action_auto_confirm.py', '                or ("closed",) + tuple(k[:-1]) in done):', '                ):', 'r8 MAJOR-1 tính cả câu vendor đã được trả lời (closed)'),
+    ('bin/corp_action_auto_confirm.py', '        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', '        if (len(k) < 4 or k[0] not in _ASKED_VENDOR_KINDS\n', 'r8 MAJOR-1 không đòi hậu tố ASKED'),
+    ('bin/corp_action_auto_confirm.py', '        if (len(k) < 4 or k[-1] != "ASKED" or k[0] not in _ASKED_VENDOR_KINDS\n', '        if (len(k) < 4 or k[-1] != "ASKED"\n', 'r8 MAJOR-1 tính mọi loại khoá (credit-overdue, cross-day…)'),
+    ('bin/corp_action_auto_confirm.py', '            if not ex or (tk, _iso(ex)) in inreg:', '            if not ex:', 'r8 MAJOR-1 tính câu vendor ở ex đã thành record'),
+    ('bin/corp_action_auto_confirm.py', '"id": topic, "effective": False', '"id": "?", "effective": False', 'r8 MAJOR-1 câu vendor không nêu topic'),
+    ('bin/corp_action_auto_confirm.py', '        need = "SHARE" if e.get("event_kind", "SHARE_EVENT") in (None, "SHARE_EVENT") else "CASH"\n', '        need = "SHARE"\n', 'r8 minor-1 câu sự kiện tiền đòi ISS'),
+    ('bin/corp_action_auto_confirm.py', '        need = "SHARE" if e.get("event_kind", "SHARE_EVENT") in (None, "SHARE_EVENT") else "CASH"\n', '        need = "CASH"\n', 'r8 minor-1 câu sự kiện KL đòi DIV'),
+    ('bin/corp_action_auto_confirm.py', '    need = {ex: {"SHARE"} for ex in exes}\n', '    need = {ex: {"CASH"} for ex in exes}\n', 'r8 minor-1 ex lô (KL) đòi DIV'),
+    ('bin/corp_action_auto_confirm.py', '                    "CASH" if ev.get("event_code") == "DIV" else "SHARE")', '                    "SHARE")', 'r8 minor-1 DIV tính như ISS (bản r7)'),
+    ('bin/corp_action_auto_confirm.py', '                    "CASH" if ev.get("event_code") == "DIV" else "SHARE")', '                    "CASH")', 'r8 minor-1 ISS tính như DIV'),
+    ('bin/corp_action_auto_confirm.py', '        need.setdefault(w["ex"], set()).add(w.get("need") or "SHARE")', '        need.setdefault(w["ex"], set())', 'r8 minor-1 câu đã hỏi không đòi gì'),
+    ('bin/corp_action_auto_confirm.py', '        if bad:\n            return None, f"ex không đọc được', '        if False:\n            return None, f"ex không đọc được', 'r8 minor-3 ex không đọc được ⇒ bỏ qua'),
+    ('bin/corp_action_auto_confirm.py', '        if bad:\n            return None, f"ex không đọc được {bad} ⇒ không khớp được với BQ"', '        if bad:\n            return {x: {"SHARE", "CASH"} for x in exes}, None', 'r8 minor-3 ex không đọc được ⇒ coi BQ có (fail-open)'),
+    ('bin/corp_action_auto_confirm.py', '    left = deadline - time.monotonic()\n', '    left = BQ_XDAY_BUDGET_S\n', 'r8 minor-4 trần theo từng mã (bản r7)'),
+    ('bin/corp_action_auto_confirm.py', '    if left <= 0:\n        return None, (f"hết trần TỔNG', '    if False:\n        return None, (f"hết trần TỔNG', 'r8 minor-4 hết trần vẫn tra'),
+    ('bin/corp_action_auto_confirm.py', '        if confirmed is not None:\n            confirmed[tk] = {"exes": allx, "bq": bq}\n', '', 'r8 minor-2 không lưu bằng chứng BQ (bản r7)'),
+    ('bin/corp_action_auto_confirm.py', '        rows = [w for w in rows if not (w["ticker"] == tk and w["ex"] in other)]\n', '', 'r8 minor-2 record ex khác vẫn tính near-dup'),
+    ('bin/corp_action_auto_confirm.py', '        pending = [_i2_refresh(e, fview, frows, xday_ok) for e in pending]\n', '        pending = [_i2_refresh(e, fview, frows) for e in pending]\n', 'r8 minor-2 gửi bù không truyền xday'),
+    ('bin/corp_action_auto_confirm.py', '    if xd and _iso(ex) in xd["exes"]:', '    if xd:', 'r8 minor-2 bằng chứng áp cả mục ex NGOÀI tập BQ'),
+    ('bin/corp_action_auto_confirm.py', 'f"lấy số nguồn khác đè. Winston kiểm nguồn; {act}.{_xday_note(e)} Chi tiết', 'f"lấy số nguồn khác đè. Winston kiểm nguồn; {act}. Chi tiết', 'r8 minor-2 câu UNVERIFIED không nói bằng chứng BQ'),
+    ('bin/corp_action_auto_confirm.py', '                     "cross_day_bq": e.get("cross_day_bq"), "accounts": e["accounts"], "urgency": "high"})', '                     "accounts": e["accounts"], "urgency": "high"})', 'r8 minor-2 payload UNVERIFIED bỏ cross_day_bq'),
 ]
 
 
@@ -5817,6 +6094,7 @@ def main():
     test_r6()
     test_r6b()
     test_r7()
+    test_r8()
     test_px()
     test_C()
     if "--replay" in sys.argv:

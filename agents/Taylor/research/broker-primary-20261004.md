@@ -337,8 +337,10 @@ thật ghi B + gửi bù bỏ record_proposed; dry-run bắt payload qua `_bus` 
 
 **ĐỀ XUẤT (không làm):** (1) áp ngoại lệ "BQ có đủ sự kiện ở mọi ex" cho nhánh multi-event REGISTRY (A đã là record): hiện vẫn chặn +
 hỏi kể cả khi BQ xác nhận 2 sự kiện thật — ~4 ca/năm toàn thị trường, đổi = thêm đường tự ghi cạnh record có sẵn, cần user chốt.
-(2) Câu hỏi phía vendor (`vendor-*` ASKED, off/shadow + confirm-only live) KHÔNG tính vào `_asked_rows`: vendor_check của detector đã
-đối chiếu lịch vendor mỗi lượt (ex lệch ⇒ UNVERIFIED); thêm thì phải parse khoá done tự do. (3) `_close_resolved` vẫn chỉ đóng câu
+(2) ~~Câu hỏi phía vendor (`vendor-*` ASKED, off/shadow + confirm-only live) KHÔNG tính vào `_asked_rows`: vendor_check của detector đã
+đối chiếu lịch vendor mỗi lượt (ex lệch ⇒ UNVERIFIED); thêm thì phải parse khoá done tự do.~~ **SAI — sửa ở r8 (MAJOR-1 arch r7):**
+lịch vendor chỉ chứa ex trong [asof, asof+10] (`corp_action_daily.py:1265`) ⇒ ex A đã qua KHÔNG còn trong lịch ⇒ broker suy ex B ≠ A
+thì vendor_check = NO_EVENT ⇒ CONFIRMABLE ⇒ r7 ghi B không tra BQ, không hỏi (probe reviewer). r8 tính khoá done vendor-*. (3) `_close_resolved` vẫn chỉ đóng câu
 cùng phiên credit — câu cross-day do người đóng (như vendor-multi-event).
 
 **Verify (artifact, r7):**
@@ -358,3 +360,56 @@ cùng phiên credit — câu cross-day do người đóng (như vendor-multi-eve
 - Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0 cả 6; sha256 `data/corp_actions.json` 21a88fb5… y nguyên; sổ broker
   production vẫn không tồn tại (chỉ .lock 10-05) ⇒ không câu đã hỏi nào ⇒ không tra BQ. 10-01 live: TPB MATCH record người ký; 10-06
   live: TV1 PRICE_ONLY INSUFFICIENT (câu lẽ ra gửi).
+
+### r8 (job Taylor_20261007_034436, user DUYỆT phương án (1) 07/10 10:44 — sửa cả 5 lỗi arch-review r7, vòng sửa cuối)
+Cùng nhánh `feat/broker-primary-r7-20261007` (worktree `wt-bp-r7-1007`, trên 179e4686). KHÔNG merge, KHÔNG đổi crontab,
+`MIKE_CA_BROKER_SOURCE` mặc định giữ shadow. Đọc lại TOÀN BỘ phần đụng một lần trước commit.
+
+- **MAJOR-1 (khoá vendor).** `_asked_rows(intents, done, mode, rows)` đọc thêm khoá done `[loại, mã, ex(,…), 'ASKED']` với loại ∈
+  `_ASKED_VENDOR_KINDS` = vendor-only, vendor-held-unknown, vendor-conflict, vendor-cash-leg, vendor-multi-event (k[2] tách ','),
+  vendor-near-record, vendor-vs-registry — mọi mode (câu vendor là câu THẬT đã gửi); bỏ khoá đã có `("closed",)+k[:-1]` (đã được
+  `_resolve_asks` trả lời) và ex đã thành record registry (như mục sổ broker). Lý do gồm cả 7: mọi loại vendor-* đều là câu hỏi người
+  về sự kiện CP ở ex trong khoá; vendor-vs-registry/near-record có record ở/quanh ex — ex đã là record thì `inreg` loại, ex vendor ≠ ex
+  record thì ex vendor VẪN là câu đã hỏi. KHÔNG tính: broker-cross-day (tập ex = mục sổ broker + câu đã hỏi, đã đếm từ gốc),
+  credit-overdue/registry-dup/reverify (hỏi về record registry). Probe reviewer: r7 `registry=['TPB-…-BROKER-SHARE-EVENT'] BQ_calls=[]
+  questions=[]` → r8 `registry=[] BQ_calls=[fresh, events] questions=['corp-action-broker-ambiguous-TPB-2026-10-01']` (cả ca vendor-only
+  lẫn broker UNVERIFIED).
+- **minor-1 (loại sự kiện).** `_bq_event_exes_raw` trả `{ex: {SHARE|CASH}}` (ISS điều chỉnh giá ⇒ SHARE, DIV ⇒ CASH). `_cross_day`
+  đòi ĐÚNG loại theo ex: ex lô (nhánh KL, kind None) ⇒ SHARE; câu đã hỏi theo `need` (event_kind SHARE_EVENT/None + mọi câu vendor ⇒
+  SHARE; PRICE_ONLY/khác ⇒ CASH). Câu hỏi nêu "THIẾU ex X: ISS điều chỉnh giá / DIV". Fake V17 + M1g sửa ISS ở cả 2 ex.
+- **minor-2 (gửi bù).** `_cross_day` khi BQ đủ ghi bằng chứng `confirmed[mã] = {exes, bq}` (`xday_ok` của lượt). `_i2_refresh(…, xday)`:
+  mục có ex trong tập đó ⇒ record ở ex KHÁC trong tập KHÔNG tính near-dup (BQ chứng minh khác sự kiện) ⇒ giữ `record_proposed`,
+  KHÔNG `registry_update_proposed`, mang `cross_day_bq`; câu UNVERIFIED/write-incomplete/chung thêm câu nói bằng chứng + key
+  `cross_day_bq` trong payload. V17 (lượt thật + dry-run) và M1g viết lại theo hành vi mới.
+- **minor-3 (lỗ test).** Test có tên: câu AMBIGUOUS và DEFER_VENDOR lượt trước tính là đã hỏi; ex không đọc được ⇒ `_bq_event_exes_raw`
+  trả LỖI "ex không đọc được […]" (trước: bỏ qua ⇒ phụ thuộc caller) ⇒ hỏi, không gọi BQ events.
+- **minor-4 (trần TỔNG).** `xday_deadline = monotonic() + BQ_XDAY_BUDGET_S` một lần/lượt; `_bq_event_exes(…, deadline)` chờ phần còn
+  lại; hết trước khi tra ⇒ KHÔNG tra, lỗi "hết trần TỔNG 60s … (các mã trước đã dùng hết)"; quá giữa chừng ⇒ "quá trần TỔNG". Cả hai
+  fail-closed ⇒ không ghi mã đó, hỏi người với lý do thật.
+
+**Verify (artifact, r8):**
+- Selfcheck **782/0 (py3.10) · 784/0 (py3.12)** × Asia/Ho_Chi_Minh / UTC / `env -u TZ` — 6/6. Mới: `test_r8` 30 assertion (MAJOR-1 ×7
+  loại vendor [multi-event: ex gần ở VỊ TRÍ 2 của k[2]] + đủ/closed/đã-record/khoá-không-tính ×4/shadow + "HỎI LẠI" trong câu; minor-1 ×4;
+  minor-2b ×3 (mục gửi bù ex NGOÀI tập BQ ⇒ I2 thường + dry-run trung thực); minor-3 ×3; minor-4 ×3 gồm luồng treo là daemon) + m4.2
+  ca "DIV ở ex lô KL".
+- Control: selfcheck r8 trên code r7 (179e4686) ⇒ 13 FAIL có tên (M1g, V17 ×2, m4.2-DIV, m4.3c, MAJOR-1 ×7, MAJOR-1b) rồi crash
+  (`_asked_rows` đổi chữ ký).
+- Mutation (bộ trong selfcheck, `--mutations` trên 2 bản sao cô lập `/tmp/r8_m310`, `/tmp/r8_m312`): **538/538 (3.10)**,
+  **537/538 (3.12 — `parse 5 chữ số` tương đương, khai từ r4)**, 0 chỉ-crash. +32 đột biến r8 (MAJOR-1 ×14: tắt nguồn done vendor,
+  bỏ từng loại ×7, multi-event không tách ex, tính câu đã closed, không đòi ASKED, tính mọi loại khoá, tính ex đã thành record, câu
+  không nêu topic; minor-1 ×6; minor-2 ×6; minor-3 ×2; minor-4 ×2; reviewer HỎI LẠI + daemon) + 6 đột biến r7 neo lại theo code r8.
+  Lần chạy đầy đủ thứ nhất: 3 sống ("r7 V17 dry-run fin_raw" — V17 nay không còn phân biệt vì bằng chứng BQ giữ record_proposed;
+  "multi-event không tách ex" — ex đầu trùng A nên `_iso[:10]` che; "minor-2 áp cả mục ex NGOÀI tập") ⇒ thêm minor-2b (mục gửi bù C ex
+  10-13 ngoài cửa sổ câu-đã-hỏi nhưng gần phiên credit ⇒ I2 thường; lượt thật vs dry-run) + đặt ex gần ở VỊ TRÍ 2 của khoá
+  multi-event. Sau sửa: hết.
+- Đột biến reviewer r7 (`/tmp/arch_r7/mut.py`, chạy lại trên bản sao cô lập `/tmp/r8_rev`): áp được 12/16 (4 pattern không còn vì code
+  đổi — bản tương ứng nằm trong bộ selfcheck: "r8 minor-4 trần theo từng mã", "r8 minor-3 ex không đọc được ⇒ coi BQ có", "r7 m4 BQ có
+  1 sự kiện đã coi là đủ", bản "asked chỉ tính câu CHƯA done" thay bằng nguồn done vendor). 9 GIẾT (gồm bỏ AMBIGUOUS / DEFER_VENDOR /
+  cả hai). 3 SỐNG ở lần đầu: "câu hỏi lại bỏ chữ HỎI LẠI" + "daemon False" ⇒ thêm assertion có tên (r8 "HỎI LẠI", r8 minor-4c) +
+  neo vào MUTANTS; "ask_key chỉ theo mã" = TƯƠNG ĐƯƠNG (khoá vẫn chứa tập ex ở k[2] và mode trong sha1 ⇒ không đổi hành vi).
+- ⚠ Sự cố quy trình (tự gây, đã xử lý): lần đầu tôi chạy SONG SONG 2 runner đột biến trên CÙNG file worktree (cả hai sửa tại chỗ) ⇒
+  kết quả lần đó vô hiệu, file còn 3 vết đột biến (`if True:` ở is_price_adjusting, chữ "HỎI LẠI" bị xoá, đuôi `__main__` nhân đôi) —
+  phát hiện bằng đối chiếu pattern MUTANTS + đọc toàn bộ diff, khôi phục tay, rồi mọi lần chạy đột biến sau đều trên bản sao riêng.
+- Dry-run dữ liệu thật 10-01 và 10-06 × off/shadow/live: rc=0 cả 6; sha256 `data/corp_actions.json` 21a88fb5… y nguyên; sổ broker
+  production vẫn không tồn tại (chỉ .lock 10-05) ⇒ không câu đã hỏi ⇒ không tra BQ. 10-01 live: TPB MATCH record người ký; 10-06 live:
+  TV1 PRICE_ONLY INSUFFICIENT (câu lẽ ra gửi).
