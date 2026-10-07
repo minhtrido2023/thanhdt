@@ -121,6 +121,25 @@ TABLES = {
             WHERE t.time >= '2013-01-01'
         """,
     },
+    # universe_pit = the raw per-day PIT membership table (universe_pit_q is a view over it).
+    # Cached because macro_state_live.py's breadth-decoupling guard (DT5G layer 4) reads
+    # `tav2_mike.universe_pit` directly; without it every cache-routed DT5G publish logged
+    # "breadth guard inactive" and silently fell back to ungated US pillar (seen 2026-09-07
+    # → 2026-10-07, user approved adding it 2026-10-07). Same fidelity rule as universe_pit_q.
+    "universe_pit": {
+        "sql": """
+            SELECT *
+            FROM `{project}.tav2_mike.universe_pit` AS t
+            WHERE t.time >= '2013-01-01'
+        """,
+        "partition_col": "time",
+        "chunk_years": list(range(2013, 2028)),
+        "verify_sql": """
+            SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
+            FROM `{project}.tav2_mike.universe_pit` AS t
+            WHERE t.time >= '2013-01-01'
+        """,
+    },
     "ticker_prune": {
         "sql": """
             SELECT *
@@ -786,6 +805,7 @@ def main():
             "vnindex_5state_dt_4gate": 2,
             "fa_ratings": 3, "fa_ratings_8l": 3,
             "ticker_financial": 4, "ticker_1m": 5, "universe_pit_q": 5,
+            "universe_pit": 5,
             "ticker_prune": 6, "ticker": 7,
         }
         target_tables.sort(key=lambda t: size_order.get(t, 99))
