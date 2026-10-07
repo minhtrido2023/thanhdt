@@ -5485,6 +5485,55 @@ def _r8_body():
           and any("hết trần TỔNG" in q[1]["question"] for q in qs)
           and any("quá trần TỔNG" in q[1]["question"] for q in qs), (dt_, pe_calls, acts(), _Bus.calls, out_[-400:]))
 
+    # ══ r10 (arch-review r8): vá 2 lỗ test — m3 (§29) bằng chứng BQ chỉ khi BQ ĐỦ; m4 trần TỔNG chia cho mã sau ══
+    # (1) mục gửi bù UNVERIFIED ex A (record_proposed) + lô CONFIRMABLE ex B; BQ THIẾU B / BQ LỖI ⇒ KHÔNG khẳng định "BQ
+    #     đã xác nhận" ở NÓI lẫn payload (cross_day_bq), KHÔNG ghi B, gửi bù không giữ record_proposed nhờ xác nhận đó
+    for lbl, kw in (("BQ THIẾU sự kiện ở ex B", {"events": [(A, "ISS", BONUS)]}),
+                    ("BQ tra LỖI", {"events": [(A, "ISS", BONUS), (EX, "ISS", BONUS)],
+                                    "err": RuntimeError("bq failed (giả r10)")})):
+        pr10 = ent(A, qty_multiplier=1.15, record_proposed=BD.build_record(dict(tpb, ex_date=A), "t"))
+        _sandbox()
+        _ledger_write([pr10])
+        _Bus.calls.clear()
+        with _bq_fake(**kw):
+            rc_, out_ = run_(cac._run_broker_locked, D, "live", [tpb])
+        qs = Q()
+        txt = " ".join(q_[1].get("question", "") for q_ in qs)
+        pls = json.dumps([q_[1] for q_ in qs], ensure_ascii=False)
+        check(f"r10 m3 {lbl} ⇒ KHÔNG ghi B, KHÔNG khẳng định BQ đã xác nhận (câu: 'KHÔNG phải cùng sự kiện' / 'BQ (lượt "
+              f"này)'; payload: cross_day_bq), mục gửi bù không mang cross_day_bq (bằng chứng BQ)",
+              acts() == [] and bool(qs) and "KHÔNG phải cùng sự kiện" not in txt and "BQ (lượt này)" not in txt
+              and "ĐỦ sự kiện đúng loại" not in pls
+              and all(not q_[1].get("cross_day_bq") for q_ in qs),
+              (lbl, acts(), [q_[0] for q_ in qs], txt[-500:]))
+    # (2) trần TỔNG chia cho mã sau: mã đầu dùng PHẦN trần (0.7s / 1.0s), mã sau treo ⇒ tổng chờ ≤ trần + lề (th.join phải
+    #     dùng `left` còn lại, không phải cả trần), câu nói 'quá trần TỔNG', mã sau KHÔNG bị tra tiếp ngoài lần treo
+    import time as _t10
+    keep10 = cac.BQ_XDAY_BUDGET_S, cac._bq_event_exes_raw
+    durs, seen10 = iter([0.7, 5.0]), []
+
+    def raw10(tk_, exes_, ds_):
+        seen10.append(tk_)
+        _t10.sleep(next(durs))
+        return {}, None
+    cac.BQ_XDAY_BUDGET_S = 1.0
+    cac._bq_event_exes_raw = raw10
+    try:
+        t0 = _t10.monotonic()
+        dl = t0 + cac.BQ_XDAY_BUDGET_S
+        r1 = cac._bq_event_exes("AAA", [A], D, dl)
+        r2 = cac._bq_event_exes("BBB", [A], D, dl)
+        r3 = cac._bq_event_exes("CCC", [A], D, dl)
+        tot = _t10.monotonic() - t0
+    finally:
+        cac.BQ_XDAY_BUDGET_S, cac._bq_event_exes_raw = keep10
+    check("r10 m4 mã đầu dùng 0.7s/1.0s, mã sau treo 5s ⇒ tổng chờ ≤ trần + lề (join theo PHẦN CÒN LẠI, không cả trần), câu "
+          "'quá trần TỔNG', mã sau nữa 'hết trần TỔNG' và KHÔNG tra",
+          r1 == ({}, None) and r2[0] is None and "quá trần TỔNG 1.0s" in r2[1]
+          and r3[0] is None and "hết trần TỔNG" in r3[1] and seen10 == ["AAA", "BBB"] and tot < 1.3,
+          (r1, r2, r3, seen10, round(tot, 2)))
+
+
 
 MUTANTS = [
     ('bin/corp_action_broker_detect.py', '    if s1["cost"] - s0["cost"] > cost_tol(s0, s1):', '    if False:', 'bỏ lọc giá vốn tăng'),
@@ -6043,6 +6092,8 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '    if xd and _iso(ex) in xd["exes"]:', '    if xd:', 'r8 minor-2 bằng chứng áp cả mục ex NGOÀI tập BQ'),
     ('bin/corp_action_auto_confirm.py', 'f"lấy số nguồn khác đè. Winston kiểm nguồn; {act}.{_xday_note(e)} Chi tiết', 'f"lấy số nguồn khác đè. Winston kiểm nguồn; {act}. Chi tiết', 'r8 minor-2 câu UNVERIFIED không nói bằng chứng BQ'),
     ('bin/corp_action_auto_confirm.py', '                     "cross_day_bq": e.get("cross_day_bq"), "accounts": e["accounts"], "urgency": "high"})', '                     "accounts": e["accounts"], "urgency": "high"})', 'r8 minor-2 payload UNVERIFIED bỏ cross_day_bq'),
+    ('bin/corp_action_auto_confirm.py', '    asked_d = [{"ex_date": w["ex"], "verdict"', '    if confirmed is not None:\n        confirmed[tk] = {"exes": allx, "bq": bq}\n    asked_d = [{"ex_date": w["ex"], "verdict"', 'r10 m3 lưu bằng chứng BQ cả khi BQ thiếu / tra lỗi'),
+    ('bin/corp_action_auto_confirm.py', '    th.join(left)\n', '    th.join(BQ_XDAY_BUDGET_S)\n', 'r10 m4 join chờ cả trần thay vì phần còn lại'),
 ]
 
 
