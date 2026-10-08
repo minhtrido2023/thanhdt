@@ -10,7 +10,7 @@
       "objective": "Khi NEUTRAL và BAL/LAG rỗng, giải ngân tiền rảnh theo thứ tự BAL/LAG → DC book (double-confirm, ex-DHG) → custom30V có thắng để-nguyên-custom30V không? (backtest +5.0pp sleeve, DSR 0.775 = insurance-grade, chưa phải alpha tin cậy cao)",
       "start": "2026-07-06",
       "end": null,
-      "end_or_trigger": "Event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN hoàn tất (LAG dự kiến refill cuối 07) + settle 4-6 tuần. Sàn ~2 tháng, trần 2026-10-06 (né mùa BCTC Q3). LAG refill trượt lịch → mốc trượt theo.",
+      "end_or_trigger": "USER CHỐT 2026-10-09 00:25 ICT (decided_by: user, phương án A): BỎ mốc review theo ngày (trần cũ 2026-10-06 đã qua mà gate 1 không thể đạt — v2 chỉ reverse-unwind khi state RỜI gate, 57 phiên đầu toàn NEUTRAL). Review EVENT-ANCHORED khi xảy ra SỚM NHẤT 1 trong 2: (a) state DT5G lần đầu rời NEUTRAL (BULL/EXBULL ⇒ bằng chứng gate mở rộng; BEAR/CRISIS ⇒ chu kỳ reverse-unwind đầu tiên), hoặc (b) trigger park quay lại kích hoạt (lãi huy động Big-4 có xu hướng hạ — cảnh báo cron refresh_deposit_cctg_weekly.sh). Không backtest thêm. Cron ghi sổ giữ nguyên. Lý do: park=0 từ 2026-10-01 ⇒ tiền nhàn rỗi ở Trứng vàng, DC-book không có vốn live; đọc sổ 2026-10-09: cum −0,16% (07-17→10-08) vs VNINDEX −2,71%, idle proxy dep1m ~+0,9%.",
       "gate_criteria": [
         {
           "text": "Trọn 1 chu kỳ deploy → reverse-unwind → settle trên paper, đúng thứ tự ưu tiên thiết kế",
@@ -47,7 +47,7 @@
         "data/dc_book_waterfall_paper_nav.csv"
       ],
       "notes": "Sleeve clock chạy từ 2026-06-26 (backfill NAV cơ sở 1B); user duyệt paper 2026-07-06 (job Taylor_20260706_132553).",
-      "review_short": "event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN + settle 4-6 tuần · trần 2026-10-06",
+      "review_short": "event-anchored (user 2026-10-09): state rời NEUTRAL HOẶC trigger park quay lại · không mốc ngày",
       "headline": {
         "mode": "csv_row",
         "path": "data/dc_book_waterfall_paper_nav.csv",

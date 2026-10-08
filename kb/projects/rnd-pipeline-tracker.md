@@ -91,6 +91,7 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   an toàn) — bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao → lý do bắt buộc paper trước. Trong EOD
   daily report. Review = EVENT-ANCHORED (khi chu kỳ reverse-unwind đầu tiên hoàn tất + settle 4-6
   tuần), sàn ~2 tháng, trần ~2026-10-06 (trượt theo nếu LAG refill trượt lịch).
+  🔁 **2026-10-09 user chốt A** (`decided_by: user`): bỏ mốc ngày; review khi state DT5G lần đầu rời NEUTRAL HOẶC trigger park quay lại kích hoạt. Không backtest thêm, cron ghi sổ giữ. Sổ 07-17→10-08: 57 phiên toàn NEUTRAL, cum −0,16% (VNINDEX −2,71%, dep1m ~+0,9%), 0 reverse-unwind. Park=0 ⇒ DC-book không có vốn live.
   ✅ **4 fix đã ÁP DỤNG từ 2026-07-20** (`SLEEVE_VERSION="v2"`, job `Taylor_20260720_091731`) —
   đoạn "bug trigger nhị phân, sửa tại mốc review" ở trên đã LỖI THỜI, giữ lại làm lịch sử số liệu
   cũ: (1) trigger continuous-residual — xong; (2) rebalance cadence q2m5 — xong; (3) cap gộp
