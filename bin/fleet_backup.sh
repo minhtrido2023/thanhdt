@@ -20,7 +20,7 @@ echo "==> Fleet repo -> github:mike-fleet"
 git -C "$MIKE" add -A
 if git -C "$MIKE" diff --cached --quiet; then
   echo "   (no fleet changes to commit)"
-elif commit_err="$(git -C "$MIKE" commit -q -m "fleet backup $ts" 2>&1)"; then
+elif commit_err="$(MIKE_KB_SIZE_GATE=warn git -C "$MIKE" commit -q -m "fleet backup $ts" 2>&1)"; then
   echo "   committed: $(git -C "$MIKE" rev-parse --short HEAD)"
 else
   # `|| true` here (arch-review round 2, 2026-08-12): the pre-commit collision gate

@@ -108,3 +108,7 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
 - **EXTREME-regime gate: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
 - **Fill-timing: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
 - Vol-scale chase-cap patch#3: **ĐÃ LIVE 2026-08-04** — đóng.
+
+## Chuyển từ kb/current_ops.md L16-16 (trim 2026-10-08, Wags_20261008_133659) — AlphaLens Paper (đã đóng)
+- **AlphaLens Paper**: FPT/ACB/MBB/HDB — **ĐÃ ĐÓNG 2026-10-01** (user chọn A: không wire live; 3/3 gate PASS nhưng N=1 cửa sổ × 4 mã chọn tay). R&D backtest PIT walk-forward chỉ mở nếu user yêu cầu.
+

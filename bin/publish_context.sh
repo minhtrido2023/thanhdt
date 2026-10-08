@@ -34,15 +34,12 @@ recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 5 2>/dev/null || true)"
     cat "$KB/canonical.md"
     printf '\n'
   fi
-  # Closed-project INDEX (1 line/project). Full detail lives in kb/projects/<slug>.md —
-  # injected on demand (agent does `cat kb/projects/<slug>.md`), NOT in this pack. Keeps
-  # the always-injected context small; closed R&D narrative no longer rides every dispatch.
-  if [ -s "$KB/projects/INDEX.md" ]; then
-    cat "$KB/projects/INDEX.md"
-    printf '\n'
-  fi
+  # kb/projects/INDEX.md (closed-project index) is NOT in the pack since 2026-10-08 (user duyệt,
+  # job Wags_20261008_143309): its OPEN-projects section moved verbatim into current_ops.md; the
+  # closed list is retrieved on demand via `bin/kb_recall.sh` (source `projects`, in its defaults)
+  # or `grep kb/projects/INDEX.md` — canonical.md carries the rule to do so before R&D proposals.
   printf '## Nguồn chuẩn tắc đầy đủ\n'
-  printf 'Chi tiết: kb/KNOWLEDGE.md (§1-9). Dự án đã đóng: kb/projects/ (index ở trên). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.\n'
+  printf 'Chi tiết: kb/KNOWLEDGE.md (§1-9). Dự án đã đóng: kb/projects/INDEX.md (KHÔNG nạp sẵn — `bin/kb_recall.sh "<từ khoá>"` hoặc grep). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.\n'
 } > "$KB/context_pack.md"
 
 echo "published context_pack v$ver"

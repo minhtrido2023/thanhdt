@@ -134,7 +134,7 @@ if [ -s "$NEW" ]; then
     cstate=add-failed
   elif git -C "$ROOT" diff --cached --quiet -- kb/; then
     cstate=nothing-staged        # kb/ identical to HEAD — benign, but NOT "committed"
-  elif ! cerr="$(git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$kbver)" -- kb/ 2>&1)"; then
+  elif ! cerr="$(MIKE_KB_SIZE_GATE=warn git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$kbver)" -- kb/ 2>&1)"; then
     cstate=commit-refused
   fi
 

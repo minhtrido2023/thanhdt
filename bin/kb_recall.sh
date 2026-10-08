@@ -6,7 +6,7 @@
 # Dùng trước khi dispatch để Mike prepend context đúng task vào prompt thay vì
 # inject cả context_pack.md (11.9K token, median 0% relevance — Taylor finding 2026-08-17).
 #
-# Sources (mặc định: context_pack,coding_guidelines):
+# Sources (mặc định: context_pack,coding_guidelines,projects):
 #   context_pack      — kb/context_pack.md (split theo ## header)
 #   coding_guidelines — kb/coding_guidelines.md (split theo ## header)
 #   data_registry     — kb/data_registry/index.md (entry-level)
@@ -26,7 +26,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 KEYWORDS=""
 TOP=5
 BUDGET_WORDS=2000
-SOURCES="context_pack,coding_guidelines"
+SOURCES="context_pack,coding_guidelines,projects"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

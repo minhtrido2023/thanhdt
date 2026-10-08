@@ -85,7 +85,7 @@ VIỆC CẦN LÀM (mỗi mục xong ghi 1-2 câu kết luận, đừng chỉ nó
    đo + báo cáo minh bạch (đây là hành vi con người của Mike, không phải bug code).
 
 4. KÍCH THƯỚC FILE KB QUAN TRỌNG: wc -c cho kb/context_pack.md, kb/current_ops.md, MIKE.md,
-   kb/coding_guidelines.md. So với ngưỡng đã biết (context_pack.md 45KB, current_ops.md 28KB).
+   kb/coding_guidelines.md. So với ngưỡng đã biết (context_pack.md 45KB, current_ops.md+canonical.md 30000 byte — pre-commit kb_hot_size_gate.py).
    Nếu đang tăng, ước lượng tốc độ tăng gần đây (so với git log trước đó ~1-2 tuần, dùng
    `git log --format=%H -- <file>` rồi `git show <commit>:<file> | wc -c` vài điểm) và số ngày
    còn lại trước khi chạm ngưỡng. KHÔNG tự trim ở đây (việc đó thuộc kb_nightly.sh Friday review

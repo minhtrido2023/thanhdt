@@ -150,3 +150,18 @@ repos:
         language: system
         verbose: true
         files: '^kb/(canonical|KNOWLEDGE)\.md$'
+
+      # ------------------------------------------------------------------------
+      # kb-hot-size-gate (user duyệt 2026-10-08, job Wags_20261008_133659) —
+      # kb/current_ops.md + kb/canonical.md bị dán NGUYÊN vào context_pack.md, nạp
+      # vào MỌI phiên Mike. Chặn khi tổng > 30000 byte VÀ tăng so với HEAD
+      # (ratchet — sàn sau trim chỉ-di-chuyển 08/10 là ~39KB, xem docstring).
+      # Commit tự động (consolidate.sh / kb_nightly.sh) chạy với
+      # MIKE_KB_SIZE_GATE=warn: cron KHÔNG được fail. Bỏ qua tay: =warn · =off.
+      - id: kb-hot-size-gate
+        name: current_ops+canonical không phình (bin/kb_hot_size_gate.py)
+        entry: bin/kb_hot_size_gate.py
+        language: system
+        pass_filenames: false
+        verbose: true
+        files: '^kb/(current_ops|canonical)\.md$'

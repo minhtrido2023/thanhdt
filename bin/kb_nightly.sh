@@ -602,7 +602,7 @@ if [ "$CHANGED" -gt 0 ]; then
     # Wags job makes the commit-collision gate BLOCK at tier-2 while the log said "committed".
     # Nothing downstream is deleted on the refused branch (no stamp/state assumes the commit
     # happened) — kb/ simply stays dirty and staged for a hand commit.
-    if git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
+    if MIKE_KB_SIZE_GATE=warn git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
             --author="Mike <mike@fleet>" -- kb/ >> "$LOG" 2>&1; then
         log "Git committed."
     else
@@ -678,6 +678,15 @@ python3 "$ROOT/bin/spend_report.py" --days 7 --csv-append "$ROOT/state/spend_his
 # hit without cutting real facts (canonical.md/projects/INDEX.md are evergreen, not prose to
 # trim) -> threshold RAISED to 45KB below (MIKE.md stays 40KB, unchanged). Deep OKF-restructure
 # of canonical.md is a separate follow-up, not required to land this mechanism.
+# 2026-10-08 (user duyệt, job Wags_20261008_133659/_143309): context_pack 78KB → trim
+# chỉ-di-chuyển current_ops/canonical sang kb/projects/ + bỏ projects/INDEX.md khỏi pack ⇒ 42KB.
+# Ngưỡng GIỮ 45KB (không hạ): sàn thật sau trim chỉ-di-chuyển là ~42KB, ngưỡng 40KB sẽ mở
+# episode CP:OVER vĩnh viễn ngay hôm đầu (mọi đêm báo/auto-nén vô ích) và che tái phình;
+# 45KB chừa ~3KB đệm nên tái phình thật mới báo. Chặn phía commit nằm ở pre-commit
+# bin/kb_hot_size_gate.py (current_ops+canonical >30000 byte và tăng so với HEAD).
+# Phase này KHÔNG chỉ cảnh báo: khi vượt ngưỡng nó tự chạy nén Opus (_ctxbloat_try, ~dòng 930)
+# TỐI ĐA 1 lần/episode + commit tự động nếu qua ctxbloat_fact_check.py, rồi mới escalate;
+# không bao giờ làm fail cron.
 _ctx_kb_or_missing() {  # "MISSING" beats silently reporting 0KB as healthy when the file is gone
     # -s (not -f): publish_context.sh:46 truncates-in-place (no tmp+rename), so a kill mid-write
     # leaves an EMPTY or TRUNCATED file, not a missing one — -f alone would silently treat that
@@ -880,7 +889,7 @@ Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19).
     # `git add "$file"` only controls what THIS function stages — a commit with no pathspec
     # commits the whole index, so anything another in-flight session left staged rides along
     # inside a commit whose message claims it is one auto-compressed file.
-    if (cd "$ROOT" && git add "${_paths[@]}" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB${_split_note} (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "${_paths[@]}") >> "$LOG" 2>&1; then
+    if (cd "$ROOT" && git add "${_paths[@]}" && MIKE_KB_SIZE_GATE=warn git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB${_split_note} (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "${_paths[@]}") >> "$LOG" 2>&1; then
         log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB${_split_note}, committed."
         return 0
     fi
@@ -1163,7 +1172,7 @@ mới ảnh hưởng thực thi/lập plan/data-ops) nhưng CHƯA lan sang (các
 context_planning_mini.md và ngược lại).
 7. **\`kb/current_ops.md\` bloat check (bài học sự cố context-bloat 2026-07-17 — file này phình
 0→36KB trong 3 tuần, đè phí token lên MỌI dispatch qua context_pack.md; ngưỡng nâng 20→28KB
-2026-07-30 sau khi context_pack.md tổng cũng nâng 20→45KB, xem kb/current_ops.md đầu file)**:
+2026-07-30 sau khi context_pack.md tổng cũng nâng 20→45KB, giữ 45KB 2026-10-08 (pack hiện ~42KB); pre-commit kb_hot_size_gate.py chặn current_ops+canonical >30000 byte nếu tăng)**:
 đọc kích thước file ('wc -c $ROOT/kb/current_ops.md'). Nếu >28KB HOẶC có mục nào mô tả 1 sự cố đã ghi rõ 'FIXED'/
 'XONG'/'ĐÃ VÁ' + có pointer 'kb/incidents/' nhưng VẪN giữ nguyên narrative đầy đủ (thay vì
 rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọn ngay theo đúng mẫu đã làm hôm
