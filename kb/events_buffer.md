@@ -431,3 +431,22 @@
 - [2026-10-08T04:05:34Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261008_032221", "source": "watcher"}
 - [2026-10-08T04:06:34Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261008_032221", "source": "watcher"}
 - [2026-10-08T04:06:58Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "in_progress", "note": "r2 selfcheck 515/515 x2py; dang chay mutation mo rong"}
+
+## Consolidation 2026-10-08T04:22:28Z
+- [2026-10-08T04:07:34Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:08:34Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:08:58Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "in_progress", "note": "r2: docs cap nhat, real 8 awaiting + VHF->DRIFT; cho mutation 47 x2py"}
+- [2026-10-08T04:09:34Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:10:34Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:11:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:12:25Z] Taylor/status — Taylor_20261008_032221: {"status": "deadline_extended", "hb_age_s": 207, "extension": 2, "max_ext": 3, "source": "watcher"}
+- [2026-10-08T04:12:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:13:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:14:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:15:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:16:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:17:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:18:35Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:19:36Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:20:36Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20261008_032221", "source": "watcher"}
+- [2026-10-08T04:21:36Z] Taylor/heartbeat — Taylor_20261008_032221: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20261008_032221", "source": "watcher"}
