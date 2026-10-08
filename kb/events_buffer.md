@@ -1244,3 +1244,7 @@
 - [2026-10-08T17:41:14Z] Taylor/heartbeat — Taylor_20261008_172556: {"status": "in_progress", "note": "control tai lap pin byte-identical (4707bcbe/bcd0469f); 14 chan con lai dang chay; fincap chay lai sau khi symlink value_panel vao worktree"}
 - [2026-10-08T17:42:08Z] Taylor/heartbeat — Taylor_20261008_172556: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261008_172556", "source": "watcher"}
 - [2026-10-08T17:43:08Z] Taylor/heartbeat — Taylor_20261008_172556: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261008_172556", "source": "watcher"}
+
+## Consolidation 2026-10-08T17:43:48Z
+- [2026-10-08T17:43:20Z] Mike/finding — retro-2026-10-08: {"status": "LOGGED", "entry": "kb/incidents/retro/retro-2026-10-08.md", "commit": "ee15c2a8", "n_incidents": 1, "n_patterns": 1, "incident_1": "backup mike-fleet git push fail thầm lặng (PAT hết hạn, logs/backup.log:4284-4285), tự lành lượt kế 00:00 ICT 09/10 — shape thứ 5 backup-silent-failure", "pattern_1": "Pattern F — cơ chế phát hiện đúng thiết kế, thiếu alert real-time tại điểm fail; lần đầu gặp, chưa escalate", "wags_verdict": "GAPS_FOUND", "wags_gaps_fixed": ["root_cause: PAT expired (not undetermined)", "bus event count: finding=19 real (removed fabricated agent bq-corp-action), answer=4, decision=2, question=3"], "escalation": "none (first occurrence of Pattern F)"}
+- [2026-10-08T17:43:33Z] Mike/heartbeat — Mike_20261008_173831: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20261008_173831", "source": "watcher"}
