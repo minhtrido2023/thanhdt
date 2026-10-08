@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # adjfactor_drift_daily.sh [--dry-run]    — runner HẰNG NGÀY của LAYER 1 (detect-only)
 #
-# ⚠️ CHƯA CÀI CRON. Dòng crontab đề xuất (chờ user sign-off, §11 phải ghi `kb/cron_registry.md`
-# TRƯỚC khi thêm):
+# ĐÃ CÀI CRON 2026-09-27 (user duyệt 18:14 ICT; `kb/cron_registry.md`). Dòng thật trong crontab:
 #     10 0 * * 2-6  cd /home/trido/thanhdt/WorkingClaude/mike && bin/adjfactor_drift_daily.sh \
 #                     >> logs/adjfactor_drift_$(date +\%Y\%m).log 2>&1
-# 00:10 ICT T3-T7 = SAU khi `sync_bq_cache_daily.sh` (23:45 ICT) đã chạy — detector đọc LỊCH SỬ
+# Host `Etc/UTC` ⇒ `10 0` = 07:10 ICT T3-T7 (không phải 00:10 ICT; dòng `TZ=` trong crontab KHÔNG đổi giờ
+# lịch của cron Debian). Vẫn SAU `sync_bq_cache_daily.sh` (23:45 ICT) — detector đọc LỊCH SỬ
 # từ BQ nên đây là đúng ca §6 cho phép dùng BQ, nhưng chạy TRƯỚC sync thì phiên mới nhất chưa có.
 # Detector tự neo `asof` vào `MAX(time)` của bảng, KHÔNG vào đồng hồ host, nên chạy sớm chỉ làm
 # cửa sổ cũ đi một phiên — không bao giờ đọc ra một ngày không tồn tại.

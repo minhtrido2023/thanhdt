@@ -1901,12 +1901,14 @@ def _pf(deltas, base=20000, step=100, n=30, rp=1.1, exchange="UPCOM", ex="2026-0
     return s, evs, _tick(exchange)
 
 
-def _scan_at(s, evs, w0, tf, dev_tol=None, min_run=None):
-    """scan_ticker y như `run_scan` ở asof có win0 = `w0`: chuỗi nạp từ load0 = w0 − CUM_PAD_DAYS, sự
-    kiện > w0 vào đường hệ số, sự kiện điều chỉnh giá (load0, w0] chỉ thành NGÀY trong `pre_ex`."""
+def _scan_at(s, evs, w0, tf, dev_tol=None, min_run=None, until=None):
+    """scan_ticker y như `run_scan` ở asof có win0 = `w0`: chuỗi nạp từ load0 = w0 − CUM_PAD_DAYS tới
+    `until` (= asof; None = hết fixture), sự kiện (w0, until] vào đường hệ số, sự kiện điều chỉnh giá
+    (load0, w0] chỉ thành NGÀY trong `pre_ex` — sự kiện/phiên SAU asof không bao giờ được thấy."""
     load0 = (date.fromisoformat(w0) - timedelta(days=det.CUM_PAD_DAYS)).isoformat()
-    s = [b for b in s if b["d"] >= load0]
-    ev_in = [e for e in evs if e["exright_date"] > w0]
+    hi = until or "9999-12-31"
+    s = [b for b in s if load0 <= b["d"] <= hi]
+    ev_in = [e for e in evs if w0 < e["exright_date"] <= hi]
     pre = {e["exright_date"] for e in evs
            if load0 < e["exright_date"] <= w0 and det.cal.is_price_adjusting(e)}
     return det.scan_ticker(s, ev_in, dev_tol or det.DEV_TOL, min_run or det.MIN_RUN, w0, tick_fn=tf,
@@ -1927,6 +1929,10 @@ def t_price_field_window():
            f"đủ 06-30..07-09", v == "PRICE_FIELD_MISMATCH" and p["pfm_rules"] == "stale_price"
            and any("PRICE_FIELD_MISMATCH 2026-06-30..2026-07-09:" in n for n in p["notes"]),
            f"v={v} {p.get('notes', [])[-1:]}")
+        ck(f"NB1 SHC win0 = {w0}: marker nêu span ĐẦY ĐỦ 06-30..07-09 như chứng từ (không bị cửa sổ cắt)",
+           p.get("d0") == "2026-06-30" and p.get("d1") == "2026-07-09"
+           and "|2026-06-30|2026-07-09|" in det.marker_price_field("SHC", p, "none"),
+           f"d0={p.get('d0')} d1={p.get('d1')}")
 
     # (2) Trượt win0 qua TỪNG phiên của fixture thật (đúng cách run_scan chia sự kiện) ⇒ 0 DRIFT giả.
     for tk in ("DRI", "DVN", "SHC", "CC1"):
@@ -2068,6 +2074,85 @@ def t_price_field_window():
     ck("NB3: láng giềng lệch +12% -> lời 'CUNG lech > dev_tol', KHÔNG 'SAT nguong'/'lam tron'",
        rule is None and "CUNG lech" in why and "SAT nguong" not in why and "lam tron" not in why
        and "+12.0000%" in why, f"{why}")
+    # Mn: láng giềng lệch ÂM lớn (−12%) phải bị loại như +12% — `abs()` trong cổng KẸP không được bỏ.
+    for side, ix in (("trái", 3), ("phải", 7)):
+        sn, _e, _t = _pf({}, n=10)
+        sn[ix]["price"] = sn[ix]["close"] * 1.1 * 0.88
+        for i in (4, 5, 6):
+            sn[i]["price"] -= 100
+        rule, why = det.explain_price_field([4, 5, 6], sn, {b["d"]: 1.1 for b in sn}, 0.003, _tick("UPCOM"))
+        ck(f"Mn: láng giềng {side} lệch −12% -> không đổi nhãn, lời 'CUNG lech' + −12.0000%",
+           rule is None and "CUNG lech" in why and "SAT nguong" not in why and "-12.0000%" in why, f"{why}")
+
+    # Mz: láng giềng |dev| == dev_tol ĐÚNG BẰNG (dev_tol lấy từ chính phép đo) -> 'khop trong dev_tol, SAT nguong',
+    # không phải 'CUNG lech > dev_tol' (đổi `<=` thành `<` sai nguyên nhân §29 đúng ở biên).
+    sz, _e, _t = _pf({}, n=10)
+    sz[3]["price"] = sz[3]["close"] * 1.1 * 1.004
+    for i in (4, 5, 6):
+        sz[i]["price"] -= 100
+    nbz = abs((sz[3]["price"] / sz[3]["close"]) / 1.1 - 1.0)
+    rule, why = det.explain_price_field([4, 5, 6], sz, {b["d"]: 1.1 for b in sz}, nbz, _tick("UPCOM"))
+    ck("Mz: láng giềng |dev| == dev_tol đúng biên -> lời 'SAT nguong', không 'CUNG lech'",
+       rule is None and "SAT nguong" in why and "CUNG lech" not in why, f"{why}")
+
+    # Mc: pre_ex có ex-date SỚM HƠN mọi phiên trước cửa sổ (lead == before) -> lý do là HẾT CHUỖI NẠP, không
+    # phải "ex-date xen giữa" (đổi `<` thành `<=` ở lead_why làm nói sai nguyên nhân §29).
+    v, p = det.scan_ticker(s_[8:], evs_, 0.003, 3, D[10], tick_fn=tf_, pre_ex={D[8]})
+    ck("Mc: ex-date pre_ex = phiên đầu chuỗi nạp, lead == before -> lý do 'het chuoi nap', không 'xen giua'",
+       v == "DRIFT" and any("het chuoi nap" in n for n in p["notes"])
+       and not any("xen giua" in n for n in p["notes"]), f"v={v} {p.get('notes', [])[-1:]}")
+
+    # Md: CUM_PAD_DAYS = 25 là giới hạn đã biết của cụm nối lùi — cụm D[5..13] cần láng giềng D[4] nằm ngoài
+    # chuỗi nạp của win0 = D[10] (load0 = 06-06) ⇒ DRIFT fail-closed. Đệm 40 ngày sẽ tìm được D[4] và đổi nhãn.
+    ck("Md: hằng số CUM_PAD_DAYS = 25", det.CUM_PAD_DAYS == 25, f"{det.CUM_PAD_DAYS}")
+    sm, evm, tfm = _pf({i: -100 for i in range(5, 14)})
+    v, p = _scan_at(sm, evm, D[10], tfm)
+    ck("Md: cụm D[5..13] cần láng giềng D[4] ngoài chuỗi nạp (load0 = win0 − 25 ngày) -> DRIFT, 'het chuoi nap'",
+       v == "DRIFT" and any("het chuoi nap" in n for n in p["notes"]), f"v={v} {p.get('notes', [])[-1:]}")
+
+    # NB6: `until` của _scan_at — phiên/sự kiện sau asof không được thấy (cùng ranh giới với run_scan).
+    pa = [20000 + 100 * ((i * 3) % 7) for i in range(30)]
+    sa, eva, tfa = _pf({i: -100 for i in range(8, 14)}, ex=D[24],
+                       closes=[pa[i] / (1.1 if i < 24 else 1.0) for i in range(30)],
+                       extra_events=[ev(D[28], "ISS", det.RIGHTS_METHOD, 0.2)])
+    v_all, _p = _scan_at(sa, eva, D[0], tfa)
+    v_cut, p_cut = _scan_at(sa, eva, D[0], tfa, until=D[26])
+    ck("NB6 _scan_at(until): quyền mua ex D[28] sau asof D[26] bị cắt -> PRICE_FIELD_MISMATCH; không cắt -> "
+       "UNCOMPUTABLE/DRIFT (uncomputable trong cửa sổ)",
+       v_cut == "PRICE_FIELD_MISMATCH" and v_all in ("UNCOMPUTABLE", "DRIFT"), f"cut={v_cut} all={v_all}")
+
+    # B1 (vòng 2): 3 cụm −1 bước {3,4,5}, {9..13}, {17,18,19}, win0 = D[0] ⇒ n_runs == 3 và marker nêu span của
+    # cụm DÀI NHẤT trong cửa sổ (D[9]..D[13]) — giết mutation lấy span cụm CUỐI / cụm ĐẦU.
+    s_b1, evs_b1, tf_b1 = _pf({**{i: -100 for i in (3, 4, 5, 17, 18, 19)}, **{i: -100 for i in range(9, 14)}})
+    v, p = _scan_at(s_b1, evs_b1, D[0], tf_b1)
+    ck("B1: 3 cụm (3 / 5 / 3 phiên), win0 = D[0] -> PRICE_FIELD_MISMATCH n_runs == 3",
+       v == "PRICE_FIELD_MISMATCH" and p.get("n_runs") == 3, f"v={v} n_runs={p.get('n_runs')}")
+    ck("B1: d0/d1 = span cụm dài nhất D[9]..D[13] (không phải cụm cuối D[17..19] hay cụm đầu D[3..5])",
+       p.get("d0") == D[9] and p.get("d1") == D[13], f"d0={p.get('d0')} d1={p.get('d1')}")
+
+    # NB6/K: phiên SAU asof không được thấy — cụm D[20..24] chỉ có sau `until` = D[15].
+    pk = [20000 + 100 * ((i * 3) % 7) for i in range(30)]
+    cl1 = [pk[i] / (1.1 if i < 1 else 1.0) for i in range(30)]   # hệ số 1,1 chỉ ở D[0]; ex = D[1]
+    s_k, evs_k, tf_k = _pf({i: -100 for i in range(20, 25)}, ex=D[1], closes=cl1)
+    v_cut, _p = _scan_at(s_k, evs_k, D[0], tf_k, until=D[15])
+    v_all, _p = _scan_at(s_k, evs_k, D[0], tf_k)
+    ck("K: cụm chỉ nằm SAU until -> AGREE khi cắt; PRICE_FIELD_MISMATCH khi không cắt",
+       v_cut == "AGREE" and v_all == "PRICE_FIELD_MISMATCH", f"cut={v_cut} all={v_all}")
+    # NB6/L: sự kiện ex SAU asof không được vào đường hệ số — ISS 5% ở D[10] mà Close chưa điều chỉnh.
+    s_l, evs_l, tf_l = _pf({}, ex=D[1], closes=cl1, extra_events=[ev(D[10], "ISS", "Cổ phiếu thưởng", 0.05)])
+    v_cut, _p = _scan_at(s_l, evs_l, D[0], tf_l, until=D[8])
+    v_all, _p = _scan_at(s_l, evs_l, D[0], tf_l)
+    ck("L: sự kiện ex D[10] sau until D[8] -> AGREE khi cắt; khác AGREE khi không cắt",
+       v_cut == "AGREE" and v_all != "AGREE", f"cut={v_cut} all={v_all}")
+
+    # NB4 sweep: ex-date uncomputable (quyền mua) tại D[5], cụm D[10..12]. ex > win0 ⇒ trong cửa sổ, chặn
+    # đường PFM ⇒ DRIFT; ex <= win0 (chỉ còn là NGÀY trong pre_ex) ⇒ PRICE_FIELD_MISMATCH.
+    s_n, evs_n, tf_n = _pf({10: -100, 11: -100, 12: -100},
+                           extra_events=[ev(D[5], "ISS", det.RIGHTS_METHOD, 0.5)])
+    got_n = {w: _scan_at(s_n, evs_n, D[w], tf_n)[0] for w in range(0, 9)}
+    exp_n = {w: ("DRIFT" if w < 5 else "PRICE_FIELD_MISMATCH") for w in got_n}
+    ck("NB4 sweep win0 = D[0..8], ex uncomputable D[5]: DRIFT khi win0 < ex, PFM khi win0 >= ex",
+       got_n == exp_n, f"got={got_n}")
 
 
 def t_price_field():
@@ -2551,13 +2636,13 @@ def t_price_field():
         lookback_days = 58
     since_seen = []
 
-    def scan_r1(extra):
+    def scan_r1(extra, ser=None):
         saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
                  det.cal.events, det.bq_max_session, det.live_exchange_fn)
         try:
             det.cohort_tickers = lambda a, b: ["PFX"]
             det.bq_max_session = lambda: A58.asof
-            det.price_rows = lambda t, s_, e: [{"tk": "PFX", **b} for b in s_pf]
+            det.price_rows = lambda t, s_, e: [{"tk": "PFX", **b} for b in (ser or s_pf)]
 
             def evs(t, since=None, until=None):
                 since_seen.append(since)
@@ -2584,9 +2669,26 @@ def t_price_field():
        since_seen[-1] == (date.fromisoformat("2026-07-01")
                           - timedelta(days=det.CUM_PAD_DAYS)).isoformat(), f"{since_seen}")
     ln = scan_r1([ev("2026-07-01", "ISS", "Cổ phiếu thưởng", 0.05)])
-    ck("run_scan R1: ex-date = win0 (≤ win0) xen giữa láng giềng và cụm -> DRIFT, và KHÔNG vào đường hệ "
-       "số (r_pred vẫn 1.1)", len(ln) == 1 and ln[0].startswith("ADJFACTOR_DRIFT|PFX|2026-08-20|")
-       and ln[0].split("|")[4] == "1.100000", f"{ln}")
+    ck("run_scan R1: ex-date = win0 (≤ win0) xen giữa láng giềng và cụm -> DRIFT (khác đoạn hệ số)",
+       len(ln) == 1 and ln[0].startswith("ADJFACTOR_DRIFT|PFX|2026-08-20|"), f"{ln}")
+    # NB6: r_pred của cụm (>= win0) KHÔNG đổi dù ex = win0 có vào đường hệ số hay không ⇒ KHÔNG dùng r_pred
+    # để chứng minh "không vào đường hệ số" (từng là tautology). Phép thử thật là sự kiện KHÔNG tính được
+    # ở đúng biên ex == win0: nếu lọt vào đường hệ số nó thành `unknown` ⇒ UNCOMPUTABLE/mất PFM oan.
+    ln0 = scan_r1([ev("2026-07-01", "DIV", dps=0)])
+    ln1 = scan_r1([ev("2026-07-01", "ISS", det.RIGHTS_METHOD, 0.2)])
+    ck("Mk biên ex == win0: DIV 0đ / quyền mua (uncomputable) KHÔNG sinh UNCOMPUTABLE, dòng y nguyên bản "
+       "chỉ có ex = win0 hợp lệ", not any(l.startswith("ADJFACTOR_UNCOMPUTABLE|") for l in ln0 + ln1)
+       and ln0 == ln1 == scan_r1([ev("2026-07-01", "ISS", "Cổ phiếu thưởng", 0.05)]), f"{ln0} / {ln1}")
+    # Mk thật sự bị giết ở chuỗi SẠCH (không cụm lệch): ex = win0 uncomputable lọt vào đường hệ số thì
+    # `unknown` ⇒ UNCOMPUTABLE oan 1 ngày; đúng ra nó chỉ là NGÀY trong pre_ex ⇒ AGREE (không dòng nào).
+    s_clean, _e, _t = _pf({})
+    for what, e_ in (("quyền mua", ev("2026-07-01", "ISS", det.RIGHTS_METHOD, 0.2)),
+                     ("DIV 0đ", ev("2026-07-01", "DIV", dps=0))):
+        lnc = scan_r1([e_], ser=s_clean)
+        ck(f"Mk chuỗi sạch: {what} ex == win0 -> KHÔNG UNCOMPUTABLE (AGREE, không dòng nào)", lnc == [], f"{lnc}")
+    ln2 = scan_r1([ev("2026-07-02", "ISS", det.RIGHTS_METHOD, 0.2)])
+    ck("Mk đối chứng: cùng quyền mua nhưng ex = win0 + 1 (trong cửa sổ) -> UNCOMPUTABLE",
+       any(l.startswith("ADJFACTOR_UNCOMPUTABLE|PFX|2026-07-02|") for l in ln2), f"{ln2}")
 
     # NB2 (hồi quy bug TIP): sự kiện ex <= win0 KHÔNG tính được hệ số (quyền mua; DIV 0đ) chỉ được thành
     # NGÀY trong pre_ex — không được vào đường hệ số ⇒ không UNCOMPUTABLE, không partial, dòng y nguyên.

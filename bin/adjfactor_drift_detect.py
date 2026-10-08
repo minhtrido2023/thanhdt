@@ -116,6 +116,11 @@ Một cụm lệch (run ≥ `MIN_RUN`) được đổi nhãn khi ĐỦ CẢ cổ
     phiên của cụm. Phán quyết của một cụm vì vậy KHÔNG đổi theo vị trí win0, miễn là (a) phần trong cửa sổ
     còn ≥ `MIN_RUN` (ít hơn thì cụm đó không còn là bằng chứng DRIFT — hành vi có từ trước) và (b) láng
     giềng trái nằm trong chuỗi nạp: `CUM_PAD_DAYS` 25 ngày lịch ≈ 17 phiên ⇒ cụm dài tới ~20 phiên.
+    NGOẠI LỆ duy nhất (NB4): ex-date KHÔNG tính được (`unknown`, vd quyền mua) nằm TRONG cửa sổ (> win0)
+    chặn đường PFM (`if not unknown`) ⇒ DRIFT/UNCOMPUTABLE; khi win0 trượt qua nó (ex ≤ win0, chỉ còn là
+    NGÀY trong `pre_ex`) cùng cụm đó có thể được đổi nhãn PFM. Phán quyết CÓ phụ thuộc win0 ở đúng ca này,
+    theo chiều DRIFT → PFM (lành hơn) và đúng về số: ex ≤ win0 không ảnh hưởng r_pred phiên nào trong cửa
+    sổ.
     Ex-date ≤ `win0` KHÔNG vào đường hệ số (hồi quy bug TIP: một ex-date đó không tính được sẽ biến mã
     thành UNCOMPUTABLE oan) nên chỉ được tra NGÀY qua `pre_ex`: phần nối dừng ở ex-date trước cửa sổ muộn
     nhất. Gặp ranh giới đó, hết chuỗi nạp, hoặc `pre_ex` không biết mà vẫn chưa thấy phiên khớp ⇒ DRIFT
@@ -676,7 +681,7 @@ def bad_runs(evaluated, dev_tol):
     return runs
 
 
-def explain_price_field(run, bars, curve, dev_tol, tick_fn, lead_bars=(), lead_why=""):
+def explain_price_field(run, bars, curve, dev_tol, tick_fn, lead_bars=(), lead_why="", span_out=None):
     """(rule, note) nếu cụm `run` là lỗi TRƯỜNG Price, ngược lại (None, lý do). Xem docstring đầu file.
 
     `bars` = các phiên được đánh giá (thẳng hàng với `evaluated`), `run` = chỉ số vào `bars`.
@@ -685,6 +690,8 @@ def explain_price_field(run, bars, curve, dev_tol, tick_fn, lead_bars=(), lead_w
     `lead_bars` = các phiên TRƯỚC `bars[0]` trong chuỗi nạp (từ `load0`) còn CÙNG đoạn hệ số với
     `bars[0]` (thứ tự thời gian), dùng khi cụm chạm rìa trái cửa sổ đánh giá; `lead_why` = vì sao chuỗi
     đó dừng ở đây (hết chuỗi nạp / ex-date trước cửa sổ / không biết ex-date) ⇒ fail-closed.
+    `span_out` (list, tùy chọn) = nhận [ngày đầu, ngày cuối] ĐẦY ĐỦ của cụm khi có luật khớp — kể cả phần
+    nối lùi trước cửa sổ — để marker nêu cùng span với chứng từ (NB1), không phải span bị cửa sổ cắt.
     """
     i0, i1 = run[0], run[-1]
     if i1 == len(bars) - 1:
@@ -726,6 +733,8 @@ def explain_price_field(run, bars, curve, dev_tol, tick_fn, lead_bars=(), lead_w
             return None, (f"lang gieng {nb['d']} lech {nb_dev:+.4%} > {PFM_NEIGHBOR_FRAC * dev_tol:.2%} "
                           f"(cong KEP doi khop RO): {what}")
     span = f"{rbars[0]['d']}..{rbars[-1]['d']}"
+    if span_out is not None:
+        span_out[:] = [rbars[0]["d"], rbars[-1]["d"]]
 
     p0 = rbars[0]["price"]
     if (left["price"] == p0 and all(b["price"] == p0 for b in rbars)
@@ -843,11 +852,13 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from, tick_fn=None, pre_e
                 else:
                     lead_why = (f"het chuoi nap (tu {before[0]['d']}, load0 = win0 - {CUM_PAD_DAYS} ngay) "
                                 f"ma chua gap phien khop")
-            pfm = []
+            pfm, spans = [], {}
             for r in bad_runs(evaluated, dev_tol):
                 if len(r) < min_run:
                     continue
-                rule, why = explain_price_field(r, ev_bars, curve, dev_tol, tick_fn, lead, lead_why)
+                sp = []
+                rule, why = explain_price_field(r, ev_bars, curve, dev_tol, tick_fn, lead, lead_why, sp)
+                spans[evaluated[r[0]][0]] = sp
                 if rule is None:
                     notes.append(f"cum {evaluated[r[0]][0]}..{evaluated[r[-1]][0]} KHONG phai loi "
                                  f"truong Price: {why}")
@@ -857,6 +868,8 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from, tick_fn=None, pre_e
             if pfm:
                 out["pfm_rules"] = ",".join(sorted({rule for rule, _w in pfm}))
                 out["n_runs"] = len(pfm)
+                # NB1: marker nêu span ĐẦY ĐỦ của cụm dài nhất TRONG CỬA SỔ (cùng chứng từ), không phần bị cửa sổ cắt.
+                out["d0"], out["d1"] = spans.get(d0) or [d0, d1]
                 notes.extend(f"PRICE_FIELD_MISMATCH {why}" for _r, why in pfm)
                 return "PRICE_FIELD_MISMATCH", out
         # CHỜ GIAO DỊCH LẠI: chỉ cho lệch `vendor_missing`, corr=0, và ex-date là SỰ KIỆN thật (không

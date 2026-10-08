@@ -54,8 +54,10 @@
 # RÌA PHẢI: cụm lệch trường giá MỚI (chạm phiên mới nhất) chưa có phiên kẹp sau ⇒ detector báo DRIFT lượt đó ⇒
 # lên Discord + sinh khoá như DRIFT thường ĐÚNG MỘT lần; lượt có phiên khớp kẹp lại thì đổi nhãn và khoá bị xoá.
 # RÌA TRÁI không nhảy khi win0 cắt ngang cụm (cụm nối lùi qua chuỗi nạp tới phiên khớp đầu tiên —
-# arch-review vòng 2 R1 + vòng 3 B1), TRỪ khi láng giềng trái không nằm trong chuỗi nạp (cụm > ~20 phiên,
-# hoặc ex-date trước cửa sổ chen vào) ⇒ DRIFT, hướng an toàn — docstring detector, đoạn RÌA TRÁI. Gộp MỘT
+# arch-review vòng 2 R1 + vòng 3 B1), TRỪ khi láng giềng trái không nằm trong chuỗi nạp (cụm > ~20 phiên)
+# ⇒ DRIFT, hướng an toàn — docstring detector, đoạn RÌA TRÁI. Ex-date trước cửa sổ chen giữa láng giềng
+# trái và cụm cũng cho DRIFT nhưng ở MỌI vị trí win0 (khác đoạn hệ số — ổn định theo cấu trúc dữ liệu),
+# KHÔNG phải ca nhảy nhãn do cửa sổ trôi. Gộp MỘT
 # dòng info, KHÔNG vào "Việc cần làm", KHÔNG giao Winston, KHÔNG sinh khoá de-dup nào và KHÔNG BAO GIỜ
 # tự kích Discord — kể cả mã đang nắm (user chốt: "không tự gửi Discord nếu chỉ có nhãn này"; hệ số đúng
 # nên không có số điều chỉnh nào sai để bảo vệ). Chỉ hiện trong tin khi tin đã gửi vì lý do khác; mã
