@@ -28,3 +28,5 @@
 - [2026-10-08T10:43:31Z] [adjfactor PFM 10-08] DỪNG sau arch-review r3 NEEDS_CHANGES (45179c7d, wt-pfm-1008): B1 win0 giữa cụm ≥4 phiên ⇒ DRIFT giả (SHC ~10-29). CHỜ user chọn vòng 4 / chấp nhận giới hạn.
 - [2026-10-08T10:49:37Z] ĐANG DỞ job Taylor_20261008_104928 PFM chế độ B (user chọn C): review toàn bộ + sửa 1 lượt B1/NB1-5 (wt-pfm-1008 @45179c7d) | NEXT: đọc diff + /tmp/arch_r3, liệt kê ca biên
 - [2026-10-08T10:59:46Z] ĐANG DỞ job Taylor_20261008_104928 PFM r4: commit d4b5202e (wt-pfm-1008), sc 821x6, slide BQ 0 DRIFT, dry-run byte-identical; mut4 chạy /tmp/pfm4/mut4_*.txt | NEXT: mutation xong → arch-review 1 lần → APPROVED merge / NEEDS_CHANGES dừng+finding
+- [2026-10-08T11:29:10Z] ĐANG DỞ job Taylor_20261008_104928 PFM r4: commit 987868af (wt-pfm-1008), sc 822x6, mut 138/138, slide BQ 0 DRIFT | NEXT: arch-review 1 lần → APPROVED merge master + finding sha / NEEDS_CHANGES dừng+finding
+- [2026-10-08T11:48:53Z] [adjfactor PFM 10-08] MERGED d484fb41 (r4 APPROVED) — xoá các dòng ĐANG DỞ/DỪNG PFM cũ; worktree wt-pfm-1008 có thể dọn. Nợ nhỏ còn lại (finding bus): Mk test ex==win0, cron_registry thân dòng 138 còn 00:10.
