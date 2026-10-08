@@ -49,6 +49,7 @@ DÒNG MÁY ĐỌC trên stdout (giá trị đã chuẩn hoá — §28, shell KH�
 duy nhất, các hàm `marker_*` — xem ghi chú ở đó về vì sao:
   ADJFACTOR_DRIFT|<tk>|<ex>|<r_obs>|<r_pred>|<dev>|<run>|<d0>|<d1>|<dir>|<held>|<corr>
   ADJFACTOR_AWAITING_TRADE|<tk>|<ex>|<n_traded>|<held>|<dev>
+  ADJFACTOR_PRICE_FIELD_MISMATCH|<tk>|<ex>|<n_runs>|<rules>|<d0>|<d1>|<held>|<dev>
   ADJFACTOR_UNCOMPUTABLE|<tk>|<ex>|<reason_code>|<held>
   ADJFACTOR_NODATA|<tk>|<held>
   ADJFACTOR_FEED|<status>|<max_ingested_ict>|<max_public>|<rows>|<age_days>|<reason>
@@ -79,8 +80,80 @@ Cổng CHẠM EX-DATE (arch-review vòng 2): cụm lệch phải kéo tới phi�
 nào nằm giữa thì phiên đó KHỚP hệ số ⇒ vendor đã áp một phần (chữ ký FPT `SETTLE_RUN=4`) ⇒ DRIFT.
 Giới hạn đã biết: "0 dòng giá từ ex-date" được đếm như "0 phiên khớp" — không phân biệt được với feed
 per-ticker chết; mã không nắm khi đó chỉ nằm trong dòng info/bus.
-`ADJFACTOR_SCAN.n_scanned` GỒM cả mã awaiting, còn bốn bộ đếm kia không ⇒ n_scanned = drift + uncomp +
-agree + nodata + số dòng AWAITING_TRADE.
+`ADJFACTOR_SCAN.n_scanned` GỒM cả mã awaiting và price-field-mismatch, còn bốn bộ đếm kia không ⇒
+n_scanned = drift + uncomp + agree + nodata + số dòng AWAITING_TRADE + số dòng PRICE_FIELD_MISMATCH.
+
+PRICE_FIELD_MISMATCH (LỆCH TRƯỜNG GIÁ, user duyệt 2026-10-08, job Taylor_20261008_080048): hệ số khớp ở
+hai phiên kẹp quanh cụm lệch, còn `Price` và `Close` không cùng bản in ở vài phiên giữa. Toàn bảng 2026 có
+2.278 phiên lệch ĐƠN LẺ kiểu này; vài phiên liền nhau là đủ chạm `MIN_RUN`=3 ⇒ DRIFT giả giao Winston.
+⚠️ §29: code chỉ đọc được hai trường của BQ nên KHÔNG khẳng định trường nào sai. Bằng chứng ngoài code:
+DRI — DNSE `marketPrice` 09-14/10-06 khớp `Close`, không khớp `Price` (Price sai). SHC/CC1 — phiên KHÔNG
+khớp lô chẵn thì giá thô đứng là BÌNH THƯỜNG, cái nhảy là `Close` (SHC 06-29→06-30 +13,8% với KL 0, đúng
+mức của phiên 07-10) ⇒ cách đọc thay thế: `Close` đã điều chỉnh bị bfill từ phiên sau (look-ahead trong
+chuỗi điều chỉnh), không phải `Price` sai. Vì vậy dòng chứng từ/Discord dùng lời TRUNG TÍNH.
+Phân biệt với lệch HỆ SỐ thật:
+  · lệch hệ số là phép NHÂN đồng nhất trên một ĐOẠN hệ số (khoảng giữa hai ex-date). Do `Close` lưu tròn
+    10đ, dev của một lệch đồng nhất ~e rải ±5/Close quanh e, nên một lệch sát `DEV_TOL` (VFR thật:
+    +0,305% suốt đoạn) VỠ thành các cụm kẹp giữa những phiên "khớp" chỉ vì dưới ngưỡng một chút (VFR
+    07-01 +0,291%). Phiên kẹp phải khớp RÕ, không chỉ "trong ngưỡng" — xem cổng KẸP.
+  · lệch trường giá chỉ ở vài phiên; hai phiên ngay trước/sau khớp hệ số của ta gần như tuyệt đối
+    (DRI/DVN/SHC/CC1 thật: |dev| láng giềng 0,00–0,07%).
+"Không tỉ lệ với giá" (spec) KHÔNG kiểm được trên cụm 3 phiên giá gần nhau — cổng KẸP là phép phân biệt
+chính, `tick_offset`/`stale_price` là điều kiện cần thêm.
+Một cụm lệch (run ≥ `MIN_RUN`) được đổi nhãn khi ĐỦ CẢ cổng KẸP và một trong hai luật:
+  KẸP (bắt buộc cho cả hai luật): cụm có phiên đánh giá NGAY TRƯỚC và NGAY SAU (không chạm rìa cửa sổ
+    đánh giá), CẢ BA cùng một giá trị r_pred (cùng đoạn hệ số — láng giềng bên kia một ex-date khớp hệ số
+    KHÁC, không chứng minh gì cho đoạn này), và cả hai láng giềng |dev| ≤ `PFM_NEIGHBOR_FRAC`·dev_tol
+    (0,15%). Biên này đóng lỗ "lệch đồng nhất vỡ cụm": cần nhiễu làm tròn ±ν với e+ν > 0,30% và
+    e−ν ≤ 0,15% ⇒ ν ≥ 0,075% ⇒ Close ≤ ~6.700đ; ở mức giá đó HNX/UPCOM 1 bước ≥ 1,5% (⇒ e ≥ 1,4%, láng
+    giềng không thể ≤ 0,15%) còn HOSE bước 10 thì không phân giải được (dưới). Mô phỏng arch-review
+    (vendor f·(1+e) đồng nhất, Close tròn 10đ, 1.500 seed × e 0,26–0,34% × HOSE/UPCOM/HNX): không biên
+    341–1.063 ca bị đổi nhãn, có biên 0.
+    RÌA TRÁI — cụm được xác định trên CHUỖI NẠP từ `load0`, KHÔNG trên cửa sổ đánh giá (rìa trái trôi
+    mỗi ngày và có thể cắt ngang cụm: vòng 2 R1 win0 = phiên đầu cụm, vòng 3 B1 win0 GIỮA cụm ≥4 phiên ⇒
+    phiên ngay trước cửa sổ là phiên của chính cụm). Cụm chạm rìa trái được nối lùi qua các phiên trước
+    cửa sổ còn lệch tới phiên KHỚP đầu tiên = láng giềng trái thật; phần nối phải đạt cùng luật như mọi
+    phiên của cụm. Phán quyết của một cụm vì vậy KHÔNG đổi theo vị trí win0, miễn là (a) phần trong cửa sổ
+    còn ≥ `MIN_RUN` (ít hơn thì cụm đó không còn là bằng chứng DRIFT — hành vi có từ trước) và (b) láng
+    giềng trái nằm trong chuỗi nạp: `CUM_PAD_DAYS` 25 ngày lịch ≈ 17 phiên ⇒ cụm dài tới ~20 phiên.
+    Ex-date ≤ `win0` KHÔNG vào đường hệ số (hồi quy bug TIP: một ex-date đó không tính được sẽ biến mã
+    thành UNCOMPUTABLE oan) nên chỉ được tra NGÀY qua `pre_ex`: phần nối dừng ở ex-date trước cửa sổ muộn
+    nhất. Gặp ranh giới đó, hết chuỗi nạp, hoặc `pre_ex` không biết mà vẫn chưa thấy phiên khớp ⇒ DRIFT
+    (fail-closed). FPT/PBP/VHF: lệch hệ số kéo dài ⇒ không có phiên khớp nào trong đoạn ⇒ DRIFT.
+    Cụm chạm rìa PHẢI (phiên mới nhất) chưa có láng giềng sau ⇒ DRIFT lượt đó, đổi nhãn khi có phiên khớp
+    kẹp lại (một cụm PFM MỚI vì vậy lên Discord như DRIFT ĐÚNG MỘT lần — chấp nhận, hướng an toàn).
+  `tick_offset`: MỌI phiên của cụm có Price − Close·r_pred = k bước giá, 1 ≤ |k| ≤ `PFM_MAX_TICKS`
+    (2), dư |k − round(k)| ≤ `PFM_TICK_FRAC` (0,2 bước). Bước giá = `trading_bot.vn_market.tick_size`
+    (HOSE 10/50/100 theo khung giá, HNX/UPCOM 100, ETF 10) trên sàn THẬT qua DNSE `marketId`
+    (cùng cách `corp_action_auto_confirm._exchange_fn`; BQ không có cột sàn). Khung giá HOSE lấy theo
+    min(Price, Close·r_pred) — bước MỊN hơn ở ranh giới khung ⇒ chặt hơn. `Close` lưu tròn 10đ
+    (đo 2026-05-15→: 98.587/98.789 dòng) ⇒ Close·r_pred mang nhiễu ±5·r_pred đồng; bước giá mà
+    nhiễu đó vượt `PFM_TICK_FRAC` bước (HOSE <10.000đ, bước 10; hoặc r_pred lớn) là KHÔNG PHÂN GIẢI
+    ĐƯỢC ⇒ fail-closed. Sàn là sàn HIỆN TẠI của DNSE, không theo thời điểm (`corporate_action` có 431
+    sự kiện MOVE): mã chuyển sàn trong cửa sổ có thể bị tính bước sai cho phiên cũ — cổng KẸP vẫn chặn
+    lệch hệ số thật. Đo thật asof 2026-10-07 (bước 100đ qua DNSE): DRI −0,93/−1,00/−0,99 bước, DVN
+    −1,09/−2,09/−1,13 ⇒ lọt; HC1 +3,96 bước ⇒ không lọt; VFR bị loại ngay ở cổng KẸP (láng giềng +0,29%).
+  `stale_price`: `Price` ĐỨNG giá suốt cụm và bằng ĐÚNG `Price` của láng giềng trước, mọi phiên có
+    `Volume` < 1 lô (`vn_market.LOT`, chỉ lô lẻ; NULL ⇒ không lọt), và thay `Price` bằng `Price` của
+    láng giềng SAU thì phiên khớp trong `dev_tol`. Không cần bước giá. Đo thật: SHC 06-30..07-09 Price
+    10.900 KL 0–13, Close·1,05 = 12.400 = Price 07-10; CC1 08-06..08-10 Price 40.900 (= 08-05) KL 6–36,
+    Close·1,05 = 38.000 = Price 08-11 — CC1 cùng chữ ký nên cũng đổi nhãn (nhãn cũ `our_table_missing`
+    là cáo buộc sai: hệ số 1,05 khớp cả hai phía). HC1 07-09..07-21 thì KHÔNG: Close·r_pred 13.104 vs
+    Price phiên sau 13.000 ⇒ vẫn DRIFT.
+Tất cả các cụm ≥ `MIN_RUN` của mã đều phải được giải thích; một cụm không giải thích được ⇒ DRIFT với
+payload Y NGUYÊN như trước (cụm dài nhất, cùng ex/dir/corr). Không áp khi mã có ex-date UNCOMPUTABLE
+(giữ hành vi cũ). Không xét `dir`/`corr`: cổng KẸP đã cho thấy hệ số của ta khớp ở chính đoạn đó, nên
+không có cáo buộc nào để caveat. KHÔNG đổi `DEV_TOL`/`MIN_RUN`. Mọi đường không xác định được (sàn
+không tra được, bước không phân giải được, thiếu láng giềng) ⇒ DRIFT như cũ.
+NHẢY NHÃN (chấp nhận, hướng an toàn): DNSE không trả sàn ở một lượt (cron `10 0 * * 2-6` theo giờ hệ
+thống UTC = 07:10 ICT) ⇒ DRI/DVN quay về DRIFT
+lượt đó; lượt PFM trước đã xoá khoá `<mã>|<ex>` ⇒ DRIFT đó lên Discord như MỚI (báo thừa, không mất).
+Giới hạn đã biết: một lệch hệ số THẬT chỉ ở 3-vài phiên GIỮA một đoạn mà hai đầu khớp rõ (vendor áp hệ số
+lộn xộn trong cùng đoạn), đồng thời lệch đúng 1-2 bước giá ±0,2 — không phân biệt được với lỗi trường
+Price. Chưa thấy ca nào; vendor fail theo kiểu FPT (một đầu). Ca riêng của giới hạn này: bỏ sót MỘT cổ tức
+tiền 100–200đ là lệch ≈ 100–200đ CỘNG (gần như không tỉ lệ giá trong một cụm ngắn) ⇒ trên HNX/UPCOM
+(bước 100) nó trùng đúng 1–2 bước giá; `tick_offset` không phân biệt được, chỉ cổng KẸP (hai phiên kẹp
+cùng đoạn khớp ≤ 0,15%) chặn — mà lệch hệ số thật thì phủ CẢ đoạn, nên láng giềng cùng đoạn không thể khớp.
 Che tạm (chấp nhận, có giới hạn): `ex_named` = ex-date ĐẦU TIÊN sau cụm lệch. Mã có DRIFT thật ở ex A
 cũ (đã đủ phiên) mà cụm lệch kéo dài tới sát một ex B mới chưa khớp phiên nào ⇒ hiện là awaiting ở B
 cho tới khi B đủ 3 phiên khớp (cổng nhất quán chặn phần lớn: thiếu cả hệ số A thì dư ≠ 0).
@@ -89,7 +162,8 @@ EXIT CODE (phân biệt rõ 3 trạng thái KHÁC nhau — §29, không gộp "k
   0  = feed nguồn TƯƠI, mọi mã tính được và khớp, 0 uncomputable, 0 nodata. Đây là trạng thái
        DUY NHẤT có nghĩa "không có gì".
   10 = có ≥1 DRIFT (lệch thật, persistent) → alert Discord.
-  11 = KHÔNG phải "sạch": ≥1 AWAITING_TRADE (lệch đã biết, chờ vendor), ≥1 UNCOMPUTABLE, hoặc ≥1
+  11 = KHÔNG phải "sạch": ≥1 AWAITING_TRADE (lệch đã biết, chờ vendor), ≥1 PRICE_FIELD_MISMATCH (hệ
+       số đúng, trường Price lệch), ≥1 UNCOMPUTABLE, hoặc ≥1
        NODATA, hoặc feed `corporate_action`
        KHÔNG tươi (STALE/DEAD/UNREADABLE), hoặc universe rỗng (bất khả về cấu trúc ở VN — đo thật
        95 mã cho cửa sổ 18 ngày). Dòng máy đọc phân biệt rõ ba loại; chỉ mã đang NẮM LIVE và ca
@@ -109,6 +183,7 @@ WC = os.environ.get("WC_ROOT", "/home/trido/thanhdt/WorkingClaude")
 sys.path.insert(0, WC)
 sys.path.insert(0, os.path.join(WC, "mike", "bin"))
 import corp_action_lib as cal  # noqa: E402
+from trading_bot import vn_market as vm  # noqa: E402
 
 BQ = cal.BQ_PROJECT
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
@@ -145,6 +220,15 @@ DEV_TOL_MAX = 0.05
 # hệ số. Dưới mốc này một lệch `vendor_missing` là AWAITING_TRADE, không phải DRIFT. User chốt 3 phiên
 # (2026-10-08) — đủ cho ETL vendor chạy lại sau phiên khớp đầu; DRI/DVN/SHC (12/19/8 phiên) vượt xa.
 AWAIT_MIN_TRADED_SESSIONS = 3
+
+# PRICE_FIELD_MISMATCH — xem docstring đầu file. `PFM_MAX_TICKS`: lệch lớn nhất đo được trên DRI/DVN là
+# 2 bước (DRI 06-23 −199đ, DVN 06-22 −209đ), trung vị toàn bảng ±100đ. `PFM_TICK_FRAC`: dư tối đa so
+# với số nguyên bước; dư thật lớn nhất 0,14 (DVN 06-23). `CLOSE_GRID_VND`: độ phân giải lưu của `Close`.
+PFM_MAX_TICKS = 2
+PFM_TICK_FRAC = 0.2
+# Phiên KẸP phải khớp RÕ: |dev| ≤ 0,5·dev_tol (arch-review 2026-10-08, ca VFR — xem docstring đầu file).
+PFM_NEIGHBOR_FRAC = 0.5
+CLOSE_GRID_VND = 10
 
 
 # ---------------------------------------------------------------- data access
@@ -327,6 +411,64 @@ def held_map(asof, max_stale_days=HELD_MAX_STALE_DAYS):
         print(f"[warn] khong tra duoc vi the LIVE -> held=unknown cho moi ma. "
               f"Loi that: {type(e).__name__}: {e}", file=sys.stderr)
         return None
+
+
+def live_exchange_fn():
+    """ticker → "HOSE"/"HNX"/"UPCOM" qua DNSE `marketId`, hoặc None nếu không xác định được.
+
+    Chỉ dùng để lấy BƯỚC GIÁ cho luật `tick_offset` (PRICE_FIELD_MISMATCH); BQ không có cột sàn. Cùng
+    cách `corp_action_auto_confirm._exchange_fn` / `plan_position_drift_check.live_exchange_fn`:
+    `Quote.exchange_known` mới là sàn thật (`Quote.exchange` mặc định "HOSE" khi feed câm — đoán sai
+    im lặng). Kết nối LƯỜI: chỉ khi có cụm lệch cần bước giá. `_raw_log=None`: script chỉ-phát-hiện
+    không ghi quote vào `dnse_raw_*.jsonl` kế toán. Mọi print của broker → stderr (stdout là kênh
+    máy đọc). Lỗi ⇒ None ⇒ luật không áp ⇒ DRIFT như cũ (fail-closed).
+    """
+    import contextlib
+    cache, src = {}, []      # src = [nguồn] khi connect được, [None] khi connect đã HỎNG (nhớ, không thử lại)
+
+    def fn(tk):
+        if tk in cache:
+            return cache[tk]
+        if bq_guard_active():
+            # Selfcheck không bao giờ được chạm broker thật.
+            cache[tk] = None
+            return None
+        try:
+            with contextlib.redirect_stdout(sys.stderr):
+                if not src:
+                    try:
+                        from trading_bot.brokers import get_quote_source
+                        q = get_quote_source("dnse")
+                        q._raw_log = None
+                        q.connect()
+                        src.append(q)
+                    except Exception:
+                        # Nhớ lỗi connect như `corp_action_auto_confirm._exchange_fn`: mỗi mã thử lại sẽ
+                        # tốn tới 3 × timeout 30s/mã trong cron không có timeout bọc ngoài.
+                        src.append(None)
+                        raise
+                if src[0] is None:
+                    raise RuntimeError("connect DNSE da hong o ma truoc trong luot nay")
+                qt = src[0].get_quote(tk)
+            cache[tk] = (str(qt.exchange).strip().upper()
+                         if getattr(qt, "exchange_known", False) else None)
+            # Whitelist: `vm.tick_size` coi mọi chuỗi lạ là HOSE (bước 10/50/100 theo khung giá) — một
+            # sàn mới/lạ (field `exchange` tự do của feed) phải là "không biết sàn" (fail-closed), không
+            # được thành một bước giá đoán.
+            if cache[tk] not in (None, "HOSE", "HNX", "UPCOM"):
+                print(f"[warn] {tk}: DNSE marketId={cache[tk]!r} ngoai HOSE/HNX/UPCOM -> luat "
+                      f"tick_offset KHONG ap (giu DRIFT)", file=sys.stderr)
+                cache[tk] = None
+                return None
+            if cache[tk] is None:
+                print(f"[warn] {tk}: DNSE khong tra marketId -> khong biet buoc gia -> luat "
+                      f"tick_offset KHONG ap (giu DRIFT)", file=sys.stderr)
+        except Exception as e:                               # noqa: BLE001
+            print(f"[warn] {tk}: khong xac dinh duoc san qua DNSE -> luat tick_offset KHONG ap (giu "
+                  f"DRIFT). Loi that: {type(e).__name__}: {e}", file=sys.stderr)
+            cache[tk] = None
+        return cache[tk]
+    return fn
 
 
 # ------------------------------------------------------------ factor building
@@ -519,11 +661,111 @@ def longest_bad_run(evaluated, dev_tol):
     return len(best), best
 
 
-def scan_ticker(series, events, dev_tol, min_run, eval_from):
+def bad_runs(evaluated, dev_tol):
+    """Mọi cụm LIÊN TIẾP các phiên lệch, mỗi cụm = list chỉ số vào `evaluated` (cùng định nghĩa
+    "lệch"/"liên tiếp" với `longest_bad_run`). Cụm là CỰC ĐẠI ⇒ phiên ngay trước/sau, nếu có, khớp."""
+    runs, cur = [], []
+    for i, (_d, dev) in enumerate(evaluated):
+        if abs(dev) > dev_tol:
+            cur.append(i)
+        elif cur:
+            runs.append(cur)
+            cur = []
+    if cur:
+        runs.append(cur)
+    return runs
+
+
+def explain_price_field(run, bars, curve, dev_tol, tick_fn, lead_bars=(), lead_why=""):
+    """(rule, note) nếu cụm `run` là lỗi TRƯỜNG Price, ngược lại (None, lý do). Xem docstring đầu file.
+
+    `bars` = các phiên được đánh giá (thẳng hàng với `evaluated`), `run` = chỉ số vào `bars`.
+    `tick_fn(price)` → bước giá hoặc None (không biết sàn) — chỉ gọi khi luật `stale_price` không lọt,
+    để không chạm DNSE khi không cần.
+    `lead_bars` = các phiên TRƯỚC `bars[0]` trong chuỗi nạp (từ `load0`) còn CÙNG đoạn hệ số với
+    `bars[0]` (thứ tự thời gian), dùng khi cụm chạm rìa trái cửa sổ đánh giá; `lead_why` = vì sao chuỗi
+    đó dừng ở đây (hết chuỗi nạp / ex-date trước cửa sổ / không biết ex-date) ⇒ fail-closed.
+    """
+    i0, i1 = run[0], run[-1]
+    if i1 == len(bars) - 1:
+        return None, "cum cham ria PHAI cua so danh gia (chua co phien sau de kep)"
+    rbars = [bars[i] for i in run]
+    if i0 == 0:
+        # Rìa trái cửa sổ 120 ngày TRÔI mỗi ngày nên có thể cắt NGANG một cụm (arch-review vòng 2 R1:
+        # win0 = phiên đầu cụm; vòng 3 B1: win0 GIỮA cụm ≥4 phiên ⇒ phiên ngay trước cửa sổ là phiên của
+        # chính cụm, lệch). Cụm được xác định trên CHUỖI NẠP, không trên cửa sổ: lùi qua các phiên trước
+        # cửa sổ còn lệch (nối vào cụm — chúng phải đạt CÙNG luật như mọi phiên khác của cụm) tới phiên
+        # khớp đầu tiên = láng giềng trái thật. Phán quyết vì vậy KHÔNG phụ thuộc win0 cắt ở đâu.
+        left, lead = None, []
+        for b in reversed(lead_bars):
+            if abs((b["price"] / b["close"]) / curve[b["d"]] - 1.0) > dev_tol:
+                lead.append(b)
+                continue
+            left = b
+            break
+        if left is None:
+            tail = (f"; {len(lead)} phien truoc cua so {lead[-1]['d']}..{lead[0]['d']} van lech"
+                    if lead else "")
+            return None, f"cum cham ria TRAI cua so danh gia, {lead_why}{tail}"
+        rbars = lead[::-1] + rbars
+    else:
+        left = bars[i0 - 1]
+    right = bars[i1 + 1]
+    rp = curve[rbars[0]["d"]]
+    # Cổng cùng-đoạn chặn bằng CẤU TRÚC, không dựa vào độ lớn hệ số: với hệ số ≥ ~1,0015 biên láng giềng
+    # 0,15% bên dưới cũng bắt được, nhưng cổ tức tiền rất nhỏ (20đ ≈ 0,1%) thì CHỈ cổng này chặn (selfcheck
+    # "cổ tức tiền 20đ"; mutation P4a nay bị giết — vòng 2 từng xếp nó là tương đương).
+    if any(curve[b["d"]] != rp for b in rbars + [left, right]):
+        return None, "lang gieng nam o doan he so KHAC (co ex-date xen giua)"
+    for nb in (left, right):
+        nb_dev = (nb["price"] / nb["close"]) / rp - 1.0
+        if abs(nb_dev) > PFM_NEIGHBOR_FRAC * dev_tol:
+            # §29: lời giải thích rẽ theo ĐÚNG giá trị vừa đo, không gán sẵn một nguyên nhân.
+            what = ("khop trong dev_tol nhung chi SAT nguong — mot lech he so dong nhat sat nguong cung "
+                    "cho dung chu ky nay" if abs(nb_dev) <= dev_tol else "lang gieng CUNG lech > dev_tol")
+            return None, (f"lang gieng {nb['d']} lech {nb_dev:+.4%} > {PFM_NEIGHBOR_FRAC * dev_tol:.2%} "
+                          f"(cong KEP doi khop RO): {what}")
+    span = f"{rbars[0]['d']}..{rbars[-1]['d']}"
+
+    p0 = rbars[0]["price"]
+    if (left["price"] == p0 and all(b["price"] == p0 for b in rbars)
+            and all(b["vol"] is not None and b["vol"] < vm.LOT for b in rbars)
+            and all(abs(b["close"] * rp / right["price"] - 1.0) <= dev_tol for b in rbars)):
+        vols = "/".join("%.0f" % b["vol"] for b in rbars)   # py3.10: không lồng nháy trong f-string
+        return "stale_price", (
+            f"{span}: Price DUNG {p0:.0f} (= phien truoc {left['d']}), KL "
+            f"{vols} < {vm.LOT}, Close*r_pred "
+            f"{rbars[0]['close'] * rp:.1f} = Price phien sau {right['d']} {right['price']:.0f} "
+            f"-> Price/Close lech o phien khong khop lo chan, he so khop 2 lang gieng; KHONG xac dinh "
+            f"duoc truong nao sai (Price dung la binh thuong khi khong khop — co the Close bi bfill)")
+
+    ks = []
+    for b in rbars:
+        imp = b["close"] * rp
+        tick = tick_fn(min(b["price"], imp)) if tick_fn else None
+        if not tick:
+            return None, f"{b['d']}: khong biet buoc gia (san khong tra duoc)"
+        if 0.5 * CLOSE_GRID_VND * rp > PFM_TICK_FRAC * tick:
+            return None, (f"{b['d']}: buoc gia {tick}d nho hon nhieu lam tron Close "
+                          f"(+-{0.5 * CLOSE_GRID_VND * rp:.1f}d) -> khong phan giai duoc")
+        k = (b["price"] - imp) / tick
+        n = round(k)
+        if not 1 <= abs(n) <= PFM_MAX_TICKS or abs(k - n) > PFM_TICK_FRAC:
+            return None, f"{b['d']}: lech {b['price'] - imp:+.1f}d = {k:+.2f} buoc {tick}d"
+        ks.append(f"{b['d']} {k:+.2f}x{tick}d")
+    return "tick_offset", (f"{span}: Price - Close*r_pred = so nguyen buoc gia ({', '.join(ks)}), "
+                           f"lang gieng {left['d']}/{right['d']} khop he so -> lech o muc gia tho, KHONG "
+                           f"phai lech he so")
+
+
+def scan_ticker(series, events, dev_tol, min_run, eval_from, tick_fn=None, pre_ex=None):
     """(verdict, payload) cho một mã. verdict ∈ AGREE / DRIFT / UNCOMPUTABLE / NODATA.
 
     `eval_from` = ngày sớm nhất được đánh giá (rìa cửa sổ đánh giá; các phiên trước đó chỉ nạp
     để tìm phiên cum cuối, không phải để chấm điểm).
+    `pre_ex` = các ex-date ĐIỀU CHỈNH GIÁ <= `eval_from` (KHÔNG vào đường hệ số — xem `run_scan`), chỉ
+    để biết láng giềng trái nằm trước cửa sổ có cùng đoạn hệ số không. None = không biết ⇒ không dùng
+    láng giềng trước cửa sổ (fail-closed, hành vi cũ).
     """
     curve, used, notes, unknown, corr_ex = build_factor_curve(series, events)
     if not series:
@@ -534,8 +776,8 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
     # đã bị nhiễm, và cũng không lặng lẽ coi hệ số thiếu bằng 1,0.
     valid_from = max((ex for ex, _c, _n in unknown), default=None)
     floor = max(x for x in (eval_from, valid_from) if x) if (eval_from or valid_from) else None
-    evaluated = [(b["d"], (b["price"] / b["close"]) / curve[b["d"]] - 1.0)
-                 for b in series if (floor is None or b["d"] >= floor)]
+    ev_bars = [b for b in series if (floor is None or b["d"] >= floor)]
+    evaluated = [(b["d"], (b["price"] / b["close"]) / curve[b["d"]] - 1.0) for b in ev_bars]
 
     run, bad = longest_bad_run(evaluated, dev_tol)
     if run >= min_run:
@@ -581,6 +823,42 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
             "n_eval": len(evaluated), "notes": notes,
             "unknown": unknown, "partial": bool(unknown),
         }
+        # LỆCH TRƯỜNG Price (xem docstring đầu file): MỌI cụm ≥ min_run phải được giải thích, và không có
+        # ex-date uncomputable. Một cụm không giải thích được ⇒ rơi xuống nhánh cũ, `out` không đổi.
+        if not unknown:
+            # Phiên TRƯỚC cửa sổ dùng để nối cụm chạm rìa trái (xem `explain_price_field`). r_pred của
+            # chúng chỉ đúng khi KHÔNG có ex-date nào nằm trong (phiên đó, phiên đầu cửa sổ] — các ex-date
+            # <= `eval_from` không được nạp vào đường hệ số, nên một ex-date ở đó sẽ bị bỏ sót im lặng
+            # (cổng cùng-đoạn không thấy) ⇒ chỉ lấy phiên >= ex-date trước cửa sổ muộn nhất (`pre_ex`).
+            lead, lead_why = [], "khong co phien nao truoc trong chuoi nap"
+            before = [b for b in series if ev_bars and b["d"] < ev_bars[0]["d"]]
+            if before and pre_ex is None:
+                lead_why = "khong biet ex-date truoc cua so (pre_ex=None)"
+            elif before:
+                seg0 = max((ex for ex in pre_ex if ex <= ev_bars[0]["d"]), default=None)
+                lead = [b for b in before if seg0 is None or b["d"] >= seg0]
+                if len(lead) < len(before):
+                    lead_why = (f"lang gieng truoc cua so nam o doan he so KHAC (ex-date {seg0} xen "
+                                f"giua) ma chua gap phien khop")
+                else:
+                    lead_why = (f"het chuoi nap (tu {before[0]['d']}, load0 = win0 - {CUM_PAD_DAYS} ngay) "
+                                f"ma chua gap phien khop")
+            pfm = []
+            for r in bad_runs(evaluated, dev_tol):
+                if len(r) < min_run:
+                    continue
+                rule, why = explain_price_field(r, ev_bars, curve, dev_tol, tick_fn, lead, lead_why)
+                if rule is None:
+                    notes.append(f"cum {evaluated[r[0]][0]}..{evaluated[r[-1]][0]} KHONG phai loi "
+                                 f"truong Price: {why}")
+                    pfm = None
+                    break
+                pfm.append((rule, why))
+            if pfm:
+                out["pfm_rules"] = ",".join(sorted({rule for rule, _w in pfm}))
+                out["n_runs"] = len(pfm)
+                notes.extend(f"PRICE_FIELD_MISMATCH {why}" for _r, why in pfm)
+                return "PRICE_FIELD_MISMATCH", out
         # CHỜ GIAO DỊCH LẠI: chỉ cho lệch `vendor_missing`, corr=0, và ex-date là SỰ KIỆN thật (không
         # phải `unknown_gap@...` — không có ngày nào để đếm phiên từ đó). Xem docstring đầu file.
         if out["dir"] == "vendor_missing" and out["corr"] == "0" and ex_is_event:
@@ -646,6 +924,11 @@ def marker_drift(tk, p, held):
 def marker_awaiting(tk, p, held):
     return "ADJFACTOR_AWAITING_TRADE|{tk}|{ex}|{n_traded}|{held}|{dev:.6f}".format(
         tk=tk, held=held, **p)
+
+
+def marker_price_field(tk, p, held):
+    return ("ADJFACTOR_PRICE_FIELD_MISMATCH|{tk}|{ex}|{n_runs}|{pfm_rules}|{d0}|{d1}|{held}"
+            "|{dev:.6f}").format(tk=tk, held=held, **p)
 
 
 def marker_uncomputable(tk, ex, code, held):
@@ -729,19 +1012,34 @@ def run_scan(args):
     ev_by_tk = defaultdict(list)
     if bq_guard_active():
         raise RuntimeError("MIKE_ADJFACTOR_NO_BQ=1: chan moi truy van BigQuery (selfcheck)")
-    for e in cal.events(tks, since=win0, until=asof):
-        ev_by_tk[e["ticker"]].append(e)
+    # Sự kiện (load0, win0] chỉ để biết ranh giới đoạn hệ số của láng giềng trái trước cửa sổ
+    # (`scan_ticker(pre_ex=)`), KHÔNG vào đường hệ số — lý do ở comment ngay trên.
+    pre_ex_by_tk = defaultdict(set)
+    for e in cal.events(tks, since=load0, until=asof):
+        if e["exright_date"] > win0:
+            ev_by_tk[e["ticker"]].append(e)
+        elif cal.is_price_adjusting(e):
+            pre_ex_by_tk[e["ticker"]].add(e["exright_date"])
 
-    drift, uncomp, agree, nodata, awaiting = [], [], [], [], []
+    drift, uncomp, agree, nodata, awaiting, pfmis = [], [], [], [], [], []
+    exchange_of = live_exchange_fn()
     for tk in tks:
         s = series.get(tk, [])
+
+        def tick_fn(price, _tk=tk):
+            ex = exchange_of(_tk)
+            return vm.tick_size(price, _tk, ex) if ex else None
+
         verdict, payload = scan_ticker(s, ev_by_tk.get(tk, []),
-                                       args.dev_tol, args.min_run, win0)
+                                       args.dev_tol, args.min_run, win0, tick_fn=tick_fn,
+                                       pre_ex=pre_ex_by_tk.get(tk, set()))
         h = held.get(tk, "none") if held is not None else held_state
         if verdict == "DRIFT":
             drift.append((tk, payload, h))
         elif verdict == "AWAITING_TRADE":
             awaiting.append((tk, payload, h))
+        elif verdict == "PRICE_FIELD_MISMATCH":
+            pfmis.append((tk, payload, h))
         elif verdict == "UNCOMPUTABLE":
             uncomp.append((tk, payload, h))
         elif verdict == "AGREE":
@@ -753,6 +1051,8 @@ def run_scan(args):
         print(marker_drift(tk, p, h))
     for tk, p, h in sorted(awaiting):
         print(marker_awaiting(tk, p, h))
+    for tk, p, h in sorted(pfmis):
+        print(marker_price_field(tk, p, h))
     for tk, p, h in sorted(uncomp):
         for ex, code, _note in p["unknown"]:
             print(marker_uncomputable(tk, ex, code, h))
@@ -766,7 +1066,20 @@ def run_scan(args):
     # SCAN giữ NGUYÊN 7 trường (alert.sh đọc theo vị trí): `n_drift` = DRIFT THẬT, awaiting đếm từ dòng
     # máy đọc riêng của nó.
     print(f"\n-- ket qua: DRIFT {len(drift)} | AWAITING_TRADE {len(awaiting)} | "
+          f"PRICE_FIELD_MISMATCH {len(pfmis)} | "
           f"UNCOMPUTABLE {len(uncomp)} | AGREE {len(agree)} | NODATA {len(nodata)} --")
+    if pfmis:
+        print("\nPRICE_FIELD_MISMATCH (he so khop o 2 phien kep quanh cum, Price/Close lech vai phien giua "
+              "— KHONG phai lech he so, KHONG phai DRIFT):")
+        print(f"{'tk':<7}{'held':<16}{'r_obs':>10}{'r_pred':>10}{'dev':>10}{'run':>5}"
+              f"  {'window':<24}{'ex':<12}rules")
+        for tk, p, h in sorted(pfmis):
+            print(f"{tk:<7}{h:<16}{p['r_obs']:>10.6f}{p['r_pred']:>10.6f}{p['dev']:>+10.4%}"
+                  f"{p['run']:>5}  {p['d0']}..{p['d1']:<12} {p['ex']:<12}{p['pfm_rules']}")
+        print("\n-- chung tu cua cac ma PRICE_FIELD_MISMATCH --")
+        for tk, p, _h in sorted(pfmis):
+            for n in p["notes"]:
+                print(f"   {tk}: {n}")
     if awaiting:
         # Bằng chứng ĐẦY ĐỦ như bảng DRIFT (arch-review 2026-10-08): nhãn "bình thường" phải truy lại
         # được — dòng máy đọc chỉ mang `dev`, nên log là nơi duy nhất giữ r_obs/r_pred/cửa sổ/chứng từ.
@@ -808,7 +1121,7 @@ def run_scan(args):
         return 10
     # rc=11 = KHÔNG phải "sạch": awaiting (lệch đã biết, chờ vendor), uncomputable, NODATA, hoặc feed
     # nguồn không tươi. Gộp cả bốn vào một mã vì không cái nào là "khớp", nhưng dòng máy đọc phân biệt rõ.
-    if awaiting or uncomp or nodata or feed_status != "FRESH":
+    if awaiting or pfmis or uncomp or nodata or feed_status != "FRESH":
         return 11
     return 0
 

@@ -14,6 +14,7 @@ selfcheck KHÔNG BAO GIỜ gửi Discord thật hay ghi bus thật.
 — một selfcheck thừa hưởng đúng `TZ` của tác giả thì PASS bất kể code có neo TZ hay không.
 """
 import argparse
+from datetime import date, timedelta
 import json
 import os
 import subprocess
@@ -23,6 +24,11 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import adjfactor_drift_detect as det  # noqa: E402
+
+# Selfcheck KHÔNG BAO GIỜ chạm DNSE thật: `run_scan` gọi `live_exchange_fn()` để lấy bước giá cho luật
+# PRICE_FIELD_MISMATCH. Bản thật giữ lại để test riêng ở [17] với broker giả.
+_REAL_LIVE_EXCHANGE_FN = det.live_exchange_fn
+det.live_exchange_fn = lambda: (lambda tk: None)
 
 FAILS = []
 N = 0
@@ -38,6 +44,15 @@ def ck(label, cond, detail=""):
     else:
         print(f"  FAIL {label}   {detail}")
         FAILS.append(label)
+
+
+def ck_perm(label, cond, detail=""):
+    """`ck` cho test dựa trên chmod: root (euid 0) bỏ qua quyền thư mục ⇒ ca không tái hiện được ⇒ N/A,
+    KHÔNG phải FAIL và KHÔNG đếm là PASS."""
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        print(f"  N/A  {label}   (euid=0: root bo qua chmod, khong tai hien duoc)")
+        return
+    ck(label, cond, detail)
 
 
 def bar(d, price, close, lo=None, hi=None):
@@ -645,12 +660,12 @@ def t_alert(tz_label, env_tz):
                 DRIFT_HELD.replace("VPB|2026-09-24", "LCK|2026-09-04"), FEED_FRESH, SCAN]) + "\n",
                 env_tz)
             sent = os.path.exists(os.path.join(sink, "notify.txt"))
-            ck(f"[{tz_label}] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)",
-               sent, f"rc={r.returncode} {r.stderr[-300:]!r}")
-            ck(f"[{tz_label}] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'",
-               "KHONG MO duoc file lock" in r.stderr
-               and "Permission denied" in r.stderr
-               and "dang giu" not in r.stderr, f"{r.stderr[-600:]!r}")
+            ck_perm(f"[{tz_label}] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)",
+                    sent, f"rc={r.returncode} {r.stderr[-300:]!r}")
+            ck_perm(f"[{tz_label}] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'",
+                    "KHONG MO duoc file lock" in r.stderr
+                    and "Permission denied" in r.stderr
+                    and "dang giu" not in r.stderr, f"{r.stderr[-600:]!r}")
         finally:
             os.chmod(lockdir, mode)
 
@@ -708,10 +723,10 @@ def t_alert(tz_label, env_tz):
             r = _run_alert(tmp, tgt, "\n".join([
                 DRIFT_HELD.replace("VPB|2026-09-24", "STW|2026-09-01"), FEED_FRESH, SCAN]) + "\n",
                 env_tz)
-            ck(f"[{tz_label}] ghi state hỏng -> KHÔNG bung traceback trần (M45)",
-               "Traceback (most recent call last)" not in r.stderr, f"{r.stderr[-400:]!r}")
-            ck(f"[{tz_label}] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật",
-               "GUI LAI" in r.stderr and "Permission denied" in r.stderr, f"{r.stderr[-400:]!r}")
+            ck_perm(f"[{tz_label}] ghi state hỏng -> KHÔNG bung traceback trần (M45)",
+                    "Traceback (most recent call last)" not in r.stderr, f"{r.stderr[-400:]!r}")
+            ck_perm(f"[{tz_label}] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật",
+                    "GUI LAI" in r.stderr and "Permission denied" in r.stderr, f"{r.stderr[-400:]!r}")
         finally:
             os.chmod(lockdir, mode)
 
@@ -1651,6 +1666,1072 @@ def t_alert_awaiting(tz_label, env_tz):
 
 
 
+# ----------------------- 17. PRICE_FIELD_MISMATCH — LỆCH TRƯỜNG Price (job Taylor_20261008_080048)
+
+REAL_1007 = {   # (d, Price, Close, Low, High, Volume) — tav2_bq.ticker thật, kéo 2026-10-08
+    "DRI": [
+        ("2026-09-03", 14300, 13330, 13140, 13420, 446520),
+        ("2026-09-04", 14200, 13240, 13140, 13420, 350272),
+        ("2026-09-07", 14200, 13240, 13240, 13420, 633939),
+        ("2026-09-08", 14600, 13700, 13240, 13800, 1105628),
+        ("2026-09-09", 14900, 13890, 13700, 14170, 1125946),
+        ("2026-09-10", 14600, 13700, 13520, 13980, 859292),
+        ("2026-09-11", 14400, 13520, 13330, 13700, 677165),
+        ("2026-09-14", 14100, 13240, 13050, 13420, 785501),
+        ("2026-09-15", 14400, 13420, 13050, 13420, 735869),
+        ("2026-09-16", 14900, 13890, 13240, 14080, 2360195),
+        ("2026-09-17", 14800, 13800, 13610, 13890, 425937),
+        ("2026-09-18", 14800, 13800, 13700, 13890, 743050),
+        ("2026-09-21", 14800, 13890, 13610, 13980, 1028231),
+        ("2026-09-22", 14000, 14000, 13800, 14600, 417345),
+        ("2026-09-23", 14500, 14500, 13900, 14500, 1824023),
+        ("2026-09-24", 14800, 14800, 14500, 15100, 1515170),
+        ("2026-09-25", 15000, 15100, 14800, 15700, 2804805),
+        ("2026-09-28", 15000, 15000, 14700, 15200, 917701),
+        ("2026-09-29", 16000, 16000, 14900, 16100, 2907544),
+        ("2026-09-30", 15600, 15700, 15500, 16400, 1701325),
+        ("2026-10-01", 15500, 15500, 15300, 16100, 1767331),
+        ("2026-10-02", 16200, 16200, 15600, 16700, 1976061),
+        ("2026-10-05", 16700, 16700, 16200, 16800, 2322100),
+        ("2026-10-06", 16300, 16400, 16000, 16800, 1518800),
+        ("2026-10-07", 16000, 16000, 15800, 16700, 2569000),
+    ],
+    "DVN": [
+        ("2026-06-15", 20800, 19660, 19660, 19750, 3800),
+        ("2026-06-16", 20800, 19660, 19570, 19660, 14210),
+        ("2026-06-17", 20800, 19660, 19470, 19660, 21986),
+        ("2026-06-18", 20700, 19570, 19380, 19660, 75587),
+        ("2026-06-19", 20500, 19470, 19280, 19570, 39040),
+        ("2026-06-22", 20400, 19470, 19280, 19470, 30134),
+        ("2026-06-23", 20400, 19380, 19280, 19470, 2355),
+        ("2026-06-24", 20400, 19280, 19090, 19380, 21720),
+        ("2026-06-25", 20200, 19090, 19090, 19280, 9000),
+        ("2026-06-26", 20200, 19090, 18810, 19190, 128886),
+        ("2026-06-29", 20000, 18900, 18900, 19190, 4243),
+        ("2026-06-30", 20200, 19090, 19000, 19090, 5801),
+        ("2026-09-08", 18300, 17300, 17110, 17300, 16900),
+        ("2026-09-09", 18100, 17110, 17110, 17300, 3100),
+        ("2026-09-10", 18100, 17110, 17110, 17300, 8200),
+        ("2026-09-11", 17200, 17200, 17200, 17400, 12700),
+        ("2026-09-14", 17100, 17100, 17000, 17300, 4700),
+        ("2026-09-15", 17500, 17500, 17200, 17500, 8431),
+        ("2026-09-16", 17000, 17000, 17000, 17300, 5819),
+        ("2026-09-17", 17100, 17300, 17000, 17600, 79412),
+        ("2026-09-18", 16900, 17000, 16500, 17300, 8532),
+    ],
+    "SHC": [
+        ("2026-06-24", 12000, 11430, 11430, 11430, 0), ("2026-06-25", 12000, 11430, 11430, 11430, 0),
+        ("2026-06-26", 12000, 11430, 11430, 11430, 49),
+        ("2026-06-29", 10900, 10380, 10380, 13140, 215), ("2026-06-30", 10900, 11810, 11810, 11810, 0),
+        ("2026-07-01", 10900, 11810, 11810, 11810, 12), ("2026-07-02", 10900, 11810, 11810, 11810, 6),
+        ("2026-07-03", 10900, 11810, 11810, 11810, 0), ("2026-07-06", 10900, 11810, 11810, 11810, 13),
+        ("2026-07-07", 10900, 11810, 11810, 11810, 0), ("2026-07-08", 10900, 11810, 11810, 11810, 0),
+        ("2026-07-09", 10900, 11810, 11810, 11810, 10),
+        ("2026-07-10", 12400, 11810, 11810, 11810, 100), ("2026-07-13", 12400, 11810, 11810, 11810, 0),
+        ("2026-07-14", 12400, 11810, 11810, 11810, 0), ("2026-07-15", 12400, 11810, 11810, 11810, 0),
+        ("2026-09-03", 10200, 9710, 9710, 9710, 0), ("2026-09-04", 10500, 10000, 10000, 10000, 1300),
+        ("2026-09-07", 10500, 10000, 10000, 10000, 0), ("2026-09-08", 10500, 10000, 10000, 10000, 0),
+        ("2026-09-09", 10000, 10000, 10000, 10000, 100), ("2026-09-10", 10000, 10000, 10000, 10000, 0),
+        ("2026-09-11", 10000, 10000, 10000, 10000, 0),
+    ],
+    "CC1": [
+        ("2026-07-29", 38900, 37050, 37050, 37050, 125),
+        ("2026-07-30", 38000, 36190, 36190, 36670, 6225),
+        ("2026-07-31", 38000, 36190, 36190, 36190, 1225),
+        ("2026-08-03", 37000, 35240, 35240, 35240, 101),
+        ("2026-08-04", 37000, 35240, 35240, 35240, 212),
+        ("2026-08-05", 40900, 38950, 34290, 38950, 672),
+        ("2026-08-06", 40900, 36190, 36190, 36190, 36), ("2026-08-07", 40900, 36190, 36190, 36190, 26),
+        ("2026-08-10", 40900, 36190, 36190, 36190, 6), ("2026-08-11", 38000, 36190, 36190, 36190, 962),
+        ("2026-08-12", 38000, 36190, 36190, 36190, 251),
+        ("2026-08-13", 38000, 36190, 36190, 36190, 429),
+        ("2026-08-14", 37500, 35720, 35720, 35720, 1000),
+        ("2026-09-11", 38700, 36860, 36860, 36860, 30), ("2026-09-14", 38700, 36860, 36860, 36860, 3),
+        ("2026-09-15", 40100, 40100, 31400, 42000, 1996),
+        ("2026-09-16", 38100, 38100, 38100, 38100, 128),
+        ("2026-09-17", 38100, 38100, 38100, 38100, 13),
+    ],
+    "HC1": [
+        ("2026-07-01", 13400, 12350, 12350, 12350, 1000),
+        ("2026-07-02", 13400, 12350, 12350, 12350, 0), ("2026-07-03", 13400, 12350, 12350, 12350, 0),
+        ("2026-07-06", 13400, 12350, 12350, 12350, 0), ("2026-07-07", 13400, 12350, 12350, 12350, 0),
+        ("2026-07-08", 13500, 12450, 11980, 12450, 500), ("2026-07-09", 13500, 12080, 12080, 12080, 0),
+        ("2026-07-10", 13500, 12080, 12080, 12080, 0), ("2026-07-13", 13500, 12080, 12080, 12080, 0),
+        ("2026-07-14", 13500, 12080, 12080, 12080, 0), ("2026-07-15", 13500, 12080, 12080, 12080, 0),
+        ("2026-07-16", 13500, 12080, 12080, 12080, 0), ("2026-07-17", 13500, 12080, 12080, 12080, 0),
+        ("2026-07-20", 13500, 12080, 12080, 12080, 0), ("2026-07-21", 13500, 12080, 12080, 12080, 0),
+        ("2026-07-22", 13000, 11980, 11800, 11980, 1500),
+        ("2026-07-23", 13000, 11890, 11890, 11890, 0), ("2026-07-24", 13000, 11890, 11890, 11890, 0),
+        ("2026-07-27", 13000, 11890, 11890, 11890, 0), ("2026-07-28", 13000, 11890, 11890, 11890, 0),
+        ("2026-07-29", 13000, 11890, 11890, 11890, 0), ("2026-07-30", 13000, 11890, 11890, 11890, 0),
+        ("2026-07-31", 13000, 11890, 11890, 11890, 0),
+        ("2026-08-03", 12800, 11800, 11800, 11800, 1000),
+        ("2026-08-04", 12800, 11800, 11800, 11800, 500), ("2026-08-05", 12800, 11800, 11800, 11800, 0),
+        ("2026-08-06", 12800, 11800, 11800, 11800, 0), ("2026-09-17", 12800, 11800, 11800, 11800, 0),
+        ("2026-09-18", 12800, 11800, 11800, 11800, 0), ("2026-09-21", 12800, 11800, 11800, 11800, 0),
+        ("2026-09-22", 11800, 11800, 11800, 11800, 0), ("2026-09-23", 11800, 11800, 11800, 11800, 0),
+        ("2026-09-24", 11500, 11500, 11500, 11500, 500),
+    ],
+    "VFR": [
+        ("2026-06-23", 10000, 9380, 9380, 9380, 0), ("2026-06-24", 10000, 9380, 9380, 9380, 0),
+        ("2026-06-25", 10000, 9380, 9380, 9380, 0), ("2026-06-26", 10000, 9380, 9380, 9380, 0),
+        ("2026-06-29", 10500, 9840, 9840, 9840, 3000), ("2026-06-30", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-01", 11000, 10310, 10310, 10310, 100), ("2026-07-02", 10500, 9840, 9840, 9840, 9001),
+        ("2026-07-03", 10500, 9840, 9840, 9840, 0), ("2026-07-06", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-07", 10500, 9840, 9840, 9840, 0), ("2026-07-08", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-09", 10500, 9840, 9840, 9840, 500), ("2026-07-10", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-13", 10500, 9840, 9840, 9840, 0), ("2026-07-14", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-15", 10500, 9840, 9840, 9840, 0), ("2026-07-16", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-17", 10500, 9840, 9840, 9840, 0), ("2026-07-20", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-21", 10500, 9840, 9840, 9840, 1013), ("2026-07-22", 10500, 9840, 9840, 9840, 0),
+        ("2026-07-23", 10500, 9840, 9840, 9840, 0), ("2026-07-24", 10000, 9380, 9380, 9380, 600),
+        ("2026-07-27", 10000, 9380, 8440, 9380, 3900), ("2026-07-28", 10000, 9190, 9190, 9190, 0),
+        ("2026-07-29", 10000, 9190, 9190, 9190, 0), ("2026-07-30", 10000, 9190, 9190, 9190, 27),
+        ("2026-07-31", 9800, 9190, 9190, 9190, 100), ("2026-08-03", 9500, 8910, 8910, 9190, 800),
+        ("2026-08-04", 9500, 8910, 8910, 8910, 307), ("2026-08-05", 9000, 8440, 8440, 8440, 1000),
+        ("2026-08-06", 9000, 8440, 8440, 8440, 0), ("2026-08-07", 9000, 8440, 8440, 8440, 0),
+        ("2026-08-10", 9000, 8440, 8440, 8440, 0), ("2026-08-11", 9000, 8440, 8440, 8440, 0),
+        ("2026-08-12", 9000, 8440, 8440, 8440, 0), ("2026-09-16", 10300, 9660, 9660, 9660, 1),
+        ("2026-09-17", 10300, 9660, 9660, 9660, 100), ("2026-09-18", 10000, 9380, 8620, 9380, 1000),
+        ("2026-09-21", 8900, 8900, 8900, 9200, 500), ("2026-09-22", 9000, 9000, 9000, 9000, 0),
+        ("2026-09-23", 8600, 8600, 8600, 8900, 1001),
+    ],
+    "VHF": [
+        ("2026-06-09", 1500, 3700, 3700, 3700, 0), ("2026-06-10", 1500, 3700, 3700, 3700, 0),
+        ("2026-06-11", 1500, 3700, 3700, 3700, 0), ("2026-06-12", 1500, 3700, 3700, 3700, 0),
+        ("2026-06-15", 1500, 3700, 3700, 3700, 0), ("2026-06-16", 1500, 3700, 3700, 3700, 0),
+        ("2026-06-17", 1500, 3700, 3700, 3700, 0), ("2026-06-18", 1500, 3700, 3700, 3700, 0),
+    ],
+    "PBP": [
+        ("2026-06-09", 12000, 11020, 11020, 11020, 100),
+        ("2026-06-10", 12100, 11110, 11020, 11110, 200),
+        ("2026-06-11", 12200, 11200, 11020, 11200, 300),
+        ("2026-06-12", 12000, 11020, 10100, 11200, 1000),
+        ("2026-06-15", 11900, 10930, 10930, 10930, 200),
+        ("2026-06-16", 12200, 11200, 10930, 11200, 7200),
+        ("2026-06-17", 12100, 11110, 10380, 11110, 1600),
+        ("2026-06-18", 11800, 10840, 10470, 10930, 700),
+        ("2026-06-19", 12000, 11020, 10740, 11020, 1300),
+        ("2026-09-10", 11700, 10740, 10740, 11750, 300),
+        ("2026-09-11", 11000, 10100, 10100, 10100, 300),
+        ("2026-09-14", 10300, 10300, 9900, 10500, 2000),
+        ("2026-09-15", 10300, 10300, 10300, 10300, 100), ("2026-09-16", 9900, 9900, 9900, 10300, 409),
+    ],
+}
+
+# Dòng máy đọc THẬT của lượt quét asof 2026-10-07 — bản TRƯỚC thay đổi (baseline) và bản SAU.
+REAL_DRIFT_BEFORE = {
+    "DRI": "ADJFACTOR_DRIFT|DRI|2026-09-22|1.064955|1.072464|-0.007002|3|2026-09-10|2026-09-14"
+           "|vendor_missing|SpaceX,ZaloPay|0",
+    "DVN": "ADJFACTOR_DRIFT|DVN|2026-09-11|1.047766|1.058480|-0.010122|3|2026-06-19|2026-06-23"
+           "|vendor_missing|none|0",
+    "SHC": "ADJFACTOR_DRIFT|SHC|2026-09-09|0.922947|1.050000|-0.121003|8|2026-06-30|2026-07-09"
+           "|vendor_missing|none|0",
+    "CC1": "ADJFACTOR_DRIFT|CC1|2026-09-15|1.130146|1.050000|0.076330|3|2026-08-06|2026-08-10"
+           "|our_table_missing|none|0",
+    "HC1": "ADJFACTOR_DRIFT|HC1|2026-09-22|1.117550|1.084746|0.030241|9|2026-07-09|2026-07-21"
+           "|our_table_missing|none|0",
+    "VFR": "ADJFACTOR_DRIFT|VFR|2026-09-21|1.067073|1.063830|0.003049|16|2026-07-02|2026-07-23"
+           "|our_table_missing|none|0",
+    "VHF": "ADJFACTOR_DRIFT|VHF|2026-10-02|0.405405|1.239669|-0.672973|8|2026-06-09|2026-06-18"
+           "|vendor_missing|none|0",
+}
+REAL_PFM_AFTER = {
+    "DRI": "ADJFACTOR_PRICE_FIELD_MISMATCH|DRI|2026-09-22|1|tick_offset|2026-09-10|2026-09-14"
+           "|SpaceX,ZaloPay|-0.007002",
+    "DVN": "ADJFACTOR_PRICE_FIELD_MISMATCH|DVN|2026-09-11|1|tick_offset|2026-06-19|2026-06-23"
+           "|none|-0.010122",
+    "SHC": "ADJFACTOR_PRICE_FIELD_MISMATCH|SHC|2026-09-09|1|stale_price|2026-06-30|2026-07-09"
+           "|none|-0.121003",
+    "CC1": "ADJFACTOR_PRICE_FIELD_MISMATCH|CC1|2026-09-15|1|stale_price|2026-08-06|2026-08-10"
+           "|none|0.076330",
+}
+REAL_EVENTS = {   # corporate_action thật (event_status executed) của từng mã
+    "DRI": [ev("2026-09-22", "DIV", ratio=0.1, dps=1000.0, tk="DRI")],
+    "DVN": [ev("2026-09-11", "DIV", ratio=0.1, dps=1000.0, tk="DVN")],
+    "SHC": [ev("2026-09-09", "DIV", ratio=0.05, dps=500.0, tk="SHC")],
+    "CC1": [ev("2026-09-15", "ISS", "Trả Cổ tức bằng Cổ phiếu", 0.05, tk="CC1")],
+    "HC1": [ev("2026-09-22", "DIV", ratio=0.1, dps=1000.0, tk="HC1")],
+    "VFR": [ev("2026-09-21", "DIV", ratio=0.06, dps=600.0, tk="VFR")],
+    "VHF": [ev("2026-10-02", "DIV", ratio=0.029, dps=290.0, tk="VHF")],
+    "PBP": [ev("2026-09-14", "ISS", "Trả Cổ tức bằng Cổ phiếu", 0.085, tk="PBP")],
+}
+REAL_HELD = {"DRI": "SpaceX,ZaloPay"}
+
+
+def _real(tk, mut=None):
+    s = [{"d": d, "price": float(p), "close": float(c), "lo": float(lo), "hi": float(hi),
+          "vol": float(v)} for d, p, c, lo, hi, v in REAL_1007[tk]]
+    for d, k, val in (mut or []):
+        next(b for b in s if b["d"] == d)[k] = val
+    return s
+
+
+def _tick(exchange, tk="XXX"):
+    from trading_bot import vn_market
+    return lambda price: vn_market.tick_size(price, tk, exchange)
+
+
+def _scan_real(tk, tick_fn="UPCOM", mut=None):
+    """Quét fixture thật với ĐÚNG ngưỡng production; rìa đánh giá = phiên đầu của fixture (PBP/VHF:
+    2026-06-09 = rìa cửa sổ 120 ngày thật)."""
+    s = _real(tk, mut)
+    tf = _tick(tick_fn, tk) if isinstance(tick_fn, str) else tick_fn
+    return det.scan_ticker(s, REAL_EVENTS[tk], det.DEV_TOL, det.MIN_RUN, s[0]["d"], tick_fn=tf)
+
+
+def _marker(tk, v, p):
+    h = REAL_HELD.get(tk, "none")
+    return det.marker_drift(tk, p, h) if v == "DRIFT" else (
+        det.marker_price_field(tk, p, h) if v == "PRICE_FIELD_MISMATCH" else v)
+
+
+def _pf(deltas, base=20000, step=100, n=30, rp=1.1, exchange="UPCOM", ex="2026-08-20",
+        extra_events=(), closes=None):
+    """Chuỗi tổng hợp: vendor ĐÚNG hệ số rp (Close = P/rp), rồi CỘNG `deltas[i]` đồng vào `Price` của
+    phiên i (lỗi trường Price). Giá dao động trên lưới `step` để tỉ lệ ≠ hằng số."""
+    ds = D[:n]
+    prices = [base + step * ((i * 3) % 7) for i in range(n)]
+    s = []
+    for i, d in enumerate(ds):
+        close = (closes[i] if closes else prices[i] / rp)
+        b = _vbar(d, prices[i] + deltas.get(i, 0), close, 5000)
+        s.append(b)
+    evs = [ev(ex, "ISS", "Cổ phiếu thưởng", round(rp - 1, 10))] + list(extra_events)
+    return s, evs, _tick(exchange)
+
+
+def _scan_at(s, evs, w0, tf, dev_tol=None, min_run=None):
+    """scan_ticker y như `run_scan` ở asof có win0 = `w0`: chuỗi nạp từ load0 = w0 − CUM_PAD_DAYS, sự
+    kiện > w0 vào đường hệ số, sự kiện điều chỉnh giá (load0, w0] chỉ thành NGÀY trong `pre_ex`."""
+    load0 = (date.fromisoformat(w0) - timedelta(days=det.CUM_PAD_DAYS)).isoformat()
+    s = [b for b in s if b["d"] >= load0]
+    ev_in = [e for e in evs if e["exright_date"] > w0]
+    pre = {e["exright_date"] for e in evs
+           if load0 < e["exright_date"] <= w0 and det.cal.is_price_adjusting(e)}
+    return det.scan_ticker(s, ev_in, dev_tol or det.DEV_TOL, min_run or det.MIN_RUN, w0, tick_fn=tf,
+                           pre_ex=pre)
+
+
+def t_price_field_window():
+    """Vòng 3 B1 + toàn bộ ca biên của việc chọn láng giềng quanh một cụm: phán quyết KHÔNG được đổi theo
+    vị trí win0; lệch hệ số thật vẫn DRIFT ở MỌI vị trí."""
+    print("\n[17b] PRICE_FIELD_MISMATCH — cửa sổ trượt qua cụm (B1/NB1/NB2/NB3 + ca biên)")
+
+    # (1) B1 thật: SHC cụm 06-30..07-09 (8 phiên stale). win0 GIỮA cụm từng ra DRIFT giả tất định.
+    s_shc = _real("SHC")
+    cl = [b["d"] for b in s_shc if "2026-06-30" <= b["d"] <= "2026-07-09"]
+    for w0 in cl[1:-2]:
+        v, p = _scan_at(s_shc, REAL_EVENTS["SHC"], w0, _tick("UPCOM", "SHC"))
+        ck(f"B1 thật SHC: win0 = {w0} (GIỮA cụm) -> PRICE_FIELD_MISMATCH stale_price, cụm nối lùi về "
+           f"đủ 06-30..07-09", v == "PRICE_FIELD_MISMATCH" and p["pfm_rules"] == "stale_price"
+           and any("PRICE_FIELD_MISMATCH 2026-06-30..2026-07-09:" in n for n in p["notes"]),
+           f"v={v} {p.get('notes', [])[-1:]}")
+
+    # (2) Trượt win0 qua TỪNG phiên của fixture thật (đúng cách run_scan chia sự kiện) ⇒ 0 DRIFT giả.
+    for tk in ("DRI", "DVN", "SHC", "CC1"):
+        s_ = _real(tk)
+        bad = []
+        for b in s_:
+            v, p = _scan_at(s_, REAL_EVENTS[tk], b["d"], _tick("UPCOM", tk))
+            if v == "DRIFT":
+                bad.append(b["d"])
+        ck(f"trượt win0 qua {len(s_)} phiên fixture thật {tk} -> 0 DRIFT", not bad, f"DRIFT tại {bad}")
+    # Đối chứng ÂM thật: HC1/VFR (lệch hệ số thật) vẫn DRIFT khi win0 = phiên đầu fixture.
+    for tk in ("HC1", "VFR"):
+        s_ = _real(tk)
+        v, _p = _scan_at(s_, REAL_EVENTS[tk], s_[0]["d"], _tick("UPCOM", tk))
+        ck(f"ÂM thật {tk}: vẫn DRIFT qua đường _scan_at", v == "DRIFT", f"v={v}")
+
+    # (3) Tổng hợp: cụm 1-bước 6 phiên D[8..13]; win0 trượt D[0..16].
+    s_, evs_, tf_ = _pf({i: -100 for i in range(8, 14)})
+    got = {}
+    for w in range(0, 17):
+        v, p = det.scan_ticker(s_, evs_, 0.003, 3, D[w], tick_fn=tf_, pre_ex=set())
+        got[w] = v
+        exp = "PRICE_FIELD_MISMATCH" if w <= 11 else "AGREE"
+        span_ok = v != "PRICE_FIELD_MISMATCH" or any(f"PRICE_FIELD_MISMATCH {D[8]}..{D[13]}:" in n
+                                                     for n in p["notes"])
+        ck(f"cụm 6 phiên D[8..13], win0 = D[{w}] (trong cửa sổ {max(0, 14 - max(w, 8))} phiên) -> {exp}"
+           f"{', cụm đủ D[8..13]' if exp != 'AGREE' else ''}", v == exp and span_ok, f"v={v}")
+    # Cụm dài hơn chuỗi nạp lùi được: lead chỉ có 2 phiên trước cửa sổ, cả hai thuộc cụm ⇒ DRIFT.
+    v, p = det.scan_ticker(s_[8:], evs_, 0.003, 3, D[10], tick_fn=tf_, pre_ex=set())
+    ck("cụm lùi quá đầu chuỗi nạp (không thấy phiên khớp) -> DRIFT fail-closed, chứng từ nói vì sao",
+       v == "DRIFT" and any("het chuoi nap" in n and f"{D[8]}..{D[9]} van lech" in n for n in p["notes"]),
+       f"v={v} {p.get('notes', [])[-1:]}")
+    # Phần nối trước cửa sổ phải đạt CÙNG luật: phiên D[8] lệch 3 bước ⇒ cả cụm DRIFT ở MỌI win0.
+    s3, evs3, tf3 = _pf({**{i: -100 for i in range(8, 14)}, 8: -300})
+    for w in (0, 9, 10, 11):
+        v, _p = det.scan_ticker(s3, evs3, 0.003, 3, D[w], tick_fn=tf3, pre_ex=set())
+        ck(f"phiên đầu cụm 3 bước, win0 = D[{w}] -> DRIFT (phần nối lùi cũng phải đạt luật)",
+           v == "DRIFT", f"v={v}")
+    # Láng giềng trái thật (sau khi lùi) chỉ khớp SÁT ngưỡng ⇒ DRIFT, không phụ thuộc win0.
+    s4, evs4, tf4 = _pf({i: -100 for i in range(8, 14)})
+    s4[7]["price"] = s4[7]["close"] * 1.1 * 1.0025
+    for w in (0, 9, 11):
+        v, p = det.scan_ticker(s4, evs4, 0.003, 3, D[w], tick_fn=tf4, pre_ex=set())
+        ck(f"láng giềng trái D[7] +0,25% (khớp SÁT), win0 = D[{w}] -> DRIFT",
+           v == "DRIFT" and any("SAT nguong" in n and D[7] in n for n in p["notes"]), f"v={v}")
+
+    # (4) NB1: cụm GIỮA cửa sổ — láng giềng là phiên trong cửa sổ, KHÔNG phải phiên trước cửa sổ.
+    s5, evs5, tf5 = _pf({10: -100, 11: -100, 12: -100})
+    s5[9]["price"] = s5[9]["close"] * 1.1 * 1.0025
+    v, p = det.scan_ticker(s5, evs5, 0.003, 3, D[5], tick_fn=tf5, pre_ex=set())
+    ck("NB1: cụm giữa cửa sổ, phiên trước cửa sổ D[4] khớp tuyệt đối nhưng láng giềng thật D[9] +0,25% "
+       "-> DRIFT", v == "DRIFT" and any("SAT nguong" in n and D[9] in n for n in p["notes"]), f"v={v}")
+
+    # (5) Ex-date sát cụm. SAU: cụm bắt đầu ĐÚNG phiên ex-date (vendor đúng ở cả hai đoạn) ⇒ khác đoạn.
+    rp6 = [1.1 * 1.05 if i < 10 else 1.1 for i in range(30)]
+    s6, evs6, tf6 = _pf({10: -100, 11: -100, 12: -100, 13: -100}, closes=[
+        (20000 + 100 * ((i * 3) % 7)) / rp6[i] for i in range(30)],
+        extra_events=[ev(D[10], "ISS", "Cổ phiếu thưởng", 0.05)])
+    v, p = det.scan_ticker(s6, evs6, 0.003, 3, D[0], tick_fn=tf6, pre_ex=set())
+    ck("cụm bắt đầu ĐÚNG phiên ex-date (láng giềng trái ở đoạn trước) -> DRIFT",
+       v == "DRIFT" and any("doan he so KHAC" in n for n in p["notes"]), f"v={v}")
+    # Cùng ca nhưng ex-date nằm TRƯỚC cửa sổ (≤ win0, chỉ có trong pre_ex), win0 giữa cụm.
+    v, p = _scan_at(s6, evs6, D[11], tf6)
+    ck("ex-date trước cửa sổ = phiên đầu cụm, win0 giữa cụm -> phần nối dừng ở ex-date -> DRIFT",
+       v == "DRIFT" and any("doan he so KHAC" in n and f"ex-date {D[10]} xen giua" in n
+                            for n in p["notes"]), f"v={v} {p.get('notes', [])[-1:]}")
+    # Đối chứng: ex-date trước cửa sổ nằm TRƯỚC láng giềng trái ⇒ không chen ⇒ PRICE_FIELD_MISMATCH.
+    s7, evs7, tf7 = _pf({10: -100, 11: -100, 12: -100, 13: -100}, closes=[
+        (20000 + 100 * ((i * 3) % 7)) / (1.1 * 1.05 if i < 7 else 1.1) for i in range(30)],
+        extra_events=[ev(D[7], "ISS", "Cổ phiếu thưởng", 0.05)])
+    v, p = _scan_at(s7, evs7, D[11], tf7)
+    ck("ex-date trước cửa sổ (D[7], trong pre_ex) TRƯỚC láng giềng trái D[9] (không chen), win0 giữa cụm "
+       "-> PRICE_FIELD_MISMATCH", v == "PRICE_FIELD_MISMATCH", f"v={v} {p.get('notes', [])[-1:]}")
+
+    # Cổ tức tiền RẤT NHỎ (20đ ≈ 0,1% < biên láng giềng 0,15%) ngay sau cụm, vendor đúng ở cả hai đoạn:
+    # chỉ cổng cùng-đoạn (r_pred láng giềng PHẢI) chặn được — biên độ lớn không bắt được.
+    pr = [20000 + 100 * ((i * 3) % 7) for i in range(30)]
+    f20 = (pr[12] - 100) / (pr[12] - 100 - 20)
+    s14, evs14, tf14 = _pf({10: -100, 11: -100, 12: -100}, closes=[
+        pr[i] / (1.1 * (f20 if i < 13 else 1.0)) for i in range(30)],
+        extra_events=[ev(D[13], "DIV", dps=20)])
+    v, p = det.scan_ticker(s14, evs14, 0.003, 3, D[0], tick_fn=tf14, pre_ex=set())
+    ck("cổ tức tiền 20đ (≈0,1%) ex ngay SAU cụm -> láng giềng phải khác đoạn -> DRIFT (cổng cùng-đoạn)",
+       v == "DRIFT" and any("doan he so KHAC" in n for n in p["notes"]), f"v={v} {p.get('notes', [])[-1:]}")
+    # Cùng cổ tức nhỏ nhưng ex <= win0 (chỉ là NGÀY trong pre_ex, ex = phiên đầu cụm D[9]) và một ex-date
+    # cũ hơn D[6]: phần nối phải dừng ở ex-date pre_ex MUỘN NHẤT (D[9]); dừng ở D[6] thì D[8] (lệch 0,1%
+    # vì hệ số 20đ không nằm trong đường hệ số) bị nhận nhầm là láng giềng khớp.
+    f20b = pr[8] / (pr[8] - 20)
+    s15, evs15, tf15 = _pf({9: -100, 10: -100, 11: -100, 12: -100}, closes=[
+        pr[i] / (1.1 * (1.05 if i < 6 else 1.0) * (f20b if i < 9 else 1.0)) for i in range(30)])
+    v, p = det.scan_ticker(s15, evs15, 0.003, 3, D[10], tick_fn=tf15, pre_ex={D[6], D[9]})
+    ck("hai ex-date trước cửa sổ (D[6], D[9] = cổ tức 20đ ở phiên đầu cụm) -> phần nối dừng ở D[9] -> DRIFT",
+       v == "DRIFT" and any(f"ex-date {D[9]} xen giua" in n for n in p["notes"]),
+       f"v={v} {p.get('notes', [])[-1:]}")
+
+    # (6) Hai cụm cách nhau MỘT phiên khớp: phiên đó là láng giềng của cả hai.
+    s8, evs8, tf8 = _pf({8: -100, 9: -100, 10: -100, 12: -100, 13: -100, 14: -100})
+    for w, exp, nr in ((0, "PRICE_FIELD_MISMATCH", 2), (8, "PRICE_FIELD_MISMATCH", 2), (9, "PRICE_FIELD_MISMATCH", 1),
+                       (10, "PRICE_FIELD_MISMATCH", 1), (12, "PRICE_FIELD_MISMATCH", 1),
+                       (13, "AGREE", None)):
+        v, p = det.scan_ticker(s8, evs8, 0.003, 3, D[w], tick_fn=tf8, pre_ex=set())
+        ck(f"hai cụm cách 1 phiên, win0 = D[{w}] -> {exp}" + (f" n_runs={nr}" if nr else ""),
+           v == exp and (nr is None or p.get("n_runs") == nr), f"v={v} n_runs={p.get('n_runs')}")
+    s9, evs9, tf9 = _pf({8: -100, 9: -100, 10: -100, 12: -100, 13: -100, 14: -100})
+    s9[11]["price"] = s9[11]["close"] * 1.1 * 1.0025
+    for w in (0, 12):
+        v, _p = det.scan_ticker(s9, evs9, 0.003, 3, D[w], tick_fn=tf9, pre_ex=set())
+        ck(f"hai cụm, phiên giữa chỉ khớp SÁT (+0,25%), win0 = D[{w}] -> DRIFT", v == "DRIFT", f"v={v}")
+
+    # (7) Cổ tức tiền 100đ vendor BỎ SÓT trên UPCOM = lệch ≈ −1 bước trên CẢ đoạn trước ex ⇒ không có láng
+    # giềng cùng đoạn khớp ⇒ DRIFT ở mọi win0 (đối chứng ÂM của giới hạn đã biết "1-2 bước").
+    s10, evs10, tf10 = _pf({}, n=30, extra_events=[ev(D[20], "DIV", dps=100)])
+    for w in (0, 5, 10, 15, 17):
+        v, p = _scan_at(s10, evs10, D[w], tf10)
+        ck(f"ÂM cổ tức tiền 100đ vendor bỏ sót (≈ −1 bước cả đoạn), win0 = D[{w}] -> DRIFT",
+           v == "DRIFT", f"v={v} {p.get('notes', [])[-1:]}")
+    # và khi đoạn trước ex bị chặn trái bởi một ex-date trước cửa sổ: phần nối dừng ở đó ⇒ DRIFT.
+    s11, evs11, tf11 = _pf({}, n=30, closes=[
+        (20000 + 100 * ((i * 3) % 7)) / (1.1 * 1.05 if i < 7 else 1.1) for i in range(30)],
+        extra_events=[ev(D[7], "ISS", "Cổ phiếu thưởng", 0.05), ev(D[20], "DIV", dps=100)])
+    v, p = _scan_at(s11, evs11, D[10], tf11)
+    ck("ÂM cổ tức tiền bỏ sót, đoạn bị chặn trái bởi ex-date trước cửa sổ -> DRIFT",
+       v == "DRIFT" and any(f"ex-date {D[7]} xen giua" in n for n in p["notes"]), f"v={v}")
+
+    # (8) Đối chứng ÂM lệch hệ số thật (chữ ký FPT, phiên 0..25) trượt win0 qua đoạn lệch ⇒ DRIFT mọi vị trí.
+    s12, evs12, tf12 = _pf({}, n=30, closes=[(20000 + 100 * ((i * 3) % 7)) / (1.0 if i < 26 else 1.1)
+                                             for i in range(30)])
+    live = [w for w in range(0, 24) if _scan_at(s12, evs12, D[w], tf12)[0] != "DRIFT"]
+    ck("ÂM chữ ký FPT, win0 trượt D[0..23] -> DRIFT ở MỌI vị trí", not live, f"không DRIFT tại {live}")
+
+    # (9) NB3 §29: chứng từ cổng KẸP rẽ theo GIÁ TRỊ đo được — láng giềng lệch 12% không được gán
+    # "sát ngưỡng / làm tròn Close".
+    s13, _e, _t = _pf({}, n=10)
+    s13[3]["price"] = s13[3]["close"] * 1.1 * 1.12
+    for i in (4, 5, 6):
+        s13[i]["price"] -= 100
+    curve = {b["d"]: 1.1 for b in s13}
+    rule, why = det.explain_price_field([4, 5, 6], s13, curve, 0.003, _tick("UPCOM"))
+    ck("NB3: láng giềng lệch +12% -> lời 'CUNG lech > dev_tol', KHÔNG 'SAT nguong'/'lam tron'",
+       rule is None and "CUNG lech" in why and "SAT nguong" not in why and "lam tron" not in why
+       and "+12.0000%" in why, f"{why}")
+
+
+def t_price_field():
+    """Lệch TRƯỜNG Price phải tách khỏi lệch HỆ SỐ thật; mọi đường không xác định được ⇒ hành vi cũ."""
+    print("\n[17] PRICE_FIELD_MISMATCH — lệch trường Price vs lệch hệ số thật")
+    ck("ngưỡng KHÔNG đổi: DEV_TOL 0,003, MIN_RUN 3", det.DEV_TOL == 0.003 and det.MIN_RUN == 3)
+    ck("hằng số có tên: PFM_MAX_TICKS 2, PFM_TICK_FRAC 0,2, CLOSE_GRID_VND 10, PFM_NEIGHBOR_FRAC 0,5",
+       det.PFM_MAX_TICKS == 2 and det.PFM_TICK_FRAC == 0.2 and det.CLOSE_GRID_VND == 10
+       and det.PFM_NEIGHBOR_FRAC == 0.5)
+
+    # (a) Số thật asof 2026-10-07: 4 mã đổi nhãn, đúng TỪNG TRƯỜNG của dòng máy đọc thật.
+    for tk in ("DRI", "DVN", "SHC", "CC1"):
+        v, p = _scan_real(tk)
+        ck(f"thật {tk} -> PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte",
+           _marker(tk, v, p) == REAL_PFM_AFTER[tk], f"v={v} {_marker(tk, v, p)}")
+    # (b) Mã còn lại GIỮ NGUYÊN dòng DRIFT cũ từng byte (VHF kiểm lại, không đoán).
+    for tk in ("HC1", "VFR", "VHF"):
+        v, p = _scan_real(tk)
+        ck(f"thật {tk} -> vẫn DRIFT, dòng máy đọc Y NGUYÊN baseline",
+           _marker(tk, v, p) == REAL_DRIFT_BEFORE[tk], f"v={v} {_marker(tk, v, p)}")
+    v, p = _scan_real("VFR")
+    ck("VFR thật: bị loại ngay ở cổng KẸP (láng giềng 07-01 +0,29% chỉ khớp SÁT ngưỡng)",
+       any("KHONG phai loi truong Price" in n and "SAT nguong" in n and "2026-07-01" in n
+           for n in p["notes"]), f"{[n for n in p['notes'] if 'Price' in n]}")
+    v, p = _scan_real("PBP")
+    ck("thật PBP (cụm 56 phiên từ rìa trái, lệch +0,41% ổn định) -> vẫn DRIFT our_table_missing",
+       v == "DRIFT" and p["run"] >= 3 and p["d0"] == "2026-06-09" and p["dir"] == "our_table_missing",
+       f"v={v} {p.get('run')} {p.get('d0')}")
+    v, p = _scan_real("HC1")
+    ck("HC1: chứng từ nói rõ vì sao KHÔNG phải lỗi trường Price (+3,96 bước)",
+       any("KHONG phai loi truong Price" in n and "+3.96 buoc" in n for n in p["notes"]),
+       f"{[n for n in p['notes'] if 'Price' in n]}")
+    v, p = _scan_real("DRI")
+    ck("DRI: chứng từ ghi số bước từng phiên + hai láng giềng khớp",
+       any("tick_offset" not in n and "-1.00x100d" in n and "2026-09-09/2026-09-15" in n
+           for n in p["notes"]), f"{p['notes']}")
+
+    # (c) FAIL-CLOSED: không biết sàn ⇒ luật tick_offset không áp ⇒ DRIFT Y NGUYÊN bản cũ.
+    for tk in ("DRI", "DVN"):
+        v, p = _scan_real(tk, tick_fn=lambda price: None)
+        ck(f"{tk}: sàn KHÔNG tra được -> DRIFT y nguyên baseline (fail-closed)",
+           _marker(tk, v, p) == REAL_DRIFT_BEFORE[tk], f"v={v} {_marker(tk, v, p)}")
+        v, p = _scan_real(tk, tick_fn=None)
+        ck(f"{tk}: không truyền tick_fn (mặc định) -> DRIFT y nguyên baseline",
+           _marker(tk, v, p) == REAL_DRIFT_BEFORE[tk], f"v={v}")
+    v, p = _scan_real("SHC", tick_fn=None)
+    ck("SHC: luật stale_price KHÔNG cần sàn -> vẫn PRICE_FIELD_MISMATCH khi sàn không biết",
+       _marker("SHC", v, p) == REAL_PFM_AFTER["SHC"], f"v={v}")
+    v, p = _scan_real("DVN", tick_fn="HOSE")
+    ck("DVN nếu là HOSE (bước 50 ở 20.400) -> −4,17 bước > 2 -> DRIFT: bước phải theo SÀN THẬT",
+       v == "DRIFT", f"v={v}")
+
+    # (d) Đối chứng ÂM — lệch hệ số THẬT phải vẫn DRIFT.
+    # FPT: vendor chưa áp 1,1 cho 26 phiên, áp đúng 4 phiên cum cuối (SETTLE_RUN=4) — cụm từ rìa trái.
+    s, evs, tf = _pf({}, n=30, closes=[(20000 + 100 * ((i * 3) % 7)) / (1.0 if i < 26 else 1.1)
+                                       for i in range(30)])
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("ÂM chữ ký FPT (r ổn định −9,09%, khớp chỉ ở 4 phiên cuối) -> DRIFT", v == "DRIFT", f"v={v}")
+    # FPT "kẹt nửa chừng" có KẸP (phiên 0 và 26.. khớp): cổng kẹp lọt, nhưng −9,09% = ~20 bước.
+    s, evs, tf = _pf({}, n=30, closes=[(20000 + 100 * ((i * 3) % 7)) / (1.0 if 0 < i < 26 else 1.1)
+                                       for i in range(30)])
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("ÂM hệ số thật kẹp giữa 2 phiên khớp nhưng lệch ~20 bước -> DRIFT", v == "DRIFT", f"v={v}")
+    ck("ÂM ... chứng từ nêu số bước", any("buoc 100d" in n for n in p["notes"]), f"{p['notes']}")
+
+    # (e) Ranh giới luật tick_offset trên fixture tổng hợp UPCOM (bước 100).
+    def run(deltas, **kw):
+        s, evs, tf = _pf(deltas, **kw)
+        return det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    v, p = run({10: -100, 11: -100, 12: -100})
+    ck("1 bước ×3 phiên kẹp giữa phiên khớp -> PRICE_FIELD_MISMATCH tick_offset",
+       v == "PRICE_FIELD_MISMATCH" and p["pfm_rules"] == "tick_offset" and p["n_runs"] == 1,
+       f"v={v} {p.get('pfm_rules')}")
+    v, _ = run({10: +200, 11: -100, 12: +100})
+    ck("±1/±2 bước lẫn dấu -> PRICE_FIELD_MISMATCH", v == "PRICE_FIELD_MISMATCH", f"v={v}")
+    v, _ = run({10: -300, 11: -300, 12: -300})
+    ck("3 bước (> PFM_MAX_TICKS) -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({10: -100, 11: -100, 12: -300})
+    ck("MỘT phiên 3 bước trong cụm -> DRIFT (mọi phiên phải đạt)", v == "DRIFT", f"v={v}")
+    v, _ = run({10: -118, 11: -118, 12: -118})
+    ck("dư 0,18 bước (≤ 0,2) -> PRICE_FIELD_MISMATCH", v == "PRICE_FIELD_MISMATCH", f"v={v}")
+    v, _ = run({10: -125, 11: -125, 12: -125})
+    ck("dư 0,25 bước (> 0,2) -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({10: -100, 11: -100, 12: -145})
+    ck("MỘT phiên dư 0,45 bước -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({10: +18, 11: +18, 12: +18}, base=5000, step=0)
+    ck("lệch 0,18 bước (>0,3% ở giá 5.000, nhưng làm tròn = 0 bước) -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({0: -100, 1: -100, 2: -100})
+    ck("cụm chạm RÌA TRÁI cửa sổ (không có láng giềng trước) -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({27: -100, 28: -100, 29: -100})
+    ck("cụm chạm RÌA PHẢI (phiên cuối) -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({1: -100, 2: -100, 3: -100})
+    ck("cụm bắt đầu ở phiên thứ 2 (có 1 láng giềng trước) -> PRICE_FIELD_MISMATCH",
+       v == "PRICE_FIELD_MISMATCH", f"v={v}")
+    # láng giềng phải ở CÙNG đoạn hệ số: thêm ex-date ngay sau cụm (vendor đúng ở cả hai đoạn).
+    rp2 = [1.1 * 1.05 if i <= 12 else 1.1 for i in range(30)]
+    s, evs, tf = _pf({10: -100, 11: -100, 12: -100}, closes=[
+        (20000 + 100 * ((i * 3) % 7)) / rp2[i] for i in range(30)],
+        extra_events=[ev(D[13], "ISS", "Cổ phiếu thưởng", 0.05)])
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("láng giềng sau nằm bên kia một ex-date (đoạn hệ số khác) -> DRIFT", v == "DRIFT",
+       f"v={v} {p.get('notes', [])[-1:]}")
+    # hai cụm: một giải thích được, một không ⇒ DRIFT với payload Y NGUYÊN như khi không có luật mới.
+    deltas = {5: -100, 6: -100, 7: -100, 15: -300, 16: -300, 17: -300, 18: -300}
+    v, p = run(deltas)
+    s, evs, _tf = _pf(deltas)
+    v0, p0 = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=None)
+    ck("hai cụm, một không giải thích được -> DRIFT, dòng máy đọc Y NGUYÊN bản không-luật",
+       v == "DRIFT" and v0 == "DRIFT" and det.marker_drift("X", p, "none")
+       == det.marker_drift("X", p0, "none"), f"v={v}")
+    v, _ = run({5: -100, 6: -100, 7: -100, 15: -100, 16: -100, 17: -100})
+    ck("hai cụm đều 1 bước -> PRICE_FIELD_MISMATCH, n_runs=2", v == "PRICE_FIELD_MISMATCH"
+       and _.get("n_runs") == 2, f"v={v}")
+    # cụm < MIN_RUN không cần giải thích (không phải DRIFT từ trước).
+    v, _ = run({5: -300, 6: -300, 10: -100, 11: -100, 12: -100})
+    ck("cụm 2 phiên 3 bước (< MIN_RUN) không chặn -> PRICE_FIELD_MISMATCH",
+       v == "PRICE_FIELD_MISMATCH", f"v={v}")
+    # ex-date UNCOMPUTABLE ⇒ giữ hành vi cũ (DRIFT partial).
+    v, p = run({10: -100, 11: -100, 12: -100},
+               extra_events=[ev(D[3], "ISS", det.RIGHTS_METHOD, 0.2)])
+    ck("có ex-date uncomputable -> DRIFT partial như cũ, KHÔNG đổi nhãn",
+       v == "DRIFT" and p.get("partial") is True, f"v={v}")
+
+    # (e2) R1 arch-review vòng 2: rìa trái cửa sổ 120 ngày TRÔI mỗi ngày ⇒ khi `win0` trượt tới phiên đầu
+    # cụm, láng giềng trái phải lấy từ chuỗi nạp trước cửa sổ (load0), không rơi về DRIFT giả.
+    for tk, w0 in (("DRI", "2026-09-10"), ("SHC", "2026-06-30")):
+        s_ = _real(tk)
+        v, p = det.scan_ticker(s_, REAL_EVENTS[tk], det.DEV_TOL, det.MIN_RUN, w0,
+                               tick_fn=_tick("UPCOM", tk), pre_ex=set())
+        ck(f"R1 thật {tk}: win0 = phiên ĐẦU cụm ({w0}) -> láng giềng trái từ load0 -> vẫn "
+           f"PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte",
+           _marker(tk, v, p) == REAL_PFM_AFTER[tk], f"v={v} {_marker(tk, v, p)} {p.get('notes', [])[-2:]}")
+        v, p = det.scan_ticker(s_, REAL_EVENTS[tk], det.DEV_TOL, det.MIN_RUN, w0,
+                               tick_fn=_tick("UPCOM", tk), pre_ex=None)
+        ck(f"R1 {tk}: pre_ex=None (không biết ex-date trước cửa sổ) -> DRIFT y nguyên baseline "
+           f"(fail-closed, hành vi cũ)", _marker(tk, v, p) == REAL_DRIFT_BEFORE[tk], f"v={v}")
+        v, p = det.scan_ticker([b for b in s_ if b["d"] >= w0], REAL_EVENTS[tk], det.DEV_TOL,
+                               det.MIN_RUN, w0, tick_fn=_tick("UPCOM", tk), pre_ex=set())
+        ck(f"R1 {tk}: KHÔNG có phiên nào trước cửa sổ trong chuỗi nạp -> DRIFT (fail-closed)",
+           v == "DRIFT" and any("ria TRAI" in n and "khong co phien nao truoc" in n
+                                for n in p["notes"]), f"v={v} {p.get('notes', [])[-1:]}")
+    # ex-date ≤ win0 KHÔNG nằm trong đường hệ số ⇒ một ex-date xen giữa láng giềng trước cửa sổ và cụm
+    # là vô hình với cổng cùng-đoạn; phải chặn qua `pre_ex`.
+    s_ = _real("DRI")
+    v, p = det.scan_ticker(s_, REAL_EVENTS["DRI"], det.DEV_TOL, det.MIN_RUN, "2026-09-10",
+                           tick_fn=_tick("UPCOM", "DRI"), pre_ex={"2026-09-10"})
+    ck("R1 DRI: ex-date (≤ win0) xen giữa láng giềng trước cửa sổ và cụm -> khác đoạn -> DRIFT",
+       _marker("DRI", v, p) == REAL_DRIFT_BEFORE["DRI"] and any(
+           "doan he so KHAC" in n and "2026-09-10 xen giua" in n for n in p["notes"]), f"v={v}")
+    v, p = det.scan_ticker(s_, REAL_EVENTS["DRI"], det.DEV_TOL, det.MIN_RUN, "2026-09-10",
+                           tick_fn=_tick("UPCOM", "DRI"), pre_ex={"2026-09-09", "2026-08-01"})
+    ck("R1 DRI: ex-date trước cửa sổ nhưng KHÔNG xen giữa (≤ láng giềng) -> vẫn PRICE_FIELD_MISMATCH",
+       _marker("DRI", v, p) == REAL_PFM_AFTER["DRI"], f"v={v}")
+    # Đối chứng ÂM: lệch hệ số THẬT kéo dài từ trước cửa sổ — láng giềng trước cửa sổ cũng lệch ⇒ DRIFT.
+    for w in (3, 5, 8):
+        s_, evs_, tf_ = _pf({}, n=30, closes=[(20000 + 100 * ((i * 3) % 7)) / (1.1 * 1.01 if i < 12
+                                                                                   else 1.1)
+                                              for i in range(30)])
+        v, p = det.scan_ticker(s_, evs_, 0.003, 3, D[w], tick_fn=tf_, pre_ex=set())
+        ck(f"R1 ÂM: lệch hệ số thật −1% phiên 0..11, win0 = phiên {w} (giữa đoạn lệch) -> DRIFT, "
+           f"chứng từ: lùi hết chuỗi nạp vẫn lệch",
+           v == "DRIFT" and p["d0"] == D[w] and any(
+               "ria TRAI" in n and "het chuoi nap" in n and f"{D[0]}..{D[w - 1]} van lech" in n
+               for n in p["notes"]), f"v={v} {p.get('d0')} {p.get('notes', [])[-1:]}")
+    # và 1-bước kiểu DRI nhưng láng giềng trước cửa sổ lệch hệ số (không khớp RÕ) ⇒ DRIFT.
+    s_, evs_, tf_ = _pf({10: -100, 11: -100, 12: -100})
+    s_[9]["price"] = s_[9]["close"] * 1.1 * 1.002
+    v, p = det.scan_ticker(s_, evs_, 0.003, 3, D[10], tick_fn=tf_, pre_ex=set())
+    ck("R1 ÂM: win0 = phiên đầu cụm 1-bước, láng giềng TRƯỚC cửa sổ +0,20% -> DRIFT", v == "DRIFT",
+       f"v={v}")
+    v, p = det.scan_ticker(_pf({10: -100, 11: -100, 12: -100})[0], evs_, 0.003, 3, D[10], tick_fn=tf_,
+                           pre_ex=set())
+    ck("R1 tổng hợp: win0 = phiên đầu cụm 1-bước, láng giềng trước cửa sổ khớp -> PRICE_FIELD_MISMATCH",
+       v == "PRICE_FIELD_MISMATCH", f"v={v}")
+
+    # (f) Bước giá & độ phân giải: HOSE <10.000đ bước 10 < nhiễu làm tròn Close ⇒ fail-closed.
+    v, _ = run({10: -20, 11: -20, 12: -20}, base=5000, step=10, exchange="HOSE")
+    ck("HOSE giá 5.000 (bước 10): 2 bước nhưng KHÔNG phân giải được -> DRIFT", v == "DRIFT", f"v={v}")
+    v, _ = run({10: -100, 11: -100, 12: -100}, base=30000, step=50, exchange="HOSE")
+    ck("HOSE giá 30.000 (bước 50): −2 bước -> PRICE_FIELD_MISMATCH", v == "PRICE_FIELD_MISMATCH",
+       f"v={v}")
+    # ranh giới khung 10.000: Price 10.000 (bước 50) vs Close·r 9.900 (bước 10) ⇒ dùng bước MỊN.
+    v, _ = run({10: 100, 11: 100, 12: 100}, base=9900, step=0, exchange="HOSE")
+    ck("ranh giới khung HOSE 9.900→10.000: lấy bước mịn (10) -> không phân giải -> DRIFT",
+       v == "DRIFT", f"v={v}")
+    v, _ = run({10: -200, 11: -200, 12: -200}, base=30000, step=100, exchange="HNX")
+    ck("HNX giá 30.000 (bước 100): −2 bước -> PRICE_FIELD_MISMATCH", v == "PRICE_FIELD_MISMATCH",
+       f"v={v}")
+    v, _ = run({10: -200, 11: -200, 12: -200}, base=30000, step=100, exchange="HOSE")
+    ck("cùng chuỗi đó nếu HOSE (bước 50): −4 bước -> DRIFT", v == "DRIFT", f"v={v}")
+
+    # (g) Luật stale_price — từng điều kiện là cần (biến thể của SHC thật).
+    run_d = ["2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-06", "2026-07-07",
+             "2026-07-08", "2026-07-09"]
+    for label, mut in (
+            ("MỘT phiên KL = 100 (một lô chẵn)", [("2026-07-01", "vol", 100.0)]),
+            ("MỘT phiên KL NULL", [("2026-07-01", "vol", None)]),
+            ("Price KHÔNG bằng láng giềng trước", [("2026-06-29", "price", 10800.0),
+                                                    ("2026-06-29", "close", 10800 / 1.05)]),
+            ("Price KHÔNG đứng giá suốt cụm", [("2026-07-03", "price", 11000.0)]),
+            ("Close·r_pred KHÔNG bằng Price phiên sau", [("2026-07-10", "price", 12600.0),
+                                                          ("2026-07-10", "close", 12600 / 1.05)]),
+            ("Close của MỘT phiên GIỮA cụm lệch khỏi Price phiên sau", [("2026-07-03", "close", 11910.0)]),
+            ("Price láng giềng trước CAO hơn giá đứng", [("2026-06-29", "price", 11000.0),
+                                                        ("2026-06-29", "close", 11000 / 1.05)])):
+        v, p = _scan_real("SHC", mut=mut)
+        ck(f"SHC biến thể: {label} -> DRIFT", v == "DRIFT", f"v={v} {p.get('pfm_rules')}")
+    # So với PRICE phiên sau, không phải Close phiên sau: láng giềng sau khớp +0,10%, cụm có Close·r_pred
+    # = Price sau +0,25% (trong dev_tol) ⇒ stale_price; so Close/Close sẽ thành +0,35% ⇒ trượt.
+    c_run = 12400 * 1.0025 / 1.05
+    v, p = _scan_real("SHC", mut=[("2026-07-10", "close", 12400 / 1.05 / 1.001)]
+                      + [(d, "close", c_run) for d in run_d])
+    ck("SHC biến thể: Close·r_pred = Price phiên sau +0,25% -> vẫn stale_price (so với PRICE sau)",
+       v == "PRICE_FIELD_MISMATCH" and p.get("pfm_rules") == "stale_price", f"v={v}")
+    v, p = _scan_real("SHC", mut=[(d, "vol", 99.0) for d in run_d])
+    ck("SHC biến thể: KL 99 (lô lẻ) mọi phiên -> vẫn stale_price", v == "PRICE_FIELD_MISMATCH"
+       and p["pfm_rules"] == "stale_price", f"v={v}")
+    v, p = _scan_real("SHC")
+    ck("SHC: chứng từ trích Price đứng, KL, và Price phiên sau",
+       any("Price DUNG 10900" in n and "2026-07-10 12400" in n for n in p["notes"]), f"{p['notes']}")
+
+    # (g2) Cổng KẸP phải khớp RÕ (arch-review 2026-10-08 #1): láng giềng chỉ "trong ngưỡng" không đủ.
+    s, evs, tf = _pf({10: -100, 11: -100, 12: -100})
+    s[9]["price"] = s[9]["close"] * 1.1 * 1.002          # láng giềng trước +0,20% (trong 0,3%, ngoài 0,15%)
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("láng giềng trước +0,20% (khớp SÁT ngưỡng) -> DRIFT", v == "DRIFT", f"v={v}")
+    s, evs, tf = _pf({10: -100, 11: -100, 12: -100})
+    s[13]["price"] = s[13]["close"] * 1.1 * 0.998        # láng giềng sau −0,20%
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("láng giềng sau −0,20% -> DRIFT", v == "DRIFT", f"v={v}")
+    s, evs, tf = _pf({10: -100, 11: -100, 12: -100})
+    s[9]["price"] = s[9]["close"] * 1.1 * 1.001          # +0,10% ≤ 0,15%
+    s[13]["price"] = s[13]["close"] * 1.1 * 0.999
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("hai láng giềng ±0,10% (≤ 0,15%) -> PRICE_FIELD_MISMATCH", v == "PRICE_FIELD_MISMATCH", f"v={v}")
+
+    # Đối chứng ÂM chính (arch-review #1, mô phỏng sim2): vendor dùng f·(1+e) ĐỒNG NHẤT cả đoạn, `Close`
+    # tròn 10đ ⇒ dev rải quanh e ⇒ cụm VỠ, kẹp giữa phiên "khớp". e sát DEV_TOL. Phải KHÔNG BAO GIỜ đổi nhãn.
+    import random
+
+    def sim(seed, e, exch, base, n=40):
+        rnd = random.Random(seed)
+        ds = [f"2026-05-{i + 1:02d}" if i < 31 else f"2026-06-{i - 30:02d}" for i in range(n + 1)]
+        tick = _tick(exch)
+        price, out = base, []
+        for i in range(n):
+            price = max(1000, price + tick(price) * rnd.choice([-2, -1, 0, 0, 1, 2]))
+            close = round(price / (1.05 * (1 + e)) / 10) * 10
+            out.append({"d": ds[i], "price": float(price), "close": float(close),
+                        "hi": 0.0, "lo": 0.0, "vol": 50000.0})
+        evs = [ev(ds[n], "ISS", "Cổ phiếu thưởng", 0.05)]
+        return det.scan_ticker(out, evs, det.DEV_TOL, det.MIN_RUN, out[0]["d"], tick_fn=tick)
+
+    cfgs = [(e, x, b) for e in (0.0028, 0.003, 0.0032) for x, b in
+            (("HOSE", 15000), ("UPCOM", 30000), ("HNX", 33000))]
+    leaked = sum(sim(sd, e, x, b)[0] == "PRICE_FIELD_MISMATCH" for e, x, b in cfgs for sd in range(150))
+    saved_frac = det.PFM_NEIGHBOR_FRAC
+    try:
+        det.PFM_NEIGHBOR_FRAC = 1.0                      # không biên = bản c864ffda
+        leaked_nomargin = sum(sim(sd, e, x, b)[0] == "PRICE_FIELD_MISMATCH"
+                              for e, x, b in cfgs for sd in range(150))
+    finally:
+        det.PFM_NEIGHBOR_FRAC = saved_frac
+    ck("ÂM lệch hệ số ĐỒNG NHẤT 0,28–0,32% vỡ cụm do làm tròn Close (1.350 chuỗi) -> 0 ca đổi nhãn",
+       leaked == 0, f"leaked={leaked}")
+    ck("... đối chứng không vô nghĩa: bỏ biên KẸP thì CÓ ca lọt", leaked_nomargin > 0,
+       f"leaked_nomargin={leaked_nomargin}")
+
+    # Hai luật trong cùng một mã: pfm_rules phải liệt kê CẢ HAI (không chỉ luật đầu).
+    s, evs, tf = _pf({5: -100, 6: -100, 7: -100})
+    p14, p18 = s[14]["price"], s[18]["price"]
+    for i in (15, 16, 17):
+        s[i]["price"], s[i]["close"], s[i]["vol"] = p14, p18 / 1.1, 0.0
+    v, p = det.scan_ticker(s, evs, 0.003, 3, D[0], tick_fn=tf)
+    ck("một cụm tick_offset + một cụm stale_price -> pfm_rules 'stale_price,tick_offset', n_runs 2",
+       v == "PRICE_FIELD_MISMATCH" and p.get("pfm_rules") == "stale_price,tick_offset"
+       and p.get("n_runs") == 2, f"v={v} {p.get('pfm_rules')} p14={p14} p18={p18}")
+    # r_pred lớn làm nhiễu làm tròn Close lớn theo: HOSE bước 50 với r_pred 2,5 ⇒ ±12,5đ > 10đ.
+    v, _ = run({10: -100, 11: -100, 12: -100}, base=30000, step=50, exchange="HOSE", rp=2.5)
+    ck("HOSE bước 50 nhưng r_pred 2,5 (nhiễu ±12,5đ > 0,2 bước) -> không phân giải -> DRIFT",
+       v == "DRIFT", f"v={v}")
+
+    # (h) Hợp đồng dòng máy đọc.
+    m = det.marker_price_field("DRI", {"ex": "2026-09-22", "n_runs": 1, "pfm_rules": "tick_offset",
+                                       "d0": "2026-09-10", "d1": "2026-09-14", "dev": -0.007002},
+                               "SpaceX,ZaloPay")
+    ck("marker_price_field đúng 9 trường theo thứ tự",
+       m.split("|") == ["ADJFACTOR_PRICE_FIELD_MISMATCH", "DRI", "2026-09-22", "1", "tick_offset",
+                        "2026-09-10", "2026-09-14", "SpaceX,ZaloPay", "-0.007002"], m)
+
+    # (i) live_exchange_fn: sàn THẬT qua marketId, fail-closed, cache, không ghi dnse_raw, stdout sạch.
+    import io
+    import types
+    from contextlib import redirect_stdout
+    calls = {"connect": 0, "quote": [], "raw_log": "unset"}
+
+    class FakeQ:
+        def __init__(self, tk):
+            self.exchange = {"DRI": "UPCOM", "MUTE": "HOSE"}.get(tk, "HOSE")
+            self.exchange_known = tk == "DRI"
+
+    class FakeSrc:
+        _raw_log = "dnse_raw_x.jsonl"
+
+        def connect(self):
+            calls["connect"] += 1
+            calls["raw_log"] = self._raw_log
+            print("[dnse] connect noise")
+
+        def get_quote(self, tk):
+            calls["quote"].append(tk)
+            if tk == "BOOM":
+                raise RuntimeError("timeout")
+            return FakeQ(tk)
+
+    import trading_bot.brokers as tb
+    saved = tb.get_quote_source
+    saved_env = os.environ.pop("MIKE_ADJFACTOR_NO_BQ", None)
+    buf = io.StringIO()
+    try:
+        tb.get_quote_source = lambda name: FakeSrc()
+        fn = _REAL_LIVE_EXCHANGE_FN()
+        with redirect_stdout(buf):
+            got = [fn("DRI"), fn("MUTE"), fn("BOOM"), fn("DRI")]
+        os.environ["MIKE_ADJFACTOR_NO_BQ"] = "1"
+        fn2 = _REAL_LIVE_EXCHANGE_FN()
+        n_before = calls["connect"]
+        got2 = fn2("DRI")
+    finally:
+        tb.get_quote_source = saved
+        os.environ.pop("MIKE_ADJFACTOR_NO_BQ", None)
+        if saved_env is not None:
+            os.environ["MIKE_ADJFACTOR_NO_BQ"] = saved_env
+    ck("live_exchange_fn: marketId biết -> 'UPCOM'; exchange_known=False -> None (KHÔNG mặc định HOSE);"
+       " lỗi -> None", got == ["UPCOM", None, None, "UPCOM"], f"{got}")
+    ck("live_exchange_fn: connect MỘT lần, cache theo mã", calls["connect"] == 1
+       and calls["quote"] == ["DRI", "MUTE", "BOOM"], f"{calls}")
+    # Whitelist sàn (arch-review vòng 2): chuỗi sàn lạ/viết thường từ field `exchange` tự do.
+    class OddQ:
+        def __init__(self, tk):
+            self.exchange = {"LOW": "hnx", "ODD": "HCX", "SP": " UPCOM "}[tk]
+            self.exchange_known = True
+
+    class OddSrc(FakeSrc):
+        def connect(self):                      # không đếm vào `calls` của các assertion khác
+            pass
+
+        def get_quote(self, tk):
+            return OddQ(tk)
+    saved_q = tb.get_quote_source
+    saved_env = os.environ.pop("MIKE_ADJFACTOR_NO_BQ", None)
+    try:
+        tb.get_quote_source = lambda name: OddSrc()
+        fn3 = _REAL_LIVE_EXCHANGE_FN()
+        with redirect_stdout(io.StringIO()):
+            got3 = [fn3("LOW"), fn3("ODD"), fn3("SP")]
+    finally:
+        tb.get_quote_source = saved_q
+        if saved_env is not None:
+            os.environ["MIKE_ADJFACTOR_NO_BQ"] = saved_env
+    ck("live_exchange_fn: whitelist HOSE/HNX/UPCOM — 'hnx'->HNX, ' UPCOM '->UPCOM, sàn lạ 'HCX'->None "
+       "(KHÔNG thành bước HOSE đoán)", got3 == ["HNX", None, "UPCOM"], f"{got3}")
+    ck("live_exchange_fn: _raw_log=None trước connect (không ghi dnse_raw kế toán)",
+       calls["raw_log"] is None, f"{calls['raw_log']!r}")
+    ck("live_exchange_fn: tiếng ồn broker KHÔNG lên stdout (kênh máy đọc)", buf.getvalue() == "",
+       repr(buf.getvalue()))
+    ck("live_exchange_fn: MIKE_ADJFACTOR_NO_BQ=1 -> None, KHÔNG chạm broker",
+       got2 is None and calls["connect"] == n_before, f"{got2} {calls}")
+    del types
+    n_conn = {"n": 0}
+
+    class DeadSrc:
+        _raw_log = "x"
+
+        def connect(self):
+            n_conn["n"] += 1
+            raise RuntimeError("dnse down")
+
+    saved = tb.get_quote_source
+    try:
+        tb.get_quote_source = lambda name: DeadSrc()
+        fn = _REAL_LIVE_EXCHANGE_FN()
+        got = [fn("AAA"), fn("BBB"), fn("CCC")]
+    finally:
+        tb.get_quote_source = saved
+    ck("live_exchange_fn: connect HỎNG được nhớ — thử MỘT lần cho cả lượt, mọi mã None",
+       got == [None, None, None] and n_conn["n"] == 1, f"{got} n={n_conn}")
+
+    # (j) run_scan: dòng máy đọc, SCAN, rc, bảng bằng chứng; sàn tra LƯỜI (chỉ mã cần bước giá).
+    class A:
+        asof = "2026-08-28"; ex0 = "2026-06-01"; ex1 = "2026-08-28"; ex_days = 30
+        lookback_days = 120; dev_tol = 0.003; min_run = 3; tickers = None; no_holdings = False
+
+    s_pf, evs_pf, _tf = _pf({10: -100, 11: -100, 12: -100})
+    s_dr, _e, _tf = _pf({}, closes=[(20000 + 100 * ((i * 3) % 7)) / (1.0 if i < 26 else 1.1)
+                                    for i in range(30)])
+    asked = []
+
+    def scan(universe, rows, held):
+        saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+                 det.cal.events, det.bq_max_session, det.live_exchange_fn)
+        try:
+            det.cohort_tickers = lambda a, b: universe
+            det.bq_max_session = lambda: A.asof
+            det.price_rows = lambda t, s_, e: rows
+            det.held_map = lambda asof, **kw: held
+            det.cal.feed_freshness = lambda: {"max_ingested": "2026-08-28 15:00:00",
+                                              "max_public": "2026-08-28", "n": "36428"}
+            det.cal.events = lambda t, since=None, until=None: [
+                dict(e, ticker=tk) for tk in universe for e in evs_pf]
+            det.live_exchange_fn = lambda: (lambda tk: asked.append(tk) or "UPCOM")
+            b = io.StringIO()
+            with redirect_stdout(b):
+                rc = det.run_scan(A)
+            return rc, b.getvalue()
+        finally:
+            (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session, det.live_exchange_fn) = saved
+
+    rc, out = scan(["PFX", "REAL"], [{"tk": "PFX", **b} for b in s_pf]
+                   + [{"tk": "REAL", **b} for b in s_dr], {"PFX": "SpaceX"})
+    lines = out.splitlines()
+    pf = [l for l in lines if l.startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|")]
+    dr = [l for l in lines if l.startswith("ADJFACTOR_DRIFT|")]
+    sc = [l for l in lines if l.startswith("ADJFACTOR_SCAN|")]
+    ck("run_scan: dòng PRICE_FIELD_MISMATCH mang nhãn nắm THẬT",
+       len(pf) == 1 and pf[0].startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|PFX|2026-08-20|1|tick_offset|")
+       and pf[0].split("|")[7] == "SpaceX", f"{pf}")
+    ck("run_scan: mã price-field KHÔNG có dòng DRIFT; DRIFT mã kia vẫn in",
+       not any("|PFX|" in l for l in dr) and len(dr) == 1 and "|REAL|" in dr[0], f"{dr}")
+    ck("run_scan: SCAN 7 trường, n_scanned GỒM price-field, n_drift KHÔNG",
+       sc == ["ADJFACTOR_SCAN|2026-08-28|2|1|0|0|0"], f"{sc}")
+    ck("run_scan: sàn chỉ tra cho mã cần bước giá (lười)", set(asked) == {"PFX"}, f"{asked}")
+    tab = [l for l in lines if l.startswith("PFX ")]
+    ck("run_scan: log có hàng bằng chứng price-field (r_obs, r_pred, cửa sổ, ex, luật)",
+       len(tab) == 1 and "tick_offset" in tab[0] and "2026-08-20" in tab[0] and "SpaceX" in tab[0],
+       f"{tab}")
+    ck("run_scan: log có chứng từ price-field", any(l.startswith("   PFX: PRICE_FIELD_MISMATCH ")
+                                                    for l in lines), f"{out[-500:]!r}")
+    ck("run_scan: có DRIFT -> rc=10", rc == 10, f"rc={rc}")
+    rc, out = scan(["PFX"], [{"tk": "PFX", **b} for b in s_pf], {})
+    ck("chỉ có price-field (feed FRESH) -> rc=11, KHÔNG phải 0; SCAN 1|0|0|0|0",
+       rc == 11 and "ADJFACTOR_SCAN|2026-08-28|1|0|0|0|0" in out.splitlines(), f"rc={rc}")
+    # Đường fail-closed THẬT của run_scan (arch-review #2): sàn không biết ⇒ DRIFT y nguyên bản không-luật.
+    s_hx, evs_hx, _tf = _pf({10: -200, 11: -200, 12: -200}, base=30000)
+
+    def scan_ex(exch):
+        saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+                 det.cal.events, det.bq_max_session, det.live_exchange_fn)
+        try:
+            det.cohort_tickers = lambda a, b: ["PFX"]
+            det.bq_max_session = lambda: A.asof
+            det.price_rows = lambda t, s_, e: [{"tk": "PFX", **b} for b in s_hx]
+            det.held_map = lambda asof, **kw: {}
+            det.cal.feed_freshness = lambda: {"max_ingested": "2026-08-28 15:00:00",
+                                              "max_public": "2026-08-28", "n": "36428"}
+            det.cal.events = lambda t, since=None, until=None: [dict(e, ticker="PFX") for e in evs_hx]
+            det.live_exchange_fn = lambda: (lambda tk: exch)
+            b = io.StringIO()
+            with redirect_stdout(b):
+                rc = det.run_scan(A)
+            return rc, [l for l in b.getvalue().splitlines() if l.startswith("ADJFACTOR_")
+                        and not l.startswith(("ADJFACTOR_FEED", "ADJFACTOR_SCAN"))]
+        finally:
+            (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session, det.live_exchange_fn) = saved
+
+    _v0, p0 = det.scan_ticker(s_hx, evs_hx, 0.003, 3, A.ex0, tick_fn=None)
+    rc, ln = scan_ex(None)
+    ck("run_scan: sàn KHÔNG tra được -> DRIFT y nguyên bản không-luật (fail-closed ở đường production)",
+       ln == [det.marker_drift("PFX", p0, "none")] and rc == 10, f"rc={rc} {ln}")
+    rc, ln = scan_ex("HNX")
+    ck("run_scan: sàn HNX (bước 100) -> −2 bước -> PRICE_FIELD_MISMATCH",
+       len(ln) == 1 and ln[0].startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|PFX|"), f"{ln}")
+    rc, ln = scan_ex("HOSE")
+    ck("run_scan: cùng chuỗi, sàn HOSE (bước 50) -> −4 bước -> DRIFT y nguyên",
+       ln == [det.marker_drift("PFX", p0, "none")], f"{ln}")
+    # R1 ở đường production: `win0` = phiên đầu cụm (lookback 58 ngày ⇒ win0 2026-07-01 = D[10]).
+    # Sự kiện phải nạp từ `load0` để biết ex-date ≤ win0; ex-date đó KHÔNG được vào đường hệ số.
+    class A58(A):
+        lookback_days = 58
+    since_seen = []
+
+    def scan_r1(extra):
+        saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+                 det.cal.events, det.bq_max_session, det.live_exchange_fn)
+        try:
+            det.cohort_tickers = lambda a, b: ["PFX"]
+            det.bq_max_session = lambda: A58.asof
+            det.price_rows = lambda t, s_, e: [{"tk": "PFX", **b} for b in s_pf]
+
+            def evs(t, since=None, until=None):
+                since_seen.append(since)
+                return [dict(e, ticker="PFX") for e in list(evs_pf) + extra
+                        if since < e["exright_date"] <= until]
+            det.held_map = lambda asof, **kw: {}
+            det.cal.feed_freshness = lambda: {"max_ingested": "2026-08-28 15:00:00",
+                                              "max_public": "2026-08-28", "n": "36428"}
+            det.cal.events = evs
+            det.live_exchange_fn = lambda: (lambda tk: "UPCOM")
+            b = io.StringIO()
+            with redirect_stdout(b):
+                det.run_scan(A58)
+            return [l for l in b.getvalue().splitlines() if l.startswith("ADJFACTOR_")
+                    and not l.startswith(("ADJFACTOR_FEED", "ADJFACTOR_SCAN"))]
+        finally:
+            (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session, det.live_exchange_fn) = saved
+    ln = scan_r1([])
+    ck("run_scan R1: win0 = phiên đầu cụm -> láng giềng trước cửa sổ -> PRICE_FIELD_MISMATCH",
+       len(ln) == 1 and ln[0].startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|PFX|2026-08-20|1|tick_offset|"
+                                          "2026-07-01|"), f"{ln}")
+    ck("run_scan R1: sự kiện nạp từ load0 (= win0 − CUM_PAD_DAYS), không từ win0",
+       since_seen[-1] == (date.fromisoformat("2026-07-01")
+                          - timedelta(days=det.CUM_PAD_DAYS)).isoformat(), f"{since_seen}")
+    ln = scan_r1([ev("2026-07-01", "ISS", "Cổ phiếu thưởng", 0.05)])
+    ck("run_scan R1: ex-date = win0 (≤ win0) xen giữa láng giềng và cụm -> DRIFT, và KHÔNG vào đường hệ "
+       "số (r_pred vẫn 1.1)", len(ln) == 1 and ln[0].startswith("ADJFACTOR_DRIFT|PFX|2026-08-20|")
+       and ln[0].split("|")[4] == "1.100000", f"{ln}")
+
+    # NB2 (hồi quy bug TIP): sự kiện ex <= win0 KHÔNG tính được hệ số (quyền mua; DIV 0đ) chỉ được thành
+    # NGÀY trong pre_ex — không được vào đường hệ số ⇒ không UNCOMPUTABLE, không partial, dòng y nguyên.
+    base = scan_r1([])
+    ln = scan_r1([ev("2026-06-08", "ISS", det.RIGHTS_METHOD, 0.2), ev("2026-06-09", "DIV", dps=0)])
+    ck("NB2 run_scan: ex <= win0 uncomputable (quyền mua, DIV 0đ) -> KHÔNG UNCOMPUTABLE/partial, dòng "
+       "PRICE_FIELD_MISMATCH y nguyên bản không có sự kiện đó",
+       ln == base and len(ln) == 1 and ln[0].startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|PFX|")
+       and not any(l.startswith("ADJFACTOR_UNCOMPUTABLE|") for l in ln), f"{ln} vs {base}")
+    # Cùng sự kiện đó nhưng ex > win0 (trong cửa sổ) thì PHẢI fail-closed — đối chứng cho test trên.
+    ln = scan_r1([ev("2026-07-03", "ISS", det.RIGHTS_METHOD, 0.2)])
+    ck("NB2 đối chứng: quyền mua ex > win0 -> UNCOMPUTABLE/DRIFT partial (không đổi nhãn price-field)",
+       any(l.startswith("ADJFACTOR_UNCOMPUTABLE|PFX|2026-07-03|") for l in ln)
+       and not any(l.startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|") for l in ln), f"{ln}")
+
+    ck("price-field mã không nắm mang nhãn `none`",
+       any(l.startswith("ADJFACTOR_PRICE_FIELD_MISMATCH|PFX|") and l.split("|")[7] == "none"
+           for l in out.splitlines()), f"{out[-400:]!r}")
+
+
+PF_FREE = "ADJFACTOR_PRICE_FIELD_MISMATCH|DVN|2026-09-11|1|tick_offset|2026-06-19|2026-06-23|none|-0.010122"
+PF_FREE2 = "ADJFACTOR_PRICE_FIELD_MISMATCH|SHC|2026-09-09|1|stale_price|2026-06-30|2026-07-09|none|-0.121003"
+PF_HELD = ("ADJFACTOR_PRICE_FIELD_MISMATCH|DRI|2026-09-22|1|tick_offset|2026-09-10|2026-09-14"
+           "|SpaceX,ZaloPay|-0.007002")
+PF_UNK = "ADJFACTOR_PRICE_FIELD_MISMATCH|UNK|2026-09-22|1|tick_offset|2026-09-10|2026-09-14|unknown|-0.007"
+PF_SKIP = "ADJFACTOR_PRICE_FIELD_MISMATCH|SKP|2026-09-22|1|tick_offset|2026-09-10|2026-09-14|skipped|-0.007"
+
+
+def t_alert_price_field(tz_label, env_tz):
+    print(f"\n[18] alert.sh — PRICE_FIELD_MISMATCH  (TZ: {tz_label})")
+    tail = "\n".join([FEED_FRESH, SCAN]) + "\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        tgt = _sandbox(tmp)
+        sink = os.path.join(tmp, "sink")
+        state = os.path.join(tmp, "state", "adjfactor_drift_alerted.json")
+        notify = os.path.join(sink, "notify.txt")
+        busf = os.path.join(sink, "bus.jsonl")
+
+        # (a) chỉ price-field — KỂ CẢ mã ĐANG NẮM — feed FRESH: bus có, Discord KHÔNG, không khoá.
+        r = _run_alert(tmp, tgt, "\n".join([PF_FREE, PF_FREE2, PF_HELD, PF_UNK]) + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] price-field-only (gồm mã nắm + unknown) -> KHÔNG gửi Discord, rc=0",
+           r.returncode == 0 and not os.path.exists(notify), f"rc={r.returncode} {r.stderr[-300:]!r}")
+        ck(f"[{tz_label}] price-field-only: log nói rõ lý do im lặng",
+           "4 ma LECH TRUONG GIA" in r.stderr, f"{r.stderr[-300:]!r}")
+        ck(f"[{tz_label}] price-field-only: log đếm ĐÚNG 2 mã có thể đang nắm (DRI + unknown), không nói 'khong ma nao'",
+           "2 ma lech truong gia CO THE DANG NAM" in r.stderr, f"{r.stderr[-300:]!r}")
+        bus = [json.loads(l) for l in open(busf) if l.strip()] if os.path.exists(busf) else []
+        ck(f"[{tz_label}] price-field-only vẫn ghi bus với ĐỦ danh sách",
+           len(bus) == 1 and bus[0].get("price_field_mismatch") == "4"
+           and bus[0].get("price_field_mismatch_markers") == [PF_FREE, PF_FREE2, PF_HELD, PF_UNK],
+           f"{bus}")
+        ck(f"[{tz_label}] price-field KHÔNG sinh khoá de-dup",
+           not os.path.exists(state) or json.load(open(state)) == {},
+           f"{open(state).read() if os.path.exists(state) else None}")
+
+        # (b) price-field + DRIFT thật -> Discord; price-field gộp MỘT dòng info, không TODO/Winston.
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_FREE, PF_FREE, PF_HELD, PF_UNK, PF_SKIP]) + "\n" + tail,
+                       env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] DRIFT thật + price-field -> có gửi Discord", r.returncode == 10 and msg,
+           f"rc={r.returncode} {r.stderr[-300:]!r}")
+        info = [l for l in msg.splitlines() if "Lệch trường giá" in l]
+        ck(f"[{tz_label}] price-field gộp đúng MỘT dòng info chứa cả 3 mã",
+           len(info) == 1 and "DVN" in info[0] and "DRI" in info[0] and "UNK" in info[0], f"{info}")
+        ck(f"[{tz_label}] price-field held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'",
+           info and "**UNK**" in info[0] and "KHÔNG TRA ĐƯỢC vị thế" in info[0], f"{info}")
+        ck(f"[{tz_label}] price-field mã không nắm KHÔNG in đậm", info and "**DVN**" not in info[0],
+           f"{info}")
+        ck(f"[{tz_label}] price-field held=skipped KHÔNG thành 'ĐANG NẮM LIVE: skipped'",
+           info and "SKP" in info[0] and "**SKP**" not in info[0] and "LIVE: skipped" not in msg, f"{info}")
+        ck(f"[{tz_label}] price-field mã nắm mang nhãn LIVE trong dòng info",
+           info and "**DRI**" in info[0] and "ĐANG NẮM LIVE: SpaceX,ZaloPay" in info[0], f"{info}")
+        todo = msg.split("**Việc cần làm:**", 1)[-1].split("_Quét", 1)[0]
+        ck(f"[{tz_label}] price-field KHÔNG vào 'Việc cần làm'", "DVN" not in todo and "DRI" not in todo,
+           f"{todo!r}")
+        ck(f"[{tz_label}] price-field KHÔNG thành dòng lệch '• **DVN**'/'• **DRI**'",
+           "• **DVN**" not in msg and "• **DRI**" not in msg)
+        ck(f"[{tz_label}] footer đếm price-field riêng", "4 lệch trường giá" in msg, f"{msg[-400:]!r}")
+        ck(f"[{tz_label}] state chỉ có khoá DRIFT", sorted(json.load(open(state))) == ["FPT|2026-09-21"],
+           f"{open(state).read()}")
+        os.remove(notify)
+
+        # (c) price-field + feed STALE -> gửi vì FEED, price-field vẫn KHÔNG giao Winston.
+        stale_tail = "\n".join([FEED_STALE, SCAN]) + "\n"
+        r = _run_alert(tmp, tgt, PF_HELD + "\n" + stale_tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] price-field + feed STALE -> VẪN gửi (feed là cảnh báo riêng)",
+           r.returncode == 10 and "KHÔNG TƯƠI" in msg, f"rc={r.returncode}")
+        ck(f"[{tz_label}] price-field KHÔNG bật 'Vendor thiếu hệ số' (Winston)",
+           "Vendor thiếu hệ số điều chỉnh" not in msg)
+        os.remove(notify)
+
+        # (d) khoá DRIFT CŨ `mã|ex` của mã nay là price-field bị XOÁ (để DRIFT thật sau đó không bị chặn);
+        # --dry-run thì KHÔNG xoá.
+        st = json.load(open(state))
+        today = subprocess.run(["bash", "-c", "TZ='Asia/Ho_Chi_Minh' date +%F"],
+                               capture_output=True, text=True).stdout.strip()
+        st["DRI|2026-09-22"] = today
+        json.dump(st, open(state, "w"))
+        r = _run_alert(tmp, tgt, PF_HELD + "\n" + tail, env_tz, args=("1234", "--dry-run"))
+        ck(f"[{tz_label}] price-field --dry-run KHÔNG xoá khoá cũ",
+           "DRI|2026-09-22" in json.load(open(state)), f"{open(state).read()}")
+        r = _run_alert(tmp, tgt, PF_HELD + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] lượt price-field XOÁ khoá DRIFT cũ `DRI|ex`, không gửi Discord",
+           "DRI|2026-09-22" not in json.load(open(state)) and not os.path.exists(notify),
+           f"rc={r.returncode} {open(state).read()}")
+        ck(f"[{tz_label}] xoá khoá price-field KHÔNG đụng khoá khác",
+           "FPT|2026-09-21" in json.load(open(state)), f"{open(state).read()}")
+        drift_dri = REAL_DRIFT_BEFORE["DRI"]
+        r = _run_alert(tmp, tgt, drift_dri + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] price-field -> DRIFT thật về sau báo như MỚI, không bị khoá cũ chặn",
+           r.returncode == 10 and "• **DRI**" in msg and "ĐANG NẮM LIVE" in msg,
+           f"rc={r.returncode} {r.stderr[-300:]!r}")
+        os.remove(notify)
+
+        # (e) price-field + awaiting cùng lượt: hai dòng info RIÊNG, cả hai im khi không có gì khác.
+        r = _run_alert(tmp, tgt, "\n".join([PF_FREE, AW_FREE]) + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] price-field + awaiting không nắm -> KHÔNG gửi Discord, rc=0",
+           r.returncode == 0 and not os.path.exists(notify), f"rc={r.returncode}")
+        ck(f"[{tz_label}] price-field mã KHÔNG nắm -> log KHÔNG nói 'CO THE DANG NAM'",
+           "CO THE DANG NAM" not in r.stderr and "khong ma awaiting nao" in r.stderr, f"{r.stderr[-300:]!r}")
+
+    # (f) xoá khoá hỏng ⇒ ép gửi Discord kèm LỖI THẬT (cùng cơ chế B1 của awaiting).
+    with tempfile.TemporaryDirectory() as tmp:
+        tgt = _sandbox(tmp)
+        sink = os.path.join(tmp, "sink")
+        notify = os.path.join(sink, "notify.txt")
+        sdir = os.path.join(tmp, "state")
+        os.makedirs(sdir)
+        state = os.path.join(sdir, "adjfactor_drift_alerted.json")
+        today = subprocess.run(["bash", "-c", "TZ='Asia/Ho_Chi_Minh' date +%F"],
+                               capture_output=True, text=True).stdout.strip()
+        json.dump({"DVN|2026-09-11": today}, open(state, "w"))
+        os.chmod(sdir, 0o555)
+        try:
+            r = _run_alert(tmp, tgt, PF_FREE + "\n" + tail, env_tz)
+        finally:
+            os.chmod(sdir, 0o755)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] price-field: xoá khoá cũ HỎNG -> ép gửi Discord kèm lỗi thật",
+           r.returncode == 10 and "STATE DE-DUP KHÔNG XOÁ ĐƯỢC" in msg and "DVN|2026-09-11" in msg,
+           f"rc={r.returncode} {r.stderr[-300:]!r}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--py", action="store_true")
@@ -1673,6 +2754,8 @@ def main():
         t_emit()
         t_held_and_corr()
         t_awaiting()
+        t_price_field()
+        t_price_field_window()
     if do_sh:
         # §16/§19: LẶP dưới 4 môi trường TZ. `unset TZ` = ca cron thật (không có TZ trong env).
         # `Pacific/Kiritimati` (+14) và `Pacific/Midway` (−11) là hai đầu cực: với MỌI thời điểm,
@@ -1687,6 +2770,7 @@ def main():
                 os.environ.pop("TZ", None)
             t_alert(label, envd)
             t_alert_awaiting(label, envd)
+            t_alert_price_field(label, envd)
         t_runner()
         print("\n[10] meta — assertion neo-TZ có thật sự phân biệt được không (§19)")
         ck(f"có ít nhất MỘT môi trường TZ phân biệt được ngày host với ngày ICT "

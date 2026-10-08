@@ -47,6 +47,21 @@
 #     đo thật 2026-10-08: VHF/IRC/HES/... đều có khoá 10-06) — giữ lại thì DRIFT thật sau đó bị chặn
 #     tới 7 ngày. Xoá chỉ có thể làm cảnh báo TỚI SỚM hơn, không bao giờ mất cảnh báo.
 #
+# PRICE_FIELD_MISMATCH (LỆCH TRƯỜNG Price, user duyệt 2026-10-08, job Taylor_20261008_080048):
+# `ADJFACTOR_PRICE_FIELD_MISMATCH|<mã>|<ex>|<n_runs>|<rules>|<d0>|<d1>|<held>|<dev>` = hệ số khớp ở hai
+# phiên kẹp quanh cụm, `Price`/`Close` lệch vài phiên giữa (luật + vì sao KHÔNG nói trường nào sai: docstring
+# detector). NHẢY NHÃN: lượt sau DNSE không trả sàn ⇒ DRIFT lại, và vì khoá cũ đã xoá ⇒ báo như MỚI (thừa, an toàn).
+# RÌA PHẢI: cụm lệch trường giá MỚI (chạm phiên mới nhất) chưa có phiên kẹp sau ⇒ detector báo DRIFT lượt đó ⇒
+# lên Discord + sinh khoá như DRIFT thường ĐÚNG MỘT lần; lượt có phiên khớp kẹp lại thì đổi nhãn và khoá bị xoá.
+# RÌA TRÁI không nhảy khi win0 cắt ngang cụm (cụm nối lùi qua chuỗi nạp tới phiên khớp đầu tiên —
+# arch-review vòng 2 R1 + vòng 3 B1), TRỪ khi láng giềng trái không nằm trong chuỗi nạp (cụm > ~20 phiên,
+# hoặc ex-date trước cửa sổ chen vào) ⇒ DRIFT, hướng an toàn — docstring detector, đoạn RÌA TRÁI. Gộp MỘT
+# dòng info, KHÔNG vào "Việc cần làm", KHÔNG giao Winston, KHÔNG sinh khoá de-dup nào và KHÔNG BAO GIỜ
+# tự kích Discord — kể cả mã đang nắm (user chốt: "không tự gửi Discord nếu chỉ có nhãn này"; hệ số đúng
+# nên không có số điều chỉnh nào sai để bảo vệ). Chỉ hiện trong tin khi tin đã gửi vì lý do khác; mã
+# nắm vẫn mang nhãn LIVE trong dòng info. Bus luôn ghi đủ marker. Khoá DRIFT `<mã>|<ex>` CŨ của mã nay
+# là price-field bị XOÁ cùng đường với awaiting (cùng lý do: khoá sót chặn DRIFT thật sau đó ≤7 ngày).
+#
 # Exit: 0 = không có gì để cảnh báo trên Discord (kể cả lượt chỉ có awaiting — bus vẫn ghi; dry-run của lượt
 #   đó in payload rồi cũng trả 0) · 10 = đã có cảnh báo (hoặc dry-run có nội dung Discord) · 11 = bỏ qua vì
 #   một lượt khác đang giữ lock · 2 = sai đối số.
@@ -77,6 +92,7 @@ DRIFTS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_DRIFT\|' || true)"
 UNCOMPS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_UNCOMPUTABLE\|' || true)"
 NODATAS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_NODATA\|' || true)"
 AWAITS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_AWAITING_TRADE\|' || true)"
+PFMS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_PRICE_FIELD_MISMATCH\|' || true)"
 FEED="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_FEED\|' | tail -1 || true)"
 SCAN="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_SCAN\|' | tail -1 || true)"
 
@@ -108,7 +124,7 @@ EMPTY_UNIVERSE=0
 
 # Chỉ im lặng khi feed ĐÚNG LÀ FRESH, có mã được quét, và không có marker nào. `MISSING` và universe
 # rỗng đều KHÔNG lọt qua đây.
-[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] && [ -z "$AWAITS" ] \
+[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] && [ -z "$AWAITS" ] && [ -z "$PFMS" ] \
   && [ "$FEED_STATUS" = "FRESH" ] && [ "$EMPTY_UNIVERSE" -eq 0 ] && exit 0
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
@@ -415,12 +431,32 @@ while IFS='|' read -r _tag tk ex ntr held _dev _rest; do
   AWAIT_LIST="${AWAIT_LIST:+${AWAIT_LIST}, }${item}"
 done <<< "$AWAITS"
 
+# PRICE_FIELD_MISMATCH — xem header. Không khoá, không N_*_NEW: KHÔNG BAO GIỜ tự kích Discord.
+N_PFM=0
+N_PFM_HELD=0
+PFM_LIST=""
+PFM_DEL_KEYS=""
+while IFS='|' read -r _tag tk ex _nruns rules d0 d1 held _dev _rest; do
+  [ -z "${tk:-}" ] && continue
+  N_PFM=$((N_PFM + 1))
+  PFM_DEL_KEYS="${PFM_DEL_KEYS}${tk}|${ex}"$'\n'
+  item="${tk} (${d0}..${d1}, ${rules})"
+  if [ "$held" = "unknown" ]; then
+    N_PFM_HELD=$((N_PFM_HELD + 1))
+    item="**${tk}** (${d0}..${d1}, ${rules}, **KHÔNG TRA ĐƯỢC vị thế**)"
+  elif [ "$held" != "none" ] && [ "$held" != "skipped" ]; then
+    N_PFM_HELD=$((N_PFM_HELD + 1))
+    item="**${tk}** (${d0}..${d1}, ${rules}, **ĐANG NẮM LIVE: ${held}**)"
+  fi
+  PFM_LIST="${PFM_LIST:+${PFM_LIST}, }${item}"
+done <<< "$PFMS"
+
 # BUS trước (kênh PHỤ, luôn ghi kể cả khi Discord im vì de-dup) — đây là dấu vết audit đầy đủ:
 # mọi DRIFT và mọi UNCOMPUTABLE của lượt quét, không qua bộ lọc de-dup/held nào.
 PAYLOAD="$(ASOF="$ASOF" N_SCANNED="$N_SCANNED" N_DRIFT="$N_DRIFT" N_UNCOMP="$N_UNCOMP" \
   N_AGREE="$N_AGREE" N_NODATA="$N_NODATA" N_NEW="$N_NEW" N_HELD="$N_HELD" \
   N_UNKNOWN="$N_UNKNOWN" FEED_STATUS="$FEED_STATUS" FEED_LINE="$FEED" \
-  N_AWAIT="$N_AWAIT" AWAITS="$AWAITS" \
+  N_AWAIT="$N_AWAIT" AWAITS="$AWAITS" N_PFM="$N_PFM" PFMS="$PFMS" \
   DRIFTS="$DRIFTS" UNCOMPS="$UNCOMPS" NODATAS="$NODATAS" python3 -c "
 import json, os
 def lines(v):
@@ -439,6 +475,7 @@ print(json.dumps({
     'drift_markers': lines('DRIFTS'), 'uncomputable_markers': lines('UNCOMPS'),
     'nodata_markers': lines('NODATAS'),
     'awaiting_trade': os.environ['N_AWAIT'], 'awaiting_trade_markers': lines('AWAITS'),
+    'price_field_mismatch': os.environ['N_PFM'], 'price_field_mismatch_markers': lines('PFMS'),
 }, ensure_ascii=False))
 ")"
 
@@ -462,12 +499,13 @@ if [ "$LOCK_SKIP" -eq 1 ]; then
   exit 11
 fi
 
-# Xoá khoá DRIFT cũ của mã nay đang AWAITING (xem header, yêu cầu #3). Dưới lock, trước mọi lối thoát
-# im lặng — lượt chỉ có awaiting cũng phải dọn được.
+# Xoá khoá DRIFT cũ của mã nay đang AWAITING hoặc PRICE_FIELD_MISMATCH (xem header, yêu cầu #3). Dưới
+# lock, trước mọi lối thoát im lặng — lượt chỉ có awaiting/price-field cũng phải dọn được.
 STATE_DEL_ERR=""
-if [ "$DRY_RUN" -eq 0 ] && [ -n "$AWAIT_DEL_KEYS" ]; then
+DEL_KEYS="${AWAIT_DEL_KEYS}${PFM_DEL_KEYS}"
+if [ "$DRY_RUN" -eq 0 ] && [ -n "$DEL_KEYS" ]; then
   _sw_rc=0
-  _sw_err="$(_state_write "" "$AWAIT_DEL_KEYS" 2>&1)" || _sw_rc=$?
+  _sw_err="$(_state_write "" "$DEL_KEYS" 2>&1)" || _sw_rc=$?
   [ -n "$_sw_err" ] && echo "$_sw_err" >&2
   # Xoá hỏng ⇒ ép gửi Discord kèm LỖI THẬT (B1), không thoát im lặng ở nhánh de-dup bên dưới.
   [ "$_sw_rc" -ne 0 ] && STATE_DEL_ERR="${_sw_err:-_state_write rc=${_sw_rc}, khong co stderr}"
@@ -485,19 +523,23 @@ if [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ] && [ "$N_NODATA_HELD" -eq 0 
    && [ -z "$STATE_DEL_ERR" ]; then
   [ "$DRY_RUN" -eq 1 ] && { echo "[dry-run] KHONG gui Discord. --- payload bus ---"; echo "$PAYLOAD"; }
   if [ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ]; then
-    # Lượt CHỈ có awaiting của mã không nắm: quiet-heartbeat — bus/log có đủ, Discord im.
+    # Lượt CHỈ có awaiting (mã không nắm / đã báo) và/hoặc price-field: quiet-heartbeat — bus/log có
+    # đủ, Discord im. Log phải đếm ĐÚNG cả mã price-field có thể đang nắm (arch-review 2026-10-08 #5).
     if [ "$N_AWAIT_HELD" -gt 0 ]; then
-      _aw_held="${N_AWAIT_HELD} ma co the dang nam nhung da bao trong ${RE_ALERT_DAYS} ngay qua"
+      _aw_held="${N_AWAIT_HELD} ma awaiting co the dang nam nhung da bao trong ${RE_ALERT_DAYS} ngay qua"
     else
-      _aw_held="khong ma nao co the dang nam"
+      _aw_held="khong ma awaiting nao co the dang nam"
     fi
-    echo "adjfactor_drift_alert: chi co ${N_AWAIT} ma CHO GIAO DICH LAI (khong DRIFT that, feed TUOI," \
-         "${_aw_held}) -> chi ghi bus, khong gui Discord." >&2
+    if [ "$N_PFM_HELD" -gt 0 ]; then
+      _aw_held="${_aw_held}, ${N_PFM_HELD} ma lech truong gia CO THE DANG NAM (khong bao Discord theo thiet ke)"
+    fi
+    echo "adjfactor_drift_alert: chi co ${N_AWAIT} ma CHO GIAO DICH LAI + ${N_PFM} ma LECH TRUONG GIA" \
+         "(khong DRIFT that, feed TUOI, ${_aw_held}) -> chi ghi bus, khong gui Discord." >&2
     exit 0
   fi
   echo "adjfactor_drift_alert: ${N_DRIFT} lech nhung tat ca da canh bao trong ${RE_ALERT_DAYS} ngay qua," \
        "khong co uncomputable/nodata nao co the dang nam, feed nguon TUOI, ${N_AWAIT} ma cho giao dich" \
-       "lai -> chi ghi bus, khong gui Discord (de-dup)." >&2
+       "lai, ${N_PFM} ma lech truong gia -> chi ghi bus, khong gui Discord (de-dup)." >&2
   exit 10
 fi
 
@@ -549,6 +591,9 @@ __**KHÔNG KẾT LUẬN ĐƯỢC (fail-closed, mã có thể đang nắm):**__${
 [ -n "$AWAIT_LIST" ] && SECTIONS="${SECTIONS}
 ℹ️ _Chờ giao dịch lại (${N_AWAIT} mã — lệch khớp đúng hệ số vendor chưa áp vì chưa đủ 3 phiên khớp từ ex-date; bình thường, KHÔNG phải việc cần làm):_ ${AWAIT_LIST}
 "
+[ -n "$PFM_LIST" ] && SECTIONS="${SECTIONS}
+ℹ️ _Lệch trường giá (${N_PFM} mã — hệ số khớp ở hai phiên kẹp quanh cụm, ${BT}Price${BT}/${BT}Close${BT} không cùng bản in vài phiên giữa; KHÔNG phải lệch hệ số, KHÔNG phải việc cần làm):_ ${PFM_LIST}
+"
 
 TODO=""
 [ "$SEEN_VENDOR" = "1" ] && TODO="${TODO}
@@ -593,7 +638,7 @@ MSG="${HEADLINE}
 ${SECTIONS}
 **Việc cần làm:**${TODO}
 
-_Quét ${N_SCANNED} mã: ${N_DRIFT} lệch · ${N_AWAIT} chờ giao dịch lại · ${N_UNCOMP} không tính được · ${N_AGREE} khớp · ${N_NODATA} không có dữ liệu · feed nguồn \`${FEED_STATUS:-không báo}\`. ${N_UNCOMP_OTHER} uncomputable + ${N_NODATA_OTHER} nodata của mã KHÔNG nắm chỉ ghi bus, không nêu ở đây._
+_Quét ${N_SCANNED} mã: ${N_DRIFT} lệch · ${N_AWAIT} chờ giao dịch lại · ${N_PFM} lệch trường giá · ${N_UNCOMP} không tính được · ${N_AGREE} khớp · ${N_NODATA} không có dữ liệu · feed nguồn \`${FEED_STATUS:-không báo}\`. ${N_UNCOMP_OTHER} uncomputable + ${N_NODATA_OTHER} nodata của mã KHÔNG nắm chỉ ghi bus, không nêu ở đây._
 _Layer 1 **KHÔNG công bố và KHÔNG sửa** số nào — cổng §21 (\`report_return_gate\`) vẫn là lớp chặn báo cáo, không thay đổi._"
 
 if [ "$DRY_RUN" -eq 1 ]; then
