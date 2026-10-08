@@ -383,3 +383,9 @@ BAI HOC 2: cong cu match theo tu khoa se TU NHAN DIEN chinh commit gioi thieu no
 ## Archived 2026-10-08 (keep=12 days=0 require_done=False)
 - [2026-09-30T02:16:42Z] [2026-09-30] coord-2026-09-30 (job 020001, resume): option B da wire BAT BUOC vao dispatch.sh ca 2 duong hoan tat (ff340ea8 + b1bc0dec va 5/5 required_change). Q goc da RESOLVED boi decision cua user 01:49Z (wags_bus_question_pending rc=1). DANG DO: cho arch-review vong 2 tren b1bc0dec; sau do ghi finding + xong.
 BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING — dispatch.sh chup 'tail -c 500 $logfile' lam preview Discord va 'head -c 400' lam cb_summary AUTO-CALLBACK. Hint 812B > cua so 500B nen an sach ket luan agent, va CHI xay ra khi hint non-empty => smoke test voi hint RONG khong the bat duoc. Luat: moi khi ghi them vao artifact cua nguoi khac, grep xem co ai CHUP cua so cua artifact do khong, va test o trang thai artifact CO NOI DUNG.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-01T01:21:25Z] [2026-10-01] coord-2026-10-01: Q label-asof DONG bang answer (cron tu ap schema, Pattern B lan 4). Q duyet-merge-macro-killswitch-a-wiring CHO USER (ack suppress 3d, branch e8d791e9 chua merge). files_changed=[].
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-01T05:46:07Z] [2026-10-01 chieu] coord-2026-10-01 (job 054510): Q Taylor/alphalens-buoc-ke-dong-hay-rnd CHO USER (A/B/C), ack suppress 7d, da post topic Taylor 1521735922066919515. files_changed=[].

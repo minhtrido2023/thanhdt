@@ -15,8 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-01T01:21:25Z] [2026-10-01] coord-2026-10-01: Q label-asof DONG bang answer (cron tu ap schema, Pattern B lan 4). Q duyet-merge-macro-killswitch-a-wiring CHO USER (ack suppress 3d, branch e8d791e9 chua merge). files_changed=[].
-- [2026-10-01T05:46:07Z] [2026-10-01 chieu] coord-2026-10-01 (job 054510): Q Taylor/alphalens-buoc-ke-dong-hay-rnd CHO USER (A/B/C), ack suppress 7d, da post topic Taylor 1521735922066919515. files_changed=[].
 - [2026-10-02T01:21:04Z] [2026-10-02] coord-2026-10-02: Q spacex-tpb-reconcile DONG bang answer (Pattern B lan 5). Q tpb-price-frame-gate CHO USER/TAYLOR (A patch price_frame cash_div / B confirm tay / C cho plan 10-03), ack suppress 2d, da post trading_daily. files_changed=[].
 - [2026-10-03T06:54:54Z] Chờ Mike merge branch fix/report-prompt-port-20261003 (1b9d4d46); sau merge: git worktree remove agents/Wags/wt-reportport-1003
 - [2026-10-03T08:28:35Z] [2026-10-03] Chờ Mike merge fix/report-prompt-r2-20261003 (1afc0c59, worktree agents/Wags/wt-reportr2-1003); sau merge: git worktree remove wt-reportr2-1003 (và wt-reportport-1003 nếu port đã merge)
@@ -27,3 +25,5 @@
 - [2026-10-08T13:38:23Z] ĐANG DỞ job Wags_20261008_133633 token telemetry: worktree agents/Wags/wt-tokentel-1008 branch feat/dispatch-token-telemetry-20261008 | thiet ke --session-id + cost-state transcript | NEXT: code+selfcheck+arch-review
 - [2026-10-08T13:55:19Z] [2026-10-08] context-pack-trim DUNG o NEEDS_CHANGES: branch chore/context-pack-trim-20261008 @f10b0326 (worktree agents/Wags/wt-ctxtrim-1008) CHUA merge. Cho user/Mike chon vong 2 (8 required_change trong bus finding context-pack-trim) hoac bo. Neu bo: git worktree remove + xoa branch.
 - [2026-10-08T14:06:19Z] [2026-10-08] dispatch-token-telemetry (job 133633) DUNG o NEEDS_CHANGES: branch feat/dispatch-token-telemetry-20261008 @bba411f3 (worktree agents/Wags/wt-tokentel-1008) CHUA merge; cho Mike/user cho vong 2 (S1 trap-window sync, S2 whitelist/tach job_telemetry.py, S3 union-find chain). Bus finding co du danh sach.
+- [2026-10-08T14:33:34Z] ĐANG DỞ job Wags_20261008_143324 tokentel VÒNG 2: worktree agents/Wags/wt-tokentel-1008 | NEXT: S1 trap/telemetry-after-terminal, S2 job_telemetry.py whitelist, S3 chain union-find, 2 test, rebase, arch-review 1 lần
+- [2026-10-08T14:42:20Z] [2026-10-08] context-pack-trim R2 DUNG NEEDS_CHANGES: branch chore/context-pack-trim-20261008 @e143a7cb (wt-ctxtrim-1008) CHUA merge. 1 blocker (V2.5 NO-GO mat khoi hot path) + 4 should-fix, bus finding context-pack-trim. Cho user/Mike cho 1 luot sua nho hoac bo; bo thi git worktree remove + xoa branch.
