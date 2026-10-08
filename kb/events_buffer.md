@@ -799,3 +799,49 @@
 - [2026-10-08T10:04:26Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "R1 da sua trong detect.py (prev_bar tu load0 + pre_ex), dang lam non-blocker"}
 - [2026-10-08T10:05:17Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261008_100015", "source": "watcher"}
 - [2026-10-08T10:06:17Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+
+## Consolidation 2026-10-08T10:43:49Z
+- [2026-10-08T10:07:18Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:08:18Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:09:00Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "R1+6 non-blocker xong, py selfcheck 266/266; chay full x2py x TZ"}
+- [2026-10-08T10:09:18Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:10:19Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:11:20Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:12:20Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:13:13Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "selfcheck 763/763 x2py x TZ; mutation r3 131 dang chay; dry-run that"}
+- [2026-10-08T10:13:20Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:14:20Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:15:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:15:28Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "attempt2: code vong 3 da co (chua commit), dang verify"}
+- [2026-10-08T10:16:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:17:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:18:03Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "selfcheck 763/763 x2py x2TZ; cho mut3"}
+- [2026-10-08T10:18:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:19:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:20:13Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "dry-run r3==r2 byte-identical; probe R1 that tren DRI"}
+- [2026-10-08T10:20:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:21:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:22:21Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:23:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:24:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:24:30Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "in_progress", "note": "commit 45179c7d; arch-review + mut3 song song"}
+- [2026-10-08T10:25:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:26:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:27:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:28:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:29:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:30:22Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:31:24Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:32:24Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:33:24Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:34:24Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:35:24Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:36:24Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:37:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:38:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:39:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:40:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:41:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:42:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:43:25Z] Taylor/heartbeat — Taylor_20261008_100015: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261008_100015", "source": "watcher"}
+- [2026-10-08T10:43:31Z] Taylor/finding — adjfactor-price-field-mismatch: DUNG sau arch-review vong 3 NEEDS_CHANGES, CHUA merge: {"status": "DUNG_CHUA_MERGE", "reason": "arch-review vong 3 (cuoi) NEEDS_CHANGES", "branch": "feat/adjfactor-price-field-mismatch-20261008", "head": "45179c7d", "worktree": "agents/Taylor/wt-pfm-1008", "r3_done": "R1 dong cho ca win0 = phien DAU cum (that: DRI --lookback-days 28: 4737f414 DRIFT gia -> 45179c7d PFM); 6 non-blocker vong 2 dong", "verify": "selfcheck 763/763 x py3.10/3.12 x (env -u TZ, LA, Kiritimati); dry-run that hom nay r3==r2 byte-identical (DRI/DVN/SHC/CC1 PFM; VHF/HC1/PBP/VFR DRIFT; PPS UNCOMPUTABLE ca 2 ban = do du lieu); mut 126/130 (P4/P4a tuong duong, P15 hong-da ap lai bi giet)", "blocker_B1": "win0 nam GIUA cum PFM dai >=4 phien -> prev_bar la phien cua chinh cum (lech) -> DRIFT gia tat dinh. Tai hien SHC that: w0 07-01..07-07 ra DRIFT 5 luot -> Discord + giao Winston 1 lan quanh asof 2026-10-29..11-04 (lech -12%). DRI/DVN/CC1 (3 phien) khong bi. Huong an toan (bao thua). Sua ~15 dong: lui trong before toi phien khop dau tien, pre_ex hit-check tren khoang do, ap luat cho cum noi dai, het before -> DRIFT. alert.sh:56 rim trai khong nhay + docstring :111-116 dang khang dinh sai", "non_blockers": ["NB1 mutation X3 song: thieu test cum giua cua so co prev_bar khop nhung lang gieng trong cua so lech", "NB2 mutation R1g/X4 song: thieu test su kien uncomputable ex<=win0 khong duoc thanh UNCOMPUTABLE/partial (hoi quy bug TIP)", "NB3 note :704 gan san sat nguong/lam tron Close ke ca lech 12% (vi pham para29)", "NB4 X8 tuong duong, chap nhan", "NB5 ngoai nhanh: kb/cron_registry.md:138 ghi 00:10 ICT, thuc te 07:10 ICT"], "options_for_user": ["A: vong 4 sua B1+NB1-3+NB5 roi review", "B: chap nhan gioi han (1 DRIFT gia/cum >=4 phien, huong an toan), chi sua cau sai alert.sh:56+docstring roi merge"], "review_artifacts": "/tmp/arch_r3/"}

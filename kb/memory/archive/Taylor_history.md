@@ -946,3 +946,9 @@
 
 ## Archived 2026-10-08 (keep=12 days=0 require_done=False)
 - [2026-10-07T04:36:12Z] [broker-primary r8 10-07] XONG job Taylor_20261007_034436: feat/broker-primary-r7-20261007@58aa852d, 782/784 x3TZ x2py, mut 538/538 (3.12 537, 1 tương đương). Thay dòng r7. CHỜ Mike arch-review r8 + user duyệt merge; KHÔNG bật live.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-07T05:44:19Z] [broker-primary r9 10-07] XONG job Taylor_20261007_050650: feat/broker-primary-r7-20261007@5c0257a6, 785/787 x3TZ x2py, mut 539/539 (3.12 538, 1 tương đương). Thay dòng r8. CHỜ Mike arch-review r9 + merge (user đã duyệt); KHÔNG bật live.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-07T06:49:00Z] [broker-primary r10 10-07] XONG job Taylor_20261007_062338: feat/broker-primary-r10-20261007@6e26dbe1 test-only, 788/790 x3TZ x2py, mut 541/541 (3.12 540). Thay dòng r8/r9. CHỜ Mike merge; KHÔNG bật live.
