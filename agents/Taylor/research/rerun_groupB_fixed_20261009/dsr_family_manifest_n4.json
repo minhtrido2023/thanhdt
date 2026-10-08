@@ -1,0 +1,140 @@
+{
+ "_doc": "Họ trial nhánh 4 (PREREG N=12 + control), ghim TRƯỚC khi tính DSR/PBO.",
+ "manifest_version": 1,
+ "criterion": {
+  "reason": "job Taylor_20261008_172556 PREREG §2"
+ },
+ "n_entries": 26,
+ "entries": [
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_c70_off_univpit.csv",
+   "md5": "f524c1a086a80518f159daf3ae4740dd",
+   "leg": "c70_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gate2_liqf5B_advprice_etfcreatpit_exp_n4_q8_off_univpit.csv",
+   "md5": "29ee5d8c8761acd70378ccb133f4d183",
+   "leg": "q8_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n12_cap10_gate2_liqf5B_advprice_etfcreatpit_exp_n4_q12_off_univpit.csv",
+   "md5": "3c61290e525fe533b1e45f031676c91a",
+   "leg": "q12_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gatenone_qfloor_liqf5B_advprice_etfcreatpit_exp_n4_qf8_off_univpit.csv",
+   "md5": "88de487e0eb19cf0c594a89bf015afa3",
+   "leg": "qf8_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_advprice_etfcreatpit_exp_n4_secA_off_univpit.csv",
+   "md5": "b095c56b9381f4b1248cc9df96741b88",
+   "leg": "secA_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_advprice_etfcreatpit_exp_n4_secB_off_univpit.csv",
+   "md5": "1de6e6b1811df72b7aa10051351f5c6b",
+   "leg": "secB_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_advprice_etfcreatpit_exp_n4_secBx_off_univpit.csv",
+   "md5": "643a577e3e856f5e52653ed90ee04f2e",
+   "leg": "secBx_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_eyonly_off_univpit_exp_seleyonly.csv",
+   "md5": "8a32dea1f5ad9fdaa71150bded8b31f3",
+   "leg": "eyonly_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap30_advprice_etfcreatpit_exp_n4_fc30_off_univpit_exp_seleyonly.csv",
+   "md5": "9d96f5dd2d60f3db330792c8a85e51ba",
+   "leg": "fc30_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap45_advprice_etfcreatpit_exp_n4_fc45_off_univpit_exp_seleyonly.csv",
+   "md5": "9d2072373f547588349222f79887b234",
+   "leg": "fc45_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap55_advprice_etfcreatpit_exp_n4_fc55_off_univpit_exp_seleyonly.csv",
+   "md5": "67bb7e21fafcbc12f065170d64fbbc85",
+   "leg": "fc55_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_l1a_off_univpit.csv",
+   "md5": "359ff0f284f765db6d8347b89c38e480",
+   "leg": "l1a_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_l1b_off_univpit.csv",
+   "md5": "9a7a69289d618f71b09e0c7ebd8185d4",
+   "leg": "l1b_off"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_c70_1m_univpit_idledep1m.csv",
+   "md5": "c0084fae5027dfbe89d1d365247f1e77",
+   "leg": "c70_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gate2_liqf5B_advprice_etfcreatpit_exp_n4_q8_1m_univpit_idledep1m.csv",
+   "md5": "3660e549329933b138e6f860d5eb8f1e",
+   "leg": "q8_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n12_cap10_gate2_liqf5B_advprice_etfcreatpit_exp_n4_q12_1m_univpit_idledep1m.csv",
+   "md5": "efe8c24762d2b9993d7c18032ecef4bc",
+   "leg": "q12_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gatenone_qfloor_liqf5B_advprice_etfcreatpit_exp_n4_qf8_1m_univpit_idledep1m.csv",
+   "md5": "c57d290509e413f4175294cb9a234bd6",
+   "leg": "qf8_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_advprice_etfcreatpit_exp_n4_secA_1m_univpit_idledep1m.csv",
+   "md5": "a1106b39e328cb7bea143acec5800574",
+   "leg": "secA_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_advprice_etfcreatpit_exp_n4_secB_1m_univpit_idledep1m.csv",
+   "md5": "70f3122c18d309d959f97e49b4fc5fa3",
+   "leg": "secB_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_advprice_etfcreatpit_exp_n4_secBx_1m_univpit_idledep1m.csv",
+   "md5": "994b67ff2ddab3cb39c4f3999c3deb42",
+   "leg": "secBx_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_eyonly_1m_univpit_exp_seleyonly_idledep1m.csv",
+   "md5": "edb229b82390e0dbef672a549655752f",
+   "leg": "eyonly_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap30_advprice_etfcreatpit_exp_n4_fc30_1m_univpit_exp_seleyonly_idledep1m.csv",
+   "md5": "3a7f957e649dd6006398af0f2ca6b2d2",
+   "leg": "fc30_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap45_advprice_etfcreatpit_exp_n4_fc45_1m_univpit_exp_seleyonly_idledep1m.csv",
+   "md5": "84247501a19419323d7e43556e42f921",
+   "leg": "fc45_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap55_advprice_etfcreatpit_exp_n4_fc55_1m_univpit_exp_seleyonly_idledep1m.csv",
+   "md5": "e28a608ea88847fec1f89aa5ed0094b0",
+   "leg": "fc55_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_l1a_1m_univpit_idledep1m.csv",
+   "md5": "19b3c1ee0f7cdc3a63b63be37ca2a6ad",
+   "leg": "l1a_1m"
+  },
+  {
+   "path": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_etfcreatpit_exp_n4_l1b_1m_univpit_idledep1m.csv",
+   "md5": "fb9ef64eab796366c7f9245de6d5ce21",
+   "leg": "l1b_1m"
+  }
+ ]
+}

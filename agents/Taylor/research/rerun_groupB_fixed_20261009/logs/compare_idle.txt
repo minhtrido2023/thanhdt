@@ -1,0 +1,195 @@
+################ c70 off → 1m
+A  f524c1a086a8  n4_c70_off
+B  c0084fae5027  n4_c70_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.474        26.111        1.636pp
+   Sharpe252                1.700         1.795        0.095
+   MaxDD                  -18.685       -18.513        0.172pp
+   Calmar                   1.310         1.410        0.101
+   Final NAV (B)          765.011       900.175      135.164B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 f524c1a0…, B md5 c0084fae…).
+rc=0
+################ q8 off → 1m
+A  29ee5d8c8761  n4_q8_off
+B  3660e5493299  n4_q8_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.673        25.484        0.811pp
+   Sharpe252                1.635         1.680        0.045
+   MaxDD                  -19.059       -18.886        0.173pp
+   Calmar                   1.295         1.349        0.055
+   Final NAV (B)          780.388       846.052       65.664B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 29ee5d8c…, B md5 3660e549…).
+rc=0
+################ q12 off → 1m
+A  3c61290e525f  n4_q12_off
+B  efe8c24762d2  n4_q12_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.651        25.749        1.098pp
+   Sharpe252                1.679         1.757        0.078
+   MaxDD                  -18.097       -18.361       -0.264pp
+   Calmar                   1.362         1.402        0.040
+   Final NAV (B)          778.653       868.528       89.875B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 3c61290e…, B md5 efe8c247…).
+rc=0
+################ qf8 off → 1m
+A  88de487e0eb1  n4_qf8_off
+B  c57d290509e4  n4_qf8_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.010        25.539        1.529pp
+   Sharpe252                1.605         1.705        0.100
+   MaxDD                  -19.621       -19.345        0.276pp
+   Calmar                   1.224         1.320        0.097
+   Final NAV (B)          730.201       850.651      120.450B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 88de487e…, B md5 c57d2905…).
+rc=0
+################ secA off → 1m
+A  b095c56b9381  n4_secA_off
+B  a1106b39e328  n4_secA_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.415        26.175        1.760pp
+   Sharpe252                1.694         1.796        0.102
+   MaxDD                  -18.467       -18.312        0.154pp
+   Calmar                   1.322         1.429        0.107
+   Final NAV (B)          760.440       905.915      145.475B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 b095c56b…, B md5 a1106b39…).
+rc=0
+################ secB off → 1m
+A  1de6e6b1811d  n4_secB_off
+B  70f3122c18d3  n4_secB_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.427        26.206        1.779pp
+   Sharpe252                1.698         1.801        0.102
+   MaxDD                  -18.420       -18.263        0.156pp
+   Calmar                   1.326         1.435        0.109
+   Final NAV (B)          761.355       908.681      147.327B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 1de6e6b1…, B md5 70f3122c…).
+rc=0
+################ secBx off → 1m
+A  643a577e3e85  n4_secBx_off
+B  994b67ff2dda  n4_secBx_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.523        26.039        1.516pp
+   Sharpe252                1.702         1.791        0.088
+   MaxDD                  -18.680       -18.506        0.174pp
+   Calmar                   1.313         1.407        0.094
+   Final NAV (B)          768.710       893.841      125.131B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 643a577e…, B md5 994b67ff…).
+rc=0
+################ eyonly off → 1m
+A  8a32dea1f5ad  n4_eyonly_off
+B  edb229b82390  n4_eyonly_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.704        27.103        2.399pp
+   Sharpe252                1.727         1.881        0.154
+   MaxDD                  -17.518       -16.239        1.280pp
+   Calmar                   1.410         1.669        0.259
+   Final NAV (B)          782.787       992.516      209.729B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 8a32dea1…, B md5 edb229b8…).
+rc=0
+################ fc30 off → 1m
+A  9d96f5dd2d60  n4_fc30_off
+B  3a7f957e649d  n4_fc30_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.278        25.513        1.235pp
+   Sharpe252                1.692         1.769        0.077
+   MaxDD                  -17.756       -17.464        0.292pp
+   Calmar                   1.367         1.461        0.094
+   Final NAV (B)          750.098       848.440       98.342B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 9d96f5dd…, B md5 3a7f957e…).
+rc=0
+################ fc45 off → 1m
+A  9d2072373f54  n4_fc45_off
+B  84247501a194  n4_fc45_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.897        26.196        1.300pp
+   Sharpe252                1.724         1.820        0.096
+   MaxDD                  -17.266       -16.293        0.972pp
+   Calmar                   1.442         1.608        0.166
+   Final NAV (B)          797.987       907.852      109.865B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 9d207237…, B md5 84247501…).
+rc=0
+################ fc55 off → 1m
+A  67bb7e21fafc  n4_fc55_off
+B  e28a608ea888  n4_fc55_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    24.513        26.816        2.302pp
+   Sharpe252                1.720         1.865        0.145
+   MaxDD                  -18.115       -17.892        0.223pp
+   Calmar                   1.353         1.499        0.146
+   Final NAV (B)          767.987       964.942      196.955B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 67bb7e21…, B md5 e28a608e…).
+rc=0
+################ l1a off → 1m
+A  359ff0f284f7  n4_l1a_off
+B  19b3c1ee0f7c  n4_l1a_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    25.349        28.001        2.652pp
+   Sharpe252                1.773         1.959        0.186
+   MaxDD                  -18.128       -16.252        1.876pp
+   Calmar                   1.398         1.723        0.325
+   Final NAV (B)          834.774      1083.569      248.795B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 359ff0f2…, B md5 19b3c1ee…).
+rc=0
+################ l1b off → 1m
+A  9a7a69289d61  n4_l1b_off
+B  fb9ef64eab79  n4_l1b_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  IDLE_CARRY_TIER:  off → dep1m
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    27.331        28.772        1.441pp
+   Sharpe252                1.925         2.021        0.096
+   MaxDD                  -19.229       -17.138        2.090pp
+   Calmar                   1.421         1.679        0.257
+   Final NAV (B)         1014.966      1167.712      152.747B
+
+   Trích dẫn phải nói rõ trục: "IDLE_CARRY_TIER off → dep1m" (A md5 9a7a6928…, B md5 fb9ef64e…).
+rc=0

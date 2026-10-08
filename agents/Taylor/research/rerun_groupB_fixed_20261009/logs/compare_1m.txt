@@ -1,0 +1,188 @@
+################ c70 → q8 (1m)
+A  c0084fae5027  n4_c70_1m
+B  3660e5493299  n4_q8_1m
+
+🔴 KHÔNG SO TRỰC TIẾP ĐƯỢC — khác 4 TRỤC cùng lúc:
+     · BASKET_GATE_RATING: A=<không khai>  ≠  B=2
+     · BASKET_LIQ_FLOOR_B: A=<không khai>  ≠  B=5
+     · BASKET_TOPN: A=<không khai>  ≠  B=8
+     · BASKET_WT: A=namecap  ≠  B=ew
+
+   Hiệu của hai số này KHÔNG quy được về bất kỳ trục nào. Muốn có câu so sánh
+   hợp lệ thì chạy A/B đổi ĐÚNG 1 trục.
+rc=2
+################ q8 → q12 (1m)
+A  3660e5493299  n4_q8_1m
+B  efe8c24762d2  n4_q12_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_TOPN:  8 → 12
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    25.484        25.749        0.264pp
+   Sharpe252                1.680         1.757        0.076
+   MaxDD                  -18.886       -18.361        0.525pp
+   Calmar                   1.349         1.402        0.053
+   Final NAV (B)          846.052       868.528       22.476B
+
+   Trích dẫn phải nói rõ trục: "BASKET_TOPN 8 → 12" (A md5 3660e549…, B md5 efe8c247…).
+rc=0
+################ c70 → qf8 (1m)
+A  c0084fae5027  n4_c70_1m
+B  c57d290509e4  n4_qf8_1m
+
+🔴 KHÔNG SO TRỰC TIẾP ĐƯỢC — khác 5 TRỤC cùng lúc:
+     · BASKET_GATE_RATING: A=<không khai>  ≠  B=none
+     · BASKET_LIQ_FLOOR_B: A=<không khai>  ≠  B=5
+     · BASKET_QFLOOR: A=<không khai>  ≠  B=1
+     · BASKET_TOPN: A=<không khai>  ≠  B=8
+     · BASKET_WT: A=namecap  ≠  B=ew
+
+   Hiệu của hai số này KHÔNG quy được về bất kỳ trục nào. Muốn có câu so sánh
+   hợp lệ thì chạy A/B đổi ĐÚNG 1 trục.
+rc=2
+################ q8 → qf8 (1m)
+A  3660e5493299  n4_q8_1m
+B  c57d290509e4  n4_qf8_1m
+
+🔴 KHÔNG SO TRỰC TIẾP ĐƯỢC — khác 2 TRỤC cùng lúc:
+     · BASKET_GATE_RATING: A=2  ≠  B=none
+     · BASKET_QFLOOR: A=<không khai>  ≠  B=1
+
+   Hiệu của hai số này KHÔNG quy được về bất kỳ trục nào. Muốn có câu so sánh
+   hợp lệ thì chạy A/B đổi ĐÚNG 1 trục.
+rc=2
+################ c70 → secA (1m)
+A  c0084fae5027  n4_c70_1m
+B  a1106b39e328  n4_secA_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_WT:  namecap → sectorcap
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    26.111        26.175        0.064pp
+   Sharpe252                1.795         1.796        0.001
+   MaxDD                  -18.513       -18.312        0.200pp
+   Calmar                   1.410         1.429        0.019
+   Final NAV (B)          900.175       905.915        5.740B
+
+   Trích dẫn phải nói rõ trục: "BASKET_WT namecap → sectorcap" (A md5 c0084fae…, B md5 a1106b39…).
+rc=0
+################ secA → secB (1m)
+A  a1106b39e328  n4_secA_1m
+B  70f3122c18d3  n4_secB_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_SECCAP_MODE:  <không khai> → mktcap
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    26.175        26.206        0.031pp
+   Sharpe252                1.796         1.801        0.005
+   MaxDD                  -18.312       -18.263        0.049pp
+   Calmar                   1.429         1.435        0.006
+   Final NAV (B)          905.915       908.681        2.766B
+
+   Trích dẫn phải nói rõ trục: "BASKET_SECCAP_MODE <không khai> → mktcap" (A md5 a1106b39…, B md5 70f3122c…).
+rc=0
+################ secB → secBx (1m)
+A  70f3122c18d3  n4_secB_1m
+B  994b67ff2dda  n4_secBx_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_SECCAP_MODE:  mktcap → mktx1.5
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    26.206        26.039       -0.167pp
+   Sharpe252                1.801         1.791       -0.010
+   MaxDD                  -18.263       -18.506       -0.243pp
+   Calmar                   1.435         1.407       -0.028
+   Final NAV (B)          908.681       893.841      -14.840B
+
+   Trích dẫn phải nói rõ trục: "BASKET_SECCAP_MODE mktcap → mktx1.5" (A md5 70f3122c…, B md5 994b67ff…).
+rc=0
+################ c70 → eyonly (1m)
+A  c0084fae5027  n4_c70_1m
+B  edb229b82390  n4_eyonly_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_SELECT:  yieldcombo → eyonly
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    26.111        27.103        0.992pp
+   Sharpe252                1.795         1.881        0.086
+   MaxDD                  -18.513       -16.239        2.274pp
+   Calmar                   1.410         1.669        0.259
+   Final NAV (B)          900.175       992.516       92.341B
+
+   Trích dẫn phải nói rõ trục: "BASKET_SELECT yieldcombo → eyonly" (A md5 c0084fae…, B md5 edb229b8…).
+rc=0
+################ eyonly → fc30 (1m)
+A  edb229b82390  n4_eyonly_1m
+B  3a7f957e649d  n4_fc30_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_WT:  namecap → fincap
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    27.103        25.513       -1.590pp
+   Sharpe252                1.881         1.769       -0.112
+   MaxDD                  -16.239       -17.464       -1.225pp
+   Calmar                   1.669         1.461       -0.208
+   Final NAV (B)          992.516       848.440     -144.076B
+
+   Trích dẫn phải nói rõ trục: "BASKET_WT namecap → fincap" (A md5 edb229b8…, B md5 3a7f957e…).
+rc=0
+################ fc30 → fc45 (1m)
+A  3a7f957e649d  n4_fc30_1m
+B  84247501a194  n4_fc45_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_FIN_CAP:  <không khai> → 0.45
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    25.513        26.196        0.684pp
+   Sharpe252                1.769         1.820        0.051
+   MaxDD                  -17.464       -16.293        1.171pp
+   Calmar                   1.461         1.608        0.147
+   Final NAV (B)          848.440       907.852       59.412B
+
+   Trích dẫn phải nói rõ trục: "BASKET_FIN_CAP <không khai> → 0.45" (A md5 3a7f957e…, B md5 84247501…).
+rc=0
+################ fc45 → fc55 (1m)
+A  84247501a194  n4_fc45_1m
+B  e28a608ea888  n4_fc55_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_FIN_CAP:  0.45 → 0.55
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    26.196        26.816        0.619pp
+   Sharpe252                1.820         1.865        0.045
+   MaxDD                  -16.293       -17.892       -1.598pp
+   Calmar                   1.608         1.499       -0.109
+   Final NAV (B)          907.852       964.942       57.090B
+
+   Trích dẫn phải nói rõ trục: "BASKET_FIN_CAP 0.45 → 0.55" (A md5 84247501…, B md5 e28a608e…).
+rc=0
+################ c70 → l1a (1m)
+A  c0084fae5027  n4_c70_1m
+B  19b3c1ee0f7c  n4_l1a_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_CFO_POOL:  <không khai> → 90
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    26.111        28.001        1.891pp
+   Sharpe252                1.795         1.959        0.164
+   MaxDD                  -18.513       -16.252        2.261pp
+   Calmar                   1.410         1.723        0.313
+   Final NAV (B)          900.175      1083.569      183.394B
+
+   Trích dẫn phải nói rõ trục: "BASKET_CFO_POOL <không khai> → 90" (A md5 c0084fae…, B md5 19b3c1ee…).
+rc=0
+################ l1a → l1b (1m)
+A  19b3c1ee0f7c  n4_l1a_1m
+B  fb9ef64eab79  n4_l1b_1m
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  BASKET_CFO_POOL:  90 → 120
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    28.001        28.772        0.771pp
+   Sharpe252                1.959         2.021        0.062
+   MaxDD                  -16.252       -17.138       -0.886pp
+   Calmar                   1.723         1.679       -0.044
+   Final NAV (B)         1083.569      1167.712       84.143B
+
+   Trích dẫn phải nói rõ trục: "BASKET_CFO_POOL 90 → 120" (A md5 19b3c1ee…, B md5 fb9ef64e…).
+rc=0
