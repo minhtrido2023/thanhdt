@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-06T03:48:16Z] [sell-split 10-06] XONG job Taylor_20261006_033324: fix/sell-split-by-loan-package-20261006@e7715cd0 (wt-sellsplit-1006), 49/49 x4, mut 20/20. CHỜ Mike arch-review + user duyệt merge; bot ZaloPay chưa có fix tới khi merge+restart.
 - [2026-10-06T04:11:06Z] [2026-10-06 sell-split r2] XONG job Taylor_20261006_040234: fix/sell-split-by-loan-package-20261006@8a669a9a, 24/24 mut. CHỜ Mike arch-review + user duyệt merge + restart bot ZaloPay.
 - [2026-10-06T04:25:16Z] [lane-C 10-06] XONG job Taylor_20261006_041048: feat/funnel-lane-c-20261006@9cf42868 (wt-lanec-1006), 193/193 x4TZ x2py, mut 40/40. CHỜ Mike arch-review + user duyệt merge (cron 19:37 dùng lại, không đổi).
 - [2026-10-06T04:43:31Z] [lane-C r2 10-06] XONG job Taylor_20261006_043550: feat/funnel-lane-c-20261006@ce0d4aa8, 210/210 x4TZ x2py, mut 56/56 (tmpdir copy). CHỜ Mike arch-review r2 + merge trước cron 19:37.
@@ -26,3 +25,4 @@
 - [2026-10-08T04:48:53Z] ĐANG DỞ job Taylor_20261008_042322 adjfactor awaiting r3: sửa 5 mục arch-review (wt-await-1008 @c2854372) | NEXT: selfcheck+mut, review lại 1 lần, merge
 - [2026-10-08T05:49:34Z] [adjfactor awaiting 10-08] DUNG sau arch-review vong 2 NEEDS_CHANGES (feat/adjfactor-awaiting-trade-20261008@25cf9a22, wt-await-1008): B1 _state_write msg duong xoa khoa, B2 alert.sh:560 dung -n DRIFTS, B3 test khe 1-2 phien, B4 dry-run lai sau r3. CHO Mike/user cho phep r4 roi merge.
 - [2026-10-08T06:30:28Z] ĐANG DỞ job Taylor_20261008_055312 adjfactor awaiting r4: commit 9e4a6bd1 (wt-await-1008), 570/570 x4, mut 64/64 | NEXT: arch-review 1 lần → APPROVED squash merge mike master / NEEDS_CHANGES ghi finding dừng
+- [2026-10-08T07:11:40Z] [adjfactor awaiting 10-08] MERGED 18f2317c (r4, APPROVED) — xoá dòng ĐANG DỞ/DUNG cũ của job này; worktree wt-await-1008 có thể dọn.

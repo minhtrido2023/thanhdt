@@ -925,3 +925,6 @@
 
 ## Archived 2026-10-08 (keep=12 days=0 require_done=False)
 - [2026-10-05T20:23:56Z] [intraday-watch r2] XONG job Taylor_20261005_195221: feat/intraday-price-watch-20261006@42d099e8, 268/268 x4TZ x2py, mut 119/121 (2 tuong duong). CHO Mike arch-review + user chot mac dinh a-d + merge/cron (proposed: kb/cron_registry.md.proposed).
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-06T03:48:16Z] [sell-split 10-06] XONG job Taylor_20261006_033324: fix/sell-split-by-loan-package-20261006@e7715cd0 (wt-sellsplit-1006), 49/49 x4, mut 20/20. CHỜ Mike arch-review + user duyệt merge; bot ZaloPay chưa có fix tới khi merge+restart.
