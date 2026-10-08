@@ -1,0 +1,6 @@
+state,N_sess,N_idle,sess_block_idle,pct_idle_sess_blocked,cand_blocked_per_blk_sess,lost_cands_idle,bal_cash_at_block_med,bal_cash_at_block_p90,lag_cash_comb_idle
+CRISIS,489,395,2,0.005,11.5,23,0.1247,0.2244,0.242
+BEAR,241,198,0,0.0,0.0,0,,,0.0
+NEUTRAL,1895,1506,24,0.016,2.67,64,0.092,0.1074,0.341
+BULL,422,333,265,0.796,7.54,1998,0.005,0.1602,0.371
+EXBULL,60,52,40,0.769,10.55,422,0.0711,0.1779,0.406

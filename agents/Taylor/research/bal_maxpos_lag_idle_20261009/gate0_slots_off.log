@@ -1,0 +1,51 @@
+outcomes: {'SLOT_BLOCK': 2730, 'FILL_START': 396, 'CASH_SKIP': 89}
+entries: 3215 | ever slot-blocked: 2730 | blocked then filled later: 0 | blocked & never filled (lost to slot): 2730
+
+GATE-0 by state (LAG-idle sessions):
+  state  N_sess  N_idle  sess_block_idle  pct_idle_sess_blocked  cand_blocked_per_blk_sess  lost_cands_idle  bal_cash_at_block_med  bal_cash_at_block_p90  lag_cash_comb_idle
+ CRISIS     489     395                2                  0.005                      11.50               23                 0.1247                 0.2244               0.242
+   BEAR     241     198                0                  0.000                       0.00                0                    NaN                    NaN               0.000
+NEUTRAL    1895    1506               24                  0.016                       2.67               64                 0.0920                 0.1074               0.341
+   BULL     422     333              265                  0.796                       7.54             1998                 0.0050                 0.1602               0.371
+ EXBULL      60      52               40                  0.769                      10.55              422                 0.0711                 0.1779               0.406
+
+QUALITY (fwd 45d from Open at would-be fill):
+                     n  n_dates  r_mean   r_med  ex_mean     hit
+grp          era                                                
+LOST_TO_SLOT IS    142       47 -0.0000 -0.0193  -0.0145  0.5070
+             OOS  2588      339  0.1060  0.0474   0.0540  0.4900
+STARTED      IS     86       61  0.0776  0.0230   0.0527  0.4884
+             OOS   305      109  0.0899  0.0559   0.0401  0.5180
+
+QUALITY BULL+EXBULL only:
+                     n  n_dates  r_mean  ex_mean     hit
+grp          era                                        
+LOST_TO_SLOT IS    122       39  0.0078  -0.0188  0.5000
+             OOS  2494      312  0.1006   0.0477  0.4844
+STARTED      IS     22       10 -0.0126  -0.0364  0.4545
+             OOS   216       62  0.0900   0.0389  0.5093
+
+per-date mean excess: STARTED 0.0553 (N=170 dates) | LOST 0.0530 (N=386 dates)
+
+BLOCKED EPISODES (ticker, <=5-session gaps merged): 531 | later started within 20 sessions: 101
+         n_ep  n_idle  med_days
+st                             
+BULL      404     343       3.0
+CRISIS      3       3       1.0
+EXBULL    107      97       4.0
+NEUTRAL    17      12       1.0
+
+EPISODE quality (fwd 45d from Open at first block), never-started episodes:
+       n  r_mean   r_med  ex_mean  ex_med     hit
+era                                              
+IS    29 -0.0100 -0.0254  -0.0321 -0.0678  0.3793
+OOS  401  0.0645  0.0068   0.0159 -0.0258  0.4439
+STARTED entries:
+       n  r_mean   r_med  ex_mean  ex_med     hit
+era                                              
+IS    86  0.0776  0.0230   0.0527 -0.0049  0.4884
+OOS  305  0.0899  0.0559   0.0401  0.0075  0.5180
+
+blocked-episode mean excess by year: {2018: {'size': 29, 'mean': -0.0321}, 2020: {'size': 60, 'mean': 0.1253}, 2021: {'size': 222, 'mean': 0.0105}, 2024: {'size': 36, 'mean': 0.0595}, 2025: {'size': 70, 'mean': -0.0732}, 2026: {'size': 13, 'mean': -0.0391}}
+
+BAL cash/BAL NAV at block time, BULL+EXBULL: mean 0.0564 med 0.0068 | share of block-sessions with cash<1%: 0.524
