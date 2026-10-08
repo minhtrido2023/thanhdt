@@ -1007,3 +1007,12 @@
 - [2026-10-08T13:04:49Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261008_123443", "source": "watcher"}
 - [2026-10-08T13:05:50Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261008_123443", "source": "watcher"}
 - [2026-10-08T13:06:50Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+
+## Consolidation 2026-10-08T13:13:36Z
+- [2026-10-08T13:07:50Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+- [2026-10-08T13:08:51Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+- [2026-10-08T13:09:51Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+- [2026-10-08T13:10:51Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+- [2026-10-08T13:11:51Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+- [2026-10-08T13:12:51Z] Taylor/heartbeat — Taylor_20261008_123443: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261008_123443", "source": "watcher"}
+- [2026-10-08T13:13:23Z] Taylor/finding — adjfactor-pfm-nonblockers: MERGED 787ddac4: {"status": "MERGED", "sha": "787ddac4", "branch": "chore/adjfactor-pfm-nonblockers-20261008", "branch_head": "334a71f2", "arch_review_r2": "APPROVED (CONFIRMED)", "selfcheck": "843/843 x python3+DNA_PYEXE x (unset TZ, LA, Kiritimati); reviewer them Chatham", "mutation": "142/142 killed ca 2 py (gom B,C,K,L moi)", "dry_run": "detect 190 dong giong master asof 2026-10-08 (new=4 vs 0 do state de-dup rieng cua worktree)", "note_non_blocking": "comment adjfactor_drift_alert.sh ~57-59 noi DRIFT o MOI win0 nen them tru ngoai le (a)"}
