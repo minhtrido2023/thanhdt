@@ -946,6 +946,22 @@ def test_r2():
           and any("VNINDEX" in m["msg"] and "CẢ THỊ TRƯỜNG" in m["msg"] for m in st["outbox"])
           and any("SỨC KHOẺ" in m["msg"] and "vnindex" in m["msg"] for m in st["outbox"]))
     shutil.rmtree(tmp)
+    # 08/10: quét 09:15:01 chưa có bar VNINDEX nào (DNSE phát bar sau khi phút đóng) ⇒ KHÔNG cảnh báo sức khoẻ
+    for pend, vni, alert, label in ((True, (None, 1000.0), False, "đầu phiên chờ bar"),
+                                    (True, (None, None), True, "đầu phiên nhưng thiếu cả ref"),
+                                    (False, (None, 1000.0), True, "ngoài đầu phiên")):
+        tmp = tempfile.mkdtemp(prefix="ipw_sc_")
+        mkt = MultiMarket(Clock(), {"AAA": {"09:15": 100_000}}, exch="HNX", vni=vni, quote_err=(), ref=100_000)
+        mkt.vni_pending_open = pend
+        deps = _deps(tmp, mkt, _uni_multi({"AAA": 1000}), dispatch=False)
+        st = _drive(tmp, mkt, deps, "09:15", "09:15")
+        got = any("SỨC KHOẺ" in m["msg"] and "vnindex" in m["msg"] for m in st["outbox"])
+        check(f"VNINDEX {label} ⇒ {'CÓ' if alert else 'KHÔNG'} cảnh báo sức khoẻ", got == alert,
+              str([m["msg"][:80] for m in st["outbox"]]))
+        if not alert:
+            check(f"VNINDEX {label} ⇒ ghi log VNI_PENDING_OPEN",
+                  any(r["kind"] == "VNI_PENDING_OPEN" for r in _log(tmp)))
+        shutil.rmtree(tmp)
     flo = {"09:15": 100_000, "09:59": 93_000}
     st, deps, tmp, _ = multi({"AAA": flo, "BBB": flo}, {"AAA": 1000, "BBB": 1000}, exch="HOSE", vni=(940.0, 1000.0))
     check("(4) 2 mã chạm sàn ⇒ gộp", not st["cases"] and any("chạm sàn" in m["msg"] for m in st["outbox"]))
@@ -1224,7 +1240,9 @@ def test_r2():
             if resolution == "1D":
                 t = dt.datetime.combine(d - dt.timedelta(days=1), dt.time(15)).replace(tzinfo=W._ICT)
                 return {"t": [int(t.timestamp())], "c": [1759.08], "v": [0]}
-            t = dt.datetime.combine(d, dt.time(*self.last_hm)).replace(tzinfo=W._ICT)
+            t = dt.datetime.combine(d, dt.time(*(self.last_hm or (0, 0)))).replace(tzinfo=W._ICT)
+            if self.last_hm is None:
+                return {"t": [], "c": [], "v": []}
             return {"t": [int(t.timestamp())], "c": [1750.0], "v": [0]}
 
     old_now = W._now
@@ -1232,7 +1250,12 @@ def test_r2():
         for now_hm, last_hm, ok, label in (((11, 15, 1), (11, 14), True, "bar tươi"),
                                            ((11, 15, 1), (9, 29), False, "bar 09:29 lúc 11:15 (ca thật)"),
                                            ((12, 0, 1), (11, 29), True, "nghỉ trưa, bar 11:29"),
-                                           ((14, 40, 1), (14, 29), True, "ATC, bar 14:29")):
+                                           ((14, 40, 1), (14, 29), True, "ATC, bar 14:29"),
+                                           ((13, 0, 1), (11, 29), True, "13:00:01 chưa có bar chiều (ca thật 07/10)"),
+                                           ((13, 3, 0), (11, 29), False, "13:03 vẫn kẹt bar 11:29"),
+                                           ((9, 16, 30), (9, 15), True, "09:16:30 đã có bar 09:15"),
+                                           ((9, 15, 1), None, None, "09:15:01 chưa có bar (ca thật 08/10)"),
+                                           ((9, 30, 1), None, None, "09:30 vẫn rỗng")):
             now = dt.datetime(2026, 10, 7, *now_hm)
             W._now = lambda now=now: now
             oc = OC(last_hm)
@@ -1241,9 +1264,15 @@ def test_r2():
             lm.ro = W.ReadOnlyDNSE(oc)
             vl, vr = lm.vni(now)
             to = dt.datetime.fromtimestamp(oc.tos[0], W._ICT).replace(tzinfo=None)
-            check(f"VNINDEX {label}: {'đọc được' if ok else 'None + lý do'}",
-                  (vl == 1750.0 and lm.vni_note is None) if ok else
-                  (vl is None and "quá cũ" in (lm.vni_note or "")), f"{vl} {lm.vni_note}")
+            if ok is None:
+                pend = now_hm[:2] == (9, 15)
+                check(f"VNINDEX {label}: None, vni_pending_open={pend}",
+                      vl is None and lm.vni_pending_open is pend, f"{vl} {lm.vni_pending_open}")
+            else:
+                check(f"VNINDEX {label}: {'đọc được' if ok else 'None + lý do'}",
+                      (vl == 1750.0 and lm.vni_note is None) if ok else
+                      (vl is None and "quá cũ" in (lm.vni_note or "")), f"{vl} {lm.vni_note}")
+                check(f"VNINDEX {label}: có bar ⇒ vni_pending_open=False", lm.vni_pending_open is False)
             check(f"VNINDEX {label}: `to` = phút hiện tại +1 (chống cache URL)",
                   to == now.replace(second=0) + dt.timedelta(minutes=1) and vr == 1759.08, f"{to} {vr}")
     finally:

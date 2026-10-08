@@ -116,6 +116,8 @@ EOD_SUMMARY_AT = dt.time(14, 50)
 QUOTE_ERR_ALERT = 0.5              # tỉ lệ lỗi lấy giá trong 1 lượt quét ⇒ cảnh báo sức khoẻ
 HEALTH_ALERT_EVERY_MIN = 60        # cảnh báo sức khoẻ cùng loại tối đa 1 lần/60'
 VNI_MAX_AGE_MIN = 5                # bar VNINDEX cuối cũ hơn ⇒ coi như không đọc được (DNSE cache theo URL)
+OPEN_GRACE_MIN = 2                 # DNSE chỉ phát bar 1 phút SAU khi phút đó đóng (đo 08/10) ⇒ lượt quét đúng
+                                   # giây mở phiên (09:15:01 / 13:00:01) chưa thể có bar của phiên đó
 REPLY_PREFIX = E.REPLY_PREFIX_SHADOW
 SHADOW_NOTE = "ĐÂY LÀ CHẠY THỬ (SHADOW), KHÔNG CÓ LỆNH THẬT"
 NO_CARRY = TERMINAL + ("HOLD",)          # sang phiên mới: ca HOLD đóng, mã được kích hoạt lại
@@ -227,12 +229,16 @@ class LiveMarket:
         """(vni_last, vni_ref) — ref = đóng cửa 1D phiên trước."""
         bars = self.bars("VNINDEX", now.date(), index=True)
         last = bars[-1][1] if bars else None
+        n = now.replace(tzinfo=None)
+        grace = dt.timedelta(minutes=OPEN_GRACE_MIN)
+        # 09:15 + vài phút đầu: chưa có bar nào là BÌNH THƯỜNG, không phải nguồn hỏng ⇒ _scan không cảnh báo
+        self.vni_pending_open = not bars and \
+            dt.timedelta(0) <= n - n.replace(hour=9, minute=15, second=0, microsecond=0) < grace
         self.vni_note = None if bars else "không có bar 1 phút nào"
         if bars:
             # nghỉ trưa / sau 14:30 không có bar mới — so với mốc cuối phiên đang mở, không với `now`
-            n = now.replace(tzinfo=None)
             ref_t = n
-            if dt.time(11, 30) <= n.time() < dt.time(13, 0):
+            if dt.time(11, 30) <= n.time() < (dt.datetime.combine(n.date(), dt.time(13)) + grace).time():
                 ref_t = n.replace(hour=11, minute=30, second=0, microsecond=0)
             elif n.time() >= dt.time(14, 30):
                 ref_t = n.replace(hour=14, minute=30, second=0, microsecond=0)
@@ -1094,7 +1100,9 @@ def _scan(now, deps, st):
     for e in errs:
         health_alert(st, "positions", e, now, deps)
     vl, vr = deps.market.vni(now)
-    if not (vl and vr):
+    if not (vl and vr) and vr and getattr(deps.market, "vni_pending_open", False):
+        log_event(deps.state_dir, day, "VNI_PENDING_OPEN", now=now, vni=[vl, vr])
+    elif not (vl and vr):
         why = getattr(deps.market, "vni_note", None)
         health_alert(st, "vnindex", f"không đọc được VNINDEX (last={vl}, ref={vr}"
                                     f"{'; ' + why if why else ''}) ⇒ idio = ret; mọi kích hoạt "
