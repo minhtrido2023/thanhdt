@@ -45,3 +45,4 @@
 - Sáng 09/10: kiểm `logs/selfcheck_red_owner_sweep.log` (lượt đầu cron Thứ Sáu).
 - KHÔNG đặt wakeup thăm dò khi không có job nền đang chờ kết quả (user 10-05).
 
+- [2026-10-08T18:15:56Z] 09/10 01:2x: Nhánh 4 xong — Taylor_20261008_172556 c8e096e7, skeptic CONFIRMED high (verify_20261008_181403). Q8/Q12 hết ý nghĩa, QF8/fc30 NO-GO hẹp, L1b chưa chứng minh (DSR<0.95), claim breadth sai OOS. CHỜ USER: duyệt sửa câu canonical breadth + .proposed registry + nhánh 5.
