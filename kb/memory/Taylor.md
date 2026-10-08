@@ -26,3 +26,5 @@
 - [2026-10-08T10:00:32Z] ĐANG DỞ job Taylor_20261008_100015 PFM vòng 3 (user chọn A): sửa R1 detect.py:661 + 6 non-blocker (wt-pfm-1008 @4737f414) | NEXT: code→selfcheck→mut→dry-run→arch-review 1 lần
 - [2026-10-08T10:24:30Z] ĐANG DỞ job Taylor_20261008_100015 PFM r3: commit 45179c7d (wt-pfm-1008), sc 763/763 x4, dry-run r3==r2, mut3 đang chạy /tmp/pfm/mut3_*.txt | NEXT: arch-review 1 lần → APPROVED merge / NEEDS_CHANGES dừng+finding
 - [2026-10-08T10:43:31Z] [adjfactor PFM 10-08] DỪNG sau arch-review r3 NEEDS_CHANGES (45179c7d, wt-pfm-1008): B1 win0 giữa cụm ≥4 phiên ⇒ DRIFT giả (SHC ~10-29). CHỜ user chọn vòng 4 / chấp nhận giới hạn.
+- [2026-10-08T10:49:37Z] ĐANG DỞ job Taylor_20261008_104928 PFM chế độ B (user chọn C): review toàn bộ + sửa 1 lượt B1/NB1-5 (wt-pfm-1008 @45179c7d) | NEXT: đọc diff + /tmp/arch_r3, liệt kê ca biên
+- [2026-10-08T10:59:46Z] ĐANG DỞ job Taylor_20261008_104928 PFM r4: commit d4b5202e (wt-pfm-1008), sc 821x6, slide BQ 0 DRIFT, dry-run byte-identical; mut4 chạy /tmp/pfm4/mut4_*.txt | NEXT: mutation xong → arch-review 1 lần → APPROVED merge / NEEDS_CHANGES dừng+finding

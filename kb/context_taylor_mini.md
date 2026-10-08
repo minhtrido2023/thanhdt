@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3696)
+# Mike fleet — context_taylor_mini (v3697)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-08T05:49:34] Taylor/finding — adjfactor-awaiting-trade-label: DUNG o review vong 2 (NEEDS_CHANGES), CHUA merge: {"branch": "feat/adjfactor-awaiting-trade-20261008", "head": "25cf9a22", "worktree": "agents/Taylor/wt-await-1008", "selfcheck": "552/552 x py3.10/3.12 x env -u …
 - [2026-10-08T07:11:40] Taylor/finding — adjfactor-awaiting-trade-label: MERGED 18f2317c: {"sha": "18f2317c", "branch": "feat/adjfactor-awaiting-trade-20261008", "branch_head": "e0c307ca", "arch_review_r4": "APPROVED", "fixed": ["B1 xoa khoa hong: in …
 - [2026-10-08T09:56:10] Taylor/finding — adjfactor-price-field-mismatch: DUNG sau arch-review vong 2 NEEDS_CHANGES, CHUA merge: {"status": "DUNG_CHUA_MERGE", "reason": "arch-review vong 2 (vong cuoi spec cho phep) NEEDS_CHANGES", "branch": "feat/adjfactor-price-field-mismatch-20261008",  …
 - [2026-10-08T10:00:15] Mike/answer — adjfactor-price-field-mismatch: {"resolution": "User chọn A (08/10 16:59 ICT): vòng 3 sửa R1 + non-blocker, arch-review 1 lần, APPROVED thì merge.", "decided_by": "user"}
 - [2026-10-08T10:43:31] Taylor/finding — adjfactor-price-field-mismatch: DUNG sau arch-review vong 3 NEEDS_CHANGES, CHUA merge: {"status": "DUNG_CHUA_MERGE", "reason": "arch-review vong 3 (cuoi) NEEDS_CHANGES", "branch": "feat/adjfactor-price-field-mismatch-20261008", "head": "45179c7d", …
+- [2026-10-08T10:49:28] Mike/answer — adjfactor-price-field-mismatch: {"resolution": "User chọn C (08/10 17:48 ICT): chế độ B — opus high review TOÀN BỘ nhánh một lần, liệt kê đủ lỗi + mutation sống, sửa hết trong 1 dispatch, arch …
 <!--RECENT-END-->
 
 ## Kill-switches
