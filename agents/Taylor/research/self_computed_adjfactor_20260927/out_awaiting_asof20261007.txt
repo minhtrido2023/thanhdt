@@ -1,0 +1,177 @@
+# r4 (job Taylor_20261008_055312) — code head 25cf9a22+r4 B1-B3, chay 2026-10-08 12:59 ICT: python3 bin/adjfactor_drift_detect.py --asof 2026-10-07
+# adjfactor Layer 1 DETECT-ONLY | asof=2026-10-07 | universe=cohort ex-date 2026-09-07..2026-10-07 + 7 ma dang nam LIVE -> 156 ma
+# cua so danh gia 2026-06-09..2026-10-07 (nap tu 2026-05-15 de tim phien cum cuoi) | dev_tol=0.300% min_run=3
+# vi the LIVE: 14 ma
+ADJFACTOR_FEED|FRESH|2026-10-07T22:49:45+07:00|2026-10-06|36471|0|
+# feed corporate_action: FRESH {'max_ingested_ict': '2026-10-07T22:49:45+07:00', 'max_public': '2026-10-06', 'rows': '36471', 'age_days': 0}
+ADJFACTOR_DRIFT|VHF|2026-10-02|0.405405|1.239669|-0.672973|8|2026-06-09|2026-06-18|vendor_missing|none|0
+ADJFACTOR_DRIFT|SHC|2026-09-09|0.922947|1.050000|-0.121003|8|2026-06-30|2026-07-09|vendor_missing|none|0
+ADJFACTOR_DRIFT|CC1|2026-09-15|1.130146|1.050000|0.076330|3|2026-08-06|2026-08-10|our_table_missing|none|0
+ADJFACTOR_DRIFT|HC1|2026-09-22|1.117550|1.084746|0.030241|9|2026-07-09|2026-07-21|our_table_missing|none|0
+ADJFACTOR_DRIFT|DVN|2026-09-11|1.047766|1.058480|-0.010122|3|2026-06-19|2026-06-23|vendor_missing|none|0
+ADJFACTOR_DRIFT|DRI|2026-09-22|1.064955|1.072464|-0.007002|3|2026-09-10|2026-09-14|vendor_missing|SpaceX,ZaloPay|0
+ADJFACTOR_DRIFT|PBP|2026-09-14|1.089494|1.085000|0.004142|56|2026-06-09|2026-09-11|our_table_missing|none|0
+ADJFACTOR_DRIFT|VFR|2026-09-21|1.067073|1.063830|0.003049|16|2026-07-02|2026-07-23|our_table_missing|none|0
+ADJFACTOR_AWAITING_TRADE|CKV|2026-10-01|0|none|-0.049231
+ADJFACTOR_AWAITING_TRADE|HES|2026-09-18|0|none|-0.070589
+ADJFACTOR_AWAITING_TRADE|INC|2026-10-06|0|none|-0.048077
+ADJFACTOR_AWAITING_TRADE|IRC|2026-09-29|0|none|-0.169787
+ADJFACTOR_AWAITING_TRADE|PIS|2026-10-02|0|none|-0.091304
+ADJFACTOR_AWAITING_TRADE|PLE|2026-09-07|0|none|-0.016000
+ADJFACTOR_AWAITING_TRADE|PPS|2026-10-07|0|none|-0.079000
+ADJFACTOR_AWAITING_TRADE|QHW|2026-09-29|0|none|-0.035294
+ADJFACTOR_UNCOMPUTABLE|ALT|2026-09-29|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|AVC|2026-09-29|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|BCF|2026-09-17|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|BHN|2026-09-15|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|BVB|2026-09-23|rights_issue_no_subscription_price|none
+ADJFACTOR_UNCOMPUTABLE|BXH|2026-09-11|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|DNC|2026-09-08|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|DNN|2026-09-09|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|DWS|2026-09-22|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|GTA|2026-09-14|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|GTS|2026-09-14|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|HUB|2026-09-09|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|L12|2026-09-30|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|LAS|2026-10-01|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|LPT|2026-09-22|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|MBB|2026-08-11|rights_issue_no_subscription_price|SpaceX,ZaloPay
+ADJFACTOR_UNCOMPUTABLE|NDN|2026-09-28|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|NDX|2026-09-18|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|NET|2026-10-05|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|NHC|2026-09-10|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|NVL|2026-09-30|rights_issue_no_subscription_price|none
+ADJFACTOR_UNCOMPUTABLE|PAT|2026-09-15|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|PDB|2026-09-25|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|PGB|2026-10-06|rights_issue_no_subscription_price|none
+ADJFACTOR_UNCOMPUTABLE|PHR|2026-09-11|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|PMP|2026-09-18|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|PNC|2026-09-17|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|PNP|2026-10-01|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|PSE|2026-10-05|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|SBM|2026-09-15|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|SBR|2026-09-30|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|SEA|2026-09-21|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|SGC|2026-09-16|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|SPD|2026-09-10|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|SZE|2026-09-14|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|TMS|2026-09-25|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|TNC|2026-09-21|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|TPB|2026-10-02|price_ffill_suspect|SpaceX
+ADJFACTOR_UNCOMPUTABLE|VAV|2026-09-08|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|VGV|2026-10-05|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|VLA|2026-09-18|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|VLW|2026-09-10|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|VNM|2026-06-26|price_ffill_suspect|SpaceX,ZaloPay
+ADJFACTOR_UNCOMPUTABLE|XHC|2026-07-22|price_ffill_suspect|none
+ADJFACTOR_UNCOMPUTABLE|XMP|2026-09-17|price_ffill_suspect|none
+ADJFACTOR_NODATA|BLN|none
+ADJFACTOR_NODATA|CKA|none
+ADJFACTOR_NODATA|CLI|none
+ADJFACTOR_NODATA|CMP|none
+ADJFACTOR_NODATA|GE2|none
+ADJFACTOR_NODATA|HD8|none
+ADJFACTOR_NODATA|HHN|none
+ADJFACTOR_NODATA|NWT|none
+ADJFACTOR_NODATA|SAL|none
+ADJFACTOR_NODATA|TD6|none
+ADJFACTOR_NODATA|TRS|none
+ADJFACTOR_NODATA|TW3|none
+ADJFACTOR_NODATA|WTC|none
+ADJFACTOR_SCAN|2026-10-07|156|8|45|82|13
+
+-- ket qua: DRIFT 8 | AWAITING_TRADE 8 | UNCOMPUTABLE 45 | AGREE 82 | NODATA 13 --
+
+AWAITING_TRADE (vendor chua ap he so vi < 3 phien khop tu ex-date, lech khop dung he so cho — BINH THUONG, khong phai DRIFT):
+tk     held                 r_obs    r_pred       dev  run  window                  ex           n_khop        du
+CKV    none              1.000000  1.051780  -4.9231%   20  2026-06-09..2026-08-14   2026-10-01        0  +0.0000%
+HES    none              1.000000  1.075950  -7.0589%   13  2026-06-09..2026-07-15   2026-09-18        0  +0.0000%
+INC    none              1.000000  1.050505  -4.8077%    8  2026-06-09..2026-06-18   2026-10-06        0  +0.0000%
+IRC    none              1.000000  1.204511 -16.9787%    8  2026-06-09..2026-06-18   2026-09-29        0  +0.0000%
+PIS    none              1.000000  1.100478  -9.1304%   30  2026-06-09..2026-09-15   2026-10-02        0  +0.0000%
+PLE    none              1.000000  1.016260  -1.6000%    8  2026-06-09..2026-06-18   2026-09-07        0  +0.0000%
+PPS    none              1.000000  1.085776  -7.9000%   38  2026-06-09..2026-10-06   2026-10-07        0  +0.0000%
+QHW    none              1.000000  1.036585  -3.5294%   29  2026-06-09..2026-09-28   2026-09-29        0  +0.0000%
+
+-- chung tu he so cua cac ma AWAITING_TRADE --
+   CKV: 2026-10-01 DIV 640d tren gia tho 13000 (2026-08-14) -> f=1.051780
+   HES: 2026-09-18 ISS Cổ phiếu thưởng 0.07595 -> f=1.075950 (khong co chan tien)
+   INC: 2026-10-06 DIV 625d tren gia tho 13000 (2026-06-18) -> f=1.050505
+   IRC: 2026-09-29 DIV 798d tren gia tho 4700 (2026-06-18) -> f=1.204511
+   PIS: 2026-10-02 DIV 1050d tren gia tho 11500 (2026-09-15) -> f=1.100478
+   PLE: 2026-09-07 DIV 1000d tren gia tho 62500 (2026-06-18) -> f=1.016260
+   PPS: 2026-10-07 DIV 790d tren gia tho 10000 (2026-10-06) -> f=1.085776
+   QHW: 2026-09-29 DIV 1200d tren gia tho 34000 (2026-09-28) -> f=1.036585
+
+tk     held                 r_obs    r_pred       dev  run  window                  dir
+VHF    none              0.405405  1.239669 -67.2973%    8  2026-06-09..2026-06-18   vendor_missing
+SHC    none              0.922947  1.050000 -12.1003%    8  2026-06-30..2026-07-09   vendor_missing
+CC1    none              1.130146  1.050000  +7.6330%    3  2026-08-06..2026-08-10   our_table_missing
+HC1    none              1.117550  1.084746  +3.0241%    9  2026-07-09..2026-07-21   our_table_missing
+DVN    none              1.047766  1.058480  -1.0122%    3  2026-06-19..2026-06-23   vendor_missing
+DRI    SpaceX,ZaloPay    1.064955  1.072464  -0.7002%    3  2026-09-10..2026-09-14   vendor_missing
+PBP    none              1.089494  1.085000  +0.4142%   56  2026-06-09..2026-09-11   our_table_missing
+VFR    none              1.067073  1.063830  +0.3049%   16  2026-07-02..2026-07-23   our_table_missing
+
+-- chung tu he so cua cac ma DRIFT (doc de truy lai, khong phai ket luan) --
+   VHF: 2026-10-02 DIV 290d tren gia tho 1500 (2026-06-18) -> f=1.239669
+   VHF: 2026-10-02: chua du 3 phien khop nhung lech KHONG giai thich duoc bang he so cho (Pi f=1.239669, du -59.4595%) -> DRIFT, khong phai AWAITING_TRADE
+   SHC: 2026-09-09 DIV 500d tren gia tho 10500 (2026-09-08) -> f=1.050000
+   CC1: 2026-06-17 ISS 'Phát hành riêng lẻ': KHONG dieu chinh gia
+   CC1: 2026-09-15 ISS Trả Cổ tức bằng Cổ phiếu 0.05 -> f=1.050000 (khong co chan tien)
+   HC1: 2026-09-22 DIV 1000d tren gia tho 12800 (2026-09-21) -> f=1.084746
+   DVN: 2026-09-11 DIV 1000d tren gia tho 18100 (2026-09-10) -> f=1.058480
+   DRI: 2026-09-22 DIV 1000d tren gia tho 14800 (2026-09-21) -> f=1.072464
+   PBP: 2026-09-14 ISS Trả Cổ tức bằng Cổ phiếu 0.085 -> f=1.085000 (khong co chan tien)
+   VFR: 2026-09-21 DIV 600d tren gia tho 10000 (2026-09-18) -> f=1.063830
+
+-- UNCOMPUTABLE (fail-closed: KHONG suy doan f=1.0, KHONG tinh la khop) --
+   ALT [none] price_ffill_suspect: 2026-09-29 DIV 1000d: phien cum cuoi 2026-09-28 Price=14500 nam ngoai band [13500,13500] da nang ve frame tho -> nghi ffill, tu choi
+   AVC [none] price_ffill_suspect: 2026-09-29 DIV 1500d: phien cum cuoi 2026-09-28 Price=38990 nam ngoai band [38700,38990] da nang ve frame tho -> nghi ffill, tu choi
+   BCF [none] price_ffill_suspect: 2026-09-17 DIV 800d: phien cum cuoi 2026-09-16 Price=37000 nam ngoai band [36200,36200] da nang ve frame tho -> nghi ffill, tu choi
+   BHN [none] price_ffill_suspect: 2026-09-15 DIV 1320d + DIV 1520d  [>1 dòng cùng event_code — KIỂM tiêu đề xem có bản ĐÍNH CHÍNH: Trả cổ tức bằng tiền mặt - Cả năm 2024 - 1,320 VND | Trả cổ tức bằng tiền mặt - Cả năm 2025 - 1,520 VND]: phien cum cuoi 2026-09-14 Price=30650 nam ngoai band [27800,28840] da nang ve frame tho -> nghi ffill, tu choi
+   BVB [none] rights_issue_no_subscription_price: 2026-09-23 ISS Quyền mua CP cho Cổ đông hiện hữu: gia phat hanh KHONG phai cot cua corporate_action va ref_price NULL tren moi dong tu 2025-01-01 -> he so khong the biet duoc
+   BXH [none] price_ffill_suspect: 2026-09-11 DIV 200d: phien cum cuoi 2026-09-10 Price=11800 nam ngoai band [11800,11800] da nang ve frame tho -> nghi ffill, tu choi
+   DNC [none] price_ffill_suspect: 2026-09-08 DIV 1000d: phien cum cuoi 2026-09-07 Price=49000 nam ngoai band [49000,49000] da nang ve frame tho -> nghi ffill, tu choi
+   DNN [none] price_ffill_suspect: 2026-09-09 DIV 1000d: phien cum cuoi 2026-09-08 Price=14600 nam ngoai band [14600,14600] da nang ve frame tho -> nghi ffill, tu choi
+   DWS [none] price_ffill_suspect: 2026-09-22 DIV 680d: phien cum cuoi 2026-09-21 Price=14000 nam ngoai band [13320,13320] da nang ve frame tho -> nghi ffill, tu choi
+   GTA [none] price_ffill_suspect: 2026-09-14 DIV 350d: phien cum cuoi 2026-09-09 Price=8640 nam ngoai band [8620,8640] da nang ve frame tho -> nghi ffill, tu choi
+   GTS [none] price_ffill_suspect: 2026-09-14 DIV 1200d: phien cum cuoi 2026-09-11 Price=10480 nam ngoai band [9940,10570] da nang ve frame tho -> nghi ffill, tu choi
+   HUB [none] price_ffill_suspect: 2026-09-09 DIV 1000d + ISS Trả Cổ tức bằng Cổ phiếu 0.05: phien cum cuoi 2026-09-08 Price=13050 nam ngoai band [11500,11590] da nang ve frame tho -> nghi ffill, tu choi
+   L12 [none] price_ffill_suspect: 2026-09-30 DIV 500d: phien cum cuoi 2026-09-29 Price=4900 nam ngoai band [4220,4400] da nang ve frame tho -> nghi ffill, tu choi
+   LAS [none] price_ffill_suspect: 2026-10-01 DIV 1000d: phien cum cuoi 2026-09-30 Price=12200 nam ngoai band [11200,11380] da nang ve frame tho -> nghi ffill, tu choi
+   LPT [none] price_ffill_suspect: 2026-09-22 DIV 1000d: phien cum cuoi 2026-09-21 Price=7600 nam ngoai band [6620,6880] da nang ve frame tho -> nghi ffill, tu choi
+   MBB [SpaceX,ZaloPay] rights_issue_no_subscription_price: 2026-08-11 ISS Quyền mua CP cho Cổ đông hiện hữu: gia phat hanh KHONG phai cot cua corporate_action va ref_price NULL tren moi dong tu 2025-01-01 -> he so khong the biet duoc
+   NDN [none] price_ffill_suspect: 2026-09-28 DIV 700d: phien cum cuoi 2026-09-25 Price=9100 nam ngoai band [8120,8400] da nang ve frame tho -> nghi ffill, tu choi
+   NDX [none] price_ffill_suspect: 2026-09-18 DIV 500d: phien cum cuoi 2026-09-17 Price=6200 nam ngoai band [6110,6200] da nang ve frame tho -> nghi ffill, tu choi
+   NET [none] price_ffill_suspect: 2026-10-05 DIV 6500d: phien cum cuoi 2026-10-02 Price=66000 nam ngoai band [59500,60760] da nang ve frame tho -> nghi ffill, tu choi
+   NHC [none] price_ffill_suspect: 2026-09-10 DIV 1000d: phien cum cuoi 2026-09-09 Price=20100 nam ngoai band [20100,22390] da nang ve frame tho -> nghi ffill, tu choi
+   NVL [none] rights_issue_no_subscription_price: 2026-09-30 ISS Quyền mua CP cho Cổ đông hiện hữu: gia phat hanh KHONG phai cot cua corporate_action va ref_price NULL tren moi dong tu 2025-01-01 -> he so khong the biet duoc
+   PAT [none] price_ffill_suspect: 2026-09-15 DIV 2900d: phien cum cuoi 2026-09-14 Price=70000 nam ngoai band [65350,67070] da nang ve frame tho -> nghi ffill, tu choi
+   PDB [none] price_ffill_suspect: 2026-09-25 DIV 1500d: phien cum cuoi 2026-09-24 Price=24900 nam ngoai band [23030,23400] da nang ve frame tho -> nghi ffill, tu choi
+   PGB [none] rights_issue_no_subscription_price: 2026-10-06 ISS Quyền mua CP cho Cổ đông hiện hữu: gia phat hanh KHONG phai cot cua corporate_action va ref_price NULL tren moi dong tu 2025-01-01 -> he so khong the biet duoc
+   PHR [none] price_ffill_suspect: 2026-09-11 DIV 1400d + ISS Cổ phiếu thưởng 0.8: phien cum cuoi 2026-09-10 Price=60400 nam ngoai band [32800,33450] da nang ve frame tho -> nghi ffill, tu choi
+   PMP [none] price_ffill_suspect: 2026-09-18 DIV 1100d: phien cum cuoi 2026-08-27 Price=11900 nam ngoai band [11900,11900] da nang ve frame tho -> nghi ffill, tu choi
+   PNC [none] price_ffill_suspect: 2026-09-17 DIV 500d: phien cum cuoi 2026-09-16 Price=23600 nam ngoai band [23600,23600] da nang ve frame tho -> nghi ffill, tu choi
+   PNP [none] price_ffill_suspect: 2026-10-01 DIV 1600d: phien cum cuoi 2026-09-30 Price=20400 nam ngoai band [18800,18800] da nang ve frame tho -> nghi ffill, tu choi
+   PSE [none] price_ffill_suspect: 2026-10-05 DIV 1000d: phien cum cuoi 2026-10-02 Price=10800 nam ngoai band [9620,9800] da nang ve frame tho -> nghi ffill, tu choi
+   SBM [none] price_ffill_suspect: 2026-09-15 DIV 1000d: phien cum cuoi 2026-09-08 Price=32000 nam ngoai band [31000,31000] da nang ve frame tho -> nghi ffill, tu choi
+   SBR [none] price_ffill_suspect: 2026-09-30 DIV 153d: phien cum cuoi 2026-09-29 Price=7450 nam ngoai band [7450,7450] da nang ve frame tho -> nghi ffill, tu choi
+   SEA [none] price_ffill_suspect: 2026-09-21 DIV 500d: phien cum cuoi 2026-09-18 Price=70000 nam ngoai band [69500,69500] da nang ve frame tho -> nghi ffill, tu choi
+   SGC [none] price_ffill_suspect: 2026-09-16 DIV 1000d: phien cum cuoi 2026-09-15 Price=108900 nam ngoai band [106910,107900] da nang ve frame tho -> nghi ffill, tu choi
+   SPD [none] price_ffill_suspect: 2026-09-10 DIV 500d: phien cum cuoi 2026-09-09 Price=7100 nam ngoai band [7100,7100] da nang ve frame tho -> nghi ffill, tu choi
+   SZE [none] price_ffill_suspect: 2026-09-14 DIV 400d: phien cum cuoi 2026-09-11 Price=8100 nam ngoai band [7800,7800] da nang ve frame tho -> nghi ffill, tu choi
+   TMS [none] price_ffill_suspect: 2026-09-25 DIV 500d + ISS Trả Cổ tức bằng Cổ phiếu 0.07: phien cum cuoi 2026-09-24 Price=37900 nam ngoai band [34950,34950] da nang ve frame tho -> nghi ffill, tu choi
+   TNC [none] price_ffill_suspect: 2026-09-21 DIV 2000d: phien cum cuoi 2026-09-18 Price=27050 nam ngoai band [23570,25050] da nang ve frame tho -> nghi ffill, tu choi
+   TPB [SpaceX] price_ffill_suspect: 2026-10-02 DIV 500d + ISS Trả Cổ tức bằng Cổ phiếu 0.15: phien cum cuoi 2026-10-01 Price=14400 nam ngoai band [12090,12300] da nang ve frame tho -> nghi ffill, tu choi
+   VAV [none] price_ffill_suspect: 2026-09-08 DIV 500d: phien cum cuoi 2026-09-07 Price=29500 nam ngoai band [29500,29500] da nang ve frame tho -> nghi ffill, tu choi
+   VGV [none] price_ffill_suspect: 2026-10-05 DIV 900d: phien cum cuoi 2026-10-02 Price=56900 nam ngoai band [47640,55890] da nang ve frame tho -> nghi ffill, tu choi
+   VLA [none] price_ffill_suspect: 2026-09-18 DIV 500d: phien cum cuoi 2026-09-17 Price=6900 nam ngoai band [6400,6400] da nang ve frame tho -> nghi ffill, tu choi
+   VLW [none] price_ffill_suspect: 2026-09-10 DIV 2500d: phien cum cuoi 2026-09-09 Price=29900 nam ngoai band [29900,29900] da nang ve frame tho -> nghi ffill, tu choi
+   VNM [SpaceX,ZaloPay] price_ffill_suspect: 2026-06-26 DIV 1850d: phien cum cuoi 2026-06-25 Price=56450 nam ngoai band [56400,56790] da nang ve frame tho -> nghi ffill, tu choi
+   XHC [none] price_ffill_suspect: 2026-07-22 DIV 2000d: phien cum cuoi 2026-07-21 Price=16500 nam ngoai band [14690,14690] da nang ve frame tho -> nghi ffill, tu choi
+   XMP [none] price_ffill_suspect: 2026-09-17 DIV 1000d: phien cum cuoi 2026-09-16 Price=16300 nam ngoai band [15300,15300] da nang ve frame tho -> nghi ffill, tu choi
+
+NODATA (khong co dong gia trong cua so): ['BLN [none]', 'CKA [none]', 'CLI [none]', 'CMP [none]', 'GE2 [none]', 'HD8 [none]', 'HHN [none]', 'NWT [none]', 'SAL [none]', 'TD6 [none]', 'TRS [none]', 'TW3 [none]', 'WTC [none]']
+
+AGREE: ['ACG', 'ADP', 'AMS', 'BAL', 'BIC', 'BMI', 'BPC', 'BTD', 'D2D', 'DGC', 'DGW', 'DHC', 'DHG', 'DHT', 'DIG', 'DMC', 'DP1', 'DVP', 'E29', 'ELC', 'FPT', 'GAS', 'GEE', 'GLT', 'HAD', 'HLD', 'HND', 'HT1', 'HTL', 'HTN', 'ICN', 'IST', 'ITC', 'MSB', 'MSR', 'MTA', 'MVC', 'MWG', 'NCT', 'NJC', 'NST', 'PCE', 'PDN', 'PDV', 'PGD', 'PHC', 'PIA', 'PMB', 'PTB', 'PVP', 'PVS', 'PVT', 'SAB', 'SBB', 'SD5', 'SIP', 'SNZ', 'SRF', 'SVT', 'SZC', 'SZL', 'TBD', 'TCX', 'TDP', 'TDT', 'TDW', 'THB', 'TIP', 'TRC', 'TV1', 'TV3', 'TVN', 'UDJ', 'V12', 'VCC', 'VGI', 'VIB', 'VLG', 'VOS', 'VPB', 'VPI', 'VTB']

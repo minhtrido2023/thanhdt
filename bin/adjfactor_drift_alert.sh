@@ -11,9 +11,8 @@
 #   · Discord = kênh CHÍNH và là ĐIỀU KIỆN để ghi de-dup; bus = kênh PHỤ, hỏng thì nêu lỗi thật
 #     rồi đi tiếp (§29 — không nuốt stderr);
 #   · state de-dup ghi NGUYÊN TỬ (tmp + os.replace, §5) dưới `flock`; state hỏng ⇒ coi như CHƯA
-#     cảnh báo. EXIT: 0 = không có gì để báo · 10 = đã xử lý (gửi hoặc de-dup) · 11 = bỏ qua vì một
+#     cảnh báo. EXIT: 0 = không có gì để báo LÊN DISCORD (gồm lượt chỉ có awaiting — bus vẫn ghi) · 10 = đã xử lý (gửi hoặc de-dup) · 11 = bỏ qua vì một
 #     lượt khác đang giữ lock · 2 = sai đối số.
-#     (fail-open về phía GỬI) và in lỗi thật.
 #
 # KHÁC `vendor_mismatch_alert.sh` ở MỘT điểm có chủ ý — KHOÁ DE-DUP:
 #   `vendor_mismatch_alert.sh` de-dup theo (file báo cáo, ngày) vì mỗi ngày là một báo cáo MỚI.
@@ -36,7 +35,21 @@
 # có writer NGOÀI repo; feed đứng im ⇒ mọi mã "khớp" ⇒ im lặng không phân biệt được với một tuần
 # sạch, đúng lớp lỗi §14/§29.
 #
-# Exit: 0 = không có gì để cảnh báo · 10 = đã có cảnh báo (hoặc dry-run có nội dung) · 2 = sai đối số.
+# AWAITING_TRADE (CHỜ GIAO DỊCH LẠI, user duyệt 2026-10-08): `ADJFACTOR_AWAITING_TRADE|<mã>|<ex>|<n>|<held>|<dev>`
+# = vendor chưa áp hệ số vì mã có < 3 phiên khớp từ ex-date — trạng thái BÌNH THƯỜNG, vendor tự cập
+# nhật khi mã giao dịch lại. Gộp thành MỘT dòng info, KHÔNG vào "Việc cần làm", KHÔNG giao Winston,
+# KHÔNG sinh khoá `<mã>|<ex>` và KHÔNG phá de-dup của nhánh DRIFT. Lượt chỉ có awaiting của mã KHÔNG
+# nắm ⇒ chỉ ghi bus/log, không Discord (quiet-heartbeat). Mã CÓ THỂ đang nắm (tên tài khoản hoặc
+# `unknown`) thì vẫn nêu tên trên Discord, de-dup theo khoá RIÊNG `<mã>|<ex>|awaiting_trade`.
+# Hai luật state đi kèm (yêu cầu #3 — khi mã giao dịch lại ≥3 phiên mà vẫn lệch, nó phải báo như MỚI):
+#   · khoá awaiting KHÁC khoá DRIFT ⇒ state của nhánh awaiting không bao giờ chặn DRIFT;
+#   · khoá DRIFT `<mã>|<ex>` CŨ của mã nay đang awaiting bị XOÁ (nó sinh ra từ trước khi có nhãn này,
+#     đo thật 2026-10-08: VHF/IRC/HES/... đều có khoá 10-06) — giữ lại thì DRIFT thật sau đó bị chặn
+#     tới 7 ngày. Xoá chỉ có thể làm cảnh báo TỚI SỚM hơn, không bao giờ mất cảnh báo.
+#
+# Exit: 0 = không có gì để cảnh báo trên Discord (kể cả lượt chỉ có awaiting — bus vẫn ghi; dry-run của lượt
+#   đó in payload rồi cũng trả 0) · 10 = đã có cảnh báo (hoặc dry-run có nội dung Discord) · 11 = bỏ qua vì
+#   một lượt khác đang giữ lock · 2 = sai đối số.
 #   ⚠️ 10 nói về SỰ TỒN TẠI của cảnh báo, KHÔNG hứa "đã gửi được" — Discord hỏng thì in LỖI THẬT ra
 #   stderr, KHÔNG ghi de-dup, và vẫn trả 10 (lượt sau của cron sẽ thử lại vì de-dup chưa ghi).
 set -uo pipefail
@@ -63,6 +76,7 @@ DET_OUT="$(cat)"
 DRIFTS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_DRIFT\|' || true)"
 UNCOMPS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_UNCOMPUTABLE\|' || true)"
 NODATAS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_NODATA\|' || true)"
+AWAITS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_AWAITING_TRADE\|' || true)"
 FEED="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_FEED\|' | tail -1 || true)"
 SCAN="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_SCAN\|' | tail -1 || true)"
 
@@ -94,7 +108,7 @@ EMPTY_UNIVERSE=0
 
 # Chỉ im lặng khi feed ĐÚNG LÀ FRESH, có mã được quét, và không có marker nào. `MISSING` và universe
 # rỗng đều KHÔNG lọt qua đây.
-[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] \
+[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] && [ -z "$AWAITS" ] \
   && [ "$FEED_STATUS" = "FRESH" ] && [ "$EMPTY_UNIVERSE" -eq 0 ] && exit 0
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
@@ -175,6 +189,78 @@ _is_fresh() {
 }
 
 _pct() { python3 -c "import sys; print('%+.2f%%' % (float(sys.argv[1]) * 100))" "$1"; }
+
+# Ghi state de-dup: đặt ngày hôm nay cho $1 (khoá mới, mỗi dòng một khoá), XOÁ $2 (khoá cần bỏ). NGUYÊN
+# TỬ (mkstemp + os.replace, §5). Gọi với $1 rỗng thì CHỈ xoá, và không ghi gì nếu không có khoá nào bị
+# xoá. Không bao giờ gọi trong --dry-run.
+_state_write() {
+  STATE="$STATE" TODAY="$TODAY" NEW_KEYS="$1" DEL_KEYS="$2" PRUNE_DAYS="$PRUNE_DAYS" \
+    RE_ALERT_DAYS="$RE_ALERT_DAYS" python3 -c "
+import datetime, json, os, sys, tempfile
+path = os.environ['STATE']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('adjfactor_drift_alert: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e),
+          file=sys.stderr)
+    state = {}
+new_keys = [k.strip() for k in os.environ['NEW_KEYS'].splitlines() if k.strip()]
+deleted = [k.strip() for k in os.environ['DEL_KEYS'].splitlines() if k.strip() in state]
+if not new_keys and not deleted:
+    raise SystemExit(0)
+for k in deleted:
+    del state[k]
+# Don khoa qua cu: mot khoa cu hon PRUNE_DAYS khong con anh huong quyet dinh nao (de-dup chi xet
+# trong RE_ALERT_DAYS), nen giu no chi lam file phinh vo han. vendor_mismatch_alert.sh chap nhan
+# duoc vi o do khoa chi sinh khi co lech THAT (do 0/62 su kien), con o day moi (ma,ex) cua moi
+# cohort deu sinh khoa (~1,2k/nam) va khong ai lam chu viec don.
+# (Khong dung backtick trong khoi nay: no nam trong chuoi NHAY KEP cua python3 -c => command
+#  substitution that su, khong phai trich dan van xuoi — §15.)
+today = datetime.date.fromisoformat(os.environ['TODAY'])
+prune = int(os.environ['PRUNE_DAYS'])
+for k in list(state):
+    try:
+        if (today - datetime.date.fromisoformat(str(state[k]))).days > prune:
+            del state[k]
+    except ValueError:
+        del state[k]          # giá trị không đọc được: bỏ, lần sau coi như chưa cảnh báo
+for k in new_keys:
+    state[k] = os.environ['TODAY']
+# Ghi state THẤT BẠI (thư mục read-only, hết đĩa) KHÔNG được bung traceback trần — nói HỆ QUẢ THẬT kèm
+# LỖI THẬT (§29). Hệ quả khác nhau theo đường gọi (arch-review vòng 2, B1): đường GHI (sau Discord) ⇒
+# lượt sau gửi lại, rc 0; đường CHỈ XOÁ (trước Discord) ⇒ khoá DRIFT cũ còn sót sẽ CHẶN DRIFT thật ⇒ rc 3
+# để bên gọi ép gửi Discord (fail-open phía gửi).
+def _fail(e):
+    if new_keys:
+        sys.stderr.write('adjfactor_drift_alert: KHONG ghi duoc state de-dup %s — Discord DA gui roi, nen '
+                         'luot cron sau se GUI LAI dung cac khoa nay (khong mat canh bao, co the trung). '
+                         'Loi that: %s: %s\n' % (path, type(e).__name__, e))
+        raise SystemExit(0)
+    sys.stderr.write('adjfactor_drift_alert: KHONG xoa duoc khoa DRIFT cu %s khoi state %s — khoa con sot '
+                     'nen DRIFT that cua cac ma nay trong <=%s ngay se bi de-dup CHAN; xoa tay. '
+                     'Loi that: %s: %s\n' % (', '.join(deleted), path, os.environ['RE_ALERT_DAYS'],
+                                              type(e).__name__, e))
+    raise SystemExit(3)
+try:
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.adjfactor_drift_alerted.', suffix='.tmp')
+except OSError as e:
+    _fail(e)
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False, sort_keys=True)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
+"
+}
 
 DETAIL_HELD=""
 DETAIL_OTHER=""
@@ -301,11 +387,40 @@ while IFS='|' read -r _tag tk held _rest; do
 • **${tk}** (${hl}): KHÔNG có dòng giá nào trong cửa sổ — **không kết luận được gì cho mã này**"
 done <<< "$NODATAS"
 
+# AWAITING_TRADE — xem header. KHÔNG đụng SEEN_VENDOR/TODO (không giao Winston).
+N_AWAIT=0
+N_AWAIT_HELD_NEW=0
+N_AWAIT_HELD=0
+AWAIT_LIST=""
+AWAIT_DEL_KEYS=""
+while IFS='|' read -r _tag tk ex ntr held _dev _rest; do
+  [ -z "${tk:-}" ] && continue
+  N_AWAIT=$((N_AWAIT + 1))
+  AWAIT_DEL_KEYS="${AWAIT_DEL_KEYS}${tk}|${ex}"$'\n'
+  item="${tk} (ex ${ex}, ${ntr} phiên khớp)"
+  if [ "$held" != "none" ] && [ "$held" != "skipped" ]; then
+    # Có thể là tiền thật ⇒ KHÔNG ẩn tên; mang nhãn nắm ngay trong dòng info.
+    if [ "$held" = "unknown" ]; then
+      item="**${tk}** (ex ${ex}, ${ntr} phiên khớp, **KHÔNG TRA ĐƯỢC vị thế**)"
+    else
+      item="**${tk}** (ex ${ex}, ${ntr} phiên khớp, **ĐANG NẮM LIVE: ${held}**)"
+    fi
+    N_AWAIT_HELD=$((N_AWAIT_HELD + 1))
+    key="${tk}|${ex}|awaiting_trade"
+    if ! _is_fresh "$key"; then
+      N_AWAIT_HELD_NEW=$((N_AWAIT_HELD_NEW + 1))
+      NEW_KEYS="${NEW_KEYS}${key}"$'\n'
+    fi
+  fi
+  AWAIT_LIST="${AWAIT_LIST:+${AWAIT_LIST}, }${item}"
+done <<< "$AWAITS"
+
 # BUS trước (kênh PHỤ, luôn ghi kể cả khi Discord im vì de-dup) — đây là dấu vết audit đầy đủ:
 # mọi DRIFT và mọi UNCOMPUTABLE của lượt quét, không qua bộ lọc de-dup/held nào.
 PAYLOAD="$(ASOF="$ASOF" N_SCANNED="$N_SCANNED" N_DRIFT="$N_DRIFT" N_UNCOMP="$N_UNCOMP" \
   N_AGREE="$N_AGREE" N_NODATA="$N_NODATA" N_NEW="$N_NEW" N_HELD="$N_HELD" \
   N_UNKNOWN="$N_UNKNOWN" FEED_STATUS="$FEED_STATUS" FEED_LINE="$FEED" \
+  N_AWAIT="$N_AWAIT" AWAITS="$AWAITS" \
   DRIFTS="$DRIFTS" UNCOMPS="$UNCOMPS" NODATAS="$NODATAS" python3 -c "
 import json, os
 def lines(v):
@@ -323,6 +438,7 @@ print(json.dumps({
     'published_any_number': False,
     'drift_markers': lines('DRIFTS'), 'uncomputable_markers': lines('UNCOMPS'),
     'nodata_markers': lines('NODATAS'),
+    'awaiting_trade': os.environ['N_AWAIT'], 'awaiting_trade_markers': lines('AWAITS'),
 }, ensure_ascii=False))
 ")"
 
@@ -346,6 +462,17 @@ if [ "$LOCK_SKIP" -eq 1 ]; then
   exit 11
 fi
 
+# Xoá khoá DRIFT cũ của mã nay đang AWAITING (xem header, yêu cầu #3). Dưới lock, trước mọi lối thoát
+# im lặng — lượt chỉ có awaiting cũng phải dọn được.
+STATE_DEL_ERR=""
+if [ "$DRY_RUN" -eq 0 ] && [ -n "$AWAIT_DEL_KEYS" ]; then
+  _sw_rc=0
+  _sw_err="$(_state_write "" "$AWAIT_DEL_KEYS" 2>&1)" || _sw_rc=$?
+  [ -n "$_sw_err" ] && echo "$_sw_err" >&2
+  # Xoá hỏng ⇒ ép gửi Discord kèm LỖI THẬT (B1), không thoát im lặng ở nhánh de-dup bên dưới.
+  [ "$_sw_rc" -ne 0 ] && STATE_DEL_ERR="${_sw_err:-_state_write rc=${_sw_rc}, khong co stderr}"
+fi
+
 FEED_BAD=0
 if [ "$FEED_STATUS" != "FRESH" ]; then
   FEED_BAD=1
@@ -354,14 +481,31 @@ fi
 # `EMPTY_UNIVERSE` phải nằm trong điều kiện này: nó không sinh khoá de-dup nào (N_NEW=0) nên nếu
 # thiếu, ca universe rỗng ghi bus rồi thoát mà KHÔNG gửi Discord — tức vẫn im lặng ở kênh người đọc.
 if [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ] && [ "$N_NODATA_HELD" -eq 0 ] \
-   && [ "$FEED_BAD" -eq 0 ] && [ "$EMPTY_UNIVERSE" -eq 0 ]; then
+   && [ "$N_AWAIT_HELD_NEW" -eq 0 ] && [ "$FEED_BAD" -eq 0 ] && [ "$EMPTY_UNIVERSE" -eq 0 ] \
+   && [ -z "$STATE_DEL_ERR" ]; then
+  [ "$DRY_RUN" -eq 1 ] && { echo "[dry-run] KHONG gui Discord. --- payload bus ---"; echo "$PAYLOAD"; }
+  if [ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ]; then
+    # Lượt CHỈ có awaiting của mã không nắm: quiet-heartbeat — bus/log có đủ, Discord im.
+    if [ "$N_AWAIT_HELD" -gt 0 ]; then
+      _aw_held="${N_AWAIT_HELD} ma co the dang nam nhung da bao trong ${RE_ALERT_DAYS} ngay qua"
+    else
+      _aw_held="khong ma nao co the dang nam"
+    fi
+    echo "adjfactor_drift_alert: chi co ${N_AWAIT} ma CHO GIAO DICH LAI (khong DRIFT that, feed TUOI," \
+         "${_aw_held}) -> chi ghi bus, khong gui Discord." >&2
+    exit 0
+  fi
   echo "adjfactor_drift_alert: ${N_DRIFT} lech nhung tat ca da canh bao trong ${RE_ALERT_DAYS} ngay qua," \
-       "khong co uncomputable/nodata nao co the dang nam, feed nguon TUOI -> chi ghi bus," \
-       "khong gui Discord (de-dup)." >&2
+       "khong co uncomputable/nodata nao co the dang nam, feed nguon TUOI, ${N_AWAIT} ma cho giao dich" \
+       "lai -> chi ghi bus, khong gui Discord (de-dup)." >&2
   exit 10
 fi
 
 SECTIONS=""
+[ -n "$STATE_DEL_ERR" ] && SECTIONS="${SECTIONS}
+__**STATE DE-DUP KHÔNG XOÁ ĐƯỢC — DRIFT thật của mã dưới đây có thể bị CHẶN ≤${RE_ALERT_DAYS} ngày:**__
+• ${STATE_DEL_ERR}
+"
 if [ "$EMPTY_UNIVERSE" -eq 1 ]; then
   SECTIONS="${SECTIONS}
 __**UNIVERSE RỖNG — 0 mã được quét, đây là ĐIỂM MÙ:**__
@@ -401,6 +545,10 @@ __**KHÔNG TRA ĐƯỢC VỊ THẾ (phải coi như có thể đang nắm):**__$
 [ -n "$DETAIL_UNCOMP" ] && SECTIONS="${SECTIONS}
 __**KHÔNG KẾT LUẬN ĐƯỢC (fail-closed, mã có thể đang nắm):**__${DETAIL_UNCOMP}
 "
+# MỘT dòng info, không phải việc của ai: vendor tự áp hệ số khi mã có phiên khớp.
+[ -n "$AWAIT_LIST" ] && SECTIONS="${SECTIONS}
+ℹ️ _Chờ giao dịch lại (${N_AWAIT} mã — lệch khớp đúng hệ số vendor chưa áp vì chưa đủ 3 phiên khớp từ ex-date; bình thường, KHÔNG phải việc cần làm):_ ${AWAIT_LIST}
+"
 
 TODO=""
 [ "$SEEN_VENDOR" = "1" ] && TODO="${TODO}
@@ -413,17 +561,39 @@ TODO=""
 - **Không tra được vị thế LIVE:** \`dividend_adjusted_return.broker_qty()\` lỗi ⇒ nhãn nắm/không nắm của lượt này KHÔNG dùng được. Kiểm \`data/execution_logs/dnse_raw_*.jsonl\` rồi chạy lại; trong lúc chờ, coi MỌI mã ở khối trên như có thể đang nắm."
 [ "$EMPTY_UNIVERSE" -eq 1 ] && TODO="${TODO}
 - **Universe rỗng:** Winston (data-ops) kiểm \`tav2_bq.corporate_action\` còn nhận dòng mới không, và kiểm câu SQL cohort của detector. **Đừng đóng bằng \"đã quét, không thấy gì\"** — lượt này KHÔNG quét được mã nào."
+[ -n "$STATE_DEL_ERR" ] && TODO="${TODO}
+- **State de-dup không xoá được:** Taylor sửa quyền/dung lượng thư mục \`state/\` rồi xoá tay các khoá nêu trong lỗi ở trên."
 [ "$N_CORR" -gt 0 ] && TODO="${TODO}
 - **${N_CORR} mã NGHI bản đính chính (\`corr=1\`):** KHÔNG giao cho Winston và KHÔNG coi là vendor sai. \`corporate_action\` giữ cả tranche thật (phải CỘNG) lẫn bản đính chính của cùng tranche (KHÔNG được cộng), phân biệt bằng \`event_title_vi\` — chỉ đọc hiểu được bằng mắt. Mở log cron, đọc dòng chứng từ \`[>1 dòng cùng event_code ...]\` của mã đó trước khi kết luận."
 [ "$N_UNCOMP_HELD" -gt 0 ] && TODO="${TODO}
 - **Mã nắm LIVE không tính được hệ số:** \`rights_issue_no_subscription_price\` = giá phát hành không có trong \`corporate_action\` (cột \`ref_price\` NULL toàn bộ từ 2025-01-01) ⇒ Layer 1 KHÔNG kết luận được gì cho mã đó, cổng §21 vẫn là lớp bảo vệ duy nhất. \`price_ffill_suspect\` = \`Price\` phiên cum cuối nằm ngoài band ⇒ Winston kiểm dòng giá đó."
 
-MSG="⚠️ **LỆCH HỆ SỐ ĐIỀU CHỈNH CORP-ACTION (Layer 1 — CHỈ PHÁT HIỆN)** — asof \`${ASOF}\`
-Hệ số tự suy từ \`tav2_bq.corporate_action\` không khớp hệ số ẩn trong \`tav2_bq.ticker\` (\`Price\`/\`Close\`), lệch >0,3% kéo dài ≥3 phiên liên tiếp:
+HEADLINE="⚠️ **LỆCH HỆ SỐ ĐIỀU CHỈNH CORP-ACTION (Layer 1 — CHỈ PHÁT HIỆN)** — asof \`${ASOF}\`
+Hệ số tự suy từ \`tav2_bq.corporate_action\` không khớp hệ số ẩn trong \`tav2_bq.ticker\` (\`Price\`/\`Close\`), lệch >0,3% kéo dài ≥3 phiên liên tiếp:"
+# Lượt gửi mà thứ DUY NHẤT kích nó là awaiting MỚI của mã có thể đang nắm (cùng các điều kiện của nhánh
+# im lặng ở trên, trừ N_AWAIT_HELD_NEW): tiêu đề "⚠️ LỆCH … ≥3 phiên" + "Việc cần làm:" trống sẽ tự mâu
+# thuẫn với dòng info "bình thường" (arch-review 2026-10-08) ⇒ nói đúng điều đang xảy ra. KHÔNG suy từ
+# "TODO rỗng": ca NODATA mã nắm cũng để TODO rỗng mà đó KHÔNG phải awaiting.
+if [ "$N_AWAIT_HELD_NEW" -gt 0 ] && [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ] \
+   && [ "$N_NODATA_HELD" -eq 0 ] && [ "$FEED_BAD" -eq 0 ] && [ "$EMPTY_UNIVERSE" -eq 0 ] \
+   && [ -z "$STATE_DEL_ERR" ]; then
+  # Còn DRIFT đã báo (de-dup) thì KHÔNG được nói "không có lệch thật" (arch-review vòng 2, #1): lệch đó
+  # vẫn mở, có thể trên mã nắm LIVE — chỉ là đã báo trong RE_ALERT_DAYS ngày.
+  if [ -n "$DRIFTS" ]; then
+    _no_drift="Không có lệch MỚI — $(printf '%s\n' "$DRIFTS" | grep -c .) lệch đã báo trong ${RE_ALERT_DAYS} ngày qua VẪN MỞ (xem cảnh báo trước / bus)."
+  else
+    _no_drift="Không có lệch thật."
+  fi
+  HEADLINE="ℹ️ **CHỜ GIAO DỊCH LẠI — mã có thể đang nắm (Layer 1 — CHỈ PHÁT HIỆN)** — asof \`${ASOF}\`
+${_no_drift} Lệch hệ số dưới đây khớp ĐÚNG hệ số corp-action mà vendor chưa áp vì mã chưa đủ 3 phiên khớp từ ex-date; nêu tên vì có thể là tiền thật:"
+  TODO=" không có việc MỚI — vendor tự áp hệ số khi mã giao dịch lại; nếu đủ 3 phiên khớp mà vẫn lệch, Layer 1 sẽ báo DRIFT như mã mới."
+fi
+
+MSG="${HEADLINE}
 ${SECTIONS}
 **Việc cần làm:**${TODO}
 
-_Quét ${N_SCANNED} mã: ${N_DRIFT} lệch · ${N_UNCOMP} không tính được · ${N_AGREE} khớp · ${N_NODATA} không có dữ liệu · feed nguồn \`${FEED_STATUS:-không báo}\`. ${N_UNCOMP_OTHER} uncomputable + ${N_NODATA_OTHER} nodata của mã KHÔNG nắm chỉ ghi bus, không nêu ở đây._
+_Quét ${N_SCANNED} mã: ${N_DRIFT} lệch · ${N_AWAIT} chờ giao dịch lại · ${N_UNCOMP} không tính được · ${N_AGREE} khớp · ${N_NODATA} không có dữ liệu · feed nguồn \`${FEED_STATUS:-không báo}\`. ${N_UNCOMP_OTHER} uncomputable + ${N_NODATA_OTHER} nodata của mã KHÔNG nắm chỉ ghi bus, không nêu ở đây._
 _Layer 1 **KHÔNG công bố và KHÔNG sửa** số nào — cổng §21 (\`report_return_gate\`) vẫn là lớp chặn báo cáo, không thay đổi._"
 
 if [ "$DRY_RUN" -eq 1 ]; then
@@ -442,55 +612,5 @@ if ! NOTIFY_ERR="$("$ROOT/bin/notify_thread.sh" "$MSG" "$TOPIC" 2>&1 >/dev/null)
   exit 10
 fi
 
-STATE="$STATE" TODAY="$TODAY" NEW_KEYS="$NEW_KEYS" PRUNE_DAYS="$PRUNE_DAYS" python3 -c "
-import datetime, json, os, sys, tempfile
-path = os.environ['STATE']
-try:
-    state = json.load(open(path))
-    if not isinstance(state, dict):
-        raise ValueError('state khong phai dict: %r' % type(state).__name__)
-except Exception as e:
-    print('adjfactor_drift_alert: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e),
-          file=sys.stderr)
-    state = {}
-# Don khoa qua cu: mot khoa cu hon PRUNE_DAYS khong con anh huong quyet dinh nao (de-dup chi xet
-# trong RE_ALERT_DAYS), nen giu no chi lam file phinh vo han. vendor_mismatch_alert.sh chap nhan
-# duoc vi o do khoa chi sinh khi co lech THAT (do 0/62 su kien), con o day moi (ma,ex) cua moi
-# cohort deu sinh khoa (~1,2k/nam) va khong ai lam chu viec don.
-# (Khong dung backtick trong khoi nay: no nam trong chuoi NHAY KEP cua python3 -c => command
-#  substitution that su, khong phai trich dan van xuoi — §15.)
-today = datetime.date.fromisoformat(os.environ['TODAY'])
-prune = int(os.environ['PRUNE_DAYS'])
-for k in list(state):
-    try:
-        if (today - datetime.date.fromisoformat(str(state[k]))).days > prune:
-            del state[k]
-    except ValueError:
-        del state[k]          # giá trị không đọc được: bỏ, lần sau coi như chưa cảnh báo
-for k in os.environ['NEW_KEYS'].splitlines():
-    if k.strip():
-        state[k.strip()] = os.environ['TODAY']
-# Ghi state THẤT BẠI (thư mục read-only, hết đĩa) KHÔNG được bung traceback trần: Discord ĐÃ gửi
-# xong ở bước trước, nên hệ quả thật là 'lượt sau sẽ gửi lại' — phải nói ra điều đó kèm LỖI THẬT
-# (§29), không phải để người đọc tự dịch một stack trace (arch-review vòng 3).
-try:
-    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.adjfactor_drift_alerted.', suffix='.tmp')
-except OSError as e:
-    sys.stderr.write('adjfactor_drift_alert: KHONG ghi duoc state de-dup %s — Discord DA gui roi, nen '
-                     'luot cron sau se GUI LAI dung cac khoa nay (khong mat canh bao, co the trung). '
-                     'Loi that: %s: %s\n' % (path, type(e).__name__, e))
-    raise SystemExit(0)
-try:
-    with os.fdopen(fd, 'w') as f:
-        json.dump(state, f, indent=2, ensure_ascii=False, sort_keys=True)
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, path)
-except BaseException:
-    try:
-        os.unlink(tmp)
-    except OSError:
-        pass
-    raise
-"
+_state_write "$NEW_KEYS" ""
 exit 10

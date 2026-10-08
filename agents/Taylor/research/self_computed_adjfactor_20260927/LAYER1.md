@@ -299,3 +299,65 @@ sign-off — xem §9.
    (CTG, VCB, VND, VNM).
 4. **Layer 2 (sửa/công bố số) vẫn chưa được phép** — §21 + quy chuẩn backtest mục 5 đòi
    **quant-skeptic CONFIRMED** trước khi bất kỳ consumer nào đọc một `Close` tự tính.
+
+## 2026-10-08 — nhãn AWAITING_TRADE (CHỜ GIAO DỊCH LẠI), job Taylor_20261008_032221
+
+User duyệt 08/10 10:21 ICT. Vendor KHÔNG điều chỉnh giá cho mã chưa có phiên khớp nào; tự cập nhật khi
+mã giao dịch lại. Detector: lệch `vendor_missing` (corr=0, ex-date là sự kiện thật) có số phiên
+`Volume>0` trong [ex-date, asof] < `AWAIT_MIN_TRADED_SESSIONS`=3 ⇒ dòng RIÊNG
+`ADJFACTOR_AWAITING_TRADE|<mã>|<ex>|<n>|<held>|<dev>`; `ADJFACTOR_DRIFT` và `ADJFACTOR_SCAN` giữ nguyên
+định dạng (`n_drift` = DRIFT thật). Volume NULL đếm là CÓ khớp (nghiêng về cảnh báo). Volume lấy cùng
+câu SQL giá, không thêm truy vấn.
+
+Đo thật asof 2026-10-07 (`out_awaiting_asof20261007.txt`): 9 AWAITING (CKV HES INC IRC PIS PLE PPS QHW
+VHF, tất cả 0 phiên); 7 DRIFT byte-identical với log cron cùng asof, gồm DRI (12 phiên, nắm SpaceX+ZaloPay),
+DVN (19), SHC (8 khớp + 6 dòng Volume=0); 4 `our_table_missing` (CC1 HC1 PBP VFR) không đổi; dòng
+UNCOMPUTABLE/NODATA/FEED y hệt. Dry-run alert (`out_awaiting_alert_dryrun_20261008.txt`): 9 mã vào MỘT
+dòng info, không vào "Việc cần làm".
+
+alert.sh: lượt chỉ có awaiting của mã không nắm ⇒ chỉ bus/log (rc=0). Mã CÓ THỂ đang nắm (tên TK hoặc
+`unknown`) vẫn nêu tên + nhãn trên Discord, de-dup khoá RIÊNG `<mã>|<ex>|awaiting_trade`. Khoá DRIFT cũ
+`<mã>|<ex>` của mã đang awaiting bị xoá (state live có khoá 10-06 của cả 9 mã) ⇒ khi đủ 3 phiên mà
+vẫn lệch, DRIFT báo như mã mới.
+
+### Vòng 2 (arch-review 2026-10-08 NEEDS_CHANGES) — cổng NHẤT QUÁN, thu hẹp spec đã duyệt
+
+arch-review bắt: nhãn "bình thường" là một khẳng định NGUYÊN NHÂN (§29) mà bản đầu không kiểm. Ca thật
+VHF: sự kiện duy nhất DIV 290 trên giá 1500 ⇒ f 1,2397 ⇒ "vendor chưa áp" dự báo lệch −19,34%, quan
+sát −67,30% (Price 1500 / Close 3700, Volume 0 suốt 06-01..06-18) = lỗi dữ liệu KHÁC. Sửa: awaiting chỉ
+khi |r_obs·Π f(ex ≥ ex_named)/r_pred − 1| ≤ dev_tol; ngược lại vẫn DRIFT + chứng từ ghi lý do. Log in
+bảng bằng chứng awaiting (r_obs/r_pred/cửa sổ/ex/n_khop/dư + chứng từ) như DRIFT — dòng máy đọc giữ 6
+trường. alert.sh: held=`skipped` không bao giờ nêu như mã nắm; lượt gửi CHỈ vì awaiting mã nắm dùng
+tiêu đề ℹ️ "CHỜ GIAO DỊCH LẠI" + "Việc cần làm: không có" thay cho "⚠️ LỆCH … ≥3 phiên" + mục trống.
+
+Đo lại thật asof 2026-10-07 (đè `out_awaiting_asof20261007.txt` / `out_awaiting_alert_dryrun_20261008.txt`):
+**8 AWAITING** (CKV HES INC IRC PIS PLE PPS QHW — dư đúng +0,0000% cả 8) · **VHF ⇒ DRIFT** (dư −59,46%)
+· 8 dòng DRIFT (VHF SHC CC1 HC1 DVN DRI PBP VFR) byte-identical với log cron cùng asof · DRI/DVN/SHC vẫn
+DRIFT. Che tạm chấp nhận: xem docstring detector (ex A cũ lệch thật + ex B mới chưa khớp — cổng nhất
+quán chặn khi thiếu cả hệ số A).
+
+### Vòng 3 (arch-review vòng 2 NEEDS_CHANGES, job Taylor_20261008_042322)
+- **Cổng CHẠM EX-DATE** (detector): chữ ký FPT `SETTLE_RUN=4` (vendor áp hệ số cho 4 phiên cum cuối rồi
+  dừng) cho dư 0 y như "chưa áp gì" ⇒ cổng nhất quán không phân biệt được. Nay chỉ AWAITING khi KHÔNG còn
+  phiên nào giữa `d1` và `ex_named`; còn ⇒ DRIFT + chứng từ "vendor da ap mot phan". Chạy lại thật asof
+  10-07: mọi dòng `ADJFACTOR_*` giống hệt vòng 2 (8 awaiting, kể cả HES, đều chạm ex-date).
+- **Tiêu đề ℹ️** không còn nói "Không có lệch thật" khi còn DRIFT đã de-dup — nói "Không có lệch MỚI — N
+  lệch đã báo … VẪN MỞ"; TODO "không có việc MỚI".
+- Log nhánh awaiting-only không khẳng định "không mã nào nắm" khi mã nắm chỉ bị de-dup; docs exit-code
+  (rc=11, dry-run awaiting-only = 0) đồng bộ.
+- Test mới: xoá khoá DRIFT cũ của mã NẮM đang awaiting; our_table_missing/unknown_gap không đi qua nhánh
+  awaiting (giết D7/D9). Giới hạn đã biết (chưa xử lý): "0 dòng giá" đếm như "0 phiên khớp" — không phân
+  biệt với feed per-ticker chết; không có trần tuổi cho mã ngừng giao dịch lâu.
+
+### Vòng 4 (arch-review vòng 2 NEEDS_CHANGES → user duyệt r4, job Taylor_20261008_055312)
+- **B1** `_state_write` đường CHỈ XOÁ (khoá DRIFT cũ của mã đang awaiting) hỏng ⇒ không còn in "Discord
+  DA gui roi" (chưa gửi gì); in lỗi thật + khoá còn sót, rc 3 ⇒ alert ÉP gửi Discord mục "STATE DE-DUP
+  KHÔNG XOÁ ĐƯỢC" (fail-open phía gửi). Lỗi SAU mkstemp (hết đĩa khi ghi) vẫn bung traceback như trước, nhưng rc≠0 ⇒ vẫn ép gửi Discord kèm traceback (không có test kích được nhánh này mà không giả lập ulimit).
+- **B2** tiêu đề ℹ️ đọc `[ -n "$DRIFTS" ]` + đếm từ chính dòng DRIFT, không từ SCAN (thiếu SCAN ⇒ `?`).
+- **B3** test khe 1 và 2 phiên ở cổng chạm ex-date ⇒ DRIFT (giết `len(gap)>1`, `len(gap)>2`).
+- **B4** chạy lại thật asof 2026-10-07 trên code r4: mọi dòng `ADJFACTOR_*` (trừ FEED) byte-identical r2/r3.
+- **B7 (một phần)** bỏ dòng thừa header alert.sh:16.
+- **NỢ (không sửa, >3 dòng):** B5 feed FRESH mà THIẾU dòng SCAN + không marker ⇒ rc 0 im lặng — nên coi
+  như FEED MISSING (cần route Discord + test); B6 chứng từ detector (nhánh khe) khẳng định "vendor da ap
+  mot phan" quá mức — chỉ là phiên khớp hệ số, chưa chứng minh nguyên nhân; B7 chữ "3 phiên" hardcode
+  trong text Discord (không đọc từ `AWAIT_MIN_TRADED_SESSIONS`).

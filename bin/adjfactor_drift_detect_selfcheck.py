@@ -58,6 +58,7 @@ def flat_series(dates, price, r_vendor):
 
 
 D = [f"2026-0{m}-{dd:02d}" for m in (6, 7, 8) for dd in range(1, 11)]   # 30 "phiên"
+POST_EX = ["2026-08-20", "2026-08-21", "2026-08-24"]   # 3 phiên có khớp từ ex 08-20 (gồm ex)
 
 
 # ---------------------------------------------------------------- 1. công thức
@@ -223,8 +224,9 @@ def t_scan():
     print("\n[6] scan_ticker — verdict, chiều lệch, và fail-closed từng phần")
     evs = [ev("2026-08-20", "ISS", "Cổ phiếu thưởng", 0.1)]
 
-    # Chữ ký FPT: vendor chưa áp hệ số -> r_obs = 1.0 trong khi r_pred = 1.1
-    v, p = det.scan_ticker(flat_series(D, 100, 1.0), evs, 0.003, 3, D[0])
+    # Chữ ký FPT: vendor chưa áp hệ số -> r_obs = 1.0 trong khi r_pred = 1.1. `POST_EX` = 3 phiên CÓ
+    # khớp từ ex-date (FPT thật đã giao dịch lại) — thiếu chúng thì đúng là ca AWAITING_TRADE ([15]).
+    v, p = det.scan_ticker(flat_series(D + POST_EX, 100, 1.0), evs, 0.003, 3, D[0])
     ck("chữ ký FPT -> DRIFT", v == "DRIFT", f"v={v}")
     ck("dev = -9.0909% (= 1 - 1/1.1)", abs(p["dev"] + 0.0909090909) < 1e-6, f"{p.get('dev')}")
     ck("dir = vendor_missing (r_obs < r_pred)", p["dir"] == "vendor_missing")
@@ -253,14 +255,14 @@ def t_scan():
     # nhưng chỉ đánh giá từ ex-date uncomputable trở đi (phần trước đã bị nhiễm).
     mixed = [ev("2026-06-15", "ISS", det.RIGHTS_METHOD, 0.5),
              ev("2026-08-20", "ISS", "Cổ phiếu thưởng", 0.1)]
-    v, p = det.scan_ticker(flat_series(D, 100, 1.0), mixed, 0.003, 3, D[0])
+    v, p = det.scan_ticker(flat_series(D + POST_EX, 100, 1.0), mixed, 0.003, 3, D[0])
     ck("ca XHC: uncomputable ở giữa + lệch sau -> DRIFT", v == "DRIFT", f"v={v}")
     ck("ca XHC: đánh dấu partial", p["partial"] is True)
     ck("ca XHC: cửa sổ chấm điểm bắt đầu TỪ ex-date uncomputable, không sớm hơn",
        p["d0"] >= "2026-06-15", f"d0={p.get('d0')}")
 
     # eval_from = rìa cửa sổ đánh giá: phiên trước đó chỉ để tìm phiên cum, không chấm điểm
-    v, p = det.scan_ticker(flat_series(D, 100, 1.0), evs, 0.003, 3, "2026-07-05")
+    v, p = det.scan_ticker(flat_series(D + POST_EX, 100, 1.0), evs, 0.003, 3, "2026-07-05")
     ck("eval_from cắt đúng: không chấm phiên trước rìa", p["d0"] >= "2026-07-05", f"{p.get('d0')}")
 
     v, p = det.scan_ticker([], evs, 0.003, 3, D[0])
@@ -1160,6 +1162,495 @@ def t_held_and_corr():
                      "--tickers", "ZZZ"]))
 
 
+# ----------------------------- 15. AWAITING_TRADE — CHỜ GIAO DỊCH LẠI (job Taylor_20261008_032221)
+
+def _vbar(d, price, close, vol):
+    b = bar(d, price, close)
+    b["vol"] = vol
+    return b
+
+
+def t_awaiting():
+    """Ngưỡng 3 phiên khớp, chỉ cho `vendor_missing`/corr=0/ex-date thật, và hợp đồng dòng máy đọc.
+
+    Chữ ký thật (asof 2026-10-07): 9 mã 0 dòng từ ex-date ⇒ awaiting; DRI/DVN/SHC 12/19/8 phiên ⇒
+    DRIFT. SHC có 6 dòng `Volume=0` xen giữa — chúng KHÔNG được đếm là phiên khớp.
+    """
+    print("\n[15] AWAITING_TRADE — ngưỡng phiên khớp + ranh giới với DRIFT")
+    EX = "2026-08-20"
+    evs = [ev(EX, "ISS", "Cổ phiếu thưởng", 0.1)]
+    pre = flat_series(D, 100, 1.0)                      # vendor CHƯA áp hệ số 1,1
+
+    def post(vols):
+        return [_vbar(d, 100, 100, v) for d, v in zip(POST_EX + ["2026-08-25", "2026-08-26",
+                                                                 "2026-08-27", "2026-08-28"], vols)]
+
+    ck("hằng số có tên AWAIT_MIN_TRADED_SESSIONS == 3", det.AWAIT_MIN_TRADED_SESSIONS == 3)
+
+    # Volume phải đi CÙNG câu SQL giá đã có (không thêm truy vấn mới). Thiếu nó ⇒ mọi `vol` None ⇒
+    # không bao giờ có awaiting (an toàn nhưng tắt tính năng một cách im lặng).
+    seen_sql = []
+    saved_bq = det._bq
+    try:
+        det._bq = lambda sql: seen_sql.append(sql) or []
+        det.price_rows(["AAA"], "2026-08-01", "2026-08-28")
+    finally:
+        det._bq = saved_bq
+    ck("price_rows: MỘT truy vấn, chọn `t.Volume AS vol`",
+       len(seen_sql) == 1 and "t.Volume AS vol" in seen_sql[0], f"{seen_sql}")
+
+    v, p = det.scan_ticker(pre, evs, 0.003, 3, D[0])
+    ck("0 phiên từ ex-date -> AWAITING_TRADE, n_traded=0",
+       v == "AWAITING_TRADE" and p.get("n_traded") == 0, f"v={v} n={p.get('n_traded')}")
+    ck("awaiting vẫn mang đủ payload DRIFT (ex, dev, dir) — không mất bằng chứng",
+       p.get("ex") == EX and p.get("dir") == "vendor_missing" and abs(p["dev"] + 0.0909090909) < 1e-6,
+       f"{p.get('ex')} {p.get('dir')} {p.get('dev')}")
+
+    v, p = det.scan_ticker(pre + post([1000, 500]), evs, 0.003, 3, D[0])
+    ck("2 phiên khớp -> vẫn AWAITING_TRADE (cho vendor thời gian)",
+       v == "AWAITING_TRADE" and p.get("n_traded") == 2, f"v={v} n={p.get('n_traded')}")
+
+    v, p = det.scan_ticker(pre + post([1000, 500, 300]), evs, 0.003, 3, D[0])
+    ck("3 phiên khớp mà vẫn lệch -> DRIFT thật", v == "DRIFT" and p.get("n_traded") == 3,
+       f"v={v} n={p.get('n_traded')}")
+
+    # ex-date TÍNH LUÔN: 3 phiên khớp đúng tại ex, ex+1, ex+2 ⇒ 3, không phải 2.
+    v, p = det.scan_ticker(pre + post([1, 1, 1]), evs, 0.003, 3, D[0])
+    ck("phiên ex-date được đếm (>= ex, không phải > ex)", v == "DRIFT" and p.get("n_traded") == 3,
+       f"v={v} n={p.get('n_traded')}")
+
+    # Chữ ký SHC: dòng `Volume=0` (ffill) KHÔNG phải phiên khớp.
+    v, p = det.scan_ticker(pre + post([0, 0, 0, 0, 0, 700, 800]), evs, 0.003, 3, D[0])
+    ck("dòng Volume=0 không đếm: 5 dòng 0 + 2 khớp -> AWAITING n=2",
+       v == "AWAITING_TRADE" and p.get("n_traded") == 2, f"v={v} n={p.get('n_traded')}")
+    v, p = det.scan_ticker(pre + post([0, 0, 0, 0, 600, 700, 800]), evs, 0.003, 3, D[0])
+    ck("4 dòng 0 + 3 khớp -> DRIFT", v == "DRIFT" and p.get("n_traded") == 3,
+       f"v={v} n={p.get('n_traded')}")
+
+    # Volume thiếu/NULL nghiêng về CẢNH BÁO, không về im lặng.
+    v, p = det.scan_ticker(pre + post([None, None, None]), evs, 0.003, 3, D[0])
+    ck("Volume NULL đếm là CÓ khớp (fail về phía DRIFT)", v == "DRIFT", f"v={v} n={p.get('n_traded')}")
+    ck("series_by_ticker giữ Volume NULL là None (không ép 0)",
+       det.series_by_ticker([{"tk": "A", "d": "2026-08-20", "close": 1, "price": 1, "hi": 1,
+                              "lo": 1, "vol": None}])["A"][0]["vol"] is None)
+    ck("series_by_ticker đọc Volume số",
+       det.series_by_ticker([{"tk": "A", "d": "2026-08-20", "close": 1, "price": 1, "hi": 1,
+                              "lo": 1, "vol": "1500"}])["A"][0]["vol"] == 1500.0)
+
+    # our_table_missing: 0 phiên vẫn DRIFT (lệch dương không giải thích được bằng "vendor chưa áp").
+    v, p = det.scan_ticker(flat_series(D, 100, 1.25), evs, 0.003, 3, D[0])
+    ck("our_table_missing + 0 phiên -> DRIFT, KHÔNG awaiting",
+       v == "DRIFT" and p["dir"] == "our_table_missing" and p["ex"] == EX, f"v={v} {p.get('dir')}")
+    ck("our_table_missing KHÔNG đi qua nhánh awaiting (không chứng từ 'chua du 3 phien')",
+       not any("chua du" in n for n in p["notes"]) and "await_resid" not in p, f"{p['notes']}")
+
+    # corr=1: 0 phiên vẫn DRIFT để caveat đính chính đi cùng cáo buộc.
+    corr = [ev(EX, "DIV", dps=2), ev(EX, "DIV", dps=3)]     # f = 100/95 trên giá thô 100
+    v, p = det.scan_ticker(pre, corr, 0.003, 3, D[0])
+    ck("corr=1 + 0 phiên -> DRIFT (giữ cờ đính chính), KHÔNG awaiting",
+       v == "DRIFT" and p.get("corr") == "1", f"v={v} corr={p.get('corr')}")
+
+    # vendor_missing nhưng KHÔNG có ex-date nào để đếm (unknown_gap) -> DRIFT.
+    v, p = det.scan_ticker(flat_series(D, 100, 0.9), [], 0.003, 3, D[0])
+    ck("vendor_missing + unknown_gap -> DRIFT (không có ngày để đếm)",
+       v == "DRIFT" and p["dir"] == "vendor_missing" and p["ex"].startswith("unknown_gap@"),
+       f"v={v} ex={p.get('ex')}")
+    ck("unknown_gap KHÔNG đi qua nhánh awaiting (không chứng từ 'chua du 3 phien')",
+       not any("chua du" in n for n in p["notes"]) and "await_resid" not in p, f"{p['notes']}")
+
+    # Chữ ký FPT `SETTLE_RUN=4` (arch-review vòng 2): vendor áp hệ số cho đúng 4 phiên cum cuối rồi
+    # dừng. Dư tại phiên tệ nhất = 0 y như "chưa áp gì", nhưng 4 phiên giữa cụm lệch và ex-date KHỚP
+    # ⇒ vendor ĐÃ chạy ⇒ phải là DRIFT, kể cả khi mới 1 phiên khớp từ ex-date.
+    fpt = flat_series(D[:-4], 100, 1.0) + flat_series(D[-4:], 100, 1.1)
+    v, p = det.scan_ticker(fpt + post([1000]), evs, 0.003, 3, D[0])
+    ck("chữ ký FPT SETTLE_RUN=4 + 1 phiên khớp -> DRIFT, KHÔNG awaiting",
+       v == "DRIFT" and p.get("d1") == D[-5] and p.get("n_traded") == 1, f"v={v} {p.get('d1')}")
+    ck("chữ ký FPT: chứng từ nói rõ vendor đã áp một phần",
+       any("vendor da ap mot phan" in n for n in p["notes"]), f"{p['notes']}")
+    # Khe NHỎ NHẤT (arch-review vòng 2, B3): 1-2 phiên cum đã khớp vẫn là bằng chứng vendor đã chạy.
+    for k in (1, 2):
+        part = flat_series(D[:-k], 100, 1.0) + flat_series(D[-k:], 100, 1.1)
+        v, p = det.scan_ticker(part + post([1000]), evs, 0.003, 3, D[0])
+        ck(f"khe {k} phiên giữa cụm lệch và ex-date + 1 phiên khớp -> DRIFT, KHÔNG awaiting",
+           v == "DRIFT" and p.get("d1") == D[-k - 1], f"v={v} {p.get('d1')}")
+    v, p = det.scan_ticker(pre + post([1000]), evs, 0.003, 3, D[0])
+    ck("cụm lệch chạm phiên cuối trước ex-date + 1 phiên khớp -> vẫn AWAITING",
+       v == "AWAITING_TRADE" and p.get("d1") == D[-1], f"v={v} {p.get('d1')}")
+
+    # Cổng NHẤT QUÁN (arch-review 2026-10-08, ca VHF thật: −67,30% quan sát vs −19,34% do hệ số chờ).
+    v, p = det.scan_ticker(pre, evs, 0.003, 3, D[0])
+    ck("awaiting khớp đúng hệ số chờ: dư = 0 (r_obs·Πf/r_pred − 1)",
+       v == "AWAITING_TRADE" and abs(p.get("await_resid", 9)) < 1e-9, f"v={v} {p.get('await_resid')}")
+    v, p = det.scan_ticker(flat_series(D, 100, 0.5), evs, 0.003, 3, D[0])
+    ck("chữ ký VHF: 0 phiên nhưng lệch KHÔNG giải thích được bằng hệ số chờ -> DRIFT",
+       v == "DRIFT" and p.get("n_traded") == 0 and abs(p["await_resid"] + 0.5) < 1e-9,
+       f"v={v} n={p.get('n_traded')} du={p.get('await_resid')}")
+    ck("chữ ký VHF: chứng từ ghi rõ vì sao không phải awaiting",
+       any("KHONG giai thich duoc bang he so cho" in n for n in p["notes"]), f"{p['notes']}")
+    v, p = det.scan_ticker(flat_series(D, 100, 1.0 * (1 - 0.0029)), evs, 0.003, 3, D[0])
+    ck("dư |−0,29%| ≤ dev_tol -> vẫn AWAITING", v == "AWAITING_TRADE", f"v={v} {p.get('await_resid')}")
+    v, p = det.scan_ticker(flat_series(D, 100, 1.0 * (1 + 0.0031)), evs, 0.003, 3, D[0])
+    ck("dư |+0,31%| > dev_tol -> DRIFT", v == "DRIFT", f"v={v} {p.get('await_resid')}")
+    v, p = det.scan_ticker(flat_series(D, 100, 0.5) + post([1, 1, 1]), evs, 0.003, 3, D[0])
+    ck("≥3 phiên + lệch không giải thích -> DRIFT, KHÔNG ghi chứng từ 'chua du 3 phien'",
+       v == "DRIFT" and not any("KHONG giai thich" in n for n in p["notes"]), f"v={v} {p['notes']}")
+    # Hai ex-date đều CHỜ: Π phải gồm MỌI hệ số từ ex_named trở đi, không chỉ hệ số của ex_named.
+    evs2 = evs + [ev("2026-08-27", "ISS", "Cổ phiếu thưởng", 0.2)]
+    v, p = det.scan_ticker(pre, evs2, 0.003, 3, D[0])
+    ck("hai ex-date cùng chờ (1,1×1,2): Π gồm cả hai -> AWAITING, dư 0",
+       v == "AWAITING_TRADE" and abs(p.get("await_resid", 9)) < 1e-9 and abs(p["r_pred"] - 1.32) < 1e-9,
+       f"v={v} r_pred={p.get('r_pred')} du={p.get('await_resid')}")
+    # Che tạm (docstring): thiếu cả hệ số ex cũ A (đã có phiên) lẫn ex mới B (chưa khớp) -> dư ≠ 0 -> DRIFT.
+    evs_ab = [ev("2026-07-05", "ISS", "Cổ phiếu thưởng", 0.1), ev(EX, "ISS", "Cổ phiếu thưởng", 0.2)]
+    v, p = det.scan_ticker(pre, evs_ab, 0.003, 3, D[0])
+    ck("thiếu cả hệ số ex cũ (A) lẫn ex chờ (B) -> DRIFT, không bị awaiting che",
+       v == "DRIFT" and p["ex"] == EX, f"v={v} ex={p.get('ex')} du={p.get('await_resid')}")
+
+    # Hợp đồng dòng máy đọc.
+    m = det.marker_awaiting("VHF", {"ex": "2026-10-02", "n_traded": 0, "dev": -0.672973}, "none")
+    ck("marker_awaiting đúng 6 trường theo thứ tự",
+       m.split("|") == ["ADJFACTOR_AWAITING_TRADE", "VHF", "2026-10-02", "0", "none", "-0.672973"],
+       m)
+
+    # run_scan: mã đang NẮM thuộc awaiting mang nhãn nắm thật; DRIFT của mã khác byte-identical.
+    class A:
+        asof = "2026-08-28"; ex0 = "2026-06-01"; ex1 = "2026-08-28"; ex_days = 30
+        lookback_days = 120; dev_tol = 0.003; min_run = 3; tickers = None; no_holdings = False
+
+    rows = ([{"tk": "WAIT", **b} for b in pre]
+            + [{"tk": "REAL", **b} for b in pre + post([1, 1, 1, 1])])
+    saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session)
+    try:
+        det.cohort_tickers = lambda a, b: ["REAL", "WAIT"]
+        det.bq_max_session = lambda: A.asof
+        det.price_rows = lambda t, s_, e: rows
+        det.held_map = lambda asof, **kw: {"WAIT": "SpaceX,ZaloPay"}
+        det.cal.feed_freshness = lambda: {"max_ingested": "2026-08-28 15:00:00",
+                                          "max_public": "2026-08-28", "n": "36428"}
+        det.cal.events = lambda t, since=None, until=None: [
+            dict(e, ticker=tk) for tk in ("REAL", "WAIT") for e in evs]
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = det.run_scan(A)
+        out = buf.getvalue()
+    finally:
+        (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+         det.cal.events, det.bq_max_session) = saved
+    lines = out.splitlines()
+    aw = [l for l in lines if l.startswith("ADJFACTOR_AWAITING_TRADE|")]
+    dr = [l for l in lines if l.startswith("ADJFACTOR_DRIFT|")]
+    sc = [l for l in lines if l.startswith("ADJFACTOR_SCAN|")]
+    ck("run_scan: mã đang NẮM awaiting -> dòng AWAITING mang nhãn nắm THẬT (không ẩn tiền thật)",
+       aw == [f"ADJFACTOR_AWAITING_TRADE|WAIT|{EX}|0|SpaceX,ZaloPay|-0.090909"], f"{aw}")
+    ck("run_scan: mã awaiting KHÔNG có dòng DRIFT", not any("|WAIT|" in l for l in dr), f"{dr}")
+    _, p_real = det.scan_ticker(pre + post([1, 1, 1, 1]), evs, 0.003, 3, A.ex0)
+    ck("run_scan: DRIFT của mã đủ phiên byte-identical với marker_drift (12 trường)",
+       dr == [det.marker_drift("REAL", p_real, "none")] and len(dr[0].split("|")) == 12, f"{dr}")
+    ck("run_scan: SCAN giữ 7 trường, n_drift = DRIFT THẬT (1), awaiting không cộng vào",
+       sc == ["ADJFACTOR_SCAN|2026-08-28|2|1|0|0|0"], f"{sc}")
+    # Bằng chứng awaiting phải nằm trong log (dòng máy đọc chỉ mang `dev`) — arch-review 2026-10-08.
+    tab = [l for l in lines if l.startswith("WAIT ")]
+    ck("run_scan: log có hàng bằng chứng awaiting (r_obs, r_pred, cửa sổ, ex, n_khop, dư)",
+       len(tab) == 1 and "1.000000" in tab[0] and "1.100000" in tab[0] and EX in tab[0]
+       and "+0.0000%" in tab[0] and "SpaceX,ZaloPay" in tab[0], f"{tab}")
+    ck("run_scan: log có chứng từ hệ số của mã awaiting",
+       any(l.startswith("   WAIT: ") for l in lines), f"{out[-600:]!r}")
+    ck("run_scan: có DRIFT -> rc=10", rc == 10, f"rc={rc}")
+
+    # awaiting-only: rc=11 (không phải 'sạch' 0)
+    saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session)
+    try:
+        det.cohort_tickers = lambda a, b: ["WAIT"]
+        det.bq_max_session = lambda: A.asof
+        det.price_rows = lambda t, s_, e: [{"tk": "WAIT", **b} for b in pre]
+        # `{}` chứ không phải một mã nắm khác: held_map thêm mã nắm NGOÀI cohort vào universe, mà mã
+        # không có giá đó thành NODATA ⇒ rc=11 vì lý do KHÁC (mutation D12 từng sống đúng vì khe này).
+        det.held_map = lambda asof, **kw: {}
+        det.cal.feed_freshness = lambda: {"max_ingested": "2026-08-28 15:00:00",
+                                          "max_public": "2026-08-28", "n": "36428"}
+        det.cal.events = lambda t, since=None, until=None: [dict(e, ticker="WAIT") for e in evs]
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = det.run_scan(A)
+        out = buf.getvalue()
+    finally:
+        (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+         det.cal.events, det.bq_max_session) = saved
+    ck("fixture awaiting-only THUẦN: không DRIFT/UNCOMP/NODATA, SCAN 1|0|0|0|0",
+       "ADJFACTOR_SCAN|2026-08-28|1|0|0|0|0" in out.splitlines(), f"{out[-400:]!r}")
+    ck("chỉ có awaiting (feed FRESH) -> rc=11, KHÔNG phải 0", rc == 11, f"rc={rc}")
+    ck("awaiting mã không nắm mang nhãn `none`",
+       f"ADJFACTOR_AWAITING_TRADE|WAIT|{EX}|0|none|-0.090909" in out.splitlines())
+
+
+AW_FREE = "ADJFACTOR_AWAITING_TRADE|VHF|2026-10-02|0|none|-0.672973"
+AW_FREE2 = "ADJFACTOR_AWAITING_TRADE|PIS|2026-10-02|2|none|-0.091304"
+AW_HELD = "ADJFACTOR_AWAITING_TRADE|DRX|2026-09-22|1|SpaceX,ZaloPay|-0.007002"
+AW_UNK = "ADJFACTOR_AWAITING_TRADE|UNK|2026-09-22|0|unknown|-0.050000"
+AW_SKIP = "ADJFACTOR_AWAITING_TRADE|SKP|2026-09-22|0|skipped|-0.050000"
+DRIFT_VHF = ("ADJFACTOR_DRIFT|VHF|2026-10-02|0.405405|1.239669|-0.672973|8|2026-06-09"
+             "|2026-06-18|vendor_missing|none|0")
+
+
+def t_alert_awaiting(tz_label, env_tz):
+    print(f"\n[16] alert.sh — AWAITING_TRADE  (TZ: {tz_label})")
+    tail = "\n".join([FEED_FRESH, SCAN]) + "\n"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tgt = _sandbox(tmp)
+        sink = os.path.join(tmp, "sink")
+        state = os.path.join(tmp, "state", "adjfactor_drift_alerted.json")
+        notify = os.path.join(sink, "notify.txt")
+
+        # (a) chỉ awaiting của mã KHÔNG nắm + feed FRESH -> bus có, Discord KHÔNG.
+        r = _run_alert(tmp, tgt, "\n".join([AW_FREE, AW_FREE2]) + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] awaiting-only (không nắm) -> KHÔNG gửi Discord, rc=0",
+           r.returncode == 0 and not os.path.exists(notify), f"rc={r.returncode} {r.stderr[-300:]!r}")
+        busf = os.path.join(sink, "bus.jsonl")
+        bus = [json.loads(l) for l in open(busf) if l.strip()] if os.path.exists(busf) else []
+        ck(f"[{tz_label}] awaiting-only vẫn ghi bus với ĐỦ danh sách",
+           len(bus) == 1 and bus[0].get("awaiting_trade") == "2"
+           and bus[0].get("awaiting_trade_markers") == [AW_FREE, AW_FREE2], f"{bus}")
+        ck(f"[{tz_label}] awaiting KHÔNG sinh khoá de-dup cho mã không nắm",
+           not os.path.exists(state) or json.load(open(state)) == {},
+           f"{open(state).read() if os.path.exists(state) else None}")
+
+        # (b) awaiting + DRIFT thật -> Discord; awaiting gộp MỘT dòng info, không vào TODO.
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_FREE, AW_FREE, AW_FREE2]) + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] DRIFT thật + awaiting -> có gửi Discord", r.returncode == 10 and msg,
+           f"rc={r.returncode} {r.stderr[-300:]!r}")
+        info = [l for l in msg.splitlines() if "Chờ giao dịch lại" in l]
+        ck(f"[{tz_label}] awaiting gộp đúng MỘT dòng info chứa cả 2 mã",
+           len(info) == 1 and "VHF" in info[0] and "PIS" in info[0], f"{info}")
+        todo = msg.split("**Việc cần làm:**", 1)[-1].split("_Quét", 1)[0]
+        ck(f"[{tz_label}] awaiting KHÔNG vào 'Việc cần làm'", "VHF" not in todo and "PIS" not in todo,
+           f"{todo!r}")
+        ck(f"[{tz_label}] awaiting KHÔNG thành dòng lệch '• **VHF**'", "• **VHF**" not in msg)
+        ck(f"[{tz_label}] footer đếm awaiting riêng", "2 chờ giao dịch lại" in msg)
+        ck(f"[{tz_label}] state chỉ có khoá DRIFT, không có khoá awaiting",
+           sorted(json.load(open(state))) == ["FPT|2026-09-21"], f"{open(state).read()}")
+        os.remove(notify)
+
+        # (c) DRIFT đã de-dup + awaiting KHÔNG phá de-dup.
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_FREE, AW_FREE]) + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] DRIFT đã cảnh báo + awaiting -> KHÔNG gửi lại (de-dup còn nguyên)",
+           r.returncode == 10 and not os.path.exists(notify), f"rc={r.returncode} {r.stderr[-300:]!r}")
+
+        # (d) chỉ awaiting, KHÔNG có mã nào nắm, nhưng awaiting không chứa Winston dù có Discord vì feed.
+        stale_tail = "\n".join([FEED_STALE, SCAN]) + "\n"
+        r = _run_alert(tmp, tgt, AW_FREE + "\n" + stale_tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] awaiting-only + feed STALE -> VẪN gửi (feed là cảnh báo riêng)",
+           r.returncode == 10 and "KHÔNG TƯƠI" in msg, f"rc={r.returncode}")
+        ck(f"[{tz_label}] awaiting KHÔNG giao 'vendor thiếu hệ số' cho Winston",
+           "Vendor thiếu hệ số điều chỉnh" not in msg)
+        os.remove(notify)
+
+        # (e) awaiting + uncomputable của mã nắm -> gửi (điều kiện quiet chỉ dành cho awaiting thuần).
+        r = _run_alert(tmp, tgt, "\n".join([AW_FREE, UNCOMP_HELD]) + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] awaiting + uncomputable mã nắm -> có gửi Discord",
+           r.returncode == 10 and os.path.exists(notify), f"rc={r.returncode}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tgt = _sandbox(tmp)
+        sink = os.path.join(tmp, "sink")
+        state = os.path.join(tmp, "state", "adjfactor_drift_alerted.json")
+        notify = os.path.join(sink, "notify.txt")
+        tail = "\n".join([FEED_FRESH, SCAN]) + "\n"
+
+        # (f) mã ĐANG NẮM thuộc awaiting -> nêu tên + nhãn LIVE trên Discord, không Winston, de-dup.
+        r = _run_alert(tmp, tgt, AW_HELD + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] awaiting mã ĐANG NẮM -> Discord nêu tên + nhãn LIVE",
+           r.returncode == 10 and "DRX" in msg and "ĐANG NẮM LIVE: SpaceX,ZaloPay" in msg,
+           f"rc={r.returncode} {msg[:300]!r}")
+        ck(f"[{tz_label}] awaiting mã nắm KHÔNG giao Winston", "Winston" not in msg, f"{msg!r}")
+        ck(f"[{tz_label}] awaiting mã nắm ghi khoá RIÊNG `mã|ex|awaiting_trade`",
+           sorted(json.load(open(state))) == ["DRX|2026-09-22|awaiting_trade"],
+           f"{open(state).read()}")
+        os.remove(notify)
+        r = _run_alert(tmp, tgt, AW_HELD + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] awaiting mã nắm lượt 2 -> de-dup, KHÔNG gửi lại",
+           not os.path.exists(notify), f"rc={r.returncode}")
+
+        # (g) held=unknown cũng phải nêu tên (có thể là tiền thật).
+        r = _run_alert(tmp, tgt, AW_UNK + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] awaiting held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'",
+           "UNK" in msg and "KHÔNG TRA ĐƯỢC vị thế" in msg, f"{msg[:300]!r}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+        # (h) yêu cầu #3: mã giao dịch lại ≥3 phiên mà vẫn lệch -> DRIFT báo như MỚI, kể cả khi
+        # state còn khoá DRIFT CŨ của nó (đo thật: VHF|2026-10-02 = 2026-10-06 trong state live).
+        st = json.load(open(state))
+        today = subprocess.run(["bash", "-c", "TZ='Asia/Ho_Chi_Minh' date +%F"],
+                               capture_output=True, text=True).stdout.strip()
+        st["VHF|2026-10-02"] = today
+        json.dump(st, open(state, "w"))
+        r = _run_alert(tmp, tgt, AW_FREE + "\n" + tail, env_tz, args=("1234", "--dry-run"))
+        ck(f"[{tz_label}] --dry-run KHÔNG xoá khoá cũ",
+           "VHF|2026-10-02" in json.load(open(state)), f"{open(state).read()}")
+        r = _run_alert(tmp, tgt, AW_FREE + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] lượt awaiting XOÁ khoá DRIFT cũ `VHF|ex` (không gửi Discord)",
+           "VHF|2026-10-02" not in json.load(open(state)) and not os.path.exists(notify),
+           f"rc={r.returncode} {open(state).read()}")
+        ck(f"[{tz_label}] xoá khoá awaiting KHÔNG đụng khoá khác",
+           "DRX|2026-09-22|awaiting_trade" in json.load(open(state)), f"{open(state).read()}")
+        r = _run_alert(tmp, tgt, DRIFT_VHF + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] awaiting -> DRIFT (≥3 phiên) báo như mã MỚI, không bị khoá cũ chặn",
+           r.returncode == 10 and "• **VHF**" in msg and "Winston" in msg,
+           f"rc={r.returncode} {r.stderr[-300:]!r}")
+
+    # arch-review 2026-10-08: held=skipped, nhánh im lặng có UNCOMP/NODATA không nắm, tiêu đề khi chỉ
+    # có awaiting mã nắm.
+    with tempfile.TemporaryDirectory() as tmp:
+        tgt = _sandbox(tmp)
+        sink = os.path.join(tmp, "sink")
+        notify = os.path.join(sink, "notify.txt")
+        tail = "\n".join([FEED_FRESH, SCAN]) + "\n"
+
+        # (i) held=skipped (`--no-holdings`) KHÔNG phải khẳng định vị thế: không nêu như mã nắm.
+        r = _run_alert(tmp, tgt, AW_SKIP + "\n" + tail, env_tz)
+        ck(f"[{tz_label}] awaiting held=skipped một mình -> im lặng như mã không nắm, rc=0",
+           r.returncode == 0 and not os.path.exists(notify), f"rc={r.returncode} {r.stderr[-300:]!r}")
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_FREE, AW_SKIP]) + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] awaiting held=skipped KHÔNG in 'ĐANG NẮM LIVE: skipped' / không in đậm",
+           "SKP (ex" in msg and "skipped" not in msg and "**SKP**" not in msg, f"{msg[-900:]!r}")
+        ck(f"[{tz_label}] DRIFT thật + awaiting -> giữ tiêu đề '⚠️ LỆCH'",
+           msg.startswith("⚠️ **LỆCH HỆ SỐ"), f"{msg[:120]!r}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+        # (j) awaiting + UNCOMP/NODATA của mã KHÔNG nắm -> nhánh de-dup (rc=10), không phải im lặng rc=0.
+        for lbl, extra in (("UNCOMPUTABLE", UNCOMP_FREE), ("NODATA", NODATA_FREE)):
+            r = _run_alert(tmp, tgt, "\n".join([AW_FREE, extra]) + "\n" + tail, env_tz)
+            ck(f"[{tz_label}] awaiting + {lbl} không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord",
+               r.returncode == 10 and not os.path.exists(notify) and "(de-dup)" in r.stderr,
+               f"rc={r.returncode} {r.stderr[-300:]!r}")
+
+        # (k) lượt gửi CHỈ vì awaiting mã nắm: tiêu đề ℹ️, không '⚠️ LỆCH … ≥3 phiên', TODO không trống.
+        r = _run_alert(tmp, tgt, AW_HELD + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        todo = msg.split("**Việc cần làm:**", 1)[-1].split("_Quét", 1)[0]
+        ck(f"[{tz_label}] chỉ awaiting mã nắm -> tiêu đề ℹ️ CHỜ GIAO DỊCH LẠI, không '⚠️ LỆCH'",
+           msg.startswith("ℹ️ **CHỜ GIAO DỊCH LẠI") and "⚠️ **LỆCH" not in msg, f"{msg[:200]!r}")
+        ck(f"[{tz_label}] chỉ awaiting mã nắm -> 'Việc cần làm' nói rõ 'không có', không trống",
+           todo.strip().startswith("không có"), f"{todo!r}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+        # (l) NODATA mã nắm (TODO cũng rỗng) KHÔNG được đổi sang tiêu đề awaiting.
+        r = _run_alert(tmp, tgt, "\n".join([NODATA_FREE.replace("|none", "|SpaceX"), AW_FREE])
+                       + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] NODATA mã nắm + awaiting không nắm -> vẫn tiêu đề '⚠️ LỆCH', không ℹ️",
+           msg.startswith("⚠️ **LỆCH HỆ SỐ"), f"{msg[:200]!r}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+        # (m) awaiting mã nắm MỚI + MỘT cảnh báo thật khác ⇒ tiêu đề '⚠️ LỆCH' (mỗi điều kiện của nhánh
+        # ℹ️ phải tự đứng được — mỗi ca dùng một mã awaiting nắm MỚI để N_AWAIT_HELD_NEW > 0).
+        for i, (lbl, extra, tl) in enumerate((
+                ("DRIFT mới", DRIFT_HELD, tail),
+                ("UNCOMPUTABLE mã nắm", UNCOMP_HELD, tail),
+                ("NODATA mã nắm", NODATA_HELD, tail),
+                ("feed STALE", "", "\n".join([FEED_STALE, SCAN]) + "\n"))):
+            aw = f"ADJFACTOR_AWAITING_TRADE|HW{i}|2026-09-22|0|SpaceX|-0.050000"
+            r = _run_alert(tmp, tgt, "\n".join(x for x in (extra, aw) if x) + "\n" + tl, env_tz)
+            msg = open(notify).read() if os.path.exists(notify) else ""
+            ck(f"[{tz_label}] awaiting mã nắm mới + {lbl} -> tiêu đề '⚠️ LỆCH', không ℹ️",
+               r.returncode == 10 and msg.startswith("⚠️ **LỆCH HỆ SỐ") and f"HW{i}" in msg,
+               f"rc={r.returncode} {msg[:200]!r}")
+            if os.path.exists(notify):
+                os.remove(notify)
+
+    # arch-review vòng 2: (n) DRIFT đã de-dup + awaiting mã nắm MỚI; (o) xoá khoá DRIFT cũ của mã NẮM;
+    # (p) log nhánh awaiting-only không khẳng định "không mã nào nắm" khi mã nắm chỉ bị de-dup.
+    with tempfile.TemporaryDirectory() as tmp:
+        tgt = _sandbox(tmp)
+        sink = os.path.join(tmp, "sink")
+        state = os.path.join(tmp, "state", "adjfactor_drift_alerted.json")
+        notify = os.path.join(sink, "notify.txt")
+        tail = "\n".join([FEED_FRESH, SCAN]) + "\n"
+        _run_alert(tmp, tgt, DRIFT_FREE + "\n" + tail, env_tz)          # FPT báo lần đầu -> de-dup
+        if os.path.exists(notify):
+            os.remove(notify)
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_FREE, AW_HELD]) + "\n" + tail, env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] DRIFT đã de-dup + awaiting mã nắm mới -> KHÔNG nói 'Không có lệch thật'",
+           r.returncode == 10 and msg.startswith("ℹ️") and "Không có lệch thật" not in msg
+           and "1 lệch đã báo" in msg and "VẪN MỞ" in msg, f"rc={r.returncode} {msg[:300]!r}")
+        todo = msg.split("**Việc cần làm:**", 1)[-1].split("_Quét", 1)[0]
+        ck(f"[{tz_label}] DRIFT đã de-dup + awaiting mã nắm -> TODO nói 'không có việc MỚI'",
+           todo.strip().startswith("không có việc MỚI"), f"{todo!r}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+        today = subprocess.run(["bash", "-c", "TZ='Asia/Ho_Chi_Minh' date +%F"],
+                               capture_output=True, text=True).stdout.strip()
+        st = json.load(open(state))
+        st["DRX|2026-09-22"] = today              # khoá DRIFT CŨ của chính mã nắm đang awaiting
+        json.dump(st, open(state, "w"))
+        r = _run_alert(tmp, tgt, AW_HELD + "\n" + tail, env_tz)    # khoá awaiting còn tươi -> im
+        ck(f"[{tz_label}] awaiting mã NẮM: XOÁ khoá DRIFT cũ `DRX|ex` (đường tiền thật)",
+           "DRX|2026-09-22" not in json.load(open(state))
+           and "DRX|2026-09-22|awaiting_trade" in json.load(open(state)),
+           f"rc={r.returncode} {open(state).read()}")
+        ck(f"[{tz_label}] awaiting-only, mã nắm đã de-dup -> rc=0, log KHÔNG nói 'khong ma nao co the dang nam'",
+           r.returncode == 0 and not os.path.exists(notify)
+           and "khong ma nao co the dang nam" not in r.stderr and "da bao trong" in r.stderr,
+           f"rc={r.returncode} {r.stderr[-300:]!r}")
+
+        # vòng 2 B2: THIẾU dòng SCAN (N_DRIFT='?') + DRIFT đã de-dup + awaiting mã nắm MỚI -> vẫn KHÔNG
+        # được nói 'Không có lệch thật' (điều kiện phải đọc từ chính dòng DRIFT, không từ SCAN).
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_FREE, AW_HELD.replace("DRX", "NSC"), FEED_FRESH])
+                       + "\n", env_tz)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] thiếu SCAN + DRIFT de-dup + awaiting nắm -> KHÔNG nói 'Không có lệch thật' (B2)",
+           msg.startswith("ℹ️") and "Không có lệch thật" not in msg and "1 lệch đã báo" in msg,
+           f"rc={r.returncode} {msg[:300]!r}")
+        if os.path.exists(notify):
+            os.remove(notify)
+
+        # vòng 2 B1: XOÁ khoá DRIFT cũ thất bại (state/ read-only) -> KHÔNG nói 'Discord DA gui roi'
+        # (chưa gửi gì), trích lỗi thật, và ÉP gửi Discord nêu khoá còn sót (fail-open phía gửi).
+        st = json.load(open(state))
+        st["VHF|2026-10-02"] = today
+        json.dump(st, open(state, "w"))
+        sdir = os.path.dirname(state)
+        for f in os.listdir(sdir):
+            if f.endswith(".lock"):
+                os.remove(os.path.join(sdir, f))
+        mode = os.stat(sdir).st_mode
+        os.chmod(sdir, 0o500)
+        try:
+            r = _run_alert(tmp, tgt, AW_FREE + "\n" + tail, env_tz)
+        finally:
+            os.chmod(sdir, mode)
+        msg = open(notify).read() if os.path.exists(notify) else ""
+        ck(f"[{tz_label}] xoá khoá hỏng -> KHÔNG nói 'Discord DA gui roi', trích lỗi thật (B1)",
+           "DA gui roi" not in r.stderr and "KHONG xoa duoc khoa DRIFT cu VHF|2026-10-02" in r.stderr
+           and "Permission denied" in r.stderr, f"{r.stderr[-500:]!r}")
+        ck(f"[{tz_label}] xoá khoá hỏng -> ÉP gửi Discord nêu khoá sót, rc=10 (B1)",
+           r.returncode == 10 and "STATE DE-DUP KHÔNG XOÁ ĐƯỢC" in msg and "VHF|2026-10-02" in msg,
+           f"rc={r.returncode} {msg[:300]!r}")
+        ck(f"[{tz_label}] xoá khoá hỏng -> khoá VẪN còn (test thật sự chạm đường lỗi)",
+           "VHF|2026-10-02" in json.load(open(state)), f"{open(state).read()}")
+
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--py", action="store_true")
@@ -1181,6 +1672,7 @@ def main():
         t_feedgate()
         t_emit()
         t_held_and_corr()
+        t_awaiting()
     if do_sh:
         # §16/§19: LẶP dưới 4 môi trường TZ. `unset TZ` = ca cron thật (không có TZ trong env).
         # `Pacific/Kiritimati` (+14) và `Pacific/Midway` (−11) là hai đầu cực: với MỌI thời điểm,
@@ -1194,6 +1686,7 @@ def main():
                 envd = {}
                 os.environ.pop("TZ", None)
             t_alert(label, envd)
+            t_alert_awaiting(label, envd)
         t_runner()
         print("\n[10] meta — assertion neo-TZ có thật sự phân biệt được không (§19)")
         ck(f"có ít nhất MỘT môi trường TZ phân biệt được ngày host với ngày ICT "

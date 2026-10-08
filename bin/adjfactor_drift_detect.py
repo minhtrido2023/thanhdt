@@ -48,6 +48,7 @@ UNCOMPUTABLE = fail-closed, KHÔNG BAO GIỜ suy đoán f=1,0:
 DÒNG MÁY ĐỌC trên stdout (giá trị đã chuẩn hoá — §28, shell KHÔNG grep văn xuôi). Dựng ở MỘT chỗ
 duy nhất, các hàm `marker_*` — xem ghi chú ở đó về vì sao:
   ADJFACTOR_DRIFT|<tk>|<ex>|<r_obs>|<r_pred>|<dev>|<run>|<d0>|<d1>|<dir>|<held>|<corr>
+  ADJFACTOR_AWAITING_TRADE|<tk>|<ex>|<n_traded>|<held>|<dev>
   ADJFACTOR_UNCOMPUTABLE|<tk>|<ex>|<reason_code>|<held>
   ADJFACTOR_NODATA|<tk>|<held>
   ADJFACTOR_FEED|<status>|<max_ingested_ict>|<max_public>|<rows>|<age_days>|<reason>
@@ -63,11 +64,33 @@ lớp này là DẤU của lệch; detector KHÔNG tự kết luận bên nào s
 ĐÍNH CHÍNH như tranche thật (registry Bẫy 3). `alert.sh` PHẢI gắn cờ những dòng này và KHÔNG quy
 việc cho Winston — chúng chưa đủ căn cứ để cáo buộc vendor.
 
+AWAITING_TRADE (CHỜ GIAO DỊCH LẠI, user duyệt 2026-10-08, job Taylor_20261008_032221): vendor KHÔNG
+điều chỉnh giá cho mã chưa có phiên khớp nào từ ex-date — nó tự cập nhật khi mã giao dịch lại (bq_admin
+giải thích; đo thật asof 2026-10-07: 9/16 mã DRIFT có 0 dòng giá từ ex-date). Một lệch `vendor_missing`
+(corr=0, ex-date đặt tên được) mà số phiên `Volume>0` trong [ex-date, asof] < `AWAIT_MIN_TRADED_SESSIONS`
+là trạng thái BÌNH THƯỜNG ⇒ dòng `ADJFACTOR_AWAITING_TRADE` RIÊNG; dòng `ADJFACTOR_DRIFT` của mọi mã
+còn lại giữ NGUYÊN từng byte. Đủ ngưỡng mà vẫn lệch (DRI/DVN/SHC hôm đó: 12/19/8 phiên) ⇒ DRIFT thật.
+`our_table_missing` và `corr=1` KHÔNG BAO GIỜ thành awaiting: lệch dương không giải thích được bằng
+"vendor chưa áp", còn corr=1 phải giữ caveat đính chính đi cùng cáo buộc.
+Cổng NHẤT QUÁN (thu hẹp spec, arch-review 2026-10-08): chỉ awaiting khi lệch KHỚP đúng hệ số còn chờ,
+|r_obs·Π f(ex ≥ ex_named)/r_pred − 1| ≤ dev_tol; lệch lớn hơn thế là lỗi dữ liệu KHÁC ⇒ vẫn DRIFT (ca
+VHF: −67,30% quan sát vs −19,34% do hệ số chờ). Log in bảng bằng chứng đầy đủ cho awaiting như DRIFT.
+Cổng CHẠM EX-DATE (arch-review vòng 2): cụm lệch phải kéo tới phiên cuối trước `ex_named`; còn phiên
+nào nằm giữa thì phiên đó KHỚP hệ số ⇒ vendor đã áp một phần (chữ ký FPT `SETTLE_RUN=4`) ⇒ DRIFT.
+Giới hạn đã biết: "0 dòng giá từ ex-date" được đếm như "0 phiên khớp" — không phân biệt được với feed
+per-ticker chết; mã không nắm khi đó chỉ nằm trong dòng info/bus.
+`ADJFACTOR_SCAN.n_scanned` GỒM cả mã awaiting, còn bốn bộ đếm kia không ⇒ n_scanned = drift + uncomp +
+agree + nodata + số dòng AWAITING_TRADE.
+Che tạm (chấp nhận, có giới hạn): `ex_named` = ex-date ĐẦU TIÊN sau cụm lệch. Mã có DRIFT thật ở ex A
+cũ (đã đủ phiên) mà cụm lệch kéo dài tới sát một ex B mới chưa khớp phiên nào ⇒ hiện là awaiting ở B
+cho tới khi B đủ 3 phiên khớp (cổng nhất quán chặn phần lớn: thiếu cả hệ số A thì dư ≠ 0).
+
 EXIT CODE (phân biệt rõ 3 trạng thái KHÁC nhau — §29, không gộp "không có gì" với "không chạy được"):
   0  = feed nguồn TƯƠI, mọi mã tính được và khớp, 0 uncomputable, 0 nodata. Đây là trạng thái
        DUY NHẤT có nghĩa "không có gì".
   10 = có ≥1 DRIFT (lệch thật, persistent) → alert Discord.
-  11 = ĐIỂM MÙ, KHÔNG phải "sạch": ≥1 UNCOMPUTABLE, hoặc ≥1 NODATA, hoặc feed `corporate_action`
+  11 = KHÔNG phải "sạch": ≥1 AWAITING_TRADE (lệch đã biết, chờ vendor), ≥1 UNCOMPUTABLE, hoặc ≥1
+       NODATA, hoặc feed `corporate_action`
        KHÔNG tươi (STALE/DEAD/UNREADABLE), hoặc universe rỗng (bất khả về cấu trúc ở VN — đo thật
        95 mã cho cửa sổ 18 ngày). Dòng máy đọc phân biệt rõ ba loại; chỉ mã đang NẮM LIVE và ca
        feed-không-tươi mới lên Discord (uncomputable là trạng thái BÌNH THƯỜNG của quyền mua —
@@ -117,6 +140,11 @@ MIN_EVAL_SESSIONS = 3
 MIN_RUN_MAX = 120
 LOOKBACK_MIN = 20
 DEV_TOL_MAX = 0.05
+
+# Số phiên CÓ KHỚP (`Volume>0`) tính từ ex-date (gồm cả ex-date) tới asof mà vendor được chờ để tự áp
+# hệ số. Dưới mốc này một lệch `vendor_missing` là AWAITING_TRADE, không phải DRIFT. User chốt 3 phiên
+# (2026-10-08) — đủ cho ETL vendor chạy lại sau phiên khớp đầu; DRI/DVN/SHC (12/19/8 phiên) vượt xa.
+AWAIT_MIN_TRADED_SESSIONS = 3
 
 
 # ---------------------------------------------------------------- data access
@@ -199,7 +227,8 @@ def price_rows(tickers, start, end):
     tk = ",".join(f'"{t}"' for t in sorted(set(tickers)))
     return _bq(f"""
         SELECT t.ticker AS tk, CAST(t.time AS STRING) AS d,
-               t.Close AS close, t.Price AS price, t.High AS hi, t.Low AS lo
+               t.Close AS close, t.Price AS price, t.High AS hi, t.Low AS lo,
+               t.Volume AS vol
         FROM `{BQ}.tav2_bq.ticker` AS t
         WHERE t.ticker IN ({tk}) AND t.time BETWEEN DATE "{start}" AND DATE "{end}"
           AND t.Close > 0 AND t.Price > 0
@@ -213,6 +242,9 @@ def series_by_ticker(rows):
         out[r["tk"]].append({
             "d": r["d"], "close": float(r["close"]), "price": float(r["price"]),
             "hi": float(r["hi"] or 0), "lo": float(r["lo"] or 0),
+            # NULL giữ là None (KHÔNG ép 0): `traded_sessions_since` coi None là CÓ khớp ⇒ thiếu cột
+            # nghiêng về DRIFT (cảnh báo), không bao giờ về AWAITING (im lặng).
+            "vol": None if r.get("vol") is None else float(r["vol"]),
         })
     return out
 
@@ -457,6 +489,17 @@ def build_factor_curve(series, events):
 
 # ------------------------------------------------------------------- scanning
 
+def traded_sessions_since(series, ex):
+    """Số phiên có khớp trong `series` từ `ex` (GỒM ex-date) tới hết chuỗi (= asof).
+
+    `Volume=0` là dòng ffill/không khớp (SHC: 6/14 dòng từ ex 2026-09-09). `Volume` thiếu/NULL ⇒ đếm
+    là CÓ khớp: không biết thì nghiêng về DRIFT (vẫn cảnh báo), không về AWAITING (im lặng).
+    """
+    return sum(1 for b in series
+               if b["d"] >= ex and (b.get("vol") is None or b["vol"] > 0))
+
+
+
 def longest_bad_run(evaluated, dev_tol):
     """(run dài nhất các phiên LIÊN TIẾP lệch, danh sách phiên của run đó).
 
@@ -518,6 +561,7 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
         # Vì vậy: khoá phải neo vào CHÍNH CỤM LỆCH quan sát được (`d1`), không vay tên một sự kiện
         # khác. `unknown_gap@<d1>` nói thẳng "không xác định được ex-date nào thiếu" thay vì đoán.
         ex_named = min((ex for ex, _f in used if ex > d1), default="")
+        ex_is_event = bool(ex_named)
         if not ex_named:
             # Neo vào ĐỘ LỆCH, KHÔNG vào `d1` (arch-review vòng 3, R3-2). `d1` trôi theo phiên mới
             # nhất khi cụm lệch chạm rìa phải: đo thật hai asof liên tiếp trên cùng một lệch không
@@ -537,6 +581,37 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
             "n_eval": len(evaluated), "notes": notes,
             "unknown": unknown, "partial": bool(unknown),
         }
+        # CHỜ GIAO DỊCH LẠI: chỉ cho lệch `vendor_missing`, corr=0, và ex-date là SỰ KIỆN thật (không
+        # phải `unknown_gap@...` — không có ngày nào để đếm phiên từ đó). Xem docstring đầu file.
+        if out["dir"] == "vendor_missing" and out["corr"] == "0" and ex_is_event:
+            out["n_traded"] = traded_sessions_since(series, ex_named)
+            # Cổng NHẤT QUÁN (arch-review 2026-10-08, ca VHF): "vendor chưa áp" là một KHẲNG ĐỊNH
+            # NGUYÊN NHÂN (§29) ⇒ phải kiểm bằng số, không suy từ chỉ việc mã chưa khớp phiên nào.
+            # Nếu vendor đúng là chưa áp MỌI hệ số từ `ex_named` trở đi (0 phiên khớp ⇒ không áp được
+            # cái nào), thì r_obs = r_pred / Π f(ex ≥ ex_named). VHF thật: DIV 290 trên giá 1500 ⇒ f
+            # 1,2397 ⇒ dự báo lệch −19,34%, quan sát −67,30% (Price 1500/Close 3700) = lỗi dữ liệu
+            # KHÁC ⇒ phải là DRIFT, không được dán nhãn "bình thường".
+            pending = 1.0
+            for ex, f in used:
+                if ex >= ex_named:
+                    pending *= f
+            out["await_resid"] = r_obs * pending / r_pred - 1.0
+            # Cụm lệch phải CHẠM ex-date (arch-review vòng 2, chữ ký FPT `SETTLE_RUN=4`): nếu còn phiên
+            # nào nằm giữa `d1` và `ex_named` thì các phiên đó KHỚP hệ số của ta ⇒ vendor ĐÃ chạy điều
+            # chỉnh (chỉ trên vài phiên cum cuối) ⇒ "vendor chưa áp" bị chính dữ liệu bác bỏ. Dư tại
+            # phiên tệ nhất bằng 0 ở CẢ hai ca nên cổng nhất quán ở dưới không phân biệt được.
+            gap = [b["d"] for b in series if d1 < b["d"] < ex_named]
+            if out["n_traded"] < AWAIT_MIN_TRADED_SESSIONS and gap:
+                notes.append(f"{ex_named}: chua du {AWAIT_MIN_TRADED_SESSIONS} phien khop nhung "
+                             f"{len(gap)} phien {gap[0]}..{gap[-1]} giua cum lech va ex-date DA khop "
+                             f"he so -> vendor da ap mot phan (chu ky SETTLE_RUN) -> DRIFT, khong "
+                             f"phai AWAITING_TRADE")
+            elif out["n_traded"] < AWAIT_MIN_TRADED_SESSIONS:
+                if abs(out["await_resid"]) <= dev_tol:
+                    return "AWAITING_TRADE", out
+                notes.append(f"{ex_named}: chua du {AWAIT_MIN_TRADED_SESSIONS} phien khop nhung lech "
+                             f"KHONG giai thich duoc bang he so cho (Pi f={pending:.6f}, du "
+                             f"{out['await_resid']:+.4%}) -> DRIFT, khong phai AWAITING_TRADE")
         return "DRIFT", out
     if unknown:
         return "UNCOMPUTABLE", {"unknown": unknown, "notes": notes,
@@ -566,6 +641,11 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
 def marker_drift(tk, p, held):
     return ("ADJFACTOR_DRIFT|{tk}|{ex}|{r_obs:.6f}|{r_pred:.6f}|{dev:.6f}|{run}|{d0}|{d1}"
             "|{dir}|{held}|{corr}").format(tk=tk, held=held, **p)
+
+
+def marker_awaiting(tk, p, held):
+    return "ADJFACTOR_AWAITING_TRADE|{tk}|{ex}|{n_traded}|{held}|{dev:.6f}".format(
+        tk=tk, held=held, **p)
 
 
 def marker_uncomputable(tk, ex, code, held):
@@ -652,7 +732,7 @@ def run_scan(args):
     for e in cal.events(tks, since=win0, until=asof):
         ev_by_tk[e["ticker"]].append(e)
 
-    drift, uncomp, agree, nodata = [], [], [], []
+    drift, uncomp, agree, nodata, awaiting = [], [], [], [], []
     for tk in tks:
         s = series.get(tk, [])
         verdict, payload = scan_ticker(s, ev_by_tk.get(tk, []),
@@ -660,6 +740,8 @@ def run_scan(args):
         h = held.get(tk, "none") if held is not None else held_state
         if verdict == "DRIFT":
             drift.append((tk, payload, h))
+        elif verdict == "AWAITING_TRADE":
+            awaiting.append((tk, payload, h))
         elif verdict == "UNCOMPUTABLE":
             uncomp.append((tk, payload, h))
         elif verdict == "AGREE":
@@ -669,6 +751,8 @@ def run_scan(args):
 
     for tk, p, h in sorted(drift, key=lambda x: -abs(x[1]["dev"])):
         print(marker_drift(tk, p, h))
+    for tk, p, h in sorted(awaiting):
+        print(marker_awaiting(tk, p, h))
     for tk, p, h in sorted(uncomp):
         for ex, code, _note in p["unknown"]:
             print(marker_uncomputable(tk, ex, code, h))
@@ -679,8 +763,25 @@ def run_scan(args):
         print(marker_nodata(tk, h))
     print(marker_scan(asof, len(tks), len(drift), len(uncomp), len(agree), len(nodata)))
 
-    print(f"\n-- ket qua: DRIFT {len(drift)} | UNCOMPUTABLE {len(uncomp)} | "
-          f"AGREE {len(agree)} | NODATA {len(nodata)} --")
+    # SCAN giữ NGUYÊN 7 trường (alert.sh đọc theo vị trí): `n_drift` = DRIFT THẬT, awaiting đếm từ dòng
+    # máy đọc riêng của nó.
+    print(f"\n-- ket qua: DRIFT {len(drift)} | AWAITING_TRADE {len(awaiting)} | "
+          f"UNCOMPUTABLE {len(uncomp)} | AGREE {len(agree)} | NODATA {len(nodata)} --")
+    if awaiting:
+        # Bằng chứng ĐẦY ĐỦ như bảng DRIFT (arch-review 2026-10-08): nhãn "bình thường" phải truy lại
+        # được — dòng máy đọc chỉ mang `dev`, nên log là nơi duy nhất giữ r_obs/r_pred/cửa sổ/chứng từ.
+        print(f"\nAWAITING_TRADE (vendor chua ap he so vi < {AWAIT_MIN_TRADED_SESSIONS} phien khop "
+              f"tu ex-date, lech khop dung he so cho — BINH THUONG, khong phai DRIFT):")
+        print(f"{'tk':<7}{'held':<16}{'r_obs':>10}{'r_pred':>10}{'dev':>10}{'run':>5}"
+              f"  {'window':<24}{'ex':<12}{'n_khop':>7}{'du':>10}")
+        for tk, p, h in sorted(awaiting):
+            print(f"{tk:<7}{h:<16}{p['r_obs']:>10.6f}{p['r_pred']:>10.6f}{p['dev']:>+10.4%}"
+                  f"{p['run']:>5}  {p['d0']}..{p['d1']:<12} {p['ex']:<12}{p['n_traded']:>7}"
+                  f"{p['await_resid']:>+10.4%}")
+        print("\n-- chung tu he so cua cac ma AWAITING_TRADE --")
+        for tk, p, _h in sorted(awaiting):
+            for n in p["notes"]:
+                print(f"   {tk}: {n}")
     if drift:
         print(f"\n{'tk':<7}{'held':<16}{'r_obs':>10}{'r_pred':>10}{'dev':>10}{'run':>5}"
               f"  {'window':<24}dir")
@@ -705,9 +806,9 @@ def run_scan(args):
 
     if drift:
         return 10
-    # rc=11 = ĐIỂM MÙ, không phải "sạch": uncomputable, NODATA, hoặc feed nguồn không tươi. Gộp cả
-    # ba vào một mã vì hệ quả giống nhau (không kết luận được), nhưng dòng máy đọc phân biệt rõ.
-    if uncomp or nodata or feed_status != "FRESH":
+    # rc=11 = KHÔNG phải "sạch": awaiting (lệch đã biết, chờ vendor), uncomputable, NODATA, hoặc feed
+    # nguồn không tươi. Gộp cả bốn vào một mã vì không cái nào là "khớp", nhưng dòng máy đọc phân biệt rõ.
+    if awaiting or uncomp or nodata or feed_status != "FRESH":
         return 11
     return 0
 
