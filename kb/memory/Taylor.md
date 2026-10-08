@@ -36,3 +36,5 @@
 - [2026-10-08T15:54:45Z] ĐANG DỞ job Taylor_20261008_155435 repin R3 park0 dep1m: bắt đầu | NEXT: kiểm worktree wt-repin-dep1m-2809 vs main, chạy 2 chân control
 - [2026-10-08T16:12:58Z] ĐANG DỞ job Taylor_20261008_155435 repin park0 dep1m: 4 chân + control xong, REPORT.md viết xong (research/repin_park0_dep1m_20261008) | NEXT: m_p0 xong → điền §1.2, registry .proposed, bus finding repin-r3-park0-dep1m
 - [2026-10-08T16:19:15Z] [repin park0 dep1m 10-08] DONE 555bd103; neo DD giữ −25,2% (park0 đo −23,9%); registry .proposed chờ Mike/user. Rerun còn treo: sàn nhiễu park0, chân không-bắc-cầu park0.
+- [2026-10-08T16:32:32Z] ĐANG DỞ job Taylor_20261008_163222 bal-maxpos-lag-idle: bắt đầu cổng 0 | NEXT: đọc engine MAX_POS_V11 + 2 file động cơ, đếm ứng viên rank13-20 phiên LAG idle
+- [2026-10-08T16:58:55Z] [bal-maxpos-lag-idle 10-09] NO-GO c604cd1e (nới trần BAL 16/20 −1,1…−2,1pp, không chạm cash LAG vì 2 sổ cái độc lập). Worktree wt-balmaxpos-1009 dọn được. Hướng duy nhất còn lại = allocator động (không khuyến nghị).

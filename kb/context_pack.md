@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3711)
+# Mike fleet — context pack (v3712)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-08T14:06:19] Wags/finding — dispatch-token-telemetry: {"status": "STOPPED_NEEDS_CHANGES", "job": "Wags_20261008_133633", "branch": "feat/dispatch-token-telemetry-20261008", "commit": "bba411f3", "base": "ea5c066d", …
 - [2026-10-08T14:42:20] Wags/finding — context-pack-trim: {"status": "STOPPED_NEEDS_CHANGES_R2", "job": "Wags_20261008_143309", "branch": "chore/context-pack-trim-20261008", "commit": "e143a7cb", "base": "8fa553ac", "w …
 - [2026-10-08T15:00:48] Wags/finding — dispatch-token-telemetry: {"status": "STOPPED_NEEDS_CHANGES_R2", "job": "Wags_20261008_143324", "branch": "feat/dispatch-token-telemetry-20261008", "commits": ["3021b022", "eacd6dfb"], " …
 - [2026-10-08T16:19:15] Taylor/finding — repin-r3-park0-dep1m: {"status": "DONE", "job": "Taylor_20261008_155435", "commit": "555bd103", "report": "mike/agents/Taylor/research/repin_park0_dep1m_20261008/REPORT.md", "registr …
 - [2026-10-08T16:21:39] quant-skeptic/verification — ✅ CONFIRMED VERIFY: repin-r3-park0-dep1m: {"finding_topic": "repin-r3-park0-dep1m", "verdict": "CONFIRMED", "confidence": "medium", "checks": {"look_ahead_leak": "pass — carry rate is point-in-time: idl …
+- [2026-10-08T16:58:55] Taylor/finding — bal-maxpos-lag-idle: {"status": "DONE", "verdict": "NO-GO", "job": "Taylor_20261008_163222", "report": "mike/agents/Taylor/research/bal_maxpos_lag_idle_20261009/REPORT.md", "prereg_ …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -159,7 +159,7 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
   `kb/projects/lag-adv-filter-tracking.md`, chi tiết cơ chế: `agents/Taylor/research/
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
 - Bootstrap 5th-pct + P(DD<−30%) + chuỗi số SUPERSEDED: `kb/projects/r3-pin-history.md`.
-- ⚠️ **CÒN MỞ — CẦN USER QUYẾT (mở 2026-10-08)**: số pin R3 (dải 23,37%…25,71%) và neo sizing DD **−25,2%** đều ĐO Ở park 0,30; live là park **0%** từ 2026-10-01, **CHƯA re-pin ở 0** ⇒ chưa có neo DD đo đúng knob live. Chân park=0 cũ (22,37%, trước FAIL-C) KHÔNG có bootstrap DD. Không tự re-pin; chờ user quyết có đo lại không.
+- ✅ **park=0 ĐÃ PIN (user duyệt 2026-10-08 23:30)**: **`pin0%` 22,12% … `pin1M` 25,42%** (egg = lãi 1M Big-4 PIT, KHÔNG 8,543%); **neo DD GIỮ −25,2%** (park0 đo −23,9%); park 0 vs 0,3 KHÔNG phân biệt được. 25,42% chỉ là ĐẦU TRẦN. Registry mục "2026-10-08".
 - **DSR/PBO đã hết trôi — họ trial nay GHIM bằng `DSR_FAMILY_MANIFEST`** (merge `f2cfb124`):
   **DSR 1,0000** (ann-SR R3 **1,815** trên ledger pin park 0,30; 1,616 ở bản @0,7). **Số pin của V2.4 là PBO = 0,2085** (chạy lại trên ledger pin park 0,30 — **không đổi**, vì CSCV
   đo trên HỌ TRIAL, ledger R3 không thuộc họ) trên họ gốc phục dựng
