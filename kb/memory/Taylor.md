@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-06T05:46:30Z] [lane-C season 10-06] XONG job Taylor_20261006_052500: feat/funnel-lane-c-season-20261006@05d1d7c2 (wt-season-1006), 263/263 x4TZ x2py, mut 103/103. DRI KHÔNG mùa vụ (η² 0,10) ⇒ vẫn RA; CHỜ user chọn C1S (ship) hay C1A (DRI vào, IS/OOS lệch dấu) + Mike arch-review/merge.
-- [2026-10-06T15:14:23Z] [broker-primary r6] XONG job Taylor_20261006_143910: feat/broker-primary-20261003@7db42331, 705/707 x3TZ x2py, mut 472/472 (3.12 471, 1 tương đương), BƯỚC0 hiếm (≤10d 67/20.636). Thay dòng r5. CHỜ Mike arch-review r6 + user quyết merge; KHÔNG bật live.
 - [2026-10-07T04:36:12Z] [broker-primary r8 10-07] XONG job Taylor_20261007_034436: feat/broker-primary-r7-20261007@58aa852d, 782/784 x3TZ x2py, mut 538/538 (3.12 537, 1 tương đương). Thay dòng r7. CHỜ Mike arch-review r8 + user duyệt merge; KHÔNG bật live.
 - [2026-10-07T05:44:19Z] [broker-primary r9 10-07] XONG job Taylor_20261007_050650: feat/broker-primary-r7-20261007@5c0257a6, 785/787 x3TZ x2py, mut 539/539 (3.12 538, 1 tương đương). Thay dòng r8. CHỜ Mike arch-review r9 + merge (user đã duyệt); KHÔNG bật live.
 - [2026-10-07T06:49:00Z] [broker-primary r10 10-07] XONG job Taylor_20261007_062338: feat/broker-primary-r10-20261007@6e26dbe1 test-only, 788/790 x3TZ x2py, mut 541/541 (3.12 540). Thay dòng r8/r9. CHỜ Mike merge; KHÔNG bật live.
@@ -26,3 +24,5 @@
 - [2026-10-08T08:01:00Z] ĐANG DỞ job Taylor_20261008_080048 adjfactor PRICE_FIELD_MISMATCH: bắt đầu | NEXT: đọc detect.py, thiết kế quy tắc bước giá
 - [2026-10-08T08:10:29Z] ĐANG DỞ job Taylor_20261008_080048 PFM: worktree agents/Taylor/wt-pfm-1008 nhánh feat/adjfactor-price-field-mismatch-20261008; baseline /tmp/pfm_baseline.txt | NEXT: code detect.py + alert.sh + selfcheck
 - [2026-10-08T08:25:52Z] ĐANG DỞ job Taylor_20261008_080048 PFM: commit c864ffda feat/adjfactor-price-field-mismatch-20261008 (wt-pfm-1008), 718/718 x2py | NEXT: đọc /tmp/pfm/mut_py31{0,2}.txt → arch-review 1 lần → merge
+- [2026-10-08T09:25:41Z] ĐANG DỞ job Taylor_20261008_080048 PFM attempt2: arch-review r1 NEEDS_CHANGES đã sửa (chưa commit, wt-pfm-1008), sc 745/745 x2py, mut2 đang chạy /tmp/pfm/mut2_*.txt | NEXT: commit r2 → arch-review r2 (lần cuối) → merge/dừng
+- [2026-10-08T09:56:10Z] [adjfactor PFM 10-08] DỪNG sau arch-review r2 NEEDS_CHANGES (feat/adjfactor-price-field-mismatch-20261008@4737f414, wt-pfm-1008): 1 lỗi R1 cửa sổ trượt qua cụm ⇒ DRIFT giả. CHỜ user chọn A (vòng 3) / B (ghi giới hạn, merge).
