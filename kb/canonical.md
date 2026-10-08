@@ -27,7 +27,7 @@
   `kb/projects/lag-adv-filter-tracking.md`, chi tiết cơ chế: `agents/Taylor/research/
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
 - Bootstrap 5th-pct + P(DD<−30%) + chuỗi số SUPERSEDED: `kb/projects/r3-pin-history.md`.
-- ⚠️ **CÒN MỞ — CẦN USER QUYẾT (mở 2026-10-08)**: số pin R3 (dải 23,37%…25,71%) và neo sizing DD **−25,2%** đều ĐO Ở park 0,30; live là park **0%** từ 2026-10-01, **CHƯA re-pin ở 0** ⇒ chưa có neo DD đo đúng knob live. Chân park=0 cũ (22,37%, trước FAIL-C) KHÔNG có bootstrap DD. Không tự re-pin; chờ user quyết có đo lại không.
+- ✅ **park=0 ĐÃ PIN (user duyệt 2026-10-08 23:30)**: **`pin0%` 22,12% … `pin1M` 25,42%** (egg = lãi 1M Big-4 PIT, KHÔNG 8,543%); **neo DD GIỮ −25,2%** (park0 đo −23,9%); park 0 vs 0,3 KHÔNG phân biệt được. 25,42% chỉ là ĐẦU TRẦN. Registry mục "2026-10-08".
 - **DSR/PBO đã hết trôi — họ trial nay GHIM bằng `DSR_FAMILY_MANIFEST`** (merge `f2cfb124`):
   **DSR 1,0000** (ann-SR R3 **1,815** trên ledger pin park 0,30; 1,616 ở bản @0,7). **Số pin của V2.4 là PBO = 0,2085** (chạy lại trên ledger pin park 0,30 — **không đổi**, vì CSCV
   đo trên HỌ TRIAL, ledger R3 không thuộc họ) trên họ gốc phục dựng
