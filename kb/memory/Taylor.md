@@ -31,3 +31,4 @@
 - [2026-10-08T11:29:10Z] ĐANG DỞ job Taylor_20261008_104928 PFM r4: commit 987868af (wt-pfm-1008), sc 822x6, mut 138/138, slide BQ 0 DRIFT | NEXT: arch-review 1 lần → APPROVED merge master + finding sha / NEEDS_CHANGES dừng+finding
 - [2026-10-08T11:48:53Z] [adjfactor PFM 10-08] MERGED d484fb41 (r4 APPROVED) — xoá các dòng ĐANG DỞ/DỪNG PFM cũ; worktree wt-pfm-1008 có thể dọn. Nợ nhỏ còn lại (finding bus): Mk test ex==win0, cron_registry thân dòng 138 còn 00:10.
 - [2026-10-08T12:33:31Z] [2026-10-08] adjfactor PFM non-blockers: DUNG sau arch-review NEEDS_CHANGES (9f550a8d, wt-pfmnb-1008) - thieu test >=2 cum (mut B/C song) + 4 non-blocker. CHO user/Mike cho vong 2 roi merge.
+- [2026-10-08T12:46:15Z] ĐANG DỞ job Taylor_20261008_123443 PFM-nb vòng 2: test+2 sửa xong (wt-pfmnb-1008, CHƯA commit), sc 843x6, mut B/C/K/L killed, mut cũ đang chạy /tmp/pfm4/mut5_py31{0,2}.txt | NEXT: mut xong → commit → arch-review 1 lần → merge/dừng
