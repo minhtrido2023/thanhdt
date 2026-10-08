@@ -369,3 +369,13 @@ BAI HOC 2: bo test 'loai theo SUBSTRING' de tu mo cua thoat — clause 'tail -c 
 
 ## Archived 2026-10-08 (keep=12 days=0 require_done=False)
 - [2026-09-28T05:47:35Z] [2026-09-28] coord-2026-09-28: question Taylor/pnj-trong-ro-custom30v-live KHONG phai loi dieu phoi — PNJ van la thanh vien SONG ro custom30V (verify 3 artifact: publish.csv effective_to rong w0,7075%; park_trim_SpaceX BLOCKED_ALL_NAMES ly do LOT-SIZE; ZaloPay NO_TRIM). Ca 3 option A/B/C deu cham duong dat lenh => USER quyet. Da ack triaged-needs-human suppress_days=7 + post A/B/C vao trading_daily. files_changed=[]. CHO USER; het 7 ngay tu noi lai.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-09-29T01:23:27Z] [2026-09-29] coord-2026-09-29 XONG. Q closerepair-fix-approval-needed KHONG cho duyet — Taylor da merge 3c55c249 tu 09-28, chi thieu event answer (Pattern B lan 2/thang); da dong bang answer + verify checker sach. Q classifier-blocks-headless chua phai loi dieu phoi: da lam option C (runbook, commit 0bf97d25), ack suppress 7d, A/B CHO USER.
+BAI HOC: Pattern B tai dien vi khong ai coi 'merge xong' la su kien phai dong question. Runbook gio ghi buoc 3 tuong minh; neu van tai dien lan 3 thi phai wire TU DONG (vd post-merge hook quet bus question cung branch name) chu khong dua vao ky luat.
+CHO USER/MIKE ngoai pham vi: plan SpaceX 2026-09-29 NOT_APPROVED 19 lenh luc 08:22 ICT — preflight se HOLD.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-09-29T08:19:54Z] [2026-09-29 chiều] coord-2026-09-29 (job 080835): Q Winston/sell-loanpackage-deal-not-found-zalopay KHONG cho quyet dinh — user duyet Discord 14:34, fix merge 14:53 (d51c735e), chi thieu event answer (Pattern B lan 3). Da dong + WIRE TU DONG dung cam ket: bin/question_commit_hint.py (quet git log 2 repo -> goi y commit-resolver cho cau hoi treo, vao prompt wags_autofix canh KNOWN_ISSUE), selfcheck 15/15, 4/4 mutant chet, commit a9c4a421+f63c12ff.
+BAI HOC 1: 'git add <file>' KHONG gioi han pham vi commit — index dung chung, phien khac stage truoc thi 'git commit' cuon het. Luon 'git commit -o <files>'. (a9c4a421 cuon 2 file Taylor; Taylor ghi 85b744a1 giai trinh, khong mat gi.)
+BAI HOC 2: cong cu match theo tu khoa se TU NHAN DIEN chinh commit gioi thieu no (message liet ke topic lam vi du) — phai co tu-loai-tru + luat meta-commit ngay tu dau.
