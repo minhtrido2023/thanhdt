@@ -39,3 +39,5 @@
   chạy `date` để biết đó là Thứ Bảy/Chủ Nhật).
 - KHÔNG đặt wakeup thăm dò khi không có job nền (user 10-05).
 
+- [2026-10-08T02:11:26Z] 08/10 09:1x: user duyệt B — backlog selfcheck-red có chủ cố định (Wags mike/bin, Taylor gốc WC), cron Thứ Sáu 16:30 ICT bin/selfcheck_red_owner_sweep.sh (commit 523d9524), question đã đóng decided_by=user. Kiểm lượt đầu 09/10 tối: logs/selfcheck_red_owner_sweep.log + 2 finding selfcheck-red-owner-sweep-2026-10-09-*.
+- [2026-10-08T02:22:31Z] 08/10 09:2x: cảnh báo VNINDEX intraday-watch 09:15:01 là lỗi giây-mở-phiên (DNSE phát bar sau khi phút đóng), KHÁC lỗi cache 07/10; vá merge mike 8912f6ae (grace 2' ở 09:15/13:00). Kiểm 13:00 hôm nay + 09:15 ngày 09/10: không còn HEALTH vnindex trong data/intraday_watch/shadow_*.jsonl.
