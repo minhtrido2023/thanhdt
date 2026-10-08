@@ -101,6 +101,12 @@ raw = open(sys.argv[1], "rb").read().split(b"\0")[:-1]
 args = [a.decode("utf-8", "replace") for a in raw]
 # phan tu nao chua marker dispatch = prompt -> thay bang <PROMPT>
 out = ["<PROMPT>" if "[DISPATCH" in a else a for a in args]
+# --session-id <uuid v4> (telemetry token theo job, 2026-10-08): uuid moi lan moi khac => thay
+# bang <SID> NEU va CHI NEU dung dang uuid chu thuong; sai dang thi giu nguyen => ca FAIL.
+import re
+for i in range(len(out) - 1):
+    if out[i] == "--session-id" and re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", out[i + 1]):
+        out[i + 1] = "<SID>"
 print("".join(out))
 ' "$SB/argv.bin" 2>/dev/null)"
   local want; want="$(printf '%s\001' "$@")"; want="${want%$'\001'}"
@@ -120,23 +126,23 @@ chk() {  # chk <mo ta> <gia tri thuc> <gia tri mong doi>
 echo "== CA 1: claude mac dinh (khong --model, khong --effort)"
 echo "   chuoi cu: -p P --permission-mode auto --max-turns 50 \$MODEL_FLAG(rong) --effort medium"
 run Taylor "viec test"
-argv_is "argv claude mac dinh" -p "<PROMPT>" --permission-mode auto --max-turns 50 --effort medium
+argv_is "argv claude mac dinh" -p "<PROMPT>" --permission-mode auto --max-turns 50 --effort medium --session-id "<SID>"
 
 echo "== CA 2: --model opus --effort high (MAX_TURNS scale theo effort = 80)"
 run Taylor "viec test" --model opus --effort high
-argv_is "argv co --model" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model opus --effort high
+argv_is "argv co --model" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model opus --effort high --session-id "<SID>"
 
 echo "== CA 3: --model fable --effort max  ⇒ CLAMP effort=high (chinh sach user 07-14)"
 run Taylor "viec test" --model fable --effort max
-argv_is "argv fable bi clamp" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model fable --effort high
+argv_is "argv fable bi clamp" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model fable --effort high --session-id "<SID>"
 
 echo "== CA 4: --effort xhigh ⇒ MAX_TURNS=120"
 run Taylor "viec test" --effort xhigh
-argv_is "argv xhigh" -p "<PROMPT>" --permission-mode auto --max-turns 120 --effort xhigh
+argv_is "argv xhigh" -p "<PROMPT>" --permission-mode auto --max-turns 120 --effort xhigh --session-id "<SID>"
 
 echo "== CA 5: --max-turns 33 tuong minh de len scale"
 run Taylor "viec test" --effort high --max-turns 33
-argv_is "argv max-turns tuong minh" -p "<PROMPT>" --permission-mode auto --max-turns 33 --effort high
+argv_is "argv max-turns tuong minh" -p "<PROMPT>" --permission-mode auto --max-turns 33 --effort high --session-id "<SID>"
 
 echo "== CA 6: prompt tieng Viet co dau \" va backtick ⇒ toi nguyen ven trong DUNG 1 argv"
 VNP='Kiem tra "bao cao" va `filter.json` — dung de vo'

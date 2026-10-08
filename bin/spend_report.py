@@ -29,6 +29,11 @@ create bus/jobs records, only headless dispatch.sh calls do.
   spend_report.py                              -> human report, trailing 7 days
   spend_report.py --days 14                    -> trailing 14 days
   spend_report.py --csv-append state/spend_history.csv   -> also append one row
+
+Per-job telemetry (2026-10-08): dispatch.sh truyen `--session-id` cho claude roi goi
+bin/job_telemetry.py (KHONG goi file nay — spend_report o tier T2, khong nam tren duong T0) => record co num_turns/total_cost_usd/input_tokens/cache_read_tokens/
+cache_creation_tokens/output_tokens/session_id. Bao cao dung no cho muc "Top chuoi ton nhat".
+Job truoc 2026-10-08 va provider khac claude khong co field => khong vao bang do (dem rieng).
 """
 import glob
 import json
@@ -39,6 +44,10 @@ import sys
 import time
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import dispatch_loop_hint as H  # noqa: E402  — MOT dinh nghia chuoi (giong dispatch_round_cap)
+import job_telemetry as JT  # noqa: E402
 
 _ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
@@ -64,6 +73,36 @@ COMMIT_PREFIXES = ["feat", "fix", "docs", "chore", "refactor", "test"]
 
 RETRY_WARN_MIN_JOBS = 10
 RETRY_WARN_PCT = 10
+
+TOP_CHAINS = 15
+TELEMETRY_INT_FIELDS = JT.INT_FIELDS
+_to_int = JT.to_int
+_to_float = JT.to_cost
+# Prompt tu sinh khi chay tiep / bao ket qua 1 job khac => noi vao chuoi cua job do (N1).
+_LINK_RE = re.compile(
+    r"^\[(?:(RESUME sau (?:usage-limit|max-turns)|FALLBACK provider)[^\]]*job gốc=|AUTO-CALLBACK(?:-FAIL)? job=)([\w-]+)"
+    r"|TIẾP TỤC (?:job|JOB) ([\w-]+)"
+)
+
+
+def _link_target(prompt_summary):
+    m = _LINK_RE.search(prompt_summary or "")
+    return (m.group(2) or m.group(3)) if m else None
+
+
+def _resume_cause(ps):
+    """Nguyen nhan cua 1 job CHAY TIEP job khac, hoac None. Gom ca 'TIẾP TỤC job X' (Mike go tay,
+    cung dieu kien voi resume_jobs) — vi vay tong causes_resume >= resume_jobs: resume_jobs (dinh
+    nghia cu, dung chung routing_retrospective.py) khong dem [RESUME sau max-turns / [FALLBACK."""
+    if ps.startswith("[RESUME sau usage-limit"):
+        return "usage_limited"
+    if ps.startswith("[RESUME sau max-turns"):
+        return "max_turns"
+    if ps.startswith("[FALLBACK provider"):
+        return "fallback_provider"
+    if "TIẾP TỤC job" in ps or "TIẾP TỤC JOB" in ps:
+        return "tiep_tuc_timeout" if "timeout" in ps.lower() else "tiep_tuc_khac"
+    return None
 
 
 def _parse_args(argv):
@@ -114,7 +153,11 @@ def _scan_jobs(since_ts):
         "extra_attempts": 0,
         "resume_jobs": 0,
         "by_status": {},
+        "causes_inloop": {},   # retry trong cung job (field retry_causes, tu 2026-10-08)
+        "causes_resume": {},   # job MOI do auto-resume/fallback sinh ra
+        "tele_missing": 0,
     }
+    tele_jobs = []  # record co telemetry token (dispatch.sh tu 2026-10-08)
     for path in glob.glob(os.path.join(ROOT, "bus", "jobs", "*.json")):
         try:
             with open(path, encoding="utf-8") as f:
@@ -135,6 +178,12 @@ def _scan_jobs(since_ts):
             retry_stats["retried_jobs"] += 1
             retry_stats["extra_attempts"] += int(attempt) - 1
             retry_stats["by_status"][status] = retry_stats["by_status"].get(status, 0) + 1
+            causes = [c for c in str(rec.get("retry_causes") or "").split(",") if c]
+            # attempt>1 ma khong co retry_causes = record truoc 2026-10-08: status/exit_code da
+            # bi lan cuoi ghi de, khong suy lai duoc nguyen nhan => dem rieng, khong doan.
+            for c in causes or ["khong_ro"] * (int(attempt) - 1):
+                ci = retry_stats["causes_inloop"]
+                ci[c] = ci.get(c, 0) + 1
         prompt_summary = rec.get("prompt_summary") or ""
         if (
             "TIẾP TỤC job" in prompt_summary
@@ -142,6 +191,14 @@ def _scan_jobs(since_ts):
             or prompt_summary.startswith("[RESUME sau usage-limit")
         ):
             retry_stats["resume_jobs"] += 1
+        cause = _resume_cause(prompt_summary)
+        if cause:
+            cr = retry_stats["causes_resume"]
+            cr[cause] = cr.get(cause, 0) + 1
+        if any(k in rec for k in TELEMETRY_INT_FIELDS):
+            tele_jobs.append(rec)
+        elif rec.get("session_id"):
+            retry_stats["tele_missing"] += 1   # co --session-id nhung khong doc duoc transcript
         agent = rec.get("to", "?")
         cat = AGENT_CATEGORY.get(agent, "other")
         b = buckets.setdefault(
@@ -172,7 +229,99 @@ def _scan_jobs(since_ts):
             dur = 0
         if dur > 0:
             b["duration_s"] += dur
+    retry_stats["tele_jobs"] = tele_jobs
     return buckets, agent_effort, retry_stats
+
+
+def _rec_tokens(rec):
+    """Token chuoi cua 1 job — CUNG dinh nghia dispatch_round_cap (H.branch_tokens tren
+    prompt_summary + chain_tokens)."""
+    ps = rec.get("prompt_summary") or ""
+    return H.branch_tokens(ps + " " + " ".join(str(rec.get("chain_tokens") or "").split(",")))
+
+
+def _top_chains(tele_jobs, all_by_id, top=TOP_CHAINS):
+    """Gom job thanh chuoi bang UNION-FIND theo TUNG token (2 job chung 1 token bat ky => cung
+    chuoi; vd job A mang token worktree X, job B mang ca token nhanh Y lan X => A, B cung chuoi)
+    + noi job resume/fallback/auto-callback/TIEP TUC vao job goc. Nhan chuoi = token xuat hien o
+    nhieu job nhat; chuoi khong co token => 40 ky tu dau prompt.
+    LUU Y: gop BAC CAU (A~B qua X, B~C qua Y => A~C) — rong hon dispatch_round_cap (dem vong theo
+    tung token rieng). Job cron dinh ky khong co token thi gop theo 40 ky tu dau prompt, nen cac
+    lan chay cung 1 cron se hien thanh 1 "chuoi". Telemetry chi doc transcript phien chinh, KHONG
+    doc transcript subagent rieng (Agent()) => chi phi subagent khong nam trong so nay."""
+    parent = {}
+
+    def find(x):
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+
+    labels = {}
+    for i, rec in enumerate(tele_jobs):
+        node = "job:" + str(rec.get("job_id") or f"#{i}")
+        find(node)
+        cur, toks, depth = rec, [], 0
+        while True:
+            toks += _rec_tokens(cur)
+            tgt = _link_target(cur.get("prompt_summary") or "")
+            if not tgt or depth >= 5:
+                break
+            union(node, "job:" + tgt)
+            depth += 1
+            cur = all_by_id.get(tgt)
+            if not cur:
+                labels.setdefault(node, []).append("resume:" + tgt)
+                break
+        for t in dict.fromkeys(toks):
+            union(node, "tok:" + t)
+            labels.setdefault(node, []).append(t)
+        if not toks and node not in labels:
+            ps = (rec.get("prompt_summary") or "")[:40].replace("\n", " ")
+            union(node, "ps:" + ps)
+            labels[node] = [ps]
+    chains = {}
+    for i, rec in enumerate(tele_jobs):
+        node = "job:" + str(rec.get("job_id") or f"#{i}")
+        c = chains.setdefault(find(node), {"jobs": 0, "tokens": 0, "cost": 0.0, "turns": 0,
+                                            "agents": set(), "labels": {}, "no_cost": 0,
+                                            "cache_read": 0})
+        c["jobs"] += 1
+        c["tokens"] += sum(_to_int(rec.get(k)) for k in TELEMETRY_INT_FIELDS if k != "num_turns")
+        cost = _to_float(rec.get("total_cost_usd"))
+        c["cost"] += cost or 0.0
+        c["no_cost"] += cost is None
+        c["turns"] += _to_int(rec.get("num_turns"))
+        c["cache_read"] += _to_int(rec.get("cache_read_tokens"))
+        c["agents"].add(rec.get("to", "?"))
+        for lb in labels.get(node, []):
+            c["labels"][lb] = c["labels"].get(lb, 0) + 1
+    out = []
+    for c in chains.values():
+        lbs = c.pop("labels")
+        key = max(lbs, key=lambda k: (lbs[k], k)) if lbs else "?"
+        out.append((key, c))
+    ranked = sorted(out, key=lambda kv: (-kv[1]["cost"], -kv[1]["tokens"]))
+    return ranked[:top], len(chains)
+
+
+def _jobs_by_id():
+    out = {}
+    for path in glob.glob(os.path.join(ROOT, "bus", "jobs", "*.json")):
+        try:
+            with open(path, encoding="utf-8") as f:
+                rec = json.load(f)
+        except Exception:
+            continue
+        if isinstance(rec, dict):
+            out[rec.get("job_id") or os.path.basename(path)[:-5]] = rec
+    return out
 
 
 def _timestamp_to_epoch(value):
@@ -391,6 +540,44 @@ def main():
             )
     else:
         print("  no attempt>1 jobs in window")
+    ci, cr = retry_stats["causes_inloop"], retry_stats["causes_resume"]
+    if ci or cr:
+        order = ["timeout", "usage_limited", "max_turns", "fallback_provider", "tiep_tuc_timeout",
+                 "tiep_tuc_khac", "khac", "khong_ro"]
+        fmt = lambda d: ", ".join(f"{k}={d[k]}" for k in order + sorted(set(d) - set(order)) if d.get(k))
+        print("  retry theo nguyên nhân:")
+        if ci:
+            print(f"    trong cùng job (attempt>1): {fmt(ci)}")
+        if cr:
+            print(f"    job auto-resume/fallback mới: {fmt(cr)}")
+        if ci.get("khong_ro"):
+            print("    (khong_ro = record trước 2026-10-08, chưa có field retry_causes)")
+    print()
+    tele_jobs = retry_stats["tele_jobs"]
+    print(f"Top chuỗi tốn nhất (telemetry theo job; {len(tele_jobs)}/{total_jobs} job có field):")
+    # Mục mới: lỗi ở đây KHÔNG được làm mất phần còn lại (CSV row ngày hôm đó) — fail-open có báo.
+    try:
+        if tele_jobs:
+            ranked, n_chains = _top_chains(tele_jobs, _jobs_by_id())
+            tot_cost = sum(_to_float(r.get("total_cost_usd")) or 0.0 for r in tele_jobs)
+            print(f"  {n_chains} chuỗi, tổng cost=${tot_cost:,.2f}; xếp theo cost rồi token "
+                  f"(token = input+cache_read+cache_creation+output; cr% = phần cache_read, rẻ ~10× input; "
+                  f"'*N' = N job thiếu cost ⇒ cost là CẬN DƯỚI)")
+            for key, c in ranked:
+                cr = 100.0 * c["cache_read"] / c["tokens"] if c["tokens"] else 0.0
+                nk = f"*{c['no_cost']}" if c["no_cost"] else ""
+                print(f"  ${c['cost']:8.2f}{nk:<4} tok={c['tokens']/1e6:8.2f}M cr%={cr:3.0f}  turns={c['turns']:5d}  "
+                      f"jobs={c['jobs']:3d}  [{','.join(sorted(c['agents']))}] {key}")
+            no_cost = sum(1 for r in tele_jobs if _to_float(r.get("total_cost_usd")) is None)
+            if no_cost:
+                print(f"  ({no_cost} job không có cost — phiên bị kill trước khi CLI ghi cost-state; "
+                      f"chỉ token được cộng)")
+        else:
+            print("  chưa có job nào mang telemetry (dispatch.sh ghi từ 2026-10-08; provider khác claude không có)")
+    except Exception as e:  # noqa: BLE001
+        print(f"  LỖI khi dựng 'Top chuỗi tốn nhất' (bỏ qua mục này, phần còn lại vẫn chạy): {type(e).__name__}: {e}")
+    if retry_stats["tele_missing"]:
+        print(f"  ({retry_stats['tele_missing']} job có session_id nhưng KHÔNG có token — transcript thiếu/không đọc được)")
     print()
     print("Cache usage (Claude transcripts in agent project dirs):")
     if cache_usage["prompt_tokens"]:
@@ -447,4 +634,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1039,12 +1039,55 @@ _emit_full_prompt() {
 #   - moi duong di qua `eval` chuoi tai sinh lop loi quoting §15 (4 su co 07-17 -> 08-01),
 #     ma prompt fleet la tieng Viet day dau " va backtick.
 # => registry CHI tra FIELD; argv dung tai cho, bang bash thuan, khong quote thu cong.
+_new_session_id() {  # -> uuid v4 chu thuong, hoac rong neu khong sinh/kiem duoc
+  local _u
+  _u="$(cat /proc/sys/kernel/random/uuid 2>/dev/null || python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null || true)"
+  [[ "$_u" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] && printf '%s' "$_u"
+  return 0
+}
+
+# _record_job_telemetry [exit_code] — ghi num_turns/total_cost_usd/input_tokens/output_tokens/
+# cache_read_tokens/cache_creation_tokens/session_id len job record (2026-10-08,
+# ops_architecture_review_20261008.md muc 4), tong qua MOI attempt (_TELE_SIDS). Parser =
+# bin/job_telemetry.py (tier T0, chi doc transcript). Hop dong (arch-review r1 S1/S2):
+#   * CHI goi SAU KHI trang thai job da chot (done/failed/timeout/pending-resume/retry-het) —
+#     job da xong thi telemetry khong bao gio duoc phep doi status/exit_code.
+#   * $1 = exit code se tra neu SIGTERM/INT/HUP roi vao luc nay (nhanh sync): trap exit NGAY voi
+#     code goc (python chay nen + `wait` de trap khong phai cho no). Khong $1 = khong dat trap.
+#   * Timeout cung JOB_TELEMETRY_TIMEOUT (mac dinh 15s, -k 2).
+#   * Chi JSET dong khop regex whitelist key+kieu gia tri; dong khac bo. FAIL-OPEN: moi loi =>
+#     bo qua, khong doi rc, khong ghi gi vao $logfile. Provider khac claude => _TELE_SIDS rong.
+_record_job_telemetry() {
+  [ -n "${_TELE_SIDS:-}" ] || return 0
+  local _u='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+  local _re="^((num_turns|input_tokens|output_tokens|cache_read_tokens|cache_creation_tokens)=[0-9]{1,15}|total_cost_usd=[0-9]{1,9}(\.[0-9]{1,9})?|session_id=${_u}(,${_u}){0,9})$"
+  local _tf _tp _line
+  local -a _kvs=()
+  _tf="$(mktemp "${TMPDIR:-/tmp}/jobtele.XXXXXX" 2>/dev/null)" || return 0
+  # shellcheck disable=SC2064  # mo rong NGAY: code + ten file tai thoi diem dat trap
+  [ -n "${1:-}" ] && trap "rm -f '$_tf'; exit $1" TERM INT HUP
+  timeout -k 2 "${JOB_TELEMETRY_TIMEOUT:-15}" python3 "$ROOT/bin/job_telemetry.py" "$_TELE_SIDS" >"$_tf" 2>/dev/null &
+  _tp=$!
+  wait "$_tp" 2>/dev/null || true
+  while IFS= read -r _line; do
+    [[ "$_line" =~ $_re ]] && _kvs+=( "$_line" )
+  done <"$_tf"
+  rm -f "$_tf"
+  if [ "${#_kvs[@]}" -gt 0 ]; then JSET "${_kvs[@]}" >/dev/null 2>&1 || true; fi
+  [ -n "${1:-}" ] && trap - TERM INT HUP
+  return 0
+}
+
 _build_argv() {
   local _p="$1"
   # CLI_STDIN_FILE: file de NOI VAO STDIN cua CLI. Rong = khong dong stdin (giu nguyen hanh vi
   # cu cua claude/opencode/agy). Chi codex dung, de prompt KHONG BAO GIO nam trong argv (tran
   # MAX_ARG_STRLEN 128KiB — xem chu thich khoi prompt-inline o duoi).
   CLI_STDIN_FILE=""
+  # CLI_SESSION_ID: session id do dispatch TU CHON cho phien claude nay (telemetry token theo
+  # job, 2026-10-08) — noi vao _TELE_SIDS (moi attempt 1 uuid), xem _record_job_telemetry.
+  # Rong = provider khac / khong sinh duoc uuid.
+  CLI_SESSION_ID=""
   case "$PROVIDER" in
     claude)
       # Phai BYTE-FOR-BYTE bang chuoi cu:
@@ -1053,6 +1096,16 @@ _build_argv() {
       CLI_ARGV=( "$CLI_BIN" -p "$_p" --permission-mode auto --max-turns "$MAX_TURNS" )
       if [ -n "$MODEL" ]; then CLI_ARGV+=( --model "$MODEL" ); fi
       CLI_ARGV+=( --effort "$EFFORT" )
+      # --session-id: ghi SU THAT luc phat sinh (coding_guidelines #5) thay vi doan transcript
+      # nao la cua job nay sau khi xong. KHONG doi --output-format (van text) => $logfile,
+      # result_summary, preview Discord, auto-callback, usage-limit/max-turns detection giu
+      # nguyen tung byte. uuid hong => BO co nay (claude tu choi uuid sai => job fail; telemetry
+      # khong bao gio duoc phep lam hong job).
+      CLI_SESSION_ID="$(_new_session_id)"
+      if [ -n "$CLI_SESSION_ID" ]; then
+        CLI_ARGV+=( --session-id "$CLI_SESSION_ID" )
+        _TELE_SIDS="${_TELE_SIDS:+$_TELE_SIDS,}$CLI_SESSION_ID"
+      fi
       ;;
     opencode)
       # prompt la POSITIONAL (`opencode run [message..]`) => de CUOI CUNG.
@@ -1371,9 +1424,24 @@ for t in tasks:
   }
 
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify
+  # Telemetry chay MOT lan SAU KHI vong attempt da chot trang thai (moi duong return/het retry),
+  # tong qua moi attempt — xem _record_job_telemetry.
   _bg_wrapper() {
+    _TELE_SIDS=""
+    local _r
+    # KHONG viet `_bg_wrapper_run || _r=$?`: trong ve trai cua || bash TAT errexit cho ca than
+    # ham => cac `set -e` trong vong attempt mat tac dung (doi hanh vi cu).
+    _bg_wrapper_run
+    _r=$?
+    _record_job_telemetry
+    return "$_r"
+  }
+  _bg_wrapper_run() {
     local max_attempts=$((RETRIES + 1))
     local attempt=1 rc=0 astart
+    # retry_causes: nguyen nhan TUNG lan retry trong job (timeout|max_turns|khac), ghi ngay luc
+    # quyet dinh retry — sau do status/exit_code bi lan cuoi ghi de nen khong suy lai duoc.
+    local _retry_causes=""
     JSET pid="$BASHPID"
     while [ "$attempt" -le "$max_attempts" ]; do
       astart="$(date +%s)"
@@ -1511,7 +1579,8 @@ $_commit_hint}" \
       if _looks_like_max_turns "$logfile"; then
         if [ "$attempt" -lt "$max_attempts" ]; then
           MAX_TURNS="$(_bumped_max_turns)"
-          JSET status=retrying exit_code="$rc" result_summary="hết turn budget, retry attempt $((attempt + 1)) với --max-turns=$MAX_TURNS"
+          _retry_causes="${_retry_causes:+$_retry_causes,}max_turns"
+          JSET status=retrying exit_code="$rc" retry_causes="$_retry_causes" result_summary="hết turn budget, retry attempt $((attempt + 1)) với --max-turns=$MAX_TURNS"
           attempt=$((attempt + 1))
           continue
         elif _maybe_schedule_maxturns_resume "$logfile"; then
@@ -1520,7 +1589,9 @@ $_commit_hint}" \
         fi
       fi
       if [ "$attempt" -lt "$max_attempts" ]; then
-        JSET status=retrying exit_code="$rc"
+        if [ "$rc" -eq 124 ]; then _retry_causes="${_retry_causes:+$_retry_causes,}timeout"
+        else _retry_causes="${_retry_causes:+$_retry_causes,}khac"; fi
+        JSET status=retrying exit_code="$rc" retry_causes="$_retry_causes"
         attempt=$((attempt + 1))
         continue
       fi
@@ -1581,11 +1652,12 @@ $_commit_hint}" \
   # function and everything it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper _preempt_wakeup _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
+  export -f _bg_wrapper _bg_wrapper_run _preempt_wakeup _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
-            _current_maxturns_resume_count _build_argv _emit_full_prompt
+            _current_maxturns_resume_count _build_argv _emit_full_prompt \
+            _new_session_id _record_job_telemetry
   # Chi export SCALAR (bash khong export duoc array — do la ly do _build_argv chay trong con).
   export ROOT WC_ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MAX_EXT HB_FRESH_S \
@@ -1771,6 +1843,7 @@ else
   trap _sync_killed_guard TERM INT HUP
   set +e
   CLI_ARGV=()
+  _TELE_SIDS=""
   if _build_argv "$dispatch_prompt"; then
     # stdin cua CLI do _hb_aware_timeout tu noi (CLI_STDIN_FILE) — xem chu thich trong ham do.
     _hb_aware_timeout "${CLI_ARGV[@]}" 2>"$logfile.err" | tee "$logfile"
@@ -1786,6 +1859,7 @@ else
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
   if [ "$rc" -eq 0 ]; then
     JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
+    _record_job_telemetry 0   # SAU khi chot done — bi kill luc nay van exit 0, record giu done
     _circuit_record "$CIRCUIT_KEY" success
     # Nhắc đóng vòng bus — cùng lý do và cùng ràng buộc như nhánh --bg ở trên (root-cause-A
     # xảy ra ở CẢ HAI nhánh; vá một nhánh là bỏ lọt nửa còn lại). Chỉ in ở đường THÀNH CÔNG:
@@ -1797,16 +1871,19 @@ else
   else
     if _maybe_fallback_provider_on_usage_limit "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) provider '$PROVIDER' hết usage/rate limit — đã fallback NGAY sang claude (job mới chạy nền, không chờ reset)." >&2
+      _record_job_telemetry 5
       exit 5
     fi
     if _maybe_schedule_usage_resume "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) hết usage limit tài khoản — KHÔNG PHẢI lỗi task." >&2
       echo "      Đã tự động lên lịch resume (bin/resume_pending.py sẽ tự chạy lại, không cần làm gì)." >&2
+      _record_job_telemetry 5
       exit 5
     fi
     if _maybe_schedule_maxturns_resume "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) hết turn budget (--max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi task." >&2
       echo "      Đã tự động lên lịch resume NGAY với trần cao hơn (bin/resume_pending.py sẽ tự chạy lại)." >&2
+      _record_job_telemetry 5
       exit 5
     fi
     fstatus=failed
@@ -1818,6 +1895,7 @@ else
     fi
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
     _circuit_record "$CIRCUIT_KEY" fail
+    _record_job_telemetry "$rc"
     exit "$rc"
   fi
 fi
