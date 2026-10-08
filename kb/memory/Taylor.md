@@ -33,3 +33,4 @@
 - [2026-10-08T12:33:31Z] [2026-10-08] adjfactor PFM non-blockers: DUNG sau arch-review NEEDS_CHANGES (9f550a8d, wt-pfmnb-1008) - thieu test >=2 cum (mut B/C song) + 4 non-blocker. CHO user/Mike cho vong 2 roi merge.
 - [2026-10-08T12:46:15Z] ĐANG DỞ job Taylor_20261008_123443 PFM-nb vòng 2: test+2 sửa xong (wt-pfmnb-1008, CHƯA commit), sc 843x6, mut B/C/K/L killed, mut cũ đang chạy /tmp/pfm4/mut5_py31{0,2}.txt | NEXT: mut xong → commit → arch-review 1 lần → merge/dừng
 - [2026-10-08T13:13:23Z] [2026-10-08] adjfactor PFM non-blockers MERGED 787ddac4 — xoá dòng ĐANG DỞ/DỪNG cũ; wt-pfmnb-1008 + wt-pfm-1008 dọn được. Nợ chữ: comment alert.sh ~57 thêm 'trừ ngoại lệ (a)'.
+- [2026-10-08T15:54:45Z] ĐANG DỞ job Taylor_20261008_155435 repin R3 park0 dep1m: bắt đầu | NEXT: kiểm worktree wt-repin-dep1m-2809 vs main, chạy 2 chân control
