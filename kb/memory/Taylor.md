@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-07T04:36:12Z] [broker-primary r8 10-07] XONG job Taylor_20261007_034436: feat/broker-primary-r7-20261007@58aa852d, 782/784 x3TZ x2py, mut 538/538 (3.12 537, 1 tương đương). Thay dòng r7. CHỜ Mike arch-review r8 + user duyệt merge; KHÔNG bật live.
 - [2026-10-07T05:44:19Z] [broker-primary r9 10-07] XONG job Taylor_20261007_050650: feat/broker-primary-r7-20261007@5c0257a6, 785/787 x3TZ x2py, mut 539/539 (3.12 538, 1 tương đương). Thay dòng r8. CHỜ Mike arch-review r9 + merge (user đã duyệt); KHÔNG bật live.
 - [2026-10-07T06:49:00Z] [broker-primary r10 10-07] XONG job Taylor_20261007_062338: feat/broker-primary-r10-20261007@6e26dbe1 test-only, 788/790 x3TZ x2py, mut 541/541 (3.12 540). Thay dòng r8/r9. CHỜ Mike merge; KHÔNG bật live.
 - [2026-10-08T04:48:53Z] ĐANG DỞ job Taylor_20261008_042322 adjfactor awaiting r3: sửa 5 mục arch-review (wt-await-1008 @c2854372) | NEXT: selfcheck+mut, review lại 1 lần, merge
@@ -26,3 +25,4 @@
 - [2026-10-08T08:25:52Z] ĐANG DỞ job Taylor_20261008_080048 PFM: commit c864ffda feat/adjfactor-price-field-mismatch-20261008 (wt-pfm-1008), 718/718 x2py | NEXT: đọc /tmp/pfm/mut_py31{0,2}.txt → arch-review 1 lần → merge
 - [2026-10-08T09:25:41Z] ĐANG DỞ job Taylor_20261008_080048 PFM attempt2: arch-review r1 NEEDS_CHANGES đã sửa (chưa commit, wt-pfm-1008), sc 745/745 x2py, mut2 đang chạy /tmp/pfm/mut2_*.txt | NEXT: commit r2 → arch-review r2 (lần cuối) → merge/dừng
 - [2026-10-08T09:56:10Z] [adjfactor PFM 10-08] DỪNG sau arch-review r2 NEEDS_CHANGES (feat/adjfactor-price-field-mismatch-20261008@4737f414, wt-pfm-1008): 1 lỗi R1 cửa sổ trượt qua cụm ⇒ DRIFT giả. CHỜ user chọn A (vòng 3) / B (ghi giới hạn, merge).
+- [2026-10-08T10:00:32Z] ĐANG DỞ job Taylor_20261008_100015 PFM vòng 3 (user chọn A): sửa R1 detect.py:661 + 6 non-blocker (wt-pfm-1008 @4737f414) | NEXT: code→selfcheck→mut→dry-run→arch-review 1 lần
