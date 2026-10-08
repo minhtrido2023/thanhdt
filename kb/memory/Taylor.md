@@ -40,3 +40,4 @@
 - [2026-10-08T16:58:55Z] [bal-maxpos-lag-idle 10-09] NO-GO c604cd1e (nới trần BAL 16/20 −1,1…−2,1pp, không chạm cash LAG vì 2 sổ cái độc lập). Worktree wt-balmaxpos-1009 dọn được. Hướng duy nhất còn lại = allocator động (không khuyến nghị).
 - [2026-10-08T17:26:05Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B (Q-sleeve/fincap/L1 pool) trên engine sửa double-count: bắt đầu | NEXT: đọc review 2.B + registry 07-12/07-14/09-09
 - [2026-10-08T17:33:34Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B: PREREG b0fe4df4, 28 chân park0,7 đang chạy (research/rerun_groupB_fixed_20261009, legs.txt/legs_rest.txt) | NEXT: analyze.py → compare_sandbox.sh → REPORT.md + registry .proposed + bus finding rerun-groupB-fixed-engine
+- [2026-10-08T18:07:44Z] [rerun nhóm B 10-09] DONE c8e096e7: Q8/Q12 hết ý nghĩa, claim breadth phải sửa (registry .proposed chờ Mike/user); chờ quant-skeptic. Việc tiếp nếu lãi hạ: c30 vs l1b@0,3 prereg mới.
