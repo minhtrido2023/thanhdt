@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-09-28T05:47:35Z] [2026-09-28] coord-2026-09-28: question Taylor/pnj-trong-ro-custom30v-live KHONG phai loi dieu phoi — PNJ van la thanh vien SONG ro custom30V (verify 3 artifact: publish.csv effective_to rong w0,7075%; park_trim_SpaceX BLOCKED_ALL_NAMES ly do LOT-SIZE; ZaloPay NO_TRIM). Ca 3 option A/B/C deu cham duong dat lenh => USER quyet. Da ack triaged-needs-human suppress_days=7 + post A/B/C vao trading_daily. files_changed=[]. CHO USER; het 7 ngay tu noi lai.
 - [2026-09-29T01:23:27Z] [2026-09-29] coord-2026-09-29 XONG. Q closerepair-fix-approval-needed KHONG cho duyet — Taylor da merge 3c55c249 tu 09-28, chi thieu event answer (Pattern B lan 2/thang); da dong bang answer + verify checker sach. Q classifier-blocks-headless chua phai loi dieu phoi: da lam option C (runbook, commit 0bf97d25), ack suppress 7d, A/B CHO USER.
 BAI HOC: Pattern B tai dien vi khong ai coi 'merge xong' la su kien phai dong question. Runbook gio ghi buoc 3 tuong minh; neu van tai dien lan 3 thi phai wire TU DONG (vd post-merge hook quet bus question cung branch name) chu khong dua vao ky luat.
 CHO USER/MIKE ngoai pham vi: plan SpaceX 2026-09-29 NOT_APPROVED 19 lenh luc 08:22 ICT — preflight se HOLD.
@@ -32,3 +31,4 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 - [2026-10-04T02:52:44Z] [2026-10-04] Cho Mike merge fix/exdate-forecast-feed-status-20261004 (agents/Wags/wt-exdate-feed-1004) TRUOC 05/10 19:00 ICT; sau merge: git worktree remove wt-exdate-feed-1004
 - [2026-10-05T01:21:21Z] [2026-10-05] coord-2026-10-05: Q polish-chain-review-rounds-cost CHO USER (A cap cung dispatch.sh / B do retro / C arch-review gop cuoi). Da post architecture, ack suppress 3d. Neu chon A: Wags lam + arch-reviewer bat buoc. files_changed=[].
 - [2026-10-07T01:21:49Z] [2026-10-07] coord-2026-10-07: CHO USER — (1) polish-chain override a/b/c (post architecture; neu (b) Wags lam + arch-reviewer); (2) duyet merge fix/sell-split-by-loan-package-20261006 @8a669a9a (post trading_daily). Ack suppress 3d. files_changed=[].
+- [2026-10-08T01:22:15Z] [2026-10-08] coord-2026-10-08: CHO USER A/B/C chu so huu backlog selfcheck-red (17 do that; de xuat Wags=mike/bin 8 file, Taylor=file goc 9). Neu chon A: Wags ra 8 file mike/bin moi thu 6. Ack suppress 3d. Da sua wags_autofix_postq (24b6dfee).
