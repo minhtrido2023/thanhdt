@@ -1,0 +1,10 @@
+== NAV 50B
+        n  size_med_B  pct_adv_med  pct_adv_p90
+slot                                           
+1-12  258      4.5061       0.4307       3.2431
+13+   212      3.5048       0.2237       2.5068
+== NAV 1B live
+        n  size_med_B  pct_adv_med  pct_adv_p90
+slot                                           
+1-12  258      0.0901       0.0086       0.0649
+13+   212      0.0701       0.0045       0.0501
