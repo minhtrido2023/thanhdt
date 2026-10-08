@@ -922,3 +922,6 @@
 
 ## Archived 2026-10-08 (keep=12 days=0 require_done=False)
 - [2026-10-05T19:38:41Z] [intraday-watch shadow] XONG job Taylor_20261005_185546: feat/intraday-price-watch-20261006@7aefa5da (wt-ipw-1006), 171/171 x4TZ, mut 59/59. CHỜ Mike arch-review trọn bộ 1 lần + user duyệt merge/cron mỗi phút 09-14 ICT + 5 phiên shadow.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-05T20:23:56Z] [intraday-watch r2] XONG job Taylor_20261005_195221: feat/intraday-price-watch-20261006@42d099e8, 268/268 x4TZ x2py, mut 119/121 (2 tuong duong). CHO Mike arch-review + user chot mac dinh a-d + merge/cron (proposed: kb/cron_registry.md.proposed).
