@@ -919,3 +919,6 @@
 
 ## Archived 2026-10-08 (keep=12 days=0 require_done=False)
 - [2026-10-05T18:28:55Z] [funnel8l r2] XONG job Taylor_20261005_181751: feat/discretionary-8l-funnel-20261006@5c528d5b, 117/117 x4TZ, mut 35/35. CHỜ Mike arch-review lại + merge + cron 19:35 (snapshot r1 data/rating_8l_daily/rating_8l_2026-10-05.csv còn đó).
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-05T19:38:41Z] [intraday-watch shadow] XONG job Taylor_20261005_185546: feat/intraday-price-watch-20261006@7aefa5da (wt-ipw-1006), 171/171 x4TZ, mut 59/59. CHỜ Mike arch-review trọn bộ 1 lần + user duyệt merge/cron mỗi phút 09-14 ICT + 5 phiên shadow.

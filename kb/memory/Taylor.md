@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-05T19:38:41Z] [intraday-watch shadow] XONG job Taylor_20261005_185546: feat/intraday-price-watch-20261006@7aefa5da (wt-ipw-1006), 171/171 x4TZ, mut 59/59. CHỜ Mike arch-review trọn bộ 1 lần + user duyệt merge/cron mỗi phút 09-14 ICT + 5 phiên shadow.
 - [2026-10-05T20:23:56Z] [intraday-watch r2] XONG job Taylor_20261005_195221: feat/intraday-price-watch-20261006@42d099e8, 268/268 x4TZ x2py, mut 119/121 (2 tuong duong). CHO Mike arch-review + user chot mac dinh a-d + merge/cron (proposed: kb/cron_registry.md.proposed).
 - [2026-10-06T03:48:16Z] [sell-split 10-06] XONG job Taylor_20261006_033324: fix/sell-split-by-loan-package-20261006@e7715cd0 (wt-sellsplit-1006), 49/49 x4, mut 20/20. CHỜ Mike arch-review + user duyệt merge; bot ZaloPay chưa có fix tới khi merge+restart.
 - [2026-10-06T04:11:06Z] [2026-10-06 sell-split r2] XONG job Taylor_20261006_040234: fix/sell-split-by-loan-package-20261006@8a669a9a, 24/24 mut. CHỜ Mike arch-review + user duyệt merge + restart bot ZaloPay.
@@ -26,3 +25,4 @@
 - [2026-10-07T05:44:19Z] [broker-primary r9 10-07] XONG job Taylor_20261007_050650: feat/broker-primary-r7-20261007@5c0257a6, 785/787 x3TZ x2py, mut 539/539 (3.12 538, 1 tương đương). Thay dòng r8. CHỜ Mike arch-review r9 + merge (user đã duyệt); KHÔNG bật live.
 - [2026-10-07T06:49:00Z] [broker-primary r10 10-07] XONG job Taylor_20261007_062338: feat/broker-primary-r10-20261007@6e26dbe1 test-only, 788/790 x3TZ x2py, mut 541/541 (3.12 540). Thay dòng r8/r9. CHỜ Mike merge; KHÔNG bật live.
 - [2026-10-08T04:48:53Z] ĐANG DỞ job Taylor_20261008_042322 adjfactor awaiting r3: sửa 5 mục arch-review (wt-await-1008 @c2854372) | NEXT: selfcheck+mut, review lại 1 lần, merge
+- [2026-10-08T05:49:34Z] [adjfactor awaiting 10-08] DUNG sau arch-review vong 2 NEEDS_CHANGES (feat/adjfactor-awaiting-trade-20261008@25cf9a22, wt-await-1008): B1 _state_write msg duong xoa khoa, B2 alert.sh:560 dung -n DRIFTS, B3 test khe 1-2 phien, B4 dry-run lai sau r3. CHO Mike/user cho phep r4 roi merge.
