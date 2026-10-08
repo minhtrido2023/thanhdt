@@ -916,3 +916,6 @@
 
 ## Archived 2026-10-07 (keep=12 days=0 require_done=False)
 - [2026-10-05T18:12:45Z] [lane-C 10-06] XONG job Taylor_20261005_180155: GARP C1 edge ro t=5.3 (median ma ~peer). CHO Mike/user quyet them lan C vao funnel; quant-skeptic truoc moi wire/size.
+
+## Archived 2026-10-08 (keep=12 days=0 require_done=False)
+- [2026-10-05T18:28:55Z] [funnel8l r2] XONG job Taylor_20261005_181751: feat/discretionary-8l-funnel-20261006@5c528d5b, 117/117 x4TZ, mut 35/35. CHỜ Mike arch-review lại + merge + cron 19:35 (snapshot r1 data/rating_8l_daily/rating_8l_2026-10-05.csv còn đó).
