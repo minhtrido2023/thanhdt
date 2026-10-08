@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-06T04:25:16Z] [lane-C 10-06] XONG job Taylor_20261006_041048: feat/funnel-lane-c-20261006@9cf42868 (wt-lanec-1006), 193/193 x4TZ x2py, mut 40/40. CHỜ Mike arch-review + user duyệt merge (cron 19:37 dùng lại, không đổi).
-- [2026-10-06T04:43:31Z] [lane-C r2 10-06] XONG job Taylor_20261006_043550: feat/funnel-lane-c-20261006@ce0d4aa8, 210/210 x4TZ x2py, mut 56/56 (tmpdir copy). CHỜ Mike arch-review r2 + merge trước cron 19:37.
 - [2026-10-06T05:46:30Z] [lane-C season 10-06] XONG job Taylor_20261006_052500: feat/funnel-lane-c-season-20261006@05d1d7c2 (wt-season-1006), 263/263 x4TZ x2py, mut 103/103. DRI KHÔNG mùa vụ (η² 0,10) ⇒ vẫn RA; CHỜ user chọn C1S (ship) hay C1A (DRI vào, IS/OOS lệch dấu) + Mike arch-review/merge.
 - [2026-10-06T15:14:23Z] [broker-primary r6] XONG job Taylor_20261006_143910: feat/broker-primary-20261003@7db42331, 705/707 x3TZ x2py, mut 472/472 (3.12 471, 1 tương đương), BƯỚC0 hiếm (≤10d 67/20.636). Thay dòng r5. CHỜ Mike arch-review r6 + user quyết merge; KHÔNG bật live.
 - [2026-10-07T04:36:12Z] [broker-primary r8 10-07] XONG job Taylor_20261007_034436: feat/broker-primary-r7-20261007@58aa852d, 782/784 x3TZ x2py, mut 538/538 (3.12 537, 1 tương đương). Thay dòng r7. CHỜ Mike arch-review r8 + user duyệt merge; KHÔNG bật live.
@@ -26,3 +24,5 @@
 - [2026-10-08T06:30:28Z] ĐANG DỞ job Taylor_20261008_055312 adjfactor awaiting r4: commit 9e4a6bd1 (wt-await-1008), 570/570 x4, mut 64/64 | NEXT: arch-review 1 lần → APPROVED squash merge mike master / NEEDS_CHANGES ghi finding dừng
 - [2026-10-08T07:11:40Z] [adjfactor awaiting 10-08] MERGED 18f2317c (r4, APPROVED) — xoá dòng ĐANG DỞ/DUNG cũ của job này; worktree wt-await-1008 có thể dọn.
 - [2026-10-08T08:01:00Z] ĐANG DỞ job Taylor_20261008_080048 adjfactor PRICE_FIELD_MISMATCH: bắt đầu | NEXT: đọc detect.py, thiết kế quy tắc bước giá
+- [2026-10-08T08:10:29Z] ĐANG DỞ job Taylor_20261008_080048 PFM: worktree agents/Taylor/wt-pfm-1008 nhánh feat/adjfactor-price-field-mismatch-20261008; baseline /tmp/pfm_baseline.txt | NEXT: code detect.py + alert.sh + selfcheck
+- [2026-10-08T08:25:52Z] ĐANG DỞ job Taylor_20261008_080048 PFM: commit c864ffda feat/adjfactor-price-field-mismatch-20261008 (wt-pfm-1008), 718/718 x2py | NEXT: đọc /tmp/pfm/mut_py31{0,2}.txt → arch-review 1 lần → merge
