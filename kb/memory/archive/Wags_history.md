@@ -401,3 +401,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-04T02:52:44Z] [2026-10-04] Cho Mike merge fix/exdate-forecast-feed-status-20261004 (agents/Wags/wt-exdate-feed-1004) TRUOC 05/10 19:00 ICT; sau merge: git worktree remove wt-exdate-feed-1004
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-05T01:21:21Z] [2026-10-05] coord-2026-10-05: Q polish-chain-review-rounds-cost CHO USER (A cap cung dispatch.sh / B do retro / C arch-review gop cuoi). Da post architecture, ack suppress 3d. Neu chon A: Wags lam + arch-reviewer bat buoc. files_changed=[].

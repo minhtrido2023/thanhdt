@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-05T01:21:21Z] [2026-10-05] coord-2026-10-05: Q polish-chain-review-rounds-cost CHO USER (A cap cung dispatch.sh / B do retro / C arch-review gop cuoi). Da post architecture, ack suppress 3d. Neu chon A: Wags lam + arch-reviewer bat buoc. files_changed=[].
 - [2026-10-07T01:21:49Z] [2026-10-07] coord-2026-10-07: CHO USER — (1) polish-chain override a/b/c (post architecture; neu (b) Wags lam + arch-reviewer); (2) duyet merge fix/sell-split-by-loan-package-20261006 @8a669a9a (post trading_daily). Ack suppress 3d. files_changed=[].
 - [2026-10-08T01:22:15Z] [2026-10-08] coord-2026-10-08: CHO USER A/B/C chu so huu backlog selfcheck-red (17 do that; de xuat Wags=mike/bin 8 file, Taylor=file goc 9). Neu chon A: Wags ra 8 file mike/bin moi thu 6. Ack suppress 3d. Da sua wags_autofix_postq (24b6dfee).
 - [2026-10-08T13:38:23Z] ĐANG DỞ job Wags_20261008_133633 token telemetry: worktree agents/Wags/wt-tokentel-1008 branch feat/dispatch-token-telemetry-20261008 | thiet ke --session-id + cost-state transcript | NEXT: code+selfcheck+arch-review
@@ -27,3 +26,4 @@
 - [2026-10-09T09:59:14Z] [2026-10-09] selfcheck-red sweep#1: 8/10 CLOSED; OPEN annualization (no moi R&D Taylor, chu Taylor) + nav_2account (SCL ban tay 30/09, question can-user). Sweep sau: 2 cau nay OPEN lan 2 => CAN USER + post Architecture.
 - [2026-10-09T15:46:30Z] [2026-10-09] instructions-dedup DUNG NEEDS_CHANGES: branch chore/instructions-dedup-20261009 @69b99144 (wt-instrdedup-1009) CHUA merge; bus finding instructions-dedup co 8 required_change. Cho Mike/user cho 1 luot sua hoac bo (bo: git worktree remove + xoa branch).
 - [2026-10-09T20:53:18Z] [2026-10-10] selfcheck-red sweep#2: 0/2 dong, ca 2 CAN USER (da post Architecture). annualization: cho Taylor_20261009_205248 bao PASS rc=0 => dong cau. nav_2account: cho user A/B/C (question selfcheck-red-sweep-2026-10-09-can-user).
+- [2026-10-09T20:58:33Z] [2026-10-10T03:58:33Z] selfcheck-red sweep#2: annualization CLOSED (Taylor commit c1516450, Wags verified rc=0 PASS doc-lap). CON LAI: nav_2account CAN USER A/B/C (da post Architecture).
