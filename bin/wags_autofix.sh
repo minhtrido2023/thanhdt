@@ -461,7 +461,7 @@ except Exception: print(\"\")")"
   # bus/inbox/arch-reviewer.jsonl (nguồn thật, không đoán từ stdout pipeline — cùng
   # nguyên tắc verify-artifact-not-self-report đã áp cho wags_bus_verdict.py). Đặt SAU chuỗi
   # if/elif/else verdict ở trên (không lồng vào nhánh NEEDS_CHANGES) để không xáo thứ tự 4
-  # call site _post_q đã có — wags_autofix_postq_selfcheck.py khớp theo VỊ TRÍ.
+  # call site _post_q đã có — wags_autofix_postq_selfcheck.py khớp theo TOPIC qua site_of(), không theo vị trí.
   if [ "$verdict" = "NEEDS_CHANGES" ] || [ "$verdict" = "REFUTED" ]; then
     _r2_prefix="ARCH-REVIEW: wags-fix: $LABEL"
     _r2_now_iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
