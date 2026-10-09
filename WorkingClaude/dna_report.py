@@ -275,12 +275,73 @@ def get_dt_gate_clock():
             else:   # no candidate running — gate is settled on its committed state
                 committed = int(dt_4gate(raw)[-1])
                 val = {"active": False, "committed": committed, "asof": asof}
+            val["badzone"] = _dt_badzone(times, raw, dt_4gate)
     except Exception as e:
         import sys as _sys
         print(f"[dna_report] dt_gate_clock skipped (fail-safe): {e}", file=_sys.stderr)
         val = None
     _DTCLOCK_CACHE.update(t=time.time(), val=val)
     return val
+
+
+# Ngưỡng XEM LẠI luật đếm DT khi nền xoay BEAR<->CRISIS (user duyệt 2026-10-09, thread
+# 1557920546891763755). Replay theo ngày 2014→10/2026: chạm ở 2 đợt (12/2014: 7 phiên,
+# 07/2018: 3 phiên), cả 2 lần chạm gần đáy rồi VNINDEX hồi (+4,0% / +6,3% từ phiên 10 tới hết
+# đợt). Chạm ⇒ chỉ là lý do để giao Taylor backtest luật gộp bộ đếm, KHÔNG phải tín hiệu giao dịch.
+BADZONE_REVIEW_MIN_DAYS, BADZONE_REVIEW_MAX_RET = 15, -0.05
+
+
+def _dt_badzone(times, raw, dt_4gate):
+    """Đợt nền v3.4b nằm LIỀN MẠCH trong {BEAR, CRISIS} khi committed chưa phòng thủ.
+
+    Vì sao cần: candidate clock reset mỗi khi nền đổi BEAR<->CRISIS, nên '2/25' che mất việc
+    nền đã xấu N phiên liền. Chỉ trả khi đợt có xoay (flips≥1) — không xoay thì candidate clock
+    đã nói đủ. THUẦN HIỂN THỊ. None khi không có đợt hoặc lỗi."""
+    try:
+        com = dt_4gate(raw)
+        bad = lambda i: int(raw[i]) in (1, 2) and int(com[i]) not in (1, 2)
+        if not bad(len(raw) - 1):
+            return None
+        i0 = len(raw) - 1
+        while i0 > 0 and bad(i0 - 1):
+            i0 -= 1
+        zone = raw[i0:].astype(int)
+        flips = int((np.diff(zone) != 0).sum())
+        if flips < 1:
+            return None
+        bz = {"n": len(zone), "flips": flips, "n_bear": int((zone == 2).sum()),
+              "n_crisis": int((zone == 1).sum()),
+              "start": str(pd.to_datetime(times[i0]).date()), "ret": None}
+        try:   # VNINDEX từ phiên ngay TRƯỚC đợt tới ngày cuối của chuỗi nền (cùng vintage)
+            d0 = str(pd.to_datetime(times[i0 - 1] if i0 > 0 else times[i0]).date())
+            d1 = str(pd.to_datetime(times[-1]).date())
+            px = _bq("SELECT t.time, t.Close FROM tav2_bq.ticker t WHERE t.ticker='VNINDEX' "
+                     f"AND t.time BETWEEN DATE '{d0}' AND DATE '{d1}' ORDER BY t.time", max_rows=200)
+            px = px.sort_values("time")
+            c0, c1 = float(px["Close"].iloc[0]), float(px["Close"].iloc[-1])
+            if str(pd.to_datetime(px["time"].iloc[0]).date()) == d0 and c0 > 0:
+                bz["ret"] = c1 / c0 - 1
+        except Exception:
+            pass
+        bz["review"] = (bz["n"] >= BADZONE_REVIEW_MIN_DAYS and bz["ret"] is not None
+                        and bz["ret"] <= BADZONE_REVIEW_MAX_RET)
+        return bz
+    except Exception:
+        return None
+
+
+def _badzone_text(bz, committed_name):
+    """Dòng phụ dễ đọc cho người, đi ngay dưới dòng gate."""
+    vn = lambda x: f"{x * 100:+.1f}%".replace(".", ",").replace("-", "−")
+    d = pd.to_datetime(bz["start"]).strftime("%d/%m")
+    ret = f"VNINDEX {vn(bz['ret'])} từ đầu đợt" if bz["ret"] is not None else "VNINDEX: chưa lấy được"
+    head = (f"↳ Nền xấu {bz['n']} phiên liền từ {d} ({bz['n_bear']} BEAR + {bz['n_crisis']} CRISIS, "
+            f"đổi qua lại {bz['flips']} lần → bộ đếm reset, vẫn {committed_name}) · {ret}")
+    if bz["review"]:
+        return (head + f" · ⚠️ CHẠM NGƯỠNG XEM LẠI (≥{BADZONE_REVIEW_MIN_DAYS} phiên + VNINDEX "
+                f"≤{vn(BADZONE_REVIEW_MAX_RET)}) — báo Mike giao Taylor kiểm luật đếm, không phải lệnh giao dịch")
+    return head + (f" · ngưỡng xem lại: ≥{BADZONE_REVIEW_MIN_DAYS} phiên và VNINDEX "
+                   f"≤{vn(BADZONE_REVIEW_MAX_RET)} — chưa chạm")
 
 
 def build_dt_gate_line(html=True):
@@ -299,7 +360,9 @@ def build_dt_gate_line(html=True):
     asof = f"<i>{asof}</i>" if html else asof
     if not c["active"]:
         cn = STATE_MAP.get(c["committed"], ("?",))[0]
-        return f"Gate DT5G: ✓ ổn định ({cn}) · không có candidate đang track  {asof}"
+        line = f"Gate DT5G: ✓ ổn định ({cn}) · không có candidate đang track  {asof}"
+        bz = c.get("badzone")
+        return line + ("\n   " + _badzone_text(bz, cn) if bz else "")
     cn = STATE_MAP.get(c["cand"], ("?",))[0]
     comm = STATE_MAP.get(c["committed"], ("?",))[0]
     left = c["need"] - c["k"]
@@ -318,9 +381,12 @@ def build_dt_gate_line(html=True):
             ntxt = f", n={c['n']}" if c["n"] is not None else ""
             base += f" [{c['lo']*100:.0f}–{c['hi']*100:.0f}%{ntxt}]"
     thin = " ⚠ mẫu mỏng, tham khảo" if c["thin"] else ""
-    return (f"Gate DT5G: {badge} {level} · candidate {B(cn)} {c['k']}/{c['need']} "
+    line = (f"Gate DT5G: {badge} {level} · candidate {B(cn)} {c['k']}/{c['need']} "
             f"({progress:.0%}, còn {left} phiên để commit, "
             f"base giữ từ {c['start']}, committed {comm}){base}{thin}  {asof}")
+    # Dòng phụ: nền xoay BEAR<->CRISIS làm candidate clock reset (user duyệt 2026-10-09).
+    bz = c.get("badzone")
+    return line + ("\n   " + _badzone_text(bz, comm) if bz else "")
 
 
 def build_value_radar_line(html=True):
