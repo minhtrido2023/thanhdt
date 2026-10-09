@@ -1,0 +1,365 @@
+day,ticker,fate
+2023-09-12,HPX,vẫn ca riêng
+2023-09-13,HPX,vẫn ca riêng
+2023-09-14,HPX,vẫn ca riêng
+2023-09-14,VHM,(C) ca hoãn → GIỮ
+2023-09-15,SFN,vẫn ca riêng
+2023-09-18,EIB,(C) ca hoãn → GIỮ
+2023-09-22,CEO,vẫn ca riêng
+2023-09-22,MBS,vẫn ca riêng
+2023-09-22,DPG,vẫn ca riêng
+2023-09-22,GEX,(C) ca hoãn → GIỮ
+2023-09-25,CEO,(A) ca riêng → gắn nhãn gộp sau
+2023-09-25,DPG,(A) gộp theo cửa sổ 60'
+2023-09-25,EIB,(A) gộp theo cửa sổ 60'
+2023-09-25,MBS,(A) hệ quả: gộp trong 1 lượt
+2023-09-25,TNG,(A) hệ quả: gộp trong 1 lượt
+2023-09-27,VEF,vẫn ca riêng
+2023-10-03,CEO,vẫn ca riêng
+2023-10-05,CEO,(C) ca hoãn → GIỮ
+2023-10-18,S72,vẫn ca riêng
+2023-10-19,PDR,vẫn ca riêng
+2023-10-24,DTC,(C) ca hoãn → GIỮ
+2023-10-26,PXT,(A) ca riêng → gắn nhãn gộp sau
+2023-10-26,BMS,(A) ca riêng → gắn nhãn gộp sau
+2023-10-26,VC7,(A) gộp theo cửa sổ 60'
+2023-10-26,PXI,(A) gộp theo cửa sổ 60'
+2023-10-26,MBS,(A) hệ quả: gộp trong 1 lượt
+2023-10-26,TSB,(A) hệ quả: gộp trong 1 lượt
+2023-10-26,DXP,(A) hệ quả: gộp trong 1 lượt
+2023-10-26,VIX,(B) chạm sàn ∧ VNI≤−2% → gộp
+2023-10-26,PVB,(A) hệ quả: gộp trong 1 lượt
+2023-10-26,DTC,(A) hệ quả: gộp trong 1 lượt
+2023-10-26,SZC,(B) chạm sàn ∧ VNI≤−2% → gộp
+2023-10-26,TCI,(B) chạm sàn ∧ VNI≤−2% → gộp
+2023-10-27,FTM,vẫn ca riêng
+2023-10-27,PXT,vẫn ca riêng
+2023-10-27,VC7,vẫn ca riêng
+2023-10-30,TV3,vẫn ca riêng
+2023-10-30,VIX,(C) ca hoãn → GIỮ
+2023-10-31,TSB,vẫn ca riêng
+2023-10-31,PXT,vẫn ca riêng
+2023-11-03,FTM,"(B) chạm sàn, idio chưa đạt → gộp"
+2023-11-10,FTM,"(B) chạm sàn, idio chưa đạt → gộp"
+2023-11-13,PBT,(C) ca hoãn → GIỮ
+2024-01-29,MCO,vẫn ca riêng
+2024-01-30,SVT,vẫn ca riêng
+2024-01-31,ADP,vẫn ca riêng
+2024-02-01,MCO,vẫn ca riêng
+2024-02-02,LUT,vẫn ca riêng
+2024-02-19,APG,vẫn ca riêng
+2024-02-21,L10,vẫn ca riêng
+2024-02-23,L35,vẫn ca riêng
+2024-02-28,TSJ,vẫn ca riêng
+2024-03-04,L10,(C) ca hoãn → GIỮ
+2024-03-18,GVR,vẫn ca riêng
+2024-03-18,TIP,vẫn ca riêng
+2024-04-08,BSI,(C) ca hoãn → GIỮ
+2024-04-08,VC7,(C) ca hoãn → GIỮ
+2024-04-16,VDS,vẫn ca riêng
+2024-04-16,SBT,(C) ca hoãn → GIỮ
+2024-04-17,NTL,(C) ca hoãn → GIỮ
+2024-04-19,BSI,vẫn ca riêng
+2024-04-19,VDS,vẫn ca riêng
+2024-04-19,SHS,vẫn ca riêng
+2024-05-02,TCO,vẫn ca riêng
+2024-05-06,TCO,vẫn ca riêng
+2024-05-07,DHM,vẫn ca riêng
+2024-05-24,CTS,(A) ca riêng → gắn nhãn gộp sau
+2024-05-24,TCH,(A) ca riêng → gắn nhãn gộp sau
+2024-05-24,CMG,(A) gộp theo cửa sổ 60'
+2024-06-14,HDG,(C) ca hoãn → GIỮ
+2024-06-14,VDS,(C) ca hoãn → GIỮ
+2024-06-24,HDG,(C) ca hoãn → GIỮ
+2024-07-22,MBS,vẫn ca riêng
+2024-07-23,MDF,(C) ca hoãn → GIỮ
+2024-07-24,DDV,vẫn ca riêng
+2024-07-25,TMX,vẫn ca riêng
+2024-07-25,PRC,(C) ca hoãn → GIỮ
+2024-07-26,MDF,vẫn ca riêng
+2024-08-01,NHA,vẫn ca riêng
+2024-08-01,VOS,vẫn ca riêng
+2024-08-01,DDV,(A) ca riêng → gắn nhãn gộp sau
+2024-08-01,LHG,(C) ca hoãn → GIỮ
+2024-08-01,MBS,(C) ca hoãn → GIỮ
+2024-08-02,NHA,vẫn ca riêng
+2024-08-05,NHA,(B) chạm sàn ∧ VNI≤−2% → gộp
+2024-08-05,VOS,(B) chạm sàn ∧ VNI≤−2% → gộp
+2024-08-05,DDV,(A) hệ quả: gộp trong 1 lượt
+2024-08-06,TMG,(C) ca hoãn → GIỮ
+2024-08-08,NHA,(C) ca hoãn → GIỮ
+2024-08-19,L10,vẫn ca riêng
+2024-08-30,BTW,vẫn ca riêng
+2024-10-08,MBS,(C) ca hoãn → GIỮ
+2024-10-14,TCH,vẫn ca riêng
+2024-10-24,STB,(C) ca hoãn → GIỮ
+2024-10-24,VHM,(C) ca hoãn → GIỮ
+2024-10-25,TNS,(C) ca hoãn → GIỮ
+2024-10-28,KSQ,vẫn ca riêng
+2024-10-30,DPG,vẫn ca riêng
+2024-10-31,SMA,(A) ca riêng → gắn nhãn gộp sau
+2024-10-31,ITQ,vẫn ca riêng
+2024-11-01,SVG,vẫn ca riêng
+2024-11-08,PVL,(C) ca hoãn → GIỮ
+2024-11-11,STB,vẫn ca riêng
+2024-11-14,CTD,(C) ca hoãn → GIỮ
+2024-11-15,HOT,vẫn ca riêng
+2024-11-15,VOS,vẫn ca riêng
+2024-11-15,TNS,(C) ca hoãn → GIỮ
+2024-11-19,HAH,(C) ca hoãn → GIỮ
+2024-11-19,VOS,(C) ca hoãn → GIỮ
+2024-12-05,VND,vẫn ca riêng
+2024-12-24,DPG,(C) ca hoãn → GIỮ
+2024-12-31,HDB,vẫn ca riêng
+2025-01-06,VOS,(C) ca hoãn → GIỮ
+2025-01-22,VOS,(C) ca hoãn → GIỮ
+2025-01-24,TNS,vẫn ca riêng
+2025-02-04,VE1,vẫn ca riêng
+2025-02-04,PMP,(C) ca hoãn → GIỮ
+2025-02-07,SPM,(C) ca hoãn → GIỮ
+2025-02-12,PMP,vẫn ca riêng
+2025-03-03,ORS,vẫn ca riêng
+2025-03-04,EVF,vẫn ca riêng
+2025-03-07,TNS,vẫn ca riêng
+2025-03-13,CTI,(C) ca hoãn → GIỮ
+2025-03-13,HAX,(C) ca hoãn → GIỮ
+2025-03-19,KSF,vẫn ca riêng
+2025-03-20,IJC,vẫn ca riêng
+2025-03-31,PHR,(C) ca hoãn → GIỮ
+2025-04-03,PHR,(B) chạm sàn ∧ VNI≤−2% → gộp
+2025-04-03,VGC,(B) chạm sàn ∧ VNI≤−2% → gộp
+2025-04-11,GVR,(A) ca riêng → gắn nhãn gộp sau
+2025-04-11,KSV,(A) ca riêng → gắn nhãn gộp sau
+2025-04-11,FMC,vẫn ca riêng
+2025-04-11,HHG,vẫn ca riêng
+2025-04-11,VMD,(C) ca hoãn → GIỮ
+2025-04-14,HHG,vẫn ca riêng
+2025-04-14,CTP,vẫn ca riêng
+2025-04-15,CTP,(A) ca riêng → gắn nhãn gộp sau
+2025-04-15,TKU,(A) ca riêng → gắn nhãn gộp sau
+2025-04-15,HHG,(C) ca hoãn → GIỮ
+2025-04-15,NAG,(A) ca riêng → gắn nhãn gộp sau
+2025-04-15,GVR,(A) ca riêng → gắn nhãn gộp sau
+2025-04-15,KSV,(A) gộp theo cửa sổ 60'
+2025-04-16,D2D,(C) ca hoãn → GIỮ
+2025-04-16,TNG,(C) ca hoãn → GIỮ
+2025-04-18,PXS,vẫn ca riêng
+2025-04-18,VIC,vẫn ca riêng
+2025-04-18,TH1,vẫn ca riêng
+2025-04-18,VHM,(C) ca hoãn → GIỮ
+2025-04-21,VIC,vẫn ca riêng
+2025-04-22,GVR,(A) ca riêng → gắn nhãn gộp sau
+2025-04-22,YEG,(A) ca riêng → gắn nhãn gộp sau
+2025-04-25,TNS,vẫn ca riêng
+2025-04-29,VIC,vẫn ca riêng
+2025-05-05,TKU,(C) ca hoãn → GIỮ
+2025-05-09,TNS,(C) ca hoãn → GIỮ
+2025-05-12,TKU,vẫn ca riêng
+2025-05-15,VHM,(C) ca hoãn → GIỮ
+2025-05-16,KSV,vẫn ca riêng
+2025-05-19,SII,vẫn ca riêng
+2025-05-19,TKU,(C) ca hoãn → GIỮ
+2025-05-22,D2D,vẫn ca riêng
+2025-06-02,HVH,vẫn ca riêng
+2025-06-09,HAH,(C) ca hoãn → GIỮ
+2025-06-09,VIC,(C) ca hoãn → GIỮ
+2025-06-13,VIC,vẫn ca riêng
+2025-06-13,HVN,(C) ca hoãn → GIỮ
+2025-06-24,PVS,vẫn ca riêng
+2025-07-03,TNG,vẫn ca riêng
+2025-07-03,TCM,(C) ca hoãn → GIỮ
+2025-07-22,VCA,vẫn ca riêng
+2025-07-28,NCS,(A) ca riêng → gắn nhãn gộp sau
+2025-07-28,NFC,(A) ca riêng → gắn nhãn gộp sau
+2025-07-28,NAP,vẫn ca riêng
+2025-07-29,TCH,(A) ca riêng → gắn nhãn gộp sau
+2025-07-29,EIB,(A) ca riêng → gắn nhãn gộp sau
+2025-07-29,DGW,(A) gộp theo cửa sổ 60'
+2025-07-30,HT1,vẫn ca riêng
+2025-07-30,HJC,vẫn ca riêng
+2025-07-30,PBT,vẫn ca riêng
+2025-07-31,HKT,(C) ca hoãn → GIỮ
+2025-08-01,GEX,(C) ca hoãn → GIỮ
+2025-08-04,INC,vẫn ca riêng
+2025-08-05,SJS,vẫn ca riêng
+2025-08-15,ATS,vẫn ca riêng
+2025-08-15,HUT,(C) ca hoãn → GIỮ
+2025-08-20,PET,(A) ca riêng → gắn nhãn gộp sau
+2025-08-20,SJS,(A) ca riêng → gắn nhãn gộp sau
+2025-08-20,NHA,(A) gộp theo cửa sổ 60'
+2025-08-20,VGS,(A) gộp theo cửa sổ 60'
+2025-08-20,HDC,(A) hệ quả: gộp trong 1 lượt
+2025-08-20,DDV,(A) hệ quả: gộp trong 1 lượt
+2025-08-21,PET,vẫn ca riêng
+2025-08-22,HUT,(A) ca riêng → gắn nhãn gộp sau
+2025-08-22,PET,(A) ca riêng → gắn nhãn gộp sau
+2025-08-22,NHA,(A) gộp theo cửa sổ 60'
+2025-08-22,PV2,(A) gộp theo cửa sổ 60'
+2025-08-22,DDV,(A) gộp theo cửa sổ 60'
+2025-08-22,BSR,(B) chạm sàn ∧ VNI≤−2% → gộp
+2025-08-22,NAG,(A) gộp theo cửa sổ 60'
+2025-08-25,PET,vẫn ca riêng
+2025-08-25,VIB,(A) ca riêng → gắn nhãn gộp sau
+2025-08-25,KLB,(A) ca riêng → gắn nhãn gộp sau
+2025-08-25,BSR,(A) gộp theo cửa sổ 60'
+2025-08-27,PV2,vẫn ca riêng
+2025-08-29,PV2,vẫn ca riêng
+2025-09-03,INC,vẫn ca riêng
+2025-09-03,NAP,vẫn ca riêng
+2025-09-08,HDC,vẫn ca riêng
+2025-09-08,PET,vẫn ca riêng
+2025-09-08,GEX,(C) ca hoãn → GIỮ
+2025-09-11,HUT,vẫn ca riêng
+2025-10-21,VIX,vẫn ca riêng
+2025-10-24,DSC,vẫn ca riêng
+2025-10-24,GEE,(A) ca riêng → gắn nhãn gộp sau
+2025-10-24,VIX,(A) ca riêng → gắn nhãn gộp sau
+2025-10-24,SBL,(C) ca hoãn → GIỮ
+2025-10-27,DDV,vẫn ca riêng
+2025-10-28,ANV,(A) ca riêng → gắn nhãn gộp sau
+2025-10-28,VHM,(A) ca riêng → gắn nhãn gộp sau
+2025-10-28,SBL,(C) ca hoãn → GIỮ
+2025-10-30,VIX,vẫn ca riêng
+2025-11-03,VIX,(A) ca riêng → gắn nhãn gộp sau
+2025-11-03,SHS,(A) ca riêng → gắn nhãn gộp sau
+2025-11-03,HDC,(A) gộp theo cửa sổ 60'
+2025-11-04,ANV,vẫn ca riêng
+2025-11-04,HAH,vẫn ca riêng
+2025-11-06,ATS,vẫn ca riêng
+2025-11-07,VHM,(C) ca hoãn → GIỮ
+2025-11-07,STB,(C) ca hoãn → GIỮ
+2025-11-10,GEE,vẫn ca riêng
+2025-11-10,VIX,vẫn ca riêng
+2025-11-11,ATS,vẫn ca riêng
+2025-11-11,HDC,vẫn ca riêng
+2025-11-24,ATS,vẫn ca riêng
+2025-11-25,APS,vẫn ca riêng
+2025-12-09,LPB,vẫn ca riêng
+2025-12-12,VHM,(B) chạm sàn ∧ VNI≤−2% → gộp
+2025-12-16,DGC,vẫn ca riêng
+2025-12-17,DGC,vẫn ca riêng
+2025-12-18,DGC,vẫn ca riêng
+2025-12-19,DGC,vẫn ca riêng
+2025-12-23,LPB,vẫn ca riêng
+2025-12-24,DGC,vẫn ca riêng
+2025-12-26,VHM,vẫn ca riêng
+2026-01-07,STB,vẫn ca riêng
+2026-01-08,VHM,(C) ca hoãn → GIỮ
+2026-01-09,HHS,vẫn ca riêng
+2026-01-12,VHM,vẫn ca riêng
+2026-01-14,VHM,vẫn ca riêng
+2026-01-15,VHM,vẫn ca riêng
+2026-01-15,BID,vẫn ca riêng
+2026-01-26,DGC,vẫn ca riêng
+2026-01-26,TMG,vẫn ca riêng
+2026-01-26,VGC,(C) ca hoãn → GIỮ
+2026-01-27,VHM,vẫn ca riêng
+2026-01-28,VHM,vẫn ca riêng
+2026-01-29,HDW,vẫn ca riêng
+2026-01-30,TDP,vẫn ca riêng
+2026-02-03,HDW,vẫn ca riêng
+2026-02-04,TDP,vẫn ca riêng
+2026-02-05,PXL,vẫn ca riêng
+2026-02-05,PLC,(C) ca hoãn → GIỮ
+2026-02-06,PTC,(A) ca riêng → gắn nhãn gộp sau
+2026-02-06,PVD,(A) ca riêng → gắn nhãn gộp sau
+2026-02-06,KBC,(A) gộp theo cửa sổ 60'
+2026-02-06,OIL,(A) gộp theo cửa sổ 60'
+2026-02-06,VGT,vẫn ca riêng
+2026-02-10,PVD,vẫn ca riêng
+2026-02-10,BVH,(C) ca hoãn → GIỮ
+2026-02-11,DAN,vẫn ca riêng
+2026-02-11,TMG,(C) ca hoãn → GIỮ
+2026-02-24,DNC,(C) ca hoãn → GIỮ
+2026-02-26,SMA,vẫn ca riêng
+2026-03-04,PC1,(A) ca riêng → gắn nhãn gộp sau
+2026-03-04,PVS,(A) hệ quả: gộp trong 1 lượt
+2026-03-04,BVH,(A) hệ quả: gộp trong 1 lượt
+2026-03-04,LAS,(A) hệ quả: gộp trong 1 lượt
+2026-03-04,TCX,(A) gộp theo cửa sổ 60'
+2026-03-04,VGC,(A) gộp theo cửa sổ 60'
+2026-03-04,HAH,(A) hệ quả: gộp trong 1 lượt
+2026-03-04,POW,(B) chạm sàn ∧ VNI≤−2% → gộp
+2026-03-04,PXL,(A) hệ quả: gộp trong 1 lượt
+2026-03-05,PVD,(A) ca riêng → gắn nhãn gộp sau
+2026-03-05,PVS,(A) ca riêng → gắn nhãn gộp sau
+2026-03-05,PTC,vẫn ca riêng
+2026-03-05,TCX,vẫn ca riêng
+2026-03-06,TCX,vẫn ca riêng
+2026-03-10,PVT,(A) ca riêng → gắn nhãn gộp sau
+2026-03-10,PVS,(A) ca riêng → gắn nhãn gộp sau
+2026-03-10,PVD,(A) gộp theo cửa sổ 60'
+2026-03-11,DCM,vẫn ca riêng
+2026-03-12,TCX,vẫn ca riêng
+2026-03-12,SMA,(C) ca hoãn → GIỮ
+2026-03-13,PVS,(A) hệ quả: gộp trong 1 lượt
+2026-03-13,PVT,(A) hệ quả: gộp trong 1 lượt
+2026-03-13,PVD,(A) hệ quả: gộp trong 1 lượt
+2026-03-13,TCX,(A) hệ quả: gộp trong 1 lượt
+2026-03-16,DCM,vẫn ca riêng
+2026-03-16,EVF,vẫn ca riêng
+2026-03-17,PVD,vẫn ca riêng
+2026-03-17,DCM,vẫn ca riêng
+2026-03-19,PVT,vẫn ca riêng
+2026-03-20,PVD,(A) ca riêng → gắn nhãn gộp sau
+2026-03-20,PVT,(A) ca riêng → gắn nhãn gộp sau
+2026-03-20,KBC,(A) gộp theo cửa sổ 60'
+2026-03-23,MWG,(B) chạm sàn ∧ VNI≤−2% → gộp
+2026-03-30,TCX,vẫn ca riêng
+2026-04-01,DCM,(C) ca hoãn → GIỮ
+2026-04-06,HHS,(C) ca hoãn → GIỮ
+2026-04-06,PVS,(C) ca hoãn → GIỮ
+2026-04-10,BVH,(A) ca riêng → gắn nhãn gộp sau
+2026-04-10,SDT,(A) ca riêng → gắn nhãn gộp sau
+2026-04-10,VCR,(C) ca hoãn → GIỮ
+2026-04-13,VIW,vẫn ca riêng
+2026-04-14,HKT,(C) ca hoãn → GIỮ
+2026-04-15,VIW,vẫn ca riêng
+2026-04-21,MNB,(C) ca hoãn → GIỮ
+2026-04-21,HHC,(C) ca hoãn → GIỮ
+2026-04-23,EVF,vẫn ca riêng
+2026-04-23,SSH,vẫn ca riêng
+2026-04-28,PVT,(C) ca hoãn → GIỮ
+2026-04-28,PVP,(C) ca hoãn → GIỮ
+2026-04-29,SAV,vẫn ca riêng
+2026-04-29,VVS,vẫn ca riêng
+2026-05-04,TMG,(C) ca hoãn → GIỮ
+2026-05-05,SAV,vẫn ca riêng
+2026-05-05,MDF,vẫn ca riêng
+2026-05-05,PC1,vẫn ca riêng
+2026-05-05,TIN,vẫn ca riêng
+2026-05-06,TIN,vẫn ca riêng
+2026-05-06,HHC,vẫn ca riêng
+2026-05-06,LAW,vẫn ca riêng
+2026-05-08,NT2,vẫn ca riêng
+2026-05-08,PC1,vẫn ca riêng
+2026-05-11,DGC,vẫn ca riêng
+2026-05-11,HHC,vẫn ca riêng
+2026-05-12,HHC,vẫn ca riêng
+2026-05-13,VIC,(A) ca riêng → gắn nhãn gộp sau
+2026-05-13,VHM,(A) hệ quả: gộp trong 1 lượt
+2026-05-13,VRE,(A) hệ quả: gộp trong 1 lượt
+2026-05-15,VVS,vẫn ca riêng
+2026-05-15,HHC,(C) ca hoãn → GIỮ
+2026-05-18,PC1,vẫn ca riêng
+2026-05-19,SSH,vẫn ca riêng
+2026-05-19,DCM,(C) ca hoãn → GIỮ
+2026-05-22,VVS,vẫn ca riêng
+2026-05-22,DP2,vẫn ca riêng
+2026-05-22,HHC,vẫn ca riêng
+2026-05-25,PC1,vẫn ca riêng
+2026-05-28,VVS,(C) ca hoãn → GIỮ
+2026-05-29,LAW,vẫn ca riêng
+2026-06-01,MSB,(C) ca hoãn → GIỮ
+2026-06-03,VIC,vẫn ca riêng
+2026-06-03,KSF,vẫn ca riêng
+2026-06-04,KSF,vẫn ca riêng
+2026-06-05,KSF,vẫn ca riêng
+2026-06-15,VIC,vẫn ca riêng
+2026-07-20,SHS,(A) ca riêng → gắn nhãn gộp sau
+2026-07-20,VIX,(A) ca riêng → gắn nhãn gộp sau
+2026-07-20,VND,(A) gộp theo cửa sổ 60'
+2026-07-22,VHM,(B) chạm sàn ∧ VNI≤−2% → gộp
+2026-07-27,VND,(C) ca hoãn → GIỮ
+2026-09-09,SCL,vẫn ca riêng
+2026-09-14,EVF,(C) ca hoãn → GIỮ
