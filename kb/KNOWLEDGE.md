@@ -65,7 +65,18 @@
 - **DSR/PBO annex (chạy lại 2026-09-27, `dsr_pbo_annex.py`):** **DSR 1.0000** (vẫn ≥0.95 ⇒ KHÔNG red flag), **PBO 0.3993** (cũ 0.2088), ann-SR 1.622 (cũ 1.829). ⚠️ PBO tăng **KHÔNG do bug return** — đo bằng cách chạy annex 2 lần trên CÙNG họ 477 CSV chỉ đổi ledger R3: PBO = 0.3993 ở cả hai (CSCV tính trên ma trận HỌ, không dùng R3 làm đầu vào). Toàn bộ +19pp đến từ **họ trial nở 80 → 477** vì `family_paths()` là glob động ⇒ mỗi backtest R&D mới tự nhập họ. ⇒ **PBO/DSR đã pin KHÔNG tái lập được theo thời gian; muốn so sánh phải pin danh sách file (`family_manifest`) — CHƯA LÀM, chờ user/Mike quyết.** PBO 0.40 còn 0.10 là tới mốc "ưu tiên config robust-trung vị".
 
 **Parking — custom30V:**
-- NEUTRAL parking: **production (30 mã, cap 0.10, park = 30% của idle pool từ 2026-09-27)** — **+1.06pp CAGR** (23.43% park=30% vs 22.37% park=0; và ở 30% parking làm **TỐT hơn** DD −16,1%→−14,4% + Calmar 1,39→1,63, KHÔNG còn đảo dấu rủi ro như ở 70%). ⚠️ 0,30 vs 0,0 **không phân biệt được bằng dữ liệu** (paired block bootstrap P=0,479) — 0,30 là sở thích rủi ro user chốt. *Số cũ @park 0,7 (SUPERSEDED làm production, giữ làm lịch sử):* **+2.05pp CAGR** (24.42% park=70% vs 22.37% park=0, cùng lệnh pin, đổi đúng 1 biến `PARK_STATES`; self-check 0 VND cả 2 chân). ⚠️ **"+7.4pp Full" SUPERSEDED** — lệnh gốc của số đó KHÔNG tồn tại trong registry (grep chỉ ra 3 chỗ trích dẫn lại); ở chân return LỖI delta là +6,49pp ⇒ **~2/3 của "+7,4pp" là return giả từ tăng trưởng số CP**. ⚠️ **Chiều rủi ro ĐẢO DẤU**: parking làm Sharpe 1.95→1.69, DD −16.1%→−18.8%, Calmar 1.39→1.30 ⇒ parking mua ~2pp CAGR bằng cách làm xấu MỌI chỉ tiêu risk-adjusted. Câu "phần tin cậy nhất" KHÔNG còn đứng trên cơ sở risk-adjusted — **giữ/bỏ/hạ parking là quyết định của user**, Taylor không tự đảo.
+- 🆕 **PARK LIVE = 0% (TẮT) từ 2026-10-01** (user chốt 2026-10-01 10:26 ICT: "Park 0% chốt. Chỉ
+  thay đổi khi lãi suất huy động có xu hướng hạ"). Lịch sử knob: 0,70→0,80 (08-04)→0,30 (09-27)→
+  **0,0 (10-01, LIVE hiện tại)**. 3 rail (R1 mua ETF_PARK / R2 bán compute_park_trim / R3 policy
+  trading_rules.json) đã đồng bộ 0,0. Trigger quay lại park>0 = lãi huy động có XU HƯỚNG HẠ (Big-4
+  12M tháng này < tháng trước HOẶC CCTG đợt mới < đợt trước) ⇒ CHỈ CẢNH BÁO user, KHÔNG tự khôi
+  phục. ✅ **Re-pin park=0 ĐÃ DUYỆT 2026-10-08 23:30**: **`pin0%` 22,12% … `pin1M` 25,42%** (dải 2
+  số cùng quy ước §trên); neo sizing DD GIỮ **−25,2%** (park0 đo −23,9%, không lấy làm neo); park
+  0 vs 0,3 **KHÔNG phân biệt được bằng dữ liệu** (giống kết luận 0,30 vs 0,0 dưới). Nguồn:
+  `data/results_registry.md` mục "2026-10-08". Dòng dưới đây (0,30 production/+1.06pp) là **LỊCH
+  SỬ của giai đoạn 09-27→09-30**, giữ để hiểu context quyết định, KHÔNG phải trạng thái LIVE nay.
+- *(Lịch sử)* NEUTRAL parking: production ở 0,30 (30 mã, cap 0.10, park = 30% của idle pool,
+  **2026-09-27→2026-09-30, đã SUPERSEDED bởi park=0 ở trên**) — **+1.06pp CAGR** (23.43% park=30% vs 22.37% park=0; và ở 30% parking làm **TỐT hơn** DD −16,1%→−14,4% + Calmar 1,39→1,63, KHÔNG còn đảo dấu rủi ro như ở 70%). ⚠️ 0,30 vs 0,0 **không phân biệt được bằng dữ liệu** (paired block bootstrap P=0,479) — 0,30 là sở thích rủi ro user chốt. *Số cũ @park 0,7 (SUPERSEDED làm production, giữ làm lịch sử):* **+2.05pp CAGR** (24.42% park=70% vs 22.37% park=0, cùng lệnh pin, đổi đúng 1 biến `PARK_STATES`; self-check 0 VND cả 2 chân). ⚠️ **"+7.4pp Full" SUPERSEDED** — lệnh gốc của số đó KHÔNG tồn tại trong registry (grep chỉ ra 3 chỗ trích dẫn lại); ở chân return LỖI delta là +6,49pp ⇒ **~2/3 của "+7,4pp" là return giả từ tăng trưởng số CP**. ⚠️ **Chiều rủi ro ĐẢO DẤU**: parking làm Sharpe 1.95→1.69, DD −16.1%→−18.8%, Calmar 1.39→1.30 ⇒ parking mua ~2pp CAGR bằng cách làm xấu MỌI chỉ tiêu risk-adjusted. Câu "phần tin cậy nhất" KHÔNG còn đứng trên cơ sở risk-adjusted — **giữ/bỏ/hạ parking là quyết định của user**, Taylor không tự đảo.
 - **(30, 0.15) là OVERFIT** — walk-forward bác.
 - Bull parking: chỉ bật khi NAV ≥150B. Custom30B bull-sleeve FAIL walk-forward, không hạ NAV threshold.
 - **NEUTRAL parking target = 30% của idle pool, ở MỌI mức NAV** — user chốt **2026-09-27 15:48 ICT**
@@ -268,6 +279,23 @@ luận: KHÔNG đề xuất rule MIKE.md §Routing mới** (rule đã tồn tạ
 vòng này). Theo dõi tuần 10-10 xem số vòng polish có giảm sau khi skill được dùng đều, không cần
 sửa gì thêm tuần này. Spend-trend: ops_h tiếp tục ~1,0h (10-03), không có dấu hiệu tăng liên tục.
 
+**Cập nhật 10-10 (weekly editorial):** opus% tổng tuần mới nhất = **46%** (`spend_report.py
+--days 7`), +12pp so với 34% (10-03) — dưới NGƯỠNG cả (a) 60% VÀ (b) tăng ≥20pp, không flag.
+fable% vẫn 0%. **Effort 5d: Taylor 67% high (n=46)** — LẦN ĐẦU dưới ngưỡng ⚠ 70% sau 2 tuần liền
+≥70% (72% 09-26, 71% 10-03) — cùng biên độ dao động 55-94% đã quan sát 10 tuần, không cần sample.
+**5e routing retro: Taylor [RETRY-RATE] 28% (13/46)** — TUẦN THỨ 3 LIÊN TIẾP ≥15% (28% 09-26 →
+32% 10-03 → 28% 10-10), dù skill `dispatch-routing` round-3 circuit-breaker đã ship 2026-10-02.
+Field `retry_causes` (thêm 10-08) mới có dữ liệu 4 ngày, phần lớn job cũ vẫn `khong_ro` (12/16) —
+**chưa đủ bằng chứng phân loại retry-do-lỗi vs continuation hợp lệ cho riêng tuần này**, nhưng xu
+hướng 3 tuần liên tục đáng theo dõi SÁT hơn: dùng `retry_causes` (đã có từ 10-08, đủ dữ liệu sau
+~1 tuần nữa) để phân loại dứt điểm ở review 10-17 — nếu vẫn ≥15% VÀ phần lớn `khac`/không phải
+continuation chủ ý thì mới đề xuất sửa MIKE.md §Routing. KHÔNG tự sửa routing tuần này (thiếu
+bằng chứng phân loại). Không agent khác bị flag FAIL-RATE. **Spend-trend (item 5):** ops_h 3 điểm
+7-ngày gần nhất (09-26/10-03/10-10) = 1,9h → 3,2h → 3,3h — tăng nhẹ nhưng research_h cùng kỳ
+13,0h → 35,0h → 20,2h lớn hơn nhiều bậc; tỷ trọng ops/research KHÔNG tăng liên tục (15%→9%→16%,
+dao động không đơn điệu) ⇒ **không đủ điều kiện "tăng liên tục ≥3 tuần" của item 5, không đề xuất
+gì.**
+
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
@@ -351,7 +379,14 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 | Đặc thù | Trim 07-06 hoàn tất (23/23 lệnh khớp broker 100%) — trạng thái mở/vận hành ngày-qua-ngày xem `kb/current_ops.md` | **DGC (legacy) EXCLUDED** khỏi rebalancing (`excluded_tickers`, xem §4) — HOSE hạn chế GD (QĐ 448) + cảnh báo (QĐ 544) do lãnh đạo bị khởi tố hình sự 17/03/2026; ước gỡ ~11-12/2026. Transition sang custom30V (bán dần) — trạng thái hiện tại xem `kb/current_ops.md` |
 | Cron thực thi thật | run_bot.sh sáng/chiều, bot_heartbeat.sh, lunch-pkill | Cùng bộ cron từ 2026-07-06 — tự động y hệt SpaceX |
 
-**Neutral parking:** cả 2 account cùng dùng `trading_rules.json` `neutral_parking` default **0.30** (user chốt 2026-09-27; xem §1 — rail BÁN `compute_park_trim.PARK_TARGET_F1` còn 0.80, chưa duyệt đổi) — không có override riêng account nào tại thời điểm này.
+**Neutral parking:** cả 2 account cùng dùng `trading_rules.json` `neutral_parking` default **0.0
+(TẮT, từ 2026-10-01, user chốt — xem §1)** — không có override riêng account nào. *(Lịch sử: 0.30
+từ 2026-09-27 đến 2026-09-30.)*
+
+**PNJ EXCLUDED cả 2 account** (SpaceX+ZaloPay, `excluded_tickers`) từ **2026-09-30** — user chọn
+option A trên bus question `Taylor/pnj-trong-ro-custom30v-live-can-user-duyet-chan` (hạ bậc
+AMBIGUOUS→NON do công bố DN 25-27/09; 0 vị thế thật ở cả 2 account tại thời điểm loại). Review
+trigger = PNJ công bố BCTC Quý 3/2026 (không phải TTL theo ngày), KHÔNG tự động khôi phục.
 
 **Known gap:** `daily_nav_snapshot.py` chưa tính đúng P&L cho vị thế legacy ZaloPay (thiếu lịch sử FILL nội bộ) — NAV/active_nav đúng, P&L breakdown cho báo cáo cần việc riêng.
 
@@ -375,6 +410,13 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 1. **Compounder screen**: permanent_exclude trong `sector_watchlist_framework` (valuation lens) — KHÔNG liên quan case bên dưới.
 2. **Special situation (SpaceX)**: giá 48,800 VND vs fair 83,000–95,000 VND. Half-Kelly, stop nếu CF_OA Q2 âm sâu hoặc pháp lý leo thang. DO NOT buy thêm cho đến khi hạn chế GD được dỡ.
 3. **ZaloPay (legacy 47.2% NAV)**: EXCLUDED khỏi rebalancing hoàn toàn (xem §4/§5) — lý do vận hành (hạn chế GD + cảnh báo kiểm toán do khởi tố hình sự lãnh đạo 17/03/2026), KHÔNG phải lý do đầu tư (Taylor giữ vì thesis target 70-75k/12-18 tháng, +37% EV, 65% xác suất). Ước gỡ hạn chế ~11-12/2026 (Điều 42 QĐ 22 cần đủ khắc phục nguyên nhân + 6 tháng CBTT sạch liên tục — legal-vn research 2026-06-21/26/29).
+
+**Trứng vàng (DNSE `egg.totalValue`) — bản chất pháp lý, đính chính 2026-09-27** (legal-vn, bus
+`dnse-trung-vang-legal-review-20260927`): KHÔNG phải tiền gửi ngân hàng, KHÔNG phải repo — khách
+**SỞ HỮU THẬT** trái phiếu niêm yết lưu ký tại VSDC; VN **KHÔNG CÓ** Quỹ bảo vệ nhà đầu tư. 2 câu
+CHƯA trả lời (hỏi DNSE bằng văn bản): (1) lưu ký đứng tên khách hay nominee DNSE? (2) mã trái
+phiếu + TCPH cụ thể? User chốt 2026-10-05: Trứng vàng = dạng tiền mặt, KHÔNG áp trần per-TCPH/
+sleeve. Chi tiết: `kb/current_ops.md` + `kb/projects/dnse-trung-vang-legal-review-20260927.md`.
 
 **Phát hiện rủi ro sector (2026-06-30, vẫn đúng):** HPG/Steel un-capturable; VOS/Shipping leverage trap; BVH/Insurance no margin of safety; Fertilizer edge = single 2021 supercycle, không lặp lại.
 
@@ -449,6 +491,11 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 | 2026-07-10 | DollarBill tính sai ngày T+1 (thứ Bảy thay vì thứ Hai) | Giao phép tính lịch tất định cho LLM tự suy luận giữa task khác | Fix commit e3001fa, dùng `next_trading_day()` có sẵn | Giá trị tính tất định được → tính bằng code, truyền literal, không giao LLM |
 | 2026-07-10 | DT5G BULL-commit giả (EW-leg stale, xem §2) | Reorg 06-21 path writer/reader lệch, không freshness-check nội bộ chain | Fix commit 498c3a6, publish chờ cron/manual | Chain nhiều bước cần post-chain mtime assertion generic, không phải 1-1 patch |
 | 2026-08-07 | P0 funding-gate chặn oan plan ZaloPay (0/9 lệnh dù thừa tiền) | UPCOM DRI loan_package_id=None + gate không cộng tín dụng lệnh bán JIT cùng plan | commit `c22bd1c` (Mafee) + `087a3d0` (Taylor), quant-skeptic CONFIRMED cả 2 | 2 dispatch sửa CÙNG file không cách ly (không worktree) trong 1 phút — nên tách file/chạy tuần tự khi trùng |
+| 2026-09-22→24 | Lớp lỗi corp-action "số công bố" (nhiều call-site) | KL/giá đọc lẫn giữa hệ CUM/EX, không phân loại bằng chứng (sự kiện cổ phiếu vs cổ tức tiền) | `exdate_frame.py`, `classify_qty_residual`, 7+ call-site vá qua nhiều PR, 4 vòng arch-review | Corp-action KL/giá phải CÙNG hệ quy chiếu; neo bằng CHỨNG CỨ không bằng lịch; chi tiết `kb/projects/corp-action-nav-chain-20260922.md` |
+| 2026-09-27 | custom30V double-count `mcap=Close_adj×OShares` sống nhiều tháng | `Close` đã điều chỉnh hồi tố sự kiện, nhân thêm OShares bước quý = đếm 2 lần | Gỡ, Δ=−4,48pp CAGR, md5 `3f836927`, quant-skeptic CONFIRMED | Self-check 0 VND LẪN quant-skeptic đều KHÔNG bắt được lớp lỗi này — mở cadence audit quý `kb/projects/measurement-integrity-audit-20260927.md` |
+| 2026-09-27 | `*_screen.py` 16/20 file sort ngược (`ascending=False` trên thang 1=tốt nhất) | "top-25" thực ra là 25 mã XẤU NHẤT | merge `ec9750f2`; `data/*_verdict.json`/`*_monthly.csv` cũ VẪN mang số sai, chưa sinh lại | Không trích số cũ từ các file output đó; `kb/projects/screen-sort-direction-bug-20260927.md` |
+| 2026-10-01→08 | NEUTRAL parking 0,30→0% rồi re-pin park=0 | User chốt tắt park theo lãi huy động thấp, không phải bug | Re-pin `pin0%`22,12%…`pin1M`25,42% (registry mục "2026-10-08"), duyệt 10-08 | Pin dải 2 số bắt buộc kèm quy ước — xem §1 |
+| 2026-10-09 | ZaloPay DNSE 401 lúc kiểm drift vị thế (retro Pattern G) | Đính chính retro-10-07: cơ chế "second-chance" KHÔNG thực retry khi plan không đổi — thành công 07/10 là trùng hợp | Chưa vá (rủi ro thấp, chỉ-cờ) | Đừng đánh giá cơ chế tự phục hồi "đúng thiết kế" từ 1 lần quan sát thành công — `kb/incidents/retro/retro-2026-10-09.md` |
 
 **Pattern đang mở (chưa đóng hẳn):** "code âm thầm đọc/dùng dữ liệu chưa sẵn sàng, che giấu bởi tolerance/giả định lịch trình rộng" — đã vá 1 lát cắt hẹp (BQ-vs-DNSE, 07-09) và 1 lát cắt khác lộ ra ngay sau đó dưới dạng khác (DT5G cron-order + chain freshness, 07-10). Bus question `retro-pattern-recurring-dataprovenance-2` đề xuất tổng quát hoá quy tắc freshness-check cho MỌI cặp pipeline producer→consumer nội bộ — **vẫn chờ user/Mike xác nhận hướng**, chưa tới ngưỡng escalate mức cao hơn.
 
@@ -492,6 +539,12 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 - 08:45 T2-T6: `preflight_check.sh`.
 - 09:05 & 13:00 (sau nghỉ trưa) T2-T6: `run_bot.sh --auto-otp`.
 - 20:30 T2-T6: `inject_discretionary_orders.sh` (chèn lệnh gom DISCRETIONARY_SPECIAL, thêm 2026-07-24).
+- 20:40 T2-T6: `auto_exit_inject_daily.sh` (thêm, LIVE 2026-09-30 — user duyệt option 2): chèn đề
+  xuất SELL tự động LAG T+25/BAL T+45/CAPIT T+60 vào plan T+1, đọc broker cost-basis thật
+  (fail-safe phantom-sell). SAU inject_discretionary 20:30, TRƯỚC send_plan_report 21:00.
+- 20:50 T2-T6: `plan_position_drift_check.py` (thêm, LIVE 2026-10-04): cờ "vị thế đổi sau khi lập
+  plan" (chỉ-cờ, không chặn) — so DNSE sống vs bản đọc đầu plan (~19:03); bus finding khi kiểm
+  được và khi không kiểm được (`CANNOT_CHECK`). SAU auto_exit_inject, TRƯỚC send_plan_report.
 - 19:10 T2-T6: `eod_trading_report.sh` (+ `daily_nav_snapshot.py`) → Trading report *(đổi từ 15:00, 2026-07-15, user duyệt — chạy sau publish DT5G 19:01 để "tình trạng thị trường" là regime HÔM NAY)*.
 - 20:05 T2-T6: `paper_late_feeds.sh` (crisis_alert_push + fetch_bdi_daily, tách khỏi papertrade_daily, thêm 2026-07-29).
 - 23:00 T2-T6: `send_plan_report.sh --second-chance` (re-send idempotent, thêm 2026-07-13).
