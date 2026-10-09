@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-08T16:12:58Z] ĐANG DỞ job Taylor_20261008_155435 repin park0 dep1m: 4 chân + control xong, REPORT.md viết xong (research/repin_park0_dep1m_20261008) | NEXT: m_p0 xong → điền §1.2, registry .proposed, bus finding repin-r3-park0-dep1m
-- [2026-10-08T16:19:15Z] [repin park0 dep1m 10-08] DONE 555bd103; neo DD giữ −25,2% (park0 đo −23,9%); registry .proposed chờ Mike/user. Rerun còn treo: sàn nhiễu park0, chân không-bắc-cầu park0.
 - [2026-10-08T16:32:32Z] ĐANG DỞ job Taylor_20261008_163222 bal-maxpos-lag-idle: bắt đầu cổng 0 | NEXT: đọc engine MAX_POS_V11 + 2 file động cơ, đếm ứng viên rank13-20 phiên LAG idle
 - [2026-10-08T16:58:55Z] [bal-maxpos-lag-idle 10-09] NO-GO c604cd1e (nới trần BAL 16/20 −1,1…−2,1pp, không chạm cash LAG vì 2 sổ cái độc lập). Worktree wt-balmaxpos-1009 dọn được. Hướng duy nhất còn lại = allocator động (không khuyến nghị).
 - [2026-10-08T17:26:05Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B (Q-sleeve/fincap/L1 pool) trên engine sửa double-count: bắt đầu | NEXT: đọc review 2.B + registry 07-12/07-14/09-09
@@ -26,3 +24,5 @@
 - [2026-10-09T09:34:03Z] ĐANG DỞ job Taylor_20261009_093353 selfcheck-red owner sweep 9 file: bắt đầu | NEXT: chạy lại 9 selfcheck, phân loại
 - [2026-10-09T09:38:42Z] ĐANG DỞ job Taylor_20261009_093353 sweep: custom30 CLOSED; 8 file phân loại xong (atc/basket/cpi/lag_gov/freshness=b, rating8l/capit/cctg=d live CSV) | worktree /home/trido/thanhdt/wt-screds-1009 branch fix/selfcheck-red-sweep-1009 | NEXT: sửa+chạy xanh, merge, close, finding
 - [2026-10-09T09:46:11Z] [selfcheck-red sweep 10-09] 9/9 CLOSED (6a73ef82). Nợ: rating8l --bq BQ2-4 pin số 09-27 (HDG đã lật POWER); nhãn cctg_6m cho dòng 12M.
+- [2026-10-09T09:46:41Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss historical replay: bắt đầu | NEXT: đọc bin/intraday_price_watch.py + data_registry intraday
+- [2026-10-09T09:54:33Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss replay: research/intraday_cutloss_replay_20261009 build_inputs.py chạy | NEXT: replay.py (HistMarket + run_tick thật), analyze, REPORT, bus finding intraday-cutloss-historical-replay

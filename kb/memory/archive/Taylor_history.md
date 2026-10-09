@@ -982,3 +982,9 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-08T15:54:45Z] ĐANG DỞ job Taylor_20261008_155435 repin R3 park0 dep1m: bắt đầu | NEXT: kiểm worktree wt-repin-dep1m-2809 vs main, chạy 2 chân control
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T16:12:58Z] ĐANG DỞ job Taylor_20261008_155435 repin park0 dep1m: 4 chân + control xong, REPORT.md viết xong (research/repin_park0_dep1m_20261008) | NEXT: m_p0 xong → điền §1.2, registry .proposed, bus finding repin-r3-park0-dep1m
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T16:19:15Z] [repin park0 dep1m 10-08] DONE 555bd103; neo DD giữ −25,2% (park0 đo −23,9%); registry .proposed chờ Mike/user. Rerun còn treo: sàn nhiễu park0, chân không-bắc-cầu park0.
