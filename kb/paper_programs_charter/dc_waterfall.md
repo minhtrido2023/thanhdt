@@ -15,7 +15,7 @@ Khi NEUTRAL và BAL/LAG rỗng, giải ngân tiền rảnh theo thứ tự BAL/L
 
 ## 📅 Nghiệm thu / mốc kết thúc
 
-Event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN hoàn tất (LAG dự kiến refill cuối 07) + settle 4-6 tuần. Sàn ~2 tháng, trần 2026-10-06 (né mùa BCTC Q3). LAG refill trượt lịch → mốc trượt theo.
+USER CHỐT 2026-10-09 00:25 ICT (decided_by: user, phương án A): BỎ mốc review theo ngày (trần cũ 2026-10-06 đã qua mà gate 1 không thể đạt — v2 chỉ reverse-unwind khi state RỜI gate, 57 phiên đầu toàn NEUTRAL). Review EVENT-ANCHORED khi xảy ra SỚM NHẤT 1 trong 2: (a) state DT5G lần đầu rời NEUTRAL (BULL/EXBULL ⇒ bằng chứng gate mở rộng; BEAR/CRISIS ⇒ chu kỳ reverse-unwind đầu tiên), hoặc (b) trigger park quay lại kích hoạt (lãi huy động Big-4 có xu hướng hạ — cảnh báo cron refresh_deposit_cctg_weekly.sh). Không backtest thêm. Cron ghi sổ giữ nguyên. Lý do: park=0 từ 2026-10-01 ⇒ tiền nhàn rỗi ở Trứng vàng, DC-book không có vốn live; đọc sổ 2026-10-09: cum −0,16% (07-17→10-08) vs VNINDEX −2,71%, idle proxy dep1m ~+0,9%.
 
 ## ✅ Tiêu chí GO/NO-GO
 
