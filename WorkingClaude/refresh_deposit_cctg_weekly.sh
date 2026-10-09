@@ -98,7 +98,7 @@ Ghi (nếu có số xác nhận): python3 append_cctg_rate.py --series 6m --rate
 
 === CHUỖI 4: LÃI SUẤT ĐIỀU HÀNH NHNN (tái cấp vốn + tái chiết khấu; OMO nếu có) — user duyệt 2026-10-09 ===
 Script TỰ lấy số chính thức từ sbv.gov.vn (bạn KHÔNG khai số NHNN, KHÔNG cần xem trước).
-Việc của bạn: WebSearch >=1 nguồn ĐỘC LẬP KHÁC CHỦ với NHNN (KHÔNG phải *.sbv.gov.vn, Thời báo Ngân hàng, Tạp chí Ngân hàng — vd báo/CTCK/vietstock), có NGÀY CỤ THỂ trong ~35 ngày, nêu RÕ lãi tái cấp vốn VÀ tái chiết khấu hiện hành (thêm lãi OMO/cầm cố giấy tờ có giá nếu bài có). Ghi đúng số bài báo nói. URL phải KHÁC lần ghi trước (script tự chặn).
+Việc của bạn: WebSearch >=1 nguồn ĐỘC LẬP KHÁC CHỦ với NHNN (KHÔNG phải *.sbv.gov.vn, Thời báo Ngân hàng, Tạp chí Ngân hàng — vd báo/CTCK/vietstock), có NGÀY CỤ THỂ trong ~120 ngày, nêu RÕ lãi tái cấp vốn VÀ tái chiết khấu hiện hành (thêm lãi OMO/cầm cố giấy tờ có giá nếu bài có). Ghi đúng số bài báo nói. URL phải KHÁC lần ghi trước (script tự chặn).
 Ghi: python3 sbv_policy_verify.py verify --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"refi\":<X>,\"rediscount\":<Y>,\"omo\":<Z hoặc bỏ field>}, ...]'
 Script TỰ đối chiếu với NHNN và SBV_REFI_EVENTS; lệch/thiếu ⇒ nó từ chối (rc=2), KHÔNG ghi số, chỉ ghi lần thử. Gặp từ chối: ĐỪNG lách, escalate kèm nguyên văn lỗi. Lãi NHNN khác SBV_REFI_EVENTS ⇒ script tự cảnh báo 🔴; TUYỆT ĐỐI không tự sửa sbv_macro_overlay.py.
 

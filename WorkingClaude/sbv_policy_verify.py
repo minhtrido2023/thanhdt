@@ -57,7 +57,7 @@ SBV_OWNED = {"sbv.gov.vn", "thoibaonganhang.vn", "tapchinganhang.gov.vn"}
 # UA trình duyệt: UA tự khai bot ("compatible; SBV-verify") bị WAF trang chủ trả "Request Rejected".
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/120.0 Safari/537.36")
-MAX_SOURCE_AGE_DAYS = 35      # cùng ngưỡng append_cctg_rate.py
+MAX_SOURCE_AGE_DAYS = 120     # user duyệt 2026-10-09 (cửa sổ B): chuỗi NHNN thay đổi hiếm; độ tươi do trang NHNN đọc trực tiếp hằng tuần. KHÔNG áp CCTG/Big-4 (35)
 RATE_EPS_PP = 0.01            # lãi điều hành niêm yết 3 số lẻ — phải khớp, không phải "gần"
 RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 20.0
 STALE_DAYS = 21

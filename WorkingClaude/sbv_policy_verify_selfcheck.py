@@ -131,7 +131,7 @@ def t_refusals_never_advance_verified():
         ("source_mismatch", page(), [src("https://vietstock.vn/x", refi=4.25)]),
         ("source_mismatch", page(), [src("https://vietstock.vn/x", red=2.5)]),
         ("not_independent", page(), [src("https://dttktt.sbv.gov.vn/x")]),
-        ("stale_source", page(), [src("https://vietstock.vn/x", days_ago=60)]),
+        ("stale_source", page(), [src("https://vietstock.vn/x", days_ago=130)]),
         ("stale_source", page(), [src("https://vietstock.vn/x", days_ago=-2)]),
         ("bad_sources", page(), [{"publisher": "p", "url": "https://vietstock.vn/x",
                                   "date": TODAY.isoformat(), "refi": 4.5}]),
