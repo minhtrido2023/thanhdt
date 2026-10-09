@@ -1604,9 +1604,9 @@ def test_fix3():
           a.get("market_wide") and b.get("market_wide")
           and any(r["kind"] == "MARKET_WIDE_RELABEL" and set(r["cases"]) == {"AAA", "BBB"} for r in lg)
           and any("GẮN NHÃN CẢ THỊ TRƯỜNG" in m["msg"] for m in st["outbox"] + deps.notifier.sent))
-    check("(A) AAA đang bán theo MẶC ĐỊNH ⇒ DỪNG, ca về HOLD; gợi ý cũ giữ lại",
+    check("(A) AAA đang bán theo MẶC ĐỊNH ⇒ DỪNG, ca về HOLD; bản ghi mặc định đã áp (BÁN) giữ nguyên",
           a["execution"]["SpaceX"]["status"] == "STOPPED_MARKET_WIDE" and a["status"] == "HOLD"
-          and a["actions_default"] == {"SpaceX": E.HOLD} and a["actions_suggested"] == {"SpaceX": E.SELL_ALL})
+          and a["actions_default"] == {"SpaceX": E.SELL_ALL} and not a.get("actions_suggested"))
     check("(A) BBB phán quyết GÃY đến SAU khi gắn nhãn ⇒ mặc định GIỮ (không tự bán)",
           b["verdict"]["label"] == E.BROKEN and b["actions_default"] == {"SpaceX": E.HOLD}
           and b["actions_suggested"] == {"SpaceX": E.SELL_ALL} and "cả thị trường" in b["hold_override"])
@@ -1697,6 +1697,21 @@ def test_fix3():
           and not c["execution"], f"{c.get('actions_default')} {c.get('execution')}")
     shutil.rmtree(tmp)
 
+    # ---- (C) ca KHÔNG late (T0 13:30), lỡ tick 13:40→hết ngày, phán quyết GÃY xử phiên sau ⇒ GIỮ (kills R2)
+    tmp = tempfile.mkdtemp(prefix="ipw_sc_")
+    clock = Clock()
+    mkt = FakeMarket(clock, {"09:15": 100_000, "13:29": 94_000}, exch="HNX",
+                     pos={"XYZ": {"qty": 1000, "sellable": 1000}})
+    deps = _deps(tmp, mkt, _uni("BAL"))
+    _drive(tmp, mkt, deps, "09:15", "13:40")
+    _verdict(tmp, "XYZ", E.BROKEN)
+    st = _drive(tmp, mkt, deps, "09:00", "10:00", day="2026-10-07")
+    c = st["cases"]["XYZ"]
+    check("(C) ca không late, phán quyết xử phiên sau ⇒ mặc định GIỮ, không lệnh",
+          not c.get("late") and c["actions_default"] == {"SpaceX": E.HOLD} and not c["execution"],
+          f"{c.get('late')} {c.get('actions_default')}")
+    shutil.rmtree(tmp)
+
     # ---- (D) N3: hết ngân sách 14:55→14:59 ⇒ không EOD_OOS, có BUDGET + cảnh báo sức khoẻ eod_oos
     st, deps, tmp = scenario("eod_budget", "BAL", end="14:54")
     deps.budget_s = 0.0
@@ -1747,6 +1762,9 @@ def test_fix3():
           len(oos) == 1 and oos[0]["ts"].endswith("14:55:00") and oos[0]["vni_day"] == 0.0
           and abs(row.get("ret_close") + 0.06) < 1e-9 and row.get("kind") == "case" and row.get("t0")
           and "verdict" in row, str(oos)[:300])
+    check("(D) đã ghi EOD_OOS ⇒ KHÔNG cảnh báo sức khoẻ eod_oos (kills R7)",
+          not any("EOD_OOS" in m["msg"] for m in st["outbox"] + deps.notifier.sent))
+    check("(D) HNX ⇒ close_final True", row.get("close_final") is True)
     shutil.rmtree(tmp)
 
 

@@ -1237,7 +1237,7 @@ def _relabel_market_wide(st, now, deps, reason):
         c["market_wide"] = {"at": _iso(now), "reason": reason}
         note = []
         pre = c.get("actions_default")
-        if pre and any(a != E.HOLD for a in pre.values()):
+        if pre and not c.get("decision") and any(a != E.HOLD for a in pre.values()):   # đã quyết ⇒ giữ nguyên bản ghi
             c.setdefault("actions_suggested", dict(pre))
             c["actions_default"] = {lab: E.HOLD for lab in pre}
             c["hold_override"] = f"cả thị trường: {reason}"
