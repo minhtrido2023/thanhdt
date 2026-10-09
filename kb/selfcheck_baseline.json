@@ -40,36 +40,6 @@
       "triaged_utc": "2026-09-29T08:45:00Z",
       "triaged_by": "Taylor"
     },
-    "basket_return_leg_oshares_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-27T22:08:21Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: basket_return_leg_oshares_selfcheck.py",
-      "escalated_utc": "2026-09-27T22:08:21Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "cpi_vn_tier15_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-27T22:08:21Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: cpi_vn_tier15_selfcheck.py",
-      "escalated_utc": "2026-09-27T22:08:21Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "freshness_ops_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-27T22:08:21Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: freshness_ops_selfcheck.py",
-      "escalated_utc": "2026-09-27T22:08:21Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "mike/bin/annualization_basis_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-09-27T22:08:21Z",
@@ -77,66 +47,6 @@
       "auto": true,
       "topic": "selfcheck-red: mike/bin/annualization_basis_selfcheck.py",
       "escalated_utc": "2026-09-27T22:08:21Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/production_manifest_selfcheck.sh": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-27T22:08:22Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/production_manifest_selfcheck.sh",
-      "escalated_utc": "2026-09-27T22:08:22Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/report_delivery_ledger_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-27T22:08:22Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/report_delivery_ledger_selfcheck.py",
-      "escalated_utc": "2026-09-27T22:08:22Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "lag_governance_order_gate_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-28T22:06:40Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: lag_governance_order_gate_selfcheck.py",
-      "escalated_utc": "2026-09-28T22:06:40Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/orb_drift_monitor_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-28T22:06:40Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/orb_drift_monitor_selfcheck.py",
-      "escalated_utc": "2026-09-28T22:06:40Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/paper_report_render_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-29T22:07:18Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/paper_report_render_selfcheck.py",
-      "escalated_utc": "2026-09-29T22:07:18Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/send_plan_report_state_gate_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-29T22:07:18Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/send_plan_report_state_gate_selfcheck.py",
-      "escalated_utc": "2026-09-29T22:07:18Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
@@ -160,16 +70,6 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "rating8l_icb_pit_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-03T22:08:10Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: rating8l_icb_pit_selfcheck.py",
-      "escalated_utc": "2026-10-03T22:08:10Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "mike/bin/plan_position_drift_check_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-10-04T22:08:35Z",
@@ -177,56 +77,6 @@
       "auto": true,
       "topic": "selfcheck-red: mike/bin/plan_position_drift_check_selfcheck.py",
       "escalated_utc": "2026-10-04T22:08:35Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "capit_lever_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-05T22:07:27Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: capit_lever_selfcheck.py",
-      "escalated_utc": "2026-10-05T22:07:27Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "cctg_deposit_wiring_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-05T22:07:28Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: cctg_deposit_wiring_selfcheck.py",
-      "escalated_utc": "2026-10-05T22:07:28Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "atc_cancel_overorder_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-06T22:08:08Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: atc_cancel_overorder_selfcheck.py",
-      "escalated_utc": "2026-10-06T22:08:08Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/commit_collision_gate_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-08T22:10:07Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/commit_collision_gate_selfcheck.py",
-      "escalated_utc": "2026-10-08T22:10:07Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/question_commit_hint_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-08T22:10:07Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/question_commit_hint_selfcheck.py",
-      "escalated_utc": "2026-10-08T22:10:07Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
