@@ -56,7 +56,7 @@ Each lot's entry_date matches its actual buy row in
 1. Day 0 NAV = exactly 50,000,000,000 (diff 0.00)
 2. Every BUY ticker in transactions has activity (50 unique)
 3. Every closed position has both buy AND sell rows (0 orphans across 77 closed)
-4. Open [REDACTED] entry_date = actual buy date (0 mismatches across 4 lots)
+4. Open [REDACTED] entry_date = actual buy date (0 [REDACTED]es across 4 lots)
 5. Cash flow from transactions reconstructs end cash exactly (diff 0.00 VND)
 6. Per-book columns sum to NAV (max diff 0.000015 VND across 233 rows)
 7. End cash residual = 0 (no orphan ETF appreciation)

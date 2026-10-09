@@ -14,7 +14,7 @@ User ([REDACTED]12): "về sau khi tôi kêu chạy simulation là phải mặc 
 **How to apply**: bất kỳ lần nào user yêu cầu "chạy simulation/backtest/chạy lại X", MẶC ĐỊNH:
 1. Dùng harness auditable: **T+1 Open fills** (KHÔNG intraday alt-fills), **mọi dữ liệu từ tav2_bq.*** (KHÔNG panel curated v4f_panel), state từ vnindex_5state_dt5g_live.
 2. Xuất **MỘT file** `data/<ver>_audit_2014_now*.csv` chia record_type META/TX/REBAL/DAILY/METRIC + self-checks (cash-flow identity 0 VND, NAV identity 0 VND, combination replay 0 VND).
-3. Chạy spot-check độc lập `data/v23_audit_spotcheck.py N <file>` (giá vs BQ 0 mismatch, metric dựng lại khớp).
+3. Chạy spot-check độc lập `data/v23_audit_spotcheck.py N <file>` (giá vs BQ 0 [REDACTED], metric dựng lại khớp).
 4. Báo kết quả kèm cảnh báo nếu in-sample/few-events.
 
 Template engine: `pt_v23_audit_2014.py` (MODE v23a/v23c/v22base + cap/maturity args). Verifier chung: `data/audit_spotcheck_generic.py`. Emitter chung: `audit_lib.py`. KHÔNG báo "đã chạy xong" nếu chưa có file audit + spot-check pass.

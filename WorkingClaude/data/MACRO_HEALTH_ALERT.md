@@ -1,10 +1,10 @@
-⚠️ MACRO HEALTH FAILED (SEV SEV1) @ 2026-10-02 15:00
+⚠️ MACRO HEALTH FAILED (SEV SEV1) @ 2026-10-09 15:00
 -> use state source: DT4_only
 market stress: False (vix_elevated=False, vni_below_ma200=False)
 failing checks:
-  [SEV1] v34b_csv_read: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmp547riqfe.sql"' returned non-zero exit status 1.
-  [SEV1] bq_ticker_query: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmpoufl_jzo.sql"' returned non-zero exit status 1.
-  [SEV1] macro_probe: get_macro_state failed: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmps3_ygpf_.sql"' returned non-zero exit status 1.
+  [SEV1] v34b_csv_read: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmpb7bo1n90.sql"' returned non-zero exit status 1.
+  [SEV1] bq_ticker_query: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmprxgerke9.sql"' returned non-zero exit status 1.
+  [SEV1] macro_probe: get_macro_state failed: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmp222_qpe8.sql"' returned non-zero exit status 1.
 stale/missing sources:
   local_v34b_state_csv: MISSING / unreadable
   bq_ticker_vnindex: MISSING / unreadable

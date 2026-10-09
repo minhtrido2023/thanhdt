@@ -110,7 +110,7 @@ User: sweep số mã × cap level. Wired env `BASKET_TOPN`/`BASKET_NAMECAP` vào
 - **cap: 0.12-0.15 ≈ nhau > 0.10 > 0.08; cap=0.08 TỆ RÕ** (ép weight xuống đuôi kém-liquid + rời mega-cap → GIẢM capacity, không bõ chống idiosyncratic). 0.10 round-choice ổn nhưng hơi chặt.
 - **Robust 2 NAV**: ranking GIỐNG HỆT ở 200B & 500B (không phải artifact 1 cửa sổ).
 
-**Winner = (top_n=40, cap=0.12)**: @500B 20.48%/Sh1.62/DD−15.5/Cal1.32; @200B 21.93%/Sh1.65/DD−15.8/Cal1.39. **Δ vs prod (30,0.10): +0.46pp/+0.06Sh @500B, +0.56pp/+0.06Sh @200B** (Calmar ~flat/nhỉnh). (40,0.15) ≈ ngang (200B nhỉnh tí 21.96/Cal1.40); (30,0.15) = +0.24/+0.45pp (DD tốt nhất −15.0 @500B). Spotcheck (40,0.12)@500B PASS toàn bộ: identity 5e-16, 0 price-mismatch, members_match=True, level rebuild 0.00 err/3110d, cashflow 0 VND, allocator replay 0 VND.
+**Winner = (top_n=40, cap=0.12)**: @500B 20.48%/Sh1.62/DD−15.5/Cal1.32; @200B 21.93%/Sh1.65/DD−15.8/Cal1.39. **Δ vs prod (30,0.10): +0.46pp/+0.06Sh @500B, +0.56pp/+0.06Sh @200B** (Calmar ~flat/nhỉnh). (40,0.15) ≈ ngang (200B nhỉnh tí 21.96/Cal1.40); (30,0.15) = +0.24/+0.45pp (DD tốt nhất −15.0 @500B). Spotcheck (40,0.12)@500B PASS toàn bộ: identity 5e-16, 0 price-[REDACTED], members_match=True, level rebuild 0.00 err/3110d, cashflow 0 VND, allocator replay 0 VND.
 
 **WALK-FORWARD ([REDACTED], `wf_basket_size_cap.py` đọc DAILY combined_nav, KHÔNG chạy lại) = GIẾT cả 2 ứng viên.** IS 2014-19 / OOS 2020-now + per-year + OOS-ex-2025:
 - **(30,0.15) FAIL**: full-edge +0.24/+0.45pp toàn từ IS (2015 +5pp, 2016 +2pp = năm SỚM/mỏng); **OOS 2020-now ≈ FLAT** (−0.27pp@500B, +0.07pp@200B). Nới cap 0.10→0.15 giữ N=30 = IS-fit thuần.

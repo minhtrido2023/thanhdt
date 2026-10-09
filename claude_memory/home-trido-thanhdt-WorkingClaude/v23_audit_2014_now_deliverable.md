@@ -13,7 +13,7 @@ User ([REDACTED]12) muốn re-verify mọi con số V2.3 bằng cách chạy l�
 
 **Output (1 file)**: `data/v23_golive_audit_2014_now.csv` (~13.3k dòng), chia `record_type`: META (quy trình verify), EVENT_CAPIT (18 washout), TX (10,074 gd: cổ phiếu+ETF+MTM), REBAL (33 lần), DAILY (3,101 phiên, ledger+allocator+VNI), ANNUAL, METRIC (+self-check).
 
-**Verifier**: `data/v23_audit_spotcheck.py` (đóng vai bot ngoài) — PASS: 660 giá vs BQ 0 mismatch; đẳng thức số tiền ~1e-16; **cash-flow identity mỗi sổ/ngày = 0 VND**; allocator replay 0 VND; CAGR/Sharpe/MaxDD dựng lại từ DAILY khớp tuyệt đối.
+**Verifier**: `data/v23_audit_spotcheck.py` (đóng vai bot ngoài) — PASS: 660 giá vs BQ 0 [REDACTED]; đẳng thức số tiền ~1e-16; **cash-flow identity mỗi sổ/ngày = 0 VND**; allocator replay 0 VND; CAGR/Sharpe/MaxDD dựng lại từ DAILY khớp tuyệt đối.
 
 **KẾT QUẢ auditable 2014→[REDACTED]11 (12.44y)**: Final 589.63B từ 50B, **CAGR 21.94% / Sharpe(252) 1.59 / MaxDD −23.7% / Calmar 0.92** (VNINDEX B&H 10.76%/0.65/−45.3%). MaxDD episode −23.7% tại 2023-05-11. Annual: 2021 +104%, 2022 −18.6%, 2025 +44.6%, 2026 YTD −5.4%.
 

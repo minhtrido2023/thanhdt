@@ -7,7 +7,7 @@ metadata:
   originSessionId: 2ef717ab-5c78-4933-9acd-888a2ecf9450
 ---
 
-THỐNG KÊ TẤT CẢ các bản đã audit qua harness BQ-verifiable (T+1 Open, mọi data tav2_bq.*, KHÔNG intraday, output 1-file + self-check 0 VND, spot-check 0 mismatch). FULL 2014-01-02 → [REDACTED]11. VNINDEX B&H = 10.76% / Sh0.65 / DD−45.3%.
+THỐNG KÊ TẤT CẢ các bản đã audit qua harness BQ-verifiable (T+1 Open, mọi data tav2_bq.*, KHÔNG intraday, output 1-file + self-check 0 VND, spot-check 0 [REDACTED]). FULL 2014-01-02 → [REDACTED]11. VNINDEX B&H = 10.76% / Sh0.65 / DD−45.3%.
 
 | Bản | State | CAGR | Sharpe | MaxDD | Calmar | File data/ |
 |---|---|---|---|---|---|---|
@@ -37,7 +37,7 @@ THỐNG KÊ TẤT CẢ các bản đã audit qua harness BQ-verifiable (T+1 Open
 | V2.3A uncapped (live cũ) | 21.94 | 1.59 | −23.7 | 0.92 | v23_golive_… |
 | **V2.3C + postbull** (best risk-adj) | 23.35 | 1.72 | **−19.0** | **1.23** | v23c_…_matpostbull_shrink0 |
 | **V2.3A + postbull** (max return, NEW live) | **24.04** | **1.79** | −20.6 | 1.17 | v23_golive_…_matpostbull_shrink0 |
-**V2.3A+postbull = CAGR & Sharpe cao nhất TẤT CẢ**; vs live-cũ V2.3A uncapped: **+2.10pp CAGR VÀ DD −23.7→−20.6** (vừa thêm return vừa giảm rủi ro). Allocator thêm +0.69pp CAGR/+0.07 Sh so V2.3C+postbull NHƯNG tốn DD (−20.6 vs −19.0). → **Chọn live: max-return=V2.3A+postbull; best-risk-adj=V2.3C+postbull (bỏ allocator)**. Cả hai >> live cũ. ⚠️ ngưỡng postbull in-sample-tuned (1 loser 2022-04) nhưng full-history+walk-forward+generalize-2007/2018 = biện minh mạnh nhất mọi gate. Verifier: data/v23_audit_spotcheck.py (allocator) — 0 mismatch/0 VND/replay 0.
+**V2.3A+postbull = CAGR & Sharpe cao nhất TẤT CẢ**; vs live-cũ V2.3A uncapped: **+2.10pp CAGR VÀ DD −23.7→−20.6** (vừa thêm return vừa giảm rủi ro). Allocator thêm +0.69pp CAGR/+0.07 Sh so V2.3C+postbull NHƯNG tốn DD (−20.6 vs −19.0). → **Chọn live: max-return=V2.3A+postbull; best-risk-adj=V2.3C+postbull (bỏ allocator)**. Cả hai >> live cũ. ⚠️ ngưỡng postbull in-sample-tuned (1 loser 2022-04) nhưng full-history+walk-forward+generalize-2007/2018 = biện minh mạnh nhất mọi gate. Verifier: data/v23_audit_spotcheck.py (allocator) — 0 [REDACTED]/0 VND/replay 0.
 
 **⭐ EDGE-CONDITIONAL ALLOCATOR (user [REDACTED]13, faithful chốt số deploy)**: allocator tilt LAG→0.65 trong NEUTRAL/BULL/EXBULL CHỈ khi LAG edge-health mean12≥4% (causal, data/lag_edge_health.csv); else giữ 0.50. BEAR=0/CRISIS=0.50 nguyên. Lý do: V2.3A DD>V2.3C vì allocator dồn 66% LAG ở NEUTRAL-phục-hồi-2023 đúng lúc LAG bleeding (edge percentile-3); edge-cond tránh điều đó. `pt_v23_audit_2014.py v23a none postbull 0.0 edge` (argv[5]=edge, EDGE_THR=4). **Walk-forward PASS** (hiếm trong phiên): edge-health yếu ở CẢ IS(58%<4%) lẫn OOS(35%) → rule được tập+kiểm thật; edge-cond thr4 thắng state-tilt CẢ IS(Cal2.11>1.93) LẪN OOS(1.40>1.36); ngưỡng 4% kinh tế nằm plateau robust (IS-optimal=5 nhưng OOS revert→bài học ngưỡng-kinh-tế>tối-ưu-IS). Faithful = overlay-research KHỚP KHÍT (validation).
 | config | CAGR | Sharpe | MaxDD | Calmar | file |
@@ -58,4 +58,4 @@ THỐNG KÊ TẤT CẢ các bản đã audit qua harness BQ-verifiable (T+1 Open
 
 **Risk-adjusted champion (không CAPIT) = V2.2-base** (Calmar 1.14, DD −18.5%, 0 param). CAPIT/allocator/gates đều thêm return mỏng đổi lấy DD (xem [[v23_audit_2014_now_deliverable]]). Bản DD thấp nhất tuyệt đối = LAGGED+VN30 (−18.2%) nhưng CAGR thấp.
 
-**Hạ tầng audit dùng chung** (theo [[simulation_[REDACTED]_audit_default]]): `pt_v23_audit_2014.py` (V2.3 family, MODE+cap+maturity args), `pt_v11_audit_2014.py`, `pt_v121_audit_2014.py`; emitter chung `audit_lib.py` (N-sổ, cột carry=lãi-vay-cash-âm để sổ tự khớp 100%, combined_override cho ensemble); verifier chung `data/audit_spotcheck_generic.py` (đọc nhãn sổ + switched-recurrence từ META). MỌI file audit: cash-flow identity 0 VND, final-NAV identity 0, giá vs BQ 0 mismatch, metric dựng-lại-từ-DAILY khớp.
+**Hạ tầng audit dùng chung** (theo [[simulation_[REDACTED]_audit_default]]): `pt_v23_audit_2014.py` (V2.3 family, MODE+cap+maturity args), `pt_v11_audit_2014.py`, `pt_v121_audit_2014.py`; emitter chung `audit_lib.py` (N-sổ, cột carry=lãi-vay-cash-âm để sổ tự khớp 100%, combined_override cho ensemble); verifier chung `data/audit_spotcheck_generic.py` (đọc nhãn sổ + switched-recurrence từ META). MỌI file audit: cash-flow identity 0 VND, final-NAV identity 0, giá vs BQ 0 [REDACTED], metric dựng-lại-từ-DAILY khớp.

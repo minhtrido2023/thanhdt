@@ -19,7 +19,7 @@ Verified [REDACTED]09 (VN 16:40). Data-freshness map of the BQ feature tables an
 **Paper-trade lag is BY DESIGN, separate issue:** `pt_dates.detect_end_date()` caps END_DATE at `today-1` (T+1, no look-ahead). So pt_v4_dt5g etc. mark to yesterday regardless of ingest — fixing ticker ingest does NOT change paper-trade output.
 
 **Fix applied [REDACTED]09 — switched latest-session CTE from `ticker`→`ticker_1m`** (keep deep-history side-CTEs like 52w-high on `ticker`):
-- SWITCH (full): `vn30_8l.py` (_liquidity), `power_lens.py` (px CTE), `recommend_lh.py` (live snapshot, also fixed docstring mismatch), `universe_scan.py` (7d universe).
+- SWITCH (full): `vn30_8l.py` (_liquidity), `power_lens.py` (px CTE), `recommend_lh.py` (live snapshot, also fixed docstring [REDACTED]), `universe_scan.py` (7d universe).
 - HYBRID (latest row→1m, keep 52w-high on ticker): `unified_screener.py` (latest CTE — gates the whole 8L daily chain → rank_8l→daily_alert→bot), `dna_card.py`, `dna_report.py` (live_now).
 - Round 2 (all run-tested exit 0): `quality_tactical_scanner.py` (market snapshot CTE→1m, keep 52w-high 400d on ticker), `whitelist_monitor.py` (additive overlay: append freshest ticker_1m Close for stocks onto the 500d history; VNINDEX stays on ticker), `golive_recommend.py` D1 ICB-8633 panel (fallback-UNION pattern — SAFE for its 15:30 run: adds rows only for dates ticker lacks, no-op if ticker_1m not ready yet).
 - CANNOT de-lag (VNINDEX not in ticker_1m): `golive_recommend.py` overheat gate, `recommend_holistic.py`(+`deploy_v11/`) VNI_OVERHEAT — left on ticker (1-day lag immaterial for slow regime gate). recommend_holistic STOCK snapshot was ALREADY hybrid (UNION ticker+ticker_1m) → no change.
