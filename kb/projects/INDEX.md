@@ -24,7 +24,7 @@
 - 2026-07-12 V2.5 leverage → `v2.5-leverage-nogo.md` — **NO-GO**, giữ DISABLED (edge là IS-artifact)
 - 2026-07-12 LAG-weight (tăng tỷ trọng PEAD) → `lag-weight.md` — ĐÓNG, KHÔNG tăng trần w_LAG
 - 2026-07-12 Momentum-deals (MOM_N/MOM_S) → `momentum-deals.md` — KHÉP KÍN, production LIVE
-- 2026-07-12 Q-sleeve → `q-sleeve.md` — **NO-GO** cả 2 trục
+- 2026-07-12 Q-sleeve → `q-sleeve.md` — **NO-GO** cả 2 trục; ⚠️ 2026-10-09 rerun engine sửa: Q8/Q12 ngang control (hết ý nghĩa), claim breadth sai OOS; QF8 + BULL-ext vẫn NO-GO; sector-cap/fincap45-55 hết ý nghĩa, fincap30 NO-GO, L1b pool chưa chứng minh (DSR<0,95)
 - 2026-07-12 Audit sẵn sàng BCTC Q2/2026 → `bctc-q2-readiness-audit.md` — KHÉP KÍN
 - 2026-07-03 Usage-limit auto-resume → `usage-limit-auto-resume.md` — XONG
 - 2026-07-02 Reliability hardening (AgentOps) → `reliability-hardening.md` — XONG
