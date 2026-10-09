@@ -87,6 +87,15 @@ def _stub_bin(bin_dir: str, tag: str, evidence: str, notify_log: str) -> None:
            "import sys\n"
            f"open({evidence!r}, 'a').write('email:{tag}\\n')\n"
            "sys.exit(0)\n")
+    # Cổng nav-flow (0ba5eb4c, FAIL-H) import 2 module EM RUỘT cùng thư mục với gate và đọc
+    # nav_history/cash-flows THẬT của account. Selfcheck này chỉ đo ĐƯỜNG GHI SỔ ⇒ stub "0 bước
+    # nhảy" để cổng PASS; logic cổng nav-flow có selfcheck riêng (nav_flow_term_selfcheck.py).
+    _write(os.path.join(bin_dir, "account_cash_flows.py"),
+           "NAV_JUMP_BLOCK_PCT = 5.0\n"
+           "def load_flows(account):\n    return []\n"
+           "def unexplained_nav_jumps(rows, flows, end=None):\n    return []\n")
+    _write(os.path.join(bin_dir, "nav_period_returns.py"),
+           "def load_nav_history(account):\n    return []\n")
 
 
 def build_sandbox(worktree_gate_src: str) -> dict:
