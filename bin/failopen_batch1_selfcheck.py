@@ -133,9 +133,32 @@ def _sbv_sandbox(script_src):
     return d, p
 
 
+def _prod_sbv_log_sig():
+    # đúng đường dẫn bản CŨ hardcode (không suy từ MIKE_ROOT — worktree nằm chỗ khác)
+    p = "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"
+    return os.stat(p).st_mtime_ns if os.path.exists(p) else None
+
+
 def t3_sbv_two_sided():
+    before = _prod_sbv_log_sig()
+    _t3_body()
+    ok(_prod_sbv_log_sig() == before, "#3 selfcheck đã GHI data/sbv_verify_log.json PRODUCTION")
+
+
+def _t3_body():
     for ref, expect_block in ((None, True), (OLD_REF, False)):
-        d, p = _sbv_sandbox(src("bin/check_sbv_weekly.sh", ref))
+        # bản MỚI đã retire sang bin/archive/ 2026-10-09 (vẫn giữ nhánh fail-closed); bản CŨ đọc từ git
+        rel = "bin/check_sbv_weekly.sh" if ref else "bin/archive/check_sbv_weekly.sh.retired-20261009"
+        text = src(rel, ref)
+        if ref:
+            # Bản CŨ hardcode WORKDIR production (không đọc SBV_CHECK_WORKDIR) ⇒ chạy nguyên văn là
+            # GHI data/sbv_verify_log.json + chạy macro_healthcheck.py (ghi macro_health.json) +
+            # bus event THẬT — đã xảy ra MỖI ĐÊM qua sweep 04:30 tới 2026-10-09 (arch-review
+            # Winston_20261009_094651). Ép về sandbox; không thay được ⇒ dừng, không chạy.
+            hard = 'WORKDIR="/home/trido/thanhdt/WorkingClaude"'
+            assert text.count(hard) == 1, f"bản CŨ: không thấy đúng 1 dòng {hard} — dừng, KHÔNG chạy"
+            text = text.replace(hard, 'WORKDIR="${SBV_CHECK_WORKDIR:?}"')
+        d, p = _sbv_sandbox(text)
         env = dict(os.environ, SBV_CHECK_WORKDIR=d)
         r = subprocess.run(["bash", p], capture_output=True, text=True, timeout=180, env=env)
         out = r.stdout + r.stderr

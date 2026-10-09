@@ -12,6 +12,17 @@
 # the timestamp — the human ran the script and SBV hasn't changed (known stable).
 
 set -euo pipefail
+# ══ RETIRED 2026-10-09 (user duyệt, job Winston_20261009_094651) ══════════════════════════════
+# URL cũ 404 + UA bị WAF chặn ⇒ fetch hỏng MỌI tuần từ ≥07/08/2026, nhưng script vẫn ghi
+# last_verified=<hôm nay> ("fetch_failed_assumed_unchanged") ⇒ nhãn "đã kiểm" sai ~10 tuần.
+# Thay bằng `sbv_policy_verify.py` trong chuỗi Thứ Hai `refresh_deposit_cctg_weekly.sh` (tách
+# verified_at/attempted_at). Dòng cron `0 8 * * 5` đã gỡ. Giữ file CHỈ làm tư liệu cho
+# failopen_batch1_selfcheck.py #3 (chạy trong sandbox qua SBV_CHECK_WORKDIR). Chạy trên cây thật
+# sẽ GHI ĐÈ data/sbv_verify_log.json bằng định dạng cũ (mất verified_at) ⇒ từ chối.
+if [ -z "${SBV_CHECK_WORKDIR:-}" ]; then
+  echo "[check_sbv_weekly] RETIRED 2026-10-09 — dùng sbv_policy_verify.py (chuỗi Thứ Hai). Không chạy trên cây thật." >&2
+  exit 4
+fi
 # WORKDIR override CHI de selfcheck chay duoc nhanh THAT BAI trong sandbox — neu khong thi
 # cach duy nhat de thu nhanh do la chay that va GHI vao data/sbv_verify_log.json production
 # (da lo xay ra 2026-09-28 01:48 khi Mike smoke-test: last_verified bi day som 3 ngay).
