@@ -14,9 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-08T12:46:15Z] ĐANG DỞ job Taylor_20261008_123443 PFM-nb vòng 2: test+2 sửa xong (wt-pfmnb-1008, CHƯA commit), sc 843x6, mut B/C/K/L killed, mut cũ đang chạy /tmp/pfm4/mut5_py31{0,2}.txt | NEXT: mut xong → commit → arch-review 1 lần → merge/dừng
-- [2026-10-08T13:13:23Z] [2026-10-08] adjfactor PFM non-blockers MERGED 787ddac4 — xoá dòng ĐANG DỞ/DỪNG cũ; wt-pfmnb-1008 + wt-pfm-1008 dọn được. Nợ chữ: comment alert.sh ~57 thêm 'trừ ngoại lệ (a)'.
-- [2026-10-08T15:54:45Z] ĐANG DỞ job Taylor_20261008_155435 repin R3 park0 dep1m: bắt đầu | NEXT: kiểm worktree wt-repin-dep1m-2809 vs main, chạy 2 chân control
 - [2026-10-08T16:12:58Z] ĐANG DỞ job Taylor_20261008_155435 repin park0 dep1m: 4 chân + control xong, REPORT.md viết xong (research/repin_park0_dep1m_20261008) | NEXT: m_p0 xong → điền §1.2, registry .proposed, bus finding repin-r3-park0-dep1m
 - [2026-10-08T16:19:15Z] [repin park0 dep1m 10-08] DONE 555bd103; neo DD giữ −25,2% (park0 đo −23,9%); registry .proposed chờ Mike/user. Rerun còn treo: sàn nhiễu park0, chân không-bắc-cầu park0.
 - [2026-10-08T16:32:32Z] ĐANG DỞ job Taylor_20261008_163222 bal-maxpos-lag-idle: bắt đầu cổng 0 | NEXT: đọc engine MAX_POS_V11 + 2 file động cơ, đếm ứng viên rank13-20 phiên LAG idle
@@ -26,3 +23,6 @@
 - [2026-10-08T18:07:44Z] [rerun nhóm B 10-09] DONE c8e096e7: Q8/Q12 hết ý nghĩa, claim breadth phải sửa (registry .proposed chờ Mike/user); chờ quant-skeptic. Việc tiếp nếu lãi hạ: c30 vs l1b@0,3 prereg mới.
 - [2026-10-09T03:08:10Z] ĐANG DỞ job Taylor_20261009_030802 cash-div first_disclosure_datetime validation (read-only): bắt đầu | NEXT: data_registry corporate_action + query snapshots
 - [2026-10-09T03:16:52Z] [cash-div fd 10-09] Kết luận C (d9361ee4): first_disclosure_datetime không PIT; giữ mốc 2027-08. Registry .proposed Bẫy 5 corporate_action_snapshots chờ Mike duyệt.
+- [2026-10-09T09:34:03Z] ĐANG DỞ job Taylor_20261009_093353 selfcheck-red owner sweep 9 file: bắt đầu | NEXT: chạy lại 9 selfcheck, phân loại
+- [2026-10-09T09:38:42Z] ĐANG DỞ job Taylor_20261009_093353 sweep: custom30 CLOSED; 8 file phân loại xong (atc/basket/cpi/lag_gov/freshness=b, rating8l/capit/cctg=d live CSV) | worktree /home/trido/thanhdt/wt-screds-1009 branch fix/selfcheck-red-sweep-1009 | NEXT: sửa+chạy xanh, merge, close, finding
+- [2026-10-09T09:46:11Z] [selfcheck-red sweep 10-09] 9/9 CLOSED (6a73ef82). Nợ: rating8l --bq BQ2-4 pin số 09-27 (HDG đã lật POWER); nhãn cctg_6m cho dòng 12M.
