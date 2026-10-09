@@ -45,3 +45,4 @@
 - Thứ Hai 12/10 08:05 ICT: kiểm cron SBV/CCTG tuần chạy đúng + finalize nhắc STALE nếu cần.
 - KHÔNG đặt wakeup thăm dò khi không có job nền đang chờ kết quả (user 10-05).
 
+- [2026-10-09T21:02:37Z] weekly-ops-audit 10/10 xong (272b5001 drift selfcheck WC_ROOT, 6250dbc3 index). Theo dõi: custom30_yield_labels_selfcheck đỏ 10 ngày (Taylor, assertion label_asof E); xác nhận weekly investor report 09:00 hôm nay dùng prompt mới; SBV nguồn B Thứ Hai 12/10.
