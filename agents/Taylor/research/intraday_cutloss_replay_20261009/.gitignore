@@ -1,0 +1,7 @@
+cache/
+runs/
+__pycache__/
+*.log
+out/daily_approx_cases.csv
+out/coverage_ledger.csv
+out/*_alt.csv

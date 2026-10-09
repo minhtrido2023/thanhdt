@@ -1,0 +1,17 @@
+ngày,VNI%,mw_scans,mw_lý_do,mw_mã,ca_riêng
+2023-09-25,-3.34,1,5 mã cùng kích hoạt trong 1 lượt quét,"HDG,MBS,PDR,PHR,TNG","CEO@13:45(giá),DPG@14:00(giá),EIB@14:00(giá),MBS@14:30(giá),TNG@14:30(sàn)"
+2023-10-03,-3.22,1,nhiều mã cùng chạm sàn,"DPG,PDR",CEO@13:00(giá)
+2023-10-26,-4.19,0,,,"BMS@09:45(giá),DTC@13:30(giá),DXP@11:15(giá),MBS@11:00(giá),PVB@13:15(giá),PXI@10:45(giá),PXT@09:30(giá),TCI@14:30(sàn),TSB@11:00(giá),VC7@10:00(giá),VIX@11:15(sàn)"
+2024-04-15,-4.7,1,3 mã cùng kích hoạt trong 1 lượt quét,"NTL,PVB,TCH",
+2024-08-05,-3.92,0,,,"NHA@13:30(sàn),VOS@14:00(sàn)"
+2025-04-03,-6.68,12,10 mã cùng kích hoạt trong 1 lượt quét; 3 mã cùng kích hoạt trong 1 lượt quét; 4 mã cùng kích hoạt trong 1 lượt quét; 7 mã cùng kích hoạt trong 1 lượt quét; 9 mã cùng kích hoạt trong 1 lượt quét; nhiều mã cùng chạm sàn,"BFC,CTI,EIB,HAX,HHV,IJC,NTP,ST8,VGC,VHM,VIP","PHR@09:30(sàn),VGC@10:15(sàn)"
+2025-04-08,-6.43,16,"11 mã cùng kích hoạt trong 1 lượt quét; 12 mã cùng kích hoạt trong 1 lượt quét; 13 mã cùng kích hoạt trong 1 lượt quét; 14 mã cùng kích hoạt trong 1 lượt quét; 15 mã cùng kích hoạt trong 1 lượt quét; 16 mã cùng kích hoạt trong 1 lượt quét; 8 mã cùng kích hoạt trong 1 lượt quét; thiếu VNINDEX (idio = ret, không tách được riêng/chung)","BFC,CTI,CTR,DGW,EIB,FMC,HHV,IJC,NTP,PHR,SCS,ST8,TNG,VGC,VHM,VIP",
+2025-04-09,-3.4,16,"7 mã cùng kích hoạt trong 1 lượt quét; 8 mã cùng kích hoạt trong 1 lượt quét; 9 mã cùng kích hoạt trong 1 lượt quét; thiếu VNINDEX (idio = ret, không tách được riêng/chung)","BFC,CTI,CTR,DGW,EIB,FMC,IJC,NTP,PHR,SCS,ST8,TNG,VGC",
+2025-07-29,-4.11,1,5 mã cùng kích hoạt trong 1 lượt quét,"BVS,CTS,GEX,PSI,SSI","DGW@13:45(giá),EIB@13:30(giá),TCH@13:15(giá)"
+2025-10-20,-5.47,2,14 mã cùng kích hoạt trong 1 lượt quét; 3 mã cùng kích hoạt trong 1 lượt quét,"EIB,GEE,GEX,HDB,HUT,KSB,MBB,MBS,PET,STB,VGC,VGS,VIX,VPB",
+2025-11-07,-2.65,0,,,"STB@14:30(giá),VHM@14:00(giá)"
+2025-12-12,-3.06,0,,,VHM@14:30(sàn)
+2026-03-09,-6.51,16,"31 mã cùng kích hoạt trong 1 lượt quét; 32 mã cùng kích hoạt trong 1 lượt quét; 35 mã cùng kích hoạt trong 1 lượt quét; 36 mã cùng kích hoạt trong 1 lượt quét; 37 mã cùng kích hoạt trong 1 lượt quét; 38 mã cùng kích hoạt trong 1 lượt quét; 39 mã cùng kích hoạt trong 1 lượt quét; 40 mã cùng kích hoạt trong 1 lượt quét; 41 mã cùng kích hoạt trong 1 lượt quét; thiếu VNINDEX (idio = ret, không tách được riêng/chung)","ACB,ANV,BID,BVB,BVH,CMG,CTG,CTS,DBC,DCM,EVF,HAH,HCM,HDB,HHS,HHV,IJC,KBC,LAS,MBB,MSB,MSN,MWG,NAF,ORS,PC1,POW,PTC,PVS,PVT,PXL,SHB,SMA,SSI,TCB,TCX,TLD,TPB,VCB,VGC,VHC,VIB,VIX,VPB",
+2026-03-20,-3.02,0,,,"KBC@14:00(giá),PVD@13:45(giá),PVT@13:45(giá)"
+2026-03-23,-3.44,1,nhiều mã cùng chạm sàn,"ANV,HAH",MWG@14:00(sàn)
+2026-07-22,-3.58,0,,,VHM@14:30(sàn)

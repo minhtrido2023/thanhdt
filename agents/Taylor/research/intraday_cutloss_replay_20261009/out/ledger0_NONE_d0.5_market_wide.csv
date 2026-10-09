@@ -1,0 +1,13 @@
+ts,day,reason,n,tickers,new,vni_ret
+2023-09-25T14:15:00,2023-09-25,5 mã cùng kích hoạt trong 1 lượt quét,5,"HDG,MBS,PDR,PHR,TNG","HDG,MBS,PDR,PHR,TNG",-0.022815472947487536
+2023-10-03T14:30:00,2023-10-03,nhiều mã cùng chạm sàn,2,"DPG,PDR","DPG,PDR",-0.02943085912140231
+2023-10-31T14:00:00,2023-10-31,3 mã cùng kích hoạt trong 1 lượt quét,3,"DHA,PXI,SDD","DHA,PXI,SDD",-0.00410590943975464
+2023-10-31T14:15:00,2023-10-31,4 mã cùng kích hoạt trong 1 lượt quét,4,"CTS,DHA,MBS,PXI","CTS,MBS",-0.012797390636991701
+2023-10-31T14:30:00,2023-10-31,5 mã cùng kích hoạt trong 1 lượt quét,5,"CTS,DHA,MBS,PVB,PXI",PVB,-0.014716039907904932
+2023-12-18T09:15:00,2023-12-18,"thiếu VNINDEX (idio = ret, không tách được riêng/chung)",1,MCH,MCH,
+2024-04-15T14:30:00,2024-04-15,3 mã cùng kích hoạt trong 1 lượt quét,3,"NTL,PVB,TCH","NTL,PVB,TCH",-0.04193952686824376
+2024-05-03T13:15:00,2024-05-03,"thiếu VNINDEX (idio = ret, không tách được riêng/chung)",1,TCO,TCO,
+2024-05-03T13:30:00,2024-05-03,"thiếu VNINDEX (idio = ret, không tách được riêng/chung)",1,TCO,,
+2024-05-03T13:45:00,2024-05-03,"thiếu VNINDEX (idio = ret, không tách được riêng/chung)",1,TCO,,
+2024-05-03T14:15:00,2024-05-03,"thiếu VNINDEX (idio = ret, không tách được riêng/chung)",1,TCO,,
+2024-05-20T09:15:00,2024-05-20,"thiếu VNINDEX (idio = ret, không tách được riêng/chung)",2,"MBS,VCS","MBS,VCS",
