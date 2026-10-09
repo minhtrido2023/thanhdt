@@ -326,3 +326,67 @@ regression thật lẫn vào nhiễu, không ai phân biệt nổi.
 **Về `test_*.py` ở repo root:** 165 file, thực chất là script backtest/R&D được đặt tên theo lịch
 sử, **154/165 không đụng từ 2026-06-21**. Không archive chúng (là artifact nghiên cứu, đúng §10
 mục 4) nhưng cũng đừng bao giờ gộp vào "chạy bộ test".
+
+
+## Dọn 2026-10-09 (instructions-dedup)
+
+> Nguyên văn các khối narrative chuyển từ `kb/coding_guidelines.md` (job `Wags_20261009_153812`, user duyệt
+> 09/10, chế độ A: di chuyển, không viết lại). Không auto-load.
+> Một số khối là MẢNH câu tách từ mục cùng số ở file chính — đọc kèm mục đó, không đọc riêng.
+
+### Header — Enforcement policy
+
+it on. Live mechanism, verified by a real `git commit`: **`bin/shellcheck_gate.sh`** (pre-commit
+hook, ShellCheck — caught all 4 real quoting incidents 2026-07-17→08-01, see §15 +
+`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). One-time setup per repo (hook
+
+### §5b
+
+- **Never infer "this is a test" from an existing field** (`account` label, `plan_date` sentinel
+  2099-*, `strategy="selfcheck"`): all 3 were inventoried and all 3 are inconsistent across
+  selfcheck files (`capit_lever_selfcheck.py` deliberately uses the REAL labels;
+  `paper_main_window_selfcheck.py` uses a real `plan_date=TODAY`). The gate must be an EXPLICIT
+  env var.
+
+### §6b
+
+tự tính lại (chốt 2026-08-18; weekly/monthly trước đó chỉ có DT5G committed state + P/E percentile
+2-năm TỰ TÍNH, thiếu cả 2 mảnh sau đã có sẵn trong daily EOD từ 07-30/07-31):**
+
+- Daily EOD đã đúng từ 07-30/07-31, KHÔNG cần sửa — chỉ weekly/monthly (hiện do Taylor soạn tay
+  qua `check_report_cadence.sh`/dispatch) thiếu.
+
+### §8c
+
+(user duyệt 2026-09-28, B0-B6).** Registry rule 2 ("CSV LÀ ARTIFACT ĐÔNG CỨNG") có từ 2026-06-19
+và chưa bao giờ cưỡng chế được; hệ quả đo thật: `data/*.csv` nằm trong `.gitignore` ⇒ 822 file /
+2,1GB ngoài version control, **tên canonical ghi đè được** (ca thật: cùng tên
+`v23_golive_audit_2014_now.csv`, md5 `84295bee` của user vs `65e7bb04` trên đĩa = hai hệ khác
+nhau), và **2/28 md5 registry trích dẫn đã mất dấu vĩnh viễn**. Nay:
+
+### §26
+
+checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng 1
+triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
+backstop auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic SAI cách
+(match tuyệt đối trong khi producer luôn thêm hậu tố tự do vào topic) → "không tìm thấy" bị lẫn vào
+cùng nhánh code với "tìm thấy và cần sửa", sinh `NEEDS_CHANGES` giả mỗi ngày. Case thật + cách phân
+biệt A/B/review-thật: xem skill. Bug B cụ thể trong `bin/wags_autofix.sh` (`has-event ...
+"finding:wags-fix: $LABEL"` khớp tuyệt đối, trong khi Wags luôn ghi topic có hậu tố tự do) — **ĐÃ
+VÁ 2026-08-11**: `mike_json.py has-event-prefix` (subcommand mới, `has-event` giữ nguyên semantics
+tuyệt đối cho 3 caller cũ) + tách `INCONCLUSIVE` khỏi `NEEDS_CHANGES` thành 2 question khác nhau +
+`bin/wags_bus_verdict.py` lấy verdict từ artifact bus thay vì stdout. Luật cho người viết checker:
+
+### §28
+
+**Vì sao thành luật:** tái diễn 4 ngày liên tiếp (2026-08-10→08-13) dưới ≥6 hình dạng khác nhau,
+đều cùng gốc — vá từng call-site cụ thể (đã làm, có test, có commit) chặn đúng ca đó nhưng không
+chặn được ca tiếp theo ở call-site KHÁC vì không có quy tắc chung.
+
+### §29
+
+**Vì sao thành luật riêng dù §28 đã nói tinh thần này:** §28 viết 2026-08-13 và **vẫn lọt 3
+lần sau đó** ở 3 vị trí khác nhau trong ~1 tuần (08-21 `ops_health_check.sh` §5b, 08-25
+check#9, 08-28 `append_event.sh` guard JSON) — mỗi lần thông điệp đoán mò được checker/dispatch
+chép nguyên văn đi tiếp, dẫn người xử lý sai hướng ngay dòng đầu. Escalate bus question
+`retro-pattern-recurring-checker-hardcode-diagnosis-3` (retro-2026-08-28 Pattern A).
