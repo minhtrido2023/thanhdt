@@ -54,7 +54,7 @@ def sub(s, a, b): return s[(s.index >= a) & (s.index <= b)]
 def met(s):
     r = daily_logret(s); yrs = (s.index[-1] - s.index[0]).days / 365.25
     cagr = (s.iloc[-1] / s.iloc[0]) ** (1 / yrs) - 1; dd = (s / s.cummax() - 1).min()
-    return dict(cagr=cagr * 100, sharpe=r.mean() / r.std(ddof=1) * np.sqrt(252), maxdd=dd * 100,
+    return dict(cagr=cagr * 100, sharpe=r.mean() / r.std(ddof=1) * np.sqrt(len(r) / yrs), maxdd=dd * 100,
                 calmar=cagr / abs(dd), nav_B=s.iloc[-1] / 1e9)
 
 
