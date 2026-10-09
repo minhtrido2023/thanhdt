@@ -1,0 +1,17 @@
+n,ticker,ex,vendor_fd,earliest_public_evidence,kind,verdict
+6,FPT,2017-05-25,2017-03-13,2017-04-24 (notice; snippet, UNVERIFIED),notice,fd_EARLY_semantic(AGM-level)
+7,SAB,2018-10-16,2018-07-12,2018-08-22 (BOD per article),bod,fd_EARLY_unexplained
+8,GMD,2018-03-09,2018-02-28,2018-02-26 (en.vietstock article),article,fd_LATE_2d
+9,FPT,2019-08-15,2019-05-08,2019-08-01 (BOD; snippet UNVERIFIED),bod,fd_EARLY_semantic
+10,BMP,2019-12-04,2019-11-18 17:34,2019-11-19 16:32 (article),article,match
+12,PLX,2020-09-03,2020-08-28,2020-08-20 (article states rd),article,fd_LATE_8d
+13,VNM,2021-06-07,2021-05-24,2021-05-21 13:39 (cafef),article,fd_LATE_3d
+14,FPT,2021-08-16,2021-08-06 09:25,2021-08-06 11:24 (cafef),article,match
+15,BMP,2022-01-14,2021-12-24,2021-12-24 (article),article,match
+16,PNJ,2022-03-07,2022-02-25,2022-02-17 21:16 (vneconomy),article,fd_LATE_8d
+17,PNJ,2023-06-09,2023-04-27,2023-05-30 (BOD),bod,fd_EARLY_semantic(~1m)
+18,DPM,2023-02-16,2022-12-27,late Dec 2022 EGM (day not shown),egm,match_plausible
+19,FPT,2024-06-12,2024-05-20 15:20,2024-05-20 15:58 (cafef),article,match
+20,SAB,2024-07-05,2024-06-20,2024-06-18 09:15 (vneconomy),article,fd_LATE_2d
+21,PNJ,2025-09-26,2025-09-18 09:39,2025-09-18 12:14 (cafef),article,match
+22,TCB,2025-09-30,2025-09-16 14:18,2025-09-15 BOD / 09-16 article,bod,match

@@ -1,0 +1,135 @@
+---
+kind: bigquery-table
+status: CANONICAL
+source: lithe-record-440915-m9.tav2_mike.corporate_action_snapshots
+group: price-volume
+scope: point-in-time provenance cho tav2_bq.corporate_action — "bảng nguồn trông như thế nào vào ngày D"
+writer: mike/bin/snapshot_corp_action_daily.py (Taylor) — cron ĐỀ XUẤT 23:50 ICT hằng ngày, CHƯA CÀI tính đến 2026-08-17
+first_snapshot: 2026-08-17
+---
+
+# `tav2_mike.corporate_action_snapshots`
+
+**Status: CANONICAL** — nguồn **duy nhất** trả lời được "bảng `corporate_action` trông như thế nào
+vào ngày D". Bảng nguồn không trả lời được câu đó (bị upsert in-place).
+
+## Là gì
+
+Append-only, mỗi ngày ghi TOÀN BỘ `tav2_bq.corporate_action` kèm `snapshot_date` (ICT) và
+`row_sha256`. 37 cột = 35 cột nguồn nguyên vẹn (đúng thứ tự) + 2 cột meta.
+Partition `snapshot_date` (DAY), cluster `ticker, id`, **không có partition expiration** (cố ý).
+
+| Cột meta | Nghĩa |
+|---|---|
+| `snapshot_date` DATE | Ngày **ICT quan sát** trạng thái bảng nguồn — KHÔNG phải ngày sự kiện, KHÔNG phải ngày vendor ghi |
+| `row_sha256` STRING | `TO_HEX(SHA256(TO_JSON_STRING(STRUCT(<34 cột nguồn TRỪ HASH_EXCLUDE = ingested_at, source_news_id, first_disclosure_datetime>))))` (từ 2026-09-15, xem Bẫy 5) — hash đổi ⟺ nội dung đổi |
+
+## Vì sao tồn tại
+
+`tav2_bq.corporate_action` là snapshot trạng thái, không phải event-log: khi sự kiện lật
+`announced` → `executed`, vendor **ghi đè `public_date` tại chỗ** ⇒ ngày công bố ý định mất vĩnh
+viễn. Đo thật 2026-08-17: batch ingest gần nhất rewrite 1.331 dòng, trong đó **1.185 dòng (89%) có
+`public_date` cũ hơn 2026-08-01** (cũ nhất 2024-09-13) ⇒ vendor sửa dòng LỊCH SỬ mỗi lần chạy.
+Đây là lý do Sprint 1 (`corp_action_program_20260815`) CẤM announcement study.
+
+## Bẫy (1) — `snapshot_date` KHÔNG phải "ngày có sự kiện". Vendor refresh KHÔNG đều.
+
+Đo thật: `corporate_action` chỉ có ingest ở 08-12 (34.841 dòng), 08-13 (4), 08-15 (1.331) — khoảng
+trống 3-5 ngày là bình thường. ⇒ **"hash không đổi giữa 2 snapshot_date" KHÔNG có nghĩa "không có
+sự kiện thật"** — rất có thể vendor đơn giản không chạy. Muốn phân biệt: đọc `MAX(ingested_at)`
+của chính snapshot đó, đừng suy từ lịch.
+
+## Bẫy (2) — CENSORING BÊN TRÁI: sự kiện treo từ trước 2026-08-17 không có vintage đăng ký thật
+
+Snapshot đầu tiên bắt được 869 dòng đang ở `event_status='announced'`. Với những dòng này,
+`MIN(snapshot_date)` = 2026-08-17 KHÔNG phải ngày công bố — chỉ là ngày ta bắt đầu chụp. Dùng chúng
+trong event study sẽ trộn sự kiện tồn đọng vào mẫu. **Lọc bỏ mọi dòng có
+`first_seen = MIN(snapshot_date) toàn bảng`** trước khi đo bất cứ thứ gì liên quan tới thời điểm
+công bố.
+
+## Bẫy (3) — `ingested_at` CỐ Ý không nằm trong `row_sha256`
+
+Nó là dấu vết pipeline, không phải nội dung sự kiện. Nếu đưa vào hash, một lần vendor rewrite dòng
+với nội dung y hệt sẽ báo **amendment giả**. Cột vẫn được LƯU nguyên trong bảng ⇒ không mất thông
+tin, chỉ đổi vai trò từ "tín hiệu" sang "metadata". Ai tự viết lại công thức hash phải giữ đúng
+điều này, nếu không mọi so sánh xuyên vintage sẽ lệch.
+
+## Bẫy (4) — schema drift làm DỪNG pipeline, cố ý, không được "sửa" bằng auto-evolve
+
+Thêm/bớt cột nguồn ⇒ đổi tập cột vào hash ⇒ ở snapshot kế tiếp *mọi dòng* trông như vừa bị amend.
+Script fail-closed (`RuntimeError: SCHEMA LECH`) và cron sẽ đỏ mỗi ngày cho tới khi có người xử lý.
+Xử lý đúng = thêm cột vào bảng snapshot **và ghi vintage đổi hash vào file này**, để phân tích sau
+biết chỗ đứt.
+
+## Bẫy (5) — schema drift 2026-09-14: 2 cột mới, vintage 09-14 MẤT, hash giờ loại 3 cột
+Vendor thêm `source_news_id` (STRING) + `first_disclosure_datetime` (TIMESTAMP) vào
+`tav2_bq.corporate_action` (vị trí 34-35, trước `ingested_at`) ⇒ run 2026-09-14 fail-closed đúng
+thiết kế Bẫy (4) ⇒ **vintage 2026-09-14 của CẢ 2 bảng (corporate_action + insider_transaction) MẤT
+VĨNH VIỄN** (nguồn upsert in-place; KHÔNG backfill `--date 2026-09-14` — sẽ gắn nhãn trạng thái sau
+thành 09-14). Xử lý A′ 2026-09-15 (user duyệt, mike `dd77553f`, arch-reviewer APPROVED):
+- `ALTER TABLE ... ADD COLUMN` 2 cột NULLABLE (bảng 37→39 cột, cột mới nằm CUỐI bảng snapshot).
+  ⇒ **vintage ≤ 2026-09-13 có 2 cột này = NULL** (không phải "vendor không có giá trị").
+- `schema_problems` so theo TÊN→KIỂU, bỏ qua thứ tự (vẫn báo thiếu/thừa/lệch kiểu/thiếu meta).
+- `HASH_EXCLUDE` = `ingested_at`, `source_news_id`, `first_disclosure_datetime` ⇒ `row_sha256` vẫn
+  phủ đúng 34 cột cũ, SO ĐƯỢC LIÊN TỤC qua mốc (đo: 09-13→09-15 chỉ 46 dòng lệch hash = sửa nội dung
+  thật, + 16 id mới). Revision của 2 cột mới phải dò bằng `LAG()` trên CHÍNH cột đó, không qua hash.
+- Mỗi bảng chạy cô lập; lỗi post Discord `architecture` kèm exception thật.
+- `first_disclosure_datetime` — **KHÔNG dùng làm ngày công bố PIT** (thẩm định 2026-10-09, job
+  `Taylor_20261009_030802`, `agents/Taylor/research/cash_div_first_disclosure_validation_20261009/REPORT.md`):
+  (a) KHÔNG phải MIN — bị ghi đè về phía SAU khi vendor đổi `source_news_id` (ADP/DRL/DHC/MWG DIV ~+90 ngày, NTH lật
+  3 lần); (b) TZ trộn và tự trôi: dòng bị rewrite bị dời −7h (ICT-naive → UTC thật), không theo batch cố định;
+  (c) flap NULL ở 5/25 vintage (130–670 dòng) rồi có lại — pin vintage, NULL ≠ "không có"; (d) sự kiện mới: vendor
+  thấy dòng TRƯỚC fd ở 13–22%, fd có sẵn lúc first-sight chỉ 26/55 (DGC 09-2026: thấy 09-06 pd 09-03, fd 09-08);
+  (e) đối chiếu web 16 sự kiện 2015–25: khớp ±1 phiên 7, muộn 2–8 ngày 5, sớm hàng tuần–tháng (ngày ĐHĐCĐ) 4;
+  (f) phủ DIV 0% 2014, 22% 2015, lỗ 2022 (84%), mã đã hủy niêm yết phủ thấp hơn 3–21pp (survivorship).
+  Ngày công bố PIT cho sự kiện mới = `MIN(first_seen snapshot, public_date tại first_seen)`; mốc mở lại
+  announcement study giữ **≥2027-08**.
+- Cron chạy thật **06:50 ICT** (`50 23` giờ UTC), không phải 23:50 ICT.
+
+## Truy vấn tiêu chuẩn
+
+```sql
+-- Dòng bị vendor sửa nội dung, kèm public_date trước/sau
+WITH v AS (
+  SELECT id, ticker, snapshot_date, row_sha256, public_date, event_status,
+         LAG(row_sha256)  OVER w AS prev_sha,
+         LAG(public_date) OVER w AS prev_public_date,
+         LAG(event_status) OVER w AS prev_status
+  FROM `lithe-record-440915-m9.tav2_mike.corporate_action_snapshots`
+  WINDOW w AS (PARTITION BY id ORDER BY snapshot_date)
+)
+SELECT * FROM v WHERE prev_sha IS NOT NULL AND row_sha256 != prev_sha;
+
+-- "Bảng trông như thế nào ngày D" — một WHERE, không cần window function
+SELECT * FROM `...corporate_action_snapshots` WHERE snapshot_date = DATE '2026-08-17';
+```
+
+## Chi phí
+
+14,6 MB/ngày logical ⇒ ~5,33 GB/năm ⇒ **~$0,64/năm** storage. Quét mỗi lần ghi ~$0,00009. Quét cả
+năm cho amendment report ~$0,03. Không phải yếu tố cần tối ưu — đã cân nhắc và BỎ phương án lưu
+delta (tiết kiệm 99% storage nhưng làm mọi truy vấn "trạng thái ngày D" phức tạp hơn).
+
+## Vì sao ở `tav2_mike` chứ không phải `tav2_bq`
+
+`tav2_bq` là dataset của bq_admin và **đã có tiền lệ WRITE_TRUNCATE + rebuild xoá lịch sử**
+([`ticker_prune.md`](ticker_prune.md) §2026-07-29: 58 mã biến mất khỏi TOÀN BỘ lịch sử). Bảng này
+**không tái tạo được** — mất một lần là mất toàn bộ tích luỹ. `tav2_mike` được dựng chính xác để
+nằm ngoài tầm truncate đó (xem [`universe_pit.md`](universe_pit.md)). Đổi được bằng env
+`SNAPSHOT_DATASET`, nhưng cần user/Mike quyết.
+
+## Trạng thái
+
+- Vintage đầu tiên: **2026-08-17**, 36.176 dòng, 36.176 hash phân biệt, 0 NULL. Chạy tay, verify
+  độc lập bằng query riêng (không đọc self-report của script).
+- Cron **CHƯA CÀI** (đề xuất `50 23 * * *` ICT, cần user/Mike duyệt — §11 coding_guidelines).
+- Selfcheck: `mike/bin/snapshot_corp_action_selfcheck.py`, **41/41 PASS** 2026-08-17.
+- Thiết kế đầy đủ + hạn chế + runway mở lại announcement study:
+  `mike/agents/Taylor/research/corp_action_snapshot_pipeline_design_20260817.md`.
+
+## Liên quan
+[`corporate_action_bq.md`](corporate_action_bq.md) (bảng nguồn, status TRAP) ·
+[`../fundamentals/insider_transaction_snapshots.md`](../fundamentals/insider_transaction_snapshots.md)
+(bảng anh em, cùng script) · [`universe_pit.md`](universe_pit.md) (cùng dataset `tav2_mike`)
+
+↩ [Về index nhóm](index.md)
