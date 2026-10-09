@@ -535,6 +535,7 @@ NAV/VNINDEX lệch mốc index=100).*
 
 > Nguyên văn các khối chuyển từ `kb/coding_guidelines.md` (job `Wags_20261009_153812`, user duyệt 09/10,
 > chế độ A: di chuyển, không viết lại). Không auto-load.
+> Một số khối là MẢNH câu tách từ mục cùng số ở file chính — đọc kèm mục đó, không đọc riêng.
 
 ### §8c
 
@@ -591,7 +592,7 @@ arch-review vòng 1 phát hiện no-op trên chính file gây sự cố: revert 
 gốc vẫn KHÔNG bị bắt vì marker khác trong cùng scope còn sống; đã sửa thành per-call trước khi
 commit. *→ docstring đầu `bin/tz_anchor_gate.py` (RULE 2).*
 
-### §29
+### §29 (mảnh dọn từ mục 29 của `coding_guidelines.md`, KHÁC "## 29." cron_health_check ở trên)
 
 **Nửa CƠ HỌC đã tự động hoá — `bin/diagnosis_evidence_gate.py`** (pre-commit, `files:
 ^(bin|hooks)/.*\.sh$`): chặn cứng dạng thứ nhất (`2>/dev/null` + `|| die "…"`). Đo thật trước

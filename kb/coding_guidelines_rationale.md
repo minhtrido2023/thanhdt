@@ -332,6 +332,7 @@ mục 4) nhưng cũng đừng bao giờ gộp vào "chạy bộ test".
 
 > Nguyên văn các khối narrative chuyển từ `kb/coding_guidelines.md` (job `Wags_20261009_153812`, user duyệt
 > 09/10, chế độ A: di chuyển, không viết lại). Không auto-load.
+> Một số khối là MẢNH câu tách từ mục cùng số ở file chính — đọc kèm mục đó, không đọc riêng.
 
 ### Header — Enforcement policy
 

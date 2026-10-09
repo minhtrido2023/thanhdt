@@ -14,7 +14,7 @@ ROOT = `/home/trido/thanhdt/WorkingClaude/mike`. Mọi đường dẫn dưới �
 | Tạo / thu agent con | Thêm hoặc gỡ một agent con |
 | Giám sát sức khỏe fleet | Debug agent DOWN/ZOMBIE, OAuth logout |
 | Context theo vai trò (role-scoped) | Thêm/đổi vai trò agent, hoặc chọn file role-scoped để ghi fact mới |
-| Dọn instructions 2026-10-09 (lịch sử §8 auto-wake, bối cảnh fundamental-skeptic, routing 2-tier cũ, srcwalk cũ, parallel cũ) | Cần hiểu VÌ SAO một luật tồn tại / nguyên văn khối đã gộp |
+| Dọn instructions 2026-10-09 (lịch sử §8 auto-wake, đoạn gốc mục 6b, dòng Discord-pattern, bối cảnh fundamental-skeptic, routing 2-tier cũ, srcwalk cũ, parallel cũ) | Cần hiểu VÌ SAO một luật tồn tại / nguyên văn khối đã gộp |
 
 ⚠️ Con trỏ này CỐ Ý không dùng `@`. `@`-import là đệ quy — xoá sạch tác dụng tách.
 
@@ -78,7 +78,7 @@ attempt vẫn tạch → queue `bus/pending_resumes/` (kind=`max_turns`, resume 
 model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng `DISPATCH_MAX_TURNS_RESUMES` (mặc
 định 2) — quá trần thì dừng, báo cần người xem lại. Cùng đường ống `resume_pending.py`/exit-code-5
 như usage-limit, nay giữ nguyên model/effort/max-turns qua mọi lần resume. Chi tiết:
-`kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md`.
+`kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md`. Đoạn gốc đầy đủ: `MIKE_ext.md` § Dọn instructions 2026-10-09 → Quy chuẩn mục 6b.
 
 **7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** Tự kiểm
 `usage_watch.py` thấy ≥~85% giữa task dài chưa xong: chủ động báo TRƯỚC cho user, và tự đề xuất
@@ -250,6 +250,8 @@ Quy tắc CỨNG:
 5. Progress phải đi ĐÚNG topic `$DISCORD_THREAD_ID` (khớp "Kỷ luật topic Discord" phía trên) và mọi nhận
    định trạng thái phải có bằng chứng cùng lượt (`jobs.sh status`, file/log/artifact) — không báo suy đoán.
 
+Dòng "Pattern học từ Claude trên Discord": `MIKE_ext.md` § Dọn instructions 2026-10-09 → §8 auto-wake (cuối khối).
+
 
 ## Chọn agent nào cho việc gì
 **1 lớp duy nhất:** *companion daemon* (persistent, systemd) chỉ còn **Mike**. **Mọi agent khác đều
@@ -278,6 +280,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 > `agents/<id>/` giữ để audit. Bật lại 1 agent làm daemon (hiếm khi cần):
 > `systemctl --user enable --now mike@<id>`. Realtime risk monitor là **`risk_monitor.py`
 > (deterministic)**, không phải daemon LLM — đó mới là gate giám sát liên tục khi go-live.
+> Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
 
 **Khi nào dùng native agent:**
 - Task không cần working memory tích lũy của agent đó
@@ -290,11 +293,9 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 - KHÔNG cần daemon để làm việc này — `dispatch.sh` tự inject KB + working memory vào mỗi phiên
   headless mới, độc lập với bất kỳ daemon nào
 
-**Bật lại 1 agent làm daemon** (hiếm khi cần, ví dụ user muốn tự mở session trực tiếp không qua
-Mike): `systemctl --user enable --now mike@<id>`. Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
-
 Native agent definitions: `~/.claude/agents/` (bq-analyst, **data-ops**, corp-scanner,
-**risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic).
+**risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic, fundamental-skeptic, macro-strategist,
+arch-reviewer, code-reviewer, memo-optimizer).
 Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
 
 Lịch sử gỡ daemon + bảng 2-tier cũ (nguyên văn): `MIKE_ext.md` § Dọn instructions 2026-10-09 → routing 2-tier.

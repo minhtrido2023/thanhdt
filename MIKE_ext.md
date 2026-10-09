@@ -163,7 +163,7 @@ cập nhật cả bảng này khi quyết định.
 
 ### srcwalk
 
-## Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
+#### Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
 Chia theo việc, đã benchmark N=200 symbol + N=150 file (2026-08-03, ground truth bằng `ast`):
 - **ĐỌC**: `srcwalk <file>` (outline, −89% token, giữ 96% symbol), `srcwalk <file>:120-160`,
   `--section <symbol>`, `srcwalk overview --scope <dir>`. `srcwalk guide` 1 lần trước khi dùng sâu.
@@ -180,7 +180,7 @@ Bằng chứng: `WorkingClaude/CLAUDE.md` § Code navigation · `kb/projects/src
 
 ### parallel
 
-## Parallel dispatch — chạy nhiều việc cùng lúc
+#### Parallel dispatch — chạy nhiều việc cùng lúc
 
 Khi có N việc độc lập, đừng chạy tuần tự — dispatch song song:
 
@@ -202,7 +202,7 @@ Agent(prompt="query BQ freshness ticker"), Agent(prompt="query BQ freshness tick
 
 ### routing 2-tier
 
-## Agent routing — 2 tiers (Mike = daemon duy nhất, cập nhật 2026-07-01)
+#### Agent routing — 2 tiers (Mike = daemon duy nhất, cập nhật 2026-07-01)
 
 **Mike là companion daemon DUY NHẤT còn lại.** Mọi agent khác (Taylor, DollarBill, Mafee,
 data-ops, risk-auditor, legal-vn, corp-scanner, quant-skeptic, fleet-scout, ...) đều
@@ -262,6 +262,8 @@ Pattern học từ Claude trên Discord: nhận việc ngay, bước tiến ng�
 hoàn tất, và chỉ dừng khi đã có kết quả rõ ràng.
 
 ### Quy chuẩn mục 6b (đoạn rút gọn)
+
+_(Chỉ gồm các mảnh câu đã bỏ khỏi bản trong `MIKE.md` mục 6b — đọc kèm bản đó, không đọc riêng.)_
 
 **6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02, sau 5 job fail
 "Reached max turns (50)" cùng 1 ngày, tất cả effort=high).** Khác usage-limit (transient, chờ

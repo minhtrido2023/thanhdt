@@ -126,7 +126,7 @@ from 6 sites (`GHOST_ORDER_DETECTED`, `LEVER_PACKAGE_UNAUTHORIZED`, `dcf-rich-fi
   `Executor` is constructed: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")` — the ONLY
   prevention against a 5th recurrence.
 - **Never infer "this is a test" from an existing field** (`account` label, `plan_date` sentinel 2099-*,
-  `strategy="selfcheck"`) — the gate must be an EXPLICIT env var (inventory of the inconsistencies: rationale § Dọn 2026-10-09).
+  `strategy="selfcheck"`) — the gate must be an EXPLICIT env var (inventory of the inconsistencies: rationale § Dọn 2026-10-09 → §5b).
 - **`PYTEST_CURRENT_TEST` does NOT cover `test_trading_bot.py`** (runs as a script, no `def test_*`).
 
 *→ rationale §5b.*
@@ -227,7 +227,7 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
   line number — refs drift as entries get inserted.
 
 **§8c. Số pin phải có ARTIFACT SỐNG trong kho bất biến — nay là CƠ CHẾ, không còn là văn xuôi
-(user duyệt 2026-09-28, B0-B6).** Nay (số đo thật + ca md5 trùng tên: rationale § Dọn 2026-10-09):
+(user duyệt 2026-09-28, B0-B6).** Nay (số đo thật + ca md5 trùng tên: rationale § Dọn 2026-10-09 → §8c):
 - **Kho** `data/pinned_ledgers/` (trong git) — `bin/pin_ledger.py add` ghi-MỘT-LẦN khoá bằng md5;
   md5 trùng ⇒ rc=2, không có `--force`. Manifest `PINS.jsonl` append-only.
 - **Pin phải khai chân CONTROL** (`--control-md5` / `--no-control "<lý do>"`): re-pin mà không
@@ -310,10 +310,26 @@ nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn
 
 Shipped alongside: a `TZ=Asia/Ho_Chi_Minh` crontab export (closes the ambient-env gap).
 
-**Cưỡng chế cơ học từ 2026-08-30 (user duyệt): cổng `bin/tz_anchor_gate.py` chặn ở pre-commit (cả 2 repo).**
-RULE 2 (2026-09-05, user duyệt): chặn gọi hàm `tdays` trừ khi chính lệnh gọi có `vn_holidays=`. Lối thoát 1 lần:
-`MIKE_TZ_GATE=warn`. Chi tiết (AST, ratchet `kb/tz_anchor_baseline.json`, shim, selfcheck, py3.10 vs 3.12,
-biến sandbox): `kb/coding_guidelines_ext.md` § Dọn 2026-10-09 → §16.
+**Cưỡng chế cơ học từ 2026-08-30 (user duyệt) — `bin/tz_anchor_gate.py`, pre-commit ở CẢ 2 repo**
+(`mike/.pre-commit-config.yaml` + `/home/trido/thanhdt/.pre-commit-config.yaml`).
+Phát hiện bằng **AST**, **ratchet per-file** so với
+`kb/tz_anchor_baseline.json` (kiểm kê ngày bật: **157 vi phạm / 87 file**) — nợ cũ không bắt sửa
+ngay, chỉ không được TĂNG. Cho qua: `datetime.now(_ICT)`, `datetime.now(ZoneInfo(...))`,
+`datetime.now(timezone.utc)` (bước 1 của ICT-anchor). CHƯA phủ: `pd.Timestamp.now()`,
+`date` trong bash, `datetime.fromtimestamp()`, và file .py NGOÀI `WorkingClaude/` (20 worktree
+của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba lối thoát, hệ quả KHÁC nhau:
+`SKIP=tz-anchor-gate` (bị chặn do lệch nhánh — baseline neo theo canonical) · `MIKE_TZ_GATE=warn`
+(qua 1 lần, **không** nâng baseline, lần sau vẫn chặn — cố ý khác `code_quality_gate.sh`) ·
+`--update-baseline` (chỉ HẠ được; nâng phải thêm `--accept-new-debt`).
+
+**Mở rộng 2026-09-05 (user duyệt Discord) — RULE 2 cùng script, namespace baseline RIÊNG**
+(`tdays_files` cạnh `files`, ratchet độc lập): chặn gọi hàm tên KHỚP TUYỆT ĐỐI `tdays` (không
+phân biệt hoa/thường) trừ khi CHÍNH lệnh gọi đó có `vn_holidays=` (per-call), HOẶC hàm bao quanh
+có tham chiếu `trading_bot.vn_market.is_holiday` (khớp tuyệt đối, per-scope).
+Cố ý KHÔNG quét mù `np.busday_count` hay biến thể tên (`get_tdays`).
+
+Lý do bật, shim repo ngoài, selfcheck (137 assertion / 38 mutation), py3.10 vs 3.12, `verbose: true`,
+biến sandbox `MIKE_TZ_GATE_*`, sự cố gốc RULE 2: `kb/coding_guidelines_ext.md` § Dọn 2026-10-09 → §16.
 
 *→ rationale §16.*
 
@@ -389,7 +405,7 @@ luận) → post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY*
 bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi cuối
 phiên. Đọc `.claude/skills/bus-question-closure/SKILL.md` trước khi sửa/vận hành bất kỳ
 checker/pipeline escalation nào (autofix, health-check, weekly audit). Hai lỗi A/B + case thật + vá `wags_autofix.sh`
-2026-08-11: rationale § Dọn 2026-10-09. Luật cho người viết checker:
+2026-08-11: rationale § Dọn 2026-10-09 → §26. Luật cho người viết checker:
 `kb/ops_runbook.md` § "Checker TRA CỨU sai".
 
 ## 27. "Lệnh Đã Đặt" ≠ "Lệnh Đã Khớp" — Đối Soát Fill Thật Trước Khi Báo "Đã Đạt Target"
@@ -413,7 +429,7 @@ vọng, trạng thái A vs B, "quyết định này đã có chưa") — luôn q
   bước ghi lại lên đúng kênh checker đang nhìn. Vắng mặt trên 1 kênh không phải bằng chứng của sự
   vắng mặt trong thực tế — phải xác nhận bằng ARTIFACT (giống §6/§9/§14), không suy diễn.
 
-(Vì sao thành luật: rationale § Dọn 2026-10-09.)
+(Vì sao thành luật: rationale § Dọn 2026-10-09 → §28.)
 
 *→ retro-2026-08-10 Pattern 1 · retro-2026-08-11 mục 1/4/5 · retro-2026-08-12 Pattern 2 ·
 retro-2026-08-13 Pattern 1 — chi tiết từng ca nằm trong file retro tương ứng
@@ -433,7 +449,7 @@ dạng vi phạm, cả hai đều đã cắn thật:
   log, `Extra data` vs `Unterminated string`) rồi rẽ nhánh theo bit đó; không phân biệt được
   thì nói thẳng "không xác định được nguyên nhân, kiểm thủ công" — đừng đoán hộ.
 
-(Vì sao thành luật riêng: rationale § Dọn 2026-10-09.)
+(Vì sao thành luật riêng: rationale § Dọn 2026-10-09 → §29.)
 
 **Nửa CƠ HỌC đã tự động hoá — `bin/diagnosis_evidence_gate.py`** (pre-commit, `files:
 ^(bin|hooks)/.*\.sh$`): chặn cứng dạng thứ nhất (`2>/dev/null` + `|| die "…"`). Bỏ qua có chủ đích:
