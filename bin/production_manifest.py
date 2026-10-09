@@ -102,6 +102,16 @@ ROOT_TIER = {
     # giới tự-sửa nào — cùng lập luận đã dùng cho 4 gốc thêm ngày 2026-09-19.
     "opening_window_l2_poll.py": T1,  # poll L2 cửa sổ đầu phiên, quote_only=True, không đặt lệnh
     "orb_drift_monitor.py": T1,       # cảnh báo sớm lệch kỳ vọng paper ORB, chỉ log + bus question
+    # Thêm 2026-10-09 (selfcheck-red owner sweep, job Wags_20261009_093350): 9 gốc cron mới
+    # 09-27..10-08. Phân theo VAI TRÒ dòng cron (docstring + crontab comment), nghiêng về tầng
+    # CHẶT hơn khi chạm plan: auto_exit_inject_daily chèn SELL vào plan nháp ⇒ T0;
+    # plan_position_drift_check đọc DNSE sống + ghi dnse_raw, cờ cho chuỗi duyệt plan ⇒ T0.
+    "auto_exit_inject_daily.sh": T0,        # chèn đề xuất SELL LAG/BAL/CAPIT vào plan T+1
+    "plan_position_drift_check.py": T0,     # cờ vị thế đổi sau lập plan (chỉ báo, đọc DNSE sống)
+    "intraday_price_watch.py": T1,          # SHADOW: ReadOnlyDNSE whitelist, chỉ ghi log shadow
+    "discretionary_candidate_funnel.py": T1,  # funnel ý tưởng 8L, đọc file đã chấm, không lệnh
+    "adjfactor_drift_daily.sh": T1,         # detect-only lệch adj-factor BQ
+    "refresh_deposit_cctg_weekly.sh": T1,   # feed lãi huy động/CCTG tuần (cùng họ refresh_deposit_rate_vn)
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
@@ -110,6 +120,7 @@ ROOT_TIER = {
     "cron_health_check_daily.sh": T2, "paper_checkpoint_escalation.sh": T2,
     "selfcheck_weekly_baseline_check.sh": T2, "spend_report_weekly.sh": T2,
     "code_quality_weekly.sh": T2, "backup_freshness_check.sh": T2,
+    "daily_decision_topic.py": T2, "selfcheck_red_owner_sweep.sh": T2,  # thêm 2026-10-09
     "session_start.sh": T2, "stop.sh": T2, "user_prompt_submit.sh": T2,
     "unit:ccdb-mike.service": T2, "unit:paseo.service": T2,
     "pkill": T0,  # dừng bot giờ trưa — không có file
