@@ -20,7 +20,11 @@ import orb_drift_monitor as M
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 BASE = json.load(open(os.path.join(HERE, "..", "data", "orb_drift_baseline.json")))
+# Sổ paper SỐNG mọc thêm 1 dòng mỗi phiên ⇒ cắt về snapshot lúc viết fixture (mọi `asof` bên dưới
+# neo vào 2026-09-25). Không cắt thì ca "trễ 2 phiên" (asof 09-29) tự thành gap=0 khi sổ chạy
+# qua 09-29 — đỏ từ 2026-09-28, sweep selfcheck-red 2026-10-09.
 LOG0 = pd.read_csv(os.path.join("/home/trido/thanhdt/WorkingClaude", "data/orb_pt_log.csv"))
+LOG0 = LOG0[LOG0["date"] <= "2026-09-25"].reset_index(drop=True)
 MU0 = BASE["moments"]["mu_bps"]/1e4; SD0 = BASE["moments"]["sd_bps"]/1e4
 rng = np.random.default_rng(99)
 VERBOSE = "-v" in sys.argv
