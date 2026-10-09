@@ -135,7 +135,9 @@ def _sbv_sandbox(script_src):
 
 def t3_sbv_two_sided():
     for ref, expect_block in ((None, True), (OLD_REF, False)):
-        d, p = _sbv_sandbox(src("bin/check_sbv_weekly.sh", ref))
+        # bản MỚI đã retire sang bin/archive/ 2026-10-09 (vẫn giữ nhánh fail-closed); bản CŨ đọc từ git
+        rel = "bin/check_sbv_weekly.sh" if ref else "bin/archive/check_sbv_weekly.sh.retired-20261009"
+        d, p = _sbv_sandbox(src(rel, ref))
         env = dict(os.environ, SBV_CHECK_WORKDIR=d)
         r = subprocess.run(["bash", p], capture_output=True, text=True, timeout=180, env=env)
         out = r.stdout + r.stderr

@@ -73,7 +73,7 @@ ROOT_TIER = {
     "daily_refresh_v34b_linux.sh": T1, "auto_update_commodity_wb.sh": T1,
     "rubber_weekly.sh": T1, "update_shares_live.sh": T1, "insider_flags.py": T1,
     "sync_bq_cache_daily.sh": T1, "fetch_new_listings_daily.sh": T1,
-    "check_sbv_weekly.sh": T1, "hit_details_daily.sh": T1,
+    "hit_details_daily.sh": T1,  # check_sbv_weekly.sh retired 2026-10-09 → sbv_policy_verify.py
     "paper_programs_daily_report.sh": T1, "dc_book_waterfall_paper.py": T1,
     "vcb_fx_feed.py": T1, "hog_price_feed.py": T1, "newdeals_daily_report.py": T1,
     "paper_main_probe_plan.py": T1, "bot_execute.py": T0,  # dòng cron `--account main` là paper, nhưng FILE là engine đặt lệnh live
