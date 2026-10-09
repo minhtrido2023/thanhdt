@@ -997,3 +997,6 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-08T17:26:05Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B (Q-sleeve/fincap/L1 pool) trên engine sửa double-count: bắt đầu | NEXT: đọc review 2.B + registry 07-12/07-14/09-09
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T17:33:34Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B: PREREG b0fe4df4, 28 chân park0,7 đang chạy (research/rerun_groupB_fixed_20261009, legs.txt/legs_rest.txt) | NEXT: analyze.py → compare_sandbox.sh → REPORT.md + registry .proposed + bus finding rerun-groupB-fixed-engine
