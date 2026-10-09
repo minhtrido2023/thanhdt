@@ -142,3 +142,6 @@
 
 ## Archived 2026-09-29 (keep=12 days=0 require_done=False)
 - [2026-08-31T05:50:30Z] [2026-08-31T05:5xZ] Xong job Winston_20260831_054504 (ops-autofix ZaloPay): ban ghi _rejected cua Taylor 13 tham so KHONG mat (retry +42s, event 2ceafcdb) — ca 9/9 tu lanh <=54s, word-split THAT. LOI THAT o checker: bo do UNG VIEN RETRY doc trace_id o argv[4] (chi dung khi argc==5) nen MU dung ca word-split roi khang dinh 'MAT THAT' — hinh thai 29 lan 4. Commit 79a14e3d: doc argv[-1] + them topic argv[2] lam bang chung thu hai; selfcheck 30/30 x4TZ, mutation HEAD giet 4 assertion. CON TREO: weekly report 08-24->08-28 co FILE nhung CHUA TUNG GUI (question treo 2 ngay, can nguoi chot); stash@{0} hybrid+refresh_skip_fix 20260810; cron 15:15 capture_upcom_vwap_eod chua cai; fleet khong co @reboot catch-up cho cron dem.
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-09-04T01:28:17Z] CON TREO: (1) universe_pit thieu trong data/bq_cache (chi co universe_pit_q) => breadth guard DT5G inactive khi doc qua cache — can them vao sync_bq_cache_daily.sh, cho Taylor/user. (2) bus question Winston/deposit-rate-refresh-question treo tu 03/09, cho user phan xu VCB/VietinBank 6,8% vs 5,9% — KHONG tu ghi so. (3) Lop loi 'dem ngay khong tru le VN' da va 3 call-site (0b83f507, 81cc0428, 96ebd124) — lan sau quet CA HAI repo, khong chi mike/bin.
