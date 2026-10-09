@@ -77,6 +77,9 @@ check_repo() {   # <nhãn> <đường dẫn repo> <remote> <branch> <grep_prefix
 check_repo "workspace chính (thanhdt/main)" "/home/trido/thanhdt" origin main "^auto-backup "
 check_repo "fleet Mike (mike-fleet)"        "$ROOT"               github mike-fleet "^fleet backup "
 
+# Hạn GitHub PAT (cảnh báo sớm). Không bao giờ làm fail check chính — script con thoát 0 và tự ghi lỗi.
+"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/github_pat_expiry_check.sh" || true
+
 DATE="$(date -u +%Y-%m-%d)"
 if [ -z "$PROBLEMS" ]; then
   printf '💾 [backup_freshness] %s: backup GitHub TƯƠI.\n%b' "$DATE" "$LINES"
