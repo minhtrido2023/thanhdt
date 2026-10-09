@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-08T17:26:05Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B (Q-sleeve/fincap/L1 pool) trên engine sửa double-count: bắt đầu | NEXT: đọc review 2.B + registry 07-12/07-14/09-09
 - [2026-10-08T17:33:34Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B: PREREG b0fe4df4, 28 chân park0,7 đang chạy (research/rerun_groupB_fixed_20261009, legs.txt/legs_rest.txt) | NEXT: analyze.py → compare_sandbox.sh → REPORT.md + registry .proposed + bus finding rerun-groupB-fixed-engine
 - [2026-10-08T18:07:44Z] [rerun nhóm B 10-09] DONE c8e096e7: Q8/Q12 hết ý nghĩa, claim breadth phải sửa (registry .proposed chờ Mike/user); chờ quant-skeptic. Việc tiếp nếu lãi hạ: c30 vs l1b@0,3 prereg mới.
 - [2026-10-09T03:08:10Z] ĐANG DỞ job Taylor_20261009_030802 cash-div first_disclosure_datetime validation (read-only): bắt đầu | NEXT: data_registry corporate_action + query snapshots
@@ -26,3 +25,4 @@
 - [2026-10-09T09:54:33Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss replay: research/intraday_cutloss_replay_20261009 build_inputs.py chạy | NEXT: replay.py (HistMarket + run_tick thật), analyze, REPORT, bus finding intraday-cutloss-historical-replay
 - [2026-10-09T10:21:17Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss replay: runs NONE đang chạy (run_none.sh), daily_approx xong | NEXT: case days → BROKEN/UNCLEAR runs, analyze.py, REPORT.md, bus finding intraday-cutloss-historical-replay
 - [2026-10-09T10:45:08Z] [intraday-cutloss replay 10-09] DONE de182a88: cutloss thua giu (T+1 -1,45%), chua live; 3 de xuat A/B/C cho user; cho quant-skeptic.
+- [2026-10-09T11:02:52Z] ĐANG DỞ job Taylor_20261009_110243 intraday watch 3 lỗ hổng + replay v2: bắt đầu | NEXT: đọc verify log + intraday_price_watch.py, worktree

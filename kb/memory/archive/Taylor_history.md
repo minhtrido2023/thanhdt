@@ -994,3 +994,6 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-08T16:58:55Z] [bal-maxpos-lag-idle 10-09] NO-GO c604cd1e (nới trần BAL 16/20 −1,1…−2,1pp, không chạm cash LAG vì 2 sổ cái độc lập). Worktree wt-balmaxpos-1009 dọn được. Hướng duy nhất còn lại = allocator động (không khuyến nghị).
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T17:26:05Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B (Q-sleeve/fincap/L1 pool) trên engine sửa double-count: bắt đầu | NEXT: đọc review 2.B + registry 07-12/07-14/09-09
