@@ -74,9 +74,16 @@ thành 09-14). Xử lý A′ 2026-09-15 (user duyệt, mike `dd77553f`, arch-rev
   phủ đúng 34 cột cũ, SO ĐƯỢC LIÊN TỤC qua mốc (đo: 09-13→09-15 chỉ 46 dòng lệch hash = sửa nội dung
   thật, + 16 id mới). Revision của 2 cột mới phải dò bằng `LAG()` trên CHÍNH cột đó, không qua hash.
 - Mỗi bảng chạy cô lập; lỗi post Discord `architecture` kèm exception thật.
-- `first_disclosure_datetime` = mốc công bố gốc (15.823/36.352 dòng non-null ở vintage 09-15, trải
-  2015-03→2026-09) — nguồn PIT tiềm năng cho nghiên cứu announcement (sprint cổ tức 04/09 bị chặn vì
-  thiếu), nhưng chỉ có vintage từ 09-15 ⇒ vẫn là giá trị vendor HIỆN TẠI cho sự kiện cũ, chưa phải PIT.
+- `first_disclosure_datetime` — **KHÔNG dùng làm ngày công bố PIT** (thẩm định 2026-10-09, job
+  `Taylor_20261009_030802`, `agents/Taylor/research/cash_div_first_disclosure_validation_20261009/REPORT.md`):
+  (a) KHÔNG phải MIN — bị ghi đè về phía SAU khi vendor đổi `source_news_id` (ADP/DRL/DHC/MWG DIV ~+90 ngày, NTH lật
+  3 lần); (b) TZ trộn và tự trôi: dòng bị rewrite bị dời −7h (ICT-naive → UTC thật), không theo batch cố định;
+  (c) flap NULL ở 5/25 vintage (130–670 dòng) rồi có lại — pin vintage, NULL ≠ "không có"; (d) sự kiện mới: vendor
+  thấy dòng TRƯỚC fd ở 13–22%, fd có sẵn lúc first-sight chỉ 26/55 (DGC 09-2026: thấy 09-06 pd 09-03, fd 09-08);
+  (e) đối chiếu web 16 sự kiện 2015–25: khớp ±1 phiên 7, muộn 2–8 ngày 5, sớm hàng tuần–tháng (ngày ĐHĐCĐ) 4;
+  (f) phủ DIV 0% 2014, 22% 2015, lỗ 2022 (84%), mã đã hủy niêm yết phủ thấp hơn 3–21pp (survivorship).
+  Ngày công bố PIT cho sự kiện mới = `MIN(first_seen snapshot, public_date tại first_seen)`; mốc mở lại
+  announcement study giữ **≥2027-08**.
 - Cron chạy thật **06:50 ICT** (`50 23` giờ UTC), không phải 23:50 ICT.
 
 ## Truy vấn tiêu chuẩn

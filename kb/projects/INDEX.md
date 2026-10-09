@@ -37,3 +37,4 @@
 - CASH_VENDOR gate (số cổ tức từ `tav2_bq.corporate_action` khi broker không giải được) →
   `cash-vendor-gate-tracking.md` — user chốt 2026-08-15 **giữ ĐÓNG**; mở lại chỉ khi có ≥1 sự
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
+- 2026-10-09 Cổ tức tiền — `first_disclosure_datetime` vendor KHÔNG dùng làm ngày công bố PIT (C: bị ghi đè về sau, TZ trôi, 56% sai ±1 phiên) → `agents/Taylor/research/cash_div_first_disclosure_validation_20261009/REPORT.md`; announcement study giữ mốc ≥2027-08, snapshot corp-action daily chạy tiếp; KHÔNG mở sleeve payer thay cash
