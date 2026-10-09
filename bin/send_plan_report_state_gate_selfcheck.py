@@ -42,13 +42,17 @@ SRC_PATHY = ("deploy_golive_dt5g_v4/golive_state_today.json "
 # want_note tồn tại vì arch-review coord-2026-08-11: "fail-open được phép, fail-open CÂM thì
 # không" — mọi nhánh bỏ qua gate phải để lại dấu vết ĐỌC ĐƯỢC trong chính report, nếu không
 # một RED giả ồn ào bị đổi lấy một GREEN giả câm (lớp lỗi khó phát hiện hơn hẳn).
+# Ca KHỚP state: từ 163714bf (user 2026-09-29 "câu cố định lặp lại vô nghĩa") report CỐ Ý không
+# in dòng "✅ state=… khớp" nữa — chỉ in khi có ⚠️. Dấu vết đúng cho ca khớp vì thế là VẮNG ⚠️;
+# gate vẫn được chứng minh SỐNG bởi ca "LỆCH STATE … PHẢI chặn" trên cùng đường code.
+_NO_STATE_WARN = "⚠️ CHƯA đối chiếu được state plan"
 CASES = [
     dict(name="annotated-source cùng state  -> KHÔNG chặn (bug 08-10/11)",
          p_src=SRC_ANNOTATED, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
-         want_block=False, want_note="✅ state=3 (NEUTRAL) khớp"),
+         want_block=False, deny_note=_NO_STATE_WARN),
     dict(name="pathy-source cùng state      -> KHÔNG chặn (bug 08-07)",
          p_src=SRC_PATHY, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
-         want_block=False, want_note="✅ state=3 (NEUTRAL) khớp"),
+         want_block=False, deny_note=_NO_STATE_WARN),
     dict(name="LỆCH STATE, nhãn source TRÙNG -> PHẢI chặn (bản cũ mù ca này)",
          p_src=SRC_BARE, p_state=1, g_src=SRC_BARE, g_state=3, has_golive=True,
          want_block=True),
