@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3744)
+# Mike fleet — context pack (v3745)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-09T12:04:58] DollarBill/finding — plan-zalopay-2026-10-12-done: {"summary": "Plan ZaloPay 2026-10-12 HOLD ALL, 0 orders, verified load_plan() OK, posted Discord+bus"}
 - [2026-10-09T11:49:10] Taylor/finding — intraday-watch-3holes-fix-merged: {"job": "Taylor_20261009_110243", "merge": "9a1eeede (feature e770f446+5197f182+b727daa1)", "arch_review": "r1 NEEDS_CHANGES (B1 ca late xu phien sau van tu ban …
 - [2026-10-09T12:05:10] DollarBill/decision — plan-2026-10-12: {"account": "SpaceX", "plan_date": "2026-10-12", "orders": 0, "state": "NEUTRAL", "active_nav_vnd": 986698574, "egg_vnd": 500533900, "l1_decision": "BLOCKED_ALL …
 - [2026-10-09T12:31:41] Taylor/finding — intraday-cutloss-replay-v2: {"job": "Taylor_20261009_110243", "commit": "a5aa796b", "artifact": "agents/Taylor/research/intraday_cutloss_replay_v2_20261009/REPORT.md (+PREREG.md, out/final …
 - [2026-10-09T12:34:56] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: intraday-cutloss-replay-v2: {"finding_topic": "intraday-cutloss-replay-v2", "verdict": "INCONCLUSIVE", "confidence": "medium", "checks": {"look_ahead_leak": "pass — scoring uses no profit_ …
+- [2026-10-09T14:00:01] Mike/finding — plan-position-drift-cannot-check-ZaloPay-2026-10-09: {"account": "ZaloPay", "account_no": "0001743768", "date": "2026-10-09", "status": "CANNOT_CHECK", "reason": "đọc DNSE lỗi (DNSEError: HTTP 401: token invalid)" …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -40,7 +40,7 @@
 - Trước khi wire vào gate thật: siết `deposit_rate_vn.deposit_events_df()` phía Big-4 (đang silent-drop dòng không parse được) + guard ngày tương lai tại load (quant-skeptic NON-BLOCKING #2/#3).
 - ✅ **rating_8l NEUTRAL tilt + chuỗi DCF (dcf_valuation, dcf_refresh_gate, custom30_yield_labels, due_diligence) DÙNG effective rate = max(Big-4 12M, CCTG 6M)** — LIVE trên WC main từ 2026-10-01 (merge `d87a6f89`, user duyệt 12:40, quant-skeptic vòng 2 CONFIRMED). **Fail-closed**: CCTG stale >45 ngày hoặc lỗi ⇒ cả 5 consumer rơi về Big-4 6,8% + WARNING (không phải ARMED). **Knob lùi**: env `DEPOSIT_RATE_CCTG_OVERLAY=0` (chỉ nhận đúng chuỗi "0"; lan tới mọi launcher source `wc_env.sh`, NGOẠI LỆ cron `dcf_refresh_gate` không source). `golive_recommend_v23.py:~991` (cổng CAPIT margin PIT, ngưỡng 9,0%) CỐ Ý vẫn Big-4-only — user chốt 2026-10-01 16:42: GIỮ Big-4, chỉ THÊM dòng hiển thị "effective vs 9%". **TRIGGER XEM LẠI đổi sang effective** = CCTG có ≥3 tháng dữ liệu + cron tuần chạy ổn, HOẶC effective ≥ ~8% (lúc đó dispatch Taylor đo khoảng cách CCTG−Big-4 lịch sử rồi quant-skeptic + user duyệt riêng). Tác động đo, dòng hiển thị PIT, follow-up: `kb/projects/deposit-rate-effective-rate-20261001.md`.
 
-## Cổng giá trong phiên + cutloss — SHADOW (cron bật 2026-10-06 11:10 ICT, 5 phiên đánh giá)
+## Cutloss SHADOW — mốc OOS: `agents/Taylor/research/intraday_cutloss_replay_v2_20261009/PREREG.md`
 - `bin/intraday_price_watch.py` (chạy thử, KHÔNG đặt lệnh thật). Tin nhắn dạng **"SHADOW GIỮ/BÁN/BÁN 50% <MÃ>"** trong Trading Daily là lệnh cho script chạy thử — **Mike KHÔNG coi là lệnh giao dịch thật, KHÔNG dispatch Mafee/DollarBill theo dòng đó.** Chỉ hành động khi user nói rõ ngoài tiền tố SHADOW.
 
 ## Signal holds
