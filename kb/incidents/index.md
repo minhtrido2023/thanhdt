@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 193 file (104 sự cố + 88 RETRO + 1 mục open-items chung)
+entries: 194 file (104 sự cố + 89 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -269,6 +269,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-10-09 | [RETRO — 2026-10-09: 2 sự cố, 1 pattern xuyên suốt (meta: self-healing mechanism đánh giá sai). #1 SBV fetch_failed: root cause thật tìm ra + vá hôm nay (curl không `-f` + stamp nhầm `last_verified`), nhưng retro-10-08 đã bỏ sót hoàn toàn lượt tái diễn 08/10 dù retro-10-07 đã dặn escalate. #2 ZaloPay DNSE 401: đính chính retro-10-07 — cơ chế "second-chance" KHÔNG thực retry drift-check khi plan không đổi, lần thành công trước là trùng hợp (md5 đổi do nội dung plan đổi), không phải cơ chế chủ động. Pattern G (MỚI): kết luận "cơ chế tự phục hồi đúng thiết kế" từ 1 lần quan sát thành công mà không truy điều kiện thật. Wags verify: GAPS FOUND (1 nhỏ) — đã sửa: đếm event error 0→1, hash manifest c62e154→ca62e154](retro/retro-2026-10-09.md) | logged |
 | 2026-10-08 | [RETRO — 2026-10-08: 1 sự cố (PAT hết hạn → 1 lượt backup push fail thầm lặng, tự lành lượt kế tiếp), 1 pattern tái diễn (backup-silent-failure shape thứ 5, cơ chế phát hiện hoạt động ĐÚNG như thiết kế, chỉ thiếu alert real-time), 0 vi phạm ScheduleWakeup, 0 time-claim mismatch. Wags verify: GAPS FOUND — đã sửa root cause (PAT expired, có log rõ, không phải "chưa chẩn đoán được") + đếm lại bus event (finding 19 thật thay vì 15 giả, bỏ agent giả "bq-corp-action")](retro/retro-2026-10-08.md) | logged |
 | 2026-10-07 | [RETRO — 2026-10-07: 0 sự cố tiền thật mới, 2 false-alarm đã vá (DT5G FROZEN giả do cửa sổ rỗng → NaT, breadth guard inactive do thiếu universe_pit), 1 pattern tái diễn ESCALATE lần đầu (selfcheck-red backlog 16 câu/10 ngày), 1 nhầm lẫn lịch tự phát hiện và tự đóng (corp-action feed 03-04/10 = cuối tuần, không phải lỗi). Wags verify: GAPS FOUND — đã sửa: đếm event error 0→1, thêm 2 finding bị bỏ sót (sbv-weekly fetch_failed, vn-realestate routine), bỏ tên DollarBill khỏi dòng nguồn gốc](retro/retro-2026-10-07.md) | logged |
 | 2026-10-06 | [RETRO — 2026-10-06: 1 sự cố tiền thật (ZaloPay BID, fix merge 13:24 nhưng chưa xác minh bot đã restart), 1 pattern tái diễn đã escalate (Pattern A polish-chain, override vòng), 4 selfcheck-red còn mở. Wags verify: GAPS FOUND — đã sửa: thêm error Mike 05:07 ICT + 3 question selfcheck-red Wags, bỏ số đếm event không tái lập](retro/retro-2026-10-06.md) | logged |
