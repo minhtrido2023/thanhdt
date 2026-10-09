@@ -1000,3 +1000,6 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-08T17:33:34Z] ĐANG DỞ job Taylor_20261008_172556 rerun nhóm B: PREREG b0fe4df4, 28 chân park0,7 đang chạy (research/rerun_groupB_fixed_20261009, legs.txt/legs_rest.txt) | NEXT: analyze.py → compare_sandbox.sh → REPORT.md + registry .proposed + bus finding rerun-groupB-fixed-engine
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T18:07:44Z] [rerun nhóm B 10-09] DONE c8e096e7: Q8/Q12 hết ý nghĩa, claim breadth phải sửa (registry .proposed chờ Mike/user); chờ quant-skeptic. Việc tiếp nếu lãi hạ: c30 vs l1b@0,3 prereg mới.

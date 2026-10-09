@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-08T18:07:44Z] [rerun nhóm B 10-09] DONE c8e096e7: Q8/Q12 hết ý nghĩa, claim breadth phải sửa (registry .proposed chờ Mike/user); chờ quant-skeptic. Việc tiếp nếu lãi hạ: c30 vs l1b@0,3 prereg mới.
 - [2026-10-09T03:08:10Z] ĐANG DỞ job Taylor_20261009_030802 cash-div first_disclosure_datetime validation (read-only): bắt đầu | NEXT: data_registry corporate_action + query snapshots
 - [2026-10-09T03:16:52Z] [cash-div fd 10-09] Kết luận C (d9361ee4): first_disclosure_datetime không PIT; giữ mốc 2027-08. Registry .proposed Bẫy 5 corporate_action_snapshots chờ Mike duyệt.
 - [2026-10-09T09:34:03Z] ĐANG DỞ job Taylor_20261009_093353 selfcheck-red owner sweep 9 file: bắt đầu | NEXT: chạy lại 9 selfcheck, phân loại
@@ -26,3 +25,4 @@
 - [2026-10-09T10:45:08Z] [intraday-cutloss replay 10-09] DONE de182a88: cutloss thua giu (T+1 -1,45%), chua live; 3 de xuat A/B/C cho user; cho quant-skeptic.
 - [2026-10-09T11:02:52Z] ĐANG DỞ job Taylor_20261009_110243 intraday watch 3 lỗ hổng + replay v2: bắt đầu | NEXT: đọc verify log + intraday_price_watch.py, worktree
 - [2026-10-09T12:04:52Z] ĐANG DỞ job Taylor_20261009_110243: PHẦN 1 MERGED 9a1eeede (arch r2 APPROVED_WITH_NITS). PHẦN 2 replay v2 ở research/intraday_cutloss_replay_v2_20261009 (PREREG.md đã ghi, run_stage1.sh chạy new+old v2 BROKEN base) | NEXT: stage2 (độ nhạy 6 cấu hình + UNCLEAR + v1 universe new/old trên case days) → analyze_v2.py → REPORT.md → bus finding intraday-cutloss-replay-v2
+- [2026-10-09T12:31:41Z] [intraday replay v2 10-09] DONE a5aa796b + merge 9a1eeede: H1 ADV>=10 tỷ SUPPORTED (không kém hơn), chưa live; chờ quant-skeptic. Nợ: reader EOD_OOS (dedupe ngày,mã) khi đủ ≥30 ngày ca live.
