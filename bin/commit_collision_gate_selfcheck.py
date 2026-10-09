@@ -606,7 +606,11 @@ _KNOWN_COMMIT_SITES = {
     "mike/bin/consolidate.sh", "mike/bin/fleet_backup.sh", "mike/bin/kb_nightly.sh",
     "mike/bin/cron_health_check_daily.sh",
 }
+# `(?:NAME=val\s+)*`: tiền tố gán env trước lệnh (`MIKE_KB_SIZE_GATE=warn git … commit`, thêm vào
+# consolidate/fleet_backup/kb_nightly cùng kb-hot-size-gate) — thiếu nó thì cả 3 site "biến mất"
+# khỏi bản quét ⇒ SCAN BROKE (đỏ từ 2026-10-08, sweep selfcheck-red 2026-10-09).
 _COMMIT_RE = re.compile(r"(?:^|[;&|)(]|\bif\s|\belif\s|\bthen\s|\bdo\s|\!\s*)\s*"
+                        r"(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*"
                         r"(?:/usr/bin/)?git(?:\s+-C\s+\S+)?\s+commit\b")
 
 

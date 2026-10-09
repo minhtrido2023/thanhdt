@@ -399,6 +399,15 @@ def main():
     _con.close()
 
     r_min = 65180 / 71700
+    # `paper_entry_adjust.DEFAULT_CACHE` neo vào WORKDIR (mặc định cây canonical), KHÔNG vào thư
+    # mục chứa module ⇒ copy file vào `root` không đổi cache. Không vá thì E5 đọc cache BQ THẬT:
+    # khi vendor hồi tố FPT (entry_adj 70.200→63.820) chặn trên bị áp lên giá vốn đã sửa ⇒ +14,79%
+    # thay vì +4,36% — đỏ từ 2026-09-29 (sweep selfcheck-red 2026-10-09). Cùng mẫu với khối F.
+    from pathlib import Path as _PathE5
+    sys.path.insert(0, root)
+    import paper_entry_adjust as _pea_e5
+    _old_cache_e5 = _pea_e5.DEFAULT_CACHE
+    _pea_e5.DEFAULT_CACHE = _PathE5(root) / "data" / "bq_cache"
     e5 = m.probe_alphalens({"json_path": "data/alphalens_e5.json",
                             "prices_parquet": "data/alphalens_e5_px.parquet"}, {}, D)
     want5 = (66600 / (70200 * r_min) - 1) * 100
@@ -415,6 +424,7 @@ def main():
     check("E6 (đối chứng): mã hệ số phẳng ⇒ KHÔNG áp chặn, không có nhãn ≥/CHẶN DƯỚI",
           f"{want6:+.2f}%" in e6["headline"] and "≥" not in e6["headline"]
           and "CHẶN DƯỚI" not in e6["body"], (want6, e6["headline"]))
+    _pea_e5.DEFAULT_CACHE = _old_cache_e5
 
     print("== F. close_repair self_computed KHÔNG bị cap hai lần (Việc nhỏ 2, 2026-09-29) ==")
     # Regression cho commit 2f6ee508/8a9d3ac3 (finding paper-report-fpt-double-adjust-fix-20260929,
