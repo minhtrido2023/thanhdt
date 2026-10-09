@@ -46,3 +46,4 @@
 - KHÔNG đặt wakeup thăm dò khi không có job nền đang chờ kết quả (user 10-05).
 
 - [2026-10-08T18:15:56Z] 09/10 01:2x: Nhánh 4 xong — Taylor_20261008_172556 c8e096e7, skeptic CONFIRMED high (verify_20261008_181403). Q8/Q12 hết ý nghĩa, QF8/fc30 NO-GO hẹp, L1b chưa chứng minh (DSR<0.95), claim breadth sai OOS. CHỜ USER: duyệt sửa câu canonical breadth + .proposed registry + nhánh 5.
+- [2026-10-09T03:08:11Z] 09/10 10:1x: user duyệt cả 2: (1) registry nhánh 4 + đính chính breadth — WC bb9fbd95, mike 7feee631 (q-sleeve.md + INDEX). (2) nhánh 5: snapshot corp-action daily ĐÃ có từ 08-17 (52 vintage) ⇒ không cần cron mới; vendor thêm first_disclosure_datetime 09-14 (15.894 dòng từ 2015) ⇒ dispatch Taylor_20261009_030802 (opus medium) thẩm định cột này PIT hay không; A ⇒ study chạy ngay thay vì chờ 2027-08. Xong ⇒ trình user (chưa chạy study).
