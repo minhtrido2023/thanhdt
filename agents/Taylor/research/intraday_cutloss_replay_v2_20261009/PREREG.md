@@ -43,3 +43,16 @@ phải phân nhóm book/sàn của đề xuất A cũ. **Chỉ đề xuất, kh�
 Bảng theo ADV20 (<1 / 1–10 / ≥10 tỷ) và giá < 5.000đ (ở cả universe v1 để so); T+1/T+20; UNCLEAR;
 bán-ngay-T0; độ nhạy sổ lệnh; so luật mới vs cũ (số ca riêng chuyển gộp/hoãn-GIỮ, Δ kết quả); control PNJ
 06–09/10 chạy lại độc lập trên code mới, so với shadow log thật.
+
+## ADDENDUM — user chốt cho phép thử OOS live (09/10/2026 19:44 ICT, thread 1557920546891763755)
+Ghi TRƯỚC khi có bất kỳ dòng `EOD_OOS` live nào (shadow chạy code mới từ 12/10/2026).
+1. **Mốc đánh giá**: bỏ mốc "5 phiên ~12/10". Thay bằng: kiểm lại H1 khi có **≥30 NGÀY có ca live**
+   (N độc lập = số ngày có ca, không phải ngày lịch) trên mã ADV20 ≥ 10 tỷ, đúng luật quyết định ở trên,
+   không đổi ngưỡng kích hoạt/ADV/horizon T+5. Nhịp lịch sử ≈ 85 ngày-ca / ~37 tháng (≈2,3/tháng ở NAV
+   mô phỏng 50 tỷ) ⇒ mốc này có thể mất **1–2 năm**; không có ngày cố định.
+2. **Biên không-kém-hơn 1,0 điểm %** (CI95 dưới > −1,0 ở T+5) — **user xác nhận chấp nhận được**
+   (`decided_by: user`). Lý do user: tiền cắt lỗ được giải phóng, tránh chi phí cơ hội nếu mã đứng yên
+   ~20 phiên; coi 1% là "chi phí sử dụng tiền". Đối chiếu: Trứng vàng 8,543%/năm ≈ 0,68% trên 20 phiên.
+   Biên này áp cho phép thử OOS live; kết quả replay lịch sử v2 vẫn chỉ là mô tả (quant-skeptic
+   INCONCLUSIVE, verify_20261009_123235) và KHÔNG đủ để bật tự bán.
+3. Bật tự bán (wire live) vẫn cần: H1 OOS SUPPORTED theo 1–2 + quant-skeptic CONFIRMED + user duyệt.
