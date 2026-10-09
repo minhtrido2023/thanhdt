@@ -49,6 +49,14 @@ REL_IDIO = -0.03
 # hoặc ≥ M mã chạm sàn, hoặc thiếu VNINDEX (idio = ret — không tách được riêng/chung).
 MARKET_WIDE_MIN_HITS = 3
 MARKET_WIDE_MIN_FLOOR = 2
+# Sửa 3 lỗ hổng thiết kế (user duyệt 09/10/2026 18:02 ICT, job Taylor_20261009_110243; bằng chứng:
+# agents/Taylor/research/intraday_cutloss_replay_20261009/REPORT.md §5). KHÔNG đổi ngưỡng kích hoạt.
+# (A) gộp theo số mã kích hoạt LUỸ KẾ trong cửa sổ trượt (không chỉ trong 1 lượt quét): cú sập rải
+#     09:30→14:30 (26/10/2023 VNI −4,19%: 11 ca riêng, 0 lượt gộp) phải thành biến động chung.
+# (B) CHẠM SÀN chỉ mở ca riêng khi idio vẫn đạt TRIG_IDIO; chạm sàn ∧ VNINDEX ≤ −2% ⇒ nhánh gộp
+#     (VHM 22/07/2026: sàn, idio −3,6%, VNI −3,3% ⇒ trước đây mở ca riêng).
+MARKET_WIDE_WINDOW_MIN = 60
+FLOOR_MW_VNI = -0.02
 REPLY_PREFIX_SHADOW = "SHADOW"   # trong shadow lệnh trả lời PHẢI có tiền tố này (tránh nhầm lệnh thật)
 
 # Giả định mô hình khớp shadow (KHÔNG phải tham số chính sách):
@@ -82,13 +90,26 @@ def trigger_check(last, ref, floor, vni_last, vni_ref, ret_thr=None, idio_thr=No
     idio = ret - vni_ret if vni_ret is not None else ret
     at_floor = floor is not None and last <= floor + EPS
     price_hit = ret <= ret_thr + EPS and idio <= idio_thr + EPS
+    floor_mw = at_floor and vni_ret is not None and vni_ret <= FLOOR_MW_VNI + EPS
     reasons = []
     if at_floor:
         reasons.append("CHẠM SÀN")
     if price_hit:
         reasons.append(f"ret {ret*100:+.1f}% ∧ idio {idio*100:+.1f}%")
+    # (B) `individual` = được mở ca RIÊNG: idio phải đạt (chạm sàn một mình không đủ) và không phải
+    # "chạm sàn trong ngày VNINDEX ≤ −2%". hit ∧ ¬individual ⇒ driver đưa vào nhánh gộp (chỉ báo).
     return {"hit": bool(at_floor or price_hit), "ret": ret, "vni_ret": vni_ret, "idio": idio,
-            "at_floor": at_floor, "reason": " + ".join(reasons), "vni_missing": vni_ret is None}
+            "at_floor": at_floor, "reason": " + ".join(reasons), "vni_missing": vni_ret is None,
+            "individual": bool(price_hit and not floor_mw), "floor_mw": bool(floor_mw)}
+
+
+def not_individual_reason(tr):
+    """Lý do 1 kích hoạt KHÔNG được mở ca riêng (B) → chuỗi | None."""
+    if tr.get("individual"):
+        return None
+    if tr.get("floor_mw"):
+        return f"chạm sàn ∧ VNINDEX {tr['vni_ret']*100:+.1f}% ≤ {FLOOR_MW_VNI*100:.0f}%"
+    return f"chạm sàn nhưng idio {tr['idio']*100:+.1f}% chưa đạt {TRIG_IDIO*100:.0f}%"
 
 
 def trigger_check_rel(last, ref, floor, vni_last, vni_ref, exchange):
@@ -107,6 +128,22 @@ def market_wide_reason(hits):
         return f"{len(hits)} mã cùng kích hoạt trong 1 lượt quét"
     if sum(1 for h in hits if h.get("at_floor")) >= MARKET_WIDE_MIN_FLOOR:
         return "nhiều mã cùng chạm sàn"
+    return None
+
+
+def window_market_wide_reason(events, now, window_min=None):
+    """(A) Gộp theo cửa sổ trượt: events = [{"ticker", "at": datetime, "at_floor"}] — mọi kích hoạt
+    (VNINDEX đọc được) trong ngày; đếm mã PHÂN BIỆT có kích hoạt trong [now − window, now] → lý do | None."""
+    win = MARKET_WIDE_WINDOW_MIN if window_min is None else window_min
+    lo = now - dt.timedelta(minutes=win)
+    rec = [e for e in events if lo <= e["at"] <= now]
+    tks = {e["ticker"] for e in rec}
+    floors = {e["ticker"] for e in rec if e.get("at_floor")}
+    since = min((e["at"] for e in rec), default=now)
+    if len(tks) >= MARKET_WIDE_MIN_HITS:
+        return f"{len(tks)} mã kích hoạt luỹ kế trong {win}' ({since:%H:%M}–{now:%H:%M})"
+    if len(floors) >= MARKET_WIDE_MIN_FLOOR:
+        return f"{len(floors)} mã chạm sàn luỹ kế trong {win}' ({since:%H:%M}–{now:%H:%M})"
     return None
 
 

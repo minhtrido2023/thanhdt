@@ -17,6 +17,16 @@ Nhịp: cron MỖI PHÚT 09:00-14:59 ICT T2-T6 (dòng đề xuất ở cuối do
 Vũ trụ = vị thế LIVE 2 TK (DNSE positions) + mã có lệnh MUA trong plan hôm nay + watchlist
 discretionary (state_*_<TK>.json + excluded_tickers + data/intraday_watch/watchlist.json).
 
+Sửa 3 lỗ hổng thiết kế + OOS (user duyệt 09/10/2026 18:02 ICT, job Taylor_20261009_110243; bằng chứng
+replay `agents/Taylor/research/intraday_cutloss_replay_20261009/REPORT.md` §5). Ngưỡng KHÔNG đổi.
+  (A) gộp "cả thị trường" theo số mã kích hoạt LUỸ KẾ trong cửa sổ trượt 60' (`st["trigger_log"]`),
+      không chỉ trong 1 lượt quét. Ca RIÊNG đã mở trong cửa sổ ⇒ gắn nhãn `market_wide`, mặc định GIỮ,
+      bán mô phỏng đang chạy theo MẶC ĐỊNH dừng (STOPPED_MARKET_WIDE); lệnh user vẫn tôn trọng.
+  (B) chạm sàn chỉ mở ca riêng khi idio đạt; chạm sàn ∧ VNINDEX ≤ −2% ⇒ nhánh gộp.
+  (C) ca hoãn sang phiên sau (kích hoạt ≥14:00 hoặc hạn trả lời >14:15) ⇒ KHÔNG tự bán qua ATO:
+      mặc định GIỮ, phán quyết chỉ là GỢI Ý (`actions_suggested`), xét lại lúc mở phiên (user quyết).
+  (D) từ 14:55 ghi 1 dòng EOD_OOS/ngày (vni_day + ret_close mỗi ca/mã gộp) ⇒ bộ OOS thật.
+
 Nguồn giờ: `trading_bot.vn_market.now_ict()` (§16). Tiền: chỉ dùng `total_nav` của
 `active_nav_<TK>.json` làm MẪU SỐ HIỂN THỊ %NAV (ghi rõ computed_at) — không đọc field tiền broker
 (§25). Same-day giá = DNSE, không BQ (§6). Đọc trả lời user: ccdb `/api/threads/<trading_daily>/
@@ -43,8 +53,8 @@ Taylor (ngưỡng 3 lỗi liên tiếp) của cả fleet.
 
 MẶC ĐỊNH AN TOÀN r2 (hằng số đầu file + engine, CHỜ USER CHỐT): (a) không có phán quyết của agent
 ⇒ GIỮ + cảnh báo lớn (engine.NON_AGENT_DEFAULT); (b) mã excluded_tickers / restricted.json ⇒ chỉ báo
-+ điều tra, không tự bán; (c) kích hoạt ≥ 14:00 hoặc hạn trả lời > 14:15 ⇒ mặc định chỉ áp từ 09:15
-phiên sau, 08:30 nhắc lại; (d) log song song ngưỡng tương đối theo biên độ sàn (không hành động).
++ điều tra, không tự bán; (c) kích hoạt ≥ 14:00 hoặc hạn trả lời > 14:15 ⇒ mặc định (GIỮ — xem (C)
+ở trên) chỉ áp từ 09:15 phiên sau, 08:30 nhắc lại; (d) log song song ngưỡng tương đối theo biên độ sàn (không hành động).
 Trả lời user trong shadow PHẢI có tiền tố: "SHADOW GIỮ PNJ" / "SHADOW BÁN PNJ" / "SHADOW BÁN 50% PNJ".
 
 Dùng:
@@ -113,6 +123,7 @@ NO_EOD_DEFAULT_AFTER = dt.time(14, 15)   # hạn trả lời sau giờ này ⇒ 
 NEXT_SESSION_APPLY = dt.time(9, 15)
 REMINDER_WINDOW = (dt.time(8, 25), dt.time(9, 0))
 EOD_SUMMARY_AT = dt.time(14, 50)
+EOD_OOS_AT = dt.time(14, 55)       # (D) ghi vni_day/ret_close mỗi ca ⇒ ca live tích luỹ thành bộ OOS thật
 QUOTE_ERR_ALERT = 0.5              # tỉ lệ lỗi lấy giá trong 1 lượt quét ⇒ cảnh báo sức khoẻ
 HEALTH_ALERT_EVERY_MIN = 60        # cảnh báo sức khoẻ cùng loại tối đa 1 lần/60'
 VNI_MAX_AGE_MIN = 5                # bar VNINDEX cuối cũ hơn ⇒ coi như không đọc được (DNSE cache theo URL)
@@ -620,8 +631,8 @@ def _save(deps, day, st):
 
 def _stats(st):
     s = st.setdefault("stats", {})
-    for k in ("scans", "triggers", "market_wide", "dispatches", "dispatch_fail", "dispatch_skipped",
-              "quotes", "quote_errors", "notify_fail", "reply_read_errors"):
+    for k in ("scans", "triggers", "market_wide", "market_wide_relabel", "dispatches", "dispatch_fail",
+              "dispatch_skipped", "quotes", "quote_errors", "notify_fail", "reply_read_errors"):
         s.setdefault(k, 0)
     for k in ("verdicts", "alt_cur", "alt_rel"):
         s.setdefault(k, [])
@@ -779,8 +790,8 @@ def _t0_msg(case, deps):
     else:
         inv_line = (f"  ⚠️⚠️ KHÔNG CÓ ĐIỀU TRA TỰ ĐỘNG — {inv.get('skipped') or inv.get('note') or '?'}\n"
                     f"  ⇒ hết hạn {vd:%H:%M} hệ thống KHÔNG tự bán (mặc định GIỮ). ANH CẦN TỰ XEM TIN {tk}.")
-    late = ("\n  ⏳ kích hoạt sau 14:00 ⇒ chỉ báo + điều tra; mặc định (nếu có) chỉ áp từ 09:15 phiên sau, "
-            "08:30 nhắc lại" if case.get("late") else "")
+    late = ("\n  ⏳ kích hoạt sau 14:00 ⇒ chỉ báo + điều tra; KHÔNG tự bán qua ATO phiên sau — ca chờ XÉT LẠI "
+            "lúc mở phiên (anh/agent quyết), mặc định GIỮ; 08:30 nhắc lại" if case.get("late") else "")
     return (f"🚨 CỔNG GIÁ TRONG PHIÊN — {tk} {t0:%H:%M}: {tr['reason']}\n"
             f"  giá {_fmt(q.get('last'))} (TC {_fmt(q.get('ref'))}, sàn {_fmt(q.get('floor'))}) | VNINDEX "
             f"{(tr['vni_ret'] or 0)*100:+.1f}%" + (" ⚠️ không đọc được VNINDEX" if tr["vni_missing"] else "")
@@ -946,19 +957,26 @@ def process_case(case, now, deps, st):
                 _save(deps, day, st)
                 return
             vv = case["verdict"]
-            case["actions_default"] = {lab: E.default_action(vv["label"], h["book"], vv["source"],
-                                                             bool(h.get("no_auto_sell")))
-                                       for lab, h in case["holdings"].items()}
+            base = {lab: E.default_action(vv["label"], h["book"], vv["source"], bool(h.get("no_auto_sell")))
+                    for lab, h in case["holdings"].items()}
             case["report_at"] = _iso(now)
             rd, deferred = _reply_deadline(case, now)
             case["reply_deadline"], case["reply_deferred"] = _iso(rd), deferred
+            why = _hold_override_reason(case, deferred)
+            case["actions_default"] = {lab: E.HOLD for lab in base} if why else base
+            if why and base != case["actions_default"]:
+                case["actions_suggested"], case["hold_override"] = base, why
             case["status"] = "AWAITING_REPLY" if case["holdings"] else "NO_POSITION"
             _save(deps, day, st)
             log_event(deps.state_dir, day, "VERDICT", now=now, ticker=tk, verdict=vv,
-                      actions_default=case["actions_default"], reply_deadline=case["reply_deadline"],
+                      actions_default=case["actions_default"], actions_suggested=case.get("actions_suggested"),
+                      hold_override=case.get("hold_override"), reply_deadline=case["reply_deadline"],
                       deferred=deferred, latency_min=lat, compressed=bool(case.get("compressed")))
+            sug = case.get("actions_suggested") or {}
             acts = "\n".join(
                 f"  • {lab}: mặc định {E.ACTION_VN[a]} (book {case['holdings'][lab]['book']})"
+                + (f" — phán quyết gợi ý {E.ACTION_VN[sug[lab]]}, KHÔNG tự áp vì {case['hold_override']}"
+                   if sug.get(lab, a) != a else "")
                 + (f" ⛔ {case['holdings'][lab]['no_auto_sell']} ⇒ hệ thống KHÔNG đặt lệnh, kể cả theo lệnh anh"
                    if case["holdings"][lab].get("no_auto_sell") else "")
                 for lab, a in case["actions_default"].items()) or "  • không giữ — chỉ hoãn mua"
@@ -1079,7 +1097,7 @@ def _apply_decision(case, now, deps):
             ex["status"], ex["open"] = "STOPPED_BY_USER", []
         else:
             ex["target"] = max(tgt, ex["sold"])
-            if ex["status"] == "STOPPED_BY_USER":
+            if ex["status"] in ("STOPPED_BY_USER", "STOPPED_MARKET_WIDE"):
                 ex["status"] = "EXECUTING"
     if case["execution"]:
         case["status"] = "EXECUTING"
@@ -1139,35 +1157,159 @@ def _scan(now, deps, st):
             for k, f in (("alt_cur", "hit_cur"), ("alt_rel", "hit_rel")):
                 if a[f] and a["ticker"] not in s[k]:
                     s[k].append(a["ticker"])
-    reason = E.market_wide_reason([h[2] for h in hits])
+    # (A) nhật ký kích hoạt trong ngày cho cửa sổ trượt — chỉ kích hoạt đo được idio (có VNINDEX)
+    tlog = st.setdefault("trigger_log", [])
+    for tk, u, tr, q in hits:
+        if not tr["vni_missing"]:
+            tlog.append({"ticker": tk, "at": _iso(now), "at_floor": tr["at_floor"]})
+    win_reason = E.window_market_wide_reason([{**e, "at": _p(e["at"])} for e in tlog], now) if hits else None
+    reason = E.market_wide_reason([h[2] for h in hits]) or win_reason
     opened = []
     if reason:
-        mw = st.setdefault("market_wide", {})
-        new = [h for h in hits if h[0] not in mw]
-        for tk, u, tr, q in hits:
-            mw.setdefault(tk, {"first": _iso(now), "reason": reason, "ret": tr["ret"],
-                               "held": {lab: h["qty"] for lab, h in u["holdings"].items()}})
-        log_event(deps.state_dir, day, "MARKET_WIDE", now=now, reason=reason,
-                  tickers=[h[0] for h in hits], new=[h[0] for h in new])
-        if new:
-            s["market_wide"] += 1
-            rows = "\n".join(
-                f"  • {tk} {tr['ret']*100:+.1f}%" + (" CHẠM SÀN" if tr["at_floor"] else "")
-                + ("".join(f" | giữ {lab} {h['qty']:,}cp" for lab, h in u["holdings"].items()) or " | không giữ")
-                + (" | có lệnh MUA trong plan" if u["buys"] else "") for tk, u, tr, q in new)
-            enqueue(st, f"🌐 CẢNH BÁO GỘP — CẢ THỊ TRƯỜNG ({reason}), {now:%H:%M}: {len(new)} mã mới kích hoạt "
-                        f"(tổng {len(hits)} lượt này)\n{rows}\n  ⇒ KHÔNG dispatch điều tra từng mã, KHÔNG tự "
-                        f"hành động; mã sẽ được xét lại riêng nếu lượt sau không còn là biến động chung. "
-                        f"Anh tự đánh giá. ({SHADOW_NOTE})", mention=True, now=now)
+        _market_wide(st, now, deps, hits, reason)
+        if win_reason:
+            _relabel_market_wide(st, now, deps, win_reason)
     else:
-        for tk, u, tr, q in hits:
-            opened.append(tk)
-            open_case(tk, u, tr, q, now, deps, st)
+        lone = []
+        for h in hits:
+            if h[2].get("individual"):
+                opened.append(h[0])
+                open_case(*h, now, deps, st)
+            else:
+                lone.append(h)
+        if lone:            # (B) chạm sàn không đủ điều kiện ca riêng ⇒ nhánh gộp (chỉ báo)
+            _market_wide(st, now, deps, lone, "chạm sàn không đủ điều kiện mở ca riêng")
     st["last_scan"] = _iso(now)
     log_event(deps.state_dir, day, "SCAN", now=now, n_universe=len(uni), triggered=opened,
               market_wide=reason, vni=[vl, vr], quote_errors=n_err)
     _save(deps, day, st)
     return opened
+
+
+def _market_wide(st, now, deps, hits, reason):
+    """Nhánh gộp: KHÔNG mở ca, KHÔNG dispatch, KHÔNG tự hành động — chỉ ghi + báo mã MỚI."""
+    day, s = now.date(), _stats(st)
+    mw = st.setdefault("market_wide", {})
+    new = [h for h in hits if h[0] not in mw]
+    for tk, u, tr, q in hits:
+        mw.setdefault(tk, {"first": _iso(now), "reason": reason, "ret": tr["ret"], "idio": tr["idio"],
+                           "vni_ret": tr["vni_ret"], "at_floor": tr["at_floor"],
+                           "not_individual": E.not_individual_reason(tr),
+                           "held": {lab: h["qty"] for lab, h in u["holdings"].items()}})
+    log_event(deps.state_dir, day, "MARKET_WIDE", now=now, reason=reason,
+              tickers=[h[0] for h in hits], new=[h[0] for h in new],
+              not_individual={h[0]: E.not_individual_reason(h[2]) for h in hits if not h[2].get("individual")})
+    if not new:
+        return
+    s["market_wide"] += 1
+    rows = "\n".join(
+        f"  • {tk} {tr['ret']*100:+.1f}%" + (" CHẠM SÀN" if tr["at_floor"] else "")
+        + (f" [{E.not_individual_reason(tr)}]" if not tr.get("individual") else "")
+        + ("".join(f" | giữ {lab} {h['qty']:,}cp" for lab, h in u["holdings"].items()) or " | không giữ")
+        + (" | có lệnh MUA trong plan" if u["buys"] else "") for tk, u, tr, q in new)
+    enqueue(st, f"🌐 CẢNH BÁO GỘP — CẢ THỊ TRƯỜNG ({reason}), {now:%H:%M}: {len(new)} mã mới kích hoạt "
+                f"(tổng {len(hits)} lượt này)\n{rows}\n  ⇒ KHÔNG dispatch điều tra từng mã, KHÔNG tự "
+                f"hành động; mã sẽ được xét lại riêng khi cửa sổ {E.MARKET_WIDE_WINDOW_MIN}' không còn đạt "
+                f"ngưỡng gộp. Anh tự đánh giá. ({SHADOW_NOTE})", mention=True, now=now)
+
+
+def _relabel_market_wide(st, now, deps, reason):
+    """(A) Ca RIÊNG đã mở trong cửa sổ trượt, nay cửa sổ đạt ngưỡng gộp ⇒ gắn nhãn cả thị trường:
+    mặc định chuyển GIỮ (không tự bán); bán mô phỏng đang chạy THEO MẶC ĐỊNH dừng. Lệnh user
+    (decision source "user") vẫn tôn trọng. Ghi log MARKET_WIDE_RELABEL + báo."""
+    day, lo = now.date(), now - dt.timedelta(minutes=E.MARKET_WIDE_WINDOW_MIN)
+    rows = []
+    for tk, c in st["cases"].items():
+        t0 = _p(c["t0"])
+        if c.get("market_wide") or t0.date() != day or t0 < lo:
+            continue
+        c["market_wide"] = {"at": _iso(now), "reason": reason}
+        note = []
+        pre = c.get("actions_default")
+        if pre and any(a != E.HOLD for a in pre.values()):
+            c.setdefault("actions_suggested", dict(pre))
+            c["actions_default"] = {lab: E.HOLD for lab in pre}
+            c["hold_override"] = f"cả thị trường: {reason}"
+            note.append("mặc định → GIỮ")
+        elif not c.get("verdict"):
+            note.append("phán quyết đến sau ⇒ mặc định GIỮ")
+        dec = c.get("decision") or {}
+        for lab, ex in (c.get("execution") or {}).items():
+            if dec.get("source") == "default" and ex["status"] == "EXECUTING":
+                ex["status"], ex["open"] = "STOPPED_MARKET_WIDE", []
+                note.append(f"{lab} DỪNG bán mô phỏng ({ex['sold']:,}/{ex['target']:,}cp đã bán)")
+            elif ex["status"] == "DONE":
+                note.append(f"{lab} đã bán xong trước khi gộp")
+            elif dec.get("source") == "user" and ex["status"] == "EXECUTING":
+                note.append(f"{lab} vẫn bán theo LỆNH ANH")
+        if c.get("execution") and c["status"] == "EXECUTING" \
+                and not any(ex["status"] == "EXECUTING" for ex in c["execution"].values()):
+            c["status"] = "HOLD"
+        rows.append((tk, t0, note))
+    if not rows:
+        return
+    _stats(st)["market_wide_relabel"] += len(rows)
+    log_event(deps.state_dir, day, "MARKET_WIDE_RELABEL", now=now, reason=reason,
+              cases={tk: {"t0": _iso(t0), "note": note} for tk, t0, note in rows})
+    enqueue(st, f"🌐 GẮN NHÃN CẢ THỊ TRƯỜNG cho ca đã mở riêng ({reason}):\n" + "\n".join(
+        f"  • {tk} (T0 {t0:%H:%M}): " + ("; ".join(note) or "ghi nhãn") for tk, t0, note in rows)
+        + f"\n  ⇒ KHÔNG tự bán các ca này; lệnh của anh vẫn được tôn trọng. ({SHADOW_NOTE})",
+        mention=True, now=now)
+
+
+def _hold_override_reason(case, deferred):
+    """(A)/(C) lý do mặc định bị ép GIỮ (thay vì theo phán quyết) → chuỗi | None."""
+    if case.get("market_wide"):
+        return f"cả thị trường: {case['market_wide']['reason']}"
+    if deferred:
+        return "hoãn sang phiên sau ⇒ KHÔNG tự bán qua ATO; xét lại lúc mở phiên (anh/agent quyết)"
+    return None
+
+
+def _eod_oos(st, now, deps):
+    """(D) Từ EOD_OOS_AT: ghi 1 dòng EOD_OOS/ngày với vni_day + ret_close (giá lúc ghi / TC) cho mọi
+    ca + mã gộp ⇒ ca live tích luỹ thành bộ OOS thật (chấm T+k sau từ giá ngày). At-least-once: bị
+    cắt giữa log và lưu state ⇒ có thể lặp dòng — dedupe theo (ngày, mã) khi đọc."""
+    if now.time() < EOD_OOS_AT or st.get("eod_oos_logged"):
+        return
+    day = now.date()
+    vl, vr = deps.market.vni(now)
+    vni_day = (vl / vr - 1) if (vl and vr) else None
+    rows = []
+    mw = st.get("market_wide") or {}
+    for tk in list(st["cases"]) + [t for t in mw if t not in st["cases"]]:
+        if deps.over_budget():
+            log_event(deps.state_dir, day, "BUDGET", now=now, where="eod_oos", ticker=tk)
+            return
+        q = deps.market.quote(tk)
+        last, ref = q.get("last"), q.get("ref")
+        row = {"ticker": tk, "exchange": q.get("exchange"), "last": last, "ref": ref,
+               "ret_close": (last / ref - 1) if (last and ref and not q.get("error")) else None}
+        c = st["cases"].get(tk)
+        if c is not None:
+            tr, vv, dec = c.get("trigger") or {}, c.get("verdict") or {}, c.get("decision") or {}
+            row.update({"kind": "case", "t0": c["t0"], "carryover_from": c.get("carryover_from"),
+                        "trig_ret": tr.get("ret"), "trig_idio": tr.get("idio"), "trig_vni": tr.get("vni_ret"),
+                        "at_floor": tr.get("at_floor"), "market_wide": c.get("market_wide"),
+                        "late": c.get("late"), "reply_deferred": c.get("reply_deferred"),
+                        "verdict": vv.get("label"), "verdict_source": vv.get("source"),
+                        "actions_default": c.get("actions_default"),
+                        "actions_suggested": c.get("actions_suggested"),
+                        "hold_override": c.get("hold_override"), "decision_source": dec.get("source"),
+                        "status": c.get("status"),
+                        "holdings": {lab: h.get("qty") for lab, h in (c.get("holdings") or {}).items()},
+                        "execution": {lab: {"status": ex["status"], "sold": ex["sold"], "target": ex["target"],
+                                            "avg": E.avg_price(ex)} for lab, ex in (c.get("execution") or {}).items()}})
+        else:
+            m = mw[tk]
+            row.update({"kind": "market_wide", "t0": m.get("first"), "trig_ret": m.get("ret"),
+                        "trig_idio": m.get("idio"), "trig_vni": m.get("vni_ret"), "at_floor": m.get("at_floor"),
+                        "market_wide": {"reason": m.get("reason")}, "not_individual": m.get("not_individual"),
+                        "holdings": m.get("held")})
+        rows.append(row)
+    log_event(deps.state_dir, day, "EOD_OOS", now=now, vni_day=vni_day, vni=[vl, vr], close_asof=_iso(now),
+              rows=rows)
+    st["eod_oos_logged"] = _iso(now)
 
 
 def _eod_summary(st, now, deps):
@@ -1229,8 +1371,11 @@ def _run_reminder(now, deps):
         if c.get("reply_deferred") and not c.get("decision") and c.get("reply_deadline"):
             acts = ", ".join(f"{lab} {E.ACTION_VN[a]}" for lab, a in (c.get("actions_default") or {}).items())
             vv = c.get("verdict") or {}
+            sug = ", ".join(f"{lab} {E.ACTION_VN[a]}" for lab, a in (c.get("actions_suggested") or {}).items())
             if enqueue(st, f"⏰ NHẮC 08:30 — {tk}: phán quyết {E.VERDICT_VN.get(vv.get('label'), '?')} "
-                           f"({vv.get('source')}); mặc định [{acts or 'không giữ'}] sẽ áp lúc "
+                           f"({vv.get('source')})" + (f" gợi ý [{sug}] — KHÔNG tự áp ({c.get('hold_override')}), "
+                                                      f"XÉT LẠI lúc mở phiên" if sug else "")
+                       + f"; mặc định [{acts or 'không giữ'}] sẽ áp lúc "
                            f"{_p(c['reply_deadline']):%H:%M} nếu anh không trả lời. Lệnh: {_reply_cmds(tk)}",
                        mention=True, key=f"remind:{tk}:{day}", now=now):
                 n += 1
@@ -1253,6 +1398,7 @@ def _run_locked(now, deps):
         pending_verdict = not case.get("verdict") and case.get("investigation")
         if (case.get("status") not in TERMINAL or pending_verdict) and tk not in opened:
             process_case(case, now, deps, st)
+    _eod_oos(st, now, deps)
     _eod_summary(st, now, deps)
     _save(deps, day, st)
     flush_outbox(st, deps, now)
