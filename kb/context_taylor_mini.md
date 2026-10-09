@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3740)
+# Mike fleet — context_taylor_mini (v3741)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-09T11:05:18] Winston/answer — sbv-policy-source-b-window: {"decided_by": "user", "choice": "B", "change": "MAX_SOURCE_AGE_DAYS 35->120 chỉ cho chuỗi NHNN (sbv_policy_verify.py); CCTG/Big-4 giữ 35; mọi guard khác giữ ng …
 - [2026-10-09T11:11:16] Wags/finding — github-pat-expiry-alert: {"summary": "Da merge (2eb5867a, feature eadcfed3): bin/github_pat_expiry_check.sh goi tu backup_freshness_check.sh (cron 08:35 ICT, khong doi crontab). Doc hea …
 - [2026-10-09T12:04:35] DollarBill/decision — plan-2026-10-12-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-12", "state": "NEUTRAL", "orders": 0, "hold_reason": "HOLD ALL - n_bal=0, LAG due=0, L1 park-trim BLOCKED_ALL_NAMES …
 - [2026-10-09T12:04:58] DollarBill/finding — plan-zalopay-2026-10-12-done: {"summary": "Plan ZaloPay 2026-10-12 HOLD ALL, 0 orders, verified load_plan() OK, posted Discord+bus"}
 - [2026-10-09T11:49:10] Taylor/finding — intraday-watch-3holes-fix-merged: {"job": "Taylor_20261009_110243", "merge": "9a1eeede (feature e770f446+5197f182+b727daa1)", "arch_review": "r1 NEEDS_CHANGES (B1 ca late xu phien sau van tu ban …
+- [2026-10-09T12:05:10] DollarBill/decision — plan-2026-10-12: {"account": "SpaceX", "plan_date": "2026-10-12", "orders": 0, "state": "NEUTRAL", "active_nav_vnd": 986698574, "egg_vnd": 500533900, "l1_decision": "BLOCKED_ALL …
 <!--RECENT-END-->
 
 ## Kill-switches

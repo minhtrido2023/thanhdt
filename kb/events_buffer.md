@@ -788,3 +788,6 @@
 - [2026-10-09T12:04:53Z] Taylor/heartbeat — Taylor_20261009_110243: {"status": "in_progress", "note": "PHAN 2 stage1 dang chay (22 shard new/old code, universe v2 NAV 50 ty); PNJ control 3/3 tai tao"}
 - [2026-10-09T12:04:55Z] Taylor/heartbeat — Taylor_20261009_110243: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20261009_110243", "source": "watcher"}
 - [2026-10-09T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-10-09T12:05:32Z
+- [2026-10-09T12:05:10Z] DollarBill/decision — plan-2026-10-12: {"account": "SpaceX", "plan_date": "2026-10-12", "orders": 0, "state": "NEUTRAL", "active_nav_vnd": 986698574, "egg_vnd": 500533900, "l1_decision": "BLOCKED_ALL_NAMES", "l2_decision": "NO_TRIGGER", "capit_sessions_held": 56, "summary": "HOLD ALL, 0 lenh. n_bal=0, LAG due=0. L1 park-trim blocked 4 phien lien tiep (5 ma duoi 1 lo). CAPIT 56 phien qua moc T60, theo doi."}
