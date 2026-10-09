@@ -275,9 +275,11 @@ def wired_into_dispatch_completion():
 
 
 def _bg_region(lines):
-    """Chỉ xét thân _bg_wrapper() — writer $logfile ngoài đó (vd $logfile.workerpid trong
-    _hb_aware_timeout) không liên quan tới thứ tự chụp/ghi ở đường hoàn tất."""
-    i = next(i for i, ln in enumerate(lines) if re.match(r"\s*_bg_wrapper\(\)\s*\{", ln))
+    """Chỉ xét thân _bg_wrapper_run() — writer $logfile ngoài đó (vd $logfile.workerpid trong
+    _hb_aware_timeout) không liên quan tới thứ tự chụp/ghi ở đường hoàn tất.
+    Từ 99742afe (telemetry theo job) `_bg_wrapper()` chỉ còn là vỏ 8 dòng gọi `_bg_wrapper_run`
+    rồi ghi telemetry; thân vòng attempt + đường hoàn tất nằm ở `_bg_wrapper_run()`."""
+    i = next(i for i, ln in enumerate(lines) if re.match(r"\s*_bg_wrapper_run\(\)\s*\{", ln))
     j = next(j for j in range(i + 1, len(lines)) if lines[j].rstrip() == "  }")
     return i, j
 
