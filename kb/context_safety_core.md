@@ -16,12 +16,16 @@ leverage trap + capital market extraction — xem KNOWLEDGE.md §6).
 Taylor (đặt rule/`trading_rules.json`) → DollarBill (lập plan, **user duyệt**) → Mafee (chỉ thực thi
 đúng plan đã duyệt, KHÔNG tự nghĩ/chế lệnh). Thay đổi rule áp vào LIVE luôn cần user duyệt.
 
-## 2 tài khoản LIVE hiện tại (2026-07-17)
+## 2 tài khoản LIVE hiện tại (2026-07-17, cập nhật excluded_tickers 2026-10-10)
 - **SpaceX** — DNSE `0002023347`, có margin, live từ 2026-07-01.
 - **ZaloPay** — DNSE `0001743768` (tên cũ `dnse_main`), **cash-only** (không margin), live từ
   2026-07-06. Có `excluded_tickers: ["DGC"]` (vị thế legacy, hạn chế giao dịch HOSE + vụ án hình
   sự lãnh đạo — Taylor giữ vì lý do đầu tư, KHÔNG rebalance qua bot). Sizing chiến lược phải dùng
   `active_nav` (loại trừ excluded), không dùng total NAV — `bin/compute_active_nav.py --account X`.
+- 🆕 **PNJ EXCLUDED Ở CẢ 2 ACCOUNT** (SpaceX + ZaloPay) từ **2026-09-30** — user chọn option A
+  trên bus question `pnj-trong-ro-custom30v-live-can-user-duyet-chan` (hạ bậc AMBIGUOUS→NON do
+  công bố DN 25-27/09; 0 vị thế thật tại thời điểm loại). Review trigger = PNJ công bố BCTC Quý
+  3/2026, KHÔNG tự động khôi phục dù thấy signal đẹp.
 
 ## Idempotent side-effects (nguyên tắc, không phải chi tiết implementation)
 Bất kỳ script nào gọi hệ thống ngoài có side-effect thật (đặt lệnh, gửi tin) phải chịu được bị

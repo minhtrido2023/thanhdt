@@ -13,20 +13,19 @@
 ## V2.4 — chiến lược production (tóm tắt, không phải phương pháp)
 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo 1/PE+1/PCF) + **LAG** (PEAD/earnings drift).
 Allocator `w_LAG` theo regime: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-**NEUTRAL parking = custom30V**, target **80%** phần idle cash khi BAL/LAG rỗng (cấu hình **F1**,
-user chốt 2026-08-04, thay mức 70% cũ — `trading_rules.json` v2.3 `neutral_parking`). Số đúng phải
-trích (cùng 1 vintage `universe_pit`/`LAG_ADV_BASIS=price`, nguồn
-`agents/Taylor/research/park_wiring_two_options_20260804.md`): **70% = CAGR 28,86% / Sharpe 1,90 /
-MaxDD −17,8% / Calmar 1,62** · **80% (F1) = 29,85% / 1,87 / −18,3% / Calmar 1,63** (đỉnh Calmar cả
-dải) · 85% = 30,51% / 1,86 / −18,9% / 1,62. **KHÔNG trích bảng cũ** `measured_tradeoff_job_130720`
-(Sharpe 1,78 vs 1,66 / DD −16,5%) — vintage 07-03 khác cơ sở và không hề có mức 80%.
-Đổi target khỏi **80%** cần field `risk_dial_confirmed_by_user` + `risk_dial_warning_acknowledged`
-trong `trading_rules.json`, thiếu 1 trong 2 → Mafee tự block plan. Plan chạy đúng mặc định 80%
-thì **không cần** 2 field đó.
-✅ **Đồng bộ engine xong 2026-08-04T11:34 ICT**: `golive_recommend_v23.py:96 ETF_PARK` đổi
-`{3:0.7}`→`{3:0.8}` (user xác nhận qua Mike) — đường MUA và đường BÁN (L1) giờ cùng nhắm 0,80.
-Còn nợ xác minh: lần chạy live kế tiếp (09:05 ICT) phải in ra `etf_park_frac=0.8` trong
-`golive_v23_status.json` — kiểm tra thật, đừng suy từ việc đã đổi dòng code.
+🆕 **NEUTRAL parking = custom30V, target LIVE = 0% (TẮT) từ 2026-10-01** (user chốt 10-01 10:26
+ICT: "Park 0% chốt. Chỉ thay đổi khi lãi suất huy động có xu hướng hạ"). `trading_rules.json
+neutral_parking.default_park_of_idle_pct=0.0` là NGUỒN SỰ THẬT DUY NHẤT cho cả 3 rail (R1 mua
+`ETF_PARK`, R2 bán `compute_park_trim.py` — đọc trực tiếp field này từ commit `adb125b7` 09-27,
+KHÔNG còn hardcode, R3 policy) — không cần verify từng rail riêng, chỉ cần verify
+`trading_rules.json` đúng 0.0. Trigger quay lại park>0 = lãi huy động CÓ XU HƯỚNG HẠ (Big-4 12M
+tháng này < tháng trước HOẶC CCTG đợt mới < đợt trước, cron tuần Thứ Hai 08:05 ICT cảnh báo) ⇒
+CHỈ CẢNH BÁO user, KHÔNG tự khôi phục park. *(Lịch sử knob, KHÔNG phải trạng thái hiện tại —
+0,70→0,80 (08-04)→0,30 (09-27)→**0,0 (10-01, LIVE)**; chi tiết số liệu từng mức:
+`kb/KNOWLEDGE.md` §1 + `kb/projects/r3-pin-history.md`.)*
+Đổi target khỏi mặc định hiện tại (0,0) cần field `risk_dial_confirmed_by_user` +
+`risk_dial_warning_acknowledged` trong `trading_rules.json`, thiếu 1 trong 2 → Mafee tự block
+plan. Plan chạy đúng mặc định (park=0) thì **không cần** 2 field đó.
 
 ## DT5G — market regime, ĐỌC ĐÚNG BẢNG (bẫy đã gây sự cố thật)
 Chỉ đọc **`tav2_bq.vnindex_5state_dt5g_live`** qua `get_gated_state()`. **KHÔNG đọc bare
@@ -198,14 +197,13 @@ suy loại book theo tên mã (bug tái diễn 2 lần: VPB/VND 08-04, SCL 08-17
 
 ## L1 park-trim — MỖI LẦN lập plan phải chạy `compute_park_trim.py` trước (thêm 2026-08-04, ĐÃ BẬT)
 
-> **TRẠNG THÁI: BẬT từ 2026-08-04.** Cả 3 điều kiện đã đủ: (a) quant-skeptic CONFIRMED cao
-> (2026-08-04T03:16Z), (b) Mike đọc lại diff `executor.py`, (c) target 0,80 đã được ghi nhận là
-> **mặc định mới** trong `trading_rules.json` v2.3 (job `Taylor_20260804_034133`).
-> ⚠️ **Script vẫn tự in dòng "CỔNG CHƯA MỞ"** vì nó so target 0,80 với `etf_park_frac=0,70` mà
-> engine `golive_recommend_v23.py` còn publish. Dòng đó nói về **đường MUA của engine chưa đồng bộ**
-> (`neutral_parking.pending_engine_consistency`), KHÔNG phải cổng chính sách — cổng chính sách đã
-> mở. Cứ chạy và đính `park_trim_proposal` như dưới, nhưng **chép nguyên dòng cảnh báo đó vào
-> `notes` của plan** để user thấy hệ đang ở trạng thái lai (mua tới 70%, chỉ trim khi vượt 80%).
+> **TRẠNG THÁI: BẬT từ 2026-08-04, ĐÃ ĐỒNG BỘ 2026-09-27.** `compute_park_trim.py` giờ đọc target
+> trực tiếp từ `trading_rules.json neutral_parking.default_park_of_idle_pct` (commit `adb125b7`,
+> KHÔNG còn hardcode `PARK_TARGET_F1` tách biệt) — target LIVE hiện tại = **0,0** (xem mục "V2.4 —
+> chiến lược production" ở trên). ⚠️ Mục dưới mô tả quy trình/JSON mẫu từ 08-04 khi target còn
+> 0,80 — **CƠ CHẾ/QUY TRÌNH chạy script vẫn đúng y nguyên**, chỉ số target cụ thể (0,80, dòng cảnh
+> báo "CỔNG CHƯA MỞ" so 0,80 vs 0,70) đã LỖI THỜI, đọc `target_park` từ output JSON thật của lần
+> chạy, không dùng số 0,80 nhớ từ đây.
 
 **Vấn đề nó vá** (`mike/agents/Taylor/research/park_unpark_live_wiring_20260803.md` §A5): engine mô
 phỏng có BA đường vào/ra sổ PARK, live chỉ có MỘT — và nó là đường MUA. Không có đường bán nào ⇒
