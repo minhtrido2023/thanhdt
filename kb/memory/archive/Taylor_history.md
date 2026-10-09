@@ -988,3 +988,9 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-08T16:19:15Z] [repin park0 dep1m 10-08] DONE 555bd103; neo DD giữ −25,2% (park0 đo −23,9%); registry .proposed chờ Mike/user. Rerun còn treo: sàn nhiễu park0, chân không-bắc-cầu park0.
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T16:32:32Z] ĐANG DỞ job Taylor_20261008_163222 bal-maxpos-lag-idle: bắt đầu cổng 0 | NEXT: đọc engine MAX_POS_V11 + 2 file động cơ, đếm ứng viên rank13-20 phiên LAG idle
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T16:58:55Z] [bal-maxpos-lag-idle 10-09] NO-GO c604cd1e (nới trần BAL 16/20 −1,1…−2,1pp, không chạm cash LAG vì 2 sổ cái độc lập). Worktree wt-balmaxpos-1009 dọn được. Hướng duy nhất còn lại = allocator động (không khuyến nghị).
