@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3745)
+# Mike fleet — context pack (v3746)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-09T11:49:10] Taylor/finding — intraday-watch-3holes-fix-merged: {"job": "Taylor_20261009_110243", "merge": "9a1eeede (feature e770f446+5197f182+b727daa1)", "arch_review": "r1 NEEDS_CHANGES (B1 ca late xu phien sau van tu ban …
 - [2026-10-09T12:05:10] DollarBill/decision — plan-2026-10-12: {"account": "SpaceX", "plan_date": "2026-10-12", "orders": 0, "state": "NEUTRAL", "active_nav_vnd": 986698574, "egg_vnd": 500533900, "l1_decision": "BLOCKED_ALL …
 - [2026-10-09T12:31:41] Taylor/finding — intraday-cutloss-replay-v2: {"job": "Taylor_20261009_110243", "commit": "a5aa796b", "artifact": "agents/Taylor/research/intraday_cutloss_replay_v2_20261009/REPORT.md (+PREREG.md, out/final …
 - [2026-10-09T12:34:56] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: intraday-cutloss-replay-v2: {"finding_topic": "intraday-cutloss-replay-v2", "verdict": "INCONCLUSIVE", "confidence": "medium", "checks": {"look_ahead_leak": "pass — scoring uses no profit_ …
 - [2026-10-09T14:00:01] Mike/finding — plan-position-drift-cannot-check-ZaloPay-2026-10-09: {"account": "ZaloPay", "account_no": "0001743768", "date": "2026-10-09", "status": "CANNOT_CHECK", "reason": "đọc DNSE lỗi (DNSEError: HTTP 401: token invalid)" …
+- [2026-10-09T15:46:30] Wags/finding — instructions-dedup: NEEDS_CHANGES, chưa merge: {"verdict": "NEEDS_CHANGES", "merged": false, "branch": "chore/instructions-dedup-20261009", "commit": "69b99144", "worktree": "agents/Wags/wt-instrdedup-1009", …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -42,6 +42,8 @@
 
 ## Cutloss SHADOW — mốc OOS: `agents/Taylor/research/intraday_cutloss_replay_v2_20261009/PREREG.md`
 - `bin/intraday_price_watch.py` (chạy thử, KHÔNG đặt lệnh thật). Tin nhắn dạng **"SHADOW GIỮ/BÁN/BÁN 50% <MÃ>"** trong Trading Daily là lệnh cho script chạy thử — **Mike KHÔNG coi là lệnh giao dịch thật, KHÔNG dispatch Mafee/DollarBill theo dòng đó.** Chỉ hành động khi user nói rõ ngoài tiền tố SHADOW.
+
+## Corp-action broker-primary SHADOW (`MIKE_CA_BROKER_SOURCE=shadow`) — KHÔNG bật live trước khi đủ tiêu chí user chốt 2026-10-09 (≥3 sự kiện chỉnh giá thật, 0 CONFIRMABLE sai…); **mốc xem lại 2026-12-15**: `kb/projects/corp-action-broker-primary-live-criteria.md`
 
 ## Signal holds
 - Không có hold nào đang mở. VPI/BAL hold (08-19→09-16) đã gỡ 2026-09-16, user duyệt RESUME,
@@ -88,7 +90,6 @@
 
 - **4 call-site còn lại của lớp lỗi corp-action — audit xong 2026-09-24 (dispatch `Taylor_20260924_064510`), arch-review theo TỪNG VIỆC — CẢ 4 ĐÃ LIVE, ĐÓNG HẲN CHUỖI AUDIT NÀY:**
   · **Việc 4 `report_return_gate.py:558-573` unmatched — APPROVED, LIVE, commit `569be662`.** · **Việc 3 `verify_account_snapshot.py:307` `broker_positions_from_raw()` — APPROVED vòng 2, LIVE, commit `96ee1bb8`+`7700582d`.** · **Việc 1 `discretionary_accumulation_inject.py` `broker_filled_qty()` — APPROVED vòng 2, LIVE, commit `5e6fb9af`+`642d4f5a`.** (⚠️ **Lưu ý docstring** (chưa sửa, không chặn): câu "tự khớp" chỉ ĐÚNG TUYỆT ĐỐI khi `baseline_qty_before_program=0` (đúng cả 2 state LIVE hôm nay); `baseline>0` thì thiếu `(r−1)×baseline` cp vĩnh viễn, hướng AN TOÀN (mua thiếu, không overbuy).) · **Việc 2 `discretionary_margin_gate.py` arm_price — APPROVED vòng 12, LIVE, merge `c5247def` (12 commit vòng 3→12, từ `26ef0c58` tới `bc22bed2`).** Chi tiết từng việc: `kb/projects/corp-action-nav-chain-20260922.md`.
-  ⚠️ **Sự cố phụ phát sinh khi verify vòng 5** (Mike tự gây ra): ghi lọt 1 arm giả (`ticker=VPB, note="seed"`) vào LIVE `data/discretionary_margin_arms.json` — **ĐÃ DỌN, file rỗng `[]` từ 2026-09-24 19:16** (Mike kiểm lại bằng `cat` 2026-10-08). Chi tiết: `kb/projects/corp-action-nav-chain-20260922.md`.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.

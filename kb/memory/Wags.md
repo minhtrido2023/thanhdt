@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-03T08:28:35Z] [2026-10-03] Chờ Mike merge fix/report-prompt-r2-20261003 (1afc0c59, worktree agents/Wags/wt-reportr2-1003); sau merge: git worktree remove wt-reportr2-1003 (và wt-reportport-1003 nếu port đã merge)
 - [2026-10-04T02:52:44Z] [2026-10-04] Cho Mike merge fix/exdate-forecast-feed-status-20261004 (agents/Wags/wt-exdate-feed-1004) TRUOC 05/10 19:00 ICT; sau merge: git worktree remove wt-exdate-feed-1004
 - [2026-10-05T01:21:21Z] [2026-10-05] coord-2026-10-05: Q polish-chain-review-rounds-cost CHO USER (A cap cung dispatch.sh / B do retro / C arch-review gop cuoi). Da post architecture, ack suppress 3d. Neu chon A: Wags lam + arch-reviewer bat buoc. files_changed=[].
 - [2026-10-07T01:21:49Z] [2026-10-07] coord-2026-10-07: CHO USER — (1) polish-chain override a/b/c (post architecture; neu (b) Wags lam + arch-reviewer); (2) duyet merge fix/sell-split-by-loan-package-20261006 @8a669a9a (post trading_daily). Ack suppress 3d. files_changed=[].
@@ -27,3 +26,4 @@
 - [2026-10-08T14:42:20Z] [2026-10-08] context-pack-trim R2 DUNG NEEDS_CHANGES: branch chore/context-pack-trim-20261008 @e143a7cb (wt-ctxtrim-1008) CHUA merge. 1 blocker (V2.5 NO-GO mat khoi hot path) + 4 should-fix, bus finding context-pack-trim. Cho user/Mike cho 1 luot sua nho hoac bo; bo thi git worktree remove + xoa branch.
 - [2026-10-08T15:00:48Z] [2026-10-08] dispatch-token-telemetry R2 DUNG o NEEDS_CHANGES: branch feat/dispatch-token-telemetry-20261008 @eacd6dfb (wt-tokentel-1008) CHUA merge; con SF1 round_cap selfcheck do (docstring spend_report:244) + nit. Cho Mike/user cho vong 3 hoac bo.
 - [2026-10-09T09:59:14Z] [2026-10-09] selfcheck-red sweep#1: 8/10 CLOSED; OPEN annualization (no moi R&D Taylor, chu Taylor) + nav_2account (SCL ban tay 30/09, question can-user). Sweep sau: 2 cau nay OPEN lan 2 => CAN USER + post Architecture.
+- [2026-10-09T15:46:30Z] [2026-10-09] instructions-dedup DUNG NEEDS_CHANGES: branch chore/instructions-dedup-20261009 @69b99144 (wt-instrdedup-1009) CHUA merge; bus finding instructions-dedup co 8 required_change. Cho Mike/user cho 1 luot sua hoac bo (bo: git worktree remove + xoa branch).

@@ -89,3 +89,6 @@
 
 ## Archived 2026-10-06 (keep=12 days=0 require_done=False)
 - [2026-10-05T20:39:15Z] 06/10 03:45: cutloss SHADOW r2 arch APPROVED (shadow only). Mike tự vá F4/F6/F8 commit 473dfe1f trên branch feat/intraday-price-watch-20261006 (worktree agents/Taylor/wt-ipw-1006), selfcheck 270/270. CHỜ user duyệt: merge + cài cron (* 2-7 * * 1-5 run + 30 1 * * 1-5 nhắc 08:30) + chốt 4 mặc định a-d. Follow-up F1-F3/F5/F7/F9-F11 trước live; L1-L6 chặn bán thật.
+
+## Archived 2026-10-09 (keep=12 days=0 require_done=False)
+- [2026-10-08T18:15:56Z] 09/10 01:2x: Nhánh 4 xong — Taylor_20261008_172556 c8e096e7, skeptic CONFIRMED high (verify_20261008_181403). Q8/Q12 hết ý nghĩa, QF8/fc30 NO-GO hẹp, L1b chưa chứng minh (DSR<0.95), claim breadth sai OOS. CHỜ USER: duyệt sửa câu canonical breadth + .proposed registry + nhánh 5.
