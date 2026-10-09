@@ -55,8 +55,9 @@ os.environ.update({"MIKE_DRIFT_SELFCHECK": "1", "MIKE_DRIFT_EXEC_DIR": EXEC,
 # DÂY BẪY (sau sự cố 2026-10-04 10:22-10:28: đột biến `selfcheck_live_guard_off` gọi DNSE THẬT, ghi 3
 # bản positions SpaceX vào dnse_raw production). Mọi đường tới broker/quote thật trong tiến trình
 # selfcheck — kể cả khi code đích bị đột biến tắt cổng — đều nổ ở đây, KHÔNG chạm mạng/file.
-sys.path.insert(0, os.environ.get("WC_ROOT") or os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.dirname(ROOT)))))
+sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+sys.path.insert(0, wc_paths.find_wc_root(__file__))
 REAL_CALLS = []
 
 

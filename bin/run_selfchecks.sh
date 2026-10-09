@@ -57,11 +57,15 @@ mkdir -p "$MIKE/state"
 #   gác bị gỡ khỏi daily_retro.sh, `13f7bd59`) ⇒ đỏ ZOMBIE, gác một thứ không còn tồn tại.
 #   Đây đúng tiêu chí "không phải production HEAD" mà 2 lần vá trước (08-15, 08-22) đã dùng.
 #   Muốn bật lại: xoá đúng 1 dòng `grep -vE "^\./mike_paseo/"` dưới đây.
+# BỔ SUNG 2026-10-10 (weekly ops audit) — loại `archive/` (file đã archive 09-14, import hàm đã gỡ
+#   khỏi trading_bot ⇒ đỏ zombie) và `tbot/` (bot KHÁC, write-scope riêng theo tbot/README.md, cần
+#   `yaml` không có trong cả python3 lẫn wc_venv ⇒ đỏ môi trường mỗi tuần). Cùng tiêu chí trên.
 mapfile -t FILES < <(cd "$WC_ROOT" && find . \( -iname "*selfcheck*.py" -o -iname "*selfcheck*.sh" \) \
   2>/dev/null | grep -v node_modules | grep -v __pycache__ \
   | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" \
   | grep -vE "(^|/)wt-|(^|/)pending_|/\.claude/worktrees/" \
   | grep -vE "^\./mike_paseo/" \
+  | grep -vE "^\./(archive|tbot)/" \
   | grep -vE "/(run_selfchecks\.sh|selfcheck_baseline_diff\.py|selfcheck_scope_map\.sh|selfcheck_weekly_baseline_check\.sh)$" \
   | sed 's|^\./||' | sort)
 
@@ -113,6 +117,8 @@ for f in "${FILES[@]}"; do
   # tuyệt đối thì bản sao vẫn rc=124 giả — đúng lỗi đang sửa, chỉ dịch sang chỗ khác).
   case "$f" in
     *due_diligence_selfcheck.py|*merge_park_orders_selfcheck.py) t=240 ;;
+    # weekly ops audit 2026-10-10: đo tay 75s, 47/47 PASS — rc=124 dưới trần 60s là giả.
+    *dispatch_token_telemetry_selfcheck.py) t=240 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
