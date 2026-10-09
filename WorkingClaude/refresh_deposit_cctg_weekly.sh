@@ -97,12 +97,12 @@ Ghi (nếu có số xác nhận): python3 append_cctg_rate.py --series 6m --rate
 ⚠️ Nguồn đã dùng cho chuỗi 2 dùng lại được cho chuỗi 3 (sidecar URL hai chuỗi tách riêng).
 
 === CHUỖI 4: LÃI SUẤT ĐIỀU HÀNH NHNN (tái cấp vốn + tái chiết khấu; OMO nếu có) — user duyệt 2026-10-09 ===
-Script TỰ lấy số chính thức từ sbv.gov.vn (bạn KHÔNG khai số NHNN). Xem trước: python3 sbv_policy_verify.py fetch
-Việc của bạn: WebSearch >=1 nguồn ĐỘC LẬP KHÁC CHỦ với NHNN (KHÔNG phải *.sbv.gov.vn — vd báo/CTCK/vietstock), có NGÀY CỤ THỂ trong ~35 ngày, nêu RÕ lãi tái cấp vốn VÀ tái chiết khấu hiện hành (thêm lãi OMO/cầm cố giấy tờ có giá nếu bài có). Ghi đúng số bài báo nói, KHÔNG chép từ output fetch. URL phải KHÁC lần ghi trước (script tự chặn).
+Script TỰ lấy số chính thức từ sbv.gov.vn (bạn KHÔNG khai số NHNN, KHÔNG cần xem trước).
+Việc của bạn: WebSearch >=1 nguồn ĐỘC LẬP KHÁC CHỦ với NHNN (KHÔNG phải *.sbv.gov.vn, Thời báo Ngân hàng, Tạp chí Ngân hàng — vd báo/CTCK/vietstock), có NGÀY CỤ THỂ trong ~35 ngày, nêu RÕ lãi tái cấp vốn VÀ tái chiết khấu hiện hành (thêm lãi OMO/cầm cố giấy tờ có giá nếu bài có). Ghi đúng số bài báo nói. URL phải KHÁC lần ghi trước (script tự chặn).
 Ghi: python3 sbv_policy_verify.py verify --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"refi\":<X>,\"rediscount\":<Y>,\"omo\":<Z hoặc bỏ field>}, ...]'
 Script TỰ đối chiếu với NHNN và SBV_REFI_EVENTS; lệch/thiếu ⇒ nó từ chối (rc=2), KHÔNG ghi số, chỉ ghi lần thử. Gặp từ chối: ĐỪNG lách, escalate kèm nguyên văn lỗi. Lãi NHNN khác SBV_REFI_EVENTS ⇒ script tự cảnh báo 🔴; TUYỆT ĐỐI không tự sửa sbv_macro_overlay.py.
 
-CẢ 3 LỆNH TRÊN tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (MỌI chuỗi — chuỗi 1 có guard này KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
+CẢ 3 LỆNH append_* (chuỗi 1-3) tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (MỌI chuỗi — chuỗi 1 có guard này KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
 
 Idempotent — nếu hôm nay đã ghi rồi (effective_date trùng), lệnh tự SKIP rc=0, không lỗi, coi là hoàn thành bình thường. Có thể 1 chuỗi ghi được, chuỗi kia escalate — xử lý ĐỘC LẬP, không phải tất-cả-hoặc-không-gì.
 
@@ -221,6 +221,18 @@ else
 fi
 SBV_RC=$?
 echo "sbv policy step exit_code=${SBV_RC}" >> "$LOG"
+if [ "$SBV_RC" -ne 0 ]; then
+  if [ "$DRY_RUN" -eq 0 ] && [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
+    SBV_TAIL="$(tail -c 800 "$LOG")"
+    "$WORKDIR_8L/mike/bin/notify_thread.sh" \
+      "🔴 sbv_policy_verify.py LỖI (exit=${SBV_RC}, ${TODAY}) — kiểm lãi điều hành NHNN tuần này có thể KHÔNG ghi nhận/không nhắc được (data/sbv_verify_log.json hỏng? Discord lỗi?). Log: ${LOG}
+Cuối log:
+${SBV_TAIL}" \
+      trading_daily >> "$LOG" 2>&1 || true
+  else
+    echo "[--dry-run or notify_thread.sh missing] sbv policy step failed (exit=${SBV_RC}) — skipping live notify" >> "$LOG"
+  fi
+fi
 
 echo "===== deposit+CCTG weekly refresh DONE (dispatch_rc=${DISPATCH_RC}, confirmed=${CONFIRMED:-no}, trend_rc=${TREND_RC}, sbv_rc=${SBV_RC}, dry_run=${DRY_RUN}) =====" >> "$LOG"
 [ "$TREND_RC" -eq 0 ] && [ "$SBV_RC" -eq 0 ] || exit 1

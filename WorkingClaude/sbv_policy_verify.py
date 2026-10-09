@@ -34,6 +34,7 @@ Lệnh:
 import argparse
 import html
 import json
+import math
 import os
 import re
 import subprocess
@@ -51,7 +52,8 @@ from append_deposit_rate import (  # noqa: E402 — dùng lại guard đã qua 8
     _owner_group, _check_urls_not_reused, _save_last_auto_urls)
 
 OFFICIAL_URL = "https://sbv.gov.vn/vi/l%C3%A3i-su%E1%BA%A5t1"
-OFFICIAL_OWNER = "sbv.gov.vn"
+# Báo/tạp chí do chính NHNN chủ quản KHÔNG phải nguồn độc lập (arch-review r1).
+SBV_OWNED = {"sbv.gov.vn", "thoibaonganhang.vn", "tapchinganhang.gov.vn"}
 # UA trình duyệt: UA tự khai bot ("compatible; SBV-verify") bị WAF trang chủ trả "Request Rejected".
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/120.0 Safari/537.36")
@@ -61,9 +63,12 @@ RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 20.0
 STALE_DAYS = 21
 HISTORY_KEEP = 52
 
-# Ghi đè đường dẫn/HTML CHỈ cho selfcheck (một biến sót lại không được âm thầm đổi đích ghi).
-_SELFCHECK = os.environ.get("SBV_POLICY_SELFCHECK") == "1"
-DATA_DIR = (os.environ.get("SBV_POLICY_DATA_DIR") if _SELFCHECK else None) or os.path.join(HERE, "data")
+# Ghi đè đường dẫn/HTML CHỈ cho selfcheck: cần CẢ cờ VÀ data dir tạm khác data/ thật — cờ đơn
+# lẻ sót lại không được bật HTML giả/tắt notify trên log production (arch-review r1).
+_REAL_DATA = os.path.join(HERE, "data")
+_OVR = os.environ.get("SBV_POLICY_DATA_DIR") if os.environ.get("SBV_POLICY_SELFCHECK") == "1" else None
+_SELFCHECK = bool(_OVR) and os.path.realpath(_OVR) != os.path.realpath(_REAL_DATA)
+DATA_DIR = _OVR if _SELFCHECK else _REAL_DATA
 LOG_PATH = os.path.join(DATA_DIR, "sbv_verify_log.json")
 SIDECAR_PATH = os.path.join(DATA_DIR, "sbv_policy_last_auto_sources.json")
 NOTIFY = os.path.join(HERE, "mike", "bin", "notify_thread.sh")
@@ -149,11 +154,15 @@ def _migrate_legacy(old):
 
 
 def load_log():
+    """Log hỏng ⇒ raise (wrapper báo 🔴 qua SBV_RC≠0) — KHÔNG tự coi là rỗng: làm thế sẽ xoá
+    verified_at thật mà không ai biết."""
     try:
         with open(LOG_PATH, encoding="utf-8") as f:
             d = json.load(f)
     except FileNotFoundError:
         d = {}
+    if not isinstance(d, dict):
+        raise ValueError(f"{LOG_PATH}: không phải JSON object")
     if d.get("schema") != "sbv_policy_verify_v2":
         d = _migrate_legacy(d)
     return d
@@ -172,18 +181,18 @@ def save_log(d):
         raise
 
 
-def record_attempt(d, outcome, detail, at=None):
+def record_attempt(d, outcome, detail, at=None, notified=None):
     at = at or _now().isoformat(timespec="seconds")
     d["attempted_at"] = at
-    d["last_attempt"] = {"at": at, "outcome": outcome, "detail": detail}
+    d["last_attempt"] = {"at": at, "outcome": outcome, "detail": detail, "notified": notified}
     d.setdefault("history", []).append({"at": at, "outcome": outcome, "detail": detail[:300]})
     d["history"] = d["history"][-HISTORY_KEEP:]
 
 
 def _notify(msg):
-    if os.environ.get("SBV_POLICY_NO_NOTIFY") == "1" or _SELFCHECK:
+    if _SELFCHECK:  # sandbox: không bao giờ post; SIM_NOTIFY_FAIL giả lập Discord lỗi
         print(f"[no-notify] {msg}")
-        return True
+        return os.environ.get("SBV_POLICY_SIM_NOTIFY_FAIL") != "1"
     r = subprocess.run([NOTIFY, msg, "trading_daily"], capture_output=True, text=True)
     if r.returncode != 0:
         print(f"LỖI notify_thread.sh rc={r.returncode}: {r.stderr.strip()[:300]}", file=sys.stderr)
@@ -214,9 +223,9 @@ def check_sources(raw, official, today):
             owner = _owner_group(url)
         except ValueError as e:
             raise Refuse("bad_sources", str(e))
-        if owner == OFFICIAL_OWNER:
+        if owner in SBV_OWNED:
             raise Refuse("not_independent",
-                         f"{url}: thuộc {OFFICIAL_OWNER} — nguồn B phải KHÁC chủ với NHNN")
+                         f"{url}: {owner} do NHNN chủ quản — nguồn B phải KHÁC chủ với NHNN")
         try:
             sd = datetime.strptime(str(s.get("date", "")), "%Y-%m-%d").date()
         except ValueError:
@@ -228,6 +237,8 @@ def check_sources(raw, official, today):
         for k in ("refi", "rediscount"):
             try:
                 v = float(s[k])
+                if not math.isfinite(v):  # NaN/inf qua mặt phép so `>` (arch-review r1)
+                    raise ValueError(v)
             except (KeyError, TypeError, ValueError):
                 raise Refuse("bad_sources", f"{url}: thiếu/sai '{k}' ({s.get(k)!r}) — mỗi nguồn "
                                             f"phải ghi rõ số nó báo")
@@ -251,9 +262,11 @@ def _omo(sources):
         if s.get("omo") is None:
             continue
         try:
-            rep.append((_owner_group(s["url"]), float(s["omo"])))
+            v = float(s["omo"])
         except (TypeError, ValueError):
             continue
+        if math.isfinite(v):
+            rep.append((_owner_group(s["url"]), v))
     if not rep:
         return None, "not_provided"
     vals = {round(v, 3) for _, v in rep}
@@ -285,12 +298,13 @@ def cmd_verify(a):
                    f"đang {ev_rate}% (từ {ev_date}). KHÔNG tự sửa — người duyệt cập nhật "
                    f"sbv_macro_overlay.py rồi chạy lại daily refresh. Nguồn: {OFFICIAL_URL} + "
                    f"{', '.join(urls)}")
-            _notify(msg)
-            raise Refuse("rate_change_detected", msg)
+            e = Refuse("rate_change_detected", msg)
+            e.notified = _notify(msg)
+            raise e
     except Exception as e:  # noqa: BLE001 — mọi kết cục không-verified đều phải để lại attempt
         if not isinstance(e, Refuse):
             e = Refuse("internal_error", repr(e))
-        record_attempt(d, e.outcome, e.detail)
+        record_attempt(d, e.outcome, e.detail, notified=getattr(e, "notified", None))
         save_log(d)
         print(f"REFUSE {e.outcome}: {e.detail}", file=sys.stderr)
         print(f"verified_at GIỮ NGUYÊN = {d.get('verified_at')}; attempted_at = {d['attempted_at']}")
@@ -320,8 +334,9 @@ def cmd_finalize(a):
     d = load_log()
     start = datetime.strptime(a.run_start, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     att = d.get("attempted_at")
+    queued = str(a.dispatch_rc) == "5"  # usage-limit: agent sẽ tự chạy lại sau, đừng nhắc oan
     if not att or datetime.fromisoformat(att) < start:
-        record_attempt(d, "no_verify_call",
+        record_attempt(d, "dispatch_queued" if queued else "no_verify_call",
                        f"không có lần gọi verify nào từ {a.run_start} (dispatch_rc={a.dispatch_rc})")
         save_log(d)
     la = d.get("last_attempt") or {}
@@ -330,8 +345,12 @@ def cmd_finalize(a):
     print(f"sbv_policy: verified_at={va} (age={age}d) attempted_at={d.get('attempted_at')} "
           f"last_outcome={la.get('outcome')}")
     stale = age is None or age > STALE_DAYS
-    # rate_change_detected đã có cảnh báo 🔴 riêng lúc verify — không nhắc lần 2.
-    if (la.get("outcome") == "verified" and not stale) or la.get("outcome") == "rate_change_detected":
+    out = la.get("outcome")
+    if out == "rate_change_detected" and not la.get("notified"):
+        # 🔴 lúc verify chưa tới được người (Discord lỗi) ⇒ gửi lại ở đây, không im lặng.
+        return 0 if _notify(str(la.get("detail"))) else 1
+    # đã 🔴 thành công / đã verified còn tươi / dispatch xếp hàng chưa quá hạn ⇒ không nhắc.
+    if out == "rate_change_detected" or (out in ("verified", "dispatch_queued") and not stale):
         return 0
     ok = _notify(f"⚠️ Lãi điều hành NHNN: lượt kiểm tuần KHÔNG xác nhận được "
                  f"({la.get('outcome')}: {str(la.get('detail'))[:160]}). Kiểm thật cuối "

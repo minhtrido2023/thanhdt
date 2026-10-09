@@ -188,8 +188,94 @@ def t_env_override_needs_selfcheck_flag():
        f"SBV_POLICY_DATA_DIR không có cờ selfcheck phải bị bỏ qua: {r.stdout}{r.stderr}")
 
 
+def t_review_r1():
+    """Các lỗ arch-review r1 bắt được: NaN/inf, báo NHNN chủ quản, 🔴 không tới người, rc=5, log hỏng."""
+    bad = [("bad_sources", '[{"publisher":"p","url":"https://vietstock.vn/n1","date":"%s","refi":NaN,"rediscount":3.0}]'),
+           ("bad_sources", '[{"publisher":"p","url":"https://vietstock.vn/n1","date":"%s","refi":4.5,"rediscount":"nan"}]'),
+           ("bad_sources", '[{"publisher":"p","url":"https://vietstock.vn/n1","date":"%s","refi":"inf","rediscount":3.0}]'),
+           ("not_independent", json.dumps([src("https://thoibaonganhang.vn/x")]).replace(TODAY.isoformat(), "%s")),
+           ("not_independent", json.dumps([src("https://tapchinganhang.gov.vn/x")]).replace(TODAY.isoformat(), "%s"))]
+    for outcome, raw in bad:
+        b = Box()
+        json.dump(LEGACY, open(os.path.join(b.d, "sbv_verify_log.json"), "w"))
+        raw = raw.replace("%s", (TODAY - timedelta(days=3)).isoformat()) if "%s" in raw else raw
+        rc, out = b.run("verify", "--sources", raw)
+        lg = b.log()
+        ok(rc == 2 and lg["last_attempt"]["outcome"] == outcome, f"{outcome}: rc={rc} {out}")
+        ok(lg["verified_at"].startswith("2026-06-27"), f"{outcome}: đẩy verified_at")
+        b.close()
+    # 🔴 không tới người ⇒ finalize gửi lại; tới rồi ⇒ finalize im
+    for fail, expect_resend in ((True, True), (False, False)):
+        b = Box()
+        b.set_page(page(refi="5,000"))
+        env = {"SBV_POLICY_SIM_NOTIFY_FAIL": "1"} if fail else {}
+        start = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        b.run("verify", "--sources", json.dumps([src("https://vietstock.vn/r", refi=5.0)]), extra_env=env)
+        ok(b.log()["last_attempt"]["notified"] is (not fail), f"notified phải = {not fail}")
+        rc, out = b.run("finalize", "--run-start", start)
+        ok(("🔴" in out) is expect_resend, f"resend={expect_resend} sai: {out}")
+        b.close()
+    # dispatch rc=5 (xếp hàng usage-limit) với verified còn tươi ⇒ ghi attempt, KHÔNG nhắc
+    b = Box()
+    b.verify([src("https://vietstock.vn/q")])
+    import time; time.sleep(1.1)
+    start = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    rc, out = b.run("finalize", "--run-start", start, "--dispatch-rc", "5")
+    ok(rc == 0 and "[no-notify]" not in out and b.log()["last_attempt"]["outcome"] == "dispatch_queued",
+       f"rc=5 phải ghi dispatch_queued, không nhắc: {out}")
+    b.close()
+    # log hỏng ⇒ rc≠0, KHÔNG ghi đè (giữ bằng chứng), không coi là rỗng
+    b = Box()
+    lp = os.path.join(b.d, "sbv_verify_log.json")
+    open(lp, "w").write("{not json")
+    for args in (("verify", "--sources", json.dumps([src("https://vietstock.vn/c")])),
+                 ("finalize", "--run-start", "2026-01-01T00:00:00Z")):
+        rc, out = b.run(*args)
+        ok(rc not in (0, 2) and open(lp).read() == "{not json", f"log hỏng {args[0]}: rc={rc} {out[-200:]}")
+    b.close()
+
+
+def t_flag_alone_does_not_enable_fakes():
+    for extra in ({}, {"SBV_POLICY_DATA_DIR": os.path.join(HERE, "data")}):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("SBV_POLICY_")}
+        env.update(SBV_POLICY_SELFCHECK="1", SBV_POLICY_FAKE_HTML="/nonexistent", **extra)
+        r = subprocess.run([sys.executable, "-c", "import sbv_policy_verify as m; print(m._SELFCHECK, m.LOG_PATH)"],
+                           capture_output=True, text=True, env=env, cwd=HERE)
+        ok(r.stdout.split()[0] == "False" and r.stdout.split()[1] == os.path.join(HERE, "data", "sbv_verify_log.json"),
+           f"cờ selfcheck không kèm data dir tạm phải KHÔNG bật fake: {extra} -> {r.stdout}{r.stderr}")
+
+
+def t_wrapper_block():
+    """Khối finalize cuối refresh_deposit_cctg_weekly.sh: đúng lệnh, dry-run chỉ fetch, notify khi
+    SBV_RC≠0 (không ở dry-run), exit code gộp TREND_RC+SBV_RC."""
+    text = open(os.path.join(HERE, "refresh_deposit_cctg_weekly.sh"), encoding="utf-8").read()
+    i = text.index("# --- SBV policy rates: finalize ALWAYS runs")
+    block = text[i:]
+    for dry, sbv_rc, trend_rc, want_exit, want_notify in (
+            (0, 0, 0, 0, False), (0, 1, 0, 1, True), (0, 0, 1, 1, False), (1, 0, 0, 0, False), (1, 2, 0, 1, False)):
+        d = tempfile.mkdtemp(prefix="sbvwrap_")
+        os.makedirs(os.path.join(d, "mike", "bin"))
+        fakepy = os.path.join(d, "fakepy")
+        open(fakepy, "w").write(f'#!/bin/bash\necho "ARGS $*" >> {d}/calls\nexit {sbv_rc}\n')
+        nt = os.path.join(d, "mike", "bin", "notify_thread.sh")
+        open(nt, "w").write(f'#!/bin/bash\necho "NOTIFY $2" >> {d}/calls\n')
+        os.chmod(fakepy, 0o755); os.chmod(nt, 0o755)
+        pre = (f'DRY_RUN={dry}; PY={fakepy}; LOG={d}/log; RUN_START_UTC=2026-10-12T01:05:00Z; '
+               f'DISPATCH_RC=0; TREND_RC={trend_rc}; WORKDIR_8L={d}; TODAY=2026-10-12; CONFIRMED=yes\n')
+        r = subprocess.run(["bash", "-c", pre + block], capture_output=True, text=True, cwd=d)
+        calls = open(os.path.join(d, "calls")).read() if os.path.exists(os.path.join(d, "calls")) else ""
+        tag = f"dry={dry} sbv={sbv_rc} trend={trend_rc}"
+        ok(r.returncode == want_exit, f"wrapper {tag}: exit {r.returncode} != {want_exit} {r.stderr}")
+        want_args = "ARGS sbv_policy_verify.py fetch" if dry else \
+            "ARGS sbv_policy_verify.py finalize --run-start 2026-10-12T01:05:00Z --dispatch-rc 0"
+        ok(want_args in calls, f"wrapper {tag}: lệnh sai: {calls}")
+        ok(("NOTIFY trading_daily" in calls) is want_notify, f"wrapper {tag}: notify sai: {calls}")
+        shutil.rmtree(d, ignore_errors=True)
+
+
 if __name__ == "__main__":
     for t in (t_fetch_parse, t_legacy_migration_and_success, t_refusals_never_advance_verified,
-              t_finalize, t_env_override_needs_selfcheck_flag):
+              t_finalize, t_env_override_needs_selfcheck_flag, t_review_r1,
+              t_flag_alone_does_not_enable_fakes, t_wrapper_block):
         t()
     print(f"PASS {_n} assertions (TZ={os.environ.get('TZ', '<unset>')})")

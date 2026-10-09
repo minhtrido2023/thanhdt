@@ -176,7 +176,8 @@ try:
     sources.append({"name": "sbv_refi_events", "as_of": str(last_ev), "age": sbv_age,
                     "ok": True, "detail": f"refi={refi_now}% last_event={last_ev} age={sbv_age}d (INFO)"})
     # sbv_verify_reminder: fire based on last_verified in sbv_verify_log.json (updated by
-    # check_sbv_weekly.sh every Friday), not on the age of the last SBV event.
+    # sbv_policy_verify.py, Monday 08:05 chain of refresh_deposit_cctg_weekly.sh since 2026-10-09;
+    # = date of the last REAL cross-checked verify), not on the age of the last SBV event.
     # Weekly check → threshold is 14 calendar days (2 weeks = enough buffer for Friday cron).
     sbv_verify_log_path = os.path.join(DATADIR, "sbv_verify_log.json")
     verify_age_days = None
@@ -191,12 +192,12 @@ try:
         # No verify log yet — fall back to legacy: warn if SBV event age > SBV_STALE_DAYS
         if sbv_age > SBV_STALE_DAYS:
             add_check("sbv_verify_reminder", False, "INFO",
-                      f"last SBV refi event {sbv_age}d old ({refi_now}%) — run check_sbv_weekly.sh "
+                      f"last SBV refi event {sbv_age}d old ({refi_now}%) — run sbv_policy_verify.py "
                       f"to initialise sbv_verify_log.json (no verify record found)")
     elif verify_age_days > SBV_VERIFY_MAX_DAYS:
         add_check("sbv_verify_reminder", False, "INFO",
                   f"last SBV verify {verify_age_days}d ago (> {SBV_VERIFY_MAX_DAYS}d) — "
-                  f"check_sbv_weekly.sh should run Fridays; current rate {refi_now}% (event: {last_ev})")
+                  f"sbv_policy_verify.py (Mon 08:05) not verified since; current rate {refi_now}% (event: {last_ev})")
 except Exception as e:
     sources.append({"name": "sbv_refi_events", "as_of": None, "age": None, "ok": False,
                     "detail": f"unreadable: {e}"})
