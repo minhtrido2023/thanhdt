@@ -332,7 +332,8 @@
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
-    "cron `52 1 * * 1-5` paper_main_probe_plan.py"
+    "cron `52 1 * * 1-5` paper_main_probe_plan.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T0",
    "tier_parent": "simulate_holistic_nav.py",
@@ -2434,6 +2435,7 @@
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7 * * * *` consolidate.sh"
    ],
    "tier": "T0",
@@ -2694,7 +2696,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/check_report_cadence.sh",
@@ -2862,7 +2865,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -3665,6 +3669,7 @@
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 23 * * *` snapshot_corp_action_daily.py",
     "cron `50 7 * * 1-5` session_announce.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7 * * * *` consolidate.sh",
     "cron `7,27,47 * * * *` fiinprox_harvest_tick.sh",
     "hook `SessionStart` session_start.sh"
@@ -3851,7 +3856,8 @@
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
-    "cron `5 2 * * 1-5` run_bot.sh"
+    "cron `5 2 * * 1-5` run_bot.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/bq_freshness_check.sh",
@@ -3890,7 +3896,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -3925,7 +3932,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -3960,7 +3968,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -4604,7 +4613,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -4613,8 +4623,8 @@
   },
   "mike/bin/jobs.sh": {
    "blast_tier": "T0",
-   "depth": 2,
-   "parent": "mike/bin/dispatch.sh",
+   "depth": 1,
+   "parent": "mike/bin/selfcheck_red_owner_sweep.sh",
    "roots": [
     "cron `*/10 * * * *` resume_pending.py",
     "cron `0 19 * * *` kb_nightly.sh",
@@ -4625,7 +4635,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -4691,6 +4702,7 @@
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7 * * * *` consolidate.sh"
    ],
    "tier": "T0",
@@ -4889,6 +4901,7 @@
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7 * * * *` consolidate.sh",
     "hook `Stop` stop.sh",
     "hook `UserPromptSubmit` user_prompt_submit.sh"
@@ -5168,6 +5181,7 @@
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7 * * * *` consolidate.sh"
    ],
    "tier": "T0",
@@ -5228,6 +5242,7 @@
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7 * * * *` consolidate.sh"
    ],
    "tier": "T0",
@@ -5318,6 +5333,7 @@
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 23 * * *` snapshot_corp_action_daily.py",
     "cron `50 7 * * 1-5` session_announce.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7,27,47 * * * *` fiinprox_harvest_tick.sh",
     "hook `SessionStart` session_start.sh"
    ],
@@ -5900,7 +5916,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -6013,7 +6030,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -6244,7 +6262,8 @@
    "depth": 0,
    "parent": "(root)",
    "roots": [
-    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh"
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "(root)",
@@ -6617,7 +6636,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -7047,7 +7067,8 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T2",
    "tier_parent": "mike/bin/dispatch.sh",
@@ -7796,7 +7817,8 @@
     "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
    ],
    "tier": "T1",
    "tier_parent": "sync_bq_cache_daily.sh",
@@ -9226,6 +9248,7 @@
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 23 * * *` snapshot_corp_action_daily.py",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `7,27,47 * * * *` fiinprox_harvest_tick.sh"
    ],
    "tier": "T0",
@@ -9234,7 +9257,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-10-09T09:47:04Z",
+ "generated_at": "2026-10-09T09:52:14Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -10314,6 +10337,16 @@
    ],
    "kind": "cron",
    "schedule": "30 9 * * 5",
+   "script": "selfcheck_red_owner_sweep.sh",
+   "tier": "T2"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/selfcheck_red_owner_sweep.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_red_owner_sweep.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/selfcheck_red_owner_sweep.sh"
+   ],
+   "kind": "cron",
+   "schedule": "52 11 * * 5",
    "script": "selfcheck_red_owner_sweep.sh",
    "tier": "T2"
   },
