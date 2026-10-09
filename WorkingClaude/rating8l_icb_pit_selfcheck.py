@@ -177,7 +177,32 @@ EXP = _artifact("R8L_EXP_CSV", "mike", "agents", "Taylor", "research",
 #     R8L_CTL_CSV=<pre-merge.csv> $DNA_PYEXE rating8l_icb_pit_selfcheck.py
 _CTL_IS_STALE = (os.path.exists(CTL) and os.path.exists(EXP)
                  and open(CTL, "rb").read() == open(EXP, "rb").read())
-if os.path.exists(CTL) and os.path.exists(EXP):
+# ⚠️ CHÂN CONTROL KHÁC VINTAGE (đo 2026-10-09, selfcheck-red 10-03→10-09). Guard byte-identical ở
+# trên chỉ bắt đúng MỘT dạng hết hạn. Canonical build lại 2026-10-03 (vintage mới, +dòng) ⇒ không
+# còn trùng EXP nhưng CŨNG không phải control ⇒ T7/T7b/c/d so 2 vintage khác nhau = ≥2 trục, đỏ giả
+# (left_only 15 / right_only 9). Bit cơ học: control hợp lệ DUY NHẤT là file có md5 đúng
+# `control_md5` mà chính lần đo ghi vào `ab_summary.json` cạnh EXP. Không khớp + không trùng EXP
+# ⇒ SKIP cả khối T7 và in md5 thật, KHÔNG so. Bản control đó (68ae047b…) không còn trên đĩa —
+# muốn chạy lại T7 thì R8L_CTL_CSV=<file có đúng md5 đó>.
+def _md5(fp):
+    import hashlib
+    return hashlib.md5(open(fp, "rb").read()).hexdigest()
+
+
+_AB = os.path.join(os.path.dirname(EXP), "ab_summary.json")
+_CTL_WRONG_VINTAGE = False
+if os.path.exists(CTL) and os.path.exists(EXP) and not _CTL_IS_STALE and os.path.exists(_AB):
+    import json as _json
+    _abj = _json.load(open(_AB))
+    ok("T7-artifact EXP còn nguyên md5 đã công bố (ab_summary.new_md5)",
+       _md5(EXP) == _abj["new_md5"], f"{_md5(EXP)} vs {_abj['new_md5']}")
+    _CTL_WRONG_VINTAGE = _md5(CTL) != _abj["control_md5"]
+if _CTL_WRONG_VINTAGE:
+    skip("T7 real A/B artifact comparison (T7/T7b/T7c/T7d/T7e)",
+         f"CTL {CTL} md5 {_md5(CTL)[:8]} ≠ control_md5 {_abj['control_md5'][:8]} trong "
+         f"{os.path.basename(_AB)} và ≠ EXP ⇒ khác vintage, so sẽ lệch ≥2 trục. "
+         "R8L_CTL_CSV=<file đúng md5 control> để chạy.")
+elif os.path.exists(CTL) and os.path.exists(EXP):
     a = pd.read_csv(CTL); b = pd.read_csv(EXP)
     K = ["ticker", "eff_date", "q_time"]
     m = a.merge(b, on=K, how="outer", suffixes=("_c", "_n"), indicator=True)

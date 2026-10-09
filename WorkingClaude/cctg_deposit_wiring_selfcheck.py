@@ -43,6 +43,14 @@ sys.path.insert(0, HERE)
 import deposit_rate_vn as dep        # noqa: E402  (pre-register THIS checkout's copy first)
 import cctg_rate_vn as cctg          # noqa: E402
 
+# Fixture = CHỈ anchor đông cứng 2026-09-30 (7,5%) trong code, KHÔNG đọc CSV append-only SỐNG
+# `data/cctg_rate_vn_events.csv`. Dòng 2026-10-05 (7,4%, rebase 6M->12M) thêm vào file sống làm 13
+# assertion R1/R2 đỏ (selfcheck-red 2026-10-05→10-09): tuổi CCTG ở STALE_DATE còn 41 ngày, không
+# phải 46. Selfcheck kiểm LOGIC wiring/aging, không kiểm dữ liệu hôm nay ⇒ trỏ đường dẫn CSV vào
+# thư mục tạm RỖNG (file không tồn tại = đúng nhánh "chưa có dòng append" của cctg_events_df()).
+import tempfile                      # noqa: E402
+cctg._EVENTS_CSV = os.path.join(tempfile.mkdtemp(prefix="cctg_sc_"), "cctg_rate_vn_events.csv")
+
 
 def _load_here(modname, filename=None):
     """Load <modname> from THIS checkout's own file at HERE, bypassing sys.path entirely — see

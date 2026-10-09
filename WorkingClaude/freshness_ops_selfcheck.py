@@ -111,6 +111,12 @@ if "AS n_cur" in q:                                                     # fin-br
     print("n_cur,n_prev"); print("%d,%d" % tuple(conf.get("fin_breadth", [240, 250]))); sys.exit(0)
 if "MAX(t.Release_Date)" in q:                                          # lag-pkl BQ reference
     print("f0_"); print(conf.get("bq_release_max", "2026-08-06")); sys.exit(0)
+# Price-freeze probe (thêm vào script ở 53ee33aa) — thiếu stub thì rơi vào nhánh "gap_days" ⇒ dòng
+# sai dạng ⇒ 🟡 "BQ CHECK KHÔNG CHẠY ĐƯỢC" giả ⇒ S1/S3 đỏ (selfcheck-red 2026-09-27→10-09).
+# Mặc định = phiên sạch: 10/250 mã Price phẳng (4% < MAX_PRICE_FLAT_PCT 50), ≥ MIN_FLAT_SAMPLE.
+if "AS n_flat" in q:
+    print("n_tot,n_flat,n_cm,n_both,d,dprev")
+    print(conf.get("price_freeze", "250,10,8,2,2026-10-08,2026-10-07")); sys.exit(0)
 order = ["vnindex_5state_dt5g_live", "shares_outstanding_live", "ticker_financial",
          "ticker_prune", "ticker_1m", "custom30v_8l", "custom30_8l", "risk_rating",
          "fa_ratings_8l", "fa_ratings"]

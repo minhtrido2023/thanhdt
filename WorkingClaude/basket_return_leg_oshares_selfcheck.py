@@ -27,6 +27,8 @@ phân biệt "sửa đúng" với "làm hỏng". Phải có cả hai chiều.
       mcap/mcapw == Close/Price phải y nguyên. Cột `mcap` KHÔNG bị sửa — chỉ thôi làm chân return.
   R5. LEGACY == TIỀN-SỬA: bật `BASKET_RETURN_OSHARES=legacy` phải tái lập module trước commit
       này BIT-FOR-BIT ⇒ knob rollback là thật, và R3 đo đúng một biến.
+  (Từ 2026-10-09: R2-tiền-sửa/R4-membership/R5 đo trên CẶP COMMIT đông cứng 1b89881b vs cha —
+   xem `load_fix()`; HEAD đã đổi chân weight có chủ đích ở 92aa43f2.)
 
 Chạy:  cd /home/trido/thanhdt/WorkingClaude && source ./wc_env.sh
        BQ_LOCAL_CACHE=data/bq_cache $DNA_PYEXE basket_return_leg_oshares_selfcheck.py
@@ -72,12 +74,12 @@ def _load(src, tag):
     return m
 
 
-def load_pre_edit(ref="HEAD"):
+def load_pre_edit(ref="1b89881b^"):
     """Module TRƯỚC bản sửa này (chuỗi return còn chạy trên `mcap`).
 
-    Mặc định `HEAD`: selfcheck này được viết CÙNG commit với bản sửa, nên tại thời điểm chạy cổng
-    (pre-commit / worktree) `HEAD` vẫn là bản tiền-sửa. Sau khi commit, truyền ref của commit^ qua
-    env `BASKET_RETLEG_PREREF` — KHÔNG hardcode một hash chưa tồn tại.
+    Mặc định `1b89881b^` = cha của commit bản sửa (2026-09-27). Bản đầu mặc định `HEAD` (đúng lúc
+    viết, khi bản sửa chưa commit) nên sau merge selfcheck tự dừng ở guard bên dưới mỗi đêm
+    (selfcheck-red 2026-09-27→10-09). Override vẫn qua env `BASKET_RETLEG_PREREF`.
     """
     ref = os.environ.get("BASKET_RETLEG_PREREF", ref)
     src = subprocess.run(["git", "show", f"{ref}:./custom_basket.py"], cwd=WORKDIR,
@@ -87,6 +89,25 @@ def load_pre_edit(ref="HEAD"):
             f"BASKET_RETLEG_PREREF={ref} ĐÃ chứa bản sửa (thấy chuỗi BASKET_RETURN_OSHARES) ⇒ "
             "control leg sẽ là no-op và R5/R3 mất ý nghĩa. Trỏ vào commit TRƯỚC bản sửa.")
     return _load(src, "preedit_retleg")
+
+
+def load_fix(ref="1b89881b"):
+    """Module ĐÚNG commit bản sửa (chưa có các thay đổi CÓ CHỦ ĐÍCH về sau).
+
+    Vì sao cần (sweep selfcheck-red 2026-10-09): sau 1b89881b, `92aa43f2` (OShares bước tại
+    EX-DATE), `d77f1123`, `e548fd73` đổi CÓ CHỦ ĐÍCH chân weight ⇒ HEAD vs `1b89881b^` khác ≥2
+    trục, R2-tiền-sửa/R5 FAIL dù bản sửa đúng. A/B "knob legacy tái lập tiền-sửa BIT-FOR-BIT" là
+    câu hỏi về CẶP COMMIT (sửa vs cha) ⇒ đo trên cặp đó, đông cứng, 1 trục. Các bất biến của
+    HEAD (R1, R1b, R2 mới==legacy, R3, R4 đồng nhất thức) vẫn chạy trên HEAD.
+    Override qua env `BASKET_RETLEG_FIXREF`.
+    """
+    ref = os.environ.get("BASKET_RETLEG_FIXREF", ref)
+    src = subprocess.run(["git", "show", f"{ref}:./custom_basket.py"], cwd=WORKDIR,
+                         capture_output=True, text=True, check=True).stdout
+    if "BASKET_RETURN_OSHARES" not in src:
+        raise SystemExit(f"BASKET_RETLEG_FIXREF={ref} KHÔNG chứa bản sửa (thiếu chuỗi "
+                         "BASKET_RETURN_OSHARES) ⇒ cặp A/B vô nghĩa. Trỏ vào commit bản sửa.")
+    return _load(src, "fix_retleg")
 
 
 def load_cur():
@@ -216,10 +237,13 @@ def main():
     print(f"cửa sổ = {WIN[0]}..{WIN[1]}  |  PROD_KW = {PROD_KW}")
     cur = load_cur()
     pre = load_pre_edit()
+    fix = load_fix()
 
     s_new, m_new, raw_new, md_new = run(cur, bq, WIN, legacy=False)
     s_leg, m_leg, raw_leg, md_leg = run(cur, bq, WIN, legacy=True)
     s_pre, m_pre, raw_pre, md_pre = run(pre, bq, WIN)
+    s_fix, m_fix, raw_fix, md_fix = run(fix, bq, WIN, legacy=False)
+    s_fixleg, _, _, _ = run(fix, bq, WIN, legacy=True)
 
     steps = oshares_step_dates(raw_new)
     n_step_in = sum(1 for d in steps if d in s_new.index)
@@ -245,9 +269,10 @@ def main():
     h_new, n_new = publish_weight_md5(cur, md_new, raw_new)
     h_leg, _ = publish_weight_md5(cur, md_leg, raw_leg)
     h_pre, _ = publish_weight_md5(pre, md_pre, raw_pre)
+    h_fix, n_fix = publish_weight_md5(fix, md_fix, raw_fix)
     check("R2 md5(weight) mới == legacy", h_new == h_leg, f"{h_new} vs {h_leg}")
-    check("R2 md5(weight) mới == tiền-sửa", h_new == h_pre,
-          f"{h_new} vs {h_pre} ({n_new} dòng ticker×rebal)")
+    check("R2 md5(weight) bản-sửa == tiền-sửa (cặp commit 1b89881b vs cha)", h_fix == h_pre,
+          f"{h_fix} vs {h_pre} ({n_fix} dòng ticker×rebal)")
 
     # ── R3. POSITIVE CONTROL ─────────────────────────────────────────────────────────────
     print("\nR3. Positive control (panel có bước OShares thật → PHẢI khác + phải khu trú)")
@@ -269,9 +294,9 @@ def main():
 
     # ── R4. MEMBERSHIP + ĐỒNG NHẤT THỨC ──────────────────────────────────────────────────
     print("\nR4. Membership và cột `mcap` không đổi")
-    ds = sorted(set(m_new) & set(m_pre))
-    per = [len(set(m_new[x]) ^ set(m_pre[x])) // 2 for x in ds]
-    check("R4 membership == tiền-sửa", sum(per) == 0,
+    ds = sorted(set(m_fix) & set(m_pre))
+    per = [len(set(m_fix[x]) ^ set(m_pre[x])) // 2 for x in ds]
+    check("R4 membership bản-sửa == tiền-sửa", sum(per) == 0,
           f"{sum(per)} tên đổi trên {len(ds)} mốc rebal")
     r = raw_new.dropna(subset=["mcap", "mcapw", "Close", "pxw", "OShares"])
     dd = float(np.nanmax(np.abs((r["mcap"] / r["mcapw"]).values - (r["Close"] / r["pxw"]).values)))
@@ -282,9 +307,9 @@ def main():
 
     # ── R5. LEGACY == TIỀN-SỬA ───────────────────────────────────────────────────────────
     print("\nR5. Knob rollback là thật (legacy trùng tiền-sửa BIT-FOR-BIT)")
-    ixp = s_leg.index.intersection(s_pre.index)
-    dl = float((s_leg.loc[ixp] - s_pre.loc[ixp]).abs().max())
-    check("R5 level legacy == tiền-sửa", dl == 0.0,
+    ixp = s_fixleg.index.intersection(s_pre.index)
+    dl = float((s_fixleg.loc[ixp] - s_pre.loc[ixp]).abs().max())
+    check("R5 level legacy (bản-sửa) == tiền-sửa", dl == 0.0,
           f"max|Δlevel| = {dl:.6e} trên {len(ixp)} phiên")
 
     print("\n" + "=" * 78)

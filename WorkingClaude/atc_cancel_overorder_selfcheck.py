@@ -92,6 +92,15 @@ class FakeSelf:
     def _journal(self, event, o=None, child_oid="", qty="", price="", note=""):
         self.journal.append({"event": event, "oid": child_oid, "qty": qty, "note": note})
 
+    # Khối pre-cancel tách gói vay (e7715cd0/8a669a9a, sự cố BID ZaloPay 2026-10-06) đứng TRƯỚC
+    # khối huỷ LO trong `_atc_sweep`. None = đúng giá trị THẬT của `Executor._sell_split_leg` khi
+    # broker không có `plan_sell_leg` (FakeBroker không có) ⇒ không tách, không `continue`.
+    def _sell_split_leg(self, o, qty):
+        return None
+
+    def _atc_split_skip(self, o, ps, pre, pleg):
+        raise AssertionError("fixture không được đi vào nhánh tách gói (_sell_split_leg=None)")
+
 
 class O:
     ticker = "AAA"
@@ -104,8 +113,13 @@ def run(ref, cancel_fails, child_qty=400, child_filled=0, parent_filled=200):
     ps = {"filled": parent_filled, "children": [child]}
     slf = FakeSelf(child, cancel_fails)
     g = {"self": slf, "ps": ps, "o": O(), "round_lot": lambda q: (int(q) // LOT) * LOT,
-         "LOT": LOT, "int": int, "max": max, "type": type}
-    exec(cut_block(src(ref), f"khối ATC @{ref or 'HEAD'}"), g)
+         "LOT": LOT, "int": int, "max": max, "min": min, "type": type, "positions": None}
+    # Khối trích nằm trong vòng `for` của `_atc_sweep` và từ 8a669a9a có `continue` (nhánh tách
+    # gói) ⇒ bọc 1 vòng 1-lần để `continue` hợp lệ khi exec; bản cũ (OLD_REF) không có `continue`
+    # nên bọc không đổi hành vi. Vẫn exec NGUYÊN VĂN khối, không viết lại logic.
+    body = cut_block(src(ref), f"khối ATC @{ref or 'HEAD'}")
+    exec("for _once in (0,):\n" + textwrap.indent(body, "    "), g)
+    ok("remaining" in g, "khối ATC thoát bằng `continue` trước khi tính remaining (nhánh tách gói?)")
     return g["remaining"], slf, child
 
 

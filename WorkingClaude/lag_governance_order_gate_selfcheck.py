@@ -174,8 +174,16 @@ check("bot_execute.py import filter_lag_governance_orders",
       "filter_lag_governance_orders," in _be)
 check("bot_execute.py GỌI filter_lag_governance_orders(plan) trong cascade",
       "plan, gov_blocked = filter_lag_governance_orders(plan)" in _be)
-check("bot_execute.py in ra CẢ 2 nhánh fail-open (không im lặng)",
-      'FAIL_OPEN_FORENSIC' in _be and 'gate quản trị KHÔNG ĐẦY ĐỦ' in _be)
+# bfccf9af (user chốt 16:52 ICT 28/09 "fail-open báo vào telegram"): chuỗi in riêng
+# "gate quản trị KHÔNG ĐẦY ĐỦ" được thay bằng `_notify_failopen` (in stdout + Discord/Telegram).
+# Kiểm đúng điều luật cần: CẢ 2 action fail-open của gate này cùng đi vào `_notify_failopen`.
+_i_fo = _be.find('if a["action"] in ("FAIL_OPEN", "FAIL_OPEN_FORENSIC"):', _be.find(
+    "plan, gov_blocked = filter_lag_governance_orders(plan)"))
+check("bot_execute.py báo CẢ 2 nhánh fail-open (không im lặng) qua _notify_failopen",
+      _i_fo > 0
+      and '_notify_failopen(p["label"], "LAG quản trị' in _be[_i_fo:_i_fo + 300]
+      and 'print(f"[{label}] ⚠⚠ {gate} KHÔNG CHẠY ĐƯỢC' in _be,
+      f"idx={_i_fo}")
 _i_rating = _be.find("plan, rating_blocked = filter_lag_rating_orders(plan)")
 _i_gov = _be.find("plan, gov_blocked = filter_lag_governance_orders(plan)")
 _i_appr = _be.find("apply_capit_lever(plan")

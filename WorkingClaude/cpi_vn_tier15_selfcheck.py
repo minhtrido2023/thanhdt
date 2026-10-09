@@ -13,8 +13,9 @@ WHAT IS ACTUALLY BEING PROVEN (finding `fiinprox-H2-cpi-swap`):
      more and no fewer -- and DCF fair value moves 0.0000% on all 7 valuable names.
   4. The §14 gate fires when (and only when) a caller asks for a month no real tier covers.
 
-The A/B is a TRUE before/after: "old" is the canonical checkout's cpi_vn.py (untouched by this
-branch), "new" is this worktree's. Nothing is re-implemented, so a bug in the wire cannot hide
+The A/B is a TRUE before/after: "old" is cpi_vn.py at CPI_OLD_REF (default f4b081b7^, the parent
+of the wire commit, read via `git show` -- 2026-10-09; it used to be the canonical checkout's file,
+which stopped being "old" the moment the wire merged), "new" is this checkout's. Nothing is re-implemented, so a bug in the wire cannot hide
 behind a matching bug in the test.
 
 ENVIRONMENT DEPENDENCIES (verify-before-done): TZ (none by construction -- all months are tz-naive
@@ -52,7 +53,23 @@ def load(path, name):
     spec.loader.exec_module(m); return m
 
 
-OLD = load(os.path.join(OLD_ROOT, "cpi_vn.py"), "cpi_old")
+# Chân "old" = cpi_vn.py ở CHA của commit wire (f4b081b7), đọc qua `git show` — KHÔNG phải file
+# đang nằm trong cây canonical. Bản đầu đọc file canonical: đúng khi chạy từ worktree TRƯỚC merge,
+# nhưng sau merge old == new ⇒ test_rename AttributeError mỗi đêm (selfcheck-red 2026-09-27→10-09).
+# `__file__` giữ trỏ OLD_ROOT để mọi đường dẫn tương đối của module y như bản canonical.
+# Override: CPI_OLD_REF=<ref>.
+OLD_REF = os.environ.get("CPI_OLD_REF", "f4b081b7^")
+
+
+def load_ref(ref, name):
+    src = subprocess.run(["git", "show", f"{ref}:./cpi_vn.py"], cwd=OLD_ROOT,
+                         capture_output=True, text=True, check=True).stdout
+    m = importlib.util.module_from_spec(importlib.util.spec_from_loader(name, loader=None))
+    m.__file__ = os.path.join(OLD_ROOT, "cpi_vn.py"); sys.modules[name] = m
+    exec(compile(src, f"{ref}:cpi_vn.py", "exec"), m.__dict__); return m
+
+
+OLD = load_ref(OLD_REF, "cpi_old")
 NEW = load(os.path.join(NEW_ROOT, "cpi_vn.py"), "cpi_new")
 END = "2026-08-01"
 
@@ -290,7 +307,7 @@ def main():
         sys.exit(0 if all(rc == 0 for _, rc in rcs) else 1)
 
     print(f"cpi_vn Tier-1.5 selfcheck | TZ={os.environ.get('TZ','(unset)')}")
-    print(f"  old = {OLD_ROOT}/cpi_vn.py   new = {NEW_ROOT}/cpi_vn.py")
+    print(f"  old = {OLD_REF}:cpi_vn.py (git, cwd {OLD_ROOT})   new = {NEW_ROOT}/cpi_vn.py")
     a = OLD.cpi_monthly_df(end=END); b = NEW.cpi_monthly_df(end=END)
     ok(len(a) == len(b), "same month index before/after", f"{len(a)} vs {len(b)}")
     test_rename()

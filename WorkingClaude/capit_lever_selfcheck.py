@@ -61,6 +61,14 @@ from trading_bot.plan import (PlannedOrder, TradePlan, apply_capit_lever,  # noq
 from trading_bot.executor import Executor  # noqa: E402
 from trading_bot.config import load_config, EXEC_DIR  # noqa: E402
 from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
+import cctg_rate_vn as _cctg_mod  # noqa: E402
+
+# Mục M/N đo field HIỂN THỊ effective-deposit trên fixture = CHỈ anchor CCTG đông cứng 2026-09-30
+# (7,5%) trong code, KHÔNG đọc CSV append-only SỐNG `data/cctg_rate_vn_events.csv`. Dòng 2026-10-05
+# (7,4%, rebase 6M->12M) thêm vào file sống làm M2/N1 đỏ (selfcheck-red 2026-10-05→10-09) dù §6a
+# không đổi. Trỏ đường dẫn vào thư mục tạm RỖNG = nhánh "chưa có dòng append" của cctg_events_df().
+_cctg_mod._EVENTS_CSV = os.path.join(tempfile.mkdtemp(prefix="capit_sc_cctg_"),
+                                     "cctg_rate_vn_events.csv")
 
 GOLIVE = os.path.join(HERE, "deploy_golive_dt5g_v4", "golive_recommend_v23.py")
 REAL_RULES = os.path.join(HERE, "data", "trading_rules.json")
