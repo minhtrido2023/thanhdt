@@ -32,6 +32,15 @@
 # the prior one for either series. It NEVER writes to a series CSV and NEVER touches park/sizing —
 # park 0% reversal is a user-only decision (CLAUDE.md macro-killswitch section).
 #
+# SBV policy rates (chuỗi 4, user duyệt 2026-10-09, job Winston_20261009_094651): the same
+# dispatch also verifies NHNN's refi + rediscount rate (OMO if cited) via sbv_policy_verify.py —
+# the script fetches sbv.gov.vn itself and cross-checks >=1 independent-owner source the agent
+# cites; only a full match advances verified_at (data/sbv_verify_log.json), every other outcome
+# advances attempted_at only. `finalize` at the end records an attempt if the agent never called
+# verify and posts ONE reminder line if this week failed or verified_at > 21 days. Replaces the
+# Friday mike/bin/check_sbv_weekly.sh (retired: it stamped last_verified even on fetch failure).
+# Display/alert only — never touches sbv_macro_overlay.SBV_REFI_EVENTS or the DT5G macro gate.
+#
 # Schedule: Monday 08:00 ICT (= 01:00 UTC same day; host crontab is Etc/UTC, see
 # kb/cron_registry.md's note on CRON_TZ vs the TZ= env line) — before run_bot 09:05.
 set -uo pipefail
@@ -87,16 +96,22 @@ TIÊU CHUẨN: y hệt chuỗi 2 (>=2 nguồn khác chủ, mỗi nguồn ghi rõ
 Ghi (nếu có số xác nhận): python3 append_cctg_rate.py --series 6m --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
 ⚠️ Nguồn đã dùng cho chuỗi 2 dùng lại được cho chuỗi 3 (sidecar URL hai chuỗi tách riêng).
 
+=== CHUỖI 4: LÃI SUẤT ĐIỀU HÀNH NHNN (tái cấp vốn + tái chiết khấu; OMO nếu có) — user duyệt 2026-10-09 ===
+Script TỰ lấy số chính thức từ sbv.gov.vn (bạn KHÔNG khai số NHNN). Xem trước: python3 sbv_policy_verify.py fetch
+Việc của bạn: WebSearch >=1 nguồn ĐỘC LẬP KHÁC CHỦ với NHNN (KHÔNG phải *.sbv.gov.vn — vd báo/CTCK/vietstock), có NGÀY CỤ THỂ trong ~35 ngày, nêu RÕ lãi tái cấp vốn VÀ tái chiết khấu hiện hành (thêm lãi OMO/cầm cố giấy tờ có giá nếu bài có). Ghi đúng số bài báo nói, KHÔNG chép từ output fetch. URL phải KHÁC lần ghi trước (script tự chặn).
+Ghi: python3 sbv_policy_verify.py verify --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"refi\":<X>,\"rediscount\":<Y>,\"omo\":<Z hoặc bỏ field>}, ...]'
+Script TỰ đối chiếu với NHNN và SBV_REFI_EVENTS; lệch/thiếu ⇒ nó từ chối (rc=2), KHÔNG ghi số, chỉ ghi lần thử. Gặp từ chối: ĐỪNG lách, escalate kèm nguyên văn lỗi. Lãi NHNN khác SBV_REFI_EVENTS ⇒ script tự cảnh báo 🔴; TUYỆT ĐỐI không tự sửa sbv_macro_overlay.py.
+
 CẢ 3 LỆNH TRÊN tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (MỌI chuỗi — chuỗi 1 có guard này KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
 
 Idempotent — nếu hôm nay đã ghi rồi (effective_date trùng), lệnh tự SKIP rc=0, không lỗi, coi là hoàn thành bình thường. Có thể 1 chuỗi ghi được, chuỗi kia escalate — xử lý ĐỘC LẬP, không phải tất-cả-hoặc-không-gì.
 
-BẮT BUỘC HÀNH ĐỘNG CUỐI (để Mike xác minh job này đã xử lý, không treo giữa chừng) — với MỖI chuỗi (1, 2 và 3), chọn ĐÚNG MỘT:
+BẮT BUỘC HÀNH ĐỘNG CUỐI (để Mike xác minh job này đã xử lý, không treo giữa chừng) — với MỖI chuỗi (1, 2, 3 và 4), chọn ĐÚNG MỘT:
   - Chạy thành công (kể cả SKIP idempotent): 'mike/bin/append_event.sh Winston status deposit-cctg-weekly-done \"<JSON: series, rate, changed true/false, note>\"'.
   - Escalate: 'mike/bin/append_event.sh Winston question deposit-cctg-weekly-question \"<JSON tóm tắt chuỗi nào, số nào mâu thuẫn>\"'.
-(Dù các chuỗi đều escalate hoặc đều done, vẫn gọi riêng mỗi chuỗi 1 event — field series = big4_12m / cctg_12m / cctg_6m — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem.)
+(Dù các chuỗi đều escalate hoặc đều done, vẫn gọi riêng mỗi chuỗi 1 event — field series = big4_12m / cctg_12m / cctg_6m / sbv_policy — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem.)
 
-BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), báo CẢ CCTG 6 tháng (chuỗi 3) cạnh CCTG 12 tháng, và với CCTG luôn ghi rõ ngân hàng + kỳ hạn của số được chọn (chuẩn 12 THÁNG cao nhất Big-4 từ 2026-10-05; trước đó chuỗi là 6 tháng — đừng gộp lẫn khi báo cáo)."
+BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), báo CẢ CCTG 6 tháng (chuỗi 3) cạnh CCTG 12 tháng, báo lãi điều hành NHNN (chuỗi 4: tái cấp vốn / tái chiết khấu / OMO nếu có, nguồn nào, verified hay bị từ chối vì sao), và với CCTG luôn ghi rõ ngân hàng + kỳ hạn của số được chọn (chuẩn 12 THÁNG cao nhất Big-4 từ 2026-10-05; trước đó chuỗi là 6 tháng — đừng gộp lẫn khi báo cáo)."
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "[--dry-run] skipping real dispatch.sh call; prompt length=${#PROMPT} chars" >> "$LOG"
@@ -195,6 +210,18 @@ ${TREND_TAIL}" \
   fi
 fi
 
-echo "===== deposit+CCTG weekly refresh DONE (dispatch_rc=${DISPATCH_RC}, confirmed=${CONFIRMED:-no}, trend_rc=${TREND_RC}, dry_run=${DRY_RUN}) =====" >> "$LOG"
-[ "$TREND_RC" -eq 0 ] || exit 1
+# --- SBV policy rates: finalize ALWAYS runs (records an attempt if the agent never called
+# verify, one reminder line if this week did not verify or verified_at > 21d). --dry-run only
+# does the read-only fetch so it never stamps attempted_at in the production log. ---
+echo "--- sbv policy finalize ---" >> "$LOG"
+if [ "$DRY_RUN" -eq 1 ]; then
+  "$PY" sbv_policy_verify.py fetch >> "$LOG" 2>&1
+else
+  "$PY" sbv_policy_verify.py finalize --run-start "$RUN_START_UTC" --dispatch-rc "$DISPATCH_RC" >> "$LOG" 2>&1
+fi
+SBV_RC=$?
+echo "sbv policy step exit_code=${SBV_RC}" >> "$LOG"
+
+echo "===== deposit+CCTG weekly refresh DONE (dispatch_rc=${DISPATCH_RC}, confirmed=${CONFIRMED:-no}, trend_rc=${TREND_RC}, sbv_rc=${SBV_RC}, dry_run=${DRY_RUN}) =====" >> "$LOG"
+[ "$TREND_RC" -eq 0 ] && [ "$SBV_RC" -eq 0 ] || exit 1
 exit 0
