@@ -131,12 +131,28 @@ def market_wide_reason(hits):
     return None
 
 
+LUNCH_BREAK = (dt.time(11, 30), dt.time(13, 0))
+
+
+def trading_minutes(a, b):
+    """Phút GIAO DỊCH từ a tới b (a ≤ b, cùng ngày): trừ nghỉ trưa 11:30–13:00 — cửa sổ 60' tính theo
+    phút giao dịch, để 11:15 → 13:00 → 13:15 (45 phút giao dịch) vẫn là MỘT cửa sổ."""
+    ls, le = (dt.datetime.combine(a.date(), t) for t in LUNCH_BREAK)
+    lunch = max(0.0, (min(b, le) - max(a, ls)).total_seconds())
+    return ((b - a).total_seconds() - lunch) / 60.0
+
+
+def in_window(at, now, window_min=None):
+    win = MARKET_WIDE_WINDOW_MIN if window_min is None else window_min
+    return at.date() == now.date() and at <= now and trading_minutes(at, now) <= win + EPS
+
+
 def window_market_wide_reason(events, now, window_min=None):
     """(A) Gộp theo cửa sổ trượt: events = [{"ticker", "at": datetime, "at_floor"}] — mọi kích hoạt
-    (VNINDEX đọc được) trong ngày; đếm mã PHÂN BIỆT có kích hoạt trong [now − window, now] → lý do | None."""
+    (VNINDEX đọc được) trong ngày; đếm mã PHÂN BIỆT có kích hoạt trong `window` PHÚT GIAO DỊCH tới now
+    (gồm cả biên) → lý do | None."""
     win = MARKET_WIDE_WINDOW_MIN if window_min is None else window_min
-    lo = now - dt.timedelta(minutes=win)
-    rec = [e for e in events if lo <= e["at"] <= now]
+    rec = [e for e in events if in_window(e["at"], now, win)]
     tks = {e["ticker"] for e in rec}
     floors = {e["ticker"] for e in rec if e.get("at_floor")}
     since = min((e["at"] for e in rec), default=now)

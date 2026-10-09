@@ -1570,6 +1570,11 @@ def test_fix3():
           E.window_market_wide_reason([ev("A", "09:59"), ev("B", "10:30"), ev("C", "11:00")], T("11:00")) is None)
     check("(A) 1 mã kích hoạt lặp nhiều lượt = 1 mã",
           E.window_market_wide_reason([ev("A", "10:00"), ev("A", "10:15"), ev("B", "10:30")], T("10:30")) is None)
+    check("(A) nghỉ trưa không tính: 11:15 → 13:00 → 13:15 (45' giao dịch) ⇒ gộp",
+          E.window_market_wide_reason([ev("A", "11:15"), ev("B", "13:00"), ev("C", "13:15")], T("13:15")) is not None)
+    check("(A) 10:45 → 13:16 = 61' giao dịch ⇒ ngoài cửa sổ",
+          E.window_market_wide_reason([ev("A", "10:45"), ev("B", "13:00"), ev("C", "13:16")], T("13:16")) is None)
+    check("(A) trading_minutes 11:00→13:30 = 60", abs(E.trading_minutes(T("11:00"), T("13:30")) - 60) < 1e-9)
     check("(A) 2 mã chạm sàn luỹ kế ⇒ gộp",
           "sàn" in (E.window_market_wide_reason([ev("A", "10:00", True), ev("B", "10:45", True)], T("10:45")) or ""))
 
@@ -1577,7 +1582,7 @@ def test_fix3():
     tmp = tempfile.mkdtemp(prefix="ipw_sc_")
     clock = Clock()
     mkt = MultiMarket(clock, {"AAA": {"09:15": 94_000}, "BBB": {"09:15": 100_000, "09:59": 94_000},
-                              "CCC": {"09:15": 100_000, "10:14": 94_000}}, exch="HNX")
+                              "CCC": {"09:15": 100_000, "10:14": 94_000, "10:20": 100_000}}, exch="HNX")
     mkt.bids_fn = lambda last: []                  # không ai mua ⇒ lệnh sàn chờ, không khớp ⇒ còn EXECUTING
     mkt.pos = {t: {"qty": 1000, "sellable": 1000} for t in ("AAA", "BBB", "CCC")}
     deps = _deps(tmp, mkt, _uni_multi({"AAA": 1000, "BBB": 1000, "CCC": 1000}))
@@ -1612,6 +1617,58 @@ def test_fix3():
           st["cases"]["AAA"]["execution"]["SpaceX"]["status"] == "EXECUTING"
           and st["cases"]["AAA"]["decision"]["source"] == "user")
     check("(A) thống kê market_wide_relabel = 2", st["stats"]["market_wide_relabel"] == 2)
+    st = _drive(tmp, mkt, deps, "11:11", "14:59")
+    oos = [r for r in _log(tmp) if r["kind"] == "EOD_OOS"]
+    kinds = {r["ticker"]: r["kind"] for r in (oos[0]["rows"] if oos else [])}
+    check("(D) EOD_OOS có cả mã chỉ-gộp (CCC kind market_wide) lẫn ca (AAA/BBB)",
+          kinds == {"AAA": "case", "BBB": "case", "CCC": "market_wide"}
+          and all(r["close_final"] for r in oos[0]["rows"]), str(kinds))
+    check("(A) không gắn nhãn/nhắn lại lần 2 khi cửa sổ vẫn đạt ngưỡng các lượt sau",
+          sum(1 for r in _log(tmp) if r["kind"] == "MARKET_WIDE_RELABEL") == 1
+          and sum(1 for m in deps.notifier.sent if "GẮN NHÃN" in m["msg"]) == 2)   # 2 kênh mặc định
+    shutil.rmtree(tmp)
+
+    def mw_run(by, end, hooks=None, msgs=None, vni=(1000.0, 1000.0)):
+        tmp = tempfile.mkdtemp(prefix="ipw_sc_")
+        clock = Clock()
+        mkt = MultiMarket(clock, by, exch="HNX", vni=vni)
+        mkt.bids_fn = lambda last: []
+        mkt.pos = {t: {"qty": 1000, "sellable": 1000} for t in by}
+        deps = _deps(tmp, mkt, _uni_multi({t: 1000 for t in by}),
+                     msgs=msgs)
+        st = _drive(tmp, mkt, deps, "09:15", end, hook=(lambda t: [h(t, tmp, mkt) for h in (hooks or [])]))
+        return st, deps, tmp, mkt
+    D = lambda hm: {"09:15": 100_000, hm: 94_000} if hm != "09:15" else {"09:15": 94_000}
+    # M4: ca ngoài cửa sổ (AAA 09:15, > 60' giao dịch trước 10:45) KHÔNG bị gắn nhãn
+    st, deps, tmp, _ = mw_run({"AAA": D("09:15"), "BBB": D("10:29"), "CCC": D("10:44"), "DDD": D("10:44")}, "10:46")
+    check("(A) gắn nhãn chỉ ca TRONG cửa sổ: AAA (09:15) không, BBB (10:30) có; CCC/DDD gộp",
+          not st["cases"]["AAA"].get("market_wide") and st["cases"]["BBB"].get("market_wide")
+          and {"CCC", "DDD"} <= set(st.get("market_wide", {})) and "AAA" not in st.get("market_wide", {}),
+          str({k: bool(c.get("market_wide")) for k, c in st["cases"].items()}))
+    shutil.rmtree(tmp)
+    # M5: user đã ra lệnh BÁN TRƯỚC khi gắn nhãn ⇒ không bị dừng
+    msgs = [{"id": 21, "is_bot": False, "content": "SHADOW BÁN AAA", "created_at": T("09:20")}]
+    st, deps, tmp, _ = mw_run({"AAA": D("09:15"), "BBB": D("09:59"), "CCC": D("10:14")}, "10:16", msgs=msgs)
+    a = st["cases"]["AAA"]
+    check("(A) lệnh user TRƯỚC gắn nhãn ⇒ vẫn EXECUTING (không STOPPED_MARKET_WIDE)",
+          a.get("market_wide") and a["decision"]["source"] == "user"
+          and a["execution"]["SpaceX"]["status"] == "EXECUTING", str(a.get("execution")))
+    shutil.rmtree(tmp)
+    # M15 + M3: lượt thiếu VNINDEX (CCC) ⇒ gộp lượt đó nhưng KHÔNG gắn nhãn AAA/BBB, CCC không vào trigger_log
+    def vni_off(t, tmp, mkt):
+        mkt.vni_ = (None, 1000.0) if t == T("10:15") else (1000.0, 1000.0)
+    st, deps, tmp, _ = mw_run({"AAA": D("09:15"), "BBB": D("09:59"), "CCC": {"09:15": 100_000, "10:14": 94_000,
+                                                                         "10:16": 100_000}}, "10:16", hooks=[vni_off])
+    check("(A) lượt thiếu VNINDEX ⇒ CCC gộp, KHÔNG gắn nhãn AAA/BBB, trigger_log không có CCC",
+          "CCC" in st.get("market_wide", {}) and not st["cases"]["AAA"].get("market_wide")
+          and not st["cases"]["BBB"].get("market_wide")
+          and "CCC" not in {e["ticker"] for e in st["trigger_log"]}, str(st.get("trigger_log")))
+    shutil.rmtree(tmp)
+    # M33: 2 mã chạm sàn ở 2 lượt quét (VNI phẳng, idio đạt ⇒ ca riêng) ⇒ lượt 2 gộp theo "chạm sàn luỹ kế"
+    st, deps, tmp, _ = mw_run({"AAA": {"09:15": 90_000}, "BBB": {"09:15": 100_000, "09:59": 90_000}}, "10:01")
+    check("(A) 2 mã chạm sàn luỹ kế qua 2 lượt ⇒ BBB gộp, AAA gắn nhãn",
+          "BBB" in st.get("market_wide", {}) and "chạm sàn luỹ kế" in st["market_wide"]["BBB"]["reason"]
+          and st["cases"]["AAA"].get("market_wide"), str(st.get("market_wide")))
     shutil.rmtree(tmp)
 
     # ---- (A) ca carryover (T0 hôm trước) KHÔNG bị gắn nhãn bởi cửa sổ hôm nay
@@ -1623,6 +1680,48 @@ def test_fix3():
     st = W.load_state(tmp, dt.date(2026, 10, 6))
     W._relabel_market_wide(st, T("10:30", "2026-10-07"), _deps(tmp, mkt, {}), "test")
     check("(A) ca carryover không bị gắn nhãn", not st["cases"]["OLD"].get("market_wide"))
+    shutil.rmtree(tmp)
+
+    # ---- (C) arch-review B1: ca late, các tick cuối ngày T0 bị lỡ, phán quyết GÃY đọc ở phiên sau ⇒ vẫn GIỮ
+    tmp = tempfile.mkdtemp(prefix="ipw_sc_")
+    clock = Clock()
+    mkt = FakeMarket(clock, {"09:15": 100_000, "14:04": 94_000}, exch="HNX",
+                     pos={"XYZ": {"qty": 1000, "sellable": 1000}})
+    deps = _deps(tmp, mkt, _uni("BAL"))
+    _drive(tmp, mkt, deps, "09:15", "14:16")                          # T0 14:15, rồi host chết tới hết ngày
+    _verdict(tmp, "XYZ", E.BROKEN)
+    st = _drive(tmp, mkt, deps, "09:00", "10:00", day="2026-10-07")
+    c = st["cases"]["XYZ"]
+    check("(C) B1: ca late, phán quyết GÃY xử ở phiên sau ⇒ mặc định GIỮ, gợi ý BÁN, không lệnh",
+          c["actions_default"] == {"SpaceX": E.HOLD} and c["actions_suggested"] == {"SpaceX": E.SELL_ALL}
+          and not c["execution"], f"{c.get('actions_default')} {c.get('execution')}")
+    shutil.rmtree(tmp)
+
+    # ---- (D) N3: hết ngân sách 14:55→14:59 ⇒ không EOD_OOS, có BUDGET + cảnh báo sức khoẻ eod_oos
+    st, deps, tmp = scenario("eod_budget", "BAL", end="14:54")
+    deps.budget_s = 0.0
+    t = T("14:55")
+    while t <= T("14:59"):
+        deps.market.c.now = t
+        W.run_tick(t, deps)
+        t += dt.timedelta(minutes=1)
+    st = W._read_json(W.state_path(tmp, dt.date(2026, 10, 6)))
+    lg = _log(tmp)
+    check("(D) hết ngân sách ⇒ không EOD_OOS, có BUDGET eod_oos + cảnh báo sức khoẻ (không mất im lặng)",
+          not any(r["kind"] == "EOD_OOS" for r in lg)
+          and any(r["kind"] == "BUDGET" and r.get("where") == "eod_oos" for r in lg)
+          and any("EOD_OOS" in m["msg"] for m in st["outbox"] + deps.notifier.sent))
+    shutil.rmtree(tmp)
+
+    # ---- (B) N6: mã sàn trượt idio (không phải floor_mw) ⇒ tin "KHÔNG MỞ CA RIÊNG", không gọi là cả thị trường
+    tmp = tempfile.mkdtemp(prefix="ipw_sc_")
+    st0 = {"cases": {}, "outbox": []}
+    trl = E.trigger_check(96_000, 100_000, 96_000, 990, 1000)
+    W._market_wide(st0, T("10:00"), _deps(tmp, FakeMarket(Clock(), {}), {}),
+                   [("ODD", _uni_multi({"ODD": 1000})["ODD"], trl, {})], "x", lone=True)
+    msg = st0["outbox"][0]["msg"] if st0["outbox"] else ""
+    check("(B) tin mã sàn trượt idio: 'KHÔNG MỞ CA RIÊNG', không 'CẢ THỊ TRƯỜNG'",
+          "KHÔNG MỞ CA RIÊNG" in msg and "CẢ THỊ TRƯỜNG" not in msg, msg[:120])
     shutil.rmtree(tmp)
 
     # ---- (B) driver: 1 mã chạm sàn ngày VNI −3,3% ⇒ không ca riêng, cảnh báo gộp nêu lý do

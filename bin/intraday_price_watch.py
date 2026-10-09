@@ -19,7 +19,7 @@ discretionary (state_*_<TK>.json + excluded_tickers + data/intraday_watch/watchl
 
 Sửa 3 lỗ hổng thiết kế + OOS (user duyệt 09/10/2026 18:02 ICT, job Taylor_20261009_110243; bằng chứng
 replay `agents/Taylor/research/intraday_cutloss_replay_20261009/REPORT.md` §5). Ngưỡng KHÔNG đổi.
-  (A) gộp "cả thị trường" theo số mã kích hoạt LUỸ KẾ trong cửa sổ trượt 60' (`st["trigger_log"]`),
+  (A) gộp "cả thị trường" theo số mã kích hoạt LUỸ KẾ trong cửa sổ trượt 60' GIAO DỊCH (trừ nghỉ trưa; `st["trigger_log"]`),
       không chỉ trong 1 lượt quét. Ca RIÊNG đã mở trong cửa sổ ⇒ gắn nhãn `market_wide`, mặc định GIỮ,
       bán mô phỏng đang chạy theo MẶC ĐỊNH dừng (STOPPED_MARKET_WIDE); lệnh user vẫn tôn trọng.
   (B) chạm sàn chỉ mở ca riêng khi idio đạt; chạm sàn ∧ VNINDEX ≤ −2% ⇒ nhánh gộp.
@@ -124,6 +124,7 @@ NEXT_SESSION_APPLY = dt.time(9, 15)
 REMINDER_WINDOW = (dt.time(8, 25), dt.time(9, 0))
 EOD_SUMMARY_AT = dt.time(14, 50)
 EOD_OOS_AT = dt.time(14, 55)       # (D) ghi vni_day/ret_close mỗi ca ⇒ ca live tích luỹ thành bộ OOS thật
+EOD_OOS_ALERT_AT = dt.time(14, 58) # tới giờ này vẫn chưa ghi được ⇒ cảnh báo sức khoẻ (không mất im lặng)
 QUOTE_ERR_ALERT = 0.5              # tỉ lệ lỗi lấy giá trong 1 lượt quét ⇒ cảnh báo sức khoẻ
 HEALTH_ALERT_EVERY_MIN = 60        # cảnh báo sức khoẻ cùng loại tối đa 1 lần/60'
 VNI_MAX_AGE_MIN = 5                # bar VNINDEX cuối cũ hơn ⇒ coi như không đọc được (DNSE cache theo URL)
@@ -962,7 +963,10 @@ def process_case(case, now, deps, st):
             case["report_at"] = _iso(now)
             rd, deferred = _reply_deadline(case, now)
             case["reply_deadline"], case["reply_deferred"] = _iso(rd), deferred
-            why = _hold_override_reason(case, deferred)
+            # (C) ca 'late' (T0 ≥ 14:00) hoặc phán quyết xử ở phiên SAU (vd lỡ các tick cuối ngày T0) ⇒ vẫn
+            # là ca hoãn: KHÔNG tự bán phiên sau dù hạn trả lời tính lại không còn "hoãn" (arch-review B1)
+            why = _hold_override_reason(case, deferred or bool(case.get("late"))
+                                        or now.date() > _p(case["t0"]).date())
             case["actions_default"] = {lab: E.HOLD for lab in base} if why else base
             if why and base != case["actions_default"]:
                 case["actions_suggested"], case["hold_override"] = base, why
@@ -1178,7 +1182,7 @@ def _scan(now, deps, st):
             else:
                 lone.append(h)
         if lone:            # (B) chạm sàn không đủ điều kiện ca riêng ⇒ nhánh gộp (chỉ báo)
-            _market_wide(st, now, deps, lone, "chạm sàn không đủ điều kiện mở ca riêng")
+            _market_wide(st, now, deps, lone, "chạm sàn không đủ điều kiện mở ca riêng", lone=True)
     st["last_scan"] = _iso(now)
     log_event(deps.state_dir, day, "SCAN", now=now, n_universe=len(uni), triggered=opened,
               market_wide=reason, vni=[vl, vr], quote_errors=n_err)
@@ -1186,8 +1190,9 @@ def _scan(now, deps, st):
     return opened
 
 
-def _market_wide(st, now, deps, hits, reason):
-    """Nhánh gộp: KHÔNG mở ca, KHÔNG dispatch, KHÔNG tự hành động — chỉ ghi + báo mã MỚI."""
+def _market_wide(st, now, deps, hits, reason, lone=False):
+    """Nhánh gộp: KHÔNG mở ca, KHÔNG dispatch, KHÔNG tự hành động — chỉ ghi + báo mã MỚI.
+    `lone` = (B) mã chạm sàn không đủ điều kiện ca riêng trong lượt KHÔNG có biến động chung."""
     day, s = now.date(), _stats(st)
     mw = st.setdefault("market_wide", {})
     new = [h for h in hits if h[0] not in mw]
@@ -1207,21 +1212,27 @@ def _market_wide(st, now, deps, hits, reason):
         + (f" [{E.not_individual_reason(tr)}]" if not tr.get("individual") else "")
         + ("".join(f" | giữ {lab} {h['qty']:,}cp" for lab, h in u["holdings"].items()) or " | không giữ")
         + (" | có lệnh MUA trong plan" if u["buys"] else "") for tk, u, tr, q in new)
-    enqueue(st, f"🌐 CẢNH BÁO GỘP — CẢ THỊ TRƯỜNG ({reason}), {now:%H:%M}: {len(new)} mã mới kích hoạt "
-                f"(tổng {len(hits)} lượt này)\n{rows}\n  ⇒ KHÔNG dispatch điều tra từng mã, KHÔNG tự "
-                f"hành động; mã sẽ được xét lại riêng khi cửa sổ {E.MARKET_WIDE_WINDOW_MIN}' không còn đạt "
-                f"ngưỡng gộp. Anh tự đánh giá. ({SHADOW_NOTE})", mention=True, now=now)
+    if lone and not any(h[2].get("floor_mw") for h in new):
+        head = f"⚠️ CHẠM SÀN — KHÔNG MỞ CA RIÊNG ({reason}), {now:%H:%M}: {len(new)} mã"
+        tail = "luật chạm sàn: chỉ mở ca riêng khi idio đạt ngưỡng và VNINDEX > −2%"
+    else:
+        head = (f"🌐 CẢNH BÁO GỘP — CẢ THỊ TRƯỜNG ({reason}), {now:%H:%M}: {len(new)} mã mới kích hoạt "
+                f"(tổng {len(hits)} lượt này)")
+        tail = (f"mã sẽ được xét lại riêng khi cửa sổ {E.MARKET_WIDE_WINDOW_MIN}' giao dịch không còn đạt "
+                f"ngưỡng gộp")
+    enqueue(st, f"{head}\n{rows}\n  ⇒ KHÔNG dispatch điều tra từng mã, KHÔNG tự hành động; {tail}. "
+                f"Anh tự đánh giá. ({SHADOW_NOTE})", mention=True, now=now)
 
 
 def _relabel_market_wide(st, now, deps, reason):
     """(A) Ca RIÊNG đã mở trong cửa sổ trượt, nay cửa sổ đạt ngưỡng gộp ⇒ gắn nhãn cả thị trường:
     mặc định chuyển GIỮ (không tự bán); bán mô phỏng đang chạy THEO MẶC ĐỊNH dừng. Lệnh user
     (decision source "user") vẫn tôn trọng. Ghi log MARKET_WIDE_RELABEL + báo."""
-    day, lo = now.date(), now - dt.timedelta(minutes=E.MARKET_WIDE_WINDOW_MIN)
+    day = now.date()
     rows = []
     for tk, c in st["cases"].items():
         t0 = _p(c["t0"])
-        if c.get("market_wide") or t0.date() != day or t0 < lo:
+        if c.get("market_wide") or not E.in_window(t0, now):      # carryover (khác ngày) ⇒ ngoài cửa sổ
             continue
         c["market_wide"] = {"at": _iso(now), "reason": reason}
         note = []
@@ -1269,7 +1280,8 @@ def _hold_override_reason(case, deferred):
 def _eod_oos(st, now, deps):
     """(D) Từ EOD_OOS_AT: ghi 1 dòng EOD_OOS/ngày với vni_day + ret_close (giá lúc ghi / TC) cho mọi
     ca + mã gộp ⇒ ca live tích luỹ thành bộ OOS thật (chấm T+k sau từ giá ngày). At-least-once: bị
-    cắt giữa log và lưu state ⇒ có thể lặp dòng — dedupe theo (ngày, mã) khi đọc."""
+    cắt giữa log và lưu state ⇒ có thể lặp dòng — dedupe theo (ngày, mã) khi đọc. UPCOM khớp liên tục
+    tới 15:00 ⇒ giá 14:55 CHƯA phải giá đóng cửa (`close_final` = False) — chấm lại bằng giá ngày BQ."""
     if now.time() < EOD_OOS_AT or st.get("eod_oos_logged"):
         return
     day = now.date()
@@ -1284,7 +1296,8 @@ def _eod_oos(st, now, deps):
         q = deps.market.quote(tk)
         last, ref = q.get("last"), q.get("ref")
         row = {"ticker": tk, "exchange": q.get("exchange"), "last": last, "ref": ref,
-               "ret_close": (last / ref - 1) if (last and ref and not q.get("error")) else None}
+               "ret_close": (last / ref - 1) if (last and ref and not q.get("error")) else None,
+               "close_final": (q.get("exchange") or "HOSE").upper() != "UPCOM"}
         c = st["cases"].get(tk)
         if c is not None:
             tr, vv, dec = c.get("trigger") or {}, c.get("verdict") or {}, c.get("decision") or {}
@@ -1329,7 +1342,9 @@ def _eod_summary(st, now, deps):
             crashes = sum(1 for x in f if '"kind": "CRASH"' in x)
     st["eod_summary_sent"] = _iso(now)
     enqueue(st, f"📊 Tóm tắt SHADOW intraday-watch {now:%d/%m}: {s['scans']} lượt quét · {s['triggers']} kích "
-                f"hoạt · {s['market_wide']} cảnh báo gộp · {s['dispatches']} điều tra ({s['dispatch_fail']} lỗi, "
+                f"hoạt · {s['market_wide']} cảnh báo gộp · {s['market_wide_relabel']} ca riêng gắn nhãn gộp sau · "
+                f"{sum(1 for c in st['cases'].values() if (c.get('hold_override') or '').startswith('hoãn'))} ca "
+                f"hoãn ⇒ GIỮ · {s['dispatches']} điều tra ({s['dispatch_fail']} lỗi, "
                 f"{s['dispatch_skipped']} bị chặn) · phán quyết agent {n('agent')} / hết giờ {n('timeout')} / "
                 f"không điều tra {n('no_dispatch')} (rút gọn: agent {n('agent', True)}, hết giờ "
                 f"{n('timeout', True)}; thường: agent {n('agent', False)}, hết giờ {n('timeout', False)}) · trễ "
@@ -1399,6 +1414,9 @@ def _run_locked(now, deps):
         if (case.get("status") not in TERMINAL or pending_verdict) and tk not in opened:
             process_case(case, now, deps, st)
     _eod_oos(st, now, deps)
+    if now.time() >= EOD_OOS_ALERT_AT and not st.get("eod_oos_logged"):
+        health_alert(st, "eod_oos", f"chưa ghi được EOD_OOS (vni_day/ret_close) lúc {now:%H:%M} — hết ngân sách "
+                                    f"hoặc lỡ tick từ {EOD_OOS_AT:%H:%M} ⇒ ngày này thiếu dữ liệu OOS", now, deps)
     _eod_summary(st, now, deps)
     _save(deps, day, st)
     flush_outbox(st, deps, now)
