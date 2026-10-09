@@ -14,6 +14,7 @@ ROOT = `/home/trido/thanhdt/WorkingClaude/mike`. Mọi đường dẫn dưới �
 | Tạo / thu agent con | Thêm hoặc gỡ một agent con |
 | Giám sát sức khỏe fleet | Debug agent DOWN/ZOMBIE, OAuth logout |
 | Context theo vai trò (role-scoped) | Thêm/đổi vai trò agent, hoặc chọn file role-scoped để ghi fact mới |
+| Dọn instructions 2026-10-09 (lịch sử §8 auto-wake, bối cảnh fundamental-skeptic, routing 2-tier cũ, srcwalk cũ, parallel cũ) | Cần hiểu VÌ SAO một luật tồn tại / nguyên văn khối đã gộp |
 
 ⚠️ Con trỏ này CỐ Ý không dùng `@`. `@`-import là đệ quy — xoá sạch tác dụng tách.
 
@@ -68,8 +69,7 @@ Dấu hiệu (không phải fail thật): log khớp "usage limit"/"rate limit"/
 (≠ fail thật) = đã queue tự resume, báo user "đang chờ tự chạy tiếp". **Giới hạn: KHÔNG cứu được
 phiên tương tác sống của chính Mike** (turn hiện tại chết là chết) — xem mục 7.
 
-**6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02, sau 5 job fail
-"Reached max turns (50)" cùng 1 ngày, tất cả effort=high).** Khác usage-limit (transient, chờ
+**6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02).** Khác usage-limit (transient, chờ
 reset-time): hết lượt là tín hiệu NGÂN SÁCH xác định — retry y trần cũ chỉ tạch lại. 2 lớp:
 (a) **mặc định scale theo effort** khi omit `--max-turns` (`high`→80, `xhigh`/`max`→120, còn lại
 giữ 50); (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂNG gấp đôi (trần
@@ -77,8 +77,7 @@ giữ 50); (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂ
 attempt vẫn tạch → queue `bus/pending_resumes/` (kind=`max_turns`, resume NGAY ~30s) giữ nguyên
 model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng `DISPATCH_MAX_TURNS_RESUMES` (mặc
 định 2) — quá trần thì dừng, báo cần người xem lại. Cùng đường ống `resume_pending.py`/exit-code-5
-như usage-limit, nay giữ nguyên model/effort/max-turns qua mọi lần resume (trước đây nhánh
-usage-limit âm thầm rơi về default CLI — fix chung). Chi tiết:
+như usage-limit, nay giữ nguyên model/effort/max-turns qua mọi lần resume. Chi tiết:
 `kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md`.
 
 **7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** Tự kiểm
@@ -95,11 +94,6 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 
 > **Thay đổi lớn 2026-08-21 (user duyệt).** GỠ toàn bộ auto-wake: push-wake-on-completion
 > (`_bg_wrapper`→`wake_thread.sh`), reconciler cron `*/5` (`wakeup_reconcile.py`), và debounce.
-> Ba tháng vá bằng cách THÊM edge (ladder→push→claim-reply→debounce→reconciler) — mỗi edge mới đẻ
-> race mới: miss-wake (ladder/push lệch), double-answer (2 edge cùng fire), resume-session-chết
-> (08-21, session codex kẹt trong thread). Nguyên nhân gốc chung: ta bắt việc *giao kết quả cho
-> người* (chỉ cần 1 tin nhắn) đi qua việc *resume một phiên Claude sống* (đắt, có trạng thái, hỏng
-> nhiều kiểu). Bỏ đường đó = bỏ nguyên lớp lỗi.
 >
 > **Mô hình mới — 2 nhu cầu TÁCH BIỆT:**
 > 1. **Giao kết quả cho NGƯỜI**: agent tự ghi finding lên bus + tự post vào topic của nó; `_bg_wrapper`
@@ -140,9 +134,7 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > (tốn phí). An toàn hơn trước: ccdb đã tự retry session mới khi gặp "No conversation found" (commit
 > ccdb `6a709e7`, 2026-08-21) — resume session cũ/chết không còn báo lỗi ra Discord.
 >
-> (Lịch sử: `wakeup_architecture_redesign_20260820.md` (reconciler, ĐÃ GỠ 08-21) +
-> `wakeup_simplification_proposal_20260821.md` (bản thay thế được duyệt). `Agent(run_in_background)`
-> wrapper MOOT từ 07-07: `kb/archive/wake_on_completion_wrapper_history_20260707.md`.)
+> (Lịch sử + bối cảnh gỡ auto-wake: `MIKE_ext.md` § Dọn instructions 2026-10-09 → §8 auto-wake.)
 
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
@@ -194,6 +186,23 @@ Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng 
    **Flow bất đồng bộ:** `--bg` → Mike báo user "đang xử lý" → agent xong → auto consolidate +
    Telegram notify → Mike kiểm tra KB.
 4. Dispatch song song nhiều con: dùng `--bg` cho mỗi agent, gộp khi có kết quả (log hoặc KB).
+   Khi có N việc độc lập, đừng chạy tuần tự — dispatch song song:
+
+   ```bash
+   # Parallel dispatch (background), đợi cả 2 xong
+   bin/dispatch.sh Taylor "phân tích kỹ thuật VNM" --bg &
+   bin/dispatch.sh Winston "corp-action scan hôm nay" --bg &
+   wait
+   # Kết quả nằm trên bus, consolidate.sh đã tự chạy sau mỗi dispatch
+   ```
+
+   Hoặc dùng Agent tool trực tiếp từ Mike (inline, không cần companion):
+   ```
+   # Trong response của Mike — gọi cùng lúc (Claude sẽ chạy parallel):
+   Agent(prompt="query BQ freshness ticker"), Agent(prompt="query BQ freshness ticker_prune")
+   ```
+
+   **Rule**: N việc độc lập → dispatch/Agent song song. Việc phụ thuộc nhau → tuần tự.
 5. **⚠️ Directive/inbox — ĐÃ DEPRECATED cho task dispatch** (cập nhật 2026-06-24):
    `bus/directives/X.jsonl` chỉ còn cho **mandate dài hạn** (setup ban đầu, quy tắc vĩnh viễn không cần reply ngay). Task cần kết quả → **dùng `dispatch.sh`**.
 
@@ -241,8 +250,6 @@ Quy tắc CỨNG:
 5. Progress phải đi ĐÚNG topic `$DISCORD_THREAD_ID` (khớp "Kỷ luật topic Discord" phía trên) và mọi nhận
    định trạng thái phải có bằng chứng cùng lượt (`jobs.sh status`, file/log/artifact) — không báo suy đoán.
 
-Pattern học từ Claude trên Discord: nhận việc ngay, bước tiến ngắn nhưng cụ thể, tự quay lại khi chưa
-hoàn tất, và chỉ dừng khi đã có kết quả rõ ràng.
 
 ## Chọn agent nào cho việc gì
 **1 lớp duy nhất:** *companion daemon* (persistent, systemd) chỉ còn **Mike**. **Mọi agent khác đều
@@ -255,6 +262,8 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 | **Taylor** (Quant: backtest, chiến lược, BQ, risk/reward) | headless on-demand | `dispatch.sh Taylor "..."` | R&D, test chiến lược, query BQ |
 | **DollarBill** (plan giao dịch) | headless on-demand | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
 | **Mafee** (thực thi plan-bound) | headless on-demand | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
+| **bq-analyst** (BQ query nhanh, data check — one-shot) | native | `Agent(subagent_type="bq-analyst", ...)` | Query BQ nhanh, data check không cần lineage |
+| **inline** (query 1 câu đơn giản) | inline | `Agent(prompt="...", ...)` không cần subagent_type | Query 1 câu đơn giản |
 | **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
 | **fundamental-skeptic** (phản biện due-diligence cơ bản — công tố, thêm 2026-08-23) | native | `Agent(subagent_type="fundamental-skeptic")` | Trước khi chốt QUALIFY/NON case fear-buy/special-situation mới (sleeve discretionary DGC/TV1-style) |
 | **macro-strategist** (đọc vĩ mô VN độc lập — gọi là **Bobby**, KHÔNG phải công tố, thêm 2026-08-24) | native | `Agent(subagent_type="macro-strategist")` | Trước khi Taylor phân loại nguyên nhân vĩ mô một episode/khủng hoảng — dispatch Bobby TRƯỚC, KHÔNG cho biết forward-return/giả thuyết đang test (tránh đồng thuận sớm giữa người đọc vĩ mô và người chạy backtest, cùng lỗi đã cắn ở `margin-valuation-spread-20260823.md` §Đính chính) |
@@ -269,6 +278,26 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 > `agents/<id>/` giữ để audit. Bật lại 1 agent làm daemon (hiếm khi cần):
 > `systemctl --user enable --now mike@<id>`. Realtime risk monitor là **`risk_monitor.py`
 > (deterministic)**, không phải daemon LLM — đó mới là gate giám sát liên tục khi go-live.
+
+**Khi nào dùng native agent:**
+- Task không cần working memory tích lũy của agent đó
+- One-shot, kết quả trả về ngay trong lượt này
+- Không cần write code phức tạp, chỉ cần query/scan/read
+
+**Khi nào dùng headless dispatch (Taylor/DollarBill/Mafee):**
+- Cần đọc/ghi working memory (`kb/memory/<id>.md`) để giữ mạch nghiên cứu/thực thi qua nhiều lượt
+- Task ghi code, chạy backtest, hoặc thao tác trading thật (plan-bound)
+- KHÔNG cần daemon để làm việc này — `dispatch.sh` tự inject KB + working memory vào mỗi phiên
+  headless mới, độc lập với bất kỳ daemon nào
+
+**Bật lại 1 agent làm daemon** (hiếm khi cần, ví dụ user muốn tự mở session trực tiếp không qua
+Mike): `systemctl --user enable --now mike@<id>`. Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
+
+Native agent definitions: `~/.claude/agents/` (bq-analyst, **data-ops**, corp-scanner,
+**risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic).
+Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
+
+Lịch sử gỡ daemon + bảng 2-tier cũ (nguyên văn): `MIKE_ext.md` § Dọn instructions 2026-10-09 → routing 2-tier.
 
 ## Model/provider routing (OKF)
 
@@ -296,11 +325,7 @@ Verdict (`CONFIRMED|REFUTED|INCONCLUSIVE`) ghi lên bus là event `verification`
 production.** Verifier read-only (Bash/Read/Grep/Glob), không sửa code/KB.
 
 ## Tier phản biện cơ bản — fundamental-skeptic (thêm 2026-08-23, user duyệt)
-Khoảng trống khác quant-skeptic: due-diligence discretionary (sleeve fear-buy/special-situation,
-kiểu DGC/TV1) trước giờ chỉ có MỘT người phân tích (Taylor) rồi lên thẳng Mike/user duyệt — không
-ai đóng vai phản biện trước quyết định, khác R&D định lượng đã có quant-skeptic bắt buộc. Case
-DGC/TV1 từng đảo verdict 2 lần chỉ vì user tình cờ phản biện bằng data — nếu không ai hỏi lại,
-kết luận sai có thể đứng yên.
+Bối cảnh (vì sao có tier này): `MIKE_ext.md` § Dọn instructions 2026-10-09 → fundamental-skeptic.
 
 `Agent(subagent_type="fundamental-skeptic", prompt="phản biện case <ticker>: <đường dẫn writeup>")`
 — stateless, read-only (Bash/Read/Grep/Glob), một việc DUY NHẤT: cố REFUTE verdict QUALIFY/NON

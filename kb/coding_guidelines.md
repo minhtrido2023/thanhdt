@@ -13,9 +13,8 @@ rationale file — **cut narrative, never cut a fact**.
 **Enforcement policy (2026-08-01, user mandate — "đẩy bài học cũ ra công cụ/linter thay vì văn
 xuôi"):** any lesson expressible as a MECHANICAL pattern in code → make it an automated check that
 blocks the commit, not another paragraph; always test a new rule against real files before turning
-it on. Live mechanism, verified by a real `git commit`: **`bin/shellcheck_gate.sh`** (pre-commit
-hook, ShellCheck — caught all 4 real quoting incidents 2026-07-17→08-01, see §15 +
-`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). One-time setup per repo (hook
+it on. Live mechanism: **`bin/shellcheck_gate.sh`** blocks at pre-commit (ShellCheck); detail → §15 (ext)
++ `kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`. One-time setup per repo (hook
 shared by all worktrees): `pip install --user pre-commit shellcheck-py && pre-commit install`.
 §7, §10, §11, §13 = process/judgment calls with no clean syntactic pattern to lint — prose is the
 right form for them, not an oversight.
@@ -43,6 +42,7 @@ Gặp đúng tình huống thì `Read` file đó.
 | **§25** "Tiền" không phải một con số — bảng field cash per-consumer, số neo, ngoại lệ L2 | Viết/sửa BẤT KỲ code nào đọc số dư tiền từ broker (NAV, sizing, gate tiền, park/unpark) |
 | **§27** "Lệnh đã đặt" ≠ "lệnh đã khớp" — đối soát fill thật | Trước khi báo 1 lệnh/plan "đã thực thi"/"đã đạt X% NAV" |
 | **§31** Bảng "Hiệu suất lũy kế" báo cáo SpaceX phải qua `nav_period_returns.py` | Soạn dòng WTD/MTD/"Từ khi bắt đầu hoạt động" trong weekly/monthly SpaceX |
+| **Dọn 2026-10-09** — §8c bẫy git · §16 chi tiết cổng `tz_anchor_gate` · §29 số đo `diagnosis_evidence_gate` | Cổng pre-commit chặn mà cần lối thoát/chi tiết; viết cổng mới |
 
 ⚠️ **Con trỏ này CỐ Ý không dùng cú pháp `@`.** `@`-import của Claude Code là **đệ quy** — viết
 `@.../coding_guidelines_ext.md` ở đây sẽ nạp lại toàn bộ file ext vào mọi phiên của cả 5 agent
@@ -125,11 +125,8 @@ from 6 sites (`GHOST_ORDER_DETECTED`, `LEVER_PACKAGE_UNAUTHORIZED`, `dcf-rich-fi
 - **Any NEW selfcheck importing `Executor`** → one line at the top of the file, BEFORE any
   `Executor` is constructed: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")` — the ONLY
   prevention against a 5th recurrence.
-- **Never infer "this is a test" from an existing field** (`account` label, `plan_date` sentinel
-  2099-*, `strategy="selfcheck"`): all 3 were inventoried and all 3 are inconsistent across
-  selfcheck files (`capit_lever_selfcheck.py` deliberately uses the REAL labels;
-  `paper_main_window_selfcheck.py` uses a real `plan_date=TODAY`). The gate must be an EXPLICIT
-  env var.
+- **Never infer "this is a test" from an existing field** (`account` label, `plan_date` sentinel 2099-*,
+  `strategy="selfcheck"`) — the gate must be an EXPLICIT env var (inventory of the inconsistencies: rationale § Dọn 2026-10-09).
 - **`PYTEST_CURRENT_TEST` does NOT cover `test_trading_bot.py`** (runs as a script, no `def test_*`).
 
 *→ rationale §5b.*
@@ -192,8 +189,7 @@ tables, next-week plan, methodology appendix). **Monthly** = institutional conve
 disclosures, outlook).
 
 **§6b. Weekly/monthly BẮT BUỘC có khối "Market regime context" — tái dùng `dna_report.py`, KHÔNG
-tự tính lại (chốt 2026-08-18; weekly/monthly trước đó chỉ có DT5G committed state + P/E percentile
-2-năm TỰ TÍNH, thiếu cả 2 mảnh sau đã có sẵn trong daily EOD từ 07-30/07-31):**
+tự tính lại (chốt 2026-08-18):**
 - **DT gate candidate/streak clock** — `dna_report.build_dt_gate_line()` (đọc `get_dt_gate_clock()`):
   không chỉ state đã COMMIT (`DT5G = NEUTRAL`) mà cả state đang TÍCH LUỸ (vd "candidate BEAR
   6/10, còn 4 phiên để commit") — đây chính là câu trả lời cho "có xu hướng mới đang hình thành
@@ -210,8 +206,6 @@ tự tính lại (chốt 2026-08-18; weekly/monthly trước đó chỉ có DT5G
   build_neutral_base_line`), hoặc chạy trực tiếp `python3 -c "from dna_report import
   build_dt_gate_line, build_value_radar_line; print(build_dt_gate_line(html=False));
   print(build_value_radar_line(html=False))"` từ `WC_ROOT`.
-- Daily EOD đã đúng từ 07-30/07-31, KHÔNG cần sửa — chỉ weekly/monthly (hiện do Taylor soạn tay
-  qua `check_report_cadence.sh`/dispatch) thiếu.
 
 *→ rationale §6.*
 
@@ -233,11 +227,7 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
   line number — refs drift as entries get inserted.
 
 **§8c. Số pin phải có ARTIFACT SỐNG trong kho bất biến — nay là CƠ CHẾ, không còn là văn xuôi
-(user duyệt 2026-09-28, B0-B6).** Registry rule 2 ("CSV LÀ ARTIFACT ĐÔNG CỨNG") có từ 2026-06-19
-và chưa bao giờ cưỡng chế được; hệ quả đo thật: `data/*.csv` nằm trong `.gitignore` ⇒ 822 file /
-2,1GB ngoài version control, **tên canonical ghi đè được** (ca thật: cùng tên
-`v23_golive_audit_2014_now.csv`, md5 `84295bee` của user vs `65e7bb04` trên đĩa = hai hệ khác
-nhau), và **2/28 md5 registry trích dẫn đã mất dấu vĩnh viễn**. Nay:
+(user duyệt 2026-09-28, B0-B6).** Nay (số đo thật + ca md5 trùng tên: rationale § Dọn 2026-10-09):
 - **Kho** `data/pinned_ledgers/` (trong git) — `bin/pin_ledger.py add` ghi-MỘT-LẦN khoá bằng md5;
   md5 trùng ⇒ rc=2, không có `--force`. Manifest `PINS.jsonl` append-only.
 - **Pin phải khai chân CONTROL** (`--control-md5` / `--no-control "<lý do>"`): re-pin mà không
@@ -248,11 +238,8 @@ nhau), và **2/28 md5 registry trích dẫn đã mất dấu vĩnh viễn**. Nay
 - **4 cổng pre-commit**: `pin-artifact-gate` (mục registry mới phải có `ledger_md5:` hoặc
   `no_ledger:`) · `pin-store-immutable` (kho chỉ-thêm) · `number-provenance-gate` (khối KB mới
   công bố CAGR/Sharpe/Calmar/MaxDD phải khai nguồn trong cùng khối) · kiểm kê `pin_artifact_inventory.py`.
-- ⚠️ **Bẫy git đã cắn 2 lần khi xây đúng bộ cổng này**: `git show <rev>:<path>` tính path từ **GỐC
-  REPO**, còn `git diff … -- <pathspec>` tính từ **CWD**. Nhầm một cái ⇒ diff rỗng ⇒ cổng **im lặng
-  cho qua**. Dùng `:(top)` cho pathspec, và `rev-parse --show-prefix` cho `show`.
-- ⚠️ **Đọc không được bản cũ ≠ sạch**: cả 2 cổng đều phải nói thẳng "KHÔNG GATE được" thay vì coi
-  mọi thứ là mới (nếu không sẽ phun hàng trăm vi phạm giả và bị tắt hẳn trong một ngày).
+- ⚠️ Bẫy git (`git show <rev>:<path>` tính từ GỐC REPO vs `git diff -- <pathspec>` tính từ CWD; dùng `:(top)` +
+  `rev-parse --show-prefix`) và "đọc không được bản cũ ≠ sạch": `kb/coding_guidelines_ext.md` § Dọn 2026-10-09 → §8c.
 
 *→ rationale §8 (+ §8b).* · **§8b** (retention snapshot `data/bq_cache_asof*`) → `kb/coding_guidelines_ext.md`.
 
@@ -323,50 +310,10 @@ nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn
 
 Shipped alongside: a `TZ=Asia/Ho_Chi_Minh` crontab export (closes the ambient-env gap).
 
-**Cưỡng chế cơ học từ 2026-08-30 (user duyệt) — `bin/tz_anchor_gate.py`, pre-commit ở CẢ 2 repo**
-(`mike/.pre-commit-config.yaml` + `/home/trido/thanhdt/.pre-commit-config.yaml`). Lý do bật: luật
-văn xuôi này có từ 2026-07 mà code-quality-weekly 2026-08-30 vẫn tìm ra **5 vi phạm cùng lớp trong
-1 tuần** (WC `20bf2f20`, mike `b26008a6`) — tất cả LATENT vì host ở +07 + crontab export che mất.
-Phát hiện bằng **AST** (regex đếm sai: `datetime.now(tz)` vs `datetime.now()` chỉ khác ở việc CÓ
-ARGUMENT, mà argument viết xuống dòng được), **ratchet per-file** so với
-`kb/tz_anchor_baseline.json` (kiểm kê ngày bật: **157 vi phạm / 87 file**) — nợ cũ không bắt sửa
-ngay, chỉ không được TĂNG. Cho qua: `datetime.now(_ICT)`, `datetime.now(ZoneInfo(...))`,
-`datetime.now(timezone.utc)` (bước 1 của ICT-anchor). CHƯA phủ: `pd.Timestamp.now()`,
-`date` trong bash, `datetime.fromtimestamp()`, và file .py NGOÀI `WorkingClaude/` (20 worktree
-của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba lối thoát, hệ quả KHÁC nhau:
-`SKIP=tz-anchor-gate` (bị chặn do lệch nhánh — baseline neo theo canonical) · `MIKE_TZ_GATE=warn`
-(qua 1 lần, **không** nâng baseline, lần sau vẫn chặn — cố ý khác `code_quality_gate.sh`) ·
-`--update-baseline` (chỉ HẠ được; nâng phải thêm `--accept-new-debt`). Hook repo ngoài đi qua shim
-`WorkingClaude/tz_anchor_gate_shim.sh` vì `.gitignore` của repo đó ẩn chính `WorkingClaude/mike/`
-⇒ trỏ `entry` thẳng vào repo lồng sẽ hỏng cứng trong mọi worktree/clone mới. Selfcheck
-`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` — **137 assertion, 38/38 mutation bị giết
-(34 trên gate .py + 4 trên shim .sh), đo dưới `$DNA_PYEXE`** (interpreter mà
-`run_selfchecks.sh`/`selfcheck_weekly_baseline_check.sh` dùng thật; selfcheck tự đếm và tự in con
-số nên không bao giờ lệch).
-⚠️ **Hook chạy `python3` (3.10) còn 2 runner selfcheck chạy `$DNA_PYEXE` (3.12) ⇒ 7 file .py của
-repo ngoài chỉ parse được ở 3.12** (f-string PEP 701). Gate phân biệt "không parse được" với
-"sạch": KÊU ra stderr, KHÔNG gate file đó và KHÔNG đụng baseline của nó. Trước bản vá vòng 5 nó
-trả 0 vi phạm im lặng rồi XOÁ key baseline ⇒ commit sau bị hard-block oan. Hệ quả vận hành:
-`--seed-baseline` chạy bằng 3.10 sẽ TỪ CHỐI ghi (kiểm kê thiếu) — re-seed bằng `$DNA_PYEXE`.
-Hook PHẢI có `verbose: true` ở cả 2 config: pre-commit chỉ in output hook khi rc≠0 hoặc verbose,
-mà gate này cố ý fail-open ⇒ thiếu verbose thì fail-open thành fail-silent.
-Ba biến `MIKE_TZ_GATE_ROOT/_BASELINE/_ROOTS` chỉ dành cho sandbox selfcheck và bị TỪ CHỐI nếu
-thiếu `MIKE_TZ_GATE_SELFCHECK=1` (một biến sót lại đủ biến gate thành no-op im lặng).
-
-**Mở rộng 2026-09-05 (user duyệt Discord) — RULE 2 cùng script, namespace baseline RIÊNG**
-(`tdays_files` cạnh `files`, ratchet độc lập): chặn gọi hàm tên KHỚP TUYỆT ĐỐI `tdays` (không
-phân biệt hoa/thường) trừ khi CHÍNH lệnh gọi đó có `vn_holidays=` (per-call), HOẶC hàm bao quanh
-có tham chiếu `trading_bot.vn_market.is_holiday` (khớp tuyệt đối, per-scope). Sự cố gốc:
-`macro_healthcheck.py::tdays()` dùng `np.busday_count` trần, nghỉ Quốc khánh 31/08→02/09 khiến
-tuổi dữ liệu thật 1 phiên bị đếm thành 4 "trading day" ⇒ `macro_health=FAILED` giả, DT5G tắt qua
-đêm — call-site thứ 3 của CÙNG lớp lỗi trong 2 ngày (`0b83f507`, `81cc0428` ở `mike/bin/`, rồi
-`96ebd124` ở repo ngoài; `kb/incidents/2026-09/2026-09-04-macro-health-failed-holiday-tdays.md`).
-Cố ý KHÔNG quét mù `np.busday_count` hay biến thể tên (`get_tdays`) — rủi ro false-positive cao
-(biến thể tên từng tự bắt nhầm chính `tdays_violations()`/`test_*_tdays()` của gate/selfcheck khi
-chạy `--scan` thật lần đầu). ⚠️ Bản đầu ân xá `vn_holidays=` theo CẢ SCOPE (không phải per-call) —
-arch-review vòng 1 phát hiện no-op trên chính file gây sự cố: revert dòng vá thật về đúng bug SEV1
-gốc vẫn KHÔNG bị bắt vì marker khác trong cùng scope còn sống; đã sửa thành per-call trước khi
-commit. *→ docstring đầu `bin/tz_anchor_gate.py` (RULE 2).*
+**Cưỡng chế cơ học từ 2026-08-30 (user duyệt): cổng `bin/tz_anchor_gate.py` chặn ở pre-commit (cả 2 repo).**
+RULE 2 (2026-09-05, user duyệt): chặn gọi hàm `tdays` trừ khi chính lệnh gọi có `vn_holidays=`. Lối thoát 1 lần:
+`MIKE_TZ_GATE=warn`. Chi tiết (AST, ratchet `kb/tz_anchor_baseline.json`, shim, selfcheck, py3.10 vs 3.12,
+biến sandbox): `kb/coding_guidelines_ext.md` § Dọn 2026-10-09 → §16.
 
 *→ rationale §16.*
 
@@ -441,16 +388,8 @@ Hành động của bạn giải quyết một `question` trên bus (fix xong, q
 luận) → post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY**, đúng topic string, kèm
 bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi cuối
 phiên. Đọc `.claude/skills/bus-question-closure/SKILL.md` trước khi sửa/vận hành bất kỳ
-checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng 1
-triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
-backstop auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic SAI cách
-(match tuyệt đối trong khi producer luôn thêm hậu tố tự do vào topic) → "không tìm thấy" bị lẫn vào
-cùng nhánh code với "tìm thấy và cần sửa", sinh `NEEDS_CHANGES` giả mỗi ngày. Case thật + cách phân
-biệt A/B/review-thật: xem skill. Bug B cụ thể trong `bin/wags_autofix.sh` (`has-event ...
-"finding:wags-fix: $LABEL"` khớp tuyệt đối, trong khi Wags luôn ghi topic có hậu tố tự do) — **ĐÃ
-VÁ 2026-08-11**: `mike_json.py has-event-prefix` (subcommand mới, `has-event` giữ nguyên semantics
-tuyệt đối cho 3 caller cũ) + tách `INCONCLUSIVE` khỏi `NEEDS_CHANGES` thành 2 question khác nhau +
-`bin/wags_bus_verdict.py` lấy verdict từ artifact bus thay vì stdout. Luật cho người viết checker:
+checker/pipeline escalation nào (autofix, health-check, weekly audit). Hai lỗi A/B + case thật + vá `wags_autofix.sh`
+2026-08-11: rationale § Dọn 2026-10-09. Luật cho người viết checker:
 `kb/ops_runbook.md` § "Checker TRA CỨU sai".
 
 ## 27. "Lệnh Đã Đặt" ≠ "Lệnh Đã Khớp" — Đối Soát Fill Thật Trước Khi Báo "Đã Đạt Target"
@@ -474,9 +413,7 @@ vọng, trạng thái A vs B, "quyết định này đã có chưa") — luôn q
   bước ghi lại lên đúng kênh checker đang nhìn. Vắng mặt trên 1 kênh không phải bằng chứng của sự
   vắng mặt trong thực tế — phải xác nhận bằng ARTIFACT (giống §6/§9/§14), không suy diễn.
 
-**Vì sao thành luật:** tái diễn 4 ngày liên tiếp (2026-08-10→08-13) dưới ≥6 hình dạng khác nhau,
-đều cùng gốc — vá từng call-site cụ thể (đã làm, có test, có commit) chặn đúng ca đó nhưng không
-chặn được ca tiếp theo ở call-site KHÁC vì không có quy tắc chung.
+(Vì sao thành luật: rationale § Dọn 2026-10-09.)
 
 *→ retro-2026-08-10 Pattern 1 · retro-2026-08-11 mục 1/4/5 · retro-2026-08-12 Pattern 2 ·
 retro-2026-08-13 Pattern 1 — chi tiết từng ca nằm trong file retro tương ứng
@@ -496,17 +433,11 @@ dạng vi phạm, cả hai đều đã cắn thật:
   log, `Extra data` vs `Unterminated string`) rồi rẽ nhánh theo bit đó; không phân biệt được
   thì nói thẳng "không xác định được nguyên nhân, kiểm thủ công" — đừng đoán hộ.
 
-**Vì sao thành luật riêng dù §28 đã nói tinh thần này:** §28 viết 2026-08-13 và **vẫn lọt 3
-lần sau đó** ở 3 vị trí khác nhau trong ~1 tuần (08-21 `ops_health_check.sh` §5b, 08-25
-check#9, 08-28 `append_event.sh` guard JSON) — mỗi lần thông điệp đoán mò được checker/dispatch
-chép nguyên văn đi tiếp, dẫn người xử lý sai hướng ngay dòng đầu. Escalate bus question
-`retro-pattern-recurring-checker-hardcode-diagnosis-3` (retro-2026-08-28 Pattern A).
+(Vì sao thành luật riêng: rationale § Dọn 2026-10-09.)
 
 **Nửa CƠ HỌC đã tự động hoá — `bin/diagnosis_evidence_gate.py`** (pre-commit, `files:
-^(bin|hooks)/.*\.sh$`): chặn cứng dạng thứ nhất (`2>/dev/null` + `|| die "…"`). Đo thật trước
-khi chốt: 0 false-positive trên toàn bộ `bin/*.sh` + `hooks/*.sh` ở HEAD, và fire đúng dòng 108
-của `git show 55b3f34c^:bin/append_event.sh` (bản đúng lúc lỗi). Bỏ qua có chủ đích:
-`MIKE_DIAG_GATE=warn|off`.
+^(bin|hooks)/.*\.sh$`): chặn cứng dạng thứ nhất (`2>/dev/null` + `|| die "…"`). Bỏ qua có chủ đích:
+`MIKE_DIAG_GATE=warn|off`. Số đo false-positive + ca tái hiện: `kb/coding_guidelines_ext.md` § Dọn 2026-10-09 → §29.
 
 **Nửa còn lại KHÔNG lint được** — dạng thứ hai là văn xuôi, phát hiện nó = đọc hiểu ngôn ngữ tự
 nhiên. Đó là **mục bắt buộc trong review**: với mọi thay đổi chạm checker/guard/alert, hỏi đúng

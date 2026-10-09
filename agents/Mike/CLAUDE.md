@@ -21,19 +21,9 @@ ADHD-friendly nữa. Skill vẫn còn cài ở `~/.claude/skills/i-have-adhd/` (
 tự gọi. Muốn bật lại: user yêu cầu tường minh, hoặc gõ `/i-have-adhd` thủ công trong phiên.
 
 ## Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
-Chia theo việc, đã benchmark N=200 symbol + N=150 file (2026-08-03, ground truth bằng `ast`):
-- **ĐỌC**: `srcwalk <file>` (outline, −89% token, giữ 96% symbol), `srcwalk <file>:120-160`,
-  `--section <symbol>`, `srcwalk overview --scope <dir>`. `srcwalk guide` 1 lần trước khi dùng sâu.
-- **TÌM định nghĩa / call site**: dùng **`grep`** — thắng có ý nghĩa thống kê, rẻ 3–25×, và **không
-  bao giờ im lặng trả rỗng** (srcwalk bỏ sót hẳn 8–10% ca, kể cả khi scope đúng).
-- Ngoại lệ nghiêng về `srcwalk discover --scope <dir>`: tên RẤT phổ biến (`main`/`run`/`load`), chỗ
-  grep nhiễu nặng (precision 0,46 vs 0,84).
-- ⚠️ **Luôn `--scope <thư mục>`** — srcwalk theo `.gitignore`, mà `.gitignore` ẩn cả `mike/` (44%
-  file `.py`); `--scope .` cho F1 0,065 trên code của fleet.
-- ⚠️ Không dùng cho bash/`.json`/`.sql`/`.csv`; không tin `trace --depth ≥2`, khối "impact", hay
-  danh sách symbol của `review` (dùng `git diff`).
-
-Bằng chứng: `WorkingClaude/CLAUDE.md` § Code navigation · `kb/projects/srcwalk-benchmark-20260803.md`.
+Luật + 3 bẫy: `WorkingClaude/CLAUDE.md` § Code navigation (auto-load mỗi phiên). Số đo chỉ có ở bản Mike:
+srcwalk outline giữ 96% symbol; bỏ sót 8–10% ca tìm kể cả scope đúng; `discover` precision 0,46 vs 0,84.
+Nguyên văn khối cũ: `MIKE_ext.md` § Dọn instructions 2026-10-09 → srcwalk.
 
 ## Dispatch — giao việc cho agent con
 
@@ -96,24 +86,7 @@ bin/remember.sh Mike --show     # xem lại
 Nguyên tắc: việc gì quan trọng mà chỉ nằm trong chat sẽ mất khi restart → đẩy vào working memory hoặc KB.
 
 ## Parallel dispatch — chạy nhiều việc cùng lúc
-
-Khi có N việc độc lập, đừng chạy tuần tự — dispatch song song:
-
-```bash
-# Parallel dispatch (background), đợi cả 2 xong
-bin/dispatch.sh Taylor "phân tích kỹ thuật VNM" --bg &
-bin/dispatch.sh Winston "corp-action scan hôm nay" --bg &
-wait
-# Kết quả nằm trên bus, consolidate.sh đã tự chạy sau mỗi dispatch
-```
-
-Hoặc dùng Agent tool trực tiếp từ Mike (inline, không cần companion):
-```
-# Trong response của Mike — gọi cùng lúc (Claude sẽ chạy parallel):
-Agent(prompt="query BQ freshness ticker"), Agent(prompt="query BQ freshness ticker_prune")
-```
-
-**Rule**: N việc độc lập → dispatch/Agent song song. Việc phụ thuộc nhau → tuần tự.
+→ Bản hợp nhất ở `MIKE.md` § Routing mục 4 (đã import ở trên).
 
 ## Gộp chuỗi nghiên cứu nhiều bước ĐÃ BIẾT TRƯỚC thành 1 dispatch (cost-opt #3, 2026-07-17)
 
@@ -146,47 +119,7 @@ lúc đó vẫn dispatch riêng từng bước như cũ, vì gộp sẽ ép agen
 cần con người/Mike cân nhắc.
 
 ## Agent routing — 2 tiers (Mike = daemon duy nhất, cập nhật 2026-07-01)
-
-**Mike là companion daemon DUY NHẤT còn lại.** Mọi agent khác (Taylor, DollarBill, Mafee,
-data-ops, risk-auditor, legal-vn, corp-scanner, quant-skeptic, fleet-scout, ...) đều
-**headless/native on-demand** — không daemon riêng, không user tự mở session trực tiếp. Lý do:
-`dispatch.sh` luôn tạo tiến trình `claude -p` độc lập, không dùng conversation sống của daemon
-phụ → daemon phụ không tạo giá trị (continuity đã do `kb/memory/<id>.md` + KB đảm nhiệm), chỉ
-tốn tài nguyên + rủi ro vận hành. Taylor gỡ daemon 2026-07-01 (cuối cùng còn lại ngoài Mike);
-DollarBill/Mafee gỡ 2026-06-30; Winston/Spyros/Wendy gỡ 2026-06-25.
-
-Trước khi dispatch, đánh giá nhanh:
-
-| Task type | Tier | Cách giao |
-|---|---|---|
-| BQ query nhanh, data check | **native** | `Agent(subagent_type="bq-analyst", ...)` |
-| Data/regime freshness, pipeline health, feeds | **native** | `Agent(subagent_type="data-ops", ...)` (was Winston) |
-| Corp-action scan hẹp | **native** | `Agent(subagent_type="corp-scanner", ...)` |
-| Review rủi ro / audit EOD / recon fill↔plan | **native** | `Agent(subagent_type="risk-auditor", ...)` (was Spyros) |
-| Câu hỏi pháp lý/thuế/compliance VN | **native** | `Agent(subagent_type="legal-vn", ...)` (was Wendy) |
-| "agent X đang làm gì?" nhanh | **native** | `Agent(subagent_type="fleet-scout", ...)` |
-| **Phản biện finding R&D (bác bỏ trước khi wire)** | **native — verifier** | `bin/verify_finding.sh [--topic …]` hoặc `Agent(subagent_type="quant-skeptic", ...)` |
-| R&D experiment, backtest, query BQ (cần lineage/working memory) | **headless dispatch** | `bin/dispatch.sh Taylor "..."` |
-| Lập plan / thực thi lệnh (live) | **headless dispatch** | `bin/dispatch.sh DollarBill/Mafee "..."` |
-| Query 1 câu đơn giản | **inline** | `Agent(prompt="...", ...)` không cần subagent_type |
-
-**Khi nào dùng native agent:**
-- Task không cần working memory tích lũy của agent đó
-- One-shot, kết quả trả về ngay trong lượt này
-- Không cần write code phức tạp, chỉ cần query/scan/read
-
-**Khi nào dùng headless dispatch (Taylor/DollarBill/Mafee):**
-- Cần đọc/ghi working memory (`kb/memory/<id>.md`) để giữ mạch nghiên cứu/thực thi qua nhiều lượt
-- Task ghi code, chạy backtest, hoặc thao tác trading thật (plan-bound)
-- KHÔNG cần daemon để làm việc này — `dispatch.sh` tự inject KB + working memory vào mỗi phiên
-  headless mới, độc lập với bất kỳ daemon nào
-
-**Bật lại 1 agent làm daemon** (hiếm khi cần, ví dụ user muốn tự mở session trực tiếp không qua
-Mike): `systemctl --user enable --now mike@<id>`. Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
-
-Native agent definitions: `~/.claude/agents/` (bq-analyst, **data-ops**, corp-scanner,
-**risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic).
-Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
+→ Bảng hợp nhất (native vs headless, cách gọi, khi nào) ở `MIKE.md` § Chọn agent nào cho việc gì (đã import ở trên).
 
 ## Việc thường lệ của bạn
 - Khi user giao việc mới cần một agent chuyên trách → `spawn_child.sh <id> "<role>" "<mô tả>"`, rồi nhắc
