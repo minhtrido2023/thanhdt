@@ -12,7 +12,11 @@
 # đảm bảo có người làm cho nó xanh, hoặc đóng có bằng chứng nếu là false-positive/selfcheck lỗi thời.
 #
 # Lịch: 16:30 ICT Thứ Sáu (`30 9 * * 5` UTC) — sau papertrade_daily 15:30 (worst DONE 15:42) và custom30v watch 16:05.
-# Idempotent: mỗi ngày tối đa 1 lần dispatch cho mỗi chủ (stamp state/selfcheck_red_sweep/).
+# Idempotent: stamp state/selfcheck_red_sweep/<ngày>_<chủ>.done chứa JOB_ID. Lần chạy sau cùng ngày
+# hỏi jobs.sh: job done/running/overdue/pending-resume ⇒ bỏ qua; failed/timeout/cancelled/không tìm thấy
+# ⇒ giao lại (sửa 2026-10-09, user duyệt: trước đây stamp ghi ngay khi 'sent' nên job hỏng vì OAuth
+# 16:30 bị coi là đã làm cả tuần). Lượt bù: cron 18:52 Thứ Sáu chạy lại chính script này.
+# Stamp rỗng (bản cũ) ⇒ không biết job nào ⇒ bỏ qua như trước (không dispatch chồng).
 # Chạy tay: bin/selfcheck_red_owner_sweep.sh [--dry-run]
 set -uo pipefail
 ROOT="/home/trido/thanhdt/WorkingClaude/mike"
@@ -52,7 +56,15 @@ for OWNER in Wags Taylor; do
   N="$(printf '%s' "$ITEMS" | grep -c '^- ' || true)"
   if [ "$N" -eq 0 ]; then log "$OWNER: 0 câu mở — bỏ qua"; continue; fi
   STAMP="$STATE_DIR/${TODAY}_${OWNER}.done"
-  if [ -e "$STAMP" ]; then log "$OWNER: đã dispatch hôm nay ($STAMP) — bỏ qua"; continue; fi
+  if [ -e "$STAMP" ]; then
+    PREV_JOB="$(head -n1 "$STAMP" 2>/dev/null | tr -d '[:space:]')"
+    if [ -z "$PREV_JOB" ]; then log "$OWNER: đã dispatch hôm nay ($STAMP, stamp cũ không có job_id) — bỏ qua"; continue; fi
+    "$ROOT/bin/jobs.sh" status "$PREV_JOB" >/dev/null 2>&1; PREV_RC=$?
+    case "$PREV_RC" in
+      0|2|3|5) log "$OWNER: job hôm nay $PREV_JOB còn sống/đã xong (jobs.sh rc=$PREV_RC) — bỏ qua"; continue ;;
+      *) log "$OWNER: job hôm nay $PREV_JOB KHÔNG thành công (jobs.sh rc=$PREV_RC: 1=failed/timeout/cancelled, 4=không tìm thấy) ⇒ giao lại" ;;
+    esac
+  fi
   if [ "$OWNER" = "Wags" ]; then
     LOC='nằm trong repo mike (/home/trido/thanhdt/WorkingClaude/mike/bin/...)'
   else
@@ -93,7 +105,15 @@ $ITEMS"
   log "$OWNER: $N câu mở → dispatch"
   if [ "$DRY" -eq 1 ]; then printf '%s\n----\n' "$PROMPT"; continue; fi
   if OUT="$("$ROOT/bin/dispatch.sh" "$OWNER" "$PROMPT" --bg --model opus --effort high --timeout 5400 --thread "$ARCH_THREAD" 2>&1)"; then
-    touch "$STAMP"; log "$OWNER: dispatched — $(printf '%s' "$OUT" | tail -1)"
+    JOB="$(printf '%s' "$OUT" | grep -oE 'job=[A-Za-z]+_[0-9]{8}_[0-9]{6}' | head -n1 | cut -d= -f2)"
+    if [ -n "$JOB" ]; then
+      printf '%s\n' "$JOB" >"$STAMP.tmp" && mv "$STAMP.tmp" "$STAMP"
+    else
+      # Không bóc được job_id ⇒ stamp rỗng = bỏ qua lượt bù (an toàn: không dispatch chồng).
+      log "WARNING: không bóc được job_id từ output dispatch — stamp rỗng, lượt bù sẽ không kiểm được job"
+      : >"$STAMP"
+    fi
+    log "$OWNER: dispatched job=${JOB:-?} — $(printf '%s' "$OUT" | tail -1)"
   else
     log "ERROR: dispatch $OWNER thất bại — lỗi thật: $(printf '%s' "$OUT" | tail -3)"
     "$ROOT/bin/notify_thread.sh" "🔴 selfcheck_red_owner_sweep: dispatch $OWNER thất bại ($N câu chưa được giao). Lỗi: $(printf '%s' "$OUT" | tail -1)" "$ARCH_THREAD" >/dev/null 2>&1 || true
