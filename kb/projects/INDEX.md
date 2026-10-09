@@ -3,6 +3,7 @@
      dispatch có context_pack ⇒ tường thuật của việc ĐÃ ĐÓNG là chi phí trả lại mỗi phiên.
      Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
      để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
+- 2026-10-09 Cổ tức tiền — `first_disclosure_datetime` vendor KHÔNG dùng làm ngày công bố PIT (C: bị ghi đè về sau, TZ trôi, 56% sai ±1 phiên) → `agents/Taylor/research/cash_div_first_disclosure_validation_20261009/REPORT.md`; announcement study giữ mốc ≥2027-08, snapshot corp-action daily chạy tiếp; KHÔNG mở sleeve payer thay cash
 - 2026-10-09 BAL MAX_POS>12 khi LAG nhàn rỗi → `agents/Taylor/research/bal_maxpos_lag_idle_20261009/REPORT.md` — **NO-GO** (quant-skeptic CONFIRMED high): trần 16/20 −1,1…−2,1pp ở cả pin0%/pin1M park0, âm IS+OOS, DSR≈0; BAL/LAG hai sổ độc lập nên BAL KHÔNG chạm cash LAG, nới trần chỉ rót vào ứng viên yếu. Trần chỉ chạm ở BULL/EXBULL (NEUTRAL 1,6%). Chưa test riêng "thêm slot, giữ hàng đợi 36" — tiền dư BAL lúc chặn trung vị 0,7% nên kỳ vọng ~0
 - 2026-09-07 Treasury-buyback OShares PIT overlay (VRE vs AIS gap) → `treasury-buyback-oshares-overlay-20260907.md` — **KHÔNG WIRE** (user chốt 09-08): overlay CONFIRMED 2 vòng quant-skeptic (162/14/29 mã), nhưng OShares chỉ nuôi 1/3 nhánh composite (sales_yield, không phải PE dominant factor), vấn đề chỉ ở cửa sổ lịch sử đã tự hết (live OShares đã đúng) — giữ làm công cụ tra cứu ad-hoc
 - 2026-08-23 Chính sách margin đơn mã sleeve fear-buy discretionary → `discretionary-margin-policy-20260823.md` — **IMPLEMENTED 2026-08-29, cap RESYNC 2026-08-30 (commit a19fc256/022c48e7)**: per-name ≤5% NAV exposure, sleeve tổng ≤10% NAV exposure (f≤1,3, %ADV≤10%, exit tự áp −20% từ giá arm); gate `bin/discretionary_margin_gate.py` + cron check-exits 15:20 ICT; trigger 15% cần ≥3 case marginable đồng thời THẬT — chưa đạt
@@ -37,4 +38,3 @@
 - CASH_VENDOR gate (số cổ tức từ `tav2_bq.corporate_action` khi broker không giải được) →
   `cash-vendor-gate-tracking.md` — user chốt 2026-08-15 **giữ ĐÓNG**; mở lại chỉ khi có ≥1 sự
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
-- 2026-10-09 Cổ tức tiền — `first_disclosure_datetime` vendor KHÔNG dùng làm ngày công bố PIT (C: bị ghi đè về sau, TZ trôi, 56% sai ±1 phiên) → `agents/Taylor/research/cash_div_first_disclosure_validation_20261009/REPORT.md`; announcement study giữ mốc ≥2027-08, snapshot corp-action daily chạy tiếp; KHÔNG mở sleeve payer thay cash
