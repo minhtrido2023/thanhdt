@@ -37,13 +37,11 @@
    "depth": 2,
    "parent": "trading_bot/strategies.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -51,7 +49,9 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -69,7 +69,8 @@
    "roots": [
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
-    "cron `30 8 * * 1-5` papertrade_daily.sh"
+    "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py"
    ],
    "tier": "T0",
    "tier_parent": "deploy_golive_dt5g_v4/golive_recommend_v23.py",
@@ -148,6 +149,49 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "atc_upcom_ordertype_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "dnse_api.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py",
+    "trading_bot/config.py",
+    "trading_bot/executor.py",
+    "trading_bot/plan.py"
+   ],
+   "depth": null,
+   "parent": "dnse_api.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "auto_exit_rules.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/auto_exit_inject.py",
+   "roots": [
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/auto_exit_inject.py",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+   "via": "import"
+  },
+  "auto_exit_rules_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "auto_exit_rules.py"
+   ],
+   "depth": null,
+   "parent": "auto_exit_rules.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "auto_update_commodity_wb.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -174,7 +218,41 @@
    "tier_root": "cron `0 1 5 * *` auto_update_commodity_wb.sh",
    "via": "exec"
   },
+  "basket_oshares_step_exdate_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "bq_local_cache.py",
+    "custom_basket.py"
+   ],
+   "depth": null,
+   "parent": "bq_local_cache.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "basket_price_basis_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "custom_basket.py",
+    "edge_health_monitor.py",
+    "pt_v22_dt5g.py",
+    "rating_8l.py",
+    "rating_8l_history.py",
+    "regime_size_overlay.py",
+    "signal_v11_sql.py",
+    "simulate_holistic_nav.py"
+   ],
+   "depth": null,
+   "parent": "custom_basket.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "basket_return_leg_oshares_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
     "custom_basket.py",
@@ -226,7 +304,6 @@
    "parent": "preflight_bq_cache.py",
    "roots": [
     "cron `*/10 * * * *` resume_pending.py",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 12 * * 1-5` hit_details_daily.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
@@ -235,7 +312,6 @@
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -246,8 +322,11 @@
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
@@ -260,6 +339,21 @@
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
   },
+  "brokers_cash_fields_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/park_holdings.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/park_holdings.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "brokers_nav_shadow_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
@@ -268,6 +362,21 @@
    ],
    "depth": null,
    "parent": "trading_bot/__init__.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "brokers_tradequantity_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/park_holdings.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/park_holdings.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -303,12 +412,14 @@
    "depth": 3,
    "parent": "recommend_holistic.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
@@ -339,6 +450,7 @@
    "depth": 2,
    "parent": "telegram_recommend.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
@@ -346,9 +458,11 @@
     "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 13 * * 1-5` paper_late_feeds.sh",
@@ -363,6 +477,8 @@
    "blast_tier": "T3",
    "covers": [
     "bot_execute.py",
+    "cctg_rate_vn.py",
+    "deposit_rate_vn.py",
     "mike/bin/send_plan_report.sh",
     "trading_bot/__init__.py",
     "trading_bot/brokers.py",
@@ -412,6 +528,90 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "cctg6m_series_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "cctg_rate_vn.py"
+   ],
+   "depth": null,
+   "parent": "cctg_rate_vn.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "cctg_deposit_wiring_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "cctg_rate_vn.py",
+    "custom30_yield_labels.py",
+    "dcf_refresh_gate.py",
+    "dcf_valuation.py",
+    "deposit_rate_vn.py",
+    "rating_8l.py",
+    "trading_bot/__init__.py",
+    "trading_bot/due_diligence.py"
+   ],
+   "depth": null,
+   "parent": "cctg_rate_vn.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "cctg_overlay_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "cctg_rate_vn.py",
+    "deposit_rate_vn.py"
+   ],
+   "depth": null,
+   "parent": "cctg_rate_vn.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "cctg_rate_vn.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/ops_health_check.sh",
+   "roots": [
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
+    "cron `0 14 * * 1-5` send_plan_report.sh",
+    "cron `0 16 * * 1-5` send_plan_report.sh",
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 23 * * 0-4` newdeals_daily_report.py",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `10 1 11 * *` dcf_refresh_gate.py",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `10 2 * * 1,3,5` bot_execute.py",
+    "cron `13 2 * * 1-5` opening_window_l2_poll.py",
+    "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
+    "cron `30 12 * * 1-5` park_trim_daily.sh",
+    "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
+    "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `46 3 * * 2,4` bot_execute.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
+    "cron `5 13 * * 1-5` paper_late_feeds.sh",
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 1 * * 1-5` plan_approval_reminder.sh",
+    "cron `52 1 * * 1-5` paper_main_probe_plan.py"
+   ],
+   "tier": "T0",
+   "tier_parent": "deposit_rate_vn.py",
+   "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
+   "via": "exec"
+  },
   "cheap_pb_floor.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -435,6 +635,42 @@
    ],
    "depth": null,
    "parent": "trading_bot/__init__.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "close_repair.py": {
+   "blast_tier": "T0",
+   "depth": 3,
+   "parent": "paper_entry_adjust.py",
+   "roots": [
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `0 23 * * 0-4` newdeals_daily_report.py",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `0 6 * * 1-5` run_bot.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `5 2 * * 1-5` run_bot.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "paper_entry_adjust.py",
+   "tier_root": "cron `5 2 * * 1-5` run_bot.sh",
+   "via": "import"
+  },
+  "close_repair_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "close_repair.py"
+   ],
+   "depth": null,
+   "parent": "close_repair.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -471,10 +707,9 @@
   "corp_action_lib.py": {
    "blast_tier": "T0",
    "depth": 1,
-   "parent": "mike/bin/corp_action_feed_canary.py",
+   "parent": "mike/bin/corp_action_auto_confirm.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
@@ -486,7 +721,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `10 0 * * 1` treasury_buyback_window_monitor.py",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -503,8 +738,10 @@
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
@@ -524,14 +761,12 @@
    "depth": 2,
    "parent": "deploy_golive_dt5g_v4/golive_recommend_v23.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -540,7 +775,9 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -550,6 +787,35 @@
    "tier_parent": "deploy_golive_dt5g_v4/golive_recommend_v23.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
+  },
+  "cpi_vn_tier15_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "cpi_vn.py",
+    "dcf_valuation.py",
+    "deposit_rate_vn.py"
+   ],
+   "depth": null,
+   "parent": "cpi_vn.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "cq_hard_boundary_20261004_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "bot_execute.py",
+    "capit_episode.py"
+   ],
+   "depth": null,
+   "parent": "bot_execute.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "crisis_alert_push.py": {
    "blast_tier": "T1",
@@ -587,6 +853,32 @@
    "tier_root": "cron `30 8 * * 1-5` papertrade_daily.sh",
    "via": "exec"
   },
+  "custom30_publish_guard.py": {
+   "blast_tier": "T1",
+   "depth": 2,
+   "parent": "custom30_history.py",
+   "roots": [
+    "cron `30 8 * * 1-5` papertrade_daily.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "custom30_history.py",
+   "tier_root": "cron `30 8 * * 1-5` papertrade_daily.sh",
+   "via": "import"
+  },
+  "custom30_publish_guard_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "custom30_history.py",
+    "custom30_publish_guard.py"
+   ],
+   "depth": null,
+   "parent": "custom30_history.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "custom30_publish_weight_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
@@ -615,13 +907,14 @@
   "custom30_yield_labels_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "corp_action_lib.py",
     "custom30_yield_labels.py",
     "simulate_holistic_nav.py",
     "trading_bot/__init__.py",
     "trading_bot/due_diligence.py"
    ],
    "depth": null,
-   "parent": "custom30_yield_labels.py",
+   "parent": "corp_action_lib.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -639,6 +932,19 @@
    "tier_parent": "custom30_history.py",
    "tier_root": "cron `30 8 * * 1-5` papertrade_daily.sh",
    "via": "import"
+  },
+  "custom_basket_forensic_failclosed_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "custom_basket.py"
+   ],
+   "depth": null,
+   "parent": "custom_basket.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "daily_refresh_v34b_linux.sh": {
    "blast_tier": "T1",
@@ -740,16 +1046,14 @@
   "dcf_valuation.py": {
    "blast_tier": "T0",
    "depth": 1,
-   "parent": "mike/bin/send_plan_report.sh",
+   "parent": "mike/bin/eod_trading_report.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -758,7 +1062,9 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -819,19 +1125,29 @@
    "tier_root": "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
    "via": "exec"
   },
+  "deposit_cctg_trend_check.py": {
+   "blast_tier": "T1",
+   "depth": 1,
+   "parent": "refresh_deposit_cctg_weekly.sh",
+   "roots": [
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "refresh_deposit_cctg_weekly.sh",
+   "tier_root": "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
+   "via": "exec"
+  },
   "deposit_rate_vn.py": {
    "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/ops_health_check.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 1 11 * *` dcf_refresh_gate.py",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
@@ -842,9 +1158,12 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 13 * * 1-5` paper_late_feeds.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -939,18 +1258,33 @@
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `5 13 * * 1-5` paper_late_feeds.sh"
    ],
    "tier": "T0",
-   "tier_parent": "mike/bin/send_plan_report.sh",
-   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
+   "tier_parent": "mike/bin/portfolio_status.py",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
    "via": "import"
+  },
+  "dna_report_killswitch_line_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "dna_report.py"
+   ],
+   "depth": null,
+   "parent": "dna_report.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "dnse_api.py": {
    "blast_tier": "T0",
    "depth": 2,
    "parent": "trading_bot/brokers.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
     "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
@@ -963,7 +1297,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -975,21 +1309,40 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
-    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
+  },
+  "dot2_batch_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "deploy_golive_dt5g_v4/golive_recommend_v23.py",
+    "pt_8l_daily.sh",
+    "telegram_run_daily.sh"
+   ],
+   "depth": null,
+   "parent": "deploy_golive_dt5g_v4/golive_recommend_v23.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "dt5g_chain_freshness_selfcheck.py": {
    "blast_tier": "T3",
@@ -1153,6 +1506,46 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "failc_residual_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "edge_health_monitor.py"
+   ],
+   "depth": null,
+   "parent": "edge_health_monitor.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "failopen_failclosed_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "rating_8l.py"
+   ],
+   "depth": null,
+   "parent": "rating_8l.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "failopen_telegram_refresh_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "bot_execute.py",
+    "rating_8l_history.py"
+   ],
+   "depth": null,
+   "parent": "bot_execute.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "fetch_bdi_daily.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -1267,14 +1660,12 @@
    "depth": 2,
    "parent": "dcf_valuation.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -1283,7 +1674,9 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -1316,8 +1709,8 @@
    "depth": 1,
    "parent": "bot_execute.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
@@ -1328,7 +1721,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -1339,16 +1732,20 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
-    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -1443,22 +1840,22 @@
   },
   "lag_forensic_filter.py": {
    "blast_tier": "T0",
-   "depth": 2,
-   "parent": "deploy_golive_dt5g_v4/golive_recommend_v23.py",
+   "depth": 1,
+   "parent": "mike/bin/discretionary_candidate_funnel.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -1573,19 +1970,19 @@
    "depth": 2,
    "parent": "deploy_golive_dt5g_v4/golive_recommend_v23.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -1658,6 +2055,20 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "logto_silent_defaults_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "capit_episode.py",
+    "sector_lens_monitor.py"
+   ],
+   "depth": null,
+   "parent": "capit_episode.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "macro_healthcheck.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -1671,6 +2082,19 @@
    "tier_parent": "papertrade_daily.sh",
    "tier_root": "cron `30 8 * * 1-5` papertrade_daily.sh",
    "via": "exec"
+  },
+  "macro_killswitch_a_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "deposit_rate_vn.py"
+   ],
+   "depth": null,
+   "parent": "deposit_rate_vn.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "macro_state_live.py": {
    "blast_tier": "T0",
@@ -1735,13 +2159,12 @@
    "parent": "mike/bin/ops_health_check.sh",
    "roots": [
     "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
    "tier": "T1",
    "tier_parent": "mike/bin/fearbuy_weekly_scan.sh",
-   "tier_root": "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+   "tier_root": "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
    "via": "exec"
   },
   "mike/agents/Taylor/capit_dd_gate_selfcheck.py": {
@@ -1846,6 +2269,99 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/account_cash_flows.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/report_delivery_gate.py",
+   "roots": [
+    "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `0 23 * * 0-4` newdeals_daily_report.py",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `0 6 * * 1-5` run_bot.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `15 13 * * 1-5` compute_active_nav_all.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
+    "cron `25 12 * * 1-5` corp_action_auto_confirm.py",
+    "cron `30 0 * * 1-5` corp_action_daily.sh",
+    "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 12 * * 1-5` park_trim_daily.sh",
+    "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
+    "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 2 * * 1-5` run_bot.sh",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/daily_nav_snapshot.py",
+   "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
+   "via": "import"
+  },
+  "mike/bin/adjfactor_drift_alert.sh": {
+   "blast_tier": "T1",
+   "depth": 1,
+   "parent": "mike/bin/adjfactor_drift_daily.sh",
+   "roots": [
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "mike/bin/adjfactor_drift_daily.sh",
+   "tier_root": "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/adjfactor_drift_daily.sh": {
+   "blast_tier": "T1",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "(root)",
+   "tier_root": "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/adjfactor_drift_detect.py": {
+   "blast_tier": "T1",
+   "depth": 1,
+   "parent": "mike/bin/adjfactor_drift_daily.sh",
+   "roots": [
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "mike/bin/adjfactor_drift_daily.sh",
+   "tier_root": "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/adjfactor_drift_detect_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/adjfactor_drift_alert.sh",
+    "mike/bin/adjfactor_drift_daily.sh",
+    "mike/bin/adjfactor_drift_detect.py",
+    "mike/bin/dividend_adjusted_return.py",
+    "mike/bin/report_return_gate.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py",
+    "trading_bot/vn_market.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/adjfactor_drift_alert.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/anomaly_escalate.py": {
    "blast_tier": "T2",
    "depth": 1,
@@ -1866,7 +2382,6 @@
    "roots": [
     "cron `*/10 * * * *` resume_pending.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 15 * * 0` fleet_housekeeping.sh",
@@ -1880,7 +2395,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 11 * * 1-5` fetch_new_listings_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
@@ -1901,18 +2416,23 @@
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
     "cron `35 11 * * 1-5` rubber_weekly.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 11 * * 1-5` update_shares_live.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
     "cron `7 * * * *` consolidate.sh"
    ],
@@ -1947,6 +2467,50 @@
    "tier_parent": "mike/bin/kb_nightly.sh",
    "tier_root": "cron `0 19 * * *` kb_nightly.sh",
    "via": "exec"
+  },
+  "mike/bin/auto_exit_inject.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/auto_exit_inject_daily.sh",
+   "roots": [
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/auto_exit_inject_daily.sh",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/auto_exit_inject_daily.sh": {
+   "blast_tier": "T0",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "(root)",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/auto_exit_inject_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "capit_episode.py",
+    "mike/bin/auto_exit_inject.py",
+    "mike/bin/corp_actions.py",
+    "mike/bin/park_holdings.py",
+    "mike/bin/portfolio_status.py",
+    "mike/bin/wc_paths.py",
+    "trading_bot/__init__.py",
+    "trading_bot/vn_market.py"
+   ],
+   "depth": null,
+   "parent": "capit_episode.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/backup_freshness_check.sh": {
    "blast_tier": "T2",
@@ -1997,6 +2561,22 @@
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "exec"
   },
+  "mike/bin/bq_freshness_check_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/bq_freshness_check.sh",
+    "mike/bin/nav_exdate_forecast.py",
+    "mike/bin/notify.sh",
+    "mike/bin/notify_thread.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/bq_freshness_check.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/bq_monthly_pin.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -2020,6 +2600,19 @@
    "tier_parent": "(root)",
    "tier_root": "cron `0 15 1 * *` bq_monthly_pin.sh",
    "via": "exec"
+  },
+  "mike/bin/bq_price_freeze_gate_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/bq_freshness_check.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/bq_freshness_check.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/broker_fill_confirm.py": {
    "blast_tier": "T0",
@@ -2089,6 +2682,7 @@
    "parent": "mike/bin/check_report_cadence.sh",
    "roots": [
     "cron `*/10 * * * *` resume_pending.py",
+    "cron `0 1 * * *` daily_decision_topic.py",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -2098,6 +2692,7 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -2265,6 +2860,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -2604,13 +3200,46 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/corp_action_broker_detect.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/corp_action_auto_confirm.py",
+   "roots": [
+    "cron `25 12 * * 1-5` corp_action_auto_confirm.py"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/corp_action_auto_confirm.py",
+   "tier_root": "cron `25 12 * * 1-5` corp_action_auto_confirm.py",
+   "via": "import"
+  },
+  "mike/bin/corp_action_broker_detect_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "corp_action_lib.py",
+    "mike/bin/corp_action_auto_confirm.py",
+    "mike/bin/corp_action_broker_detect.py",
+    "mike/bin/corp_actions.py",
+    "mike/bin/daily_nav_snapshot.py",
+    "mike/bin/exdate_frame.py",
+    "mike/bin/verify_account_snapshot.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py",
+    "trading_bot/vn_market.py"
+   ],
+   "depth": null,
+   "parent": "corp_action_lib.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/corp_action_daily.py": {
    "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/corp_action_daily.sh",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -2618,7 +3247,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -2629,7 +3258,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -2658,7 +3289,6 @@
    "parent": "mike/bin/corp_action_daily.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -2666,7 +3296,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -2677,7 +3307,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -2735,7 +3367,6 @@
    "parent": "mike/bin/corp_action_auto_confirm.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -2743,7 +3374,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -2754,7 +3385,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -2764,6 +3397,20 @@
    "tier_parent": "mike/bin/daily_nav_snapshot.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
+  },
+  "mike/bin/corp_actions_verify_cashleg_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/corp_actions.py",
+    "mike/bin/dividend_adjusted_return.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/corp_actions.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/cron_health_check.py": {
    "blast_tier": "T2",
@@ -2838,13 +3485,24 @@
    "tier_root": "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
    "via": "exec"
   },
+  "mike/bin/daily_decision_topic.py": {
+   "blast_tier": "T2",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `0 1 * * *` daily_decision_topic.py"
+   ],
+   "tier": "T2",
+   "tier_parent": "(root)",
+   "tier_root": "cron `0 1 * * *` daily_decision_topic.py",
+   "via": "exec"
+  },
   "mike/bin/daily_nav_snapshot.py": {
    "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/eod_trading_report.sh",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -2852,7 +3510,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -2863,7 +3521,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -2892,7 +3552,9 @@
    "blast_tier": "T3",
    "covers": [
     "mike/bin/corp_action_daily.py",
+    "mike/bin/corp_actions.py",
     "mike/bin/daily_nav_snapshot.py",
+    "mike/bin/park_holdings.py",
     "mike/bin/verify_account_snapshot.py"
    ],
    "depth": null,
@@ -2934,10 +3596,12 @@
    "depth": 1,
    "parent": "mike/bin/code_quality_weekly.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/10 * * * *` resume_pending.py",
     "cron `*/10 * * * *` watchdog.sh",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
     "cron `*/5 2-7 * * 1-5` bot_heartbeat.sh",
+    "cron `0 1 * * *` daily_decision_topic.py",
     "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 12 * * 1-5` hit_details_daily.sh",
@@ -2955,7 +3619,7 @@
     "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `1 6 * * 1-5` session_announce.sh",
     "cron `10 0 * * 1` treasury_buyback_window_monitor.py",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
@@ -2969,6 +3633,7 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
@@ -2977,22 +3642,27 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `31 4 * * 1-5` session_announce.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
     "cron `35 6 * * 1-5` paper_main_early_check.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `40 2 * * 1,3,5` paper_main_early_check.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 23 * * *` snapshot_corp_action_daily.py",
     "cron `50 7 * * 1-5` session_announce.sh",
     "cron `7 * * * *` consolidate.sh",
@@ -3009,8 +3679,8 @@
    "depth": 1,
    "parent": "newdeals_daily_report.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -3018,7 +3688,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -3027,9 +3697,12 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -3084,16 +3757,30 @@
   },
   "mike/bin/discretionary_candidate_funnel.py": {
    "blast_tier": "T1",
-   "depth": 1,
-   "parent": "mike/bin/fearbuy_weekly_scan.sh",
+   "depth": 0,
+   "parent": "(root)",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh"
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py"
    ],
    "tier": "T1",
-   "tier_parent": "mike/bin/fearbuy_weekly_scan.sh",
-   "tier_root": "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+   "tier_parent": "(root)",
+   "tier_root": "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
    "via": "exec"
+  },
+  "mike/bin/discretionary_candidate_funnel_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "anomaly_gate.py",
+    "mike/bin/daily_decision_topic.py",
+    "mike/bin/discretionary_candidate_funnel.py"
+   ],
+   "depth": null,
+   "parent": "anomaly_gate.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/discretionary_margin_check_exits_daily.sh": {
    "blast_tier": "T0",
@@ -3112,10 +3799,9 @@
    "depth": 1,
    "parent": "mike/bin/discretionary_margin_check_exits_daily.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
-    "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh"
+    "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/discretionary_margin_check_exits_daily.sh",
@@ -3127,7 +3813,8 @@
    "covers": [
     "mike/bin/corp_actions.py",
     "mike/bin/daily_nav_snapshot.py",
-    "mike/bin/discretionary_margin_gate.py"
+    "mike/bin/discretionary_margin_gate.py",
+    "mike/bin/verify_account_snapshot.py"
    ],
    "depth": null,
    "parent": "mike/bin/corp_actions.py",
@@ -3142,6 +3829,7 @@
    "depth": 1,
    "parent": "mike/bin/resume_pending.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/10 * * * *` resume_pending.py",
     "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
@@ -3151,16 +3839,18 @@
     "cron `0 2 1 * *` check_report_cadence.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 2 * * 1-5` run_bot.sh"
    ],
    "tier": "T0",
@@ -3186,6 +3876,41 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/dispatch_loop_hint.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [
+    "cron `*/10 * * * *` resume_pending.py",
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 17 * * *` daily_retro.sh",
+    "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/dispatch.sh",
+   "tier_root": "cron `*/10 * * * *` resume_pending.py",
+   "via": "exec"
+  },
+  "mike/bin/dispatch_loop_hint_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dispatch.sh",
+    "mike/bin/dispatch_loop_hint.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/dispatch_question_hint.py": {
    "blast_tier": "T0",
    "depth": 2,
@@ -3198,6 +3923,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -3220,12 +3946,70 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/dispatch_round_cap.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [
+    "cron `*/10 * * * *` resume_pending.py",
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 17 * * *` daily_retro.sh",
+    "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/dispatch.sh",
+   "tier_root": "cron `*/10 * * * *` resume_pending.py",
+   "via": "exec"
+  },
+  "mike/bin/dispatch_round_cap_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/bq_freshness_check.sh",
+    "mike/bin/check_report_cadence.sh",
+    "mike/bin/daily_retro.sh",
+    "mike/bin/dispatch.sh",
+    "mike/bin/dispatch_round_cap.py",
+    "mike/bin/fearbuy_weekly_scan.sh",
+    "mike/bin/kb_nightly.sh",
+    "mike/bin/ops_autofix.sh",
+    "mike/bin/paper_checkpoint_escalation.sh",
+    "mike/bin/wags_autofix.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/bq_freshness_check.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/dispatch_tiny_prompt_selfcheck.sh": {
    "blast_tier": "T3",
    "covers": [
     "mike/bin/dispatch.sh",
     "mike/bin/ops_health_check.sh",
     "mike/bin/usage_limit_phrases.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/dispatch_token_telemetry_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dispatch.sh",
+    "mike/bin/job_telemetry.py",
+    "mike/bin/spend_report.py"
    ],
    "depth": null,
    "parent": "mike/bin/dispatch.sh",
@@ -3256,7 +4040,6 @@
    "parent": "mike/bin/daily_nav_snapshot.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -3264,7 +4047,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -3275,7 +4058,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -3360,6 +4145,7 @@
    "blast_tier": "T3",
    "covers": [
     "corp_action_lib.py",
+    "mike/bin/wc_paths.py",
     "trading_bot/__init__.py",
     "trading_bot/due_diligence.py"
    ],
@@ -3417,7 +4203,6 @@
    "parent": "mike/bin/compute_active_nav.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -3425,7 +4210,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -3436,7 +4221,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -3446,6 +4233,20 @@
    "tier_parent": "mike/bin/dividend_adjusted_return.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
+  },
+  "mike/bin/exdate_frame_cashleg_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/corp_actions.py",
+    "mike/bin/exdate_frame.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/corp_actions.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/exdate_frame_selfcheck.py": {
    "blast_tier": "T3",
@@ -3505,17 +4306,32 @@
    "tier_root": "cron `0 13 * * *` fa_ratings_earnings_window_daily.sh",
    "via": "exec"
   },
+  "mike/bin/failopen_batch1_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/account_cash_flows.py",
+    "mike/bin/bot_heartbeat.sh",
+    "mike/bin/check_sbv_weekly.sh",
+    "mike/bin/nav_period_returns.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/account_cash_flows.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/fearbuy_weekly_scan.sh": {
    "blast_tier": "T1",
    "depth": 0,
    "parent": "(root)",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh"
+    "cron `0 1 * * 1` fearbuy_weekly_scan.sh"
    ],
    "tier": "T1",
    "tier_parent": "(root)",
-   "tier_root": "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+   "tier_root": "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
    "via": "exec"
   },
   "mike/bin/fiinprox_harvest_tick.py": {
@@ -3590,11 +4406,12 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
-    "cron `45 5 * * 1-5` ops_health_check.sh"
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "(root)",
-   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
+   "tier_root": "cron `50 13 * * 1-5` plan_position_drift_check.py",
    "via": "exec"
   },
   "mike/bin/forensic_flag_review_check.py": {
@@ -3689,6 +4506,47 @@
    "tier_root": "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
    "via": "exec"
   },
+  "mike/bin/intraday_cutloss_engine.py": {
+   "blast_tier": "T1",
+   "depth": 1,
+   "parent": "mike/bin/intraday_price_watch.py",
+   "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
+    "cron `30 1 * * 1-5` intraday_price_watch.py"
+   ],
+   "tier": "T1",
+   "tier_parent": "mike/bin/intraday_price_watch.py",
+   "tier_root": "cron `30 1 * * 1-5` intraday_price_watch.py",
+   "via": "import"
+  },
+  "mike/bin/intraday_price_watch.py": {
+   "blast_tier": "T1",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
+    "cron `30 1 * * 1-5` intraday_price_watch.py"
+   ],
+   "tier": "T1",
+   "tier_parent": "(root)",
+   "tier_root": "cron `30 1 * * 1-5` intraday_price_watch.py",
+   "via": "exec"
+  },
+  "mike/bin/intraday_price_watch_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dispatch.sh",
+    "mike/bin/intraday_cutloss_engine.py",
+    "mike/bin/intraday_price_watch.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/is_serving.py": {
    "blast_tier": "T2",
    "depth": 1,
@@ -3732,6 +4590,27 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/job_telemetry.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [
+    "cron `*/10 * * * *` resume_pending.py",
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 17 * * *` daily_retro.sh",
+    "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/dispatch.sh",
+   "tier_root": "cron `*/10 * * * *` resume_pending.py",
+   "via": "exec"
+  },
   "mike/bin/jobs.sh": {
    "blast_tier": "T0",
    "depth": 2,
@@ -3744,6 +4623,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -3759,7 +4639,6 @@
    "roots": [
     "cron `*/10 * * * *` resume_pending.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 15 * * 0` fleet_housekeeping.sh",
@@ -3773,7 +4652,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 11 * * 1-5` fetch_new_listings_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
@@ -3794,18 +4673,23 @@
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
     "cron `35 11 * * 1-5` rubber_weekly.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 11 * * 1-5` update_shares_live.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
     "cron `7 * * * *` consolidate.sh"
    ],
@@ -3881,17 +4765,29 @@
    "tier_root": "cron `45 14 * * 1-5` late_plan_catchup.sh",
    "via": "exec"
   },
+  "mike/bin/locked_shares.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/send_plan_report.sh",
+   "roots": [
+    "cron `0 14 * * 1-5` send_plan_report.sh",
+    "cron `0 16 * * 1-5` send_plan_report.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/send_plan_report.sh",
+   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
+   "via": "import"
+  },
   "mike/bin/marginability_check.py": {
    "blast_tier": "T1",
-   "depth": 2,
+   "depth": 1,
    "parent": "mike/bin/discretionary_candidate_funnel.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh"
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py"
    ],
    "tier": "T1",
    "tier_parent": "mike/bin/discretionary_candidate_funnel.py",
-   "tier_root": "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+   "tier_root": "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
    "via": "import"
   },
   "mike/bin/merge_park_daily.sh": {
@@ -3954,7 +4850,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 11 * * 1-5` fetch_new_listings_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
@@ -3975,18 +4871,23 @@
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
     "cron `35 11 * * 1-5` rubber_weekly.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 11 * * 1-5` update_shares_live.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
     "cron `7 * * * *` consolidate.sh",
     "hook `Stop` stop.sh",
@@ -4053,7 +4954,8 @@
   "mike/bin/nav_cum_dividend_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
-    "mike/bin/daily_nav_snapshot.py"
+    "mike/bin/daily_nav_snapshot.py",
+    "mike/bin/wc_paths.py"
    ],
    "depth": null,
    "parent": "mike/bin/daily_nav_snapshot.py",
@@ -4068,7 +4970,9 @@
    "depth": 1,
    "parent": "mike/bin/bq_freshness_check.sh",
    "roots": [
-    "cron `0 12 * * 1-5` bq_freshness_check.sh"
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/bq_freshness_check.sh",
@@ -4088,6 +4992,35 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/nav_flow_term_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/account_cash_flows.py",
+    "mike/bin/nav_period_returns.py",
+    "mike/bin/report_delivery_gate.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/account_cash_flows.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/nav_jump_flow_gate_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/account_cash_flows.py",
+    "mike/bin/daily_nav_snapshot.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/account_cash_flows.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/nav_period_returns.py": {
    "blast_tier": "T0",
    "depth": 2,
@@ -4098,18 +5031,20 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
    "tier": "T0",
-   "tier_parent": "mike/bin/report_delivery_gate.py",
-   "tier_root": "cron `10 12 * * 1-5` eod_trading_report.sh",
-   "via": "exec"
+   "tier_parent": "mike/bin/portfolio_status.py",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+   "via": "import"
   },
   "mike/bin/nav_scripts_2account_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
     "mike/bin/daily_nav_snapshot.py",
-    "mike/bin/verify_account_snapshot.py"
+    "mike/bin/verify_account_snapshot.py",
+    "mike/bin/wc_paths.py"
    ],
    "depth": null,
    "parent": "mike/bin/daily_nav_snapshot.py",
@@ -4201,7 +5136,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
@@ -4219,9 +5154,12 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
@@ -4229,6 +5167,7 @@
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `7 * * * *` consolidate.sh"
    ],
    "tier": "T0",
@@ -4257,7 +5196,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
@@ -4275,9 +5214,12 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
@@ -4285,6 +5227,7 @@
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `7 * * * *` consolidate.sh"
    ],
    "tier": "T0",
@@ -4293,16 +5236,18 @@
    "via": "exec"
   },
   "mike/bin/notify_telegram.sh": {
-   "blast_tier": "T2",
+   "blast_tier": "T1",
    "depth": 1,
    "parent": "mike/bin/ops_health_check.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
-   "tier": "T2",
-   "tier_parent": "mike/bin/ops_health_check.sh",
-   "tier_root": "cron `20 1 * * 1-5` ops_health_check.sh",
+   "tier": "T1",
+   "tier_parent": "mike/bin/intraday_price_watch.py",
+   "tier_root": "cron `30 1 * * 1-5` intraday_price_watch.py",
    "via": "exec"
   },
   "mike/bin/notify_thread.sh": {
@@ -4310,11 +5255,11 @@
    "depth": 1,
    "parent": "daily_refresh_v34b_linux.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/10 * * * *` resume_pending.py",
     "cron `*/10 * * * *` watchdog.sh",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
     "cron `*/5 2-7 * * 1-5` bot_heartbeat.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 12 * * 1-5` hit_details_daily.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
@@ -4328,9 +5273,10 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
+    "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `1 6 * * 1-5` session_announce.sh",
     "cron `10 0 * * 1` treasury_buyback_window_monitor.py",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
@@ -4343,6 +5289,7 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
@@ -4350,17 +5297,21 @@
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `31 4 * * 1-5` session_announce.sh",
     "cron `35 1 * * *` backup_freshness_check.sh",
     "cron `35 6 * * 1-5` paper_main_early_check.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `40 2 * * 1,3,5` paper_main_early_check.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
@@ -4413,6 +5364,28 @@
    "tier_parent": "mike/hooks/user_prompt_submit.sh",
    "tier_root": "hook `UserPromptSubmit` user_prompt_submit.sh",
    "via": "exec"
+  },
+  "mike/bin/oddlot_full_exit_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/auto_exit_inject.py",
+    "mike/bin/compute_jit_unpark.py",
+    "mike/bin/compute_park_trim.py",
+    "mike/bin/merge_park_orders.py",
+    "mike/bin/park_holdings.py",
+    "mike/bin/wc_paths.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py",
+    "trading_bot/plan.py",
+    "trading_bot/vn_market.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/auto_exit_inject.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/opening_window_l2_poll.py": {
    "blast_tier": "T1",
@@ -4469,6 +5442,19 @@
    "tier_parent": "(root)",
    "tier_root": "cron `20 1 * * 1-5` ops_health_check.sh",
    "via": "exec"
+  },
+  "mike/bin/ops_health_check_autofix_dryrun_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/ops_health_check.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/ops_health_check.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/ops_health_check_rejected_selfcheck.py": {
    "blast_tier": "T3",
@@ -4651,11 +5637,28 @@
   "mike/bin/paper_report_render_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "mike/bin/daily_nav_snapshot.py",
     "mike/bin/paper_programs_daily_report.py",
     "paper_entry_adjust.py"
    ],
    "depth": null,
-   "parent": "mike/bin/paper_programs_daily_report.py",
+   "parent": "mike/bin/daily_nav_snapshot.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/park_chain_alert_selfcheck.sh": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/append_event.sh",
+    "mike/bin/jit_unpark_daily.sh",
+    "mike/bin/notify_thread.sh",
+    "mike/bin/park_trim_daily.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/append_event.sh",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -4667,15 +5670,51 @@
    "depth": 2,
    "parent": "mike/bin/compute_active_nav.py",
    "roots": [
+    "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `0 6 * * 1-5` run_bot.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
+    "cron `25 12 * * 1-5` corp_action_auto_confirm.py",
+    "cron `30 0 * * 1-5` corp_action_daily.sh",
+    "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
-    "cron `40 12 * * 1-5` jit_unpark_daily.sh"
+    "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
+    "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 2 * * 1-5` run_bot.sh",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
-   "tier_parent": "mike/bin/compute_active_nav.py",
-   "tier_root": "cron `15 13 * * 1-5` compute_active_nav_all.sh",
+   "tier_parent": "mike/bin/daily_nav_snapshot.py",
+   "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
+  },
+  "mike/bin/park_rail_consistency_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/compute_park_trim.py",
+    "mike/bin/wc_paths.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/compute_park_trim.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/park_trim_daily.sh": {
    "blast_tier": "T0",
@@ -4713,6 +5752,62 @@
    "tier_parent": null,
    "tier_root": null,
    "via": "selfcheck"
+  },
+  "mike/bin/plan_position_drift_check.py": {
+   "blast_tier": "T0",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
+   ],
+   "tier": "T0",
+   "tier_parent": "(root)",
+   "tier_root": "cron `50 13 * * 1-5` plan_position_drift_check.py",
+   "via": "exec"
+  },
+  "mike/bin/plan_position_drift_check_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/append_event.sh",
+    "mike/bin/plan_position_drift_check.py",
+    "mike/bin/send_plan_report.sh",
+    "mike/bin/wc_paths.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/append_event.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/portfolio_status.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/eod_trading_report.sh",
+   "roots": [
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/auto_exit_inject.py",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/portfolio_status_selfcheck.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/portfolio_status.py",
+   "roots": [
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/portfolio_status.py",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
+   "via": "import"
   },
   "mike/bin/preempt_wakeup_selfcheck.sh": {
    "blast_tier": "T3",
@@ -4791,6 +5886,42 @@
    "tier_root": "cron `7 * * * *` consolidate.sh",
    "via": "exec"
   },
+  "mike/bin/question_commit_hint.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [
+    "cron `*/10 * * * *` resume_pending.py",
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 17 * * *` daily_retro.sh",
+    "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/dispatch.sh",
+   "tier_root": "cron `*/10 * * * *` resume_pending.py",
+   "via": "exec"
+  },
+  "mike/bin/question_commit_hint_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dispatch.sh",
+    "mike/bin/question_commit_hint.py",
+    "mike/bin/wags_autofix.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/rebuild_context_mini.py": {
    "blast_tier": "T0",
    "depth": 1,
@@ -4814,6 +5945,21 @@
    "tier_parent": "mike/hooks/session_start.sh",
    "tier_root": "hook `SessionStart` session_start.sh",
    "via": "exec"
+  },
+  "mike/bin/reconcile_equity_egg_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/wc_paths.py",
+    "trading_bot/__init__.py",
+    "trading_bot/config.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/wc_paths.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/reconcile_equity_realized_selfcheck.py": {
    "blast_tier": "T3",
@@ -4865,6 +6011,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -4929,6 +6076,8 @@
   "mike/bin/report_delivery_ledger_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "mike/bin/account_cash_flows.py",
+    "mike/bin/nav_period_returns.py",
     "mike/bin/notify_thread.sh",
     "mike/bin/report_delivery_gate.py",
     "mike/bin/report_return_gate.py",
@@ -4937,7 +6086,7 @@
     "wc_env.sh"
    ],
    "depth": null,
-   "parent": "mike/bin/notify_thread.sh",
+   "parent": "mike/bin/account_cash_flows.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -4970,11 +6119,12 @@
   "mike/bin/report_return_gate_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "mike/bin/dividend_adjusted_return.py",
     "mike/bin/report_return_gate.py",
     "mike/bin/wc_paths.py"
    ],
    "depth": null,
-   "parent": "mike/bin/report_return_gate.py",
+   "parent": "mike/bin/dividend_adjusted_return.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -4992,6 +6142,22 @@
    "tier_parent": "(root)",
    "tier_root": "cron `*/10 * * * *` resume_pending.py",
    "via": "exec"
+  },
+  "mike/bin/retro_escalate_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/append_event.sh",
+    "mike/bin/daily_retro.sh",
+    "mike/bin/ops_health_check.sh",
+    "mike/bin/ops_health_check_selfcheck.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/append_event.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/run_bot.sh": {
    "blast_tier": "T0",
@@ -5017,6 +6183,20 @@
    "tier_parent": "mike/bin/weekly_ops_audit.sh",
    "tier_root": "cron `30 20 * * 5` weekly_ops_audit.sh",
    "via": "exec"
+  },
+  "mike/bin/runonce_label_selfcheck.sh": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/ops_health_check.sh",
+    "trading_bot/__init__.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/ops_health_check.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/sector_valuation_lens_selfcheck.py": {
    "blast_tier": "T3",
@@ -5059,6 +6239,18 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/selfcheck_red_owner_sweep.sh": {
+   "blast_tier": "T2",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "(root)",
+   "tier_root": "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+   "via": "exec"
+  },
   "mike/bin/selfcheck_weekly_baseline_check.sh": {
    "blast_tier": "T2",
    "depth": 0,
@@ -5073,10 +6265,12 @@
   },
   "mike/bin/send_macro_note_email.py": {
    "blast_tier": "T1",
-   "depth": 2,
-   "parent": "mike/bin/vn_realestate_monthly_check.py",
+   "depth": 1,
+   "parent": "mike/bin/intraday_price_watch.py",
    "roots": [
-    "cron `0 20 6 * *` vn_realestate_monthly_check.sh"
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
+    "cron `0 20 6 * *` vn_realestate_monthly_check.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py"
    ],
    "tier": "T1",
    "tier_parent": "mike/bin/vn_realestate_monthly_check.py",
@@ -5096,10 +6290,25 @@
    "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
    "via": "exec"
   },
+  "mike/bin/send_plan_report_aei_notes_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/send_plan_report.sh",
+    "mike/bin/wc_paths.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/send_plan_report.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/send_plan_report_park_jit_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
-    "mike/bin/send_plan_report.sh"
+    "mike/bin/send_plan_report.sh",
+    "mike/bin/wc_paths.py"
    ],
    "depth": null,
    "parent": "mike/bin/send_plan_report.sh",
@@ -5163,19 +6372,19 @@
    "depth": 1,
    "parent": "mike/bin/bq_freshness_check.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -5406,6 +6615,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -5460,11 +6670,10 @@
   },
   "mike/bin/verify_account_snapshot.py": {
    "blast_tier": "T0",
-   "depth": 2,
-   "parent": "mike/bin/compute_active_nav.py",
+   "depth": 1,
+   "parent": "mike/bin/corp_action_auto_confirm.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -5472,7 +6681,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -5483,7 +6692,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -5705,10 +6916,11 @@
   "mike/bin/wags_dispatch_dead_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "mike/bin/dispatch_round_cap.py",
     "mike/bin/wags_autofix.sh"
    ],
    "depth": null,
-   "parent": "mike/bin/wags_autofix.sh",
+   "parent": "mike/bin/dispatch_round_cap.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -5833,6 +7045,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
@@ -5857,10 +7070,9 @@
   "mike/bin/wc_paths.py": {
    "blast_tier": "T0",
    "depth": 1,
-   "parent": "mike/bin/paper_programs_daily_report.sh",
+   "parent": "mike/bin/plan_position_drift_check.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -5869,7 +7081,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `10 0 * * 1` treasury_buyback_window_monitor.py",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
@@ -5882,16 +7094,20 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
+    "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/nav_exdate_forecast.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
-   "via": "exec"
+   "via": "import"
   },
   "mike/bin/weekly_ops_audit.sh": {
    "blast_tier": "T2",
@@ -6032,11 +7248,12 @@
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `5 13 * * 1-5` paper_late_feeds.sh"
    ],
    "tier": "T0",
    "tier_parent": "dna_report.py",
-   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
    "via": "import"
   },
   "money_path_freshness_selfcheck.py": {
@@ -6157,7 +7374,6 @@
    "parent": "mike/bin/corp_action_feed_canary.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -6165,7 +7381,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -6177,7 +7393,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -6194,7 +7412,6 @@
    "parent": "rating_8l.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -6202,7 +7419,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -6214,7 +7431,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -6231,7 +7450,6 @@
    "parent": "oshares_live.py",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 2 * * 0` spend_report_weekly.sh",
     "cron `0 2 * * 6` check_report_cadence.sh",
@@ -6239,7 +7457,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
@@ -6251,7 +7469,9 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
@@ -6409,8 +7629,8 @@
    "depth": 2,
    "parent": "trading_bot/brokers.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
@@ -6421,7 +7641,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -6432,16 +7652,20 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
-    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -6468,8 +7692,8 @@
    "depth": 2,
    "parent": "trading_bot/brokers.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
@@ -6480,7 +7704,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -6491,16 +7715,20 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
-    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -6565,6 +7793,7 @@
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `30 17 * * *` daily_retro.sh",
     "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh"
@@ -6725,6 +7954,19 @@
    "tier_root": "cron `20 12 * * 1-5` pt_8l_daily.sh",
    "via": "exec"
   },
+  "rating8l_icb_pit_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "rating_8l_history.py"
+   ],
+   "depth": null,
+   "parent": "rating_8l_history.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "rating_8l.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -6749,17 +7991,32 @@
    "tier_root": "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
    "via": "exec"
   },
+  "rating_8l_history_bank_aq_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "rating_8l_history.py"
+   ],
+   "depth": null,
+   "parent": "rating_8l_history.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "recommend_holistic.py": {
    "blast_tier": "T0",
    "depth": 2,
    "parent": "telegram_recommend.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
@@ -6772,6 +8029,33 @@
    "tier_parent": "telegram_recommend.py",
    "tier_root": "cron `10 2 * * 1,3,5` bot_execute.py",
    "via": "import"
+  },
+  "refresh_deposit_cctg_weekly.sh": {
+   "blast_tier": "T1",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "(root)",
+   "tier_root": "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
+   "via": "exec"
+  },
+  "refresh_deposit_cctg_weekly_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "cctg_rate_vn.py",
+    "deposit_cctg_trend_check.py",
+    "deposit_rate_vn.py"
+   ],
+   "depth": null,
+   "parent": "cctg_rate_vn.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "refresh_deposit_rate_vn.sh": {
    "blast_tier": "T1",
@@ -6968,6 +8252,7 @@
    "depth": 1,
    "parent": "mike/bin/check_sbv_weekly.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
@@ -6976,6 +8261,7 @@
     "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
@@ -7015,6 +8301,41 @@
    "tier_root": "cron `20 12 * * 1-5` pt_8l_daily.sh",
    "via": "exec"
   },
+  "sell_loan_package_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/bot_heartbeat.sh",
+    "mike/bin/ops_health_check.sh",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py",
+    "trading_bot/executor.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/bot_heartbeat.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "sell_split_by_loan_package_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "dnse_api.py",
+    "trading_bot/__init__.py",
+    "trading_bot/brokers.py",
+    "trading_bot/config.py",
+    "trading_bot/executor.py",
+    "trading_bot/plan.py"
+   ],
+   "depth": null,
+   "parent": "dnse_api.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "signal_v11_sql.py": {
    "blast_tier": "T0",
    "depth": 2,
@@ -7034,7 +8355,6 @@
    "depth": 2,
    "parent": "refresh_lagged_caches.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 12 * * 1-5` hit_details_daily.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
@@ -7042,7 +8362,6 @@
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7050,7 +8369,9 @@
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -7142,12 +8463,14 @@
    "depth": 1,
    "parent": "telegram_run_daily.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 17 * * 1-5` dc_book_waterfall_paper.py",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
@@ -7194,6 +8517,7 @@
    "depth": 1,
    "parent": "mike/bin/bq_freshness_check.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
     "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
@@ -7211,7 +8535,7 @@
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `1 6 * * 1-5` session_announce.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7226,6 +8550,7 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -7234,8 +8559,10 @@
     "cron `31 4 * * 1-5` session_announce.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
     "cron `35 6 * * 1-5` paper_main_early_check.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `40 2 * * 1,3,5` paper_main_early_check.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 14 * * 1-5` late_plan_catchup.sh",
@@ -7247,6 +8574,7 @@
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 7 * * 1-5` session_announce.sh",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
     "cron `52 1 * * 1-5` paper_main_probe_plan.py"
@@ -7259,10 +8587,10 @@
   "trading_bot/brokers.py": {
    "blast_tier": "T0",
    "depth": 1,
-   "parent": "mike/bin/send_plan_report.sh",
+   "parent": "mike/bin/plan_position_drift_check.py",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
@@ -7273,7 +8601,7 @@
     "cron `0 23 * * 0-4` newdeals_daily_report.py",
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7284,16 +8612,20 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
-    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/daily_nav_snapshot.py",
@@ -7305,8 +8637,8 @@
    "depth": 1,
    "parent": "mike/bin/bq_freshness_check.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 15 * * 1-5` late_plan_catchup.sh",
@@ -7320,7 +8652,7 @@
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
     "cron `1 6 * * 1-5` session_announce.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7335,6 +8667,7 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -7343,8 +8676,10 @@
     "cron `31 4 * * 1-5` session_announce.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
     "cron `35 6 * * 1-5` paper_main_early_check.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `40 2 * * 1,3,5` paper_main_early_check.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 14 * * 1-5` late_plan_catchup.sh",
@@ -7356,6 +8691,7 @@
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 7 * * 1-5` session_announce.sh",
     "cron `52 1 * * 1-5` paper_main_probe_plan.py"
    ],
@@ -7381,13 +8717,11 @@
    "depth": 1,
    "parent": "mike/bin/send_plan_report.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7395,7 +8729,9 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -7469,13 +8805,11 @@
    "depth": 2,
    "parent": "mike/bin/discretionary_accumulation_inject.py",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7483,8 +8817,10 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -7500,19 +8836,19 @@
    "depth": 1,
    "parent": "mike/bin/send_plan_report.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -7574,13 +8910,11 @@
    "depth": 1,
    "parent": "mike/bin/send_plan_report.sh",
    "roots": [
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `0 19 * * *` kb_nightly.sh",
     "cron `0 3 * * 0` code_quality_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7588,7 +8922,9 @@
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
@@ -7604,6 +8940,7 @@
    "depth": 1,
    "parent": "mike/bin/bq_freshness_check.sh",
    "roots": [
+    "cron `* 2-7 * * 1-5` intraday_price_watch.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
     "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
@@ -7620,7 +8957,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `0 8 * * 5` check_sbv_weekly.sh",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `13 2 * * 1-5` opening_window_l2_poll.py",
@@ -7633,14 +8970,17 @@
     "cron `30 0 * * 1-5` corp_action_daily.sh",
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
     "cron `30 16 * * 1-5` late_plan_catchup.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 14 * * 1-5` late_plan_catchup.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
@@ -7650,6 +8990,7 @@
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `50 1 * * 1-5` plan_approval_reminder.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 8 * * 1-5` orb_drift_monitor.py",
     "cron `52 1 * * 1-5` paper_main_probe_plan.py"
    ],
@@ -7758,11 +9099,12 @@
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `5 13 * * 1-5` paper_late_feeds.sh"
    ],
    "tier": "T0",
    "tier_parent": "dna_report.py",
-   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
+   "tier_root": "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
    "via": "import"
   },
   "vcb_fx_feed.py": {
@@ -7821,7 +9163,6 @@
     "cron `*/10 * * * *` resume_pending.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
     "cron `*/5 2-7 * * 1-5` bot_heartbeat.sh",
-    "cron `0 1 * * 1` fearbuy_weekly_scan.sh",
     "cron `0 1 10 * *` auto_update_commodity_wb.sh",
     "cron `0 1 5 * *` auto_update_commodity_wb.sh",
     "cron `0 12 * * 1-5` bq_freshness_check.sh",
@@ -7839,7 +9180,7 @@
     "cron `0 3 * * 0` code_quality_weekly.sh",
     "cron `0 6 * * 1-5` run_bot.sh",
     "cron `10 0 * * 1` treasury_buyback_window_monitor.py",
-    "cron `10 1 * * 5` fearbuy_weekly_scan.sh",
+    "cron `10 0 * * 2-6` adjfactor_drift_daily.sh",
     "cron `10 1 3 * *` refresh_deposit_rate_vn.sh",
     "cron `10 11 * * 1-5` fetch_new_listings_daily.sh",
     "cron `10 12 * * 1-5` eod_trading_report.sh",
@@ -7864,20 +9205,26 @@
     "cron `30 20 * * 5` weekly_ops_audit.sh",
     "cron `30 21 * * *` selfcheck_weekly_baseline_check.sh",
     "cron `30 8 * * 1-5` papertrade_daily.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
     "cron `35 11 * * 1-5` rubber_weekly.sh",
     "cron `35 12 * * 1-5` telegram_run_daily.sh",
+    "cron `37 12 * * 1-5` discretionary_candidate_funnel.py",
     "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
+    "cron `40 1 * * 1-5` paper_corp_action.py",
     "cron `40 11 * * 1-5` update_shares_live.sh",
     "cron `40 12 * * 1-5` jit_unpark_daily.sh",
+    "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 14 * * 1-5` late_plan_catchup.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `5 0 * * 1-5` corp_action_feed_canary.py",
+    "cron `5 1 * * 1` refresh_deposit_cctg_weekly.sh",
     "cron `5 13 * * 1-5` paper_late_feeds.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+    "cron `50 13 * * 1-5` plan_position_drift_check.py",
     "cron `50 23 * * *` snapshot_corp_action_daily.py",
     "cron `7,27,47 * * * *` fiinprox_harvest_tick.sh"
    ],
@@ -7887,7 +9234,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-09-25T20:52:52Z",
+ "generated_at": "2026-10-09T09:47:04Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -8094,6 +9441,27 @@
    "kind": "cron",
    "schedule": "30 13 * * 1-5",
    "script": "inject_discretionary_orders.sh",
+   "tier": "T0"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/auto_exit_inject_daily.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/auto_exit_inject_daily.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/auto_exit_inject_daily.sh"
+   ],
+   "kind": "cron",
+   "schedule": "40 13 * * 1-5",
+   "script": "auto_exit_inject_daily.sh",
+   "tier": "T0"
+  },
+  {
+   "command": "timeout 600 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/plan_position_drift_check.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_position_drift.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/for_each_live_account.sh",
+    "mike/bin/plan_position_drift_check.py"
+   ],
+   "kind": "cron",
+   "schedule": "50 13 * * 1-5",
+   "script": "plan_position_drift_check.py",
    "tier": "T0"
   },
   {
@@ -8497,16 +9865,6 @@
    "tier": "T1"
   },
   {
-   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/fearbuy_weekly_scan.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/fearbuy_weekly.log 2>&1",
-   "in_repo_files": [
-    "mike/bin/fearbuy_weekly_scan.sh"
-   ],
-   "kind": "cron",
-   "schedule": "10 1 * * 5",
-   "script": "fearbuy_weekly_scan.sh",
-   "tier": "T1"
-  },
-  {
    "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/fearbuy_weekly_scan.sh --mode monday >> /home/trido/thanhdt/WorkingClaude/mike/logs/fearbuy_monday.log 2>&1",
    "in_repo_files": [
     "mike/bin/fearbuy_weekly_scan.sh"
@@ -8890,6 +10248,92 @@
    "tier": "T1"
   },
   {
+   "command": "cd /home/trido/thanhdt/WorkingClaude/mike && bin/adjfactor_drift_daily.sh >> logs/adjfactor_drift_$(date +\\%Y\\%m).log 2>&1",
+   "in_repo_files": [
+    "mike/bin/adjfactor_drift_daily.sh"
+   ],
+   "kind": "cron",
+   "schedule": "10 0 * * 2-6",
+   "script": "adjfactor_drift_daily.sh",
+   "tier": "T1"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/refresh_deposit_cctg_weekly.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/refresh_deposit_cctg_weekly.log 2>&1",
+   "in_repo_files": [
+    "refresh_deposit_cctg_weekly.sh"
+   ],
+   "kind": "cron",
+   "schedule": "5 1 * * 1",
+   "script": "refresh_deposit_cctg_weekly.sh",
+   "tier": "T1"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_decision_topic.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/daily_decision_topic.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/daily_decision_topic.py"
+   ],
+   "kind": "cron",
+   "schedule": "0 1 * * *",
+   "script": "daily_decision_topic.py",
+   "tier": "T2"
+  },
+  {
+   "command": "timeout 120 python3 /home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/discretionary_funnel.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/discretionary_candidate_funnel.py"
+   ],
+   "kind": "cron",
+   "schedule": "37 12 * * 1-5",
+   "script": "discretionary_candidate_funnel.py",
+   "tier": "T1"
+  },
+  {
+   "command": "cd /home/trido/thanhdt/WorkingClaude && TZ=Asia/Ho_Chi_Minh timeout 55 /home/trido/thanhdt/wc_venv/bin/python mike/bin/intraday_price_watch.py run >> mike/logs/intraday_price_watch.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/intraday_price_watch.py"
+   ],
+   "kind": "cron",
+   "schedule": "30 1 * * 1-5",
+   "script": "intraday_price_watch.py",
+   "tier": "T1"
+  },
+  {
+   "command": "cd /home/trido/thanhdt/WorkingClaude && TZ=Asia/Ho_Chi_Minh timeout 55 /home/trido/thanhdt/wc_venv/bin/python mike/bin/intraday_price_watch.py run >> mike/logs/intraday_price_watch.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/intraday_price_watch.py"
+   ],
+   "kind": "cron",
+   "schedule": "* 2-7 * * 1-5",
+   "script": "intraday_price_watch.py",
+   "tier": "T1"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/selfcheck_red_owner_sweep.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_red_owner_sweep.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/selfcheck_red_owner_sweep.sh"
+   ],
+   "kind": "cron",
+   "schedule": "30 9 * * 5",
+   "script": "selfcheck_red_owner_sweep.sh",
+   "tier": "T2"
+  },
+  {
+   "command": "/workspace/claude-code-discord-bridge/.venv/bin/python -m claude_discord.main",
+   "in_repo_files": [],
+   "kind": "unit",
+   "schedule": "ccdb-mike.service",
+   "script": "unit:ccdb-mike.service",
+   "tier": "T2"
+  },
+  {
+   "command": "/home/trido/.nvm/versions/node/v22.23.0/bin/paseo start --foreground",
+   "in_repo_files": [],
+   "kind": "unit",
+   "schedule": "paseo.service",
+   "script": "unit:paseo.service",
+   "tier": "T2"
+  },
+  {
    "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/session_start.sh",
    "in_repo_files": [
     "mike/hooks/session_start.sh"
@@ -8920,6 +10364,6 @@
    "tier": "T2"
   }
  ],
- "units_status": "unavailable",
+ "units_status": "ok",
  "untracked_refs": []
 }
