@@ -443,3 +443,8 @@ Cùng nhánh `feat/broker-primary-r7-20261007` (worktree `wt-bp-r7-1007`, trên 
 - 2 đột biến mới trong MUTANTS. Trên selfcheck CŨ cả 2 SỐNG (785/0); trên MỚI chết (m3 2 FAIL, m4 1 FAIL). Control: test mới PASS trên code đúng.
 - Selfcheck 6/6 xanh: 3.10 = 788/0, 3.12 = 790/0 × {Asia/Ho_Chi_Minh, UTC, env -u TZ}.
 - `--mutations` trên bản sao cô lập: **541/541 (3.10)**, **540/541 (3.12 — `parse 5 chữ số` tương đương, khai từ r4)**.
+
+## Tiêu chí bật live (user chốt 2026-10-09 22:11 ICT)
+≥3 sự kiện điều chỉnh giá thật trên mã đang giữ qua shadow (MATCH hoặc fail-closed hỏi đúng) · 0 `CONFIRMABLE` sai · xác minh
+`marketId` sau 19:00 · 0 crash/kẹt khoá · 1 vòng test-only cho 5 đột biến r9 còn sống ngay trước khi bật. Mốc xem lại 2026-12-15.
+Nguồn: `kb/current_ops.md` § Corp-action broker-primary SHADOW.

@@ -77,3 +77,7 @@ warnings=[]` IM LẶNG (đo thật `--date 2026-09-12`: 80 triệu vẫn nằm t
 trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọt cổng sanity ±15%) và ghi thẳng vào
 `nav_history`. Nghĩa là: **tự động hoá SAI ở đây còn tệ hơn tự tay xử lý mỗi quý vài lần.**
 
+
+
+## Chuyển từ current_ops 2026-10-09 (sự cố đã dọn, kb-hot-size-gate)
+  ⚠️ **Sự cố phụ phát sinh khi verify vòng 5** (Mike tự gây ra): ghi lọt 1 arm giả (`ticker=VPB, note="seed"`) vào LIVE `data/discretionary_margin_arms.json` — **ĐÃ DỌN, file rỗng `[]` từ 2026-09-24 19:16** (Mike kiểm lại bằng `cat` 2026-10-08). Chi tiết: `kb/projects/corp-action-nav-chain-20260922.md`.
