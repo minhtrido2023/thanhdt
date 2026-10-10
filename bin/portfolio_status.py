@@ -601,23 +601,27 @@ def build_output(account, date, returns_fn=None):
     status = _read_json(os.path.join(WC_ROOT, "data", "golive_v23_status.json"), {}) or {}
     state_name = status.get("state_name", "?")
 
-    today_row, prior_row = load_nav_row(account, date)
+    today_row, _prior_row = load_nav_row(account, date)
     if today_row is None:
         return None  # không có NAV — caller in cảnh báo, không crash
 
     nav = today_row["nav"]
-    day_chg_pct = None
-    if prior_row and prior_row["nav"]:
-        day_chg_pct = (nav / prior_row["nav"] - 1) * 100
-
-    inception_pct = None
+    # Cả hai phần trăm của đầu mục lấy từ MỘT nguồn — tỉ suất giá đơn vị quỹ (đã khử nạp/rút),
+    # đúng hàm mà báo cáo tuần/tháng dùng. Trước 2026-10-11 "Hôm nay" là tỉ số NAV thô (nạp tiền
+    # thành "lãi"), và lỗi của nguồn bị nuốt bằng `except: pass`.
+    day_chg_pct = inception_pct = None
     try:
         from nav_period_returns import load_inception, load_nav_history, compute_period_returns
         result = compute_period_returns(account, _dt.date.fromisoformat(date),
-                                         load_nav_history(account), load_inception(account))
-        inception_pct = result.get("inception", {}).get("return_pct")
-    except Exception:
-        pass
+                                         load_nav_history(account, EXEC_DIR), load_inception(account))
+        inception_pct = result["inception"]["return_pct"]
+        day_chg_pct = (result["day"]["unit_price_ratio"] - 1) * 100 if result["day"] else None
+        for f in result["pending_flows"]:
+            print(f"portfolio_status: dòng tiền đã khai {f['date']} {f['amount_vnd']:+,.0f} VND "
+                  f"({account}) chưa nằm trong tỉ suất nào — {f['reason']}", file=sys.stderr)
+    except Exception as exc:                                    # noqa: BLE001
+        print(f"portfolio_status: KHÔNG tính được tỉ suất NAV ({account} {date}) — in '?' thay "
+              f"cho phần trăm: {type(exc).__name__}: {exc}", file=sys.stderr)
 
     account_no = account_no_for(account)
     positions = broker_positions_with_cost(account_no, date) if account_no else None

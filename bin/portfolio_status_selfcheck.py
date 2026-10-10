@@ -282,6 +282,71 @@ def run():
     else:
         check("NAV stale: bỏ qua (không có nav_history_ZaloPay.csv nào để test fallback)", True)
 
+    # 17b (N11, 2026-10-11): "Hôm nay" và "Từ khi bắt đầu hoạt động" là tỉ suất GIÁ ĐƠN VỊ (đã
+    # khử nạp/rút), lấy từ nav_period_returns — không phải tỉ số NAV thô. 1.000 → nạp 200 lúc
+    # 10:00 → +2% ⇒ NAV 1.224: phải in +2.00%, không phải +22.40%.
+    with tempfile.TemporaryDirectory() as td:
+        hdr = "date,nav,mtm_stock,cash,margin_debt,offbook_assets,egg_assets,balance_ts,cum_dividend_excl,nav_is_estimate,nav_source"
+        with open(os.path.join(td, "nav_history_SpaceX.csv"), "w", encoding="utf-8") as f:
+            f.write(hdr + "\n2026-07-02,1000000000,0,0,0,0,0,2026-07-02T19:10:00,0,False,live\n"
+                    "2026-07-03,1224000000,0,0,0,0,0,2026-07-03T19:10:00,0,False,live\n")
+        flows = os.path.join(td, "flows.json")
+        old_exec_dir, old_env = ps.EXEC_DIR, os.environ.get("ACCOUNT_CASH_FLOWS_PATH")
+        ps.EXEC_DIR = td
+        os.environ["ACCOUNT_CASH_FLOWS_PATH"] = flows
+        try:
+            import contextlib as _ctx
+            import io as _io
+
+            def header(records, date="2026-07-03"):
+                with open(flows, "w", encoding="utf-8") as fh:
+                    _json.dump({"SpaceX": records}, fh)
+                err = _io.StringIO()
+                with _ctx.redirect_stderr(err):
+                    out = ps.build_output("SpaceX", date, returns_fn=_no_tool)
+                line = next((ln for ln in (out or "").splitlines() if ln.startswith("NAV: **")), "")
+                return line, err.getvalue()
+
+            dep = {"date": "2026-07-03", "time_ict": "10:00", "amount_vnd": 200_000_000,
+                   "kind": "deposit", "evidence": "sao kê"}
+            line, err = header([dep])
+            check("N11: ngày có nạp 200tr — 'Hôm nay' = +2.00% (giá đơn vị), không phải +22.40% (NAV thô)",
+                  "| Hôm nay: **+2.00%** |" in line and "22.40" not in line, line)
+            check("N11: 'Từ khi bắt đầu hoạt động' cùng nguồn = +2.00%",
+                  line.endswith("Từ khi bắt đầu hoạt động: **+2.00%**"), line)
+            line, err = header([])
+            check("N11: không có dòng tiền — hai số = tỉ số NAV (+22.40%)",
+                  "| Hôm nay: **+22.40%** |" in line and line.endswith("**+22.40%**"), line)
+            line, err = header([dict(dep, date="2026-07-04")])
+            check("N11: dòng tiền treo ⇒ báo ra stderr (không vô hình)",
+                  "chưa nằm trong tỉ suất nào" in err and "2026-07-04" in err, err)
+            bad = dict(dep)
+            del bad["time_ict"]
+            line, err = header([bad])
+            check("N11: nguồn tỉ suất lỗi ⇒ in '?' cho CẢ HAI phần trăm, không lùi về tỉ số NAV thô",
+                  "| Hôm nay: **?** |" in line and line.endswith("**?**") and "%" not in line, line)
+            check("N11: nguồn tỉ suất lỗi ⇒ nói lý do thật ra stderr (không còn `except: pass`)",
+                  "KHÔNG tính được tỉ suất NAV" in err and "thiếu time_ict" in err, err)
+            # Nhiều phiên, vắt qua tuần + tháng ⇒ bốn kỳ ra bốn số khác nhau: "Hôm nay" phải là kỳ
+            # NGÀY (không phải WTD), "Từ khi bắt đầu" phải là kỳ từ mốc khởi điểm (không phải MTD).
+            #   07-02 1.010 · 07-31 (thứ Sáu) 1.020 · 08-03 (thứ Hai) 1.030 · 08-04 1.050 (tr)
+            #   ngày 1.050/1.030 = +1,94% · WTD = MTD 1.050/1.020 = +2,94% · từ mốc 1 tỷ = +5,00%
+            with open(os.path.join(td, "nav_history_SpaceX.csv"), "w", encoding="utf-8") as f:
+                f.write(hdr + "".join(f"\n{d},{v},0,0,0,0,0,{d}T19:10:00,0,False,live" for d, v in (
+                    ("2026-07-02", 1010000000), ("2026-07-31", 1020000000), ("2026-08-03", 1030000000),
+                    ("2026-08-04", 1050000000))) + "\n")
+            line, err = header([], date="2026-08-04")
+            check("N11: nhiều phiên — 'Hôm nay' = kỳ NGÀY +1.94% (không phải WTD/MTD +2.94%)",
+                  "| Hôm nay: **+1.94%** |" in line, line)
+            check("N11: nhiều phiên — 'Từ khi bắt đầu hoạt động' = từ mốc khởi điểm +5.00% (không phải MTD +2.94%)",
+                  line.endswith("Từ khi bắt đầu hoạt động: **+5.00%**"), line)
+        finally:
+            ps.EXEC_DIR = old_exec_dir
+            if old_env is None:
+                os.environ.pop("ACCOUNT_CASH_FLOWS_PATH", None)
+            else:
+                os.environ["ACCOUNT_CASH_FLOWS_PATH"] = old_env
+
     # 18: value_per_share dạng CHUỖI từ producer (ca thật TV1 DIV '1500.0', ex 07/10) — trước đây
     # f"{vps:,.0f}" ném ValueError, mất cả khối danh mục trong báo cáo ngày 05-06/10.
     check("cash_div_impact: chuỗi '1500.0' → 1,500đ/cp",

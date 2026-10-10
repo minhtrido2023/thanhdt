@@ -16,6 +16,9 @@ title: Trading bot / execution (money-path thật)
 | [`gdkhq_rollout_state.md`](gdkhq_rollout_state.md) — data/gdkhq_d1d3_rollout.json + gdkhq_shadow_acceptance.json | CANONICAL (cadence chưa xác nhận) |
 | [`executor_state_journal.md`](executor_state_journal.md) — data/execution_logs/exec_<label>_<date>_state.json / _journal.csv | CANONICAL |
 | [`nav_history.md`](nav_history.md) — data/execution_logs/nav_history_<account>.csv | CANONICAL |
+| [`nav_unit_ledger.md`](nav_unit_ledger.md) — data/execution_logs/nav_unit_ledger_<account>.csv (sổ đơn vị quỹ, chỉ-ghi-thêm; bản đối chứng) | NOT-YET-SEALED (không chốt sổ thật trước bước 3) |
+| [`account_cash_flows.md`](account_cash_flows.md) — data/account_cash_flows.json (nạp/rút, ghi tay kèm bằng chứng) | CANONICAL |
+| [`account_inception.md`](account_inception.md) — data/account_inception.json (mốc + vốn khởi điểm) | CANONICAL |
 | [`account_seed_capital.md`](account_seed_capital.md) — data/account_seed_capital.json (vốn đầu kỳ + lô legacy + fill broker dnse_raw thiếu, cho reconcile_equity.py) | CANONICAL |
 | [`active_nav_snapshot.md`](active_nav_snapshot.md) — data/execution_logs/active_nav_<label>.json (label = SpaceX \| ZaloPay) | CANONICAL |
 | [`trade_plans.md`](trade_plans.md) — data/trade_plans/plan_<account>_<YYYY-MM-DD>.json | CANONICAL |

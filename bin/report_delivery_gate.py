@@ -13,6 +13,7 @@ import datetime as dt
 import fcntl
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -198,6 +199,13 @@ def _check_period_returns(report: Path) -> None:
               f"data ({exc}), bỏ qua (fail-open)", file=sys.stderr)
         return
 
+    # NaN/inf/null KHÔNG phải "thiếu dữ liệu": CLI đã chạy xong và trả một con số không so được —
+    # `abs(x − nan) >= tol` luôn False nên từng in "PASS ... vs canonical +nan%". Chặn.
+    if not (isinstance(canonical, (int, float)) and math.isfinite(canonical)):
+        raise RuntimeError(
+            f"period-return BLOCK ({report.name}): canonical (nav_period_returns.py --account SpaceX "
+            f"--report-date {report_date}) trả return_pct = {canonical!r} — không phải số hữu hạn nên "
+            f"KHÔNG xác minh được số trong báo cáo ({reported_pct:+.2f}%)")
     diff = abs(reported_pct - canonical)
     if diff >= PERIOD_RETURN_TOL_PP:
         raise RuntimeError(
@@ -244,12 +252,15 @@ def _check_nav_flow_records(report: Path) -> None:
         try:
             rows = load_nav_history(account)
             flows = load_flows(account)
+            # Trong CÙNG khối fail-closed: bước gán bản ghi vào phiên cũng có thể từ chối (thiếu
+            # giờ, thiếu balance_ts) — bản ghi không gán được thì tỉ suất trong báo cáo không
+            # kiểm chứng được, y như không đọc được file.
+            jumps = unexplained_nav_jumps(rows, flows, end=end)
         except Exception as exc:                       # noqa: BLE001 — fail-closed có chủ đích
             raise RuntimeError(
-                f"nav-flow BLOCK ({report.name}): không đọc được nav_history/cash-flows của "
-                f"{account} ({type(exc).__name__}: {exc}) — số tiền trong báo cáo không kiểm "
+                f"nav-flow BLOCK ({report.name}): không đọc/không gán được nav_history/cash-flows "
+                f"của {account} ({type(exc).__name__}: {exc}) — số tiền trong báo cáo không kiểm "
                 f"chứng được, không gửi.") from exc
-        jumps = unexplained_nav_jumps(rows, flows, end=end)
         if jumps:
             lines = "\n".join(
                 f"    {j['prev_date']} → {j['date']}: {j['nav0']:,.0f} → {j['nav1']:,.0f} VND "

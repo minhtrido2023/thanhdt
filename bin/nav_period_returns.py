@@ -11,37 +11,49 @@ return sai lệch so với thực tế (đã xảy ra thật trong báo cáo tu�
 -2,177%). ZaloPay không bị lỗi này (không có `starting_capital` ⇒ dùng dòng đầu, vì tài khoản có
 vị thế legacy trước khi bot go-live, không có mốc "vốn nạp ngày 1" sạch).
 
-SỐ HẠNG DÒNG TIỀN (FAIL-H audit measurement-integrity 2026-09-27) — tỉ suất ở đây là
-TIME-WEIGHTED RETURN, không phải tỉ số NAV thuần. Bản trước tính `nav1/nav0 − 1`: user nạp 200tr
-vào SpaceX ⇒ báo cáo công bố "+20% lợi nhuận", rút 100tr ⇒ "−10%", không cảnh báo, rc=0. Chưa nổ
-vì tới 2026-09-25 chưa có lần nạp/rút nào sau inception; rủi ro là lần ĐẦU TIÊN.
+TỈ SUẤT = TỈ SỐ HAI GIÁ ĐƠN VỊ QUỸ (chính sách "tài khoản = quỹ mở", user duyệt 2026-10-10 —
+`kb/projects/fund-unit-performance-policy-20261010.md`). `return_pct` của một kỳ là
+`giá_đơn_vị[to_date] / giá_đơn_vị[from_date] − 1`, hai giá lấy từ sổ đơn vị do
+`nav_unit_ledger.build_ledger` dựng — đó là công thức DUY NHẤT; file này không còn tự chain-link.
+Đây là tỉ suất GIA QUYỀN THỜI GIAN: nạp/rút phát hành/huỷ đơn vị ở giá chốt nên không làm đổi giá.
+(Bản đầu tiên tính `nav1/nav0 − 1`: nạp 200tr vào SpaceX ⇒ công bố "+20% lợi nhuận" — FAIL-H,
+audit measurement-integrity 2026-09-27.)
 
   - Nguồn dòng tiền: `data/account_cash_flows.json` (thủ công — DNSE OpenAPI KHÔNG có sổ nạp/rút;
-    xem `account_cash_flows.py` để biết đã quét những gì). File thiếu ⇒ không có flow ⇒ công thức
-    thu về ĐÚNG `nav1/nav0 − 1` như cũ, bit-for-bit.
-  - TWR = chain-link, tái định giá TẠI MỖI ngày có dòng tiền (định nghĩa sách giáo khoa, không
-    phải xấp xỉ Dietz). Giữa 2 ngày có dòng tiền, tỉ số NAV telescope ⇒ chỉ cần MỘT phép chia cho
-    mỗi đoạn, nên khi không có flow nào thì kết quả là CHÍNH `nav1/nav0` (không có sai số dồn của
-    phép nhân nhiều tỉ số).
-  - Quy ước thời điểm, `timing` trong bản ghi flow:
-      * `"bod"` (MẶC ĐỊNH): `r_t = nav_t / (nav_{t-1} + flow_t) − 1`. Vì DNSE ghi tiền nạp vào
-        `totalCash` ngay khi nhận, mà `nav_t` là snapshot CUỐI ngày ⇒ `nav_t` ĐÃ chứa tiền nạp;
-        vốn cơ sở sinh lời của ngày t vì vậy là `nav_{t-1} + flow_t`. Rút tiền: flow âm, `nav_t`
-        đã trừ ⇒ cùng công thức. Đây là quy ước mặc định vì nạp/rút trong giờ giao dịch (ca phổ
-        biến với TK cá nhân) khớp với nó.
-      * `"eod"`: `r_t = (nav_t − flow_t) / nav_{t-1} − 1`, cho tiền vào/ra SAU khi NAV ngày t đã
-        chốt theo giá đóng cửa. Sai quy ước làm lệch đúng 1 ngày lợi nhuận của phần vốn đó —
-        nhỏ, nhưng là lệch có hướng, nên bắt ghi rõ thay vì đoán.
+    xem `account_cash_flows.py`). Kỳ không có dòng tiền: số đơn vị không đổi ⇒ tỉ số giá =
+    `nav1/nav0`, đúng số đã công bố trước khi có sổ đơn vị.
+  - Quy tắc chốt: người khai ghi NGÀY + GIỜ + SỐ TIỀN, code suy quy ước (một luật —
+    `account_cash_flows.assign_flow`; công thức: `nav_unit_ledger.py`). Tiền giao dịch ở giá
+    chốt GẦN NHẤT TRƯỚC thời điểm tiền vào/ra:
+      * tới SAU giờ đóng cửa phiên R (trước khi chụp NAV của R) ⇒ "eod" trên R:
+        `r_R = (nav_R − flow) / nav_{R-1} − 1`.
+      * tới trước/trong phiên R ⇒ "bod" trên R: `r_R = nav_R / (nav_{R-1} + flow) − 1`.
   - Vốn KHỞI ĐIỂM không phải flow: flow có `date <= inception_date` bị BỎ (nó đã nằm trong
-    `starting_capital`). Nạp thêm ĐÚNG ngày inception phải gộp vào `starting_capital`, đừng ghi
-    thành flow — nếu không sẽ trừ hai lần.
+    `starting_capital`) và HIỆN ở `dropped_flows`. Nạp thêm ĐÚNG ngày inception phải gộp vào
+    `starting_capital`, đừng ghi thành flow — nếu không sẽ tính hai lần.
+  - Dòng tiền TREO (chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra) không thuộc kỳ đo
+    nào và HIỆN ở `pending_flows` + cảnh báo stderr — không bao giờ vô hình.
+
+HAI SỐ CỦA CHỦ TÀI KHOẢN, tách khỏi tỉ suất gia quyền thời gian (không trộn):
+  - `pnl_vnd` = nav1 − nav0 − dòng tiền ròng của kỳ — lãi/lỗ bằng tiền.
+  - `mwr_pct` = tỉ suất gia quyền THEO TIỀN (IRR) của CẢ KỲ, không quy năm: nghiệm R của
+    `nav0·(1+R) + Σ flow_i·(1+R)^{w_i} = nav1`, `w_i` = phần kỳ còn lại sau dòng tiền i (theo
+    ngày lịch), tính từ ĐÚNG mốc giá mà sổ đơn vị đã gán: "eod" trên R ⇒ từ ngày R; "bod" trên
+    R ⇒ từ ngày của dòng sổ liền trước R. Không có nghiệm duy nhất ⇒ `null` kèm `mwr_note`.
+QUY NĂM: kỳ < 365 ngày lịch ⇒ `annualized_return_pct` và `mwr_annualized_pct` là `null` kèm
+`annualized_note` (`annualize_or_null` là cửa duy nhất). Số mũ `365,25/số_ngày` (quy ước repo).
+ĐƯỜNG NÀY KHÔNG ĐỌC SỔ ĐƠN VỊ TRÊN ĐĨA (bước 1/4): tỉ suất luôn tính từ chuỗi dựng trong bộ nhớ.
+
+MỌI phần trăm hiệu suất của tài khoản thật (báo cáo tuần/tháng, dòng 💰 NAV hằng ngày của
+`daily_nav_snapshot.py`, đầu mục `portfolio_status.py`) lấy từ `compute_period_returns` — một công
+thức, một mốc khởi điểm (`data/account_inception.json`). Kỳ `day` = phiên gần nhất so với dòng sổ
+liền trước.
 
 Dùng: python3 mike/bin/nav_period_returns.py --account SpaceX --report-date 2026-09-18
 Selfcheck: python3 mike/bin/nav_period_returns.py --selfcheck
          python3 mike/bin/nav_flow_term_selfcheck.py   (số hạng dòng tiền + cổng NAV-jump)
 """
 import argparse
-import csv
 import datetime
 import json
 import os
@@ -50,43 +62,15 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from account_cash_flows import (CashFlowError, attach_flows_to_rows,  # noqa: E402
-                                load_flows)
+from account_cash_flows import CashFlowError, load_flows  # noqa: E402
+from nav_unit_ledger import (INCEPTION_PATH, NAV_HISTORY_DIR,  # noqa: E402,F401
+                             _inception_baseline, _parse_date, build_ledger, load_inception,
+                             load_nav_history)
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-INCEPTION_PATH = os.path.join(WC_ROOT, "data", "account_inception.json")
-NAV_HISTORY_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
-
-
-def _parse_date(s: str) -> datetime.date:
-    return datetime.datetime.strptime(s, "%Y-%m-%d").date()
-
-
-def load_inception(account: str, inception_path: str = INCEPTION_PATH) -> dict:
-    with open(inception_path, "r", encoding="utf-8") as f:
-        cfg = json.load(f)
-    if account not in cfg:
-        raise ValueError(f"account '{account}' không có entry trong {inception_path}")
-    return cfg[account]
-
-
-def load_nav_history(account: str, nav_dir: str = NAV_HISTORY_DIR) -> list:
-    """Trả list [(date, nav), ...] tăng dần theo ngày."""
-    path = os.path.join(nav_dir, f"nav_history_{account}.csv")
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"thiếu {path}")
-    rows = []
-    with open(path, "r", encoding="utf-8") as f:
-        for rec in csv.DictReader(f):
-            if not rec.get("date") or not rec.get("nav"):
-                continue
-            rows.append((_parse_date(rec["date"]), float(rec["nav"])))
-    rows.sort(key=lambda r: r[0])
-    if not rows:
-        raise ValueError(f"{path} rỗng")
-    return rows
+ANNUALIZE_MIN_DAYS = 365
+DAYS_PER_YEAR = 365.25            # số mũ quy năm — cùng quy ước với backtest của repo
 
 
 def _last_on_or_before(rows: list, d: datetime.date):
@@ -100,111 +84,120 @@ def _last_on_or_before(rows: list, d: datetime.date):
     return found
 
 
-def _last_before(rows: list, d: datetime.date):
-    """Row cuối cùng có date < d, hoặc None."""
-    found = None
-    for rd, nav in rows:
-        if rd < d:
-            found = (rd, nav)
-        else:
-            break
-    return found
+def annualize_or_null(factor: float, days: int) -> tuple:
+    """Cửa DUY NHẤT cho số quy năm của tài khoản thật. Trả `(pct | None, lý_do | None)`:
+    kỳ < 365 ngày lịch ⇒ `(None, lý do)` — không quy năm (chính sách 2026-10-10)."""
+    if days < ANNUALIZE_MIN_DAYS:
+        return None, (f"kỳ {days} ngày lịch < {ANNUALIZE_MIN_DAYS} — không quy năm "
+                      f"(chính sách đo hiệu suất 2026-10-10)")
+    if factor <= 0:
+        return None, f"hệ số tăng trưởng {factor} <= 0 — không quy năm được"
+    return round((factor ** (DAYS_PER_YEAR / days) - 1) * 100, 3), None
 
 
-def _inception_baseline(rows: list, inception: dict):
-    """(from_date, nav0) khởi điểm thật: starting_capital nếu có, else dòng đầu tiên."""
-    starting_capital = inception.get("starting_capital")
-    if starting_capital is not None:
-        return _parse_date(inception["inception_date"]), float(starting_capital)
-    first_date, first_nav = rows[0]
-    return first_date, first_nav
+def money_weighted_return(nav0: float, nav1: float, flows: list) -> tuple:
+    """Tỉ suất gia quyền theo tiền của CẢ KỲ (không quy năm). `flows` = [(w, amount_vnd), ...],
+    `w` ∈ [0, 1] = phần kỳ CÒN LẠI sau dòng tiền. Nghiệm x = 1 + R của
+        nav0·x + Σ amount·x^w − nav1 = 0.
+    Trả `(R | None, ghi_chú | None)`. Không có ĐÚNG MỘT nghiệm trong khoảng tìm ⇒ `None` + ghi
+    chú chỉ nêu điều đã đo (số nghiệm, giá trị hàm ở hai đầu / các nghiệm) — không chọn hộ một
+    nghiệm, không khẳng định nguyên nhân."""
+    flows = [(w, a) for w, a in flows if a]
+    if not flows:
+        return nav1 / nav0 - 1, None
+
+    def f(x):
+        return nav0 * x + sum(a * x ** w for w, a in flows) - nav1
+
+    grid = [10 ** (-3 + 6 * i / 6000) for i in range(6001)]       # x ∈ [0,001; 1000]
+    roots = []
+    for lo, hi in zip(grid, grid[1:]):
+        f_lo, f_hi = f(lo), f(hi)
+        if f_lo == 0:
+            roots.append(lo)
+        elif f_lo * f_hi < 0:
+            for _ in range(200):
+                mid = (lo + hi) / 2
+                if f_lo * f(mid) <= 0:
+                    hi = mid
+                else:
+                    lo, f_lo = mid, f(mid)
+            roots.append((lo + hi) / 2)
+    if len(roots) == 1:
+        return roots[0] - 1, None
+    if not roots:
+        return None, (f"IRR không xác định: 0 nghiệm trong khoảng −99,9%…+99.900% — hàm giá trị "
+                      f"không đổi dấu trên lưới {len(grid)} điểm (tại −99,9%: {f(grid[0]):+,.0f}; "
+                      f"tại +99.900%: {f(grid[-1]):+,.0f})")
+    return None, (f"IRR không xác định duy nhất: {len(roots)} nghiệm trong khoảng "
+                  f"−99,9%…+99.900% (" + "; ".join(f"{(x - 1) * 100:+.3f}%" for x in roots) + ")")
 
 
-def _twr_factor(seq: list, flows_by_date: dict) -> tuple:
-    """Time-weighted growth factor trên chuỗi quan sát `seq` = [(date, nav), ...] tăng dần.
-
-    Chain-link tái định giá tại MỖI ngày có dòng tiền; giữa 2 ngày đó tỉ số NAV telescope nên chỉ
-    cần MỘT phép chia cho cả đoạn ⇒ không có flow nào thì factor = seq[-1][1]/seq[0][1] ĐÚNG
-    bit-for-bit (không phải "gần bằng"). Trả (factor, net_flow_vnd, flows_in_period).
-    """
-    factor = 1.0
-    base = seq[0][1]
-    net_flow = 0.0
-    used = []
-    for i in range(1, len(seq)):
-        d, nav = seq[i]
-        prev_nav = seq[i - 1][1]
-        day_flows = flows_by_date.get(d, [])
-        f_bod = sum(f["amount_vnd"] for f in day_flows if f["timing"] == "bod")
-        f_eod = sum(f["amount_vnd"] for f in day_flows if f["timing"] == "eod")
-        used.extend(day_flows)
-        net_flow += f_bod + f_eod
-        if f_bod:
-            if base <= 0:
-                raise ValueError(f"vốn cơ sở <= 0 tại {seq[i - 1][0]} — không tính được TWR")
-            factor *= prev_nav / base
-            base = prev_nav + f_bod
-            if base <= 0:
-                raise ValueError(f"vốn cơ sở sau dòng tiền {d} <= 0 ({base:.0f}) — không tính "
-                                 f"được TWR; kỳ này cần chia nhỏ thủ công")
-        if f_eod:
-            if base <= 0:
-                raise ValueError(f"vốn cơ sở <= 0 tại {d} — không tính được TWR")
-            factor *= (nav - f_eod) / base
-            base = nav
-    if base <= 0:
-        raise ValueError("vốn cơ sở cuối kỳ <= 0 — không tính được TWR")
-    factor *= seq[-1][1] / base
-    return factor, net_flow, used
-
-
-def _observation_seq(rows: list, from_date: datetime.date, nav0: float,
-                     nav1_date: datetime.date, nav1: float) -> list:
-    """[(from_date, nav0)] + mọi dòng nav_history trong (from_date, nav1_date].
-
-    `from_date` có thể KHÔNG phải một dòng nav_history (baseline inception của SpaceX =
-    2026-07-01, dòng đầu tiên là 07-02) ⇒ phải nối tay, không lấy slice của rows.
-    """
-    seq = [(from_date, nav0)]
-    seq.extend((d, n) for d, n in rows if from_date < d <= nav1_date)
-    if seq[-1][0] != nav1_date:
-        seq.append((nav1_date, nav1))
-    return seq
-
-
-def _period_result(rows: list, from_date: datetime.date, nav0: float,
-                   nav1_date: datetime.date, nav1: float, flows_by_date: dict) -> dict:
-    """Khối kết quả một kỳ. `net_flow_vnd`/`cash_flows` chỉ xuất hiện KHI kỳ đó có dòng tiền —
-    cố ý, để output giữ nguyên byte-for-byte với mọi kỳ không có dòng tiền (toàn bộ lịch sử 2 TK
-    tới 2026-09-25), tức bản vá này không thể làm lệch một con số đã công bố nào."""
-    seq = _observation_seq(rows, from_date, nav0, nav1_date, nav1)
-    factor, net_flow, used = _twr_factor(seq, flows_by_date)
+def _period_result(ledger: list, i0: int, i1: int) -> dict:
+    """Khối kết quả kỳ `ledger[i0] → ledger[i1]`. `net_flow_vnd`/`cash_flows` chỉ xuất hiện KHI
+    kỳ đó có dòng tiền (giữ nguyên hợp đồng cũ)."""
+    a, b = ledger[i0], ledger[i1]
+    factor = b["unit_price"] / a["unit_price"]
+    days = (b["date"] - a["date"]).days
+    used, weighted = [], []
+    for i in range(i0 + 1, i1 + 1):
+        row = ledger[i]
+        for f in row["flows"]:
+            used.append(f)
+            # Cùng mốc với sổ đơn vị: eod giao dịch ở giá chốt của `row`; bod ở giá chốt của dòng
+            # sổ LIỀN TRƯỚC (bod thứ Hai tính từ thứ Sáu, không phải Chủ nhật).
+            at = row["date"] if f["timing"] == "eod" else ledger[i - 1]["date"]
+            weighted.append(((b["date"] - at).days / days, f["amount_vnd"]))
+    net_flow = sum(f["amount_vnd"] for f in used)
+    mwr, mwr_note = money_weighted_return(a["nav"], b["nav"], weighted)
+    ann, ann_note = annualize_or_null(factor, days)
+    mwr_ann = annualize_or_null(1 + mwr, days)[0] if mwr is not None else None
     out = {
-        "from_date": from_date.isoformat(),
-        "to_date": nav1_date.isoformat(),
-        "nav0": nav0,
-        "nav1": nav1,
+        "from_date": a["date"].isoformat(),
+        "to_date": b["date"].isoformat(),
+        "nav0": a["nav"],
+        "nav1": b["nav"],
         "return_pct": round((factor - 1) * 100, 3),
     }
     if used:
         out["net_flow_vnd"] = net_flow
         out["cash_flows"] = [{"date": f["date"].isoformat(), "amount_vnd": f["amount_vnd"],
                               "kind": f["kind"], "timing": f["timing"],
-                              "evidence": f["evidence"]} for f in used]
+                              "evidence": f["evidence"], "time_ict": f["time_ict"],
+                              "session_date": f["session_date"].isoformat()} for f in used]
+    out.update({
+        "days": days,
+        # Tỉ số hai giá đơn vị CHƯA làm tròn — cho nơi hiển thị tự làm tròn MỘT lần (dòng NAV
+        # hằng ngày in 2 chữ số; làm tròn 3 rồi 2 chữ số lệch 0,01 ở ~5% số ngày).
+        "unit_price_ratio": factor,
+        "unit_price0": round(a["unit_price"], 4),
+        "unit_price1": round(b["unit_price"], 4),
+        "pnl_vnd": b["nav"] - a["nav"] - net_flow,
+        "mwr_pct": round(mwr * 100, 3) if mwr is not None else None,
+        "annualized_return_pct": ann,
+        "mwr_annualized_pct": mwr_ann,
+    })
+    if mwr_note:
+        out["mwr_note"] = mwr_note
+    if ann_note:
+        out["annualized_note"] = ann_note
     return out
 
 
-def _period(rows: list, report_date: datetime.date, period_start_exclusive: datetime.date,
-            inception_from: datetime.date, inception_nav0: float, nav1_date: datetime.date,
-            nav1: float, flows_by_date: dict) -> dict:
-    """Baseline = row cuối < period_start_exclusive; nếu không có (kỳ bắt đầu trước/đúng lúc
-    inception) thì lùi về chính baseline khởi điểm — không có dữ liệu nào trước điểm đó."""
-    prior = _last_before(rows, period_start_exclusive)
-    if prior is not None and prior[0] >= inception_from:
-        from_date, nav0 = prior
-    else:
-        from_date, nav0 = inception_from, inception_nav0
-    return _period_result(rows, from_date, nav0, nav1_date, nav1, flows_by_date)
+def _period(ledger: list, period_start_exclusive: datetime.date, i1: int) -> dict:
+    """Baseline = dòng sổ cuối < period_start_exclusive; không có (kỳ bắt đầu trước/đúng lúc
+    inception) thì lùi về chính mốc khởi điểm (dòng 0) — không có dữ liệu nào trước điểm đó."""
+    i0 = 0
+    for i, row in enumerate(ledger):         # dòng sau i1 có ngày > report_date >= đầu kỳ: không khớp
+        if row["date"] < period_start_exclusive:
+            i0 = i
+    return _period_result(ledger, i0, i1)
+
+
+def _flow_note(f: dict, reason: str) -> dict:
+    return {"date": f["date"].isoformat(), "time_ict": f.get("time_ict"),
+            "amount_vnd": f["amount_vnd"], "kind": f["kind"], "evidence": f["evidence"],
+            "reason": reason}
 
 
 def compute_period_returns(account: str, report_date: datetime.date, rows: list, inception: dict,
@@ -212,7 +205,7 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
     nav1_row = _last_on_or_before(rows, report_date)
     if nav1_row is None:
         raise ValueError(f"không có dòng nav_history nào <= {report_date} cho {account}")
-    nav1_date, nav1 = nav1_row
+    nav1_date = nav1_row[0]
 
     inception_from, inception_nav0 = _inception_baseline(rows, inception)
     if nav1_date < inception_from:
@@ -223,25 +216,29 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
         # require_file=True: day la duong CONG BO SO (§21/§31). Thieu so dong tien ⇒ TU CHOI,
         # khong duoc doan `[]` (mot lan NAP thanh LAI — sai theo huong co loi cho minh).
         flows = load_flows(account, require_file=True)
-    # Vốn khởi điểm KHÔNG phải flow — bỏ mọi bản ghi <= mốc baseline (nó đã nằm trong nav0).
-    flows = [f for f in flows if f["date"] > inception_from]
-    flows_by_date = attach_flows_to_rows(rows, flows)
-    flows_by_date.pop(None, None)   # flow sau dòng nav_history cuối cùng: ngoài mọi kỳ đo
+    ledger, info = build_ledger(rows, flows, inception_from, inception_nav0)
+    i1 = max(i for i, row in enumerate(ledger) if row["date"] <= report_date)
 
     monday = report_date - datetime.timedelta(days=report_date.weekday())
     month_start = report_date.replace(day=1)
 
-    out = {
+    return {
         "account": account,
         "report_date": report_date.isoformat(),
-        "inception": _period_result(rows, inception_from, inception_nav0, nav1_date, nav1,
-                                    flows_by_date),
-        "wtd": _period(rows, report_date, monday, inception_from, inception_nav0, nav1_date, nav1,
-                        flows_by_date),
-        "mtd": _period(rows, report_date, month_start, inception_from, inception_nav0, nav1_date,
-                        nav1, flows_by_date),
+        "inception": _period_result(ledger, 0, i1),
+        "wtd": _period(ledger, monday, i1),
+        "mtd": _period(ledger, month_start, i1),
+        # Phiên gần nhất so với dòng sổ liền trước (None nếu chưa có phiên nào sau mốc khởi điểm).
+        # Nguồn % "so với hôm trước" của daily_nav_snapshot.py và "Hôm nay" của portfolio_status.py.
+        "day": _period_result(ledger, i1 - 1, i1) if i1 else None,
+        # Dòng tiền ĐÃ KHAI nhưng KHÔNG nằm trong số nào ở trên — luôn có mặt (rỗng = không có).
+        "pending_flows": [_flow_note(f, f"TREO: chưa dòng nav_history nào chụp sau thời điểm tiền "
+                                        f"vào/ra (dòng cuối {ledger[-1]['date']})")
+                          for f in info["pending"]],
+        "dropped_flows": [_flow_note(f, f"ngày <= mốc khởi điểm {inception_from} — đã nằm trong "
+                                        f"vốn khởi điểm, không phải dòng tiền")
+                          for f in info["dropped"]],
     }
-    return out
 
 
 def main() -> int:
@@ -267,6 +264,11 @@ def main() -> int:
         print(f"LỖI nav_period_returns: {e}", file=sys.stderr)
         return 1
 
+    for key, label in (("pending_flows", "TREO"), ("dropped_flows", "BỊ LOẠI")):
+        for f in result[key]:
+            print(f"⚠️ nav_period_returns ({args.account}): dòng tiền {label} — {f['date']} "
+                  f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND ({f['kind']}) KHÔNG nằm "
+                  f"trong tỉ suất nào ở trên: {f['reason']}", file=sys.stderr)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
@@ -292,13 +294,21 @@ def _selfcheck() -> int:
         f"inception return_pct sai: {result['inception']['return_pct']} (kỳ vọng ~-2.177)"
     n += 1
 
+    # ZaloPay: baseline = starting_capital 987.865.567 tại 2026-07-06 (user duyệt 2026-09-27,
+    # Option A) — assertion cũ "starting_capital phải null" đã lỗi thời từ ngày đó.
     zalopay_rows = load_nav_history("ZaloPay")
     zalopay_inception = load_inception("ZaloPay")
-    assert zalopay_inception["starting_capital"] is None, "ZaloPay starting_capital phải null"
-    zfirst_date, zfirst_nav = zalopay_rows[0]
+    assert zalopay_inception["starting_capital"] == 987_865_567, "ZaloPay starting_capital phải 987.865.567"
     zresult = compute_period_returns("ZaloPay", datetime.date(2026, 9, 18), zalopay_rows, zalopay_inception)
-    assert zresult["inception"]["nav0"] == zfirst_nav, "ZaloPay inception nav0 phải = dòng đầu (không starting_capital)"
-    assert zresult["inception"]["from_date"] == zfirst_date.isoformat()
+    assert zresult["inception"]["nav0"] == 987_865_567.0, "ZaloPay inception nav0 phải = starting_capital"
+    assert zresult["inception"]["from_date"] == "2026-07-06"
+    n += 1
+
+    # Không có starting_capital ⇒ baseline lùi về dòng đầu nav_history (nhánh dự phòng còn sống).
+    legacy = compute_period_returns("ZaloPay", datetime.date(2026, 9, 18), zalopay_rows,
+                                    {"inception_date": "2026-07-06", "starting_capital": None}, [])
+    assert legacy["inception"]["nav0"] == zalopay_rows[0][1], "thiếu starting_capital ⇒ nav0 = dòng đầu"
+    assert legacy["inception"]["from_date"] == zalopay_rows[0][0].isoformat()
     n += 1
 
     # WTD: baseline phải là dòng cuối TRƯỚC thứ Hai của tuần chứa report_date (tuần 09-14..09-18,

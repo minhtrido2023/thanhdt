@@ -54,7 +54,7 @@ CORP_ACTIONS_FILE = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
 import corp_actions  # noqa: E402 — validate() ép ex_date/qty_multiplier hợp lệ, xem
 # confirmed_qty_multiplier_after() (§29 vòng 6, Việc 2 blocker 1)
-from account_cash_flows import (CashFlowError, attach_flows_to_rows,  # noqa: E402
+from account_cash_flows import (CashFlowError, NavRow, attach_flows_to_rows,  # noqa: E402
                                 load_flows)
 from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noqa: E402
                            _cash_fields_inconsistent)
@@ -847,8 +847,71 @@ def _write_nav_history(hist_path, hist_rows, fieldnames):
 # này — trước đó mọi case đều truyền `sanity_max` tường minh nên mutation đổi 15→95 SỐNG SÓT.
 NAV_SANITY_DEFAULT_PCT = 15.0
 
+def unit_price_performance(account, date, hist_rows, inception=None, flows=None):
+    """Số hiệu suất cho dòng 💰 NAV của `date`: `(kết quả compute_period_returns | None, lỗi | None)`.
+
+    MỌI phần trăm của dòng NAV hằng ngày lấy từ ĐÚNG hàm mà báo cáo tuần/tháng và cổng tỉ suất
+    dùng (`nav_period_returns.compute_period_returns` — tỉ số hai giá đơn vị quỹ, mốc khởi điểm ở
+    `data/account_inception.json`). Trước 2026-10-11 dòng "Từ go-live" tự tính `nav /
+    --starting-capital − 1` với mặc định 1 tỷ mà không caller nào truyền ⇒ ZaloPay (vốn khởi
+    điểm 987.865.567) in −6,06% trong khi số chuẩn là −4,907%, và không dòng nào khử nạp/rút.
+
+    `hist_rows`: nav_history ĐÃ gồm dòng `date`. Không tính được ⇒ trả lỗi thật để in ra (§29),
+    KHÔNG lùi về công thức cũ. `inception`/`flows` bỏ trống = đọc file thật (flows: bắt buộc có
+    sổ dòng tiền, như đường công bố); truyền vào chỉ để selfcheck chạy offline.
+
+    Đây là đường HIỂN THỊ, chạy SAU khi nav_history đã ghi: không lỗi nào ở đây được làm hỏng lần
+    chụp NAV (rc≠0 ⇒ `nav_snapshot_daily.sh` báo "NAV KHÔNG ghi được" dù đã ghi) ⇒ bắt MỌI
+    Exception, kể cả lỗi import — nên `nav_period_returns` import TRONG hàm: `exdate_frame.py`,
+    `dividend_adjusted_return.py`, `discretionary_margin_gate.py` đều `import daily_nav_snapshot`
+    và không được gãy theo code hiển thị.
+    """
+    try:
+        from nav_period_returns import compute_period_returns, load_inception
+        rows = sorted(NavRow(datetime.date.fromisoformat(r["date"]), float(r["nav"]),
+                             balance_ts=(r.get("balance_ts") or None))
+                      for r in hist_rows if r.get("date") and r.get("nav"))
+        return compute_period_returns(account, datetime.date.fromisoformat(date), rows,
+                                      inception or load_inception(account), flows), None
+    except Exception as exc:                # noqa: BLE001 — đường hiển thị, xem docstring
+        return None, f"{type(exc).__name__}: {exc}"
+
+
+def nav_performance_lines(day_change, perf, perf_err):
+    """`(đoạn trong ngoặc của dòng 💰 NAV, các dòng 'Từ go-live' + cảnh báo)`.
+
+    Phần trăm = tỉ suất giá đơn vị (đã khử nạp/rút), làm tròn MỘT lần từ `unit_price_ratio`. Số VND: ngày/kỳ KHÔNG có nạp/rút thì thay
+    đổi NAV chính là lãi/lỗ (giữ nguyên dạng dòng cũ); có nạp/rút thì tách rõ lãi/lỗ với dòng
+    tiền ròng — không gộp nạp tiền vào "tăng NAV".
+    """
+    if perf is None:
+        return (f"{day_change:+,.0f} VND so với hôm trước; tỉ suất KHÔNG tính được — xem dòng dưới",
+                [f"   Từ go-live: tỉ suất KHÔNG tính được — {perf_err}"])
+    day, inc = perf["day"], perf["inception"]
+
+    def pct(period):
+        return (period["unit_price_ratio"] - 1) * 100
+
+    def vnd(period, tail):
+        flow = period.get("net_flow_vnd", 0.0)
+        if not flow:
+            return f"{period['pnl_vnd']:+,.0f} VND{tail}"
+        return (f"{period['pnl_vnd']:+,.0f} VND lãi/lỗ{tail}; NAV đổi "
+                f"{period['nav1'] - period['nav0']:+,.0f} VND, trong đó nạp/rút ròng {flow:+,.0f} VND")
+
+    if day is None:
+        paren = f"{day_change:+,.0f} VND so với hôm trước; chưa có phiên nào sau mốc khởi điểm"
+    else:
+        paren = vnd(day, f", {pct(day):+.2f}% so với hôm trước")
+    lines = ["   Từ go-live: " + vnd(inc, f" ({pct(inc):+.2f}%)")]
+    for f in perf["pending_flows"]:
+        lines.append(f"   ⚠️ Dòng tiền đã khai {f['date']} {f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND "
+                     f"CHƯA nằm trong số nào ở trên — {f['reason']}")
+    return paren, lines
+
+
 def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
-                     components=None, flows_path=None):
+                     components=None, flows_path=None, balance_ts=None):
     """Quyết định có được GHI dòng nav_history của `date` hay không.
 
     Trả `(ok: bool, message: str|None)`. `ok=False` ⇒ caller KHÔNG ghi lịch sử và exit 3.
@@ -857,6 +920,8 @@ def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
 
     `hist_rows`: list dict nav_history đã đọc (chưa chèn dòng `date`). `components`: dict số
     thành phần để in kèm khi chặn (mtm_stock/cash/debt/egg/offbook) — chỉ để chẩn đoán.
+    `balance_ts`: lúc chụp số dư của dòng `date` SẮP ghi — luật gán dòng tiền so thời điểm tiền
+    vào/ra với nó (nạp thứ Bảy được gán vào dòng thứ Hai này vì dòng này chụp sau thời điểm nạp).
     """
     comp = components or {}
     day_change = nav - prev_nav
@@ -869,41 +934,56 @@ def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
                 f"debt {comp.get('debt', 0):,.0f}, egg {comp.get('egg', 0):,.0f}, "
                 f"offbook {comp.get('offbook', 0):,.0f}")
 
-    # rows cho attach_flows_to_rows: lịch sử + dòng hôm nay (chưa ghi). Dùng CHÍNH hàm mapping
-    # của account_cash_flows thay vì so ngày bằng tay, để quy ước bod/eod chỉ tồn tại ở MỘT chỗ.
-    # ⚠️ Khoá phải là `datetime.date`, KHÔNG phải chuỗi: `attach_flows_to_rows` so `d >= f["date"]`
-    # với `f["date"]` là `date` ⇒ truyền chuỗi (dạng lưu trong nav_history CSV) nổ TypeError.
-    # Selfcheck `nav_jump_flow_gate_selfcheck.py` bắt đúng lỗi này ngay lần chạy đầu (§19).
+    # rows cho attach_flows_to_rows: lịch sử + dòng hôm nay (chưa ghi). Dùng CHÍNH hàm gán của
+    # account_cash_flows thay vì so ngày bằng tay, để luật gán chỉ tồn tại ở MỘT chỗ.
+    # ⚠️ Khoá phải là `datetime.date`, KHÔNG phải chuỗi (dạng lưu trong nav_history CSV).
     date_d = datetime.date.fromisoformat(date)
     flow_rows = sorted(
-        [(datetime.date.fromisoformat(r["date"]), float(r["nav"])) for r in hist_rows
-         if r.get("date") and r["date"] < date and r.get("nav")] + [(date_d, nav)])
+        [NavRow(datetime.date.fromisoformat(r["date"]), float(r["nav"]),
+                balance_ts=(r.get("balance_ts") or None)) for r in hist_rows
+         if r.get("date") and r["date"] < date and r.get("nav")]
+        + [NavRow(date_d, nav, balance_ts=balance_ts)])
+    head = (f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: biến động {day_change_pct:+.2f}%/ngày "
+            f"vượt ngưỡng ±{sanity_max:.0f}%, và ")
+    tail = ("   KHÔNG nâng NAV_SANITY_MAX_PCT để đi qua — làm vậy là tắt guard cho cả nguyên nhân "
+            "bug dữ liệu.")
     try:
         flows = load_flows(account, flows_path=flows_path)
-        mapped = attach_flows_to_rows(flow_rows, flows)
     except CashFlowError as exc:
         # Bản ghi dòng tiền hỏng = dòng tiền CÓ THỂ đã xảy ra mà ta không đọc đúng ⇒ chặn, và in
         # ĐÚNG lỗi parser vừa trả, không đoán hộ (§29).
         return False, (
-            f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: biến động {day_change_pct:+.2f}%/ngày "
-            f"vượt ngưỡng ±{sanity_max:.0f}%, và data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên "
-            f"không xác nhận được có nạp/rút hay không.\n"
-            f"   Lỗi thật: {exc}\n"
-            f"   Sửa bản ghi dòng tiền rồi chạy lại. KHÔNG nâng NAV_SANITY_MAX_PCT để đi qua — "
-            f"làm vậy là tắt guard cho cả nguyên nhân bug dữ liệu.")
+            f"{head}data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên không xác nhận được có "
+            f"nạp/rút hay không.\n   Lỗi thật: {exc}\n   Sửa bản ghi dòng tiền rồi chạy lại.\n{tail}")
+    try:
+        mapped = attach_flows_to_rows(flow_rows, flows)
+    except ValueError as exc:               # CashFlowError (thiếu giờ/balance_ts…) là ValueError
+        # File ĐỌC ĐƯỢC; cái hỏng là bước GÁN bản ghi vào phiên — nói đúng điều đó (§29).
+        return False, (
+            f"{head}data/account_cash_flows.json đọc được ({len(flows)} bản ghi cho '{account}') "
+            f"nhưng KHÔNG GÁN ĐƯỢC bản ghi vào phiên nào nên chưa xác nhận được có nạp/rút hay "
+            f"không.\n   Lỗi thật: {exc}\n   Sửa theo lỗi trên rồi chạy lại.\n{tail}")
 
     today_flows = list(mapped.get(date_d, []))
     if not today_flows:
         # §29: nói rõ ĐÃ ĐỌC gì (file nào, bao nhiêu bản ghi của account này, ngày nào) — KHÔNG
         # khẳng định nguyên nhân là bug hay là nạp/rút.
         near = [f["date"].isoformat() for f in flows if abs((f["date"] - date_d).days) <= 3]
+        # Bản ghi có ngày <= hôm nay mà vẫn TREO = giờ khai SAU lần chụp số dư của dòng sắp ghi ⇒
+        # luật gán đẩy nó sang phiên sau. Nói đúng điều đó thay vì chỉ "không có bản ghi nào".
+        late = [f for f in mapped.get(None, []) if f["date"] <= date_d]
+        late_note = ("".join(
+            f"\n   ⚠️ Bản ghi {f['date']} time_ict={f['time_ict']} {f['amount_vnd']:+,.0f} VND ĐÃ khai "
+            f"nhưng giờ khai SAU lần chụp số dư của dòng này ({balance_ts}) ⇒ bị đẩy sang phiên sau, "
+            f"không giải thích bước nhảy hôm nay. Nếu tiền thật sự đã nằm trong số dư lúc chụp thì "
+            f"giờ khai sai — sửa time_ict." for f in late))
         return False, (
             f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: {nav:,.0f} VND (biến động "
             f"{day_change_pct:+.2f}%/ngày = {day_change:+,.0f} VND, vượt ngưỡng ±{sanity_max:.0f}%).\n"
             f"   ĐÃ TRA data/account_cash_flows.json: {len(flows)} bản ghi cho '{account}', KHÔNG "
             f"có bản ghi nào gán vào {date}"
             + (f" (gần nhất trong ±3 ngày: {', '.join(near)})" if near
-               else " (không có bản ghi nào trong ±3 ngày)") + ".\n"
+               else " (không có bản ghi nào trong ±3 ngày)") + "." + late_note + "\n"
             f"   ⇒ CHƯA xác định được nguyên nhân. Hai việc cần làm, KHÔNG được đoán:\n"
             f"     (a) nếu ĐÚNG là nạp/rút → khai vào data/account_cash_flows.json kèm bằng chứng "
             f"(schema: mike/bin/account_cash_flows.py), rồi chạy lại — guard tự cho qua, KHÔNG "
@@ -947,7 +1027,10 @@ def main():
     ap.add_argument("--account", required=True)
     ap.add_argument("--account-no", default=None)
     ap.add_argument("--date", required=True)
-    ap.add_argument("--starting-capital", type=float, default=1_000_000_000)
+    ap.add_argument("--starting-capital", type=float, default=1_000_000_000,
+                    help="CHỈ làm mốc cho cổng bước nhảy 15%% của phiên ĐẦU TIÊN (khi nav_history "
+                         "chưa có dòng nào trước đó). Phần trăm in ra KHÔNG dùng số này — mốc "
+                         "khởi điểm lấy từ data/account_inception.json.")
     ap.add_argument("--from-raw", action="store_true",
                     help="backfill ngày QUÁ KHỨ chỉ từ dnse_raw_{date}.jsonl (positions+balances cuối "
                          "ngày) + BQ Price thô, không gọi broker; ghi nav_is_estimate=True")
@@ -1440,13 +1523,12 @@ def main():
         prev_nav = args.starting_capital
 
     day_change = nav - prev_nav
-    day_change_pct = day_change / prev_nav * 100 if prev_nav else 0
 
     sanity_max = float(os.environ.get("NAV_SANITY_MAX_PCT", NAV_SANITY_DEFAULT_PCT))
     jump_ok, jump_msg = nav_jump_verdict(
         args.account, args.date, prev_nav, nav, sanity_max, hist_rows,
         components={"mtm_stock": mtm_stock, "cash": cash, "debt": debt,
-                    "egg": egg_value, "offbook": offbook})
+                    "egg": egg_value, "offbook": offbook}, balance_ts=bal["ts"])
     if jump_msg:
         print(jump_msg)
     if not jump_ok:
@@ -1468,16 +1550,16 @@ def main():
                   "egg_assets", "balance_ts", "cum_dividend_excl", "nav_is_estimate", "nav_source"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
 
-    since_inception = nav - args.starting_capital
-    since_inception_pct = since_inception / args.starting_capital * 100
-
+    # Hiệu suất hiển thị: MỘT nguồn (giá đơn vị quỹ). `day_change`/`prev_nav` ở trên chỉ còn
+    # phục vụ cổng bước nhảy 15% — không dùng để in phần trăm.
+    perf, perf_err = unit_price_performance(args.account, args.date, hist_rows)
+    paren, perf_lines = nav_performance_lines(day_change, perf, perf_err)
     lines = [
-        f"💰 **NAV {args.date}: {nav:,.0f} VND** ({day_change:+,.0f} VND, {day_change_pct:+.2f}% so với hôm trước)",
+        f"💰 **NAV {args.date}: {nav:,.0f} VND** ({paren})",
         f"   Cổ phiếu {mtm_stock:,.0f} · Tiền mặt {cash:,.0f} · Nợ margin {debt:,.0f}"
         + (f" · Trứng vàng {egg_value:,.0f}" if egg_value else "")
         + (f" · Off-book {offbook:,.0f}" if offbook else ""),
-        f"   Từ go-live: {since_inception:+,.0f} VND ({since_inception_pct:+.2f}%)",
-    ]
+    ] + perf_lines
     if cum_div["amount"]:
         lines.append(f"   ℹ️ Đã LOẠI {cum_div['amount']:,.0f} VND cổ tức phải thu khỏi tiền mặt "
                       f"(broker báo {cash_broker:,.0f}) — {cum_div['note']}")
@@ -1509,8 +1591,15 @@ def main():
            "offbook_assets": offbook, "offbook_assets_note": offbook_note,
            "offbook_assets_asof": offbook_asof, "offbook_stale_warning": offbook_stale_warning,
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,
-           "day_change_pct": day_change_pct, "since_inception": since_inception,
-           "since_inception_pct": since_inception_pct, "balance_ts": bal["ts"],
+           # % = tỉ suất giá đơn vị (nav_period_returns); None kèm `performance_error` nếu không
+           # tính được. `since_inception` = thay đổi NAV so với vốn khởi điểm (gồm cả nạp/rút);
+           # lãi/lỗ đã khử nạp/rút nằm trong khối `performance`.
+           "day_change_pct": (perf["day"]["return_pct"] if perf and perf["day"] else None),
+           "since_inception": (perf["inception"]["nav1"] - perf["inception"]["nav0"] if perf else None),
+           "since_inception_pct": (perf["inception"]["return_pct"] if perf else None),
+           "performance": ({"day": perf["day"], "inception": perf["inception"],
+                            "pending_flows": perf["pending_flows"]} if perf else None),
+           "performance_error": perf_err, "balance_ts": bal["ts"],
            "nav_is_estimate": bool(args.from_raw), "positions_ts": positions_ts,
            "raw_price_notes": raw_price_notes, "corp_action_qty_adj": corp_action_adj,
            # [5] arch-review vòng 2: P4 trước chỉ ghi bằng chứng ở nhánh rc=5 + cash_div_confirmed
