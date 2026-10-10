@@ -154,16 +154,16 @@ MUTANTS = [
     ("noise_announced_error_swallowed", "B1", DAR,
      "        return {id(a): why for a in both}\n", "        return {}\n"),
     ("noise_ignores_cost_steps", "B1", DAR,
-     '            if st["kind"] in ("cash", "stock", "cash+stock") and not owned(st) \\',
-     '            if False and not owned(st) \\'),
+     '            if st["kind"] in ("cash", "stock", "cash+stock") and not owned(st):',
+     '            if False and not owned(st):'),
     ("noise_ignores_orphan_cash", "B1", DAR,
-     "            if orphan.get(d, 0.0) > 0:", "            if False:"),
+     '            if code == "orphan":\n                return f"{lb} đang giữ',
+     '            if False:\n                return f"{lb} đang giữ'),
     ("noise_cash_of_account_not_holding", "B1", DAR,
-     "        if not any(float(qmap.get((adj.ticker, d)) or 0) > 0\n"
-     "                   for d in (adj.last_cum_date, adj.ex_date)):\n            continue",
+     "        if not any(r[1] > 0 for r in rows[first:last + 1]):\n            continue",
      "        if False:\n            continue"),
     ("noise_owned_step_counts", "B1", DAR,
-     '("cash", "stock", "cash+stock") and not owned(st) \\', '("cash", "stock", "cash+stock") and True \\'),
+     '("cash", "stock", "cash+stock") and not owned(st):', '("cash", "stock", "cash+stock") and True:'),
     ("noise_owned_ignores_amount", "B1", DAR,
      'and abs(st["cash"] - cash) <= 1.0\n', "and True\n"),
     ("noise_veto_ignored", "B1", DAR,
@@ -171,7 +171,7 @@ MUTANTS = [
     ("lag_veto_ignored", "B1", DAR,
      "    for adj, v in lagged:\n        if id(adj) in vetoes:", "    for adj, v in lagged:\n        if False:"),
     ("cash_slip_not_paired", "B1", DAR,
-     "            if res[d] * res[d2] < 0 and abs(res[d] + res[d2]) <= tol(res[d]):",
+     "            if abs(res[d] + res[d2]) <= tol(res[d]):       # |res[d]| > tol ⇒ buộc TRÁI DẤU",
      "            if False:"),
     ("cash_slip_40_days", "B1", DAR, "CASH_SLIP_DAYS = 4\n", "CASH_SLIP_DAYS = 40\n"),
     ("cash_negative_residual_is_orphan", "B1", DAR,
@@ -190,7 +190,7 @@ MUTANTS = [
      '        return a.resolved and getattr(a, "entitled", "") not in ("no", "unknown")',
      "        return a.resolved"),
     ("no_ledger_read_as_not_held", "B2", DAR,
-     "        elif days is not None and (a.last_cum_date in days or a.ex_date in days):",
+     "        elif days is not None and a.last_cum_date in days:",
      "        elif True:"),
     ("unknown_entitlement_not_flagged", "B2", DAR,
      '                if not getattr(a, "resolved", False) or getattr(a, "entitled", "") == "unknown"]',
@@ -239,11 +239,12 @@ MUTANTS = [
     ("masked_resolved_assumed_deducted", "B4", RRG,
      '        if obs.get("why") == "masked":', "        if False:"),
     ("mask_doubt_ignored", "B4", RRG, "                if doubt:\n", "                if False:\n"),
-    ("mask_no_cash_coverage_ok", "B4", RRG,
-     '    if not cashd.covers(st["ts0"], st["ts"]):', "    if False:"),
-    ("mask_orphan_cash_ignored", "B4", RRG, "    if near:\n", "    if False:\n"),
-    ("mask_orphan_any_date", "B4", RRG,
-     "    near = {d: v for d, v in orphan.items() if lo <= _dt.date.fromisoformat(d) <= hi}",
+    ("mask_no_cash_coverage_ok", "B4", DAR,
+     "    if not cashd.covers(t0, t1):\n        return \"blind\"", "    if False:\n        return \"blind\""),
+    ("mask_orphan_cash_ignored", "B4", DAR, "    if near:\n        return \"orphan\"",
+     "    if False:\n        return \"orphan\""),
+    ("mask_orphan_any_date", "B4", DAR,
+     "    near = {d: v for d, v in orphan.items() if lo <= _d.date.fromisoformat(d) <= hi}",
      "    near = dict(orphan)"),
     ("mask_only_buy", "B4", RRG,
      '            if st["kind"] in ("buy", "other"):\n                doubt',
@@ -308,6 +309,171 @@ MUTANTS = [
      "    lo = (day - _dt.timedelta(days=1)).isoformat()        # cửa sổ vendor là (lo, end]",
      "    lo = asof"),
     ("N7_ex_equals_asof_no_income", "N7", RRG, "            if pre[0] <= asof:\n", "            if False:\n"),
+    # ================= VÒNG 3 (arch-review lần 2, 2026-10-10) =================
+    # Tên `Rv_<id>` = bản TƯƠNG ĐƯƠNG của mutant `<id>` trong bộ của reviewer (/tmp/arch_rev2/
+    # mymut.py) mà dòng neo đã đổi ở vòng này. KHÔNG có ở đây, có chủ ý:
+    #   · M10 (bù trừ cùng dấu): điều kiện `res[d] * res[d2] < 0` đã GỠ vì thừa — |res[d]| > tol
+    #     và |res[d] + res[d2]| ≤ tol buộc hai số trái dấu; không còn dòng nào để đột biến.
+    #   · M25 (`frame_ok = True` khi vendor khai phương thức lạ): TƯƠNG ĐƯƠNG — `_assign_frames`
+    #     chạy sau và đặt lại `frame_ok = False` cho mọi sự kiện có `frame_note` (`_known` trả
+    #     False), nên dòng `adj.frame_ok = False` ở đó không quyết định kết quả nào.
+    #   · M08 (cú nhảy trễ CŨNG hỏi broker): nay chính là code; đột biến ngược là Rv_M08.
+    # ---- C1: một rổ giải
+    ("Z01_basket_not_unioned", "C1", DAR,
+     "    basket = sorted(asked | ledger_tickers(accounts, start, end))\n", "    basket = sorted(asked)\n"),
+    ("Z02_basket_not_filtered", "C1", DAR,
+     "    out = _AdjList(a for a in adjs if a.ticker in asked)\n", "    out = _AdjList(adjs)\n"),
+    ("Z03_ledger_tickers_zero_qty", "C1", DAR,
+     "            if any(q > 0 and start <= ts[:10] <= end for ts, q, _c in rows):",
+     "            if any(start <= ts[:10] <= end for ts, q, _c in rows):"),
+    ("Z04_ledger_tickers_any_date", "C1", DAR,
+     "            if any(q > 0 and start <= ts[:10] <= end for ts, q, _c in rows):",
+     "            if any(q > 0 for ts, q, _c in rows):"),
+    ("Z05_solver_note_guesses_again", "C1", DAR,
+     "            others = sorted({tk for (tk, day), q in qtys[lb].items() if day == d and q}\n",
+     "            others = sorted(set()\n"),
+    ("Z06_scope_leaks", "C1", DAR, "    finally:\n        _SCOPE = keep\n", "    finally:\n        pass\n"),
+    ("Z07_scope_ignores_window", "C1", DAR,
+     'return bool(sc) and ticker in sc["tickers"] and (start, end) == (sc["start"], sc["end"])',
+     'return bool(sc) and ticker in sc["tickers"]'),
+    ("Z08_scope_ignores_ticker", "C1", DAR,
+     'return bool(sc) and ticker in sc["tickers"] and (start, end) == (sc["start"], sc["end"])',
+     'return bool(sc) and (start, end) == (sc["start"], sc["end"])'),
+    ("Z09_scope_swallows_bq_error", "C1", DAR,
+     "    if err is not None:\n        raise err\n    return val\n", "    return val\n"),
+    ("Z10_scope_serves_announced", "C1", DAR,
+     '    if sc and not include_announced and ticker in sc["tickers"] \\',
+     '    if sc and ticker in sc["tickers"] \\'),
+    ("Z11_scope_serves_out_of_window_ex", "C1", DAR,
+     '            and sc["start"] < ex_date <= sc["end"]:', "            and True:"),
+    ("Z12_scope_never_batches", "C1", DAR, "    if _SCOPE is None:\n        return fetch()\n",
+     "    if True:\n        return fetch()\n"),
+    # ---- C2: ghép trễ CẦN và ĐỦ, và cũng phải qua broker
+    ("Z20_lag_no_necessity", "C2", DAR,
+     "    if abs(own / want - 1.0) <= LAG_TOL:\n        return False\n", ""),
+    ("Rv_M08_lagged_skips_broker", "C2", DAR,
+     "        else:\n            pending.append(a)\n    if pending:",
+     "        elif root is None:\n            pending.append(a)\n    if pending:"),
+    ("Rv_M08b_root_row_vetoes_itself", "C2", DAR, "                      and a.last_cum_date <= ex <= a.ex_date and (tk, ex) != root)",
+     "                      and a.last_cum_date <= ex <= a.ex_date)"),
+    ("Rv_M30_vendor_hit_only_ex_date", "C2", DAR, "                      and a.last_cum_date <= ex <= a.ex_date and (tk, ex) != root)",
+     "                      and ex == a.ex_date and (tk, ex) != root)"),
+    ("Z21_vendor_hit_no_lower_bound", "C2", DAR, "                      and a.last_cum_date <= ex <= a.ex_date and (tk, ex) != root)",
+     "                      and ex <= a.ex_date and (tk, ex) != root)"),
+    ("Rv_M15_lag_tol_10pct", "C2", DAR, "LAG_TOL = 0.02\n", "LAG_TOL = 0.10\n"),
+    ("Rv_M15b_lag_tol_half_pct", "C2", DAR, "LAG_TOL = 0.02\n", "LAG_TOL = 0.005\n"),
+    ("Rv_M15c_lag_guard_off", "C2", DAR,
+     "    if p <= 0 or cash >= p:\n        return False\n    want = m * p / (p - cash)", "    want = m * p / (p - cash)"),
+    ("Rv_M15d_lag_ignores_cash", "C2", DAR, "    want = m * p / (p - cash)\n", "    want = m\n"),
+    ("Rv_M15f_lag_uses_all_iss", "C2", DAR,
+     '    m = 1.0 + float(row["stock_free"] if "stock_free" in row else (row.get("stock") or 0.0))\n    if p <= 0',
+     '    m = 1.0 + float(row.get("stock") or 0.0)\n    if p <= 0'),
+    ("Rv_M16_lag_no_ratio_update", "C2", DAR,
+     "        v.ratio_per_share = round(v.last_cum_price * (1.0 - 1.0 / total), 2)\n", "        pass\n"),
+    ("Rv_M16b_lag_no_jump_update", "C2", DAR, "        v.ratio_jump = total - 1.0\n", "        pass\n"),
+    ("Rv_M16c_lag_no_pershare_update", "C2", DAR,
+     '        if v.source == "unresolved":\n            v.per_share = v.ratio_per_share\n', "        pass\n"),
+    # ---- K3: lô phải thu / chi trả lẫn
+    ("Rv_M27_readings_empty", "C4", DAR, "    out.readings = [ts for ts, _ in series]\n", "    out.readings = []\n"),
+    ("Rv_M27b_deltas_include_negative", "C4", DAR,
+     "        if cd > prev_cd:\n            out[ts[:10]]", "        if cd != prev_cd:\n            out[ts[:10]]"),
+    ("Z30_every_payout_is_odd", "K3", DAR,
+     "        elif cd < prev_cd and not _settle_lots(lots, float(prev_cd - cd)):", "        elif cd < prev_cd:"),
+    ("Z31_no_payout_is_odd", "K3", DAR,
+     "        elif cd < prev_cd and not _settle_lots(lots, float(prev_cd - cd)):", "        elif False:"),
+    ("Z32_lots_not_recorded", "K3", DAR, "            lots.append(float(cd - prev_cd))\n", "            pass\n"),
+    ("Z33_settle_any_amount", "K3", DAR,
+     "            if abs(sum(lots[i] for i in idx) - paid) <= 1.0:", "            if True:"),
+    ("Z34_settle_keeps_paid_lots", "K3", DAR,
+     "                for i in sorted(idx, reverse=True):\n                    del lots[i]\n", ""),
+    ("Z35_payout_never_doubts", "K3", DAR, '    if mixed:\n        return "payout"', '    if False:\n        return "payout"'),
+    ("Z36_payout_any_gap", "K3", DAR, "             if p[:19] < t1[:19] and r[:19] > t0[:19]]", "             if True]"),
+    ("Z37_payout_gap_touching_start", "K3", DAR, "             if p[:19] < t1[:19] and r[:19] > t0[:19]]",
+     "             if p[:19] < t1[:19] and r[:19] >= t0[:19]]"),
+    ("Z38_payout_gap_touching_end", "K3", DAR, "             if p[:19] < t1[:19] and r[:19] > t0[:19]]",
+     "             if p[:19] <= t1[:19] and r[:19] > t0[:19]]"),
+    # ---- K4 / C4: `cash_witness` + `_broker_touched`
+    ("Rv_R02_witness_window_lo_zero", "C4", DAR,
+     "    lo = _d.date.fromisoformat(t0[:10]) - _d.timedelta(days=CASH_SLIP_DAYS)", "    lo = _d.date.fromisoformat(t0[:10])"),
+    ("Rv_R02_witness_window_hi_zero", "C4", DAR,
+     "    hi = _d.date.fromisoformat(t1[:10]) + _d.timedelta(days=CASH_SLIP_DAYS)", "    hi = _d.date.fromisoformat(t1[:10])"),
+    ("Rv_R02b_witness_window_hi_30d", "C4", DAR,
+     "    hi = _d.date.fromisoformat(t1[:10]) + _d.timedelta(days=CASH_SLIP_DAYS)",
+     "    hi = _d.date.fromisoformat(t1[:10]) + _d.timedelta(days=30)"),
+    ("Rv_R02c_witness_window_lo_60d", "C4", DAR,
+     "    lo = _d.date.fromisoformat(t0[:10]) - _d.timedelta(days=CASH_SLIP_DAYS)",
+     "    lo = _d.date.fromisoformat(t0[:10]) - _d.timedelta(days=60)"),
+    ("Rv_M09b_slip_days_1", "C4", DAR, "CASH_SLIP_DAYS = 4\n", "CASH_SLIP_DAYS = 1\n"),
+    ("Rv_M09c_slip_days_3", "C4", DAR, "CASH_SLIP_DAYS = 4\n", "CASH_SLIP_DAYS = 3\n"),
+    ("Rv_M09d_slip_days_5", "C4", DAR, "CASH_SLIP_DAYS = 4\n", "CASH_SLIP_DAYS = 5\n"),
+    ("Rv_M10b_net_any_amount", "C4", DAR,
+     "            if abs(res[d] + res[d2]) <= tol(res[d]):       # |res[d]| > tol ⇒ buộc TRÁI DẤU",
+     "            if res[d] * res[d2] < 0:"),
+    ("Rv_M04_owned_ignores_mult", "C4", DAR, '                   and abs(st["q1"] - st["q0"] * mult) <= 1.5', "                   and True"),
+    ("Rv_M05_owned_ignores_window", "C4", DAR, "tk == adj.ticker and cum <= day <= ex and", "tk == adj.ticker and True and"),
+    ("Rv_M05b_owned_any_ticker", "C4", DAR, "return any(tk == adj.ticker and cum <= day", "return any(True and cum <= day"),
+    ("Rv_M06_touch_step_any_date", "C4", DAR, "        return t0[:10] <= hi and t1[:10] >= lo\n", "        return True\n"),
+    ("Z40_touch_pair_only_by_end_day", "K4", DAR, "        return t0[:10] <= hi and t1[:10] >= lo\n",
+     "        return lo <= t1[:10] <= hi\n"),
+    ("Rv_M06b_touch_only_cash_steps", "C4", DAR,
+     '            if st["kind"] in ("cash", "stock", "cash+stock") and not owned(st):',
+     '            if st["kind"] in ("cash",) and not owned(st):'),
+    ("Z41_blind_ledger_read_as_clean", "K4", DAR,
+     '        if not (any(t[:10] < lo for t in L["ts"]) and any(t[:10] >= hi for t in L["ts"])):', "        if False:"),
+    ("Z42_ledger_cover_one_side_enough", "K4", DAR,
+     '        if not (any(t[:10] < lo for t in L["ts"]) and any(t[:10] >= hi for t in L["ts"])):',
+     '        if not (any(t[:10] < lo for t in L["ts"]) or any(t[:10] >= hi for t in L["ts"])):'),
+    ("Z43_masked_pairs_not_asked", "K4", DAR,
+     '        spans = ([(st["ts0"], st["ts"]) for st in pairs if st["kind"] in ("buy", "other")]',
+     "        spans = ([]"),
+    ("Z44_opening_pairs_not_asked", "K4", DAR,
+     '                 + [p for p in opening_pairs(rows, L["ts"]) if meets(*p)])', "                 + [])"),
+    ("Z45_masked_pair_only_orphan_counts", "K4", DAR,
+     "            if code:\n                return (f\"sổ giá vốn {lb} MÙ", "            if code == \"orphan\":\n                return (f\"sổ giá vốn {lb} MÙ"),
+    ("Z46_clean_cost_but_blind_cash_vetoes", "K4", DAR,
+     '            if code == "orphan":\n                return f"{lb} đang giữ', '            if code:\n                return f"{lb} đang giữ'),
+    ("Z47_opening_pair_uses_itself", "K2", DAR,
+     "            out.append((rows[i - 1][0] if i else max((t for t in record_ts if t < ts), default=ts),",
+     "            out.append((ts,"),
+    ("Z48_reopen_not_an_opening", "K2", DAR, "        if q > 0 and (i == 0 or rows[i - 1][1] <= 0):", "        if q > 0 and i == 0:"),
+    ("Rv_M33_qtymap_days_dropped", "C4", DAR, "    out.days = set(day_last_rec)\n", "    pass\n"),
+    ("Rv_M18_entitle_unknown_becomes_no", "C4", DAR, "        elif days is not None and a.last_cum_date in days:", "        elif True:  # Rv"),
+    ("Rv_M18b_entitle_no_becomes_unknown", "C4", DAR, "        elif days is not None and a.last_cum_date in days:", "        elif False:"),
+    ("Rv_M18c_entitle_ex_day_record_is_enough", "C4", DAR, "        elif days is not None and a.last_cum_date in days:",
+     "        elif days is not None and (a.last_cum_date in days or a.ex_date in days):"),
+    ("Rv_M19_entitle_marks_noise", "C4", DAR,
+     '    for a in adjs:\n        if a.kind == "RATIO_NOISE":\n            continue\n        q, status, why = qty_entitled(qmap, a)',
+     '    for a in adjs:\n        q, status, why = qty_entitled(qmap, a)'),
+    # ---- cổng: K2, H1c, C3, K5 và nguyên thủy
+    ("Rv_R01_gate_ignores_witness", "C4", RRG,
+     '    return (text + " ⇒ không loại trừ được một bước trừ cổ tức nằm lẫn trong cặp bản ghi này"\n            if code else "")',
+     '    return ""'),
+    ("Rv_R12_all_deltas_orphan", "C4", RRG,
+     "    orphan = dar.unexplained_cash(cashd, dar.cash_step_totals(series))", "    orphan = dar.unexplained_cash(cashd, {})"),
+    ("Z60_opening_pair_not_checked", "K2", RRG,
+     "        for before, opened in dar.opening_pairs(cur, record_ts):", "        for before, opened in []:"),
+    ("Z61_solved_hidden_cash_still_orphan", "K2", RRG, "    if hidden_paid:\n", "    if False:\n"),
+    ("Z62_hidden_cash_wrong_qty", "K2", RRG,
+     "                                                + q_cum[-1] * want_cash)", "                                                + want_cash)"),
+    ("Z63_h1c_never_blocks", "H1c", RRG,
+     "    for tk in sorted({m[0] for m in unmatched_held_qty_mismatch} - matched_tk):", "    for tk in []:"),
+    ("Z64_h1c_blocks_despite_exact_row", "H1c", RRG,
+     "    for tk in sorted({m[0] for m in unmatched_held_qty_mismatch} - matched_tk):",
+     "    for tk in sorted({m[0] for m in unmatched_held_qty_mismatch}):"),
+    ("Z65_nocover_claims_unpublished_blind", "C3", RRG,
+     '               if not cov_mention[tk]["pub"]]', "               if True]"),
+    ("Z66_unchecked_published_silent", "C3", RRG,
+     '    unchecked = [((tk, q), v) for (tk, q), v in nocover_keys if cov_mention[tk]["pub"]]', "    unchecked = []"),
+    ("Z67_k5_any_multiplier", "K5", RRG,
+     '        if mult > 1.0 and abs(step["q1"] - step["q0"] * mult) <= 1.5:', "        if mult > 1.0:"),
+    ("Z68_k5_never_says", "K5", RRG,
+     '    if step["kind"] not in ("stock", "cash+stock"):\n        return ""', '    if True:\n        return ""'),
+    ("Rv_R07_near_pct_400chars", "C4", RRG, 'r"(?![A-Za-z0-9])([^%\\n]{0,40}?)"', 'r"(?![A-Za-z0-9])([^%\\n]{0,400}?)"'),
+    ("Rv_R20_cands_when_pct_found", "C4", RRG,
+     "    return qty_i, pct_i, ([] if pct_i is not None else cands)", "    return qty_i, pct_i, cands"),
+    ("Rv_R22_cand_last_not_first", "C4", RRG,
+     '            col = next((j for j in cands if j < len(cells) and "%" in cells[j]), None)',
+     '            col = next((j for j in reversed(cands) if j < len(cells) and "%" in cells[j]), None)'),
 ]
 
 
@@ -315,9 +481,14 @@ def _selfcheck(workdir: str, fname: str) -> int:
     env = dict(os.environ, PYTHONPATH=BIN + os.pathsep + os.environ.get("PYTHONPATH", ""),
                MIKE_BOT_TEST_MODE="1",
                WC_ROOT=os.path.join(workdir, "wcroot") if fname == RRG else REAL_ROOT)
-    return subprocess.run([sys.executable, os.path.join(workdir, fname), "--selfcheck"],
-                          env=env, cwd=workdir, stdout=subprocess.DEVNULL,
-                          stderr=subprocess.DEVNULL).returncode
+    p = subprocess.run([sys.executable, os.path.join(workdir, fname), "--selfcheck"],
+                       env=env, cwd=workdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                       text=True)
+    # rc ≠ 0 mà có traceback KHÔNG phải AssertionError = selfcheck SẬP giữa chừng: đột biến "chết"
+    # nhưng không assertion nào bắt nó, và mọi ca phía sau chỗ sập không còn chạy (arch-review K8).
+    tb = p.stdout.rfind("Traceback (most recent call last)")
+    crashed = tb >= 0 and "AssertionError" not in p.stdout[tb:]
+    return -p.returncode if (p.returncode and crashed) else p.returncode
 
 
 def _workdir(src: dict, mutate=None) -> str:
@@ -344,7 +515,9 @@ def _run_one(src: dict, m: tuple) -> tuple:
         rcs = [_selfcheck(work, f)] + ([_selfcheck(work, RRG)] if f == DAR else [])
     finally:
         shutil.rmtree(work, ignore_errors=True)
-    return name, case, f, ("CHẾT" if any(rcs) else "SỐNG"), rcs
+    if any(rc > 0 for rc in rcs):
+        return name, case, f, "CHẾT", rcs
+    return name, case, f, ("SẬP" if any(rcs) else "SỐNG"), rcs
 
 
 def main() -> int:
@@ -368,13 +541,16 @@ def main() -> int:
     with ThreadPoolExecutor(6) as pool:
         results = list(pool.map(lambda m: _run_one(src, m), picked))
     survivors = [r[0] for r in results if r[3] == "SỐNG"]
+    crashed = [r[0] for r in results if r[3] == "SẬP"]
     broken = [r[0] for r in results if r[3].startswith("HỎNG")]
     for name, case, f, state, rcs in results:
         print(f"  {state.split(' ')[0]:5s} {name:42s} [{case}] {f} rc={rcs}"
               + (f"  {state}" if state.startswith("HỎNG") else ""))
-    print(f"\n{len(picked)} đột biến: {len(picked) - len(survivors) - len(broken)} chết, "
-          f"{len(survivors)} SỐNG {survivors}, {len(broken)} hỏng {broken}")
-    return 1 if (survivors or broken) else 0
+    dead = len(picked) - len(survivors) - len(broken) - len(crashed)
+    print(f"\n{len(picked)} đột biến: {dead} chết bằng ASSERTION, {len(survivors)} SỐNG {survivors}, "
+          f"{len(crashed)} chỉ làm SẬP selfcheck (rc âm = không assertion nào bắt) {crashed}, "
+          f"{len(broken)} hỏng {broken}")
+    return 1 if (survivors or broken or crashed) else 0
 
 
 if __name__ == "__main__":
