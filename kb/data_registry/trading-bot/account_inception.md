@@ -31,6 +31,9 @@ dòng đầu: giá 10.000 đ, số đơn vị = `starting_capital` / 10.000.
   nhảy 15% của phiên đầu tiên.
 - Đổi `starting_capital` hay `inception_date` làm đổi MỌI giá đơn vị ⇒ lệch toàn bộ sổ đã chốt.
 - **Bản ghi dòng tiền bị loại theo NGÀY, không theo giờ** (`date` <= `inception_date` ⇒ `dropped_flows`).
-  Mốc ZaloPay là NAV đêm TRƯỚC phiên 2026-07-06, nên tiền vào trong/tối 07-06 KHÔNG nằm trong vốn khởi
-  điểm mà vẫn bị loại — nó hiện ở `dropped_flows` để người đọc thấy; code không tự sửa (arch-review lần 2,
-  L10). Hiện không có bản ghi nào như vậy (0 bản ghi dòng tiền, đo 2026-10-11).
+  Mốc được coi là giá CHỐT của `inception_date`. ZaloPay: mốc = balances `2026-07-06T21:45:43` (sau đóng
+  cửa 07-06, `data/account_seed_capital.json`) ⇒ đúng, chỉ hở khe 21:45–24:00 ngày 07-06. SpaceX: mốc 1 tỷ
+  là số dư SÁNG 2026-07-01 (09:30, trước phiên đầu) ⇒ tiền vào 07-01 sau 09:30 bị loại oan, và tiền vào
+  07-02 trước lần chụp 09:46 được phát hành ở 10.000, thiếu biến động phiên 07-01 (~0,5%) mà không lỗi.
+  Bản ghi bị loại hiện ở `dropped_flows`; code không tự sửa (arch-review lần 2 L10, đính chính lần 3 K1).
+  Hiện không có bản ghi nào như vậy (0 bản ghi dòng tiền, đo 2026-10-11).

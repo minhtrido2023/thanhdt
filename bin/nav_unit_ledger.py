@@ -131,9 +131,12 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
     flow_bod_vnd, flow_eod_vnd, units_issued, units, unit_price, nav_is_estimate, flows.
     `info`: {"dropped": flow có date <= mốc khởi điểm (đã nằm trong vốn khởi điểm, KHÔNG phải
     dòng tiền), "pending": flow TREO — chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra}.
-    ⚠️ "dropped" lọc theo NGÀY, không theo giờ: mốc khởi điểm ZaloPay là NAV đêm TRƯỚC phiên
-    2026-07-06, nên tiền vào trong/tối 07-06 KHÔNG nằm trong vốn khởi điểm mà vẫn bị loại — nó
-    hiện ở `dropped_flows` của mọi consumer để người đọc thấy, không tự sửa ở đây.
+    ⚠️ "dropped" lọc theo NGÀY, không theo giờ, và mốc khởi điểm được coi là giá CHỐT của
+    `inception_date`. ZaloPay: mốc = balances 2026-07-06T21:45:43 (sau đóng cửa 07-06) ⇒ đúng,
+    chỉ hở khe 21:45–24:00 ngày 07-06. SpaceX: mốc 1 tỷ là số dư SÁNG 2026-07-01 (09:30, trước
+    phiên đầu) ⇒ tiền vào 07-01 sau 09:30 bị loại oan, và tiền vào 07-02 trước lần chụp 09:46
+    được phát hành ở 10.000, thiếu biến động phiên 07-01 (~0,5%) mà không lỗi. Cả hai khe nằm
+    trong quá khứ, sổ dòng tiền thật rỗng; hiện ở `dropped_flows`, không tự sửa ở đây.
     `flows` của mỗi dòng sổ là bản sao đã gán (`timing` = quy ước suy ra, `session_date`).
     """
     if inception_nav0 <= 0:
