@@ -176,6 +176,13 @@ def main() -> int:
     print("     " + (_count[-1] if _count
                      else "\n     ".join(out_emb.strip().splitlines()[-8:])))
 
+    # Hai worktree giả PHẢI nằm trong `mike/agents/` (RED control đo đúng độ sâu đó; test cổng thật
+    # cần đi lên tới gốc cây thật) nên không dời sang thư mục tạm hệ thống được. Cái để lại rác
+    # (74 thư mục `wt-fake-*`, 403M, dọn 2026-10-10) là lượt bị `timeout`/kill giữa chừng: SIGTERM
+    # mặc định giết tiến trình mà KHÔNG chạy `finally`. Đổi nó thành SystemExit ⇒ `finally` dọn.
+    import signal
+    for _sig in (signal.SIGTERM, signal.SIGHUP):
+        signal.signal(_sig, lambda signum, _frame: sys.exit(128 + signum))
     wt_new = make_fake_worktree(src_new)
     wt_old = make_fake_worktree(src_old)
     try:
