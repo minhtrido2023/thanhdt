@@ -1,0 +1,24 @@
+CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-09.md | chốt 2026-10-09 | tài khoản ZaloPay | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+VPI        —  ZaloPay     -11.13     -11.13    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 26)
+DGC        —  ZaloPay     -13.34     -13.34     0.00   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+VPB        —  ZaloPay      12.13      12.13     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+MBB        —  ZaloPay      -7.12      -7.12     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+MSB        —  ZaloPay       7.82       7.82     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+VIB        —  ZaloPay       0.31       0.31    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+PVT        —  ZaloPay      46.10      46.10    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 32)
+SIP        —  ZaloPay       4.79       4.79    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 32)
+VNM        —  ZaloPay      -1.70      -1.70     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 32)
+SAB        —  ZaloPay      -3.58      -3.58     0.00   3,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 32)
+NCT        —  ZaloPay      -3.28      -3.28     0.00   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 32)
+DRI        —  ZaloPay      34.58      34.58    -0.00   1,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 35)
+TV1        —  ZaloPay       1.95       1.95    -0.00   1,500.00            —  OK  (dòng vị thế báo cáo ngày, dòng 35)
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   ZaloPay  giá vốn thô     263,951,159  lãi/lỗ tổng      22,398,791     8.49%
+   (vị thế excluded — NGOÀI tổng ở trên; giá vốn = sổ broker + cổ tức đã giải, không có journal lệnh mua: không thấy dòng bảng (mã, KL) nào của DGC (ZaloPay))
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

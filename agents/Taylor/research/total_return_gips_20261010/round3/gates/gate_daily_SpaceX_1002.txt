@@ -1,0 +1,22 @@
+CỔNG TỈ SUẤT — SpaceX_daily_report_2026-10-02.md | chốt 2026-10-02 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     455,082,600  lãi/lỗ tổng      31,400,989     6.90%
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+   · SpaceX · BID ex 2026-07-17: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0684 × phần hưởng 0.9091 = 382.89đ/cp trên KL đang giữ
+   · SpaceX · TPB ex 2026-10-02: 500đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 1.0000 = 434.78đ/cp trên KL đang giữ
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+⚠️  6 vị thế CÓ cổ tức và mã CÓ tỉ suất đứng cạnh trong báo cáo mà cổng KHÔNG kiểm (dòng không phải bảng có cột KL, cũng không khớp mẫu văn xuôi 'MÃ ±x%') — người soạn PHẢI tự đối chiếu với kỳ vọng:
+   • BID (SpaceX, KL=75): mã CÓ tỉ suất ở dòng 26 ('BID … -11.2%') mà cổng KHÔNG kiểm — kỳ vọng -11.99% (cổ tức GỘP 383đ/cp)
+   • DRI (SpaceX, KL=3700): mã CÓ tỉ suất ở dòng 32 ('DRI … +28.0%') mà cổng KHÔNG kiểm — kỳ vọng +29.32% (cổ tức GỘP 1,000đ/cp)
+   • MBB (SpaceX, KL=275): mã CÓ tỉ suất ở dòng 26 ('MBB … -5.6%') mà cổng KHÔNG kiểm — kỳ vọng -7.46% (cổ tức GỘP 657đ/cp)
+   • NCT (SpaceX, KL=500): mã CÓ tỉ suất ở dòng 29 ('NCT … -3.4%') mà cổng KHÔNG kiểm — kỳ vọng -3.45% (cổ tức GỘP 8,000đ/cp)
+   • SAB (SpaceX, KL=1100): mã CÓ tỉ suất ở dòng 29 ('SAB … -2.4%') mà cổng KHÔNG kiểm — kỳ vọng -4.37% (cổ tức GỘP 3,000đ/cp)
+   • TPB (SpaceX, KL=30): mã CÓ tỉ suất ở dòng 26 ('TPB … -13.9%') mà cổng KHÔNG kiểm — kỳ vọng -15.71% (cổ tức GỘP 435đ/cp)
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

@@ -1,0 +1,43 @@
+== (1) sinh thử + cổng
+TRIAL ZaloPay 2026-10-02 portfolio_status rc=0 158s | mục chi tiết: 4 | dòng 'chưa có tỉ suất': 0 | memo files=26
+GATE gate_ZaloPay_2026-10-02 rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+TRIAL SpaceX 2026-10-02 portfolio_status rc=0 128s | mục chi tiết: 4 | dòng 'chưa có tỉ suất': 0 | memo files=25
+GATE gate_SpaceX_2026-10-02 rc=0 36s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+TRIAL ZaloPay 2026-10-09 portfolio_status rc=0 128s | mục chi tiết: 4 | dòng 'chưa có tỉ suất': 0 | memo files=20
+GATE gate_ZaloPay_2026-10-09 rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+TRIAL SpaceX 2026-10-09 portfolio_status rc=0 116s | mục chi tiết: 4 | dòng 'chưa có tỉ suất': 0 | memo files=20
+GATE gate_SpaceX_2026-10-09 rc=0 36s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+== (2) biến thể trên SpaceX 02/10
+VARIANTS 14 | dòng bị sửa: VPI 47.0M -5.73 | cờ: None | DRI: True
+GATE t01_one_pct_plus0.3 rc=1 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • VPI (dòng vị thế báo cáo ngày, dòng 26): báo cáo -5.43% vs kỳ vọng SpaceX -5.73% (cổ tức GỘP 0đ/cp)
+GATE t02_unicode_minus_comma rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+GATE t03_format_drift_colon_ALL rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ❌ CHẶN — 4 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+GATE t03s_format_drift_colon_ONE rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 14 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+GATE t04_format_drift_trieu_ALL rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ❌ CHẶN — 4 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+GATE t04s_format_drift_trieu_ONE rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 14 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+GATE t05_format_drift_paren_ALL rc=1 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ❌ CHẶN — 4 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+GATE t05s_format_drift_paren_ONE rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 14 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+GATE t06_zalopay_block_in_spacex_file rc=1 36s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 14 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 9 vấn đề: |    • VPB (dòng vị thế báo cáo ngày, dòng 29): báo cáo +7.89% vs kỳ vọng SpaceX +3.99% (cổ tức GỘP 0đ/cp)
+GATE t07_dri_costprice_number rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • DRI (dòng vị thế báo cáo ngày, dòng 35): báo cáo +31.50% vs kỳ vọng SpaceX +29.32% (cổ tức GỘP 1,000đ/cp)
+GATE t08_sleeve_total_tampered rc=0 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+GATE t09_bold_pct_wrong rc=1 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • VPI (dòng vị thế báo cáo ngày, dòng 26): báo cáo -4.00% vs kỳ vọng SpaceX -5.73% (cổ tức GỘP 0đ/cp)
+GATE t09b_bold_pct_right rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+GATE t10_value_B_unit rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 14 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 1 vấn đề: |    • mục 'Chi tiết BAL (1 mã)' (dòng 25): báo cáo khai 1 vị thế nhưng cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 
+== (3) 2 bản nháp tuần
+GATE weekly_SpaceX_weekly_report_2026-10-05_to_2026-10-09 rc=0 36s | Đã kiểm 13 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+GATE weekly_ZaloPay_weekly_report_2026-10-05_to_2026-10-09 rc=0 35s | Đã kiểm 13 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày  | ✅ PASS — mọi tỉ suất vị th� | 
+== (4) báo cáo ngày CŨ đã gửi (hồi quy)
+GATE old_SpaceX_2026-10-01 rc=0 59s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_ZaloPay_2026-10-01 rc=1 42s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 26 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 4 vấn đề: |    • DGC (dòng vị thế báo cáo ngày, dòng 27): báo cáo -11.00% vs kỳ vọng ZaloPay -9.99% (cổ tức GỘP 8,000đ/cp)
+GATE old_SpaceX_2026-10-02 rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 13 vấn đề: |    • VPI (dòng vị thế báo cáo ngày, dòng 23): báo cáo -6.40% vs kỳ vọng SpaceX -5.73% (cổ tức GỘP 0đ/cp)
+GATE old_ZaloPay_2026-10-02 rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 18 vấn đề: |    • VPI (dòng vị thế báo cáo ngày, dòng 23): báo cáo -6.50% vs kỳ vọng ZaloPay -5.84% (cổ tức GỘP 0đ/cp)
+GATE old_SpaceX_2026-10-06 rc=0 54s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_ZaloPay_2026-10-06 rc=0 41s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_SpaceX_2026-10-07 rc=1 47s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày  | ❌ CHẶN — 4 vấn đề: |    • TPB (dòng vị thế báo cáo ngày, dòng 26): báo cáo -16.70% vs kỳ vọng SpaceX -16.40% (cổ tức GỘP 435đ/cp)
+GATE old_ZaloPay_2026-10-07 rc=0 39s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_SpaceX_2026-10-08 rc=0 48s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_ZaloPay_2026-10-08 rc=0 39s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_SpaceX_2026-10-09 rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+GATE old_ZaloPay_2026-10-09 rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ( | ✅ PASS — mọi tỉ suất vị th� | 
+ALLDONE
+GATE t11_flag_line_wrong rc=1 90s (không sổ nhớ) | Đã kiểm 0 dòng bảng + 1 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày  |    • VIX (văn xuôi, dòng 41): báo cáo -19.00% không khớp tài khoản nào — kỳ vọng SpaceX -23.70%

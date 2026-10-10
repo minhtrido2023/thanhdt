@@ -1,0 +1,63 @@
+baseline: {'dividend_adjusted_return.py': 0, 'report_return_gate.py': 0, 'portfolio_status.py': 0, 'eod_trading_report.sh': 0}
+  CHẾT     R01_stale_boundary_gt                      report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R02_stale_ignores_calendar                 report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  HỎNG(0)  R03_stale_never_applied                    report_return_gate.py            rc=[] 
+  CHẾT     R04_stale_code_blocked                     report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R05_nocost_lt                              report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R06_nocost_code                            report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R07_excluded_flag_false                    report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R08_posbit_no_lookbehind                   report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R09_posbit_unsigned_ok                     report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R10_posbit_reads_table_lines               report_return_gate.py            rc=[1, 1] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R11_bits_never_fail                        report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R12_bits_unresolved_pub_ok                 report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R13_bits_skip_excluded_expected            report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R14_vendor_published_no_bits               report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R15_pctnum_3digits                         report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R16_table_cell_num_not_pctnum              report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R17_prose_num_not_pctnum                   report_return_gate.py            rc=[1, 1] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R18_bits_num_not_pctnum                    report_return_gate.py            rc=[1, 1] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R19_price_session_dropped                  report_return_gate.py            rc=[1, 0] FAIL  phiên giá của nguồn giá đi theo kết quả (`price_session`); nguồn không khai ⇒ None: got=(None, None) want=('9998-12-31', None)
+  CHẾT     R20_prices_session_not_set                 report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R21_bits_tol_x10                           report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R22_nocover_ignores_bits                   report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R23_bits_unheld_counts_checked             report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R24_position_returns_expected_uses_cp_only report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R25_gate_ignores_position_returns_why      report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     R26_session_is_min_not_max                 report_return_gate.py            rc=[1, 0] PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  CHẾT     D01_began_boundary_gt                      dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D02_began_ignores_first_holding            dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D03_began_any_holding_vetoes               dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D04_began_always_true                      dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D05_empty_ledger_not_skipped               dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  HỎNG(0)  D06_first_from_series_rows                 dividend_adjusted_return.py      rc=[] 
+  CHẾT     D07_memo_key_constant                      dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D08_memo_remembers_errors                  dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D09_memo_always_on_cwd                     dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D10_memo_no_isdir_check                    dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D11_memo_never_read                        dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D12_memo_nonatomic_write                   dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     D13_record_ts_skips_empty                  dividend_adjusted_return.py      rc=[1, 0] 18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  CHẾT     P01_code_always_blocked                    portfolio_status.py              rc=[1] [FAIL] K1: mã công cụ KHÔNG cấp tỉ suất ⇒ không in tỉ suất (kể cả khi dòng lọt một `pct` cạnh `why`), in lý do ngắn ĐÚNG theo từng `code`; `code` lạ ⇒
+  CHẾT     P02_sleeve_den_broker_cost                 portfolio_status.py              rc=[1] [value_radar] skipped (fail-safe): 503 failed to connect to all addresses; last error: FAILED_PRECONDITION: ipv6:%5B2001:4860:4843:400::%5D:443: conne
+  CHẾT     P03_sleeve_total_partial                   portfolio_status.py              rc=[1] [FAIL] K1: mã CÓ tỉ suất công cụ ⇒ in đúng số đó, 2 chữ số, dạng 'MÃ <giá trị>M, ±x.xx%' — EXC:KeyError: 'QQ2'
+  CHẾT     P04_fallback_to_costprice                  portfolio_status.py              rc=[1] [FAIL] K1: công cụ LỖI ⇒ vẫn ra khối danh mục, KHÔNG mã nào có tỉ suất, lý do nói đúng là công cụ không chạy được (không rơi về costPrice); lỗi THẬT r
+  CHẾT     P05_absent_falls_to_costprice              portfolio_status.py              rc=[1] [value_radar] skipped (fail-safe): 503 failed to connect to all addresses; last error: FAILED_PRECONDITION: ipv6:%5B2001:4860:4845:400::%5D:443: conne
+  CHẾT     P06_pct_1_decimal                          portfolio_status.py              rc=[1] [FAIL] K1: mã CÓ tỉ suất công cụ ⇒ in đúng số đó, 2 chữ số, dạng 'MÃ <giá trị>M, ±x.xx%' — ─────────────────────────────────────────────────
+  CHẾT     P07_no_reason_line                         portfolio_status.py              rc=[1] [FAIL] K1: mã công cụ KHÔNG cấp tỉ suất ⇒ không in tỉ suất (kể cả khi dòng lọt một `pct` cạnh `why`), in lý do ngắn ĐÚNG theo từng `code`; `code` lạ ⇒
+  CHẾT     P08_stop_blind_dropped                     portfolio_status.py              rc=[1] [FAIL] F2: 'không đánh giá được' nói đúng TỪNG lý do: sleeve không lệnh tự động thiếu tỉ suất (QQ5 CAPIT) — không kể BAL (đã đo trên sổ broker) hay LA
+  CHẾT     P09_stdout_not_redirected                  portfolio_status.py              rc=[1] [FAIL] `section21_returns` = `report_return_gate.position_returns(...)['positions']` — đúng hàm cổng dùng; stdout của công cụ KHÔNG lẫn vào nội dung b
+  CHẾT     P10_why_row_still_gets_pct                 portfolio_status.py              rc=[1] [FAIL] K1: KHÔNG còn số tự tính trên costPrice (QQ1 +20.0%, QQ2 +25.0%, QQ3 +20.0%) — ─────────────────────────────────────────────────
+  HỎNG(0)  P11_stop_blind_all_sleeves                 portfolio_status.py              rc=[] 
+  CHẾT     P12_tool_error_swallowed_silently          portfolio_status.py              rc=[1] [FAIL] K1: công cụ LỖI ⇒ vẫn ra khối danh mục, KHÔNG mã nào có tỉ suất, lý do nói đúng là công cụ không chạy được (không rơi về costPrice); lỗi THẬT r
+  CHẾT     P13_why_not_logged                         portfolio_status.py              rc=[1] [FAIL] K1: lý do THẬT của từng mã không có tỉ suất đi ra stderr (⇒ log cron), không vào báo cáo
+  CHẾT     B01_memo_not_exported                      eod_trading_report.sh            rc=[1] ✗ biến `DAR_BQ_MEMO_DIR` TỚI tiến trình con portfolio_status (phải `export`): stub thấy một thư mục `eod_bq_memo.*` dưới TMPDIR đang TỒN TẠI lúc nó ch
+  CHẾT     B02_no_cleanup_trap                        eod_trading_report.sh            rc=[1] ✗ thư mục sổ nhớ của lượt bị XOÁ khi tiến trình bash thoát (trap EXIT)   [['caller_memo', 'eod_bq_memo.2phOsH', 'eod_bq_memo.FRESH', 'other_tool.OLD']
+  CHẾT     B03_timeout_back_to_60                     eod_trading_report.sh            rc=[1] ✗ trần thời gian lời gọi portfolio_status ghim 600s (công cụ tỉ suất đo ~110-167s; 60s cũ là cắt ngang MỌI lượt có lệnh)   [['60']]
+  CHẾT     B04_stderr_not_forwarded                   eod_trading_report.sh            rc=[1] ✗ stderr của portfolio_status được CHUYỂN ra log: dòng `portfolio_status:` và dòng của công cụ tỉ suất có mặt, FutureWarning của thư viện thì không; k
+  CHẾT     B05_why_hardcoded_again                    eod_trading_report.sh            rc=[1] ✗ cổng tỉ suất CHẶN ⇒ why nêu đúng số vấn đề + mục ĐẦU TIÊN của khối chặn (bản cũ: 'delivery chưa đủ kênh (Discord/email)' cho mọi rc≠0)   [delivery c
+  CHẾT     B06_why_no_json_sanitize                   eod_trading_report.sh            rc=[1] ✗ why= an toàn để ghép vào chuỗi JSON: không nháy kép, không gạch chéo ngược, một dòng   [report_delivery_gate rc=1 — dòng cuối cổng in ra:    nhiều  
+  SẬP      B07_why_last_line_first_instead            eod_trading_report.sh            rc=[-1] 
+SỐNG: []
+SẬP: ['B07_why_last_line_first_instead']
+HỎNG: ['R03_stale_never_applied', 'D06_first_from_series_rows', 'P11_stop_blind_all_sleeves']

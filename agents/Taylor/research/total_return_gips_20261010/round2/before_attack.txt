@@ -1,0 +1,76 @@
+⚠️  WC_ROOT='/tmp/arch_rev/wcroot' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+
+##### H1-control: DRI unresolved, KL khớp 1.900
+   rc=1  PASS=False
+   | DRI     1900  ZaloPay      37.81          —        —          —            —  KHÔNG KỲ VỌNG
+   | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+   | ❌ CHẶN — 1 vấn đề:
+
+##### H1: DRI unresolved, báo cáo ghi KL 1.901 (lệch 1cp) +37,81%
+   rc=0  PASS=True
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ℹ️  1 vị thế KHÔNG có kỳ vọng nhưng báo cáo không công bố tỉ suất riêng của nó (không chặn — vẫn phải xử trước khi công bố):
+   |    • DRI (ZaloPay, KL=1900): sự kiện ex 2026-09-22 [UNVERIFIED] CHƯA giải (hệ VÔ ĐỊNH) — sổ broker lúc 2026-09-21T19:07:40: KL giữ nguyên 1,900, giá vốn/cp bị TRỪ 1,000.00đ
+   | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 1 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+##### H1b: DRI unresolved, bảng KHÔNG có cột KL
+   rc=0  PASS=True
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ℹ️  1 vị thế KHÔNG có kỳ vọng nhưng báo cáo không công bố tỉ suất riêng của nó (không chặn — vẫn phải xử trước khi công bố):
+   |    • DRI (ZaloPay, KL=1900): sự kiện ex 2026-09-22 [UNVERIFIED] CHƯA giải (hệ VÔ ĐỊNH) — sổ broker lúc 2026-09-21T19:07:40: KL giữ nguyên 1,900, giá vốn/cp bị TRỪ 1,000.00đ
+   | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+##### H1c: DRI ĐÃ giải, KL báo cáo 1.901, +37,81% (sai)
+   rc=0  PASS=True
+   | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+   | ⚠️  1 dòng CÒN GIỮ mã đó trên sổ broker nhưng KL báo cáo KHÔNG khớp KL đang giữ — KHÔNG được tính vào '0 dòng ngoài phạm vi' phía trên (đó là suy luận cho lệnh ĐÃ THỰC HIỆN, ca này vẫn ĐANG GIỮ). Nghi corp-action credit sớm giữa l
+   |    • DRI: báo cáo KL=1901 (+37.81%), broker đang giữ KL=1900
+
+##### H1d: DRI đã giải, cột 'Sinh lời (%)' +37,81% (sai)
+   rc=1  PASS=False
+   | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+   | ℹ️  1 vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng (không chặn — không công bố thì không sai được): DRI (ZaloPay, cổ tức 1,000đ/cp)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (bảng, dòng 5): ô '+37,81%' ở cột 'Sinh lời (%)' là một tỉ suất có dấu nhưng cổng KHÔNG nhận ra cột này là tỉ suất lãi/lỗ hay tỷ trọng ⇒ không kiểm được. Đặt tiêu đề cột là 'Lãi/lỗ (%)' nếu là tỉ suất từ-ngày-mua.
+
+steps S_MASK: [('cash+stock', 221.05)]
+   costPrice broker=12,390.00  tỉ suất thổi (costPrice+0)=+36.40%  tỉ suất đúng chuẩn=+33.45%
+
+##### H2: RATIO_NOISE nuốt sự kiện thật + lệnh mua che bước trừ
+   rc=1  PASS=False
+   | DRI     2000  ZaloPay      36.40          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2000): báo cáo công bố +36.40% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sổ broker lúc 2026-09-21T19:07:40: KL 1,900→2,000 (×1.0526) và tổng giá vốn GIẢM 221.05đ trên mỗi cp cũ — KHÔNG có sự kiện đã gi
+
+##### H2': KHÔNG sự kiện nào được phát hiện + lệnh mua che bước trừ
+   rc=1  PASS=False
+   | DRI     2000  ZaloPay      36.40          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2000): báo cáo công bố +36.40% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sổ broker lúc 2026-09-21T19:07:40: KL 1,900→2,000 (×1.0526) và tổng giá vốn GIẢM 221.05đ trên mỗi cp cũ — KHÔNG có sự kiện đã gi
+
+steps S_OTH: [('other', 0.0)]
+
+##### H2b: không sự kiện + BÁN bớt cùng cặp bản ghi với bước trừ ('other')
+   rc=0  PASS=True
+   | DRI     1500  ZaloPay      37.81      37.81    -0.00       0.00    12,263.16  OK
+   | ✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.
+
+   pre-ex: thổi=+19.45%  đúng=+10.94%
+
+##### H3: pre-ex (chốt 21/09) + mua thêm cùng ngày che bước trừ
+   rc=1  PASS=False
+   | DRI     2000  ZaloPay      19.45          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2000): báo cáo công bố +19.45% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sổ broker lúc 2026-09-21T19:07:40: KL 1,900→2,000 (×1.0526) và tổng giá vốn GIẢM 221.05đ trên mỗi cp cũ — KHÔNG có sự kiện đã gi
+
+##### H4: bước trừ 20/07 (không sự kiện nào nhận) + vendor khai cổ tức 1.000đ ex 22/09 (asof 18/09)
+   blockers: {} | addback: {'DRI': 1000.0} | out: {}
+   note: DRI: broker đã trừ 1,000đ/cp khỏi giá vốn lúc 2026-07-20T19:07:40 cho cổ tức ex 2026-09-22 (vendor khai 1,000đ/cp) — ex-date SAU 2026-09-18 ⇒ cộng lại giá vốn, CHƯA tính thu nhập (giá còn nguyên quyền)
+
+##### H5: blank read (19:07:16) rồi bản ghi kế tiếp đã có lệnh mua 100cp
+   series sau _drop_blank_reads: [('07-08T15:00', 2400.0), ('07-09T15:00', 2400.0), ('07-20T19:06', 2400.0), ('07-20T19:07', 0.0), ('07-21T09:20', 2500.0), ('10-09T23:30', 2500.0)]
+   out: {} | blockers: {} | notes: []
+   kỳ vọng cổng cấp: -11.35%  vs đúng: -11.11%

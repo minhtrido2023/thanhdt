@@ -1,0 +1,21 @@
+CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-02.md | chốt 2026-10-02 | tài khoản ZaloPay | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   ZaloPay  giá vốn thô     272,819,585  lãi/lỗ tổng      16,080,292     5.89%
+   (vị thế excluded — NGOÀI tổng ở trên; giá vốn = sổ broker + cổ tức đã giải, không có journal lệnh mua: không thấy dòng bảng (mã, KL) nào của DGC (ZaloPay))
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · ZaloPay · BID ex 2026-07-17: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0684 × phần hưởng 0.7500 = 315.88đ/cp trên KL đang giữ
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+⚠️  6 vị thế CÓ cổ tức và mã CÓ tỉ suất đứng cạnh trong báo cáo mà cổng KHÔNG kiểm (dòng không phải bảng có cột KL, cũng không khớp mẫu văn xuôi 'MÃ ±x%') — người soạn PHẢI tự đối chiếu với kỳ vọng:
+   • BID (ZaloPay, KL=27): mã CÓ tỉ suất ở dòng 26 ('BID … -5.8%') mà cổng KHÔNG kiểm — kỳ vọng -7.38% (cổ tức GỘP 316đ/cp)
+   • CTG (ZaloPay, KL=50): mã CÓ tỉ suất ở dòng 26 ('CTG … -6.8%') mà cổng KHÔNG kiểm — kỳ vọng -7.38% (cổ tức GỘP 450đ/cp)
+   • DGC (ZaloPay, KL=10000): mã CÓ tỉ suất ở dòng 26 ('DGC … -11.0%') mà cổng KHÔNG kiểm — kỳ vọng -9.79% (cổ tức GỘP 8,000đ/cp)
+   • DRI (ZaloPay, KL=1900): mã CÓ tỉ suất ở dòng 32 ('DRI … +28.0%') mà cổng KHÔNG kiểm — kỳ vọng +29.31% (cổ tức GỘP 1,000đ/cp)
+   • NCT (ZaloPay, KL=373): mã CÓ tỉ suất ở dòng 29 ('NCT … -3.5%') mà cổng KHÔNG kiểm — kỳ vọng -3.50% (cổ tức GỘP 8,000đ/cp)
+   • SAB (ZaloPay, KL=744): mã CÓ tỉ suất ở dòng 29 ('SAB … -2.6%') mà cổng KHÔNG kiểm — kỳ vọng -4.53% (cổ tức GỘP 3,000đ/cp)
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

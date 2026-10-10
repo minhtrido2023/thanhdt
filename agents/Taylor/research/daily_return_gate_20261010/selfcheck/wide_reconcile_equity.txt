@@ -1,0 +1,42 @@
+1. realized theo lô-đang-sống
+  ✓ bình quân 11.000, bán 150@13.000 ⇒ +300.000
+  ✓ không có phần untraced
+  ✓ buy/sell value
+2. hằng đẳng thức realized + unrealized = Σbán − Σmua + MTM (có lô reset kiểu LPB)
+  ✓ realized = 900×2.000 + 400×2.000 = 2.600.000
+  ✓ hằng đẳng thức đóng tới đồng
+  ✓ lô còn lại khớp CostBook của verify_account_snapshot (500 @51.000)
+3. bán legacy vượt KL trace được ⇒ KHÔNG bịa giá vốn
+  ✓ realized = 0
+  ✓ untraced = 20.000.000, gắn đúng mã
+  ✓ bán 500 khi chỉ trace 300: realized 300×1.000, untraced 200×21.000
+4. corp-action: mua trước ex-date, bán sau ex-date (chia 1:2)
+  ✓ 200×11.000 − 2.000.000 = +200.000, không untraced
+5. cổ tức ròng — số thật MBB 17/07/2026 (gộp 2.400.000, thuế 5% lúc chi trả)
+  ✓ ngoài cửa sổ bị loại, gộp 3.255.000
+  ✓ đã chi trả 2.400.000, thuế 120.000, ròng 3.135.000
+  ✓ còn nguyên phải thu ⇒ chưa trừ thuế (DGC 09-11)
+6. lãi margin ước tính theo ngày lịch, carry-forward
+  ✓ ngày 1 nợ 0, ngày 2-3 nợ 365tr ⇒ 2×125.000 = 250.000
+7. end-to-end main() trên fixture tạm + lọc account_no (§12)
+  ✓ realized đọc lại từ fill đúng account = 3.000.000
+  ✓ cổ tức gộp 1.000.000 (chưa chi trả ⇒ chưa thuế); số dư account KHÁC không lọt vào
+  ✓ cash vế phải = đúng bản ghi của account mình
+  ✓ Σmua/Σbán chỉ của account mình
+  ✓ SAU sửa: residual = 0, rc=0
+  ✓ CHỨNG MINH NGƯỢC: công thức cũ lệch đúng −(realized + cổ tức)
+  ✓ công thức cũ giữ nguyên unrealized/fee (không đổi)
+  ✓ diễn giải: phí trên doanh số + thuế bán được in
+  ✓ diễn giải: phí thật mua×70tr + bán×33tr − phí vế trái; thuế 0,1%×33tr
+8. vốn seed + lô legacy (aria-F2): account_seed_capital.json, fill broker xác nhận dnse_raw thiếu
+  ✓ phí thật dnse_fee_rates: mua/bán 0,097% (không còn 0,075%)
+  ✓ vốn đầu kỳ = nav seed 35tr
+  ✓ realized legacy theo giá vốn MTM-seed: 400×2.000 + 100×3.000 = 1.100.000, untraced 0
+  ✓ legacy còn giữ: MTM 500×31.000 (broker ĐÚNG account), unrealized +500.000
+  ✓ đẳng thức đóng 0, rc=0
+  ✓ CHỨNG MINH NGƯỢC: thiếu fill broker xác nhận ⇒ cảnh báo KL + residual = −(tiền bán 100×33.000 − MTM 100×31.000)
+  ✓ truyền --starting-capital ⇒ BỎ QUA seed (hành vi cũ): legacy untraced, không cộng MTM legacy
+  ✓ seed account_no lệch ⇒ từ chối rc=2 (§12)
+  ✓ không --starting-capital và seed không có entry ⇒ rc=2
+
+32 PASS, 0 FAIL

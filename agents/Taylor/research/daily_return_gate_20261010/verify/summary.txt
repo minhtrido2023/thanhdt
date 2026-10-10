@@ -1,0 +1,17 @@
+VERIFY trial_ZaloPay_2026-10-02 rc=0 121s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày ('MÃ | 0 mục
+VERIFY trial_ZaloPay_2026-10-09 rc=0 54s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày ('MÃ | 0 mục
+VERIFY trial_SpaceX_2026-10-02 rc=0 47s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày ('MÃ | 0 mục
+VERIFY trial_SpaceX_2026-10-09 rc=0 40s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày ('MÃ | 0 mục
+TAMPER ZaloPay_daily_report_2026-10-02.md: VPI -5.84% -> -4.34%
+VERIFY tamper_ZaloPay_2026-10-02 rc=1 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày ('MÃ | 1 mục
+TAMPER SpaceX_daily_report_2026-10-02.md: VPI -5.73% -> -4.23%
+VERIFY tamper_SpaceX_2026-10-02 rc=1 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày ('MÃ | 1 mục
+VERIFY old_ZaloPay_2026-10-01 rc=1 68s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 26 dòng vị thế dạng báo cáo ngày ('MÃ | 4 mục
+VERIFY old_SpaceX_2026-10-01 rc=0 49s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ  | 1 mục
+VERIFY old_ZaloPay_2026-10-02 rc=1 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày ('MÃ | 18 mục
+VERIFY old_SpaceX_2026-10-02 rc=1 34s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 15 dòng vị thế dạng báo cáo ngày ('MÃ | 13 mục
+VERIFY old_ZaloPay_2026-10-09 rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ  | 0 mục
+VERIFY old_SpaceX_2026-10-09 rc=0 35s | Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ  | 0 mục
+VERIFY weekly_SpaceX_weekly_report_2026-10-05_to_2026-10-09 rc=0 35s | Đã kiểm 13 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ | 0 mục
+VERIFY weekly_ZaloPay_weekly_report_2026-10-05_to_2026-10-09 rc=0 35s | Đã kiểm 13 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ | 0 mục
+ALLDONE

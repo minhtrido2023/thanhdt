@@ -1,0 +1,94 @@
+❌ exposure 60,000,000 VND > trần per-name 5% NAV (50,000,000 VND, NAV=1,000,000,000 @ 2026-08-28).
+❌ sleeve tổng sẽ là 110,000,000 VND > trần 10% NAV (100,000,000 VND) — case khác đang active: 100,000,000 VND.
+❌ f=2.0 không phải số hữu hạn ≤ hard-cap 1.3 (đồng quy ước capit_margin_lever, KHÔNG dùng broker-max 2,0).
+❌ exposure 20,000,000 VND > trần 10% ADV-3-tháng (10,000,000 VND, ADV=100,000,000/ngày asof=2026-08-28).
+❌ --marginability-confirmed-by 'mafee' không phải một xác nhận thật (chuỗi giữ chỗ/tên tác nhân tự động). Cần Mafee xác nhận marginable TỪNG CASE trước khi arm (chính sách §Vận hành).
+❌ FAIL-SAFE: không đọc được NAV thật (khong doc duoc NAV) — KHÔNG arm khi thiếu dữ liệu.
+❌ FAIL-SAFE: khong co du lieu ADV — KHÔNG arm khi thiếu ADV.
+❌ account 'ZaloPay' ngoài phạm vi chính sách (chỉ SpaceX có margin) — KHÔNG arm.
+❌ --arm-price=nan không phải số hữu hạn dương (nan/inf/≤0) — cấm arm: mọi phép chia dùng arm_price ở cmd_check_exits sẽ ÂM THẦM cho drawdown =nan và bị bỏ qua khỏi breach check (§29 coding_guidelines).
+❌ --arm-price=inf không phải số hữu hạn dương (nan/inf/≤0) — cấm arm: mọi phép chia dùng arm_price ở cmd_check_exits sẽ ÂM THẦM cho drawdown =nan và bị bỏ qua khỏi breach check (§29 coding_guidelines).
+❌ --arm-price=-100.0 không phải số hữu hạn dương (nan/inf/≤0) — cấm arm: mọi phép chia dùng arm_price ở cmd_check_exits sẽ ÂM THẦM cho drawdown =nan và bị bỏ qua khỏi breach check (§29 coding_guidelines).
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: armed_at=None rỗng hoặc không phải ngày ISO hợp lệ
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: armed_at='unknown-date' rỗng hoặc không phải ngày ISO hợp lệ
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: FileNotFoundError: registry corp-action không tồn tại: /tmp/dmg_selfcheck_nsa1i_7w/corp_actions_R2a_absent.json
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+✅ ĐÃ ARM TV1 — exposure 50,000,000 VND (5.00% NAV, 5.00% ADV), f=1.3
+✅ ĐÃ ARM DGC — exposure 50,000,000 VND (5.00% NAV, 5.00% ADV), f=1.3
+✅ ĐÃ ARM TV1 — exposure 30,000,000 VND (3.00% NAV, 3.00% ADV), f=1.3
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — TV1: giá hiện tại 16,000 vs giá arm → drawdown -20.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+✅ ĐÃ ARM TV1 — exposure 30,000,000 VND (3.00% NAV, 3.00% ADV), f=1.3
+OK — 1 case active, không case nào chạm -20%.
+✅ ĐÃ EXIT TV1 — lý do: test chot
+✅ ĐÃ ARM JJJ — exposure 1,000,000 VND (0.10% NAV, 0.10% ADV), f=1.3
+⚠ CẢNH BÁO: bản ghi arm đã ghi nhưng dấu vết bus/Discord không đầy đủ — báo lại kênh discretionary_stocks bằng tay.
+✅ ĐÃ ARM KKK — exposure 1,000,000 VND (0.10% NAV, 0.10% ADV), f=1.3
+⚠ CẢNH BÁO: bản ghi arm đã ghi nhưng dấu vết bus/Discord không đầy đủ — báo lại kênh discretionary_stocks bằng tay.
+  [CORPACTION] VPB: registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > 2026-09-01 ⇒ hệ số ×1.300000 (trước đó ×1.000000)
+OK — 1 case active, không case nào chạm -20%.
+OK — 1 case active, không case nào chạm -20%.
+  [CORPACTION] VPB: registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > 2026-09-01 ⇒ hệ số ×1.300000 (trước đó ×1.000000)
+OK — 1 case active, không case nào chạm -20%.
+  [CORPACTION] VPB: registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > 2026-09-01 ⇒ hệ số ×1.430000 (trước đó ×1.300000)
+OK — 1 case active, không case nào chạm -20%.
+OK — 1 case active, không case nào chạm -20%.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: armed_at=None rỗng hoặc không phải ngày ISO hợp lệ
+⚠ 1 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: armed_at='unknown-date' rỗng hoặc không phải ngày ISO hợp lệ
+⚠ 1 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — TV1: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ 2 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc registry: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1. Drawdown dưới đây CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh báo giả). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ 1 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+  [CORPACTION] VPB: registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > 2026-09-01 ⇒ hệ số ×1.300000 (trước đó ×1.000000)
+OK — 1 case active, không case nào chạm -20%.
+  [CORPACTION] VPB: registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > 2026-09-01 ⇒ hệ số ×1.000000 (trước đó ×1.300000)
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 19,000 vs giá arm → drawdown -26.9% ≤ -20% (quy đổi corp-action: arm_price 26,000 → 26,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: FileNotFoundError: registry corp-action không tồn tại: /tmp/dmg_selfcheck_nsa1i_7w/corp_actions_R2a_absent.json
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc registry: FileNotFoundError: registry corp-action không tồn tại: /tmp/dmg_selfcheck_nsa1i_7w/corp_actions_R2a_absent.json. Drawdown dưới đây CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh báo giả). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ 1 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+  [CORPACTION] VPB: registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > 2026-09-01 ⇒ hệ số ×1.300000 (trước đó ×1.000000)
+OK — 1 case active, không case nào chạm -20%.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc registry: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1. Drawdown dưới đây CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh báo giả). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — TV1: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong cho arm_date 2026-09-01
+⚠ NANCASE: arm_price=nan hoặc corp_action_multiplier=1.0 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ ZEROMULT: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+⚠ ZEROMULT: arm_price=20000.0 hoặc corp_action_multiplier=0.0 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ NEGPRICE: arm_price=-20000.0 hoặc corp_action_multiplier=1.0 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ NEGMULT: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+⚠ NEGMULT: arm_price=20000.0 hoặc corp_action_multiplier=-1.3 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+❌ f=nan không phải số hữu hạn ≤ hard-cap 1.3 (đồng quy ước capit_margin_lever, KHÔNG dùng broker-max 2,0).
+⚠ 2 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 19,500 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 26,000 → 26,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 19,500 vs giá arm → drawdown -50.0% ≤ -20% (quy đổi corp-action: arm_price 39,000 → 39,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ VPB: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong cho arm_date 2026-09-01
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc registry: RuntimeError: gia lap corp_actions.json hong cho arm_date 2026-09-01. Drawdown dưới đây CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh báo giả). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — VPB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ 2 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ NANCASE: arm_price=nan hoặc corp_action_multiplier=1.0 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ 1 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — REALCASE: giá hiện tại 16,000 vs giá arm → drawdown -20.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ ZEROMULT: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+⚠ ZEROMULT: arm_price=20000.0 hoặc corp_action_multiplier=0.0 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ 1 case active, 2 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ NEGPRICE: arm_price=-20000.0 hoặc corp_action_multiplier=1.0 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ 1 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ NEGMULT: lỗi đọc corp-action registry khi tính multiplier — KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). Lỗi thật: RuntimeError: gia lap corp_actions.json hong: Expecting value: line 1 column 1
+⚠ NEGMULT: arm_price=20000.0 hoặc corp_action_multiplier=-1.3 không phải số hữu hạn dương — KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.
+⚠ 1 case active, 2 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+⚠ UNCHECKED: DNSE khong tra duoc gia (test)
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — BREACHER: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+⚠ 2 case active, 1 case KHÔNG kiểm được breach lượt này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — MISSINGKEY: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+🚨 **KỶ LUẬT THOÁT −20% CHẠM** — HEALTHYSIB: giá hiện tại 15,000 vs giá arm → drawdown -25.0% ≤ -20% (quy đổi corp-action: arm_price 20,000 → 20,000, hệ số ×1.000000). Chính sách yêu cầu de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.
+
+======================================================================
+PASS=150 FAIL=0
+Tat ca selfcheck PASS.

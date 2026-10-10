@@ -1,0 +1,7 @@
+TRIAL ZaloPay 2026-10-02 portfolio_status rc=0 123s | gate(memo ấm) rc=0 35s | memo files=26
+TRIAL SpaceX 2026-10-02 portfolio_status rc=0 55s | gate(memo ấm) rc=0 34s | memo files=29
+TRIAL ZaloPay 2026-10-09 portfolio_status rc=0 100s | gate(memo ấm) rc=0 35s | memo files=20
+TRIAL SpaceX 2026-10-09 portfolio_status rc=0 54s | gate(memo ấm) rc=0 34s | memo files=23
+TRIAL-NOMEMO ZaloPay 2026-10-02 gate rc=0 125s
+TRIAL-NOMEMO SpaceX 2026-10-02 gate rc=0 117s
+ALLDONE

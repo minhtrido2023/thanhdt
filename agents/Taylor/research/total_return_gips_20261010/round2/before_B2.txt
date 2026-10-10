@@ -1,0 +1,8 @@
+MBB  100cp · giá vốn 25,000.00 · giá 2026-07-31 22,500
+  · ex-date 2026-07-09: 1,000đ/cp  [CASH_CONFIRMED] giải từ tiền mặt broker thật (1 phương trình / 1 ẩn: MBB@2026-07-09)
+  Lãi/lỗ do GIÁ        :        -250,000  (-10.00%)
+  Cổ tức GỘP           :         100,000  (1,000.00đ/cp trên KL đang giữ)
+  − thuế TNCN 5%      :          -5,000  (khấu trừ tại nguồn lúc chi trả)
+  = Cổ tức RÒNG        :          95,000  (950.0đ/cp thực nhận)
+  Tổng (gộp, tham chiếu):       -150,000  (-6.00%)
+  TỔNG RÒNG (dùng báo cáo):     -155,000  (-6.20%)

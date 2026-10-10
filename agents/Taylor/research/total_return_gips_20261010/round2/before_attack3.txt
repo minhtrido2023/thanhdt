@@ -1,0 +1,4 @@
+ứng viên: [('2026-09-08', '0.71%', 100.34), ('2026-09-16', '0.70%', 100.4), ('2026-09-22', '0.75%', 110.0), ('2026-09-25', '0.67%', 98.01), ('2026-09-30', '0.64%', 101.91), ('2026-10-06', '0.61%', 101.83), ('2026-10-08', '0.60%', 95.81)] amp=0.70%
+(a) vendor có dòng   : CASH_CONFIRMED 110.0 | resolved True
+(b) vendor 0 dòng     : RATIO_NOISE | resolved True | NHIỄU tỉ số, KHÔNG phải sự kiện: vendor `corporate_action` tra được và xác nhận 0 dòng ở ex 2026-09-22; chuỗi Close/Price của chính mã này có cú GIẢM 
+    build_position_return: cổ tức/cp = 0.0 | unverified: 0 | tỉ suất 27.42% (đúng: 28.21%)

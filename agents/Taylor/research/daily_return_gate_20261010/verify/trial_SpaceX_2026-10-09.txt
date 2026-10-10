@@ -1,0 +1,27 @@
+CỔNG TỈ SUẤT — SpaceX_daily_report_2026-10-09.md | chốt 2026-10-09 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+VPI        —   SpaceX     -11.02     -11.02     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 24)
+VPB        —   SpaceX       8.08       8.08     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+MBB        —   SpaceX      -7.69      -7.69     0.00     656.72            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+MSB        —   SpaceX       7.82       7.82     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+VIB        —   SpaceX       0.22       0.22    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+TPB        —   SpaceX     -18.79     -18.79     0.00     434.78            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+PVT        —   SpaceX      47.37      47.37     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+SIP        —   SpaceX       4.98       4.98     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+VNM        —   SpaceX      -1.54      -1.54    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+SAB        —   SpaceX      -3.42      -3.42    -0.00   3,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+NCT        —   SpaceX      -3.24      -3.24     0.00   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+DRI        —   SpaceX      34.59      34.59    -0.00   1,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 33)
+TV1        —   SpaceX       2.86       2.86    -0.00   1,500.00            —  OK  (dòng vị thế báo cáo ngày, dòng 33)
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     449,645,405  lãi/lỗ tổng      41,259,265     9.18%
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+   · SpaceX · TPB ex 2026-10-02: 500đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 1.0000 = 434.78đ/cp trên KL đang giữ
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 13 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

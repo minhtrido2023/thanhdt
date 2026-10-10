@@ -1,0 +1,419 @@
+1) Công thức nhân (KHÔNG phải hiệu số) suy đúng cổ tức/cp:
+  [PASS] MBB div/share: got=1,000.00 want=1,000.00
+  [PASS] BID div/share: got=450.00 want=450.00
+  [PASS] CTG div/share: got=450.00 want=450.00
+  [PASS] NCT div/share: got=8,000.00 want=8,000.00
+  [PASS] SAB div/share: got=3,000.00 want=3,000.00
+2) Hiệu số Close−Price KHÔNG bằng cổ tức (chứng minh vì sao phải dùng tỉ số):
+  [PASS] SAB hiệu số tại 24/07 lệch so với 3.000: got=2,990.00 want=2,990.00
+3) Tỉ suất tổng của vị thế (số thật SpaceX 31/07) — ba mức: giá / gộp / ròng sau thuế:
+  [PASS] NCT % chỉ-giá: got=-11.62 want=-11.61
+  [PASS] NCT % tổng GỘP: got=-3.14 want=-3.14
+  [PASS] NCT % tổng RÒNG (sau thuế 5%): got=-3.56 want=-3.56
+  [PASS] SAB % chỉ-giá: got=-8.06 want=-8.06
+  [PASS] SAB % tổng GỘP: got=-1.73 want=-1.73
+  [PASS] SAB % tổng RÒNG (sau thuế 5%): got=-2.04 want=-2.04
+  [PASS] MBB % chỉ-giá: got=-12.96 want=-12.96
+  [PASS] MBB % tổng GỘP: got=-9.09 want=-9.09
+  [PASS] MBB % tổng RÒNG (sau thuế 5%): got=-9.28 want=-9.28
+4) Tổng danh mục SpaceX 31/07 (giá vốn 986.725.443):
+  [PASS] lãi/lỗ gồm cổ tức GỘP: got=-50,435,443.00 want=-50,435,443.00
+  [PASS] % tổng GỘP: got=-5.11 want=-5.11
+  [PASS] thuế TNCN 5% trên 12.175.000: got=608,750.00 want=608,750.00
+  [PASS] lãi/lỗ gồm cổ tức RÒNG: got=-51,044,193.00 want=-51,044,193.00
+  [PASS] % tổng RÒNG: got=-5.17 want=-5.17
+5) Vị thế KHÔNG có cổ tức thì hai con số phải trùng khít:
+  [PASS] PVT % chỉ-giá == % tổng: got=0.00 want=0.00
+6) Cờ chưa-xác-minh phải nổi khi thiếu đối soát broker:
+  [PASS] số sự kiện UNVERIFIED: got=1.00 want=1.00
+7) TẦNG 2 giải ĐÚNG cả 6 sự kiện tháng 7 từ TIỀN BROKER THẬT (không dùng tỉ số):
+  [PASS] MBB per_share: got=1,000.00 want=1,000.00
+  [PASS] MBB kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] BID per_share: got=450.00 want=450.00
+  [PASS] BID kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] CTG per_share: got=450.00 want=450.00
+  [PASS] CTG kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] VCB per_share: got=450.00 want=450.00
+  [PASS] VCB kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] NCT per_share: got=8,000.00 want=8,000.00
+  [PASS] NCT kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] SAB per_share: got=3,000.00 want=3,000.00
+  [PASS] SAB kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+8) Ngày 23/07 CTG+VCB trùng ex-date: chỉ tách được nhờ hệ 2 tài khoản (2pt/2ẩn):
+  [PASS] CTG: got=450.00 want=450.00
+  [PASS] VCB: got=450.00 want=450.00
+     kiểm tra ngược: 2300·450+1300·450 và 1050·450+800·450 phải khớp delta thật
+  [PASS] SpaceX 22/07: got=1,620,000.00 want=1,620,000.00
+  [PASS] ZaloPay 22/07: got=832,500.00 want=832,500.00
+9) HỆ VÔ ĐỊNH (1 tài khoản, 2 ẩn) ⇒ giữ UNVERIFIED, KHÔNG lấp bằng ước lượng tỉ số:
+  [PASS] CTG kind: got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] CTG cash_per_share (không được lọt vào báo cáo): got=0.00 want=0.00
+     lý do ghi lại: hệ VÔ ĐỊNH (1 phương trình / 2 ẩn: CTG@2026-07-23, VCB@2026-07-23) — n…
+10) Ước lượng tỉ số SAI ⇒ hạ về UNVERIFIED (tầng 1 là lưới an toàn, không phải nguồn số):
+  [PASS] NCT kind khi tỉ số lệch xa: got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] NCT cash_per_share: got=0.00 want=0.00
+11) Số lượng cổ phiếu đổi tại ex-date ⇒ STOCK_SUSPECTED, KHÔNG cộng như tiền:
+  [PASS] XXX kind: got='STOCK_SUSPECTED' want='STOCK_SUSPECTED'
+  [PASS] XXX cash_per_share: got=0.00 want=0.00
+12) Delta ÂM (chi trả khoản phải thu) KHÔNG được coi là sự kiện mới:
+  [PASS] BID per_share vẫn đúng 450 (delta âm 17/07 đã bị loại): got=450.00 want=450.00
+13) DƯƠNG TÍNH GIẢ đã biết: MUA/BÁN THẬT đúng cửa sổ ex-date cũng làm đổi openQuantity
+  [PASS] CTG bị gắn nhầm STOCK_SUSPECTED khi vừa mua thêm: got='STOCK_SUSPECTED' want='STOCK_SUSPECTED'
+  [PASS] → cash_per_share = 0 (fail-closed: THIẾU cổ tức, không bao giờ THỪA): got=0.00 want=0.00
+14) Tổng cộng lại phải khớp tiền cổ tức thật từng tài khoản (GỘP, như sổ broker ghi):
+  [PASS] SpaceX tổng: got=12,175,000.00 want=12,175,000.00
+  [PASS] ZaloPay tổng (không có MBB — mua sau ex-date 09/07): got=6,453,500.00 want=6,453,500.00
+  [PASS] SpaceX RÒNG sau thuế 5%: got=11,566,250.00 want=11,566,250.00
+  [PASS] ZaloPay RÒNG sau thuế 5%: got=6,130,825.00 want=6,130,825.00
+15) GHIM BẰNG CHỨNG THỰC NGHIỆM: ca chi trả THẬT duy nhất (MBB, SpaceX, 17/07/2026)
+    — đây là thứ chứng minh `cashDividendReceiving` là GỘP và thuế trừ lúc CHI TRẢ.
+  [PASS] hằng đẳng thức totalCash 16/07: got=305,388,637.00 want=305,388,637.00
+  [PASS] hằng đẳng thức totalCash 17/07: got=3,160,463.00 want=3,160,463.00
+  [PASS] khoản phải thu xoá = GỘP 2400cp×1.000đ: got=2,400,000.00 want=2,400,000.00
+  [PASS] tiền THẬT vào availableCash: got=2,280,000.00 want=2,280,000.00
+  [PASS] thuế suy ra từ tiền thật (%): got=5.00 want=5.00
+  [PASS] khớp đúng hằng số PIT_DIVIDEND_RATE: got=0.05 want=0.05
+  [PASS] rút Trứng vàng == withdrawableCash 16/07 (không phải số ép cho khớp): got=302,108,211.00 want=302,108,211.00
+16) CỔ TỨC TIỀN + CỔ PHIẾU CÙNG EX-DATE, broker credit sớm ⇒ per_share vẫn ĐÚNG:
+     KL cuối ngày cum ĐÃ credit (1.386/1.512) nhưng KL hưởng quyền là 1.100/1.200; tiền thật 1,100,000 / 1,200,000
+  [PASS] ZZZ per_share (chân TIỀN MẶT): got=1,000.00 want=1,000.00
+  [PASS] ZZZ kind/source: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] ZZZ cash_per_share được phép vào báo cáo: got=1,000.00 want=1,000.00
+     MUTATION — đảo bản vá (dùng KL cuối ngày 1.386/1.512 như trước):
+  [PASS] → per_share KHÔNG còn bằng 1.000 (bản cũ giải ra thấp hơn ~hệ số sự kiện): got=1.00 want=1.00
+  [PASS] → và fail-closed về 0 (lưới SANITY bắt được, không ra số sai): got=0.00 want=0.00
+17) LÁ CHẮN: credit sớm làm KL hai ngày BẰNG NHAU ⇒ lá chắn CŨ mù, lá chắn MỚI bật:
+  [PASS] KL ngày cum == KL ex-date (điều kiện làm lá chắn cũ câm): got=True want=True
+  [PASS] ZZZ kind (thuần cổ phiếu, không có tiền) = STOCK_SUSPECTED: got='STOCK_SUSPECTED' want='STOCK_SUSPECTED'
+  [PASS] ZZZ cash_per_share: got=0.00 want=0.00
+  [PASS] ZZZ share_multiplier ghi lại đúng hệ số sự kiện: got=1.26 want=1.26
+18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:
+  [PASS] ZZZ kind: got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] ZZZ cash_per_share: got=0.00 want=0.00
+  [PASS] YYY (mã LÀNH cùng ngày) cũng KHÔNG được giải — hệ số ẩn kia không biết: got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] YYY cash_per_share: got=0.00 want=0.00
+  [PASS] → nếu coi ẩn-không-biết như 0 thì YYY sẽ được công bố 502đ/cp thay vì 500 (sai 0,4%, lọt cả dư số lẫn SANITY): got=1.00 want=1.00
+     lý do ghi lại: phương trình SpaceX 2026-09-23 BỊ BỎ — có ẩn không xác định được KL hưởng quyền (ZZZ: Spac…
+19) `_cash_ratio_ref` — ước lượng tỉ số phải TRỪ phần giá tụt do chân cổ phiếu:
+  [PASS] sự kiện TIỀN+CỔ PHIẾU: ref ≈ đúng chân tiền 1.000đ/cp: got=1,000.00 want=1,000.00
+  [PASS] sự kiện THUẦN cổ phiếu: ref = 0 ⇒ mọi nghiệm dương bị từ chối: got=-0.00 want=0.00
+  [PASS] sự kiện THUẦN tiền mặt: ref KHÔNG đổi một đồng so với bản cũ: got=1,000.00 want=1,000.00
+20) DỮ LIỆU THẬT — `credit_frame` trên dnse_raw của CẢ 2 tài khoản (§12):
+    7 sự kiện trong data/corp_actions.json; KL hưởng quyền phải KHÁC nhau giữa 2 TK.
+  [PASS] BID 2026-08-14 ZaloPay status: got='pre_credit' want='pre_credit'
+  [PASS] BID 2026-08-14 ZaloPay KL hưởng quyền: got=400.00 want=400.00
+  [PASS] BID 2026-08-14 SpaceX status: got='pre_credit' want='pre_credit'
+  [PASS] BID 2026-08-14 SpaceX KL hưởng quyền: got=1,100.00 want=1,100.00
+  [PASS] MSB 2026-08-27 ZaloPay status: got='pre_credit' want='pre_credit'
+  [PASS] MSB 2026-08-27 ZaloPay KL hưởng quyền: got=200.00 want=200.00
+  [PASS] MSB 2026-08-27 SpaceX status: got='pre_credit' want='pre_credit'
+  [PASS] MSB 2026-08-27 SpaceX KL hưởng quyền: got=500.00 want=500.00
+  [PASS] VHM 2026-08-05 ZaloPay status: got='pre_credit' want='pre_credit'
+  [PASS] VHM 2026-08-05 ZaloPay KL hưởng quyền: got=300.00 want=300.00
+  [PASS] VHM 2026-08-05 SpaceX status: got='pre_credit' want='pre_credit'
+  [PASS] VHM 2026-08-05 SpaceX KL hưởng quyền: got=500.00 want=500.00
+  [PASS] VIB 2026-09-09 ZaloPay status: got='pre_credit' want='pre_credit'
+  [PASS] VIB 2026-09-09 ZaloPay KL hưởng quyền: got=200.00 want=200.00
+  [PASS] VIB 2026-09-09 SpaceX status: got='pre_credit' want='pre_credit'
+  [PASS] VIB 2026-09-09 SpaceX KL hưởng quyền: got=500.00 want=500.00
+  [PASS] VIX 2026-08-19 ZaloPay status: got='pre_credit' want='pre_credit'
+  [PASS] VIX 2026-08-19 ZaloPay KL hưởng quyền: got=100.00 want=100.00
+  [PASS] VIX 2026-08-19 SpaceX status: got='pre_credit' want='pre_credit'
+  [PASS] VIX 2026-08-19 SpaceX KL hưởng quyền: got=400.00 want=400.00
+  [PASS] VPB 2026-09-23 ZaloPay status: got='pre_credit' want='pre_credit'
+  [PASS] VPB 2026-09-23 ZaloPay KL hưởng quyền: got=1,200.00 want=1,200.00
+  [PASS] VPB 2026-09-23 SpaceX status: got='pre_credit' want='pre_credit'
+  [PASS] VPB 2026-09-23 SpaceX KL hưởng quyền: got=1,100.00 want=1,100.00
+  [PASS] §12: số sự kiện mà 2 tài khoản cho KL KHÁC nhau (phải > 0): got=1.00 want=1.00
+  [PASS] MBB 10/08 SpaceX: broker CHƯA credit trong ngày cum ⇒ KL cuối ngày là đúng: got='eod' want='eod'
+  [PASS] MBB 10/08 SpaceX KL hưởng quyền = 1.100 (đã trừ lệnh BÁN 400 trong phiên cum): got=1,100.00 want=1,100.00
+21) KÊNH GIÁ — bắt ca kênh KHỐI LƯỢNG mù (credit rơi trước bản ghi vị thế gần nhất).
+    Số THẬT: Price(BQ, hệ cum) và marketPrice(broker) đọc từ dnse_raw cùng ngày.
+  [PASS] BID 14/08 giá ĐÃ sang hệ mới: got='unknown' want='unknown'
+  [PASS] VPB 23/09 giá ĐÃ sang hệ mới: got='unknown' want='unknown'
+  [PASS] VHM 05/08 giá ĐÃ sang hệ mới: got='unknown' want='unknown'
+  [PASS] MBB 10/08 giá CÒN ở hệ cum: got='eod' want='eod'
+  [PASS] thuần tiền mặt (m=1): got='eod' want='eod'
+  [PASS] broker không trả marketPrice: got='eod' want='eod'
+     ⚠️ ca cuối: thiếu marketPrice ⇒ kênh giá CÂM, chỉ còn kênh khối lượng bảo vệ —
+        ghi lại để không ai tưởng 'eod' ở đó là một kết luận dương tính.
+22) `_event_multiplier` — sự kiện DIV cũng mang `exercise_ratio` nhưng đó là tỉ lệ
+    cổ tức trên MỆNH GIÁ, KHÔNG phải tỉ lệ cổ phiếu (ca thật DRI 22/09: 0,1 = 1.000đ):
+  [PASS] DIV ratio 0,1 (DRI 22/09) ⇒ KHÔNG được thành hệ số 1,1: got=1.00 want=1.00
+  [PASS] ISS ratio 0,2604104 (VPB 24/09) ⇒ hệ số 1,2604104: got=1.26 want=1.26
+  [PASS] sự kiện KHÔNG điều chỉnh giá ⇒ 1,0: got=1.00 want=1.00
+  [PASS] không có sự kiện ⇒ 1,0: got=1.00 want=1.00
+  [PASS] ratio hỏng kiểu ⇒ 1,0 (không ném lỗi giữa đường dựng báo cáo): got=1.00 want=1.00
+23) `_ledger_event` — chỉ nhận dòng CONFIRMED, bỏ REVOKED, bỏ sự kiện không tăng KL:
+  [PASS] VPB 24/09 (CONFIRMED trong data/corp_actions.json) ⇒ hệ số 1,2604104: got=1.26 want=1.26
+  [PASS] mã không có trong sổ ⇒ None: got=None want=None
+  [PASS] đúng mã nhưng SAI ex-date ⇒ None: got=None want=None
+  [PASS] _status REVOKED ⇒ KHÔNG khôi phục sự kiện đã bị rút lại: got=None want=None
+  [PASS] hệ số 1,0 (không tăng KL) ⇒ None: got=None want=None
+  [PASS] hệ số hỏng kiểu ⇒ None (không ném lỗi): got=None want=None
+  [PASS] dòng CONFIRMED hợp lệ ⇒ tỉ lệ 0,5: got=0.50 want=0.50
+24) CHÍNH SÁCH vendor mismatch (user chốt 2026-09-24): LỆCH NGUỒN ⇒ HẠ VỀ UNVERIFIED.
+    Ca gốc do arch-review dựng: sự kiện VỪA-TIỀN-VỪA-CỔ-PHIẾU, broker giải ra 1.000đ/cp,
+    vendor khai 1.500đ/cp (lệch 50%) — trước bản vá vẫn ra số CÔNG BỐ, 0 cảnh báo.
+  [PASS] mismatch ⇒ vendor_check: got='mismatch' want='mismatch'
+  [PASS] mismatch ⇒ kind HẠ VỀ UNVERIFIED (KHÔNG còn CASH_CONFIRMED): got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] mismatch ⇒ cash_per_share = 0 (không qua cổng công bố): got=0.00 want=0.00
+  [PASS] lý do có '1,000': got=True want=True
+  [PASS] lý do có '1,500': got=True want=True
+  [PASS] lý do có '50.0%': got=True want=True
+  [PASS] lý do có 'Winston': got=True want=True
+  [PASS] mã lệch nguồn nổi lên PositionReturn.unverified: got=1.00 want=1.00
+    Chống hồi quy — vendor KHỚP thì vẫn công bố BÌNH THƯỜNG (kể cả có chân cổ phiếu):
+  [PASS] vendor khớp ⇒ vendor_check: got='match' want='match'
+  [PASS] vendor khớp ⇒ kind giữ CASH_CONFIRMED: got='CASH_CONFIRMED' want='CASH_CONFIRMED'
+  [PASS] vendor khớp ⇒ vẫn công bố 1.000đ/cp: got=1,000.00 want=1,000.00
+    Ngưỡng (VENDOR_MISMATCH_REL=1%, sàn 1đ/cp) — hai bên sát ngưỡng:
+  [PASS] lệch 0,9% ⇒ match, vẫn công bố: got=('match', 'CASH_CONFIRMED') want=('match', 'CASH_CONFIRMED')
+  [PASS] lệch 1,1% ⇒ mismatch, hạ UNVERIFIED: got=('mismatch', 'UNVERIFIED') want=('mismatch', 'UNVERIFIED')
+    24b) NHÁNH CON ANH EM (arch-review vòng 2, D1): vendor khai THUẦN CỔ PHIẾU mà
+         solver vẫn giải ra tiền với share_multiplier=1,0 ⇒ BẤT NHẤT NỘI BỘ.
+  [PASS] vendor thuần CP + mult=1,0 ⇒ vendor_check: got=('mismatch', 'stock_leg_ignored') want=('mismatch', 'stock_leg_ignored')
+  [PASS] vendor thuần CP + mult=1,0 ⇒ vendor_check ĐƠN LẺ đúng 'mismatch' (không phải 'broker_only' — nhãn mà entitled_gross lọc, arch-review D1b R3): got='mismatch' want='mismatch'
+  [PASS] vendor thuần CP + mult=1,0 ⇒ kind HẠ VỀ UNVERIFIED: got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] vendor thuần CP + mult=1,0 ⇒ cash_per_share = 0: got=0.00 want=0.00
+  [PASS] lý do D1 có '0.2604': got=True want=True
+  [PASS] lý do D1 có '1,000': got=True want=True
+  [PASS] lý do D1 có 'Winston': got=True want=True
+  [PASS] lý do D1 có 'share_multiplier': got=True want=True
+  [PASS] mã D1 nổi lên PositionReturn.unverified: got=1.00 want=1.00
+         CHỐNG QUÁ-HẠ-CẤP: solver ĐÃ biết chân cổ phiếu (mult > 1) ⇒ VẪN QUA.
+  [PASS] vendor thuần CP nhưng mult>1 ⇒ broker_only, giữ CASH_CONFIRMED: got=('broker_only', 'CASH_CONFIRMED') want=('broker_only', 'CASH_CONFIRMED')
+  [PASS] vendor thuần CP nhưng mult>1 ⇒ vẫn công bố 1.000đ/cp: got=1,000.00 want=1,000.00
+    Ba nhánh CÒN LẠI không được đổi hành vi:
+  [PASS] vendor không có số tiền ⇒ broker_only, giữ CASH_CONFIRMED: got=('broker_only', 'CASH_CONFIRMED') want=('broker_only', 'CASH_CONFIRMED')
+  [PASS] broker chưa giải + vendor thuần tiền ⇒ CASH_VENDOR (vẫn bị chặn ở cash_per_share): got=('vendor_only', 'CASH_VENDOR') want=('vendor_only', 'CASH_VENDOR')
+  [PASS] CASH_VENDOR vẫn không được công bố: got=0.00 want=0.00
+  [PASS] broker chưa giải + vendor có chân cổ phiếu ⇒ STOCK_CONFIRMED: got=('vendor_only', 'STOCK_CONFIRMED') want=('vendor_only', 'STOCK_CONFIRMED')
+⚠️  không đọc được trading_bot_accounts.json (JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)) — dùng fixture offline ['SpaceX', 'ZaloPay']; nếu đang chạy THẬT thì account mới sẽ KHÔNG được nhận
+⚠️  [resolve_dividends] DRI ex 2026-09-22: vendor khai sự kiện nhưng không lấy được phiên cuối còn quyền (không có phiên nào trong 15 ngày trước ex-date) — sự kiện này CHƯA được đưa vào
+25) `broker_qty()` — GỘP TỔNG các lô cùng mã/ngày, KHÔNG lấy lô CUỐI (vá 2026-09-24).
+    Fixture hình dạng THẬT ZaloPay BID 14/08 (2 gói vay margin, loanPackageId khác nhau,
+    107 + 320 = 427; bản cũ chỉ giữ lô đứng CUỐI mảng positions[] = 320):
+  [PASS] nhiều lô cùng mã/ngày ⇒ TỔNG (107+320): got=427.00 want=427.00
+  [PASS] một lô duy nhất ⇒ KHÔNG đổi so với trước: got=500.00 want=500.00
+  [PASS] ngày khác của CÙNG mã không bị cộng chéo: got=200.00 want=200.00
+26) `bq_corp_action` KHÔNG TRA ĐƯỢC (lỗi hạ tầng) ⇒ nhãn `lookup_failed`, KHÔNG lẫn với
+    `unavailable` (vendor XÁC NHẬN 0 dòng) — arch-review 2026-09-24: nuốt exception làm
+    CẢ HAI lá chắn D1 (stock_leg_ignored/cash_mismatch) tắt IM LẶNG khi BQ hỏng, quay lại
+    đúng hành vi trước chính sách vendor-mismatch (§28/§29).
+  [PASS] BQ ném lỗi ⇒ vendor_check = lookup_failed (KHÔNG phải 'unavailable'): got='lookup_failed' want='lookup_failed'
+  [PASS] BQ ném lỗi khi ĐÃ CASH_CONFIRMED ⇒ hạ về UNVERIFIED (fail-closed): got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] ⇒ cash_per_share = 0 (không qua cổng công bố): got=0.00 want=0.00
+    Chống hồi quy — BQ ném lỗi mà broker CHƯA giải (kind chưa từng đạt CASH_CONFIRMED):
+    KHÔNG được ép giá trị nào khác, chỉ đơn thuần KHÔNG promote lên CASH_VENDOR/
+    STOCK_CONFIRMED (những nhãn đó chỉ hợp lệ khi vendor THỰC SỰ tra được):
+  [PASS] BQ lỗi + broker chưa giải ⇒ vendor_check = lookup_failed: got='lookup_failed' want='lookup_failed'
+  [PASS] BQ lỗi + broker chưa giải ⇒ kind vẫn UNVERIFIED (KHÔNG bị promote): got='UNVERIFIED' want='UNVERIFIED'
+    Chống hồi quy — vendor XÁC NHẬN 0 dòng (`bq_corp_action` trả về None, KHÔNG ném lỗi)
+    VẪN là 'unavailable', KHÔNG bị lẫn sang 'lookup_failed':
+  [PASS] vendor 0 dòng (thành công) ⇒ vendor_check = unavailable: got='unavailable' want='unavailable'
+  [PASS] vendor 0 dòng ⇒ kind GIỮ CASH_CONFIRMED (không bị hạ oan): got='CASH_CONFIRMED' want='CASH_CONFIRMED'
+  [PASS] vendor 0 dòng ⇒ vẫn công bố 1.000đ/cp: got=1,000.00 want=1,000.00
+27) ACCOUNTS đọc từ trading_bot_accounts.json, KHÔNG hardcode (§7, code-quality 2026-09-27):
+  [PASS] account thứ BA vừa bật (enabled=true) TỰ ĐỘNG có trong ACCOUNTS — bản hardcode KHÔNG BAO GIỜ thấy nó: got='0002023348' want='0002023348'
+  [PASS] 2 account live cũ vẫn đúng account_no: got=('0002023347', '0001743768') want=('0002023347', '0001743768')
+  [PASS] account enabled=false KHÔNG lọt (bộ lọc `enabled` nằm ở pick_accounts/live_dnse_labels, load_accounts trả CẢ disabled): got=False want=False
+  [PASS] account paper/phs KHÔNG lọt (bộ giải dùng sổ khớp DNSE): got=False want=False
+  [PASS] config HỎNG ⇒ rơi về fixture offline 2 account + cảnh báo stderr (không nổ, không trả rỗng âm thầm): got={'SpaceX': '0002023347', 'ZaloPay': '0001743768'} want={'SpaceX': '0002023347', 'ZaloPay': '0001743768'}
+  [PASS] ACCOUNTS ở module KHÔNG phải chính object fixture (chứng minh đã đi qua config): got=False want=False
+27) CA 1 — DRI (UPCOM): 8 cú nhảy tỉ số, 1 sự kiện thật. Nhiễu KHÔNG được thành ex-date.
+  [PASS] tầng 1 vẫn thấy đủ 8 cú nhảy (KHÔNG đổi `_scan_jumps` — consumer khác còn dùng): got=['2026-09-08', '2026-09-10', '2026-09-21', '2026-09-22', '2026-09-25', '2026-09-30', '2026-10-06', '2026-10-08'] want=['2026-09-08', '2026-09-10', '2026-09-21', '2026-09-22', '2026-09-25', '2026-09-30', '2026-10-06', '2026-10-08']
+  [PASS] ước lượng tỉ số của sự kiện THẬT lệch cả 1 bước giá (910đ, thật 1.000đ): got=910.00 want=910.00
+  [PASS] chuỗi có cú GIẢM > RATIO_JUMP_MIN — bằng chứng cơ khí của nhiễu: got=True want=True
+  [PASS] 7 cú nhảy không có dòng vendor ⇒ RATIO_NOISE (kể cả cú ex 21/09: bước trừ 1.000đ tối 21/09 nằm trong cửa sổ của nó nhưng ĐÃ CÓ CHỦ — cổ tức vendor khai ex 22/09): got=['2026-09-08', '2026-09-10', '2026-09-21', '2026-09-25', '2026-09-30', '2026-10-06', '2026-10-08'] want=['2026-09-08', '2026-09-10', '2026-09-21', '2026-09-25', '2026-09-30', '2026-10-06', '2026-10-08']
+  [PASS] sự kiện thật 22/09 ⇒ CASH_CONFIRMED từ tiền broker: got=('CASH_CONFIRMED', 'broker_solved') want=('CASH_CONFIRMED', 'broker_solved')
+  [PASS] … đúng 1.000đ/cp (KHÔNG phải ước lượng 910đ): got=1,000.00 want=1,000.00
+  [PASS] ZaloPay DRI tỉ suất tổng RÒNG = +34,58%: got=34.58 want=34.58
+  [PASS] không còn sự kiện nào 'chưa xác minh' (nhiễu KHÔNG phải sự kiện chưa giải): got=0 want=0
+  [PASS] SpaceX DRI = +34,59%: got=34.59 want=34.59
+28) CA 1 — FAIL-CLOSED: thiếu MỘT điều kiện thì KHÔNG được gọi là nhiễu.
+  [PASS] vendor KHÔNG tra được ⇒ 0 cú nhảy bị gọi là nhiễu: got=0 want=0
+  [PASS] … cả 8 mang nhãn lookup_failed: got={'lookup_failed'} want={'lookup_failed'}
+  [PASS] … và sự kiện thật KHÔNG được công bố khi chưa đối soát được: got=0 want=0.0
+  [PASS] vendor THIẾU dòng của sự kiện thật (cú nhảy 6,55% ≫ biên độ nhiễu) ⇒ KHÔNG nuốt: got=True want=True
+  [PASS] … nó là sự kiện chưa giải ⇒ nằm trong `.unverified`: got=False want=False
+  [PASS] chuỗi KHÔNG có cú giảm nào (không bằng chứng nhiễu) + vendor 0 dòng ⇒ vẫn UNVERIFIED: got=['UNVERIFIED'] want=['UNVERIFIED']
+29) Nguồn phát hiện THỨ HAI: vendor khai sự kiện mà tỉ số KHÔNG nhảy.
+  [PASS] sự kiện được thêm từ vendor: got=[('2026-09-22', 'vendor')] want=[('2026-09-22', 'vendor')]
+  [PASS] … và giải ra từ tiền broker như mọi sự kiện khác: got=[('CASH_CONFIRMED', 1000.0)] want=[('CASH_CONFIRMED', 1000.0)]
+  [PASS] quyền mua/ESOP đứng một mình ⇒ KHÔNG thêm (không đụng tới tỉ suất): got=0 want=0
+  [PASS] không lấy được phiên cuối còn quyền ⇒ không thêm, và NÓI RA ở `.warnings`: got=(0, 1) want=(0, 1)
+  [PASS] VHM: tầng 1 thấy HAI cú nhảy (06/08 nhỏ, 07/08 lớn) cho MỘT sự kiện: got=['2026-08-06', '2026-08-07'] want=['2026-08-06', '2026-08-07']
+  [PASS] vendor ex 06/08 ×2, hai cú nhảy cộng lại ×2,00 ⇒ ghép thành MỘT sự kiện: got=[('2026-08-06', 'STOCK_CONFIRMED'), ('2026-08-07', 'RATIO_NOISE')] want=[('2026-08-06', 'STOCK_CONFIRMED'), ('2026-08-07', 'RATIO_NOISE')]
+  [PASS] … sự kiện vendor ĐÃ GIẢI, hệ số ×2, khung KL xác định: got=(True, 2.0, True) want=(True, 2.0, True)
+  [PASS] vendor chỉ khai ×1,15 mà hai cú nhảy cộng lại ×2,00 ⇒ KHÔNG ghép, cú 07/08 giữ UNVERIFIED: got=('UNVERIFIED', False) want=('UNVERIFIED', False)
+30) Lưới an toàn của solver: nhân chứng thứ hai (vendor) — và vẫn bác khi không ai khớp.
+  [PASS] ước lượng tỉ số 910 ≠ nghiệm 1.000 và KHÔNG có số vendor ⇒ bác (như cũ): got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] vendor khai đúng 1.000 ⇒ qua lưới: got=('CASH_CONFIRMED', 1000.0) want=('CASH_CONFIRMED', 1000.0)
+  [PASS] vendor khai 1.200 ≠ nghiệm 1.000 ⇒ vẫn bác: got='UNVERIFIED' want='UNVERIFIED'
+  [PASS] KL đổi tại ex-date, vendor KHÔNG nói gì ⇒ STOCK_SUSPECTED (lá chắn cũ giữ nguyên): got='STOCK_SUSPECTED' want='STOCK_SUSPECTED'
+  [PASS] … kể cả khi vendor khai thuần tiền: lá chắn KHÔNG nới (N8 — sai theo hướng thiếu): got=('STOCK_SUSPECTED', 0.0) want=('STOCK_SUSPECTED', 0.0)
+31) CA 4 — TPB: cổ tức 500đ + thưởng 15% CÙNG ex-date 02/10. Mọi thứ về KL ĐANG GIỮ.
+  [PASS] 1 cp hưởng quyền = 1,15 cp hôm nay: got=1.15 want=1.15
+  [PASS] cổ tức quy về KL đang giữ = 500/1,15 = 434,78đ (KHÔNG phải 500đ): got=434.78 want=434.78
+  [PASS] giá vốn/cp = 16.800/1,15 = 14.608,70 (tổng giá vốn giữ nguyên): got=14,608.70 want=14,608.70
+  [PASS] tỉ suất tổng RÒNG = −18,79% (đúng chuẩn; bản cũ −18,73%): got=-18.79 want=-18.79
+  [PASS] khai giá vốn ở hệ 'current' ⇒ cùng kết quả: got=-18.79 want=-18.79
+  [PASS] có sự kiện cổ phiếu mà KHÔNG khai cost_frame ⇒ từ chối: got='ValueError' want='ValueError'
+  [PASS] công thức CŨ (giá vốn + 500 chưa chia, cổ tức 500/cp sau thưởng) cho số KHÁC: got=True want=True
+32) Khung KL qua NHIỀU sự kiện (MBB: tiền 09/07 → thưởng 15% + quyền mua 10% ngày 11/08).
+  [PASS] `stock` (mọi ISS) = 0,25 — nghĩa cũ giữ nguyên: got=0.25 want=0.25
+  [PASS] `stock_free` chỉ tính cổ phiếu MIỄN PHÍ = 0,15 (quyền mua không phải multiplier): got=0.15 want=0.15
+  [PASS] ESOP ⇒ stock_free = 0: got=0.00 want=0.00
+  [PASS] hai dòng DIV khác số cùng ex-date (DGC 14/09: 3.000 + 5.000) ⇒ 8.000: got=8,000.00 want=8,000.00
+  [PASS] broker ×1,15 khớp cổ phiếu miễn phí vendor ×1,15 ⇒ khung xác định: got=True want=True
+  [PASS] cổ tức 09/07 phải ÷ 1,15 của đợt thưởng SAU nó: got=869.57 want=869.57
+  [PASS] thưởng đã có hệ số là sự kiện ĐÃ GIẢI (không thu nhập): got=True want=True
+  [PASS] hai nguồn hệ số MÂU THUẪN (1,25 vs 1,15) ⇒ khung KHÔNG xác định: got=False want=False
+  [PASS] … kéo theo cổ tức TRƯỚC nó không được công bố: got=(False, 0.0) want=(False, 0.0)
+  [PASS] một sự kiện SAU chưa rõ là tiền hay cổ phiếu ⇒ khung của sự kiện TRƯỚC không xác định: got=(False, 0.0) want=(False, 0.0)
+  [PASS] chỉ vendor khai cổ phiếu miễn phí 20% ⇒ hệ số ×1,20 lấy từ vendor, sự kiện đã giải: got=(1.2, True) want=(1.2, True)
+  [PASS] chỉ có quyền mua ⇒ ISS_NONFREE: đã giải, hệ số 1, không thu nhập: got=('ISS_NONFREE', True, 1.0) want=('ISS_NONFREE', True, 1.0)
+33) Sổ giá vốn broker là nhân chứng per-mã: `classify_cost_steps` trên số THẬT.
+  [PASS] DRI 21/09 19:07: KL giữ nguyên, giá vốn −1.000: got=[('cash', 1000.0, 1.0)] want=[('cash', 1000.0, 1.0)]
+  [PASS] TPB 01/10 19:03: 200×16.800 → 230×14.173,913 = tiền 500 + thưởng ×1,15: got=[('cash+stock', 500.0, 1.15)] want=[('cash+stock', 500.0, 1.15)]
+  [PASS] VPB 23/09: 1.100 → 1.386, tổng giá vốn bất biến = thưởng thuần: got=[('stock', 0.0, 1.26)] want=[('stock', 0.0, 1.26)]
+  [PASS] mua lẻ 1cp (SAB 740→741) KHÔNG bị đọc thành thưởng: got=[('buy', 0.0, 1.0)] want=[('buy', 0.0, 1.0)]
+  [PASS] bán: giá vốn/cp không đổi: got=[('sell', 0.0, 1.0)] want=[('sell', 0.0, 1.0)]
+  [PASS] không đổi gì ⇒ không sinh bước: got=[] want=[]
+  [PASS] bản ghi rỗng thoáng qua của DNSE (SAB 20/08) bị bỏ — KHÔNG phải 'bán hết rồi mua lại': got=[('19:06', 1100.0, 48804999.98), ('19:08', 1100.0, 48804999.98)] want=[('19:06', 1100.0, 48804999.98), ('19:08', 1100.0, 48804999.98)]
+  [PASS] bán hết rồi mua lại THẬT (tổng giá vốn khác) ⇒ giữ nguyên mốc 0: got=[('d1', 1100.0, 48804999.98), ('d2', 0.0, 0.0), ('d3', 1100.0, 47000000.0)] want=[('d1', 1100.0, 48804999.98), ('d2', 0.0, 0.0), ('d3', 1100.0, 47000000.0)]
+  [PASS] `broker_cost_series` đọc file thật: bỏ bản ghi rỗng, và KHÔNG lẫn tài khoản khác (§12): got=[('19:06:46', 1100.0), ('19:07:46', 1100.0)] want=[('19:06:46', 1100.0), ('19:07:46', 1100.0)]
+  [PASS] … nên không bước giá vốn giả nào sinh ra: got=[] want=[]
+34) Hưởng quyền: có bản ghi ngày chốt quyền mà VẮNG mã ⇒ không hưởng (mua đúng ex-date).
+  [PASS] `.days` có 08/07, mã vắng ⇒ KL hưởng quyền 0: got=0.0 want=0.0
+  [PASS] dict thuần (không biết ngày nào có bản ghi) ⇒ hành vi cũ, rơi về KL ex-date: got=1000.0 want=1000.0
+35) B1 — cú nhảy hình-dạng-nhiễu chỉ thành RATIO_NOISE khi KHÔNG nhân chứng nào thấy gì.
+  [PASS] cổ tức 110đ CÓ hình dạng nhiễu (≤ biên độ, ≤ 150đ) — hình dạng không phân biệt được: got=(True, 110) want=(True, 110)
+  [PASS] vendor 0 dòng nhưng SỔ GIÁ VỐN hai tài khoản có bước trừ 110đ ⇒ KHÔNG nuốt thành nhiễu: got=('CASH_CONFIRMED', 110.0, True) want=('CASH_CONFIRMED', 110.0, True)
+  [PASS] … tỉ suất +28,21% (bản 9c4b8a90: +27,42%, không cờ nào): got=28.21 want=28.21
+  [PASS] bước trừ giá vốn KHÔNG quan sát được (lệnh mua 500cp cùng cặp bản ghi che) nhưng phải thu tăng mà không mã nào nhận ⇒ KHÔNG phải nhiễu, đi vào hệ và giải ra đúng 110đ: got=('CASH_CONFIRMED', 110.0) want=('CASH_CONFIRMED', 110.0)
+  [PASS] ca biên: phải thu tăng ở tài khoản KHÔNG giữ mã (sổ nó phủ cửa sổ, vắng DRI), tài khoản giữ mã thì giá vốn không đổi và không có đồng vô chủ ⇒ nhiễu: got='RATIO_NOISE' want='RATIO_NOISE'
+  [PASS] broker không thấy gì nhưng vendor có dòng `announced` (chưa kịp `executed`) ⇒ KHÔNG nhiễu: got=('UNVERIFIED', False, True) want=('UNVERIFIED', False, True)
+  [PASS] không tra được `announced` ⇒ 0 cú nhảy bị gọi là nhiễu: got=0 want=0
+  [PASS] ca biên: vendor 0 dòng kể cả announced, sổ hai tài khoản PHỦ cửa sổ và không ai giữ mã ⇒ nhiễu (không ai giữ thì không có nhân chứng broker — giới hạn đã biết): got='RATIO_NOISE' want='RATIO_NOISE'
+  [PASS] bước trừ trong cửa sổ KHỚP NGÀY sự kiện vendor nhưng LỆCH SỐ (890đ vs 1.000đ) ⇒ không có chủ ⇒ cú nhảy ex 21/09 KHÔNG được gọi là nhiễu: got=True want=True
+  [PASS] chặn trên VẬT LÝ: 150đ còn là nhiễu, 151đ thì không (dù vẫn trong biên độ): got=(True, False) want=(True, False)
+  [PASS] NOISE_AMP_MULT ghim ở 1,5×: cú nhảy 1,43× biên độ là nhiễu, 2,0× thì không (dù chỉ 140đ): got=(True, False) want=(True, False)
+  [PASS] biên độ ≤ RATIO_JUMP_MIN (0,25%) KHÔNG phải bằng chứng nhiễu, dù cú nhảy nằm trong 1,5×: got=False want=False
+  [PASS] cú nhảy trễ khớp hệ số vendor NHƯNG vendor còn một dòng `announced` ở chính ngày đó ⇒ KHÔNG ghép: got='UNVERIFIED' want='UNVERIFIED'
+   sổ tiền broker là nhân chứng không che được: `unexplained_cash` trên số THẬT.
+  [PASS] DRI 21/09 SpaceX: phải thu +3.700.000 = 3.700cp × bước trừ 1.000đ ⇒ không đồng nào vô chủ: got={} want={}
+  [PASS] SAB SpaceX: phải thu ghi 27/07, giá vốn trừ 28/07 (lệch một phiên) ⇒ vẫn có chủ: got={} want={}
+  [PASS] phải thu tăng mà KHÔNG bước trừ nào ⇒ vô chủ đúng số đó: got={'2026-09-21': 209000.0} want={'2026-09-21': 209000.0}
+  [PASS] bước trừ 1.900.000 chỉ giải thích một phần của 2.109.000 ⇒ còn 209.000 vô chủ: got={'2026-09-21': 209000.0} want={'2026-09-21': 209000.0}
+  [PASS] bước trừ KHÔNG kèm phải thu (dư âm) không phải tiền vô chủ: got={} want={}
+  [PASS] lệch quá CASH_SLIP_DAYS thì KHÔNG bù cho nhau: got={'2026-07-20': 3300000.0} want={'2026-07-20': 3300000.0}
+  [PASS] `cash_step_totals`: TPB 200cp × 500đ (bước tiền + thưởng) + DRI 1.900cp × 1.000đ: got={'2026-10-01': 100000.00999999978, '2026-09-21': 1900000.0} want={'2026-10-01': 100000.00999999978, '2026-09-21': 1900000.0}
+  [PASS] `covers`: có bản đọc số dư hai phía của cặp bản ghi vị thế (lệch vài giây cùng vòng poll): got=(True, False, False) want=(True, False, False)
+36) B2 — cổ tức là của MÃ, hưởng hay không là của TÀI KHOẢN.
+  [PASS] sổ có bản ghi 08/07: giữ ⇒ yes · vắng mã ⇒ no · KHÔNG có bản ghi nào ⇒ unknown: got=('yes', 'no', 'unknown') want=('yes', 'no', 'unknown')
+  [PASS] ca ghim MBB/ZaloPay (không giữ 07-09/07): KHÔNG cộng 1.000đ ⇒ −10,00% (9c4b8a90: −6,20%): got=-10.00 want=-10.00
+  [PASS] … nằm ở `.not_entitled` (có cảnh báo), KHÔNG phải 'chưa xác minh': got=(1, 0) want=(1, 0)
+  [PASS] sổ không phủ ngày chốt quyền ⇒ không cộng VÀ gắn cờ chưa xác minh: got=(0, 1) want=(0.0, 1)
+  [PASS] tài khoản CÓ giữ ⇒ vẫn cộng như cũ (−6,20%): got=-6.20 want=-6.20
+  [PASS] `position_total_return(account_no=…)` THẬT SỰ dùng tài khoản; bỏ trống ⇒ hành vi cũ: got=(0, 1, 1000.0) want=(0.0, 1, 1000.0)
+  [PASS] thưởng mà tài khoản không hưởng ⇒ hệ số KHÔNG áp vào giá vốn (không đòi cost_frame): got=1.0 want=1.0
+37) Trạng thái 'đã giải' / khung KL / sổ giá vốn — các nhánh trước đây không ai canh.
+  [PASS] quyền mua KÈM chân tiền vendor khai mà broker chưa giải ⇒ CHƯA giải: got=False want=False
+  [PASS] thưởng đã có hệ số KÈM chân tiền chưa giải ⇒ CHƯA giải: got=False want=False
+  [PASS] sự kiện SAU không tra được vendor (lookup_failed) ⇒ khung của sự kiện TRƯỚC không xác định: got=(False, 0.0) want=(False, 0.0)
+  [PASS] sự kiện cổ phiếu CHƯA giải không được chia giá vốn (hệ số chưa ai xác nhận): got=1.0 want=1.0
+  [PASS] N12: phương thức phát hành đã biết ⇒ không có gì lạ; chuỗi vendor đổi cách viết ⇒ nêu tên: got=([], ['Thưởng cổ phiếu']) want=([], ['Thưởng cổ phiếu'])
+  [PASS] … sự kiện đó KHÔNG được coi là 'quyền mua, đã giải': khung KL không xác định, nêu lý do: got=(False, False, True) want=(False, False, True)
+  [PASS] … và được đưa vào kể cả khi tỉ số KHÔNG nhảy (không rơi vào nhánh 'quyền mua đứng một mình'): got=[('2026-08-11', 'vendor')] want=[('2026-08-11', 'vendor')]
+  [PASS] N4 — GIỚI HẠN ĐÃ BIẾT: bản đọc rỗng mà bản ghi kế tiếp đã lẫn một lệnh mua thì không phân biệt được với đóng-rồi-mở ⇒ giữ mốc 0 (vị thế bị coi là MỚI, cổ tức cũ không cộng): got=[('2026-07-20T19:06:46', 2400.0, 59640000.0), ('2026-07-20T19:07:16', 0.0, 0.0), ('2026-07-21T09:20:00', 2500.0, 62040000.0)] want=[('2026-07-20T19:06:46', 2400.0, 59640000.0), ('2026-07-20T19:07:16', 0.0, 0.0), ('2026-07-21T09:20:00', 2500.0, 62040000.0)]
+  [PASS] quãng 0 mà hai đầu trùng tổng giá vốn nhưng KHÁC KL ⇒ KHÔNG phải bản đọc rỗng, giữ: got=[('19:06', 1100.0, 48804999.98), ('19:07', 0.0, 0.0), ('19:08', 1000.0, 48804999.98)] want=[('19:06', 1100.0, 48804999.98), ('19:07', 0.0, 0.0), ('19:08', 1000.0, 48804999.98)]
+  [PASS] bước trừ nhỏ 30đ/cp vẫn là bước tiền (COST_STEP_TOL 0,5đ): got=[('cash', 30.0)] want=[('cash', 30.0)]
+  [PASS] bước mang cả hai mốc thời gian kẹp nó (`ts0`, `ts`): got=[('a', 'b')] want=[('a', 'b')]
+38) C1 — rổ giải do TÀI KHOẢN định, không do người hỏi: ca CTG/VCB 23/07 (số thật).
+  [PASS] đối chứng: 1.300×450 + 2.300×450 = 1.620.000 và 800×450 + 1.050×450 = 832.500: got=(1620000, 832500) want=(1620000, 832500)
+  [PASS] hỏi RIÊNG CTG (rổ của ZaloPay sau khi bán hết VCB) ⇒ vẫn giải trên rổ {CTG, VCB}: CASH_CONFIRMED 450đ (bản 7cbc486a: CASH_VENDOR, chặn bền báo cáo ngày 02/10): got=[('CTG', 'CASH_CONFIRMED', 450.0, True)] want=[('CTG', 'CASH_CONFIRMED', 450.0, True)]
+  [PASS] … và ra ĐÚNG nghiệm của người hỏi cả rổ (một rổ, một nghiệm): got=[('CTG', 'CASH_CONFIRMED', 450.0)] want=[('CTG', 'CASH_CONFIRMED', 450.0)]
+  [PASS] hỏi NHIỀU mã ⇒ trả sự kiện của MỌI mã được hỏi, thứ tự hỏi nào cũng vậy (không chỉ mã đầu): got=(['CTG', 'VCB'], ['CTG', 'VCB']) want=(['CTG', 'VCB'], ['CTG', 'VCB'])
+  [PASS] `ledger_tickers`: mọi mã BẤT KỲ tài khoản nào có KL > 0 trong cửa sổ: got=({'CTG', 'VCB'}, {'CTG'}, set()) want=({'CTG', 'VCB'}, {'CTG'}, set())
+  [PASS] thiếu ẩn thật ⇒ CASH_VENDOR, và ghi chú nêu số lệch + 'còn giữ VCB' (không còn câu đoán 'có thể còn mã khác'): got=('CASH_VENDOR', True, True, False) want=('CASH_VENDOR', True, True, False)
+  [PASS] sau một lượt giải, phạm vi gom truy vấn được trả lại (không rò sang lượt sau): got=None want=None
+   gom truy vấn: trong MỘT lượt, mỗi bảng chỉ bị hỏi một lần cho cả rổ — cùng kết quả.
+  [PASS] 2 mã × (tỉ số + vendor) + 1 lần hỏi cửa sổ = 2 truy vấn (bản cũ: 5): got=2 want=2
+  [PASS] … kết quả Y HỆT hỏi từng mã: got=([('AAA', '2026-09-10', 500.0)], {'cash': 500.0, 'stock': None, 'stock_free': 0.0, 'unknown_methods': [], 'titles': 't', 'n_rows': 1, 'n_dedup': 1}, None, [('AAA', '2026-09-10')]) want=([('AAA', '2026-09-10', 500.0)], {'cash': 500.0, 'stock': None, 'stock_free': 0.0, 'unknown_methods': [], 'titles': 't', 'n_rows': 1, 'n_dedup': 1}, None, [('AAA', '2026-09-10')])
+  [PASS] ngoài phạm vi (ex-date ngoài cửa sổ / kể cả announced / mã ngoài rổ / cửa sổ khác) ⇒ vẫn hỏi riêng: got=4 want=4
+  [PASS] BQ lỗi ⇒ TỪNG người hỏi đều nhận lại đúng lỗi đó (không biến thành 'vendor 0 dòng'), và chỉ hỏi BQ một lần: got=(['EXC:RuntimeError', 'EXC:RuntimeError', 'EXC:RuntimeError'], 1) want=(['EXC:RuntimeError', 'EXC:RuntimeError', 'EXC:RuntimeError'], 1)
+39) C2 — ghép cú nhảy TRỄ: chỉ khi CẦN (riêng sự kiện vendor chưa đủ hệ số) và ĐỦ.
+  [PASS] VHM thật: +0,78% ở ex-date rồi ×1,9844 phiên sau, vendor khai ×2 ⇒ ghép: got=True want=True
+  [PASS] LAG_TOL ghim 2% HAI phía: tổng lệch 1,5% còn ghép, lệch 3% thì không: got=(True, False, True, False) want=(True, False, True, False)
+  [PASS] vế CẦN: riêng cú nhảy của sự kiện vendor ĐÃ ra hệ số (300đ/15.000 = 2,04%) ⇒ cú sau (0,67% nhiễu hay 1,35% cổ tức thật khác) KHÔNG phải phần trễ của nó: got=(False, False) want=(False, False)
+  [PASS] vế CẦN dùng CÙNG dung sai LAG_TOL (2%): riêng sự kiện vendor đã ra 99% hệ số ×2 ⇒ đã đủ, cú sau (+0,6%, cộng vào vẫn trong dung sai) KHÔNG được ghép; mới ra 97% ⇒ còn thiếu ⇒ ghép: got=(False, True) want=(False, True)
+  [PASS] số hạng TIỀN nằm trong hệ số: 3.000đ trên 15.000 ⇒ cần ×1,25 (không phải ×1,00): got=(True, False) want=(True, False)
+  [PASS] tiền ≥ giá, hoặc giá cuối còn quyền = 0 ⇒ không dựng được hệ số ⇒ KHÔNG ghép (không ném lỗi): got=(False, False, False) want=(False, False, False)
+  [PASS] hệ số KL là cổ phiếu MIỄN PHÍ (`stock_free` 0,15), không phải mọi ISS (`stock` 0,25 gồm quyền mua); caller cũ không khai `stock_free` ⇒ dùng `stock`: got=(True, False, True) want=(True, False, True)
+  [PASS] VHM qua đủ đường: cửa sổ vendor (kể cả announced) có CHÍNH dòng gốc ex 06/08, sổ SpaceX có bước ×2 tối 05/08 — đều là của sự kiện gốc ⇒ vẫn ghép: got='RATIO_NOISE' want='RATIO_NOISE'
+  [PASS] … ba dòng cập nhật sự kiện gốc: cú nhảy gộp ×2,0000, ước lượng tỉ số 76.500đ, per_share theo nó: got=(1.0, 76500.0, 76500.0, 'STOCK_CONFIRMED') want=(1.0, 76500.0, 76500.0, 'STOCK_CONFIRMED')
+  [PASS] … ghi chú nói đúng cái đã kiểm (riêng ex-date chưa đủ), không khẳng định suông: got=(True, True) want=(True, True)
+  [PASS] cú nhảy trễ CŨNG phải qua sổ broker: tối 06/08 có thêm bước trừ 500đ không ai khai ⇒ KHÔNG ghép, sự kiện gốc không bị dồn cú nhảy vào: got=('UNVERIFIED', 0.0078, True) want=('UNVERIFIED', 0.0078, True)
+  [PASS] A5: vendor khai 300đ ex 21/09 (cú nhảy đã đủ), 22/09 có cổ tức THẬT thứ hai 200đ vendor chưa có dòng ⇒ HAI sự kiện, cả hai giải từ tiền broker (7cbc486a: cái sau thành RATIO_NOISE): got=[('2026-09-21', 'CASH_CONFIRMED', 300.0, 300.0), ('2026-09-22', 'CASH_CONFIRMED', 200.0, 200.0)] want=[('2026-09-21', 'CASH_CONFIRMED', 300.0, 300.0), ('2026-09-22', 'CASH_CONFIRMED', 200.0, 200.0)]
+  [PASS] … tỉ suất +3,17% (7cbc486a: +1,90%, unverified=0): got=3.17 want=3.17
+  [PASS] A6: cú nhảy vendor đã đủ + NHIỄU +0,67% phiên sau ⇒ sự kiện thật KHÔNG bị làm bẩn (ước lượng tỉ số vẫn 300đ; 7cbc486a: 397đ), cú sau là nhiễu thường — ghi chú không nói 'trễ': got=(300.0, 'RATIO_NOISE', False) want=(300.0, 'RATIO_NOISE', False)
+   cửa sổ vendor của một ứng viên = [ngày cuối còn quyền, ex], hai đầu KỂ CẢ.
+  [PASS] vendor có dòng `announced` ở NGÀY CUỐI CÒN QUYỀN của cú nhảy (lệch một phiên) ⇒ không nhiễu: got=('UNVERIFIED', True) want=('UNVERIFIED', True)
+  [PASS] … còn dòng vendor ở TRƯỚC cửa sổ (18/09) không dính tới cú nhảy này ⇒ vẫn là nhiễu: got='RATIO_NOISE' want='RATIO_NOISE'
+40) K4 — `_broker_touched`: mù ≠ không có; sổ tiền hỏi qua MỘT hàm `cash_witness`.
+  [PASS] giữ mã, sổ phủ hai đầu, giá vốn KHÔNG đổi, không đồng vô chủ ⇒ không dấu vết: got='' want=''
+  [PASS] … kể cả khi sổ TIỀN mù: sổ giá vốn đã tự xác nhận không đụng tới mã: got='' want=''
+  [PASS] sổ vị thế KHÔNG có bản ghi bao hai đầu cửa sổ ⇒ mù ⇒ KHÔNG được gọi là nhiễu: got=(True, True) want=(True, True)
+  [PASS] biên của 'bao hai đầu': bản ghi đầu rơi ĐÚNG ngày cuối còn quyền (18/09, đã giữ mã) chưa phải 'trước cửa sổ' ⇒ mù; bản ghi cuối rơi ĐÚNG ex-date (21/09) là đủ đầu sau: got=(True, '') want=(True, '')
+  [PASS] sổ phủ hai đầu mà tài khoản KHÔNG giữ mã (kể cả có đồng vô chủ của mã khác) ⇒ không phải nhân chứng: got='' want=''
+  [PASS] giữ DRI tới 10/09 rồi bán hết: quanh cửa sổ KL = 0 ⇒ không phải nhân chứng dù có đồng vô chủ (đợt nắm giữ TRƯỚC cửa sổ không tính): got='' want=''
+  [PASS] … bán hết 04/09, mua lại 06/10: quanh cửa sổ vẫn KL = 0 ⇒ không phải nhân chứng (đợt nắm giữ SAU cửa sổ không tính): got='' want=''
+   P1 — tài khoản mà sổ CHƯA BẮT ĐẦU lúc đó và bản ghi đầu không giữ mã: không phải nhân chứng.
+  [PASS] thêm một tài khoản SỔ RỖNG (vừa bật, chưa có bản ghi nào) ⇒ kết quả KHÔNG đổi (bản 318097fa: phủ quyết ⇒ 0/7 cú nhiễu DRI được gỡ, DRI bị chặn ở mọi báo cáo): got=('', '', '') want=('', '', '')
+  [PASS] … sổ bắt đầu SAU cửa sổ (05/10) với mã khác ⇒ không đổi: got='' want=''
+  [PASS] … tài khoản mới đó MUA chính DRI hôm 07/10: mốc là bản ghi đầu của TÀI KHOẢN (05/10), không phải dòng đầu của mã ⇒ vẫn không đổi: got=('', '') want=('', '')
+  [PASS] sổ bắt đầu sau cửa sổ NHƯNG bản ghi đầu ĐÃ giữ DRI (vị thế có từ trước khi sổ bắt đầu) ⇒ vẫn mù ⇒ phủ quyết: got=True want=True
+  [PASS] sổ CÓ bản ghi trước cửa sổ mà thiếu đầu sau (tài khoản ngừng ghi từ 10/09) ⇒ vẫn mù ⇒ phủ quyết: got=True want=True
+  [PASS] tài khoản sổ rỗng KHÔNG che dấu vết thật của tài khoản khác (bước trừ 110đ của ZaloPay): got=True want=True
+  [PASS] A1: sổ THỦNG 18→22/09, bước trừ 110đ chỉ lộ ở bản ghi 23/09 — cặp bản ghi VẮT QUA cửa sổ vẫn là dấu vết (bản 7cbc486a: 'không dấu vết' ⇒ RATIO_NOISE, +27,42% không cờ): got=True want=True
+  [PASS] bước đã CÓ CHỦ (vendor khai đúng 500đ ×1,15, phủ ngày đó) ⇒ không tính: got='' want=''
+  [PASS] `owned` đòi đủ BỐN thứ: đúng mã · ngày trong [cum, ex] · tiền tới 1đ · hệ số tới 1,5cp: got=(True, True, True, True) want=(True, True, True, True)
+  [PASS] bước trừ chưa có chủ nhưng cặp bản ghi của nó (22/09 → 06/10) nằm HẲN ngoài cửa sổ [18/09, 21/09] ⇒ không phải dấu vết của cú nhảy này: got='' want=''
+  [PASS] bước THUẦN cổ phiếu (KL ×1,15, tổng giá vốn giữ nguyên) không ai khai cũng là dấu vết: got=True want=True
+  [PASS] lệnh mua che cặp bản ghi: sổ tiền PHỦ và sạch ⇒ loại trừ được: got='' want=''
+  [PASS] … sổ tiền MÙ ở cặp đó ⇒ không loại trừ được (A2): got=True want=True
+  [PASS] … phải thu ghi vào THỨ BẢY 19/09 nằm giữa hai đầu mút ⇒ vẫn thấy (A3; bản cũ chỉ hỏi 18 và 21): got=True want=True
+  [PASS] … chi trả 332.000đ không khớp khoản nào rơi cùng khe ⇒ phải thu mới có thể bị bù (K3): got=True want=True
+  [PASS] MỞ vị thế đúng ngày cuối còn quyền (bản ghi đầu đã mang giá vốn broker tính sẵn) + đồng vô chủ ⇒ dấu vết; không có đồng vô chủ nào ⇒ không: got=(True, '') want=(True, '')
+  [PASS] giá vốn không đổi nhưng có đồng vô chủ ở CHÍNH ex-date / ở thứ Bảy giữa cửa sổ ⇒ dấu vết: got=(True, True) want=(True, True)
+  [PASS] `opening_pairs`: mã mới (bản ghi tài khoản ngay trước) · mở lại sau khi về 0 (bản ghi KL 0 của chính nó) · không có gì trước (chính bản ghi đầu): got=([('t1', 't2')], [('t0', 't1'), ('t2', 't3')], [('t0', 't0')]) want=([('t1', 't2')], [('t0', 't1'), ('t2', 't3')], [('t0', 't0')])
+   `cash_witness` — cửa sổ ±CASH_SLIP_DAYS, `covers`, chi trả lẫn trong khe.
+  [PASS] đồng vô chủ cách đầu khe đúng 4 ngày (17/09, 25/09) ⇒ còn tính; 5 ngày (16/09, 26/09) ⇒ không: got=['orphan', 'orphan', '', ''] want=['orphan', 'orphan', '', '']
+  [PASS] không có bản đọc số dư hai phía ⇒ 'blind', kể cả khi dict đồng vô chủ rỗng hay có số: got=('blind', 'blind') want=('blind', 'blind')
+  [PASS] chi trả lẫn: khe giao với cặp bản ghi ⇒ 'payout'; khe kết thúc ĐÚNG đầu cặp / bắt đầu ĐÚNG cuối cặp ⇒ không giao: got=['payout', '', ''] want=['payout', '', '']
+  [PASS] sạch cả ba ⇒ ('', ''): got='blind' want='blind'
+41) C4 — thân THẬT của các hàm đọc sổ, trên file dnse_raw giả lập (không stub).
+  [PASS] `account_ledger['first']` = bản ghi vị thế ĐẦU của tài khoản KỂ CẢ bản ghi rỗng (TK 7: rỗng 17/09, mua BBB 21/09 ⇒ 17/09, không phải dòng đầu của mã); tài khoản chưa có bản ghi ⇒ '': got=('2026-09-17T19:07:00', '2026-09-17T19:08:00', '2026-09-21T19:08:00', '', []) want=('2026-09-17T19:07:00', '2026-09-17T19:08:00', '2026-09-21T19:08:00', '', [])
+  [PASS] `broker_cash_deltas`: CHỈ delta dương, theo ngày, đúng tài khoản (§12): got={'2026-09-18': 300000.0, '2026-09-21': 200000.0} want={'2026-09-18': 300000.0, '2026-09-21': 200000.0}
+  [PASS] … `.readings` = mọi bản đọc hợp lệ (bỏ bản 'khối stock toàn số 0', bỏ tài khoản khác): got=['2026-09-17T19:07:00', '2026-09-18T04:51:00', '2026-09-18T19:07:00', '2026-09-21T19:07:00', '2026-09-22T19:07:00', '2026-09-23T19:07:00'] want=['2026-09-17T19:07:00', '2026-09-18T04:51:00', '2026-09-18T19:07:00', '2026-09-21T19:07:00', '2026-09-22T19:07:00', '2026-09-23T19:07:00']
+  [PASS] … `.drops`: chi trả 300.000 = đúng một khoản đã ghi ⇒ sạch; chi trả 50.000 không khớp ⇒ ghi lại: got=[('2026-09-22T19:07:00', '2026-09-23T19:07:00', 50000.0)] want=[('2026-09-22T19:07:00', '2026-09-23T19:07:00', 50000.0)]
+  [PASS] … và `covers` chạy trên chính `.readings` đó: got=(True, False) want=(True, False)
+  [PASS] `broker_qty`: gộp lô cùng mã; `.days` = ngày CÓ bản ghi vị thế (kể cả bản ghi không giữ gì): got=({('AAA', '2026-09-17'): 100.0, ('AAA', '2026-09-18'): 100.0}, ['2026-09-17', '2026-09-18', '2026-09-21']) want=({('AAA', '2026-09-17'): 100.0, ('AAA', '2026-09-18'): 100.0}, ['2026-09-17', '2026-09-18', '2026-09-21'])
+  [PASS] `account_ledger`: bước trừ 1.000đ × 100cp nhận đúng 100.000 trong 300.000 phải thu ⇒ còn 200.000 vô chủ ngày 18/09 + 200.000 ngày 21/09: got=({'2026-09-18': 200000.0, '2026-09-21': 200000.0}, ['2026-09-17T19:07:00', '2026-09-18T19:07:00', '2026-09-21T19:07:00'], ['cash']) want=({'2026-09-18': 200000.0, '2026-09-21': 200000.0}, ['2026-09-17T19:07:00', '2026-09-18T19:07:00', '2026-09-21T19:07:00'], ['cash'])
+  [PASS] `_settle_lots`: đúng một khoản · tổng hai khoản · không khớp thì KHÔNG đụng vào sổ lô: got=(True, [300000.0, 80000000.0], True, [], False, False) want=(True, [300000.0, 80000000.0], True, [], False, False)
+   `unexplained_cash` bù trừ CHÉO NGÀY: đúng số, trong đúng CASH_SLIP_DAYS = 4.
+  [PASS] lệch đúng 4 ngày (thứ Sáu 24/07 → thứ Ba 28/07) ⇒ còn bù; 5 ngày ⇒ không: got=({}, {'2026-07-23': 3300000.0}) want=({}, {'2026-07-23': 3300000.0})
+  [PASS] khác SỐ thì không bù (300.000 phải thu vs bước trừ 100.000 hôm sau) — phần dư âm cũng không 'xoá' được phải thu: got={'2026-09-21': 300000.0} want={'2026-09-21': 300000.0}
+  [PASS] hai ngày CÙNG dư dương không bao giờ bù nhau: got={'2026-09-22': 300000.0, '2026-09-21': 300000.0} want={'2026-09-21': 300000.0, '2026-09-22': 300000.0}
+   quyền hưởng: 'no' chỉ khi sổ có bản ghi ở NGÀY CUỐI CÒN QUYỀN; nhiễu thì không đánh dấu.
+  [PASS] sổ chỉ có bản ghi của CHÍNH ex-date và vắng mã (bán hết sáng ex-date vẫn hưởng quyền) ⇒ 'unknown', không phải 'no': got='unknown' want='unknown'
+  [PASS] cú nhảy đã là RATIO_NOISE không được gắn quyền hưởng (không phải sự kiện): got=('', '') want=('', '')
+42) Sổ nhớ truy vấn `DAR_BQ_MEMO_DIR`: chỉ khi caller đặt biến, chỉ kết quả THÀNH CÔNG.
+  [PASS] KHÔNG đặt biến (mặc định) ⇒ lần nào cũng hỏi BQ, không ghi file nào ở đâu cả: got=(1, 2, 2, [], []) want=(1, 2, 2, [], [])
+  [PASS] đặt biến ⇒ cùng câu SQL hỏi BQ MỘT lần rồi đọc lại; câu SQL khác là khoá khác: got=(True, 3, 'SELECT 2', 4, 2) want=(True, 3, 'SELECT 2', 4, 2)
+  [PASS] lỗi BQ KHÔNG được nhớ (lần sau hỏi lại, vẫn ném đúng lỗi); kết quả đã nhớ vẫn đọc được: got=(['EXC:RuntimeError', 'EXC:RuntimeError'], 6, True) want=(['EXC:RuntimeError', 'EXC:RuntimeError'], 6, True)
+  [PASS] thư mục sổ nhớ không tồn tại ⇒ hỏi BQ như không đặt biến (ở đây: ném lỗi của BQ): got=('EXC:RuntimeError', 7) want=('EXC:RuntimeError', 7)
+
+=== SELFCHECK: 336 PASS / 0 FAIL ===

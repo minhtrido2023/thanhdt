@@ -1,0 +1,45 @@
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: TV1 20,400 (Close 18,930)
+CỔNG TỈ SUẤT — t06_zalopay_block_in_spacex_file__SpaceX_daily_report_2026-10-02.md | chốt 2026-10-02 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+VPI        —   SpaceX      -5.84      -5.73    -0.11       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 26)
+VPB        —   SpaceX       7.89       3.99     3.90       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+MBB        —   SpaceX      -6.88      -7.46     0.58     656.72            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+BID        —   SpaceX      -7.38     -11.99     4.61     382.89            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+MSB        —   SpaceX       3.75       3.75    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+VIB        —   SpaceX      -1.89      -1.98     0.09       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+VIX        —   SpaceX     -11.18     -23.70    12.52       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+PVT        —   SpaceX      36.25      37.43    -1.18       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 32)
+SIP        —   SpaceX       3.10       3.28    -0.18       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 32)
+VNM        —   SpaceX      -2.38      -2.22    -0.16       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 32)
+SAB        —   SpaceX      -4.53      -4.37    -0.16   3,000.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 32)
+NCT        —   SpaceX      -3.50      -3.45    -0.05   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 32)
+DRI        —   SpaceX      29.31      29.32    -0.01   1,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 35)
+TV1        —   SpaceX       0.35       1.25    -0.90       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 35)
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     455,082,600  lãi/lỗ tổng      31,400,989     6.90%
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+   · SpaceX · BID ex 2026-07-17: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0684 × phần hưởng 0.9091 = 382.89đ/cp trên KL đang giữ
+   · SpaceX · TPB ex 2026-10-02: 500đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 1.0000 = 434.78đ/cp trên KL đang giữ
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 14 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring); 5 dòng vị thế báo cáo ngày của mã KHÔNG có trong sổ vị thế broker.
+ℹ️  1 vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng (không chặn — không công bố thì không sai được): TPB (SpaceX, cổ tức 435đ/cp)
+
+❌ CHẶN — 9 vấn đề:
+   • VPB (dòng vị thế báo cáo ngày, dòng 29): báo cáo +7.89% vs kỳ vọng SpaceX +3.99% (cổ tức GỘP 0đ/cp)
+   • MBB (dòng vị thế báo cáo ngày, dòng 29): báo cáo -6.88% vs kỳ vọng SpaceX -7.46% (cổ tức GỘP 657đ/cp)
+   • BID (dòng vị thế báo cáo ngày, dòng 29): báo cáo -7.38% vs kỳ vọng SpaceX -11.99% (cổ tức GỘP 383đ/cp)
+   • VIX (dòng vị thế báo cáo ngày, dòng 29): báo cáo -11.18% vs kỳ vọng SpaceX -23.70% (cổ tức GỘP 0đ/cp)
+   • PVT (dòng vị thế báo cáo ngày, dòng 32): báo cáo +36.25% vs kỳ vọng SpaceX +37.43% (cổ tức GỘP 0đ/cp)
+   • SIP (dòng vị thế báo cáo ngày, dòng 32): báo cáo +3.10% vs kỳ vọng SpaceX +3.28% (cổ tức GỘP 0đ/cp)
+   • VNM (dòng vị thế báo cáo ngày, dòng 32): báo cáo -2.38% vs kỳ vọng SpaceX -2.22% (cổ tức GỘP 0đ/cp)
+   • SAB (dòng vị thế báo cáo ngày, dòng 32): báo cáo -4.53% vs kỳ vọng SpaceX -4.37% (cổ tức GỘP 3,000đ/cp)
+   • TV1 (dòng vị thế báo cáo ngày, dòng 35): báo cáo +0.35% vs kỳ vọng SpaceX +1.25% (cổ tức GỘP 0đ/cp)
+
+   Trong đó PVT, SIP, TV1, VIX, VNM, VPB KHÔNG có cổ tức ⇒ lệch KHÔNG phải do thiếu cộng cổ tức. Gần như chắc chắn sai CƠ SỞ GIÁ: dùng `mtm_price` trong `data/execution_logs/verified_snapshot_<acct>_<asof>.json` (giá đóng cửa đã xác minh), KHÔNG dùng `positions[].marketPrice` — field đó không phải giá ATC.
+
+   Với mã CÓ cổ tức (BID, MBB, SAB): chạy `mike/bin/dividend_adjusted_return.py --resolve <rổ mã> --from … --to …`,
+   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số); giá vốn và cổ tức/cp đều quy về KL ĐANG GIỮ (cột 'gia von THO' và 'co tuc GOP' ở bảng trên) — coding_guidelines §21.

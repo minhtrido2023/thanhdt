@@ -1,0 +1,30 @@
+⚠️  WC_ROOT='/tmp/arch_rev/wcroot' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+steps: [('buy', 0.0)]
+costPrice broker=12,872.00; giá vốn thô đúng=13,632.00; thổi=+31.29%  đúng=+29.27%
+
+##### H2: sự kiện thật bị gắn RATIO_NOISE + lệnh MUA (600cp) cùng cặp bản ghi che bước trừ
+   rc=0  PASS=True
+   | DRI     2500  ZaloPay      31.29      31.29    -0.00       0.00    12,872.00  OK
+   | ✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.
+
+##### H2': không sự kiện nào được phát hiện + lệnh mua che
+   rc=0  PASS=True
+   | DRI     2500  ZaloPay      31.29      31.29    -0.00       0.00    12,872.00  OK
+   | ✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.
+
+##### H2-control: sự kiện ĐÃ giải + mua che (hidden) => kỳ vọng?
+   rc=1  PASS=False
+   | DRI     2500  ZaloPay      29.27      28.68     0.59   1,000.00    13,872.00  LỆCH
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2500): báo cáo +29.27% vs kỳ vọng +28.68% (lệch +0.59pp; cổ tức GỘP 1,000đ/cp)
+   |    Với mã CÓ cổ tức (DRI): chạy `mike/bin/dividend_adjusted_return.py --resolve <rổ mã> --from … --to …`,
+
+pre-ex: thổi=+14.98%  đúng=+8.57%
+
+##### H3: chốt 21/09 (ex 22/09), mua 600cp cùng ngày che bước trừ
+   rc=0  PASS=True
+   | DRI     2500  ZaloPay      14.98      14.98     0.00       0.00    12,872.00  OK
+   | ✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.
+
+##### H6: (qua _assign_frames thật) cú nhảy lookup_failed ex 25/09 SAU sự kiện thật 22/09
+   real.frame_ok: False | real.resolved: False | out: {} | blockers: {'DRI': ['sự kiện ex 2026-09-22 [CASH_CONFIRMED] CHƯA giải (—) — sổ broker lúc 2026-09-21T19:07:40: KL giữ nguyên 1,900, giá vốn/cp bị TRỪ 1,000.00đ']}

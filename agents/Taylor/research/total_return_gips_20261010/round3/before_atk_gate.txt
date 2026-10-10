@@ -1,0 +1,44 @@
+### B3 lặp lại H1/H1b/H1d (mã KHÔNG kỳ vọng)
+  H1 KL lệch 1cp: rc=1
+  H1b không cột KL: rc=1
+  H1d cột 'Sinh lời (%)': rc=1
+  H1e ô mã 'DRI (UPCOM)' + dòng dài: rc=0
+  H1f văn xuôi không dấu 'DRI lãi 37,81%': rc=0
+  H1g STT đứng trước mã: rc=1
+
+### H1c — mã ĐÃ có kỳ vọng (+34,58%), số SAI +37,81%
+  đối chứng KL đúng: rc=1
+  H1c KL lệch 1cp: rc=0  ⟵ PASS số sai; có cảnh báo KL
+  H1c' KL ghi '1,9k': rc=0  ⟵ PASS số sai; có cảnh báo KL
+  không cột KL: rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  cột 'Hiệu suất' ô KHÔNG dấu: rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  cột 'Hiệu suất' ô CÓ dấu: rc=1
+  STT đứng trước mã: rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  ô mã 'DRI (UPCOM)': rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  văn xuôi 'DRI +37,81%': rc=1
+  văn xuôi 'DRI lãi +37,81%': rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  văn xuôi 'DRI: +37,81%': rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  bảng trong blockquote: rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+  2 cột ứng viên: 'Lãi/lỗ ngày' +0,6% rồi 'Lãi/lỗ' +37,81%: rc=1
+  2 cột %: 'Lãi/lỗ (%)' +37,81% rồi 'Lãi/lỗ tuần (%)' +34,58%: rc=0  ⟵ PASS số sai; KHÔNG cảnh báo nào
+
+### B4 lặp lại H2/H2'/H2b/H3
+  H3 rc= 1
+  H2' rc= 1
+  H2 rc= 1
+  H2b rc= 1
+
+### (ii) PHÁ thiết kế sổ-tiền-làm-trọng-tài
+  G3 H3 + chi trả cùng khe (không delta dương): rc=0  (đúng +8,57%, công bố +14,98%)
+  G3' H2' + chi trả cùng khe: rc=0 (đúng +29,27%)
+  G2 MỞ vị thế ngày cuối còn quyền, chốt cùng ngày, phải thu vô chủ 1,9tr có trong sổ: rc=0  (công bố +7,25%; đúng 0,00%)
+          ZaloPay  giá vốn thô      26,220,000  lãi/lỗ tổng       1,900,000     7.25%
+      Đã kiểm 1 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+      ✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.
+  G2b như trên, chốt tối CHÍNH ex-date (tỉ số chưa lộ, vendor announced): rc=0  (công bố +1,45%; đúng (14000-14800+950)/14800 = +1,01%)
+  G2c như trên, sự kiện bị gắn RATIO_NOISE (hoặc không nguồn nào thấy), chốt 09/10: rc=0  (công bố +22,46%; đúng (16900-14800+950)/14800 = +20,61%)
+  G2d đối chứng: sự kiện UNVERIFIED (không phải nhiễu): rc=1
+  G2e đối chứng: sự kiện ĐÃ giải: gross={'DRI': 1000.0} addback={} blockers=[]
+  G6 đối chứng chặn oan (phải thu ĐÃ có chủ, mã khác mua cùng ngày): blockers={}
+  G4 thưởng ×1,15 bị lệnh mua che + cổ tức tiền trước đó: blockers=[] gross cổng={'MBB': 644.122383252818} (đúng 740.74) ⇒ kỳ vọng cổng 34.74624326623192 vs đúng 34.58
+  G4b VHM ×2 bị che + cổ tức 2.000đ trước đó: gross cổng={'VHM': 454.5454545454545} (đúng 909.09) ⇒ kỳ vọng cổng 39.45% vs đúng 39.08%

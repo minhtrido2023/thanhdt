@@ -1,0 +1,21 @@
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 28,450 (Close 21,880), TV1 20,400 (Close 18,930)
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: TV1 20,400 (Close 18,930)
+(i) 2 tài khoản thật
+   ZaloPay DRI: (29.31, '', [], '19/19 mã có tỉ suất')
+   SpaceX  DRI: (29.32, '', [], '15/15 mã có tỉ suất')
+   (live BQ calls so far: 29)
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 28,450 (Close 21,880), TV1 20,400 (Close 18,930)
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: TV1 20,400 (Close 18,930)
+(ii) + tài khoản thứ ba KHÔNG có bản ghi nào
+   ZaloPay DRI: (29.31, '', [], '19/19 mã có tỉ suất')
+   SpaceX  DRI: (29.32, '', [], '15/15 mã có tỉ suất')
+   (live BQ calls so far: 29)
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 28,450 (Close 21,880), TV1 20,400 (Close 18,930)
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: TV1 20,400 (Close 18,930)
+   L3: first='2026-07-06T19:07:00' n_ts=70 (bản ghi có thật: 70 tối, đều rỗng)
+(iii) + tài khoản thứ ba có bản ghi positions RỖNG mỗi tối từ 06/07 (sổ phủ mọi cửa sổ, chưa từng giữ gì)
+   ZaloPay DRI: (29.31, '', [], '19/19 mã có tỉ suất')
+   SpaceX  DRI: (29.32, '', [], '15/15 mã có tỉ suất')
+   (live BQ calls so far: 29)
+
+[rc=0]

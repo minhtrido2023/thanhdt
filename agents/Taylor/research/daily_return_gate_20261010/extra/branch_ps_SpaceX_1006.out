@@ -1,0 +1,42 @@
+─────────────────────────────────────────────────
+📋 **TÌNH TRẠNG DANH MỤC — SpaceX (2026-10-06)**
+Chiến lược: **V2.4** | Regime: **NEUTRAL** (DT5G) | Park target: **0%** idle cash
+NAV: **981.3M** | Hôm nay: **+0.13%** | Từ khi bắt đầu hoạt động: **-1.87%**
+Gate DT5G: 🟢 BÌNH THƯỜNG · candidate CRISIS 3/25 (12%, còn 22 phiên để commit, base giữ từ 2026-10-07, committed NEUTRAL) · P(CRISIS xác nhận|k=3)≈33% [18–50%, n=33] ⚠ mẫu mỏng, tham khảo  [dữ liệu tới 2026-10-09]
+   ↳ Nền xấu 9 phiên liền từ 29/09 (6 BEAR + 3 CRISIS, đổi qua lại 1 lần → bộ đếm reset, vẫn NEUTRAL) · VNINDEX −2,6% từ đầu đợt · ngưỡng xem lại: ≥15 phiên và VNINDEX ≤−5,0% — chưa chạm
+Value Radar: 🟢 22.4 RẺ (phân vị 10 năm) · P/E 11.11 (p6) · P/B 1.87 (p23) · spread EY−CCTG 6T +1.60pp (p38)  [dữ liệu tới 2026-10-09]
+─────────────────────────────────────────────────
+
+**Cơ cấu danh mục**
+
+| Sleeve | Giá trị | % NAV | Lãi/Lỗ CK | Ghi chú |
+|--------|--------:|------:|----------:|---------|
+| BAL (1 mã) | 46.1M | 4.7% | -7.7% | Momentum V11 + yieldcombo |
+| PARK custom30V (5 mã) | 14.3M | 1.5% | -0.4% | Rebal gần nhất: 2026-08-05 | kế tiếp: ~2026-12-01 (ước tính Q4) |
+| CAPIT (5 mã) | 308.8M | 31.5% | +8.2% | Bear-washout overflow |
+| Discretionary (2 mã) | 105.1M | 10.7% | +16.9% | Fear-buy/special situation |
+| Trứng vàng | 347.6M | 35.4% | — | DNSE bond-like (off-book) |
+| Cash | 156.4M | 15.9% | 0% | Idle |
+
+**Chi tiết BAL (1 mã)**
+  VPI 46.1M, -7.66%
+
+**Chi tiết PARK custom30V (5 mã)**
+  VPB 6.6M, +5.35% · MBB 5.3M, -6.99% · MSB 1.4M, +6.34% · VIB 0.6M, -0.88% · TPB 0.4M, -16.40%
+
+**Chi tiết CAPIT (5 mã)**
+  PVT 85.8M, +43.27% — còn 4 phiên tới hạn cố định T+60 — sắp tới hạn · SIP 81.9M, +2.43% — còn 4 phiên tới hạn cố định T+60 — sắp tới hạn · VNM 52.6M, -0.34% — còn 4 phiên tới hạn cố định T+60 — sắp tới hạn · SAB 46.8M, -4.16% — còn 4 phiên tới hạn cố định T+60 — sắp tới hạn · NCT 41.7M, -3.56% — còn 4 phiên tới hạn cố định T+60 — sắp tới hạn
+
+**Chi tiết Discretionary (2 mã)**
+  DRI 60.7M, +30.82% — ⚠️ 37 phiên từ 2026-08-11 — chờ ý kiến PM về exit · TV1 44.4M, +2.24% — ⚠️ 37 phiên từ 2026-08-11 — chờ ý kiến PM về exit
+
+**Corp Action — 7 ngày tới** (mã đang giữ)
+| Mã | Sự kiện | Ngày | Tác động dự kiến |
+|----|---------|------|-------------------|
+| MBB | AIS | 2026-10-06 | MBB - Niêm yết bổ sung 1.208.249.986 cổ phiếu |
+| TV1 | DIV | 2026-10-07 | 1,500đ/cp cổ tức tiền mặt |
+
+**Cờ theo dõi**
+- PARK: rổ hiện hành chốt 2026-08-05 (chu kỳ ~quý, kế tiếp ~2026-12-01 (ước tính)).
+- ⚠️ Discretionary: DRI (37p), TV1 (37p) — chờ ý kiến PM về exit
+- CAPIT: 5 mã đang trong episode overflow — còn 4 phiên tới hạn cố định T+60 — sắp tới hạn.

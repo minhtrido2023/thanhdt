@@ -1,0 +1,27 @@
+gốc cây (marker wc_env.sh): /home/trido/thanhdt/WorkingClaude
+RED control = bản cũ 9645d2bd (dirname×3), lấy từ git
+
+✅ bộ assertion NHÚNG `report_return_gate.py --selfcheck` PASS
+✅ … và nó THỰC SỰ chạy: dòng đếm có thật, số ca > 0, không ca nào FAIL
+     SELFCHECK: PASS (257/257 ca)
+✅ worktree giả · bản MỚI: ROOT = gốc WorkingClaude
+✅ worktree giả · bản MỚI: EXEC_DIR trỏ thư mục CÓ THẬT
+✅ RED control · bản CŨ: ROOT lệch về mike/agents (tái hiện sự cố)
+✅ RED control · bản CŨ: EXEC_DIR KHÔNG tồn tại ⇒ cổng fail-closed
+✅ env WC_ROOT độc hại (=mike/agents, y hệt dispatch.sh trong worktree): bị BỎ QUA
+✅ env WC_ROOT độc hại: EXEC_DIR vẫn trỏ thư mục CÓ THẬT
+✅ env WC_ROOT HỢP LỆ vẫn được tôn trọng (không vô hiệu hoá override)
+
+(--root-only: bỏ qua 2 test chạy cổng thật)
+
+[CFG] nhãn account biến mất khỏi ACCOUNTS vì lệch config ⇒ cổng phải CHẶN
+✅ [CFG0] `_all_account_labels()` chỉ trả profile broker DNSE, KHÔNG trả sổ paper (`main`/`ab_dip`/`ab_cross` — `'main' in <tên file>` sẽ chặn oan hàng loạt)
+✅ [CFG1] …và nó CÓ thấy account DNSE đang disabled (RocketX) — đúng mục đích: phân biệt 'account có thật mà cổng không thấy' với 'báo cáo không thuộc account nào'
+✅ [CFG1b] ACCOUNTS rỗng ⇒ `accounts_asof_from_name()` KHÔNG thấy nhãn nào, tức đúng nhánh 'không nhận ra tài khoản nào' mà bản cũ trả 0
+✅ [CFG2] `run_gate()` THẬT trên `SpaceX_weekly_report_*.md` khi ACCOUNTS mất SpaceX ⇒ rc=1 (trước bản vá: rc=0, cổng tắt im lặng)
+✅ [CFG2b] …và nói đúng nguyên nhân là LỆCH CONFIG, không phải báo cáo sai (§29)
+✅ [CFG3] CHỨNG MINH NGƯỢC: `run_gate()` THẬT trên báo cáo KHÔNG mang nhãn account nào ⇒ vẫn rc=0 (giữ hành vi cũ, không chặn oan)
+✅ [CFG4a] `run_gate()` có ĐÚNG MỘT nhánh `if _named:`
+✅ [CFG4b] nhánh đó thật sự `return 1` (không chỉ in cảnh báo rồi vẫn trả 0)
+
+✅ SELFCHECK PASS

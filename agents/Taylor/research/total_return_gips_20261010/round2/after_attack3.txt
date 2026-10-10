@@ -1,0 +1,4 @@
+ứng viên: [('2026-09-08', '0.71%', 100.34), ('2026-09-16', '0.70%', 100.4), ('2026-09-22', '0.75%', 110.0), ('2026-09-25', '0.67%', 98.01), ('2026-09-30', '0.64%', 101.91), ('2026-10-06', '0.61%', 101.83), ('2026-10-08', '0.60%', 95.81)] amp=0.70%
+(a) vendor có dòng   : CASH_CONFIRMED 110.0 | resolved True
+(b) vendor 0 dòng     : CASH_CONFIRMED | resolved True | giải từ tiền mặt broker thật (2 phương trình / 1 ẩn: DRI@2026-09-22)
+    build_position_return: cổ tức/cp = 110.0 | unverified: 0 | tỉ suất 28.21% (đúng: 28.21%)

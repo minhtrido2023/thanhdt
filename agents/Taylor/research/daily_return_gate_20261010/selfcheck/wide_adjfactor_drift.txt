@@ -1,0 +1,917 @@
+[warn] 2/2 tai khoan KHONG tra ve vi the nao (SpaceX, ZaloPay) -> nguon vi the coi nhu HONG cho ca luot, held=unknown cho moi ma. `broker_qty()` KHONG raise khi thieu file/record: kiem `dividend_adjusted_return.EXEC_LOG_DIR`. Mot tai khoan con song KHONG du: ma chi nam o tai khoan hong se bi gan 'none' — mot khang dinh SAI ve phoi nhiem tien that.
+[warn] anh chup vi the CU: SpaceX moi nhat 2026-09-01, cach phien 2026-09-25 24 ngay (> 4) -> nhan 'none' khong dang tin, held=unknown cho moi ma.
+=== selfcheck adjfactor Layer 1 (DETECT-ONLY) ===
+
+[1] group_price_factor — công thức giá tham chiếu của sàn
+  ok   thưởng 10% -> f=1.1
+  ok   GEX cùng ngày: CỘNG tỉ lệ -> 1.45
+  ok   GEX: KHÔNG phải tích 1.20*1.25=1.50
+  ok   DGC cùng ngày: CỘNG tiền -> 1.206452
+  ok   DGC: KHÔNG phải tích hai hệ số đơn (1.196544)
+  ok   cổ phiếu + tiền cùng ngày -> (1+q)*P/(P-D)
+
+[2] UNCOMPUTABLE — fail-closed, mã lý do suy TỪ bằng chứng (§29)
+  ok   quyền mua cổ đông hiện hữu -> None + rights_issue_no_subscription_price
+  ok   quyền mua cổ đông hiện hữu: note có số/giá trị thật, không phải câu đoán
+  ok   ISS ratio không parse -> None + iss_ratio_unparsable
+  ok   ISS ratio không parse: note có số/giá trị thật, không phải câu đoán
+  ok   ISS ratio <= 0 -> None + iss_ratio_nonpositive
+  ok   ISS ratio <= 0: note có số/giá trị thật, không phải câu đoán
+  ok   DIV dps không parse -> None + div_dps_unparsable
+  ok   DIV dps không parse: note có số/giá trị thật, không phải câu đoán
+  ok   DIV dps <= 0 -> None + div_dps_nonpositive
+  ok   DIV dps <= 0: note có số/giá trị thật, không phải câu đoán
+  ok   event_code lạ -> None + unsupported_event_code
+  ok   event_code lạ: note có số/giá trị thật, không phải câu đoán
+  ok   tiền >= giá thô -> None + cash_exceeds_price
+  ok   tiền >= giá thô: note có số/giá trị thật, không phải câu đoán
+  ok   không có phiên cum trong cửa sổ -> no_cum_session_in_window
+  ok   cổ phiếu thuần: tính được dù KHÔNG có dòng giá nào
+
+[3] price_stale_suspect — guard ffill `Price`, và KHÔNG bắt oan dòng khoẻ
+  ok   dòng KHOẺ (Price thô trên band đã điều chỉnh) KHÔNG bị nghi
+  ok   dòng ffill (Price ngoài band đã nâng về frame thô) BỊ nghi
+  ok   phiên đầu chuỗi (không có láng giềng) KHÔNG kết luận nghi
+  ok   thiếu hi/lo -> KHÔNG kết luận nghi
+  ok   group_price_factor THẬT SỰ gọi price_stale_suspect cho chân tiền (M11)
+
+[4] build_factor_curve — tích theo ex-date, dedupe, taxonomy
+  ok   2 ex-date liên tiếp: r_pred trước cả hai = 1.1*1.2
+  ok   giữa hai ex-date: chỉ hệ số của ex-date SAU
+  ok   sau cả hai: r_pred = 1.0
+  ok   ex-date ĐÚNG ngày không tính hệ số của CHÍNH nó (tích lấy ex > t)
+  ok   không có unknown
+  ok   2 ex-date khác code, không dòng trùng code -> corr_ex rỗng
+  ok   dòng trùng y hệt -> dedupe thành 1 (1.2, không phải 1.4)
+  ok   hai tranche KHÁC nhau -> CỘNG (1.3)
+  ok   ESOP KHÔNG điều chỉnh giá -> r_pred = 1.0 ở mọi phiên
+
+[5] longest_bad_run — ngưỡng persistence (bộ lọc ffill 2026-01-30)
+  ok   lệch 1 phiên lẻ -> run=1 (< min_run 3)
+  ok   lệch 2 phiên -> run=2 (< min_run 3)
+  ok   lệch đúng 3 phiên liên tiếp -> run=3
+  ok   hai cụm 2 phiên rời nhau KHÔNG gộp thành 4
+  ok   lệch 0.29% (dưới sàn 0.3%, ca DXG) -> run=0
+  ok   lệch ÂM cũng tính (|dev|)
+  ok   trả về đúng cụm dài nhất
+
+[6] scan_ticker — verdict, chiều lệch, và fail-closed từng phần
+  ok   chữ ký FPT -> DRIFT
+  ok   dev = -9.0909% (= 1 - 1/1.1)
+  ok   dir = vendor_missing (r_obs < r_pred)
+  ok   run = số phiên trước ex-date
+  ok   KHÔNG partial (không có ex-date uncomputable)
+  ok   vendor áp đúng -> AGREE
+  ok   r_obs > r_pred -> dir = our_table_missing
+  ok   quyền mua ở cuối cửa sổ -> UNCOMPUTABLE, KHÔNG phải DRIFT
+  ok   UNCOMPUTABLE nêu đúng mã lý do
+  ok   ca XHC: uncomputable ở giữa + lệch sau -> DRIFT
+  ok   ca XHC: đánh dấu partial
+  ok   ca XHC: cửa sổ chấm điểm bắt đầu TỪ ex-date uncomputable, không sớm hơn
+  ok   eval_from cắt đúng: không chấm phiên trước rìa
+  ok   chuỗi rỗng -> NODATA
+  ok   ex = ex-date BỊ HỎNG (08-05), không phải ex-date sớm nhất (06-05)
+  ok   cụm lệch kết thúc TRƯỚC ex-date bị hỏng
+  ok   our_table_missing: KHÔNG vay tên ex-date vendor làm ĐÚNG (M24)
+  ok   our_table_missing: khoá nói thẳng 'không xác định được ex-date nào thiếu'
+  ok   R3-2: `d1` trôi sang phiên mới nhưng khoá de-dup KHÔNG đổi
+  ok   R3-3: khoá too_few KHÔNG trôi theo rìa trái cửa sổ nạp
+
+[7] guard tham số CLI + hợp đồng dòng máy đọc (round-trip THẬT, không grep nguồn)
+  ok   --min-run dưới 3 bị TỪ CHỐI (không cho hạ ngưỡng persistence)
+  ok   --dev-tol <= 0 bị TỪ CHỐI
+  ok   --dev-tol >= 0.5 bị TỪ CHỐI (dung sai vô nghĩa = tắt cảnh báo mà trông như đang chạy)
+  ok   xác định được merge-base với master
+  FAIL nhánh này KHÔNG chạm report_return_gate.py / dividend_adjusted_return.py (commit + worktree)   committed='' working='M bin/dividend_adjusted_return.py\n M bin/report_return_gate.py'
+  ok   detector chỉ ĐỌC dividend_adjusted_return (ACCOUNTS/broker_qty), không gọi hàm ghi/tính §21
+  ok   marker_drift: 12 trường
+  ok   marker_drift: thứ tự trường đúng vị trí (tag,tk,ex,r_obs,r_pred,dev,run,d0,d1,dir,held,corr)
+  ok   marker_uncomputable: 5 trường đúng vị trí
+  ok   marker_nodata: 3 trường đúng vị trí
+  ok   marker_feed: 7 trường đúng vị trí
+  ok   marker_scan: 7 trường đúng vị trí
+  ok   round-trip: body có DRIFT -> alert trả rc=10
+  ok   round-trip: `held` của dòng producer thành nhãn ĐANG NẮM LIVE (không phải `dir`)
+  ok   round-trip: `dir` của dòng producer thành câu nguyên nhân vendor (không phải held)
+  ok   round-trip: `dev` in ra đúng -20.66%
+  ok   round-trip: `run` in ra đúng 78 phiên
+  ok   round-trip: `d0..d1` in ra đúng cửa sổ
+  ok   round-trip: `ex` in ra đúng ex-date bị hỏng
+  ok   round-trip: NODATA mã không nắm -> chỉ đếm, không nêu tên
+  ok   round-trip: mã UNCOMPUTABLE đang nắm -> nêu tên + mã lý do
+
+[11] detector: BQ chết -> rc=1 (KHÔNG phải 0/11) và in LỖI THẬT
+  ok   cal.bq ném -> rc=1
+  ok   stderr có nhãn [FATAL] + LỖI THẬT (loại + thông điệp), không phải câu đoán
+  ok   stderr nói rõ KHÔNG kết luận gì
+  ok   universe rỗng -> rc=11 (điểm mù), KHÔNG phải 0
+  ok   universe rỗng -> nói rõ 'DIEM MU', không phải 'khong co lech'
+
+[12] feed_gate — phân loại độ tươi feed nguồn (bảng TRAP, writer ngoài repo)
+  ok   nạp cùng ngày phiên -> FRESH
+  ok   nạp trước phiên 2 ngày -> STALE
+  ok   STALE có lý do TRÍCH TỪ SỐ ĐÃ ĐỌC, không phải câu cố định
+  ok   nạp cũ > 5 ngày -> DEAD
+  ok   max_ingested không đọc được -> UNREADABLE (KHÔNG fail-open thành FRESH)
+  ok   UNREADABLE trích giá trị thô đã đọc vào lý do
+  ok   feed_freshness() ném -> UNREADABLE + LỖI THẬT trong lý do
+  ok   FEED_DEAD_DAYS khớp nguồn chuẩn tắc corp_action_daily.py
+
+[13] run_scan — marker thật phát ra + rc thật (kill M7/M8/M18/M19)
+  ok   run_scan IN RA dòng ADJFACTOR_FEED (M7)
+  ok   run_scan in ra dòng DRIFT cho mã lệch
+  ok   dòng DRIFT mang nhãn nắm THẬT (không phải 'none')
+  ok   có DRIFT -> rc=10
+  ok   held_map()=None -> nhãn `unknown`, KHÔNG phải `none` (M19/F1)
+  ok   held_map()=None: KHÔNG có dòng nào mang nhãn `none`
+  ok   --no-holdings -> nhãn `skipped`, KHÔNG phải `unknown` (F7)
+  ok   mã không có dòng giá -> IN RA ADJFACTOR_NODATA (M18)
+  ok   dòng NODATA mang nhãn nắm (mã không nắm vẫn phải có dòng để bus thấy)
+  ok   mọi mã khớp + feed FRESH -> rc=0 (trạng thái 'không có gì' DUY NHẤT)
+  ok   lượt sạch vẫn in ADJFACTOR_SCAN
+  ok   mọi mã khớp nhưng feed CHẾT -> rc=11, KHÔNG phải 0 (M8)
+  ok   feed chết in ra status DEAD để alert.sh đọc được
+
+[14] held_map fail-closed · corr đính chính · knob làm-im (F1/F4/F6/F8)
+  ok   broker_qty() trả {} (không raise) -> held_map = None, KHÔNG phải {} (F1)
+[warn] 1/2 tai khoan KHONG tra ve vi the nao (ZaloPay) -> nguon vi the coi nhu HONG cho ca luot, held=unknown cho moi ma. `broker_qty()` KHONG raise khi thieu file/record: kiem `dividend_adjusted_return.EXEC_LOG_DIR`. Mot tai khoan con song KHONG du: ma chi nam o tai khoan hong se bi gan 'none' — mot khang dinh SAI ve phoi nhiem tien that.
+  ok   ảnh chụp cũ > 4 ngày -> held_map = None (freshness §14)
+  ok   ảnh chụp TƯƠI -> trả map thật
+  ok   qty = 0 -> KHÔNG tính là đang nắm
+  ok   MỘT tài khoản rỗng (tài khoản kia khoẻ) -> held_map = None (R3-1)
+  ok   CẢ HAI tài khoản trả vị thế -> mới được dùng nhãn nắm
+  ok   2 dòng DIV cùng ex-date (nghi đính chính) -> corr_ex có ex-date đó (F4)
+  ok   ca đính chính -> DRIFT với corr=1 (caveat đi CÙNG cáo buộc, §29)
+  ok   dòng máy đọc mang corr=1 ở trường cuối
+  ok   ca thường -> corr=0 (cờ phân biệt được, không phải luôn bật)
+  ok   chỉ so được 1 phiên (< 3) -> UNCOMPUTABLE, KHÔNG phải AGREE (F8)
+  ok   mã lý do nói rõ thiếu phiên để so
+  ok   --min-run 9999 bị TỪ CHỐI (chiều làm im) (F6)
+  ok   --lookback-days 2 bị TỪ CHỐI (chiều làm im)
+  ok   --ex-days 0 bị TỪ CHỐI
+  ok   --dev-tol 0.4 bị TỪ CHỐI (> DEV_TOL_MAX=0.05, chiều làm im) (R3-6)
+  ok   --dev-tol 0.003 (mặc định, sàn bằng chứng) VẪN được nhận
+  ok   R3-5: selfcheck KHÔNG chạm BigQuery — cổng MIKE_ADJFACTOR_NO_BQ có tác dụng thật
+  ok   --min-run 3 (mặc định) VẪN được nhận — cổng không chặn oan giá trị đúng
+
+[15] AWAITING_TRADE — ngưỡng phiên khớp + ranh giới với DRIFT
+  ok   hằng số có tên AWAIT_MIN_TRADED_SESSIONS == 3
+  ok   price_rows: MỘT truy vấn, chọn `t.Volume AS vol`
+  ok   0 phiên từ ex-date -> AWAITING_TRADE, n_traded=0
+  ok   awaiting vẫn mang đủ payload DRIFT (ex, dev, dir) — không mất bằng chứng
+  ok   2 phiên khớp -> vẫn AWAITING_TRADE (cho vendor thời gian)
+  ok   3 phiên khớp mà vẫn lệch -> DRIFT thật
+  ok   phiên ex-date được đếm (>= ex, không phải > ex)
+  ok   dòng Volume=0 không đếm: 5 dòng 0 + 2 khớp -> AWAITING n=2
+  ok   4 dòng 0 + 3 khớp -> DRIFT
+  ok   Volume NULL đếm là CÓ khớp (fail về phía DRIFT)
+  ok   series_by_ticker giữ Volume NULL là None (không ép 0)
+  ok   series_by_ticker đọc Volume số
+  ok   our_table_missing + 0 phiên -> DRIFT, KHÔNG awaiting
+  ok   our_table_missing KHÔNG đi qua nhánh awaiting (không chứng từ 'chua du 3 phien')
+  ok   corr=1 + 0 phiên -> DRIFT (giữ cờ đính chính), KHÔNG awaiting
+  ok   vendor_missing + unknown_gap -> DRIFT (không có ngày để đếm)
+  ok   unknown_gap KHÔNG đi qua nhánh awaiting (không chứng từ 'chua du 3 phien')
+  ok   chữ ký FPT SETTLE_RUN=4 + 1 phiên khớp -> DRIFT, KHÔNG awaiting
+  ok   chữ ký FPT: chứng từ nói rõ vendor đã áp một phần
+  ok   khe 1 phiên giữa cụm lệch và ex-date + 1 phiên khớp -> DRIFT, KHÔNG awaiting
+  ok   khe 2 phiên giữa cụm lệch và ex-date + 1 phiên khớp -> DRIFT, KHÔNG awaiting
+  ok   cụm lệch chạm phiên cuối trước ex-date + 1 phiên khớp -> vẫn AWAITING
+  ok   awaiting khớp đúng hệ số chờ: dư = 0 (r_obs·Πf/r_pred − 1)
+  ok   chữ ký VHF: 0 phiên nhưng lệch KHÔNG giải thích được bằng hệ số chờ -> DRIFT
+  ok   chữ ký VHF: chứng từ ghi rõ vì sao không phải awaiting
+  ok   dư |−0,29%| ≤ dev_tol -> vẫn AWAITING
+  ok   dư |+0,31%| > dev_tol -> DRIFT
+  ok   ≥3 phiên + lệch không giải thích -> DRIFT, KHÔNG ghi chứng từ 'chua du 3 phien'
+  ok   hai ex-date cùng chờ (1,1×1,2): Π gồm cả hai -> AWAITING, dư 0
+  ok   thiếu cả hệ số ex cũ (A) lẫn ex chờ (B) -> DRIFT, không bị awaiting che
+  ok   marker_awaiting đúng 6 trường theo thứ tự
+  ok   run_scan: mã đang NẮM awaiting -> dòng AWAITING mang nhãn nắm THẬT (không ẩn tiền thật)
+  ok   run_scan: mã awaiting KHÔNG có dòng DRIFT
+  ok   run_scan: DRIFT của mã đủ phiên byte-identical với marker_drift (12 trường)
+  ok   run_scan: SCAN giữ 7 trường, n_drift = DRIFT THẬT (1), awaiting không cộng vào
+  ok   run_scan: log có hàng bằng chứng awaiting (r_obs, r_pred, cửa sổ, ex, n_khop, dư)
+  ok   run_scan: log có chứng từ hệ số của mã awaiting
+  ok   run_scan: có DRIFT -> rc=10
+  ok   fixture awaiting-only THUẦN: không DRIFT/UNCOMP/NODATA, SCAN 1|0|0|0|0
+  ok   chỉ có awaiting (feed FRESH) -> rc=11, KHÔNG phải 0
+  ok   awaiting mã không nắm mang nhãn `none`
+
+[17] PRICE_FIELD_MISMATCH — lệch trường Price vs lệch hệ số thật
+  ok   ngưỡng KHÔNG đổi: DEV_TOL 0,003, MIN_RUN 3
+  ok   hằng số có tên: PFM_MAX_TICKS 2, PFM_TICK_FRAC 0,2, CLOSE_GRID_VND 10, PFM_NEIGHBOR_FRAC 0,5
+  ok   thật DRI -> PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte
+  ok   thật DVN -> PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte
+  ok   thật SHC -> PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte
+  ok   thật CC1 -> PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte
+  ok   thật HC1 -> vẫn DRIFT, dòng máy đọc Y NGUYÊN baseline
+  ok   thật VFR -> vẫn DRIFT, dòng máy đọc Y NGUYÊN baseline
+  ok   thật VHF -> vẫn DRIFT, dòng máy đọc Y NGUYÊN baseline
+  ok   VFR thật: bị loại ngay ở cổng KẸP (láng giềng 07-01 +0,29% chỉ khớp SÁT ngưỡng)
+  ok   thật PBP (cụm 56 phiên từ rìa trái, lệch +0,41% ổn định) -> vẫn DRIFT our_table_missing
+  ok   HC1: chứng từ nói rõ vì sao KHÔNG phải lỗi trường Price (+3,96 bước)
+  ok   DRI: chứng từ ghi số bước từng phiên + hai láng giềng khớp
+  ok   DRI: sàn KHÔNG tra được -> DRIFT y nguyên baseline (fail-closed)
+  ok   DRI: không truyền tick_fn (mặc định) -> DRIFT y nguyên baseline
+  ok   DVN: sàn KHÔNG tra được -> DRIFT y nguyên baseline (fail-closed)
+  ok   DVN: không truyền tick_fn (mặc định) -> DRIFT y nguyên baseline
+  ok   SHC: luật stale_price KHÔNG cần sàn -> vẫn PRICE_FIELD_MISMATCH khi sàn không biết
+  ok   DVN nếu là HOSE (bước 50 ở 20.400) -> −4,17 bước > 2 -> DRIFT: bước phải theo SÀN THẬT
+  ok   ÂM chữ ký FPT (r ổn định −9,09%, khớp chỉ ở 4 phiên cuối) -> DRIFT
+  ok   ÂM hệ số thật kẹp giữa 2 phiên khớp nhưng lệch ~20 bước -> DRIFT
+  ok   ÂM ... chứng từ nêu số bước
+  ok   1 bước ×3 phiên kẹp giữa phiên khớp -> PRICE_FIELD_MISMATCH tick_offset
+  ok   ±1/±2 bước lẫn dấu -> PRICE_FIELD_MISMATCH
+  ok   3 bước (> PFM_MAX_TICKS) -> DRIFT
+  ok   MỘT phiên 3 bước trong cụm -> DRIFT (mọi phiên phải đạt)
+  ok   dư 0,18 bước (≤ 0,2) -> PRICE_FIELD_MISMATCH
+  ok   dư 0,25 bước (> 0,2) -> DRIFT
+  ok   MỘT phiên dư 0,45 bước -> DRIFT
+  ok   lệch 0,18 bước (>0,3% ở giá 5.000, nhưng làm tròn = 0 bước) -> DRIFT
+  ok   cụm chạm RÌA TRÁI cửa sổ (không có láng giềng trước) -> DRIFT
+  ok   cụm chạm RÌA PHẢI (phiên cuối) -> DRIFT
+  ok   cụm bắt đầu ở phiên thứ 2 (có 1 láng giềng trước) -> PRICE_FIELD_MISMATCH
+  ok   láng giềng sau nằm bên kia một ex-date (đoạn hệ số khác) -> DRIFT
+  ok   hai cụm, một không giải thích được -> DRIFT, dòng máy đọc Y NGUYÊN bản không-luật
+  ok   hai cụm đều 1 bước -> PRICE_FIELD_MISMATCH, n_runs=2
+  ok   cụm 2 phiên 3 bước (< MIN_RUN) không chặn -> PRICE_FIELD_MISMATCH
+  ok   có ex-date uncomputable -> DRIFT partial như cũ, KHÔNG đổi nhãn
+  ok   R1 thật DRI: win0 = phiên ĐẦU cụm (2026-09-10) -> láng giềng trái từ load0 -> vẫn PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte
+  ok   R1 DRI: pre_ex=None (không biết ex-date trước cửa sổ) -> DRIFT y nguyên baseline (fail-closed, hành vi cũ)
+  ok   R1 DRI: KHÔNG có phiên nào trước cửa sổ trong chuỗi nạp -> DRIFT (fail-closed)
+  ok   R1 thật SHC: win0 = phiên ĐẦU cụm (2026-06-30) -> láng giềng trái từ load0 -> vẫn PRICE_FIELD_MISMATCH, dòng máy đọc đúng từng byte
+[dnse] connect noise
+[warn] MUTE: DNSE khong tra marketId -> khong biet buoc gia -> luat tick_offset KHONG ap (giu DRIFT)
+[warn] BOOM: khong xac dinh duoc san qua DNSE -> luat tick_offset KHONG ap (giu DRIFT). Loi that: RuntimeError: timeout
+[warn] ODD: DNSE marketId='HCX' ngoai HOSE/HNX/UPCOM -> luat tick_offset KHONG ap (giu DRIFT)
+[warn] AAA: khong xac dinh duoc san qua DNSE -> luat tick_offset KHONG ap (giu DRIFT). Loi that: RuntimeError: dnse down
+[warn] BBB: khong xac dinh duoc san qua DNSE -> luat tick_offset KHONG ap (giu DRIFT). Loi that: RuntimeError: connect DNSE da hong o ma truoc trong luot nay
+[warn] CCC: khong xac dinh duoc san qua DNSE -> luat tick_offset KHONG ap (giu DRIFT). Loi that: RuntimeError: connect DNSE da hong o ma truoc trong luot nay
+  ok   R1 SHC: pre_ex=None (không biết ex-date trước cửa sổ) -> DRIFT y nguyên baseline (fail-closed, hành vi cũ)
+  ok   R1 SHC: KHÔNG có phiên nào trước cửa sổ trong chuỗi nạp -> DRIFT (fail-closed)
+  ok   R1 DRI: ex-date (≤ win0) xen giữa láng giềng trước cửa sổ và cụm -> khác đoạn -> DRIFT
+  ok   R1 DRI: ex-date trước cửa sổ nhưng KHÔNG xen giữa (≤ láng giềng) -> vẫn PRICE_FIELD_MISMATCH
+  ok   R1 ÂM: lệch hệ số thật −1% phiên 0..11, win0 = phiên 3 (giữa đoạn lệch) -> DRIFT, chứng từ: lùi hết chuỗi nạp vẫn lệch
+  ok   R1 ÂM: lệch hệ số thật −1% phiên 0..11, win0 = phiên 5 (giữa đoạn lệch) -> DRIFT, chứng từ: lùi hết chuỗi nạp vẫn lệch
+  ok   R1 ÂM: lệch hệ số thật −1% phiên 0..11, win0 = phiên 8 (giữa đoạn lệch) -> DRIFT, chứng từ: lùi hết chuỗi nạp vẫn lệch
+  ok   R1 ÂM: win0 = phiên đầu cụm 1-bước, láng giềng TRƯỚC cửa sổ +0,20% -> DRIFT
+  ok   R1 tổng hợp: win0 = phiên đầu cụm 1-bước, láng giềng trước cửa sổ khớp -> PRICE_FIELD_MISMATCH
+  ok   HOSE giá 5.000 (bước 10): 2 bước nhưng KHÔNG phân giải được -> DRIFT
+  ok   HOSE giá 30.000 (bước 50): −2 bước -> PRICE_FIELD_MISMATCH
+  ok   ranh giới khung HOSE 9.900→10.000: lấy bước mịn (10) -> không phân giải -> DRIFT
+  ok   HNX giá 30.000 (bước 100): −2 bước -> PRICE_FIELD_MISMATCH
+  ok   cùng chuỗi đó nếu HOSE (bước 50): −4 bước -> DRIFT
+  ok   SHC biến thể: MỘT phiên KL = 100 (một lô chẵn) -> DRIFT
+  ok   SHC biến thể: MỘT phiên KL NULL -> DRIFT
+  ok   SHC biến thể: Price KHÔNG bằng láng giềng trước -> DRIFT
+  ok   SHC biến thể: Price KHÔNG đứng giá suốt cụm -> DRIFT
+  ok   SHC biến thể: Close·r_pred KHÔNG bằng Price phiên sau -> DRIFT
+  ok   SHC biến thể: Close của MỘT phiên GIỮA cụm lệch khỏi Price phiên sau -> DRIFT
+  ok   SHC biến thể: Price láng giềng trước CAO hơn giá đứng -> DRIFT
+  ok   SHC biến thể: Close·r_pred = Price phiên sau +0,25% -> vẫn stale_price (so với PRICE sau)
+  ok   SHC biến thể: KL 99 (lô lẻ) mọi phiên -> vẫn stale_price
+  ok   SHC: chứng từ trích Price đứng, KL, và Price phiên sau
+  ok   láng giềng trước +0,20% (khớp SÁT ngưỡng) -> DRIFT
+  ok   láng giềng sau −0,20% -> DRIFT
+  ok   hai láng giềng ±0,10% (≤ 0,15%) -> PRICE_FIELD_MISMATCH
+  ok   ÂM lệch hệ số ĐỒNG NHẤT 0,28–0,32% vỡ cụm do làm tròn Close (1.350 chuỗi) -> 0 ca đổi nhãn
+  ok   ... đối chứng không vô nghĩa: bỏ biên KẸP thì CÓ ca lọt
+  ok   một cụm tick_offset + một cụm stale_price -> pfm_rules 'stale_price,tick_offset', n_runs 2
+  ok   HOSE bước 50 nhưng r_pred 2,5 (nhiễu ±12,5đ > 0,2 bước) -> không phân giải -> DRIFT
+  ok   marker_price_field đúng 9 trường theo thứ tự
+  ok   live_exchange_fn: marketId biết -> 'UPCOM'; exchange_known=False -> None (KHÔNG mặc định HOSE); lỗi -> None
+  ok   live_exchange_fn: connect MỘT lần, cache theo mã
+  ok   live_exchange_fn: whitelist HOSE/HNX/UPCOM — 'hnx'->HNX, ' UPCOM '->UPCOM, sàn lạ 'HCX'->None (KHÔNG thành bước HOSE đoán)
+  ok   live_exchange_fn: _raw_log=None trước connect (không ghi dnse_raw kế toán)
+  ok   live_exchange_fn: tiếng ồn broker KHÔNG lên stdout (kênh máy đọc)
+  ok   live_exchange_fn: MIKE_ADJFACTOR_NO_BQ=1 -> None, KHÔNG chạm broker
+  ok   live_exchange_fn: connect HỎNG được nhớ — thử MỘT lần cho cả lượt, mọi mã None
+  ok   run_scan: dòng PRICE_FIELD_MISMATCH mang nhãn nắm THẬT
+  ok   run_scan: mã price-field KHÔNG có dòng DRIFT; DRIFT mã kia vẫn in
+  ok   run_scan: SCAN 7 trường, n_scanned GỒM price-field, n_drift KHÔNG
+  ok   run_scan: sàn chỉ tra cho mã cần bước giá (lười)
+  ok   run_scan: log có hàng bằng chứng price-field (r_obs, r_pred, cửa sổ, ex, luật)
+  ok   run_scan: log có chứng từ price-field
+  ok   run_scan: có DRIFT -> rc=10
+  ok   chỉ có price-field (feed FRESH) -> rc=11, KHÔNG phải 0; SCAN 1|0|0|0|0
+  ok   run_scan: sàn KHÔNG tra được -> DRIFT y nguyên bản không-luật (fail-closed ở đường production)
+  ok   run_scan: sàn HNX (bước 100) -> −2 bước -> PRICE_FIELD_MISMATCH
+  ok   run_scan: cùng chuỗi, sàn HOSE (bước 50) -> −4 bước -> DRIFT y nguyên
+  ok   run_scan R1: win0 = phiên đầu cụm -> láng giềng trước cửa sổ -> PRICE_FIELD_MISMATCH
+  ok   run_scan R1: sự kiện nạp từ load0 (= win0 − CUM_PAD_DAYS), không từ win0
+  ok   run_scan R1: ex-date = win0 (≤ win0) xen giữa láng giềng và cụm -> DRIFT (khác đoạn hệ số)
+  ok   Mk biên ex == win0: DIV 0đ / quyền mua (uncomputable) KHÔNG sinh UNCOMPUTABLE, dòng y nguyên bản chỉ có ex = win0 hợp lệ
+  ok   Mk chuỗi sạch: quyền mua ex == win0 -> KHÔNG UNCOMPUTABLE (AGREE, không dòng nào)
+  ok   Mk chuỗi sạch: DIV 0đ ex == win0 -> KHÔNG UNCOMPUTABLE (AGREE, không dòng nào)
+  ok   Mk đối chứng: cùng quyền mua nhưng ex = win0 + 1 (trong cửa sổ) -> UNCOMPUTABLE
+  ok   NB2 run_scan: ex <= win0 uncomputable (quyền mua, DIV 0đ) -> KHÔNG UNCOMPUTABLE/partial, dòng PRICE_FIELD_MISMATCH y nguyên bản không có sự kiện đó
+  ok   NB2 đối chứng: quyền mua ex > win0 -> UNCOMPUTABLE/DRIFT partial (không đổi nhãn price-field)
+  ok   price-field mã không nắm mang nhãn `none`
+
+[17b] PRICE_FIELD_MISMATCH — cửa sổ trượt qua cụm (B1/NB1/NB2/NB3 + ca biên)
+  ok   B1 thật SHC: win0 = 2026-07-01 (GIỮA cụm) -> PRICE_FIELD_MISMATCH stale_price, cụm nối lùi về đủ 06-30..07-09
+  ok   NB1 SHC win0 = 2026-07-01: marker nêu span ĐẦY ĐỦ 06-30..07-09 như chứng từ (không bị cửa sổ cắt)
+  ok   B1 thật SHC: win0 = 2026-07-02 (GIỮA cụm) -> PRICE_FIELD_MISMATCH stale_price, cụm nối lùi về đủ 06-30..07-09
+  ok   NB1 SHC win0 = 2026-07-02: marker nêu span ĐẦY ĐỦ 06-30..07-09 như chứng từ (không bị cửa sổ cắt)
+  ok   B1 thật SHC: win0 = 2026-07-03 (GIỮA cụm) -> PRICE_FIELD_MISMATCH stale_price, cụm nối lùi về đủ 06-30..07-09
+  ok   NB1 SHC win0 = 2026-07-03: marker nêu span ĐẦY ĐỦ 06-30..07-09 như chứng từ (không bị cửa sổ cắt)
+  ok   B1 thật SHC: win0 = 2026-07-06 (GIỮA cụm) -> PRICE_FIELD_MISMATCH stale_price, cụm nối lùi về đủ 06-30..07-09
+  ok   NB1 SHC win0 = 2026-07-06: marker nêu span ĐẦY ĐỦ 06-30..07-09 như chứng từ (không bị cửa sổ cắt)
+  ok   B1 thật SHC: win0 = 2026-07-07 (GIỮA cụm) -> PRICE_FIELD_MISMATCH stale_price, cụm nối lùi về đủ 06-30..07-09
+  ok   NB1 SHC win0 = 2026-07-07: marker nêu span ĐẦY ĐỦ 06-30..07-09 như chứng từ (không bị cửa sổ cắt)
+  ok   trượt win0 qua 25 phiên fixture thật DRI -> 0 DRIFT
+  ok   trượt win0 qua 21 phiên fixture thật DVN -> 0 DRIFT
+  ok   trượt win0 qua 23 phiên fixture thật SHC -> 0 DRIFT
+  ok   trượt win0 qua 18 phiên fixture thật CC1 -> 0 DRIFT
+  ok   ÂM thật HC1: vẫn DRIFT qua đường _scan_at
+  ok   ÂM thật VFR: vẫn DRIFT qua đường _scan_at
+  ok   cụm 6 phiên D[8..13], win0 = D[0] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[1] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[2] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[3] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[4] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[5] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[6] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[7] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[8] (trong cửa sổ 6 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[9] (trong cửa sổ 5 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[10] (trong cửa sổ 4 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[11] (trong cửa sổ 3 phiên) -> PRICE_FIELD_MISMATCH, cụm đủ D[8..13]
+  ok   cụm 6 phiên D[8..13], win0 = D[12] (trong cửa sổ 2 phiên) -> AGREE
+  ok   cụm 6 phiên D[8..13], win0 = D[13] (trong cửa sổ 1 phiên) -> AGREE
+  ok   cụm 6 phiên D[8..13], win0 = D[14] (trong cửa sổ 0 phiên) -> AGREE
+  ok   cụm 6 phiên D[8..13], win0 = D[15] (trong cửa sổ 0 phiên) -> AGREE
+  ok   cụm 6 phiên D[8..13], win0 = D[16] (trong cửa sổ 0 phiên) -> AGREE
+  ok   cụm lùi quá đầu chuỗi nạp (không thấy phiên khớp) -> DRIFT fail-closed, chứng từ nói vì sao
+  ok   phiên đầu cụm 3 bước, win0 = D[0] -> DRIFT (phần nối lùi cũng phải đạt luật)
+  ok   phiên đầu cụm 3 bước, win0 = D[9] -> DRIFT (phần nối lùi cũng phải đạt luật)
+  ok   phiên đầu cụm 3 bước, win0 = D[10] -> DRIFT (phần nối lùi cũng phải đạt luật)
+  ok   phiên đầu cụm 3 bước, win0 = D[11] -> DRIFT (phần nối lùi cũng phải đạt luật)
+  ok   láng giềng trái D[7] +0,25% (khớp SÁT), win0 = D[0] -> DRIFT
+  ok   láng giềng trái D[7] +0,25% (khớp SÁT), win0 = D[9] -> DRIFT
+  ok   láng giềng trái D[7] +0,25% (khớp SÁT), win0 = D[11] -> DRIFT
+  ok   NB1: cụm giữa cửa sổ, phiên trước cửa sổ D[4] khớp tuyệt đối nhưng láng giềng thật D[9] +0,25% -> DRIFT
+  ok   cụm bắt đầu ĐÚNG phiên ex-date (láng giềng trái ở đoạn trước) -> DRIFT
+  ok   ex-date trước cửa sổ = phiên đầu cụm, win0 giữa cụm -> phần nối dừng ở ex-date -> DRIFT
+  ok   ex-date trước cửa sổ (D[7], trong pre_ex) TRƯỚC láng giềng trái D[9] (không chen), win0 giữa cụm -> PRICE_FIELD_MISMATCH
+  ok   cổ tức tiền 20đ (≈0,1%) ex ngay SAU cụm -> láng giềng phải khác đoạn -> DRIFT (cổng cùng-đoạn)
+  ok   hai ex-date trước cửa sổ (D[6], D[9] = cổ tức 20đ ở phiên đầu cụm) -> phần nối dừng ở D[9] -> DRIFT
+  ok   hai cụm cách 1 phiên, win0 = D[0] -> PRICE_FIELD_MISMATCH n_runs=2
+  ok   hai cụm cách 1 phiên, win0 = D[8] -> PRICE_FIELD_MISMATCH n_runs=2
+  ok   hai cụm cách 1 phiên, win0 = D[9] -> PRICE_FIELD_MISMATCH n_runs=1
+  ok   hai cụm cách 1 phiên, win0 = D[10] -> PRICE_FIELD_MISMATCH n_runs=1
+  ok   hai cụm cách 1 phiên, win0 = D[12] -> PRICE_FIELD_MISMATCH n_runs=1
+  ok   hai cụm cách 1 phiên, win0 = D[13] -> AGREE
+  ok   hai cụm, phiên giữa chỉ khớp SÁT (+0,25%), win0 = D[0] -> DRIFT
+  ok   hai cụm, phiên giữa chỉ khớp SÁT (+0,25%), win0 = D[12] -> DRIFT
+  ok   ÂM cổ tức tiền 100đ vendor bỏ sót (≈ −1 bước cả đoạn), win0 = D[0] -> DRIFT
+  ok   ÂM cổ tức tiền 100đ vendor bỏ sót (≈ −1 bước cả đoạn), win0 = D[5] -> DRIFT
+  ok   ÂM cổ tức tiền 100đ vendor bỏ sót (≈ −1 bước cả đoạn), win0 = D[10] -> DRIFT
+  ok   ÂM cổ tức tiền 100đ vendor bỏ sót (≈ −1 bước cả đoạn), win0 = D[15] -> DRIFT
+  ok   ÂM cổ tức tiền 100đ vendor bỏ sót (≈ −1 bước cả đoạn), win0 = D[17] -> DRIFT
+  ok   ÂM cổ tức tiền bỏ sót, đoạn bị chặn trái bởi ex-date trước cửa sổ -> DRIFT
+  ok   ÂM chữ ký FPT, win0 trượt D[0..23] -> DRIFT ở MỌI vị trí
+  ok   NB3: láng giềng lệch +12% -> lời 'CUNG lech > dev_tol', KHÔNG 'SAT nguong'/'lam tron'
+  ok   Mn: láng giềng trái lệch −12% -> không đổi nhãn, lời 'CUNG lech' + −12.0000%
+  ok   Mn: láng giềng phải lệch −12% -> không đổi nhãn, lời 'CUNG lech' + −12.0000%
+  ok   Mz: láng giềng |dev| == dev_tol đúng biên -> lời 'SAT nguong', không 'CUNG lech'
+  ok   Mc: ex-date pre_ex = phiên đầu chuỗi nạp, lead == before -> lý do 'het chuoi nap', không 'xen giua'
+  ok   Md: hằng số CUM_PAD_DAYS = 25
+  ok   Md: cụm D[5..13] cần láng giềng D[4] ngoài chuỗi nạp (load0 = win0 − 25 ngày) -> DRIFT, 'het chuoi nap'
+  ok   NB6 _scan_at(until): quyền mua ex D[28] sau asof D[26] bị cắt -> PRICE_FIELD_MISMATCH; không cắt -> UNCOMPUTABLE/DRIFT (uncomputable trong cửa sổ)
+  ok   B1: 3 cụm (3 / 5 / 3 phiên), win0 = D[0] -> PRICE_FIELD_MISMATCH n_runs == 3
+  ok   B1: d0/d1 = span cụm dài nhất D[9]..D[13] (không phải cụm cuối D[17..19] hay cụm đầu D[3..5])
+  ok   K: cụm chỉ nằm SAU until -> AGREE khi cắt; PRICE_FIELD_MISMATCH khi không cắt
+  ok   L: sự kiện ex D[10] sau until D[8] -> AGREE khi cắt; khác AGREE khi không cắt
+  ok   NB4 sweep win0 = D[0..8], ex uncomputable D[5]: DRIFT khi win0 < ex, PFM khi win0 >= ex
+
+[8] adjfactor_drift_alert.sh  (TZ: unset TZ)
+  ok   [unset TZ] 0 marker + feed FRESH + có mã quét -> rc=0, không gửi gì
+  ok   [unset TZ] có lệch -> rc=10
+  ok   [unset TZ] Discord nêu mã ĐANG NẮM riêng và có nhãn LIVE
+  ok   [unset TZ] Discord nói rõ Layer 1 KHÔNG công bố/sửa số
+  ok   [unset TZ] UNCOMPUTABLE của mã NẮM được nêu tên + 'không kết luận là khớp'
+  ok   [unset TZ] UNCOMPUTABLE của mã KHÔNG nắm chỉ đếm, không nêu tên
+  ok   [unset TZ] có dòng việc-cần-làm quy đúng người (Winston cho vendor_missing)
+  ok   [unset TZ] bus ghi 1 event, published_any_number=False
+  ok   [unset TZ] bus giữ TOÀN BỘ marker (kể cả mã không nắm) — dấu vết audit đầy đủ
+  ok   [unset TZ] state de-dup ghi đúng 3 khoá (2 DRIFT `mã|ex` + 1 UNCOMP `mã|ex|code`)
+  --   [unset TZ] assertion neo-TZ VÔ NGHĨA ở thời điểm này (ngày host == ngày ICT == 2026-10-10) — không tính là PASS
+  ok   [unset TZ] lượt 2: de-dup -> KHÔNG gửi Discord, rc=10
+  ok   [unset TZ] lượt 2: bus VẪN ghi (de-dup chỉ áp cho Discord)
+  ok   [unset TZ] lượt 3 y hệt: uncomputable của mã nắm CŨNG bị de-dup, KHÔNG gửi
+  ok   [unset TZ] khoá uncomputable gồm cả reason_code
+  ok   [unset TZ] cùng (mã,ex) nhưng reason_code KHÁC -> vẫn gửi
+  ok   [unset TZ] NODATA mã đang nắm được nêu tên
+  ok   [unset TZ] khoá NODATA được ghi state (`<mã>|nodata`)
+  ok   [unset TZ] lượt 2 chỉ-NODATA y hệt -> de-dup, KHÔNG gửi lại (M4)
+  ok   [unset TZ] 0 marker + THIẾU dòng FEED -> VẪN gửi Discord (F5, không im lặng)
+  ok   [unset TZ] thiếu FEED: nói rõ là ĐIỂM MÙ, không phải 'feed ổn'
+  ok   [unset TZ] universe RỖNG + feed FRESH -> VẪN gửi Discord (F2)
+  ok   [unset TZ] universe rỗng: nói rõ ĐIỂM MÙ + quy việc, không phải 'không có sự kiện'
+  ok   [unset TZ] corr=1: câu Discord nói NGHI BẢN ĐÍNH CHÍNH, không khẳng định vendor sai
+  ok   [unset TZ] corr=1: KHÔNG sinh dòng việc backfill cho Winston (F4)
+  ok   [unset TZ] corr=1: vẫn nêu mã + vẫn ghi bus (không im lặng bỏ qua)
+  ok   [unset TZ] held=skipped KHÔNG bị in thành 'ĐANG NẮM LIVE: skipped' (F7)
+  ok   [unset TZ] dòng có trường thứ 13 -> cờ corr VẪN đọc đúng (R3-7)
+  ok   fixture 11 trường dựng đúng (không còn trường corr)
+  ok   [unset TZ] dòng 11 trường (không có corr) -> coi như corr=0, vẫn quy việc bình thường
+  ok   [unset TZ] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)
+  ok   [unset TZ] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'
+  ok   [unset TZ] flock không chạy được -> VẪN gửi Discord (môi trường, không tranh chấp)
+  ok   [unset TZ] flock không chạy được: KHÔNG nói 'lượt khác đang giữ', trích LỖI THẬT
+  ok   [unset TZ] lock bị giữ -> BUS VẪN ghi (dấu vết audit không mất) (M47)
+  ok   [unset TZ] lock bị giữ -> KHÔNG gửi Discord (không trùng), rc=11
+  ok   [unset TZ] ghi state hỏng -> KHÔNG bung traceback trần (M45)
+  ok   [unset TZ] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật
+  ok   [unset TZ] feed STALE mà KHÔNG có lệch nào -> VẪN gửi Discord (rc=10)
+  ok   [unset TZ] feed STALE: trích LÝ DO THẬT detector in ra, không phải câu đoán
+  ok   [unset TZ] feed STALE: nói rõ mọi kết luận 'khớp' không đáng tin
+  ok   [unset TZ] feed STALE: quy việc cho Winston + cấm đóng bằng 'đã quét không thấy gì'
+  ok   [unset TZ] feed FRESH + không marker nào -> rc=0, im lặng
+  ok   [unset TZ] Discord hỏng -> state de-dup RỖNG (không nói dối 'đã cảnh báo')
+  ok   [unset TZ] Discord hỏng -> stderr nêu LỖI THẬT, rc=10
+  ok   [unset TZ] state JSON cụt -> VẪN gửi Discord
+  ok   [unset TZ] state JSON cụt -> stderr nêu lỗi thật, không im lặng
+  ok   [unset TZ] 9 mã NẮM đều có tên trên Discord (không cắt)
+  ok   [unset TZ] mã KHÔNG nắm bị cắt ở trần + nói rõ còn bao nhiêu
+  ok   [unset TZ] held=unknown có mục RIÊNG, không nằm dưới 'Mã không nắm'
+  ok   [unset TZ] cả 9 mã held=unknown đều có tên (KHÔNG bị trần cắt)
+  ok   [unset TZ] không mã unknown nào lọt vào khối 'Mã không nắm'
+  ok   [unset TZ] có dòng việc-cần-làm cho ca không tra được vị thế
+  ok   [unset TZ] thiếu đối số topic -> rc=2
+
+[16] alert.sh — AWAITING_TRADE  (TZ: unset TZ)
+  ok   [unset TZ] awaiting-only (không nắm) -> KHÔNG gửi Discord, rc=0
+  ok   [unset TZ] awaiting-only vẫn ghi bus với ĐỦ danh sách
+  ok   [unset TZ] awaiting KHÔNG sinh khoá de-dup cho mã không nắm
+  ok   [unset TZ] DRIFT thật + awaiting -> có gửi Discord
+  ok   [unset TZ] awaiting gộp đúng MỘT dòng info chứa cả 2 mã
+  ok   [unset TZ] awaiting KHÔNG vào 'Việc cần làm'
+  ok   [unset TZ] awaiting KHÔNG thành dòng lệch '• **VHF**'
+  ok   [unset TZ] footer đếm awaiting riêng
+  ok   [unset TZ] state chỉ có khoá DRIFT, không có khoá awaiting
+  ok   [unset TZ] DRIFT đã cảnh báo + awaiting -> KHÔNG gửi lại (de-dup còn nguyên)
+  ok   [unset TZ] awaiting-only + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [unset TZ] awaiting KHÔNG giao 'vendor thiếu hệ số' cho Winston
+  ok   [unset TZ] awaiting + uncomputable mã nắm -> có gửi Discord
+  ok   [unset TZ] awaiting mã ĐANG NẮM -> Discord nêu tên + nhãn LIVE
+  ok   [unset TZ] awaiting mã nắm KHÔNG giao Winston
+  ok   [unset TZ] awaiting mã nắm ghi khoá RIÊNG `mã|ex|awaiting_trade`
+  ok   [unset TZ] awaiting mã nắm lượt 2 -> de-dup, KHÔNG gửi lại
+  ok   [unset TZ] awaiting held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [unset TZ] --dry-run KHÔNG xoá khoá cũ
+  ok   [unset TZ] lượt awaiting XOÁ khoá DRIFT cũ `VHF|ex` (không gửi Discord)
+  ok   [unset TZ] xoá khoá awaiting KHÔNG đụng khoá khác
+  ok   [unset TZ] awaiting -> DRIFT (≥3 phiên) báo như mã MỚI, không bị khoá cũ chặn
+  ok   [unset TZ] awaiting held=skipped một mình -> im lặng như mã không nắm, rc=0
+  ok   [unset TZ] awaiting held=skipped KHÔNG in 'ĐANG NẮM LIVE: skipped' / không in đậm
+  ok   [unset TZ] DRIFT thật + awaiting -> giữ tiêu đề '⚠️ LỆCH'
+  ok   [unset TZ] awaiting + UNCOMPUTABLE không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [unset TZ] awaiting + NODATA không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [unset TZ] chỉ awaiting mã nắm -> tiêu đề ℹ️ CHỜ GIAO DỊCH LẠI, không '⚠️ LỆCH'
+  ok   [unset TZ] chỉ awaiting mã nắm -> 'Việc cần làm' nói rõ 'không có', không trống
+  ok   [unset TZ] NODATA mã nắm + awaiting không nắm -> vẫn tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [unset TZ] awaiting mã nắm mới + DRIFT mới -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [unset TZ] awaiting mã nắm mới + UNCOMPUTABLE mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [unset TZ] awaiting mã nắm mới + NODATA mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [unset TZ] awaiting mã nắm mới + feed STALE -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [unset TZ] DRIFT đã de-dup + awaiting mã nắm mới -> KHÔNG nói 'Không có lệch thật'
+  ok   [unset TZ] DRIFT đã de-dup + awaiting mã nắm -> TODO nói 'không có việc MỚI'
+  ok   [unset TZ] awaiting mã NẮM: XOÁ khoá DRIFT cũ `DRX|ex` (đường tiền thật)
+  ok   [unset TZ] awaiting-only, mã nắm đã de-dup -> rc=0, log KHÔNG nói 'khong ma nao co the dang nam'
+  ok   [unset TZ] thiếu SCAN + DRIFT de-dup + awaiting nắm -> KHÔNG nói 'Không có lệch thật' (B2)
+  ok   [unset TZ] xoá khoá hỏng -> KHÔNG nói 'Discord DA gui roi', trích lỗi thật (B1)
+  ok   [unset TZ] xoá khoá hỏng -> ÉP gửi Discord nêu khoá sót, rc=10 (B1)
+  ok   [unset TZ] xoá khoá hỏng -> khoá VẪN còn (test thật sự chạm đường lỗi)
+
+[18] alert.sh — PRICE_FIELD_MISMATCH  (TZ: unset TZ)
+  ok   [unset TZ] price-field-only (gồm mã nắm + unknown) -> KHÔNG gửi Discord, rc=0
+  ok   [unset TZ] price-field-only: log nói rõ lý do im lặng
+  ok   [unset TZ] price-field-only: log đếm ĐÚNG 2 mã có thể đang nắm (DRI + unknown), không nói 'khong ma nao'
+  ok   [unset TZ] price-field-only vẫn ghi bus với ĐỦ danh sách
+  ok   [unset TZ] price-field KHÔNG sinh khoá de-dup
+  ok   [unset TZ] DRIFT thật + price-field -> có gửi Discord
+  ok   [unset TZ] price-field gộp đúng MỘT dòng info chứa cả 3 mã
+  ok   [unset TZ] price-field held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [unset TZ] price-field mã không nắm KHÔNG in đậm
+  ok   [unset TZ] price-field held=skipped KHÔNG thành 'ĐANG NẮM LIVE: skipped'
+  ok   [unset TZ] price-field mã nắm mang nhãn LIVE trong dòng info
+  ok   [unset TZ] price-field KHÔNG vào 'Việc cần làm'
+  ok   [unset TZ] price-field KHÔNG thành dòng lệch '• **DVN**'/'• **DRI**'
+  ok   [unset TZ] footer đếm price-field riêng
+  ok   [unset TZ] state chỉ có khoá DRIFT
+  ok   [unset TZ] price-field + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [unset TZ] price-field KHÔNG bật 'Vendor thiếu hệ số' (Winston)
+  ok   [unset TZ] price-field --dry-run KHÔNG xoá khoá cũ
+  ok   [unset TZ] lượt price-field XOÁ khoá DRIFT cũ `DRI|ex`, không gửi Discord
+  ok   [unset TZ] xoá khoá price-field KHÔNG đụng khoá khác
+  ok   [unset TZ] price-field -> DRIFT thật về sau báo như MỚI, không bị khoá cũ chặn
+  ok   [unset TZ] price-field + awaiting không nắm -> KHÔNG gửi Discord, rc=0
+  ok   [unset TZ] price-field mã KHÔNG nắm -> log KHÔNG nói 'CO THE DANG NAM'
+  ok   [unset TZ] price-field: xoá khoá cũ HỎNG -> ép gửi Discord kèm lỗi thật
+
+[8] adjfactor_drift_alert.sh  (TZ: TZ=UTC)
+  ok   [TZ=UTC] 0 marker + feed FRESH + có mã quét -> rc=0, không gửi gì
+  ok   [TZ=UTC] có lệch -> rc=10
+  ok   [TZ=UTC] Discord nêu mã ĐANG NẮM riêng và có nhãn LIVE
+  ok   [TZ=UTC] Discord nói rõ Layer 1 KHÔNG công bố/sửa số
+  ok   [TZ=UTC] UNCOMPUTABLE của mã NẮM được nêu tên + 'không kết luận là khớp'
+  ok   [TZ=UTC] UNCOMPUTABLE của mã KHÔNG nắm chỉ đếm, không nêu tên
+  ok   [TZ=UTC] có dòng việc-cần-làm quy đúng người (Winston cho vendor_missing)
+  ok   [TZ=UTC] bus ghi 1 event, published_any_number=False
+  ok   [TZ=UTC] bus giữ TOÀN BỘ marker (kể cả mã không nắm) — dấu vết audit đầy đủ
+  ok   [TZ=UTC] state de-dup ghi đúng 3 khoá (2 DRIFT `mã|ex` + 1 UNCOMP `mã|ex|code`)
+  --   [TZ=UTC] assertion neo-TZ VÔ NGHĨA ở thời điểm này (ngày host == ngày ICT == 2026-10-10) — không tính là PASS
+  ok   [TZ=UTC] lượt 2: de-dup -> KHÔNG gửi Discord, rc=10
+  ok   [TZ=UTC] lượt 2: bus VẪN ghi (de-dup chỉ áp cho Discord)
+  ok   [TZ=UTC] lượt 3 y hệt: uncomputable của mã nắm CŨNG bị de-dup, KHÔNG gửi
+  ok   [TZ=UTC] khoá uncomputable gồm cả reason_code
+  ok   [TZ=UTC] cùng (mã,ex) nhưng reason_code KHÁC -> vẫn gửi
+  ok   [TZ=UTC] NODATA mã đang nắm được nêu tên
+  ok   [TZ=UTC] khoá NODATA được ghi state (`<mã>|nodata`)
+  ok   [TZ=UTC] lượt 2 chỉ-NODATA y hệt -> de-dup, KHÔNG gửi lại (M4)
+  ok   [TZ=UTC] 0 marker + THIẾU dòng FEED -> VẪN gửi Discord (F5, không im lặng)
+  ok   [TZ=UTC] thiếu FEED: nói rõ là ĐIỂM MÙ, không phải 'feed ổn'
+  ok   [TZ=UTC] universe RỖNG + feed FRESH -> VẪN gửi Discord (F2)
+  ok   [TZ=UTC] universe rỗng: nói rõ ĐIỂM MÙ + quy việc, không phải 'không có sự kiện'
+  ok   [TZ=UTC] corr=1: câu Discord nói NGHI BẢN ĐÍNH CHÍNH, không khẳng định vendor sai
+  ok   [TZ=UTC] corr=1: KHÔNG sinh dòng việc backfill cho Winston (F4)
+  ok   [TZ=UTC] corr=1: vẫn nêu mã + vẫn ghi bus (không im lặng bỏ qua)
+  ok   [TZ=UTC] held=skipped KHÔNG bị in thành 'ĐANG NẮM LIVE: skipped' (F7)
+  ok   [TZ=UTC] dòng có trường thứ 13 -> cờ corr VẪN đọc đúng (R3-7)
+  ok   fixture 11 trường dựng đúng (không còn trường corr)
+  ok   [TZ=UTC] dòng 11 trường (không có corr) -> coi như corr=0, vẫn quy việc bình thường
+  ok   [TZ=UTC] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)
+  ok   [TZ=UTC] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'
+  ok   [TZ=UTC] flock không chạy được -> VẪN gửi Discord (môi trường, không tranh chấp)
+  ok   [TZ=UTC] flock không chạy được: KHÔNG nói 'lượt khác đang giữ', trích LỖI THẬT
+  ok   [TZ=UTC] lock bị giữ -> BUS VẪN ghi (dấu vết audit không mất) (M47)
+  ok   [TZ=UTC] lock bị giữ -> KHÔNG gửi Discord (không trùng), rc=11
+  ok   [TZ=UTC] ghi state hỏng -> KHÔNG bung traceback trần (M45)
+  ok   [TZ=UTC] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật
+  ok   [TZ=UTC] feed STALE mà KHÔNG có lệch nào -> VẪN gửi Discord (rc=10)
+  ok   [TZ=UTC] feed STALE: trích LÝ DO THẬT detector in ra, không phải câu đoán
+  ok   [TZ=UTC] feed STALE: nói rõ mọi kết luận 'khớp' không đáng tin
+  ok   [TZ=UTC] feed STALE: quy việc cho Winston + cấm đóng bằng 'đã quét không thấy gì'
+  ok   [TZ=UTC] feed FRESH + không marker nào -> rc=0, im lặng
+  ok   [TZ=UTC] Discord hỏng -> state de-dup RỖNG (không nói dối 'đã cảnh báo')
+  ok   [TZ=UTC] Discord hỏng -> stderr nêu LỖI THẬT, rc=10
+  ok   [TZ=UTC] state JSON cụt -> VẪN gửi Discord
+  ok   [TZ=UTC] state JSON cụt -> stderr nêu lỗi thật, không im lặng
+  ok   [TZ=UTC] 9 mã NẮM đều có tên trên Discord (không cắt)
+  ok   [TZ=UTC] mã KHÔNG nắm bị cắt ở trần + nói rõ còn bao nhiêu
+  ok   [TZ=UTC] held=unknown có mục RIÊNG, không nằm dưới 'Mã không nắm'
+  ok   [TZ=UTC] cả 9 mã held=unknown đều có tên (KHÔNG bị trần cắt)
+  ok   [TZ=UTC] không mã unknown nào lọt vào khối 'Mã không nắm'
+  ok   [TZ=UTC] có dòng việc-cần-làm cho ca không tra được vị thế
+  ok   [TZ=UTC] thiếu đối số topic -> rc=2
+
+[16] alert.sh — AWAITING_TRADE  (TZ: TZ=UTC)
+  ok   [TZ=UTC] awaiting-only (không nắm) -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=UTC] awaiting-only vẫn ghi bus với ĐỦ danh sách
+  ok   [TZ=UTC] awaiting KHÔNG sinh khoá de-dup cho mã không nắm
+  ok   [TZ=UTC] DRIFT thật + awaiting -> có gửi Discord
+  ok   [TZ=UTC] awaiting gộp đúng MỘT dòng info chứa cả 2 mã
+  ok   [TZ=UTC] awaiting KHÔNG vào 'Việc cần làm'
+  ok   [TZ=UTC] awaiting KHÔNG thành dòng lệch '• **VHF**'
+  ok   [TZ=UTC] footer đếm awaiting riêng
+  ok   [TZ=UTC] state chỉ có khoá DRIFT, không có khoá awaiting
+  ok   [TZ=UTC] DRIFT đã cảnh báo + awaiting -> KHÔNG gửi lại (de-dup còn nguyên)
+  ok   [TZ=UTC] awaiting-only + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [TZ=UTC] awaiting KHÔNG giao 'vendor thiếu hệ số' cho Winston
+  ok   [TZ=UTC] awaiting + uncomputable mã nắm -> có gửi Discord
+  ok   [TZ=UTC] awaiting mã ĐANG NẮM -> Discord nêu tên + nhãn LIVE
+  ok   [TZ=UTC] awaiting mã nắm KHÔNG giao Winston
+  ok   [TZ=UTC] awaiting mã nắm ghi khoá RIÊNG `mã|ex|awaiting_trade`
+  ok   [TZ=UTC] awaiting mã nắm lượt 2 -> de-dup, KHÔNG gửi lại
+  ok   [TZ=UTC] awaiting held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [TZ=UTC] --dry-run KHÔNG xoá khoá cũ
+  ok   [TZ=UTC] lượt awaiting XOÁ khoá DRIFT cũ `VHF|ex` (không gửi Discord)
+  ok   [TZ=UTC] xoá khoá awaiting KHÔNG đụng khoá khác
+  ok   [TZ=UTC] awaiting -> DRIFT (≥3 phiên) báo như mã MỚI, không bị khoá cũ chặn
+  ok   [TZ=UTC] awaiting held=skipped một mình -> im lặng như mã không nắm, rc=0
+  ok   [TZ=UTC] awaiting held=skipped KHÔNG in 'ĐANG NẮM LIVE: skipped' / không in đậm
+  ok   [TZ=UTC] DRIFT thật + awaiting -> giữ tiêu đề '⚠️ LỆCH'
+  ok   [TZ=UTC] awaiting + UNCOMPUTABLE không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [TZ=UTC] awaiting + NODATA không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [TZ=UTC] chỉ awaiting mã nắm -> tiêu đề ℹ️ CHỜ GIAO DỊCH LẠI, không '⚠️ LỆCH'
+  ok   [TZ=UTC] chỉ awaiting mã nắm -> 'Việc cần làm' nói rõ 'không có', không trống
+  ok   [TZ=UTC] NODATA mã nắm + awaiting không nắm -> vẫn tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=UTC] awaiting mã nắm mới + DRIFT mới -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=UTC] awaiting mã nắm mới + UNCOMPUTABLE mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=UTC] awaiting mã nắm mới + NODATA mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=UTC] awaiting mã nắm mới + feed STALE -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=UTC] DRIFT đã de-dup + awaiting mã nắm mới -> KHÔNG nói 'Không có lệch thật'
+  ok   [TZ=UTC] DRIFT đã de-dup + awaiting mã nắm -> TODO nói 'không có việc MỚI'
+  ok   [TZ=UTC] awaiting mã NẮM: XOÁ khoá DRIFT cũ `DRX|ex` (đường tiền thật)
+  ok   [TZ=UTC] awaiting-only, mã nắm đã de-dup -> rc=0, log KHÔNG nói 'khong ma nao co the dang nam'
+  ok   [TZ=UTC] thiếu SCAN + DRIFT de-dup + awaiting nắm -> KHÔNG nói 'Không có lệch thật' (B2)
+  ok   [TZ=UTC] xoá khoá hỏng -> KHÔNG nói 'Discord DA gui roi', trích lỗi thật (B1)
+  ok   [TZ=UTC] xoá khoá hỏng -> ÉP gửi Discord nêu khoá sót, rc=10 (B1)
+  ok   [TZ=UTC] xoá khoá hỏng -> khoá VẪN còn (test thật sự chạm đường lỗi)
+
+[18] alert.sh — PRICE_FIELD_MISMATCH  (TZ: TZ=UTC)
+  ok   [TZ=UTC] price-field-only (gồm mã nắm + unknown) -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=UTC] price-field-only: log nói rõ lý do im lặng
+  ok   [TZ=UTC] price-field-only: log đếm ĐÚNG 2 mã có thể đang nắm (DRI + unknown), không nói 'khong ma nao'
+  ok   [TZ=UTC] price-field-only vẫn ghi bus với ĐỦ danh sách
+  ok   [TZ=UTC] price-field KHÔNG sinh khoá de-dup
+  ok   [TZ=UTC] DRIFT thật + price-field -> có gửi Discord
+  ok   [TZ=UTC] price-field gộp đúng MỘT dòng info chứa cả 3 mã
+  ok   [TZ=UTC] price-field held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [TZ=UTC] price-field mã không nắm KHÔNG in đậm
+  ok   [TZ=UTC] price-field held=skipped KHÔNG thành 'ĐANG NẮM LIVE: skipped'
+  ok   [TZ=UTC] price-field mã nắm mang nhãn LIVE trong dòng info
+  ok   [TZ=UTC] price-field KHÔNG vào 'Việc cần làm'
+  ok   [TZ=UTC] price-field KHÔNG thành dòng lệch '• **DVN**'/'• **DRI**'
+  ok   [TZ=UTC] footer đếm price-field riêng
+  ok   [TZ=UTC] state chỉ có khoá DRIFT
+  ok   [TZ=UTC] price-field + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [TZ=UTC] price-field KHÔNG bật 'Vendor thiếu hệ số' (Winston)
+  ok   [TZ=UTC] price-field --dry-run KHÔNG xoá khoá cũ
+  ok   [TZ=UTC] lượt price-field XOÁ khoá DRIFT cũ `DRI|ex`, không gửi Discord
+  ok   [TZ=UTC] xoá khoá price-field KHÔNG đụng khoá khác
+  ok   [TZ=UTC] price-field -> DRIFT thật về sau báo như MỚI, không bị khoá cũ chặn
+  ok   [TZ=UTC] price-field + awaiting không nắm -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=UTC] price-field mã KHÔNG nắm -> log KHÔNG nói 'CO THE DANG NAM'
+  ok   [TZ=UTC] price-field: xoá khoá cũ HỎNG -> ép gửi Discord kèm lỗi thật
+
+[8] adjfactor_drift_alert.sh  (TZ: TZ=Pacific/Kiritimati)
+  ok   [TZ=Pacific/Kiritimati] 0 marker + feed FRESH + có mã quét -> rc=0, không gửi gì
+  ok   [TZ=Pacific/Kiritimati] có lệch -> rc=10
+  ok   [TZ=Pacific/Kiritimati] Discord nêu mã ĐANG NẮM riêng và có nhãn LIVE
+  ok   [TZ=Pacific/Kiritimati] Discord nói rõ Layer 1 KHÔNG công bố/sửa số
+  ok   [TZ=Pacific/Kiritimati] UNCOMPUTABLE của mã NẮM được nêu tên + 'không kết luận là khớp'
+  ok   [TZ=Pacific/Kiritimati] UNCOMPUTABLE của mã KHÔNG nắm chỉ đếm, không nêu tên
+  ok   [TZ=Pacific/Kiritimati] có dòng việc-cần-làm quy đúng người (Winston cho vendor_missing)
+  ok   [TZ=Pacific/Kiritimati] bus ghi 1 event, published_any_number=False
+  ok   [TZ=Pacific/Kiritimati] bus giữ TOÀN BỘ marker (kể cả mã không nắm) — dấu vết audit đầy đủ
+  ok   [TZ=Pacific/Kiritimati] state de-dup ghi đúng 3 khoá (2 DRIFT `mã|ex` + 1 UNCOMP `mã|ex|code`)
+  ok   [TZ=Pacific/Kiritimati] ngày trong state là ngày ICT (2026-10-10), KHÔNG phải ngày host (2026-10-11)
+  ok   [TZ=Pacific/Kiritimati] lượt 2: de-dup -> KHÔNG gửi Discord, rc=10
+  ok   [TZ=Pacific/Kiritimati] lượt 2: bus VẪN ghi (de-dup chỉ áp cho Discord)
+  ok   [TZ=Pacific/Kiritimati] lượt 3 y hệt: uncomputable của mã nắm CŨNG bị de-dup, KHÔNG gửi
+  ok   [TZ=Pacific/Kiritimati] khoá uncomputable gồm cả reason_code
+  ok   [TZ=Pacific/Kiritimati] cùng (mã,ex) nhưng reason_code KHÁC -> vẫn gửi
+  ok   [TZ=Pacific/Kiritimati] NODATA mã đang nắm được nêu tên
+  ok   [TZ=Pacific/Kiritimati] khoá NODATA được ghi state (`<mã>|nodata`)
+  ok   [TZ=Pacific/Kiritimati] lượt 2 chỉ-NODATA y hệt -> de-dup, KHÔNG gửi lại (M4)
+  ok   [TZ=Pacific/Kiritimati] 0 marker + THIẾU dòng FEED -> VẪN gửi Discord (F5, không im lặng)
+  ok   [TZ=Pacific/Kiritimati] thiếu FEED: nói rõ là ĐIỂM MÙ, không phải 'feed ổn'
+  ok   [TZ=Pacific/Kiritimati] universe RỖNG + feed FRESH -> VẪN gửi Discord (F2)
+  ok   [TZ=Pacific/Kiritimati] universe rỗng: nói rõ ĐIỂM MÙ + quy việc, không phải 'không có sự kiện'
+  ok   [TZ=Pacific/Kiritimati] corr=1: câu Discord nói NGHI BẢN ĐÍNH CHÍNH, không khẳng định vendor sai
+  ok   [TZ=Pacific/Kiritimati] corr=1: KHÔNG sinh dòng việc backfill cho Winston (F4)
+  ok   [TZ=Pacific/Kiritimati] corr=1: vẫn nêu mã + vẫn ghi bus (không im lặng bỏ qua)
+  ok   [TZ=Pacific/Kiritimati] held=skipped KHÔNG bị in thành 'ĐANG NẮM LIVE: skipped' (F7)
+  ok   [TZ=Pacific/Kiritimati] dòng có trường thứ 13 -> cờ corr VẪN đọc đúng (R3-7)
+  ok   fixture 11 trường dựng đúng (không còn trường corr)
+  ok   [TZ=Pacific/Kiritimati] dòng 11 trường (không có corr) -> coi như corr=0, vẫn quy việc bình thường
+  ok   [TZ=Pacific/Kiritimati] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)
+  ok   [TZ=Pacific/Kiritimati] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'
+  ok   [TZ=Pacific/Kiritimati] flock không chạy được -> VẪN gửi Discord (môi trường, không tranh chấp)
+  ok   [TZ=Pacific/Kiritimati] flock không chạy được: KHÔNG nói 'lượt khác đang giữ', trích LỖI THẬT
+  ok   [TZ=Pacific/Kiritimati] lock bị giữ -> BUS VẪN ghi (dấu vết audit không mất) (M47)
+  ok   [TZ=Pacific/Kiritimati] lock bị giữ -> KHÔNG gửi Discord (không trùng), rc=11
+  ok   [TZ=Pacific/Kiritimati] ghi state hỏng -> KHÔNG bung traceback trần (M45)
+  ok   [TZ=Pacific/Kiritimati] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật
+  ok   [TZ=Pacific/Kiritimati] feed STALE mà KHÔNG có lệch nào -> VẪN gửi Discord (rc=10)
+  ok   [TZ=Pacific/Kiritimati] feed STALE: trích LÝ DO THẬT detector in ra, không phải câu đoán
+  ok   [TZ=Pacific/Kiritimati] feed STALE: nói rõ mọi kết luận 'khớp' không đáng tin
+  ok   [TZ=Pacific/Kiritimati] feed STALE: quy việc cho Winston + cấm đóng bằng 'đã quét không thấy gì'
+  ok   [TZ=Pacific/Kiritimati] feed FRESH + không marker nào -> rc=0, im lặng
+  ok   [TZ=Pacific/Kiritimati] Discord hỏng -> state de-dup RỖNG (không nói dối 'đã cảnh báo')
+  ok   [TZ=Pacific/Kiritimati] Discord hỏng -> stderr nêu LỖI THẬT, rc=10
+  ok   [TZ=Pacific/Kiritimati] state JSON cụt -> VẪN gửi Discord
+  ok   [TZ=Pacific/Kiritimati] state JSON cụt -> stderr nêu lỗi thật, không im lặng
+  ok   [TZ=Pacific/Kiritimati] 9 mã NẮM đều có tên trên Discord (không cắt)
+  ok   [TZ=Pacific/Kiritimati] mã KHÔNG nắm bị cắt ở trần + nói rõ còn bao nhiêu
+  ok   [TZ=Pacific/Kiritimati] held=unknown có mục RIÊNG, không nằm dưới 'Mã không nắm'
+  ok   [TZ=Pacific/Kiritimati] cả 9 mã held=unknown đều có tên (KHÔNG bị trần cắt)
+  ok   [TZ=Pacific/Kiritimati] không mã unknown nào lọt vào khối 'Mã không nắm'
+  ok   [TZ=Pacific/Kiritimati] có dòng việc-cần-làm cho ca không tra được vị thế
+  ok   [TZ=Pacific/Kiritimati] thiếu đối số topic -> rc=2
+
+[16] alert.sh — AWAITING_TRADE  (TZ: TZ=Pacific/Kiritimati)
+  ok   [TZ=Pacific/Kiritimati] awaiting-only (không nắm) -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=Pacific/Kiritimati] awaiting-only vẫn ghi bus với ĐỦ danh sách
+  ok   [TZ=Pacific/Kiritimati] awaiting KHÔNG sinh khoá de-dup cho mã không nắm
+  ok   [TZ=Pacific/Kiritimati] DRIFT thật + awaiting -> có gửi Discord
+  ok   [TZ=Pacific/Kiritimati] awaiting gộp đúng MỘT dòng info chứa cả 2 mã
+  ok   [TZ=Pacific/Kiritimati] awaiting KHÔNG vào 'Việc cần làm'
+  ok   [TZ=Pacific/Kiritimati] awaiting KHÔNG thành dòng lệch '• **VHF**'
+  ok   [TZ=Pacific/Kiritimati] footer đếm awaiting riêng
+  ok   [TZ=Pacific/Kiritimati] state chỉ có khoá DRIFT, không có khoá awaiting
+  ok   [TZ=Pacific/Kiritimati] DRIFT đã cảnh báo + awaiting -> KHÔNG gửi lại (de-dup còn nguyên)
+  ok   [TZ=Pacific/Kiritimati] awaiting-only + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [TZ=Pacific/Kiritimati] awaiting KHÔNG giao 'vendor thiếu hệ số' cho Winston
+  ok   [TZ=Pacific/Kiritimati] awaiting + uncomputable mã nắm -> có gửi Discord
+  ok   [TZ=Pacific/Kiritimati] awaiting mã ĐANG NẮM -> Discord nêu tên + nhãn LIVE
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm KHÔNG giao Winston
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm ghi khoá RIÊNG `mã|ex|awaiting_trade`
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm lượt 2 -> de-dup, KHÔNG gửi lại
+  ok   [TZ=Pacific/Kiritimati] awaiting held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [TZ=Pacific/Kiritimati] --dry-run KHÔNG xoá khoá cũ
+  ok   [TZ=Pacific/Kiritimati] lượt awaiting XOÁ khoá DRIFT cũ `VHF|ex` (không gửi Discord)
+  ok   [TZ=Pacific/Kiritimati] xoá khoá awaiting KHÔNG đụng khoá khác
+  ok   [TZ=Pacific/Kiritimati] awaiting -> DRIFT (≥3 phiên) báo như mã MỚI, không bị khoá cũ chặn
+  ok   [TZ=Pacific/Kiritimati] awaiting held=skipped một mình -> im lặng như mã không nắm, rc=0
+  ok   [TZ=Pacific/Kiritimati] awaiting held=skipped KHÔNG in 'ĐANG NẮM LIVE: skipped' / không in đậm
+  ok   [TZ=Pacific/Kiritimati] DRIFT thật + awaiting -> giữ tiêu đề '⚠️ LỆCH'
+  ok   [TZ=Pacific/Kiritimati] awaiting + UNCOMPUTABLE không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [TZ=Pacific/Kiritimati] awaiting + NODATA không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [TZ=Pacific/Kiritimati] chỉ awaiting mã nắm -> tiêu đề ℹ️ CHỜ GIAO DỊCH LẠI, không '⚠️ LỆCH'
+  ok   [TZ=Pacific/Kiritimati] chỉ awaiting mã nắm -> 'Việc cần làm' nói rõ 'không có', không trống
+  ok   [TZ=Pacific/Kiritimati] NODATA mã nắm + awaiting không nắm -> vẫn tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm mới + DRIFT mới -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm mới + UNCOMPUTABLE mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm mới + NODATA mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Kiritimati] awaiting mã nắm mới + feed STALE -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Kiritimati] DRIFT đã de-dup + awaiting mã nắm mới -> KHÔNG nói 'Không có lệch thật'
+  ok   [TZ=Pacific/Kiritimati] DRIFT đã de-dup + awaiting mã nắm -> TODO nói 'không có việc MỚI'
+  ok   [TZ=Pacific/Kiritimati] awaiting mã NẮM: XOÁ khoá DRIFT cũ `DRX|ex` (đường tiền thật)
+  ok   [TZ=Pacific/Kiritimati] awaiting-only, mã nắm đã de-dup -> rc=0, log KHÔNG nói 'khong ma nao co the dang nam'
+  ok   [TZ=Pacific/Kiritimati] thiếu SCAN + DRIFT de-dup + awaiting nắm -> KHÔNG nói 'Không có lệch thật' (B2)
+  ok   [TZ=Pacific/Kiritimati] xoá khoá hỏng -> KHÔNG nói 'Discord DA gui roi', trích lỗi thật (B1)
+  ok   [TZ=Pacific/Kiritimati] xoá khoá hỏng -> ÉP gửi Discord nêu khoá sót, rc=10 (B1)
+  ok   [TZ=Pacific/Kiritimati] xoá khoá hỏng -> khoá VẪN còn (test thật sự chạm đường lỗi)
+
+[18] alert.sh — PRICE_FIELD_MISMATCH  (TZ: TZ=Pacific/Kiritimati)
+  ok   [TZ=Pacific/Kiritimati] price-field-only (gồm mã nắm + unknown) -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=Pacific/Kiritimati] price-field-only: log nói rõ lý do im lặng
+  ok   [TZ=Pacific/Kiritimati] price-field-only: log đếm ĐÚNG 2 mã có thể đang nắm (DRI + unknown), không nói 'khong ma nao'
+  ok   [TZ=Pacific/Kiritimati] price-field-only vẫn ghi bus với ĐỦ danh sách
+  ok   [TZ=Pacific/Kiritimati] price-field KHÔNG sinh khoá de-dup
+  ok   [TZ=Pacific/Kiritimati] DRIFT thật + price-field -> có gửi Discord
+  ok   [TZ=Pacific/Kiritimati] price-field gộp đúng MỘT dòng info chứa cả 3 mã
+  ok   [TZ=Pacific/Kiritimati] price-field held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [TZ=Pacific/Kiritimati] price-field mã không nắm KHÔNG in đậm
+  ok   [TZ=Pacific/Kiritimati] price-field held=skipped KHÔNG thành 'ĐANG NẮM LIVE: skipped'
+  ok   [TZ=Pacific/Kiritimati] price-field mã nắm mang nhãn LIVE trong dòng info
+  ok   [TZ=Pacific/Kiritimati] price-field KHÔNG vào 'Việc cần làm'
+  ok   [TZ=Pacific/Kiritimati] price-field KHÔNG thành dòng lệch '• **DVN**'/'• **DRI**'
+  ok   [TZ=Pacific/Kiritimati] footer đếm price-field riêng
+  ok   [TZ=Pacific/Kiritimati] state chỉ có khoá DRIFT
+  ok   [TZ=Pacific/Kiritimati] price-field + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [TZ=Pacific/Kiritimati] price-field KHÔNG bật 'Vendor thiếu hệ số' (Winston)
+  ok   [TZ=Pacific/Kiritimati] price-field --dry-run KHÔNG xoá khoá cũ
+  ok   [TZ=Pacific/Kiritimati] lượt price-field XOÁ khoá DRIFT cũ `DRI|ex`, không gửi Discord
+  ok   [TZ=Pacific/Kiritimati] xoá khoá price-field KHÔNG đụng khoá khác
+  ok   [TZ=Pacific/Kiritimati] price-field -> DRIFT thật về sau báo như MỚI, không bị khoá cũ chặn
+  ok   [TZ=Pacific/Kiritimati] price-field + awaiting không nắm -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=Pacific/Kiritimati] price-field mã KHÔNG nắm -> log KHÔNG nói 'CO THE DANG NAM'
+  ok   [TZ=Pacific/Kiritimati] price-field: xoá khoá cũ HỎNG -> ép gửi Discord kèm lỗi thật
+
+[8] adjfactor_drift_alert.sh  (TZ: TZ=Pacific/Midway)
+  ok   [TZ=Pacific/Midway] 0 marker + feed FRESH + có mã quét -> rc=0, không gửi gì
+  ok   [TZ=Pacific/Midway] có lệch -> rc=10
+  ok   [TZ=Pacific/Midway] Discord nêu mã ĐANG NẮM riêng và có nhãn LIVE
+  ok   [TZ=Pacific/Midway] Discord nói rõ Layer 1 KHÔNG công bố/sửa số
+  ok   [TZ=Pacific/Midway] UNCOMPUTABLE của mã NẮM được nêu tên + 'không kết luận là khớp'
+  ok   [TZ=Pacific/Midway] UNCOMPUTABLE của mã KHÔNG nắm chỉ đếm, không nêu tên
+  ok   [TZ=Pacific/Midway] có dòng việc-cần-làm quy đúng người (Winston cho vendor_missing)
+  ok   [TZ=Pacific/Midway] bus ghi 1 event, published_any_number=False
+  ok   [TZ=Pacific/Midway] bus giữ TOÀN BỘ marker (kể cả mã không nắm) — dấu vết audit đầy đủ
+  ok   [TZ=Pacific/Midway] state de-dup ghi đúng 3 khoá (2 DRIFT `mã|ex` + 1 UNCOMP `mã|ex|code`)
+  --   [TZ=Pacific/Midway] assertion neo-TZ VÔ NGHĨA ở thời điểm này (ngày host == ngày ICT == 2026-10-10) — không tính là PASS
+  ok   [TZ=Pacific/Midway] lượt 2: de-dup -> KHÔNG gửi Discord, rc=10
+  ok   [TZ=Pacific/Midway] lượt 2: bus VẪN ghi (de-dup chỉ áp cho Discord)
+  ok   [TZ=Pacific/Midway] lượt 3 y hệt: uncomputable của mã nắm CŨNG bị de-dup, KHÔNG gửi
+  ok   [TZ=Pacific/Midway] khoá uncomputable gồm cả reason_code
+  ok   [TZ=Pacific/Midway] cùng (mã,ex) nhưng reason_code KHÁC -> vẫn gửi
+  ok   [TZ=Pacific/Midway] NODATA mã đang nắm được nêu tên
+  ok   [TZ=Pacific/Midway] khoá NODATA được ghi state (`<mã>|nodata`)
+  ok   [TZ=Pacific/Midway] lượt 2 chỉ-NODATA y hệt -> de-dup, KHÔNG gửi lại (M4)
+  ok   [TZ=Pacific/Midway] 0 marker + THIẾU dòng FEED -> VẪN gửi Discord (F5, không im lặng)
+  ok   [TZ=Pacific/Midway] thiếu FEED: nói rõ là ĐIỂM MÙ, không phải 'feed ổn'
+  ok   [TZ=Pacific/Midway] universe RỖNG + feed FRESH -> VẪN gửi Discord (F2)
+  ok   [TZ=Pacific/Midway] universe rỗng: nói rõ ĐIỂM MÙ + quy việc, không phải 'không có sự kiện'
+  ok   [TZ=Pacific/Midway] corr=1: câu Discord nói NGHI BẢN ĐÍNH CHÍNH, không khẳng định vendor sai
+  ok   [TZ=Pacific/Midway] corr=1: KHÔNG sinh dòng việc backfill cho Winston (F4)
+  ok   [TZ=Pacific/Midway] corr=1: vẫn nêu mã + vẫn ghi bus (không im lặng bỏ qua)
+  ok   [TZ=Pacific/Midway] held=skipped KHÔNG bị in thành 'ĐANG NẮM LIVE: skipped' (F7)
+  ok   [TZ=Pacific/Midway] dòng có trường thứ 13 -> cờ corr VẪN đọc đúng (R3-7)
+  ok   fixture 11 trường dựng đúng (không còn trường corr)
+  ok   [TZ=Pacific/Midway] dòng 11 trường (không có corr) -> coi như corr=0, vẫn quy việc bình thường
+  ok   [TZ=Pacific/Midway] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)
+  ok   [TZ=Pacific/Midway] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'
+  ok   [TZ=Pacific/Midway] flock không chạy được -> VẪN gửi Discord (môi trường, không tranh chấp)
+  ok   [TZ=Pacific/Midway] flock không chạy được: KHÔNG nói 'lượt khác đang giữ', trích LỖI THẬT
+  ok   [TZ=Pacific/Midway] lock bị giữ -> BUS VẪN ghi (dấu vết audit không mất) (M47)
+  ok   [TZ=Pacific/Midway] lock bị giữ -> KHÔNG gửi Discord (không trùng), rc=11
+  ok   [TZ=Pacific/Midway] ghi state hỏng -> KHÔNG bung traceback trần (M45)
+  ok   [TZ=Pacific/Midway] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật
+  ok   [TZ=Pacific/Midway] feed STALE mà KHÔNG có lệch nào -> VẪN gửi Discord (rc=10)
+  ok   [TZ=Pacific/Midway] feed STALE: trích LÝ DO THẬT detector in ra, không phải câu đoán
+  ok   [TZ=Pacific/Midway] feed STALE: nói rõ mọi kết luận 'khớp' không đáng tin
+  ok   [TZ=Pacific/Midway] feed STALE: quy việc cho Winston + cấm đóng bằng 'đã quét không thấy gì'
+  ok   [TZ=Pacific/Midway] feed FRESH + không marker nào -> rc=0, im lặng
+  ok   [TZ=Pacific/Midway] Discord hỏng -> state de-dup RỖNG (không nói dối 'đã cảnh báo')
+  ok   [TZ=Pacific/Midway] Discord hỏng -> stderr nêu LỖI THẬT, rc=10
+  ok   [TZ=Pacific/Midway] state JSON cụt -> VẪN gửi Discord
+  ok   [TZ=Pacific/Midway] state JSON cụt -> stderr nêu lỗi thật, không im lặng
+  ok   [TZ=Pacific/Midway] 9 mã NẮM đều có tên trên Discord (không cắt)
+  ok   [TZ=Pacific/Midway] mã KHÔNG nắm bị cắt ở trần + nói rõ còn bao nhiêu
+  ok   [TZ=Pacific/Midway] held=unknown có mục RIÊNG, không nằm dưới 'Mã không nắm'
+  ok   [TZ=Pacific/Midway] cả 9 mã held=unknown đều có tên (KHÔNG bị trần cắt)
+  ok   [TZ=Pacific/Midway] không mã unknown nào lọt vào khối 'Mã không nắm'
+  ok   [TZ=Pacific/Midway] có dòng việc-cần-làm cho ca không tra được vị thế
+  ok   [TZ=Pacific/Midway] thiếu đối số topic -> rc=2
+
+[16] alert.sh — AWAITING_TRADE  (TZ: TZ=Pacific/Midway)
+  ok   [TZ=Pacific/Midway] awaiting-only (không nắm) -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=Pacific/Midway] awaiting-only vẫn ghi bus với ĐỦ danh sách
+  ok   [TZ=Pacific/Midway] awaiting KHÔNG sinh khoá de-dup cho mã không nắm
+  ok   [TZ=Pacific/Midway] DRIFT thật + awaiting -> có gửi Discord
+  ok   [TZ=Pacific/Midway] awaiting gộp đúng MỘT dòng info chứa cả 2 mã
+  ok   [TZ=Pacific/Midway] awaiting KHÔNG vào 'Việc cần làm'
+  ok   [TZ=Pacific/Midway] awaiting KHÔNG thành dòng lệch '• **VHF**'
+  ok   [TZ=Pacific/Midway] footer đếm awaiting riêng
+  ok   [TZ=Pacific/Midway] state chỉ có khoá DRIFT, không có khoá awaiting
+  ok   [TZ=Pacific/Midway] DRIFT đã cảnh báo + awaiting -> KHÔNG gửi lại (de-dup còn nguyên)
+  ok   [TZ=Pacific/Midway] awaiting-only + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [TZ=Pacific/Midway] awaiting KHÔNG giao 'vendor thiếu hệ số' cho Winston
+  ok   [TZ=Pacific/Midway] awaiting + uncomputable mã nắm -> có gửi Discord
+  ok   [TZ=Pacific/Midway] awaiting mã ĐANG NẮM -> Discord nêu tên + nhãn LIVE
+  ok   [TZ=Pacific/Midway] awaiting mã nắm KHÔNG giao Winston
+  ok   [TZ=Pacific/Midway] awaiting mã nắm ghi khoá RIÊNG `mã|ex|awaiting_trade`
+  ok   [TZ=Pacific/Midway] awaiting mã nắm lượt 2 -> de-dup, KHÔNG gửi lại
+  ok   [TZ=Pacific/Midway] awaiting held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [TZ=Pacific/Midway] --dry-run KHÔNG xoá khoá cũ
+  ok   [TZ=Pacific/Midway] lượt awaiting XOÁ khoá DRIFT cũ `VHF|ex` (không gửi Discord)
+  ok   [TZ=Pacific/Midway] xoá khoá awaiting KHÔNG đụng khoá khác
+  ok   [TZ=Pacific/Midway] awaiting -> DRIFT (≥3 phiên) báo như mã MỚI, không bị khoá cũ chặn
+  ok   [TZ=Pacific/Midway] awaiting held=skipped một mình -> im lặng như mã không nắm, rc=0
+  ok   [TZ=Pacific/Midway] awaiting held=skipped KHÔNG in 'ĐANG NẮM LIVE: skipped' / không in đậm
+  ok   [TZ=Pacific/Midway] DRIFT thật + awaiting -> giữ tiêu đề '⚠️ LỆCH'
+  ok   [TZ=Pacific/Midway] awaiting + UNCOMPUTABLE không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [TZ=Pacific/Midway] awaiting + NODATA không nắm -> rc=10 qua nhánh de-dup, KHÔNG Discord
+  ok   [TZ=Pacific/Midway] chỉ awaiting mã nắm -> tiêu đề ℹ️ CHỜ GIAO DỊCH LẠI, không '⚠️ LỆCH'
+  ok   [TZ=Pacific/Midway] chỉ awaiting mã nắm -> 'Việc cần làm' nói rõ 'không có', không trống
+  ok   [TZ=Pacific/Midway] NODATA mã nắm + awaiting không nắm -> vẫn tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Midway] awaiting mã nắm mới + DRIFT mới -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Midway] awaiting mã nắm mới + UNCOMPUTABLE mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Midway] awaiting mã nắm mới + NODATA mã nắm -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Midway] awaiting mã nắm mới + feed STALE -> tiêu đề '⚠️ LỆCH', không ℹ️
+  ok   [TZ=Pacific/Midway] DRIFT đã de-dup + awaiting mã nắm mới -> KHÔNG nói 'Không có lệch thật'
+  ok   [TZ=Pacific/Midway] DRIFT đã de-dup + awaiting mã nắm -> TODO nói 'không có việc MỚI'
+  ok   [TZ=Pacific/Midway] awaiting mã NẮM: XOÁ khoá DRIFT cũ `DRX|ex` (đường tiền thật)
+  ok   [TZ=Pacific/Midway] awaiting-only, mã nắm đã de-dup -> rc=0, log KHÔNG nói 'khong ma nao co the dang nam'
+  ok   [TZ=Pacific/Midway] thiếu SCAN + DRIFT de-dup + awaiting nắm -> KHÔNG nói 'Không có lệch thật' (B2)
+  ok   [TZ=Pacific/Midway] xoá khoá hỏng -> KHÔNG nói 'Discord DA gui roi', trích lỗi thật (B1)
+  ok   [TZ=Pacific/Midway] xoá khoá hỏng -> ÉP gửi Discord nêu khoá sót, rc=10 (B1)
+  ok   [TZ=Pacific/Midway] xoá khoá hỏng -> khoá VẪN còn (test thật sự chạm đường lỗi)
+
+[18] alert.sh — PRICE_FIELD_MISMATCH  (TZ: TZ=Pacific/Midway)
+  ok   [TZ=Pacific/Midway] price-field-only (gồm mã nắm + unknown) -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=Pacific/Midway] price-field-only: log nói rõ lý do im lặng
+  ok   [TZ=Pacific/Midway] price-field-only: log đếm ĐÚNG 2 mã có thể đang nắm (DRI + unknown), không nói 'khong ma nao'
+  ok   [TZ=Pacific/Midway] price-field-only vẫn ghi bus với ĐỦ danh sách
+  ok   [TZ=Pacific/Midway] price-field KHÔNG sinh khoá de-dup
+  ok   [TZ=Pacific/Midway] DRIFT thật + price-field -> có gửi Discord
+  ok   [TZ=Pacific/Midway] price-field gộp đúng MỘT dòng info chứa cả 3 mã
+  ok   [TZ=Pacific/Midway] price-field held=unknown -> nêu tên + 'KHÔNG TRA ĐƯỢC vị thế'
+  ok   [TZ=Pacific/Midway] price-field mã không nắm KHÔNG in đậm
+  ok   [TZ=Pacific/Midway] price-field held=skipped KHÔNG thành 'ĐANG NẮM LIVE: skipped'
+  ok   [TZ=Pacific/Midway] price-field mã nắm mang nhãn LIVE trong dòng info
+  ok   [TZ=Pacific/Midway] price-field KHÔNG vào 'Việc cần làm'
+  ok   [TZ=Pacific/Midway] price-field KHÔNG thành dòng lệch '• **DVN**'/'• **DRI**'
+  ok   [TZ=Pacific/Midway] footer đếm price-field riêng
+  ok   [TZ=Pacific/Midway] state chỉ có khoá DRIFT
+  ok   [TZ=Pacific/Midway] price-field + feed STALE -> VẪN gửi (feed là cảnh báo riêng)
+  ok   [TZ=Pacific/Midway] price-field KHÔNG bật 'Vendor thiếu hệ số' (Winston)
+  ok   [TZ=Pacific/Midway] price-field --dry-run KHÔNG xoá khoá cũ
+  ok   [TZ=Pacific/Midway] lượt price-field XOÁ khoá DRIFT cũ `DRI|ex`, không gửi Discord
+  ok   [TZ=Pacific/Midway] xoá khoá price-field KHÔNG đụng khoá khác
+  ok   [TZ=Pacific/Midway] price-field -> DRIFT thật về sau báo như MỚI, không bị khoá cũ chặn
+  ok   [TZ=Pacific/Midway] price-field + awaiting không nắm -> KHÔNG gửi Discord, rc=0
+  ok   [TZ=Pacific/Midway] price-field mã KHÔNG nắm -> log KHÔNG nói 'CO THE DANG NAM'
+  ok   [TZ=Pacific/Midway] price-field: xoá khoá cũ HỎNG -> ép gửi Discord kèm lỗi thật
+
+[9] adjfactor_drift_daily.sh — tách cờ, và rc=1/2 KHÔNG được đọc thành 'sạch'
+  ok   --dry-run KHÔNG bị chuyển vào detector (nó sẽ rc=2 và gửi Discord thật)
+  ok   --dry-run ĐƯỢC chuyển vào alert
+  ok   runner trả rc của alert khi detector chạy được
+  ok   output detector được đưa nguyên vào stdin của alert
+  ok   detector rc=1 -> KHÔNG gọi alert (không có kết luận nào để cảnh báo)
+  ok   detector rc=1 -> runner trả rc=1, KHÔNG phải 0/10
+  ok   detector rc=1 -> thông điệp nói rõ "KHÔNG phải không có lệch"
+  ok   detector rc=1 + --dry-run -> KHÔNG gửi Discord
+  ok   detector rc=124 (ngoài allow-list) -> runner trả 124, KHÔNG phải 0/10 (M31)
+  ok   detector rc=124 -> KHÔNG gọi alert, và nói rõ KHÔNG phải 'không có lệch'
+  ok   detector rc=137 (ngoài allow-list) -> runner trả 137, KHÔNG phải 0/10 (M31)
+  ok   detector rc=137 -> KHÔNG gọi alert, và nói rõ KHÔNG phải 'không có lệch'
+  ok   detector rc=3 (ngoài allow-list) -> runner trả 3, KHÔNG phải 0/10 (M31)
+  ok   detector rc=3 -> KHÔNG gọi alert, và nói rõ KHÔNG phải 'không có lệch'
+  ok   detector rc=11 (điểm mù) -> VẪN gọi alert (nằm trong allow-list)
+  ok   detector rc=1 KHÔNG dry-run -> CÓ gửi Discord cảnh báo hạ tầng
+  ok   cảnh báo hạ tầng trích LỖI THẬT detector in ra, không phải câu đoán
+  ok   detector rc=0 (sạch) -> vẫn gọi alert (alert tự exit 0 nếu không có marker)
+
+[10] meta — assertion neo-TZ có thật sự phân biệt được không (§19)
+  ok   có ít nhất MỘT môi trường TZ phân biệt được ngày host với ngày ICT (không vô nghĩa): ['TZ=Pacific/Kiritimati']
+
+=== 842/843 assertion PASS ===
+FAIL:
+  - nhánh này KHÔNG chạm report_return_gate.py / dividend_adjusted_return.py (commit + worktree)

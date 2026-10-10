@@ -1,0 +1,2 @@
+rổ ['CTG', 'VCB'] ⇒ [('CTG', 'CASH_CONFIRMED', 450.0, True, 'giải từ tiền mặt broker thật (2 phương trình / 2 ẩn: CTG@2026-07-23, VCB@2026-07-23)'), ('VCB', 'CASH_CONFIRMED', 450.0, True, 'giải từ tiền mặt broker thật (2 phương trình / 2 ẩn: CTG@2026-07-23, VCB@2026-07-23)')]
+rổ ['CTG'] ⇒ [('CTG', 'CASH_VENDOR', 450.0, False, 'nghiệm KHÔNG khớp tiền broker tại SpaceX 2026-07-22 (phải thu 1,620,000đ, nghiệm cho 1,656,000đ, lệch +36,000đ; hôm đó tài khoản còn giữ VCB')]

@@ -1,0 +1,20 @@
+CỔNG TỈ SUẤT — SpaceX_daily_report_2026-10-01.md | chốt 2026-10-01 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     615,438,905  lãi/lỗ tổng      20,961,325     3.41%   ⚠️ THIẾU TPB (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+   · SpaceX · BID ex 2026-07-17: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0684 × phần hưởng 0.9091 = 382.89đ/cp trên KL đang giữ
+   · SpaceX · CTG ex 2026-07-23: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0000 × phần hưởng 0.8333 = 375.00đ/cp trên KL đang giữ
+   · SpaceX · VCB ex 2026-07-23: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0000 × phần hưởng 0.7143 = 321.43đ/cp trên KL đang giữ
+
+⚠️  1 vị thế KHÔNG có kỳ vọng và mã CÓ xuất hiện trong báo cáo — cổng không kiểm được các dòng này, người soạn PHẢI tự xem:
+   • TPB (SpaceX, KL=230): dòng 4 nhắc tới mã, không thấy tỉ suất có dấu/ô % nào cạnh nó. Lý do không có kỳ vọng: sổ broker lúc 2026-10-01T19:03:01: KL 200→230 (×1.1500) và tổng giá vốn GIẢM 500.00đ trên mỗi cp cũ — KHÔNG có sự kiện đã giải nào khớp — vendor khai sự kiện cổ phiếu ×1.1500 ex 2026-10-02, SAU ngày chốt 2026-10-01: broker đã credit từ tối hôm trước nên sổ đã ở hệ SAU sự kiện trong khi giá 2026-10-01 còn ở hệ TRƯỚC; sự kiện có ex-date sau ngày chốt không vào kỳ vọng của báo cáo này ⇒ chạy lại / `--resolve` KHÔNG gỡ được, phải bỏ tỉ suất của mã này khỏi báo cáo chốt 2026-10-01 và nói rõ vì sao
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+ℹ️  7 vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng (không chặn — không công bố thì không sai được): BID (SpaceX, cổ tức 383đ/cp), CTG (SpaceX, cổ tức 375đ/cp), DRI (SpaceX, cổ tức 1,000đ/cp), MBB (SpaceX, cổ tức 657đ/cp), NCT (SpaceX, cổ tức 8,000đ/cp), SAB (SpaceX, cổ tức 3,000đ/cp), VCB (SpaceX, cổ tức 321đ/cp)
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

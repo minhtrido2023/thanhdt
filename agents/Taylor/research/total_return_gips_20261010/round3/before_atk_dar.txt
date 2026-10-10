@@ -1,0 +1,31 @@
+=== A0 control: attack3 cô lập thật (sổ giả, bước trừ 110đ, phải thu khớp) — kỳ vọng CASH_CONFIRMED
+A0: kind=CASH_CONFIRMED resolved=True per_share=110.0 | tỉ suất 28.21% (đúng 28.21%) unverified=0
+     note: giải từ tiền mặt broker thật (2 phương trình / 1 ẩn: DRI@2026-09-22)
+
+=== A1: tài khoản GIỮ mã nhưng SỔ KHÔNG PHỦ ngày đó (không bản đọc số dư, không bản ghi vị thế 18-22/09) — vắng mặt ≠ không có
+A1: kind=RATIO_NOISE resolved=True per_share=110.0 | tỉ suất 27.42% (đúng 28.21%) unverified=0
+     note: NHIỄU tỉ số, KHÔNG phải sự kiện: vendor `corporate_action` tra được và có 0 dòng (`executed` lẫn `announced`) trong [2026-09-21, 2026-09-22]; sổ giá vốn và `cashDividendReceiving` của SpaceX, ZaloPay không có dấu vết nào quanh đó;
+
+=== A2: phải thu MỚI và CHI TRẢ cũ rơi cùng khe bản đọc (delta ròng ≤ 0) + lệnh mua che bước trừ ở cả 2 tài khoản
+A2: kind=RATIO_NOISE resolved=True per_share=110.0 | tỉ suất 27.42% (đúng 28.21%) unverified=0
+     note: NHIỄU tỉ số, KHÔNG phải sự kiện: vendor `corporate_action` tra được và có 0 dòng (`executed` lẫn `announced`) trong [2026-09-21, 2026-09-22]; sổ giá vốn và `cashDividendReceiving` của SpaceX, ZaloPay không có dấu vết nào quanh đó;
+
+=== A3: phải thu được ghi vào ngày THỨ BẢY nằm giữa (last_cum thứ Sáu 18/09 → ex thứ Hai 21/09) + lệnh mua che; orphan chỉ hỏi 2 đầu mút
+   ứng viên: [('2026-09-08', '2026-09-07', 100, True), ('2026-09-16', '2026-09-15', 100, True), ('2026-09-21', '2026-09-18', 110, True), ('2026-09-25', '2026-09-24', 98, True), ('2026-09-30', '2026-09-29', 102, True), ('2026-10-06', '2026-10-05', 102, True), ('2026-10-08', '2026-10-07', 96, True)]
+A3: kind=RATIO_NOISE resolved=True | note: NHIỄU tỉ số, KHÔNG phải sự kiện: vendor `corporate_action` tra được và có 0 dòng (`executed` lẫn `announced`) trong [2026-09-18, 2026-09-21]; sổ giá vốn và `cashDividendReceiving` của SpaceX, ZaloPay 
+A3-control (phải thu ghi đúng thứ Sáu): kind=RATIO_NOISE resolved=True
+
+=== A4: hai mã cùng ex-date trong một tài khoản; X=DRI 110đ (vendor chưa có, bị lệnh mua che), Y=ZZZ 1000đ (vendor có, bước trừ thấy)
+A4 DRI: kind=UNVERIFIED resolved=False | hệ VÔ ĐỊNH (1 phương trình / 2 ẩn: DRI@2026-09-22, ZZZ@2026-09-22) — nhiều mã cùng ngày chốt quyền mà không đủ tài khoản có tỉ lệ nắm giữ khác nhau để tách | cú
+A4 ZZZ: kind=CASH_VENDOR per_share=1000.0 resolved=False | hệ VÔ ĐỊNH (1 phương trình / 2 ẩn: DRI@2026-09-22, ZZZ@2026-09-22) — nhiều mã cùng ngày chốt quyền mà không đủ tài khoản có tỉ lệ nắm giữ khác nhau để tách
+
+=== A5 (lagged, 7d9ce9ae): vendor khai cổ tức 300đ ex 21/09 (cú nhảy ĐÃ đủ); 22/09 có cổ tức THẬT thứ hai 200đ, vendor chưa có dòng; broker có bước trừ + phải thu
+   ứng viên: [('2026-09-21', '2026-09-18', 300.0, '2.04%'), ('2026-09-22', '2026-09-21', 200.0, '1.35%')]
+A5 ex 2026-09-21: kind=CASH_CONFIRMED resolved=True per_share=300.0 ratio_ps=496.0 | giải từ tiền mặt broker thật (1 phương trình / 1 ẩn: LLL@2026-09-21)
+A5 ex 2026-09-22: kind=RATIO_NOISE resolved=True per_share=200.0 ratio_ps=200.0 | KHÔNG phải sự kiện riêng: cú nhảy tỉ số TRỄ 1 phiên của sự kiện vendor khai ở ex 2026-09-21 (cột `Price` phiên đó chưa phản ánh giá sau quyền; hai cú nhảy cộng lại ×1.034
+   tỉ suất 1.90% (đúng 3.17%), unverified=0
+
+=== A6 (lagged): cú nhảy vendor ĐÃ ĐỦ ở ex-date + NHIỄU +0,67% phiên sau ⇒ bị ghép như 'trễ'? ratio_per_share của sự kiện thật bị làm bẩn?
+   ứng viên: [('2026-09-21', '2026-09-18', 300.0, '2.04%', 'amp 0.70%'), ('2026-09-22', '2026-09-21', 99.3, '0.67%', 'amp 0.70%')]
+A6 ex 2026-09-21: kind=CASH_VENDOR per_share=300.0 ratio_ps=397.35 jump=2.72% | không có bản ghi broker khớp — chưa nắm giữ tại ngày chốt quyền, hoặc log không phủ ngày đó
+A6 ex 2026-09-22: kind=RATIO_NOISE per_share=99.34 ratio_ps=99.34 jump=0.67% | KHÔNG phải sự kiện riêng: cú nhảy tỉ số TRỄ 1 phiên của sự kiện vendor khai ở ex 2026-09-21 (cột `Price` phiên đó chưa phản ánh giá sau quyền; hai cú 

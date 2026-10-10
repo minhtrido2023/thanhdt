@@ -1,0 +1,31 @@
+CỔNG TỈ SUẤT — SpaceX_weekly_report_2026-10-05_to_2026-10-09.md | chốt 2026-10-09 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+PVT     3500   SpaceX      47.37      47.37     0.00       0.00    17,100.00  OK
+SIP     1700   SpaceX       4.97       4.98    -0.01       0.00    47,058.82  OK
+DRI     3700   SpaceX      37.82      34.59     3.23   1,000.00    13,262.16  LỆCH
+VNM      900   SpaceX      -1.54      -1.54    -0.00       0.00    58,600.00  OK
+SAB     1100   SpaceX      -3.42      -3.42    -0.00   3,000.00    47,368.18  OK
+VPI      800   SpaceX     -11.02     -11.02     0.00       0.00    62,375.00  OK
+TV1     2300   SpaceX       2.86       2.86    -0.00   1,500.00    20,147.83  OK
+NCT      500   SpaceX      -3.24      -3.24     0.00   8,000.00    94,360.00  OK
+VPB      286   SpaceX       8.08       8.08     0.00       0.00    22,020.98  OK
+MBB      175   SpaceX      -7.65      -7.69     0.04     656.72    21,313.43  OK
+MSB      100   SpaceX       7.81       7.82    -0.01       0.00    13,541.67  OK
+VIB       47   SpaceX       0.32       0.22     0.10       0.00    13,619.74  OK
+TPB       30   SpaceX     -18.73     -18.79     0.06     434.78    14,608.70  OK
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     449,645,405  lãi/lỗ tổng      41,259,265     9.18%
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+   · SpaceX · TPB ex 2026-10-02: 500đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 1.0000 = 434.78đ/cp trên KL đang giữ
+
+Đã kiểm 13 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+❌ CHẶN — 1 vấn đề:
+   • DRI (SpaceX, KL=3700): báo cáo +37.82% vs kỳ vọng +34.59% (lệch +3.23pp; cổ tức GỘP 1,000đ/cp)
+
+   Với mã CÓ cổ tức (DRI): chạy `mike/bin/dividend_adjusted_return.py --resolve <rổ mã> --from … --to …`,
+   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số); giá vốn và cổ tức/cp đều quy về KL ĐANG GIỮ (cột 'gia von THO' và 'co tuc GOP' ở bảng trên) — coding_guidelines §21.

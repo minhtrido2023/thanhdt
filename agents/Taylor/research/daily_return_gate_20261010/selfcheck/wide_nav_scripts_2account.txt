@@ -1,0 +1,20 @@
+Selfcheck 2-account interleaved — ngày dùng: 2026-10-10
+  cửa sổ fill cho verify_account_snapshot: 43 ngày (2026-06-12 → 2026-10-07)
+
+--- SpaceX ---
+  verify_account_snapshot.py: rc=0 mtm=474757035.842
+  reconcile_equity.py: rc=0
+  daily_nav_snapshot.py: rc=0 out=[dnse] ⚠ chưa có trading-token (SpaceX) — inquiry OK, đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng --send-otp trước)
+[dnse] kết nối OK [SpaceX] tiểu khoản 0002023347
+💰 **NAV 2026-10-10: 9
+
+--- ZaloPay ---
+  verify_account_snapshot.py: rc=0 mtm=269666516.48
+  reconcile_equity.py: rc=1
+  daily_nav_snapshot.py: rc=0 out=[dnse] ⚠ chưa có trading-token (ZaloPay) — inquiry OK, đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng --send-otp trước)
+[dnse] kết nối OK [ZaloPay] tiểu khoản 0001743768
+💰 **NAV 2026-10-10:
+
+(Đã restore nav_history_*.csv + nav_snapshot_*.json về đúng trạng thái trước khi chạy.)
+
+PASS — cả 3 script cho SpaceX/ZaloPay ra kết quả KHÁC NHAU đúng như kỳ vọng (ngày 2026-10-10), không có dấu hiệu đọc chung/lẫn account. Xem dòng (info) ở trên nếu có cảnh báo phụ (không phải fail).

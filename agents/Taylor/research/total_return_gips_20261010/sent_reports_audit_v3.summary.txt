@@ -1,0 +1,67 @@
+SpaceX_ZaloPay_monthly_report_2026-08.md: 10 dòng khớp vị thế, 1 lệch
+    SpaceX   SCL KL=1500 công bố +16.95% | đúng +17.80% | lệch -0.85pp | cổ tức/cp 0.00 giá vốn thô 23,600.00 (cp broker 23,600.00, giá 27,800)
+SpaceX_ZaloPay_weekly_report_2026-07-06_to_2026-07-10.md: 15 dòng khớp vị thế, 1 lệch
+    SpaceX   MBB KL=2400 công bố -4.64% | đúng -0.97% | lệch -3.67pp | cổ tức/cp 1,000.00 giá vốn thô 25,850.00 (cp broker 24,850.00, giá 24,650)
+SpaceX_ZaloPay_weekly_report_2026-07-13_to_2026-07-17.md: 15 dòng khớp vị thế, 3 lệch
+    SpaceX   BID KL=1900 công bố -9.75% | đúng -8.75% | lệch -1.00pp | cổ tức/cp 450.00 giá vốn thô 42,991.30 (cp broker 42,541.30, giá 38,800)
+    SpaceX   MBB KL=2400 công bố -8.12% | đúng -4.45% | lệch -3.67pp | cổ tức/cp 1,000.00 giá vốn thô 25,850.00 (cp broker 24,850.00, giá 23,750)
+    SpaceX   LPB KL=900 công bố +0.60% | đúng +2.78% | lệch -2.18pp | cổ tức/cp 0.00 giá vốn thô 51,466.67 (cp broker 51,466.67, giá 52,900)
+SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md: 20 dòng khớp vị thế, 0 lệch
+SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14_CORRECTION_VIB.md: 1 dòng khớp vị thế, 0 lệch
+SpaceX_ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md: 26 dòng khớp vị thế, 1 lệch
+    SpaceX   SCL KL=1500 công bố +16.95% | đúng +17.80% | lệch -0.85pp | cổ tức/cp 0.00 giá vốn thô 23,600.00 (cp broker 23,600.00, giá 27,800)
+SpaceX_monthly_report_2026-08.md: 10 dòng khớp vị thế, 1 lệch
+    SpaceX   SCL KL=1500 công bố +16.95% | đúng +17.80% | lệch -0.85pp | cổ tức/cp 0.00 giá vốn thô 23,600.00 (cp broker 23,600.00, giá 27,800)
+SpaceX_monthly_report_2026-09.md: 24 dòng khớp vị thế, 0 lệch
+SpaceX_weekly_report_2026-07-03.md: 0 dòng khớp vị thế, 0 lệch  LỖI: ValueError: không có bản ghi positions nào của 0002023347 ngày 2026-07-03 — CHẶN
+SpaceX_weekly_report_2026-08-24_to_2026-08-28.md: 26 dòng khớp vị thế, 1 lệch
+    SpaceX   SCL KL=1500 công bố +16.95% | đúng +17.80% | lệch -0.85pp | cổ tức/cp 0.00 giá vốn thô 23,600.00 (cp broker 23,600.00, giá 27,800)
+SpaceX_weekly_report_2026-09-07_to_2026-09-11.md: 27 dòng khớp vị thế, 1 lệch
+    SpaceX   DRI KL=3700 công bố +9.33% | đúng +8.58% | lệch +0.75pp | cổ tức/cp 0.00 giá vốn thô 13,262.16 (cp broker 13,262.16, giá 14,400)
+SpaceX_weekly_report_2026-09-14_to_2026-09-18.md: 26 dòng khớp vị thế, 5 lệch
+    SpaceX   SAB KL=1100 công bố -6.48% | đúng -0.46% | lệch -6.02pp | cổ tức/cp 3,000.00 giá vốn thô 47,368.18 (cp broker 44,368.18, giá 44,300)
+    SpaceX   NCT KL=500 công bố -10.56% | đúng -2.50% | lệch -8.06pp | cổ tức/cp 8,000.00 giá vốn thô 94,360.00 (cp broker 86,360.00, giá 84,400)
+    SpaceX   BID KL=1175 công bố -10.50% | đúng -9.61% | lệch -0.89pp | cổ tức/cp 382.89 giá vốn thô 39,954.21 (cp broker 39,571.32, giá 35,750)
+    SpaceX   VCB KL=700 công bố -3.05% | đúng -2.56% | lệch -0.49pp | cổ tức/cp 321.43 giá vốn thô 61,785.71 (cp broker 61,464.29, giá 59,900)
+    SpaceX   CTG KL=1200 công bố -11.50% | đúng -10.46% | lệch -1.04pp | cổ tức/cp 375.00 giá vốn thô 34,180.65 (cp broker 33,805.65, giá 30,250)
+SpaceX_weekly_report_2026-09-21_to_2026-09-25.md: 27 dòng khớp vị thế, 6 lệch
+    SpaceX   DRI KL=3700 công bố +13.86% | đúng +21.02% | lệch -7.16pp | cổ tức/cp 1,000.00 giá vốn thô 13,262.16 (cp broker 12,262.16, giá 15,100)
+    SpaceX   SAB KL=1100 công bố -7.32% | đúng -1.31% | lệch -6.01pp | cổ tức/cp 3,000.00 giá vốn thô 47,368.18 (cp broker 44,368.18, giá 43,900)
+    SpaceX   BID KL=1175 công bố -10.50% | đúng -9.61% | lệch -0.89pp | cổ tức/cp 382.89 giá vốn thô 39,954.21 (cp broker 39,571.32, giá 35,750)
+    SpaceX   NCT KL=500 công bố -11.40% | đúng -3.35% | lệch -8.05pp | cổ tức/cp 8,000.00 giá vốn thô 94,360.00 (cp broker 86,360.00, giá 83,600)
+    SpaceX   VCB KL=700 công bố -6.13% | đúng -5.63% | lệch -0.50pp | cổ tức/cp 321.43 giá vốn thô 61,785.71 (cp broker 61,464.29, giá 58,000)
+    SpaceX   CTG KL=1200 công bố -11.79% | đúng -10.75% | lệch -1.04pp | cổ tức/cp 375.00 giá vốn thô 34,180.65 (cp broker 33,805.65, giá 30,150)
+SpaceX_weekly_report_2026-09-28_to_2026-10-02.md: 15 dòng khớp vị thế, 2 lệch
+    SpaceX   DRI KL=3700 công bố +32.11% | đúng +29.32% | lệch +2.79pp | cổ tức/cp 1,000.00 giá vốn thô 13,262.16 (cp broker 12,262.16, giá 16,200)
+    SpaceX   BID KL=75 công bố -12.06% | đúng -11.99% | lệch -0.07pp | cổ tức/cp 382.89 giá vốn thô 39,954.21 (cp broker 39,571.32, giá 34,800)
+SpaceX_weekly_report_2026-10-05_to_2026-10-09.md: 13 dòng khớp vị thế, 3 lệch
+    SpaceX   DRI KL=3700 công bố +37.82% | đúng +34.59% | lệch +3.23pp | cổ tức/cp 1,000.00 giá vốn thô 13,262.16 (cp broker 12,262.16, giá 16,900)
+    SpaceX   VIB KL=47 công bố +0.32% | đúng +0.22% | lệch +0.10pp | cổ tức/cp 0.00 giá vốn thô 13,619.74 (cp broker 13,619.74, giá 13,650)
+    SpaceX   TPB KL=30 công bố -18.73% | đúng -18.79% | lệch +0.06pp | cổ tức/cp 434.78 giá vốn thô 14,608.70 (cp broker 14,173.91, giá 11,450)
+ZaloPay_monthly_report_2026-09.md: 24 dòng khớp vị thế, 0 lệch
+ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md: 11 dòng khớp vị thế, 2 lệch
+    ZaloPay  VPB KL=1300 công bố +3.85% | đúng +3.95% | lệch -0.10pp | cổ tức/cp 0.00 giá vốn thô 26,744.63 (cp broker 26,744.63, giá 27,800)
+    ZaloPay  SCL KL=1000 công bố +17.00% | đúng +17.85% | lệch -0.85pp | cổ tức/cp 0.00 giá vốn thô 23,590.00 (cp broker 23,590.00, giá 27,800)
+ZaloPay_weekly_report_2026-09-14_to_2026-09-18.md: 27 dòng khớp vị thế, 6 lệch
+    ZaloPay  DGC KL=10000 công bố -9.62% | đúng -8.84% | lệch -0.78pp | cổ tức/cp 8,000.00 giá vốn thô 47,775.00 (cp broker 39,775.00, giá 35,950)
+    ZaloPay  SAB KL=744 công bố -6.64% | đúng -0.63% | lệch -6.01pp | cổ tức/cp 3,000.00 giá vốn thô 47,450.20 (cp broker 44,450.20, giá 44,300)
+    ZaloPay  NCT KL=373 công bố -10.59% | đúng -2.54% | lệch -8.05pp | cổ tức/cp 8,000.00 giá vốn thô 94,400.00 (cp broker 86,400.00, giá 84,400)
+    ZaloPay  VCB KL=300 công bố -1.46% | đúng -1.23% | lệch -0.23pp | cổ tức/cp 150.00 giá vốn thô 60,787.50 (cp broker 60,637.50, giá 59,900)
+    ZaloPay  BID KL=427 công bố -5.60% | đúng -4.89% | lệch -0.71pp | cổ tức/cp 315.88 giá vốn thô 37,903.71 (cp broker 37,587.82, giá 35,750)
+    ZaloPay  CTG KL=450 công bố -7.16% | đúng -5.85% | lệch -1.31pp | cổ tức/cp 450.00 giá vốn thô 32,583.33 (cp broker 32,133.33, giá 30,250)
+ZaloPay_weekly_report_2026-09-21_to_2026-09-25.md: 27 dòng khớp vị thế, 7 lệch
+    ZaloPay  DGC KL=10000 công bố -9.62% | đúng -8.84% | lệch -0.78pp | cổ tức/cp 8,000.00 giá vốn thô 47,775.00 (cp broker 39,775.00, giá 35,950)
+    ZaloPay  SAB KL=744 công bố -7.48% | đúng -1.48% | lệch -6.00pp | cổ tức/cp 3,000.00 giá vốn thô 47,450.20 (cp broker 44,450.20, giá 43,900)
+    ZaloPay  NCT KL=373 công bố -11.44% | đúng -3.39% | lệch -8.05pp | cổ tức/cp 8,000.00 giá vốn thô 94,400.00 (cp broker 86,400.00, giá 83,600)
+    ZaloPay  DRI KL=1900 công bố +13.85% | đúng +21.01% | lệch -7.16pp | cổ tức/cp 1,000.00 giá vốn thô 13,263.16 (cp broker 12,263.16, giá 15,100)
+    ZaloPay  VCB KL=300 công bố -4.59% | đúng -4.35% | lệch -0.24pp | cổ tức/cp 150.00 giá vốn thô 60,787.50 (cp broker 60,637.50, giá 58,000)
+    ZaloPay  BID KL=427 công bố -5.60% | đúng -4.89% | lệch -0.71pp | cổ tức/cp 315.88 giá vốn thô 37,903.71 (cp broker 37,587.82, giá 35,750)
+    ZaloPay  CTG KL=450 công bố -7.47% | đúng -6.16% | lệch -1.31pp | cổ tức/cp 450.00 giá vốn thô 32,583.33 (cp broker 32,133.33, giá 30,150)
+ZaloPay_weekly_report_2026-09-28_to_2026-10-02.md: 19 dòng khớp vị thế, 2 lệch
+    ZaloPay  DRI KL=1900 công bố +32.10% | đúng +29.31% | lệch +2.79pp | cổ tức/cp 1,000.00 giá vốn thô 13,263.16 (cp broker 12,263.16, giá 16,200)
+    ZaloPay  CTG KL=50 công bố -7.42% | KHÔNG dựng được: sự kiện ex 2026-07-23 [CASH_VENDOR] CHƯA giải (nghiệm KHÔNG khớp tiền broker tại ZaloPay 2026-07-22, SpaceX 2026-07-22 — có thể còn mã khác cùng ngày 
+ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md: 13 dòng khớp vị thế, 2 lệch
+    ZaloPay  DGC KL=10000 công bố -29.25% | đúng -13.34% | lệch -15.91pp | cổ tức/cp 8,000.00 giá vốn thô 47,775.00 (cp broker 39,775.00, giá 33,800)
+    ZaloPay  DRI KL=1900 công bố +37.81% | đúng +34.58% | lệch +3.23pp | cổ tức/cp 1,000.00 giá vốn thô 13,263.16 (cp broker 12,263.16, giá 16,900)
+
+TỔNG: 376 dòng, 44 lệch > 0.05pp

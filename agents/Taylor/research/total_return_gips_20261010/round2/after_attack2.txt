@@ -1,0 +1,36 @@
+⚠️  WC_ROOT='/tmp/arch_rev/wcroot' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+steps: [('buy', 0.0)]
+costPrice broker=12,872.00; giá vốn thô đúng=13,632.00; thổi=+31.29%  đúng=+29.27%
+
+##### H2: sự kiện thật bị gắn RATIO_NOISE + lệnh MUA (600cp) cùng cặp bản ghi che bước trừ
+   rc=1  PASS=False
+   | DRI     2500  ZaloPay      31.29          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2500): báo cáo công bố +31.29% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sổ broker lúc 2026-09-21T19:07:40: KL 1,900→2,500 cùng cặp bản ghi với lệnh mua/bán — `cashDividendReceiving` tăng 1,900,000đ ng
+
+##### H2': không sự kiện nào được phát hiện + lệnh mua che
+   rc=1  PASS=False
+   | DRI     2500  ZaloPay      31.29          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2500): báo cáo công bố +31.29% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sổ broker lúc 2026-09-21T19:07:40: KL 1,900→2,500 cùng cặp bản ghi với lệnh mua/bán — `cashDividendReceiving` tăng 1,900,000đ ng
+
+##### H2-control: sự kiện ĐÃ giải + mua che (hidden) => kỳ vọng?
+   rc=1  PASS=False
+   | DRI     2500  ZaloPay      29.27          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2500): báo cáo công bố +29.27% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sự kiện ex 2026-09-22 đã giải là 1,000đ/cp nhưng trong [2026-09-21, 2026-09-22] sổ giá vốn chỉ có cặp bản ghi lẫn lệnh mua/bán (
+
+pre-ex: thổi=+14.98%  đúng=+8.57%
+
+##### H3: chốt 21/09 (ex 22/09), mua 600cp cùng ngày che bước trừ
+   rc=1  PASS=False
+   | DRI     2500  ZaloPay      14.98          —        —          —            —  KHÔNG KỲ VỌNG
+   |    ZaloPay  giá vốn thô               0  lãi/lỗ tổng               0     0.00%   ⚠️ THIẾU DRI (không dựng được kỳ vọng — tổng này KHÔNG so được với dòng tổng của báo cáo)
+   | ❌ CHẶN — 1 vấn đề:
+   |    • DRI (ZaloPay, KL=2500): báo cáo công bố +14.98% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — sổ broker lúc 2026-09-21T19:07:40: KL 1,900→2,500 cùng cặp bản ghi với lệnh mua/bán — `cashDividendReceiving` tăng 1,900,000đ ng
+
+##### H6: (qua _assign_frames thật) cú nhảy lookup_failed ex 25/09 SAU sự kiện thật 22/09
+   real.frame_ok: False | real.resolved: False | out: {} | blockers: {'DRI': ['sự kiện ex 2026-09-22 [CASH_CONFIRMED] KHÔNG dùng được — khung KL không xác định vì: DRI ex 2026-09-25 [UNVERIFIED] — sổ broker lúc 2026-09-21T19:07:4']}

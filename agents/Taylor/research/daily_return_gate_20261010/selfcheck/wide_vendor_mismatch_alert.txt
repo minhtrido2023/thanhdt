@@ -1,0 +1,124 @@
+
+CA 1 — notify THÀNH CÔNG ⇒ state CÓ ghi, exit 10
+  ✓ exit 10
+  ✓ có gọi notify_thread.sh
+  ✓ có ghi bus
+  ✓ state CÓ ghi de-dup cho file
+  ✓ không sót file .tmp (ghi nguyên tử)
+  ✓ lượt 2 cùng ngày vẫn exit 10 (de-dup)
+  ✓ lượt 2 KHÔNG gọi lại notify (de-dup thật)
+
+CA 2 — notify THẤT BẠI ⇒ state KHÔNG ghi + IN LỖI THẬT
+  ✓ vẫn exit 10 (lệch nguồn CÓ thật, caller dựa vào để quy nguyên nhân)
+  ✓ MUTATION-GUARD vendor_alert_no_state_on_notify_fail: state KHÔNG ghi ⇒ lượt sau thử lại
+  ✓ stderr mang LỖI THẬT của notify (§29)
+  ✓ stderr nói rõ kênh nào hỏng
+  ✓ lượt sau THỬ LẠI notify (không bị de-dup khoá)
+  ✓ lượt sau gửi được thì mới ghi state
+
+CA 2b — bus hỏng nhưng Discord SỐNG ⇒ vẫn cảnh báo được (bus là kênh phụ)
+  ✓ exit 10
+  ✓ bus hỏng KHÔNG chặn đường tới user
+  ✓ state vẫn ghi (Discord mới là điều kiện)
+  ✓ stderr mang LỖI THẬT của bus (§29)
+
+CA 3 — state file CỤT/hỏng ⇒ VẪN cảnh báo được, không chết im lặng
+  ✓ exit 10
+  ✓ state hỏng KHÔNG làm câm cảnh báo
+  ✓ nêu rõ state hỏng (không im lặng)
+  ✓ trích lỗi parser THẬT (§29), không đoán nguyên nhân
+  ✓ state được dựng lại thành JSON hợp lệ
+
+CA 4 — KHÔNG có marker ⇒ không post gì, không ghi state, exit 0
+  ✓ exit 0
+  ✓ KHÔNG gọi side-effect nào
+  ✓ KHÔNG tạo state
+
+CA 5 — marker KHÔNG công bố (published=0) ⇒ vẫn cảnh báo (ca cổng rc=0, không kênh nào khác kêu)
+  ✓ exit 10
+  ✓ vẫn gửi Discord dù báo cáo KHÔNG bị chặn
+  ✓ payload bus ghi blocked_report=0
+
+CA 6 — --dry-run ⇒ exit 10, KHÔNG side-effect, KHÔNG state
+  ✓ exit 10
+  ✓ KHÔNG side-effect
+  ✓ KHÔNG tạo state
+  ✓ dry-run in chi tiết mã
+
+CA 7 — KILL giữa lúc ghi state ⇒ state CŨ còn NGUYÊN VẸN (ghi nguyên tử, §5)
+  ✓ đã gửi cảnh báo trước khi bị kill
+  ✓ MUTATION-GUARD vendor_alert_atomic_state_write: state vẫn là JSON HỢP LỆ sau kill
+  ✓ MUTATION-GUARD vendor_alert_atomic_state_write: nội dung CŨ không mất
+
+CA 8 — sai số đối số (0/1) ⇒ rc=2 + usage ra stderr, KHÔNG post gì (dòng 18/31-34)
+  ✓ rc=2 khi gọi với 0 đối số
+  ✓ in usage ra stderr (0 đối số)
+  ✓ KHÔNG gọi side-effect nào (0 đối số)
+  ✓ rc=2 khi gọi với 1 đối số
+  ✓ in usage ra stderr (1 đối số)
+  ✓ KHÔNG gọi side-effect nào (1 đối số)
+
+CA 9 — mốc ICT neo CỨNG bất kể TZ môi trường gọi script (MUTATION-GUARD vendor_alert_ict_anchor)
+  ✓ exit 10
+  ✓ MUTATION-GUARD vendor_alert_ict_anchor: key = ngày ICT (2026-09-24), không phải ngày theo TZ môi trường (2026-09-25)
+
+CA 10 — RẼ theo mã lý do (VENDOR_MISMATCH_REASON, arch-review D1b R1): câu Discord + Việc cần làm PHẢI khác nhau theo reason, không phát một câu cố định
+  ✓ exit 10
+  ✓ STK (stock_leg_ignored): câu nói ĐÚNG 'THUẦN CỔ PHIẾU', không phải 'hai nguồn bất đồng'
+  ✓ STK: Việc cần làm có mục 'Nghi giá rơi chia tách' (không phải 'đối soát cho khớp lại')
+  ✓ CSH (cash_mismatch): câu nói ĐÚNG 'hai nguồn bất đồng số cổ tức'
+  ✓ CSH: Việc cần làm có mục 'Bất đồng số cổ tức' (đối soát Winston)
+  ✓ UNK (REASON vắng mặt): câu nói THẲNG không xác định được, không đoán
+  ✓ UNK: Việc cần làm nói 'kiểm thủ công', KHÔNG suy đoán nguyên nhân
+  ✓ MUTATION-GUARD vendor_alert_reason_routing: CẢ BA câu đặc trưng cùng có mặt — 3 mã lý do KHÔNG bị gộp thành 1 câu chung
+
+CA 11 — VENDOR_LOOKUP_FAILED, had_broker_cash=1 published=1 (arch-review vòng 4 R1(e) + vòng 5 R1-A/R1-B): sự kiện TỪNG là CASH_CONFIRMED, đang công bố ⇒ CHẶN thật
+  ✓ exit 10 (thuần lookup_failed vẫn phải bắn cảnh báo)
+  ✓ câu Discord nói ĐÚNG 'KHÔNG TRA ĐƯỢC nguồn vendor', không phải 'hai nguồn bất đồng'
+  ✓ tiêu đề riêng cho ca THUẦN lookup_failed (không phải 'LỆCH NGUỒN CỔ TỨC')
+  ✓ Việc cần làm nói 'chạy lại report_return_gate.py' (rerun), không giao Winston đối soát số
+  ✓ KHÔNG phát nhầm câu 'hai nguồn bất đồng số cổ tức' của mismatch
+  ✓ R1-A: had_broker_cash=1 ⇒ câu 'broker đã giải Xđ/cp' (per_share là tiền broker thật)
+  ✓ R1-B: had_broker_cash=1 + published=1 ⇒ câu nói ĐÚNG 'báo cáo bị CHẶN'
+  ✓ R1-D: payload bus ghi blocked_report=1 đúng lúc report bị CHẶN
+
+CA 11b — VENDOR_LOOKUP_FAILED, had_broker_cash=0 (arch-review vòng 5 R1-A/R1-B): per_share chỉ là ƯỚC LƯỢNG, KHÔNG mất số công bố ⇒ KHÔNG chặn dù published=1
+  ✓ exit 10 (vẫn phải bắn cảnh báo, kể cả không chặn)
+  ✓ R1-A: had_broker_cash=0 ⇒ câu ĐÚNG 'broker CHƯA giải được số nào (ước lượng...)'
+  ✓ R1-A: KHÔNG khẳng định sai 'broker đã giải' cho số ước lượng
+  ✓ R1-B: had_broker_cash=0 ⇒ câu ĐÚNG 'không mất số đã công bố ... vẫn gửi bình thường'
+  ✓ R1-B: KHÔNG chặn oan — per_share ước lượng chưa từng là tiền broker
+  ✓ payload bus ghi blocked_report=0 (published=1 nhưng had_broker_cash=0 ⇒ không chặn)
+
+CA 12 — MIX: mismatch (VCB) + lookup_failed (VPB) trong CÙNG lượt ⇒ CẢ HAI câu cùng có mặt, không đè lẫn nhau
+  ✓ exit 10
+  ✓ VCB (mismatch) vẫn ra ĐÚNG câu cash_mismatch
+  ✓ VPB (lookup_failed) vẫn ra ĐÚNG câu riêng, không bị VCB đè
+  ✓ Việc cần làm có CẢ HAI mục (đối soát Winston + rerun BQ), không mất mục nào
+  ✓ ca MIX dùng tiêu đề chung 'LỆCH NGUỒN CỔ TỨC' (đúng vì có cả 2 loại)
+
+MUTATION 1 — W1(a) quay xe: ghi state VÔ ĐIỀU KIỆN dù notify hỏng
+  ✓ MUTANT m1 (mất cảnh báo vĩnh viễn) chết bằng ASSERTION: MUTATION-GUARD vendor_alert_no_state_on_notify_fail: state KHÔNG được ghi khi notify hỏng
+
+MUTATION 2 — W1(b) quay xe: nuốt stderr của notify (2>/dev/null)
+  ✓ MUTANT m2 (chẩn đoán mất bằng chứng (§29)) chết bằng ASSERTION: stderr mang LỖI THẬT của notify (§29)
+
+MUTATION 3 — W2 quay xe: ghi state KHÔNG nguyên tử (open(path,'w') thẳng)
+  ✓ MUTANT m3 (kill giữa lúc ghi ⇒ state cụt) chết bằng ASSERTION: MUTATION-GUARD vendor_alert_atomic_state_write: state vẫn là JSON HỢP LỆ sau kill
+
+MUTATION 4 — W1(c) quay xe: bus hỏng chặn luôn đường Discord
+  ✓ MUTANT m4 (kênh phụ chặn kênh chính) chết bằng ASSERTION: bus hỏng KHÔNG chặn đường tới user
+
+MUTATION 5 — mốc ICT quay xe: bỏ TZ='Asia/Ho_Chi_Minh' khi tính TODAY (R2)
+  ✓ MUTANT m5 (mốc ngày lệ thuộc TZ môi trường gọi (cron/host có thể không phải ICT)) chết bằng ASSERTION: MUTATION-GUARD vendor_alert_ict_anchor: key = ngày ICT (2026-09-24), không phải ngày theo TZ môi trường (2026-09-25)
+
+MUTATION 6 — R1 quay xe: xoá dòng đọc VENDOR_MISMATCH_REASON (mọi mã lý do rơi về UNKNOWN)
+  ✓ MUTANT m6 (3 mã lý do khác nhau gộp về cùng 1 câu, mất định tuyến Winston) chết bằng ASSERTION: MUTATION-GUARD vendor_alert_reason_routing: CẢ BA câu đặc trưng cùng có mặt — 3 mã lý do KHÔNG bị gộp thành 1 câu chung
+
+MUTATION 7 — R1(e) quay xe: bỏ điều kiện LOOKUP_MARKERS ở cổng thoát sớm (ca THUẦN lookup_failed lại exit 0 câm lặng)
+  ✓ MUTANT m7 (ca THUẦN lookup_failed exit 0 câm lặng đúng lúc bị CHẶN) chết bằng ASSERTION: exit 10 (thuần lookup_failed vẫn phải bắn cảnh báo)
+
+MUTATION 8 — R1-D quay xe: đảo điều kiện published trong vòng lặp VENDOR_LOOKUP_FAILED (BLOCKED không còn bật đúng lúc CHẶN thật)
+  ✓ MUTANT m8 (BLOCKED không bật đúng lúc CHẶN thật — lớp lỗi 'trường thứ 8' tái diễn) chết bằng ASSERTION: R1-B: had_broker_cash=1 + published=1 ⇒ câu nói ĐÚNG 'báo cáo bị CHẶN'
+
+===== vendor_mismatch_alert_selfcheck: 78 PASS / 0 FAIL =====

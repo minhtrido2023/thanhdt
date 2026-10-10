@@ -1,0 +1,37 @@
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 28,450 (Close 21,880), TV1 20,400 (Close 18,930)
+CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-02.md | chốt 2026-10-02 | tài khoản ZaloPay | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+VPI        —  ZaloPay      -4.34      -5.84     1.50       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 24)
+DGC        —  ZaloPay      -9.79      -9.79    -0.00   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+VPB        —  ZaloPay       7.89       7.89     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+LPB        —  ZaloPay     -26.70     -26.70     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+TCB        —  ZaloPay       2.02       2.02    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+HDB        —  ZaloPay       9.88       9.88    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+CTG        —  ZaloPay      -7.38      -7.38     0.00     450.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+MBB        —  ZaloPay      -6.88      -6.88    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+BID        —  ZaloPay      -7.38      -7.38    -0.00     315.88            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+MSB        —  ZaloPay       3.75       3.75    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+VIB        —  ZaloPay      -1.89      -1.89     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+VIX        —  ZaloPay     -11.18     -11.18     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 27)
+PVT        —  ZaloPay      36.25      36.25     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+SIP        —  ZaloPay       3.10       3.10     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+VNM        —  ZaloPay      -2.38      -2.38     0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+SAB        —  ZaloPay      -4.53      -4.53     0.00   3,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+NCT        —  ZaloPay      -3.50      -3.50    -0.00   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 30)
+DRI        —  ZaloPay      29.31      29.31     0.00   1,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 33)
+TV1        —  ZaloPay       0.35       0.35    -0.00       0.00            —  OK  (dòng vị thế báo cáo ngày, dòng 33)
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   ZaloPay  giá vốn thô     272,819,585  lãi/lỗ tổng      16,080,292     5.89%
+   (vị thế excluded — NGOÀI tổng ở trên; giá vốn = sổ broker + cổ tức đã giải, không có journal lệnh mua: không thấy dòng bảng (mã, KL) nào của DGC (ZaloPay))
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · ZaloPay · BID ex 2026-07-17: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0684 × phần hưởng 0.7500 = 315.88đ/cp trên KL đang giữ
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+❌ CHẶN — 1 vấn đề:
+   • VPI (dòng vị thế báo cáo ngày, dòng 24): báo cáo -4.34% vs kỳ vọng ZaloPay -5.84% (cổ tức GỘP 0đ/cp)
+
+   Trong đó VPI KHÔNG có cổ tức ⇒ lệch KHÔNG phải do thiếu cộng cổ tức. Gần như chắc chắn sai CƠ SỞ GIÁ: dùng `mtm_price` trong `data/execution_logs/verified_snapshot_<acct>_<asof>.json` (giá đóng cửa đã xác minh), KHÔNG dùng `positions[].marketPrice` — field đó không phải giá ATC.

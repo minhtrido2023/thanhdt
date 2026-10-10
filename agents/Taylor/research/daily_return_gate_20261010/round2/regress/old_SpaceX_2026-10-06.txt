@@ -1,0 +1,17 @@
+ℹ️  giá 2026-10-06: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-06 — `Close` của phiên đó đã bị điều chỉnh hồi tố: TV1 20,600 (Close 19,110)
+CỔNG TỈ SUẤT — SpaceX_daily_report_2026-10-06.md | chốt 2026-10-06 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     451,776,749  lãi/lỗ tổng      36,095,910     7.99%
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+   · SpaceX · TPB ex 2026-10-02: 500đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 1.0000 = 434.78đ/cp trên KL đang giữ
+   · SpaceX · TV1: broker đã trừ 1,500đ/cp khỏi giá vốn lúc 2026-10-06T20:15:02 cho cổ tức ex 2026-10-07 (vendor khai 1,500đ/cp) — ex-date SAU 2026-10-06 ⇒ cộng lại giá vốn, CHƯA tính thu nhập (giá còn nguyên quyền)
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+ℹ️  5 vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng (không chặn — không công bố thì không sai được): DRI (SpaceX, cổ tức 1,000đ/cp), MBB (SpaceX, cổ tức 657đ/cp), NCT (SpaceX, cổ tức 8,000đ/cp), SAB (SpaceX, cổ tức 3,000đ/cp), TPB (SpaceX, cổ tức 435đ/cp)
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

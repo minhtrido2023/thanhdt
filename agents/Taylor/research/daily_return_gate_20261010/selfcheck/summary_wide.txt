@@ -1,0 +1,11 @@
+wide_auto_exit_inject rc=0 0s | 110 PASS, 0 FAIL
+wide_eod_delivery_wiring rc=0 0s | eod_delivery_wiring_selfcheck: 9/9 PASS
+wide_vendor_mismatch_alert rc=0 14s | ===== vendor_mismatch_alert_selfcheck: 78 PASS / 0 FAIL =====
+wide_nav_scripts_2account rc=0 63s | PASS — cả 3 script cho SpaceX/ZaloPay ra kết quả KHÁC NHAU đúng như kỳ vọng (ngày 2
+wide_report_delivery_ledger rc=1 6s | 
+wide_rrg_root_only rc=0 3s | ✅ SELFCHECK PASS
+wide_dar_selfcheck_runner rc=0 1s | === SELFCHECK: 336 PASS / 0 FAIL ===
+wide_corp_actions_cashleg rc=0 0s | 4/4 PASS
+wide_adjfactor_drift rc=1 34s | === 842/843 assertion PASS ===
+wide_reconcile_equity rc=0 1s | 32 PASS, 0 FAIL
+wide_discretionary_margin rc=0 0s | Tat ca selfcheck PASS.

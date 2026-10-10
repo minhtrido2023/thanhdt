@@ -1,0 +1,11 @@
+draft_ZaloPay rc=0 secs=89
+draft_SpaceX rc=0 secs=90
+daily_ZaloPay_1002 rc=0 secs=101
+sent_ZaloPay rc=1 secs=84
+sent_SpaceX rc=1 secs=85
+daily_SpaceX_1009 rc=0 secs=81
+daily_ZaloPay_1009 rc=0 secs=83
+daily_ZaloPay_1001 rc=0 secs=106
+daily_SpaceX_1001 rc=0 secs=107
+daily_SpaceX_1002 rc=0 secs=92
+ALLDONE

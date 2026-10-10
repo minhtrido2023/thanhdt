@@ -1,0 +1,188 @@
+  [inject] SELL AAA qty=1000 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+  [inject] SELL CCC qty=2000 book=BAL (AUTO-EXIT BAL: giữ 45 phiên ≥ mốc cố định 45 (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 2 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_3mmjcl8r/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test1: rc=0  [rc=0]
+  PASS — Test1: AAA (LAG@25) có lệnh sell
+  PASS — Test1: BBB (LAG@24) KHÔNG có lệnh sell
+  PASS — Test1: CCC (BAL@45) có lệnh sell
+  PASS — Test1: AAA qty đúng sổ lô LAG (1000)
+  [inject] SELL MIXED qty=700 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_5srx6tsn/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test1b: rc=0  [rc=0]
+  PASS — Test1b: MIXED có lệnh sell LAG
+  PASS — Test1b: qty = PHẦN LAG (700), KHÔNG PHẢI tổng broker (1800)  [qty=700]
+  [FAILSAFE] LAG BADQTY: qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau, KHÔNG chèn
+[auto-exit] SelfcheckAcct: đã ghi 0 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_pyrms6wk/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": "BADQTY", "book": "LAG", "reason": "qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau"}], "capped": []}
+  PASS — Test1c: rc=0  [rc=0]
+  PASS — Test1c: BADQTY (sổ lô > broker) KHÔNG chèn lệnh  [got=set()]
+  PASS — Test1c: BADQTY xuất hiện trong blocked_notes book=LAG (§29, Mblk — không chỉ 'không chèn')  [blocked=[{'ticker': 'BADQTY', 'book': 'LAG', 'reason': 'qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau'}]]
+  PASS — Test1c: entry ghi bởi WRITER THẬT có source=auto_exit_inject (Mwriter_no_source)  [notes=[{'at': '2026-10-10T18:38:15+07:00', 'source': 'auto_exit_inject', 'blocked': [{'ticker': 'BADQTY', 'book': 'LAG', 'reason': 'qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau'}]}]]
+  [FAILSAFE] LAG SelfcheckAcct: sổ lô KHÔNG dựng được (selfcheck: giả lập reconcile lệch (kết cấu)) — KHÔNG chèn lệnh LAG lượt này
+  [inject] SELL CCC qty=2000 book=BAL (AUTO-EXIT BAL: giữ 45 phiên ≥ mốc cố định 45 (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_cp1znnqw/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": null, "book": "LAG", "reason": "sổ lô book LAG không dựng được (lỗi kết cấu): selfcheck: giả lập reconcile lệch (kết cấu)"}], "capped": []}
+  PASS — Test1d: rc=0 (fail-safe, không crash)  [rc=0]
+  PASS — Test1d: LAG ok=False ⇒ AAA KHÔNG chèn dù tới mốc  [got={('CCC', 'BAL')}]
+  PASS — Test1d: BAL ok=True KHÔNG bị ảnh hưởng ⇒ CCC vẫn chèn  [got={('CCC', 'BAL')}]
+  PASS — Test1d: lỗi kết cấu LAG ghi vào blocked_notes với ticker=None, book=LAG (§29, Mblk)  [blocked=[{'ticker': None, 'book': 'LAG', 'reason': 'sổ lô book LAG không dựng được (lỗi kết cấu): selfcheck: giả lập reconcile lệch (kết cấu)'}]]
+  [FAILSAFE] BAL SLBAD: qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau, KHÔNG chèn
+  [FAILSAFE] BAL SLBAD: qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau, KHÔNG tính stop-loss
+[auto-exit] SelfcheckAcct: đã ghi 0 lệnh SELL, 2 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_ahplbo4v/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": "SLBAD", "book": "BAL", "reason": "qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau"}, {"ticker": "SLBAD", "book": "BAL", "reason": "qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau (stop-loss)"}], "capped": []}
+  PASS — Test1e: rc=0  [rc=0]
+  PASS — Test1e: SLBAD (sổ lô > broker, -25% lỗ) KHÔNG chèn stop-loss  [got=set()]
+  PASS — Test1e: SLBAD xuất hiện trong blocked_notes với lý do stop-loss (§29, Mblk)  [blocked=[{'ticker': 'SLBAD', 'book': 'BAL', 'reason': 'qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau'}, {'ticker': 'SLBAD', 'book': 'BAL', 'reason': 'qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau (stop-loss)'}]]
+  PASS — Test1e: SLBAD CŨNG xuất hiện qua wiring T+45 thường (KHÔNG hậu tố stop-loss)  [blocked=[{'ticker': 'SLBAD', 'book': 'BAL', 'reason': 'qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau'}, {'ticker': 'SLBAD', 'book': 'BAL', 'reason': 'qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau (stop-loss)'}]]
+  [inject] SELL BALGOOD qty=1000 book=BAL (AUTO-EXIT BAL: giữ 45 phiên ≥ mốc cố định 45 (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_w5snkoe0/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": "BALBAD", "book": "BAL", "reason": "selfcheck: book_lot_snapshot reconcile lệch (per-ticker)"}], "capped": []}
+  PASS — Test1f: rc=0  [rc=0]
+  PASS — Test1f: BALGOOD (trong lots, không blocked) vẫn bán  [got={('BALGOOD', 'BAL')}]
+  PASS — Test1f: BALBAD (blocked riêng mã qua book_lot_snapshot) KHÔNG bán  [got={('BALGOOD', 'BAL')}]
+  PASS — Test1f: BALBAD xuất hiện trong blocked_notes book=BAL (Mblk3/4/5/7)  [blocked=[{'ticker': 'BALBAD', 'book': 'BAL', 'reason': 'selfcheck: book_lot_snapshot reconcile lệch (per-ticker)'}]]
+  PASS — TestCap: qty cộng dồn 2 lô (300+300=600)  [out={'LOANPKG': {'qty': 600.0, 'marketPrice': 21000.0, 'sellable': 600, 'avg_cost': 20000.0}}]
+  PASS — TestCap: sellable CỘNG DỒN (300+300=600), KHÔNG lấy lô cuối (Mcap5)  [out={'LOANPKG': {'qty': 600.0, 'marketPrice': 21000.0, 'sellable': 600, 'avg_cost': 20000.0}}]
+  [inject] SELL AAA qty=1000 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_dtvevo4o/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [skip] AAA: đã có sell LAG trong plan (id=SELL-AAA-AUTOEXIT-LAG)
+[auto-exit] SelfcheckAcct 2024-03-29: 1 mã đã có sẵn lệnh sell trong plan (không chèn lại) — [('AAA', 'LAG')]
+  PASS — Test2: chạy 2 lần KHÔNG nhân đôi lệnh AAA  [count=1]
+[auto-exit] SelfcheckAcct: plan ĐÃ DUYỆT (approved='user') — REFUSE, không mutate plan đã ký.
+  PASS — Test3: rc=1 (REFUSE)  [rc=1]
+  PASS — Test3: plan KHÔNG bị sửa (byte-identical)
+  [inject] SELL VNM qty=900 book=CAPIT (AUTO-EXIT CAPIT: episode CAPIT-TEST giữ 61 phiên ≥ mốc cố định 60 (CAPIT_HOLD, pt_v22_dt5g.py:123) — đề xuất thoát TOÀN BỘ rổ)
+  [inject] SELL SAB qty=1100 book=CAPIT (AUTO-EXIT CAPIT: episode CAPIT-TEST giữ 61 phiên ≥ mốc cố định 60 (CAPIT_HOLD, pt_v22_dt5g.py:123) — đề xuất thoát TOÀN BỘ rổ)
+[auto-exit] SelfcheckAcct: đã ghi 2 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_vl9cyk03/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test4: rc=0  [rc=0]
+  PASS — Test4: CAPIT@61 bán TOÀN BỘ rổ (VNM+SAB)  [got={'VNM', 'SAB'}]
+  [reminder] episode CAPIT-TEST2: 56 phiên ≥ 55 — gửi nhắc trước lên bus
+  [TEST-MODE] bỏ qua post bus thật, payload={"episode_id": "CAPIT-TEST2", "sessions_held": 56, "remaining_sessions_to_auto_exit": 4, "message": "Episode CAPIT CAPIT-TEST2 đã giữ 56 phiên, còn 4 phiên tới mốc auto-exit cố định 60 phiên. PM can thiệp trước nếu muốn giữ tiếp — nếu không, lệnh bán TOÀN BỘ rổ sẽ tự chèn vào plan nháp khi tới mốc."}
+[auto-exit] SelfcheckAcct 2024-03-29: không có candidate tới mốc exit.
+[auto-exit] SelfcheckAcct 2024-03-29: không có candidate tới mốc exit.
+  PASS — Test5: CAPIT@56 KHÔNG bán (chỉ nhắc, chưa tới 60)  [count=0]
+  PASS — Test5: reminder_55_sent_at được ghi lần đầu
+  PASS — Test5: reminder KHÔNG gửi lại lần 2 (idempotent)
+[auto-exit] SelfcheckAcct: plan ĐÃ DUYỆT (approved='user') — REFUSE, không mutate plan đã ký.
+  PASS — Test7: rc=1 (REFUSE trên approved_by_user)  [rc=1]
+  PASS — Test7: plan KHÔNG bị sửa (byte-identical)
+  [inject] SELL VNM qty=900 book=CAPIT (AUTO-EXIT CAPIT: episode CAPIT-TEST8 giữ 61 phiên ≥ mốc cố định 60 (CAPIT_HOLD, pt_v22_dt5g.py:123) — đề xuất thoát TOÀN BỘ rổ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_tjef_vsb/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test8: rc=0  [rc=0]
+  PASS — Test8: VNM (còn vị thế) có lệnh sell
+  PASS — Test8: SAB (hết vị thế) KHÔNG có lệnh sell khống  [got={'VNM'}]
+  [inject] SELL EXACT20 qty=1000 book=BAL (AUTO-EXIT BAL STOP-LOSS: lỗ -20.0% ≤ mốc -20% trên giá vốn (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ)
+  [inject] SELL OVER20 qty=1000 book=BAL (AUTO-EXIT BAL STOP-LOSS: lỗ -25.0% ≤ mốc -20% trên giá vốn (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 2 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_0a3lyex0/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test9: rc=0  [rc=0]
+  PASS — Test9: EXACT20 (-20.0%) có lệnh sell (boundary đúng)
+  PASS — Test9: OVER20 (-25.0%) có lệnh sell
+  PASS — Test9: UNDER20 (-19.999%) KHÔNG có lệnh sell
+  PASS — Test9: EXITED (hết vị thế) KHÔNG bị bán khống (phantom-sell guard)
+  [inject] SELL EXACT20 qty=1000 book=BAL (AUTO-EXIT BAL STOP-LOSS: lỗ -20.0% ≤ mốc -20% trên giá vốn (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_zqly4tgp/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [skip] EXACT20: đã có sell BAL trong plan (id=SELL-EXACT20-AUTOEXIT-BAL-STOPLOSS)
+[auto-exit] SelfcheckAcct 2024-03-29: 1 mã đã có sẵn lệnh sell trong plan (không chèn lại) — [('EXACT20', 'BAL')]
+  PASS — Test10: chạy 2 lần KHÔNG nhân đôi lệnh stop-loss  [count=1]
+[auto-exit] SelfcheckAcct 2024-03-29: không có candidate tới mốc exit.
+  PASS — Test11: rc=0  [rc=0]
+  PASS — Test11: TOOFRESH (-25%, chỉ 1 phiên) KHÔNG bán (chưa đủ min_hold=2)  [got=set()]
+  PASS — Test12: ok=True (sổ lô đối soát khớp)  [reason=None]
+  PASS — Test12: OLDBUY thấy được dù KHÔNG journal nào (chỉ bootstrap)  [lots={'OLDBUY': {'qty': 800, 'entry_date': '2024-01-04'}}]
+  PASS — Test12: entry_date = ngày 0 bootstrap  [lots={'OLDBUY': {'qty': 800, 'entry_date': '2024-01-04'}}]
+  PASS — Test13: LAG ok=True
+  PASS — Test13: VPB phần LAG = 700 (KHÔNG PHẢI tổng broker 1800)  [lag_lots={'VPB': {'qty': 700, 'entry_date': '2024-01-04'}}]
+  PASS — Test13: PARK ok=True
+  PASS — Test13: VPB phần PARK = 1100  [park_lots={'VPB': {'qty': 1100, 'entry_date': '2024-01-04'}}]
+  PASS — Test14: ok=True (park_holdings tự nó không lỗi kết cấu)  [ok=True reason=None]
+  PASS — Test14: MISMATCH KHÔNG nằm trong lots (bị block riêng mã)  [lots={}]
+  PASS — Test14: MISMATCH nằm trong blocked, lý do nhắc reconcile lệch  [blocked={'MISMATCH': 'reconcile lệch broker: sổ lô=1000 broker=900'}]
+  PASS — Test15: ok=True  [ok=True reason=None]
+  PASS — Test15: CLEAN (mã KHÔNG lệch) vẫn ra lots bình thường  [lots={'CLEAN': {'qty': 500, 'entry_date': '2024-01-04'}}]
+  PASS — Test15: MISMATCH2 (mã lệch) bị block riêng, KHÔNG kéo CLEAN theo  [blocked={'MISMATCH2': 'reconcile lệch broker: sổ lô=1000 broker=900'} lots={'CLEAN': {'qty': 500, 'entry_date': '2024-01-04'}}]
+  PASS — Test16: ok=True  [reason=None]
+  PASS — Test16: VPI qty = CỘNG DỒN 4 lô (300+150+250+100=800)  [lots={'VPI': {'qty': 800, 'entry_date': '2024-01-04'}}]
+  PASS — Test16: VPI entry_date = lô SỚM NHẤT (day0), không phải lô gần nhất  [lots={'VPI': {'qty': 800, 'entry_date': '2024-01-04'}}]
+  PASS — Test17: BAL ok=True
+  PASS — Test17: VPI2 phần BAL = 700 (KHÔNG PHẢI tổng broker 1000)  [bal_lots={'VPI2': {'qty': 700, 'entry_date': '2024-01-25'}}]
+  PASS — Test17: stop-loss trả đúng 1 candidate  [out=[('VPI2', 700, 75000.0, -0.25)]]
+  PASS — Test17: qty stop-loss = PHẦN BAL (700), KHÔNG PHẢI tổng broker (1000)  [out=[('VPI2', 700, 75000.0, -0.25)]]
+  [CAP] VPB book=LAG: Σ SELL kế hoạch (1182cp) > sellable 900cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 600cp, phần vượt KHÔNG khớp hết được phiên tới
+  [inject] SELL VPB qty=600 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ — [CAP sellable 882→600cp])
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 1 mã bị cắt vào /tmp/auto_exit_selfcheck_ouvci2k0/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [], "capped": [{"ticker": "VPB", "book": "LAG", "desired_qty": 882, "capped_qty": 600, "reason": "VPB book=LAG: Σ SELL kế hoạch (1182cp) > sellable 900cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 600cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+  PASS — Test18: rc=0  [rc=0]
+  PASS — Test18: AUTO_EXIT_TEST_MODE=1 ⇒ 0 subprocess.run thật dù có capped (Mguard_block_alert)  [calls=[]]
+  PASS — Test18: VPB LAG có lệnh sell (bị CẮT, KHÔNG bỏ hẳn)
+  PASS — Test18: qty bị cắt còn 600 (900 sellable − 300 PARK đã có)  [qty=600]
+  PASS — Test18: capped_notes ghi lại mã bị cắt (§29)  [capped=[{'ticker': 'VPB', 'book': 'LAG', 'desired_qty': 882, 'capped_qty': 600, 'reason': 'VPB book=LAG: Σ SELL kế hoạch (1182cp) > sellable 900cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 600cp, phần vượt KHÔNG khớp hết được phiên tới'}]]
+  PASS — Test18: entry ghi bởi WRITER THẬT có source=auto_exit_inject (Mwriter_no_source)  [notes=[{'at': '2026-10-10T18:38:15+07:00', 'source': 'auto_exit_inject', 'injected': [{'ticker': 'VPB', 'book': 'LAG', 'sessions_held': 25}], 'capped': [{'ticker': 'VPB', 'book': 'LAG', 'desired_qty': 882, 'capped_qty': 600, 'reason': 'VPB book=LAG: Σ SELL kế hoạch (1182cp) > sellable 900cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 600cp, phần vượt KHÔNG khớp hết được phiên tới'}]}]]
+  [CAP] VPB2 book=LAG: Σ SELL kế hoạch (1182cp) > sellable 300cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới
+  [CAP] VPB2 book=LAG: hết chỗ sellable — KHÔNG chèn lệnh
+[auto-exit] SelfcheckAcct: đã ghi 0 lệnh SELL, 0 mã bị chặn, 1 mã bị cắt vào /tmp/auto_exit_selfcheck_87zobgzv/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [], "capped": [{"ticker": "VPB2", "book": "LAG", "desired_qty": 882, "capped_qty": 0, "reason": "VPB2 book=LAG: Σ SELL kế hoạch (1182cp) > sellable 300cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+  PASS — Test19: rc=0  [rc=0]
+  PASS — Test19: AUTO_EXIT_TEST_MODE=1 ⇒ 0 subprocess.run thật dù capped về 0 (Mguard_block_alert)  [calls=[]]
+  PASS — Test19: VPB2 LAG KHÔNG có lệnh sell (hết chỗ sellable)
+  PASS — Test19: dù KHÔNG chèn lệnh, vẫn ghi capped_notes (không lặng lẽ biến mất, §29)  [capped=[{'ticker': 'VPB2', 'book': 'LAG', 'desired_qty': 882, 'capped_qty': 0, 'reason': 'VPB2 book=LAG: Σ SELL kế hoạch (1182cp) > sellable 300cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới'}]]
+  [inject] SELL GOODTK qty=500 book=LAG (AUTO-EXIT LAG: giữ 60 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_ao0fb9yv/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": "BADTK", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=1000 broker=900"}], "capped": []}
+  PASS — Test20: rc=0  [rc=0]
+  PASS — Test20: AUTO_EXIT_TEST_MODE=1 ⇒ 0 subprocess.run thật dù có blocked (Mguard_block_alert)  [calls=[]]
+  PASS — Test20: BADTK (lệch reconcile) KHÔNG bán dù tới mốc T+25  [sells={('GOODTK', 'LAG')}]
+  PASS — Test20: GOODTK (sạch, CÙNG book) vẫn bán bình thường  [sells={('GOODTK', 'LAG')}]
+  PASS — Test20: BADTK hiện ra trong blocked_notes (§29)  [blocked=[{'ticker': 'BADTK', 'book': 'LAG', 'reason': 'reconcile lệch broker: sổ lô=1000 broker=900'}]]
+  [inject] SELL VPB qty=882 book=LAG (AUTO-EXIT LAG: giữ 40 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_t3aqwm0c/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test21: rc=0  [rc=0]
+  PASS — Test21: VPB LAG có lệnh sell
+  PASS — Test21: qty = 882 (700×1.2604104 floor, SAU corp-action, không phải 700 cũ)  [qty=882]
+  [FAILSAFE] LAG BADQTY22: qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau, KHÔNG chèn
+[auto-exit] SelfcheckAcct: DRY-RUN — 0 lệnh SELL sẽ chèn, 1 mã bị chặn, 0 mã bị cắt, KHÔNG ghi.
+  PASS — Test22: dry_run=True ⇒ _send_block_alert KHÔNG được gọi  [calls=0]
+  [FAILSAFE] LAG BADQTY22: qty sổ lô (700) > qty broker (500.0) — hai nguồn lệch nhau, KHÔNG chèn
+[auto-exit] SelfcheckAcct: đã ghi 0 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_hyzihb7e/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  PASS — Test22: rc=0  [rc=0]
+  PASS — Test22: dry_run=False + có blocked ⇒ _send_block_alert gọi ĐÚNG 1 LẦN (Mguard_alert_never_sent)  [calls=1]
+
+[Test23] _new_block_alert_lines — dedup theo (ticker,book,reason/capped_qty,ngày)
+  PASS — Test23a: lần đầu trong ngày ⇒ có dòng mới  [lines=['⛔ DEDUP1 (LAG): lý do A']]
+  PASS — Test23b: CÙNG ngày + CÙNG (ticker,book,reason) ⇒ bị nuốt (Mdedup_never_skip chết)  [lines=[]]
+  PASS — Test23c: CÙNG ngày nhưng reason ĐỔI ⇒ vẫn báo lại (khoá theo NỘI DUNG, Mdedup_always_skip chết)  [lines=['⛔ DEDUP1 (LAG): lý do B — ĐỔI nội dung']]
+  PASS — Test23d: ngày KHÁC + nội dung CŨ ⇒ vẫn báo lại (dedup chỉ trong 1 ngày)  [lines=['⛔ DEDUP1 (LAG): lý do A']]
+  PASS — Test23e: capped lần đầu trong ngày ⇒ có dòng mới  [lines=['⚠️ DEDUP2 (BAL): 1000cp → 600cp']]
+  PASS — Test23f: capped CÙNG ngày + CÙNG capped_qty ⇒ bị nuốt  [lines=[]]
+  PASS — Test23g: capped_qty ĐỔI trong cùng ngày (600→300, lượt sau cắt sâu hơn) ⇒ vẫn báo lại  [lines=['⚠️ DEDUP2 (BAL): 1000cp → 300cp']]
+
+[Test24] _send_block_alert — notify_thread topic đúng + dedup chỉ ghi khi rc=0
+  PASS — Test24a: notify_thread được gọi ĐÚNG 1 LẦN với topic 'trading_daily' (Mnotify_topic)  [calls=[['/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh', '🚨 auto-exit RecAcct: 1 mã bị CHẶN/CẮT (LAG/BAL/CAPIT), KHÔNG tự chèn đủ lệnh — kiểm plan trước khi duyệt:\n⛔ REC1 (LAG): r', 'trading_daily']]]
+  PASS — Test24b: notify rc=0 ⇒ state ĐƯỢC ghi
+  [WARN] notify_thread.sh THẤT BẠI (rc=1) — KHÔNG ghi de-dup, lượt sau sẽ thử lại. Lỗi thật: selfcheck: giả lập notify_thread lỗi
+  PASS — Test24c: notify_thread vẫn được GỌI dù sẽ rc=1 (không bị skip nhầm)
+  PASS — Test24d: notify rc=1 (bridge lỗi) ⇒ KHÔNG ghi state — cảnh báo không mất im lặng (Mnotify_removed chết nếu guard rc bị bỏ)
+
+[Test25] book_lot_snapshot._reason_for — ranh giới TỪ, không khớp nhầm AAA/AAAB
+  PASS — Test25: ok=True
+  PASS — Test25a: AAAB khớp ĐÚNG cảnh báo của chính nó (không fallback)  [blocked={'AAA': 'unverified (park_holdings không nêu rõ lý do cụ thể cho mã này — xem warnings)', 'AAAB': 'AAAB: reconcile lệch broker nghiêm trọng'}]
+  PASS — Test25b: AAA KHÔNG bị gán nhầm cảnh báo của AAAB — rơi về fallback chung (Mregex_substring chết)  [blocked={'AAA': 'unverified (park_holdings không nêu rõ lý do cụ thể cho mã này — xem warnings)', 'AAAB': 'AAAB: reconcile lệch broker nghiêm trọng'}]
+  [inject] SELL AAA26 qty=1000 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+  [FAILSAFE] BAL SelfcheckAcct: sổ lô KHÔNG dựng được (selfcheck: giả lập reconcile lệch (kết cấu)) — KHÔNG chèn lệnh BAL/stop-loss lượt này
+[auto-exit] SelfcheckAcct: đã ghi 1 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_p8na_bkp/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": null, "book": "BAL", "reason": "sổ lô book BAL không dựng được (lỗi kết cấu): selfcheck: giả lập reconcile lệch (kết cấu)"}], "capped": []}
+  PASS — Test26: rc=0 (fail-safe, không crash)  [rc=0]
+  PASS — Test26: BAL ok=False ⇒ CCC26 KHÔNG chèn dù tới mốc  [got={('AAA26', 'LAG')}]
+  PASS — Test26: LAG ok=True KHÔNG bị ảnh hưởng ⇒ AAA26 vẫn chèn  [got={('AAA26', 'LAG')}]
+  PASS — Test26: lỗi kết cấu BAL ghi vào blocked_notes với ticker=None, book=BAL (§29, Mblk_balstruct)  [blocked=[{'ticker': None, 'book': 'BAL', 'reason': 'sổ lô book BAL không dựng được (lỗi kết cấu): selfcheck: giả lập reconcile lệch (kết cấu)'}]]
+  [FAILSAFE] LAG DUPTK27: qty sổ lô (100) > qty broker (50.0) — hai nguồn lệch nhau, KHÔNG chèn
+[auto-exit] SelfcheckAcct: đã ghi 0 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_idxftf90/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": "DUPTK27", "book": "LAG", "reason": "qty sổ lô (100) > qty broker (50.0) — hai nguồn lệch nhau"}], "capped": []}
+  PASS — Test27 (setup): qty-mismatch guard tự sinh reason cho DUPTK27  [blocked=[{'ticker': 'DUPTK27', 'book': 'LAG', 'reason': 'qty sổ lô (100) > qty broker (50.0) — hai nguồn lệch nhau'}]]
+  [FAILSAFE] LAG DUPTK27: qty sổ lô (100) > qty broker (50.0) — hai nguồn lệch nhau, KHÔNG chèn
+[auto-exit] SelfcheckAcct: đã ghi 0 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/auto_exit_selfcheck_hxf5g7sr/trade_plans/plan_SelfcheckAcct_2024-03-29.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "SelfcheckAcct", "blocked": [{"ticker": "DUPTK27", "book": "LAG", "reason": "qty sổ lô (100) > qty broker (50.0) — hai nguồn lệch nhau"}], "capped": []}
+  PASS — Test27: rc=0  [rc=0]
+  PASS — Test27: 2 nguồn ĐỘC LẬP báo TRÙNG (ticker,book,reason) y hệt ⇒ dedup còn ĐÚNG 1, không nhân đôi (Mbaldedup_off)  [blocked=[{'ticker': 'DUPTK27', 'book': 'LAG', 'reason': 'qty sổ lô (100) > qty broker (50.0) — hai nguồn lệch nhau'}]]
+  PASS — Test6: plan_date neo ICT giống nhau qua 3 TZ (default/unset/NY)  [default=2026-10-12 unset=2026-10-12 NY=2026-10-12]
+
+110 PASS, 0 FAIL

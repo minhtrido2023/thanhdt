@@ -1,0 +1,24 @@
+CỔNG TỈ SUẤT — ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md | chốt 2026-10-09 | tài khoản ZaloPay | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+DGC    10000  ZaloPay     -13.34     -13.34     0.00   8,000.00    47,775.00  OK  (excluded — ngoài tổng)
+PVT     2071  ZaloPay      46.10      46.10    -0.00       0.00    17,248.31  OK
+SIP      749  ZaloPay       4.79       4.79    -0.00       0.00    47,140.05  OK
+VNM      601  ZaloPay      -1.70      -1.70     0.00       0.00    58,699.83  OK
+DRI     1900  ZaloPay      34.58      34.58    -0.00   1,000.00    13,263.16  OK
+SAB      744  ZaloPay      -3.58      -3.58     0.00   3,000.00    47,450.20  OK
+NCT      373  ZaloPay      -3.28      -3.28     0.00   8,000.00    94,400.00  OK
+TV1     1400  ZaloPay       1.95       1.95    -0.00   1,500.00    20,328.57  OK
+VPI      400  ZaloPay     -11.13     -11.13    -0.00       0.00    62,450.00  OK
+VPB      312  ZaloPay      12.13      12.13     0.00       0.00    21,225.90  OK
+MBB       52  ZaloPay      -7.12      -7.12     0.00       0.00    20,511.03  OK
+MSB       40  ZaloPay       7.82       7.82     0.00       0.00    13,541.67  OK
+VIB       19  ZaloPay       0.31       0.31    -0.00       0.00    13,607.31  OK
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   ZaloPay  giá vốn thô     263,951,159  lãi/lỗ tổng      22,398,791     8.49%
+   (vị thế excluded — NGOÀI tổng ở trên; giá vốn = sổ broker + cổ tức đã giải, không có journal lệnh mua: ĐÃ KIỂM dòng bảng công bố tỉ suất của DGC (ZaloPay))
+
+Đã kiểm 13 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

@@ -1,0 +1,202 @@
+# BÁO CÁO TUẦN — TÀI KHOẢN ZALOPAY
+## Kỳ báo cáo: 05/10/2026 – 09/10/2026
+
+**Tài khoản:** ZaloPay · DNSE, số hiệu 0001743768 · V2.4 live từ 06/07/2026 (cash-only, không margin)
+**Chiến lược:** V2.4 (2 book BAL/LAG + parking custom30V tại trạng thái NEUTRAL)
+**Ngày lập báo cáo:** 10/10/2026 · **Người lập:** Taylor (Quant) — auto-dispatch từ `check_report_cadence.sh` (báo cáo tuần bị bỏ sót, phát hiện tự động, job Taylor_20261010_020005)
+**Đối tượng:** Kênh theo dõi nội bộ (KHÔNG gửi nhà đầu tư ngoài) — giữ minh bạch đầy đủ
+
+> 📊 Xem biểu đồ minh hoạ đính kèm trong email (NAV, lợi nhuận lũy kế so VN-Index, phân bổ danh mục);
+> bản trên kênh chat chỉ hiển thị văn bản.
+
+---
+
+## 1. TÓM TẮT ĐIỀU HÀNH
+
+| Chỉ tiêu | ZaloPay |
+|---|---:|
+| NAV cuối kỳ trước (02/10) | 950.434.410 |
+| NAV cuối kỳ (09/10) | **939.394.841** |
+| Thay đổi trong kỳ | **−11.039.569 (−1,16%)** |
+| VN-Index cùng kỳ (02/10 → 09/10) | 1.737,71 → 1.735,09 (**−0,15%**) |
+| Giá trị cổ phiếu cuối kỳ | 615.594.750 (65,5% NAV) |
+| Tiền mặt tại công ty CK | 4.909.765 (0,5% NAV) |
+| Tiền gửi "Trứng vàng" (đọc tự động qua API DNSE) | 318.890.326 (33,9% NAV) |
+| Số mã nắm giữ cuối kỳ | 13 (gồm DGC 36,0% NAV, VPB legacy) |
+
+**Nhận định tuần:** VN-Index −0,15%, ZaloPay **−1,16%**, **kém chỉ số 1,01 điểm phần trăm**. Nguyên nhân chính là **DGC** (10.000cp, 36,0% NAV, ngoài phạm vi bot) giảm 35.500 → 33.800 đ/cp = **−17,0 triệu VND**, lớn hơn toàn bộ phần đóng góp dương của các mã còn lại (PVT +3,52 triệu, DRI +1,33 triệu, SIP +0,60 triệu). Bot chỉ bán nốt phần nhỏ còn lại của các mã ngân hàng/VIX (5 lệnh, ~8,0 triệu VND); không có lệnh mua. DT5G giữ **NEUTRAL (3/5)**, gate đang tích luỹ **candidate CRISIS 3/25** (Mục 2). **Có 5 điểm chưa xác minh/chưa giải thích được — xem Mục 4.**
+
+![NAV theo ngày, ZaloPay](assets/ZaloPay_weekly_2026-10-05_to_2026-10-09_nav.png)
+*NAV theo ngày, ZaloPay. Đơn vị: VND / chỉ số (cơ sở 100). Kỳ dữ liệu: 02/10–09/10/2026 (6 phiên). Nguồn: dữ liệu tài khoản tại công ty chứng khoán lưu ký (NAV chốt cuối ngày), HOSE (VN-Index), tính toán nội bộ.*
+
+---
+
+## 2. TOÀN CẢNH THỊ TRƯỜNG
+
+| Ngày | VN-Index | Thay đổi |
+|---|---:|---:|
+| 02/10 (cuối kỳ trước) | 1737,71 | — |
+| 05/10 | 1753,20 | +0,89% |
+| 06/10 | 1759,08 | +0,34% |
+| 07/10 | 1753,39 | −0,32% |
+| 08/10 | 1738,97 | −0,82% |
+| 09/10 | 1735,09 | −0,22% |
+
+*VN-Index đóng cửa hằng ngày; nguồn `tav2_bq.ticker` (ticker=VNINDEX), dữ liệu tới 09/10/2026.*
+
+**Kỹ thuật (VN-Index, dữ liệu đóng cửa 09/10/2026):**
+- *Xu hướng:* chỉ số đóng cửa 1.735,09 điểm, gần như đi ngang so với cuối tuần trước (−0,15%); biên dao động trong tuần 1.735–1.759. Chỉ số nằm dưới cả MA20 (1.779,0), MA50 (1.779,8) và MA200 (1.797,4) — cấu trúc vẫn là điều chỉnh sau nhịp giảm từ cuối tháng 9.
+- *Hỗ trợ/kháng cự:* hỗ trợ gần là đáy tuần 1.735 (vừa được kiểm tra lại) rồi vùng đáy 3 tháng 1.668,5; kháng cự gần là cụm MA20/MA50 quanh 1.779–1.780, xa hơn là đỉnh 3 tháng 1.853,1.
+- *Động lượng:* RSI(14) 37,2 (thấp, chưa vào vùng quá bán); MACD−signal −5,74, đã thu hẹp từ −8,68 (02/10) nhưng vẫn âm; dòng tiền CMF −0,10 (âm).
+- *Thanh khoản:* khối lượng khớp trung bình tuần đạt khoảng 717 triệu cp, cao hơn khoảng 7,6% so với tuần trước; phiên 09/10 đạt 911 triệu cp trong ngày chỉ số giảm nhẹ.
+- *Độ rộng:* tỷ lệ cổ phiếu đóng cửa trên MA50 là **32,4%** (836 mã trong rổ đủ điều kiện ngày 09/10), cải thiện so với 29,0% (824 mã) ngày 02/10 nhưng vẫn thấp.
+
+**Cơ bản / định giá (dữ liệu tới 09/10/2026):**
+- *Định giá:* chỉ báo định giá tổng hợp (P/E, P/B và chênh lệch với lãi suất tiền gửi, phân vị 10 năm) ở **22,4/100 — vùng RẺ**; P/E thị trường 11,11 lần (phân vị 6), P/B 1,87 lần (phân vị 23), chênh lệch lợi suất lợi nhuận so với lãi suất tiền gửi 6 tháng +1,60 điểm % (phân vị 38). Chỉ báo này mang tính tham khảo, chưa được kiểm định đủ mạnh để dùng làm tín hiệu giao dịch.
+- *Trạng thái thị trường theo mô hình của chiến lược:* DT5G committed **NEUTRAL (state=3)** cả tuần (`vnindex_5state_dt5g_live` qua `get_gated_state()`); gate **candidate CRISIS 3/25** (12%, còn 22 phiên để commit, base giữ từ 07/10) · P(CRISIS xác nhận|k=3)≈33% [18–50%, n=33] ⚠ mẫu mỏng, tham khảo · nền xấu 9 phiên liền từ 29/09 (6 BEAR + 3 CRISIS, đổi qua lại 1 lần → bộ đếm reset), VNINDEX −2,6% từ đầu đợt, ngưỡng xem lại ≥15 phiên và VNINDEX ≤−5,0% — chưa chạm (`dna_report.build_dt_gate_line()`). Value Radar: DISPLAY-ONLY, 0/17 lăng kính qua đa kiểm định (`build_value_radar_line()`); breadth lấy từ `tav2_mike.universe_pit` JOIN `tav2_bq.ticker` (Close vs MA50)
+- *Tăng trưởng lợi nhuận, dòng tiền khối ngoại, diễn biến lãi suất mới trong tuần:* báo cáo này không có số liệu đã đối soát cho các mục này trong kỳ nên không đưa ra nhận định; chỉ sử dụng mặt bằng lãi suất đã phản ánh trong chỉ báo định giá ở trên.
+
+![Lợi nhuận lũy kế so với VN-Index (cơ sở 100 tại 02/10/2026)](assets/ZaloPay_weekly_2026-10-05_to_2026-10-09_cumret.png)
+*Lợi nhuận lũy kế so với VN-Index (cơ sở 100 tại 02/10/2026). Đơn vị: VND / chỉ số (cơ sở 100). Kỳ dữ liệu: 02/10–09/10/2026 (6 phiên). Nguồn: dữ liệu tài khoản tại công ty chứng khoán lưu ký (NAV chốt cuối ngày), HOSE (VN-Index), tính toán nội bộ.*
+
+---
+
+## 3. HIỆU QUẢ, ATTRIBUTION & RỦI RO
+
+### 3.1 NAV theo ngày
+
+| Ngày | NAV (VND) | Δ ngày | Thay đổi VN-Index |
+|---|---:|---:|---:|
+| 02/10 (cuối kỳ trước) | 950.434.410 | — | — |
+| 05/10 | 948.296.456 | −0,22% | +0,89% |
+| 06/10 | 941.824.936 | −0,68% | +0,34% |
+| 07/10 | 930.757.202 | −1,18% | −0,32% |
+| 08/10 | 926.780.212 | −0,43% | −0,82% |
+| 09/10 | 939.394.841 | +1,36% | −0,22% |
+
+Cả 5 dòng NAV tuần này `nav_is_estimate=False`, nguồn `live`. Cả tuần **−1,16%** vs VN-Index **−0,15%**: kém chỉ số 1,01 điểm phần trăm.
+
+### 3.2 Hiệu suất lũy kế (`nav_period_returns.py`, mốc từ `data/account_inception.json`)
+
+| Giai đoạn | ZaloPay | VN-Index | Chênh lệch |
+|---|---:|---:|---:|
+| Tuần này (02/10 → 09/10) | −1,16% | −0,15% | −1,01pp |
+| Từ đầu tháng 10 (MTD, 30/09 → 09/10) | −2,01% | −1,90% | −0,11pp |
+| Từ khi bắt đầu hoạt động (06/07 → 09/10) | −4,91% | −6,82% | +1,91pp |
+
+Mốc VN-Index "từ khi bắt đầu" = đóng cửa 03/07 (1.862,08), cùng mốc thời điểm với NAV gốc 987.865.567 (như kỳ trước). Rủi ro từ go-live (NAV chốt cuối ngày, kể cả mốc vốn gốc): sụt giảm tối đa −16,35% từ đỉnh, độ biến động ngày 1.35% (quy năm ~21.4%) — cao hơn SpaceX do DGC chiếm ~36% NAV.
+
+### 3.3 Attribution tuần (đóng góp vào NAV, triệu VND)
+
+| Nguồn | Đóng góp |
+|---|---:|
+| **DGC** | **−17,00** |
+| TV1 | −1,54 |
+| VPI | −1,32 |
+| PVT | +3,52 |
+| DRI | +1,33 |
+| SIP | +0,60 |
+| Các mã khác (cộng) | +0,96 |
+| **Biến động giá (gồm phần đã bán trong kỳ)** | **−13,47** |
+| Phần còn lại (cổ tức tiền mặt, lãi tiền gửi, trừ phí) — **chưa phân rã được** | +2,43 |
+| **Thay đổi NAV** | **−11,04** |
+
+*Đóng góp giá = qty × (giá 09/10 − giá 02/10), phần bán theo giá khớp; giá `Price` BQ. Phần "còn lại" là hiệu số để khớp NAV — xem 4.3.*
+
+### 3.4 Hoạt động giao dịch (toàn bộ là lệnh BÁN, không có lệnh mua)
+
+Nguồn: `orders` trong `dnse_raw_*.jsonl` lọc `accountNo=0001743768`.
+
+| Ngày | Giá trị bán | Chi tiết |
+|---|---:|---|
+| 05/10 | ~7,1 tr | CTG 50 @ 29.800, HDB 59 @ 28.400, LPB 52 @ 40.317, TCB 56 @ 32.200, VIX 5 @ 11.800 (thoát hết các mã này) |
+| 06/10 | ~0,9 tr | BID 27 @ 34.150 (2 lệnh 20+7, thoát hết BID) |
+| 07–09/10 | 0 | Không có lệnh |
+
+Tổng giá trị bán ~8,0 triệu VND; phí 0,097% + thuế bán 0,1% ≈ 16 nghìn VND (ước tính theo biểu phí). `verify_account_snapshot.py --account ZaloPay`: **Verified=True**.
+
+**Chuyển tiền sang Trứng vàng 08/10:** tiền mặt 157,66 → 4,91 triệu VND, egg 165,99 → 318,82 triệu (≈ +152,8 triệu VND), không đổi NAV. Tôi chưa xác định lệnh chuyển do bot (park) hay thao tác tay — xem 4.4.
+
+**Quyền lợi cổ đông:** không có chia tách/cổ phiếu thưởng. Cổ tức tiền mặt: xem 4.3.
+
+### 3.5 Danh mục cuối kỳ (09/10/2026)
+
+Nguồn: vị thế OPEN từ `dnse_raw` (positions 23:30 09/10, cộng theo mã) × giá `Price` BQ 09/10; giá vốn thô và % lãi/lỗ theo `report_return_gate.py`.
+
+| Mã | KL | Giá vốn | Giá 09/10 | Giá trị thị trường | % NAV | Lãi/lỗ (%) |
+|---|---:|---:|---:|---:|---:|---:|
+| DGC | 10.000 | 47.775 | 33.800 | 338.000.000 | 35,98 | −29,25% |
+| PVT | 2.071 | 17.248 | 25.200 | 52.189.200 | 5,56 | +46,10% |
+| SIP | 749 | 47.140 | 49.400 | 37.000.600 | 3,94 | +4,79% |
+| VNM | 601 | 58.700 | 57.700 | 34.677.700 | 3,69 | −1,70% |
+| DRI | 1.900 | 12.263 | 16.900 | 32.110.000 | 3,42 | +37,81% |
+| SAB | 744 | 47.450 | 42.900 | 31.917.600 | 3,40 | −3,58% |
+| NCT | 373 | 94.400 | 83.700 | 31.220.100 | 3,32 | −3,28% |
+| TV1 | 1.400 | 20.329 | 19.300 | 27.020.000 | 2,88 | +1,95% |
+| VPI | 400 | 62.450 | 55.500 | 22.200.000 | 2,36 | −11,13% |
+| VPB | 312 | 21.226 | 23.800 | 7.425.600 | 0,79 | +12,13% |
+| MBB | 52 | 20.511 | 19.050 | 990.600 | 0,11 | −7,12% |
+| MSB | 40 | 13.542 | 14.600 | 584.000 | 0,06 | +7,81% |
+| VIB | 19 | 13.607 | 13.650 | 259.350 | 0,03 | +0,32% |
+| Tiền mặt | | | | 4.909.765 | 0,52 | |
+| Tiền gửi Trứng vàng | | | | 318.890.326 | 33,95 | |
+| **Tổng NAV** | | | | **939.394.841** | **100,00** | |
+
+Lãi/lỗ chưa thực hiện toàn danh mục (không gồm DGC; số của cổng tỉ suất, đã cộng cổ tức ròng): **+22,5 triệu VND (+8,58% trên giá vốn thô 262,05 triệu)**; DGC riêng −(47.775−33.800)×10.000 = −139,75 triệu theo giá vốn thô cổng (−59,75 triệu theo giá vốn broker 39.775).
+
+**Đẳng thức NAV:** Σ(qty × giá) + tiền mặt + Trứng vàng − nợ = 615.594.750 + 4.909.765 + 318.890.326 − 0 = **939.394.841 = NAV `nav_history_ZaloPay.csv` ngày 09/10 (residual 0 đồng)**.
+
+![Phân bổ danh mục cuối kỳ](assets/ZaloPay_weekly_2026-10-05_to_2026-10-09_allocation.png)
+*Phân bổ danh mục cuối kỳ 09/10/2026, % NAV. Nguồn: dữ liệu tài khoản tại công ty chứng khoán lưu ký, giá đóng cửa HOSE 09/10/2026, tính toán nội bộ.*
+
+**Rủi ro tập trung DGC — nhắc lại:** DGC 36,0% NAV, ngoài phạm vi tái cân bằng tự động, giá 33.800 (−29,25% so với giá vốn thô theo cổng tỉ suất 47.775 = broker 39.775 + 8.000 cổ tức; −15,0% so với giá vốn broker 39.775). Cần user xác nhận giữ/giảm.
+
+---
+
+## 4. CÔNG BỐ SỰ CỐ, SỰ KIỆN VẬN HÀNH & ĐIỂM CHƯA XÁC MINH
+
+Nguyên tắc: liệt kê đầy đủ, không làm tròn, kể cả phần chưa giải thích được.
+
+### 4.1 `verify_account_snapshot.py` SpaceX vẫn liệt kê SCL 1.500cp
+Lần chạy 09/10 SpaceX: Verified=True nhưng danh sách "vị thế" vẫn có SCL 1.500cp (+8,1 triệu) dù đã bán tay 30/09 và broker `positions` 09/10 không còn SCL. Quan sát lại hiện tượng đã ghi tuần trước, **chưa xác định nguyên nhân**. Báo cáo SpaceX dùng qty broker nên không bị ảnh hưởng. Dòng NAV SpaceX 01/10 là `nav_is_estimate=True` (backfill từ `dnse_raw` positions/balances + BQ Price) — số này nằm ngoài kỳ báo cáo này nhưng chưa được thay bằng số live.
+
+### 4.2 Giá vốn broker ≠ giá vốn thật (SAB/NCT/TV1/DRI) — chưa xác định nguồn
+`costPrice` của DNSE thấp hơn giá khớp thật 3.000đ (SAB), 8.000đ (NCT), 1.500đ (TV1), 1.000đ (DRI). Báo cáo dùng giá vốn thô = broker + cổ tức gộp đã xác minh (SAB 47.450, NCT 94.400, TV1 20.329). **DRI cổ tức 1.000đ/cp UNVERIFIED** theo `dividend_adjusted_return.py` (ước lượng từ tỉ số giá chỉ ~102đ/cp) nên DRI dùng giá vốn broker 12.263 chưa cộng cổ tức — % lãi/lỗ DRI (+37,8%) vì vậy có thể đã cao hơn số thật nếu 1.000đ là cổ tức đã trừ khỏi giá vốn.
+
+### 4.3 Phần NAV ngoài giá +2,43 triệu chưa phân rã
+Ngày 07/10 tiền mặt ZaloPay tăng +2,10 triệu dù không có lệnh nào. `cashDividendReceiving` từ 1,9 triệu (tuần trước) lên 4,0 triệu cuối tuần. 1.900cp DRI × 1.000đ × 95% = 1,805 triệu — khớp một phần nhưng **không khớp trọn** (còn ~0,3 triệu) và không có bản ghi broker phân tách theo mã. Chưa xác minh. (SpaceX cùng ngày +~3,4 triệu ngoài lệnh bán, cũng phù hợp DRI 3.700cp × 1.000đ × 95% = 3,515 triệu.)
+
+### 4.4 Chuyển cash → Trứng vàng 08/10 và mức tỷ trọng cổ phiếu vs mục tiêu NEUTRAL
+Cả 2 tài khoản chuyển ~152,7–152,8 triệu từ tiền mặt sang Trứng vàng ngày 08/10 (SpaceX egg 50,7% NAV, ZaloPay 33,9%). Tôi **chưa đối chiếu được** quy tắc kích hoạt, và cũng chưa đối chiếu được vì sao tỷ trọng cổ phiếu (SpaceX 48,4%, ZaloPay 65,5%) thấp hơn mục tiêu parking ~70% của NEUTRAL — mục "4.4" kỳ trước vẫn còn mở. Số NAV/vị thế ở trên là số thực tế.
+
+### 4.5 Điểm nhỏ
+- `verify_account_snapshot.py` bỏ DGC/VPB khỏi P&L (không có lịch sử fill — legacy); P&L DGC/VPB trong bảng lấy giá vốn broker.
+- `reconcile_equity.py` không chạy lại (không áp dụng đầy đủ do DGC/VPB legacy — đã biết từ các kỳ trước).
+- Nợ ký quỹ cả tuần = 0.
+
+---
+
+## 5. KẾ HOẠCH TUẦN TỚI (12/10 – 16/10/2026)
+
+**Outlook — Kỹ thuật.** Cơ sở (cao nhất): VN-Index đi ngang–hồi nhẹ 1.735–1.780 (kiểm tra MA20/MA50). Tích cực (trung bình): đóng cửa >1.780 và breadth >40% → hướng 1.850. Tiêu cực (trung bình): thủng 1.735 kèm khối lượng → đáy 3 tháng 1.668. Làm sai cơ sở: 2 phiên đóng dưới 1.735 hoặc breadth <29%.
+
+**Outlook — Cơ bản.** Định giá thấp (P/E 11,1, Value Radar 22,4 RẺ) là nền trung hạn, không phải tín hiệu thời điểm. DT5G candidate CRISIS 3/25: P(xác nhận)≈33% [18–50%] mẫu mỏng; xác nhận → phân bổ mục tiêu CRISIS 0%. Làm sai: thị trường bứt >1.850 với breadth cải thiện.
+
+- **CAPIT (PVT/SIP/VNM/SAB/NCT):** theo dõi mốc T+60 (báo cáo ngày).
+- **DRI / TV1 (discretionary):** chờ ý kiến PM về exit — cần user.
+- **DGC (36,0% NAV):** quyết định của user, ngoài phạm vi bot.
+- **Việc kỹ thuật:** xác minh cổ tức DRI + nguồn điều chỉnh giá vốn (4.2/4.3); xác nhận quy tắc chuyển Trứng vàng & tỷ trọng cổ phiếu (4.4); tìm nguyên nhân SCL còn trong verify SpaceX (4.1).
+
+---
+
+## 6. PHỤ LỤC — PHƯƠNG PHÁP LUẬN & LƯU Ý
+
+- **Pipeline xác minh** (`mike/kb/coding_guidelines.md` §6): `verify_account_snapshot.py` (cả 2 account) → `nav_history_ZaloPay.csv` (5/5 dòng live) → `nav_period_returns.py` → đẳng thức NAV recompute từ `dnse_raw` positions + BQ `Price` (residual 0).
+- **Trứng vàng:** đọc tự động qua API DNSE (`egg.totalValue`, cột `egg_assets_auto=True`).
+- **VN-Index:** đóng cửa BQ `tav2_bq.ticker` (không dùng `data/VNINDEX.csv` cục bộ). **Breadth:** `tav2_mike.universe_pit` JOIN `tav2_bq.ticker`, không dùng `ticker_prune`.
+- **Phí/thuế:** 0,097%/lượt (HOSE) + thuế bán 0,1%.
+- **Track record ngắn** (~66 phiên từ go-live 06/07/2026) — so sánh VN-Index chỉ mang tính mô tả.
+- **Đây không phải khuyến nghị đầu tư.** Kết quả quá khứ (kể cả backtest) không đảm bảo tương lai; CAGR thật ≈ CAGR backtest − 1,5%.
+
+---
+*Báo cáo tổng hợp từ hệ thống giám sát vận hành nội bộ, đối soát với dữ liệu sàn (DNSE API) và cơ sở dữ liệu thị trường (BigQuery). Kênh nội bộ — KHÔNG gửi nhà đầu tư ngoài.*

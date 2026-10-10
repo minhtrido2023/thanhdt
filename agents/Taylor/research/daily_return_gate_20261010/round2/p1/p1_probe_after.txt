@@ -1,0 +1,24 @@
+A. TK thứ 3 KHÔNG có bản ghi nào
+   first='' ts[:2]=[]
+   _broker_touched -> ''
+
+B. TK thứ 3 bật 05/10→ chỉ có bản ghi 09/10 (rỗng)
+   first='2026-10-09T19:08:00' ts[:2]=['2026-10-09T19:08:00']
+   _broker_touched -> ''
+
+C. TK thứ 3 có bản ghi RỖNG mọi tối từ 01/09 (sổ phủ hai đầu cửa sổ, chưa từng giữ gì)
+   first='2026-09-01T19:08:00' ts[:2]=['2026-09-01T19:08:00', '2026-09-04T19:08:00']
+   _broker_touched -> ''
+
+D. như C, nhưng 09/10 mua PVT (mã khác)
+   first='2026-09-01T19:08:00' ts[:2]=['2026-09-01T19:08:00', '2026-09-04T19:08:00']
+   _broker_touched -> ''
+
+E. như C, nhưng giữ PVT suốt từ 01/09 (đối chứng: sổ có dòng ⇒ nhìn thấy)
+   first='2026-09-01T19:08:00' ts[:2]=['2026-09-01T19:08:00', '2026-09-04T19:08:00']
+   _broker_touched -> ''
+
+F. TK thứ 3: bản ghi ĐẦU (22/09, sau cửa sổ) là bản đọc RỖNG do lỗi API, 09/10 lộ ra đang giữ DRI
+   first='2026-10-09T19:08:00' ts[:2]=['2026-10-09T19:08:00']
+   _broker_touched -> 'sổ vị thế New3 KHÔNG có bản ghi bao hai đầu [2026-09-18, 2026-09-21] ⇒ không biết tài khoản này có giữ DRI hay có bị trừ giá vốn lúc đó không'
+

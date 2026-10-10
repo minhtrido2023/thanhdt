@@ -1,0 +1,5 @@
+PASS gộp CP+tiền, BQ 1,1911, cash=500 ⇒ MATCH 
+PASS cùng BQ 1,1911 nhưng cash=0 ⇒ MISMATCH (hành vi cũ giữ nguyên) 
+PASS thuần CP 1,15, cash=0 ⇒ MATCH (byte-identical) 
+PASS cash=500 khai nhưng BQ chỉ 1,15 ⇒ MISMATCH 
+4/4 PASS

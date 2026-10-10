@@ -1,0 +1,12 @@
+dar_notz rc=0 1s | === SELFCHECK: 336 PASS / 0 FAIL ===
+rrg_notz rc=0 2s | SELFCHECK: PASS (257/257 ca)
+ps_notz rc=0 20s | SELFCHECK PASSED — mọi assertion OK.
+eodfilter_notz rc=0 0s | KẾT QUẢ: 25 PASS / 0 FAIL
+dar_kiritimati rc=0 1s | === SELFCHECK: 336 PASS / 0 FAIL ===
+rrg_kiritimati rc=0 3s | SELFCHECK: PASS (257/257 ca)
+ps_kiritimati rc=0 10s | SELFCHECK PASSED — mọi assertion OK.
+eodfilter_kiritimati rc=0 1s | KẾT QUẢ: 25 PASS / 0 FAIL
+dar_la rc=0 1s | === SELFCHECK: 336 PASS / 0 FAIL ===
+rrg_la rc=0 3s | SELFCHECK: PASS (257/257 ca)
+ps_la rc=0 13s | SELFCHECK PASSED — mọi assertion OK.
+eodfilter_la rc=0 1s | KẾT QUẢ: 25 PASS / 0 FAIL

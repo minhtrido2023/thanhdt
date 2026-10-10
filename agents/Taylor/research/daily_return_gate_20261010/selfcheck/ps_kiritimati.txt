@@ -1,0 +1,72 @@
+/home/trido/.local/lib/python3.10/site-packages/google/api_core/_python_version_support.py:240: FutureWarning: You are using a Python version (3.10.12) past its end of life. Google will update google.api_core with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/home/trido/.local/lib/python3.10/site-packages/google/api_core/_python_version_support.py:240: FutureWarning: You are using a Python version (3.10.12) past its end of life. Google will update google.cloud.bigquery_storage_v1 with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.cloud.bigquery_storage_v1.
+  warnings.warn(message, FutureWarning)
+/home/trido/.local/lib/python3.10/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+⚠️ portfolio_status: không có NAV cho SpaceX 2000-01-01
+portfolio_status: QQ2 (ZaloPay 2026-10-09) không có tỉ suất §21: sự kiện ex 2026-09-22 [UNVERIFIED] CHƯA giải
+portfolio_status: công cụ tỉ suất §21 lỗi (ZaloPay 2026-10-09) — không in tỉ suất mã nào: ValueError: không lấy được giá thô 2026-10-09 từ BQ: quota — CHẶN
+[PASS] import module OK
+[PASS] SLEEVE_ORDER có 5 sleeve
+[PASS] account_no_for('SpaceX') == 0002023347
+[PASS] account_no_for('ZaloPay') == 0001743768
+[PASS] classify_sleeve: journal LAG thắng dù ticker cũng trong PARK
+[PASS] classify_sleeve: CORP_ACTION book bỏ qua, rơi về nhánh tiếp theo
+[PASS] classify_sleeve: không có journal, có trong PARK → PARK
+[PASS] classify_sleeve: không có bằng chứng nào → mặc định BAL
+[PASS] broker_positions_with_cost: qty cộng dồn 2 lô = 300
+[PASS] broker_positions_with_cost: avg_cost bình quân gia quyền đúng
+[PASS] broker_positions_with_cost: §12 lọc account — record 'WRONGACC'/'OTHERACC' không lẫn vào
+[PASS] broker_positions_with_cost: qty vẫn cộng dồn đủ dù thiếu costPrice ở 1 lô
+[PASS] broker_positions_with_cost: avg_cost=None khi CÓ lô thiếu costPrice (fail-safe)
+[PASS] build_output SpaceX (2026-10-09) không None
+[PASS] build_output SpaceX: có header TÌNH TRẠNG DANH MỤC
+[PASS] build_output SpaceX: có bảng Cơ cấu danh mục
+[PASS] build_output ZaloPay (2026-10-09) không None
+[PASS] §12: SpaceX và ZaloPay cho output KHÁC nhau (không lẫn account)
+[PASS] build_output ngày TRƯỚC mọi lịch sử NAV → None
+[PASS] count_trading_days(2026-08-10 → 2026-09-29) == 33 (bao gồm bù lễ Quốc khánh)
+[PASS] count_trading_days: asof <= start → 0
+[PASS] lag_entry_dates: XYZ entry = FILL mua LAG SỚM NHẤT across nhiều file (01-05, không phải 01-10)
+[PASS] lag_entry_dates: bỏ qua book khác (ABC/BAL không xuất hiện)
+[PASS] lag_exit_hint: 15 phiên → còn 10 phiên tới hạn cố định T+25
+[PASS] lag_exit_hint: đã qua T+25 → 'ĐÃ QUA hạn cố định T+25'
+[PASS] lag_exit_hint: không có entry date → None
+[PASS] latest_recs_csv: chọn theo tên file (2026-09-25), bất kể mtime
+[PASS] load_recs: đọc đúng book BAL của file được chọn (FPT, không phải MBB)
+[PASS] bal_exit_hint: có tín hiệu hôm nay → nêu status
+[PASS] bal_exit_hint: không có tín hiệu mới hôm nay (KHÔNG suy ra 'đã kết thúc')
+[PASS] bal_exit_hint: file recs rỗng/thiếu → None (không báo gì)
+[PASS] risk_warning: PARK luôn None (không có stop-loss cứng)
+[PASS] risk_warning: BAL -14% (dưới sàn 15%) → None
+[PASS] risk_warning: BAL -19.5% (dưới RED_ZONE 18? actually >=18) → 🔴, còn 0.5pp
+[PASS] risk_warning: LAG -15.0% → None (LAG không có ngưỡng stop-loss)
+[PASS] risk_warning: LAG -19.5% → None (LAG không có ngưỡng stop-loss)
+[PASS] risk_warning: LAG -50.0% → None (LAG không có ngưỡng stop-loss)
+[PASS] park_next_rebal_estimate(2026-09-29) → Q4, tháng 12
+[PASS] park_next_rebal_estimate(2026-12-15) → sang năm sau, Q1 tháng 3
+[PASS] main() trả rc=1 khi không có NAV cho ngày đó
+[PASS] NAV stale: build_output không None (vẫn fallback dòng gần nhất, không crash)
+[PASS] NAV stale: có cảnh báo ⚠️ NAV hôm nay CHƯA có + nêu đúng ngày yêu cầu
+[PASS] NAV stale: KHÔNG còn dán nhãn 'Hôm nay:' cho số của ngày khác (dòng cũ đã bị thay)
+[PASS] NAV stale: có nêu ngày THẬT của số đang hiện (today_row['date'])
+[PASS] cash_div_impact: chuỗi '1500.0' → 1,500đ/cp
+[PASS] cash_div_impact: float 3000.0 → 3,000đ/cp
+[PASS] cash_div_impact: None → chưa rõ mức (không crash)
+[PASS] cash_div_impact: '' → chưa rõ mức (không crash)
+[PASS] cash_div_impact: 'abc' → chưa rõ mức (không crash)
+[PASS] K1: mã CÓ tỉ suất công cụ ⇒ in đúng số đó, 2 chữ số, dạng 'MÃ <giá trị>M, ±x.xx%'
+[PASS] K1: KHÔNG còn số tự tính trên costPrice (QQ1 +20.0%, QQ2 +25.0%, QQ3 +20.0%)
+[PASS] K1: mã công cụ KHÔNG cấp tỉ suất ⇒ không in tỉ suất, in lý do ngắn theo từng loại
+[PASS] K1: tổng sleeve thiếu một mã ⇒ '—' (không cộng phần còn lại rồi gọi là cả sleeve)
+[PASS] K1: cảnh báo gần ngưỡng dùng CHÍNH số công cụ (QQ4 −18,50% ⇒ còn 1,5pp), và nói rõ mã nào không đánh giá được
+[PASS] HỢP ĐỒNG với cổng: `parse_position_bits` đọc lại ĐÚNG và ĐỦ các dòng có tỉ suất (đổi định dạng dòng mà cổng không đọc được = PASS trên 0 dòng, lỗi K1)
+[PASS] HỢP ĐỒNG với cổng: dòng cờ '🔴 QQ4 -18.50%' được đọc đúng số qua đường văn xuôi
+[PASS] HỢP ĐỒNG với cổng: mã không có tỉ suất KHÔNG bị cổng thấy 'có tỉ suất đứng cạnh' (nếu thấy, cổng sẽ chặn oan báo cáo đã cố ý không in số)
+[PASS] K1: đủ mọi mã ⇒ tổng sleeve = Σ lãi/lỗ ròng ÷ Σ giá vốn THÔ của chính các số công cụ
+[PASS] K1: công cụ LỖI ⇒ vẫn ra khối danh mục, KHÔNG mã nào có tỉ suất, lý do nói đúng là công cụ không chạy được (không rơi về costPrice)
+[PASS] K1: không truyền `returns_fn` ⇒ mặc định gọi `section21_returns` (công cụ thật)
+[PASS] `section21_returns` = `report_return_gate.position_returns(...)['positions']` — đúng hàm cổng dùng; stdout của công cụ KHÔNG lẫn vào nội dung báo cáo
+
+SELFCHECK PASSED — mọi assertion OK.

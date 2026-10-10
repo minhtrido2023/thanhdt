@@ -1,0 +1,41 @@
+[0] harness còn sống
+  ✓ trích được đúng 1 đoạn python REPORT=...PYEOF từ bản hiện tại
+  ✓ đoạn trích là bản CÓ fail-closed (_target_account_err)
+  ✓ trích được đoạn python bản trước vá (4195911c)
+  ✓ bản trước vá KHÔNG có fail-closed (đúng là bản cũ)
+
+[i] secrets thiếu account ⇒ BỎ đối soát, câu trung tính, không gộp order account khác
+  ✓ rc=0 (báo cáo vẫn ra)
+  ✓ báo cáo có câu trung tính
+  ✓ báo cáo KHÔNG lộ path/exception (chi tiết chỉ ở kênh ops)
+  ✓ KHÔNG báo lệch 🚨 / KHÔNG báo khớp ✅ (không đối soát trên dữ liệu gộp)
+  ✓ stderr + notify.sh STUB nhận lỗi thật
+
+[ii] record thiếu account_no ⇒ bị loại
+  ✓ SpaceX broker_filled = 100 (không cộng record thiếu account_no 500)
+
+[iii] 2 account cùng file ⇒ SpaceX ≠ ZaloPay, mỗi bên đúng của mình
+  ✓ SpaceX = 100
+  ✓ ZaloPay = 300
+  ✓ SpaceX ≠ ZaloPay
+
+[vendor-reason] why= rẽ theo TAG THẬT trong $gate_out, không suy từ vendor_rc=10 (arch-review 2026-09-24 vòng 6, T1-c)
+  ✓ mismatch-only ⇒ why nêu LỆCH NGUỒN VENDOR + Winston
+  ✓ mismatch-only ⇒ KHÔNG lẫn câu lookup_failed
+  ✓ lookup_failed-only ⇒ why nêu lỗi hạ tầng BQ, KHÔNG giao Winston đối soát số
+  ✓ lookup_failed-only ⇒ KHÔNG lẫn câu LỆCH NGUỒN VENDOR (sai nguyên nhân/sai người, §29)
+  ✓ cả hai tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)
+  ✓ vendor_rc≠10 ⇒ giữ nguyên why= của khối trước (không đổi khi không có tag vendor để so)
+
+[gate-reason] why= mặc định đọc từ CHÍNH output của cổng, không gán sẵn một nguyên nhân (§29)
+  ✓ cổng tỉ suất CHẶN ⇒ why nêu đúng số vấn đề + mục ĐẦU TIÊN của khối chặn (bản cũ: 'delivery chưa đủ kênh (Discord/email)' cho mọi rc≠0)
+  ✓ không có khối chặn ⇒ why trích DÒNG CUỐI cổng in ra (lỗi kênh thật) + rc
+  ✓ cổng không in gì ⇒ nói đúng là không xác định được (kèm rc), không đoán
+  ✓ why= an toàn để ghép vào chuỗi JSON: không nháy kép, không gạch chéo ngược, một dòng
+
+[RED] CHỨNG MINH NGƯỢC trên bản trước vá 4195911c: (i)/(ii) phải ĐỎ
+  ✓ bản cũ (i) ĐỎ — gộp order account khác / không có câu trung tính
+  ✓ bản cũ (ii) ĐỎ — record thiếu account_no lọt vào
+
+======================================================================
+KẾT QUẢ: 25 PASS / 0 FAIL

@@ -1,0 +1,252 @@
+  PASS  MBB đúng: lãi/lỗ ròng: got=-1125000 want=-1125000
+  PASS  MBB đúng: giá vốn thô: got=25850.0 want=25850.0
+  PASS  MBB đúng: %: got=-2.9 want=-2.9
+  PASS  MBB SAI (quên cổ tức) khác đúng > dung sai: got=True want=True
+  PASS  NCT: giá vốn thô: got=94360.0 want=94360.0
+  PASS  NCT: lãi/lỗ ròng: got=-2080000 want=-2080000
+  PASS  NCT: %: got=-4.41 want=-4.41
+  PASS  SAB đúng: dương: got=True want=True
+  PASS  SAB sai: âm (đảo dấu): got=True want=True
+  PASS  PVT (không cổ tức): %: got=7.31 want=7.31
+  PASS  thuế 5% trên cổ tức 1.000đ×1.000cp: got=-50000 want=-50000
+  PASS  parser: số dòng bảng (bảng %NAV bị loại): got=2 want=2
+  PASS  parser: NCT (âm, dấu − unicode): got=('NCT', 500.0, -12.46) want=('NCT', 500.0, -12.46)
+  PASS  parser: SIP (bold, nghìn phân cách): got=('SIP', 1700.0, 8.16) want=('SIP', 1700.0, 8.16)
+  PASS  parser: KHÔNG lấy cột % NAV làm tỉ suất: got=['NCT', 'SIP'] want=['NCT', 'SIP']
+  PASS  văn xuôi: bắt đủ 4 tỉ suất có dấu: got=4 want=4
+  PASS  văn xuôi: CSV +11,4: got=('CSV', 11.4) want=('CSV', 11.4)
+  PASS  văn xuôi: BỎ QUA '46,5% NAV' (không dấu): got=['CSV', 'SIP', 'NCT', 'TCB'] want=['CSV', 'SIP', 'NCT', 'TCB']
+  PASS  blockquote `> |` là BẢNG, không phải văn xuôi: got=0 want=0
+  PASS  _strip_quote bóc lồng nhau: got='| a |' want='| a |'
+  PASS  dòng có CẢ số cũ lẫn số đúng ⇒ KHÔNG chặn: got=True want=True
+  PASS  dòng CHỈ có số cũ ⇒ CHẶN: got=False want=False
+  PASS  tên file → (tài khoản, ngày chốt): got=(['SpaceX', 'ZaloPay'], '2026-08-07') want=(['SpaceX', 'ZaloPay'], '2026-08-07')
+  PASS  thiếu dnse_raw ⇒ fail-closed: got=True want=True
+  PASS  multi-lot: gộp tổng qty (100+300, không mất lô đầu): got=400.0 want=400.0
+  PASS  multi-lot: cost bình quân gia quyền đúng: got=10750.0 want=10750.0
+  PASS  multi-lot: giá lấy từ nguồn giá đóng cửa, không từ lô: got=12000.0 want=12000.0
+  PASS  lô lệch giá: vẫn gộp đủ khối lượng (107+300): got=407.0 want=407.0
+  PASS  lô lệch giá: KHÔNG lấy giá từ lô nào cả — dùng giá đóng cửa: got=35800.0 want=35800.0
+  PASS  lô lệch giá: đổi nguồn giá thì kết quả đổi theo (không dính giá lô): got=36500.0 want=36500.0
+  PASS  lô lệch giá: thiếu giá ⇒ CHẶN (fail-closed): got=True want=True
+  PASS  paper T1: có sự kiện + factor ĐÃ điều chỉnh ⇒ qua: got=[] want=[]
+  PASS  paper T1: CÓ sự kiện nhưng factor = 1,0 (cache cũ) ⇒ CHẶN: got=1 want=1
+  PASS  paper T1: KHÔNG sự kiện nhưng factor < 1 (chuỗi giá điều chỉnh vu vơ) ⇒ CHẶN: got=1 want=1
+  PASS  paper T1: không sự kiện + không điều chỉnh ⇒ qua (không báo động giả): got=[] want=[]
+  PASS  paper T1: quyền mua đơn thuần (accrue-only = 1,0, terp < 1) ⇒ KHÔNG báo động giả: got=[] want=[]
+  PASS  paper T1: trạng thái VINTAGE_STALE ⇒ CHẶN (đang in tỉ suất trên giá THÔ): got=True want=True
+  PASS  paper T1: trạng thái RIGHTS_UNRESOLVED ⇒ CHẶN (đang in tỉ suất trên giá THÔ): got=True want=True
+  PASS  paper T1: trạng thái BAD_FACTOR ⇒ CHẶN (đang in tỉ suất trên giá THÔ): got=True want=True
+  PASS  paper T1: trạng thái NO_DATA ⇒ CHẶN (đang in tỉ suất trên giá THÔ): got=True want=True
+  PASS  báo cáo KHÔNG có mục paper ⇒ chân paper không áp dụng, không chặn: got=(False, []) want=(False, [])
+  PASS  coupling THẬT: build_message() nhánh có-thay-đổi → changed=True: got=True want=True
+  PASS  coupling THẬT: CẢ HAI marker khớp heading thật (fail nếu bất kỳ heading nào trôi): got=True want=True
+  PASS  ngày không đổi gì: one-liner KHÔNG chứa marker paper nào: got=False want=False
+  PASS  ngày không đổi gì: run_gate() PASS (rc=0, không có tài khoản/mục paper nào để chặn): got=0 want=0
+[2026-10-11 00:18:22] newdeals: FATAL — cổng tỉ suất (report_return_gate) KHÔNG chạy được (parquet cache đang ghi dở (mô phỏng đúng overnight sync)) — CHẶN (fail-closed). NOT sending.
+  PASS  nhánh CRASH: main() trả về rc=3: got=3 want=3
+  PASS  nhánh CRASH: đúng 1 alert được post: got=1 want=1
+  PASS  nhánh CRASH: nội dung alert đúng loại 'crash' (không lẫn 'blocked'): got=True want=True
+  PASS  content-gate: còn marker TBD ⇒ run_gate() CHẶN (rc=1): got=1 want=1
+  PASS  content-gate: báo đúng dòng chứa marker: got=[3] want=[3]
+  PASS  content-gate: đầy đủ ⇒ find_incomplete_markers() rỗng: got=[] want=[]
+  PASS  content-gate: đầy đủ + không tài khoản nào trong tên ⇒ run_gate() PASS (rc=0): got=0 want=0
+  PASS  content-gate: chạy 2 lần liên tiếp ⇒ kết quả giống nhau (rc, rc): got=(0, 0) want=(0, 0)
+  PASS  vendor mismatch + mã ĐANG công bố ⇒ CHẶN (rc=1): got=1 want=1
+  PASS  cảnh báo nêu cả hai số nguồn: got=True want=True
+  PASS  cảnh báo lệch 50,0%: got=True want=True
+  PASS  cảnh báo chỉ đích danh Winston (data-ops), không phải câu chung chung (§29): got=True want=True
+  PASS  có dòng máy đọc VENDOR_MISMATCH_ALERT, cờ published=1: got=True want=True
+  PASS  khối VIỆC CẦN LÀM có dòng RIÊNG cho cash_mismatch (anchor riêng, không dùng chung chữ 'Winston' với khối CHẶN): got=True want=True
+  PASS  vendor mismatch + mã KHÔNG công bố ⇒ không chặn (rc=0): got=0 want=0
+  PASS  … nhưng cảnh báo VẪN in ra (không im lặng): got=True want=True
+  PASS  … và dòng máy đọc vẫn có, cờ published=0 (ca rc=0 — nếu thiếu, cảnh báo chết trong log): got=True want=True
+  PASS  không lệch nguồn ⇒ rc=0 và KHÔNG có cảnh báo vendor: got=(0, False) want=(0, False)
+  PASS  không lệch nguồn ⇒ KHÔNG có dòng máy đọc (không báo động giả tới user): got=False want=False
+  PASS  stock_leg_ignored + mã ĐANG công bố ⇒ vẫn CHẶN (rc=1): got=1 want=1
+  PASS  câu chẩn đoán nói ĐÚNG nguyên nhân (thuần cổ phiếu + tỉ lệ ISS), KHÔNG nói 'vendor 0đ': got=True want=True
+  PASS  … và KHÔNG phát câu 'lệch 100.0%' gây hiểu sai: got=False want=False
+  PASS  dòng ALERT giữ ĐÚNG 7 trường như hợp đồng cũ (không thêm trường thứ 8): got=True want=True
+  PASS  có dòng TAG RIÊNG mang mã lý do + tỉ lệ ISS: got=True want=True
+  PASS  khối VIỆC CẦN LÀM có dòng RIÊNG cho stock_leg_ignored (giao Winston xác nhận chân CỔ PHIẾU, KHÔNG PHẢI đối soát số tiền): got=True want=True
+  PASS  mã lý do unknown + mã ĐANG công bố ⇒ vẫn CHẶN (rc=1): got=1 want=1
+  PASS  câu chẩn đoán nói THẲNG không xác định được mã lý do: got=True want=True
+  PASS  … và KHÔNG lặng lẽ đoán thành câu 'lệch X%' của cash_mismatch: got=False want=False
+  PASS  … VIỆC CẦN LÀM nói đúng 'kiểm thủ công', không phải 'đối soát cho khớp lại': got=True want=True
+  PASS  khối VIỆC CẦN LÀM có dòng RIÊNG cho mã lý do không xác định (anchor riêng, không dùng chung 'kiểm thủ công' với dòng chẩn đoán per-event): got=True want=True
+  PASS  lookup_failed + mã ĐANG công bố ⇒ CHẶN (rc=1): got=1 want=1
+  PASS  câu người-đọc nói ĐÚNG 'lỗi hạ tầng BQ', không phải 'hai nguồn bất đồng': got=True want=True
+  PASS  R1-A: had_broker_cash=True ⇒ câu khẳng định ĐÚNG 'broker đã giải' (per_share là tiền thật): got=True want=True
+  PASS  có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1: got=True want=True
+  PASS  KHÔNG in dòng VENDOR_MISMATCH_ALERT cho ca lookup_failed (tránh trộn sentinel 0đ vào cặp số cũ): got=False want=False
+  PASS  VIỆC CẦN LÀM nói 'chạy lại' (rerun khi BQ khoẻ), không giao Winston đối soát số: got=True want=True
+  PASS  khối VIỆC CẦN LÀM (reasons_present) có câu riêng 'hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu': got=True want=True
+  PASS  KHÔNG in câu 'hai nguồn độc lập đang bất đồng' cho ca THUẦN lookup_failed: got=False want=False
+  PASS  KHÔNG in câu 'Gỡ chặn = Winston xác minh xong nguồn vendor' (sai người — BQ lỗi hạ tầng, không phải Winston đối soát): got=False want=False
+  PASS  có câu riêng '…chưa tra được nguồn thứ hai' cho ca THUẦN lookup_failed BỊ CHẶN: got=True want=True
+  PASS  lookup_failed + mã KHÔNG công bố ⇒ không chặn (rc=0): got=0 want=0
+  PASS  … nhưng vẫn cảnh báo (không im lặng): got=True want=True
+  PASS  … và dòng máy đọc vẫn có, had_broker_cash=1, published=0: got=True want=True
+  PASS  R1-B: had_broker_cash=False + mã ĐANG công bố ⇒ KHÔNG CHẶN (rc=0, chưa mất số công bố): got=0 want=0
+  PASS  R1-A: had_broker_cash=False ⇒ câu ĐÚNG 'broker CHƯA giải được số nào (ước lượng...)': got=True want=True
+  PASS  R1-A: KHÔNG khẳng định sai 'broker đã giải' khi had_broker_cash=False: got=False want=False
+  PASS  dòng máy đọc VENDOR_LOOKUP_FAILED có had_broker_cash=0, published=1: got=True want=True
+  PASS  % công bố lệch kỳ vọng ⇒ vẫn CHẶN (rc=1, qua nhánh fails chính): got=1 want=1
+  PASS  KHÔNG phát câu 'sai CƠ SỞ GIÁ' cho ZZZ (nguyên nhân thật đã nói ở trên, §29): got=False want=False
+  PASS  entitled_gross: sự kiện lệch nguồn vào ĐÚNG phần tử thứ 2 (mã, ex, broker, vendor, had_broker_cash — arch-review vòng 5, R1-A): got=[('AAA', '2026-09-10', 1000.0, 1500.0, 'cash_mismatch', 0.0, True), ('EEE', '2026-09-13', 500.0, 900.0, 'cash_mismatch', 0.0, True), ('FFF', '2026-09-14', 400.0, 700.0, 'unknown', 0.0, True), ('GGG', '2026-09-15', 300.0, 0.0, 'lookup_failed', 0.0, False), ('HHH', '2026-09-16', 200.0, 0.0, 'lookup_failed', 0.0, True)] want=[('AAA', '2026-09-10', 1000.0, 1500.0, 'cash_mismatch', 0.0, True), ('EEE', '2026-09-13', 500.0, 900.0, 'cash_mismatch', 0.0, True), ('FFF', '2026-09-14', 400.0, 700.0, 'unknown', 0.0, True), ('GGG', '2026-09-15', 300.0, 0.0, 'lookup_failed', 0.0, False), ('HHH', '2026-09-16', 200.0, 0.0, 'lookup_failed', 0.0, True)]
+  PASS  entitled_gross: mã lệch nguồn KHÔNG vào kỳ vọng công bố: got=(False, False, False, False, False) want=(False, False, False, False, False)
+  PASS  entitled_gross: sự kiện hai nguồn KHỚP vẫn vào kỳ vọng: got={'BBB': 800.0} want={'BBB': 800.0}
+  PASS  Việc4/H1c: mã CÒN GIỮ mà KHÔNG dòng nào khớp đúng (mã, KL) ⇒ CHẶN (rc=1), nêu kỳ vọng: got=(1, True, False) want=(1, True, False)
+  PASS  H1c đối chứng: CÓ một dòng khớp đúng (mã, KL) ⇒ dòng lệch KL còn lại (lệnh đã thực hiện) chỉ cảnh báo, KHÔNG chặn: got=(0, True) want=(0, True)
+  PASS  Việc4: QQQ (còn giữ, lệch KL) rơi vào khối cảnh báo RIÊNG: got=True want=True
+  PASS  Việc4: khối cảnh báo nêu đúng KL báo cáo (150) và KL broker đang giữ (100): got=True want=True
+  PASS  Việc4: đếm 'ngoài phạm vi' KHÔNG gộp mã còn giữ (đúng 1 dòng: chỉ RRR): got=True want=True
+  PASS  Việc4: RRR (thật sự ngoài phạm vi) KHÔNG xuất hiện trong khối cảnh báo lệch KL: got=True want=True
+  -- CA 2: cổ tức CHƯA giải mà broker đã trừ giá vốn ⇒ KHÔNG cấp kỳ vọng
+  PASS  CA2: báo cáo công bố +37,81% (costPrice đã trừ cổ tức + cổ tức 0) ⇒ CHẶN: got=1 want=1
+  PASS  CA2: cổng KHÔNG in một '% kỳ vọng' nào cho DRI: got=True want=True
+  PASS  CA2: KHÔNG còn PASS: got=False want=False
+  PASS  CA2: lý do trích bằng chứng sổ broker (trừ đúng 1.000đ lúc 21/09 19:07): got=True want=True
+  PASS  CA2: gợi ý KHÔNG bảo 'lấy costPrice làm giá vốn': got=True want=True
+  PASS  CA2: kể cả số ĐÚNG cũng không được cấp PASS khi cổng chưa kiểm được: got=1 want=1
+  PASS  CA2: không công bố tỉ suất DRI ⇒ không chặn: got=0 want=0
+  PASS  CA2: … nhưng vẫn NÓI RA mã đang thiếu kỳ vọng: got=True want=True
+  PASS  CA2: công bố qua VĂN XUÔI cũng bị chặn: got=1 want=1
+  PASS  CA2: sự kiện ĐÃ giải ⇒ kỳ vọng +34,58% và PASS: got=(0, True) want=(0, True)
+  PASS  CA2: giá vốn THÔ in ra = 13.263,16: got=True want=True
+  PASS  CA2: sự kiện đã giải, báo cáo vẫn ghi +37,81% ⇒ LỆCH: got=1 want=1
+  -- sổ broker làm TRỌNG TÀI: bước trừ không ai nhận / cú nhảy không đụng giá vốn
+  PASS  không sự kiện nào được phát hiện nhưng sổ broker có bước trừ 1.000đ ⇒ CHẶN: got=(1, True) want=(1, True)
+  PASS  cú nhảy chưa giải (BQ lỗi) mà giá vốn broker KHÔNG đổi quanh ngày đó ⇒ không chặn: got={} want={}
+  PASS  … cổ tức thật vẫn vào kỳ vọng: got={'DRI': 1000.0} want={'DRI': 1000.0}
+  PASS  cú nhảy chưa giải SÁT sự kiện thật không 'cướp' bước trừ của sự kiện đã giải: got=({}, {'DRI': 1000.0}) want=({}, {'DRI': 1000.0})
+  PASS  cú nhảy ĐÃ chứng minh là nhiễu (ex 21/09, sát sự kiện thật) không được đụng tới sổ: got=({}, {'DRI': 1000.0}) want=({}, {'DRI': 1000.0})
+  PASS  sự kiện chưa giải + sổ broker KHÔNG quan sát được ⇒ chặn (không loại trừ được): got=['DRI'] want=['DRI']
+  PASS  sự kiện 'đã giải' 800đ nhưng broker trừ 1.000đ ⇒ chặn, không cộng số sai: got=(['DRI'], {}) want=(['DRI'], {})
+  -- broker trừ giá vốn TRƯỚC ex-date (tối ngày cuối còn quyền)
+  PASS  chốt 21/09 (ex 22/09): cộng lại 1.000đ giá vốn, CHƯA tính thu nhập ⇒ +11,59% PASS: got=0 want=0
+  PASS  … và nói rõ đã làm gì: got=True want=True
+  PASS  … +20,69% (lấy costPrice đã trừ làm giá vốn) ⇒ CHẶN: got=1 want=1
+  PASS  vendor khai 900đ ≠ broker trừ 1.000đ ⇒ không nhận, CHẶN: got=1 want=1
+  PASS  không tra được vendor ⇒ CHẶN (fail-closed), nêu lỗi thật: got=(1, True) want=(1, True)
+  PASS  expected_pct: addback 1.000, thu nhập 0 ⇒ giá vốn thô 13.263,16: got=13263.16 want=13263.16
+  PASS  expected_pct: mặc định addback = cổ tức (hành vi cũ không đổi): got=(-4.408647732089869, -2080000.0, 94360.0) want=(-4.408647732089869, -2080000.0, 94360.0)
+  -- CA 3: mã excluded CÓ dòng bảng công bố tỉ suất thì PHẢI được kiểm
+  PASS  CA3: DGC −29,25% (thuần giá, thiếu 8.000đ cổ tức) ⇒ CHẶN: got=1 want=1
+  PASS  CA3: … kỳ vọng in ra là −13,34%: got=True want=True
+  PASS  CA3: DGC −13,34% ⇒ PASS: got=0 want=0
+  PASS  CA3: cổng nói ĐÚNG việc nó vừa làm (đã kiểm), không còn câu 'báo cáo không công bố': got=(True, False) want=(True, False)
+  PASS  CA3: DGC đứng NGOÀI tổng tài khoản: got=True want=True
+  PASS  CA3: dòng DGC được đếm là ĐÃ KIỂM (không rơi vào 'ngoài phạm vi'): got=True want=True
+  PASS  CA3: văn xuôi về mã excluded (biến động kỳ) KHÔNG bị kiểm như tỉ suất vị thế: got=0 want=0
+  PASS  CA3: không có dòng bảng DGC ⇒ nói 'không thấy dòng bảng', không nói 'đã kiểm': got=(True, False) want=(True, False)
+  -- CA 4: TPB — tiền 500đ + thưởng 15% cùng ex-date; mọi số về KL đang giữ
+  PASS  CA4: cổ tức/cp trên KL đang giữ = 500/1,15 = 434,78 (KHÔNG phải 500): got=434.7826 want=434.7826
+  PASS  CA4: giá vốn thô/cp = 16.800/1,15 = 14.608,70 (KHÔNG phải 14.674): got=14608.7 want=14608.7
+  PASS  CA4: tỉ suất kỳ vọng = −18,79%: got=-18.79 want=-18.79
+  PASS  CA4: bước 'tiền + thưởng' của broker khớp sự kiện ⇒ không chặn: got={} want={}
+  PASS  CA4: báo cáo −18,79% ⇒ PASS: got=0 want=0
+  PASS  CA4: −18,50% ⇒ LỆCH: got=1 want=1
+  PASS  CA4: sự kiện khai hệ số ×1,20 nhưng broker credit ×1,15 ⇒ chặn: got=['TPB'] want=['TPB']
+  -- cùng lớp: mua thêm SAU ex-date pha loãng cổ tức/cp; vị thế đóng rồi mở lại
+  PASS  600cp mua SAU ex-date không hưởng ⇒ cổ tức/cp = 1.000 × 2.400/3.000 = 800: got=800.0 want=800.0
+  PASS  … và giá vốn thô dựng lại = bình quân gia quyền của CHÍNH các lệnh mua: got=25480.0 want=25480.0
+  PASS  bán hết rồi mua lại ⇒ cổ tức của đợt nắm giữ CŨ không cộng vào vị thế mới: got=({}, {}) want=({}, {})
+  -- mã có chữ số (TV1) phải được đọc
+  PASS  TV1: dòng bảng được ĐỌC và kiểm (bản cũ regex [A-Z]{3} bỏ qua): got=(0, True) want=(0, True)
+  PASS  TV1: không còn câu sai 'CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng': got=False want=False
+  PASS  TV1: số sai +10,47% ⇒ CHẶN (bản cũ: lọt vì dòng không được đọc): got=1 want=1
+  PASS  văn xuôi 'TV1 +2,86%' cũng được nhận là tỉ suất: got=[('TV1', '+2,86')] want=[('TV1', '+2,86')]
+  PASS  'MA20 +1%' KHÔNG bị nhận nhầm là mã: got=[] want=[]
+  -- bảng vị thế phải được ĐỌC dù tiêu đề cột viết kiểu nào; không đọc được thì CHẶN
+  PASS  tiêu đề `Lãi/lỗ` KHÔNG có `%`, ô `+32,11%` ⇒ dòng được đọc (bản cũ: 0 dòng, PASS rỗng): got=([('DRI', 3700.0, 32.11)], []) want=([('DRI', 3700.0, 32.11)], [])
+  PASS  cùng tiêu đề `Lãi/lỗ` nhưng ô là SỐ TIỀN ⇒ không đọc thành tỉ suất, không chặn: got=([], []) want=([], [])
+  PASS  tiêu đề `Tỷ suất` (chữ ỷ) đứng TRƯỚC cột tiền cùng nhóm tên (`Lỗ (VND)`) — báo cáo tháng 08 ⇒ đọc đúng cột có `%`: got=([('TPB', 500.0, -12.8)], []) want=([('TPB', 500.0, -12.8)], [])
+  PASS  tiêu đề `% lỗ` ⇒ dòng được đọc: got=([('TPB', 500.0, -12.8)], []) want=([('TPB', 500.0, -12.8)], [])
+  PASS  cột KL tên `qty` (báo cáo tháng 08 gộp) ⇒ dòng được đọc: got=([('PVT', 3500.0, 18.13)], []) want=([('PVT', 3500.0, 18.13)], [])
+  PASS  ô tỉ suất có dấu ở cột cổng KHÔNG nhận ra (`% tổng`) ⇒ báo là điểm mù, không bỏ im lặng: got=([], [(3, 'SIP', '% tổng', '+2,2%')]) want=([], [(3, 'SIP', '% tổng', '+2,2%')])
+  PASS  ô có dấu ở cột TỶ TRỌNG (`% NAV`) hay ô không dấu ⇒ KHÔNG phải điểm mù: got=([], []) want=([], [])
+  PASS  … và cổng CHẶN (rc=1) báo cáo có ô tỉ suất nằm ngoài tầm kiểm, nêu đúng cột: got=(1, True) want=(1, True)
+  -- cửa sổ tra sự kiện phủ HẾT sổ broker; giá thô khi Close đã bị điều chỉnh hồi tố
+  PASS  chốt 01/12: cửa sổ lùi tới ngày đầu sổ broker (06/07), KHÔNG chỉ 120 ngày (03/08): got='2026-07-06' want='2026-07-06'
+  PASS  chốt 01/08: sàn 120 ngày vẫn giữ khi nó sớm hơn: got='2026-04-03' want='2026-04-03'
+  PASS  TV1 phiên 06/10 CÓ sự kiện sau (ex 07/10) ⇒ dùng `Price` thô 20.600, không phải Close 19.110: got=(20600.0, 'Price') want=(20600.0, 'Price')
+  PASS  không có sự kiện sau ⇒ giữ `Close` (DRI 08/10: giá khớp cuối 16.700): got=(16700.0, 'Close') want=(16700.0, 'Close')
+  -- B3: mã KHÔNG có kỳ vọng — mọi tỉ suất đứng cạnh nó là CHẶN, bất kể KL hay tên cột
+  PASS  H1: báo cáo ghi KL 1.901 (lệch 1cp so với sổ) +37,81% ⇒ CHẶN (9c4b8a90: PASS): got=(1, True) want=(1, True)
+  PASS  H1: … và KHÔNG in câu 'báo cáo không công bố tỉ suất riêng' (§29): got=False want=False
+  PASS  H1b: bảng KHÔNG có cột KL ⇒ CHẶN, không in câu 'không công bố': got=(1, False) want=(1, False)
+  PASS  H1b': không cột KL, tiêu đề lạ, tỉ suất KHÔNG dấu ⇒ vẫn CHẶN: got=1 want=1
+  PASS  H1d: cột tên 'Sinh lời (%)' (ngoài PCT_HEADER_OK) ⇒ CHẶN: got=1 want=1
+  PASS  bảng trong blockquote có ô mã + ô tỉ suất (không dấu) ⇒ CHẶN: got=1 want=1
+  PASS  văn xuôi 'DRI lãi +37,81%' (dấu KHÔNG liền mã — PROSE_RE bỏ qua) ⇒ CHẶN: got=1 want=1
+  PASS  mã chỉ nằm ở bảng TỶ TRỌNG và ở văn xuôi sau tỉ suất của mã KHÁC ⇒ không chặn: got=0 want=0
+ℹ️  giá 2026-10-06: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-06 — `Close` của phiên đó đã bị điều chỉnh hồi tố: TV1 20,600 (Close 19,110)
+  PASS  … nhưng cổng nói ĐÚNG điều nó thấy: mã CÓ xuất hiện, KHÔNG nói 'không công bố': got=(True, True, False) want=(True, True, False)
+  PASS  không dòng nào nhắc tới mã ⇒ chỉ khi đó mới in 'báo cáo không công bố tỉ suất riêng': got=(0, True, True) want=(0, True, True)
+  PASS  mã EXCLUDED không có kỳ vọng: dòng lệch KL và văn xuôi biến động kỳ KHÔNG chặn (ngoài phạm vi bot) — nhưng được nêu ra để người soạn tự xem: got=(0, True) want=(0, True)
+  PASS  ticker_mentions: ô ghi chú 'thay DRI' ở dòng mã KHÁC, bảng tỷ trọng, tỉ suất đứng TRƯỚC mã ⇒ chỉ là 'seen'; ô 'DRI −5,53%' ⇒ 'pub': got=([3, 7, 9], [10], [9]) want=([3, 7, 9], [10], [9])
+  -- B4: lệnh mua/bán cùng cặp bản ghi che bước trừ ⇒ sổ TIỀN của broker làm trọng tài
+  PASS  fixture: cặp bản ghi 21/09 là `buy` (bước trừ 1.000đ biến mất trong lệnh mua 600cp): got=['buy'] want=['buy']
+  PASS  H3: chốt ngày cuối còn quyền, mua thêm cùng ngày che bước trừ ⇒ CHẶN +14,98% (9c4b8a90: PASS; đúng +8,57%): got=(1, True) want=(1, True)
+  PASS  H2': KHÔNG nguồn nào biết sự kiện + lệnh mua che ⇒ CHẶN +31,29% (đúng +29,27%): got=1 want=1
+  PASS  H2: sự kiện thật bị gắn RATIO_NOISE + lệnh mua che ⇒ CHẶN: got=1 want=1
+  PASS  H2b: BÁN bớt cùng cặp bản ghi với bước trừ (`other`) ⇒ CHẶN +37,81%: got=(['other'], 1) want=(['other'], 1)
+  PASS  KHÔNG có bản đọc số dư nào quanh cặp bản ghi ⇒ không loại trừ được ⇒ CHẶN: got=(1, True) want=(1, True)
+  PASS  đối chứng: cùng lệnh mua đó, sổ tiền PHỦ và không đồng phải thu nào vô chủ ⇒ lệnh mua vô can, costPrice là giá vốn thô ⇒ PASS: got=0 want=0
+  PASS  đối chứng: tiền vô chủ cách cặp bản ghi > CASH_SLIP_DAYS không liên quan ⇒ PASS: got=0 want=0
+  PASS  H2-control: sự kiện ĐÃ giải nhưng bước trừ nằm lẫn lệnh mua ⇒ KHÔNG cấp kỳ vọng (9c4b8a90 cấp +28,68%, sai): got=(['DRI'], {}) want=(['DRI'], {})
+  PASS  sự kiện CHƯA giải + lệnh mua che cửa sổ ⇒ chặn dù sổ tiền sạch: got=['DRI'] want=['DRI']
+  -- sổ broker làm trọng tài: các nhánh trước đây không ai canh
+  PASS  bước trừ SAU ex-date (30/09) không thuộc cửa sổ [21/09, 22/09] ⇒ sự kiện không được nhận nó, bước đó vẫn vô chủ ⇒ chặn: got=['DRI'] want=['DRI']
+  PASS  cổ tức đã giải mà broker KHÔNG trừ giá vốn ⇒ thu nhập 1.000đ, cộng-lại-giá-vốn 0: got=({'DRI': 1000.0}, {'DRI': 0.0}, []) want=({'DRI': 1000.0}, {'DRI': 0.0}, [])
+  PASS  sự kiện chưa giải, sổ chỉ có bản ghi TỪ tối ngày cuối còn quyền (thiếu đầu trước) ⇒ không quan sát được ⇒ chặn: got=['DRI'] want=['DRI']
+  PASS  bước THƯỞNG (KL ×1,26, tổng giá vốn giữ nguyên) không sự kiện nào nhận ⇒ chặn: got=['VPB'] want=['VPB']
+  PASS  bước 'tiền + thưởng' không sự kiện nào nhận ⇒ chặn: got=['TPB'] want=['TPB']
+  PASS  thưởng THUẦN đã giải, khớp bước KL của broker ⇒ không thu nhập, không cộng lại, không chặn: got=({}, {}, []) want=({}, {}, [])
+  PASS  chốt 18/09: bước trừ tối 21/09 CHƯA xảy ra ⇒ không được nhìn thấy, không chặn: got=[] want=[]
+  PASS  không tra được vendor (lookup_failed) VÀ sổ broker có bước trừ trong cửa sổ ⇒ chặn: got=['DRI'] want=['DRI']
+  PASS  mua thêm TRƯỚC ngày chốt quyền thì HƯỞNG đủ ⇒ không pha loãng (1.000đ, không phải 750đ): got=(1000.0, []) want=(1000.0, [])
+  PASS  … kể cả khi broker không trừ giá vốn (không có mốc bước để neo thời điểm): got=1000.0 want=1000.0
+  -- broker trừ giá vốn trước/đúng ex-date: ràng buộc ghép với sự kiện vendor (N3, N7)
+  PASS  N3/H4: bước trừ CŨ 20/07 KHÔNG được ghép với cổ tức ex 22/09 chỉ vì trùng 1.000đ ⇒ chặn: got=(['DRI'], {}) want=(['DRI'], {})
+  PASS  N3: HAI bước trừ 1.000đ, vendor chỉ khai MỘT cổ tức ⇒ bước thứ hai vô chủ ⇒ chặn: got=(['DRI'], 1) want=(['DRI'], 1)
+  PASS  N7: chạy tối CHÍNH ex-date (tỉ số chưa lộ, vendor còn `announced`) ⇒ nhận sự kiện, cộng lại giá vốn VÀ tính thu nhập (9c4b8a90: chặn tới ~23:45): got=({'DRI': 1000.0}, {}, []) want=({'DRI': 1000.0}, {}, [])
+  PASS  vendor khai tiền 1.000đ KÈM thưởng 15% mà broker chỉ trừ tiền ⇒ không ghép, chặn: got=['DRI'] want=['DRI']
+  PASS  chiều ngược lại: broker trừ tiền 500đ KÈM credit ×1,15 mà vendor chỉ khai tiền ⇒ bước 'tiền + thưởng' không được ghép như một bước tiền, chặn: got=['TPB'] want=['TPB']
+  -- N5: lý do chặn phải là lý do THẬT (khung KL), không phải ghi chú của bộ giải
+  PASS  sự kiện có tiền broker nhưng khung KL bị sự kiện SAU làm mất ⇒ nêu khung KL, không còn câu tự mâu thuẫn '[CASH_CONFIRMED] CHƯA giải (giải từ tiền mặt broker thật)': got=(True, True, False) want=(True, True, False)
+  -- N1: GIỚI HẠN ĐÃ BIẾT của dung sai 0,15pp (ghi nhận, không đổi — Mike/user quyết)
+  PASS  TPB −18,73% (công thức CŨ) cách số chuẩn −18,79% có 0,06pp < 0,15pp ⇒ cổng KHÔNG phân biệt được, PASS — siết dung sai là quyết định chính sách: got=(0, 0.15) want=(0, 0.15)
+  -- N6: `raw_close_prices` — nguồn giá mặc định của cổng
+  PASS  chạy lại sau ngày chốt: mã CÓ sự kiện sau (kể cả `announced`) dùng `Price` thô, mã không có thì giữ `Close`: got={'TV1': 20600.0, 'DRI': 16400.0} want={'TV1': 20600.0, 'DRI': 16400.0}
+  PASS  … cửa sổ sự kiện sau = (ngày chốt, hôm nay], gồm `announced`: got=[('2026-10-06', '2026-10-10', True)] want=[('2026-10-06', '2026-10-10', True)]
+  PASS  chạy ĐÚNG ngày chốt: chưa thể có sự kiện sau ⇒ `Close` cho mọi mã, không tra vendor: got=({'TV1': 19110.0, 'DRI': 16400.0}, 1) want=({'TV1': 19110.0, 'DRI': 16400.0}, 1)
+  PASS  BQ lỗi ⇒ ValueError mang lỗi thật (fail-closed): got=True want=True
+  -- K2: MỞ vị thế đúng ngày cuối còn quyền — bản ghi đầu đã mang giá vốn broker đã trừ
+  PASS  G2: không sự kiện nào đã giải, phải thu 1,9tr vô chủ trong sổ ⇒ CHẶN (7cbc486a: PASS +7,25%, đúng 0,00%): got=(1, True) want=(1, True)
+  PASS  đối chứng chặn oan: sự kiện ĐÃ GIẢI 1.000đ × 1.900cp nhận đúng 1,9tr đó ⇒ không còn đồng vô chủ ⇒ KHÔNG chặn, cộng lại đủ 1.000đ: got=({}, {'DRI': 1000.0}, {}) want=({}, {'DRI': 1000.0}, {})
+  PASS  mở vị thế mà KHÔNG có bản đọc số dư quanh bản ghi đầu ⇒ không loại trừ được ⇒ CHẶN: got=(1, True) want=(1, True)
+  PASS  mở vị thế 15/09, đồng vô chủ gần nhất cách 6 ngày (21/09) ⇒ ngoài ±4 ngày ⇒ KHÔNG chặn: got={} want={}
+  PASS  … đồng vô chủ nằm TRONG khe mở vị thế (11/09, giữa bản ghi trước 10/09 và bản ghi đầu 15/09) ⇒ CHẶN: got=['DRI'] want=['DRI']
+  -- K3: phải thu mới và chi trả cũ cùng khe bản đọc số dư
+  PASS  lệnh mua che cặp bản ghi, khe đó có chi trả 332.000đ KHÔNG khớp khoản phải thu nào ⇒ phải thu mới có thể bị bù ⇒ CHẶN (7cbc486a: PASS +31,29%, đúng +29,27%): got=(['DRI'], True) want=(['DRI'], True)
+  PASS  … chi trả ở khe TRƯỚC cặp bản ghi (không giao) ⇒ sổ tiền sạch ⇒ không chặn: got={} want={}
+  PASS  bước `other` (bán kèm đổi giá vốn) cũng là cặp bản ghi MÙ — vị thế mở từ 04/09 (xa đồng vô chủ 21/09) nên CHỈ bước đó sinh nghi vấn: got=[(True, False)] want=[(True, False)]
+  -- đối chứng chặn oan: tiền ĐÃ có chủ thì lệnh mua của mã khác cùng ngày không bị nghi
+  PASS  DRI có bước trừ 1.000đ × 1.900cp = đúng 1,9tr phải thu; PVT mua thêm cùng tối ⇒ PVT KHÔNG bị chặn (đồng vô chủ = phải thu − bước trừ ĐÃ thấy, không phải mọi phải thu): got={} want={}
+  -- C3: 'báo cáo không công bố tỉ suất riêng' chỉ được nói sau khi ĐÃ ĐỌC từng dòng
+  PASS  báo cáo NGÀY ghi 'DGC 354.0M, -11.0%' / 'DRI 29.8M, +28.0%': KHÔNG còn bị gọi là 'không công bố' (7cbc486a in câu đó cho cả hai); PVT thật sự không có tỉ suất nào thì vẫn đúng câu đó: got=(0, False, False, True) want=(0, False, False, True)
+  PASS  … thay vào đó nêu ĐÚNG dòng và kỳ vọng: 'mã CÓ tỉ suất ở dòng N … mà cổng KHÔNG kiểm': got=(True, True) want=(True, True)
+  -- H1c: mã CÓ kỳ vọng (+34,58%) mà dòng bảng lệch KL, không dòng nào khớp đúng
+  PASS  KL lệch 1cp ⇒ CHẶN, nêu kỳ vọng để người soạn đối chiếu (7cbc486a: PASS số sai +37,81%): got=(1, True, True) want=(1, True, True)
+  PASS  KL ghi '1,9k' ⇒ CHẶN, nêu kỳ vọng để người soạn đối chiếu (7cbc486a: PASS số sai +37,81%): got=(1, True, True) want=(1, True, True)
+  PASS  đối chứng: có dòng khớp đúng (mã, KL) và đúng số ⇒ dòng 600cp của bảng lệnh đã thực hiện không làm chặn: got=0 want=0
+  -- K5: bước cổ phiếu của sự kiện có ex-date SAU ngày chốt — nói đúng hướng gỡ
+  PASS  BID credit thưởng tối thứ Sáu 14/08 (ex thứ Hai 17/08), báo cáo chốt 14/08: vẫn CHẶN, nhưng nói rõ vendor khai ex 17/08 SAU ngày chốt và chạy lại KHÔNG gỡ được: got=(True, True, True) want=(True, True, True)
+  PASS  … vendor khai hệ số KHÁC bước của broker (×1,15 vs ×1,0682) ⇒ không gán nguyên nhân đó: got=False want=False
+  -- nguyên thủy phía cổng: khoảng cách mã–tỉ suất, chọn cột
+  PASS  `_near_signed_pct`: tỉ suất cách mã ≤ 40 ký tự mới là 'đứng cạnh' (39 ⇒ có, 45 ⇒ không): got=('+37,81%', None) want=('+37,81%', None)
+  PASS  `_pick_columns`: đã có cột mang cả '%' lẫn tên tỉ suất ⇒ KHÔNG còn ứng viên theo ô: got=(1, 2, []) want=(1, 2, [])
+  PASS  hai cột ứng viên cùng có ô %: lấy cột ĐẦU (ghim hành vi — đổi thứ tự là đổi số được kiểm): got=[('DRI', 1900.0, 0.6)] want=[('DRI', 1900.0, 0.6)]
+SELFCHECK: PASS (226/226 ca)

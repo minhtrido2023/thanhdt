@@ -1,0 +1,15 @@
+TZ=UNSET dividend_adjusted_return rc=0 :: === SELFCHECK: 347 PASS / 0 FAIL ===
+TZ=UNSET report_return_gate rc=0 :: SELFCHECK: PASS (269/269 ca)
+TZ=UNSET portfolio_status_selfcheck rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+TZ=UNSET eod_trading_report_account_filter_selfcheck rc=0 :: KẾT QUẢ: 36 PASS / 0 FAIL
+TZ=UNSET check_report_cadence_selfcheck rc=0 :: ✅ PASS 58/58
+TZ=America/Los_Angeles dividend_adjusted_return rc=0 :: === SELFCHECK: 347 PASS / 0 FAIL ===
+TZ=America/Los_Angeles report_return_gate rc=0 :: SELFCHECK: PASS (269/269 ca)
+TZ=America/Los_Angeles portfolio_status_selfcheck rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+TZ=America/Los_Angeles eod_trading_report_account_filter_selfcheck rc=0 :: KẾT QUẢ: 36 PASS / 0 FAIL
+TZ=America/Los_Angeles check_report_cadence_selfcheck rc=0 :: ✅ PASS 58/58
+TZ=Pacific/Kiritimati dividend_adjusted_return rc=0 :: === SELFCHECK: 347 PASS / 0 FAIL ===
+TZ=Pacific/Kiritimati report_return_gate rc=0 :: SELFCHECK: PASS (269/269 ca)
+TZ=Pacific/Kiritimati portfolio_status_selfcheck rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+TZ=Pacific/Kiritimati eod_trading_report_account_filter_selfcheck rc=0 :: KẾT QUẢ: 36 PASS / 0 FAIL
+TZ=Pacific/Kiritimati check_report_cadence_selfcheck rc=0 :: ✅ PASS 58/58

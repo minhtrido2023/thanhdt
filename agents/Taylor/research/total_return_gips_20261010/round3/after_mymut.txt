@@ -1,0 +1,90 @@
+HỎNG(0)   M01_orphan_never_vetoes                       dividend_adjusted_return.py      
+HỎNG(0)   M02_orphan_no_holding_check                   dividend_adjusted_return.py      
+CHẾT      M03_owned_ignores_cash                        dividend_adjusted_return.py      assert×0
+CHẾT      M04_owned_ignores_mult                        dividend_adjusted_return.py      assert×0
+CHẾT      M05_owned_ignores_window                      dividend_adjusted_return.py      assert×0
+CHẾT      M05b_owned_any_ticker                         dividend_adjusted_return.py      assert×0
+HỎNG(0)   M06_touch_step_any_date                       dividend_adjusted_return.py      
+HỎNG(0)   M06b_touch_only_cash_steps                    dividend_adjusted_return.py      
+HỎNG(0)   M06c_touch_ignores_owned                      dividend_adjusted_return.py      
+HỎNG(0)   M07_orphan_only_lastcum                       dividend_adjusted_return.py      
+HỎNG(0)   M07b_orphan_only_ex                           dividend_adjusted_return.py      
+HỎNG(0)   M08_lagged_also_asks_broker                   dividend_adjusted_return.py      
+HỎNG(0)   M08b_lagged_vendor_window_wide                dividend_adjusted_return.py      
+CHẾT      M09_slip_unbounded                            dividend_adjusted_return.py      assert×0
+CHẾT      M09b_slip_days_1                              dividend_adjusted_return.py      assert×0
+CHẾT      M09c_slip_days_3                              dividend_adjusted_return.py      assert×0
+CHẾT      M09d_slip_days_8                              dividend_adjusted_return.py      assert×0,assert×1
+HỎNG(0)   M10_net_same_sign                             dividend_adjusted_return.py      
+HỎNG(0)   M10b_net_any_amount                           dividend_adjusted_return.py      
+CHẾT      M11_orphan_returns_negative                   dividend_adjusted_return.py      assert×0,assert×9
+CHẾT      M12_covers_or                                 dividend_adjusted_return.py      assert×0
+CHẾT      M13_covers_slack_day                          dividend_adjusted_return.py      assert×0
+CHẾT      M13b_covers_slack_zero                        dividend_adjusted_return.py      assert×0
+CHẾT      M14_noise_vnd_cap_off                         dividend_adjusted_return.py      assert×0
+CHẾT      M14b_noise_vnd_200                            dividend_adjusted_return.py      assert×0
+CHẾT      M15_lag_tol_10pct                             dividend_adjusted_return.py      assert×0
+CHẾT      M15b_lag_tol_half_pct                         dividend_adjusted_return.py      assert×0
+CHẾT      M15c_lag_guard_off                            dividend_adjusted_return.py      assert×0
+CHẾT      M15d_lag_ignores_cash                         dividend_adjusted_return.py      assert×0
+CHẾT      M15e_lag_ignores_mult                         dividend_adjusted_return.py      assert×0
+CHẾT      M15f_lag_uses_all_iss                         dividend_adjusted_return.py      assert×0
+CHẾT      M16_lag_no_ratio_update                       dividend_adjusted_return.py      assert×0
+CHẾT      M16b_lag_no_jump_update                       dividend_adjusted_return.py      assert×0
+CHẾT      M16c_lag_no_pershare_update                   dividend_adjusted_return.py      assert×0
+CHẾT      M17_lag_matches_same_day                      dividend_adjusted_return.py      assert×0
+CHẾT      M17b_lag_veto_ignored                         dividend_adjusted_return.py      assert×0
+CHẾT      M17c_shaped_veto_ignored                      dividend_adjusted_return.py      assert×0
+HỎNG(0)   M18_entitle_unknown_becomes_no                dividend_adjusted_return.py      
+HỎNG(0)   M18b_entitle_no_becomes_unknown               dividend_adjusted_return.py      
+HỎNG(0)   M18c_entitle_only_lastcum_day                 dividend_adjusted_return.py      
+CHẾT      M19_entitle_marks_noise                       dividend_adjusted_return.py      assert×0
+CHẾT      M20_unknown_entitled_counts                   dividend_adjusted_return.py      assert×0
+CHẾT      M20b_no_entitled_counts                       dividend_adjusted_return.py      assert×0
+CHẾT      M20c_unknown_not_flagged                      dividend_adjusted_return.py      assert×0
+CHẾT      M22_account_ignored                           dividend_adjusted_return.py      assert×0
+CHẾT      M24_unknown_method_silent                     dividend_adjusted_return.py      assert×0
+SỐNG      M25_unknown_method_frame_ok                   dividend_adjusted_return.py      
+CHẾT      M26_vendor_only_drops_odd                     dividend_adjusted_return.py      assert×0
+CHẾT      M27_readings_empty                            dividend_adjusted_return.py      assert×0
+CHẾT      M27b_deltas_include_negative                  dividend_adjusted_return.py      assert×0
+CHẾT      M28_steptotal_q1                              dividend_adjusted_return.py      assert×0
+CHẾT      M29_announced_window_only_executed            dividend_adjusted_return.py      assert×0
+HỎNG(0)   M30_vendor_hit_ignores_window                 dividend_adjusted_return.py      
+CHẾT      M31_vetoed_note_dropped                       dividend_adjusted_return.py      assert×0
+CHẾT      M32_noise_resolved_false                      dividend_adjusted_return.py      assert×0
+CHẾT      M33_qtymap_days_dropped                       dividend_adjusted_return.py      assert×0
+HỎNG(0)   R01_mask_no_cover_check                       report_return_gate.py            
+HỎNG(0)   R02_mask_window_zero                          report_return_gate.py            
+HỎNG(0)   R02b_mask_window_30d                          report_return_gate.py            
+HỎNG(0)   R02c_mask_window_lo_60d                       report_return_gate.py            
+CHẾT      R03_mask_only_buy                             report_return_gate.py            assert×1
+CHẾT      R03b_mask_only_other                          report_return_gate.py            assert×1
+CHẾT      R04_masked_resolved_ok                        report_return_gate.py            assert×1
+CHẾT      R05_qty_mismatch_unres_not_row_blocked        report_return_gate.py            assert×1
+CHẾT      R06_mention_counts_weight_cols                report_return_gate.py            assert×3
+CHẾT      R07_near_pct_400chars                         report_return_gate.py            assert×1
+CHẾT      R07b_near_pct_crosses_tickers                 report_return_gate.py            assert×1
+CHẾT      R09_blind_includes_weight_cols                report_return_gate.py            assert×1
+CHẾT      R09b_blind_never                              report_return_gate.py            assert×2
+CHẾT      R09c_blind_unsigned_too                       report_return_gate.py            assert×1
+CHẾT      R10_pre_ex_tol_150                            report_return_gate.py            assert×1
+CHẾT      R11_closed_holding_events_counted             report_return_gate.py            assert×1
+CHẾT      R12_all_deltas_orphan                         report_return_gate.py            assert×1
+CHẾT      R12b_no_orphan                                report_return_gate.py            assert×7
+CHẾT      R15_mention_loop_off                          report_return_gate.py            assert×5
+CHẾT      R16_mentions_no_quote_strip                   report_return_gate.py            assert×1
+CHẾT      R18_Y01_entitlement_check_removed             report_return_gate.py            assert×1
+CHẾT      R19_noise_not_skipped                         report_return_gate.py            assert×1
+CHẾT      R20_cands_when_pct_found                      report_return_gate.py            assert×1
+CHẾT      R21_cand_any_cell                             report_return_gate.py            assert×2
+CHẾT      R22_cand_last_not_first                       report_return_gate.py            assert×1
+CHẾT      R23_excluded_unres_blocks_by_qty              report_return_gate.py            assert×1
+CHẾT      R24_pre_ex_income_when_future                 report_return_gate.py            assert×2
+CHẾT      R25_masked_step_skip_claimed_check            report_return_gate.py            assert×20
+CHẾT      R26_absent_message_always                     report_return_gate.py            assert×1
+CHẾT      R27_bad_mult_ignored                          report_return_gate.py            assert×1
+CHẾT      R28_bad_cash_ignored                          report_return_gate.py            assert×1
+CHẾT      R29_addback_always_equal                      report_return_gate.py            assert×3
+CHẾT      R30_tol_pp_050                                report_return_gate.py            assert×2
+TỔNG 89 | sống: ['M25_unknown_method_frame_ok'] | hỏng: ['M01_orphan_never_vetoes', 'M02_orphan_no_holding_check', 'M06_touch_step_any_date', 'M06b_touch_only_cash_steps', 'M06c_touch_ignores_owned', 'M07_orphan_only_lastcum', 'M07b_orphan_only_ex', 'M08_lagged_also_asks_broker', 'M08b_lagged_vendor_window_wide', 'M10_net_same_sign', 'M10b_net_any_amount', 'M18_entitle_unknown_becomes_no', 'M18b_entitle_no_becomes_unknown', 'M18c_entitle_only_lastcum_day', 'M30_vendor_hit_ignores_window', 'R01_mask_no_cover_check', 'R02_mask_window_zero', 'R02b_mask_window_30d', 'R02c_mask_window_lo_60d'] | chết-do-crash: []

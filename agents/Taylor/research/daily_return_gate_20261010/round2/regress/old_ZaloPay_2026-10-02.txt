@@ -1,0 +1,57 @@
+ℹ️  giá 2026-10-02: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-10-02 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 28,450 (Close 21,880), TV1 20,400 (Close 18,930)
+CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-02.md | chốt 2026-10-02 | tài khoản ZaloPay | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+VPI        —  ZaloPay      -6.50      -5.84    -0.66       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 23)
+DGC        —  ZaloPay     -11.00      -9.79    -1.21   8,000.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+VPB        —  ZaloPay       8.80       7.89     0.91       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+LPB        —  ZaloPay     -23.40     -26.70     3.30       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+TCB        —  ZaloPay       3.30       2.02     1.28       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+HDB        —  ZaloPay       8.10       9.88    -1.78       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+CTG        —  ZaloPay      -6.80      -7.38     0.58     450.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+MBB        —  ZaloPay      -4.70      -6.88     2.18       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+BID        —  ZaloPay      -5.80      -7.38     1.58     315.88            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+MSB        —  ZaloPay       4.90       3.75     1.15       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+VIB        —  ZaloPay      -1.50      -1.89     0.39       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+VIX        —  ZaloPay      -8.50     -11.18     2.68       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 26)
+PVT        —  ZaloPay      37.70      36.25     1.45       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+SIP        —  ZaloPay       4.50       3.10     1.40       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+VNM        —  ZaloPay      -0.20      -2.38     2.18       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+SAB        —  ZaloPay      -2.60      -4.53     1.93   3,000.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 29)
+NCT        —  ZaloPay      -3.50      -3.50    -0.00   8,000.00            —  OK  (dòng vị thế báo cáo ngày, dòng 29)
+DRI        —  ZaloPay      28.00      29.31    -1.31   1,000.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 32)
+TV1        —  ZaloPay      -0.10       0.35    -0.45       0.00            —  LỆCH  (dòng vị thế báo cáo ngày, dòng 32)
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   ZaloPay  giá vốn thô     272,819,585  lãi/lỗ tổng      16,080,292     5.89%
+   (vị thế excluded — NGOÀI tổng ở trên; giá vốn = sổ broker + cổ tức đã giải, không có journal lệnh mua: không thấy dòng bảng (mã, KL) nào của DGC (ZaloPay))
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · ZaloPay · BID ex 2026-07-17: 450đ/cp lúc chốt quyền ÷ hệ số KL 1.0684 × phần hưởng 0.7500 = 315.88đ/cp trên KL đang giữ
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 19 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+❌ CHẶN — 18 vấn đề:
+   • VPI (dòng vị thế báo cáo ngày, dòng 23): báo cáo -6.50% vs kỳ vọng ZaloPay -5.84% (cổ tức GỘP 0đ/cp)
+   • DGC (dòng vị thế báo cáo ngày, dòng 26): báo cáo -11.00% vs kỳ vọng ZaloPay -9.79% (cổ tức GỘP 8,000đ/cp)
+   • VPB (dòng vị thế báo cáo ngày, dòng 26): báo cáo +8.80% vs kỳ vọng ZaloPay +7.89% (cổ tức GỘP 0đ/cp)
+   • LPB (dòng vị thế báo cáo ngày, dòng 26): báo cáo -23.40% vs kỳ vọng ZaloPay -26.70% (cổ tức GỘP 0đ/cp)
+   • TCB (dòng vị thế báo cáo ngày, dòng 26): báo cáo +3.30% vs kỳ vọng ZaloPay +2.02% (cổ tức GỘP 0đ/cp)
+   • HDB (dòng vị thế báo cáo ngày, dòng 26): báo cáo +8.10% vs kỳ vọng ZaloPay +9.88% (cổ tức GỘP 0đ/cp)
+   • CTG (dòng vị thế báo cáo ngày, dòng 26): báo cáo -6.80% vs kỳ vọng ZaloPay -7.38% (cổ tức GỘP 450đ/cp)
+   • MBB (dòng vị thế báo cáo ngày, dòng 26): báo cáo -4.70% vs kỳ vọng ZaloPay -6.88% (cổ tức GỘP 0đ/cp)
+   • BID (dòng vị thế báo cáo ngày, dòng 26): báo cáo -5.80% vs kỳ vọng ZaloPay -7.38% (cổ tức GỘP 316đ/cp)
+   • MSB (dòng vị thế báo cáo ngày, dòng 26): báo cáo +4.90% vs kỳ vọng ZaloPay +3.75% (cổ tức GỘP 0đ/cp)
+   • VIB (dòng vị thế báo cáo ngày, dòng 26): báo cáo -1.50% vs kỳ vọng ZaloPay -1.89% (cổ tức GỘP 0đ/cp)
+   • VIX (dòng vị thế báo cáo ngày, dòng 26): báo cáo -8.50% vs kỳ vọng ZaloPay -11.18% (cổ tức GỘP 0đ/cp)
+   • PVT (dòng vị thế báo cáo ngày, dòng 29): báo cáo +37.70% vs kỳ vọng ZaloPay +36.25% (cổ tức GỘP 0đ/cp)
+   • SIP (dòng vị thế báo cáo ngày, dòng 29): báo cáo +4.50% vs kỳ vọng ZaloPay +3.10% (cổ tức GỘP 0đ/cp)
+   • VNM (dòng vị thế báo cáo ngày, dòng 29): báo cáo -0.20% vs kỳ vọng ZaloPay -2.38% (cổ tức GỘP 0đ/cp)
+   • SAB (dòng vị thế báo cáo ngày, dòng 29): báo cáo -2.60% vs kỳ vọng ZaloPay -4.53% (cổ tức GỘP 3,000đ/cp)
+   • DRI (dòng vị thế báo cáo ngày, dòng 32): báo cáo +28.00% vs kỳ vọng ZaloPay +29.31% (cổ tức GỘP 1,000đ/cp)
+   • TV1 (dòng vị thế báo cáo ngày, dòng 32): báo cáo -0.10% vs kỳ vọng ZaloPay +0.35% (cổ tức GỘP 0đ/cp)
+
+   Trong đó HDB, LPB, MBB, MSB, PVT, SIP, TCB, TV1, VIB, VIX, VNM, VPB, VPI KHÔNG có cổ tức ⇒ lệch KHÔNG phải do thiếu cộng cổ tức. Gần như chắc chắn sai CƠ SỞ GIÁ: dùng `mtm_price` trong `data/execution_logs/verified_snapshot_<acct>_<asof>.json` (giá đóng cửa đã xác minh), KHÔNG dùng `positions[].marketPrice` — field đó không phải giá ATC.
+
+   Với mã CÓ cổ tức (BID, CTG, DGC, DRI, SAB): chạy `mike/bin/dividend_adjusted_return.py --resolve <rổ mã> --from … --to …`,
+   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số); giá vốn và cổ tức/cp đều quy về KL ĐANG GIỮ (cột 'gia von THO' và 'co tuc GOP' ở bảng trên) — coding_guidelines §21.
