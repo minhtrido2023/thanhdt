@@ -54,7 +54,7 @@ CORP_ACTIONS_FILE = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
 import corp_actions  # noqa: E402 — validate() ép ex_date/qty_multiplier hợp lệ, xem
 # confirmed_qty_multiplier_after() (§29 vòng 6, Việc 2 blocker 1)
-from account_cash_flows import (CashFlowError, attach_flows_to_rows,  # noqa: E402
+from account_cash_flows import (CashFlowError, NavRow, attach_flows_to_rows,  # noqa: E402
                                 load_flows)
 from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noqa: E402
                            _cash_fields_inconsistent)
@@ -848,7 +848,7 @@ def _write_nav_history(hist_path, hist_rows, fieldnames):
 NAV_SANITY_DEFAULT_PCT = 15.0
 
 def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
-                     components=None, flows_path=None):
+                     components=None, flows_path=None, balance_ts=None):
     """Quyết định có được GHI dòng nav_history của `date` hay không.
 
     Trả `(ok: bool, message: str|None)`. `ok=False` ⇒ caller KHÔNG ghi lịch sử và exit 3.
@@ -857,6 +857,8 @@ def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
 
     `hist_rows`: list dict nav_history đã đọc (chưa chèn dòng `date`). `components`: dict số
     thành phần để in kèm khi chặn (mtm_stock/cash/debt/egg/offbook) — chỉ để chẩn đoán.
+    `balance_ts`: lúc chụp số dư của dòng `date` SẮP ghi — luật gán dòng tiền so thời điểm tiền
+    vào/ra với nó (nạp thứ Bảy được gán vào dòng thứ Hai này vì dòng này chụp sau thời điểm nạp).
     """
     comp = components or {}
     day_change = nav - prev_nav
@@ -869,28 +871,35 @@ def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
                 f"debt {comp.get('debt', 0):,.0f}, egg {comp.get('egg', 0):,.0f}, "
                 f"offbook {comp.get('offbook', 0):,.0f}")
 
-    # rows cho attach_flows_to_rows: lịch sử + dòng hôm nay (chưa ghi). Dùng CHÍNH hàm mapping
-    # của account_cash_flows thay vì so ngày bằng tay, để quy ước bod/eod chỉ tồn tại ở MỘT chỗ.
-    # ⚠️ Khoá phải là `datetime.date`, KHÔNG phải chuỗi: `attach_flows_to_rows` so `d >= f["date"]`
-    # với `f["date"]` là `date` ⇒ truyền chuỗi (dạng lưu trong nav_history CSV) nổ TypeError.
-    # Selfcheck `nav_jump_flow_gate_selfcheck.py` bắt đúng lỗi này ngay lần chạy đầu (§19).
+    # rows cho attach_flows_to_rows: lịch sử + dòng hôm nay (chưa ghi). Dùng CHÍNH hàm gán của
+    # account_cash_flows thay vì so ngày bằng tay, để luật gán chỉ tồn tại ở MỘT chỗ.
+    # ⚠️ Khoá phải là `datetime.date`, KHÔNG phải chuỗi (dạng lưu trong nav_history CSV).
     date_d = datetime.date.fromisoformat(date)
     flow_rows = sorted(
-        [(datetime.date.fromisoformat(r["date"]), float(r["nav"])) for r in hist_rows
-         if r.get("date") and r["date"] < date and r.get("nav")] + [(date_d, nav)])
+        [NavRow(datetime.date.fromisoformat(r["date"]), float(r["nav"]),
+                balance_ts=(r.get("balance_ts") or None)) for r in hist_rows
+         if r.get("date") and r["date"] < date and r.get("nav")]
+        + [NavRow(date_d, nav, balance_ts=balance_ts)])
+    head = (f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: biến động {day_change_pct:+.2f}%/ngày "
+            f"vượt ngưỡng ±{sanity_max:.0f}%, và ")
+    tail = ("   KHÔNG nâng NAV_SANITY_MAX_PCT để đi qua — làm vậy là tắt guard cho cả nguyên nhân "
+            "bug dữ liệu.")
     try:
         flows = load_flows(account, flows_path=flows_path)
-        mapped = attach_flows_to_rows(flow_rows, flows)
     except CashFlowError as exc:
         # Bản ghi dòng tiền hỏng = dòng tiền CÓ THỂ đã xảy ra mà ta không đọc đúng ⇒ chặn, và in
         # ĐÚNG lỗi parser vừa trả, không đoán hộ (§29).
         return False, (
-            f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: biến động {day_change_pct:+.2f}%/ngày "
-            f"vượt ngưỡng ±{sanity_max:.0f}%, và data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên "
-            f"không xác nhận được có nạp/rút hay không.\n"
-            f"   Lỗi thật: {exc}\n"
-            f"   Sửa bản ghi dòng tiền rồi chạy lại. KHÔNG nâng NAV_SANITY_MAX_PCT để đi qua — "
-            f"làm vậy là tắt guard cho cả nguyên nhân bug dữ liệu.")
+            f"{head}data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên không xác nhận được có "
+            f"nạp/rút hay không.\n   Lỗi thật: {exc}\n   Sửa bản ghi dòng tiền rồi chạy lại.\n{tail}")
+    try:
+        mapped = attach_flows_to_rows(flow_rows, flows)
+    except ValueError as exc:               # CashFlowError (thiếu giờ/balance_ts…) là ValueError
+        # File ĐỌC ĐƯỢC; cái hỏng là bước GÁN bản ghi vào phiên — nói đúng điều đó (§29).
+        return False, (
+            f"{head}data/account_cash_flows.json đọc được ({len(flows)} bản ghi cho '{account}') "
+            f"nhưng KHÔNG GÁN ĐƯỢC bản ghi vào phiên nào nên chưa xác nhận được có nạp/rút hay "
+            f"không.\n   Lỗi thật: {exc}\n   Sửa theo lỗi trên rồi chạy lại.\n{tail}")
 
     today_flows = list(mapped.get(date_d, []))
     if not today_flows:
@@ -1446,7 +1455,7 @@ def main():
     jump_ok, jump_msg = nav_jump_verdict(
         args.account, args.date, prev_nav, nav, sanity_max, hist_rows,
         components={"mtm_stock": mtm_stock, "cash": cash, "debt": debt,
-                    "egg": egg_value, "offbook": offbook})
+                    "egg": egg_value, "offbook": offbook}, balance_ts=bal["ts"])
     if jump_msg:
         print(jump_msg)
     if not jump_ok:

@@ -35,7 +35,6 @@
     "mike/agents/Taylor/pending_adv3t_hard_gate_20260810/golive_recommend_v23.py": 5,
     "mike/agents/Taylor/pending_adv3t_hard_gate_20260810/lag_liq_signal_filter_selfcheck.py": 1,
     "mike/bin/anomaly_escalate.py": 3,
-    "mike/bin/daily_nav_snapshot.py": 1,
     "mike/bin/discretionary_accumulation_inject.py": 2,
     "mike/bin/ops_health_check_selfcheck.py": 4,
     "mike/bin/paper_main_probe_plan.py": 1,

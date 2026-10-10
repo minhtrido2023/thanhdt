@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Sổ ĐƠN VỊ QUỸ của một account — chuỗi "giá một đơn vị quỹ" chốt theo ngày, nguồn DUY NHẤT cho
-tỉ suất theo kỳ (`nav_period_returns.py` lấy tỉ suất = tỉ số hai giá đơn vị trong sổ này).
+"""Sổ ĐƠN VỊ QUỸ của một account — chuỗi "giá một đơn vị quỹ" chốt theo ngày. `build_ledger` là
+công thức DUY NHẤT cho tỉ suất theo kỳ (`nav_period_returns.py` lấy tỉ suất = tỉ số hai giá đơn vị
+của chuỗi dựng trong bộ nhớ); file sổ trên đĩa chỉ là BẢN ĐỐI CHỨNG, chưa có trước bước 3.
 
 Chính sách: `kb/projects/fund-unit-performance-policy-20261010.md` (user duyệt 2026-10-10) —
 tài khoản quản lý đo như một quỹ mở. Dựng từ ba nguồn, không nguồn nào khác:
@@ -13,37 +14,48 @@ QUY TẮC CHỐT (một chỗ duy nhất định nghĩa nó — `build_ledger`):
   · Khởi điểm: giá 10.000 đ/đơn vị tại `inception_date`, số đơn vị = `starting_capital`/10.000.
   · Nạp ⇒ PHÁT HÀNH đơn vị, rút ⇒ HUỶ đơn vị, luôn theo một GIÁ CHỐT; giá đơn vị không đổi vì
     dòng tiền, chỉ đổi vì lãi/lỗ.
-  · `timing="eod"` (mặc định): tiền ngày T giao dịch ở giá chốt CUỐI ngày T.
-        giá_T = (nav_T − tiền_eod_T) / đơn_vị_trước ;  đơn_vị += tiền_eod_T / giá_T
-    `nav_T` là snapshot cuối ngày ĐÃ chứa khoản tiền đó nên phải trừ ra trước khi chia.
-  · `timing="bod"` (khai tường minh kèm `time_ict`): giao dịch ở giá chốt phiên LIỀN TRƯỚC.
-        đơn_vị += tiền_bod_T / giá_{T−1} ;  giá_T = nav_T / đơn_vị
-  · Cả hai cùng ngày: bod trước, eod sau ⇒ giá_T/giá_{T−1} = (nav_T − eod)/(nav_{T−1} + bod).
+  · Quy ước của từng dòng tiền do `account_cash_flows.assign_flow` SUY từ ngày + giờ khai và
+    `balance_ts` của nav_history (người khai không chọn): tiền giao dịch ở giá chốt GẦN NHẤT
+    TRƯỚC thời điểm tiền vào/ra.
+  · "eod" trên dòng R (tiền tới SAU giờ đóng cửa phiên R, trước khi chụp NAV của R):
+        giá_R = (nav_R − tiền_eod_R) / đơn_vị_trước ;  đơn_vị += tiền_eod_R / giá_R
+    `nav_R` ĐÃ chứa khoản tiền đó nên phải trừ ra trước khi chia.
+  · "bod" trên dòng R (tiền tới trước/trong phiên R): giao dịch ở giá chốt của dòng LIỀN TRƯỚC.
+        đơn_vị += tiền_bod_R / giá_{R−1} ;  giá_R = nav_R / đơn_vị
+  · Cả hai cùng dòng: bod trước, eod sau ⇒ giá_R/giá_{R−1} = (nav_R − eod)/(nav_{R−1} + bod).
   · Bất biến mỗi dòng: đơn_vị × giá = nav (sai số dấu phẩy động, ≪ 1 đồng).
+  · nav_history phải tăng NGHIÊM NGẶT theo ngày (trùng ngày ⇒ từ chối).
 
-SỔ TRÊN ĐĨA LÀ CHỈ-GHI-THÊM: `data/execution_logs/nav_unit_ledger_{account}.csv`. `--seal` chỉ
-THÊM dòng mới vào cuối. Dựng lại mà một dòng ĐÃ CHỐT khác đi (NAV nguồn bị sửa, dòng tiền khai
-lùi ngày, dòng bị xoá/chen) ⇒ rc=2, in từng dòng lệch bao nhiêu, KHÔNG ghi gì. Đường tính lại
-lịch sử có chủ đích (đính chính) CHƯA có ở đây — thuộc bước 3 của chính sách.
+SỔ TRÊN ĐĨA LÀ CHỈ-GHI-THÊM: `nav_unit_ledger_{account}.csv`. `--seal` chỉ THÊM dòng mới vào
+cuối (đọc file MỘT lần dưới khoá `fcntl.flock`, ghi qua file tạm + `os.replace`). Dựng lại mà
+một dòng ĐÃ CHỐT khác đi (NAV nguồn bị sửa, dòng tiền khai lùi ngày, dòng bị xoá/chen) ⇒ rc=2,
+in từng dòng lệch bao nhiêu, KHÔNG ghi gì.
+⚠️ CHƯA CHỐT SỔ THẬT TRƯỚC BƯỚC 3 của chính sách (rà các ngày `nav_is_estimate`, có đường đính
+chính): `--seal` TỪ CHỐI ghi vào thư mục dữ liệu mặc định (rc=3) — chỉ ghi khi truyền
+`--ledger-dir` trỏ nơi khác (test/research). `nav_period_returns.py` KHÔNG đọc sổ trên đĩa.
 
 Dùng:
-    python3 mike/bin/nav_unit_ledger.py --account SpaceX            # dựng + đối chiếu sổ đã chốt
-    python3 mike/bin/nav_unit_ledger.py --account SpaceX --seal     # thêm các dòng chưa chốt
+    python3 mike/bin/nav_unit_ledger.py --account SpaceX                      # dựng + in
+    python3 mike/bin/nav_unit_ledger.py --account SpaceX --ledger-dir D       # + đối chiếu sổ ở D
+    python3 mike/bin/nav_unit_ledger.py --account SpaceX --ledger-dir D --seal
 Selfcheck: python3 mike/bin/nav_unit_ledger_selfcheck.py
 """
 import argparse
 import csv
 import datetime
+import fcntl
 import json
+import math
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from account_cash_flows import (CashFlowError, attach_flows_to_rows,  # noqa: E402
-                                load_flows)
+from account_cash_flows import (NavRow, attach_flows_to_rows,  # noqa: E402,F401
+                                load_flows, require_strictly_increasing)
+from wc_paths import find_wc_root  # noqa: E402
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+WC_ROOT = find_wc_root(__file__)
 INCEPTION_PATH = os.path.join(WC_ROOT, "data", "account_inception.json")
 NAV_HISTORY_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 
@@ -66,15 +78,8 @@ class LedgerDriftError(ValueError):
                          + "\n  ".join(diffs))
 
 
-class NavRow(tuple):
-    """Một dòng nav_history: vẫn là cặp `(date, nav)` cho mọi consumer cũ, mang thêm
-    `.is_estimate` (cờ `nav_is_estimate` của ngày nguồn) và `.balance_ts`."""
-
-    def __new__(cls, date, nav, is_estimate=False, balance_ts=None):
-        self = super().__new__(cls, (date, nav))
-        self.is_estimate = is_estimate
-        self.balance_ts = balance_ts
-        return self
+class SealRefused(ValueError):
+    """Từ chối chốt sổ vào thư mục dữ liệu thật — chưa được phép trước bước 3 của chính sách."""
 
 
 def _parse_date(s: str) -> datetime.date:
@@ -117,24 +122,6 @@ def _inception_baseline(rows: list, inception: dict):
     return first_date, first_nav
 
 
-def _check_eod_in_snapshot(flow, row):
-    """Flow `eod` có khai giờ: nếu tiền vào/ra SAU lúc chụp NAV ngày đó thì `nav` ngày đó CHƯA chứa
-    nó ⇒ công thức eod (trừ tiền ra khỏi nav) sẽ trừ một khoản không có trong nav. Fail-closed."""
-    ts = getattr(row, "balance_ts", None)
-    if not flow.get("time_ict") or not ts:
-        return
-    try:
-        snap = datetime.datetime.fromisoformat(ts)
-    except ValueError:
-        return
-    if snap.date() == row[0] and flow["time_ict"] > snap.strftime("%H:%M"):
-        raise CashFlowError(
-            f"flow {flow['date']} timing='eod' khai time_ict={flow['time_ict']} nhưng dòng "
-            f"nav_history ngày đó chụp lúc {ts} (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ nav ngày "
-            f"đó chưa chứa khoản này. Chụp lại NAV ngày đó sau {flow['time_ict']}, hoặc khai "
-            f"timing='bod' cho phiên kế tiếp (cùng giá giao dịch: giá chốt cuối ngày {row[0]}).")
-
-
 def build_ledger(rows: list, flows: list, inception_from: datetime.date,
                  inception_nav0: float) -> tuple:
     """Dựng sổ đơn vị. Trả `(ledger, info)`.
@@ -143,10 +130,12 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
     10.000), sau đó mỗi dòng nav_history có date > `inception_from` một dòng. Khoá: date, nav,
     flow_bod_vnd, flow_eod_vnd, units_issued, units, unit_price, nav_is_estimate, flows.
     `info`: {"dropped": flow có date <= mốc khởi điểm (đã nằm trong vốn khởi điểm, KHÔNG phải
-    dòng tiền), "pending": flow sau dòng nav_history cuối (chưa thuộc ngày chốt nào)}.
+    dòng tiền), "pending": flow TREO — chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra}.
+    `flows` của mỗi dòng sổ là bản sao đã gán (`timing` = quy ước suy ra, `session_date`).
     """
     if inception_nav0 <= 0:
         raise ValueError(f"vốn khởi điểm phải > 0, được {inception_nav0}")
+    require_strictly_increasing(rows)
     nav_rows = [r for r in rows if r[0] > inception_from]
     dropped = [f for f in flows if f["date"] <= inception_from]
     by_date = attach_flows_to_rows(nav_rows, [f for f in flows if f["date"] > inception_from])
@@ -164,9 +153,6 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
         day = by_date.get(d, [])
         f_bod = sum(f["amount_vnd"] for f in day if f["timing"] == "bod")
         f_eod = sum(f["amount_vnd"] for f in day if f["timing"] == "eod")
-        for f in day:
-            if f["timing"] == "eod":
-                _check_eod_in_snapshot(f, row)
         before = units
         units += f_bod / price                      # bod: giao dịch ở giá chốt phiên liền trước
         if units <= 0:
@@ -188,9 +174,8 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
 
 
 # ---------------------------------------------------------------- sổ trên đĩa (chỉ-ghi-thêm)
-def ledger_path(account: str, ledger_dir: str = None) -> str:
-    base = ledger_dir or os.environ.get("NAV_UNIT_LEDGER_DIR") or NAV_HISTORY_DIR
-    return os.path.join(base, f"nav_unit_ledger_{account}.csv")
+def ledger_path(account: str, ledger_dir: str) -> str:
+    return os.path.join(ledger_dir, f"nav_unit_ledger_{account}.csv")
 
 
 def _csv_line(row: dict) -> str:
@@ -200,13 +185,7 @@ def _csv_line(row: dict) -> str:
                      repr(float(row["unit_price"])), str(bool(row["nav_is_estimate"]))]) + "\n"
 
 
-def read_sealed(path: str) -> list:
-    """Dòng đã chốt, tăng dần. File không tồn tại ⇒ [] (chưa chốt dòng nào). File hỏng ⇒ raise:
-    sổ đã chốt mà đọc không ra thì không được coi như chưa có sổ."""
-    if not os.path.exists(path):
-        return []
-    with open(path, "r", encoding="utf-8", newline="") as f:
-        text = f.read()
+def _parse_sealed(text: str, path: str) -> list:
     if text and not text.endswith("\n"):
         raise ValueError(f"{path}: dòng cuối không kết thúc bằng xuống dòng (ghi dở?) — không "
                          f"đọc tiếp, kiểm file bằng tay")
@@ -222,12 +201,29 @@ def read_sealed(path: str) -> list:
             rec = {"date": _parse_date(parts[0]), "nav_is_estimate": parts[7] == "True"}
             for key, raw in zip(LEDGER_FIELDS[1:7], parts[1:7]):
                 rec[key] = float(raw)
+                if not math.isfinite(rec[key]):
+                    raise ValueError(f"{key}={raw} không phải số hữu hạn")
         except ValueError as exc:
             raise ValueError(f"{path} dòng {n}: không đọc được ({exc}): {line!r}") from exc
         if out and rec["date"] <= out[-1]["date"]:
             raise ValueError(f"{path} dòng {n}: ngày {rec['date']} không tăng dần")
         out.append(rec)
     return out
+
+
+def _read_text(path: str):
+    """Nội dung file sổ, hoặc None nếu chưa có file."""
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8", newline="") as f:
+        return f.read()
+
+
+def read_sealed(path: str) -> list:
+    """Dòng đã chốt, tăng dần. File không tồn tại ⇒ [] (chưa chốt dòng nào). File hỏng ⇒ raise:
+    sổ đã chốt mà đọc không ra thì không được coi như chưa có sổ."""
+    text = _read_text(path)
+    return [] if text is None else _parse_sealed(text, path)
 
 
 def diff_against_sealed(ledger: list, sealed: list) -> list:
@@ -256,18 +252,19 @@ def diff_against_sealed(ledger: list, sealed: list) -> list:
             diffs.append(f"{d} nav_is_estimate: đã chốt {old['nav_is_estimate']} → dựng lại "
                          f"{bool(new['nav_is_estimate'])}")
         for key in ("units_issued", "units", "unit_price"):
-            if abs(new[key] - old[key]) > DERIVED_REL_TOL * max(abs(old[key]), 1.0):
+            # nan/inf ở giá trị đã chốt phải tính là LỆCH: `abs(x − nan) > tol` luôn False, và
+            # với inf thì dung sai tương đối cũng thành inf — nên kiểm hữu hạn trước, so `<=` sau.
+            if not (math.isfinite(old[key])
+                    and abs(new[key] - old[key]) <= DERIVED_REL_TOL * max(abs(old[key]), 1.0)):
                 rel = (new[key] / old[key] - 1) * 100 if old[key] else float("inf")
                 diffs.append(f"{d} {key}: đã chốt {old[key]!r} → dựng lại {new[key]!r} "
                              f"(lệch {new[key] - old[key]:+.6f} = {rel:+.6f}%)")
     return diffs
 
 
-def seal(path: str, ledger: list, asof: datetime.date = None, write: bool = True) -> tuple:
-    """Đối chiếu `ledger` với sổ đã chốt rồi (khi `write`) THÊM vào cuối sổ mọi dòng có ngày sau
-    dòng đã chốt cuối cùng (và <= `asof`). Trả `(dòng_đã_chốt_trước_đó, dòng_vừa_thêm)`.
-    Lệch với dòng đã chốt ⇒ LedgerDriftError, KHÔNG ghi gì."""
-    sealed = read_sealed(path)
+def _seal_locked(path, ledger, asof, write):
+    old_text = _read_text(path)                 # đọc MỘT lần: vừa để đối chiếu, vừa để ghi lại
+    sealed = [] if old_text is None else _parse_sealed(old_text, path)
     diffs = diff_against_sealed(ledger, sealed)
     if diffs:
         raise LedgerDriftError(path, diffs)
@@ -276,19 +273,40 @@ def seal(path: str, ledger: list, asof: datetime.date = None, write: bool = True
            and (asof is None or r["date"] <= asof)]
     if not write or not new:
         return sealed, []
-    old_text = ""
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8", newline="") as f:
-            old_text = f.read()
-    else:
+    if old_text is None:
         old_text = ",".join(LEDGER_FIELDS) + "\n"
     tmp = f"{path}.tmp.{os.getpid()}"
-    with open(tmp, "w", encoding="utf-8", newline="") as f:
-        f.write(old_text + "".join(_csv_line(r) for r in new))    # byte cũ giữ NGUYÊN
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, path)
+    try:
+        with open(tmp, "w", encoding="utf-8", newline="") as f:
+            f.write(old_text + "".join(_csv_line(r) for r in new))    # byte cũ giữ NGUYÊN
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):                 # ghi dở ⇒ không để lại file tạm, sổ cũ nguyên vẹn
+            os.remove(tmp)
     return sealed, new
+
+
+def seal(path: str, ledger: list, asof: datetime.date = None, write: bool = True) -> tuple:
+    """Đối chiếu `ledger` với sổ đã chốt rồi (khi `write`) THÊM vào cuối sổ mọi dòng có ngày sau
+    dòng đã chốt cuối cùng (và <= `asof`). Trả `(dòng_đã_chốt_trước_đó, dòng_vừa_thêm)`.
+    Lệch với dòng đã chốt ⇒ LedgerDriftError, KHÔNG ghi gì. Ghi vào thư mục dữ liệu thật ⇒
+    SealRefused (chưa chốt sổ thật trước bước 3). Khi ghi: giữ khoá độc quyền `<path>.lock`
+    suốt đọc→ghi, để hai tiến trình chốt cùng lúc không sinh dòng trùng."""
+    if not write:
+        return _seal_locked(path, ledger, asof, False)
+    if os.path.realpath(os.path.dirname(os.path.abspath(path))) == os.path.realpath(NAV_HISTORY_DIR):
+        raise SealRefused(
+            f"TỪ CHỐI chốt sổ vào thư mục dữ liệu thật {NAV_HISTORY_DIR}: chưa chốt sổ đơn vị thật "
+            f"trước bước 3 của chính sách (kb/projects/fund-unit-performance-policy-20261010.md). "
+            f"Truyền --ledger-dir trỏ thư mục khác nếu đang test/research.")
+    with open(f"{path}.lock", "a", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            return _seal_locked(path, ledger, asof, True)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def build_account_ledger(account, nav_dir=NAV_HISTORY_DIR, inception_path=INCEPTION_PATH,
@@ -303,21 +321,27 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--account", required=True)
     ap.add_argument("--seal", action="store_true",
-                    help="THÊM các dòng chưa chốt vào sổ (mặc định chỉ dựng + đối chiếu)")
+                    help="THÊM các dòng chưa chốt vào sổ ở --ledger-dir (KHÔNG phải thư mục dữ "
+                         "liệu thật — bị từ chối trước bước 3)")
     ap.add_argument("--asof", help="YYYY-MM-DD — chỉ chốt tới ngày này (mặc định: dòng cuối)")
     ap.add_argument("--tail", type=int, default=5, help="số dòng cuối in ra (mặc định 5)")
-    ap.add_argument("--ledger-dir", help="thư mục sổ (mặc định data/execution_logs)")
+    ap.add_argument("--ledger-dir", help="thư mục sổ để đối chiếu/chốt; bỏ trống = chỉ dựng + in")
     ap.add_argument("--nav-dir", default=NAV_HISTORY_DIR)
     ap.add_argument("--inception-path", default=INCEPTION_PATH)
     ap.add_argument("--flows-path")
     args = ap.parse_args()
 
-    path = ledger_path(args.account, args.ledger_dir)
+    path = ledger_path(args.account, args.ledger_dir or NAV_HISTORY_DIR)
+    sealed = added = None
     try:
         asof = _parse_date(args.asof) if args.asof else None
         ledger, info = build_account_ledger(args.account, args.nav_dir, args.inception_path,
                                             args.flows_path)
-        sealed, added = seal(path, ledger, asof, write=args.seal)
+        if args.seal or args.ledger_dir:
+            sealed, added = seal(path, ledger, asof, write=args.seal)
+    except SealRefused as e:
+        print(f"nav_unit_ledger ({args.account}): {e}", file=sys.stderr)
+        return 3
     except LedgerDriftError as e:
         print(f"LỆCH SỔ nav_unit_ledger ({args.account}): {e}\n  ⇒ KHÔNG ghi gì. Dòng đã chốt "
               f"không được đổi; tính lại lịch sử có chủ đích là đường riêng (chưa có).",
@@ -331,17 +355,21 @@ def main() -> int:
         print(f"  ℹ️ bỏ flow {f['date']} {f['amount_vnd']:+,.0f} VND: ngày <= mốc khởi điểm "
               f"{ledger[0]['date']} (đã nằm trong vốn khởi điểm)", file=sys.stderr)
     for f in info["pending"]:
-        print(f"  ℹ️ flow {f['date']} {f['amount_vnd']:+,.0f} VND chưa vào sổ: sau dòng "
-              f"nav_history cuối {ledger[-1]['date']}", file=sys.stderr)
-    n_sealed = len(sealed) + len(added)
-    last_sealed = (added or sealed or [None])[-1]
+        print(f"  ⚠️ flow {f['date']} {f.get('time_ict') or ''} {f['amount_vnd']:+,.0f} VND TREO, "
+              f"chưa vào sổ: chưa dòng nav_history nào chụp sau thời điểm đó (dòng cuối "
+              f"{ledger[-1]['date']})", file=sys.stderr)
     print(f"nav_unit_ledger {args.account}: {len(ledger)} dòng dựng được "
           f"({ledger[0]['date']} → {ledger[-1]['date']}), "
           f"{sum(1 for r in ledger if r['nav_is_estimate'])} dòng nav_is_estimate, "
           f"{sum(1 for r in ledger if r['flow_bod_vnd'] or r['flow_eod_vnd'])} ngày có dòng tiền")
-    print(f"sổ đã chốt: {path} — {n_sealed} dòng"
-          + (f", tới {last_sealed['date']}" if last_sealed else " (chưa chốt dòng nào)")
-          + (f"; vừa THÊM {len(added)} dòng" if args.seal else "; khớp chuỗi dựng lại"))
+    if sealed is None:
+        print("sổ trên đĩa: KHÔNG đối chiếu (không truyền --ledger-dir; sổ thật chưa chốt trước "
+              "bước 3)")
+    else:
+        last_sealed = (added or sealed or [None])[-1]
+        print(f"sổ đã chốt: {path} — {len(sealed) + len(added)} dòng"
+              + (f", tới {last_sealed['date']}" if last_sealed else " (chưa chốt dòng nào)")
+              + (f"; vừa THÊM {len(added)} dòng" if args.seal else "; khớp chuỗi dựng lại"))
     print(",".join(LEDGER_FIELDS))
     for r in ledger[-args.tail:] if args.tail > 0 else []:
         print(_csv_line(r), end="")
