@@ -294,6 +294,19 @@ def part_b_synthetic(tmp):
     ok(cf[0]["timing"] == "eod" and cf[0]["session_date"] == "2026-07-03"
        and cf[0]["time_ict"] == AFTER_CLOSE and cf[0]["date"] == "2026-07-03",
        f"B1: cash_flows phải nêu quy ước SUY RA (eod) + phiên được gán, được {cf}")
+    full = envs[("E", AFTER_CLOSE)].returns(D(2026, 7, 3))
+    ok(isinstance(full.get("day"), dict), f"B1: đã có phiên sau mốc khởi điểm thì `day` phải là một kỳ, được {full.get('day')!r}")
+    ok(full["day"]["from_date"] == "2026-07-02" and full["day"]["to_date"] == "2026-07-03"
+       and full["day"]["return_pct"] == 2.0 and full["day"].get("net_flow_vnd") == 200e6
+       and full["day"]["pnl_vnd"] == 20_000_000.0 and full["day"]["unit_price_ratio"] == 1.02,
+       f"B1: kỳ `day` = phiên gần nhất so với dòng sổ liền trước (+2,0%, lãi 20tr, nạp 200tr), được {full['day']}")
+    nxt = envs[("E", AFTER_CLOSE)].returns(D(2026, 7, 6))
+    ok(nxt["day"]["from_date"] == "2026-07-03" and nxt["day"]["return_pct"] == 0.0
+       and "net_flow_vnd" not in nxt["day"] and nxt["inception"]["unit_price_ratio"] == 1.02,
+       f"B1: phiên sau (thị trường đứng yên) ⇒ `day` 0,0%, không còn dòng tiền; được {nxt['day']}")
+    only_inc = npr.compute_period_returns("SpaceX", D(2026, 7, 1), [nul.NavRow(D(2026, 7, 1), 1e9)], INC["SpaceX"], [])
+    ok(only_inc["day"] is None and only_inc["inception"]["return_pct"] == 0.0,
+       f"B1: chưa có phiên nào sau mốc khởi điểm ⇒ `day` là None, được {only_inc['day']}")
     cf = envs[("B", IN_SESSION)].returns()["inception"]["cash_flows"]
     ok(cf[0]["timing"] == "bod" and cf[0]["session_date"] == "2026-07-03",
        f"B1: tiền vào trong phiên phải được ghi là bod, được {cf}")

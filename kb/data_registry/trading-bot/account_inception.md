@@ -16,11 +16,17 @@ dòng đầu: giá 10.000 đ, số đơn vị = `starting_capital` / 10.000.
 2026-09-27, Option A).
 
 ## Ai đọc
-`nav_unit_ledger.py` (`load_inception`), và qua nó `nav_period_returns.py`, `portfolio_status.py`.
+`nav_unit_ledger.py` (`load_inception`), và qua nó `nav_period_returns.py`, `portfolio_status.py`,
+`daily_nav_snapshot.py` (dòng "Từ go-live" và "% so với hôm trước" của báo cáo ngày — từ 2026-10-11).
 
 ## Bẫy
 - KHÁC `data/account_seed_capital.json` ([`account_seed_capital.md`](account_seed_capital.md)) — file kia
   phục vụ đẳng thức của `reconcile_equity.py`.
 - Dòng đầu của `nav_history_<account>.csv` là snapshot SAU phiên đầu tiên, không phải vốn khởi điểm
   (coding_guidelines_ext §31).
+- **Đây là mốc DUY NHẤT cho mọi phần trăm hiệu suất.** Trước 2026-10-11 dòng "Từ go-live" của
+  `daily_nav_snapshot.py` dùng `--starting-capital` mặc định 1 tỷ (không caller nào truyền) ⇒ 28/28 báo
+  cáo ngày ZaloPay có dòng đó in thấp hơn số chuẩn 1,127–1,220 điểm % (vd 2026-10-09: −6,06% so với
+  −4,907%). Báo cáo cũ KHÔNG được sửa/gửi lại. `--starting-capital` giờ chỉ còn là mốc cho cổng bước
+  nhảy 15% của phiên đầu tiên.
 - Đổi `starting_capital` hay `inception_date` làm đổi MỌI giá đơn vị ⇒ lệch toàn bộ sổ đã chốt.

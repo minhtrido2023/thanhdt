@@ -44,6 +44,11 @@ QUY NĂM: kỳ < 365 ngày lịch ⇒ `annualized_return_pct` và `mwr_annualize
 `annualized_note` (`annualize_or_null` là cửa duy nhất). Số mũ `365,25/số_ngày` (quy ước repo).
 ĐƯỜNG NÀY KHÔNG ĐỌC SỔ ĐƠN VỊ TRÊN ĐĨA (bước 1/4): tỉ suất luôn tính từ chuỗi dựng trong bộ nhớ.
 
+MỌI phần trăm hiệu suất của tài khoản thật (báo cáo tuần/tháng, dòng 💰 NAV hằng ngày của
+`daily_nav_snapshot.py`, đầu mục `portfolio_status.py`) lấy từ `compute_period_returns` — một công
+thức, một mốc khởi điểm (`data/account_inception.json`). Kỳ `day` = phiên gần nhất so với dòng sổ
+liền trước.
+
 Dùng: python3 mike/bin/nav_period_returns.py --account SpaceX --report-date 2026-09-18
 Selfcheck: python3 mike/bin/nav_period_returns.py --selfcheck
          python3 mike/bin/nav_flow_term_selfcheck.py   (số hạng dòng tiền + cổng NAV-jump)
@@ -162,6 +167,9 @@ def _period_result(ledger: list, i0: int, i1: int) -> dict:
                               "session_date": f["session_date"].isoformat()} for f in used]
     out.update({
         "days": days,
+        # Tỉ số hai giá đơn vị CHƯA làm tròn — cho nơi hiển thị tự làm tròn MỘT lần (dòng NAV
+        # hằng ngày in 2 chữ số; làm tròn 3 rồi 2 chữ số lệch 0,01 ở ~5% số ngày).
+        "unit_price_ratio": factor,
         "unit_price0": round(a["unit_price"], 4),
         "unit_price1": round(b["unit_price"], 4),
         "pnl_vnd": b["nav"] - a["nav"] - net_flow,
@@ -220,6 +228,9 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
         "inception": _period_result(ledger, 0, i1),
         "wtd": _period(ledger, monday, i1),
         "mtd": _period(ledger, month_start, i1),
+        # Phiên gần nhất so với dòng sổ liền trước (None nếu chưa có phiên nào sau mốc khởi điểm).
+        # Nguồn % "so với hôm trước" của daily_nav_snapshot.py và "Hôm nay" của portfolio_status.py.
+        "day": _period_result(ledger, i1 - 1, i1) if i1 else None,
         # Dòng tiền ĐÃ KHAI nhưng KHÔNG nằm trong số nào ở trên — luôn có mặt (rỗng = không có).
         "pending_flows": [_flow_note(f, f"TREO: chưa dòng nav_history nào chụp sau thời điểm tiền "
                                         f"vào/ra (dòng cuối {ledger[-1]['date']})")
