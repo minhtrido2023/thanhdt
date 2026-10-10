@@ -28,6 +28,11 @@ def check(name, cond, detail=""):
         FAILS.append(name)
 
 
+def _no_tool(account, date):
+    """Thay công cụ §21 (BQ + ~2 phút) cho các ca chỉ kiểm KHUNG của build_output."""
+    return {}
+
+
 def _latest_date_with_nav(account):
     path = os.path.join(ps.EXEC_DIR, f"nav_history_{account}.csv")
     if not os.path.exists(path):
@@ -125,7 +130,7 @@ def run():
 
     # 6: build_output SpaceX/ZaloPay — chỉ chạy khi có NAV hôm nay (fail-soft weekend/holiday)
     if date_spacex:
-        out_sx = ps.build_output("SpaceX", date_spacex)
+        out_sx = ps.build_output("SpaceX", date_spacex, returns_fn=_no_tool)
         check(f"build_output SpaceX ({date_spacex}) không None", out_sx is not None)
         check("build_output SpaceX: có header TÌNH TRẠNG DANH MỤC",
               out_sx is not None and "TÌNH TRẠNG DANH MỤC" in out_sx)
@@ -135,15 +140,15 @@ def run():
         print("[SKIP] build_output SpaceX — không có nav_history_SpaceX.csv")
 
     if date_zalopay:
-        out_zp = ps.build_output("ZaloPay", date_zalopay)
+        out_zp = ps.build_output("ZaloPay", date_zalopay, returns_fn=_no_tool)
         check(f"build_output ZaloPay ({date_zalopay}) không None", out_zp is not None)
     else:
         print("[SKIP] build_output ZaloPay — không có nav_history_ZaloPay.csv")
 
     # 7: §12 sanity — 2 account cho output khác nhau (không đọc chung không lọc)
     if date_spacex and date_zalopay:
-        out_sx = ps.build_output("SpaceX", date_spacex)
-        out_zp = ps.build_output("ZaloPay", date_zalopay)
+        out_sx = ps.build_output("SpaceX", date_spacex, returns_fn=_no_tool)
+        out_zp = ps.build_output("ZaloPay", date_zalopay, returns_fn=_no_tool)
         check("§12: SpaceX và ZaloPay cho output KHÁC nhau (không lẫn account)",
               out_sx != out_zp)
 
@@ -152,7 +157,7 @@ def run():
     # chạy vào ngày chưa có NAV hôm đó) — nên test None phải dùng ngày TRƯỚC lịch sử, không
     # phải ngày tương lai (tương lai vẫn có "gần nhất trước" = dòng cuối cùng).
     check("build_output ngày TRƯỚC mọi lịch sử NAV → None",
-          ps.build_output("SpaceX", "2000-01-01") is None)
+          ps.build_output("SpaceX", "2000-01-01", returns_fn=_no_tool) is None)
 
     # 10: count_trading_days — dùng next_trading_day thật (§16 RULE 2), không đếm lịch tay
     import datetime as _dt
@@ -264,7 +269,7 @@ def run():
     # ngày khác. Dùng ngày tương lai xa (chưa có + không thể có) để chắc chắn tái lập fallback.
     if date_zalopay:
         _future = "2099-12-31"
-        out_stale = ps.build_output("ZaloPay", _future)
+        out_stale = ps.build_output("ZaloPay", _future, returns_fn=_no_tool)
         check("NAV stale: build_output không None (vẫn fallback dòng gần nhất, không crash)",
               out_stale is not None)
         if out_stale is not None:
@@ -286,6 +291,107 @@ def run():
     for _bad in (None, "", "abc"):
         check(f"cash_div_impact: {_bad!r} → chưa rõ mức (không crash)",
               ps._cash_div_impact(_bad) == "cổ tức tiền mặt (chưa rõ mức)")
+
+    # 19+: K1 (2026-10-10) — tỉ suất từng mã lấy từ CÔNG CỤ §21, không tự tính trên costPrice.
+    import datetime as _dt2
+    import tempfile
+    import report_return_gate as rrg
+    keep = {k: getattr(ps, k) for k in ("broker_positions_with_cost", "load_nav_row",
+                                        "sleeve_map_from_journal", "current_park_basket",
+                                        "section21_returns")}
+    keep_rrg = rrg.position_returns
+    pos = {"QQ1": {"qty": 1000.0, "marketPrice": 12000.0, "avg_cost": 10000.0, "sellable": 1000},
+           "QQ2": {"qty": 500.0, "marketPrice": 10000.0, "avg_cost": 8000.0, "sellable": 500},
+           "QQ3": {"qty": 100.0, "marketPrice": 30000.0, "avg_cost": 25000.0, "sellable": 100},
+           "QQ4": {"qty": 200.0, "marketPrice": 8150.0, "avg_cost": 10000.0, "sellable": 200}}
+
+    def row(qty, raw, pct, **kw):
+        return {"qty": qty, "cost_price": raw, "market": 0.0, "excluded": False, "why": [],
+                "code": "", "pct": pct, "pl": qty * raw * pct / 100.0, "raw_cost": raw,
+                "gross": 0.0, **kw}
+    tool = {"QQ1": row(1000.0, 11000.0, 12.34),
+            "QQ2": {"qty": 500.0, "cost_price": 8000.0, "market": 10000.0, "excluded": False,
+                    "why": ["sự kiện ex 2026-09-22 [UNVERIFIED] CHƯA giải"], "code": "blocked"},
+            "QQ4": row(200.0, 10000.0, -18.5)}          # QQ3: công cụ không trả dòng nào
+    try:
+        ps.broker_positions_with_cost = lambda no, d: {k: dict(v) for k, v in pos.items()}
+        ps.load_nav_row = lambda a, d: ({"date": _dt2.date.fromisoformat(d), "nav": 1e9,
+                                         "cash": 1e8, "egg_assets": 0.0}, None)
+        ps.sleeve_map_from_journal = lambda a: {}
+        ps.current_park_basket = lambda: (set(), None)
+        out = ps.build_output("ZaloPay", "2026-10-09", returns_fn=lambda a, d: tool) or ""
+        check("K1: mã CÓ tỉ suất công cụ ⇒ in đúng số đó, 2 chữ số, dạng 'MÃ <giá trị>M, ±x.xx%'",
+              "QQ1 12.0M, +12.34%" in out and "QQ4 1.6M, -18.50%" in out, out)
+        check("K1: KHÔNG còn số tự tính trên costPrice (QQ1 +20.0%, QQ2 +25.0%, QQ3 +20.0%)",
+              "+20.0" not in out and "+25.0" not in out, out)
+        check("K1: mã công cụ KHÔNG cấp tỉ suất ⇒ không in tỉ suất, in lý do ngắn theo từng loại",
+              "QQ2 5.0M (chưa có tỉ suất)" in out and "QQ3 3.0M (chưa có tỉ suất)" in out
+              and f"ⓘ Chưa có tỉ suất (QQ2): {ps.RETURN_UNAVAILABLE['blocked']}" in out
+              and f"ⓘ Chưa có tỉ suất (QQ3): {ps.RETURN_UNAVAILABLE['absent']}" in out, out)
+        check("K1: tổng sleeve thiếu một mã ⇒ '—' (không cộng phần còn lại rồi gọi là cả sleeve)",
+              "| BAL (4 mã) | 21.6M | 2.2% | — |" in out, out)
+        check("K1: cảnh báo gần ngưỡng dùng CHÍNH số công cụ (QQ4 −18,50% ⇒ còn 1,5pp), và nói rõ mã "
+              "nào không đánh giá được",
+              "🔴 QQ4 -18.50% (BAL): còn 1.5pp" in out
+              and "KHÔNG đánh giá được khoảng cách tới ngưỡng xử lý: QQ2, QQ3." in out, out)
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+            fh.write(out)
+            tmp = fh.name
+        try:
+            bits = [(tk, pct) for tk, pct, _ln in rrg.parse_position_bits(tmp)]
+            prose = [(tk, pct) for tk, pct, _ln in rrg.parse_prose_pcts(tmp)]
+            mention = rrg.ticker_mentions(tmp, {"QQ2", "QQ3"})
+        finally:
+            os.unlink(tmp)
+        check("HỢP ĐỒNG với cổng: `parse_position_bits` đọc lại ĐÚNG và ĐỦ các dòng có tỉ suất "
+              "(đổi định dạng dòng mà cổng không đọc được = PASS trên 0 dòng, lỗi K1)",
+              sorted(bits) == [("QQ1", 12.34), ("QQ4", -18.5)], str(bits))
+        check("HỢP ĐỒNG với cổng: dòng cờ '🔴 QQ4 -18.50%' được đọc đúng số qua đường văn xuôi",
+              prose == [("QQ4", -18.5)], str(prose))
+        check("HỢP ĐỒNG với cổng: mã không có tỉ suất KHÔNG bị cổng thấy 'có tỉ suất đứng cạnh' "
+              "(nếu thấy, cổng sẽ chặn oan báo cáo đã cố ý không in số)",
+              mention["QQ2"]["pub"] == [] and mention["QQ3"]["pub"] == [], str(mention))
+        full = dict(tool, QQ2=row(500.0, 8000.0, 25.0), QQ3=row(100.0, 25000.0, 20.0))
+        out2 = ps.build_output("ZaloPay", "2026-10-09", returns_fn=lambda a, d: full) or ""
+        pl = sum(r["pl"] for r in full.values())
+        cost = sum(r["qty"] * r["raw_cost"] for r in full.values())
+        check("K1: đủ mọi mã ⇒ tổng sleeve = Σ lãi/lỗ ròng ÷ Σ giá vốn THÔ của chính các số công cụ",
+              f"| BAL (4 mã) | 21.6M | 2.2% | {pl / cost * 100:+.1f}% |" in out2
+              and "Chưa có tỉ suất" not in out2, out2)
+
+        def boom(a, d):
+            raise ValueError("không lấy được giá thô 2026-10-09 từ BQ: quota — CHẶN")
+        out3 = ps.build_output("ZaloPay", "2026-10-09", returns_fn=boom) or ""
+        check("K1: công cụ LỖI ⇒ vẫn ra khối danh mục, KHÔNG mã nào có tỉ suất, lý do nói đúng là "
+              "công cụ không chạy được (không rơi về costPrice)",
+              "TÌNH TRẠNG DANH MỤC" in out3 and "%" not in "".join(
+                  ln for ln in out3.splitlines() if ln.startswith("  QQ"))
+              and f"(QQ1, QQ2, QQ3, QQ4): {ps.RETURN_UNAVAILABLE['error']}" in out3, out3)
+        ps.section21_returns = lambda a, d: full
+        out4 = ps.build_output("ZaloPay", "2026-10-09") or ""
+        check("K1: không truyền `returns_fn` ⇒ mặc định gọi `section21_returns` (công cụ thật)",
+              "QQ3 3.0M, +20.00%" in out4, out4)
+        ps.section21_returns = keep["section21_returns"]
+        seen = []
+
+        def fake_pr(label, asof):
+            seen.append((label, asof))
+            print("dòng công cụ in ra stdout")
+            return {"positions": tool}
+        rrg.position_returns = fake_pr
+        import contextlib
+        import io
+        buf, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err):
+            got = ps.section21_returns("ZaloPay", "2026-10-09")
+        check("`section21_returns` = `report_return_gate.position_returns(...)['positions']` — đúng "
+              "hàm cổng dùng; stdout của công cụ KHÔNG lẫn vào nội dung báo cáo",
+              got is tool and seen == [("ZaloPay", "2026-10-09")] and buf.getvalue() == ""
+              and "dòng công cụ" in err.getvalue(), repr((seen, buf.getvalue())))
+    finally:
+        for k, v in keep.items():
+            setattr(ps, k, v)
+        rrg.position_returns = keep_rrg
 
     print()
     if FAILS:

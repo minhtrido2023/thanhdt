@@ -14,6 +14,18 @@ if [ -f "$WC_ROOT/wc_env.sh" ]; then
   source "$WC_ROOT/wc_env.sh"
 fi
 
+# Sổ nhớ truy vấn BQ của RIÊNG lượt chạy này (K1, 2026-10-10). Báo cáo ngày nay LẤY tỉ suất
+# từng mã từ công cụ §21 (portfolio_status.py → report_return_gate.position_returns), rồi cổng
+# giao hàng gọi lại CÙNG công cụ để kiểm: hai tiến trình, cùng ~29 truy vấn `bq` (~105s/lượt).
+# Đặt biến này thì lượt thứ hai đọc lại kết quả của lượt đầu (dividend_adjusted_return._bq).
+# Thư mục tạm riêng từng lượt, xoá khi thoát ⇒ không sống qua lượt chạy; backstop
+# check_report_cadence.sh và báo cáo tuần/tháng KHÔNG đặt biến nên luôn hỏi BQ. mktemp lỗi ⇒
+# không đặt biến ⇒ chỉ chậm hơn, không sai.
+if [ -z "${DAR_BQ_MEMO_DIR:-}" ] && _eod_memo="$(mktemp -d "${TMPDIR:-/tmp}/eod_bq_memo.XXXXXX")"; then
+  export DAR_BQ_MEMO_DIR="$_eod_memo"
+  trap 'rm -rf "$_eod_memo"' EXIT
+fi
+
 ACCOUNT="SpaceX"
 PLAN_DATE="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 while [[ $# -gt 0 ]]; do
@@ -80,7 +92,28 @@ _deliver_eod() {
   # Nguyên nhân phải đọc từ BẰNG CHỨNG cổng vừa in ra, không quy chụp một nguyên nhân cố định
   # (§29): vendor_rc=10 chỉ nói "có vendor-lệch-nguồn HOẶC lookup_failed", KHÔNG nói được loại
   # nào — phải grep TAG THẬT trong $gate_out (arch-review vòng 5, R1-C), ĐỪNG suy từ rc=10.
-  local why="delivery chưa đủ kênh (Discord/email)"
+  # EOD_GATE_REASON_BEGIN — trích bởi eod_trading_report_account_filter_selfcheck.py.
+  # Bản trước gán sẵn "delivery chưa đủ kênh (Discord/email)" cho MỌI lần rc≠0, kể cả khi cổng
+  # tỉ suất CHẶN vì số sai — bus/log chỉ sai hướng người xử lý. Giờ: có khối "❌ CHẶN" thì trích
+  # dòng tiêu đề + mục đầu tiên của nó; không có thì trích DÒNG CUỐI cổng in ra (nơi
+  # report_delivery_gate ghi "INCOMPLETE — <lỗi thật>"); không có dòng nào thì nói đúng là không
+  # xác định được.
+  local why _blk _item _last
+  _blk="$(printf '%s\n' "$gate_out" | grep -m1 '^❌ CHẶN' || true)"
+  if [ -n "$_blk" ]; then
+    _item="$(printf '%s\n' "$gate_out" | grep -m1 -A1 '^❌ CHẶN' | sed -n '2p' | sed -E 's/^ *• *//')"
+    why="cổng tỉ suất CHẶN — ${_blk#❌ CHẶN — } ${_item}"
+  else
+    _last="$(printf '%s\n' "$gate_out" | grep -v '^[[:space:]]*$' | tail -n 1 || true)"
+    if [ -n "$_last" ]; then
+      why="report_delivery_gate rc=$gate_rc — dòng cuối cổng in ra: $_last"
+    else
+      why="report_delivery_gate rc=$gate_rc, cổng không in dòng nào — không xác định được nguyên nhân từ output"
+    fi
+  fi
+  # $why đi vào một chuỗi JSON ghép tay bên dưới ⇒ bỏ dấu nháy kép/gạch chéo ngược, gộp một dòng.
+  why="$(printf '%s' "$why" | python3 -c 'import sys; s = sys.stdin.read(); print(" ".join(s.replace(chr(34), "").replace(chr(92), "").split())[:400], end="")')"
+  # EOD_GATE_REASON_END
   # EOD_VENDOR_REASON_BEGIN — trích bởi eod_trading_report_account_filter_selfcheck.py,
   # extract-and-test 3 tổ hợp $gate_out (mismatch-only / lookup_failed-only / cả hai). Đổi
   # tên/di chuyển marker ⇒ selfcheck FATAL, không im lặng pass.
@@ -590,8 +623,16 @@ try:
     _ps = subprocess.run(
         [sys.executable, os.path.join(wc_root, "mike", "bin", "portfolio_status.py"),
          "--account", account, "--date", plan_date],
-        capture_output=True, text=True, cwd=wc_root, timeout=60,
+        # 60s → 600s (K1, 2026-10-10): portfolio_status nay gọi công cụ tỉ suất §21 (đo ~110-145s,
+        # phần lớn là ~29 truy vấn bq) thay vì tự tính trên costPrice.
+        capture_output=True, text=True, cwd=wc_root, timeout=600,
     )
+    # stderr của portfolio_status mang LÝ DO THẬT của từng mã không có tỉ suất ⇒ phải vào log cron
+    # (stdout của khối này là nội dung báo cáo, stderr thì không). Chỉ chuyển các dòng của chính
+    # nó và của công cụ tỉ suất — bỏ FutureWarning/UserWarning của thư viện google.
+    for _el in _ps.stderr.splitlines():
+        if _el.startswith(("portfolio_status:", "ℹ️", "⚠️")):
+            print(_el, file=sys.stderr)
     if _ps.returncode == 0 and _ps.stdout.strip():
         lines.extend(_ps.stdout.splitlines())
         lines.append("")

@@ -211,7 +211,7 @@ def run_eod_vendor_reason(gate_out, vendor_rc=10):
     """Chạy khối EOD_VENDOR_REASON thật (why= rẽ theo TAG trong $gate_out) trên 1 fixture."""
     body = extract_bash("EOD_VENDOR_REASON_BEGIN", "EOD_VENDOR_REASON_END")
     script = ("#!/usr/bin/env bash\nset -uo pipefail\n"
-              'gate_out="$1"\nvendor_rc="$2"\nwhy="delivery chưa đủ kênh (Discord/email)"\n'
+              'gate_out="$1"\nvendor_rc="$2"\nwhy="__WHY_CỦA_KHỐI_TRƯỚC__"\n'
               + body + '\nprintf \'%s\' "$why"\n')
     with tempfile.TemporaryDirectory() as td:
         p = os.path.join(td, "reason.sh")
@@ -247,8 +247,54 @@ check("cả hai tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)",
       "LỆCH NGUỒN VENDOR" in why_both and "Winston" in why_both, why_both)
 
 why_no10 = run_eod_vendor_reason("", vendor_rc=1)
-check("vendor_rc≠10 ⇒ giữ why= mặc định (không đổi khi không có tag vendor để so)",
-      why_no10 == "delivery chưa đủ kênh (Discord/email)", why_no10)
+check("vendor_rc≠10 ⇒ giữ nguyên why= của khối trước (không đổi khi không có tag vendor để so)",
+      why_no10 == "__WHY_CỦA_KHỐI_TRƯỚC__", why_no10)
+
+
+def run_eod_gate_reason(gate_out, gate_rc=1):
+    """Chạy khối EOD_GATE_REASON thật (why= đọc từ CHÍNH output của cổng, §29) trên 1 fixture."""
+    body = extract_bash("EOD_GATE_REASON_BEGIN", "EOD_GATE_REASON_END")
+    script = ("#!/usr/bin/env bash\nset -uo pipefail\nf() {\n"
+              'local gate_out="$1" gate_rc="$2"\n' + body + '\nprintf \'%s\' "$why"\n}\nf "$@"\n')
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "reason.sh")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(script)
+        r = subprocess.run(["bash", p, gate_out, str(gate_rc)], capture_output=True, text=True)
+        if r.returncode or "syntax error" in r.stderr or "command not found" in r.stderr:
+            return f"__BLOCK_DID_NOT_RUN__ rc={r.returncode}: " + r.stderr
+        return r.stdout
+
+
+print("\n[gate-reason] why= mặc định đọc từ CHÍNH output của cổng, không gán sẵn một nguyên nhân (§29)")
+_BLOCKED = ("CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-02.md | chốt 2026-10-02\n\n"
+            "❌ CHẶN — 2 vấn đề:\n"
+            "   • DRI (dòng vị thế báo cáo ngày, dòng 32): báo cáo +28.00% vs kỳ vọng ZaloPay +29.31%\n"
+            "   • SAB (dòng vị thế báo cáo ngày, dòng 29): báo cáo -2.60% vs kỳ vọng ZaloPay -4.53%\n"
+            "report_delivery_gate: INCOMPLETE — Command '['python3', 'report_return_gate.py']' "
+            "returned non-zero exit status 1.\n")
+why_blk = run_eod_gate_reason(_BLOCKED)
+check("cổng tỉ suất CHẶN ⇒ why nêu đúng số vấn đề + mục ĐẦU TIÊN của khối chặn (bản cũ: 'delivery "
+      "chưa đủ kênh (Discord/email)' cho mọi rc≠0)",
+      why_blk.startswith("cổng tỉ suất CHẶN — 2 vấn đề: DRI (dòng vị thế báo cáo ngày, dòng 32): "
+                         "báo cáo +28.00% vs kỳ vọng ZaloPay +29.31%")
+      and "SAB" not in why_blk and "delivery chưa đủ kênh" not in why_blk, why_blk)
+why_ch = run_eod_gate_reason("report_delivery_gate: nav-flow PASS (x.md)\n\n"
+                             "report_delivery_gate: INCOMPLETE — discord: HTTP 503\n", gate_rc=1)
+check("không có khối chặn ⇒ why trích DÒNG CUỐI cổng in ra (lỗi kênh thật) + rc",
+      why_ch == "report_delivery_gate rc=1 — dòng cuối cổng in ra: report_delivery_gate: INCOMPLETE "
+                "— discord: HTTP 503", why_ch)
+why_none = run_eod_gate_reason("", gate_rc=7)
+check("cổng không in gì ⇒ nói đúng là không xác định được (kèm rc), không đoán",
+      "rc=7" in why_none and "không xác định được nguyên nhân" in why_none
+      and "Discord" not in why_none, why_none)
+why_json = run_eod_gate_reason('Traceback\n  File "x.py"\nKeyError: "a\\b" \n   nhiều   khoảng trắng\n')
+check("why= an toàn để ghép vào chuỗi JSON: không nháy kép, không gạch chéo ngược, một dòng",
+      '"' not in why_json and "\\" not in why_json and "\n" not in why_json
+      and why_json.endswith("nhiều khoảng trắng"), why_json)
+assert why_blk.startswith("cổng tỉ suất CHẶN — 2 vấn đề: DRI"), (
+    "MUTATION-GUARD eod_gate_reason: output có khối '❌ CHẶN' mà why= không trích nó — khối "
+    f"EOD_GATE_REASON đã bị bỏ/hỏng và nguyên nhân lại bị gán cứng. Đang là: {why_blk!r}")
 
 print(f"\n[RED] CHỨNG MINH NGƯỢC trên bản trước vá {PRE_FIX_REF}: (i)/(ii) phải ĐỎ")
 if old_py is not None:

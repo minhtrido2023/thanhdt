@@ -22,11 +22,20 @@ Sleeve còn lại KHÔNG xác định được (không có journal FILL, không 
 mặc định về BAL (momentum/yieldcombo — sleeve nền của V2.4) — không suy diễn LAG/CAPIT/DISCRETIONARY
 nếu không có bằng chứng trực tiếp.
 
-⚠️ Lãi/lỗ per-position dùng `costPrice` DNSE báo cáo trực tiếp (bình quân gia quyền broker-native,
-KHÔNG tự tính lại từ fill log) — đây là con số DASHBOARD nội bộ cho PM theo dõi hướng, KHÔNG đi qua
-`dividend_adjusted_return.py` (§21) nên KHÔNG được dùng làm số công bố chính thức investor-facing.
+Lãi/lỗ từng mã (và tổng từng sleeve) lấy từ CÔNG CỤ §21 — `report_return_gate.position_returns()`,
+đúng hàm mà cổng tỉ suất dùng làm kỳ vọng: giá vốn THÔ (costPrice broker + phần broker đã trừ), cổ
+tức RÒNG quy về KL đang giữ ở tử số, giá đóng cửa thô của phiên. File này KHÔNG tự tính tỉ suất
+(trước 2026-10-10 nó tính `(marketPrice − costPrice)/costPrice` — giá vốn đã bị broker trừ cổ tức,
+không cộng cổ tức — và khối này được nhúng nguyên văn vào báo cáo NGÀY gửi đi: DRI +28,0% thay vì
++29,31%, SAB −2,6% thay vì −4,53%; K1). Mã mà công cụ KHÔNG cấp được tỉ suất thì KHÔNG in tỉ suất,
+in lý do ngắn (`RETURN_UNAVAILABLE`) — không rơi về `costPrice`. `broker_positions_with_cost()`
+vẫn trả `avg_cost` cho các caller khác (`auto_exit_inject.py`), nhưng `build_output` không dùng nó.
+
+Định dạng dòng `MÃ <giá trị>M, ±x.xx%` là HỢP ĐỒNG với `report_return_gate.POSBIT_RE` (cổng đọc
+đúng dạng đó để kiểm) — selfcheck ghim hai phía với nhau; đổi định dạng phải đổi cả hai.
 """
 import argparse
+import contextlib
 import csv
 import datetime as _dt
 import glob
@@ -472,6 +481,29 @@ def classify_sleeve(ticker, journal_sleeve, park_tickers, capit_tickers):
     return "BAL"
 
 
+# Lý do NGẮN in trong báo cáo khi công cụ §21 không cấp tỉ suất cho một mã — viết cho người đọc
+# báo cáo (SpaceX là báo cáo gửi nhà đầu tư). Lý do THẬT, đầy đủ (bước sổ nào, sự kiện nào) đi ra
+# stderr ⇒ log cron, và cổng tỉ suất in lại nó khi chạy.
+RETURN_UNAVAILABLE = {
+    "blocked": "chưa đối soát xong cổ tức/giá vốn với sổ công ty chứng khoán",
+    "no_price": "chưa có giá đóng cửa đã xác minh của phiên",
+    "no_cost": "sổ công ty chứng khoán không ghi giá vốn",
+    "absent": "công cụ tỉ suất không thấy vị thế này trong sổ cuối ngày",
+    "error": "công cụ tỉ suất không chạy được ở lượt này",
+}
+
+
+def section21_returns(account, date):
+    """{mã: dòng `position_returns`} — tỉ suất §21 của từng vị thế, từ ĐÚNG hàm cổng dùng.
+
+    Import muộn: `report_return_gate` kéo theo `dividend_adjusted_return` (đọc secrets/BQ) — các
+    caller chỉ cần `broker_positions_with_cost`/`book_lot_snapshot` không phải trả giá đó. Mọi thứ
+    công cụ in ra stdout bị đẩy sang stderr: stdout của file này là NỘI DUNG báo cáo."""
+    with contextlib.redirect_stdout(sys.stderr):
+        import report_return_gate as rrg
+        return rrg.position_returns(account, date)["positions"]
+
+
 def risk_warning(sleeve, pnl_pct):
     """(emoji, text)|None — cảnh báo gần ngưỡng xử lý cho 1 position, hoặc None nếu sleeve
     không có ngưỡng (PARK) / lỗ chưa tới RISK_WARN_DISPLAY_FLOOR_PCT."""
@@ -525,7 +557,9 @@ def _cash_div_impact(vps_raw):
     return f"{vps:,.0f}đ/cp cổ tức tiền mặt" if vps is not None else "cổ tức tiền mặt (chưa rõ mức)"
 
 
-def build_output(account, date):
+def build_output(account, date, returns_fn=None):
+    """`returns_fn(account, date) -> {mã: dòng position_returns}`; bỏ trống = công cụ §21 thật
+    (`section21_returns`). Tham số chỉ để selfcheck chạy offline."""
     lines = []
     status = _read_json(os.path.join(WC_ROOT, "data", "golive_v23_status.json"), {}) or {}
     state_name = status.get("state_name", "?")
@@ -557,12 +591,35 @@ def build_output(account, date):
     park_tickers, park_rebal_date = current_park_basket()
     capit_tickers = set(status.get("capit_episode_basket") or [])
 
+    # Tỉ suất từng mã: MỘT nguồn — công cụ §21. Lỗi công cụ ⇒ không mã nào có tỉ suất (nói rõ),
+    # KHÔNG tự tính thay.
+    ret_rows, ret_err = {}, None
+    if positions:
+        try:
+            ret_rows = (returns_fn or section21_returns)(account, date)
+        except Exception as exc:
+            ret_err = f"{type(exc).__name__}: {exc}"
+            print(f"portfolio_status: công cụ tỉ suất §21 lỗi ({account} {date}) — không in tỉ suất "
+                  f"mã nào: {ret_err}", file=sys.stderr)
+    ret_pl = {}   # mã -> (lãi/lỗ ròng VND, tổng giá vốn THÔ) — để cộng tổng sleeve
+    no_ret = {}   # mã -> khoá RETURN_UNAVAILABLE
+
     sleeves = defaultdict(list)  # sleeve -> [(ticker, qty, mkt_value, pnl_pct)]
     for tk, p in positions.items():
         mkt_value = (p["qty"] * p["marketPrice"]) if p.get("marketPrice") else None
         pnl_pct = None
-        if p.get("avg_cost") and p.get("marketPrice"):
-            pnl_pct = (p["marketPrice"] - p["avg_cost"]) / p["avg_cost"] * 100
+        r = ret_rows.get(tk)
+        if ret_err:
+            no_ret[tk] = "error"
+        elif r is None:
+            no_ret[tk] = "absent"
+        elif r.get("why"):
+            no_ret[tk] = r.get("code") if r.get("code") in RETURN_UNAVAILABLE else "blocked"
+            print(f"portfolio_status: {tk} ({account} {date}) không có tỉ suất §21: "
+                  + " | ".join(r["why"]), file=sys.stderr)
+        else:
+            pnl_pct = r["pct"]
+            ret_pl[tk] = (r["pl"], r["qty"] * r["raw_cost"])
         sleeve = classify_sleeve(tk, journal_sleeve, park_tickers, capit_tickers)
         sleeves[sleeve].append((tk, p["qty"], mkt_value, pnl_pct))
 
@@ -628,15 +685,13 @@ def build_output(account, date):
         if not rows:
             continue
         tot_value = sum(v for _, _, v, _ in rows if v is not None)
-        num = 0.0
-        den = 0.0
-        for tk, qty, v, pp in rows:
-            if v is None or pp is None:
-                continue
-            cost_v = v / (1 + pp / 100)
-            num += v - cost_v
-            den += cost_v
-        pnl_txt = f"{(num / den * 100):+.1f}%" if den else "—"
+        # Tổng sleeve = Σ lãi/lỗ ròng ÷ Σ giá vốn THÔ của CHÍNH các số §21 từng mã. Thiếu một mã
+        # thì không có tổng: một tổng tính trên phần còn lại mang nhãn cả sleeve là số sai.
+        den = sum(ret_pl[tk][1] for tk, *_ in rows if tk in ret_pl)
+        if den and all(tk in ret_pl for tk, *_ in rows):
+            pnl_txt = f"{sum(ret_pl[tk][0] for tk, *_ in rows) / den * 100:+.1f}%"
+        else:
+            pnl_txt = "—"
         pct_nav = f"{tot_value / nav * 100:.1f}%" if nav else "—"
         note = SLEEVE_NOTE.get(sleeve) or ""
         if sleeve == "PARK":
@@ -667,7 +722,7 @@ def build_output(account, date):
         bits = []
         for tk, qty, v, pp in rows_sorted:
             v_txt = f"{v / 1e6:,.1f}M" if v is not None else "?"
-            pp_txt = f", {pp:+.1f}%" if pp is not None else ""
+            pp_txt = f", {pp:+.2f}%" if pp is not None else " (chưa có tỉ suất)"
             extra = []
             if sleeve == "LAG":
                 h = lag_exit_hint(tk, lag_entries, date)
@@ -701,6 +756,13 @@ def build_output(account, date):
                 bit += " — " + "; ".join(extra)
             bits.append(bit)
         lines.append("  " + " · ".join(bits))
+        by_reason = defaultdict(list)
+        for tk, *_ in rows_sorted:
+            if tk in no_ret:
+                by_reason[no_ret[tk]].append(tk)
+        for code, tks in by_reason.items():
+            lines.append(f"  ⓘ Chưa có tỉ suất ({', '.join(tks)}): {RETURN_UNAVAILABLE[code]} — "
+                         "không công bố số chưa kiểm.")
         lines.append("")
         if sleeve == "BAL" and bal_recs:
             candidates = [tk for tk, st in sorted(bal_recs.items())
@@ -763,8 +825,13 @@ def build_output(account, date):
     n_lag_upcoming = status.get("n_lag_upcoming") or 0
     if n_lag_upcoming:
         flags.append(f"LAG: {n_lag_upcoming} candidate đang trong cửa sổ upcoming (chưa vào lệnh).")
+    stop_blind = sorted(tk for sl, rows in sleeves.items() if sl in STOP_LOSS_PCT_BY_SLEEVE
+                        for tk, *_ in rows if tk in no_ret)
+    if stop_blind:
+        flags.append(f"⚠️ Chưa có tỉ suất nên KHÔNG đánh giá được khoảng cách tới ngưỡng xử lý: "
+                     f"{', '.join(stop_blind)}.")
     for sleeve, tk, pp, remaining in red_zone:
-        flags.append(f"🔴 {tk} {pp:+.1f}% ({SLEEVE_LABEL[sleeve]}): còn {remaining:.1f}pp → "
+        flags.append(f"🔴 {tk} {pp:+.2f}% ({SLEEVE_LABEL[sleeve]}): còn {remaining:.1f}pp → "
                      "ngưỡng, cân nhắc xử lý sớm")
     if flags:
         lines.append("**Cờ theo dõi**")

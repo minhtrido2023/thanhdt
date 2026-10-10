@@ -191,7 +191,20 @@ def broker_positions(account_no: str, asof: str, price_fn=None) -> dict:
             # (bỏ mã sẽ làm tỉ suất TỔNG công bố cho nhà đầu tư thiếu đúng mã đó).
             raise ValueError(f"thiếu giá đóng cửa {sym} ngày {asof} — CHẶN (fail-closed)")
         out[sym] = (qty, cost_value / qty, float(px))
-    return out
+    res = _Positions(out)
+    res.price_session = getattr(prices, "session", None)
+    return res
+
+
+class _Positions(dict):
+    """`broker_positions()` + `price_session` = phiên giá MỚI NHẤT mà nguồn giá trả về (None khi
+    nguồn giá không khai — fixture selfcheck). Vẫn là dict ⇒ mọi consumer cũ không đổi."""
+    price_session = None
+
+
+class _Prices(dict):
+    """`raw_close_prices()` + `session` (phiên mới nhất trong kết quả)."""
+    session = None
 
 
 def _today_ict() -> str:
@@ -219,7 +232,11 @@ def pick_raw_price(close: float, price: float, later_events: bool) -> tuple:
 
 
 def raw_close_prices(tickers, asof: str) -> dict:
-    """{mã: giá THÔ phiên mới nhất ≤ asof}. Fail-closed: không tra được ⇒ ValueError (CHẶN)."""
+    """{mã: giá THÔ phiên mới nhất ≤ asof}. Fail-closed: không tra được ⇒ ValueError (CHẶN).
+
+    Trả `_Prices` mang `session` = phiên mới nhất BQ có: hàm này lấy "phiên gần nhất ≤ asof", nên
+    khi BQ CHƯA nạp phiên `asof` (báo cáo ngày chạy 19:10 mà ingest ~17:30 trễ) nó lặng lẽ trả giá
+    HÔM TRƯỚC cho mọi mã — `stale_price_note` là chỗ nói điều đó ra."""
     inlist = ",".join(f"'{t}'" for t in sorted(set(tickers)))
     try:
         rows = dar._bq(f"""
@@ -240,7 +257,8 @@ def raw_close_prices(tickers, asof: str) -> dict:
         raise ValueError(f"không lấy được giá thô {asof} từ BQ: {str(e)[:300]} — CHẶN") from e
     later_tk = {tk for (tk, _ex) in later}
     newest = max((str(r["d"])[:10] for r in rows), default=None)
-    out, used_price, lagging = {}, [], {}
+    out, used_price, lagging = _Prices(), [], {}
+    out.session = newest
     for r in rows:
         px, col = pick_raw_price(float(r["close"]), float(r["price"]), r["tk"] in later_tk)
         out[r["tk"]] = px
@@ -671,12 +689,89 @@ def expected_pct(qty: float, cost_price: float, market: float, gross_ps: float,
     return pl_net / (qty * raw_cost) * 100.0, pl_net, raw_cost
 
 
+def _is_session_day(day: str) -> bool:
+    """`day` có phải phiên giao dịch không (thứ 2-6, không lễ). Không tra được lịch ⇒ True
+    (fail-closed: coi như CÓ phiên ⇒ thiếu giá phiên đó là thiếu thật)."""
+    d = _dt.date.fromisoformat(day)
+    if d.weekday() >= 5:
+        return False
+    try:
+        sys.path.insert(0, ROOT)
+        from trading_bot.vn_market import is_holiday
+        return not is_holiday(d)
+    except Exception:                                           # noqa: BLE001
+        return True
+
+
+def stale_price_note(price_session, asof: str) -> str:
+    """Câu bằng chứng khi giá đang dùng KHÔNG phải của phiên `asof`; "" khi đúng phiên (hoặc nguồn
+    giá không khai phiên / `asof` không phải phiên giao dịch)."""
+    if not price_session or price_session >= asof or not _is_session_day(asof):
+        return ""
+    return (f"giá đóng cửa phiên {asof} CHƯA có trên BQ (phiên mới nhất: {price_session}) — tỉ "
+            f"suất tính trên giá phiên trước là tỉ suất của ngày khác")
+
+
+def position_returns(label: str, asof: str) -> dict:
+    """Tỉ suất §21 của TỪNG vị thế đang giữ của một tài khoản — MỘT chỗ tính cho cả hai phía:
+    `run_gate` lấy kỳ vọng từ đây, và báo cáo NGÀY (`portfolio_status.py`) lấy CHÍNH các số này
+    để in (K1, 2026-10-10: trước đó báo cáo ngày tự tính trên `costPrice` broker — giá vốn đã bị
+    trừ cổ tức, không cộng cổ tức — và in dạng dòng cổng không đọc được ⇒ PASS trên 0 dòng).
+
+    Trả `{"label", "asof", "price_session", "positions": {mã: {...}}, "mismatches", "notes"}`.
+    Mỗi vị thế: `qty`, `cost_price` (broker), `market` (giá thô phiên `asof`), `excluded`,
+    `why` ([] = có kỳ vọng) và `code` ("" | "blocked" | "no_price" | "no_cost"). Có kỳ vọng thì
+    thêm `pct`, `pl` (lãi/lỗ ròng VND, đã cộng cổ tức sau thuế), `raw_cost` (giá vốn THÔ/cp),
+    `gross` (cổ tức GỘP đồng/cp trên KL đang giữ). KHÔNG có kỳ vọng ⇒ KHÔNG có `pct`: người
+    gọi không được rơi về `costPrice` (đúng lỗi DRI +37,81% thay vì +34,58%).
+    """
+    acct = dar.ACCOUNTS[label]
+    pos = broker_positions(acct, asof)
+    excl = excluded_tickers(label)
+    res = entitled_gross(pos.keys(), acct, asof)
+    gross, mism = res[0], res[1]
+    extra = res[2] if len(res) > 2 else {}
+    blockers, addback = extra.get("blockers", {}), extra.get("addback", {})
+    session = getattr(pos, "price_session", None)
+    stale = stale_price_note(session, asof)
+    rows = {}
+    for tk, (qty, cp, mkt) in pos.items():
+        g = gross.get(tk, 0.0)
+        row = {"qty": qty, "cost_price": cp, "market": mkt, "excluded": tk in excl,
+               "why": list(blockers.get(tk, [])), "code": "blocked" if tk in blockers else ""}
+        if stale:
+            row["why"].insert(0, stale)
+            row["code"] = "no_price"
+        elif not row["why"] and cp + addback.get(tk, g) <= 0:
+            row["why"].append("sổ broker không có giá vốn (costPrice ≤ 0) cho vị thế này")
+            row["code"] = "no_cost"
+        if not row["why"]:
+            # Cấp "costPrice + 0" cho mã có lý do ở trên chính là lỗi DRI: mẫu số thiếu đúng phần
+            # broker đã trừ, tỉ suất bị thổi lên ⇒ chỉ tính khi KHÔNG có lý do nào.
+            pct, pl, raw = expected_pct(qty, cp, mkt, g, addback_ps=addback.get(tk))
+            row.update(pct=pct, pl=pl, raw_cost=raw, gross=g)
+        rows[tk] = row
+    return {"label": label, "asof": asof, "price_session": session, "positions": rows,
+            "mismatches": list(mism), "notes": list(extra.get("notes", []))}
+
+
 # ---------------------------------------------------------------- báo cáo
 # Mã chứng khoán VN = 3 ký tự, ký tự 2-3 có thể là SỐ (TV1, PC1, VC3, L18). Bản cũ `[A-Z]{3}`
 # làm dòng TV1 của CẢ HAI báo cáo tuần 05→09/10 không bao giờ được đọc: không kiểm, không đếm,
 # rồi cổng in "TV1 CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng" — sai sự thật.
 _TK = r"[A-Z][A-Z0-9]{2}"
-ROW_RE = re.compile(r"^\|\s*(?:\*\*)?(" + _TK + r")(?:\*\*)?\s*\|(.+)\|\s*$")
+# Ô mã của một dòng bảng vị thế: cho phép một cột STT thuần số đứng trước (`| 1 | DRI |`) và một
+# chú thích trong ngoặc sau mã (`| **DGC** (legacy, excluded) |`, `| DRI (UPCOM) |`) — hai biến thể
+# H1c: bản cũ đòi ô ĐẦU đúng bằng mã nên cả dòng bị bỏ im lặng (ca thật: bảng 3.5 báo cáo tháng
+# 09/2026 của ZaloPay, dòng DGC −8,74% chưa từng được kiểm).
+_TK_NOTE = r"(?:\s*\([^|()]*\))?"
+ROW_RE = re.compile(r"^\|(?:\s*\d+\.?\s*\|)?\s*(?:\*\*)?(" + _TK + r")(?:\*\*)?" + _TK_NOTE
+                    + r"\s*\|(.+)\|\s*$")
+# Dòng vị thế của báo cáo NGÀY (`portfolio_status.py`): "DGC 354.0M, -9.79% · VPB 7.2M, +8.81%" —
+# mã, GIÁ TRỊ thị trường (triệu), rồi tỉ suất từ-ngày-mua. Không phải bảng, không khớp `PROSE_RE`
+# (giữa mã và tỉ suất có giá trị), nên trước 2026-10-10 cổng PASS báo cáo ngày trên 0 dòng (K1).
+POSBIT_RE = re.compile(r"(?<![A-Za-z0-9])(" + _TK + r")\s+\d[\d.,]*\s*M\s*,\s*"
+                       r"([+\-−]\d+(?:[.,]\d+)?)\s*%")
 SEP_RE = re.compile(r"^\|[\s:|-]+\|\s*$")
 # Văn xuôi: CHỈ bắt "MÃ +12,3%" / "MÃ −4,5%" — bắt buộc có DẤU và đứng liền mã, nên
 # "DGC 46,5% NAV" (tỷ trọng, không dấu) không bị nhận nhầm là tỉ suất.
@@ -696,6 +791,16 @@ def _num(cell: str):
         return float(cell)
     except ValueError:
         return None
+
+
+def _pct_num(cell: str):
+    """`_num` cho một TỈ SUẤT, nhận thêm dấu CHẤM thập phân: báo cáo ngày in `-11.0%` / `+9.79%`
+    (định dạng `{:+.2f}`), mà `_num` coi `.` là dấu nghìn ⇒ đọc thành −110 / +979. Một tỉ suất
+    viết `x.y` hoặc `x.yz` không thể là dấu nghìn (nhóm nghìn luôn đủ 3 chữ số)."""
+    t = re.sub(r"[^0-9,.\-+]", "", cell.strip().replace("**", "").replace("−", "-"))
+    if re.fullmatch(r"[+\-]?\d+\.\d{1,2}", t):
+        return float(t)
+    return _num(cell)
 
 
 def _pick_columns(header_cells: list) -> tuple:
@@ -745,8 +850,10 @@ def _strip_quote(line: str) -> str:
 
 def _scan_tables(path: str) -> tuple:
     """(dòng tỉ suất đã nhận, dòng CÓ tỉ suất mà cổng không nhận ra cột) của mọi bảng có cột KL."""
+    # bóc `>` trước: bảng VỊ THẾ đặt trong blockquote vẫn là bảng (H1c). Bảng tóm tắt của mục
+    # đính chính (`> | Mã bị đảo dấu | SAB −5,53% | …`) không có cột KL nên vẫn bị bỏ qua như cũ.
     with open(path, encoding="utf-8") as f:
-        lines = [ln.rstrip("\n") for ln in f]
+        lines = [_strip_quote(ln.rstrip("\n")) for ln in f]
     rows, blind = [], []
     qty_i = pct_i = None
     cands, header = [], []
@@ -779,7 +886,7 @@ def _scan_tables(path: str) -> tuple:
             continue
         if max(qty_i, col) >= len(cells):
             continue
-        qty, pct = _num(cells[qty_i]), _num(cells[col])
+        qty, pct = _num(cells[qty_i]), _pct_num(cells[col])
         if qty is None or pct is None:
             continue
         rows.append((m.group(1), qty, pct))
@@ -818,7 +925,25 @@ def parse_prose_pcts(path: str) -> list:
             if _strip_quote(line).startswith("|"):
                 continue
             for tk, num in PROSE_RE.findall(line):
-                v = _num(num)
+                v = _pct_num(num)
+                if v is not None:
+                    out.append((tk, v, i))
+    return out
+
+
+def parse_position_bits(path: str) -> list:
+    """[(ticker, pct, lineno)] — dòng vị thế dạng báo cáo NGÀY (`POSBIT_RE`), ngoài bảng.
+
+    Khác `parse_prose_pcts` ở hai chỗ, đều có chủ đích: (1) con số đứng SAU giá trị thị trường
+    của chính mã đó nên chắc chắn là tỉ suất của VỊ THẾ, không thể là biến động kỳ ⇒ kiểm cả mã
+    excluded; (2) không có luật "cũ → đúng" theo dòng — đây là dòng máy sinh, mỗi mã một số."""
+    out = []
+    with open(path, encoding="utf-8") as f:
+        for i, line in enumerate(f, 1):
+            if _strip_quote(line).startswith("|"):
+                continue
+            for tk, num in POSBIT_RE.findall(line):
+                v = _pct_num(num)
                 if v is not None:
                     out.append((tk, v, i))
     return out
@@ -873,7 +998,8 @@ def ticker_mentions(path: str, tickers) -> dict:
             if not re.search(r"(?<![A-Za-z0-9])" + re.escape(tk) + r"(?![A-Za-z0-9])", line):
                 continue
             hit = None
-            if is_table and any(c.replace("*", "").strip() == tk for c in cells):
+            if is_table and any(re.sub(r"\s*\([^()]*\)\s*$", "", c.replace("*", "")).strip() == tk
+                                for c in cells):
                 for j, c in enumerate(cells):
                     h = header[j] if j < len(header) else ""
                     if _PCT_ANY_RE.search(c) and not any(bad in h.lower() for bad in PCT_HEADER_NO):
@@ -1123,36 +1249,27 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     basis_notes = []
     vendor_mismatch = []     # (nhãn TK, mã, ex-date, đồng/cp broker, đồng/cp vendor)
     for lb in labels:
-        acct = dar.ACCOUNTS[lb]
-        pos = broker_positions(acct, asof)
-        excl = excluded_tickers(lb)
-        res = entitled_gross(pos.keys(), acct, asof)
-        gross, mism = res[0], res[1]
-        extra = res[2] if len(res) > 2 else {}
-        blockers, addback = extra.get("blockers", {}), extra.get("addback", {})
-        basis_notes.extend(f"{lb} · {n}" for n in extra.get("notes", []))
-        vendor_mismatch.extend((lb,) + m for m in mism)
+        pr = position_returns(lb, asof)
+        basis_notes.extend(f"{lb} · {n}" for n in pr["notes"])
+        vendor_mismatch.extend((lb,) + m for m in pr["mismatches"])
         tot_pl = tot_cost = 0.0
         left_out = []
-        for tk, (qty, cp, mkt) in pos.items():
-            key = (tk, qty)
-            if tk in excl:
+        for tk, r in pr["positions"].items():
+            key = (tk, r["qty"])
+            if r["excluded"]:
                 excluded_keys[key] = lb
-            if tk in blockers:
-                # KHÔNG dựng được giá vốn thô ⇒ không có kỳ vọng nào để cấp. Cấp "costPrice + 0"
-                # ở đây chính là lỗi DRI: mẫu số thiếu đúng phần broker đã trừ, tỉ suất bị thổi lên.
-                unresolved[key] = (lb, blockers[tk])
-                if tk not in excl:
+            if r["why"]:
+                # KHÔNG dựng được giá vốn thô / không có giá đúng phiên ⇒ không có kỳ vọng nào để cấp.
+                unresolved[key] = (lb, r["why"])
+                if not r["excluded"]:
                     left_out.append(tk)
                 continue
-            g = gross.get(tk, 0.0)
-            pct, pl, raw = expected_pct(qty, cp, mkt, g, addback_ps=addback.get(tk))
-            if tk not in excl:
-                tot_pl += pl
-                tot_cost += qty * raw
+            if not r["excluded"]:
+                tot_pl += r["pl"]
+                tot_cost += r["qty"] * r["raw_cost"]
             if key in expected:                   # 2 tài khoản trùng cả mã lẫn KL → không phân biệt được
                 ambiguous.add(key)
-            expected[key] = (lb, pct, pl, raw, cp, g)
+            expected[key] = (lb, r["pct"], r["pl"], r["raw_cost"], r["cost_price"], r["gross"])
         agg[lb] = (tot_pl, tot_cost, tot_pl / tot_cost * 100.0 if tot_cost else 0.0, left_out)
 
     fails, checked, unmatched = list(paper_fails), 0, 0
@@ -1257,6 +1374,37 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     for tk, pct, ln in parse_prose_pcts(report_path):
         if tk in by_ticker:
             by_line.setdefault((ln, tk), []).append(pct)
+    # ---- dòng vị thế của báo cáo NGÀY ("MÃ <giá trị>M, ±x%") — không có KL ⇒ đối chiếu với mọi
+    # tài khoản của báo cáo đang giữ mã đó, KỂ CẢ mã excluded (xem `parse_position_bits`).
+    exp_by_tk = {}
+    for key, v in expected.items():
+        exp_by_tk.setdefault(key[0], []).append((v[0], v[1], v[5]))
+    bits_checked, bits_unheld, bit_tk = 0, 0, set()
+    for tk, pct, ln in parse_position_bits(report_path):
+        bit_tk.add(tk)
+        if tk not in exp_by_tk:
+            keys = [k for k in unresolved if k[0] == tk]
+            if not keys:
+                bits_unheld += 1                  # mã không có trong sổ vị thế — ngoài phạm vi
+            elif not set(keys) <= unresolved_published:
+                unresolved_published.update(keys)
+                lb, why = unresolved[keys[0]]
+                fails.append(f"{tk} ({lb}; dòng vị thế báo cáo ngày, dòng {ln}): báo cáo công bố "
+                             f"{pct:+.2f}% nhưng cổng KHÔNG dựng được giá vốn thô để kiểm — "
+                             + " | ".join(why))
+            continue
+        bits_checked += 1
+        cands = exp_by_tk[tk]
+        lb0, e0, g0 = min(cands, key=lambda c: abs(pct - c[1]))
+        print(f"{tk:5}{'—':>7}{lb0:>9}{pct:>11.2f}{e0:>11.2f}{pct - e0:>9.2f}{g0:>11,.2f}{'—':>13}"
+              f"  {'OK' if abs(pct - e0) <= tol_pp else 'LỆCH'}  (dòng vị thế báo cáo ngày, dòng {ln})",
+              file=out)
+        if any(abs(pct - e) <= tol_pp for _lb, e, _g in cands):
+            continue
+        fails.append(f"{tk} (dòng vị thế báo cáo ngày, dòng {ln}): báo cáo {pct:+.2f}% vs kỳ vọng "
+                     + ", ".join(f"{lb} {e:+.2f}% (cổ tức GỘP {g:,.0f}đ/cp)" for lb, e, g in cands))
+        (fails_no_div if all(g <= 0 for _lb, _e, g in cands) else fails_with_div).append(tk)
+
     # Mã KHÔNG có kỳ vọng: đọc THẲNG từng dòng có mã đó, không qua (mã, KL) hay tiêu đề cột —
     # bảng thiếu cột KL, cột tên lạ, bảng trong blockquote, văn xuôi đều đi qua MỘT chỗ này.
     mention = ticker_mentions(report_path, {k[0] for k in unresolved})
@@ -1336,7 +1484,8 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
                   + " | ".join(why), file=out)
     prose_tk = {t for t, _, _ in parse_prose_pcts(report_path)}
     nocover_keys = [(k, v) for k, v in expected.items()
-                    if v[5] > 0 and k not in seen and k[0] not in prose_tk]
+                    if v[5] > 0 and k not in seen and k[0] not in prose_tk
+                    and k[0] not in bit_tk]
     # §29 (arch-review lần 2, C3): mã CÓ kỳ vọng cũng phải được ĐỌC từng dòng trước khi nói
     # "không công bố" — báo cáo NGÀY ghi "DGC 354.0M, -11.0%" (không khớp `PROSE_RE`, không có
     # bảng KL) là một tỉ suất đang công bố mà cổng KHÔNG kiểm; nói "không công bố" là sai sự thật.
@@ -1345,9 +1494,11 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
                if not cov_mention[tk]["pub"]]
     unchecked = [((tk, q), v) for (tk, q), v in nocover_keys if cov_mention[tk]["pub"]]
 
-    print(f"\nĐã kiểm {checked} dòng bảng + {prose_checked} tỉ suất trong văn xuôi; {unmatched} dòng "
-          f"KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng "
-          f"này, xem docstring).", file=out)
+    print(f"\nĐã kiểm {checked} dòng bảng + {prose_checked} tỉ suất trong văn xuôi + {bits_checked} "
+          f"dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); {unmatched} dòng KHÔNG khớp sổ vị "
+          f"thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring)"
+          + (f"; {bits_unheld} dòng vị thế báo cáo ngày của mã KHÔNG có trong sổ vị thế broker"
+             if bits_unheld else "") + ".", file=out)
     if unmatched_held_qty_mismatch:
         print(f"\n⚠️  {len(unmatched_held_qty_mismatch)} dòng CÒN GIỮ mã đó trên sổ broker nhưng KL "
               f"báo cáo KHÔNG khớp KL đang giữ — KHÔNG được tính vào '{unmatched} dòng ngoài phạm "
@@ -1377,7 +1528,7 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     vendor_fail_reasons = set()   # mã lý do của các sự kiện THẬT SỰ bị chặn (R1-C: khác reasons_present)
     reasons_present = set()
     if vendor_mismatch:
-        published = {tk for tk, _q, _p in rows} | prose_tk
+        published = {tk for tk, _q, _p in rows} | prose_tk | bit_tk
         print("\n⚠️  LỆCH NGUỒN VENDOR — tiền broker thật ≠ `tav2_bq.corporate_action`:", file=out)
         for lb, tk, ex, broker_ps, vendor_ps, reason, vendor_stock, had_broker_cash in \
                 sorted(vendor_mismatch):
@@ -1682,6 +1833,11 @@ def _selfcheck() -> int:
         check("multi-lot: gộp tổng qty (100+300, không mất lô đầu)", qty, 400.0)
         check("multi-lot: cost bình quân gia quyền đúng", round(cost, 4), 10750.0)
         check("multi-lot: giá lấy từ nguồn giá đóng cửa, không từ lô", mp, 12000.0)
+        _px = _Prices({"XYZ": 12000.0})
+        _px.session = "9998-12-31"
+        check("phiên giá của nguồn giá đi theo kết quả (`price_session`); nguồn không khai ⇒ None",
+              (broker_positions("0009999999", _fake_asof, price_fn=lambda tks, d: _px).price_session,
+               pos.price_session), ("9998-12-31", None))
     finally:
         os.unlink(_fake_path)
 
@@ -2340,7 +2496,8 @@ def _selfcheck() -> int:
     check("Việc4: khối cảnh báo nêu đúng KL báo cáo (150) và KL broker đang giữ (100)",
           "KL=150" in txt_um and "KL=100" in txt_um, True)
     check("Việc4: đếm 'ngoài phạm vi' KHÔNG gộp mã còn giữ (đúng 1 dòng: chỉ RRR)",
-          "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 1 dòng" in txt_um, True)
+          "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày "
+          "('MÃ <giá trị>M, ±x%'); 1 dòng" in txt_um, True)
     check("Việc4: RRR (thật sự ngoài phạm vi) KHÔNG xuất hiện trong khối cảnh báo lệch KL",
           "RRR" not in txt_um.split("CÒN GIỮ mã đó")[1].split("vị thế CÓ cổ tức")[0]
           if "CÒN GIỮ mã đó" in txt_um else True, True)
@@ -2399,7 +2556,8 @@ def _selfcheck_total_return(check) -> None:
             if isinstance(window, Exception):
                 raise window
             return {k: v for k, v in (window or {}).items() if start < k[1] <= end}
-        g["broker_positions"] = lambda acct, d, **kw: dict(positions)
+        g["broker_positions"] = lambda acct, d, **kw: (
+            positions if isinstance(positions, _Positions) else dict(positions))
         g["excluded_tickers"] = lambda lb: set(excl)
         dar.resolve_dividends = lambda tks, start, end: [a for a in adjs if a.ticker in tks]
         dar.broker_qty = lambda acct: {}
@@ -2526,7 +2684,8 @@ def _selfcheck_total_return(check) -> None:
            "báo cáo không công bố tỉ suất từ-ngày-mua" in txt), (True, False))
     check("CA3: DGC đứng NGOÀI tổng tài khoản", f"{2071 * 17248.31:,.0f}" in txt, True)
     check("CA3: dòng DGC được đếm là ĐÃ KIỂM (không rơi vào 'ngoài phạm vi')",
-          "Đã kiểm 2 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng" in txt, True)
+          "Đã kiểm 2 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày "
+          "('MÃ <giá trị>M, ±x%'); 0 dòng" in txt, True)
     rc, txt = run(table(("PVT", "2.071", "+46,10%")) + "\nDGC −4,79% trong tuần.\n",
                   P_DGC, [dgc], S_DGC, excl={"DGC"})
     check("CA3: văn xuôi về mã excluded (biến động kỳ) KHÔNG bị kiểm như tỉ suất vị thế", rc, 0)
@@ -2656,6 +2815,7 @@ def _selfcheck_total_return(check) -> None:
 
     _selfcheck_round2(check, run, ev)
     _selfcheck_round3(check, run, ev)
+    _selfcheck_round4(check, run, ev)
 
 
 def _selfcheck_round2(check, run, ev) -> None:
@@ -2914,6 +3074,8 @@ def _selfcheck_round2(check, run, ev) -> None:
     check("chạy ĐÚNG ngày chốt: chưa thể có sự kiện sau ⇒ `Close` cho mọi mã, không tra vendor",
           (px_same_day, len(seen)), ({"TV1": 19110.0, "DRI": 16400.0}, 1))
     check("BQ lỗi ⇒ ValueError mang lỗi thật (fail-closed)", failed, True)
+    check("kết quả mang `session` = phiên MỚI NHẤT BQ trả về (để biết giá có đúng phiên chốt không)",
+          (px.session, px_same_day.session), ("2026-10-06", "2026-10-06"))
 
 
 def _selfcheck_round3(check, run, ev) -> None:
@@ -3014,13 +3176,15 @@ def _selfcheck_round3(check, run, ev) -> None:
                   [dri_ok(), ev("DGC", "2026-09-11", "2026-09-14", 3000.0),
                    ev("PVT", "2026-09-11", "2026-09-14", 300.0)], S_C3)
     quiet = next((ln for ln in txt.splitlines() if "báo cáo không công bố tỉ suất riêng" in ln), "")
-    check("báo cáo NGÀY ghi 'DGC 354.0M, -11.0%' / 'DRI 29.8M, +28.0%': KHÔNG còn bị gọi là 'không "
-          "công bố' (7cbc486a in câu đó cho cả hai); PVT thật sự không có tỉ suất nào thì vẫn đúng câu đó",
-          (rc, "DGC" in quiet, "DRI" in quiet, "PVT" in quiet), (0, False, False, True))
-    check("… thay vào đó nêu ĐÚNG dòng và kỳ vọng: 'mã CÓ tỉ suất ở dòng N … mà cổng KHÔNG kiểm'",
-          ("DGC (ZaloPay, KL=6600): mã CÓ tỉ suất ở dòng 3 ('DGC … -11.0%') mà cổng KHÔNG kiểm" in txt,
-           "DRI (ZaloPay, KL=1900): mã CÓ tỉ suất ở dòng 4 ('DRI … +28.0%') mà cổng KHÔNG kiểm — kỳ vọng "
-           "+34.58%" in txt), (True, True))
+    check("báo cáo NGÀY ghi 'DGC 354.0M, -11.0%' / 'DRI 29.8M, +28.0%': KHÔNG bị gọi là 'không công "
+          "bố' (7cbc486a in câu đó cho cả hai); PVT thật sự không có tỉ suất nào thì vẫn đúng câu đó",
+          ("DGC" in quiet, "DRI" in quiet, "PVT" in quiet), (False, False, True))
+    check("K1: hai dòng THẬT đó nay được KIỂM và CHẶN — số tính trên costPrice broker, thiếu cổ tức "
+          "(318097fa: rc=0, chỉ in 'mà cổng KHÔNG kiểm')",
+          (rc, "DGC (dòng vị thế báo cáo ngày, dòng 3): báo cáo -11.00% vs kỳ vọng ZaloPay -10.40% "
+               "(cổ tức GỘP 3,000đ/cp)" in txt,
+           "DRI (dòng vị thế báo cáo ngày, dòng 4): báo cáo +28.00% vs kỳ vọng ZaloPay +34.58%" in txt,
+           "mà cổng KHÔNG kiểm" in txt), (1, True, True, False))
 
     print("  -- H1c: mã CÓ kỳ vọng (+34,58%) mà dòng bảng lệch KL, không dòng nào khớp đúng")
     for tag, row in (("KL lệch 1cp", "| DRI | 1.901 | x | +37,81% |"),
@@ -3067,16 +3231,237 @@ def _selfcheck_round3(check, run, ev) -> None:
         os.unlink(path)
 
 
+def _selfcheck_round4(check, run, ev) -> None:
+    """K1 (báo cáo NGÀY đi qua công cụ §21), biến thể H1c dạng bảng, và các dòng arch-review lần 3
+    thấy chưa ai canh (N30/N31/N37/N38 — số học `hidden_paid`). OFFLINE, cùng `run`/`ev`."""
+    import tempfile
+    DRI_HI, DRI_LO = 1900 * 13263.1579, 1900 * 12263.1579
+    S_DRI = {"DRI": [("2026-09-04T19:07:00", 1900.0, DRI_HI), ("2026-09-18T19:07:00", 1900.0, DRI_HI),
+                     ("2026-09-21T04:51:37", 1900.0, DRI_HI), ("2026-09-21T19:07:40", 1900.0, DRI_LO),
+                     ("2026-09-22T19:07:32", 1900.0, DRI_LO), ("2026-10-09T23:30:07", 1900.0, DRI_LO)]}
+    S = {**S_DRI,
+         "DGC": [("2026-09-04T19:07:00", 6600.0, 6600 * 63000.0), ("2026-09-11T04:51:00", 6600.0, 6600 * 63000.0),
+                 ("2026-09-11T19:07:00", 6600.0, 6600 * 60000.0), ("2026-10-09T23:30:07", 6600.0, 6600 * 60000.0)],
+         "PVT": [("2026-09-04T19:07:00", 500.0, 1e7), ("2026-10-09T23:30:07", 500.0, 1e7)]}
+    P = {"DRI": (1900.0, 12263.1579, 16900.0), "DGC": (6600.0, 60000.0, 53600.0),
+         "PVT": (500.0, 20000.0, 21000.0)}
+
+    def evs(dri=None):
+        return [dri or ev("DRI", "2026-09-21", "2026-09-22", 1000.0),
+                ev("DGC", "2026-09-11", "2026-09-14", 3000.0)]
+    e_dri = expected_pct(1900.0, 12263.1579, 16900.0, 1000.0)[0]
+    e_dgc = expected_pct(6600.0, 60000.0, 53600.0, 3000.0)[0]
+
+    def daily(dri=f"{e_dri:+.2f}%", dgc=f"{e_dgc:+.2f}%", pvt="+5.00%", tail=""):
+        return ("**Chi tiết PARK custom30V (2 mã)**\n"
+                f"  DGC 353.8M, {dgc} · PVT 10.5M, {pvt}\n\n"
+                "**Chi tiết Discretionary (1 mã)**\n"
+                f"  DRI 32.1M, {dri} — ⚠️ 35 phiên từ 2026-08-11 — chờ ý kiến PM về exit\n" + tail)
+
+    print("  -- K1: dòng vị thế của báo cáo NGÀY ('MÃ <giá trị>M, ±x%') được ĐỌC và KIỂM")
+    check("đối chứng số: DRI +34,58% · DGC −10,40% (cổ tức ròng vào tử số, giá vốn THÔ ở mẫu số)",
+          (round(e_dri, 2), round(e_dgc, 2)), (34.58, -10.4))
+    rc, txt = run(daily(), P, evs(), S)
+    check("ba dòng đúng số công cụ ⇒ PASS và 'Đã kiểm … + 3 dòng vị thế dạng báo cáo ngày' (không "
+          "còn PASS trên 0 dòng)",
+          (rc, "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi + 3 dòng vị thế dạng báo cáo ngày" in txt,
+           "mà cổng KHÔNG kiểm" in txt), (0, True, False))
+    rc, txt = run(daily(dri="+37.81%"), P, evs(), S)
+    check("sửa tay MỘT tỉ suất (DRI +37.81% = số trên costPrice broker) ⇒ CHẶN đúng dòng đó",
+          (rc, "DRI (dòng vị thế báo cáo ngày, dòng 5): báo cáo +37.81% vs kỳ vọng ZaloPay +34.58%" in txt,
+           "DGC (dòng vị thế" in txt), (1, True, False))
+    rc, _ = run(daily(dri=f"{e_dri:+.1f}%"), P, evs(), S)
+    rc2, _ = run(daily(dri=f"{e_dri + 0.2:+.2f}%"), P, evs(), S)
+    check("làm tròn 1 chữ số (+34.6%) còn trong dung sai 0,15pp ⇒ PASS; lệch 0,20pp ⇒ CHẶN",
+          (rc, rc2), (0, 1))
+    rc, txt = run(daily(dgc="-11.00%"), P, evs(), S, excl=("DGC",))
+    rc2, txt2 = run(daily() + "\nDGC −4,79% trong tuần.\n", P, evs(), S, excl=("DGC",))
+    check("mã EXCLUDED: dòng vị thế báo cáo ngày của nó VẪN được kiểm (số sai ⇒ CHẶN); 'DGC −4,79% "
+          "trong tuần' ở văn xuôi vẫn không bị kiểm (biến động kỳ)",
+          (rc, "DGC (dòng vị thế báo cáo ngày, dòng 2): báo cáo -11.00%" in txt, rc2,
+           "+ 3 dòng vị thế dạng báo cáo ngày" in txt2), (1, True, 0, True))
+    unv = ev("DRI", "2026-09-21", "2026-09-22", 910.0, kind="UNVERIFIED", vcheck="unavailable",
+             note="hệ VÔ ĐỊNH")
+    rc, txt = run(daily(), P, evs(unv), S)
+    check("mã KHÔNG có kỳ vọng mà báo cáo ngày vẫn in tỉ suất (kể cả đúng số) ⇒ CHẶN, nêu lý do thật",
+          (rc, "DRI (ZaloPay; dòng vị thế báo cáo ngày, dòng 5): báo cáo công bố +34.58% nhưng cổng "
+               "KHÔNG dựng được giá vốn thô để kiểm" in txt, "bị TRỪ 1,000.00đ" in txt), (1, True, True))
+    rc, txt = run(daily(), P, evs(unv), S, excl=("DRI",))
+    check("… kể cả khi mã đó EXCLUDED (bản cũ: mã excluded không kỳ vọng chỉ được nhắc, rc=0)",
+          (rc, "DRI (ZaloPay; dòng vị thế báo cáo ngày, dòng 5)" in txt), (1, True))
+    hidden = daily().replace(f"DRI 32.1M, {e_dri:+.2f}%",
+                             "DRI 32.1M (chưa công bố tỉ suất: chưa đối soát xong cổ tức với sổ "
+                             "công ty chứng khoán)")
+    rc, txt = run(hidden, P, evs(unv), S)
+    check("báo cáo ngày KHÔNG in tỉ suất cho mã đó (in lý do thay vào) ⇒ không chặn, vẫn kiểm 2 mã còn lại",
+          (rc, "+ 2 dòng vị thế dạng báo cáo ngày" in txt), (0, True))
+    rc, txt = run(daily(tail="  ZZZ 1.0M, +3.00%\n"), P, evs(), S)
+    check("dòng vị thế của mã KHÔNG có trong sổ broker: không tính là đã kiểm, nói rõ số dòng đó",
+          (rc, "+ 3 dòng vị thế dạng báo cáo ngày" in txt,
+           "; 1 dòng vị thế báo cáo ngày của mã KHÔNG có trong sổ vị thế broker." in txt), (0, True, True))
+    rc, txt = run("🔴 DRI +37.81% (Discretionary): còn 1.0pp → ngưỡng\n", P, evs(), S)
+    check("dòng cờ 'MÃ ±x.xx%' (dấu CHẤM thập phân) đi qua đường văn xuôi và đọc đúng số (bản cũ: "
+          "`_num` đọc +37.81 thành +3781)",
+          (rc, "DRI (văn xuôi, dòng 1): báo cáo +37.81% không khớp" in txt), (1, True))
+
+    print("  -- còn NGOÀI tầm kiểm (ghim, để không ai tưởng đã phủ): văn xuôi có chữ chen giữa mã và tỉ suất")
+    rc, txt = run("## Nhận định\n\nDRI lãi chưa thực hiện +37,81% từ ngày mua.\n\nPVT không có số.\n",
+                  P, evs(), S)
+    quiet = next((ln for ln in txt.splitlines() if "báo cáo không công bố tỉ suất riêng" in ln), "")
+    check("'DRI lãi chưa thực hiện +37,81%' (mã CÓ kỳ vọng): cổng KHÔNG kiểm và KHÔNG chặn — nhưng "
+          "nói ĐÚNG điều đó kèm dòng và kỳ vọng, không gọi nó là 'không công bố'; DGC thật sự vắng "
+          "mặt thì đúng là 'không công bố'",
+          (rc, "DRI (ZaloPay, KL=1900): mã CÓ tỉ suất ở dòng 3 ('DRI … +37,81%') mà cổng KHÔNG kiểm — "
+               "kỳ vọng +34.58%" in txt, "DRI" in quiet, "DGC" in quiet), (0, True, False, True))
+
+    print("  -- nguyên thủy: `_pct_num`, `POSBIT_RE`")
+    check("`_pct_num`: chấm thập phân 1-2 chữ số · phẩy thập phân VN · dấu trừ unicode · 3 chữ số sau "
+          "chấm vẫn là dấu NGHÌN",
+          [_pct_num(x) for x in ("-11.0%", "+9.79%", "−4,53%", "**+8,16%**", "1.234,5%", "+1.234%", "—")],
+          [-11.0, 9.79, -4.53, 8.16, 1234.5, 1234.0, None])
+    check("`POSBIT_RE`: chỉ 'MÃ <số>M, ±x%'; tỷ trọng / không dấu / không có giá trị / mã dính chữ thì không",
+          [POSBIT_RE.findall(x) for x in (
+              "DGC 354.0M, -9.79% · VPB 7.2M, +8.81%", "TV1 1,028.4M, −0.10%", "DGC 46,5% NAV",
+              "DGC 354.0M, 9.79%", "DGC -9.79%", "XDGC 354.0M, -9.79%", "DGC 354.0M (chưa công bố)")],
+          [[("DGC", "-9.79"), ("VPB", "+8.81")], [("TV1", "−0.10")], [], [], [], [], []])
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+        fh.write("| DGC 354.0M, -9.79% | x |\n> | DGC 354.0M, -9.79% |\n  DGC 354.0M, -9.79%\n")
+        path = fh.name
+    try:
+        check("`parse_position_bits` bỏ qua dòng BẢNG (kể cả trong blockquote), trả kèm số dòng",
+              parse_position_bits(path), [("DGC", -9.79, 3)])
+    finally:
+        os.unlink(path)
+
+    print("  -- giá KHÔNG phải của phiên chốt ⇒ không cấp kỳ vọng (báo cáo ngày 19:10, BQ nạp trễ)")
+    check("`stale_price_note`: phiên giá cũ hơn ngày chốt (thứ Sáu 09/10) ⇒ có câu; đúng phiên / nguồn "
+          "không khai phiên / ngày chốt là Chủ nhật ⇒ không",
+          [bool(stale_price_note(a, b)) for a, b in (("2026-10-08", "2026-10-09"), ("2026-10-09", "2026-10-09"),
+                                                    (None, "2026-10-09"), ("2026-10-09", "2026-10-11"))],
+          [True, False, False, False])
+    old = _Positions(P)
+    old.price_session = "2026-10-08"
+    rc, txt = run(daily(), old, evs(), S)
+    check("BQ mới có tới 08/10 mà báo cáo chốt 09/10 vẫn in tỉ suất ⇒ CHẶN mọi mã, lý do nói đúng phiên",
+          (rc, txt.count("giá đóng cửa phiên 2026-10-09 CHƯA có trên BQ (phiên mới nhất: 2026-10-08)") >= 3),
+          (1, True))
+    rc, _ = run("## Ghi chú\n\nKhông in tỉ suất nào.\n", old, evs(), S)
+    fresh = _Positions(P)
+    fresh.price_session = "2026-10-09"
+    rc2, _ = run(daily(), fresh, evs(), S)
+    check("… báo cáo không in tỉ suất nào thì KHÔNG chặn (thiếu giá không phải lý do giữ báo cáo); "
+          "giá đúng phiên ⇒ PASS như thường", (rc, rc2), (0, 0))
+
+    print("  -- `position_returns`: MỘT chỗ tính cho báo cáo ngày và cổng")
+    keep = {k: globals()[k] for k in ("broker_positions", "excluded_tickers", "entitled_gross")}
+    keep_acc = dar.ACCOUNTS
+    try:
+        dar.ACCOUNTS = {"ZaloPay": "x"}
+        globals()["broker_positions"] = lambda acct, d, **kw: {**P, "NOC": (10.0, 0.0, 5000.0)}
+        globals()["excluded_tickers"] = lambda lb: {"DGC"}
+        globals()["entitled_gross"] = lambda tks, acct, d: (
+            {"DRI": 1000.0, "DGC": 3000.0}, [("PVT", "2026-09-11", 300.0, 0.0, "lookup_failed", 0.0, True)],
+            {"blockers": {"PVT": ["lý do A", "lý do B"]}, "addback": {}, "notes": ["ghi chú"]})
+        try:
+            pr = position_returns("ZaloPay", "2026-10-09")
+        except Exception as e:                                  # noqa: BLE001
+            pr = f"EXC:{type(e).__name__}"
+    finally:
+        globals().update(keep)
+        dar.ACCOUNTS = keep_acc
+    rows = pr["positions"] if isinstance(pr, dict) else {}
+    check("mã có kỳ vọng: đúng số `expected_pct`; mã bị chặn / không có giá vốn (costPrice 0): KHÔNG "
+          "có `pct` (không rơi về costPrice, không chia cho 0), kèm `why` + `code`",
+          (pr if not rows else (
+              round(rows["DRI"]["pct"], 2), round(rows["DGC"]["pct"], 2), rows["DGC"]["excluded"],
+              "pct" in rows["PVT"], rows["PVT"]["code"], rows["PVT"]["why"],
+              "pct" in rows["NOC"], rows["NOC"]["code"])),
+          (34.58, -10.4, True, False, "blocked", ["lý do A", "lý do B"], False, "no_cost"))
+    check("… và mang theo lệch nguồn vendor + ghi chú bằng chứng cho cổng",
+          rows and (pr["mismatches"][0][0], pr["notes"], pr["label"], pr["asof"]),
+          ("PVT", ["ghi chú"], "ZaloPay", "2026-10-09"))
+    mis = ev("DRI", "2026-09-21", "2026-09-22", 1000.0, vcheck="mismatch", vendor_cash=1500.0,
+             vendor_stock=0.0, vendor_mismatch_reason="cash_mismatch")
+    rc, txt = run(daily(), P, [mis, evs()[1]], S)
+    check("mã lệch nguồn vendor được công bố CHỈ qua dòng vị thế báo cáo ngày vẫn tính là 'đang công "
+          "bố' (dòng máy đọc …|1) và CHẶN",
+          (rc, "VENDOR_MISMATCH_ALERT|ZaloPay|DRI|2026-09-22|1000|1500|1" in txt), (1, True))
+
+    print("  -- H1c dạng BẢNG: cột STT trước mã · chú thích trong ngoặc sau mã · bảng trong blockquote")
+    P1, E1 = {"DRI": P["DRI"]}, [ev("DRI", "2026-09-21", "2026-09-22", 1000.0)]
+    HDR = "| STT | Mã | KL | Lãi/lỗ (%) |\n|---|---|---:|---:|\n"
+    for tag, good, bad in (
+            ("cột STT trước mã", HDR + "| 1 | DRI | 1.900 | +34,58% |\n", HDR + "| 1 | DRI | 1.900 | +37,81% |\n"),
+            ("ô 'DRI (UPCOM)'", "| Mã | KL | Lãi/lỗ (%) |\n|---|---:|---:|\n| DRI (UPCOM) | 1.900 | +34,58% |\n",
+             "| Mã | KL | Lãi/lỗ (%) |\n|---|---:|---:|\n| **DRI** (UPCOM) | 1.900 | +37,81% |\n"),
+            ("bảng trong blockquote", "> | Mã | KL | Lãi/lỗ (%) |\n> |---|---:|---:|\n> | DRI | 1.900 | +34,58% |\n",
+             "> | Mã | KL | Lãi/lỗ (%) |\n> |---|---:|---:|\n> | DRI | 1.900 | +37,81% |\n")):
+        rc, txt = run("## 3.5\n\n" + good, P1, E1, S_DRI)
+        rc2, _ = run("## 3.5\n\n" + bad, P1, E1, S_DRI)
+        check(f"{tag}: số đúng ⇒ PASS và ĐÃ KIỂM 1 dòng bảng; số +37,81% ⇒ CHẶN (318097fa: rc=0, 0 dòng)",
+              (rc, "Đã kiểm 1 dòng bảng" in txt, rc2), (0, True, 1))
+    rc, txt = run("| Mã | Tỷ trọng | Tỷ suất |\n|---|---:|---:|\n| DRI (UPCOM) | 6,1% | +37,81% |\n",
+                  P1, [unv], S_DRI)
+    check("mã KHÔNG kỳ vọng, ô 'DRI (UPCOM)' trong bảng không cột KL (có ô % khác chen giữa) ⇒ vẫn CHẶN",
+          (rc, "có tỉ suất đứng cạnh mã này" in txt), (1, True))
+    rc, _ = run("> | Mã bị đảo dấu | SAB −5,53% | SAB +0,49% |\n> |---|---|---|\n> | DRI | x | y |\n",
+                P1, E1, S_DRI)
+    check("đối chứng: bảng tóm tắt đính chính trong blockquote (không cột KL) vẫn KHÔNG bị đọc thành "
+          "dòng vị thế", rc, 0)
+
+    print("  -- N30/N31/N37/N38: số học `hidden_paid` (bước trừ không quan sát được của sự kiện ĐÃ GIẢI)")
+    OPEN = [("2026-09-21T19:07:40", 1900.0, 1900 * 13800.0), ("2026-09-22T19:07:32", 1900.0, 1900 * 13800.0),
+            ("2026-10-09T23:30:07", 1900.0, 1900 * 13800.0)]
+    P_OPEN = {"DRI": (1900.0, 13800.0, 16900.0)}
+    dri = ev("DRI", "2026-09-21", "2026-09-22", 1000.0)
+    res = run("", P_OPEN, [dri], {"DRI": OPEN}, direct=True, cash={"2026-09-21": 2_400_000.0})
+    check("N37: sự kiện đã giải nhận 1,9tr của nó, CÒN 500.000đ phải thu vô chủ cùng ngày ⇒ vẫn CHẶN "
+          "(tính lại tiền vô chủ, không xoá sạch)", sorted(res[2]["blockers"]), ["DRI"])
+    pvt_step = [("2026-09-04T19:07:00", 1000.0, 1.7e7), ("2026-09-21T04:51:37", 1000.0, 1.7e7),
+                ("2026-09-21T19:07:40", 1000.0, 1.7e7 - 1000 * 300.0), ("2026-10-09T23:30:07", 1000.0, 1.7e7 - 3e5)]
+    res = run("", {**P_OPEN, "PVT": (1000.0, 16700.0, 18000.0)},
+              [dri, ev("PVT", "2026-09-21", "2026-09-22", 300.0)], {"DRI": OPEN, "PVT": pvt_step},
+              direct=True, cash={"2026-09-21": 2_200_000.0})
+    check("N38: cùng ngày có bước trừ ĐÃ THẤY của mã khác (PVT 300đ × 1.000 = 300.000) và tiền của sự "
+          "kiện không quan sát được (DRI 1,9tr) ⇒ CỘNG vào nhau = đúng 2,2tr phải thu ⇒ không chặn",
+          res[2]["blockers"], {})
+    pvt_buy = [("2026-09-04T19:07:00", 1000.0, 1.7e7), ("2026-09-23T04:51:37", 1000.0, 1.7e7),
+               ("2026-09-23T19:07:40", 1500.0, 1.7e7 + 500 * 18000.0),
+               ("2026-10-09T23:30:07", 1500.0, 1.7e7 + 500 * 18000.0)]
+    res = run("", {"DRI": P["DRI"], "PVT": (1500.0, 2.6e7 / 1500, 25000.0)}, [dri],
+              {**S_DRI, "PVT": pvt_buy}, direct=True,
+              cash={"2026-09-21": 1_900_000.0, "2026-09-23": 1_900_000.0})
+    check("N30: bước trừ của DRI ĐÃ THẤY trong sổ (đã nằm trong tổng bước trừ) thì KHÔNG cộng lần nữa — "
+          "cộng đôi tạo dư âm 1,9tr nuốt mất phải thu vô chủ 1,9tr ngày 23/09 ⇒ PVT mua thêm hôm đó "
+          "phải bị CHẶN", sorted(res[2]["blockers"]), ["PVT"])
+    more = OPEN[:2] + [("2026-09-25T19:07:00", 2500.0, 1900 * 13800.0 + 600 * 15000.0),
+                       ("2026-10-09T23:30:07", 2500.0, 1900 * 13800.0 + 600 * 15000.0)]
+    res = run("", {"DRI": (2500.0, (1900 * 13800.0 + 600 * 15000.0) / 2500, 16900.0)}, [dri],
+              {"DRI": more}, direct=True, cash={"2026-09-21": 2_500_000.0})
+    check("N31: tiền của sự kiện không quan sát được = KL lúc CHỐT QUYỀN (1.900cp ⇒ 1,9tr), không phải "
+          "KL hiện tại (2.500cp sau khi mua thêm 25/09 ⇒ 2,5tr sẽ nuốt 600.000đ vô chủ) ⇒ CHẶN",
+          sorted(res[2]["blockers"]), ["DRI"])
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--report", help="đường dẫn file .md báo cáo sắp gửi")
     ap.add_argument("--tolerance-pp", type=float, default=DEFAULT_TOL_PP)
     ap.add_argument("--selfcheck", action="store_true")
+    ap.add_argument("--returns", metavar="NHÃN_TK",
+                    help="in JSON `position_returns(NHÃN_TK, --asof)` — CHÍNH các số cổng dùng làm "
+                         "kỳ vọng; báo cáo lấy tỉ suất từ đây thay vì tự tính")
+    ap.add_argument("--asof", help="ngày chốt YYYY-MM-DD (cho --returns)")
     a = ap.parse_args()
     if a.selfcheck:
         return _selfcheck()
+    if a.returns:
+        if not a.asof:
+            ap.error("--returns cần --asof")
+        print(json.dumps(position_returns(a.returns, a.asof), ensure_ascii=False, indent=1))
+        return 0
     if not a.report:
-        ap.error("cần --report hoặc --selfcheck")
+        ap.error("cần --report, --returns hoặc --selfcheck")
     return run_gate(a.report, a.tolerance_pp)
 
 
