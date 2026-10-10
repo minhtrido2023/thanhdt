@@ -1003,3 +1003,9 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-10-08T18:07:44Z] [rerun nhóm B 10-09] DONE c8e096e7: Q8/Q12 hết ý nghĩa, claim breadth phải sửa (registry .proposed chờ Mike/user); chờ quant-skeptic. Việc tiếp nếu lãi hạ: c30 vs l1b@0,3 prereg mới.
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T03:08:10Z] ĐANG DỞ job Taylor_20261009_030802 cash-div first_disclosure_datetime validation (read-only): bắt đầu | NEXT: data_registry corporate_action + query snapshots
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T03:16:52Z] [cash-div fd 10-09] Kết luận C (d9361ee4): first_disclosure_datetime không PIT; giữ mốc 2027-08. Registry .proposed Bẫy 5 corporate_action_snapshots chờ Mike duyệt.
