@@ -547,7 +547,7 @@ SEP_RE = re.compile(r"^\|[\s:|-]+\|\s*$")
 # "DGC 46,5% NAV" (tỷ trọng, không dấu) không bị nhận nhầm là tỉ suất.
 PROSE_RE = re.compile(r"\b(" + _TK + r")\s*\*{0,2}\s*([+\-−]\d+(?:[.,]\d+)?)\s*%")
 # Cột % nào là TỈ SUẤT lãi/lỗ (được kiểm) — cột nào là tỷ trọng (bỏ qua).
-PCT_HEADER_OK = ("lãi", "lai/lo", "tỉ suất", "ti suat", "return", "p&l")
+PCT_HEADER_OK = ("lãi", "lỗ", "lai/lo", "tỉ suất", "tỷ suất", "ti suat", "ty suat", "return", "p&l")
 PCT_HEADER_NO = ("nav", "tỷ trọng", "ty trong", "phân bổ", "phan bo", "trần", "quota")
 
 
@@ -564,23 +564,37 @@ def _num(cell: str):
 
 
 def _pick_columns(header_cells: list) -> tuple:
-    """(chỉ số cột KL, chỉ số cột % TỈ SUẤT) — None nếu bảng này không công bố tỉ suất.
+    """(chỉ số cột KL, chỉ số cột % TỈ SUẤT, [cột ứng viên nhận THEO Ô]) — cột % là None nếu
+    tiêu đề không cột nào vừa mang `%` vừa mang tên tỉ suất.
 
     Chọn theo TIÊU ĐỀ, không theo vị trí: bảng Mục 5.3 có 2 cột `%` nhưng cả hai là **tỷ trọng
     NAV**, không phải tỉ suất — lấy "ô % cuối dòng" sẽ kiểm nhầm tỷ trọng vào tỉ suất.
+
+    Tiêu đề KHÔNG mang dấu `%` nhưng mang tên tỉ suất (`Lãi/lỗ`, `Tỷ suất`) ⇒ là ỨNG VIÊN
+    "theo ô" (phần tử thứ ba): mỗi dòng lấy ứng viên ĐẦU TIÊN mà chính Ô đó có `%`, vì cùng tên
+    ấy cũng được dùng cho cột số tiền (`| Tỷ suất | Lãi (VND) |`). Đo thật: bảng vị thế của MỌI báo cáo tuần 31/08→02/10/2026 có
+    tiêu đề `| Mã | KL | Giá vốn | Giá … | Giá trị thị trường | % NAV | Lãi/lỗ |` với ô
+    `+32,11%` — bản cũ đòi `%` trong tiêu đề nên bỏ cả bảng và PASS trên 0 dòng.
     """
     qty_i = pct_i = None
+    cands = []
     for i, h in enumerate(header_cells):
         low = h.strip().lower().replace("*", "")
-        if qty_i is None and (low == "kl" or "khối lượng" in low or "khoi luong" in low):
+        if qty_i is None and (low in ("kl", "qty") or "khối lượng" in low or "khoi luong" in low):
             qty_i = i
-        if "%" not in low:
-            continue
         if any(bad in low for bad in PCT_HEADER_NO):
             continue
-        if low == "%" or any(ok in low for ok in PCT_HEADER_OK):
+        named = any(ok in low for ok in PCT_HEADER_OK)
+        if "%" not in low:
+            if named:
+                cands.append(i)
+            continue
+        if low == "%" or named:
             pct_i = i
-    return qty_i, pct_i
+    return qty_i, pct_i, ([] if pct_i is not None else cands)
+
+
+SIGNED_PCT_CELL_RE = re.compile(r"^\s*(?:\*\*)?[+\-−]\d+(?:[.,]\d+)?\s*%(?:\*\*)?\s*$")
 
 
 def _strip_quote(line: str) -> str:
@@ -594,32 +608,59 @@ def _strip_quote(line: str) -> str:
     return s
 
 
-def parse_report_rows(path: str) -> list:
-    """[(ticker, qty, pct)] — chỉ lấy từ bảng có cột KL **và** cột % là tỉ suất lãi/lỗ."""
+def _scan_tables(path: str) -> tuple:
+    """(dòng tỉ suất đã nhận, dòng CÓ tỉ suất mà cổng không nhận ra cột) của mọi bảng có cột KL."""
     with open(path, encoding="utf-8") as f:
         lines = [ln.rstrip("\n") for ln in f]
-    rows, qty_i, pct_i = [], None, None
+    rows, blind = [], []
+    qty_i = pct_i = None
+    cands, header = [], []
     for i, line in enumerate(lines):
         if line.startswith("|") and i + 1 < len(lines) and SEP_RE.match(lines[i + 1]):
-            cells = [c.strip() for c in line.strip().strip("|").split("|")]
-            qty_i, pct_i = _pick_columns(cells)
+            header = [c.strip() for c in line.strip().strip("|").split("|")]
+            qty_i, pct_i, cands = _pick_columns(header)
             continue
         if not line.startswith("|"):
             qty_i = pct_i = None
             continue
-        if qty_i is None or pct_i is None:
+        if qty_i is None:
             continue
         m = ROW_RE.match(line)
         if not m:
             continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if max(qty_i, pct_i) >= len(cells):
+        col = pct_i
+        if col is None:
+            col = next((j for j in cands if j < len(cells) and "%" in cells[j]), None)
+        if col is None:
+            # bảng VỊ THẾ (có cột KL) mà không cột nào được nhận là tỉ suất — kể cả khi mọi cột
+            # ứng viên "theo ô" hoá ra là cột SỐ TIỀN: một ô "+12,3%" có DẤU nằm ở cột không
+            # thuộc nhóm tỷ trọng ⇒ có tỉ suất đang được công bố ngoài tầm cổng
+            for j, c in enumerate(cells):
+                h = header[j] if j < len(header) else ""
+                if SIGNED_PCT_CELL_RE.match(c) and not any(
+                        bad in h.lower() for bad in PCT_HEADER_NO):
+                    blind.append((i + 1, m.group(1), h, c))
             continue
-        qty, pct = _num(cells[qty_i]), _num(cells[pct_i])
+        if max(qty_i, col) >= len(cells):
+            continue
+        qty, pct = _num(cells[qty_i]), _num(cells[col])
         if qty is None or pct is None:
             continue
         rows.append((m.group(1), qty, pct))
-    return rows
+    return rows, blind
+
+
+def parse_report_rows(path: str) -> list:
+    """[(ticker, qty, pct)] — chỉ lấy từ bảng có cột KL **và** cột % là tỉ suất lãi/lỗ."""
+    return _scan_tables(path)[0]
+
+
+def unrecognized_return_cells(path: str) -> list:
+    """[(số dòng, mã, tiêu đề cột, ô)] — ô tỉ suất CÓ DẤU trong bảng vị thế (có cột KL) mà
+    `_pick_columns` không nhận cột nào là tỉ suất. `run_gate` CHẶN: không kiểm được thì không
+    được PASS (bảng bị bỏ im lặng = đúng cách cổng đã PASS trên 0 dòng)."""
+    return _scan_tables(path)[1]
 
 
 def parse_prose_pcts(path: str) -> list:
@@ -915,6 +956,10 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         agg[lb] = (tot_pl, tot_cost, tot_pl / tot_cost * 100.0 if tot_cost else 0.0, left_out)
 
     fails, checked, unmatched = list(paper_fails), 0, 0
+    for ln, tk, hdr, cell in unrecognized_return_cells(report_path):
+        fails.append(f"{tk} (bảng, dòng {ln}): ô '{cell}' ở cột '{hdr}' là một tỉ suất có dấu "
+                     f"nhưng cổng KHÔNG nhận ra cột này là tỉ suất lãi/lỗ hay tỷ trọng ⇒ không "
+                     f"kiểm được. Đặt tiêu đề cột là 'Lãi/lỗ (%)' nếu là tỉ suất từ-ngày-mua.")
     fails_no_div = []   # mã lệch mà cổ tức = 0 ⇒ nguyên nhân KHÔNG phải thiếu cổ tức
     fails_with_div = [] # mã lệch mà CÓ cổ tức ⇒ câu "cộng cổ tức ròng vào tử số" mới có nghĩa
     # §corp-action (job Taylor_20260924_064510, Việc 4) — mã CÒN GIỮ (có mặt trong `expected`
@@ -2244,6 +2289,46 @@ def _selfcheck_total_return(check) -> None:
     check("văn xuôi 'TV1 +2,86%' cũng được nhận là tỉ suất",
           PROSE_RE.findall("lãi TV1 +2,86% từ ngày mua"), [("TV1", "+2,86")])
     check("'MA20 +1%' KHÔNG bị nhận nhầm là mã", PROSE_RE.findall("MA20 +1,0%"), [])
+
+    print("  -- bảng vị thế phải được ĐỌC dù tiêu đề cột viết kiểu nào; không đọc được thì CHẶN")
+
+    def scan(header, *rows):
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+            fh.write(f"| {' | '.join(header)} |\n|{'---|' * len(header)}\n"
+                     + "".join(f"| {' | '.join(r)} |\n" for r in rows))
+        try:
+            return _scan_tables(fh.name)
+        finally:
+            os.unlink(fh.name)
+    # tiêu đề THẬT của báo cáo tuần 28/09→02/10 (đã gửi): cột tỉ suất tên `Lãi/lỗ`, không có `%`
+    H_SENT = ["Mã", "KL", "Giá vốn", "Giá 02/10", "Giá trị thị trường", "% NAV", "Lãi/lỗ"]
+    check("tiêu đề `Lãi/lỗ` KHÔNG có `%`, ô `+32,11%` ⇒ dòng được đọc (bản cũ: 0 dòng, PASS rỗng)",
+          scan(H_SENT, ["DRI", "3.700", "12.262", "16.200", "59.940.000", "6,14", "+32,11%"]),
+          ([("DRI", 3700.0, 32.11)], []))
+    check("cùng tiêu đề `Lãi/lỗ` nhưng ô là SỐ TIỀN ⇒ không đọc thành tỉ suất, không chặn",
+          scan(["Mã", "KL", "Lãi/lỗ"], ["DRI", "3.700", "+14.570.000"]), ([], []))
+    check("tiêu đề `Tỷ suất` (chữ ỷ) đứng TRƯỚC cột tiền cùng nhóm tên (`Lỗ (VND)`) — báo cáo "
+          "tháng 08 ⇒ đọc đúng cột có `%`",
+          scan(["Mã", "Khối lượng", "Tỷ suất", "Lỗ (VND)"], ["TPB", "500", "−12,80%", "−1.075.000đ"]),
+          ([("TPB", 500.0, -12.8)], []))
+    check("tiêu đề `% lỗ` ⇒ dòng được đọc",
+          scan(["Mã", "qty", "% lỗ", "VND"], ["TPB", "500", "−12,80%", "−1.075.000đ"]),
+          ([("TPB", 500.0, -12.8)], []))
+    check("cột KL tên `qty` (báo cáo tháng 08 gộp) ⇒ dòng được đọc",
+          scan(["Mã", "qty", "% lãi", "VND"], ["PVT", "3.500", "+18,13%", "+10.850.000đ"]),
+          ([("PVT", 3500.0, 18.13)], []))
+    # tiêu đề THẬT của báo cáo tuần 27→31/07: tỉ suất nằm ở cột `% tổng`, cột `Lãi/lỗ do giá` là tiền
+    H_0727 = ["Mã", "KL", "Giá vốn thật", "Lãi/lỗ do giá", "% tổng", "Nhóm"]
+    check("ô tỉ suất có dấu ở cột cổng KHÔNG nhận ra (`% tổng`) ⇒ báo là điểm mù, không bỏ im lặng",
+          scan(H_0727, ["SIP", "1.700", "47.059", "**+1.770.000**", "+2,2%", "CAPIT"]),
+          ([], [(3, "SIP", "% tổng", "+2,2%")]))
+    check("ô có dấu ở cột TỶ TRỌNG (`% NAV`) hay ô không dấu ⇒ KHÔNG phải điểm mù",
+          scan(["Mã", "KL", "% NAV", "Δ % NAV", "% tổng"], ["SIP", "1.700", "8,42", "+0,50%", "2,2%"]),
+          ([], []))
+    rc, txt = run("## 3.5 Danh mục\n\n| Mã | KL | Giá vốn | % tổng |\n|---|---:|---:|---:|\n"
+                  "| TV1 | 2.300 | x | +2,86% |\n", P_TV1, [tv1], S_TV1, label="SpaceX")
+    check("… và cổng CHẶN (rc=1) báo cáo có ô tỉ suất nằm ngoài tầm kiểm, nêu đúng cột",
+          (rc, "cột '% tổng'" in txt), (1, True))
 
     print("  -- cửa sổ tra sự kiện phủ HẾT sổ broker; giá thô khi Close đã bị điều chỉnh hồi tố")
     tmp = tempfile.mkdtemp(prefix="rrg_lb_")
