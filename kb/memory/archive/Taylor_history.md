@@ -1033,3 +1033,9 @@
 
 ## Archived 2026-10-10 (keep=12 days=0 require_done=False)
 - [2026-10-09T11:02:52Z] ĐANG DỞ job Taylor_20261009_110243 intraday watch 3 lỗ hổng + replay v2: bắt đầu | NEXT: đọc verify log + intraday_price_watch.py, worktree
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T12:04:52Z] ĐANG DỞ job Taylor_20261009_110243: PHẦN 1 MERGED 9a1eeede (arch r2 APPROVED_WITH_NITS). PHẦN 2 replay v2 ở research/intraday_cutloss_replay_v2_20261009 (PREREG.md đã ghi, run_stage1.sh chạy new+old v2 BROKEN base) | NEXT: stage2 (độ nhạy 6 cấu hình + UNCLEAR + v1 universe new/old trên case days) → analyze_v2.py → REPORT.md → bus finding intraday-cutloss-replay-v2
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T12:31:41Z] [intraday replay v2 10-09] DONE a5aa796b + merge 9a1eeede: H1 ADV>=10 tỷ SUPPORTED (không kém hơn), chưa live; chờ quant-skeptic. Nợ: reader EOD_OOS (dedupe ngày,mã) khi đủ ≥30 ngày ca live.
