@@ -137,6 +137,7 @@ from __future__ import annotations
 
 import argparse
 import glob
+import hashlib
 import json
 import os
 import shutil
@@ -284,8 +285,11 @@ MULT_TOL = 0.005
 #   5. TIỀN: chỗ nào sổ giá vốn mù (cặp bản ghi lẫn lệnh mua/bán, cặp MỞ vị thế) thì sổ tiền phải
 #      loại trừ được (`cash_witness`: có bản đọc hai phía, không đồng phải thu vô chủ, không chi
 #      trả lẫn); và không tài khoản nào đang giữ mã mà có đồng phải thu VÔ CHỦ quanh cửa sổ.
-#   (4)-(5) nằm ở `_broker_touched`. Mù ≠ không có: tài khoản không có sổ phủ cửa sổ (kể cả mọi
-#   cú nhảy trước ngày đầu của dnse_raw 06/07/2026) ⇒ KHÔNG được gọi là nhiễu.
+#   (4)-(5) nằm ở `_broker_touched`. Mù ≠ không có: tài khoản không có sổ phủ cửa sổ (kể cả cú
+#   nhảy trước ngày đầu của dnse_raw 06/07/2026 trên mã mà bản ghi ĐẦU của tài khoản đã giữ) ⇒
+#   KHÔNG được gọi là nhiễu. Ngoại lệ duy nhất (P1, `_ledger_began_without`): tài khoản mà sổ
+#   chưa bắt đầu lúc đó và bản ghi đầu tiên không giữ mã ấy thì không phải nhân chứng — nếu
+#   không, bật thêm một tài khoản sổ rỗng là phủ quyết mọi cú nhiễu của mọi tài khoản khác.
 # (3)-(5) thêm theo arch-review 2026-10-10 (B1; lần 2: K4): bản đầu quyết nhiễu TRƯỚC khi hỏi tiền broker,
 # nên cổ tức nhỏ (LNC 110đ, ITS 100đ, USC 205đ) mà vendor chưa kịp có dòng bị nuốt im lặng dù cả
 # hai tài khoản đã ghi phải thu — 60 sự kiện THẬT toàn thị trường nằm trong dải nhiễu của chính mã.
@@ -500,8 +504,43 @@ class PositionReturn:
 BQ_MAX_ROWS = 200_000
 
 
+# Sổ nhớ truy vấn của MỘT lượt chạy ngoài (thêm 2026-10-10, báo cáo ngày đi qua công cụ §21): báo
+# cáo ngày gọi công cụ này để LẤY tỉ suất rồi vài chục giây sau cổng gọi lại để KIỂM — hai tiến
+# trình khác nhau, cùng ~29 truy vấn `bq` (~3,6s/lượt, đo 105s/145s của một lượt cổng). Caller đặt
+# `DAR_BQ_MEMO_DIR` = một thư mục TẠM của riêng lượt chạy đó (`eod_trading_report.sh`: `mktemp -d`,
+# xoá khi thoát) thì kết quả truy vấn THÀNH CÔNG được ghi lại theo sha256 của câu SQL và tiến trình
+# sau đọc lại. Không đặt biến (mặc định, mọi đường khác: báo cáo tuần/tháng, chạy tay, rescue) ⇒
+# hành vi cũ, luôn hỏi BQ. Lỗi KHÔNG được nhớ; thư mục không tồn tại/không ghi được ⇒ hỏi BQ.
+BQ_MEMO_ENV = "DAR_BQ_MEMO_DIR"
+
+
+def _bq_memo_path(sql: str) -> str:
+    d = os.environ.get(BQ_MEMO_ENV) or ""
+    if not d or not os.path.isdir(d):
+        return ""
+    return os.path.join(d, hashlib.sha256(sql.encode("utf-8")).hexdigest() + ".json")
+
+
 def _bq(sql: str) -> list:
-    """Chạy BQ, trả về list[dict]. Không dùng cache env (§11) — đây là tra cứu lịch sử thuần."""
+    """Chạy BQ, trả về list[dict]. Không dùng cache env (§11) — đây là tra cứu lịch sử thuần.
+    (`DAR_BQ_MEMO_DIR` ở trên KHÔNG phải cache đó: nó chỉ sống trong một lượt chạy của caller.)"""
+    memo = _bq_memo_path(sql)
+    if memo and os.path.exists(memo):
+        with open(memo, encoding="utf-8") as fh:
+            return json.load(fh)
+    rows = _bq_live(sql)
+    if memo:
+        tmp = f"{memo}.{os.getpid()}.tmp"
+        try:
+            with open(tmp, "w", encoding="utf-8") as fh:
+                json.dump(rows, fh)
+            os.replace(tmp, memo)
+        except OSError:
+            pass                                   # sổ nhớ chỉ để nhanh — không ghi được thì thôi
+    return rows
+
+
+def _bq_live(sql: str) -> list:
     out = subprocess.run(
         [_BQ_BIN, "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
          f"--max_rows={BQ_MAX_ROWS}", "--format=json", sql],
@@ -1017,7 +1056,18 @@ def broker_cost_series(account_no: str) -> dict:
         for sym in seen:
             q, tot = cur.get(sym, (0.0, 0.0))
             out.setdefault(sym, []).append((ts, q, tot))
-    return {sym: _drop_blank_reads(rows) for sym, rows in out.items()}
+    res = _CostSeries((sym, _drop_blank_reads(rows)) for sym, rows in out.items())
+    res.record_ts = [rec.get("ts") or "" for rec in recs]
+    return res
+
+
+class _CostSeries(dict):
+    """`broker_cost_series()` + mốc của MỌI bản ghi vị thế của tài khoản (`.record_ts`, đã sắp),
+    KỂ CẢ bản ghi rỗng. Chuỗi per-mã không mang thông tin "sổ của tài khoản bắt đầu khi nào": mã
+    chỉ có dòng từ lần đầu nó xuất hiện, nên tài khoản mới mở (mấy bản ghi đầu rỗng) rồi mua một mã
+    trông y hệt tài khoản đã giữ mã đó từ trước khi sổ bắt đầu. `_broker_touched` cần đúng phân
+    biệt đó (P1). Vẫn là dict ⇒ mọi consumer cũ không đổi."""
+    record_ts = ()
 
 
 def _drop_blank_reads(rows: list) -> list:
@@ -1899,14 +1949,45 @@ def _noise_vetoes(lagged: list, shaped: list, start: str, end: str, accounts: di
 
 def account_ledger(account_no: str) -> dict:
     """Sổ broker của MỘT tài khoản dưới dạng mà mọi nhân chứng cùng đọc: `series` (chuỗi giá vốn
-    từng mã), `steps` (bước giá vốn từng mã), `ts` (mốc MỌI bản ghi vị thế, đã sắp), `cashd`
-    (`_CashDeltas`), `orphan` (`unexplained_cash`)."""
+    từng mã), `steps` (bước giá vốn từng mã), `ts` (mốc MỌI bản ghi vị thế dùng được làm nhân
+    chứng, KỂ CẢ bản ghi rỗng, đã sắp — `witness_record_ts`; `ts[0]` là bản ghi ĐẦU TIÊN của tài
+    khoản, `[]` = tài khoản chưa có bản ghi nào), `first` (= `ts[0]` hoặc "" — chỉ để người/probe
+    đọc; mọi phép thử dùng `ts`), `cashd` (`_CashDeltas`), `orphan` (`unexplained_cash`)."""
     series, cashd = broker_cost_series(account_no), broker_cash_deltas(account_no)
+    rec_ts = witness_record_ts(series)
     return {"series": series,
             "steps": {tk: classify_cost_steps(rows) for tk, rows in series.items()},
-            "ts": sorted({r[0] for rows in series.values() for r in rows}),
+            "ts": rec_ts,
+            "first": rec_ts[0] if rec_ts else "",
             "cashd": cashd,
             "orphan": unexplained_cash(cashd, cash_step_totals(series))}
+
+
+def witness_record_ts(series) -> list:
+    """PURE — mốc các bản ghi vị thế của tài khoản mà sổ được dùng làm NHÂN CHỨNG, đã sắp.
+
+    = `series.record_ts`: MỌI bản ghi, kể cả bản ghi RỖNG. Bản trước dựng `ts` từ dòng per-mã
+    (arch-review 53b48b76, F1): tài khoản live vừa bật, bot poll mỗi tối mà chưa mua gì, có 70 bản
+    ghi nhưng `ts = []` ⇒ "không có bản ghi bao hai đầu" ⇒ phủ quyết mọi cú nhiễu của mọi mã ở
+    báo cáo của tài khoản KHÁC — bằng một câu sai sự thật (sổ đó PHỦ cửa sổ và không giữ gì).
+
+    Trừ đúng một ca: bản ghi ĐẦU TIÊN của tài khoản rỗng mà bản ghi NGAY SAU nó đã có vị thế.
+    Một bản đọc `positions` rỗng là lỗi API đã biết của DNSE (`_drop_blank_reads`; đo trên sổ
+    thật tới 2026-10-09: 1 / 11.183 bản đọc, SpaceX 2026-08-20 19:07:16, bản đọc 30 giây sau lại
+    đủ). Ở GIỮA chuỗi `_drop_blank_reads` nhận ra nó nhờ hai đầu trùng nhau; ở ĐẦU chuỗi không có
+    đầu trước để so, nên một bản đọc rỗng đơn lẻ không phân biệt được với "tài khoản mới, chưa
+    giữ gì" ⇒ KHÔNG tính nó là bản ghi: mốc đầu của sổ lùi về bản ghi có vị thế, và các mã nằm
+    trong bản ghi đó quay về ca "sổ bắt đầu khi vị thế đã có sẵn" (mù ⇒ phủ quyết, fail-closed).
+    Từ HAI bản ghi rỗng liên tiếp ở đầu sổ trở lên thì tính đủ — tài khoản mới thật được poll
+    nhiều lần mỗi ngày trước lệnh mua đầu tiên."""
+    row_ts = {r[0] for rows in series.values() for r in rows}
+    # hợp với mốc của các dòng per-mã: `series` là dict thuần (fixture, caller cũ) thì không có
+    # `record_ts` — khi đó `ts` đúng bằng bản cũ, không rỗng đi.
+    ts = sorted({t for t in (getattr(series, "record_ts", None) or ()) if t} | row_ts)
+    held = min(row_ts, default="")
+    if held and sum(1 for t in ts if t < held) == 1:
+        ts = ts[1:]
+    return ts
 
 
 def opening_pairs(rows: list, record_ts: list) -> list:
@@ -1925,6 +2006,25 @@ def opening_pairs(rows: list, record_ts: list) -> list:
     return out
 
 
+def _ledger_began_without(L: dict, rows: list, lo: str) -> bool:
+    """PURE — sổ của tài khoản chưa có bản ghi nào trước `lo` VÀ bản ghi vị thế ĐẦU TIÊN của nó
+    (kể cả bản ghi rỗng) không giữ mã có chuỗi `rows`; hoặc tài khoản chưa có bản ghi nào cả.
+
+    P1 (arch-review lần 3): "mù ≠ không có" đúng cho tài khoản CÓ THỂ đã giữ mã lúc đó — sổ thủng,
+    hoặc sổ bắt đầu khi vị thế đã có sẵn (bản ghi đầu mang mã). Áp nó cho một tài khoản vừa bật
+    (RocketX / onboard: sổ rỗng hoặc bắt đầu sau cửa sổ, không giữ mã) là phủ quyết MỌI cú nhiễu
+    của MỌI mã trước ngày đó: 0/7 cú nhiễu DRI được gỡ, sự kiện 22/09 thành chưa giải, DRI bị chặn
+    ở mọi báo cáo của tài khoản KHÁC. Mốc là bản ghi đầu của TÀI KHOẢN (`L["ts"][0]`), không phải
+    dòng đầu của mã: tài khoản mới mua chính mã đó vài hôm sau vẫn là "bắt đầu mà không giữ".
+    Sổ có bản ghi trước `lo` mà thiếu đầu sau (tài khoản ngừng ghi) KHÔNG thuộc ca này — vẫn mù.
+    Bản ghi đầu là MỘT bản đọc rỗng đơn lẻ ngay trước bản ghi có vị thế thì không được tính là
+    bản ghi đầu (`witness_record_ts`): có thể chỉ là lỗi API che một vị thế có sẵn."""
+    first = L["ts"][0] if L["ts"] else ""
+    if not first:
+        return True
+    return first[:10] >= lo and not any(r[0] == first and r[1] > 0 for r in rows)
+
+
 def _broker_touched(adj, ledgers: dict, backed: list = ()) -> str:
     """PURE — câu bằng chứng nếu sổ broker của BẤT KỲ tài khoản nào có dấu vết của một sự kiện
     thật trong [ngày cuối còn quyền, ex-date] của `adj`, HOẶC không nhìn được chỗ đó (mù ≠ không
@@ -1934,7 +2034,9 @@ def _broker_touched(adj, ledgers: dict, backed: list = ()) -> str:
     Từng tài khoản, theo thứ tự:
       1. Cặp bản ghi của mã GIAO với cửa sổ (kể cả cặp vắt qua một quãng sổ thiếu bản ghi) có bước
          `cash`/`stock`/`cash+stock` CHƯA có chủ ⇒ dấu vết.
-      2. Sổ vị thế không có bản ghi bao hai đầu cửa sổ ⇒ mù.
+      2. Sổ vị thế không có bản ghi bao hai đầu cửa sổ ⇒ mù — TRỪ tài khoản mà sổ chưa bắt đầu
+         lúc đó và bản ghi đầu tiên của nó không giữ mã này (`_ledger_began_without`): không phải
+         nhân chứng, bỏ qua.
       3. Tài khoản không giữ mã quanh cửa sổ ⇒ không phải nhân chứng, bỏ qua.
       4. Cặp lẫn lệnh mua/bán hoặc cặp MỞ vị thế giao với cửa sổ: sổ giá vốn mù ở đó ⇒ hỏi sổ TIỀN
          (`cash_witness` — cùng một hàm với cổng) cho đúng cặp đó; mù / tiền vô chủ / chi trả lẫn
@@ -1967,6 +2069,8 @@ def _broker_touched(adj, ledgers: dict, backed: list = ()) -> str:
                         f"của {adj.ticker} (KL {st['q0']:,.0f}→{st['q1']:,.0f}, trừ "
                         f"{st['cash']:,.2f}đ/cp)")
         if not (any(t[:10] < lo for t in L["ts"]) and any(t[:10] >= hi for t in L["ts"])):
+            if _ledger_began_without(L, rows, lo):
+                continue
             return (f"sổ vị thế {lb} KHÔNG có bản ghi bao hai đầu [{lo}, {hi}] ⇒ không biết tài "
                     f"khoản này có giữ {adj.ticker} hay có bị trừ giá vốn lúc đó không")
         first = max((i for i, r in enumerate(rows) if r[0][:10] < lo), default=0)
@@ -3608,6 +3712,11 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
     same("… và ra ĐÚNG nghiệm của người hỏi cả rổ (một rổ, một nghiệm)",
          [(a.ticker, a.kind, a.per_share) for a in r2 if a.ticker == "CTG"],
          [(a.ticker, a.kind, a.per_share) for a in r])
+    same("hỏi NHIỀU mã ⇒ trả sự kiện của MỌI mã được hỏi, thứ tự hỏi nào cũng vậy (không chỉ mã đầu)",
+         (sorted(a.ticker for a in r2),
+          sorted(a.ticker for a in offline(both, v450, deltas=d23, qtys=q23, cost=c23,
+                                           ask=["VCB", "CTG"], span=span))),
+         (["CTG", "VCB"], ["CTG", "VCB"]))
     keep_bcs = g["broker_cost_series"]
     g["broker_cost_series"] = lambda no: c23[{"1": "SpaceX", "2": "ZaloPay"}[no]]
     try:
@@ -3696,6 +3805,9 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
          "(0,67% nhiễu hay 1,35% cổ tức thật khác) KHÔNG phải phần trễ của nó",
          (lag(15000.0, 300 / 14700.0, (1 + 300 / 14700.0) * 1.0067, c300),
           lag(15000.0, 300 / 14700.0, (1 + 300 / 14700.0) * 1.0135, c300)), (False, False))
+    same("vế CẦN dùng CÙNG dung sai LAG_TOL (2%): riêng sự kiện vendor đã ra 99% hệ số ×2 ⇒ đã đủ, "
+         "cú sau (+0,6%, cộng vào vẫn trong dung sai) KHÔNG được ghép; mới ra 97% ⇒ còn thiếu ⇒ ghép",
+         (lag(153000.0, 0.98, 1.98 * 1.006, x2), lag(153000.0, 0.94, 1.94 * 1.025, x2)), (False, True))
     c3k = {"cash": 3000.0, "stock": None, "stock_free": 0.0}
     same("số hạng TIỀN nằm trong hệ số: 3.000đ trên 15.000 ⇒ cần ×1,25 (không phải ×1,00)",
          (lag(15000.0, 0.10, 1.25, c3k), lag(15000.0, 0.10, 1.10 * 1.0001, c3k)), (True, False))
@@ -3795,11 +3907,14 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
     print("40) K4 — `_broker_touched`: mù ≠ không có; sổ tiền hỏi qua MỘT hàm `cash_witness`.")
     full = ["0001-01-01T00:00:00", "9999-12-31T23:59:59"]
 
-    def L(series, deltas=None, readings=full, drops=()):
+    def L(series, deltas=None, readings=full, drops=(), empty=()):
+        """`empty` = mốc các bản ghi vị thế RỖNG của tài khoản (không mã nào có dòng ở đó)."""
         cd = _CashDeltas(deltas or {})
         cd.readings, cd.drops = list(readings), list(drops)
+        cs = _CostSeries(series)
+        cs.record_ts = sorted({r[0] for rows_ in series.values() for r in rows_} | set(empty))
         return {"series": series, "steps": {tk: classify_cost_steps(r) for tk, r in series.items()},
-                "ts": sorted({r[0] for rows_ in series.values() for r in rows_}), "cashd": cd,
+                "ts": witness_record_ts(cs), "cashd": cd,
                 "orphan": unexplained_cash(cd, cash_step_totals(series))}
     cand = _mk("DRI", "2026-09-21", "2026-09-18", 14800.0, 110.0)       # thứ Sáu 18/09 → thứ Hai 21/09
     q, hi_ = 1900.0, 1900 * 13263.1579
@@ -3814,11 +3929,87 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
          touched({"DRI": flat}, readings=[]), "")
     same("sổ vị thế KHÔNG có bản ghi bao hai đầu cửa sổ ⇒ mù ⇒ KHÔNG được gọi là nhiễu",
          ("KHÔNG có bản ghi bao hai đầu" in touched({"DRI": flat[2:]}),
-          "KHÔNG có bản ghi bao hai đầu" in touched({"DRI": flat[:2]}),
-          "KHÔNG có bản ghi bao hai đầu" in touched({})), (True, True, True))
+          "KHÔNG có bản ghi bao hai đầu" in touched({"DRI": flat[:2]})), (True, True))
+    same("biên của 'bao hai đầu': bản ghi đầu rơi ĐÚNG ngày cuối còn quyền (18/09, đã giữ mã) chưa "
+         "phải 'trước cửa sổ' ⇒ mù; bản ghi cuối rơi ĐÚNG ex-date (21/09) là đủ đầu sau",
+         ("KHÔNG có bản ghi bao hai đầu" in touched({"DRI": flat[1:]}), touched({"DRI": flat[:3]})),
+         (True, ""))
     other = {"PVT": [("2026-09-04T19:07:00", 100.0, 1e6), ("2026-10-09T23:30:07", 100.0, 1e6)]}
     same("sổ phủ hai đầu mà tài khoản KHÔNG giữ mã (kể cả có đồng vô chủ của mã khác) ⇒ không phải "
          "nhân chứng", touched(other, deltas={"2026-09-18": 209_000.0}), "")
+    stray = {"2026-09-19": 209_000.0}
+    sold = [flat[0]] + [(t, 0.0, 0.0) for t in ("2026-09-10T19:07:00", "2026-09-18T19:07:00",
+                                                "2026-09-21T19:07:40", "2026-10-09T23:30:07")]
+    same("giữ DRI tới 10/09 rồi bán hết: quanh cửa sổ KL = 0 ⇒ không phải nhân chứng dù có đồng vô "
+         "chủ (đợt nắm giữ TRƯỚC cửa sổ không tính)", touched({"DRI": sold}, deltas=stray), "")
+    back = [("2026-09-01T19:07:00", q, hi_), ("2026-09-04T19:07:00", 0.0, 0.0),
+            ("2026-09-18T19:07:00", 0.0, 0.0), ("2026-09-21T19:07:40", 0.0, 0.0),
+            ("2026-10-06T19:07:00", q, hi_), flat[3]]
+    same("… bán hết 04/09, mua lại 06/10: quanh cửa sổ vẫn KL = 0 ⇒ không phải nhân chứng (đợt nắm "
+         "giữ SAU cửa sổ không tính)", touched({"DRI": back}, deltas=stray), "")
+
+    print("   P1 — tài khoản mà sổ CHƯA BẮT ĐẦU lúc đó và bản ghi đầu không giữ mã: không phải nhân chứng.")
+    base = {"ZaloPay": L({"DRI": flat})}
+
+    def plus(extra):
+        return _broker_touched(cand, {**base, "RocketX": extra}, ())
+    same("thêm một tài khoản SỔ RỖNG (vừa bật, chưa có bản ghi nào) ⇒ kết quả KHÔNG đổi (bản 318097fa: "
+         "phủ quyết ⇒ 0/7 cú nhiễu DRI được gỡ, DRI bị chặn ở mọi báo cáo)",
+         (_broker_touched(cand, base, ()), plus(L({})), touched({})), ("", "", ""))
+    newpvt = {"PVT": [("2026-10-05T19:07:00", 100.0, 1e6), ("2026-10-09T23:30:07", 100.0, 1e6)]}
+    same("… sổ bắt đầu SAU cửa sổ (05/10) với mã khác ⇒ không đổi", plus(L(newpvt)), "")
+    newdri = {"DRI": [("2026-10-07T19:07:00", q, hi_), flat[3]]}
+    same("… tài khoản mới đó MUA chính DRI hôm 07/10: mốc là bản ghi đầu của TÀI KHOẢN (05/10), "
+         "không phải dòng đầu của mã ⇒ vẫn không đổi (bản ghi đầu giữ PVT / hai bản ghi đầu rỗng)",
+         (plus(L({**newpvt, **newdri})),
+          plus(L(newdri, empty=["2026-10-05T19:07:00", "2026-10-06T19:07:00"]))), ("", ""))
+    same("sổ bắt đầu sau cửa sổ NHƯNG bản ghi đầu ĐÃ giữ DRI (vị thế có từ trước khi sổ bắt đầu) ⇒ "
+         "vẫn mù ⇒ phủ quyết", "sổ vị thế RocketX KHÔNG có bản ghi bao hai đầu" in plus(L(newdri)), True)
+    stopped = {"PVT": [("2026-09-04T19:07:00", 100.0, 1e6), ("2026-09-10T19:07:00", 100.0, 1e6)]}
+    same("sổ CÓ bản ghi trước cửa sổ mà thiếu đầu sau (tài khoản ngừng ghi từ 10/09) ⇒ vẫn mù ⇒ phủ "
+         "quyết", "sổ vị thế RocketX KHÔNG có bản ghi bao hai đầu" in plus(L(stopped)), True)
+    # F1 (arch-review 53b48b76): `ts` của sổ là mốc MỌI bản ghi, kể cả bản ghi RỖNG.
+    nightly = [f"2026-{m:02d}-{dd:02d}T19:07:00" for m, dd in
+               ((9, 1), (9, 4), (9, 17), (9, 18), (9, 21), (9, 22), (10, 9))]
+    same("F1: tài khoản live vừa bật có bản ghi RỖNG mỗi tối, sổ PHỦ hai đầu cửa sổ và chưa từng giữ "
+         "gì ⇒ nhìn thấy, không giữ ⇒ không đổi (bản 53b48b76: `ts` dựng từ dòng per-mã = [] ⇒ phủ "
+         "quyết bằng câu 'KHÔNG có bản ghi bao hai đầu' — DRI mất kỳ vọng ở cả hai tài khoản thật)",
+         (plus(L({}, empty=nightly)), L({}, empty=nightly)["ts"] == nightly), ("", True))
+    late_pvt = {"PVT": [("2026-10-09T19:07:00", 100.0, 1e6)]}
+    same("F1: … sổ rỗng suốt cửa sổ rồi 09/10 mới mua mã KHÁC ⇒ không đổi",
+         plus(L(late_pvt, empty=nightly[:-1])), "")
+    late_dri = {"DRI": [("2026-10-09T19:07:00", q, hi_)]}
+    same("F1: … sổ rỗng suốt cửa sổ rồi 09/10 mới mua CHÍNH DRI ⇒ quanh cửa sổ không giữ, cặp mở vị "
+         "thế (22/09 → 09/10) không giao cửa sổ ⇒ không đổi",
+         plus(L(late_dri, empty=nightly[:-1])), "")
+    on_lo = ["2026-09-18T19:07:00", "2026-09-21T19:07:00", "2026-10-09T19:07:00"]
+    same("F1 biên: bản ghi ĐẦU của tài khoản rơi ĐÚNG ngày cuối còn quyền (18/09) và không giữ mã ⇒ "
+         "'bắt đầu mà không giữ' (`>=`, không phải `>`) ⇒ không phải nhân chứng; cùng mốc đó mà "
+         "bản ghi đầu ĐÃ giữ DRI ⇒ mù ⇒ phủ quyết",
+         (plus(L({}, empty=on_lo)), plus(L({"PVT": [(t, 100.0, 1e6) for t in on_lo]})),
+          "sổ vị thế RocketX KHÔNG có bản ghi bao hai đầu" in plus(L({"DRI": flat[1:]}))),
+         ("", "", True))
+    same("F1 ca phụ: bản ghi đầu là MỘT bản đọc rỗng đơn lẻ (22/09, sau cửa sổ) rồi 09/10 lộ ra đang "
+         "giữ DRI — không phân biệt được lỗi API với tài khoản mới ⇒ KHÔNG tính bản đọc đó là bản "
+         "ghi đầu ⇒ sổ bắt đầu khi đã giữ DRI ⇒ mù ⇒ phủ quyết (bản 53b48b76: 'bắt đầu mà không giữ')",
+         ("sổ vị thế RocketX KHÔNG có bản ghi bao hai đầu"
+          in plus(L(late_dri, empty=["2026-09-22T19:07:00"])),
+          L(late_dri, empty=["2026-09-22T19:07:00"])["ts"]), (True, ["2026-10-09T19:07:00"]))
+    same("F1 ca phụ: … bản đọc rỗng đơn lẻ nằm TRƯỚC cửa sổ (17/09) rồi 22/09 mới thấy DRI: nó không "
+         "được làm 'đầu trước' của sổ ⇒ vẫn mù ⇒ phủ quyết",
+         "sổ vị thế RocketX KHÔNG có bản ghi bao hai đầu"
+         in plus(L({"DRI": [("2026-09-22T19:07:00", q, hi_), flat[3]]},
+                   empty=["2026-09-17T19:07:00"])), True)
+    same("F1 ca phụ: … mã KHÁC của chính tài khoản đó (không nằm trong bản ghi lộ ra) vẫn là 'bắt đầu "
+         "mà không giữ' ⇒ không đổi; và HAI bản ghi rỗng liên tiếp ở đầu sổ thì tính đủ",
+         (plus(L(late_pvt, empty=["2026-09-22T19:07:00"])),
+          plus(L(late_dri, empty=["2026-09-22T19:07:00", "2026-09-23T19:07:00"]))), ("", ""))
+    same("tài khoản sổ rỗng KHÔNG che dấu vết thật của tài khoản khác (bước trừ 110đ của ZaloPay)",
+         "có bước `cash`" in _broker_touched(
+             cand, {"RocketX": L({}), "ZaloPay": L({"DRI": [flat[0], ("2026-09-17T19:07:00", q, hi_),
+                                                           ("2026-09-23T19:07:40", q, hi_ - q * 110.0),
+                                                           flat[3]]})}, ()), True)
+
     gap = [flat[0], ("2026-09-17T19:07:00", q, hi_), ("2026-09-23T19:07:40", q, hi_ - q * 110.0), flat[3]]
     same("A1: sổ THỦNG 18→22/09, bước trừ 110đ chỉ lộ ở bản ghi 23/09 — cặp bản ghi VẮT QUA cửa sổ "
          "vẫn là dấu vết (bản 7cbc486a: 'không dấu vết' ⇒ RATIO_NOISE, +27,42% không cờ)",
@@ -3898,16 +4089,23 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
             {"accountNo": acct, "symbol": sym, "openQuantity": qq, "costPrice": cp}
             for sym, qq, cp in items]}}
     recs = {
-        "2026-09-17": [bal("9", "2026-09-17T19:07:00", 0), pos("9", "2026-09-17T19:07:00", [("AAA", 100, 10000.0)])],
+        "2026-09-17": [bal("9", "2026-09-17T19:07:00", 0), pos("9", "2026-09-17T19:07:00", [("AAA", 100, 10000.0)]),
+                       pos("7", "2026-09-17T19:08:00", []),                  # TK mới: bản ghi đầu RỖNG
+                       pos("6", "2026-09-17T19:09:00", []),                  # MỘT bản đọc rỗng đơn lẻ
+                       pos("5", "2026-09-17T19:10:00", [])],                 # TK chưa từng giữ gì
         "2026-09-18": [bal("9", "2026-09-18T04:51:00", 0), bal("9", "2026-09-18T19:07:00", 300000),
                        bal("8", "2026-09-18T19:07:05", 999999),
                        pos("9", "2026-09-18T19:07:00", [("AAA", 60, 9000.0), ("AAA", 40, 9000.0)]),
-                       pos("8", "2026-09-18T19:07:05", [("ZZZ", 7, 1.0)])],
+                       pos("8", "2026-09-18T19:07:05", [("ZZZ", 7, 1.0)]),
+                       pos("7", "2026-09-18T19:08:00", []), pos("5", "2026-09-18T19:10:00", [])],
         "2026-09-21": [bal("9", "2026-09-21T19:07:00", 500000),
                        {"kind": "balances", "account_no": "9", "ts": "2026-09-21T19:07:30",
                         "payload": {"stock": {"totalCash": 0, "availableCash": 0, "depositInterest": 0,
                                               "cashDividendReceiving": 0}}},
-                       pos("9", "2026-09-21T19:07:00", [])],
+                       pos("9", "2026-09-21T19:07:00", []),
+                       pos("7", "2026-09-21T19:08:00", [("BBB", 5, 1000.0)]),
+                       pos("6", "2026-09-21T19:09:00", [("CCC", 5, 1000.0)]),
+                       pos("5", "2026-09-21T19:10:00", [])],
         "2026-09-22": [bal("9", "2026-09-22T19:07:00", 200000)],          # −300.000 = đúng lô 18/09
         "2026-09-23": [bal("9", "2026-09-23T19:07:00", 150000)],          # −50.000: không khớp lô nào
     }
@@ -3918,11 +4116,32 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
                     fh.write(json.dumps(rec) + "\n")
         g["EXEC_LOG_DIR"] = d
         cd, qm, led = broker_cash_deltas("9"), broker_qty("9"), account_ledger("9")
+        led7, led0 = account_ledger("7"), account_ledger("0")
+        led6, led5 = account_ledger("6"), account_ledger("5")
     finally:
         g["EXEC_LOG_DIR"] = keep_dir
         for f_ in os.listdir(d):
             os.unlink(os.path.join(d, f_))
         os.rmdir(d)
+    same("`account_ledger['ts'][0]` = bản ghi vị thế ĐẦU của tài khoản KỂ CẢ bản ghi rỗng (TK 7: rỗng "
+         "17/09 + 18/09, mua BBB 21/09 ⇒ 17/09, không phải dòng đầu của mã); tài khoản chưa có bản "
+         "ghi ⇒ []; khoá `first` = `ts[0]` hoặc ''",
+         (led["ts"][0], led7["ts"][0], led0["ts"], led7["first"], led6["first"], led0["first"]),
+         ("2026-09-17T19:07:00", "2026-09-17T19:08:00", [], "2026-09-17T19:08:00",
+          "2026-09-21T19:09:00", ""))
+    same("F1: `account_ledger['ts']` = mốc MỌI bản ghi vị thế kể cả bản ghi RỖNG (TK 7: 3 bản ghi, 2 "
+         "rỗng; TK 5 chưa từng giữ gì: 3 bản ghi rỗng — bản 53b48b76: ['…21T19:08:00'] và [])",
+         (led7["ts"], led5["ts"], dict(led5["series"])),
+         (["2026-09-17T19:08:00", "2026-09-18T19:08:00", "2026-09-21T19:08:00"],
+          ["2026-09-17T19:10:00", "2026-09-18T19:10:00", "2026-09-21T19:10:00"], {}))
+    same("F1 ca phụ: TK 6 có MỘT bản đọc rỗng (17/09) rồi 21/09 đã có vị thế ⇒ bản đọc đó không được "
+         "tính: sổ bắt đầu ở bản ghi có vị thế",
+         led6["ts"], ["2026-09-21T19:09:00"])
+    cand5 = _mk("DRI", "2026-09-21", "2026-09-18", 14800.0, 110.0)
+    same("F1 trên SỔ ĐỌC TỪ FILE: TK 5 (rỗng mọi tối, phủ [18/09, 21/09]) không phủ quyết; TK 6 (bản "
+         "đọc rỗng bị bỏ ⇒ sổ bắt đầu 21/09, không giữ DRI) cũng không; TK 9 không giữ DRI ⇒ không",
+         (_broker_touched(cand5, {"New5": led5}, ()), _broker_touched(cand5, {"New6": led6}, ()),
+          _broker_touched(cand5, {"Nine": led}, ())), ("", "", ""))
     same("`broker_cash_deltas`: CHỈ delta dương, theo ngày, đúng tài khoản (§12)",
          dict(cd), {"2026-09-18": 300000.0, "2026-09-21": 200000.0})
     same("… `.readings` = mọi bản đọc hợp lệ (bỏ bản 'khối stock toàn số 0', bỏ tài khoản khác)",
@@ -3974,6 +4193,55 @@ def _selfcheck_round3(check, same, offline, dri_qtys, dri_cost) -> None:
     mark_entitlement([nz], "x", qmap=only_ex)
     same("cú nhảy đã là RATIO_NOISE không được gắn quyền hưởng (không phải sự kiện)",
          (nz.entitled, nz.entitled_note), ("", ""))
+
+    print("42) Sổ nhớ truy vấn `DAR_BQ_MEMO_DIR`: chỉ khi caller đặt biến, chỉ kết quả THÀNH CÔNG.")
+    live, boom = [], [False]
+
+    def fake_live(sql):
+        live.append(sql)
+        if boom[0]:
+            raise RuntimeError("bq query failed: giả lập")
+        return [{"sql": sql, "n": len(live)}]
+    keep_live, keep_env, keep_cwd = g["_bq_live"], os.environ.pop(BQ_MEMO_ENV, None), os.getcwd()
+    memo_dir, cwd_dir = _tf.mkdtemp(prefix="dar_memo_"), _tf.mkdtemp(prefix="dar_cwd_")
+    g["_bq_live"] = fake_live
+    try:
+        os.chdir(cwd_dir)
+        off = (_bq("SELECT 1"), _bq("SELECT 1"), len(live), os.listdir(cwd_dir), os.listdir(memo_dir))
+        os.environ[BQ_MEMO_ENV] = memo_dir
+        a1, a2, b1 = _bq("SELECT 1"), _bq("SELECT 1"), _bq("SELECT 2")
+        on = (a1 == a2, a1[0]["n"], b1[0]["sql"], len(live), len(os.listdir(memo_dir)))
+        boom[0] = True
+        errs = [safe(lambda: _bq("SELECT 3")) for _ in range(2)]
+        n_err, kept = len(live), safe(lambda: _bq("SELECT 1")) == a1
+        os.environ[BQ_MEMO_ENV] = os.path.join(memo_dir, "khong-ton-tai")
+        gone = (safe(lambda: _bq("SELECT 1")), len(live))
+        a_file = os.path.join(memo_dir, "mot-file")
+        open(a_file, "w").close()
+        paths = [bool(_bq_memo_path("SELECT 1"))]                  # biến trỏ thư mục KHÔNG tồn tại
+        os.environ[BQ_MEMO_ENV] = a_file
+        paths.append(bool(_bq_memo_path("SELECT 1")))              # biến trỏ một FILE
+        os.environ[BQ_MEMO_ENV] = memo_dir
+        paths.append(os.path.dirname(_bq_memo_path("SELECT 1")) == memo_dir)
+    finally:
+        os.chdir(keep_cwd)
+        g["_bq_live"] = keep_live
+        os.environ.pop(BQ_MEMO_ENV, None)
+        if keep_env is not None:
+            os.environ[BQ_MEMO_ENV] = keep_env
+        shutil.rmtree(memo_dir, ignore_errors=True)
+        shutil.rmtree(cwd_dir, ignore_errors=True)
+    same("KHÔNG đặt biến (mặc định) ⇒ lần nào cũng hỏi BQ, không ghi file nào ở đâu cả",
+         (off[0][0]["n"], off[1][0]["n"], off[2], off[3], off[4]), (1, 2, 2, [], []))
+    same("đặt biến ⇒ cùng câu SQL hỏi BQ MỘT lần rồi đọc lại; câu SQL khác là khoá khác",
+         on, (True, 3, "SELECT 2", 4, 2))
+    same("lỗi BQ KHÔNG được nhớ (lần sau hỏi lại, vẫn ném đúng lỗi); kết quả đã nhớ vẫn đọc được",
+         (errs, n_err, kept), (["EXC:RuntimeError"] * 2, 6, True))
+    same("thư mục sổ nhớ không tồn tại ⇒ hỏi BQ như không đặt biến (ở đây: ném lỗi của BQ)",
+         gone, ("EXC:RuntimeError", 7))
+    same("`_bq_memo_path`: biến trỏ chỗ KHÔNG phải thư mục đang tồn tại (thiếu / là file) ⇒ '' = sổ "
+         "nhớ TẮT hẳn (không dựng đường dẫn rồi trông vào lỗi ghi); thư mục thật ⇒ đường dẫn trong nó",
+         paths, [False, False, True])
 
 
 def main() -> int:

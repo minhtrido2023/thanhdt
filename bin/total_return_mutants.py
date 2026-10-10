@@ -5,6 +5,11 @@ Mỗi đột biến đảo ĐÚNG MỘT dòng vá trong `dividend_adjusted_retur
 về hành vi cũ (hoặc gỡ đúng một lá chắn), rồi chạy selfcheck nhúng của file đó trên BẢN SAO:
 selfcheck phải ĐỎ. Đột biến sống = một dòng vá không có assertion nào canh.
 
+Từ vòng 2 của K1 (arch-review 53b48b76, F5) bộ này phủ thêm ba file của đường báo cáo NGÀY, mỗi
+file có selfcheck riêng (bảng `TARGETS`): `portfolio_status.py` (selfcheck `portfolio_status_
+selfcheck.py`, chạy trên bản sao trong thư mục tạm), `eod_trading_report.sh` và
+`check_report_cadence.sh` (selfcheck của chúng nhận bản đột biến qua `EOD_SRC` / `RC_SRC`).
+
 Bản sao nằm trong thư mục tạm của HỆ THỐNG (`tempfile.mkdtemp()`), KHÔNG trong `bin/`: bản đầu
 đặt chúng dưới `bin/.total_return_mutants_*` để `wc_paths.find_wc_root(__file__)` tìm ra gốc —
 tức là có lúc trong `bin/` tồn tại một `report_return_gate.py` ĐỘT BIẾN, không gitignore, một
@@ -33,6 +38,14 @@ import wc_paths  # noqa: E402
 
 REAL_ROOT = wc_paths.find_wc_root(__file__)
 DAR, RRG = "dividend_adjusted_return.py", "report_return_gate.py"
+PS, PSS = "portfolio_status.py", "portfolio_status_selfcheck.py"
+SH, SHS = "eod_trading_report.sh", "eod_trading_report_account_filter_selfcheck.py"
+RC, RCS = "check_report_cadence.sh", "check_report_cadence_selfcheck.py"
+# file bị đột biến -> các selfcheck phải chạy (theo thứ tự; dừng ở cái đầu tiên ĐỎ). Đột biến ở
+# `dar` có thể chỉ lộ qua selfcheck của cổng (cổng import bản sao `dar`); đột biến ở cổng có thể
+# chỉ lộ qua HỢP ĐỒNG mà selfcheck của `portfolio_status` ghim với cổng.
+TARGETS = {DAR: (DAR, RRG), RRG: (RRG, PSS), PS: (PSS,), SH: (SHS,), RC: (RCS,)}
+COPIED = (DAR, RRG, PS, PSS, SH, RC)
 
 # (tên, ca, file, đoạn gốc — phải xuất hiện ĐÚNG 1 lần, đoạn thay)
 MUTANTS = [
@@ -75,13 +88,16 @@ MUTANTS = [
     ("stock_step_loose_tolerance", "CA2", DAR,
      "        elif abs(c1 - c0) <= max(1.0, 1e-3 * q1):", "        elif abs(c1 - c0) <= max(p1, 1.0):"),
     ("blank_reads_kept", "CA2", DAR,
-     "    return {sym: _drop_blank_reads(rows) for sym, rows in out.items()}\n", "    return out\n"),
+     "    res = _CostSeries((sym, _drop_blank_reads(rows)) for sym, rows in out.items())\n",
+     "    res = _CostSeries(out)\n"),
     ("entitled_falls_to_exdate", "CA2", DAR,
      '        if adj.last_cum_date in getattr(qmap, "days", ()):', "        if False:"),
 
     ("noise_treated_as_event", "CA1", RRG,
      '        if getattr(a, "kind", "") == "RATIO_NOISE":\n            continue', "        if False:\n            continue"),
-    ("gate_issues_expectation_anyway", "CA2", RRG, "            if tk in blockers:\n", "            if False:\n"),
+    ("gate_issues_expectation_anyway", "CA2", RRG,
+     '               "why": list(blockers.get(tk, [])), "code": "blocked" if tk in blockers else ""}',
+     '               "why": [], "code": ""}'),
     ("unresolved_event_not_blocked", "CA2", RRG,
      '        if not getattr(a, "resolved", a.cash_per_share > 0):', "        if False:"),
     ("unclaimed_step_ignored", "CA2", RRG,
@@ -101,10 +117,11 @@ MUTANTS = [
     ("price_always_close", "CA2", RRG,
      '    return (price, "Price") if later_events else (close, "Close")\n', '    return (close, "Close")\n'),
     ("excluded_skipped", "CA3", RRG,
-     "            if tk in excl:\n                excluded_keys[key] = lb\n",
-     "            if tk in excl:\n                continue\n"),
+     '            if r["excluded"]:\n                excluded_keys[key] = lb\n',
+     '            if r["excluded"]:\n                continue\n'),
     ("excluded_in_total", "CA3", RRG,
-     "            if tk not in excl:\n                tot_pl += pl\n", "            if True:\n                tot_pl += pl\n"),
+     '            if not r["excluded"]:\n                tot_pl += r["pl"]\n',
+     '            if True:\n                tot_pl += r["pl"]\n'),
     ("excluded_prose_checked", "CA3", RRG,
      "        if key not in excluded_keys:\n            by_ticker.setdefault(key[0], []).append((lb, exp))\n",
      "        if True:\n            by_ticker.setdefault(key[0], []).append((lb, exp))\n"),
@@ -219,7 +236,8 @@ MUTANTS = [
      "                    if _PCT_ANY_RE.search(c) and not any(bad in h.lower() for bad in PCT_HEADER_NO):",
      "                    if _PCT_ANY_RE.search(c):"),
     ("mention_any_cell_of_row", "B3", RRG,
-     '            if is_table and any(c.replace("*", "").strip() == tk for c in cells):',
+     '            if is_table and any(re.sub(r"\\s*\\([^()]*\\)\\s*$", "", c.replace("*", "")).strip() == tk\n'
+     "                                for c in cells):",
      "            if is_table:"),
     ("mention_blockquote_not_stripped", "B3", RRG,
      "    stripped = [_strip_quote(ln) for ln in lines]", "    stripped = list(lines)"),
@@ -474,15 +492,287 @@ MUTANTS = [
     ("Rv_R22_cand_last_not_first", "C4", RRG,
      '            col = next((j for j in cands if j < len(cells) and "%" in cells[j]), None)',
      '            col = next((j for j in reversed(cands) if j < len(cells) and "%" in cells[j]), None)'),
+    # ================ 2026-10-10 (job Taylor_20261010_105705): P1 + K1 + dòng arch-review lần 3
+    # ---------------- P1 — tài khoản sổ rỗng / sổ bắt đầu sau cửa sổ không phải nhân chứng
+    ("P1_revert", "P1", DAR,
+     "            if _ledger_began_without(L, rows, lo):\n                continue\n",
+     "            if False:\n                continue\n"),
+    ("P1_skip_any_late_ledger", "P1", DAR,
+     "    return first[:10] >= lo and not any(r[0] == first and r[1] > 0 for r in rows)\n",
+     "    return first[:10] >= lo\n"),
+    ("P1_skip_any_not_held_at_first", "P1", DAR,
+     "    return first[:10] >= lo and not any(r[0] == first and r[1] > 0 for r in rows)\n",
+     "    return not any(r[0] == first and r[1] > 0 for r in rows)\n"),
+    # (P1_first_from_ticker_rows của vòng 1 đảo `L.get("first", …)` về `L["ts"][0]` — từ F1 đó
+    #  CHÍNH LÀ code: `ts` đã là mốc mọi bản ghi của tài khoản. Bản tương đương: F1_ts_from_ticker_rows.)
+    ("P1_empty_ledger_vetoes", "P1", DAR, "    if not first:\n        return True\n",
+     "    if not first:\n        return False\n"),
+    ("P1_ledger_first_blank", "P1", DAR,
+     '            "first": rec_ts[0] if rec_ts else "",\n', '            "first": "",\n'),
+    ("P1_record_ts_skips_empty_records", "P1", DAR,
+     '    res.record_ts = [rec.get("ts") or "" for rec in recs]\n',
+     "    res.record_ts = sorted({r[0] for rows in res.values() for r in rows})\n"),
+    # ---------------- dòng reviewer thấy chưa ai canh (định nghĩa: /tmp/arch_rev2/mymut3.py)
+    ("N05_holding_from_ledger_start", "N", DAR,
+     "        first = max((i for i, r in enumerate(rows) if r[0][:10] < lo), default=0)", "        first = 0"),
+    ("N05b_holding_to_ledger_end", "N", DAR,
+     "        last = min((i for i, r in enumerate(rows) if r[0][:10] >= hi), default=len(rows) - 1)",
+     "        last = len(rows) - 1"),
+    ("N09_lag_necessity_tight", "N", DAR,
+     "    if abs(own / want - 1.0) <= LAG_TOL:\n        return False",
+     "    if abs(own / want - 1.0) <= 0.0005:\n        return False"),
+    ("N09b_lag_necessity_loose", "N", DAR,
+     "    if abs(own / want - 1.0) <= LAG_TOL:\n        return False",
+     "    if abs(own / want - 1.0) <= 0.2:\n        return False"),
+    ("N22_blind_lo_inclusive", "N", DAR,
+     'if not (any(t[:10] < lo for t in L["ts"]) and any(t[:10] >= hi for t in L["ts"])):',
+     'if not (any(t[:10] <= lo for t in L["ts"]) and any(t[:10] >= hi for t in L["ts"])):'),
+    ("N22b_blind_hi_exclusive", "N", DAR,
+     'if not (any(t[:10] < lo for t in L["ts"]) and any(t[:10] >= hi for t in L["ts"])):',
+     'if not (any(t[:10] < lo for t in L["ts"]) and any(t[:10] > hi for t in L["ts"])):'),
+    ("N29_asked_only_first", "N", DAR, "    asked = set(tickers)\n", "    asked = set(list(tickers)[:1])\n"),
+    ("N30_hidden_paid_for_seen_steps", "N", RRG,
+     '        if obs["kind"] == "hidden":\n            q_cum', "        if True:\n            q_cum"),
+    ("N31_hidden_paid_latest_qty", "N", RRG,
+     "            q_cum = [r[1] for r in cur if r[0][:10] <= a.last_cum_date]",
+     "            q_cum = [r[1] for r in cur]"),
+    ("N37_hidden_paid_clears_all_orphans", "N", RRG,
+     "        orphan = dar.unexplained_cash(cashd, totals)", "        orphan = {}"),
+    ("N38_hidden_paid_overwrites_totals", "N", RRG,
+     "            totals[d] = totals.get(d, 0.0) + v", "            totals[d] = v"),
+    # ---------------- sổ nhớ truy vấn theo lượt chạy
+    ("memo_never_read", "MEMO", DAR, "    if memo and os.path.exists(memo):\n", "    if False:\n"),
+    ("memo_never_written", "MEMO", DAR, "    if memo:\n        tmp = ", "    if False:\n        tmp = "),
+    ("memo_key_ignores_sql", "MEMO", DAR,
+     'hashlib.sha256(sql.encode("utf-8")).hexdigest()', 'hashlib.sha256(b"").hexdigest()'),
+    ("memo_on_without_env", "MEMO", DAR,
+     '    if not d or not os.path.isdir(d):\n        return ""\n', '    if False:\n        return ""\n'),
+    # ---------------- K1 — báo cáo NGÀY: một chỗ tính, cổng đọc đúng dòng vị thế
+    ("K1_bits_never_fail", "K1", RRG,
+     "              file=out)\n        if any(abs(pct - e) <= tol_pp for _lb, e, _g in cands):\n",
+     "              file=out)\n        if True:\n"),
+    ("K1_bits_skip_excluded", "K1", RRG,
+     "    for key, v in expected.items():\n        exp_by_tk.setdefault(key[0], []).append((v[0], v[1], v[5]))\n",
+     "    for key, v in expected.items():\n        if key in excluded_keys:\n            continue\n"
+     "        exp_by_tk.setdefault(key[0], []).append((v[0], v[1], v[5]))\n"),
+    ("K1_unresolved_bit_not_blocked", "K1", RRG,
+     "            elif not set(keys) <= unresolved_published:\n", "            elif False:\n"),
+    ("K1_pct_dot_read_as_thousands", "K1", RRG,
+     '    if re.fullmatch(r"[+\\-]?\\d+\\.\\d{1,2}", t):\n', "    if False:\n"),
+    ("K1_pct_three_decimals_as_decimal", "K1", RRG,
+     '    if re.fullmatch(r"[+\\-]?\\d+\\.\\d{1,2}", t):\n', '    if re.fullmatch(r"[+\\-]?\\d+\\.\\d+", t):\n'),
+    ("K1_bits_read_inside_tables", "K1", RRG,
+     "                continue\n            for tk, num in POSBIT_RE.findall(line):",
+     "                pass\n            for tk, num in POSBIT_RE.findall(line):"),
+    ("K1_posbit_unsigned", "K1", RRG, 'r"([+\\-−]\\d+(?:[.,]\\d+)?)\\s*%")\nSEP_RE',
+     'r"([+\\-−]?\\d+(?:[.,]\\d+)?)\\s*%")\nSEP_RE'),
+    ("K1_stale_price_ignored", "K1", RRG,
+     '    if not price_session or price_session >= asof or not _is_session_day(asof):\n        return ""\n',
+     '    if True:\n        return ""\n'),
+    ("K1_stale_on_non_session_day", "K1", RRG,
+     "    if not price_session or price_session >= asof or not _is_session_day(asof):\n",
+     "    if not price_session or price_session >= asof:\n"),
+    ("K1_stale_not_applied", "K1", RRG,
+     '        if tk_stale:\n            row["why"].insert(0, tk_stale)\n',
+     '        if False:\n            row["why"].insert(0, tk_stale)\n'),
+    ("K1_no_cost_gets_pct", "K1", RRG,
+     '        elif not row["why"] and cp + addback.get(tk, g) <= 0:\n', "        elif False:\n"),
+    ("K1_price_session_dropped", "K1", RRG,
+     '    res.price_session = getattr(prices, "session", None)\n', "    res.price_session = None\n"),
+    ("K1_prices_session_unset", "K1", RRG, "    out.session = newest\n", "    out.session = None\n"),
+    ("K1_published_ignores_bits", "K1", RRG,
+     "        published = {tk for tk, _q, _p in rows} | prose_tk | bit_tk\n",
+     "        published = {tk for tk, _q, _p in rows} | prose_tk\n"),
+    ("K1_nocover_ignores_bits", "K1", RRG, "                    and k[0] not in bit_tk]", "                    ]"),
+    ("K1_unheld_bits_counted_checked", "K1", RRG,
+     "                bits_unheld += 1                  # mã không có trong sổ vị thế — ngoài phạm vi",
+     "                bits_checked += 1"),
+    # ---------------- H1c dạng bảng
+    ("H1c_row_needs_ticker_first", "H1c", RRG,
+     'ROW_RE = re.compile(r"^\\|(?:\\s*\\d+\\.?\\s*\\|)?\\s*(?:\\*\\*)?(" + _TK',
+     'ROW_RE = re.compile(r"^\\|\\s*(?:\\*\\*)?(" + _TK'),
+    ("H1c_row_no_note_after_ticker", "H1c", RRG, '_TK_NOTE = r"(?:\\s*\\([^|()]*\\))?"', '_TK_NOTE = r""'),
+    ("H1c_tables_in_quote_skipped", "H1c", RRG,
+     '        lines = [_strip_quote(ln.rstrip("\\n")) for ln in f]\n    rows, blind = [], []',
+     '        lines = [ln.rstrip("\\n") for ln in f]\n    rows, blind = [], []'),
+    ("H1c_mention_cell_exact_only", "H1c", RRG,
+     'any(re.sub(r"\\s*\\([^()]*\\)\\s*$", "", c.replace("*", "")).strip() == tk',
+     'any(c.replace("*", "").strip() == tk'),
+    # ================ 2026-10-10 vòng 2 của K1 (job Taylor_20261010_125837, arch-review 53b48b76)
+    # ---------------- F5: 17 đột biến reviewer để lại (15 SỐNG + 2 chỉ SẬP) — /tmp/archrev_k1_evidence/mymut.py
+    ("R04_stale_code_blocked", "F5", RRG, '            row["code"] = "no_price"', '            row["code"] = "blocked"'),
+    ("R16_table_cell_num_not_pctnum", "F5", RRG,
+     "        qty, pct = _num(cells[qty_i]), _pct_num(cells[col])", "        qty, pct = _num(cells[qty_i]), _num(cells[col])"),
+    ("R25_gate_ignores_position_returns_why", "F5", RRG,
+     '            if r["why"]:\n                # KHÔNG dựng được giá vốn thô / không có giá đúng phiên',
+     '            if False:\n                # KHÔNG dựng được giá vốn thô / không có giá đúng phiên'),
+    ("R26_session_is_min_not_max", "F5", RRG,
+     '    newest = max((str(r["d"])[:10] for r in rows), default=None)',
+     '    newest = min((str(r["d"])[:10] for r in rows), default=None)'),
+    ("D01_began_boundary_gt", "F5", DAR,
+     "    return first[:10] >= lo and not any(r[0] == first and r[1] > 0 for r in rows)",
+     "    return first[:10] > lo and not any(r[0] == first and r[1] > 0 for r in rows)"),
+    ("D10_memo_no_isdir_check", "F5", DAR,
+     '    if not d or not os.path.isdir(d):\n        return ""', '    if not d:\n        return ""'),
+    ("P01_code_always_blocked", "F5", PS,
+     '            no_ret[tk] = r.get("code") if r.get("code") in RETURN_UNAVAILABLE else "blocked"',
+     '            no_ret[tk] = "blocked"'),
+    ("P02_sleeve_den_broker_cost", "F5", PS, '            ret_pl[tk] = (r["pl"], r["qty"] * r["raw_cost"])',
+     '            ret_pl[tk] = (r["pl"], r["qty"] * r["cost_price"])'),
+    ("P03_sleeve_total_partial", "F5", PS, "        if den and all(tk in ret_pl for tk, *_ in rows):", "        if den:"),
+    ("P10_why_row_still_gets_pct", "F5", PS,
+     '        else:\n            pnl_pct = r["pct"]\n            ret_pl[tk]',
+     '        if r and "pct" in r:\n            pnl_pct = r["pct"]\n            ret_pl[tk]'),
+    ("P12_tool_error_swallowed_silently", "F5", PS,
+     '            print(f"portfolio_status: công cụ tỉ suất §21 lỗi ({account} {date}) — không in tỉ suất "\n'
+     '                  f"mã nào: {ret_err}", file=sys.stderr)', '            pass'),
+    ("P13_why_not_logged", "F5", PS,
+     '            print(f"portfolio_status: {tk} ({account} {date}) không có tỉ suất §21: "\n'
+     '                  + " | ".join(r["why"]), file=sys.stderr)', '            pass'),
+    ("B01_memo_not_exported", "F5", SH, '  export DAR_BQ_MEMO_DIR="$_eod_memo"', '  DAR_BQ_MEMO_DIR="$_eod_memo"'),
+    ("B02_no_cleanup_trap", "F5", SH, "  trap 'rm -rf \"$_eod_memo\"' EXIT\n", "  :\n"),
+    ("B03_timeout_back_to_60", "F5", SH, "capture_output=True, text=True, cwd=wc_root, timeout=600,",
+     "capture_output=True, text=True, cwd=wc_root, timeout=60,"),
+    ("B04_stderr_not_forwarded", "F5", SH,
+     '        if _el.startswith(("portfolio_status:", "ℹ️", "⚠️")):\n            print(_el, file=sys.stderr)',
+     '        if False:\n            print(_el, file=sys.stderr)'),
+    # (P11_stop_blind_all_sleeves của reviewer: dòng đó đã đổi ở F2 — bản tương đương là
+    #  F2_stop_blind_counts_auto_sleeves + F2_stop_blind_all_sleeves bên dưới.)
+    # ---------------- F1: `ts` của sổ = mốc MỌI bản ghi, kể cả bản ghi rỗng; bản đọc rỗng đơn lẻ ở đầu sổ
+    ("F1_ts_from_ticker_rows", "F1", DAR,
+     '    ts = sorted({t for t in (getattr(series, "record_ts", None) or ()) if t} | row_ts)\n',
+     "    ts = sorted(row_ts)\n"),
+    ("F1_ts_only_record_ts", "F1", DAR,
+     '    ts = sorted({t for t in (getattr(series, "record_ts", None) or ()) if t} | row_ts)\n',
+     '    ts = sorted({t for t in (getattr(series, "record_ts", None) or ()) if t})\n'),
+    ("F1_lone_blank_first_read_kept", "F1", DAR,
+     "    if held and sum(1 for t in ts if t < held) == 1:\n", "    if False:\n"),
+    ("F1_two_blank_reads_dropped_too", "F1", DAR,
+     "    if held and sum(1 for t in ts if t < held) == 1:\n",
+     "    if held and sum(1 for t in ts if t < held) >= 1:\n"),
+    ("F1_blank_dropped_without_holding", "F1", DAR,
+     "    if held and sum(1 for t in ts if t < held) == 1:\n",
+     "    if len(ts) >= 1 and sum(1 for t in ts if not held or t < held) >= 1:\n"),
+    ("F1_ledger_ts_from_ticker_rows", "F1", DAR, '            "ts": rec_ts,\n',
+     '            "ts": sorted({r[0] for rows in series.values() for r in rows}),\n'),
+    ("F1_first_ignores_witness_rule", "F1", DAR, '            "first": rec_ts[0] if rec_ts else "",\n',
+     '            "first": min(getattr(series, "record_ts", None) or [""]),\n'),
+    # ---------------- F4: giá của RIÊNG một mã dừng ở phiên cũ
+    ("F4_prices_lagging_unset", "F4", RRG, "    out.lagging = lagging\n", "    out.lagging = {}\n"),
+    ("F4_positions_drop_lagging", "F4", RRG,
+     '    res.price_lagging = dict(getattr(prices, "lagging", None) or {})\n', "    res.price_lagging = {}\n"),
+    ("F4_lagging_ticker_still_gets_pct", "F4", RRG,
+     '        tk_stale = stale or (lagging_price_note(tk, lagging[tk], session) if tk in lagging else "")\n',
+     "        tk_stale = stale\n"),
+    ("F4_lagging_blocks_every_ticker", "F4", RRG,
+     '        tk_stale = stale or (lagging_price_note(tk, lagging[tk], session) if tk in lagging else "")\n',
+     '        tk_stale = stale or (lagging_price_note(tk, "?", session) if lagging else "")\n'),
+    ("F4_lagging_compares_wrong_way", "F4", RRG,
+     '        if str(r["d"])[:10] != newest:\n            lagging[r["tk"]] = str(r["d"])[:10]',
+     '        if str(r["d"])[:10] == newest:\n            lagging[r["tk"]] = str(r["d"])[:10]'),
+    # ---------------- F6: dây bẫy đếm dòng vị thế + POSBIT nhận in đậm / giá trị "?"
+    ("F6_tripwire_off", "F6", RRG,
+     "    for ln, label, n, read, noret in position_line_gaps(report_path):\n",
+     "    for ln, label, n, read, noret in []:\n"),
+    ("F6_tripwire_only_when_short", "F6", RRG,
+     "        if read + noret != int(m.group(2)):\n", "        if read + noret < int(m.group(2)):\n"),
+    ("F6_tripwire_ignores_no_return_mark", "F6", RRG,
+     "            noret += body.count(NO_RETURN_MARK)\n", "            noret += 0\n"),
+    ("F6_tripwire_counts_table_lines", "F6", RRG,
+     '            if body.startswith("|"):\n                continue\n            read +=',
+     '            if body.startswith("|"):\n                pass\n            read +='),
+    ("F6_tripwire_runs_past_blank_line", "F6", RRG,
+     "            if not body.strip():\n                break\n", "            if not body.strip():\n                continue\n"),
+    ("F6_tripwire_not_in_blockquote", "F6", RRG,
+     '        lines = [_strip_quote(ln.rstrip("\\n")) for ln in f]\n    out = []\n    for i, line in enumerate(lines):\n        m = DETAIL_HDR_RE',
+     '        lines = [ln.rstrip("\\n") for ln in f]\n    out = []\n    for i, line in enumerate(lines):\n        m = DETAIL_HDR_RE'),
+    ("F6_posbit_no_bold", "F6", RRG,
+     'r")\\s+(?:\\d[\\d.,]*\\s*M|\\?)\\s*,\\s*\\*{0,2}\\s*"\n', 'r")\\s+(?:\\d[\\d.,]*\\s*M|\\?)\\s*,\\s*"\n'),
+    ("F6_posbit_no_unknown_value", "F6", RRG,
+     'r")\\s+(?:\\d[\\d.,]*\\s*M|\\?)\\s*,\\s*\\*{0,2}\\s*"\n', 'r")\\s+\\d[\\d.,]*\\s*M\\s*,\\s*\\*{0,2}\\s*"\n'),
+    # ---------------- F2: khoảng cách tới ngưỡng cắt lỗ TỰ ĐỘNG đo trên cơ sở của lệnh
+    ("F2_bal_on_published_return", "F2", PS,
+     "            basis_pp = broker_pct[tk] if sleeve in AUTO_STOP_SLEEVES else pp\n", "            basis_pp = pp\n"),
+    ("F2_every_sleeve_on_broker_basis", "F2", PS,
+     "            basis_pp = broker_pct[tk] if sleeve in AUTO_STOP_SLEEVES else pp\n",
+     "            basis_pp = broker_pct[tk]\n"),
+    ("F2_no_auto_stop_sleeve", "F2", PS, 'AUTO_STOP_SLEEVES = frozenset({"BAL"})\n', "AUTO_STOP_SLEEVES = frozenset()\n"),
+    ("F2_basis_other_formula", "F2", PS, "    return (market_price / avg_cost - 1.0) * 100.0\n",
+     "    return (market_price - avg_cost) / market_price * 100.0\n"),
+    ("F2_basis_without_validity_guard", "F2", PS,
+     "    if not avg_cost or avg_cost <= 0 or not market_price or market_price <= 0:\n        return None\n",
+     "    if False:\n        return None\n"),
+    ("F2_basis_accepts_negative_cost", "F2", PS,
+     "    if not avg_cost or avg_cost <= 0 or not market_price or market_price <= 0:\n",
+     "    if not avg_cost or not market_price or market_price <= 0:\n"),
+    ("F2_auto_text_reads_as_ticker_pct", "F2", PS,
+     "    if sleeve in AUTO_STOP_SLEEVES:\n        return emoji, (", "    if False:\n        return emoji, ("),
+    ("F2_auto_flag_printed_as_ticker_pct", "F2", PS,
+     "        if sleeve in AUTO_STOP_SLEEVES:\n            # không in", "        if False:\n            # không in"),
+    ("F2_stop_blind_counts_auto_sleeves", "F2", PS,
+     "                        if sl in STOP_LOSS_PCT_BY_SLEEVE and sl not in AUTO_STOP_SLEEVES\n",
+     "                        if sl in STOP_LOSS_PCT_BY_SLEEVE\n"),
+    ("F2_stop_blind_all_sleeves", "F2", PS,
+     "                        if sl in STOP_LOSS_PCT_BY_SLEEVE and sl not in AUTO_STOP_SLEEVES\n",
+     "                        if sl not in AUTO_STOP_SLEEVES\n"),
+    ("F2_auto_blind_flag_dropped", "F2", PS, "    if auto_blind:\n", "    if False:\n"),
+    ("F2_auto_blind_all_sleeves", "F2", PS,
+     "    auto_blind = sorted(tk for sl, rows in sleeves.items() if sl in AUTO_STOP_SLEEVES\n",
+     "    auto_blind = sorted(tk for sl, rows in sleeves.items()\n"),
+    # ---------------- F3: chú thích hai giá
+    ("F3_price_note_dropped", "F3", PS, "        lines.append(PRICE_BASIS_NOTE)\n", "        pass\n"),
+    # ---------------- F7: vỏ bash
+    ("F7_memo_leftovers_never_cleaned", "F7", SH,
+     "find \"${TMPDIR:-/tmp}\" -maxdepth 1 -type d -name 'eod_bq_memo.*' -user \"$(id -u)\" -mmin +1440 \\\n"
+     "  -exec rm -rf {} + 2>/dev/null || true\n", ":\n"),
+    ("F7_memo_cleanup_any_age", "F7", SH, "-user \"$(id -u)\" -mmin +1440 \\\n", "-user \"$(id -u)\" \\\n"),
+    ("F7_memo_cleanup_any_name", "F7", SH, "-type d -name 'eod_bq_memo.*' -user", "-type d -name '*.*' -user"),
+    ("F7_memo_overrides_caller", "F7", SH,
+     'if [ -z "${DAR_BQ_MEMO_DIR:-}" ] && _eod_memo=', "if _eod_memo="),
+    ("F7_report_leaks_tool_error", "F7", SH,
+     '              + f" [rc={_ps.returncode}]", file=sys.stderr)\n        lines.append(PORTFOLIO_BLOCK_MISSING)',
+     '              + f" [rc={_ps.returncode}]", file=sys.stderr)\n        lines.append("⚠️ portfolio_status.py: không có dữ liệu (" + _ps.stderr.strip().splitlines()[-1] + ")")'),
+    ("F7_report_leaks_exception", "F7", SH,
+     "          file=sys.stderr)\n    lines.append(PORTFOLIO_BLOCK_MISSING)",
+     '          file=sys.stderr)\n    lines.append(f"⚠️ portfolio_status.py lỗi: {_e}")'),
+    ("F7_tool_error_not_logged", "F7", SH,
+     '              + f" [rc={_ps.returncode}]", file=sys.stderr)', '              + f" [rc={_ps.returncode}]", file=open(os.devnull, "w"))'),
+    ("F7_exception_not_logged", "F7", SH,
+     '    print(f"portfolio_status: KHÔNG gọi được ({account} {plan_date}) — {type(_e).__name__}: {_e}",\n          file=sys.stderr)',
+     '    print(f"portfolio_status: KHÔNG gọi được ({account} {plan_date}) — {type(_e).__name__}: {_e}",\n          file=open(os.devnull, "w"))'),
+    ("F7_crash_reason_is_wrapper_line", "F7", SH,
+     '    case "$_last" in *"returned non-zero exit status"*)', '    case "$_last" in __khong_bao_gio__)'),
+    ("F7_rc_fixed_reason_again", "F7", RC, '          if [ -n "$_RC_BLK" ]; then\n', "          if false; then\n"),
+    ("F7_rc_crash_reason_is_wrapper_line", "F7", RC,
+     "| grep -v '^[[:space:]]*$' | grep -v 'returned non-zero exit status' | tail -n 1 || true)\"\n            [ -n \"$_RC_WHY\" ] ||",
+     "| grep -v '^[[:space:]]*$' | tail -n 1 || true)\"\n            [ -n \"$_RC_WHY\" ] ||"),
+    ("F7_rc_wrapper_only_gives_nothing", "F7", RC,
+     '            [ -n "$_RC_WHY" ] || _RC_WHY="$(printf', '            : || _RC_WHY="$(printf'),
+    ("F7_rc_empty_output_says_nothing", "F7", RC,
+     '          [ -n "$_RC_WHY" ] || _RC_WHY="cổng không in dòng nào', '          : || _RC_WHY="cổng không in dòng nào'),
+    ("F7_rc_reason_not_sanitized", "F7", RC,
+     '          _RC_WHY="$(printf \'%s\' "$_RC_WHY" | python3 -c', '          : "$(printf \'%s\' "$_RC_WHY" | python3 -c'),
+    ("F7_rc_reason_not_in_message", "F7", RC,
+     '— ${_RC_WHY}. Sweep tự retry mỗi ngày; chi tiết:', '— báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; chi tiết:'),
 ]
 
 
 def _selfcheck(workdir: str, fname: str) -> int:
+    """Chạy MỘT selfcheck trên bản sao trong `workdir`. `fname` = file mang selfcheck nhúng (DAR,
+    RRG) hoặc file selfcheck rời (PSS chạy từ bản sao; SHS/RCS chạy bản thật trong `bin/` và nhận
+    file .sh đột biến qua biến môi trường)."""
     env = dict(os.environ, PYTHONPATH=BIN + os.pathsep + os.environ.get("PYTHONPATH", ""),
-               MIKE_BOT_TEST_MODE="1",
+               MIKE_BOT_TEST_MODE="1", AUTO_EXIT_TEST_MODE="1",
                WC_ROOT=os.path.join(workdir, "wcroot") if fname == RRG else REAL_ROOT)
-    p = subprocess.run([sys.executable, os.path.join(workdir, fname), "--selfcheck"],
-                       env=env, cwd=workdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+    env.pop("DAR_BQ_MEMO_DIR", None)
+    if fname in (DAR, RRG):
+        cmd = [sys.executable, os.path.join(workdir, fname), "--selfcheck"]
+    elif fname == PSS:
+        cmd = [sys.executable, os.path.join(workdir, PSS)]
+    else:
+        env["EOD_SRC" if fname == SHS else "RC_SRC"] = os.path.join(workdir, SH if fname == SHS else RC)
+        cmd = [sys.executable, os.path.join(BIN, fname)]
+    p = subprocess.run(cmd, env=env, cwd=workdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                        text=True)
     # rc ≠ 0 mà có traceback KHÔNG phải AssertionError = selfcheck SẬP giữa chừng: đột biến "chết"
     # nhưng không assertion nào bắt nó, và mọi ca phía sau chỗ sập không còn chạy (arch-review K8).
@@ -511,8 +801,11 @@ def _run_one(src: dict, m: tuple) -> tuple:
         return name, case, f, f"HỎNG — đoạn gốc xuất hiện {n} lần (cần 1)", []
     work = _workdir(src, (f, old, new))
     try:
-        # đột biến ở `dar` có thể chỉ lộ qua selfcheck của cổng (cổng import bản sao `dar`)
-        rcs = [_selfcheck(work, f)] + ([_selfcheck(work, RRG)] if f == DAR else [])
+        rcs = []
+        for target in TARGETS[f]:
+            rcs.append(_selfcheck(work, target))
+            if rcs[-1] > 0:                        # đã chết bằng assertion — khỏi chạy cái sau
+                break
     finally:
         shutil.rmtree(work, ignore_errors=True)
     if any(rc > 0 for rc in rcs):
@@ -528,10 +821,10 @@ def main() -> int:
     if dup:
         print(f"❌ tên đột biến trùng: {dup}")
         return 2
-    src = {f: open(os.path.join(BIN, f), encoding="utf-8").read() for f in (DAR, RRG)}
+    src = {f: open(os.path.join(BIN, f), encoding="utf-8").read() for f in COPIED}
     work = _workdir(src)
     try:
-        base = {f: _selfcheck(work, f) for f in (DAR, RRG)}
+        base = {f: _selfcheck(work, f) for f in (DAR, RRG, PSS, SHS, RCS)}
     finally:
         shutil.rmtree(work, ignore_errors=True)
     print(f"baseline (không đột biến): {base}")

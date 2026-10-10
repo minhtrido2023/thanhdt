@@ -211,7 +211,7 @@ def run_eod_vendor_reason(gate_out, vendor_rc=10):
     """Chạy khối EOD_VENDOR_REASON thật (why= rẽ theo TAG trong $gate_out) trên 1 fixture."""
     body = extract_bash("EOD_VENDOR_REASON_BEGIN", "EOD_VENDOR_REASON_END")
     script = ("#!/usr/bin/env bash\nset -uo pipefail\n"
-              'gate_out="$1"\nvendor_rc="$2"\nwhy="delivery chưa đủ kênh (Discord/email)"\n'
+              'gate_out="$1"\nvendor_rc="$2"\nwhy="__WHY_CỦA_KHỐI_TRƯỚC__"\n'
               + body + '\nprintf \'%s\' "$why"\n')
     with tempfile.TemporaryDirectory() as td:
         p = os.path.join(td, "reason.sh")
@@ -247,8 +247,179 @@ check("cả hai tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)",
       "LỆCH NGUỒN VENDOR" in why_both and "Winston" in why_both, why_both)
 
 why_no10 = run_eod_vendor_reason("", vendor_rc=1)
-check("vendor_rc≠10 ⇒ giữ why= mặc định (không đổi khi không có tag vendor để so)",
-      why_no10 == "delivery chưa đủ kênh (Discord/email)", why_no10)
+check("vendor_rc≠10 ⇒ giữ nguyên why= của khối trước (không đổi khi không có tag vendor để so)",
+      why_no10 == "__WHY_CỦA_KHỐI_TRƯỚC__", why_no10)
+
+
+def run_eod_gate_reason(gate_out, gate_rc=1):
+    """Chạy khối EOD_GATE_REASON thật (why= đọc từ CHÍNH output của cổng, §29) trên 1 fixture."""
+    body = extract_bash("EOD_GATE_REASON_BEGIN", "EOD_GATE_REASON_END")
+    script = ("#!/usr/bin/env bash\nset -uo pipefail\nf() {\n"
+              'local gate_out="$1" gate_rc="$2"\n' + body + '\nprintf \'%s\' "$why"\n}\nf "$@"\n')
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "reason.sh")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(script)
+        r = subprocess.run(["bash", p, gate_out, str(gate_rc)], capture_output=True, text=True)
+        if r.returncode or "syntax error" in r.stderr or "command not found" in r.stderr:
+            return f"__BLOCK_DID_NOT_RUN__ rc={r.returncode}: " + r.stderr
+        return r.stdout
+
+
+print("\n[gate-reason] why= mặc định đọc từ CHÍNH output của cổng, không gán sẵn một nguyên nhân (§29)")
+_BLOCKED = ("CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-02.md | chốt 2026-10-02\n\n"
+            "❌ CHẶN — 2 vấn đề:\n"
+            "   • DRI (dòng vị thế báo cáo ngày, dòng 32): báo cáo +28.00% vs kỳ vọng ZaloPay +29.31%\n"
+            "   • SAB (dòng vị thế báo cáo ngày, dòng 29): báo cáo -2.60% vs kỳ vọng ZaloPay -4.53%\n"
+            "report_delivery_gate: INCOMPLETE — Command '['python3', 'report_return_gate.py']' "
+            "returned non-zero exit status 1.\n")
+why_blk = run_eod_gate_reason(_BLOCKED)
+check("cổng tỉ suất CHẶN ⇒ why nêu đúng số vấn đề + mục ĐẦU TIÊN của khối chặn (bản cũ: 'delivery "
+      "chưa đủ kênh (Discord/email)' cho mọi rc≠0)",
+      why_blk.startswith("cổng tỉ suất CHẶN — 2 vấn đề: DRI (dòng vị thế báo cáo ngày, dòng 32): "
+                         "báo cáo +28.00% vs kỳ vọng ZaloPay +29.31%")
+      and "SAB" not in why_blk and "delivery chưa đủ kênh" not in why_blk, why_blk)
+why_ch = run_eod_gate_reason("report_delivery_gate: nav-flow PASS (x.md)\n\n"
+                             "report_delivery_gate: INCOMPLETE — discord: HTTP 503\n", gate_rc=1)
+check("không có khối chặn ⇒ why trích DÒNG CUỐI cổng in ra (lỗi kênh thật) + rc",
+      why_ch == "report_delivery_gate rc=1 — dòng cuối cổng in ra: report_delivery_gate: INCOMPLETE "
+                "— discord: HTTP 503", why_ch)
+why_none = run_eod_gate_reason("", gate_rc=7)
+check("cổng không in gì ⇒ nói đúng là không xác định được (kèm rc), không đoán",
+      "rc=7" in why_none and "không xác định được nguyên nhân" in why_none
+      and "Discord" not in why_none, why_none)
+why_json = run_eod_gate_reason('Traceback\n  File "x.py"\nKeyError: "a\\b" \n   nhiều   khoảng trắng\n')
+check("why= an toàn để ghép vào chuỗi JSON: không nháy kép, không gạch chéo ngược, một dòng",
+      '"' not in why_json and "\\" not in why_json and "\n" not in why_json
+      and why_json.endswith("nhiều khoảng trắng"), why_json)
+assert why_blk.startswith("cổng tỉ suất CHẶN — 2 vấn đề: DRI"), (
+    "MUTATION-GUARD eod_gate_reason: output có khối '❌ CHẶN' mà why= không trích nó — khối "
+    f"EOD_GATE_REASON đã bị bỏ/hỏng và nguyên nhân lại bị gán cứng. Đang là: {why_blk!r}")
+
+why_crash = run_eod_gate_reason(
+    # (cố ý KHÔNG chép dòng mở đầu traceback của Python vào fixture: các bộ đột biến nhận diện
+    #  "selfcheck SẬP" bằng chính chuỗi đó trong output của selfcheck)
+    "  File \"report_return_gate.py\", line 1310, in run_gate\n    tot_pl += r[\"pl\"]\n"
+    "KeyError: 'pl'\nreport_delivery_gate: INCOMPLETE — Command '['python3', "
+    "'report_return_gate.py']' returned non-zero exit status 1.\n")
+check("cổng tỉ suất SẬP (traceback, không khối chặn) ⇒ why là dòng lỗi THẬT, không phải dòng bọc "
+      "'Command … returned non-zero exit status' (bản 53b48b76: dòng bọc)",
+      why_crash == "report_delivery_gate rc=1 — dòng cuối cổng in ra: KeyError: 'pl' (cổng con thoát "
+                   "lỗi, không in khối chặn)", why_crash)
+why_wrap = run_eod_gate_reason("report_delivery_gate: INCOMPLETE — Command '['python3', 'x.py']' "
+                               "returned non-zero exit status 1.\n")
+check("chỉ có dòng bọc ⇒ giữ dòng bọc (không còn gì khác để trích)",
+      why_wrap.endswith("returned non-zero exit status 1.") and "cổng con thoát lỗi" not in why_wrap,
+      why_wrap)
+
+# ── Vỏ bash quanh khối danh mục (K1 + arch-review 53b48b76 F5/F7): chạy NGUYÊN khối EOD_MEMO thật
+#    rồi NGUYÊN đoạn python REPORT= trong cùng một tiến trình bash, trên wc_root giả có STUB
+#    `mike/bin/portfolio_status.py`. Không có đường nào tới portfolio_status/BQ thật.
+STUB_PS = r"""#!/usr/bin/env python3
+import os, sys, time
+mode = os.environ.get("STUB_PS_MODE", "ok")
+d = os.environ.get("DAR_BQ_MEMO_DIR")
+print("portfolio_status: QQ2 (SpaceX) không có tỉ suất §21: LÝ-DO-THẬT", file=sys.stderr)
+print("/x/google/auth/_default.py:76: FutureWarning: ồn của thư viện", file=sys.stderr)
+print("ℹ️  giá: dòng của công cụ tỉ suất", file=sys.stderr)
+if mode == "fail":
+    print("  File \"x.py\", line 1, in <module>\nValueError: chi tiết nội bộ BÍ-MẬT", file=sys.stderr)
+    sys.exit(1)
+if mode == "slow":
+    time.sleep(6)
+print(f"STUB_MEMO_DIR={d} ISDIR={bool(d) and os.path.isdir(d)} ARGS={' '.join(sys.argv[1:])}")
+"""
+NEUTRAL_PS = "Chưa có bảng tình trạng danh mục cho báo cáo hôm nay"
+
+
+def run_shell(py, mode="ok", preset=False, account="SpaceX"):
+    """{rc, out (báo cáo), err (log), memo (đường dẫn sổ nhớ stub thấy), tmp_after, preset}."""
+    accts = [{"label": a, "account_id": n} for a, n in ACCT_NO.items()]
+    root = build_root(accts, [order_rec(ACCT_NO[account], 1, 0)])
+    tmp = tempfile.mkdtemp(prefix="eod_shell_sc_")
+    try:
+        with open(os.path.join(root, "mike", "bin", "portfolio_status.py"), "w", encoding="utf-8") as f:
+            f.write(STUB_PS)
+        two_days = __import__("time").time() - 2 * 86400
+        for name, old_ in (("eod_bq_memo.OLD", True), ("eod_bq_memo.FRESH", False),
+                           ("other_tool.OLD", True)):
+            dpath = os.path.join(tmp, name)
+            os.makedirs(dpath)
+            open(os.path.join(dpath, "x.json"), "w").close()
+            if old_:
+                os.utime(dpath, (two_days, two_days))
+        pre = os.path.join(tmp, "caller_memo")
+        os.makedirs(pre)
+        script = ("#!/usr/bin/env bash\nset -uo pipefail\n"
+                  + extract_bash("EOD_MEMO_BEGIN", "EOD_MEMO_END", sh_text=SH_TEXT)
+                  + f'\npython3 - plan.json "{root}/state/state_{account}.json" "{account}" "{DATE}" '
+                    f'"{root}" << \'PYEOF\'\n' + py + "PYEOF\n")
+        spath = os.path.join(root, "harness.sh")
+        with open(spath, "w", encoding="utf-8") as f:
+            f.write(script)
+        env = {"PATH": os.path.join(root, "mike", "bin") + ":/usr/bin:/bin", "HOME": root,
+               "LANG": "C.UTF-8", "TMPDIR": tmp, "STUB_PS_MODE": mode}
+        if preset:
+            env["DAR_BQ_MEMO_DIR"] = pre
+        r = subprocess.run(["bash", spath], capture_output=True, text=True, env=env, cwd=root,
+                           timeout=120)
+        m = re.search(r"STUB_MEMO_DIR=(\S+) ISDIR=(\S+) ARGS=(.*)", r.stdout)
+        return {"rc": r.returncode, "out": r.stdout, "err": r.stderr,
+                "memo": m.group(1) if m else None, "isdir": m.group(2) if m else None,
+                "args": m.group(3).strip() if m else None, "tmp": tmp,
+                "memo_alive": bool(m) and os.path.isdir(m.group(1)),
+                "after": sorted(os.listdir(tmp)), "pre": pre}
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+print("\n[vỏ bash] sổ nhớ BQ của lượt chạy + lời gọi portfolio_status (stub) — chạy khối thật")
+SH_TEXT = cur_text
+S = run_shell(cur_py)
+check("biến `DAR_BQ_MEMO_DIR` TỚI tiến trình con portfolio_status (phải `export`): stub thấy một thư "
+      "mục `eod_bq_memo.*` dưới TMPDIR đang TỒN TẠI lúc nó chạy; đúng tham số --account/--date",
+      S["rc"] == 0 and bool(S["memo"]) and S["memo"].startswith(os.path.join(S["tmp"], "eod_bq_memo."))
+      and S["isdir"] == "True" and S["args"] == f"--account SpaceX --date {DATE}",
+      (S["rc"], S["memo"], S["isdir"], S["args"], S["err"][-300:]))
+check("thư mục sổ nhớ của lượt bị XOÁ khi tiến trình bash thoát (trap EXIT)",
+      S["memo"] is not None and not S["memo_alive"], S["after"])
+check("dọn rác SIGKILL: `eod_bq_memo.*` cũ hơn 1 ngày bị xoá; cái MỚI (lượt tài khoản kia đang chạy) "
+      "và thư mục tên khác thì không đụng",
+      S["after"] == ["caller_memo", "eod_bq_memo.FRESH", "other_tool.OLD"], S["after"])
+check("stderr của portfolio_status được CHUYỂN ra log: dòng `portfolio_status:` và dòng của công cụ "
+      "tỉ suất có mặt, FutureWarning của thư viện thì không; không dòng nào lọt vào báo cáo",
+      "portfolio_status: QQ2 (SpaceX) không có tỉ suất §21: LÝ-DO-THẬT" in S["err"]
+      and "ℹ️  giá: dòng của công cụ tỉ suất" in S["err"] and "FutureWarning" not in S["err"]
+      and "LÝ-DO-THẬT" not in S["out"], S["err"][-400:])
+SP = run_shell(cur_py, preset=True)
+check("caller ĐÃ đặt `DAR_BQ_MEMO_DIR` ⇒ dùng đúng thư mục đó, không tạo cái mới, không xoá của caller",
+      SP["memo"] == SP["pre"] and "caller_memo" in SP["after"]
+      and not [x for x in SP["after"] if x.startswith("eod_bq_memo.") and x != "eod_bq_memo.FRESH"],
+      (SP["memo"], SP["after"]))
+_to = re.findall(r'"portfolio_status\.py"\),.*?timeout=(\d+),', cur_py, re.S)
+check("trần thời gian lời gọi portfolio_status ghim 600s (công cụ tỉ suất đo ~110-167s; 60s cũ là "
+      "cắt ngang MỌI lượt có lệnh)", _to == ["600"], str(_to))
+SF = run_shell(cur_py, mode="fail")
+check("portfolio_status lỗi ⇒ báo cáo in MỘT câu trung tính — không tên script, không lệnh, không "
+      "traceback/thông báo lỗi nội bộ (bản SpaceX gửi nhà đầu tư)",
+      SF["rc"] == 0 and NEUTRAL_PS in SF["out"]
+      and not any(x in SF["out"] for x in ("portfolio_status", "BÍ-MẬT", "x.py", "ValueError",
+                                           "Command", "rc=")), SF["out"][:400])
+check("… và lý do THẬT (dòng cuối stderr + rc) vào log",
+      "portfolio_status: KHÔNG ra khối danh mục (SpaceX " + DATE + ") — ValueError: chi tiết nội bộ "
+      "BÍ-MẬT [rc=1]" in SF["err"], SF["err"][-400:])
+_fast = cur_py.replace("cwd=wc_root, timeout=600,", "cwd=wc_root, timeout=1,")
+ST = run_shell(_fast, mode="slow") if _fast != cur_py else {"rc": -1, "out": "", "err": "không thay được timeout"}
+check("portfolio_status QUÁ GIỜ (trần ép về 1s cho ca này) ⇒ vẫn câu trung tính; chuỗi 'Command … "
+      "timed out' chỉ nằm trong log",
+      ST["rc"] == 0 and NEUTRAL_PS in ST["out"]
+      and not any(x in ST["out"] for x in ("timed out", "Command", "portfolio_status"))
+      and "portfolio_status: KHÔNG gọi được (SpaceX " + DATE + ") — TimeoutExpired" in ST["err"],
+      (ST["out"][:300], ST["err"][-300:]))
+assert S["memo"] and S["isdir"] == "True" and not S["memo_alive"], (
+    "MUTATION-GUARD eod_memo: khối EOD_MEMO không còn export sổ nhớ tới tiến trình con hoặc không "
+    f"dọn khi thoát. Đang là: memo={S['memo']!r} isdir={S['isdir']!r} alive={S['memo_alive']!r}")
 
 print(f"\n[RED] CHỨNG MINH NGƯỢC trên bản trước vá {PRE_FIX_REF}: (i)/(ii) phải ĐỎ")
 if old_py is not None:

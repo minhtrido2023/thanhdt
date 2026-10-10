@@ -132,7 +132,23 @@ except Exception as e:
         elif printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_LOOKUP_FAILED|'; then
           INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì KHÔNG TRA ĐƯỢC nguồn vendor \`tav2_bq.corporate_action\` (lỗi hạ tầng BQ), KHÔNG PHẢI hai nguồn bất đồng số và KHÔNG phải lỗi soạn báo cáo. Thử lại khi BQ khoẻ — không cần Winston đối soát số trừ khi lỗi lặp lại nhiều lượt. Sweep tự retry mỗi ngày."
         else
-          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}."
+          # Bản trước in MỘT câu cố định "chưa giao đủ (Discord+email, hash-bound)" cho mọi ca còn
+          # lại — kể cả khi cổng tỉ suất CHẶN vì số sai hay cổng SẬP (arch-review 53b48b76 F7):
+          # sai hướng người xử lý, lặp mỗi ngày. Lý do đọc từ CHÍNH $GATE_OUT (§29), cùng cách
+          # trích với khối EOD_GATE_REASON của eod_trading_report.sh: khối "❌ CHẶN" ⇒ tiêu đề + mục
+          # đầu; không có ⇒ dòng cuối cổng in ra (dòng bọc "returned non-zero exit status" thì lấy
+          # dòng lỗi thật đứng trước nó); cổng không in gì ⇒ nói đúng là không xác định được.
+          _RC_BLK="$(printf '%s\n' "$GATE_OUT" | grep -m1 '^❌ CHẶN' || true)"
+          if [ -n "$_RC_BLK" ]; then
+            _RC_WHY="cổng tỉ suất CHẶN — ${_RC_BLK#❌ CHẶN — } $(printf '%s\n' "$GATE_OUT" | grep -m1 -A1 '^❌ CHẶN' | sed -n '2p' | sed -E 's/^ *• *//')"
+          else
+            _RC_WHY="$(printf '%s\n' "$GATE_OUT" | grep -v '^[[:space:]]*$' | grep -v 'returned non-zero exit status' | tail -n 1 || true)"
+            [ -n "$_RC_WHY" ] || _RC_WHY="$(printf '%s\n' "$GATE_OUT" | grep -v '^[[:space:]]*$' | tail -n 1 || true)"
+            [ -n "$_RC_WHY" ] && _RC_WHY="dòng cuối cổng in ra: $_RC_WHY"
+          fi
+          [ -n "$_RC_WHY" ] || _RC_WHY="cổng không in dòng nào — không xác định được nguyên nhân từ output"
+          _RC_WHY="$(printf '%s' "$_RC_WHY" | python3 -c 'import sys; s = sys.stdin.read(); print(" ".join(s.replace(chr(34), "").replace(chr(92), "").replace(chr(96), "").split())[:300], end="")')"
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — ${_RC_WHY}. Sweep tự retry mỗi ngày; chi tiết: logs/check_report_cadence.log, hoặc bin/report_delivery_gate.py --status ${FNAME}."
         fi
         # RC_VENDOR_REASON_END
         "$ROOT/bin/notify_thread.sh" "$INCOMPLETE_MSG" \
