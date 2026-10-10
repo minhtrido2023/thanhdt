@@ -1009,3 +1009,6 @@
 
 ## Archived 2026-10-10 (keep=12 days=0 require_done=False)
 - [2026-10-09T03:16:52Z] [cash-div fd 10-09] Kết luận C (d9361ee4): first_disclosure_datetime không PIT; giữ mốc 2027-08. Registry .proposed Bẫy 5 corporate_action_snapshots chờ Mike duyệt.
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T09:34:03Z] ĐANG DỞ job Taylor_20261009_093353 selfcheck-red owner sweep 9 file: bắt đầu | NEXT: chạy lại 9 selfcheck, phân loại

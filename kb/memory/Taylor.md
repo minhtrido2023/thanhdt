@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-09T09:34:03Z] ĐANG DỞ job Taylor_20261009_093353 selfcheck-red owner sweep 9 file: bắt đầu | NEXT: chạy lại 9 selfcheck, phân loại
 - [2026-10-09T09:38:42Z] ĐANG DỞ job Taylor_20261009_093353 sweep: custom30 CLOSED; 8 file phân loại xong (atc/basket/cpi/lag_gov/freshness=b, rating8l/capit/cctg=d live CSV) | worktree /home/trido/thanhdt/wt-screds-1009 branch fix/selfcheck-red-sweep-1009 | NEXT: sửa+chạy xanh, merge, close, finding
 - [2026-10-09T09:46:11Z] [selfcheck-red sweep 10-09] 9/9 CLOSED (6a73ef82). Nợ: rating8l --bq BQ2-4 pin số 09-27 (HDG đã lật POWER); nhãn cctg_6m cho dòng 12M.
 - [2026-10-09T09:46:41Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss historical replay: bắt đầu | NEXT: đọc bin/intraday_price_watch.py + data_registry intraday
@@ -26,3 +25,4 @@
 - [2026-10-09T12:31:41Z] [intraday replay v2 10-09] DONE a5aa796b + merge 9a1eeede: H1 ADV>=10 tỷ SUPPORTED (không kém hơn), chưa live; chờ quant-skeptic. Nợ: reader EOD_OOS (dedupe ngày,mã) khi đủ ≥30 ngày ca live.
 - [2026-10-10T04:39:48Z] ĐANG DỞ job Taylor_20261010_043938 vá §21 dividend_adjusted_return.py + report_return_gate.py (GIPS total return, 4 ca DRI/DGC/TPB/TV1): bắt đầu | NEXT: worktree riêng, rà toàn bộ 2 file
 - [2026-10-10T04:55:21Z] ĐANG DỞ job Taylor_20261010_043938 vá §21 GIPS: worktree SPARSE /home/trido/thanhdt/WorkingClaude/wt-totalreturn-1010 (chỉ bin/, đĩa đầy) nhánh fix/total-return-gips-20261010; đã rà xong, đang sửa dar (noise RATIO_NOISE, vendor union, frame_factor, broker_cost_series) rồi gate (entitled_gross 3-tuple+blockers, excluded DGC, regex TV1, lookback) | NEXT: selfcheck + chạy cổng 2 nháp wt-1558282936489611354/reports + bus finding
+- [2026-10-10T06:07:20Z] ĐANG DỞ job Taylor_20261010_043938: ĐÃ COMMIT 9c4b8a90 nhánh fix/total-return-gips-20261010 (worktree sparse WorkingClaude/wt-totalreturn-1010; dar 220 PASS, cổng 155 PASS, 41/41 mutant chết, TZ ok). Đang chạy nền agents/Taylor/research/total_return_gips_20261010/sent_reports_audit.py (→ .out) | NEXT: tổng hợp .out → bus finding (bảng % đúng 2 TK + báo cáo đã gửi bị ảnh hưởng), KHÔNG merge
