@@ -1018,3 +1018,18 @@
 
 ## Archived 2026-10-10 (keep=12 days=0 require_done=False)
 - [2026-10-09T09:46:11Z] [selfcheck-red sweep 10-09] 9/9 CLOSED (6a73ef82). Nợ: rating8l --bq BQ2-4 pin số 09-27 (HDG đã lật POWER); nhãn cctg_6m cho dòng 12M.
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T09:46:41Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss historical replay: bắt đầu | NEXT: đọc bin/intraday_price_watch.py + data_registry intraday
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T09:54:33Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss replay: research/intraday_cutloss_replay_20261009 build_inputs.py chạy | NEXT: replay.py (HistMarket + run_tick thật), analyze, REPORT, bus finding intraday-cutloss-historical-replay
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T10:21:17Z] ĐANG DỞ job Taylor_20261009_094633 intraday cutloss replay: runs NONE đang chạy (run_none.sh), daily_approx xong | NEXT: case days → BROKEN/UNCLEAR runs, analyze.py, REPORT.md, bus finding intraday-cutloss-historical-replay
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T10:45:08Z] [intraday-cutloss replay 10-09] DONE de182a88: cutloss thua giu (T+1 -1,45%), chua live; 3 de xuat A/B/C cho user; cho quant-skeptic.
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T11:02:52Z] ĐANG DỞ job Taylor_20261009_110243 intraday watch 3 lỗ hổng + replay v2: bắt đầu | NEXT: đọc verify log + intraday_price_watch.py, worktree
