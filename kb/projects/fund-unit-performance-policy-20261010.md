@@ -48,5 +48,62 @@ trình 23:40 ICT cùng ngày). Áp cho SpaceX + ZaloPay và mọi account thêm 
    chính (điểm 4) thành cơ chế.
 4. Mốc so sánh có cổ tức + chuỗi riêng ZaloPay "phần bot quản lý".
 
+## Luật gán dòng tiền vào giá đơn vị (bước 1, LIVE trên master từ 2026-10-11)
+Người khai CHỈ ghi ngày + giờ ICT (`time_ict`, bắt buộc) + số tiền + bằng chứng; code tự suy quy
+ước. Một luật: **tiền giao dịch ở giá đơn vị chốt GẦN NHẤT TRƯỚC thời điểm tiền vào/ra**, tham gia
+tỉ suất từ sau đó.
+| Tiền vào/ra lúc | Giá áp dụng |
+|---|---|
+| Sau giờ đóng cửa ngày T (14:45), kể cả tối muộn | giá chốt ngày T |
+| Trong phiên ngày T / trước giờ mở cửa ngày T | giá chốt phiên liền trước |
+| Cuối tuần, ngày nghỉ lễ | giá chốt phiên liền trước |
+Hai dòng cuối là phần Mike MỞ RỘNG từ quyết định 1 (user mới chốt ca "sau đóng cửa" và "trong
+phiên") — **CHỜ user xác nhận**; phương án khác = khớp ở giá chốt phiên KẾ TIẾP (kiểu quỹ mở thuần).
+Fail-closed (từ chối, không đoán): thiếu giờ; ngày trong tương lai; `timing` khai khác suy ra; dòng
+NAV dùng làm giá chụp TRƯỚC giờ đóng cửa của chính phiên đó; nav_history THIẾU dòng của phiên đóng
+cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiền không hữu hạn. Chi tiết + bẫy:
+`kb/data_registry/trading-bot/account_cash_flows.md`, `nav_unit_ledger.md`, `account_inception.md`.
+
 ## Trạng thái
-- 2026-10-10: bước 1 giao Taylor (xem `kb/memory/Mike.md` cho job id). Bước 2-4 chưa bắt đầu.
+- **Bước 1 XONG — merge master `cdb565a6` (2026-10-11 04:1x ICT)**, nhánh
+  `feat/fund-unit-ledger-20261011`, 3 vòng arch-review (feaa33b5 → 75060709 → e102ebef), lần cuối
+  APPROVED. Có: `bin/nav_unit_ledger.py` (sổ đơn vị, `--seal` TỪ CHỐI thư mục dữ liệu thật tới bước
+  3); `nav_period_returns.py` một công thức = tỉ số giá đơn vị + `pnl_vnd`, `mwr_pct` (IRR kỳ),
+  `pending_flows`/`dropped_flows`, quy năm = null khi < 365 ngày; mọi % của dòng NAV hằng ngày
+  (`daily_nav_snapshot.py`, `portfolio_status.py`) qua cùng công thức, mốc `account_inception.json`.
+  Nghiệm thu asof 2026-10-09 không đổi: SpaceX −1,33 / 1,024 / 0,519; ZaloPay −4,907 / −1,162 / −2,01.
+  Review + bằng chứng: `agents/Taylor/research/fund_unit_ledger_20261011/` (REVIEW.md, REVIEW2.md).
+- **CHƯA chốt sổ thật** (`data/execution_logs/nav_unit_ledger_*.csv` chưa tồn tại) — thuộc bước 3.
+- Bước 2-4 chưa giao.
+
+## Nợ đã biết sau bước 1 (đưa vào bước 2/3, không chặn)
+- **Nhìn 2 dòng 💰 NAV của lần cron thật đầu tiên: 19:10 ICT thứ Hai 2026-10-12** (chưa có lượt
+  `daily_nav_snapshot.py`/`eod_trading_report.sh` end-to-end thật với dòng mới). ZaloPay phải ra
+  quanh −4,9% "Từ go-live" thay cho −6,06%.
+- **Báo cáo ngày ZaloPay đã gửi in sai mốc**: 28/28 bản có dòng "Từ go-live" thấp hơn chuẩn
+  1,127–1,220 điểm % (mốc 1 tỷ mặc định thay vì 987.865.567). Vượt ngưỡng đính chính 0,5% (điểm 4)
+  ⇒ **CHỜ user quyết** đính chính thế nào (Mike đề xuất 1 dòng đính chính ở báo cáo ngày 12/10).
+- nav_history THIẾU dòng phiên **2026-08-06** ở cả 2 tài khoản (dnse_raw ngày đó có balances tới
+  19:10) ⇒ backfill `--from-raw` ở bước 3; tới lúc đó dòng tiền khai trong cửa sổ 08-06 14:45 →
+  08-07 14:44 bị từ chối (đúng).
+- 3 dòng NAV chụp trước giờ đóng cửa (SpaceX 2026-07-02 09:46; cả hai TK 2026-08-24 ~04:50) chưa
+  có lối đính chính (08-24 không có balances sau đóng cửa) ⇒ bước 3.
+- Còn sai IM LẶNG ngoài phạm vi bước 1 (arch-review lần 3): **K3** dòng NAV mang ngày T nhưng chụp
+  sau khi phiên T+1 đã đóng cửa (xảy ra khi chạy lại snapshot ngày cũ theo đường live) — hướng sửa:
+  một điều kiện "phiên đóng cửa gần nhất theo lần chụp của dòng cho giá == theo thời điểm tiền vào"
+  gộp luôn kiểm thiếu phiên + chụp trước đóng cửa; **K1** SpaceX mốc 1 tỷ là số dư SÁNG 07-01 ⇒
+  khe 07-01/07-02 (quá khứ, sổ dòng tiền rỗng); giờ khai lệch vài giây quanh lần chụp với khoản
+  < 5% NAV (lớp bắt = đẳng thức tiền của bước 2).
+- Lỗi nhỏ chưa sửa: **K2** `account_cash_flows.py:339` từ chối oan tiền tới ngày không phiên khi
+  dòng ngày đó chụp trước 14:45 (1 dòng); **K5** `starting_capital`/`nav` = NaN ra "+nan%" ở dòng
+  NAV ngày (`nav_unit_ledger.py:139`, 1-2 dòng); **K4** 4 mutant sống L06/T05/T07/D07.
+- Cổng tỉ suất của `report_delivery_gate` vẫn fail-open khi CLI rc≠0, và chưa đọc `pending_flows`
+  (nên cảnh báo, không chặn cứng) ⇒ bước 2.
+- `trading_bot/vn_market.is_holiday` chưa khai Tết 2027/Giỗ Tổ ⇒ tiền vào dịp đó bị từ chối oan
+  ("thiếu dòng của phiên") — khai lịch trước 02/2027.
+- Hạ tầng (việc riêng, giao Wags): `tz_anchor_gate.baseline_key` tính sai khoá dưới GIT_DIR của
+  worktree `WorkingClaude/wt-*` (buộc `SKIP=tz-anchor-gate`); `nav_scripts_2account_selfcheck.py`
+  gọi broker thật và chạy snapshot trên `data/` THẬT khi chạy từ worktree (đêm 10→11/10 để lại
+  `dnse_raw_2026-10-11.jsonl`, `verified_snapshot_*_2026-10-11.json`, nav_history thật có dòng
+  10-11 trong ~23 giây rồi được khôi phục) ⇒ cần sandbox hoá; `portfolio_status_selfcheck` không
+  khép kín (BigQuery + ghi `data/value_radar_series.csv`).
