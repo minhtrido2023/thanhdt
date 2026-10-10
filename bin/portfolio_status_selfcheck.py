@@ -327,6 +327,19 @@ def run():
                   "| Hôm nay: **?** |" in line and line.endswith("**?**") and "%" not in line, line)
             check("N11: nguồn tỉ suất lỗi ⇒ nói lý do thật ra stderr (không còn `except: pass`)",
                   "KHÔNG tính được tỉ suất NAV" in err and "thiếu time_ict" in err, err)
+            # Nhiều phiên, vắt qua tuần + tháng ⇒ bốn kỳ ra bốn số khác nhau: "Hôm nay" phải là kỳ
+            # NGÀY (không phải WTD), "Từ khi bắt đầu" phải là kỳ từ mốc khởi điểm (không phải MTD).
+            #   07-02 1.010 · 07-31 (thứ Sáu) 1.020 · 08-03 (thứ Hai) 1.030 · 08-04 1.050 (tr)
+            #   ngày 1.050/1.030 = +1,94% · WTD = MTD 1.050/1.020 = +2,94% · từ mốc 1 tỷ = +5,00%
+            with open(os.path.join(td, "nav_history_SpaceX.csv"), "w", encoding="utf-8") as f:
+                f.write(hdr + "".join(f"\n{d},{v},0,0,0,0,0,{d}T19:10:00,0,False,live" for d, v in (
+                    ("2026-07-02", 1010000000), ("2026-07-31", 1020000000), ("2026-08-03", 1030000000),
+                    ("2026-08-04", 1050000000))) + "\n")
+            line, err = header([], date="2026-08-04")
+            check("N11: nhiều phiên — 'Hôm nay' = kỳ NGÀY +1.94% (không phải WTD/MTD +2.94%)",
+                  "| Hôm nay: **+1.94%** |" in line, line)
+            check("N11: nhiều phiên — 'Từ khi bắt đầu hoạt động' = từ mốc khởi điểm +5.00% (không phải MTD +2.94%)",
+                  line.endswith("Từ khi bắt đầu hoạt động: **+5.00%**"), line)
         finally:
             ps.EXEC_DIR = old_exec_dir
             if old_env is None:

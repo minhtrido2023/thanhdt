@@ -30,3 +30,7 @@ dòng đầu: giá 10.000 đ, số đơn vị = `starting_capital` / 10.000.
   −4,907%). Báo cáo cũ KHÔNG được sửa/gửi lại. `--starting-capital` giờ chỉ còn là mốc cho cổng bước
   nhảy 15% của phiên đầu tiên.
 - Đổi `starting_capital` hay `inception_date` làm đổi MỌI giá đơn vị ⇒ lệch toàn bộ sổ đã chốt.
+- **Bản ghi dòng tiền bị loại theo NGÀY, không theo giờ** (`date` <= `inception_date` ⇒ `dropped_flows`).
+  Mốc ZaloPay là NAV đêm TRƯỚC phiên 2026-07-06, nên tiền vào trong/tối 07-06 KHÔNG nằm trong vốn khởi
+  điểm mà vẫn bị loại — nó hiện ở `dropped_flows` để người đọc thấy; code không tự sửa (arch-review lần 2,
+  L10). Hiện không có bản ghi nào như vậy (0 bản ghi dòng tiền, đo 2026-10-11).

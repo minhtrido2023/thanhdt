@@ -148,7 +148,7 @@ def main():
 
     # ---- 6. Flow sau lần chụp NAV cuối cùng: TREO — không vào số nào, không crash, và HIỆN ra.
     r_after = ret(base_rows, acf.load_flows("SpaceX", flows_file(tmp, [
-        {"date": "2026-12-31", "amount_vnd": 500_000_000, "kind": "deposit", "evidence": "x",
+        {"date": "2026-07-08", "amount_vnd": 500_000_000, "kind": "deposit", "evidence": "x",
          "time_ict": "10:00"}])))
     ok(r_after["inception"]["return_pct"] == 3.0, "flow treo không được đổi tỉ suất")
     ok(len(r_after["pending_flows"]) == 1 and r_after["pending_flows"][0]["amount_vnd"] == 500e6
@@ -163,30 +163,40 @@ def main():
        and mapped[D(2026, 7, 6)][0]["session_date"] == D(2026, 7, 6),
        f"flow thứ Bảy 07-04 phải gán vào phiên 07-06 (bod), được {mapped}")
 
-    # ---- 8. Schema fail-closed: 10 bản ghi hỏng, tất cả phải raise CashFlowError.
+    # ---- 8. Schema fail-closed: 10 bản ghi hỏng, mỗi cái phải raise CashFlowError VÌ ĐÚNG LỖI CỦA
+    # NÓ. Bản ghi không thử về giờ đều khai `time_ict` hợp lệ — thiếu thì mọi bản ghi rơi chung vào
+    # lỗi "thiếu time_ict" và các chốt evidence/kind/date không còn được thử (arch-review lần 2, L4).
+    t = {"time_ict": "10:00"}
     bad = [
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit"},                     # thiếu evidence
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "  "},   # evidence rỗng
-        {"date": "03/07/2026", "amount_vnd": 1, "kind": "deposit", "evidence": "x"},    # date sai
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "nap", "evidence": "x"},        # kind lạ
-        {"date": "2026-07-03", "amount_vnd": 5, "kind": "market_only", "evidence": "x"},  # !=0
-        {"date": "2026-07-03", "amount_vnd": -1, "kind": "deposit", "evidence": "x"},   # sai dấu
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
-         "timing": "intraday"},                                                        # timing lạ
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
-         "timing": "bod"},                                              # không khai giờ
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x"},  # không giờ, không timing
-        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
-         "time_ict": "25:00"},                                          # giờ không hợp lệ
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", **t}, "thiếu field bắt buộc 'evidence'"),
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "  ", **t}, "evidence rỗng"),
+        ({"date": "03/07/2026", "amount_vnd": 1, "kind": "deposit", "evidence": "x", **t},
+         "date không phải YYYY-MM-DD"),
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "nap", "evidence": "x", **t}, "kind='nap'"),
+        ({"date": "2026-07-03", "amount_vnd": 5, "kind": "market_only", "evidence": "x"},
+         "kind='market_only' phải có amount_vnd=0"),
+        ({"date": "2026-07-03", "amount_vnd": -1, "kind": "deposit", "evidence": "x", **t},
+         "kind='deposit' phải có amount_vnd>0"),
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x", "timing": "intraday", **t},
+         "timing='intraday'"),
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x", "timing": "bod"},
+         "thiếu time_ict"),                                             # không khai giờ
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x"},
+         "thiếu time_ict"),                                             # không giờ, không timing
+        ({"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x", "time_ict": "25:00"},
+         "time_ict không phải HH:MM"),                                  # giờ không hợp lệ
     ]
-    for rec in bad:
+    ok(len(bad) == 10, "khối bản ghi hỏng phải đủ 10 ca")
+    for rec, needle in bad:
         try:
             acf.load_flows("SpaceX", flows_file(tmp, [rec]))
+        except acf.CashFlowError as exc:
+            ok(needle in str(exc), f"bản ghi hỏng {rec}: phải bị từ chối vì {needle!r}, lại vì: {exc}")
+        except Exception as exc:                                    # noqa: BLE001
+            raise AssertionError(f"bản ghi hỏng {rec}: phải raise CashFlowError, lại raise "
+                                 f"{type(exc).__name__}: {exc}") from exc
+        else:
             raise AssertionError(f"bản ghi hỏng phải raise: {rec}")
-        except acf.CashFlowError:
-            N_before = N
-            ok(True, "")
-            del N_before
     # KHÔNG có mặc định timing: không khai ⇒ None (code suy khi gán); giờ được chuẩn hoá.
     dflt = acf.load_flows("SpaceX", flows_file(tmp, [
         {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",

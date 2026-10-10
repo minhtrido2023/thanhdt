@@ -118,11 +118,12 @@ def run(tmp):
     os.environ["NAV_SANITY_MAX_PCT"] = "1000000"
     sys.argv = ["daily_nav_snapshot.py", "--account", ACCT, "--account-no", ACCT_NO,
                 "--date", DATE, "--from-raw", "--starting-capital", "10000000"]
-    err = io.StringIO()
+    err, out = io.StringIO(), io.StringIO()
     try:
-        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
             rc = D.main()
     finally:
+        run.stdout = out.getvalue()
         (D.EXEC_DIR, D.CORP_ACTIONS_FILE, D.HISTORY_FILE_TMPL, CAD.snapshot_path,
          D.bq_raw_prices, D.cum_dividend_double_count, sys.argv, _env, V.EXEC_DIR) = old
         if _env is None:
@@ -332,6 +333,114 @@ with tempfile.TemporaryDirectory() as tmp:
           (snap or {}).get("mtm_stock"))
     check("(k1c) đường phục hồi KHÔNG chạy", not load_block(tmp).get("corp_action_recovered"),
           load_block(tmp).get("corp_action_recovered"))
+
+print("11. [N11 + arch-review lần 2: L2, L3, D03/D17/D18/D21/D29] dòng 💰 NAV + nav_snapshot JSON qua main() thật")
+import subprocess  # noqa: E402
+
+import nav_period_returns as NPR  # noqa: E402
+
+
+def run_perf(tmp, flows, inception, break_import=False):
+    """main() --from-raw với sổ dòng tiền + mốc khởi điểm của SANDBOX. `flows`/`inception`: nội
+    dung JSON ghi nguyên văn; `None` = KHÔNG có file. Trả (rc, stdout, snapshot | None)."""
+    build_fixture(tmp, qty_now=547.0, confirmed=True)
+    with open(os.path.join(tmp, f"nav_history_{ACCT}.csv"), "w", encoding="utf-8") as f:
+        f.write("date,nav,mtm_stock,cash,margin_debt,offbook_assets,egg_assets,balance_ts,"
+                "cum_dividend_excl,nav_is_estimate,nav_source\n"
+                f"{PREV},10100000,0,0,0,0,0,{PREV}T19:05:00,0,False,live\n")
+    flows_p, inc_p = os.path.join(tmp, "account_cash_flows.json"), os.path.join(tmp, "account_inception.json")
+    for path, content in ((flows_p, flows), (inc_p, inception)):
+        if content is not None:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(content, f)
+    real_load, old_env = NPR.load_inception, os.environ.get("ACCOUNT_CASH_FLOWS_PATH")
+    NPR.load_inception = lambda account, inception_path=inc_p: real_load(account, inception_path)
+    os.environ["ACCOUNT_CASH_FLOWS_PATH"] = flows_p
+    if break_import:
+        sys.modules["nav_period_returns"] = None          # `import nav_period_returns` ⇒ ImportError
+    try:
+        rc, _err, snap = run(tmp)
+    finally:
+        sys.modules["nav_period_returns"] = NPR
+        NPR.load_inception = real_load
+        if old_env is None:
+            os.environ.pop("ACCOUNT_CASH_FLOWS_PATH", None)
+        else:
+            os.environ["ACCOUNT_CASH_FLOWS_PATH"] = old_env
+    return rc, run.stdout, snap
+
+
+GOOD_INC = {ACCT: {"inception_date": "2026-09-07", "starting_capital": 10_000_000}}
+DEPOSIT = {"date": DATE, "time_ict": "10:00", "amount_vnd": 5_000_000, "kind": "deposit", "evidence": "selfcheck"}
+with tempfile.TemporaryDirectory() as tmp:
+    # Mốc 10.000.000 (giá 10.000, 1.000 đơn vị); 09-08 NAV 10.100.000 (giá 10.100); 09-09 nạp
+    # 5.000.000 lúc 10:00 ⇒ phát hành ở giá 10.100; NAV 09-09 = cổ phiếu + 5.000.000 tiền.
+    rc, out, snap = run_perf(tmp, {ACCT: [DEPOSIT]}, GOOD_INC)
+    snap = snap or {}
+    nav = round(snap.get("nav") or 0.0)             # nav_history ghi NAV tròn đồng — sổ đơn vị đọc số đó
+    want_day = round((nav / 15_100_000 - 1) * 100, 3)
+    want_inc = round((nav / 15_100_000 * 1.01 - 1) * 100, 3)
+    perf = snap.get("performance") or {}
+    check("(l0) sanity fixture: tỉ suất ngày ≠ từ mốc ≠ tỉ số NAV thô ≠ 0",
+          len({want_day, want_inc, round((nav / 10_100_000 - 1) * 100, 3), 0.0}) == 4, (nav, want_day, want_inc))
+    check("(l1) rc=0, dòng 💰 NAV in tỉ suất giá đơn vị + tách nạp/rút ròng (sổ dòng tiền THẬT SỰ được đọc)",
+          rc == 0 and f"💰 **NAV {DATE}" in out and f"{want_day:+.2f}% so với hôm trước" in out
+          and "nạp/rút ròng +5,000,000 VND" in out and f"({want_inc:+.2f}%)" in out, (rc, out[:600]))
+    check("(l2) JSON day_change_pct = tỉ suất giá đơn vị của ngày (không phải tỉ số NAV thô)",
+          snap.get("day_change_pct") == want_day, (snap.get("day_change_pct"), want_day))
+    check("(l3) JSON since_inception_pct = tỉ suất từ mốc khởi điểm; since_inception = NAV − vốn khởi điểm",
+          snap.get("since_inception_pct") == want_inc and snap.get("since_inception") == nav - 10_000_000.0,
+          (snap.get("since_inception_pct"), want_inc, snap.get("since_inception")))
+    check("(l4) JSON performance mang đủ day/inception/pending_flows; performance_error = None",
+          (perf.get("day") or {}).get("return_pct") == want_day
+          and (perf.get("day") or {}).get("net_flow_vnd") == 5_000_000
+          and (perf.get("inception") or {}).get("return_pct") == want_inc
+          and perf.get("pending_flows") == [] and snap.get("performance_error") is None and "performance_error" in snap,
+          (perf, snap.get("performance_error")))
+
+# Đường hiển thị hỏng KHÔNG được làm hỏng lần chụp: nav_history đã ghi ⇒ rc phải 0, dòng 💰 vẫn in,
+# nav_snapshot JSON vẫn ghi, lỗi thật nằm trong performance_error.
+BROKEN = [
+    ("flows: date null", {ACCT: [dict(DEPOSIT, date=None)]}, GOOD_INC, False, "date không phải YYYY-MM-DD"),
+    ("flows: date là số", {ACCT: [dict(DEPOSIT, date=20260909)]}, GOOD_INC, False, "date không phải YYYY-MM-DD"),
+    ("flows: gốc JSON là list", [DEPOSIT], GOOD_INC, False, "gốc file phải là object"),
+    ("flows: amount_vnd NaN", {ACCT: [dict(DEPOSIT, amount_vnd=float("nan"))]}, GOOD_INC, False, "không phải số hữu hạn"),
+    ("flows: KHÔNG có file", None, GOOD_INC, False, "KHÔNG có sổ dòng tiền"),
+    ("inception: inception_date null", {ACCT: []}, {ACCT: {"inception_date": None, "starting_capital": 10_000_000}},
+     False, "TypeError"),
+    ("inception: starting_capital là list", {ACCT: []}, {ACCT: {"inception_date": "2026-09-07", "starting_capital": [1]}},
+     False, "TypeError"),
+    ("inception: gốc JSON là list", {ACCT: []}, [GOOD_INC], False, "không có entry"),
+    ("inception: KHÔNG có file", {ACCT: []}, None, False, "FileNotFoundError"),
+    ("nav_period_returns không import được", {ACCT: []}, GOOD_INC, True, "import of nav_period_returns halted"),
+]
+for label, flows, inception, break_import, needle in BROKEN:
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            rc, out, snap = run_perf(tmp, flows, inception, break_import)
+            crash = None
+        except Exception as exc:                                # noqa: BLE001
+            rc, out, snap, crash = None, "", None, f"{type(exc).__name__}: {exc}"
+        snap = snap or {}
+        hist = os.path.join(tmp, f"nav_history_{ACCT}.csv")
+        check(f"(l5) {label} ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi",
+              crash is None and rc == 0 and f"💰 **NAV {DATE}" in out and "KHÔNG tính được" in out
+              and snap.get("nav") and os.path.exists(hist) and DATE in open(hist, encoding="utf-8").read(),
+              (crash, rc, out[:300]))
+        check(f"(l6) {label} ⇒ JSON performance_error nêu lỗi thật ({needle}); không có số phần trăm nào",
+              needle in (snap.get("performance_error") or "") and needle in out
+              and snap.get("performance") is None and snap.get("day_change_pct") is None
+              and snap.get("since_inception_pct") is None and "performance" in snap,
+              snap.get("performance_error"))
+
+# L3: `import daily_nav_snapshot` KHÔNG được kéo nav_period_returns (exdate_frame.py,
+# dividend_adjusted_return.py, discretionary_margin_gate.py đều import daily_nav_snapshot).
+p = subprocess.run([sys.executable, "-c",
+                    "import sys; sys.path.insert(0, sys.argv[1]); import daily_nav_snapshot; "
+                    "print(sorted(m for m in ('nav_period_returns', 'nav_unit_ledger') if m in sys.modules))",
+                    HERE], capture_output=True, text=True, env=dict(os.environ, MIKE_BOT_TEST_MODE="1"))
+check("(l7) import daily_nav_snapshot không kéo nav_period_returns / nav_unit_ledger",
+      p.returncode == 0 and p.stdout.strip() == "[]", (p.returncode, p.stdout, p.stderr[-300:]))
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)

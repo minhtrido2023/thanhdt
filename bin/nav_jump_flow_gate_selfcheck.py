@@ -256,6 +256,9 @@ def build_cases(verdict):
                 f.append("dòng tiền 09-18 (gán vào 09-22) KHÔNG được giải thích cho 09-25")
             if "không có bản ghi nào trong ±3 ngày" not in (msg or ""):
                 f.append("phải nói rõ đã soi cả ±3 ngày và không thấy")
+            if "bị đẩy sang phiên sau" in (msg or ""):
+                f.append("bản ghi 09-18 đã gán vào phiên 09-22 (không treo) — không được nói nó bị đẩy "
+                         f"sang phiên sau: {msg!r}")
         finally:
             os.remove(p)
         return f
@@ -344,9 +347,22 @@ def build_cases(verdict):
             if ok:
                 f.append("tiền 20:00 (sau lần chụp 19:10:30) KHÔNG được giải thích bước nhảy hôm nay")
             for need in ("1 bản ghi cho 'SpaceX'", "KHÔNG có bản ghi nào gán vào 2026-09-25",
-                         "gần nhất trong ±3 ngày: 2026-09-25"):
+                         "gần nhất trong ±3 ngày: 2026-09-25",
+                         # L9 (§29): phải nói bản ghi bị đẩy sang phiên sau VÌ giờ khai.
+                         "Bản ghi 2026-09-25 time_ict=20:00 +200,000,000 VND ĐÃ khai",
+                         f"giờ khai SAU lần chụp số dư của dòng này ({TODAY_TS})",
+                         "bị đẩy sang phiên sau"):
                 if need not in (msg or ""):
                     f.append(f"message thiếu {need!r}: {msg!r}")
+        finally:
+            os.remove(p)
+        # Không có bản ghi nào treo (không khai gì) ⇒ KHÔNG được in ghi chú "bị đẩy sang phiên sau".
+        p = flows_file([])
+        try:
+            ok, msg = verdict("SpaceX", TODAY, PREV, 1_200_000_000.0, 15.0, HIST,
+                              components=COMP, flows_path=p)
+            if ok or "bị đẩy sang phiên sau" in (msg or ""):
+                f.append(f"không có bản ghi treo mà vẫn in ghi chú đẩy phiên: ok={ok} {msg!r}")
         finally:
             os.remove(p)
         return f
@@ -714,6 +730,13 @@ MUTATIONS = [
         'f"💰 **NAV {args.date}: {nav:,.0f} VND** ({paren})"',
         'f"💰 **NAV {args.date}: {nav:,.0f} VND** ({day_change:+,.0f} VND, {day_change_pct:+.2f}% so với hôm trước)"')),
     ("n11-main-bo-dong-go-live", lambda t: t.replace("    ] + perf_lines\n", "    ]\n")),
+    # ---- arch-review lần 2
+    ("l9-bo-ghi-chu-day-phien", lambda t: t.replace(
+        '" (không có bản ghi nào trong ±3 ngày)") + "." + late_note + "\\n"',
+        '" (không có bản ghi nào trong ±3 ngày)") + ".\\n"')),
+    ("l9-ghi-chu-moi-ban-ghi-gan", lambda t: t.replace(
+        'late = [f for f in mapped.get(None, []) if f["date"] <= date_d]',
+        'late = [f for f in flows if f["date"] <= date_d]')),
     ("bo-so-thanh-phan", lambda t: t.replace(
         "kiểm vị thế thiếu/giá sai ({_comp_line()}).", "kiểm vị thế thiếu/giá sai.")),
 ]

@@ -16,7 +16,8 @@ writer: "tay (người ghi kèm bằng chứng); mẫu: mike/templates/account_c
 `{"<account>": [{date, time_ict, amount_vnd, kind, evidence, timing?}, ...]}`. Người khai chỉ ghi NGÀY +
 GIỜ + SỐ TIỀN (+ bằng chứng). `amount_vnd` dương = nạp, âm = rút. `kind` ∈ deposit | withdraw |
 market_only. `time_ict` ("HH:MM" hoặc "HH:MM:SS", giờ ICT lúc tiền thật sự vào/ra) BẮT BUỘC với
-deposit/withdraw. Schema đầy đủ + kiểm lỗi: `mike/bin/account_cash_flows.py`.
+deposit/withdraw. `date` sau hôm nay (giờ ICT) ⇒ bị từ chối (bắt gõ nhầm ngày); `amount_vnd` phải là số
+hữu hạn (NaN/Infinity ⇒ bị từ chối). Schema đầy đủ + kiểm lỗi: `mike/bin/account_cash_flows.py`.
 Đo 2026-10-11: cả SpaceX và ZaloPay đều 0 bản ghi.
 
 ## Ai đọc
@@ -39,9 +40,23 @@ Chưa có R ⇒ TREO, hiện ở `pending_flows` của `nav_period_returns.py`.
   Luật so với `balance_ts` thật nên ca "sáng hôm sau" vẫn đúng; dòng cần xét mà `balance_ts` thiếu/hỏng ⇒
   bị từ chối. **Dòng chụp TRƯỚC giờ đóng cửa của chính nó không cho được giá chốt**: mọi khoản tiền vào/ra
   từ sau lần chụp đó cho tới lần chụp của dòng kế tiếp (trong phiên đó, tối hôm đó, sáng phiên sau) ⇒ bị từ
-  chối — chạy lại `daily_nav_snapshot.py` cho ngày đó (số dư sau đóng cửa). Ví dụ đo: phiên +10%, nạp 22% NAV
+  chối. Chụp lại NAV ngày đó (`daily_nav_snapshot.py --date <ngày> --from-raw`) CHỈ làm được khi
+  `dnse_raw_<ngày>.jsonl` có bản ghi balances sau giờ đóng cửa; **2026-08-24 không có** (mỗi TK đúng một
+  bản ghi balances, lúc 04:49/04:50) ⇒ với các dòng đó chưa có lối ra, đường đính chính thuộc bước 3 của
+  chính sách. Dòng của ngày KHÔNG có phiên (cuối tuần/nghỉ lễ) chụp giờ nào cũng là giá chốt phiên trước —
+  không bị coi là chụp trước đóng cửa. Ví dụ đo: phiên +10%, nạp 22% NAV
   tối hôm đó mà nhận theo NAV chụp trước phiên thì tỉ suất ra +8,197% thay vì +10,0%, vĩnh viễn
   (`nav_unit_ledger_selfcheck.py` B8b).
+- **nav_history THIẾU dòng của một phiên ⇒ tiền vào/ra từ giờ đóng cửa phiên đó trở đi bị từ chối** (nêu
+  tên phiên thiếu) cho tới khi backfill dòng đó (`--from-raw`, cùng điều kiện balances ở trên). Không chặn
+  thì dòng cho giá lùi về phiên trước nữa và giá chốt thiếu trọn biến động của phiên thiếu (đo: +8,197%
+  thay vì +10,0%, không lỗi — `nav_unit_ledger_selfcheck.py` B13). Thật: cả hai TK thiếu dòng 2026-08-06
+  (`dnse_raw_2026-08-06.jsonl` có balances tới 19:10, chưa backfill). Tiền vào TRONG chính phiên thiếu
+  dòng vẫn được nhận (giá chốt phiên trước, đúng luật). "Phiên" = thứ Hai–Sáu không thuộc
+  `trading_bot.vn_market.is_holiday` ⇒ **ngày nghỉ lễ chưa khai ở đó sẽ bị coi là phiên thiếu dòng**
+  (từ chối oan, không sai số) — khai lịch nghỉ trước.
+- `balance_ts` phải tăng NGHIÊM NGẶT theo ngày của dòng (từ dòng liền trước dòng tiền đầu tiên trở đi);
+  không thì bị từ chối — dòng sửa tay bằng số dư chụp muộn hơn dòng sau từng cho giá sai im lặng.
 - `time_ict` trùng PHÚT với `balance_ts` của dòng đang xét mà không có giây ⇒ bị từ chối (khai `HH:MM:SS`).
 - `timing` là tuỳ chọn: có khai mà khác kết quả suy ra ⇒ bị từ chối, thông điệp nêu cả hai.
 - `market_only` gán theo NGÀY (dòng nav_history đầu tiên có ngày >= `date`), không có `timing`.

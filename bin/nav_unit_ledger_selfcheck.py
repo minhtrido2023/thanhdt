@@ -23,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import types
 from pathlib import Path
 
 BIN = Path(__file__).resolve().parent
@@ -113,16 +114,16 @@ class Env:
     def ledger_raw(self):
         return nul.build_account_ledger("SpaceX", str(self.dir), self.inc_path, self.flows_path)
 
-    def returns_raw(self, report_date=REPORT):
+    def returns_raw(self, report_date=REPORT, today=None):
         return npr.compute_period_returns(
             "SpaceX", report_date, self.rows(), nul.load_inception("SpaceX", self.inc_path),
-            acf.load_flows("SpaceX", self.flows_path, require_file=True))
+            acf.load_flows("SpaceX", self.flows_path, require_file=True, today=today))
 
     def ledger(self):
         return must(self.ledger_raw, f"dựng sổ {self.dir.name}")
 
-    def returns(self, report_date=REPORT):
-        return must(lambda: self.returns_raw(report_date), f"tính kỳ {self.dir.name}")
+    def returns(self, report_date=REPORT, today=None):
+        return must(lambda: self.returns_raw(report_date, today), f"tính kỳ {self.dir.name}")
 
     def cli_args(self, *extra, ledger_dir=True):
         return ([sys.executable, str(BIN / "nav_unit_ledger.py"), "--account", "SpaceX",
@@ -284,6 +285,8 @@ def part_b_synthetic(tmp):
        and row["flow_bod_vnd"] == 200e6 and row["flow_eod_vnd"] == 0.0,
        f"B1 trong phiên: phát hành 200tr/10.000 = 20.000 đơn vị ở giá phiên trước, được {row}")
     r = envs[("E", AFTER_CLOSE)].returns()["inception"]
+    ok("net_flow_vnd" in r and "cash_flows" in r,
+       f"B1: kỳ có dòng tiền phải xuất net_flow_vnd + cash_flows, được khoá {sorted(r)}")
     ok(r["pnl_vnd"] == 20_000_000.0 and r["net_flow_vnd"] == 200_000_000.0,
        f"B1: lãi/lỗ VND = 1.220 − 1.000 − 200 = 20tr, được {r['pnl_vnd']}")
     ok(r["nav1"] == 1_220_000_000.0 and r["unit_price0"] == 10_000.0 and r["unit_price1"] == 10_200.0,
@@ -304,7 +307,8 @@ def part_b_synthetic(tmp):
     ok(nxt["day"]["from_date"] == "2026-07-03" and nxt["day"]["return_pct"] == 0.0
        and "net_flow_vnd" not in nxt["day"] and nxt["inception"]["unit_price_ratio"] == 1.02,
        f"B1: phiên sau (thị trường đứng yên) ⇒ `day` 0,0%, không còn dòng tiền; được {nxt['day']}")
-    only_inc = npr.compute_period_returns("SpaceX", D(2026, 7, 1), [nul.NavRow(D(2026, 7, 1), 1e9)], INC["SpaceX"], [])
+    only_inc = must(lambda: npr.compute_period_returns("SpaceX", D(2026, 7, 1), [nul.NavRow(D(2026, 7, 1), 1e9)],
+                                                       INC["SpaceX"], []), "B1 báo cáo ĐÚNG ngày inception")
     ok(only_inc["day"] is None and only_inc["inception"]["return_pct"] == 0.0,
        f"B1: chưa có phiên nào sau mốc khởi điểm ⇒ `day` là None, được {only_inc['day']}")
     cf = envs[("B", IN_SESSION)].returns()["inception"]["cash_flows"]
@@ -547,6 +551,9 @@ def part_b_synthetic(tmp):
                      "tới TRONG phiên")
         ok("2026-08-24T04:49:59" in msg and "daily_nav_snapshot.py" in msg,
            f"B8b: thông điệp phải trích balance_ts đã đọc + cách sửa, được {msg}")
+        ok("dnse_raw_2026-08-24.jsonl có bản ghi balances SAU giờ đóng cửa" in msg and "--date 2026-08-24 --from-raw" in msg and "bước 3" in msg,
+           f"B8b (L6): lối ra phải nói ĐÚNG điều kiện — chỉ chụp lại được khi dnse_raw có balances sau "
+           f"đóng cửa, không thì thuộc bước 3; được {msg}")
         raises(acf.CashFlowError, lambda: env.returns_raw(D(2026, 8, 25)), f"B8b nav_period_returns ({t})",
                "tới TRONG phiên")
     # Tiền tới SAU đóng cửa 08-24 (hoặc trong phiên 08-25) ⇒ luật: giá chốt 08-24, tức bod trên
@@ -558,8 +565,16 @@ def part_b_synthetic(tmp):
                      f"B8b tiền {t_date} {t}: dòng giá nguồn 08-24 chụp trước đóng cửa", "không phải giá chốt")
         ok("2026-08-24T04:49:59" in msg and "phiên 2026-08-25" in msg and "daily_nav_snapshot.py" in msg,
            f"B8b: thông điệp phải trích balance_ts của dòng giá nguồn + phiên được gán + cách sửa, được {msg}")
+        ok("dnse_raw_2026-08-24.jsonl có bản ghi balances SAU giờ đóng cửa" in msg and "--date 2026-08-24 --from-raw" in msg and "bước 3" in msg,
+           f"B8b (L6): lối ra của dòng giá nguồn chụp sớm phải nói đúng điều kiện, được {msg}")
         raises(acf.CashFlowError, lambda: env.returns_raw(D(2026, 8, 25)),
                f"B8b nav_period_returns ({t_date} {t})", "không phải giá chốt")
+    # Chốt dòng giá nguồn cũng phải chạy khi R là dòng THỨ HAI của chuỗi (dòng giá nguồn là dòng đầu).
+    two = [nul.NavRow(D(2026, 8, 24), 1e9, balance_ts="2026-08-24T04:49:59"),
+           nul.NavRow(D(2026, 8, 25), 1.2e9, balance_ts="2026-08-25T19:10:00")]
+    f25 = dict(dep("2026-08-25", 200e6, "10:00"), date=D(2026, 8, 25), timing=None)
+    raises(acf.CashFlowError, lambda: acf.attach_flows_to_rows(two, [f25]),
+           "B8b dòng giá nguồn là dòng ĐẦU chuỗi, chụp trước đóng cửa", "không phải giá chốt")
     # Con số: phiên 08-24 +10% (dòng 08-24 chụp 04:49 vẫn ghi 1.000), nạp 220 lúc 20:00, phiên 08-25
     # đứng yên ⇒ NAV 08-25 = 1.100 + 220 = 1.320. Sự thật: +10,0%. Nếu nhận bản ghi này (giá nguồn
     # 10.000 thay vì 11.000) thì ra 1.320/1.220 − 1 = +8,197% — vĩnh viễn. Phải là LỖI, không phải số.
@@ -658,6 +673,12 @@ def part_b_synthetic(tmp):
     raises(ValueError, env.ledger_raw, "B9 file nav_history trùng ngày", "HAI dòng cùng ngày")
     p = env.cli(ledger_dir=False)
     ok(p.returncode == 1 and "HAI dòng cùng ngày" in p.stderr, f"B9: CLI phải rc=1: {p.stderr[:200]}")
+    # Dòng nav_history có ô `nav` TRỐNG ⇒ bỏ qua dòng đó (không sập, không thành một ngày của sổ).
+    blank = Env(tmp, "b9_blank_nav", plain, [])
+    with open(blank.dir / "nav_history_SpaceX.csv", "a", encoding="utf-8") as fh:
+        fh.write("2026-07-07,,0,0,0,0,0,2026-07-07T19:10:00,0,False,live\n")
+    ok([r["date"] for r in blank.ledger()[0]] == [r["date"] for r in base.ledger()[0]],
+       "B9: dòng nav_history có ô nav trống phải bị bỏ qua, sổ y như không có dòng đó")
     # File nav_history KHÔNG theo thứ tự ngày (không trùng) ⇒ đọc vào được sắp lại, sổ y nguyên.
     shuffled = Env(tmp, "b9_shuffled", [plain[2], plain[0], plain[1]], [])
     ok([(r["date"], r["unit_price"]) for r in shuffled.ledger()[0]]
@@ -725,6 +746,129 @@ def part_b_synthetic(tmp):
            f"B12 {t}: nhân đôi dòng tiền phải giữ tỉ suất +0,495%, được {results}")
         ok(abs(results[0][1] - results[1][1]) < 1e-6,
            f"B12 {t}: giá đơn vị cuối phải như nhau, được {results}")
+
+    # --- B13. Dòng cho giá phải là phiên đóng cửa GẦN NHẤT trước thời điểm tiền vào/ra (arch-review
+    # lần 2, B1). Thứ Sáu 07-03 +10% (1.000 → 1.100), nạp 220 SAU đóng cửa 07-03, thứ Hai 07-06 đứng
+    # yên ⇒ NAV 1.320. Sự thật: giá 10.000 → 11.000 → 11.000 = +10,0%. nav_history THIẾU dòng 07-03
+    # thì dòng cho giá lùi về 07-02 (10.000) ⇒ +8,197%, không lỗi — phải là LỖI nêu tên phiên thiếu.
+    ok(acf._is_session_day(D(2026, 7, 3)) and not acf._is_session_day(D(2026, 7, 4))
+       and not acf._is_session_day(D(2026, 9, 1)) and not acf._is_session_day(D(2026, 9, 2))
+       and acf._is_session_day(D(2026, 9, 3)),
+       "B13 sanity lịch phiên: 07-03 có phiên; thứ Bảy 07-04, nghỉ bù 09-01, Quốc khánh 09-02 không; 09-03 có")
+    full = [("2026-07-02", 1e9), ("2026-07-03", 1.32e9), ("2026-07-06", 1.32e9)]
+    gap = [("2026-07-02", 1e9), ("2026-07-06", 1.32e9)]
+    env = Env(tmp, "b13_full", full, [dep("2026-07-03", 220_000_000, AFTER_CLOSE)])
+    ok(by_date(env.ledger()[0])[D(2026, 7, 3)]["unit_price"] == 11_000.0
+       and env.returns(D(2026, 7, 6))["inception"]["return_pct"] == 10.0,
+       "B13: đủ dòng phiên 07-03 ⇒ eod trên 07-03 ở giá 11.000, +10,0%")
+    # (a) thiếu dòng phiên + tiền tới từ giờ đóng cửa phiên đó trở đi ⇒ từ chối, nêu đúng tên phiên.
+    for t_date, t in (("2026-07-03", "14:45"), ("2026-07-03", AFTER_CLOSE), ("2026-07-04", "10:00"),
+                      ("2026-07-06", "08:00")):
+        env = Env(tmp, f"b13_gap_{t_date[-2:]}_{t.replace(':', '')}", gap, [dep(t_date, 220_000_000, t)])
+        msg = raises(acf.CashFlowError, env.ledger_raw, f"B13a thiếu dòng 07-03, tiền {t_date} {t}",
+                     "THIẾU dòng của phiên 2026-07-03")
+        ok("dòng cho giá là 2026-07-02" in msg and "--date 2026-07-03 --from-raw" in msg,
+           f"B13a: thông điệp phải nêu dòng cho giá đã dùng + lệnh backfill đúng ngày, được {msg}")
+        raises(acf.CashFlowError, lambda: env.returns_raw(D(2026, 7, 6)), f"B13a nav_period_returns ({t_date} {t})",
+               "THIẾU dòng của phiên 2026-07-03")
+        raises(acf.CashFlowError,
+               lambda: acf.unexplained_nav_jumps(env.rows(), acf.load_flows("SpaceX", env.flows_path)),
+               f"B13a cổng 5% ({t_date} {t})", "THIẾU dòng của phiên 2026-07-03")
+    env = Env(tmp, "b13_gap_many", [("2026-07-02", 1e9), ("2026-07-08", 1.32e9)],
+              [dep("2026-07-07", 220_000_000, "20:00")])
+    raises(acf.CashFlowError, env.ledger_raw, "B13a thiếu NHIỀU phiên (07-03, 07-06, 07-07)",
+           "THIẾU dòng của phiên 2026-07-07")
+    # eod cũng phải kiểm: dòng 07-06 chụp sáng 07-08, tiền 16:00 ngày 07-07 đã nằm trong dòng đó ⇒
+    # "eod trên 07-06" — nhưng phiên 07-07 đã đóng cửa trước khi tiền vào mà không có dòng.
+    env = Env(tmp, "b13_gap_eod", [("2026-07-02", 1e9), ("2026-07-03", 1e9),
+                                   ("2026-07-06", 1.2e9, False, "2026-07-08T09:00:00"), ("2026-07-08", 1.2e9)],
+              [dep("2026-07-07", 200_000_000, "16:00")])
+    msg = raises(acf.CashFlowError, env.ledger_raw, "B13a eod trên dòng cũ hơn phiên đóng cửa gần nhất",
+                 "THIẾU dòng của phiên 2026-07-07")
+    ok("dòng cho giá là 2026-07-06" in msg, f"B13a eod: dòng cho giá phải là dòng R, được {msg}")
+    # (b) tiền tới TRONG chính phiên thiếu dòng ⇒ vẫn nhận: bod ở giá chốt phiên TRƯỚC (07-02), đúng luật.
+    for t in ("10:00", "14:44:59"):
+        env = Env(tmp, f"b13_in_{t.replace(':', '')}", gap, [dep("2026-07-03", 220_000_000, t)])
+        row = by_date(env.ledger()[0])[D(2026, 7, 6)]
+        ok(row["flow_bod_vnd"] == 220e6 and abs(row["units_issued"] - 22_000.0) < 1e-6
+           and abs(row["unit_price"] - 1.32e9 / 122_000) < 1e-6,
+           f"B13b: tiền 07-03 {t} (trong phiên thiếu dòng) ⇒ bod trên 07-06, phát hành ở giá 10.000; được {row}")
+    # (c) ngày nghỉ lễ THẬT (31/08–02/09/2026) và cuối tuần không phải "phiên thiếu dòng".
+    hol = [("2026-08-28", 1e9), ("2026-09-03", 1.2e9)]
+    for t_date, t in (("2026-08-29", "16:00"), ("2026-08-31", "16:00"), ("2026-09-01", "10:00"),
+                      ("2026-09-02", "16:00"), ("2026-09-03", "08:00")):
+        env = Env(tmp, f"b13_hol_{t_date[-2:]}_{t.replace(':', '')}", hol, [dep(t_date, 200_000_000, t)])
+        row = by_date(env.ledger()[0])[D(2026, 9, 3)]
+        ok(row["flow_bod_vnd"] == 200e6 and row["unit_price"] == 10_000.0,
+           f"B13c: tiền {t_date} {t} (nghỉ lễ/cuối tuần) ⇒ bod trên 09-03 ở giá chốt 08-28, không bị bắt oan; được {row}")
+    # (d) R là dòng ĐẦU của sổ: dòng cho giá là mốc khởi điểm (07-01).
+    first_gap = [("2026-07-03", 1.32e9), ("2026-07-06", 1.32e9)]             # thiếu dòng phiên 07-02
+    env = Env(tmp, "b13_i0_gap", first_gap, [dep("2026-07-02", 220_000_000, AFTER_CLOSE)])
+    msg = raises(acf.CashFlowError, env.ledger_raw, "B13d thiếu dòng 07-02, tiền sau đóng cửa 07-02",
+                 "THIẾU dòng của phiên 2026-07-02")
+    ok("dòng cho giá là 2026-07-01" in msg, f"B13d: dòng cho giá phải là mốc khởi điểm, được {msg}")
+    env = Env(tmp, "b13_i0_in", first_gap, [dep("2026-07-02", 220_000_000, "10:00")])
+    ok(by_date(env.ledger()[0])[D(2026, 7, 3)]["flow_bod_vnd"] == 220e6,
+       "B13d: tiền TRONG phiên 07-02 (thiếu dòng) ⇒ bod trên 07-03 ở giá mốc khởi điểm, vẫn nhận")
+    f02 = dict(dep("2026-07-02", 220e6, AFTER_CLOSE), date=D(2026, 7, 2), timing=None)
+    raises(acf.CashFlowError, lambda: acf.assign_flow(env.rows(), f02, D(2026, 7, 1)),
+           "B13d assign_flow có baseline_date", "THIẾU dòng của phiên 2026-07-02")
+    ok(must(lambda: acf.assign_flow(env.rows(), f02), "B13d không có mốc trước dòng đầu") == (0, "bod"),
+       "B13d: không truyền baseline_date ⇒ không có dòng cho giá để so, riêng ca dòng đầu không kiểm")
+    # (e) DỮ LIỆU THẬT (fixture đóng băng asof 2026-10-09): cả hai TK thiếu dòng phiên 2026-08-06.
+    for account in PUBLISHED:
+        real = nul.load_nav_history(account, str(FIXTURE))
+        inc = nul.load_inception(account, str(FIXTURE / "account_inception.json"))
+        have = {r[0] for r in real}
+        ok(D(2026, 8, 6) not in have and {D(2026, 8, 5), D(2026, 8, 7)} <= have,
+           f"B13e sanity ({account}): fixture phải thiếu đúng dòng 08-06 giữa 08-05 và 08-07")
+
+        def with_flow(t, account=account, real=real, inc=inc):
+            flow = dict(dep("2026-08-06", 100e6, t), date=D(2026, 8, 6), timing=None)
+            return npr.compute_period_returns(account, D(2026, 10, 9), real, inc, [flow])
+        raises(acf.CashFlowError, lambda: with_flow(AFTER_CLOSE),
+               f"B13e ({account}) nạp 16:00 ngày 08-06 — phiên thiếu dòng", "THIẾU dòng của phiên 2026-08-06")
+        cf = must(lambda: with_flow("10:00"), f"B13e ({account}) nạp 10:00 ngày 08-06")["inception"]["cash_flows"]
+        ok(cf[0]["timing"] == "bod" and cf[0]["session_date"] == "2026-08-07",
+           f"B13e ({account}): nạp 10:00 ngày 08-06 ⇒ bod trên 08-07 ở giá chốt 08-05, vẫn nhận; được {cf}")
+
+    # --- B14. `balance_ts` phải tăng NGHIÊM NGẶT (arch-review lần 2, L1). Dòng 07-03 sửa tay bằng số
+    # dư chụp sáng 07-07; nạp 20:00 ngày 07-06 từng bị gán eod trên 07-03 (giá sai, im lặng).
+    edited = [("2026-07-02", 1e9), ("2026-07-03", 1e9, False, "2026-07-07T09:00:00"), ("2026-07-06", 1.2e9),
+              ("2026-07-07", 1.2e9)]
+    env = Env(tmp, "b14_edited", edited, [dep("2026-07-06", 200_000_000, "20:00")])
+    msg = raises(acf.CashFlowError, env.ledger_raw, "B14 balance_ts lùi", "balance_ts không tăng nghiêm ngặt")
+    ok("2026-07-07T09:00:00" in msg and "2026-07-06T19:10:00" in msg and "2026-07-03" in msg,
+       f"B14: thông điệp phải trích hai balance_ts đã đọc + ngày dòng, được {msg}")
+    raises(acf.CashFlowError, lambda: env.returns_raw(D(2026, 7, 7)), "B14 nav_period_returns",
+           "balance_ts không tăng nghiêm ngặt")
+    raises(acf.CashFlowError, lambda: acf.unexplained_nav_jumps(env.rows(), acf.load_flows("SpaceX", env.flows_path)),
+           "B14 cổng 5%", "balance_ts không tăng nghiêm ngặt")
+    same = [("2026-07-02", 1e9), ("2026-07-03", 1e9, False, "2026-07-06T19:10:00"), ("2026-07-06", 1.2e9)]
+    env = Env(tmp, "b14_equal", same, [dep("2026-07-06", 200_000_000, AFTER_CLOSE)])
+    raises(acf.CashFlowError, env.ledger_raw, "B14 hai dòng cùng balance_ts", "balance_ts không tăng nghiêm ngặt")
+    # Ngoài đoạn liên quan (trước dòng liền trước dòng tiền đầu tiên) thì không cản; không có dòng
+    # tiền nào (chỉ market_only) thì luật gán không dùng balance_ts ⇒ không kiểm.
+    old = [("2026-07-02", 1e9, False, "2026-07-03T20:00:00"), ("2026-07-03", 1e9), ("2026-07-06", 1.2e9),
+           ("2026-07-07", 1.2e9)]
+    env = Env(tmp, "b14_old", old, [dep("2026-07-06", 200_000_000, AFTER_CLOSE)])
+    ok(by_date(env.ledger()[0])[D(2026, 7, 6)]["flow_eod_vnd"] == 200e6,
+       "B14: balance_ts lùi ở dòng NGOÀI đoạn liên quan không được cản việc gán")
+    env = Env(tmp, "b14_market_only", edited, [{"date": "2026-07-06", "amount_vnd": 0, "kind": "market_only",
+                                               "evidence": "sàn"}])
+    ok(len(env.ledger()[0]) == 5, "B14: chỉ có market_only ⇒ không kiểm balance_ts, sổ dựng bình thường")
+
+    # --- B15. Dòng nav_history của ngày KHÔNG có phiên chụp trước 14:45 vẫn là giá chốt phiên trước
+    # (arch-review lần 2, L8) — không bị coi là "chụp trước đóng cửa" khi làm dòng cho giá.
+    for name, nav_rows, flow_day in (
+            ("sat", [("2026-07-03", 1e9), ("2026-07-04", 1e9, False, "2026-07-04T10:00:00"), ("2026-07-06", 1.2e9)],
+             "2026-07-06"),
+            ("hol", [("2026-08-28", 1e9), ("2026-09-02", 1e9, False, "2026-09-02T08:00:00"), ("2026-09-03", 1.2e9)],
+             "2026-09-03")):
+        env = Env(tmp, f"b15_{name}", nav_rows, [dep(flow_day, 200_000_000, "10:00")])
+        row = by_date(env.ledger()[0])[D.fromisoformat(flow_day)]
+        ok(row["flow_bod_vnd"] == 200e6 and row["unit_price"] == 10_000.0,
+           f"B15 ({name}): dòng cho giá là ngày không phiên chụp sáng ⇒ vẫn nhận, giá 10.000; được {row}")
 
 
 # ------------------------------------------------------------------ C. sổ trên đĩa chỉ-ghi-thêm
@@ -954,6 +1098,54 @@ def part_c_sealed(tmp):
     ok(len(must(lambda: nul.read_sealed(str(env.sealed)), "C3 đọc lại sổ")) == 7,
        "C3: sổ sau hai tiến trình chốt xen nhau phải đọc lại được, đúng 7 dòng")
 
+    # --- C3b. HAI tiến trình `seal` thật: khoá phải ĐỘC QUYỀN. Tiến trình A dừng BÊN TRONG vùng
+    # khoá (ngay trước khi đọc sổ) cho tới khi có file "go"; trong lúc đó tiến trình B không được
+    # vào vùng khoá. Khoá chia sẻ (LOCK_SH) thì cả hai cùng vào ⇒ cùng đọc sổ cũ, cùng ghi.
+    two = Env(tmp, "c3b_two", nav, flows)
+    helper = (
+        "import sys, os, time, datetime\n"
+        f"sys.path.insert(0, {str(BIN)!r})\n"
+        "import nav_unit_ledger as nul\n"
+        "tag, d = sys.argv[1], sys.argv[2]\n"
+        "orig = nul._seal_locked\n"
+        "def slow(path, ledger, asof, write):\n"
+        "    open(os.path.join(d, 'inside_' + tag), 'w').close()\n"
+        "    end = time.monotonic() + 20\n"
+        "    while not os.path.exists(os.path.join(d, 'go_' + tag)) and time.monotonic() < end:\n"
+        "        time.sleep(0.02)\n"
+        "    return orig(path, ledger, asof, write)\n"
+        "nul._seal_locked = slow\n"
+        f"ledger, _ = nul.build_account_ledger('SpaceX', d, {two.inc_path!r}, {two.flows_path!r})\n"
+        f"sealed, added = nul.seal({str(two.sealed)!r}, ledger)\n"
+        "print(len(added))\n")
+
+    def spawn(tag):
+        return subprocess.Popen([sys.executable, "-c", helper, tag, str(two.dir)],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    def wait_for(name, seconds):
+        end = time.monotonic() + seconds
+        while time.monotonic() < end and not (two.dir / name).exists():
+            time.sleep(0.02)
+        return (two.dir / name).exists()
+
+    proc_a = spawn("A")
+    a_in = wait_for("inside_A", 20)
+    proc_b = spawn("B")
+    b_in_early = wait_for("inside_B", 1.5)
+    (two.dir / "go_A").touch()
+    (two.dir / "go_B").touch()
+    out_a, err_a = proc_a.communicate(timeout=60)
+    out_b, err_b = proc_b.communicate(timeout=60)
+    ok(a_in and proc_a.returncode == 0 and proc_b.returncode == 0,
+       f"C3b: cả hai tiến trình seal phải chạy xong rc=0, được A={proc_a.returncode} {err_a[-300:]} "
+       f"B={proc_b.returncode} {err_b[-300:]}")
+    ok(not b_in_early,
+       "C3b: tiến trình B đã vào vùng khoá trong khi A còn giữ — khoá chốt sổ phải ĐỘC QUYỀN (LOCK_EX)")
+    n_rows = len(must(lambda: nul.read_sealed(str(two.sealed)), "C3b đọc lại sổ"))
+    ok((out_a.strip(), out_b.strip()) == (str(n_rows), "0") and n_rows == len(two.ledger()[0]),
+       f"C3b: A thêm đủ {n_rows} dòng, B vào sau thấy sổ đã chốt và thêm 0; được A={out_a!r} B={out_b!r}")
+
     # --- C4. Thiếu sổ dòng tiền ⇒ đường dựng sổ từ chối (không đoán `[]`).
     os.remove(env.flows_path)
     raises(acf.CashFlowError, env.ledger_raw, "C4 thiếu account_cash_flows.json", "KHÔNG có sổ dòng tiền")
@@ -1062,7 +1254,7 @@ def part_d_owner_numbers(tmp):
     #   2027-06-30: +5% rồi nạp 1.000 sau đóng cửa ⇒ NAV 2.050 ; 2030-07-01: 2.050 × 1,2 = 2.460
     env = Env(tmp, "d_long_flow", [("2026-07-02", 1_000_000_000.0), ("2027-06-30", 2_050_000_000.0),
                                    ("2030-07-01", 2_460_000_000.0)], [dep("2027-06-30", 1_000_000_000, AFTER_CLOSE)])
-    p = env.returns(D(2030, 7, 1))["inception"]
+    p = env.returns(D(2030, 7, 1), today=D(2030, 7, 1))["inception"]   # fixture ở tương lai: tiêm "hôm nay"
     irr = mwr(1e9, 2.46e9, [((1461 - 364) / 1461, 1e9)])[0]
     ok(p["return_pct"] == 26.0 and p["annualized_return_pct"] == npr.annualize_or_null(1.26, 1461)[0]
        and p["mwr_pct"] == round(irr * 100, 3)
@@ -1072,6 +1264,8 @@ def part_d_owner_numbers(tmp):
     # report_date mà dòng NAV gần nhất còn TRƯỚC mốc khởi điểm ⇒ từ chối có nghĩa.
     env = Env(tmp, "d_before", [("2026-06-29", 9e8), ("2026-07-02", 1e9)], [])
     raises(ValueError, lambda: env.returns_raw(D(2026, 6, 30)), "D report-date trước inception", "trước inception")
+    raises(ValueError, lambda: env.returns_raw(D(2026, 6, 1)), "D report-date trước MỌI dòng nav_history",
+           "không có dòng nav_history nào <= 2026-06-01")
 
 
 # ------------------------------------------------------------------ E. module dòng tiền + cổng 5%
@@ -1119,8 +1313,55 @@ def part_e_flow_module(tmp):
              "timing": "intraday"}, "timing='intraday'"),
            ({"date": "2026-07-03", "amount_vnd": 0, "kind": "market_only", "evidence": "x", "timing": "bod"},
             "market_only")]
+    nan_rec = {"date": "2026-07-03", "kind": "deposit", "evidence": "x", "time_ict": "10:00"}
+    bad += [({"date": "2026-07-03", "amount_vnd": 5, "kind": "deposit", "time_ict": "10:00"},
+             "thiếu field bắt buộc 'evidence'"),
+            ("không phải object", "phải là object"),
+            # amount_vnd không hữu hạn (json nhận NaN/Infinity) — từng ra "+nan%" (L7).
+            (dict(nan_rec, amount_vnd=float("nan")), "không phải số hữu hạn"),
+            (dict(nan_rec, amount_vnd=float("inf")), "không phải số hữu hạn"),
+            (dict(nan_rec, amount_vnd=float("-inf"), kind="withdraw"), "không phải số hữu hạn"),
+            # date không phải chuỗi (L2): null, số.
+            (dict(nan_rec, amount_vnd=5, date=None), "date không phải YYYY-MM-DD"),
+            (dict(nan_rec, amount_vnd=5, date=20260703), "date không phải YYYY-MM-DD")]
     for rec, needle in bad:
         raises(acf.CashFlowError, lambda: load([rec]), f"E bản ghi hỏng {rec}", needle)
+    raises(acf.CashFlowError, lambda: load({"SpaceX": {"date": "2026-07-03"}}), "E entry account không phải list",
+           "phải là list")
+    path = Path(tmp) / "e_root_list.json"
+    path.write_text(json.dumps([dep("2026-07-03", 1)]), encoding="utf-8")
+    raises(acf.CashFlowError, lambda: acf.load_flows("SpaceX", str(path)), "E gốc file là list (L2)",
+           "gốc file phải là object")
+    raises(ValueError, lambda: nul.load_inception("NoSuch", str(Path(tmp) / "b4_base" / "account_inception.json")),
+           "E account lạ trong account_inception.json", "không có entry")
+
+    # Bản ghi có ngày trong TƯƠNG LAI so với hôm nay (ICT) ⇒ từ chối — bắt ca gõ nhầm ngày.
+    mo_rec = {"date": "2026-07-04", "amount_vnd": 0, "kind": "market_only", "evidence": "x"}
+    for rec in (dep("2026-07-04", 5), mo_rec):
+        msg = raises(acf.CashFlowError, lambda: load([rec], today=D(2026, 7, 3)), f"E ngày tương lai {rec['kind']}",
+                     "TƯƠNG LAI")
+        ok("2026-07-04" in msg and "hôm nay 2026-07-03" in msg, f"E: thông điệp phải nêu cả hai ngày, được {msg}")
+        ok(len(must(lambda rec=rec: load([rec], today=D(2026, 7, 4)), "E bản ghi đúng ngày hôm nay")) == 1,
+           "E: bản ghi ĐÚNG ngày hôm nay phải được nhận")
+    # Không truyền `today` ⇒ đồng hồ thật neo ICT (không theo TZ của máy): 17:30 UTC ngày 07-03 là
+    # 00:30 ngày 07-04 giờ ICT ⇒ bản ghi 07-04 được nhận, 07-05 bị từ chối.
+    real_dt = acf.datetime
+
+    class _Clock(real_dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            inst = real_dt.datetime(2026, 7, 3, 17, 30, tzinfo=real_dt.timezone.utc)
+            return inst.astimezone(tz) if tz else inst.replace(tzinfo=None)
+
+    acf.datetime = types.SimpleNamespace(datetime=_Clock, date=real_dt.date, time=real_dt.time,
+                                         timedelta=real_dt.timedelta)
+    try:
+        ok(len(must(lambda: load([dep("2026-07-04", 5)]), "E đồng hồ ICT 07-04")) == 1,
+           "E: hôm nay mặc định phải tính theo giờ ICT (07-04 00:30 ICT), không theo UTC/TZ máy")
+        raises(acf.CashFlowError, lambda: load([dep("2026-07-05", 5)]), "E đồng hồ ICT, bản ghi 07-05",
+               "hôm nay 2026-07-04")
+    finally:
+        acf.datetime = real_dt
     ok(len(load([{"date": "2026-07-03", "amount_vnd": 0, "kind": "market_only", "evidence": "x"}])) == 1,
        "E: market_only không cần time_ict")
     raises(acf.CashFlowError, lambda: acf.load_flows("SpaceX", str(Path(tmp) / "khong_co.json"), require_file=True),
@@ -1154,6 +1395,9 @@ def part_e_flow_module(tmp):
     mo = {"date": "2026-07-07", "amount_vnd": 0, "kind": "market_only", "evidence": "sàn"}
     ok(jumps(r4, [dep("2026-07-03", 200_000_000, "10:00"), mo]) == [],
        "E: market_only (amount 0) cũng là bản ghi giải thích bước nhảy")
+    ok(jumps(r4, [], start=D(2026, 7, 3)) == [("2026-07-03", 20.0), ("2026-07-07", -25.0)]
+       and jumps(r4, [], start=D(2026, 7, 7)) == [("2026-07-07", -25.0)],
+       "E: start ĐÚNG ngày đến của bước nhảy ⇒ bước nhảy đó vẫn được xét")
     ok(jumps(r4, [], start=D(2026, 7, 6)) == [("2026-07-07", -25.0)]
        and jumps(r4, [], end=D(2026, 7, 6)) == [("2026-07-03", 20.0)]
        and jumps(r4, [], end=D(2026, 7, 7)) == [("2026-07-03", 20.0), ("2026-07-07", -25.0)],
@@ -1268,6 +1512,23 @@ def part_f_sandbox(tmp):
     ok(p.returncode == 0 and p.stdout.split() == [str(wc), str(wc), str(wc / "data" / "execution_logs"),
                                                  str(wc / "data" / "account_cash_flows.json")],
        f"F/N6: module ở mike/agents/wt-deep/bin phải neo gốc {wc}, được {p.stdout} {p.stderr[:200]}")
+
+    # L7: số chuẩn KHÔNG hữu hạn (NAV nguồn "nan") không phải "thiếu dữ liệu" — CLI rc=0 và trả NaN;
+    # cổng tỉ suất phải CHẶN, không được in "PASS ... vs canonical +nan%".
+    flows_path.write_text(json.dumps({"SpaceX": [], "ZaloPay": []}), encoding="utf-8")
+    hist = wc / "data" / "execution_logs" / "nav_history_SpaceX.csv"
+    good_hist = hist.read_text(encoding="utf-8")
+    body = good_hist.rstrip("\n").split("\n")
+    cells = body[-1].split(",")
+    cells[1] = "nan"
+    hist.write_text("\n".join(body[:-1] + [",".join(cells)]) + "\n", encoding="utf-8")
+    p = cli("SpaceX")
+    ok(p.returncode == 0 and "NaN" in p.stdout, f"F/L7 sanity: NAV nguồn nan ⇒ CLI rc=0, return_pct NaN; được {p.stdout[:200]} {p.stderr[:200]}")
+    p = gate("SpaceX_weekly_report_2026-10-05_to_2026-10-09.md", "+9,99%")     # `name` đã bị vòng N6 ghi đè
+    ok("_check_period_returns: BLOCK period-return BLOCK" in p.stdout and "không phải số hữu hạn" in p.stdout
+       and "period-return PASS" not in p.stdout,
+       f"F/L7: số chuẩn NaN ⇒ cổng tỉ suất phải CHẶN (không xác minh được), được {p.stdout} {p.stderr[-300:]}")
+    hist.write_text(good_hist, encoding="utf-8")
 
     os.remove(flows_path)
     p = cli("SpaceX")

@@ -56,7 +56,6 @@ import corp_actions  # noqa: E402 — validate() ép ex_date/qty_multiplier hợ
 # confirmed_qty_multiplier_after() (§29 vòng 6, Việc 2 blocker 1)
 from account_cash_flows import (CashFlowError, NavRow, attach_flows_to_rows,  # noqa: E402
                                 load_flows)
-from nav_period_returns import compute_period_returns, load_inception  # noqa: E402
 from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noqa: E402
                            _cash_fields_inconsistent)
 # §25 hệ quả 2 (code-quality 2026-09-27): TÁI DÙNG cả BA guard tiền của park_holdings, KHÔNG
@@ -860,14 +859,21 @@ def unit_price_performance(account, date, hist_rows, inception=None, flows=None)
     `hist_rows`: nav_history ĐÃ gồm dòng `date`. Không tính được ⇒ trả lỗi thật để in ra (§29),
     KHÔNG lùi về công thức cũ. `inception`/`flows` bỏ trống = đọc file thật (flows: bắt buộc có
     sổ dòng tiền, như đường công bố); truyền vào chỉ để selfcheck chạy offline.
+
+    Đây là đường HIỂN THỊ, chạy SAU khi nav_history đã ghi: không lỗi nào ở đây được làm hỏng lần
+    chụp NAV (rc≠0 ⇒ `nav_snapshot_daily.sh` báo "NAV KHÔNG ghi được" dù đã ghi) ⇒ bắt MỌI
+    Exception, kể cả lỗi import — nên `nav_period_returns` import TRONG hàm: `exdate_frame.py`,
+    `dividend_adjusted_return.py`, `discretionary_margin_gate.py` đều `import daily_nav_snapshot`
+    và không được gãy theo code hiển thị.
     """
     try:
+        from nav_period_returns import compute_period_returns, load_inception
         rows = sorted(NavRow(datetime.date.fromisoformat(r["date"]), float(r["nav"]),
                              balance_ts=(r.get("balance_ts") or None))
                       for r in hist_rows if r.get("date") and r.get("nav"))
         return compute_period_returns(account, datetime.date.fromisoformat(date), rows,
                                       inception or load_inception(account), flows), None
-    except (ValueError, KeyError, OSError) as exc:        # CashFlowError là ValueError
+    except Exception as exc:                # noqa: BLE001 — đường hiển thị, xem docstring
         return None, f"{type(exc).__name__}: {exc}"
 
 
@@ -963,13 +969,21 @@ def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
         # §29: nói rõ ĐÃ ĐỌC gì (file nào, bao nhiêu bản ghi của account này, ngày nào) — KHÔNG
         # khẳng định nguyên nhân là bug hay là nạp/rút.
         near = [f["date"].isoformat() for f in flows if abs((f["date"] - date_d).days) <= 3]
+        # Bản ghi có ngày <= hôm nay mà vẫn TREO = giờ khai SAU lần chụp số dư của dòng sắp ghi ⇒
+        # luật gán đẩy nó sang phiên sau. Nói đúng điều đó thay vì chỉ "không có bản ghi nào".
+        late = [f for f in mapped.get(None, []) if f["date"] <= date_d]
+        late_note = ("".join(
+            f"\n   ⚠️ Bản ghi {f['date']} time_ict={f['time_ict']} {f['amount_vnd']:+,.0f} VND ĐÃ khai "
+            f"nhưng giờ khai SAU lần chụp số dư của dòng này ({balance_ts}) ⇒ bị đẩy sang phiên sau, "
+            f"không giải thích bước nhảy hôm nay. Nếu tiền thật sự đã nằm trong số dư lúc chụp thì "
+            f"giờ khai sai — sửa time_ict." for f in late))
         return False, (
             f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: {nav:,.0f} VND (biến động "
             f"{day_change_pct:+.2f}%/ngày = {day_change:+,.0f} VND, vượt ngưỡng ±{sanity_max:.0f}%).\n"
             f"   ĐÃ TRA data/account_cash_flows.json: {len(flows)} bản ghi cho '{account}', KHÔNG "
             f"có bản ghi nào gán vào {date}"
             + (f" (gần nhất trong ±3 ngày: {', '.join(near)})" if near
-               else " (không có bản ghi nào trong ±3 ngày)") + ".\n"
+               else " (không có bản ghi nào trong ±3 ngày)") + "." + late_note + "\n"
             f"   ⇒ CHƯA xác định được nguyên nhân. Hai việc cần làm, KHÔNG được đoán:\n"
             f"     (a) nếu ĐÚNG là nạp/rút → khai vào data/account_cash_flows.json kèm bằng chứng "
             f"(schema: mike/bin/account_cash_flows.py), rồi chạy lại — guard tự cho qua, KHÔNG "

@@ -131,6 +131,9 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
     flow_bod_vnd, flow_eod_vnd, units_issued, units, unit_price, nav_is_estimate, flows.
     `info`: {"dropped": flow có date <= mốc khởi điểm (đã nằm trong vốn khởi điểm, KHÔNG phải
     dòng tiền), "pending": flow TREO — chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra}.
+    ⚠️ "dropped" lọc theo NGÀY, không theo giờ: mốc khởi điểm ZaloPay là NAV đêm TRƯỚC phiên
+    2026-07-06, nên tiền vào trong/tối 07-06 KHÔNG nằm trong vốn khởi điểm mà vẫn bị loại — nó
+    hiện ở `dropped_flows` của mọi consumer để người đọc thấy, không tự sửa ở đây.
     `flows` của mỗi dòng sổ là bản sao đã gán (`timing` = quy ước suy ra, `session_date`).
     """
     if inception_nav0 <= 0:
@@ -138,7 +141,8 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
     require_strictly_increasing(rows)
     nav_rows = [r for r in rows if r[0] > inception_from]
     dropped = [f for f in flows if f["date"] <= inception_from]
-    by_date = attach_flows_to_rows(nav_rows, [f for f in flows if f["date"] > inception_from])
+    by_date = attach_flows_to_rows(nav_rows, [f for f in flows if f["date"] > inception_from],
+                                   inception_from)
     pending = by_date.pop(None, [])
 
     base_est = next((getattr(r, "is_estimate", False) for r in rows if r[0] == inception_from),
