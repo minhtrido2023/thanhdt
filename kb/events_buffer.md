@@ -423,3 +423,65 @@
 
 ## Consolidation 2026-10-10T17:39:16Z
 - [2026-10-10T17:39:10Z] Mike/finding — daily-retro-finalized-2026-10-10: {"summary": "Retro 2026-10-10 hoàn tất 3/3 bước: entry kb/incidents/retro/retro-2026-10-10.md (commit 3b1cbe16), index.md cập nhật. 2 sự cố: disk-full-root tự hồi phục không rõ ai dọn (error không đóng vòng); công cụ tỉ suất §21 lỗi GIPS/tax-lot lan 2 báo cáo tuần đã gửi (sửa+gửi lại, user duyệt). Pattern H MỚI: lỗi đo lường client-facing tự phát hiện-vá-đóng gọn trong 1 phiên nhưng không có event error đánh dấu mức nghiêm trọng, chỉ finding. Không escalate (lần đầu, đã tự đóng trong ngày). Wags verify GAPS FOUND nhỏ (đếm event bus 516/7/529 sai → sửa 524/9/539), đã sửa trước khi ghi. Working memory Mike dọn gọn cuối ngày. consolidate.sh chạy xong (KB v3775). Draft state/retro_draft_2026-10-10.md đã xoá. Tóm tắt đã post Trading Daily.", "verified_by": "Wags — GAPS FOUND (minor), fixed"}
+
+## Consolidation 2026-10-10T19:07:02Z
+- [2026-10-10T18:21:32Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "bat dau vong 2: doc REVIEW.md + worktree"}
+- [2026-10-10T18:21:50Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "da doc REVIEW + 3 module loi; dang khao sat caller + vn_market + du lieu that balance_ts"}
+- [2026-10-10T18:22:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:23:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:24:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:24:41Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "da doc selfcheck + bo mutant reviewer; sap viet lai luat gan D1 (account_cash_flows) + so don vi"}
+- [2026-10-10T18:25:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:26:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:27:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:28:23Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:28:40Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "xong account_cash_flows + nav_unit_ledger (D1, D2, N2, N6, N8); dang sua nav_period_returns (N1, N7, N9)"}
+- [2026-10-10T18:29:24Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:30:24Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:31:20Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "code K1/K2/N1-N9 xong, so nghiem thu 10-09 giu nguyen; dang viet lai selfcheck (D1 + mutant song)"}
+- [2026-10-10T18:31:24Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:32:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:33:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:34:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:35:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:36:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:36:48Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "nav_unit_ledger_selfcheck moi 4561 assertion PASS (bat duoc 1 loi inf trong ban sua N8 cua chinh minh); dang cap nhat 2 selfcheck con lai"}
+- [2026-10-10T18:37:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:38:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:38:35Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "nav_jump_flow_gate_selfcheck 19 case + 18/18 mutant chet; tiep: nav_flow_term_selfcheck roi bo mutant reviewer"}
+- [2026-10-10T18:39:26Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:40:13Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "3 selfcheck xanh (4561+177 assertion, 19 case); dang chay bo mutant cua reviewer tren sandbox (4 shard) + viet bo mutant vong 2"}
+- [2026-10-10T18:40:26Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:41:26Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:42:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:43:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:43:51Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "mutant reviewer tren code moi: 100 chet assertion / 30 khong ap duoc (code da viet lai, da chuyen sang bo vong 2) / 5 song / 1 sap -> da them assertion; dang chay bo vong 2 (87 mutant). Song song: khao sat N11"}
+- [2026-10-10T18:44:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:45:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:46:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:47:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:48:18Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "mutant: reviewer 136 -> 0 song/0 sap tren code moi (30 khong ap duoc da chuyen sang bo vong 2); bo vong 2 87 mutant chet het bang assertion. Dang: control toan lich su vs master, TZ, cong pre-commit, roi commit 1"}
+- [2026-10-10T18:48:27Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:49:28Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:50:28Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:51:13Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "COMMIT 1 xong (sua review K1 K2 N1-N10) tren feat/fund-unit-ledger-20261011; control 3900 gia tri 0 lech vs master; bat dau N11 (commit 2)"}
+- [2026-10-10T18:51:28Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:52:29Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:52:44Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "COMMIT 1 = 9618de75 (lan dau bi tz-anchor-gate chan oan dong co san report_delivery_gate.py:330 do GIT_DIR trong hook tu worktree; da commit voi SKIP=tz-anchor-gate theo dung huong dan cua hook, ghi ro trong commit message). Dang lam N11 (commit 2)"}
+- [2026-10-10T18:53:29Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:54:29Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:55:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:56:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:57:05Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "N11 code + test xong (chua commit): dong NAV ngay va portfolio_status lay % tu gia don vi; 28/28 bao cao ngay ZaloPay da in sai moc 1 ty (thap hon chuan 1,127-1,220 diem %). Dang kiem cong bao cao ngay + quet rong"}
+- [2026-10-10T18:57:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:58:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T18:59:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:00:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:01:30Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:01:56Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "N11 xong + mutant chet het, cat tam thanh round2/n11_wip.patch; dang them chot D1 cho ca NAV chup TRUOC gio dong cua (08-24 04:49) vao commit 1 roi ap lai N11 lam commit 2"}
+- [2026-10-10T19:02:31Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:03:31Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:04:31Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:05:25Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "in_progress", "note": "attempt 2: commit 1 = 18b41746 da co; N11 dang staged, kiem lai roi commit 2 + mutant + bus"}
+- [2026-10-10T19:05:31Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261010_182122", "source": "watcher"}
+- [2026-10-10T19:06:31Z] Taylor/heartbeat — Taylor_20261010_182122: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261010_182122", "source": "watcher"}
