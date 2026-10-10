@@ -94,12 +94,20 @@ còn lại vẫn nằm ở khoản phải thu). Mức 5% có căn cứ pháp lý
 sự kiện chi trả THỨ HAI phải được đối chiếu lại theo đúng cách trên trước khi coi là quy luật
 đã đóng. Xem `_selfcheck()` mục 15 (đã ghim số thật của ca 17/07).
 
-QUY TẮC
+QUY TẮC — CHUẨN TỈ SUẤT TỔNG (user chốt 2026-10-10: "đúng quy chuẩn quốc tế" = GIPS / tax-lot)
 -------
 * Giá vốn (`cost`) là giá khớp THẬT đã trả — số THÔ, chưa điều chỉnh.
 * Giá cuối kỳ dùng `Price` (thô) — đúng thứ nhà đầu tư thấy trên bảng điện.
-* Cổ tức tiền mặt CỘNG VÀO TỬ SỐ (số RÒNG sau thuế), mẫu số giữ nguyên giá vốn gốc:
+* (a) Cổ tức TIỀN là THU NHẬP: CỘNG VÀO TỬ SỐ (số RÒNG sau thuế), mẫu số giữ nguyên giá vốn gốc
+      — KHÔNG phải khoản giảm giá vốn (broker thì trừ nó khỏi `costPrice`; đó là sổ của broker,
+      không phải cách tính tỉ suất):
       total_return = (P_end + D×(1 − thuế) − cost) / cost
+* (b) Cổ phiếu thưởng / cổ tức cổ phiếu / tách KHÔNG phải thu nhập: TỔNG giá vốn giữ nguyên,
+      phân bổ lại trên số cổ phiếu mới — `cost` trên mỗi cổ phiếu đang giữ = giá đã trả ÷ hệ số.
+* (c) `D` phải ở CÙNG hệ cổ phiếu với khối lượng đang giữ: cổ tức của một sự kiện ÷ hệ số của
+      mọi đợt thưởng có ex-date ≥ nó (`Adjustment.cash_per_share_now`). Ca thật TPB 02/10/2026:
+      500đ + thưởng 15% CÙNG ex-date, mua 16.800 ⇒ giá vốn 16.800/1,15 = 14.608,70, cổ tức
+      500/1,15 = 434,78 ⇒ (11.450 + 413,04 − 14.608,70)/14.608,70 = −18,79%.
   KHÔNG dùng `Close_end/Close_start` để so với giá vốn: chuỗi `Close` được hồi tố từ vintage
   HÔM NAY nên mức giá của nó không cùng hệ quy chiếu với một giá khớp thô. (`Close/Close` chỉ
   đúng khi so hai NGÀY với nhau — ví dụ "mã X tăng bao nhiêu trong tuần" — không phải để so với
@@ -120,6 +128,9 @@ CLI
         --from 2026-07-01 --to 2026-08-01
     python3 mike/bin/dividend_adjusted_return.py --ticker NCT --from 2026-07-21 --to 2026-07-31 \
         --cost 94360 --qty 500 --account SpaceX
+    # trong kỳ có thưởng/cổ tức CP ⇒ PHẢI khai --cost đang ở hệ nào (không khai = từ chối, rc=2):
+    python3 mike/bin/dividend_adjusted_return.py --ticker TPB --from 2026-09-01 --to 2026-10-09 \
+        --cost 16800 --cost-frame purchase --qty 30
     python3 mike/bin/dividend_adjusted_return.py --selfcheck
 """
 from __future__ import annotations
@@ -230,6 +241,32 @@ SANITY_REL = 0.01
 # nới bây giờ là nới mù. Số đo tái lập bằng `agents/Taylor/exp_vendor_mismatch/measure_k1.py`.
 VENDOR_MISMATCH_REL, VENDOR_MISMATCH_ABS = 0.01, 1.0
 
+# ---- CHUẨN TỈ SUẤT TỔNG (user chốt 2026-10-10: "đúng quy chuẩn quốc tế" = GIPS / tax-lot) ----
+#   (a) cổ tức TIỀN là THU NHẬP — cộng vào tử số SAU thuế khấu trừ, KHÔNG phải khoản giảm giá vốn;
+#   (b) cổ phiếu thưởng / cổ tức cổ phiếu / tách KHÔNG phải thu nhập — TỔNG giá vốn giữ nguyên,
+#       phân bổ lại trên số cổ phiếu mới (giá vốn/cp = giá vốn cũ ÷ hệ số);
+#   (c) cổ tức tiền/cp phải quy về CÙNG hệ số cổ phiếu với khối lượng đang giữ (÷ `frame_factor`).
+# Chỉ hai phương thức phát hành này trao cổ phiếu KHÔNG THU TIỀN cho cổ đông hiện hữu ⇒ chỉ chúng
+# làm đổi hệ số KL. "Quyền mua" có `exercise_ratio` nhưng là QUYẾT ĐỊNH VỐN (thực hiện = một lệnh
+# mua mới, không phải multiplier — xem MBB-2026-08-11 trong `data/corp_actions.json`); ESOP/riêng
+# lẻ không trao gì cho cổ đông hiện hữu. Cộng bừa mọi `ISS.exercise_ratio` (như `vendor_stock`)
+# cho MBB 11/08 ra 0,25 trong khi broker chỉ credit ×1,15.
+FREE_SHARE_ISS = ("Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng")
+# Hai nguồn hệ số (KL broker đã chứng minh vs vendor) lệch quá mức này ⇒ khung KL KHÔNG xác định.
+MULT_TOL = 0.005
+
+# ---- NHIỄU TỈ SỐ `Close/Price` (đo 2026-10-10, ca DRI) ----
+# Trên UPCOM cột `Price` của `tav2_bq.ticker` là GIÁ BÌNH QUÂN GIA QUYỀN (giá tham chiếu của sàn),
+# còn `Close` là giá KHỚP CUỐI đã điều chỉnh ⇒ hai cột lệch nhau đúng 1 bước giá (100đ) ở những
+# phiên giá cuối ≠ giá bình quân, và tỉ số nhảy ±0,6-0,7% KHÔNG vì sự kiện nào. DRI 03/09→09/10:
+# 8 cú nhảy, chỉ MỘT là thật (22/09, cổ tức 1.000đ). Hệ số điều chỉnh THẬT chỉ có thể TĂNG theo
+# thời gian (mỗi ex-date gỡ đi một thừa số < 1), nên một cú GIẢM của tỉ số là bằng chứng cơ khí
+# rằng chuỗi này có nhiễu, và độ lớn cú giảm lớn nhất là thước đo biên độ nhiễu của CHÍNH mã đó.
+# Một cú nhảy bị gọi là nhiễu chỉ khi ĐỦ CẢ BA: vendor TRA ĐƯỢC và xác nhận 0 dòng ở (mã, ngày);
+# chuỗi có cú giảm > RATIO_JUMP_MIN; cú nhảy ≤ NOISE_AMP_MULT × biên độ đó. Thiếu một ⇒ giữ
+# UNVERIFIED (fail-closed — không nuốt sự kiện thật vì vendor thiếu/lỗi).
+NOISE_AMP_MULT = 1.5
+
 
 @dataclass
 class Adjustment:
@@ -240,7 +277,9 @@ class Adjustment:
     last_cum_date: str
     last_cum_price: float
     per_share: float          # sau tầng 1 = ƯỚC LƯỢNG tỉ số; tầng 2 GHI ĐÈ bằng số từ tiền thật
-    kind: str = "UNVERIFIED"  # UNVERIFIED | CASH_CONFIRMED | STOCK_SUSPECTED
+    kind: str = "UNVERIFIED"  # UNVERIFIED | CASH_CONFIRMED | CASH_VENDOR | STOCK_SUSPECTED |
+                              # STOCK_CONFIRMED | ISS_NONFREE (quyền mua/ESOP: không tiền, không
+                              # cổ phiếu miễn phí) | RATIO_NOISE (cú nhảy tỉ số KHÔNG phải sự kiện)
     note: str = ""
     ratio_per_share: float = 0.0    # TẦNG 1 — giữ lại để chẩn đoán/sanity, KHÔNG vào báo cáo
     source: str = "unresolved"      # unresolved | broker_solved | bq_corp_action
@@ -274,6 +313,50 @@ class Adjustment:
     #         chưa từng là tiền thật (đúng lớp lỗi D1 mà chính sách vendor-mismatch sinh ra để
     #         đóng, chỉ đảo vai giữa hai nhánh).
     lookup_failed_had_broker_cash: bool = False
+    # --- thêm 2026-10-10 (chuẩn tỉ suất tổng + lọc nhiễu tỉ số) ---
+    detected_by: str = "ratio"          # ratio | vendor  (vendor = KHÔNG có cú nhảy tỉ số)
+    ratio_jump: float = 0.0             # cú nhảy tỉ số tại ex-date (0,0065 = +0,65%)
+    ratio_noise_amp: float = 0.0        # cú GIẢM lớn nhất của tỉ số trong cùng chuỗi (bất khả với
+    ratio_noise_at: str = ""            #   hệ số điều chỉnh thật) + ngày xảy ra — bằng chứng nhiễu
+    vendor_stock_free: float = 0.0      # Σ exercise_ratio CHỈ của `FREE_SHARE_ISS` (xem hằng số)
+    # Π hệ số KL của mọi sự kiện cổ phiếu có ex-date ≥ sự kiện này (gồm chân cổ phiếu của CHÍNH
+    # nó): 1 cổ phiếu hưởng quyền lúc đó = `frame_factor` cổ phiếu HÔM NAY. Đặt bởi `_assign_frames`.
+    frame_factor: float = 1.0
+    frame_ok: bool = True               # False ⇒ KHÔNG biết khung KL ⇒ không được công bố
+    frame_note: str = ""
+
+    @property
+    def cash_per_share_now(self) -> float:
+        """Cổ tức GỘP đồng/cp quy về KHỐI LƯỢNG ĐANG GIỮ (chuẩn (c)) — số được cộng vào tỉ suất.
+
+        `cash_per_share` là đồng trên MỘT CỔ PHIẾU HƯỞNG QUYỀN (hệ lúc chốt quyền — đúng số công
+        bố của doanh nghiệp, đúng số broker trừ khỏi giá vốn lúc đó). Sau một đợt thưởng ×m, mỗi
+        cổ phiếu đang giữ chỉ "mang" 1/m khoản đó: TPB 02/10/2026 trả 500đ + thưởng 15% CÙNG
+        ex-date ⇒ 500/1,15 = 434,78đ trên mỗi cổ phiếu sau thưởng. 0 khi khung KL không xác định.
+        """
+        if not self.frame_ok or self.frame_factor <= 0:
+            return 0.0
+        return self.cash_per_share / self.frame_factor
+
+    @property
+    def resolved(self) -> bool:
+        """Sự kiện đã HIỂU ĐỦ để dựng tỉ suất: biết nó là gì, bao nhiêu tiền, hệ số KL bao nhiêu.
+
+        KHÁC `kind == "CASH_CONFIRMED"`: thưởng cổ phiếu đã xác nhận hệ số là ĐÃ GIẢI (không thu
+        nhập, chỉ phân bổ lại giá vốn) và cú nhảy đã chứng minh là nhiễu thì không phải sự kiện.
+        Mọi thứ còn lại — UNVERIFIED, CASH_VENDOR, STOCK_SUSPECTED chưa có hệ số, sự kiện cổ phiếu
+        kèm chân tiền chưa giải, khung KL mâu thuẫn — là CHƯA GIẢI ⇒ không dựng được giá vốn thô.
+        """
+        if self.kind == "RATIO_NOISE":
+            return True
+        if not self.frame_ok:
+            return False
+        if self.kind == "CASH_CONFIRMED":
+            return True
+        if self.kind == "ISS_NONFREE":
+            return self.vendor_cash <= 0
+        return (self.kind == "STOCK_CONFIRMED" and self.vendor_cash <= 0
+                and self.share_multiplier > 1.0)
 
     @property
     def cash_per_share(self) -> float:
@@ -296,6 +379,12 @@ class Adjustment:
 class PositionReturn:
     """`dividend_per_share` nhận số **GỘP** (như sổ broker ghi); thuế được trừ ở đây.
 
+    MỌI con số per-share ở đây cùng MỘT hệ: cổ phiếu ĐANG GIỮ (`qty`). `cost_per_share` là giá vốn
+    THÔ đã phân bổ lại trên KL hiện tại (giá đã trả ÷ `share_multiplier`), `dividend_per_share` là
+    cổ tức đã quy về KL hiện tại (`Adjustment.cash_per_share_now`). Trộn hai hệ — giá vốn trên cổ
+    phiếu cũ, cổ tức 500đ trên cổ phiếu sau thưởng — là lỗi TPB 2026-10-02 (−18,73% thay vì −18,80%).
+    `share_multiplier`/`cost_per_share_paid` chỉ để IN ra cho người đọc đối chiếu, không vào phép tính.
+
     Hai bộ số song song, CỐ Ý không giấu bộ nào:
       * `*_gross` — cổ tức danh nghĩa theo mệnh giá công bố, đối chiếu được với sổ broker.
       * mặc định (`pl_total`, `pct_total_return`) — RÒNG sau thuế = tiền thật về túi ⇒ số công bố.
@@ -308,6 +397,8 @@ class PositionReturn:
     dividend_per_share: float          # GỘP (trước thuế)
     adjustments: list = field(default_factory=list)
     tax_rate: float = PIT_DIVIDEND_RATE
+    share_multiplier: float = 1.0      # Π hệ số thưởng/cổ tức CP trong kỳ nắm giữ
+    cost_per_share_paid: float = 0.0   # giá ĐÃ TRẢ/cp ở hệ lúc mua (0 = không khai, trùng hệ)
 
     @property
     def cost_total(self) -> float:
@@ -353,7 +444,13 @@ class PositionReturn:
 
     @property
     def unverified(self) -> list:
-        return [a for a in self.adjustments if a.kind != "CASH_CONFIRMED"]
+        """Sự kiện CHƯA GIẢI — còn một cái là tỉ suất KHÔNG được công bố (§21).
+
+        Dùng `Adjustment.resolved`, không phải `kind != "CASH_CONFIRMED"`: thưởng cổ phiếu đã có
+        hệ số và cú nhảy đã chứng minh là nhiễu KHÔNG phải thứ "chưa xác minh" (bản cũ gắn cờ cả
+        hai, nên DRI với 7 cú nhiễu UPCOM bị cấm công bố dù sự kiện thật duy nhất đã khớp sổ).
+        """
+        return [a for a in self.adjustments if not getattr(a, "resolved", False)]
 
 
 # `bq query` mặc định CHỈ trả 100 dòng và cắt ÂM THẦM (không lỗi, không cảnh báo). Đã cắn thật
@@ -401,20 +498,25 @@ def _scan_jumps(ticker: str, rows: list, start: str) -> list:
     """Cú nhảy tỉ số Close/Price → sự kiện điều chỉnh giá. MỘT bản cài đặt duy nhất cho cả
     đường single-ticker lẫn batch (đừng nhân bản vòng lặp này ra chỗ khác)."""
     events, prev = [], None
+    amp, amp_at = 0.0, ""      # cú GIẢM lớn nhất của tỉ số — xem khối "NHIỄU TỈ SỐ" ở đầu file
     for r in rows:
         d = str(r["d"])[:10]
         price, close = float(r["price"]), float(r["close"])
         ratio = close / price
         if prev is not None:
             pd_, pprice, pratio = prev
+            if pratio / ratio - 1.0 > amp:
+                amp, amp_at = pratio / ratio - 1.0, d
             # ex-date phải nằm SAU 'start' (sự kiện trước khi mua vị thế không liên quan)
             if ratio / pratio - 1.0 > RATIO_JUMP_MIN and d > start:
                 est = round(pprice * (1.0 - pratio / ratio), 2)
                 events.append(Adjustment(
                     ticker=ticker, ex_date=d, last_cum_date=pd_, last_cum_price=pprice,
-                    per_share=est, ratio_per_share=est,
+                    per_share=est, ratio_per_share=est, ratio_jump=ratio / pratio - 1.0,
                 ))
         prev = (d, price, ratio)
+    for ev in events:          # biên độ nhiễu là thuộc tính của CẢ chuỗi ⇒ gắn sau khi quét xong
+        ev.ratio_noise_amp, ev.ratio_noise_at = amp, amp_at
     return events
 
 
@@ -506,8 +608,19 @@ def bq_corp_action(ticker: str, ex_date: str, include_announced: bool = False):
     if not rows:
         return None
 
-    seen, cash, stock, titles = set(), 0.0, 0.0, []
+    return _fold_corp_rows(rows)
+
+
+def _fold_corp_rows(rows: list) -> dict:
+    """PURE — dedup + cộng các dòng `corporate_action` của MỘT (mã, ex-date).
+
+    `stock` = Σ `exercise_ratio` của MỌI dòng ISS (giữ nguyên nghĩa cũ — consumer cũ đọc nó để
+    hỏi "có phát hành gì không"). `stock_free` = Σ chỉ của `FREE_SHARE_ISS` — đây mới là thứ làm
+    đổi HỆ SỐ KL của cổ đông hiện hữu; dùng `stock` làm hệ số là cộng nhầm quyền mua/ESOP.
+    """
+    seen, cash, stock, free, titles = set(), 0.0, 0.0, 0.0, []
     for r in rows:
+        method = (r.get("issue_method_name_vi") or "").strip()
         key = (r["event_code"], r.get("issue_method_name_vi"),
                str(r.get("value_per_share")), str(r.get("exercise_ratio")))
         if key in seen:
@@ -518,11 +631,56 @@ def bq_corp_action(ticker: str, ex_date: str, include_announced: bool = False):
             cash += float(r["value_per_share"])
         elif r["event_code"] == "ISS" and r.get("exercise_ratio") is not None:
             stock += float(r["exercise_ratio"])
+            if method in FREE_SHARE_ISS:
+                free += float(r["exercise_ratio"])
 
     return {"cash": cash if cash > 0 else None,
             "stock": stock if stock > 0 else None,
+            "stock_free": free,
             "titles": "; ".join(titles),
             "n_rows": len(rows), "n_dedup": len(seen)}
+
+
+def bq_corp_events_window(tickers, start: str, end: str, include_announced: bool = False) -> dict:
+    """{(mã, ex-date): `_fold_corp_rows`} cho MỌI sự kiện DIV/ISS có ex-date trong (start, end].
+
+    Nguồn phát hiện THỨ HAI, độc lập với cú nhảy tỉ số: tầng 1 chỉ thấy sự kiện làm tỉ số nhảy
+    > `RATIO_JUMP_MIN`, nên nó MÙ với (i) cổ tức nhỏ hơn 0,3% thị giá, (ii) ex-date mà BQ `ticker`
+    chưa sync, (iii) cú nhảy thật bị một phiên nhiễu ngược chiều che mất (mã UPCOM). Sự kiện vendor
+    khai mà tầng 1 không thấy được `resolve_dividends` thêm vào với `detected_by="vendor"`.
+
+    NÉM LẠI exception của `_bq()` — cùng hợp đồng với `bq_corp_action` (không trộn "vendor không
+    có gì" với "không tra được vendor").
+    """
+    inlist = ",".join(f"'{t}'" for t in sorted(set(tickers)))
+    rows = _bq(f"""
+        SELECT ticker, CAST(exright_date AS STRING) AS ex, event_code, value_per_share,
+               exercise_ratio, issue_method_name_vi, event_title_vi
+        FROM `{BQ_PROJECT}.tav2_bq.corporate_action`
+        WHERE ticker IN ({inlist})
+          AND exright_date > DATE '{start}' AND exright_date <= DATE '{end}'
+          AND event_status IN {"('executed', 'announced')" if include_announced
+                               else "('executed')"}
+          AND event_code IN ('DIV', 'ISS')
+    """)
+    by = {}
+    for r in rows:
+        by.setdefault((r["ticker"], str(r["ex"])[:10]), []).append(r)
+    return {k: _fold_corp_rows(v) for k, v in by.items()}
+
+
+def _last_cum(ticker: str, ex_date: str):
+    """(ngày, `Price` thô) của phiên CUỐI CÒN QUYỀN — phiên gần nhất trước ex-date. None nếu
+    không có. Chỉ dùng cho sự kiện `detected_by="vendor"` (tầng 1 không cho sẵn ngày này)."""
+    rows = _bq(f"""
+        SELECT CAST(t.time AS STRING) AS d, t.Price AS price
+        FROM `{BQ_PROJECT}.tav2_bq.ticker` AS t
+        WHERE t.ticker = '{ticker}' AND t.Price > 0
+          AND t.time BETWEEN DATE_SUB(DATE '{ex_date}', INTERVAL 15 DAY)
+                         AND DATE_SUB(DATE '{ex_date}', INTERVAL 1 DAY)
+        ORDER BY t.time DESC LIMIT 1
+    """)
+    return (str(rows[0]["d"])[:10], float(rows[0]["price"])) if rows else None
 
 
 def broker_cash_deltas(account_no: str) -> dict:
@@ -580,7 +738,8 @@ def broker_qty(account_no: str) -> dict:
         day_last_ts[day] = ts
         day_last_rec[day] = rec
 
-    out = {}
+    out = _QtyMap()
+    out.days = set(day_last_rec)
     for day, rec in day_last_rec.items():
         for it in rec.get("payload", {}).get("positions", []):
             if str(it.get("accountNo")) != str(account_no):
@@ -588,6 +747,117 @@ def broker_qty(account_no: str) -> dict:
             key = (it["symbol"], day)
             out[key] = out.get(key, 0.0) + float(it.get("openQuantity") or 0)
     return out
+
+
+class _QtyMap(dict):
+    """`broker_qty()` + tập NGÀY CÓ BẢN GHI (`.days`).
+
+    Một dict thuần không phân biệt được "ngày đó không có bản ghi vị thế nào" với "có bản ghi
+    nhưng KHÔNG giữ mã này" — cả hai đều là thiếu khoá. `qty_entitled` cần đúng phân biệt đó để
+    không lấy KL của ex-date thay cho ngày chốt quyền khi tài khoản mua vào ĐÚNG ex-date.
+    """
+    days = frozenset()
+
+
+def broker_cost_series(account_no: str) -> dict:
+    """{mã: [(ts, KL, TỔNG giá vốn broker)]} — MỌI bản ghi positions theo thời gian, đã gộp lô.
+
+    Bản ghi có mà vắng mã (đã bán hết) ⇒ chèn (ts, 0, 0): mốc vị thế về 0 là chỗ giá vốn RESET,
+    phải thấy được. §12: lọc `account_no` ở cả bản ghi (`_broker_records`) lẫn từng dòng vị thế.
+    """
+    recs = sorted(_broker_records("positions", account_no), key=lambda r: r.get("ts") or "")
+    out, seen = {}, set()
+    for rec in recs:
+        ts = rec.get("ts") or ""
+        cur = {}
+        for it in rec.get("payload", {}).get("positions", []):
+            if str(it.get("accountNo")) != str(account_no):
+                continue
+            q = float(it.get("openQuantity") or 0)
+            a = cur.setdefault(it["symbol"], [0.0, 0.0])
+            a[0] += q
+            a[1] += q * float(it.get("costPrice") or 0)
+        seen |= set(cur)
+        for sym in seen:
+            q, tot = cur.get(sym, (0.0, 0.0))
+            out.setdefault(sym, []).append((ts, q, tot))
+    return {sym: _drop_blank_reads(rows) for sym, rows in out.items()}
+
+
+def _drop_blank_reads(rows: list) -> list:
+    """PURE — bỏ các bản ghi KL=0 THOÁNG QUA: vị thế "biến mất" rồi hiện lại Y NGUYÊN.
+
+    Lỗi API đã biết của DNSE (cùng họ với "khối stock toàn số 0" ở `broker_cash_deltas`): một lần
+    đọc trả `positions` rỗng. Đo thật SpaceX 2026-08-20: 19:06:46 SAB 1.100cp/48.804.999,98đ →
+    19:07:16 rỗng → 19:07:46 lại đúng 1.100cp/48.804.999,98đ. Giữ bản ghi đó thì mọi consumer
+    hiểu là "bán hết rồi mua lại" ⇒ vị thế MỚI, cổ tức 28/07 không thuộc về nó — sai hoàn toàn.
+    Chỉ bỏ khi hai đầu của quãng 0 TRÙNG cả KL lẫn tổng giá vốn (tới 1đ): bán hết rồi mua lại
+    thật thì không thể ra đúng tổng giá vốn cũ. Quãng 0 ở CUỐI chuỗi giữ nguyên (chưa biết).
+    """
+    out, i, n = [], 0, len(rows)
+    while i < n:
+        if rows[i][1] > 0 or not out or out[-1][1] <= 0:
+            out.append(rows[i])
+            i += 1
+            continue
+        j = i
+        while j < n and rows[j][1] <= 0:
+            j += 1
+        if j < n and rows[j][1] == out[-1][1] and abs(rows[j][2] - out[-1][2]) <= 1.0:
+            i = j                          # quãng 0 thoáng qua — bỏ
+        else:
+            out.extend(rows[i:j])          # đóng vị thế thật (hoặc cuối chuỗi)
+            i = j
+    return out
+
+
+COST_STEP_TOL = 0.5      # đồng/cp — costPrice DNSE có 4 chữ số thập phân, bước thật ≥ hàng chục đồng
+
+
+def classify_cost_steps(series: list) -> list:
+    """PURE — phân loại từng cặp bản ghi liên tiếp của MỘT mã thành bước giá vốn.
+
+    Sổ broker là nhân chứng PER-MÃ, PER-TÀI-KHOẢN cho việc giá vốn có bị đụng tới hay không —
+    khác `cashDividendReceiving` (gộp cả tài khoản theo ngày) và khác tỉ số giá (không biết tài
+    khoản nào hưởng). Đo thật: DRI 21/09 19:07 KL 3.700 giữ nguyên, costPrice 13.262,16 →
+    12.262,16 (trừ đúng 1.000đ cổ tức); TPB 01/10 19:03 200cp × 16.800 → 230cp × 14.173,913
+    (tổng giá vốn giảm đúng 200 × 500đ, KL ×1,15).
+
+    Trả list dict `{ts, kind, cash, mult, q0, q1}`; `kind`:
+      cash        KL không đổi, giá vốn/cp GIẢM  ⇒ broker trừ `cash` đồng/cp
+      stock       KL tăng, TỔNG giá vốn không đổi ⇒ thưởng/cổ tức CP, `mult` = q1/q0
+      cash+stock  KL tăng, TỔNG giá vốn GIẢM      ⇒ cả hai (`cash` trên cổ phiếu TRƯỚC sự kiện)
+      sell        KL giảm, giá vốn/cp không đổi (bình quân gia quyền không đổi khi bán)
+      buy         KL tăng, TỔNG giá vốn tăng      ⇒ CHE mọi bước khác rơi cùng cặp bản ghi
+      other       mọi thứ còn lại (bán kèm đổi giá vốn, giá vốn/cp TĂNG khi KL không đổi …)
+    Cặp không đổi gì thì không sinh phần tử nào. Mua không thể làm GIẢM tổng giá vốn, nên
+    `cash+stock` không lẫn được với một lệnh khớp.
+    """
+    steps = []
+    for (_t0, q0, c0), (t1, q1, c1) in zip(series, series[1:]):
+        if q0 <= 0 or q1 <= 0:
+            continue                       # mở/đóng vị thế — giá vốn reset, không phải bước
+        p0, p1 = c0 / q0, c1 / q1
+        base = {"ts": t1, "cash": 0.0, "mult": 1.0, "q0": q0, "q1": q1}
+        if q1 == q0:
+            if p0 - p1 > COST_STEP_TOL:
+                steps.append({**base, "kind": "cash", "cash": p0 - p1})
+            elif p1 - p0 > COST_STEP_TOL:
+                steps.append({**base, "kind": "other"})
+        elif q1 < q0:
+            steps.append({**base, "kind": "sell" if abs(p1 - p0) <= COST_STEP_TOL else "other"})
+        elif abs(c1 - c0) <= max(1.0, 1e-3 * q1):
+            # TỔNG giá vốn bất biến TỚI ĐỒNG: broker làm tròn KL lẻ xuống rồi đặt lại
+            # costPrice = tổng cũ ÷ KL mới (MBB 11/08: 232 × 21.417,1483 khớp tuyệt đối tổng cũ),
+            # dung sai chỉ còn là 4 chữ số thập phân của costPrice × KL. KHÔNG nới tới "một cổ
+            # phiếu": mua lẻ 1cp làm tổng tăng đúng ~1 thị giá và sẽ bị đọc thành thưởng (đo thật
+            # 2026-10-10: SAB 740→741, VNM 600→601 của ZaloPay ngày 21/07).
+            steps.append({**base, "kind": "stock", "mult": q1 / q0})
+        elif c1 < c0:
+            steps.append({**base, "kind": "cash+stock", "cash": (c0 - c1) / q0, "mult": q1 / q0})
+        else:
+            steps.append({**base, "kind": "buy"})
+    return steps
 
 
 # ======================================================================================
@@ -794,6 +1064,10 @@ def qty_entitled(qmap: dict, adj, frame: dict = None):
     ev = (frame or {}).get((adj.ticker, adj.last_cum_date))
     q = qmap.get((adj.ticker, adj.last_cum_date))
     if q is None:
+        # CÓ bản ghi vị thế của ngày chốt quyền mà vắng mã ⇒ KHÔNG nắm giữ lúc chốt quyền. Rơi
+        # xuống KL của ex-date ở ca này là trao cổ tức cho cổ phiếu mua ĐÚNG ex-date (không hưởng).
+        if adj.last_cum_date in getattr(qmap, "days", ()):
+            return 0.0, "eod", ""
         q = qmap.get((adj.ticker, adj.ex_date))
         if q is None:
             return 0.0, "eod", ""                     # không nắm giữ ở cả hai ngày
@@ -917,6 +1191,12 @@ def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None,
         # vừa mua/bán đúng ngày đó". Một lệnh khớp thật quanh ex-date sẽ nén cổ tức tiền mặt thật
         # xuống 0. Sai theo hướng AN TOÀN (thiếu, không bao giờ thừa) nên giữ nguyên; xem selfcheck
         # mục 13. Muốn tách đúng phải có lịch sử lệnh khớp, không suy được từ số lượng cuối ngày.
+        # NGOẠI LỆ CÓ BẰNG CHỨNG (2026-10-10): vendor ĐÃ khai sự kiện này là THUẦN TIỀN (có DIV,
+        # không dòng ISS nào) ⇒ KL đổi quanh ex-date là LỆNH KHỚP, không phải thưởng CP. Sự kiện
+        # ở lại hệ; nghiệm vẫn phải khớp dư số tiền broker VÀ khớp ước lượng tỉ số/vendor mới qua.
+        if (changed and float(getattr(adj, "vendor_cash", 0.0) or 0.0) > 0
+                and float(getattr(adj, "vendor_stock", 0.0) or 0.0) <= 0):
+            changed = []
         if changed:
             adj.kind = "STOCK_SUSPECTED"
             adj.note = ("số lượng cổ phiếu đổi tại ex-date (" + "; ".join(changed)
@@ -989,9 +1269,21 @@ def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None,
         for c in cols:
             adj, val = live[c], float(x[pos[c]])
             ref = _cash_ratio_ref(adj)
-            if val <= 0 or ref <= 0 or abs(val - ref) > SANITY_REL * ref:
-                adj.note = (f"nghiệm broker {val:,.0f}đ/cp LỆCH XA ước lượng tỉ số {ref:,.0f}đ/cp — "
-                            "nghi phương trình bị nhiễm bởi sự kiện chưa phát hiện")
+            # LƯỚI AN TOÀN qua được bằng MỘT trong hai nhân chứng độc lập với tiền broker:
+            #   · ước lượng tỉ số (tầng 1) — như cũ; hoặc
+            #   · số vendor `corporate_action` khai cho ĐÚNG (mã, ex-date) khớp nghiệm.
+            # Nhân chứng thứ hai thêm 2026-10-10: ước lượng tỉ số của mã UPCOM sai tới cả một
+            # bước giá (DRI 22/09: ước lượng 910đ, tiền broker 1.000đ, vendor 1.000đ) nên lưới cũ
+            # BÁC đúng nghiệm ĐÚNG. Dư số phương trình tiền broker vẫn phải ~0 ở trên — vendor
+            # chỉ thay vai "nhân chứng độc lập", không thay tiền thật.
+            vref = float(getattr(adj, "vendor_cash", 0.0) or 0.0)
+            ok_ratio = ref > 0 and abs(val - ref) <= SANITY_REL * ref
+            ok_vendor = vref > 0 and abs(val - vref) <= max(VENDOR_MISMATCH_ABS,
+                                                            VENDOR_MISMATCH_REL * val)
+            if val <= 0 or not (ok_ratio or ok_vendor):
+                adj.note = (f"nghiệm broker {val:,.0f}đ/cp LỆCH XA ước lượng tỉ số {ref:,.0f}đ/cp"
+                            + (f" và số vendor {vref:,.0f}đ/cp" if vref > 0 else "")
+                            + " — nghi phương trình bị nhiễm bởi sự kiện chưa phát hiện")
                 continue
             adj.per_share, adj.kind, adj.source = val, "CASH_CONFIRMED", "broker_solved"
             adj.note = f"giải từ tiền mặt broker thật ({shape})"
@@ -1055,6 +1347,37 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
     adjs = []
     for tk in tickers:
         adjs.extend(detect_adjustments(tk, start, end))
+    # Nguồn phát hiện THỨ HAI: sự kiện vendor khai mà tỉ số KHÔNG nhảy (xem `bq_corp_events_window`).
+    warnings = _add_vendor_only_events(adjs, tickers, start, end)
+
+    # Tra vendor cho TỪNG ứng viên TRƯỚC khi giải — solver cần biết vendor nói gì để (i) không coi
+    # cú nhảy nhiễu là một ẩn (làm hệ vô định — ca DRI), (ii) có nhân chứng thứ hai cho lưới an
+    # toàn. Kết quả tra (kể cả LỖI) giữ nguyên trong `looked`; chính sách fail-closed khi lỗi vẫn
+    # áp ở vòng lặp phía dưới, SAU khi giải, đúng thứ tự cũ (provenance `had_broker_cash`).
+    looked = {}
+    for adj in adjs:
+        try:
+            looked[id(adj)] = (bq_corp_action(adj.ticker, adj.ex_date), None)
+        except Exception as e:                     # noqa: BLE001 — xử ở vòng lặp dưới
+            looked[id(adj)] = (None, e)
+    for adj in adjs:
+        row, err = looked[id(adj)]
+        if err is not None:
+            continue                               # KHÔNG tra được ⇒ không được phép gọi là nhiễu
+        if row:
+            adj.vendor_cash = float(row.get("cash") or 0.0)
+            adj.vendor_stock = float(row.get("stock") or 0.0)
+            # caller/stub cũ không khai `stock_free` ⇒ giữ nghĩa cũ (mọi ISS là chân cổ phiếu)
+            adj.vendor_stock_free = float(row["stock_free"] if "stock_free" in row
+                                          else adj.vendor_stock)
+        elif (adj.detected_by == "ratio" and adj.ratio_noise_amp > RATIO_JUMP_MIN
+              and 0 < adj.ratio_jump <= NOISE_AMP_MULT * adj.ratio_noise_amp):
+            adj.kind = "RATIO_NOISE"
+            adj.note = (f"NHIỄU tỉ số, KHÔNG phải sự kiện: vendor `corporate_action` tra được và "
+                        f"xác nhận 0 dòng ở ex {adj.ex_date}; chuỗi Close/Price của chính mã này "
+                        f"có cú GIẢM {adj.ratio_noise_amp * 100:.2f}% ngày {adj.ratio_noise_at} "
+                        f"(bất khả với hệ số điều chỉnh thật) và cú nhảy này chỉ "
+                        f"{adj.ratio_jump * 100:.2f}% ≤ {NOISE_AMP_MULT:g}× biên độ đó")
 
     # TIỀN BROKER THẬT VẪN LÀ NGUỒN SỐ (tầng 2). Bảng vendor `corporate_action` chạy SAU, làm 3
     # việc khác nhau — cố ý KHÔNG cho nó ghi đè một nghiệm đã giải ra từ tiền thật:
@@ -1063,14 +1386,17 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
     #   2. ĐỐI SOÁT CHÉO nghiệm broker — hai nguồn độc lập lệch nhau là tín hiệu phải điều tra.
     #   3. LẤP chỗ broker không giải được (hệ vô định / ngoài cửa sổ dnse_raw từ 06/07/2026),
     #      nhưng gắn nhãn RIÊNG `CASH_VENDOR` — xem `cash_per_share`: KHÔNG tự động vào báo cáo.
-    todo = [a for a in adjs if a.source == "unresolved"]
+    todo = [a for a in adjs if a.source == "unresolved" and a.kind != "RATIO_NOISE"]
     if todo:
         solve_from_broker(todo, accounts)
 
     for adj in adjs:
-        try:
-            row = bq_corp_action(adj.ticker, adj.ex_date)
-        except Exception as e:
+        if adj.kind == "RATIO_NOISE":
+            adj.vendor_check = "unavailable"
+            adj.vendor_note = "không có sự kiện executed nào ở (mã, ex-date) trong corporate_action"
+            continue
+        row, e = looked[id(adj)]
+        if e is not None:
             # FAIL-CLOSED có chủ đích (arch-review 2026-09-24, xem docstring `bq_corp_action`):
             # KHÔNG tra được vendor ⇒ không chạy được 2 lá chắn D1 (stock_leg_ignored/
             # cash_mismatch) cho ĐÚNG mã này. Vẫn hạ CHỈ sự kiện này (không crash cả
@@ -1095,13 +1421,15 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
             adj.vendor_check = "unavailable"
             adj.vendor_note = "không có sự kiện executed nào ở (mã, ex-date) trong corporate_action"
             continue
-        adj.vendor_cash = float(row.get("cash") or 0.0)
-        adj.vendor_stock = float(row.get("stock") or 0.0)
         adj.vendor_note = row.get("titles", "")
+        # Hệ số mà SOLVER biết (từ KL broker) — chụp TRƯỚC khi `_settle_multiplier` bổ sung hệ số
+        # vendor: lá chắn D1 bên dưới hỏi đúng câu "solver có biết chân cổ phiếu không".
+        solver_mult = adj.share_multiplier
+        _settle_multiplier(adj)
 
         if adj.kind == "CASH_CONFIRMED":
             # broker đã cho số chính thức — vendor chỉ được phép XÁC NHẬN hoặc BÁO ĐỘNG
-            if adj.vendor_cash <= 0 and adj.vendor_stock > 0 and adj.share_multiplier == 1.0:
+            if adj.vendor_cash <= 0 and adj.vendor_stock > 0 and solver_mult == 1.0:
                 # BẤT NHẤT NỘI BỘ (arch-review vòng 2, D1). Ba mảnh bằng chứng đang cầm trong tay,
                 # KHÔNG phải hạ cấp mù (§29):
                 #   · vendor NÓI THẲNG đây là sự kiện CỔ PHIẾU (`ISS`, exercise_ratio > 0) và
@@ -1170,27 +1498,145 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
             adj.vendor_check = "vendor_only"
         elif adj.vendor_stock > 0:
             # phân loại chắc chắn: có phát hành CP ⇒ không được cộng như tiền mặt
-            adj.kind = "STOCK_CONFIRMED"
+            # `ISS_NONFREE`: vendor khai phát hành nhưng KHÔNG có cổ phiếu miễn phí nào cho cổ
+            # đông hiện hữu (quyền mua / ESOP) và broker cũng không chứng minh credit nào ⇒ không
+            # thu nhập, không đổi hệ số KL — không phải "thưởng cổ phiếu".
+            adj.kind = ("STOCK_CONFIRMED" if adj.vendor_stock_free > 0 or adj.share_multiplier > 1.0
+                        else "ISS_NONFREE")
             adj.vendor_check = "vendor_only"
             adj.note = (f"corporate_action: ISS tỉ lệ {adj.vendor_stock:.4f}"
+                        + (f" (miễn phí cho cổ đông: {adj.vendor_stock_free:.4f})"
+                           if adj.vendor_stock_free != adj.vendor_stock else "")
                         + (f" + DIV {adj.vendor_cash:,.0f}đ/cp" if adj.vendor_cash > 0 else ""))
 
+    _assign_frames(adjs)
     if with_crosscheck:
-        crosscheck_dividend_1y(adjs)
-    return adjs
+        crosscheck_dividend_1y([a for a in adjs if a.kind != "RATIO_NOISE"])
+    out = _AdjList(adjs)
+    out.warnings = warnings
+    for w in warnings:
+        print(f"⚠️  [resolve_dividends] {w}", file=sys.stderr)
+    return out
+
+
+class _AdjList(list):
+    """`resolve_dividends()` + `.warnings` (những gì lượt này KHÔNG làm được, vd không tra được
+    cửa sổ vendor). Vẫn là list ⇒ mọi consumer cũ không đổi."""
+    warnings = ()
+
+
+def _add_vendor_only_events(adjs: list, tickers, start: str, end: str) -> list:
+    """Thêm vào `adjs` các sự kiện vendor khai (DIV / cổ phiếu miễn phí) mà tầng 1 KHÔNG thấy.
+    Trả danh sách cảnh báo (rỗng = làm đủ)."""
+    try:
+        vend = bq_corp_events_window(tickers, start, end)
+    except Exception as e:                         # noqa: BLE001 — nói ra, không nuốt
+        return [f"KHÔNG tra được cửa sổ vendor corporate_action ({str(e)[:200]}) — sự kiện mà cú "
+                f"nhảy tỉ số không lộ (cổ tức nhỏ, BQ chưa sync ex-date, nhiễu che) sẽ KHÔNG được "
+                f"phát hiện ở lượt này"]
+    warnings = []
+    have = {(a.ticker, a.ex_date) for a in adjs}
+    for (tk, ex), row in sorted(vend.items()):
+        if (tk, ex) in have:
+            continue
+        if not ((row.get("cash") or 0) > 0 or (row.get("stock_free") or 0) > 0):
+            continue                   # quyền mua / ESOP đứng một mình: không đụng tới tỉ suất
+        try:
+            cum = _last_cum(tk, ex)
+        except Exception as e:                     # noqa: BLE001
+            cum, why = None, str(e)[:200]
+        else:
+            why = "không có phiên nào trong 15 ngày trước ex-date"
+        if cum is None:
+            warnings.append(f"{tk} ex {ex}: vendor khai sự kiện nhưng không lấy được phiên cuối "
+                            f"còn quyền ({why}) — sự kiện này CHƯA được đưa vào")
+            continue
+        adjs.append(Adjustment(
+            ticker=tk, ex_date=ex, last_cum_date=cum[0], last_cum_price=cum[1],
+            per_share=0.0, ratio_per_share=0.0, detected_by="vendor",
+        ))
+    return warnings
+
+
+def _settle_multiplier(adj) -> None:
+    """Chốt `share_multiplier` từ HAI nguồn: KL broker đã chứng minh (`credit_frame`, đặt bởi
+    solver) và cổ phiếu miễn phí vendor khai. Một nguồn ⇒ dùng nó; hai nguồn lệch > `MULT_TOL` ⇒
+    khung KL KHÔNG xác định (`frame_ok=False`) — không chọn bừa một bên."""
+    free = float(adj.vendor_stock_free or 0.0)
+    if adj.share_multiplier > 1.0:
+        if abs(adj.share_multiplier - (1.0 + free)) > MULT_TOL:
+            adj.frame_ok = False
+            adj.frame_note = (f"hệ số KL MÂU THUẪN: broker đã credit ×{adj.share_multiplier:.4f}, "
+                              f"vendor khai cổ phiếu miễn phí ×{1.0 + free:.4f}")
+    elif free > 0:
+        adj.share_multiplier = 1.0 + free
+
+
+def _assign_frames(adjs: list) -> None:
+    """Đặt `frame_factor` cho từng sự kiện = Π hệ số KL của mọi sự kiện CÙNG MÃ có ex-date ≥ nó.
+
+    Chân tiền và chân cổ phiếu cùng ex-date đều tính trên KL lúc chốt quyền, nên hệ số của CHÍNH
+    sự kiện đó cũng nằm trong tích (TPB 02/10: 500đ trên 200cp cũ = 434,78đ trên mỗi cp của 230).
+    Một sự kiện sau đó mà KHÔNG biết hệ số (chưa rõ là tiền hay cổ phiếu) làm khung của mọi sự
+    kiện trước nó thành không xác định ⇒ `frame_ok=False` (fail-closed, không đoán hệ số = 1).
+    """
+    by = {}
+    for a in adjs:
+        if a.kind != "RATIO_NOISE":
+            by.setdefault(a.ticker, []).append(a)
+
+    def _known(j) -> bool:
+        if j.frame_note:                               # `_settle_multiplier` đã thấy mâu thuẫn
+            return False
+        if j.kind in ("UNVERIFIED", "STOCK_SUSPECTED") and \
+                j.vendor_check in ("unavailable", "lookup_failed"):
+            return False                               # không nguồn nào nói nó là tiền hay cổ phiếu
+        return True
+
+    for evs in by.values():
+        evs.sort(key=lambda a: a.ex_date)
+        known = [_known(j) for j in evs]
+        for i, e in enumerate(evs):
+            f, bad = 1.0, []
+            for j, ok in zip(evs[i:], known[i:]):
+                if not ok:
+                    bad.append(f"{j.ticker} ex {j.ex_date} [{j.kind}]"
+                               + (f": {j.frame_note}" if j.frame_note else ""))
+                else:
+                    f *= float(j.share_multiplier or 1.0)
+            if bad:
+                e.frame_ok = False
+                if not e.frame_note:
+                    e.frame_note = "khung KL không xác định vì: " + "; ".join(bad)
+            else:
+                e.frame_factor = f
 
 
 def position_total_return(ticker, qty, cost_per_share, start, end, end_price=None,
-                          account_no=None, tax_rate: float = PIT_DIVIDEND_RATE) -> PositionReturn:
+                          account_no=None, tax_rate: float = PIT_DIVIDEND_RATE,
+                          cost_frame: str = None) -> PositionReturn:
     """Tỉ suất TỔNG (giá + cổ tức tiền mặt) của một vị thế giữ từ `start` tới `end`.
 
-    `start` = ngày mua (chỉ tính cổ tức có ex-date SAU ngày này).
+    `start` = ngày mua (chỉ tính sự kiện có ex-date SAU ngày này).
+    `qty` = KL ĐANG GIỮ ở `end` (sau mọi đợt thưởng).
     `end_price` bỏ trống → tự lấy `Price` (thô) phiên `end`.
-    `account_no` có truyền → GIẢI cổ tức từ tiền mặt broker của CHÍNH tài khoản đó.
+    `cost_frame` — `cost_per_share` đang ở hệ nào. CHỈ có nghĩa khi trong kỳ có thưởng/cổ tức CP:
+        "purchase" = giá ĐÃ TRẢ trên mỗi cổ phiếu LÚC MUA ⇒ hàm chia cho hệ số (chuẩn (b));
+        "current"  = đã phân bổ lại trên KL đang giữ ⇒ dùng nguyên.
+      Có sự kiện cổ phiếu mà KHÔNG khai ⇒ `ValueError`: hai hệ cho hai tỉ suất khác nhau và hàm
+      không có cách nào biết người gọi đang cầm số nào — đoán là công bố sai một cách im lặng.
 
-    ⚠️ Đường một-mã/một-tài-khoản này chỉ giải được khi delta của ngày chốt quyền CHỈ chứa mã này.
-    Nhiều mã cùng ngày → dư số không khớp → giữ UNVERIFIED (fail-closed, không ra số sai). Làm báo
-    cáo thì gọi `resolve_dividends()` cho CẢ RỔ để đủ phương trình mà tách.
+    Đi qua `resolve_dividends` (đủ 4 tầng + vendor + lọc nhiễu + khung KL) với MỌI tài khoản làm
+    phương trình — cổ tức/cp là thuộc tính của MÃ, không của tài khoản. Bản cũ tự gọi
+    `detect_adjustments` + `solve_from_broker` nên THIẾU cả đối soát vendor lẫn lọc nhiễu, và ra
+    kết quả khác đường `--resolve` cho cùng một mã (ca DRI 2026-10-10). `account_no` giữ lại cho
+    tương thích chữ ký; không còn thu hẹp hệ phương trình.
+
+    ⚠️ GIẢ ĐỊNH MỘT LÔ: vị thế mua MỘT lần ở `start`, không mua thêm sau một ex-date nào. Vị thế
+    gom nhiều đợt thì phần mua sau ex-date KHÔNG hưởng cổ tức đó — cổng `report_return_gate.py`
+    tính hệ số pha loãng này từ sổ KL broker; hàm này thì không.
+    ⚠️ Nhiều mã cùng ngày chốt quyền mà chỉ giải một mã → hệ vô định → UNVERIFIED (fail-closed).
+    Làm báo cáo thì gọi `resolve_dividends()` cho CẢ RỔ để đủ phương trình mà tách.
     """
     if end_price is None:
         rows = _bq(f"""SELECT t.Price AS price FROM `{BQ_PROJECT}.tav2_bq.ticker` AS t
@@ -1199,14 +1645,39 @@ def position_total_return(ticker, qty, cost_per_share, start, end, end_price=Non
             raise RuntimeError(f"{ticker}: không có giá phiên {end} trong tav2_bq.ticker")
         end_price = float(rows[0]["price"])
 
-    adjs = detect_adjustments(ticker, start, end)
-    if account_no:
-        label = next((lb for lb, no in ACCOUNTS.items() if no == str(account_no)), str(account_no))
-        solve_from_broker(adjs, {label: str(account_no)})
-    # CHỈ số đã xác minh mới được cộng — `cash_per_share` trả 0 cho UNVERIFIED/STOCK_SUSPECTED.
-    div = sum(a.cash_per_share for a in adjs)
-    return PositionReturn(ticker, qty, float(cost_per_share), float(end_price), div, adjs,
-                          tax_rate=tax_rate)
+    adjs = [a for a in resolve_dividends([ticker], start, end, with_crosscheck=False)
+            if a.ex_date <= end]
+    return build_position_return(ticker, qty, cost_per_share, end_price, adjs,
+                                 tax_rate=tax_rate, cost_frame=cost_frame)
+
+
+def build_position_return(ticker, qty, cost_per_share, end_price, adjs, tax_rate=PIT_DIVIDEND_RATE,
+                          cost_frame: str = None) -> PositionReturn:
+    """PURE — ghép `PositionReturn` từ các sự kiện ĐÃ giải, mọi thứ quy về KL đang giữ.
+
+        hệ số M      = Π `share_multiplier` của các sự kiện cổ phiếu đã giải trong kỳ
+        giá vốn/cp   = giá đã trả ÷ M                     (chuẩn (b): TỔNG giá vốn giữ nguyên)
+        cổ tức/cp    = Σ `cash_per_share_now`             (chuẩn (c): ÷ hệ số của sự kiện SAU nó)
+
+    Sự kiện chưa giải KHÔNG đóng góp gì (cổ tức 0, hệ số 1) và nằm trong `.unverified` — người gọi
+    thấy cờ đó thì KHÔNG được công bố tỉ suất.
+    """
+    mult = 1.0
+    for a in adjs:
+        if a.resolved and a.kind != "RATIO_NOISE":
+            mult *= float(a.share_multiplier or 1.0)
+    cost = float(cost_per_share)
+    if mult != 1.0:
+        if cost_frame not in ("purchase", "current"):
+            raise ValueError(
+                f"{ticker}: trong kỳ có sự kiện CỔ PHIẾU (hệ số KL ×{mult:.4f}) — phải khai "
+                f"`cost_frame`: 'purchase' (giá đã trả trên mỗi cổ phiếu LÚC MUA, sẽ ÷ hệ số) "
+                f"hoặc 'current' (đã phân bổ lại trên KL đang giữ). Không đoán.")
+        if cost_frame == "purchase":
+            cost = cost / mult
+    div = sum(a.cash_per_share_now for a in adjs if a.resolved)
+    return PositionReturn(ticker, qty, cost, float(end_price), div, list(adjs), tax_rate=tax_rate,
+                          share_multiplier=mult, cost_per_share_paid=float(cost_per_share))
 
 
 # --------------------------------------------------------------------------------------
@@ -1598,7 +2069,9 @@ def _selfcheck() -> int:
         `mult` = `share_multiplier` mà solver để lại (1,0 = solver KHÔNG biết chân cổ phiếu nào).
         """
         g = globals()
-        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action")}
+        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action",
+                                   "bq_corp_events_window")}
+        g["bq_corp_events_window"] = lambda *a, **k: {}   # cửa I/O thêm 2026-10-10 — giữ offline
         made = _mk("ZZZ", ex_date, "2026-09-23", 27_800.0, broker_ps)
 
         def _detect(tk, start, end):
@@ -1821,7 +2294,9 @@ def _selfcheck() -> int:
 
     def _resolve_offline_raising(ex_date, broker_ps, exc, solved=True):
         g = globals()
-        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action")}
+        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action",
+                                   "bq_corp_events_window")}
+        g["bq_corp_events_window"] = lambda *a, **k: {}   # cửa I/O thêm 2026-10-10 — giữ offline
         made = _mk("ZZZ", ex_date, "2026-09-23", 27_800.0, broker_ps)
 
         def _detect(tk, start, end):
@@ -1899,7 +2374,9 @@ def _selfcheck() -> int:
 
     def _resolve_offline_none(ex_date, broker_ps):
         g = globals()
-        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action")}
+        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action",
+                                   "bq_corp_events_window")}
+        g["bq_corp_events_window"] = lambda *a, **k: {}   # cửa I/O thêm 2026-10-10 — giữ offline
         made = _mk("ZZZ", ex_date, "2026-09-23", 27_800.0, broker_ps)
 
         def _detect(tk, start, end):
@@ -1972,8 +2449,300 @@ def _selfcheck() -> int:
     _shutil_rm = __import__("shutil").rmtree
     _shutil_rm(_acc_tmp, ignore_errors=True)
 
+    _selfcheck_total_return(check, same)
+
     print(f"\n=== SELFCHECK: {passed} PASS / {failed} FAIL ===")
     return 1 if failed else 0
+
+
+# Chuỗi (ngày, Price, Close) THẬT của DRI (UPCOM) 03/09→09/10/2026, chép từ `tav2_bq.ticker` ngày
+# 2026-10-10. Sự kiện thật DUY NHẤT: cổ tức 1.000đ ex 22/09. 7 cú nhảy còn lại là `Price` (giá
+# bình quân) lệch `Close` (giá khớp cuối) đúng 1 bước giá 100đ.
+_DRI_ROWS = [
+    ("2026-09-03", 14300, 13330), ("2026-09-04", 14200, 13240), ("2026-09-07", 14200, 13240),
+    ("2026-09-08", 14600, 13700), ("2026-09-09", 14900, 13890), ("2026-09-10", 14600, 13700),
+    ("2026-09-11", 14400, 13520), ("2026-09-14", 14100, 13240), ("2026-09-15", 14400, 13420),
+    ("2026-09-16", 14900, 13890), ("2026-09-17", 14800, 13800), ("2026-09-18", 14800, 13800),
+    ("2026-09-21", 14800, 13890), ("2026-09-22", 14000, 14000), ("2026-09-23", 14500, 14500),
+    ("2026-09-24", 14800, 14800), ("2026-09-25", 15000, 15100), ("2026-09-28", 15000, 15000),
+    ("2026-09-29", 16000, 16000), ("2026-09-30", 15600, 15700), ("2026-10-01", 15500, 15500),
+    ("2026-10-02", 16200, 16200), ("2026-10-05", 16700, 16700), ("2026-10-06", 16300, 16400),
+    ("2026-10-07", 16000, 16000), ("2026-10-08", 16600, 16700), ("2026-10-09", 16900, 16900),
+]
+
+
+def _selfcheck_total_return(check, same) -> None:
+    """Mục 27-34 — chuẩn tỉ suất tổng 2026-10-10 (GIPS/tax-lot) + lọc nhiễu tỉ số. OFFLINE.
+
+    Mỗi mục ghim một CA THẬT đo ngày 2026-10-10; mutation tương ứng (đảo đúng dòng vá) nằm ở
+    `bin/total_return_mutants.py` — chạy nó để chứng minh từng assertion ở đây bắt được lỗi cũ.
+    """
+    g = globals()
+    accs = {"SpaceX": "1", "ZaloPay": "2"}
+
+    def offline(detect, vendor, window=None, deltas=None, qtys=None, last_cum=None):
+        """`resolve_dividends` với MỌI cửa I/O thay bằng fixture; solver THẬT chạy trên
+        `deltas`/`qtys` tiêm vào (không đọc dnse_raw)."""
+        names = ("detect_adjustments", "solve_from_broker", "bq_corp_action",
+                 "bq_corp_events_window", "_last_cum")
+        keep = {k: g[k] for k in names}
+        real_solve = keep["solve_from_broker"]
+        g["detect_adjustments"] = lambda tk, s, e: [a for a in detect if a.ticker == tk]
+        g["solve_from_broker"] = lambda todo, accounts: real_solve(
+            todo, accs, deltas=deltas or {lb: {} for lb in accs},
+            qtys=qtys or {lb: {} for lb in accs}, frames={lb: {} for lb in accs})
+        g["bq_corp_action"] = vendor
+        g["bq_corp_events_window"] = lambda *a, **k: dict(window or {})
+        g["_last_cum"] = lambda tk, ex: last_cum
+        try:
+            return resolve_dividends(sorted({a.ticker for a in detect} | {k[0] for k in (window or {})}),
+                                     "2026-08-11", "2026-10-09", with_crosscheck=False)
+        finally:
+            g.update(keep)
+
+    def dri_candidates():
+        return _scan_jumps("DRI", [{"d": d, "price": p, "close": c} for d, p, c in _DRI_ROWS],
+                           "2026-08-11")
+
+    dri_deltas = {"SpaceX": {"2026-09-21": 3_700_000.0}, "ZaloPay": {"2026-09-21": 1_900_000.0}}
+    dri_qtys = {"SpaceX": {("DRI", d): 3700 for d, _, _ in _DRI_ROWS},
+                "ZaloPay": {("DRI", d): 1900 for d, _, _ in _DRI_ROWS}}
+
+    def dri_vendor(tk, ex, include_announced=False):
+        return ({"cash": 1000.0, "stock": None, "stock_free": 0.0, "titles": "DIV 1.000đ"}
+                if ex == "2026-09-22" else None)
+
+    print("27) CA 1 — DRI (UPCOM): 8 cú nhảy tỉ số, 1 sự kiện thật. Nhiễu KHÔNG được thành ex-date.")
+    cands = dri_candidates()
+    same("tầng 1 vẫn thấy đủ 8 cú nhảy (KHÔNG đổi `_scan_jumps` — consumer khác còn dùng)",
+         [a.ex_date for a in cands],
+         ["2026-09-08", "2026-09-10", "2026-09-21", "2026-09-22", "2026-09-25", "2026-09-30",
+          "2026-10-06", "2026-10-08"])
+    real = next(a for a in cands if a.ex_date == "2026-09-22")
+    check("ước lượng tỉ số của sự kiện THẬT lệch cả 1 bước giá (910đ, thật 1.000đ)",
+          real.ratio_per_share, 910.0, tol=1.0)
+    same("chuỗi có cú GIẢM > RATIO_JUMP_MIN — bằng chứng cơ khí của nhiễu",
+         real.ratio_noise_amp > RATIO_JUMP_MIN, True)
+    adjs = offline(cands, dri_vendor, deltas=dri_deltas, qtys=dri_qtys)
+    same("7 cú nhảy không có dòng vendor ⇒ RATIO_NOISE",
+         sorted(a.ex_date for a in adjs if a.kind == "RATIO_NOISE"),
+         ["2026-09-08", "2026-09-10", "2026-09-21", "2026-09-25", "2026-09-30", "2026-10-06",
+          "2026-10-08"])
+    ev = next(a for a in adjs if a.ex_date == "2026-09-22")
+    same("sự kiện thật 22/09 ⇒ CASH_CONFIRMED từ tiền broker", (ev.kind, ev.source),
+         ("CASH_CONFIRMED", "broker_solved"))
+    check("… đúng 1.000đ/cp (KHÔNG phải ước lượng 910đ)", ev.per_share, 1000.0, tol=0.01)
+    pr = build_position_return("DRI", 1900, 13263.1579, 16900.0, adjs)
+    check("ZaloPay DRI tỉ suất tổng RÒNG = +34,58%", pr.pct_total_return, 34.58, tol=0.005)
+    same("không còn sự kiện nào 'chưa xác minh' (nhiễu KHÔNG phải sự kiện chưa giải)",
+         len(pr.unverified), 0)
+    pr_s = build_position_return("DRI", 3700, 13262.1622, 16900.0, adjs)
+    check("SpaceX DRI = +34,59%", pr_s.pct_total_return, 34.59, tol=0.005)
+
+    print("28) CA 1 — FAIL-CLOSED: thiếu MỘT trong ba điều kiện thì KHÔNG được gọi là nhiễu.")
+
+    def _boom(tk, ex, include_announced=False):
+        raise RuntimeError("bq query failed: quota")
+    adjs_err = offline(dri_candidates(), _boom, deltas=dri_deltas, qtys=dri_qtys)
+    same("vendor KHÔNG tra được ⇒ 0 cú nhảy bị gọi là nhiễu",
+         sum(a.kind == "RATIO_NOISE" for a in adjs_err), 0)
+    same("… cả 8 mang nhãn lookup_failed", {a.vendor_check for a in adjs_err}, {"lookup_failed"})
+    same("… và sự kiện thật KHÔNG được công bố khi chưa đối soát được",
+         build_position_return("DRI", 1900, 13263.1579, 16900.0, adjs_err).dividend_per_share, 0.0)
+    adjs_miss = offline(dri_candidates(), lambda tk, ex, include_announced=False: None,
+                        deltas=dri_deltas, qtys=dri_qtys)
+    ev_miss = next(a for a in adjs_miss if a.ex_date == "2026-09-22")
+    same("vendor THIẾU dòng của sự kiện thật (cú nhảy 6,55% ≫ biên độ nhiễu) ⇒ KHÔNG nuốt",
+         ev_miss.kind != "RATIO_NOISE", True)
+    same("… nó là sự kiện chưa giải ⇒ nằm trong `.unverified`", ev_miss.resolved, False)
+    clean = _scan_jumps("ZZZ", [{"d": "2026-09-01", "price": 20000, "close": 19900},
+                                {"d": "2026-09-02", "price": 20000, "close": 19900},
+                                {"d": "2026-09-03", "price": 19900, "close": 19900}], "2026-08-01")
+    adjs_clean = offline(clean, lambda tk, ex, include_announced=False: None)
+    same("chuỗi KHÔNG có cú giảm nào (không bằng chứng nhiễu) + vendor 0 dòng ⇒ vẫn UNVERIFIED",
+         [a.kind for a in adjs_clean], ["UNVERIFIED"])
+
+    print("29) Nguồn phát hiện THỨ HAI: vendor khai sự kiện mà tỉ số KHÔNG nhảy.")
+    win = {("DRI", "2026-09-22"): {"cash": 1000.0, "stock": None, "stock_free": 0.0}}
+    adjs_v = offline([], dri_vendor, window=win, deltas=dri_deltas, qtys=dri_qtys,
+                     last_cum=("2026-09-21", 14800.0))
+    same("sự kiện được thêm từ vendor", [(a.ex_date, a.detected_by) for a in adjs_v],
+         [("2026-09-22", "vendor")])
+    same("… và giải ra từ tiền broker như mọi sự kiện khác",
+         (adjs_v[0].kind, adjs_v[0].per_share), ("CASH_CONFIRMED", 1000.0))
+    adjs_v2 = offline([], dri_vendor, deltas=dri_deltas, qtys=dri_qtys,
+                      window={("DRI", "2026-08-20"): {"cash": None, "stock": 0.1, "stock_free": 0.0}})
+    same("quyền mua/ESOP đứng một mình ⇒ KHÔNG thêm (không đụng tới tỉ suất)", len(adjs_v2), 0)
+    adjs_v3 = offline([], dri_vendor, window=win, last_cum=None)
+    same("không lấy được phiên cuối còn quyền ⇒ không thêm, và NÓI RA ở `.warnings`",
+         (len(adjs_v3), len(adjs_v3.warnings)), (0, 1))
+
+    print("30) Lưới an toàn của solver: nhân chứng thứ hai (vendor) — và vẫn bác khi không ai khớp.")
+    a30 = _mk("DRI", "2026-09-22", "2026-09-21", 14800.0, 910.0)
+    solve_from_broker([a30], accs, deltas=dri_deltas, qtys=dri_qtys, frames={lb: {} for lb in accs})
+    same("ước lượng tỉ số 910 ≠ nghiệm 1.000 và KHÔNG có số vendor ⇒ bác (như cũ)", a30.kind,
+         "UNVERIFIED")
+    a30b = _mk("DRI", "2026-09-22", "2026-09-21", 14800.0, 910.0)
+    a30b.vendor_cash = 1000.0
+    solve_from_broker([a30b], accs, deltas=dri_deltas, qtys=dri_qtys, frames={lb: {} for lb in accs})
+    same("vendor khai đúng 1.000 ⇒ qua lưới", (a30b.kind, a30b.per_share), ("CASH_CONFIRMED", 1000.0))
+    a30c = _mk("DRI", "2026-09-22", "2026-09-21", 14800.0, 910.0)
+    a30c.vendor_cash = 1200.0
+    solve_from_broker([a30c], accs, deltas=dri_deltas, qtys=dri_qtys, frames={lb: {} for lb in accs})
+    same("vendor khai 1.200 ≠ nghiệm 1.000 ⇒ vẫn bác", a30c.kind, "UNVERIFIED")
+    # KL đổi đúng ex-date (lệnh khớp thật) — lá chắn a2 cũ nén cổ tức thật xuống 0
+    q_trade = {"SpaceX": {("DRI", "2026-09-21"): 3700, ("DRI", "2026-09-22"): 3000},
+               "ZaloPay": {("DRI", "2026-09-21"): 1900, ("DRI", "2026-09-22"): 1900}}
+    a30d = _mk("DRI", "2026-09-22", "2026-09-21", 14800.0, 1000.0)
+    solve_from_broker([a30d], accs, deltas=dri_deltas, qtys=q_trade, frames={lb: {} for lb in accs})
+    same("KL đổi tại ex-date, vendor KHÔNG nói gì ⇒ STOCK_SUSPECTED (lá chắn cũ giữ nguyên)",
+         a30d.kind, "STOCK_SUSPECTED")
+    a30e = _mk("DRI", "2026-09-22", "2026-09-21", 14800.0, 1000.0)
+    a30e.vendor_cash = 1000.0
+    solve_from_broker([a30e], accs, deltas=dri_deltas, qtys=q_trade, frames={lb: {} for lb in accs})
+    same("… vendor khai THUẦN TIỀN ⇒ KL đổi là lệnh khớp, cổ tức vẫn giải được",
+         (a30e.kind, a30e.per_share), ("CASH_CONFIRMED", 1000.0))
+
+    print("31) CA 4 — TPB: cổ tức 500đ + thưởng 15% CÙNG ex-date 02/10. Mọi thứ về KL ĐANG GIỮ.")
+    tpb = _mk("TPB", "2026-10-02", "2026-10-01", 14450.0, 500.0)
+    tpb.kind, tpb.source, tpb.share_multiplier = "CASH_CONFIRMED", "broker_solved", 1.15
+    tpb.vendor_cash, tpb.vendor_stock, tpb.vendor_stock_free = 500.0, 0.15, 0.15
+    _settle_multiplier(tpb)
+    _assign_frames([tpb])
+    check("1 cp hưởng quyền = 1,15 cp hôm nay", tpb.frame_factor, 1.15, tol=1e-9)
+    check("cổ tức quy về KL đang giữ = 500/1,15 = 434,78đ (KHÔNG phải 500đ)",
+          tpb.cash_per_share_now, 434.7826, tol=0.001)
+    pr_t = build_position_return("TPB", 30, 16800.0, 11450.0, [tpb], cost_frame="purchase")
+    check("giá vốn/cp = 16.800/1,15 = 14.608,70 (tổng giá vốn giữ nguyên)", pr_t.cost_per_share,
+          14608.6957, tol=0.001)
+    check("tỉ suất tổng RÒNG = −18,79% (đúng chuẩn; bản cũ −18,73%)", pr_t.pct_total_return,
+          -18.7946, tol=0.0005)
+    pr_t2 = build_position_return("TPB", 30, 14608.6957, 11450.0, [tpb], cost_frame="current")
+    check("khai giá vốn ở hệ 'current' ⇒ cùng kết quả", pr_t2.pct_total_return, -18.7946, tol=0.0005)
+    try:
+        build_position_return("TPB", 30, 16800.0, 11450.0, [tpb])
+        same("có sự kiện cổ phiếu mà KHÔNG khai cost_frame ⇒ từ chối", "không ném lỗi", "ValueError")
+    except ValueError:
+        same("có sự kiện cổ phiếu mà KHÔNG khai cost_frame ⇒ từ chối", "ValueError", "ValueError")
+    old = (30 * (11450.0 - 14673.913) + 0.95 * 30 * 500.0) / (30 * 14673.913) * 100.0
+    same("công thức CŨ (giá vốn + 500 chưa chia, cổ tức 500/cp sau thưởng) cho số KHÁC",
+         abs(old - pr_t.pct_total_return) > 0.05, True)
+
+    print("32) Khung KL qua NHIỀU sự kiện (MBB: tiền 09/07 → thưởng 15% + quyền mua 10% ngày 11/08).")
+    folded = _fold_corp_rows([
+        {"event_code": "ISS", "exercise_ratio": 0.1,
+         "issue_method_name_vi": "Quyền mua CP cho Cổ đông hiện hữu"},
+        {"event_code": "ISS", "exercise_ratio": 0.15,
+         "issue_method_name_vi": "Trả Cổ tức bằng Cổ phiếu"}])
+    check("`stock` (mọi ISS) = 0,25 — nghĩa cũ giữ nguyên", folded["stock"], 0.25, tol=1e-9)
+    check("`stock_free` chỉ tính cổ phiếu MIỄN PHÍ = 0,15 (quyền mua không phải multiplier)",
+          folded["stock_free"], 0.15, tol=1e-9)
+    check("ESOP ⇒ stock_free = 0",
+          _fold_corp_rows([{"event_code": "ISS", "exercise_ratio": 0.0024,
+                            "issue_method_name_vi": "Phát hành cho CBCNV"}])["stock_free"], 0.0,
+          tol=1e-12)
+    check("hai dòng DIV khác số cùng ex-date (DGC 14/09: 3.000 + 5.000) ⇒ 8.000",
+          _fold_corp_rows([{"event_code": "DIV", "value_per_share": 3000.0},
+                           {"event_code": "DIV", "value_per_share": 5000.0}])["cash"], 8000.0,
+          tol=1e-9)
+    m1 = _mk("MBB", "2026-07-09", "2026-07-08", 26000.0, 1000.0)
+    m1.kind, m1.vendor_check = "CASH_CONFIRMED", "match"
+    m2 = _mk("MBB", "2026-08-11", "2026-08-10", 24250.0, 4050.0)
+    m2.kind, m2.vendor_check, m2.vendor_stock, m2.vendor_stock_free = (
+        "STOCK_CONFIRMED", "vendor_only", 0.25, 0.15)
+    m2.share_multiplier = 1.15          # broker đã credit ×1,15 (credit_frame)
+    _settle_multiplier(m2)
+    _assign_frames([m1, m2])
+    same("broker ×1,15 khớp cổ phiếu miễn phí vendor ×1,15 ⇒ khung xác định", m2.frame_ok, True)
+    check("cổ tức 09/07 phải ÷ 1,15 của đợt thưởng SAU nó", m1.cash_per_share_now, 1000.0 / 1.15,
+          tol=0.001)
+    same("thưởng đã có hệ số là sự kiện ĐÃ GIẢI (không thu nhập)", m2.resolved, True)
+    m2b = _mk("MBB", "2026-08-11", "2026-08-10", 24250.0, 4050.0)
+    m2b.kind, m2b.vendor_check, m2b.vendor_stock, m2b.vendor_stock_free = (
+        "STOCK_CONFIRMED", "vendor_only", 0.25, 0.15)
+    m2b.share_multiplier = 1.25         # giả sử ai đó lấy nhầm tổng mọi ISS làm hệ số
+    _settle_multiplier(m2b)
+    m1b = _mk("MBB", "2026-07-09", "2026-07-08", 26000.0, 1000.0)
+    m1b.kind, m1b.vendor_check = "CASH_CONFIRMED", "match"
+    _assign_frames([m1b, m2b])
+    same("hai nguồn hệ số MÂU THUẪN (1,25 vs 1,15) ⇒ khung KHÔNG xác định", m2b.frame_ok, False)
+    same("… kéo theo cổ tức TRƯỚC nó không được công bố", (m1b.resolved, m1b.cash_per_share_now),
+         (False, 0.0))
+    m3 = _mk("MBB", "2026-09-01", "2026-08-31", 20000.0, 300.0)   # UNVERIFIED, vendor 0 dòng
+    m3.vendor_check = "unavailable"
+    m1c = _mk("MBB", "2026-07-09", "2026-07-08", 26000.0, 1000.0)
+    m1c.kind, m1c.vendor_check = "CASH_CONFIRMED", "match"
+    _assign_frames([m1c, m3])
+    same("một sự kiện SAU chưa rõ là tiền hay cổ phiếu ⇒ khung của sự kiện TRƯỚC không xác định",
+         (m1c.frame_ok, m1c.cash_per_share_now), (False, 0.0))
+    m4 = _mk("MSB", "2026-08-28", "2026-08-27", 12000.0, 2000.0)   # broker KHÔNG chứng minh được
+    m4.kind, m4.vendor_check, m4.vendor_stock, m4.vendor_stock_free = (
+        "STOCK_CONFIRMED", "vendor_only", 0.2, 0.2)
+    _settle_multiplier(m4)
+    same("chỉ vendor khai cổ phiếu miễn phí 20% ⇒ hệ số ×1,20 lấy từ vendor, sự kiện đã giải",
+         (m4.share_multiplier, m4.resolved), (1.2, True))
+    r1 = _mk("MBB", "2026-08-11", "2026-08-10", 24250.0, 2000.0)
+    adjs_r = offline([r1], lambda tk, ex, include_announced=False:
+                     {"cash": None, "stock": 0.1, "stock_free": 0.0, "titles": "quyền mua"})
+    same("chỉ có quyền mua ⇒ ISS_NONFREE: đã giải, hệ số 1, không thu nhập",
+         (adjs_r[0].kind, adjs_r[0].resolved, adjs_r[0].share_multiplier), ("ISS_NONFREE", True, 1.0))
+
+    print("33) Sổ giá vốn broker là nhân chứng per-mã: `classify_cost_steps` trên số THẬT.")
+    def kinds(series):
+        return [(s["kind"], round(s["cash"], 2), round(s["mult"], 4)) for s in
+                classify_cost_steps(series)]
+    same("DRI 21/09 19:07: KL giữ nguyên, giá vốn −1.000",
+         kinds([("a", 3700, 3700 * 13262.1622), ("b", 3700, 3700 * 12262.1622)]),
+         [("cash", 1000.0, 1.0)])
+    same("TPB 01/10 19:03: 200×16.800 → 230×14.173,913 = tiền 500 + thưởng ×1,15",
+         kinds([("a", 200, 200 * 16800.0), ("b", 230, 230 * 14173.913)]),
+         [("cash+stock", 500.0, 1.15)])
+    same("VPB 23/09: 1.100 → 1.386, tổng giá vốn bất biến = thưởng thuần",
+         kinds([("a", 1100, 30_000_000.0), ("b", 1386, 30_000_000.0)]), [("stock", 0.0, 1.26)])
+    same("mua lẻ 1cp (SAB 740→741) KHÔNG bị đọc thành thưởng",
+         kinds([("a", 740, 740 * 47450.0), ("b", 741, 740 * 47450.0 + 46800.0)]),
+         [("buy", 0.0, 1.0)])
+    same("bán: giá vốn/cp không đổi",
+         kinds([("a", 230, 230 * 14173.913), ("b", 30, 30 * 14173.913)]), [("sell", 0.0, 1.0)])
+    same("không đổi gì ⇒ không sinh bước", kinds([("a", 100, 1e6), ("b", 100, 1e6)]), [])
+    blank = [("19:06", 1100.0, 48804999.98), ("19:07", 0.0, 0.0), ("19:08", 1100.0, 48804999.98)]
+    same("bản ghi rỗng thoáng qua của DNSE (SAB 20/08) bị bỏ — KHÔNG phải 'bán hết rồi mua lại'",
+         _drop_blank_reads(blank), [blank[0], blank[2]])
+    reopen = [("d1", 1100.0, 48804999.98), ("d2", 0.0, 0.0), ("d3", 1100.0, 47000000.0)]
+    same("bán hết rồi mua lại THẬT (tổng giá vốn khác) ⇒ giữ nguyên mốc 0", _drop_blank_reads(reopen),
+         reopen)
+
+    import tempfile as _tf
+    d = _tf.mkdtemp(prefix="dar_cs_")
+    keep_dir = g["EXEC_LOG_DIR"]
+    lot = {"accountNo": "9", "symbol": "SAB", "openQuantity": 1100, "costPrice": 44368.1818}
+    try:
+        with open(os.path.join(d, "dnse_raw_2026-08-20.jsonl"), "w", encoding="utf-8") as fh:
+            for acct, ts, pos in [
+                    ("9", "2026-08-20T19:06:46", [lot]),
+                    ("8", "2026-08-20T19:07:00", [{**lot, "accountNo": "8", "openQuantity": 5}]),
+                    ("9", "2026-08-20T19:07:16", []),
+                    ("9", "2026-08-20T19:07:46", [lot])]:
+                fh.write(json.dumps({"kind": "positions", "account_no": acct, "ts": ts,
+                                     "payload": {"positions": pos}}) + "\n")
+        g["EXEC_LOG_DIR"] = d
+        ser = broker_cost_series("9")
+    finally:
+        g["EXEC_LOG_DIR"] = keep_dir
+        os.unlink(os.path.join(d, "dnse_raw_2026-08-20.jsonl"))
+        os.rmdir(d)
+    same("`broker_cost_series` đọc file thật: bỏ bản ghi rỗng, và KHÔNG lẫn tài khoản khác (§12)",
+         [(ts[-8:], q) for ts, q, _c in ser.get("SAB", [])],
+         [("19:06:46", 1100.0), ("19:07:46", 1100.0)])
+    same("… nên không bước giá vốn giả nào sinh ra", classify_cost_steps(ser.get("SAB", [])), [])
+
+    print("34) Hưởng quyền: có bản ghi ngày chốt quyền mà VẮNG mã ⇒ không hưởng (mua đúng ex-date).")
+    ex_buy = _mk("MBB", "2026-07-09", "2026-07-08", 26000.0, 1000.0)
+    qm = _QtyMap({("VCB", "2026-07-08"): 800, ("MBB", "2026-07-09"): 1000})
+    qm.days = {"2026-07-08", "2026-07-09"}
+    same("`.days` có 08/07, mã vắng ⇒ KL hưởng quyền 0", qty_entitled(qm, ex_buy)[0], 0.0)
+    same("dict thuần (không biết ngày nào có bản ghi) ⇒ hành vi cũ, rơi về KL ex-date",
+         qty_entitled({("MBB", "2026-07-09"): 1000}, ex_buy)[0], 1000.0)
 
 
 def main() -> int:
@@ -1981,8 +2750,12 @@ def main() -> int:
     ap.add_argument("--resolve", help="GIẢI CẢ RỔ (danh sách mã, phân tách bằng dấu phẩy) — bản "
                                       "dùng khi làm báo cáo")
     ap.add_argument("--ticker")
-    ap.add_argument("--qty", type=int, default=1)
+    ap.add_argument("--qty", type=int, default=1, help="KL ĐANG GIỮ ở --to (sau mọi đợt thưởng)")
     ap.add_argument("--cost", type=float, help="giá vốn THÔ/cp (giá khớp thật đã trả)")
+    ap.add_argument("--cost-frame", choices=("purchase", "current"),
+                    help="BẮT BUỘC khi trong kỳ có thưởng/cổ tức CP: --cost là giá trên mỗi cổ "
+                         "phiếu LÚC MUA (purchase — sẽ chia hệ số) hay đã phân bổ lại trên KL "
+                         "đang giữ (current)")
     ap.add_argument("--from", dest="start", help="ngày mua / đầu kỳ YYYY-MM-DD")
     ap.add_argument("--to", dest="end", help="cuối kỳ YYYY-MM-DD")
     ap.add_argument("--end-price", type=float, help="ghi đè giá cuối kỳ (mặc định lấy Price thô từ BQ)")
@@ -2004,14 +2777,33 @@ def main() -> int:
         print(f"Sự kiện {a.start} → {a.end} (giải từ tiền broker: {', '.join(ACCOUNTS)}):\n")
         rate = a.div_tax_rate
         print(f"  (thuế TNCN cổ tức {rate * 100:g}% — GỘP = sổ broker, RÒNG = tiền về túi)\n")
+        noise = [x for x in adjs if x.kind == "RATIO_NOISE"]
         for x in sorted(adjs, key=lambda z: (z.ex_date, z.ticker)):
-            ps = (f"{x.per_share:,.0f} → {x.per_share * (1 - rate):,.1f}đ/cp"
-                  if x.kind == "CASH_CONFIRMED" else "— (chưa xác minh)")
+            if x.kind == "RATIO_NOISE":
+                continue
+            if x.kind == "CASH_CONFIRMED":
+                ps = f"{x.per_share:,.0f} → {x.per_share * (1 - rate):,.1f}đ/cp"
+            elif x.resolved:
+                ps = "không thu nhập"
+            else:
+                ps = "— (chưa xác minh)"
             print(f"  {x.ticker:5s} ex {x.ex_date}  {ps:>26s}  [{x.kind}/{x.source}]")
-            print(f"        ước lượng tỉ số (chỉ để đối chiếu): {x.ratio_per_share:,.0f}đ/cp")
+            if x.share_multiplier != 1.0 or x.frame_factor != 1.0 or not x.frame_ok:
+                print(f"        hệ số KL của sự kiện ×{x.share_multiplier:.4f}; 1cp hưởng quyền = "
+                      f"{x.frame_factor:.4f}cp hôm nay"
+                      + (f" ⇒ cổ tức quy về KL đang giữ {x.cash_per_share_now:,.2f}đ/cp GỘP"
+                         if x.cash_per_share > 0 else "")
+                      + (f"  ⚠️ {x.frame_note}" if not x.frame_ok else ""))
+            print(f"        ước lượng tỉ số (chỉ để đối chiếu): {x.ratio_per_share:,.0f}đ/cp"
+                  + ("" if x.detected_by == "ratio" else "  [tỉ số KHÔNG nhảy — phát hiện từ vendor]"))
             print(f"        {x.note}")
             print(f"        Dividend_1Y: {x.fin_check} — {x.fin_note}")
-        bad = [x for x in adjs if x.kind == "UNVERIFIED"]
+        if noise:
+            print(f"\n  ℹ️ {len(noise)} cú nhảy tỉ số bị loại là NHIỄU (không phải sự kiện): "
+                  + ", ".join(f"{x.ticker} {x.ex_date} (+{x.ratio_jump * 100:.2f}%)"
+                              for x in sorted(noise, key=lambda z: (z.ticker, z.ex_date))))
+            print(f"     bằng chứng (mã đầu): {noise[0].note}")
+        bad = [x for x in adjs if not x.resolved]
         if bad:
             print(f"\n  ⚠️ {len(bad)} sự kiện CHƯA XÁC MINH — CẤM đưa vào báo cáo gửi nhà đầu tư.")
         return 0
@@ -2020,17 +2812,30 @@ def main() -> int:
         ap.error("cần --ticker --cost --from --to (hoặc --resolve, hoặc --selfcheck)")
 
     acc = a.account_no or ACCOUNTS.get(a.account or "")
-    pr = position_total_return(a.ticker, a.qty, a.cost, a.start, a.end, a.end_price, acc,
-                               tax_rate=a.div_tax_rate)
+    try:
+        pr = position_total_return(a.ticker, a.qty, a.cost, a.start, a.end, a.end_price, acc,
+                                   tax_rate=a.div_tax_rate, cost_frame=a.cost_frame)
+    except ValueError as e:
+        print(f"❌ {e}", file=sys.stderr)
+        return 2
 
-    print(f"{pr.ticker}  {pr.qty:,}cp · giá vốn {pr.cost_per_share:,.0f} · giá {a.end} {pr.end_price:,.0f}")
-    for adj in pr.adjustments:
-        print(f"  · ex-date {adj.ex_date}: {adj.per_share:,.0f}đ/cp  [{adj.kind}] {adj.note}")
-    if not pr.adjustments:
+    print(f"{pr.ticker}  {pr.qty:,}cp · giá vốn {pr.cost_per_share:,.2f} · giá {a.end} {pr.end_price:,.0f}")
+    if pr.share_multiplier != 1.0:
+        print(f"  (hệ số KL trong kỳ ×{pr.share_multiplier:.4f}; --cost {pr.cost_per_share_paid:,.2f} "
+              f"khai ở hệ '{a.cost_frame}' ⇒ giá vốn trên KL đang giữ {pr.cost_per_share:,.2f})")
+    events = [x for x in pr.adjustments if x.kind != "RATIO_NOISE"]
+    for adj in events:
+        tail = (f" → {adj.cash_per_share_now:,.2f}đ/cp trên KL đang giữ"
+                if adj.cash_per_share > 0 and adj.frame_factor != 1.0 else "")
+        print(f"  · ex-date {adj.ex_date}: {adj.per_share:,.0f}đ/cp{tail}  [{adj.kind}] {adj.note}")
+    if not events:
         print("  · không có sự kiện điều chỉnh giá trong kỳ")
+    n_noise = len(pr.adjustments) - len(events)
+    if n_noise:
+        print(f"  · ({n_noise} cú nhảy tỉ số đã loại là NHIỄU — xem --resolve để thấy bằng chứng)")
     print(f"  Lãi/lỗ do GIÁ        : {pr.pl_price:>15,.0f}  ({pr.pct_price_only:+.2f}%)")
     print(f"  Cổ tức GỘP           : {pr.dividend_total_gross:>15,.0f}  "
-          f"({pr.dividend_per_share:,.0f}đ/cp danh nghĩa)")
+          f"({pr.dividend_per_share:,.2f}đ/cp trên KL đang giữ)")
     print(f"  − thuế TNCN {pr.tax_rate * 100:g}%      : {-pr.dividend_tax:>15,.0f}  "
           f"(khấu trừ tại nguồn lúc chi trả)")
     print(f"  = Cổ tức RÒNG        : {pr.dividend_total:>15,.0f}  "
