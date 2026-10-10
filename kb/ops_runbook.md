@@ -130,7 +130,7 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 | 13:00 | `run_bot.sh` resume (per account) | Resume state, chạy phiên chiều | Như 09:05 |
 | ~14:50 | phiên đóng (ATC) | Bot tự cancel lệnh treo, ghi `exec_*_report.md` | — (thực thi thật, autofix KHÔNG đụng) |
 | 15:05 | `dc_book_waterfall_paper.py --update` | Paper sleeve DC-book cập nhật | Lỗi → autofix (paper, không chạm tiền thật) |
-| 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
+| 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động; cổng tỉ suất CHẶN ⇒ mục "Báo cáo NGÀY bị cổng tỉ suất CHẶN" |
 | 19:50 | `nav_snapshot_daily.sh` (mọi account live) | Đường ghi NAV thứ 2, độc lập EOD: chưa có dòng `nav_history` hôm nay ⇒ gọi `daily_nav_snapshot.py`; có rồi ⇒ bỏ qua | rc=2/timeout tự retry 2 vòng×5'; rc=4 ⇒ marker cho `nav_sync_retry`; **rc=5 ⇒ KHÔNG retry, escalate NGAY** (xem § NAV thiếu dòng mục 5); rc=2 hết retry / rc=3 ⇒ 🔴 Trading Daily, xử lý TAY (xem § NAV thiếu dòng) |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
 
@@ -277,6 +277,76 @@ Discord vào **topic Trading report** (`$TRADING_REPORT_THREAD`) với tiêu đ�
      cho việc khác (kiểm dữ liệu vendor nói chung), không tự đóng coi như hết trách nhiệm.
    - De-dup 1 lần/file/ngày ở `state/vendor_mismatch_alerted.json` — thấy tin liên tục nhiều
      NGÀY KHÁC NHAU cho CÙNG một (mã, ex-date) nghĩa là vẫn CHƯA xử lý, không phải bug spam.
+
+### Báo cáo NGÀY bị cổng tỉ suất CHẶN (K1, từ merge `fix/daily-report-return-gate-20261010`)
+Từ K1, tỉ suất từng mã trong báo cáo ngày lấy từ công cụ §21 và cổng giao hàng KIỂM từng dòng vị thế
+(`MÃ <giá trị>M, ±x.xx%`). Cổng chặn thì báo cáo ngày của tài khoản đó KHÔNG được gửi.
+
+**Triệu chứng.** Tối 19:10 không có báo cáo ngày của một tài khoản ở topic Trading report · bus có
+`Mafee error eod-trading-report-delivery-incomplete`, trường `cause` là LÝ DO THẬT (không còn câu cố định
+"delivery chưa đủ kênh") · sáng hôm sau sweep 08:30 bắn `🔴 Delivery INCOMPLETE — <file> — <lý do thật>`
+và lặp mỗi ngày cho tới khi báo cáo đó giao xong.
+
+**Làm theo thứ tự:**
+1. Đọc lý do — KHÔNG đoán: `grep -n '❌ CHẶN' -A8 mike/logs/eod_trading_report.log | tail -40` (khối cuối là
+   lượt mới nhất). Cùng log, các dòng `portfolio_status: <MÃ> (…) không có tỉ suất §21: …` nêu lý do thật
+   của từng mã mà báo cáo ghi "(chưa có tỉ suất)".
+2. Rẽ theo CHÍNH dòng ❌ CHẶN đó:
+   - `… (dòng vị thế báo cáo ngày, dòng N): báo cáo X% vs kỳ vọng Y%` — số lúc SINH báo cáo khác số lúc
+     CỔNG chạy: hai lần đọc `dnse_raw` cách nhau ~2–3 phút rơi vào hai bản ghi `positions` khác nhau
+     (nợ đã ghi F8, hiếm). ⇒ chạy lại (bước 3). Chạy lại mà vẫn lệch ⇒ lỗi code, dispatch Taylor kèm khối chặn.
+   - `mục 'Chi tiết … (n mã)' … cổng chỉ đọc được …` — dây bẫy định dạng: có vị thế in theo dạng cổng không
+     đọc được. KHÔNG chạy lại (sẽ chặn y hệt). Đây là hợp đồng `portfolio_status.py` ↔
+     `report_return_gate.POSBIT_RE` bị ai đó sửa một phía ⇒ dispatch Taylor; chạy
+     `python3 mike/bin/portfolio_status_selfcheck.py` (các ca "HỢP ĐỒNG với cổng") để thấy phía nào trôi.
+   - `… cổng KHÔNG dựng được giá vốn thô để kiểm — …` / `giá đóng cửa phiên … CHƯA có trên BQ` /
+     `giá đóng cửa của <MÃ> trên BQ dừng ở phiên …` — DỮ LIỆU: cổ tức chưa giải được, hoặc BQ chưa nạp
+     phiên. Báo cáo đúng ra đã KHÔNG in tỉ suất mã đó; bị chặn nghĩa là lúc sinh và lúc cổng chạy thấy
+     dữ liệu khác nhau ⇒ kiểm `bq_freshness_check.sh` rồi chạy lại (bước 3).
+   - `LỆCH NGUỒN VENDOR` / `VENDOR LOOKUP THẤT BẠI` ⇒ mục ngay trên (Winston).
+   - `cause` là một dòng lỗi Python — rẽ theo ĐUÔI của dòng đó (`run_gate` không bắt lỗi của
+     `position_returns`, nên lệnh fail-closed CỐ Ý cũng hiện ra dạng này):
+     · kết thúc bằng `— CHẶN` hoặc `CHẶN (fail-closed)` (vd `ValueError: không lấy được giá thô … từ BQ … — CHẶN`,
+       `FileNotFoundError: thiếu …dnse_raw… — CHẶN (fail-closed)`, `ValueError: thiếu giá đóng cửa … — CHẶN`)
+       ⇒ HẠ TẦNG/DỮ LIỆU: kiểm BQ (`bq_freshness_check.sh`) / file `dnse_raw` của ngày đó rồi chạy lại (bước 3).
+     · exception khác (`KeyError: …`, `TypeError: …`, `… (cổng con thoát lỗi, không in khối chặn)`) ⇒ cổng SẬP
+       do lỗi code: dispatch Taylor kèm traceback trong log. KHÔNG chạy lại.
+3. Chạy lại cho ĐÚNG tài khoản + ngày:
+   `mike/bin/eod_trading_report.sh --account <SpaceX|ZaloPay> --date <YYYY-MM-DD>`
+   Phía GIAO thì an toàn: `report_delivery_gate` hash-bound — kênh đã có bằng chứng không gửi lại.
+   ⚠️ Phía NAV thì KHÔNG phải lúc nào cũng an toàn: `eod_trading_report.sh` gọi `daily_nav_snapshot.py` ở chế
+   độ live — lấy vị thế HIỆN TẠI của broker nhân giá đóng cửa ngày D rồi GHI ĐÈ dòng `nav_history` ngày D.
+   · Chạy lại trong CÙNG buổi tối, hoặc cho ngày quá khứ nhưng TRƯỚC lệnh khớp đầu tiên của phiên kế
+     (trước 09:15): được.
+   · Sau lệnh khớp đầu tiên của phiên kế: PHẢI sao lưu dòng `nav_history` ngày D trước khi chạy, và sau đó
+     khôi phục bằng `daily_nav_snapshot.py --from-raw --date D` — nếu không, NAV ngày D bị viết lại bằng khối
+     lượng của ngày sau (xem "NAV thiếu dòng `nav_history`" mục 6).
+   · Chạy lại cũng kích lại dispatch risk-auditor nếu còn file `eod_mismatch_*` của ngày đó.
+4. KHÔNG sửa tay con số trong file báo cáo, KHÔNG `--skip-validation` / `--skip-return-gate` để "cho qua":
+   số không qua cổng là số chưa kiểm.
+
+**Báo cáo ra nhưng có dòng "⚠️ Chưa có bảng tình trạng danh mục cho báo cáo hôm nay — đội vận hành đang
+kiểm tra."** = `portfolio_status.py` lỗi hoặc quá trần 600s. Lý do thật: `grep -n 'portfolio_status: KHÔNG'
+mike/logs/eod_trading_report.log | tail -5`. Báo cáo vẫn đi (không có tỉ suất nào để kiểm); muốn bổ sung
+khối danh mục thì chạy lại như bước 3 sau khi nguyên nhân (thường là BQ) hết.
+
+**Thời lượng mới (ngày có lệnh).** `portfolio_status` 128–158s + cổng 35–36s ≈ 2'45"–3'15" mỗi tài khoản,
+hai tài khoản nối tiếp ⇒ EOD xong ≈ 19:16–19:17 (đo trên dữ liệu thật 02/10 + 09/10, ngoài giờ). Chưa thấy
+báo cáo lúc 19:12 KHÔNG phải sự cố. Chi tiết + ca xấu nhất: `kb/cron_registry.md` hàng 19:10.
+
+**Rác.** Sổ nhớ BQ của lượt (`/tmp/eod_bq_memo.*`) tự xoá khi script thoát; lượt bị SIGKILL để lại thì lượt
+kế tiếp tự dọn cái cũ hơn 1 ngày. Không cần dọn tay.
+
+**Lùi một bước** (khi chính K1 là thủ phạm và cần báo cáo ngày đi ngay): `git revert -m 1 <merge commit của
+fix/daily-report-return-gate-20261010>` trên repo `mike`, rồi chạy lại lệnh ở bước 3. Không có knob env nào
+tắt K1. Sau khi lùi, báo cáo ngày quay về tỉ suất tự tính trên `costPrice` (sai với mã có cổ tức) và cổng lại
+không đọc dòng vị thế báo cáo ngày — chỉ là tạm, phải vá tiến.
+
+**Bật tài khoản live MỚI (ảnh hưởng tới cổng này).** Trước lệnh mua đầu tiên của tài khoản mới phải có **≥2 bản ghi
+`positions` rỗng** của nó trong `dnse_raw` (bot poll ít nhất 2 lần). Lý do: công cụ §21 coi MỘT bản đọc rỗng đơn lẻ
+ngay trước bản ghi có vị thế là có thể do lỗi API (fail-closed) ⇒ mã tài khoản mới mua ngay sau đó bị coi là "sổ bắt
+đầu khi đã giữ", các bước nhảy nhiễu cũ của mã đó bị phủ quyết và mã mất kỳ vọng ở MỌI tài khoản (tái hiện với DRI,
+arch-review 7812f586). Nhịp ghi hiện tại (≥9 bản ghi mỗi tối + 1 bản ~04:55) thoả sẵn; chỉ cần nhớ khi onboarding.
 
 ## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)
 
