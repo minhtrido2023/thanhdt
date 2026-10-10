@@ -283,6 +283,48 @@ msg_both = run_vendor_reason(_MISMATCH_TAG + "\n" + _LOOKUP_TAG)
 check("#23 GATE_OUT có CẢ HAI tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)",
       ("LỆCH NGUỒN CỔ TỨC" in msg_both and "Winston" in msg_both), msg_both)
 
+# ── Phần 1e: KHÔNG có tag vendor ⇒ INCOMPLETE_MSG nêu LÝ DO THẬT đọc từ $GATE_OUT (arch-review
+#     53b48b76 F7). Bản trước: một câu cố định "chưa giao đủ (Discord+email, hash-bound)" cho mọi
+#     ca còn lại — kể cả cổng tỉ suất CHẶN vì số sai — lặp mỗi sáng, chỉ sai người xử lý (§29).
+_RC_BLOCKED = ("CỔNG TỈ SUẤT — ZaloPay_daily_report_2026-10-02.md | chốt 2026-10-02\n\n"
+               "❌ CHẶN — 2 vấn đề:\n"
+               "   • DRI (dòng vị thế báo cáo ngày, dòng 32): báo cáo +28.00% vs kỳ vọng ZaloPay +29.31%\n"
+               "   • SAB (dòng vị thế báo cáo ngày, dòng 29): báo cáo -2.60% vs kỳ vọng ZaloPay -4.53%\n"
+               "report_delivery_gate: INCOMPLETE — Command '['python3', 'report_return_gate.py']' "
+               "returned non-zero exit status 1.\n")
+_WRAP = ("report_delivery_gate: INCOMPLETE — Command '['python3', 'report_return_gate.py']' "
+         "returned non-zero exit status 1.")
+msg_blk = run_vendor_reason(_RC_BLOCKED)
+check("#24a cổng tỉ suất CHẶN ⇒ nêu số vấn đề + mục ĐẦU TIÊN của khối chặn, không còn câu cố định",
+      ("— cổng tỉ suất CHẶN — 2 vấn đề: DRI (dòng vị thế báo cáo ngày, dòng 32): báo cáo +28.00% vs "
+       "kỳ vọng ZaloPay +29.31%." in msg_blk and "SAB" not in msg_blk
+       and "chưa giao đủ" not in msg_blk and "fixture.md" in msg_blk), msg_blk)
+msg_ch = run_vendor_reason("report_delivery_gate: nav-flow PASS (x.md)\n\n"
+                           "report_delivery_gate: INCOMPLETE — discord: HTTP 503\n")
+check("#24b lỗi KÊNH ⇒ trích dòng cuối cổng in ra (lỗi kênh thật)",
+      "— dòng cuối cổng in ra: report_delivery_gate: INCOMPLETE — discord: HTTP 503." in msg_ch, msg_ch)
+msg_crash = run_vendor_reason("  File \"x.py\", line 1, in run_gate\n    tot_pl += r[\"pl\"]\n"
+                              "KeyError: 'pl'\n" + _WRAP + "\n")
+check("#24c cổng SẬP (không khối chặn) ⇒ dòng lỗi THẬT của traceback, không phải dòng bọc "
+      "'returned non-zero exit status'",
+      "— dòng cuối cổng in ra: KeyError: 'pl'." in msg_crash and "returned non-zero" not in msg_crash,
+      msg_crash)
+msg_wrap = run_vendor_reason(_WRAP + "\n")
+check("#24d chỉ có dòng bọc ⇒ giữ dòng bọc (không còn gì khác để trích)",
+      "returned non-zero exit status 1" in msg_wrap, msg_wrap)
+msg_none = run_vendor_reason("")
+check("#24e cổng không in gì ⇒ nói đúng là không xác định được, không đoán",
+      "cổng không in dòng nào — không xác định được nguyên nhân từ output" in msg_none
+      and "Discord+email" not in msg_none, msg_none)
+msg_dirty = run_vendor_reason('x\n   lỗi "nháy" \\ `backtick`   ' + "dài " * 200 + "\n")
+_why_dirty = msg_dirty.split(" — ", 2)[-1].split(". Sweep tự retry")[0]
+check("#24f lý do được làm sạch (không nháy kép / gạch chéo ngược / backtick, một dòng) và cắt ≤ 300 ký tự",
+      not any(c in _why_dirty for c in ('"', "\\", "`", "\n")) and len(_why_dirty) <= 300
+      and "lỗi nháy backtick dài dài" in _why_dirty, msg_dirty[:200])
+assert "cổng tỉ suất CHẶN — 2 vấn đề: DRI" in msg_blk and msg_blk != "__BLOCK_DID_NOT_RUN__", (
+    "MUTATION-GUARD rc_gate_reason: GATE_OUT có khối '❌ CHẶN' mà INCOMPLETE_MSG không trích nó — "
+    f"nhánh else của RC_VENDOR_REASON lại phát câu cố định. Đang là: {msg_blk!r}")
+
 # ── Phần 2: danh sách "còn treo" lấy từ matcher CHÍNH THỐNG (bus_question_audit.py) ─────
 def pending_topics_from_bus(events, archived=()):
     """Dựng 1 bus giả rồi hỏi bus_question_audit.py xem còn treo những gì."""

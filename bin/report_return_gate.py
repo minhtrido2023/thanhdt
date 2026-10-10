@@ -193,18 +193,24 @@ def broker_positions(account_no: str, asof: str, price_fn=None) -> dict:
         out[sym] = (qty, cost_value / qty, float(px))
     res = _Positions(out)
     res.price_session = getattr(prices, "session", None)
+    res.price_lagging = dict(getattr(prices, "lagging", None) or {})
     return res
 
 
 class _Positions(dict):
     """`broker_positions()` + `price_session` = phiên giá MỚI NHẤT mà nguồn giá trả về (None khi
-    nguồn giá không khai — fixture selfcheck). Vẫn là dict ⇒ mọi consumer cũ không đổi."""
+    nguồn giá không khai — fixture selfcheck) + `price_lagging` = {mã: phiên giá của CHÍNH mã đó}
+    cho các mã mà giá dừng ở một phiên CŨ HƠN `price_session`. Vẫn là dict ⇒ mọi consumer cũ
+    không đổi."""
     price_session = None
+    price_lagging = {}
 
 
 class _Prices(dict):
-    """`raw_close_prices()` + `session` (phiên mới nhất trong kết quả)."""
+    """`raw_close_prices()` + `session` (phiên mới nhất trong kết quả) + `lagging` ({mã: phiên giá
+    của chính mã đó} khi nó cũ hơn `session`)."""
     session = None
+    lagging = {}
 
 
 def _today_ict() -> str:
@@ -270,9 +276,10 @@ def raw_close_prices(tickers, asof: str) -> dict:
         print(f"ℹ️  giá {asof}: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU "
               f"{asof} — `Close` của phiên đó đã bị điều chỉnh hồi tố: {', '.join(sorted(used_price))}",
               file=sys.stderr)
+    out.lagging = lagging
     if lagging:
-        print(f"⚠️ BQ: các mã có phiên giá cũ hơn {newest} (dùng giá phiên gần nhất của CHÍNH mã "
-              f"đó — kiểm tra ngừng giao dịch/thiếu dòng): {lagging}", file=sys.stderr)
+        print(f"⚠️ BQ: các mã có phiên giá cũ hơn {newest} (kiểm tra ngừng giao dịch/thiếu dòng) — "
+              f"`position_returns` KHÔNG cấp tỉ suất cho các mã này: {lagging}", file=sys.stderr)
     return out
 
 
@@ -712,6 +719,12 @@ def stale_price_note(price_session, asof: str) -> str:
             f"suất tính trên giá phiên trước là tỉ suất của ngày khác")
 
 
+def lagging_price_note(tk: str, tk_session: str, basket_session) -> str:
+    """Câu bằng chứng cho MỘT mã mà giá trên BQ dừng ở phiên cũ hơn phiên mới nhất của rổ."""
+    return (f"giá đóng cửa của {tk} trên BQ dừng ở phiên {tk_session} trong khi các mã khác đã có "
+            f"phiên {basket_session} — tỉ suất tính trên giá phiên cũ là tỉ suất của ngày khác")
+
+
 def position_returns(label: str, asof: str) -> dict:
     """Tỉ suất §21 của TỪNG vị thế đang giữ của một tài khoản — MỘT chỗ tính cho cả hai phía:
     `run_gate` lấy kỳ vọng từ đây, và báo cáo NGÀY (`portfolio_status.py`) lấy CHÍNH các số này
@@ -733,14 +746,18 @@ def position_returns(label: str, asof: str) -> dict:
     extra = res[2] if len(res) > 2 else {}
     blockers, addback = extra.get("blockers", {}), extra.get("addback", {})
     session = getattr(pos, "price_session", None)
+    lagging = getattr(pos, "price_lagging", None) or {}
     stale = stale_price_note(session, asof)
     rows = {}
     for tk, (qty, cp, mkt) in pos.items():
         g = gross.get(tk, 0.0)
         row = {"qty": qty, "cost_price": cp, "market": mkt, "excluded": tk in excl,
                "why": list(blockers.get(tk, [])), "code": "blocked" if tk in blockers else ""}
-        if stale:
-            row["why"].insert(0, stale)
+        # F4 (arch-review 53b48b76): `price_session` là phiên mới nhất của CẢ RỔ — một mã thiếu
+        # dòng giá phiên đó (probe: dòng mới nhất cũ 11 ngày) vẫn được cấp tỉ suất trên giá cũ.
+        tk_stale = stale or (lagging_price_note(tk, lagging[tk], session) if tk in lagging else "")
+        if tk_stale:
+            row["why"].insert(0, tk_stale)
             row["code"] = "no_price"
         elif not row["why"] and cp + addback.get(tk, g) <= 0:
             row["why"].append("sổ broker không có giá vốn (costPrice ≤ 0) cho vị thế này")
@@ -770,7 +787,10 @@ ROW_RE = re.compile(r"^\|(?:\s*\d+\.?\s*\|)?\s*(?:\*\*)?(" + _TK + r")(?:\*\*)?"
 # Dòng vị thế của báo cáo NGÀY (`portfolio_status.py`): "DGC 354.0M, -9.79% · VPB 7.2M, +8.81%" —
 # mã, GIÁ TRỊ thị trường (triệu), rồi tỉ suất từ-ngày-mua. Không phải bảng, không khớp `PROSE_RE`
 # (giữa mã và tỉ suất có giá trị), nên trước 2026-10-10 cổng PASS báo cáo ngày trên 0 dòng (K1).
-POSBIT_RE = re.compile(r"(?<![A-Za-z0-9])(" + _TK + r")\s+\d[\d.,]*\s*M\s*,\s*"
+# Nhận cả tỉ suất IN ĐẬM ("VPI 47.0M, **-4.00%**") và giá trị "?" (`portfolio_status` in "?" khi
+# sổ broker thiếu `marketPrice`) — hai dạng mà bản 53b48b76 bỏ im (arch-review F6). Mọi dạng KHÁC
+# của dòng vị thế không khớp ở đây thì `position_line_gaps` chặn, không PASS trên dòng chưa đọc.
+POSBIT_RE = re.compile(r"(?<![A-Za-z0-9])(" + _TK + r")\s+(?:\d[\d.,]*\s*M|\?)\s*,\s*\*{0,2}\s*"
                        r"([+\-−]\d+(?:[.,]\d+)?)\s*%")
 SEP_RE = re.compile(r"^\|[\s:|-]+\|\s*$")
 # Văn xuôi: CHỈ bắt "MÃ +12,3%" / "MÃ −4,5%" — bắt buộc có DẤU và đứng liền mã, nên
@@ -946,6 +966,42 @@ def parse_position_bits(path: str) -> list:
                 v = _pct_num(num)
                 if v is not None:
                     out.append((tk, v, i))
+    return out
+
+
+# Tiêu đề mục chi tiết của báo cáo NGÀY: "**Chi tiết BAL (4 mã)**" — `portfolio_status` in nó
+# ngay trên dòng vị thế của sleeve đó, kèm ĐÚNG số vị thế.
+DETAIL_HDR_RE = re.compile(r"^\s*\*\*Chi tiết (.+?) \((\d+) mã\)\*\*\s*$")
+NO_RETURN_MARK = "(chưa có tỉ suất)"
+
+
+def position_line_gaps(path: str) -> list:
+    """[(dòng tiêu đề, nhãn mục, số mã KHAI, số dòng vị thế ĐỌC được, số mã ghi "(chưa có tỉ
+    suất)")] cho mọi mục "**Chi tiết <nhãn> (n mã)**" mà n ≠ đọc được + chưa có tỉ suất.
+
+    Dây bẫy lúc CHẠY cho lỗi "PASS trên 0 dòng" (K1, tái diễn ở arch-review 53b48b76 F6): báo cáo
+    khai n vị thế, mỗi vị thế hoặc mang một tỉ suất mà `POSBIT_RE` đọc được, hoặc ghi rõ "(chưa có
+    tỉ suất)". Thiếu ⇒ có vị thế in theo một dạng cổng KHÔNG đọc ("VPI 47.0M: -5.73%", "47.0
+    triệu, …", "47.0M (-5.73%)", "0.08B, +9.99%") — tỉ suất của nó đi ra ngoài mà chưa ai kiểm.
+    Hàm này chỉ ĐẾM; nó không đoán vì sao lệch (§29). Phần của một mục = các dòng ngay dưới tiêu
+    đề cho tới dòng trống đầu tiên, bỏ dòng bảng."""
+    with open(path, encoding="utf-8") as f:
+        lines = [_strip_quote(ln.rstrip("\n")) for ln in f]
+    out = []
+    for i, line in enumerate(lines):
+        m = DETAIL_HDR_RE.match(line)
+        if not m:
+            continue
+        read = noret = 0
+        for body in lines[i + 1:]:
+            if not body.strip():
+                break
+            if body.startswith("|"):
+                continue
+            read += len(POSBIT_RE.findall(body))
+            noret += body.count(NO_RETURN_MARK)
+        if read + noret != int(m.group(2)):
+            out.append((i + 1, m.group(1), int(m.group(2)), read, noret))
     return out
 
 
@@ -1405,6 +1461,14 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
                      + ", ".join(f"{lb} {e:+.2f}% (cổ tức GỘP {g:,.0f}đ/cp)" for lb, e, g in cands))
         (fails_no_div if all(g <= 0 for _lb, _e, g in cands) else fails_with_div).append(tk)
 
+    # Dây bẫy: mục chi tiết khai n mã mà cổng không đọc đủ n dòng vị thế ⇒ CHẶN (xem hàm).
+    for ln, label, n, read, noret in position_line_gaps(report_path):
+        fails.append(f"mục 'Chi tiết {label} ({n} mã)' (dòng {ln}): báo cáo khai {n} vị thế nhưng "
+                     f"cổng chỉ đọc được {read} dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + {noret} "
+                     f"mã ghi '{NO_RETURN_MARK}' = {read + noret} ⇒ lệch {n - read - noret:+d}: có "
+                     f"vị thế mà cổng KHÔNG đọc được nên KHÔNG kiểm được tỉ suất của nó. In lại "
+                     f"dòng vị thế đúng dạng trên (hợp đồng `portfolio_status.py` ↔ `POSBIT_RE`).")
+
     # Mã KHÔNG có kỳ vọng: đọc THẲNG từng dòng có mã đó, không qua (mã, KL) hay tiêu đề cột —
     # bảng thiếu cột KL, cột tên lạ, bảng trong blockquote, văn xuôi đều đi qua MỘT chỗ này.
     mention = ticker_mentions(report_path, {k[0] for k in unresolved})
@@ -1838,6 +1902,11 @@ def _selfcheck() -> int:
         check("phiên giá của nguồn giá đi theo kết quả (`price_session`); nguồn không khai ⇒ None",
               (broker_positions("0009999999", _fake_asof, price_fn=lambda tks, d: _px).price_session,
                pos.price_session), ("9998-12-31", None))
+        _px.lagging = {"XYZ": "9998-12-20"}
+        check("F4: mã có phiên giá CŨ HƠN phiên của rổ đi theo kết quả (`price_lagging`); nguồn không "
+              "khai ⇒ {}",
+              (broker_positions("0009999999", _fake_asof, price_fn=lambda tks, d: _px).price_lagging,
+               pos.price_lagging), ({"XYZ": "9998-12-20"}, {}))
     finally:
         os.unlink(_fake_path)
 
@@ -2574,6 +2643,10 @@ def _selfcheck_total_return(check) -> None:
             buf = io.StringIO()
             try:
                 return run_gate(path, out=buf), buf.getvalue()
+            except Exception as e:                              # noqa: BLE001
+                # cổng SẬP trên fixture = ca ĐỎ có tên (rc "EXC:…" ≠ mọi rc mong đợi), không phải
+                # traceback cắt ngang mọi ca phía sau — đột biến "chỉ sập" phải chết bằng assertion.
+                return f"EXC:{type(e).__name__}", buf.getvalue() + f"\nEXC:{type(e).__name__}: {e}"
             finally:
                 os.unlink(path)
         finally:
@@ -3076,6 +3149,19 @@ def _selfcheck_round2(check, run, ev) -> None:
     check("BQ lỗi ⇒ ValueError mang lỗi thật (fail-closed)", failed, True)
     check("kết quả mang `session` = phiên MỚI NHẤT BQ trả về (để biết giá có đúng phiên chốt không)",
           (px.session, px_same_day.session), ("2026-10-06", "2026-10-06"))
+    keep = (dar._bq, g["_today_ict"])
+    dar._bq = lambda sql: [{"tk": "AAA", "close": 20000, "price": 20000, "d": "2026-10-06"},
+                           {"tk": "BBB", "close": 10000, "price": 10000, "d": "2026-09-25"},
+                           {"tk": "CCC", "close": 30000, "price": 30000, "d": "2026-10-05"}]
+    try:
+        g["_today_ict"] = lambda: "2026-10-06"
+        px_lag = raw_close_prices(["AAA", "BBB", "CCC"], "2026-10-06")
+    finally:
+        dar._bq, g["_today_ict"] = keep
+    check("F4: mã thiếu dòng giá phiên mới nhất (BBB dừng 25/09, CCC dừng 05/10) ⇒ `session` vẫn là "
+          "phiên MỚI NHẤT của rổ (06/10) và `lagging` khai đúng phiên của từng mã trễ; rổ đủ ⇒ {}",
+          (px_lag.session, px_lag.lagging, px.lagging),
+          ("2026-10-06", {"BBB": "2026-09-25", "CCC": "2026-10-05"}, {}))
 
 
 def _selfcheck_round3(check, run, ev) -> None:
@@ -3289,13 +3375,13 @@ def _selfcheck_round4(check, run, ev) -> None:
     rc, txt = run(daily(), P, evs(unv), S, excl=("DRI",))
     check("… kể cả khi mã đó EXCLUDED (bản cũ: mã excluded không kỳ vọng chỉ được nhắc, rc=0)",
           (rc, "DRI (ZaloPay; dòng vị thế báo cáo ngày, dòng 5)" in txt), (1, True))
-    hidden = daily().replace(f"DRI 32.1M, {e_dri:+.2f}%",
-                             "DRI 32.1M (chưa công bố tỉ suất: chưa đối soát xong cổ tức với sổ "
-                             "công ty chứng khoán)")
+    hidden = daily().replace(f"DRI 32.1M, {e_dri:+.2f}%", "DRI 32.1M (chưa có tỉ suất)") + (
+        "  ⓘ Chưa có tỉ suất (DRI): chưa đối soát xong cổ tức/giá vốn với sổ công ty chứng khoán — "
+        "không công bố số chưa kiểm.\n")
     rc, txt = run(hidden, P, evs(unv), S)
     check("báo cáo ngày KHÔNG in tỉ suất cho mã đó (in lý do thay vào) ⇒ không chặn, vẫn kiểm 2 mã còn lại",
           (rc, "+ 2 dòng vị thế dạng báo cáo ngày" in txt), (0, True))
-    rc, txt = run(daily(tail="  ZZZ 1.0M, +3.00%\n"), P, evs(), S)
+    rc, txt = run(daily(tail="\n**Chi tiết BAL (1 mã)**\n  ZZZ 1.0M, +3.00%\n"), P, evs(), S)
     check("dòng vị thế của mã KHÔNG có trong sổ broker: không tính là đã kiểm, nói rõ số dòng đó",
           (rc, "+ 3 dòng vị thế dạng báo cáo ngày" in txt,
            "; 1 dòng vị thế báo cáo ngày của mã KHÔNG có trong sổ vị thế broker." in txt), (0, True, True))
@@ -3303,6 +3389,51 @@ def _selfcheck_round4(check, run, ev) -> None:
     check("dòng cờ 'MÃ ±x.xx%' (dấu CHẤM thập phân) đi qua đường văn xuôi và đọc đúng số (bản cũ: "
           "`_num` đọc +37.81 thành +3781)",
           (rc, "DRI (văn xuôi, dòng 1): báo cáo +37.81% không khớp" in txt), (1, True))
+
+    print("  -- F6: dòng vị thế TRÔI định dạng không còn PASS trên dòng chưa đọc (dây bẫy `position_line_gaps`)")
+    good = f"DRI 32.1M, {e_dri:+.2f}%"
+    drift = {"hai chấm": f"DRI 32.1M: {e_dri:+.2f}%", "'triệu'": f"DRI 32.1 triệu, {e_dri:+.2f}%",
+             "trong ngoặc": f"DRI 32.1M ({e_dri:+.2f}%)", "đơn vị B": f"DRI 0.03B, {e_dri:+.2f}%",
+             "thiếu dấu": f"DRI 32.1M, {abs(e_dri):.2f}%"}
+    got = {}
+    for tag, bit in drift.items():
+        rc, txt = run(daily().replace(good, bit), P, evs(), S)
+        got[tag] = (rc, "mục 'Chi tiết Discretionary (1 mã)' (dòng 4): báo cáo khai 1 vị thế nhưng "
+                        "cổng chỉ đọc được 0 dòng vị thế dạng 'MÃ <giá trị>M, ±x%' + 0 mã ghi "
+                        "'(chưa có tỉ suất)' = 0 ⇒ lệch +1" in txt)
+    check("5 dạng trôi của MỘT dòng (số vẫn đúng) ⇒ CHẶN, nêu đúng mục + số đếm (bản 53b48b76: rc=0, "
+          "dòng đó không được đọc, 'Đã kiểm … 2 dòng')", got, {tag: (1, True) for tag in drift})
+    rc, txt = run(daily(dri=f"**{e_dri:+.2f}%**"), P, evs(), S)
+    rc2, txt2 = run(daily(dri="**+37.81%**"), P, evs(), S)
+    check("tỉ suất IN ĐẬM được ĐỌC: đúng số ⇒ PASS 3 dòng; sai số ⇒ CHẶN đúng dòng (bản 53b48b76: bỏ "
+          "im, rc=0)",
+          (rc, "+ 3 dòng vị thế dạng báo cáo ngày" in txt, rc2,
+           "DRI (dòng vị thế báo cáo ngày, dòng 5): báo cáo +37.81%" in txt2), (0, True, 1, True))
+    rc, txt = run(daily().replace("DRI 32.1M,", "DRI ?,"), P, evs(), S)
+    rc2, _ = run(daily(dri="+37.81%").replace("DRI 32.1M,", "DRI ?,"), P, evs(), S)
+    check("giá trị '?' (sổ broker thiếu giá) vẫn là một dòng vị thế: tỉ suất của nó được đọc và kiểm",
+          (rc, "+ 3 dòng vị thế dạng báo cáo ngày" in txt, rc2), (0, True, 1))
+    rc, txt = run(daily().replace("(2 mã)", "(3 mã)"), P, evs(), S)
+    rc2, txt2 = run(daily().replace("(2 mã)", "(1 mã)"), P, evs(), S)
+    check("số mã KHAI lệch số dòng đọc được theo cả hai chiều ⇒ CHẶN (thiếu một dòng / thừa một dòng)",
+          (rc, "= 2 ⇒ lệch +1" in txt, rc2, "= 2 ⇒ lệch -1" in txt2), (1, True, 1, True))
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+        fh.write("**Chi tiết BAL (3 mã)**\n  AAA 1.0M, +1.00% · BBB 2.0M (chưa có tỉ suất) — ⚠️ x\n"
+                 "  ⓘ Chưa có tỉ suất (BBB): lý do\n| CCC 3.0M, +3.00% | bảng |\n\n"
+                 "  DDD 4.0M, +4.00%\n\n> **Chi tiết LAG (2 mã)**\n>   EEE 5.0M, **-5.00%**\n\n"
+                 "**Chi tiết đáng chú ý:**\n  FFF 6.0M, +6.00%\n\n**Chi tiết CAPIT (0 mã)**\n")
+        path = fh.name
+    try:
+        check("`position_line_gaps`: đếm dòng vị thế + '(chưa có tỉ suất)' của TỪNG mục tới dòng trống "
+              "đầu tiên; bỏ dòng bảng; dòng 'ⓘ Chưa có tỉ suất (…)' không tính là một vị thế; đọc cả "
+              "trong blockquote; tiêu đề không khai số mã thì không áp dụng; 0 mã = 0 dòng",
+              position_line_gaps(path), [(1, "BAL", 3, 1, 1), (8, "LAG", 2, 1, 0)])
+    finally:
+        os.unlink(path)
+    rc, txt = run("## 3.5\n\n| Mã | KL | Lãi/lỗ (%) |\n|---|---:|---:|\n| DRI | 1.900 | "
+                  + f"{e_dri:+.2f}".replace(".", ",") + "% |\n", P, evs(), S)
+    check("báo cáo KHÔNG có mục 'Chi tiết … (n mã)' (tuần/tháng: bảng) ⇒ dây bẫy không áp dụng",
+          (rc, "Đã kiểm 1 dòng bảng" in txt, "báo cáo khai" in txt), (0, True, False))
 
     print("  -- còn NGOÀI tầm kiểm (ghim, để không ai tưởng đã phủ): văn xuôi có chữ chen giữa mã và tỉ suất")
     rc, txt = run("## Nhận định\n\nDRI lãi chưa thực hiện +37,81% từ ngày mua.\n\nPVT không có số.\n",
@@ -3352,6 +3483,16 @@ def _selfcheck_round4(check, run, ev) -> None:
     check("… báo cáo không in tỉ suất nào thì KHÔNG chặn (thiếu giá không phải lý do giữ báo cáo); "
           "giá đúng phiên ⇒ PASS như thường", (rc, rc2), (0, 0))
 
+    lag = _Positions(P)
+    lag.price_session, lag.price_lagging = "2026-10-09", {"DRI": "2026-09-28"}
+    rc, txt = run(daily(), lag, evs(), S)
+    rc2, txt2 = run(hidden, lag, evs(), S)
+    check("F4: RIÊNG DRI có giá dừng ở phiên 28/09 trong khi rổ đã có 09/10 ⇒ tỉ suất DRI không có kỳ "
+          "vọng ⇒ in ra là CHẶN, lý do nói đúng phiên của mã; hai mã còn lại vẫn được kiểm; báo cáo "
+          "không in tỉ suất DRI thì qua (bản 53b48b76: cấp +34,58% trên giá cũ 11 ngày)",
+          (rc, "giá đóng cửa của DRI trên BQ dừng ở phiên 2026-09-28 trong khi các mã khác đã có phiên "
+               "2026-10-09" in txt, "+ 2 dòng vị thế dạng báo cáo ngày" in txt, rc2), (1, True, True, 0))
+
     print("  -- `position_returns`: MỘT chỗ tính cho báo cáo ngày và cổng")
     keep = {k: globals()[k] for k in ("broker_positions", "excluded_tickers", "entitled_gross")}
     keep_acc = dar.ACCOUNTS
@@ -3380,6 +3521,34 @@ def _selfcheck_round4(check, run, ev) -> None:
     check("… và mang theo lệch nguồn vendor + ghi chú bằng chứng cho cổng",
           rows and (pr["mismatches"][0][0], pr["notes"], pr["label"], pr["asof"]),
           ("PVT", ["ghi chú"], "ZaloPay", "2026-10-09"))
+    got = {}
+    try:
+        dar.ACCOUNTS = {"ZaloPay": "x"}
+        globals()["excluded_tickers"] = lambda lb: set()
+        globals()["entitled_gross"] = lambda tks, acct, d: (
+            {"DRI": 1000.0}, [], {"blockers": {"PVT": ["lý do A"]}, "addback": {}, "notes": []})
+        for tag, src in (("rổ trễ", old), ("một mã trễ", lag), ("đúng phiên", fresh)):
+            globals()["broker_positions"] = lambda acct, d, _s=src, **kw: _s
+            rr = position_returns("ZaloPay", "2026-10-09")["positions"]
+            got[tag] = {tk: (r["code"], "pct" in r, len(r["why"])) for tk, r in rr.items()}
+        globals()["broker_positions"] = lambda acct, d, **kw: lag
+        why_lag = position_returns("ZaloPay", "2026-10-09")["positions"]["DRI"]["why"]
+    except Exception as e:                                      # noqa: BLE001
+        got = f"EXC:{type(e).__name__}: {e}"
+    finally:
+        globals().update(keep)
+        dar.ACCOUNTS = keep_acc
+    check("`code` = 'no_price' (không phải 'blocked') khi lý do là GIÁ: cả rổ chưa có phiên chốt ⇒ mọi "
+          "mã, kể cả mã vốn đã bị chặn (lý do giá đứng trước); một mã trễ ⇒ chỉ mã đó; đúng phiên ⇒ "
+          "không mã nào — báo cáo ngày đổi `code` thành câu người đọc thấy",
+          got, {"rổ trễ": {"DRI": ("no_price", False, 1), "DGC": ("no_price", False, 1),
+                           "PVT": ("no_price", False, 2)},
+                "một mã trễ": {"DRI": ("no_price", False, 1), "DGC": ("", True, 0),
+                               "PVT": ("blocked", False, 1)},
+                "đúng phiên": {"DRI": ("", True, 0), "DGC": ("", True, 0),
+                               "PVT": ("blocked", False, 1)}})
+    check("… câu lý do của mã trễ là `lagging_price_note` (mã, phiên của mã, phiên của rổ)",
+          why_lag, [lagging_price_note("DRI", "2026-09-28", "2026-10-09")])
     mis = ev("DRI", "2026-09-21", "2026-09-22", 1000.0, vcheck="mismatch", vendor_cash=1500.0,
              vendor_stock=0.0, vendor_mismatch_reason="cash_mismatch")
     rc, txt = run(daily(), P, [mis, evs()[1]], S)
@@ -3400,6 +3569,13 @@ def _selfcheck_round4(check, run, ev) -> None:
         rc2, _ = run("## 3.5\n\n" + bad, P1, E1, S_DRI)
         check(f"{tag}: số đúng ⇒ PASS và ĐÃ KIỂM 1 dòng bảng; số +37,81% ⇒ CHẶN (318097fa: rc=0, 0 dòng)",
               (rc, "Đã kiểm 1 dòng bảng" in txt, rc2), (0, True, 1))
+    DOT = "| Mã | KL | Lãi/lỗ (%) |\n|---|---:|---:|\n| DRI | 1.900 | {} |\n"
+    rc, txt = run("## 3.5\n\n" + DOT.format("+34.58%"), P1, E1, S_DRI)
+    rc2, txt2 = run("## 3.5\n\n" + DOT.format("+37.81%"), P1, E1, S_DRI)
+    check("ô BẢNG ghi tỉ suất với dấu CHẤM thập phân (+34.58%) đọc đúng là 34,58 — không phải 3.458 "
+          "(`_pct_num`, không phải `_num`): đúng số ⇒ PASS, sai số ⇒ CHẶN với đúng con số đã đọc",
+          (rc, "Đã kiểm 1 dòng bảng" in txt, rc2, "báo cáo +37.81% vs kỳ vọng +34.58%" in txt2),
+          (0, True, 1, True))
     rc, txt = run("| Mã | Tỷ trọng | Tỷ suất |\n|---|---:|---:|\n| DRI (UPCOM) | 6,1% | +37,81% |\n",
                   P1, [unv], S_DRI)
     check("mã KHÔNG kỳ vọng, ô 'DRI (UPCOM)' trong bảng không cột KL (có ô % khác chen giữa) ⇒ vẫn CHẶN",

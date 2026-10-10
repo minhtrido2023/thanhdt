@@ -28,8 +28,10 @@ tức RÒNG quy về KL đang giữ ở tử số, giá đóng cửa thô của 
 (trước 2026-10-10 nó tính `(marketPrice − costPrice)/costPrice` — giá vốn đã bị broker trừ cổ tức,
 không cộng cổ tức — và khối này được nhúng nguyên văn vào báo cáo NGÀY gửi đi: DRI +28,0% thay vì
 +29,31%, SAB −2,6% thay vì −4,53%; K1). Mã mà công cụ KHÔNG cấp được tỉ suất thì KHÔNG in tỉ suất,
-in lý do ngắn (`RETURN_UNAVAILABLE`) — không rơi về `costPrice`. `broker_positions_with_cost()`
-vẫn trả `avg_cost` cho các caller khác (`auto_exit_inject.py`), nhưng `build_output` không dùng nó.
+in lý do ngắn (`RETURN_UNAVAILABLE`) — không rơi về `costPrice`. `avg_cost` của
+`broker_positions_with_cost()` chỉ còn MỘT chỗ dùng trong `build_output`: đo khoảng cách tới ngưỡng
+cắt lỗ TỰ ĐỘNG của sleeve BAL trên đúng cơ sở lệnh đó dùng (`AUTO_STOP_SLEEVES`,
+`broker_basis_pct`) — in thành câu riêng có ghi cơ sở, không bao giờ thành tỉ suất của mã.
 
 Định dạng dòng `MÃ <giá trị>M, ±x.xx%` là HỢP ĐỒNG với `report_return_gate.POSBIT_RE` (cổng đọc
 đúng dạng đó để kiểm) — selfcheck ghim hai phía với nhau; đổi định dạng phải đổi cả hai.
@@ -94,6 +96,14 @@ STOP_LOSS_PCT_BY_SLEEVE = {
 }
 RISK_WARN_DISPLAY_FLOOR_PCT = 15.0  # bắt đầu in cảnh báo từ mức lỗ này
 RISK_WARN_RED_ZONE_PCT = 18.0  # đưa vào "Cờ theo dõi" từ mức lỗ này
+# Sleeve có lệnh cắt lỗ TỰ ĐỘNG (`auto_exit_inject._bal_stop_loss_candidates`). Lệnh đó quyết trên
+# `marketPrice / avg_cost − 1` của sổ broker — KHÔNG phải tỉ suất §21 (giá đóng cửa, giá vốn thô,
+# cộng cổ tức). Khoảng cách tới ngưỡng của các sleeve này phải đo trên ĐÚNG cơ sở của lệnh
+# (`broker_basis_pct`): đo trên tỉ suất §21 thì mã có cổ tức d trên giá vốn thô C in "còn
+# ≈ 0,15·d/C pp" đúng lúc lệnh bán đã tự chèn (arch-review 53b48b76, F2; số thật TPB SpaceX
+# 07/10: −16,70% cơ sở broker vs −16,40% §21). Sleeve khác trong `STOP_LOSS_PCT_BY_SLEEVE` không
+# có lệnh tự động nào ⇒ ngưỡng của chúng vẫn đo trên tỉ suất công bố.
+AUTO_STOP_SLEEVES = frozenset({"BAL"})
 
 
 def _read_json(path, default=None):
@@ -493,6 +503,14 @@ RETURN_UNAVAILABLE = {
 }
 
 
+# Viết cho người đọc báo cáo (bản SpaceX gửi nhà đầu tư): không tên hệ thống nội bộ, không mã cổ
+# phiếu, không "±x%" nào (cổng tỉ suất sẽ đọc nó thành tỉ suất công bố).
+PRICE_BASIS_NOTE = ("ⓘ Tỉ suất từng mã tính trên giá đóng cửa của phiên, đã cộng cổ tức tiền mặt "
+                    "sau thuế; cột giá trị tính trên giá do công ty chứng khoán ghi cuối ngày. Hai "
+                    "giá có thể lệch nhau ở mã giao dịch trên UPCOM, nên giá trị và tỉ suất của "
+                    "cùng một mã không quy đổi trực tiếp sang nhau.")
+
+
 def section21_returns(account, date):
     """{mã: dòng `position_returns`} — tỉ suất §21 của từng vị thế, từ ĐÚNG hàm cổng dùng.
 
@@ -504,15 +522,34 @@ def section21_returns(account, date):
         return rrg.position_returns(account, date)["positions"]
 
 
+def broker_basis_pct(p):
+    """% lãi/lỗ của một vị thế trên CƠ SỞ của lệnh cắt lỗ tự động: `marketPrice / avg_cost − 1`,
+    cùng phép tính và cùng điều kiện hợp lệ với `auto_exit_inject._bal_stop_loss_candidates`
+    (thiếu/≤ 0 một trong hai ⇒ lệnh tự động KHÔNG tính ⇒ ở đây None). Chỉ dùng để đo khoảng cách
+    tới ngưỡng — KHÔNG phải tỉ suất công bố (đó là số §21)."""
+    avg_cost, market_price = p.get("avg_cost"), p.get("marketPrice")
+    if not avg_cost or avg_cost <= 0 or not market_price or market_price <= 0:
+        return None
+    return (market_price / avg_cost - 1.0) * 100.0
+
+
 def risk_warning(sleeve, pnl_pct):
     """(emoji, text)|None — cảnh báo gần ngưỡng xử lý cho 1 position, hoặc None nếu sleeve
-    không có ngưỡng (PARK) / lỗ chưa tới RISK_WARN_DISPLAY_FLOOR_PCT."""
+    không có ngưỡng (PARK) / lỗ chưa tới RISK_WARN_DISPLAY_FLOOR_PCT.
+
+    `pnl_pct` do NGƯỜI GỌI chọn đúng cơ sở: `broker_basis_pct` cho sleeve trong
+    `AUTO_STOP_SLEEVES`, tỉ suất §21 cho sleeve còn lại. Câu của sleeve có lệnh tự động nói rõ cơ
+    sở và CỐ Ý không chứa "±x%" nào: cổng tỉ suất đọc "MÃ … ±x%" là một tỉ suất công bố của mã
+    đó (`PROSE_RE`, `_near_signed_pct`) và sẽ đem so với số §21."""
     threshold = STOP_LOSS_PCT_BY_SLEEVE.get(sleeve)
     if threshold is None or pnl_pct is None or pnl_pct > -RISK_WARN_DISPLAY_FLOOR_PCT:
         return None
     dd = abs(pnl_pct)
     remaining = max(threshold - dd, 0.0)
     emoji = "🔴" if dd >= RISK_WARN_RED_ZONE_PCT else "⚠️"
+    if sleeve in AUTO_STOP_SLEEVES:
+        return emoji, (f"{emoji} còn {remaining:.1f}pp đến ngưỡng cắt lỗ tự động (lỗ "
+                       f"{threshold:.0f}% trên giá vốn sổ công ty chứng khoán; hiện lỗ {dd:.1f}%)")
     return emoji, f"{emoji} còn {remaining:.1f}pp đến ngưỡng xử lý (−{threshold:.0f}%)"
 
 
@@ -603,6 +640,7 @@ def build_output(account, date, returns_fn=None):
                   f"mã nào: {ret_err}", file=sys.stderr)
     ret_pl = {}   # mã -> (lãi/lỗ ròng VND, tổng giá vốn THÔ) — để cộng tổng sleeve
     no_ret = {}   # mã -> khoá RETURN_UNAVAILABLE
+    broker_pct = {tk: broker_basis_pct(p) for tk, p in positions.items()}   # cơ sở lệnh tự động
 
     sleeves = defaultdict(list)  # sleeve -> [(ticker, qty, mkt_value, pnl_pct)]
     for tk, p in positions.items():
@@ -712,7 +750,15 @@ def build_output(account, date, returns_fn=None):
     lines.append("")
 
     # ---------------- per-sleeve detail ----------------
-    red_zone = []  # [(sleeve, ticker, pnl_pct, remaining_pp)]
+    if positions:
+        # Một dòng vị thế dùng HAI giá (arch-review 53b48b76, F3): giá trị = KL × `marketPrice`
+        # broker (khớp NAV và số dư công ty chứng khoán hiện cho khách), tỉ suất = giá ĐÓNG CỬA
+        # (`marketPrice` không phải giá ATC — `report_return_gate.broker_positions`). Lệch đo
+        # 01→09/10/2026 trên UPCOM: DRI −1,80…+1,29%, TV1 −0,52…+2,58%, SCL +1,40%; HOSE khớp.
+        # Giữ hai giá (mỗi cột đúng với mục đích của nó) và nói ra, không lặng lẽ trộn.
+        lines.append(PRICE_BASIS_NOTE)
+        lines.append("")
+    red_zone = []  # [(sleeve, ticker, % trên cơ sở của ngưỡng, remaining_pp)]
     for sleeve in SLEEVE_ORDER:
         rows = sleeves.get(sleeve) or []
         if not rows:
@@ -744,13 +790,16 @@ def build_output(account, date, returns_fn=None):
                 else:
                     sess_txt = "ngày vào không rõ"
                 extra.append(f"⚠️ {sess_txt} — chờ ý kiến PM về exit")
-            rw = risk_warning(sleeve, pp)
+            # Khoảng cách tới ngưỡng: sleeve có lệnh cắt lỗ tự động đo trên cơ sở của lệnh (sổ
+            # broker) — có số cả khi công cụ §21 không cấp tỉ suất; sleeve khác đo trên số §21.
+            basis_pp = broker_pct[tk] if sleeve in AUTO_STOP_SLEEVES else pp
+            rw = risk_warning(sleeve, basis_pp)
             if rw:
                 emoji, rw_txt = rw
                 extra.append(rw_txt)
                 if emoji == "🔴":
                     threshold = STOP_LOSS_PCT_BY_SLEEVE[sleeve]
-                    red_zone.append((sleeve, tk, pp, max(threshold - abs(pp), 0.0)))
+                    red_zone.append((sleeve, tk, basis_pp, max(threshold - abs(basis_pp), 0.0)))
             bit = f"{tk} {v_txt}{pp_txt}"
             if extra:
                 bit += " — " + "; ".join(extra)
@@ -825,12 +874,24 @@ def build_output(account, date, returns_fn=None):
     n_lag_upcoming = status.get("n_lag_upcoming") or 0
     if n_lag_upcoming:
         flags.append(f"LAG: {n_lag_upcoming} candidate đang trong cửa sổ upcoming (chưa vào lệnh).")
-    stop_blind = sorted(tk for sl, rows in sleeves.items() if sl in STOP_LOSS_PCT_BY_SLEEVE
+    stop_blind = sorted(tk for sl, rows in sleeves.items()
+                        if sl in STOP_LOSS_PCT_BY_SLEEVE and sl not in AUTO_STOP_SLEEVES
                         for tk, *_ in rows if tk in no_ret)
     if stop_blind:
         flags.append(f"⚠️ Chưa có tỉ suất nên KHÔNG đánh giá được khoảng cách tới ngưỡng xử lý: "
                      f"{', '.join(stop_blind)}.")
+    auto_blind = sorted(tk for sl, rows in sleeves.items() if sl in AUTO_STOP_SLEEVES
+                        for tk, *_ in rows if broker_pct[tk] is None)
+    if auto_blind:
+        flags.append(f"⚠️ Sổ công ty chứng khoán thiếu giá vốn hoặc giá nên KHÔNG đánh giá được "
+                     f"khoảng cách tới ngưỡng cắt lỗ tự động: {', '.join(auto_blind)}.")
     for sleeve, tk, pp, remaining in red_zone:
+        if sleeve in AUTO_STOP_SLEEVES:
+            # không in "MÃ ±x%": số này đo trên sổ broker, không phải tỉ suất §21 cổng kiểm
+            flags.append(f"🔴 {tk} ({SLEEVE_LABEL[sleeve]}): lỗ {abs(pp):.1f}% trên giá vốn sổ công "
+                         f"ty chứng khoán, còn {remaining:.1f}pp đến ngưỡng cắt lỗ tự động — cân "
+                         "nhắc xử lý sớm")
+            continue
         flags.append(f"🔴 {tk} {pp:+.2f}% ({SLEEVE_LABEL[sleeve]}): còn {remaining:.1f}pp → "
                      "ngưỡng, cân nhắc xử lý sớm")
     if flags:
