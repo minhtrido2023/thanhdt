@@ -1012,3 +1012,9 @@
 
 ## Archived 2026-10-10 (keep=12 days=0 require_done=False)
 - [2026-10-09T09:34:03Z] ĐANG DỞ job Taylor_20261009_093353 selfcheck-red owner sweep 9 file: bắt đầu | NEXT: chạy lại 9 selfcheck, phân loại
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T09:38:42Z] ĐANG DỞ job Taylor_20261009_093353 sweep: custom30 CLOSED; 8 file phân loại xong (atc/basket/cpi/lag_gov/freshness=b, rating8l/capit/cctg=d live CSV) | worktree /home/trido/thanhdt/wt-screds-1009 branch fix/selfcheck-red-sweep-1009 | NEXT: sửa+chạy xanh, merge, close, finding
+
+## Archived 2026-10-10 (keep=12 days=0 require_done=False)
+- [2026-10-09T09:46:11Z] [selfcheck-red sweep 10-09] 9/9 CLOSED (6a73ef82). Nợ: rating8l --bq BQ2-4 pin số 09-27 (HDG đã lật POWER); nhãn cctg_6m cho dòng 12M.
