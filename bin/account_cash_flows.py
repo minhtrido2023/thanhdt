@@ -21,8 +21,7 @@ SCHEMA `data/account_cash_flows.json`:
       "_doc": "...",
       "SpaceX": [
         {"date": "2026-10-05", "amount_vnd": 200000000, "kind": "deposit",
-         "evidence": "sao kê DNSE 2026-10-05 + email xác nhận chuyển khoản",
-         "timing": "bod"}
+         "evidence": "sao kê DNSE 2026-10-05 + email xác nhận chuyển khoản"}
       ],
       "ZaloPay": []
     }
@@ -31,7 +30,15 @@ SCHEMA `data/account_cash_flows.json`:
     KHẲNG ĐỊNH CÓ BẰNG CHỨNG rằng bước nhảy NAV ngày đó là biến động thị trường, không phải
     nạp/rút — đó là cách duy nhất để mở cổng chặn ở `report_delivery_gate`.
   - `evidence`: bắt buộc, non-empty. Không có bằng chứng ⇒ không được ghi (§6).
-  - `timing`: "bod" (mặc định) hoặc "eod" — xem `nav_period_returns.py` § quy ước.
+  - `timing`: "eod" (MẶC ĐỊNH từ 2026-10-10, user quyết định 1 của chính sách "tài khoản = quỹ
+    mở" — `kb/projects/fund-unit-performance-policy-20261010.md`) hoặc "bod". Xem
+    `nav_unit_ledger.py` § quy tắc chốt.
+      * "eod": tiền nạp/rút ngày T giao dịch ở giá đơn vị quỹ chốt CUỐI ngày T. Điều kiện ngầm:
+        dòng nav_history ngày T ĐÃ chứa khoản tiền đó (snapshot chụp SAU khi tiền vào/ra).
+      * "bod": giao dịch ở giá chốt phiên LIỀN TRƯỚC (tiền có mặt từ đầu phiên T và hưởng trọn
+        lãi/lỗ phiên T). Chỉ hợp lệ khi khai TƯỜNG MINH kèm `time_ict` — không còn là mặc định.
+  - `time_ict`: "HH:MM" giờ ICT lúc tiền vào/ra. BẮT BUỘC khi `timing="bod"`; tuỳ chọn với "eod"
+    (có khai thì `nav_unit_ledger.py` đối chiếu với `balance_ts` của dòng nav_history ngày đó).
   - File KHÔNG tồn tại = CHƯA có dòng tiền nào được ghi (hợp lệ, không phải lỗi). Nó KHÔNG có
     nghĩa "không có dòng tiền nào xảy ra" — phân biệt 2 điều đó là việc của cổng NAV-jump.
 
@@ -47,6 +54,9 @@ FLOWS_PATH = os.path.join(WC_ROOT, "data", "account_cash_flows.json")
 
 VALID_KINDS = ("deposit", "withdraw", "market_only")
 VALID_TIMING = ("bod", "eod")
+# Đổi "bod" → "eod" ngày 2026-10-10 (user duyệt). Lúc đổi, data/account_cash_flows.json có 0 bản
+# ghi cho cả 2 account ⇒ không có bản ghi nào từng dựa vào mặc định cũ, không số lịch sử nào đổi.
+DEFAULT_TIMING = "eod"
 
 # Ngưỡng cổng NAV-jump: |Δnav ngày| vượt ngưỡng mà KHÔNG có bản ghi dòng tiền nào cho ngày đó
 # ⇒ BLOCK. Đo thật trên toàn bộ lịch sử 2 TK ngày 2026-09-27 (N=113 cặp phiên liên tiếp:
@@ -70,7 +80,7 @@ def _parse_date(s):
 
 
 def load_flows(account, flows_path=None, require_file=False):
-    """Trả list [{date, amount_vnd, kind, evidence, timing}, ...] tăng dần theo ngày.
+    """Trả list [{date, amount_vnd, kind, evidence, timing, time_ict}, ...] tăng dần theo ngày.
 
     Bản ghi sai schema ⇒ raise CashFlowError (KHÔNG bỏ qua: một bản ghi hỏng nghĩa là dòng tiền
     có xảy ra mà ta không đọc đúng, đúng lớp lỗi §28 "suy từ sự vắng mặt").
@@ -132,11 +142,22 @@ def load_flows(account, flows_path=None, require_file=False):
         if kind == "withdraw" and amount >= 0:
             raise CashFlowError(f"{where}: kind='withdraw' phải có amount_vnd<0 (rút = số âm), "
                                 f"được {amount:.0f}")
-        timing = rec.get("timing", "bod")
+        timing = rec.get("timing", DEFAULT_TIMING)
         if timing not in VALID_TIMING:
             raise CashFlowError(f"{where}: timing='{timing}' không thuộc {VALID_TIMING}")
+        time_ict = rec.get("time_ict")
+        if time_ict is not None:
+            try:
+                time_ict = datetime.datetime.strptime(str(time_ict), "%H:%M").strftime("%H:%M")
+            except ValueError as exc:
+                raise CashFlowError(f"{where}: time_ict không phải HH:MM ({rec['time_ict']!r})") from exc
+        if timing == "bod" and time_ict is None:
+            raise CashFlowError(
+                f"{where}: timing='bod' phải khai kèm time_ict (HH:MM, giờ ICT lúc tiền vào/ra)."
+                f" Mặc định là 'eod' (giao dịch ở giá đơn vị chốt cuối ngày); 'bod' là ngoại lệ"
+                f" cho tiền vào/ra TRONG phiên nên phải có giờ.")
         out.append({"date": d, "amount_vnd": amount, "kind": kind,
-                    "evidence": str(rec["evidence"]), "timing": timing})
+                    "evidence": str(rec["evidence"]), "timing": timing, "time_ict": time_ict})
     out.sort(key=lambda r: r["date"])
     return out
 
@@ -153,21 +174,27 @@ def attach_flows_to_rows(rows, flows):
       - timing="bod": ngày quan sát NAV ĐẦU TIÊN có date >= flow.date. Tiền đã vào tài khoản
         trước khi chốt NAV ngày đó ⇒ nav ngày đó ĐÃ chứa tiền nạp. Nạp cuối tuần (không có dòng
         nav_history) vì vậy rơi đúng vào phiên kế tiếp.
-      - timing="eod": phải có dòng nav_history ĐÚNG ngày đó (tiền vào/ra sau khi NAV ngày đó đã
-        được chốt theo giá đóng cửa); không có ⇒ CashFlowError (nạp/rút EOD của một ngày không
-        có snapshot thực chất là BOD của phiên sau — ghi lại cho đúng, đừng để script đoán).
+      - timing="eod" (mặc định): phải có dòng nav_history ĐÚNG ngày đó — không có dòng thì không
+        có giá đơn vị chốt cuối ngày để giao dịch ⇒ CashFlowError (fail-closed; script không
+        đoán hộ phiên nào). Ngoại lệ duy nhất: ngày của flow SAU dòng nav_history cuối cùng =
+        snapshot ngày đó CHƯA chạy ⇒ chưa thuộc kỳ đo nào (key None), không phải lỗi.
     Trả dict {row_date: [flow, ...]}. Flow sau dòng NAV cuối cùng bị BỎ (ngoài kỳ đo) và trả
     riêng ở key None để caller báo nếu cần.
     """
-    dates = [d for d, _ in rows]
+    dates = [r[0] for r in rows]
     mapped = {}
     for f in flows:
         if f["timing"] == "eod":
-            if f["date"] not in dates:
+            if f["date"] in dates:
+                key = f["date"]
+            elif not dates or f["date"] > dates[-1]:
+                key = None
+            else:
                 raise CashFlowError(
-                    f"flow {f['date']} timing='eod' nhưng nav_history không có dòng ngày đó — "
-                    f"ghi lại thành timing='bod' của phiên kế tiếp")
-            key = f["date"]
+                    f"flow {f['date']} timing='eod' nhưng nav_history không có dòng ngày đó "
+                    f"(dòng cuối cùng hiện có: {dates[-1]}) ⇒ không có giá đơn vị chốt cuối ngày "
+                    f"{f['date']} để giao dịch. Khai lại tường minh: timing='bod' + time_ict "
+                    f"(giao dịch ở giá chốt phiên liền trước của phiên kế tiếp).")
         else:
             key = next((d for d in dates if d >= f["date"]), None)
         mapped.setdefault(key, []).append(f)

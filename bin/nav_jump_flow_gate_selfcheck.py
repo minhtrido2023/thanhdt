@@ -99,7 +99,7 @@ def build_cases(verdict):
     def c3():
         f = []
         p = flows_file([{"date": TODAY, "amount_vnd": 200_000_000, "kind": "deposit",
-                         "evidence": "sao kê VCB 2026-09-25 ref 998", "timing": "bod"}])
+                         "evidence": "sao kê VCB 2026-09-25 ref 998", "timing": "bod", "time_ict": "10:00"}])
         try:
             # nav 1,2B = 1B + 200tr nạp ⇒ phần dư 0%
             ok, msg = verdict("SpaceX", TODAY, PREV, 1_200_000_000.0, 15.0, HIST,
@@ -123,7 +123,7 @@ def build_cases(verdict):
     def c4():
         f = []
         p = flows_file([{"date": TODAY, "amount_vnd": -300_000_000, "kind": "withdraw",
-                         "evidence": "rút Trứng vàng, email DNSE 2026-09-25", "timing": "bod"}])
+                         "evidence": "rút Trứng vàng, email DNSE 2026-09-25", "timing": "bod", "time_ict": "10:00"}])
         try:
             ok, msg = verdict("SpaceX", TODAY, PREV, 700_000_000.0, 15.0, HIST,
                               components=COMP, flows_path=p)
@@ -140,7 +140,7 @@ def build_cases(verdict):
     def c5():
         f = []
         p = flows_file([{"date": TODAY, "amount_vnd": 1_000_000, "kind": "deposit",
-                         "evidence": "nạp lẻ 1tr", "timing": "bod"}])
+                         "evidence": "nạp lẻ 1tr", "timing": "bod", "time_ict": "10:00"}])
         try:
             # khai 1tr nhưng NAV nhảy +50% ⇒ phần dư ~+49,9% ⇒ chặn
             ok, msg = verdict("SpaceX", TODAY, PREV, 1_500_000_000.0, 15.0, HIST,
@@ -162,7 +162,7 @@ def build_cases(verdict):
     def c6():
         f = []
         p = flows_file([{"date": TODAY, "amount_vnd": 0, "kind": "market_only",
-                         "evidence": "VNINDEX -6,8% + 4 mã sàn, xác nhận bằng dnse_raw", "timing": "bod"}])
+                         "evidence": "VNINDEX -6,8% + 4 mã sàn, xác nhận bằng dnse_raw", "timing": "bod", "time_ict": "10:00"}])
         try:
             ok, msg = verdict("SpaceX", TODAY, PREV, 800_000_000.0, 15.0, HIST,
                               components=COMP, flows_path=p)
@@ -182,7 +182,7 @@ def build_cases(verdict):
         f = []
         # deposit amount âm = sai schema ⇒ CashFlowError
         p = flows_file([{"date": TODAY, "amount_vnd": -5, "kind": "deposit",
-                         "evidence": "x", "timing": "bod"}])
+                         "evidence": "x", "timing": "bod", "time_ict": "10:00"}])
         try:
             ok, msg = verdict("SpaceX", TODAY, PREV, PREV * 1.30, 15.0, HIST,
                               components=COMP, flows_path=p)
@@ -205,7 +205,7 @@ def build_cases(verdict):
     def c8():
         f = []
         p = flows_file([{"date": TODAY, "amount_vnd": 200_000_000, "kind": "deposit",
-                         "evidence": "nạp cho ZaloPay", "timing": "bod"}], account="ZaloPay")
+                         "evidence": "nạp cho ZaloPay", "timing": "bod", "time_ict": "10:00"}], account="ZaloPay")
         try:
             ok, msg = verdict("SpaceX", TODAY, PREV, 1_200_000_000.0, 15.0, HIST,
                               components=COMP, flows_path=p)
@@ -240,7 +240,7 @@ def build_cases(verdict):
     def c10():
         f = []
         p = flows_file([{"date": "2026-09-18", "amount_vnd": 200_000_000, "kind": "deposit",
-                         "evidence": "nạp tuần trước", "timing": "bod"}])
+                         "evidence": "nạp tuần trước", "timing": "bod", "time_ict": "10:00"}])
         try:
             ok, msg = verdict("SpaceX", TODAY, PREV, 1_200_000_000.0, 15.0, HIST,
                               components=COMP, flows_path=p)

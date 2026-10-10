@@ -93,7 +93,7 @@ def main():
     # ---- 2. YÊU CẦU CHÍNH: nạp +200tr giữa kỳ (bod) ⇒ return_pct KHÔNG đổi.
     dep_rows = rows_only(with_flow(+200_000_000, "bod"))
     fl = [{"date": "2026-07-03", "amount_vnd": 200_000_000, "kind": "deposit",
-           "evidence": "selfcheck fixture"}]
+           "evidence": "selfcheck fixture", "timing": "bod", "time_ict": "10:30"}]
     rd = ret(dep_rows, acf.load_flows("SpaceX", flows_file(tmp, fl)))
     ok(rd["inception"]["return_pct"] == 3.0,
        f"nạp 200tr giữa kỳ: return_pct phải giữ +3,0%, được {rd['inception']['return_pct']}")
@@ -121,7 +121,8 @@ def main():
     bod_on_eod_series = ret(rows_only(with_flow(+200_000_000, "eod")),
                             acf.load_flows("SpaceX", flows_file(tmp, [
                                 {"date": "2026-07-03", "amount_vnd": 200_000_000,
-                                 "kind": "deposit", "evidence": "x", "timing": "bod"}])))
+                                 "kind": "deposit", "evidence": "x", "timing": "bod",
+                                 "time_ict": "10:30"}])))
     ok(bod_on_eod_series["inception"]["return_pct"] != 3.0,
        "dùng SAI quy ước timing phải ra số KHÁC — nếu bằng nhau thì quy ước là vô nghĩa")
 
@@ -139,10 +140,11 @@ def main():
 
     # ---- 7. Flow ngày KHÔNG có phiên (bod) rơi vào phiên kế tiếp.
     mapped = acf.attach_flows_to_rows(base_rows, acf.load_flows("SpaceX", flows_file(tmp, [
-        {"date": "2026-07-04", "amount_vnd": 1, "kind": "deposit", "evidence": "thứ Bảy"}])))
+        {"date": "2026-07-04", "amount_vnd": 1, "kind": "deposit", "evidence": "thứ Bảy",
+         "timing": "bod", "time_ict": "09:00"}])))
     ok(D(2026, 7, 6) in mapped, f"flow thứ Bảy 07-04 phải gán vào phiên 07-06, được {list(mapped)}")
 
-    # ---- 8. Schema fail-closed: 7 bản ghi hỏng, tất cả phải raise CashFlowError.
+    # ---- 8. Schema fail-closed: 9 bản ghi hỏng, tất cả phải raise CashFlowError.
     bad = [
         {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit"},                     # thiếu evidence
         {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "  "},   # evidence rỗng
@@ -152,6 +154,10 @@ def main():
         {"date": "2026-07-03", "amount_vnd": -1, "kind": "deposit", "evidence": "x"},   # sai dấu
         {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
          "timing": "intraday"},                                                        # timing lạ
+        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
+         "timing": "bod"},                                              # bod không khai giờ
+        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
+         "time_ict": "25:00"},                                          # giờ không hợp lệ
     ]
     for rec in bad:
         try:
@@ -161,6 +167,15 @@ def main():
             N_before = N
             ok(True, "")
             del N_before
+    # Mặc định (không khai timing) là eod, và bod hợp lệ khi có giờ.
+    dflt = acf.load_flows("SpaceX", flows_file(tmp, [
+        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x"},
+        {"date": "2026-07-03", "amount_vnd": 1, "kind": "deposit", "evidence": "x",
+         "timing": "bod", "time_ict": "9:05"}]))
+    ok([f["timing"] for f in dflt] == ["eod", "bod"] and acf.DEFAULT_TIMING == "eod",
+       f"không khai timing phải là eod, được {[f['timing'] for f in dflt]}")
+    ok([f["time_ict"] for f in dflt] == [None, "09:05"],
+       f"time_ict phải chuẩn hoá HH:MM, được {[f['time_ict'] for f in dflt]}")
     # eod trên ngày không có dòng nav_history ⇒ raise (không đoán hộ)
     try:
         acf.attach_flows_to_rows(base_rows, acf.load_flows("SpaceX", flows_file(tmp, [
