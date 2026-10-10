@@ -1360,10 +1360,32 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
             looked[id(adj)] = (bq_corp_action(adj.ticker, adj.ex_date), None)
         except Exception as e:                     # noqa: BLE001 — xử ở vòng lặp dưới
             looked[id(adj)] = (None, e)
+    # sự kiện vendor ĐÃ khai (có dòng) — ứng viên để ghép cú nhảy tỉ số TRỄ 1 phiên vào
+    vendor_backed = {(a.ticker, a.ex_date): a for a in adjs
+                     if looked[id(a)][1] is None and looked[id(a)][0]}
     for adj in adjs:
         row, err = looked[id(adj)]
         if err is not None:
             continue                               # KHÔNG tra được ⇒ không được phép gọi là nhiễu
+        v = vendor_backed.get((adj.ticker, adj.last_cum_date))
+        if not row and adj.detected_by == "ratio" and v is not None \
+                and _lag_completes(v, looked[id(v)][0], adj):
+            # CÙNG MỘT SỰ KIỆN, tỉ số lộ TRỄ một phiên. Đo thật VHM (cổ tức CP 1:1): vendor khai
+            # ex 06/08/2026 và broker credit ×2 tối 05/08, nhưng cột `Price` của phiên 06/08 vẫn
+            # mang giá TRƯỚC chia (153.000 trong khi `Close` 77.100) nên tỉ số chỉ nhảy +0,8% ở
+            # 06/08 rồi nhảy nốt ở 07/08. Không ghép thì có HAI sự kiện: cái của vendor (đúng
+            # ngày) và một cú nhảy "không ai khai" ở 07/08 — cái sau làm khung KL của cả mã thành
+            # không xác định. Ghép = giữ sự kiện vendor (ngày đúng), dồn cú nhảy vào nó.
+            total = (1.0 + v.ratio_jump) * (1.0 + adj.ratio_jump)
+            v.ratio_jump = total - 1.0
+            v.ratio_per_share = round(v.last_cum_price * (1.0 - 1.0 / total), 2)
+            if v.source == "unresolved":
+                v.per_share = v.ratio_per_share
+            adj.kind = "RATIO_NOISE"
+            adj.note = (f"KHÔNG phải sự kiện riêng: cú nhảy tỉ số TRỄ 1 phiên của sự kiện vendor "
+                        f"khai ở ex {v.ex_date} (cột `Price` phiên đó chưa phản ánh giá sau quyền; "
+                        f"hai cú nhảy cộng lại ×{total:.4f} khớp hệ số vendor khai)")
+            continue
         if row:
             adj.vendor_cash = float(row.get("cash") or 0.0)
             adj.vendor_stock = float(row.get("stock") or 0.0)
@@ -1517,6 +1539,24 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
     for w in warnings:
         print(f"⚠️  [resolve_dividends] {w}", file=sys.stderr)
     return out
+
+
+LAG_TOL = 0.02
+
+
+def _lag_completes(v, row: dict, late) -> bool:
+    """PURE — cú nhảy `late` (phiên NGAY SAU ex-date vendor khai của `v`) có phải phần còn thiếu
+    của CHÍNH sự kiện `v` không: hai cú nhảy cộng lại phải ra đúng hệ số mà vendor khai,
+    `m × P/(P − tiền)`, trong `LAG_TOL`. Không khớp ⇒ là thứ khác ⇒ KHÔNG ghép (giữ UNVERIFIED).
+    """
+    p = float(v.last_cum_price or 0.0)
+    cash = float(row.get("cash") or 0.0)
+    m = 1.0 + float(row["stock_free"] if "stock_free" in row else (row.get("stock") or 0.0))
+    if p <= 0 or cash >= p:
+        return False
+    want = m * p / (p - cash)
+    got = (1.0 + float(v.ratio_jump or 0.0)) * (1.0 + float(late.ratio_jump or 0.0))
+    return abs(got / want - 1.0) <= LAG_TOL
 
 
 class _AdjList(list):
@@ -2576,6 +2616,30 @@ def _selfcheck_total_return(check, same) -> None:
     adjs_v3 = offline([], dri_vendor, window=win, last_cum=None)
     same("không lấy được phiên cuối còn quyền ⇒ không thêm, và NÓI RA ở `.warnings`",
          (len(adjs_v3), len(adjs_v3.warnings)), (0, 1))
+
+    # chuỗi THẬT của VHM 03→07/08/2026 (Price, Close): tỉ số 0,5 → 0,50392 (06/08) → 1,0 (07/08)
+    def vhm_cands():
+        return _scan_jumps("VHM", [{"d": d, "price": p, "close": c} for d, p, c in [
+            ("2026-08-03", 148000, 74000), ("2026-08-04", 152900, 76450), ("2026-08-05", 153000, 76500),
+            ("2026-08-06", 153000, 77100), ("2026-08-07", 73000, 73000)]], "2026-07-01")
+
+    def vhm_vendor(ratio):
+        return lambda tk, ex, include_announced=False: (
+            {"cash": None, "stock": ratio, "stock_free": ratio, "titles": "cổ tức CP"}
+            if ex == "2026-08-06" else None)
+    same("VHM: tầng 1 thấy HAI cú nhảy (06/08 nhỏ, 07/08 lớn) cho MỘT sự kiện",
+         [a.ex_date for a in vhm_cands()], ["2026-08-06", "2026-08-07"])
+    adjs_lag = offline(vhm_cands(), vhm_vendor(1.0))
+    same("vendor ex 06/08 ×2, hai cú nhảy cộng lại ×2,00 ⇒ ghép thành MỘT sự kiện",
+         sorted((a.ex_date, a.kind) for a in adjs_lag),
+         [("2026-08-06", "STOCK_CONFIRMED"), ("2026-08-07", "RATIO_NOISE")])
+    v_lag = next(a for a in adjs_lag if a.ex_date == "2026-08-06")
+    same("… sự kiện vendor ĐÃ GIẢI, hệ số ×2, khung KL xác định",
+         (v_lag.resolved, v_lag.share_multiplier, v_lag.frame_ok), (True, 2.0, True))
+    adjs_nolag = offline(vhm_cands(), vhm_vendor(0.15))
+    late = next(a for a in adjs_nolag if a.ex_date == "2026-08-07")
+    same("vendor chỉ khai ×1,15 mà hai cú nhảy cộng lại ×2,00 ⇒ KHÔNG ghép, cú 07/08 giữ UNVERIFIED",
+         (late.kind, late.resolved), ("UNVERIFIED", False))
 
     print("30) Lưới an toàn của solver: nhân chứng thứ hai (vendor) — và vẫn bác khi không ai khớp.")
     a30 = _mk("DRI", "2026-09-22", "2026-09-21", 14800.0, 910.0)
