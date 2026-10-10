@@ -113,3 +113,6 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
 ## Chuyển từ kb/current_ops.md L16-16 (trim 2026-10-08, Wags_20261008_133659) — AlphaLens Paper (đã đóng)
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB — **ĐÃ ĐÓNG 2026-10-01** (user chọn A: không wire live; 3/3 gate PASS nhưng N=1 cửa sổ × 4 mã chọn tay). R&D backtest PIT walk-forward chỉ mở nếu user yêu cầu.
 
+
+## Chuyển nguyên văn từ `kb/current_ops.md` (2026-10-10, dòng dự án đã đóng)
+- **AlphaLens Paper**: FPT/ACB/MBB/HDB — **ĐÃ ĐÓNG 2026-10-01** (user chọn A: không wire live) → `kb/projects/rnd-pipeline-tracker.md`.
