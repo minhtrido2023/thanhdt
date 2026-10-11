@@ -1094,3 +1094,6 @@
 
 ## Archived 2026-10-11 (keep=12 days=0 require_done=False)
 - [2026-10-10T19:28:57Z] ĐANG DỞ job Taylor_20261010_182122 attempt 2 (wt-fundunit-1011): thêm chốt D1 'dòng cho giá chụp trước đóng cửa ⇒ từ chối' (fold vào commit 1 bằng autosquash). 2 commit hiện tại xem git log -2. LƯU Ý: nav_scripts_2account_selfcheck trong broad_scan ghi dnse_raw_2026-10-11.jsonl + verified_snapshot_*_2026-10-11.json vào data/ THẬT (có sẵn, phải khai trong bus) | NEXT: chạy lại mutant (round2/run_mutants.py → round2/final2/), selfcheck×4TZ, control, probe, sandbox_gate_trial, bus finding
+
+## Archived 2026-10-11 (keep=12 days=0 require_done=False)
+- [2026-10-10T19:35:48Z] [quỹ mở bước 1/4 VÒNG 2, 10-11] XONG phần Taylor: nhánh feat/fund-unit-ledger-20261011 @75060709 (5dce11e3 sửa review + 75060709 N11; worktree wt-fundunit-1011, CHƯA merge), finding trên bus trace Taylor_20261010_182122, bằng chứng research/fund_unit_ledger_20261011/round2/final2/. Chờ: Mike arch-review vòng 2 + xác nhận chốt D1 'dòng cho giá chụp trước đóng cửa ⇒ từ chối'; user quyết 28 báo cáo ngày ZaloPay sai mốc. BÀI HỌC: nav_scripts_2account_selfcheck (trong quét rộng §23) gọi broker thật + ghi data/ thật (dnse_raw, verified_snapshot, nav_history tạm ~23s) — đừng dựng sandbox chép data/ trong lúc nó chạy, và khai tác động trong báo cáo.
