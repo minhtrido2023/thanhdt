@@ -12,6 +12,11 @@ Kiểm:
   B. ts naive kiểu cũ (= giờ ICT) tươi        ⇒ DT5G_macro
   C. ts aware UTC (+00:00) tươi               ⇒ DT5G_macro (so theo THỜI ĐIỂM, không theo chữ)
   D. ts aware / naive già hơn 1440 phút       ⇒ DT4_only
+  C2/D2. offset KHÁC +07:00 ở khoảng mà lệch múi giờ làm đổi kết luận (UTC già 1200 ⇒ DT5G_macro,
+     +09:00 già 1500 ⇒ DT4_only) — bắt kiểu cài "đè offset bằng ICT" và "cắt chuỗi rồi parse"
+  D3. ngưỡng 1440 bị ghim hai phía: già 1430 ⇒ DT5G_macro, già 1450 ⇒ DT4_only
+  I. ts ở TƯƠNG LAI quá 5 phút (aware / naive) ⇒ DT4_only, reason in ra ts + số phút lệch thật;
+     tương lai ≤5 phút (lệch đồng hồ) ⇒ vẫn DT5G_macro   (user duyệt 2026-10-11 22:10 ICT)
   E. ts rác / thiếu ts / ts không phải chuỗi / JSON hỏng / thiếu file ⇒ DT4_only
   F. ts tươi nhưng status=FAILED hoặc recommended_state_source≠DT5G_macro ⇒ DT4_only
   G. cửa sổ "live" của frozen-state guard (≤10 ngày) tính theo NGÀY ICT, không theo ngày host
@@ -27,12 +32,14 @@ data/macro_health.json thật, KHÔNG chạm BigQuery, KHÔNG gửi alert.
 Chạy: python3 macro_gate_health_tz_selfcheck.py   (rc=0 khi tất cả PASS)
 """
 import ast
+import contextlib
+import io
 import json
 import os
 import sys
 import tempfile
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -117,6 +124,7 @@ def run_cases(tz_label):
     aware = lambda m: (now - timedelta(minutes=m)).isoformat(timespec="seconds")
     naive = lambda m: (now - timedelta(minutes=m)).replace(tzinfo=None).isoformat(timespec="seconds")
     utc = lambda m: (now - timedelta(minutes=m)).astimezone(UTC).isoformat(timespec="seconds")
+    plus9 = lambda m: (now - timedelta(minutes=m)).astimezone(timezone(timedelta(hours=9))).isoformat(timespec="seconds")
     DT5G, DT4 = ("DT5G_macro", 2), ("DT4_only", 3)
     T = f"[TZ={tz_label}] "
 
@@ -130,6 +138,14 @@ def run_cases(tz_label):
             ("D. aware +07:00, 1500 phút (>1440)", aware(1500), DT4),
             ("D. naive kiểu cũ, 1500 phút (>1440)", naive(1500), DT4),
             ("D. aware UTC +00:00, 1500 phút (>1440)", utc(1500), DT4),
+            ("C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620)", utc(1200), DT5G),
+            ("D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380)", plus9(1500), DT4),
+            ("D3. aware +07:00, 1430 phút (<1440)", aware(1430), DT5G),
+            ("D3. aware +07:00, 1450 phút (>1440)", aware(1450), DT4),
+            ("I. aware tương lai +120 phút", aware(-120), DT4),
+            ("I. aware tương lai +10 ngày", aware(-10 * 1440), DT4),
+            ("I. naive tương lai +10 năm", naive(-3650 * 1440), DT4),
+            ("I. aware tương lai +3 phút (lệch đồng hồ ≤5)", aware(-3), DT5G),
             ("E. ts rác", "khong-phai-ngay", DT4),
             ("E. ts rỗng", "", DT4),
             ("E. ts là số", 1760000000, DT4),
@@ -144,6 +160,14 @@ def run_cases(tz_label):
         check(T + "E. JSON hỏng ⇒ DT4_only", got == DT4, f"got={got}")
         got = _gate(tmp, None)
         check(T + "E. thiếu file ⇒ DT4_only", got == DT4, f"got={got}")
+
+        # I. reason của nhánh tương lai phải in GIÁ TRỊ THẬT đọc được (§29): ts + số phút lệch.
+        ts = aware(-120)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            _gate(tmp, _health(ts))
+        check(T + "I. reason tương lai in ra ts thật + số phút lệch (120)",
+              ts in buf.getvalue() and "120min" in buf.getvalue(), f"printed={buf.getvalue()!r}")
 
         got = _gate(tmp, _health(aware(5), status="FAILED"))
         check(T + "F. tươi nhưng status=FAILED ⇒ DT4_only", got == DT4, f"got={got}")

@@ -296,6 +296,8 @@ def get_gated_state(start, end, bq=None, health_path=None, max_health_age_min=14
     from datetime import datetime
     from zoneinfo import ZoneInfo
     ict = ZoneInfo("Asia/Ho_Chi_Minh")
+    # Clock-skew allowance for a health `ts` AHEAD of now; beyond it => DT4_only (user duyệt 2026-10-11 22:10 ICT).
+    MAX_HEALTH_FUTURE_SKEW_MIN = 5
     if health_path is None:
         health_path = os.path.join(WORKDIR, "data", "macro_health.json")
     if bq is None:
@@ -312,7 +314,10 @@ def get_gated_state(start, end, bq=None, health_path=None, max_health_age_min=14
         if ts.tzinfo is None:
             ts = ts.replace(tzinfo=ict)
         age_min = (datetime.now(ict) - ts).total_seconds() / 60.0
-        if age_min > max_health_age_min:
+        if age_min < -MAX_HEALTH_FUTURE_SKEW_MIN:
+            reason = (f"health report ts={h['ts']} is {-age_min:.0f}min in the FUTURE "
+                      f"(> {MAX_HEALTH_FUTURE_SKEW_MIN}min clock-skew allowance) -> DT4_only")
+        elif age_min > max_health_age_min:
             reason = f"health report {age_min:.0f}min old (> {max_health_age_min}) -> DT4_only"
         elif h.get("status") != "FAILED" and h.get("recommended_state_source") == "DT5G_macro":
             use_macro, reason = True, f"health={h.get('status')} -> DT5G_macro"
