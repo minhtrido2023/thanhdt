@@ -278,7 +278,10 @@ def _check_nav_flow_records(report: Path) -> None:
 
 
 def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
-            email_script: Path, skip_validation: bool = False) -> int:
+            email_script: Path, skip_validation: bool = False,
+            attach: tuple = (), attach_note: str | None = None) -> int:
+    # `attach`/`attach_note` chỉ được CHUYỂN TIẾP cho email_script (nó tự bỏ qua với báo cáo
+    # không phải daily). Không thuộc artifact: không vào sha, không vào sổ, không đổi COMPLETE.
     report = report.resolve()
     if not report.is_file() or report.suffix.lower() != ".md":
         print(f"report_delivery_gate: invalid report: {report}", file=sys.stderr)
@@ -327,9 +330,12 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                 # The exact hash already passed the same return gate above while this process
                 # holds the delivery lock. Avoid running the expensive BQ gate a second time;
                 # send_report_email records this explicit, auditable bypass reason.
+                extra = [arg for path in attach for arg in ("--attach", str(path))]
+                if attach_note:
+                    extra += ["--attach-note", attach_note]
                 run_checked([sys.executable, str(email_script), str(report),
                              "--skip-return-gate",
-                             f"report_delivery_gate already validated sha256={sha}"])
+                             f"report_delivery_gate already validated sha256={sha}", *extra])
                 record["email"] = {"status": "delivered", "delivered_at": now(),
                                    "sha256": sha}
                 save_atomic(state_path, state)
@@ -371,10 +377,15 @@ def main() -> int:
     ap.add_argument("--notify-script", type=Path, default=ROOT / "bin" / "notify_thread.sh")
     ap.add_argument("--email-script", type=Path, default=ROOT / "bin" / "send_report_email.py")
     ap.add_argument("--skip-validation", action="store_true", help=argparse.SUPPRESS)
+    ap.add_argument("--attach", action="append", default=[], type=Path, metavar="FILE",
+                    help="file kèm thêm vào EMAIL (lặp được, chỉ daily) — ngoài artifact được gate")
+    ap.add_argument("--attach-note", metavar="DÒNG",
+                    help="một dòng thêm vào thân EMAIL (chỉ daily)")
     args = ap.parse_args()
     return status(args.report.resolve(), args.state.resolve()) if args.status else deliver(
         args.report, args.state.resolve(), args.topic, args.notify_script.resolve(),
-        args.email_script.resolve(), args.skip_validation)
+        args.email_script.resolve(), args.skip_validation,
+        tuple(args.attach), args.attach_note)
 
 
 if __name__ == "__main__":
