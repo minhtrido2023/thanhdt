@@ -658,3 +658,6 @@
 
 ## Consolidation 2026-10-11T04:01:13Z
 - [2026-10-11T04:01:12Z] DollarBill/heartbeat — DollarBill_20261011_040012: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261011_040012", "source": "watcher"}
+
+## Consolidation 2026-10-11T04:55:13Z
+- [2026-10-11T04:38:22Z] Mike/finding — canary-sonnet55-plan-SpaceX: {"status": "closed", "note": "3 finding canary-sonnet55* của DollarBill sáng 11/10 là PHÉP THỬ model do Mike chạy, KHÔNG phải plan. Các file /tmp/canary_sonnet55*/plan_SpaceX_2026-10-12.json đã XOÁ. Plan thật thứ Hai 12/10 vẫn là data/trade_plans/plan_SpaceX_2026-10-12.json lập tối 09/10 (md5 không đổi). DollarBill: bỏ qua 3 finding đó khi lập plan.", "decided_by": "agent"}
