@@ -57,7 +57,8 @@
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
 #                  cho fable sẽ tự clamp về high + cảnh báo stderr. Xem MIKE.md §Model routing.
 #   --max-turns N  override trần lượt tool-call. Mặc định SCALE theo --effort khi omit
-#                  (high->80, xhigh/max->120, còn lại 50 — thêm 2026-08-02). Task ước
+#                  (high->80, xhigh/max->120, --model opus->80 từ 2026-10-11, còn lại 50
+#                  — thêm 2026-08-02). Task ước
 #                  lượng chạm/vượt trần → cân nhắc TĂNG THÊM THỦ CÔNG THAY VÌ chia task nếu
 #                  các phần phụ thuộc lẫn nhau (không chia được sạch); ngược lại, ưu tiên
 #                  chia thành nhiều dispatch độc lập theo ranh giới tự nhiên (mỗi phần tự

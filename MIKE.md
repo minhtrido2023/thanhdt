@@ -71,8 +71,8 @@ phiên tương tác sống của chính Mike** (turn hiện tại chết là ch�
 
 **6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02).** Khác usage-limit (transient, chờ
 reset-time): hết lượt là tín hiệu NGÂN SÁCH xác định — retry y trần cũ chỉ tạch lại. 2 lớp:
-(a) **mặc định scale theo effort** khi omit `--max-turns` (`high`→80, `xhigh`/`max`→120, còn lại
-giữ 50); (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂNG gấp đôi (trần
+(a) **mặc định scale theo effort** khi omit `--max-turns` (`high`→80, `xhigh`/`max`→120, `--model opus`→80
+từ 2026-10-11, còn lại giữ 50); (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂNG gấp đôi (trần
 `DISPATCH_MAX_TURNS_CEILING`, mặc định 200) rồi retry ngay, không đợi hết attempt; hết TOÀN BỘ
 attempt vẫn tạch → queue `bus/pending_resumes/` (kind=`max_turns`, resume NGAY ~30s) giữ nguyên
 model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng `DISPATCH_MAX_TURNS_RESUMES` (mặc
