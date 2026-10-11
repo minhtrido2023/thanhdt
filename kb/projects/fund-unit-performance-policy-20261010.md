@@ -58,7 +58,11 @@ tỉ suất từ sau đó.
 | Trong phiên ngày T / trước giờ mở cửa ngày T | giá chốt phiên liền trước |
 | Cuối tuần, ngày nghỉ lễ | giá chốt phiên liền trước |
 Hai dòng cuối là phần Mike MỞ RỘNG từ quyết định 1 (user mới chốt ca "sau đóng cửa" và "trong
-phiên") — **CHỜ user xác nhận**; phương án khác = khớp ở giá chốt phiên KẾ TIẾP (kiểu quỹ mở thuần).
+phiên") — **USER CHỐT 2026-10-11 10:22 ICT (`decided_by: user`): GIỮ giá chốt phiên liền trước**
+cho tiền vào trước giờ mở cửa / cuối tuần / ngày nghỉ. Phương án bị loại = khớp ở giá chốt phiên KẾ
+TIẾP (kiểu quỹ mở thuần). Hệ quả đã trình user: tiền mới nằm chờ làm LOÃNG tỉ suất của đúng phiên
+đầu sau khi nạp (ví dụ nạp 200tr vào quỹ 1 tỷ, phiên đó +2% ⇒ in +1,67% thay vì +2,00%); tổng tiền
+không đổi, các phiên sau hai cách đi giống nhau. Code bước 1 đã chạy đúng luật này — không sửa gì.
 Fail-closed (từ chối, không đoán): thiếu giờ; ngày trong tương lai; `timing` khai khác suy ra; dòng
 NAV dùng làm giá chụp TRƯỚC giờ đóng cửa của chính phiên đó; nav_history THIẾU dòng của phiên đóng
 cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiền không hữu hạn. Chi tiết + bẫy:
