@@ -39,6 +39,7 @@ HISTORY_COLUMNS = [
     "sonnet_jobs", "opus_jobs", "fable_jobs", "default_jobs",
     "feat", "fix", "docs", "chore", "refactor", "test", "other_commits",
     "retried_jobs", "extra_attempts", "resume_jobs", "cache_hit_pct",
+    "haiku_jobs",
 ]
 COMMIT_COLUMNS = ["feat", "fix", "docs", "chore", "refactor", "test", "other_commits"]
 
@@ -219,6 +220,7 @@ def row_from_summary(report_date, days, summary):
         "extra_attempts": summary["retry_stats"]["extra_attempts"],
         "resume_jobs": summary["retry_stats"]["resume_jobs"],
         "cache_hit_pct": f"{cache_hit:.1f}" if cache_hit is not None else "",
+        "haiku_jobs": c.get("haiku", 0),
     }
 
 
@@ -417,7 +419,7 @@ def build_report(report_date, summary, previous, charts):
             ["Log KB", summary["total_log_kb"], prev_kb, f"{summary['total_log_kb'] - prev_kb:+d}", _pct(summary["total_log_kb"], prev_kb)],
             ["Commits", summary["commit_total"], prev_commits, f"{summary['commit_total'] - prev_commits:+d}", _pct(summary["commit_total"], prev_commits)],
         ]
-        for model in ["sonnet", "opus", "fable", "default"]:
+        for model in ["haiku", "sonnet", "opus", "fable", "default"]:
             cur = summary["claude_counts"].get(model, 0)
             pv = _int(previous, model + "_jobs")
             rows.append([f"Claude {model}", cur, pv, f"{cur - pv:+d}", _pct(cur, pv)])

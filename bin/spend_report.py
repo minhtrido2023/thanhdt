@@ -130,7 +130,8 @@ def _parse_args(argv):
 # "default", nen job opencode se bi dem lan vao claude: viec chia tai sang provider re tro
 # thanh VO HINH, va ty le model-mix cua claude (chi so da bat duoc drift fable 07-17) bi loang.
 # 2026-10-11: them "haiku" (tang 0 cua routing doi 5.5) — thieu no thi job haiku bi dem thanh
-# "default" (= Sonnet), dung lop loi mo ta o tren. state/spend_history.csv CHUA co cot haiku_jobs.
+# "default" (= Sonnet), dung lop loi mo ta o tren. Cot haiku_jobs nam CUOI state/spend_history.csv
+# (them sau cung de dong cu khong lech cot); dong truoc 2026-10-11 de RONG = chua do.
 MODELS = ["haiku", "sonnet", "opus", "fable", "default"]
 # Provider != claude duoc gom theo TEN PROVIDER, khong theo ten model, vi ten model cua ho
 # (vd "opencode/deepseek-v4-flash-free") khong so sanh duoc voi tier cua claude.
@@ -614,7 +615,7 @@ def main():
                     "production_h,ops_jobs,ops_kb,ops_h,other_jobs,other_kb,other_h,"
                     "sonnet_jobs,opus_jobs,fable_jobs,default_jobs,"
                     "feat,fix,docs,chore,refactor,test,other_commits,"
-                    "retried_jobs,extra_attempts,resume_jobs,cache_hit_pct\n"
+                    "retried_jobs,extra_attempts,resume_jobs,cache_hit_pct,haiku_jobs\n"
                 )
             f.write(
                 f"{_ict_today()},{days},"
@@ -630,7 +631,7 @@ def main():
                 # 4 cột cuối do spend_report_weekly.py tính (retry/cache); writer nightly
                 # này KHÔNG đo chúng — ghi RỖNG để giữ đúng số cột của header, thay vì
                 # cắt ngắn dòng (csv.DictReader trả None => consumer int()/float() nổ).
-                f"{commit_counts.get('other',0)},,,,\n"
+                f"{commit_counts.get('other',0)},,,,,{total_models.get('haiku',0)}\n"
             )
         print(f"\nAppended row to {csv_path}")
 
