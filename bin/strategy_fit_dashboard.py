@@ -1055,7 +1055,7 @@ def run(now, out_dir, **build_kw):
         return 1, None
     os.makedirs(out_dir, exist_ok=True)
     path = out_path(now, out_dir)
-    tmp = path + ".tmp"
+    tmp = f"{path}.{os.getpid()}.tmp"      # riêng từng tiến trình: hai lượt sinh song song không giẫm nhau
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(page)
     os.replace(tmp, path)

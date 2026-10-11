@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""send_report_email.py <report.md> [--subject "..."]
+"""send_report_email.py <report.md> [--subject "..."] [--attach FILE]... [--attach-note "..."]
 
 Gửi 1 báo cáo (weekly/monthly .md) qua email — Gmail SMTP với App Password (KHÔNG dùng chung
 credential OAuth gmail.readonly hiện có cho DNSE auto-OTP, xem lý do trong kb/incidents/ hoặc
@@ -18,6 +18,11 @@ Thân email = HTML render qua render_report_html.py (bin/), theo chuẩn trình 
 đầu tư (GIPS/CFA Asset Manager Code/tear-sheet/investor-letter — xem docstring file đó) — KHÔNG
 còn gửi markdown thô làm plain text (2026-08-01, user phản ánh format "kiểu LLM khó nhìn"). File
 .md gốc vẫn đính kèm để có bản nguồn tham chiếu.
+
+--attach / --attach-note (2026-10-11, user chọn gửi dashboard "độ phù hợp chiến lược" kèm EOD):
+file đính kèm THÊM, CHỈ cho báo cáo DAILY (tên chứa `_daily_report_`) — với weekly/monthly gửi nhà
+đầu tư hai cờ này bị BỎ QUA (dashboard là tài liệu chẩn đoán nội bộ). File đính kèm không thuộc
+artifact được gate: thiếu/không đọc được ⇒ email VẪN gửi, thân email thêm một dòng nêu lỗi thật.
 """
 import argparse
 import base64
@@ -71,6 +76,10 @@ def main():
     ap.add_argument("--skip-return-gate", metavar="LÝ_DO",
                     help="BỎ QUA cổng tỉ suất (coding_guidelines §21) — chỉ dùng khi đã hiểu vì sao "
                          "cổng báo lệch; lý do được in ra và ghi vào email log")
+    ap.add_argument("--attach", action="append", default=[], metavar="FILE",
+                    help="file đính kèm thêm (lặp được) — CHỈ áp cho báo cáo daily")
+    ap.add_argument("--attach-note", metavar="DÒNG",
+                    help="một dòng thêm vào cuối thân email (vd lý do không có file kèm) — CHỈ daily")
     args = ap.parse_args()
 
     if not os.path.exists(args.report_path):
@@ -123,9 +132,35 @@ def main():
     else:
         subject = args.subject
 
+    # File kèm thêm: đọc TRƯỚC khi dựng thân để dòng ghi chú nói đúng cái thực sự được kèm.
+    extra_parts, attach_lines = [], []
+    if (args.attach or args.attach_note) and "_daily_report_" not in fname:
+        print(f"⚠️  --attach/--attach-note chỉ áp cho báo cáo daily — BỎ QUA với {fname}",
+              file=sys.stderr)
+    else:
+        for path in args.attach:
+            aname = os.path.basename(path)
+            try:
+                with open(path, "rb") as f:
+                    data = f.read()
+            except OSError as exc:
+                print(f"⚠️  Không đính kèm được {path}: {exc}", file=sys.stderr)
+                attach_lines.append(f"📎 KHÔNG kèm được **{aname}**: {type(exc).__name__}: "
+                                    f"{exc.strerror or exc}")
+                continue
+            extra = MIMEApplication(data, Name=aname)
+            extra["Content-Disposition"] = f'attachment; filename="{aname}"'
+            extra_parts.append(extra)
+            attach_lines.append(f"📎 Kèm theo: **{aname}** — tài liệu chẩn đoán nội bộ, mở bằng "
+                                f"trình duyệt; chỉ để mô tả, không phải tín hiệu giao dịch.")
+        if args.attach_note:
+            attach_lines.append(f"📎 {args.attach_note}")
+    # Ghi chú chỉ vào THÂN email; file .md đính kèm bên dưới vẫn là artifact nguyên bản trên đĩa.
+    body_md = md_body + ("\n\n---\n\n" + "\n\n".join(attach_lines) + "\n" if attach_lines else "")
+
     title_line = md_body.split("\n", 1)[0]
     title = re.sub(r"^#+\s*", "", title_line).strip() or fname
-    html_body = render_html(md_body, title, os.path.dirname(os.path.abspath(args.report_path)))
+    html_body = render_html(body_md, title, os.path.dirname(os.path.abspath(args.report_path)))
 
     msg = MIMEMultipart()
     msg["From"] = from_email
@@ -146,6 +181,8 @@ def main():
         part = MIMEApplication(f.read(), Name=fname)
     part["Content-Disposition"] = f'attachment; filename="{fname}"'
     msg.attach(part)
+    for extra in extra_parts:
+        msg.attach(extra)
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()

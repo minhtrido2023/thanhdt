@@ -92,7 +92,17 @@ except Exception as e:
     # thấy. Bắt lấy ở đây rồi bắn Discord/bus với ĐÚNG nguyên nhân + ĐÚNG người (Winston).
     # Chạy cho CẢ hai nhánh rc: ca "mã lệch nguồn nhưng báo cáo không công bố tỉ suất" cho rc=0,
     # tức cổng KHÔNG chặn — đó chính là ca không kênh nào khác kêu lên.
-    GATE_OUT="$(python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" 2>&1)"
+    # Gửi bù báo cáo DAILY: kèm dashboard "độ phù hợp chiến lược" CỦA ĐÚNG NGÀY ĐÓ nếu file còn
+    # trên đĩa; không có thì gửi không kèm. KHÔNG sinh lại ở đây — dashboard đọc dữ liệu "hiện
+    # tại", sinh cho ngày cũ ra số sai ngày. Weekly/monthly không khớp mẫu tên ⇒ không bao giờ kèm.
+    # SWEEP_ATTACH_BEGIN — trích bởi strategy_fit_email_attach_selfcheck.py. Đổi marker ⇒ FATAL.
+    ATTACH_ARGS=()
+    if [[ "$FNAME" =~ _daily_report_([0-9]{4}-[0-9]{2}-[0-9]{2})\.md$ ]] \
+       && [ -s "$ROOT/reports/dashboard/strategy_fit_${BASH_REMATCH[1]}.html" ]; then
+      ATTACH_ARGS=(--attach "$ROOT/reports/dashboard/strategy_fit_${BASH_REMATCH[1]}.html")
+    fi
+    # SWEEP_ATTACH_END
+    GATE_OUT="$(python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" "${ATTACH_ARGS[@]}" 2>&1)"
     GATE_RC=$?
     printf '%s\n' "$GATE_OUT"
     VENDOR_RC=0
