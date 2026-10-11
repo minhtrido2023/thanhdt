@@ -33,6 +33,7 @@ Run: python macro_healthcheck.py   (intended right AFTER macro_state_live in the
 """
 import os, sys, io, json, traceback
 from datetime import datetime, date, timedelta
+from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
@@ -53,7 +54,7 @@ SPXDD_RANGE      = (-1.0, 0.20)
 REFI_RANGE       = (0.0, 20.0)
 PROBE_LOOKBACK_DAYS = 120  # window for the get_macro_state liveness probe
 
-NOW = datetime.now()
+NOW = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
 TODAY = NOW.date()
 
 # Lịch nghỉ lễ VN — cùng nguồn preflight_check.sh/bq_freshness_check.sh dùng

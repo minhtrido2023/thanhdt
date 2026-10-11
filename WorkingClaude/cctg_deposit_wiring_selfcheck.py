@@ -50,6 +50,12 @@ import cctg_rate_vn as cctg          # noqa: E402
 # thư mục tạm RỖNG (file không tồn tại = đúng nhánh "chưa có dòng append" của cctg_events_df()).
 import tempfile                      # noqa: E402
 cctg._EVENTS_CSV = os.path.join(tempfile.mkdtemp(prefix="cctg_sc_"), "cctg_rate_vn_events.csv")
+# Same reasoning for the Big-4 leg: dep.current_deposit_rate()/consumer_deposit_rate() read
+# `data/deposit_rate_vn_events.csv` SỐNG qua dep._EVENTS_CSV. Một lượt refresh Big-4 ghi anchor
+# khác 6,8% (ngày ≤ STALE_DATE bên dưới) sẽ làm "fixture sanity: Big-4-only == 6.8%" đỏ dù logic
+# wiring không đổi. Cách ly giống cctg: trỏ vào thư mục tạm RỖNG = đúng nhánh "chưa có dòng
+# append", mọi số 6,8%/7,5%/0,70pp đến từ DEPOSIT_EVENTS đông cứng trong code.
+dep._EVENTS_CSV = os.path.join(tempfile.mkdtemp(prefix="dep_sc_"), "deposit_rate_vn_events.csv")
 
 
 def _load_here(modname, filename=None):

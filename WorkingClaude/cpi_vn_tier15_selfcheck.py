@@ -218,6 +218,10 @@ def test_regime(a, b):
     mf = merge_deposit(mf.sort_values("time"))
     mf["usd_up126"] = (mf["USDVND"] / mf["USDVND"].shift(6 * 21) - 1.0) > 0
     mf["dep_rising"] = (mf["deposit_rate"] - mf["deposit_rate"].shift(6 * 21)) > 0
+    # Cắt về cửa sổ CỐ ĐỊNH của finding published (data/macro_features.csv live đứng tại
+    # 2026-05-15 lúc viết finding, nhưng sẽ được regenerate/kéo dài theo thời gian) — nếu không
+    # cắt, 185/27/17 trôi theo độ dài file sống chứ không còn là hằng của chính finding này.
+    mf = mf[mf["time"] <= "2026-05-15"]
     Co, Bo = regime_labels(a, None, mf)
     Cn, Bn = regime_labels(b, None, mf)
     chC = [str(x) for x in Co.index[Co.values != Cn.values]]

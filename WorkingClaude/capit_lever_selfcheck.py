@@ -335,19 +335,22 @@ with tempfile.TemporaryDirectory() as TMP:
           detail=f"golive tự khai APPROVED_*: "
                  f"{sorted(extract_consts(SRC, 'CAPIT_LEVER_APPROVED', allow_empty=True))}")
 
-    # Cấu hình THẬT trên đĩa
+    # Cấu hình THẬT trên đĩa. `enabled` là công tắc vận hành user có thể bật/tắt bất kỳ lúc nào
+    # (xem C19) — KHÔNG pin giá trị sống của nó. Khi BẬT, tham số phải khớp phạm vi đã duyệt
+    # (CAPIT_LEVER_APPROVED_* ở trading_bot/plan.py, nguồn chuẩn tắc); khi TẮT, tham số không
+    # còn ý nghĩa nên bỏ qua — selfcheck không được đỏ chỉ vì user tắt đòn bẩy.
     real_pol, real_err = run_policy(HERE)
-    check("A6 data/trading_rules.json THẬT: đọc được, tham số đúng chính sách đã duyệt",
-          real_err is None and real_pol["f"] == 1.3 and real_pol["loan_package_id"] == 1840
-          and real_pol["accounts"] == ["SpaceX"] and real_pol["scope"] == "capit_only",
+    check("A6 data/trading_rules.json THẬT: đọc được, enabled là bool",
+          real_err is None and isinstance(real_pol["enabled"], bool),
           detail=f"{real_pol} err={real_err}")
-    # A7: BẬT từ 2026-08-22 (user John duyệt qua Discord thread 1521735922066919515). Pin cũ
-    # `enabled is False` là trạng thái TRƯỚC quyết định đó — giữ nguyên thì selfcheck khoá hệ
-    # vào một quyết định đã bị thay thế. Cổng NGƯỜI thứ hai KHÔNG mất: nó chuyển từ lệnh riêng
-    # `approve_margin_day.py` sang chính hành vi duyệt plan (approve_plan_simple.sh gọi hộ) —
-    # xem L2/L3.
-    check("A7 …và đang BẬT (enabled=true) — user duyệt 2026-08-22",
-          real_pol["enabled"] is True, detail=f"enabled={real_pol['enabled']!r}")
+    check("A7 Khi enabled=true, tham số khớp phạm vi đã duyệt (CAPIT_LEVER_APPROVED_*)"
+          " — enabled hiện tại là trạng thái vận hành, không phải bất biến",
+          not real_pol["enabled"] or (
+              real_pol["f"] == CONSTS["CAPIT_LEVER_APPROVED_F"]
+              and real_pol["loan_package_id"] == CONSTS["CAPIT_LEVER_APPROVED_PACKAGE"]
+              and real_pol["accounts"] == CONSTS["CAPIT_LEVER_APPROVED_ACCOUNTS"]
+              and real_pol["scope"] == "capit_only"),
+          detail=f"enabled={real_pol['enabled']!r} pol={real_pol}")
 
     # ─────────────────── B. Tầng tín hiệu: §6a với washout giả lập ───────────────────
     section("B. Tín hiệu §6a (source production giữa CAPIT_LEVER_BEGIN/END)")
@@ -1401,13 +1404,18 @@ with tempfile.TemporaryDirectory() as TMP:
     section("G. Chốt chặn: cấu hình THẬT trên đĩa")
     with open(REAL_RULES, encoding="utf-8") as f:
         real_blk = json.load(f)["capit_margin_lever"]
-    check("G1 data/trading_rules.json :: capit_margin_lever.enabled == true (user 2026-08-22)",
-          real_blk["enabled"] is True, detail=f"enabled={real_blk['enabled']!r}")
-    check("G2 …live_requires_user_approval == true",
+    check("G1 data/trading_rules.json :: capit_margin_lever.enabled là bool (công tắc vận hành,"
+          " không pin giá trị sống)",
+          isinstance(real_blk["enabled"], bool), detail=f"enabled={real_blk['enabled']!r}")
+    check("G2 …live_requires_user_approval == true (bất kể enabled)",
           real_blk.get("live_requires_user_approval") is True)
-    check("G3 …phạm vi đúng bản duyệt: f=1,3 · gói 1840 · capit_only · chỉ SpaceX",
-          real_blk["f"] == 1.3 and real_blk["loan_package_id"] == 1840
-          and real_blk["scope"] == "capit_only" and real_blk["accounts"] == ["SpaceX"])
+    check("G3 …khi enabled=true, phạm vi khớp bản duyệt: f=1,3 · gói 1840 · capit_only · chỉ SpaceX",
+          not real_blk["enabled"] or (
+              real_blk["f"] == CONSTS["CAPIT_LEVER_APPROVED_F"]
+              and real_blk["loan_package_id"] == CONSTS["CAPIT_LEVER_APPROVED_PACKAGE"]
+              and real_blk["scope"] == "capit_only"
+              and real_blk["accounts"] == CONSTS["CAPIT_LEVER_APPROVED_ACCOUNTS"]),
+          detail=f"enabled={real_blk['enabled']!r} blk={real_blk}")
 
     # ───────── H. Cổng đối chiếu cỡ deploy ở BƯỚC DUYỆT (mike/bin/send_plan_report.sh) ─────────
     # Trích NGUYÊN VĂN đoạn python trong heredoc production rồi chạy (§17 extract-and-test):

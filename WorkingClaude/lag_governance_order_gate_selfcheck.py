@@ -80,11 +80,34 @@ check("plan hỗn hợp: chặn IVS+TMG, GIỮ TRC (không kêu oan)",
 # --- 2. Ba nguồn đều có hiệu lực ở tầng lệnh ---
 pl, blk = run([("VVS", "LAG", "buy")])
 check("BANNED (VVS) bị chặn ở tầng lệnh", len(pl.orders) == 0 and blk[0]["kind"] == "banned")
-pl, blk = run([("BFC", "LAG", "buy")])
-check("cờ forensic exclude (BFC) bị chặn ở tầng lệnh",
+# cờ forensic: dùng CSV fixture tạm (1 dòng exclude cho mã GIẢ, không có mã sạch) thay vì
+# BFC/POW thật trong data/forensic_flags.csv — assert quan hệ "có cờ -> chặn / không cờ -> giữ",
+# không phải tên mã đang sống (cờ BFC bị gỡ/đổi severity hoặc POW bị gắn cờ sẽ làm bản cũ đỏ
+# giả dù filter_lag_governance_orders không đổi).
+import tempfile
+_orig_gate_deps = plan_mod._governance_gate_deps
+_tmp_csv = tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False, encoding="utf-8")
+_tmp_csv.write("ticker,flag_type,severity,date,source,note,review_by\n")
+_tmp_csv.write('ZZFAKEX,related_party,exclude,2026-01-01,test_fixture,"fixture row",2099-01-01\n')
+_tmp_csv.close()
+
+
+def _fixture_csv_deps():
+    real = _orig_gate_deps()
+
+    def _wrapped(cand, asof, workdir=None, csv_path=None):
+        return real(cand, asof, csv_path=_tmp_csv.name)
+    return _wrapped
+
+
+plan_mod._governance_gate_deps = _fixture_csv_deps
+pl, blk = run([("ZZFAKEX", "LAG", "buy")])
+check("cờ forensic exclude (fixture) bị chặn ở tầng lệnh",
       len(pl.orders) == 0 and blk[0]["kind"] == "forensic")
-pl, blk = run([("POW", "LAG", "buy")])
-check("mã sạch (POW) KHÔNG bị chặn", len(pl.orders) == 1 and not blk)
+pl, blk = run([("ZZFAKEY", "LAG", "buy")])
+check("mã sạch (fixture, không có dòng nào trong CSV) KHÔNG bị chặn", len(pl.orders) == 1 and not blk)
+plan_mod._governance_gate_deps = _orig_gate_deps
+os.unlink(_tmp_csv.name)
 
 # --- 3. PHẠM VI: chỉ lệnh MUA, chỉ book LAG ---
 pl, blk = run([("IVS", "LAG", "sell")])

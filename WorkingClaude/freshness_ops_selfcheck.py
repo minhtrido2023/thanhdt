@@ -32,6 +32,9 @@ import sys
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 WC = Path("/home/trido/thanhdt/WorkingClaude")
 MIKE = WC / "mike"
@@ -195,7 +198,7 @@ def build_sandbox(tmp: Path) -> dict:
     # corp-action scanner: script đọc $WC_ROOT/data/... = thư mục CHA của $ROOT trong sandbox
     (root.parent / "data").mkdir(parents=True, exist_ok=True)
     (root.parent / "data" / "corp_action_backlog.json").write_text(
-        json.dumps({"checked_at": datetime.now().isoformat()}))
+        json.dumps({"checked_at": datetime.now(_ICT).replace(tzinfo=None).isoformat()}))
     return {"root": root, "fakebin": fakebin, "logs": logs, "workdir": workdir}
 
 
@@ -204,7 +207,7 @@ def _write_dt5g_evidence(workdir: Path):
     < PIPELINE_START_EPOCH: cổng DT5G (chỉ đòi mtime cùng NGÀY) PASS, còn cổng artifact-fresh
     (đòi mtime ≥ lúc gate bắt đầu) chỉ PASS khi bước pipeline giả thật sự touch lại — đúng
     kịch bản S1 vs S4."""
-    d = datetime.now().date()
+    d = datetime.now(_ICT).date()
     while d.weekday() >= 5:
         d -= timedelta(days=1)
     out = workdir / "deploy_golive_dt5g_v4" / "out"
@@ -217,7 +220,7 @@ def _write_dt5g_evidence(workdir: Path):
     # `_assert_fresh_artifact` so `stat -c %Y` (nguyên giây) với PIPELINE_START_EPOCH. Ghi ở
     # "now" thì mtime == gate-start ⇒ `-lt` sai ⇒ kịch bản S4 (artifact KHÔNG được ghi lại)
     # lọt thành PASS. Lùi vài giây làm thứ tự thời gian rõ ràng, không phụ thuộc tốc độ máy.
-    old = datetime.now().timestamp() - 30
+    old = datetime.now(_ICT).timestamp() - 30
     for p in (sj, cs):
         os.utime(p, (old, old))
 

@@ -173,12 +173,23 @@ def main():
     # --- date-newer-than-last-anchor guard (fail fast, before writing a row cctg_events_df()
     # would reject on next load anyway — avoid leaving the CSV in a state nobody notices is broken
     # until the next unrelated reader crashes) ---
+    # `--force` khi effective_date ĐÃ TỒN TẠI là đính chính một dòng cũ, không phải chèn ngày mới
+    # lệch thứ tự — so last_date trên CẢ series (gồm chính dòng sắp bị thay) luôn tự chặn (eff ==
+    # last_date). Loại trừ đúng dòng đang sửa khỏi phép so để guard chỉ còn chặn cái nó PHẢI chặn:
+    # ngày nhỏ hơn mốc đông cứng trong code (CCTG_EVENTS/SEED_6M — không ai được sửa qua CLI này).
     import cctg_rate_vn
+    is_correction = args.force and args.effective in existing
     if is_6m:
-        last_date = max([_valid_date(SEED_6M[0])] + [_valid_date(r["effective_date"]) for r in rows])
+        other_dates = ([_valid_date(SEED_6M[0])] +
+                       [_valid_date(r["effective_date"]) for r in rows
+                        if not (is_correction and r["effective_date"] == args.effective)])
+        last_date = max(other_dates)
     else:
-        existing_ev = cctg_rate_vn.cctg_events_df()
-        last_date = existing_ev["time"].max().date()
+        if is_correction:
+            last_date = _valid_date(cctg_rate_vn.CCTG_EVENTS[-1][0])
+        else:
+            existing_ev = cctg_rate_vn.cctg_events_df()
+            last_date = existing_ev["time"].max().date()
     if eff <= last_date:
         sys.exit(f"ERROR: --effective {eff} is not newer than the last anchor {last_date} — "
                  f"cctg_events_df() treats this as corrupt/duplicate data and will raise loudly "

@@ -133,7 +133,13 @@ def check_staleness(series_data, state, today):
     """Returns list of staleness warnings for series whose last anchor age has crossed into the
     warn window [STALE_DAYS_LIMIT - STALE_WARN_BEFORE_DAYS, ...) and hasn't been warned yet FOR
     THAT SAME last_date (a new anchor arriving naturally resets the warning — idempotent per
-    last_date, not per calendar day, so it doesn't spam every week while stuck at the same age)."""
+    last_date, not per calendar day, so it doesn't spam every week while stuck at the same age).
+
+    Tracks phase (pre-stale vs stale) alongside last_date: without it, the FIRST warning (still
+    pre-stale, "SẮP STALE") marks staleness_warned_for_date == last_date, so the SECOND crossing
+    — the same anchor later actually going stale (days_to_stale < 0) — was silently skipped by
+    the `already == last_date` dedup, meaning users never got the "ĐÃ STALE" alert for an anchor
+    that only ever got one refresh warning before expiring."""
     warnings = []
     for key, points in series_data.items():
         if not points:
@@ -142,13 +148,20 @@ def check_staleness(series_data, state, today):
         age = (today - date.fromisoformat(last_date)).days
         if age < (STALE_DAYS_LIMIT - STALE_WARN_BEFORE_DAYS):
             continue
-        already = state.get(key, {}).get("staleness_warned_for_date")
-        if already == last_date:
+        days_to_stale = STALE_DAYS_LIMIT - age
+        phase = "pre" if days_to_stale >= 0 else "stale"
+        already = state.get(key, {})
+        # Default missing phase to "pre": state written before this fix only ever recorded a
+        # single warning, which in practice was always the first (pre-stale) one — defaulting
+        # preserves idempotency for that legacy shape while still re-firing once a stored "pre"
+        # entry is later found in the "stale" phase (the bug this fixes).
+        already_phase = already.get("staleness_warned_phase", "pre")
+        if already.get("staleness_warned_for_date") == last_date and already_phase == phase:
             continue
         warnings.append({
             "key": key, "label": SERIES[key]["label"], "last_date": last_date,
             "last_rate": last_rate, "age": age,
-            "days_to_stale": STALE_DAYS_LIMIT - age,
+            "days_to_stale": days_to_stale, "phase": phase,
         })
     return warnings
 
@@ -288,7 +301,9 @@ def main():
 
         notify_status = _send_trading_daily(msg)
         if notify_status == "sent":
-            state.setdefault(w["key"], {})["staleness_warned_for_date"] = w["last_date"]
+            st = state.setdefault(w["key"], {})
+            st["staleness_warned_for_date"] = w["last_date"]
+            st["staleness_warned_phase"] = w["phase"]
         elif notify_status == "suppressed":
             print(f"  state NOT marked (NOTIFY_OFF) — will (re-)send next run once lifted.")
         else:

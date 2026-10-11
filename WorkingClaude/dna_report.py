@@ -89,7 +89,9 @@ def get_capitulation():
         return _CAPIT_CACHE["val"]
     d = _bq("""WITH daily AS (
         SELECT p.time, AVG(CASE WHEN p.D_RSI<0.3 THEN 1.0 ELSE 0 END) oversold
-        FROM tav2_bq.ticker_prune p WHERE p.Close_T1>0 GROUP BY p.time)
+        FROM tav2_bq.ticker_prune p
+        WHERE p.Close_T1>0 AND p.time >= DATE_SUB(CURRENT_DATE(), INTERVAL 200 DAY)
+        GROUP BY p.time)
       SELECT d.time, s.state, d.oversold
       FROM daily d JOIN tav2_bq.vnindex_5state_dt5g_live s USING(time)
       ORDER BY d.time DESC LIMIT 120""", max_rows=200)
