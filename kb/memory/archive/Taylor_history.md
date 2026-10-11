@@ -1085,3 +1085,12 @@
 
 ## Archived 2026-10-11 (keep=12 days=0 require_done=False)
 - [2026-10-10T19:05:25Z] ĐANG DỞ job Taylor_20261010_182122 attempt 2 (wt-fundunit-1011): commit 1 = 18b41746 (đã amend). N11 đang STAGED chưa commit | NEXT: kiểm diff staged, selfcheck ×TZ, commit 2, chạy lại mutant (round2/run_mutants.py), sandbox CLI+cổng, bus finding
+
+## Archived 2026-10-11 (keep=12 days=0 require_done=False)
+- [2026-10-10T19:07:43Z] ĐANG DỞ job Taylor_20261010_182122 attempt 2 (wt-fundunit-1011): 2 COMMIT XONG — 18b41746 (sửa review) + c778f922 (N11); selfcheck×4TZ, gates, control 0 lệch đều xanh (round2/*commit2*) | NEXT: chạy lại 3 bộ mutant (round2/run_mutants.py: reviewer mut/mutants.py, mutants_r2.py, mutants_n11.py), quét rộng round2/broad_scan/run.sh (lần trước dở 17/27), sandbox CLI+cổng, bus finding
+
+## Archived 2026-10-11 (keep=12 days=0 require_done=False)
+- [2026-10-10T19:21:34Z] ĐANG DỞ job Taylor_20261010_182122 attempt 2 (wt-fundunit-1011): 2 commit CUỐI = 18b41746 + 37ba142b (N11, đã amend sửa test). Mutant trên code cuối: reviewer 105 chết-assert/31 NOAPPLY(đã chuyển)/0 sống; r2 91/91; n11 12/12; njf builtin 31/31 — round2/final/ | NEXT: broad_scan/run.sh (đang chạy nền), probe before/after lại, sandbox CLI+cổng, bus finding
+
+## Archived 2026-10-11 (keep=12 days=0 require_done=False)
+- [2026-10-10T19:28:57Z] ĐANG DỞ job Taylor_20261010_182122 attempt 2 (wt-fundunit-1011): thêm chốt D1 'dòng cho giá chụp trước đóng cửa ⇒ từ chối' (fold vào commit 1 bằng autosquash). 2 commit hiện tại xem git log -2. LƯU Ý: nav_scripts_2account_selfcheck trong broad_scan ghi dnse_raw_2026-10-11.jsonl + verified_snapshot_*_2026-10-11.json vào data/ THẬT (có sẵn, phải khai trong bus) | NEXT: chạy lại mutant (round2/run_mutants.py → round2/final2/), selfcheck×4TZ, control, probe, sandbox_gate_trial, bus finding

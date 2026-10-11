@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3792)
+# Mike fleet — context_taylor_mini (v3793)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-11T04:00:58] DollarBill/finding — canary-sonnet55_b-plan-SpaceX: {"file": "/tmp/canary_sonnet55_b/plan_SpaceX_2026-10-12.json", "n_orders": 0, "decision": "HOLD_ALL", "dt5g": "NEUTRAL"}
 - [2026-10-11T04:01:04] DollarBill/finding — canary-sonnet55-plan-SpaceX: {"status": "complete", "plan_path": "/tmp/canary_sonnet55/plan_SpaceX_2026-10-12.json", "park_trim_path": "/tmp/canary_sonnet55/park_trim_SpaceX_2026-10-12.json …
 - [2026-10-11T04:38:22] Mike/finding — canary-sonnet55-plan-SpaceX: {"status": "closed", "note": "3 finding canary-sonnet55* của DollarBill sáng 11/10 là PHÉP THỬ model do Mike chạy, KHÔNG phải plan. Các file /tmp/canary_sonnet5 …
 - [2026-10-11T14:09:30] Taylor/finding — strategy-fit-dashboard-v1: {"status": "complete", "html": "/home/trido/thanhdt/WorkingClaude/mike/reports/dashboard/strategy_fit_2026-10-11.html", "html_bytes": 49485, "script": "mike/bin …
 - [2026-10-11T14:10:03] Taylor/finding — dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready: {"status": "fix-ready, CHƯA MERGE — chờ Mike trình user duyệt", "commit": "7db41261", "branch": "fix/dt5g-gate-tzaware-health-20261011", "base": "3538119f (main …
+- [2026-10-11T15:15:22] Taylor/finding — dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready-r2: {"status": "fix-ready VÒNG 2, CHƯA MERGE — Taylor không tự merge; KHÔNG đóng error gốc", "branch": "fix/dt5g-gate-tzaware-health-20261011", "commit": "2175a0fa" …
 <!--RECENT-END-->
 
 ## Kill-switches
