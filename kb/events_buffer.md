@@ -661,3 +661,31 @@
 
 ## Consolidation 2026-10-11T04:55:13Z
 - [2026-10-11T04:38:22Z] Mike/finding — canary-sonnet55-plan-SpaceX: {"status": "closed", "note": "3 finding canary-sonnet55* của DollarBill sáng 11/10 là PHÉP THỬ model do Mike chạy, KHÔNG phải plan. Các file /tmp/canary_sonnet55*/plan_SpaceX_2026-10-12.json đã XOÁ. Plan thật thứ Hai 12/10 vẫn là data/trade_plans/plan_SpaceX_2026-10-12.json lập tối 09/10 (md5 không đổi). DollarBill: bỏ qua 3 finding đó khi lập plan.", "decided_by": "agent"}
+
+## Consolidation 2026-10-11T14:07:01Z
+- [2026-10-11T13:55:31Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "doc boi canh + nguon du lieu"}
+- [2026-10-11T13:55:48Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "doc code nguon: pt_v22, macro_state_live, dna_report, value_radar, deposit_rate"}
+- [2026-10-11T13:55:56Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "tim nguong CAPIT margin 9%, value_radar, breadth registry"}
+- [2026-10-11T13:56:17Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "truy anh xa tin hieu->book trong golive_recommend_v23, signal_v11_sql, custom30"}
+- [2026-10-11T13:56:20Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T13:57:07Z] Taylor/error — dt5g-gate-fallback-dt4-tzaware-health-ts: {"severity": "high", "what": "get_gated_state() dang roi ve DT4_only o MOI lan goi ke tu 2026-10-11 10:23 ICT", "evidence": "chay that 20:5x ICT: '[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only'", "root_cause": "commit WorkingClaude 3538119f (cq-2026-10-11, 10:28 ICT) doi macro_healthcheck.py:48 NOW=datetime.now(ZoneInfo(Asia/Ho_Chi_Minh)) => data/macro_health.json ts='2026-10-11T10:23:04+07:00' (tz-aware). macro_state_live.py:305 van tru datetime.now() NAIVE - fromisoformat(ts) => TypeError => except => fail-closed DT4_only (mat macro cap + breadth guard).", "impact": "Hom nay DT4==DT5G==NEUTRAL(3) nen chua lech state; nhung daily_refresh 18:30 thu Hai 12/10 se publish DT4 vao vnindex_5state_dt5g_live va moi consumer mat tran macro cho toi khi sua. eod_monitor.py cung parse file nay - chua kiem.", "fix_de_xuat": "macro_state_live.py:305 doi sang so sanh tz-aware (datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')) va gan ICT cho ts naive cu). 1 dong + selfcheck. CHUA SUA: job nay bi cam sua file co san; can Mike/user giao.", "found_by": "job Taylor_20261011_135520 (strategy-fit-dashboard) khi goi get_gated_state that"}
+- [2026-10-11T13:57:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T13:58:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T13:58:45Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "xong thiet ke; gom not neo file:dong (signal_v11, custom30V, dt gate, breadth) roi viet script"}
+- [2026-10-11T13:59:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T13:59:22Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "tao worktree, viet strategy_fit_dashboard.py"}
+- [2026-10-11T14:00:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:01:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:02:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:03:16Z] Taylor/heartbeat — Taylor_20261011_140235: {"status": "in_progress", "note": "quet reader macro_health.json + doc get_gated_state"}
+- [2026-10-11T14:03:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:03:35Z] Taylor/heartbeat — Taylor_20261011_140235: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261011_140235", "source": "watcher"}
+- [2026-10-11T14:03:59Z] Taylor/heartbeat — Taylor_20261011_140235: {"status": "in_progress", "note": "lap ban do publisher/consumer + cron"}
+- [2026-10-11T14:04:04Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "script viet xong, chay that lan 1"}
+- [2026-10-11T14:04:21Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:04:36Z] Taylor/heartbeat — Taylor_20261011_140235: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261011_140235", "source": "watcher"}
+- [2026-10-11T14:05:22Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:05:36Z] Taylor/heartbeat — Taylor_20261011_140235: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261011_140235", "source": "watcher"}
+- [2026-10-11T14:06:23Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261011_135520", "source": "watcher"}
+- [2026-10-11T14:06:36Z] Taylor/heartbeat — Taylor_20261011_140235: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261011_140235", "source": "watcher"}
+- [2026-10-11T14:06:52Z] Taylor/heartbeat — Taylor_20261011_135520: {"status": "in_progress", "note": "chay selfcheck lan 1"}
