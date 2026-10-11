@@ -2,6 +2,17 @@
 # PROPOSED (2026-10-04, Taylor) — chỉ đề xuất, CHƯA áp dụng. Cần xác nhận ở báo cáo tuần sau
 # (2026-10-11) trước khi merge vào kb/mike_model_routing.md (coding_guidelines §13).
 # Nguồn: reports/spend_report_weekly_2026-10-04.md + state/spend_history.csv.
+#
+# ĐÃ BÁC BỎ 2026-10-11 (Taylor, job Taylor_20261011_020011, arch-reviewer audit) —
+# GIỮ FILE để không mất nội dung nhưng ĐỪNG áp dụng/merge nữa. Premise sai: bucket Ops của
+# spend_report.py KHÔNG lẫn Opus diễn giải của Wendy/Spyros — 2 agent này gần như 0 job trong
+# bus/jobs (native agent, không qua dispatch.sh; Spyros có đúng 1 job lịch sử 2026-09-13).
+# 100% Opus của bucket Ops hai tuần 09-27→10-11 là Wags+Winston, đến từ --model opus HARDCODE
+# trong bin/wags_autofix.sh:213, bin/ops_autofix.sh:177, bin/selfcheck_red_owner_sweep.sh:107 —
+# đây là code pin, không phải lỗ hổng trong bảng phân loại của file này. Thêm nữa, "Đề xuất 1"
+# dưới đây (WAGS-AUTOFIX -> Sonnet) MÂU THUẪN trực tiếp với quyết định user 2026-10-06 ("Kiểm kê
+# cron ghim Opus": wags_autofix.sh -> giữ Opus) đang nằm NGAY TRONG kb/mike_model_routing.md live.
+# Xem bus topic spend-report-routing-review-2026-10-11 cho verdict đầy đủ.
 ---
 
 ## Đề xuất 1 — Bảng phân loại nhanh: thêm 2 dòng ops-autofix mặc định Sonnet
