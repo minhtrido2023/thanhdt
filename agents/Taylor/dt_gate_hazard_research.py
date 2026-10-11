@@ -15,27 +15,18 @@
 #   Every quantity at session t uses only data up to t (the gate itself is causal);
 #   the episode LABEL (commit/revert) is known only at episode end — noted in report.
 
+import sys
 import numpy as np
 import pandas as pd
+
+WORKDIR = "/home/trido/thanhdt/WorkingClaude"
+sys.path.insert(0, WORKDIR)
+from macro_state_live import _dt_4gate as dt_4gate  # noqa: E402 — single source of truth,
+# not a copy (see module docstring above: two independent definitions had drifted apart risk)
 
 BQC = "/home/trido/thanhdt/WorkingClaude/data/bq_cache"
 STATE_NAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EXBULL"}
 rng = np.random.default_rng(20260710)
-
-
-def dt_4gate(states, default=10, enC=25, exC=10, enX=25, exX=10):
-    out = states.copy(); committed = states[0]; ps, pr = states[0], 1
-    for t in range(1, len(states)):
-        s = states[t]
-        if s == ps: pr += 1
-        else: ps, pr = s, 1
-        if ps == committed:
-            out[t] = committed; continue
-        need = (enC if ps == 1 else enX if ps == 5
-                else exC if committed == 1 else exX if committed == 5 else default)
-        if pr >= need: committed = ps
-        out[t] = committed
-    return out
 
 
 def need_for(cand, committed, default=10, enC=25, exC=10, enX=25, exX=10):
