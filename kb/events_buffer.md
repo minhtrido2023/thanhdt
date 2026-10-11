@@ -406,3 +406,6 @@
 
 ## Consolidation 2026-10-11T17:33:13Z
 - [2026-10-11T17:33:01Z] Mike/finding — retro-2026-10-11-final: {"summary": "Retro 10-11 ghi xong, Wags GAPS FOUND đã sửa (+3 sự cố), Pattern I mới", "file": "kb/incidents/retro/retro-2026-10-11.md"}
+
+## Consolidation 2026-10-11T23:07:02Z
+- [2026-10-11T22:10:36Z] Wags/answer — selfcheck-red: mike/bin/production_manifest_selfcheck.sh — recovered 2026-10-11: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/production_manifest_selfcheck.sh", "artifact": "chạy lại lúc 2026-10-11T22:10:36Z bằng đúng required_env ⇒ PASS", "red_since": "2026-10-10T22:11:25Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
