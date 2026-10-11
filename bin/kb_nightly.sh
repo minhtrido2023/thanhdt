@@ -1126,7 +1126,7 @@ Nếu ops_h có xu hướng tăng liên tục qua ≥3 tuần gần nhất so v�
 bất thường do sự cố đơn lẻ) — ghi nhận vào KNOWLEDGE.md + cân nhắc đề xuất thêm biện pháp tối
 ưu (không tự làm gì thêm, chỉ ghi nhận + đề xuất cho user quyết).
 5b. **Model-mix drift check (bài học sự cố 2026-07-17)**: cùng file, cột fable_jobs/(sonnet_
-jobs+opus_jobs+fable_jobs+default_jobs). Sự cố thật: job count giảm 76% trong 3 tuần nhưng
+jobs+opus_jobs+fable_jobs+default_jobs+haiku_jobs; haiku_jobs rỗng = 0). Sự cố thật: job count giảm 76% trong 3 tuần nhưng
 compute TĂNG 150% vì %fable đi từ 0%→58% — chỉ đếm job/KB log đã KHÔNG bắt được, chỉ
 '$ROOT/bin/spend_report.py' bản có model-mix mới bắt được. Nếu %fable tổng (mọi category)
 ≥30% ở tuần mới nhất → đọc lại các dispatch fable thật (bus/jobs, field prompt_summary) xem
@@ -1135,7 +1135,7 @@ ladder MIKE.md §Model routing — ghi nhận vào KNOWLEDGE.md nếu lệch, kh
 dispatch của Mike (đây là hành vi con người, không phải 1 lỗi code có thể fix 1 lần).
 5c. **Opus-drift check (thêm 2026-08-01, user yêu cầu sau khi %fable=0% nhưng %opus âm thầm đi
 từ ~14% (07-17) lên ~73% (07-31) — cùng dạng drift, khác tầng)**: cùng file, cột opus_jobs/
-(sonnet_jobs+opus_jobs+fable_jobs+default_jobs) MỖI tuần trong toàn bộ file (không chỉ tuần mới
+(sonnet_jobs+opus_jobs+fable_jobs+default_jobs+haiku_jobs; haiku_jobs rỗng = 0) MỖI tuần trong toàn bộ file (không chỉ tuần mới
 nhất). Flag nếu (a) opus% tuần mới nhất ≥60%, HOẶC (b) opus% tăng ≥20 điểm % so với 3 tuần trước
 (drift bền vững, không phải 1 tuần đột biến do 1 việc đơn lẻ). Nếu flag: lấy mẫu 5-8 dispatch
 opus gần nhất (bus/jobs/*.json field prompt/prompt_summary), tự hỏi ĐÚNG câu ladder MIKE.md
