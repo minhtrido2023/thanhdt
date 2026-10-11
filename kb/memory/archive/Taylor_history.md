@@ -1082,3 +1082,6 @@
 
 ## Archived 2026-10-11 (keep=12 days=0 require_done=False)
 - [2026-10-10T19:01:56Z] ĐANG DỞ job Taylor_20261010_182122 (wt-fundunit-1011): commit 1 = 9618de75 (sẽ amend thêm chốt 'NAV chụp trước đóng cửa + tiền vào trong phiên ⇒ từ chối'). N11 ĐÃ VIẾT XONG nhưng đang nằm ở research/fund_unit_ledger_20261011/round2/n11_wip.patch (bản sao /tmp/n11_wip.patch.bak) — CHƯA áp lại | NEXT: amend commit 1 (SKIP=tz-anchor-gate), git apply n11_wip.patch, commit 2, quét rộng round2/broad_scan/run.sh, chạy lại mutant (run_mutants.py với mutants reviewer + mutants_r2.py + mutants_n11.py), bus finding
+
+## Archived 2026-10-11 (keep=12 days=0 require_done=False)
+- [2026-10-10T19:05:25Z] ĐANG DỞ job Taylor_20261010_182122 attempt 2 (wt-fundunit-1011): commit 1 = 18b41746 (đã amend). N11 đang STAGED chưa commit | NEXT: kiểm diff staged, selfcheck ×TZ, commit 2, chạy lại mutant (round2/run_mutants.py), sandbox CLI+cổng, bus finding
