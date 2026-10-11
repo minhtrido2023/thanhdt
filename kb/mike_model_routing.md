@@ -16,10 +16,9 @@ Fable, mọi cron đang ghim Opus (kể cả `ops_autofix.sh` — xem "Đã cân
 
 Alias của CLI (đo 2026-10-11, CLI 2.1.295): `haiku` → `claude-haiku-5-5`, `sonnet` →
 `claude-sonnet-5-5`, `opus` → `claude-opus-5-5`. Omit `--model` → model ghi trong
-`agents/<id>/.claude/settings.json`: **6 agent = `claude-sonnet-5-5`** (Mike, Taylor, Wags, Winston,
-Wendy, Spyros); **DollarBill + Mafee TẠM GIỮ `claude-sonnet-5`** (đường tiền — xem "Chạy thử plan").
-⚠️ Với DollarBill/Mafee: CHỈ omit, KHÔNG truyền `--model sonnet` — alias đó ra 5.5 và vượt qua
-quyết định giữ. Cron lập plan thật (`bq_freshness_check.sh`) vốn omit nên đang đúng.
+`agents/<id>/.claude/settings.json`: **cả 8 agent ghi alias `sonnet`** (user chốt 2026-10-11 11:50
+ICT: không ghim ID đầy đủ nữa; đã thử — settings ghi `sonnet` ra `claude-sonnet-5-5`) ⇒ omit ≡
+`--model sonnet`, kể cả DollarBill và Mafee (xem "Chạy thử plan" về bằng chứng lúc đổi).
 
 Giá niêm yết API, USD / 1 triệu token vào / ra (bảng cached 2026-10-06 trong skill `claude-api`;
 đội chạy gói thuê bao nên đây là thước TƯƠNG ĐỐI, không phải hoá đơn): Haiku 5.5 0,10 / 0,50
@@ -33,7 +32,7 @@ Taylor/Opus 214-243K ⇒ gần như luôn rơi vào bảng giá prompt dài, Hai
 | Tầng | Model / effort | Việc | Điều kiện / lưu ý |
 |---|---|---|---|
 | **0** | `haiku` — chủ yếu qua native `Agent(...)` | Kiểm trạng thái job/session (`fleet-scout`), phân loại log + bus event, smoke test, tra KB | CHỈ ĐỌC · dưới ~30 lượt · đầu ra kiểm được bằng mắt/script. KHÔNG dùng cho: ghi code/KB, query BQ, phản biện, bất cứ việc nào mà bỏ sót im lặng sẽ lọt. Qua `dispatch.sh --model haiku` chỉ khi việc thật sự ngắn (lợi ~4 lần, không phải 20) |
-| **1** | omit `--model` (hoặc `--model sonnet`, trừ DollarBill/Mafee), effort omit = medium | Báo cáo ngày/tuần/tháng, plan T+1, Mafee, data-ops, corp-scanner, query BQ, sửa code đã biết đúng chỗ, áp `required_change` | Mặc định. KHÔNG hạ `low`: ở `low` Sonnet 5.5 hay báo xong khi chưa chạy kiểm |
+| **1** | omit `--model` (≡ `--model sonnet`), effort omit = medium | Báo cáo ngày/tuần/tháng, plan T+1, Mafee, data-ops, corp-scanner, query BQ, sửa code đã biết đúng chỗ, áp `required_change` | Mặc định. KHÔNG hạ `low`: ở `low` Sonnet 5.5 hay báo xong khi chưa chạy kiểm |
 | **2** | `--model opus` (effort omit = medium; trần lượt tự = 80) | R&D / backtest theo khuôn có sẵn, due diligence, tổng hợp nhiều nguồn, lỗi chưa rõ nguyên nhân | Mặc định MỚI cho việc khó. `dispatch.sh` tự đặt `--max-turns 80` khi `--model opus` (trước đó medium ⇒ 50, thấp hơn trung vị 73 lượt của việc Taylor) |
 | **2+** | `--model opus --effort high` | Phản biện, mọi thứ chạm tiền / cổng an toàn, thiết kế backtest MỚI từ đầu, lượt "review TOÀN BỘ nhánh một lần" (chế độ B) | `xhigh`/`max` chỉ khi đã ĐO được lợi trên việc đó |
 | **3** | `--model fable --effort high` (trần high) | Chỉ LÊN KẾ HOẠCH việc cực khó | Hiếm; không tự thực thi (bright line bên dưới) |
@@ -50,7 +49,7 @@ Cron ghim `--model opus` hiện có: `wags_autofix.sh` (2 chỗ), `ops_autofix.s
 `fearbuy_weekly_scan.sh`, `paper_checkpoint_escalation.sh`, `weekly_ops_audit.sh`, `kb_nightly.sh`,
 `selfcheck_red_owner_sweep.sh` — 5 cái sau kèm `--effort high`. Đợt thử dưới KHÔNG đổi cron nào.
 
-**Chạy thử plan 2026-10-11 — vì sao DollarBill/Mafee CHƯA đổi.** Chạy lại đề lập plan SpaceX của
+**Chạy thử plan 2026-10-11 (trước khi DollarBill/Mafee được đổi lúc 11:50 cùng ngày).** Chạy lại đề lập plan SpaceX của
 thứ Sáu 09/10 trên Sonnet 5.5, file plan ghi ra `/tmp` (job `DollarBill_20261011_035729`): ra ĐÚNG
 quyết định (HOLD, 0 lệnh) với 5 lượt gọi thay vì 19 của bản thật, nhưng CHÉP nguyên khối
 `state_note`/`nav_basis`/`jit_unpark_proposal` từ plan hôm trước (ngày as-of lệch 1 phiên) và tự
@@ -63,8 +62,12 @@ nhiễm chéo. Tác dụng phụ không lường trước: `compute_active_nav.p
 lập plan) GHI ĐÈ `data/execution_logs/active_nav_SpaceX.json` bằng số DNSE sống lúc 11:00 ICT
 11/10 — số đúng, cron làm tươi lại 20:15 T2-T6; 6 file `*_2026-10-12.json` trong
 `data/trade_plans/` không đổi (md5 khớp trước/sau).
-**Điều kiện đổi:** user quyết (dựa vào duyệt plan 21:00 + các cổng cơ học), hoặc có phép thử sạch
-trên ngày CÓ lệnh. Tới lúc đó vòng `for` kiểm settings in ra 6 dòng `-5-5` + 2 dòng `-5` là ĐÚNG.
+**User chốt 2026-10-11 11:50 ICT (`decided_by: user`): chuyển DollarBill + Mafee sang alias `sonnet`
+(= Sonnet 5.5)** dù phép thử mới n=1 và chưa có ngày CÓ lệnh — Mike đã khuyên giữ Sonnet 5. Lưới
+an toàn còn lại: user duyệt plan 21:00 + các cổng cơ học (`load_plan`, funding gate, signal_holds,
+drift check). Lượt plan THẬT đầu tiên trên Sonnet 5.5: tối thứ Hai 12/10 (plan cho 13/10). Dấu hiệu
+phải soi ở plan đó: ngày as-of trong `state_note`/`nav_basis` có phải của hôm lập không, và giá
+tham chiếu của từng lệnh có lấy từ DNSE sống không.
 
 **🧪 ĐANG THỬ — Opus mặc định `medium` (2026-10-11 → mốc xem lại 2026-10-25).** Cơ sở: tài liệu
 Anthropic nói Opus 5.5 ở `medium` ngang/hơn Opus 5 ở `high` với ~nửa token — số của HỌ, chưa đo
@@ -158,8 +161,8 @@ vẻ "chỉ là implement một plan rõ ràng" — lúc đó dùng Opus, không
 
 **⚠️ "Omit `--model`" KHÔNG có nghĩa là "Sonnet đời mới nhất" — nó có nghĩa là "lấy model trong
 `agents/<id>/.claude/settings.json`".** `dispatch.sh` khi `MODEL` rỗng thì **không truyền cờ nào**,
-nên CLI tự lấy từ file đó. Hai thứ này chỉ trùng nhau CHỪNG NÀO cả 8 `settings.json` còn ghi
-`claude-sonnet-5-5` (trừ DollarBill/Mafee đang giữ `claude-sonnet-5` có chủ đích, 2026-10-11) — kiểm bằng:
+nên CLI tự lấy từ file đó. Từ 2026-10-11 11:50 ICT (user duyệt) cả 8 `settings.json` ghi ALIAS
+`sonnet` ⇒ omit ≡ `--model sonnet`, luôn là Sonnet đời mới nhất. Vòng kiểm dưới phải in 8 dòng `sonnet`:
 ```bash
 for a in $(ls agents/); do printf '%-11s %s\n' "$a" \
   "$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('model','-'))" agents/$a/.claude/settings.json)"; done
@@ -172,9 +175,13 @@ thế nhưng **`settings.json` không được cập nhật**. Hệ quả đo đ
 `model=default`. 2026-08-03 cả 8 về `claude-sonnet-5`.
 **Lệch LẦN HAI (sửa 2026-10-11):** Sonnet 5.5 ra mắt, alias `sonnet` tự nhảy sang
 `claude-sonnet-5-5` nhưng 8 `settings.json` ghim ID đầy đủ nên omit vẫn chạy `claude-sonnet-5` —
-đo 3 ngày: 1.054 dòng transcript đời cũ vs 522 đời mới (khử trùng theo message id: 574 vs 273 lượt). Nay 6/8 ghi `claude-sonnet-5-5` (+ mặc định
-của `bin/spawn_child.sh`); DollarBill/Mafee giữ đời cũ có chủ đích (xem đầu file). **Mỗi lần Anthropic ra đời model mới: chạy lại vòng `for` ở trên** — ID
-đầy đủ KHÔNG tự cập nhật như alias. Đổi model 1 agent thì phải sửa cả mô tả này.
+đo 3 ngày: 1.054 dòng transcript đời cũ vs 522 đời mới (khử trùng theo message id: 574 vs 273 lượt). 
+**Sửa GỐC 2026-10-11 11:50 ICT (user chốt "không dùng fix cứng, chuyển sang alias"):** cả 8
+`settings.json` + mặc định của `bin/spawn_child.sh` ghi alias `sonnet` thay cho ID đầy đủ ⇒ hết lớp
+lỗi "ghim ID cũ mà không ai thấy". **Đánh đổi phải nhớ:** từ nay mỗi lần Anthropic ra đời Sonnet
+mới, MỌI agent (kể cả DollarBill lập plan và Mafee) tự chuyển sang đời đó KHÔNG qua bước duyệt
+nào ⇒ khi có đời mới, soi kỹ plan T+1 đầu tiên (ngày as-of của `state_note`/`nav_basis`, đã chạy
+`load_plan()` chưa) trước khi duyệt. Đổi model 1 agent thì phải sửa cả mô tả này.
 
 **⚠️ Sự cố model-drift đã đo được (2026-07-17, chi tiết `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`)**: %fable dispatch lên
 58%/tuần dù hầu hết là task "phức tạp thường" (Q2, tầng Opus), không phải Q3 — compute wall-clock
