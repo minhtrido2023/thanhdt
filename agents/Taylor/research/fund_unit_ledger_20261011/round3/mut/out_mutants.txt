@@ -1,0 +1,9 @@
+{'KILLED_ASSERT': 146, 'NOT_APPLIED': 6, 'SURVIVED': 2}
+A28 NOT_APPLIED(count=0) bin/account_cash_flows.py:None | biên nguồn chụp đúng 14:45 | None | 
+A39 NOT_APPLIED(count=0) bin/account_cash_flows.py:None | attach không kiểm trùng ngày | None | 
+A46 NOT_APPLIED(count=0) bin/account_cash_flows.py:None | flow_moment không kiểm time_ict | None | 
+U07 NOT_APPLIED(count=0) bin/nav_unit_ledger.py:None | flow đúng ngày inception vào sổ | None | 
+P17b SURVIVED bin/nav_period_returns.py:172 | ratio làm tròn 7 chữ số | None | 
+D02 NOT_APPLIED(count=0) bin/daily_nav_snapshot.py:None | perf: ValueError thoát ra | None | 
+D02b NOT_APPLIED(count=0) bin/daily_nav_snapshot.py:None | perf: OSError thoát ra | None | 
+S06 SURVIVED bin/portfolio_status.py:604 | (chuẩn bị) — vô hại | None | 

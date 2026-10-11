@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/tmp/ar3/WC/mike/bin/auto_exit_inject_selfcheck.py", line 35, in <module>
+    import auto_exit_inject as aei  # noqa: E402
+  File "/tmp/ar3/WC/mike/bin/auto_exit_inject.py", line 45, in <module>
+    import capit_episode  # noqa: E402
+ModuleNotFoundError: No module named 'capit_episode'

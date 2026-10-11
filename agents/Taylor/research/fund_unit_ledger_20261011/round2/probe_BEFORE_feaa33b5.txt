@@ -1,0 +1,49 @@
+== K1. Thị trường ĐỨNG YÊN, NAV chụp 19:10, tiền vào/ra 20:00 thứ Sáu 07-03. Sự thật: 0,0% mọi ngày
+  [nạp 200tr — mẫu cũ (chỉ ngày, không giờ)] asof 2026-07-03: inception -20.000% pnl -200,000,000 (không có khoá pending)
+  [nạp 200tr — mẫu cũ (chỉ ngày, không giờ)] asof 2026-07-06: inception -4.000% pnl +0 (không có khoá pending)
+  [nạp 200tr — mẫu cũ (chỉ ngày, không giờ)] asof 2026-07-07: inception -4.000% pnl +0 (không có khoá pending)
+  [nạp 200tr — bod + 20:00 (mặc định cũ)] asof 2026-07-03: inception -16.667% pnl -200,000,000 (không có khoá pending)
+  [nạp 200tr — bod + 20:00 (mặc định cũ)] asof 2026-07-06: inception +0.000% pnl +0 (không có khoá pending)
+  [nạp 200tr — bod + 20:00 (mặc định cũ)] asof 2026-07-07: inception +0.000% pnl +0 (không có khoá pending)
+  [nạp 200tr — ngày + giờ 20:00 (schema mới)] asof 2026-07-03: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [nạp 200tr — ngày + giờ 20:00 (schema mới)] asof 2026-07-06: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [nạp 200tr — ngày + giờ 20:00 (schema mới)] asof 2026-07-07: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [rút 200tr — mẫu cũ (chỉ ngày, không giờ)] asof 2026-07-03: inception +20.000% pnl +200,000,000 (không có khoá pending)
+  [rút 200tr — mẫu cũ (chỉ ngày, không giờ)] asof 2026-07-06: inception -4.000% pnl +0 (không có khoá pending)
+  [rút 200tr — mẫu cũ (chỉ ngày, không giờ)] asof 2026-07-07: inception -4.000% pnl +0 (không có khoá pending)
+  [rút 200tr — ngày + giờ 20:00 (schema mới)] asof 2026-07-03: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [rút 200tr — ngày + giờ 20:00 (schema mới)] asof 2026-07-06: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [rút 200tr — ngày + giờ 20:00 (schema mới)] asof 2026-07-07: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [nạp 200tr — eod + 20:00] asof 2026-07-03: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [nạp 200tr — eod + 20:00] asof 2026-07-06: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+  [nạp 200tr — eod + 20:00] asof 2026-07-07: CashFlowError: flow 2026-07-03 timing='eod' khai time_ict=20:00 nhưng dòng nav_history ngày đó chụp lúc 2026-07-03T19:10:00 (balance_ts) — TRƯỚC khi tiền vào/ra ⇒ na
+== N1. Bản ghi gõ nhầm ngày 07-13 (thay vì 07-03), NAV 07-03 đã +40tr (4%)
+  [mẫu cũ] asof 07-06: inception +4.000% pnl +40,000,000 (không có khoá pending)
+  [ngày + giờ] asof 07-06: inception +4.000% pnl +40,000,000 (không có khoá pending)
+== N3/N4. Nạp 100tr thứ Bảy 07-04, thị trường đứng yên; thứ Hai NAV 1,1 tỷ
+  [mẫu cũ] Chủ nhật: inception +0.000% pnl +0 (không có khoá pending)
+  [mẫu cũ] thứ Hai: CashFlowError: flow 2026-07-04 timing='eod' nhưng nav_history không có dòng ngày đó (dòng cuối cùng hiện có: 2026-07-06) ⇒ không có giá đơn vị chốt cuối ngày 2026-07
+  [mẫu cũ] cổng 5% thứ Hai: [('2026-07-06', 10.0)]
+  [bod + 10:00 (gợi ý của thông báo lỗi cũ)] Chủ nhật: inception +0.000% pnl +0 (không có khoá pending)
+  [bod + 10:00 (gợi ý của thông báo lỗi cũ)] thứ Hai: inception +0.000% pnl +0 (không có khoá pending)
+  [bod + 10:00 (gợi ý của thông báo lỗi cũ)] cổng 5% thứ Hai: [('2026-07-06', 10.0)]
+  [ngày + giờ 10:00] Chủ nhật: inception +0.000% pnl +0 (không có khoá pending)
+  [ngày + giờ 10:00] thứ Hai: CashFlowError: flow 2026-07-04 timing='eod' nhưng nav_history không có dòng ngày đó (dòng cuối cùng hiện có: 2026-07-06) ⇒ không có giá đơn vị chốt cuối ngày 2026-07
+  [ngày + giờ 10:00] cổng 5% thứ Hai: [('2026-07-06', 10.0)]
+  [mẫu cũ] daily_nav_snapshot cổng 15% thứ Hai (+20%): ok=False :: 🔴 NAV 2026-07-06 (SpaceX) TỰ CHẶN KHÔNG ĐĂNG: biến động +20.00%/ngày vượt ngưỡng ±15%, và data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên không xác nhận được có nạp/rút h
+  [ngày + giờ 10:00] daily_nav_snapshot cổng 15% thứ Hai (+20%): ok=False :: 🔴 NAV 2026-07-06 (SpaceX) TỰ CHẶN KHÔNG ĐĂNG: biến động +20.00%/ngày vượt ngưỡng ±15%, và data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên không xác nhận được có nạp/rút h
+== N2. nav_history có 2 dòng trùng ngày + dòng tiền ngày đó
+  [mẫu cũ] giá đơn vị từng dòng: [('2026-07-01', 10000.0), ('2026-07-02', 10000.0), ('2026-07-03', 10000.0), ('2026-07-03', 8333.33)]
+  [ngày + giờ 16:00] giá đơn vị từng dòng: [('2026-07-01', 10000.0), ('2026-07-02', 10000.0), ('2026-07-03', 10000.0), ('2026-07-03', 8333.33)]
+== N7. Ghi chú IRR
+  0 nghiệm do lỗ >99,9% (dòng tiền KHÔNG đổi dấu): (None, 'IRR không xác định duy nhất: 0 nghiệm trong khoảng −99,9%…+99.900% (dòng tiền đổi dấu nhiều lần)')
+  2 nghiệm: (None, 'IRR không xác định duy nhất: 2 nghiệm trong khoảng −99,9%…+99.900% (dòng tiền đổi dấu nhiều lần)')
+  nạp thứ Bảy 07-04 09:00 ⇒ mwr asof 07-10 (w=7/9 tính từ giá chốt thứ Sáu ⇒ 2,078; w=5/9 từ CN ⇒ 2,161): 2.161
+== N8. Cột suy ra trong sổ đã chốt bị sửa thành nan/inf
+  unit_price=nan: KHÔNG phát hiện lệch
+  unit_price=inf: KHÔNG phát hiện lệch
+  annualize_or_null(1.4641, 1461 ngày = 4×365,25) (N9: 365,25 ⇒ đúng 10,0): (9.993, None)
+== K2. Sandbox: sổ đơn vị LỆCH nằm trong thư mục dữ liệu ⇒ CLI + cổng báo cáo (+9,99% là số SAI)
+  CLI nav_period_returns: rc=1 :: LỖI nav_period_returns: sổ đơn vị đã chốt /tmp/fu_probe_6ope9o5z/WC/data/execution_logs/nav_unit_ledger_SpaceX.csv KHÁC chuỗi dựng lại ở 1 chỗ:
+  cổng tỉ suất với báo cáo ghi +9,99%: KHÔNG chặn (đi tiếp)
+  nav_unit_ledger.py --seal (thư mục dữ liệu mặc định): rc=2 :: LỆCH SỔ nav_unit_ledger (SpaceX): sổ đơn vị đã chốt /tmp/fu_probe_6ope9o5z/WC/data/execution_logs/nav_unit_ledger_SpaceX.csv KHÁC chuỗi dựng lại ở 1 c

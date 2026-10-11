@@ -1,0 +1,55 @@
+import sys, os, datetime as dt
+sys.path.insert(0, "/tmp/ar2/probe"); sys.path.insert(0, "/tmp/ar2/fix/WC/mike/bin")
+from fixk1 import R, F, run, D, acf, nul, npr
+T1, T2, T3, T4, T5 = D(2026,6,2), D(2026,6,3), D(2026,6,4), D(2026,6,5), D(2026,6,8)
+print("== E1. ZaloPay THẬT, dòng 07-27 chụp 07-28T09:15")
+rows = nul.load_nav_history("ZaloPay"); inc = nul.load_inception("ZaloPay")
+def real(label, flows, acct_rows=rows, acct_inc=inc, name="ZaloPay"):
+    try:
+        r = npr.compute_period_returns(name, D(2026,10,9), acct_rows, acct_inc, flows)
+        cf = r["inception"].get("cash_flows", [])
+        print(f"  {label:58s} => inception {r['inception']['return_pct']:+.3f}% gán={[(c['timing'], c['session_date']) for c in cf]} pend={len(r['pending_flows'])} drop={len(r['dropped_flows'])}")
+    except Exception as e:
+        print(f"  {label:58s} => {type(e).__name__}: {str(e)[:210]}")
+real("không dòng tiền", [])
+real("nạp 50tr 07-27 10:00 (trong phiên 07-27)", [F(D(2026,7,27), "10:00", 50e6)])
+real("nạp 50tr 07-27 20:00 (sau đóng cửa, trước chụp 07-28 09:15)", [F(D(2026,7,27), "20:00", 50e6)])
+real("nạp 50tr 07-28 08:00 (sáng hôm sau, trước chụp 09:15)", [F(D(2026,7,28), "08:00", 50e6)])
+real("nạp 50tr 07-28 09:15 (đúng phút chụp của dòng 07-27)", [F(D(2026,7,28), "09:15", 50e6)])
+real("nạp 50tr 07-28 09:15:15 (đúng giây chụp)", [F(D(2026,7,28), "09:15:15", 50e6)])
+real("nạp 50tr 07-28 09:20 (trong phiên 07-28, sau lần chụp dòng 07-27)", [F(D(2026,7,28), "09:20", 50e6)])
+real("nạp 50tr 08-24 03:00 (trước lần chụp 04:50)", [F(D(2026,8,24), "03:00", 50e6)])
+real("nạp 50tr 08-23 20:00 CN", [F(D(2026,8,23), "20:00", 50e6)])
+real("nạp 50tr 08-24 16:00 (sau đóng cửa, dòng 08-24 chụp 04:50)", [F(D(2026,8,24), "16:00", 50e6)])
+real("nạp 50tr 08-25 08:00", [F(D(2026,8,25), "08:00", 50e6)])
+real("nạp 50tr 08-25 21:00 (sau chụp 08-25 20:15)", [F(D(2026,8,25), "21:00", 50e6)])
+real("nạp 50tr 08-31 10:00 (ngày nghỉ CÓ dòng NAV)", [F(D(2026,8,31), "10:00", 50e6)])
+real("nạp 50tr 09-01 10:00 (ngày nghỉ KHÔNG dòng)", [F(D(2026,9,1), "10:00", 50e6)])
+real("nạp 50tr 09-02 16:00 (lễ 2/9)", [F(D(2026,9,2), "16:00", 50e6)])
+real("nạp 50tr 10-09 20:00 (sau dòng cuối) ⇒ treo", [F(D(2026,10,9), "20:00", 50e6)])
+real("nạp 50tr 10-12 10:00 (ngày sau dòng cuối) ⇒ treo", [F(D(2026,10,12), "10:00", 50e6)])
+real("nạp 50tr 07-06 20:00 (ĐÚNG ngày inception, sau mốc)", [F(D(2026,7,6), "20:00", 50e6)])
+real("nạp 50tr 07-05 10:00 (trước inception)", [F(D(2026,7,5), "10:00", 50e6)])
+real("nạp 50tr 07-07 08:00 (trước dòng đầu tiên)", [F(D(2026,7,7), "08:00", 50e6)])
+real("rút 900tr 10-05 10:00 (gần hết)", [F(D(2026,10,5), "10:00", -900e6)])
+real("rút 941,8tr 10-06 20:00 (đúng bằng NAV 10-06?)", [F(D(2026,10,6), "20:00", -930757202.0)])
+real("chuỗi 6 dòng tiền", [F(D(2026,9,1), "10:00", 50e6), F(D(2026,9,3), "16:00", -30e6), F(D(2026,9,3), "20:30", 20e6), F(D(2026,9,5), "09:00", 10e6), F(D(2026,9,7), "23:59:59", -5e6), F(D(2026,9,8), "14:45", 7e6)])
+real("2 dòng tiền quanh lần chụp 10-06 19:10:19 (19:09 + 19:12)", [F(D(2026,10,6), "19:09", 30e6), F(D(2026,10,6), "19:12", 40e6)])
+real("market_only 08-06 (phiên thiếu dòng)", [dict(F(D(2026,8,6), None, 0, kind="market_only"))])
+print("== E2. balance_ts KHÔNG tăng dần (dòng T2 sửa tay bằng số dư chụp sáng T4); thị trường đứng yên trừ T3 +10%")
+rows2 = [R(T1,1e9), R(T2,1e9, ts=f"{T4}T09:00:00"), R(T3,1.1e9), R(T4,1.1e9+220e6)]
+run("nạp 220tr 20:00 T3 (sự thật: T3=11000, T4=11000)", rows2, [F(T3, "20:00", 220e6)])
+rows3 = [R(T1,1e9), R(T2,1e9, ts=f"{T3}T23:00:00"), R(T3,1.1e9), R(T4,1.1e9+220e6)]
+run("dòng T2 chụp 23:00 T3 (sau dòng T3), nạp 20:00 T3", rows3, [F(T3, "20:00", 220e6)])
+print("== E3. balance_ts có múi giờ")
+rows4 = [R(T1,1e9, ts=f"{T1}T12:10:00+00:00"), R(T2,1.2e9, ts=f"{T2}T12:10:00Z"), R(T3,1.2e9, ts=f"{T3}T12:10:00+00:00")]
+run("ts '...Z' / '+00:00' (12:10 UTC = 19:10 ICT), nạp 16:00 T2", rows4, [F(T2, "16:00", 200e6)])
+rows5 = [R(T1,1e9), R(T2,1.2e9, ts=f"{T2} 19:10:00"), R(T3,1.2e9, ts=f"{T3}T19:10:00.123456")]
+run("ts dạng 'YYYY-MM-DD HH:MM:SS' + micro giây", rows5, [F(T2, "16:00", 200e6)])
+rows6 = [R(T1,1e9), R(T2,1.2e9, ts=f"{T2}"), R(T3,1.2e9)]
+run("ts chỉ có NGÀY ('2026-06-03' ⇒ 00:00)", rows6, [F(T2, "16:00", 200e6)])
+print("== E4. dòng NAV ngày KHÔNG phiên (thứ Bảy 06-06) chụp 10:00; nạp CN 06-07 09:00")
+SAT, SUN, MON = D(2026,6,6), D(2026,6,7), D(2026,6,8)
+run("thứ Bảy chụp 10:00, nạp CN", [R(T4,1e9), R(SAT,1e9,hh="10:00:00"), R(MON,1.2e9)], [F(SUN,"09:00",200e6)])
+print("== E5. nạp trong phiên, thị trường +10% phiên đó (quy ước bod — biết trước, không phải lỗi)")
+run("nạp 220tr 10:00 T2, T2 +10% trên vốn cũ", [R(T1,1e9), R(T2,1.1e9+220e6), R(T3,1.32e9)], [F(T2,"10:00",220e6)])

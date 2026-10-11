@@ -1,0 +1,110 @@
+[
+ {
+  "id": "A05x",
+  "file": "bin/account_cash_flows.py",
+  "line": 247,
+  "note": "bỏ hẳn kiểm dấu deposit",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4627 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 0, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '10:00'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A06x",
+  "file": "bin/account_cash_flows.py",
+  "line": 249,
+  "note": "bỏ hẳn kiểm dấu withdraw",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4628 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 0, 'kind': 'withdraw', 'evidence': 'x', 'time_ict': '10:00'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A66",
+  "file": "bin/account_cash_flows.py",
+  "line": 223,
+  "note": "không bắt key evidence (⇒ KeyError)",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4634 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 5, 'kind': 'deposit', 'time_ict': '10:00'}: phải raise CashFlowError, lại raise KeyError: 'evidence'"
+ },
+ {
+  "id": "A67",
+  "file": "bin/account_cash_flows.py",
+  "line": 221,
+  "note": "bản ghi không phải object",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4635 assertion PASS): E bản ghi hỏng không phải object: thông điệp thiếu 'phải là object': /tmp/nav_unit_ledger_selfcheck_9oxoi8ec/e_flows.json[SpaceX][0]: thiếu field bắt buộc 'date'"
+ },
+ {
+  "id": "A68",
+  "file": "bin/account_cash_flows.py",
+  "line": 216,
+  "note": "entry không phải list",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4641 assertion PASS): E entry account không phải list: thông điệp thiếu 'phải là list': /tmp/nav_unit_ledger_selfcheck_w1e1hg5x/e_flows.json[SpaceX][0]: phải là object"
+ },
+ {
+  "id": "A69",
+  "file": "bin/account_cash_flows.py",
+  "line": 229,
+  "note": "date sai ⇒ mặc định",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4639 assertion PASS): E bản ghi hỏng {'date': None, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '10:00', 'amount_vnd': 5}: phải raise CashFlowError"
+ },
+ {
+  "id": "A70",
+  "file": "bin/account_cash_flows.py",
+  "line": 260,
+  "note": "giờ sai dạng ⇒ 00:00",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4631 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 5, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '25:00'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A71",
+  "file": "bin/account_cash_flows.py",
+  "line": 127,
+  "note": "noop",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "U62",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 92,
+  "note": "account lạ trong inception ⇒ KeyError",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4643 assertion PASS): E account lạ trong account_inception.json: phải raise ValueError, lại raise KeyError: 'NoSuch'"
+ },
+ {
+  "id": "U63",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 119,
+  "note": "mốc = ngày dòng đầu thay vì inception_date",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 147 assertion PASS): fixture SpaceX 2026-07-02: không dòng tiền ⇒ tỉ số giá đơn vị phải == nav1/nav0 − 1"
+ },
+ {
+  "id": "P54",
+  "file": "bin/nav_period_returns.py",
+  "line": 206,
+  "note": "không dòng nào <= report_date",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4621 assertion PASS): D report-date trước MỌI dòng nav_history: phải raise ValueError, lại raise TypeError: 'NoneType' object is not subscriptable"
+ },
+ {
+  "id": "P55",
+  "file": "bin/nav_period_returns.py",
+  "line": 159,
+  "note": "nav1 sai",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 151 assertion PASS): fixture SpaceX 2026-07-02: nav0/nav1/unit_price0/unit_price1 sai: {'from_date': '2026-07-01', 'to_date': '2026-07-02', 'nav0': 1000000000.0, 'nav1': 1000000000.0, 'return_pct': -0.527, 'days': 1, 'unit_price_ratio': 0.9947"
+ }
+]

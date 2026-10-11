@@ -1,0 +1,74 @@
+{
+ "context": "answer cho dispatch job Taylor_20261010_182122 (attempt 2/2 — hoàn tất phần còn dở của attempt 1: commit N11, chạy lại mutant trên code cuối, sandbox cổng; thêm 1 chốt D1). VÒNG 2 sửa theo arch-review @feaa33b5. CHƯA merge, KHÔNG gửi báo cáo, KHÔNG đụng crontab.",
+ "branch": "feat/fund-unit-ledger-20261011",
+ "worktree": "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011",
+ "commits": {
+  "1_sua_review": "5dce11e3",
+  "2_N11": "75060709",
+  "base": "feaa33b5",
+  "diff": "20 file, +2151/−507"
+ },
+ "nghiem_thu": {
+  "asof_2026-10-09": {
+   "SpaceX": "-1,33 / 1,024 / 0,519",
+   "ZaloPay": "-4,907 / -1,162 / -2,01"
+  },
+  "so_master": "3.900 giá trị (195 account×ngày lịch) 0 lệch ở khoá cũ; khoá mới thêm: day, unit_price_ratio, pending_flows, dropped_flows",
+  "dong_tien_that": "data/account_cash_flows.json 0 bản ghi cả 2 TK ⇒ không số lịch sử nào đổi",
+  "selfcheck": "nav_unit_ledger 4604 assertion, nav_flow_term 179, nav_jump_flow_gate PASS, portfolio_status PASS — 16/16 lượt rc=0 dưới env -u TZ / America/New_York / UTC / Pacific/Kiritimati",
+  "gates": "tz_anchor_gate rc=0, code_quality_gate rc=0, pre-commit run --files rc=0 trên mọi file đổi (N10)"
+ },
+ "truoc_sau": {
+  "K1": "TRƯỚC: nạp 200tr 20:00 mẫu mặc định −20,0% asof T, −4,0% vĩnh viễn; rút: +20,0% rồi −4,0%; bod+20:00 −16,667% asof T. SAU: bản ghi không giờ ⇒ CashFlowError 'thiếu time_ict'; khai ngày+giờ 20:00 ⇒ 0,000% asof T, T+1, T+2 (nạp lẫn rút); timing khai khác suy ra ⇒ CashFlowError nêu cả hai; balance_ts thiếu/hỏng ⇒ từ chối, trích giá trị đã đọc.",
+  "K2": "TRƯỚC: sổ lệch +1.234đ ⇒ CLI rc=1 ⇒ cổng fail-open, báo cáo +9,99% lọt. SAU (sandbox, sổ lệch nằm sẵn trong thư mục dữ liệu): CLI rc=0 (−1,33), cổng CHẶN +9,99% (lệch 11,320pp); --seal vào thư mục dữ liệu mặc định rc=3 TỪ CHỐI; registry nav_unit_ledger.md = NOT-YET-SEALED, 'bản đối chứng'.",
+  "N1": "TRƯỚC: không có khoá pending. SAU: pending_flows/dropped_flows luôn có trong JSON + cảnh báo stderr (ca gõ nhầm 07-13: pending=1; sandbox nạp thứ Bảy 10-10 chưa có dòng NAV: pending hiện ở JSON + stderr).",
+  "N2": "TRƯỚC: 2 dòng trùng ngày ⇒ giá 10.000→8.333; seal đọc 2 lần không khoá. SAU: nav_history không tăng nghiêm ngặt ⇒ ValueError; seal đọc 1 lần dưới fcntl.flock + ghi nguyên tử (mutant U56p/U70 chết bằng assertion).",
+  "N3": "TRƯỚC: nạp thứ Bảy làm cổng 15% chặn dòng NAV thứ Hai, tiêu đề 'KHÔNG ĐỌC ĐƯỢC'. SAU: nạp thứ Bảy 10:00 ⇒ bod trên thứ Hai, cổng 15% ok=True 'ĐƯỢC PHÉP GHI: đã trừ dòng tiền đã khai'; tiêu đề tách 'không đọc được' với 'đọc được nhưng không gán được'.",
+  "N4": "TRƯỚC: cổng 5% so ngày ghi thô ⇒ chặn oan thứ Hai [('2026-07-06', 10.0)]. SAU: so theo phiên được gán ⇒ [].",
+  "N5": "neo số công bố trên fixture đóng băng bin/fixtures/nav_unit_ledger_asof_20261009; điều kiện bỏ qua = có dòng tiền amount≠0, in rõ khi bỏ qua.",
+  "N6": "wc_paths.find_wc_root thay dirname×3 (nav_unit_ledger.py, account_cash_flows.py).",
+  "N7": "TRƯỚC: ghi chú luôn 'dòng tiền đổi dấu nhiều lần'; mwr nạp thứ Bảy 2,161. SAU: '0 nghiệm … hàm giá trị không đổi dấu trên lưới' / '2 nghiệm (+4,040%; +21,000%)'; mốc ngày IRR = phiên sổ đã gán ⇒ 2,078.",
+  "N8": "TRƯỚC: nan/inf 'KHÔNG phát hiện lệch'. SAU: báo lệch; bỏ env NAV_UNIT_LEDGER_DIR.",
+  "N9": "TRƯỚC: annualize(1,4641; 1461 ngày)=9,993. SAU: 10,0 (365,25); ngưỡng vẫn ≥365 ngày lịch.",
+  "N10": "đã chạy 3 cổng trên nhánh, rc=0 cả ba. Lưu ý: hook tz-anchor-gate trong worktree tính khoá 'wt-fundunit-1011/bin/…' nên không khớp baseline cho report_delivery_gate.py:330 (dòng có sẵn) ⇒ commit 1 dùng SKIP=tz-anchor-gate; chạy tay cùng file rc=0.",
+  "N11": "commit riêng 75060709. 'Từ go-live', '% so với hôm trước' (daily_nav_snapshot) và 'Hôm nay %' (portfolio_status) lấy từ compute_period_returns (kỳ mới day + unit_price_ratio), mốc account_inception.json; số VND tách lãi/lỗ với nạp/rút ròng khi có dòng tiền; không tính được ⇒ in lỗi thật, không lùi về công thức cũ; portfolio_status hết except: pass. Fixture 10-09: ZaloPay '−48,470,726 VND (−4.91%)' thay cho −6,06%; SpaceX giữ nguyên từng ký tự. Cổng báo cáo ngày (report_return_gate): thay khối NAV của 56 báo cáo ngày đã gửi bằng dòng mới (kể cả dạng có nạp/rút + dòng treo) ⇒ cổng đọc ra y hệt 56/56."
+ },
+ "N11_bao_cao_da_gui_sai_moc": {
+  "ZaloPay": "28/28 báo cáo ngày có dòng 'Từ go-live' (37 file, 9 file không có dòng đó) in THẤP hơn chuẩn 1,127…1,220 điểm % (vd 2026-10-09 in −6,06%, chuẩn −4,907%; 2026-08-17 in −8,02%, chuẩn −6,893%)",
+  "SpaceX": "2/28 lệch ±0,005 điểm % (làm tròn), mốc 1 tỷ trùng mốc chuẩn",
+  "hanh_dong": "KHÔNG sửa/gửi lại báo cáo cũ — chờ user quyết"
+ },
+ "mutant_tren_code_cuoi_75060709": {
+  "reviewer_mut_run_py": "136: 105 chết-assertion · 0 chết-sập · 0 sống · 31 không áp được (code đã viết lại)",
+  "31_khong_ap_duoc": "23 đã chuyển sang cấu trúc mới (hậu tố p/q trong mutants_r2.py) — chết-assertion hết; 8 không có bản chuyển vì code bị XOÁ: P31/P42 (đường đọc sổ đã chốt, bỏ theo D2), A01 (DEFAULT_TIMING, bỏ theo D1), A03/A04/A07/A20 (gán theo ngày thô, thay bằng assign_flow — phủ bởi R01–R24, R62–R67), P25 (vòng lặp viết lại)",
+  "33_mutant_neu_ten_trong_REVIEW": "33/33 chết bằng assertion (kể cả P08b, A09, A17 trước chết do sập) — bảng từng mã + file:dòng ở round2/final2/named_mutants_table.txt",
+  "mutants_r2_py_moi": "97/97 chết-assertion (35 bản chuyển + 62 mutant cho code mới: luật gán D1, khoá/ghi nguyên tử, từ chối chốt sổ thật, pending/dropped, IRR, 365,25, cổng báo cáo)",
+  "N11": "nav_period_returns 5/5, portfolio_status 7/7, daily_nav_snapshot 31/31 (bộ --mutations sẵn có của nav_jump_flow_gate_selfcheck, gồm 13 mutant n11-*) — chết-assertion hết",
+  "tuong_duong_cua_reviewer": "U34b, U38, U45, P10b, P27 nay CHẾT bằng assertion; P18→P18p chết; P25 không còn áp được",
+  "con_song": "0",
+  "chet_sap": "0",
+  "khong_thu": "không có — U69 (bỏ fsync), reviewer không thử được, nay CHẾT bằng assertion (nav_unit_ledger.py:283, test 'C2 fsync nổ: phải raise OSError')"
+ },
+ "quet_rong_23": "27 selfcheck như vòng 1: 26 rc=0, 1 đỏ CÓ SẴN (report_delivery_ledger_selfcheck.py — đỏ từ mọi worktree, reviewer đã ghi nhận). Chạy đủ 27 trên 37ba142b; chạy lại 26 trên code cuối (bỏ nav_scripts_2account_selfcheck vì lý do ở mục tac_dong_ngoai_y_muon).",
+ "sandbox_cong": "bản sao bin/ nhánh @75060709 + bản sao dữ liệu thật + báo cáo tuần đã gửi, report_delivery_gate.ROOT=/tmp/fu_fin_gate/s0/WC/mike: (1) CLI ra đúng số nghiệm thu 2 TK; (2) báo cáo tuần đã gửi SpaceX+ZaloPay QUA cả 2 cổng; (3) sửa thành +9,99% ⇒ CHẶN; (4) sổ lệch nằm sẵn ⇒ CLI rc=0, vẫn CHẶN, --seal rc=3; (5) bản ghi thiếu giờ ⇒ CLI rc=1, cổng period-return fail-open (WARN) nhưng cổng nav-flow CHẶN; (6) nạp thứ Bảy chưa có dòng NAV ⇒ pending hiện ở JSON + stderr; (7) report_delivery_gate_selfcheck + nav_period_returns --selfcheck trong sandbox rc=0. Nguyên văn: round2/final2/sandbox_gate_trial.txt",
+ "D1_voi_du_lieu_that": {
+  "ca_1": "ZaloPay 2026-07-27 có balance_ts 2026-07-28T09:15:15 (chụp sáng hôm sau). Xử lý: luật so với balance_ts thật và xét cả dòng liền trước ngày của dòng tiền ⇒ tiền 07-27 16:00/20:00 hoặc 07-28 09:05 ⇒ eod trên dòng 07-27; 07-28 10:00 ⇒ bod trên 07-28; 07-28 09:15 (cùng phút, không giây) ⇒ từ chối, yêu cầu HH:MM:SS. Còn lại chưa xử lý được: NAV của dòng 07-27 nếu định giá bằng giá lúc 09:15 thì đã lẫn ~15 phút biến động phiên 07-28 — là chất lượng của chính dòng NAV, không phát hiện được từ balance_ts.",
+  "ca_2": "3 dòng chụp TRƯỚC giờ đóng cửa của chính nó: SpaceX 2026-07-02 09:46, cả hai TK 2026-08-24 04:49/04:50. Cơ chế D1 nguyên văn cho ra giá SAI ở hai kiểu: (a) tiền tới trong phiên đó sau lần chụp ⇒ bị đẩy sang dòng kế, giao dịch ở 'giá chốt' của chính ngày đó; (b) [MỚI ở attempt 2] tiền tới sau đóng cửa hôm đó hoặc sáng phiên sau ⇒ bod trên phiên kế, giá nguồn là dòng chụp trước phiên — không phải giá chốt. Đo (b): phiên +10%, nạp 22% NAV tối hôm đó ⇒ tỉ suất +8,197% thay vì +10,0%, vĩnh viễn. Attempt 1 đã nhận ca (b) là hợp lệ và có test khẳng định điều đó trên thị trường đứng yên (0,0% cả hai cách nên không lộ) — tôi đổi: cả (a) lẫn (b) đều CashFlowError, trích balance_ts đã đọc, yêu cầu chạy lại daily_nav_snapshot.py cho ngày đó. Đây là chỗ tôi làm KHÁC câu chữ D1 (D1 nói bod = giá chốt dòng liền trước, không nói dòng đó phải chụp sau đóng cửa) — cần Mike xác nhận.",
+  "ca_3": "giờ đóng cửa: trading_bot/vn_market không có hằng số ⇒ SESSION_CLOSE_ICT = 14:45 khai trong account_cash_flows.py (kết thúc ATC HOSE). Tiền tới 14:45–15:00 (thoả thuận/UPCOM còn chạy) được coi là sau đóng cửa.",
+  "gia_dinh_chua_kiem": "date+time_ict phải là lúc tiền THẬT SỰ vào số dư DNSE; độ trễ ngân hàng→DNSE chưa ai đo. balance_ts là ICT chỉ suy từ vn_market.now_ict()."
+ },
+ "tac_dong_ngoai_y_muon_PHAI_BIET": "Quét rộng §23 gồm nav_scripts_2account_selfcheck.py (CÓ SẴN, nhánh không sửa): nó gọi broker DNSE THẬT (chỉ đọc) và chạy daily_nav_snapshot.py của NHÁNH trên data/ THẬT, có backup/restore nav_history. Hệ quả đo được đêm nay: (1) data/execution_logs/dnse_raw_2026-10-11.jsonl được ghi thêm 16 bản ghi balances/positions (00:10, 00:25 vòng 1; 02:00–02:01 attempt 1; 02:22 attempt 2); (2) data/execution_logs/verified_snapshot_{SpaceX,ZaloPay}_2026-10-11.json được tạo/ghi đè (mtime 02:22) — selfcheck không backup/xoá file này; (3) nav_history_SpaceX.csv THẬT có dòng 2026-10-11 trong ~23 giây (02:22:24→02:22:47) rồi được khôi phục đúng (mtime 2026-10-09 19:10:51, dòng cuối 2026-10-09) — tôi phát hiện vì sandbox của tôi chép đúng lúc đó và ra kết quả sai, đã dựng lại sandbox và chạy lại; (4) data/value_radar_series.csv được làm tươi (cache của value_radar.py, qua portfolio_status_selfcheck). Tôi KHÔNG xoá/sửa các file này (dnse_raw là log dùng chung, 10-11 là Chủ nhật). Trái với yêu cầu 'KHÔNG tạo file trong data/' — do chính bộ quét rộng được yêu cầu; đề nghị Wags/Mike cho nav_scripts_2account_selfcheck ra khỏi danh sách §23 chạy-từ-worktree hoặc sandbox hoá nó.",
+ "khong_lam_duoc": [
+  "Cổng period-return của report_delivery_gate vẫn fail-open khi CLI rc≠0 (có sẵn, D2 chọn phương án b nên không đổi): ca bản ghi thiếu giờ hiện được cổng nav-flow chặn thay, nhưng một lỗi CLI khác không qua nav-flow vẫn lọt.",
+  "report_delivery_gate chưa đọc pending_flows: dòng tiền treo chỉ hiện ở JSON/stderr/dòng NAV hằng ngày, chưa chặn báo cáo tuần/tháng.",
+  "Chưa có lượt daily_nav_snapshot.py / eod_trading_report.sh end-to-end THẬT trên nhánh với dòng mới (chỉ hàm + fixture + sandbox); lượt cron đầu tiên sau merge cần nhìn log.",
+  "Python 3.12 chưa thử (máy chỉ chạy 3.10).",
+  "Không sửa/gửi lại 28 báo cáo ngày ZaloPay sai mốc — user quyết."
+ ],
+ "bang_chung": "mike/agents/Taylor/research/fund_unit_ledger_20261011/round2/ — final2/{reviewer_mutants,mutants_r2,mutants_n11_period,mutants_n11_status}.json+log, final2/njf_builtin_mutations.log, final2/named_mutants_table.txt, final2/selfcheck_tz.txt, final2/gates.txt, final2/compare_all_dates.txt, final2/probe_AFTER.txt (so với probe_BEFORE_feaa33b5.txt), final2/sandbox_gate_trial.{py,txt}, final2/broad_scan/, broad_scan/ (đủ 27 trên 37ba142b), n11_daily_reports_wrong_baseline.txt, n11_daily_gate_parser_check.txt, mutants_r2.py, mutants_n11.py, run_mutants.py",
+ "cho_quyet": [
+  "Mike: arch-review vòng 2 + xác nhận chốt D1 ca_2(b)",
+  "User: 28 báo cáo ngày ZaloPay sai mốc có đính chính không",
+  "User/Mike: 2 file verified_snapshot_*_2026-10-11.json do selfcheck để lại trong data/"
+ ]
+}

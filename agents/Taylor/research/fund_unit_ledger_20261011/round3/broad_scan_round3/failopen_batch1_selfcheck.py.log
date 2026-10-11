@@ -1,0 +1,7 @@
+TZ=(unset)  python=3.10.12  tree=/tmp/ar3/WC/mike  OLD_REF=afc1e6b5^
+  FAIL t2_lag_days_two_sided: không đọc được afc1e6b5^:bin/compute_jit_unpark.py — git: fatal: not a git repository (or any of the parent directories): .git
+  FAIL t3_sbv_two_sided: không đọc được afc1e6b5^:bin/check_sbv_weekly.sh — git: fatal: not a git repository (or any of the parent directories): .git
+  FAIL t4_cash_flows_two_sided: không đọc được afc1e6b5^:bin/account_cash_flows.py — git: fatal: not a git repository (or any of the parent directories): .git
+  FAIL t5_heartbeat_two_sided: không đọc được afc1e6b5^:bin/bot_heartbeat.sh — git: fatal: not a git repository (or any of the parent directories): .git
+
+FAIL  (20 assertion, 4 test FAIL)

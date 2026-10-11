@@ -1,0 +1,62 @@
+[1] G1 close ĐÃ thuộc phiên HÔM NAY ⇒ dùng nguyên giá ATC, KHÔNG đụng secdef
+  ✓ MBB giữ giá đóng cửa hôm nay 24.250 (KHÔNG bị thay bằng 20.200)  — 24250.0
+  ✓ nguồn khai 'dnse_g1_today'  — {'MBB': 'dnse_g1_today', 'ACB': 'dnse_g1_today'}
+  ✓ secdef KHÔNG hề được gọi (không tốn round-trip trên đường chạy chính)
+  ✓ không in cảnh báo thay giá
+
+[2] G1 close thuộc phiên TRƯỚC + mã đang GDKHQ ⇒ lấy secdef.basicPrice (CA THẬT MBB)
+  ✓ MBB 24.250 → 20.200 (giá tham chiếu sàn cho phiên ex)  — 20200.0
+  ✓ nguồn khai 'dnse_secdef_basic' — provenance KHÔNG nói dối  — {'MBB': 'dnse_secdef_basic'}
+  ✓ có cảnh báo nêu rõ mã + cả hai giá + phiên của giá cũ  — ℹ️ giá thuộc phiên HÔM NAY thay cho giá đóng cửa phiên trước — thường là mã đang giao dịch không hưởng quyền: MBB 24,250→20,200 (G1 close phiên 2026-10-10, thay
+  ✓ số học khớp công thức điều chỉnh HOSE gộp cổ tức CP 15% + quyền mua 10:1 @10.000đ
+
+[3] TỔNG QUÁT, không chỉ ex-date: UPCOM/HNX có giá tham chiếu ≠ giá đóng cửa
+  ✓ TV1 19.800 → 19.700 (UPCOM tham chiếu = giá BÌNH QUÂN phiên trước)  — 19700.0
+  ✓ SCL 23.300 → 23.400  — 23400.0
+  ✓ cả hai khai đúng nguồn secdef  — {'SCL': 'dnse_secdef_basic', 'TV1': 'dnse_secdef_basic'}
+
+[4] Ngày thường (hai nguồn trùng) ⇒ giá không đổi, KHÔNG spam cảnh báo
+  ✓ ACB/VCB giữ nguyên giá  — {'ACB': 22650.0, 'VCB': 60300.0}
+  ✓ KHÔNG in cảnh báo khi hai nguồn bằng nhau (cảnh báo phải hiếm mới có nghĩa)
+
+[5] FAIL-SAFE: secdef lỗi/rỗng ⇒ GIỮ giá G1 cũ, không crash, không trả rỗng
+  ✓ secdef ném exception ⇒ MBB vẫn có giá (24.250, hành vi CŨ) chứ không biến mất  — {'MBB': 24250.0}
+  ✓   …và nguồn khai đúng là 'dnse_g1_today' (không khai khống secdef)  — {'MBB': 'dnse_g1_today'}
+  ✓ secdef trả rỗng ⇒ MBB vẫn có giá (24.250, hành vi CŨ) chứ không biến mất  — {'MBB': 24250.0}
+  ✓   …và nguồn khai đúng là 'dnse_g1_today' (không khai khống secdef)  — {'MBB': 'dnse_g1_today'}
+
+[6] Tương thích ngược: with_source=False trả dict phẳng như chữ ký cũ
+  ✓ trả về dict (không phải tuple)  — dict
+  ✓ giá vẫn là giá ĐÃ VÁ  — {'MBB': 20200.0, 'ACB': 22650.0}
+
+[7] Mã lỗi API bị BỎ QUA, không kéo sập cả rổ
+  ✓ mã không tồn tại vắng khỏi kết quả, mã còn lại vẫn đúng  — {'MBB': 20200.0}
+
+[8] `time` thiếu/méo ⇒ fail-safe về hành vi CŨ (không đoán sang nhánh mới)
+  ✓ thiếu field `time` ⇒ giữ giá G1, KHÔNG gọi secdef  — ({'MBB': 24250.0}, [])
+
+[9] CA CHỨNG MINH NGƯỢC — bỏ bản vá thì cổng 5% của daily_nav_snapshot CHẶN NAV hôm nay
+  ✓ KHÔNG vá: lệch 20.0% > 5.0% ⇒ cổng chặn (bug có thật, không phải giả định)  — 20.05%
+  ✓ CÓ vá: lệch 0.0% ⇒ cổng thông, NAV tính được  — 0.00%
+  ✓ cổng 5% vẫn còn nguyên trong daily_nav_snapshot.py (bản vá KHÔNG gỡ lưới an toàn)
+
+[10] CỬA SỔ GIỮA PHIÊN (09:00–14:45): closePrice=0 mọi board — nửa đồng hồ quant-skeptic
+  ✓ giữa phiên + chưa có khớp lệnh ⇒ secdef.basicPrice 20.200 (KHÔNG rớt khỏi kết quả)  — ({'MBB': 20200.0}, {'MBB': 'dnse_secdef_basic'})
+  ✓ BẢN CŨ trên cùng fixture: không tìm được entry G1 ⇒ mã rớt ⇒ rơi về BQ T-1 (bug thật)
+  ✓ và BQ T-1 chưa điều chỉnh × qty đã điều chỉnh = +5.123.250 đúng như trước khi vá  — 5123250.0
+  ✓ latest_trade thuộc PHIÊN TRƯỚC ⇒ BỊ TỪ CHỐI, rơi về basicPrice (không tái lập bug)  — ({'MBB': 20200.0}, {'MBB': 'dnse_secdef_basic'})
+  ✓   ↳ bỏ cổng vintage thì sẽ ra đúng 24.250 sai — cổng là thứ duy nhất chặn  — ['MBB']
+  ✓ latest_trade thuộc phiên HÔM NAY ⇒ dùng mark sống 20.550, nguồn 'dnse_trade_today'  — ({'MBB': 20550.0}, {'MBB': 'dnse_trade_today'})
+  ✓   ↳ có mark sống rồi thì KHÔNG gọi secdef nữa
+  ✓ cả hai nguồn hỏng ⇒ mã vắng khỏi kết quả (fail-safe, caller khai bq_close_stale)
+  ✓ EOD: G1 close hôm nay ⇒ giữ 24.250, KHÔNG gọi latest_trade/secdef (đường chạy chính)  — ({'MBB': 24250.0}, {'MBB': 'dnse_g1_today'}, [], [])
+
+[11] §16 — neo TZ tường minh: kết quả KHÔNG đổi theo TZ của tiến trình gọi
+  ✓ TZ=Asia/Ho_Chi_Minh ⇒ 20200.0  — 20200.0
+  ✓ env -u TZ ⇒ 20200.0  — 20200.0
+  ✓ TZ=America/New_York ⇒ 20200.0  — 20200.0
+  ✓ TZ=UTC ⇒ 20200.0  — 20200.0
+  ✓ mọi môi trường TZ cho KẾT QUẢ ĐỒNG NHẤT  — {'TZ=Asia/Ho_Chi_Minh': '20200.0', 'env -u TZ': '20200.0', 'TZ=America/New_York': '20200.0', 'TZ=UTC': '20200.0'}
+
+==========================================================================
+KẾT QUẢ: 38 PASS / 0 FAIL

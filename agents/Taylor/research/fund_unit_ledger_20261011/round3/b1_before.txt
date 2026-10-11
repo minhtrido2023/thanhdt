@@ -1,0 +1,17 @@
+== B1. Sự thật: phiên T +10%, T+1 đứng yên ⇒ giá đơn vị 10.000 → 11.000 → 11.000 (+10,0%)
+đủ dòng (có dòng phiên T)                                    => 06-02:10000.0[] 06-03:11000.0[e] 06-04:11000.0[]  pend=0 drop=0
+THIẾU dòng phiên T (như 2026-08-06 thật)                     => 06-02:10000.0[] 06-04:10819.7[b]  pend=0 drop=0
+   compute_period_returns asof T+1: 8.197 % | pending: [] | dropped: [] | cash_flows: [('bod', '2026-06-04')]
+   cổng 5% (unexplained_nav_jumps): []
+== B1b. Cùng ca, đi qua cổng 15% của daily_nav_snapshot đúng trình tự thật
+   tối T 19:10, CHƯA khai dòng tiền: ok=False (dòng phiên T KHÔNG được ghi — rc=3)
+   tối T+1 19:10, ĐÃ khai nạp 220tr 16:00 ngày T: ok=True ::    ℹ️ NAV 2026-06-04 (X) biến động +32.00% vượt ngưỡng ±15% nhưng ĐƯỢC PHÉP GHI: đã trừ dòng tiền đã khai +220,000,000 VND thì phần dư còn +10.00% (≤±15%) — 2026-06-03 deposit +220,000,000 [timing=bod] x
+   ⇒ nav_history = [T-1, T+1], dòng T thiếu vĩnh viễn nếu không ai backfill; sổ đơn vị:
+   sổ sau đó                                                 => 06-02:10000.0[] 06-04:10819.7[b]  pend=0 drop=0
+== B1c. Biến thể: thiếu dòng T, tiền tới sáng T+1 08:00 (trước phiên)
+thiếu T, nạp 08:00 T+1                                       => 06-02:10000.0[] 06-04:10819.7[b]  pend=0 drop=0
+== B1d. Thiếu NHIỀU phiên (T và T+1), tiền tới tối T+1
+thiếu T,T+1; nạp 20:00 T+1; dòng kế T+2                      => 06-02:10000.0[] 06-05:11270.5[b]  pend=0 drop=0
+   (sự thật: 10.000 → 11.550)
+== B1e. Dữ liệu THẬT: SpaceX thiếu dòng 2026-08-06; nạp 100tr lúc 16:00 ngày 08-06
+   KHÔNG lỗi, KHÔNG cảnh báo; gán: [('bod', '2026-08-07')] | pending: []

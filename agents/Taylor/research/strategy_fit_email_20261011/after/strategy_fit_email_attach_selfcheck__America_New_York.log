@@ -1,0 +1,63 @@
+⚠️  report_delivery_gate: chạy từ /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-1011 nhưng GHI SỔ THẬT + gọi script con của cây canonical /home/trido/thanhdt/WorkingClaude/mike — đây không phải sandbox
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: report_delivery_gate already validated sha256=2af6a844c3b51d8fecb886a128991ae2a0bb4dce0dfddc0c947b2e250e32e36a
+✅ Đã gửi email '[Daily report] ZaloPay_daily_report_2026-10-11.md' tới to@selfcheck.invalid
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: report_delivery_gate already validated sha256=2af6a844c3b51d8fecb886a128991ae2a0bb4dce0dfddc0c947b2e250e32e36a
+⚠️  Không đính kèm được /tmp/tmpuvcehrk3/gate/strategy_fit_2026-10-11.html: [Errno 2] No such file or directory: '/tmp/tmpuvcehrk3/gate/strategy_fit_2026-10-11.html'
+✅ Đã gửi email '[Daily report] ZaloPay_daily_report_2026-10-11.md' tới to@selfcheck.invalid
+[PASS] E1 daily KHÔNG cờ: gửi y như cũ (1 file .md, không dòng 📎)
+[PASS] E2 daily + --attach: có file HTML kèm, đúng từng byte
+[PASS] E2b file .md kèm vẫn là artifact nguyên bản (ghi chú chỉ vào thân)
+[PASS] E2c thân có đúng MỘT dòng 📎 nói có file kèm và nó là gì
+[PASS] E2d chỉ gửi tới đúng to_email của credential
+[PASS] E2e thân chỉ THÊM đúng 1 đường kẻ + 1 dòng ghi chú, không mất/đổi dòng nào của báo cáo
+[PASS] E3 file kèm KHÔNG tồn tại: email VẪN gửi, không kèm, một dòng mang lỗi thật
+[PASS] E3b file kèm không đọc được (là thư mục): vẫn gửi, lỗi thật IsADirectoryError
+[PASS] E4 --attach-note: đúng MỘT dòng, nguyên văn lỗi, không file kèm thêm
+[PASS] E5 --attach lặp được: kèm đủ 2 file
+[PASS] E6 weekly: --attach/--attach-note bị BỎ QUA — không file HTML, không dòng 📎, vẫn gửi
+[PASS] E6 monthly: --attach/--attach-note bị BỎ QUA — không file HTML, không dòng 📎, vẫn gửi
+[PASS] E6 khác: --attach/--attach-note bị BỎ QUA — không file HTML, không dòng 📎, vẫn gửi
+report_delivery_gate: COMPLETE ZaloPay_daily_report_2026-10-11.md (validated + Discord + email)
+[PASS] G1 cổng → email THẬT (SMTP giả): COMPLETE và email daily có file HTML kèm
+[PASS] G2 sổ giao hàng không đổi hình dạng: sha = sha256(file .md), không khoá nào về file kèm
+report_delivery_gate: COMPLETE (idempotent) ZaloPay_daily_report_2026-10-11.md
+[PASS] G3 chạy lại có --attach: COMPLETE idempotent, KHÔNG gửi lại kênh nào
+report_delivery_gate: COMPLETE ZaloPay_daily_report_2026-10-11.md (validated + Discord + email)
+[PASS] G4 retry kênh email còn thiếu, file kèm đã mất: vẫn COMPLETE, không gửi lại Discord
+report_delivery_gate: COMPLETE SpaceX_weekly_report_2026-10-05_to_2026-10-09.md (validated + Discord + email)
+report_delivery_gate: COMPLETE SpaceX_daily_report_2026-10-11.md (validated + Discord + email)
+[PASS] G5 không --attach ⇒ lệnh email y nguyên (kết thúc ở lý do skip-return-gate)
+[PASS] G6 có --attach/--attach-note ⇒ chuyển tiếp nguyên văn sau các tham số cũ
+[PASS] D1 [TZ=unset] hôm nay, chưa có file ⇒ SINH rồi --attach đúng đường dẫn
+[PASS] D2 [TZ=unset] account sau: file hôm nay đã có ⇒ DÙNG LẠI, không sinh lần hai
+[PASS] D3 [TZ=unset] sinh LỖI ⇒ hàm vẫn rc=0, không --attach, một --attach-note mang lỗi thật
+[PASS] D4 [TZ=unset] script rc=0 nhưng KHÔNG ra file ⇒ ghi chú, không --attach file ma
+[PASS] D5 [TZ=unset] ngày CŨ, không có file ⇒ KHÔNG sinh lại, không tham số nào (gửi không kèm)
+[PASS] D6 [TZ=unset] ngày CŨ, file ngày đó còn ⇒ kèm file đó, không sinh lại
+[PASS] D1 [TZ=America/New_York] hôm nay, chưa có file ⇒ SINH rồi --attach đúng đường dẫn
+[PASS] D2 [TZ=America/New_York] account sau: file hôm nay đã có ⇒ DÙNG LẠI, không sinh lần hai
+[PASS] D3 [TZ=America/New_York] sinh LỖI ⇒ hàm vẫn rc=0, không --attach, một --attach-note mang lỗi thật
+[PASS] D4 [TZ=America/New_York] script rc=0 nhưng KHÔNG ra file ⇒ ghi chú, không --attach file ma
+[PASS] D5 [TZ=America/New_York] ngày CŨ, không có file ⇒ KHÔNG sinh lại, không tham số nào (gửi không kèm)
+[PASS] D6 [TZ=America/New_York] ngày CŨ, file ngày đó còn ⇒ kèm file đó, không sinh lại
+[PASS] D1 [TZ=Asia/Ho_Chi_Minh] hôm nay, chưa có file ⇒ SINH rồi --attach đúng đường dẫn
+[PASS] D2 [TZ=Asia/Ho_Chi_Minh] account sau: file hôm nay đã có ⇒ DÙNG LẠI, không sinh lần hai
+[PASS] D3 [TZ=Asia/Ho_Chi_Minh] sinh LỖI ⇒ hàm vẫn rc=0, không --attach, một --attach-note mang lỗi thật
+[PASS] D4 [TZ=Asia/Ho_Chi_Minh] script rc=0 nhưng KHÔNG ra file ⇒ ghi chú, không --attach file ma
+[PASS] D5 [TZ=Asia/Ho_Chi_Minh] ngày CŨ, không có file ⇒ KHÔNG sinh lại, không tham số nào (gửi không kèm)
+[PASS] D6 [TZ=Asia/Ho_Chi_Minh] ngày CŨ, file ngày đó còn ⇒ kèm file đó, không sinh lại
+[PASS] D7 sinh QUÁ timeout ⇒ bị dừng (không chờ 30s), rc=0, ghi chú nói quá giờ
+[PASS] D8 _deliver_eod (dùng cho CẢ 4 nhánh) gọi hàm và nối tham số vào lệnh cổng
+[PASS] D9 timeout mặc định 120 giây, có -k để giết hẳn tiến trình treo
+[PASS] D10 dashboard ghi nguyên tử, file tạm RIÊNG từng tiến trình (2 lượt song song không giẫm nhau)
+[PASS] S1 gửi bù daily ngày cũ, dashboard NGÀY ĐÓ còn ⇒ kèm đúng file ngày đó
+[PASS] S2 tên daily gộp 2 account cũng khớp
+[PASS] S3 gửi bù daily, KHÔNG có dashboard ngày đó ⇒ gửi không kèm (không lấy file ngày khác)
+[PASS] S4 dashboard ngày đó rỗng 0 byte ⇒ không kèm
+[PASS] S5 SpaceX_weekly_report_2026-10-05_to_2026-10-09.md: KHÔNG BAO GIỜ kèm (dù dashboard các ngày trong tên đều có)
+[PASS] S5 ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md: KHÔNG BAO GIỜ kèm (dù dashboard các ngày trong tên đều có)
+[PASS] S5 SpaceX_monthly_report_2026-09.md: KHÔNG BAO GIỜ kèm (dù dashboard các ngày trong tên đều có)
+[PASS] S5 SpaceX_weekly_report_2026-10-09.md: KHÔNG BAO GIỜ kèm (dù dashboard các ngày trong tên đều có)
+[PASS] S6 lệnh cổng của sweep nhận ATTACH_ARGS; sweep KHÔNG gọi script sinh dashboard
+[PASS] S7 không dòng nào khác của check_report_cadence.sh truyền --attach cho cổng
+strategy_fit_email_attach_selfcheck: PASS (51/51) [TZ env=America/New_York, hôm nay ICT=2026-10-11]

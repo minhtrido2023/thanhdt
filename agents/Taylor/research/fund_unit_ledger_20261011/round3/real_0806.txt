@@ -1,0 +1,6 @@
+SpaceX có dòng 08-05/08-06/08-07: [True, False, True]
+  nạp 16:00 08-06 => CashFlowError: flow 2026-08-06 time_ict=16:00: phiên 2026-08-06 đã đóng cửa trước khi tiền vào/ra nhưng dòng cho giá là 2026-08-05 — nav_history THIẾU dòng của phiên 2026-08-06 ⇒ giá chốt thiếu biến động của phiên đó. Backfill dòng đó (daily_nav_snapshot.py --ac
+  nạp 10:00 08-06 => QUA: inception -6.214% gán [('bod', '2026-08-07')]
+ZaloPay có dòng 08-05/08-06/08-07: [True, False, True]
+  nạp 16:00 08-06 => CashFlowError: flow 2026-08-06 time_ict=16:00: phiên 2026-08-06 đã đóng cửa trước khi tiền vào/ra nhưng dòng cho giá là 2026-08-05 — nav_history THIẾU dòng của phiên 2026-08-06 ⇒ giá chốt thiếu biến động của phiên đó. Backfill dòng đó (daily_nav_snapshot.py --ac
+  nạp 10:00 08-06 => QUA: inception -9.845% gán [('bod', '2026-08-07')]

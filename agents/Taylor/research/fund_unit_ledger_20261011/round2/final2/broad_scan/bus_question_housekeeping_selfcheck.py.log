@@ -1,0 +1,7 @@
+  ok   four mechanically provable topics are eligible
+  ok   CASH_VENDOR decision is never auto-closed
+  ok   dry-run has no bus side effect
+  ok   broken proofs close nothing
+  ok   same topic asked again after old answer becomes eligible again
+
+5/5 PASS

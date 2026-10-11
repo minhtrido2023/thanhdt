@@ -1,0 +1,2 @@
+so 3900 giá trị trên 195 (account, ngày lịch): 0 lệch
+khoá MỚI thêm vào mỗi kỳ: ['annualized_note', 'annualized_return_pct', 'days', 'mwr_annualized_pct', 'mwr_pct', 'pnl_vnd', 'unit_price0', 'unit_price1', 'unit_price_ratio']

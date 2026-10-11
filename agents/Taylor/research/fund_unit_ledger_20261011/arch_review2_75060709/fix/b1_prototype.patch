@@ -1,0 +1,76 @@
+--- /tmp/ar2/WC/mike/bin/account_cash_flows.py	2026-10-10 19:28:57.000000000 +0000
++++ /tmp/ar2/fix/WC/mike/bin/account_cash_flows.py	2026-10-10 20:08:00.251730107 +0000
+@@ -266,7 +266,21 @@
+     return snap
+ 
+ 
+-def assign_flow(rows, flow):
++def _is_session_day(d):
++    if WC_ROOT not in sys.path:
++        sys.path.insert(0, WC_ROOT)
++    from trading_bot.vn_market import is_holiday
++    return d.weekday() < 5 and not is_holiday(d)
++
++
++def _last_session_closed_by(at):
++    d = at.date() if at.time() >= SESSION_CLOSE_ICT else at.date() - datetime.timedelta(days=1)
++    while not _is_session_day(d):
++        d -= datetime.timedelta(days=1)
++    return d
++
++
++def assign_flow(rows, flow, baseline_date=None):
+     """LUẬT GÁN (xem docstring module). Trả `(chỉ số dòng R trong rows | None, timing | None)`.
+     `None` ở chỉ số = TREO (chưa có dòng NAV nào chứa khoản tiền)."""
+     dates = [r[0] for r in rows]
+@@ -318,11 +332,18 @@
+                         f"{SESSION_CLOSE_ICT:%H:%M} của chính nó ⇒ NAV dòng {src[0]} không phải giá "
+                         f"chốt (thiếu biến động phần còn lại của phiên). Chạy lại "
+                         f"daily_nav_snapshot.py cho ngày {src[0]} (số dư sau đóng cửa) rồi tính lại.")
++            src_date = rows[i][0] if timing == "eod" else (rows[i - 1][0] if i > 0 else baseline_date)
++            last = _last_session_closed_by(at)
++            if src_date is not None and src_date < last:
++                raise CashFlowError(
++                    f"flow {flow['date']} time_ict={flow['time_ict']}: phiên {last} đã đóng cửa trước khi "
++                    f"tiền vào/ra nhưng dòng cho giá là {src_date} — nav_history THIẾU dòng của phiên "
++                    f"{last} ⇒ giá chốt thiếu biến động. Backfill dòng đó (--from-raw) rồi tính lại.")
+             return i, timing
+     return None, None
+ 
+ 
+-def attach_flows_to_rows(rows, flows):
++def attach_flows_to_rows(rows, flows, baseline_date=None):
+     """Gán mỗi bản ghi dòng tiền vào ĐÚNG MỘT mốc quan sát NAV theo `assign_flow`.
+ 
+     `rows`: NavRow tăng nghiêm ngặt theo ngày. Trả dict {ngày của dòng R: [flow, ...]}; mỗi flow
+@@ -330,9 +351,18 @@
+     `session_date` = ngày dòng R. Flow TREO nằm ở key `None` (timing giữ như người khai).
+     """
+     require_strictly_increasing(rows)
++    money = [f for f in flows if f["kind"] != "market_only"]
++    if money:
++        first = min(f["date"] for f in money)
++        s0 = max(0, bisect.bisect_left([r[0] for r in rows], first) - 1)
++        for prev, cur in zip(rows[s0:], rows[s0 + 1:]):
++            if _snapshot_moment(cur, money[0]) <= _snapshot_moment(prev, money[0]):
++                raise CashFlowError(
++                    f"balance_ts không tăng dần: dòng {cur[0]} chụp lúc {cur.balance_ts} không sau dòng "
++                    f"{prev[0]} ({prev.balance_ts}) — luật gán giả định lần chụp tăng theo ngày. Không gán hộ.")
+     mapped = {}
+     for f in flows:
+-        idx, timing = assign_flow(rows, f)
++        idx, timing = assign_flow(rows, f, baseline_date)
+         if idx is None:
+             mapped.setdefault(None, []).append(dict(f, session_date=None))
+         else:
+--- /tmp/ar2/WC/mike/bin/nav_unit_ledger.py	2026-10-10 19:28:57.000000000 +0000
++++ /tmp/ar2/fix/WC/mike/bin/nav_unit_ledger.py	2026-10-10 20:07:21.034906450 +0000
+@@ -138,7 +138,7 @@
+     require_strictly_increasing(rows)
+     nav_rows = [r for r in rows if r[0] > inception_from]
+     dropped = [f for f in flows if f["date"] <= inception_from]
+-    by_date = attach_flows_to_rows(nav_rows, [f for f in flows if f["date"] > inception_from])
++    by_date = attach_flows_to_rows(nav_rows, [f for f in flows if f["date"] > inception_from], inception_from)
+     pending = by_date.pop(None, [])
+ 
+     base_est = next((getattr(r, "is_estimate", False) for r in rows if r[0] == inception_from),

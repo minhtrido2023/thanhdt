@@ -1,0 +1,110 @@
+[
+ {
+  "id": "A05x",
+  "file": "bin/account_cash_flows.py",
+  "line": 220,
+  "note": "bỏ hẳn kiểm dấu deposit",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4566 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 0, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '10:00'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A06x",
+  "file": "bin/account_cash_flows.py",
+  "line": 222,
+  "note": "bỏ hẳn kiểm dấu withdraw",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4567 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 0, 'kind': 'withdraw', 'evidence': 'x', 'time_ict': '10:00'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A66",
+  "file": "bin/account_cash_flows.py",
+  "line": 202,
+  "note": "không bắt key evidence (⇒ KeyError)",
+  "status": "KILLED_CRASH",
+  "by": "bin/nav_flow_term_selfcheck.py",
+  "tail": "KeyError: 'evidence'"
+ },
+ {
+  "id": "A67",
+  "file": "bin/account_cash_flows.py",
+  "line": 200,
+  "note": "bản ghi không phải object",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "A68",
+  "file": "bin/account_cash_flows.py",
+  "line": 195,
+  "note": "entry không phải list",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "A69",
+  "file": "bin/account_cash_flows.py",
+  "line": 208,
+  "note": "date sai ⇒ mặc định",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "A70",
+  "file": "bin/account_cash_flows.py",
+  "line": 233,
+  "note": "giờ sai dạng ⇒ 00:00",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4570 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 5, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '25:00'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A71",
+  "file": "bin/account_cash_flows.py",
+  "line": 114,
+  "note": "noop",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "U62",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 92,
+  "note": "account lạ trong inception ⇒ KeyError",
+  "status": "KILLED_CRASH",
+  "by": "bin/nav_period_returns.py --selfcheck",
+  "tail": "KeyError: 'NoSuchAccount'"
+ },
+ {
+  "id": "U63",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 119,
+  "note": "mốc = ngày dòng đầu thay vì inception_date",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 147 assertion PASS): fixture SpaceX 2026-07-02: không dòng tiền ⇒ tỉ số giá đơn vị phải == nav1/nav0 − 1"
+ },
+ {
+  "id": "P54",
+  "file": "bin/nav_period_returns.py",
+  "line": 206,
+  "note": "không dòng nào <= report_date",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "P55",
+  "file": "bin/nav_period_returns.py",
+  "line": 159,
+  "note": "nav1 sai",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 151 assertion PASS): fixture SpaceX 2026-07-02: nav0/nav1/unit_price0/unit_price1 sai: {'from_date': '2026-07-01', 'to_date': '2026-07-02', 'nav0': 1000000000.0, 'nav1': 1000000000.0, 'return_pct': -0.527, 'days': 1, 'unit_price_ratio': 0.9947"
+ }
+]

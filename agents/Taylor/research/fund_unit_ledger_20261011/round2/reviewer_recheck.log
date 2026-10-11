@@ -1,0 +1,7 @@
+P25 NOAPPLY 0
+U70 nav_unit_ledger.py L278 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4406 assertion PASS): C: sau --seal file sổ phải tồn tại: [PosixPath('/tmp/nav_unit_ledger_selfcheck_7b2r1gzm/c_seal/ledger/nav_unit_ledger_SpaceX.csv.lock')]
+U45 nav_unit_ledger.py L182 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4416 assertion PASS): C: NAV có phần lẻ phải ghi/đọc lại đúng từng bit (không làm tròn), được [1000000000.0, 1010000000.2, 1020000000.1]
+U38 nav_unit_ledger.py L68 SURVIVED  | 
+P27 nav_period_returns.py L214 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2585 assertion PASS): B5b: WTD phải tính từ dòng cuối TRƯỚC thứ Hai (Chủ nhật 07-05), được {'from_date': '2026-07-03', 'to_date': '2026-07-07', 'nav0': 1000000000.0, 'nav1': 1020100000.0, 'return_pct': 2.01, 'days': 4, 'unit_price0': 10000.0, 
+P32 nav_period_returns.py L210 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4565 assertion PASS): F: thiếu account_cash_flows.json ⇒ CLI công bố phải rc=1, không in số; được rc=0 {
+Counter({'KILLED_ASSERT': 4, 'SURVIVED': 1, 'NOAPPLY': 1})

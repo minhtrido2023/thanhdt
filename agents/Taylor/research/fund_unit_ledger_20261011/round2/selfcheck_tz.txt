@@ -1,0 +1,12 @@
+[env -u TZ] bin/nav_unit_ledger_selfcheck.py rc=0 :: OK — 4576 assertion PASS (nav_unit_ledger_selfcheck.py) 
+[env -u TZ] bin/nav_flow_term_selfcheck.py rc=0 :: OK — 179 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive 
+[env -u TZ] bin/nav_jump_flow_gate_selfcheck.py rc=0 :: PASS 
+[env TZ=America/New_York] bin/nav_unit_ledger_selfcheck.py rc=0 :: OK — 4576 assertion PASS (nav_unit_ledger_selfcheck.py) 
+[env TZ=America/New_York] bin/nav_flow_term_selfcheck.py rc=0 :: OK — 179 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive 
+[env TZ=America/New_York] bin/nav_jump_flow_gate_selfcheck.py rc=0 :: PASS 
+[env TZ=UTC] bin/nav_unit_ledger_selfcheck.py rc=0 :: OK — 4576 assertion PASS (nav_unit_ledger_selfcheck.py) 
+[env TZ=UTC] bin/nav_flow_term_selfcheck.py rc=0 :: OK — 179 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive 
+[env TZ=UTC] bin/nav_jump_flow_gate_selfcheck.py rc=0 :: PASS 
+[env TZ=Pacific/Kiritimati] bin/nav_unit_ledger_selfcheck.py rc=0 :: OK — 4576 assertion PASS (nav_unit_ledger_selfcheck.py) 
+[env TZ=Pacific/Kiritimati] bin/nav_flow_term_selfcheck.py rc=0 :: OK — 179 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive 
+[env TZ=Pacific/Kiritimati] bin/nav_jump_flow_gate_selfcheck.py rc=0 :: PASS 

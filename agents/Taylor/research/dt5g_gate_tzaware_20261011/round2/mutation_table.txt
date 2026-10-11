@@ -1,0 +1,67 @@
+sandbox: /tmp/dt5g_r2_9f4qw6up
+
+== 1. BASELINE (code nhánh, không mutate) ==
+  venv312 TZ=Asia/Ho_Chi_Minh      rc=0 150/150 PASS
+  venv312 env -u TZ                rc=0 120/120 PASS
+  venv312 TZ=America/New_York      rc=0 120/120 PASS
+  py3.10 env -u TZ                 rc=0 120/120 PASS
+
+== 2. MUTATION (rc≠0 = ĐỎ = mutant CHẾT) ==
+  M10    CHẾT  luôn ts.replace(tzinfo=ict) — đè offset
+         rc=1 140/150 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS
+         ✗ C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+         ✗ D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380) ⇒ DT4_only
+  M11    CHẾT  cắt h["ts"][:19] rồi parse
+         rc=1 140/150 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS
+         ✗ C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+         ✗ D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380) ⇒ DT4_only
+  M09a   CHẾT  mặc định max_health_age_min 1440→1400
+         rc=1 145/150 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS
+         ✗ D3. aware +07:00, 1430 phút (<1440) ⇒ DT5G_macro
+  M09b   CHẾT  mặc định max_health_age_min 1440→1490
+         rc=1 145/150 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS
+         ✗ D3. aware +07:00, 1450 phút (>1440) ⇒ DT4_only
+  M13    CHẾT  bỏ hẳn nhánh tương lai
+         rc=1 130/150 PASS | rc=1 104/120 PASS | rc=1 104/120 PASS | rc=1 104/120 PASS
+         ✗ I. aware tương lai +10 ngày ⇒ DT4_only
+         ✗ I. aware tương lai +120 phút ⇒ DT4_only
+         ✗ I. naive tương lai +10 năm ⇒ DT4_only
+         ✗ I. reason tương lai in ra ts thật + số phút lệch (120)
+  M13b   CHẾT  đảo dấu điều kiện (< thành >)
+         rc=1 80/150 PASS | rc=1 64/120 PASS | rc=1 64/120 PASS | rc=1 64/120 PASS
+         ✗ A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro
+         ✗ A. aware +07:00, 5 phút ⇒ DT5G_macro
+         ✗ B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+         ✗ B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+         ✗ C. aware UTC +00:00, 5 phút ⇒ DT5G_macro
+         ✗ C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+         ✗ D3. aware +07:00, 1430 phút (<1440) ⇒ DT5G_macro
+         ✗ F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)
+         ✗ H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro
+         ✗ I. aware tương lai +10 ngày ⇒ DT4_only
+         ✗ I. aware tương lai +120 phút ⇒ DT4_only
+         ✗ I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+         ✗ I. naive tương lai +10 năm ⇒ DT4_only
+         ✗ I. reason tương lai in ra ts thật + số phút lệch (120)
+  M13c*  CHẾT  bỏ dấu trừ của ngưỡng (age_min < +5)
+         rc=1 140/150 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS
+         ✗ H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro
+         ✗ I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+  M13d*  CHẾT  hằng số 5→200 phút
+         rc=1 140/150 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS | rc=1 112/120 PASS
+         ✗ I. aware tương lai +120 phút ⇒ DT4_only
+         ✗ I. reason tương lai in ra ts thật + số phút lệch (120)
+  M13e*  CHẾT  hằng số 5→1 phút
+         rc=1 145/150 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS
+         ✗ I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+  M14*   CHẾT  reason tương lai không in ts thật (§29)
+         rc=1 145/150 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS | rc=1 116/120 PASS
+         ✗ I. reason tương lai in ra ts thật + số phút lệch (120)
+
+== 3. NEGATIVE CONTROL: selfcheck mới trên macro_state_live.py của 3538119f ==
+  venv312 TZ=Asia/Ho_Chi_Minh      rc=1 95/150 PASS
+  venv312 env -u TZ                rc=1 75/120 PASS
+  venv312 TZ=America/New_York      rc=1 75/120 PASS
+  py3.10 env -u TZ                 rc=1 75/120 PASS
+
+KẾT: baseline_all_green=True survivors=KHÔNG negative_control_red_all_envs=True

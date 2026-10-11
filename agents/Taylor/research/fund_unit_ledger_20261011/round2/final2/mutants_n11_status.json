@@ -1,0 +1,58 @@
+[
+ [
+  "S01",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: ngày có nạp 200tr — 'Hôm nay' = +2.00% (giá đơn vị), không phải +22.40% (NAV thô) — NAV: **1,224.0M** | Hôm nay: **+22.40%** | Từ khi bắt đầu hoạt động: **+2.00%**",
+  618
+ ],
+ [
+  "S02",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: ngày có nạp 200tr — 'Hôm nay' = +2.00% (giá đơn vị), không phải +22.40% (NAV thô) — NAV: **1,224.0M** | Hôm nay: **+3.00%** | Từ khi bắt đầu hoạt động: **+2.00%**",
+  618
+ ],
+ [
+  "S03",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: ngày có nạp 200tr — 'Hôm nay' = +2.00% (giá đơn vị), không phải +22.40% (NAV thô) — NAV: **1,224.0M** | Hôm nay: **+2.00%** | Từ khi bắt đầu hoạt động: **+22.40%**",
+  617
+ ],
+ [
+  "S04",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: ngày có nạp 200tr — 'Hôm nay' = +2.00% (giá đơn vị), không phải +22.40% (NAV thô) — NAV: **1,224.0M** | Hôm nay: **?** | Từ khi bắt đầu hoạt động: **?**",
+  616
+ ],
+ [
+  "S05",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: dòng tiền treo ⇒ báo ra stderr (không vô hình)",
+  619
+ ],
+ [
+  "S06",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: nguồn tỉ suất lỗi ⇒ nói lý do thật ra stderr (không còn `except: pass`)",
+  623
+ ],
+ [
+  "S07",
+  "portfolio_status.py",
+  "KILLED_ASSERT",
+  "portfolio_status_selfcheck.py",
+  "[FAIL] N11: nguồn tỉ suất lỗi ⇒ in '?' cho CẢ HAI phần trăm, không lùi về tỉ số NAV thô — NAV: **1,224.0M** | Hôm nay: **+0.00%** | Từ khi bắt đầu hoạt động: **+0.00%**",
+  612
+ ]
+]

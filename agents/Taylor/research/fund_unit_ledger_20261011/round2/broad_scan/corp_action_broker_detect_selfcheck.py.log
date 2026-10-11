@@ -1,0 +1,414 @@
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker pha qty: 1 mục sổ mới, 0 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  shadow: 1 finding tóm tắt cho 1 mục
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] sổ broker đã có ['shadow', 'TPB', '2026-10-01', 'CONFIRMABLE'] ⇒ không lặp (idempotent)
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MATCH — broker ×1.15 = registry 'TPB-2026-10-02-BROKER-SHARE-EVENT' (broker) ×1.15; chân tiền broker 500 = registry 500đ/cp
+  [TPB] registry khớp broker ⇒ không ghi/hỏi lại
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MATCH — broker ×1.15 = registry 'TPB-2026-10-02-STOCK-DIVIDEND' (người ký/vendor cũ) ×1.15; chân tiền broker 500 = registry 500đ/cp
+  [TPB] registry khớp broker ⇒ không ghi/hỏi lại
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-STOCK-DIVIDEND] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MISMATCH — registry có 'TPB-2026-10-02-STOCK-DIVIDEND' (người ký/vendor cũ) trạng thái 'PROPOSED — chờ' — CHƯA áp dụng, trong khi broker thấy SHARE_EVENT ×1.15 chân tiền 500đ/cp
+  [TPB] registry (sau lô) đã có record TPB-2026-10-02-STOCK-DIVIDEND cho mã quanh ex 2026-10-02 ⇒ bỏ đề xuất record, chỉ đề nghị sửa/thu hồi (I2)
+  [TPB] registry (sau lô) đã có record TPB-2026-10-02-STOCK-DIVIDEND cho mã quanh ex 2026-10-02 ⇒ bỏ đề xuất record, chỉ đề nghị sửa/thu hồi (I2)
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry (sau lô) đã có record TPB-NEAR cho mã quanh ex 2026-10-02 ⇒ bỏ đề xuất record, chỉ đề nghị sửa/thu hồi (I2)
+  [TPB] registry (sau lô) đã có record TPB-NEAR cho mã quanh ex 2026-10-02 ⇒ bỏ đề xuất record, chỉ đề nghị sửa/thu hồi (I2)
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry (sau lô) đã có record TPB-PAST cho mã quanh ex 2026-10-02 ⇒ bỏ đề xuất record, chỉ đề nghị sửa/thu hồi (I2)
+  [TPB] registry (sau lô) đã có record TPB-PAST cho mã quanh ex 2026-10-02 ⇒ bỏ đề xuất record, chỉ đề nghị sửa/thu hồi (I2)
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  ❌ lịch vendor /tmp/brokerca_hsjyeeet/ca_daily/corp_action_daily_2026-10-01.json đọc hỏng: AttributeError: 'list' object has no attribute 'get' ⇒ VENDOR_UNREADABLE: không đối chiếu được — broker vẫn là nguồn chính
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor UNREADABLE): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 AMBIGUOUS (vendor INFO): sàn UPCOM — cổng giá dựng từ giá đóng cửa chỉ đúng HOSE/HNX (UPCOM tham chiếu = bình quân gia quyền)
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker pha qty: 1 mục sổ mới, 0 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  ❌ append_event finding corp-action-broker-shadow-2026-10-01 rc=1: bus giả lỗi
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MATCH — broker ×1.15 = registry 'TPB-2026-10-02-BROKER-SHARE-EVENT' (broker) ×1.15; chân tiền broker 500 = registry 500đ/cp
+  [TPB] registry khớp broker ⇒ không ghi/hỏi lại
+  [TPB] (shadow) registry đã có (TPB, 2026-10-02) — 'CONFIRMED — corp_action_auto_confirm.py '; vẫn ghi sổ để so sánh
+  ↻ gửi bù 1 mục sổ chưa có 'done' (lượt trước bị kill/bus lỗi)
+Xong nhánh broker pha qty: 1 mục sổ mới, 1 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  shadow: 1 finding tóm tắt cho 2 mục
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MATCH — broker ×1.15 = registry 'TPB-2026-10-02-BROKER-SHARE-EVENT' (broker) ×1.15; chân tiền broker 500 = registry 500đ/cp
+  [TPB] registry khớp broker ⇒ không ghi/hỏi lại
+  [TPB] (shadow) registry đã có (TPB, 2026-10-02) — 'CONFIRMED — corp_action_auto_confirm.py '; vẫn ghi sổ để so sánh
+  [TPB] sổ broker đã có ['shadow', 'TPB', '2026-10-01', 'CONFIRMABLE', 'TPB-2026-10-02-BROKER-SHARE-EVENT'] ⇒ không lặp (idempotent)
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 INSUFFICIENT (vendor INFO): không có giá đóng cửa cum của phiên credit
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE, INSUFFICIENT)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 AMBIGUOUS (vendor INFO): hệ số KL [1.150000, 1.155000) KHÔNG giao hệ số giá [1.270569, 1.313277] (giá cum 16,128, chân tiền 500, marketPrice 12,100) — KL và giá không kể cùng một sự kiện (quyền mua? gói vay chưa xong?)
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 AMBIGUOUS (vendor INFO): hệ số KL [1.150000, 1.155000) KHÔNG giao hệ số giá [1.270569, 1.313277] (giá cum 16,128, chân tiền 500, marketPrice 12,100) — KL và giá không kể cùng một sự kiện (quyền mua? gói vay chưa xong?)
+  [TPB] sổ broker đã có ['live', 'TPB', '2026-10-01', 'AMBIGUOUS'] ⇒ không lặp (idempotent)
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 INSUFFICIENT (vendor INFO): không có giá đóng cửa cum của phiên credit
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor VERIFIED): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 UNVERIFIED (vendor MISMATCH): broker KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp — LỆCH VENDOR: hệ số: broker ×1.15 vs vendor ×1.17 (lệch 1.74% > 1%) ⇒ hạ UNVERIFIED, Winston kiểm
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 UNVERIFIED (vendor MISMATCH): broker KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp — LỆCH VENDOR: hệ số: broker ×1.15 vs vendor ×1.17 (lệch 1.74% > 1%) ⇒ hạ UNVERIFIED, Winston kiểm
+  [TPB] sổ broker đã có ['live', 'TPB', '2026-10-01', 'UNVERIFIED'] ⇒ không lặp (idempotent)
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  ❌ lịch vendor /tmp/brokerca_mtkmflrm/ca_daily/corp_action_daily_2026-10-01.json đọc hỏng: JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1) ⇒ VENDOR_UNREADABLE: không đối chiếu được — broker vẫn là nguồn chính
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor UNREADABLE): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  ❌ append_event finding corp-action-broker-confirm-TPB rc=1: bus giả lỗi
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 0/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MATCH — broker ×1.15 = registry 'TPB-2026-10-02-BROKER-SHARE-EVENT' (broker) ×1.15; chân tiền broker 500 = registry 500đ/cp
+  [TPB] registry khớp broker ⇒ không ghi/hỏi lại
+  ↻ gửi bù 1 mục sổ chưa có 'done' (lượt trước bị kill/bus lỗi)
+Xong nhánh broker: 0 mục sổ mới, 1 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] registry ĐÃ có (TPB, 2026-10-02) — đối chiếu: MATCH — broker ×1.15 = registry 'TPB-2026-10-02-BROKER-SHARE-EVENT' (broker) ×1.15; chân tiền broker 500 = registry 500đ/cp
+  [TPB] registry khớp broker ⇒ không ghi/hỏi lại
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (CONFIRMABLE)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  ❌ ghi registry lỗi: OSError: đĩa đầy (giả) — đọc lại registry để biết đã ghi gì
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] sổ broker đã có ['live', 'TPB', '2026-10-01', 'CONFIRMABLE'] ⇒ không lặp (idempotent)
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 401, in _run_branch
+    return fn()
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 420, in <lambda>
+    rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 1998, in run_broker
+    return _run_broker(date_str, dry_run, mode)
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 2005, in _run_broker
+    qty, ctx = BD.scan_qty(date_str, _px_cum_fn(date_str), vfn, exec_dir=EXEC_DIR,
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_broker_detect_selfcheck.py", line 1035, in <lambda>
+    BD.scan_qty = lambda *a, **k: 1 / 0
+ZeroDivisionError: division by zero
+
+  ⚠ MIKE_CA_BROKER_SOURCE='livee' không hợp lệ ('off', 'shadow', 'live') ⇒ dùng 'shadow'
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=True
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [DRY-RUN] KHÔNG ghi 1 dòng sổ /tmp/brokerca_pwqgn8ye/ledger.jsonl
+  [DRY-RUN] KHÔNG ghi 1 record vào /tmp/brokerca_pwqgn8ye/corp_actions.json
+[DRY-RUN] would write 1 records to /tmp/brokerca_pwqgn8ye/corp_actions.json
+  [DRY-RUN] KHÔNG gửi bus finding corp-action-broker-confirm-TPB: AUTO_CONFIRMED_BROKER
+  [DRY-RUN] KHÔNG ghi 1 dòng sổ /tmp/brokerca_pwqgn8ye/ledger.jsonl
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [DRY-RUN] TPB ex 2026-10-02 CONFIRMABLE ×1.15 vendor=NO_EVENT: KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  ❌ load_corp_actions() lỗi khi đọc lại: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+
+❌ NHÁNH BROKER KHÔNG GHI TPB-2026-10-02-BROKER-SHARE-EVENT — validate() từ chối: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+  → không mục mới / không việc dở.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  ❌ load_corp_actions() lỗi khi đọc lại: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [ABC] ex 2026-10-02 INSUFFICIENT (vendor INFO): không có giá đóng cửa cum của phiên credit
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  ❌ load_corp_actions() lỗi khi đọc lại: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+
+❌ NHÁNH BROKER KHÔNG GHI TPB-2026-10-02-BROKER-SHARE-EVENT — validate() từ chối: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 0 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  ❌ load_corp_actions() lỗi khi đọc lại: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+  → không mục mới / không việc dở.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-USER' ex 2026-10-05 (người ký/vendor cũ, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+❌ không lấy được khoá /tmp/brokerca_kqgk16as/ledger.jsonl.lock sau 0s — tiến trình khác đang chạy nhánh broker; KHÔNG ghi gì.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+❌ không lấy được khoá /tmp/brokerca_kqgk16as/ledger.jsonl.lock sau 0s — tiến trình khác đang chạy nhánh broker; KHÔNG ghi gì.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  1 candidate event(s), 1 account(s): ['SpaceX']
+  [TPB] ex_date=2026-10-02, ratio=0.15 (×1.15) — kiểm broker ...
+  [TPB] broker results: {'SpaceX': {'verdict': 'MISMATCH', 'qty_before': 200, 'qty_after': 230, 'qty_ratio': 1.15, 'cost_ratio': 1.1853, 'cost_before': 16800.0, 'cost_after': 14173.913, 'modified_today': True}}
+  [TPB] ❌ giá vốn broker SpaceX 16,800.0000→14,173.9130 với KL ×1.15: lệch hệ số KL thuần +500.0đ/cp ⇒ có chân tiền chưa khai — KHÔNG tự ghi (record thiếu chân tiền ⇒ cổng giá đêm FAIL), hỏi người.
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'PROPOSED — chờ', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-09-30 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  [TPB] đã gửi question ['vendor-multi-event', 'TPB', '2026-10-02,2026-10-05', 'aa86668f3646', 'ASKED'] ⇒ không gửi lại
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  ❌ append_event question corp-action-vendor-multi-event-TPB-2026-10-01 rc=1: bus giả lỗi
+  ❌ _ask_vendor_multi_event TPB 2026-10-02,2026-10-05: câu hỏi CHƯA gửi được (trả False)
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+  ❌ 1 lần hỏi người lỗi trong nhánh vendor: [{'call': '_ask_vendor_multi_event', 'ticker': 'TPB', 'ex_date': '2026-10-02,2026-10-05', 'error': 'câu hỏi chưa gửi được (bus rc≠0, trả False)'}]
+  ❌ append_event question corp-action-vendor-ask-failed-2026-10-01 rc=1: bus giả lỗi
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=True confirm_only=False
+  [TPB] ❌ 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"] — KHÔNG ghi gì cho mã này, hỏi người 1 lần.
+  [DRY-RUN] KHÔNG gửi bus question corp-action-vendor-multi-event-TPB-2026-10-01: [Winston] TPB phiên 2026-10-01: 2 sự kiện KHÁC ex trong ±10 ngày: ["lô: ex 2026-10-02 vendor {'event_code': 'ISS', 'date': '2026-10-02', 'exercise_ratio': 0.15, 'price_adjusting': True}", "registry: 'TPB-2026-10-05-BROKER-SHARE-EVENT' ex 2026-10-05 (broker, 'CONFIRMED — broker', ×1.15)"]. Hai sự kiện cùng mã thường CÙNG NGÀY hoặc cách
+  [DRY-RUN] KHÔNG ghi 1 dòng sổ /tmp/brokerca_ucribw2e/ledger.jsonl
+  0 candidate event(s), 1 account(s): ['SpaceX']
+Xong: không có event mới nào đủ điều kiện tự xác nhận.
+  [TPB] không xác định được sàn qua DNSE: ConnectionError: DNSE sập (giả)
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker pha qty: 1 mục sổ mới, 0 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  shadow: 1 finding tóm tắt cho 1 mục
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=True
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [DRY-RUN] KHÔNG ghi 1 dòng sổ /tmp/brokerca_s4undos4/ledger.jsonl
+Xong nhánh broker pha qty: 1 mục sổ mới, 0 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [DRY-RUN] KHÔNG gửi bus finding corp-action-broker-shadow-2026-10-01: 
+  [DRY-RUN] KHÔNG ghi 1 dòng sổ /tmp/brokerca_s4undos4/ledger.jsonl
+  shadow: 1 finding tóm tắt cho 1 mục
+  [DRY-RUN] TPB ex 2026-10-02 CONFIRMABLE ×1.15 vendor=NO_EVENT: KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+❌ không lấy được khoá /tmp/brokerca_an2bhgta/ledger.jsonl.lock sau 0s — tiến trình khác đang chạy; KHÔNG chạy nhánh nào.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  [credit-watch TPB-2026-10-02-BROKER-SHARE-EVENT] ĐÃ THẤY ở sổ broker / kết quả lượt này (AMBIGUOUS, CONFIRMABLE, DEFER_VENDOR, INSUFFICIENT)
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker: 1 mục sổ mới, 0 gửi bù, 1 record ghi registry, 1/1 đã thông báo.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  ❌ append_event finding t treo > 60s — coi như CHƯA gửi
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+Xong nhánh broker pha qty: 1 mục sổ mới, 0 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  ❌ append_event finding corp-action-broker-shadow-2026-10-01 treo > 60s — coi như CHƯA gửi
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  ❌ load_corp_actions() lỗi khi đọc lại: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+
+❌ NHÁNH BROKER KHÔNG GHI TPB-2026-10-02-BROKER-SHARE-EVENT — validate() từ chối: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+  (shadow) live sẽ hỏi validate-reject cho ['TPB-2026-10-02-BROKER-SHARE-EVENT']
+Xong nhánh broker pha qty: 1 mục sổ mới, 0 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  ❌ load_corp_actions() lỗi khi đọc lại: corp_actions[0].qty_multiplier=13.0 > 10.0 — vượt biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX
+  → không mục mới / không việc dở.
+  shadow: 1 finding tóm tắt cho 1 mục
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+  [TPB] ex 2026-10-02 CONFIRMABLE (vendor NO_EVENT): KL+giá vốn+giá cùng kể sự kiện ×1.15 chân tiền 500đ/cp
+  [TPB] sổ broker đã có ['shadow', 'TPB', '2026-10-01', 'CONFIRMABLE'] ⇒ không lặp (idempotent)
+  ↻ gửi bù 1 mục sổ chưa có 'done' (lượt trước bị kill/bus lỗi)
+Xong nhánh broker pha qty: 0 mục sổ mới, 1 gửi bù — gộp vào finding shadow cuối lượt.
+  sàng lọc chỉ-giá: 0.0s / ngân sách 90s
+  → không mục mới / không việc dở.
+  shadow: 1 finding tóm tắt cho 1 mục
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 401, in _run_branch
+    return fn()
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 420, in <lambda>
+    rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 1998, in run_broker
+    return _run_broker(date_str, dry_run, mode)
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 2005, in _run_broker
+    qty, ctx = BD.scan_qty(date_str, _px_cum_fn(date_str), vfn, exec_dir=EXEC_DIR,
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_broker_detect_selfcheck.py", line 1507, in crash
+    raise exc
+RuntimeError: detector nổ (giả)
+
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=True
+  [ABC] vendor ISS ×1.15 ex 2026-10-02, đang giữ ở ['SpaceX'], nhưng sổ broker đọc được và KHÔNG có mục nào cho mã phiên 2026-10-01 ⇒ KHÔNG ghi (broker là nguồn chính), hỏi người.
+[corp_action_auto_confirm] NHÁNH BROKER mode=live date=2026-10-01 dry_run=False
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 401, in _run_branch
+    return fn()
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 420, in <lambda>
+    rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 1998, in run_broker
+    return _run_broker(date_str, dry_run, mode)
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 2005, in _run_broker
+    qty, ctx = BD.scan_qty(date_str, _px_cum_fn(date_str), vfn, exec_dir=EXEC_DIR,
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_broker_detect_selfcheck.py", line 1507, in crash
+    raise exc
+OSError: đĩa lỗi (giả)
+
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=True
+  [ABC] vendor ISS ×1.15 ex 2026-10-02, đang giữ ở ['SpaceX'], nhưng sổ broker đọc được và KHÔNG có mục nào cho mã phiên 2026-10-01 ⇒ KHÔNG ghi (broker là nguồn chính), hỏi người.
+[corp_action_auto_confirm] date=2026-10-01 dry_run=False confirm_only=False
+  1 candidate event(s), 1 account(s): ['SpaceX']
+  [ABC] ex_date=2026-10-02, ratio=0.15 (×1.15) — kiểm broker ...
+  [ABC] broker results: {'SpaceX': {'verdict': 'MATCH', 'qty_before': 200, 'qty_after': 230, 'qty_ratio': 1.15, 'cost_ratio': 1.15, 'cost_before': 16800.0, 'cost_after': 14608.695652173914, 'modified_today': True}}
+  [ABC] ✅ AUTO-CONFIRMED ×1.15 (ex 2026-10-02)
+
+Xong: 1 event(s) AUTO-CONFIRMED: ['ABC']
+[corp_action_auto_confirm] NHÁNH BROKER mode=shadow date=2026-10-01 dry_run=False
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 401, in _run_branch
+    return fn()
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 427, in <lambda>
+    rc_b = _run_branch("broker", lambda: run_broker(date_str, dry_run=dry_run, mode=mode),
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 1998, in run_broker
+    return _run_broker(date_str, dry_run, mode)
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_auto_confirm.py", line 2005, in _run_broker
+    qty, ctx = BD.scan_qty(date_str, _px_cum_fn(date_str), vfn, exec_dir=EXEC_DIR,
+  File "/home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin/corp_action_broker_detect_selfcheck.py", line 1507, in crash
+    raise exc
+RuntimeError: detector nổ (giả)
+
+  ⚠ VENDOR_FEED_DEAD: corp_action_daily_2026-10-01_FAILED.json failed_gate=feed_dead ⇒ vendor feed chết, broker là nguồn xác định (lịch vendor coi là rỗng)
+  [BAD] giá DNSE nguồn 'dnse_trade_today' ≠ dnse_g1_today ⇒ không dùng
+  hết ngân sách sàng lọc chỉ-giá trước khi gọi giá DNSE cho BBB ⇒ dừng prefetch
+  [TPB] giá DNSE nguồn 'dnse_g1_prev_session' ≠ dnse_g1_today ⇒ không dùng
+  [TPB] không lấy được giá cum 2026-10-01: ConnectionError: DNSE sập (giả)
+
+788 PASS / 0 FAIL  (TZ=None, py=3.10.12)

@@ -1,0 +1,19 @@
+### tz_anchor_gate (mọi .py đổi so với feaa33b5)
+rc=0
+### code_quality_gate
+rc=0
+### pre-commit run --files <mọi file đổi so với feaa33b5>
+ShellCheck (curated hard-block list — see bin/shellcheck_gate.sh)........................(no files to check)Skipped
+Commit-collision (job khác đang LIVE trong cùng repo — xem bin/repo_commit_gate.sh)..........................Passed
+Discord ID trần (dùng tên trong kb/discord_channels.json — xem bin/discord_id_gate.sh).......................Passed
+Giờ UTC trong text gửi người (ICT + phút — xem bin/utc_text_gate.sh, §16)....................................Passed
+Vứt stderr rồi đoán nguyên nhân (xem bin/diagnosis_evidence_gate.py, §29)................(no files to check)Skipped
+ruff ratchet (F/E9/B006/B008, per-file so với baseline — xem bin/code_quality_gate.sh).......................Passed
+datetime.now()/date.today() không neo TZ (xem bin/tz_anchor_gate.py, §16)....................................Passed
+- hook id: tz-anchor-gate
+- duration: 0.22s
+Số hiệu suất mới trong KB phải khai nguồn (bin/number_provenance_gate.py, B3)............(no files to check)Skipped
+- hook id: number-provenance-gate
+current_ops+canonical không phình (bin/kb_hot_size_gate.py)..............................(no files to check)Skipped
+- hook id: kb-hot-size-gate
+rc=0

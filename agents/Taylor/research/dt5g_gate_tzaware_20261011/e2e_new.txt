@@ -1,0 +1,5 @@
+module: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-dt5ggate-1011/WorkingClaude/macro_state_live.py
+real health: ts=2026-10-11T10:23:04+07:00 status=HEALTHY rec=DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+rows=3184 last=2026-10-09 source=DT5G_macro state=3 base=3 macro=3 stale=False
+tail25: n(macro!=base)=0 ; full history n(macro!=base)=50

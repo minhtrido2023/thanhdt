@@ -1,0 +1,10 @@
+[PASS] helper calls report_delivery_gate
+[PASS] artifact name is cadence-discoverable
+[PASS] cron loads shared env before gates
+[PASS] all three early branches call helper
+[PASS] early alerts skip only inapplicable return validation
+[PASS] normal branch calls helper
+[PASS] normal branch returns delivery rc after risk audit
+[PASS] legacy direct report delivery removed
+[PASS] failure is durable and retryable
+eod_delivery_wiring_selfcheck: 9/9 PASS

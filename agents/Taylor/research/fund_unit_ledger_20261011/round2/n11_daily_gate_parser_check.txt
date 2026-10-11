@@ -1,0 +1,10 @@
+== ZaloPay: báo cáo đã gửi 2026-10-09 — cổng đọc ra 0 dòng bảng, 0 tỉ suất văn xuôi, 0 mẩu vị thế
+   [dòng mới, không dòng tiền (ZaloPay 10-09)] cổng đọc ra Y HỆT báo cáo gốc: True
+   [dòng mới, CÓ nạp + dòng tiền treo] cổng đọc ra Y HỆT báo cáo gốc: True
+   [dòng mới, không tính được] cổng đọc ra Y HỆT báo cáo gốc: True
+== SpaceX: báo cáo đã gửi 2026-10-09 — cổng đọc ra 0 dòng bảng, 0 tỉ suất văn xuôi, 0 mẩu vị thế
+   [dòng mới, không dòng tiền (ZaloPay 10-09)] cổng đọc ra Y HỆT báo cáo gốc: True
+   [dòng mới, CÓ nạp + dòng tiền treo] cổng đọc ra Y HỆT báo cáo gốc: True
+   [dòng mới, không tính được] cổng đọc ra Y HỆT báo cáo gốc: True
+== thay khối 💰 NAV của 56 báo cáo ngày đã gửi bằng dòng MỚI dạng có-nạp-rút + dòng treo: cổng đọc ra y hệt ở 56/56 báo cáo (5 báo cáo có ít nhất một tỉ suất/vị thế để cổng đọc)
+PROSE_RE trên khối mới: []

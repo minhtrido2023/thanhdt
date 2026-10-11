@@ -1,0 +1,137 @@
+U01 nav_unit_ledger.py L62 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 144 assertion PASS): fixture SpaceX: dòng khởi điểm phải là 2026-07-01, giá 10.000, đơn vị = vốn/10.000
+U03 nav_unit_ledger.py L140 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2562 assertion PASS): B4: flow ngày inception phải nằm trong info['dropped'], được {'dropped': [], 'pending': []}
+U06 nav_unit_ledger.py L154 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2464 assertion PASS): B1 chuỗi E, tiền vào 16:00: tính tay 2.0%, được -15.0%
+U04 nav_unit_ledger.py L141 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2563 assertion PASS): B4: flow ngày inception không được đổi bất kỳ số nào
+U02 nav_unit_ledger.py L139 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2567 assertion PASS): B4: dòng nav ngày inception không được thay mốc khởi điểm, được {'date': datetime.date(2026, 7, 1), 'nav': 1000000000.0, 'flow_bod_vnd': 0.0, 'flow_eod_vnd': 0.0, 'units_issued': 0.0, 'units': 100000.0, 'unit_price': 1000
+U07 nav_unit_ledger.py L157 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2542 assertion PASS): B2 09:30 2026-07-03: thị trường đứng yên ⇒ giá phải giữ 10.100, được 10083.333333333334
+U08 nav_unit_ledger.py L157 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2473 assertion PASS): B1 chuỗi E, tiền vào 10:00: tính tay 1.667%, được 52.5%
+U06b nav_unit_ledger.py L155 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2464 assertion PASS): B1 chuỗi E, tiền vào 16:00: tính tay 2.0%, được 22.0%
+U09 nav_unit_ledger.py L158 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2557 assertion PASS): B3 rút đầu ngày hết đơn vị: phải raise ValueError, lại raise ZeroDivisionError: float division by zero
+U11 nav_unit_ledger.py L161 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2464 assertion PASS): B1 chuỗi E, tiền vào 16:00: tính tay 2.0%, được 6.938%
+U10 nav_unit_ledger.py L161 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2464 assertion PASS): B1 chuỗi E, tiền vào 16:00: tính tay 2.0%, được 4.817%
+U13 nav_unit_ledger.py L165 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2464 assertion PASS): B1 chuỗi E, tiền vào 16:00: tính tay 2.0%, được 1.667%
+U15 nav_unit_ledger.py L170 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2501 assertion PASS): B1 sau đóng cửa: phát hành 200tr/10.200 = 19.607,843 đơn vị, được -19607.84313725491
+U19 NOAPPLY 0
+U12 nav_unit_ledger.py L162 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2560 assertion PASS): B3 nav − tiền eod = 0: phải raise ValueError, lại raise ZeroDivisionError: float division by zero
+U23 nav_unit_ledger.py L108 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 1 assertion PASS): fixture SpaceX: phải có đúng 8 dòng nav_is_estimate=True (ô trống KHÔNG phải ước tính), được 52
+U16 nav_unit_ledger.py L171 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 146 assertion PASS): fixture SpaceX: cờ nav_is_estimate phải được mang theo đủ
+U20 NOAPPLY 0
+U14 nav_unit_ledger.py L166 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2558 assertion PASS): B3 rút cuối ngày hết đơn vị: phải raise ValueError
+U18 NOAPPLY 0
+U22 NOAPPLY 0
+U17 nav_unit_ledger.py L144 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2568 assertion PASS): B4: cờ nav_is_estimate của dòng nav ngày inception phải vào dòng khởi điểm của sổ
+U21 NOAPPLY 0
+U25 nav_unit_ledger.py L120 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 146 assertion PASS): fixture SpaceX 2026-07-02: không dòng tiền ⇒ tỉ số giá đơn vị phải == nav1/nav0 − 1
+U24 nav_unit_ledger.py L110 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2654 assertion PASS): dựng sổ b9_shuffled: đầu vào hợp lệ không được raise, được ValueError: nav_history không tăng nghiêm ngặt theo ngày: dòng 2026-07-02 (nav 1,010,000,000) đứng sau dòng 2026-07-06 (nav 1,030,000,000) — sai thứ tự; sửa nav_h
+U26 nav_unit_ledger.py L189 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4456 assertion PASS): C sổ hỏng (ghi dở) (): phải rc=1 và không đụng file, được rc=0
+U27 nav_unit_ledger.py L193 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4459 assertion PASS): C sổ hỏng (sai header) (): phải rc=1 và không đụng file, được rc=0
+U29 nav_unit_ledger.py L199 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4468 assertion PASS): C sổ hỏng (cờ ước tính viết thường) (): phải rc=1 và không đụng file, được rc=0
+U28 nav_unit_ledger.py L208 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4465 assertion PASS): C sổ hỏng (ngày trùng dòng cuối) (): phải rc=1 và không đụng file, được rc=0
+U30 nav_unit_ledger.py L235 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4406 assertion PASS): C: chốt tiếp phải THÊM 1 dòng và giữ nguyên từng byte cũ
+U31 nav_unit_ledger.py L237 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4430 assertion PASS): C chen dòng quá khứ (): phải rc=2, được 0:
+U33 nav_unit_ledger.py L247 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4437 assertion PASS): C dòng tiền khai lùi ngày: stderr phải nêu ['2026-07-02 flow_eod_vnd:', 'lệch +50,000,000.00 VND', '2026-07-06 units:']: LỆCH SỔ nav_unit_ledger (SpaceX): sổ đơn vị đã chốt /tmp/nav_unit_ledger_selfcheck_sys5ghah/c_seal/l
+U32 nav_unit_ledger.py L243 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4424 assertion PASS): C xoá dòng quá khứ (): phải rc=2, được 0:
+U34 nav_unit_ledger.py L247 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4419 assertion PASS): C NAV quá khứ +1đ: stderr phải nêu ['2026-07-02 nav:', 'lệch +1.00 VND', '2026-07-02 unit_price:']: LỆCH SỔ nav_unit_ledger (SpaceX): sổ đơn vị đã chốt /tmp/nav_unit_ledger_selfcheck_liy27of5/c_seal/ledger/nav_unit_ledger
+U34b nav_unit_ledger.py L247 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4443 assertion PASS): C đổi giờ dòng tiền đã chốt: stderr phải nêu ['2026-07-03 flow_bod_vnd:', '2026-07-03 flow_eod_vnd:']: LỆCH SỔ nav_unit_ledger (SpaceX): sổ đơn vị đã chốt /tmp/nav_unit_ledger_selfcheck__qv5zbz9/c_seal/ledger/nav_unit_led
+U36 nav_unit_ledger.py L254 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4412 assertion PASS): C: units_issued=nan trong sổ đã chốt phải bị báo lệch đúng 1 chỗ, được []
+U35 nav_unit_ledger.py L251 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4448 assertion PASS): C đổi cờ ước tính (): phải rc=2, được 0:
+U36b nav_unit_ledger.py L254 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4412 assertion PASS): C: units_issued=nan trong sổ đã chốt phải bị báo lệch đúng 1 chỗ, được []
+U36c nav_unit_ledger.py L254 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4414 assertion PASS): C: unit_price=nan trong sổ đã chốt phải bị báo lệch đúng 1 chỗ, được []
+U37 nav_unit_ledger.py L68 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4419 assertion PASS): C NAV quá khứ +1đ: stderr phải nêu ['2026-07-02 nav:', 'lệch +1.00 VND', '2026-07-02 unit_price:']: LỆCH SỔ nav_unit_ledger (SpaceX): sổ đơn vị đã chốt /tmp/nav_unit_ledger_selfcheck_8zvfji8i/c_seal/ledger/nav_unit_ledger
+U39 nav_unit_ledger.py L269 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4418 assertion PASS): C NAV quá khứ +1đ (): phải rc=2, được 0:
+U40 nav_unit_ledger.py L272 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4406 assertion PASS): C: chốt tiếp phải THÊM 1 dòng và giữ nguyên từng byte cũ
+U38 nav_unit_ledger.py L68 SURVIVED  | 
+U41 nav_unit_ledger.py L273 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4402 assertion PASS): C: --asof 07-03 phải chốt 3 dòng (khởi điểm + 2), được nav_unit_ledger SpaceX: 4 dòng dựng được (2026-07-01 → 2026-07-06), 1 dòng nav_is_estimate, 1 ngày có dòng tiền
+U43 nav_unit_ledger.py L281 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4403 assertion PASS): C: header + 3 dòng, được ['2026-07-01,1000000000.0,0.0,0.0,0.0,100000.0,10000.0,False', '2026-07-02,1010000000.0,0.0,0.0,0.0,100000.0,10100.0,False', '2026-07-03,1220000000.0,0.0,200000000.0,19607.84313725491,119607.84313
+U44 nav_unit_ledger.py L185 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4404 assertion PASS): C: dòng khởi điểm sai: 2026-07-01,1000000000.0,0.0,0.0,0.0,100000.0,10000.0000,False
+U42 nav_unit_ledger.py L274 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4394 assertion PASS): C0: write=False trên thư mục dữ liệu thật chỉ đọc — được phép, không tạo file
+U46 NOAPPLY 0
+U50 nav_unit_ledger.py L136 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2561 assertion PASS): B3 vốn khởi điểm 0: thông điệp thiếu 'vốn khởi điểm phải > 0': 2026-07-02: rút đầu ngày 0 VND huỷ hết đơn vị quỹ (còn 0.000000) — không còn giá đơn vị; kỳ này phải chia thủ công
+U55 nav_unit_ledger.py L354 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2566 assertion PASS): B4: CLI sổ phải báo flow bị loại ra stderr, được
+U47 nav_unit_ledger.py L348 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4418 assertion PASS): C NAV quá khứ +1đ (): phải rc=2, được 1: LỆCH SỔ nav_unit_ledger (SpaceX): sổ đơn vị đã chốt /tmp/nav_unit_ledger_selfcheck_a2be9z42/c_seal/ledger/nav_unit_ledger_SpaceX.csv KHÁC chuỗi dựng lại ở 2 chỗ:
+U48 nav_unit_ledger.py L341 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4400 assertion PASS): C: chạy không --seal KHÔNG được tạo file, được rc=0 000.0,0.0,0.0,0.0,100000.0,10100.0,False
+U51 nav_unit_ledger.py L109 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2 assertion PASS): fixture SpaceX: mọi dòng phải mang balance_ts
+U56 NOAPPLY 0
+U45 nav_unit_ledger.py L182 SURVIVED  | 
+U53 nav_unit_ledger.py L341 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4402 assertion PASS): C: --asof 07-03 phải chốt 3 dòng (khởi điểm + 2), được nav_unit_ledger SpaceX: 4 dòng dựng được (2026-07-01 → 2026-07-06), 1 dòng nav_is_estimate, 1 ngày có dòng tiền
+U57 nav_unit_ledger.py L173 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2607 assertion PASS): K1: tiền chưa vào dòng NAV nào phải TREO và HIỆN ở pending_flows, được []
+P04 NOAPPLY 0
+P08b NOAPPLY 0
+P02 nav_period_returns.py L67 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4510 assertion PASS): D: ngưỡng 365 ngày, số mũ 365,25
+P11 nav_period_returns.py L135 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2464 assertion PASS): B1 chuỗi E, tiền vào 16:00: tính tay 2.0%, được 22.0%
+P07 nav_period_returns.py L105 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2586 assertion PASS): B5c: tiền vào cuối kỳ (w=0) ⇒ mwr = (1.222,1 − 202)/1.000 − 1 = 2,01%, được 1.672
+P16 nav_period_returns.py L144 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2586 assertion PASS): B5c: tiền vào cuối kỳ (w=0) ⇒ mwr = (1.222,1 − 202)/1.000 − 1 = 2,01%, được 1.793
+P20 nav_period_returns.py L167 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2503 assertion PASS): B1: lãi/lỗ VND = 1.220 − 1.000 − 200 = 20tr, được 220000000.0
+P24 nav_period_returns.py L184 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (-1.33, 0.688, 0.795)
+P27b nav_period_returns.py L214 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (-1.33, 0.688, 0.519)
+P30 NOAPPLY 0
+P34 nav_period_returns.py L157 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2564 assertion PASS): B4: flow bị loại không được hiện trong kỳ
+P03 nav_period_returns.py L85 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4512 assertion PASS): D: đúng 365 ngày +10% ⇒ 1,1^(365,25/365) − 1 = 10,007%, được (None, 'kỳ 365 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)')
+P08 NOAPPLY 0
+P10 nav_period_returns.py L107 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4497 assertion PASS): D: 2 nghiệm phải trả None + ghi chú liệt kê CẢ HAI nghiệm, được None IRR không xác định: 0 nghiệm trong khoảng −99,9%…+99.900% — hàm giá trị không đổi dấu trên lưới 61 điểm (tại −99,9%: +1,056; tại +99.900%: +934,082)
+P14 NOAPPLY 0
+P18 NOAPPLY 0
+U49 nav_unit_ledger.py L316 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4489 assertion PASS): C4 thiếu account_cash_flows.json: phải raise CashFlowError
+U54 nav_unit_ledger.py L357 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2608 assertion PASS): K1: CLI sổ phải báo dòng tiền treo ra stderr, được rc=0
+P38 nav_period_returns.py L172 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4509 assertion PASS): D: IRR không xác định ⇒ mwr_pct null KÈM mwr_note trong JSON, được {'from_date': '2026-07-01', 'to_date': '2026-07-11', 'nav0': 1000000000.0, 'nav1': 100.0, 'return_pct': -100.0, 'net_flow_vnd': 10000000.0, 'cash_flows': 
+P41b nav_period_returns.py L154 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 150 assertion PASS): fixture SpaceX 2026-07-02: nav0/nav1/unit_price0/unit_price1 sai: {'from_date': '2026-07-01', 'to_date': '2026-07-02', 'nav0': 1000000000.0, 'nav1': 9947.33747, 'return_pct': -0.527, 'days': 1, 'unit_price0': 10000.0, 'uni
+P45 nav_period_returns.py L160 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2506 assertion PASS): B1: cash_flows phải nêu quy ước SUY RA (eod) + phiên được gán, được [{'date': '2026-07-03', 'amount_vnd': 200000000.0, 'kind': 'deposit', 'timing': 'bod', 'evidence': 'selfcheck fixture', 'time_ict': '16:00', 'session_dat
+U64 nav_unit_ledger.py L351 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2612 assertion PASS): K1: CLI phải rc=1, nêu lỗi, KHÔNG tạo sổ; được rc=0 LỖI nav_unit_ledger (SpaceX): flow 2026-07-03 time_ict=20:00 khai timing='eod' nhưng suy ra từ dữ liệu là 'bod' trên phiên 2026-07-06 (NAV phiên đó chụp lúc 2026-07-06T1
+A01 NOAPPLY 0
+A06 NOAPPLY 0
+P10b nav_period_returns.py L107 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4499 assertion PASS): D: lỗ >99,9% ⇒ 0 nghiệm, ghi chú nêu giá trị hàm ở hai đầu, không đoán nguyên nhân: IRR không xác định: 0 nghiệm trong khoảng −99,9%…+99.900% — hàm giá trị không đổi dấu trên lưới 6001 điểm (tại −99,9%: +103; tại +99.900%
+P15 NOAPPLY 0
+P19 nav_period_returns.py L167 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2503 assertion PASS): B1: lãi/lỗ VND = 1.220 − 1.000 − 200 = 20tr, được 420000000.0
+P23 nav_period_returns.py L155 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (-1.33, 1.02, 0.52)
+A10 account_cash_flows.py L96 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2618 assertion PASS): B7: không có bản ghi thì bước nhảy +10% thứ Hai phải bị bắt, được []
+A13 NOAPPLY 0
+A17 NOAPPLY 0
+A21 NOAPPLY 0
+P22 nav_period_returns.py L149 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4518 assertion PASS): D: kỳ dài có dòng tiền — hai số quy năm phải là hai số riêng, đúng công thức; được {'from_date': '2026-07-01', 'to_date': '2030-07-01', 'nav0': 1000000000.0, 'nav1': 2460000000.0, 'return_pct': 26.0, 'net_flow_vnd': 10000
+P26 nav_period_returns.py L212 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (-1.266, 1.09, 0.585)
+P29 nav_period_returns.py L220 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (0.519, 1.024, 0.519)
+P01 nav_period_returns.py L67 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4510 assertion PASS): D: ngưỡng 365 ngày, số mũ 365,25
+P27 nav_period_returns.py L214 SURVIVED  | 
+P29b nav_period_returns.py L222 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (-1.33, 1.024, 1.024)
+P05 nav_period_returns.py L88 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4514 assertion PASS): D: hệ số <= 0 ⇒ None kèm lý do
+P09 nav_period_returns.py L122 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2586 assertion PASS): B5c: tiền vào cuối kỳ (w=0) ⇒ mwr = (1.222,1 − 202)/1.000 − 1 = 2,01%, được 102.01
+P13 NOAPPLY 0
+P17 NOAPPLY 0
+P32 nav_period_returns.py L210 SURVIVED  | 
+P21 nav_period_returns.py L168 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 149 assertion PASS): fixture SpaceX 2026-07-02: không dòng tiền ⇒ mwr == twr và pnl == nav1 − nav0
+P36b nav_period_returns.py L165 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2583 assertion PASS): B5b: WTD phải nêu đúng hai giá đơn vị 10.200 → 10.404 và hai NAV, được {'from_date': '2026-07-03', 'to_date': '2026-07-07', 'nav0': 1220000000.0, 'nav1': 1244400000.0, 'return_pct': 2.0, 'days': 4, 'unit_price0': 10000.0,
+P33 nav_period_returns.py L253 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4558 assertion PASS): F: bản ghi thiếu giờ ⇒ CLI rc=1, không in số, được rc=0 LỖI nav_period_returns: /tmp/nav_unit_ledger_selfcheck_z1pjpm6v/sandbox/WC/data/account_cash_flows.json[SpaceX][0]: deposit +40,000,000 VND thiếu time_ict — BẮT BUỘC
+P40 nav_period_returns.py L203 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4519 assertion PASS): D report-date trước inception: thông điệp thiếu 'trước inception': max() arg is an empty sequence
+P43 nav_period_returns.py L147 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2586 assertion PASS): B5c: tiền vào cuối kỳ (w=0) ⇒ mwr = (1.222,1 − 202)/1.000 − 1 = 2,01%, được 1.672
+P25 nav_period_returns.py L183 SURVIVED  | 
+P28 nav_period_returns.py L215 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 3 assertion PASS): fixture SpaceX asof 2026-10-09 phải ra số đã công bố (-1.33, 1.024, 0.519), được (-1.33, 1.024, 0.494)
+P31 NOAPPLY 0
+P36 nav_period_returns.py L166 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 150 assertion PASS): fixture SpaceX 2026-07-02: nav0/nav1/unit_price0/unit_price1 sai: {'from_date': '2026-07-01', 'to_date': '2026-07-02', 'nav0': 1000000000.0, 'nav1': 994733747.0, 'return_pct': -0.527, 'days': 1, 'unit_price0': 10000.0, 'un
+P39 nav_period_returns.py L174 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 152 assertion PASS): fixture SpaceX 2026-07-02 inception: kỳ 1 ngày < 365 phải KHÔNG quy năm
+P42 NOAPPLY 0
+P46 nav_period_returns.py L111 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2588 assertion PASS): K1 [nạp 200tr 20:00, chỉ khai ngày+giờ] asof 2026-07-06: thị trường đứng yên ⇒ mọi tỉ suất 0,0% và pnl 0, được (0.0, 0.0, 0.0) pnl 0.0 mwr None
+U68 nav_unit_ledger.py L277 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4403 assertion PASS): C: header + 3 dòng, được ['2026-07-01,1000000000.0,0.0,0.0,0.0,100000.0,10000.0,False', '2026-07-02,1010000000.0,0.0,0.0,0.0,100000.0,10100.0,False', '2026-07-03,1220000000.0,0.0,200000000.0,19607.84313725491,119607.84313
+A02 NOAPPLY 0
+A07 NOAPPLY 0
+P37 nav_period_returns.py L164 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4501 assertion PASS): D 16:00: mwr_pct phải dùng w=0.6 ⇒ 1.786, được 1.786
+P41 nav_period_returns.py L153 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 150 assertion PASS): fixture SpaceX 2026-07-02: nav0/nav1/unit_price0/unit_price1 sai: {'from_date': '2026-07-01', 'to_date': '2026-07-02', 'nav0': 10000.0, 'nav1': 994733747.0, 'return_pct': -0.527, 'days': 1, 'unit_price0': 10000.0, 'unit_pr
+P44 nav_period_returns.py L146 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2531 assertion PASS): B2 16:00: pnl = 919,1 − 1.000 − (−100) = 19,1tr, được -580900000.0
+P53 NOAPPLY 0
+P49 nav_period_returns.py L136 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4501 assertion PASS): D 16:00: mwr_pct phải dùng w=0.6 ⇒ 1.786, được 1.667
+U70 nav_unit_ledger.py L278 KILLED_CRASH nav_unit_ledger_selfcheck.py | FileNotFoundError: [Errno 2] No such file or directory: '/tmp/nav_unit_ledger_selfcheck_rm_mdtyi/c_seal/ledger/nav_unit_ledger_SpaceX.csv'
+A04 NOAPPLY 0
+A09 account_cash_flows.py L329 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 2617 assertion PASS): B7: cổng 5% so theo PHIÊN ĐƯỢC GÁN — nạp thứ Bảy phải giải thích bước nhảy thứ Hai
+U69 nav_unit_ledger.py L283 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4480 assertion PASS): C2 fsync nổ: phải raise OSError
+A03 NOAPPLY 0
+A10b account_cash_flows.py L96 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4534 assertion PASS): E: ngưỡng cổng công bố phải đúng 5,0%, được 4.2
+A12 account_cash_flows.py L215 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4525 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 0, 'kind': 'withdraw', 'evidence': 'x', 'time_ict': '10:00'}: phải raise CashFlowError
+A08 account_cash_flows.py L329 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4536 assertion PASS): E: bước nhảy ÂM (rút lớn chưa khai) cũng phải bị bắt: −20% bị bắt, −4,99% không
+A14 account_cash_flows.py L211 KILLED_ASSERT nav_flow_term_selfcheck.py | raise AssertionError(f"bản ghi hỏng phải raise: {rec}")
+A16 account_cash_flows.py L187 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4521 assertion PASS): E §12: load_flows phải lọc đúng account (SpaceX 1 bản ghi, ZaloPay 2, account lạ 0)
+A20 NOAPPLY 0
+A11 account_cash_flows.py L213 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4524 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 0, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '10:00'}: phải raise CashFlowError
+A18 account_cash_flows.py L324 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4542 assertion PASS): E: start/end giới hạn theo ngày ĐẾN của bước nhảy, tính cả hai đầu mút
+A22 NOAPPLY 0
+A15 account_cash_flows.py L175 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4489 assertion PASS): C4 thiếu account_cash_flows.json: phải raise CashFlowError
+A19 account_cash_flows.py L222 KILLED_ASSERT nav_unit_ledger_selfcheck.py | ASSERT-FAIL (sau 4523 assertion PASS): E: time_ict chuẩn hoá HH:MM / HH:MM:SS; không khai timing ⇒ None (không có mặc định)
+Counter({'KILLED_ASSERT': 100, 'NOAPPLY': 30, 'SURVIVED': 5, 'KILLED_CRASH': 1})

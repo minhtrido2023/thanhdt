@@ -1,0 +1,179 @@
+macro_gate_health_tz_selfcheck — TZ thừa hưởng=<unset>, TZ lệch ngày với ICT lúc này=Pacific/Kiritimati
+
+--- host TZ = thừa hưởng:<unset> (giờ host 2026-10-11 14:07) ---
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=thừa hưởng:<unset>] A. aware +07:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:02:37+07:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=thừa hưởng:<unset>] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-10T22:07:37+07:00']
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:<unset>] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:<unset>] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=thừa hưởng:<unset>] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T14:02:37+00:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  FAIL  [TZ=thừa hưởng:<unset>] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only  [got=('DT5G_macro', 2) ts='2026-10-10T20:07:37']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmp576ld4c7/health.json') -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] E. thiếu file ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=thừa hưởng:<unset>] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)  [got=('DT4_only', 3)]
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=thừa hưởng:<unset>] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=thừa hưởng:<unset>] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:07:38+07:00']
+
+--- host TZ = UTC (giờ host 2026-10-11 14:07) ---
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=UTC] A. aware +07:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:02:38+07:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=UTC] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-10T22:07:38+07:00']
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=UTC] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T14:02:38+00:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=UTC] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  FAIL  [TZ=UTC] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only  [got=('DT5G_macro', 2) ts='2026-10-10T20:07:38']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=UTC] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=UTC] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=UTC] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=UTC] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=UTC] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=UTC] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=UTC] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmpmodxsxn5/health.json') -> DT4_only
+  PASS  [TZ=UTC] E. thiếu file ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=UTC] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=UTC] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=UTC] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)  [got=('DT4_only', 3)]
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=UTC] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=UTC] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=UTC] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:07:38+07:00']
+
+--- host TZ = America/New_York (giờ host 2026-10-11 10:07) ---
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=America/New_York] A. aware +07:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:02:38+07:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=America/New_York] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-10T22:07:38+07:00']
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=America/New_York] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=America/New_York] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=America/New_York] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T14:02:38+00:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=America/New_York] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  FAIL  [TZ=America/New_York] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only  [got=('DT5G_macro', 2) ts='2026-10-10T20:07:38']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=America/New_York] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=America/New_York] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=America/New_York] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=America/New_York] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=America/New_York] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=America/New_York] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=America/New_York] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmp03fo9x9c/health.json') -> DT4_only
+  PASS  [TZ=America/New_York] E. thiếu file ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=America/New_York] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=America/New_York] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=America/New_York] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)  [got=('DT4_only', 3)]
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=America/New_York] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=America/New_York] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=America/New_York] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:07:38+07:00']
+
+--- host TZ = Pacific/Kiritimati (giờ host 2026-10-12 04:07) ---
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] A. aware +07:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:02:38+07:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-10T22:07:38+07:00']
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1800min old (> 1440) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-10T22:07:38']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T14:02:38+00:00']
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1920min old (> 1440) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmp38y3l8ap/health.json') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. thiếu file ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)  [got=('DT4_only', 3)]
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần  [calls=0]
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT4_only: health report unreadable (can't subtract offset-naive and offset-aware datetimes) -> DT4_only
+  FAIL  [TZ=Pacific/Kiritimati] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro  [got=('DT4_only', 3) ts='2026-10-11T21:07:38+07:00']
+
+===== macro_gate_health_tz_selfcheck: 59/84 PASS =====

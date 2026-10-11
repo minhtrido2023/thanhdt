@@ -1,0 +1,54 @@
+target: /tmp/fu_f2_njf/s0/WC/mike/bin/daily_nav_snapshot.py
+môi trường TZ: ['ICT', 'UTC', 'NY', 'no-TZ']
+
+--- TZ=ICT rc=0
+  __RESULT__ cases=25 fails=0
+
+--- TZ=UTC rc=0
+  __RESULT__ cases=25 fails=0
+
+--- TZ=NY rc=0
+  __RESULT__ cases=25 fails=0
+
+--- TZ=no-TZ rc=0
+  __RESULT__ cases=25 fails=0
+
+BẤT BIẾN theo TZ: cả 4 môi trường cho cùng kết quả ✓
+
+MUTATION (31 đột biến trên CHÍNH file thật):
+  killed   nguong-15->95  (__RESULT__ cases=25 fails=1)
+  killed   nguong-mac-dinh-bang-cong-cong-bo  (__RESULT__ cases=25 fails=2)
+  killed   in-nguong-gt->ge  (__RESULT__ cases=25 fails=1)
+  killed   khong-co-flow-van-cho-qua  (__RESULT__ cases=25 fails=11)
+  killed   bo-kiem-phan-du  (__RESULT__ cases=25 fails=2)
+  killed   CashFlowError-cho-qua  (__RESULT__ cases=25 fails=7)
+  killed   resid-khong-tru-flow  (__RESULT__ cases=25 fails=18)
+  killed   market_only-bo-dieu-kien-amount  (__RESULT__ cases=25 fails=8)
+  killed   net_flow-dao-dau  (__RESULT__ cases=25 fails=18)
+  killed   bo-loi-that-CashFlowError  (__RESULT__ cases=25 fails=10)
+  killed   loi-gan-cho-qua  (__RESULT__ cases=25 fails=12)
+  killed   loi-gan-chi-bat-CashFlowError  (__RESULT__ cases=25 fails=1)
+  killed   tieu-de-gan-noi-khong-doc-duoc  (__RESULT__ cases=25 fails=5)
+  killed   bo-balance_ts-dong-hom-nay  (__RESULT__ cases=25 fails=32)
+  killed   bo-balance_ts-lich-su  (__RESULT__ cases=25 fails=34)
+  killed   lich-su-lay-ca-dong-hom-nay  (__RESULT__ cases=25 fails=1)
+  killed   main-bo-balance_ts  (__RESULT__ cases=25 fails=1)
+  killed   n11-moc-khoi-diem-1-ty  (__RESULT__ cases=25 fails=8)
+  killed   n11-bo-dong-tien  (__RESULT__ cases=25 fails=7)
+  killed   n11-nuot-loi-thanh-so  (__RESULT__ cases=25 fails=2)
+  killed   n11-luon-dang-cu  (__RESULT__ cases=25 fails=4)
+  killed   n11-vnd-la-thay-doi-nav  (__RESULT__ cases=25 fails=4)
+  killed   n11-ngay-lay-pct-go-live  (__RESULT__ cases=25 fails=8)
+  killed   n11-lam-tron-hai-buoc  (__RESULT__ cases=25 fails=5)
+  killed   n11-go-live-lay-pct-ngay  (__RESULT__ cases=25 fails=9)
+  killed   n11-go-live-lay-vnd-ngay  (__RESULT__ cases=25 fails=9)
+  killed   n11-bo-canh-bao-treo  (__RESULT__ cases=25 fails=1)
+  killed   n11-dong-tien-rong-dao-dau  (__RESULT__ cases=25 fails=4)
+  killed   n11-main-in-cong-thuc-cu  (__RESULT__ cases=25 fails=2)
+  killed   n11-main-bo-dong-go-live  (__RESULT__ cases=25 fails=1)
+  killed   bo-so-thanh-phan  (__RESULT__ cases=25 fails=1)
+  (file thật đã được phục hồi nguyên trạng ✓)
+
+MUTATION: 31/31 bị giết
+
+PASS

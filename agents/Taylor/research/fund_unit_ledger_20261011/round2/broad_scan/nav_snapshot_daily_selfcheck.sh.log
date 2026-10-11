@@ -1,0 +1,64 @@
+== Ca 1: không có plan/state file, 2 account rc=0 ⇒ vẫn ghi, --date = hôm nay ICT
+  PASS sandbox không có plan file
+  PASS exit 0
+  PASS mỗi account đúng 1 dòng 2026-09-14
+  PASS --date truyền vào = ngày ICT
+  PASS NAV SpaceX = cash−debt từ dnse_raw giả
+  PASS báo Trading Daily ✅ x2
+== Ca 2: chạy lần 2 liên tiếp ⇒ không gọi lại, nav_history giống hệt từng byte
+  PASS exit 0
+  PASS 0 lần gọi daily_nav_snapshot
+  PASS nav_history byte-identical
+  PASS không spam notify
+== Ca 3: EOD đã ghi dòng hôm nay (khác số dnse_raw) ⇒ cron KHÔNG ghi đè
+  PASS SpaceX không gọi
+  PASS dòng EOD giữ nguyên
+  PASS ZaloPay (thiếu) vẫn được ghi
+== Ca 4: rc=2 ⇒ retry tối đa 2 VÒNG (vòng ngoài = lần thử, gộp mọi account)
+  PASS SpaceX rc=2 rồi 0 ⇒ 2 lần gọi, có dòng
+  PASS ZaloPay rc=2 x3 ⇒ dừng ở 3 lần gọi, không dòng
+  PASS đúng 2 lượt ngủ-retry dù 2 account cùng lỗi vòng đầu
+  PASS 🔴 rc=2 chỉ cho ZaloPay, 1 lần
+  PASS cron_health_check THẬT bắt được lỗi trong log
+  PASS exit 1 khi còn account thất bại
+  PASS rc=2 thoáng qua rồi hồi ⇒ cron_health KHÔNG báo lỗi giả
+== Ca 4b: giữa 2 vòng retry, marker/dòng xuất hiện ⇒ vòng sau KHÔNG gọi lại, không 🔴
+  PASS SpaceX: marker mới ⇒ nhường, 1 lần gọi
+  PASS ZaloPay: dòng EOD mới ⇒ bỏ qua, không ghi đè
+  PASS không 🔴, exit 0
+== Ca 5: python treo quá timeout ⇒ xử lý như rc=2 (retry), không kẹt flock ngày sau
+  PASS treo ⇒ timeout ⇒ retry ⇒ có dòng
+  PASS treo 1 lần rồi hồi ⇒ cron_health KHÔNG báo lỗi
+  PASS treo cả 3 lần ⇒ 🔴 rc=124 + cron_health bắt được
+== Ca 6: rc=4 ⇒ không ghi, không retry, marker cho nav_sync_retry, không in ❌ raw; lần sau nhường marker
+  PASS 1 lần gọi, không dòng
+  PASS marker SpaceX_2026-09-14.log (định dạng nav_sync_retry)
+  PASS log không có dòng ❌
+  PASS báo Trading Daily ⏳
+  PASS exit 0 (rc=4 không phải thất bại của cron)
+  PASS rc=4 ⇒ cron_health KHÔNG báo lỗi
+  PASS lượt 2: nhường marker, không gọi
+  PASS marker .stuck (đã escalate) cũng nhường
+== Ca 7: rc=3 (sanity guard) ⇒ không retry, không ghi, báo 🔴
+  PASS 1 lần gọi, không dòng
+  PASS báo Trading Daily 🔴 rc=3
+  PASS rc=3 ⇒ cron_health bắt được
+  PASS notify lỗi ⇒ NOTIFY_FAILED + cron_health bắt được
+== Ca 8: rc=0 nhưng không ghi dòng (account chưa có ngày giao dịch) ⇒ không báo ✅
+  PASS không dòng, không ✅
+== Ca 9: không phải phiên ⇒ không gọi gì (ngày lễ; Thứ Bảy)
+  PASS ngày lễ: 0 lần gọi
+  PASS Thứ Bảy 2026-09-12: 0 lần gọi
+== Ca 10 (§16, không phụ thuộc giờ chạy): 01:00 ICT T2 = 18:00 UTC Chủ Nhật ⇒ --date phải là ngày ICT
+  PASS fixture: ngày ICT (2026-09-14) ≠ ngày UTC (2026-09-13)
+  PASS --date = 2026-09-14 (ICT) cho cả 2 account
+== Ca 11: danh sách account rỗng ⇒ 🔴 + exit 1 (không im lặng exit 0)
+  PASS exit 1 + 🔴 + 0 lần gọi
+  PASS LABELS rỗng ⇒ cron_health bắt được
+== Ca 12: lượt khác đang giữ lock ⇒ thoát 0, không gọi
+  PASS bị lock ⇒ 0 lần gọi
+== Ca 13: chờ EOD của CHÍNH cây này (bash <ROOT>/bin/eod… và for_each …), KHÔNG chờ mồi
+  PASS (a) chờ EOD đang chạy rồi mới ghi
+  PASS (b) chờ for_each_live_account … eod_trading_report.sh
+  PASS (c) 3 tiến trình mồi không làm wrapper chờ
+== Tổng: PASS=49 FAIL=0

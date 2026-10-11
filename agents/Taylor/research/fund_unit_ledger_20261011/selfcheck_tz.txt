@@ -1,0 +1,29 @@
+Python 3.10.12
+Python 3.12.13
+[env -u TZ] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env -u TZ] nav_flow_term_selfcheck.py → rc=0 | OK — 170 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 c�
+[env -u TZ] nav_period_returns.py --selfcheck → rc=0 | OK — 9 assertion PASS (nav_period_returns.py)
+[env -u TZ] nav_jump_flow_gate_selfcheck.py → rc=0 | PASS
+[env -u TZ] report_delivery_gate_selfcheck.py → rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+[env TZ=America/New_York] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env TZ=America/New_York] nav_flow_term_selfcheck.py → rc=0 | OK — 170 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 c�
+[env TZ=America/New_York] nav_period_returns.py --selfcheck → rc=0 | OK — 9 assertion PASS (nav_period_returns.py)
+[env TZ=America/New_York] nav_jump_flow_gate_selfcheck.py → rc=0 | PASS
+[env TZ=America/New_York] report_delivery_gate_selfcheck.py → rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+[env TZ=Asia/Ho_Chi_Minh] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env TZ=Asia/Ho_Chi_Minh] nav_flow_term_selfcheck.py → rc=0 | OK — 170 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 c�
+[env TZ=Asia/Ho_Chi_Minh] nav_period_returns.py --selfcheck → rc=0 | OK — 9 assertion PASS (nav_period_returns.py)
+[env TZ=Asia/Ho_Chi_Minh] nav_jump_flow_gate_selfcheck.py → rc=0 | PASS
+[env TZ=Asia/Ho_Chi_Minh] report_delivery_gate_selfcheck.py → rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+[env TZ=Pacific/Kiritimati] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env TZ=Pacific/Kiritimati] nav_flow_term_selfcheck.py → rc=0 | OK — 170 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 c�
+[env TZ=Pacific/Kiritimati] nav_period_returns.py --selfcheck → rc=0 | OK — 9 assertion PASS (nav_period_returns.py)
+[env TZ=Pacific/Kiritimati] nav_jump_flow_gate_selfcheck.py → rc=0 | PASS
+[env TZ=Pacific/Kiritimati] report_delivery_gate_selfcheck.py → rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+[wc_venv python, -u TZ] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env -u TZ @feaa33b5] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env -u TZ @feaa33b5] nav_flow_term_selfcheck.py → rc=0 | OK — 170 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng c�
+[env -u TZ @feaa33b5] nav_period_returns.py --selfcheck → rc=0 | OK — 9 assertion PASS (nav_period_returns.py)
+[env TZ=America/New_York @feaa33b5] nav_unit_ledger_selfcheck.py → rc=0 | OK — 2880 assertion PASS (nav_unit_ledger_selfcheck.py)
+[env TZ=America/New_York @feaa33b5] nav_flow_term_selfcheck.py → rc=0 | OK — 170 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng c�
+[env TZ=America/New_York @feaa33b5] nav_period_returns.py --selfcheck → rc=0 | OK — 9 assertion PASS (nav_period_returns.py)

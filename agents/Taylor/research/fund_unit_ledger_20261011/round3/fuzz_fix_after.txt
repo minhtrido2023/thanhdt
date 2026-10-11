@@ -1,0 +1,8 @@
+A. sạch: mọi phiên có dòng, chụp ~19:1x                 {'ok': 2906, 'ok_pending': 94}  max|lệch|=0.000%
+B. + ngày nghỉ lễ giữa tuần                             {'ok': 1907, 'error': 937, 'ok_pending': 156}  max|lệch|=0.000%
+C. + dòng NAV cả cuối tuần/ngày nghỉ                    {'ok': 2496, 'error': 481, 'ok_pending': 23}  max|lệch|=0.000%
+D. + chụp sáng hôm sau                                  {'ok': 2924, 'ok_pending': 76}  max|lệch|=0.000%
+E. + chụp TRƯỚC đóng cửa                                {'error': 1076, 'ok_pending': 83, 'ok': 1841}  max|lệch|=0.000%
+F. + THIẾU dòng của một phiên giao dịch                 {'error': 764, 'ok_pending': 115, 'ok': 2121}  max|lệch|=0.000%
+G. tất cả                                               {'error': 1241, 'ok': 1704, 'ok_pending': 55}  max|lệch|=0.000%
+H. sạch, 5 dòng tiền                                    {'ok': 2772, 'ok_pending': 201, 'error': 27}  max|lệch|=0.000%

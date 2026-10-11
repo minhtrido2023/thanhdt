@@ -1,0 +1,341 @@
+[
+ {
+  "id": "A47",
+  "file": "bin/account_cash_flows.py",
+  "line": 151,
+  "note": "flow_moment: thiếu giờ ⇒ mặc định 00:00",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2621 assertion PASS): K1 thiếu time_ict (flow dựng tay): thông điệp thiếu 'không có time_ict': flow 2026-07-03 time_ict=None khai timing='eod' nhưng suy ra từ dữ liệu là 'bod' trên phiên 2026-07-03 (NAV phiên đó chụp lúc 2026-07-03T19:10:00, g"
+ },
+ {
+  "id": "A48",
+  "file": "bin/account_cash_flows.py",
+  "line": 287,
+  "note": "balance_ts hỏng ⇒ mặc định im lặng",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2677 assertion PASS): B8d balance_ts hỏng ở dòng R: phải raise CashFlowError"
+ },
+ {
+  "id": "A49",
+  "file": "bin/account_cash_flows.py",
+  "line": 331,
+  "note": "không xét dòng cuối",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2564 assertion PASS): B3 rút cuối ngày hết đơn vị: thông điệp thiếu 'rút cuối ngày': 2026-07-03: nav 0 − dòng tiền eod 0 <= 0 — không tính được giá đơn vị (số tiền khai có đúng không?)"
+ },
+ {
+  "id": "A50",
+  "file": "bin/account_cash_flows.py",
+  "line": 386,
+  "note": "flow treo ⇒ gán dòng cuối",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2614 assertion PASS): K1: tiền chưa vào dòng NAV nào phải TREO và HIỆN ở pending_flows, được []"
+ },
+ {
+  "id": "A51",
+  "file": "bin/account_cash_flows.py",
+  "status": "NOT_APPLIED(count=0)",
+  "note": "nguồn: so với giờ đóng cửa của R"
+ },
+ {
+  "id": "A53",
+  "file": "bin/account_cash_flows.py",
+  "line": 353,
+  "note": "đảo so timing khai",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2599 assertion PASS): tính kỳ b6_k1_23: đầu vào hợp lệ không được raise, được CashFlowError: flow 2026-07-03 time_ict=20:00 khai timing='bod' nhưng suy ra từ dữ liệu là 'bod' trên phiên 2026-07-06 (NAV phiên đó chụp lúc 2026-07-06T19:10:00, gi"
+ },
+ {
+  "id": "A55",
+  "file": "bin/account_cash_flows.py",
+  "line": 416,
+  "note": "khoá theo ngày khai thay vì ngày dòng R",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2594 assertion PASS): K1 [nạp 200tr 20:00, chỉ khai ngày+giờ] asof 2026-07-03: thị trường đứng yên ⇒ mọi tỉ suất 0,0% và pnl 0, được (-16.667, -16.667, -16.667) pnl -200000000.0 mwr -18.1"
+ },
+ {
+  "id": "A56",
+  "file": "bin/account_cash_flows.py",
+  "line": 429,
+  "note": "cổng 5% so ngày khai thô",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2624 assertion PASS): B7: cổng 5% so theo PHIÊN ĐƯỢC GÁN — nạp thứ Bảy phải giải thích bước nhảy thứ Hai"
+ },
+ {
+  "id": "A58",
+  "file": "bin/account_cash_flows.py",
+  "line": 243,
+  "note": "evidence rỗng",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_flow_term_selfcheck.py",
+  "tail": "AssertionError: bản ghi hỏng phải raise: {'date': '2026-07-03', 'amount_vnd': 1, 'kind': 'deposit', 'evidence': '  ', 'time_ict': '10:00'}"
+ },
+ {
+  "id": "A60",
+  "file": "bin/account_cash_flows.py",
+  "line": 253,
+  "note": "timing lạ",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4632 assertion PASS): E bản ghi hỏng {'date': '2026-07-03', 'amount_vnd': 5, 'kind': 'deposit', 'evidence': 'x', 'time_ict': '10:00', 'timing': 'intraday'}: phải raise CashFlowError"
+ },
+ {
+  "id": "A61",
+  "file": "bin/account_cash_flows.py",
+  "line": 235,
+  "note": "kind lạ",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_flow_term_selfcheck.py",
+  "tail": "AssertionError: bản ghi hỏng phải raise: {'date': '2026-07-03', 'amount_vnd': 1, 'kind': 'nap', 'evidence': 'x', 'time_ict': '10:00'}"
+ },
+ {
+  "id": "A62",
+  "file": "bin/account_cash_flows.py",
+  "line": 436,
+  "note": "nav0 == 0",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "A63",
+  "file": "bin/account_cash_flows.py",
+  "status": "NOT_APPLIED(count=0)",
+  "note": "nguồn: bỏ qua khi R là dòng thứ hai"
+ },
+ {
+  "id": "A64",
+  "file": "bin/account_cash_flows.py",
+  "line": 339,
+  "note": "chốt trong phiên chỉ khi dòng đúng ngày flow",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "A65",
+  "file": "bin/account_cash_flows.py",
+  "line": 351,
+  "note": "eod theo GIỜ trong ngày, không theo phiên R",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2598 assertion PASS): K1 [nạp 200tr 20:00, chỉ khai ngày+giờ]: tiền sau lần chụp thứ Sáu phải vào phiên thứ Hai ở giá chốt thứ Sáu, được {'date': datetime.date(2026, 7, 6), 'nav': 1200000000.0, 'flow_bod_vnd': 0, 'flow_eod_vnd': 200000000.0, '"
+ },
+ {
+  "id": "U54",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 139,
+  "note": "vốn khởi điểm 0",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2567 assertion PASS): B3 vốn khởi điểm 0: thông điệp thiếu 'vốn khởi điểm phải > 0': 2026-07-02: rút đầu ngày 0 VND huỷ hết đơn vị quỹ (còn 0.000000) — không còn giá đơn vị; kỳ này phải chia thủ công"
+ },
+ {
+  "id": "U55",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 189,
+  "note": "ghi giá 4 chữ số",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4495 assertion PASS): C: dòng khởi điểm sai: 2026-07-01,1000000000.0,0.0,0.0,0.0,100000.0,10000.0000,False"
+ },
+ {
+  "id": "U57",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 281,
+  "note": "sổ mới không header",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4494 assertion PASS): C: header + 3 dòng, được ['2026-07-01,1000000000.0,0.0,0.0,0.0,100000.0,10000.0,False', '2026-07-02,1010000000.0,0.0,0.0,0.0,100000.0,10100.0,False', '2026-07-03,1220000000.0,0.0,200000000.0,19607.84313725491,119607.84313"
+ },
+ {
+  "id": "U58",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 308,
+  "note": "khoá riêng từng tiến trình",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4499 assertion PASS): C: thư mục sổ chỉ được có file sổ + file khoá, không file tạm: [PosixPath('/tmp/nav_unit_ledger_selfcheck_7jwj7fv2/c_seal/ledger/nav_unit_ledger_SpaceX.csv.293183.lock'), PosixPath('/tmp/nav_unit_ledger_selfcheck_7jwj7fv2"
+ },
+ {
+  "id": "U59",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 270,
+  "note": "đọc file HAI lần (N2 cũ)",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "U60",
+  "file": "bin/nav_unit_ledger.py",
+  "line": 105,
+  "note": "dòng nav rỗng",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2694 assertion PASS): dựng sổ b9_blank_nav: đầu vào hợp lệ không được raise, được ValueError: could not convert string to float: ''"
+ },
+ {
+  "id": "U61",
+  "file": "bin/nav_unit_ledger.py",
+  "status": "NOT_APPLIED(count=0)",
+  "note": "noop"
+ },
+ {
+  "id": "P41",
+  "file": "bin/nav_period_returns.py",
+  "line": 80,
+  "note": "_last_on_or_before biên",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 149 assertion PASS): fixture SpaceX 2026-07-02: đầu vào hợp lệ không được raise, được ValueError: không có dòng nav_history nào <= 2026-07-02 cho SpaceX"
+ },
+ {
+  "id": "P42",
+  "file": "bin/nav_period_returns.py",
+  "line": 211,
+  "note": "report đúng ngày inception",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2512 assertion PASS): B1 báo cáo ĐÚNG ngày inception: đầu vào hợp lệ không được raise, được ValueError: report-date 2026-07-01 có nav1_date 2026-07-01 trước inception 2026-07-01 cho SpaceX"
+ },
+ {
+  "id": "P44",
+  "file": "bin/nav_period_returns.py",
+  "line": 264,
+  "note": "CLI lỗi rc=0",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4680 assertion PASS): F: bản ghi thiếu giờ ⇒ CLI rc=1, không in số, được rc=0 LỖI nav_period_returns: /tmp/nav_unit_ledger_selfcheck_e3fh0dp8/sandbox/WC/data/account_cash_flows.json[SpaceX][0]: deposit +40,000,000 VND thiếu time_ict — BẮT BUỘC"
+ },
+ {
+  "id": "P46",
+  "file": "bin/nav_period_returns.py",
+  "line": 152,
+  "note": "IRR đảo nav",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 150 assertion PASS): fixture SpaceX 2026-07-02: không dòng tiền ⇒ mwr == twr và pnl == nav1 − nav0"
+ },
+ {
+  "id": "P47",
+  "file": "bin/nav_period_returns.py",
+  "line": 153,
+  "note": "quy năm sớm",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 153 assertion PASS): fixture SpaceX 2026-07-02 inception: kỳ 1 ngày < 365 phải KHÔNG quy năm"
+ },
+ {
+  "id": "P48",
+  "file": "bin/nav_period_returns.py",
+  "line": 178,
+  "note": "mwr quy năm = twr quy năm",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4619 assertion PASS): D: kỳ dài có dòng tiền — hai số quy năm phải là hai số riêng, đúng công thức; được {'from_date': '2026-07-01', 'to_date': '2030-07-01', 'nav0': 1000000000.0, 'nav1': 2460000000.0, 'return_pct': 26.0, 'net_flow_vnd': 10000"
+ },
+ {
+  "id": "P49",
+  "file": "bin/nav_period_returns.py",
+  "line": 95,
+  "note": "số mũ đảo",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4613 assertion PASS): D: đúng 365 ngày +10% ⇒ 1,1^(365,25/365) − 1 = 10,007%, được (9.993, None)"
+ },
+ {
+  "id": "P50",
+  "file": "bin/nav_period_returns.py",
+  "line": 157,
+  "note": "to_date sai",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 2510 assertion PASS): B1: kỳ `day` = phiên gần nhất so với dòng sổ liền trước (+2,0%, lãi 20tr, nạp 200tr), được {'from_date': '2026-07-02', 'to_date': '2026-07-02', 'nav0': 1000000000.0, 'nav1': 1220000000.0, 'return_pct': 2.0, 'net_flow_vnd'"
+ },
+ {
+  "id": "P51",
+  "file": "bin/nav_period_returns.py",
+  "line": 141,
+  "note": "days +1",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 4602 assertion PASS): D 16:00: mwr_pct phải dùng w=0.6 ⇒ 1.786, được 1.819"
+ },
+ {
+  "id": "P52",
+  "file": "bin/nav_period_returns.py",
+  "line": 228,
+  "note": "inception tới dòng cuối thay vì report_date",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "ASSERT-FAIL (sau 149 assertion PASS): fixture SpaceX 2026-07-02: không dòng tiền ⇒ tỉ số giá đơn vị phải == nav1/nav0 − 1"
+ },
+ {
+  "id": "P53",
+  "file": "bin/nav_period_returns.py",
+  "line": 190,
+  "note": "tương đương (dòng sau i1 > report_date)",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "D27",
+  "file": "bin/daily_nav_snapshot.py",
+  "line": 944,
+  "note": "cổng: gồm dòng cũ cùng ngày (chạy lại)",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_jump_flow_gate_selfcheck.py",
+  "tail": "FAIL"
+ },
+ {
+  "id": "D29",
+  "file": "bin/daily_nav_snapshot.py",
+  "line": 1600,
+  "note": "JSON performance",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_corpaction_gate_e2e_selfcheck.py",
+  "tail": "63 PASS, 1 FAIL"
+ },
+ {
+  "id": "D30",
+  "file": "bin/daily_nav_snapshot.py",
+  "status": "NOT_APPLIED(count=0)",
+  "note": "mốc khởi điểm viết cứng 1 tỷ (lỗi N11 gốc)"
+ },
+ {
+  "id": "D31",
+  "file": "bin/daily_nav_snapshot.py",
+  "line": 898,
+  "note": "tương đương khi không có flow",
+  "status": "SURVIVED",
+  "by": null,
+  "tail": ""
+ },
+ {
+  "id": "S07",
+  "file": "bin/portfolio_status.py",
+  "line": 617,
+  "note": "giấu flow treo",
+  "status": "KILLED_ASSERT",
+  "by": "bin/portfolio_status_selfcheck.py",
+  "tail": "❌ [dividend_adjusted_return] trading_bot_accounts.json ĐỌC ĐƯỢC nhưng KHÔNG có account live nào ⇒ ACCOUNTS rỗng. Cổng tỉ suất của report (report_return_gate.py) sẽ coi là 'không áp dụng' và KHÔNG CHẶN — kiểm lại `enabled`/`mode`/`account_id` trước khi tin bất "
+ },
+ {
+  "id": "G03",
+  "file": "bin/report_delivery_gate.py",
+  "line": 259,
+  "note": "noop-crash",
+  "status": "KILLED_ASSERT",
+  "by": "bin/nav_unit_ledger_selfcheck.py",
+  "tail": "NameError: name 'CashFlowErrorX' is not defined"
+ }
+]

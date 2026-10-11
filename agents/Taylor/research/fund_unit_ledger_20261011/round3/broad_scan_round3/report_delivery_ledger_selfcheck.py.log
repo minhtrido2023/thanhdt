@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/tmp/ar3/WC/mike/bin/report_delivery_ledger_selfcheck.py", line 359, in <module>
+    sys.exit(main())
+  File "/tmp/ar3/WC/mike/bin/report_delivery_ledger_selfcheck.py", line 159, in main
+    sha_old, src_old = old_source()
+  File "/tmp/ar3/WC/mike/bin/report_delivery_ledger_selfcheck.py", line 58, in old_source
+    revs = subprocess.run(["git", "-C", MIKE, "rev-list", "HEAD", "--", "bin/" + GATE],
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', '-C', '/tmp/ar3/WC/mike', 'rev-list', 'HEAD', '--', 'bin/report_delivery_gate.py']' returned non-zero exit status 128.

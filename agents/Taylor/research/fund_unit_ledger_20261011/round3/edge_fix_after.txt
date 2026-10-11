@@ -1,0 +1,37 @@
+== E1. ZaloPay THẬT, dòng 07-27 chụp 07-28T09:15
+  không dòng tiền                                            => inception -4.907% gán=[] pend=0 drop=0
+  nạp 50tr 07-27 10:00 (trong phiên 07-27)                   => inception -10.208% gán=[('bod', '2026-07-27')] pend=0 drop=0
+  nạp 50tr 07-27 20:00 (sau đóng cửa, trước chụp 07-28 09:15) => inception -10.609% gán=[('eod', '2026-07-27')] pend=0 drop=0
+  nạp 50tr 07-28 08:00 (sáng hôm sau, trước chụp 09:15)      => inception -10.609% gán=[('eod', '2026-07-27')] pend=0 drop=0
+  nạp 50tr 07-28 09:15 (đúng phút chụp của dòng 07-27)       => CashFlowError: flow 2026-07-28 time_ict=09:15 rơi đúng PHÚT chụp số dư của dòng nav_history 2026-07-27 (balance_ts 2026-07-28T09:15:15) — khô
+  nạp 50tr 07-28 09:15:15 (đúng giây chụp)                   => inception -10.609% gán=[('eod', '2026-07-27')] pend=0 drop=0
+  nạp 50tr 07-28 09:20 (trong phiên 07-28, sau lần chụp dòng 07-27) => inception -10.286% gán=[('bod', '2026-07-28')] pend=0 drop=0
+  nạp 50tr 08-24 03:00 (trước lần chụp 04:50)                => inception -9.670% gán=[('bod', '2026-08-24')] pend=0 drop=0
+  nạp 50tr 08-23 20:00 CN                                    => inception -9.670% gán=[('bod', '2026-08-24')] pend=0 drop=0
+  nạp 50tr 08-24 16:00 (sau đóng cửa, dòng 08-24 chụp 04:50) => CashFlowError: flow 2026-08-24 time_ict=16:00 được gán bod trên phiên 2026-08-25 ⇒ giao dịch ở giá chốt của dòng nav_history 2026-08-24, n
+  nạp 50tr 08-25 08:00                                       => CashFlowError: flow 2026-08-25 time_ict=08:00 được gán bod trên phiên 2026-08-25 ⇒ giao dịch ở giá chốt của dòng nav_history 2026-08-24, nhưng d
+  nạp 50tr 08-25 21:00 (sau chụp 08-25 20:15)                => inception -9.587% gán=[('bod', '2026-08-26')] pend=0 drop=0
+  nạp 50tr 08-31 10:00 (ngày nghỉ CÓ dòng NAV)               => inception -9.650% gán=[('bod', '2026-08-31')] pend=0 drop=0
+  nạp 50tr 09-01 10:00 (ngày nghỉ KHÔNG dòng)                => inception -9.650% gán=[('bod', '2026-09-03')] pend=0 drop=0
+  nạp 50tr 09-02 16:00 (lễ 2/9)                              => inception -9.650% gán=[('bod', '2026-09-03')] pend=0 drop=0
+  nạp 50tr 10-09 20:00 (sau dòng cuối) ⇒ treo                => inception -4.907% gán=[] pend=1 drop=0
+  nạp 50tr 10-12 10:00 (ngày sau dòng cuối) ⇒ treo           => inception -4.907% gán=[] pend=1 drop=0
+  nạp 50tr 07-06 20:00 (ĐÚNG ngày inception, sau mốc)        => inception -4.907% gán=[] pend=0 drop=1
+  nạp 50tr 07-05 10:00 (trước inception)                     => inception -4.907% gán=[] pend=0 drop=1
+  nạp 50tr 07-07 08:00 (trước dòng đầu tiên)                 => inception -9.488% gán=[('bod', '2026-07-07')] pend=0 drop=0
+  rút 900tr 10-05 10:00 (gần hết)                            => inception +1692.031% gán=[('bod', '2026-10-05')] pend=0 drop=0
+  rút 941,8tr 10-06 20:00 (đúng bằng NAV 10-06?)             => inception +7992.110% gán=[('bod', '2026-10-07')] pend=0 drop=0
+  chuỗi 6 dòng tiền                                          => inception -9.837% gán=[('bod', '2026-09-03'), ('eod', '2026-09-03'), ('bod', '2026-09-04'), ('bod', '2026-09-07'), ('bod', '2026-09-08'), ('eod', '2026-09-08')]
+  2 dòng tiền quanh lần chụp 10-06 19:10:19 (19:09 + 19:12)  => inception -11.686% gán=[('eod', '2026-10-06'), ('bod', '2026-10-07')] pend=0 drop=0
+  market_only 08-06 (phiên thiếu dòng)                       => inception -4.907% gán=[(None, '2026-08-07')] pend=0 drop=0
+== E2. balance_ts KHÔNG tăng dần (dòng T2 sửa tay bằng số dư chụp sáng T4); thị trường đứng yên trừ T3 +10%
+nạp 220tr 20:00 T3 (sự thật: T3=11000, T4=11000)             => CashFlowError: balance_ts không tăng nghiêm ngặt: dòng nav_history 2026-06-04 chụp số dư lúc 2026-06-04T19:10:00, không sau dòng 2026-06-03 (2026-
+dòng T2 chụp 23:00 T3 (sau dòng T3), nạp 20:00 T3            => CashFlowError: balance_ts không tăng nghiêm ngặt: dòng nav_history 2026-06-04 chụp số dư lúc 2026-06-04T19:10:00, không sau dòng 2026-06-03 (2026-
+== E3. balance_ts có múi giờ
+ts '...Z' / '+00:00' (12:10 UTC = 19:10 ICT), nạp 16:00 T2   => CashFlowError: flow 2026-06-03 16:00 +200,000,000 VND: balance_ts của dòng nav_history 2026-06-03 không đọc được (đọc được: '2026-06-03T12:10:00Z'
+ts dạng 'YYYY-MM-DD HH:MM:SS' + micro giây                   => 06-02:10000.0[] 06-03:10000.0[e] 06-04:10000.0[]  pend=0 drop=0
+ts chỉ có NGÀY ('2026-06-03' ⇒ 00:00)                        => CashFlowError: flow 2026-06-03 time_ict=16:00 được gán bod trên phiên 2026-06-04 ⇒ giao dịch ở giá chốt của dòng nav_history 2026-06-03, như
+== E4. dòng NAV ngày KHÔNG phiên (thứ Bảy 06-06) chụp 10:00; nạp CN 06-07 09:00
+thứ Bảy chụp 10:00, nạp CN                                   => 06-05:10000.0[] 06-06:10000.0[] 06-08:10000.0[b]  pend=0 drop=0
+== E5. nạp trong phiên, thị trường +10% phiên đó (quy ước bod — biết trước, không phải lỗi)
+nạp 220tr 10:00 T2, T2 +10% trên vốn cũ                      => 06-02:10000.0[] 06-03:10819.7[b] 06-04:10819.7[]  pend=0 drop=0

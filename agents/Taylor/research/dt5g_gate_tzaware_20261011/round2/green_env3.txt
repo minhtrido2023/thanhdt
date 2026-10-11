@@ -1,0 +1,248 @@
+# venv312 TZ=America/New_York
+macro_gate_health_tz_selfcheck — TZ thừa hưởng=America/New_York, TZ lệch ngày với ICT lúc này=Pacific/Kiritimati
+
+--- host TZ = thừa hưởng:America/New_York (giờ host 2026-10-11 11:13) ---
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] A. aware +07:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] D3. aware +07:00, 1430 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1450min old (> 1440) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] D3. aware +07:00, 1450 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-12T00:13:27+07:00 is 120min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] I. aware tương lai +120 phút ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-21T22:13:27+07:00 is 14400min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] I. aware tương lai +10 ngày ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2036-10-08T22:13:27 is 5256000min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] I. naive tương lai +10 năm ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmp1r3fr_ut/health.json') -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] E. thiếu file ⇒ DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] I. reason tương lai in ra ts thật + số phút lệch (120)
+[get_gated_state] DT4_only: health=FAILED rec=DT5G_macro -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health=DEGRADED rec=DT4_only -> DT4_only
+  PASS  [TZ=thừa hưởng:America/New_York] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=DEGRADED -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=thừa hưởng:America/New_York] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro
+
+--- host TZ = <unset> (giờ host 2026-10-11 15:13) ---
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] A. aware +07:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=<unset>] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=<unset>] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=<unset>] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=<unset>] D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] D3. aware +07:00, 1430 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1450min old (> 1440) -> DT4_only
+  PASS  [TZ=<unset>] D3. aware +07:00, 1450 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-12T00:13:27+07:00 is 120min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=<unset>] I. aware tương lai +120 phút ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-21T22:13:27+07:00 is 14400min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=<unset>] I. aware tương lai +10 ngày ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2036-10-08T22:13:27 is 5256000min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=<unset>] I. naive tương lai +10 năm ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=<unset>] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=<unset>] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=<unset>] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=<unset>] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=<unset>] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=<unset>] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmpmw9udqdz/health.json') -> DT4_only
+  PASS  [TZ=<unset>] E. thiếu file ⇒ DT4_only
+  PASS  [TZ=<unset>] I. reason tương lai in ra ts thật + số phút lệch (120)
+[get_gated_state] DT4_only: health=FAILED rec=DT5G_macro -> DT4_only
+  PASS  [TZ=<unset>] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health=DEGRADED rec=DT4_only -> DT4_only
+  PASS  [TZ=<unset>] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=DEGRADED -> DT5G_macro
+  PASS  [TZ=<unset>] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=<unset>] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro
+
+--- host TZ = UTC (giờ host 2026-10-11 15:13) ---
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] A. aware +07:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=UTC] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=UTC] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=UTC] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=UTC] D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] D3. aware +07:00, 1430 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1450min old (> 1440) -> DT4_only
+  PASS  [TZ=UTC] D3. aware +07:00, 1450 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-12T00:13:27+07:00 is 120min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=UTC] I. aware tương lai +120 phút ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-21T22:13:27+07:00 is 14400min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=UTC] I. aware tương lai +10 ngày ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2036-10-08T22:13:27 is 5256000min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=UTC] I. naive tương lai +10 năm ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=UTC] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=UTC] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=UTC] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=UTC] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=UTC] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=UTC] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmp4sytol20/health.json') -> DT4_only
+  PASS  [TZ=UTC] E. thiếu file ⇒ DT4_only
+  PASS  [TZ=UTC] I. reason tương lai in ra ts thật + số phút lệch (120)
+[get_gated_state] DT4_only: health=FAILED rec=DT5G_macro -> DT4_only
+  PASS  [TZ=UTC] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health=DEGRADED rec=DT4_only -> DT4_only
+  PASS  [TZ=UTC] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=DEGRADED -> DT5G_macro
+  PASS  [TZ=UTC] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=UTC] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro
+
+--- host TZ = Pacific/Kiritimati (giờ host 2026-10-12 05:13) ---
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] A. aware +07:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] A. aware +07:00, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] B. naive kiểu cũ, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] B. naive kiểu cũ, 1380 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] C. aware UTC +00:00, 5 phút ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D. aware +07:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D. naive kiểu cũ, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D. aware UTC +00:00, 1500 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] C2. aware UTC +00:00, 1200 phút (<1440; đè offset thành ICT ⇒ 1620) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1500min old (> 1440) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D2. aware +09:00, 1500 phút (>1440; đè offset thành ICT ⇒ 1380) ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] D3. aware +07:00, 1430 phút (<1440) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report 1450min old (> 1440) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] D3. aware +07:00, 1450 phút (>1440) ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-12T00:13:27+07:00 is 120min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] I. aware tương lai +120 phút ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2026-10-21T22:13:27+07:00 is 14400min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] I. aware tương lai +10 ngày ⇒ DT4_only
+[get_gated_state] DT4_only: health report ts=2036-10-08T22:13:27 is 5256000min in the FUTURE (> 5min clock-skew allowance) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] I. naive tương lai +10 năm ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] I. aware tương lai +3 phút (lệch đồng hồ ≤5) ⇒ DT5G_macro
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: 'khong-phai-ngay') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts rác ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Invalid isoformat string: '') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts rỗng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts là số ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (fromisoformat: argument must be str) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. ts null ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ('ts') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. thiếu khoá ts ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable (Expecting property name enclosed in double quotes: line 1 column 3 (char 2)) -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. JSON hỏng ⇒ DT4_only
+[get_gated_state] DT4_only: health report unreadable ([Errno 2] No such file or directory: '/tmp/tmpnldy2glm/health.json') -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] E. thiếu file ⇒ DT4_only
+  PASS  [TZ=Pacific/Kiritimati] I. reason tương lai in ra ts thật + số phút lệch (120)
+[get_gated_state] DT4_only: health=FAILED rec=DT5G_macro -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] F. tươi nhưng status=FAILED ⇒ DT4_only
+[get_gated_state] DT4_only: health=DEGRADED rec=DT4_only -> DT4_only
+  PASS  [TZ=Pacific/Kiritimati] F. tươi nhưng rec=DT4_only ⇒ DT4_only
+[get_gated_state] DT5G_macro: health=DEGRADED -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] F. tươi, DEGRADED + rec=DT5G_macro ⇒ DT5G_macro (hành vi cũ)
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] G. end = hôm nay ICT − 10 ngày ⇒ freshness probe gọi 1 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] G. end = hôm nay ICT − 11 ngày ⇒ freshness probe gọi 0 lần
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+  PASS  [TZ=Pacific/Kiritimati] H. ts do writer thật sinh (NOW = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh'))) ⇒ DT5G_macro
+
+===== macro_gate_health_tz_selfcheck: 120/120 PASS =====

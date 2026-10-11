@@ -1,0 +1,57 @@
+== 0. Đồng bộ corporate-action live ↔ paper-report ==
+  PASS  paper report gọi paper_entry_adjust trước khi tính AlphaLens return
+  PASS  live NAV giữ cổng corp-action v2: def + call site classify_qty_residual, chặn qty_change_block, lưới 5%
+== A. Giao dịch hôm nay: CÓ / KHÔNG / n-a ==
+  PASS  exit 0
+  PASS  MỌI chương trình đều có dòng 'Giao dịch hôm nay'
+  PASS  có fill → '1 lệnh khớp' + chi tiết mã
+  PASS  phiên lỗi toàn tập → KHÔNG nói 'Không có giao dịch'
+  PASS  phiên yên thật (0 lệnh, 0 lỗi) → 'Không có giao dịch'
+  PASS  thiếu file journal → n/a, KHÔNG suy diễn thành 'không có giao dịch'
+  PASS  csv turnover=0 → 'Không có giao dịch'
+  PASS  csv turnover>0 → 'CÓ giao dịch'
+  PASS  csv thiếu dòng hôm nay → n/a (không mượn dòng cũ để nói 'không có giao dịch')
+  PASS  lag_days=1 → dòng T-1 là ĐÚNG thiết kế, không báo động
+  PASS  thiếu khai báo today_activity → nói rõ thiếu + badge WATCH
+  PASS  phiên lỗi toàn tập → badge RED
+  PASS  header liệt kê chương trình RED
+== A2. Phạm vi báo cáo ==
+  PASS  entry reporting=false không render section hoặc tổng quan
+  PASS  entry reporting=false được công khai là đã chuyển khỏi báo cáo
+== B. Cảnh báo có ngữ cảnh mức độ ==
+  PASS  cảnh báo có giải thích → in note + WATCH
+  PASS  cảnh báo chưa giải thích → 'CHƯA CÓ GIẢI THÍCH' + RED
+== C. Không lặp nội dung tĩnh (charter + gate) ==
+  PASS  charter được sinh ra file riêng
+  PASS  charter chứa mục đích + tiêu chí đầy đủ
+  PASS  report KHÔNG paste mục đích đầy đủ nữa
+  PASS  report link tới charter
+  PASS  checklist GO/NO-GO tiếng Anh bị lược
+  PASS  drop_regex bỏ đúng dòng
+  PASS  headline khớp trên output GỐC dù dòng nguồn bị drop_regex bỏ
+  PASS  lần đầu: in gate đầy đủ
+  PASS  ngày thường (gate không đổi): chỉ 1 dòng badge
+  PASS  ngày thường: đếm đúng số gate PASS
+  PASS  charter không bị ghi lại khi registry không đổi
+  PASS  gate ĐỔI → in lại đầy đủ + đánh dấu mục đổi
+  PASS  charter cập nhật theo registry
+  PASS  state lưu trạng thái gate để so sánh lần sau
+  PASS  --no-state KHÔNG ghi đè state production
+  PASS  gate FAIL → badge RED
+== D. 3 lỗ hổng quant-skeptic bắt được (verify_20260731_051111, REFUTED trước fix) ==
+  PASS  D1: dòng đầu tiên chuỗi unchanged_vs_prev → n/a, KHÔNG tuyên bố 'CÓ giao dịch'
+  PASS  D2: phiên toàn NO_QUOTE → RED + KHÔNG tuyên bố 'Không có giao dịch' như ngày calm thật
+  PASS  D2b: có NO_QUOTE NHƯNG cũng có PLACE/FILL thật → vẫn báo lệnh khớp, KHÔNG bị NO_QUOTE ghi đè
+  PASS  D3: probe journal_scan marker bắn hôm nay → badge RED (không lọt qua thành XANH)
+  PASS  E1: chuỗi hệ số GIẢM thật (1,0 → 0,909) ⇒ bị bắt, kèm ngày gãy + chặn trên
+  PASS  E2: rung làm tròn (giảm ~4e-4) KHÔNG bị bắt — ngưỡng FACTOR_EPS từng báo động giả ở đây
+  PASS  E3: hệ số phẳng / <2 dòng / mã không có trong cache ⇒ rỗng, không exception
+  PASS  E4: ngưỡng nằm GIỮA nền nhiễu và tín hiệu thật đã đo (4,01e-4 < tol < 9,09e-2)
+  PASS  E5: có lệch hệ số ⇒ số DẪN DẮT tính bằng giá vốn đã áp chặn trên (+4,36%, không -5,13%)
+  PASS  E5b: body nêu rõ giá vốn cũ→mới và giữ nguyên bằng chứng ngày gãy
+  PASS  E6 (đối chứng): mã hệ số phẳng ⇒ KHÔNG áp chặn, không có nhãn ≥/CHẶN DƯỚI
+== F. close_repair self_computed KHÔNG bị cap hai lần (Việc nhỏ 2, 2026-09-29) ==
+  PASS  F1: close_repair self_computed + raw-cache stale detector CẢ HAI fire ⇒ CHỈ MỘT lần sửa (ret ≈ -0,19%, KHÔNG +9,80%)
+  PASS  F2: body xác nhận cap bị gate tắt (đã sửa qua close_repair, không áp thêm chặn trên)
+
+ALL PASS (48/48)  (tmp: /tmp/ppdr_selfcheck__61_1pdv)

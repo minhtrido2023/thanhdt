@@ -1,0 +1,58 @@
+[
+ [
+  "P46",
+  "nav_period_returns.py",
+  "SURVIVED",
+  "",
+  "",
+  105
+ ],
+ [
+  "P49",
+  "nav_period_returns.py",
+  "KILLED_ASSERT",
+  "nav_unit_ledger_selfcheck.py",
+  "ASSERT-FAIL (sau 2866 assertion PASS): D eod: mwr_pct phải dùng w=0.6 ⇒ 1.786, được 1.667",
+  126
+ ],
+ [
+  "P53",
+  "nav_period_returns.py",
+  "KILLED_ASSERT",
+  "nav_unit_ledger_selfcheck.py",
+  "ASSERT-FAIL (sau 2866 assertion PASS): D eod: mwr_pct phải dùng w=0.6 ⇒ 1.786, được 1.853",
+  133
+ ],
+ [
+  "U64",
+  "nav_unit_ledger.py",
+  "KILLED_ASSERT",
+  "nav_unit_ledger_selfcheck.py",
+  "ASSERT-FAIL (sau 1069 assertion PASS): B6: CLI phải rc=1, nêu ngày, KHÔNG tạo sổ; được rc=0 LỖI nav_unit_ledger (SpaceX): flow 2026-07-04 timing='eod' nhưng nav_history không có dòng ngày đó (dòng cuối cùng hiện có: 2026-07-06) ⇒ ",
+  327
+ ],
+ [
+  "U68",
+  "nav_unit_ledger.py",
+  "KILLED_ASSERT",
+  "nav_unit_ledger_selfcheck.py",
+  "ASSERT-FAIL (sau 2809 assertion PASS): C: header + 3 dòng, được ['2026-07-01,1000000000.0,0.0,0.0,0.0,100000.0,10000.0,False', '2026-07-02,1010000000.0,0.0,0.0,0.0,100000.0,10100.0,False', '2026-07-03,1220000000.0,0.0,200000000.0,",
+  284
+ ],
+ [
+  "U69",
+  "nav_unit_ledger.py",
+  "SURVIVED",
+  "",
+  "",
+  289
+ ],
+ [
+  "U70",
+  "nav_unit_ledger.py",
+  "SURVIVED",
+  "",
+  "",
+  285
+ ]
+]

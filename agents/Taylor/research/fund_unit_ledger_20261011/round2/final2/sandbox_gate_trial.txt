@@ -1,0 +1,55 @@
+cây bin: /home/trido/thanhdt/WorkingClaude/wt-fundunit-1011/bin @ 75060709 → /tmp/fu_fin_gate/s0/WC/mike/bin
+sổ dòng tiền thật (bản sao): {'SpaceX': 0, 'ZaloPay': 0}
+
+== 1. dữ liệu thật, CLI nhánh
+   SpaceX: rc=0 :: inception -1.33 / wtd 1.024 / mtd 0.519 · pending=0 dropped=0
+   ZaloPay: rc=0 :: inception -4.907 / wtd -1.162 / mtd -2.01 · pending=0 dropped=0
+
+== 2. báo cáo tuần ĐÃ GỬI (nguyên văn) qua cổng
+   SpaceX_weekly_report_2026-10-05_to_2026-10-09.md
+     ROOT=/tmp/fu_fin_gate/s0/WC/mike
+     report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical -1.330% (lệch 0.000pp)
+     _check_period_returns: QUA
+     report_delivery_gate: nav-flow PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): SpaceX — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-10-09 (0 bản ghi dòng tiền)
+     _check_nav_flow_records: QUA
+   ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md
+     ROOT=/tmp/fu_fin_gate/s0/WC/mike
+     _check_period_returns: QUA
+     report_delivery_gate: nav-flow PASS (ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md): ZaloPay — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-10-09 (0 bản ghi dòng tiền)
+     _check_nav_flow_records: QUA
+
+== 3. cùng báo cáo SpaceX, sửa dòng 'Từ khi bắt đầu hoạt động' thành +9,99%
+   (đã thay 1 ô)
+     ROOT=/tmp/fu_fin_gate/s0/WC/mike
+     _check_period_returns: CHẶN — period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): bảng ghi 'Từ khi bắt đầu hoạt động' = +9.99%, canonical (nav_period_returns.py --account SpaceX --report-date 2026-10-09) = -1.330% — lệch 11.320pp >= 0.05pp tolerance
+     report_delivery_gate: nav-flow PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): SpaceX — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-10-09 (0 bản ghi dòng tiền)
+     _check_nav_flow_records: QUA
+
+== 4. sổ đơn vị LỆCH nằm sẵn trong thư mục dữ liệu (ca K2 của reviewer): CLI + cổng với báo cáo sai
+   SpaceX: rc=0 :: inception -1.33 / wtd 1.024 / mtd 0.519 · pending=0 dropped=0
+     ROOT=/tmp/fu_fin_gate/s0/WC/mike
+     _check_period_returns: CHẶN — period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): bảng ghi 'Từ khi bắt đầu hoạt động' = +9.99%, canonical (nav_period_returns.py --account SpaceX --report-date 2026-10-09) = -1.330% — lệch 11.320pp >= 0.05pp tolerance
+     report_delivery_gate: nav-flow PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): SpaceX — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-10-09 (0 bản ghi dòng tiền)
+     _check_nav_flow_records: QUA
+   --seal vào thư mục dữ liệu mặc định: rc=3 :: nav_unit_ledger (SpaceX): TỪ CHỐI chốt sổ vào thư mục dữ liệu thật /tmp/fu_fin_gate/s0/WC/data/execution_logs: chưa chốt sổ đơn vị thật trước bước 3 của chính sách (kb/projects/fund-unit-performance-policy-20261010.md). Truyền --ledger-dir trỏ thư mục khác nếu
+
+== 5. bản ghi nạp 200tr KHÔNG khai giờ (mẫu cũ) trong sổ dòng tiền: CLI + cổng với báo cáo ĐÚNG
+   SpaceX: rc=1 :: LỖI nav_period_returns: /tmp/fu_fin_gate/s0/WC/data/account_cash_flows.json[SpaceX][0]: deposit +200,000,000 VND thiếu time_ict — BẮT BUỘC khai giờ ICT lúc tiền vào/ra (HH:MM). Không có giờ thì không biết tiền giao dịch ở giá chốt nào; code không còn mặc định hộ.
+     ROOT=/tmp/fu_fin_gate/s0/WC/mike
+     _check_period_returns: QUA
+     _check_nav_flow_records: CHẶN — nav-flow BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): không đọc/không gán được nav_history/cash-flows của SpaceX (CashFlowError: /tmp/fu_fin_gate/s0/WC/data/account_cash_flows.json[SpaceX][0]: deposit +200,000,000 VND thiếu time_ict — BẮT BUỘC khai giờ ICT lúc tiền vào/ra (HH:MM). Không có giờ thì không biết tiền gi
+     [stderr] report_delivery_gate: WARN period-return check — nav_period_returns.py lỗi/thiếu data (Command '['/usr/bin/python3', '/tmp/fu_fin_gate/s0/WC/mike/bin/nav_period_returns.py', '--account', 'SpaceX', '--report-date', '2026-10-09']' returned non-zero exit status 1.), bỏ qua (fail-open)
+
+== 6. nạp 200tr 2026-10-10 (thứ Bảy) 10:00, CHƯA có dòng NAV nào sau đó ⇒ treo, phải HIỆN
+   SpaceX asof 2026-10-09: rc=0 :: inception -1.33 / wtd 1.024 / mtd 0.519 · pending=1 dropped=0
+   SpaceX asof 2026-10-10: rc=0 pending_flows=[{'date': '2026-10-10', 'time_ict': '10:00', 'amount_vnd': 200000000.0, 'kind': 'deposit', 'evidence': 'sao kê', 'reason': 'TREO: chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra (dòng cuối 2026-10-09)'}]
+   stderr: ⚠️ nav_period_returns (SpaceX): dòng tiền TREO — 2026-10-10 10:00 +200,000,000 VND (deposit) KHÔNG nằm trong tỉ suất nào ở trên: TREO: chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra (dòng cuối 2026-10-09)
+     ROOT=/tmp/fu_fin_gate/s0/WC/mike
+     report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical -1.330% (lệch 0.000pp)
+     _check_period_returns: QUA
+     report_delivery_gate: nav-flow PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): SpaceX — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-10-09 (1 bản ghi dòng tiền)
+     _check_nav_flow_records: QUA
+
+== 7. selfcheck của cổng chạy TRONG sandbox (gọi nav_period_returns.py của nhánh)
+   bin/report_delivery_gate_selfcheck.py: rc=0 :: report_delivery_gate: WARN period-return check — không suy được report-date từ tên file SpaceX_special_report.md, bỏ qua
+   bin/nav_period_returns.py --selfcheck: rc=0 :: OK — 9 assertion PASS (nav_period_returns.py)

@@ -1,0 +1,2 @@
+SpaceX {'wtd': 1.024, 'mtd': 0.519, 'inception': -1.33} pending []
+ZaloPay {'wtd': -1.162, 'mtd': -2.01, 'inception': -4.907} pending []

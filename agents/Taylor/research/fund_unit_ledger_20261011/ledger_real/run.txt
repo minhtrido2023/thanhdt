@@ -1,0 +1,36 @@
+$ nav_unit_ledger.py --account SpaceX --ledger-dir <research>/ledger_real --seal
+nav_unit_ledger SpaceX: 70 dòng dựng được (2026-07-01 → 2026-10-09), 8 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: ledger_real/nav_unit_ledger_SpaceX.csv — 70 dòng, tới 2026-10-09; vừa THÊM 70 dòng
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+2026-10-07,982786247.0,0.0,0.0,0.0,100000.0,9827.86247,False
+2026-10-08,987341794.0,0.0,0.0,0.0,100000.0,9873.41794,False
+2026-10-09,986698574.0,0.0,0.0,0.0,100000.0,9866.98574,False
+rc=0
+$ (chạy lại, không --seal)
+nav_unit_ledger SpaceX: 70 dòng dựng được (2026-07-01 → 2026-10-09), 8 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: ledger_real/nav_unit_ledger_SpaceX.csv — 70 dòng, tới 2026-10-09; khớp chuỗi dựng lại
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ (mặc định: sổ thật trong data/ — chưa chốt)
+nav_unit_ledger SpaceX: 70 dòng dựng được (2026-07-01 → 2026-10-09), 8 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: /home/trido/thanhdt/WorkingClaude/data/execution_logs/nav_unit_ledger_SpaceX.csv — 0 dòng (chưa chốt dòng nào); khớp chuỗi dựng lại
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ nav_unit_ledger.py --account ZaloPay --ledger-dir <research>/ledger_real --seal
+nav_unit_ledger ZaloPay: 67 dòng dựng được (2026-07-06 → 2026-10-09), 6 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: ledger_real/nav_unit_ledger_ZaloPay.csv — 67 dòng, tới 2026-10-09; vừa THÊM 67 dòng
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+2026-10-07,930757202.0,0.0,0.0,0.0,98786.5567,9421.901451900692,False
+2026-10-08,926780212.0,0.0,0.0,0.0,98786.5567,9381.64303888527,False
+2026-10-09,939394841.0,0.0,0.0,0.0,98786.5567,9509.338845090042,False
+rc=0
+$ (chạy lại, không --seal)
+nav_unit_ledger ZaloPay: 67 dòng dựng được (2026-07-06 → 2026-10-09), 6 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: ledger_real/nav_unit_ledger_ZaloPay.csv — 67 dòng, tới 2026-10-09; khớp chuỗi dựng lại
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ (mặc định: sổ thật trong data/ — chưa chốt)
+nav_unit_ledger ZaloPay: 67 dòng dựng được (2026-07-06 → 2026-10-09), 6 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: /home/trido/thanhdt/WorkingClaude/data/execution_logs/nav_unit_ledger_ZaloPay.csv — 0 dòng (chưa chốt dòng nào); khớp chuỗi dựng lại
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0

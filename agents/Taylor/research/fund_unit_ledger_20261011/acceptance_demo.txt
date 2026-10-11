@@ -1,0 +1,30 @@
+== 1. Nạp 200tr vào 1 tỷ đúng ngày thị trường +2%
+chuỗi NAV 1.220tr đọc eod (mặc định) — tay: +2,000%        twr     2.0%  mwr 1.786%  pnl     20,000,000  ròng    200,000,000  đơn vị cuối   119,607.8431  giá cuối  10,200.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+chuỗi NAV 1.220tr đọc bod            — tay: +1,667%        twr   1.667%  mwr 1.725%  pnl     20,000,000  ròng    200,000,000  đơn vị cuối   120,000.0000  giá cuối  10,166.6667  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+chuỗi NAV 1.224tr đọc bod            — tay: +2,000%        twr     2.0%  mwr 2.07%  pnl     24,000,000  ròng    200,000,000  đơn vị cuối   120,000.0000  giá cuối  10,200.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+chuỗi NAV 1.224tr đọc eod            — tay: +2,400%        twr     2.4%  mwr 2.144%  pnl     24,000,000  ròng    200,000,000  đơn vị cuối   119,531.2500  giá cuối  10,240.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+== 2. Rút một phần (nạp 200 rồi rút 300, thị trường đứng yên 2 ngày đó; trước +1%, sau +1%) — tay: +2,010%
+eod                                                        twr    2.01%  mwr 1.763%  pnl     19,100,000  ròng   -100,000,000  đơn vị cuối    90,099.0099  giá cuối  10,201.0000  max|đv×giá−NAV| 1.19e-07đ  quy năm None
+bod                                                        twr    2.01%  mwr 1.79%  pnl     19,100,000  ròng   -100,000,000  đơn vị cuối    90,099.0099  giá cuối  10,201.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+== 3. Rút gần hết (còn 1tr) rồi +5% — tay: +5,000%, còn 100 đơn vị
+eod                                                        twr     5.0%  mwr 0.012%  pnl         50,000  ròng   -999,000,000  đơn vị cuối       100.0000  giá cuối  10,500.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+rút HẾT đầu ngày → TỪ CHỐI: 2026-07-03: rút đầu ngày -1,000,000,000 VND huỷ hết đơn vị quỹ (còn 0.000000) — không còn giá đơn vị; kỳ này phải chia thủ công
+rút HẾT cuối ngày → TỪ CHỐI: 2026-07-03: rút cuối ngày -1,000,000,000 VND huỷ hết đơn vị quỹ (còn 0.000000) — không còn giá đơn vị; kỳ này phải chia thủ công
+== 4. Nạp 500tr ĐÚNG ngày inception — bị loại (đã nằm trong vốn khởi điểm), số không đổi so với không khai
+không khai gì                                              twr     3.0%  mwr 3.0%  pnl     30,000,000  ròng              0  đơn vị cuối   100,000.0000  giá cuối  10,300.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+khai nạp 500tr ngày 07-01                                  twr     3.0%  mwr 3.0%  pnl     30,000,000  ròng              0  đơn vị cuối   100,000.0000  giá cuối  10,300.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+   CLI rc = 0 | stderr: ℹ️ bỏ flow 2026-07-01 +500,000,000 VND: ngày <= mốc khởi điểm 2026-07-01 (đã nằm trong vốn khởi điểm)
+== 5. Ba dòng tiền cùng ngày 07-03: bod +100, eod +200, eod −50 — tay: 1,01 × (1282,2−150)/(1010+100) − 1 = +3,020%
+                                                           twr    3.02%  mwr 2.754%  pnl     32,200,000  ròng    250,000,000  đơn vị cuối   124,461.2697  giá cuối  10,302.0000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+== 6. Dòng tiền rơi vào ngày KHÔNG có dòng nav_history (thứ Bảy 07-04, mặc định eod) — fail-closed
+   nav_unit_ledger --seal rc = 1 | sổ được tạo: False 
+   stderr: LỖI nav_unit_ledger (SpaceX): flow 2026-07-04 timing='eod' nhưng nav_history không có dòng ngày đó (dòng cuối cùng hiện có: 2026-07-06) ⇒ không có giá đơn vị chốt cuối ngày 2026-07-04 để giao dịch. Khai lại tường minh: timing='bod' + time_ict (giao dịch ở giá chốt phiên liền trước của phiên kế tiếp).
+   nav_period_returns: TỪ CHỐI (CashFlowError)
+== 7. Nhân đôi mọi dòng tiền — chỉ nạp vào tiền mặt, thị trường đứng yên từ lần nạp đầu (trước đó +1%, −0,5%) — tay: +0,495% cả hai
+eod × 1                                                    twr   0.495%  mwr 0.475%  pnl      4,950,000  ròng    400,000,000  đơn vị cuối   139,802.9753  giá cuối  10,049.5000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+eod × 2                                                    twr   0.495%  mwr 0.456%  pnl      4,950,000  ròng    800,000,000  đơn vị cuối   179,605.9505  giá cuối  10,049.5000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+bod × 1                                                    twr   0.495%  mwr 0.45%  pnl      4,950,000  ròng    400,000,000  đơn vị cuối   139,802.9753  giá cuối  10,049.5000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+bod × 2                                                    twr   0.495%  mwr 0.413%  pnl      4,950,000  ròng    800,000,000  đơn vị cuối   179,605.9505  giá cuối  10,049.5000  max|đv×giá−NAV| 0.00e+00đ  quy năm None
+== 8. Quy năm: SpaceX-giả từ 2026-07-01
+   asof 2027-06-30: 364 ngày, twr 5.0%, annualized_return_pct=None, note=kỳ 364 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)
+   asof 2028-06-30: 730 ngày, twr 21.0%, annualized_return_pct=10.0, note=None

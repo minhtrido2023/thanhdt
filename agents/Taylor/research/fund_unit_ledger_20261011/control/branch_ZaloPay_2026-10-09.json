@@ -1,0 +1,53 @@
+{
+  "account": "ZaloPay",
+  "report_date": "2026-10-09",
+  "inception": {
+    "from_date": "2026-07-06",
+    "to_date": "2026-10-09",
+    "nav0": 987865567.0,
+    "nav1": 939394841.0,
+    "return_pct": -4.907,
+    "days": 95,
+    "unit_price0": 10000.0,
+    "unit_price1": 9509.3388,
+    "pnl_vnd": -48470726.0,
+    "mwr_pct": -4.907,
+    "annualized_return_pct": null,
+    "mwr_annualized_pct": null,
+    "annualized_note": "kỳ 95 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)"
+  },
+  "wtd": {
+    "from_date": "2026-10-02",
+    "to_date": "2026-10-09",
+    "nav0": 950434410.0,
+    "nav1": 939394841.0,
+    "return_pct": -1.162,
+    "days": 7,
+    "unit_price0": 9621.0906,
+    "unit_price1": 9509.3388,
+    "pnl_vnd": -11039569.0,
+    "mwr_pct": -1.162,
+    "annualized_return_pct": null,
+    "mwr_annualized_pct": null,
+    "annualized_note": "kỳ 7 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)"
+  },
+  "mtd": {
+    "from_date": "2026-09-30",
+    "to_date": "2026-10-09",
+    "nav0": 958666279.0,
+    "nav1": 939394841.0,
+    "return_pct": -2.01,
+    "days": 9,
+    "unit_price0": 9704.4204,
+    "unit_price1": 9509.3388,
+    "pnl_vnd": -19271438.0,
+    "mwr_pct": -2.01,
+    "annualized_return_pct": null,
+    "mwr_annualized_pct": null,
+    "annualized_note": "kỳ 9 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)"
+  },
+  "unit_ledger": {
+    "path": "/home/trido/thanhdt/WorkingClaude/data/execution_logs/nav_unit_ledger_ZaloPay.csv",
+    "sealed_through": null
+  }
+}

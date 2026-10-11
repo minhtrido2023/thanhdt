@@ -1,0 +1,10 @@
+{'KILLED_ASSERT': 30, 'NOT_APPLIED': 4, 'SURVIVED': 5}
+A51 NOT_APPLIED(count=0) bin/account_cash_flows.py:None | nguồn: so với giờ đóng cửa của R | None | 
+A62 SURVIVED bin/account_cash_flows.py:436 | nav0 == 0 | None | 
+A63 NOT_APPLIED(count=0) bin/account_cash_flows.py:None | nguồn: bỏ qua khi R là dòng thứ hai | None | 
+A64 SURVIVED bin/account_cash_flows.py:339 | chốt trong phiên chỉ khi dòng đúng ngày flow | None | 
+U59 SURVIVED bin/nav_unit_ledger.py:270 | đọc file HAI lần (N2 cũ) | None | 
+U61 NOT_APPLIED(count=0) bin/nav_unit_ledger.py:None | noop | None | 
+P53 SURVIVED bin/nav_period_returns.py:190 | tương đương (dòng sau i1 > report_date) | None | 
+D30 NOT_APPLIED(count=0) bin/daily_nav_snapshot.py:None | mốc khởi điểm viết cứng 1 tỷ (lỗi N11 gốc) | None | 
+D31 SURVIVED bin/daily_nav_snapshot.py:898 | tương đương khi không có flow | None | 

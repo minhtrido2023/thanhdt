@@ -1,0 +1,36 @@
+⚠️  report_delivery_gate: chạy từ /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-1011 nhưng GHI SỔ THẬT + gọi script con của cây canonical /home/trido/thanhdt/WorkingClaude/mike — đây không phải sandbox
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: report_delivery_gate already validated sha256=43355ba6154c3af653dad0fe8cdefd14623e44023cd67a7c2247c480c920f2ac
+✅ Đã gửi email '[Daily report] SpaceX_daily_report_2026-10-11.md' tới to@selfcheck.invalid
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: report_delivery_gate already validated sha256=fb0cda8f9214264040473569d766e38b1aee994e556e71a5133f7611c9a6e806
+✅ Đã gửi email '[Daily report] ZaloPay_daily_report_2026-10-11.md' tới to@selfcheck.invalid
+[song song B] 17.3s args=['--attach', '/tmp/sf_dryrun_o5nnyy99/root/reports/dashboard/strategy_fit_2026-10-11.html']
+[song song A] 17.8s args=['--attach', '/tmp/sf_dryrun_o5nnyy99/root/reports/dashboard/strategy_fit_2026-10-11.html']
+file trong thư mục dashboard: ['strategy_fit_2026-10-11.html']
+[ô] edge_ic         ok
+[ô] edge_lag        ok | CHẠM: 1
+[ô] edge_capit      ok
+[ô] book_map        ok
+[ô] env_dt5g        ok | CHẠM: 1
+[ô] env_breadth     ok
+[ô] env_value       ok
+[ô] env_rates       ok
+[ô] env_structural  ok
+stderr lượt A: (trống)
+[account sau — dùng lại] 0.0s args=['--attach', '/tmp/sf_dryrun_o5nnyy99/root/reports/dashboard/strategy_fit_2026-10-11.html']
+dashboard: strategy_fit_2026-10-11.html 49485 byte sha256=411250aa4d6e26a4
+report_delivery_gate: COMPLETE SpaceX_daily_report_2026-10-11.md (validated + Discord + email)
+
+== SpaceX: nội dung lấy từ SpaceX_daily_report_2026-10-09.md; cổng rc=0; To=['to@selfcheck.invalid']; Subject=[Daily report] SpaceX_daily_report_2026-10-11.md
+   dòng trong thân: ['📎 Kèm theo: <strong>strategy_fit_2026-10-11.html</strong> — tài liệu chẩn đoán nội bộ, mở bằng trình duyệt; chỉ để mô tả, không phải tín hiệu giao dịch.']
+   đính kèm: SpaceX_daily_report_2026-10-11.md 641 byte sha256=43355ba6154c3af6  == artifact .md
+   đính kèm: strategy_fit_2026-10-11.html 49485 byte sha256=411250aa4d6e26a4  == file dashboard
+   sổ: sha256==sha(.md) True; khoá=['artifact_validated_at', 'completed_at', 'created_at', 'delivered_by_tree', 'discord', 'email', 'path', 'sha256']; email=['delivered_at', 'sha256', 'status']
+report_delivery_gate: COMPLETE ZaloPay_daily_report_2026-10-11.md (validated + Discord + email)
+
+== ZaloPay: nội dung lấy từ ZaloPay_daily_report_2026-10-09.md; cổng rc=0; To=['to@selfcheck.invalid']; Subject=[Daily report] ZaloPay_daily_report_2026-10-11.md
+   dòng trong thân: ['📎 Kèm theo: <strong>strategy_fit_2026-10-11.html</strong> — tài liệu chẩn đoán nội bộ, mở bằng trình duyệt; chỉ để mô tả, không phải tín hiệu giao dịch.']
+   đính kèm: ZaloPay_daily_report_2026-10-11.md 2221 byte sha256=fb0cda8f92142640  == artifact .md
+   đính kèm: strategy_fit_2026-10-11.html 49485 byte sha256=411250aa4d6e26a4  == file dashboard
+   sổ: sha256==sha(.md) True; khoá=['artifact_validated_at', 'completed_at', 'created_at', 'delivered_by_tree', 'discord', 'email', 'path', 'sha256']; email=['delivered_at', 'sha256', 'status']
+
+email giả đã 'gửi': 2 | sổ canonical không bị đụng: True

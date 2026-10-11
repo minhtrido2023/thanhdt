@@ -1,0 +1,50 @@
+FAIL parse-case [sh] '"$ROOT/bin/jobs.sh" status x': mong jobs.sh:exec, được []
+FAIL parse-case [sh] 'FILES=(\n  "$ROOT/bin/jobs.sh"\n)': mong jobs.sh:ref, được []
+FAIL parse-case [sh] "python3 - <<'PY'\nimport mike_json\nPY": mong mike_json.py:import, được []
+FAIL parse-case [sh] 'printf \'%s\' "$p" | timeout 25 python3 "$ROOT/bin/jobs.sh"': mong jobs.sh:exec, được []
+FAIL parse-case [sh] 'out=$(echo "$j" | python3 "$ROOT/bin/mike_json.py" get)': mong mike_json.py:exec, được []
+FAIL parse-case [sh] 'setsid bash -c \'\n  ROOT="\'"$ROOT"\'"; L=\'"$(printf %q "$L")"\'\n  "$ROOT/bin/jobs.sh" list\n\' &': mong jobs.sh:exec, được []
+FAIL parse-case [sh] 'R="$(python3 - "$A" << \'PYEOF\'\nimport mike_json\nPYEOF\n)"': mong mike_json.py:import, được []
+FAIL parse-case [sh] 'X="$(cd "$W" && python3 -c "import mike_json")"': mong mike_json.py:import, được []
+FAIL parse-case [sh] 'P="$(cd "$W" && python3 - "$T" << \'PYEOF\'\nimport mike_json\nPYEOF\n)"': mong mike_json.py:import, được []
+FAIL parse-case [sh] "python3 -c 'import mike_json'": mong mike_json.py:import, được []
+FAIL parse-case [py] 'import subprocess\nsubprocess.run([str(ROOT / "bin" / "jobs.sh")])': mong jobs.sh:exec, được []
+FAIL parse-case [py] 'def gate_selfcheck():\n    import mike_json\n': mong mike_json.py:import, được []
+Traceback (most recent call last):
+  File "<stdin>", line 43, in <module>
+  File "/usr/lib/python3.10/tempfile.py", line 714, in NamedTemporaryFile
+    file = _io.open(dir, mode, buffering=buffering,
+  File "/usr/lib/python3.10/tempfile.py", line 711, in opener
+    fd, name = _mkstemp_inner(dir, prefix, suffix, flags, output_type)
+  File "/usr/lib/python3.10/tempfile.py", line 395, in _mkstemp_inner
+    fd = _os.open(file, flags, 0o600)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/mike/logs/.pm_untracked_probe_0bqm3npk.py'
+FAIL drift-probe: thiếu file dò /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/score_live_signals.py — chọn file research khác cho probe
+FAIL tier/root-probe (rc=1) — bộ so không bắt lệch tầng/gốc
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 812, in <module>
+    main()
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 782, in main
+    m = build(text)
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 606, in build
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 812, in <module>
+    main()
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 782, in main
+    m = build(text)
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 606, in build
+    r["start"] = command_edges(r["command"])
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 492, in command_edges
+    return edges_shell_src(cmd, WC)
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 444, in edges_shell_src
+    f = resolve_ref(tok, ctx)
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 183, in resolve_ref
+    return os.path.realpath(t) if in_scope(t) else None
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 171, in in_scope
+    if rp not in tracked():
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-base-tmp/bin/production_manifest.py", line 159, in tracked
+    r = subprocess.run(["git", "-C", repo, "ls-files", "-z"], capture_output=True, text=True, check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', '-C', '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/mike', 'ls-files', '-z']' returned non-zero exit status 128.
+FAIL production_manifest_selfcheck

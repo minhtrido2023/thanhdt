@@ -1,0 +1,36 @@
+unset strategy_fit_email_attach_selfcheck.py rc=0 | strategy_fit_email_attach_selfcheck: PASS (51/51) [TZ env=<unset>, hôm nay ICT=2026-10-11]
+unset strategy_fit_dashboard_selfcheck.py rc=0 | ==> 93 PASS / 0 FAIL
+unset report_delivery_gate_selfcheck.py rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+unset report_delivery_ledger_selfcheck.py rc=1 | ❌ SELFCHECK FAIL — 5 test: env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không phải 'cây của tôi'); check_report_cadence.s
+unset check_report_cadence_selfcheck.py rc=0 | ✅ PASS 58/58
+unset eod_delivery_wiring_selfcheck.py rc=0 | eod_delivery_wiring_selfcheck: 9/9 PASS
+unset eod_trading_report_account_filter_selfcheck.py rc=0 | KẾT QUẢ: 36 PASS / 0 FAIL
+unset report_return_gate_selfcheck.py rc=0 | ✅ SELFCHECK PASS
+unset paper_report_render_selfcheck.py rc=1 | FileNotFoundError: [Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-1011/bin/../../paper_entry_adjust.py'
+unset nav_flow_term_selfcheck.py rc=0 | OK — 180 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive
+unset portfolio_status_selfcheck.py rc=0 | SELFCHECK PASSED — mọi assertion OK.
+unset production_manifest_selfcheck.sh rc=1 | FAIL production_manifest_selfcheck
+America/New_York strategy_fit_email_attach_selfcheck.py rc=0 | strategy_fit_email_attach_selfcheck: PASS (51/51) [TZ env=America/New_York, hôm nay ICT=2026-10-11]
+America/New_York strategy_fit_dashboard_selfcheck.py rc=0 | ==> 93 PASS / 0 FAIL
+America/New_York report_delivery_gate_selfcheck.py rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+America/New_York report_delivery_ledger_selfcheck.py rc=1 | ❌ SELFCHECK FAIL — 5 test: env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không phải 'cây của tôi'); check_report_cadence.s
+America/New_York check_report_cadence_selfcheck.py rc=0 | ✅ PASS 58/58
+America/New_York eod_delivery_wiring_selfcheck.py rc=0 | eod_delivery_wiring_selfcheck: 9/9 PASS
+America/New_York eod_trading_report_account_filter_selfcheck.py rc=0 | KẾT QUẢ: 36 PASS / 0 FAIL
+America/New_York report_return_gate_selfcheck.py rc=0 | ✅ SELFCHECK PASS
+America/New_York paper_report_render_selfcheck.py rc=1 | FileNotFoundError: [Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-1011/bin/../../paper_entry_adjust.py'
+America/New_York nav_flow_term_selfcheck.py rc=0 | OK — 180 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive
+America/New_York portfolio_status_selfcheck.py rc=0 | SELFCHECK PASSED — mọi assertion OK.
+America/New_York production_manifest_selfcheck.sh rc=1 | FAIL production_manifest_selfcheck
+Asia/Ho_Chi_Minh strategy_fit_email_attach_selfcheck.py rc=0 | strategy_fit_email_attach_selfcheck: PASS (51/51) [TZ env=Asia/Ho_Chi_Minh, hôm nay ICT=2026-10-11]
+Asia/Ho_Chi_Minh strategy_fit_dashboard_selfcheck.py rc=0 | ==> 93 PASS / 0 FAIL
+Asia/Ho_Chi_Minh report_delivery_gate_selfcheck.py rc=0 | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+Asia/Ho_Chi_Minh report_delivery_ledger_selfcheck.py rc=1 | ❌ SELFCHECK FAIL — 5 test: env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không phải 'cây của tôi'); check_report_cadence.s
+Asia/Ho_Chi_Minh check_report_cadence_selfcheck.py rc=0 | ✅ PASS 58/58
+Asia/Ho_Chi_Minh eod_delivery_wiring_selfcheck.py rc=0 | eod_delivery_wiring_selfcheck: 9/9 PASS
+Asia/Ho_Chi_Minh eod_trading_report_account_filter_selfcheck.py rc=0 | KẾT QUẢ: 36 PASS / 0 FAIL
+Asia/Ho_Chi_Minh report_return_gate_selfcheck.py rc=0 | ✅ SELFCHECK PASS
+Asia/Ho_Chi_Minh paper_report_render_selfcheck.py rc=1 | FileNotFoundError: [Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-stratfit-1011/bin/../../paper_entry_adjust.py'
+Asia/Ho_Chi_Minh nav_flow_term_selfcheck.py rc=0 | OK — 180 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive
+Asia/Ho_Chi_Minh portfolio_status_selfcheck.py rc=0 | SELFCHECK PASSED — mọi assertion OK.
+Asia/Ho_Chi_Minh production_manifest_selfcheck.sh rc=1 | FAIL production_manifest_selfcheck

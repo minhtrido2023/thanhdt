@@ -1,0 +1,15 @@
+== ZaloPay: 37 file báo cáo ngày, 28 file có dòng 'Từ go-live', 9 file không có dòng đó, 0 file không tính được chuẩn []
+   số file in LỆCH chuẩn (|lệch| >= 0,005 điểm %): 28/28; lệch nhỏ nhất -1.220, lớn nhất -1.127 điểm %
+   file mà NAV in trong báo cáo khác NAV của fixture hôm nay (dòng nav_history đã được ghi lại sau khi gửi): 0 []
+   2026-08-17: in -8.02% (-80,225,197 VND) · chuẩn -6.893% (-68,090,764 VND) · lệch -1.127 điểm %
+   2026-08-18: in -7.32% (-73,200,185 VND) · chuẩn -6.182% (-61,065,752 VND) · lệch -1.138 điểm %
+   2026-10-08: in -7.32% (-73,219,788 VND) · chuẩn -6.184% (-61,085,355 VND) · lệch -1.136 điểm %
+   2026-10-09: in -6.06% (-60,605,159 VND) · chuẩn -4.907% (-48,470,726 VND) · lệch -1.153 điểm %
+== SpaceX: 38 file báo cáo ngày, 28 file có dòng 'Từ go-live', 10 file không có dòng đó, 0 file không tính được chuẩn []
+   số file in LỆCH chuẩn (|lệch| >= 0,005 điểm %): 2/28; lệch nhỏ nhất -0.005, lớn nhất +0.005 điểm %
+   file mà NAV in trong báo cáo khác NAV của fixture hôm nay (dòng nav_history đã được ghi lại sau khi gửi): 0 []
+   2026-08-20: in -3.68% (-36,845,141 VND) · chuẩn -3.685% (-36,845,141 VND) · lệch +0.005 điểm %
+   2026-08-28: in -1.45% (-14,452,510 VND) · chuẩn -1.445% (-14,452,510 VND) · lệch -0.005 điểm %
+   2026-08-20: in -3.68% (-36,845,141 VND) · chuẩn -3.685% (-36,845,141 VND) · lệch +0.005 điểm %
+   2026-08-28: in -1.45% (-14,452,510 VND) · chuẩn -1.445% (-14,452,510 VND) · lệch -0.005 điểm %
+== làm tròn hai bước (3 rồi 2 chữ số) khác làm tròn trực tiếp 2 chữ số ở 14/270 số của toàn lịch sử fixture

@@ -1,0 +1,4 @@
+# tz_anchor_gate — KHÔNG có chế độ CLI chỉ-đọc (chạy thường tự hạ baseline + git add). Gọi thẳng 2 hàm detector thuần (violations / tdays_violations) qua import — không đi qua main(), không ghi gì.
+macro_state_live.py: datetime.now()/date.today() trần = 0 [] ; tdays trần = 0 ; baseline files{'macro_state_live.py': 2} tdays{}
+macro_gate_health_tz_selfcheck.py: datetime.now()/date.today() trần = 0 [] ; tdays trần = 0 ; baseline files{} tdays{}
+baseline md5 trước/sau: 912f4348d702dd354a15d4a3d36d32f5 912f4348d702dd354a15d4a3d36d32f5

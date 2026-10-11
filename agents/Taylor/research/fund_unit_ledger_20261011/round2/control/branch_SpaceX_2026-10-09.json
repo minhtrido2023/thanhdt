@@ -1,0 +1,51 @@
+{
+  "account": "SpaceX",
+  "report_date": "2026-10-09",
+  "inception": {
+    "from_date": "2026-07-01",
+    "to_date": "2026-10-09",
+    "nav0": 1000000000.0,
+    "nav1": 986698574.0,
+    "return_pct": -1.33,
+    "days": 100,
+    "unit_price0": 10000.0,
+    "unit_price1": 9866.9857,
+    "pnl_vnd": -13301426.0,
+    "mwr_pct": -1.33,
+    "annualized_return_pct": null,
+    "mwr_annualized_pct": null,
+    "annualized_note": "kỳ 100 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)"
+  },
+  "wtd": {
+    "from_date": "2026-10-02",
+    "to_date": "2026-10-09",
+    "nav0": 976699776.0,
+    "nav1": 986698574.0,
+    "return_pct": 1.024,
+    "days": 7,
+    "unit_price0": 9766.9978,
+    "unit_price1": 9866.9857,
+    "pnl_vnd": 9998798.0,
+    "mwr_pct": 1.024,
+    "annualized_return_pct": null,
+    "mwr_annualized_pct": null,
+    "annualized_note": "kỳ 7 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)"
+  },
+  "mtd": {
+    "from_date": "2026-09-30",
+    "to_date": "2026-10-09",
+    "nav0": 981599301.0,
+    "nav1": 986698574.0,
+    "return_pct": 0.519,
+    "days": 9,
+    "unit_price0": 9815.993,
+    "unit_price1": 9866.9857,
+    "pnl_vnd": 5099273.0,
+    "mwr_pct": 0.519,
+    "annualized_return_pct": null,
+    "mwr_annualized_pct": null,
+    "annualized_note": "kỳ 9 ngày lịch < 365 — không quy năm (chính sách đo hiệu suất 2026-10-10)"
+  },
+  "pending_flows": [],
+  "dropped_flows": []
+}

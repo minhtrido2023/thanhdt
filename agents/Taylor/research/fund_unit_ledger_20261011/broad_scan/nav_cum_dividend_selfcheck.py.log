@@ -1,0 +1,47 @@
+=== 1) Cổ tức phải thu chưa qua ex-date (dữ liệu thật, 2 chế độ) ===
+  [PASS] SpaceX 2026-07-08 [rerun]: loại 0 (kỳ vọng 0) — trước khi cổ tức MBB được ghi nhận — không có gì để trừ
+  [PASS] SpaceX 2026-07-08 [live]: loại 0 (kỳ vọng 0) — trước khi cổ tức MBB được ghi nhận — không có gì để trừ
+  [PASS] SpaceX 2026-07-09 [rerun]: loại 0 (kỳ vọng 0) — CA ÂM: cashDivRecv +2.400.000 (MBB) nhưng 09/07 CHÍNH LÀ ex-date
+           ↳ cashDividendReceiving tăng 2,400,000đ nhưng BQ (dữ liệu tới 2026-07-24) xác nhận không mã nào còn ex-date sau 2026-07-09 — khoản này ĐÃ qua ex-date, không trừ.
+  [PASS] SpaceX 2026-07-09 [live]: loại 0 (kỳ vọng 0) — CA ÂM: cashDivRecv +2.400.000 (MBB) nhưng 09/07 CHÍNH LÀ ex-date
+           ⚠️ cashDividendReceiving tăng 2,400,000đ nhưng KHÔNG kết luận được đã qua ex-date hay chưa: BQ chưa có phiên sau 2026-07-09 và bản ghi balance phiên trước (2026-07-08T15:00:15) là bản GIỮA PHIÊN. KHÔNG tự trừ — cần người đối chiếu.
+  [PASS] SpaceX 2026-07-16 [rerun]: loại 855,000 (kỳ vọng 855,000) — BID 1.900cp × 450 — ex-date 17/07
+           ↳ Trừ 855,000đ cổ tức phải thu của BID (ex-date 2026-07-17) — giá đóng cửa 2026-07-16 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+           ⚠️ Cổ tức chờ theo BQ (868,813đ cho ['BID']) LỆCH so với mức tăng thật của cashDividendReceiving (855,000đ) — trừ theo số tiền thật trong tài khoản, nhưng cần người kiểm tra nguyên nhân lệch.
+  [PASS] SpaceX 2026-07-16 [live]: loại 855,000 (kỳ vọng 855,000) — BID 1.900cp × 450 — ex-date 17/07
+           ↳ Trừ 855,000đ cổ tức phải thu vừa ghi nhận tối 2026-07-16 (bản ghi phiên trước 2026-07-15T19:10:22 là bản cuối ngày ⇒ ex-date là phiên sau; BQ chưa có dữ liệu sau 2026-07-16 để xác nhận mã cụ thể).
+  [PASS] SpaceX 2026-07-23 [rerun]: loại 0 (kỳ vọng 0) — CA ÂM: 23/07 là ex-date CTG+VCB, khoản đã ghi từ 22/07
+  [PASS] SpaceX 2026-07-23 [live]: loại 0 (kỳ vọng 0) — CA ÂM: 23/07 là ex-date CTG+VCB, khoản đã ghi từ 22/07
+  [PASS] SpaceX 2026-07-24 [rerun]: loại 4,000,000 (kỳ vọng 4,000,000) — NCT 500cp × 8.000 — ex-date 27/07 (thứ Hai)
+           ↳ Trừ 4,000,000đ cổ tức phải thu của NCT (ex-date 2026-07-27) — giá đóng cửa 2026-07-24 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+  [PASS] SpaceX 2026-07-24 [live]: loại 4,000,000 (kỳ vọng 4,000,000) — NCT 500cp × 8.000 — ex-date 27/07 (thứ Hai)
+           ↳ Trừ 4,000,000đ cổ tức phải thu vừa ghi nhận tối 2026-07-24 (bản ghi phiên trước 2026-07-23T19:10:38 là bản cuối ngày ⇒ ex-date là phiên sau; BQ chưa có dữ liệu sau 2026-07-24 để xác nhận mã cụ thể).
+  [PASS] SpaceX 2026-07-27 [rerun]: loại 3,300,000 (kỳ vọng 3,300,000) — SAB 1.100cp × 3.000 — ex-date 28/07
+           ↳ Trừ 3,300,000đ cổ tức phải thu của SAB (ex-date 2026-07-28) — giá đóng cửa 2026-07-27 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+  [PASS] SpaceX 2026-07-27 [live]: loại 3,300,000 (kỳ vọng 3,300,000) — SAB 1.100cp × 3.000 — ex-date 28/07
+           ↳ Trừ 3,300,000đ cổ tức phải thu vừa ghi nhận tối 2026-07-27 (bản ghi phiên trước 2026-07-24T19:10:48 là bản cuối ngày ⇒ ex-date là phiên sau; BQ chưa có dữ liệu sau 2026-07-27 để xác nhận mã cụ thể).
+  [PASS] SpaceX 2026-07-28 [rerun]: loại 0 (kỳ vọng 0) — CA ÂM: 28/07 là ex-date SAB
+  [PASS] SpaceX 2026-07-28 [live]: loại 0 (kỳ vọng 0) — CA ÂM: 28/07 là ex-date SAB
+  [PASS] SpaceX 2026-07-31 [rerun]: loại 0 (kỳ vọng 0) — CA ÂM: không có sự kiện quyền nào
+  [PASS] SpaceX 2026-07-31 [live]: loại 0 (kỳ vọng 0) — CA ÂM: không có sự kiện quyền nào
+  [PASS] ZaloPay 2026-07-16 [rerun]: loại 405,000 (kỳ vọng 405,000) — BID 900cp × 450 — ex-date 17/07
+           ↳ Trừ 405,000đ cổ tức phải thu của BID (ex-date 2026-07-17) — giá đóng cửa 2026-07-16 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+           ⚠️ Cổ tức chờ theo BQ (411,543đ cho ['BID']) LỆCH so với mức tăng thật của cashDividendReceiving (405,000đ) — trừ theo số tiền thật trong tài khoản, nhưng cần người kiểm tra nguyên nhân lệch.
+  [PASS] ZaloPay 2026-07-16 [live]: loại 405,000 (kỳ vọng 405,000) — BID 900cp × 450 — ex-date 17/07
+           ↳ Trừ 405,000đ cổ tức phải thu vừa ghi nhận tối 2026-07-16 (bản ghi phiên trước 2026-07-15T19:10:08 là bản cuối ngày ⇒ ex-date là phiên sau; BQ chưa có dữ liệu sau 2026-07-16 để xác nhận mã cụ thể).
+  [PASS] ZaloPay 2026-07-22 [rerun]: loại 832,500 (kỳ vọng 832,500) — CTG 1.050 + VCB 800, × 450 — ex-date 23/07
+           ↳ Trừ 832,500đ cổ tức phải thu của CTG, VCB (ex-date 2026-07-23) — giá đóng cửa 2026-07-22 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+  [PASS] ZaloPay 2026-07-22 [live]: loại 832,500 (kỳ vọng 832,500) — CTG 1.050 + VCB 800, × 450 — ex-date 23/07
+           ↳ Trừ 832,500đ cổ tức phải thu vừa ghi nhận tối 2026-07-22 (bản ghi phiên trước 2026-07-21T19:10:08 là bản cuối ngày ⇒ ex-date là phiên sau; BQ chưa có dữ liệu sau 2026-07-22 để xác nhận mã cụ thể).
+  [PASS] ZaloPay 2026-07-24 [rerun]: loại 2,984,000 (kỳ vọng 2,984,000) — NCT 373cp × 8.000 — ex-date 27/07
+           ↳ Trừ 2,984,000đ cổ tức phải thu của NCT (ex-date 2026-07-27) — giá đóng cửa 2026-07-24 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+  [PASS] ZaloPay 2026-07-24 [live]: loại 2,984,000 (kỳ vọng 2,984,000) — NCT 373cp × 8.000 — ex-date 27/07
+           ↳ Trừ 2,984,000đ cổ tức phải thu vừa ghi nhận tối 2026-07-24 (bản ghi phiên trước 2026-07-23T19:10:22 là bản cuối ngày ⇒ ex-date là phiên sau; BQ chưa có dữ liệu sau 2026-07-24 để xác nhận mã cụ thể).
+  [PASS] ZaloPay 2026-07-31 [rerun]: loại 0 (kỳ vọng 0) — CA ÂM: không có sự kiện quyền nào
+  [PASS] ZaloPay 2026-07-31 [live]: loại 0 (kỳ vọng 0) — CA ÂM: không có sự kiện quyền nào
+
+=== 2) Bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets ===
+  [PASS] SpaceX: bất biến NAV trên 69 dòng
+  [PASS] ZaloPay: bất biến NAV trên 66 dòng
+
+=== SELFCHECK: 38 PASS / 0 FAIL ===

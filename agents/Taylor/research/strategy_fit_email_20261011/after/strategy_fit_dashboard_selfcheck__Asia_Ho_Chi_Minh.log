@@ -1,0 +1,145 @@
+Không dựng được ô dữ liệu nào — không ghi file.
+[BẤT BIẾN VỠ] ô env_rates: có 1 dòng ngưỡng, bảng THR_COUNT khai 2
+strategy_fit_dashboard selfcheck — TZ env = 'Asia/Ho_Chi_Minh', WC_ROOT = /home/trido/thanhdt/WorkingClaude
+
+[T1] fixture đầy đủ
+  PASS  T1a đủ 9 ô, không ô nào lỗi
+  PASS  T1b bất biến trang đạt
+  PASS  T1c html.parser đọc được
+  PASS  T1d không có http(s)://
+  PASS  T1e < 1 MB
+  PASS  T1f mọi ô có as_of khác 'không xác định'
+  PASS  T1g không ô nào CŨ
+  PASS  T1h câu trễ 3 tháng nằm NGAY TRONG ô IC
+  PASS  T1i ô IC hiện 3 giá trị IC tháng gần nhất
+  PASS  T1j ô mô tả ghi đúng câu chuẩn
+  PASS  T1k không có chuỗi profit_
+  PASS  T1l mean12 −0,59 < 4 ⇒ chạm ngưỡng w_LAG
+  PASS  T1m số kiểu VN (dấu phẩy, dấu trừ U+2212)
+  PASS  T1n có viewport + lang=vi + một cột
+
+[T2] thiếu file + mọi nguồn sống hỏng
+  PASS  T2a không crash, đủ 9 ô
+  PASS  T2b 8 ô dữ liệu đều báo lỗi
+  PASS  T2c lỗi THẬT được in ra (tên file / thông điệp exception)
+  PASS  T2d trang vẫn đạt bất biến (as_of + ngưỡng vẫn hiện)
+  PASS  T2e có đủ 8 thông báo KHÔNG CÓ DỮ LIỆU
+  PASS  T2f ngưỡng của ô lỗi KHÔNG biến mất
+[ô] edge_ic         LỖI: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp8vvhvyyh/data/edge_health_matrix.csv'
+[ô] edge_lag        LỖI: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp8vvhvyyh/data/lag_edge_health.csv'
+[ô] edge_capit      LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] book_map        ok
+[ô] env_dt5g        LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_breadth     LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_value       LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_rates       LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_structural  LỖI: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp8vvhvyyh/kb/structural_break_watch.json'
+  PASS  T2g không ô dữ liệu nào ⇒ rc=1, không ghi file
+[ô] edge_ic         ok
+[ô] edge_lag        ok | CHẠM: 1
+[ô] edge_capit      LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] book_map        ok
+[ô] env_dt5g        LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_breadth     LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_value       LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_rates       LỖI: ConnectionError: BQ không kết nối được (giả lập)
+[ô] env_structural  ok
+24437 byte
+/tmp/tmptq_iw4yk/out/strategy_fit_2026-10-12.html
+  PASS  T2h còn ô dựng được ⇒ rc=0, có file
+  PASS  T2i ghi nguyên tử, không sót .tmp
+
+[T3] dữ liệu cũ ⇒ huy hiệu CŨ
+  PASS  T3 edge_ic gắn CŨ
+  PASS  T3 edge_lag gắn CŨ
+  PASS  T3 env_dt5g gắn CŨ
+  PASS  T3 env_breadth gắn CŨ
+  PASS  T3 env_value gắn CŨ
+  PASS  T3 env_rates gắn CŨ
+  PASS  T3 env_structural gắn CŨ
+  PASS  T3 edge_capit KHÔNG gắn CŨ (nguồn không có nhịp)
+  PASS  T3 khối đầu trang liệt kê nguồn CŨ
+  PASS  T3 kill-switch ARMED-do-cũ lên khối đầu trang
+  PASS  T3 bất biến vẫn đạt
+  PASS  T3 biên: Thứ Hai/Chủ Nhật đọc T6 không CŨ
+  PASS  T3 biên: Thứ Ba đọc T6 là CŨ
+
+[T4] CSV rỗng
+  PASS  T4 (0 byte) edge_ic / edge_lag / structural báo lỗi, không crash
+  PASS  T4 (0 byte) ô khác không bị kéo theo
+  PASS  T4 (0 byte) bất biến đạt
+  PASS  T4 (chỉ header) edge_ic / edge_lag / structural báo lỗi, không crash
+  PASS  T4 (chỉ header) ô khác không bị kéo theo
+  PASS  T4 (chỉ header) bất biến đạt
+
+[T5] giá trị NaN
+  PASS  T5a không ô nào crash
+  PASS  T5b không rò chữ 'nan'/'inf' ra trang
+  PASS  T5c NaN hiện thành '—'
+  PASS  T5d mean12 NaN ⇒ ghi rõ luật live rơi về 0,50 (đúng nhánh pd.notna trong code)
+  PASS  T5e Big-4 NaN không bị coi là chạm ngưỡng margin
+  PASS  T5f bất biến đạt
+  PASS  T5g vn(): None/NaN/inf/chuỗi rác → '—'
+  PASS  T5h vn(): dấu phẩy + dấu trừ + dấu cộng
+
+[T6] múi giờ — neo ICT tường minh
+  PASS  T6 TZ=None: tên file theo NGÀY ICT
+  PASS  T6 TZ=None: tiêu đề in giờ ICT
+  PASS  T6 TZ=None: mtime quy về ICT
+  PASS  T6 TZ=America/New_York: tên file theo NGÀY ICT
+  PASS  T6 TZ=America/New_York: tiêu đề in giờ ICT
+  PASS  T6 TZ=America/New_York: mtime quy về ICT
+  PASS  T6 TZ=UTC: tên file theo NGÀY ICT
+  PASS  T6 TZ=UTC: tiêu đề in giờ ICT
+  PASS  T6 TZ=UTC: mtime quy về ICT
+  PASS  T6 TZ=Asia/Tokyo: tên file theo NGÀY ICT
+  PASS  T6 TZ=Asia/Tokyo: tiêu đề in giờ ICT
+  PASS  T6 TZ=Asia/Tokyo: mtime quy về ICT
+  PASS  T6 datetime.now(ICT) lệch UTC đúng +7h
+  PASS  T6 nguồn không gọi datetime.now() trần
+
+[T7] đột biến — selfcheck phải ĐỎ khi mất ngưỡng / as_of
+  PASS  T7a xoá 1 dòng ngưỡng ⇒ đỏ
+  PASS  T7b xoá khối «Ngưỡng hành động» ⇒ đỏ
+  PASS  T7c as_of rỗng ⇒ đỏ
+  PASS  T7d ô có ngưỡng thật bị hạ thành «chỉ để mô tả» ⇒ đỏ
+  PASS  T7e ô mô tả bị bịa ngưỡng ⇒ đỏ
+  PASS  T7f ngưỡng không trích file:dòng ⇒ đỏ
+  PASS  T7g chèn URL ngoài ⇒ đỏ
+  PASS  T7h thẻ không đóng ⇒ đỏ
+  PASS  T7i mất hẳn 1 ô ⇒ đỏ
+  PASS  T7j lọt chuỗi profit_ ⇒ đỏ
+[ô] edge_ic         ok
+[ô] edge_lag        ok | CHẠM: 1
+[ô] edge_capit      ok
+[ô] book_map        ok
+[ô] env_dt5g        ok
+[ô] env_breadth     ok
+[ô] env_value       ok
+[ô] env_rates       ok
+[ô] env_structural  ok
+  PASS  T7k code đánh rơi 1 dòng ngưỡng ⇒ run() rc=4, không ghi file
+
+[T8] neo trích dẫn trên code THẬT (chỉ đọc)
+  PASS  T8a mọi neo file:dòng định vị được
+  PASS  T8b trang không có 'KHÔNG ĐỊNH VỊ ĐƯỢC'
+  PASS  T8c có ≥ 25 trích dẫn file:dòng khác nhau
+  PASS  T8d hằng số đọc từ code là số hữu hạn
+  PASS  T8e neo mất ⇒ in rõ + ghi misses, không im lặng
+  PASS  T8f file mất ⇒ in rõ + lỗi thật
+  PASS  T8g repo nguồn không đọc được ⇒ bất biến đỏ (không ra trang thiếu trích dẫn)
+
+[T9] khối «đáng chú ý» chỉ theo ngưỡng thật
+  PASS  T9a không gì chạm ⇒ đúng câu «Không ô nào chạm ngưỡng»
+  PASS  T9b mom_200·ALL FLIPPED ⇒ chạm
+  PASS  T9c mean12 ≥ 4 ⇒ ô LAG KHÔNG chạm
+  PASS  T9d DT4_only + đồng hồ ≥70% + ngưỡng xem lại ⇒ 3 dòng
+  PASS  T9e kill-switch ARMED + Big-4 ≥ 9,0 ⇒ 2 dòng
+  PASS  T9f sự kiện cấu trúc khác 'watching' ⇒ chạm
+  PASS  T9g ô mô tả không bao giờ chạm
+  PASS  T9h Không còn câu «Không ô nào chạm ngưỡng»
+  PASS  T9i tercile: thấp nhất 252 phiên ⇒ LOW (pct=0 không bị ném mất)
+  PASS  T9j tercile: cao nhất ⇒ HIGH
+  PASS  T9k tercile: thiếu 252 phiên trước ⇒ không xếp
+
+==> 93 PASS / 0 FAIL
