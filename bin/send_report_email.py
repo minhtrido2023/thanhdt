@@ -69,6 +69,21 @@ def _collect_inline_images(html_body):
     return new_html, images
 
 
+# Chốt "daily" dùng chung ý với check_report_cadence.sh (selfcheck so hai mẫu): đúng mẫu tên
+# `_daily_report_<ngày>.md` VÀ không chứa weekly/monthly ở bất kỳ đâu trong tên.
+_DAILY_RE = r"_daily_report_\d{4}-\d{2}-\d{2}\.md$"
+
+
+def _is_daily(fname: str) -> bool:
+    low = fname.lower()
+    return bool(re.search(_DAILY_RE, fname)) and "weekly" not in low and "monthly" not in low
+
+
+def _clean(s: str) -> str:
+    """Chuỗi từ argv/OS có thể mang byte không phải UTF-8 (surrogate) ⇒ MIMEText ném UnicodeEncodeError."""
+    return s.encode("utf-8", "surrogateescape").decode("utf-8", "replace")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("report_path")
@@ -133,61 +148,83 @@ def main():
         subject = args.subject
 
     # File kèm thêm: đọc TRƯỚC khi dựng thân để dòng ghi chú nói đúng cái thực sự được kèm.
-    extra_parts, attach_lines = [], []
-    if (args.attach or args.attach_note) and "_daily_report_" not in fname:
+    # Phần THÊM này không bao giờ được làm rơi email: MỌI exception trong khối chỉ làm rơi phần thêm
+    # (ghi lỗi thật ra stderr — §29), email + file .md artifact vẫn đi.
+    extra_parts, attach_lines = [], []          # attach_lines: (loại, văn bản); loại "ok" = file đã kèm
+    if (args.attach or args.attach_note) and not _is_daily(fname):
         print(f"⚠️  --attach/--attach-note chỉ áp cho báo cáo daily — BỎ QUA với {fname}",
               file=sys.stderr)
     else:
-        for path in args.attach:
-            aname = os.path.basename(path)
-            try:
-                with open(path, "rb") as f:
-                    data = f.read()
-            except OSError as exc:
-                print(f"⚠️  Không đính kèm được {path}: {exc}", file=sys.stderr)
-                attach_lines.append(f"📎 KHÔNG kèm được **{aname}**: {type(exc).__name__}: "
-                                    f"{exc.strerror or exc}")
-                continue
-            extra = MIMEApplication(data, Name=aname)
-            extra["Content-Disposition"] = f'attachment; filename="{aname}"'
-            extra_parts.append(extra)
-            attach_lines.append(f"📎 Kèm theo: **{aname}** — tài liệu chẩn đoán nội bộ, mở bằng "
-                                f"trình duyệt; chỉ để mô tả, không phải tín hiệu giao dịch.")
-        if args.attach_note:
-            attach_lines.append(f"📎 {args.attach_note}")
-    # Ghi chú chỉ vào THÂN email; file .md đính kèm bên dưới vẫn là artifact nguyên bản trên đĩa.
-    body_md = md_body + ("\n\n---\n\n" + "\n\n".join(attach_lines) + "\n" if attach_lines else "")
+        try:
+            for path in args.attach:
+                aname = _clean(os.path.basename(path))
+                try:
+                    with open(path, "rb") as f:
+                        data = f.read()
+                except OSError as exc:
+                    print(f"⚠️  Không đính kèm được {_clean(path)}: {_clean(str(exc))}", file=sys.stderr)
+                    attach_lines.append(("err", f"📎 KHÔNG kèm được **{aname}**: {type(exc).__name__}: "
+                                                f"{_clean(str(exc.strerror or exc))}"))
+                    continue
+                extra = MIMEApplication(data, Name=aname)
+                extra["Content-Disposition"] = f'attachment; filename="{aname}"'
+                extra_parts.append(extra)
+                attach_lines.append(("ok", f"📎 Kèm theo: **{aname}** — tài liệu chẩn đoán nội bộ, mở bằng "
+                                           f"trình duyệt; chỉ để mô tả, không phải tín hiệu giao dịch."))
+            if args.attach_note:
+                attach_lines.append(("note", f"📎 {_clean(args.attach_note)}"))
+        except Exception as exc:  # noqa: BLE001 — chủ đích: lỗi phần thêm không được làm rơi email
+            print(f"⚠️  Bỏ phần đính kèm thêm vì lỗi {type(exc).__name__}: {_clean(str(exc))}",
+                  file=sys.stderr)
+            extra_parts, attach_lines = [], []
 
-    title_line = md_body.split("\n", 1)[0]
-    title = re.sub(r"^#+\s*", "", title_line).strip() or fname
-    html_body = render_html(body_md, title, os.path.dirname(os.path.abspath(args.report_path)))
+    def build_msg(extras, lines):
+        # Ghi chú chỉ vào THÂN email; file .md đính kèm bên dưới vẫn là artifact nguyên bản trên đĩa.
+        body_md = md_body + ("\n\n---\n\n" + "\n\n".join(lines) + "\n" if lines else "")
+        title_line = md_body.split("\n", 1)[0]
+        title = re.sub(r"^#+\s*", "", title_line).strip() or fname
+        html_body = render_html(body_md, title, os.path.dirname(os.path.abspath(args.report_path)))
+        msg = MIMEMultipart()
+        msg["From"] = from_email
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        html_body, inline_images = _collect_inline_images(html_body)
+        related = MIMEMultipart("related")
+        related.attach(MIMEText(html_body, "html", "utf-8"))
+        for image in inline_images:
+            img = MIMEImage(image["data"], _subtype=image["subtype"])
+            img.add_header("Content-ID", f"<{image['cid']}>")
+            img.add_header("Content-Disposition", "inline",
+                           filename=f"{image['cid']}.{image['subtype']}")
+            related.attach(img)
+        msg.attach(related)
+        with open(args.report_path, "rb") as f:
+            part = MIMEApplication(f.read(), Name=fname)
+        part["Content-Disposition"] = f'attachment; filename="{fname}"'
+        msg.attach(part)
+        for extra in extras:
+            msg.attach(extra)
+        return msg
 
-    msg = MIMEMultipart()
-    msg["From"] = from_email
-    msg["To"] = to_email
-    msg["Subject"] = subject
-    html_body, inline_images = _collect_inline_images(html_body)
-    related = MIMEMultipart("related")
-    related.attach(MIMEText(html_body, "html", "utf-8"))
-    for image in inline_images:
-        img = MIMEImage(image["data"], _subtype=image["subtype"])
-        img.add_header("Content-ID", f"<{image['cid']}>")
-        img.add_header("Content-Disposition", "inline",
-                       filename=f"{image['cid']}.{image['subtype']}")
-        related.attach(img)
-    msg.attach(related)
+    def smtp_send(msg):
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(from_email, app_password)
+            server.sendmail(from_email, [to_email], msg.as_string())
 
-    with open(args.report_path, "rb") as f:
-        part = MIMEApplication(f.read(), Name=fname)
-    part["Content-Disposition"] = f'attachment; filename="{fname}"'
-    msg.attach(part)
-    for extra in extra_parts:
-        msg.attach(extra)
-
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login(from_email, app_password)
-        server.sendmail(from_email, [to_email], msg.as_string())
+    try:
+        smtp_send(build_msg(extra_parts, [t for _, t in attach_lines]))
+    except (smtplib.SMTPException, OSError) as exc:
+        if not extra_parts:
+            raise
+        # Lối lùi ĐÚNG MỘT lần: SMTP từ chối thư có file kèm thêm ⇒ gửi lại KHÔNG kèm chúng
+        # (file .md artifact vẫn kèm). Lần hai lỗi ⇒ propagate như cũ (cổng thấy INCOMPLETE).
+        real = f"{type(exc).__name__}: {_clean(str(exc))}"
+        print(f"⚠️  SMTP từ chối thư có file kèm thêm ({real}) — thử lại một lần không kèm",
+              file=sys.stderr)
+        lines = [t for k, t in attach_lines if k != "ok"]
+        lines.append(f"📎 Dashboard KHÔNG kèm hôm nay — SMTP từ chối thư có file kèm: {real}")
+        smtp_send(build_msg([], lines))
 
     print(f"✅ Đã gửi email '{subject}' tới {to_email}")
 

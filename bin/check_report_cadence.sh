@@ -97,7 +97,9 @@ except Exception as e:
     # tại", sinh cho ngày cũ ra số sai ngày. Weekly/monthly không khớp mẫu tên ⇒ không bao giờ kèm.
     # SWEEP_ATTACH_BEGIN — trích bởi strategy_fit_email_attach_selfcheck.py. Đổi marker ⇒ FATAL.
     ATTACH_ARGS=()
-    if [[ "$FNAME" =~ _daily_report_([0-9]{4}-[0-9]{2}-[0-9]{2})\.md$ ]] \
+    # Kiểm weekly/monthly TRƯỚC: `=~` thứ hai sẽ ghi đè BASH_REMATCH của mẫu ngày.
+    if [[ ! "${FNAME,,}" =~ (weekly|monthly) ]] \
+       && [[ "$FNAME" =~ _daily_report_([0-9]{4}-[0-9]{2}-[0-9]{2})\.md$ ]] \
        && [ -s "$ROOT/reports/dashboard/strategy_fit_${BASH_REMATCH[1]}.html" ]; then
       ATTACH_ARGS=(--attach "$ROOT/reports/dashboard/strategy_fit_${BASH_REMATCH[1]}.html")
     fi

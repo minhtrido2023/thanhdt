@@ -79,7 +79,10 @@ _strategy_fit_attach_args() {
   local dir="$ROOT/reports/dashboard"
   local dash="$dir/strategy_fit_${PLAN_DATE}.html"
   local tmo="${STRATEGY_FIT_TIMEOUT_S:-120}" out rc last
-  if [ ! -s "$dash" ] && [ "$PLAN_DATE" = "$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)" ]; then
+  # Dùng lại CHỈ khi file vừa sinh (<30 phút): file "của hôm nay" cũ hơn là số liệu trước lần
+  # publish 18:30/19:00 (vd một lượt chạy tay ban ngày) ⇒ sinh lại (~7 giây). Rỗng 0 byte = không có.
+  if [ -z "$(find "$dash" -mmin -30 -size +0c 2>/dev/null)" ] \
+     && [ "$PLAN_DATE" = "$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)" ]; then
     # Bắt RIÊNG stderr (nơi script ghi lỗi thật); stdout (trạng thái từng ô) vẫn chảy ra log.
     # Gộp 2>&1 thì dòng cuối là stdout bị đệm xả lúc thoát, không phải lỗi.
     { out="$(timeout -k 5 "$tmo" "${DNA_PYEXE:-python3}" "$ROOT/bin/strategy_fit_dashboard.py" --out-dir "$dir" 2>&1 >&3)"; rc=$?; } 3>&1
@@ -88,7 +91,9 @@ _strategy_fit_attach_args() {
       if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
         last="quá ${tmo} giây, đã dừng (rc=$rc)"
       else
-        last="$(printf '%s\n' "$out" | grep -v '^[[:space:]]*$' | tail -n 1 | cut -c1-300)"
+        # Cắt theo KÝ TỰ và thay byte không phải UTF-8: `cut -c` của GNU cắt theo BYTE, dòng lỗi
+        # tiếng Việt bị cắt giữa ký tự ⇒ argv hỏng ⇒ email không gửi được.
+        last="$(printf '%s\n' "$out" | grep -v '^[[:space:]]*$' | tail -n 1 | python3 -c 'import sys; s = sys.stdin.buffer.read().decode("utf-8", "replace").rstrip("\n"); sys.stdout.buffer.write(s[:300].encode("utf-8"))')"
         last="rc=$rc — ${last:-script không ghi gì ra stderr}"
       fi
       STRATEGY_FIT_ARGS=(--attach-note "Dashboard độ phù hợp chiến lược KHÔNG kèm hôm nay — sinh lỗi: $last")
