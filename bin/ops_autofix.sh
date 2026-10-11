@@ -5,12 +5,12 @@
 # tự động fix bug, không thụ động chờ báo lỗi... tự fix rồi báo cáo lại").
 #
 # Được gọi bởi các checker định kỳ (ops_health_check.sh, sync_bq_cache_daily.sh, ...) khi
-# phát hiện vấn đề — dispatch 1 headless agent (Winston, model opus) để CHẨN ĐOÁN + SỬA
+# phát hiện vấn đề — dispatch 1 headless agent (Winston, model sonnet) để CHẨN ĐOÁN + SỬA
 # trong giới hạn an toàn (guardrails bên dưới) + báo cáo vào Trading Daily. Model hạ từ
-# fable xuống opus (cost-opt model-drift fix, 2026-07-17) — mọi issue checker này gọi tới
-# là "phức tạp thường" (chẩn đoán+fix 1 script) theo đúng ladder ở MIKE.md §Model routing,
-# không phải "cực kỳ phức tạp" cần fable. Cần fable thật (issue khó bất thường) → dispatch
-# tay lại với --model fable, đừng mặc định.
+# fable xuống opus (cost-opt model-drift fix, 2026-07-17), rồi opus xuống sonnet (user duyệt
+# 2026-10-11, routing đời 5.5: sửa lỗi vận hành cơ học = tầng Sonnet 5.5/medium — xem
+# kb/mike_model_routing.md). Issue khó bất thường (Sonnet báo ops-autofix-unresolved hoặc
+# sửa không hết) → dispatch tay lại với --model opus, đừng đổi mặc định ở đây.
 #
 # GUARDRAILS (nhúng thẳng vào prompt — fixer KHÔNG được vượt). NGUỒN CHUẨN TẮC =
 # kb/ops_runbook.md § Nguyên tắc phân quyền tự sửa — bản chép NÀY (comment + prompt dòng
@@ -174,6 +174,6 @@ QUY TRÌNH BẮT BUỘC:
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
 5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm 1 FILE entry mới kb/incidents/<YYYY-MM>/<YYYY-MM-DD>-<topic>.md + 1 dòng trong kb/incidents/index.md (KHÔNG append vào kb/INCIDENTS.md — file đó nay chỉ là STUB REDIRECT).
 6. BẮT BUỘC (khác việc 5, đây là hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, nên đây là tín hiệu DUY NHẤT phân biệt \"đã xong thật\" với \"lạc đề/chết im\"): kết thúc bằng ĐÚNG MỘT trong hai lệnh sau — (a) nếu đã chẩn đoán+sửa+verify xong (hoặc xác nhận không có gì để sửa): append_event.sh Winston finding \"ops-autofix-done: $LABEL\" \"<JSON: root_cause, fix, verify>\"; (b) nếu gặp ranh giới cấm ở việc 3 hoặc không chẩn đoán được: append_event.sh Winston question \"ops-autofix-unresolved: $LABEL\" \"<JSON: ly_do>\". Thiếu bước này = lần chạy này coi như KHÔNG xác nhận được, dù các việc 1-5 có làm đúng đến đâu." \
-  --bg --thread "$TRADING_DAILY_THREAD" --timeout "$AUTOFIX_TIMEOUT" --model opus 2>&1 | tail -3
+  --bg --thread "$TRADING_DAILY_THREAD" --timeout "$AUTOFIX_TIMEOUT" --model sonnet 2>&1 | tail -3
 
 echo "[ops_autofix] dispatched fixer for '$LABEL'"

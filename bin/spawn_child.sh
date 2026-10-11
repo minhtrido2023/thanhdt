@@ -42,7 +42,7 @@ fi
 # --- .claude/settings.json (hooks + model). Default Sonnet (cheaper); override with
 #     MIKE_MODEL=claude-opus-5 khi that su can (nhung uu tien --model opus PER-DISPATCH,
 #     vi chinh sach 2026-07-14: model chon theo TASK, khong gan cung theo AGENT). ---
-MODEL="${MIKE_MODEL:-claude-sonnet-5}"
+MODEL="${MIKE_MODEL:-claude-sonnet-5-5}"
 python3 "$PY" settings "$HOOKS" "$id" "$MODEL" > "$AGDIR/.claude/settings.json"
 echo "model: $MODEL"
 
