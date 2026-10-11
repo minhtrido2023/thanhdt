@@ -132,6 +132,12 @@ echo "== CA 2: --model opus --effort high (MAX_TURNS scale theo effort = 80)"
 run Taylor "viec test" --model opus --effort high
 argv_is "argv co --model" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model opus --effort high --session-id "<SID>"
 
+echo "== CA 2b: --model opus, KHONG --effort (MAX_TURNS scale theo MODEL = 80; sonnet van 50)"
+run Taylor "viec test" --model opus
+argv_is "argv opus/medium tran 80" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model opus --effort medium --session-id "<SID>"
+run Taylor "viec test" --model sonnet
+argv_is "argv sonnet/medium tran 50" -p "<PROMPT>" --permission-mode auto --max-turns 50 --model sonnet --effort medium --session-id "<SID>"
+
 echo "== CA 3: --model fable --effort max  ⇒ CLAMP effort=high (chinh sach user 07-14)"
 run Taylor "viec test" --model fable --effort max
 argv_is "argv fable bi clamp" -p "<PROMPT>" --permission-mode auto --max-turns 80 --model fable --effort high --session-id "<SID>"

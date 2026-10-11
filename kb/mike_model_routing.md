@@ -4,6 +4,117 @@ title: Mike model and provider routing
 source: MIKE.md (OKF split 2026-08-15)
 ---
 
+## Routing đời 5.5 — BẢNG HIỆN HÀNH (user duyệt 2026-10-11 10:55 ICT, `decided_by: user`)
+
+**Mục này là luật đang chạy.** Chỗ nào bên dưới mâu thuẫn với mục này thì mục này thắng; các mục
+dưới giữ làm lịch sử + chi tiết cơ chế (provider, cầu chì vòng, kỷ luật effort) và vẫn hiệu lực ở
+phần không mâu thuẫn. Hai điểm bị thay: (a) "Q1 → opencode" (2026-08-03) — nay phần CHỈ-ĐỌC NGẮN
+KIỂM ĐƯỢC của Q1 → Haiku, phần còn lại của Q1 → Sonnet; (b) "việc khó ⇒ Opus + `--effort high`"
+(2026-10-02/10-06) — nay Opus mặc định `medium`, `high` theo danh sách dưới (ĐANG THỬ, xem mốc).
+KHÔNG đổi: chính sách codex 2026-08-16, cơ chế provider + auto-fallback, cầu chì vòng, bright line
+Fable, mọi cron đang ghim Opus (kể cả `ops_autofix.sh` — xem "Đã cân nhắc và RÚT LẠI" cuối mục).
+
+Alias của CLI (đo 2026-10-11, CLI 2.1.295): `haiku` → `claude-haiku-5-5`, `sonnet` →
+`claude-sonnet-5-5`, `opus` → `claude-opus-5-5`. Omit `--model` → model ghi trong
+`agents/<id>/.claude/settings.json`: **6 agent = `claude-sonnet-5-5`** (Mike, Taylor, Wags, Winston,
+Wendy, Spyros); **DollarBill + Mafee TẠM GIỮ `claude-sonnet-5`** (đường tiền — xem "Chạy thử plan").
+⚠️ Với DollarBill/Mafee: CHỈ omit, KHÔNG truyền `--model sonnet` — alias đó ra 5.5 và vượt qua
+quyết định giữ. Cron lập plan thật (`bq_freshness_check.sh`) vốn omit nên đang đúng.
+
+Giá niêm yết API, USD / 1 triệu token vào / ra (bảng cached 2026-10-06 trong skill `claude-api`;
+đội chạy gói thuê bao nên đây là thước TƯƠNG ĐỐI, không phải hoá đơn): Haiku 5.5 0,10 / 0,50
+(prompt > 100K token: 0,50 / 2,50) · Sonnet 5.5 2 / 10 · Opus 5.5 4 / 20 · Fable 5.1 10 / 50.
+Đọc cache: Sonnet 5.5 và Opus 5.5 CÙNG 0,20 ⇒ với job cache-hit cao, Opus đắt hơn Sonnet dưới 2 lần.
+⚠️ **Haiku chỉ rẻ 20 lần ở prompt NGẮN.** Job qua `dispatch.sh` mang ngữ cảnh lớn — đo 14 ngày,
+token prompt mỗi lượt (trung vị): Wags 58-76K, Taylor/Sonnet 106K, DollarBill 116K, Mike 160K,
+Taylor/Opus 214-243K ⇒ gần như luôn rơi vào bảng giá prompt dài, Haiku ở đó chỉ rẻ hơn Sonnet
+~4 lần. Mức 20 lần chỉ đạt ở native `Agent(...)` ngữ cảnh nhỏ (vd `fleet-scout`).
+
+| Tầng | Model / effort | Việc | Điều kiện / lưu ý |
+|---|---|---|---|
+| **0** | `haiku` — chủ yếu qua native `Agent(...)` | Kiểm trạng thái job/session (`fleet-scout`), phân loại log + bus event, smoke test, tra KB | CHỈ ĐỌC · dưới ~30 lượt · đầu ra kiểm được bằng mắt/script. KHÔNG dùng cho: ghi code/KB, query BQ, phản biện, bất cứ việc nào mà bỏ sót im lặng sẽ lọt. Qua `dispatch.sh --model haiku` chỉ khi việc thật sự ngắn (lợi ~4 lần, không phải 20) |
+| **1** | omit `--model` (hoặc `--model sonnet`, trừ DollarBill/Mafee), effort omit = medium | Báo cáo ngày/tuần/tháng, plan T+1, Mafee, data-ops, corp-scanner, query BQ, sửa code đã biết đúng chỗ, áp `required_change` | Mặc định. KHÔNG hạ `low`: ở `low` Sonnet 5.5 hay báo xong khi chưa chạy kiểm |
+| **2** | `--model opus` (effort omit = medium; trần lượt tự = 80) | R&D / backtest theo khuôn có sẵn, due diligence, tổng hợp nhiều nguồn, lỗi chưa rõ nguyên nhân | Mặc định MỚI cho việc khó. `dispatch.sh` tự đặt `--max-turns 80` khi `--model opus` (trước đó medium ⇒ 50, thấp hơn trung vị 73 lượt của việc Taylor) |
+| **2+** | `--model opus --effort high` | Phản biện, mọi thứ chạm tiền / cổng an toàn, thiết kế backtest MỚI từ đầu, lượt "review TOÀN BỘ nhánh một lần" (chế độ B) | `xhigh`/`max` chỉ khi đã ĐO được lợi trên việc đó |
+| **3** | `--model fable --effort high` (trần high) | Chỉ LÊN KẾ HOẠCH việc cực khó | Hiếm; không tự thực thi (bright line bên dưới) |
+
+Không chắc tầng nào → tầng 1. Lưỡng lự 0-hay-1 → 1. Lưỡng lự 2-hay-2+ → hỏi "việc này có phải phản
+biện / chạm tiền / thiết kế mới không?" — không ⇒ 2.
+
+**Reviewer chạy bằng SCRIPT không truyền cờ theo bảng trên — giá trị THẬT đang chạy (2026-10-11):**
+`bin/verify_finding.sh` (quant-skeptic) và `bin/code_quality_weekly.sh` gọi `claude -p` không
+`--model`/`--effort` ⇒ thừa hưởng `~/.claude/settings.json` (`opus[1m]`) + effort mặc định của CLI;
+`bin/wags_autofix.sh:85` (arch-reviewer) truyền `--model opus`, không effort. Tức cả ba đang ở
+Opus nhưng KHÔNG chắc `high`. Chưa sửa trong đợt này — muốn ép `high` thì thêm cờ ở 3 script đó.
+Cron ghim `--model opus` hiện có: `wags_autofix.sh` (2 chỗ), `ops_autofix.sh`,
+`fearbuy_weekly_scan.sh`, `paper_checkpoint_escalation.sh`, `weekly_ops_audit.sh`, `kb_nightly.sh`,
+`selfcheck_red_owner_sweep.sh` — 5 cái sau kèm `--effort high`. Đợt thử dưới KHÔNG đổi cron nào.
+
+**Chạy thử plan 2026-10-11 — vì sao DollarBill/Mafee CHƯA đổi.** Chạy lại đề lập plan SpaceX của
+thứ Sáu 09/10 trên Sonnet 5.5, file plan ghi ra `/tmp` (job `DollarBill_20261011_035729`): ra ĐÚNG
+quyết định (HOLD, 0 lệnh) với 5 lượt gọi thay vì 19 của bản thật, nhưng CHÉP nguyên khối
+`state_note`/`nav_basis`/`jit_unpark_proposal` từ plan hôm trước (ngày as-of lệch 1 phiên) và tự
+báo "chưa chạy `load_plan()`". Lượt 5.5 thứ hai (`_040016`) cũng HOLD 0 lệnh, số liệu tươi, vẫn bỏ
+`load_plan()` — nhưng nó chạy SAU lượt đầu nên KHÔNG độc lập ⇒ **n=1 sạch**. Giới hạn của phép thử:
+(a) ngày HOLD ⇒ không thử được sizing/giá tham chiếu; (b) đề có chữ "chạy thử" có thể làm model
+làm tắt; (c) lượt đối chứng Sonnet 5 (`_040012`) HỎNG — nó thấy finding của lượt trước trong KB
+delta, không lập plan mà trỏ sang file của lượt kia rồi báo xong ⇒ chạy liên tiếp cùng agent là
+nhiễm chéo. Tác dụng phụ không lường trước: `compute_active_nav.py` (bước thường lệ của mọi lượt
+lập plan) GHI ĐÈ `data/execution_logs/active_nav_SpaceX.json` bằng số DNSE sống lúc 11:00 ICT
+11/10 — số đúng, cron làm tươi lại 20:15 T2-T6; 6 file `*_2026-10-12.json` trong
+`data/trade_plans/` không đổi (md5 khớp trước/sau).
+**Điều kiện đổi:** user quyết (dựa vào duyệt plan 21:00 + các cổng cơ học), hoặc có phép thử sạch
+trên ngày CÓ lệnh. Tới lúc đó vòng `for` kiểm settings in ra 6 dòng `-5-5` + 2 dòng `-5` là ĐÚNG.
+
+**🧪 ĐANG THỬ — Opus mặc định `medium` (2026-10-11 → mốc xem lại 2026-10-25).** Cơ sở: tài liệu
+Anthropic nói Opus 5.5 ở `medium` ngang/hơn Opus 5 ở `high` với ~nửa token — số của HỌ, chưa đo
+trên việc của đội. Phạm vi: dispatch tương tác của Mike (nơi phát sinh phần lớn job Opus).
+Số nền 14 ngày trước khi thử (27/9 → 11/10; `bus/jobs/*.json` lọc theo `started_at`):
+- Job Opus: 120 = `high` 88 (73%) / `medium` 30 / `xhigh` 2.
+- Taylor opus/high: n=78, trung vị 24,1 phút, 73 lượt (n=14 có ghi), $11,46/job (n=13), phải chạy
+  lại (`attempt>1`) 24/78 = 31%. Taylor opus/medium: n=10, 9,5 phút, $6,72 (n=2), chạy lại 5/10 —
+  KHÁC loại việc và trần lượt lúc đó là 50, không phải so sánh có đối chứng.
+- Verdict `verification` trên bus, TÁCH theo reviewer: quant-skeptic 30 = CONFIRMED 22 / REFUTED 7 /
+  INCONCLUSIVE 1 (không-CONFIRMED 27%); arch-reviewer 12 = NEEDS_CHANGES 9 / CONFIRMED 2 / REFUTED 1
+  (đến từ đường `wags_autofix`, đợt thử không chạm ⇒ KHÔNG dùng làm thước).
+- Cầu chì vòng: log mới có từ 2026-10-05 (6 ngày), 1 chuỗi duy nhất ⇒ chưa đủ làm số nền.
+**Thước đo tại mốc 2026-10-25** (cùng nguồn, cửa sổ 11/10 → 25/10), và ngưỡng:
+- QUAY VỀ `high` nếu quant-skeptic không-CONFIRMED ≥ 40% trên ≥ 15 verdict, HOẶC job
+  Taylor opus/medium chạy lại ≥ 45% trên ≥ 15 job.
+- CHỐT `medium` nếu không chạm ngưỡng trên VÀ chi phí trung vị mỗi job Taylor/Opus thấp hơn $11,46.
+- Không đủ mẫu (dưới 15) ⇒ kéo dài thêm 2 tuần, không kết luận.
+Ngưỡng là phán đoán đặt trước để khỏi diễn giải sau khi thấy số — mẫu nhỏ, không phải kiểm định.
+Nhắc mốc: task one-shot trong bộ lập lịch ccdb (topic của phiên đặt) + dòng trong `kb/memory/Mike.md`.
+
+**Native subagent — ghim `model:` trong frontmatter `~/.claude/agents/*.md` (2026-10-11).** Trước
+đó 10/12 file không ghim ⇒ thừa hưởng model của phiên gọi (phiên Mike = Opus), kể cả việc tra cứu.
+Nay: `fleet-scout` = haiku · `bq-analyst`, `corp-scanner`, `data-ops`, `memo-optimizer` = sonnet ·
+`quant-skeptic`, `fundamental-skeptic`, `macro-strategist`, `risk-auditor`, `legal-vn`,
+`arch-reviewer`, `code-reviewer` = opus. Không trái nguyên tắc "model theo TASK": mỗi native agent
+là MỘT loại việc hẹp nên ghim = mặc định hợp lý cho loại việc đó; agent headless đa năng
+(Taylor…) vẫn chọn theo từng lần dispatch. Cần tầng khác cho MỘT lần gọi → truyền `model` ở
+`Agent(...)`, đừng sửa frontmatter. `fleet-scout` đã sửa đường dẫn cũ (`bus/outbox` → `bus/inbox`,
+`bus/jobs`) + khoá `tools:` chỉ-đọc, và thử 3 câu biết trước đáp án trên Haiku: 3/3 đúng, chạy đúng
+`claude-haiku-5-5`, $0,012 cho cả 3. Sửa xong chạy `bin/sync_native_agents.sh` (bản gương có version:
+`agents_native/`). Bản trước khi sửa: `~/.claude/agents-bak-20261011/`.
+
+**opencode:** không còn là đích mặc định của Q1 (offload đo được 0% tuần 04-11/10 — luật không
+chạy trên thực tế). Giữ cho `bin/second_opinion.sh` (giá trị = ý kiến từ model KHÁC) và khi user
+chỉ định. Chính sách codex 2026-08-16 bên dưới KHÔNG nằm trong quyết định này, giữ nguyên.
+
+**Tầng ccdb (Discord) nằm NGOÀI file này và ngoài vòng `for` kiểm settings:** `.env`
+`CCDB_MODEL`, DB `claude_model`, và override theo thread. Đo 2026-10-11: `.env` còn
+`claude-sonnet-5`; trong DB có 7 giá trị `claude-sonnet-4-6`, 1 `claude-opus-4-8`, 1 `claude-sonnet-5`
+(các dòng còn lại dùng alias `sonnet`/`opus`). Chưa đổi.
+
+**Đã cân nhắc và RÚT LẠI (2026-10-11): hạ `ops_autofix.sh` từ Opus xuống Sonnet.** arch-review bác:
+14 job OPS-AUTOFIX gần nhất không có job nào là việc cơ học — 2 job dò ra nguyên nhân nằm trong
+ranh giới tiền (`trading_bot/plan_funding_gate.py`, `trading_bot/brokers.py`) và dừng đúng, còn lại
+là chẩn đoán lỗi chưa rõ nguyên nhân; ranh giới tiền của Winston chỉ là văn xuôi trong prompt,
+không có reviewer hậu kiểm; script được `run_bot.sh` gọi khi bot lỗi giữa phiên; lợi ích ~6 job
+ngắn / 14 ngày. Nó vốn đã ở opus/medium = đúng tầng 2. Muốn xét lại phải kèm chặn cơ học cho
+Winston trên `trading_bot/`, `trading_rules.json`, crontab, `BOT_STOP`, `data/trade_plans/`.
+
 ## Model routing — ladder 3 tầng theo độ phức tạp task (cập nhật 2026-07-14, user yêu cầu)
 
 **Checklist thủ công SAU MỖI LẦN đổi model của chính Mike** (bài học sự cố schema-drift 07-06,
@@ -25,11 +136,11 @@ cực kỳ phức tạp.**
 
 | # | Câu hỏi | YES → |
 |---|---|---|
-| Q1 | Tra cứu/query/check cơ học, có 1 đáp án đúng rõ ràng? | **Sonnet 5** (mặc định, omit `--model`) |
+| Q1 | Tra cứu/query/check cơ học, có 1 đáp án đúng rõ ràng? | **Sonnet** (mặc định, omit `--model`) — từ 2026-10-11 tách tiếp: chỉ-đọc ngắn kiểm được → Haiku (bảng hiện hành ở đầu file) |
 | Q2 | Phức tạp thường: cân nhắc trade-off, tổng hợp nhiều nguồn, sinh giả thuyết, phản biện/soi lỗi tinh vi, hoặc chạm production chưa có template? | **Opus** (`--model opus`) |
 | Q3 | **CỰC KỲ phức tạp**: thiết kế chiến lược/hệ thống mới từ đầu, backtest đa-giả-thuyết nhiều tầng, verify đối kháng khó nhất — vượt tầm Opus? | **Fable 5** (`--model fable`) — hiếm |
 
-Không chắc → mặc định Sonnet 5. Lưỡng lự Opus-hay-Fable → chọn **Opus**. Tránh dùng model đắt cho
+Không chắc → mặc định Sonnet. Lưỡng lự Opus-hay-Fable → chọn **Opus**. Tránh dùng model đắt cho
 việc thường lệ.
 
 **🔴 BRIGHT LINE — Fable = LÊN KẾ HOẠCH, không tự thực thi (user mandate, 2026-08-21)**
@@ -45,10 +156,10 @@ trọng hơn, **plan do Fable tạo ra vẫn cần human/Mike review trước kh
 Fable tự implement là bỏ qua bước review đó. Không có exception: kể cả khi dispatch prompt nghe có
 vẻ "chỉ là implement một plan rõ ràng" — lúc đó dùng Opus, không phải Fable.
 
-**⚠️ "Omit `--model`" KHÔNG có nghĩa là "Sonnet 5" — nó có nghĩa là "lấy model trong
+**⚠️ "Omit `--model`" KHÔNG có nghĩa là "Sonnet đời mới nhất" — nó có nghĩa là "lấy model trong
 `agents/<id>/.claude/settings.json`".** `dispatch.sh` khi `MODEL` rỗng thì **không truyền cờ nào**,
 nên CLI tự lấy từ file đó. Hai thứ này chỉ trùng nhau CHỪNG NÀO cả 8 `settings.json` còn ghi
-`claude-sonnet-5` — kiểm bằng:
+`claude-sonnet-5-5` (trừ DollarBill/Mafee đang giữ `claude-sonnet-5` có chủ đích, 2026-10-11) — kiểm bằng:
 ```bash
 for a in $(ls agents/); do printf '%-11s %s\n' "$a" \
   "$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('model','-'))" agents/$a/.claude/settings.json)"; done
@@ -58,7 +169,12 @@ AGENT — Taylor=`claude-opus-4-8`, 6 agent còn lại=`claude-sonnet-4-6`; chí
 thế nhưng **`settings.json` không được cập nhật**. Hệ quả đo được: `--model sonnet` →
 `claude-sonnet-5`, nhưng **omit** → `claude-sonnet-4-6` (đời trước); Taylor omit →
 `claude-opus-4-8` (tầng ĐẮT NHẤT, ngược ý "mặc định = tầng rẻ"). 64/400 job gần nhất chạy
-`model=default`. Nay cả 8 đã về `claude-sonnet-5`; đổi model 1 agent thì phải sửa cả mô tả này.
+`model=default`. 2026-08-03 cả 8 về `claude-sonnet-5`.
+**Lệch LẦN HAI (sửa 2026-10-11):** Sonnet 5.5 ra mắt, alias `sonnet` tự nhảy sang
+`claude-sonnet-5-5` nhưng 8 `settings.json` ghim ID đầy đủ nên omit vẫn chạy `claude-sonnet-5` —
+đo 3 ngày: 1.054 dòng transcript đời cũ vs 522 đời mới (khử trùng theo message id: 574 vs 273 lượt). Nay 6/8 ghi `claude-sonnet-5-5` (+ mặc định
+của `bin/spawn_child.sh`); DollarBill/Mafee giữ đời cũ có chủ đích (xem đầu file). **Mỗi lần Anthropic ra đời model mới: chạy lại vòng `for` ở trên** — ID
+đầy đủ KHÔNG tự cập nhật như alias. Đổi model 1 agent thì phải sửa cả mô tả này.
 
 **⚠️ Sự cố model-drift đã đo được (2026-07-17, chi tiết `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`)**: %fable dispatch lên
 58%/tuần dù hầu hết là task "phức tạp thường" (Q2, tầng Opus), không phải Q3 — compute wall-clock
@@ -67,7 +183,7 @@ in nhắc stderr mỗi lần `--model fable`; `bin/spend_report.py` cảnh báo 
 editorial review). Tự hỏi đúng Q1-Q3, đừng phản xạ chọn tier cao khi việc "nghe có vẻ quan trọng".
 
 **Gợi ý xác suất ban đầu theo loại việc** (không phải rule cứng theo tên agent):
-- **Sonnet 5**: `bq-analyst`, `fleet-scout`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based),
+- **Sonnet**: `bq-analyst`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based) — `fleet-scout` sang Haiku từ 2026-10-11,
   `Mafee` (thực thi plan-bound), `ops_health_check`/`preflight_check`-style.
 - **Opus** (tầng phức tạp mặc định): `Taylor` khi làm R&D/backtest/sinh giả thuyết, `quant-skeptic`,
   `DollarBill` khi plan có trade-off không tầm thường, `risk-auditor`/`legal-vn` khi câu hỏi mang
@@ -82,9 +198,10 @@ cũ chạy y nguyên, 0 thay đổi hành vi — chứng minh bằng `bin/cli_pr
 byte-for-byte). Khai báo provider ở **`kb/cli_providers.json`** — thêm CLI mới = thêm 1 entry,
 KHÔNG sửa `dispatch.sh`.
 
-**Chính sách user 2026-08-03: coi `deepseek-v4-flash-free` ngang tầm Sonnet ⇒ CHỦ ĐỘNG đẩy việc
-tầng-Sonnet sang opencode để tiết kiệm quota claude.** Nay là kênh chia tải mặc định cho tầng rẻ,
-không còn là "chỉ dùng khi cần ý kiến trái chiều".
+**Chính sách user 2026-08-03 (THAY bởi quyết định 2026-10-11 — xem bảng hiện hành ở đầu file):**
+coi `deepseek-v4-flash-free` ngang tầm Sonnet ⇒ chủ động đẩy việc tầng-Sonnet sang opencode để
+tiết kiệm quota claude. Từ 2026-10-11 việc chỉ-đọc ngắn kiểm được sang Haiku 5.5 (phần còn lại của Q1 về Sonnet); opencode quay về vai "ý kiến trái
+chiều" (`second_opinion.sh`) hoặc khi user chỉ định.
 
 **Chính sách user 2026-08-16: Codex CLI làm cổng router.** `ocgo/deepseek-v4-flash` là default cho
 implementation/execution; `gpt-5.6-sol` chỉ dùng cho planning khi user tự set `/model` hoặc dispatch
@@ -110,7 +227,7 @@ cược deadline vào biến chưa biết.
 
 | | Loại task | Đích |
 |---|---|---|
-| **Q1** | Tra cứu web (lãi suất, tin tức, corp-action), đọc/tóm tắt/so sánh tài liệu, phản biện một kết luận, smoke test, kiểm tra trạng thái | **`--provider opencode`** ⟵ *đổi từ Sonnet* |
+| **Q1** | Tra cứu web (lãi suất, tin tức, corp-action), đọc/tóm tắt/so sánh tài liệu, ~~phản biện một kết luận~~ (từ 2026-10-11 phản biện = tầng 2+ Opus), smoke test, kiểm tra trạng thái | ~~`--provider opencode`~~ ⟵ *từ 2026-10-11: Haiku nếu đạt điều kiện tầng 0, không thì Sonnet* |
 | **Q2** | Trade-off, tổng hợp nhiều nguồn, sinh giả thuyết, soi lỗi tinh vi | `claude --model opus` |
 | **Q3** | Cực kỳ phức tạp, vượt tầm Opus | `claude --model fable` (hiếm) |
 
@@ -180,8 +297,8 @@ sandbox bảo mật**: pattern khớp trên chuỗi lệnh nên lệnh trong all
 hướng (`grep x y > z`) để ghi file. Giảm bề mặt **tai nạn**, không chặn được chủ đích.
 
 Ví dụ: `bin/dispatch.sh Taylor "Thiết kế lại toàn bộ hệ thống chọn cổ phiếu từ đầu" --model fable --effort high`
-· `bin/dispatch.sh Taylor "Backtest thêm 1 sector cho family có sẵn" --model opus --effort high`
-· `bin/dispatch.sh Taylor "Query PE hiện tại của VNM"` (omit `--model` → Sonnet 5, medium).
+· `bin/dispatch.sh Taylor "Backtest thêm 1 sector cho family có sẵn" --model opus` (khuôn có sẵn = tầng 2, medium)
+· `bin/dispatch.sh Taylor "Query PE hiện tại của VNM"` (omit `--model` → Sonnet, medium).
 
 **Reasoning-effort per dispatch — `--effort LEVEL` (chính sách user 2026-07-14):** `dispatch.sh`
 nhận `--effort low|medium|high|xhigh|max`, validate lúc parse, ghi vào job record (`effort=`), áp
@@ -193,8 +310,8 @@ cho cả `--bg` lẫn đồng bộ.
   về `high` + cảnh báo stderr (không bao giờ chạy fable ở xhigh/max). `xhigh`/`max` chỉ dành cho
   model khác (vd `opus`) khi thực sự cần.
 - Ghép với ladder model: lookup cơ học → omit cả hai (**Sonnet, medium**); phức tạp thường →
-  **`--model opus --effort high`**; cực kỳ phức tạp → **`--model fable --effort high`** (fable trần
-  high).
+  **`--model opus`** (medium — đang thử từ 2026-10-11; `--effort high` cho danh sách tầng 2+ ở đầu
+  file); cực kỳ phức tạp → **`--model fable --effort high`** (fable trần high).
 
 **⚠️ Kỷ luật riêng cho dispatch TƯƠNG TÁC của chính Mike (chốt 2026-08-10, sau audit token-usage;
 bổ sung 2026-08-16: góp ý bên thứ ba — giữ mặc định `medium` cho audit/fix thường, chỉ dùng `high`
@@ -217,14 +334,14 @@ cụ thể để tự áp dụng mỗi lần dispatch tương tác:
 | Task type | Model | Effort | Lý do |
 |---|---|---|---|
 | Selfcheck sweep, verify artifact | Sonnet | medium | Rule-based, kết quả binary PASS/FAIL |
-| Ops autofix cơ học (rotate, trim, crontab check) | Sonnet | medium | Deterministic, không cần suy luận mới |
+| Ops autofix cơ học (rotate, trim, crontab check) — KHÔNG phải `ops_autofix.sh` (script đó là chẩn đoán lỗi chưa rõ nguyên nhân, giữ Opus) | Sonnet | medium | Deterministic, không cần suy luận mới |
 | Bug fix với nguyên nhân đã xác định | Sonnet/Opus | **medium** | Thực thi theo spec đã rõ |
 | Audit freshness / health check | Sonnet | medium | Read + compare, không sinh giả thuyết |
 | Wags autofix theo verdict có sẵn | Sonnet | medium | Tiếp nối verdict của arch-reviewer |
 | **Redispatch "tiếp tục từ working memory"** | giữ model gốc | **medium** | Context đã load, không cần effort mới |
 | Code review / phản biện tinh vi | Opus | high | Cần suy luận đa chiều |
 | Backtest/giả thuyết mới chưa có template | Opus | high | Thiết kế từ đầu |
-| Fix bug MÀ nguyên nhân chưa rõ | Opus | high | Cần tự điều tra |
+| Fix bug MÀ nguyên nhân chưa rõ | Opus | medium (đợt thử 2026-10-11; `high` nếu chạm tiền/cổng an toàn) | Cần tự điều tra |
 | Thiết kế hệ thống/chiến lược mới | Fable | high | Cực kỳ phức tạp |
 
 Dấu hiệu đang cần medium, không phải high: "vá đúng chỗ đã xác định", "chạy lại selfcheck", "tiếp
@@ -237,11 +354,14 @@ kế", "giả thuyết mới", "tại sao lại hỏng", "chưa hiểu rõ" → 
   nhắc việc hằng ngày, scan/kiểm tra định kỳ, cập nhật số liệu, đồng bộ registry, chạy lại pipeline
   có sẵn. Dispatch omit `--model` đã rơi về Sonnet (`agents/*/.claude/settings.json`) và effort
   `medium` (`dispatch.sh`) ⇒ cron nào không ghim là đúng luật.
-- **Điều phối coding task KHÓ + NGHIÊN CỨU ⇒ `Opus`** (effort `high` khi thật sự khó): thiết kế/sửa
+- **Điều phối coding task KHÓ + NGHIÊN CỨU ⇒ `Opus`** (effort `medium` mặc định từ 2026-10-11;
+  `high` theo danh sách tầng 2+ ở đầu file): thiết kế/sửa
   code chưa rõ nguyên nhân, R&D/backtest/due-diligence, đánh giá checkpoint paper-program.
 - Kiểm kê cron ghim Opus (06/10): `fearbuy_weekly_scan.sh` (due-diligence = nghiên cứu, giữ),
   `paper_checkpoint_escalation.sh` (đánh giá gate R&D, giữ), `wags_autofix.sh` (sửa lỗi điều phối,
   giữ). `check_report_cadence.sh` báo cáo THÁNG opus/high ⇒ ĐỔI sang sonnet/medium.
+- 2026-10-11: đề xuất hạ `ops_autofix.sh` xuống Sonnet ĐÃ RÚT (arch-review bác — xem đầu file);
+  kiểm kê đầy đủ cron ghim Opus cũng ở đầu file.
 
 ### Hai chế độ theo ĐỘ KHÓ + cắt vòng lặp polish (user chỉ đạo 2026-10-02 10:43 ICT)
 
@@ -256,7 +376,9 @@ revert phần thừa theo chỉ định, áp verdict arch-review đã liệt kê
 đồng bộ config/registry, dọn worktree. Dấu hiệu: reviewer đã chỉ ĐÚNG file:dòng/mutation cần giết.
 Redispatch "vòng N chỉ test-only" cũng thuộc nhóm này — mặc định Sonnet medium.
 
-**Chế độ B — việc MỚI/KHÓ/lỗi cứ phát sinh thêm ⇒ `Opus` + `--effort high`, làm MỘT LẦN cho trọn.**
+**Chế độ B — việc MỚI/KHÓ/lỗi cứ phát sinh thêm ⇒ `Opus`, làm MỘT LẦN cho trọn** (lượt REVIEW toàn
+bộ = `--effort high`; lượt SỬA theo danh sách đã lập = `medium`, `high` nếu chạm tiền/cổng an toàn —
+đợt thử 2026-10-11).
 Gồm: thiết kế mới chưa có template, bug chưa rõ nguyên nhân, chạm production/tiền/cổng an toàn,
 hoặc review lộ ra lỗi MỚI khác loại với lỗi vòng trước. Cách chạy: (1) Opus high **review TOÀN BỘ**
 diff/nhánh một lượt (không chỉ chỗ reviewer vừa chỉ) và lập danh sách đầy đủ mọi lỗi + mutation còn

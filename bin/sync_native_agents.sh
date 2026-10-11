@@ -22,5 +22,15 @@ for f in "$LIVE"/*.md; do
     changed=1
   fi
 done
+# Skill dispatch-routing cũng nằm ngoài cả 2 repo (~/.claude/skills) và chép luật từ
+# kb/mike_model_routing.md — gương 1 bản có version để revert/backup được (2026-10-11).
+SKILL_LIVE="$HOME/.claude/skills/dispatch-routing/SKILL.md"
+SKILL_MIRROR="$MIRROR/skills/dispatch-routing/SKILL.md"
+if [ -f "$SKILL_LIVE" ] && ! cmp -s "$SKILL_LIVE" "$SKILL_MIRROR" 2>/dev/null; then
+  mkdir -p "$(dirname "$SKILL_MIRROR")"
+  cp "$SKILL_LIVE" "$SKILL_MIRROR"
+  echo "synced: skills/dispatch-routing/SKILL.md"
+  changed=1
+fi
 [ "$changed" = 0 ] && echo "native agents already in sync"
 exit 0

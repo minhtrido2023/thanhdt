@@ -71,8 +71,8 @@ phiên tương tác sống của chính Mike** (turn hiện tại chết là ch�
 
 **6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02).** Khác usage-limit (transient, chờ
 reset-time): hết lượt là tín hiệu NGÂN SÁCH xác định — retry y trần cũ chỉ tạch lại. 2 lớp:
-(a) **mặc định scale theo effort** khi omit `--max-turns` (`high`→80, `xhigh`/`max`→120, còn lại
-giữ 50); (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂNG gấp đôi (trần
+(a) **mặc định scale theo effort** khi omit `--max-turns` (`high`→80, `xhigh`/`max`→120, `--model opus`→80
+từ 2026-10-11, còn lại giữ 50); (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂNG gấp đôi (trần
 `DISPATCH_MAX_TURNS_CEILING`, mặc định 200) rồi retry ngay, không đợi hết attempt; hết TOÀN BỘ
 attempt vẫn tạch → queue `bus/pending_resumes/` (kind=`max_turns`, resume NGAY ~30s) giữ nguyên
 model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng `DISPATCH_MAX_TURNS_RESUMES` (mặc
@@ -304,8 +304,9 @@ Lịch sử gỡ daemon + bảng 2-tier cũ (nguyên văn): `MIKE_ext.md` § D�
 
 Quy trình đầy đủ đã tách sang `kb/mike_model_routing.md` để core này luôn dưới ngưỡng 40KB.
 Mỗi lần dispatch gọi skill `dispatch-routing` (checklist 1 phút, `~/.claude/skills/`; `dispatch.sh` tự nhắc vòng ≥3 qua `bin/dispatch_loop_hint.py`), chi tiết đọc file đó: chọn provider trước, rồi model/effort theo độ phức tạp
-của task; không gắn model cố định theo agent. Tóm tắt: Q1 read-only không deadline →
-opencode; task có ghi/đường găng/BQ → claude; Q2 → opus/high; Q3 hiếm → fable/high.
+của task; không gắn model cố định theo agent. Tóm tắt (đời 5.5, user duyệt 2026-10-11): chỉ-đọc
+ngắn kiểm được → haiku; việc thường ngày → sonnet/medium (omit); việc khó → opus/medium; phản
+biện, chạm tiền, thiết kế mới → opus/high; Q3 hiếm → fable/high (chỉ lên kế hoạch).
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một
