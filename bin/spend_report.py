@@ -129,7 +129,9 @@ def _parse_args(argv):
 # xem _model_key(). Truoc 2026-08-03 moi model la khong nam trong list nay bi gan thanh
 # "default", nen job opencode se bi dem lan vao claude: viec chia tai sang provider re tro
 # thanh VO HINH, va ty le model-mix cua claude (chi so da bat duoc drift fable 07-17) bi loang.
-MODELS = ["sonnet", "opus", "fable", "default"]
+# 2026-10-11: them "haiku" (tang 0 cua routing doi 5.5) — thieu no thi job haiku bi dem thanh
+# "default" (= Sonnet), dung lop loi mo ta o tren. state/spend_history.csv CHUA co cot haiku_jobs.
+MODELS = ["haiku", "sonnet", "opus", "fable", "default"]
 # Provider != claude duoc gom theo TEN PROVIDER, khong theo ten model, vi ten model cua ho
 # (vd "opencode/deepseek-v4-flash-free") khong so sanh duoc voi tier cua claude.
 PROVIDER_KEYS = ["opencode", "codex", "antigravity"]

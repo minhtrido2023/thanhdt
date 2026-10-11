@@ -415,7 +415,10 @@ case "$MAX_TURNS" in
     case "$EFFORT" in
       high) MAX_TURNS=80 ;;
       xhigh|max) MAX_TURNS=120 ;;
-      *) MAX_TURNS=50 ;;
+      # 2026-10-11: --model opus cũng là tín hiệu "việc khó" (routing đời 5.5: Opus mặc định
+      # effort medium). Đo 14 ngày: Taylor opus/high trung vị 73 lượt (13/14 job > 50), và
+      # opus/medium đã phải retry 5/10 job — để 50 là ép việc khó vào vòng nâng-trần-rồi-chạy-lại.
+      *) if [ "$MODEL" = "opus" ]; then MAX_TURNS=80; else MAX_TURNS=50; fi ;;
     esac
     ;;
   *[!0-9]*) echo "ERROR: --max-turns '$MAX_TURNS' phải là số nguyên dương." >&2; exit 1 ;;
