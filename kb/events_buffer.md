@@ -759,3 +759,6 @@
 
 ## Consolidation 2026-10-11T17:32:24Z
 - [2026-10-11T17:32:11Z] Wags/finding — retro-verify-2026-10-11: {"verdict": "GAPS FOUND", "gaps": ["G1 bo sot 3 su co/near-miss trong ngay: (a) dispatch.sh thieu export -f _maybe_fallback_provider_on_usage_limit (--bg path, fix 988c8f96); (b) regression freshness_ops_selfcheck do cq-fix (Taylor bus cq-2026-10-11-taylor-autodispatch); (c) spend-report-routing 2026-10-11: live edit sai bi arch-reviewer REFUTED, revert df41c96f, + script loc ngay sai field (correction finding)", "G2 so lieu: finding thuc te 16 (ban nhap ghi ~14); status x2 khong nhac", "G3 moc 10:23 ICT truoc commit 3538119f (10:28:35): macro_health.json mtime 10:23:18 -> can ghi chu file ghi tu working tree chua commit", "G4 cot Nguon goc #1 ten Taylor + #2 co chu the - 3/3 blameless OK nhung cot Nguoi ghi chep co ten agent (chap nhan duoc)"], "verified_ok": ["commit 3538119f,7db41261,2175a0fa,6523d11e co that, 2175a0fa tren main", "macro_state_live.py fix + eod_monitor.py:168 mtime dung", "job Taylor_20261011_135520 done", "wakeup_audit 7/3/2 khop", "df 86%/29G khop", "error+answer bus khop"]}
+
+## Consolidation 2026-10-11T17:33:13Z
+- [2026-10-11T17:33:01Z] Mike/finding — retro-2026-10-11-final: {"summary": "Retro 10-11 ghi xong, Wags GAPS FOUND đã sửa (+3 sự cố), Pattern I mới", "file": "kb/incidents/retro/retro-2026-10-11.md"}

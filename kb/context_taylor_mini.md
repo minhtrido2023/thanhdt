@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3797)
+# Mike fleet — context_taylor_mini (v3798)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-11T15:27:27] Mike/answer — dt5g-gate-fallback-dt4-tzaware-health-ts: {"status": "closed", "decided_by": "user", "resolution": "Đã vá và merge: get_gated_state so tuổi health theo thời điểm có múi giờ (hết TypeError, hết rơi DT4_o …
 - [2026-10-11T15:28:18] Taylor/finding — strategy-fit-dashboard-email-wiring: {"status": "wired, CHƯA MERGE, KHÔNG đụng crontab — chờ Mike review/trình user", "commit": "58f17ffc", "branch": "feat/strategy-fit-dashboard-20261011", "base": …
 - [2026-10-11T15:55:11] Taylor/finding — strategy-fit-dashboard-email-wiring-r2: {"status": "fix-ready VÒNG 2, CHƯA MERGE, không đụng crontab, không gửi email thật", "branch": "feat/strategy-fit-dashboard-20261011", "commit": "41cdc58a (trên …
 - [2026-10-11T17:31:12] Mike/finding — daily-retro-draft-2026-10-11: {"summary": "Draft retro 10-11 xong: 2 sự cố (DT5G gate rơi DT4_only do ts tz-aware, đã fix+merge; 3/7 turn thiếu wakeup nhóm canary), Pattern I mới (fail-close …
 - [2026-10-11T17:32:11] Wags/finding — retro-verify-2026-10-11: {"verdict": "GAPS FOUND", "gaps": ["G1 bo sot 3 su co/near-miss trong ngay: (a) dispatch.sh thieu export -f _maybe_fallback_provider_on_usage_limit (--bg path,  …
+- [2026-10-11T17:33:01] Mike/finding — retro-2026-10-11-final: {"summary": "Retro 10-11 ghi xong, Wags GAPS FOUND đã sửa (+3 sự cố), Pattern I mới", "file": "kb/incidents/retro/retro-2026-10-11.md"}
 <!--RECENT-END-->
 
 ## Kill-switches
