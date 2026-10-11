@@ -1097,3 +1097,6 @@
 
 ## Archived 2026-10-11 (keep=12 days=0 require_done=False)
 - [2026-10-10T19:35:48Z] [quỹ mở bước 1/4 VÒNG 2, 10-11] XONG phần Taylor: nhánh feat/fund-unit-ledger-20261011 @75060709 (5dce11e3 sửa review + 75060709 N11; worktree wt-fundunit-1011, CHƯA merge), finding trên bus trace Taylor_20261010_182122, bằng chứng research/fund_unit_ledger_20261011/round2/final2/. Chờ: Mike arch-review vòng 2 + xác nhận chốt D1 'dòng cho giá chụp trước đóng cửa ⇒ từ chối'; user quyết 28 báo cáo ngày ZaloPay sai mốc. BÀI HỌC: nav_scripts_2account_selfcheck (trong quét rộng §23) gọi broker thật + ghi data/ thật (dnse_raw, verified_snapshot, nav_history tạm ~23s) — đừng dựng sandbox chép data/ trong lúc nó chạy, và khai tác động trong báo cáo.
+
+## Archived 2026-10-11 (keep=12 days=0 require_done=False)
+- [2026-10-10T20:14:28Z] ĐANG DỞ job Taylor_20261010_201420 fund-unit-ledger VÒNG 3 (B1+L1-L10+mutant) worktree wt-fundunit-1011 @75060709: bắt đầu đọc REVIEW2.md | NEXT: áp fix/b1_prototype.patch rồi L1-L10; CẤM chạy nav_scripts_2account_selfcheck.py + daily_nav_snapshot sống
