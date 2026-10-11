@@ -106,9 +106,13 @@ chạy trên thực tế). Giữ cho `bin/second_opinion.sh` (giá trị = ý ki
 chỉ định. Chính sách codex 2026-08-16 bên dưới KHÔNG nằm trong quyết định này, giữ nguyên.
 
 **Tầng ccdb (Discord) nằm NGOÀI file này và ngoài vòng `for` kiểm settings:** `.env`
-`CCDB_MODEL`, DB `claude_model`, và override theo thread. Đo 2026-10-11: `.env` còn
-`claude-sonnet-5`; trong DB có 7 giá trị `claude-sonnet-4-6`, 1 `claude-opus-4-8`, 1 `claude-sonnet-5`
-(các dòng còn lại dùng alias `sonnet`/`opus`). Chưa đổi.
+`CCDB_MODEL`, DB `claude_model`, và override theo thread. Đo 2026-10-11 trước khi đổi: `.env`
+`claude-sonnet-5`; trong DB có 7 giá trị `claude-sonnet-4-6`, 1 `claude-opus-4-8`, 1 `claude-sonnet-5`.
+**Đã đổi hết sang alias 2026-10-11 12:22 ICT** (user tự chạy `state/ccdb_model_alias.py --apply`,
+không restart bot): đo lại DB còn `sonnet` 22 / `opus` 12 / `ocgo/deepseek-v4-flash` 4, `.env`
+`CCDB_MODEL=sonnet`. Sao lưu: `/workspace/ccdb-mike/data/sessions.db.bak-20261011-model-alias` và
+`/workspace/ccdb-mike/.env.bak-20261011-model-alias`. Phiên Mike KHÔNG tự ghi được hai file này
+(lớp kiểm quyền chặn) — lần sau cần đổi thì dùng `/model` trong thread hoặc user chạy script.
 
 **Đã cân nhắc và RÚT LẠI (2026-10-11): hạ `ops_autofix.sh` từ Opus xuống Sonnet.** arch-review bác:
 14 job OPS-AUTOFIX gần nhất không có job nào là việc cơ học — 2 job dò ra nguyên nhân nằm trong
