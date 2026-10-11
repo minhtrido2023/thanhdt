@@ -333,22 +333,12 @@ def t_contract():
     ck("--dev-tol >= 0.5 bị TỪ CHỐI (dung sai vô nghĩa = tắt cảnh báo mà trông như đang chạy)",
        _exits_2(["--dev-tol", "0.9"]))
 
-    # Hard-constraint #1/#2: KHÔNG được import để SỬA hai file của cổng §21. `git diff --name-status`
-    # là bằng chứng đúng (không phải grep chuỗi) — assertion cũ dùng `A or (B not in py)` nên PASS
-    # với bất kỳ import có alias, tức là không chứng minh gì (arch-review 2026-09-27).
-    # Câu hỏi đúng là "NHÁNH NÀY có chạm hai file đó không", không phải "commit gần nhất trong
-    # LỊCH SỬ chạm chúng lúc nào" — `git log -1 -- <paths>` trả về commit cũ bất kỳ và luôn FAIL.
-    root = os.path.dirname(HERE)
-    paths = ["bin/report_return_gate.py", "bin/dividend_adjusted_return.py"]
-    base = subprocess.run(["git", "-C", root, "merge-base", "HEAD", "master"],
-                          capture_output=True, text=True).stdout.strip()
-    ck("xác định được merge-base với master", bool(base), "git merge-base rong")
-    committed = subprocess.run(["git", "-C", root, "diff", "--name-only", base, "HEAD", "--",
-                                *paths], capture_output=True, text=True).stdout.strip()
-    working = subprocess.run(["git", "-C", root, "status", "--porcelain", "--", *paths],
-                             capture_output=True, text=True).stdout.strip()
-    ck("nhánh này KHÔNG chạm report_return_gate.py / dividend_adjusted_return.py (commit + worktree)",
-       committed == "" and working == "", f"committed={committed!r} working={working!r}")
+    # Hard-constraint #1/#2: KHÔNG được import để SỬA hai file của cổng §21. Từng kiểm bằng
+    # `git diff`/`git status` trên hai file đó (commit 2026-09-27, arch-review) — bỏ (code-quality
+    # 2026-10-11): `merge-base(HEAD, master)` luôn RỖNG khi tự chạy TRÊN master (sau merge) nên nửa
+    # "committed" không còn chứng minh gì ở đó, còn nửa "working" đỏ oan mỗi khi CÁ NHÂN KHÁC đang
+    # sửa dở 2 file đó trong working tree vì lý do không liên quan Layer 1. Bất biến đúng và BỀN
+    # VỚI MỌI BRANCH là tĩnh trên chính detector — ngay dưới đây.
     ck("detector chỉ ĐỌC dividend_adjusted_return (ACCOUNTS/broker_qty), không gọi hàm ghi/tính §21",
        "dar.broker_qty" in py and "dar.detect_adjustments" not in py
        and "dar.dividend_adjusted" not in py)

@@ -1653,6 +1653,7 @@ $_commit_hint}" \
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
   export -f _bg_wrapper _bg_wrapper_run _preempt_wakeup _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
+            _maybe_fallback_provider_on_usage_limit \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
