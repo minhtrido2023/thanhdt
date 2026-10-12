@@ -21,7 +21,7 @@ one DNSE login).
 under `tbot/`, per the write-scope rule). Output HTML goes to
 `WorkingClaude/tbot/html/dashboards/dnse_portfolio/` (gitignored — holds real financial data).
 `--demo` mode works today with synthetic data; real use needs DNSE credentials (see the script's
-`--creds`/`--account` args) — still [REDACTED] on minhtrido for which account(s) to point it at.
+`--creds`/`--account` args) — still waiting on minhtrido for which account(s) to point it at.
 
 The calling guideline for DNSE OpenAPI v2 (signing, endpoints, gotchas) is now a proper versioned
 KB concept at `WorkingClaude/tbot/kb/concepts/dnse-openapi-v2-calling-guideline/` (status
