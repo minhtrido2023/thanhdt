@@ -139,8 +139,8 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
     trong quá khứ, sổ dòng tiền thật rỗng; hiện ở `dropped_flows`, không tự sửa ở đây.
     `flows` của mỗi dòng sổ là bản sao đã gán (`timing` = quy ước suy ra, `session_date`).
     """
-    if inception_nav0 <= 0:
-        raise ValueError(f"vốn khởi điểm phải > 0, được {inception_nav0}")
+    if not (math.isfinite(inception_nav0) and inception_nav0 > 0):
+        raise ValueError(f"vốn khởi điểm phải > 0 và hữu hạn, được {inception_nav0}")
     require_strictly_increasing(rows)
     nav_rows = [r for r in rows if r[0] > inception_from]
     dropped = [f for f in flows if f["date"] <= inception_from]
@@ -157,6 +157,9 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
                "nav_is_estimate": base_est, "flows": []}]
     for row in nav_rows:
         d, nav = row[0], row[1]
+        if not math.isfinite(nav):
+            raise ValueError(f"{d}: nav của nav_history không phải số hữu hạn ({nav!r}) — không "
+                             f"tính được giá đơn vị từ dòng này trở đi; sửa nav_history")
         day = by_date.get(d, [])
         f_bod = sum(f["amount_vnd"] for f in day if f["timing"] == "bod")
         f_eod = sum(f["amount_vnd"] for f in day if f["timing"] == "eod")

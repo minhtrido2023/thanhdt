@@ -337,6 +337,7 @@ with tempfile.TemporaryDirectory() as tmp:
 print("11. [N11 + arch-review lần 2: L2, L3, D03/D17/D18/D21/D29] dòng 💰 NAV + nav_snapshot JSON qua main() thật")
 import subprocess  # noqa: E402
 
+import cash_identity as CI  # noqa: E402
 import nav_period_returns as NPR  # noqa: E402
 
 
@@ -355,6 +356,8 @@ def run_perf(tmp, flows, inception, break_import=False):
                 json.dump(content, f)
     real_load, old_env = NPR.load_inception, os.environ.get("ACCOUNT_CASH_FLOWS_PATH")
     NPR.load_inception = lambda account, inception_path=inc_p: real_load(account, inception_path)
+    old_ci = (CI.INCEPTION_PATH, CI.SEED_PATH)          # đẳng thức tiền cũng chỉ được đọc sandbox
+    CI.INCEPTION_PATH, CI.SEED_PATH = inc_p, os.path.join(tmp, "account_seed_capital.json")
     os.environ["ACCOUNT_CASH_FLOWS_PATH"] = flows_p
     if break_import:
         sys.modules["nav_period_returns"] = None          # `import nav_period_returns` ⇒ ImportError
@@ -363,11 +366,16 @@ def run_perf(tmp, flows, inception, break_import=False):
     finally:
         sys.modules["nav_period_returns"] = NPR
         NPR.load_inception = real_load
+        CI.INCEPTION_PATH, CI.SEED_PATH = old_ci
         if old_env is None:
             os.environ.pop("ACCOUNT_CASH_FLOWS_PATH", None)
         else:
             os.environ["ACCOUNT_CASH_FLOWS_PATH"] = old_env
     return rc, run.stdout, snap
+
+
+def inc_path_of(tmp):
+    return os.path.join(tmp, "account_inception.json")
 
 
 GOOD_INC = {ACCT: {"inception_date": "2026-09-07", "starting_capital": 10_000_000}}
@@ -397,6 +405,14 @@ with tempfile.TemporaryDirectory() as tmp:
           and (perf.get("inception") or {}).get("return_pct") == want_inc
           and perf.get("pending_flows") == [] and snap.get("performance_error") is None and "performance_error" in snap,
           (perf, snap.get("performance_error")))
+    # Bước 2 (đẳng thức tiền): main() phải gọi `cash_identity_lines` trên CHÍNH thư mục sandbox và
+    # đưa kết quả vào CẢ dòng 💰 NAV lẫn JSON. Mốc khởi điểm của sandbox không có account_no ⇒ đẳng
+    # thức không chạy được ⇒ đúng MỘT dòng nêu lỗi đó (không im lặng, không làm hỏng lần chụp).
+    warns = snap.get("cash_flow_warnings")
+    check("(l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0",
+          rc == 0 and isinstance(warns, list) and len(warns) == 1
+          and "Đẳng thức tiền" in warns[0] and "không có account_no" in warns[0]
+          and inc_path_of(tmp) in warns[0] and ("   " + warns[0]) in out, (rc, warns))
 
 # Đường hiển thị hỏng KHÔNG được làm hỏng lần chụp: nav_history đã ghi ⇒ rc phải 0, dòng 💰 vẫn in,
 # nav_snapshot JSON vẫn ghi, lỗi thật nằm trong performance_error.

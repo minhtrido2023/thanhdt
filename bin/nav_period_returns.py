@@ -33,6 +33,9 @@ audit measurement-integrity 2026-09-27.)
     `starting_capital`, đừng ghi thành flow — nếu không sẽ tính hai lần.
   - Dòng tiền TREO (chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra) không thuộc kỳ đo
     nào và HIỆN ở `pending_flows` + cảnh báo stderr — không bao giờ vô hình.
+  - Dòng tiền CHƯA KHAI: CLI in thêm `cash_flow_warnings` — các dòng "DÒNG TIỀN CHỜ KHAI" của đẳng
+    thức tiền (`cash_identity.py`) tới ngày báo cáo. Khác rỗng ⇒ tỉ suất ở trên chưa khử khoản
+    đó; báo cáo tuần/tháng phải chép nguyên văn các dòng này (cổng giao báo cáo nhắc nếu thiếu).
 
 HAI SỐ CỦA CHỦ TÀI KHOẢN, tách khỏi tỉ suất gia quyền thời gian (không trộn):
   - `pnl_vnd` = nav1 − nav0 − dòng tiền ròng của kỳ — lãi/lỗ bằng tiền.
@@ -269,6 +272,18 @@ def main() -> int:
             print(f"⚠️ nav_period_returns ({args.account}): dòng tiền {label} — {f['date']} "
                   f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND ({f['kind']}) KHÔNG nằm "
                   f"trong tỉ suất nào ở trên: {f['reason']}", file=sys.stderr)
+    # Dòng tiền NGOÀI nghi ngờ mà sổ chưa có bản ghi khớp (đẳng thức tiền — `cash_identity.py`):
+    # tỉ suất ở trên CHƯA khử các khoản đó, nên người soạn báo cáo phải thấy và chép cảnh báo vào.
+    # Đường CẢNH BÁO: lỗi ở đây (kể cả lỗi import) không được làm mất số tỉ suất đã tính xong.
+    try:
+        from cash_identity import warning_lines
+        result["cash_flow_warnings"] = warning_lines(args.account, asof=report_date)
+    except Exception as exc:                # noqa: BLE001
+        result["cash_flow_warnings"] = [
+            f"⚠️ Đẳng thức tiền ({args.account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
+            f"chưa khai — {type(exc).__name__}: {exc}"]
+    for line in result["cash_flow_warnings"]:
+        print(f"nav_period_returns: {line}", file=sys.stderr)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 

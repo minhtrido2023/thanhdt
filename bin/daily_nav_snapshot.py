@@ -910,6 +910,20 @@ def nav_performance_lines(day_change, perf, perf_err):
     return paren, lines
 
 
+def cash_identity_lines(account, date, **paths):
+    """Các dòng "DÒNG TIỀN CHỜ KHAI" của đẳng thức tiền (`cash_identity.py`) cho dòng 💰 NAV của
+    `date`: dòng tiền ngoài nghi ngờ mà sổ dòng tiền chưa có bản ghi khớp, tính trên nav_history ĐÃ
+    gồm dòng `date`. Đường HIỂN THỊ chạy sau khi nav_history đã ghi ⇒ bắt mọi Exception, kể cả lỗi
+    import (cùng lý do với `unit_price_performance`), và in đúng lỗi đã gặp thay vì im lặng."""
+    try:
+        from cash_identity import warning_lines
+        return ["   " + line
+                for line in warning_lines(account, asof=datetime.date.fromisoformat(date), **paths)]
+    except Exception as exc:                # noqa: BLE001 — đường hiển thị (xem docstring)
+        return [f"   ⚠️ Đẳng thức tiền ({account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
+                f"chưa khai — {type(exc).__name__}: {exc}"]
+
+
 def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
                      components=None, flows_path=None, balance_ts=None):
     """Quyết định có được GHI dòng nav_history của `date` hay không.
@@ -1560,6 +1574,9 @@ def main():
         + (f" · Trứng vàng {egg_value:,.0f}" if egg_value else "")
         + (f" · Off-book {offbook:,.0f}" if offbook else ""),
     ] + perf_lines
+    # Đọc CHÍNH thư mục mà lần chụp này vừa ghi nav_history và đọc dnse_raw.
+    flow_warnings = cash_identity_lines(args.account, args.date, nav_dir=EXEC_DIR, raw_dir=EXEC_DIR)
+    lines += flow_warnings
     if cum_div["amount"]:
         lines.append(f"   ℹ️ Đã LOẠI {cum_div['amount']:,.0f} VND cổ tức phải thu khỏi tiền mặt "
                       f"(broker báo {cash_broker:,.0f}) — {cum_div['note']}")
@@ -1600,6 +1617,8 @@ def main():
            "performance": ({"day": perf["day"], "inception": perf["inception"],
                             "pending_flows": perf["pending_flows"]} if perf else None),
            "performance_error": perf_err, "balance_ts": bal["ts"],
+           # Dòng tiền ngoài nghi ngờ chưa khai tại lúc chụp (đẳng thức tiền) — vết của từng tối.
+           "cash_flow_warnings": [line.strip() for line in flow_warnings],
            "nav_is_estimate": bool(args.from_raw), "positions_ts": positions_ts,
            "raw_price_notes": raw_price_notes, "corp_action_qty_adj": corp_action_adj,
            # [5] arch-review vòng 2: P4 trước chỉ ghi bằng chứng ở nhánh rc=5 + cash_div_confirmed

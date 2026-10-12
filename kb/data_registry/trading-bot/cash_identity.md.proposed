@@ -1,0 +1,59 @@
+---
+kind: derived-check (không có file dữ liệu riêng)
+status: CANONICAL cho câu hỏi "có nạp/rút CHƯA KHAI không" — CHỜ MERGE nhánh feat/fund-cashflow-detect-20261012
+source: mike/bin/cash_identity.py (đọc nav_history_<account>.csv + dnse_raw_<ngày>.jsonl + account_cash_flows.json)
+group: trading-bot
+role: đẳng thức tiền hằng tối — tự phát hiện dòng tiền ngoài (nạp/rút) mà sổ dòng tiền chưa có bản ghi khớp
+writer: "KHÔNG ghi file nào. Kết quả đi ra 3 chỗ hiển thị: dòng 💰 NAV + trường cash_flow_warnings của nav_snapshot_<account>_<ngày>.json (daily_nav_snapshot.py), cash_flow_warnings của nav_period_returns.py, cảnh báo stderr của report_delivery_gate.py"
+---
+
+# Đẳng thức tiền — `mike/bin/cash_identity.py`
+
+Bước 2/4 của chính sách "tài khoản = quỹ mở" (`kb/projects/fund-unit-performance-policy-20261010.md`).
+
+## Là gì
+Với MỖI cửa sổ giữa hai lần chụp NAV liên tiếp của một tài khoản:
+
+    ΔK = bán − mua − phí − thuế bán + cổ tức + lãi Trứng vàng + [dòng tiền ngoài] + nhiễu
+    K  = cash + cum_dividend_excl − margin_debt + offbook_assets + egg_assets   (cột nav_history)
+
+K là "tôi SỞ HỮU bao nhiêu tiền" (§25), không phải sức mua. Vay/trả ký quỹ và chuyển tiền ↔ Trứng
+vàng triệt tiêu trong K. Phần dư sau khi trừ dòng tiền ĐÃ khai, vượt **±0,05% NAV đầu cửa sổ** và
+không có bản ghi `market_only` phủ ngày đó ⇒ **"DÒNG TIỀN CHỜ KHAI"** + cảnh báo nêu ngày, số tiền,
+chiều nạp/rút và bằng chứng đã đọc. Module KHÔNG BAO GIỜ ghi vào
+[`account_cash_flows.md`](account_cash_flows.md) — sổ đó do người khai kèm bằng chứng.
+
+## Ngưỡng 0,05% — đo, không lấy sẵn
+135 cửa sổ thật (SpaceX 69, ZaloPay 66) tới 2026-10-12, sổ dòng tiền rỗng, |phần dư| theo % NAV:
+trung vị 0,0000 · p90 0,0066 · p95 0,0115 · p99 0,0543 · max 0,1124; số cửa sổ vượt
+0,005/0,01/0,02/0,05/0,1 = 18/11/4/2/1; 131/135 cửa sổ ≤ 0,0152%. Chọn 0,05 vì (1) đó là cận dưới
+dải PHẢI SỬA của chính sách (điểm 4) — ngưỡng 0,1% dự kiến để lại dải mù 0,05–0,1% mà chính sách
+buộc sửa; (2) gấp 3,3 lần nhiễu thường nhật lớn nhất. Lệnh tái lập + bảng từng ngày:
+`agents/Taylor/research/fund_cashflow_detect_20261012/acceptance/2_history_residuals.txt`.
+
+## Mở cảnh báo (người làm, kèm bằng chứng)
+- Đúng là nạp/rút ⇒ bản ghi deposit/withdraw có ngày + giờ rơi vào cửa sổ; khai thiếu/thừa thì phần
+  còn lại vẫn cảnh báo.
+- Không phải nạp/rút ⇒ bản ghi `market_only` (amount_vnd = 0) có ngày thuộc cửa sổ.
+
+## Bẫy
+1. **Hai cửa sổ lịch sử của SpaceX đang vượt ngưỡng** (07-02→07-03: −539.935đ, −0,054%; 08-27→08-28:
+   −1.107.515đ, −0,112%) và đều không phải nạp/rút theo bằng chứng hiện có. Tới khi người chép bản
+   ghi `market_only` (đề xuất sẵn: `agents/Taylor/research/fund_cashflow_detect_20261012/proposed_acks.json`),
+   dòng 💰 NAV hằng tối và báo cáo tuần/tháng của SpaceX MANG 2 cảnh báo đó. Cửa sổ 08-28 chưa có
+   chứng từ trực tiếp (báo cáo tháng 08 của DNSE không có mục sao kê tiền).
+2. **Không mô hình hoá** (nằm trong phần dư): lãi vay ký quỹ / phí ứng trước / lãi không kỳ hạn /
+   phí lưu ký DNSE post DỒN theo kỳ; khấu trừ lãi khi rút Trứng vàng trước hạn (đo 2 lần 09-17:
+   0,2013–0,2014% số rút); phí UPCOM thấp hơn HOSE; cổ tức chốt quyền và chi trả trong cùng cửa sổ.
+3. **Không phủ** chuyển CỔ PHIẾU vào/ra (không đi qua tiền) — lớp bắt vẫn là cổng bước nhảy NAV.
+4. `EGG_DAILY_RATE = 0,023397%/ngày` là hằng số ĐO (80 cửa sổ, 08-19 → 10-12). DNSE đổi lãi suất ⇒
+   phần dư các ngày yên tĩnh lệch có hệ thống; đo lại hằng số, không nâng ngưỡng.
+5. Cửa sổ có đầu mút thiếu/hỏng `balance_ts` ⇒ "không kiểm được" (in ra, không coi là sạch).
+6. DNSE KHÔNG gửi email xác nhận nạp/rút (đo 2026-10-12: 251 thư từ dnse.com.vn từ 06-01, 0 thư
+   nạp/rút); báo cáo tháng chỉ tháng 07 có mục "Sao kê chứng khoán - tiền" ⇒ không có nguồn chứng
+   từ theo ngày để wire. Chi tiết: `agents/Taylor/research/fund_cashflow_detect_20261012/B_result.md`.
+
+## Dùng
+    python3 mike/bin/cash_identity.py --account SpaceX [--asof YYYY-MM-DD] [--json]
+rc: 0 = không có khoản chờ khai · 3 = CÓ · 1 = không chạy được. Selfcheck khép kín (không broker,
+không BigQuery, không ghi data/): `python3 mike/bin/cash_identity_selfcheck.py`.

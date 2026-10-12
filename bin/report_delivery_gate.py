@@ -162,9 +162,11 @@ def _parse_inception_return_pct(text: str) -> float | None:
 
 def _check_period_returns(report: Path) -> None:
     """BLOCK nếu 'Từ khi bắt đầu hoạt động' lệch canonical (nav_period_returns.py) >= tolerance.
-    Mọi trường hợp KHÔNG xác định được (không phải SpaceX investor-facing, không suy được
-    report-date, không parse được bảng, nav_period_returns.py lỗi/thiếu data) → WARN, KHÔNG BLOCK
-    (fail-open — coding_guidelines §28: không suy diễn từ sự vắng mặt/thiếu dữ liệu)."""
+    Báo cáo CÓ dòng đó mà CLI không đưa ra được số chuẩn (thoát rc≠0, đầu ra không đọc được,
+    số không hữu hạn) ⇒ BLOCK (fail-closed từ 2026-10-12): số trong báo cáo không kiểm chứng được
+    thì không gửi — trước đó nhánh này chỉ WARN, nên mọi lỗi của CLI lặng lẽ tắt luôn cổng.
+    Chỉ còn WARN, KHÔNG BLOCK khi không có gì để so: không phải SpaceX investor-facing, không suy
+    được report-date từ tên file, báo cáo không có dòng 'Từ khi bắt đầu hoạt động' đọc được."""
     if not _is_spacex_investor_report(report):
         return
 
@@ -194,10 +196,18 @@ def _check_period_returns(report: Path) -> None:
              "--account", "SpaceX", "--report-date", report_date],
             check=True, capture_output=True, text=True)
         canonical = json.loads(proc.stdout)["inception"]["return_pct"]
-    except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError) as exc:
-        print(f"report_delivery_gate: WARN period-return check — nav_period_returns.py lỗi/thiếu "
-              f"data ({exc}), bỏ qua (fail-open)", file=sys.stderr)
-        return
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"period-return BLOCK ({report.name}): nav_period_returns.py --account SpaceX "
+            f"--report-date {report_date} thoát rc={exc.returncode} nên KHÔNG có số chuẩn để đối "
+            f"chiếu số trong báo cáo ({reported_pct:+.2f}%). Lỗi của CLI: "
+            f"{(exc.stderr or '').strip()[-600:] or '(stderr rỗng)'}") from exc
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise RuntimeError(
+            f"period-return BLOCK ({report.name}): nav_period_returns.py --account SpaceX "
+            f"--report-date {report_date} thoát rc=0 nhưng đầu ra không có số "
+            f"inception.return_pct đọc được ({type(exc).__name__}: {exc}) nên KHÔNG có số chuẩn để "
+            f"đối chiếu số trong báo cáo ({reported_pct:+.2f}%). stdout: {proc.stdout[:300]!r}") from exc
 
     # NaN/inf/null KHÔNG phải "thiếu dữ liệu": CLI đã chạy xong và trả một con số không so được —
     # `abs(x − nan) >= tol` luôn False nên từng in "PASS ... vs canonical +nan%". Chặn.
@@ -277,6 +287,70 @@ def _check_nav_flow_records(report: Path) -> None:
               f"({len(flows)} bản ghi dòng tiền)")
 
 
+# Dòng tiền TREO / CHỜ KHAI — CỐ Ý CHỈ CẢNH BÁO, không chặn (chính sách quỹ mở, bước 2): dòng tiền
+# đã khai đang treo vẫn cho số đúng của các kỳ đã đóng, và khoản chưa khai dưới ngưỡng 5% đã được
+# chính sách xếp vào dải "sửa sổ + ghi chú ở báo cáo kế tiếp". Cái phải có là người đọc báo cáo
+# THẤY nó: báo cáo ngày mang sẵn các dòng này qua dòng 💰 NAV; báo cáo tuần/tháng lấy từ
+# `cash_flow_warnings`/`pending_flows` của `nav_period_returns.py`.
+PENDING_FLOW_MARKER = "DÒNG TIỀN TREO"
+
+
+def cash_flow_warnings(report: Path, **paths) -> list:
+    """Các dòng cảnh báo dòng tiền TREO (đã khai, chưa dòng NAV nào chứa) và CHỜ KHAI (đẳng thức
+    tiền thấy mà sổ chưa có) của các tài khoản trong tên báo cáo, tới ngày báo cáo. `paths` chỉ để
+    selfcheck trỏ dữ liệu giả. Không tính được ⇒ một dòng nêu đúng lỗi đã gặp (vẫn không chặn)."""
+    accounts = _accounts_in_report(report)
+    report_date = _extract_report_date(report.name)
+    if not accounts or report_date is None:
+        return []
+    end = dt.date.fromisoformat(report_date)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))    # cùng cây với cổng, như nav-flow
+    from account_cash_flows import attach_flows_to_rows, load_flows  # noqa: E402
+    from cash_identity import warning_lines  # noqa: E402
+    from nav_period_returns import load_nav_history  # noqa: E402
+
+    out = []
+    for account in accounts:
+        try:
+            rows = [r for r in load_nav_history(account, *([paths["nav_dir"]] if paths.get("nav_dir") else []))
+                    if r[0] <= end]
+            flows = [f for f in load_flows(account, flows_path=paths.get("flows_path"))
+                     if f["date"] <= end]
+            for f in attach_flows_to_rows(rows, flows).get(None, []):
+                out.append(
+                    f"⚠️ {PENDING_FLOW_MARKER} ({account}): {f['kind']} {f['date']} "
+                    f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND đã khai nhưng tới "
+                    f"{report_date} chưa dòng nav_history nào chụp sau thời điểm đó ⇒ CHƯA nằm "
+                    f"trong tỉ suất nào của báo cáo này.")
+        except Exception as exc:                       # noqa: BLE001 — cảnh báo, không chặn
+            out.append(f"⚠️ {PENDING_FLOW_MARKER} ({account}): KHÔNG kiểm được dòng tiền treo — "
+                       f"{type(exc).__name__}: {exc}")
+        out.extend(warning_lines(account, asof=end, **paths))
+    return out
+
+
+def _warn_cash_flows(report: Path) -> None:
+    lines = cash_flow_warnings(report)
+    if not lines:
+        return
+    try:
+        text = report.read_text(encoding="utf-8")
+    except OSError as exc:
+        text = ""
+        print(f"report_delivery_gate: không đọc lại được {report} ({exc})", file=sys.stderr)
+    for line in lines:
+        print(f"report_delivery_gate: CẢNH BÁO (không chặn) {line}", file=sys.stderr)
+    missing = [m for m in ("DÒNG TIỀN CHỜ KHAI", PENDING_FLOW_MARKER)
+               if any(m in line for line in lines) and m not in text]
+    if missing:
+        print(f"report_delivery_gate: CẢNH BÁO (không chặn) báo cáo {report.name} KHÔNG có cụm "
+              f"{' / '.join(repr(m) for m in missing)} — {len(lines)} cảnh báo trên CHƯA nằm trong "
+              f"báo cáo gửi đi; chép nguyên văn vào mục hiệu suất.", file=sys.stderr)
+    else:
+        print(f"report_delivery_gate: {len(lines)} cảnh báo dòng tiền — báo cáo {report.name} đã "
+              f"mang cụm cảnh báo tương ứng.", file=sys.stderr)
+
+
 def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
             email_script: Path, skip_validation: bool = False,
             attach: tuple = (), attach_note: str | None = None) -> int:
@@ -316,6 +390,7 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                                  "--report", str(report)])
                     _check_period_returns(report)
                     _check_nav_flow_records(report)
+                    _warn_cash_flows(report)
                 record["artifact_validated_at"] = now()
                 save_atomic(state_path, state)
 
