@@ -78,17 +78,21 @@ cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiề
   Nghiệm thu asof 2026-10-09 không đổi: SpaceX −1,33 / 1,024 / 0,519; ZaloPay −4,907 / −1,162 / −2,01.
   Review + bằng chứng: `agents/Taylor/research/fund_unit_ledger_20261011/` (REVIEW.md, REVIEW2.md).
 - **CHƯA chốt sổ thật** (`data/execution_logs/nav_unit_ledger_*.csv` chưa tồn tại) — thuộc bước 3.
-- **Bước 2: USER DUYỆT giao 2026-10-11 10:04 ICT** — giao SAU khi lượt cron tối thứ Hai 12/10
-  chạy sạch. Bước 3-4 chưa giao.
+- **Bước 2: ĐÃ GIAO 2026-10-12 19:50 ICT** — job `Taylor_20261012_124854` (opus/high, nền), nhánh
+  `feat/fund-cashflow-detect-20261012`, chưa merge. Phạm vi: đẳng thức tiền (ngưỡng đo từ nhiễu
+  thật, phát hiện ⇒ chờ khai + cảnh báo, KHÔNG tự ghi sổ dòng tiền), kiểm email nạp/rút DNSE,
+  K2/K3/K4/K5, cổng tỉ suất `report_delivery_gate` fail-closed + cảnh báo pending. Xong ⇒ Mike
+  kiểm artifact ⇒ arch-review MỘT lần toàn nhánh ⇒ merge. Bước 3-4 chưa giao.
 
 ## Nợ đã biết sau bước 1 (đưa vào bước 2/3, không chặn)
-- **Nhìn 2 dòng 💰 NAV của lần cron thật đầu tiên: 19:10 ICT thứ Hai 2026-10-12** (chưa có lượt
-  `daily_nav_snapshot.py`/`eod_trading_report.sh` end-to-end thật với dòng mới). ZaloPay phải ra
-  quanh −4,9% "Từ go-live" thay cho −6,06%.
+- ✅ **ĐÃ KIỂM lượt cron thật đầu tiên 19:10 ICT 2026-10-12 — sạch**: SpaceX "Từ go-live" −1,38%
+  (CLI −1,375), ZaloPay −5,71% (CLI −5,712, mốc 987.865.567; mốc cũ 1 tỷ sẽ in −6,86%; con số
+  −4,9% là asof 10-09, phiên 12/10 NAV −0,85%). `report_delivery_gate` COMPLETE cả hai.
 - **Báo cáo ngày ZaloPay đã gửi in sai mốc**: 28/28 bản có dòng "Từ go-live" thấp hơn chuẩn
   1,127–1,220 điểm % (mốc 1 tỷ mặc định thay vì 987.865.567). Vượt ngưỡng đính chính 0,5% (điểm 4)
   ⇒ **USER DUYỆT 2026-10-11 10:04 ICT (`decided_by: user`)**: gửi MỘT dòng đính chính kèm báo cáo
-  ngày 12/10, KHÔNG gửi lại 28 bản cũ. Chưa gửi (mốc: sau cron 19:10 ICT thứ Hai 12/10).
+  ngày 12/10, KHÔNG gửi lại 28 bản cũ. ✅ ĐÃ GỬI 2026-10-12 19:5x ICT vào topic Trading report
+  (một tin `notify_thread.sh ... trading_report`; chỉ Discord, không email).
 - nav_history THIẾU dòng phiên **2026-08-06** ở cả 2 tài khoản (dnse_raw ngày đó có balances tới
   19:10) ⇒ backfill `--from-raw` ở bước 3; tới lúc đó dòng tiền khai trong cửa sổ 08-06 14:45 →
   08-07 14:44 bị từ chối (đúng).
