@@ -1124,3 +1124,6 @@
 
 ## Archived 2026-10-12 (keep=12 days=0 require_done=False)
 - [2026-10-11T15:12:01Z] ĐANG DỞ job Taylor_20261011_151151 (nối strategy_fit dashboard vào email EOD daily dạng đính kèm, wt-stratfit-1011 nhánh feat/strategy-fit-dashboard-20261011, KHÔNG merge/crontab): bắt đầu đọc chuỗi gửi | NEXT: đọc send_report_email/report_delivery_gate/eod_trading_report/check_report_cadence, kiểm người nhận, rồi thiết kế --attach
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T15:14:28Z] ĐANG DỞ job Taylor_20261011_151151 (wt-stratfit-1011): ĐỌC XONG — người nhận daily = 1 địa chỉ = chủ hệ thống (được nối); hash cổng = sha256 file .md duy nhất. THIẾT KẾ: send_report_email --attach(lặp)/--attach-note, chỉ daily; cổng --attach/--attach-note chuyển tiếp; eod _deliver_eod sinh dashboard timeout 120s (--out-dir ROOT/reports/dashboard); check_report_cadence kèm nếu file ngày đó có; dashboard tmp theo pid | NEXT: sửa 5 file, viết strategy_fit_email_attach_selfcheck.py, chạy lại mọi selfcheck liên quan 3 TZ, dry-run e2e, commit, bus finding strategy-fit-dashboard-email-wiring
