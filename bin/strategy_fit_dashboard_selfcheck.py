@@ -506,6 +506,9 @@ def t10_tier3():
         c, page, *_ = cells_with(r, ledger_prov({"SpaceX": [10000, 10200, 9690], "ZaloPay": [10000, 10200, 9700]}, est=(1, 2)))
         check("T10s phiên đóng cửa −5,0% ⇒ chạm phanh lỗ trong ngày", len(c["live_dd_spacex"].touched) == 1, c["live_dd_spacex"].touched)
         check("T10t −4,9% ⇒ KHÔNG chạm", c["live_dd_zalopay"].touched == [], c["live_dd_zalopay"].touched)
+        check("T10s2 ngưỡng drawdown-từ-đỉnh 25% đọc từ code thật, kèm trạng thái đầu vào của luật",
+              "25%" in c["live_dd_spacex"].thr[0] and "risk_monitor.py:" in c["live_dd_spacex"].thr[0]
+              and "không có file nào" in c["live_dd_spacex"].thr[0], c["live_dd_spacex"].thr[0])
         check("T10u đỉnh/đáy rơi vào ngày NAV ước tính ⇒ gắn nhãn ngay cạnh ngày", c["live_dd_spacex"].body.count("(NAV ước tính)") >= 2
               and "2/2 phiên có NAV" in c["live_dd_spacex"].body)
     with tempfile.TemporaryDirectory() as r:
@@ -514,6 +517,15 @@ def t10_tier3():
         check("T10v giá đơn vị NaN ⇒ ô lỗi, không rò 'nan%' ra trang", c["live_dd_spacex"].error and "nan%" not in page.lower())
         check("T10w dòng tiền TREO được nêu trong ô", "TREO" in c["live_dd_zalopay"].body)
 
+    with tempfile.TemporaryDirectory() as r:
+        os.makedirs(os.path.join(r, "data"), exist_ok=True)
+        open(os.path.join(r, "data", "eod_account_20260702.json"), "w").write("{}")
+        c, page, *_ = cells_with(r, ledger_prov({"SpaceX": [10000, 9000, 8000, 7500], "ZaloPay": [10000, 9000, 8000, 7501]}))
+        check("T10w2 drawdown −25,00% ⇒ chạm ngưỡng HALT của risk_monitor; −24,99% ⇒ không",
+              any("HALT 25%" in t for t in c["live_dd_spacex"].touched)
+              and not any("HALT 25%" in t for t in c["live_dd_zalopay"].touched),
+              (c["live_dd_spacex"].touched, c["live_dd_zalopay"].touched))
+        check("T10w3 ngày của file đầu vào eod_account được ĐỌC ra, không viết cứng", "20260702" in c["live_dd_spacex"].thr[0])
     # ── trượt giá
     with tempfile.TemporaryDirectory() as r:
         c, page, data, kb = cells_with(r, ledger_prov(LEDGER_OK))

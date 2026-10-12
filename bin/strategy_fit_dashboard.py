@@ -63,14 +63,14 @@ STATE_NAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 # con số này, nên xoá/ thêm một dòng ngưỡng mà không sửa bảng dưới đây là selfcheck đỏ.
 THR_COUNT = {"edge_ic": 3, "edge_lag": 3, "edge_capit": 2, "book_map": 0, "env_dt5g": 6,
              "env_breadth": 0, "env_value": 0, "env_rates": 2, "env_structural": 1,
-             "live_dd_spacex": 2, "live_dd_zalopay": 2, "live_slippage": 1}
+             "live_dd_spacex": 3, "live_dd_zalopay": 3, "live_slippage": 1}
 CELL_KEYS = ["edge_ic", "edge_lag", "edge_capit", "book_map",
              "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural",
              "live_dd_spacex", "live_dd_zalopay", "live_slippage"]
 # File chỉ được TRÍCH DẪN (đọc dòng để in file:dòng), trang không chạy/không import nó. Để trong dict vì
 # `production_manifest.py` (path_context) không coi chuỗi trong dict là cạnh phụ thuộc — viết thành biến
 # gán thẳng sẽ kéo công cụ chạy tay này vào danh sách production tầng T0 (đo 2026-10-12).
-CITE_ONLY = {"eqr": "execution_quality_review.py"}
+CITE_ONLY = {"eqr": "execution_quality_review.py", "risk": "mike/agents/Spyros/risk_monitor.py"}
 LIVE_ACCOUNTS = ["SpaceX", "ZaloPay"]      # nhãn tài khoản; trang KHÔNG in số tài khoản hay số dư bằng tiền
 
 
@@ -830,7 +830,17 @@ def cell_live_dd(account, data_dir, ct, now, prov):
     lim, lim_cite = ct.const("data/trading_rules.json", r'"daily_loss_limit_pct":\s*(-?[0-9.]+)')
     epi, epi_cite = ct.const("data/trading_rules.json", r"recovery episode's entry point > (-[0-9.]+)")
     epi_on = os.path.exists(os.path.join(data_dir, "recovery_episode_state.json"))
+    ddt, ddt_cite = ct.const(CITE_ONLY["risk"], r"^DD_THRESHOLD\s*=\s*([0-9.]+)")
+    try:
+        eod = sorted(f[len("eod_account_"):-len(".json")] for f in os.listdir(data_dir)
+                     if f.startswith("eod_account_") and f.endswith(".json"))
+        eod_txt = f"file mới nhất mang ngày <b>{esc(eod[-1])}</b>" if eod else "<b>không có file nào</b>"
+    except OSError as e:
+        eod_txt = f"<b>không liệt kê được thư mục</b> (<code>{esc(_err(e))}</code>)"
     c.thr = [
+        f"Drawdown từ đỉnh NAV ≥ {vn(100 * ddt, 0) if ddt is not None else 'KHÔNG ĐỌC ĐƯỢC'}% → HALT (BOT_STOP) — "
+        f"hằng số {ddt_cite}. Luật này tính trên NAV THÔ đọc từ <code>data/eod_account_*.json</code> (chưa loại "
+        f"nạp/rút), không phải trên giá đơn vị quỹ của ô này; đầu vào của nó hiện có: {eod_txt}",
         f"Phanh lỗ TRONG NGÀY (không phải drawdown từ đỉnh): NAV trong phiên giảm ≤ "
         f"{vn(100 * lim, 1) if lim is not None else 'KHÔNG ĐỌC ĐƯỢC'}% → HALT (dừng lệnh mới, huỷ lệnh chờ, "
         f"BOT_STOP) — khai báo {lim_cite}. Ô này chỉ có giá CHỐT cuối ngày nên chỉ bắt được ca phiên đóng cửa "
@@ -871,9 +881,10 @@ def cell_live_dd(account, data_dir, ct, now, prov):
             + sparkline([100 * (r["unit_price"] / got["ledger"][0]["unit_price"] - 1) for r in got["ledger"]],
                         f"Tỉ suất luỹ kế {account} theo giá đơn vị quỹ, {s['n']} phiên")
             + f'<p class="cap">Tỉ suất luỹ kế theo giá đơn vị quỹ (%), {s["n"]} phiên; đường ngang = mốc khởi điểm.</p>'
-            + '<p class="muted"><b>Drawdown từ đỉnh không có luật hành động nào trong code/KB</b> — hai dòng ngưỡng '
-              'bên dưới là hai luật KHÁC đại lượng (lỗ trong ngày; lỗ từ điểm vào episode). Mốc tham chiếu là con số '
-              f'của backtest nhiều năm; {s["n"]} phiên live chưa đủ để nói drawdown thật «khớp» hay «lệch» mốc đó.</p>')
+            + '<p class="muted">Mốc tham chiếu là con số của backtest nhiều năm, <b>không phải ngưỡng hành động</b>; '
+              f'{s["n"]} phiên live chưa đủ để nói drawdown thật «khớp» hay «lệch» mốc đó. Ngưỡng thật duy nhất cho '
+              'drawdown từ đỉnh là dòng đầu bên dưới; hai dòng còn lại là hai đại lượng KHÁC (lỗ trong ngày; lỗ từ '
+              'điểm vào episode).</p>')
         if account == "ZaloPay":
             c.body += ('<p class="muted">Đây là chuỗi <b>TOÀN tài khoản</b>, gồm cả DGC và vị thế có sẵn nằm ngoài '
                        'phạm vi bot; chuỗi «phần bot quản lý» chưa được dựng — '
@@ -891,6 +902,9 @@ def cell_live_dd(account, data_dir, ct, now, prov):
             if got.get(key):
                 c.body += (f'<p class="nodata-msg">{len(got[key])} dòng tiền {label}: '
                            + ", ".join(str(f.get("date")) for f in got[key]) + ".</p>")
+        if ddt is not None and s["cur_dd"] <= -ddt:
+            c.touched.append(f"{account}: drawdown từ đỉnh {vn(100 * s['cur_dd'], 2)}% (giá đơn vị quỹ) đã tới ngưỡng "
+                             f"HALT {vn(100 * ddt, 0)}% của risk_monitor")
         if lim is not None and s["day_ret"] <= lim:
             c.touched.append(f"{account}: phiên {s['last']['date']} đóng cửa {vn(100 * s['day_ret'], 2, True)}% so với "
                              f"phiên trước, ≤ phanh lỗ trong ngày {vn(100 * lim, 1)}%")
