@@ -17,11 +17,17 @@ Kiểm:
   D3. ngưỡng 1440 bị ghim hai phía: già 1430 ⇒ DT5G_macro, già 1450 ⇒ DT4_only
   I. ts ở TƯƠNG LAI quá 5 phút (aware / naive) ⇒ DT4_only, reason in ra ts + số phút lệch thật;
      tương lai ≤5 phút (lệch đồng hồ) ⇒ vẫn DT5G_macro   (user duyệt 2026-10-11 22:10 ICT)
-  I2. con số 5 phút bị ghim hai phía: tương lai 4'30" ⇒ DT5G_macro, 5'30" ⇒ DT4_only
+  I2. con số 5 phút bị ghim hai phía: tương lai 4'30" ⇒ DT5G_macro, 5'30" ⇒ DT4_only — cho cả ts
+      aware +07:00, naive và aware UTC (bắt kiểu nới ngưỡng riêng cho naive / offset khác +07:00)
   E. ts rác / thiếu ts / ts không phải chuỗi / JSON hỏng / thiếu file ⇒ DT4_only
   F. ts tươi nhưng status=FAILED hoặc recommended_state_source≠DT5G_macro ⇒ DT4_only
   G. cửa sổ "live" của frozen-state guard (≤10 ngày) tính theo NGÀY ICT, không theo ngày host
   H. writer thật: `ts` mà macro_healthcheck.py ghi (đọc biểu thức NOW từ file thật) ⇒ DT5G_macro
+  J. khối GHI file của macro_healthcheck.py thật (trích bằng AST, exec với DATADIR tạm):
+     (a) byte file == json.dumps(report, indent=2, ensure_ascii=False) và cổng đọc ra DT5G_macro;
+     (b) ghi xong thư mục chỉ còn đúng macro_health.json (không sót tmp);
+     (c) đã có file cũ + report không serialize được ⇒ khối ghi ném lỗi, file cũ còn nguyên từng
+         byte, không sót tmp
 
 Mỗi nhóm chạy lại dưới nhiều TZ host (đổi TZ trong tiến trình bằng time.tzset), gồm một TZ mà
 NGÀY lịch đang lệch với ICT ngay lúc chạy — §16 coding_guidelines: selfcheck thừa hưởng TZ đúng
@@ -120,6 +126,32 @@ def _writer_ts_expr():
     raise RuntimeError("macro_healthcheck.py không còn gán NOW ở top-level")
 
 
+def _writer_block():
+    """Khối GHI macro_health.json của macro_healthcheck.py THẬT, trích bằng AST: từ phép gán
+    HEALTH_PATH tới câu lệnh top-level đầu tiên là Try/chứa os.replace (không chạy phần còn lại của
+    file — nó chạm BigQuery và ghi data/ thật). Trả (code, có_os.replace)."""
+    tree = ast.parse((HERE / "macro_healthcheck.py").read_text(encoding="utf-8"))
+    body = tree.body
+    start = next(i for i, n in enumerate(body) if isinstance(n, ast.Assign)
+                 and any(getattr(t, "id", None) == "HEALTH_PATH" for t in n.targets))
+    has_replace = lambda n: any(isinstance(x, ast.Attribute) and x.attr == "replace"
+                                and getattr(x.value, "id", None) == "os" for x in ast.walk(n))
+    end = next((i for i in range(start, len(body)) if isinstance(body[i], ast.Try) or has_replace(body[i])),
+               start + 2)
+    mod = ast.Module(body=body[start:end + 1], type_ignores=[])
+    code = compile(ast.fix_missing_locations(mod), "macro_healthcheck.py[write-block]", "exec")
+    return code, has_replace(mod)
+
+
+def _run_writer(code, datadir, report):
+    """Chạy khối ghi; trả về lỗi nó ném (hoặc None) để ca kiểm FAIL thay vì làm sập selfcheck."""
+    try:
+        exec(code, {"os": os, "json": json, "DATADIR": str(datadir), "report": report})  # noqa: S102
+    except Exception as e:  # noqa: BLE001
+        return e
+    return None
+
+
 def run_cases(tz_label):
     now = datetime.now(ICT)
     aware = lambda m: (now - timedelta(minutes=m)).isoformat(timespec="seconds")
@@ -158,13 +190,19 @@ def run_cases(tz_label):
         # I2. ghim CON SỐ 5 phút hai phía. ts dựng ngay trước lệnh gọi cổng (không dùng `now` đầu
         # hàm) để biên an toàn 30 giây không bị thời gian chạy các ca trên ăn mất. Đổi hằng số
         # sang bất kỳ số nguyên phút nào khác (4, 6, …) đều làm đúng một trong hai ca đỏ.
-        for name, ahead_s, want in [
-            ("I2. aware tương lai +4 phút 30 giây (ngay DƯỚI ngưỡng 5)", 270, DT5G),
-            ("I2. aware tương lai +5 phút 30 giây (ngay TRÊN ngưỡng 5)", 330, DT4),
-        ]:
-            ts = (datetime.now(ICT) + timedelta(seconds=ahead_s)).isoformat(timespec="seconds")
-            got = _gate(tmp, _health(ts))
-            check(T + name + f" ⇒ {want[0]}", got == want, f"got={got} ts={ts!r}")
+        fmt = {
+            "aware +07:00": lambda d: d.isoformat(timespec="seconds"),
+            "naive": lambda d: d.replace(tzinfo=None).isoformat(timespec="seconds"),
+            "aware UTC": lambda d: d.astimezone(UTC).isoformat(timespec="seconds"),
+        }
+        for kind, f in fmt.items():
+            for name, ahead_s, want in [
+                (f"I2. {kind} tương lai +4 phút 30 giây (ngay DƯỚI ngưỡng 5)", 270, DT5G),
+                (f"I2. {kind} tương lai +5 phút 30 giây (ngay TRÊN ngưỡng 5)", 330, DT4),
+            ]:
+                ts = f(datetime.now(ICT) + timedelta(seconds=ahead_s))
+                got = _gate(tmp, _health(ts))
+                check(T + name + f" ⇒ {want[0]}", got == want, f"got={got} ts={ts!r}")
 
         got = _gate(tmp, {"status": "HEALTHY", "recommended_state_source": "DT5G_macro"})
         check(T + "E. thiếu khoá ts ⇒ DT4_only", got == DT4, f"got={got}")
@@ -203,6 +241,37 @@ def run_cases(tz_label):
         got = _gate(tmp, _health(ts))
         check(T + f"H. ts do writer thật sinh (NOW = {expr}) ⇒ DT5G_macro", got == DT5G,
               f"got={got} ts={ts!r}")
+
+    # J. khối ghi file thật (atomic).
+    code, has_replace = _writer_block()
+    check(T + "J(0). khối ghi trong macro_healthcheck.py còn gọi os.replace", has_replace)
+    ts = datetime.now(ICT).isoformat(timespec="seconds")
+    report = {"ts": ts, "status": "HEALTHY", "recommended_state_source": "DT5G_macro",
+              "note": "tiếng Việt ✓"}
+    with tempfile.TemporaryDirectory() as d:
+        err = _run_writer(code, d, report)
+        check(T + "J(a). khối ghi chạy không lỗi", err is None, f"err={err!r}")
+        target = Path(d) / "macro_health.json"
+        want_bytes = json.dumps(report, indent=2, ensure_ascii=False).encode("utf-8")
+        check(T + "J(a). byte file == json.dumps(report, indent=2, ensure_ascii=False)",
+              target.exists() and target.read_bytes() == want_bytes)
+        g = msl.get_gated_state("2020-01-01", OLD_END, bq=_BqStub(), health_path=str(target), alert=False)
+        check(T + "J(a). cổng đọc file do khối ghi sinh ra ⇒ DT5G_macro",
+              str(g["source"].iloc[0]) == "DT5G_macro", f"source={g['source'].iloc[0]}")
+        check(T + "J(b). ghi xong thư mục chỉ còn macro_health.json",
+              sorted(os.listdir(d)) == ["macro_health.json"], f"ls={sorted(os.listdir(d))}")
+
+    with tempfile.TemporaryDirectory() as d:
+        target = Path(d) / "macro_health.json"
+        old_bytes = b'{"ts": "cu", "ghi_chu": "file cu \xc4\x91\xc3\xba ng"}\n'
+        target.write_bytes(old_bytes)
+        raised = _run_writer(code, d, {"ts": ts, "bad": object()})
+        check(T + "J(c). report không serialize được ⇒ khối ghi ném TypeError",
+              isinstance(raised, TypeError), f"raised={raised!r}")
+        check(T + "J(c). file cũ còn nguyên từng byte",
+              target.exists() and target.read_bytes() == old_bytes)
+        check(T + "J(c). không sót tmp",
+              sorted(os.listdir(d)) == ["macro_health.json"], f"ls={sorted(os.listdir(d))}")
 
 
 def main():
