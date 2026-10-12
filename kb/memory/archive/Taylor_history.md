@@ -1100,3 +1100,6 @@
 
 ## Archived 2026-10-11 (keep=12 days=0 require_done=False)
 - [2026-10-10T20:14:28Z] ĐANG DỞ job Taylor_20261010_201420 fund-unit-ledger VÒNG 3 (B1+L1-L10+mutant) worktree wt-fundunit-1011 @75060709: bắt đầu đọc REVIEW2.md | NEXT: áp fix/b1_prototype.patch rồi L1-L10; CẤM chạy nav_scripts_2account_selfcheck.py + daily_nav_snapshot sống
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-10T20:34:13Z] ĐANG DỞ job Taylor_20261010_201420 attempt 2 (wt-fundunit-1011, CHƯA commit): code B1+L1-L3,L6-L10+future-date ĐÃ có trong diff (11 file), selfcheck lõi xanh 2 TZ (round3/selfcheck_tz.txt) | NEXT: kiểm L4/L5 test còn thiếu, chạy mutant reviewer (mut/run.py) + mutant mới, broad_scan so head, control, gates, MỘT commit, bus finding
