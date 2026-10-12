@@ -641,3 +641,12 @@
 - [2026-10-12T04:55:03Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261012_044300", "source": "watcher"}
 - [2026-10-12T04:56:03Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261012_044300", "source": "watcher"}
 - [2026-10-12T04:57:04Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+
+## Consolidation 2026-10-12T06:00:04Z
+- [2026-10-12T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-10-12", "auto_otp": true}
+- [2026-10-12T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-10-12", "auto_otp": true}
+- [2026-10-12T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-12", "elapsed_s": 1, "rc": 0}
+- [2026-10-12T05:45:05Z] Mike/status — preflight-ZaloPay-2026-10-12: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-10-12: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 26.4h tuổi ≤ ngưỡng 69.3h theo phiên 2026-10-09)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-10-09 = phiên gần nhất, 205 mã ✓"]}
+- [2026-10-12T05:45:07Z] Mike/status — ops-health-check-ZaloPay-2026-10-12: {"account": "ZaloPay", "label": "Trước phiên chiều", "warn_count": 2}
+- [2026-10-12T05:45:10Z] Mike/status — preflight-SpaceX-2026-10-12: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-10-12: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 26.4h tuổi ≤ ngưỡng 69.3h theo phiên 2026-10-09)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-10-09 = phiên gần nhất, 205 mã ✓"]}
+- [2026-10-12T05:45:22Z] Mike/status — ops-health-check-SpaceX-2026-10-12: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 2}
