@@ -1,0 +1,4 @@
+SpaceX asof 2026-10-09: từ đầu -1.33 · MTD 0.519 · WTD 1.024 · cash_flow_warnings 2
+ZaloPay asof 2026-10-09: từ đầu -4.907 · MTD -2.01 · WTD -1.162 · cash_flow_warnings 0
+SpaceX asof 2026-10-12: từ đầu -1.375 · MTD 0.474 · WTD -0.046 · cash_flow_warnings 2
+ZaloPay asof 2026-10-12: từ đầu -5.712 · MTD -2.841 · WTD -0.847 · cash_flow_warnings 0

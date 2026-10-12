@@ -1,0 +1,5 @@
+BASE  XANH HẾT
+C20   KILLED by cashid                       cash_identity.py         | market_only phủ cả cửa sổ kế [chuyển sang code vòng 2]
+C21   KILLED by cashid                       cash_identity.py         | market_only đúng ngày dòng không phủ [chuyển sang code vòng 2]
+C59   KILLED by cashid                       cash_identity.py         | bỏ ghi chú rút Trứng vàng [chuyển sang code vòng 2]
+== bộ step2: 3 mutant · KILLED 3 · SURVIVED 0 · NOT_APPLIED 0

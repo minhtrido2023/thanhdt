@@ -1,0 +1,85 @@
+1. [1] Đường PHỤC HỒI --from-raw cho corp-action ĐÃ CONFIRMED (killer objection vòng 1)
+  ✓ (1a) VIB 500→547, corp_actions.json CONFIRMED mult=1.095 ⇒ rc=0 (KHÔNG chặn)
+  ✓ (1b) KL được quy NGƯỢC về trước sự kiện (547/1,095 ≈ 499,5)
+  ✓ (1c) có dòng nav_history được ghi
+  ✓ (1d) gate ghi lại việc đã phục hồi (audit được)
+  ✓ (1e) KHÔNG sinh file nav_gate_block_* khi không chặn
+2. Mô hình TIN CẬY không đổi — CHƯA CONFIRMED thì vẫn CHẶN (bỏ điều kiện ⇒ case này chết)
+  ✓ (2a) corp_actions.json PROPOSED ⇒ rc=5
+  ✓ (2b) thông điệp nói ĐÚNG bằng chứng (phần dư khớp tỉ lệ), không đoán
+  ✓ (2c) [3] bằng chứng chặn ghi ra tên RIÊNG nav_gate_block_*, KHÔNG đè nav_snapshot_*
+  ✓ (2d) artifact chặn có đủ số liệu đối soát
+3. [3] §8 — chạy lại tay sau ngày ĐÃ có NAV không được ĐÈ MẤT artifact audit
+  ✓ (3a) rc=5 nhưng nav_snapshot_* CŨ còn nguyên (nav != null)
+4. [2] §29 — KL đổi do LỆNH KHỚP THẬT không được báo 'credit sớm' (rc=5 giả)
+  ✓ (4a) mua 100 đúng phiên cum, KL 500→600 ⇒ rc=0, KHÔNG chặn
+  ✓ (4b) mua 100 + credit 47 ⇒ vẫn rc=5, phần dư +47
+5. [2] gap D — KL đổi thật nhưng LỊCH thiếu sự kiện: trước đây KHÔNG ai chặn
+  ✓ (5a) lịch rỗng + KL +47 không lệnh khớp ⇒ rc=5
+  ✓ (5b) thông điệp nói THẲNG 'CHƯA GIẢI THÍCH ĐƯỢC', KHÔNG khẳng định credit sớm
+6. [5] §14 — mất snapshot lịch: gate phải NÓI, và trục KHỐI LƯỢNG vẫn sống
+  ✓ (6a) thiếu corp_action_daily ⇒ vẫn chặn rc=5 (trục KL không phụ thuộc lịch)
+  ✓ (6b) in ⚠️ nói rõ gate đang thiếu lịch
+  ✓ (6c) ngày bình thường vẫn ghi corp_action_gate_v2.active=false vào nav_snapshot
+7. [B1] arch-review vòng 3 — đường PHỤC HỒI phải có BẰNG CHỨNG mult giải thích phần dư,
+   không chỉ 'có action CONFIRMED tồn tại' (§29 dạng 2: chữ 'khớp' phải đọc bằng chứng)
+  ✓ (g1) lịch mất + CONFIRMED ex-date KHÁC phiên kế tiếp ⇒ rc=5 (KHÔNG vơ bừa mult)
+  ✓ (g2) KHÔNG ghi NAV — mtm_stock sai 10.490.411 không tồn tại
+  ✓ (h1) ex-date khớp nhưng phần dư KHÔNG khớp mult ⇒ rc=5
+  ✓ (h2) KHÔNG ghi NAV — mtm_stock sai 13.424.657 không tồn tại
+  ✓ (h3) artifact chặn ghi đúng phần dư +200 ở nhánh 'chưa giải thích được'
+  ✓ (h4) đường phục hồi KHÔNG chạy (không có corp_action_recovered)
+  ✓ (g3) VIB THẬT + lịch mất + CONFIRMED ex-date = phiên kế tiếp ⇒ rc=0, vẫn phục hồi
+8. [B2] arch-review vòng 3 — bản ghi ngày trước CÓ nhưng VẮNG mã này ⇒ qty_prev = 0,
+   không phải 'không biết' (fail-open cũ nuốt đúng lớp L4 mà gate sinh ra để đóng)
+  ✓ (i3a) mã mới + ISS ~1% credit sớm 5cp ⇒ rc=5 (trước vá: rc=0)
+  ✓ (i3b) KHÔNG ghi NAV — mtm_stock sai 505×21.000 = 10.605.000 không tồn tại
+  ✓ (i3c) bằng chứng ghi đúng: qty_prev=0, lệnh khớp thật +500, phần dư +5
+  ✓ (i4a) mã mới mua bình thường ⇒ rc=0 (siết [B2] KHÔNG sinh false-block)
+  ✓ (i4b) mtm_stock = 500 × 21.000 = 10.500.000 CHÍNH XÁC
+9. [C1] arch-review vòng 4 — dung sai tương đối neo vào ĐỘ LỚN SỰ KIỆN, không phải độ
+   lớn vị thế: `qty_multiplier` ghi SAI ≤2% KHÔNG được coi là 'giải thích được' phần dư
+  ✓ (j1a) mult ghi 1,24 cho sự kiện thật 1,26 ⇒ rc=5 (trước vá: rc=0)
+  ✓ (j1b) KHÔNG ghi NAV — mtm_stock sai 10.161,29 × 21.000 không tồn tại
+  ✓ (j1c) đường phục hồi KHÔNG chạy
+  ✓ (j2a) 2 action cùng ex-date (1,10 + 1,005), first-match 1,10 ⇒ rc=5 (trước vá: rc=0)
+  ✓ (j2b) KHÔNG ghi NAV — mtm_stock sai 10.050 × 21.000 = 211.050.000 không tồn tại
+  ✓ (j2c) đường phục hồi KHÔNG chạy
+10. [D1] arch-review vòng 5 — dung sai là GIAO của hai mẫu số: mult > 2,0 KHÔNG được
+   NỚI so với vòng 3 (residual > base ⟺ m > 2 ⇒ mẫu số 'độ lớn sự kiện' lớn hơn 'vị thế')
+  ✓ (k1a) mult > 2 (2,0 + leg 2,05%) ⇒ rc=5 — KHÔNG BAO GIỜ yếu hơn vòng 3
+  ✓ (k1b) KHÔNG ghi NAV — mtm_stock sai 10.205 × 21.000 = 214.305.000 không tồn tại
+  ✓ (k1c) đường phục hồi KHÔNG chạy
+11. [N11 + arch-review lần 2: L2, L3, D03/D17/D18/D21/D29] dòng 💰 NAV + nav_snapshot JSON qua main() thật
+  ✓ (l0) sanity fixture: tỉ suất ngày ≠ từ mốc ≠ tỉ số NAV thô ≠ 0
+  ✓ (l1) rc=0, dòng 💰 NAV in tỉ suất giá đơn vị + tách nạp/rút ròng (sổ dòng tiền THẬT SỰ được đọc)
+  ✓ (l2) JSON day_change_pct = tỉ suất giá đơn vị của ngày (không phải tỉ số NAV thô)
+  ✓ (l3) JSON since_inception_pct = tỉ suất từ mốc khởi điểm; since_inception = NAV − vốn khởi điểm
+  ✓ (l4) JSON performance mang đủ day/inception/pending_flows; performance_error = None
+  ✓ (l4b) đẳng thức tiền nối vào main(): lỗi thật nằm ở JSON vận hành, không vào stdout, rc vẫn 0
+  ✓ (l4c) đẳng thức chạy trên dữ liệu sandbox: cửa sổ 09-08 → 09-09 mở, chi tiết chỉ ở JSON
+  ✓ (l4e) cash_flow_ops = chi tiết cửa sổ hôm nay + MỘT dòng đếm cửa sổ cũ; cash_flow_warnings = chi tiết cả hai
+  ✓ (l4d) stdout (thân báo cáo ngày) chỉ mang MỘT dòng trung tính, không dòng vận hành
+  ✓ (l5) flows: date null ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) flows: date null ⇒ JSON performance_error nêu lỗi thật (date không phải YYYY-MM-DD); không có số phần trăm nào
+  ✓ (l5) flows: date là số ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) flows: date là số ⇒ JSON performance_error nêu lỗi thật (date không phải YYYY-MM-DD); không có số phần trăm nào
+  ✓ (l5) flows: gốc JSON là list ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) flows: gốc JSON là list ⇒ JSON performance_error nêu lỗi thật (gốc file phải là object); không có số phần trăm nào
+  ✓ (l5) flows: amount_vnd NaN ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) flows: amount_vnd NaN ⇒ JSON performance_error nêu lỗi thật (không phải số hữu hạn); không có số phần trăm nào
+  ✓ (l5) flows: KHÔNG có file ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) flows: KHÔNG có file ⇒ JSON performance_error nêu lỗi thật (KHÔNG có sổ dòng tiền); không có số phần trăm nào
+  ✓ (l5) inception: inception_date null ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) inception: inception_date null ⇒ JSON performance_error nêu lỗi thật (TypeError); không có số phần trăm nào
+  ✓ (l5) inception: starting_capital là list ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) inception: starting_capital là list ⇒ JSON performance_error nêu lỗi thật (TypeError); không có số phần trăm nào
+  ✓ (l5) inception: gốc JSON là list ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) inception: gốc JSON là list ⇒ JSON performance_error nêu lỗi thật (không có entry); không có số phần trăm nào
+  ✓ (l5) inception: KHÔNG có file ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) inception: KHÔNG có file ⇒ JSON performance_error nêu lỗi thật (FileNotFoundError); không có số phần trăm nào
+  ✓ (l5) nav_period_returns không import được ⇒ rc=0, dòng 💰 NAV vẫn in kèm 'KHÔNG tính được', nav_snapshot JSON + nav_history vẫn ghi
+  ✓ (l6) nav_period_returns không import được ⇒ JSON performance_error nêu lỗi thật (import of nav_period_returns halted); không có số phần trăm nào
+  ✓ (l7) import daily_nav_snapshot không kéo nav_period_returns / nav_unit_ledger
+
+68 PASS, 0 FAIL

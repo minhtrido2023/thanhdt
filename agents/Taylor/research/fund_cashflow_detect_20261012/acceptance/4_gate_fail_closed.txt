@@ -1,0 +1,6 @@
+== master @fa6d36c8b
+ĐỎ — báo cáo QUA cổng dù CLI rc=1 (fail-open). Cổng chỉ in: report_delivery_gate: WARN period-return check — nav_period_returns.py lỗi/thiếu data (Command '['/usr/bin/python3', '/tmp/fundcf_master/WC/mike/bin/nav_period_returns.py', '--account', 'SpaceX', '--r
+rc=1
+== nhánh
+XANH — báo cáo KHÔNG qua cổng khi CLI rc=1: period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): nav_period_returns.py --account SpaceX --report-date 2026-10-09 thoát rc=1 nên KHÔNG có số chuẩn để đối chiếu số trong báo cáo (-1.33%). Lỗi của CLI: LỖI nav_period_returns: thiếu time_ict
+rc=0

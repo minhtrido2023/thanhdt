@@ -1,0 +1,19 @@
+== SpaceX: 70 ngày báo cáo, 2520 trường số trên master
+   nhánh KHÔNG áp acks vs master (bỏ cash_flow_*): 0 ngày lệch []
+   nhánh CÓ áp acks    vs master (bỏ cash_flow_*): 0 ngày lệch []
+   khoá nhánh thêm so với master: ['cash_flow_investor_line', 'cash_flow_warnings']
+   KHÔNG áp: ngày cuối 2026-10-12 — cash_flow_investor_line = 'ℹ️ Có 2 khoản biến động tiền chưa đối chiếu xong (lớn nhất 2.304.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'; cash_flow_warnings 2 dòng; số ngày có dòng nhà đầu tư = 69/70 (max dòng CHỜ KHAI/ngày 2)
+   CÓ áp: ngày cuối 2026-10-12 — cash_flow_investor_line = None; cash_flow_warnings 0 dòng; số ngày có dòng nhà đầu tư = 0/70 (max dòng CHỜ KHAI/ngày 0)
+== ZaloPay: 67 ngày báo cáo, 2412 trường số trên master
+   nhánh KHÔNG áp acks vs master (bỏ cash_flow_*): 0 ngày lệch []
+   nhánh CÓ áp acks    vs master (bỏ cash_flow_*): 0 ngày lệch []
+   khoá nhánh thêm so với master: ['cash_flow_investor_line', 'cash_flow_warnings']
+   KHÔNG áp: ngày cuối 2026-10-12 — cash_flow_investor_line = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 420.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'; cash_flow_warnings 1 dòng; số ngày có dòng nhà đầu tư = 30/67 (max dòng CHỜ KHAI/ngày 1)
+   CÓ áp: ngày cuối 2026-10-12 — cash_flow_investor_line = None; cash_flow_warnings 0 dòng; số ngày có dòng nhà đầu tư = 0/67 (max dòng CHỜ KHAI/ngày 0)
+== báo cáo ngày 2026-10-12, KHÔNG áp acks:
+{"account": "SpaceX", "investor_line": "ℹ️ Có 2 khoản biến động tiền chưa đối chiếu xong (lớn nhất 2.304.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.", "ops_today": ["⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): còn 2 cửa sổ cũ chưa đóng (kết thúc 2026-07-03, 2026-08-28) — chi tiết: python3 mike/bin/cash_identity.py --account SpaceX"], "n_ops_lines": 2, "error": null}
+{"account": "ZaloPay", "investor_line": "ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 420.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.", "ops_today": ["⚠️ DÒNG TIỀN CHỜ KHAI (ZaloPay): còn 1 cửa sổ cũ chưa đóng (kết thúc 2026-08-28) — chi tiết: python3 mike/bin/cash_identity.py --account ZaloPay"], "n_ops_lines": 1, "error": null}
+== báo cáo ngày 2026-10-12, CÓ áp acks:
+{"account": "SpaceX", "investor_line": null, "ops_today": [], "n_ops_lines": 0, "error": null}
+{"account": "ZaloPay", "investor_line": null, "ops_today": [], "n_ops_lines": 0, "error": null}
+== data/cash_identity_acks.json THẬT tồn tại: False (phải là False — vòng này không tạo)

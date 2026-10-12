@@ -1,0 +1,99 @@
+⚠️ [2026-09-19] corp_action_daily snapshot (/tmp/tmpe4tw87eo/corp_action_daily_2026-09-19.json) tồn tại nhưng đọc/parse lỗi (Expecting ',' delimiter: line 1 column 38 (char 37)) — corp_action_gate_v2 KHÔNG xác nhận được sự kiện nào hôm nay (coi như rỗng, KHÔNG chặn NAV vì lỗi này), nhưng cần kiểm tra snapshot.
+1. classify_raw_price_gap
+  ✓ lệch 2,1% ⇒ ok
+  ✓ PVT 10/08: marketPrice 18.350 = giá phiên trước ⇒ stale_market_price
+  ✓ MSB 27/08: 15.700/1,2 ≈ 13.100, ex 28/08 CONFIRMED ⇒ early_credit 1,2
+  ✓ VHM 06/08: Price 153.000 (=phiên trước), mp 76.500, ex_date = CHÍNH ngày ⇒ unexplained
+  ✓ corp-action PROPOSED không được dùng làm lý do
+  ✓ ex_date ĐÃ qua không phải ghi có sớm
+2. raw_positions
+  ✓ bản ghi CUỐI của A1, gộp loan package 300+200, bỏ KL 0
+  ✓ ts của bản ghi đó
+  ✓ bản ghi account khác / thiếu tag không lọt
+  ✓ account không có bản ghi ⇒ (None, None)
+  ✓ không có file ngày ⇒ (None, None)
+3. cum_dividend_double_count với positions dạng dict
+  ✓ SpaceX 22/07 số thật: trừ 1.620.000, expected_bq = (2300+1300)×450
+  ✓ dạng {mã: qty} của selfcheck cũ vẫn chạy như trước
+4. classify_corp_action_gap (corp_action_gate_v2, job Taylor_20260922_111128)
+  ✓ (a) cổ tức đã nằm trong tiền (amount=0, không pending) ⇒ unexplained, FAIL-CLOSED
+  ✓ (a2) amount thuộc mã KHÁC (không khớp expected, không trong tickers) ⇒ unexplained
+  ✓ cash_div_confirmed khi in_bq_list=True dù có warning biên độ (net/gross)
+  ✓ CASH_DIV_PRICE_TOL_VND ghim = 200đ
+  ✓ DRI rơi 1.100đ trong khi cổ tức công bố 1.000đ ⇒ lệch 100đ ≤ 200 ⇒ vẫn confirm
+  ✓ rơi 3.800đ ≫ cổ tức 1.000đ (lệch 2.800 > 200) ⇒ KHÔNG confirm — nới TOL lên 20.000 sẽ giết case này
+5. classify_qty_residual (§29 — phần dư KL sau khi trừ lệnh khớp thật)
+  ✓ (5a) VIB SpaceX 500→547 (0,095 ⇒ 47,5, broker làm tròn 47) ⇒ share_event_credit
+  ✓ (5a) VIB ZaloPay 200→219 ⇒ share_event_credit
+  ✓ (5a) BID SpaceX 1.100→1.175 (0,068433 ⇒ 75,28) ⇒ share_event_credit
+  ✓ (5b) KL +100 do MUA 100 cùng mã ⇒ ok, KHÔNG rc=5 giả (bỏ net_fill sẽ giết case này)
+  ✓ (5c) vừa BÁN 100 vừa credit 47 ⇒ vẫn bắt được phần dư +47 khớp tỉ lệ
+  ✓ (5d) gap D — KL +200 không lệnh khớp, lịch KHÔNG có sự kiện ⇒ qty_unexplained (CHẶN)
+  ✓ (5e) lịch CÓ sự kiện nhưng phần dư +200 ≠ tỉ lệ 0,095 (47,5) ⇒ qty_unexplained, KHÔNG được khẳng định 'credit sớm thật'
+  ✓ (5f) DIV ratio 0,1 KHÔNG được dùng giải thích KL +10% ⇒ qty_unexplained
+  ✓ (5g) qty_prev=None (mã mới mua / thiếu file ngày trước) ⇒ ok, fail-open KHÔNG chặn
+  ✓ (5h) KL không đổi dù lịch có sự kiện ⇒ ok (chống over-block theo LỊCH, lỗi v1)
+6. _corp_action_daily_snapshot + _corp_action_gate_status (§14 — gate phải NÓI khi bị tắt tiếng)
+  ✓ (6a) thiếu file ⇒ None (im lặng, KHÔNG phải lỗi)
+  ✓ (6b) JSON hỏng ⇒ None + có cảnh báo (không nuốt im lặng)
+  ✓ (6c) file OK ⇒ đọc được
+  ✓ (6d) snapshot None ⇒ active=False + note nói rõ nhánh KL vẫn chạy
+  ✓ (6e) status=FAILED / usable=False ⇒ active=False
+  ✓ (6f) snapshot của NGÀY KHÁC (asof lệch) ⇒ active=False — không tin lịch cũ
+  ✓ (6g) asof đúng + OK + usable ⇒ active=True
+7. held_event_next_session — biên PHIÊN (cuối tuần + nghỉ lễ), KHÔNG phải ngày lịch
+  ✓ (7a) T6 14/08 → phiên kế tiếp T2 17/08 = ex-date ⇒ KHỚP (days_ahead thô = 3, sẽ trượt)
+  ✓ (7b) T5 13/08 → phiên kế tiếp 14/08 ≠ 17/08 ⇒ KHÔNG khớp
+  ✓ (7c) nghỉ lễ 31/08–02/09: T6 28/08 → phiên kế tiếp 03/09 ⇒ KHỚP
+  ✓ (7d) 31/08 là ngày NGHỈ ⇒ không bao giờ là 'phiên kế tiếp' của 28/08
+  ✓ (7e) snapshot None ⇒ None (không nổ)
+  ✓ (7f) mã khác không khớp
+8. previous_raw_qty — thiếu file / mã mới ⇒ (None, None), KHÔNG chặn
+  ✓ (8a) KHÔNG có file dnse_raw nào ⇒ (None, None)
+  ✓ (8b) có file ngày trước ⇒ (500, '2026-09-08')
+  ✓ (8c) mã MỚI mua (không có trong bản ghi trước) ⇒ (None, ngày) ⇒ gate fail-open
+  ✓ (8d) account KHÁC (§12 lọc tuyệt đối) ⇒ (None, None)
+  ✓ (8e) chỉ lấy ngày TRƯỚC `date`, không lấy chính ngày đó
+9. net_fills_between — cột `qty` của FILL là LŨY KẾ theo child_oid, KHÔNG cộng dồn
+  ✓ (9a) 2 dòng lũy kế 200→400 của CÙNG child ⇒ −400, KHÔNG phải −600
+  ✓ (9b) cửa sổ 2 ngày: −400 (bán) +200 (mua) = −200
+  ✓ (9c) biên MỞ bên trái: (10, 11] chỉ tính ngày 11 ⇒ +200
+  ✓ (9d) không có ngày nào trong khoảng ⇒ rỗng
+  ✓ (9e) cache dùng được
+  ✓ (9f) 08-09→08-11 có đủ 2 journal ⇒ KHÔNG báo thiếu ngày nào
+  ✓ (9g) ngày giao dịch thiếu journal ⇒ liệt kê ra, out vẫn rỗng (không đoán +0)
+  ✓ (9h) cuối tuần thiếu journal ⇒ KHÔNG báo (chỉ đếm ngày giao dịch)
+  ✓ (9i) cache trả lại CẢ danh sách ngày thiếu, không nuốt mất
+10. confirmed_share_event_multiplier — đường PHỤC HỒI --from-raw (mục [1])
+  ✓ (10a) VIB ngày 09-09, ex 09-10, CONFIRMED ⇒ 1.095 (bỏ điều kiện CONFIRMED thì (10b) chết)
+  ✓ (10b) VPB PROPOSED (chưa ký) ⇒ None — mô hình tin cậy KHÔNG đổi
+  ✓ (10c) ex_date ĐÃ qua ⇒ None
+  ✓ (10d) ex_date truyền vào KHÁC ex_date của bản ghi ⇒ None (không vơ bừa sự kiện khác)
+  ✓ (10e) mã không có bản ghi ⇒ None
+11. _write_json_atomic (§5) — ghi hỏng giữa chừng KHÔNG được để lại file dở
+  ✓ (11a) lỗi serialize được ném ra, không nuốt
+  ✓ (11b) file cũ còn NGUYÊN sau lần ghi hỏng (ghi trực tiếp sẽ giết case này)
+  ✓ (11c) ghi thành công thì thay được nội dung
+12. cash_block_reject_reason — CẢ BA guard §25 (code-quality 2026-09-27)
+  ✓ (12a) block stock TOÀN SỐ 0 ⇒ từ chối
+  ✓ (12b) CHỈ ba field tiền = 0, depositInterest còn sống ⇒ từ chối (guard _cash_fields_all_zero; bản cũ LỌT)
+  ✓ (12c) totalCash 0 < availableCash 5.000.000 ⇒ từ chối (bất biến kế toán; bản cũ LỌT)
+  ✓ (12d) block tiền LÀNH MẠNH (số thật SpaceX 2026-08-07) ⇒ None, không chặn oan
+  ✓ (12e) 0 đồng tiền mặt HỢP LỆ (availableCash=0 nhưng totalDebt sống) ⇒ None
+  ✓ (12f) ba guard là CHÍNH hàm của park_holdings, không phải bản copy (chống lệch lại — park_holdings.py:148)
+  ✓ (12g) alias `_stock_all_zero` (previous_balance dùng) trỏ về guard đã import
+13. MỘT đường đọc corp_actions.json duy nhất (code-quality 2026-09-27)
+  ✓ (13) record hỏng — qty_multiplier = nan (mọi so sánh ngưỡng ÂM THẦM False — §29) — CẢ HAI đường ném CorpActionError (bản cũ bỏ qua im lặng)
+  ✓ (13) record hỏng — qty_multiplier = '1,30' (dấu phẩy kiểu VN, float() nổ ValueError) — CẢ HAI đường ném CorpActionError (bản cũ bỏ qua im lặng)
+  ✓ (13) record hỏng — qty_multiplier = 13 (gõ tay thiếu dấu chấm, > QTY_MULT_MAX) — CẢ HAI đường ném CorpActionError (bản cũ bỏ qua im lặng)
+  ✓ (13) record hỏng — qty_multiplier = 1.0 (sổ này chỉ mô tả sự kiện LÀM TĂNG KL) — CẢ HAI đường ném CorpActionError (bản cũ bỏ qua im lặng)
+  ✓ (13) record hỏng — ex_date = '28/08/2026' (không phải ISO) — CẢ HAI đường ném CorpActionError (bản cũ bỏ qua im lặng)
+  ✓ (13x) daily_nav_snapshot.py KHÔNG còn mở CORP_ACTIONS_FILE thô ở bất kỳ đâu
+  ✓ (13y) `except (TypeError, ValueError)` chỉ còn ở `classify_qty_residual` (đọc exercise_ratio của corp_action_daily — NGUỒN KHÁC), không còn ở đường đọc corp_actions.json
+  ✓ (13z) `confirmed_qty_multiplier_after` đọc sổ qua `confirmed_actions_after()` — MỘT đường duy nhất
+  ✓ (13z) `classify_raw_price_gap` đọc sổ qua `confirmed_actions_after()` — MỘT đường duy nhất
+  ✓ (13z) `confirmed_share_event_multiplier` đọc sổ qua `confirmed_actions_after()` — MỘT đường duy nhất
+  ✓ (13w) record ĐẦY ĐỦ, hợp lệ ⇒ vẫn early_credit 1,2 như mục 1
+  ✓ (13v) record ĐẦY ĐỦ, hợp lệ ⇒ confirmed_share_event_multiplier vẫn 1.095 như mục 10
+
+83 PASS, 0 FAIL

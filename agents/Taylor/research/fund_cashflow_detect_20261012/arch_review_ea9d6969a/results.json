@@ -1,0 +1,227 @@
+[
+ {
+  "id": "BASE",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "không mutant",
+  "checks": {
+   "cashid": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)"
+   },
+   "ledger": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 4734 assertion PASS (nav_unit_ledger_selfcheck.py)"
+   },
+   "jump": {
+    "rc": 0,
+    "fails": [],
+    "tail": "PASS"
+   },
+   "e2e": {
+    "rc": 0,
+    "fails": [
+     "65 PASS, 0 FAIL"
+    ],
+    "tail": "65 PASS, 0 FAIL"
+   },
+   "flowterm": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive"
+   },
+   "npr": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 9 assertion PASS (nav_period_returns.py)"
+   },
+   "rdg": {
+    "rc": 0,
+    "fails": [],
+    "tail": "report_delivery_gate: WARN period-return check — không suy được report-date từ tên file SpaceX_special_report.md, bỏ qua"
+   }
+  }
+ },
+ {
+  "id": "G06",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng: dung sai >= thành >",
+  "checks": {
+   "cashid": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)"
+   },
+   "ledger": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 4734 assertion PASS (nav_unit_ledger_selfcheck.py)"
+   },
+   "jump": {
+    "rc": 0,
+    "fails": [],
+    "tail": "PASS"
+   },
+   "e2e": {
+    "rc": 0,
+    "fails": [
+     "65 PASS, 0 FAIL"
+    ],
+    "tail": "65 PASS, 0 FAIL"
+   },
+   "flowterm": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive"
+   },
+   "npr": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 9 assertion PASS (nav_period_returns.py)"
+   },
+   "rdg": {
+    "rc": 0,
+    "fails": [],
+    "tail": "report_delivery_gate: WARN period-return check — không suy được report-date từ tên file SpaceX_special_report.md, bỏ qua"
+   }
+  }
+ },
+ {
+  "id": "G07",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng: lỗi khi kiểm dòng tiền treo bị nuốt im lặng",
+  "checks": {
+   "cashid": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)"
+   },
+   "ledger": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 4734 assertion PASS (nav_unit_ledger_selfcheck.py)"
+   },
+   "jump": {
+    "rc": 0,
+    "fails": [],
+    "tail": "PASS"
+   },
+   "e2e": {
+    "rc": 0,
+    "fails": [
+     "65 PASS, 0 FAIL"
+    ],
+    "tail": "65 PASS, 0 FAIL"
+   },
+   "flowterm": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive"
+   },
+   "npr": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 9 assertion PASS (nav_period_returns.py)"
+   },
+   "rdg": {
+    "rc": 0,
+    "fails": [],
+    "tail": "report_delivery_gate: WARN period-return check — không suy được report-date từ tên file SpaceX_special_report.md, bỏ qua"
+   }
+  }
+ },
+ {
+  "id": "G11",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng: báo cáo không có dòng 'Từ khi bắt đầu' ⇒ CHẶN (chặn oan báo cáo ngày)",
+  "checks": {
+   "cashid": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)"
+   },
+   "ledger": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 4734 assertion PASS (nav_unit_ledger_selfcheck.py)"
+   },
+   "jump": {
+    "rc": 0,
+    "fails": [],
+    "tail": "PASS"
+   },
+   "e2e": {
+    "rc": 0,
+    "fails": [
+     "65 PASS, 0 FAIL"
+    ],
+    "tail": "65 PASS, 0 FAIL"
+   },
+   "flowterm": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive"
+   },
+   "npr": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 9 assertion PASS (nav_period_returns.py)"
+   },
+   "rdg": {
+    "rc": 1,
+    "fails": [],
+    "tail": "RuntimeError: period-return BLOCK: thiếu dòng"
+   }
+  }
+ },
+ {
+  "id": "G12",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng: áp cả ZaloPay (chặn oan)",
+  "checks": {
+   "cashid": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)"
+   },
+   "ledger": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 4734 assertion PASS (nav_unit_ledger_selfcheck.py)"
+   },
+   "jump": {
+    "rc": 0,
+    "fails": [],
+    "tail": "PASS"
+   },
+   "e2e": {
+    "rc": 0,
+    "fails": [
+     "65 PASS, 0 FAIL"
+    ],
+    "tail": "65 PASS, 0 FAIL"
+   },
+   "flowterm": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive"
+   },
+   "npr": {
+    "rc": 0,
+    "fails": [],
+    "tail": "OK — 9 assertion PASS (nav_period_returns.py)"
+   },
+   "rdg": {
+    "rc": 1,
+    "fails": [],
+    "tail": "RuntimeError: period-return BLOCK (ZaloPay_weekly_report_2026-09-14_to_2026-09-18.md): bảng ghi 'Từ khi bắt đầu hoạt động' = -99.99%, canonical (nav_period_returns.py --account SpaceX --report-date 2026-09-18) = -2.177% — lệch 97.813pp >= 0.05pp tolerance"
+   }
+  }
+ }
+]

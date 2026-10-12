@@ -1,0 +1,160 @@
+[
+ {
+  "id": "BASE",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "không mutant — phải xanh hết",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "D42",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "main() không in cảnh báo đẳng thức tiền",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [])]"
+    ]
+   }
+  }
+ },
+ {
+  "id": "D43",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "main() tính nhưng không in vào dòng NAV",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError: /tmp/tmpqfv__q2m/account_inception.json: không có account_n"
+    ]
+   }
+  }
+ },
+ {
+  "id": "D44",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "main() không ghi cảnh báo vào JSON",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [])]"
+    ]
+   }
+  }
+ }
+]

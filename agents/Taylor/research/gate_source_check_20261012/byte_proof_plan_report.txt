@@ -1,0 +1,3 @@
+DT5G_macro: rc master=0 nhánh=0 · md5 master=5f6ceb7dde729ccba51bbb65efaf68b9 nhánh=5f6ceb7dde729ccba51bbb65efaf68b9 · bytes=653/653 · GIỐNG HỆT=True · số dòng khác=0
+DT4_only: rc master=0 nhánh=0 · md5 master=5f6ceb7dde729ccba51bbb65efaf68b9 nhánh=e1b30d9a4ac1a75c7e73d79520cb163f · bytes=653/1064 · GIỐNG HỆT=False · số dòng khác=1
+    +   ⚠️ **Cổng DT5G SUY GIẢM**: bản publish 2026-08-10T19:01:15 (as_of 2026-08-10) ra nguồn DT4_only, không phải DT5G_macro ⇒ state này KHÔNG áp macro cap (cổng fail-closed về DT4). Plan KHÔNG bị chặn — anh cân nhắc khi duyệt. Không có bằng chứng nguyên nhân củ

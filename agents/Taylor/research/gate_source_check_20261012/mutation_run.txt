@@ -1,0 +1,35 @@
+BẮT ĐƯỢC   S1 bỏ tee (không giữ output lượt publish): rc=[1] assertion đỏ=2 · FAIL: gate-source DT4_only: tin trích NGUYÊN VĂN dòng cổng của lượt này 🟡 CỔNG DT5G SUY GIẢM (2026-10-12 11:23
+BẮT ĐƯỢC   S2 bỏ --alert (không gửi kênh nào): rc=[1] assertion đỏ=34 · FAIL: gate-source mktemp hỏng: vẫn đúng 1 tin + 1 bus, chuỗi chạy tiếp 
+BẮT ĐƯỢC   S3 bỏ --since-epoch (báo cả file state cũ): rc=[1] assertion đỏ=3 · FAIL: gate-source publish không chạy: 0 tin, 0 bus [['notify_thread.sh', '🟡 CỔNG DT5G SUY GIẢM (2001-09-09 08:
+BẮT ĐƯỢC   S4 helper lỗi ⇒ exit 1 (biến cảnh báo thành CHẶN): rc=[1] assertion đỏ=4 · FAIL: gate-source mktemp hỏng + DT5G_macro: stdout vẫn byte-identical, 0 tin 
+BẮT ĐƯỢC   S5 không xoá file tạm: rc=[1] assertion đỏ=1 · FAIL: gate-source DT5G_macro: không sót file tạm ['tmp.YqcTvgPD8f']
+BẮT ĐƯỢC   S6 nguồn suy giảm ⇒ FAILED=1 (chặn plan): rc=[1] assertion đỏ=8 · FAIL: gate-source mktemp hỏng: vẫn đúng 1 tin + 1 bus, chuỗi chạy tiếp 
+BẮT ĐƯỢC   S7 bỏ fallback /dev/null khi mktemp hỏng: rc=[1] assertion đỏ=1 · FAIL: gate-source mktemp hỏng: stderr chỉ có lỗi mktemp thật + dòng stub, không lỗi tee/rm "mktemp: stub hỏng\
+BẮT ĐƯỢC   P20 /dev/null bị báo thành 'không tìm thấy dòng cổng': rc=[1] assertion đỏ=1 · FAIL: gate-source mktemp hỏng: tin nói 'output lượt publish không được giữ lại' 🟡 CỔNG DT5G SUY GIẢM (2026-10-
+BẮT ĐƯỢC   P1 DT5G_macro vẫn báo (bỏ nhánh im lặng): rc=[1] assertion đỏ=6 · FAIL: gate-source mktemp hỏng + DT5G_macro: stdout vẫn byte-identical, 0 tin 
+BẮT ĐƯỢC   P2 thiếu trường source coi như DT5G_macro: rc=[1, 1] assertion đỏ=5 · FAIL: gate-source MISSING_FIELD: đúng 1 tin + 1 bus, không chặn []
+BẮT ĐƯỢC   P3 file state hỏng ⇒ im lặng: rc=[1] assertion đỏ=4 · FAIL: gate-source CORRUPT: đúng 1 tin + 1 bus, không chặn []
+BẮT ĐƯỢC   P4 giá trị lạ coi như ổn (chỉ báo 2 nguồn đã biết): rc=[1] assertion đỏ=4 · FAIL: gate-source LA_LUNG_v9: đúng 1 tin + 1 bus, không chặn []
+BẮT ĐƯỢC   P5 bỏ khoá chống lặp: rc=[1] assertion đỏ=8 · FAIL: gate-source chạy lại cùng ngày: KHÔNG tin/bus thứ hai [['notify_thread.sh', '🟡 CỔNG DT5G SUY GIẢM (2026-
+BẮT ĐƯỢC   P6 khoá chống lặp không theo ngày: rc=[1] assertion đỏ=1 · FAIL: gate-source ngày publish khác: báo lại (khoá theo NGÀY, không khoá vĩnh viễn) [['notify_thread.sh', '🟡 C
+BẮT ĐƯỢC   P7 đánh dấu đã gửi dù kênh hỏng: rc=[1] assertion đỏ=2 · FAIL: gate-source Discord hỏng: nêu lỗi thật, chưa đánh dấu discord, bus vẫn ghi 
+BẮT ĐƯỢC   P8 không bỏ qua khi lượt publish không ghi file: rc=[1] assertion đỏ=3 · FAIL: gate-source publish không chạy: 0 tin, 0 bus [['notify_thread.sh', '🟡 CỔNG DT5G SUY GIẢM (2001-09-09 08:
+BẮT ĐƯỢC   P9 file state không tồn tại ⇒ vẫn báo: rc=[1] assertion đỏ=1 · FAIL: gate-source file state không tồn tại: 0 tin, 0 bus, có dòng SKIP 
+BẮT ĐƯỢC   P10 nguyên nhân HARDCODE thay vì dòng cổng thật: rc=[1] assertion đỏ=1 · FAIL: gate-source DT4_only: tin trích NGUYÊN VĂN dòng cổng của lượt này 🟡 CỔNG DT5G SUY GIẢM (2026-10-12 11:23
+BẮT ĐƯỢC   P11 không có dòng cổng ⇒ đoán nguyên nhân: rc=[1] assertion đỏ=1 · FAIL: gate-source không có dòng cổng: tin nói 'không tìm thấy' 🟡 CỔNG DT5G SUY GIẢM (2026-10-12 11:24 ICT): lư
+BẮT ĐƯỢC   P12 bỏ ts của macro_health khỏi tin: rc=[1] assertion đỏ=1 · FAIL: gate-source DT4_only: tin trích status + ts của macro_health.json 🟡 CỔNG DT5G SUY GIẢM (2026-10-12 11:24
+BẮT ĐƯỢC   P13 health không đọc được ⇒ giấu lỗi thật: rc=[1] assertion đỏ=1 · FAIL: gate-source không có file health: tin nêu lỗi thật 🟡 CỔNG DT5G SUY GIẢM (2026-10-12 11:24 ICT): lượt pub
+BẮT ĐƯỢC   P14 luôn khẳng định 'KHÔNG áp macro cap': rc=[1, 1] assertion đỏ=4 · FAIL: gate-source LA_LUNG_v9: không khẳng định quá bằng chứng về macro cap 🟡 CỔNG DT5G SUY GIẢM (2026-10-12 11
+BẮT ĐƯỢC   P15 thêm Telegram (2 tin tới người): rc=[1] assertion đỏ=17 · FAIL: gate-source mktemp hỏng: vẫn đúng 1 tin + 1 bus, chuỗi chạy tiếp 
+BẮT ĐƯỢC   P16 bus event không phải error: rc=[1] assertion đỏ=1 · FAIL: gate-source DT4_only: bus = Taylor error, topic khoá theo ngày publish [['append_event.sh', 'Taylor', 'f
+BẮT ĐƯỢC   P17 bus topic không khoá theo ngày publish: rc=[1] assertion đỏ=1 · FAIL: gate-source DT4_only: bus = Taylor error, topic khoá theo ngày publish [['append_event.sh', 'Taylor', 'e
+BẮT ĐƯỢC   P18 nguồn suy giảm ⇒ thoát rc≠0: rc=[1] assertion đỏ=35 · FAIL: gate-source mktemp hỏng: vẫn đúng 1 tin + 1 bus, chuỗi chạy tiếp 
+BẮT ĐƯỢC   P19 sai topic Discord: rc=[1] assertion đỏ=1 · FAIL: gate-source DT4_only: tin vào topic trading_daily [['notify_thread.sh', '🟡 CỔNG DT5G SUY GIẢM (2026-10-1
+BẮT ĐƯỢC   R1 plan report tin marker của lượt publish khác: rc=[1] assertion đỏ=1 · [FAIL] nguồn cổng DT4_only, marker của lượt KHÁC -> KHÔNG trích bằng chứng cũ
+BẮT ĐƯỢC   R2 plan report in dòng cả khi DT5G_macro: rc=[1, 1] assertion đỏ=8 · [FAIL] annotated-source cùng state  -> KHÔNG chặn (bug 08-10/11)
+BẮT ĐƯỢC   R3 send_plan_report không chèn dòng: rc=[1] assertion đỏ=5 · [FAIL] nguồn cổng DT4_only + bằng chứng đúng lượt -> KHÔNG chặn, dòng ⚠️ trích dòng cổng
+BẮT ĐƯỢC   R4 send_plan_report nuốt lỗi import câm: rc=[1] assertion đỏ=14 · [FAIL] annotated-source cùng state  -> KHÔNG chặn (bug 08-10/11)
+
+Tổng 31 mutant · không bắt được/lỗi: 0 · file khôi phục nguyên văn: True
+sau khôi phục bq_freshness_check_selfcheck.py: rc=0 · bq_freshness_check_selfcheck: 78 PASS, 0 FAIL
+sau khôi phục send_plan_report_state_gate_selfcheck.py: rc=0 · 15/15 PASS

@@ -1,0 +1,33 @@
+{
+  "_doc": "ĐỀ XUẤT (Taylor, job Taylor_20261012_162001, vòng 2) — KHÔNG phải file thật. Đúng schema của data/cash_identity_acks.json (xem `load_acks` trong mike/bin/cash_identity.py): sau khi user xác nhận, Mike chép nguyên file này thành data/cash_identity_acks.json (khoá `_doc` bị bỏ qua khi đọc), sửa `confirmed_by`/`confirmed_date` thành người và ngày xác nhận THẬT. Mỗi lời xác nhận chỉ có hiệu lực khi phần dư đo được còn lệch `acked_residual_vnd` không quá 0,05% NAV đầu cửa sổ và số lượng đổi ngoài lệnh đúng bằng `acked_qty_gaps`; dòng nav_history bị chụp lại (đổi balance_ts) thì lời xác nhận hết hiệu lực. Đã thử trên bản sao dữ liệu ngày 2026-10-12: áp file này ⇒ SpaceX và ZaloPay 0 cửa sổ mở; không áp ⇒ SpaceX 2 cửa sổ mở, ZaloPay 1. Bản ghi ZaloPay là hệ quả của sửa C1 (đối chiếu số lượng ở mọi cửa sổ): cùng sự kiện MBB ngày 08-28 với SpaceX, phần dư tiền dưới ngưỡng nhưng số lượng đổi ngoài lệnh nên cửa sổ mở.",
+  "SpaceX": [
+    {
+      "window": {"from": "2026-07-02T09:46:35", "to": "2026-07-03T21:57:33"},
+      "acked_residual_vnd": -539935,
+      "reason": "Không phải nạp/rút: dòng nav_history 07-02 chụp lúc 09:46, giữa loạt lệnh mua sáng go-live, nên số dư tiền lúc đó trễ so với lệnh đã khớp và chưa trừ phí; phần lệch dồn sang cửa sổ này.",
+      "evidence": "Sao kê DNSE tháng 07/2026 tiểu khoản 0002023347 (mục V 'Sao kê chứng khoán - tiền', email DNSE 2026-08-01): KHÔNG có dòng nộp/rút tiền nào trong tháng. Số đo: tiền sở hữu đổi −4.969.227 đ, 1 lệnh mua 4.425.000 đ + phí 4.292 đ đọc được trong cửa sổ ⇒ dư −539.935 đ (0,054% NAV). Lúc chụp 07-02 09:46 totalCash = −404.886.253 trong khi lệnh đã khớp 1.408.240.000 (số dư trễ lệnh khoảng 3,35 triệu và chưa trừ phí). Cuối cửa sổ có dư nợ ký quỹ 409.863.737 đ (lãi vay một ngày ước 140.364 đ, không nằm trong đẳng thức). GIỚI HẠN: dnse_raw không có bản ghi vị thế lúc 07-02 09:46 nên số lượng cổ phiếu của cửa sổ này KHÔNG đối chiếu được với lệnh khớp bằng máy; reviewer chưa tự kiểm sao kê tháng 07.",
+      "confirmed_by": "CHỜ user xác nhận (đề xuất của Taylor)",
+      "confirmed_date": "2026-10-12"
+    },
+    {
+      "window": {"from": "2026-08-27T22:16:08", "to": "2026-08-28T19:10:35"},
+      "acked_residual_vnd": -1107515,
+      "acked_qty_gaps": {"MBB": 110},
+      "reason": "Không phải nạp/rút: tiền đổi thành cổ phiếu — tài khoản nhận thêm 110 MBB với giá vốn 10.000 đ/cp (1.100.000 đ) mà không có lệnh nào qua bot.",
+      "evidence": "Số học trên sổ broker (dnse_raw), Mike đã tự kiểm số lượng và giá vốn MBB: MBB 1.565 → 1.675 cp (+110); số lượng × costPrice 33.500.000 → 34.600.000 (+1.100.000 = 110 × 10.000). totalCash đổi −1.264.731 = −165.000 thuế cổ tức đã chi trả − 1.100.000 mua 110 MBB + 269 lãi không kỳ hạn. Phần dư đẳng thức −1.107.515 = −1.100.000 − 7.763 (totalDebt phát sinh) + 269 − 21. Cùng ngày ZaloPay nhận +20 MBB cũng ở giá vốn 10.000 đ. CHƯA xác minh bằng nguồn ngoài (thông báo phát hành, sao kê tiền tháng 08) rằng đây là quyền mua phát hành thêm — chỉ có số học trên sổ broker; báo cáo tháng 08 DNSE gửi 2026-09-01 không có mục sao kê tiền.",
+      "confirmed_by": "CHỜ user xác nhận (đề xuất của Taylor)",
+      "confirmed_date": "2026-10-12"
+    }
+  ],
+  "ZaloPay": [
+    {
+      "window": {"from": "2026-08-27T22:16:11", "to": "2026-08-28T19:10:06"},
+      "acked_residual_vnd": -206656,
+      "acked_qty_gaps": {"MBB": 20},
+      "reason": "Không phải nạp/rút: tiền đổi thành cổ phiếu — tài khoản nhận thêm 20 MBB với giá vốn 10.000 đ/cp (200.000 đ) mà không có lệnh nào qua bot (cùng sự kiện với SpaceX ngày 08-28).",
+      "evidence": "Số học trên sổ broker (dnse_raw): lô MBB 232 → 252 cp (+20); số lượng × costPrice tăng 200.000 = 20 × 10.000. totalCash đổi −311.405 = −111.600 thuế cổ tức đã chi trả − 200.000 mua 20 MBB + 195 lãi không kỳ hạn. Phần dư đẳng thức −206.656 = −200.000 − 6.842 (totalDebt phát sinh) + 195 − 9 (0,022% NAV, dưới ngưỡng tiền; cửa sổ mở vì số lượng đổi ngoài lệnh). CHƯA xác minh bằng nguồn ngoài rằng đây là quyền mua phát hành thêm — chỉ có số học trên sổ broker.",
+      "confirmed_by": "CHỜ user xác nhận (đề xuất của Taylor)",
+      "confirmed_date": "2026-10-12"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+1. Registry hỏng (qty_multiplier kiểu số Việt) trên đường LIVE (không --from-raw)
+  ✓ (1a) rc=2 VÀ lý do CHÍNH XÁC là 'corp_actions.json có record hỏng' — không phải rc=2 vì guard khác phía sau (§28/§29: so giá trị đã chuẩn hoá, không suy từ rc trần)
+  ✓ (1b) thông điệp lỗi nêu rõ corp_actions.json + ticker liên quan
+  ✓ (1c) KHÔNG ghi nav_history — record hỏng không được lọt qua thành NAV
+2. Registry hỏng (ex_date thiếu) — cùng nhánh except, dạng lỗi khác
+  ✓ (2a) rc=2 VÀ lý do CHÍNH XÁC là 'corp_actions.json có record hỏng' (cùng lý do §28 như (1a) — bắt mutation swallow-lỗi qua guard 'thiếu giá' phía sau)
+  ✓ (2b) thông điệp lỗi nêu rõ corp_actions.json + ticker liên quan
+  ✓ (2c) KHÔNG ghi nav_history
+3. Đối chứng KHÔNG-ĐƯỢC-CHẾT: registry LÀNH hoàn toàn không kích nhánh except (rc khác 2 vì lý do KHÁC — chứng minh guard không chặn oan đường lành)
+  ✓ (3a) registry lành -> KHÔNG bị chặn bởi CorpActionError (rc=2 chấp nhận được ở bước SAU đó — vd thiếu giá BQ — nhưng KHÔNG được có 'corp_actions.json có record hỏng' trong stderr)
+
+======================================================================
+PASS=7 FAIL=0
+Tat ca selfcheck PASS.

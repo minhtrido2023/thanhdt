@@ -1,0 +1,88 @@
+BASE  XANH HẾT
+C01   KILLED by cashid                       cash_identity.py         | K bỏ cum_dividend_excl
+C02   KILLED by cashid                       cash_identity.py         | K bỏ nợ ký quỹ
+C03   KILLED by cashid                       cash_identity.py         | K bỏ off-book
+C04   KILLED by cashid                       cash_identity.py         | K bỏ Trứng vàng
+C05   KILLED by cashid                       cash_identity.py         | bỏ thuế bán
+C06   KILLED by cashid                       cash_identity.py         | phí mua tính trên bán
+C07   KILLED by cashid                       cash_identity.py         | đảo dấu phí [chuyển sang code vòng 2]
+C08   KILLED by cashid                       cash_identity.py         | bỏ cổ tức [chuyển sang code vòng 2]
+C09   KILLED by cashid                       cash_identity.py         | bỏ lãi Trứng vàng [chuyển sang code vòng 2]
+C10   KILLED by cashid                       cash_identity.py         | đảo mua/bán [chuyển sang code vòng 2]
+C11   KILLED by cashid                       cash_identity.py         | chi trả cổ tức coi như mất cả khoản
+C12   KILLED by cashid                       cash_identity.py         | bỏ thuế cổ tức lúc chi trả
+C13   KILLED by cashid                       cash_identity.py         | chốt quyền chỉ tính 5%
+C14   KILLED by cashid                       cash_identity.py         | lãi Trứng vàng luôn 1 ngày
+C15   KILLED by cashid                       cash_identity.py         | lãi tính trên số dư CUỐI cửa sổ
+C16   KILLED by cashid                       cash_identity.py         | đảo dấu dòng tiền đã khai
+C17   KILLED by cashid                       cash_identity.py         | bỏ dòng tiền đã khai
+C18   KILLED by cashid                       cash_identity.py         | biên cửa sổ của dòng tiền đã khai
+C19   KILLED by cashid                       cash_identity.py         | dòng tiền cũ tính lại ở mọi cửa sổ sau
+C20   SURVIVED                               cash_identity.py         | market_only phủ cả cửa sổ kế [chuyển sang code vòng 2]
+C21   SURVIVED                               cash_identity.py         | market_only đúng ngày dòng không phủ [chuyển sang code vòng 2]
+C22   KILLED by cashid                       cash_identity.py         | market_only bất kỳ phủ mọi cửa sổ [chuyển sang code vòng 2]
+C23   KILLED by cashid                       cash_identity.py         | bỏ market_only [chuyển sang code vòng 2]
+C24   KILLED by cashid                       cash_identity.py         | chỉ bắt chiều nạp [chuyển sang code vòng 2]
+C25   KILLED by cashid                       cash_identity.py         | ngưỡng gấp đôi [chuyển sang code vòng 2]
+C26   KILLED by cashid                       cash_identity.py         | ngưỡng một nửa [chuyển sang code vòng 2]
+C27   KILLED by cashid                       cash_identity.py         | % theo NAV cuối cửa sổ [chuyển sang code vòng 2]
+C28   KILLED by cashid                       cash_identity.py         | ngưỡng 0,1
+C30   KILLED by cashid                       cash_identity.py         | bỏ lọc account_no ở bản ghi [chuyển sang code vòng 2]
+C31   KILLED by cashid                       cash_identity.py         | nhận balances không gắn tài khoản [chuyển sang code vòng 2]
+C32   KILLED by cashid                       cash_identity.py         | bỏ lọc accountNo từng lệnh
+C33   KILLED by cashid                       cash_identity.py         | phải thu: lấy bản ghi SAU lần chụp [chuyển sang code vòng 2]
+C34   KILLED by cashid                       cash_identity.py         | lệnh gán theo NGÀY, không theo giờ [chuyển sang code vòng 2]
+C35   KILLED by cashid                       cash_identity.py         | biên cửa sổ của lệnh [chuyển sang code vòng 2]
+C36   KILLED by cashid                       cash_identity.py         | mọi lệnh là mua [chuyển sang code vòng 2]
+C37   KILLED by cashid                       cash_identity.py         | modifiedDate không đổi UTC→ICT
+C38   KILLED by cashid                       cash_identity.py         | (chuẩn bị) nhận lệnh chưa khớp — vô hại nếu value=0 [chuyển sang code vòng 2]
+C39   KILLED by cashid                       cash_identity.py         | fill xác nhận tính ở MỌI cửa sổ
+C40   KILLED by cashid                       cash_identity.py         | bỏ lệnh trong dnse_raw
+C41   KILLED by cashid                       cash_identity.py         | fill xác nhận luôn là mua
+C42   KILLED by cashid                       cash_identity.py         | fill xác nhận lấy của tài khoản ĐẦU file
+C50   KILLED by cashid                       cash_identity.py         | chỉ kiểm lần chụp của dòng sau
+C51   KILLED by cashid                       cash_identity.py         | bỏ kiểm lần chụp tăng
+C52   KILLED by cashid,e2e                   cash_identity.py         | asof loại chính ngày đó
+C53   KILLED by cashid,ledger                cash_identity.py         | bỏ asof
+C54   KILLED by cashid                       cash_identity.py         | thiếu sổ dòng tiền coi như rỗng
+C55   KILLED by cashid                       cash_identity.py         | giấu cửa sổ không kiểm được [chuyển sang code vòng 2]
+C56   KILLED by cashid                       cash_identity.py         | đảo chiều nạp/rút trong cảnh báo [chuyển sang code vòng 2]
+C57   KILLED by cashid                       cash_identity.py         | bỏ bằng chứng lệnh/vị thế [chuyển sang code vòng 2]
+C58   KILLED by cashid                       cash_identity.py         | bằng chứng vị thế: bán cộng như mua
+C59   SURVIVED                               cash_identity.py         | bỏ ghi chú rút Trứng vàng [chuyển sang code vòng 2]
+C60   KILLED by cashid                       cash_identity.py         | bỏ ghi chú dư nợ
+C61   KILLED by cashid                       cash_identity.py         | bỏ ghi chú ngày không có bản ghi orders
+C62   KILLED by cashid                       cash_identity.py         | vị thế: lấy bản ghi cuối ngày bất kể giờ
+D40   KILLED by cashid                       daily_nav_snapshot.py    | dòng NAV bỏ asof [chuyển sang code vòng 2]
+D41   KILLED by e2e                          daily_nav_snapshot.py    | dòng NAV không thụt lề [chuyển sang code vòng 2]
+D42   KILLED by e2e                          daily_nav_snapshot.py    | main() không in cảnh báo đẳng thức tiền [chuyển sang code vòng 2]
+D43   KILLED by e2e                          daily_nav_snapshot.py    | main() tính nhưng không in vào dòng NAV [chuyển sang code vòng 2]
+D44   KILLED by e2e                          daily_nav_snapshot.py    | main() không ghi cảnh báo vào JSON [chuyển sang code vòng 2]
+P60   KILLED by ledger                       nav_period_returns.py    | CLI không in cash_flow_warnings [chuyển sang code vòng 2]
+P61   KILLED by ledger                       nav_period_returns.py    | CLI bỏ asof của cảnh báo [chuyển sang code vòng 2]
+R01   KILLED by cashid,ledger                report_delivery_gate.py  | cổng tỉ suất fail-open khi CLI rc≠0 (hành vi cũ)
+R02   KILLED by cashid                       report_delivery_gate.py  | cổng tỉ suất fail-open khi đầu ra hỏng
+R03   KILLED by cashid                       report_delivery_gate.py  | bỏ TypeError (inception không phải object)
+R04   KILLED by cashid                       report_delivery_gate.py  | cổng: dòng tiền treo tính trên cả nav_history sau ngày báo cáo
+R05   KILLED by cashid                       report_delivery_gate.py  | cổng: tính cả bản ghi sau ngày báo cáo
+R06   KILLED by cashid                       report_delivery_gate.py  | cổng bỏ asof của đẳng thức tiền [chuyển sang code vòng 2]
+R07   KILLED by cashid                       report_delivery_gate.py  | cổng không đọc khoản chờ khai [chuyển sang code vòng 2]
+R08   KILLED by cashid                       report_delivery_gate.py  | cổng không đọc dòng tiền treo
+R09   KILLED by cashid                       report_delivery_gate.py  | cổng không nói báo cáo thiếu cảnh báo [chuyển sang code vòng 2]
+R10   KILLED by cashid                       report_delivery_gate.py  | deliver() không gọi cảnh báo dòng tiền
+K21   KILLED by ledger,jump                  account_cash_flows.py    | K2: bỏ điều kiện ngày có phiên (hành vi cũ)
+K22   KILLED by ledger,jump                  account_cash_flows.py    | K2: đảo điều kiện
+K31   KILLED by ledger                       account_cash_flows.py    | K3: chỉ bắt chiều chụp quá muộn
+K32   KILLED by ledger                       account_cash_flows.py    | K3: chỉ bắt chiều chụp quá sớm
+K33   KILLED by ledger                       account_cash_flows.py    | K3: bỏ bất biến (hành vi cũ)
+K34   KILLED by ledger                       account_cash_flows.py    | K3: so với chính thời điểm tiền vào
+K35   KILLED by cashid,ledger,jump,e2e,flowterm account_cash_flows.py    | K3: bod lấy nhầm dòng R làm dòng cho giá
+B01n  KILLED by cashid,ledger,jump,e2e,flowterm account_cash_flows.py    | dòng cho giá luôn là R (vô hiệu bod)
+B02n  KILLED by ledger                       account_cash_flows.py    | bỏ mốc khởi điểm (i==0)
+B03n  KILLED by ledger                       account_cash_flows.py    | eod không kiểm thiếu phiên
+B08n  KILLED by ledger,jump,e2e,flowterm     account_cash_flows.py    | i>0 → i>1 ở dòng cho giá
+B09n  KILLED by ledger,jump                  account_cash_flows.py    | i==0 lấy chính R làm dòng cho giá
+K51   KILLED by ledger                       nav_unit_ledger.py       | K5: bỏ kiểm hữu hạn vốn khởi điểm (inf lọt)
+K52   KILLED by ledger                       nav_unit_ledger.py       | K5: hành vi cũ (nan lọt)
+K53   KILLED by ledger                       nav_unit_ledger.py       | K5: bỏ kiểm nav hữu hạn
+== bộ step2: 86 mutant · KILLED 83 · SURVIVED 3 · NOT_APPLIED 0

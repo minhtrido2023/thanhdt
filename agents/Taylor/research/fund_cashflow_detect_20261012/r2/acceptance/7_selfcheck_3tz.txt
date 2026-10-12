@@ -1,0 +1,24 @@
+TZ=UNSET rc=0 cash_identity_selfcheck.py :: OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+TZ=UNSET rc=0 nav_unit_ledger_selfcheck.py :: OK — 4736 assertion PASS (nav_unit_ledger_selfcheck.py)
+TZ=UNSET rc=0 nav_jump_flow_gate_selfcheck.py :: PASS
+TZ=UNSET rc=0 nav_corpaction_gate_e2e_selfcheck.py :: 68 PASS, 0 FAIL
+TZ=UNSET rc=0 nav_flow_term_selfcheck.py :: OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive
+TZ=UNSET rc=0 nav_period_returns.py --selfcheck :: OK — 9 assertion PASS (nav_period_returns.py)
+TZ=UNSET rc=0 report_delivery_gate_selfcheck.py :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+TZ=UNSET rc=0 eod_delivery_wiring_selfcheck.py :: eod_delivery_wiring_selfcheck: 9/9 PASS
+TZ=America/New_York rc=0 cash_identity_selfcheck.py :: OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+TZ=America/New_York rc=0 nav_unit_ledger_selfcheck.py :: OK — 4736 assertion PASS (nav_unit_ledger_selfcheck.py)
+TZ=America/New_York rc=0 nav_jump_flow_gate_selfcheck.py :: PASS
+TZ=America/New_York rc=0 nav_corpaction_gate_e2e_selfcheck.py :: 68 PASS, 0 FAIL
+TZ=America/New_York rc=0 nav_flow_term_selfcheck.py :: OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive
+TZ=America/New_York rc=0 nav_period_returns.py --selfcheck :: OK — 9 assertion PASS (nav_period_returns.py)
+TZ=America/New_York rc=0 report_delivery_gate_selfcheck.py :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+TZ=America/New_York rc=0 eod_delivery_wiring_selfcheck.py :: eod_delivery_wiring_selfcheck: 9/9 PASS
+TZ=Pacific/Kiritimati rc=0 cash_identity_selfcheck.py :: OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+TZ=Pacific/Kiritimati rc=0 nav_unit_ledger_selfcheck.py :: OK — 4736 assertion PASS (nav_unit_ledger_selfcheck.py)
+TZ=Pacific/Kiritimati rc=0 nav_jump_flow_gate_selfcheck.py :: PASS
+TZ=Pacific/Kiritimati rc=0 nav_corpaction_gate_e2e_selfcheck.py :: 68 PASS, 0 FAIL
+TZ=Pacific/Kiritimati rc=0 nav_flow_term_selfcheck.py :: OK — 182 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 135 cặp phiên thật kiểm false-positive
+TZ=Pacific/Kiritimati rc=0 nav_period_returns.py --selfcheck :: OK — 9 assertion PASS (nav_period_returns.py)
+TZ=Pacific/Kiritimati rc=0 report_delivery_gate_selfcheck.py :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+TZ=Pacific/Kiritimati rc=0 eod_delivery_wiring_selfcheck.py :: eod_delivery_wiring_selfcheck: 9/9 PASS

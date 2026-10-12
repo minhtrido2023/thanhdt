@@ -1,0 +1,4 @@
+dt5g_publisher_gate_selfcheck (bản NHÁNH của bq_freshness_check.sh, bố cục thư mục chuẩn) [default] rc=0 · === SELFCHECK OK — 9/9 ca đúng ===
+dt5g_publisher_gate_selfcheck (bản NHÁNH của bq_freshness_check.sh, bố cục thư mục chuẩn) [unset] rc=0 · === SELFCHECK OK — 9/9 ca đúng ===
+dt5g_publisher_gate_selfcheck (bản NHÁNH của bq_freshness_check.sh, bố cục thư mục chuẩn) [LA] rc=0 · === SELFCHECK OK — 9/9 ca đúng ===
+dt5g_publisher_gate_selfcheck (bản NHÁNH của bq_freshness_check.sh, bố cục thư mục chuẩn) [KI] rc=0 · === SELFCHECK OK — 9/9 ca đúng ===

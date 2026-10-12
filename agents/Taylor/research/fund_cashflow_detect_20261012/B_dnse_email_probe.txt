@@ -1,0 +1,90 @@
+/home/trido/.local/lib/python3.10/site-packages/google/api_core/_python_version_support.py:224: FutureWarning: You are using a non-supported Python version (3.10.12). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+== email từ dnse.com.vn sau 2026-06-01: 251
+người gửi: {'noreply@mail.dnse.com.vn': 204, 'e-invoice@dnse.com.vn': 44, 'hello@dnse.com.vn': 1, 'nhung.nguyen@dnse.com.vn': 2}
+  134  Xác thực với Email OTP   | vd Mon, 12 Oct 2026
+   45  DNSE_Báo cáo giao dịch khớp lệnh tài khoản <số>C<số> ngày <ngày>   | vd Wed, 07 Oct 2026
+   44  DNSE thông báo phát hành hóa đơn điện tử   | vd Thu, 08 Oct 2026
+   14  DNSE_Thông báo Sự kiện quyền Họp đại hội đồng cổ đông   | vd Mon, 28 Sep 2026
+    1  DNSE | 2 TRIỆU TÀI KHOẢN - MỘT DẤU MỐC, TRIỆU HÀNH TRÌNH ĐẦU TƯ   | vd Thu, 01 Oct 2026
+    1  DNSE kính gửi Quý khách Báo cáo tài khoản Chứng khoán tháng 09/<số>   | vd Thu, 01 Oct 2026
+    1  DNSE kính gửi Quý khách Báo cáo tài khoản Chứng khoán tháng 08/<số>   | vd Tue, 01 Sep 2026
+    1  DNSE_Cập nhật quy định về quan hệ đồng hành cùng SACO từ <ngày>   | vd Thu, 27 Aug 2026
+    1  Thông báo nâng cấp hệ thống giao dịch trực tuyến    | vd Thu, 27 Aug 2026
+    1  DNSE | Thông báo lịch nghỉ lễ Quốc khánh 02/09   | vd Tue, 25 Aug 2026
+    1  🛡️ Khuyến nghị bảo vệ tài khoản trước các hình thức lừa đảo trực tuyến   | vd Tue, 04 Aug 2026
+    1  DNSE kính gửi Quý khách Báo cáo tài khoản Chứng khoán tháng 07/<số>   | vd Sat, 01 Aug 2026
+    1  Khối lượng chuẩn xác – Đặt lệnh an tâm   | vd Tue, 14 Jul 2026
+    1  DNSE kính gửi Quý khách Báo cáo tài khoản Chứng khoán tháng 06/<số>   | vd Wed, 01 Jul 2026
+    1  Trả lời: Mở sub mới tk <số>C<số> Đinh Tiến Thành   | vd Thu, 25 Jun 2026
+    1  Mở sub mới tk <số>C<số> Đinh Tiến Thành   | vd Thu, 25 Jun 2026
+    1  Mở thêm sub tk Đinh Tiến Thành <số>C<số>   | vd Thu, 25 Jun 2026
+    1  DNSE kính gửi Quý khách Báo cáo tài khoản Chứng khoán tháng 05/<số>   | vd Mon, 01 Jun 2026
+
+== truy vấn nhắm đích (mọi người gửi, sau 2026-06-01)
+-- "nạp tiền": 8 thư
+     Tue, 22 Sep 2026 | customercare@care.vpb.com.vn | [QC] LỘ DIỆN 02 HÀNH TRÌNH KHAI MỞ ĐẶC QUYỀN NHẬN VÉ MỜI THAM DỰ BIGBANG 2026-2027 WORLD TO
+     Fri, 28 Aug 2026 | customercare@care.vpb.com.vn | VPBank thông báo lịch giao dịch trong dịp lễ Quốc khánh 02/09/2026
+     Thu, 27 Aug 2026 | customercare@care.vpb.com.vn | VPBank thông báo lịch giao dịch trong dịp lễ Quốc khánh 02/09/2026
+     27 Aug 2026 06:5 | info@info.vietcombank.com.vn | [TB] Cảnh báo thủ đoạn giả mạo Vietcombank và cơ quan báo chí để dụ dỗ đầu tư tiền ảo
+     Fri, 10 Jul 2026 | clientcare@kbsec.vn | Chỉ 3 bước đơn giản - Khởi tạo hành trình đầu tư cùng KBSV
+     Wed, 1 Jul 2026  | cskh@vps.com.vn | VPS | Chính thức ra mắt tính năng Nạp tiền nhanh từ ngân hàng BIDV và Giao diện nạp tiền mới
+-- "rút tiền": 57 thư
+     Mon, 12 Oct 2026 | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Mon, 12 Oct 2026 | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Fri, 9 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Thu, 8 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Thu, 8 Oct 2026  | mbebanking@mbbank.com.vn | Giao dich tao ma rut tien tai ATM MB thanh cong
+     Wed, 7 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+-- "nộp tiền": 159 thư
+     Mon, 12 Oct 2026 | notify@propertycube.asia | SAVILLS-SWANBAY Z4-10/26 THÔNG BÁO ĐẾN HẠN THANH TOÁN PHÍ (LẦN 1)
+     Mon, 12 Oct 2026 | notify@propertycube.asia | SAVILLS-SWANBAY Z4-10/26 THÔNG BÁO ĐẾN HẠN THANH TOÁN PHÍ (LẦN 1)
+     Fri, 9 Oct 2026  | phs_info@phs.vn | Thông báo hết hạn khoản vay kỹ quỹ 
+     Tue, 06 Oct 2026 | notify@propertycube.asia | Savills-SWANBAY Z4 - 10/26 - THÔNG BÁO PHÍ
+     Tue, 06 Oct 2026 | notify@propertycube.asia | Savills-SWANBAY Z4 - 10/26 - THÔNG BÁO PHÍ
+     Tue, 06 Oct 2026 | notify@propertycube.asia | Savills-SWANBAY Z4 - J.07.28(L5.19) - 1/2026 - PHIẾU XÁC NHẬN THANH TOÁN/RECEIPT NOTIFICATION
+-- "chuyển tiền": 159 thư
+     Mon, 12 Oct 2026 | mbebanking@mbbank.com.vn | Thong bao giao dich thanh cong
+     Mon, 12 Oct 2026 | mbebanking@mbbank.com.vn | Thong bao giao dich thanh cong
+     Mon, 12 Oct 2026 | mbebanking@mbbank.com.vn | Thong bao giao dich thanh cong
+     Mon, 12 Oct 2026 | vpbankonline@vpb.com.vn | Transfer successful
+     Sun, 11 Oct 2026 | mbebanking@mbbank.com.vn | Thong bao giao dich thanh cong
+     Sat, 10 Oct 2026 | tieudongta@gmail.com | [Weekly report] ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md
+-- "biến động số dư": 1 thư
+     Tue, 21 Jul 2026 | clientcare@kbsec.vn | KBSV thông báo miễn phí chuyển tiền từ tài khoản chứng khoán ra tài khoản ngân hàng
+-- "sao kê": 109 thư
+     Sun, 11 Oct 2026 | noreply@info.vietnamairlines.com | Thông báo tài khoản Bông Sen Vàng tháng 10.2026
+     Wed, 07 Oct 2026 | tieudongta@gmail.com | [Daily report] SpaceX_daily_report_2026-10-07.md
+     Tue, 6 Oct 2026  | noreply@ssi.com.vn | CTCP Chứng Khoán SSI - Báo cáo tháng 09/2026
+     Tue, 6 Oct 2026  | noreply@ssi.com.vn | CTCP Chứng Khoán SSI - Báo cáo tháng 09/2026
+     Tue, 06 Oct 2026 | tieudongta@gmail.com | [Daily report] SpaceX_daily_report_2026-10-06.md
+     Tue, 06 Oct 2026 | notify@propertycube.asia | Savills-SWANBAY Z4 - 10/26 - THÔNG BÁO PHÍ
+-- DNSE nạp: 25 thư
+     Sat, 10 Oct 2026 | tieudongta@gmail.com | [Weekly report] ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md
+     Wed, 30 Sep 2026 | tieudongta@gmail.com | [Monthly report] ZaloPay_monthly_report_2026-09.md
+     Wed, 30 Sep 2026 | tieudongta@gmail.com | [Monthly report] SpaceX_monthly_report_2026-09.md
+     Wed, 02 Sep 2026 | tieudongta@gmail.com | [Trading Report] ZaloPay_monthly_report_2026-08.md
+     Wed, 02 Sep 2026 | tieudongta@gmail.com | [Trading Report] ZaloPay_monthly_report_2026-08.md
+     Wed, 02 Sep 2026 | tieudongta@gmail.com | [Trading Report] SpaceX_ZaloPay_monthly_report_2026-08.md
+-- DNSE rút: 25 thư
+     Sat, 10 Oct 2026 | tieudongta@gmail.com | [Weekly report] ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md
+     Wed, 30 Sep 2026 | tieudongta@gmail.com | [Monthly report] ZaloPay_monthly_report_2026-09.md
+     Wed, 30 Sep 2026 | tieudongta@gmail.com | [Monthly report] SpaceX_monthly_report_2026-09.md
+     Fri, 18 Sep 2026 | tieudongta@gmail.com | [Weekly report] ZaloPay_weekly_report_2026-09-14_to_2026-09-18.md
+     Wed, 02 Sep 2026 | tieudongta@gmail.com | [Trading Report] ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md
+     Wed, 02 Sep 2026 | tieudongta@gmail.com | [Trading Report] SpaceX_weekly_report_2026-08-24_to_2026-08-28.md
+-- "chuyển khoản" DNSE: 0 thư
+-- "Trứng vàng": 89 thư
+     Mon, 12 Oct 2026 | tieudongta@gmail.com | [Daily report] SpaceX_daily_report_2026-10-12.md
+     Mon, 12 Oct 2026 | tieudongta@gmail.com | [Daily report] ZaloPay_daily_report_2026-10-12.md
+     Sat, 10 Oct 2026 | tieudongta@gmail.com | [Weekly report] ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md
+     Sat, 10 Oct 2026 | tieudongta@gmail.com | [Weekly report] SpaceX_weekly_report_2026-10-05_to_2026-10-09.md
+     Sat, 10 Oct 2026 | dtienthanh@gmail.com | Fwd: [Weekly report] SpaceX_weekly_report_2026-10-05_to_2026-10-09.md
+     Fri, 09 Oct 2026 | tieudongta@gmail.com | [Weekly report] ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md
+-- subject:(nạp OR rút OR "chuyển tiền" OR "số dư"): 57 thư
+     Mon, 12 Oct 2026 | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Mon, 12 Oct 2026 | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Fri, 9 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Thu, 8 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Wed, 7 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit
+     Tue, 6 Oct 2026  | info@phs.vn | Thông báo kết quả giao dịch Chứng khoán Cơ sở - Chứng chỉ Quỹ & Rút tiền /Notice of Stock Trading Result & Wit

@@ -1,0 +1,78 @@
+BASE  XANH HẾT
+S01   KILLED by ledger,jump                  account_cash_flows.py    | thứ Bảy thành phiên
+S02   KILLED by ledger                       account_cash_flows.py    | thứ Sáu hết là phiên
+S03   KILLED by ledger                       account_cash_flows.py    | bỏ lịch nghỉ lễ
+S04   KILLED by ledger,jump                  account_cash_flows.py    | ngày nào cũng là phiên
+S05   KILLED by ledger,jump                  account_cash_flows.py    | and→or
+S06   KILLED by ledger                       account_cash_flows.py    | đảo is_holiday
+S07   KILLED by ledger,flowterm              account_cash_flows.py    | bỏ chèn WC_ROOT vào sys.path
+S08   KILLED by ledger,jump                  account_cash_flows.py    | bỏ kiểm cuối tuần
+L01   KILLED by ledger                       account_cash_flows.py    | đúng 14:45 ⇒ phiên trước
+L02   KILLED by ledger,jump,e2e,flowterm     account_cash_flows.py    | luôn lấy ngày của dòng tiền
+L03   KILLED by ledger,jump,e2e,flowterm     account_cash_flows.py    | luôn lùi một ngày
+L04   KILLED by ledger,jump                  account_cash_flows.py    | while→if (lùi tối đa 1 ngày)
+L05   KILLED by ledger,jump                  account_cash_flows.py    | không lùi qua ngày không phiên
+L06   KILLED by ledger                       account_cash_flows.py    | lùi 2 ngày mỗi bước
+L07   KILLED by ledger                       account_cash_flows.py    | giờ đóng cửa 14:30 riêng cho L
+G01   KILLED by ledger                       account_cash_flows.py    | bỏ ngoại lệ ngày không phiên (L8)
+G02   KILLED by ledger                       account_cash_flows.py    | L8 xét nhầm ngày của R
+G03   KILLED by ledger                       account_cash_flows.py    | L8 đảo điều kiện
+G04   KILLED by ledger                       account_cash_flows.py    | A63 lần 2: bỏ chốt khi R là dòng thứ hai
+B01   NOT_APPLIED(count=0) account_cash_flows.py | dòng cho giá luôn là R (vô hiệu bod)
+B02   NOT_APPLIED(count=0) account_cash_flows.py | bỏ mốc khởi điểm (i==0)
+B03   NOT_APPLIED(count=0) account_cash_flows.py | eod không kiểm
+B04   KILLED by cashid,ledger,jump,e2e,flowterm account_cash_flows.py    | < → <=
+B05   KILLED by ledger                       account_cash_flows.py    | < → >
+B06   KILLED by ledger                       account_cash_flows.py    | bỏ hẳn kiểm thiếu phiên
+B07   KILLED by cashid,ledger,jump,e2e,flowterm account_cash_flows.py    | L tính theo lần chụp của R
+B08   NOT_APPLIED(count=0) account_cash_flows.py | i>0 → i>1 ở dòng cho giá
+B09   NOT_APPLIED(count=0) account_cash_flows.py | i==0 lấy chính R làm dòng cho giá
+B10   KILLED by ledger                       account_cash_flows.py    | thông điệp nêu sai dòng cho giá
+B11   KILLED by ledger                       account_cash_flows.py    | lệnh backfill sai ngày
+B12   KILLED by ledger                       account_cash_flows.py    | thông điệp nêu sai phiên thiếu
+B13   KILLED by ledger                       account_cash_flows.py    | attach không chuyển baseline_date
+T01   KILLED by ledger                       account_cash_flows.py    | bỏ kiểm balance_ts tăng
+T02   KILLED by ledger                       account_cash_flows.py    | cho phép bằng nhau
+T03   KILLED by ledger                       account_cash_flows.py    | kiểm mọi dòng
+T04   KILLED by ledger                       account_cash_flows.py    | bỏ dòng liền trước dòng tiền đầu
+T05   KILLED by ledger                       account_cash_flows.py    | min→max
+T06   KILLED by ledger                       account_cash_flows.py    | market_only cũng kích hoạt kiểm
+T07   KILLED by ledger                       account_cash_flows.py    | chỉ kiểm cặp đầu
+T08   KILLED by ledger                       account_cash_flows.py    | lùi thêm một dòng
+T09   KILLED by ledger                       account_cash_flows.py    | bỏ cặp đầu tiên
+F01   KILLED by ledger                       account_cash_flows.py    | > → >=
+F02   KILLED by ledger                       account_cash_flows.py    | bỏ kiểm ngày tương lai
+F03   KILLED by ledger                       account_cash_flows.py    | đồng hồ không neo ICT
+F04   KILLED by ledger                       account_cash_flows.py    | bỏ qua today truyền vào
+F05   KILLED by cashid,ledger,jump,e2e,flowterm account_cash_flows.py    | market_only tương lai được nhận
+F06   KILLED by ledger                       account_cash_flows.py    | inf được nhận
+F07   KILLED by ledger,e2e                   account_cash_flows.py    | nan được nhận
+F08   KILLED by ledger,e2e                   account_cash_flows.py    | bỏ kiểm hữu hạn
+F09   KILLED by ledger,e2e                   account_cash_flows.py    | bỏ TypeError ở date (L2)
+F10   KILLED by ledger,e2e                   account_cash_flows.py    | bỏ kiểm gốc file là object (L2)
+F11   KILLED by ledger                       account_cash_flows.py    | nới 1 ngày
+C01   KILLED by flowterm                     account_cash_flows.py    | A58: bỏ kiểm evidence rỗng
+C02   KILLED by flowterm                     account_cash_flows.py    | A61: bỏ kiểm kind lạ
+C03   KILLED by ledger,e2e,flowterm          account_cash_flows.py    | A69: date sai nhận mặc định
+H01   KILLED by ledger                       account_cash_flows.py    | gợi ý thiếu --from-raw
+U01   KILLED by ledger                       nav_unit_ledger.py       | build_ledger không truyền mốc
+U02   KILLED by ledger                       nav_unit_ledger.py       | mốc = ngày TRƯỚC inception
+U03   KILLED by ledger                       nav_unit_ledger.py       | mốc = ngày dòng đầu
+U22   KILLED by ledger                       nav_unit_ledger.py       | lần 2 U22: khoá chia sẻ
+D01   KILLED by e2e                          daily_nav_snapshot.py    | L2: bắt hẹp lại
+D02   KILLED by e2e                          daily_nav_snapshot.py    | L2: bắt thiếu ImportError
+D03   KILLED by e2e                          daily_nav_snapshot.py    | L3: import ngoài try
+D04   KILLED by e2e                          daily_nav_snapshot.py    | L3: import mức module (thừa)
+D05   KILLED by e2e                          daily_nav_snapshot.py    | lần 2 D03: không đọc sổ dòng tiền
+D06   KILLED by jump                         daily_nav_snapshot.py    | <= → <
+D07   KILLED by jump                         daily_nav_snapshot.py    | bỏ lọc ngày của bản ghi treo
+D08   KILLED by jump                         daily_nav_snapshot.py    | bỏ trích balance_ts
+D09   KILLED by jump                         daily_nav_snapshot.py    | bỏ ghi chú đẩy phiên
+D10   KILLED by e2e                          daily_nav_snapshot.py    | lần 2 D29: JSON performance_error
+D11   KILLED by jump                         daily_nav_snapshot.py    | chỉ bản ghi đúng ngày
+R01   KILLED by cashid                       report_delivery_gate.py  | bỏ chặn canonical không hữu hạn
+R02   KILLED by cashid                       report_delivery_gate.py  | chỉ kiểm kiểu (NaN lọt)
+R03   KILLED by cashid                       report_delivery_gate.py  | bỏ kiểm kiểu (None ⇒ TypeError)
+R04   KILLED by cashid                       report_delivery_gate.py  | int bị chặn
+R05   KILLED by cashid                       report_delivery_gate.py  | inf lọt
+== bộ ar3: 76 mutant · KILLED 71 · SURVIVED 0 · NOT_APPLIED 5

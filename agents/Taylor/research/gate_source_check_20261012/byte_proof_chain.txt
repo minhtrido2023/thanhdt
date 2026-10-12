@@ -1,0 +1,6 @@
+DT5G_macro: master 20 lượt -> [(0, '461b527bb6151801cc7ca7790bb4285e', 346)]
+DT5G_macro: nhánh  20 lượt -> (rc,md5,bytes)=[(0, '461b527bb6151801cc7ca7790bb4285e', 346)] calls(discord,bus,telegram)=[(0, 0, 0)] marker_ghi=[False]
+DT5G_macro: GIỐNG HỆT = True
+DT4_only: master 20 lượt -> [(0, '2d2e2b0f3a9ff2a498618e08e5ada46d', 360)]
+DT4_only: nhánh  20 lượt -> (rc,md5,bytes)=[(0, '518ab30d4aa663d3e4de37d7a244077b', 1072)] calls(discord,bus,telegram)=[(1, 1, 0)] marker_ghi=[True]
+DT4_only: GIỐNG HỆT = False

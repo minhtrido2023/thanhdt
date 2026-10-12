@@ -1,0 +1,6 @@
+ngày thường, publisher không stderr        master: rc/bytes/md5/giây/(discord,bus,tele) = (0, 329, '36992b51653222265f46d234f6f8bd21', 0.0, (0, 0, 0))
+ngày thường, publisher không stderr        nhánh : rc/bytes/md5/giây/(discord,bus,tele) = (0, 329, '36992b51653222265f46d234f6f8bd21', 0.1, (0, 0, 0))
+ngày thường + cháu mồ côi giữ stdout       master: rc/bytes/md5/giây/(discord,bus,tele) = (0, 329, '36992b51653222265f46d234f6f8bd21', 0.0, (0, 0, 0))
+ngày thường + cháu mồ côi giữ stdout       nhánh : rc/bytes/md5/giây/(discord,bus,tele) = (0, 329, '36992b51653222265f46d234f6f8bd21', 0.1, (0, 0, 0))
+ngày thường, publisher CÓ stderr           master: rc/bytes/md5/giây/(discord,bus,tele) = (0, 346, '461b527bb6151801cc7ca7790bb4285e', 0.0, (0, 0, 0))
+ngày thường, publisher CÓ stderr           nhánh : rc/bytes/md5/giây/(discord,bus,tele) = (0, 346, '992734dca2447b7135fd26969267b9f0', 0.1, (0, 0, 0))

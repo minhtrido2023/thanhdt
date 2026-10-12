@@ -1,0 +1,16 @@
+bq_freshness_check_selfcheck.py [default] rc=0 · bq_freshness_check_selfcheck: 78 PASS, 0 FAIL
+bq_freshness_check_selfcheck.py [unset] rc=0 · bq_freshness_check_selfcheck: 78 PASS, 0 FAIL
+bq_freshness_check_selfcheck.py [LA] rc=0 · bq_freshness_check_selfcheck: 78 PASS, 0 FAIL
+bq_freshness_check_selfcheck.py [KI] rc=0 · bq_freshness_check_selfcheck: 78 PASS, 0 FAIL
+send_plan_report_state_gate_selfcheck.py [default] rc=0 · 15/15 PASS
+send_plan_report_state_gate_selfcheck.py [unset] rc=0 · 15/15 PASS
+send_plan_report_state_gate_selfcheck.py [LA] rc=0 · 15/15 PASS
+send_plan_report_state_gate_selfcheck.py [KI] rc=0 · 15/15 PASS
+send_plan_report_aei_notes_selfcheck.py [default] rc=0 · KẾT QUẢ: 11 PASS / 0 FAIL
+send_plan_report_aei_notes_selfcheck.py [unset] rc=0 · KẾT QUẢ: 11 PASS / 0 FAIL
+send_plan_report_aei_notes_selfcheck.py [LA] rc=0 · KẾT QUẢ: 11 PASS / 0 FAIL
+send_plan_report_aei_notes_selfcheck.py [KI] rc=0 · KẾT QUẢ: 11 PASS / 0 FAIL
+send_plan_report_park_jit_selfcheck.py [default] rc=0 · KẾT QUẢ: 44 PASS / 0 FAIL
+send_plan_report_park_jit_selfcheck.py [unset] rc=0 · KẾT QUẢ: 44 PASS / 0 FAIL
+send_plan_report_park_jit_selfcheck.py [LA] rc=0 · KẾT QUẢ: 44 PASS / 0 FAIL
+send_plan_report_park_jit_selfcheck.py [KI] rc=0 · KẾT QUẢ: 44 PASS / 0 FAIL

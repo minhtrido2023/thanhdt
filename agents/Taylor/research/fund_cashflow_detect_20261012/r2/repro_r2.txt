@@ -1,0 +1,47 @@
+--- R1 nạp 50tr + mua tay 50tr, ngày không có bản ghi orders (NAV +5,0% do nạp): windows=1 suspects=1 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=-48,500 unexplained=-48,500 pct=-0.0049% suspect=True acked=False
+    warning_lines: 1 | ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu đã ký không giải thích: AAA +5.000 cp (bản ghi vị thế không
+--- R2 bán tay 60tr + rút 60tr, không có bản ghi orders (NAV −6,0%): windows=1 suspects=1 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=-118,200 unexplained=-118,200 pct=-0.0118% suspect=True acked=False
+    warning_lines: 1 | ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu đã ký không giải thích: AAA -6.000 cp (bản ghi vị thế không
+--- R3 nạp 200tr CHƯA khai + market_only cùng ngày: windows=1 suspects=1 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=+200,000,000 unexplained=+200,000,000 pct=+20.0000% suspect=True acked=False
+    warning_lines: 1 | ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — nghi nạp/rút chưa khai: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư +200.000.000 đ (20,000% NAV) không có khoản nội bộ nào đã đọc giải thích được ⇒ nghi tiền NẠP vào mà sổ d
+--- R5 rút hết Trứng vàng (nội bộ), khấu trừ 642,376đ: windows=1 suspects=0 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=-642,376 unexplained=-74,513 pct=-0.0080% suspect=False acked=False
+    warning_lines: 1 | ℹ️ Đẳng thức tiền (SpaceX) cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10) — cần xác nhận khoản nội bộ: rút Trứng vàng 319.188.671 đ, đẳng thức khép nhờ khoản khấu trừ ƯỚC TÍNH 642.527 đ (0,069% NAV, lớn hơn ngưỡng) — đ
+--- R6 DNSE post lãi vay tháng 4,166,667đ: windows=1 suspects=1 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=-4,166,667 unexplained=-4,166,667 pct=-0.4167% suspect=True acked=False
+    warning_lines: 1 | ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư -4.166.667 đ (0,417% NAV) chưa giải thích, nhưng chưa loại trừ được: lãi vay ký quỹ DNSE ghi dồn (dư n
+--- R8 cổ tức 80tr ghi + trả trong một cửa sổ: windows=1 suspects=1 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=+76,000,000 unexplained=+76,000,000 pct=+7.6000% suspect=True acked=False
+    warning_lines: 1 | ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư +76.000.000 đ (7,600% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức tiền mặt ghi và chi trả t
+--- R10 rút nhỏ giọt 450k×10: suspects=0, Σ unexplained=-4,500,000 (-0.451% NAV)
+--- R11 lãi Trứng vàng thật 6,5%/năm: suspects=0, phần dư mỗi cửa sổ ≈ -27,944đ (-0.0028%), Σ20 = -559,824đ
+--- R12 nav='nan': ⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError (/tmp/fcf_r2/repro/R12/nav_history_SpaceX.csv: dòng '2026-03-03' không đọc được (không phải số hữu
+--- R13 ô cash RỖNG ở dòng sau (đọc thành 0): windows=1 suspects=1 uncheckable=1
+    2026-03-02→2026-03-03 ΔK=-200,000,000 unexplained=-200,000,000 pct=-20.0000% suspect=True acked=False
+    warning_lines: 1 | ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — nghi nạp/rút chưa khai: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư -200.000.000 đ (20,000% NAV) không có khoản nội bộ nào đã đọc giải thích được ⇒ nghi tiền RÚT ra mà sổ dò
+=== NHÃN TỪNG CA (vòng 2)
+R1: 1 dòng vận hành; dòng nhà đầu tư = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 48.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu đã ký không giải thích: AAA +5.000 cp (
+R2: 1 dòng vận hành; dòng nhà đầu tư = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 118.200 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu đã ký không giải thích: AAA -6.000 cp (
+R3: 1 dòng vận hành; dòng nhà đầu tư = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 200.000.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — nghi nạp/rút chưa khai: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư +200.000.000 đ (20,000% NAV) không có khoản nội bộ nào đã đọc giải thích được ⇒ nghi 
+R5: 1 dòng vận hành; dòng nhà đầu tư = None
+    ℹ️ Đẳng thức tiền (SpaceX) cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10) — cần xác nhận khoản nội bộ: rút Trứng vàng 319.188.671 đ, đẳng thức khép nhờ khoản khấu trừ ƯỚC TÍNH 642.527 đ (0,069% NAV,
+R6: 1 dòng vận hành; dòng nhà đầu tư = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 4.166.667 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư -4.166.667 đ (0,417% NAV) chưa giải thích, nhưng chưa loại trừ được: lãi vay ký qu
+R8: 1 dòng vận hành; dòng nhà đầu tư = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 76.000.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư +76.000.000 đ (7,600% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức tiền 
+R10: 2 dòng vận hành; dòng nhà đầu tư = None
+    ℹ️ Đẳng thức tiền (SpaceX) cửa sổ 2026-03-11 (11/03 19:10) → 2026-03-12 (12/03 19:10) — phần dư tiền -450.000 đ dưới ngưỡng nhưng không đọc được vị thế ở lần chụp 2026-03-11 19:10:05 và lần chụp 2026-03-12 19:1
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — phần dư trôi có hệ thống: 10 cửa sổ gần nhất (2026-03-02 → 2026-03-12) cộng lại -4.500.000 đ (0,451% NAV), 10/10 cửa sổ cùng chiều, dù không cửa sổ nào tự vượt ngưỡng. Đo lại hằ
+R11: 2 dòng vận hành; dòng nhà đầu tư = None
+    ℹ️ Đẳng thức tiền (SpaceX) cửa sổ 2026-03-21 (21/03 19:10) → 2026-03-22 (22/03 19:10) — phần dư tiền -28.038 đ dưới ngưỡng nhưng không đọc được vị thế ở lần chụp 2026-03-21 19:10:05 và lần chụp 2026-03-22 19:10
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — phần dư trôi có hệ thống: 20 cửa sổ gần nhất (2026-03-02 → 2026-03-22) cộng lại -559.824 đ (0,056% NAV), 20/20 cửa sổ cùng chiều, dù không cửa sổ nào tự vượt ngưỡng. Đo lại hằng
+R12: 1 dòng vận hành; dòng nhà đầu tư = None
+    ⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError (/tmp/fcf_r2/repro/R12/nav_history_SpaceX.csv: dòng '2026-03-03' không đọc được (không phải số hữu hạn ('nan
+R13: 1 dòng vận hành; dòng nhà đầu tư = 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 200.000.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.'
+    ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — nghi nạp/rút chưa khai: cửa sổ 2026-03-02 (02/03 19:10) → 2026-03-03 (03/03 19:10): phần dư -200.000.000 đ (20,000% NAV) không có khoản nội bộ nào đã đọc giải thích được ⇒ nghi 

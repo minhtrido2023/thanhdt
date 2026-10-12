@@ -1,0 +1,2 @@
+SpaceX 2026-10-09 {'inception': -1.33, 'wtd': 1.024, 'mtd': 0.519} | line = ℹ️ Có 2 khoản biến động tiền chưa đối chiếu xong (lớn nhất 2.304.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh. | n_ops = 2
+SpaceX 2026-10-12 {'inception': -1.375, 'wtd': -0.046, 'mtd': 0.474} | line = ℹ️ Có 2 khoản biến động tiền chưa đối chiếu xong (lớn nhất 2.304.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh. | n_ops = 2

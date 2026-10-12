@@ -3344,3 +3344,116 @@ CMG) → kết luận điều tra đại án điện (cổng TV1) → giấy ph�
 [CafeF — Phó TGĐ Vietcombank xin nghỉ hưu trước tuổi](https://cafef.vn/pho-tong-giam-doc-vietcombank-bat-ngo-xin-nghi-huu-truoc-tuoi-188261002150652259.chn)
 
 ---
+
+### 2026-10-12 — QUÉT SÁNG THỨ HAI (job `Taylor_20261012_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 1 AMBIGUOUS-yếu mới (SHB, không giữ) · 1 không-phải-case (DHC) · 14 mã gác rà qua (5 NH + 9 ngoài NH)** · ★★ **0 lệnh MUA trên mọi kênh live phiên 12/10 ⇒ không có luận điểm nào để RÚT** · ★ **PNJ (NON, đã excluded): giải chấp 2,94 tr cp con gái Chủ tịch (08/10) + kiểm định độc lập "100% kim cương thiên nhiên" ⇒ trần 09/10 sau 13 phiên giảm — KHÔNG đổi phân loại** · ★ **HDB −20% giá thô 09/10 = ex-right, adjusted +4,0%**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **watchlist TƯƠI** (`active_nav` computed_at **2026-10-09**;
+file SpaceX tính lại 10-11). Universe 249 mã (H:14 / W:244). Không có cảnh báo QUÁ HẠN.
+
+#### Việc 1 — anomaly_scan: 1 mã MỚI chưa từng phân loại (DHC)
+
+```
+[W] 2026-10-09 DHC: IDIOCRASH | ret −6,9% (VNI −0,2%, idio −6,7%) vol 3,2× val 58,8B close 36.500   ← MỚI
+[W] 2026-10-05 F88: IDIOCRASH | ret −6,9% (idio −7,7%) vol 2,0× val 12,5B   (không-phải-case từ 08-14, không xét lại)
+[W] 2026-10-08 HGM: CEIL2 +9,9%                                              (cờ trần, watch note)
+[W] 2026-10-02..10-07 PNJ: IDIOCRASH ×4                                       (NON từ 09-28)
+```
+
+- **DHC (Đông Hải Bến Tre, giấy bao bì; KHÔNG giữ, KHÔNG trong plan)** — 1 phiên −6,89% trên KL 3,15×,
+  `Price == Close` ⇒ biến động THẬT, không phải corp-action. **Nguyên nhân: KHÔNG XÁC ĐỊNH ĐƯỢC** — 3 truy vấn
+  tin + bản tin phiên 09/10 chỉ ghi mức giảm, **0 công bố** khởi tố/thanh tra/kiểm toán/giao dịch nội bộ/BCTC
+  trong cửa sổ. Nền đã biết (không phải tin mới): HSC cho rằng chu kỳ giá giấy thuận lợi "phần lớn đã phản
+  ánh vào giá", DHC bắt đầu vay ngân hàng từ 9/2026; KH 2026 LNST −11%. Số BQ 09/10: PE **7,06** (PE_MA5Y
+  10,07) · PB **1,54** · Debt/Eq 0,62 · FSCORE 6 · NP_P0 177,8 tỷ vs CF_OA_P0 150,2 tỷ · 8L rating 2.
+  ⇒ **Không-phải-case**: không có trigger §0.5 nào (1 phiên, chưa FLOOR2, không sự kiện). Cổng mở lại: BCTC
+  Q3/2026 (cuối 10) nếu biên gộp gãy, hoặc xuất hiện công bố bán của cổ đông nội bộ.
+
+#### Việc 2/3 — quét rộng: 1 case mới ngoài danh mục — **SHB → AMBIGUOUS-yếu**
+
+- **Sự kiện**: SHB giảm 7 phiên liên tiếp, **sàn −6,94% phiên 08/10 xuống 10.050**, 09/10 đóng **10.000 (mệnh
+  giá)**, KL 2,95×; từ 11.600 (25/09) = **−13,8%**. (anomaly_scan KHÔNG cờ vì SHB không còn là vị thế và 8L
+  rating bản mới nhất = **3** ⇒ ngoài tier W — ranh giới phủ, không phải lỗi.)
+- **Trigger = TIN ĐỒN mạng xã hội, 3 nội dung** (VietnamBiz 09/10): SHB *sử dụng vốn không đúng quy định* ·
+  *không đăng ký/lưu ký được cổ phiếu phát hành thêm* · *đợt phát hành có thể bị huỷ*. **0 cơ quan nào lên
+  tiếng**; 0 thanh tra/khởi tố/kiểm soát đặc biệt trong mọi nguồn rà.
+- **Phản hồi SHB 09/10**: phương án tăng vốn lên **53.442 tỷ** đã được NHNN chấp thuận; UBCKNN đã xác nhận
+  kết quả chào bán; cổ phiếu mới đã lưu ký. **Còn mở đúng 1 bước**: NHNN đang xét hồ sơ **sửa vốn điều lệ
+  trên Giấy phép** ⇒ sau đó mới niêm yết bổ sung; SHB nói "dự kiến trong tháng 10". Thông cáo **không trả
+  lời trực diện** ý "sử dụng vốn sai quy định". CAR hợp nhất 11,81% · dự trữ thanh khoản 17,05% · LDR 80,6%
+  (30/06). Phó TGĐ đăng ký mua 2 tr cp; ngoại mua ròng ~125 tỷ phiên 09/10.
+- **Áp trục quyết định**: tin đồn chạm **PHÁP NHÂN/VỐN của ngân hàng** (lõi), KHÔNG phải cá nhân ⇒ tiêu chí
+  #1 §2 **không đạt theo cấu trúc**; tiêu chí #2 (backstop NN >50%) **không có** (NH tư nhân). Ngược lại
+  chưa có một dữ kiện chính thức nào xác nhận ⇒ cũng **chưa đủ để xếp NON**. Định giá: PE **4,40** · PB
+  **0,71** (PB_MA5Y 0,95) — rẻ, nhưng rẻ không thay được trụ #1/#2.
+  ⇒ **AMBIGUOUS-yếu**, **cổng NHỊ PHÂN, ngắn hạn, kiểm chứng được**: *NHNN ghi nhận vốn điều lệ 53.442 tỷ
+  trên Giấy phép + HoSE chấp thuận niêm yết bổ sung*. Đóng cổng = tin đồn sai ⇒ không còn sự kiện sợ hãi
+  (và nhiều khả năng không còn điểm vào). Trượt tháng 10 mà không có giải thích = nghiêng NON. Treo thêm:
+  200 tr cp riêng lẻ giá 16.850 (13 NĐT chuyên nghiệp, đang lỗ ~1.360 tỷ) chờ niêm yết = cung treo.
+  **Không đề xuất hành động** — chỉ ghi sổ để lượt sau đối chiếu cổng.
+
+#### Việc 2 — read-through 14 mã gác (cửa sổ 10→11/10, + phiên 09/10)
+
+- **5 mã ngân hàng (MBB MSB TPB VIB VPB)**: **0 sự kiện rủi ro** (0 kiểm soát đặc biệt / chuyển giao bắt buộc
+  / khởi tố lãnh đạo / rút tiền hàng loạt / sân sau / thao túng). Tin có thật đều là vốn: TPB hoàn tất tăng
+  vốn lên >31.900 tỷ; VPB hoàn tất tăng vốn lên 100.000 tỷ; MSB niêm yết bổ sung hiệu lực 15/10
+  (không điều chỉnh giá). Phiên 09/10: MBB +0,8% · VPB +1,5% · MSB −1,0% · VIB −1,1%. **Sự kiện SHB không
+  lan**: là tin đồn riêng về thủ tục tăng vốn của SHB, không có nội dung hệ thống.
+- **VPI (BĐS — nhánh c)**: 0 sự kiện tín dụng/trái phiếu/giải chấp mới; niêm yết bổ sung hiệu lực 14/10 (không
+  điều chỉnh giá); −1,5% phiên 09/10. Vụ UBCKNN phạt 2 cá nhân thao túng VPI (1,5 tỷ, cấm GD 2 năm) + 16
+  người cho mượn TK là tin **19/08**, ngoài cửa sổ, chỉ cá nhân ngoài DN — không phải dữ kiện mới. Vingroup:
+  0 tin hạ bậc/chậm trả/cầm cố trong cửa sổ.
+- **8 mã ngoài NH còn lại**: **0 sự kiện riêng lẻ**. **DGC**: vẫn trong danh sách 65 mã HoSE cắt margin Q4/2026
+  (lý do hạn chế giao dịch) — đúng trạng thái đã biết, 0 dữ kiện mới. **TV1**: họp báo BCA 01/10 nâng lên
+  **48 bị can** (+1), vẫn CHỈ cá nhân, **chưa có kết luận điều tra**; đã qua ex-date cổ tức tiền 1.500đ/cp
+  (07/10). **PVT**: công ty con PVT Logistics xin ý kiến chào bán thêm cổ phần mở rộng đội tàu (05/10) —
+  không phải sự kiện rủi ro. SAB/VNM/SIP/NCT/DRI: không có tin.
+- **Case cũ — PNJ (NON, `excluded_tickers` cả 2 account)**: dữ kiện MỚI (a) VNDirect **bán giải chấp 2,94 tr
+  cp** của bà Trần Phương Ngọc Giao (con gái Chủ tịch) 08/10; (b) **T. Rowe Price** rời vị trí cổ đông lớn;
+  (c) PNJ công bố kiểm định độc lập (Vinacontrol lấy mẫu → AIGS): "100% mẫu là kim cương thiên nhiên" ⇒
+  **tăng trần 09/10** sau 13 phiên giảm (6 sàn), giá vùng thấp nhất 9 năm. Đọc: (c) do PNJ tự công bố, không
+  phải kết luận của cơ quan điều tra; lý do hạ NON 09-28 (phát hành riêng lẻ 550 tr cp > 511 tr đang lưu
+  hành) **đứng nguyên** ⇒ **giữ NON**, cổng kế tiếp ĐHĐCĐ bất thường **21/10**.
+- **Ngoài danh mục**: **HDB** Price 28.000 → 22.400 (−20%) nhưng `Close` adjusted 21.540 → 22.400 (**+4,0%**)
+  ⇒ ex-right, artifact (BQ tự kiểm). **KOS** sàn chuỗi 15 phiên (không-phải-case từ 09-21; người nhà Chủ
+  tịch đăng ký mua 8 tr cp). **DRH** sắp đình chỉ giao dịch (mãn tính). Chủ tịch CTCP Đầu tư du lịch Mặt
+  trời Việt Nam bị bắt 09/10 (tham ô) — chưa xác nhận được là DN niêm yết, không có mã để xét. **0 vụ khởi
+  tố lãnh đạo DN niêm yết mới** tìm được trong cửa sổ.
+- **Nền**: VN-Index **1.735,09** (09/10, −0,22%; **tuần giảm thứ 3 liên tiếp**); ngoại bán ròng **13 phiên
+  liên tiếp**, ~14.000 tỷ/tuần chủ yếu thoả thuận (riêng 09/10: −9.272,7 tỷ, thoả thuận toàn thị trường
+  12.975,6 tỷ); Brent >104 USD; HoSE cắt margin 65 mã + HNX 67 mã Q4/2026.
+
+#### Việc 4 — ẢNH HƯỞNG TỚI PHÍA MUA: **0 lệnh MUA trên mọi kênh live phiên 12/10**
+
+`plan_SpaceX_2026-10-12` và `plan_ZaloPay_2026-10-12`: **`orders = []`**, `deferred_orders = []`, `n_bal = 0`,
+LAG `due_today = 0`; cả hai **`approved_by = None`**. `park_trim_*` = `BLOCKED_ALL_NAMES` (các mã park còn lại
+< 1 lô, toàn phía BÁN). `jit_unpark_*` = `NO_TRIGGER`. Injector TV1 (`inject_discretionary.log` 09/10 20:30):
+**skip deadband** cả 2 account (SpaceX thiếu 200cp = 0,39% < 0,50%; ZaloPay thiếu 100cp = 0,32%) ⇒ không
+chèn lệnh. ⇒ **Không có luận điểm mua nào để RÚT.** SHB và DHC đều không nằm trong vị thế hay rổ ứng viên.
+Ghi nhận phụ (không phải việc lượt này): injector in `[FAILSAFE] TV1: luật A không lấy được giá tham chiếu
+chính thức (biên độ đo +14,508% ≠ ±15% UPCoM)` → rơi về band cố định; trùng thời điểm sau ex-date 07/10.
+
+#### Việc 7 — phễu candidate hệ thống
+
+**KHÔNG có khối "PHỄU CANDIDATE HỆ THỐNG" trong dispatch lượt này** (cadence sáng thứ Hai) ⇒ không rà,
+không suy diễn danh sách.
+
+**Kết luận lượt này:** **14 mã gác rà qua** · 249 mã anomaly_scan × 7 phiên · 13 truy vấn tin + 4 WebFetch +
+2 truy vấn BQ + đọc 6 artifact plan + log injector · **0 QUALIFY · 1 AMBIGUOUS-yếu (SHB) · 1
+không-phải-case (DHC) · watchlist TƯƠI · 0 lệnh mua để RÚT.**
+
+**Mốc phải theo, gần → xa: NHNN ghi nhận vốn điều lệ SHB + niêm yết bổ sung (trong tháng 10 — cổng SHB) →
+PNJ ĐHĐCĐ bất thường 21/10 → BCTC Q3/2026 cuối 10 (cổng DHC, PAN, PTB, KSB, CMG) → kết luận điều tra đại án
+điện (cổng TV1) → giấy phép mỏ Phước Vĩnh KSB hết hạn 6/2027.**
+
+**Nguồn (cửa sổ 08→12/10/2026):**
+[Vietstock — 12/10: Đọc gì trước giờ giao dịch](https://vietstock.vn/2026/10/1210-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1501226.htm) ·
+[Hà Nội Mới — Chứng khoán 9-10: PNJ, SHB lấy lại "phong độ", ngoại bán ròng hơn 9.000 tỷ](https://hanoimoi.vn/chung-khoan-9-10-pnj-shb-lay-lai-phong-do-khoi-ngoai-ban-rong-hon-9-000-ty-dong-1760290.html) ·
+[VietnamBiz — SHB lên tiếng trước tin đồn, tăng vốn hoàn tất trong tháng 10](https://vietnambiz.vn/shb-len-tieng-truoc-tin-don-khang-dinh-tang-von-dung-trinh-tu-va-cho-biet-se-hoan-tat-trong-thang-10-2026109201433954.htm) ·
+[CafeF — Chuyện gì đang xảy ra với SHB](https://cafef.vn/chuyen-gi-dang-xay-ra-voi-shb-giam-rong-ra-tu-18000-dong-roi-ve-menh-gia-loat-ca-map-noi-ngoai-tam-lo-1400-ty-sau-nua-nam-188261008153047064.chn) ·
+[Báo Chính phủ — SHB hoạt động ổn định, tăng vốn đúng quy định](https://baochinhphu.vn/shb-hoat-dong-on-dinh-trien-khai-tang-von-dung-quy-dinh-da-dang-hoa-nguon-luc-102261009195931565.htm) ·
+[CafeF — 65 mã bị HoSE cắt margin Q4/2026](https://cafef.vn/nong-65-ma-chung-khoan-bi-hose-cat-margin-quy-4-2026-hvn-dgc-cung-hang-loat-co-phieu-hot-nam-trong-danh-sach-188261005103507177.chn) ·
+[Công Lý — Vụ án EVNNPT: khởi tố 48 bị can](https://congly.vn/vu-an-tai-cong-ty-truyen-tai-dien-quoc-gia-khoi-to-48-bi-can-5-toi-danh-541571.html) ·
+[Dân Trí — Hai cá nhân bị phạt 1,5 tỷ (thao túng VPI, 19/08)](https://dantri.com.vn/kinh-doanh/hai-ca-nhan-bi-phat-15-ty-dong-va-cam-giao-dich-chung-khoan-2-nam-20260819150254726.htm) ·
+[Công Luận — Chủ tịch công ty du lịch bị khởi tố vì tham ô](https://congluan.vn/lap-tai-khoan-ngan-hang-mat-chu-tich-hdqt-bo-tui-rieng-tien-ban-tau-cua-cong-ty-post363433.html)
+
+---
