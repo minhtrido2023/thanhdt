@@ -31,6 +31,13 @@ tightening was a NO-OP. This selfcheck pins down all fixes:
      BQ); failure path dies AND alerts; dt_4gate is advisory-only (research consumer,
      step [8] non-fatal by design — must not block the production publish path).
 
+  E. macro_healthcheck runs BEFORE publish (2026-10-12, job Taylor_20261012_040247) — the
+     healthcheck command sits immediately before the publish command, exactly ONCE (a second
+     run would double the Telegram/MACRO_HEALTH_ALERT.md on every non-HEALTHY evening), is
+     non-fatal and time-bounded; and the REAL block (extracted from the script, run in a
+     sandbox with a stub interpreter) still reaches publish when the healthcheck exits
+     1/2/127, is SIGKILLed, or hangs.
+
 Run: python3 dt5g_chain_freshness_selfcheck.py   (exit 0 = all pass)
 NOTE: never runs the real chain and never touches BQ — everything is sandboxed in tmp.
 """
@@ -40,11 +47,15 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 
 WC = "/home/trido/thanhdt/WorkingClaude"
 FRESHNESS_SH = os.path.join(WC, "mike/bin/bq_freshness_check.sh")
 ASSERT_SH = os.path.join(WC, "assert_chain_outputs.sh")
-REFRESH_SH = os.path.join(WC, "daily_refresh_v34b_linux.sh")
+# Script nằm cạnh selfcheck này (ở canonical HERE == WC): chạy từ một worktree thì phải kiểm
+# đúng bản của worktree đó, không phải bản đang chạy cron.
+HERE = os.path.dirname(os.path.abspath(__file__))
+REFRESH_SH = os.path.join(HERE, "daily_refresh_v34b_linux.sh")
 
 fails = []
 
@@ -246,6 +257,130 @@ check("D5 dt_4gate checked as ADVISORY (alert, no die) — research-only, must n
 check("D6 bash syntax of both scripts still valid",
       subprocess.run(["bash", "-n", REFRESH_SH]).returncode == 0
       and subprocess.run(["bash", "-n", ASSERT_SH]).returncode == 0)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# E. macro_healthcheck BEFORE publish — order (static) + non-blocking (sandboxed real block)
+# ═══════════════════════════════════════════════════════════════════════════
+print("\nE. macro_healthcheck runs before publish_gated_state, and never blocks it")
+HC_CMD = r'\$PY\s+(\S*/)?macro_healthcheck\.py\b'
+PUB_CMD = r'\$PY\s+(\S*/)?publish_gated_state\.py\b'
+
+
+def cmd_lines(pattern):
+    """Chỉ dòng LỆNH: bỏ comment và nhãn `step "..."` (nhãn có nhắc tên file .py)."""
+    return [i for i, ln in enumerate(lines)
+            if re.search(pattern, ln) and not re.match(r'\s*(#|step\s)', ln)]
+
+
+hc_ls, pub_ls = cmd_lines(HC_CMD), cmd_lines(PUB_CMD)
+step_ls = [i for i, ln in enumerate(lines) if re.match(r'step\s+"', ln)]
+check("E1 exactly ONE macro_healthcheck invocation (2 lượt = nhân đôi Telegram tối không HEALTHY)",
+      len(hc_ls) == 1, f"lines {[i + 1 for i in hc_ls]}")
+check("E2 exactly ONE publish_gated_state invocation", len(pub_ls) == 1,
+      f"lines {[i + 1 for i in pub_ls]}")
+e_ok = len(hc_ls) == 1 and len(pub_ls) == 1
+l_hc, l_pub = (hc_ls[0], pub_ls[0]) if e_ok else (-1, -1)
+check("E3 healthcheck command stands BEFORE publish command", e_ok and l_hc < l_pub,
+      f"healthcheck line {l_hc + 1}, publish line {l_pub + 1}")
+hc_step = max([i for i in step_ls if i < l_hc], default=-1) if e_ok else -1
+pub_step = max([i for i in step_ls if i < l_pub], default=-1) if e_ok else -1
+after_pub = min([i for i in step_ls if i > l_pub], default=-1) if e_ok else -1
+e4_ok = (e_ok and 0 <= hc_step < pub_step
+         and [i for i in step_ls if hc_step < i <= pub_step] == [pub_step]
+         and 0 <= line_of(r'step "\[11b\]') < hc_step)
+check("E4 healthcheck step is the step IMMEDIATELY before the publish step (after sync [11]/[11b])",
+      e4_ok, f"step lines {hc_step + 1}/{pub_step + 1}")
+hc_blk = "\n".join(lines[hc_step:pub_step]) if 0 <= hc_step < pub_step else ""
+hc_code = "\n".join(ln for ln in hc_blk.splitlines() if not ln.lstrip().startswith("#"))
+check("E5 healthcheck is NON-FATAL (`||` guard, no die/exit in its step) and TIME-BOUNDED (timeout)",
+      e_ok and re.search(r'\btimeout\b[^|\n]*' + HC_CMD + r'\s*\|\|', lines[l_hc]) is not None
+      and not re.search(r'\b(die|exit)\b', hc_code), lines[l_hc].strip()[:90] if e_ok else "")
+set_ls = [ln for ln in lines if re.match(r'set\s+[-+]', ln)]
+check("E6 script does not enable errexit (`set -e` would turn healthcheck rc!=0 into an abort)",
+      len(set_ls) == 1 and not re.search(r'\s-[a-zA-Z]*e', set_ls[0]), f"{set_ls}")
+
+# E7: chạy KHỐI THẬT [healthcheck step → hết publish step] trong sandbox. $PY là stub ghi lại
+# thứ tự gọi; notify*.sh (đường dẫn tuyệt đối trong khối) bị trỏ sang stub — còn sót đường dẫn
+# thật thì KHÔNG chạy (không bao giờ bắn notify thật từ selfcheck). Ba lớp chặn lệnh THẬT lọt
+# vào sandbox nếu sau này khối bị sửa: (1) chỉ chạy khi E4 đạt — khối đúng 2 step healthcheck +
+# publish, không kẹp step nào khác (bq load / restate guard…); (2) PATH kín = stub + /usr/bin:/bin
+# (bq/gcloud nằm ngoài đó); (3) stub `bq`/`gcloud` đứng đầu PATH.
+STUB_PY = """#!/usr/bin/env bash
+echo "$1" >> "$CALLS"
+case "$1" in
+  *macro_healthcheck.py)
+    case "$HC_MODE" in
+      rc*)  exit "${HC_MODE#rc}" ;;
+      kill) kill -9 $$ ;;
+      hang) exec sleep 20 ;;
+    esac ;;
+esac
+exit 0
+"""
+# Shim CHỈ rút ngắn thời lượng (để ca treo không chờ đủ trần thật); dạng gọi khác
+# `timeout -k N N cmd…` ⇒ shim exit 99 ⇒ stub healthcheck không được gọi ⇒ E7 đỏ.
+STUB_TIMEOUT = """#!/usr/bin/env bash
+[ "$1" = "-k" ] || exit 99
+shift 3
+exec "$REAL_TIMEOUT" -k 1 2 "$@"
+"""
+blk_e = "\n".join(lines[hc_step:after_pub]) if e4_ok and l_pub < after_pub else ""
+with tempfile.TemporaryDirectory() as sbx:
+    sbin = os.path.join(sbx, "bin")
+    os.makedirs(sbin)
+    blk_run = blk_e.replace(WC + "/mike/bin/", sbin + "/")
+    safe = bool(blk_e) and "/home/" not in blk_run.replace(sbx, "")
+    check("E7a real healthcheck→publish block extracted (needs E4); no real absolute path left after stubbing",
+          safe, f"{len(blk_e.splitlines())} lines")
+
+    def put(path, body):
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(body)
+        os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR)
+
+    real_timeout = subprocess.run(["bash", "-c", "command -v timeout"],
+                                  capture_output=True, text=True).stdout.strip()
+    put(os.path.join(sbin, "stubpy"), STUB_PY)
+    put(os.path.join(sbin, "timeout"), STUB_TIMEOUT)
+    for nm in ("notify.sh", "notify_thread.sh", "bq", "gcloud"):
+        put(os.path.join(sbin, nm), '#!/usr/bin/env bash\necho "$0" >> "$CALLS"\n')
+    harness = os.path.join(sbx, "harness.sh")
+    put(harness, "\n".join([
+        "#!/usr/bin/env bash",
+        set_ls[0] if set_ls else "set -uo pipefail",     # đúng dòng `set` của script thật
+        f'PY="{sbin}/stubpy"; LOG="{sbx}/refresh.log"; WORKDIR_8L="{sbx}"',
+        'step() { echo "--- $* ---"; }',
+        'die() { echo "!!! ABORT: $*"; exit 1; }',
+        blk_run,
+        "echo CHAIN_CONTINUED",
+        "",
+    ]))
+
+    def run_block(mode):
+        calls = os.path.join(sbx, f"calls_{mode}.log")
+        env = dict(os.environ, PATH=sbin + os.pathsep + "/usr/bin:/bin",
+                   CALLS=calls, HC_MODE=mode, REAL_TIMEOUT=real_timeout)
+        t0 = time.monotonic()
+        r = subprocess.run(["bash", harness], cwd=sbx, env=env, capture_output=True,
+                           text=True, timeout=120)
+        got = [os.path.basename(c) for c in read(calls).split()] if os.path.exists(calls) else []
+        return r, got, time.monotonic() - t0
+
+    want = ["macro_healthcheck.py", "publish_gated_state.py"]
+    for mode, label in (("rc0", "HEALTHY rc=0"), ("rc1", "DEGRADED rc=1"), ("rc2", "FAILED rc=2"),
+                        ("rc127", "interpreter/script hỏng rc=127"), ("kill", "bị SIGKILL"),
+                        ("hang", "TREO, timeout cắt")):
+        if not (safe and real_timeout):
+            check(f"E7 [{label}] publish still runs", False, "block not runnable / no timeout binary")
+            continue
+        r, got, dt = run_block(mode)
+        check(f"E7 [{label}] healthcheck called first, publish STILL runs, chain continues",
+              got == want and "CHAIN_CONTINUED" in r.stdout and r.returncode == 0 and dt < 10,
+              f"calls={got} rc={r.returncode} {dt:.1f}s")
+        if mode != "rc0":
+            warn = re.findall(r"WARN: macro_healthcheck[^\n]*rc=[1-9][0-9]*", r.stdout)
+            check(f"E7 [{label}] failure is LOGGED with its rc, not silent", bool(warn),
+                  (warn or ["<no WARN line>"])[0][:70])
 
 print()
 if fails:
