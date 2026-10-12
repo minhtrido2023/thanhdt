@@ -622,3 +622,22 @@
 ## Consolidation 2026-10-12T04:29:05Z
 - [2026-10-12T04:28:20Z] Taylor/heartbeat — Taylor_20261012_042619: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261012_042619", "source": "watcher"}
 - [2026-10-12T04:28:54Z] Taylor/finding — healthcheck-before-publish-20261012-r2: {"branch": "fix/healthcheck-before-publish-20261012", "commit": "5f965565", "base": "1f5af0f4", "merged": false, "worktree": "mike/agents/Taylor/wt-hcpub-1012", "selfcheck": "dt5g_chain_freshness_selfcheck 59 PASS / 0 FAIL, env -u TZ + Pacific/Honolulu + Asia/Kolkata, wc_venv python; bash -n OK; pre-commit/shellcheck pass", "M1": "E5 parse -k K N từ dòng thật, assert K>=1 và 60<=N<=600", "M2": "[11c] case theo rc: 1=DEGRADED(không lỗi),2=FAILED,124/137=TIMEOUT,khác=LỖI CHẠY; notify.sh+notify_thread.sh (cùng đường với [12]) chỉ cho rc ngoài {0,1,2}, `|| true`; publish chạy mọi nhánh", "M3": "E7 ma trận rc0/1/2/124/137/127/kill/hang: publish gọi, nhãn đúng, notify 0 lần (rc0/1/2) hoặc 1 lần (còn lại), notify tự lỗi vẫn chạy tiếp", "mutations": {"timeout -k 10 0": "CHẾT", "-k 10 3000": "CHẾT", "-k 10 1": "CHẾT", "-k 0 300": "CHẾT", "tập {0,1,2} đổi": "CHẾT", "notify || die": "CHẾT (6 fail)", "nhãn rc1=FAILED": "CHẾT", "rc2 có notify": "CHẾT"}, "survivors": 0}
+
+## Consolidation 2026-10-12T04:58:04Z
+- [2026-10-12T04:43:48Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "in_progress", "note": "đọc xong code hiện trạng, bắt đầu sửa C1-C4"}
+- [2026-10-12T04:44:01Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:45:01Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:46:01Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:47:01Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:48:01Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:49:01Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:49:07Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "in_progress", "note": "dashboard C1-C3+N1-N6 đã sửa, trang thật sinh OK; đang viết selfcheck + sửa eod script (C4)"}
+- [2026-10-12T04:50:02Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:51:02Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:52:02Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:52:58Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "in_progress", "note": "dashboard + selfcheck T11-T13 xanh; sang eod_trading_report.sh (C4a) + attach selfcheck"}
+- [2026-10-12T04:53:02Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:54:03Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:55:03Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:56:03Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261012_044300", "source": "watcher"}
+- [2026-10-12T04:57:04Z] Taylor/heartbeat — Taylor_20261012_044300: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261012_044300", "source": "watcher"}
