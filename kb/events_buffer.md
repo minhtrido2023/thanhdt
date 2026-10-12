@@ -724,3 +724,12 @@
 - [2026-10-12T11:40:27Z] Taylor/heartbeat — Taylor_20261012_111422: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261012_111422", "source": "watcher"}
 - [2026-10-12T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-10-12", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-10-12T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-10-12T12:03:43Z
+- [2026-10-12T12:03:00Z] DollarBill/heartbeat — DollarBill_20261012_120250: {"status": "in_progress", "note": "start ZaloPay plan 10-13"}
+- [2026-10-12T12:03:01Z] DollarBill/heartbeat — DollarBill_20261012_120252: {"status": "in_progress", "note": "bat dau doc state/NAV"}
+- [2026-10-12T12:03:35Z] DollarBill/decision — plan-2026-10-13-SpaceX: {"plan": "HOLD ALL 0 lenh", "dt5g": "NEUTRAL", "active_nav": 986247378, "l1": "BLOCKED_ALL_NAMES", "capit_sessions": 57, "file": "data/trade_plans/plan_SpaceX_2026-10-13.json"}
+- [2026-10-12T12:00:59Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "in_progress", "note": "r2 bat dau: doc nhanh + file monitor"}
+- [2026-10-12T12:01:49Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261012_120049", "source": "watcher"}
+- [2026-10-12T12:01:58Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "in_progress", "note": "doc xong monitor+selfcheck, dang doc phu thuoc"}
+- [2026-10-12T12:02:50Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261012_120049", "source": "watcher"}
