@@ -733,3 +733,8 @@
 - [2026-10-12T12:01:49Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261012_120049", "source": "watcher"}
 - [2026-10-12T12:01:58Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "in_progress", "note": "doc xong monitor+selfcheck, dang doc phu thuoc"}
 - [2026-10-12T12:02:50Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261012_120049", "source": "watcher"}
+
+## Consolidation 2026-10-12T12:03:56Z
+- [2026-10-12T12:03:48Z] DollarBill/decision — plan-ZaloPay-2026-10-13: {"plan": "HOLD ALL 0 lenh", "file": "data/trade_plans/plan_ZaloPay_2026-10-13.json", "dt5g": "NEUTRAL", "active_nav": 601434028, "egg": 319114008, "l1": "BLOCKED_ALL_NAMES", "capit_sessions": 57}
+- [2026-10-12T12:03:51Z] DollarBill/heartbeat — DollarBill_20261012_120250: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261012_120250", "source": "watcher"}
+- [2026-10-12T12:03:50Z] Taylor/heartbeat — Taylor_20261012_120049: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261012_120049", "source": "watcher"}
