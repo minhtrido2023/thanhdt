@@ -104,7 +104,10 @@ def age_hours(path):
     try:
         with open(path, encoding="utf-8") as f:
             d = json.load(f)
-        ts = datetime.datetime.fromisoformat(d["ts"]).replace(tzinfo=ICT)
+        ts = datetime.datetime.fromisoformat(d["ts"])
+        # naive = giờ tường ICT (quy ước ghi của các script này) ⇒ gắn ICT; đã aware ⇒ quy đổi,
+        # KHÔNG ghi đè múi giờ (ts UTC/+00:00 bị ép thành ICT sẽ lệch âm thầm 7 giờ).
+        ts = ts.replace(tzinfo=ICT) if ts.tzinfo is None else ts.astimezone(ICT)
         now = datetime.datetime.now(ICT)
         return round((now - ts).total_seconds() / 3600, 1)
     except Exception:

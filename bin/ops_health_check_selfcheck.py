@@ -58,6 +58,7 @@ CHECK10_SRC = extract_block("CHECK10")
 CHECK10B_SRC = extract_block("CHECK10B")
 CHECK11_SRC = extract_block("CHECK11")
 CHECK12_SRC = extract_block("CHECK12")
+CHECK13_SRC = extract_block("CHECK13")
 ROUTING_SRC = extract_block("ROUTING")
 
 
@@ -2105,6 +2106,328 @@ def case_c12_journalctl_invocation_is_pinned():
           "--since" in argv and "-24h" in argv, repr(argv))
 
 
+# ── check 13: cổng get_gated_state suy giảm (nguồn DT4_only/DT4_STALE) ─────────────────────────
+_ICT13 = dt.timezone(dt.timedelta(hours=7))     # ICT không có DST ⇒ offset cố định là đủ
+
+
+def _c13_now():
+    return dt.datetime.now(_ICT13).replace(microsecond=0)
+
+
+def _c13_naive(t):
+    """Giờ tường ICT không offset — đúng dạng publish_gated_state.py ghi `published_at`."""
+    return t.astimezone(_ICT13).replace(tzinfo=None).isoformat(timespec="seconds")
+
+
+def _c13_root(source="DT5G_macro", pub=None, health=None, state_raw=None, health_raw=None,
+              refresh_log=None, bq_log=None):
+    """Dựng WC_ROOT giả. `health=None` ⇒ KHÔNG có file health; `state_raw`/`health_raw` ghi nguyên văn."""
+    td = tempfile.mkdtemp(prefix="ops_c13_")
+    os.makedirs(os.path.join(td, "deploy_golive_dt5g_v4"))
+    os.makedirs(os.path.join(td, "data"))
+    os.makedirs(os.path.join(td, "mike", "logs"))
+    pub = pub or _c13_now() - dt.timedelta(hours=13)
+    sp = os.path.join(td, "deploy_golive_dt5g_v4", "golive_state_today.json")
+    with open(sp, "w", encoding="utf-8") as f:
+        f.write(state_raw if state_raw is not None else json.dumps({
+            "published_at": _c13_naive(pub), "as_of": pub.strftime("%Y-%m-%d"), "state": 2,
+            "base_state_dt4": 2, "macro_state_dt5g": 1, "source": source,
+            "bq_table": "tav2_bq.vnindex_5state_dt5g_live", "bq_publish_ok": True}))
+    hp = os.path.join(td, "data", "macro_health.json")
+    if health_raw is not None:
+        with open(hp, "w", encoding="utf-8") as f:
+            f.write(health_raw)
+    elif health is not None:
+        with open(hp, "w", encoding="utf-8") as f:
+            json.dump(health, f)
+    if refresh_log is not None:
+        with open(os.path.join(td, "data", f"refresh_v34b_linux_{pub.strftime('%Y-%m-%d')}.log"),
+                  "w", encoding="utf-8") as f:
+            f.write(refresh_log)
+    if bq_log is not None:
+        with open(os.path.join(td, "mike", "logs", "bq_freshness.log"), "w", encoding="utf-8") as f:
+            f.write(bq_log)
+    return td, pub
+
+
+def _c13_health(ts, status="HEALTHY", rec="DT5G_macro", aware=True):
+    return {"ts": ts.isoformat() if aware else _c13_naive(ts), "status": status,
+            "recommended_state_source": rec}
+
+
+def _c13_tree(td):
+    out = {}
+    for base, _dirs, files in os.walk(td):
+        for fn in files:
+            fp = os.path.join(base, fn)
+            st = os.stat(fp)
+            out[os.path.relpath(fp, td)] = (st.st_size, st.st_mtime_ns)
+    return out
+
+
+def run_check13(td, account="SpaceX", label="SpaceX", extra_ns=None):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {"json": json, "os": os, "W": W, "OK": OK, "lines": lines, "wc_root": td,
+          "account": account, "runonce_label": label}
+    ns.update(extra_ns or {})
+    exec(compile(CHECK13_SRC, SRC + ":CHECK13", "exec"), ns)
+    return lines, warn
+
+
+def case_c13_dt5g_published_is_ok_even_when_health_is_old_now():
+    """Cửa sổ ĐÚNG THIẾT KẾ: sáng thứ Hai file health cũ ~62h (>1440') so với BÂY GIỜ, nhưng lượt
+    publish thứ Sáu ra DT5G_macro ⇒ KHÔNG được báo động (đo thật: T2 08:20 = 3703', 4/4 tuần)."""
+    pub = _c13_now() - dt.timedelta(minutes=3703)
+    for aware in (True, False):
+        td, _ = _c13_root("DT5G_macro", pub=pub,
+                          health=_c13_health(pub - dt.timedelta(minutes=186), aware=aware))
+        lines, warn = run_check13(td)
+        out = joined(lines)
+        check(f"check13: publish DT5G_macro + health cũ 3889' so với bây giờ (ts aware={aware}) "
+              "⇒ OK, 0 WARN (không báo động giả sáng thứ Hai)",
+              not warn and len(lines) == 1 and "DT5G_macro" in out, out)
+        shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_emits_exactly_once_per_run():
+    """for_each_live_account gọi script mỗi account một lần — cảnh báo cấp hệ thống chỉ ra 1 lần."""
+    pub = _c13_now() - dt.timedelta(hours=13)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(hours=72)))
+    total = []
+    for acct in ("SpaceX", "ZaloPay"):
+        lines, _w = run_check13(td, account=acct, label="SpaceX")
+        total += lines
+    check("check13: 2 account trong một lượt ⇒ ĐÚNG 1 dòng cảnh báo", len(total) == 1, joined(total))
+    lines, _w = run_check13(td, account="ZaloPay", label="ZaloPay")
+    check("check13: SpaceX không còn live ⇒ account được chọn (ZaloPay) vẫn báo", len(lines) == 1,
+          joined(lines))
+    lines, _w = run_check13(td, account="SpaceX", label="")
+    check("check13: nhãn runonce rỗng ⇒ im (cùng cổng RUNONCE với 3 check chạy-một-lần khác; "
+          "ca LỖI đã có dòng ⚠️ [runonce] riêng)", lines == [], joined(lines))
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_cause_health_old_at_publish():
+    pub = _c13_now() - dt.timedelta(hours=13)
+    for aware in (True, False):
+        td, _ = _c13_root("DT4_only", pub=pub,
+                          health=_c13_health(pub - dt.timedelta(minutes=4321), aware=aware))
+        lines, warn = run_check13(td)
+        out = joined(lines)
+        check(f"check13: DT4_only + health cũ tại lúc publish (ts aware={aware}) ⇒ WARN nêu ĐÚNG "
+              "số phút đo được và ngưỡng 1440",
+              len(warn) == 1 and "4321 phút" in out and "1440" in out and "DT4_only" in out
+              and "[WARN-ONLY]" in out and "KHÔNG áp macro cap" in out, out)
+        shutil.rmtree(td, ignore_errors=True)
+    # ts viết theo UTC (+00:00): phải QUY ĐỔI chứ không ép thành ICT (ép ⇒ lệch 420 phút)
+    h = _c13_health(pub - dt.timedelta(minutes=4321))
+    h["ts"] = (pub - dt.timedelta(minutes=4321)).astimezone(dt.timezone.utc).isoformat()
+    td, _ = _c13_root("DT4_only", pub=pub, health=h)
+    out = joined(run_check13(td)[0])
+    check("check13: ts health viết theo UTC (+00:00) ⇒ vẫn đúng 4321 phút (quy đổi, không ghi đè múi giờ)",
+          h["ts"].endswith("+00:00") and "4321 phút" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_cause_health_unreadable_real_error():
+    td, _ = _c13_root("DT4_only", health_raw='{"ts": "2026-10-11T10:23:04+07:00", "status": ')
+    out = joined(run_check13(td)[0])
+    check("check13: health JSON cụt ⇒ nêu lỗi parse THẬT (JSONDecodeError + thông điệp của parser)",
+          "JSONDecodeError" in out and "Expecting value" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    td, _ = _c13_root("DT4_only", health=None)
+    out = joined(run_check13(td)[0])
+    check("check13: KHÔNG có file health ⇒ nêu FileNotFoundError thật, không nói 'cũ'",
+          "FileNotFoundError" in out and "CŨ" not in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    td, _ = _c13_root("DT4_only", health={"status": "HEALTHY", "recommended_state_source": "DT5G_macro"})
+    out = joined(run_check13(td)[0])
+    check("check13: health thiếu field ts ⇒ nêu KeyError 'ts' thật", "KeyError" in out and "'ts'" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    td, _ = _c13_root("DT4_only", health={"ts": "hom-qua", "status": "HEALTHY"})
+    out = joined(run_check13(td)[0])
+    check("check13: ts không phải ISO ⇒ nêu ValueError thật kèm giá trị hỏng",
+          "ValueError" in out and "hom-qua" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_cause_feed_untrusted():
+    pub = _c13_now() - dt.timedelta(hours=13)
+    for status, rec in (("FAILED", "DT4_only"), ("DEGRADED", "DT4_only"), ("FAILED", "DT5G_macro")):
+        td, _ = _c13_root("DT4_only", pub=pub,
+                          health=_c13_health(pub - dt.timedelta(minutes=30), status=status, rec=rec))
+        out = joined(run_check13(td)[0])
+        check(f"check13: health tươi nhưng status={status} rec={rec} ⇒ nêu đúng 2 giá trị đọc được, "
+              "không nói 'cũ'",
+              f"status={status}" in out and f"recommended_state_source={rec}" in out
+              and "KHÔNG đáng tin" in out and "CŨ" not in out, out)
+        shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_cause_ts_in_future():
+    pub = _c13_now() - dt.timedelta(hours=13)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(_c13_now() + dt.timedelta(minutes=125)))
+    out = joined(run_check13(td)[0])
+    check("check13: ts health ở tương lai 125' so với bây giờ ⇒ nêu TƯƠNG LAI + số phút + mức cho lệch 5'",
+          "TƯƠNG LAI" in out and re.search(r"TƯƠNG LAI 12[45] phút", out) and "5 phút" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(_c13_now() + dt.timedelta(minutes=2)))
+    out = joined(run_check13(td)[0])
+    check("check13: ts trước bây giờ 2' (trong mức lệch 5') ⇒ KHÔNG gọi là tương lai",
+          "TƯƠNG LAI" not in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_health_rewritten_after_publish_no_guess():
+    """Bước [14] ghi lại health SAU bước [12] publish ⇒ file hiện tại không phải bản cổng đã đọc."""
+    pub = _c13_now() - dt.timedelta(hours=13)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub + dt.timedelta(minutes=1)))
+    out = joined(run_check13(td)[0])
+    check("check13: health ghi lại SAU publish ⇒ nói thẳng không suy được, KHÔNG gán nguyên nhân "
+          "(không 'cũ', không 'không đáng tin')",
+          "SAU lượt publish" in out and "KHÔNG suy được" in out and "CŨ" not in out
+          and "KHÔNG đáng tin" not in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_health_valid_says_unknown():
+    pub = _c13_now() - dt.timedelta(hours=13)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=186)))
+    out = joined(run_check13(td)[0])
+    check("check13: DT4_only mà health tại lúc publish hợp lệ (186') ⇒ 'KHÔNG xác định được', không đoán",
+          "KHÔNG xác định được nguyên nhân" in out and "186 phút" in out and "CŨ" not in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    # mép ngưỡng: đúng 1440' KHÔNG phải cũ (cổng dùng `>`), 1441' là cũ
+    for mins, is_old in ((1440, False), (1441, True)):
+        td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=mins)))
+        out = joined(run_check13(td)[0])
+        check(f"check13: mép ngưỡng tuổi {mins}' ⇒ {'CŨ' if is_old else 'chưa cũ'} (khớp `>` của cổng)",
+              ("CŨ" in out) == is_old, out)
+        shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_dt4_stale_source():
+    pub = _c13_now() - dt.timedelta(hours=13)
+    td, _ = _c13_root("DT4_STALE", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=4000)))
+    lines, warn = run_check13(td)
+    out = joined(lines)
+    check("check13: DT4_STALE ⇒ WARN nêu engine đóng băng, KHÔNG đổ cho file health dù health cũ",
+          len(warn) == 1 and "DT4_STALE" in out and "không phải do file health" in out
+          and "CŨ" not in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_gate_log_line_only_when_it_matches_source():
+    pub = _c13_now() - dt.timedelta(hours=13)
+    real = "[get_gated_state] DT4_only: health report 4321min old (> 1440) -> DT4_only"
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=4321)),
+                      refresh_log=f"--- [12] publish ---\n{real}\n--- [14] ---\n")
+    out = joined(run_check13(td)[0])
+    check("check13: log lượt publish có dòng cổng tự in khớp nguồn ⇒ trích NGUYÊN VĂN kèm tên file",
+          real in out and "refresh_v34b_linux_" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    other = "[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro"
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=4321)),
+                      refresh_log=other + "\n", bq_log=other + "\n")
+    out = joined(run_check13(td)[0])
+    check("check13: dòng log nói nguồn KHÁC nguồn đã công bố ⇒ KHÔNG trích (không phải bằng chứng), "
+          "nói rõ không tìm thấy", other not in out and "Không tìm thấy dòng [get_gated_state]" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=4321)),
+                      bq_log=f"x\n{other}\ny\n{real}\n")
+    out = joined(run_check13(td)[0])
+    check("check13: không có log refresh ⇒ rơi sang bq_freshness.log, lấy dòng CUỐI",
+          real in out and "bq_freshness.log" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_unreadable_state_never_reports_green():
+    for label, raw, needle in (("JSON cụt", '{"source": ', "JSONDecodeError"),
+                               ("thiếu field source", '{"published_at": "2026-10-09T19:01:21"}', "KeyError")):
+        td, _ = _c13_root(state_raw=raw, health=_c13_health(_c13_now() - dt.timedelta(hours=14)))
+        lines, warn = run_check13(td)
+        out = joined(lines)
+        check(f"check13: trạng thái đã công bố {label} ⇒ WARN với lỗi thật, KHÔNG bao giờ ✅",
+              len(warn) == 1 and needle in out and "✅" not in out and "KHÔNG kết luận được" in out, out)
+        shutil.rmtree(td, ignore_errors=True)
+    td, _ = _c13_root()
+    os.remove(os.path.join(td, "deploy_golive_dt5g_v4", "golive_state_today.json"))
+    lines, warn = run_check13(td)
+    check("check13: KHÔNG có file trạng thái ⇒ WARN FileNotFoundError, không ✅",
+          len(warn) == 1 and "FileNotFoundError" in joined(lines) and "✅" not in joined(lines), joined(lines))
+    shutil.rmtree(td, ignore_errors=True)
+    td, pub = _c13_root("DT4_only", state_raw=json.dumps({"source": "DT4_only", "published_at": "khong-ro"}),
+                        health=_c13_health(_c13_now() - dt.timedelta(hours=1)))
+    out = joined(run_check13(td)[0])
+    check("check13: published_at hỏng ⇒ vẫn WARN DT4_only, nói không có mốc publish để đối chiếu",
+          "DT4_only" in out and "không có thời điểm publish" in out, out)
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_is_read_only_and_never_calls_the_gate():
+    """Chỉ ĐỌC: không file nào đổi/sinh ra; không subprocess, không import code cổng (BQ + Telegram)."""
+    pub = _c13_now() - dt.timedelta(hours=13)
+    td, _ = _c13_root("DT4_only", pub=pub, health=_c13_health(pub - dt.timedelta(minutes=4321)),
+                      refresh_log="[get_gated_state] DT4_only: x\n", bq_log="y\n")
+    before = _c13_tree(td)
+
+    class _Boom:
+        def __getattr__(self, name):
+            raise AssertionError(f"check 13 gọi subprocess.{name} — phải chỉ đọc file")
+
+    lines, warn = run_check13(td, extra_ns={"subprocess": _Boom()})
+    check("check13: chạy xong cây file y nguyên (không ghi, không tạo, không đổi mtime)",
+          _c13_tree(td) == before and len(warn) == 1, (before, _c13_tree(td)))
+    code = "\n".join(l for l in CHECK13_SRC.splitlines() if not l.lstrip().startswith("#"))
+    check("check13: khối không gọi get_gated_state / macro_state_live / subprocess / mở file để ghi",
+          not re.search(r"get_gated_state\s*\(|import\s+macro_state_live|subprocess\.|open\([^)]*[\"'][wa]", code),
+          "khối CHECK13 có lời gọi ngoài phạm vi chỉ-đọc")
+    shutil.rmtree(td, ignore_errors=True)
+
+
+def case_c13_thresholds_pinned_to_gate_source():
+    """1440 và 5 là BẢN SAO hằng của cổng — ghim với macro_state_live.py thật để không trôi âm thầm."""
+    check("check13: khối khai đúng 2 hằng 1440 / 5",
+          "_G13_MAX_AGE_MIN, _G13_FUTURE_SKEW_MIN = 1440, 5" in CHECK13_SRC, "không thấy dòng khai hằng")
+    gate = os.environ.get("OPS_C13_GATE_SRC") or os.path.join(os.path.dirname(ROOT), "macro_state_live.py")
+    if not os.path.isfile(gate):
+        gate = "/home/trido/thanhdt/WorkingClaude/macro_state_live.py"   # chạy trong worktree của mike
+    try:
+        gsrc = open(gate, encoding="utf-8").read()
+    except OSError as e:
+        check("check13: đọc được macro_state_live.py để ghim hằng", False, f"{type(e).__name__}: {e}")
+        return
+    check("check13: ngưỡng tươi của cổng vẫn là max_health_age_min=1440",
+          re.search(r"def get_gated_state\([^)]*max_health_age_min=1440\b", gsrc, re.S) is not None, gate)
+    if "MAX_HEALTH_FUTURE_SKEW_MIN" in gsrc:
+        check("check13: mức lệch đồng hồ của cổng vẫn là MAX_HEALTH_FUTURE_SKEW_MIN = 5",
+              re.search(r"MAX_HEALTH_FUTURE_SKEW_MIN\s*=\s*5\b", gsrc) is not None, gate)
+    else:
+        print(f"  SKIP  check13: {gate} chưa có MAX_HEALTH_FUTURE_SKEW_MIN (bản trước 2175a0fa) — "
+              "không ghim được mức lệch 5'")
+
+
+def case_c13_wired_into_heredoc_with_runonce_label():
+    with open(SRC, encoding="utf-8") as f:
+        src = f.read()
+    i_py = src.find('REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" "$RUNONCE_LABEL" << \'PYEOF\'')
+    i_lbl = src.find('RUNONCE_LABEL="$(_runonce_label)"')
+    i_arg = src.find('runonce_label = sys.argv[4] if len(sys.argv) > 4 else ""')
+    i_blk = src.find("# CHECK13_BEGIN")
+    i_end = src.find('print(f"__WARN_COUNT__={warn}")')
+    check("check13: nhãn RUNONCE được tính TRƯỚC và truyền vào heredoc python; khối nằm trong heredoc "
+          "trước dòng đếm WARN",
+          -1 < i_lbl < i_py < i_arg < i_blk < i_end, (i_lbl, i_py, i_arg, i_blk, i_end))
+
+
 def case_c12_interrupted_marker_also_counts():
     """Restart GIỮA LƯỢT (lớp sự cố đẻ ra bản fix) ghi INTERRUPTED, không phải DROPPED."""
     lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_INTERRUPTED + "\n")))
@@ -2374,6 +2697,7 @@ def main():
           "+ check #9 (retro freshness) "
           "+ check #10 (notify_thread) "
           "+ check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) "
+          "+ check #13 (cổng get_gated_state suy giảm DT4) "
           "+ khối DELIVER (Discord→Telegram) regression")
     for fn in (case_c8b_age_35_is_ok, case_c8b_age_36_warns,
                case_c8b_garbage_row_not_mislabeled_empty,
@@ -2427,6 +2751,20 @@ def main():
                case_c12_interrupted_marker_also_counts,
                case_c12_unreachable_destination_is_reported_separately,
                case_c12_unreadable_journal_never_reports_green,
+               case_c13_dt5g_published_is_ok_even_when_health_is_old_now,
+               case_c13_emits_exactly_once_per_run,
+               case_c13_dt4_cause_health_old_at_publish,
+               case_c13_dt4_cause_health_unreadable_real_error,
+               case_c13_dt4_cause_feed_untrusted,
+               case_c13_dt4_cause_ts_in_future,
+               case_c13_dt4_health_rewritten_after_publish_no_guess,
+               case_c13_dt4_health_valid_says_unknown,
+               case_c13_dt4_stale_source,
+               case_c13_gate_log_line_only_when_it_matches_source,
+               case_c13_unreadable_state_never_reports_green,
+               case_c13_is_read_only_and_never_calls_the_gate,
+               case_c13_thresholds_pinned_to_gate_source,
+               case_c13_wired_into_heredoc_with_runonce_label,
                case_routing_domain_split_is_real,
                case_routing_coord_only_does_not_wake_winston,
                case_routing_red_control,
@@ -2480,6 +2818,25 @@ MUTATIONS = [
      "suppress_days — case_triaged_needs_human_ack)",
      "((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))",
      "a_until >= _now", True),
+    ("MU7 check 13 bỏ cổng RUNONCE (cảnh báo cấp hệ thống ra mỗi account một lần)",
+     "if runonce_label and account == runonce_label:\n    import datetime as _dt13",
+     "if True:\n    import datetime as _dt13", True),
+    ("MU8 check 13 lấy tuổi health so với BÂY GIỜ thay vì lúc publish (báo động giả theo lịch / "
+     "sai số phút)",
+     "_age = (pub_dt - _hts).total_seconds() / 60.0",
+     "_age = (_now - _hts).total_seconds() / 60.0", True),
+    ("MU9 check 13 ép ts health thành ICT (ghi đè múi giờ) thay vì quy đổi",
+     "return t.replace(tzinfo=_ICT13) if t.tzinfo is None else t.astimezone(_ICT13)",
+     "return t.replace(tzinfo=_ICT13)", True),
+    ("MU10 check 13 coi mọi nguồn là DT5G (không bao giờ cảnh báo)",
+     'if _g13_src == "DT5G_macro":', 'if _g13_src:', True),
+    ("MU11 check 13 trích dòng log bất kể nguồn (bằng chứng của lượt khác)",
+     'if _hits and _hits[-1].startswith(f"[get_gated_state] {src}:"):',
+     "if _hits:", True),
+    ("MU12 check 13 bỏ nhánh 'health ghi lại SAU publish' (đoán nguyên nhân từ file không phải bản cổng đọc)",
+     "if _hts > pub_dt:", "if False:", True),
+    ("MU13 check 13 đổi mép ngưỡng tuổi > thành >=",
+     "if _age > _G13_MAX_AGE_MIN:", "if _age >= _G13_MAX_AGE_MIN:", True),
 ]
 
 
