@@ -84,6 +84,18 @@ cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiề
   K2/K3/K4/K5, cổng tỉ suất `report_delivery_gate` fail-closed + cảnh báo pending. Xong ⇒ Mike
   kiểm artifact ⇒ arch-review MỘT lần toàn nhánh ⇒ merge. Bước 3-4 chưa giao.
 
+## Xác nhận của user — 2 cửa sổ lệch tiền SpaceX KHÔNG phải nạp/rút (2026-10-12 23:17 ICT, `decided_by: user`)
+Đẳng thức tiền (bước 2, ngưỡng 0,05% NAV) báo 2 cửa sổ lịch sử của SpaceX; user xác nhận cả hai
+KHÔNG phải nạp/rút:
+- 02/07 09:46 → 03/07 21:57: −539.935 đ (−0,054% NAV) — dòng NAV 02/07 chụp giữa loạt lệnh mua sáng
+  go-live.
+- 27/08 22:16 → 28/08 19:10: −1.107.515 đ (−0,112% NAV) — tiền đổi thành 110 MBB giá vốn 10.000 đ/cp
+  (ZaloPay cùng ngày +20 MBB, −206.656 đ, dưới ngưỡng); chưa có nguồn ngoài xác nhận là quyền mua.
+⇒ SAU khi nhánh `feat/fund-cashflow-detect-20261012` merge: Mike chép 2 lời xác nhận (schema vòng 2,
+`acked_residual_vnd`) từ `agents/Taylor/research/fund_cashflow_detect_20261012/proposed_acks.json`
+vào `data/cash_identity_acks.json`, ghi người xác nhận = user, ngày 2026-10-12. CHƯA làm (file và
+cơ chế chưa ở master). Review vòng 1: `.../arch_review_ea9d6969a/REVIEW.md`.
+
 ## Nợ đã biết sau bước 1 (đưa vào bước 2/3, không chặn)
 - ✅ **ĐÃ KIỂM lượt cron thật đầu tiên 19:10 ICT 2026-10-12 — sạch**: SpaceX "Từ go-live" −1,38%
   (CLI −1,375), ZaloPay −5,71% (CLI −5,712, mốc 987.865.567; mốc cũ 1 tỷ sẽ in −6,86%; con số
