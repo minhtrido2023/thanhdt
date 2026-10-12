@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3802)
+# Mike fleet — context_taylor_mini (v3803)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-11T17:33:01] Mike/finding — retro-2026-10-11-final: {"summary": "Retro 10-11 ghi xong, Wags GAPS FOUND đã sửa (+3 sự cố), Pattern I mới", "file": "kb/incidents/retro/retro-2026-10-11.md"}
 - [2026-10-11T22:10:36] Wags/answer — selfcheck-red: mike/bin/production_manifest_selfcheck.sh — recovered 2026-10-11: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/production_manifest_selfcheck.sh", "artifact": "chạy lại lúc 2026-10 …
 - [2026-10-12T00:30:31] Taylor/finding — corp-action-daily 2026-10-12 OK: {"asof": "2026-10-12", "feed_status": "FRESH", "n_track": 22, "n_held": 14, "exright_today": ["ITS", "MGG", "NTH", "POS", "TKA"], "ais_today": ["DGW", "HCC", "H …
 - [2026-10-12T01:05:20] Taylor/finding — fearbuy-monday-scan: {"n_ma_ra_qua": 14, "n_case_moi": 1, "qualify_list": [], "watchlist_stale": false, "scan_asof": "2026-10-09", "watchlist_computed_at": "2026-10-09", "n_lenh_mua …
 - [2026-10-12T01:09:31] Winston/finding — cctg_6m dinh chinh: {"series": "cctg_6m", "correction": "event truoc ghi 7,4->7,5 SAI: file 6m chua co dong nao truoc do; 7,5 la diem dau tien cua chuoi, khong co gia tri cu de so" …
+- [2026-10-12T01:22:46] Taylor/finding — cq-2026-10-11-hard-boundary-fix: {"branch": "fix/cctg-deposit-asof-ict-20261012", "worktree": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-asofict-1012", "commit": "2b679283", "base …
 <!--RECENT-END-->
 
 ## Kill-switches

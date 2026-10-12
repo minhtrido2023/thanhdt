@@ -1103,3 +1103,15 @@
 
 ## Archived 2026-10-12 (keep=12 days=0 require_done=False)
 - [2026-10-10T20:34:13Z] ĐANG DỞ job Taylor_20261010_201420 attempt 2 (wt-fundunit-1011, CHƯA commit): code B1+L1-L3,L6-L10+future-date ĐÃ có trong diff (11 file), selfcheck lõi xanh 2 TZ (round3/selfcheck_tz.txt) | NEXT: kiểm L4/L5 test còn thiếu, chạy mutant reviewer (mut/run.py) + mutant mới, broad_scan so head, control, gates, MỘT commit, bus finding
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-10T20:41:49Z] [quỹ mở bước 1/4 VÒNG 3, 10-11] XONG phần Taylor: nhánh feat/fund-unit-ledger-20261011 @e102ebef (worktree wt-fundunit-1011, CHƯA merge), finding trên bus trace Taylor_20261010_201420, bằng chứng research/fund_unit_ledger_20261011/round3/. Chờ Mike nghiệm thu/merge; sau merge cần người nhìn 2 dòng 💰 lượt cron 19:10 ICT 12/10. Nợ ngoài nhánh: tz_anchor_gate.baseline_key sai dưới worktree (phải SKIP khi commit), backfill dòng nav_history 2026-08-06 cả 2 TK.
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T14:02:46Z] ĐANG DỞ job Taylor_20261011_140235 (vá cổng DT5G naive/aware, nhánh fix/dt5g-gate-tzaware-health-20261011, KHÔNG merge): bắt đầu | NEXT: worktree + vá macro_state_live.py + quét 3538119f/e706495c + selfcheck 3 TZ + bus finding dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T14:04:45Z] ĐANG DỞ job Taylor_20261011_140235: worktree mike/agents/Taylor/wt-dt5ggate-1011 nhánh fix/dt5g-gate-tzaware-health-20261011 (từ 3538119f). Đã biết: caller duy nhất get_gated_state = publish_gated_state.py (cron 18:30 daily_refresh + 19:00 bq_freshness); 3(a)=CHƯA ghi gì (BQ lastModified 10-09 19:01, state json DT5G_macro); eod_monitor/preflight dùng mtime=an toàn; staleness_watch replace(tzinfo)=an toàn | NEXT: viết macro_gate_health_tz_selfcheck.py (ĐỎ trước), vá macro_state_live.py:305+319, 3 TZ, commit, bus finding
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T14:09:03Z] ĐANG DỞ job Taylor_20261011_140235: ĐÃ COMMIT 7db41261 trên fix/dt5g-gate-tzaware-health-20261011 (worktree wt-dt5ggate-1011, CHƯA merge); selfcheck đỏ 75/105 → xanh 105/84/84 (3 TZ); e2e đọc-only: cũ DT4_only, mới DT5G_macro; bằng chứng research/dt5g_gate_tzaware_20261011/ | NEXT: chỉ còn đăng bus finding dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready (KHÔNG đăng event đóng error gốc)
