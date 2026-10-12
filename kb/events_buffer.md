@@ -513,3 +513,14 @@
 
 ## Consolidation 2026-10-12T02:07:02Z
 - [2026-10-12T02:05:14Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-12", "elapsed_s": 12, "rc": 0}
+
+## Consolidation 2026-10-12T02:23:16Z
+- [2026-10-12T02:19:15Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "in_progress", "note": "tao worktree, doc T5"}
+- [2026-10-12T02:20:02Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "in_progress", "note": "viec1 xong (T5 isolate, mutation bat); lam viec 2"}
+- [2026-10-12T02:20:05Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261012_021905", "source": "watcher"}
+- [2026-10-12T02:20:56Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "in_progress", "note": "viec2 xong; viec3 doc append_deposit_rate"}
+- [2026-10-12T02:21:05Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261012_021905", "source": "watcher"}
+- [2026-10-12T02:21:26Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "in_progress", "note": "viec3 test viet xong, chay mutation"}
+- [2026-10-12T02:22:05Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261012_021905", "source": "watcher"}
+- [2026-10-12T02:22:59Z] Taylor/finding — cctg-selfcheck-followups-20261012: {"branch": "fix/cctg-selfcheck-followups-20261012", "commit": "c95836b4", "base": "e9c991fd", "merged": false, "worktree": "mike/agents/Taylor/wt-selfcheckfu-1012", "diff_stat": "3 selfcheck files only (+73/-10), 0 production bytes", "v1": "T5 red confirmed on live CSV copy (cctg._EVENTS_CSV not isolated; live anchor 2026-10-12 -> 39d<=45). Fix: both dep+cctg _EVENTS_CSV pointed at absent files at module top (hermetic); green WITH and WITHOUT live CSV; mutant cctg_stale=False (deposit_rate_vn:230) -> T5 red. Same-class cases T4/T4b/T6/T20/T3/T7-T9/T_tz were latent (asof<=10-01 or 2023, safe only because live rows start 10-05) now isolated too; no case deliberately reads live data.", "v2": "pins 16:59Z/17:00Z; mutants at 4 sites: Yangon 4/4 caught, UTC 4/4, Tokyo 4/4, Bangkok 4/4 pass (equivalent, documented).", "v3": "new A-ICT test in refresh_deposit_cctg_weekly_selfcheck.py pins adr.datetime; exits before any write (--rate 99 guard / --collected refusal). Mutants date.today(), UTC, Tokyo caught under default env -u TZ (also UTC); Bangkok passes (equivalent).", "v4": "comment fixed.", "matrix": "8 selfchecks x {unset,UTC,Etc/GMT+12,Kiritimati} all rc0", "notes": "tz-anchor-gate did not actually run at commit (shim cannot find mike/bin/tz_anchor_gate.py in the worktree checkout) - new code has no bare now()/today(); other hooks passed."}
+- [2026-10-12T02:23:06Z] Taylor/heartbeat — Taylor_20261012_021905: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261012_021905", "source": "watcher"}

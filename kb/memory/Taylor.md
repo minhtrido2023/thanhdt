@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-11T15:28:18Z] [dashboard strategy-fit kèm email EOD daily, 10-11] XONG phần Taylor: nhánh feat/strategy-fit-dashboard-20261011 @58f17ffc (worktree wt-stratfit-1011, CHƯA merge, không đụng crontab), finding strategy-fit-dashboard-email-wiring trên bus trace Taylor_20261011_151151, bằng chứng research/strategy_fit_email_20261011/. Chờ Mike review/merge; sau merge nhìn email daily 19:10 có file HTML kèm + chạy lại 3 selfcheck vốn đỏ dưới worktree (report_delivery_ledger, paper_report_render, production_manifest) trên canonical.
 - [2026-10-11T15:55:11Z] [dashboard strategy-fit email VÒNG 2, 10-11] XONG: wt-stratfit-1011 @41cdc58a (CHƯA merge), finding strategy-fit-dashboard-email-wiring-r2 trace Taylor_20261011_154713. Chờ Mike kiểm/merge.
 - [2026-10-12] [fearbuy] CỔNG ĐANG TREO từ quét 10-12: SHB AMBIGUOUS-yếu (cổng = NHNN ghi nhận vốn điều lệ 53.442 tỷ + niêm yết bổ sung, "trong tháng 10"; trượt không giải thích ⇒ nghiêng NON) · DHC không-phải-case (mở lại ở BCTC Q3) · PNJ ĐHĐCĐ bất thường 21/10. Đối chiếu ở lượt quét kế.
 - [2026-10-12T01:19:22Z] ĐANG DỞ job Taylor_20261012_011913 (dọn quanh cổng DT5G: atomic write macro_health.json + 2 ca ghim 5 phút + đọc signal_v11_sql s5_ff + custom30V mode; nhánh fix/dt5g-gate-followups-20261012 từ main, KHÔNG merge): bắt đầu | NEXT: worktree, sửa, selfcheck 3 TZ + mutation, bus finding dt5g-gate-followups-20261012
@@ -26,3 +25,4 @@
 - [2026-10-12T01:36:54Z] [dt5g followups r2, 10-12] XONG: fix/dt5g-gate-followups-20261012 @d295da79 (wt-dt5gfollow-1012, CHƯA merge); finding dt5g-gate-followups-20261012-r2. Chờ Mike merge.
 - [2026-10-12T01:44:11Z] [asof ICT r2, 10-12] XONG: fix/cctg-deposit-asof-ict-20261012 @e9c991fd (wt-asofict-1012, CHƯA merge); finding cq-2026-10-11-hard-boundary-fix-r2. Chờ Mike merge + hạ tz_anchor_baseline (append_deposit_rate bớt 1 date.today).
 - [2026-10-12T02:02:05Z] [dashboard followups r2, 10-12] XONG: fix/dashboard-dt5g-followups-20261012 @d2f846c92 (wt-dashfollow-1012, CHƯA merge); finding dashboard-dt5g-followups-20261012-r2. Chờ Mike merge.
+- [2026-10-12T02:22:59Z] [selfcheck followups 10-12] XONG: fix/cctg-selfcheck-followups-20261012 @c95836b4 (wt-selfcheckfu-1012, CHƯA merge); chờ Mike merge.

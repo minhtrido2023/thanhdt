@@ -1130,3 +1130,6 @@
 
 ## Archived 2026-10-12 (keep=12 days=0 require_done=False)
 - [2026-10-11T15:15:22Z] [vá cổng DT5G tz-aware VÒNG 2, 10-11] XONG phần Taylor: nhánh fix/dt5g-gate-tzaware-health-20261011 @2175a0fa (trên 7db41261; worktree wt-dt5ggate-1011, CHƯA merge — Mike merge, user đã duyệt 22:10 ICT). F2: ts tương lai >5' ⇒ DT4_only. Finding dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready-r2 trace Taylor_20261011_151149; bằng chứng research/dt5g_gate_tzaware_20261011/round2/. KHÔNG tự đóng error gốc. Sau merge: nhìn log daily_refresh 18:30 ICT 12/10 có '[get_gated_state] DT5G_macro'.
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T15:28:18Z] [dashboard strategy-fit kèm email EOD daily, 10-11] XONG phần Taylor: nhánh feat/strategy-fit-dashboard-20261011 @58f17ffc (worktree wt-stratfit-1011, CHƯA merge, không đụng crontab), finding strategy-fit-dashboard-email-wiring trên bus trace Taylor_20261011_151151, bằng chứng research/strategy_fit_email_20261011/. Chờ Mike review/merge; sau merge nhìn email daily 19:10 có file HTML kèm + chạy lại 3 selfcheck vốn đỏ dưới worktree (report_delivery_ledger, paper_report_render, production_manifest) trên canonical.
