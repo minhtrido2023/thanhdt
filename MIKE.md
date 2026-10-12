@@ -278,9 +278,11 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 
 > Mọi agent đã gỡ daemon. Tri thức + working memory (`kb/memory/<id>.md`) GIỮ NGUYÊN trên đĩa;
 > `agents/<id>/` giữ để audit. Bật lại 1 agent làm daemon (hiếm khi cần):
-> `systemctl --user enable --now mike@<id>`. Realtime risk monitor là **`risk_monitor.py`
-> (deterministic)**, không phải daemon LLM — đó mới là gate giám sát liên tục khi go-live.
-> Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
+> `systemctl --user enable --now mike@<id>`. Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
+> ⚠️ **Phanh lỗ cấp NAV CHƯA có tiến trình nào thực thi** (phát hiện 2026-10-12):
+> `agents/Spyros/risk_monitor.py` chưa từng được lên lịch, `daily_loss_limit_pct` không code nào
+> đọc — ĐỪNG coi đó là gate đang chạy. Monitor thay thế (chỉ cảnh báo, giá chốt, user duyệt
+> 2026-10-12) đang dựng: nhánh `feat/nav-loss-brake-monitor-20261012`. Sửa dòng này khi nó live.
 
 **Khi nào dùng native agent:**
 - Task không cần working memory tích lũy của agent đó
