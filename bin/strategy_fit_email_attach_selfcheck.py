@@ -50,9 +50,13 @@ class _SMTP:
     def __init__(self, *a, **k): pass
     def __enter__(self): return self
     def __exit__(self, *a):
-        # FAKE_SMTP_QUIT_FAIL=1: máy chủ ĐÃ nhận thư (sendmail trả về) rồi rớt lúc QUIT/đóng kết nối
+        # Máy chủ ĐÃ nhận thư (sendmail trả về) rồi lỗi lúc QUIT/đóng kết nối. Chỉ dùng lớp lỗi mà
+        # smtplib.SMTP.__exit__ thật KHÔNG tự nuốt (nó nuốt SMTPServerDisconnected):
+        #   =1 SMTPResponseException (QUIT trả mã ≠ 221) · =2 OSError từ close()
         if a[0] is None and os.environ.get("FAKE_SMTP_QUIT_FAIL") == "1":
-            raise smtplib.SMTPServerDisconnected("Connection unexpectedly closed (fake QUIT)")
+            raise smtplib.SMTPResponseException(421, b"fake QUIT refused")
+        if a[0] is None and os.environ.get("FAKE_SMTP_QUIT_FAIL") == "2":
+            raise OSError("fake close() error")
         return False
     def starttls(self): pass
     def login(self, *a): pass
@@ -103,7 +107,7 @@ class Sandbox:
         """Chạy send_report_email.py thật (SMTP giả; `fail`=số lần sendmail đầu bị từ chối).
         → (rc, stderr, message mới nhất | None). `extra` nhận cả bytes (argv không phải UTF-8)."""
         n = len(self.sent())
-        env = dict(self.env, FAKE_SMTP_FAIL=str(fail), FAKE_SMTP_QUIT_FAIL="1" if quit_fail else "0")
+        env = dict(self.env, FAKE_SMTP_FAIL=str(fail), FAKE_SMTP_QUIT_FAIL="2" if quit_fail == "oserror" else "1" if quit_fail else "0")
         p = subprocess.run([sys.executable, str(self.wrapper), str(report),
                             "--skip-return-gate", "selfcheck",
                             *[a if isinstance(a, bytes) else str(a) for a in extra]],
@@ -240,12 +244,17 @@ def part_email(td: Path):
     check("E13 có --attach, sendmail OK rồi lỗi lúc đóng kết nối ⇒ ĐÚNG 1 lần gửi (không vào lối lùi), "
           "rc=0, thư đã đi vẫn kèm HTML, lỗi thật ra stderr",
           rc == 0 and s is not None and sb.attempts() - a0 == 1 and set(atts) == {daily.name, dash.name}
-          and "KHÔNG kèm" not in body and "SMTPServerDisconnected" in err and "fake QUIT" in err
+          and "KHÔNG kèm" not in body and "SMTPResponseException" in err and "fake QUIT" in err
           and "thử lại một lần" not in err, (rc, sb.attempts() - a0, list(atts), err[-300:]))
     a0 = sb.attempts()
     rc, err, s = sb.send(daily, quit_fail=True)
     check("E14 không --attach, sendmail OK rồi lỗi lúc đóng kết nối ⇒ rc=0 (cổng không retry gửi lần hai), đúng 1 lần gửi",
-          rc == 0 and s is not None and sb.attempts() - a0 == 1 and "SMTPServerDisconnected" in err,
+          rc == 0 and s is not None and sb.attempts() - a0 == 1 and "SMTPResponseException" in err,
+          (rc, sb.attempts() - a0, err[-300:]))
+    a0 = sb.attempts()
+    rc, err, s = sb.send(daily, "--attach", dash, quit_fail="oserror")
+    check("E14b sendmail OK rồi close() ném OSError ⇒ rc=0, đúng 1 lần gửi (không gửi trùng), lỗi thật ra stderr",
+          rc == 0 and s is not None and sb.attempts() - a0 == 1 and "OSError" in err and "fake close" in err,
           (rc, sb.attempts() - a0, err[-300:]))
     a0 = sb.attempts()
     rc, err, s = sb.send(daily, "--attach", dash, fail=1, quit_fail=True)
