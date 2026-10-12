@@ -17,6 +17,7 @@ Kiểm:
   D3. ngưỡng 1440 bị ghim hai phía: già 1430 ⇒ DT5G_macro, già 1450 ⇒ DT4_only
   I. ts ở TƯƠNG LAI quá 5 phút (aware / naive) ⇒ DT4_only, reason in ra ts + số phút lệch thật;
      tương lai ≤5 phút (lệch đồng hồ) ⇒ vẫn DT5G_macro   (user duyệt 2026-10-11 22:10 ICT)
+  I2. con số 5 phút bị ghim hai phía: tương lai 4'30" ⇒ DT5G_macro, 5'30" ⇒ DT4_only
   E. ts rác / thiếu ts / ts không phải chuỗi / JSON hỏng / thiếu file ⇒ DT4_only
   F. ts tươi nhưng status=FAILED hoặc recommended_state_source≠DT5G_macro ⇒ DT4_only
   G. cửa sổ "live" của frozen-state guard (≤10 ngày) tính theo NGÀY ICT, không theo ngày host
@@ -151,6 +152,17 @@ def run_cases(tz_label):
             ("E. ts là số", 1760000000, DT4),
             ("E. ts null", None, DT4),
         ]:
+            got = _gate(tmp, _health(ts))
+            check(T + name + f" ⇒ {want[0]}", got == want, f"got={got} ts={ts!r}")
+
+        # I2. ghim CON SỐ 5 phút hai phía. ts dựng ngay trước lệnh gọi cổng (không dùng `now` đầu
+        # hàm) để biên an toàn 30 giây không bị thời gian chạy các ca trên ăn mất. Đổi hằng số
+        # sang bất kỳ số nguyên phút nào khác (4, 6, …) đều làm đúng một trong hai ca đỏ.
+        for name, ahead_s, want in [
+            ("I2. aware tương lai +4 phút 30 giây (ngay DƯỚI ngưỡng 5)", 270, DT5G),
+            ("I2. aware tương lai +5 phút 30 giây (ngay TRÊN ngưỡng 5)", 330, DT4),
+        ]:
+            ts = (datetime.now(ICT) + timedelta(seconds=ahead_s)).isoformat(timespec="seconds")
             got = _gate(tmp, _health(ts))
             check(T + name + f" ⇒ {want[0]}", got == want, f"got={got} ts={ts!r}")
 
