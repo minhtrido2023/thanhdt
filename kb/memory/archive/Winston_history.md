@@ -148,3 +148,6 @@
 
 ## Archived 2026-10-09 (keep=12 days=0 require_done=False)
 - [2026-09-04T05:47:27Z] [2026-09-04T05:5xZ] Xong job Winston_20260904_054506 (ops-autofix ZaloPay): deposit_rate_vn 46 ngay KHONG phai bug — cron escalate dung thiet ke, question treo cho user. Da them BANG CHUNG DOC LAP THU 3: webgia.com 04/09 cho VCB TRAN 6,0%/nam (24 thang) => 6,8% cua CafeF cho VCB la BAT KHA THI, kha nang loi copy hang Agribank/BIDV; VietinBank 12M 5,90% quay / ~6,05% online. 3 nhom nguon doc lap deu ~5,9%, chi nhom VCCorp (CafeF+Kenh14 cung chu) noi 6,8% ca 4. KHONG ghi so (input model rating_8l). CON TREO: (1) question deposit-rate can user chot A=cap nhat/B=giu 6,8/C=verify app; (2) universe_pit thieu trong data/bq_cache (breadth guard DT5G inactive khi doc qua cache); (3) stash@{0} hybrid+refresh_skip_fix 20260810; (4) cron 15:15 capture_upcom_vwap_eod chua cai.
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-09-13T07:59:46Z] aria-I (07-10 VHC 600cp) = LOP LOI latent: run_session CLOSED break khong poll lai sau ATC 14:45; EOD leg2 cung mu. Fix de xuat tren bus, CHUA ai nhan sua executor.py.
