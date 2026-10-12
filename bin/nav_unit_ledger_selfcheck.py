@@ -1496,7 +1496,8 @@ def part_e_flow_module(tmp):
 
 # ------------------------------------------------------------------ F. sandbox: CLI nhánh + cổng
 SANDBOX_FILES = ("nav_period_returns.py", "nav_unit_ledger.py", "account_cash_flows.py",
-                 "report_delivery_gate.py", "wc_paths.py", "cash_identity.py", "dnse_fee_rates.py")
+                 "report_delivery_gate.py", "wc_paths.py", "cash_identity.py", "dnse_fee_rates.py",
+                 "corp_actions.py")
 
 
 def part_f_sandbox(tmp):
@@ -1539,13 +1540,31 @@ def part_f_sandbox(tmp):
         ok(p.returncode == 0, f"F: CLI sandbox {account} phải rc=0: {p.stderr[:300]}")
         ok(pcts(json.loads(p.stdout)) == want, f"F: CLI sandbox {account} phải ra {want}, được {p.stdout[:200]}")
         ok("unit_ledger" not in json.loads(p.stdout), "F: đường CLI không còn khối unit_ledger (không đọc sổ)")
-        ok(isinstance(json.loads(p.stdout).get("cash_flow_warnings"), list),
-           "F: CLI phải in khối cash_flow_warnings (đẳng thức tiền) cạnh số tỉ suất")
+        ok(isinstance(json.loads(p.stdout).get("cash_flow_warnings"), list)
+           and "cash_flow_investor_line" in json.loads(p.stdout),
+           "F: CLI phải in cash_flow_warnings (chi tiết vận hành) + cash_flow_investor_line cạnh số tỉ suất")
     # Cảnh báo đẳng thức tiền của CLI chỉ tính TỚI ngày báo cáo (sandbox không có dnse_raw nên mọi
     # cửa sổ có biến động tiền đều thành cảnh báo — đủ để đếm).
     n_early = len(json.loads(cli("SpaceX", "2026-07-10").stdout)["cash_flow_warnings"])
     n_late = len(json.loads(cli("SpaceX").stdout)["cash_flow_warnings"])
     ok(0 < n_early < n_late, f"F: cash_flow_warnings phải tính tới ngày báo cáo, được {n_early} (07-10) / {n_late} (10-09)")
+    p = cli("SpaceX")
+    out = json.loads(p.stdout)
+    ok(out["cash_flow_investor_line"] and "biến động tiền chưa đối chiếu xong" in out["cash_flow_investor_line"]
+       and all(f"nav_period_returns: {line}" in p.stderr for line in out["cash_flow_warnings"]),
+       f"F: CLI phải đưa dòng trung tính vào JSON và in MỌI dòng vận hành ra stderr; được {out['cash_flow_investor_line']!r}")
+    # Đẳng thức tiền hỏng tới mức không import được ⇒ CLI vẫn phải ra đủ số tỉ suất (đường cảnh báo).
+    good_ci = (wc / "mike" / "bin" / "cash_identity.py").read_text(encoding="utf-8")
+    (wc / "mike" / "bin" / "cash_identity.py").write_text("raise RuntimeError('hỏng giả')\n", encoding="utf-8")
+    p = cli("SpaceX")
+    (wc / "mike" / "bin" / "cash_identity.py").write_text(good_ci, encoding="utf-8")
+    out = json.loads(p.stdout) if p.returncode == 0 else {}
+    ok(p.returncode == 0 and pcts(out) == PUBLISHED["SpaceX"] and out["cash_flow_investor_line"] is None
+       and len(out["cash_flow_warnings"]) == 1 and "KHÔNG chạy được" in out["cash_flow_warnings"][0]
+       and "RuntimeError (hỏng giả)" in out["cash_flow_warnings"][0]
+       and "nav_period_returns: " + out["cash_flow_warnings"][0] in p.stderr,
+       f"F: cash_identity không import được ⇒ CLI vẫn rc=0 + đủ số, lỗi hiện ở JSON và stderr; được "
+       f"rc={p.returncode} {p.stderr[-300:]}")
     name = "SpaceX_weekly_report_2026-10-05_to_2026-10-09.md"
     p = gate(name, "-1,33%")
     ok(f"ROOT={wc / 'mike'}" in p.stdout, f"F: cổng phải chạy trên cây sandbox, được {p.stdout[:200]} {p.stderr[:200]}")

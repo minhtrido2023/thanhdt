@@ -139,25 +139,35 @@ def _extract_report_date(name: str) -> str | None:
     return None
 
 
-def _parse_inception_return_pct(text: str) -> float | None:
-    """Đọc dòng 'Từ khi bắt đầu hoạt động' trong bảng '### 3.2 Hiệu suất lũy kế', cột SpaceX
-    (cột thứ 2). Định dạng thật: '| Từ khi bắt đầu hoạt động (01/07 → 18/09) | −1,66% | ... |'
-    (dấu trừ Unicode U+2212, thập phân dấu phẩy)."""
+def _inception_return_cell(text: str) -> str | None:
+    """Ô số (cột thứ 2 = SpaceX) của dòng 'Từ khi bắt đầu hoạt động' trong bảng '### 3.2 Hiệu suất
+    lũy kế', nguyên văn. Không có dòng bảng nào như vậy ⇒ None; có dòng nhưng thiếu cột ⇒ ""."""
     for line in text.splitlines():
         stripped = line.strip()
         if "Từ khi bắt đầu hoạt động" in stripped and stripped.startswith("|"):
             cells = [c.strip() for c in stripped.strip("|").split("|")]
-            if len(cells) < 2:
-                return None
-            m = re.search(r"([+\-−]?[\d.,]+)\s*%", cells[1])
-            if not m:
-                return None
-            num = m.group(1).replace("−", "-").replace(",", ".")
-            try:
-                return float(num)
-            except ValueError:
-                return None
+            return cells[1] if len(cells) >= 2 else ""
     return None
+
+
+def _parse_return_cell(cell: str) -> float | None:
+    """'−1,66%' → -1.66 (dấu trừ Unicode U+2212, thập phân dấu phẩy). Không đọc ra MỘT số hữu hạn
+    ⇒ None ('+nan%', 'n/a', '—', '−1.330,5%')."""
+    m = re.search(r"([+\-−]?[\d.,]+)\s*%", cell)
+    if not m:
+        return None
+    try:
+        value = float(m.group(1).replace("−", "-").replace(",", "."))
+    except ValueError:
+        return None
+    return value if math.isfinite(value) else None
+
+
+def _parse_inception_return_pct(text: str) -> float | None:
+    """Số ở dòng 'Từ khi bắt đầu hoạt động', hoặc None (không có dòng HOẶC ô số không đọc được —
+    `_check_period_returns` tách hai trường hợp đó bằng `_inception_return_cell`)."""
+    cell = _inception_return_cell(text)
+    return None if cell is None else _parse_return_cell(cell)
 
 
 def _check_period_returns(report: Path) -> None:
@@ -165,8 +175,11 @@ def _check_period_returns(report: Path) -> None:
     Báo cáo CÓ dòng đó mà CLI không đưa ra được số chuẩn (thoát rc≠0, đầu ra không đọc được,
     số không hữu hạn) ⇒ BLOCK (fail-closed từ 2026-10-12): số trong báo cáo không kiểm chứng được
     thì không gửi — trước đó nhánh này chỉ WARN, nên mọi lỗi của CLI lặng lẽ tắt luôn cổng.
+    Dòng CÓ MẶT mà ô số không đọc ra một số hữu hạn ('+nan%', 'n/a', '—') ⇒ cũng BLOCK, trích
+    nguyên ô: một ô hỏng là thứ đang được gửi cho nhà đầu tư, không phải "thiếu dữ liệu để so".
     Chỉ còn WARN, KHÔNG BLOCK khi không có gì để so: không phải SpaceX investor-facing, không suy
-    được report-date từ tên file, báo cáo không có dòng 'Từ khi bắt đầu hoạt động' đọc được."""
+    được report-date từ tên file, không đọc được file, báo cáo KHÔNG có dòng 'Từ khi bắt đầu hoạt
+    động'."""
     if not _is_spacex_investor_report(report):
         return
 
@@ -183,12 +196,17 @@ def _check_period_returns(report: Path) -> None:
               file=sys.stderr)
         return
 
-    reported_pct = _parse_inception_return_pct(text)
-    if reported_pct is None:
-        print(f"report_delivery_gate: WARN period-return check — không parse được dòng 'Từ khi "
-              f"bắt đầu hoạt động' trong bảng Hiệu suất lũy kế của {report.name}, bỏ qua",
-              file=sys.stderr)
+    cell = _inception_return_cell(text)
+    if cell is None:
+        print(f"report_delivery_gate: WARN period-return check — {report.name} không có dòng 'Từ "
+              f"khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế, bỏ qua", file=sys.stderr)
         return
+    reported_pct = _parse_return_cell(cell)
+    if reported_pct is None:
+        raise RuntimeError(
+            f"period-return BLOCK ({report.name}): dòng 'Từ khi bắt đầu hoạt động' có mặt nhưng ô số "
+            f"là {cell!r} — không đọc ra một tỉ suất hữu hạn nên không đối chiếu được với số chuẩn; "
+            f"báo cáo đang mang một ô hỏng")
 
     try:
         proc = subprocess.run(
@@ -227,9 +245,9 @@ def _check_period_returns(report: Path) -> None:
           f"canonical {canonical:+.3f}% (lệch {diff:.3f}pp)")
 
 
-# NAV-flow gate (FAIL-H, audit measurement-integrity 2026-09-27) — CỐ Ý FAIL-CLOSED, khác
-# `_check_period_returns` ở trên (fail-open). Lý do khác nhau: cổng kia so 2 con số đã tồn tại nên
-# "thiếu dữ liệu" = không kết luận được; cổng này canh một BƯỚC NHẢY NAV không giải thích được —
+# NAV-flow gate (FAIL-H, audit measurement-integrity 2026-09-27) — CỐ Ý FAIL-CLOSED, như
+# `_check_period_returns` ở trên (cổng đó cũng fail-closed từ 2026-10-12; nó chỉ còn bỏ qua khi báo
+# cáo không có dòng nào để so). Cổng này canh một BƯỚC NHẢY NAV không giải thích được —
 # mà đúng hình dạng đó là hình dạng của một lần nạp/rút chưa ghi nhận, tức tỉ suất trong báo cáo
 # đang sai. Không chặn thì cái sai được công bố cho nhà đầu tư. Mở cổng = ghi bản ghi có BẰNG
 # CHỨNG vào `data/account_cash_flows.json` (kể cả `kind:"market_only"` khi đó thật là thị trường).
@@ -287,68 +305,83 @@ def _check_nav_flow_records(report: Path) -> None:
               f"({len(flows)} bản ghi dòng tiền)")
 
 
-# Dòng tiền TREO / CHỜ KHAI — CỐ Ý CHỈ CẢNH BÁO, không chặn (chính sách quỹ mở, bước 2): dòng tiền
-# đã khai đang treo vẫn cho số đúng của các kỳ đã đóng, và khoản chưa khai dưới ngưỡng 5% đã được
-# chính sách xếp vào dải "sửa sổ + ghi chú ở báo cáo kế tiếp". Cái phải có là người đọc báo cáo
-# THẤY nó: báo cáo ngày mang sẵn các dòng này qua dòng 💰 NAV; báo cáo tuần/tháng lấy từ
-# `cash_flow_warnings`/`pending_flows` của `nav_period_returns.py`.
+# Dòng tiền TREO / biến động tiền CHƯA ĐỐI CHIẾU XONG — CỐ Ý CHỈ CẢNH BÁO, không chặn (chính sách
+# quỹ mở, bước 2): dòng tiền đã khai đang treo vẫn cho số đúng của các kỳ đã đóng, và khoản chưa
+# khai dưới ngưỡng 5% đã được chính sách xếp vào dải "sửa sổ + ghi chú ở báo cáo kế tiếp". Báo cáo
+# gửi nhà đầu tư chỉ mang MỘT dòng trung tính mỗi tài khoản (`investor_line` của đẳng thức tiền:
+# báo cáo ngày nhận qua dòng 💰 NAV, báo cáo tuần/tháng lấy `cash_flow_investor_line` của
+# `nav_period_returns.py`); chi tiết vận hành in ở stderr của cổng, KHÔNG được nằm trong báo cáo.
 PENDING_FLOW_MARKER = "DÒNG TIỀN TREO"
+INVESTOR_FLOW_MARKER = "biến động tiền chưa đối chiếu xong"   # = cash_identity.INVESTOR_MARKER
+OPS_FLOW_MARKER = "DÒNG TIỀN CHỜ KHAI"                        # = cash_identity.WARNING_MARKER
 
 
-def cash_flow_warnings(report: Path, **paths) -> list:
-    """Các dòng cảnh báo dòng tiền TREO (đã khai, chưa dòng NAV nào chứa) và CHỜ KHAI (đẳng thức
-    tiền thấy mà sổ chưa có) của các tài khoản trong tên báo cáo, tới ngày báo cáo. `paths` chỉ để
-    selfcheck trỏ dữ liệu giả. Không tính được ⇒ một dòng nêu đúng lỗi đã gặp (vẫn không chặn)."""
+def cash_flow_warnings(report: Path, **paths) -> tuple:
+    """`(ops, investor)` cho các tài khoản trong tên báo cáo, tới ngày báo cáo: `ops` = các dòng
+    VẬN HÀNH (dòng tiền TREO đã khai chưa dòng NAV nào chứa + chi tiết đẳng thức tiền), `investor`
+    = các dòng trung tính mà báo cáo phải mang. `paths` chỉ để selfcheck trỏ dữ liệu giả. Không
+    tính được phần nào ⇒ một dòng `ops` nêu đúng lỗi đã gặp (vẫn không chặn, không ném)."""
     accounts = _accounts_in_report(report)
     report_date = _extract_report_date(report.name)
     if not accounts or report_date is None:
-        return []
+        return [], []
     end = dt.date.fromisoformat(report_date)
     sys.path.insert(0, str(Path(__file__).resolve().parent))    # cùng cây với cổng, như nav-flow
-    from account_cash_flows import attach_flows_to_rows, load_flows  # noqa: E402
-    from cash_identity import warning_lines  # noqa: E402
-    from nav_period_returns import load_nav_history  # noqa: E402
-
-    out = []
+    ops, investor = [], []
     for account in accounts:
         try:
+            from account_cash_flows import attach_flows_to_rows, load_flows  # noqa: E402
+            from nav_period_returns import load_nav_history  # noqa: E402
             rows = [r for r in load_nav_history(account, *([paths["nav_dir"]] if paths.get("nav_dir") else []))
                     if r[0] <= end]
             flows = [f for f in load_flows(account, flows_path=paths.get("flows_path"))
                      if f["date"] <= end]
             for f in attach_flows_to_rows(rows, flows).get(None, []):
-                out.append(
+                ops.append(
                     f"⚠️ {PENDING_FLOW_MARKER} ({account}): {f['kind']} {f['date']} "
-                    f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND đã khai nhưng tới "
+                    f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} đ đã khai nhưng tới "
                     f"{report_date} chưa dòng nav_history nào chụp sau thời điểm đó ⇒ CHƯA nằm "
                     f"trong tỉ suất nào của báo cáo này.")
         except Exception as exc:                       # noqa: BLE001 — cảnh báo, không chặn
-            out.append(f"⚠️ {PENDING_FLOW_MARKER} ({account}): KHÔNG kiểm được dòng tiền treo — "
-                       f"{type(exc).__name__}: {exc}")
-        out.extend(warning_lines(account, asof=end, **paths))
-    return out
+            ops.append(f"⚠️ {PENDING_FLOW_MARKER} ({account}): KHÔNG kiểm được dòng tiền treo — "
+                       f"{type(exc).__name__} ({exc})")
+        try:
+            from cash_identity import report as cash_identity_report  # noqa: E402
+            identity = cash_identity_report(account, asof=end, **paths)
+            ops.extend(identity["ops_lines"])
+            if identity["investor_line"]:
+                investor.append(identity["investor_line"])
+        except Exception as exc:                       # noqa: BLE001 — cảnh báo, không chặn
+            ops.append(f"⚠️ Đẳng thức tiền ({account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
+                       f"chưa khai — {type(exc).__name__} ({exc})")
+    return ops, investor
 
 
 def _warn_cash_flows(report: Path) -> None:
-    lines = cash_flow_warnings(report)
-    if not lines:
-        return
+    """In cảnh báo dòng tiền ra stderr. KHÔNG BAO GIỜ ném: đây là đường "chỉ cảnh báo", một lỗi ở
+    đây không được chặn việc giao báo cáo đã qua các cổng chặn."""
     try:
-        text = report.read_text(encoding="utf-8")
-    except OSError as exc:
-        text = ""
-        print(f"report_delivery_gate: không đọc lại được {report} ({exc})", file=sys.stderr)
-    for line in lines:
-        print(f"report_delivery_gate: CẢNH BÁO (không chặn) {line}", file=sys.stderr)
-    missing = [m for m in ("DÒNG TIỀN CHỜ KHAI", PENDING_FLOW_MARKER)
-               if any(m in line for line in lines) and m not in text]
-    if missing:
-        print(f"report_delivery_gate: CẢNH BÁO (không chặn) báo cáo {report.name} KHÔNG có cụm "
-              f"{' / '.join(repr(m) for m in missing)} — {len(lines)} cảnh báo trên CHƯA nằm trong "
-              f"báo cáo gửi đi; chép nguyên văn vào mục hiệu suất.", file=sys.stderr)
-    else:
-        print(f"report_delivery_gate: {len(lines)} cảnh báo dòng tiền — báo cáo {report.name} đã "
-              f"mang cụm cảnh báo tương ứng.", file=sys.stderr)
+        ops, investor = cash_flow_warnings(report)
+        if not ops and not investor:
+            return
+        try:
+            text = report.read_text(encoding="utf-8")
+        except OSError as exc:
+            text = ""
+            print(f"report_delivery_gate: không đọc lại được {report} ({exc})", file=sys.stderr)
+        for line in ops:
+            print(f"report_delivery_gate: CẢNH BÁO (không chặn) {line}", file=sys.stderr)
+        if OPS_FLOW_MARKER in text:
+            print(f"report_delivery_gate: CẢNH BÁO (không chặn) báo cáo {report.name} mang cụm vận "
+                  f"hành {OPS_FLOW_MARKER!r} — chi tiết nội bộ không thuộc báo cáo gửi nhà đầu tư; "
+                  f"chỉ để một dòng {INVESTOR_FLOW_MARKER!r}.", file=sys.stderr)
+        if investor and INVESTOR_FLOW_MARKER not in text:
+            print(f"report_delivery_gate: CẢNH BÁO (không chặn) báo cáo {report.name} KHÔNG có dòng "
+                  f"{INVESTOR_FLOW_MARKER!r} dù còn khoản chưa đối chiếu — dòng phải có: "
+                  + " | ".join(investor), file=sys.stderr)
+    except Exception as exc:                           # noqa: BLE001 — xem docstring
+        print(f"report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối "
+              f"chiếu của {report.name} — {type(exc).__name__} ({exc})", file=sys.stderr)
 
 
 def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,

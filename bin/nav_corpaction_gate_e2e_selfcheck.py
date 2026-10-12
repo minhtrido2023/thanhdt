@@ -341,13 +341,13 @@ import cash_identity as CI  # noqa: E402
 import nav_period_returns as NPR  # noqa: E402
 
 
-def run_perf(tmp, flows, inception, break_import=False):
+def run_perf(tmp, flows, inception, break_import=False, older_rows=""):
     """main() --from-raw với sổ dòng tiền + mốc khởi điểm của SANDBOX. `flows`/`inception`: nội
     dung JSON ghi nguyên văn; `None` = KHÔNG có file. Trả (rc, stdout, snapshot | None)."""
     build_fixture(tmp, qty_now=547.0, confirmed=True)
     with open(os.path.join(tmp, f"nav_history_{ACCT}.csv"), "w", encoding="utf-8") as f:
         f.write("date,nav,mtm_stock,cash,margin_debt,offbook_assets,egg_assets,balance_ts,"
-                "cum_dividend_excl,nav_is_estimate,nav_source\n"
+                "cum_dividend_excl,nav_is_estimate,nav_source\n" + older_rows +
                 f"{PREV},10100000,0,0,0,0,0,{PREV}T19:05:00,0,False,live\n")
     flows_p, inc_p = os.path.join(tmp, "account_cash_flows.json"), os.path.join(tmp, "account_inception.json")
     for path, content in ((flows_p, flows), (inc_p, inception)):
@@ -356,8 +356,10 @@ def run_perf(tmp, flows, inception, break_import=False):
                 json.dump(content, f)
     real_load, old_env = NPR.load_inception, os.environ.get("ACCOUNT_CASH_FLOWS_PATH")
     NPR.load_inception = lambda account, inception_path=inc_p: real_load(account, inception_path)
-    old_ci = (CI.INCEPTION_PATH, CI.SEED_PATH)          # đẳng thức tiền cũng chỉ được đọc sandbox
+    old_ci = (CI.INCEPTION_PATH, CI.SEED_PATH, CI.ACKS_PATH, CI.CORP_ACTIONS_PATH)   # đẳng thức tiền chỉ đọc sandbox
     CI.INCEPTION_PATH, CI.SEED_PATH = inc_p, os.path.join(tmp, "account_seed_capital.json")
+    CI.ACKS_PATH = os.path.join(tmp, "cash_identity_acks.json")
+    CI.CORP_ACTIONS_PATH = os.path.join(tmp, "khong_co_corp_actions.json")
     os.environ["ACCOUNT_CASH_FLOWS_PATH"] = flows_p
     if break_import:
         sys.modules["nav_period_returns"] = None          # `import nav_period_returns` ⇒ ImportError
@@ -366,7 +368,7 @@ def run_perf(tmp, flows, inception, break_import=False):
     finally:
         sys.modules["nav_period_returns"] = NPR
         NPR.load_inception = real_load
-        CI.INCEPTION_PATH, CI.SEED_PATH = old_ci
+        CI.INCEPTION_PATH, CI.SEED_PATH, CI.ACKS_PATH, CI.CORP_ACTIONS_PATH = old_ci
         if old_env is None:
             os.environ.pop("ACCOUNT_CASH_FLOWS_PATH", None)
         else:
@@ -405,14 +407,45 @@ with tempfile.TemporaryDirectory() as tmp:
           and (perf.get("inception") or {}).get("return_pct") == want_inc
           and perf.get("pending_flows") == [] and snap.get("performance_error") is None and "performance_error" in snap,
           (perf, snap.get("performance_error")))
-    # Bước 2 (đẳng thức tiền): main() phải gọi `cash_identity_lines` trên CHÍNH thư mục sandbox và
-    # đưa kết quả vào CẢ dòng 💰 NAV lẫn JSON. Mốc khởi điểm của sandbox không có account_no ⇒ đẳng
-    # thức không chạy được ⇒ đúng MỘT dòng nêu lỗi đó (không im lặng, không làm hỏng lần chụp).
+    # Bước 2 (đẳng thức tiền): main() phải gọi `cash_identity_report` trên CHÍNH thư mục sandbox.
+    # Mốc khởi điểm của sandbox không có account_no ⇒ đẳng thức không chạy được ⇒ đúng MỘT dòng
+    # nêu lỗi đó ở JSON (kênh vận hành), KHÔNG vào stdout (thân báo cáo gửi nhà đầu tư), rc vẫn 0.
     warns = snap.get("cash_flow_warnings")
-    check("(l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0",
+    check("(l4b) đẳng thức tiền nối vào main(): lỗi thật nằm ở JSON vận hành, không vào stdout, rc vẫn 0",
           rc == 0 and isinstance(warns, list) and len(warns) == 1
           and "Đẳng thức tiền" in warns[0] and "không có account_no" in warns[0]
-          and inc_path_of(tmp) in warns[0] and ("   " + warns[0]) in out, (rc, warns))
+          and inc_path_of(tmp) in warns[0] and "Đẳng thức tiền" not in out
+          and snap.get("cash_flow_investor_line") is None
+          and snap.get("cash_flow_ops") == {"lines": warns, "status": "chưa gửi"}, (rc, warns, snap.get("cash_flow_ops")))
+
+with tempfile.TemporaryDirectory() as tmp:
+    # Mốc khởi điểm CÓ account_no ⇒ đẳng thức chạy thật trên nav_history + dnse_raw của SANDBOX:
+    # dòng 09-08 của fixture ghi tiền = 0 nên cửa sổ 09-08 → 09-09 chắc chắn mở. Báo cáo (stdout)
+    # chỉ được nhận MỘT dòng trung tính; chi tiết nằm ở JSON. (Không truyền nav_dir/raw_dir thì
+    # module sẽ đọc thư mục dữ liệu mặc định — cửa sổ sẽ mang ngày khác.)
+    rc, out, snap = run_perf(tmp, {ACCT: []}, {ACCT: dict(GOOD_INC[ACCT], account_no=ACCT_NO)})
+    snap = snap or {}
+    warns, inv_line = snap.get("cash_flow_warnings") or [], snap.get("cash_flow_investor_line") or ""
+    check("(l4c) đẳng thức chạy trên dữ liệu sandbox: cửa sổ 09-08 → 09-09 mở, chi tiết chỉ ở JSON",
+          rc == 0 and len(warns) == 1 and CI.WARNING_MARKER in warns[0] and f"cửa sổ {PREV} " in warns[0]
+          and f"→ {DATE} " in warns[0] and snap.get("cash_flow_ops") == {"lines": warns, "status": "chưa gửi"},
+          (rc, warns, snap.get("cash_flow_ops")))
+    # Thêm một cửa sổ CŨ đang mở (09-04 → 09-08: tiền sở hữu 3tr → 0, không lệnh): `cash_flow_ops`
+    # (phần gửi kênh vận hành của lượt này) chỉ được mang chi tiết cửa sổ kết thúc HÔM NAY + một
+    # dòng đếm; `cash_flow_warnings` mang chi tiết cả hai.
+    rc2, out2, snap2 = run_perf(tmp, {ACCT: []}, {ACCT: {"inception_date": "2026-09-03", "starting_capital": 10_000_000,
+                                                         "account_no": ACCT_NO}},
+                                older_rows="2026-09-04,10100000,7100000,3000000,0,0,0,2026-09-04T19:05:00,0,False,live\n")
+    snap2 = snap2 or {}
+    ops2, warns2 = (snap2.get("cash_flow_ops") or {}).get("lines") or [], snap2.get("cash_flow_warnings") or []
+    check("(l4e) cash_flow_ops = chi tiết cửa sổ hôm nay + MỘT dòng đếm cửa sổ cũ; cash_flow_warnings = chi tiết cả hai",
+          rc2 == 0 and len(warns2) == 2 and all("Đã đọc:" in w for w in warns2) and len(ops2) == 2
+          and f"→ {DATE} " in ops2[0] and "Đã đọc:" in ops2[0]
+          and f"còn 1 cửa sổ cũ chưa đóng (kết thúc {PREV})" in ops2[1] and "Đã đọc:" not in ops2[1]
+          and out2.count(CI.INVESTOR_MARKER) == 1 and "Có 2 khoản" in out2, (rc2, ops2, warns2))
+    check("(l4d) stdout (thân báo cáo ngày) chỉ mang MỘT dòng trung tính, không dòng vận hành",
+          CI.INVESTOR_MARKER in inv_line and out.count(CI.INVESTOR_MARKER) == 1 and ("   " + inv_line) in out
+          and CI.WARNING_MARKER not in out and "dnse_raw" not in out and "cash_identity" not in out, (inv_line, out[-600:]))
 
 # Đường hiển thị hỏng KHÔNG được làm hỏng lần chụp: nav_history đã ghi ⇒ rc phải 0, dòng 💰 vẫn in,
 # nav_snapshot JSON vẫn ghi, lỗi thật nằm trong performance_error.

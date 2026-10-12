@@ -34,8 +34,9 @@ SCHEMA `data/account_cash_flows.json`:
     KHẲNG ĐỊNH CÓ BẰNG CHỨNG rằng bước nhảy NAV ngày đó là biến động thị trường, không phải
     nạp/rút — đó là cách duy nhất để mở cổng chặn ở `report_delivery_gate`. Gán theo NGÀY (dòng
     nav_history đầu tiên có ngày >= `date`); không cần `time_ict`, không được khai `timing`.
-    Đẳng thức tiền (`cash_identity.py`) đọc cùng bản ghi này như lời khẳng định có bằng chứng
-    "ngày đó KHÔNG có nạp/rút" để thôi cảnh báo phần dư của cửa sổ chứa ngày đó.
+    Bản ghi này KHÔNG đóng được cửa sổ nào của đẳng thức tiền (`cash_identity.py`): nó không
+    mang số tiền nên từng che được khoản nạp bất kỳ cùng ngày. Lời xác nhận của đẳng thức tiền
+    nằm ở file riêng `data/cash_identity_acks.json` và mang phần dư đã xem.
   - `evidence`: bắt buộc, non-empty. Không có bằng chứng ⇒ không được ghi (§6).
   - `timing`: TUỲ CHỌN, "bod" | "eod". Không khai ⇒ code tự suy. Có khai mà KHÁC kết quả suy ra
     ⇒ CashFlowError nêu cả hai (không âm thầm chọn một bên).
