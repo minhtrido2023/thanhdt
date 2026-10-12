@@ -22,10 +22,12 @@ BOUNDARY (=exactly 1.0pp): treated INCLUSIVE → REFRESH. The user's phrasing wa
   to test with strict '>'. Flagged here so the user can flip to strict '>' (set THRESHOLD_INCLUSIVE
   = False) if preferred — this is the one judgment call in the gate.
 
-This gate DECIDES + PERSISTS; it does not itself run the (cheap) DCF recompute. The consumer that
-regenerates DCF numbers for a report/dashboard calls run_gate() first and only recomputes its
-fair values when the returned dict has refresh=True. Fail-safe: any error → returns refresh=True
-(recompute rather than silently serve stale on a broken gate) and logs the error.
+This gate DECIDES + PERSISTS; it does not itself run the (cheap) DCF recompute. Intended use: a
+consumer that regenerates DCF numbers calls run_gate() first and only recomputes its fair values
+when the returned dict has refresh=True. As of 2026-10-12 NO such consumer exists — the only caller
+is this file's CLI (monthly cron, 08:10 ICT day 11), so the gate is a drift monitor: state + log
+only, nothing reads refresh. Fail-safe: any error → returns refresh=True (recompute rather than
+silently serve stale on a broken gate) and logs the error.
 
 Run: $DNA_PYEXE dcf_refresh_gate.py            # evaluate + persist + log (real)
      $DNA_PYEXE dcf_refresh_gate.py --dry      # evaluate + print only, no state/log write
