@@ -412,7 +412,7 @@ if mode == "silent_nofile":
     sys.exit(0)
 os.makedirs(out, exist_ok=True)
 p = os.path.join(out, "strategy_fit_%s.html" % os.environ["FAKE_DATE"])
-open(p, "w").write("<html>fake</html>")
+open(p, "w").write("<html>fake</html>" + os.environ.get("FAKE_NAV", ""))
 print(p)
 '''
 
@@ -457,9 +457,20 @@ def part_eod(td0: Path):
         args, rc, _, n, log = run_eod_fn(td, TODAY, "ok", tz)
         check(f"D1 {tag} hôm nay, chưa có file ⇒ SINH rồi --attach đúng đường dẫn",
               rc == 0 and args == ["--attach", str(dash)] and n == 1 and dash.exists(), (args, rc, n, log))
-        args, rc, _, n, log = run_eod_fn(td, TODAY, "fail", tz)
-        check(f"D2 {tag} account sau: file hôm nay đã có ⇒ DÙNG LẠI, không sinh lần hai",
-              rc == 0 and args == ["--attach", str(dash)] and n == 1, (args, rc, n))
+        # C4a (2026-10-12): trang có ô drawdown TỪNG tài khoản ⇒ lượt account sau PHẢI sinh lại, sau lượt chụp NAV
+        # của nó — không dùng lại file của lượt trước (file đó chưa có NAV hôm nay của account này).
+        args, rc, _, n, log = run_eod_fn(td, TODAY, "ok", tz, extra_env={"FAKE_NAV": " nav:ZaloPay"})
+        first = dash.read_text() if dash.exists() else ""
+        args2, rc2, _, n2, log = run_eod_fn(td, TODAY, "ok", tz, extra_env={"FAKE_NAV": " nav:ZaloPay+SpaceX"})
+        check(f"D2 {tag} thứ tự ZaloPay → SpaceX: lượt SAU SINH LẠI (không dùng lại), file kèm mang NAV đã chụp của lượt đó",
+              rc2 == 0 and args2 == ["--attach", str(dash)] and n2 == n + 1 and first.endswith("nav:ZaloPay")
+              and dash.read_text().endswith("nav:ZaloPay+SpaceX"), (args2, n, n2, first, dash.read_text()))
+        args, rc, _, n3, log = run_eod_fn(td, TODAY, "fail", tz)
+        check(f"D2b {tag} lượt sau sinh LỖI ⇒ KHÔNG kèm file của lượt account trước (dù file còn mới), ghi chú mang lỗi thật",
+              rc == 0 and n3 == n2 + 1 and len(args) == 2 and args[0] == "--attach-note" and "Boom thật" in args[1], (args, n3))
+        args, rc, _, n4, log = run_eod_fn(td, TODAY, "silent_nofile", tz)
+        check(f"D2c {tag} lượt sau rc=0 nhưng KHÔNG ghi lại file ⇒ không kèm file lượt trước như thể của lượt này",
+              rc == 0 and n4 == n3 + 1 and len(args) == 2 and args[0] == "--attach-note" and "rc=0" in args[1], (args, n4))
 
         # N1: file "hôm nay" nhưng mtime cũ ⇒ SINH LẠI (không dùng số liệu trước lần publish)
         td = Path(tempfile.mkdtemp(dir=td0))
@@ -558,6 +569,18 @@ def part_eod(td0: Path):
     body = eod[eod.index("_deliver_eod() {"):eod.index("gate_out=\"$(python3")]
     check("D8 _deliver_eod (dùng cho CẢ 4 nhánh) gọi hàm và nối tham số vào lệnh cổng",
           "_strategy_fit_attach_args\n" in body and 'gate_args+=("${STRATEGY_FIT_ARGS[@]}")' in body)
+    fn = block(eod, "# STRATEGY_FIT_BEGIN", "# STRATEGY_FIT_END")
+    code = "\n".join(ln for ln in eod.splitlines() if not ln.lstrip().startswith("#"))
+    check("D8b không còn cửa sổ dùng lại (-mmin): hôm nay ⇒ luôn sinh lại; trang chỉ được sinh trong _deliver_eod",
+          "-mmin" not in fn and code.count("_strategy_fit_attach_args") == 2 and code.count("strategy_fit_dashboard.py") == 1,
+          (code.count("_strategy_fit_attach_args"), code.count("strategy_fit_dashboard.py")))
+    hold = code[code.index('elif [ "$N_ORDERS_TODAY" = "0" ]; then'):code.index('elif [ ! -f "$STATE_FILE" ]; then')]
+    full = code[code.index("# Case 4") if "# Case 4" in code else code.index('REPORT="$(python3 - "$PLAN_FILE"'):]
+    check("D8c thứ tự trong MỖI nhánh có chụp NAV: _nav_section (chụp NAV của account) đứng TRƯỚC _deliver_eod (sinh trang + gửi)",
+          0 <= hold.find("_nav_section\n") < hold.find("_deliver_eod ") and 0 <= full.find("\n_nav_section\n") < full.find("\n_deliver_eod "),
+          (hold.find("_nav_section\n"), hold.find("_deliver_eod "), full.find("\n_nav_section\n"), full.find("\n_deliver_eod ")))
+    check("D8d comment của hàm không còn gọi trang là tài liệu cấp thị trường dùng lại giữa các account",
+          "KHÔNG còn là tài liệu cấp thị trường" in eod and "thì dùng lại" not in eod)
     check("D9 timeout mặc định 120 giây, có -k để giết hẳn tiến trình treo",
           'tmo="${STRATEGY_FIT_TIMEOUT_S:-120}"' in eod and 'timeout -k 5 "$tmo"' in eod)
     dsrc = (BIN / "strategy_fit_dashboard.py").read_text(encoding="utf-8")
