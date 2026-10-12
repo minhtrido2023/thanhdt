@@ -6,7 +6,6 @@
     "8l_package/rank_8l_daily_alert.py": 1,
     "8l_package/telegram_recommend.py": 1,
     "analyze_portfolio.py": 1,
-    "append_deposit_rate.py": 1,
     "auto_update_commodity_wb.py": 1,
     "bot_8l_commands.py": 4,
     "bull_div_boost.py": 2,
