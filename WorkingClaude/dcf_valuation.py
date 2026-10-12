@@ -564,6 +564,8 @@ if __name__ == "__main__":
                     help=f"terminal-growth mode (default {DEFAULT_TERM_MODE})")
     args = ap.parse_args()
     px = args.price if args.price is not None else latest_price(args.ticker, args.asof)
-    res = fair_value(args.ticker, args.asof or pd.Timestamp.today().normalize(),
+    # default "today" = ICT calendar date (§16), tz-naive midnight as before
+    today_ict = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None)
+    res = fair_value(args.ticker, args.asof or today_ict,
                      price=px, erp=args.erp, term_mode=args.term)
     _print_report(res)

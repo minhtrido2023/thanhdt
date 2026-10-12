@@ -926,7 +926,7 @@ def dd_check_for_order(ticker, book=None, asof=None, est_value_vnd=None):
 
     Cố ý KHÔNG chứa text dài (plan JSON đọc bằng mắt): chỉ cờ + bằng chứng 1 dòng thanh khoản.
     skip_dcf=True — trục định giá đã có dcf_check riêng. KHÔNG BAO GIỜ raise."""
-    ctx = {"asof": asof or dt.date.today(), "skip_dcf": True, "skip_corp_flags": True}
+    ctx = {"asof": asof or _today_ict(), "skip_dcf": True, "skip_corp_flags": True}
     if est_value_vnd:
         ctx["est_value_vnd"] = est_value_vnd
     d = run_due_diligence(ticker, book, ctx, as_dict=True)
@@ -957,7 +957,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     KHÔNG BAO GIỜ raise.
     """
     ctx = context or {}
-    asof = str(ctx.get("asof") or dt.date.today())[:10]
+    asof = str(ctx.get("asof") or _today_ict())[:10]
     prefix = f"DD {ticker}" + (f" [{book}]" if book else "")
     is_buy = str(ctx.get("side", "buy")).lower() in ("buy", "mua", "b")
     has_override = bool(ctx.get("dd_override_reason") or ctx.get("has_override"))
