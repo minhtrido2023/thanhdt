@@ -4,10 +4,15 @@
 Covers the 4 default-asof call sites: cctg_rate_vn.current_cctg_rate, and deposit_rate_vn
 .macro_killswitch_a_status / current_deposit_rate / effective_deposit_rate.
 
-Each case runs a child process under a foreign TZ with synthetic events dated ICT-today -1/0/+1
-and asserts asof=None picks the ICT-today row. TZ=Etc/GMT+12 (UTC-12) disagrees with ICT on the date
-when ICT hour < 19; TZ=Pacific/Kiritimati (UTC+14) when ICT hour >= 17 -- together they cover all
-24h, so at least one leg is red on the old code at any run time. Run under $DNA_PYEXE."""
+Two independent proofs:
+ (1) "Not the process TZ": each case runs a child under a foreign TZ with synthetic events dated
+     ICT-today -1/0/+1. TZ=Etc/GMT+12 (UTC-12) disagrees with ICT on the date when ICT hour < 19;
+     TZ=Pacific/Kiritimati (UTC+14) when ICT hour >= 17 -- together they cover all 24h, so at
+     least one leg is red on a today()-style regression at any run time.
+ (2) "Anchored to ICT, not some other fixed zone": pd.Timestamp.now is pinned at two instants
+     straddling ICT midnight (2026-10-11 16:30Z -> want 10-11; 17:30Z -> want 10-12). A wrong
+     fixed zone (UTC, Asia/Tokyo, UTC-naive) gives the wrong date at one of them, whatever the
+     wall-clock time of the run. Run under $DNA_PYEXE."""
 import json
 import os
 import subprocess
@@ -38,6 +43,29 @@ out["killswitch"] = dep.macro_killswitch_a_status()["last_update"]
 print(json.dumps(out))
 ''' % {"here": HERE}
 
+PINNED = r'''
+import json, sys
+sys.path.insert(0, %(here)r)
+import pandas as pd
+import cctg_rate_vn as cctg
+import deposit_rate_vn as dep
+ds = pd.to_datetime(["2026-10-10", "2026-10-11", "2026-10-12", "2026-10-13"])
+dep.deposit_events_df = lambda: pd.DataFrame({"time": ds, "deposit_rate": [4.0, 5.0, 6.0, 7.0]})
+cctg.cctg_events_df = lambda: pd.DataFrame({"time": ds, "cctg_rate": [4.5, 5.5, 6.5, 7.5]})
+by_rate = {4.0: "2026-10-10", 5.0: "2026-10-11", 6.0: "2026-10-12", 7.0: "2026-10-13"}
+out = {}
+for inst in ("2026-10-11 16:30", "2026-10-11 17:30"):
+    def _now(tz=None, _i=inst):
+        t = pd.Timestamp(_i, tz="UTC")
+        return t.tz_convert(tz) if tz is not None else t.tz_localize(None)
+    pd.Timestamp.now = staticmethod(_now)
+    out[inst] = {"cctg": str(cctg.current_cctg_rate()[1].date()),
+                 "dep": by_rate[dep.current_deposit_rate()],
+                 "effective": dep.effective_deposit_rate()["last_update"],
+                 "killswitch": dep.macro_killswitch_a_status()["last_update"]}
+print(json.dumps(out))
+''' % {"here": HERE}
+
 N = 0
 FAILS = []
 
@@ -50,13 +78,13 @@ def check(label, cond):
     print(f"  {'ok' if cond else 'FAIL'}: {label}")
 
 
-def run(tz):
+def run(tz, code=None):
     env = dict(os.environ)
     if tz is None:
         env.pop("TZ", None)
     else:
         env["TZ"] = tz
-    p = subprocess.run([sys.executable, "-c", CHILD], env=env, capture_output=True, text=True)
+    p = subprocess.run([sys.executable, "-c", code or CHILD], env=env, capture_output=True, text=True)
     assert p.returncode == 0, f"child rc={p.returncode}\n{p.stderr}"
     return json.loads(p.stdout.strip().splitlines()[-1])
 
@@ -71,6 +99,13 @@ for tz in (None, "UTC", "Etc/GMT+12", "Pacific/Kiritimati"):
     check(f"[{tag}] current_deposit_rate picks ICT-today row (6.0)", o["dep_rate"] == 6.0)
     check(f"[{tag}] effective_deposit_rate last_update == {t}", o["effective"] == t)
     check(f"[{tag}] macro_killswitch_a_status last_update == {t}", o["killswitch"] == t)
+# fixed-instant legs: 23:30 ICT (10-11) and 00:30 ICT (10-12); TZ-independent, run under 2 TZs anyway
+for tz in (None, "Etc/GMT+12"):
+    o = run(tz, PINNED)
+    tag = tz or "unset"
+    for inst, want in (("2026-10-11 16:30", "2026-10-11"), ("2026-10-11 17:30", "2026-10-12")):
+        for site, got in o[inst].items():
+            check(f"[pinned {inst}Z, TZ={tag}] {site} -> ICT date {want}", got == want)
 if FAILS:
     print(f"{len(FAILS)}/{N} CHECKS FAILED")
     sys.exit(1)

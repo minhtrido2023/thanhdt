@@ -122,7 +122,7 @@ def cctg_events_df():
 
 def current_cctg_rate(asof=None):
     """Returns (rate_pct, last_date) or (None, None) if no CCTG observation exists at/before asof
-    (in particular: any asof before 2026-09-30). asof=None means TODAY (see deposit_rate_vn's
+    (in particular: any asof before 2026-09-30). asof=None means TODAY in ICT (Asia/Ho_Chi_Minh, not the host TZ; see deposit_rate_vn's
     current_deposit_rate() docstring for why this must anchor to the real clock, not just the
     series' own last row)."""
     ev = cctg_events_df()

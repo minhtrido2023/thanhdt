@@ -270,7 +270,7 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
 
 
 def current_deposit_rate(asof=None):
-    """asof=None means TODAY, not "the last row in the series" — a future-dated or typo'd
+    """asof=None means TODAY in ICT (Asia/Ho_Chi_Minh, not the host TZ), not "the last row in the series" — a future-dated or typo'd
     effective_date (e.g. a year typo) must never pin/pre-empt the live value. Found 2026-07-20
     via adversarial review of append_deposit_rate.py (mike/kb/projects/deposit-rate-autocheck.md,
     round 7->8): the old `if asof is None: return ev.deposit_rate.iloc[-1]` returned whatever row

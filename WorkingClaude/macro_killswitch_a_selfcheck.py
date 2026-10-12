@@ -3,8 +3,10 @@
 macro_kill_switches.A_sbv_rate_suspend, wired 2026-10-01). Fixtures hand-computed against the
 LITERAL spec text in trading_rules.json, not against the implementation. Run under $DNA_PYEXE
 and under `env -u TZ` per coding_guidelines §19/verify-before-done (no TZ dependency expected —
-this uses pd.Timestamp.today().normalize() with an explicit asof override in every test, so the
-host TZ should not matter; asserted explicitly below as a regression guard)."""
+the module's default asof (asof=None) is today in ICT via pd.Timestamp.now(tz="Asia/Ho_Chi_Minh"),
+and every test here passes an explicit asof override, so the host TZ should not matter; asserted
+explicitly below as a regression guard; the asof=None ICT anchor itself is covered by
+cctg_deposit_asof_ict_selfcheck.py)."""
 import os
 import sys
 

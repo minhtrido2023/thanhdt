@@ -80,7 +80,8 @@ import os
 import sys
 import tempfile
 import urllib.parse
-from datetime import date, datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(HERE, "data", "deposit_rate_vn_events.csv")
@@ -314,7 +315,7 @@ def main():
         eff = _valid_date(args.effective)
     except ValueError:
         sys.exit(f"ERROR: --effective '{args.effective}' is not YYYY-MM-DD")
-    real_today = date.today().isoformat()
+    real_today = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()
     # Round-8 review: current_deposit_rate() itself is now fixed (deposit_rate_vn.py resolves
     # asof=None to real today, not "last row by time"), which closes the production impact of a
     # bad --effective regardless of how it entered the CSV. This is defense-in-depth on the writer
