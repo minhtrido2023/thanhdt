@@ -287,6 +287,13 @@ _nav_section() {
   else
     NAV_SECTION="$raw"
   fi
+  # Chi tiết đẳng thức tiền của lượt chụp này (mã, số lượng, phân rã, tên file) đi kênh VẬN HÀNH;
+  # NAV_SECTION ở trên chỉ mang một dòng trung tính. Chỉ gọi khi NAV đã ghi xong (rc=0); lỗi gửi
+  # hiện ở stderr của lượt cron, không đổi báo cáo và không đổi mã thoát.
+  if [ "$rc" = "0" ]; then
+    python3 "$ROOT/bin/cash_identity.py" --account "$ACCOUNT" --notify-snapshot "$PLAN_DATE" \
+      --channel trading_daily >&2 || true
+  fi
 }
 
 # Trả về block (có newline dẫn đầu) khi có dữ liệu, "" khi lỗi/không có. Gọi LAZY — chỉ

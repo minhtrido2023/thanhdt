@@ -51,6 +51,12 @@ EOF
 printf '%s\t%s\n' "${2:-}" "$1" >> "$(dirname "$0")/../../notify.log"
 EOF
   chmod +x "$SB/mike/bin/notify_thread.sh"
+  # Stub: cash_identity.py — chi ghi lai tham so goi (buoc gui chi tiet dang thuc tien, arch-review N2).
+  cat > "$SB/mike/bin/cash_identity.py" <<'EOF'
+import os, sys
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ci_calls.log"), "a") as f:
+    f.write(" ".join(sys.argv[1:]) + "\n")
+EOF
   # Stub: mô phỏng hợp đồng rc của daily_nav_snapshot.py. Token lấy lần lượt từ scenario_<acct>
   # (mặc định 0): số = rc; "hang" = ngủ 30s (để timeout bắn); "norow" = rc 0 không ghi dòng.
   # rc=0 ⇒ NAV = totalCash − totalDebt của bản ghi balances CUỐI trong dnse_raw giả, ghi đè dòng
@@ -107,7 +113,7 @@ EOF
     echo "{\"ts\":\"${TODAY}T19:10:07\",\"kind\":\"balances\",\"account_label\":\"SpaceX\",\"payload\":{\"stock\":{\"totalCash\":500,\"totalDebt\":100}}}"
     echo "{\"ts\":\"${TODAY}T19:10:07\",\"kind\":\"balances\",\"account_label\":\"ZaloPay\",\"payload\":{\"stock\":{\"totalCash\":700,\"totalDebt\":0}}}"
   } > "$SB/data/execution_logs/dnse_raw_${TODAY}.jsonl"
-  : > "$SB/calls.log"; : > "$SB/notify.log"
+  : > "$SB/calls.log"; : > "$SB/notify.log"; : > "$SB/ci_calls.log"
 }
 run() {  # wrapper dưới env -u TZ + shim date; mặc định không chờ, không ngủ (ca riêng ghi đè env)
   env -u TZ PATH="$SB/shim:$PATH" NAV_SNAPSHOT_RETRY_SLEEP_S="${RS:-0}" NAV_SNAPSHOT_EOD_WAIT_MAX_S="${EW:-0}" \
@@ -128,6 +134,10 @@ run; rc=$?
 [ "$(grep -c " $TODAY$" "$SB/calls.log")" = 2 ] && ok "--date truyền vào = ngày ICT" || bad "calls: $(cat "$SB/calls.log")"
 grep -q "^$TODAY,400," "$SB/data/execution_logs/nav_history_SpaceX.csv" && ok "NAV SpaceX = cash−debt từ dnse_raw giả" || bad "NAV SpaceX sai"
 [ "$(nfy '^trading_daily	✅')" = 2 ] && ok "báo Trading Daily ✅ x2" || bad "notify: $(cat "$SB/notify.log")"
+[ "$(grep -c -- "--notify-snapshot $TODAY --channel trading_daily$" "$SB/ci_calls.log")" = 2 ] \
+  && grep -q -- "--account SpaceX " "$SB/ci_calls.log" && grep -q -- "--account ZaloPay " "$SB/ci_calls.log" \
+  && ok "N2: NAV ghi xong ⇒ gửi chi tiết đẳng thức tiền cho CẢ HAI account, kênh trading_daily (tên)" \
+  || bad "ci_calls: $(cat "$SB/ci_calls.log")"
 
 echo "== Ca 2: chạy lần 2 liên tiếp ⇒ không gọi lại, nav_history giống hệt từng byte"
 sha1="$(hist_sha)"; : > "$SB/calls.log"; : > "$SB/notify.log"
@@ -156,6 +166,8 @@ run; rc=$?
 [ "$(grep -c 'retry [12]/2' "$SB/run.out")" = 2 ] && ok "đúng 2 lượt ngủ-retry dù 2 account cùng lỗi vòng đầu" || bad "retry lines=$(grep -c 'retry' "$SB/run.out")"
 [ "$(nfy '^trading_daily	🔴 NAV ZaloPay.*rc=2')" = 1 ] && [ "$(nfy '🔴 NAV SpaceX')" = 0 ] && ok "🔴 rc=2 chỉ cho ZaloPay, 1 lần" || bad "notify: $(cat "$SB/notify.log")"
 [ "$(ch_hits "$SB/run.out")" -ge 1 ] && ok "cron_health_check THẬT bắt được lỗi trong log" || bad "cron_health không thấy lỗi: $(cat "$SB/run.out")"
+[ "$(grep -c -- "--account SpaceX " "$SB/ci_calls.log")" = 1 ] && [ "$(grep -c -- "--account ZaloPay " "$SB/ci_calls.log")" = 0 ] \
+  && ok "N2: chỉ gửi chi tiết đẳng thức tiền cho account NAV đã ghi (ZaloPay lỗi ⇒ không gửi)" || bad "ci_calls: $(cat "$SB/ci_calls.log")"
 [ "$rc" = 1 ] && ok "exit 1 khi còn account thất bại" || bad "exit=$rc"
 rm -rf "$SB"
 

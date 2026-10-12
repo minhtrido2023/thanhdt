@@ -119,6 +119,10 @@ for attempt in $(seq 0 "$MAX_RETRIES"); do
         if has_row "$ACCOUNT"; then
           notify_daily "✅ NAV $ACCOUNT ($TODAY) được ghi bởi cron độc lập nav_snapshot_daily (EOD không ghi hôm nay):
 $(printf '%s\n' "$OUT" | grep -m1 'NAV')"
+          # Chi tiết đẳng thức tiền của lượt chụp này → kênh vận hành (như eod_trading_report.sh /
+          # nav_sync_retry.sh; arch-review vòng 2, N2). Lỗi gửi hiện ở stderr, không đổi mã thoát.
+          python3 "$ROOT/bin/cash_identity.py" --account "$ACCOUNT" --notify-snapshot "$TODAY" \
+            --channel trading_daily >&2 || true
         else
           log "$ACCOUNT: rc=0 nhưng không có dòng (chưa có ngày giao dịch nào) — không làm gì."
         fi

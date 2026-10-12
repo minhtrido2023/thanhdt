@@ -356,6 +356,32 @@ def build_cases(verdict):
                     f.append(f"message thiếu {need!r}: {msg!r}")
         finally:
             os.remove(p)
+        # Bản ghi của một ngày SAU ngày đang chụp (chạy lại snapshot ngày cũ) cũng "treo" so với
+        # chuỗi dòng tới ngày đó, nhưng nó không bị đẩy đi đâu cả ⇒ KHÔNG được in ghi chú đó cho nó.
+        p = flows_file([{"date": "2026-09-28", "time_ict": "10:00", "amount_vnd": 200_000_000,
+                         "kind": "deposit", "evidence": "nạp tuần sau"}])
+        try:
+            ok, msg = verdict("SpaceX", TODAY, PREV, 1_200_000_000.0, 15.0, HIST,
+                              components=COMP, flows_path=p)
+            if ok or "Bản ghi 2026-09-28" in (msg or "") or "bị đẩy sang phiên sau" in (msg or ""):
+                f.append(f"bản ghi của ngày sau ngày đang chụp không được nhận ghi chú đẩy phiên: ok={ok} {msg!r}")
+            if "gần nhất trong ±3 ngày: 2026-09-28" not in (msg or ""):
+                f.append(f"bản ghi 09-28 vẫn phải hiện ở danh sách ±3 ngày: {msg!r}")
+        finally:
+            os.remove(p)
+        # Bản ghi treo có ngày TRƯỚC ngày đang chụp vẫn bị đẩy sang phiên sau ⇒ PHẢI được nêu, không
+        # chỉ bản ghi đúng ngày. Chỉ dựng được với dòng của ngày KHÔNG có phiên mang số dư chụp từ
+        # hôm trước (dòng thứ Bảy, số dư tối thứ Sáu 21:00, tiền vào thứ Sáu 22:00): dòng của ngày
+        # có phiên mà chụp trước khi tiền vào thì đã bị từ chối ở bước gán.
+        p = flows_file([{"date": "2026-09-25", "time_ict": "22:00", "amount_vnd": 200_000_000,
+                         "kind": "deposit", "evidence": "nạp tối thứ Sáu"}])
+        try:
+            ok, msg = verdict("SpaceX", "2026-09-26", PREV, 1_200_000_000.0, 15.0, HIST_FRI,
+                              components=COMP, flows_path=p, balance_ts="2026-09-25T21:00:00")
+            if ok or "Bản ghi 2026-09-25 time_ict=22:00 +200,000,000 VND ĐÃ khai" not in (msg or ""):
+                f.append(f"bản ghi treo của ngày TRƯỚC ngày đang chụp phải được nêu: ok={ok} {msg!r}")
+        finally:
+            os.remove(p)
         # Không có bản ghi nào treo (không khai gì) ⇒ KHÔNG được in ghi chú "bị đẩy sang phiên sau".
         p = flows_file([])
         try:

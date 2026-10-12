@@ -25,6 +25,7 @@ import datetime
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 import time as _time
@@ -65,6 +66,14 @@ from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noq
 # biến kế toán). Alias giữ tên cũ cho `previous_balance()` và để hai file KHÔNG thể lệch nữa —
 # docstring park_holdings.py:148 đã ghi "sửa một nơi, sửa cả hai (đã lệch 1 lần)".
 _stock_all_zero = _stock_block_all_zero
+
+_ERRNO_RE = re.compile(r"\[Errno -?\d+\] ?")
+
+
+def _exc_text(exc) -> str:
+    """Lỗi → "TênLỗi (thông điệp)" cho dòng CẢNH BÁO: bỏ cụm "[Errno N]" và không viết "TênLỗi:" —
+    hai dạng đó khớp `ERROR_RE` của `cron_health_check.py`, mà các dòng này vào log cron mỗi tối."""
+    return f"{type(exc).__name__} ({_ERRNO_RE.sub('', str(exc))})"
 
 
 def cash_block_reject_reason(stock):
@@ -910,6 +919,39 @@ def nav_performance_lines(day_change, perf, perf_err):
     return paren, lines
 
 
+def cash_identity_report(account, date, **paths):
+    """Kết quả đẳng thức tiền (`cash_identity.report`) cho lượt chụp `date`, tính trên nav_history
+    ĐÃ gồm dòng `date`: `investor_line` (MỘT dòng trung tính cho dòng 💰 NAV — thứ duy nhất của
+    đẳng thức được phép vào báo cáo gửi nhà đầu tư), `ops_lines` (chi tiết đầy đủ), `ops_today`
+    (phần gửi kênh vận hành của lượt này). Đường HIỂN THỊ chạy sau khi nav_history đã ghi ⇒ bắt
+    mọi Exception, kể cả lỗi import (cùng lý do với `unit_price_performance`); lỗi đã gặp đi kênh
+    vận hành, KHÔNG vào stdout (stdout + stderr của script này là thân báo cáo ngày)."""
+    try:
+        from cash_identity import report
+        return report(account, asof=datetime.date.fromisoformat(date), **paths)
+    except Exception as exc:                # noqa: BLE001 — đường hiển thị (xem docstring)
+        line = (f"⚠️ Đẳng thức tiền ({account}) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa "
+                f"khai — {_exc_text(exc)}")
+        return {"investor_line": None, "ops_lines": [line], "ops_today": [line], "error": line}
+
+
+def cash_flow_ops_record(snapshot_path, lines):
+    """Khối `cash_flow_ops` cho nav_snapshot JSON: các dòng vận hành của lượt này + trạng thái gửi.
+    Chụp lại cùng ngày với đúng nội dung đã gửi ⇒ giữ "đã gửi" (đọc file cũ TRƯỚC khi ghi đè) để
+    `cash_identity.py --notify-snapshot` không gửi lần hai. Không đọc được file cũ = chưa gửi."""
+    previous = None
+    try:
+        with open(snapshot_path, "r", encoding="utf-8") as f:
+            previous = json.load(f).get("cash_flow_ops")
+    except (OSError, ValueError, AttributeError):
+        pass
+    lines = list(lines)
+    if isinstance(previous, dict) and previous.get("lines") == lines \
+            and str(previous.get("status", "")).startswith("đã gửi"):
+        return {"lines": lines, "status": previous["status"]}
+    return {"lines": lines, "status": "chưa gửi" if lines else "không có gì để gửi"}
+
+
 def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
                      components=None, flows_path=None, balance_ts=None):
     """Quyết định có được GHI dòng nav_history của `date` hay không.
@@ -1560,6 +1602,11 @@ def main():
         + (f" · Trứng vàng {egg_value:,.0f}" if egg_value else "")
         + (f" · Off-book {offbook:,.0f}" if offbook else ""),
     ] + perf_lines
+    # Đọc CHÍNH thư mục mà lần chụp này vừa ghi nav_history và đọc dnse_raw. Báo cáo chỉ nhận MỘT
+    # dòng trung tính; chi tiết nằm ở nav_snapshot JSON bên dưới và kênh vận hành.
+    identity = cash_identity_report(args.account, args.date, nav_dir=EXEC_DIR, raw_dir=EXEC_DIR)
+    if identity["investor_line"]:
+        lines.append("   " + identity["investor_line"])
     if cum_div["amount"]:
         lines.append(f"   ℹ️ Đã LOẠI {cum_div['amount']:,.0f} VND cổ tức phải thu khỏi tiền mặt "
                       f"(broker báo {cash_broker:,.0f}) — {cum_div['note']}")
@@ -1584,6 +1631,7 @@ def main():
             lines.append(f"   ℹ️ {n}")
     print("\n".join(lines))
 
+    snapshot_path = os.path.join(EXEC_DIR, f"nav_snapshot_{args.account}_{args.date}.json")
     out = {"account": args.account, "date": args.date, "nav": nav,
            "mtm_stock": mtm_stock, "cash": cash, "cash_broker": cash_broker,
            "cum_dividend_excl": cum_div, "margin_debt": debt,
@@ -1600,6 +1648,12 @@ def main():
            "performance": ({"day": perf["day"], "inception": perf["inception"],
                             "pending_flows": perf["pending_flows"]} if perf else None),
            "performance_error": perf_err, "balance_ts": bal["ts"],
+           # Đẳng thức tiền tại lúc chụp — vết của từng tối. `cash_flow_warnings` = chi tiết đầy
+           # đủ mọi cửa sổ đang mở; `cash_flow_ops` = phần gửi kênh vận hành của lượt này (do
+           # `cash_identity.py --notify-snapshot` gửi sau khi script này thoát rc=0).
+           "cash_flow_warnings": identity["ops_lines"],
+           "cash_flow_investor_line": identity["investor_line"],
+           "cash_flow_ops": cash_flow_ops_record(snapshot_path, identity["ops_today"]),
            "nav_is_estimate": bool(args.from_raw), "positions_ts": positions_ts,
            "raw_price_notes": raw_price_notes, "corp_action_qty_adj": corp_action_adj,
            # [5] arch-review vòng 2: P4 trước chỉ ghi bằng chứng ở nhánh rc=5 + cash_div_confirmed
@@ -1619,8 +1673,7 @@ def main():
                      "egg.totalValue từ balances API (tự động, live từ 2026-08-18) + "
                      "manual_offbook_assets_vnd (trading_bot_accounts.json, user tự báo, KHÔNG "
                      "có API — xem note/asof)"}
-    with open(os.path.join(EXEC_DIR, f"nav_snapshot_{args.account}_{args.date}.json"), "w",
-              encoding="utf-8") as f:
+    with open(snapshot_path, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
     return 0
 

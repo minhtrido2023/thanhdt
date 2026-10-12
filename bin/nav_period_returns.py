@@ -33,6 +33,11 @@ audit measurement-integrity 2026-09-27.)
     `starting_capital`, đừng ghi thành flow — nếu không sẽ tính hai lần.
   - Dòng tiền TREO (chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra) không thuộc kỳ đo
     nào và HIỆN ở `pending_flows` + cảnh báo stderr — không bao giờ vô hình.
+  - Dòng tiền CHƯA KHAI: CLI in thêm hai trường của đẳng thức tiền (`cash_identity.py`) tới ngày
+    báo cáo. `cash_flow_investor_line` = MỘT dòng trung tính (hoặc null) — báo cáo tuần/tháng gửi
+    nhà đầu tư chép ĐÚNG dòng này, không thêm gì (cổng giao báo cáo nhắc nếu thiếu).
+    `cash_flow_warnings` = chi tiết VẬN HÀNH (mã, số lượng, phân rã, tên file) — cho người soạn
+    đọc, KHÔNG chép vào báo cáo.
 
 HAI SỐ CỦA CHỦ TÀI KHOẢN, tách khỏi tỉ suất gia quyền thời gian (không trộn):
   - `pnl_vnd` = nav1 − nav0 − dòng tiền ròng của kỳ — lãi/lỗ bằng tiền.
@@ -57,6 +62,7 @@ import argparse
 import datetime
 import json
 import os
+import re
 import sys
 from zoneinfo import ZoneInfo
 
@@ -71,6 +77,14 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 ANNUALIZE_MIN_DAYS = 365
 DAYS_PER_YEAR = 365.25            # số mũ quy năm — cùng quy ước với backtest của repo
+
+_ERRNO_RE = re.compile(r"\[Errno -?\d+\] ?")
+
+
+def _exc_text(exc) -> str:
+    """Lỗi → "TênLỗi (thông điệp)" cho dòng CẢNH BÁO: bỏ cụm "[Errno N]" và không viết "TênLỗi:" —
+    hai dạng đó khớp `ERROR_RE` của `cron_health_check.py`, mà các dòng này vào log cron mỗi tối."""
+    return f"{type(exc).__name__} ({_ERRNO_RE.sub('', str(exc))})"
 
 
 def _last_on_or_before(rows: list, d: datetime.date):
@@ -269,6 +283,21 @@ def main() -> int:
             print(f"⚠️ nav_period_returns ({args.account}): dòng tiền {label} — {f['date']} "
                   f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND ({f['kind']}) KHÔNG nằm "
                   f"trong tỉ suất nào ở trên: {f['reason']}", file=sys.stderr)
+    # Biến động tiền mà đẳng thức tiền (`cash_identity.py`) chưa đối chiếu xong: người soạn báo
+    # cáo phải thấy chi tiết (stderr + `cash_flow_warnings`), báo cáo chỉ mang một dòng trung tính.
+    # Đường CẢNH BÁO: lỗi ở đây (kể cả lỗi import) không được làm mất số tỉ suất đã tính xong.
+    try:
+        from cash_identity import report as cash_identity_report
+        identity = cash_identity_report(args.account, asof=report_date)
+        result["cash_flow_warnings"] = identity["ops_lines"]
+        result["cash_flow_investor_line"] = identity["investor_line"]
+    except Exception as exc:                # noqa: BLE001
+        result["cash_flow_warnings"] = [
+            f"⚠️ Đẳng thức tiền ({args.account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
+            f"chưa khai — {_exc_text(exc)}"]
+        result["cash_flow_investor_line"] = None
+    for line in result["cash_flow_warnings"]:
+        print(f"nav_period_returns: {line}", file=sys.stderr)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
