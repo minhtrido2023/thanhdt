@@ -1997,6 +1997,43 @@ except Exception as _e13x:
       f"({type(_e13x).__name__}: {str(_e13x)[:160]}) — không kết luận được cổng đang ở DT5G hay DT4.")
 # CHECK13_END
 
+# LB. Phanh lỗ cấp NAV (thêm 2026-10-12, job Taylor_20261012_111422) — MỘT dòng mỗi account, đọc
+#     data/loss_brake/status.json do nav_loss_brake_monitor.py ghi tối phiên trước. Độ tươi do
+#     chính `--health-line` kiểm (PHIÊN ghi trong file so với lịch phiên — §14, không dùng mtime);
+#     ở đây chỉ đổi rc thành dòng:
+#       rc=0 ✅ · rc=1 không đo được ⇒ [WARN-ONLY] (user quyết — monitor chỉ cảnh báo, KHÔNG
+#       được route sang autofix) · rc=5 phanh CHẠM / số tạm tính vượt ngưỡng ⇒ dòng 🔴 RIÊNG, không
+#       lẫn vào đám [WARN-ONLY] thường nhật; dòng không mang ⚠️/❌ nên khối ROUTING không đẩy sang
+#       autofix (user quyết), vẫn tính 1 warn · rc=2 monitor không chạy (file thiếu/cũ/hỏng) và
+#       rc=3 monitor có chạy nhưng LỖI (tự nó hỏng / không gửi được cảnh báo) ⇒ WARN thường: lỗi
+#       VẬN HÀNH, phải tới được autofix. Autofix được và không được làm gì: kb/ops_runbook.md mục
+#       "Phanh lỗ NAV".
+# LOSSBRAKE_BEGIN
+try:
+    _lb = subprocess.run([sys.executable,
+                          os.path.join(wc_root, "mike", "bin", "nav_loss_brake_monitor.py"),
+                          "--health-line", "--account", account],
+                         capture_output=True, text=True, timeout=60)
+    _lb_out = (_lb.stdout or "").strip()
+    _lb_line = _lb_out.splitlines()[-1] if _lb_out else ""
+    if _lb.returncode == 0 and _lb_line:
+        OK(_lb_line)
+    elif _lb.returncode == 1 and _lb_line:
+        W(f"[WARN-ONLY] {_lb_line}")
+    elif _lb.returncode == 5 and _lb_line:
+        warn += 1
+        lines.append("🔴 PHANH LỖ NAV CHẠM NGƯỠNG — USER QUYẾT (không autofix): "
+                     + _lb_line.replace("⚠️", "⚠").replace("❌", "✗"))
+    elif _lb.returncode in (2, 3) and _lb_line:
+        W(_lb_line)
+    else:
+        W(f"Phanh lỗ NAV [{account}]: nav_loss_brake_monitor.py --health-line rc={_lb.returncode} "
+          f"không in dòng trạng thái nào — stderr: {(_lb.stderr or '').strip()[-200:] or '(rỗng)'}")
+except Exception as _elb:
+    W(f"Phanh lỗ NAV [{account}]: không chạy được nav_loss_brake_monitor.py --health-line "
+      f"({type(_elb).__name__}: {str(_elb)[:160]})")
+# LOSSBRAKE_END
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF
