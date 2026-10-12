@@ -31,7 +31,7 @@ Một cửa sổ MỞ (cần người xem) khi:
   dư nợ; khấu trừ rút Trứng vàng lớn hơn mức đã đo; cổ tức ghi và trả trong cùng cửa sổ), còn lại
   là **"nghi nạp/rút chưa khai"**.
 
-Ngoài ra: tổng phần dư của 20 cửa sổ gần nhất (chỉ cửa sổ kiểm được và không đang mở) vượt 0,05% ⇒
+Ngoài ra: tổng phần dư của 20 cửa sổ gần nhất (chỉ cửa sổ kiểm được, không đang mở và chưa có lời xác nhận khớp) vượt 0,05% ⇒
 MỘT dòng **"phần dư trôi có hệ thống"** (khoản nhỏ lặp lại, hoặc một hằng số của đẳng thức đã cũ).
 
 Module KHÔNG BAO GIỜ ghi vào [`account_cash_flows.md`](account_cash_flows.md).
@@ -40,7 +40,7 @@ Module KHÔNG BAO GIỜ ghi vào [`account_cash_flows.md`](account_cash_flows.md
 | Nơi | Thấy gì |
 |---|---|
 | Báo cáo ngày/tuần/tháng gửi nhà đầu tư | tối đa MỘT dòng: "ℹ️ Có N khoản biến động tiền chưa đối chiếu xong (lớn nhất X đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh." — chỉ khi còn cửa sổ mở |
-| Trading Daily (`cash_identity.py --notify-snapshot`, do `eod_trading_report.sh` / `nav_sync_retry.sh` gọi sau khi NAV đã ghi) | chi tiết đầy đủ của cửa sổ kết thúc ĐÚNG ngày chụp; cửa sổ cũ gộp một dòng đếm mỗi tối; dòng trôi gửi chi tiết một lần |
+| Trading Daily (`cash_identity.py --notify-snapshot`, do `eod_trading_report.sh` / `nav_sync_retry.sh` / `nav_snapshot_daily.sh` gọi sau khi NAV đã ghi) | chi tiết đầy đủ của cửa sổ kết thúc ĐÚNG ngày chụp; cửa sổ cũ gộp một dòng đếm mỗi tối (kể cả cửa sổ THIẾU BẰNG CHỨNG — không kiểm được / không đối chiếu được số lượng — trong 30 ngày qua; cửa sổ mốc khởi điểm không đếm); dòng trôi gửi chi tiết một lần. Gửi hỏng ⇒ stderr mang `NOTIFY_FAILED` |
 | `nav_snapshot_<TK>_<ngày>.json` | `cash_flow_warnings` (mọi cửa sổ đang mở), `cash_flow_investor_line`, `cash_flow_ops` (`lines` + `status` gửi) |
 | `nav_period_returns.py` | `cash_flow_investor_line` (chép vào báo cáo tuần/tháng) + `cash_flow_warnings` (cho người soạn, KHÔNG chép) |
 | `report_delivery_gate.py` | stderr; nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; không chặn |
@@ -90,6 +90,11 @@ lần**: hai cửa sổ dưới ngưỡng lớn nhất đạt 0,0294% (SpaceX 07
    từ theo ngày để wire. Chi tiết: `agents/Taylor/research/fund_cashflow_detect_20261012/B_result.md`.
 
 ## Không phủ
+- Nhãn "cổ tức ghi và trả trong cùng cửa sổ" (phần dư dương ≤ 15% giá trị cổ phiếu / 0,95) rộng: một khoản
+  nạp thật nhỏ có thể mang nhãn nội bộ này. Cửa sổ vẫn MỞ (không âm tính giả) nhưng nhãn dễ dẫn người duyệt
+  tới ack nhầm — cần bằng chứng (`cashDividendReceiving` > 0 gần đó) hoặc trần chặt hơn (arch-review vòng 2, N5, chưa làm).
+- Bản ghi vị thế được nhận trong ±10 phút quanh lần chụp; ngoài khoảng đó = không đối chiếu được số lượng.
+  Bản ghi vị thế RỖNG trong khi NAV có cổ phiếu = lỗi đọc của broker (đã thấy: dnse_raw_2026-08-20 SpaceX 19:07:16) ⇒ cũng không đối chiếu được.
 - Chuyển CỔ PHIẾU vào/ra không kèm tiền: chỉ thấy ở dạng "số lượng đổi ngoài lệnh" (không biết giá
   trị thật) — lớp bắt chính vẫn là cổng bước nhảy NAV và cổng phần dư số lượng của
   `daily_nav_snapshot.py`.

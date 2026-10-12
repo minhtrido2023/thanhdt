@@ -155,6 +155,7 @@ DIVIDEND_SAME_WINDOW_CAP = 0.15
 # tăng đúng 110 × 10.000 đ; ZaloPay cùng ngày +20 cp) — chưa xác minh bằng nguồn ngoài rằng đó là
 # quyền mua. Chi tiết từng ngày: `agents/Taylor/research/fund_cashflow_detect_20261012/`.
 THRESHOLD_PCT = 0.05
+THIN_DAYS = 30                    # cửa sổ thiếu bằng chứng còn được nhắc trong dòng đếm hằng tối (ngày)
 # Trôi tích luỹ: tổng phần dư (% NAV) của `DRIFT_WINDOWS` cửa sổ gần nhất — chỉ cộng cửa sổ kiểm
 # được và không đang mở/đã xác nhận riêng — vượt `THRESHOLD_PCT` ⇒ một dòng "phần dư trôi". Trên
 # lịch sử thật tới 2026-10-12 tổng trượt lớn nhất là 0,046% (SpaceX) / 0,025% (ZaloPay): chưa lần
@@ -366,12 +367,14 @@ class RawLog:
         return None if best is None else best[1]
 
     def positions_at(self, snap):
-        """{mã: (KL đang giữ, giá thị trường | None)} ở bản ghi positions mới nhất không muộn hơn
-        `snap` quá 10 phút (positions và balances được ghi cách nhau vài giây). Không có ⇒ `None`."""
+        """{mã: (KL đang giữ, giá thị trường | None)} ở bản ghi positions mới nhất KHÔNG lệch `snap`
+        quá 10 phút về cả hai phía (positions và balances được ghi cách nhau vài giây). Không có bản
+        nào trong khoảng đó ⇒ `None` (không đối chiếu được) — KHÔNG lấy bản ghi buổi sáng thay cho
+        bản buổi tối (arch-review vòng 2, N3: ca mua tay 10:00 kèm nạp tiền báo sạch)."""
         best = None
-        limit = snap + datetime.timedelta(minutes=10)
+        gap = datetime.timedelta(minutes=10)
         for at, positions in self.day(snap.date())["positions"]:
-            if at <= limit and (best is None or at >= best[0]):
+            if snap - gap <= at <= snap + gap and (best is None or at >= best[0]):
                 best = (at, positions)
         return None if best is None else best[1]
 
@@ -495,16 +498,23 @@ def load_share_credits(corp_actions_path=None):
                     f"KHÔNG được giải thích — {_err(exc)}")
 
 
-def _reconcile_quantities(raw, snap0, snap1, fills, share_credits):
+def _reconcile_quantities(raw, snap0, snap1, fills, share_credits, mtm0=0.0, mtm1=0.0):
     """Số lượng vị thế đổi giữa hai lần chụp có bằng đúng lệnh đã đọc + cổ phiếu thưởng đã ký không.
     Trả `(gaps, values, unverified, credited)`: `gaps` = {mã: số lượng dư}, `values` = {mã: giá trị
     ước tính theo giá thị trường của bản ghi vị thế | None}, `unverified` = lý do không đối chiếu
     được (None nếu đối chiếu được), `credited` = ghi chú các khoản dư đã khớp sự kiện đã ký."""
     p0, p1 = raw.positions_at(snap0), raw.positions_at(snap1)
+    # Bản ghi vị thế RỖNG trong khi dòng nav_history có cổ phiếu = lỗi đọc của broker (đã thấy thật:
+    # dnse_raw_2026-08-20 SpaceX 19:07:16 có 0 vị thế kẹp giữa các bản ghi 27 vị thế), KHÔNG phải
+    # "không giữ mã nào" — coi là không đọc được (arch-review vòng 2, N4).
+    if p0 == {} and mtm0 > 0:
+        p0 = None
+    if p1 == {} and mtm1 > 0:
+        p1 = None
     if p0 is None or p1 is None:
         return {}, {}, ("không đọc được vị thế ở "
                         + " và ".join(f"lần chụp {s}" for s, p in ((snap0, p0), (snap1, p1)) if p is None)
-                        + " (dnse_raw không có bản ghi positions quanh lúc đó)"), []
+                        + " (quanh lúc đó dnse_raw không có bản ghi positions, hoặc bản ghi rỗng trong khi NAV có cổ phiếu)"), []
     net = {}
     for fx in fills:
         net[fx["symbol"]] = net.get(fx["symbol"], 0.0) + (fx["qty"] if fx["side"] == "buy" else -fx["qty"])
@@ -621,7 +631,8 @@ def build_windows(rows, raw, flows, extra_fills=(), threshold_pct=THRESHOLD_PCT,
         declared_vnd = sum(f["amount_vnd"] for f in declared)
         unexplained = residual - declared_vnd
         tol = prev["nav"] * threshold_pct / 100
-        gaps, values, unverified, credited = _reconcile_quantities(raw, snap0, snap1, fills, share_credits)
+        gaps, values, unverified, credited = _reconcile_quantities(
+            raw, snap0, snap1, fills, share_credits, prev["mtm"], cur["mtm"])
         win.update(delta_k=delta_k, sell=sell, buy=buy, n_fills=len(fills), fees=fees,
                    dividend=dividend, egg_interest=egg_interest, egg_out=egg_out, egg_cost=egg_cost,
                    residual=residual, declared=declared_vnd, declared_flows=declared,
@@ -836,9 +847,16 @@ def report(account, asof=None, **paths):
         return {"investor_line": None, "ops_lines": [line], "ops_today": [line], "error": line}
     every = ([result["baseline"]] if result["baseline"] else []) + result["windows"]
     day = asof or (every[-1]["date1"] if every else None)
-    ops, today, older = [], [], []
+    ops, today, older, thin = [], [], [], []
     for w in every:
         ends_today = w["date1"] == day
+        # Cửa sổ THIẾU BẰNG CHỨNG (không kiểm được / không đối chiếu được số lượng) đã kết thúc trong
+        # THIN_DAYS ngày qua: chỉ được nhắc đúng một tối ở chi tiết, nên gộp vào dòng đếm hằng tối
+        # để thiếu bằng chứng không bị đối xử như sạch (arch-review vòng 2, N8). Cửa sổ mốc khởi
+        # điểm luôn không kiểm được (cấu trúc, không đổi) ⇒ không đếm.
+        if (not ends_today and not w.get("baseline") and day and (day - w["date1"]).days <= THIN_DAYS
+                and not w["suspect"] and (not w["checkable"] or (w.get("qty_unverified") and not w["acked"]))):
+            thin.append(w)
         if w["suspect"]:
             ops.append(suspect_line(account, w))
             (today if ends_today else older).append(ops[-1] if ends_today else w)
@@ -859,6 +877,9 @@ def report(account, asof=None, **paths):
     stale = ([f"{len(older)} cửa sổ cũ chưa đóng (kết thúc "
               + ", ".join(str(w["date1"]) for w in older[:6]) + ("…" if len(older) > 6 else "") + ")"]
              if older else [])
+    stale += [f"{len(thin)} cửa sổ trong {THIN_DAYS} ngày qua chưa kiểm được hoặc chưa đối chiếu được số "
+              f"lượng cổ phiếu (kết thúc " + ", ".join(str(w["date1"]) for w in thin[:6])
+              + ("…" if len(thin) > 6 else "") + ")"] if thin else []
     stale += ["phần dư trôi có hệ thống đã báo từ lượt trước"] if drift and not drift["new"] else []
     if stale:
         today.append(f"⚠️ {WARNING_MARKER} ({account}): còn " + " và ".join(stale)
@@ -971,7 +992,10 @@ def main() -> int:
     if args.notify_snapshot:
         rc, message = notify_snapshot(args.account, args.notify_snapshot, args.channel,
                                       exec_dir=args.nav_dir)
-        print(f"cash_identity: {message}", file=sys.stderr if rc else sys.stdout)
+        # NOTIFY_FAILED = chuỗi cron_health_check.py bắt; thiếu nó thì gửi hỏng chỉ nằm trong log cron
+        # và các tối sau không gửi bù (arch-review vòng 2, N1).
+        print(f"{'NOTIFY_FAILED: ' if rc else ''}cash_identity: {message}",
+              file=sys.stderr if rc else sys.stdout)
         return rc
     try:
         result = check_account(

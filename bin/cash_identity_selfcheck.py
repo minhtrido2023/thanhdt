@@ -643,6 +643,86 @@ def run_checks(tmp):
            in ci.suspect_line("SpaceX", res["suspects"][0]),
            f"F: lời xác nhận {label} ⇒ không đóng được cửa sổ có số lượng lệch")
 
+    # ---- F2. arch-review vòng 2: N3 (cận dưới giờ), N4 (bản ghi rỗng), N6 (mã biến mất / lô trùng / thanh lý hết)
+    def pos_rec(*lots, tag=True, ts=None):
+        """Bản ghi positions thủ công; mỗi lot = (mã, số lượng). Có thể có hai lot cùng mã (lô trùng)."""
+        no = ACCOUNTS["SpaceX"]
+        out = {"kind": "positions", "payload": {"positions": [
+            {"symbol": sym, "accountNo": no, "openQuantity": q, "marketPrice": PRICE} for sym, q in lots]}}
+        if tag:
+            out["account_no"] = no
+        if ts:
+            out["ts"] = ts
+        return out
+
+    def hand_positions(name, records, events=(), day=4):
+        wd = World(tmp, name)
+        for ev in events:
+            wd.add("SpaceX", *ev)
+        wd.no_positions.add(("SpaceX", D(2026, 3, day)))
+        wd.extra_raw[("SpaceX", D(2026, 3, day))] = records
+        return wd.build()
+
+    # N3: chỉ còn bản ghi vị thế BUỔI SÁNG của ngày 04/03 (trước lệnh mua tay 10:30) ⇒ KHÔNG được dùng thay
+    # cho bản buổi tối; cửa sổ phải báo "không đối chiếu được số lượng", không báo sạch.
+    wd = hand_positions("F2_N3", [pos_rec(("AAA", 30_000.0), ("BBB", 20_000.0), ts="2026-03-04T10:00:00")],
+                        events=[(at(4, "10:30"), "buy", "AAA", 5_000, ), ])
+    res = wd.check("SpaceX")
+    ok(window(res, 4)["qty_unverified"] and window(res, 4)["qty_gaps"] == {}
+       and wd.build().check("SpaceX")["windows"][1]["qty_unverified"],
+       f"F2/N3: chỉ có bản ghi vị thế buổi sáng ⇒ không đối chiếu được số lượng (không báo sạch); được "
+       f"{window(res, 4)['qty_unverified']!r} / {window(res, 4)['qty_gaps']}")
+    ok(ci.RawLog is not None and hasattr(ci.RawLog, "positions_at"), "F2/N3: RawLog.positions_at phải tồn tại")
+    log_obj = ci.RawLog(ACCOUNTS["SpaceX"], str(wd.dir / "logs"))
+    ok(log_obj.positions_at(at(4, "19:10:05")) is None
+       and log_obj.positions_at(at(4, "10:05:00")) is not None and log_obj.positions_at(at(4, "09:51:00")) is not None
+       and log_obj.positions_at(at(4, "09:49:00")) is None and log_obj.positions_at(at(4, "10:11:00")) is None,
+       "F2/N3: bản ghi vị thế chỉ được nhận trong ±10 phút quanh lần chụp (biên 09:50 và 10:10)")
+
+    # N4: bản ghi positions RỖNG (lỗi đọc broker) trong khi NAV có cổ phiếu ⇒ không đối chiếu được, KHÔNG báo
+    # "mất sạch AAA/BBB".
+    wd = hand_positions("F2_N4", [pos_rec(ts="2026-03-04T19:10:07")])
+    res = wd.check("SpaceX")
+    ok(not res["suspects"] and window(res, 4)["qty_unverified"] and not window(res, 4)["qty_gaps"]
+       and window(res, 5)["qty_unverified"] and "bản ghi rỗng trong khi NAV có cổ phiếu" in window(res, 4)["qty_unverified"],
+       f"F2/N4: bản ghi vị thế rỗng khi NAV có cổ phiếu ⇒ không đối chiếu được ở CẢ HAI cửa sổ kề nó; được "
+       f"{res['suspects']} / {window(res, 4)['qty_unverified']}")
+    # N6/C10: thanh lý HẾT thật (mtm=0) ⇒ bản ghi rỗng là sự thật, phải đối chiếu được và khớp lệnh bán.
+    wd = hand_positions("F2_C10", [pos_rec(ts="2026-03-04T19:10:07")],
+                        events=[(at(4, "10:00"), "sell", "AAA", 30_000), (at(4, "10:01"), "sell", "BBB", 20_000)])
+    res = wd.check("SpaceX")
+    ok(not res["suspects"] and not window(res, 4)["qty_unverified"] and not window(res, 4)["qty_gaps"]
+       and window(res, 4)["n_fills"] == 2,
+       f"F2/C10: bán hết cổ phiếu, bản ghi rỗng đúng sự thật ⇒ đối chiếu được và khớp; được {res['suspects']} "
+       f"{window(res, 4)['qty_unverified']} {window(res, 4)['qty_gaps']}")
+    # N6/C07: một mã BIẾN MẤT khỏi bản ghi vị thế (không có lệnh bán) trong khi mã khác còn ⇒ phải báo lệch.
+    wd = hand_positions("F2_C07", [pos_rec(("BBB", 20_000.0), ts="2026-03-04T19:10:07")])
+    res = wd.check("SpaceX")
+    ok(4 in open_days(res) and window(res, 4)["qty_gaps"] == {"AAA": -30_000.0}
+       and window(res, 5)["qty_gaps"] == {"AAA": 30_000.0},     # hôm sau AAA hiện lại ⇒ cửa sổ kề bên lệch ngược
+       f"F2/C07: mã AAA biến mất khỏi vị thế không kèm lệnh bán ⇒ lệch AAA −30.000; được {open_days(res)} {window(res, 4)['qty_gaps']}")
+    # N6/C09: hai LÔ cùng mã phải được CỘNG, không ghi đè (ZaloPay thật có 168 cặp ngày-mã nhiều lô).
+    wd = hand_positions("F2_C09", [pos_rec(("AAA", 10_000.0), ("AAA", 20_000.0), ("BBB", 20_000.0), ts="2026-03-04T19:10:07")])
+    res = wd.check("SpaceX")
+    ok(not res["suspects"] and not window(res, 4)["qty_gaps"] and not window(res, 4)["qty_unverified"],
+       f"F2/C09: AAA chia hai lô 10.000 + 20.000 = 30.000 ⇒ khớp, không lệch; được {window(res, 4)['qty_gaps']}")
+
+    # N8: cửa sổ THIẾU BẰNG CHỨNG đã kết thúc trong 30 ngày qua phải có mặt trong dòng đếm hằng tối;
+    # cửa sổ mốc khởi điểm (luôn không kiểm được, cấu trúc) thì không.
+    wd = World(tmp, "F2_N8")
+    wd.no_positions.add(("SpaceX", D(2026, 3, 4)))
+    wd.build()
+    rep = ci.report("SpaceX", asof=D(2026, 3, 13), **wd.paths)
+    thin_lines = [x for x in rep["ops_today"] if "chưa kiểm được hoặc chưa đối chiếu được số lượng" in x]
+    ok(len(thin_lines) == 1 and "2 cửa sổ trong 30 ngày qua" in thin_lines[0] and "2026-03-04, 2026-03-05" in thin_lines[0],
+       f"F2/N8: cửa sổ không đối chiếu được số lượng phải vào dòng đếm hằng tối; được {rep['ops_today']}")
+    rep0 = ci.report("SpaceX", asof=D(2026, 3, 13), **internal_only(World(tmp, "F2_N8_clean")).build().paths)
+    ok(not any("chưa kiểm được hoặc chưa đối chiếu được" in x for x in rep0["ops_today"]),
+       f"F2/N8: thế giới sạch (chỉ có cửa sổ mốc khởi điểm không kiểm được) ⇒ dòng đếm KHÔNG nhắc; được {rep0['ops_today']}")
+    rep = ci.report("SpaceX", asof=D(2026, 4, 20), **wd.paths)         # 47 ngày sau ⇒ quá THIN_DAYS, hết nhắc
+    ok(ci.THIN_DAYS == 30 and not any("chưa kiểm được hoặc chưa đối chiếu được" in x for x in rep["ops_today"]),
+       f"F2/N8: cửa sổ thiếu bằng chứng quá {ci.THIN_DAYS} ngày thì thôi nhắc hằng tối (vẫn thấy ở CLI); được {rep['ops_today']}")
+
     # Cổ phiếu thưởng/cổ tức cổ phiếu ĐÃ KÝ giải thích được số lượng tăng; chưa ký / lệch ⇒ không.
     def bonus(name, n=3_000, **patch):
         wd = quiet(name).add("SpaceX", at(5, "12:00"), "bonus", "BBB", n)
@@ -689,8 +769,11 @@ def run_checks(tmp):
        "F: thiếu bản ghi positions ⇒ hai cửa sổ quanh nó không đối chiếu được số lượng (phần dư tiền ~0 ⇒ không mở)")
     rep5, rep9 = ci.report("SpaceX", asof=D(2026, 3, 5), **wd.paths), ci.report("SpaceX", asof=D(2026, 3, 9), **wd.paths)
     ok(len(rep5["ops_today"]) == 1 and "KHÔNG đối chiếu được số lượng" in rep5["ops_today"][0]
-       and rep5["investor_line"] is None and rep9["ops_today"] == [] and rep9["ops_lines"] == [],
-       f"F: lượt chụp đúng ngày thiếu vị thế báo MỘT dòng vận hành, các lượt sau không nhắc lại; được {rep5} / {rep9}")
+       and rep5["investor_line"] is None and rep9["ops_lines"] == []
+       and len(rep9["ops_today"]) == 1 and "2 cửa sổ trong 30 ngày qua" in rep9["ops_today"][0]
+       and "ℹ️" not in rep9["ops_today"][0],
+       f"F/N8: lượt chụp đúng ngày thiếu vị thế báo MỘT dòng chi tiết; các lượt sau chỉ còn dòng ĐẾM (không lặp chi tiết); "
+       f"được {rep5} / {rep9}")
     ok("(không đối chiếu được số lượng)" in ci._table(res), "F: bảng phải đánh dấu cửa sổ không đối chiếu được số lượng")
     wd = quiet("F_nopos_over").add("SpaceX", at(5, "10:00"), "external", -5_000_000)
     wd.no_positions.add(("SpaceX", D(2026, 3, 5)))
@@ -1156,6 +1239,18 @@ def run_checks(tmp):
                            capture_output=True, text=True, env=dict(env, MIKE_BOT_TEST_MODE="1"))
         ok(p.returncode == 1 and "nav_snapshot_SpaceX_2026-03-11.json" in p.stderr and "Traceback" not in p.stderr,
            f"J: CLI --notify-snapshot thiếu file ⇒ rc=1 + một dòng stderr; được {p.returncode} {p.stderr[-200:]}")
+        ok(p.stderr.startswith("NOTIFY_FAILED: cash_identity:") and chc.ERROR_RE.search(p.stderr),
+           f"J/N1: gửi hỏng phải mang NOTIFY_FAILED để cron_health_check bắt được; được {p.stderr[:120]!r}")
+        write_snap(["x"])
+        p = subprocess.run(cli + ["--account", "SpaceX", "--notify-snapshot", "2026-03-10", "--nav-dir", str(snap_dir)],
+                           capture_output=True, text=True, env=dict(env, MIKE_BOT_TEST_MODE="1"))
+        ok(p.returncode == 0 and "NOTIFY_FAILED" not in p.stdout + p.stderr,
+           f"J/N1: không gửi (chế độ test) ⇒ rc=0 và KHÔNG có NOTIFY_FAILED; được {p.returncode} {p.stderr[-120:]}")
+        nsd = (Path(BIN) / "nav_snapshot_daily.sh").read_text(encoding="utf-8")
+        ok(re.search(r'has_row "\$ACCOUNT"; then\n.*?cash_identity\.py" --account "\$ACCOUNT" --notify-snapshot "\$TODAY" \\\n'
+                     r'\s+--channel trading_daily >&2 \|\| true\n\s+else', nsd, re.S),
+           "J/N2: nav_snapshot_daily.sh phải gửi chi tiết đẳng thức tiền ngay sau khi NAV đã ghi (trong nhánh has_row), "
+           "bằng TÊN kênh trading_daily, lỗi gửi không đổi mã thoát")
     finally:
         os.environ["MIKE_BOT_TEST_MODE"] = "1"
         os.environ.pop("FAKE_NOTIFY_RC", None)

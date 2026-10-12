@@ -101,9 +101,9 @@ cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiề
 - **Bước 2 — XONG trên nhánh `feat/fund-cashflow-detect-20261012` (CHƯA merge; job
   `Taylor_20261012_124854`)**: đẳng thức tiền `bin/cash_identity.py` (ngưỡng ĐO 0,05% NAV — registry
   `kb/data_registry/trading-bot/cash_identity.md`); **K2/K3/K5 đã sửa, K4 đã giết** (L06/T05/T07/D07
-  + D11; 157 mutant, 0 sống); cổng tỉ suất `report_delivery_gate` **fail-CLOSED** khi CLI rc≠0 /
-  đầu ra hỏng; dòng tiền treo + chờ khai ra CẢNH BÁO (không chặn) ở dòng NAV ngày, CLI tỉ suất và
-  cổng giao báo cáo.
+  + D11); cổng tỉ suất `report_delivery_gate` **fail-CLOSED** khi CLI rc≠0 /
+  đầu ra hỏng; dòng tiền treo + chờ khai ra CẢNH BÁO (không chặn). Dạng cảnh báo ở vòng 1 (hai
+  đoạn thô trong báo cáo nhà đầu tư) đã THAY bằng thiết kế vòng 2 ngay bên dưới.
 - **Bước 2 VÒNG 2 (job `Taylor_20261012_162001`, sau arch-review NEEDS_CHANGES —
   `agents/Taylor/research/fund_cashflow_detect_20261012/arch_review_ea9d6969a/REVIEW.md`)**: sửa
   C1 (đối chiếu số lượng cổ phiếu ở MỌI cửa sổ), C2 (báo cáo gửi nhà đầu tư chỉ mang MỘT dòng trung
@@ -111,7 +111,13 @@ cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiề
   `data/cash_identity_acks.json`, mang phần dư đã xem — `market_only` không còn tắt đẳng thức),
   S2 (khấu trừ rút Trứng vàng vào đẳng thức + nhãn "cần xác nhận khoản nội bộ"), S3 (dòng "phần dư
   trôi có hệ thống" trên 20 cửa sổ), S4/S5 (cổng tỉ suất chặn ô số hỏng; đường cảnh báo không làm
-  gãy giao báo cáo), S6-S9, G3/G6/G7/G8.
+  gãy giao báo cáo), S6-S9, G3/G6/G7/G8. Arch-review hẹp vòng 2 (không lỗi chặn) → Mike tự sửa N1
+  (gửi hỏng mang `NOTIFY_FAILED`), N2 (`nav_snapshot_daily.sh` cũng gửi chi tiết vận hành), N3
+  (bản ghi vị thế chỉ nhận trong ±10 phút quanh lần chụp), N4 (bản ghi vị thế RỖNG khi NAV có cổ
+  phiếu = không đọc được), N6 (selfcheck cho mã biến mất / lô trùng mã / thanh lý hết), N8 (cửa
+  sổ thiếu bằng chứng trong 30 ngày qua vào dòng đếm hằng tối). **N5 CHƯA làm** (nhãn "cổ tức ghi
+  và trả cùng cửa sổ" quá rộng — một khoản nạp thật nhỏ có thể mang nhãn nội bộ; cửa sổ vẫn MỞ nên
+  không phải âm tính giả, chỉ là nhãn dễ dẫn người duyệt ack nhầm).
 - **Việc của NGƯỜI sau khi merge bước 2**: ba cửa sổ lịch sử đang mở (SpaceX 07-02→07-03; SpaceX
   và ZaloPay 08-27→08-28 — nhận thêm MBB ở giá vốn 10.000 đ/cp ngoài lệnh) ⇒ tới khi user xác nhận
   và Mike chép `agents/Taylor/research/fund_cashflow_detect_20261012/proposed_acks.json` thành
