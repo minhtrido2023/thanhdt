@@ -9,13 +9,32 @@ Ba câu hỏi, không phải "chạy có ra output không":
 Kiểm tra "rổ 30 mã không đổi" nằm ở tầng ngoài (chạy lại custom30_history.py với đích scratch
 rồi diff CSV) — xem FINDINGS/bus event của job.
 """
-import os, sys
+import os, sys, importlib.util
 import pandas as pd
-WORKDIR = "/home/trido/thanhdt/WorkingClaude"
-sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
+WORKDIR = "/home/trido/thanhdt/WorkingClaude"            # DỮ LIỆU production (CSV publish không track)
+HERE = os.path.dirname(os.path.abspath(__file__))   # code under test: cạnh file này (worktree-aware)
+
+
+def _load(name):
+    """Nạp module GỐC từ HERE theo đường dẫn file — module production tự chèn WORKDIR canonical vào
+    sys.path[0], nên `import <name>` từ worktree sẽ lặng lẽ lấy bản canonical (cùng mẫu
+    tz_asof_ict_dd_dcf_selfcheck.py)."""
+    spec = importlib.util.spec_from_file_location(name, os.path.join(HERE, name + ".py"))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    assert os.path.abspath(mod.__file__).startswith(HERE + os.sep), mod.__file__
+    return mod
+
+
+sys.path.insert(0, HERE); os.chdir(WORKDIR)
+os.environ.setdefault("TRADING_BOT_RUNTIME_ROOT", WORKDIR)   # trading_bot.config: code = HERE, data = WORKDIR
+import trading_bot.due_diligence as _dd                 # TRƯỚC mọi module gốc (chúng chèn WORKDIR canonical)
+assert os.path.abspath(_dd.__file__).startswith(HERE + os.sep), _dd.__file__
+_yield_floor = _dd._yield_floor
+yfl = _load("custom30_yield_labels")
+_cal = _load("corp_action_lib")
 from simulate_holistic_nav import bq
-import custom30_yield_labels as yfl
-from trading_bot.due_diligence import _yield_floor
 
 CSV = "data/custom30v_8l_publish.csv"
 fails = []
@@ -71,8 +90,6 @@ if missing or empty:
 # Test nay chet ngay khi dieu do xay ra — truoc day chi duoc chung minh 1 lan bang tay.
 import datetime as _dt
 from zoneinfo import ZoneInfo
-import corp_action_lib as _cal
-import trading_bot.due_diligence as _dd
 
 _today = _dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()
 _cur_rd_d = _dt.date.fromisoformat(str(rd)[:10])
@@ -133,7 +150,13 @@ else:
     # Ky vong dung cong thuc `_asof_cur = today if today > _cur_rd else _cur_rd` cua chinh
     # custom30_history.py (quant-skeptic vong 1 bat: assert "!= rebal_date" bao gia tren ca
     # chay tay dung ngay rebal, khi _asof_cur == _cur_rd la dung thiet ke, khong phai loi).
-    _exp_open_asof = str(max(_today, _cur_rd_d))
+    # "hom nay" o day = NGAY CSV DUOC SINH (mtime, ICT), khong phai ngay chay selfcheck: file sinh
+    # ~15:3x ICT ngay giao dich, nen so voi dong ho luc chay thi ca nay do moi sang truoc gio do
+    # + cuoi tuan/le du code dung (2026-10-12). Do tuoi cua file la viec cua freshness-check,
+    # khong phai cua selfcheck logic — o day chi in ra.
+    _gen_d = _dt.datetime.fromtimestamp(os.path.getmtime(CSV), ZoneInfo("Asia/Ho_Chi_Minh")).date()
+    _exp_open_asof = str(max(_gen_d, _cur_rd_d))
+    print(f"[E] CSV sinh ngay {_gen_d} (ICT, mtime) — cach hom nay {(_today - _gen_d).days}d")
     _open_vals = _open["label_asof"].unique()
     _ok_open_asof = len(_open_vals) == 1 and _open_vals[0] == _exp_open_asof
     print(f"[E] ky da dong: label_asof==rebal_date {'PASS' if _ok_closed_asof else 'FAIL'} "

@@ -11,12 +11,27 @@ Checks the three things that can silently invalidate the backtest:
 
 Run: $DNA_PYEXE dcf_selector_selfcheck.py
 """
-import os, sys, bisect, warnings
+import os, sys, bisect, warnings, importlib.util
 import numpy as np, pandas as pd
 warnings.filterwarnings("ignore")
 
-WORKDIR = "/home/trido/thanhdt/WorkingClaude"
-sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
+WORKDIR = "/home/trido/thanhdt/WorkingClaude"            # DỮ LIỆU production (bq_cache, parquet — không track)
+HERE = os.path.dirname(os.path.abspath(__file__))   # code under test: cạnh file này (worktree-aware)
+
+
+def _load(name):
+    """Nạp module GỐC từ HERE theo đường dẫn file — module production tự chèn WORKDIR canonical vào
+    sys.path[0], nên `import <name>` từ worktree sẽ lặng lẽ lấy bản canonical (cùng mẫu
+    tz_asof_ict_dd_dcf_selfcheck.py)."""
+    spec = importlib.util.spec_from_file_location(name, os.path.join(HERE, name + ".py"))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    assert os.path.abspath(mod.__file__).startswith(HERE + os.sep), mod.__file__
+    return mod
+
+
+sys.path.insert(0, HERE); os.chdir(WORKDIR)
 
 CACHE = f"{WORKDIR}/mike/agents/Taylor/dcf_exp/fv_sens_releases.parquet"
 FAILS = []
@@ -32,7 +47,7 @@ def check(cond, label):
 # discount rate / terminal g at d. An earlier version of this overlay read a per-release FV cache
 # instead, which prices r/g at rel_time, not d -> 14/40 samples disagreed with production incl. a
 # CHEAP/RICH flip at MoS~=0. Kept live on purpose; the cache parquet is no longer a dependency.
-import dcf_valuation as _dcfv
+_dcfv = _load("dcf_valuation")
 _FIN = _dcfv._load_financials()
 
 
@@ -60,7 +75,10 @@ def status_live(tk, d, px):
 
 # ---- [1] parity with the production dcf_check producer ----------------------------------------
 print("\n[1] live status/robust == production _dcf_check_for_order (real samples)")
-from trading_bot.strategies import _dcf_check_for_order
+sys.path.insert(0, HERE)                                # dcf_valuation vừa chèn WORKDIR canonical lên đầu
+import trading_bot.strategies as _strat
+assert os.path.abspath(_strat.__file__).startswith(HERE + os.sep), _strat.__file__
+_dcf_check_for_order = _strat._dcf_check_for_order
 
 import duckdb
 c = duckdb.connect(":memory:")
@@ -130,8 +148,8 @@ if len(_flip):
 # ---- [3] default OFF ---------------------------------------------------------------------------
 print("\n[3] overlay OFF by default")
 for k in ("BASKET_DCF_MODE", "BASKET_DCF_W"): os.environ.pop(k, None)
-import custom_basket as CB
-src = open(f"{WORKDIR}/custom_basket.py").read()
+CB = _load("custom_basket")
+src = open(f"{HERE}/custom_basket.py").read()
 check('os.environ.get("BASKET_DCF_MODE", "")' in src, "BASKET_DCF_MODE defaults to '' (OFF)")
 check("if DCF_MODE:" in src and "dcf_at = None" in src,
       "cache/price load and dcf_at are gated behind DCF_MODE (OFF -> no work, no behaviour change)")
