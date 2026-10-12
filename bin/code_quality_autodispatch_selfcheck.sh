@@ -341,6 +341,23 @@ else
   bad "T16" "out=$OUT"
 fi
 
+# --- T17: 2 file quyết định cổng get_gated_state() — macro_healthcheck.py (ghi data/macro_health.json,
+# đầu vào DUY NHẤT của cổng; sự cố 2026-10-11) + macro_state_live.py (chính cổng). Nằm ở GỐC
+# WorkingClaude nên rel = tên trần. Mỗi file MỘT lượt riêng, severity low, KHÔNG manifest ⇒ chỉ
+# danh sách tay mới chặn được. ---
+for t17 in "macro_healthcheck.py:Taylor:17" "macro_state_live.py:Wags:18"; do
+  IFS=: read -r t17_file t17_owner t17_day <<<"$t17"
+  printf '{"findings": [{"file": "/x/%s", "line": 1, "category": "correctness", "severity": "low", "summary": "s17", "evidence": "e17", "owner": "%s"}]}\n' \
+    "$t17_file" "$t17_owner" > "$SANDBOX/t17.json"
+  run "$SANDBOX/t17.json" "2099-01-$t17_day"
+  if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+     && grep -q "hard_boundary_tien_that" "$SANDBOX_EVENT_LOG" && grep -qF "$t17_file" "$SANDBOX_EVENT_LOG"; then
+    ok "T17 $t17_file (cổng get_gated_state) owner=$t17_owner severity=low -> escalate, KHÔNG dispatch"
+  else
+    bad "T17 $t17_file" "out=$OUT event=$(cat "$SANDBOX_EVENT_LOG" 2>/dev/null)"
+  fi
+done
+
 # --- T14: cùng file vừa có finding escalate (owner lạ) vừa có finding dispatch (owner Taylor) ->
 # prompt Taylor PHẢI chứa cảnh báo "CÙNG FILE ... ESCALATE" nêu đúng tên file (arch-review round 3:
 # bản trước so _rel với path thô nên cảnh báo này là code chết, không bao giờ bắn) ---

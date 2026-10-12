@@ -49,7 +49,15 @@ _calls = [0]
 class _SMTP:
     def __init__(self, *a, **k): pass
     def __enter__(self): return self
-    def __exit__(self, *a): return False
+    def __exit__(self, *a):
+        # Máy chủ ĐÃ nhận thư (sendmail trả về) rồi lỗi lúc QUIT/đóng kết nối. Chỉ dùng lớp lỗi mà
+        # smtplib.SMTP.__exit__ thật KHÔNG tự nuốt (nó nuốt SMTPServerDisconnected):
+        #   =1 SMTPResponseException (QUIT trả mã ≠ 221) · =2 OSError từ close()
+        if a[0] is None and os.environ.get("FAKE_SMTP_QUIT_FAIL") == "1":
+            raise smtplib.SMTPResponseException(421, b"fake QUIT refused")
+        if a[0] is None and os.environ.get("FAKE_SMTP_QUIT_FAIL") == "2":
+            raise OSError("fake close() error")
+        return False
     def starttls(self): pass
     def login(self, *a): pass
     def sendmail(self, frm, to, raw):
@@ -95,11 +103,11 @@ class Sandbox:
         f = self.td / "attempts"
         return len(f.read_text().splitlines()) if f.exists() else 0
 
-    def send(self, report: Path, *extra, fail=0):
+    def send(self, report: Path, *extra, fail=0, quit_fail=False):
         """Chạy send_report_email.py thật (SMTP giả; `fail`=số lần sendmail đầu bị từ chối).
         → (rc, stderr, message mới nhất | None). `extra` nhận cả bytes (argv không phải UTF-8)."""
         n = len(self.sent())
-        env = dict(self.env, FAKE_SMTP_FAIL=str(fail))
+        env = dict(self.env, FAKE_SMTP_FAIL=str(fail), FAKE_SMTP_QUIT_FAIL="2" if quit_fail == "oserror" else "1" if quit_fail else "0")
         p = subprocess.run([sys.executable, str(self.wrapper), str(report),
                             "--skip-return-gate", "selfcheck",
                             *[a if isinstance(a, bytes) else str(a) for a in extra]],
@@ -228,6 +236,36 @@ def part_email(td: Path):
     rc, err, s = sb.send(daily, "--attach", td / "khong_co2.html", fail=1)
     check("E12 --attach nhưng không file nào kèm được ⇒ không có gì để bỏ ⇒ không lùi (1 lần thử)",
           rc != 0 and sb.attempts() - a0 == 1, (rc, sb.attempts() - a0))
+
+    # --- gửi trùng: SMTP ĐÃ nhận thư (sendmail trả về) rồi mới lỗi lúc đóng kết nối
+    a0 = sb.attempts()
+    rc, err, s = sb.send(daily, "--attach", dash, quit_fail=True)
+    atts, body = parts_of(s) if s else ({}, "")
+    check("E13 có --attach, sendmail OK rồi lỗi lúc đóng kết nối ⇒ ĐÚNG 1 lần gửi (không vào lối lùi), "
+          "rc=0, thư đã đi vẫn kèm HTML, lỗi thật ra stderr",
+          rc == 0 and s is not None and sb.attempts() - a0 == 1 and set(atts) == {daily.name, dash.name}
+          and "KHÔNG kèm" not in body and "SMTPResponseException" in err and "fake QUIT" in err
+          and "thử lại một lần" not in err, (rc, sb.attempts() - a0, list(atts), err[-300:]))
+    a0 = sb.attempts()
+    rc, err, s = sb.send(daily, quit_fail=True)
+    check("E14 không --attach, sendmail OK rồi lỗi lúc đóng kết nối ⇒ rc=0 (cổng không retry gửi lần hai), đúng 1 lần gửi",
+          rc == 0 and s is not None and sb.attempts() - a0 == 1 and "SMTPResponseException" in err,
+          (rc, sb.attempts() - a0, err[-300:]))
+    a0 = sb.attempts()
+    rc, err, s = sb.send(daily, "--attach", dash, quit_fail="oserror")
+    check("E14b sendmail OK rồi close() ném OSError ⇒ rc=0, đúng 1 lần gửi (không gửi trùng), lỗi thật ra stderr",
+          rc == 0 and s is not None and sb.attempts() - a0 == 1 and "OSError" in err and "fake close" in err,
+          (rc, sb.attempts() - a0, err[-300:]))
+    a0 = sb.attempts()
+    rc, err, s = sb.send(daily, "--attach", dash, fail=1, quit_fail=True)
+    atts, body = parts_of(s) if s else ({}, "")
+    check("E15 lần 1 bị TỪ CHỐI thật (trước khi nhận) + lần 2 nhận rồi lỗi đóng ⇒ lối lùi vẫn chạy, đúng 1 email đi, 2 lần thử",
+          rc == 0 and s is not None and sb.attempts() - a0 == 2 and list(atts) == [daily.name]
+          and "KHÔNG kèm" in body, (rc, sb.attempts() - a0, list(atts), err[-300:]))
+    a0 = sb.attempts()
+    rc, err, s = sb.send(daily, "--attach", dash, fail=2, quit_fail=True)
+    check("E16 sendmail bị từ chối cả hai lần (chưa hề nhận) ⇒ vẫn là THẤT BẠI rc≠0 — nhánh mới không nuốt lỗi gửi thật",
+          rc != 0 and s is None and sb.attempts() - a0 == 2, (rc, sb.attempts() - a0, err[-300:]))
 
 
 GATE_RUNNER = r'''

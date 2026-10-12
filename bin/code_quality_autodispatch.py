@@ -92,6 +92,9 @@ EXEC_HARD_BOUNDARY_EXACT = (
     # manifest bên dưới không tự bắt được — liệt tay (arch-review gate-narrowing round, 2026-09-18).
     "macro_state_live.py",
     "deploy_golive_dt5g_v4/publish_gated_state.py",
+    # Ghi `data/macro_health.json` — đầu vào DUY NHẤT quyết định get_gated_state() trả DT5G hay
+    # lùi về DT4 (sự cố cổng 2026-10-11): sửa sai file này = đổi trần exposure của cả hệ.
+    "macro_healthcheck.py",
     # Ghi lại orders[] của plan SỐNG qua `signal_holds.py --enforce` (atomic tmp+replace) —
     # arch-review gate-narrowing round 2 killer cùng lớp: caller thực sự gọi --enforce lên plan,
     # trong khi callee (mike/bin/signal_holds.py, cũng nạp bởi trading_bot/plan.py) đã được

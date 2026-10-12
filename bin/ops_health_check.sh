@@ -18,6 +18,11 @@
 #      mới tự dispatch Taylor soạn+gửi khi quá hạn (không chỉ cảnh báo) + post riêng vào
 #      Trading report topic (không chôn ở Trading Daily) + bus event question.
 #
+#   8. Lãi suất tiết kiệm / 8b. lãi suất CCTG freshness · 9. daily_retro freshness · 9. anomaly scan
+#   10. notify_thread không phân giải được topic · 11. selfcheck production · 12. ccdb mất wakeup
+#   13. Cổng get_gated_state() công bố nguồn SUY GIẢM (DT4_only/DT4_STALE ⇒ không áp macro cap)
+#   14. Hạn rà lại cờ forensic
+#   15. Worktree chạy bản tiền-vá script giao hàng báo cáo + sổ giao hàng lạc
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
 # eod_trading_report.sh (19:10) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
 # Post tóm tắt vào Trading Daily (vận hành sống trong ngày), không phải Trading report
@@ -91,8 +96,8 @@ case "$RUNONCE_LABEL" in
   __RUNONCE_ERR__*)
     RUNONCE_ERR="${RUNONCE_LABEL#__RUNONCE_ERR__}"
     RUNONCE_LABEL=""
-    echo "⚠️ [runonce] KHONG lay duoc nhan account live ⇒ BO QUA ca 3 check chay-mot-lan"
-    echo "   (anomaly_scan / forensic_check / worktree_stale) cho CA HAI account. Loi that:"
+    echo "⚠️ [runonce] KHONG lay duoc nhan account live ⇒ BO QUA ca 4 check chay-mot-lan"
+    echo "   (anomaly_scan / forensic_check / worktree_stale / check 13 cong DT5G) cho CA HAI account. Loi that:"
     echo "   $RUNONCE_ERR"
     ;;
 esac
@@ -110,11 +115,12 @@ export OPS_HEALTH_DRY_RUN="$DRY_RUN"   # heredoc python (close_plan_approval_que
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
 
-REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" << 'PYEOF'
+REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" "$RUNONCE_LABEL" << 'PYEOF'
 import glob, gzip, json, os, re, sys, subprocess, csv
 from collections import defaultdict
 
 wc_root, today, account = sys.argv[1:4]
+runonce_label = sys.argv[4] if len(sys.argv) > 4 else ""   # check 13 (cấp hệ thống, 1 lần/lượt)
 lines = []
 warn = 0
 
@@ -1838,6 +1844,159 @@ except Exception as _e12:
       f"{str(_e12)[:120]}) — không kết luận được có mất wakeup hay không.")
 # CHECK12_END
 
+# 13. Cổng get_gated_state() đang chạy SUY GIẢM (nguồn DT4_only / DT4_STALE = KHÔNG áp macro cap)
+#     — retro 2026-10-11 Pattern I: cổng rơi về DT4 ở MỌI lần gọi mà không dòng nào trong báo cáo
+#     vận hành nói ra. Cấp HỆ THỐNG ⇒ chỉ lượt ACCOUNT đầu (cùng cổng RUNONCE với anomaly_scan).
+#
+#     CHỈ ĐỌC 3 file, KHÔNG gọi get_gated_state(): hàm đó không ghi file nhưng KHÔNG vô hại để
+#     gọi từ cron — nó dựng lại cả chuỗi trạng thái từ BQ (warm-up từ 2014) và ở alert=True thì
+#     bắn Telegram "DT5G FROZEN". Quan trọng hơn, gọi nó (hay tự lấy tuổi file health so với BÂY
+#     GIỜ) lúc 08:20/12:45 sẽ BÁO ĐỘNG GIẢ theo lịch: data/macro_health.json chỉ được ghi T2-T6
+#     lúc 15:30 (papertrade_daily [4]) và ~18:37 (daily_refresh [14]), nên sáng thứ Hai (và sau
+#     mọi ngày nghỉ) nó LUÔN cũ hơn ngưỡng 1440 phút (đo 2026-09-08→10-09: T2 08:20 = 3703 phút,
+#     12:45 = 3968 phút, 4/4 tuần) — trong khi KHÔNG consumer production nào gọi cổng ở cửa sổ đó.
+#     Nơi DUY NHẤT gọi cổng cho production là publish_gated_state.py (18:3x trong daily_refresh
+#     + 19:00 trong bq_freshness_check), lúc file health mới 0-186 phút. Vì vậy sự thật cần đọc
+#     là NGUỒN ĐÃ CÔNG BỐ (`source` trong golive_state_today.json): cổng thật đã trả gì ở lần
+#     chạy production gần nhất. Suy giảm ở đó là suy giảm THẬT, không phải hiện vật của giờ đọc.
+#
+#     §29: nguyên nhân phải là bằng chứng vừa đọc — (a) dòng `[get_gated_state] …` do CHÍNH cổng
+#     in ra trong log lượt publish, (b) file health đối chiếu với THỜI ĐIỂM publish. File health
+#     bị ghi lại SAU lượt publish (bước [14] chạy sau [12]) thì KHÔNG còn là bản cổng đã đọc ⇒
+#     nói thẳng là không suy được từ file, không đoán.
+#     [WARN-ONLY] có chủ đích: macro_healthcheck.py / macro_state_live.py là ranh giới cứng
+#     (code_quality_autodispatch EXEC_HARD_BOUNDARY_EXACT) — job autofix không được tự sửa; việc
+#     của dòng này là lọt vào mắt người đọc.
+# CHECK13_BEGIN — marker ỔN ĐỊNH (giống CHECK5/10/11/12): selfcheck trích đúng khối này chạy trên
+# thư mục giả. Đổi/xoá marker ⇒ bin/ops_health_check_selfcheck.py FAIL ngay.
+try:
+    if runonce_label and account == runonce_label:
+        import datetime as _dt13
+        from zoneinfo import ZoneInfo as _ZI13
+        _ICT13 = _ZI13("Asia/Ho_Chi_Minh")
+        # Bản sao 2 hằng của macro_state_live.get_gated_state (max_health_age_min / MAX_HEALTH_FUTURE_
+        # SKEW_MIN) — selfcheck ghim chúng với file nguồn để không trôi âm thầm.
+        _G13_MAX_AGE_MIN, _G13_FUTURE_SKEW_MIN = 1440, 5
+        _g13_state_path = os.path.join(wc_root, "deploy_golive_dt5g_v4", "golive_state_today.json")
+        _g13_health_path = os.path.join(wc_root, "data", "macro_health.json")
+
+        def _g13_ict(text):
+            # naive = giờ tường ICT (cả hai file được ghi dưới TZ=Asia/Ho_Chi_Minh); aware ⇒ quy đổi.
+            t = _dt13.datetime.fromisoformat(str(text))
+            return t.replace(tzinfo=_ICT13) if t.tzinfo is None else t.astimezone(_ICT13)
+
+        def _g13_mtime(path):
+            return _dt13.datetime.fromtimestamp(os.stat(path).st_mtime, _ICT13)
+
+        def _g13_health_cause(pub_m):
+            # pub_m = mtime của golive_state_today.json (mốc publish THẬT, theo đồng hồ file);
+            # published_at là giờ naive theo TZ tiến trình publisher nên chỉ để HIỂN THỊ.
+            try:
+                with open(_g13_health_path, encoding="utf-8") as _hf:
+                    _h = json.load(_hf)
+                _hts = _g13_ict(_h["ts"])
+                _hm = _g13_mtime(_g13_health_path)
+            except Exception as _eh:
+                return (f"file health KHÔNG đọc/parse được ({type(_eh).__name__}: {str(_eh)[:160]}) "
+                        f"— cổng fail-closed về DT4 khi không đọc được health")
+            _now = _dt13.datetime.now(_ICT13)
+            _ahead = (_hts - _now).total_seconds() / 60.0
+            if _ahead > _G13_FUTURE_SKEW_MIN:
+                return (f"ts của file health ở TƯƠNG LAI {_ahead:.0f} phút so với bây giờ "
+                        f"(ts={_h['ts']}; cổng chỉ cho lệch {_G13_FUTURE_SKEW_MIN} phút)")
+            if pub_m is None:
+                return (f"không đọc được mtime file trạng thái đã công bố; file health hiện tại: "
+                        f"ts={_h['ts']} status={_h.get('status')} rec={_h.get('recommended_state_source')} "
+                        f"— KHÔNG xác định được nguyên nhân từ file health")
+            if _hm > pub_m:
+                return (f"file health được ghi lại lúc {_hm:%Y-%m-%d %H:%M} ICT (mtime), SAU lượt publish "
+                        f"lúc {pub_m:%Y-%m-%d %H:%M} ICT (mtime) ⇒ không còn là bản cổng đã đọc — "
+                        f"KHÔNG suy được nguyên nhân từ file health")
+            _age = (pub_m - _hm).total_seconds() / 60.0
+            if _age > _G13_MAX_AGE_MIN:
+                return (f"file health CŨ {_age:.0f} phút tại lúc publish (ngưỡng {_G13_MAX_AGE_MIN}; "
+                        f"mtime={_hm:%Y-%m-%d %H:%M} ICT) — macro_healthcheck không ghi lại trước lượt publish đó")
+            if _h.get("status") == "FAILED" or _h.get("recommended_state_source") != "DT5G_macro":
+                return (f"feed vĩ mô tự báo KHÔNG đáng tin: status={_h.get('status')} "
+                        f"recommended_state_source={_h.get('recommended_state_source')} (ts={_h['ts']})")
+            return (f"file health tại lúc publish trông HỢP LỆ (status={_h.get('status')}, "
+                    f"rec={_h.get('recommended_state_source')}, tuổi {_age:.0f} phút) — KHÔNG xác định "
+                    f"được nguyên nhân từ file health")
+
+        def _g13_gate_log_line(pub_m, src):
+            # Dòng cổng TỰ IN của ĐÚNG lượt publish đang báo: log phải được ghi không sớm hơn file trạng
+            # thái; lấy dòng [get_gated_state] ĐẦU TIÊN sau header "PUBLISH GATED STATE ... -> <ngày>"
+            # CUỐI CÙNG (bq_freshness.log cộng dồn nhiều lượt). Không buộc được vào lượt này ⇒ "".
+            if pub_m is None:
+                return ""
+            _hdr = "PUBLISH GATED STATE"
+            _cands = []
+            try:
+                _cands.append(os.path.join(wc_root, "data", "refresh_v34b_linux_"
+                                           f"{_dt13.date.fromisoformat(str(_g13.get('as_of'))):%Y-%m-%d}.log"))
+            except Exception:
+                pass
+            _cands.append(os.path.join(wc_root, "mike", "logs", "bq_freshness.log"))
+            for _lp in _cands:
+                try:
+                    if _g13_mtime(_lp) < pub_m:
+                        continue
+                    with open(_lp, encoding="utf-8", errors="replace") as _lf:
+                        _ls = [l.strip() for l in _lf]
+                except OSError:
+                    continue
+                _hi = [i for i, l in enumerate(_ls) if _hdr in l]
+                if not _hi:
+                    continue
+                for l in _ls[_hi[-1] + 1:]:
+                    if _hdr in l:
+                        break
+                    if l.startswith("[get_gated_state]"):
+                        # Chỉ trích dòng nói ĐÚNG nguồn đã công bố — khác nguồn thì không phải bằng chứng.
+                        if l.startswith(f"[get_gated_state] {src}:"):
+                            return f"{os.path.basename(_lp)}: {l[:300]}"
+                        break
+            return ""
+
+        try:
+            with open(_g13_state_path, encoding="utf-8") as _sf:
+                _g13 = json.load(_sf)
+            _g13_src = str(_g13["source"])
+        except Exception as _e13:
+            W(f"[WARN-ONLY] check 13: không đọc được trạng thái cổng đã công bố "
+              f"(deploy_golive_dt5g_v4/golive_state_today.json — {type(_e13).__name__}: "
+              f"{str(_e13)[:160]}) — KHÔNG kết luận được cổng get_gated_state đang ở DT5G hay DT4.")
+        else:
+            _g13_pub_txt = _g13.get("published_at")
+            try:
+                _g13_pub = _g13_mtime(_g13_state_path)
+            except OSError:
+                _g13_pub = None
+            if _g13_src == "DT5G_macro":
+                _g13_age = (f"bản publish cách đây {(_dt13.datetime.now(_ICT13) - _g13_pub).total_seconds() / 3600:.1f}h"
+                            if _g13_pub is not None else "không đọc được tuổi bản publish")
+                OK(f"check 13: cổng get_gated_state công bố gần nhất ({_g13_pub_txt}, "
+                   f"as_of {_g13.get('as_of')}) ở nguồn DT5G_macro — có macro cap; {_g13_age} (mtime), "
+                   f"bq_publish_ok={_g13.get('bq_publish_ok')}.")
+            else:
+                if _g13_src == "DT4_STALE":
+                    _g13_cause = ("nguồn DT4_STALE = cổng không xác minh được engine trạng thái còn "
+                                  "theo kịp VNINDEX (đóng băng/lỗi kiểm độ tươi) — không phải do file health")
+                else:
+                    _g13_cause = _g13_health_cause(_g13_pub)
+                _g13_log = _g13_gate_log_line(_g13_pub, _g13_src)
+                W(f"[WARN-ONLY] check 13: cổng get_gated_state đang SUY GIẢM — lượt publish gần nhất "
+                  f"({_g13_pub_txt}, as_of {_g13.get('as_of')}) ra nguồn {_g13_src}: state="
+                  f"{_g13.get('state')} (DT4 base={_g13.get('base_state_dt4')}, DT5G macro="
+                  f"{_g13.get('macro_state_dt5g')}) ⇒ KHÔNG áp macro cap. Nguyên nhân theo bằng chứng: "
+                  f"{_g13_cause}."
+                  + (f" Dòng cổng tự in — {_g13_log}" if _g13_log else
+                     " Không tìm thấy dòng cổng của lượt này (log không buộc được vào đúng lượt publish)."))
+except Exception as _e13x:
+    W(f"[WARN-ONLY] check 13: lỗi khi đọc trạng thái cổng get_gated_state "
+      f"({type(_e13x).__name__}: {str(_e13x)[:160]}) — không kết luận được cổng đang ở DT5G hay DT4.")
+# CHECK13_END
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF
@@ -1898,7 +2057,7 @@ if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$ANOMAL
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${ANOMALY_WARN:-0} ))
 
-# 13. Hạn RÀ LẠI cờ forensic (user chốt 2026-09-04: "forensic cũng phải đưa thời hạn review
+# 14. Hạn RÀ LẠI cờ forensic (user chốt 2026-09-04: "forensic cũng phải đưa thời hạn review
 #     xử lý vào, không được để treo mãi"). Cờ forensic là lớp bảo vệ DUY NHẤT cho rủi ro
 #     gian lận/thao túng — `adaptive_exclusion_v3_20260904.md` đã chứng minh gate tài chính
 #     động KHÔNG thay được nó (false-positive 91,9%, DSR 0,14) — nên nó PHẢI ở lại, nhưng
@@ -1924,7 +2083,7 @@ if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$FORENS
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${FORENSIC_WARN:-0} ))
 
-# 14. Worktree chạy bản TIỀN-VÁ script giao hàng báo cáo + sổ giao hàng LẠC (Wags 2026-09-12,
+# 15. Worktree chạy bản TIỀN-VÁ script giao hàng báo cáo + sổ giao hàng LẠC (Wags 2026-09-12,
 #     incident report-return-gate-worktree-root mục "Còn treo" #1/#2). Fleet-wide ⇒ chỉ lượt
 #     ACCOUNT đầu (cùng lý do ANOMALY_SCAN). Checker TỰ IM khi không có gì để nói: chỉ kể cây
 #     còn được dùng <14 ngày, và chỉ kể sổ lạc có báo cáo ĐÃ GỬI mà sổ canonical không biết.

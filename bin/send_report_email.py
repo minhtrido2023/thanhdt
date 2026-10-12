@@ -207,10 +207,21 @@ def main():
         return msg
 
     def smtp_send(msg):
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(from_email, app_password)
-            server.sendmail(from_email, [to_email], msg.as_string())
+        # sendmail() trả về bình thường = máy chủ ĐÃ nhận thư. Lỗi SAU mốc đó (QUIT/đóng kết nối
+        # khi rời `with`) KHÔNG phải gửi thất bại: propagate thì lối lùi bên dưới (hoặc lượt retry
+        # của cổng giao hàng) sẽ gửi email THỨ HAI. Nuốt đúng lớp lỗi đó, in lỗi thật ra stderr (§29).
+        accepted = False
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls()
+                server.login(from_email, app_password)
+                server.sendmail(from_email, [to_email], msg.as_string())
+                accepted = True
+        except (smtplib.SMTPException, OSError) as exc:
+            if not accepted:
+                raise
+            print(f"⚠️  SMTP đã nhận thư nhưng lỗi khi đóng kết nối ({type(exc).__name__}: "
+                  f"{_clean(str(exc))}) — coi là ĐÃ GỬI, không gửi lại", file=sys.stderr)
 
     try:
         smtp_send(build_msg(extra_parts, [t for _, t in attach_lines]))
