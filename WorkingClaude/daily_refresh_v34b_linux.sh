@@ -215,15 +215,30 @@ RESTATE_LOOKBACK_DAYS=45 RESTATE_ALERT_THRESHOLD=0 \
                    "vnindex_5state (base v3.4b)"
 case $? in 0) : ;; 2) echo "  restate ALERT đã gửi (base)" ;; *) echo "  WARN: restate guard (base) không chạy được" ;; esac
 
+# --- 3c. update macro_health — TRƯỚC publish (dời từ step [14] cũ, user duyệt 2026-10-12) ---
+# Cổng get_gated_state ở step [12] đọc data/macro_health.json. Khi bước này còn nằm SAU publish,
+# lượt publish 18:3x sống nhờ bản health do papertrade_daily ghi lúc 15:30; bản đó hỏng thì cổng
+# đọc bản 18:37 HÔM TRƯỚC, cũ ~1439 phút sát ngưỡng 1440 (DT5G hay DT4 tuỳ lệch 1 phút), riêng
+# thứ Hai chắc chắn DT4_only. Dời (KHÔNG chạy thêm lượt thứ hai) vì healthcheck không đọc gì do
+# [12]-[13] sinh ra: BQ đi qua BQ_LOCAL_CACHE (wc_env.sh; cache sync 23:45 ⇒ T-1 ở cả hai vị trí),
+# us_market_history.csv là của step [2] — lượt sau publish sẽ ra đúng kết luận đó và chỉ nhân đôi
+# Telegram/MACRO_HEALTH_ALERT.md những tối không HEALTHY.
+# NON-FATAL và có TRẦN THỜI GIAN: healthcheck lỗi / rc!=0 (1=DEGRADED, 2=FAILED) / treo ⇒ publish
+# VẪN chạy, cổng tự fail-closed theo file. `timeout` vì từ vị trí này một healthcheck treo sẽ chặn
+# publish production (ở vị trí cũ nó chỉ chặn step [15]); 300s so với ~14s đo được tới lúc ghi
+# JSON (ts→mtime 2026-10-11) và <=77s cho cả [14]+[15] cũ (log 09-30→10-09).
+step "[11c] macro_healthcheck.py (update macro_health.json — TRƯỚC publish)"
+timeout -k 10 300 $PY macro_healthcheck.py || echo "  WARN: macro_healthcheck failed/timeout rc=$? (non-fatal — publish vẫn chạy, cổng fail-closed theo file)"
+
 # --- 4. republish DT5G live ---
 # publish_gated_state.py giờ exit!=0 khi publish BQ hỏng (trước đây chỉ in WARNING rồi exit 0
-# ⇒ thất bại lặng lẽ). KHÔNG `die`: cần step [14] macro_healthcheck vẫn chạy — health report
-# đứng im sẽ khiến get_gated_state fail-closed về DT4, tức BỎ macro cap (kém phòng thủ hơn).
+# ⇒ thất bại lặng lẽ). KHÔNG `die`: các step sau ([12b] restate guard, [13] verify, [15]
+# snapshot) vẫn phải chạy; macro_healthcheck đã chạy ở [11c] nên không còn phụ thuộc nhánh này.
 # Bảng giữ nguyên bản hôm qua ⇒ bq_freshness_check chặn hạ nguồn đúng như thiết kế.
 step "[12] publish_gated_state.py -> dt5g_live (bất biến)"
 if ! $PY deploy_golive_dt5g_v4/publish_gated_state.py; then
   PMSG="🛑 daily_refresh_v34b $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): publish_gated_state THẤT BẠI — vnindex_5state_dt5g_live GIỮ NGUYÊN bản hôm qua. Hạ nguồn sẽ bị bq_freshness_check chặn. Xem $LOG."
-  echo "  !!! publish_gated_state FAILED (chain vẫn tiếp tục để macro_healthcheck chạy)"
+  echo "  !!! publish_gated_state FAILED (chain vẫn tiếp tục: restate guard / verify / snapshot)"
   /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$PMSG" 2>/dev/null || true
   /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$PMSG" "1521470705563340910" 2>/dev/null || true
 fi
@@ -247,9 +262,7 @@ LIVE_MAX="$(bq query --use_legacy_sql=false --format=csv --project_id="$PJ" \
 echo "  _v34b_clean max=$BASE_MAX   dt5g_live max=$LIVE_MAX   (local=$LOCAL_MAX)"
 [ "$BASE_MAX" = "$LOCAL_MAX" ] || echo "  WARN: base BQ ($BASE_MAX) != local ($LOCAL_MAX)"
 
-# --- 6. update macro_health ---
-step "[14] macro_healthcheck.py (update macro_health.json)"
-$PY macro_healthcheck.py || echo "  WARN: macro_healthcheck failed (non-fatal)"
+# (step [14] macro_healthcheck cũ đã DỜI lên [11c], trước publish — xem "3c" ở trên.)
 
 # --- 7. local BQ snapshot (cache for Taylor experiments) ---
 step "[15] Building local BQ snapshot..."

@@ -115,9 +115,9 @@ print(f"  today: as_of={prov['as_of']} state={prov['state']} source={prov['sourc
       f"(DT4={prov['base_state_dt4']}, DT5G={prov['macro_state_dt5g']})")
 print(f"  wrote {STATE_JSON}")
 # Trước đây BQ load hỏng chỉ in WARNING rồi exit 0 => publish thất bại LẶNG LẼ. Giờ exit!=0.
-# Caller (daily_refresh_v34b_linux.sh step [12]) alert nhưng KHÔNG die: để step [14]
-# macro_healthcheck vẫn chạy — health report đứng im sẽ khiến get_gated_state fail-closed về
-# DT4 (BỎ macro cap), tức kém phòng thủ hơn, nên không được để publish hỏng kéo theo nó chết.
+# Caller (daily_refresh_v34b_linux.sh step [12]) alert nhưng KHÔNG die: các step sau (restate
+# guard, verify, snapshot) vẫn phải chạy. macro_healthcheck từ 2026-10-12 chạy TRƯỚC publish
+# (step [11c]) để lượt gọi get_gated_state ở trên đọc bản health vừa ghi.
 if not publish_ok:
     print("DONE (with PUBLISH FAILURE).")
     sys.exit(1)
