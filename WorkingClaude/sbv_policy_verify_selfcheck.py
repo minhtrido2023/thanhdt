@@ -327,6 +327,134 @@ def t_official_unchanged():
             b.close()
 
 
+def _patch(b, fn):
+    path = os.path.join(b.d, "sbv_verify_log.json")
+    d = json.load(open(path, encoding="utf-8"))
+    fn(d)
+    json.dump(d, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+
+
+def _hist(outcomes, at_override=None):
+    """fn cho _patch: history = các attempt của lượt (cách PIN vài phút), last_attempt = mục cuối."""
+    def fn(d):
+        hs = []
+        for i, o in enumerate(outcomes):
+            at = at_override or (PIN - timedelta(seconds=10 - i)).isoformat(timespec="seconds")
+            hs.append({"at": at, "outcome": o, "detail": f"seed {o} #{i}"})
+        d["history"] = hs
+        d["last_attempt"] = dict(hs[-1], notified=None)
+        d["attempted_at"] = hs[-1]["at"]
+    return fn
+
+
+def src_pin(url, days_ago=3, **kw):  # ngày theo đồng hồ GHIM, không theo ngày chạy
+    return dict(publisher="p", url=url, date=(PIN.date() - timedelta(days=days_ago)).isoformat(),
+                **{**dict(refi=4.5, rediscount=3.0), **kw})
+
+
+def t_round2():
+    # B1: attempt cùng lượt phải tới người đứng TRƯỚC attempt cuối vô hại
+    for veto in ("source_mismatch", "internal_error", "rate_change_detected"):
+        for last in ("stale_source", "url_reused"):
+            b = Box()
+            frozen = _seed(b, age_days=3)
+            _patch(b, _hist([veto, last]))
+            rc, out, lg, after = _fin(b)
+            ok(rc == 0 and out.count("[no-notify] ⚠️") == 1 and f"({veto}: seed {veto}" in out,
+               f"B1[{veto}→{last}]: phải nhắc đúng 1 dòng, trích detail CỦA {veto}: rc={rc} {out}")
+            ok("official_reconfirmed_at" not in lg and lg["last_attempt"]["outcome"] == last
+               and after == frozen and [h["outcome"] for h in lg["history"]] == [veto, last],
+               f"B1[{veto}→{last}]: không được ghi official_unchanged/đổi log: {lg['history']}")
+            b.close()
+    # không veto: bad_sources/not_independent (agent trượt quoting rồi gọi lại) và attempt TUẦN TRƯỚC
+    for tag, fn in (("bad_sources", _hist(["bad_sources", "stale_source"])),
+                    ("not_independent", _hist(["not_independent", "url_reused"])),
+                    ("mismatch tuần trước", _hist(["source_mismatch", "stale_source"],
+                                                  at_override=(PIN - timedelta(days=7)).isoformat(timespec="seconds")))):
+        b = Box()
+        frozen = _seed(b, age_days=3)
+        _patch(b, fn)
+        rc, out, lg, after = _fin(b)
+        ok(rc == 0 and "[no-notify]" not in out and lg["last_attempt"]["outcome"] == "official_unchanged"
+           and after == frozen, f"B1 không-veto[{tag}] phải im + official_unchanged: {out} {lg['last_attempt']}")
+        b.close()
+    # B1 + B1b đầu-cuối qua lệnh verify thật (đồng hồ ghim): mismatch rồi stale ⇒ finalize PHẢI nhắc
+    b = Box()
+    frozen = _seed(b, age_days=3)
+    rc, _ = b.run("verify", "--sources", json.dumps([src_pin("https://vietstock.vn/m", refi=4.25)]), extra_env=PIN_ENV)
+    rc2, _ = b.run("verify", "--sources", json.dumps([src_pin("https://vnexpress.net/o", days_ago=130)]), extra_env=PIN_ENV)
+    ok(rc == 2 and rc2 == 2 and [h["outcome"] for h in b.log()["history"]] == ["source_mismatch", "stale_source"],
+       f"B1 e2e: history sai {b.log()['history']}")
+    rc, out, lg, after = _fin(b)
+    ok(out.count("[no-notify] ⚠️") == 1 and "(source_mismatch:" in out and "official_reconfirmed_at" not in lg
+       and after == frozen, f"B1 e2e: phải nhắc source_mismatch: {out}")
+    b.close()
+    # B1b: nguồn quá hạn KHÔNG che nguồn còn hạn lệch số — cả 2 thứ tự; không lệch ⇒ stale_source
+    stale = src_pin("https://vnexpress.net/old", days_ago=200)
+    bad = src_pin("https://vietstock.vn/new", refi=4.25)
+    good = src_pin("https://cafef.vn/new")
+    for tag, lst, want in (("stale→bad", [stale, bad], "source_mismatch"), ("bad→stale", [bad, stale], "source_mismatch"),
+                           ("stale→good", [stale, good], "stale_source"), ("good→stale", [good, stale], "stale_source")):
+        b = Box()
+        _seed(b, age_days=3)
+        rc, out = b.run("verify", "--sources", json.dumps(lst), extra_env=PIN_ENV)
+        lg = b.log()
+        ok(rc == 2 and lg["last_attempt"]["outcome"] == want, f"B1b[{tag}]: phải {want}: {out}")
+        ok(lg["verified_at"] == (PIN - timedelta(days=3)).isoformat(timespec="seconds"), f"B1b[{tag}] đẩy verified_at")
+        b.close()
+    # B2(i): official_unchanged của TUẦN TRƯỚC (at < run-start) không được che lượt này
+    wk = (PIN - timedelta(days=7)).isoformat(timespec="seconds")
+    b = Box()
+    frozen = _seed(b, age_days=3, verified=dict(V_OK, refi_pct=4.25))  # trang đổi so với verified{}
+    _patch(b, _hist(["official_unchanged"], at_override=wk))
+    lg = _must_nag("leftover:trang đổi", b, frozen, "no_verify_call", "≠ verified refi=4.25%")
+    b.close()
+    b = Box()
+    frozen = _seed(b, age_days=3)
+    _patch(b, _hist(["official_unchanged"], at_override=wk))
+    rc, out, lg, after = _fin(b)
+    ok([h["outcome"] for h in lg["history"]] == ["official_unchanged", "no_verify_call", "official_unchanged"]
+       and "[no-notify]" not in out and lg["official_reconfirmed_at"] == PIN.isoformat(timespec="seconds")
+       and after == frozen, f"leftover:trang y nguyên: phải có no_verify_call + official_unchanged MỚI: {lg['history']} {out}")
+    b.close()
+    # B2(ii): NaN trong verified{} ⇒ nhắc (phép so `>` sẽ cho qua)
+    nan = float("nan")
+    b = Box()
+    frozen = _seed(b, age_days=3, verified=dict(V_OK, refi_pct=nan, rediscount_pct=nan))
+    _must_nag("NaN verified", b, frozen, "no_verify_call", "≠ verified refi=nan%")
+    b.close()
+    # N9: verified{} không phải object ⇒ nhắc kèm lý do thật, không AttributeError
+    for tag, v in (("list", [1, 2]), ("str", "4.5")):
+        b = Box()
+        frozen = _seed(b, age_days=3, verified=v)
+        _must_nag(f"verified={tag}", b, frozen, "no_verify_call", "không phải object")
+        b.close()
+    # B2(iv): verified_at tuổi đúng 0 ngày ⇒ im (biên dưới của 0..120)
+    b = Box()
+    frozen = _seed(b, age_days=0)
+    rc, out, lg, after = _fin(b)
+    ok(rc == 0 and "[no-notify]" not in out and lg["last_attempt"]["outcome"] == "official_unchanged"
+       and "0/120" in lg["last_attempt"]["detail"] and after == frozen, f"tuổi 0 phải im: {out} {lg['last_attempt']}")
+    b.close()
+    # N1: verify thành công chen giữa lúc finalize đọc mạng ⇒ verified_at KHÔNG lùi
+    b = Box()
+    _seed(b, age_days=30, outcome="stale_source")
+    new_va = PIN.isoformat(timespec="seconds")
+    raced = {"schema": "sbv_policy_verify_v2", "verified_at": new_va, "attempted_at": new_va,
+             "last_verified": PIN.date().isoformat(), "verified": dict(V_OK, note="verify chen giữa"),
+             "last_attempt": {"at": new_va, "outcome": "verified", "detail": "raced", "notified": None},
+             "history": [{"at": new_va, "outcome": "verified", "detail": "raced"}]}
+    rp = os.path.join(b.d, "raced.json")
+    json.dump(raced, open(rp, "w", encoding="utf-8"), ensure_ascii=False)
+    rc, out = b.run("finalize", "--run-start", PIN_START, "--dispatch-rc", "0",
+                    extra_env=dict(PIN_ENV, SBV_POLICY_SIM_RACE_LOG=rp))
+    lg = b.log()
+    ok(rc == 0 and lg["verified_at"] == new_va and lg["verified"]["note"] == "verify chen giữa"
+       and lg["last_attempt"]["outcome"] == "verified" and "[no-notify]" not in out
+       and "official_reconfirmed_at" not in lg, f"N1: verified_at bị lùi/ghi đè: {lg} // {out}")
+    b.close()
+
+
 def t_fake_now_needs_selfcheck():
     env = {k: v for k, v in os.environ.items() if not k.startswith("SBV_POLICY_")}
     env.update(SBV_POLICY_SELFCHECK="1", SBV_POLICY_FAKE_NOW="2001-01-01T00:00:00+07:00")
@@ -433,6 +561,6 @@ if __name__ == "__main__":
     for t in (t_fetch_parse, t_legacy_migration_and_success, t_refusals_never_advance_verified,
               t_finalize, t_env_override_needs_selfcheck_flag, t_review_r1,
               t_flag_alone_does_not_enable_fakes, t_wrapper_block, t_official_unchanged,
-              t_fake_now_needs_selfcheck):
+              t_round2, t_fake_now_needs_selfcheck):
         t()
     print(f"PASS {_n} assertions (TZ={os.environ.get('TZ', '<unset>')})")

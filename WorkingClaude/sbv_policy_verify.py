@@ -68,6 +68,8 @@ STALE_DAYS = 21
 # Lớp "không có nguồn độc lập MỚI" — chỉ lớp này được finalize tự đọc trang NHNN để khỏi nhắc.
 # Lệch số / lỗi fetch-parse / nguồn sai KHÔNG thuộc lớp: các ca đó luôn tới người.
 NO_NEW_SOURCE_OUTCOMES = frozenset({"no_verify_call", "url_reused", "stale_source"})
+# Kết cục CÙNG LƯỢT với lớp trên ⇒ không được im (r2 B1): lệch số / lỗi code / 🔴 đổi lãi.
+VETO_OUTCOMES = frozenset({"source_mismatch", "internal_error", "rate_change_detected"})
 _OFFICIAL_SEP = " | NHNN tự đọc: "
 HISTORY_KEEP = 52
 
@@ -228,6 +230,7 @@ def check_sources(raw, official, today):
     if not isinstance(sources, list) or not sources or not all(isinstance(s, dict) for s in sources):
         raise Refuse("bad_sources", "--sources phải là mảng JSON >=1 object")
     owners, urls = set(), []
+    stale = None  # Refuse stale_source ĐẦU TIÊN — giữ lại, soi số các nguồn còn hạn trước (r2 B1b)
     for s in sources:
         url = str(s.get("url", ""))
         try:
@@ -243,8 +246,12 @@ def check_sources(raw, official, today):
             raise Refuse("bad_sources", f"{url}: 'date' thiếu/sai ({s.get('date')!r})")
         age = (today - sd).days
         if age < 0 or age > MAX_SOURCE_AGE_DAYS:
-            raise Refuse("stale_source", f"{url}: ngày {sd} cách hôm nay {age} ngày "
-                                         f"(cho phép 0..{MAX_SOURCE_AGE_DAYS})")
+            # source_mismatch thắng stale_source: lớp stale được finalize tự đọc NHNN rồi im,
+            # còn lệch số thì phải tới người ⇒ không được che bởi nguồn quá hạn đứng trước.
+            if stale is None:
+                stale = Refuse("stale_source", f"{url}: ngày {sd} cách hôm nay {age} ngày "
+                                               f"(cho phép 0..{MAX_SOURCE_AGE_DAYS})")
+            continue
         for k in ("refi", "rediscount"):
             try:
                 v = float(s[k])
@@ -259,6 +266,8 @@ def check_sources(raw, official, today):
                              f"cần người xem")
         owners.add(owner)
         urls.append(url)
+    if stale:
+        raise stale
     try:
         _check_urls_not_reused(urls, SIDECAR_PATH)
     except SystemExit as e:
@@ -338,17 +347,29 @@ def cmd_verify(a):
     return 0
 
 
-def _official_unchanged(d, va, age):
-    """finalize tự đọc trang NHNN. -> (True, mô tả) khi CẢ BA: (a) refi + rediscount khớp
-    verified{}, (b) refi khớp SBV_REFI_EVENTS, (c) verified_at tuổi 0..MAX_SOURCE_AGE_DAYS.
-    Ngược lại (False, lý do THẬT đang cầm — §29). Không ghi gì."""
+def _probe_official():
+    """Phần MẠNG của việc tự đọc NHNN — chạy TRƯỚC khi nạp log lần cuối (r2 N1: giữ cửa sổ
+    load→save không có I/O mạng). -> (o, ev_date, ev_rate), None | None, lý do thật (§29)."""
     try:
         o = parse_official(_fetch_official_html())
         ev_date, ev_rate = _recorded_refi()
+        return (o, ev_date, ev_rate), None
     except Exception as e:  # noqa: BLE001 — trích lỗi thật, không đoán (§29)
-        return False, f"{e.outcome}: {e.detail}" if isinstance(e, Refuse) else repr(e)
+        return None, (f"{e.outcome}: {e.detail}" if isinstance(e, Refuse) else repr(e))
+
+
+def _official_unchanged(d, va, age, probe):
+    """finalize so trang NHNN đã đọc (probe) với log. -> (True, mô tả) khi CẢ BA: (a) refi +
+    rediscount khớp verified{}, (b) refi khớp SBV_REFI_EVENTS, (c) verified_at tuổi
+    0..MAX_SOURCE_AGE_DAYS. Ngược lại (False, lý do THẬT đang cầm — §29). Không ghi gì."""
+    res, err = probe
+    if err:
+        return False, err
+    o, ev_date, ev_rate = res
     got = f"refi={o['refi_pct']}% rediscount={o['rediscount_pct']}%"
     v = d.get("verified") or {}
+    if not isinstance(v, dict):
+        return False, f"NHNN {got} nhưng verified{{}} không phải object ({type(v).__name__}: {v!r:.80})"
     try:
         v_refi, v_red = float(v["refi_pct"]), float(v["rediscount_pct"])
     except (KeyError, TypeError, ValueError):
@@ -367,18 +388,49 @@ def _official_unchanged(d, va, age):
                   f"tuổi {age}/{MAX_SOURCE_AGE_DAYS} ngày")
 
 
+def _settle_no_call(d, a, start):
+    """Chưa ai gọi verify từ run-start ⇒ ghi attempt (KHÔNG đẩy verified_at). True nếu đã ghi."""
+    att = d.get("attempted_at")
+    if att and datetime.fromisoformat(att) >= start:
+        return False
+    queued = str(a.dispatch_rc) == "5"  # usage-limit: agent sẽ tự chạy lại sau, đừng nhắc oan
+    record_attempt(d, "dispatch_queued" if queued else "no_verify_call",
+                   f"không có lần gọi verify nào từ {a.run_start} (dispatch_rc={a.dispatch_rc})")
+    return True
+
+
+def _veto_attempt(d, start):
+    """Attempt MỚI NHẤT của lượt này có kết cục phải tới người (r2 B1). Chỉ xét 3 outcome
+    đó — KHÔNG veto bad_sources/not_independent: agent hay trượt quoting JSON rồi gọi lại."""
+    for h in reversed(d.get("history") or []):
+        try:
+            if datetime.fromisoformat(h.get("at")) >= start and h.get("outcome") in VETO_OUTCOMES:
+                return h
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
 def cmd_finalize(a):
     """Cuối wrapper Thứ Hai. (1) Không ai gọi verify từ run-start ⇒ ghi attempt (KHÔNG đẩy
     verified_at). (2) Lượt này không verified, hoặc verified_at > STALE_DAYS ⇒ ĐÚNG 1 dòng nhắc
     vào Trading Daily (chạy tuần 1 lần ⇒ không spam hằng ngày). (3) Ngoại lệ của (2): lượt chỉ
-    thiếu nguồn độc lập MỚI mà trang NHNN tự đọc y nguyên ⇒ `official_unchanged`, không nhắc."""
-    d = load_log()
+    thiếu nguồn độc lập MỚI mà trang NHNN tự đọc y nguyên ⇒ `official_unchanged`, không nhắc —
+    trừ khi CÙNG lượt có attempt source_mismatch/internal_error/rate_change_detected (VETO)."""
     start = datetime.strptime(a.run_start, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-    att = d.get("attempted_at")
-    queued = str(a.dispatch_rc) == "5"  # usage-limit: agent sẽ tự chạy lại sau, đừng nhắc oan
-    if not att or datetime.fromisoformat(att) < start:
-        record_attempt(d, "dispatch_queued" if queued else "no_verify_call",
-                       f"không có lần gọi verify nào từ {a.run_start} (dispatch_rc={a.dispatch_rc})")
+    # Mạng TRƯỚC, nạp log SAU (r2 N1): peek trên bản sao để biết có cần đọc trang không.
+    pk = load_log()
+    _settle_no_call(pk, a, start)
+    probe = None
+    if (pk.get("last_attempt") or {}).get("outcome") in NO_NEW_SOURCE_OUTCOMES \
+            and not _veto_attempt(pk, start):
+        probe = _probe_official()
+    if _SELFCHECK and os.environ.get("SBV_POLICY_SIM_RACE_LOG"):  # giả lập verify chen giữa
+        with open(os.environ["SBV_POLICY_SIM_RACE_LOG"], encoding="utf-8") as f:
+            raced = json.load(f)
+        save_log(raced)
+    d = load_log()
+    if _settle_no_call(d, a, start):
         save_log(d)
     la = d.get("last_attempt") or {}
     va = d.get("verified_at")
@@ -388,8 +440,13 @@ def cmd_finalize(a):
     stale = age is None or age > STALE_DAYS
     out = la.get("outcome")
     why = None
-    if out in NO_NEW_SOURCE_OUTCOMES:
-        same, why = _official_unchanged(d, va, age)
+    veto = _veto_attempt(d, start) if out in NO_NEW_SOURCE_OUTCOMES else None
+    if veto:  # nhắc với CHÍNH attempt đó, không phải attempt cuối vô hại
+        la, out = veto, veto["outcome"]
+    elif out in NO_NEW_SOURCE_OUTCOMES:
+        if probe is None:  # trạng thái đổi sang lớp này sau lần peek (rất hiếm)
+            probe = _probe_official()
+        same, why = _official_unchanged(d, va, age, probe)
         if same:
             record_attempt(d, "official_unchanged", f"{why} (lượt này: {out})")
             d["official_reconfirmed_at"] = d["attempted_at"]
@@ -401,14 +458,14 @@ def cmd_finalize(a):
         if d.get("history") and d["history"][-1].get("at") == la.get("at"):
             d["history"][-1]["detail"] = la["detail"][:300]
         save_log(d)
-    if out == "rate_change_detected" and not la.get("notified"):
+    if not veto and out == "rate_change_detected" and not la.get("notified"):
         # 🔴 lúc verify chưa tới được người (Discord lỗi) ⇒ gửi lại ở đây, không im lặng.
         return 0 if _notify(str(la.get("detail"))) else 1
     # đã 🔴 thành công / đã verified còn tươi / dispatch xếp hàng chưa quá hạn ⇒ không nhắc.
     # official_unchanged (finalize chạy lại trong cùng lượt): không áp STALE_DAYS — trần
     # MAX_SOURCE_AGE_DAYS đã kiểm lúc ghi outcome.
-    if out in ("rate_change_detected", "official_unchanged") or (
-            out in ("verified", "dispatch_queued") and not stale):
+    if not veto and (out in ("rate_change_detected", "official_unchanged") or (
+            out in ("verified", "dispatch_queued") and not stale)):
         return 0
     ok = _notify(f"⚠️ Lãi điều hành NHNN: lượt kiểm tuần KHÔNG xác nhận được "
                  f"({la.get('outcome')}: {str(la.get('detail')).split(_OFFICIAL_SEP)[0][:160]}"
