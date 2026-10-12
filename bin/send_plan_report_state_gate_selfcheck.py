@@ -46,6 +46,8 @@ SRC_PATHY = ("deploy_golive_dt5g_v4/golive_state_today.json "
 # in dòng "✅ state=… khớp" nữa — chỉ in khi có ⚠️. Dấu vết đúng cho ca khớp vì thế là VẮNG ⚠️;
 # gate vẫn được chứng minh SỐNG bởi ca "LỆCH STATE … PHẢI chặn" trên cùng đường code.
 _NO_STATE_WARN = "⚠️ CHƯA đối chiếu được state plan"
+_G_PUB = "2026-08-10T19:01:15"          # published_at của golive fixture
+_GATE_LINE_MARK = "Cổng DT5G SUY GIẢM"   # chuỗi nhận diện dòng nguồn cổng trong report
 CASES = [
     dict(name="annotated-source cùng state  -> KHÔNG chặn (bug 08-10/11)",
          p_src=SRC_ANNOTATED, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
@@ -75,6 +77,38 @@ CASES = [
          p_src=SRC_BARE, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
          p_state_name="BULL", want_block=False,
          want_note="hai field trong cùng plan mâu thuẫn"),
+    # ── Dòng NGUỒN CỔNG (retro 2026-10-11 Pattern I, bin/gate_source_check.py): bản publish plan
+    # dựa vào ra nguồn khác DT5G_macro ⇒ đúng MỘT dòng ⚠️ trong report, KHÔNG chặn. Mọi ca ở trên
+    # dùng g_src=DT5G_macro nên cũng phải KHÔNG có dòng này (kiểm chung trong run_case).
+    dict(name="nguồn cổng DT4_only + bằng chứng đúng lượt -> KHÔNG chặn, dòng ⚠️ trích dòng cổng",
+         p_src=SRC_BARE, p_state=3, g_src="DT4_only", g_state=3, has_golive=True, want_block=False,
+         gate_marker=dict(source="DT4_only", published_at=_G_PUB,
+                          gate_line="[get_gated_state] DT4_only: health report 2903min old (> 1440) -> DT4_only",
+                          gate_line_why="", health="status=HEALTHY, ts=2026-10-10T18:37:02+07:00, recommended_state_source=DT5G_macro"),
+         want_note="ra nguồn DT4_only, không phải DT5G_macro ⇒ state này KHÔNG áp macro cap (cổng fail-closed về DT4). "
+                   "Plan KHÔNG bị chặn — anh cân nhắc khi duyệt. Bằng chứng lượt publish: dòng cổng tự in: "
+                   "«[get_gated_state] DT4_only: health report 2903min old (> 1440) -> DT4_only» · "
+                   "data/macro_health.json: status=HEALTHY, ts=2026-10-10T18:37:02+07:00",
+         want_gate_lines=1),
+    dict(name="nguồn cổng DT4_only, KHÔNG có marker    -> dòng ⚠️ nói thẳng không có bằng chứng",
+         p_src=SRC_BARE, p_state=3, g_src="DT4_only", g_state=3, has_golive=True, want_block=False,
+         want_note="Không có bằng chứng nguyên nhân của đúng lượt publish này", want_gate_lines=1),
+    dict(name="nguồn cổng DT4_only, marker của lượt KHÁC -> KHÔNG trích bằng chứng cũ",
+         p_src=SRC_BARE, p_state=3, g_src="DT4_only", g_state=3, has_golive=True, want_block=False,
+         gate_marker=dict(source="DT4_only", published_at="2026-08-07T19:01:00",
+                          gate_line="[get_gated_state] DT4_only: BẰNG CHỨNG CŨ", gate_line_why="", health="status=CU"),
+         want_note="Không có bằng chứng nguyên nhân của đúng lượt publish này",
+         deny_note="BẰNG CHỨNG CŨ", want_gate_lines=1),
+    dict(name="golive THIẾU trường source              -> dòng ⚠️, không khẳng định về macro cap",
+         p_src=SRC_BARE, p_state=3, g_src=None, g_state=3, has_golive=True, want_block=False,
+         want_note="ra nguồn <thiếu trường source>, không phải DT5G_macro ⇒ KHÔNG xác nhận được state này có áp macro cap",
+         deny_note="state này KHÔNG áp macro cap", want_gate_lines=1),
+    dict(name="nguồn cổng DT4_STALE                    -> dòng ⚠️",
+         p_src=SRC_BARE, p_state=3, g_src="DT4_STALE", g_state=3, has_golive=True, want_block=False,
+         want_note="ra nguồn DT4_STALE, không phải DT5G_macro", want_gate_lines=1),
+    dict(name="nguồn cổng DT5G_macro dù còn marker cũ   -> KHÔNG có dòng ⚠️ nguồn cổng",
+         p_src=SRC_BARE, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True, want_block=False,
+         gate_marker=dict(source="DT4_only", published_at=_G_PUB, gate_line="x", gate_line_why="", health="x")),
 ]
 
 PLAN_DATE = "2026-08-11"
@@ -82,7 +116,8 @@ ACCOUNT = "SpaceX"
 
 
 def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
-             want_note=None, deny_note=None, p_state_name="NEUTRAL"):
+             want_note=None, deny_note=None, p_state_name="NEUTRAL",
+             gate_marker=None, want_gate_lines=0):
     sandbox = tempfile.mkdtemp(prefix="sendplan_selfcheck_")
     try:
         plans = os.path.join(sandbox, "data", "trade_plans")
@@ -109,11 +144,19 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
                 with open(gpath, "w") as f:
                     f.write('{"as_of": "2026-08-10", "state": 3,')   # JSON cụt
             else:
-                golive = {"as_of": "2026-08-10", "source": g_src, "bq_publish_ok": True}
+                golive = {"as_of": "2026-08-10", "source": g_src, "bq_publish_ok": True,
+                          "published_at": _G_PUB}
+                if g_src is None:
+                    del golive["source"]
                 if g_state is not None:
                     golive["state"] = g_state
                 with open(gpath, "w") as f:
                     json.dump(golive, f)
+
+        if gate_marker is not None:
+            os.makedirs(os.path.join(sandbox, "data"), exist_ok=True)
+            with open(os.path.join(sandbox, "data", "gate_source_alert.json"), "w") as f:
+                json.dump(gate_marker, f)
 
         env = dict(os.environ)
         env["SEND_PLAN_WORKDIR_OVERRIDE"] = sandbox
@@ -132,6 +175,13 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
             ok, why = False, f"thiếu dấu vết trong report: không thấy {want_note!r}"
         if ok and deny_note and deny_note in out:
             ok, why = False, f"report không được chứa {deny_note!r}"
+        # Dòng nguồn cổng: đúng số lần mong đợi ở MỌI ca (0 khi nguồn là DT5G_macro / không đọc
+        # được golive — ca sau đã có dòng "CHƯA đối chiếu được state plan", không in hai dòng).
+        n_gate = out.count(_GATE_LINE_MARK)
+        if ok and n_gate != want_gate_lines:
+            ok, why = False, f"dòng nguồn cổng xuất hiện {n_gate} lần, mong đợi {want_gate_lines}"
+        if ok and "KHÔNG kiểm được nguồn cổng DT5G" in out:
+            ok, why = False, "gate_source_check không import/chạy được trong send_plan_report"
         return ok, blocked, why, out
     finally:
         shutil.rmtree(sandbox, ignore_errors=True)

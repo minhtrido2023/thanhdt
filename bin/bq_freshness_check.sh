@@ -6,6 +6,7 @@
 # ở 17:30 nghĩa là luôn đọc DT5G của HÔM QUA, mỗi ngày, vì bản hôm nay chưa kịp tính):
 #   → STALE: cảnh báo Telegram + Discord stale-alert channel, dừng, block DollarBill
 #   → FRESH: publish_gated_state → golive_recommend → push_to_bq → dispatch DollarBill lập plan
+#            (ngay sau publish: gate_source_check.py báo — KHÔNG chặn — khi nguồn cổng ≠ DT5G_macro)
 #
 # Tables checked (BLOCK = stale ⇒ chặn pipeline + DollarBill; WARN = alert Discord, không chặn):
 #   tav2_bq.ticker_prune              BLOCK — daily EOD price (pipeline step H)
@@ -684,7 +685,26 @@ cd "$WORKDIR"
 # cùng pattern post-chain assertion của daily_refresh_v34b_linux.sh, Winston_20260711_023903.)
 PIPELINE_START_EPOCH="$(date +%s)"
 
-_run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
+# [pipeline-1] chạy qua `tee` để GIỮ nguyên văn stdout của CHÍNH lượt publish này (dòng
+# `[get_gated_state] …` cổng tự in) làm bằng chứng cho bước kiểm nguồn cổng ngay dưới. `tee` chỉ
+# sao chép — stdout ra log vẫn y hệt; _run_pipeline không đặt biến nào nên chạy trong subshell
+# của pipe không mất gì.
+GATE_PUB_OUT="$(mktemp)" || GATE_PUB_OUT=/dev/null
+_run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py | tee "$GATE_PUB_OUT"
+# --- GATE-SOURCE check (retro 2026-10-11 Pattern I, user duyệt 2026-10-12 11:01 ICT) ----------
+# Bản publish VỪA XONG là bản DollarBill đọc để lập plan T+1. Nguồn khác DT5G_macro (DT4_only /
+# DT4_STALE / giá trị lạ / thiếu trường / file hỏng) ⇒ báo NGAY: 1 tin Trading Daily + 1 bus
+# error + bằng chứng cho dòng ⚠️ trong báo cáo plan 21:00 (send_plan_report.sh) — trước đây chỉ
+# check 13 của ops_health_check.sh kêu lúc 08:20 sáng hôm sau, SAU khi plan đã duyệt.
+# CHỈ CẢNH BÁO, KHÔNG CHẶN (DT4_only là fail-closed đúng thiết kế; chặn hay không là quyết định
+# của user): không đụng FAILED, không exit. Nguồn DT5G_macro ⇒ gate_source_check.py không in,
+# không ghi, không gửi gì. Đặt Ở ĐÂY chứ không ở khối publisher-evidence phía trên: khối đó đọc
+# bản publish 18:3x của daily_refresh step [12], bản mà [pipeline-1] vừa GHI ĐÈ.
+# Lượt publish không ghi file state ⇒ helper tự bỏ qua, _assert_fresh_artifact bên dưới xử.
+python3 "$ROOT/bin/gate_source_check.py" --workdir "$WORKDIR" --publish-log "$GATE_PUB_OUT" \
+  --since-epoch "$PIPELINE_START_EPOCH" --alert \
+  || echo "  [WARN] gate_source_check.py thoát rc=$? — KHÔNG kiểm được nguồn cổng lượt publish này, không chặn pipeline; kiểm tay trường source trong deploy_golive_dt5g_v4/golive_state_today.json"
+[ "$GATE_PUB_OUT" = /dev/null ] || rm -f "$GATE_PUB_OUT"
 
 # [pipeline-1b] build universe_pit — BLOCK on real fail.
 # build_universe_pit.py exit 1 cả khi: (a) fail thật, (b) B8_DUPLICATE (data đã có = idempotent).
