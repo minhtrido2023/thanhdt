@@ -1133,3 +1133,6 @@
 
 ## Archived 2026-10-12 (keep=12 days=0 require_done=False)
 - [2026-10-11T15:28:18Z] [dashboard strategy-fit kèm email EOD daily, 10-11] XONG phần Taylor: nhánh feat/strategy-fit-dashboard-20261011 @58f17ffc (worktree wt-stratfit-1011, CHƯA merge, không đụng crontab), finding strategy-fit-dashboard-email-wiring trên bus trace Taylor_20261011_151151, bằng chứng research/strategy_fit_email_20261011/. Chờ Mike review/merge; sau merge nhìn email daily 19:10 có file HTML kèm + chạy lại 3 selfcheck vốn đỏ dưới worktree (report_delivery_ledger, paper_report_render, production_manifest) trên canonical.
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T15:55:11Z] [dashboard strategy-fit email VÒNG 2, 10-11] XONG: wt-stratfit-1011 @41cdc58a (CHƯA merge), finding strategy-fit-dashboard-email-wiring-r2 trace Taylor_20261011_154713. Chờ Mike kiểm/merge.
