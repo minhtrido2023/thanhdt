@@ -1,6 +1,6 @@
 ---
 kind: derived-check (không có file dữ liệu riêng; đọc một file lời xác nhận do người ghi)
-status: CANONICAL cho câu hỏi "có biến động tiền nào chưa đối chiếu xong không" — CHỜ MERGE nhánh feat/fund-cashflow-detect-20261012
+status: CANONICAL cho câu hỏi "có biến động tiền nào chưa đối chiếu xong không" — merge master 2026-10-13 (nhánh feat/fund-cashflow-detect-20261012); lời xác nhận chưa ghi, xem policy quỹ mở
 source: mike/bin/cash_identity.py (đọc nav_history_<account>.csv + dnse_raw_<ngày>.jsonl + account_cash_flows.json + corp_actions.json + cash_identity_acks.json)
 group: trading-bot
 role: đẳng thức tiền hằng tối — tự phát hiện dòng tiền ngoài (nạp/rút) mà sổ dòng tiền chưa có bản ghi khớp, và số lượng cổ phiếu đổi ngoài lệnh đã đọc

@@ -19,6 +19,7 @@ title: Trading bot / execution (money-path thật)
 | [`nav_history.md`](nav_history.md) — data/execution_logs/nav_history_<account>.csv | CANONICAL |
 | [`nav_unit_ledger.md`](nav_unit_ledger.md) — data/execution_logs/nav_unit_ledger_<account>.csv (sổ đơn vị quỹ, chỉ-ghi-thêm; bản đối chứng) | NOT-YET-SEALED (không chốt sổ thật trước bước 3) |
 | [`account_cash_flows.md`](account_cash_flows.md) — data/account_cash_flows.json (nạp/rút, ghi tay kèm bằng chứng) | CANONICAL |
+| [`cash_identity.md`](cash_identity.md) — `bin/cash_identity.py` (đẳng thức tiền hằng tối: phát hiện nạp/rút CHƯA KHAI; lời xác nhận ở data/cash_identity_acks.json) | CANONICAL cho câu hỏi "có nạp/rút chưa khai không" — có điểm mù, xem mục "Không phủ" |
 | [`account_inception.md`](account_inception.md) — data/account_inception.json (mốc + vốn khởi điểm) | CANONICAL |
 | [`account_seed_capital.md`](account_seed_capital.md) — data/account_seed_capital.json (vốn đầu kỳ + lô legacy + fill broker dnse_raw thiếu, cho reconcile_equity.py) | CANONICAL |
 | [`active_nav_snapshot.md`](active_nav_snapshot.md) — data/execution_logs/active_nav_<label>.json (label = SpaceX \| ZaloPay) | CANONICAL |
