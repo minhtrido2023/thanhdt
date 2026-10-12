@@ -35,7 +35,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANTS = (("2026-10-11T16:59:00+00:00", "2026-10-11"), ("2026-10-11T17:00:00+00:00", "2026-10-12"))
 EXPLICIT = ("2026-07-21", "2026-10-11", "2026-10-12")
 TZS = (None, "UTC", "Etc/GMT+12", "Pacific/Kiritimati", "Asia/Ho_Chi_Minh")
-SITES = ("dd_order", "dd_run", "dcf_cli", "gate", "gate_run", "gate_state")
+SITES = ("dd_order", "dd_run", "dcf_cli", "gate", "gate_run", "gate_state", "gate_log")
 
 CHILD = r'''
 import os
@@ -154,6 +154,7 @@ def probe(asof):
         out["gate_run"] = _desc(GATE.run_gate(asof=asof, state_path=sp, log_path=lp)["date"])
         st = json.load(open(sp))
         out["gate_state"] = _desc(st["last_check_date"]) + [st["last_used_date"]]
+        out["gate_log"] = _desc(json.loads(open(lp).read().splitlines()[-1])["date"])
     return out
 
 
@@ -202,6 +203,7 @@ for tz in TZS:
     for iso, want in INSTANTS:
         for site in SITES:
             check(f"[TZ={tag}] {iso[:16]}Z {site} -> ICT date {want}", o["pinned"][iso][site][1] == want)
+        check(f"[TZ={tag}] {iso[:16]}Z gate_state.last_used_date -> ICT date {want}", o["pinned"][iso]["gate_state"][3] == want)
     # kind of the default value is what the callers always got
     p = o["pinned"][INSTANTS[0][0]]
     check(f"[TZ={tag}] dd_order default is a datetime.date", p["dd_order"][0] == "date")
