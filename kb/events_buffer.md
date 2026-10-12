@@ -1010,3 +1010,15 @@
 - [2026-10-12T17:05:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261012_162001", "source": "watcher"}
 - [2026-10-12T17:06:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261012_162001", "source": "watcher"}
 - [2026-10-12T17:06:15Z] Taylor/status — Taylor_20261012_162001: {"status": "deadline_extended", "hb_age_s": 103, "extension": 1, "max_ext": 3, "source": "watcher"}
+
+## Consolidation 2026-10-12T17:16:18Z
+- [2026-10-12T17:07:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:08:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:09:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:10:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:11:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:12:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:13:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:14:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:15:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:16:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20261012_162001", "source": "watcher"}
