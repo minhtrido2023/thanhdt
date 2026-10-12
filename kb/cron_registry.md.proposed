@@ -1,0 +1,34 @@
+# ĐỀ XUẤT — 2 hàng mới cho `kb/cron_registry.md` (CHƯA CÀI, chờ Mike/user duyệt)
+
+> Job `Taylor_20261012_120049` (arch-review vòng 1, mục B9) · nhánh `feat/nav-loss-brake-monitor-20261012`.
+> File này là MẢNH CHÈN, không phải bản thay cả registry: chèn 2 hàng dưới vào bảng chính theo đúng
+> thứ tự giờ ICT (hàng 1 sau `late_plan_catchup.sh` 22:00; hàng 2 sau `dc_book_waterfall_paper.py`
+> 00:15), CÙNG COMMIT với lúc sửa crontab (§11). Chưa dòng nào được cài.
+
+## Dòng crontab nguyên văn (host `Etc/UTC` ⇒ giờ dưới là UTC)
+
+```cron
+5 15 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && TZ=Asia/Ho_Chi_Minh flock -n mike/state/nav_loss_brake_monitor.cron.lock timeout 600 python3 mike/bin/nav_loss_brake_monitor.py >> mike/logs/nav_loss_brake_monitor.log 2>&1   # 22:05 ICT T2-T6
+20 17 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && TZ=Asia/Ho_Chi_Minh flock -n mike/state/nav_loss_brake_monitor.cron.lock timeout 600 python3 mike/bin/nav_loss_brake_monitor.py >> mike/logs/nav_loss_brake_monitor.log 2>&1   # 00:20 ICT T3-T7 (phiên của tối hôm trước)
+```
+
+Khe đã tra trên crontab thật 2026-10-12: `0 15` = `late_plan_catchup.sh`, `5 15` TRỐNG;
+`15 17` = `dc_book_waterfall_paper.py`, `0 17` = `fleet_backup.sh`, `30 17` = `daily_retro.sh`,
+`20 17` TRỐNG ⇒ lượt hai đặt 00:20 thay vì 00:15.
+
+## Hai hàng cho bảng chính
+
+| Giờ ICT | Script | Đọc (vintage) | Ghi | Ai đọc tiếp | Phụ thuộc thứ tự | Idempotent / bằng chứng chạy |
+|---|---|---|---|---|---|---|
+| **22:05 (T2-T6) — ĐỀ XUẤT 2026-10-12** | `mike/bin/nav_loss_brake_monitor.py` (không tham số) — phanh lỗ cấp NAV, CHỈ CẢNH BÁO | Toàn file local, không gọi broker/BQ: `nav_history_{TK}.csv` (dòng của CHÍNH phiên hôm nay, phải chụp trong [14:45, 09:00 phiên kế)) · `dnse_raw_{ngày}.jsonl` bản ghi `positions` cuối cùng SAU 14:45 · `active_nav_{TK}.json` (cron 20:15, `computed_at` = hôm nay) · `corp_action_daily_{ngày}.json` (07:30) · `account_cash_flows.json` · `account_inception.json` · `trading_rules.json` (ngưỡng) · `margin_approvals/` · `secrets/trading_bot_accounts.json` (`excluded_tickers`) · `data/loss_brake/` (sổ người khai) | `data/loss_brake/`: `status.json` (nguyên tử) · `alerts_sent.json` · `excluded_value_history_{TK}.csv` (chỉ-ghi-thêm) · `episodes.json` (khi tự mở) · `run_log.jsonl` (1 dòng/lượt) · `.lock`; Discord `trading_daily` qua `notify_thread.sh` CHỈ khi có phanh chạm / tạm tính vượt ngưỡng / không đo được | `ops_health_check.sh` 08:20 + 12:45 (khối LOSSBRAKE, `--health-line`) → người | SAU `nav_sync_retry.sh` lượt cuối 21:45 (hằng số `NAV_EXPECTED_AFTER_ICT` 21:50) và SAU `compute_active_nav_all.sh` 20:15; không ai chờ nó. Runtime đo thật 2026-10-12: ~1s/lượt (2 account), `timeout 600` | Chạy lại cùng phiên không gửi trùng (khoá `account\|phiên\|phanh\|trạng thái`); gửi lỗi ⇒ không ghi dấu ⇒ lượt sau thử lại. Hai khoá: `flock -n` của cron (chống chồng lượt) + `fcntl` trong tiến trình (`data/loss_brake/.lock`, chung với `--close-episode`/`--open-episode`/`--correct-excluded`). **Bằng chứng chạy hằng ngày:** `data/loss_brake/run_log.jsonl` + `status.json.generated_at`/`session` + `logs/nav_loss_brake_monitor.log`; thiếu lượt ⇒ `--health-line` rc=2 ("file trạng thái CŨ") trong ops_health sáng hôm sau. Mã thoát: 0 OK · 1 phanh chạm/không đo được (việc của NGƯỜI) · 3 monitor lỗi / không gửi được · 4 khoá bận. Selfcheck `bin/nav_loss_brake_monitor_selfcheck.py` |
+| **00:20 (T3-T7) — ĐỀ XUẤT 2026-10-12** | cùng script, lượt THỨ HAI cho phiên của tối hôm trước (`expected_session` lúc 00:20 = phiên vừa qua) | như trên; thêm được: dòng NAV backfill về sau 22:05, bản ghi `positions` 23:30 | như trên | như trên | Sau `fleet_backup.sh` 00:00 (bản sao lưu đêm đó chứa state của lượt 22:05, state của lượt này vào bản sao lưu đêm sau) | Idempotent hoàn toàn: không có gì mới ⇒ không gửi gì. Ba việc nó bắt: (a) dòng NAV về muộn (22:05 đã báo "không có dòng") — nếu số tạm tính ĐÃ VƯỢT ngưỡng thì gửi tin đỏ mới (khoá `BREACH_PROVISIONAL` khác khoá `UNMEASURABLE`); (b) gửi lại cảnh báo mà lượt 22:05 gửi lỗi; (c) lượt 22:05 không chạy/khoá bận |
+
+## Thứ tự cài (arch-reviewer yêu cầu)
+1. merge commit monitor (KHÔNG gồm commit `ops_health_check.sh`);
+2. seed `data/loss_brake/` (xem `kb/ops_runbook.lossbrake.md.proposed` mục "Cài lần đầu") và `--replay` khớp
+   `agents/Taylor/research/nav_loss_brake_20261012/replay_full_history.txt`;
+3. chạy tay một tối với `MIKE_LOSS_BRAKE_ALERT_SINK=<file>` (không gửi Discord), đọc `status.json`;
+4. cài 2 dòng cron trên + chép 2 hàng vào `kb/cron_registry.md` cùng commit;
+5. sau MỘT đêm cron chạy thành công (`run_log.jsonl` có đủ 2 dòng) mới merge commit `ops_health_check.sh`.
+
+`data/loss_brake/` phải nằm trong phạm vi sao lưu (`fleet_backup.sh`) — xem việc còn mở N14.

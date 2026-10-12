@@ -1,0 +1,13 @@
+{
+  "_doc": "Dòng tiền chạy GIỮA phần mã loại trừ và phần bot quản lý của một account (cổ tức tiền của mã loại trừ, bán/mua mã loại trừ). Đọc bởi mike/bin/nav_loss_brake_monitor.py; cùng schema và cùng luật gán giờ với data/account_cash_flows.json (mike/bin/account_cash_flows.py). amount_vnd DƯƠNG = tiền VÀO phần bot quản lý. Nạp/rút từ bên ngoài KHÔNG ghi ở đây (ghi ở data/account_cash_flows.json). kind=market_only = đã kiểm, ngày đó không có tiền chuyển giữa hai phần.",
+  "SpaceX": [],
+  "ZaloPay": [
+    {
+      "date": "2026-09-14",
+      "time_ict": "09:00",
+      "amount_vnd": 80000000,
+      "kind": "deposit",
+      "evidence": "DGC GDKHQ 2026-09-14, cổ tức tiền 3.000đ (đợt 1/2026) + 5.000đ (đợt 2/2025) = 8.000đ/cp × 10.000 cp = 80.000.000đ. Nguồn: data/corp_action_daily/corp_action_daily_2026-09-14.json upcoming_events_held (2 dòng DGC DIV, date=2026-09-14); giá BQ ticker.Price DGC 46.750 (09-11) → 37.400 (09-14); KL 10.000 cp theo dnse_raw positions. Từ mở cửa 09-14 khoản phải thu này nằm trong tiền của nav_history (NAV tổng 09-14 chỉ −1,45%), tức đã sang phần bot quản lý."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+# ĐỀ XUẤT — mục mới cho `kb/ops_runbook.md`: "Phanh lỗ NAV" (CHƯA duyệt)
+
+> Job `Taylor_20261012_120049` (arch-review vòng 1, mục B9/N11/N13/N14). Mảnh CHÈN, không phải bản
+> thay cả runbook — `kb/ops_runbook.md.proposed` đang giữ một đề xuất KHÁC chưa duyệt nên file này
+> mang tên riêng để không đè lên nó. Chèn làm một mục `##` sau "Timeline ngày giao dịch".
+
+## Phanh lỗ NAV — `nav_loss_brake_monitor.py` (CHỈ CẢNH BÁO)
+
+Monitor đo ba phanh mỗi tối (22:05 + lượt hai 00:20) và **không bao giờ** tạo `data/BOT_STOP`, không
+huỷ lệnh, không gọi broker. Dừng giao dịch hay không là quyết định của user. Đầu vào/đầu ra:
+`kb/data_registry/trading-bot/loss_brake_state.md`. Cron: `kb/cron_registry.md` hàng 22:05 / 00:20.
+
+### Mỗi loại tin thì NGƯỜI làm gì
+
+| Tin (đầu tin / dòng) | Nghĩa | Việc của người |
+|---|---|---|
+| 🚨 **PHANH LỖ NAV ĐÃ CHẠM** | Số CHỐT đã qua ngưỡng (ngày ≤ −5% · từ đỉnh ≤ −25% · từ điểm vào episode ≤ −15%) | User quyết. Muốn dừng: chạy đúng dòng `touch …/data/BOT_STOP` in trong tin. Monitor không làm hộ. Phiên sau còn vi phạm ⇒ báo lại |
+| 🚨 **SỐ TẠM TÍNH ĐÃ VƯỢT NGƯỠNG (chưa phải số chốt)** | Có số nhưng dòng NAV chưa phải giá chốt đã kiểm (dòng `nav_is_estimate`, chụp ngoài [14:45, 09:00 phiên kế), thiếu phiên liền trước, chuỗi bắt đầu muộn…) — và số đó ĐÃ qua ngưỡng | Coi như phanh chạm cho tới khi chứng minh ngược lại: đọc lý do sau chữ "chưa phải số chốt", kiểm NAV thật của phiên đó (`daily_nav_snapshot.py`), rồi user quyết như dòng trên |
+| ⚠️ **KHÔNG ĐO ĐƯỢC** — "nav_history không có dòng …" | NAV phiên đó chưa ghi (cổng chặn / EOD chưa chạy) | Runbook "NAV thiếu dòng `nav_history`". Lượt 00:20 tự đo lại khi dòng về |
+| ⚠️ … "chụp số dư lúc … TRƯỚC giờ đóng cửa / SAU giờ mở cửa phiên kế" | Dòng NAV không phải giá chốt | Ghi lại dòng NAV đúng giờ nếu còn làm được (`daily_nav_snapshot.py --from-raw`); không thì chấp nhận phiên đó + phiên kế chỉ có số tạm tính |
+| ⚠️ … "mang cờ nav_is_estimate" | Dòng backfill ước tính | Không cần làm gì nếu số tạm tính xa ngưỡng (đo lịch sử: xem `agents/Taylor/research/nav_loss_brake_20261012/measure_estimate_rows_result.txt`). User CHƯA quyết có tắt loại tin này hay không ⇒ hiện vẫn báo hết |
+| ⚠️ … "nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai" (KL mã loại trừ đổi · giá nhảy quá biên độ sàn · lịch corp-action có sự kiện · KHÔNG kiểm được lịch corp-action) | Phần bot quản lý có thể đã nhận/chuyển tiền với mã loại trừ. **Chặn mọi phiên sau cho tới khi khai** | Kiểm sao kê/corp-action của mã đó, rồi thêm một bản ghi vào `data/loss_brake/managed_sleeve_flows.json` cho ĐÚNG ngày nêu trong tin: có tiền ⇒ `deposit`/`withdraw` + `time_ict` + `evidence`; không có tiền ⇒ `kind: market_only`, `amount_vnd: 0`, `evidence` ghi đã kiểm bằng gì |
+| ⚠️ … "chuỗi phần quản lý chỉ bắt đầu từ …" | Chuỗi mã loại trừ không có dòng tại mốc khởi điểm ⇒ đỉnh cũ nằm ngoài chuỗi | Vá chuỗi: `nav_loss_brake_backfill_excluded.py` (mục "Cài lần đầu") |
+| ⚠️ … "chưa ghi được giá trị mã loại trừ ngày …" / "CÓ dòng … nhưng chuỗi giá trị mã loại trừ thì không" | Không tách được phần bot quản lý của ngày đó (thiếu `active_nav` đúng ngày, positions chụp trước phiên, KL hai nguồn lệch…) | Trong ngày: chạy lại `compute_active_nav_all.sh` rồi chạy lại monitor. Ngày đã qua: backfill bằng giá BQ, hoặc `--correct-excluded <TK> --date … --detail '{"MÃ": {"qty": …, "price": …}}' --corrected-by … --reason …` (KHÔNG mổ CSV tay) |
+| ⚠️ episode — "broker có vị thế dưới gói vay … nhưng KHÔNG có episode" | Đang vay mà phanh −15% không canh | Xác minh bản duyệt + ngày giải ngân, rồi `--open-episode <TK> --opened-date … --opened-by … --reason …` (điểm vào mặc định = giá chốt phiên trước ngày mở; đổi bằng `--entry-ref-date`) |
+| ⚠️ episode — "đang mở nhưng broker KHÔNG còn vị thế nào dưới gói vay" | Đã tất toán mà episode chưa đóng | `--close-episode <TK> --closed-by … --reason …` |
+| ⚠️/🚨 episode — "có bản duyệt margin MỚI ngày … trong lúc episode … còn mở" | Có thể là lần vay MỚI (điểm vào khác). Tin in cả hai số: từ điểm vào gốc và từ chốt trước bản duyệt mới | Cùng episode (giải ngân thêm) ⇒ `--ack-approval <TK> --approval-date … --acked-by … --reason …`. Lần vay mới ⇒ `--close-episode` rồi `--open-episode` |
+| ⚠️ episode — "KHÔNG kiểm được broker có vị thế dưới gói vay" | Không có bản ghi `positions` sau 14:45 của phiên đó | Việc vận hành: vì sao `dnse_raw_<ngày>.jsonl` thiếu bản ghi tối (EOD 19:10 / park 23:30) |
+| 🛑 **MONITOR PHANH LỖ NAV LỖI** | Monitor tự hỏng (cấu hình/sổ không đọc được…); đêm đó không phanh nào được đo | Việc vận hành — sửa đúng lỗi in trong tin rồi chạy lại monitor |
+| "sổ đã-gửi … không đọc được … tin này có thể trùng" | `alerts_sent.json` hỏng; monitor vẫn gửi và tự dựng lại sổ (bản hỏng cất ở `alerts_sent.json.corrupt.*`) | Không cần làm gì; xem vì sao file hỏng nếu lặp lại |
+
+### Dòng buổi sáng trong ops_health (khối LOSSBRAKE)
+`--health-line` rc=0 ✅ · rc=1 ⚠️ `[WARN-ONLY]` (phanh chạm / tạm tính vượt / không đo được — user
+quyết, KHÔNG route autofix) · rc=2 ⚠️ monitor không chạy (file trạng thái thiếu/cũ/hỏng) · rc=3 ⚠️
+monitor có chạy nhưng lỗi, hoặc không gửi được cảnh báo. rc=2 và rc=3 là lỗi vận hành ⇒ tới autofix.
+
+### `ops_autofix` ĐƯỢC và KHÔNG ĐƯỢC làm gì
+ĐƯỢC (rc=2 / rc=3, và chỉ khi `data/loss_brake/managed_sleeve_flows.json` + `episodes.json` đã tồn tại
+— tức đã seed):
+- chạy lại `python3 mike/bin/nav_loss_brake_monitor.py` cho phiên mặc định (idempotent; cảnh báo đã
+  gửi không gửi lại; cảnh báo gửi lỗi được gửi bù);
+- sửa lỗi hạ tầng quanh nó: cron không chạy, khoá `.lock` kẹt do tiến trình chết, thiếu thư mục log.
+
+KHÔNG ĐƯỢC (mọi rc):
+- chạy monitor khi `data/loss_brake/` CHƯA seed (thiếu sổ khai hoặc chuỗi mã loại trừ không bắt đầu
+  từ mốc khởi điểm) — việc seed là của người, theo mục "Cài lần đầu";
+- tạo/xoá `data/BOT_STOP`; sửa ngưỡng trong `data/trading_rules.json` hay `DD_THRESHOLD`;
+- khai hộ `managed_sleeve_flows.json`, mở/đóng episode, `--ack-approval`, `--correct-excluded` — mỗi
+  cái là một khẳng định về tiền/đòn bẩy cần người + bằng chứng;
+- xoá/sửa `alerts_sent.json`, `excluded_value_history_*.csv`, `episodes.json` để "làm sạch" cảnh báo;
+- dùng `--date … --write-backdated` (ghi đè status + gửi cảnh báo cho phiên cũ);
+- xử lý dòng rc=1 dưới bất kỳ hình thức nào ngoài việc để nguyên cho người đọc.
+
+### Cài lần đầu (sau khi merge commit monitor)
+```bash
+cd /home/trido/thanhdt/WorkingClaude
+R=mike/agents/Taylor/research/nav_loss_brake_20261012
+# 1) giá đóng cửa CHƯA điều chỉnh của mọi mã loại trừ đang/đã giữ (hiện chỉ DGC), tới phiên gần
+#    nhất BQ đã sync — lệnh bq trong docstring của công cụ; rồi vá chuỗi (chỉ THÊM ngày thiếu):
+python3 mike/bin/nav_loss_brake_backfill_excluded.py --price-csv <csv mới> --out-dir data/loss_brake --until <ngày cuối CSV>
+# 2) sổ người khai: bản gốc + 27 bản khai market_only KIỂM BẰNG MÁY cho các phiên không đọc được lịch
+#    corp-action (26 phiên trước 2026-08-13 + 2026-10-02) — ĐỌC evidence rồi mới chép
+cp $R/seed/managed_sleeve_flows.json $R/seed/episodes.json $R/seed/excluded_ticker_exchange.json data/loss_brake/
+# 3) phải ra đúng bảng trong $R/replay_full_history.txt (cho tới ngày cuối của file đó)
+python3 mike/bin/nav_loss_brake_monitor.py --replay
+# 4) một tối chạy tay, cảnh báo vào file thay vì Discord
+MIKE_LOSS_BRAKE_ALERT_SINK=/tmp/lossbrake_sink.jsonl python3 mike/bin/nav_loss_brake_monitor.py
+```
+Ngày nằm giữa "ngày cuối CSV" và ngày cài mà account đang giữ mã loại trừ: monitor KHÔNG tự ghi được
+(giá `active_nav` của ngày cũ đã bị ghi đè) ⇒ phải có trong CSV, hoặc `--correct-excluded`.
+
+### Việc còn mở (không nằm trong nhánh này)
+- **N13** `strategy_fit_dashboard.py` (@aaaf60a3b:879-908) vẫn grep chữ `risk_monitor` để kết luận phanh
+  lỗ có ai canh — phải đổi sang đọc `data/loss_brake/status.json` sau khi monitor này cài xong.
+- **N14** `data/loss_brake/` phải nằm trong phạm vi `fleet_backup.sh` + `backup_freshness_check.sh`:
+  `excluded_value_history_*.csv` KHÔNG dựng lại được từ đĩa (giá `active_nav` bị ghi đè mỗi tối).
+- Khoá SỐ cho ngưỡng episode: monitor đã ưu tiên
+  `macro_kill_switches.C_episode_drawdown_breaker.episode_drawdown_limit_pct` nếu có (số trong
+  [−0,30, −0,05]); chưa có thì đọc `-0.xx` duy nhất trong chuỗi `trigger`. Thêm khoá ⇒ user duyệt.
+- User chưa quyết: có chỉ đẩy tin khi "không có số" hoặc "tạm tính cách ngưỡng dưới X điểm %".

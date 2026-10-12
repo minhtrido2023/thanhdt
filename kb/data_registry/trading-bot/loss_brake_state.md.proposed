@@ -4,49 +4,61 @@ status: CANONICAL
 source: data/loss_brake/
 group: trading-bot
 role: trạng thái + đầu vào riêng của monitor phanh lỗ cấp NAV (chỉ cảnh báo)
-writer: "mike/bin/nav_loss_brake_monitor.py (cron tối, đề xuất 22:05 ICT T2-T6) + người (managed_sleeve_flows.json, đóng episode)"
+writer: "mike/bin/nav_loss_brake_monitor.py (cron tối, đề xuất 22:05 + 00:20 ICT) + người (sổ khai, mở/đóng episode, đính chính)"
 ---
 
 # data/loss_brake/
 
-**Status: CANONICAL (đề xuất — chưa cài cron, chưa merge; job `Taylor_20261012_111422`).**
+**Status: CANONICAL (đề xuất — chưa cài cron, chưa merge; job `Taylor_20261012_111422`, sửa theo
+arch-review vòng 1 ở job `Taylor_20261012_120049`).**
 Thư mục của `mike/bin/nav_loss_brake_monitor.py`. Monitor chỉ CẢNH BÁO: không tạo `data/BOT_STOP`,
-không gọi broker/BQ.
+không gọi broker/BQ. Người làm gì với từng loại tin: `kb/ops_runbook.md` mục "Phanh lỗ NAV".
 
-## Năm file
+## Các file
 | File | Ai ghi | Là gì |
 |---|---|---|
-| `status.json` | monitor, mỗi lượt (ghi nguyên tử) | phiên đã đo (`session`), giờ chạy, ba phanh của từng account: trạng thái, số đo, ngưỡng, `distance_pp` (khoảng cách tới ngưỡng, điểm %), cơ sở đo, kết quả gửi cảnh báo |
-| `alerts_sent.json` | monitor, NGAY sau mỗi lần gửi được | khoá `account\|phiên\|phanh\|trạng thái` → giờ gửi; chống gửi trùng |
-| `excluded_value_history_{account}.csv` | monitor, chỉ-ghi-thêm | giá trị các mã `excluded_tickers` theo ngày (KL × giá đóng cửa) — phần phải trừ khỏi NAV để ra phần bot quản lý |
-| `managed_sleeve_flows.json` | NGƯỜI, kèm bằng chứng | tiền chạy giữa phần mã loại trừ và phần bot quản lý (cổ tức tiền của mã loại trừ, bán/mua mã loại trừ). Cùng schema + luật gán giờ với `data/account_cash_flows.json` |
-| `episodes.json` | monitor mở, NGƯỜI đóng (`--close-episode`) | episode đòn bẩy cho phanh −15% |
+| `status.json` | monitor, mỗi lượt chạy thật (nguyên tử) | `schema: 2`. Phiên đã đo (`session`), giờ chạy, `error` (monitor tự hỏng thì ghi lỗi thật ở đây), ba phanh của từng account: `status` ∈ `OK` / `BREACH` / `BREACH_PROVISIONAL` (số tạm tính đã vượt ngưỡng) / `UNMEASURABLE` / `NO_EPISODE`, số đo, ngưỡng, `distance_pp`, cơ sở đo, kết quả gửi cảnh báo, `monitor_error` |
+| `alerts_sent.json` | monitor, NGAY sau mỗi lần gửi được | khoá `account\|phiên\|phanh\|trạng thái` (và `monitor\|phiên\|loại lỗi`) → giờ gửi; chống gửi trùng. Hỏng ⇒ monitor vẫn gửi, dựng lại file, cất bản hỏng ở `alerts_sent.json.corrupt.*` |
+| `run_log.jsonl` | monitor, 1 dòng mỗi lượt chạy thật | bằng chứng monitor CÓ chạy: giờ, phiên, mã thoát, trạng thái từng account, account nào được gửi tin |
+| `excluded_value_history_{account}.csv` | monitor (mỗi tối) + `nav_loss_brake_backfill_excluded.py` (ngày đã qua); chỉ-ghi-thêm | giá trị các mã `excluded_tickers` theo ngày (KL cuối phiên × giá đóng cửa) — phần phải trừ khỏi NAV để ra phần bot quản lý |
+| `excluded_value_corrections.json` | NGƯỜI, qua `--correct-excluded` (chỉ-ghi-thêm) | đính chính / vá một ngày của chuỗi trên, kèm người + lý do; đè lên CSV khi ĐỌC, CSV gốc không đổi |
+| `excluded_ticker_exchange.json` | NGƯỜI | `{"MÃ": "HOSE"\|"HNX"\|"UPCOM"}` — sàn của từng mã loại trừ, để lấy biên độ giá/ngày (±7/10/15% + 0,5pp). Mã chưa khai ⇒ biên HOSE (hẹp nhất, nghiêng về kêu) |
+| `managed_sleeve_flows.json` | NGƯỜI, kèm bằng chứng | tiền chạy giữa phần mã loại trừ và phần bot quản lý (cổ tức tiền của mã loại trừ, bán/mua mã loại trừ). Cùng schema + luật gán giờ với `data/account_cash_flows.json`. `kind: market_only` = đã kiểm, ngày đó không có tiền chuyển |
+| `episodes.json` | monitor tự mở khi đủ bằng chứng; NGƯỜI qua `--open-episode` / `--close-episode` / `--ack-approval` | episode đòn bẩy cho phanh −15% |
+| `.lock` | monitor + mọi lệnh ghi của người | khoá `fcntl` độc quyền cho mọi đường ghi vào thư mục này |
 
 ## Ai đọc
-`mike/bin/ops_health_check.sh` (check 16) qua `nav_loss_brake_monitor.py --health-line --account <TK>`:
-1 dòng mỗi sáng; file thiếu/cũ ⇒ cảnh báo. Độ tươi kiểm bằng `session` trong file so với lịch phiên
-(`expected_session`), không bằng mtime.
+`mike/bin/ops_health_check.sh` (khối LOSSBRAKE) qua `nav_loss_brake_monitor.py --health-line --account <TK>`:
+1 dòng mỗi sáng. rc=0 ✅ · rc=1 phanh chạm / tạm tính vượt / không đo được (`[WARN-ONLY]`) · rc=2 file
+thiếu/cũ/hỏng · rc=3 monitor lỗi hoặc không gửi được cảnh báo. Độ tươi kiểm bằng `session` trong file
+so với lịch phiên (`expected_session`), không bằng mtime.
 
 ## Bẫy
 - **`excluded_value_history` KHÔNG dựng lại được từ đĩa cho ngày đã qua**: giá lấy từ
   `active_nav_{account}.json`, file đó bị ghi đè mỗi tối. Ngày đang giữ mã loại trừ mà monitor không
-  chạy ⇒ lỗ hổng vĩnh viễn trên đĩa; vá bằng `agents/Taylor/research/nav_loss_brake_20261012/
-  backfill_excluded_value.py` (giá `tav2_bq.ticker.Price`, sau khi BQ đã sync). Ngày KHÔNG giữ mã loại
-  trừ thì monitor tự vá (giá trị 0, không cần giá).
-- **Thiếu bản khai trong `managed_sleeve_flows.json` ⇒ monitor báo KHÔNG ĐO ĐƯỢC cho tới khi khai**
-  (kể cả `kind: market_only` = đã kiểm, không có tiền chuyển). Ba bẫy phát hiện: KL mã loại trừ đổi ·
-  giá nhảy quá ±7,5%/phiên · `corp_action_daily_<ngày>.json` có sự kiện đúng ngày. Tiền về vào một
-  ngày KHÁC ngày GDKHQ mà không khai thì KHÔNG bẫy nào bắt được ⇒ lãi giả + đỉnh giả.
+  chạy ⇒ lỗ hổng trên đĩa; vá bằng `mike/bin/nav_loss_brake_backfill_excluded.py` (giá
+  `tav2_bq.ticker.Price`, sau khi BQ đã sync; chỉ THÊM ngày thiếu) hoặc `--correct-excluded`.
+  Ngày KHÔNG giữ mã loại trừ thì monitor tự vá (giá trị 0, không cần giá).
+- **Chuỗi phải bắt đầu ĐÚNG mốc khởi điểm của account** (`data/account_inception.json`). Bắt đầu muộn
+  hơn ⇒ đỉnh cũ nằm ngoài chuỗi ⇒ phanh lỗ-từ-đỉnh và phanh episode chỉ ra số tạm tính (KHÔNG ĐO
+  ĐƯỢC), không âm thầm đặt lại đỉnh.
+- **Thiếu bản khai trong `managed_sleeve_flows.json` ⇒ KHÔNG ĐO ĐƯỢC từ ngày đó cho tới khi khai**
+  (kể cả `market_only`). Bốn bẫy, xét trên MỌI phiên giữa hai dòng liền nhau của chuỗi: KL mã loại trừ
+  đổi · giá nhảy quá biên độ sàn của mã · `corp_action_daily_<phiên>.json` có sự kiện đúng phiên ·
+  **không đọc được** snapshot đó (thiếu / `usable != true`) trong lúc đang giữ mã loại trừ. Tiền về
+  vào một ngày KHÁC ngày GDKHQ mà không khai thì KHÔNG bẫy nào bắt được ⇒ lãi giả + đỉnh giả.
+- **`active_nav_{account}.json` chỉ ghi `computed_at` theo NGÀY, không có giờ** ⇒ monitor không chứng
+  minh được file đó định giá sau giờ đóng cửa; đối chiếu `total_nav` với nav_history (dung sai 0,1%)
+  chỉ bắt được lệch đủ lớn, và dung sai đó mới đo trên một cặp cùng ngày (chưa kiểm).
+- **Bản ghi `positions` phải chụp SAU 14:45** mới được coi là danh mục cuối phiên (cho cả KL mã loại
+  trừ lẫn vị thế gói vay). Chỉ có bản chụp trước phiên ⇒ KHÔNG ĐO ĐƯỢC, không coi là "không giữ".
+- Bản ghi `positions` cuối ngày rỗng do lỗi API ⇒ chuỗi ghi 0; hôm đó bẫy "KL mã loại trừ đổi" kêu.
+  Sửa bằng `--correct-excluded`, không mổ CSV tay.
 - Xoá `alerts_sent.json` ⇒ monitor gửi lại mọi cảnh báo của phiên hiện tại.
 - Số trong `status.json` là của **phần bot quản lý** với account có `excluded_tickers`; số NAV tổng
   nằm ở `total_nav_info` và chỉ để tham chiếu.
+- `--date` của phiên cũ là CHẠY KHÔ (không ghi, không gửi) trừ khi thêm `--write-backdated`.
 
-## Cài lần đầu (sau khi merge)
-```bash
-cd /home/trido/thanhdt/WorkingClaude
-R=mike/agents/Taylor/research/nav_loss_brake_20261012
-# 1) lấy lại giá DGC tới phiên gần nhất (lệnh bq trong docstring của backfill), rồi:
-python3 $R/backfill_excluded_value.py --price-csv <csv mới> --out-dir data/loss_brake
-cp $R/seed/managed_sleeve_flows.json $R/seed/episodes.json data/loss_brake/
-python3 mike/bin/nav_loss_brake_monitor.py --replay      # phải ra đúng bảng trong $R/replay_full_history.txt
-```
+## Cài lần đầu
+`kb/ops_runbook.md` mục "Phanh lỗ NAV" → "Cài lần đầu" (đề xuất: `kb/ops_runbook.lossbrake.md.proposed`).
+Cron đề xuất: `kb/cron_registry.md.proposed`.

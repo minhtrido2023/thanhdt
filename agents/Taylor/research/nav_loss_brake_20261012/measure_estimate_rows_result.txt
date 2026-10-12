@@ -1,0 +1,57 @@
+
+=== SpaceX: 70 dòng · 8 dòng ước tính đo được · 58 dòng thật làm đối chứng · bỏ 4
+   bỏ 2026-07-02: dòng thật không phải giá chốt (2026-07-02T09:46:35)
+   bỏ 2026-07-03: dnse_raw_2026-07-03.jsonl không có bản ghi positions nào của account 0
+   bỏ 2026-08-24: dòng thật không phải giá chốt (2026-08-24T04:49:59)
+   bỏ 2026-08-31: không phải phiên
+  (1) ĐỐI CHỨNG — |KL×BQ Price − mtm_stock dòng thật| / NAV trên 58 ngày có dòng thật:
+      trung vị 0.000% · p90 0.038% · p95 0.038% · lớn nhất 7.972%
+        2026-08-05: BQ−dòng +7.972% NAV · marketPrice−dòng +0.000% NAV
+        2026-09-09: BQ−dòng +0.073% NAV · marketPrice−dòng +0.061% NAV
+        2026-09-14: BQ−dòng -0.038% NAV · marketPrice−dòng -0.024% NAV
+        2026-09-11: BQ−dòng -0.038% NAV · marketPrice−dòng -0.007% NAV
+        2026-09-10: BQ−dòng -0.038% NAV · marketPrice−dòng +0.000% NAV
+      số ngày lệch > 0,5% NAV: 1/58 · > 1% NAV: 1/58 · > 2% NAV: 1/58
+  (2) DÒNG ƯỚC TÍNH — so với định giá marketPrice của broker (cùng bản ghi positions):
+        2026-07-21: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng +0.228% NAV
+        2026-07-22: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng -0.171% NAV
+        2026-08-10: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng -0.932% NAV
+        2026-08-25: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng +0.116% NAV
+        2026-08-27: KL×BQ Price−dòng +0.159% NAV (kiểm tái lập) · marketPrice−dòng -0.067% NAV
+        2026-09-21: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng -0.409% NAV
+        2026-09-23: KL×BQ Price−dòng +0.810% NAV (kiểm tái lập) · marketPrice−dòng -0.075% NAV
+        2026-10-01: KL×BQ Price−dòng +0.044% NAV (kiểm tái lập) · marketPrice−dòng +0.042% NAV
+      |marketPrice − dòng ước tính| / NAV: trung vị 0.143% · lớn nhất 0.932%
+
+=== ZaloPay: 67 dòng · 6 dòng ước tính đo được · 58 dòng thật làm đối chứng · bỏ 3
+   bỏ 2026-07-27: dòng thật không phải giá chốt (2026-07-28T09:15:15)
+   bỏ 2026-08-24: dòng thật không phải giá chốt (2026-08-24T04:50:08)
+   bỏ 2026-08-31: không phải phiên
+  (1) ĐỐI CHỨNG — |KL×BQ Price − mtm_stock dòng thật| / NAV trên 58 ngày có dòng thật:
+      trung vị 0.000% · p90 0.020% · p95 0.021% · lớn nhất 5.028%
+        2026-08-05: BQ−dòng +5.028% NAV · marketPrice−dòng +0.000% NAV
+        2026-07-14: BQ−dòng +0.043% NAV · marketPrice−dòng +0.043% NAV
+        2026-09-09: BQ−dòng +0.029% NAV · marketPrice−dòng +0.041% NAV
+        2026-10-08: BQ−dòng -0.021% NAV · marketPrice−dòng -0.062% NAV
+        2026-10-06: BQ−dòng -0.020% NAV · marketPrice−dòng -0.193% NAV
+      số ngày lệch > 0,5% NAV: 1/58 · > 1% NAV: 1/58 · > 2% NAV: 1/58
+  (2) DÒNG ƯỚC TÍNH — so với định giá marketPrice của broker (cùng bản ghi positions):
+        2026-08-07: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng +0.000% NAV
+        2026-08-10: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng +0.046% NAV
+        2026-08-25: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng +0.065% NAV
+        2026-08-27: KL×BQ Price−dòng +0.066% NAV (kiểm tái lập) · marketPrice−dòng -0.040% NAV
+        2026-09-21: KL×BQ Price−dòng +0.000% NAV (kiểm tái lập) · marketPrice−dòng -0.216% NAV
+        2026-09-23: KL×BQ Price−dòng +0.909% NAV (kiểm tái lập) · marketPrice−dòng -0.043% NAV
+      |marketPrice − dòng ước tính| / NAV: trung vị 0.044% · lớn nhất 0.216%
+
+=== (3) Nếu chỉ đẩy tin khi 'không có số' HOẶC 'tạm tính cách ngưỡng dưới X điểm %' — đếm trên lịch sử tới 2026-10-09
+  SpaceX: 69 phiên · 20 phiên kêu = 14 phiên CHỈ vì cờ nav_is_estimate (đều có số tạm tính) + 4 phiên có ít nhất một phanh 'không có số' + 2 phiên có số tạm tính vì lý do khác (giờ chụp / thiếu phiên trước)
+     khoảng cách tới ngưỡng của số tạm tính ở 14 phiên đó: nhỏ nhất 3.15pp · trung vị 4.97pp
+     X = 1pp ⇒ còn 0/14 phiên phải đẩy tin
+     X = 2pp ⇒ còn 0/14 phiên phải đẩy tin
+     X = 3pp ⇒ còn 0/14 phiên phải đẩy tin
+  ZaloPay: 66 phiên · 15 phiên kêu = 9 phiên CHỈ vì cờ nav_is_estimate (đều có số tạm tính) + 2 phiên có ít nhất một phanh 'không có số' + 4 phiên có số tạm tính vì lý do khác (giờ chụp / thiếu phiên trước)
+     khoảng cách tới ngưỡng của số tạm tính ở 9 phiên đó: nhỏ nhất 4.55pp · trung vị 5.10pp
+     X = 1pp ⇒ còn 0/9 phiên phải đẩy tin
+     X = 2pp ⇒ còn 0/9 phiên phải đẩy tin
+     X = 3pp ⇒ còn 0/9 phiên phải đẩy tin

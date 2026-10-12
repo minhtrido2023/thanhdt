@@ -1,44 +1,116 @@
-M01 daily: <= → <                                    CHẾT  B1 đúng −5,00% ⇒ BREACH  { | B1 đúng −5,00% ⇒ BREACH · 
-M02 daily: bỏ EPS                                    CHẾT  B4b vẫn BREACH nhờ EPS  {'
-M03 drawdown: <= → <                                 CHẾT  C1 đúng −25,00% ⇒ BREACH  
-M04 episode: <= → <                                  CHẾT  D1 đúng −15,00% từ điểm và
-M05 DD_THRESHOLD 0.25 → 0.20                         CHẾT  A5 DD_THRESHOLD = 0.25 (ri | C2 −24,999999% ⇒ OK  {'sta | P2 ...drawdown vẫn đo  {'s
-M06 bỏ lọc account ở raw_positions                   CHẾT  I3 Z: giá trị mã loại trừ  | I6 Z: nhưng cũng KHÔNG coi | I10 sau khi KHAI ⇒ đo được
-M07 daily: bỏ kiểm cờ ước tính                       CHẾT  F1 dòng nav_is_estimate ⇒ 
-M08 drawdown: bỏ kiểm cờ ước tính                    CHẾT  F1 dòng nav_is_estimate ⇒ 
-M09 không ghi dấu đã gửi                             CHẾT  
-M10 gửi lỗi vẫn đánh dấu                             CHẾT  K7 gửi lỗi ⇒ KHÔNG đánh dấ | K8 lượt sau gửi được ⇒ gửi | K9 mất status.json nhưng d
-M11 dedupe: gửi lại mọi lần                          CHẾT  K3 chạy lại cùng phiên: KH | K4 chạy lại sáng hôm sau ( | K5 phiên sau còn vi phạm ( | K8 lượt sau gửi được ⇒ gửi
-M12 basis luôn total                                 CHẾT  I1 S đo trên NAV toàn tài  | I3 Z: giá trị mã loại trừ  | I5 Z: KHÔNG có phanh nào B | I6 Z: nhưng cũng KHÔNG coi
-M13 bẫy sleeve: bỏ điều kiện đã khai                 CHẾT  I10 sau khi KHAI ⇒ đo được
-M14 bẫy sleeve: tắt hẳn                              CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo  
-M15 bẫy giá: bỏ số mũ n phiên                        CHẾT  T3 giá mã loại trừ +14% qu
-M16 bẫy KL: tắt                                      CHẾT  J1 KL mã loại trừ đổi mà c
-M17 bẫy lịch corp-action: tắt                        CHẾT  T1 lịch corp-action có sự 
-M18 thiếu phiên liền trước: bỏ kiểm                  CHẾT  P1 thiếu dòng phiên liền t
-M19 mốc so: luôn dòng liền trước                     CHẾT  O2 mốc so = dòng của phiên
-M20 health: bỏ kiểm phiên                            CHẾT  H3 monitor không chạy tối  | H5 thứ Bảy: phiên phải có 
-M21 bỏ dòng tiền nạp/rút                             CHẾT  E1 rút 150tr (NAV 200→50)  | E2 nạp không đẩy đỉnh lên  | E5 dòng tiền TREO (chưa dò
-M22 sổ dòng tiền thiếu ⇒ coi như rỗng                CHẾT  E4 MẤT sổ dòng tiền ⇒ KHÔN
-M23 bản duyệt thu hồi vẫn mở                         CHẾT  D14 bản duyệt đã thu hồi ⇒
-M24 mở episode không cần vị thế gói vay              CHẾT  D11 có bản duyệt nhưng KHÔ | D12 ...và ghi chú nói rõ  
-M25 vị thế gói vay không episode: im                 CHẾT  D13 có vị thế gói vay mà K
-M26 thiếu ngưỡng ⇒ mặc định −5%                      CHẾT  A6 thiếu khoá daily ⇒ dail | A7 lý do nêu đúng tên khoá | A8 thiếu khoá ⇒ in ❌ + rc≠ | A11 daily kiểu bool ⇒ lỗi
-M27 lý do thiếu dòng: bỏ đọc file chặn               CHẾT  G3 có file chặn ⇒ lý do tr
-M28 chuỗi mã loại trừ: cho ghi đè                    CHẾT  R1b _append_excluded tự nó | R5 lệch 0,05% (trong dung 
-M29 active_nav sai ngày vẫn dùng                     CHẾT  R2 đang giữ mã loại trừ mà
-M30 không so KL hai nguồn                            CHẾT  R3 KL lệch giữa dnse_raw v | R4 active_nav.total_nav lệ
-M31 từ chối gửi thật khi không live: bỏ              CHẾT  K6 không sink + data-root 
-M32 expected_session: dùng ngày UTC                  CHẾT  N4 17:30 UTC thứ Hai = 00:
-M33 NAV_EXPECTED_AFTER 21:50 → 00:00                 CHẾT  K4 chạy lại sáng hôm sau ( | K5 phiên sau còn vi phạm ( | K8 lượt sau gửi được ⇒ gửi | K9 mất status.json nhưng d
-M34 episode: điểm vào = ngày mở (không phải phiên trước) CHẾT  D1 đúng −15,00% từ điểm và | D2 điểm vào = chốt phiên T
-M35 đóng episode không cần lý do                     CHẾT  
-M36 episode đã đóng vẫn tính                         CHẾT  D8 sau khi đóng ⇒ 'không c
-M37 dòng tiền treo: bỏ qua                           CHẾT  E5 dòng tiền TREO (chưa dò
-M38 tin cảnh báo: bỏ lệnh BOT_STOP                   CHẾT  B1 đúng −5,00% ⇒ BREACH ·  | B3 −5,000001% ⇒ BREACH · t
-M39 EXCL_PRICE_BAND 7,5% → 30%                       CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo  
-M41 bỏ đối chiếu total_nav hai file                  CHẾT  R4 active_nav.total_nav lệ
-M42 NAV_MATCH_TOL 0,1% → 0,01%                       CHẾT  R5 lệch 0,05% (trong dung 
-M40 chưa có chuỗi mã loại trừ ⇒ lặng lẽ coi 0        SỐNG  nav_loss_brake_monitor_selfcheck: 110 PASS / 0 FAIL (TZ=Asia/Ho_Chi_Minh)
+M01 so ngưỡng: <= → <                                      CHẾT  B1 đúng −5,00% ⇒ BREACH  { | B1 đúng −5,00% ⇒ BREACH ·  | t_daily_edges chạy hết khô | B4b vẫn BREACH nhờ EPS  {'
+M02/X43/X44 bỏ EPS                                         CHẾT  B4b vẫn BREACH nhờ EPS  {'
+M03 episode dùng nhầm ngưỡng daily                         CHẾT  D10 −14,999999% ⇒ OK  {'st | G25 dòng ước tính ⇒ phanh 
+M05 DD_THRESHOLD 0.25 → 0.20                               CHẾT  A5 DD_THRESHOLD = 0.25 (ri | C2 −24,999999% ⇒ OK  {'sta
+M06 positions: lấy bản ghi account nào cũng được           CHẾT  R2 đang giữ mã loại trừ mà | R3 KL lệch giữa dnse_raw v | R4 active_nav.total_nav lệ | R5 lệch 0,05% (trong dung 
+M07 bỏ kiểm cờ ước tính (mọi phanh)                        CHẾT  F1 dòng nav_is_estimate ⇒  | t_fail_loud chạy hết không | W2 dòng ước tính −8% ⇒ BRE | W4 tin đỏ: đầu tin TẠM TÍN
+M07b daily: bỏ kiểm MỐC SO                                 CHẾT  F4 hôm sau: mốc so là dòng | V12 hôm sau: MỐC SO là dòn
+M07c daily: bỏ kiểm dòng của phiên                         CHẾT  F1 dòng nav_is_estimate ⇒  | t_fail_loud chạy hết không | V10 dòng D2 chụp 04:49 ⇒ l | V14 dòng chụp 09:15 HÔM SA
+M08 drawdown: bỏ kiểm dòng của phiên                       CHẾT  F1 dòng nav_is_estimate ⇒  | V11 ...lỗ từ đỉnh cũng vậy
+X02 episode: bỏ kiểm dòng của phiên (cờ ước tính)          CHẾT  G25 dòng ước tính ⇒ phanh  | G26 ...ước tính −16% từ đi
+M09 không ghi dấu đã gửi                                   CHẾT  t_provisional_breach chạy  | t_idempotent chạy hết khôn | t_monitor_failures chạy hế
+M10 gửi lỗi vẫn đánh dấu                                   CHẾT  K7 gửi lỗi ⇒ KHÔNG đánh dấ | K8 lượt sau gửi được ⇒ gửi | K9 mất status.json nhưng d
+M11 dedupe: gửi lại mọi lần                                CHẾT  W8 chạy lại: không gửi trù | K3 chạy lại cùng phiên: KH | K4 chạy lại sáng hôm sau ( | K5 phiên sau còn vi phạm (
+M12 basis luôn total                                       CHẾT  I1 S đo trên NAV toàn tài  | I3 Z: giá trị mã loại trừ  | I5 Z: KHÔNG có phanh nào B | I6 Z: nhưng cũng KHÔNG coi
+M13 bẫy sleeve: bỏ điều kiện đã khai                       CHẾT  I10 sau khi KHAI ⇒ đo được | t_two_accounts_and_sleeve  | Y3 khai market_only cho ng | Z8 lấy bản ghi positions C
+M14 bẫy sleeve: tắt hẳn                                    CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo   | t_two_accounts_and_sleeve 
+X05 bẫy chỉ chặn đúng một ngày                             CHẾT  Y2 bẫy chưa khai CHẶN TIẾP
+M15 bẫy giá: bỏ số mũ n phiên                              CHẾT  T3 giá mã loại trừ +14% qu
+X21a bẫy giá: bỏ cận TRÊN                                  CHẾT  Y10 giá mã loại trừ +20% t | Y11 chữ in ra không làm hỏ | Y12 chưa khai sàn ⇒ dùng b | Y14 sàn khai không nhận ra
+X21b bẫy giá: bỏ cận DƯỚI                                  CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo   | t_two_accounts_and_sleeve 
+M39 biên HOSE 7% → 30%                                     CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo   | t_two_accounts_and_sleeve 
+N8a sàn lạ/chưa khai ⇒ biên RỘNG nhất                      CHẾT  Y11 chữ in ra không làm hỏ | Y12 chưa khai sàn ⇒ dùng b | Y14 sàn khai không nhận ra
+N8b bỏ qua sàn đã khai                                     CHẾT  Y13 mã khai sàn UPCOM: +12
+M16 bẫy KL: tắt                                            CHẾT  J1 KL mã loại trừ đổi mà c | Z8 lấy bản ghi positions C
+M17 bẫy lịch corp-action: bỏ sự kiện                       CHẾT  T1 lịch corp-action có sự  | Y7 sự kiện rơi vào phiên K
+B2a thiếu snapshot corp-action ⇒ coi là sạch               CHẾT  Y1 đang giữ mã loại trừ mà | Y2 bẫy chưa khai CHẶN TIẾP | Y8 ...và thiếu snapshot củ
+X08 dùng snapshot usable=False                             CHẾT  Y4 snapshot usable=False ⇒ | Y5 snapshot usable=False k
+X07 bỏ lọc ngày sự kiện                                    CHẾT  Y6 sự kiện có ngày hiệu lự
+X07b bỏ lọc mã sự kiện                                     CHẾT  T2 sự kiện của mã KHÔNG lo
+B2b chỉ quét lịch của ngày dòng hiện tại                   CHẾT  Y7 sự kiện rơi vào phiên K | Y8 ...và thiếu snapshot củ
+B2c không giữ mã loại trừ vẫn đòi lịch                     CHẾT  Q2 không giữ mã loại trừ n | Q4 chuỗi bắt đầu MUỘN hơn  | Q5 ...và dòng ops_health b | Q6 vá xong dòng mốc khởi đ
+M18 thiếu phiên liền trước: bỏ kiểm                        CHẾT  P1 thiếu dòng phiên liền t | P3 số gộp nhiều phiên mà Đ
+M19 mốc so: luôn dòng liền trước                           CHẾT  O2 mốc so = dòng của phiên
+M20 health: bỏ kiểm phiên                                  CHẾT  H3 monitor không chạy tối  | H5 thứ Bảy: phiên phải có 
+M21 bỏ dòng tiền nạp/rút (NAV tổng)                        CHẾT  E1 rút 150tr (NAV 200→50)  | E2 nạp không đẩy đỉnh lên  | E5 dòng tiền TREO (chưa dò
+M22 sổ dòng tiền thiếu ⇒ coi như rỗng                      CHẾT  E4 MẤT sổ dòng tiền ⇒ KHÔN
+X28 bỏ nạp/rút ngoài khỏi chuỗi quản lý                    CHẾT  Z1 RÚT 300tr khỏi account 
+X28b bỏ kiểm dòng tiền treo ở chuỗi quản lý                CHẾT  Z3 dòng tiền GIỮA hai phần
+M37 dòng tiền treo (NAV tổng): bỏ qua                      CHẾT  E5 dòng tiền TREO (chưa dò
+X29 thiếu managed_sleeve_flows.json coi như rỗng           CHẾT  Z4 MẤT managed_sleeve_flow
+X33 nuốt lỗi khi ghi chuỗi mã loại trừ                     CHẾT  Z7 GHI chuỗi mã loại trừ l
+X46 account nổ ⇒ overall OK                                CHẾT  X7 cấu hình account không  | X12 MỘT account nổ khi đo 
+X50 active_nav thiếu giá mã loại trừ coi là 0              CHẾT  Z5 active_nav không có giá | Z6 active_nav của ACCOUNT 
+X09 health: rc bỏ qua send_error                           CHẾT  K7b gửi lỗi ⇒ dòng ops_hea
+X54 health: không in lỗi gửi                               CHẾT  K7b gửi lỗi ⇒ dòng ops_hea
+N11 health: monitor lỗi vẫn ra rc như phanh                CHẾT  K7b gửi lỗi ⇒ dòng ops_hea | X10 dòng ops_health: rc=3  | X14 ops_health: account nổ
+X18 không lọc openQuantity>0                               CHẾT  Z8 lấy bản ghi positions C | G24 dòng gói vay openQuant
+X19 lấy positions ĐẦU thay vì cuối                         CHẾT  D1 đúng −15,00% từ điểm và | D2 điểm vào = chốt phiên T | D4 episode được GHI với bằ | D5 chạy lại không mở trùng
+X20 bỏ kiểm account của active_nav                         CHẾT  Z6 active_nav của ACCOUNT 
+M29 active_nav sai ngày vẫn dùng                           CHẾT  R2 đang giữ mã loại trừ mà
+M30 không so KL hai nguồn                                  CHẾT  R3 KL lệch giữa dnse_raw v | R4 active_nav.total_nav lệ
+M41 bỏ đối chiếu total_nav hai file                        CHẾT  R4 active_nav.total_nav lệ
+M42 NAV_MATCH_TOL 0,1% → 0,01%                             CHẾT  R5 lệch 0,05% (trong dung 
+M40 chưa có chuỗi mã loại trừ ⇒ lặng lẽ coi 0              CHẾT  Q1 chưa có chuỗi mã loại t
+M28 chuỗi mã loại trừ: cho ghi đè                          CHẾT  R1b _append_excluded tự nó | R5 lệch 0,05% (trong dung 
+N4 không áp bản đính chính                                 CHẾT  Z12 đính chính hợp lệ ⇒ gi
+X45a tắt cảnh báo mốc muộn                                 CHẾT  Q3 ...có cảnh báo chuỗi bắ
+X45b tắt cảnh báo ngày thiếu                               CHẾT  Y9 chuỗi có ngày thiếu ⇒ c
+B3 chuỗi bắt đầu muộn vẫn đo đỉnh như thường               CHẾT  Q4 chuỗi bắt đầu MUỘN hơn  | Q5 ...và dòng ops_health b
+B1a bỏ kiểm giờ chụp                                       CHẾT  V10 dòng D2 chụp 04:49 ⇒ l | V11 ...lỗ từ đỉnh cũng vậy | V12 hôm sau: MỐC SO là dòn | V14 dòng chụp 09:15 HÔM SA
+B1b bỏ cận dưới (chụp trước đóng cửa)                      CHẾT  V2 14:44:59 ⇒ trước giờ đó | V10 dòng D2 chụp 04:49 ⇒ l | V11 ...lỗ từ đỉnh cũng vậy | V12 hôm sau: MỐC SO là dòn
+B1c bỏ cận trên (chụp sau mở cửa phiên kế)                 CHẾT  V4 09:00:00 phiên kế ⇒ đã  | V6 thứ Sáu chụp 09:00 thứ  | V14 dòng chụp 09:15 HÔM SA
+B1d cận dưới lệch biên                                     CHẾT  V1 14:45:00 đúng ngày ⇒ là | V8 có múi giờ: 07:45Z = 14
+B1e cận trên lệch biên                                     CHẾT  V4 09:00:00 phiên kế ⇒ đã  | V6 thứ Sáu chụp 09:00 thứ 
+B1f cửa sổ đóng ở 09:00 của NGÀY LỊCH kế (không phải phiên kế) CHẾT  V5 thứ Sáu chụp sáng thứ B
+B6a tạm tính vượt ngưỡng vẫn là KHÔNG ĐO ĐƯỢC              CHẾT  P3 số gộp nhiều phiên mà Đ | W2 dòng ước tính −8% ⇒ BRE | W3 ...và GỬI tin mới dù ph | W4 tin đỏ: đầu tin TẠM TÍN
+B6b tin tạm tính vượt ngưỡng không có lệnh BOT_STOP        CHẾT  W4 tin đỏ: đầu tin TẠM TÍN
+B6c tạm tính vượt ngưỡng không gửi                         CHẾT  W2 dòng ước tính −8% ⇒ BRE | W3 ...và GỬI tin mới dù ph | W4 tin đỏ: đầu tin TẠM TÍN | W5 khoá chống-trùng mang t
+B6d đầu tin tạm tính vượt ngưỡng vẫn vàng                  CHẾT  W4 tin đỏ: đầu tin TẠM TÍN
+B4a episode mở mà hết vị thế vay: im                       CHẾT  G1 episode đang mở mà brok
+B4b bản duyệt mới trong episode: không nêu                 CHẾT  G2 bản duyệt MỚI trong lúc
+B4c bản duyệt mới: không lấy số xấu nhất                   CHẾT  G2 bản duyệt MỚI trong lúc
+B4d --ack-approval không có tác dụng                       CHẾT  G5 người xác nhận 'cùng ep
+B5a không đọc được positions ⇒ 'không có episode'          CHẾT  G7 hôm sau KHÔNG có dnse_r | G8 positions chỉ có bản ch
+B5b positions chụp trước phiên vẫn dùng                    CHẾT  Z9 positions chỉ có bản ch | G8 positions chỉ có bản ch | G10 ngày duyệt không đọc đ | G11 mở tay thiếu --opened-
+B5c không khớp vị thế ở phiên kế                           CHẾT  D12 ...và ghi chú nói rõ   | G17 vị thế xuất hiện ở phi | G18 chạy tiếp không mở trù
+B5d episode đang mở mà không đọc được positions: im        CHẾT  G1b episode đang mở mà KHÔ
+M25 vị thế gói vay không episode: im                       CHẾT  D13 có vị thế gói vay mà K | G6 vị thế gói vay không có | G10 ngày duyệt không đọc đ | G21 đóng trong ngày D ⇒ từ
+M23 bản duyệt thu hồi vẫn mở                               CHẾT  D14 bản duyệt đã thu hồi ⇒ | G23 revoked='true' ⇒ ĐÃ th | G23 revoked=1 ⇒ ĐÃ thu hồi | G23 revoked='yes' ⇒ ĐÃ thu
+N5 revoked: chuỗi 'false' coi là đã thu hồi                CHẾT  G23 revoked='false' ⇒ CHƯA
+N5b revoked: chỉ nhận đúng True                            CHẾT  G23 revoked='true' ⇒ ĐÃ th | G23 revoked=1 ⇒ ĐÃ thu hồi | G23 revoked='yes' ⇒ ĐÃ thu
+M24 mở episode không cần vị thế gói vay                    CHẾT  D11 có bản duyệt nhưng KHÔ | D12 ...và ghi chú nói rõ   | G16 tối ngày duyệt chưa có | G17 vị thế xuất hiện ở phi
+M34 episode: điểm vào = ngày mở                            CHẾT  D1 đúng −15,00% từ điểm và | D2 điểm vào = chốt phiên T | G2 bản duyệt MỚI trong lúc | G5 người xác nhận 'cùng ep
+M36 episode đã đóng vẫn tính                               CHẾT  D8 sau khi đóng ⇒ 'không c | G21 đóng trong ngày D ⇒ từ
+X14 ngày đóng dùng <=                                      CHẾT  G21 đóng trong ngày D ⇒ từ
+X15 bỏ kiểm account trong bản duyệt                        CHẾT  G19 file duyệt mang tên L 
+X16 bản duyệt tương lai vẫn mở                             CHẾT  G20 bản duyệt ngày TƯƠNG L
+X17 bản duyệt cũ hơn episode đã đóng vẫn mở                CHẾT  G22 bản duyệt cũ hơn một e
+M35 đóng/mở/đính chính không cần người + lý do             CHẾT  t_episode chạy hết không n | t_managed_invariants chạy  | t_episode_guards chạy hết 
+B5e --open-episode cho phép mở chồng                       CHẾT  G15 mở tay khi đang có epi
+B5f --open-episode nhận ngày tương lai                     CHẾT  G12 mở tay với ngày TƯƠNG  | G13 mở tay hợp lệ ⇒ ghi ep | G14 ...và phanh −15% đo đư
+M26 thiếu ngưỡng ⇒ mặc định −5%                            CHẾT  A6 thiếu khoá daily ⇒ dail | A7 lý do nêu đúng tên khoá | A8 thiếu khoá ⇒ in ❌ + rc≠ | A11 daily kiểu bool ⇒ lỗi
+X51 nhận ngưỡng daily dương                                CHẾT  A15 daily = 0.05 (không âm | A15 daily = 0 (không âm th
+N6a bỏ kiểm khoảng ngưỡng episode (trigger)                CHẾT  A12 trigger -0.45 (ngoài k
+N6b regex lỏng như cũ                                      CHẾT  A12 trigger 1-0.15 (dính s
+N6c bỏ qua khoá số                                         CHẾT  A13 có khoá SỐ ⇒ dùng khoá | A14 khoá số 0.15 ⇒ lỗi (kh | A14 khoá số -0.6 ⇒ lỗi (kh | A14 khoá số True ⇒ lỗi (kh
+N6d khoá số: bỏ kiểm khoảng                                CHẾT  A14 khoá số 0.15 ⇒ lỗi (kh | A14 khoá số -0.6 ⇒ lỗi (kh
+N6e bỏ đối chiếu (-NN%) trong trigger                      CHẾT  A12 trigger -0.15 nhưng gh
+M27 lý do thiếu dòng: bỏ đọc file chặn                     CHẾT  G3 có file chặn ⇒ lý do tr
+N10 lý do sai khi phiên là dòng đầu chuỗi                  CHẾT  N16 phiên = mốc đầu chuỗi 
+M31 từ chối gửi thật khi không live: bỏ                    CHẾT  K6 không sink + data-root  | K7b gửi lỗi ⇒ dòng ops_hea
+M32 expected_session: dùng ngày UTC                        CHẾT  W2 dòng ước tính −8% ⇒ BRE | W3 ...và GỬI tin mới dù ph | W4 tin đỏ: đầu tin TẠM TÍN | W5 khoá chống-trùng mang t
+M33 NAV_EXPECTED_AFTER 21:50 → 00:00                       CHẾT  W2 dòng ước tính −8% ⇒ BRE | W4 tin đỏ: đầu tin TẠM TÍN | W5 khoá chống-trùng mang t | W7 dòng ops_health: rc=1 +
+M38 tin cảnh báo: bỏ lệnh BOT_STOP                         CHẾT  B1 đúng −5,00% ⇒ BREACH ·  | B3 −5,000001% ⇒ BREACH · t | W4 tin đỏ: đầu tin TẠM TÍN
+B7a monitor nổ: không gửi tin                              CHẾT  X8 ...và MỘT tin 'monitor  | X9 chạy lại cùng lỗi: khôn
+B7b monitor nổ: không ghi status                           CHẾT  X7 cấu hình account không  | X10 dòng ops_health: rc=3 
+B7c sổ đã-gửi hỏng ⇒ nổ như cũ                             CHẾT  X1 sổ đã-gửi cụt, hai acco | t_monitor_failures chạy hế
+B7d sổ episode hỏng ⇒ nổ cả lượt                           CHẾT  X5 sổ episode cụt ⇒ hai ph
+B7e monitor nổ: không bắt ở main                           CHẾT  t_monitor_failures chạy hế
+B7f sổ đã-gửi hỏng: không cất bản hỏng                     CHẾT  X3 sổ được dựng lại hợp lệ
+B9 không ghi nhật ký lượt chạy                             CHẾT  t_idempotent chạy hết khôn | t_monitor_failures chạy hế
+N1 --date phiên cũ vẫn ghi/gửi                             CHẾT  N10 --date khác phiên phải | N12b chạy khô KHÔNG ghi ch
+N1b chạy khô vẫn ghi chuỗi/episode                         CHẾT  N12b chạy khô KHÔNG ghi ch
+N2 không khoá                                              CHẾT  N13 lượt khác đang giữ kho | N14 --close-episode cũng p
 
-41/42 mutant chết. Còn sống: ['M40 chưa có chuỗi mã loại trừ ⇒ lặng lẽ coi 0']
+114/114 mutant chết. Còn sống: không
