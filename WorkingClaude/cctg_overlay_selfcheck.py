@@ -14,6 +14,16 @@ import pandas as pd
 import cctg_rate_vn as cctg
 import deposit_rate_vn as dep
 
+# Hermetic by default: point BOTH event-CSV paths at files that do not exist, so every case below
+# sees only the frozen anchors (+ whatever fixture it injects itself) and never today's live
+# data/*_rate_vn_events.csv. Without this, T5 (which isolated only dep) went red the day the
+# 08:08 cron appended a fresh CCTG anchor (2026-10-12) -> asof 2026-11-20 no longer stale.
+# No case here deliberately reads live data. Cases that inject a fixture override the path
+# themselves and restore to these isolated paths (not the live ones).
+_isodir = tempfile.mkdtemp(prefix="cctg_selfcheck_iso_")
+dep._EVENTS_CSV = os.path.join(_isodir, "absent_deposit_rate_vn_events.csv")
+cctg._EVENTS_CSV = os.path.join(_isodir, "absent_cctg_rate_vn_events.csv")
+
 N = 0
 
 
@@ -64,7 +74,8 @@ try:
     check("T4b effective_deposit_rate: big4_rate_pct=6.5 preserved", abs(r4b["big4_rate_pct"] - 6.5) < 1e-9)
     check("T4b effective_deposit_rate: cctg_rate_pct=7.5 preserved", abs(r4b["cctg_rate_pct"] - 7.5) < 1e-9)
 
-    # T5: CCTG present but STALE (asof far enough past the single CCTG anchor) -> Big-4's OWN
+    # T5: CCTG present but STALE (asof far enough past the single CCTG anchor; cctg._EVENTS_CSV is
+    # isolated at module top, so only the frozen 2026-09-30 anchor exists) -> Big-4's OWN
     # reading (6.5%) drives `rate`, even though CCTG's last-known value (7.5%, exactly == the 7.5%
     # threshold) is higher. Round-6 fix (hướng B, 2026-10-01): a stale CCTG reading now ALWAYS
     # forces armed=True + stale=True regardless of whether its last-known value was <=, ==, or >
@@ -507,4 +518,5 @@ os.environ.pop("TZ", None)
 r_tz_b = dep.macro_killswitch_a_status(asof="2026-10-01")
 check("T_tz TZ-independent", r_tz_a == r_tz_b)
 
+shutil.rmtree(_isodir, ignore_errors=True)
 print(f"\n=== {N} assertions PASS ===")

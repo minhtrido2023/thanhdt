@@ -839,6 +839,54 @@ check("B11c exactly-at-tolerance decline (0.10pp) tagged within_noise_band (boun
 print(f"Part B done, {N} checks total so far, {len(FAILS)} fail(s)")
 
 
+# --- A-ICT: real_today (append_deposit_rate.py:318) is pinned to ICT by a FIXED clock, not by the
+# host TZ or the hour this selfcheck happens to run. adr.datetime is swapped for a subclass whose
+# now(tz) returns a fixed UTC instant converted to tz, at the two instants straddling ICT midnight
+# to the minute (2026-10-11 16:59Z = 23:59 ICT -> 10-11; 17:00Z = 00:00 ICT 10-12 -> 10-12). A
+# dispatched agent's --collected may only equal real_today, so acceptance/refusal of the two dates
+# proves which date real_today resolved to. Every call exits BEFORE any write: accepted dates fall
+# through to the next guard, `--rate 99` (out of range -> sys.exit), refused dates exit at the
+# --collected guard itself -- and adr.CSV_PATH is a throwaway file anyway. Reverting to
+# date.today(), or to ZoneInfo("UTC") / ZoneInfo("Asia/Tokyo"), flips at least one of the 4 cases
+# whatever TZ the process runs under (Asia/Bangkok, +7 no DST, is identical to ICT: not a gap). ---
+_orig_adr_datetime = adr.datetime
+
+
+def _fixed_clock(utc_iso):
+    fixed = datetime.fromisoformat(utc_iso).replace(tzinfo=ZoneInfo("UTC"))
+
+    class _Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return fixed.astimezone(tz) if tz is not None else fixed.replace(tzinfo=None)
+    return _Clock
+
+
+tmpdir, tmp_csv = _fresh_tmpdir()
+adr.CSV_PATH = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+try:
+    for utc_iso, want, other in (("2026-10-11T16:59", "2026-10-11", "2026-10-12"),
+                                 ("2026-10-11T17:00", "2026-10-12", "2026-10-11")):
+        adr.datetime = _fixed_clock(utc_iso)
+        for coll, accepted in ((want, True), (other, False)):
+            rc, msg = _run_append_dep(
+                ["--rate", "99", "--effective", want, "--source", "web_crosscheck_auto",
+                 "--collected", coll, "--note", "test"], job_id="job123")
+            msg = msg or ""
+            if accepted:
+                ok = rc != 0 and "--rate 99.0 out of sane range" in msg
+            else:
+                ok = rc != 0 and f"--collected '{coll}' is refused" in msg and f"({want})" in msg
+            check(f"A-ICT clock pinned {utc_iso}Z: --collected {coll} "
+                  f"{'accepted (reaches rate guard)' if accepted else f'refused, real_today={want}'}", ok)
+    check("A-ICT nothing written (every call exits before the CSV write)",
+          _row_count_at(adr.CSV_PATH) == 0)
+finally:
+    adr.datetime = _orig_adr_datetime
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+
 # ============================================================================
 # Part C — TZ environment matrix note (actual multi-TZ run happens via shell wrapper below;
 # this in-process check just confirms every date comparison exercised above used an explicit
@@ -848,8 +896,9 @@ print("=== Part C: TZ sensitivity spot-check ===")
 import inspect
 src_trend = inspect.getsource(trend)
 # check_declines/check_staleness never call date.today() themselves (today is always a param) —
-# only main()/_heartbeat_lines read date.today(), and that's the one place a host-TZ difference
-# could matter in production; selfcheck covers it by calling check_staleness with an explicit date.
+# only main() resolves "today" (datetime.now(_ICT).date(), deposit_cctg_trend_check.py:227) and
+# passes it down to check_staleness/_heartbeat_lines; selfcheck covers it by calling
+# check_staleness with an explicit date.
 bare_calls_in_pure_fns = re.findall(r"def check_(?:declines|staleness).*?(?=\ndef |\Z)",
                                      src_trend, re.S)
 all_clean = all("date.today()" not in blk for blk in bare_calls_in_pure_fns)
