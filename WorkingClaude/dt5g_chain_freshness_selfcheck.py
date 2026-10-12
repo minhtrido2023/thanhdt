@@ -292,9 +292,12 @@ check("E4 healthcheck step is the step IMMEDIATELY before the publish step (afte
       e4_ok, f"step lines {hc_step + 1}/{pub_step + 1}")
 hc_blk = "\n".join(lines[hc_step:pub_step]) if 0 <= hc_step < pub_step else ""
 hc_code = "\n".join(ln for ln in hc_blk.splitlines() if not ln.lstrip().startswith("#"))
-check("E5 healthcheck is NON-FATAL (`||` guard, no die/exit in its step) and TIME-BOUNDED (timeout)",
-      e_ok and re.search(r'\btimeout\b[^|\n]*' + HC_CMD + r'\s*\|\|', lines[l_hc]) is not None
-      and not re.search(r'\b(die|exit)\b', hc_code), lines[l_hc].strip()[:90] if e_ok else "")
+_tm = re.search(r'\btimeout\s+-k\s+(\d+)\s+(\d+)\s+[^|\n]*' + HC_CMD + r'\s*\|\|', lines[l_hc]) if e_ok else None
+_k, _n = (int(_tm.group(1)), int(_tm.group(2))) if _tm else (-1, -1)
+check("E5 healthcheck is NON-FATAL (`||` guard, no die/exit in its step) and TIME-BOUNDED "
+      "(`timeout -k K N`, K>=1 so KILL always follows, 60<=N<=600: không tắt/không đụng chuỗi 19:00/không giết healthcheck sống)",
+      e_ok and _tm is not None and _k >= 1 and 60 <= _n <= 600
+      and not re.search(r'\b(die|exit)\b', hc_code), f"-k {_k} {_n}")
 set_ls = [ln for ln in lines if re.match(r'set\s+[-+]', ln)]
 check("E6 script does not enable errexit (`set -e` would turn healthcheck rc!=0 into an abort)",
       len(set_ls) == 1 and not re.search(r'\s-[a-zA-Z]*e', set_ls[0]), f"{set_ls}")
@@ -343,7 +346,7 @@ with tempfile.TemporaryDirectory() as sbx:
     put(os.path.join(sbin, "stubpy"), STUB_PY)
     put(os.path.join(sbin, "timeout"), STUB_TIMEOUT)
     for nm in ("notify.sh", "notify_thread.sh", "bq", "gcloud"):
-        put(os.path.join(sbin, nm), '#!/usr/bin/env bash\necho "$0" >> "$CALLS"\n')
+        put(os.path.join(sbin, nm), '#!/usr/bin/env bash\necho "$0" >> "$CALLS"\n[ -n "${NOTIFY_FAIL:-}" ] && exit 1\nexit 0\n')
     harness = os.path.join(sbx, "harness.sh")
     put(harness, "\n".join([
         "#!/usr/bin/env bash",
@@ -356,31 +359,47 @@ with tempfile.TemporaryDirectory() as sbx:
         "",
     ]))
 
-    def run_block(mode):
-        calls = os.path.join(sbx, f"calls_{mode}.log")
+    def run_block(mode, notify_fail=False):
+        calls = os.path.join(sbx, f"calls_{mode}{'_nf' if notify_fail else ''}.log")
         env = dict(os.environ, PATH=sbin + os.pathsep + "/usr/bin:/bin",
                    CALLS=calls, HC_MODE=mode, REAL_TIMEOUT=real_timeout)
+        if notify_fail:
+            env["NOTIFY_FAIL"] = "1"
         t0 = time.monotonic()
         r = subprocess.run(["bash", harness], cwd=sbx, env=env, capture_output=True,
                            text=True, timeout=120)
         got = [os.path.basename(c) for c in read(calls).split()] if os.path.exists(calls) else []
         return r, got, time.monotonic() - t0
 
-    want = ["macro_healthcheck.py", "publish_gated_state.py"]
-    for mode, label in (("rc0", "HEALTHY rc=0"), ("rc1", "DEGRADED rc=1"), ("rc2", "FAILED rc=2"),
-                        ("rc127", "interpreter/script hỏng rc=127"), ("kill", "bị SIGKILL"),
-                        ("hang", "TREO, timeout cắt")):
+    HC, PUB = "macro_healthcheck.py", "publish_gated_state.py"
+    NTF = ["notify.sh", "notify_thread.sh"]
+    # (mode, nhãn, notify?, nhãn bắt buộc, nhãn cấm)
+    modes = (("rc0", "HEALTHY rc=0", False, None, None),
+             ("rc1", "DEGRADED rc=1", False, "DEGRADED", "FAILED"),
+             ("rc2", "FAILED rc=2", False, "FAILED", "DEGRADED"),
+             ("rc124", "rc=124", True, "TIMEOUT", "DEGRADED"),
+             ("rc137", "rc=137", True, "TIMEOUT", "DEGRADED"),
+             ("rc127", "interpreter/script hỏng rc=127", True, "LỖI CHẠY", "TIMEOUT"),
+             ("kill", "bị SIGKILL", True, "TIMEOUT", "DEGRADED"),
+             ("hang", "TREO, timeout cắt", True, "TIMEOUT", "DEGRADED"))
+    for mode, label, notif, must, banned in modes:
         if not (safe and real_timeout):
             check(f"E7 [{label}] publish still runs", False, "block not runnable / no timeout binary")
             continue
-        r, got, dt = run_block(mode)
-        check(f"E7 [{label}] healthcheck called first, publish STILL runs, chain continues",
-              got == want and "CHAIN_CONTINUED" in r.stdout and r.returncode == 0 and dt < 10,
-              f"calls={got} rc={r.returncode} {dt:.1f}s")
+        want = [HC] + (NTF if notif else []) + [PUB]
+        for nf in ((False, True) if notif else (False,)):
+            r, got, dt = run_block(mode, nf)
+            tag = f"{label}{' + notify TỰ LỖI' if nf else ''}"
+            check(f"E7 [{tag}] healthcheck first, publish STILL runs, chain continues; "
+                  f"notify {'đúng 1 lần (notify.sh+notify_thread.sh)' if notif else '0 lần'}",
+                  got == want and "CHAIN_CONTINUED" in r.stdout and r.returncode == 0 and dt < 10,
+                  f"calls={got} rc={r.returncode} {dt:.1f}s")
         if mode != "rc0":
+            r, got, dt = run_block(mode)
             warn = re.findall(r"WARN: macro_healthcheck[^\n]*rc=[1-9][0-9]*", r.stdout)
-            check(f"E7 [{label}] failure is LOGGED with its rc, not silent", bool(warn),
-                  (warn or ["<no WARN line>"])[0][:70])
+            check(f"E7 [{label}] failure is LOGGED with its rc, label '{must}' (not '{banned}')",
+                  bool(warn) and must in warn[0] and banned not in warn[0],
+                  (warn or ["<no WARN line>"])[0][:90])
 
 print()
 if fails:

@@ -228,7 +228,24 @@ case $? in 0) : ;; 2) echo "  restate ALERT đã gửi (base)" ;; *) echo "  WAR
 # publish production (ở vị trí cũ nó chỉ chặn step [15]); 300s so với ~14s đo được tới lúc ghi
 # JSON (ts→mtime 2026-10-11) và <=77s cho cả [14]+[15] cũ (log 09-30→10-09).
 step "[11c] macro_healthcheck.py (update macro_health.json — TRƯỚC publish)"
-timeout -k 10 300 $PY macro_healthcheck.py || echo "  WARN: macro_healthcheck failed/timeout rc=$? (non-fatal — publish vẫn chạy, cổng fail-closed theo file)"
+# rc 0/1/2 là kết luận của CHÍNH healthcheck (nó đã tự báo qua kênh của nó) ⇒ không notify thêm,
+# tránh nhân đôi tin mỗi tối DEGRADED. rc khác (124/137 timeout, crash, 127) = healthcheck không
+# nói được gì ⇒ log refresh không ai quét, nên bước này tự notify (cùng đường với [12]); notify
+# hỏng KHÔNG được chặn chuỗi.
+hc_rc=0
+timeout -k 10 300 $PY macro_healthcheck.py || hc_rc=$?
+case "$hc_rc" in
+  0) ;;
+  1) echo "  WARN: macro_healthcheck DEGRADED rc=1 (kết luận hợp lệ của healthcheck, không phải lỗi — cổng vẫn có thể trả DT5G; publish vẫn chạy)" ;;
+  2) echo "  WARN: macro_healthcheck FAILED rc=2 (non-fatal — publish vẫn chạy, cổng fail-closed theo file)" ;;
+  *)
+    if [ "$hc_rc" = 124 ] || [ "$hc_rc" = 137 ]; then hc_what="TIMEOUT (trần 300s)"; else hc_what="LỖI CHẠY (crash/không khởi động được)"; fi
+    echo "  WARN: macro_healthcheck $hc_what rc=$hc_rc (non-fatal — publish vẫn chạy, cổng fail-closed theo file)"
+    HMSG="⚠️ daily_refresh_v34b $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): macro_healthcheck $hc_what rc=$hc_rc — macro_health.json có thể cũ ⇒ cổng get_gated_state có thể fail-closed về DT4 (ca thứ Hai). Publish vẫn chạy. Xem $LOG."
+    /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$HMSG" 2>/dev/null || true
+    /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$HMSG" "1521470705563340910" 2>/dev/null || true
+    ;;
+esac
 
 # --- 4. republish DT5G live ---
 # publish_gated_state.py giờ exit!=0 khi publish BQ hỏng (trước đây chỉ in WARNING rồi exit 0
