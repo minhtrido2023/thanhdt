@@ -15,7 +15,7 @@ Vì vậy đo bằng hai phép thay thế, đều trên dữ liệu còn trên �
   (2) Trên các ngày ƯỚC TÍNH: giá trị cổ phiếu của dòng lệch bao nhiêu % NAV so với định giá bằng
       `marketPrice` của broker trong cùng bản ghi positions cuối phiên.
   (3) Đếm trên lịch sử: nếu chỉ đẩy tin khi "không có số" hoặc "số tạm tính cách ngưỡng dưới X
-      điểm %" thì bớt được bao nhiêu tin (dùng state seed của thư mục này, tới 2026-10-09).
+      điểm %" thì bớt được bao nhiêu tin — VÒNG 3: phép này chuyển sang `--replay` của monitor.
 KL = bản ghi positions cuối cùng của account, chụp từ giờ đóng cửa trở đi (cùng hàm monitor dùng).
 
 ⚠️ Phép (1) là định giá NGÂY THƠ (không có cổng corp-action của `--from-raw` thật). Ngày lệch lớn
@@ -24,8 +24,7 @@ ghi KL mới (500→1.000 / 300→600) và giá sau tách (76.500) trong khi BQ 
 (153.000). `--from-raw` thật gặp ca này thì quy KL về trước sự kiện hoặc từ chối ghi (rc=4), nên
 con số đó là sai số của phép đo ngây thơ, KHÔNG phải của dòng ước tính.
 
-Dùng: python3 measure_estimate_rows.py --price-csv bq_price_held_20260701_20261012_exp.csv \\
-          --state-dir seed
+Dùng: python3 measure_estimate_rows.py --price-csv bq_price_held_20260701_20261012_exp.csv
 """
 import argparse
 import csv
@@ -39,7 +38,7 @@ import nav_loss_brake_monitor as m  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--price-csv", required=True)
-ap.add_argument("--state-dir", required=True)
+ap.add_argument("--state-dir", help="(không còn dùng — phép 3 đã chuyển sang --replay)")
 args = ap.parse_args()
 price = {}
 with open(args.price_csv, encoding="utf-8") as f:
@@ -70,7 +69,7 @@ for account in ("SpaceX", "ZaloPay"):
         if m.close_capture_problem(d, r["balance_ts"]) and not is_est:
             skipped.append(f"{d}: dòng thật không phải giá chốt ({r['balance_ts']})")
             continue
-        pos, ts, why = m.close_positions(ctx, profiles[account]["account_id"], d)
+        pos, ts, why = m.close_positions(ctx, profiles[account], d)
         if pos is None:
             skipped.append(f"{d}: {why[:70]}")
             continue
@@ -107,39 +106,5 @@ for account in ("SpaceX", "ZaloPay"):
               f"lớn nhất {max(b)*100:.3f}%")
 
 # ---- (3) luật "chỉ đẩy tin khi không có số, hoặc tạm tính cách ngưỡng dưới X điểm %"
-LAST = m.datetime.date(2026, 10, 9)
-ctx = m.Ctx(state_dir=os.path.abspath(args.state_dir),
-            now=m.datetime.datetime(2026, 10, 9, 22, 5, tzinfo=m.ICT))
-ctx.pos_cache = {}
-th, th_err = m.load_thresholds(ctx.rules_path)
-print(f"\n=== (3) Nếu chỉ đẩy tin khi 'không có số' HOẶC 'tạm tính cách ngưỡng dưới X điểm %' — "
-      f"đếm trên lịch sử tới {LAST}")
-for account in ("SpaceX", "ZaloPay"):
-    chain = m.build_chain(ctx, account, profiles[account], ctx.now.date())
-    d, n, alert = chain["ledger"][0]["date"], 0, []
-    while d < LAST:
-        d += m.datetime.timedelta(days=1)
-        if not m.is_session(d):
-            continue
-        n += 1
-        g = m.lever_guard(ctx, account, profiles[account]["account_id"], d, th["lever_package_id"],
-                          [], [])
-        res = m.evaluate(ctx, account, d, chain, th, th_err, [], g)
-        bad = [res[b] for b in m.BRAKES if res[b]["status"] in m.ALERTING]
-        if not bad:
-            continue
-        only_est = all(r.get("value") is not None
-                       and all("nav_is_estimate" in p for p in r["reason"].split("; ")) for r in bad)
-        dist = min((r["distance_pp"] for r in bad if r.get("value") is not None), default=None)
-        alert.append((d, only_est, any(r.get("value") is None for r in bad), dist))
-    est = [x for x in alert if x[1]]
-    nonum = sum(1 for x in alert if x[2])
-    print(f"  {account}: {n} phiên · {len(alert)} phiên kêu = {len(est)} phiên CHỈ vì cờ "
-          f"nav_is_estimate (đều có số tạm tính) + {nonum} phiên có ít nhất một phanh 'không có số' "
-          f"+ {len(alert) - len(est) - nonum} phiên có số tạm tính vì lý do khác (giờ chụp / thiếu "
-          f"phiên trước)")
-    ds = sorted(x[3] for x in est)
-    print(f"     khoảng cách tới ngưỡng của số tạm tính ở {len(est)} phiên đó: nhỏ nhất "
-          f"{ds[0]:.2f}pp · trung vị {ds[len(ds) // 2]:.2f}pp")
-    for X in (1.0, 2.0, 3.0):
-        print(f"     X = {X:.0f}pp ⇒ còn {sum(1 for v in ds if v < X)}/{len(est)} phiên phải đẩy tin")
+print("\n(3) ĐÃ CHUYỂN: số tin trước/sau luật giảm tin 2,0pp nay do `nav_loss_brake_monitor.py --replay` "
+      "đếm — xem replay_full_history.txt.)")

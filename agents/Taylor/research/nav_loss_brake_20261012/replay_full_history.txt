@@ -1,104 +1,104 @@
 
-=== SpaceX · cơ sở đo: managed ===
-  ⚠ 1 ngày nav_history chưa có giá trị mã loại trừ (chuỗi phần quản lý bắc cầu qua): 2026-08-24
+=== SpaceX · đo trên NAV toàn tài khoản ===
   2026-07-02
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-02 chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-07-02 ⇒ không phải giá chốt phiên 2026-07-02 · tạm tính -0,53% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-02 chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-07-02 ⇒ không phải giá chốt phiên 2026-07-02 · tạm tính -0,53% (ngưỡng -25%)
-      UNMEASURABLE Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — không có episode nào đang mở, nhưng KHÔNG kiểm được broker có vị thế dưới gói vay 1840 cuối phiên 2026-07-02 hay không: dnse_raw_2026-07-02.jsonl không có bản ghi positions nào của account 0002023347
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-02 chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-07-02 ⇒ không phải giá chốt phiên 2026-07-02 · tạm tính -0,53% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-02 chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-07-02 ⇒ không phải giá chốt phiên 2026-07-02 · tạm tính -0,53% (ngưỡng -25%)
+      Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — không có episode nào đang mở, nhưng KHÔNG kiểm được broker có vị thế dưới gói vay 1840 cuối phiên 2026-07-02 hay không: dnse_raw_2026-07-02.jsonl không có bản ghi positions nào của account 0002023347
   2026-07-03
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-02 chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-07-02 ⇒ không phải giá chốt phiên 2026-07-02 · tạm tính -0,61% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — không có episode nào đang mở, nhưng KHÔNG kiểm được broker có vị thế dưới gói vay 1840 cuối phiên 2026-07-03 hay không: dnse_raw_2026-07-03.jsonl không có bản ghi positions nào của account 0002023347
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-02 chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-07-02 ⇒ không phải giá chốt phiên 2026-07-02 · tạm tính -0,61% (ngưỡng -5%)
+      Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — không có episode nào đang mở, nhưng KHÔNG kiểm được broker có vị thế dưới gói vay 1840 cuối phiên 2026-07-03 hay không: dnse_raw_2026-07-03.jsonl không có bản ghi positions nào của account 0002023347
   2026-07-21
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,28% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -7,27% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,28% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,72pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -7,27% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 17,73pp > 2,0pp)
   2026-07-22
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-22 mang cờ nav_is_estimate (backfill ước tính); dòng NAV 2026-07-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,85% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-22 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -8,98% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-22 mang cờ nav_is_estimate (backfill ước tính); dòng NAV 2026-07-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,85% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 3,15pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-22 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -8,98% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 16,02pp > 2,0pp)
   2026-07-23
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-22 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,17% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-22 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,17% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,17pp > 2,0pp)
   2026-08-06
-      UNMEASURABLE cả 3 phanh — nav_history không có dòng 2026-08-06 (dòng mới nhất: 2026-10-12); không thấy file nav_gate_block_SpaceX_2026-08-06.json
+      [ĐẨY TIN] Cả 3 phanh: KHÔNG ĐO ĐƯỢC — nav_history không có dòng 2026-08-06 (dòng mới nhất: 2026-10-12); không thấy file nav_gate_block_SpaceX_2026-08-06.json
   2026-08-07
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — thiếu dòng của phiên liền trước 2026-08-06: dòng trước 2026-08-07 trong chuỗi là 2026-08-05 ⇒ con số là gộp nhiều phiên · tạm tính +0,12% (ngưỡng -5%)
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — thiếu dòng của phiên liền trước 2026-08-06: dòng trước 2026-08-07 trong chuỗi là 2026-08-05 ⇒ con số là gộp nhiều phiên · tạm tính +0,12% (ngưỡng -5%)
   2026-08-10
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,93% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,97% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,93% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,93pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,97% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 22,03pp > 2,0pp)
   2026-08-11
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,27% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,27% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,73pp > 2,0pp)
   2026-08-24
-      UNMEASURABLE cả 3 phanh — nav_history CÓ dòng 2026-08-24 nhưng chuỗi giá trị mã loại trừ thì không ⇒ chưa tách được phần bot quản lý ngày đó
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-24 chụp số dư lúc 2026-08-24T04:49:59 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-08-24 ⇒ không phải giá chốt phiên 2026-08-24 · tạm tính +0,31% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-24 chụp số dư lúc 2026-08-24T04:49:59 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-08-24 ⇒ không phải giá chốt phiên 2026-08-24 · tạm tính -1,98% (ngưỡng -25%)
+      Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — không có episode nào đang mở, nhưng KHÔNG kiểm được broker có vị thế dưới gói vay 1840 cuối phiên 2026-08-24 hay không: bản ghi positions cuối cùng của account 0002023347 trong dnse_raw_2026-08-24.jsonl chụp lúc '2026-08-24T04:49:59' — trước giờ đóng cửa 14:45 ⇒ chưa phải danh mục cuối phiên
   2026-08-25
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — thiếu dòng của phiên liền trước 2026-08-24: dòng trước 2026-08-25 trong chuỗi là 2026-08-21 ⇒ con số là gộp nhiều phiên; dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,25% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,54% (ngưỡng -25%)
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính); dòng NAV 2026-08-24 chụp số dư lúc 2026-08-24T04:49:59 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-08-24 ⇒ không phải giá chốt phiên 2026-08-24 · tạm tính -0,56% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,54% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 22,46pp > 2,0pp)
   2026-08-26
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,82% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,82% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,82pp > 2,0pp)
   2026-08-27
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,26% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,49% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,26% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,26pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,49% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 23,51pp > 2,0pp)
   2026-08-28
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,04% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,04% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,04pp > 2,0pp)
   2026-09-21
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,37% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,53% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,37% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,63pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,53% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 22,47pp > 2,0pp)
   2026-09-22
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,89% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,89% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,89pp > 2,0pp)
   2026-09-23
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,03% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,70% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,03% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,97pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,70% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 23,30pp > 2,0pp)
   2026-09-24
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,59% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,59% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,41pp > 2,0pp)
   2026-10-01
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-10-01 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,27% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-10-01 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,11% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-10-01 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,27% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,73pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-10-01 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,11% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 22,89pp > 2,0pp)
   2026-10-02
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-10-01 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,23% (ngưỡng -5%)
-  — 70 phiên, 50 phiên im lặng, 20 phiên sẽ kêu.
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-10-01 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,23% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,77pp > 2,0pp)
+  — 70 phiên, 50 phiên im lặng, 20 phiên có phanh không OK: TRƯỚC luật giảm tin đẩy 20 tin · SAU luật giảm tin đẩy 6 tin (14 phiên chỉ hiện ở status + dòng kiểm sáng).
   — ngày giảm mạnh nhất (đo được): -2,27% ngày 2026-07-20 · sâu nhất từ đỉnh: -10,29% ngày 2026-07-27
   — dòng mới nhất 2026-10-12: Lỗ một ngày: -0,05% (ngưỡng -5%, cách 4,95pp) · Lỗ từ đỉnh: -1,38% (ngưỡng -25%, cách 23,62pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
-  — NAV tổng 2026-10-12: ngày -0,05% · từ đỉnh -1,38% (đỉnh 2026-07-01)
-  — NAV tổng, cả lịch sử (dòng-so-dòng, kể cả dòng ước tính): ngày giảm mạnh nhất -2,27% ngày 2026-07-20 · sâu nhất từ đỉnh -10,29% ngày 2026-07-27
+  — cả lịch sử, dòng-so-dòng (kể cả dòng ước tính / chụp lệch giờ): ngày giảm mạnh nhất -2,27% ngày 2026-07-20 · sâu nhất từ đỉnh -10,29% ngày 2026-07-27
 
-=== ZaloPay · cơ sở đo: managed ===
-  ⚠ 1 ngày nav_history chưa có giá trị mã loại trừ (chuỗi phần quản lý bắc cầu qua): 2026-08-24
+=== ZaloPay · đo trên NAV toàn tài khoản ===
   2026-07-27
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-27 chụp số dư lúc 2026-07-28T09:15:15 — SAU giờ mở cửa phiên kế (09:00 ngày 2026-07-28) ⇒ đã lẫn giá của phiên sau · tạm tính -0,94% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-27 chụp số dư lúc 2026-07-28T09:15:15 — SAU giờ mở cửa phiên kế (09:00 ngày 2026-07-28) ⇒ đã lẫn giá của phiên sau · tạm tính -10,81% (ngưỡng -25%)
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-27 chụp số dư lúc 2026-07-28T09:15:15 — SAU giờ mở cửa phiên kế (09:00 ngày 2026-07-28) ⇒ đã lẫn giá của phiên sau · tạm tính -1,54% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-27 chụp số dư lúc 2026-07-28T09:15:15 — SAU giờ mở cửa phiên kế (09:00 ngày 2026-07-28) ⇒ đã lẫn giá của phiên sau · tạm tính -16,35% (ngưỡng -25%)
   2026-07-28
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-27 chụp số dư lúc 2026-07-28T09:15:15 — SAU giờ mở cửa phiên kế (09:00 ngày 2026-07-28) ⇒ đã lẫn giá của phiên sau · tạm tính +0,84% (ngưỡng -5%)
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-07-27 chụp số dư lúc 2026-07-28T09:15:15 — SAU giờ mở cửa phiên kế (09:00 ngày 2026-07-28) ⇒ đã lẫn giá của phiên sau · tạm tính +1,38% (ngưỡng -5%)
   2026-08-06
-      UNMEASURABLE cả 3 phanh — nav_history không có dòng 2026-08-06 (dòng mới nhất: 2026-10-12); không thấy file nav_gate_block_ZaloPay_2026-08-06.json
+      [ĐẨY TIN] Cả 3 phanh: KHÔNG ĐO ĐƯỢC — nav_history không có dòng 2026-08-06 (dòng mới nhất: 2026-10-12); không thấy file nav_gate_block_ZaloPay_2026-08-06.json
   2026-08-07
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — thiếu dòng của phiên liền trước 2026-08-06: dòng trước 2026-08-07 trong chuỗi là 2026-08-05 ⇒ con số là gộp nhiều phiên; dòng NAV 2026-08-07 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,27% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-07 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -4,25% (ngưỡng -25%)
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — thiếu dòng của phiên liền trước 2026-08-06: dòng trước 2026-08-07 trong chuỗi là 2026-08-05 ⇒ con số là gộp nhiều phiên; dòng NAV 2026-08-07 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +4,15% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-07 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -4,62% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 20,38pp > 2,0pp)
   2026-08-10
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính); dòng NAV 2026-08-07 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +1,02% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -3,28% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính); dòng NAV 2026-08-07 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,09% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,91pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -4,71% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 20,29pp > 2,0pp)
   2026-08-11
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,21% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-10 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,41% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,41pp > 2,0pp)
   2026-08-24
-      UNMEASURABLE cả 3 phanh — nav_history CÓ dòng 2026-08-24 nhưng chuỗi giá trị mã loại trừ thì không ⇒ chưa tách được phần bot quản lý ngày đó
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-24 chụp số dư lúc 2026-08-24T04:50:08 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-08-24 ⇒ không phải giá chốt phiên 2026-08-24 · tạm tính +1,06% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-24 chụp số dư lúc 2026-08-24T04:50:08 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-08-24 ⇒ không phải giá chốt phiên 2026-08-24 · tạm tính -3,86% (ngưỡng -25%)
+      Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — không có episode nào đang mở, nhưng KHÔNG kiểm được broker có vị thế dưới gói vay 1840 cuối phiên 2026-08-24 hay không: bản ghi positions cuối cùng của account 0001743768 trong dnse_raw_2026-08-24.jsonl chụp lúc '2026-08-24T04:50:08' — trước giờ đóng cửa 14:45 ⇒ chưa phải danh mục cuối phiên
   2026-08-25
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — thiếu dòng của phiên liền trước 2026-08-24: dòng trước 2026-08-25 trong chuỗi là 2026-08-21 ⇒ con số là gộp nhiều phiên; dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,26% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,80% (ngưỡng -25%)
+      [ĐẨY TIN] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính); dòng NAV 2026-08-24 chụp số dư lúc 2026-08-24T04:50:08 — TRƯỚC giờ đóng cửa 14:45 ngày 2026-08-24 ⇒ không phải giá chốt phiên 2026-08-24 · tạm tính +0,79% (ngưỡng -5%)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -3,10% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 21,90pp > 2,0pp)
   2026-08-26
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,76% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-25 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,16% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,84pp > 2,0pp)
   2026-08-27
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,27% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,79% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -1,10% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 3,90pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -4,31% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 20,69pp > 2,0pp)
   2026-08-28
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,10% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-08-27 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,15% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,85pp > 2,0pp)
   2026-09-21
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,32% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,73% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,83% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,17pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -4,61% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 20,39pp > 2,0pp)
   2026-09-22
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,78% (ngưỡng -5%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-21 mang cờ nav_is_estimate (backfill ước tính) · tạm tính +0,97% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 5,97pp > 2,0pp)
   2026-09-23
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,15% (ngưỡng -5%)
-      UNMEASURABLE Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -2,11% (ngưỡng -25%)
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,46% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,54pp > 2,0pp)
+      Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -4,13% (ngưỡng -25%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 20,87pp > 2,0pp)
   2026-09-24
-      UNMEASURABLE Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,45% (ngưỡng -5%)
-  — 67 phiên, 52 phiên im lặng, 15 phiên sẽ kêu.
-  — ngày giảm mạnh nhất (đo được): -2,29% ngày 2026-07-20 · sâu nhất từ đỉnh: -10,06% ngày 2026-07-28
-  — dòng mới nhất 2026-10-12: Lỗ một ngày: +0,01% (ngưỡng -5%, cách 5,01pp) · Lỗ từ đỉnh: -2,06% (ngưỡng -25%, cách 22,94pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
-  — NAV tổng 2026-10-12: ngày -0,85% · từ đỉnh -6,56% (đỉnh 2026-07-08)
-  — NAV tổng, cả lịch sử (dòng-so-dòng, kể cả dòng ước tính): ngày giảm mạnh nhất -3,58% ngày 2026-07-22 · sâu nhất từ đỉnh -16,35% ngày 2026-07-27
+      [không đẩy — luật giảm tin] Lỗ một ngày: KHÔNG ĐO ĐƯỢC — dòng NAV 2026-09-23 mang cờ nav_is_estimate (backfill ước tính) · tạm tính -0,44% (ngưỡng -5%) · KHÔNG đẩy tin tối (chỉ vướng cờ ước tính, còn cách ngưỡng 4,56pp > 2,0pp)
+  — 67 phiên, 52 phiên im lặng, 15 phiên có phanh không OK: TRƯỚC luật giảm tin đẩy 15 tin · SAU luật giảm tin đẩy 6 tin (9 phiên chỉ hiện ở status + dòng kiểm sáng).
+  — ngày giảm mạnh nhất (đo được): -3,58% ngày 2026-07-22 · sâu nhất từ đỉnh: -15,20% ngày 2026-07-28
+  — dòng mới nhất 2026-10-12: Lỗ một ngày: -0,85% (ngưỡng -5%, cách 4,15pp) · Lỗ từ đỉnh: -6,56% (ngưỡng -25%, cách 18,44pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+  — cả lịch sử, dòng-so-dòng (kể cả dòng ước tính / chụp lệch giờ): ngày giảm mạnh nhất -3,58% ngày 2026-07-22 · sâu nhất từ đỉnh -16,35% ngày 2026-07-27

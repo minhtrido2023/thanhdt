@@ -44,14 +44,4 @@
         2026-09-23: KL×BQ Price−dòng +0.909% NAV (kiểm tái lập) · marketPrice−dòng -0.043% NAV
       |marketPrice − dòng ước tính| / NAV: trung vị 0.044% · lớn nhất 0.216%
 
-=== (3) Nếu chỉ đẩy tin khi 'không có số' HOẶC 'tạm tính cách ngưỡng dưới X điểm %' — đếm trên lịch sử tới 2026-10-09
-  SpaceX: 69 phiên · 20 phiên kêu = 14 phiên CHỈ vì cờ nav_is_estimate (đều có số tạm tính) + 4 phiên có ít nhất một phanh 'không có số' + 2 phiên có số tạm tính vì lý do khác (giờ chụp / thiếu phiên trước)
-     khoảng cách tới ngưỡng của số tạm tính ở 14 phiên đó: nhỏ nhất 3.15pp · trung vị 4.97pp
-     X = 1pp ⇒ còn 0/14 phiên phải đẩy tin
-     X = 2pp ⇒ còn 0/14 phiên phải đẩy tin
-     X = 3pp ⇒ còn 0/14 phiên phải đẩy tin
-  ZaloPay: 66 phiên · 15 phiên kêu = 9 phiên CHỈ vì cờ nav_is_estimate (đều có số tạm tính) + 2 phiên có ít nhất một phanh 'không có số' + 4 phiên có số tạm tính vì lý do khác (giờ chụp / thiếu phiên trước)
-     khoảng cách tới ngưỡng của số tạm tính ở 9 phiên đó: nhỏ nhất 4.55pp · trung vị 5.10pp
-     X = 1pp ⇒ còn 0/9 phiên phải đẩy tin
-     X = 2pp ⇒ còn 0/9 phiên phải đẩy tin
-     X = 3pp ⇒ còn 0/9 phiên phải đẩy tin
+(3) ĐÃ CHUYỂN: số tin trước/sau luật giảm tin 2,0pp nay do `nav_loss_brake_monitor.py --replay` đếm — xem replay_full_history.txt.)

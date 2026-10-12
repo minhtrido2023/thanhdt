@@ -53,16 +53,13 @@ class Fx:
         self.state = os.path.join(self.data, "loss_brake")
         self.secrets = os.path.join(self.root, "secrets.json")
         self.sink = os.path.join(self.root, "sink.jsonl")
-        for d in (self.exec, self.state, os.path.join(self.data, "margin_approvals"),
-                  os.path.join(self.data, "corp_action_daily")):
+        for d in (self.exec, self.state, os.path.join(self.data, "margin_approvals")):
             os.makedirs(d)
         self.acc, self.navs, self.incep = [], {}, {}
-        self.cash, self.sleeve = {}, {}
+        self.cash = {}
         self.nos, self.auto_pos, self.pos_written = {}, True, set()
         self.rules()
         self._j(os.path.join(self.state, "episodes.json"), {"episodes": []})
-        for d in ALL_D:               # mặc định: lịch corp-action mọi phiên đọc được, không sự kiện
-            self.corp(d, [])
 
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -90,11 +87,10 @@ class Fx:
         self.navs[label] = {}
         self.nos[label] = no
         self.flows(label, [])
-        self.flows(label, [], sleeve=True)
 
     def nav(self, label, date, nav, est=False, ts="19:10:00"):
         """`ts`: giờ chụp trong chính ngày đó ("HH:MM:SS") hoặc dấu thời gian đầy đủ ("…T…").
-        Mặc định kèm một bản ghi positions cuối phiên KHÔNG có vị thế gói vay / mã loại trừ."""
+        Mặc định kèm một bản ghi positions cuối phiên KHÔNG có vị thế gói vay."""
         self.navs[label][date] = (nav, est, ts)
         if self.auto_pos and (self.nos[label], date) not in self.pos_written:
             self.positions(self.nos[label], date, [("AAA", 100, 1841)])
@@ -119,31 +115,9 @@ class Fx:
         with open(os.path.join(self.exec, f"dnse_raw_{date}.jsonl"), "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
 
-    def active_nav(self, label, date, items, total_nav=None):
-        """items: [(ticker, qty, price)] (mã loại trừ). total_nav mặc định = NAV cùng ngày."""
-        if total_nav is None:
-            total_nav = self.navs[label][date][0]
-        self._j(os.path.join(self.exec, f"active_nav_{label}.json"),
-                {"account": label, "computed_at": date, "total_nav": total_nav,
-                 "positions": [{"ticker": t, "qty": q, "price": p, "excluded": True,
-                                "price_source": "fixture"} for t, q, p in items]})
-
-    def excl_seed(self, label, rows):
-        """rows: [(date, {ticker: (qty, price)})] — ghi thẳng chuỗi mã loại trừ (ngày đã qua)."""
-        out = []
-        for d, det in rows:
-            detail = {t: {"qty": q, "price": p} for t, (q, p) in det.items()}
-            out.append({"date": d, "excluded_value": f"{sum(q * p for q, p in det.values()):.0f}",
-                        "detail": json.dumps(detail, sort_keys=True), "source": "fixture",
-                        "positions_ts": "", "recorded_at": "fixture"})
-        m._append_excluded(os.path.join(self.state, f"excluded_value_history_{label}.csv"), out)
-
-    def flows(self, label, recs, sleeve=False):
-        store = self.sleeve if sleeve else self.cash
-        store[label] = recs
-        path = (os.path.join(self.state, "managed_sleeve_flows.json") if sleeve
-                else os.path.join(self.data, "account_cash_flows.json"))
-        self._j(path, store)
+    def flows(self, label, recs):
+        self.cash[label] = recs
+        self._j(os.path.join(self.data, "account_cash_flows.json"), self.cash)
 
     def approval(self, label, date, revoked=None, account=None):
         rec = {"account": account or label, "plan_date": date, "approved_by": "user (fixture)"}
@@ -152,17 +126,8 @@ class Fx:
         self._j(os.path.join(self.data, "margin_approvals",
                              f"margin_approval_{label}_{date}.json"), rec)
 
-    def corp(self, date, events, usable=True):
-        path = os.path.join(self.data, "corp_action_daily", f"corp_action_daily_{date}.json")
-        if events is None:                                   # None = không có snapshot phiên đó
-            if os.path.exists(path):
-                os.remove(path)
-            return
-        self._j(path, {"asof": date, "status": "OK", "usable": usable,
-                       "upcoming_events_held": events})
-
     def cli(self, now, *extra):
-        """Gọi main() với cờ tuỳ ý (đóng/mở episode, đính chính…). Trả (rc, output)."""
+        """Gọi main() với cờ tuỳ ý (đóng/mở episode, ack…). Trả (rc, output)."""
         os.environ[m.SINK_ENV] = self.sink
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
@@ -219,6 +184,10 @@ def t_thresholds():
     check("A2 file THẬT: episode = -0.15", th["episode"] == -0.15, f"{th} {err}")
     check("A3 file THẬT: gói vay là số nguyên", isinstance(th["lever_package_id"], int), f"{th}")
     check("A4 file THẬT: không lỗi ngưỡng", err == {}, f"{err}")
+    node = json.load(open(real, encoding="utf-8"))["macro_kill_switches"]["C_episode_drawdown_breaker"]
+    check("A4b file THẬT CÓ khoá số episode_drawdown_limit_pct và monitor đọc ĐÚNG khoá đó",
+          node.get(m.EPISODE_NUMERIC_KEY) == th["episode"] and "khoá số" in th["episode_source"],
+          f"{node.get(m.EPISODE_NUMERIC_KEY)} {th}")
     check("A5 DD_THRESHOLD = 0.25 (risk_monitor.py:46)", m.DD_THRESHOLD == 0.25)
     fx = Fx()
     try:
@@ -230,6 +199,9 @@ def t_thresholds():
         check("A6 thiếu khoá daily ⇒ daily KHÔNG ĐO ĐƯỢC (dù NAV −10%)",
               b["daily"]["status"] == m.UNMEASURABLE, f"{b['daily']}")
         check("A7 lý do nêu đúng tên khoá", "daily_loss_limit_pct" in (b["daily"]["reason"] or ""))
+        check("A7b K1: thiếu ngưỡng nhưng sổ có dòng phiên ⇒ VẪN kèm số tạm tính −10%",
+              b["daily"]["value"] is not None and abs(b["daily"]["value"] + 0.10) < 1e-9
+              and "tạm tính -10,00%" in fx.msgs()[0], f"{b['daily']}")
         check("A8 thiếu khoá ⇒ in ❌ + rc≠0 + có gửi cảnh báo",
               "THIẾU NGƯỠNG" in out and rc == 1 and len(fx.msgs()) == 1, f"rc={rc} {out[:200]}")
         check("A9 phanh khác vẫn đo", b["drawdown"]["status"] == m.OK, f"{b['drawdown']}")
@@ -414,17 +386,37 @@ def t_flows():
         os.remove(os.path.join(fx.data, "account_cash_flows.json"))
         rc, out, st = fx.run(D3)
         b = st["accounts"]["A"]["brakes"]
-        check("E4 MẤT sổ dòng tiền ⇒ KHÔNG ĐO ĐƯỢC (không coi như 'không có dòng tiền')",
-              all(b[x]["status"] == m.UNMEASURABLE for x in m.BRAKES)
-              and "account_cash_flows.json" in b["daily"]["reason"], f"{b['daily']}")
+        check("E4 MẤT sổ dòng tiền ⇒ KHÔNG coi như 'không có dòng tiền': số chỉ là TẠM TÍNH, −75% "
+              "chưa trừ lần rút ⇒ TẠM TÍNH VƯỢT NGƯỠNG (K1), lý do nêu file",
+              b["daily"]["status"] == m.BREACH_PROV and b["drawdown"]["status"] == m.BREACH_PROV
+              and "account_cash_flows.json" in b["daily"]["reason"]
+              and abs(b["daily"]["value"] + 0.75) < 1e-9, f"{b['daily']}")
+        check("E4b K8: thông báo thiếu sổ KHÔNG gợi ý tạo file rỗng để qua",
+              "Tạo file" not in b["daily"]["reason"] and "[]" not in b["daily"]["reason"]
+              and "sao lưu" in b["daily"]["reason"], b["daily"]["reason"])
+        fx.navs_seq("A", [(D1, 100e6), (D2, 100e6), (D3, 99e6)])      # mất sổ, số tạm tính xa ngưỡng
+        n = len(fx.msgs())
+        rc, out, st = fx.run(D3)
+        b = st["accounts"]["A"]["brakes"]
+        check("E4c mất sổ + tạm tính −1% ⇒ KHÔNG ĐO ĐƯỢC kèm số, VẪN đẩy tin (không thuộc luật giảm tin)",
+              b["daily"]["status"] == m.UNMEASURABLE and b["daily"]["value"] is not None
+              and not b["daily"].get("quiet") and len(fx.msgs()) == n + 1, f"{b['daily']}")
+        fx.navs_seq("A", [(D1, 100e6), (D2, 200e6), (D3, 50e6)])
         # dòng tiền khai SAU lần chụp NAV cuối cùng ⇒ chưa dòng nào chứa nó (treo)
         fx.flows("A", [dep, wd, {"date": D3, "time_ict": "23:00", "amount_vnd": 5e6,
                                  "kind": "deposit", "evidence": "fixture"}])
         rc, out, st = fx.run(D3, now=f"{D3}T23:30:00")
         b = st["accounts"]["A"]["brakes"]
-        check("E5 dòng tiền TREO (chưa dòng NAV nào chụp sau nó) ⇒ KHÔNG ĐO ĐƯỢC",
-              b["daily"]["status"] == m.UNMEASURABLE and "TREO" in b["daily"]["reason"],
-              f"{b['daily']}")
+        check("E5 dòng tiền TREO (chưa dòng NAV nào chụp sau nó) ⇒ KHÔNG ĐO ĐƯỢC, kèm số tạm tính (K1)",
+              b["daily"]["status"] == m.UNMEASURABLE and "TREO" in b["daily"]["reason"]
+              and b["daily"]["value"] is not None and not b["daily"].get("quiet"), f"{b['daily']}")
+        fx.nav("A", D3, 40e6)                      # còn dòng treo mà số tạm tính đã vượt ngưỡng
+        rc, out, st = fx.run(D3, now=f"{D3}T23:40:00")
+        b = st["accounts"]["A"]["brakes"]
+        check("E6 dòng tiền TREO + tạm tính vượt ngưỡng ⇒ TẠM TÍNH VƯỢT NGƯỠNG (tin đỏ), không còn "
+              "là 'không đo được' trơn", b["daily"]["status"] == m.BREACH_PROV
+              and "TREO" in b["daily"]["reason"]
+              and "touch " in m.alert_text("A", st["accounts"]["A"]), f"{b['daily']}")
     finally:
         fx.close()
 
@@ -443,8 +435,11 @@ def t_fail_loud():
               f"{brakes(st, 'A')}")
         check("F2 vẫn cho số tạm tính + lý do đọc từ cờ",
               b["daily"]["value"] is not None and "nav_is_estimate" in b["daily"]["reason"])
-        check("F3 có gửi cảnh báo (không đo được ≠ an toàn)",
-              rc == 1 and len(fx.msgs()) == 1 and "KHÔNG ĐO ĐƯỢC" in fx.msgs()[0])
+        check("F3 chỉ vướng cờ ước tính + tạm tính −1,01% (cách ngưỡng 3,99pp) ⇒ rc=1, status vẫn KHÔNG "
+              "ĐO ĐƯỢC, nhưng KHÔNG đẩy tin (luật giảm tin)",
+              rc == 1 and fx.msgs() == [] and b["daily"].get("quiet") is True
+              and st["accounts"]["A"]["alert"]["suppressed"] == ["daily", "drawdown"],
+              f"{len(fx.msgs())} {st['accounts']['A']['alert']}")
         fx.nav("A", D4, 97e6)
         rc, out, st = fx.run(D4)
         b = st["accounts"]["A"]["brakes"]
@@ -469,7 +464,8 @@ def t_fail_loud():
         rc, out, st = fx.run(D6)
         b = st["accounts"]["A"]["brakes"]
         check("P1 thiếu dòng phiên liền trước ⇒ daily KHÔNG ĐO ĐƯỢC (số gộp nhiều phiên)",
-              b["daily"]["status"] == m.UNMEASURABLE and D5 in b["daily"]["reason"], f"{b['daily']}")
+              b["daily"]["status"] == m.UNMEASURABLE and D5 in b["daily"]["reason"]
+              and not b["daily"].get("quiet"), f"{b['daily']}")
         check("P2 ...drawdown vẫn đo", b["drawdown"]["status"] == m.OK, f"{b['drawdown']}")
         fx.nav("A", D6, 80e6)
         rc, out, st = fx.run(D6)
@@ -493,189 +489,6 @@ def t_fail_loud():
         fx.close()
 
 
-def _two_accounts():
-    """S = account thường; Z = account có mã loại trừ XXX (10.000 cp)."""
-    fx = Fx()
-    fx.account("S", "111")
-    fx.account("Z", "222", excluded=("XXX", "YYY"), capital=1000e6)
-    fx.navs_seq("S", [(D1, 101e6), (D2, 100e6)])
-    fx.navs_seq("Z", [(D1, 1000e6), (D2, 998e6)])
-    fx.excl_seed("Z", [(D0, {"XXX": (10000, 46000)}), (D1, {"XXX": (10000, 46000)}),
-                       (D2, {"XXX": (10000, 46750)})])
-    return fx
-
-
-def t_two_accounts_and_sleeve():
-    print("[I/J/R/Q] hai account · phần bot quản lý · ca DGC 11/09 · chuỗi mã loại trừ")
-    fx = _two_accounts()
-    try:
-        # D3: XXX GDKHQ cổ tức 8.000đ ⇒ giá 46.750 → 37.400. NAV tổng hụt GIẢ 80tr + 13,5tr giảm
-        # thật của XXX (khoản phải thu chưa được ghi vào tiền) = −9,4%; phần quản lý KHÔNG đổi.
-        fx.nav("S", D3, 99.5e6)
-        fx.nav("Z", D3, 998e6 - 93.5e6)
-        for d in (D3,):
-            # cùng MỘT file raw chứa cả hai account; account 111 cũng "giữ XXX" để bắt lỗi lọc §12
-            # ...và bản ghi của account KIA nằm SAU CÙNG trong file (bỏ lọc là lấy nhầm ngay)
-            fx.positions("222", d, [("XXX", 10000, 1841), ("AAA", 50, 1841)])
-            fx.positions("111", d, [("XXX", 777, 1841)], ts="23:30:00")
-        fx.active_nav("Z", D3, [("XXX", 10000, 37400)])
-        rc, out, st = fx.run(D3)
-        s, z = st["accounts"]["S"], st["accounts"]["Z"]
-        check("I1 S đo trên NAV toàn tài khoản, Z đo trên phần bot quản lý",
-              s["basis"] == "total" and z["basis"] == "managed", f"{s['basis']} {z['basis']}")
-        check("I2 hai account cho hai kết quả KHÁC nhau (§12)",
-              s["unit_price"] != z["unit_price"] and s["overall"] != z["overall"],
-              f"{s['overall']} {z['overall']}")
-        check("I3 Z: giá trị mã loại trừ lấy ĐÚNG account (10.000 cp, không dính 777 của account kia)",
-              z["excluded_value"] == 374_000_000 and z["excluded_detail"]["XXX"]["qty"] == 10000,
-              f"{z['excluded_value']} {z['excluded_detail']}")
-        check("I4 Z: NAV tổng hụt −9,37% (giả) chỉ HIỂN THỊ",
-              abs(z["total_nav_info"]["daily"] - (-93.5 / 998)) < 1e-9, f"{z['total_nav_info']}")
-        check("I5 Z: KHÔNG có phanh nào BREACH vì cú hụt giả của mã loại trừ",
-              m.BREACH not in brakes(st, "Z").values(), f"{brakes(st, 'Z')}")
-        r = z["brakes"]["daily"]["reason"] or ""
-        check("I6 Z: nhưng cũng KHÔNG coi là an toàn — bẫy giá nhảy quá biên độ ⇒ KHÔNG ĐO ĐƯỢC",
-              z["overall"] == m.UNMEASURABLE and "XXX" in r and "biên độ" in r, r)
-        check("I7 S không bị ảnh hưởng: OK", s["overall"] == m.OK, f"{brakes(st, 'S')}")
-        check("I8 chỉ Z có tin cảnh báo", len(fx.msgs()) == 1 and "— Z ·" in fx.msgs()[0],
-              f"{fx.msgs()}")
-        check("I9 tin của Z ghi rõ NAV tổng chỉ để tham chiếu",
-              "KHÔNG kích phanh" in fx.msgs()[0] and "phần bot quản lý" in fx.msgs()[0])
-        # người kiểm xong, khai: ngày D3 chưa có tiền nào sang phần quản lý
-        fx.flows("Z", [{"date": D3, "amount_vnd": 0, "kind": "market_only",
-                        "evidence": "fixture: GDKHQ, tiền chưa về"}], sleeve=True)
-        rc, out, st = fx.run(D3)
-        z = st["accounts"]["Z"]
-        check("I10 sau khi KHAI ⇒ đo được, phần quản lý ngày 0% ⇒ OK",
-              z["overall"] == m.OK and abs(z["brakes"]["daily"]["value"]) < 1e-9, f"{z['brakes']}")
-        # D4: khoản phải thu 80tr được ghi vào tiền ⇒ NAV tổng +80tr = tiền VÀO phần quản lý
-        fx.nav("S", D4, 99.5e6)
-        fx.nav("Z", D4, 998e6 - 93.5e6 + 80e6)
-        fx.positions("222", D4, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D4, [("XXX", 10000, 37400)])
-        fx.flows("Z", [{"date": D3, "amount_vnd": 0, "kind": "market_only", "evidence": "x"},
-                       {"date": D4, "time_ict": "09:00", "amount_vnd": 80e6, "kind": "deposit",
-                        "evidence": "fixture: cổ tức XXX 8.000đ × 10.000"}], sleeve=True)
-        rc, out, st = fx.run(D4)
-        z = st["accounts"]["Z"]
-        check("I11 cổ tức mã loại trừ có khai ⇒ KHÔNG thành lãi giả (ngày 0%, đỉnh không bị đẩy)",
-              abs(z["brakes"]["daily"]["value"]) < 1e-9
-              and z["brakes"]["drawdown"]["peak_date"] != D4, f"{z['brakes']}")
-        # --- J: KL mã loại trừ đổi (bán 4.000 cp) mà chưa khai
-        fx.nav("S", D5, 99.5e6)
-        fx.nav("Z", D5, 998e6 - 93.5e6 + 80e6)
-        fx.positions("222", D5, [("XXX", 6000, 1841)])
-        fx.active_nav("Z", D5, [("XXX", 6000, 37400)])
-        rc, out, st = fx.run(D5)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("J1 KL mã loại trừ đổi mà chưa khai ⇒ KHÔNG ĐO ĐƯỢC, nêu 10.000 → 6.000",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "10.000 → 6.000" in r, r)
-        # --- R: chuỗi chỉ-ghi-thêm
-        before = open(os.path.join(fx.state, "excluded_value_history_Z.csv"), encoding="utf-8").read()
-        fx.active_nav("Z", D5, [("XXX", 6000, 99999)])      # giá khác hẳn — không được ghi đè
-        fx.run(D5)
-        after = open(os.path.join(fx.state, "excluded_value_history_Z.csv"), encoding="utf-8").read()
-        check("R1 dòng đã ghi không bị ghi đè khi chạy lại", before == after)
-        hist = os.path.join(fx.state, "excluded_value_history_Z.csv")
-        m._append_excluded(hist, [{"date": D5, "excluded_value": "1", "detail": "{}",
-                                   "source": "ghi đè?", "positions_ts": "", "recorded_at": "x"}])
-        check("R1b _append_excluded tự nó cũng từ chối ghi đè dòng đã có",
-              open(hist, encoding="utf-8").read() == before)
-        # --- R: active_nav không đúng ngày ⇒ không lấy giá cũ
-        fx.nav("Z", D6, 990e6)
-        fx.nav("S", D6, 99.5e6)
-        fx.positions("222", D6, [("XXX", 6000, 1841)])
-        rc, out, st = fx.run(D6)                            # active_nav vẫn là của D5
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("R2 đang giữ mã loại trừ mà active_nav là của ngày khác ⇒ KHÔNG ĐO ĐƯỢC, nêu ngày",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and D5 in r and "computed_at" in r, r)
-        fx.active_nav("Z", D6, [("XXX", 5000, 37400)])
-        rc, out, st = fx.run(D6)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("R3 KL lệch giữa dnse_raw và active_nav ⇒ KHÔNG ĐO ĐƯỢC", "KL XXX lệch" in r, r)
-        # ca DGC 11/09 dạng hai file định giá khác nhau: active_nav cao hơn nav_history 8%
-        fx.active_nav("Z", D6, [("XXX", 6000, 37400)], total_nav=990e6 * 1.08)
-        rc, out, st = fx.run(D6)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("R4 active_nav.total_nav lệch nav_history 8% ⇒ KHÔNG ĐO ĐƯỢC, không trừ giá khác hệ",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "định giá khác nhau" in r, r)
-        fx.active_nav("Z", D6, [("XXX", 6000, 37400)], total_nav=990e6 * 1.0005)
-        fx.flows("Z", fx.sleeve["Z"] + [{"date": D5, "amount_vnd": 0, "kind": "market_only",
-                                         "evidence": "fixture"}], sleeve=True)
-        rc, out, st = fx.run(D6)
-        check("R5 lệch 0,05% (trong dung sai) ⇒ ghi được và đo được",
-              st["accounts"]["Z"]["brakes"]["daily"]["status"] in (m.OK, m.BREACH),
-              f"{st['accounts']['Z']['brakes']['daily']}")
-    finally:
-        fx.close()
-    # --- Q: có excluded_tickers mà chưa có chuỗi ⇒ không âm thầm đo trên NAV tổng
-    fx = Fx()
-    try:
-        fx.auto_pos = False
-        fx.account("Z", "222", excluded=("XXX",))
-        fx.navs_seq("Z", [(D1, 100e6), (D2, 99e6)])
-        rc, out, st = fx.run(D2)                            # không có dnse_raw ⇒ không ghi được
-        z = st["accounts"]["Z"]
-        check("Q1 chưa có chuỗi mã loại trừ ⇒ KHÔNG ĐO ĐƯỢC (không rơi về NAV tổng), nêu đúng lý do",
-              z["basis"] == "managed" and z["overall"] == m.UNMEASURABLE
-              and "chưa có chuỗi" in z["brakes"]["daily"]["reason"], f"{z['brakes']['daily']}")
-        fx.positions("222", D1, [("AAA", 5, 1841)])
-        fx.positions("222", D2, [("AAA", 5, 1841)])
-        fx.corp(D1, None)                                    # không giữ mã loại trừ ⇒ không cần lịch
-        fx.corp(D2, None)
-        rc, out, st = fx.run(D2)
-        z = st["accounts"]["Z"]
-        check("Q2 không giữ mã loại trừ nào ⇒ tự ghi 0 (không cần giá), lỗ một ngày đo được",
-              z["brakes"]["daily"]["status"] == m.OK and z["excluded_value"] == 0,
-              f"{z['brakes']['daily']}")
-        check("Q3 ...có cảnh báo chuỗi bắt đầu muộn hơn mốc khởi điểm",
-              any("chỉ bắt đầu từ" in w for w in z["warnings"]), f"{z['warnings']}")
-        dd = z["brakes"]["drawdown"]
-        check("Q4 chuỗi bắt đầu MUỘN hơn mốc khởi điểm ⇒ lỗ từ đỉnh KHÔNG ĐO ĐƯỢC (đỉnh cũ nằm "
-              "ngoài chuỗi), không âm thầm đặt lại đỉnh",
-              dd["status"] == m.UNMEASURABLE and "chỉ bắt đầu từ" in dd["reason"]
-              and z["overall"] == m.UNMEASURABLE and rc == 1, f"{dd}")
-        rc, line = fx.health("Z", f"{D3}T08:20:00")
-        check("Q5 ...và dòng ops_health buổi sáng cũng nói ra (rc=1)",
-              rc == 1 and "chỉ bắt đầu từ" in line, line)
-        fx.excl_seed("Z", [(D0, {})])                       # vá mốc khởi điểm (không giữ mã nào)
-        rc, out, st = fx.run(D2)
-        check("Q6 vá xong dòng mốc khởi điểm ⇒ lỗ từ đỉnh đo được, đỉnh = mốc khởi điểm",
-              st["accounts"]["Z"]["overall"] == m.OK
-              and st["accounts"]["Z"]["brakes"]["drawdown"]["peak_date"] == D0, f"{st['accounts']['Z']['brakes']}")
-    finally:
-        fx.close()
-    # --- lịch corp-action: cổ tức NHỎ (trong biên độ) vẫn bị bắt
-    fx = _two_accounts()
-    try:
-        fx.nav("S", D3, 100e6)
-        fx.nav("Z", D3, 998e6)
-        fx.positions("222", D3, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D3, [("XXX", 10000, 45750)])      # −2,1%: trong biên độ
-        fx.corp(D3, [{"ticker": "XXX", "date": D3, "event_code": "DIV", "value_per_share": "1000.0",
-                      "title": "Cổ tức tiền 1.000đ"},
-                     {"ticker": "AAA", "date": D3, "event_code": "DIV", "value_per_share": "500"}])
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("T1 lịch corp-action có sự kiện mã loại trừ đúng ngày ⇒ KHÔNG ĐO ĐƯỢC + số tiền gợi ý",
-              "lịch corp-action" in r and "10.000.000đ" in r, r)
-        check("T2 sự kiện của mã KHÔNG loại trừ không gây bẫy", "AAA" not in r, r)
-    finally:
-        fx.close()
-    fx = _two_accounts()
-    try:
-        fx.nav("Z", D4, 998e6)                                # bỏ qua D3: hai dòng cách 2 phiên
-        fx.nav("S", D4, 100e6)
-        fx.positions("222", D4, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D4, [("XXX", 10000, 46750 * 1.14)])   # +14% qua 2 phiên: trong biên
-        rc, out, st = fx.run(D4)
-        r = st["accounts"]["Z"]["brakes"]["drawdown"]
-        check("T3 giá mã loại trừ +14% qua HAI phiên không bị coi là quá biên độ",
-              r["status"] == m.OK, f"{r}")
-    finally:
-        fx.close()
-
-
 def t_idempotent():
     print("[K/L] gửi trùng · đánh dấu ngay · gửi lỗi · file trạng thái")
     fx = Fx()
@@ -684,6 +497,8 @@ def t_idempotent():
         fx.navs_seq("A", [(D1, 100e6), (D2, 70e6)])
         rc, out, st = fx.run(D2)
         check("K1 lần đầu: 1 tin", len(fx.msgs()) == 1 and st["accounts"]["A"]["alert"]["sent_now"])
+        check("K1c status.alert ghi rõ tin đi vào SINK nào (K5)",
+              st["accounts"]["A"]["alert"]["sink"] == fx.sink, f"{st['accounts']['A']['alert']}")
         log = [json.loads(x) for x in read(os.path.join(fx.state, "run_log.jsonl")).splitlines()]
         check("K1b mỗi lượt chạy thật để lại MỘT dòng nhật ký (phiên, rc, account đã gửi)",
               len(log) == 1 and log[0]["session"] == D2 and log[0]["rc"] == 1
@@ -754,8 +569,8 @@ def t_health_and_clock():
         fx.nav("A", D3, 90e6)
         fx.run(D3)
         rc, line = fx.health("A", f"{D4}T08:20:00")
-        check("H6 phiên trước có vi phạm ⇒ dòng sáng rc=1 + nêu ĐÃ CHẠM", rc == 1 and "ĐÃ CHẠM" in line,
-              line)
+        check("H6 phiên trước có vi phạm ⇒ dòng sáng rc=5 (riêng cho phanh chạm) + nêu ĐÃ CHẠM",
+              rc == m.HEALTH_RC_BREACH == 5 and "ĐÃ CHẠM" in line, f"{rc} {line}")
         with open(os.path.join(fx.state, "status.json"), "w", encoding="utf-8") as f:
             f.write('{"schema": 1, "session": ')
         rc, line = fx.health("A", f"{D4}T08:20:00")
@@ -811,6 +626,14 @@ def t_threshold_parsing():
         th, err = m.load_thresholds(rp)
         check("A13 có khoá SỐ ⇒ dùng khoá số, không cần đọc chuỗi trigger",
               th["episode"] == -0.12 and "episode" not in err, f"{th} {err}")
+        fx.rules(numeric=-0.12)                 # trigger mặc định ghi -0.15 (-15%)
+        th, err = m.load_thresholds(rp)
+        check("A13b khoá số −0.12 LỆCH câu chữ trigger −0.15 ⇒ KHÔNG ĐO ĐƯỢC, không chọn hộ",
+              th["episode"] is None and "LỆCH" in err.get("episode", ""), f"{th} {err}")
+        fx.rules(numeric=-0.15)
+        th, err = m.load_thresholds(rp)
+        check("A13c khoá số khớp câu chữ ⇒ dùng khoá số", th["episode"] == -0.15 and err == {},
+              f"{th} {err}")
         for bad in (0.15, -0.6, True, "-0.15"):
             fx.rules(numeric=bad)
             th, err = m.load_thresholds(rp)
@@ -899,263 +722,10 @@ def t_provisional_breach():
               f"{sorted(sent)}")
         check("W6 vẫn KHÔNG tạo BOT_STOP", not os.path.exists(os.path.join(fx.data, "BOT_STOP")))
         rc, line = fx.health("A", f"{D4}T08:20:00")
-        check("W7 dòng ops_health: rc=1 + nêu TẠM TÍNH … ĐÃ VƯỢT", rc == 1 and "ĐÃ VƯỢT" in line, line)
+        check("W7 dòng ops_health: rc=5 + nêu TẠM TÍNH … ĐÃ VƯỢT", rc == 5 and "ĐÃ VƯỢT" in line,
+              f"{rc} {line}")
         rc, out, st = fx.run(D3, now=f"{D4}T00:30:00")
         check("W8 chạy lại: không gửi trùng", len(fx.msgs()) == 2)
-    finally:
-        fx.close()
-
-
-def t_corp_calendar():
-    print("[B2/N8/N9] bẫy lịch corp-action không fail-open · biên giá theo sàn")
-
-    def day3(price=46750, corp="keep", sleeve=None, exch=None, z_nav=998e6):
-        fx = _two_accounts()
-        fx.nav("S", D3, 100e6)
-        fx.nav("Z", D3, z_nav)
-        fx.positions("222", D3, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D3, [("XXX", 10000, price)])
-        if corp != "keep":
-            fx.corp(D3, corp[0], usable=corp[1])
-        if sleeve is not None:
-            fx.flows("Z", sleeve, sleeve=True)
-        if exch is not None:
-            fx._j(os.path.join(fx.state, "excluded_ticker_exchange.json"), exch)
-        return fx
-
-    fx = day3(corp=(None, True))
-    try:
-        rc, out, st = fx.run(D3)
-        z = st["accounts"]["Z"]
-        r = z["brakes"]["daily"]["reason"] or ""
-        check("Y1 đang giữ mã loại trừ mà KHÔNG có snapshot lịch corp-action phiên đó ⇒ KHÔNG ĐO ĐƯỢC",
-              z["overall"] == m.UNMEASURABLE and "KHÔNG kiểm được lịch corp-action" in r and D3 in r
-              and f"không có corp_action_daily_{D3}.json" in r, r)
-        fx.nav("Z", D4, 998e6)
-        fx.nav("S", D4, 100e6)
-        fx.positions("222", D4, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D4, [("XXX", 10000, 46750)])
-        rc, out, st = fx.run(D4)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Y2 bẫy chưa khai CHẶN TIẾP các phiên sau (không chỉ một ngày), vẫn nêu ngày gốc",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and f"gần nhất {D3}" in r, r)
-        fx.flows("Z", [{"date": D3, "amount_vnd": 0, "kind": "market_only", "evidence": "x"}],
-                 sleeve=True)
-        rc, out, st = fx.run(D4)
-        check("Y3 khai market_only cho ngày đó ⇒ đo lại được", st["accounts"]["Z"]["overall"] == m.OK,
-              f"{st['accounts']['Z']['brakes']['daily']}")
-    finally:
-        fx.close()
-    fx = day3(corp=([{"ticker": "XXX", "date": D3, "event_code": "DIV", "value_per_share": "1"}],
-                    False))
-    try:
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Y4 snapshot usable=False ⇒ là bẫy 'không kiểm được', KHÔNG lấy sự kiện từ nó",
-              "không dùng được" in r and "usable=False" in r and "hiệu lực" not in r, r)
-    finally:
-        fx.close()
-    fx = day3(corp=([], False))
-    try:
-        rc, out, st = fx.run(D3)
-        check("Y5 snapshot usable=False không có sự kiện nào ⇒ vẫn KHÔNG ĐO ĐƯỢC (không coi là sạch)",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE, f"{st['accounts']['Z']['brakes']['daily']}")
-    finally:
-        fx.close()
-    fx = day3(corp=([{"ticker": "XXX", "date": D5, "event_code": "DIV", "value_per_share": "1000",
-                      "title": "sắp tới"}], True))
-    try:
-        rc, out, st = fx.run(D3)
-        check("Y6 sự kiện có ngày hiệu lực TƯƠNG LAI (D5) không gây bẫy ở D3",
-              st["accounts"]["Z"]["overall"] == m.OK, f"{st['accounts']['Z']['brakes']['daily']}")
-    finally:
-        fx.close()
-    # --- chuỗi bắc cầu qua ngày thiếu: sự kiện rơi đúng ngày thiếu vẫn phải bị bắt
-    fx = _two_accounts()
-    try:
-        fx.nav("S", D4, 100e6)
-        fx.nav("Z", D4, 998e6)                               # Z không có dòng D3
-        fx.positions("222", D4, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D4, [("XXX", 10000, 45000)])      # −3,7% qua 2 phiên: trong biên
-        fx.corp(D3, [{"ticker": "XXX", "date": D3, "event_code": "DIV", "value_per_share": "1500",
-                      "title": "Cổ tức 1.500đ"}])
-        rc, out, st = fx.run(D4)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Y7 sự kiện rơi vào phiên KHÔNG có dòng (D3) vẫn bị bắt khi chuỗi bắc cầu D2→D4",
-              f"hiệu lực {D3}" in r and "15.000.000đ" in r, r)
-        fx.corp(D3, None)
-        rc, out, st = fx.run(D4)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Y8 ...và thiếu snapshot của phiên bị bắc cầu cũng là bẫy",
-              "KHÔNG kiểm được lịch corp-action" in r and D3 in r, r)
-    finally:
-        fx.close()
-    fx = _two_accounts()
-    try:
-        fx.auto_pos = False
-        fx.nav("Z", D3, 998e6)                               # có dòng NAV D3 nhưng không có dnse_raw
-        fx.auto_pos = True
-        fx.nav("S", D4, 100e6)
-        fx.nav("Z", D4, 998e6)
-        rc, out, st = fx.run(D4)
-        z = st["accounts"]["Z"]
-        check("Y9 chuỗi có ngày thiếu ⇒ cảnh báo 'bắc cầu qua' nêu ngày thiếu",
-              any("bắc cầu qua" in w and D3 in w for w in z["warnings"]), f"{z['warnings']}")
-    finally:
-        fx.close()
-    # --- biên giá
-    fx = day3(price=46750 * 1.2)
-    try:
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Y10 giá mã loại trừ +20% trong MỘT phiên (phía TRÊN biên) ⇒ bẫy",
-              "quá biên độ" in r and "+20,00%" in r, r)
-        check("Y11 chữ in ra không làm hỏng giá: '46.750' còn nguyên, biên ghi '±7,5%/phiên'",
-              "46.750 → 56.100" in r and "±7,5%/phiên" in r, r)
-        check("Y12 chưa khai sàn ⇒ dùng biên HOSE và NÓI là mặc định", "HOSE — mặc định" in r, r)
-    finally:
-        fx.close()
-    fx = day3(price=46750 * 1.12, exch={"XXX": "UPCOM"})
-    try:
-        rc, out, st = fx.run(D3)
-        check("Y13 mã khai sàn UPCOM: +12% một phiên nằm trong biên ±15% ⇒ không bẫy",
-              st["accounts"]["Z"]["brakes"]["drawdown"]["status"] == m.OK,
-              f"{st['accounts']['Z']['brakes']['daily']}")
-    finally:
-        fx.close()
-    fx = day3(price=46750 * 1.12, exch={"XXX": "NASDAQ"})
-    try:
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Y14 sàn khai không nhận ra ⇒ về biên hẹp nhất (kêu), nêu giá trị đã khai",
-              "quá biên độ" in r and "'NASDAQ'" in r, r)
-    finally:
-        fx.close()
-
-
-def t_managed_invariants():
-    print("[B8] bất biến trên nhánh phần-bot-quản-lý")
-
-    def day3(z_nav=998e6):
-        fx = _two_accounts()
-        fx.nav("S", D3, 100e6)
-        fx.nav("Z", D3, z_nav)
-        fx.positions("222", D3, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D3, [("XXX", 10000, 46750)])
-        return fx
-
-    wd = {"date": D3, "time_ict": "10:00", "amount_vnd": -300e6, "kind": "withdraw", "evidence": "x"}
-    fx = day3(z_nav=998e6 - 300e6)
-    try:
-        fx.flows("Z", [wd])
-        rc, out, st = fx.run(D3)
-        b = st["accounts"]["Z"]["brakes"]
-        check("Z1 RÚT 300tr khỏi account có mã loại trừ, đã khai ⇒ phần quản lý ngày 0%, không kêu",
-              b["daily"]["status"] == m.OK and abs(b["daily"]["value"]) < 1e-9
-              and abs(b["drawdown"]["value"] - (530.5 / 540 - 1)) < 1e-9, f"{b['daily']} {b['drawdown']}")
-        fx.flows("Z", [])
-        rc, out, st = fx.run(D3)
-        check("Z2 đối chứng: không khai lần rút ⇒ BREACH (ca Z1 có răng)",
-              brakes(st, "Z")["daily"] == m.BREACH, f"{brakes(st, 'Z')}")
-        fx.flows("Z", [wd])
-        fx.flows("Z", [{"date": D3, "time_ict": "23:00", "amount_vnd": 5e6, "kind": "deposit",
-                        "evidence": "x"}], sleeve=True)
-        rc, out, st = fx.run(D3, now=f"{D3}T23:30:00")
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Z3 dòng tiền GIỮA hai phần còn TREO (khai sau lần chụp NAV cuối) ⇒ KHÔNG ĐO ĐƯỢC",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "TREO" in r
-              and "managed_sleeve_flows" in r, r)
-        os.remove(os.path.join(fx.state, "managed_sleeve_flows.json"))
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Z4 MẤT managed_sleeve_flows.json ⇒ KHÔNG ĐO ĐƯỢC (không coi như 'không có dòng tiền')",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "managed_sleeve_flows.json" in r, r)
-    finally:
-        fx.close()
-    fx = day3()
-    try:
-        fx._j(os.path.join(fx.exec, "active_nav_Z.json"),
-              {"account": "Z", "computed_at": D3, "total_nav": 998e6,
-               "positions": [{"ticker": "XXX", "qty": 10000, "price": 0}]})
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Z5 active_nav không có giá của mã loại trừ đang giữ ⇒ KHÔNG ĐO ĐƯỢC (không coi giá = 0)",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "không có giá của mã loại trừ XXX" in r, r)
-        fx._j(os.path.join(fx.exec, "active_nav_Z.json"),
-              {"account": "S", "computed_at": D3, "total_nav": 998e6,
-               "positions": [{"ticker": "XXX", "qty": 10000, "price": 46750}]})
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Z6 active_nav của ACCOUNT KHÁC (đúng ngày) ⇒ KHÔNG ĐO ĐƯỢC, nêu account đọc được",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "account='S'" in r, r)
-    finally:
-        fx.close()
-    fx = day3()
-    real = m._append_excluded
-    try:
-        def boom(path, rows):
-            raise OSError("đĩa đầy (giả lập)")
-        m._append_excluded = boom
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Z7 GHI chuỗi mã loại trừ lỗi ⇒ KHÔNG ĐO ĐƯỢC kèm đúng lỗi đọc được (không nuốt)",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "đĩa đầy (giả lập)" in r
-              and "OSError" in r, r)
-    finally:
-        m._append_excluded = real
-        fx.close()
-    # --- positions: lọc openQuantity>0, lấy bản ghi CUỐI, chụp sau giờ đóng cửa
-    fx = _two_accounts()
-    try:
-        fx.nav("S", D3, 100e6)
-        fx.nav("Z", D3, 998e6)                               # bán hết XXX: tiền ở lại trong account
-        fx.positions("222", D3, [("XXX", 10000, 1841)], ts="15:00:00")
-        fx.positions("222", D3, [("XXX", 0, 1841), ("AAA", 5, 1841)], ts="19:07:00")
-        fx.flows("Z", [{"date": D3, "time_ict": "10:00", "amount_vnd": 467.5e6, "kind": "deposit",
-                        "evidence": "bán hết XXX"}], sleeve=True)
-        rc, out, st = fx.run(D3)
-        z = st["accounts"]["Z"]
-        check("Z8 lấy bản ghi positions CUỐI ngày + bỏ dòng openQuantity=0 ⇒ giá trị mã loại trừ = 0, "
-              "không cần giá", z["excluded_value"] == 0 and z["excluded_detail"] == {}
-              and z["brakes"]["daily"]["status"] == m.OK, f"{z['excluded_value']} {z['brakes']['daily']}")
-    finally:
-        fx.close()
-    fx = _two_accounts()
-    try:
-        fx.auto_pos = False
-        fx.nav("S", D3, 100e6)
-        fx.nav("Z", D3, 998e6)
-        fx.positions("111", D3, [("AAA", 1, 1841)])
-        fx.positions("222", D3, [("XXX", 10000, 1841)], ts="04:58:00")
-        fx.active_nav("Z", D3, [("XXX", 10000, 46750)])
-        rc, out, st = fx.run(D3)
-        r = st["accounts"]["Z"]["brakes"]["daily"]["reason"] or ""
-        check("Z9 positions chỉ có bản chụp 04:58 (trước phiên) ⇒ không dùng làm danh mục cuối phiên",
-              st["accounts"]["Z"]["overall"] == m.UNMEASURABLE and "04:58:00" in r
-              and "trước giờ đóng cửa" in r, r)
-    finally:
-        fx.close()
-    # --- đính chính có người + lý do, CSV gốc không đổi
-    fx = day3()
-    try:
-        fx.run(D3)
-        hist = os.path.join(fx.state, "excluded_value_history_Z.csv")
-        before = read(hist)
-        rc, out = fx.cli(f"{D3}T22:10:00", "--correct-excluded", "Z", "--date", D3,
-                         "--detail", '{"XXX": {"qty": 10000, "price": 40000}}')
-        check("Z10 đính chính thiếu người/lý do ⇒ từ chối", rc == 2 and "--corrected-by" in out, out)
-        rc, out = fx.cli(f"{D3}T22:10:00", "--correct-excluded", "Z", "--date", D3, "--detail",
-                         '{"AAA": {"qty": 1, "price": 1}}', "--corrected-by", "u", "--reason", "r")
-        check("Z11 đính chính mã KHÔNG thuộc excluded_tickers ⇒ từ chối", rc == 2 and "AAA" in out, out)
-        rc, out = fx.cli(f"{D3}T22:10:00", "--correct-excluded", "Z", "--date", D3, "--detail",
-                         '{"XXX": {"qty": 10000, "price": 46000}}', "--corrected-by",
-                         "user (fixture)", "--reason", "giá đóng cửa đúng là 46.000")
-        rc2, out2, st = fx.run(D3)
-        z = st["accounts"]["Z"]
-        check("Z12 đính chính hợp lệ ⇒ giá trị đọc ra đổi theo, CSV gốc KHÔNG bị sửa",
-              rc == 0 and z["excluded_value"] == 460e6 and read(hist) == before
-              and abs(z["brakes"]["daily"]["value"] - (538 / 530.5 - 1)) < 1e-9,
-              f"{rc} {z['excluded_value']} {z['brakes']['daily']}")
     finally:
         fx.close()
 
@@ -1171,14 +741,15 @@ def t_episode_guards():
         rc, out, st = fx.run(D6)
         e = st["accounts"]["L"]["brakes"]["episode"]
         check("G1 episode đang mở mà broker KHÔNG còn vị thế gói vay ⇒ KHÔNG ĐO ĐƯỢC, gợi ý đóng",
-              e["status"] == m.UNMEASURABLE and "--close-episode" in e["reason"] and rc == 1, f"{e}")
+              e["status"] == m.UNMEASURABLE and "--close-episode" in e["reason"] and rc == 1
+              and not e.get("quiet"), f"{e}")
         os.remove(os.path.join(fx.exec, f"dnse_raw_{D6}.jsonl"))
         rc, out, st = fx.run(D6)
         e = st["accounts"]["L"]["brakes"]["episode"]
         check("G1b episode đang mở mà KHÔNG đọc được positions phiên đó ⇒ KHÔNG ĐO ĐƯỢC kèm lý do, "
               "vẫn cho số tạm tính", e["status"] == m.UNMEASURABLE and e["value"] is not None
               and "không kiểm được vị thế gói vay" in e["reason"]
-              and f"dnse_raw_{D6}.jsonl" in e["reason"], f"{e}")
+              and f"dnse_raw_{D6}.jsonl" in e["reason"] and not e.get("quiet"), f"{e}")
     finally:
         fx.close()
     # --- B4b: ca của reviewer — vào 100, lên 125, bản duyệt mới ở 125, về 105
@@ -1232,26 +803,64 @@ def t_episode_guards():
               brakes(st, "A")["daily"] == m.OK and brakes(st, "A")["drawdown"] == m.OK, f"{brakes(st, 'A')}")
     finally:
         fx.close()
-    # --- B5 ca 2: ngày duyệt chỉ có positions 04:58 ⇒ không tự mở; mở TAY
+    # --- B5 ca 2: ngày duyệt chỉ có positions 04:58 ⇒ VẪN thử phiên kế; điểm vào = mốc XẤU hơn
     fx = Fx()
     try:
         fx.auto_pos = False
         fx.account("L", "111")
-        fx.navs_seq("L", [(D1, 100e6), (D2, 99e6), (D3, 84e6)])
+        fx.navs_seq("L", [(D1, 100e6), (D2, 110e6), (D3, 93.5e6)])
         fx.positions("111", D1, [("AAA", 1, 1841)])
         fx.positions("111", D2, [("BBB", 500, 1840)], ts="04:58:00")
         fx.positions("111", D3, [("BBB", 500, 1840)])
         fx.approval("L", D2)
         rc, out, st = fx.run(D3)
+        a, eps = st["accounts"]["L"], fx.episodes()
+        check("G10 ngày duyệt không đọc được positions ⇒ VẪN thử phiên kế và MỞ ở đó; điểm vào = mốc "
+              "sớm nhất có thể (D1), mốc kia (D2) giữ làm điểm vào phụ",
+              len(eps) == 1 and eps[0]["opened_date"] == D3 and eps[0]["entry_ref_date"] == D1
+              and eps[0]["entry_ref_alt_dates"] == [D2]
+              and D2 in eps[0]["evidence"]["unreadable_sessions"], f"{eps} {a['notes']}")
+        e = a["brakes"]["episode"]
+        check("G10b phanh đo theo điểm vào XẤU hơn: −15% từ D2 (không phải −6,5% từ D1) ⇒ BREACH, có ghi chú",
+              e["status"] == m.BREACH and abs(e["value"] - (93.5 / 110 - 1)) < 1e-9
+              and "XẤU hơn" in e.get("note", "") and any("XẤU hơn" in n for n in a["notes"]), f"{e}")
+    finally:
+        fx.close()
+    # --- B5: bản duyệt CÓ THẬT nhưng vị thế tới muộn ⇒ lý do KHÔNG được nói "không có bản duyệt"
+    fx = Fx()
+    try:
+        fx.account("L", "111")
+        fx.navs_seq("L", [(D1, 100e6), (D2, 99e6), (D3, 98e6), (D4, 97e6)])
+        fx.positions("111", D4, [("BBB", 500, 1840)])
+        fx.approval("L", D1)
+        rc, out, st = fx.run(D4)
+        e = st["accounts"]["L"]["brakes"]["episode"]
+        check("G10c có vị thế vay, có bản duyệt D1 (vị thế tới muộn hơn phiên kế) ⇒ lý do ĐỌC từ bản "
+              "duyệt: nêu ngày + vì sao chưa mở, không nói 'không có bản duyệt' (§29)",
+              e["status"] == m.UNMEASURABLE and f"bản duyệt margin đọc được tới phiên này: {D1}" in e["reason"]
+              and "ý định" in e["reason"] and "không thấy bản duyệt" not in e["reason"], e["reason"])
+    finally:
+        fx.close()
+    # --- không có bản duyệt nào ⇒ nói đúng thế; mở TAY
+    fx = Fx()
+    try:
+        fx.account("L", "111")
+        fx.navs_seq("L", [(D1, 100e6), (D2, 99e6), (D3, 84e6)])
+        fx.positions("111", D2, [("BBB", 500, 1840)])
+        fx.positions("111", D3, [("BBB", 500, "1840")])      # broker trả mã gói dạng CHUỖI
+        rc, out, st = fx.run(D3)
         a = st["accounts"]["L"]
-        check("G10 ngày duyệt không đọc được positions cuối phiên ⇒ KHÔNG tự mở, ghi chú chỉ đường mở tay",
+        check("G10d vị thế vay mà KHÔNG có bản duyệt nào ⇒ KHÔNG ĐO ĐƯỢC, nói đúng 'không thấy bản duyệt'; "
+              "mã gói dạng chuỗi \"1840\" vẫn nhận ra (K11/§28 — không thành NO_EPISODE im lặng)",
               fx.episodes() == [] and a["brakes"]["episode"]["status"] == m.UNMEASURABLE
-              and any("--open-episode" in n for n in a["notes"]), f"{a['notes']}")
+              and "không thấy bản duyệt margin nào" in a["brakes"]["episode"]["reason"]
+              and "--open-episode" in a["brakes"]["episode"]["reason"], f"{a['brakes']['episode']}")
         rc, out = fx.cli(f"{D3}T22:10:00", "--open-episode", "L", "--opened-date", D2)
         check("G11 mở tay thiếu --opened-by/--reason ⇒ từ chối", rc == 2 and fx.episodes() == [], out)
         rc, out = fx.cli(f"{D3}T22:10:00", "--open-episode", "L", "--opened-date", D6,
                          "--opened-by", "u", "--reason", "r")
         check("G12 mở tay với ngày TƯƠNG LAI ⇒ từ chối", rc == 2 and fx.episodes() == [], out)
+        n = len(fx.msgs())
         rc, out = fx.cli(f"{D3}T22:10:00", "--open-episode", "L", "--opened-date", D2,
                          "--opened-by", "user (fixture)", "--reason", "sao kê broker: giải ngân 06/10")
         eps = fx.episodes()
@@ -1259,10 +868,17 @@ def t_episode_guards():
               rc == 0 and len(eps) == 1 and eps[0]["entry_ref_date"] == D1
               and eps[0]["evidence"]["manual"] is True and eps[0]["opened_by"] == "user (fixture)",
               f"{rc} {out} {eps}")
-        rc, out, st = fx.run(D3)
+        check("G13b ...và gửi MỘT dòng báo lệnh tay (ai, lý do, trước/sau) vào kênh",
+              len(fx.msgs()) == n + 1 and "LỆNH TAY --open-episode" in fx.msgs()[-1]
+              and "user (fixture)" in fx.msgs()[-1] and "sao kê broker" in fx.msgs()[-1]
+              and "trước:" in fx.msgs()[-1] and "sau:" in fx.msgs()[-1], fx.msgs()[-1])
+        rc, out, st = fx.run(D3, now=f"{D3}T22:20:00")
         e = st["accounts"]["L"]["brakes"]["episode"]
         check("G14 ...và phanh −15% đo được ngay: −16% ⇒ BREACH", e["status"] == m.BREACH
               and abs(e["value"] - (-0.16)) < 1e-9, f"{e}")
+        check("G14b lượt đo kế NÊU lệnh tay trong notes + trong tin",
+              any("LỆNH TAY --open-episode" in x for x in st["accounts"]["L"]["notes"])
+              and "LỆNH TAY --open-episode" in fx.msgs()[-1], f"{st['accounts']['L']['notes']}")
         rc, out = fx.cli(f"{D3}T22:10:00", "--open-episode", "L", "--opened-date", D3,
                          "--opened-by", "u", "--reason", "r")
         check("G15 mở tay khi đang có episode mở ⇒ từ chối", rc == 1 and len(fx.episodes()) == 1, out)
@@ -1309,15 +925,31 @@ def t_episode_guards():
               f"{fx.episodes()} {notes}")
     finally:
         fx.close()
+    for last, lever_at_close, want in ((86e6, True, m.OK), (85e6, False, m.BREACH)):
+        fx = _episode_fx(last)
+        try:
+            fx.run(D4)
+            if not lever_at_close:                           # đã tất toán ngay trong ngày đóng
+                fx.positions("111", D5, [("AAA", 100, 1841)])
+            rc, out = fx.cli(f"{D5}T15:30:00", "--close-episode", "L", *close)   # TRƯỚC lượt 22:05
+            rc, out, st = fx.run(D5)
+            e = st["accounts"]["L"]["brakes"]["episode"]
+            check(f"G21 đóng episode TRƯỚC lượt tối của chính ngày đóng ⇒ phiên đó VẪN đo với episode "
+                  f"({want}, không phải NO_EPISODE xanh)", e["status"] == want
+                  and abs(e["value"] - (last / 100e6 - 1)) < 1e-9 and "đóng tay" in e.get("note", ""),
+                  f"{e}")
+        finally:
+            fx.close()
     fx = _episode_fx(95e6)
     try:
         fx.run(D5)
-        rc, out = fx.cli(f"{D5}T22:30:00", "--close-episode", "L", *close)
-        rc, out, st = fx.run(D5, now=f"{D5}T22:40:00")
-        check("G21 đóng trong ngày D ⇒ từ chính phiên D episode không còn hiệu lực (ngày đóng không tính)",
-              brakes(st, "L")["episode"] == m.UNMEASURABLE
-              and "KHÔNG có episode nào đang mở" in st["accounts"]["L"]["brakes"]["episode"]["reason"],
-              f"{st['accounts']['L']['brakes']['episode']}")
+        fx.cli(f"{D5}T22:30:00", "--close-episode", "L", *close)
+        fx.nav("L", D6, 94e6)
+        fx.positions("111", D6, [("BBB", 500, 1840)])
+        rc, out, st = fx.run(D6)
+        e = st["accounts"]["L"]["brakes"]["episode"]
+        check("G21b phiên SAU ngày đóng: episode hết hiệu lực; còn vị thế vay ⇒ kêu 'không có episode'",
+              e["status"] == m.UNMEASURABLE and "KHÔNG có episode nào đang mở" in e["reason"], f"{e}")
     finally:
         fx.close()
     fx = Fx()
@@ -1451,8 +1083,8 @@ def t_monitor_failures():
               f"rc={rc} {len(fx.msgs())}")
         hrc, line = fx.health("A", f"{D3}T08:20:00")
         hrc_b, line_b = fx.health("B", f"{D3}T08:20:00")
-        check("X14 ops_health: account nổ ⇒ rc=3 (tới được vận hành); account chạm phanh ⇒ rc=1",
-              hrc == 3 and "MONITOR LỖI" in line and hrc_b == 1, f"{hrc} {line} | {hrc_b}")
+        check("X14 ops_health: account nổ ⇒ rc=3 (tới được vận hành); account chạm phanh ⇒ rc=5",
+              hrc == 3 and "MONITOR LỖI" in line and hrc_b == 5, f"{hrc} {line} | {hrc_b}")
     finally:
         fx.close()
     # --- N1: --date của phiên cũ ⇒ chạy khô
@@ -1471,21 +1103,6 @@ def t_monitor_failures():
               st["session"] == D3 and len(fx.msgs()) == n + 2, f"{st['session']} {len(fx.msgs())}")
         rc, out, st = fx.run(D3, extra=["--date", D3])
         check("N12 --date TRÙNG phiên phải đo ⇒ chạy thật như thường", "CHẠY KHÔ" not in out)
-    finally:
-        fx.close()
-    fx = _two_accounts()
-    try:
-        fx.run(D2)
-        fx.nav("S", D3, 100e6)
-        fx.nav("Z", D3, 998e6)
-        fx.positions("222", D3, [("XXX", 10000, 1841)])
-        fx.active_nav("Z", D3, [("XXX", 10000, 46750)])
-        hist = os.path.join(fx.state, "excluded_value_history_Z.csv")
-        before, log = read(hist), read(os.path.join(fx.state, "run_log.jsonl"))
-        rc, out, st = fx.run(D4, extra=["--date", D3])
-        check("N12b chạy khô KHÔNG ghi chuỗi mã loại trừ, KHÔNG ghi nhật ký lượt chạy",
-              read(hist) == before and read(os.path.join(fx.state, "run_log.jsonl")) == log
-              and "CHẠY KHÔ" in out, out[-200:])
     finally:
         fx.close()
     # --- N2: khoá
@@ -1515,41 +1132,291 @@ def t_monitor_failures():
         fx.nav("A", D1, 100e6)
         rc, out, st = fx.run(D1)
         r = st["accounts"]["A"]["brakes"]["daily"]["reason"]
-        check("N16 phiên = mốc đầu chuỗi ⇒ lý do nói đúng việc đó (không đổ cho chuỗi mã loại trừ)",
-              "ĐẦU TIÊN" in r and "mã loại trừ" not in r, r)
+        check("N16 phiên = mốc đầu chuỗi ⇒ lý do nói đúng việc đó", "ĐẦU TIÊN" in r, r)
     finally:
         fx.close()
 
 
-def t_backfill_tool():
-    print("[B3] công cụ vá chuỗi mã loại trừ: chỉ THÊM ngày thiếu, ghi nguyên tử")
-    import nav_loss_brake_backfill_excluded as bf
-    fx = _two_accounts()
+def t_total_basis():
+    print("[I/R56] cơ sở đo = NAV TOÀN TÀI KHOẢN cho mọi account · lọc account (§12)")
+    fx = Fx()
     try:
-        for d in (D0, D1, D2):
-            fx.positions("222", d, [("XXX", 10000, 1841)])
-        fx.nav("Z", D3, 998e6)
-        fx.positions("222", D3, [("XXX", 10000, 1841)])
-        fx.nav("Z", D4, 998e6)
-        fx.positions("222", D4, [("XXX", 10000, 1841)], ts="04:58:00")
-        csvp = os.path.join(fx.root, "px.csv")
-        with open(csvp, "w", encoding="utf-8") as f:
-            f.write("time,ticker,Price,Close\n" + "".join(f"{d},XXX,50000,50000\n" for d in ALL_D))
-        hist = os.path.join(fx.state, "excluded_value_history_Z.csv")
-        before = read(hist)
+        fx.account("S", "111")
+        fx.account("Z", "222", excluded=("XXX",))            # có khai excluded_tickers
+        fx.account("Y", "333")                               # cùng chuỗi NAV với Z, không khai
+        fx.navs_seq("S", [(D1, 101e6), (D2, 100e6), (D3, 99.5e6)])
+        for a in ("Z", "Y"):
+            fx.navs_seq(a, [(D1, 100e6), (D2, 99.8e6), (D3, 90.4e6)])
+        fx.positions("222", D3, [("XXX", 10000, 1841)])      # Z đang giữ mã "loại trừ"
+        rc, out, st = fx.run(D3)
+        s, z, y = (st["accounts"][k] for k in "SZY")
+        check("I1 account khai excluded_tickers VẪN đo trên NAV tổng: −9,42% ⇒ BREACH (không còn "
+              "'phần bot quản lý' che)", z["brakes"]["daily"]["status"] == m.BREACH
+              and abs(z["brakes"]["daily"]["value"] - (90.4 / 99.8 - 1)) < 1e-12, f"{z['brakes']['daily']}")
+        check("I2 excluded_tickers KHÔNG ảnh hưởng gì: Z và Y (cùng chuỗi NAV) ra y hệt ba phanh",
+              z["brakes"] == y["brakes"] and z["unit_price"] == y["unit_price"], f"{z['brakes']} {y['brakes']}")
+        check("I3 hai account khác chuỗi cho hai kết quả KHÁC nhau (§12)",
+              s["unit_price"] != z["unit_price"] and s["overall"] == m.OK and z["overall"] == m.BREACH,
+              f"{s['overall']} {z['overall']}")
+        check("I4 status/tin ghi cơ sở đo 'NAV toàn tài khoản'; không còn khoá/câu chữ của phần quản lý",
+              st["basis"] == m.BASIS_VI and "basis" not in z and "excluded_value" not in z
+              and all("NAV toàn tài khoản" in t and "phần bot quản lý" not in t for t in fx.msgs())
+              and len(fx.msgs()) == 2, f"{sorted(z)} {len(fx.msgs())}")
+        check("I5 state-dir không còn file nào của bộ máy mã loại trừ",
+              not [f for f in os.listdir(fx.state) if "excluded" in f or "sleeve" in f],
+              f"{os.listdir(fx.state)}")
+        src = read(os.path.join(BIN, "nav_loss_brake_monitor.py"))
+        check("I6 mã nguồn không còn đọc excluded_tickers / active_nav / corp_action_daily",
+              '"excluded_tickers"' not in src and "active_nav_" not in src
+              and "corp_action_daily" not in src and "managed_sleeve" not in src)
+    finally:
+        fx.close()
+    fx = _episode_fx(95e6)                                   # L có episode (điểm vào D1)
+    try:
+        fx.account("M", "222")
+        fx.navs_seq("M", [(D1, 100e6), (D2, 99e6), (D3, 98e6), (D4, 97e6), (D5, 96e6)])
+        rc, out, st = fx.run(D5)
+        check("R56 episode của account L KHÔNG phủ sang account M (§12): L đo −5% OK, M 'không có episode'",
+              brakes(st, "L")["episode"] == m.OK and brakes(st, "M")["episode"] == m.NO_EPISODE,
+              f"{brakes(st, 'L')} {brakes(st, 'M')}")
+    finally:
+        fx.close()
+
+
+def t_quiet_rule():
+    print("[luật giảm tin] chỉ cờ ước tính + cách ngưỡng > 2,0pp ⇒ không đẩy tin; đúng biên 2,00 ⇒ đẩy")
+    check("T0 hằng số có tên = 2,0 điểm %", m.QUIET_ESTIMATE_MARGIN_PP == 2.0)
+    raw = []
+    for name, cap, start, nav, quiet in (
+            ("T1 −3,00% (cách ngưỡng ĐÚNG 2,00pp) ⇒ VẪN đẩy", 100e6, 100e6, 97e6, False),
+            # vốn 700tr, NAV 1.100 → 1.067tr: đúng −3% nhưng phép chia cho −0,02999999999999991
+            ("T1b −3,00% mà dấu phẩy động cho khoảng cách 2,000000000000009pp ⇒ VẪN đẩy",
+             700e6, 1100e6, 1067e6, False),
+            ("T2 −2,9999% (cách 2,0001pp) ⇒ KHÔNG đẩy", 100e6, 100e6, 97_000_100, True)):
+        fx = Fx()
+        try:
+            fx.account("A", "111", capital=cap)
+            fx.navs_seq("A", [(D1, start), (D2, start)])
+            fx.nav("A", D3, nav, est=True)
+            rc, out, st = fx.run(D3)
+            a = st["accounts"]["A"]
+            b = a["brakes"]["daily"]
+            raw.append(b["distance_pp"])
+            check(name, b["status"] == m.UNMEASURABLE and bool(b.get("quiet")) == quiet
+                  and len(fx.msgs()) == (0 if quiet else 1) and rc == 1
+                  and ("daily" in a["alert"]["suppressed"]) == quiet, f"{b} msgs={len(fx.msgs())}")
+            if quiet:
+                check("T2b ca không đẩy: status vẫn KHÔNG ĐO ĐƯỢC kèm số tạm tính + lý do cờ ước tính",
+                      a["overall"] == m.UNMEASURABLE and b["value"] is not None
+                      and "nav_is_estimate" in b["reason"] and a["alert"]["sent_now"] is False, f"{b}")
+                hrc, line = fx.health("A", f"{D4}T08:20:00")
+                check("T2c dòng kiểm sáng: rc=1 (không đỏ), có số tạm tính + nói rõ không đẩy tin tối",
+                      hrc == 1 and "tạm tính -3,00%" in line and "KHÔNG đẩy tin tối" in line
+                      and "ĐÃ" not in line, f"{hrc} {line}")
+                log = [json.loads(x) for x in read(os.path.join(fx.state, "run_log.jsonl")).splitlines()]
+                check("T2d nhật ký lượt chạy ghi account bị giảm tin", log[-1]["suppressed"] == ["A"]
+                      and log[-1]["sent"] == [], f"{log[-1]}")
+        finally:
+            fx.close()
+    check("T1d ca T1b thật sự cho khoảng cách NHỈNH hơn 2,0 nếu so trần (EPS của luật có việc)",
+          raw[1] > 2.0 and raw[0] <= 2.0, f"{raw}")
+    fx = Fx()
+    try:
+        fx.account("A", "111")
+        fx.navs_seq("A", [(D1, 100e6), (D2, 100e6)])
+        fx.nav("A", D3, 99e6, est=True, ts="04:49:59")       # ước tính + chụp lệch giờ
+        rc, out, st = fx.run(D3)
+        b = st["accounts"]["A"]["brakes"]["daily"]
+        check("T3 có THÊM lý do khác ngoài cờ ước tính ⇒ đẩy như cũ dù số xa ngưỡng",
+              not b.get("quiet") and len(fx.msgs()) == 1 and "04:49:59" in b["reason"], f"{b}")
+        fx.nav("A", D3, 99e6, est=True)
+        fx.nav("A", D4, 98.5e6)                              # dòng phiên sạch, MỐC SO là dòng ước tính
+        n = len(fx.msgs())
+        rc, out, st = fx.run(D4)
+        b = st["accounts"]["A"]["brakes"]
+        check("T4 cờ ước tính ở dòng MỐC SO, số xa ngưỡng ⇒ không đẩy; lỗ từ đỉnh đo được bình thường",
+              b["daily"]["status"] == m.UNMEASURABLE and b["daily"].get("quiet") is True
+              and b["drawdown"]["status"] == m.OK and len(fx.msgs()) == n and rc == 1, f"{b['daily']}")
+        fx.nav("A", D5, 98e6, est=True)
+        fx.nav("A", D5, 75.5e6, est=True)                    # từ đỉnh −24,5%: cách ngưỡng 0,5pp
+        rc, out, st = fx.run(D5)
+        b = st["accounts"]["A"]["brakes"]
+        check("T5 tạm tính vượt ngưỡng (ngày) ⇒ tin đỏ; phanh lỗ-từ-đỉnh cách ngưỡng 0,5pp ⇒ không quiet",
+              b["daily"]["status"] == m.BREACH_PROV and b["drawdown"]["status"] == m.UNMEASURABLE
+              and not b["drawdown"].get("quiet") and len(fx.msgs()) == n + 1, f"{b}")
+    finally:
+        fx.close()
+    fx = _episode_fx(86.5e6)
+    try:
+        fx.nav("L", D5, 86.5e6, est=True)                    # episode −13,5% (cách 1,5pp); ngày −2,26%
+        rc, out, st = fx.run(D5)
+        a = st["accounts"]["L"]
+        check("T6 mỗi phanh xét RIÊNG: episode cách ngưỡng 1,5pp ⇒ đẩy; lỗ một ngày cách 2,74pp ⇒ quiet",
+              a["brakes"]["episode"]["status"] == m.UNMEASURABLE and not a["brakes"]["episode"].get("quiet")
+              and a["brakes"]["daily"].get("quiet") is True and len(fx.msgs()) == 1
+              and a["alert"]["keys"] == [f"L|{D5}|episode|UNMEASURABLE"]
+              and a["alert"]["suppressed"] == ["daily", "drawdown"],
+              f"{a['alert']} {a['brakes']}")
+    finally:
+        fx.close()
+
+
+def t_human_actions():
+    print("[K2] lệnh tay ghi state: kiểm bản duyệt · một dòng vào kênh · hiện ở lượt đo kế")
+    by = ["--acked-by", "user (fixture)", "--reason", "cùng episode"]
+    fx = Fx()
+    try:
+        fx.account("L", "111")
+        fx.navs_seq("L", [(D1, 100e6), (D2, 110e6), (D3, 125e6), (D4, 124e6), (D5, 105e6 / 0.96),
+                          (D6, 105e6)])
+        for d in (D2, D3, D4, D5, D6):
+            fx.positions("111", d, [("BBB", 500, 1840)])
+        fx.approval("L", D2)
+        fx.run(D3)
+        fx.approval("L", D4)
+        n = len(fx.msgs())
+        rc, out, st = fx.run(D4)
+        e = st["accounts"]["L"]["brakes"]["episode"]
+        check("HA0 bản duyệt mới chưa ack, số xấu nhất −0,8% (xa ngưỡng) ⇒ KHÔNG ĐO ĐƯỢC và VẪN đẩy tin "
+              "(không thuộc luật giảm tin)", e["status"] == m.UNMEASURABLE and not e.get("quiet")
+              and len(fx.msgs()) == n + 1, f"{e}")
+        rc, out = fx.cli(f"{D5}T10:00:00", "--ack-approval", "L", "--approval-date", "2027-01-01", *by)
+        check("HA1 ack bản duyệt ngày TƯƠNG LAI ⇒ từ chối rc=2, không ghi gì",
+              rc == 2 and "TƯƠNG LAI" in out and fx.episodes()[0]["acked_approvals"] == [], f"{rc} {out}")
+        rc, out = fx.cli(f"{D5}T10:00:00", "--ack-approval", "L", "--approval-date", D3, *by)
+        check("HA2 ack bản duyệt KHÔNG TỒN TẠI ⇒ từ chối rc=1, nêu các bản đang có, không ghi gì",
+              rc == 1 and "không có bản duyệt margin" in out and D4 in out
+              and fx.episodes()[0]["acked_approvals"] == []
+              and not os.path.exists(os.path.join(fx.state, "human_actions.jsonl")), f"{rc} {out}")
+        n = len(fx.msgs())
+        rc, out = fx.cli(f"{D5}T10:00:00", "--ack-approval", "L", "--approval-date", D4, *by)
+        t = fx.msgs()[-1]
+        check("HA3 ack hợp lệ ⇒ rc=0 + ĐÚNG MỘT dòng vào kênh: lệnh, ai, lý do, trước/sau",
+              rc == 0 and len(fx.msgs()) == n + 1 and t.startswith("📝") and "--ack-approval" in t
+              and "user (fixture)" in t and "cùng episode" in t and "trước:" in t and D4 in t, t)
+        acts = [json.loads(x) for x in read(os.path.join(fx.state, "human_actions.jsonl")).splitlines()]
+        check("HA4 sổ lệnh tay có một dòng (ai, lý do, trước/sau)", len(acts) == 1
+              and acts[0]["cmd"] == "--ack-approval" and acts[0]["by"] == "user (fixture)"
+              and acts[0]["account"] == "L", f"{acts}")
+        fx.account("M", "222")
+        fx.navs_seq("M", [(D4, 100e6), (D5, 100e6), (D6, 100e6)])
+        rc, out, st = fx.run(D5)
+        check("HA5 lượt đo kế NÊU lệnh tay trong notes (kể cả khi mọi phanh xanh) và in ra log",
+              any("LỆNH TAY --ack-approval" in x for x in st["accounts"]["L"]["notes"])
+              and "LỆNH TAY --ack-approval" in out, f"{st['accounts']['L']['notes']}")
+        check("HA5b ...account KHÁC trong cùng lượt đo KHÔNG thấy lệnh tay của L (§12)",
+              st["accounts"]["M"]["notes"] == [], f"{st['accounts']['M']['notes']}")
+        rc, out, st = fx.run(D6)
+        check("HA6 lượt đo phiên SAU nữa không nhắc lại",
+              not any("LỆNH TAY" in x for x in st["accounts"]["L"]["notes"] + st["accounts"]["M"]["notes"]),
+              f"{st['accounts']['L']['notes']}")
+        with open(os.path.join(fx.state, "human_actions.jsonl"), "a", encoding="utf-8") as f:
+            f.write('{"at": "2026-')
+        rc, out, st = fx.run(D6)
+        check("HA7 sổ lệnh tay cụt ⇒ notes nói đúng lỗi đọc được (§29), không coi là 'không có lệnh'",
+              any("sổ lệnh tay" in x and "JSONDecodeError" in x for x in st["accounts"]["L"]["notes"]),
+              f"{st['accounts']['L']['notes']}")
+    finally:
+        fx.close()
+    fx = _episode_fx(95e6)
+    try:
+        fx.run(D5)
+        os.environ.pop(m.SINK_ENV, None)                     # không sink + state giả ⇒ gửi bị từ chối
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-            rc = bf.main(["--price-csv", csvp, "--out-dir", fx.state, "--data-root", fx.data,
-                          "--secrets", fx.secrets, "--account", "Z"])
-        after = read(hist)
-        check("BF1 dòng đã có (D0–D2, giá 46.000/46.750) KHÔNG bị ghi đè bằng giá 50.000 của CSV",
-              rc == 0 and after.startswith(before.rstrip("\n")) and "46750" in after, buf.getvalue())
-        check("BF2 chỉ THÊM ngày thiếu (D3) với giá từ CSV", f'{D3},500000000' in after, after[-300:])
-        check("BF3 ngày chỉ có positions chụp trước phiên (D4) ⇒ bỏ qua, nêu lý do, không điền hộ",
-              D4 not in after and "04:58:00" in buf.getvalue(), buf.getvalue())
-        check("BF4 không sót file tạm", not [f for f in os.listdir(fx.state) if ".tmp" in f])
-        src = read(os.path.join(BIN, "nav_loss_brake_backfill_excluded.py"))
-        check("BF5 công cụ không còn xoá CSV trước khi ghi", "os.remove" not in src)
+            rc = m.main(fx.args(f"{D5}T22:30:00") + ["--close-episode", "L", "--closed-by", "u",
+                                                     "--reason", "r"])
+        check("HA8 lệnh tay ghi được state nhưng KHÔNG gửi được dòng báo ⇒ rc=3 + ❌ nói rõ; sổ lệnh "
+              "tay vẫn có để lượt đo kế nêu", rc == 3 and "KHÔNG gửi được dòng báo lệnh tay" in buf.getvalue()
+              and fx.episodes()[0]["closed_date"] == D5
+              and os.path.exists(os.path.join(fx.state, "human_actions.jsonl")), f"{rc} {buf.getvalue()}")
+    finally:
+        fx.close()
+
+
+def t_k_items():
+    print("[K3/K4/K5/K11] --now trên state sống · state-dir không ghi được · sink trên state sống · "
+          "positions thiếu khoá · giờ chụp điểm vào · ghi chú đỉnh")
+    class LiveStateCtx(m.Ctx):               # thư mục vẫn là thư mục TẠM, chỉ cờ state sống bật
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            self.state_is_live = True
+
+    fx = Fx()
+    try:
+        fx.account("A", "111")
+        fx.navs_seq("A", [(D1, 100e6), (D2, 70e6)])
+        real_ctx, m.Ctx = m.Ctx, LiveStateCtx
+        try:
+            rc, out = fx.cli(f"{D2}T22:00:00")
+            rc2, out2 = fx.cli(f"{D2}T22:00:00", "--close-episode", "A", "--closed-by", "x",
+                               "--reason", "y")
+            rc3, out3 = fx.cli(f"{D2}T22:00:00", "--health-line", "--account", "A")
+        finally:
+            m.Ctx = real_ctx
+        check("K3 --now khi state là state SỐNG ⇒ từ chối rc=2 trước khi làm bất cứ gì (lượt đo, lệnh "
+              "tay, health-line): không status, không tin",
+              rc == rc2 == rc3 == 2 and (out + out2 + out3).count("TỪ CHỐI --now") == 3
+              and not os.path.exists(os.path.join(fx.state, "status.json")) and fx.msgs() == [],
+              f"{rc} {rc2} {rc3} {out}")
+        blocker = os.path.join(fx.root, "blk")
+        open(blocker, "w").close()                           # state-dir nằm DƯỚI một file ⇒ không tạo được
+        argv = ["--data-root", fx.data, "--state-dir", os.path.join(blocker, "st"), "--secrets",
+                fx.secrets, "--now", f"{D2}T22:00:00"]
+        os.environ[m.SINK_ENV] = fx.sink
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+            rc = m.main(argv)
+            rc2 = m.main(argv + ["--close-episode", "A", "--closed-by", "u", "--reason", "r"])
+        check("K4 state-dir không tạo/khoá được ⇒ rc=3 (không traceback, không rc=1) + MỘT tin 'monitor "
+              "lỗi' kèm lỗi thật", rc == 3 and len(fx.msgs()) == 1
+              and "MONITOR PHANH LỖ NAV LỖI" in fx.msgs()[0] and "NotADirectoryError" in fx.msgs()[0],
+              f"{rc} {fx.msgs()} {buf.getvalue()[-300:]}")
+        check("K4b lệnh tay gặp cùng lỗi ⇒ rc=3 + ❌ nêu lỗi, không traceback",
+              rc2 == 3 and "NotADirectoryError" in buf.getvalue(), f"{rc2}")
+        # --- K5: sink trên state SỐNG không được tính là đã gửi
+        ctx = m.Ctx(fx.data, fx.state, fx.secrets)
+        ctx.is_live = True
+        out = m.send_once(ctx, ["A|x|daily|BREACH"], lambda: "tin thử K5")
+        check("K5 tin đi vào sink khi state là state SỐNG ⇒ KHÔNG tính đã gửi: sent_now=False, có "
+              "send_error, KHÔNG ghi khoá chống-trùng, status ghi rõ sink",
+              out["sent_now"] is False and "sink" in (out["send_error"] or "")
+              and out["sink"] == fx.sink and not os.path.exists(ctx.sent_path), f"{out}")
+        # --- K11: bản ghi positions cuối cùng không có khoá payload.positions
+        with open(os.path.join(fx.exec, f"dnse_raw_{D2}.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": f"{D2}T19:20:00", "kind": "positions", "account_no": "111",
+                                "payload": {"error": "timeout"}}) + "\n")
+        rc, out, st = fx.run(D2)
+        e = st["accounts"]["A"]["brakes"]["episode"]
+        check("K11a bản ghi positions thiếu khoá payload.positions ⇒ 'không đọc được' (KHÔNG coi là "
+              "không giữ gì), nêu khoá đọc được", e["status"] == m.UNMEASURABLE
+              and "KHÔNG có danh sách payload.positions" in e["reason"] and "error" in e["reason"], f"{e}")
+    finally:
+        fx.close()
+    check("K11b mã gói vay chuẩn hoá trước khi so (§28)", m._pkg_id("1840") == 1840
+          and m._pkg_id(1840.0) == 1840 and m._pkg_id(" 1840 ") == 1840 and m._pkg_id(None) is None
+          and m._pkg_id("1840.5") is None and m._pkg_id(1841) == 1841)
+    fx = _episode_fx(95e6)
+    try:
+        fx.nav("L", D1, 100e6, ts="04:49:59")                # dòng ĐIỂM VÀO chụp lệch giờ
+        rc, out, st = fx.run(D5)
+        e = st["accounts"]["L"]["brakes"]["episode"]
+        check("K11c dòng điểm vào episode không phải giá chốt ⇒ phanh episode chỉ TẠM TÍNH, nêu giờ chụp",
+              e["status"] == m.UNMEASURABLE and "04:49:59" in e["reason"] and e["value"] is not None
+              and not e.get("quiet"), f"{e}")
+    finally:
+        fx.close()
+    fx = Fx()
+    try:
+        fx.account("A", "111")
+        fx.nav("A", D1, 110e6, est=True)                     # ĐỈNH là dòng ước tính
+        fx.navs_seq("A", [(D2, 100e6), (D3, 99e6)])
+        rc, out, st = fx.run(D3)
+        d = st["accounts"]["A"]["brakes"]["drawdown"]
+        hrc, line = fx.health("A", f"{D4}T08:20:00")
+        check("K11d ghi chú 'đỉnh chưa phải giá chốt' ĐƯỢC IN ra (log lượt chạy + dòng kiểm sáng)",
+              d["status"] == m.OK and "đỉnh chưa phải giá chốt" in out
+              and "đỉnh chưa phải giá chốt" in line and "nav_is_estimate" in line, f"{out} | {line}")
     finally:
         fx.close()
 
@@ -1557,9 +1424,9 @@ def t_backfill_tool():
 def main():
     os.environ.pop(m.SINK_ENV, None)
     for t in (t_thresholds, t_threshold_parsing, t_daily_edges, t_float_edge, t_dd_edges, t_episode,
-              t_flows, t_fail_loud, t_close_capture, t_provisional_breach, t_two_accounts_and_sleeve,
-              t_corp_calendar, t_managed_invariants, t_episode_guards, t_idempotent,
-              t_monitor_failures, t_backfill_tool, t_health_and_clock):
+              t_flows, t_fail_loud, t_close_capture, t_provisional_breach, t_total_basis,
+              t_quiet_rule, t_episode_guards, t_human_actions, t_k_items, t_idempotent,
+              t_monitor_failures, t_health_and_clock):
         try:
             t()
         except Exception as exc:           # ca nổ giữa chừng = FAIL có tên, không phải traceback trần
