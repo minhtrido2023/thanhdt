@@ -1,0 +1,44 @@
+M01 daily: <= → <                                    CHẾT  B1 đúng −5,00% ⇒ BREACH  { | B1 đúng −5,00% ⇒ BREACH · 
+M02 daily: bỏ EPS                                    CHẾT  B4b vẫn BREACH nhờ EPS  {'
+M03 drawdown: <= → <                                 CHẾT  C1 đúng −25,00% ⇒ BREACH  
+M04 episode: <= → <                                  CHẾT  D1 đúng −15,00% từ điểm và
+M05 DD_THRESHOLD 0.25 → 0.20                         CHẾT  A5 DD_THRESHOLD = 0.25 (ri | C2 −24,999999% ⇒ OK  {'sta | P2 ...drawdown vẫn đo  {'s
+M06 bỏ lọc account ở raw_positions                   CHẾT  I3 Z: giá trị mã loại trừ  | I6 Z: nhưng cũng KHÔNG coi | I10 sau khi KHAI ⇒ đo được
+M07 daily: bỏ kiểm cờ ước tính                       CHẾT  F1 dòng nav_is_estimate ⇒ 
+M08 drawdown: bỏ kiểm cờ ước tính                    CHẾT  F1 dòng nav_is_estimate ⇒ 
+M09 không ghi dấu đã gửi                             CHẾT  
+M10 gửi lỗi vẫn đánh dấu                             CHẾT  K7 gửi lỗi ⇒ KHÔNG đánh dấ | K8 lượt sau gửi được ⇒ gửi | K9 mất status.json nhưng d
+M11 dedupe: gửi lại mọi lần                          CHẾT  K3 chạy lại cùng phiên: KH | K4 chạy lại sáng hôm sau ( | K5 phiên sau còn vi phạm ( | K8 lượt sau gửi được ⇒ gửi
+M12 basis luôn total                                 CHẾT  I1 S đo trên NAV toàn tài  | I3 Z: giá trị mã loại trừ  | I5 Z: KHÔNG có phanh nào B | I6 Z: nhưng cũng KHÔNG coi
+M13 bẫy sleeve: bỏ điều kiện đã khai                 CHẾT  I10 sau khi KHAI ⇒ đo được
+M14 bẫy sleeve: tắt hẳn                              CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo  
+M15 bẫy giá: bỏ số mũ n phiên                        CHẾT  T3 giá mã loại trừ +14% qu
+M16 bẫy KL: tắt                                      CHẾT  J1 KL mã loại trừ đổi mà c
+M17 bẫy lịch corp-action: tắt                        CHẾT  T1 lịch corp-action có sự 
+M18 thiếu phiên liền trước: bỏ kiểm                  CHẾT  P1 thiếu dòng phiên liền t
+M19 mốc so: luôn dòng liền trước                     CHẾT  O2 mốc so = dòng của phiên
+M20 health: bỏ kiểm phiên                            CHẾT  H3 monitor không chạy tối  | H5 thứ Bảy: phiên phải có 
+M21 bỏ dòng tiền nạp/rút                             CHẾT  E1 rút 150tr (NAV 200→50)  | E2 nạp không đẩy đỉnh lên  | E5 dòng tiền TREO (chưa dò
+M22 sổ dòng tiền thiếu ⇒ coi như rỗng                CHẾT  E4 MẤT sổ dòng tiền ⇒ KHÔN
+M23 bản duyệt thu hồi vẫn mở                         CHẾT  D14 bản duyệt đã thu hồi ⇒
+M24 mở episode không cần vị thế gói vay              CHẾT  D11 có bản duyệt nhưng KHÔ | D12 ...và ghi chú nói rõ  
+M25 vị thế gói vay không episode: im                 CHẾT  D13 có vị thế gói vay mà K
+M26 thiếu ngưỡng ⇒ mặc định −5%                      CHẾT  A6 thiếu khoá daily ⇒ dail | A7 lý do nêu đúng tên khoá | A8 thiếu khoá ⇒ in ❌ + rc≠ | A11 daily kiểu bool ⇒ lỗi
+M27 lý do thiếu dòng: bỏ đọc file chặn               CHẾT  G3 có file chặn ⇒ lý do tr
+M28 chuỗi mã loại trừ: cho ghi đè                    CHẾT  R1b _append_excluded tự nó | R5 lệch 0,05% (trong dung 
+M29 active_nav sai ngày vẫn dùng                     CHẾT  R2 đang giữ mã loại trừ mà
+M30 không so KL hai nguồn                            CHẾT  R3 KL lệch giữa dnse_raw v | R4 active_nav.total_nav lệ
+M31 từ chối gửi thật khi không live: bỏ              CHẾT  K6 không sink + data-root 
+M32 expected_session: dùng ngày UTC                  CHẾT  N4 17:30 UTC thứ Hai = 00:
+M33 NAV_EXPECTED_AFTER 21:50 → 00:00                 CHẾT  K4 chạy lại sáng hôm sau ( | K5 phiên sau còn vi phạm ( | K8 lượt sau gửi được ⇒ gửi | K9 mất status.json nhưng d
+M34 episode: điểm vào = ngày mở (không phải phiên trước) CHẾT  D1 đúng −15,00% từ điểm và | D2 điểm vào = chốt phiên T
+M35 đóng episode không cần lý do                     CHẾT  
+M36 episode đã đóng vẫn tính                         CHẾT  D8 sau khi đóng ⇒ 'không c
+M37 dòng tiền treo: bỏ qua                           CHẾT  E5 dòng tiền TREO (chưa dò
+M38 tin cảnh báo: bỏ lệnh BOT_STOP                   CHẾT  B1 đúng −5,00% ⇒ BREACH ·  | B3 −5,000001% ⇒ BREACH · t
+M39 EXCL_PRICE_BAND 7,5% → 30%                       CHẾT  I2 hai account cho hai kết | I6 Z: nhưng cũng KHÔNG coi | I8 chỉ Z có tin cảnh báo  
+M41 bỏ đối chiếu total_nav hai file                  CHẾT  R4 active_nav.total_nav lệ
+M42 NAV_MATCH_TOL 0,1% → 0,01%                       CHẾT  R5 lệch 0,05% (trong dung 
+M40 chưa có chuỗi mã loại trừ ⇒ lặng lẽ coi 0        SỐNG  nav_loss_brake_monitor_selfcheck: 110 PASS / 0 FAIL (TZ=Asia/Ho_Chi_Minh)
+
+41/42 mutant chết. Còn sống: ['M40 chưa có chuỗi mã loại trừ ⇒ lặng lẽ coi 0']

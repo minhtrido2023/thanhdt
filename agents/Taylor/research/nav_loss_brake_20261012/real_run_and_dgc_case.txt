@@ -1,0 +1,25 @@
+### 1) CHẠY THẬT trên dữ liệu thật (state = seed research, cảnh báo → sink), phiên mặc định
+✅ SpaceX phiên 2026-10-09 (phần bot quản lý): Lỗ một ngày: -0,07% (ngưỡng -5%, cách 4,93pp) · Lỗ từ đỉnh: -1,33% (ngưỡng -25%, cách 23,67pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+✅ ZaloPay phiên 2026-10-09 (phần bot quản lý): Lỗ một ngày: -0,06% (ngưỡng -5%, cách 4,94pp) · Lỗ từ đỉnh: -2,06% (ngưỡng -25%, cách 22,94pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+--- lần 2 (idempotent)
+✅ SpaceX phiên 2026-10-09 (phần bot quản lý): Lỗ một ngày: -0,07% (ngưỡng -5%, cách 4,93pp) · Lỗ từ đỉnh: -1,33% (ngưỡng -25%, cách 23,67pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+✅ ZaloPay phiên 2026-10-09 (phần bot quản lý): Lỗ một ngày: -0,06% (ngưỡng -5%, cách 4,94pp) · Lỗ từ đỉnh: -2,06% (ngưỡng -25%, cách 22,94pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+sink lines: 0
+
+### 2) dòng ops_health (đọc status.json vừa ghi)
+Phanh lỗ NAV [SpaceX] phiên 09/10 (phần bot quản lý): Lỗ một ngày: -0,07% (ngưỡng -5%, cách 4,93pp) · Lỗ từ đỉnh: -1,33% (ngưỡng -25%, cách 23,67pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+Phanh lỗ NAV [ZaloPay] phiên 09/10 (phần bot quản lý): Lỗ một ngày: -0,06% (ngưỡng -5%, cách 4,94pp) · Lỗ từ đỉnh: -2,06% (ngưỡng -25%, cách 22,94pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+
+### 3) CA DGC — bỏ bản khai cổ tức 80tr khỏi managed_sleeve_flows.json
+⚠️ ZaloPay phiên 2026-09-14 (phần bot quản lý): Lỗ một ngày: KHÔNG ĐO ĐƯỢC — phần bot quản lý có 1 ngày nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai trong managed_sleeve_flows.json — gần nhất 2026-09-14: giá DGC nhảy -20,00% (46.750 → 37.400, so với 2026-09-11) — quá biên độ sàn +7,5%/phiên qua 1 phiên; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 1 2026 - 3,000 VND) ≈ 30.000.000đ tiền về phần quản lý; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 5,000 VND) ≈ 50.000.000đ tiền về phần quản lý · Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — phần bot quản lý có 1 ngày nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai trong managed_sleeve_flows.json — gần nhất 2026-09-14: giá DGC nhảy -20,00% (46.750 → 37.400, so với 2026-09-11) — quá biên độ sàn +7,5%/phiên qua 1 phiên; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 1 2026 - 3,000 VND) ≈ 30.000.000đ tiền về phần quản lý; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 5,000 VND) ≈ 50.000.000đ tiền về phần quản lý · Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — phần bot quản lý có 1 ngày nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai trong managed_sleeve_flows.json — gần nhất 2026-09-14: giá DGC nhảy -20,00% (46.750 → 37.400, so với 2026-09-11) — quá biên độ sàn +7,5%/phiên qua 1 phiên; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 1 2026 - 3,000 VND) ≈ 30.000.000đ tiền về phần quản lý; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 5,000 VND) ≈ 50.000.000đ tiền về phần quản lý
+rc=1
+⚠️ PHANH LỖ NAV — KHÔNG ĐO ĐƯỢC — ZaloPay · phiên 2026-09-14 · đo trên phần bot quản lý
+🟡 Lỗ một ngày: KHÔNG ĐO ĐƯỢC — phần bot quản lý có 1 ngày nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai trong managed_sleeve_flows.json — gần nhất 2026-09-14: giá DGC nhảy -20,00% (46.750 → 37.400, so với 2026-09-11) — quá biên độ sàn +7,5%/phiên qua 1 phiên; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 1 2026 - 3,000 VND) ≈ 30.000.000đ tiền về phần quản lý; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 5,000 VND) ≈ 50.000.000đ tiền về phần quản lý
+🟡 Lỗ từ đỉnh: KHÔNG ĐO ĐƯỢC — phần bot quản lý có 1 ngày nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai trong managed_sleeve_flows.json — gần nhất 2026-09-14: giá DGC nhảy -20,00% (46.750 → 37.400, so với 2026-09-11) — quá biên độ sàn +7,5%/phiên qua 1 phiên; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 1 2026 - 3,000 VND) ≈ 30.000.000đ tiền về phần quản lý; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 5,000 VND) ≈ 50.000.000đ tiền về phần quản lý
+🟡 Lỗ từ điểm vào episode: KHÔNG ĐO ĐƯỢC — phần bot quản lý có 1 ngày nghi nhận/chuyển tiền với phần loại trừ mà CHƯA khai trong managed_sleeve_flows.json — gần nhất 2026-09-14: giá DGC nhảy -20,00% (46.750 → 37.400, so với 2026-09-11) — quá biên độ sàn +7,5%/phiên qua 1 phiên; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 1 2026 - 3,000 VND) ≈ 30.000.000đ tiền về phần quản lý; lịch corp-action: DGC DIV hiệu lực 2026-09-14 (Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 5,000 VND) ≈ 50.000.000đ tiền về phần quản lý
+ℹ️ NAV tổng (chỉ để tham chiếu, KHÔNG kích phanh): 966.798.467đ · ngày -1,45% · từ đỉnh -3,01%
+Không đo được KHÔNG có nghĩa là an toàn — cần người xem lý do ở trên.
