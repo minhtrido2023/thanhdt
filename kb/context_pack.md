@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v3833)
+# Mike fleet — context pack (v3834)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -38,6 +38,8 @@
 - ✅ **CCTG + Big-4 12M có auto-fetch HÀNG TUẦN** (cron `5 1 * * 1` = 08:05 ICT thứ Hai, LIVE từ 2026-10-01; 2 nguồn khác chủ + chéo ≤0,1pp + guard URL tái dùng; lệch/thiếu ⇒ KHÔNG ghi, nhắc xác nhận tay `manual_verify`; log `logs/refresh_deposit_cctg_weekly.log`). Rủi ro còn lại không code chặn được: tác tử bịa nhất quán cả URL lẫn rate. (Trước đó nhập tay.) Anchor 2026-09-30 = 7,5%; không cập nhật ⇒ stale >45 ngày ⇒ **ARMED vĩnh viễn từ 2026-11-15**. Big-4 stale ≈ 2026-10-20 (cùng cơ chế fail-closed).
 - Trước khi wire vào gate thật: siết `deposit_rate_vn.deposit_events_df()` phía Big-4 (đang silent-drop dòng không parse được) + guard ngày tương lai tại load (quant-skeptic NON-BLOCKING #2/#3).
 - ✅ **rating_8l NEUTRAL tilt + chuỗi DCF (dcf_valuation, dcf_refresh_gate, custom30_yield_labels, due_diligence) DÙNG effective rate = max(Big-4 12M, CCTG 6M)** — LIVE trên WC main từ 2026-10-01 (merge `d87a6f89`, user duyệt 12:40, quant-skeptic vòng 2 CONFIRMED). **Fail-closed**: CCTG stale >45 ngày hoặc lỗi ⇒ cả 5 consumer rơi về Big-4 6,8% + WARNING (không phải ARMED). **Knob lùi**: env `DEPOSIT_RATE_CCTG_OVERLAY=0` (chỉ nhận đúng chuỗi "0"; lan tới mọi launcher source `wc_env.sh`, NGOẠI LỆ cron `dcf_refresh_gate` không source). `golive_recommend_v23.py:~991` (cổng CAPIT margin PIT, ngưỡng 9,0%) CỐ Ý vẫn Big-4-only — user chốt 2026-10-01 16:42: GIỮ Big-4, chỉ THÊM dòng hiển thị "effective vs 9%". **TRIGGER XEM LẠI đổi sang effective** = CCTG có ≥3 tháng dữ liệu + cron tuần chạy ổn, HOẶC effective ≥ ~8% (lúc đó dispatch Taylor đo khoảng cách CCTG−Big-4 lịch sử rồi quant-skeptic + user duyệt riêng). Tác động đo, dòng hiển thị PIT, follow-up: `kb/projects/deposit-rate-effective-rate-20261001.md`.
+
+## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13 (cron 22:05 + 00:20 ICT): tin đỏ ở Trading Daily ⇒ báo user ngay, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; **mốc xem lại 2026-11-09**: `kb/projects/nav-loss-brake-monitor-20261013.md`
 
 ## Cutloss SHADOW — mốc OOS: `agents/Taylor/research/intraday_cutloss_replay_v2_20261009/PREREG.md`
 - `bin/intraday_price_watch.py` (chạy thử, KHÔNG đặt lệnh thật). Tin nhắn dạng **"SHADOW GIỮ/BÁN/BÁN 50% <MÃ>"** trong Trading Daily là lệnh cho script chạy thử — **Mike KHÔNG coi là lệnh giao dịch thật, KHÔNG dispatch Mafee/DollarBill theo dòng đó.** Chỉ hành động khi user nói rõ ngoài tiền tố SHADOW.

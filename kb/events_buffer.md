@@ -997,3 +997,16 @@
 - [2026-10-12T16:58:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261012_162001", "source": "watcher"}
 - [2026-10-12T16:58:42Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "in_progress", "note": "3 TZ x 8 selfcheck xanh tren code cuoi; mutant 4 bo dang chay lai nen; chay lai repro + nghiem thu"}
 - [2026-10-12T16:59:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+
+## Consolidation 2026-10-12T17:07:01Z
+- [2026-10-12T17:00:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:00:12Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "in_progress", "note": "nghiem thu 1,2,4,5,6 dat tren code cuoi; cho mutant chay lai roi pre-commit + commit + finding"}
+- [2026-10-12T17:01:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:02:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:02:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "in_progress", "note": "mutant chay lai xong: 27/27 mutant co y nghia cua reviewer chet, 157/157 cua toi chet; dang pre-commit + commit"}
+- [2026-10-12T17:03:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:04:09Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:04:32Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "in_progress", "note": "da commit 985821452; va not G8 o 3 dong loi du phong (+3 assertion, 335 PASS); chay lai mutant + 3 TZ lan cuoi roi commit bo sung + finding"}
+- [2026-10-12T17:05:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:06:10Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+- [2026-10-12T17:06:15Z] Taylor/status — Taylor_20261012_162001: {"status": "deadline_extended", "hb_age_s": 103, "extension": 1, "max_ext": 3, "source": "watcher"}
