@@ -1115,3 +1115,6 @@
 
 ## Archived 2026-10-12 (keep=12 days=0 require_done=False)
 - [2026-10-11T14:09:03Z] ĐANG DỞ job Taylor_20261011_140235: ĐÃ COMMIT 7db41261 trên fix/dt5g-gate-tzaware-health-20261011 (worktree wt-dt5ggate-1011, CHƯA merge); selfcheck đỏ 75/105 → xanh 105/84/84 (3 TZ); e2e đọc-only: cũ DT4_only, mới DT5G_macro; bằng chứng research/dt5g_gate_tzaware_20261011/ | NEXT: chỉ còn đăng bus finding dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready (KHÔNG đăng event đóng error gốc)
+
+## Archived 2026-10-12 (keep=12 days=0 require_done=False)
+- [2026-10-11T14:10:11Z] [vá cổng DT5G tz-aware, 10-11] XONG phần Taylor: nhánh fix/dt5g-gate-tzaware-health-20261011 @7db41261 (worktree wt-dt5ggate-1011, CHƯA merge), finding dt5g-gate-fallback-dt4-tzaware-health-ts-fix-ready trên bus trace Taylor_20261011_140235, bằng chứng research/dt5g_gate_tzaware_20261011/. Chờ Mike trình user merge TRƯỚC 18:30 ICT 12/10; sau merge nhìn log daily_refresh có '[get_gated_state] DT5G_macro'. KHÔNG tự đóng error gốc. Việc treo riêng: job Taylor_20261011_135520 strategy_fit_dashboard (wt-stratfit-1011) còn dở — dashboard sẽ hiện DT4_only tới khi nhánh vá merge.
