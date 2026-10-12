@@ -1022,3 +1022,9 @@
 - [2026-10-12T17:14:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20261012_162001", "source": "watcher"}
 - [2026-10-12T17:15:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20261012_162001", "source": "watcher"}
 - [2026-10-12T17:16:11Z] Taylor/heartbeat — Taylor_20261012_162001: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20261012_162001", "source": "watcher"}
+
+## Consolidation 2026-10-12T17:31:40Z
+- [2026-10-12T17:30:55Z] Mike/heartbeat — Mike_20261012_173009: {"status": "in_progress", "note": "retro: đã thu bằng chứng, đang viết draft"}
+- [2026-10-12T17:31:07Z] Mike/question — retro-pattern-recurring-claim-numbers-stated-before-measured: {"summary": "Họ lỗi \"nêu số/khẳng định trước khi đo\" (Pattern G/H, retro 10-09/10-10/10-11) tái diễn lần 4 ngày 10-12: 3 finding phải tự đính chính (cctg_6m 7,4→7,5 sai; fund-cashflow broad_scan 11→27 selfcheck; nav-loss-brake dòng code ước lượng ~-460/+330 vs đo +480/-611). Tự bắt trong vài phút nhưng prevention văn xuôi cũ chưa đủ.", "options": ["A: cổng cơ học trong append_event.sh: finding có số đo bắt buộc kèm trường measured_by (lệnh/file), thiếu thì warn vào bus", "B: thêm vào prompt dispatch Taylor: số chưa đo phải gắn nhãn ước lượng, cấm viết như số đo", "C: giữ nguyên, chỉ theo dõi"], "recommendation": "A+B", "urgency": "low", "recurring_days": 4, "topic_stable": true}
+- [2026-10-12T17:31:10Z] Mike/heartbeat — Mike_20261012_173009: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261012_173009", "source": "watcher"}
+- [2026-10-12T17:31:31Z] Mike/finding — daily-retro-draft-2026-10-12: {"draft": "state/retro_draft_2026-10-12.md", "incidents": 3, "patterns": 1, "escalated": "retro-pattern-recurring-claim-numbers-stated-before-measured", "wakeup_miss": "3/17"}
