@@ -4,12 +4,12 @@ status: CANONICAL
 source: data/loss_brake/
 group: trading-bot
 role: trạng thái riêng của monitor phanh lỗ cấp NAV (chỉ cảnh báo)
-writer: "mike/bin/nav_loss_brake_monitor.py (cron tối, đề xuất 22:05 + 00:20 ICT) + người (mở/đóng episode, ack bản duyệt)"
+writer: "mike/bin/nav_loss_brake_monitor.py (cron 22:05 + 00:20 ICT, cài 2026-10-13) + người (mở/đóng episode, ack bản duyệt)"
 ---
 
 # data/loss_brake/
 
-**Status: CANONICAL (đề xuất — chưa cài cron, chưa merge; job `Taylor_20261012_111422`, vòng 3 ở job
+**Status: CANONICAL (monitor merge master + cron cài 2026-10-13, user duyệt 12/10 21:31 ICT; job `Taylor_20261012_111422`, vòng 3 ở job
 `Taylor_20261012_161627`).**
 Thư mục của `mike/bin/nav_loss_brake_monitor.py`. Monitor chỉ CẢNH BÁO: không tạo `data/BOT_STOP`,
 không gọi broker/BQ. Đo trên **NAV toàn tài khoản** của mọi account (user chốt 2026-10-12 21:31 ICT:
@@ -62,5 +62,5 @@ Không file nào cần seed: thư mục và mọi file dưới đây tự sinh.
   trong phạm vi sao lưu (việc còn mở N14).
 
 ## Cài lần đầu
-`kb/ops_runbook.md` mục "Phanh lỗ NAV" → "Cài lần đầu" (đề xuất: `kb/ops_runbook.lossbrake.md.proposed`)
-— không có bước seed. Cron đề xuất: `kb/cron_registry.md.proposed`.
+`kb/ops_runbook.md` mục "Phanh lỗ NAV" → "Cài lần đầu" (đã áp 2026-10-13)
+— không có bước seed. Cron: `kb/cron_registry.md` hàng 22:05 và 00:20.

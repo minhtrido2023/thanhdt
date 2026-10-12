@@ -10,6 +10,7 @@ title: Trading bot / execution (money-path thật)
 |---|---|
 | [`dnse_openapi_v2_calling_guideline.md`](dnse_openapi_v2_calling_guideline.md) — cách gọi DNSE OpenAPI v2 (signing/OTP/endpoint/gotcha), cho dashboard quản lý danh mục | CANONICAL |
 | [`bot_stop.md`](bot_stop.md) — data/BOT_STOP | CANONICAL |
+| [`loss_brake_state.md`](loss_brake_state.md) — data/loss_brake/ (trạng thái monitor phanh lỗ cấp NAV, chỉ cảnh báo) | CANONICAL |
 | [`dnse_raw_execution_logs.md`](dnse_raw_execution_logs.md) — data/execution_logs/dnse_raw_<date>.jsonl | CANONICAL |
 | [`dnse_khoplenh_broker_email.md`](dnse_khoplenh_broker_email.md) — email DNSE "Báo cáo giao dịch khớp lệnh" + data/execution_logs/dnse_khoplenh_broker_confirm_<DD-MM-YYYY>.csv — fill THẬT, đối soát độc lập với dnse_raw | CANONICAL |
 | [`dcf_lens_history.md`](dcf_lens_history.md) — data/dcf_lens_history.csv (append-only DCF forecast log) | CANONICAL |
