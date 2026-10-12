@@ -36,6 +36,38 @@ def check(name, cond, detail=""):
 
 
 # ───────────────────────────────────────────────────────────────── fixture
+def mk_ledger(prices, end="2026-10-09", est=()):
+    """Sổ đơn vị giả: dòng 0 = mốc khởi điểm; `est` = chỉ số dòng có NAV ước tính."""
+    days = pd.bdate_range(end=end, periods=len(prices))
+    return [dict(date=d.date(), nav=p * 1e5, unit_price=float(p), nav_is_estimate=(i in est))
+            for i, (d, p) in enumerate(zip(days, prices))]
+
+
+def ledger_prov(prices, end="2026-10-09", est=(), jumps=(), pending=()):
+    return lambda account: dict(ledger=mk_ledger(prices[account] if isinstance(prices, dict) else prices, end, est),
+                                pending=list(pending), dropped=[], jumps=list(jumps), block_pct=5.0)
+
+
+LEDGER_OK = {"SpaceX": [10000, 10100, 9900, 10050], "ZaloPay": [10000, 9800, 9700, 9900]}
+JHDR = "ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note\n"
+
+
+def write_journal(data, account, day, rows):
+    d = os.path.join(data, "execution_logs"); os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, f"exec_{account}_{day}_journal.csv"), "w", encoding="utf-8") as f:
+        f.write(JHDR + "".join(f"{day}T11:00:00,{ev},P,AAA,{side},1,100,10000,0,{book},X,\n" for ev, side, book in rows))
+
+
+def write_registry(kb, *, count=0, target=10, review="fill-vs-open hybrid = +13,4 bps (se 14,4, n=6) x", lm=True):
+    prog = {"id": "fill_timing", "status": "graduated-live 2026-08-26", "review_short": review, "progress": {}}
+    if lm:
+        prog["progress"]["live_monitoring"] = {
+            "target_sessions": target, "count_current_measured": count, "measured_sessions": [],
+            "since": "2026-08-26", "note_2026-09-02": "0/10",
+            "rollback_condition": "mean fill-vs-open > +22 bps (1 tick) ben vung -> rollback flip"}
+    json.dump({"programs": [{"id": "other"}, prog]}, open(os.path.join(kb, "paper_programs_registry.json"), "w"))
+
+
 def write_fixture(root, *, mean12=-0.59, mom_verdict="DECAYED", status="watching",
                   next_review="2026-11-26", nan=False):
     data = os.path.join(root, "data"); kb = os.path.join(root, "kb")
@@ -69,6 +101,7 @@ def write_fixture(root, *, mean12=-0.59, mom_verdict="DECAYED", status="watching
         {"id": "a", "label": "Nang hang", "status": status, "effective_date": None, "revalidate": ["DT5G"]},
         {"id": "b", "label": "KRX", "status": "watching", "effective_date": None, "revalidate": ["fill"]}]},
         open(os.path.join(kb, "structural_break_watch.json"), "w"))
+    write_registry(kb)
     return data, kb
 
 
@@ -104,6 +137,7 @@ def fake_providers(*, last="2026-10-09", source="DT5G_macro", ks=None, big4=6.8,
                                       last_update="2026-10-03", age_days=8, rate_source="cctg_6m(2026-10-05)",
                                       reason="cctg_6m(2026-10-05) 7.40% <= 7.5% -> CLEAR"),
         big4_rate=lambda: big4,
+        unit_ledger=ledger_prov(LEDGER_OK, end=last),
         capit=lambda: dict(n=12, full_mean=14.2, full_hit=0.75, rec_mean=10.0, rec_hit=0.75,
                            last=-1.2, verdict="HEALTHY", max_carve=0.70),
     )
@@ -145,7 +179,7 @@ def t1_full():
     with tempfile.TemporaryDirectory() as r:
         cells, page, ct = build(r, fake_providers())
         c = by(cells)
-        check("T1a đủ 9 ô, không ô nào lỗi", list(c) == D.CELL_KEYS and all(x.error is None for x in cells),
+        check("T1a đủ 12 ô, không ô nào lỗi", list(c) == D.CELL_KEYS and all(x.error is None for x in cells),
               {k: v.error for k, v in c.items() if v.error})
         check("T1b bất biến trang đạt", D.validate_html(page) == [], D.validate_html(page))
         check("T1c html.parser đọc được", parses(page))
@@ -174,15 +208,15 @@ def t2_missing():
         page = D.render_page(cells, NOW, ct.misses)
         c = by(cells)
         data_cells = [x for x in cells if x.key != "book_map"]
-        check("T2a không crash, đủ 9 ô", list(c) == D.CELL_KEYS)
-        check("T2b 8 ô dữ liệu đều báo lỗi", all(x.error is not None for x in data_cells),
+        check("T2a không crash, đủ 12 ô", list(c) == D.CELL_KEYS)
+        check("T2b 11 ô dữ liệu đều báo lỗi", all(x.error is not None for x in data_cells),
               [x.key for x in data_cells if x.error is None])
         check("T2c lỗi THẬT được in ra (tên file / thông điệp exception)",
               "edge_health_matrix.csv" in (c["edge_ic"].error or "")
               and "BQ không kết nối được" in (c["env_dt5g"].error or ""),
               (c["edge_ic"].error, c["env_dt5g"].error))
         check("T2d trang vẫn đạt bất biến (as_of + ngưỡng vẫn hiện)", D.validate_html(page) == [], D.validate_html(page))
-        check("T2e có đủ 8 thông báo KHÔNG CÓ DỮ LIỆU", page.count("nodata-msg") >= 8, page.count("nodata-msg"))
+        check("T2e có đủ 11 thông báo KHÔNG CÓ DỮ LIỆU", page.count("nodata-msg") >= 11, page.count("nodata-msg"))
         check("T2f ngưỡng của ô lỗi KHÔNG biến mất", "golive_recommend_v23.py:" in D.render_cell(c["edge_lag"]))
         out = os.path.join(r, "out")
         rc, path = D.run(NOW, out, data_dir=os.path.join(r, "data"), kb_dir=os.path.join(r, "kb"),
@@ -208,11 +242,12 @@ def t3_stale():
                                       rate_source="big4_12m", reason="feed stale (72d > 45d) -> fail-closed (armed)"))
         cells, ct = D.build_cells(NOW, data_dir=data, kb_dir=kb, providers=prov, citer=D.Citer(D.WC_ROOT))
         c = by(cells)
-        for k in ("edge_ic", "edge_lag", "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural"):
+        for k in ("edge_ic", "edge_lag", "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural",
+                  "live_dd_spacex", "live_dd_zalopay"):
             check(f"T3 {k} gắn CŨ", c[k].stale is True and 'class="bdg stale"' in D.render_cell(c[k]), c[k].stale_why)
         check("T3 edge_capit KHÔNG gắn CŨ (nguồn không có nhịp)", c["edge_capit"].stale is None)
         page = D.render_page(cells, NOW)
-        check("T3 khối đầu trang liệt kê nguồn CŨ", page.count("<b>Nguồn CŨ</b>") == 7, page.count("<b>Nguồn CŨ</b>"))
+        check("T3 khối đầu trang liệt kê nguồn CŨ", page.count("<b>Nguồn CŨ</b>") == 9, page.count("<b>Nguồn CŨ</b>"))
         check("T3 kill-switch ARMED-do-cũ lên khối đầu trang", "Kill-switch A lãi suất đang ARMED" in page)
         check("T3 bất biến vẫn đạt", D.validate_html(page) == [])
     # biên: Thứ Hai đọc dữ liệu Thứ Sáu = bình thường; Thứ Ba đọc Thứ Sáu = CŨ
@@ -282,6 +317,13 @@ def t6_tz():
                 cells, _ = D.build_cells(NOW, data_dir=data, kb_dir=kb, providers=fake_providers(), citer=D.Citer(D.WC_ROOT))
                 check(f"T6 TZ={tz}: mtime quy về ICT", "file ghi 2026-10-10 00:30 ICT" in by(cells)["edge_ic"].as_of,
                       by(cells)["edge_ic"].as_of)
+                # 01:30 ICT Thứ Ba 13/10 (= 18:30 UTC Thứ Hai): theo ngày ICT thì dữ liệu T6 09/10 đã CŨ;
+                # code lấy nhầm ngày UTC/NY (12/10) sẽ báo KHÔNG cũ.
+                late = datetime(2026, 10, 12, 18, 30, tzinfo=timezone.utc).astimezone(D.ICT)
+                c3, _ = D.build_cells(late, data_dir=data, kb_dir=kb, providers=fake_providers(), citer=D.Citer(D.WC_ROOT))
+                dd = by(c3)["live_dd_spacex"]
+                check(f"T6 TZ={tz}: ô drawdown tính CŨ theo ngày ICT", dd.as_of == "2026-10-09" and dd.stale is True,
+                      (dd.as_of, dd.stale, dd.stale_why))
         off = datetime.now(D.ICT).utcoffset()
         check("T6 datetime.now(ICT) lệch UTC đúng +7h", off == timedelta(hours=7), off)
     finally:
@@ -395,6 +437,7 @@ def t9_touch_logic():
         check("T9d DT4_only + đồng hồ ≥70% + ngưỡng xem lại ⇒ 3 dòng", len(t["env_dt5g"]) == 3, t["env_dt5g"])
         check("T9e kill-switch ARMED + Big-4 ≥ 9,0 ⇒ 2 dòng", len(t["env_rates"]) == 2, t["env_rates"])
         check("T9f sự kiện cấu trúc khác 'watching' ⇒ chạm", len(t["env_structural"]) == 1, t["env_structural"])
+        check("T9g2 ô tầng 3 không chạm khi không có điều kiện thật", t["live_dd_spacex"] == [] and t["live_slippage"] == [])
         check("T9g ô mô tả không bao giờ chạm", t["env_breadth"] == [] and t["env_value"] == [] and t["book_map"] == [])
         check("T9h Không còn câu «Không ô nào chạm ngưỡng»", "Không ô nào chạm ngưỡng." not in page)
     check("T9i tercile: thấp nhất 252 phiên ⇒ LOW (pct=0 không bị ném mất)",
@@ -403,9 +446,141 @@ def t9_touch_logic():
     check("T9k tercile: thiếu 252 phiên trước ⇒ không xếp", D.breadth_tercile([0.5] * 100) == (None, None))
 
 
+def t10_tier3():
+    print("\n[T10] tầng 3 — drawdown thật + trượt giá")
+    import inspect
+    s = D.drawdown_stats(mk_ledger([10000, 11000, 9900, 10450, 12000, 11400], est=(2,)))
+    check("T10a N = số phiên sau mốc khởi điểm", s["n"] == 5, s["n"])
+    check("T10b drawdown lớn nhất −10% (đỉnh dòng 1 → đáy dòng 2)", abs(s["max_dd"] + 0.10) < 1e-12
+          and s["max_peak"]["unit_price"] == 11000 and s["max_trough"]["unit_price"] == 9900, s["max_dd"])
+    check("T10c drawdown hiện tại −5% từ đỉnh MỚI NHẤT, 1 phiên kể từ đỉnh", abs(s["cur_dd"] + 0.05) < 1e-12
+          and s["peak"]["unit_price"] == 12000 and s["since_peak"] == 1, (s["cur_dd"], s["since_peak"]))
+    check("T10d phiên giảm mạnh nhất −10%, phiên gần nhất −5%", abs(s["worst_day"] + 0.10) < 1e-12 and abs(s["day_ret"] + 0.05) < 1e-12)
+    check("T10e đếm đúng phiên NAV ước tính", [r["unit_price"] for r in s["est"]] == [9900])
+    flat = mk_ledger([10000, 10000, 10000])
+    flat[1]["nav"] *= 3; flat[2]["nav"] /= 2                     # nạp rồi rút lớn: nav nhảy, giá đơn vị đứng yên
+    s = D.drawdown_stats(flat)
+    check("T10f nạp/rút (nav nhảy, giá đơn vị không đổi) KHÔNG tạo drawdown", s["max_dd"] == 0 and s["cur_dd"] == 0 and s["total"] == 0, s)
+    check("T10g drawdown_stats không đọc cột nav thô", '"nav"]' not in inspect.getsource(D.drawdown_stats))
+    gap = mk_ledger([10000, 10100, 10200]); gap[2]["date"] += timedelta(days=4)   # T6 09/10 → T3 13/10: thiếu T6 + T2
+    check("T10h ngày Thứ 2–6 thiếu dòng được liệt kê (bỏ T7/CN), không nội suy",
+          [str(d) for d in D.drawdown_stats(gap)["missing"]] == ["2026-10-09", "2026-10-12"], D.drawdown_stats(gap)["missing"])
+    for bad, why in (([10000], "1 dòng"), ([10000, float("nan"), 9000], "NaN"), ([10000, 0, 9000], "giá 0")):
+        try:
+            D.drawdown_stats(mk_ledger(bad)); ok = False
+        except ValueError:
+            ok = True
+        check(f"T10i sổ hỏng ({why}) ⇒ từ chối, không ra số", ok)
+
+    def cells_with(r, ul, **reg):
+        data, kb = write_fixture(r)
+        if reg:
+            write_registry(kb, **reg)
+        prov = fake_providers(); prov["unit_ledger"] = ul
+        cells, ct = D.build_cells(NOW, data_dir=data, kb_dir=kb, providers=prov, citer=D.Citer(D.WC_ROOT))
+        return by(cells), D.render_page(cells, NOW, ct.misses), data, kb
+
+    with tempfile.TemporaryDirectory() as r:
+        c, page, data, kb = cells_with(r, ledger_prov(LEDGER_OK))
+        a, b = c["live_dd_spacex"], c["live_dd_zalopay"]
+        check("T10j hai tài khoản ra hai kết quả KHÁC nhau (§12)", a.error is None and b.error is None and a.body != b.body)
+        check("T10k số đúng: SpaceX max −1,98% · ZaloPay hiện tại −1,00%", "−1,98%" in a.body and "−1,00%" in b.body, a.body[:400])
+        check("T10l mốc tham chiếu đọc từ CLAUDE.md, ghi rõ KHÔNG phải ngưỡng", "−25,2%" in a.body and "KHÔNG phải ngưỡng" in a.body)
+        check("T10m ô ZaloPay ghi rõ chuỗi TOÀN tài khoản; SpaceX không", "TOÀN tài khoản" in b.body and "TOÀN tài khoản" not in a.body)
+        check("T10n không in NAV bằng tiền / số tài khoản", "1.000.000.000" not in page and "0002023347" not in page
+              and "0001743768" not in page and "1005000000" not in page)
+        check("T10o bất biến đạt, không neo nào mất", D.validate_html(page) == [], D.validate_html(page))
+    with tempfile.TemporaryDirectory() as r:
+        c, page, *_ = cells_with(r, ledger_prov([10000, 10100, 9900, 10050]))
+        check("T10p hai tài khoản ra số GIỐNG HỆT ⇒ cả hai báo lỗi, không công bố",
+              all("giống hệt" in (c[k].error or "") for k in ("live_dd_spacex", "live_dd_zalopay")))
+        check("T10p2 … trang vẫn đạt bất biến", D.validate_html(page) == [])
+    with tempfile.TemporaryDirectory() as r:
+        j = [dict(date="2026-10-08", prev_date="2026-10-07", nav0=1e9, nav1=1.2e9, change_pct=20.0)]
+        c, page, *_ = cells_with(r, lambda acc: ledger_prov(LEDGER_OK, jumps=j if acc == "SpaceX" else ())(acc))
+        a = c["live_dd_spacex"]
+        check("T10q cổng NAV-jump chặn ⇒ ô báo lỗi thật, KHÔNG in drawdown", "NAV-jump" in (a.error or "") and "Drawdown hiện tại" not in a.body, a.error)
+        check("T10r … tài khoản kia không bị kéo theo, ngưỡng của ô lỗi vẫn hiện", c["live_dd_zalopay"].error is None
+              and "trading_rules.json:" in D.render_cell(a) and D.validate_html(page) == [])
+    with tempfile.TemporaryDirectory() as r:
+        c, page, *_ = cells_with(r, ledger_prov({"SpaceX": [10000, 10200, 9690], "ZaloPay": [10000, 10200, 9700]}, est=(1, 2)))
+        check("T10s phiên đóng cửa −5,0% ⇒ chạm phanh lỗ trong ngày", len(c["live_dd_spacex"].touched) == 1, c["live_dd_spacex"].touched)
+        check("T10t −4,9% ⇒ KHÔNG chạm", c["live_dd_zalopay"].touched == [], c["live_dd_zalopay"].touched)
+        check("T10u đỉnh/đáy rơi vào ngày NAV ước tính ⇒ gắn nhãn ngay cạnh ngày", c["live_dd_spacex"].body.count("(NAV ước tính)") >= 2
+              and "2/2 phiên có NAV" in c["live_dd_spacex"].body)
+    with tempfile.TemporaryDirectory() as r:
+        c, page, *_ = cells_with(r, ledger_prov({"SpaceX": [10000, float("nan"), 9000], "ZaloPay": [10000, 9900, 9950]},
+                                               pending=[dict(date="2026-10-09")]))
+        check("T10v giá đơn vị NaN ⇒ ô lỗi, không rò 'nan%' ra trang", c["live_dd_spacex"].error and "nan%" not in page.lower())
+        check("T10w dòng tiền TREO được nêu trong ô", "TREO" in c["live_dd_zalopay"].body)
+
+    # ── trượt giá
+    with tempfile.TemporaryDirectory() as r:
+        c, page, data, kb = cells_with(r, ledger_prov(LEDGER_OK))
+        sl = c["live_slippage"]
+        check("T10x registry 0 phiên + journal 0 phiên ⇒ không CŨ, không chạm", sl.error is None and sl.stale is False and sl.touched == [])
+        check("T10y nói thẳng «Chưa có nguồn định kỳ» + số LIVE «chưa có»", "Chưa có nguồn định kỳ" in sl.body and "<b>chưa có</b>" in sl.body)
+        check("T10z ngưỡng +22 bps đọc từ KB thật, có trích file:dòng", "+22 bps" in sl.thr[0] and "current_ops.md:" in sl.thr[0]
+              and "paper_programs_registry.json:" in sl.thr[0], sl.thr[0])
+        check("T10A số PAPER ghi rõ không phải live", "+13,4 bps" in sl.body and "không phải live" in sl.body)
+        write_journal(data, "SpaceX", "2026-09-17", [("PLACE", "buy", "LAG"), ("FILL", "buy", "LAG")])
+        write_journal(data, "SpaceX", "2026-08-28", [("PLACE", "buy", "CORP_ACTION")])        # quyền mua: không tính
+        write_journal(data, "SpaceX", "2026-08-20", [("PLACE", "buy", "LAG")])                # trước `since`: không tính
+        write_journal(data, "SpaceX", "2026-09-21", [("PLACE", "sell", "LAG"), ("HYBRID_DEFER", "buy", "LAG")])  # không có PLACE mua
+        write_journal(data, "ZaloPay", "2026-09-17", [("PLACE", "buy", "BAL")])
+        write_journal(data, "ZaloPay", "2026-09-14", [("PLACE", "buy", "BAL")])
+        write_journal(data, "STRESSTEST_P1SPACEX", "2026-09-22", [("PLACE", "buy", "LAG")])   # nhãn khác: không tính
+        write_journal(data, "main", "2026-09-23", [("PLACE", "buy", "LAG")])                  # paper: không tính
+        check("T10B đếm theo TỪNG tài khoản (§12): SpaceX 1 phiên, ZaloPay 2 phiên",
+              D.live_buy_sessions(data, "SpaceX", "2026-08-26") == ["2026-09-17"]
+              and D.live_buy_sessions(data, "ZaloPay", "2026-08-26") == ["2026-09-14", "2026-09-17"],
+              (D.live_buy_sessions(data, "SpaceX", "2026-08-26"), D.live_buy_sessions(data, "ZaloPay", "2026-08-26")))
+        sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
+        check("T10C registry 0 ≠ journal 2 phiên (hợp, không cộng trùng ngày) ⇒ CŨ kèm lý do thật",
+              sl.stale is True and "registry ghi 0 phiên, journal đếm được 2 phiên" in sl.stale_why and "<b>2/10</b>" in sl.body, sl.stale_why)
+        check("T10D chưa đủ 10 phiên ⇒ không ghi «đến hạn đo»", "đến hạn đo" not in sl.stale_why)
+        write_registry(kb, count=0, target=2)
+        sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
+        check("T10E đủ số phiên mục tiêu ⇒ ghi «đến hạn đo»", "đến hạn đo" in sl.stale_why, sl.stale_why)
+        write_registry(kb, count=2)
+        check("T10F registry khớp journal ⇒ không CŨ", D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW).stale is False)
+        write_registry(kb, review="khong co so nao")
+        check("T10G registry không còn số PAPER ⇒ ghi «không đọc được», không bịa",
+              "không đọc được từ registry" in D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW).body)
+        write_registry(kb, lm=False)
+        sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
+        check("T10H registry mất khối live_monitoring ⇒ ô lỗi, ngưỡng vẫn hiện", "live_monitoring" in (sl.error or "")
+              and "current_ops.md:" in D.render_cell(sl))
+        open(os.path.join(kb, "paper_programs_registry.json"), "w").write("{hỏng")
+        sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
+        check("T10I registry hỏng JSON ⇒ ô lỗi kèm lỗi thật", "JSONDecodeError" in (sl.error or ""), sl.error)
+    # ── đột biến + chỉ đọc
+    with tempfile.TemporaryDirectory() as r:
+        c, page, *_ = cells_with(r, ledger_prov(LEDGER_OK))
+        cells = list(c.values())
+        x = c["live_dd_spacex"]; saved = x.thr; x.thr = x.thr[:1]
+        bad = D.validate_html(D.render_page(cells, NOW)); x.thr = saved
+        check("T10J ô drawdown rơi 1 dòng ngưỡng ⇒ đỏ", any("live_dd_spacex" in b for b in bad), bad)
+        x = c["live_slippage"]; saved = x.thr; x.thr = []
+        bad = D.validate_html(D.render_page(cells, NOW)); x.thr = saved
+        check("T10K ô trượt giá bị hạ thành «chỉ để mô tả» ⇒ đỏ", any("live_slippage" in b for b in bad), bad)
+        x = c["live_dd_zalopay"]; saved = x.thr; x.thr = saved + ["drawdown &lt; −25,2% ⇒ giảm tỷ trọng"]
+        bad = D.validate_html(D.render_page(cells, NOW)); x.thr = saved
+        check("T10L bịa ngưỡng −25,2% cho drawdown ⇒ đỏ", any("live_dd_zalopay" in b for b in bad), bad)
+        cut = page[page.index('<section class="cell" id="live_slippage"'):]
+        cut = cut[:cut.index("</section>") + len("</section>")]
+        check("T10M mất hẳn ô tầng 3 ⇒ đỏ", any("thiếu ô live_slippage" in b for b in D.validate_html(page.replace(cut, "", 1))))
+        check("T10N trang có tiêu đề Tầng 3 và KHÔNG có ô «NAV so dải backtest»", "Tầng 3 — Thực tế so với kỳ vọng" in page
+              and len(D.CELL_KEYS) == 12 and not any("backtest_band" in k or "nav_vs" in k for k in D.CELL_KEYS))
+    src = "".join(inspect.getsource(f) for f in (D.drawdown_stats, D.cell_live_dd, D.live_buy_sessions, D.cell_live_slippage))
+    prov_src = inspect.getsource(D.default_providers)
+    check("T10O code tầng 3 chỉ ĐỌC (không mở file để ghi, không chốt sổ, không gọi tiến trình con)",
+          not any(t in src + prov_src for t in ('"w"', "'w'", '"a"', "os.replace", "seal(", "--seal", "subprocess", "to_csv")))
+
+
 def main():
     print(f"strategy_fit_dashboard selfcheck — TZ env = {os.environ.get('TZ')!r}, WC_ROOT = {D.WC_ROOT}")
-    for t in (t1_full, t2_missing, t3_stale, t4_empty, t5_nan, t6_tz, t7_mutation, t8_anchors, t9_touch_logic):
+    for t in (t1_full, t2_missing, t3_stale, t4_empty, t5_nan, t6_tz, t7_mutation, t8_anchors, t9_touch_logic, t10_tier3):
         try:
             t()
         except Exception as e:

@@ -22,6 +22,13 @@ LUẬT CHO MỌI Ô (validate_html() cưỡng chế, selfcheck có ca đột bi�
   3. màu chỉ phản ánh nhãn/điều kiện đã có trong code nguồn;
   4. nguồn thiếu/hỏng ⇒ ô VẪN hiện "KHÔNG CÓ DỮ LIỆU" kèm lỗi thật (coding_guidelines §29).
 
+TẦNG 3 (bản hẹp, user duyệt 2026-10-12 11:01 ICT, job Taylor_20261012_040250) — "thực tế so với kỳ
+vọng", ĐÚNG 2 nhóm ô: drawdown thật từng tài khoản live, và trượt giá khớp lệnh. Ô "NAV thật so dải
+backtest" bị HOÃN có chủ đích (69 phiên live quá ngắn, chưa có ngưỡng chốt trước) — đừng thêm.
+  · Drawdown tính trên GIÁ ĐƠN VỊ QUỸ do `nav_unit_ledger.build_ledger` dựng (đã loại nạp/rút —
+    cùng công thức với `nav_period_returns.py`), KHÔNG tính từ cột nav thô.
+  · Trang KHÔNG tự đo trượt giá: hiện chưa có nguồn định kỳ nào, ô chỉ hiện trạng thái thật.
+
 Chạy:  /home/trido/thanhdt/wc_venv/bin/python mike/bin/strategy_fit_dashboard.py
 Ra:    mike/reports/dashboard/strategy_fit_<YYYY-MM-DD>.html (ngày ICT); dòng cuối stdout = đường dẫn.
 Thoát: 0 = có ít nhất 1 ô DỮ LIỆU dựng được · 1 = không ô dữ liệu nào dựng được (ô book_map chỉ đọc
@@ -55,9 +62,16 @@ STATE_NAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 # Số dòng ngưỡng (có trích file:dòng) mỗi ô PHẢI mang; 0 = ô "chỉ để mô tả". validate_html() so đúng
 # con số này, nên xoá/ thêm một dòng ngưỡng mà không sửa bảng dưới đây là selfcheck đỏ.
 THR_COUNT = {"edge_ic": 3, "edge_lag": 3, "edge_capit": 2, "book_map": 0, "env_dt5g": 6,
-             "env_breadth": 0, "env_value": 0, "env_rates": 2, "env_structural": 1}
+             "env_breadth": 0, "env_value": 0, "env_rates": 2, "env_structural": 1,
+             "live_dd_spacex": 2, "live_dd_zalopay": 2, "live_slippage": 1}
 CELL_KEYS = ["edge_ic", "edge_lag", "edge_capit", "book_map",
-             "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural"]
+             "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural",
+             "live_dd_spacex", "live_dd_zalopay", "live_slippage"]
+# File chỉ được TRÍCH DẪN (đọc dòng để in file:dòng), trang không chạy/không import nó. Để trong dict vì
+# `production_manifest.py` (path_context) không coi chuỗi trong dict là cạnh phụ thuộc — viết thành biến
+# gán thẳng sẽ kéo công cụ chạy tay này vào danh sách production tầng T0 (đo 2026-10-12).
+CITE_ONLY = {"eqr": "execution_quality_review.py"}
+LIVE_ACCOUNTS = ["SpaceX", "ZaloPay"]      # nhãn tài khoản; trang KHÔNG in số tài khoản hay số dư bằng tiền
 
 
 # ───────────────────────────────────────────────────────────────── định dạng số kiểu VN
@@ -765,6 +779,201 @@ def cell_env_structural(kb_dir, ct, now):
     return c
 
 
+# ───────────────────────────────────────────────────────────────── TẦNG 3 — thực tế so với kỳ vọng
+def drawdown_stats(ledger):
+    """Drawdown trên GIÁ ĐƠN VỊ QUỸ. `ledger` = đầu ra `nav_unit_ledger.build_ledger` (dòng 0 = mốc
+    khởi điểm, mỗi dòng sau = một phiên có NAV chốt). N = số PHIÊN (sự kiện độc lập), không phải số dòng file."""
+    if len(ledger) < 2:
+        raise ValueError(f"sổ đơn vị chỉ có {len(ledger)} dòng — chưa có phiên nào sau mốc khởi điểm")
+    for r in ledger:
+        if not _isnum(r["unit_price"]) or float(r["unit_price"]) <= 0:
+            raise ValueError(f"giá đơn vị ngày {r['date']} không hợp lệ: {r['unit_price']!r}")
+    peak, max_dd, max_peak, max_trough = ledger[0], 0.0, ledger[0], ledger[0]
+    worst_day, worst_row = None, None
+    for prev, row in zip(ledger, ledger[1:]):
+        day = row["unit_price"] / prev["unit_price"] - 1
+        if worst_day is None or day < worst_day:
+            worst_day, worst_row = day, row
+        if row["unit_price"] > peak["unit_price"]:
+            peak = row
+        dd = row["unit_price"] / peak["unit_price"] - 1
+        if dd < max_dd:
+            max_dd, max_peak, max_trough = dd, peak, row
+    last = ledger[-1]
+    missing, d = [], ledger[0]["date"]
+    have = {r["date"] for r in ledger}
+    while d < last["date"]:
+        d += timedelta(days=1)
+        if d.weekday() < 5 and d not in have:
+            missing.append(d)
+    return dict(n=len(ledger) - 1, first=ledger[0], last=last, peak=peak,
+                cur_dd=last["unit_price"] / peak["unit_price"] - 1,
+                since_peak=sum(1 for r in ledger if r["date"] > peak["date"]),
+                max_dd=max_dd, max_peak=max_peak, max_trough=max_trough,
+                day_ret=last["unit_price"] / ledger[-2]["unit_price"] - 1,
+                worst_day=worst_day, worst_row=worst_row,
+                total=last["unit_price"] / ledger[0]["unit_price"] - 1,
+                est=[r for r in ledger[1:] if r.get("nav_is_estimate")], missing=missing)
+
+
+def _d(row):
+    return f'{row["date"]}' + (" <i>(NAV ước tính)</i>" if row.get("nav_is_estimate") else "")
+
+
+def cell_live_dd(account, data_dir, ct, now, prov):
+    c = Cell(f"live_dd_{account.lower()}", f"Drawdown thật — tài khoản {account}", 3,
+             source="giá đơn vị quỹ dựng trong bộ nhớ bởi <code>mike/bin/nav_unit_ledger.build_ledger</code> từ "
+                    f"<code>nav_history_{esc(account)}.csv</code> + <code>account_cash_flows.json</code> + "
+                    "<code>account_inception.json</code> (đã loại nạp/rút; cùng công thức với "
+                    "<code>nav_period_returns.py</code>). Sổ đơn vị trên đĩa CHƯA chốt (chính sách bước 3)",
+             cadence="mỗi phiên, sau lượt chụp NAV 19:10 ICT; CŨ khi thiếu quá 1 ngày làm việc")
+    lim, lim_cite = ct.const("data/trading_rules.json", r'"daily_loss_limit_pct":\s*(-?[0-9.]+)')
+    epi, epi_cite = ct.const("data/trading_rules.json", r"recovery episode's entry point > (-[0-9.]+)")
+    epi_on = os.path.exists(os.path.join(data_dir, "recovery_episode_state.json"))
+    c.thr = [
+        f"Phanh lỗ TRONG NGÀY (không phải drawdown từ đỉnh): NAV trong phiên giảm ≤ "
+        f"{vn(100 * lim, 1) if lim is not None else 'KHÔNG ĐỌC ĐƯỢC'}% → HALT (dừng lệnh mới, huỷ lệnh chờ, "
+        f"BOT_STOP) — khai báo {lim_cite}. Ô này chỉ có giá CHỐT cuối ngày nên chỉ bắt được ca phiên đóng cửa "
+        "đã ở dưới ngưỡng; không thấy được ca chạm trong phiên rồi hồi",
+        f"Phanh episode recovery: NAV giảm quá {vn(100 * epi, 0) if epi is not None else 'KHÔNG ĐỌC ĐƯỢC'}% tính "
+        f"từ điểm vào episode (KHÔNG tính từ đỉnh tài khoản) → HALT — khai báo {epi_cite}. File trạng thái "
+        f"episode <code>data/recovery_episode_state.json</code>: <b>{'có' if epi_on else 'không tồn tại'}</b>"
+        + ("" if epi_on else " ⇒ không có episode nào đang được theo dõi, ô này không đánh giá luật đó"),
+    ]
+    anchor_cite = ct.cite("CLAUDE.md", r"Neo sizing DD lấy ĐẦU SÀN")
+    try:
+        got = prov["unit_ledger"](account)
+        if got["jumps"]:
+            j = got["jumps"][0]
+            raise RuntimeError(
+                f"cổng NAV-jump {got.get('block_pct')}% CHẶN: {len(got['jumps'])} bước nhảy NAV không có bản ghi dòng "
+                f"tiền (đầu tiên {j['prev_date']}→{j['date']}: {j['change_pct']:+.2f}%) — có thể là nạp/rút chưa "
+                f"khai, nên KHÔNG công bố drawdown")
+        s = drawdown_stats(got["ledger"])
+        c.as_of = str(s["last"]["date"])
+        c.stale, c.stale_why = session_stale(s["last"]["date"], now.date())
+        _, m = ct.find("CLAUDE.md", r"Neo sizing DD lấy ĐẦU SÀN (−[0-9]+,[0-9]+)%")
+        anchor = m.group(1) if m else "KHÔNG ĐỌC ĐƯỢC"
+        rows = [
+            ["Số phiên live (N)", f"<b>{s['n']}</b>", f"từ mốc khởi điểm {s['first']['date']} tới {_d(s['last'])}"],
+            ["Drawdown hiện tại từ đỉnh", f"<b>{vn(100 * s['cur_dd'], 2)}%</b>",
+             f"đỉnh giá đơn vị ngày {_d(s['peak'])}; {s['since_peak']} phiên kể từ đỉnh"],
+            ["Drawdown lớn nhất từ khi live", f"<b>{vn(100 * s['max_dd'], 2)}%</b>",
+             f"đỉnh {_d(s['max_peak'])} → đáy {_d(s['max_trough'])}" if s["max_dd"] < 0 else "chưa có phiên nào dưới đỉnh"],
+            ["Tỉ suất từ khi live (gia quyền thời gian)", f"{vn(100 * s['total'], 2, True)}%", "tỉ số hai giá đơn vị"],
+            ["Phiên gần nhất so với phiên trước", f"{vn(100 * s['day_ret'], 2, True)}%", "giá chốt → giá chốt"],
+            ["Phiên giảm mạnh nhất", f"{vn(100 * s['worst_day'], 2, True)}%", f"{_d(s['worst_row'])}; giá chốt → giá chốt"],
+            ["Mốc tham chiếu (KHÔNG phải ngưỡng)", f"{esc(anchor)}%",
+             f"neo sizing: phân vị 5 của bootstrap trên backtest, quy ước pin0% — {anchor_cite}"],
+        ]
+        c.body = (
+            _table(["Chỉ số", "Giá trị", "Ghi chú"], rows)
+            + sparkline([100 * (r["unit_price"] / got["ledger"][0]["unit_price"] - 1) for r in got["ledger"]],
+                        f"Tỉ suất luỹ kế {account} theo giá đơn vị quỹ, {s['n']} phiên")
+            + f'<p class="cap">Tỉ suất luỹ kế theo giá đơn vị quỹ (%), {s["n"]} phiên; đường ngang = mốc khởi điểm.</p>'
+            + '<p class="muted"><b>Drawdown từ đỉnh không có luật hành động nào trong code/KB</b> — hai dòng ngưỡng '
+              'bên dưới là hai luật KHÁC đại lượng (lỗ trong ngày; lỗ từ điểm vào episode). Mốc tham chiếu là con số '
+              f'của backtest nhiều năm; {s["n"]} phiên live chưa đủ để nói drawdown thật «khớp» hay «lệch» mốc đó.</p>')
+        if account == "ZaloPay":
+            c.body += ('<p class="muted">Đây là chuỗi <b>TOÀN tài khoản</b>, gồm cả DGC và vị thế có sẵn nằm ngoài '
+                       'phạm vi bot; chuỗi «phần bot quản lý» chưa được dựng — '
+                       + ct.cite("mike/kb/projects/fund-unit-performance-policy-20261010.md", r"ZaloPay hai chuỗi")
+                       + '. Không so thẳng với SpaceX hay backtest.</p>')
+        if s["est"]:
+            c.body += (f'<p class="muted">{len(s["est"])}/{s["n"]} phiên có NAV <b>ước tính</b> '
+                       f'(<code>nav_is_estimate</code>), giữ nguyên không sửa: '
+                       + ", ".join(str(r["date"]) for r in s["est"][:12]) + ("…" if len(s["est"]) > 12 else "") + ".</p>")
+        if s["missing"]:
+            c.body += (f'<p class="muted">{len(s["missing"])} ngày Thứ 2–6 không có dòng NAV (gồm cả nghỉ lễ), '
+                       f'KHÔNG nội suy: ' + ", ".join(str(d) for d in s["missing"][:8])
+                       + ("…" if len(s["missing"]) > 8 else "") + ".</p>")
+        for key, label in (("pending", "TREO — chưa nằm trong tỉ suất nào"), ("dropped", "bị loại vì ≤ mốc khởi điểm")):
+            if got.get(key):
+                c.body += (f'<p class="nodata-msg">{len(got[key])} dòng tiền {label}: '
+                           + ", ".join(str(f.get("date")) for f in got[key]) + ".</p>")
+        if lim is not None and s["day_ret"] <= lim:
+            c.touched.append(f"{account}: phiên {s['last']['date']} đóng cửa {vn(100 * s['day_ret'], 2, True)}% so với "
+                             f"phiên trước, ≤ phanh lỗ trong ngày {vn(100 * lim, 1)}%")
+    except Exception as e:
+        c.error = _err(e)
+    return c
+
+
+def live_buy_sessions(data_dir, account, since):
+    """Ngày (chuỗi) có ≥1 lệnh MUA bot ĐẶT (journal PLACE) từ `since`, trừ corp-action. Journal là file
+    RIÊNG từng tài khoản (tên file mang nhãn) — không đọc file dùng chung nào (§12). Đây là bộ ĐẾM
+    phiên, không phải số đo giá."""
+    import csv
+    import glob
+    out = []
+    for f in sorted(glob.glob(os.path.join(data_dir, "execution_logs", f"exec_{account}_2*_journal.csv"))):
+        d = os.path.basename(f)[len(f"exec_{account}_"):][:10]
+        if d < since:
+            continue
+        with open(f, encoding="utf-8", newline="") as fh:
+            if any(r.get("event") == "PLACE" and str(r.get("side", "")).lower() == "buy"
+                   and r.get("book") != "CORP_ACTION" for r in csv.DictReader(fh)):
+                out.append(d)
+    return out
+
+
+def cell_live_slippage(data_dir, kb_dir, ct, now):
+    reg, ops, eqr = "mike/kb/paper_programs_registry.json", "mike/kb/current_ops.md", CITE_ONLY["eqr"]
+    c = Cell("live_slippage", "Trượt giá khớp lệnh MUA — giá khớp so với giá mở cửa", 3,
+             source="<code>mike/kb/paper_programs_registry.json</code> (chương trình <code>fill_timing</code>, khối "
+                    "<code>progress.live_monitoring</code>) + bộ đếm phiên từ journal từng tài khoản "
+                    "<code>data/execution_logs/exec_&lt;tài khoản&gt;_*_journal.csv</code>. Trang KHÔNG tự đo trượt giá",
+             cadence="theo luật: đo lại sau mỗi ~10 phiên live có lệnh MUA hybrid. CHƯA có cron nào sinh số này; "
+                     "CŨ khi bộ đếm ghi trong registry lệch số phiên đếm được từ journal")
+    thr_bps, thr_cite = ct.const(ops, r"rollback nếu mean >\+([0-9]+)bps")
+    c.thr = [f"Trung bình giá khớp MUA so với giá mở cửa &gt; +{vn(thr_bps, 0) if thr_bps is not None else 'KHÔNG ĐỌC ĐƯỢC'} "
+             f"bps (1 bước giá), bền ⇒ rollback fill_timing HYBRID; đo mỗi ~10 phiên live có lệnh MUA hybrid — "
+             f"{thr_cite}, điều kiện ghi ở " + ct.cite(reg, r'"rollback_condition"')]
+    try:
+        with open(os.path.join(kb_dir, "paper_programs_registry.json"), encoding="utf-8") as f:
+            j = json.load(f)
+        progs = j.get("programs") if isinstance(j, dict) else j
+        p = next((x for x in progs or [] if isinstance(x, dict) and x.get("id") == "fill_timing"), None)
+        if p is None:
+            raise ValueError("registry không có chương trình id=fill_timing")
+        lm = (p.get("progress") or {}).get("live_monitoring")
+        if not isinstance(lm, dict):
+            raise ValueError("fill_timing.progress.live_monitoring không có trong registry")
+        since, target, cnt = str(lm.get("since")), lm.get("target_sessions"), lm.get("count_current_measured")
+        notes = sorted(k[5:] for k in lm if re.fullmatch(r"note_\d{4}-\d{2}-\d{2}", k))
+        c.as_of = (f"bộ đếm registry ghi {notes[-1]}" if notes else f"bộ đếm registry mở {since}, chưa ghi lần đếm nào")
+        per = {a: live_buy_sessions(data_dir, a, since) for a in LIVE_ACCOUNTS}
+        union = sorted(set().union(*per.values()))
+        c.stale = _isnum(cnt) and len(union) != int(cnt)
+        c.stale_why = (f"registry ghi {cnt} phiên, journal đếm được {len(union)} phiên từ {since}"
+                       + (f" — ĐÃ ĐỦ {target} phiên, đến hạn đo" if _isnum(target) and len(union) >= target else ""))
+        m = re.search(r"fill-vs-open hybrid = ([+\-−]?[0-9]+,[0-9]+) bps \(se ([0-9]+,[0-9]+), n=(\d+)\)",
+                      str(p.get("review_short", "")))
+        md = re.search(r"\d{4}-\d{2}-\d{2}", str(p.get("status", "")))
+        paper = (f"{esc(m.group(1))} bps (sai số chuẩn {esc(m.group(2))}; n = {esc(m.group(3))} phiên)" if m
+                 else "không đọc được từ registry")
+        rows = [["Số đo LIVE gần nhất", "<b>chưa có</b>" if not lm.get("measured_sessions") else
+                 f"{len(lm['measured_sessions'])} phiên đã đo — xem registry", "chưa lần đo live nào được ghi vào registry"
+                 if not lm.get("measured_sessions") else esc(", ".join(map(str, lm["measured_sessions"])))],
+                ["Bộ đếm ghi trong registry", f"{esc(cnt)}/{esc(target)} phiên", f"từ {esc(since)}; lần đếm ghi gần nhất "
+                 + (notes[-1] if notes else "—")]]
+        for a in LIVE_ACCOUNTS:
+            rows.append([f"Phiên live có lệnh MUA bot đặt — {a}", f"{len(per[a])}", esc(", ".join(per[a]) or "—")])
+        rows += [["Hợp hai tài khoản (số phiên khác nhau)", f"<b>{len(union)}/{esc(target)}</b>", esc(", ".join(union) or "—")],
+                 ["Số đo gần nhất trên PAPER (tài khoản main, không phải live)", paper,
+                  f"ghi lúc tốt nghiệp {md.group(0) if md else '—'}; dương = mua ĐẮT hơn giá mở cửa"]]
+        c.body = (
+            '<p><b>Chưa có nguồn định kỳ</b> cho trượt giá của tài khoản live. '
+            f'<code>{eqr}</code> là công cụ chạy tay; lượt chạy tự động hằng ngày gọi nó không kèm '
+            f'<code>--account</code> nên LOẠI mọi tài khoản live — ' + ct.cite(eqr, r"EXCLUDE every configured LIVE account")
+            + '.</p>' + _table(["Chỉ số", "Giá trị", "Ghi chú"], rows, cls="wide")
+            + '<p class="muted">Bộ đếm phiên lấy từ journal (lệnh bot ĐẶT, trừ corp-action) — là số phiên, không phải '
+              'giá khớp. Số trượt giá khi đo phải lấy giá khớp từ xác nhận của broker, lọc theo từng tài khoản.</p>')
+    except Exception as e:
+        c.error = _err(e)
+    return c
+
+
 # ───────────────────────────────────────────────────────────────── nguồn sống (tiêm được để test)
 def default_providers(wc_root):
     """Mọi lời gọi module production nằm ở đây — CHỈ import/đọc. Import trễ để một module hỏng
@@ -815,9 +1024,21 @@ def default_providers(wc_root):
         import edge_health_monitor
         return edge_health_monitor.neg_month_streak(d, "known_date")
 
+    def unit_ledger(account):
+        bin_dir = os.path.dirname(os.path.abspath(__file__))
+        if bin_dir not in sys.path:
+            sys.path.insert(0, bin_dir)
+        import account_cash_flows as acf
+        import nav_unit_ledger as nul
+        rows = nul.load_nav_history(account)
+        flows = acf.load_flows(account, require_file=True)     # thiếu sổ dòng tiền ⇒ TỪ CHỐI, không đoán []
+        ledger, info = nul.build_ledger(rows, flows, *nul._inception_baseline(rows, nul.load_inception(account)))
+        return dict(ledger=ledger, pending=info["pending"], dropped=info["dropped"],
+                    jumps=acf.unexplained_nav_jumps(rows, flows), block_pct=acf.NAV_JUMP_BLOCK_PCT)
+
     return dict(gated_state=gated_state, dt_clock=dt_clock, dt_line=dt_line, value_radar=value_radar,
                 killswitch=killswitch, big4_rate=big4_rate, breadth=breadth, capit=capit,
-                neg_streak=neg_streak)
+                neg_streak=neg_streak, unit_ledger=unit_ledger)
 
 
 # ───────────────────────────────────────────────────────────────── trang
@@ -891,6 +1112,13 @@ def build_cells(now, wc_root=WC_ROOT, data_dir=None, kb_dir=None, providers=None
         cell_env_rates(data_dir, ct, now, prov),
         cell_env_structural(kb_dir, ct, now),
     ]
+    dd = [cell_live_dd(a, data_dir, ct, now, prov) for a in LIVE_ACCOUNTS]
+    # §12: hai tài khoản mà ra BẢNG SỐ giống hệt nhau = gần như chắc chắn đọc chung một nguồn không lọc.
+    ok = [c for c in dd if c.error is None]
+    if len(ok) > 1 and len({re.search(r"<table.*?</table>", c.body, re.S).group(0) for c in ok}) == 1:
+        for c in ok:
+            c.error = "hai tài khoản ra số giống hệt nhau — nghi đọc chung một nguồn không lọc tài khoản; không công bố"
+    cells += dd + [cell_live_slippage(data_dir, kb_dir, ct, now)]
     return cells, ct
 
 
@@ -907,6 +1135,7 @@ def render_page(cells, now, cite_misses=()):
     top = ("<ul>" + "".join(items) + "</ul>") if items else "<p>Không ô nào chạm ngưỡng.</p>"
     t1 = "".join(render_cell(c) for c in cells if c.tier == 1)
     t2 = "".join(render_cell(c) for c in cells if c.tier == 2)
+    t3 = "".join(render_cell(c) for c in cells if c.tier == 3)
     miss = ""
     if cite_misses:
         miss = ("<p><b>Trích dẫn không định vị được</b> (file nguồn đã đổi — cần cập nhật neo): "
@@ -918,12 +1147,13 @@ def render_page(cells, now, cite_misses=()):
         f'<style>{CSS}</style></head><body><main>'
         '<h1>Độ phù hợp của chiến lược với thị trường hiện hành</h1>'
         f'<p class="meta">Sinh lúc <b>{now:%Y-%m-%d %H:%M} ICT</b> (múi giờ Asia/Ho_Chi_Minh). '
-        'Trang CHẨN ĐOÁN: không có điểm tổng hợp, không phát tín hiệu, không số tài khoản. '
+        'Trang CHẨN ĐOÁN: không có điểm tổng hợp, không phát tín hiệu, không in số tài khoản hay số dư bằng tiền. '
         'Bốn lần thử biến các số đo này thành luật tự điều chỉnh đều đã bị bác.</p>'
         f'<div class="top"><h3>Hôm nay có gì đáng chú ý</h3>{top}'
         '<p class="muted">Chỉ liệt kê ô có ngưỡng thật trong code/KB đang bị chạm, hoặc nguồn đang cũ/thiếu.</p></div>'
         f'<h2>Tầng 1 — Độ khớp của edge</h2>{t1}'
         f'<h2>Tầng 2 — Môi trường</h2>{t2}'
+        f'<h2>Tầng 3 — Thực tế so với kỳ vọng</h2>{t3}'
         f'<footer>{miss}<p>Huy hiệu CŨ đếm ngày Thứ 2–6, <b>không trừ nghỉ lễ</b> — sau kỳ nghỉ dài có thể báo CŨ giả. '
         'Màu ở nhãn edge chỉ theo ba nhãn mà <code>edge_health_monitor.py</code> tự gắn màu (FLIPPED / DECAYED / STRENGTH); '
         'màu dải DT5G chỉ để phân biệt năm trạng thái. Sinh bởi <code>mike/bin/strategy_fit_dashboard.py</code>.</p></footer>'
