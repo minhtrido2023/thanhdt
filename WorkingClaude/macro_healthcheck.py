@@ -331,8 +331,20 @@ report = {
     "macro_now": macro_now, "missed_runs_tdays": missed,
     "sources": sources, "checks": checks,
 }
-with open(os.path.join(DATADIR, "macro_health.json"), "w", encoding="utf-8") as f:
-    json.dump(report, f, indent=2, ensure_ascii=False)
+# atomic (tmp in the same dir + os.replace): get_gated_state() must never read a half-written
+# report — an unreadable file fails closed to DT4_only. Bytes written are unchanged.
+# Behaviour change: an error mid-write now KEEPS the last good report (valid up to 1440 min)
+# instead of dropping to DT4 at once — the tmp is removed and the error re-raised unchanged.
+HEALTH_PATH = os.path.join(DATADIR, "macro_health.json")
+_health_tmp = f"{HEALTH_PATH}.tmp.{os.getpid()}"
+try:
+    with open(_health_tmp, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2, ensure_ascii=False)
+    os.replace(_health_tmp, HEALTH_PATH)
+except BaseException:
+    if os.path.exists(_health_tmp):
+        os.remove(_health_tmp)
+    raise
 
 # console summary
 print("-" * 90)
