@@ -192,7 +192,7 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
         if check_freshness is None:
             check_freshness = asof is None
         ev = deposit_events_df()
-        asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+        asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
         avail = ev[ev.time <= asof_ts]
         if avail.empty:
             return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
@@ -277,7 +277,7 @@ def current_deposit_rate(asof=None):
     sorted last by time, with no bound against the real clock — rating_8l.py calls this with no
     asof (the live NEUTRAL-tilt path), so this was a real, reachable production gap."""
     ev = deposit_events_df()
-    asof = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+    asof = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
     return float(ev[ev.time <= asof].deposit_rate.iloc[-1])
 
 
@@ -303,7 +303,7 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
     if check_freshness is None:
         check_freshness = asof is None
-    asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+    asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
     big4_pct = current_deposit_rate(str(asof_ts.date()))
     rate_pct, rate_source = big4_pct, "big4_12m"
     last_date = asof_ts

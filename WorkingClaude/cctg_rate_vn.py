@@ -126,7 +126,7 @@ def current_cctg_rate(asof=None):
     current_deposit_rate() docstring for why this must anchor to the real clock, not just the
     series' own last row)."""
     ev = cctg_events_df()
-    asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+    asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
     avail = ev[ev.time <= asof_ts]
     if avail.empty:
         return None, None
