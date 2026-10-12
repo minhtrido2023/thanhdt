@@ -12,6 +12,10 @@ HAI MỐC TÁCH RỜI (luật cốt lõi của file này):
                  CHỈ `cmd_verify` nhánh thành công được đẩy mốc này. Không có đường nào khác.
   attempted_at — lần cuối THỬ (mọi kết cục). Fetch hỏng / lệch / thiếu nguồn CHỈ đẩy mốc này.
 `last_verified` (YYYY-MM-DD) giữ cho macro_healthcheck.py đọc như cũ = ngày của verified_at.
+  official_reconfirmed_at — (user duyệt 2026-10-12) lượt tuần KHÔNG có nguồn độc lập MỚI nhưng
+                 `finalize` tự đọc trang NHNN thấy số y nguyên verified{} + SBV_REFI_EVENTS và
+                 verified_at còn trong MAX_SOURCE_AGE_DAYS ⇒ outcome `official_unchanged`, không
+                 nhắc. KHÔNG phải verified: mốc này không đẩy verified_at/last_verified/verified{}.
 
 Nguồn (chuẩn giống CCTG/Big-4 — append_cctg_rate.py):
   A. Trang chính thức NHNN `sbv.gov.vn/vi/lãi-suất1` — script TỰ fetch + parse (cơ học, agent không
@@ -61,6 +65,10 @@ MAX_SOURCE_AGE_DAYS = 120     # user duyệt 2026-10-09 (cửa sổ B): chuỗi 
 RATE_EPS_PP = 0.01            # lãi điều hành niêm yết 3 số lẻ — phải khớp, không phải "gần"
 RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 20.0
 STALE_DAYS = 21
+# Lớp "không có nguồn độc lập MỚI" — chỉ lớp này được finalize tự đọc trang NHNN để khỏi nhắc.
+# Lệch số / lỗi fetch-parse / nguồn sai KHÔNG thuộc lớp: các ca đó luôn tới người.
+NO_NEW_SOURCE_OUTCOMES = frozenset({"no_verify_call", "url_reused", "stale_source"})
+_OFFICIAL_SEP = " | NHNN tự đọc: "
 HISTORY_KEEP = 52
 
 # Ghi đè đường dẫn/HTML CHỈ cho selfcheck: cần CẢ cờ VÀ data dir tạm khác data/ thật — cờ đơn
@@ -81,6 +89,9 @@ class Refuse(Exception):
 
 
 def _now():
+    fake = os.environ.get("SBV_POLICY_FAKE_NOW") if _SELFCHECK else None  # ghim đồng hồ selfcheck
+    if fake:
+        return datetime.fromisoformat(fake).astimezone(_ICT)
     return datetime.now(_ICT)
 
 
@@ -327,10 +338,40 @@ def cmd_verify(a):
     return 0
 
 
+def _official_unchanged(d, va, age):
+    """finalize tự đọc trang NHNN. -> (True, mô tả) khi CẢ BA: (a) refi + rediscount khớp
+    verified{}, (b) refi khớp SBV_REFI_EVENTS, (c) verified_at tuổi 0..MAX_SOURCE_AGE_DAYS.
+    Ngược lại (False, lý do THẬT đang cầm — §29). Không ghi gì."""
+    try:
+        o = parse_official(_fetch_official_html())
+        ev_date, ev_rate = _recorded_refi()
+    except Exception as e:  # noqa: BLE001 — trích lỗi thật, không đoán (§29)
+        return False, f"{e.outcome}: {e.detail}" if isinstance(e, Refuse) else repr(e)
+    got = f"refi={o['refi_pct']}% rediscount={o['rediscount_pct']}%"
+    v = d.get("verified") or {}
+    try:
+        v_refi, v_red = float(v["refi_pct"]), float(v["rediscount_pct"])
+    except (KeyError, TypeError, ValueError):
+        return False, (f"NHNN {got} nhưng verified{{}} thiếu/sai refi_pct={v.get('refi_pct')!r} "
+                       f"rediscount_pct={v.get('rediscount_pct')!r}")
+    # `not (<=)` thay vì `>`: NaN trong log phải rơi về nhánh nhắc.
+    if not (abs(o["refi_pct"] - v_refi) <= RATE_EPS_PP
+            and abs(o["rediscount_pct"] - v_red) <= RATE_EPS_PP):
+        return False, f"NHNN {got} ≠ verified refi={v_refi}% rediscount={v_red}%"
+    if not abs(o["refi_pct"] - ev_rate) <= RATE_EPS_PP:
+        return False, f"NHNN {got} ≠ SBV_REFI_EVENTS {ev_rate}% (từ {ev_date})"
+    if age is None or not 0 <= age <= MAX_SOURCE_AGE_DAYS:
+        return False, (f"NHNN {got} khớp verified + SBV_REFI_EVENTS nhưng verified_at={va} tuổi "
+                       f"{age} ngày ngoài 0..{MAX_SOURCE_AGE_DAYS}")
+    return True, (f"NHNN {got} khớp verified + SBV_REFI_EVENTS {ev_rate}%; verified_at={va} "
+                  f"tuổi {age}/{MAX_SOURCE_AGE_DAYS} ngày")
+
+
 def cmd_finalize(a):
     """Cuối wrapper Thứ Hai. (1) Không ai gọi verify từ run-start ⇒ ghi attempt (KHÔNG đẩy
     verified_at). (2) Lượt này không verified, hoặc verified_at > STALE_DAYS ⇒ ĐÚNG 1 dòng nhắc
-    vào Trading Daily (chạy tuần 1 lần ⇒ không spam hằng ngày)."""
+    vào Trading Daily (chạy tuần 1 lần ⇒ không spam hằng ngày). (3) Ngoại lệ của (2): lượt chỉ
+    thiếu nguồn độc lập MỚI mà trang NHNN tự đọc y nguyên ⇒ `official_unchanged`, không nhắc."""
     d = load_log()
     start = datetime.strptime(a.run_start, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     att = d.get("attempted_at")
@@ -346,14 +387,32 @@ def cmd_finalize(a):
           f"last_outcome={la.get('outcome')}")
     stale = age is None or age > STALE_DAYS
     out = la.get("outcome")
+    why = None
+    if out in NO_NEW_SOURCE_OUTCOMES:
+        same, why = _official_unchanged(d, va, age)
+        if same:
+            record_attempt(d, "official_unchanged", f"{why} (lượt này: {out})")
+            d["official_reconfirmed_at"] = d["attempted_at"]
+            save_log(d)
+            print(f"sbv_policy: official_unchanged — {why}; KHÔNG nhắc, verified_at giữ nguyên")
+            return 0
+        # vẫn nhắc như cũ; lý do thật vào detail (ghi đè phần đuôi nếu finalize chạy lại)
+        la["detail"] = str(la.get("detail")).split(_OFFICIAL_SEP)[0] + _OFFICIAL_SEP + why
+        if d.get("history") and d["history"][-1].get("at") == la.get("at"):
+            d["history"][-1]["detail"] = la["detail"][:300]
+        save_log(d)
     if out == "rate_change_detected" and not la.get("notified"):
         # 🔴 lúc verify chưa tới được người (Discord lỗi) ⇒ gửi lại ở đây, không im lặng.
         return 0 if _notify(str(la.get("detail"))) else 1
     # đã 🔴 thành công / đã verified còn tươi / dispatch xếp hàng chưa quá hạn ⇒ không nhắc.
-    if out == "rate_change_detected" or (out in ("verified", "dispatch_queued") and not stale):
+    # official_unchanged (finalize chạy lại trong cùng lượt): không áp STALE_DAYS — trần
+    # MAX_SOURCE_AGE_DAYS đã kiểm lúc ghi outcome.
+    if out in ("rate_change_detected", "official_unchanged") or (
+            out in ("verified", "dispatch_queued") and not stale):
         return 0
     ok = _notify(f"⚠️ Lãi điều hành NHNN: lượt kiểm tuần KHÔNG xác nhận được "
-                 f"({la.get('outcome')}: {str(la.get('detail'))[:160]}). Kiểm thật cuối "
+                 f"({la.get('outcome')}: {str(la.get('detail')).split(_OFFICIAL_SEP)[0][:160]}"
+                 f"{'; tự đọc trang NHNN: ' + why[:220] if why else ''}). Kiểm thật cuối "
                  f"{va or 'CHƯA CÓ'} ({age if age is not None else '?'} ngày"
                  f"{', QUÁ ' + str(STALE_DAYS) + ' ngày — STALE' if stale else ''}). "
                  f"Xác nhận tay: {OFFICIAL_URL} (DT5G vẫn dùng SBV_REFI_EVENTS, không đổi).")
