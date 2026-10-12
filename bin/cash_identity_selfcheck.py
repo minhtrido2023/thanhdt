@@ -946,6 +946,10 @@ def run_checks(tmp):
        and not chc.ERROR_RE.search(lines[0]) and not chc.ERROR_RE.search("nav_period_returns: " + lines[0]),
        f"I/G8: dòng lỗi phải nêu lỗi thật nhưng không khớp ERROR_RE của cron_health_check; được {lines}")
     ok(chc.ERROR_RE.search("FileNotFoundError: [Errno 2] x"), "I/G8: phép thử phải phân biệt được (dạng thô CÓ khớp)")
+    import nav_period_returns as npr_mod
+    ok(not chc.ERROR_RE.search("x — " + npr_mod._exc_text(FileNotFoundError(2, "No such file or directory", "/a/b.csv")))
+       and "b.csv" in npr_mod._exc_text(FileNotFoundError(2, "No such file or directory", "/a/b.csv")),
+       "G8: dòng lỗi dự phòng của nav_period_returns.py phải nêu lỗi thật mà không khớp ERROR_RE của cron_health_check")
 
     cli = [sys.executable, os.path.join(BIN, "cash_identity.py")]
     env = {k: v for k, v in os.environ.items() if k not in ("WC_ROOT", "MIKE_ROOT")}
@@ -1052,6 +1056,9 @@ def run_checks(tmp):
                            rec("2026-03-13", "20:00", 7_000_000)]               # sau lần chụp cuối ⇒ TREO
     wd.build()
     import daily_nav_snapshot as dns
+    ok(not chc.ERROR_RE.search("x — " + dns._exc_text(FileNotFoundError(2, "No such file or directory", "/a/b.csv")))
+       and "b.csv" in dns._exc_text(FileNotFoundError(2, "No such file or directory", "/a/b.csv")),
+       "G8: dòng lỗi dự phòng của daily_nav_snapshot.py phải nêu lỗi thật mà không khớp ERROR_RE của cron_health_check")
     kw = {k: v for k, v in wd.paths.items()}
     got = window(wd.check("SpaceX"), 10)["unexplained"]
     rep10 = dns.cash_identity_report("SpaceX", "2026-03-10", **kw)
@@ -1197,6 +1204,9 @@ def run_checks(tmp):
 
     with contextlib.redirect_stderr(io.StringIO()):
         import report_delivery_gate as g
+    ok(not chc.ERROR_RE.search("x — " + g._exc_text(FileNotFoundError(2, "No such file or directory", "/a/b.csv")))
+       and "b.csv" in g._exc_text(FileNotFoundError(2, "No such file or directory", "/a/b.csv")),
+       "G8: dòng lỗi dự phòng của report_delivery_gate.py phải nêu lỗi thật mà không khớp ERROR_RE của cron_health_check")
     ok(g.INVESTOR_FLOW_MARKER == ci.INVESTOR_MARKER and g.OPS_FLOW_MARKER == ci.WARNING_MARKER,
        "J: cổng và module phải dùng cùng hai cụm đánh dấu")
     gate_kw = {k: v for k, v in wd.paths.items()}

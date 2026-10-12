@@ -25,6 +25,7 @@ import datetime
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 import time as _time
@@ -65,6 +66,14 @@ from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noq
 # biến kế toán). Alias giữ tên cũ cho `previous_balance()` và để hai file KHÔNG thể lệch nữa —
 # docstring park_holdings.py:148 đã ghi "sửa một nơi, sửa cả hai (đã lệch 1 lần)".
 _stock_all_zero = _stock_block_all_zero
+
+_ERRNO_RE = re.compile(r"\[Errno -?\d+\] ?")
+
+
+def _exc_text(exc) -> str:
+    """Lỗi → "TênLỗi (thông điệp)" cho dòng CẢNH BÁO: bỏ cụm "[Errno N]" và không viết "TênLỗi:" —
+    hai dạng đó khớp `ERROR_RE` của `cron_health_check.py`, mà các dòng này vào log cron mỗi tối."""
+    return f"{type(exc).__name__} ({_ERRNO_RE.sub('', str(exc))})"
 
 
 def cash_block_reject_reason(stock):
@@ -922,7 +931,7 @@ def cash_identity_report(account, date, **paths):
         return report(account, asof=datetime.date.fromisoformat(date), **paths)
     except Exception as exc:                # noqa: BLE001 — đường hiển thị (xem docstring)
         line = (f"⚠️ Đẳng thức tiền ({account}) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa "
-                f"khai — {type(exc).__name__} ({exc})")
+                f"khai — {_exc_text(exc)}")
         return {"investor_line": None, "ops_lines": [line], "ops_today": [line], "error": line}
 
 

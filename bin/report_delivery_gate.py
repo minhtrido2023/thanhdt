@@ -139,6 +139,15 @@ def _extract_report_date(name: str) -> str | None:
     return None
 
 
+_ERRNO_RE = re.compile(r"\[Errno -?\d+\] ?")
+
+
+def _exc_text(exc) -> str:
+    """Lỗi → "TênLỗi (thông điệp)" cho dòng CẢNH BÁO: bỏ cụm "[Errno N]" và không viết "TênLỗi:" —
+    hai dạng đó khớp `ERROR_RE` của `cron_health_check.py`, mà các dòng này vào log cron mỗi tối."""
+    return f"{type(exc).__name__} ({_ERRNO_RE.sub('', str(exc))})"
+
+
 def _inception_return_cell(text: str) -> str | None:
     """Ô số (cột thứ 2 = SpaceX) của dòng 'Từ khi bắt đầu hoạt động' trong bảng '### 3.2 Hiệu suất
     lũy kế', nguyên văn. Không có dòng bảng nào như vậy ⇒ None; có dòng nhưng thiếu cột ⇒ ""."""
@@ -344,7 +353,7 @@ def cash_flow_warnings(report: Path, **paths) -> tuple:
                     f"trong tỉ suất nào của báo cáo này.")
         except Exception as exc:                       # noqa: BLE001 — cảnh báo, không chặn
             ops.append(f"⚠️ {PENDING_FLOW_MARKER} ({account}): KHÔNG kiểm được dòng tiền treo — "
-                       f"{type(exc).__name__} ({exc})")
+                       f"{_exc_text(exc)}")
         try:
             from cash_identity import report as cash_identity_report  # noqa: E402
             identity = cash_identity_report(account, asof=end, **paths)
@@ -353,7 +362,7 @@ def cash_flow_warnings(report: Path, **paths) -> tuple:
                 investor.append(identity["investor_line"])
         except Exception as exc:                       # noqa: BLE001 — cảnh báo, không chặn
             ops.append(f"⚠️ Đẳng thức tiền ({account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
-                       f"chưa khai — {type(exc).__name__} ({exc})")
+                       f"chưa khai — {_exc_text(exc)}")
     return ops, investor
 
 
@@ -381,7 +390,7 @@ def _warn_cash_flows(report: Path) -> None:
                   + " | ".join(investor), file=sys.stderr)
     except Exception as exc:                           # noqa: BLE001 — xem docstring
         print(f"report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối "
-              f"chiếu của {report.name} — {type(exc).__name__} ({exc})", file=sys.stderr)
+              f"chiếu của {report.name} — {_exc_text(exc)}", file=sys.stderr)
 
 
 def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,

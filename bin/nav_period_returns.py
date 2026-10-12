@@ -62,6 +62,7 @@ import argparse
 import datetime
 import json
 import os
+import re
 import sys
 from zoneinfo import ZoneInfo
 
@@ -76,6 +77,14 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 ANNUALIZE_MIN_DAYS = 365
 DAYS_PER_YEAR = 365.25            # số mũ quy năm — cùng quy ước với backtest của repo
+
+_ERRNO_RE = re.compile(r"\[Errno -?\d+\] ?")
+
+
+def _exc_text(exc) -> str:
+    """Lỗi → "TênLỗi (thông điệp)" cho dòng CẢNH BÁO: bỏ cụm "[Errno N]" và không viết "TênLỗi:" —
+    hai dạng đó khớp `ERROR_RE` của `cron_health_check.py`, mà các dòng này vào log cron mỗi tối."""
+    return f"{type(exc).__name__} ({_ERRNO_RE.sub('', str(exc))})"
 
 
 def _last_on_or_before(rows: list, d: datetime.date):
@@ -285,7 +294,7 @@ def main() -> int:
     except Exception as exc:                # noqa: BLE001
         result["cash_flow_warnings"] = [
             f"⚠️ Đẳng thức tiền ({args.account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
-            f"chưa khai — {type(exc).__name__} ({exc})"]
+            f"chưa khai — {_exc_text(exc)}"]
         result["cash_flow_investor_line"] = None
     for line in result["cash_flow_warnings"]:
         print(f"nav_period_returns: {line}", file=sys.stderr)
