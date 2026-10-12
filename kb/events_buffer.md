@@ -1035,3 +1035,14 @@
 
 ## Consolidation 2026-10-12T17:33:40Z
 - [2026-10-12T17:33:31Z] Mike/finding — retro-2026-10-12-finalized: {"entry": "kb/incidents/retro/retro-2026-10-12.md", "verified": "Wags gaps found and fixed", "escalation": "retro-pattern-recurring-claim-numbers-stated-before-measured"}
+
+## Consolidation 2026-10-12T17:50:25Z
+- [2026-10-12T17:44:38Z] Winston/heartbeat — Winston_20261012_174428: {"status": "in_progress", "note": "r2: doc code"}
+- [2026-10-12T17:45:29Z] Winston/heartbeat — Winston_20261012_174428: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261012_174428", "source": "watcher"}
+- [2026-10-12T17:45:45Z] Winston/heartbeat — Winston_20261012_174428: {"status": "in_progress", "note": "r2: code xong, viet selfcheck"}
+- [2026-10-12T17:46:29Z] Winston/heartbeat — Winston_20261012_174428: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261012_174428", "source": "watcher"}
+- [2026-10-12T17:47:29Z] Winston/heartbeat — Winston_20261012_174428: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20261012_174428", "source": "watcher"}
+- [2026-10-12T17:47:34Z] Winston/heartbeat — Winston_20261012_174428: {"status": "in_progress", "note": "r2: selfcheck PASS 321x2TZ, chay mutant"}
+- [2026-10-12T17:48:29Z] Winston/heartbeat — Winston_20261012_174428: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20261012_174428", "source": "watcher"}
+- [2026-10-12T17:49:30Z] Winston/heartbeat — Winston_20261012_174428: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20261012_174428", "source": "watcher"}
+- [2026-10-12T17:50:13Z] Winston/finding — sbv-policy-official-unchanged-20261012-r2: {"commit": "6f6eb62a", "branch": "fix/sbv-policy-official-unchanged-20261012", "diffstat": " 2 files changed, 205 insertions(+), 20 deletions(-)", "selfcheck": "sbv_policy_verify 321 PASS (env -u TZ + TZ=Etc/GMT+12); refresh_deposit_cctg_weekly 94 PASS x2 TZ", "mutants": {"leftover": "killed", "a-nan": "killed (#34)", "c-zero": "killed (#55)", "no-veto-B1": "killed (#1)", "no-B1b": "killed (#18)", "no-N1": "killed (#56)"}, "done": "B1 veto (source_mismatch/internal_error/rate_change_detected, at>=run-start; khong veto bad_sources/not_independent), B1b, B2 i-iv, N1 (probe mang truoc, load_log lai sau; hook SBV_POLICY_SIM_RACE_LOG chi trong selfcheck), N9", "not_done": "none. Luu y: veto rate_change_detected tu history (khong co co notified) di qua nhac ⚠️ chung voi detail cat 300 ky tu, khong gui lai 🔴 nguyen van; KHONG chay finalize/verify tren data/ that, khong merge"}
