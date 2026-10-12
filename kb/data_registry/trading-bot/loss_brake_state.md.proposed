@@ -1,0 +1,66 @@
+---
+kind: local-dir
+status: CANONICAL
+source: data/loss_brake/
+group: trading-bot
+role: trạng thái riêng của monitor phanh lỗ cấp NAV (chỉ cảnh báo)
+writer: "mike/bin/nav_loss_brake_monitor.py (cron tối, đề xuất 22:05 + 00:20 ICT) + người (mở/đóng episode, ack bản duyệt)"
+---
+
+# data/loss_brake/
+
+**Status: CANONICAL (đề xuất — chưa cài cron, chưa merge; job `Taylor_20261012_111422`, vòng 3 ở job
+`Taylor_20261012_161627`).**
+Thư mục của `mike/bin/nav_loss_brake_monitor.py`. Monitor chỉ CẢNH BÁO: không tạo `data/BOT_STOP`,
+không gọi broker/BQ. Đo trên **NAV toàn tài khoản** của mọi account (user chốt 2026-10-12 21:31 ICT:
+không còn "phần bot quản lý"; `excluded_tickers` không ảnh hưởng). Người làm gì với từng loại tin:
+`kb/ops_runbook.md` mục "Phanh lỗ NAV".
+
+## Các file
+Không file nào cần seed: thư mục và mọi file dưới đây tự sinh.
+
+| File | Ai ghi | Là gì |
+|---|---|---|
+| `status.json` | monitor, mỗi lượt chạy thật (nguyên tử) | `schema: 3`. Phiên đã đo (`session`), giờ chạy, `basis` ("NAV toàn tài khoản"), `error` (monitor tự hỏng thì ghi lỗi thật ở đây), ngưỡng + nguồn ngưỡng + `quiet_estimate_margin_pp`; mỗi account: `nav`, `unit_price`, ba phanh (`status` ∈ `OK` / `BREACH` / `BREACH_PROVISIONAL` / `UNMEASURABLE` / `NO_EPISODE`, `value`, `threshold`, `distance_pp`, `reason`, `provisional`, `quiet` = thuộc luật giảm tin, `note`), `notes` (gồm lệnh tay gần đây), `alert` (`keys`, `sent_now`, `send_error`, `sink`, `suppressed`), `monitor_error` |
+| `alerts_sent.json` | monitor, NGAY sau mỗi lần gửi được | khoá `account\|phiên\|phanh\|trạng thái` (và `monitor\|phiên\|loại lỗi`) → giờ gửi; chống gửi trùng. Hỏng ⇒ monitor vẫn gửi, dựng lại file, cất bản hỏng ở `alerts_sent.json.corrupt.*`. Phanh thuộc luật giảm tin KHÔNG tạo khoá |
+| `run_log.jsonl` | monitor, 1 dòng mỗi lượt chạy thật | bằng chứng monitor CÓ chạy: giờ, phiên, mã thoát, trạng thái từng account, account nào được gửi tin (`sent`), account nào có phanh bị giảm tin (`suppressed`) |
+| `episodes.json` | monitor tự mở khi đủ bằng chứng; NGƯỜI qua `--open-episode` / `--close-episode` / `--ack-approval` | episode đòn bẩy cho phanh −15%. Vắng file = chưa có episode nào. `entry_ref_alt_dates` = điểm vào phụ khi lúc mở không đọc được positions của ngày duyệt (phanh đo theo mốc xấu hơn) |
+| `human_actions.jsonl` | mỗi lệnh tay ghi state (chỉ-ghi-thêm) | ai, lúc nào, lý do, trước/sau. Lệnh tay cũng gửi MỘT dòng 📝 vào `trading_daily`; lượt đo kế đọc file này để nhắc lại trong `notes` |
+| `.lock` | monitor + mọi lệnh ghi của người | khoá `fcntl` độc quyền cho mọi đường ghi vào thư mục này |
+
+## Monitor đọc gì (không file nào trong số này do nó ghi)
+`data/execution_logs/nav_history_{TK}.csv` (NAV, `balance_ts`, `nav_is_estimate`) ·
+`data/account_inception.json` · `data/account_cash_flows.json` (BẮT BUỘC có; nạp/rút) ·
+`data/execution_logs/nav_gate_block_{TK}_{ngày}.json` (lý do thiếu dòng) ·
+`data/execution_logs/dnse_raw_{ngày}.jsonl` bản ghi `positions` cuối cùng của ĐÚNG account, chụp sau
+14:45 (chỉ để biết có vị thế dưới gói vay hay không) · `data/margin_approvals/` ·
+`data/trading_rules.json` (ngưỡng) · `secrets/trading_bot_accounts.json` (chỉ `account_id`).
+
+## Ai đọc
+`mike/bin/ops_health_check.sh` (khối LOSSBRAKE) qua `nav_loss_brake_monitor.py --health-line --account <TK>`:
+1 dòng mỗi sáng. rc=0 ✅ · rc=1 không đo được (`[WARN-ONLY]`) · rc=5 phanh chạm / tạm tính vượt (dòng
+🔴 riêng) · rc=2 file thiếu/cũ/hỏng · rc=3 monitor lỗi hoặc không gửi được cảnh báo. Độ tươi kiểm bằng
+`session` trong file so với lịch phiên (`expected_session`), không bằng mtime.
+
+## Bẫy
+- **Số trong `status.json` là của NAV TỔNG**, kể cả với account có `excluded_tickers` (ZaloPay/DGC).
+  Cổ tức tiền của một mã đang giữ không tạo bước nhảy giả: chuỗi `nav_history` mark giá CUM trước
+  GDKHQ và ghi khoản phải thu vào tiền (kiểm trên ca DGC 14/09 → 25/09/2026:
+  `agents/Taylor/research/nav_loss_brake_20261012/real_run_and_dgc_case.txt` mục 5).
+- **`UNMEASURABLE` không có nghĩa là có tin tối.** Phanh mang `quiet: true` (chỉ vướng cờ
+  `nav_is_estimate`, số tạm tính cách ngưỡng > 2,0pp) không đẩy tin; ai đếm "số tin" phải đọc
+  `alert.sent_now`, không đếm trạng thái.
+- **`alert.sink` khác rỗng trên state sống = tin KHÔNG tới Discord** (biến
+  `MIKE_LOSS_BRAKE_ALERT_SINK` đang đặt); monitor ghi `send_error`, không ghi khoá chống-trùng, rc=3.
+- **Bản ghi `positions` phải chụp SAU 14:45 và có danh sách `payload.positions`** mới được coi là danh
+  mục cuối phiên. Thiếu một trong hai ⇒ KHÔNG ĐO ĐƯỢC, không coi là "không giữ vị thế vay".
+- **Phiên của chính ngày đóng episode vẫn đo với episode** (`closed_date` là ngày CUỐI còn hiệu lực).
+- Xoá `alerts_sent.json` ⇒ monitor gửi lại mọi cảnh báo của phiên hiện tại.
+- `--date` của phiên cũ là CHẠY KHÔ (không ghi, không gửi) trừ khi thêm `--write-backdated`; `--now`
+  bị từ chối khi state-dir là thư mục này.
+- Thư mục này KHÔNG dựng lại được từ nguồn khác (`episodes.json`, `human_actions.jsonl`) ⇒ phải nằm
+  trong phạm vi sao lưu (việc còn mở N14).
+
+## Cài lần đầu
+`kb/ops_runbook.md` mục "Phanh lỗ NAV" → "Cài lần đầu" (đề xuất: `kb/ops_runbook.lossbrake.md.proposed`)
+— không có bước seed. Cron đề xuất: `kb/cron_registry.md.proposed`.
