@@ -428,3 +428,14 @@
 
 ## Consolidation 2026-10-12T01:07:02Z
 - [2026-10-12T01:06:03Z] Winston/heartbeat — Winston_20261012_010502: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261012_010502", "source": "watcher"}
+
+## Consolidation 2026-10-12T01:09:43Z
+- [2026-10-12T01:07:03Z] Winston/heartbeat — Winston_20261012_010502: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261012_010502", "source": "watcher"}
+- [2026-10-12T01:07:12Z] Winston/heartbeat — Winston_20261012_010502: {"status": "in_progress", "note": "online 12M 6.8 co 1 nguon VCCorp/kenh14 (An ninh tien te); tim nguon doc lap thu 2; CCTG 12M 7.4 va 6M 7.5 co 2 nguon 01/10"}
+- [2026-10-12T01:08:03Z] Winston/heartbeat — Winston_20261012_010502: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20261012_010502", "source": "watcher"}
+- [2026-10-12T01:09:03Z] Winston/heartbeat — Winston_20261012_010502: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20261012_010502", "source": "watcher"}
+- [2026-10-12T01:09:23Z] Winston/status — deposit-cctg-weekly-done: {"series": "big4_12m", "rate": 6.8, "changed": false, "note": "ghi 2026-10-12 = 6,8% online; 3 nguon (Kenh14 09/10, Dan tri 05/10, VietnamNet 07/10); quay 5,9% bo qua"}
+- [2026-10-12T01:09:23Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_12m", "rate": 7.4, "changed": false, "note": "BIDV 12T 7,4% + VietinBank 12-36T 7,4% (cao nhat); VCB chi 6T; Agribank khong so; nguon cong bo 2026-10-01 (x2)"}
+- [2026-10-12T01:09:23Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_6m", "rate": 7.5, "changed": true, "note": "6M 7,4->7,5: Vietcombank 7,5% cao nhat; BIDV 7,2%, VietinBank 7,2%; nguon 2026-10-01 (x2)"}
+- [2026-10-12T01:09:23Z] Winston/question — deposit-cctg-weekly-question: {"series": "sbv_policy", "issue": "khong tim duoc nguon doc lap NGOAI NHNN co ngay <=120 ngay neu CA tai cap von VA tai chiet khau: bai gan nhat co ca hai (East Asia Forum 06/10) da dung 09/10 nen URL bi chan; luatvietnam khong co ngay; DBS 07/2026 chi co refi 4,5; VnEconomy/AnNinhTienTe chi noi giu nguyen. Chua chay verify. De xuat: Mike/Taylor chi nguon moi hoac chap nhan EAF 06/10 (con trong 120 ngay) bang re-verify nguon khac.", "nhnn_official": "refi 4,5 / rediscount 3,0 (QD 1123/2023) khong doi"}
+- [2026-10-12T01:09:31Z] Winston/finding — cctg_6m dinh chinh: {"series": "cctg_6m", "correction": "event truoc ghi 7,4->7,5 SAI: file 6m chua co dong nao truoc do; 7,5 la diem dau tien cua chuoi, khong co gia tri cu de so"}
