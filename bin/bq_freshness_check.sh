@@ -685,12 +685,20 @@ cd "$WORKDIR"
 # cùng pattern post-chain assertion của daily_refresh_v34b_linux.sh, Winston_20260711_023903.)
 PIPELINE_START_EPOCH="$(date +%s)"
 
-# [pipeline-1] chạy qua `tee` để GIỮ nguyên văn stdout của CHÍNH lượt publish này (dòng
-# `[get_gated_state] …` cổng tự in) làm bằng chứng cho bước kiểm nguồn cổng ngay dưới. `tee` chỉ
-# sao chép — stdout ra log vẫn y hệt; _run_pipeline không đặt biến nào nên chạy trong subshell
-# của pipe không mất gì.
-GATE_PUB_OUT="$(mktemp)" || GATE_PUB_OUT=/dev/null
-_run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py | tee "$GATE_PUB_OUT"
+# [pipeline-1] GIỮ nguyên văn stdout của CHÍNH lượt publish này (dòng `[get_gated_state] …` cổng
+# tự in) làm bằng chứng cho bước kiểm nguồn cổng ngay dưới: ghi ra FILE THƯỜNG rồi `cat` lại.
+# CỐ Ý KHÔNG dùng pipe (`| tee`, `> >(tee …)`): pipe bắt chuỗi 19:00 chờ MỌI tiến trình con cháu
+# của publisher còn giữ stdout (publisher → notify.sh → notify_discord.sh → curl; subprocess
+# timeout chỉ kill notify.sh, curl mồ côi vẫn giữ đầu ghi) — arch-review 2026-10-12 tái hiện treo.
+# File thường không có đầu đọc nào phải chờ EOF. mktemp hỏng ⇒ chạy trần y như trước khi có bước
+# kiểm. stderr của publisher KHÔNG đi qua file (ra thẳng như cũ).
+if GATE_PUB_OUT="$(mktemp)"; then
+  _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py > "$GATE_PUB_OUT"
+  cat "$GATE_PUB_OUT"
+else
+  GATE_PUB_OUT=/dev/null
+  _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
+fi
 # --- GATE-SOURCE check (retro 2026-10-11 Pattern I, user duyệt 2026-10-12 11:01 ICT) ----------
 # Bản publish VỪA XONG là bản DollarBill đọc để lập plan T+1. Nguồn khác DT5G_macro (DT4_only /
 # DT4_STALE / giá trị lạ / thiếu trường / file hỏng) ⇒ báo NGAY: 1 tin Trading Daily + 1 bus

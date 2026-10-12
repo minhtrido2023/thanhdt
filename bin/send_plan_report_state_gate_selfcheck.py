@@ -109,6 +109,12 @@ CASES = [
     dict(name="nguồn cổng DT5G_macro dù còn marker cũ   -> KHÔNG có dòng ⚠️ nguồn cổng",
          p_src=SRC_BARE, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True, want_block=False,
          gate_marker=dict(source="DT4_only", published_at=_G_PUB, gate_line="x", gate_line_why="", health="x")),
+    # ── Nhánh LỖI của khối nguồn cổng (send_plan_report.sh, `except Exception as _e`): helper hỏng
+    # ⇒ report VẪN render và có ĐÚNG MỘT dòng nói ra là không kiểm được. "lỗi ⇒ sys.exit(1)" làm
+    # mất report; "lỗi ⇒ câm" làm mất dòng — cả hai mutation phải làm ca này đỏ.
+    dict(name="helper nguồn cổng HỎNG                  -> report vẫn render, đúng 1 dòng 'KHÔNG kiểm được'",
+         p_src=SRC_BARE, p_state=3, g_src="DT4_only", g_state=3, has_golive=True, want_block=False,
+         broken_helper=True, want_note="🧭 Thị trường:", want_gate_err_lines=1),
 ]
 
 PLAN_DATE = "2026-08-11"
@@ -117,7 +123,7 @@ ACCOUNT = "SpaceX"
 
 def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
              want_note=None, deny_note=None, p_state_name="NEUTRAL",
-             gate_marker=None, want_gate_lines=0):
+             gate_marker=None, want_gate_lines=0, broken_helper=False, want_gate_err_lines=0):
     sandbox = tempfile.mkdtemp(prefix="sendplan_selfcheck_")
     try:
         plans = os.path.join(sandbox, "data", "trade_plans")
@@ -158,6 +164,12 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
             with open(os.path.join(sandbox, "data", "gate_source_alert.json"), "w") as f:
                 json.dump(gate_marker, f)
 
+        if broken_helper:
+            # Khối python của report chạy `python3 -` với cwd = WORKDIR ⇒ sys.path[0] là WORKDIR,
+            # đứng TRƯỚC mike/bin: file này che helper thật và ném lỗi ngay lúc import.
+            with open(os.path.join(sandbox, "gate_source_check.py"), "w") as f:
+                f.write('raise RuntimeError("selfcheck: helper hỏng")\n')
+
         env = dict(os.environ)
         env["SEND_PLAN_WORKDIR_OVERRIDE"] = sandbox
         env["SEND_PLAN_MARKER_DIR"] = os.path.join(sandbox, "markers")
@@ -180,8 +192,12 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
         n_gate = out.count(_GATE_LINE_MARK)
         if ok and n_gate != want_gate_lines:
             ok, why = False, f"dòng nguồn cổng xuất hiện {n_gate} lần, mong đợi {want_gate_lines}"
-        if ok and "KHÔNG kiểm được nguồn cổng DT5G" in out:
-            ok, why = False, "gate_source_check không import/chạy được trong send_plan_report"
+        n_err = out.count("KHÔNG kiểm được nguồn cổng DT5G")
+        if ok and n_err != want_gate_err_lines:
+            ok, why = False, (f"dòng 'KHÔNG kiểm được nguồn cổng DT5G' xuất hiện {n_err} lần, mong đợi "
+                              f"{want_gate_err_lines} (0 = helper phải import/chạy được; 1 = ca helper hỏng)")
+        if ok and broken_helper and "RuntimeError: selfcheck: helper hỏng" not in out:
+            ok, why = False, "dòng lỗi không trích lỗi thật của helper (§29)"
         return ok, blocked, why, out
     finally:
         shutil.rmtree(sandbox, ignore_errors=True)

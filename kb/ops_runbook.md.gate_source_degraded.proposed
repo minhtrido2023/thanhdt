@@ -1,0 +1,42 @@
+<!-- ĐỀ XUẤT (§13) — một mục MỚI cho kb/ops_runbook.md (chèn trước "## Nhật ký & kinh nghiệm").
+     Ghi ra file riêng vì kb/ops_runbook.md.proposed đang có đề xuất khác chờ duyệt — không ghi đè.
+     Nguồn: nhánh feat/gate-source-check-publish-20261012 (bin/gate_source_check.py). -->
+
+## Nhận tin "🟡 CỔNG DT5G SUY GIẢM" thì làm gì
+
+**Tin này là gì.** Lượt `publish_gated_state` của chuỗi 19:00 (`bq_freshness_check.sh`
+[pipeline-1]) vừa ghi `deploy_golive_dt5g_v4/golive_state_today.json` với `source` khác
+`DT5G_macro`. Plan T+1 sẽ lập trên state đó. **Chỉ cảnh báo — pipeline và plan KHÔNG bị chặn**;
+`DT4_only` là fail-closed đúng thiết kế (bỏ macro cap, giữ base + DT 4-gate). Tin đến qua 3
+đường: Discord Trading Daily (1 tin/ngày/nguồn), bus `error` topic
+`dt5g-gate-source-degraded-<ngày>`, và dòng ⚠️ trong báo cáo plan 21:00. Sáng hôm sau check 13
+của `ops_health_check.sh` (08:20) nhắc lại nếu còn.
+
+**Bước 1 — đọc bằng chứng ngay trong tin** (không đoán nguyên nhân):
+- `dòng cổng tự in: «[get_gated_state] …»` = lý do cổng tự nêu ở chính lượt đó.
+- `data/macro_health.json: status=…, ts=…` = báo cáo sức khoẻ feed cổng đã đọc.
+- Tin ghi "không tìm thấy dòng [get_gated_state]" / "KHÔNG đọc được" ⇒ không có bằng chứng,
+  xem `mike/logs/bq_freshness.log` quanh `[pipeline-1]`.
+
+**Bước 2 — phân loại theo bằng chứng:**
+
+| Thấy gì | Nghĩa là | Làm gì |
+| --- | --- | --- |
+| `health report N min old (> 1440)` | `macro_healthcheck` không chạy/không ghi trong 24h | Winston (data-ops): xem `daily_refresh` step healthcheck + log; chạy lại healthcheck, rồi chạy lại publisher |
+| `status` khác `HEALTHY` | feed vĩ mô (SBV/VIX/SPX/breadth) bị báo không tin được | Winston sửa feed; KHÔNG ép cổng về DT5G bằng tay |
+| `DT4_STALE` | bản DT4 đang dùng cũng cũ | Coi như sự cố dữ liệu: Winston kiểm `daily_refresh` trước khi tin state |
+| nguồn lạ / thiếu trường `source` / file hỏng | publisher hoặc file state bất thường | Taylor (chủ `macro_state_live.py`) kiểm; không xác nhận được có áp macro cap hay không |
+
+**Bước 3 — quyết định về plan (của user).** Plan không bị chặn. Khác biệt thực tế chỉ có khi
+macro cap ĐANG siết: so `state` với `macro_state_dt5g` trong tin — bằng nhau ⇒ hôm nay cap không
+đổi gì; `state` cao hơn `macro_state_dt5g` ⇒ plan đang chạy tỷ trọng cao hơn mức cổng đầy đủ cho
+phép, cân nhắc khi duyệt.
+
+**KHÔNG làm:** `touch`/sửa tay `golive_state_today.json` hay `macro_health.json` (đều là bằng
+chứng của gate chặn tiền thật); không re-tune tham số cổng; không xoá
+`data/gate_source_alert.json` để "tắt" tin.
+
+**Không thấy tin dù nghi cổng suy giảm:** đọc trường `source` của `golive_state_today.json`; trong
+`mike/logs/bq_freshness.log` tìm `WARN gate-source` (đã phát hiện), `gửi … THẤT BẠI` (kênh hỏng,
+không có lượt tự gửi lại cùng ngày) hoặc `SKIP gate-source` (lượt publish không ghi file state —
+khi đó `_assert_fresh_artifact` đã chặn và báo riêng).

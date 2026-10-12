@@ -307,7 +307,7 @@ def gs_sandbox(td, with_helper=True, health='{"ts": "2026-10-10T18:37:02+07:00",
     return td
 
 
-def gs_run(td, src, script=None, baseline=False, published_at=None, pre=""):
+def gs_run(td, src, script=None, baseline=False, published_at=None, pre="", env_extra=None):
     """Chạy đoạn publish 1 lần. Trả (stdout, stderr). `pre` = bash chèn trước đoạn publish."""
     td = Path(td)
     fn, seg = gs_extract(script, baseline)
@@ -315,10 +315,32 @@ def gs_run(td, src, script=None, baseline=False, published_at=None, pre=""):
             f'{fn}\ncd "$WORKDIR"\n{pre}\n{seg}\necho "__END__ FAILED=$FAILED"\n')
     env = dict(os.environ, STUB_SRC=src, TMPDIR=str(td))
     env.pop("JOB_ID", None)
+    env.pop("GATE_SOURCE_SEND_TIMEOUT_S", None)
     if published_at:
         env["STUB_PUBLISHED_AT"] = published_at
+    env.update(env_extra or {})
     r = subprocess.run(["bash", "-c", body], capture_output=True, text=True, timeout=120, env=env)
     return r.stdout, r.stderr
+
+
+def gs_run_combined(td, src, baseline=False, timeout=120):
+    """Chạy như CRON: stdout + stderr vào CÙNG MỘT FILE (`>> log 2>&1`). Trả (rc|"TIMEOUT", bytes log, giây)."""
+    import time
+    td = Path(td)
+    fn, seg = gs_extract(None, baseline)
+    body = (f'set -uo pipefail\nROOT="{td}/mike"\nWORKDIR="{td}/wc"\nPY=python3\nFAILED=0\nWARNED=0\n'
+            f'{fn}\ncd "$WORKDIR"\n{seg}\necho "__END__ FAILED=$FAILED"\n')
+    env = dict(os.environ, STUB_SRC=src, TMPDIR=str(td))
+    env.pop("JOB_ID", None)
+    log = td / "combined.log"
+    t0 = time.monotonic()
+    with open(log, "ab") as lf:
+        try:
+            rc = subprocess.run(["bash", "-c", body], stdout=lf, stderr=subprocess.STDOUT, env=env,
+                                timeout=timeout).returncode
+        except subprocess.TimeoutExpired:
+            rc = "TIMEOUT"
+    return rc, log.read_bytes(), time.monotonic() - t0
 
 
 def gs_calls(td):
@@ -337,6 +359,12 @@ def gs_marker(td):
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
+def _gs_sent(td, src):
+    """Các kênh đã đánh dấu gửi cho cặp (ngày publish của marker, nguồn)."""
+    m = gs_marker(td) or {}
+    return (m.get("sent") or {}).get(f"{m.get('publish_date')}|{src}")
+
+
 def case_gate_source_dt5g_macro_is_invisible():
     """Ngày thường: stdout và stderr y hệt từng byte đoạn publish TRẦN (không có bước kiểm), không
     tin, không bus, không file nào được ghi thêm, không sót file tạm."""
@@ -353,6 +381,27 @@ def case_gate_source_dt5g_macro_is_invisible():
         check("gate-source DT5G_macro: không ghi gate_source_alert.json", gs_marker(b) is None)
         left = sorted(p.name for p in Path(b).iterdir() if p.name not in ("mike", "wc"))
         check("gate-source DT5G_macro: không sót file tạm", left == [], extra=str(left))
+    # Như CRON (`>> log 2>&1`, stdout+stderr chung một file). Publisher không ghi stderr (đúng log
+    # thật [pipeline-1] ngày thường) ⇒ log gộp y hệt TỪNG BYTE đoạn trần. Publisher CÓ ghi stderr ⇒
+    # cùng tập dòng, chỉ dòng stderr đổi chỗ (stdout nay đi qua file rồi mới `cat` ra) — ghim đúng
+    # thực tế đó, không giả vờ byte-identical.
+    quiet = _STUB_PUBLISHER.replace('print("stub stderr line", file=sys.stderr)\n', "")
+    for label, pub, exact in (("publisher không ghi stderr", quiet, True), ("publisher có ghi stderr", _STUB_PUBLISHER, False)):
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            for d in (a, b):
+                gs_sandbox(d)
+                (Path(d) / "wc" / "deploy_golive_dt5g_v4" / "publish_gated_state.py").write_text(pub, encoding="utf-8")
+            rc0, log0, _ = gs_run_combined(a, "DT5G_macro", baseline=True)
+            rc1, log1, _ = gs_run_combined(b, "DT5G_macro")
+            if exact:
+                check(f"gate-source DT5G_macro log gộp như cron ({label}): rc + từng byte y hệt đoạn trần",
+                      rc0 == rc1 == 0 and log0 == log1 and b"[get_gated_state] DT5G_macro" in log1,
+                      extra=f"rc {rc0}/{rc1}\n--- trần ---\n{log0.decode()}\n--- mới ---\n{log1.decode()}")
+            else:
+                check(f"gate-source DT5G_macro log gộp như cron ({label}): rc + cùng tập dòng, cùng số byte",
+                      rc0 == rc1 == 0 and sorted(log0.splitlines()) == sorted(log1.splitlines())
+                      and len(log0) == len(log1) and b"stub stderr line" in log1,
+                      extra=f"rc {rc0}/{rc1}\n--- trần ---\n{log0.decode()}\n--- mới ---\n{log1.decode()}")
 
 
 def case_gate_source_dt4_only_alerts_once():
@@ -381,7 +430,7 @@ def case_gate_source_dt4_only_alerts_once():
               payload.get("source") == "DT4_only" and payload.get("blocking") is False
               and "[get_gated_state] DT4_only" in str(payload.get("gate_line")), extra=str(payload))
         check("gate-source DT4_only: marker ghi bằng chứng + đã gửi 2 kênh",
-              m.get("source") == "DT4_only" and m.get("sent") == {"discord": True, "bus": True}
+              m.get("source") == "DT4_only" and m.get("sent") == {f"{day}|DT4_only": {"discord": True, "bus": True}}
               and m.get("published_at") == "2026-10-12T19:01:21", extra=str(m))
         check("gate-source DT4_only: KHÔNG chặn — chuỗi chạy tiếp, FAILED=0, output publish còn nguyên",
               "__END__ FAILED=0" in out and "  [ok] [pipeline-1] publish_gated_state" in out, extra=out)
@@ -396,6 +445,7 @@ def case_gate_source_dt4_only_alerts_once():
 
         # ngày publish KHÁC (marker cũ của hôm trước) ⇒ là sự kiện mới, phải báo lại
         m = gs_marker(td); m["publish_date"] = "2000-01-01"
+        m["sent"] = {"2000-01-01|DT4_only": {"discord": True, "bus": True}}
         (Path(td) / "wc" / "data" / "gate_source_alert.json").write_text(json.dumps(m), encoding="utf-8")
         gs_run(td, "DT4_only")
         check("gate-source ngày publish khác: báo lại (khoá theo NGÀY, không khoá vĩnh viễn)",
@@ -464,12 +514,16 @@ def case_gate_source_failed_send_is_retried_not_marked():
         (Path(td) / "notify_thread.sh.rc").write_text("1")
         out, _ = gs_run(td, "DT4_only")
         check("gate-source Discord hỏng: nêu lỗi thật, chưa đánh dấu discord, bus vẫn ghi",
-              "gửi discord THẤT BẠI — Lỗi thật: rc=1" in out and (gs_marker(td) or {}).get("sent") == {"bus": True}
+              "gửi discord THẤT BẠI — Lỗi thật: rc=1" in out and _gs_sent(td, "DT4_only") == {"bus": True}
               and "__END__ FAILED=0" in out, extra=out + str(gs_marker(td)))
+        # N5: câu WARN không được hứa một lượt tự chạy lại không tồn tại; phải nêu lưới còn lại thật
+        check("gate-source Discord hỏng: WARN nêu lưới còn lại, không hứa 'lượt chạy lại sẽ thử lại'",
+              "sẽ thử lại" not in out and "KHÔNG có lượt tự chạy lại cùng ngày" in out
+              and "bus event error" in out and "báo cáo plan 21:00" in out and "check 13" in out, extra=out)
         (Path(td) / "notify_thread.sh.rc").write_text("0")
         gs_run(td, "DT4_only")
         check("gate-source chạy lại sau khi kênh sống: gửi bù Discord, bus KHÔNG lặp",
-              gs_count(td) == (2, 1, 0) and (gs_marker(td) or {}).get("sent") == {"bus": True, "discord": True},
+              gs_count(td) == (2, 1, 0) and _gs_sent(td, "DT4_only") == {"bus": True, "discord": True},
               extra=str(gs_calls(td)))
 
 
@@ -494,7 +548,7 @@ def case_gate_source_recovered_rerun_and_helper_crash():
 
 def case_gate_source_mktemp_fails():
     """mktemp hỏng ⇒ rơi về /dev/null: output publish vẫn ra log nguyên vẹn, vẫn báo nguồn cổng, tin
-    nói thẳng là không giữ được output (không giả vờ 'không tìm thấy dòng cổng'), stderr không có lỗi tee/rm."""
+    nói thẳng là không giữ được output (không giả vờ 'không tìm thấy dòng cổng'), stderr không có lỗi cat/rm."""
     stub = 'mktemp() { echo "mktemp: stub hỏng" >&2; return 1; }'
     with tempfile.TemporaryDirectory() as td:
         gs_sandbox(td)
@@ -515,8 +569,140 @@ def case_gate_source_mktemp_fails():
               out == base_out and gs_count(b) == (0, 0, 0), extra=out)
 
 
+def case_gate_source_orphan_holding_stdout_does_not_hang():
+    """B1 (arch-review 2026-10-12): publisher để lại tiến trình CHÁU mồ côi còn giữ stdout (mô phỏng
+    notify.sh → notify_discord.sh → curl treo) ⇒ đoạn publish vẫn xong ngay như bản trần. Quay lại
+    `| tee` (hay bất kỳ pipe nào) ⇒ đầu đọc chờ EOF tới khi tiến trình cháu chết ⇒ ca này đỏ."""
+    orphan = _STUB_PUBLISHER + r"""
+import subprocess
+subprocess.Popen(["bash", "-c", "echo $$ > orphan.pid; exec sleep 20"], stderr=subprocess.DEVNULL)
+"""
+    with tempfile.TemporaryDirectory() as td:
+        gs_sandbox(td)
+        (Path(td) / "wc" / "deploy_golive_dt5g_v4" / "publish_gated_state.py").write_text(orphan, encoding="utf-8")
+        rc, log, secs = gs_run_combined(td, "DT4_only", timeout=60)
+        pidf = Path(td) / "wc" / "orphan.pid"
+        alive = False
+        if pidf.exists():
+            try:
+                os.kill(int(pidf.read_text().strip()), 0)
+                alive = True
+            except (OSError, ValueError):
+                pass
+        text = log.decode("utf-8", "replace")
+        check("gate-source tiến trình cháu giữ stdout: đoạn publish xong trong vài giây (không chờ nó)",
+              rc == 0 and secs < 8, extra=f"rc={rc} {secs:.1f}s\n{text}")
+        check("gate-source tiến trình cháu giữ stdout: đối chứng — tiến trình cháu CÒN SỐNG lúc chuỗi đã xong",
+              alive, extra=f"pidfile={pidf.exists()}")
+        check("gate-source tiến trình cháu giữ stdout: output publish còn đủ + vẫn báo nguồn cổng",
+              "[get_gated_state] DT4_only" in text and "  [ok] [pipeline-1] publish_gated_state" in text
+              and "__END__ FAILED=0" in text and gs_count(td) == (1, 1, 0), extra=text + str(gs_calls(td)))
+        if alive:
+            try:
+                os.kill(int(pidf.read_text().strip()), 9)
+            except OSError:
+                pass
+
+
+def case_gate_source_marker_unwritable_still_alerts():
+    """N1: không ghi được data/gate_source_alert.json (data/ chỉ-đọc, đĩa đầy) ⇒ VẪN gửi Discord + bus,
+    WARN nêu lỗi thật và nói đúng là ĐÃ thấy suy giảm, chuỗi chạy tiếp."""
+    with tempfile.TemporaryDirectory() as td:
+        gs_sandbox(td)
+        # file .tmp là THƯ MỤC ⇒ open(tmp, "w") ném IsADirectoryError kể cả khi chạy bằng root
+        (Path(td) / "wc" / "data" / "gate_source_alert.json.tmp").mkdir()
+        out, _ = gs_run(td, "DT4_only")
+        check("gate-source không ghi được dấu: VẪN đúng 1 tin Discord + 1 bus",
+              gs_count(td) == (1, 1, 0), extra=str(gs_calls(td)) + out)
+        check("gate-source không ghi được dấu: WARN nêu lỗi thật + nói đã phát hiện suy giảm",
+              "KHÔNG ghi được data/gate_source_alert.json — Lỗi thật: IsADirectoryError" in out
+              and "ĐÃ được phát hiện" in out and "KHÔNG kiểm được nguồn cổng" not in out, extra=out)
+        check("gate-source không ghi được dấu: helper thoát 0, chuỗi chạy tiếp, không có file dấu",
+              "thoát rc=" not in out and "__END__ FAILED=0" in out and gs_marker(td) is None, extra=out)
+
+
+def case_gate_source_publish_time_is_ict_anchored():
+    """N2: ngày publish + giờ trong tin neo ICT theo mtime file state, KHÔNG theo TZ của máy. mtime cố
+    định quanh nửa đêm ICT; chạy helper dưới TZ lạ. fromtimestamp trần / fromtimestamp(utc) ⇒ đỏ."""
+    import calendar
+    for label, utc_tuple, want_date, want_hm in (
+            ("23:30 ICT", (2026, 10, 12, 16, 30, 0), "2026-10-12", "23:30"),
+            ("00:30 ICT", (2026, 10, 12, 17, 30, 0), "2026-10-13", "00:30")):
+        mtime = calendar.timegm(utc_tuple)
+        for tz in ("UTC", "America/Los_Angeles", "Pacific/Kiritimati"):
+            with tempfile.TemporaryDirectory() as td:
+                gs_sandbox(td)
+                st = Path(td) / "wc" / "deploy_golive_dt5g_v4" / "golive_state_today.json"
+                st.write_text('{"published_at": "x", "as_of": "2026-10-12", "source": "DT4_only"}', encoding="utf-8")
+                os.utime(st, (mtime, mtime))
+                env = dict(os.environ, TZ=tz)
+                env.pop("JOB_ID", None)
+                subprocess.run([sys.executable, str(Path(td) / "mike" / "bin" / "gate_source_check.py"),
+                                "--workdir", str(Path(td) / "wc"), "--since-epoch", "0", "--alert"],
+                               capture_output=True, text=True, timeout=60, env=env)
+                calls = gs_calls(td)
+                nt = [c for c in calls if c[0] == "notify_thread.sh"]
+                bus = [c for c in calls if c[0] == "append_event.sh"]
+                msg = nt[0][1] if nt else ""
+                check(f"gate-source neo ICT ({label}, TZ={tz}): tin ghi '({want_date} {want_hm} ICT)'",
+                      f"CỔNG DT5G SUY GIẢM ({want_date} {want_hm} ICT)" in msg, extra=msg[:120])
+                check(f"gate-source neo ICT ({label}, TZ={tz}): publish_date của dấu + topic bus = {want_date}",
+                      (gs_marker(td) or {}).get("publish_date") == want_date
+                      and bool(bus) and bus[0][3] == f"dt5g-gate-source-degraded-{want_date}",
+                      extra=str(gs_marker(td)) + str(bus)[:200])
+
+
+def case_gate_source_hung_channel_is_capped():
+    """N3: kênh báo TREO ⇒ helper về trong trần (rút ngắn qua GATE_SOURCE_SEND_TIMEOUT_S), chuỗi chạy
+    tiếp, kênh treo CHƯA bị đánh dấu, kênh kia vẫn gửi. Bỏ timeout ⇒ ca này đỏ."""
+    import time
+    with tempfile.TemporaryDirectory() as td:
+        gs_sandbox(td)
+        hung = Path(td) / "mike" / "bin" / "notify_thread.sh"
+        hung.write_text('#!/usr/bin/env bash\nexec sleep 20\n', encoding="utf-8")
+        hung.chmod(0o755)
+        t0 = time.monotonic()
+        out, _ = gs_run(td, "DT4_only", env_extra={"GATE_SOURCE_SEND_TIMEOUT_S": "1"})
+        secs = time.monotonic() - t0
+        check("gate-source kênh treo: helper về trong trần, chuỗi chạy tiếp",
+              secs < 8 and "__END__ FAILED=0" in out and "thoát rc=" not in out, extra=f"{secs:.1f}s\n{out}")
+        check("gate-source kênh treo: nêu lỗi thật TimeoutExpired, CHƯA đánh dấu discord, bus vẫn ghi",
+              "gửi discord THẤT BẠI — Lỗi thật: TimeoutExpired" in out and _gs_sent(td, "DT4_only") == {"bus": True}
+              and gs_count(td) == (0, 1, 0), extra=out + str(gs_marker(td)))
+    sys.path.insert(0, str(_HERE))
+    import gate_source_check as g
+    check("gate-source trần gửi mặc định production = 60s (biến môi trường chỉ để test)",
+          g.SEND_TIMEOUT_S == float(os.environ.get("GATE_SOURCE_SEND_TIMEOUT_S") or 60) and
+          'os.environ.get("GATE_SOURCE_SEND_TIMEOUT_S") or 60' in GS_HELPER.read_text(encoding="utf-8"))
+
+
+def case_gate_source_dedupe_is_per_date_source_pair():
+    """N5: khoá chống lặp theo TỪNG CẶP (ngày publish, nguồn). DT4_only → LA_LUNG_v9 → DT4_only cùng
+    ngày ⇒ 2 cặp = 2 tin + 2 bus; lượt thứ ba KHÔNG gửi lại (khoá một-ô cũ sẽ gửi lần ba)."""
+    with tempfile.TemporaryDirectory() as td:
+        gs_sandbox(td)
+        gs_run(td, "DT4_only")
+        gs_run(td, "LA_LUNG_v9")
+        check("gate-source đổi nguồn cùng ngày: cặp mới ⇒ báo thêm 1 tin + 1 bus", gs_count(td) == (2, 2, 0),
+              extra=str(gs_calls(td)))
+        out, _ = gs_run(td, "DT4_only")
+        check("gate-source quay lại nguồn đã báo cùng ngày: KHÔNG gửi lần ba", gs_count(td) == (2, 2, 0)
+              and out.count("không gửi lại") == 2, extra=out + str(gs_calls(td)))
+        m = gs_marker(td) or {}
+        day = m.get("publish_date")
+        check("gate-source dấu giữ cả hai cặp của ngày, bằng chứng theo lượt MỚI NHẤT",
+              m.get("source") == "DT4_only" and m.get("sent") == {
+                  f"{day}|DT4_only": {"discord": True, "bus": True},
+                  f"{day}|LA_LUNG_v9": {"discord": True, "bus": True}}, extra=str(m))
+
+
 if __name__ == "__main__":
     case_gate_source_mktemp_fails()
+    case_gate_source_orphan_holding_stdout_does_not_hang()
+    case_gate_source_marker_unwritable_still_alerts()
+    case_gate_source_publish_time_is_ict_anchored()
+    case_gate_source_hung_channel_is_capped()
+    case_gate_source_dedupe_is_per_date_source_pair()
     case_gate_source_dt5g_macro_is_invisible()
     case_gate_source_dt4_only_alerts_once()
     case_gate_source_other_degraded_values()

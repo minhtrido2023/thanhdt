@@ -20,8 +20,11 @@ Khi source khác DT5G_macro (DT4_only, DT4_STALE, giá trị lạ, thiếu trư�
   3. data/gate_source_alert.json — bằng chứng để send_plan_report.sh in một dòng vào báo cáo plan
      (plan_report_line() bên dưới; dòng đó đọc NGUỒN từ chính golive_state_today.json, file này
      chỉ cấp phần bằng chứng và bị bỏ qua nếu không thuộc đúng bản publish đang hiển thị).
-Khoá chống lặp = (ngày publish theo mtime file state, nguồn): chạy lại chuỗi cùng ngày không gửi
-lại kênh đã gửi; kênh gửi HỎNG thì chưa đánh dấu, lượt chạy lại sẽ thử lại (§5).
+Khoá chống lặp theo TỪNG CẶP (ngày publish theo mtime file state, nguồn): chạy lại chuỗi cùng ngày
+không gửi lại kênh đã gửi cho cặp đó, kể cả khi giữa chừng có lượt ra nguồn khác. Kênh gửi HỎNG thì
+chưa đánh dấu (§5) — nhưng KHÔNG có lượt tự chạy lại cùng ngày: lưới còn lại là kênh kia, dòng ⚠️
+trong báo cáo plan 21:00 và check 13 của ops_health_check.sh sáng hôm sau. Không ghi được file dấu
+(data/ chỉ-đọc, đĩa đầy) ⇒ VẪN gửi, chỉ mất chống lặp + mất bằng chứng cho báo cáo plan.
 
 Lượt publish KHÔNG ghi file state (mtime < --since-epoch, hoặc file không tồn tại) ⇒ bỏ qua:
 _assert_fresh_artifact của bq_freshness_check.sh đã chặn + báo ca đó, không báo trùng.
@@ -47,6 +50,11 @@ GATE_PREFIX = "[get_gated_state]"
 STATE_REL = os.path.join("deploy_golive_dt5g_v4", "golive_state_today.json")
 HEALTH_REL = os.path.join("data", "macro_health.json")
 MARKER_REL = os.path.join("data", "gate_source_alert.json")
+# Trần mỗi lần gọi kênh báo. Biến môi trường chỉ để selfcheck rút ngắn, production không đặt.
+SEND_TIMEOUT_S = float(os.environ.get("GATE_SOURCE_SEND_TIMEOUT_S") or 60)
+# Lưới còn lại khi một kênh gửi hỏng (không có lượt tự chạy lại cùng ngày).
+NETS = {"discord": "bus event error", "bus": "tin Discord Trading Daily"}
+_DEGRADED_SEEN = ""     # nguồn suy giảm đã THẤY ở lượt này — để câu WARN cuối file nói đúng thực tế
 
 
 def _err(exc):
@@ -117,17 +125,22 @@ def load_marker(workdir):
 
 
 def save_marker(workdir, marker):
+    """Ghi dấu (atomic). Trả lỗi thật ("" = ghi được) — ghi hỏng KHÔNG được nuốt Discord/bus."""
     path = os.path.join(workdir, MARKER_REL)
     tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(marker, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, path)
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(marker, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, path)
+        return ""
+    except OSError as exc:
+        return _err(exc)
 
 
 def _run(cmd):
     """(ok, lỗi thật) — kênh báo hỏng không được làm chết bước kiểm."""
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=SEND_TIMEOUT_S)
     except Exception as exc:                                        # noqa: BLE001
         return False, _err(exc)
     return r.returncode == 0, f"rc={r.returncode} {(r.stderr or r.stdout).strip()[:200]}"
@@ -180,6 +193,8 @@ def main():
     if src == GOOD_SOURCE:
         return 0
 
+    global _DEGRADED_SEEN
+    _DEGRADED_SEEN = src
     doc = doc or {}
     pub = dt.datetime.fromtimestamp(mtime, ICT)
     publish_date = pub.date().isoformat()
@@ -199,13 +214,25 @@ def main():
            f"{evidence}.")
     print(f"WARN gate-source: {msg}")
 
-    prev = load_marker(a.workdir)
-    same = prev.get("publish_date") == publish_date and prev.get("source") == src
-    sent = dict(prev.get("sent") or {}) if same else {}
+    # Khoá chống lặp theo TỪNG CẶP (ngày publish, nguồn): `sent` = {"<ngày>|<nguồn>": {kênh: True}}.
+    # Chỉ giữ các cặp của CHÍNH ngày publish này (ngày khác = sự kiện mới, file không phình).
+    key = f"{publish_date}|{src}"
+    prev_sent = load_marker(a.workdir).get("sent")
+    sent_all = {k: dict(v) for k, v in (prev_sent if isinstance(prev_sent, dict) else {}).items()
+                if k.startswith(publish_date + "|") and isinstance(v, dict)}
+    sent = sent_all.setdefault(key, {})
     marker = {"publish_date": publish_date, "source": src,
               "published_at": doc.get("published_at"), "as_of": doc.get("as_of"),
-              "gate_line": line, "gate_line_why": line_why, "health": health, "sent": sent}
-    save_marker(a.workdir, marker)       # bằng chứng cho báo cáo plan — ghi kể cả khi không --alert
+              "gate_line": line, "gate_line_why": line_why, "health": health, "sent": sent_all}
+
+    def _mark():
+        why = save_marker(a.workdir, marker)
+        if why:
+            print(f"  [WARN] gate-source: KHÔNG ghi được {MARKER_REL} — Lỗi thật: {why}. Nguồn "
+                  f"suy giảm ĐÃ được phát hiện và vẫn báo qua Discord/bus; mất: chống lặp khi "
+                  f"chạy lại + phần bằng chứng trong dòng ⚠️ của báo cáo plan 21:00.")
+
+    _mark()                              # bằng chứng cho báo cáo plan — ghi kể cả khi không --alert
     if not a.alert:
         return 0
 
@@ -229,10 +256,11 @@ def main():
         ok, why = _run(cmd)
         if ok:
             sent[kind] = True
-            save_marker(a.workdir, marker)   # đánh dấu NGAY sau mỗi kênh, không gom cuối
+            _mark()                          # đánh dấu NGAY sau mỗi kênh, không gom cuối
         else:
-            print(f"  [WARN] gate-source: gửi {kind} THẤT BẠI — Lỗi thật: {why}. "
-                  f"Chưa đánh dấu, lượt chạy lại sẽ thử lại.")
+            print(f"  [WARN] gate-source: gửi {kind} THẤT BẠI — Lỗi thật: {why}. Chưa đánh dấu; "
+                  f"KHÔNG có lượt tự chạy lại cùng ngày — lưới còn lại: {NETS[kind]} (nếu gửi "
+                  f"được), dòng ⚠️ trong báo cáo plan 21:00, check 13 ops_health_check sáng hôm sau.")
     return 0
 
 
@@ -240,6 +268,11 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:                                        # noqa: BLE001
-        print(f"  [WARN] gate_source_check.py lỗi ({_err(exc)}) — KHÔNG kiểm được nguồn cổng "
-              f"lượt publish này, không chặn pipeline; kiểm tay trường source trong {STATE_REL}")
+        if _DEGRADED_SEEN:
+            print(f"  [WARN] gate_source_check.py lỗi ({_err(exc)}) SAU KHI đã kiểm và THẤY nguồn "
+                  f"cổng suy giảm ({_DEGRADED_SEEN}) — có thể CHƯA báo đủ Discord/bus, không chặn "
+                  f"pipeline; xem dòng 'WARN gate-source' ngay trên và {STATE_REL}")
+        else:
+            print(f"  [WARN] gate_source_check.py lỗi ({_err(exc)}) — KHÔNG kiểm được nguồn cổng "
+                  f"lượt publish này, không chặn pipeline; kiểm tay trường source trong {STATE_REL}")
         raise SystemExit(0)
