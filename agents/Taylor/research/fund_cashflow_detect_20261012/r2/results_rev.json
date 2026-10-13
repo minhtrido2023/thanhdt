@@ -8,7 +8,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -53,7 +53,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -752,7 +752,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -844,7 +844,7 @@
    "cashid": {
     "rc": 1,
     "fails": [],
-    "tail": "account_cash_flows.CashFlowError: KHÔNG có sổ dòng tiền /tmp/cash_identity_selfcheck_bd6ou4sm/110_I/flows.json — người gọi yêu cầu bắt buộc (require_file=True). Thiếu file thì không phân biệt được 'chưa từng nạp/rút' với 'mất sổ', và đoán theo hướng rỗng sẽ công bố một lần NẠP thành LÃI. Tạo file (c"
+    "tail": "account_cash_flows.CashFlowError: KHÔNG có sổ dòng tiền /tmp/cash_identity_selfcheck_z3xe57cz/110_I/flows.json — người gọi yêu cầu bắt buộc (require_file=True). Thiếu file thì không phân biệt được 'chưa từng nạp/rút' với 'mất sổ', và đoán theo hướng rỗng sẽ công bố một lần NẠP thành LÃI. Tạo file (c"
    },
    "ledger": {
     "rc": 0,
@@ -889,9 +889,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 247 assertion PASS): I: CLI có cửa sổ đang mở ⇒ rc=3 + bảng + dòng cảnh báo; được rc=0 "
+     "ASSERT-FAIL (sau 248 assertion PASS): I: CLI có cửa sổ đang mở ⇒ rc=3 + bảng + dòng cảnh báo; được rc=0 "
     ],
-    "tail": "ASSERT-FAIL (sau 247 assertion PASS): I: CLI có cửa sổ đang mở ⇒ rc=3 + bảng + dòng cảnh báo; được rc=0"
+    "tail": "ASSERT-FAIL (sau 248 assertion PASS): I: CLI có cửa sổ đang mở ⇒ rc=3 + bảng + dòng cảnh báo; được rc=0"
    },
    "ledger": {
     "rc": 0,
@@ -936,7 +936,7 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 251 assertion PASS): I: sổ fill xác nhận thiếu field ⇒ CLI rc=1 + lỗi đã gặp, không traceback; được rc=1 (account, seed_path),"
+     "ASSERT-FAIL (sau 252 assertion PASS): I: sổ fill xác nhận thiếu field ⇒ CLI rc=1 + lỗi đã gặp, không traceback; được rc=1 (account, seed_path),"
     ],
     "tail": "KeyError: 'date'"
    },
@@ -1592,7 +1592,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -1684,9 +1684,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 257 assertion PASS): L (R11): hằng số lãi Trứng vàng đã cũ ⇒ từng cửa sổ dưới ngưỡng, không bị coi là rút, nhưng tổng phải báo trôi; được None"
+     "ASSERT-FAIL (sau 258 assertion PASS): L (R11): hằng số lãi Trứng vàng đã cũ ⇒ từng cửa sổ dưới ngưỡng, không bị coi là rút, nhưng tổng phải báo trôi; được None"
     ],
-    "tail": "ASSERT-FAIL (sau 257 assertion PASS): L (R11): hằng số lãi Trứng vàng đã cũ ⇒ từng cửa sổ dưới ngưỡng, không bị coi là rút, nhưng tổng phải báo trôi; được None"
+    "tail": "ASSERT-FAIL (sau 258 assertion PASS): L (R11): hằng số lãi Trứng vàng đã cũ ⇒ từng cửa sổ dưới ngưỡng, không bị coi là rút, nhưng tổng phải báo trôi; được None"
    },
    "ledger": {
     "rc": 0,
@@ -1966,9 +1966,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 311 assertion PASS): K: số chuẩn NaN ⇒ CHẶN; được PASS report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical +nan% (lệch nanpp)"
+     "ASSERT-FAIL (sau 314 assertion PASS): K: số chuẩn NaN ⇒ CHẶN; được PASS report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical +nan% (lệch nanpp)"
     ],
-    "tail": "ASSERT-FAIL (sau 311 assertion PASS): K: số chuẩn NaN ⇒ CHẶN; được PASS report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical +nan% (lệch nanpp)"
+    "tail": "ASSERT-FAIL (sau 314 assertion PASS): K: số chuẩn NaN ⇒ CHẶN; được PASS report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical +nan% (lệch nanpp)"
    },
    "ledger": {
     "rc": 0,
@@ -2148,9 +2148,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 307 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được BLOCK period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): nav_period_returns.py --account SpaceX --report-date 2026-10-09 thoát rc=1 nên KHÔNG có số chuẩn để đối chiếu s"
+     "ASSERT-FAIL (sau 310 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được BLOCK period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): nav_period_returns.py --account SpaceX --report-date 2026-10-09 thoát rc=1 nên KHÔNG có số chuẩn để đối chiếu s"
     ],
-    "tail": "ASSERT-FAIL (sau 307 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được BLOCK period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): nav_period_returns.py --account SpaceX --report-date 2026-10-09 thoát rc=1 nên KHÔNG có số chuẩn để đối chiếu s"
+    "tail": "ASSERT-FAIL (sau 310 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được BLOCK period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): nav_period_returns.py --account SpaceX --report-date 2026-10-09 thoát rc=1 nên KHÔNG có số chuẩn để đối chiếu s"
    },
    "ledger": {
     "rc": 0,
@@ -2195,7 +2195,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2240,9 +2240,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 298 assertion PASS): J: không đọc được nav_history ⇒ cả hai phép kiểm nói rõ lỗi của mình, không ném; được ['⚠️ Đẳng thức tiền (ZaloPay) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError (thiếu /tmp/cash_identity_selfcheck_9hkbijr0/khong_co_thu_muc/nav_histo"
+     "ASSERT-FAIL (sau 301 assertion PASS): J: không đọc được nav_history ⇒ cả hai phép kiểm nói rõ lỗi của mình, không ném; được ['⚠️ Đẳng thức tiền (ZaloPay) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError (thiếu /tmp/cash_identity_selfcheck_npuv3pcm/khong_co_thu_muc/nav_histo"
     ],
-    "tail": "ASSERT-FAIL (sau 298 assertion PASS): J: không đọc được nav_history ⇒ cả hai phép kiểm nói rõ lỗi của mình, không ném; được ['⚠️ Đẳng thức tiền (ZaloPay) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError (thiếu /tmp/cash_identity_selfcheck_9hkbijr0/khong_co_thu_muc/nav_histo"
+    "tail": "ASSERT-FAIL (sau 301 assertion PASS): J: không đọc được nav_history ⇒ cả hai phép kiểm nói rõ lỗi của mình, không ném; được ['⚠️ Đẳng thức tiền (ZaloPay) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError (thiếu /tmp/cash_identity_selfcheck_npuv3pcm/khong_co_thu_muc/nav_histo"
    },
    "ledger": {
     "rc": 0,
@@ -2287,9 +2287,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 306 assertion PASS): J: deliver() phải gọi _warn_cash_flows sau cổng nav-flow và trước khi đóng dấu đã kiểm, được [2126, 2081, 2174]"
+     "ASSERT-FAIL (sau 309 assertion PASS): J: deliver() phải gọi _warn_cash_flows sau cổng nav-flow và trước khi đóng dấu đã kiểm, được [2126, 2081, 2174]"
     ],
-    "tail": "ASSERT-FAIL (sau 306 assertion PASS): J: deliver() phải gọi _warn_cash_flows sau cổng nav-flow và trước khi đóng dấu đã kiểm, được [2126, 2081, 2174]"
+    "tail": "ASSERT-FAIL (sau 309 assertion PASS): J: deliver() phải gọi _warn_cash_flows sau cổng nav-flow và trước khi đóng dấu đã kiểm, được [2126, 2081, 2174]"
    },
    "ledger": {
     "rc": 0,
@@ -2334,7 +2334,7 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 299 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
+     "ASSERT-FAIL (sau 302 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
     ],
     "tail": "report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối chiếu của SpaceX_weekly_report_2026-03-09_to_2026-03-13.md — RuntimeError (cash-flow BLOCK)"
    },
@@ -2381,9 +2381,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 299 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
+     "ASSERT-FAIL (sau 302 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
     ],
-    "tail": "ASSERT-FAIL (sau 299 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
+    "tail": "ASSERT-FAIL (sau 302 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
    },
    "ledger": {
     "rc": 0,
@@ -2428,9 +2428,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 329 assertion PASS): K/S4: báo cáo KHÔNG có dòng đó ⇒ chỉ WARN, bỏ qua (không có gì để so); được BLOCK period-return BLOCK thiếu dòng"
+     "ASSERT-FAIL (sau 332 assertion PASS): K/S4: báo cáo KHÔNG có dòng đó ⇒ chỉ WARN, bỏ qua (không có gì để so); được BLOCK period-return BLOCK thiếu dòng"
     ],
-    "tail": "ASSERT-FAIL (sau 329 assertion PASS): K/S4: báo cáo KHÔNG có dòng đó ⇒ chỉ WARN, bỏ qua (không có gì để so); được BLOCK period-return BLOCK thiếu dòng"
+    "tail": "ASSERT-FAIL (sau 332 assertion PASS): K/S4: báo cáo KHÔNG có dòng đó ⇒ chỉ WARN, bỏ qua (không có gì để so); được BLOCK period-return BLOCK thiếu dòng"
    },
    "ledger": {
     "rc": 0,
@@ -2475,7 +2475,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2520,9 +2520,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 294 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+     "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
     ],
-    "tail": "ASSERT-FAIL (sau 294 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+    "tail": "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
    },
    "ledger": {
     "rc": 0,
@@ -2612,7 +2612,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2657,7 +2657,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2702,12 +2702,12 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 4719 assertion PASS): F: cash_identity không import được ⇒ CLI vẫn rc=0 + đủ số, lỗi hiện ở JSON và stderr; được rc=1 ck_wd4fj3t9/sandbox/WC/mike/bin/nav_period_returns.py\", line 281, in main"
+     "ASSERT-FAIL (sau 4719 assertion PASS): F: cash_identity không import được ⇒ CLI vẫn rc=0 + đủ số, lỗi hiện ở JSON và stderr; được rc=1 ck_tkdvd7o7/sandbox/WC/mike/bin/nav_period_returns.py\", line 290, in main"
     ],
     "tail": "RuntimeError: hỏng giả"
    },
@@ -2749,7 +2749,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2796,7 +2796,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2843,7 +2843,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2890,7 +2890,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2937,7 +2937,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2984,7 +2984,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3031,7 +3031,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3078,7 +3078,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3125,7 +3125,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3172,7 +3172,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3219,7 +3219,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3266,7 +3266,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3313,7 +3313,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,

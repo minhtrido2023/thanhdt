@@ -1,0 +1,7 @@
+FIRED pnj-q3-watch: PNJ 2026Q3 (Release_Date 2026-10-27) — bus question 'pnj-bctc-q3-review-trigger' + Discord OK.
+run1 = fired | run2 = already_fired | event trên bus tạm: 1 | question đúng topic: 1 | Discord: 1
+agent = Taylor | payload là object: True | target = Mike
+bus_has_question() đọc lại event do append_event.sh THẬT ghi: True
+FIRED pnj-q3-watch: PNJ 2026Q3 (Release_Date 2026-10-27) — bus question 'pnj-bctc-q3-review-trigger' + Discord OK.
+mất state rồi chạy lại = fired | tổng event trên bus: 1 (phải vẫn 1)
+E2E PASS

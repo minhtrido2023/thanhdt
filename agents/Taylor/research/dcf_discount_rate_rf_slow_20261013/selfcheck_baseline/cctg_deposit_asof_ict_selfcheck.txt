@@ -1,0 +1,35 @@
+=== asof=None anchors to ICT selfcheck (ICT now 2026-10-13 23:40) ===
+  ok: [unset] current_cctg_rate picks ICT-today row 2026-10-13
+  ok: [unset] current_deposit_rate picks ICT-today row (6.0)
+  ok: [unset] effective_deposit_rate last_update == 2026-10-13
+  ok: [unset] macro_killswitch_a_status last_update == 2026-10-13
+  ok: [UTC] current_cctg_rate picks ICT-today row 2026-10-13
+  ok: [UTC] current_deposit_rate picks ICT-today row (6.0)
+  ok: [UTC] effective_deposit_rate last_update == 2026-10-13
+  ok: [UTC] macro_killswitch_a_status last_update == 2026-10-13
+  ok: [Etc/GMT+12] current_cctg_rate picks ICT-today row 2026-10-13
+  ok: [Etc/GMT+12] current_deposit_rate picks ICT-today row (6.0)
+  ok: [Etc/GMT+12] effective_deposit_rate last_update == 2026-10-13
+  ok: [Etc/GMT+12] macro_killswitch_a_status last_update == 2026-10-13
+  ok: [Pacific/Kiritimati] current_cctg_rate picks ICT-today row 2026-10-13
+  ok: [Pacific/Kiritimati] current_deposit_rate picks ICT-today row (6.0)
+  ok: [Pacific/Kiritimati] effective_deposit_rate last_update == 2026-10-13
+  ok: [Pacific/Kiritimati] macro_killswitch_a_status last_update == 2026-10-13
+  ok: [pinned 2026-10-11 16:59Z, TZ=unset] cctg -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 16:59Z, TZ=unset] dep -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 16:59Z, TZ=unset] effective -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 16:59Z, TZ=unset] killswitch -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 17:00Z, TZ=unset] cctg -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 17:00Z, TZ=unset] dep -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 17:00Z, TZ=unset] effective -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 17:00Z, TZ=unset] killswitch -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 16:59Z, TZ=Etc/GMT+12] cctg -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 16:59Z, TZ=Etc/GMT+12] dep -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 16:59Z, TZ=Etc/GMT+12] effective -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 16:59Z, TZ=Etc/GMT+12] killswitch -> ICT date 2026-10-11
+  ok: [pinned 2026-10-11 17:00Z, TZ=Etc/GMT+12] cctg -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 17:00Z, TZ=Etc/GMT+12] dep -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 17:00Z, TZ=Etc/GMT+12] effective -> ICT date 2026-10-12
+  ok: [pinned 2026-10-11 17:00Z, TZ=Etc/GMT+12] killswitch -> ICT date 2026-10-12
+ALL 32 CHECKS PASSED
+rc=0

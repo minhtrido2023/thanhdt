@@ -1,0 +1,7 @@
+target : /tmp/bctcq3_sb2/thanhdt/WorkingClaude/mike/bin/bq_freshness_check.sh
+trích  : 82 dòng (_check_price_freeze + 2 ngưỡng)
+môi trường TZ: ['ICT', 'UTC', 'NY', 'no-TZ']
+
+BASE: 156 assertion, 0 fail
+
+PASS

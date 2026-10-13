@@ -1,0 +1,39 @@
+BASELINE (không mutant) rc=0 fails=[] 
+BỊ BẮT  M01 tier2 ghi vào file 12M | W6 ghi tay VPB 100tr 9,2% ->
+BỊ BẮT  M02 bỏ whitelist ngân hàng | W2 --bank VCB (Big-4, ngoài ; W3 --denom ngoài 10tr/100tr ; W4 thiếu --product bị chặn; W5 lợi suất 0 bị chặn (không
+BỊ BẮT  M03 khoá bỏ cả bank+denom (gộp mọi ngân hàng) | W8 VPB 10tr cùng ngày là kho; W9 MB 7,1% (lệch 2,1pp so vớ; W10 VPB 100tr lệch 1,1pp so ; W11 VPB 100tr ngày cũ hơn dò
+BỊ BẮT  M04 khoá bỏ denomination | W8 VPB 10tr cùng ngày là kho; W9 MB 7,1% (lệch 2,1pp so vớ; W10 VPB 100tr lệch 1,1pp so ; W11 VPB 100tr ngày cũ hơn dò
+BỊ BẮT  M05 tắt chặn lệch >=1pp cho tier2 | W10 VPB 100tr lệch 1,1pp so ; W11 VPB 100tr ngày cũ hơn dò; W11b ACB ngày hôm qua vẫn gh; W12 thứ tự dòng = thứ tự ghi
+BỊ BẮT  M06 tier2 không so với dòng gần nhất (chỉ so dòng người ghi) | W16c khoá chỉ có dòng auto (; W19 --force (người) đính chí
+BỊ BẮT  M07 nới lệch 2 nguồn 0,1 -> 0,5pp | W14b 2 nguồn lệch 0,2pp bị c; W14c --rate không nguồn nào ; W16b cùng URL dùng lại cho C; W16c khoá chỉ có dòng auto (
+BỊ BẮT  M08 sidecar tier2 dùng chung sidecar 12M | W15b sidecar RIÊNG theo khoá; W16 cùng bài báo dùng cho ng; W16b cùng URL dùng lại cho C; W16c khoá chỉ có dòng auto (
+BỊ BẮT  M09 sidecar tier2 chung cho mọi khoá | W15b sidecar RIÊNG theo khoá; W16 cùng bài báo dùng cho ng; W16b cùng URL dùng lại cho C; W16c khoá chỉ có dòng auto (
+BỊ BẮT  M10 agent (JOB_ID) được dùng manual_verify | W13 JOB_ID + manual_verify b; W14 2 nguồn cùng chủ bị chặn; W14b 2 nguồn lệch 0,2pp bị c; W14c --rate không nguồn nào 
+BỊ BẮT  M11 --bank/--denom lọt vào chuỗi 12m/6m | W18 --bank/--denom với chuỗi
+BỊ BẮT  M12 bỏ bắt buộc --product | W4 thiếu --product bị chặn; W5 lợi suất 0 bị chặn (không; W6 ghi tay VPB 100tr 9,2% ->
+BỊ BẮT  M13 bỏ kiểm --denom | W3 --denom ngoài 10tr/100tr ; W4 thiếu --product bị chặn; W5 lợi suất 0 bị chặn (không; W6 ghi tay VPB 100tr 9,2% ->
+BỊ BẮT  M14 tier2 bỏ chặn ngày không-mới-hơn | W11 VPB 100tr ngày cũ hơn dò; W11b ACB ngày hôm qua vẫn gh; W12 thứ tự dòng = thứ tự ghi; W13 JOB_ID + manual_verify b
+BỊ BẮT  M15 chèn dòng mới lên đầu file | W8 VPB 10tr cùng ngày là kho; W9 MB 7,1% (lệch 2,1pp so vớ; W12 thứ tự dòng = thứ tự ghi; B0 dựng file tier2 có dòng 9
+BỊ BẮT  M16 --force xoá mọi khoá cùng ngày | W19 --force (người) đính chí
+BỊ BẮT  M17 header tier2 thiếu holding_period | ValueError: dict contains fields not in fieldnames: 'holding_period'
+BỊ BẮT  M18 cho phép lợi suất 0 | W5 lợi suất 0 bị chặn (không; W6 ghi tay VPB 100tr 9,2% ->
+BỊ BẮT  M19 lượt tier2 rò global sang lượt 12m | W17 lượt 12m mặc định SAU lư
+BỊ BẮT  M20 không ghi bank vào dòng | W6 ghi tay VPB 100tr 9,2% ->; W7 cùng (ngày, VPB, 100tr) c; W8 VPB 10tr cùng ngày là kho; W9 MB 7,1% (lệch 2,1pp so vớ
+BỊ BẮT  M21 wrapper bỏ luật KHÔNG điền 0 | S5b wrapper tuần nêu đủ 4 ng
+BỊ BẮT  M22 wrapper bỏ --bank khỏi lệnh mẫu | S5 wrapper tuần có lệnh --se
+BỊ BẮT  M23 wrapper truyền tier2 cho trend check | S5c wrapper tuần chỉ gọi tre
+BỊ BẮT  M24 wrapper bỏ series cctg_tier2 khỏi event | S5 wrapper tuần có lệnh --se
+BỊ BẮT  M30 effective_deposit_rate lấy max với tier2 (đường dẫn né quét tĩnh) | B1 41 đầu ra (effective/kill; B1 effective_deposit_rate: 5; B1 consumer_deposit_rate_det; B1 consumer_deposit_rate: 5 
+BỊ BẮT  M31 effective_deposit_rate chỉ DÒ file tier2, không đổi kết quả | B2 không consumer nào mở/dò 
+BỊ BẮT  M32 kill-switch A armed theo tier2 | B1 41 đầu ra (effective/kill; B1 macro_killswitch_a_status; B2 không consumer nào mở/dò ; B2c 13/10 có file tier2 15%:
+BỊ BẮT  M33 consumer_deposit_rate cộng tier2 | B1 41 đầu ra (effective/kill; B1 consumer_deposit_rate: 5 ; B1 dcf.discount_rate: 4 giá ; B2 không consumer nào mở/dò 
+BỊ BẮT  M34 trend check nạp thêm chuỗi tier2 | B1 41 đầu ra (effective/kill; B1 trend._load_series: 1 giá; B2 không consumer nào mở/dò ; B2b chuỗi trend check chỉ gồ
+BỊ BẮT  M35 cctg_events_df glob mọi file cctg_rate_vn_*_events.csv | W17 lượt 12m mặc định SAU lư; B1 41 đầu ra (effective/kill; B1 effective_deposit_rate: 5; B1 macro_killswitch_a_status
+BỊ BẮT  M36 dcf discount_rate lấy max với tier2 | B1 41 đầu ra (effective/kill; B1 dcf.discount_rate: 4 giá ; B2 không consumer nào mở/dò 
+BỊ BẮT  M37 rating_8l.py nhắc đường dẫn file tier2 (tĩnh) | S1 quét 1108 file: chỉ write
+BỊ BẮT  M38 due_diligence import writer append_cctg_rate (tĩnh) | S3 chỉ selfcheck mới import 
+BỊ BẮT  M39 golive_recommend_v23 dùng CSV_PATH_TIER2 (tĩnh) | S1 quét 1108 file: chỉ write
+SỐNG    M41 [KHOẢNG HỞ ĐÃ BIẾT] rating_8l.py đọc tier2 bằng đường dẫn né quét tĩnh | 
+BỊ BẮT  M40 custom30_yield_labels glob cctg_rate_vn* (tĩnh) | S4 không consumer nào glob '
+
+35/36 mutant bị bắt, 1 sống

@@ -1,0 +1,35 @@
+usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source
+                           SOURCE [--collected COLLECTED] [--note NOTE]
+                           [--sources SOURCES] [--series {12m,6m}] [--force]
+append_cctg_rate.py: error: argument --series: invalid choice: 'tier2' (choose from 12m, 6m)
+usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source
+                           SOURCE [--collected COLLECTED] [--note NOTE]
+                           [--sources SOURCES] [--series {12m,6m}] [--force]
+append_cctg_rate.py: error: argument --series: invalid choice: 'tier2' (choose from 12m, 6m)
+usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source
+                           SOURCE [--collected COLLECTED] [--note NOTE]
+                           [--sources SOURCES] [--series {12m,6m}] [--force]
+append_cctg_rate.py: error: argument --series: invalid choice: 'tier2' (choose from 12m, 6m)
+usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source
+                           SOURCE [--collected COLLECTED] [--note NOTE]
+                           [--sources SOURCES] [--series {12m,6m}] [--force]
+append_cctg_rate.py: error: argument --series: invalid choice: 'tier2' (choose from 12m, 6m)
+usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source
+                           SOURCE [--collected COLLECTED] [--note NOTE]
+                           [--sources SOURCES] [--series {12m,6m}] [--force]
+append_cctg_rate.py: error: argument --series: invalid choice: 'tier2' (choose from 12m, 6m)
+usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source
+                           SOURCE [--collected COLLECTED] [--note NOTE]
+                           [--sources SOURCES] [--series {12m,6m}] [--force]
+append_cctg_rate.py: error: argument --series: invalid choice: 'tier2' (choose from 12m, 6m)
+FAIL W1 thiếu --bank bị chặn
+FAIL W2 --bank VCB (Big-4, ngoài nhóm tier2) bị chặn
+FAIL W3 --denom ngoài 10tr/100tr bị chặn
+FAIL W4 thiếu --product bị chặn
+FAIL W5 lợi suất 0 bị chặn (không điền 0 cho ngân hàng thiếu số)
+FAIL W6 ghi tay VPB 100tr 9,2% -> đúng 1 dòng, đủ trường
+Traceback (most recent call last):
+  File "/tmp/cctg_oldw_feI0/cctg_tier2_series_selfcheck.py", line 136, in <module>
+    with open(csvt, newline="", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cctg_t2sc_1mqcty0k/cctg_rate_vn_tier2_events.csv'

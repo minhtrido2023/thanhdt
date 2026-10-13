@@ -1,2 +1,4 @@
 SpaceX 2026-10-09 {'inception': -1.33, 'wtd': 1.024, 'mtd': 0.519} | line = ℹ️ Có 2 khoản biến động tiền chưa đối chiếu xong (lớn nhất 2.304.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh. | n_ops = 2
 SpaceX 2026-10-12 {'inception': -1.375, 'wtd': -0.046, 'mtd': 0.474} | line = ℹ️ Có 2 khoản biến động tiền chưa đối chiếu xong (lớn nhất 2.304.500 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh. | n_ops = 2
+ZaloPay 2026-10-09 {'inception': -4.907, 'wtd': -1.162, 'mtd': -2.01} | line = ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 420.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh. | n_ops = 1
+ZaloPay 2026-10-12 {'inception': -5.712, 'wtd': -0.847, 'mtd': -2.841} | line = ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 420.000 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh. | n_ops = 1

@@ -1,0 +1,173 @@
+tz_anchor_gate_selfcheck — gate=/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/bin/tz_anchor_gate.py  TZ=(unset)
+[1] Detector — RED (phải bị bắt)
+  ✓ datetime.now() (from datetime import datetime)
+  ✓ datetime.datetime.now() (import datetime)
+  ✓ dt.datetime.now() (import datetime as dt)
+  ✓ _dt.datetime.now() (alias _dt)
+  ✓ date.today()
+  ✓ datetime.date.today()
+  ✓ _dt.date.today()
+  ✓ datetime.today() (naive local, biến thể ít gặp)
+  ✓ nằm trong f-string: f'{datetime.now():%H:%M}'
+  ✓ alias import: from datetime import datetime as dtm
+  ✓ alias import: from datetime import date as d
+  ✓ datetime.now(None) — có arg nhưng vô hiệu
+  ✓ datetime.now(tz=None)
+[2] Detector — CONTROL (phải im)
+  ✓ datetime.now(_ICT)
+  ✓ datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
+  ✓ datetime.now(tz=ICT) (keyword)
+  ✓ datetime.now(timezone.utc) — bước 1 của ICT-anchor, PHẢI cho qua
+  ✓ ICT-anchor đầy đủ: (now(utc)+7h).date()
+  ✓ call xuống dòng: now(\n timezone.utc\n) — regex đếm sai, AST đúng
+  ✓ receiver khác: okf.today()
+  ✓ ngoài phạm vi user duyệt: pd.Timestamp.now()
+  ✓ ngoài phạm vi: datetime.utcnow() (naive UTC, không phụ thuộc TZ host)
+[2b] KNOWN GAP — gate còn hở, ghi nhận chứ không tuyên bố là đúng
+  · tham chiếu rồi gọi: n = datetime.now; n(): vẫn hở
+  · datetime.fromtimestamp(t) — naive host-local, chưa canh: vẫn hở
+  · date.fromtimestamp(t): vẫn hở
+  · datetime.now(*args) — có arg nên qua (c): vẫn hở
+[1b] Detector RULE 2 (tdays/holiday) — RED (phải bị bắt)
+  ✓ tdays() trần trong def, không marker
+  ✓ tdays() trần ở module top-level, không marker
+  ✓ TDAYS() hoa toàn bộ vẫn bắt — khớp tuyệt đối KHÔNG phân biệt hoa/thường
+  ✓ gọi qua attribute: obj.tdays(x)
+  ✓ scope LỒNG: is_holiday ở hàm NGOÀI không cứu hàm lồng bên trong (scope riêng)
+  ✓ F1: anchored + tdays() TRẦN khác trong CÙNG def — call anchored không được che call trần
+  ✓ F1: anchored + tdays() TRẦN khác ở CÙNG module top-level
+  ✓ F1: identifier chỉ CHỨA chuỗi con 'is_holiday' (vd `_vn_is_holiday`) KHÔNG còn là marker thật — khớp phải TUYỆT ĐỐI, không phải substring
+  ✓ scope LỒNG hướng NGƯỢC (M7b): marker is_holiday nằm TRONG def lồng TRỰC TIẾP ở top-level scope.body KHÔNG được phép cứu call tdays() trần ở scope NGOÀI nó — pin bộ lọc top-level (arch-review vòng 2 RULE-2 gốc)
+  ✓ scope LỒNG hướng NGƯỢC (M7): marker is_holiday nằm TRONG def lồng bên TRONG 1 compound statement (if), không phải statement top-level trực tiếp của scope.body, để pin RIÊNG bộ lọc bên trong walk() (arch-review vòng 3, B1: ca top-level chỉ pin được bộ lọc top-level — xoá RIÊNG bộ lọc trong walk() không lộ ra nếu chỉ có ca top-level, đã đo: 129/129 vẫn PASS)
+  ✓ B2: is_holiday trong LAMBDA lồng bên trong hàm không được cứu call tdays() trần khác
+  ✓ B2: is_holiday trong LIST COMPREHENSION không được cứu call tdays() trần khác
+  ✓ B2: is_holiday trong GENERATOR EXPRESSION không được cứu call tdays() trần khác
+  ✓ B2: is_holiday trong method của 1 CLASS lồng bên trong hàm không được cứu call tdays() trần
+  ✓ B2: is_holiday trong method của 1 class Ở MODULE TOP-LEVEL không được cứu call tdays() trần khác cũng ở module top-level
+  ✓ B3: `is_holiday = None` (Store, không phải Load) KHÔNG được tính là marker thật
+  ✓ B3: `del is_holiday` (Del, không phải Load) KHÔNG được tính là marker thật
+[2b'] Detector RULE 2 — CONTROL (phải im)
+  ✓ vn_holidays=True ngay tại lệnh gọi
+  ✓ vn_holidays=False ngay tại lệnh gọi — vẫn PASS, có tham chiếu là đủ (ca us_market cố ý Mon-Fri)
+  ✓ vn_holidays=<biểu thức> — ca thật macro_healthcheck.py add_source() dòng 100
+  ✓ is_holiday tham chiếu Ở NƠI KHÁC trong CÙNG hàm (không phải trên chính lệnh gọi)
+  ✓ is_holiday dạng ATTRIBUTE (vn_market.is_holiday(d)), không phải import trực tiếp — pin riêng nhánh ast.Attribute (arch-review vòng 1 RULE-2, X4: bản trước chỉ CONTROL bằng Name nên xoá riêng nhánh Attribute vẫn PASS 122/122)
+  ✓ hàm bao quanh có tham số vn_holidays trong chữ ký, CHUYỂN TIẾP THẬT vào lệnh gọi (forward qua tham số vị trí) — khác ca KNOWN GAP bên dưới (khai báo rồi KHÔNG dùng)
+  ✓ np.busday_count trần — KHÔNG thuộc phạm vi rule 2 (chữ ký chỉ bắt tên KHỚP TUYỆT ĐỐI 'tdays')
+  ✓ tên hàm chứa 'tdays' làm HẬU TỐ NGỮ NGHĨA KHÁC (tdays_violations) — KHÔNG phải call đếm ngày
+  ✓ tên hàm chứa 'tdays' dạng test_*_tdays — cùng lớp false-positive vừa đo được
+[2c] KNOWN GAP RULE 2 — gate còn hở, ghi nhận chứ không tuyên bố là đúng
+  · alias reimport: from x import tdays as t; t(a) — tên sau alias không còn khớp 'tdays': vẫn hở
+  · tham chiếu rồi gọi: f = tdays; f(a): vẫn hở
+  · biến thể tên get_tdays/calc_tdays_age — khớp tuyệt đối cố ý KHÔNG bắt (đổi lấy loại bỏ false-positive tự-tham-chiếu tdays_violations/test_*_tdays, xem docstring đầu file): vẫn hở
+  · _scope_has_vn_holidays_param CHỈ kiểm KHAI BÁO, KHÔNG kiểm CHUYỂN TIẾP thật (arch-review vòng 2 RULE-2, R2): tham số `vn_holidays` khai báo rồi KHÔNG dùng ở lệnh gọi vẫn PASS: vẫn hở
+[3] Ca THẬT — 5 finding §16 ngày 2026-08-30 (bản TRƯỚC vá phải bị bắt, SAU vá phải im)
+  ✓ golive_recommend_v23.py: bắt được dòng [85, 1216] ở bản TRƯỚC vá
+  ✓ golive_recommend_v23.py: im ở dòng [85, 1216] sau khi vá
+  ✓ dna_report.py: bắt được dòng [69] ở bản TRƯỚC vá
+  ✓ dna_report.py: im ở dòng [69] sau khi vá
+  ✓ anomaly_scan.py: bắt được dòng [379] ở bản TRƯỚC vá
+  ✓ anomaly_scan.py: im ở dòng [379] sau khi vá
+  ✓ insider_flags.py: bắt được dòng [231] ở bản TRƯỚC vá
+  ✓ insider_flags.py: im ở dòng [231] sau khi vá
+[3b] Ca THẬT RULE 2 — macro_health=FAILED giả 2026-09-04 (commit 96ebd124)
+  ✓ macro_healthcheck.py: bắt được đúng dòng [73, 233] ở bản TRƯỚC vá (2 FLAG)
+  ✓ macro_healthcheck.py: im HOÀN TOÀN sau khi vá (3 PASS: def dòng 70 không phải call, call dòng 100+265 đều có vn_holidays)
+  ✓ macro_healthcheck.py: dòng 100 REVERT lại đúng bug SEV1 gốc — regenerate build đã đổi nội dung
+  ✓ macro_healthcheck.py: F1 — dòng 100 revert về bug SEV1 gốc PHẢI bị FLAG (không được ân xá theo scope bởi vn_holidays=/is_holiday khác còn sống trong cùng file)
+[4] End-to-end — ratchet per-file + escape hatch + exclude
+  ✓ file MỚI có 1 vi phạm, baseline 0 → BLOCK (rc=1)
+  ✓ thông điệp BLOCK có số dòng + biểu thức
+  ✓ thông điệp BLOCK nói baseline neo theo canonical + lối thoát SKIP (F6)
+  ✓ nợ CŨ đã trong baseline (1) → qua (rc=0)
+  ✓ nợ TĂNG 1→2 → BLOCK
+  ✓ đã vá (0 < baseline 1) → qua
+  ✓ MIKE_TZ_GATE=warn → cảnh báo, không chặn
+  ✓ MIKE_TZ_GATE=off → im hoàn toàn
+  ✓ off + --scan (chạy TAY) → KHÔNG im: nói rõ là đã KHÔNG chạy
+  ✓ loại trừ R&D/vendor: test_thing.py không bị gate
+  ✓ loại trừ R&D/vendor: probe_x/run.py không bị gate
+  ✓ loại trừ R&D/vendor: agents/T/research/r.py không bị gate
+  ✓ loại trừ R&D/vendor: archive/old.py không bị gate
+  ✓ commit ngoài repo mike → KHÔNG tự ghi baseline
+[4b] End-to-end RULE 2 — ratchet per-file trong namespace 'tdays_files' RIÊNG
+  ✓ file MỚI có 1 vi phạm tdays, baseline tdays_files 0 → BLOCK (rc=1)
+  ✓ thông điệp BLOCK gắn nhãn RULE 2 + số dòng + biểu thức
+  ✓ thông điệp BLOCK có hướng dẫn vn_holidays= riêng cho RULE 2
+  ✓ nợ CŨ đã trong tdays_files (1) → qua (rc=0)
+  ✓ nợ RULE 2 TĂNG 1→2 → BLOCK
+  ✓ đã vá bằng vn_holidays=True (0 < baseline 1) → qua
+  ✓ rule 1 vi phạm (datetime.now trần) TĂNG dù rule 2 SẠCH → vẫn BLOCK, không bị che
+  ✓ commit ngoài repo mike → KHÔNG tự ghi tdays_files
+[6] F1 — shim khi repo lồng WorkingClaude/mike/ KHÔNG có mặt
+  ✓ thiếu repo lồng → rc=0 (không chặn commit)
+  ✓ thiếu repo lồng → CÓ cảnh báo, không im lặng
+  ✓ có repo lồng → shim ủy quyền cho gate thật và gate CHẶN
+  ✓ gọi shim bằng TÊN TRẦN (không có '/') → vẫn tìm đúng gate và CHẶN
+  ✓ DNA_PYEXE hỏng KHÔNG còn ảnh hưởng shim (vẫn gate bình thường)
+  ✓ KHÔNG có python3 trên PATH → cảnh báo + rc=0 (không chặn)
+[7] F2 — file ngoài WC_ROOT: phải KÊU, không im
+  ✓ không chặn (fail-open)
+  ✓ nhưng CÓ cảnh báo nêu tên file + lý do
+[8] F3 — MIKE_TZ_GATE=warn KHÔNG được nâng baseline
+  ✓ warn → rc=0
+  ✓ warn → baseline VẪN rỗng
+  ✓ warn → nói rõ commit sau vẫn chặn
+  ✓ lần commit sau vẫn BLOCK
+[9] F4 — --update-baseline mặc định chỉ SIẾT, nâng phải nói ra
+  ✓ nâng 0→2 mà không có cờ → TỪ CHỐI (rc=1)
+  ✓ baseline không đổi
+  ✓ có --accept-new-debt → nâng được
+  ✓ HẠ (siết) thì không cần cờ
+[10] F5 — --seed-baseline từ chối ghi khi kiểm kê thiếu
+  ✓ root hỏng → rc != 0
+  ✓ root hỏng → baseline KHÔNG bị ghi đè
+[11] F7 — auto-update baseline trong repo thật + guard baseline bẩn
+  ✓ trong repo + cây sạch → auto-update HẠ baseline
+  ✓ baseline được `git add` vào cùng commit
+  ✓ F3 trong repo thật: warn cho qua nhưng KHÔNG nâng baseline
+  ✓ baseline BẨN (chưa stage) → bỏ qua auto-update, không ghi đè
+[12] R1 — commit từ repo NGOÀI không được ghi baseline của repo LỒNG
+  ✓ chạy từ repo NGOÀI → rc=0
+  ✓ baseline của repo LỒNG byte-identical (không bị ghi đè)
+[13] R4 — baseline_key chuẩn hoá worktree về key canonical
+  ✓ canonical → 'mike/bin/x.py'
+  ✓ worktree → CÙNG key (không phải mike/agents/wt-test/bin/x.py)
+[14] R2 — hook phải có verbose:true, và verbose thật sự lộ stderr khi rc=0
+  ✓ R5-3 fixture: hook kế tiếp mở đầu `- name:` KHÔNG bị nuốt vào khối tz-anchor-gate
+  ❌ mike/.pre-commit-config.yaml: đọc được  — [Errno 2] No such file or directory: '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/.pre-commit-config.yaml'
+  ✓ thanhdt/.pre-commit-config.yaml: khối hook tz-anchor-gate tồn tại
+  ✓ thanhdt/.pre-commit-config.yaml: verbose: true trong khối đó
+  ✓ pre-commit mặc định + rc=0 → cảnh báo BỊ NUỐT
+  ✓ pre-commit verbose + rc=0 → cảnh báo HIỆN
+[15] R5 — env knob sandbox phải bị từ chối nếu thiếu MIKE_TZ_GATE_SELFCHECK=1
+  ✓ MIKE_TZ_GATE_ROOT không có cờ → TỪ CHỐI chạy
+  ✓ MIKE_TZ_GATE_ROOT + MIKE_TZ_GATE=off → off THẮNG (rc=0, im)
+  ✓ MIKE_TZ_GATE_BASELINE không có cờ → TỪ CHỐI chạy
+  ✓ MIKE_TZ_GATE_BASELINE + MIKE_TZ_GATE=off → off THẮNG (rc=0, im)
+  ✓ MIKE_TZ_GATE_ROOTS không có cờ → TỪ CHỐI chạy
+  ✓ MIKE_TZ_GATE_ROOTS + MIKE_TZ_GATE=off → off THẮNG (rc=0, im)
+[16] R3-residual — git add baseline thất bại phải KÊU
+  ✓ git add thất bại → không chặn commit
+  ✓ git add thất bại → CÓ cảnh báo 'CHƯA stage', không im
+[18] R5-1 — file KHÔNG parse được: phải KÊU, không gate, KHÔNG đụng baseline
+  ✓ file không parse được → không chặn commit (rc=0)
+  ✓ file không parse được → KÊU ra stderr, nêu tên file + nguyên văn exception
+  ✓ file không parse được → baseline KHÔNG bị đụng (key 2 còn nguyên)
+  ✓ file không parse được → baseline KHÔNG bị `git add`
+  ✓ --seed-baseline khi có file không parse được → TỪ CHỐI ghi (kiểm kê THIẾU)
+[19] R5-2 — baseline HỎNG: fail-open + nói nguyên văn lỗi, không hard-block hàng loạt
+  ✓ baseline hỏng → KHÔNG chặn (rc=0)
+  ✓ baseline hỏng → nói rõ là không đọc được + nguyên văn lỗi
+  ✓ baseline hỏng → KHÔNG khẳng định 'baseline 0' / HARD-BLOCK
+  ✓ baseline CHƯA seed (thiếu file) → vẫn gate bình thường (BLOCK nợ mới)
+[20] R5-5 — cảnh báo MIKE_TZ_GATE=off phải quét MỌI argv, không chỉ argv[0]
+  ✓ off + --update-baseline (cờ ĐỨNG TRƯỚC) → KHÔNG im lặng
+  ✓ off + --update-baseline (cờ ĐỨNG SAU file) → KHÔNG im lặng
+[17] TRACKED_ROOTS phải trỏ vào 2 checkout git THẬT
+  ✓ /tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike là git checkout
+  ✓ /home/trido/thanhdt là git checkout
+[5] File production không bị selfcheck đụng
+  ✓ kb/tz_anchor_baseline.json nguyên vẹn
+
+❌ 1/136 FAIL: ['mike/.pre-commit-config.yaml: đọc được']

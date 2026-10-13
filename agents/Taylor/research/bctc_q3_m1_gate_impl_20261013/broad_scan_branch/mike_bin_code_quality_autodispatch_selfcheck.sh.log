@@ -1,0 +1,21 @@
+PASS T1 rỗng: không dispatch, không escalate, rc=0
+PASS T2 prefix trading_bot/ bắt được module CHƯA TỪNG liệt tên -> escalate + ack, severity=low vẫn escalate
+PASS T3 exact-match dnse_api.py + mike/bin/run_bot.sh -> escalate dù severity=low
+PASS T4 file KHÔNG nhạy cảm (kể cả severity=high) -> dispatch bình thường, job_id parse ĐÚNG từ stderr
+PASS T5 owner lạ/thiếu -> escalate cả 2
+PASS T6 mix Taylor+Wags -> --write-scope REPO-RELATIVE (không còn /x/...), file dưới mike/ khai CẢ 2 dạng
+PASS T7 idempotency: mọi nhóm đã có trong state -> skip sạch
+PASS T8 --dry-run không đụng dispatch/event/notify thật, cmd_preview còn --bg (bug preview cũ đã vá)
+PASS T9 finding thiếu 'file' -> escalate riêng, không crash
+PASS T9b severity không hợp lệ ('Med') -> escalate fail-safe
+PASS T9c severity ' medium ' (khoảng trắng thừa) chuẩn hoá đúng -> vẫn escalate
+PASS T10 dispatch rc≠0 -> KHÔNG ghi state, script rc≠0, Discord có lệnh rerun tay (không hứa suông)
+PASS T11 rerun chỉ retry nhóm chưa xong (Wags), không dispatch lại Taylor, lần 2 rc=0
+PASS T12 escalation post FAIL -> notify_failure() gọi, rc≠0, KHÔNG ghi state (không im lặng như round 1)
+PASS T13 lọc roots[] đúng cả 5 ca: (a) root ghi lệnh->escalate (b) root báo cáo->dispatch dù severity=high (c) roots MIX (báo cáo+ghi lệnh)->escalate — đúng ca killer tier_root cũ bỏ sót (d) SAFE_TOOLING_ALLOWLIST (dispatch.sh)->dispatch dù roots có root ghi lệnh (e) root autoheal phóng executor (bot_heartbeat.sh)->escalate
+PASS T16 mike/bin/send_plan_report.sh (ghi orders[] qua signal_holds --enforce) -> escalate dù severity=low
+PASS T17 macro_healthcheck.py (cổng get_gated_state) owner=Taylor severity=low -> escalate, KHÔNG dispatch
+PASS T17 macro_state_live.py (cổng get_gated_state) owner=Wags severity=low -> escalate, KHÔNG dispatch
+PASS T14 cùng file escalate+dispatch -> cảnh báo THẬT SỰ xuất hiện trong prompt (regression round 3 đã vá)
+PASS T15 manifest thiếu -> warning THẤY ĐƯỢC trong summary JSON + Discord (không im lặng như round 4 killer)
+=== 20 PASS / 0 FAIL ===

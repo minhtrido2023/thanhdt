@@ -1,0 +1,18 @@
+=== A/B/C: unknown override key — stderr-only, không lẫn vào stdout label list ===
+  PASS  A1 stdout label list KHÔNG lẫn dòng cảnh báo (đúng 1 account thật) — ['InheritAcct']
+  PASS  A2 cảnh báo khóa lạ có xuất hiện, nhưng trên stderr — [config] ⚠ khóa lạ trong overrides account 'InheritAcct': ['fill_timing_live_gat']
+  PASS  A3 cảnh báo KHÔNG rò sang stdout — InheritAcct
+
+=== C: override key hợp lệ — KHÔNG cảnh báo giả ===
+  PASS  C1 override key hợp lệ (đã có trong DEFAULTS) không sinh cảnh báo
+  PASS  C2 account vẫn được liệt kê đúng — ValidOverride
+
+=== D: broker resolution == make_broker() (p.get('broker') or cfg.get('broker') or 'phs') ===
+  PASS  D1 profile broker=None kế thừa global broker=dnse -> CÓ trong live list — got=['D1acc'] expected=['D1acc']
+  PASS  D2 profile broker='DNSE' hoa -> CÓ trong live list (case-insensitive) — got=['D2acc'] expected=['D2acc']
+  PASS  D3 profile broker='phs' tường minh -> KHÔNG trong live list dù global=dnse — got=[] expected=[]
+  PASS  D4 profile broker=None + global KHÔNG khai broker (fallback DEFAULTS='phs') -> KHÔNG trong live list — got=[] expected=[]
+=== E: regression trên secrets THẬT (best-effort, skip nếu không có) ===
+  SKIP  không có secrets/trading_bot_accounts.json trong môi trường này
+
+===== account_overrides_broker_resolution_selfcheck: 9/9 PASS =====

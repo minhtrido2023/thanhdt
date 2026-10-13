@@ -1,0 +1,15 @@
+nam,san_luong_tr_kwh,doanh_thu_ban_dien_ty,gom_thue_TN_phi,gia_bq_d_kwh,gia_hop_dong_chua_thue_d_kwh,gia_CGM_d_kwh,nguon,ghi_chu
+2013,174,,,,,,BCTN 2015 tr.24 (vietstock),chỉ có sản lượng
+2014,125.93,118.22,khong,938.8,938.78,,PA bán SB5 8/2018 tr.10-11 (pecc1.com.vn),100% theo giá HĐ; gồm thuế+phí: 127.95 tỷ = 1016 đ/kWh
+2015,151.71,146.10,khong,963.0,938.78,1178.5,PA bán SB5 8/2018 tr.10-11,gồm thuế+phí 158.86 tỷ = 1047 (khớp BCTN 2015 '158.86 tỷ trước VAT'); CGM 10.1% sản lượng
+2016,169.50,157.30,khong,928.0,938.78,831.4,PA bán SB5 8/2018 tr.10-11,gồm thuế+phí 173.69 tỷ = 1025; CGM 10.0%
+2017,250.02,229.51,khong,918.0,940.76,653.94,PA bán SB5 8/2018 tr.10-11,gồm thuế+phí 255.32 tỷ = 1021; CGM 7.9%
+2018,,192.79,khong ro,,,,PA bán SB5 8/2018 tr.20,doanh thu thuần SXKD SB5 ước 2018; không có sản lượng
+2019,,,,,,,KHONG TIM DUOC,
+2020,,,,,,,KHONG TIM DUOC,
+2021,197.37?,197.55,co (suy dien),1001?,,,kienthuc.net.vn 18/07/2024 trích BC BKS ĐHĐCĐ 2023,SUY DIỄN: 272.35-74.8 tỷ; sản lượng = 258.887-61.516 nếu '61.515,89 kWh' là nghìn kWh — bài gốc ghi lỗi (823.8%) nên KHÔNG chắc
+2022,258.89,272.35,co (suy dien),1052,,,kienthuc.net.vn 18/07/2024 trích BC BKS ĐHĐCĐ 2023,tự chia
+2023,187,214.59,co (suy dien),1148,,,pecc1.com.vn 11/12/2023 (sản lượng) + BC SXKD 2024 tr.2 (doanh thu),VCBS 21/06/2024 ghi 183 tr kWh / 215 tỷ / 1172 — lệch sản lượng 2%
+2024,,215.94,co (suy dien),,,,BCTN 2025 tr.19,KHÔNG tìm được sản lượng 2024 (VCBS dự phóng 195 — không phải số thực)
+2025,236.6,261.60,co (suy dien),1106,,,BCTN 2025 tr.7 + tr.19,tự chia; thuế tài nguyên phát sinh 2025 = 28.66 tỷ (BCTN tr.24)
+2026KH,,187,,,,,BCTN 2025 tr.36,kế hoạch bán điện 187 tỷ — chưa phản ánh hạ giá

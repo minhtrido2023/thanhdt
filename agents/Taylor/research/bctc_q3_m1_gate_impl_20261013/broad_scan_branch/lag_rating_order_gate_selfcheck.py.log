@@ -1,0 +1,20 @@
+==============================================================================
+  UNIT (bq giả lập)
+==============================================================================
+  PASS  LAG buy rating≤3 → giữ nguyên
+  PASS  LAG buy rating=4 → LOẠI lệnh
+  PASS  … blocked ghi đủ ticker/rating/order_id
+  PASS  rating == 3 → GIỮ
+  PASS  rating == 4 → LOẠI
+  PASS  rating == 8 → LOẠI
+  PASS  rating thiếu 1 mã → chỉ loại mã đó (fail-closed)
+  WARNING: không đọc được 8L rating cho ứng viên LAG (BQ down) — GIỮ nguyên danh sách (fail-open). LƯU Ý: lưới executor (filter_lag_rating_orders) cũng fail-open khi nguồn hỏng, xem lag_rating_filter_error trong status.json
+  PASS  BQ hỏng → fail-OPEN, giữ nguyên MỌI lệnh
+  PASS  … và phát 1 cảnh báo FAIL_OPEN
+  PASS  import nguồn hỏng → fail-OPEN, giữ nguyên
+  PASS  book khác + LAG sell → KHÔNG đụng (đúng phạm vi chính sách)
+  PASS  plan không có LAG buy → no-op, không chạm nguồn
+  PASS  case-insensitive book/side → vẫn LOẠI
+  PASS  loại hết lệnh cùng mã xấu, giữ thứ tự phần còn lại
+==============================================================================
+  TỔNG: 14 PASS / 0 FAIL

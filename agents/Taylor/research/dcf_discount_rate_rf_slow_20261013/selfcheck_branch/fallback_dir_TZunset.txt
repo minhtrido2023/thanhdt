@@ -1,0 +1,80 @@
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> HOLDING last known CCTG 7.50%, not dropping to Big-4 6.80%
+host TZ=<unset>  grid=1st+15th <2026 + daily 2026
+
+S — behaviour of the central function (this checkout):
+  [PASS] S1 stale CCTG is HELD at last known 7.5 (not Big-4 6.8)
+  [PASS] S1 held value is labelled cctg_held(2026-09-30; cctg_stale: 46d)
+  [PASS] S1 a WARNING saying HOLDING was logged
+  [PASS] S2 age==45d is still fresh: 7.5, labelled cctg_6m(2026-09-30)
+  [PASS] S3 with no new data the rate never drops below 7.5 through 2028
+  [PASS] S4 a newer confirmed CCTG row ends the hold (7.0, fresh label)
+  [PASS] S4 a confirmed CCTG below Big-4 -> plain Big-4 6.8 (no hold, no label)
+  [PASS] S5a out-of-range value (74): strict loader really errors (fixture is live)
+  [PASS] S5a out-of-range value (74): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] S5a out-of-range value (74): labelled cctg_held(2026-10-12; cctg_unavailable: ...)
+  [PASS] S5a out-of-range value (74): a WARNING saying HOLDING was logged
+  [PASS] S5b unparseable rate (7.4%): strict loader really errors (fixture is live)
+  [PASS] S5b unparseable rate (7.4%): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] S5b unparseable rate (7.4%): labelled cctg_held(2026-10-12; cctg_unavailable: ...)
+  [PASS] S5b unparseable rate (7.4%): a WARNING saying HOLDING was logged
+  [PASS] S5c unparseable date: strict loader really errors (fixture is live)
+  [PASS] S5c unparseable date: HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] S5c unparseable date: labelled cctg_held(2026-10-12; cctg_unavailable: ...)
+  [PASS] S5c unparseable date: a WARNING saying HOLDING was logged
+  [PASS] S5e malformed row (extra fields): strict loader really errors (fixture is live)
+  [PASS] S5e malformed row (extra fields): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] S5e malformed row (extra fields): labelled cctg_held(2026-10-12; cctg_unavailable: ...)
+  [PASS] S5e malformed row (extra fields): a WARNING saying HOLDING was logged
+  [PASS] S5f year-typo row (<= anchor): strict loader really errors (fixture is live)
+  [PASS] S5f year-typo row (<= anchor): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] S5f year-typo row (<= anchor): labelled cctg_held(2026-10-12; cctg_unavailable: ...)
+  [PASS] S5f year-typo row (<= anchor): a WARNING saying HOLDING was logged
+  [PASS] S5d wrong header: no CSV row is trustworthy -> held at frozen anchor 7.5
+  [PASS] S5g unreadable file (OSError): held at frozen anchor 7.5
+  [PASS] S5h the checked reader itself raising: held at 7.4, cause named
+  [PASS] S5j a FUTURE-dated good row is not used for a past asof (7.4, not 9.0)
+  [PASS] S5i nothing readable at all -> Big-4 6.8, and the label says exactly that
+  [PASS] S6 error + nothing known at/before asof (2026-09-29) -> Big-4 6.8
+  [PASS] S7 DEPOSIT_RATE_CCTG_OVERLAY=0 -> Big-4-only 6.8 at a stale date
+  [PASS] S7 knob unset == knob 1 (default on)
+  [PASS] S8 Big-4 8.0 > stale CCTG 7.5 -> 8.0, plain big4_12m
+  [PASS] S9 macro_killswitch_a_status: stale CCTG still ARMED + stale, rate = Big-4 6.8
+  [PASS] S10 asof=None == asof=ICT today (2026-10-13), whatever the host TZ
+
+H — history byte-identical to cce3699d for every asof <= 2026-10-13:
+  [PASS] H0 pinned source really is the pre-change code (no cctg_held in it)
+      frozen fixtures  old=6d9d62ad5b0bdce0  new=6d9d62ad5b0bdce0  (646 asof x 5 outputs)
+  [PASS] H1 frozen fixtures: identical fingerprint
+      live-CSV copy    old=a735c6f03a31ff83  new=a735c6f03a31ff83
+  [PASS] H2 copy of the LIVE CSVs: identical fingerprint
+  [PASS] H3b kill-switch A on live-CSV copy, grid to 2027-06-30: identical
+      kill-switch A    old=6c30dc283c111aa7  new=6c30dc283c111aa7  (grid runs to 2027-06-30; frozen + Big-4-kept-fresh)
+  [PASS] H3 macro_killswitch_a_status identical incl. the stale future (frozen fixtures)
+  [PASS] H4 deposit_rate_vn.macro_killswitch_a_status: source unchanged vs cce3699d
+  [PASS] H4 deposit_rate_vn.deposit_events_df: source unchanged vs cce3699d
+  [PASS] H4 deposit_rate_vn.merge_deposit: source unchanged vs cce3699d
+  [PASS] H4 deposit_rate_vn.current_deposit_rate: source unchanged vs cce3699d
+  [PASS] H4 deposit_rate_vn.consumer_deposit_rate: source unchanged vs cce3699d
+  [PASS] H4 deposit_rate_vn.effective_deposit_events_df: source unchanged vs cce3699d
+  [PASS] H4 cctg_rate_vn.cctg_events_df: source unchanged vs cce3699d
+  [PASS] H4 cctg_rate_vn.current_cctg_rate: source unchanged vs cce3699d
+  [PASS] H4 cctg_rate_vn.current_cctg_rate_checked: source unchanged vs cce3699d
+  [PASS] H4 frozen anchors unchanged (DEPOSIT_EVENTS, CCTG_EVENTS)
+  [PASS] H5 the change is real AFTER history ends: 2026-11-15 old=6.8 -> new=7.5
+
+M — source-level mutants (each must be CAUGHT; a mutant that does not apply is a FAIL):
+  [PASS] M1 REVERSED DIRECTION, stale branch (drop to Big-4 again): caught by 2 check(s), e.g. S1 stale CCTG is HELD at last known 7.5 (not Big-4 6.8)
+  [PASS] M2 REVERSED DIRECTION, error branch (drop to Big-4 again): caught by 9 check(s), e.g. S5a out-of-range value (74): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] M3 silent hold (stale WARNING removed): caught by 1 check(s), e.g. S1 a WARNING saying HOLDING was logged
+  [PASS] M4 held value mislabelled as fresh: caught by 1 check(s), e.g. S1 held value is labelled cctg_held(2026-09-30; cctg_stale: 46d)
+  [PASS] M5 rollback knob ignored: caught by 1 check(s), e.g. S7 DEPOSIT_RATE_CCTG_OVERLAY=0 -> Big-4-only 6.8 at a stale date
+  [PASS] M6 salvage accepts an out-of-range row: caught by 3 check(s), e.g. S5a out-of-range value (74): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] M7 salvage ignores asof (uses a future row): caught by 2 check(s), e.g. S5j a FUTURE-dated good row is not used for a past asof (7.4, not 9.0)
+  [PASS] M8 salvage returns the OLDEST known row, not the latest: caught by 12 check(s), e.g. S5a out-of-range value (74): HELD at last good row 7.4 (not Big-4 6.8, not the bad row)
+  [PASS] M9 hold reaches back into history (stale threshold 5d): caught by H1 history fingerprint
+  [PASS] M10 kill-switch A weakened (stale CCTG no longer forces ARMED): caught by H3 kill-switch fingerprint
+  [PASS] M11 a CCTG BELOW Big-4 is allowed to drive (rate can fall under Big-4): caught by 2 check(s), e.g. S4 a confirmed CCTG below Big-4 -> plain Big-4 6.8 (no hold, no label)
+
+ALL PASS
+rc=0

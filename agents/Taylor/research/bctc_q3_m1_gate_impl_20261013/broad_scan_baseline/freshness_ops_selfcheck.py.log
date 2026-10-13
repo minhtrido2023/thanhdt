@@ -1,0 +1,57 @@
+
+=== (A) bq_freshness_check.sh — ngưỡng 8 bảng + artifact gate (sandbox) ===
+  PASS  S1 boundary-PASS ticker_prune (lag=2tradingd ≤ 2)
+  PASS  S1 boundary-PASS vnindex_5state_dt5g_live (lag=0tradingd ≤ 0)
+  PASS  S1 boundary-PASS ticker_financial (lag=90calendard ≤ 90)
+  PASS  S1 boundary-PASS ticker_1m (lag=2tradingd ≤ 2)
+  PASS  S1 boundary-PASS shares_outstanding_live (lag=2tradingd ≤ 2)
+  PASS  S1 boundary-PASS custom30v_8l (lag=98calendard ≤ 98)
+  PASS  S1 boundary-PASS custom30_8l (lag=98calendard ≤ 98)
+  PASS  S1 boundary-PASS risk_rating (lag=135 WARN-table vẫn OK)
+  PASS  S1 boundary-PASS writer-alive x2 (last-modified 4d ≤ 4)
+  PASS  S1 ALL FRESH → pipeline chạy + artifact fresh-ok x2
+  PASS  S1 dispatch DollarBill được gọi (TestAcct)
+  PASS  S1 rc=0, không alert nào
+  PASS  S2 boundary-FAIL ticker_prune (lag=3tradingd > 2)
+  PASS  S2 boundary-FAIL vnindex_5state_dt5g_live (lag=1tradingd > 0)
+  PASS  S2 boundary-FAIL ticker_financial (lag=91calendard > 90)
+  PASS  S2 boundary-FAIL ticker_1m (lag=3tradingd > 2)
+  PASS  S2 boundary-FAIL shares_outstanding_live (lag=3tradingd > 2)
+  PASS  S2 boundary-FAIL custom30v_8l (lag=99calendard > 98)
+  PASS  S2 boundary-FAIL custom30_8l (lag=99calendard > 98)
+  PASS  S2 risk_rating = WARN chứ không FAIL (orphan, non-blocking)
+  PASS  S2 writer-alive 5d → WARN nghi chết
+  PASS  S2 lastmod metadata unreadable → age=999 WARN (fail-safe, không im lặng)
+  PASS  S2 rc=1 + ⛔ block DollarBill, KHÔNG dispatch
+  PASS  S2 BLOCK có Telegram (notify.sh), WARN 🟡 CHỈ Discord
+  PASS  S3 WARN-only → pipeline vẫn chạy, dispatch vẫn đi, rc=0
+  PASS  S3 WARN không Telegram, có 3 🟡 Discord
+  PASS  S4 artifact stale → rc=1, ARTIFACT STALE alert, KHÔNG dispatch
+
+=== (B) chain 8L (pt_8l_daily / papertrade_daily) — FAIL phải alert ===
+  PASS  pt_8l_daily: extract được run()+notify_fails() từ file thật
+  PASS  pt_8l_daily: 1 step FAIL → alert gộp đúng chain+count+label, Telegram+Discord
+  PASS  pt_8l_daily: FAILS counter đếm đúng, chain không chết (rc=0)
+  PASS  pt_8l_daily: 0 FAIL → im lặng tuyệt đối (không notify)
+  PASS  pt_8l_daily: nhiều FAIL → đếm đủ 2 + đủ tên step trong 1 message
+  PASS  pt_8l_daily: notify chết → chain vẫn rc=0 (alert không được giết chain)
+  PASS  papertrade_daily: extract được run()+notify_fails() từ file thật
+  PASS  papertrade_daily: 1 step FAIL → alert gộp đúng chain+count+label, Telegram+Discord
+  PASS  papertrade_daily: FAILS counter đếm đúng, chain không chết (rc=0)
+  PASS  papertrade_daily: 0 FAIL → im lặng tuyệt đối (không notify)
+  PASS  papertrade_daily: nhiều FAIL → đếm đủ 2 + đủ tên step trong 1 message
+  PASS  papertrade_daily: notify chết → chain vẫn rc=0 (alert không được giết chain)
+  PASS  pt_8l_daily: inline step [8] snapshot có tăng FAILS + gọi notify_fails cuối chain
+  PASS  papertrade_daily: inline step [6b] có tăng FAILS + gọi notify_fails cuối chain
+
+=== (C) risk_monitor --test-provenance (sandbox nội bộ, dry-run) ===
+  FAIL  suite provenance chạy PASS toàn bộ (rc=0 + 'Provenance test PASSED') — /home/trido/thanhdt/wc_venv/bin/python: can't open file '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/agents/Spyros/risk_monitor.py': [Errno 2] No such file or directory
+
+  FAIL  nhánh 1: provenance TỐT + breach → HALT nổ (gate không chặn HALT) — /home/trido/thanhdt/wc_venv/bin/python: can't open file '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/agents/Spyros/risk_monitor.py': [Errno 2] No such file or directory
+
+  FAIL  nhánh 2: provenance XẤU + breach → VẪN HALT (không fail-open, không suppress) — /home/trido/thanhdt/wc_venv/bin/python: can't open file '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/agents/Spyros/risk_monitor.py': [Errno 2] No such file or directory
+
+  FAIL  nhánh 2b: provenance XẤU + clean → không im lặng (alert + cờ suspect) — /home/trido/thanhdt/wc_venv/bin/python: can't open file '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/agents/Spyros/risk_monitor.py': [Errno 2] No such file or directory
+
+
+===== freshness_ops_selfcheck: 41/45 PASS =====

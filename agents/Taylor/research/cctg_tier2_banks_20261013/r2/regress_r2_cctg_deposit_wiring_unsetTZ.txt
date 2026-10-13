@@ -1,0 +1,88 @@
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-11-15): CCTG stale (46d > 45d, last 2026-09-30) -> Big-4-only
+effective_deposit_rate(asof=2026-10-01): CCTG unavailable -> Big-4-only (simulated CSV corruption)
+Path-trap guard (sys.modules pre-registration actually points at HERE, not canonical):
+  [PASS] sys.modules['deposit_rate_vn'].__file__ is under HERE (/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-cctgt2-1013/WorkingClaude/deposit_rate_vn.py)
+  [PASS] sys.modules['cctg_rate_vn'].__file__ is under HERE (/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-cctgt2-1013/WorkingClaude/cctg_rate_vn.py)
+  [PASS] sys.modules['custom30_yield_labels'].__file__ is under HERE (/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-cctgt2-1013/WorkingClaude/custom30_yield_labels.py)
+  [PASS] sys.modules['dcf_refresh_gate'].__file__ is under HERE (/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-cctgt2-1013/WorkingClaude/dcf_refresh_gate.py)
+  [PASS] sys.modules['dcf_valuation'].__file__ is under HERE (/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-cctgt2-1013/WorkingClaude/dcf_valuation.py)
+consumer_deposit_rate() — knob semantics:
+  [PASS] knob=0 (today) == current_deposit_rate(today)
+  [PASS] knob=1 (today) == effective_deposit_rate(today)['rate_pct']
+  [PASS] knob default (unset) behaves like knob=1
+  [PASS] post-anchor: effective > big4-only (CCTG 7.5% beats Big-4 12M 6.8%)
+  [PASS] post-anchor rate_source is cctg_6m(...)
+
+History unaffected (pre-anchor byte-identical, both knob values):
+  [PASS] knob=1 byte-identical to current_deposit_rate() for 424 pre-anchor dates
+  [PASS] knob=0 byte-identical to current_deposit_rate() for 424 pre-anchor dates
+  [PASS] day before anchor (2026-09-29) unaffected by knob=1
+  [PASS] anchor day itself (2026-09-30) IS affected by knob=1
+
+Call-site wiring (grep-equivalent, read the actual source text):
+  [PASS] rating_8l.py wired (from deposit_rate_vn import consumer_deposit_rate_detail)
+  [PASS] dcf_valuation.py wired (_dep\.consumer_deposit_rate\()
+  [PASS] dcf_refresh_gate.py wired (_dep\.consumer_deposit_rate\()
+  [PASS] custom30_yield_labels.py wired (from deposit_rate_vn import consumer_deposit_rate\b)
+  [PASS] trading_bot/due_diligence.py wired (from deposit_rate_vn import consumer_deposit_rate_detail)
+
+trading_bot/due_diligence.py::_deposit_rate_pct (direct call):
+  [PASS] knob=0 label says big4_12m(cctg_overlay_disabled)
+  [PASS] knob=1 label says cctg_6m(...) today (post-anchor)
+  [PASS] knob=1 rate > knob=0 rate today
+  [PASS] pre-anchor: knob=1 rate == knob=0 rate (byte-identical)
+
+dcf_valuation.py::discount_rate (direct call):
+  [PASS] today: effective discount_rate > big4-only discount_rate
+  [PASS] delta matches CCTG-vs-Big4 spread (0.70pp) exactly
+  [PASS] pre-anchor: discount_rate byte-identical regardless of knob
+
+Mutation guard (manual, not an automated AST mutator):
+  [PASS] mutant (knob ignored) is caught by the knob=0 equality check
+
+R1 regression — all 5 consumers age out CCTG identically, PIT-causal on asof:
+  [PASS] fixture sanity: Big-4-only at both fixture dates == 6.8%
+  [PASS] fixture sanity: STALE_DATE is anchor+46d, FRESH_DATE is anchor+44d
+  [PASS] consumer_deposit_rate(stale) == Big-4-only (CCTG aged out)
+  [PASS] consumer_deposit_rate(fresh) == CCTG 7.5 (not yet aged out)
+  [PASS] effective_deposit_rate(stale, check_freshness=True) agrees with consumer_deposit_rate
+  [PASS] dcf_valuation.discount_rate(stale) matches Big-4-only leg
+  [PASS] dcf_valuation.discount_rate(fresh) matches CCTG leg
+  [PASS] dcf_refresh_gate's consumer_deposit_rate(stale) == Big-4-only
+  [PASS] dcf_refresh_gate's consumer_deposit_rate(fresh) == CCTG
+  [PASS] custom30_yield_labels._label_one (real call path) uses Big-4-only at stale date
+  [PASS] custom30_yield_labels._label_one (real call path) uses CCTG at fresh date
+  [PASS] due_diligence._deposit_rate_pct(stale) == Big-4-only, labeled big4
+  [PASS] due_diligence._deposit_rate_pct(fresh) == CCTG, labeled cctg
+
+R1 mutant: effective_deposit_rate called with check_freshness forced False (the exact pre-fix bug) must be caught by the stale-date equality check:
+  [PASS] R1 mutant (check_freshness forced False) is caught
+
+R2 regression — CCTG failure is logged + annotated, not silently swallowed:
+  [PASS] R2: CCTG error -> still returns Big-4 rate (fail-open on the display number)
+  [PASS] R2: rate_source names the real cause (cctg_unavailable), not a bare big4_12m
+  [PASS] R2: a WARNING was actually logged for the CCTG error (not silently swallowed)
+  [PASS] R2: rate_source names the real cause (cctg_stale) when CCTG aged out
+  [PASS] R2: a WARNING was actually logged for the CCTG staleness
+
+R2 mutant: silent-swallow (bare except, no annotation) must be caught by the rate_source assertions above:
+  [PASS] R2 mutant (annotation stripped) is caught by the cctg_unavailable assertion
+
+rating_8l.py call-site check (source inspection — full pipeline run is disproportionate for a ±0.03 display print; the shared function's correctness is covered by sections 1-8):
+  [PASS] rating_8l.py imports consumer_deposit_rate_detail (not the bare-float wrapper)
+  [PASS] rating_8l.py print line includes the driver (rate_source)
+  [PASS] rating_8l.py calls consumer_deposit_rate_detail() with asof=None (live path)
+  [PASS] rating_8l.py's _dep is assigned from _dep_detail['rate_pct'] (not a separate Big-4 call)
+  [PASS] rating_8l.py never assigns _dep from current_deposit_rate() directly (M15 pattern)
+
+Mutation-survivor regression (M9 NEUTRAL-gate text, M12 custom30 call-site arg):
+  [PASS] rating_8l.py gates the deposit tilt on NEUTRAL (int(_st) == 3), not any other state
+  [PASS] custom30_yield_labels.py's REAL _label_one call site passes consumer_deposit_rate (not current_deposit_rate or any other bare-Big-4 callable)
+
+======================================================================
+0 FAIL / selfcheck PASSED

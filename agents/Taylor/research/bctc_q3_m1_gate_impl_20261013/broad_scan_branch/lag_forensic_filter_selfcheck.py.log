@@ -1,0 +1,40 @@
+=== lag_forensic_filter self-check ===
+  PASS  BANNED khớp build_universe_pit_quality.py
+  PASS  KNOWLEDGE.md có ĐÚNG 1 dòng BANNED chuẩn tắc
+  PASS  BANNED khớp mike/kb/KNOWLEDGE.md (nguồn chuẩn tắc)
+  PASS  mã sạch: không loại gì
+  PASS  VVS bị loại (BANNED thắng trước, dù cũng có cờ forensic)
+  PASS  BFC bị loại vì cờ forensic exclude
+  PASS  HSG (BANNED, KHÔNG có cờ forensic) vẫn bị loại
+  PASS  severity=watch KHÔNG loại
+  PASS  event CŨ hơn ngày cờ nhưng xét ở asof SAU cờ → VẪN bị chặn (ca BFC thật)
+  PASS  replay asof TRƯỚC ngày cờ → KHÔNG hồi tố (giữ)
+  PASS  asof ĐÚNG ngày cờ → chặn (biên <=)
+  PASS  BANNED không phụ thuộc asof (chặn cả ở asof rất cũ)
+  PASS  asof = NaT → fail-closed (coi mọi cờ đã hiệu lực)
+  PASS  nhiều cờ exclude cùng mã → dùng ngày sớm nhất
+  WARNING: không đọc được /nonexistent/forensic.csv ([Errno 2] No such file or directory: '/nonexistent/forensic.csv') — cờ forensic KHÔNG được áp (fail-open); danh sách BANNED vĩnh viễn VẪN áp. Xem lag_forensic_filter_error trong status.json
+  PASS  CSV thiếu → fail-open cho cờ forensic + trả error string
+  WARNING: không đọc được /nonexistent/forensic.csv ([Errno 2] No such file or directory: '/nonexistent/forensic.csv') — cờ forensic KHÔNG được áp (fail-open); danh sách BANNED vĩnh viễn VẪN áp. Xem lag_forensic_filter_error trong status.json
+  PASS  CSV thiếu nhưng BANNED VẪN chặn (fail-closed tuyệt đối)
+  PASS  cand rỗng → no-op
+  PASS  cand None → no-op
+  PASS  không mutate DataFrame đầu vào
+  PASS  không cần cột Release_Date (gate chỉ dùng asof)
+  PASS  đọc được data/forensic_flags.csv thật; BFC+KLB loại, POW giữ
+  PASS  mọi cờ exclude đều có ngày > AUDIT_END 2026-06-19 (⇒ 0 event trong cửa sổ pin)
+  PASS  IVS + TMG có trong LAG_USER_EXCLUDED
+  PASS  IVS+TMG bị loại vì user-exclude, POW giữ
+  PASS  dropped ghi ngày quyết định + lý do (audit trail đọc được)
+  PASS  asof TRƯỚC ngày user quyết → KHÔNG hồi tố (giữ IVS)
+  PASS  asof ĐÚNG ngày user quyết → chặn (biên <=)
+  WARNING: không đọc được /nonexistent/forensic.csv ([Errno 2] No such file or directory: '/nonexistent/forensic.csv') — cờ forensic KHÔNG được áp (fail-open); danh sách BANNED vĩnh viễn VẪN áp. Xem lag_forensic_filter_error trong status.json
+  PASS  CSV forensic hỏng nhưng user-exclude VẪN chặn (fail-closed tuyệt đối)
+  PASS  asof = NaT → user-exclude fail-closed (chặn)
+  PASS  IVS/TMG KHÔNG nằm trong BANNED (phạm vi CHỈ LAG, không nới hộ toàn hệ)
+  PASS  IVS/TMG KHÔNG nằm trong forensic_flags.csv (tránh đổi bảng 8L + số pin R3)
+  PASS  mọi mục LAG_USER_EXCLUDED có ngày > AUDIT_END 2026-06-19 (⇒ 0 event trong cửa sổ pin)
+  PASS  mọi mã trong văn xuôi context_planning_mini.md đều có trong LAG_USER_EXCLUDED
+  PASS  golive_recommend_v23.py import + gọi lag_filter_forensic_banned(cand, LATEST, …)
+
+=== 34 PASS / 0 FAIL ===

@@ -1,0 +1,31 @@
+### lag_rating_stale --live
+  F. LIVE (BQ thật, chỉ đọc)
+==============================================================================
+  cờ live @2026-10-13: [{'ticker': 'KBC', 'rating': 4, 'rating_date': '2026-07-31', 'release_date': '2026-10-12', 'gate': 'RATING_FAIL'}]  err=None
+  PASS  F1 live: truy vấn không lỗi
+  PASS  F2 live: POW/TVN (BCTC Q2 đã re-rate từ lâu) KHÔNG bị cờ
+  PASS  F3 live: nhãn gate của cờ khớp quyết định cổng thật
+==============================================================================
+  TỔNG: 69 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude, base=3dc35467)
+### pnj watch --live
+  10. LIVE: --dry-run chạm BQ thật (chỉ đọc)
+==============================================================================
+    OK   pnj-q3-watch: not_yet (PNJ 2026Q3)
+  PASS  10a exit 0
+  PASS  10b in ra đúng 1 trong 2 trạng thái đọc được (not_yet | DRY-RUN … sẽ post), không WARN
+  PASS  10c dry-run không tạo/sửa state thật
+==============================================================================
+  TỔNG: 52 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/pnj_q3_review_watch.py)
+### refresh pkl --live
+  6. LIVE (BQ sống → pkl TẠM; pkl production chỉ ĐỌC)
+==============================================================================
+    updated {'path': '/tmp/resp_0o9h9gos/es.pkl', 'old_rows': 58233, 'old_max': '2026-08-21', 'new_rows': 58234, 'new_max': '2026-10-12'} (13.7s)
+  PASS  6a kéo BQ sống: updated|unchanged, không kept_old
+  PASS  6b định dạng trùng pkl production (cột + dtype)
+  PASS  6c không lùi: số dòng ≥ 98% và max Release_Date ≥ bản production
+  PASS  6d live_lag_candidates đọc được pkl mới; mọi sự kiện cũ vẫn còn và qualify không đổi
+    sự kiện chỉ có ở pkl mới: [('KBC', '2026Q3')]
+  PASS  6e pkl production KHÔNG bị chạm (md5 trước = sau)
+  PASS  6f thời gian kéo < 120s
+==============================================================================
+  TỔNG: 51 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude/refresh_earnings_surprise_pkl.py)

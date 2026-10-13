@@ -48,7 +48,7 @@ PORT_REV = {
     "N38": (CI, "            if silent:\n", "            if False:\n"),
     "N40": (CI, 'out["n_order_records"] += 1 if (mine or tag is not None) else 0', 'out["n_order_records"] += 1'),
     "N41": (CI, MATCH, "matching = list(acks)[:1]"),
-    "G07": (RG, '            ops.append(f"⚠️ {PENDING_FLOW_MARKER} ({account}): KHÔNG kiểm được dòng tiền treo — "\n                       f"{type(exc).__name__} ({exc})")',
+    "G07": (RG, '            ops.append(f"⚠️ {PENDING_FLOW_MARKER} ({account}): KHÔNG kiểm được dòng tiền treo — "\n                       f"{_exc_text(exc)}")',
             "            pass"),
     "G09": (RG, "        if investor and INVESTOR_FLOW_MARKER not in text:\n", '        if investor and INVESTOR_FLOW_MARKER not in text:\n            raise RuntimeError("cash-flow BLOCK")\n'),
     "G10": (RG, "if investor and INVESTOR_FLOW_MARKER not in text:", "if investor and INVESTOR_FLOW_MARKER in text:"),

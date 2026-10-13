@@ -8,7 +8,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -476,7 +476,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -1459,9 +1459,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 252 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {}"
+     "ASSERT-FAIL (sau 253 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {}"
     ],
-    "tail": "ASSERT-FAIL (sau 252 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {}"
+    "tail": "ASSERT-FAIL (sau 253 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {}"
    },
    "ledger": {
     "rc": 0,
@@ -1506,9 +1506,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 252 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {'date0': datetime.date(2026, 3, 2), 'date1': datetime.date(2026, 3, 13), 'n_windows': 9, 'sum_vnd': -4049950.5590471, 'sum_pct': -0.40558617197630886, 'same_sign': 9, 'margi"
+     "ASSERT-FAIL (sau 253 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {'date0': datetime.date(2026, 3, 2), 'date1': datetime.date(2026, 3, 13), 'n_windows': 9, 'sum_vnd': -4049950.5590471, 'sum_pct': -0.40558617197630886, 'same_sign': 9, 'margi"
     ],
-    "tail": "ASSERT-FAIL (sau 252 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {'date0': datetime.date(2026, 3, 2), 'date1': datetime.date(2026, 3, 13), 'n_windows': 9, 'sum_vnd': -4049950.5590471, 'sum_pct': -0.40558617197630886, 'same_sign': 9, 'margi"
+    "tail": "ASSERT-FAIL (sau 253 assertion PASS): L (R10): rút nhỏ giọt 450k × 9 phiên (mỗi cửa sổ dưới ngưỡng) ⇒ phải có dòng trôi; được {'date0': datetime.date(2026, 3, 2), 'date1': datetime.date(2026, 3, 13), 'n_windows': 9, 'sum_vnd': -4049950.5590471, 'sum_pct': -0.40558617197630886, 'same_sign': 9, 'margi"
    },
    "ledger": {
     "rc": 0,
@@ -1553,9 +1553,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 254 assertion PASS): L: lượt chụp ĐẦU TIÊN tổng vượt ngưỡng (04/03) gửi chi tiết; trước đó (03/03) chưa có gì; được {'investor_line': None, 'ops_lines': [], 'ops_today': [], 'error': None} / {'investor_line': None, 'ops_lines': ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — phần dư trôi có hệ t"
+     "ASSERT-FAIL (sau 255 assertion PASS): L: lượt chụp ĐẦU TIÊN tổng vượt ngưỡng (04/03) gửi chi tiết; trước đó (03/03) chưa có gì; được {'investor_line': None, 'ops_lines': [], 'ops_today': [], 'error': None} / {'investor_line': None, 'ops_lines': ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — phần dư trôi có hệ t"
     ],
-    "tail": "ASSERT-FAIL (sau 254 assertion PASS): L: lượt chụp ĐẦU TIÊN tổng vượt ngưỡng (04/03) gửi chi tiết; trước đó (03/03) chưa có gì; được {'investor_line': None, 'ops_lines': [], 'ops_today': [], 'error': None} / {'investor_line': None, 'ops_lines': ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — phần dư trôi có hệ t"
+    "tail": "ASSERT-FAIL (sau 255 assertion PASS): L: lượt chụp ĐẦU TIÊN tổng vượt ngưỡng (04/03) gửi chi tiết; trước đó (03/03) chưa có gì; được {'investor_line': None, 'ops_lines': [], 'ops_today': [], 'error': None} / {'investor_line': None, 'ops_lines': ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — phần dư trôi có hệ t"
    },
    "ledger": {
     "rc": 0,
@@ -1600,9 +1600,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 253 assertion PASS): L (R10): dòng trôi phải nêu khoảng, tổng, số cửa sổ cùng chiều, việc phải làm; được []"
+     "ASSERT-FAIL (sau 254 assertion PASS): L (R10): dòng trôi phải nêu khoảng, tổng, số cửa sổ cùng chiều, việc phải làm; được []"
     ],
-    "tail": "ASSERT-FAIL (sau 253 assertion PASS): L (R10): dòng trôi phải nêu khoảng, tổng, số cửa sổ cùng chiều, việc phải làm; được []"
+    "tail": "ASSERT-FAIL (sau 254 assertion PASS): L (R10): dòng trôi phải nêu khoảng, tổng, số cửa sổ cùng chiều, việc phải làm; được []"
    },
    "ledger": {
     "rc": 0,
@@ -1647,9 +1647,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 256 assertion PASS): L: dòng trôi không gắn cửa sổ nào (không ai đóng được) ⇒ KHÔNG vào báo cáo nhà đầu tư"
+     "ASSERT-FAIL (sau 257 assertion PASS): L: dòng trôi không gắn cửa sổ nào (không ai đóng được) ⇒ KHÔNG vào báo cáo nhà đầu tư"
     ],
-    "tail": "ASSERT-FAIL (sau 256 assertion PASS): L: dòng trôi không gắn cửa sổ nào (không ai đóng được) ⇒ KHÔNG vào báo cáo nhà đầu tư"
+    "tail": "ASSERT-FAIL (sau 257 assertion PASS): L: dòng trôi không gắn cửa sổ nào (không ai đóng được) ⇒ KHÔNG vào báo cáo nhà đầu tư"
    },
    "ledger": {
     "rc": 0,
@@ -1786,9 +1786,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 245 assertion PASS): I/G8: dòng lỗi phải nêu lỗi thật nhưng không khớp ERROR_RE của cron_health_check; được [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cash_identity_selfcheck_u33"
+     "ASSERT-FAIL (sau 245 assertion PASS): I/G8: dòng lỗi phải nêu lỗi thật nhưng không khớp ERROR_RE của cron_health_check; được [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cash_identity_selfcheck_h9h"
     ],
-    "tail": "ASSERT-FAIL (sau 245 assertion PASS): I/G8: dòng lỗi phải nêu lỗi thật nhưng không khớp ERROR_RE của cron_health_check; được [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cash_identity_selfcheck_u33"
+    "tail": "ASSERT-FAIL (sau 245 assertion PASS): I/G8: dòng lỗi phải nêu lỗi thật nhưng không khớp ERROR_RE của cron_health_check; được [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — FileNotFoundError: [Errno 2] No such file or directory: '/tmp/cash_identity_selfcheck_h9h"
    },
    "ledger": {
     "rc": 0,
@@ -1927,9 +1927,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 237 assertion PASS): H6/S6: nhiều bản ghi hỏng ⇒ in số bản ghi bị bỏ, trích 3 cái đầu; được 5 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: /tmp/cash_identity_selfcheck_3aiyf9zz/109_H6_many/logs/dnse_raw_2026-03-05.jsonl dòng 5 — JSONDeco"
+     "ASSERT-FAIL (sau 237 assertion PASS): H6/S6: nhiều bản ghi hỏng ⇒ in số bản ghi bị bỏ, trích 3 cái đầu; được 5 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: /tmp/cash_identity_selfcheck_htj036dn/109_H6_many/logs/dnse_raw_2026-03-05.jsonl dòng 5 — JSONDeco"
     ],
-    "tail": "ASSERT-FAIL (sau 237 assertion PASS): H6/S6: nhiều bản ghi hỏng ⇒ in số bản ghi bị bỏ, trích 3 cái đầu; được 5 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: /tmp/cash_identity_selfcheck_3aiyf9zz/109_H6_many/logs/dnse_raw_2026-03-05.jsonl dòng 5 — JSONDeco"
+    "tail": "ASSERT-FAIL (sau 237 assertion PASS): H6/S6: nhiều bản ghi hỏng ⇒ in số bản ghi bị bỏ, trích 3 cái đầu; được 5 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: /tmp/cash_identity_selfcheck_htj036dn/109_H6_many/logs/dnse_raw_2026-03-05.jsonl dòng 5 — JSONDeco"
    },
    "ledger": {
     "rc": 0,
@@ -1974,9 +1974,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 269 assertion PASS): J/C2: lượt chụp hôm sau chỉ gộp MỘT dòng đếm ở kênh vận hành (không lặp chi tiết); được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, n"
+     "ASSERT-FAIL (sau 271 assertion PASS): J/C2: lượt chụp hôm sau chỉ gộp MỘT dòng đếm ở kênh vận hành (không lặp chi tiết); được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, n"
     ],
-    "tail": "ASSERT-FAIL (sau 269 assertion PASS): J/C2: lượt chụp hôm sau chỉ gộp MỘT dòng đếm ở kênh vận hành (không lặp chi tiết); được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, n"
+    "tail": "ASSERT-FAIL (sau 271 assertion PASS): J/C2: lượt chụp hôm sau chỉ gộp MỘT dòng đếm ở kênh vận hành (không lặp chi tiết); được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, n"
    },
    "ledger": {
     "rc": 0,
@@ -2068,9 +2068,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 276 assertion PASS): J/§5: chạy lại ⇒ không gửi lần hai; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
+     "ASSERT-FAIL (sau 278 assertion PASS): J/§5: chạy lại ⇒ không gửi lần hai; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
     ],
-    "tail": "ASSERT-FAIL (sau 276 assertion PASS): J/§5: chạy lại ⇒ không gửi lần hai; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
+    "tail": "ASSERT-FAIL (sau 278 assertion PASS): J/§5: chạy lại ⇒ không gửi lần hai; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
    },
    "ledger": {
     "rc": 0,
@@ -2115,9 +2115,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 274 assertion PASS): J/§5b: MIKE_BOT_TEST_MODE=1 ⇒ KHÔNG gửi gì, không đổi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
+     "ASSERT-FAIL (sau 276 assertion PASS): J/§5b: MIKE_BOT_TEST_MODE=1 ⇒ KHÔNG gửi gì, không đổi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
     ],
-    "tail": "ASSERT-FAIL (sau 274 assertion PASS): J/§5b: MIKE_BOT_TEST_MODE=1 ⇒ KHÔNG gửi gì, không đổi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
+    "tail": "ASSERT-FAIL (sau 276 assertion PASS): J/§5b: MIKE_BOT_TEST_MODE=1 ⇒ KHÔNG gửi gì, không đổi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily"
    },
    "ledger": {
     "rc": 0,
@@ -2162,9 +2162,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 278 assertion PASS): J: gửi hỏng ⇒ rc=1, nêu mã thoát, trạng thái ghi GỬI HỎNG; được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily / đã gửi trading_daily lúc 2026-10-12 23:58:59"
+     "ASSERT-FAIL (sau 280 assertion PASS): J: gửi hỏng ⇒ rc=1, nêu mã thoát, trạng thái ghi GỬI HỎNG; được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily / đã gửi trading_daily lúc 2026-10-13 00:06:21"
     ],
-    "tail": "ASSERT-FAIL (sau 278 assertion PASS): J: gửi hỏng ⇒ rc=1, nêu mã thoát, trạng thái ghi GỬI HỎNG; được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily / đã gửi trading_daily lúc 2026-10-12 23:58:59"
+    "tail": "ASSERT-FAIL (sau 280 assertion PASS): J: gửi hỏng ⇒ rc=1, nêu mã thoát, trạng thái ghi GỬI HỎNG; được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily / đã gửi trading_daily lúc 2026-10-13 00:06:21"
    },
    "ledger": {
     "rc": 0,
@@ -2209,9 +2209,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 275 assertion PASS): J/C2: gửi đúng chi tiết của lượt chụp tới kênh theo TÊN, ghi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily / chưa gửi"
+     "ASSERT-FAIL (sau 277 assertion PASS): J/C2: gửi đúng chi tiết của lượt chụp tới kênh theo TÊN, ghi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily / chưa gửi"
     ],
-    "tail": "ASSERT-FAIL (sau 275 assertion PASS): J/C2: gửi đúng chi tiết của lượt chụp tới kênh theo TÊN, ghi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily / chưa gửi"
+    "tail": "ASSERT-FAIL (sau 277 assertion PASS): J/C2: gửi đúng chi tiết của lượt chụp tới kênh theo TÊN, ghi trạng thái; được 0 SpaceX 2026-03-10: đã gửi 1 dòng tới trading_daily / chưa gửi"
    },
    "ledger": {
     "rc": 0,
@@ -2256,9 +2256,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 279 assertion PASS): J: lượt sau gửi lại cái đã hỏng (nhiều dòng = một tin); được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily"
+     "ASSERT-FAIL (sau 281 assertion PASS): J: lượt sau gửi lại cái đã hỏng (nhiều dòng = một tin); được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily"
     ],
-    "tail": "ASSERT-FAIL (sau 279 assertion PASS): J: lượt sau gửi lại cái đã hỏng (nhiều dòng = một tin); được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily"
+    "tail": "ASSERT-FAIL (sau 281 assertion PASS): J: lượt sau gửi lại cái đã hỏng (nhiều dòng = một tin); được 0 SpaceX 2026-03-10: đã gửi 2 dòng tới trading_daily"
    },
    "ledger": {
     "rc": 0,
@@ -2303,9 +2303,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 277 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
+     "ASSERT-FAIL (sau 279 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
     ],
-    "tail": "ASSERT-FAIL (sau 277 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
+    "tail": "ASSERT-FAIL (sau 279 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
    },
    "ledger": {
     "rc": 0,
@@ -2350,9 +2350,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 277 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
+     "ASSERT-FAIL (sau 279 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
     ],
-    "tail": "ASSERT-FAIL (sau 277 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
+    "tail": "ASSERT-FAIL (sau 279 assertion PASS): J/§5: chụp lại cùng ngày, nội dung KHÔNG đổi ⇒ giữ 'đã gửi'; nội dung đổi ⇒ 'chưa gửi'"
    },
    "ledger": {
     "rc": 0,
@@ -2397,7 +2397,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2442,7 +2442,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 332 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2487,9 +2487,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 288 assertion PASS): J/C2: NAV rc=2 (chưa ghi nav_history) ⇒ KHÔNG gọi bước gửi; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n'"
+     "ASSERT-FAIL (sau 290 assertion PASS): J/C2: NAV rc=2 (chưa ghi nav_history) ⇒ KHÔNG gọi bước gửi; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n'"
     ],
-    "tail": "ASSERT-FAIL (sau 288 assertion PASS): J/C2: NAV rc=2 (chưa ghi nav_history) ⇒ KHÔNG gọi bước gửi; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n'"
+    "tail": "ASSERT-FAIL (sau 290 assertion PASS): J/C2: NAV rc=2 (chưa ghi nav_history) ⇒ KHÔNG gọi bước gửi; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n'"
    },
    "ledger": {
     "rc": 0,
@@ -2534,9 +2534,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 286 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n' / 'stdout của bước gửi\\n💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\n'"
+     "ASSERT-FAIL (sau 288 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n' / 'stdout của bước gửi\\n💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\n'"
     ],
-    "tail": "ASSERT-FAIL (sau 286 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n' / 'stdout của bước gửi\\n💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\n'"
+    "tail": "ASSERT-FAIL (sau 288 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_daily\\n' / 'stdout của bước gửi\\n💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\n'"
    },
    "ledger": {
     "rc": 0,
@@ -2581,9 +2581,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 286 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_report\\n' / '💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\nstdout của bước gửi\\n'"
+     "ASSERT-FAIL (sau 288 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_report\\n' / '💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\nstdout của bước gửi\\n'"
     ],
-    "tail": "ASSERT-FAIL (sau 286 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_report\\n' / '💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\nstdout của bước gửi\\n'"
+    "tail": "ASSERT-FAIL (sau 288 assertion PASS): J/C2: NAV rc=0 ⇒ gọi bước gửi kênh vận hành đúng tham số; đầu ra của nó KHÔNG vào thân báo cáo; được '--account SpaceX --notify-snapshot 2026-03-10 --channel trading_report\\n' / '💰 NAV giả\\n   dòng trung tính' / 'stderr của bước gửi\\nstdout của bước gửi\\n'"
    },
    "ledger": {
     "rc": 0,
@@ -2628,9 +2628,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 291 assertion PASS): J/C2: nav_sync_retry.sh gọi bước gửi kênh vận hành đúng một lần, trong nhánh chụp bù thành công"
+     "ASSERT-FAIL (sau 293 assertion PASS): J/C2: nav_sync_retry.sh gọi bước gửi kênh vận hành đúng một lần, trong nhánh chụp bù thành công"
     ],
-    "tail": "ASSERT-FAIL (sau 291 assertion PASS): J/C2: nav_sync_retry.sh gọi bước gửi kênh vận hành đúng một lần, trong nhánh chụp bù thành công"
+    "tail": "ASSERT-FAIL (sau 293 assertion PASS): J/C2: nav_sync_retry.sh gọi bước gửi kênh vận hành đúng một lần, trong nhánh chụp bù thành công"
    },
    "ledger": {
     "rc": 0,
@@ -2675,9 +2675,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 301 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần [\"mang cụm vận hành 'DÒNG TIỀN CHỜ KHAI'\"], cấm ['KHÔNG có dòng']; được report_delivery_gate: CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận"
+     "ASSERT-FAIL (sau 304 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần [\"mang cụm vận hành 'DÒNG TIỀN CHỜ KHAI'\"], cấm ['KHÔNG có dòng']; được report_delivery_gate: CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận"
     ],
-    "tail": "ASSERT-FAIL (sau 301 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần [\"mang cụm vận hành 'DÒNG TIỀN CHỜ KHAI'\"], cấm ['KHÔNG có dòng']; được report_delivery_gate: CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận"
+    "tail": "ASSERT-FAIL (sau 304 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần [\"mang cụm vận hành 'DÒNG TIỀN CHỜ KHAI'\"], cấm ['KHÔNG có dòng']; được report_delivery_gate: CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận"
    },
    "ledger": {
     "rc": 0,
@@ -2722,9 +2722,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 293 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưn"
+     "ASSERT-FAIL (sau 296 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưn"
     ],
-    "tail": "ASSERT-FAIL (sau 293 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưn"
+    "tail": "ASSERT-FAIL (sau 296 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưn"
    },
    "ledger": {
     "rc": 0,
@@ -2769,9 +2769,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 318 assertion PASS): K/S4: ô số '+nan%' ⇒ CHẶN kèm nguyên ô; được PASS "
+     "ASSERT-FAIL (sau 321 assertion PASS): K/S4: ô số '+nan%' ⇒ CHẶN kèm nguyên ô; được PASS "
     ],
-    "tail": "ASSERT-FAIL (sau 318 assertion PASS): K/S4: ô số '+nan%' ⇒ CHẶN kèm nguyên ô; được PASS"
+    "tail": "ASSERT-FAIL (sau 321 assertion PASS): K/S4: ô số '+nan%' ⇒ CHẶN kèm nguyên ô; được PASS"
    },
    "ledger": {
     "rc": 0,
@@ -2816,9 +2816,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 327 assertion PASS): K/S4: dòng thiếu cột số ⇒ CHẶN; được PASS report_delivery_gate: WARN period-return check — SpaceX_weekly_report_2026-10-05_to_2026-10-09.md không có dòng 'Từ khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế, bỏ qua"
+     "ASSERT-FAIL (sau 330 assertion PASS): K/S4: dòng thiếu cột số ⇒ CHẶN; được PASS report_delivery_gate: WARN period-return check — SpaceX_weekly_report_2026-10-05_to_2026-10-09.md không có dòng 'Từ khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế, bỏ qua"
     ],
-    "tail": "ASSERT-FAIL (sau 327 assertion PASS): K/S4: dòng thiếu cột số ⇒ CHẶN; được PASS report_delivery_gate: WARN period-return check — SpaceX_weekly_report_2026-10-05_to_2026-10-09.md không có dòng 'Từ khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế, bỏ qua"
+    "tail": "ASSERT-FAIL (sau 330 assertion PASS): K/S4: dòng thiếu cột số ⇒ CHẶN; được PASS report_delivery_gate: WARN period-return check — SpaceX_weekly_report_2026-10-05_to_2026-10-09.md không có dòng 'Từ khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế, bỏ qua"
    },
    "ledger": {
     "rc": 0,
@@ -2863,9 +2863,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 326 assertion PASS): K/S4: ô số '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
+     "ASSERT-FAIL (sau 329 assertion PASS): K/S4: ô số '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
     ],
-    "tail": "ASSERT-FAIL (sau 326 assertion PASS): K/S4: ô số '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
+    "tail": "ASSERT-FAIL (sau 329 assertion PASS): K/S4: ô số '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
    },
    "ledger": {
     "rc": 0,
@@ -2955,9 +2955,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 303 assertion PASS): J/S5: cash_identity không import được ⇒ _warn_cash_flows không ném, lỗi ở stderr; được report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối chiếu của SpaceX_weekly_report_2026-03-09_to_2026-03-13.md — ModuleNotFoundError (import of"
+     "ASSERT-FAIL (sau 306 assertion PASS): J/S5: cash_identity không import được ⇒ _warn_cash_flows không ném, lỗi ở stderr; được report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối chiếu của SpaceX_weekly_report_2026-03-09_to_2026-03-13.md — ModuleNotFoundError (import of"
     ],
-    "tail": "ASSERT-FAIL (sau 303 assertion PASS): J/S5: cash_identity không import được ⇒ _warn_cash_flows không ném, lỗi ở stderr; được report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối chiếu của SpaceX_weekly_report_2026-03-09_to_2026-03-13.md — ModuleNotFoundError (import of"
+    "tail": "ASSERT-FAIL (sau 306 assertion PASS): J/S5: cash_identity không import được ⇒ _warn_cash_flows không ném, lỗi ở stderr; được report_delivery_gate: CẢNH BÁO (không chặn) không kiểm được dòng tiền treo/chưa đối chiếu của SpaceX_weekly_report_2026-03-09_to_2026-03-13.md — ModuleNotFoundError (import of"
    },
    "ledger": {
     "rc": 0,
@@ -3002,9 +3002,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 305 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] / "
+     "ASSERT-FAIL (sau 308 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] / "
     ],
-    "tail": "ASSERT-FAIL (sau 305 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] /"
+    "tail": "ASSERT-FAIL (sau 308 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] /"
    },
    "ledger": {
     "rc": 0,

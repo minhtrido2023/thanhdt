@@ -1,0 +1,71 @@
+
+A. bq_freshness_check.sh boundary (real _check(), mocked bq)
+  [PASS] A1 MAX_STATE_LAG tightened to 0  — found 0
+  [PASS] A2 _check() extractable from script
+  [PASS] A3 lag=0 vs MAX=0 -> PASS (normal day must not be blocked)
+  [PASS] A4 lag=1 vs MAX=0 -> FAIL (state 1 day behind now blocks DollarBill)
+  [PASS] A5 regression proof: lag=1 vs old MAX=1 passed under -le (07-10 tighten was a NO-OP)
+  [PASS] A6 lag=2 vs old MAX=1 would have failed (old setting only caught >=2)
+
+B. writer/reader path consistency
+  [PASS] B1 ew_v1 staging writer -> data/
+  [PASS] B2 ew_v1 diagnostics writer -> data/
+  [PASS] B3 ew_v1 has NO remaining root write of either output
+  [PASS] B4 vnindex_5state_dual_v3.py reads data/ and has no root read
+  [PASS] B4 compare_ew_vs_live.py reads data/ and has no root read
+  [PASS] B4 run_phase2_states.py reads data/ and has no root read
+  [PASS] B4 ngu_hanh_shadow_tracker.py reads data/ and has no root read
+  [PASS] B4 vnindex_5state_dual_v1.py reads data/ and has no root read
+  [PASS] B4 sweep_ew_liq_threshold.py reads data/ and has no root read
+  [PASS] B4 mike/agents/Taylor/bull_commit_breadth_check.py reads data/ and has no root read
+  [PASS] B5 build_dt_4gate reads data/ v3_4b AND daily_refresh mirrors root -> data/ nightly
+  [PASS] B6 daily_refresh bq load still reads ROOT v3_4b (intentional, untouched)
+  [PASS] B7 quarantined stale copies exist and live ONLY under data/_quarantine/
+
+C. assert_chain_outputs.sh mechanism
+  [PASS] C1 REQUIRED_OUTPUTS parseable from daily_refresh, 10 files  — got 10: ['data/us_market_history.csv', 'data/vnindex_5state_ew_full.csv', 'data/vnindex_5state_ew_staging.csv', 'data/concentration_history.csv', 'data/vnindex_5state_dual_v3_staging.csv', 'data/vnindex_5state_dual_v3_full.csv', 'data/vnindex_5state_tam_quan_v3_1_clean.csv', 'data/vnindex_5state_tam_quan_v3_1_full_history.csv', 'vnindex_5state_tam_quan_v3_4b_full_history.csv', 'data/vnindex_5state_tam_quan_v3_4b_full_history.csv']
+  [PASS] C2 ALL fresh -> exit 0 (no false positive — Monday publish must not be blocked)  —   fresh:   data/vnindex_5state_tam_quan_v3_4b_full_history.csv (2026-10-13 13:34:15)
+  [PASS] C3 boundary mtime == chain start -> still fresh (>= semantics)
+  [PASS] C4 ONE stale file -> exit 1 and named as STALE (the 3-week EW freeze signature)  — fresh:   data/us_market_history.csv (2026-10-13 13:34:15)
+  STALE:   data/vnindex_5state_ew_full.csv (mtime 2026-09-22 13:34:15 < chain start 2026-10-13 13:34:10 — writer sót/ghi sai path)
+  fresh:   data/vnindex_5state_ew_staging.csv (2026-10-13 13:34:15)
+  fresh:   data/concentration_history.csv (2026-10-13 13:34:15)
+  fresh:   data/vnindex_5state_dual_v3_staging.csv (2026-10-13 13:34:15)
+  fresh:   data/vnindex_5state_dual_v3_full.csv (2026-10-13 13:34:15)
+  fresh:   data/vnindex_5state_tam_quan_v3_1_clean.csv (2026-10-13 13:34:15)
+  fresh:   data/vnindex_5state_tam_quan_v3_1_full_history.csv (2026-10-13 13:34:15)
+  fresh:   vnindex_5state_tam_quan_v3_4b_full_history.csv (2026-10-13 13:34:15)
+  fresh:   data/vnindex_5state_tam_quan_v3_4b_full_history.csv (2026-10-13 13:34:15)
+  [PASS] C5 MISSING file -> exit 1 and named as MISSING
+  [PASS] C6 garbage start_epoch -> exit 1 (never silently passes)
+  [PASS] C7 no files given -> usage error exit 1
+
+D. daily_refresh_v34b_linux.sh wiring
+  [PASS] D1 CHAIN_START_EPOCH captured after step [0], before step [1]  — lines 51/79/81
+  [PASS] D2 assertion invoked with CHAIN_START_EPOCH + REQUIRED_OUTPUTS
+  [PASS] D3 assertion step [8b] runs BEFORE backup [9] and bq load [10] — stale never publishes  — lines 112/146/174
+  [PASS] D4 REQUIRED failure path dies (not warn) AND alerts via notify.sh + notify_thread.sh
+  [PASS] D5 dt_4gate checked as ADVISORY (alert, no die) — research-only, must not block publish
+  [PASS] D6 bash syntax of both scripts still valid
+
+E. macro_healthcheck runs before publish_gated_state, and never blocks it
+  [PASS] E1 exactly ONE macro_healthcheck invocation (2 lượt = nhân đôi Telegram tối không HEALTHY)  — lines [231]
+  [PASS] E2 exactly ONE publish_gated_state invocation  — lines [239]
+  [PASS] E3 healthcheck command stands BEFORE publish command  — healthcheck line 231, publish line 239
+  [PASS] E4 healthcheck step is the step IMMEDIATELY before the publish step (after sync [11]/[11b])  — step lines 230/238
+  [PASS] E5 healthcheck is NON-FATAL (`||` guard, no die/exit in its step) and TIME-BOUNDED (timeout)  — timeout -k 10 300 $PY macro_healthcheck.py || echo "  WARN: macro_healthcheck failed/timeo
+  [PASS] E6 script does not enable errexit (`set -e` would turn healthcheck rc!=0 into an abort)  — ['set -uo pipefail']
+  [PASS] E7a real healthcheck→publish block extracted (needs E4); no real absolute path left after stubbing  — 15 lines
+  [PASS] E7 [HEALTHY rc=0] healthcheck called first, publish STILL runs, chain continues  — calls=['macro_healthcheck.py', 'publish_gated_state.py'] rc=0 0.0s
+  [PASS] E7 [DEGRADED rc=1] healthcheck called first, publish STILL runs, chain continues  — calls=['macro_healthcheck.py', 'publish_gated_state.py'] rc=0 0.0s
+  [PASS] E7 [DEGRADED rc=1] failure is LOGGED with its rc, not silent  — WARN: macro_healthcheck failed/timeout rc=1
+  [PASS] E7 [FAILED rc=2] healthcheck called first, publish STILL runs, chain continues  — calls=['macro_healthcheck.py', 'publish_gated_state.py'] rc=0 0.0s
+  [PASS] E7 [FAILED rc=2] failure is LOGGED with its rc, not silent  — WARN: macro_healthcheck failed/timeout rc=2
+  [PASS] E7 [interpreter/script hỏng rc=127] healthcheck called first, publish STILL runs, chain continues  — calls=['macro_healthcheck.py', 'publish_gated_state.py'] rc=0 0.0s
+  [PASS] E7 [interpreter/script hỏng rc=127] failure is LOGGED with its rc, not silent  — WARN: macro_healthcheck failed/timeout rc=127
+  [PASS] E7 [bị SIGKILL] healthcheck called first, publish STILL runs, chain continues  — calls=['macro_healthcheck.py', 'publish_gated_state.py'] rc=0 0.0s
+  [PASS] E7 [bị SIGKILL] failure is LOGGED with its rc, not silent  — WARN: macro_healthcheck failed/timeout rc=137
+  [PASS] E7 [TREO, timeout cắt] healthcheck called first, publish STILL runs, chain continues  — calls=['macro_healthcheck.py', 'publish_gated_state.py'] rc=0 2.0s
+  [PASS] E7 [TREO, timeout cắt] failure is LOGGED with its rc, not silent  — WARN: macro_healthcheck failed/timeout rc=124
+
+ALL CHECKS PASSED — freshness gate now blocks 1-day-stale DT5G, all chain outputs write/read a single canonical data/ path, and the post-chain mtime assertion dies loudly BEFORE publishing if any expected output is missing or stale.

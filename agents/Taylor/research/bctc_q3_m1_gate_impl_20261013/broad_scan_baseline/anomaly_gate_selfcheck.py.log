@@ -1,0 +1,23 @@
+== A. date-desync fix (kịch bản cố định 2026-07-20, snapshot ĐÓNG BĂNG) ==
+  PASS  A1 fixture snapshot nguyên vẹn (không bị cắt/ghi đè) (raw=218/218, sau liq>=2B=189/189)
+  INFO  ticker_prune SỐNG tại 2026-07-20 hôm nay: 189 mã sau lọc (fixture đóng băng 2026-08-08: 189) — chênh = data drift, không phải lỗi code
+  PASS  A2 quality gate ra pool >=3 tên (n=12: ['BFC', 'DHC', 'HAH', 'MCH', 'NCT', 'PNJ', 'PVT', 'SAB', 'SIP', 'TLG', 'VHM', 'VNM'])
+  PASS  A3 pb_z<-1 trước gate gồm PNJ (['NCT', 'PNJ', 'PVT', 'SAB', 'SIP', 'VNM'])
+  PASS  A4 rổ sau due-diligence == kỳ vọng (['NCT', 'PVT', 'SAB', 'SIP', 'VNM'] vs ['NCT', 'PVT', 'SAB', 'SIP', 'VNM'])
+  PASS  A5 rổ >=3 tên → KHÔNG còn '<3 eligible names' (n=5)
+  PASS  A6 bản CŨ (MAX(time)) thật sự hỏng khi lệch ngày (MAX(time)=2026-10-13: 179 mã → pool 8 vs ngày tín hiệu 12)
+== B. due-diligence gate (module dùng chung) ==
+  PASS  B1 PNJ có cờ active tại ngày tín hiệu (excl=['LPB', 'PNJ'])
+  PASS  B2 chống look-ahead: chạy lại 2025-12 không thấy cờ 2026 
+  PASS  B3 hết TTL 30d thì cờ tự rụng 
+  PASS  B4 nhận str/date/Timestamp như nhau 
+  PASS  B5 fail-safe khi file THIẾU 
+  PASS  B6 fail-safe khi file HỎNG 
+  PASS  B7 mã giả lập bị gắn cờ được nhận diện (NCT)
+  PASS  B8 mã giả lập bị loại khỏi rổ CAPIT 
+  PASS  B9 DC book loại đúng mã, giữ phần còn lại 
+  PASS  B10 pt_v22 capit_basket loại đúng mã 
+== D. bản dùng chung khớp bản inline production (PRE-PATCH, ghim git rev) ==
+  PASS  D1 2 bản trả kết quả giống nhau trên 5 ngày mẫu (pre-patch pinned vs shared) 
+
+17 PASS / 0 FAIL

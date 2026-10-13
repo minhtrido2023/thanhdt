@@ -1,0 +1,21 @@
+# trích anomaly_excluded() từ golive_recommend_v23.py | TTL=30d
+# phiên hoàn chỉnh gần nhất (BQ live): 2026-10-13
+
+A. PNJ lọt bộ lọc chất lượng CAPIT: False
+   cờ active (6 mã): ['BTW', 'DHC', 'F88', 'HGM', 'PNJ', 'VPB']
+B. rổ TRƯỚC gate (4): ['QNS', 'SIP', 'VGC', 'VNM']
+   rổ SAU  gate (4): ['QNS', 'SIP', 'VGC', 'VNM']
+   → PNJ KHÔNG qua nổi bộ lọc chất lượng: gate không phải lớp chặn duy nhất (ghi nhận)
+
+C. regression 2026-03-27 (cờ active: 0) → rổ không đổi: PASS
+C2. không cờ tương lai rò về 2026-03-27: PASS
+
+D. fail-safe:
+   asof là chuỗi '2026-10-13': PASS
+  WARNING: due-diligence flags không đọc được ([Errno 2] No such file or directory: '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/data/anomaly_flags.json') — chạy KHÔNG có gate
+   thiếu file: set() → PASS
+  WARNING: due-diligence flags không đọc được (Expecting property name enclosed in double quotes: line 1 column 2 (char 1)) — chạy KHÔNG có gate
+   JSON hỏng: set() → PASS
+   rỗng: set() → PASS
+
+SELFCHECK PASS

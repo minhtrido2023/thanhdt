@@ -8,7 +8,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -23,9 +23,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -53,9 +53,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 199 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, 0), (5, -4000000), (6, 4000001), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+     "ASSERT-FAIL (sau 202 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, 0), (5, -4000000), (6, 4000001), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
     ],
-    "tail": "ASSERT-FAIL (sau 199 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, 0), (5, -4000000), (6, 4000001), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    "tail": "ASSERT-FAIL (sau 202 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, 0), (5, -4000000), (6, 4000001), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
    },
    "ledger": {
     "rc": 0,
@@ -70,9 +70,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -117,9 +117,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -147,9 +147,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 199 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, -120000000), (5, 0), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+     "ASSERT-FAIL (sau 202 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, -120000000), (5, 0), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
     ],
-    "tail": "ASSERT-FAIL (sau 199 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, -120000000), (5, 0), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    "tail": "ASSERT-FAIL (sau 202 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, -120000000), (5, 0), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
    },
    "ledger": {
     "rc": 0,
@@ -164,9 +164,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -211,9 +211,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -258,9 +258,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -305,9 +305,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -352,9 +352,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -399,9 +399,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -446,9 +446,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -493,9 +493,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -540,9 +540,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -587,9 +587,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -634,9 +634,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -681,9 +681,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -728,9 +728,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -775,9 +775,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -822,9 +822,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -869,9 +869,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -916,9 +916,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -944,9 +944,11 @@
   "note": "market_only phủ cả cửa sổ kế [chuyển sang code vòng 2]",
   "checks": {
    "cashid": {
-    "rc": 0,
-    "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "rc": 1,
+    "fails": [
+     "ASSERT-FAIL (sau 122 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC (đúng mốc cuối, sai mốc đầu) ⇒ không đóng cửa sổ này — phải khớp CẢ HAI mốc chụp"
+    ],
+    "tail": "ASSERT-FAIL (sau 122 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC (đúng mốc cuối, sai mốc đầu) ⇒ không đóng cửa sổ này — phải khớp CẢ HAI mốc chụp"
    },
    "ledger": {
     "rc": 0,
@@ -961,9 +963,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -989,9 +991,11 @@
   "note": "market_only đúng ngày dòng không phủ [chuyển sang code vòng 2]",
   "checks": {
    "cashid": {
-    "rc": 0,
-    "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "rc": 1,
+    "fails": [
+     "ASSERT-FAIL (sau 123 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC (đúng mốc đầu, sai mốc cuối) ⇒ không đóng cửa sổ này — phải khớp CẢ HAI mốc chụp"
+    ],
+    "tail": "ASSERT-FAIL (sau 123 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC (đúng mốc đầu, sai mốc cuối) ⇒ không đóng cửa sổ này — phải khớp CẢ HAI mốc chụp"
    },
    "ledger": {
     "rc": 0,
@@ -1006,9 +1010,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1036,9 +1040,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 121 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC ⇒ không đóng cửa sổ này"
+     "ASSERT-FAIL (sau 121 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC (cửa sổ kế) ⇒ không đóng cửa sổ này — phải khớp CẢ HAI mốc chụp"
     ],
-    "tail": "ASSERT-FAIL (sau 121 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC ⇒ không đóng cửa sổ này"
+    "tail": "ASSERT-FAIL (sau 121 assertion PASS): D3: lời xác nhận ghi cửa sổ KHÁC (cửa sổ kế) ⇒ không đóng cửa sổ này — phải khớp CẢ HAI mốc chụp"
    },
    "ledger": {
     "rc": 0,
@@ -1053,9 +1057,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1100,9 +1104,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1145,11 +1149,11 @@
     "tail": "PASS"
    },
    "e2e": {
-    "rc": 0,
+    "rc": 1,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "67 PASS, 1 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "67 PASS, 1 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1194,9 +1198,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1241,9 +1245,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1288,9 +1292,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1335,9 +1339,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1382,9 +1386,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1412,9 +1416,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 201 assertion PASS): G5/§12: bản ghi balances không gắn tài khoản không được tính là của SpaceX (coi như không có)"
+     "ASSERT-FAIL (sau 204 assertion PASS): G5/§12: bản ghi balances không gắn tài khoản không được tính là của SpaceX (coi như không có)"
     ],
-    "tail": "ASSERT-FAIL (sau 201 assertion PASS): G5/§12: bản ghi balances không gắn tài khoản không được tính là của SpaceX (coi như không có)"
+    "tail": "ASSERT-FAIL (sau 204 assertion PASS): G5/§12: bản ghi balances không gắn tài khoản không được tính là của SpaceX (coi như không có)"
    },
    "ledger": {
     "rc": 0,
@@ -1429,9 +1433,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1459,9 +1463,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 162 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
+     "ASSERT-FAIL (sau 165 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
     ],
-    "tail": "ASSERT-FAIL (sau 162 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
+    "tail": "ASSERT-FAIL (sau 165 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
    },
    "ledger": {
     "rc": 0,
@@ -1476,9 +1480,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1506,9 +1510,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 205 assertion PASS): G7: nhiều bản ghi balances trong ngày (08:00 trước, 23:00 sau lần chụp) ⇒ dùng bản lúc chụp 19:10; được cổ tức 0 / 0"
+     "ASSERT-FAIL (sau 208 assertion PASS): G7: nhiều bản ghi balances trong ngày (08:00 trước, 23:00 sau lần chụp) ⇒ dùng bản lúc chụp 19:10; được cổ tức 0 / 0"
     ],
-    "tail": "ASSERT-FAIL (sau 205 assertion PASS): G7: nhiều bản ghi balances trong ngày (08:00 trước, 23:00 sau lần chụp) ⇒ dùng bản lúc chụp 19:10; được cổ tức 0 / 0"
+    "tail": "ASSERT-FAIL (sau 208 assertion PASS): G7: nhiều bản ghi balances trong ngày (08:00 trước, 23:00 sau lần chụp) ⇒ dùng bản lúc chụp 19:10; được cổ tức 0 / 0"
    },
    "ledger": {
     "rc": 0,
@@ -1523,9 +1527,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1570,9 +1574,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1600,9 +1604,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 151 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, -5004850), (5, 5004850), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+     "ASSERT-FAIL (sau 153 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, -5004850), (5, 5004850), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
     ],
-    "tail": "ASSERT-FAIL (sau 151 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, -5004850), (5, 5004850), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    "tail": "ASSERT-FAIL (sau 153 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, -5004850), (5, 5004850), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
    },
    "ledger": {
     "rc": 0,
@@ -1617,9 +1621,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1664,9 +1668,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1694,9 +1698,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 151 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, 40097600), (5, -40097600), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+     "ASSERT-FAIL (sau 153 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, 40097600), (5, -40097600), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
     ],
-    "tail": "ASSERT-FAIL (sau 151 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, 40097600), (5, -40097600), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    "tail": "ASSERT-FAIL (sau 153 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, 40097600), (5, -40097600), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
    },
    "ledger": {
     "rc": 0,
@@ -1711,9 +1715,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1741,9 +1745,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 164 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
+     "ASSERT-FAIL (sau 167 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
     ],
-    "tail": "ASSERT-FAIL (sau 164 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
+    "tail": "ASSERT-FAIL (sau 167 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
    },
    "ledger": {
     "rc": 0,
@@ -1758,9 +1762,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1788,9 +1792,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 163 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
+     "ASSERT-FAIL (sau 166 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
     ],
-    "tail": "ASSERT-FAIL (sau 163 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
+    "tail": "ASSERT-FAIL (sau 166 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
    },
    "ledger": {
     "rc": 0,
@@ -1805,9 +1809,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1852,9 +1856,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1882,9 +1886,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 163 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
+     "ASSERT-FAIL (sau 166 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
     ],
-    "tail": "ASSERT-FAIL (sau 163 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
+    "tail": "ASSERT-FAIL (sau 166 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức và số lượng đều khép"
    },
    "ledger": {
     "rc": 0,
@@ -1899,9 +1903,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1929,9 +1933,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 164 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
+     "ASSERT-FAIL (sau 167 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
     ],
-    "tail": "ASSERT-FAIL (sau 164 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
+    "tail": "ASSERT-FAIL (sau 167 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
    },
    "ledger": {
     "rc": 0,
@@ -1946,9 +1950,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -1991,9 +1995,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2021,9 +2025,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 209 assertion PASS): H: dòng 05/03 chụp TRƯỚC lần chụp của dòng 04/03 ⇒ cửa sổ không kiểm được, nêu hai lần chụp"
+     "ASSERT-FAIL (sau 212 assertion PASS): H: dòng 05/03 chụp TRƯỚC lần chụp của dòng 04/03 ⇒ cửa sổ không kiểm được, nêu hai lần chụp"
     ],
-    "tail": "ASSERT-FAIL (sau 209 assertion PASS): H: dòng 05/03 chụp TRƯỚC lần chụp của dòng 04/03 ⇒ cửa sổ không kiểm được, nêu hai lần chụp"
+    "tail": "ASSERT-FAIL (sau 212 assertion PASS): H: dòng 05/03 chụp TRƯỚC lần chụp của dòng 04/03 ⇒ cửa sổ không kiểm được, nêu hai lần chụp"
    },
    "ledger": {
     "rc": 0,
@@ -2038,9 +2042,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2085,9 +2089,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "65 PASS, 2 FAIL"
+     "65 PASS, 3 FAIL"
     ],
-    "tail": "65 PASS, 2 FAIL"
+    "tail": "65 PASS, 3 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2115,9 +2119,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 234 assertion PASS): I: asof trước ngày có dòng tiền ⇒ chưa thấy; asof đúng ngày ⇒ thấy"
+     "ASSERT-FAIL (sau 238 assertion PASS): I: asof trước ngày có dòng tiền ⇒ chưa thấy; asof đúng ngày ⇒ thấy"
     ],
-    "tail": "ASSERT-FAIL (sau 234 assertion PASS): I: asof trước ngày có dòng tiền ⇒ chưa thấy; asof đúng ngày ⇒ thấy"
+    "tail": "ASSERT-FAIL (sau 238 assertion PASS): I: asof trước ngày có dòng tiền ⇒ chưa thấy; asof đúng ngày ⇒ thấy"
    },
    "ledger": {
     "rc": 1,
@@ -2134,9 +2138,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2164,9 +2168,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 238 assertion PASS): I: thiếu sổ dòng tiền ⇒ một dòng nêu đúng lỗi, không ném; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: "
+     "ASSERT-FAIL (sau 242 assertion PASS): I: thiếu sổ dòng tiền ⇒ một dòng nêu đúng lỗi, không ném; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: "
     ],
-    "tail": "ASSERT-FAIL (sau 238 assertion PASS): I: thiếu sổ dòng tiền ⇒ một dòng nêu đúng lỗi, không ném; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: "
+    "tail": "ASSERT-FAIL (sau 242 assertion PASS): I: thiếu sổ dòng tiền ⇒ một dòng nêu đúng lỗi, không ném; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: "
    },
    "ledger": {
     "rc": 0,
@@ -2181,9 +2185,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2228,9 +2232,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2275,9 +2279,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2305,9 +2309,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 160 assertion PASS): F: bán 600 AAA không có log ⇒ cửa sổ 'không kết luận được' với AAA −600, được {'AAA': -600.0}"
+     "ASSERT-FAIL (sau 163 assertion PASS): F: bán 600 AAA không có log ⇒ cửa sổ 'không kết luận được' với AAA −600, được {'AAA': -600.0}"
     ],
-    "tail": "ASSERT-FAIL (sau 160 assertion PASS): F: bán 600 AAA không có log ⇒ cửa sổ 'không kết luận được' với AAA −600, được {'AAA': -600.0}"
+    "tail": "ASSERT-FAIL (sau 163 assertion PASS): F: bán 600 AAA không có log ⇒ cửa sổ 'không kết luận được' với AAA −600, được {'AAA': -600.0}"
    },
    "ledger": {
     "rc": 0,
@@ -2322,9 +2326,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2369,9 +2373,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2397,9 +2401,11 @@
   "note": "bỏ ghi chú rút Trứng vàng [chuyển sang code vòng 2]",
   "checks": {
    "cashid": {
-    "rc": 0,
-    "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "rc": 1,
+    "fails": [
+     "ASSERT-FAIL (sau 197 assertion PASS): G: mất 2tr khi rút 280tr (0,7% < trần 1%) ⇒ 'cần xác nhận khoản nội bộ', không gọi là rút tiền; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư -1.436.360 đ (0,144% NAV) chưa gi"
+    ],
+    "tail": "ASSERT-FAIL (sau 197 assertion PASS): G: mất 2tr khi rút 280tr (0,7% < trần 1%) ⇒ 'cần xác nhận khoản nội bộ', không gọi là rút tiền; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư -1.436.360 đ (0,144% NAV) chưa gi"
    },
    "ledger": {
     "rc": 0,
@@ -2414,9 +2420,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2444,9 +2450,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 196 assertion PASS): G (R6): DNSE ghi dồn 1tr lãi vay trên dư nợ 300tr ⇒ nhãn nội bộ + ghi chú dư nợ (tính trên dư nợ LỚN hơn); được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư -1.000.000 đ (0,143% N"
+     "ASSERT-FAIL (sau 199 assertion PASS): G (R6): DNSE ghi dồn 1tr lãi vay trên dư nợ 300tr ⇒ nhãn nội bộ + ghi chú dư nợ (tính trên dư nợ LỚN hơn); được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư -1.000.000 đ (0,143% N"
     ],
-    "tail": "ASSERT-FAIL (sau 196 assertion PASS): G (R6): DNSE ghi dồn 1tr lãi vay trên dư nợ 300tr ⇒ nhãn nội bộ + ghi chú dư nợ (tính trên dư nợ LỚN hơn); được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư -1.000.000 đ (0,143% N"
+    "tail": "ASSERT-FAIL (sau 199 assertion PASS): G (R6): DNSE ghi dồn 1tr lãi vay trên dư nợ 300tr ⇒ nhãn nội bộ + ghi chú dư nợ (tính trên dư nợ LỚN hơn); được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư -1.000.000 đ (0,143% N"
    },
    "ledger": {
     "rc": 0,
@@ -2461,9 +2467,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2491,9 +2497,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 162 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
+     "ASSERT-FAIL (sau 165 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
     ],
-    "tail": "ASSERT-FAIL (sau 162 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
+    "tail": "ASSERT-FAIL (sau 165 assertion PASS): F/§12: lệnh của ZaloPay các ngày đó không được tính là 'có bản ghi orders' của SpaceX; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu"
    },
    "ledger": {
     "rc": 0,
@@ -2508,9 +2514,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2538,9 +2544,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 236 assertion PASS): I: có lệnh BÁN đủ log + bản ghi vị thế 23:30 (sau lần chụp) ⇒ vị thế vẫn phải khớp; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu "
+     "ASSERT-FAIL (sau 240 assertion PASS): I: có lệnh BÁN đủ log + bản ghi vị thế 23:30 (sau lần chụp) ⇒ vị thế vẫn phải khớp; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu "
     ],
-    "tail": "ASSERT-FAIL (sau 236 assertion PASS): I: có lệnh BÁN đủ log + bản ghi vị thế 23:30 (sau lần chụp) ⇒ vị thế vẫn phải khớp; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu "
+    "tail": "ASSERT-FAIL (sau 240 assertion PASS): I: có lệnh BÁN đủ log + bản ghi vị thế 23:30 (sau lần chụp) ⇒ vị thế vẫn phải khớp; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu "
    },
    "ledger": {
     "rc": 0,
@@ -2555,9 +2561,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2585,9 +2591,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 264 assertion PASS): J/C2: chi tiết đầy đủ đi kênh vận hành ở lượt chụp đúng ngày; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): còn 1 cửa sổ cũ chưa đóng (kết thúc 2026-03-10) — chi tiết: python3 mike/bin/cash_identity.py --account SpaceX']"
+     "ASSERT-FAIL (sau 270 assertion PASS): J/C2: chi tiết đầy đủ đi kênh vận hành ở lượt chụp đúng ngày; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): còn 1 cửa sổ cũ chưa đóng (kết thúc 2026-03-10) — chi tiết: python3 mike/bin/cash_identity.py --account SpaceX']"
     ],
-    "tail": "ASSERT-FAIL (sau 264 assertion PASS): J/C2: chi tiết đầy đủ đi kênh vận hành ở lượt chụp đúng ngày; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): còn 1 cửa sổ cũ chưa đóng (kết thúc 2026-03-10) — chi tiết: python3 mike/bin/cash_identity.py --account SpaceX']"
+    "tail": "ASSERT-FAIL (sau 270 assertion PASS): J/C2: chi tiết đầy đủ đi kênh vận hành ở lượt chụp đúng ngày; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): còn 1 cửa sổ cũ chưa đóng (kết thúc 2026-03-10) — chi tiết: python3 mike/bin/cash_identity.py --account SpaceX']"
    },
    "ledger": {
     "rc": 0,
@@ -2602,9 +2608,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2632,7 +2638,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2647,9 +2653,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "66 PASS, 1 FAIL"
+     "67 PASS, 1 FAIL"
     ],
-    "tail": "66 PASS, 1 FAIL"
+    "tail": "67 PASS, 1 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2677,7 +2683,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2692,9 +2698,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "66 PASS, 1 FAIL"
+     "66 PASS, 2 FAIL"
     ],
-    "tail": "66 PASS, 1 FAIL"
+    "tail": "66 PASS, 2 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2722,7 +2728,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2737,9 +2743,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "66 PASS, 1 FAIL"
+     "67 PASS, 1 FAIL"
     ],
-    "tail": "66 PASS, 1 FAIL"
+    "tail": "67 PASS, 1 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2767,7 +2773,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 0,
@@ -2782,9 +2788,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "65 PASS, 2 FAIL"
+     "65 PASS, 3 FAIL"
     ],
-    "tail": "65 PASS, 2 FAIL"
+    "tail": "65 PASS, 3 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2812,7 +2818,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2829,9 +2835,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2859,7 +2865,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -2876,9 +2882,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2906,16 +2912,16 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 303 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được PASS "
+     "ASSERT-FAIL (sau 310 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được PASS "
     ],
-    "tail": "ASSERT-FAIL (sau 303 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được PASS"
+    "tail": "ASSERT-FAIL (sau 310 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được PASS"
    },
    "ledger": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 4730 assertion PASS): F: CLI rc=1 ⇒ cổng tỉ suất phải CHẶN báo cáo ghi +9,99% (fail-closed), được ROOT=/tmp/nav_unit_ledger_selfcheck_482p27r3/sandbox/WC/mike"
+     "ASSERT-FAIL (sau 4730 assertion PASS): F: CLI rc=1 ⇒ cổng tỉ suất phải CHẶN báo cáo ghi +9,99% (fail-closed), được ROOT=/tmp/nav_unit_ledger_selfcheck_lyjrma3g/sandbox/WC/mike"
     ],
-    "tail": "_check_nav_flow_records: BLOCK nav-flow BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): không đọc/không gán được nav_history/cash-flows của SpaceX (CashFlowError: /tmp/nav_unit_ledger_selfcheck_482p27r3/sandbox/WC/data/account_cash_flows.json[SpaceX][0]: deposit +40,000,000 VND thiếu time_"
+    "tail": "_check_nav_flow_records: BLOCK nav-flow BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): không đọc/không gán được nav_history/cash-flows của SpaceX (CashFlowError: /tmp/nav_unit_ledger_selfcheck_lyjrma3g/sandbox/WC/data/account_cash_flows.json[SpaceX][0]: deposit +40,000,000 VND thiếu time_"
    },
    "jump": {
     "rc": 0,
@@ -2925,9 +2931,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -2955,9 +2961,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 304 assertion PASS): K: đầu ra không phải JSON ⇒ CHẶN; được PASS "
+     "ASSERT-FAIL (sau 311 assertion PASS): K: đầu ra không phải JSON ⇒ CHẶN; được PASS "
     ],
-    "tail": "ASSERT-FAIL (sau 304 assertion PASS): K: đầu ra không phải JSON ⇒ CHẶN; được PASS"
+    "tail": "ASSERT-FAIL (sau 311 assertion PASS): K: đầu ra không phải JSON ⇒ CHẶN; được PASS"
    },
    "ledger": {
     "rc": 0,
@@ -2972,9 +2978,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3017,9 +3023,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3047,9 +3053,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 291 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được []"
+     "ASSERT-FAIL (sau 298 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được []"
     ],
-    "tail": "ASSERT-FAIL (sau 291 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được []"
+    "tail": "ASSERT-FAIL (sau 298 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được []"
    },
    "ledger": {
     "rc": 0,
@@ -3064,9 +3070,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3094,9 +3100,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 291 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được ['⚠️ DÒNG TIỀN TREO (ZaloPay): deposit 2026-03-10 20:00 +3,000,000 đ đã khai nhưng tới 2026-03-10 chưa dòng nav_history nào chụp sau thời điểm đó ⇒ CHƯA nằm trong tỉ suất nào"
+     "ASSERT-FAIL (sau 298 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được ['⚠️ DÒNG TIỀN TREO (ZaloPay): deposit 2026-03-10 20:00 +3,000,000 đ đã khai nhưng tới 2026-03-10 chưa dòng nav_history nào chụp sau thời điểm đó ⇒ CHƯA nằm trong tỉ suất nào"
     ],
-    "tail": "ASSERT-FAIL (sau 291 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được ['⚠️ DÒNG TIỀN TREO (ZaloPay): deposit 2026-03-10 20:00 +3,000,000 đ đã khai nhưng tới 2026-03-10 chưa dòng nav_history nào chụp sau thời điểm đó ⇒ CHƯA nằm trong tỉ suất nào"
+    "tail": "ASSERT-FAIL (sau 298 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được ['⚠️ DÒNG TIỀN TREO (ZaloPay): deposit 2026-03-10 20:00 +3,000,000 đ đã khai nhưng tới 2026-03-10 chưa dòng nav_history nào chụp sau thời điểm đó ⇒ CHƯA nằm trong tỉ suất nào"
    },
    "ledger": {
     "rc": 0,
@@ -3111,9 +3117,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3141,9 +3147,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 292 assertion PASS): J: báo cáo ngày 09/03 — chưa có gì để cảnh báo"
+     "ASSERT-FAIL (sau 299 assertion PASS): J: báo cáo ngày 09/03 — chưa có gì để cảnh báo"
     ],
-    "tail": "ASSERT-FAIL (sau 292 assertion PASS): J: báo cáo ngày 09/03 — chưa có gì để cảnh báo"
+    "tail": "ASSERT-FAIL (sau 299 assertion PASS): J: báo cáo ngày 09/03 — chưa có gì để cảnh báo"
    },
    "ledger": {
     "rc": 0,
@@ -3158,9 +3164,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3188,9 +3194,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 289 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được [] / ['ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 5.000.001 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.']"
+     "ASSERT-FAIL (sau 296 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được [] / ['ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 5.000.001 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.']"
     ],
-    "tail": "ASSERT-FAIL (sau 289 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được [] / ['ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 5.000.001 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.']"
+    "tail": "ASSERT-FAIL (sau 296 assertion PASS): J: cổng phải thấy khoản chưa đối chiếu của SpaceX (chi tiết + dòng nhà đầu tư), được [] / ['ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất 5.000.001 đ); tỉ suất kỳ chứa ngày đó có thể được điều chỉnh.']"
    },
    "ledger": {
     "rc": 0,
@@ -3205,9 +3211,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3235,9 +3241,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 290 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+     "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
     ],
-    "tail": "ASSERT-FAIL (sau 290 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+    "tail": "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
    },
    "ledger": {
     "rc": 0,
@@ -3252,9 +3258,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3282,9 +3288,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 295 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
+     "ASSERT-FAIL (sau 302 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
     ],
-    "tail": "ASSERT-FAIL (sau 295 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
+    "tail": "ASSERT-FAIL (sau 302 assertion PASS): J/C2: cổng in chi tiết ở stderr, nhắc khi báo cáo thiếu dòng trung tính hoặc mang dòng vận hành; cần ['CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI', \"KHÔNG có dòng 'biến động tiền chưa đối chiếu xong'\", 'ℹ️ Có 1 khoản biến động tiền chưa đối chiếu xong (lớn nhất"
    },
    "ledger": {
     "rc": 0,
@@ -3299,9 +3305,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3329,9 +3335,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 301 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] / "
+     "ASSERT-FAIL (sau 308 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] / "
     ],
-    "tail": "ASSERT-FAIL (sau 301 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] /"
+    "tail": "ASSERT-FAIL (sau 308 assertion PASS): J/S5: cash_identity không import được ⇒ deliver() vẫn rc=0, giao Discord + email, lỗi ở stderr; được rc=0 ['report_return_gate.py', 'notify', 'email'] /"
    },
    "ledger": {
     "rc": 0,
@@ -3346,9 +3352,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3376,7 +3382,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3396,9 +3402,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3426,7 +3432,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3446,9 +3452,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3476,7 +3482,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3493,9 +3499,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3523,7 +3529,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3540,9 +3546,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3570,7 +3576,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3587,9 +3593,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3617,7 +3623,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3634,9 +3640,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3664,9 +3670,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 290 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+     "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
     ],
-    "tail": "ASSERT-FAIL (sau 290 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+    "tail": "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
    },
    "ledger": {
     "rc": 1,
@@ -3686,9 +3692,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "63 PASS, 4 FAIL"
+     "64 PASS, 4 FAIL"
     ],
-    "tail": "63 PASS, 4 FAIL"
+    "tail": "64 PASS, 4 FAIL"
    },
    "flowterm": {
     "rc": 1,
@@ -3716,9 +3722,9 @@
    "cashid": {
     "rc": 1,
     "fails": [
-     "ASSERT-FAIL (sau 290 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+     "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
     ],
-    "tail": "ASSERT-FAIL (sau 290 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
+    "tail": "ASSERT-FAIL (sau 297 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — cần xác nhận khoản nội bộ: cửa sổ 2026-03-09 (09/03 19:10) → 2026-03-10 (10/03 19:10): phần dư +5.000.001 đ (0,497% NAV) chưa giải thích, nhưng chưa loại trừ được: cổ tức ti"
    },
    "ledger": {
     "rc": 1,
@@ -3738,9 +3744,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "63 PASS, 4 FAIL"
+     "64 PASS, 4 FAIL"
     ],
-    "tail": "63 PASS, 4 FAIL"
+    "tail": "64 PASS, 4 FAIL"
    },
    "flowterm": {
     "rc": 1,
@@ -3768,7 +3774,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3785,9 +3791,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3815,7 +3821,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3832,9 +3838,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3862,7 +3868,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3882,9 +3888,9 @@
    "e2e": {
     "rc": 1,
     "fails": [
-     "63 PASS, 4 FAIL"
+     "64 PASS, 4 FAIL"
     ],
-    "tail": "63 PASS, 4 FAIL"
+    "tail": "64 PASS, 4 FAIL"
    },
    "flowterm": {
     "rc": 1,
@@ -3912,7 +3918,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3932,9 +3938,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -3962,7 +3968,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -3979,9 +3985,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -4009,7 +4015,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -4026,9 +4032,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,
@@ -4056,7 +4062,7 @@
    "cashid": {
     "rc": 0,
     "fails": [],
-    "tail": "OK — 327 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
+    "tail": "OK — 335 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)"
    },
    "ledger": {
     "rc": 1,
@@ -4073,9 +4079,9 @@
    "e2e": {
     "rc": 0,
     "fails": [
-     "67 PASS, 0 FAIL"
+     "68 PASS, 0 FAIL"
     ],
-    "tail": "67 PASS, 0 FAIL"
+    "tail": "68 PASS, 0 FAIL"
    },
    "flowterm": {
     "rc": 0,

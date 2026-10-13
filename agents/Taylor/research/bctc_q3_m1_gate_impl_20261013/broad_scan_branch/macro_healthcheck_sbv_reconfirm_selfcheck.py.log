@@ -1,0 +1,161 @@
+macro_healthcheck đang kiểm: /tmp/bctcq3_sb2/thanhdt/WorkingClaude/macro_healthcheck.py  sha256=335d20f26928
+TZ env = <unset>  ·  --baseline = không
+
+A–G. hành vi trên macro_healthcheck.py thật
+  PASS  A1 last 20d + NHNN đọc lại 3d ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A1 last 20d + NHNN đọc lại 3d ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  A2 ranh: NHNN đọc lại đúng 14d ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A2 ranh: NHNN đọc lại đúng 14d ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  A3 ranh: NHNN đọc lại 15d ⇒ nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A3 ranh: NHNN đọc lại 15d ⇒ nhắc · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  A4 max: last 2d + NHNN đọc lại 30d (cũ hơn) ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A4 max: last 2d + NHNN đọc lại 30d (cũ hơn) ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  A5 không có mốc NHNN, last đúng 14d ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A5 không có mốc NHNN, last đúng 14d ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  A6 không có mốc NHNN, last 15d ⇒ nhắc, detail Y NGUYÊN bản cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A6 không có mốc NHNN, last 15d ⇒ nhắc, detail Y NGUYÊN bản cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  A7 official_reconfirmed_at=null ⇒ coi như không có, detail Y NGUYÊN bản cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A7 official_reconfirmed_at=null ⇒ coi như không có, detail Y NGUYÊN bản cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  A8 mốc NHNN cách 1 giây trước NOW ⇒ dùng được, không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  A8 mốc NHNN cách 1 giây trước NOW ⇒ dùng được, không nhắc · không có check sbv_verify_reminder
+  PASS  B1 last 40d + NHNN đọc lại 20d ⇒ nhắc, nêu cả hai mốc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  B1 last 40d + NHNN đọc lại 20d ⇒ nhắc, nêu cả hai mốc · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C1 mốc NHNN ở tương lai (+1 ngày) ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C1 mốc NHNN ở tương lai (+1 ngày) ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C2 mốc NHNN tương lai 1 giây ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C2 mốc NHNN tương lai 1 giây ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C3 mốc NHNN thiếu múi giờ ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C3 mốc NHNN thiếu múi giờ ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C4 mốc NHNN chỉ có ngày (không giờ, không múi giờ) ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C4 mốc NHNN chỉ có ngày (không giờ, không múi giờ) ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C5 mốc NHNN là rác ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C5 mốc NHNN là rác ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C6 mốc NHNN chuỗi rỗng ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C6 mốc NHNN chuỗi rỗng ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C7 mốc NHNN là số ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C7 mốc NHNN là số ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C8 mốc NHNN là object ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C8 mốc NHNN là object ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C9 mốc NHNN tràn số khi đổi múi giờ (0001-01-01+14:00) ⇒ nhắc như cũ, KHÔNG SEV1 · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C9 mốc NHNN tràn số khi đổi múi giờ (0001-01-01+14:00) ⇒ nhắc như cũ, KHÔNG SEV1 · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  C10 mốc NHNN tràn số (9999-12-31-12:00) ⇒ nhắc như cũ, KHÔNG SEV1 · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  C10 mốc NHNN tràn số (9999-12-31-12:00) ⇒ nhắc như cũ, KHÔNG SEV1 · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  D1 trần: last 121d + NHNN đọc lại 3d ⇒ vẫn nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  D1 trần: last 121d + NHNN đọc lại 3d ⇒ vẫn nhắc · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  D2 trần: last đúng 120d + NHNN đọc lại 3d ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  D2 trần: last đúng 120d + NHNN đọc lại 3d ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  E1 thiếu verified_at + NHNN đọc lại 3d ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E1 thiếu verified_at + NHNN đọc lại 3d ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E2 verified_at=null ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E2 verified_at=null ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E3 verified_at rác ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E3 verified_at rác ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E4 verified_at thiếu múi giờ ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E4 verified_at thiếu múi giờ ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E5 thiếu last_verified + NHNN đọc lại 3d ⇒ nhánh legacy như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E5 thiếu last_verified + NHNN đọc lại 3d ⇒ nhánh legacy như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E6 last_verified rác + NHNN đọc lại 3d ⇒ nhánh legacy như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E6 last_verified rác + NHNN đọc lại 3d ⇒ nhánh legacy như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E7 không có file verify log ⇒ nhánh legacy như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E7 không có file verify log ⇒ nhánh legacy như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E8 verify log là JSON list ⇒ nhánh legacy như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E8 verify log là JSON list ⇒ nhánh legacy như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  E9 verify log không phải JSON ⇒ nhánh legacy như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  E9 verify log không phải JSON ⇒ nhánh legacy như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  G1 16:59Z (23:59 ICT 10-27): mốc 10-12T17:30Z = 10-13 ICT, 14d ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  G1 16:59Z (23:59 ICT 10-27): mốc 10-12T17:30Z = 10-13 ICT, 14d ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  G2 17:00Z (00:00 ICT 10-28): cùng mốc, 15d ⇒ nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  G2 17:00Z (00:00 ICT 10-28): cùng mốc, 15d ⇒ nhắc · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  G3 16:59Z: cùng thời điểm viết +07:00 ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  G3 16:59Z: cùng thời điểm viết +07:00 ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  G4 17:00Z: cùng thời điểm viết +07:00 ⇒ nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  G4 17:00Z: cùng thời điểm viết +07:00 ⇒ nhắc · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  G5 16:59Z: mốc 17:00:30Z cùng ngày (tương lai 90 giây, viết múi giờ khác) ⇒ nhắc như cũ · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  G5 16:59Z: mốc 17:00:30Z cùng ngày (tương lai 90 giây, viết múi giờ khác) ⇒ nhắc như cũ · sbv_verify_reminder ok=False sev=INFO, detail đúng
+  PASS  G6 17:00Z: mốc 16:59:30Z (30 giây trước, ICT đã sang 10-28?) ⇒ không nhắc · khung: rc=0 status=HEALTHY sev=OK source=DT5G_macro, không sbv_import
+  PASS  G6 17:00Z: mốc 16:59:30Z (30 giây trước, ICT đã sang 10-28?) ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  X1 nền DEGRADED (US feed cũ) + NHNN đọc lại 3d ⇒ không nhắc · khung: rc=1 status=DEGRADED sev=SEV2 source=DT4_only, không sbv_import
+  PASS  X1 nền DEGRADED (US feed cũ) + NHNN đọc lại 3d ⇒ không nhắc · không có check sbv_verify_reminder
+  PASS  X2 nền DEGRADED + cả hai mốc cũ ⇒ nhắc · khung: rc=1 status=DEGRADED sev=SEV2 source=DT4_only, không sbv_import
+  PASS  X2 nền DEGRADED + cả hai mốc cũ ⇒ nhắc · sbv_verify_reminder ok=False sev=INFO, detail đúng
+
+F1. cùng log, bỏ official_reconfirmed_at ⇒ report chỉ khác check sbv_verify_reminder
+  PASS  F1 A1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 A1 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 A2 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 A2 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 A3 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 A3 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 A4 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 A4 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 A7 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 A7 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail y nguyên
+  PASS  F1 A8 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 A8 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 B1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 B1 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C1 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C2 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C2 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C3 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C3 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C4 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C4 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C5 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C5 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C6 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C6 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C7 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C7 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C8 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C8 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C9 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C9 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 C10 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 C10 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 D1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 D1 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 D2 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 D2 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 E1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 E1 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 E2 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 E2 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 E3 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 E3 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 E4 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 E4 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 E5 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 E5 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail y nguyên
+  PASS  F1 E6 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 E6 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail y nguyên
+  PASS  F1 G1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 G1 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 G2 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 G2 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 G3 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 G3 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 G4 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 G4 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 G5 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 G5 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+  PASS  F1 G6 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 G6 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 X1 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 X1 mốc NHNN chỉ có thể GỠ nhắc, không bao giờ THÊM nhắc
+  PASS  F1 X2 report/rc/stdout/alert giống hệt ngoài sbv_verify_reminder
+  PASS  F1 X2 cả hai cùng nhắc ⇒ ok/sev y nguyên, detail = detail cũ + phần nối
+
+H. hằng số ghim
+  PASS  H1 SBV_VERIFY_MAX_DAYS vẫn 14
+  PASS  H2 SBV_RECONFIRM_MAX_DAYS == sbv_policy_verify.MAX_SOURCE_AGE_DAYS
+  PASS  H3 macro_healthcheck.py không import sbv_policy_verify
+
+I. hermetic
+  PASS  I1 không lượt nào gọi Telegram
+  PASS  I2 tiến trình con không nạp module nào từ thư mục code thật (toàn stub)
+  PASS  I3 /tmp/bctcq3_sb2/thanhdt/WorkingClaude/data/macro_health.json không bị đụng tới
+  PASS  I4 mọi lượt đều ghi được macro_health.json (trong thư mục tạm)
+
+===== macro_healthcheck_sbv_reconfirm_selfcheck: 149/149 PASS =====

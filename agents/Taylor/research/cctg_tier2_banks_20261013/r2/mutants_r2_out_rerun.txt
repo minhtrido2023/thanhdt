@@ -1,0 +1,13 @@
+BASELINE rc=0 fails=[] 
+BỊ BẮT  A1' khoá chỉ bọc đoạn ghi, không bọc đọc | A1a 3 vòng x 8 tiến trình --se; A1b 5 agent ghi đồng thời lên 
+BỊ BẮT  A3d dải dùng max+5pp (nới) | K9b [A3c] biên dải (8,2; 10,7); K10 [A3c] TCB 9,0% trong dải (
+BỊ BẮT  B7c post-condition không báo chuỗi thiếu | B7d chuỗi 1-4 có event, chuỗi ; B7e không event nào: post-cond
+BỊ BẮT  B7d bỏ nhánh 'dừng giữa chừng' (chuỗi cũ bị báo hỏng) | B7g nhánh 'dừng giữa chừng' đứ
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cctg_tier2_banks_20261013/r2/mutants_r2.py", line 193, in <module>
+    d = tree(); apply(d, f, rest)
+                ^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cctg_tier2_banks_20261013/r2/mutants_r2.py", line 167, in apply
+    assert s.count(rest[0]) == 1, f"{f}: chuỗi gốc xuất hiện {s.count(rest[0])} lần: {rest[0][:60]}"
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError: append_cctg_rate.py: chuỗi gốc xuất hiện 2 lần: and not args.force and is_tier2:
