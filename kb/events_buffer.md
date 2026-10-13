@@ -731,3 +731,13 @@
 - [2026-10-13T05:30:16Z] Wags/heartbeat — Wags_20261013_033359: {"status": "still_running", "elapsed_min": 116, "job_id": "Wags_20261013_033359", "source": "watcher"}
 - [2026-10-13T05:31:16Z] Wags/heartbeat — Wags_20261013_033359: {"status": "still_running", "elapsed_min": 117, "job_id": "Wags_20261013_033359", "source": "watcher"}
 - [2026-10-13T05:32:16Z] Wags/heartbeat — Wags_20261013_033359: {"status": "still_running", "elapsed_min": 118, "job_id": "Wags_20261013_033359", "source": "watcher"}
+
+## Consolidation 2026-10-13T06:00:04Z
+- [2026-10-13T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-10-13", "auto_otp": true}
+- [2026-10-13T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-10-13", "auto_otp": true}
+- [2026-10-13T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-13", "elapsed_s": 1, "rc": 0}
+- [2026-10-13T06:00:03Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-13", "elapsed_s": 1, "rc": 0}
+- [2026-10-13T05:45:05Z] Mike/status — preflight-ZaloPay-2026-10-13: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-10-13: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.1h tuổi ≤ ngưỡng 21.3h theo phiên 2026-10-12)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-10-12 = phiên gần nhất, 206 mã ✓"]}
+- [2026-10-13T05:45:06Z] Mike/status — ops-health-check-ZaloPay-2026-10-13: {"account": "ZaloPay", "label": "Trước phiên chiều", "warn_count": 4}
+- [2026-10-13T05:45:10Z] Mike/status — preflight-SpaceX-2026-10-13: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-10-13: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.1h tuổi ≤ ngưỡng 21.3h theo phiên 2026-10-12)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-10-12 = phiên gần nhất, 206 mã ✓"]}
+- [2026-10-13T05:45:21Z] Mike/status — ops-health-check-SpaceX-2026-10-13: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 4}
