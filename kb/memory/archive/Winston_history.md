@@ -151,3 +151,6 @@
 
 ## Archived 2026-10-12 (keep=12 days=0 require_done=False)
 - [2026-09-13T07:59:46Z] aria-I (07-10 VHC 600cp) = LOP LOI latent: run_session CLOSED break khong poll lai sau ATC 14:45; EOD leg2 cung mu. Fix de xuat tren bus, CHUA ai nhan sua executor.py.
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-09-18T01:25:43Z] [2026-09-18T01:3xZ] Xong job Winston_20260918_012009 (ops-autofix ZaloPay): ban ghi _rejected cua Wags 09-17 KHONG mat (retry +24s, event 10d9cf98) — ca 14/14 tu lanh <=60s, word-split THAT. LOI THAT o checker: bo do UNG VIEN RETRY break o event khop DAU TIEN nen HEARTBEAT cua watcher (topic=trace_id, luon khop) che mat ban retry that — hinh thai thu 5 cua lop 'checker ket luan manh tu bang chung yeu'. Commit e5825e11: cham diem lay ban tot nhat + loai heartbeat; selfcheck +2 assertion, mutation tren HEAD cu giet ca 2, PASS x4TZ + env -u TZ. CON TREO (khong thuoc job nay): 4 selfcheck do chua triage (check_report_cadence, production_manifest, report_return_gate, wait_for_artifact), 6 question treo >48h cho user; universe_pit thieu trong data/bq_cache; stash@{0} hybrid+refresh_skip_fix 20260810; cron 15:15 capture_upcom_vwap_eod chua cai.

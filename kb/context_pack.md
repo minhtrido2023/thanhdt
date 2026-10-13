@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3860)
+# Mike fleet — context pack (v3861)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-13T09:28:39] Taylor/finding — cctg-tier2-banks-series-20261013-r2: {"job": "Taylor_20261013_090057", "status": "DONE_ON_BRANCH_NOT_MERGED", "branch": "feat/cctg-tier2-banks-series-20261013", "commits": ["07c858c2", "d6c60ecd (t …
 - [2026-10-13T11:52:45] Taylor/finding — ftse-upgrade-revalidate-20261013: {"job": "Taylor_20261013_114456", "label": "MEASURED — chi do, KHONG doi tham so", "conclusion": "GIU NGUYEN ca 3 tang. 0/24 dai luong nam ngoai dai p5-p95. Du  …
 - [2026-10-13T12:03:38] DollarBill/decision — plan-2026-10-14-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-14", "decision": "HOLD_ALL", "orders": 0, "active_nav": 597631443, "egg": 319188568, "dt5g": "NEUTRAL", "bal": 0, " …
 - [2026-10-13T12:03:47] DollarBill/decision — plan-2026-10-14-SpaceX: {"plan": "data/trade_plans/plan_SpaceX_2026-10-14.json", "action": "HOLD ALL 0 lenh", "dt5g": "NEUTRAL", "active_nav": 979087536, "egg": 501001692, "n_bal": 0,  …
 - [2026-10-13T12:08:57] Taylor/finding — capit-margin-hold-lock-20261013: {"job": "Taylor_20261013_114453", "status": "DONE_ON_BRANCH_NOT_MERGED — cần arch-review + 1 QUYẾT ĐỊNH của user/Mike (mục open_decision) trước khi bật giữ", "b …
+- [2026-10-13T12:38:05] Winston/finding — bctc-q3-readiness-infra-20261013: {"verdict": "SAN SANG - 0 CRITICAL, 0 MEDIUM, 3 LOW. Chi doc+do, khong sua gi.", "checks": {"1_fin_breadth": "OK. Cong thuc mua [qend+10d,qend+62d] cho Q3 = 10/ …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -39,7 +39,7 @@
 - Trước khi wire vào gate thật: siết `deposit_rate_vn.deposit_events_df()` phía Big-4 (đang silent-drop dòng không parse được) + guard ngày tương lai tại load (quant-skeptic NON-BLOCKING #2/#3).
 - ✅ **rating_8l NEUTRAL tilt + chuỗi DCF (dcf_valuation, dcf_refresh_gate, custom30_yield_labels, due_diligence) DÙNG effective rate = max(Big-4 12M, CCTG 6M)** — LIVE trên WC main từ 2026-10-01 (merge `d87a6f89`, user duyệt 12:40, quant-skeptic vòng 2 CONFIRMED). **Fail-closed**: CCTG stale >45 ngày hoặc lỗi ⇒ cả 5 consumer rơi về Big-4 6,8% + WARNING (không phải ARMED). **Knob lùi**: env `DEPOSIT_RATE_CCTG_OVERLAY=0` (chỉ nhận đúng chuỗi "0"; lan tới mọi launcher source `wc_env.sh`, NGOẠI LỆ cron `dcf_refresh_gate` không source). `golive_recommend_v23.py:~991` (cổng CAPIT margin PIT, ngưỡng 9,0%) CỐ Ý vẫn Big-4-only — user chốt 2026-10-01 16:42: GIỮ Big-4, chỉ THÊM dòng hiển thị "effective vs 9%". **TRIGGER XEM LẠI đổi sang effective** = CCTG có ≥3 tháng dữ liệu + cron tuần chạy ổn, HOẶC effective ≥ ~8% (lúc đó dispatch Taylor đo khoảng cách CCTG−Big-4 lịch sử rồi quant-skeptic + user duyệt riêng). Tác động đo, dòng hiển thị PIT, follow-up: `kb/projects/deposit-rate-effective-rate-20261001.md`.
 
-## CAPIT margin TẠM GIỮ từ 2026-10-13 (user duyệt): plan có lệnh CAPIT đòn bẩy ⇒ **KHÔNG chạy `approve_plan_simple.sh` như thường** (nó tự duyệt margin), hỏi user RIÊNG; chỉ user gỡ: `kb/projects/capit-margin-hold-20261013.md`
+## CAPIT đòn bẩy TẮT từ 2026-10-13 (`capit_margin_lever.enabled=false`, user duyệt): KHÔNG plan nào sizing ×1,3, KHÔNG cấp margin; chỉ user bật lại: `kb/projects/capit-margin-hold-20261013.md`
 
 ## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13 (cron 22:05 + 00:20 ICT): tin đỏ ở Trading Daily ⇒ báo user ngay, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; **mốc xem lại 2026-11-09**: `kb/projects/nav-loss-brake-monitor-20261013.md`
 
@@ -65,7 +65,7 @@
 - **EXTREME-regime gate** (`extreme_regime_enabled=True`) — LIVE SpaceX+ZaloPay từ **2026-08-22** (account overrides `secrets/trading_bot_accounts.json`). Default config=False, override=True. Alert pipeline: `bin/extreme_regime_dd_alert.sh` hook trong `run_bot.sh`. Commit `07726527`.
 - **Vol-scale buy chase-cap** (`chase_cap_vol_scale_enabled=True`) — LIVE toàn bộ từ **2026-08-04** (`config.py:190`). k=2.0, ceil=4%, clamp static→ceil theo 20d rvol.
 - **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
-- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
+- **CAPIT margin lever** — **TẮT từ 2026-10-13** (LIVE 08-24→10-13), xem mục CAPIT đòn bẩy TẮT ở trên.
 - **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
 - **close_repair.py — Layer 2 self-computed back-adjustment khi vendor backfill kẹt vĩnh viễn** (`MIKE_CLOSE_REPAIR` mặc định ON) — LIVE từ **2026-09-28**, commit `3c55c249`. Tự tính hệ số (xác nhận 2 nguồn độc lập, lệch <0,006%), fail-closed khi không đủ bằng chứng. Vòng review + VND/VNM: `kb/projects/corp-action-nav-chain-20260922.md`.
 - **NAV corp-action L1 — cảnh báo TRƯỚC ex-date** (`bin/nav_exdate_forecast.py`) — LIVE từ **2026-09-22**, commit `2a7dd54e`. Wire `[pipeline-0]` trong `bq_freshness_check.sh` (TRƯỚC `exit 1` đầu tiên) ⇒ chuỗi 19:00 in cảnh báo corp-action của mã ĐANG GIỮ vào plan report + Discord. Selfcheck 58/58.

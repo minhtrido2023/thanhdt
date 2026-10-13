@@ -1181,3 +1181,6 @@
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-12T16:20:14Z] ĐANG DỞ job Taylor_20261012_162001 (resume #3 quỹ mở bước 2 vòng 2): wt-fundcf-1012 có bin/cash_identity.py viết lại CHƯA COMMIT | NEXT: kiểm file compile, sửa tiếp consumer (nav_period_returns, daily_nav_snapshot, report gate), selfcheck, mutant, finding
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T16:26:49Z] ĐANG DỞ job Taylor_20261012_162001 (quỹ mở bước 2 vòng 2, wt-fundcf-1012, CHƯA COMMIT): code xong cash_identity.py (acks file riêng, đối chiếu SL mọi cửa sổ, trôi, --notify-snapshot), daily_nav_snapshot (1 dòng trung tính + cash_flow_ops), nav_period_returns, report_delivery_gate (S4/S5/G6), eod_trading_report.sh + nav_sync_retry.sh; repro reviewer R1-R13 đạt (research/.../r2/repro_r2.txt) | NEXT: viết lại cash_identity_selfcheck.py + sửa ca ở nav_unit_ledger_selfcheck/e2e, proposed_acks.json (SpaceX 07-03, 08-28 + ZaloPay 08-28), .proposed docs, mutant reviewer + 157, nghiệm thu 1-6, commit, finding
