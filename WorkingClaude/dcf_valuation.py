@@ -217,10 +217,12 @@ def is_financial(ticker, asof):
 def discount_rate(asof, erp=ERP):
     """Cost of equity = deposit rate (as-of) + ERP, in decimal. Deposit leg wired to
     deposit_rate_vn.consumer_deposit_rate() 2026-10-01 (job Taylor_20261001_054110,
-    user-approved) = max(Big-4 12M, Big-4 CCTG 6M) when CCTG fresh/in-range, else Big-4-only.
+    user-approved) = max(Big-4 12M, Big-4 CCTG); a stale/unreadable CCTG is HELD at its last
+    known value with a WARNING (2026-10-13, job Taylor_20261013_163831 -- it used to drop to
+    Big-4-only, which lowered r and raised every fair value on a feed lapse).
     "Fresh" is evaluated PIT-causally relative to `asof` itself, not wall-clock today (round-2 fix
     R1, 2026-10-01: `consumer_deposit_rate()` now always passes `check_freshness=True`, so a CCTG
-    reading more than 45 days old AS OF the queried `asof` is excluded here exactly as it would be
+    reading more than 45 days old AS OF the queried `asof` is flagged stale here exactly as it would be
     for a live/today call — before this fix, this explicit-asof call site never aged CCTG out at
     all). History unaffected: CCTG's only anchor is 2026-09-30, so every asof before that date is
     byte-identical to the prior Big-4-only series. Rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0."""

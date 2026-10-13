@@ -164,3 +164,43 @@ def current_cctg_rate_checked(asof=None):
         return None, None, (f"cctg rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
                              f"[{RATE_MIN_PCT},{RATE_MAX_PCT}]")
     return rate_pct, date, None
+
+
+def last_known_good_cctg(asof=None):
+    """FALLBACK-PATH ONLY salvage: the latest CCTG observation at/before asof that is still
+    readable, for deposit_rate_vn.effective_deposit_rate() to HOLD when the normal read
+    (current_cctg_rate_checked) errors out. Added 2026-10-13 (job Taylor_20261013_163831, user-
+    approved): before this, any CCTG read error made the 5 consumers drop to Big-4-only -- a
+    fallback that LOWERS the discount rate / yield hurdle exactly when a feed breaks.
+
+    Tolerant on purpose (the strict, loud loader cctg_events_df() stays the only NORMAL path and
+    is unchanged): starts from the frozen in-code CCTG_EVENTS, then reads _EVENTS_CSV row by row
+    and keeps only rows that parse, sit inside [RATE_MIN_PCT, RATE_MAX_PCT] and are strictly newer
+    than the frozen anchor -- the same rows cctg_events_df() would have accepted; the offending
+    row(s) are skipped, never guessed. An unreadable file -> frozen anchors only.
+
+    Returns (rate_pct, date) or (None, None) if nothing is known at/before asof."""
+    import csv
+    asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
+    known = [(pd.Timestamp(d), float(r)) for d, r in CCTG_EVENTS]
+    frozen_max = max(d for d, _ in known)
+    try:
+        with open(_EVENTS_CSV, newline="", encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                if None in row or None in row.values():      # wrong field count -> not a clean row
+                    continue
+                try:
+                    d = pd.to_datetime(row["effective_date"])
+                    r = float(row["cctg_rate"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if pd.isna(d) or not (RATE_MIN_PCT <= r <= RATE_MAX_PCT) or d <= frozen_max:
+                    continue
+                known.append((d, r))
+    except (OSError, csv.Error, UnicodeDecodeError):
+        pass
+    known = [(d, r) for d, r in known if d <= asof_ts]
+    if not known:
+        return None, None
+    d, r = max(enumerate(known), key=lambda t: (t[1][0], t[0]))[1]   # latest date; ties -> last written
+    return r, d
