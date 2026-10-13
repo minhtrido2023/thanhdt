@@ -16,8 +16,8 @@
 # Thay thế 2 dòng cron TẠM THỜI thứ Ba (Winston_20260713_103213, guard ≤20260804) — đã xoá
 # cùng commit. Dòng thứ Bảy hàng tuần (08:30/09:15) GIỮ NGUYÊN làm baseline quanh năm.
 #
-# Crontab (server chạy UTC; 13:00 UTC = 20:00 ICT, chạy DAILY — gate ngày/tháng nằm ở đây):
-#   0 13 * * * /home/trido/thanhdt/WorkingClaude/mike/bin/fa_ratings_earnings_window_daily.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/fa_ratings_earnings_window.log 2>&1
+# Crontab (server chạy UTC; 10:30 UTC = 17:30 ICT từ 2026-10-13 — trước đó 13:00 UTC = 20:00 ICT; chạy DAILY — gate ngày/tháng nằm ở đây):
+#   30 10 * * * /home/trido/thanhdt/WorkingClaude/mike/bin/fa_ratings_earnings_window_daily.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/fa_ratings_earnings_window.log 2>&1
 #
 # Điều kiện chạy (tính theo ngày ICT qua trading_bot.vn_market — không tin TZ của cron):
 #   (a)+(b) ngày nằm trong CỬA SỔ = một trong hai nhánh:
@@ -39,7 +39,7 @@
 # spacing như mẫu thứ Bảy 08:30→09:15 và thứ Ba tạm 20:00→20:45) rồi chạy refresh_fa_ratings.sh.
 # Hai wrapper con tự verify artifact (bq show lastModified+numRows) + tự alert khi fail.
 #
-# 4 câu hỏi cron_registry.md: xem entry 20:00 (mùa BCTC) trong mike/kb/cron_registry.md.
+# 4 câu hỏi cron_registry.md: xem entry 17:30 (mùa BCTC) trong mike/kb/cron_registry.md.
 # Bộ test gate: bin/fa_ratings_earnings_window_gate_selfcheck.sh (gọi --check, không chạy refresh).
 set -uo pipefail
 

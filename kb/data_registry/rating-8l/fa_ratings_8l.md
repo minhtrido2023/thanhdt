@@ -4,7 +4,7 @@ status: CANONICAL
 source: tav2_bq.fa_ratings_8l
 group: rating-8l
 note: as-of 8L, refresh định kỳ, ghi-BQ xác nhận THẬT 2026-07-12
-writer: rating_8l_history.py refresh_bq_table() qua mike/bin/refresh_fa_ratings_8l.sh, cron weekly thứ Bảy 08:30 ICT + cron 20:00 ICT HẰNG NGÀY có gate mùa BCTC (mike/bin/fa_ratings_earnings_window_daily.sh)
+writer: rating_8l_history.py refresh_bq_table() qua mike/bin/refresh_fa_ratings_8l.sh, cron weekly thứ Bảy 08:30 ICT + cron 17:30 ICT HẰNG NGÀY có gate mùa BCTC (mike/bin/fa_ratings_earnings_window_daily.sh)
 ---
 
 # tav2_bq.fa_ratings_8l
@@ -18,7 +18,7 @@ builders, `custom_basket.rating_asof`, regime_size overlay, DC-book double-confi
 
 ## Ai ghi / cadence
 `rating_8l_history.py refresh_bq_table()` qua wrapper `mike/bin/refresh_fa_ratings_8l.sh`, cron
-**weekly thứ Bảy 08:30 ICT** (Winston proposal + user approved 2026-07-11) + cron **20:00 ICT HẰNG NGÀY
+**weekly thứ Bảy 08:30 ICT** (Winston proposal + user approved 2026-07-11) + cron **17:30 ICT HẰNG NGÀY
 có gate** `mike/bin/fa_ratings_earnings_window_daily.sh` — chỉ chạy thật trong cửa sổ mùa BCTC:
 ngày 10 tháng đầu quý (1/4/7/10) → hết ngày 10 tháng kế tiếp (2/5/8/11), kể cả cuối tuần, trừ lễ VN
 (quy tắc vĩnh viễn 2026-07-14, nới cả hai đầu 2026-10-13 — xem `cron_registry.md`; cron TẠM T3 mùa

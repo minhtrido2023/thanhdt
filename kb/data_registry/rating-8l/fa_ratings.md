@@ -5,7 +5,7 @@ source: tav2_bq.fa_ratings
 group: rating-8l
 note: ĐANG REFRESH ĐỊNH KỲ (hết static từ 2026-07-12)
 builder: fundamental_rating.py (repo root); refresh refresh_fa_ratings.py qua mike/bin/refresh_fa_ratings.sh
-writer: cron weekly thứ Bảy 09:15 ICT + 20:45 ICT HẰNG NGÀY có gate mùa BCTC (chạy sau 8L 45' trong mike/bin/fa_ratings_earnings_window_daily.sh)
+writer: cron weekly thứ Bảy 09:15 ICT + 18:15 ICT HẰNG NGÀY có gate mùa BCTC (chạy sau 8L 45' trong mike/bin/fa_ratings_earnings_window_daily.sh)
 ---
 
 # tav2_bq.fa_ratings
@@ -25,7 +25,7 @@ quarters không đụng, 2 quý mở re-rank, quý mới append khi cohort ≥30
 `mike/bin/refresh_fa_ratings.sh`**, cron **weekly thứ Bảy 09:15 ICT ĐÃ CÀI + identity fix `a9716f6`
 (source `wc_env.sh`) + test ghi THẬT 2026-07-12 OK: lastModified 07-12, 12.406 rows, invariant 48/48
 quý đóng băng giữ nguyên** (quant-skeptic CONFIRMED — hết câu hỏi treo, lần scheduled đầu 07-18 chỉ là
-chạy bình thường). Mùa BCTC: chạy 20:45 ICT HẰNG NGÀY trong cửa sổ có
+chạy bình thường). Mùa BCTC: chạy 18:15 ICT HẰNG NGÀY trong cửa sổ có
 gate của `mike/bin/fa_ratings_earnings_window_daily.sh` (ngày 10 tháng 1/4/7/10 → ngày 10 tháng
 2/5/8/11, 45' sau bước 8L; nới 2026-10-13 — xem `cron_registry.md`). Cron TẠM T3 mùa Q2 đã xoá 07-14.
 
