@@ -48,6 +48,8 @@ TICKER_MAX_TDAYS = 3      # BQ ticker VNINDEX
 US_MAX_TDAYS     = 3      # us_market_history.csv (US calendar; T-1 aligned)
 SBV_STALE_DAYS   = 550    # SBV refi: INFO reminder to verify if last event older than this
 SBV_VERIFY_MAX_DAYS = 14  # fire sbv_verify_reminder if last manual/auto verify > this many days ago
+SBV_RECONFIRM_MAX_DAYS = 120  # = sbv_policy_verify.MAX_SOURCE_AGE_DAYS. Khai riêng, KHÔNG import: module đó
+                              # không được phép làm sập file ghi macro_health.json; selfcheck ghim 2 số bằng nhau.
 FROZEN_WINDOW    = 10     # frozen-feed: VIX identical across last N rows -> dead feed
 VIX_RANGE        = (5.0, 150.0)
 SPXDD_RANGE      = (-1.0, 0.20)
@@ -88,6 +90,37 @@ def tdays(asof: date, ref: date = TODAY, vn_holidays: bool = False) -> int:
                 n -= 1
             d = d + timedelta(days=1)
     return max(n, 0)
+
+def sbv_reconfirm_date(vlog, last_v):
+    """Ngày ICT của `official_reconfirmed_at` nếu nó ĐƯỢC PHÉP thay last_verified làm mốc nhắc.
+
+    Mốc này do sbv_policy_verify.cmd_finalize ghi (outcome `official_unchanged`): lượt thứ Hai
+    không có bài độc lập MỚI nhưng trang NHNN tự đọc khớp verified{} + SBV_REFI_EVENTS.
+    -> (date | None, lý do bỏ qua | None). Dữ liệu hỏng ⇒ (None, lý do thật) ⇒ caller nhắc theo
+    last_verified y như trước khi có mốc này.
+    """
+    raw = vlog.get("official_reconfirmed_at")
+    try:
+        rd = datetime.fromisoformat(raw)
+    except Exception as e:
+        return None, f"không parse được ({type(e).__name__}: {e})"
+    if rd.utcoffset() is None:
+        return None, "thiếu múi giờ"
+    rd = rd.astimezone(NOW.tzinfo)
+    if rd > NOW:
+        return None, f"ở tương lai (now={NOW.isoformat(timespec='seconds')})"
+    # verified_at hỏng/thiếu ⇒ không có verified{} nào để NHNN "khớp lại" — không cứu log đó.
+    va = vlog.get("verified_at")
+    try:
+        va_aware = datetime.fromisoformat(va).utcoffset() is not None
+    except Exception as e:
+        return None, f"verified_at={va!r:.80} không hợp lệ ({type(e).__name__}: {e})"
+    if not va_aware:
+        return None, f"verified_at={va!r:.80} thiếu múi giờ"
+    age = (TODAY - last_v).days
+    if age > SBV_RECONFIRM_MAX_DAYS:
+        return None, f"kiểm thật cuối {last_v} đã {age}d (> {SBV_RECONFIRM_MAX_DAYS}d)"
+    return rd.date(), None
 
 # accumulators
 sources, checks = [], []
@@ -189,16 +222,36 @@ try:
     except Exception:
         pass  # file missing → verify_age_days stays None
 
+    # official_reconfirmed_at: NHNN tự đọc lại y nguyên ⇒ tính tuổi nhắc từ mốc mới hơn trong hai mốc.
+    remind_age_days, reconf_note = verify_age_days, ""
+    if verify_age_days is not None and vlog.get("official_reconfirmed_at") is not None:
+        # Lỗi BẤT KỲ ở đây chỉ được làm mất quyền che của mốc này — không được lọt ra except
+        # ngoài (sbv_import SEV1 ⇒ FAILED ⇒ cổng DT5G rơi về DT4) hay làm reminder biến mất.
+        try:
+            reconf_d, reconf_skip = sbv_reconfirm_date(vlog, last_v)
+        except Exception as e:
+            reconf_d, reconf_skip = None, f"{type(e).__name__}: {e}"
+        if reconf_d is None:
+            reconf_note = (f"; official_reconfirmed_at={vlog['official_reconfirmed_at']!r:.80} "
+                           f"bỏ qua: {reconf_skip}")
+        else:
+            remind_age_days = (TODAY - max(last_v, reconf_d)).days
+            reconf_note = (f"; kiểm thật cuối {last_v}, NHNN tự đọc lại {reconf_d} "
+                           f"({(TODAY - reconf_d).days}d ago)")
+            if remind_age_days <= SBV_VERIFY_MAX_DAYS < verify_age_days:
+                print(f"  sbv_verify_reminder: không nhắc{reconf_note}")
+
     if verify_age_days is None:
         # No verify log yet — fall back to legacy: warn if SBV event age > SBV_STALE_DAYS
         if sbv_age > SBV_STALE_DAYS:
             add_check("sbv_verify_reminder", False, "INFO",
                       f"last SBV refi event {sbv_age}d old ({refi_now}%) — run sbv_policy_verify.py "
                       f"to initialise sbv_verify_log.json (no verify record found)")
-    elif verify_age_days > SBV_VERIFY_MAX_DAYS:
+    elif remind_age_days > SBV_VERIFY_MAX_DAYS:
         add_check("sbv_verify_reminder", False, "INFO",
                   f"last SBV verify {verify_age_days}d ago (> {SBV_VERIFY_MAX_DAYS}d) — "
-                  f"sbv_policy_verify.py (Mon 08:05) not verified since; current rate {refi_now}% (event: {last_ev})")
+                  f"sbv_policy_verify.py (Mon 08:05) not verified since; current rate {refi_now}% (event: {last_ev})"
+                  f"{reconf_note}")
 except Exception as e:
     sources.append({"name": "sbv_refi_events", "as_of": None, "age": None, "ok": False,
                     "detail": f"unreadable: {e}"})
