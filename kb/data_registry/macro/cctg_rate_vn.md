@@ -234,3 +234,58 @@ re-verify trong round này — 26 ở đây là số **DEPOSIT_EVENTS anchor Big
   wire vào đâu ⇒ quant-skeptic + user duyệt riêng.
 - Chưa có loader Python; đọc thẳng CSV (header `effective_date,cctg_rate,collected_date,source,note`).
   File chưa tồn tại cho tới lần ghi đầu tiên (sớm nhất cron 12/10/2026).
+
+## Chuỗi phụ CCTG NHÓM NGÂN HÀNG NGAY SAU BIG-4 — `data/cctg_rate_vn_tier2_events.csv` (thêm 2026-10-13, user duyệt)
+- **Là gì**: lợi suất CCTG cao nhất (thời gian nắm giữ ≤12 tháng) của VPB / MB / TCB / ACB, RIÊNG từng
+  ngân hàng và RIÊNG từng mệnh giá (10tr / 100tr; trống = nguồn không nêu hoặc ngân hàng không chia
+  theo hai mệnh giá này). Lý do thu: user nhận định Big-4 phản ứng chậm do áp lực NHNN, nhóm ngay
+  sau phản ánh thị trường vốn sớm hơn.
+- **Status: CHỈ THU THẬP + HIỂN THỊ.** KHÔNG consumer SỐ nào đọc (người đọc duy nhất ngoài writer: ngưỡng Macro Watch
+  (6) trong PROMPT của `mike/bin/vn_realestate_monthly_check.py` — user duyệt 13/10 15:21 ICT, commit `0adc1293f` — bảo
+  agent đọc số kỳ trước ở file này để HIỂN THỊ/escalate, không vào mô hình; selfcheck liệt kê tên nó thành ngoại lệ có
+  chủ đích, file khác nhắc tới file này là đỏ). Không đi vào: không vào `effective_deposit_rate()`,
+  `macro_killswitch_a_status()`, `consumer_deposit_rate*()`, rating_8l, chuỗi DCF, due_diligence,
+  `custom30_yield_labels`, cổng CAPIT; `deposit_cctg_trend_check.py` (cảnh báo "xu hướng hạ" để bật
+  lại park) cũng KHÔNG đọc — định nghĩa user chốt chỉ gồm Big-4 12M và CCTG Big-4. Muốn wire vào
+  đâu ⇒ quant-skeptic + user duyệt riêng.
+- **Ghi bằng**: `append_cctg_rate.py --series tier2 --bank <VPB|MB|TCB|ACB> --product "<tên>"
+  [--denom 10tr|100tr] [--holding "<khoảng nắm giữ>"] --rate <X> ...`, do cron tuần
+  `refresh_deposit_cctg_weekly.sh` (**chuỗi 5** trong prompt — "chuỗi 4" đã là lãi điều hành NHNN
+  từ 09/10). Lịch cron không đổi.
+- **Schema** (append-only, 9 cột): `effective_date, bank, product, denomination, holding_period,
+  cctg_rate, collected_date, source, note`. Khoá = `(bank, denomination)`; một ngày có nhiều dòng.
+- **Guard** (cùng họ với 12M/6M, nhưng tính RIÊNG từng khoá): ≥2 nguồn khác chủ, mỗi nguồn tự mang
+  số, lệch ≤0,1pp, `--rate` khớp một số đã cite; lệch ≥1,0pp so với kỳ trước CỦA CHÍNH KHOÁ ĐÓ ⇒ từ
+  chối, nhắc xác nhận tay; ngày phải mới hơn dòng cuối của khoá; **khoá MỚI không lách được guard lệch** (job Taylor_20261013_090057, A3): ngân hàng
+  đã có khoá kiểu 10tr/100tr thì khoá '' bị từ chối và ngược lại (trừ `--force` của người, không JOB_ID); agent mở khoá
+  mới cho ngân hàng ĐÃ có dòng phải lệch <1,0pp so với ít nhất một khoá cùng ngân hàng; agent mở ngân hàng CHƯA có dòng
+  phải nằm trong dải (min−1pp, max+1pp) của dòng mới nhất mọi khoá khác; file rỗng ⇒ không có mốc ⇒ từ chối — tất cả
+  nhắc người seed bằng `manual_verify`. Người (không JOB_ID) seed khoá mới thì không bị chặn bởi (b)/(c). **Ghi song
+  song** an toàn: đọc→ghi→sidecar của tier2 nằm trong `flock` trên `data/cctg_rate_vn_tier2_events.csv.lock`
+  (không có nó, 6 lệnh đồng thời cho 6 dòng "OK" nhưng file còn 1 dòng). Sidecar URL riêng từng khoá
+  (`data/cctg_tier2_<BANK>_<denom|na>_last_auto_sources.json`) — một bài báo dùng được cho nhiều
+  ngân hàng, không dùng lại cho cùng khoá kỳ sau. Không có mốc đông cứng: khoá chưa có dòng nào thì
+  không có số CÙNG KHOÁ để so — người seed tự chịu trách nhiệm, agent bị kiểm cơ học như trên. Lợi suất 0 bị từ chối (ngân hàng không có số thì KHÔNG ghi).
+- **Chứng minh ranh giới**: `cctg_tier2_series_selfcheck.py` — 83 kiểm tra (vòng 2), 4 môi trường TZ + overlay
+  =0 + JOB_ID đặt sẵn; ghim `sys.path` về đúng cây đang kiểm (dcf_valuation chèn thư mục PRODUCTION lên đầu `sys.path`,
+  nên không ghim thì `importlib.reload(cctg_rate_vn)` nạp file production và mutant trong cây kiểm sống), khẳng định lại
+  `__file__` của 5 module trước phần B và ở cuối; đầu ra của các hàm trên (+ `deposit_cctg_trend_check.main --dry-run`)
+  giống hệt từng byte khi file vắng so với khi có dòng 9,2% và 15%; bẫy mở-file không ghi nhận lần đọc nào; quét tĩnh
+  + quét AST hằng chuỗi 'cctg' trong consumer. Đo thêm trên code + dữ liệu production trước/sau
+  khi ghi 3 dòng mốc: sha256 `6e561b6c…` không đổi.
+- **Chưa có loader Python**; đọc thẳng CSV.
+
+### Bẫy riêng của chuỗi này
+1. **`holding_period` là văn bản tự do, luật "≤12 tháng" KHÔNG được cưỡng chế bằng code** — nằm ở
+   prompt của Winston. Một dòng ghi nhầm mức của kỳ 13 tháng sẽ không bị writer chặn.
+2. **Không so sánh ngang giữa các ngân hàng như cùng một sản phẩm.** VPB chia theo mệnh giá và theo
+   số ngày nắm giữ thực tế (CCTG 36 tháng, chuyển nhượng được); MB chia theo số tiền mua (bậc từ
+   1 tỷ cao hơn hẳn); ACB/TCB niêm yết theo kỳ hạn. `denomination` trống ≠ "mọi mệnh giá".
+3. **"Lên tới X%" trên app/quảng cáo là mức trần của sản phẩm, không phải mức của một mệnh giá hay
+   một khoảng nắm giữ cụ thể** — dòng 2026-10-13 VPB để trống `holding_period` vì hai nguồn khớp số
+   9,2% và mệnh giá 100tr nhưng lệch dải (184-389 ngày vs 4 tháng-1 năm).
+4. **Độc lập theo CHỦ SỞ HỮU tên miền, không theo nội dung.** Bài "lãi suất ngân hàng hôm nay" của
+   báo địa phương có thể viết lại từ VietnamNet; writer không phát hiện được.
+5. **Dòng mốc 2026-10-13** (3 dòng: VPB 100tr 9,2% · MB 7,1% 6-9 tháng · ACB 7,2% 3 tháng) mang
+   `source=web_crosscheck_auto` vì được ghi trong phiên dispatch (writer cấm `manual_verify` khi có
+   `JOB_ID`). VPB 10tr và TCB KHÔNG có dòng: các nguồn lệch nhau >0,1pp.
