@@ -348,3 +348,8 @@
 
 ## Consolidation 2026-10-13T17:33:25Z
 - [2026-10-13T17:33:18Z] Mike/finding — retro-finalize-2026-10-13: {"summary": "Retro 13/10 ghi xong (Wags GAPS FOUND đã sửa: backup thực ra đã chạy, nghi race consolidate); memory dọn; consolidate chạy; đã post Trading Daily", "file": "kb/incidents/retro/retro-2026-10-13.md", "commit": "62bcbdb48"}
+
+## Consolidation 2026-10-13T23:07:02Z
+- [2026-10-13T22:11:28Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20261013.json"}
+- [2026-10-13T22:11:26Z] Wags/question — selfcheck-red: mike/bin/snapshot_corp_action_selfcheck.py: {"question": "Selfcheck `mike/bin/snapshot_corp_action_selfcheck.py` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "mike/bin/snapshot_corp_action_selfcheck.py", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-10-13T22:11:26Z] Wags/status — triaged-needs-human: selfcheck-red: mike/bin/snapshot_corp_action_selfcheck.py: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}
