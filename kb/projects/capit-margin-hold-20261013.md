@@ -1,5 +1,23 @@
 # CAPIT margin — TẠM GIỮ: không duyệt ngày margin nào (mở 2026-10-13)
-> User duyệt 2026-10-13 15:21 ICT (`decided_by: user`), topic Discord 1540662920889761883. Status: ĐANG GIỮ.
+> User duyệt 2026-10-13 15:21 ICT (`decided_by: user`), topic Discord 1540662920889761883. Status: ĐANG GIỮ —
+> từ 19:30 ICT cùng ngày giữ bằng CÔNG TẮC TỔNG (mục "Cơ chế đang chạy").
+
+## Cơ chế đang chạy — công tắc tổng TẮT (user duyệt phương án D, 2026-10-13 19:30 ICT, `decided_by: user`)
+- `data/trading_rules.json` → `capit_margin_lever.enabled = false` (WC `b33c1952`; chỉ 3 khoá đổi: cờ, dòng
+  status, changelog; f / gate / gói vay giữ nguyên).
+- Tác dụng ở HAI tầng: (1) SIZING — `golive_recommend_v23.py:1057` `_lever_active` đòi `enabled` ⇒ không plan
+  nào sizing ×1,3 (đã chạy hàm `capit_lever_policy()` thật: enabled=False, err=None; mọi điều kiện khác đạt
+  vẫn không active); (2) THỰC THI — `apply_capit_lever` mở lại file chính sách lúc đặt lệnh ⇒ không cấp cờ
+  vay, gỡ cờ có sẵn (`capit_lever_selfcheck.py` C19/C20).
+- Selfcheck sau đổi (trên main): `capit_lever_selfcheck` tất cả PASS (C20 đảo kỳ vọng theo trạng thái thật,
+  WC `3dc35467`), park_rail_consistency OK (park 0,0 không đổi), strategy_fit_dashboard 93/0,
+  nav_loss_brake_monitor 228/0, macro_killswitch_a 38, compute_park_trim 122/0.
+- **Bật lại**: CHỈ khi user chỉ đạo tường minh. Thao tác: đổi `enabled` về true + đảo lại kỳ vọng C20 trong
+  CÙNG commit + ghi changelog. **Trước khi bật lại phải xử lý lỗ hổng ở mục ⚠️ bên dưới** (thiếu bản duyệt
+  margin không làm giảm khối lượng ×1,3) hoặc user chấp nhận nó bằng văn bản.
+- Nhánh khoá bằng file giữ `feat/capit-margin-hold-lock-20261013` @ `0d0702856`: KHÔNG merge. Với công tắc
+  tổng tắt thì không còn plan đòn bẩy nào để nó chặn ⇒ thừa; giữ nhánh làm tư liệu.
+- Luật bằng chữ ở mục "Luật" dưới đây nay là lớp dự phòng (chỉ còn nghĩa nếu ai đó bật lại công tắc).
 
 ## Luật
 Plan có lệnh CAPIT đòn bẩy (`loan_package_id` khác null) ⇒ Mike **KHÔNG chạy `bin/approve_plan_simple.sh`
@@ -56,3 +74,7 @@ User xác nhận gỡ (tường minh). Mike KHÔNG tự gỡ.
 - Bảng ngưỡng lãi suất × PE đo 12-13/10 là MÔ TẢ (số đợt độc lập 2-5 mỗi vùng, ~40 ô chưa hiệu chỉnh đa
   kiểm định), KHÔNG phải cổng: lãi CCTG-tương-đương <7,5% không ảnh hưởng PE; 7,5-8% trần PE ~17; ≥8%
   trần ~14; ≥9% PE trung vị ~9,7 (chỉ 2011-13). Script tạm ở /tmp, CHƯA lưu repo, chưa qua quant-skeptic.
+
+## Chuyển từ `kb/current_ops.md` 2026-10-13 19:4x (nguyên văn 2 dòng bị thay)
+## CAPIT margin TẠM GIỮ từ 2026-10-13 (user duyệt): plan có lệnh CAPIT đòn bẩy ⇒ **KHÔNG chạy `approve_plan_simple.sh` như thường** (nó tự duyệt margin), hỏi user RIÊNG; chỉ user gỡ: `kb/projects/capit-margin-hold-20261013.md`
+- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
