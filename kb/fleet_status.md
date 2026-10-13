@@ -1,8 +1,8 @@
-# Fleet status — 2026-10-13T12:03:48 UTC
+# Fleet status — 2026-10-13T12:03:59 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | working | 2026-10-13T12:03:44Z | 0 |  |
+| DollarBill | DollarBill | child | working | 2026-10-13T12:03:52Z | 0 |  |
 | Mike | Mike | child | working | 2026-10-13T11:57:13Z | 6 |  |
 | Mike_1536608 | mike-ba | child | dead | 2026-10-12T01:20:01Z | 2083 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_1554487 | mike-e3 | child | dead | 2026-10-12T01:30:01Z | 2073 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
