@@ -101,6 +101,12 @@ _time_claim_count="$(printf '%s\n' "$_time_claim_out" | grep -m1 -E '^time_claim
 [ -n "$_time_claim_count" ] || _time_claim_count=0
 echo "$(date -Iseconds) [time-claim-audit] $TODAY count=$_time_claim_count" >> "$LOG"
 
+# --- Đếm cảnh báo cổng `measured_by` (user duyệt 2026-10-13) --------------------------------
+# Số đếm THÔNG TIN, đọc-only (bin/measured_by_warn_report.py), đưa vào mục 2f của prompt draft.
+# FAIL-OPEN: helper vắng/lỗi/treo ⇒ chuỗi rỗng ⇒ dùng câu "chưa có dữ liệu"; retro chạy y như cũ.
+_mb_warn_block="$(timeout "${DAILY_RETRO_MB_TIMEOUT:-20}" python3 "$ROOT/bin/measured_by_warn_report.py" 2>/dev/null || true)"
+[ -n "$_mb_warn_block" ] || _mb_warn_block="[measured_by warn] chưa có dữ liệu (helper không chạy được)"
+
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
@@ -148,6 +154,11 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    lại — chỉ cần: nếu count>0, đưa vào danh sách sự cố ở bước 3 (category=data-registry-
    accuracy), trích chi tiết từ bus event vừa nêu (grep bus/inbox/*.jsonl). Mục tiêu S4 là
    0 mismatch/tuần; count=0 KHÔNG cần nêu gì thêm (không phải regression, không mở sự cố).
+2f. CẢNH BÁO measured_by (số đếm THÔNG TIN, bash đã đếm sẵn — ĐỪNG tự đếm lại):
+$_mb_warn_block
+   Đây chỉ là số đếm: KHÔNG escalate, KHÔNG tạo question từ nó. Chỉ nêu 1 dòng trong retro nếu
+   có xu hướng đổi ĐÁNG KỂ so với hôm trước (so '24h' với '24h trước đó'); không đổi đáng kể
+   thì không nêu gì.
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong

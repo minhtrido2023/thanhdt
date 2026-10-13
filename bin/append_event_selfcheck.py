@@ -590,6 +590,21 @@ def case_measured_by_fail_open():
 
     d = mksandbox()
     try:
+        # Có file mà KHÔNG ĐỌC ĐƯỢC (-r, không phải -f) ⇒ im như vắng mặt. Bỏ qua nếu chạy bằng
+        # quyền đọc-được-mọi-file (root): chmod 000 không còn nghĩa.
+        hp = os.path.join(d, "bin", "finding_measured_by.py")
+        os.chmod(hp, 0)
+        if os.access(hp, os.R_OK):
+            print("  SKIP  helper KHÔNG ĐỌC ĐƯỢC (process vẫn đọc được file chmod 000)")
+        else:
+            rc, out, err = run(d, args)
+            assert_intact("helper KHÔNG ĐỌC ĐƯỢC", d, rc, out)
+            check("fail-open [helper KHÔNG ĐỌC ĐƯỢC]: stderr RỖNG", err == "", repr(err)[:200])
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+    d = mksandbox()
+    try:
         os.remove(os.path.join(d, "bin", "finding_measured_by.py"))
         rc, out, err = run(d, args)
         assert_intact("helper VẮNG", d, rc, out)
@@ -668,12 +683,18 @@ def case_measured_by_fail_open():
         env = dict(os.environ)
         env.pop("JOB_ID", None)
         t0 = time.time()
-        p = subprocess.run([os.path.join(d, "bin", "append_event.sh")] + args, env=env,
-                           stdout=subprocess.PIPE, stderr=w_fd, text=True)
-        dt = time.time() - t0
-        os.close(r_fd)
-        os.close(w_fd)
-        assert_intact("stderr là pipe đầy", d, p.returncode, p.stdout, max_s=8, dt=dt)
+        try:
+            # timeout cứng phía harness: nếu cổng hỏng mà treo thật thì selfcheck FAIL chứ không treo theo.
+            p = subprocess.run([os.path.join(d, "bin", "append_event.sh")] + args, env=env,
+                               stdout=subprocess.PIPE, stderr=w_fd, text=True, timeout=30)
+            dt = time.time() - t0
+            assert_intact("stderr là pipe đầy", d, p.returncode, p.stdout, max_s=8, dt=dt)
+        except subprocess.TimeoutExpired:
+            check("fail-open [stderr là pipe đầy]: không treo (harness timeout 30s)", False,
+                  "append_event.sh treo >30s")
+        finally:
+            os.close(r_fd)
+            os.close(w_fd)
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -784,7 +805,7 @@ def case_measured_by_rule_table():
         ("-25,2%", ["-25,2%"]), ("23.37", ["23.37"]), ("10%", ["10%"]), ("N=200", ["200"]),
         ("~460", ["460"]), ("(27)", ["27"]), ("7,4->7,5", ["7,4", "7,5"]),
         ("+480/-611", ["+480", "-611"]), ("25/25", ["25", "25"]), ("13/13", ["13", "13"]),
-        ("32/12", ["32", "12"]), ("23,37%/năm", ["23,37%"]), ("10%/năm", ["10%"]),
+        ("32/12", ["32", "12"]), ("23,37%/năm", ["23,37%"]), ("10%/năm", ["10%"]), ("3,5%/năm,", ["3,5%"]), ("23,37%/năm.", ["23,37%"]), ("(10%/năm)", ["10%"]),
         ("0,1%/chiều", ["0,1%"]), ("3.pyramid", ["3"]),
         # âm tính giả đã biết
         ("0.2-0.5", []), ("1,234.5-2,000", []), ("2.5x", []), ("1.5tỷ", []), ("3.4b", []),

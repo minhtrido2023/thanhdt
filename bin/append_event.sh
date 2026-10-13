@@ -187,7 +187,7 @@ echo "appended $etype/$topic for $id"
 #   · Chỉ event_type=finding. Loại khác không chạy thêm lệnh nào.
 #   · Fail-open về KẾT QUẢ: python lỗi / treo / stderr đóng ⇒ rc vẫn 0, event gốc không đổi.
 #     KHÔNG phải "nuốt hết": helper hỏng thì traceback của python vẫn có thể lọt ra stderr.
-#   · Helper VẮNG ⇒ không chạy gì, im tuyệt đối. Đây cũng là công tắc tắt TOÀN FLEET (cron và
+#   · Helper VẮNG hoặc KHÔNG ĐỌC ĐƯỢC (-r) ⇒ không chạy gì, im tuyệt đối. Đây cũng là công tắc tắt TOÀN FLEET (cron và
 #     executor không nhận env của bạn): đổi tên bin/finding_measured_by.py là tắt sạch.
 #   · Trần trễ: +2s (timeout) — chỉ chạm tới khi helper treo hoặc stderr của caller là pipe đầy
 #     không ai đọc. Bình thường: xem latency_*.out trong thư mục research của cổng này.
@@ -196,7 +196,7 @@ echo "appended $etype/$topic for $id"
 #     với _rejected.jsonl ở trên): không reader nào nuốt, không đệ quy, không sinh question.
 # Tắt cho RIÊNG một caller: AE_MEASURED_BY_CHECK=0 (chỉ đúng chuỗi "0"; giá trị khác = vẫn bật).
 case "$etype" in finding)
-  if [ "${AE_MEASURED_BY_CHECK:-1}" != 0 ] && [ -f "$ROOT/bin/finding_measured_by.py" ]; then
+  if [ "${AE_MEASURED_BY_CHECK:-1}" != 0 ] && [ -r "$ROOT/bin/finding_measured_by.py" ]; then
     flock -u 9 2>/dev/null || true
     printf '%s\n' "$line" \
       | timeout 2 python3 "$ROOT/bin/finding_measured_by.py" "$BUS/_measured_by_warn.jsonl" 9>&- \

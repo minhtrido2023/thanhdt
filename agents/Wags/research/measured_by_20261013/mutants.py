@@ -110,6 +110,8 @@ M += [
  ("C3 stdin đọc theo locale", PY, 'json.loads(sys.stdin.buffer.read().decode("utf-8", "replace"))', "json.loads(sys.stdin.read())"),
  ("C4 topic không ép 1 dòng trên stderr", PY, '% (" ".join(topic.split()), shown))', "% (topic, shown))"),
  ("C5 kết thúc bằng sys.exit(0) thay os._exit(0)", PY, "        pass\n    os._exit(0)", "        pass\n    sys.exit(0)"),
+ ("R3-1 hậu tố đơn vị không nhận dấu câu theo sau (vòng bổ sung 13/10)", PY, '[.,;:!?)\\]]*$"', '$"'),
+ ("R3-2 [ -r ] đổi lại thành [ -f ] (vòng bổ sung 13/10)", SH, '[ -r "$ROOT/bin/finding_measured_by.py" ]', '[ -f "$ROOT/bin/finding_measured_by.py" ]'),
 ]
 only = sys.argv[1:]
 killed, alive = [], []

@@ -15,7 +15,8 @@ LUẬT CƠ HỌC (RULE_VERSION=1) — không có phán đoán nào khác ngoài 
               (a) một giá trị JSON kiểu số (int/float; true/false KHÔNG tính), hoặc
               (b) một chuỗi mà sau khi bỏ các "mã tham chiếu" vẫn còn token số.
               Xét từng từ (cách nhau bởi khoảng trắng), theo đúng thứ tự:
-                1. bỏ hậu tố đơn vị `/<chỉ chữ cái>` ở cuối từ: `23,37%/năm` → `23,37%`
+                1. bỏ hậu tố đơn vị `/<chỉ chữ cái>` (kèm dấu câu `.,;:!?)]` theo sau) ở cuối từ:
+                   `23,37%/năm` → `23,37%`, `3,5%/năm,` → `3,5%`
                 2. BỎ NGUYÊN TỪ nếu còn `/` kèm chữ cái ASCII (đường dẫn, tên nhánh) hoặc có
                    tên file `x.py`, `x.json`…
                 3. xoá ngày `12/10`, `12/10/2026` (ngày ≤31, tháng ≤12) và giờ `08:23`, `08:23:05`
@@ -29,7 +30,7 @@ LUẬT CƠ HỌC (RULE_VERSION=1) — không có phán đoán nào khác ngoài 
               HỆ QUẢ CHẤP NHẬN (phần lớn có ca ghim trong append_event_selfcheck.py, bảng
               `exact`; riêng "tham số thiết kế" và "số tài khoản" thì không):
                 · ÂM TÍNH GIẢ: số dính đơn vị/chữ (`2.5x`, `1.5tỷ`, `+480/-611dòng`); CẢ
-                  khoảng `0.2-0.5`; hậu tố đơn vị có dấu câu theo sau (`3,5%/năm,`); tỉ số trùng dạng ngày (`9/9`, `25/12`); số nằm trong từ có
+                  khoảng `0.2-0.5`; tỉ số trùng dạng ngày (`9/9`, `25/12`); số nằm trong từ có
                   `/` kèm chữ (`P/E=12.5`, `(pass=27/fail=0)`); dấu trừ Unicode `−` bị rơi.
                 · DƯƠNG TÍNH GIẢ: mã THUẦN SỐ (số tài khoản, `HTTP 401`), tham số thiết kế
                   (`45 ngày`), ngày viết `12.10.2026` hay `2026/10/12`.
@@ -74,7 +75,7 @@ _REF_RE = re.compile(
     r"|\b\d{1,2}:\d{2}(?::\d{2})?\b"                             # giờ HH:MM[:SS]
 )
 _NUM_RE = re.compile(r"(?<![\w.,:#§-])[+-]?\d+(?:[.,]\d+)*%?(?!\w|-\d|[.,]\d)")
-_UNIT_SUFFIX_RE = re.compile(r"/[^\W\d_]+$")
+_UNIT_SUFFIX_RE = re.compile(r"/[^\W\d_]+[.,;:!?)\]]*$")
 _HAS_ALPHA_RE = re.compile(r"[A-Za-z]")
 _MAX_SAMPLES = 5
 

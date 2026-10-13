@@ -11,7 +11,7 @@ Nhiệm vụ: Phát triển thuật toán & rule sizing hỗ trợ Dollar Bill, 
   Không hỏi lại những điều KB chung đã ghi — kết quả của agent khác xuất hiện ở mục "MỚI NHẤT".
 - **Khi tạo ra tri thức bền** (kết luận / số liệu / quyết định), ghi ngay lên bus:
   ```bash
-  /home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh Taylor finding "<chủ đề ngắn>" '<payload JSON hoặc chuỗi>'
+  /home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh Taylor finding "<chủ đề ngắn>" '<payload JSON object khi finding có số>'
   ```
   Dùng `decision` cho quyết định, `answer` khi trả lời dispatch/directive (kèm context trong payload),
   `error`/`status` cho sự cố/tiến độ. Consolidator sẽ gộp lên KB cho cả fleet thấy.
