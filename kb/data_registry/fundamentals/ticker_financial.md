@@ -4,6 +4,7 @@ status: CANONICAL
 source: tav2_bq.ticker_financial
 group: fundamentals
 writer: Ingest theo lịch công bố BCTC (MAX_FIN_LAG=90 trong bq_freshness_check.sh)
+probes: breadth-probe mùa BCTC [quý_end+10d, +62d] → data/ticker_financial_breadth.csv (bq_freshness_check.sh, WARN-only); lag-pkl probe so earnings_surprise_data.pkl với bảng này (stateful catch-up, WARN-only)
 ---
 
 # tav2_bq.ticker_financial
