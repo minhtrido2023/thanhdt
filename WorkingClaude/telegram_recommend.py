@@ -464,6 +464,15 @@ def build_message(target: str, state5, state_label: str,
     # Active books
     lines.append(build_book_section(bal_book, "📋 BOOK A — BAL (momentum, allocator-weighted)"))
     lines.append(build_lag_section(lag_df, w_tgt))
+    # Cảnh báo-only: rating 8L cũ hơn BCTC của sự kiện LAG (golive ghi vào status.json; không lọc).
+    try:
+        from lag_rating_filter import format_lag_rating_stale_line
+        _stale = format_lag_rating_stale_line(st.get("lag_rating_stale"),
+                                              st.get("lag_rating_stale_error"), html=True)
+    except Exception as _e:
+        _stale = f"⚠️ lag_rating_stale: không đọc được ({type(_e).__name__})"
+    if _stale:
+        lines.append(_stale)
 
     # ── CAPIT v2 monitor ──
     # Gate hiển thị = `capit_signal_today OR capit_episode_open` (2026-07-31). Chỉ nhìn cờ tín
