@@ -15,9 +15,16 @@
         "custom30V pool thanh khoan",
         "CAPIT %ADV"
       ],
-      "conclusion": "DANG RE-VALIDATE (mo 2026-10-13): chi tiet kb/projects/ftse-upgrade-structural-break-20260921.md. Mac dinh protocol = KHONG doi tham so.",
+      "conclusion": "2026-10-13 RE-VALIDATE XONG: GIU NGUYEN ca 3 tang, KHONG doi tham so. Taylor: 0/24 dai luong ngoai dai p5-p95 (16 phien sau su kien, qua mong - \"trong nhieu\" khong phai bang chung khong doi). Bobby BLIND: doi DAN nhieu quy, chua phai doi che do. Moc kiem lai: 2026-11-26, 2026-12-15 (60 vs 60 phien), ~2027-04-12 (sau dot 2), sau dot 3 (18/06/2027), sau dot 4 (17/09/2027). Mo prereg khi 1 dai luong ngoai dai o moc 60 phien VA van ngoai o moc ke tiep. Chi tiet: kb/projects/ftse-upgrade-structural-break-20260921.md",
       "triggered_decided_by": "user (Discord 1540662920889761883, 2026-10-13 18:37 ICT: \"Ftse da nang hang ngay 21/09\")",
-      "triggered_note": "FTSE Russell: Frontier -> Secondary Emerging, hieu luc 2026-09-21, co phieu vao ro theo nhieu dot toi ~09/2027 (Bobby 13/10; moi nguon Bobby tim duoc deu dang <=18/09 o thi tuong lai, chua co nguon sau ngay do xac nhan thuc thi). MSCI: 06/2026 CHUA dua VN vao danh sach theo doi => ve MSCI chua kich hoat. Nhan goc \"FTSE Advanced Emerging\" KHONG khop su kien that (Secondary Emerging) - user quyet dinh van tinh la kich hoat."
+      "triggered_note": "FTSE Russell: Frontier -> Secondary Emerging, hieu luc 2026-09-21; DA XAC MINH bang FTSE Annual Announcement 06/10/2026. Vao ro 4 dot: 10% (21/09/2026) -> 30% (22/03/2027) -> 65% (21/06/2027) -> 100% (20/09/2027); phien co cau = dong cua thu Sau lien truoc (19/03, 18/06, 17/09/2027). MSCI: 06/2026 CHUA dua VN vao danh sach theo doi. Nhan goc \"FTSE Advanced Emerging\" khong khop su kien that (Secondary Emerging) - user quyet dinh van tinh la kich hoat.",
+      "next_checks": [
+        "2026-11-26",
+        "2026-12-15",
+        "2027-04-12",
+        "2027-07-12",
+        "2027-10-11"
+      ]
     },
     {
       "id": "krx_microstructure",
