@@ -407,3 +407,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-07T01:21:49Z] [2026-10-07] coord-2026-10-07: CHO USER â€” (1) polish-chain override a/b/c (post architecture; neu (b) Wags lam + arch-reviewer); (2) duyet merge fix/sell-split-by-loan-package-20261006 @8a669a9a (post trading_daily). Ack suppress 3d. files_changed=[].
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-08T01:22:15Z] [2026-10-08] coord-2026-10-08: CHO USER A/B/C chu so huu backlog selfcheck-red (17 do that; de xuat Wags=mike/bin 8 file, Taylor=file goc 9). Neu chon A: Wags ra 8 file mike/bin moi thu 6. Ack suppress 3d. Da sua wags_autofix_postq (24b6dfee).
