@@ -373,9 +373,7 @@ if want rotate; then
            # nên find ở trên mù với nó. copytruncate an toàn ở đây vì append_event.sh mở
            # bằng "a" mỗi lần ghi rồi đóng ngay (không giữ fd dài hạn ⇒ không có lỗ sparse).
            # CỐ Ý không nằm dưới bus/inbox/: mọi reader glob inbox/*.jsonl không lọc tên.
-           # bus/_measured_by_warn.jsonl (2026-10-13): cùng hình thái — helper
-           # finding_measured_by.py mở "a", ghi 1 dòng, đóng ngay; không có reader nào.
-           find "$ROOT/bus" -maxdepth 1 -type f \( -name '_rejected.jsonl' -o -name '_measured_by_warn.jsonl' \) -size +300k 2>/dev/null)
+           find "$ROOT/bus" -maxdepth 1 -type f -name '_rejected.jsonl' -size +300k 2>/dev/null)
 fi
 
 # ── 10. (ĐÃ GỠ) datacold — arch-review 2026-07-30 bác bỏ ─────────────────────

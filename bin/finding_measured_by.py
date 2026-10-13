@@ -26,9 +26,10 @@ LUẬT CƠ HỌC (RULE_VERSION=1) — không có phán đoán nào khác ngoài 
               `2.5x`, `1.2e6`, `§23`, `#5`, `10-12`, `06-15..06-30`. Cũng nhờ mệnh đề này mà
               ngày ISO `2026-10-12T01:09:31Z`, job id `Taylor_20261012_124854`, mã commit
               `a1b2c3d4` tự rơi ra — không cần luật riêng.
-              HỆ QUẢ CHẤP NHẬN (đều có ca ghim trong append_event_selfcheck.py):
-                · ÂM TÍNH GIẢ: số dính đơn vị/chữ (`2.5x`, `1.5tỷ`, `+480/-611dòng`); vế đầu
-                  khoảng `0.2-0.5`; tỉ số trùng dạng ngày (`9/9`, `25/12`); số nằm trong từ có
+              HỆ QUẢ CHẤP NHẬN (phần lớn có ca ghim trong append_event_selfcheck.py, bảng
+              `exact`; riêng "tham số thiết kế" và "số tài khoản" thì không):
+                · ÂM TÍNH GIẢ: số dính đơn vị/chữ (`2.5x`, `1.5tỷ`, `+480/-611dòng`); CẢ
+                  khoảng `0.2-0.5`; hậu tố đơn vị có dấu câu theo sau (`3,5%/năm,`); tỉ số trùng dạng ngày (`9/9`, `25/12`); số nằm trong từ có
                   `/` kèm chữ (`P/E=12.5`, `(pass=27/fail=0)`); dấu trừ Unicode `−` bị rơi.
                 · DƯƠNG TÍNH GIẢ: mã THUẦN SỐ (số tài khoản, `HTTP 401`), tham số thiết kế
                   (`45 ngày`), ngày viết `12.10.2026` hay `2026/10/12`.
@@ -53,7 +54,8 @@ của cả fleet, (2) tự kích lại chính cổng này nếu là finding, (3)
 ops_health_check nếu là question. `bus/_measured_by_warn.jsonl` theo đúng tiền lệ
 `bus/_rejected.jsonl`: nằm trên bus, không reader nào nuốt, không thể đệ quy.
 KHÔNG có reader tự động nào đọc file này (cố ý — không đẩy việc cho ai); muốn xem thì mở tay.
-Nó được fleet_housekeeping.sh rotate cùng chỗ với `_rejected.jsonl`.
+CHƯA được rotate: fleet_housekeeping.sh chỉ rotate `_rejected.jsonl` (đo 2026-10-13: ~5,8 KB/ngày,
+tức ~2 MB/năm) — thêm vào rotate là việc theo sau, phải kèm selfcheck cho script đó.
 
 Exit code LUÔN 0 (kết thúc bằng os._exit(0) sau khi flush có bọc lỗi — stderr hỏng cũng không
 đổi được rc). Mọi ngoại lệ bị nuốt: thà mất 1 cảnh báo còn hơn làm phiền đường ghi.
