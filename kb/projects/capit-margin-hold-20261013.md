@@ -5,8 +5,10 @@
 Plan có lệnh CAPIT đòn bẩy (`loan_package_id` khác null) ⇒ Mike **KHÔNG chạy `bin/approve_plan_simple.sh`
 như thường**. Từ 2026-08-22 script đó TỰ tạo margin approval ("duyệt plan = duyệt margin",
 `approve_plan_simple.sh:173-194`). Trong thời gian giữ: hỏi user RIÊNG về margin, nói rõ đang giữ, chỉ
-duyệt khi user trả lời riêng câu đó. **Chưa có khoá cơ học** — đề xuất (chờ user): file giữ mà
-`approve_plan_simple.sh` kiểm trước khi tự gọi `approve_margin_day.py`.
+duyệt khi user trả lời riêng câu đó. **Khoá cơ học: user DUYỆT làm 2026-10-13 18:37 ICT** — nhánh mike
+`feat/capit-margin-hold-lock-20261013` (Taylor, CHƯA merge tới khi arch-review APPROVED): file giữ mà
+`approve_plan_simple.sh` + `approve_margin_day.py` kiểm, hỏng/không đọc được ⇒ coi như ĐANG GIỮ. Cho tới
+khi nhánh đó merge VÀ file giữ được bật, luật bằng chữ ở trên vẫn là chốt duy nhất.
 
 ## Vì sao
 Chi phí vốn tăng ngầm mà bộ lọc "khủng hoảng cơ cấu" của lever không thấy: `pit_deposit_threshold` 9%
