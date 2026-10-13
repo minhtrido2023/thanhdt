@@ -14,19 +14,28 @@ LUẬT CƠ HỌC (RULE_VERSION=1) — không có phán đoán nào khác ngoài 
               có ít nhất một trong:
               (a) một giá trị JSON kiểu số (int/float; true/false KHÔNG tính), hoặc
               (b) một chuỗi mà sau khi bỏ các "mã tham chiếu" vẫn còn token số.
-              Mã tham chiếu bị bỏ, theo từng từ cách nhau bởi khoảng trắng:
-                · từ có `/` kèm chữ cái (đường dẫn, tên nhánh) hoặc có tên file `x.py`, `x.json`…
-                · ngày `12/10`, `12/10/2026` (ngày ≤31, tháng ≤12); giờ `08:23`, `08:23:05`
+              Xét từng từ (cách nhau bởi khoảng trắng), theo đúng thứ tự:
+                1. bỏ hậu tố đơn vị `/<chỉ chữ cái>` ở cuối từ: `23,37%/năm` → `23,37%`
+                2. BỎ NGUYÊN TỪ nếu còn `/` kèm chữ cái ASCII (đường dẫn, tên nhánh) hoặc có
+                   tên file `x.py`, `x.json`…
+                3. xoá ngày `12/10`, `12/10/2026` (ngày ≤31, tháng ≤12) và giờ `08:23`, `08:23:05`
+                4. tìm token số trong phần còn lại.
               Token số = dãy chữ số (kèm dấu +/-, phần thập phân `.`/`,`, `%`) KHÔNG dính
-              liền chữ cái/`_`, KHÔNG đứng sau `.` `,` `:` `#` `§` `-` và KHÔNG đứng ngay
-              trước `-<chữ số>` ⇒ `r2`, `T5`, `v3.4b`, `§23`, `#5`, `10-12`, `06-15..06-30`
-              không tính. Cũng nhờ mệnh đề này mà ngày ISO `2026-10-12T01:09:31Z`, job id
-              `Taylor_20261012_124854`, mã commit `a1b2c3d4` tự rơi ra — không cần luật riêng.
-              Hệ quả chấp nhận: vế đầu của khoảng `0.2-0.5` không tính; tỉ số `9/9` trùng
-              dạng ngày nên không tính; mã THUẦN SỐ (số tài khoản, `HTTP 401`) VẪN tính.
+              liền chữ cái/`_`, KHÔNG đứng sau `.` `,` `:` `#` `§` `-`, và KHÔNG đứng ngay
+              trước chữ cái, `-<chữ số>` hay `.`/`,`+chữ số ⇒ không tính: `r2`, `T5`, `v3.4b`,
+              `2.5x`, `1.2e6`, `§23`, `#5`, `10-12`, `06-15..06-30`. Cũng nhờ mệnh đề này mà
+              ngày ISO `2026-10-12T01:09:31Z`, job id `Taylor_20261012_124854`, mã commit
+              `a1b2c3d4` tự rơi ra — không cần luật riêng.
+              HỆ QUẢ CHẤP NHẬN (đều có ca ghim trong append_event_selfcheck.py):
+                · ÂM TÍNH GIẢ: số dính đơn vị/chữ (`2.5x`, `1.5tỷ`, `+480/-611dòng`); vế đầu
+                  khoảng `0.2-0.5`; tỉ số trùng dạng ngày (`9/9`, `25/12`); số nằm trong từ có
+                  `/` kèm chữ (`P/E=12.5`, `(pass=27/fail=0)`); dấu trừ Unicode `−` bị rơi.
+                · DƯƠNG TÍNH GIẢ: mã THUẦN SỐ (số tài khoản, `HTTP 401`), tham số thiết kế
+                  (`45 ngày`), ngày viết `12.10.2026` hay `2026/10/12`.
 
-  ĐÃ KHAI   ⇔ payload có khoá CẤP CAO NHẤT `measured_by` với giá trị không rỗng
-              (chuỗi khác rỗng sau strip, hoặc list/dict khác rỗng).
+  ĐÃ KHAI   ⇔ payload có khoá CẤP CAO NHẤT tên ĐÚNG `measured_by` với giá trị không rỗng
+              (chuỗi khác rỗng sau strip, hoặc list/dict khác rỗng). `measured_by` đặt lồng
+              cạnh con số, hay viết `measuredBy`, KHÔNG được tính.
 
   CẢNH BÁO  ⇔ ĐƯỢC XÉT ∧ CÓ SỐ ∧ ¬ĐÃ KHAI.
 
@@ -43,10 +52,14 @@ VÌ SAO FILE CẠNH BUS CHỨ KHÔNG PHẢI EVENT: mọi reader của bus glob `
 của cả fleet, (2) tự kích lại chính cổng này nếu là finding, (3) thành việc cho
 ops_health_check nếu là question. `bus/_measured_by_warn.jsonl` theo đúng tiền lệ
 `bus/_rejected.jsonl`: nằm trên bus, không reader nào nuốt, không thể đệ quy.
+KHÔNG có reader tự động nào đọc file này (cố ý — không đẩy việc cho ai); muốn xem thì mở tay.
+Nó được fleet_housekeeping.sh rotate cùng chỗ với `_rejected.jsonl`.
 
-Exit code LUÔN 0. Mọi ngoại lệ bị nuốt: thà mất 1 cảnh báo còn hơn làm phiền đường ghi.
+Exit code LUÔN 0 (kết thúc bằng os._exit(0) sau khi flush có bọc lỗi — stderr hỏng cũng không
+đổi được rc). Mọi ngoại lệ bị nuốt: thà mất 1 cảnh báo còn hơn làm phiền đường ghi.
 """
 import json
+import os
 import re
 import sys
 import time
@@ -58,7 +71,8 @@ _REF_RE = re.compile(
     r"\b(?:0?[1-9]|[12]\d|3[01])/(?:0?[1-9]|1[0-2])(?:/\d{2,4})?\b"  # ngày d/m[/y]
     r"|\b\d{1,2}:\d{2}(?::\d{2})?\b"                             # giờ HH:MM[:SS]
 )
-_NUM_RE = re.compile(r"(?<![\w.,:#§-])[+-]?\d+(?:[.,]\d+)*%?(?!\w|-\d)")
+_NUM_RE = re.compile(r"(?<![\w.,:#§-])[+-]?\d+(?:[.,]\d+)*%?(?!\w|-\d|[.,]\d)")
+_UNIT_SUFFIX_RE = re.compile(r"/[^\W\d_]+$")
 _HAS_ALPHA_RE = re.compile(r"[A-Za-z]")
 _MAX_SAMPLES = 5
 
@@ -84,6 +98,7 @@ def number_tokens(payload, limit=_MAX_SAMPLES):
             found.append(repr(v))
         elif isinstance(v, str):
             for word in v.split():
+                word = _UNIT_SUFFIX_RE.sub("", word)
                 if ("/" in word and _HAS_ALPHA_RE.search(word)) or _FILE_RE.search(word):
                     continue
                 found.extend(_NUM_RE.findall(_REF_RE.sub(" ", word)))
@@ -114,7 +129,8 @@ def verdict(event):
 
 
 def main(argv):
-    event = json.loads(sys.stdin.read())
+    # Đọc BYTE rồi tự giải mã UTF-8: không phụ thuộc locale của caller (cron hay chạy LC_ALL=C).
+    event = json.loads(sys.stdin.buffer.read().decode("utf-8", "replace"))
     samples = verdict(event)
     if not samples:
         return
@@ -132,10 +148,10 @@ def main(argv):
                 f.write(json.dumps(rec, ensure_ascii=True) + "\n")
     finally:
         sys.stderr.write(
-            "append_event.sh: [CẢNH BÁO — KHÔNG chặn, event ĐÃ ghi] finding '%s' có số "
-            "(vd %s) nhưng payload thiếu \"measured_by\". Lần sau khai "
+            "append_event.sh: [CẢNH BÁO — KHÔNG chặn, event ĐÃ ghi, ĐỪNG gửi lại] finding '%s' "
+            "có số (vd %s) nhưng payload thiếu \"measured_by\" ở CẤP CAO NHẤT. Lần sau khai "
             "\"measured_by\":\"<lệnh đã chạy | file chứa số>\"; số CHƯA đo thì ghi rõ "
-            "\"ước lượng\".\n" % (topic, shown))
+            "\"ước lượng\".\n" % (" ".join(topic.split()), shown))
 
 
 if __name__ == "__main__":
@@ -143,4 +159,8 @@ if __name__ == "__main__":
         main(sys.argv)
     except BaseException:  # noqa: BLE001 — fail-open tuyệt đối, kể cả SystemExit/KeyboardInterrupt
         pass
-    sys.exit(0)
+    try:
+        sys.stderr.flush()
+    except BaseException:  # noqa: BLE001 — stderr hỏng (/dev/full, pipe đóng) không được đổi rc
+        pass
+    os._exit(0)

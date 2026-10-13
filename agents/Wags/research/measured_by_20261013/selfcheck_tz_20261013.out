@@ -1,3 +1,4 @@
-env -u TZ python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=198 FAIL=0
-env TZ=Pacific/Kiritimati python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=198 FAIL=0
-env TZ=America/New_York python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=198 FAIL=0
+env -u TZ python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=267 FAIL=0
+env TZ=Pacific/Kiritimati python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=267 FAIL=0
+env TZ=America/New_York python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=267 FAIL=0
+env -u TZ LC_ALL=C python3 bin/append_event_selfcheck.py ⇒ rc=0 PASS=267 FAIL=0

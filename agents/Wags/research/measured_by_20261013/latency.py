@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Đo thời gian chạy append_event.sh TRƯỚC (git show <base>:bin/append_event.sh) vs SAU (cây này),
 trong bus tạm. Xen kẽ trước/sau từng lượt để máy bận thì bận đều 2 bên.
-    python3 latency.py [N=30] [base=master]
+    python3 latency.py <N> <base_sha>     # base PHẢI là commit TRƯỚC cổng (vd e15aef0bf); sau merge
+                                          # mà để master thì thành so mới-với-mới
 """
 import os, shutil, statistics, subprocess, sys, tempfile, time
-N = int(sys.argv[1]) if len(sys.argv) > 1 else 30
-BASE = sys.argv[2] if len(sys.argv) > 2 else "master"
+N, BASE = int(sys.argv[1]), sys.argv[2]
+print("# python3 latency.py %d %s   (bus tạm; xen kẽ trước/sau; 3 lượt làm nóng bỏ)" % (N, BASE))
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 def tree(old):
     d = tempfile.mkdtemp(prefix="ae_lat_"); os.makedirs(d + "/bin"); os.makedirs(d + "/kb")

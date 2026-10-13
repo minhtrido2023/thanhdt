@@ -451,6 +451,9 @@ def case_measured_by_warn_only():
               err.count(WARN_MARK) == 1 and err.count("\n") == 1, repr(err)[:300])
         check("thiếu khai: cảnh báo nói rõ KHÔNG chặn + nêu topic + số mẫu",
               "KHÔNG chặn" in err and "thieu-khai" in err and "27" in err, repr(err)[:300])
+        check("thiếu khai: cảnh báo dặn event ĐÃ ghi / ĐỪNG gửi lại / khai ở CẤP CAO NHẤT / Lần sau",
+              all(k in err for k in ("event ĐÃ ghi", "ĐỪNG gửi lại", "CẤP CAO NHẤT", "Lần sau")),
+              repr(err)[:300])
         lines = raw_lines(d, "B")
         check("thiếu khai: inbox có ĐÚNG 1 dòng (cảnh báo không sinh event ⇒ không đệ quy)",
               len(lines) == 1, f"{len(lines)} dòng")
@@ -467,8 +470,9 @@ def case_measured_by_warn_only():
                   w[0].get("event_id") == ev["event_id"] and w[0].get("agent_id") == "B"
                   and w[0].get("topic") == "thieu-khai"
                   and w[0].get("trace_id") == "Wags_20261013_012440", repr(w[0])[:300])
-            check("bản ghi cảnh báo có số mẫu + rule_version",
-                  w[0].get("sample_numbers") == ["27", "0"] and w[0].get("rule_version") == 1,
+            check("bản ghi cảnh báo có số mẫu + rule_version + loại cảnh báo",
+                  w[0].get("sample_numbers") == ["27", "0"] and w[0].get("rule_version") == 1
+                  and w[0].get("warn") == "finding_missing_measured_by",
                   repr(w[0])[:300])
             ts = w[0].get("ts", "")
             now = datetime.datetime.now(datetime.timezone.utc)
@@ -517,7 +521,8 @@ def case_measured_by_warn_only():
         shutil.copy2(real_helper, real_helper + ".real")
         with open(real_helper, "w", encoding="utf-8") as f:
             f.write(f"open({marker!r}, 'a').write('x')\n")
-        for et in ("status", "heartbeat", "question", "answer", "decision", "error"):
+        for et in ("status", "heartbeat", "question", "answer", "decision", "error",
+                   "verification", "VERIFY", "findings", "Finding", "FINDING", "finding2"):
             run(d, ["D2", et, "khong-chay-helper", NUM_PAYLOAD])
         check("loại khác ⇒ helper KHÔNG được gọi", not os.path.exists(marker))
         run(d, ["D2", "finding", "co-chay-helper", NUM_PAYLOAD])
@@ -542,6 +547,12 @@ def case_measured_by_warn_only():
         check("AE_MEASURED_BY_CHECK=0 ⇒ rc=0, im, event vẫn ghi",
               rc == 0 and err == "" and len(events(d, "F")) == 1 and len(warns(d)) == n0,
               f"rc={rc} err={err[:200]}")
+        # chỉ ĐÚNG chuỗi "0" mới tắt (ghi rõ trong append_event.sh) — giá trị khác vẫn bật
+        for val in ("2", "false", ""):
+            rc, out, err = run(d, ["F", "finding", "van-bat", NUM_PAYLOAD],
+                               {"AE_MEASURED_BY_CHECK": val})
+            check(f"AE_MEASURED_BY_CHECK={val!r} ⇒ VẪN cảnh báo", rc == 0 and WARN_MARK in err,
+                  f"rc={rc} err={err[:120]}")
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -582,6 +593,8 @@ def case_measured_by_fail_open():
         os.remove(os.path.join(d, "bin", "finding_measured_by.py"))
         rc, out, err = run(d, args)
         assert_intact("helper VẮNG", d, rc, out)
+        check("fail-open [helper VẮNG]: stderr RỖNG (đổi tên helper = công tắc tắt sạch toàn fleet)",
+              err == "", repr(err)[:200])
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -591,7 +604,7 @@ def case_measured_by_fail_open():
             f.write("import time\ntime.sleep(60)\n")
         t0 = time.time()
         rc, out, err = run(d, args)
-        assert_intact("helper treo 60s", d, rc, out, max_s=15, dt=time.time() - t0)
+        assert_intact("helper treo 60s", d, rc, out, max_s=8, dt=time.time() - t0)
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -601,15 +614,66 @@ def case_measured_by_fail_open():
         # lâu hơn bản cũ). Helper thử khoá non-blocking chính file inbox rồi ghi kết quả.
         marker = os.path.join(d, "lock_probe")
         with open(os.path.join(d, "bin", "finding_measured_by.py"), "w", encoding="utf-8") as f:
-            f.write("import fcntl\n"
-                    f"fh = open({os.path.join(d, 'bus', 'inbox', 'G.jsonl')!r}, 'a')\n"
+            f.write("import fcntl, os\n"
+                    f"inbox = {os.path.join(d, 'bus', 'inbox', 'G.jsonl')!r}\n"
+                    "try:\n    os.fstat(9); fd9 = 'fd9-open'\n"
+                    "except OSError:\n    fd9 = 'fd9-closed'\n"
+                    "n = len(open(inbox, 'rb').read().splitlines()) if os.path.exists(inbox) else 0\n"
+                    "fh = open(inbox, 'a')\n"
                     "try:\n    fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB); r = 'free'\n"
                     "except OSError:\n    r = 'held'\n"
-                    f"open({marker!r}, 'w').write(r)\n")
+                    f"open({marker!r}, 'w').write(r + ' ' + fd9 + ' lines=' + str(n))\n")
         rc, out, err = run(d, args)
         assert_intact("helper dò khoá", d, rc, out)
         got = open(marker).read() if os.path.exists(marker) else "(helper không chạy)"
-        check("khoá inbox ĐÃ nhả trước khi phần kiểm chạy", got == "free", got)
+        check("khoá inbox ĐÃ nhả trước khi phần kiểm chạy", got.startswith("free "), got)
+        check("helper KHÔNG thừa hưởng fd 9 của inbox", " fd9-closed " in got, got)
+        check("THỨ TỰ: lúc phần kiểm chạy, event gốc ĐÃ nằm trên bus", got.endswith(" lines=1"), got)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+    d = mksandbox()
+    try:
+        # THỨ TỰ + ĐỒNG BỘ: helper ngủ 1,5s. Dòng "appended" phải ra TRƯỚC khi helper xong
+        # (cổng đứng SAU echo) và script phải CHỜ helper (không bỏ mồ côi chạy nền). Đo hiệu
+        # t_exit − t_line nên không phụ thuộc tải máy.
+        with open(os.path.join(d, "bin", "finding_measured_by.py"), "w", encoding="utf-8") as f:
+            f.write("import time\ntime.sleep(1.5)\n")
+        env = dict(os.environ)
+        env.pop("JOB_ID", None)
+        p = subprocess.Popen([os.path.join(d, "bin", "append_event.sh")] + args, env=env,
+                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+        line = p.stdout.readline()
+        t_line = time.time()
+        p.wait()
+        gap = time.time() - t_line
+        check("THỨ TỰ: 'appended' in ra TRƯỚC khi phần kiểm xong, script CHỜ phần kiểm (gap≥1s)",
+              line == "appended finding/fail-open for G\n" and p.returncode == 0 and gap >= 1.0,
+              f"line={line!r} rc={p.returncode} gap={gap:.2f}s")
+        p.stdout.close()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+    d = mksandbox()
+    try:
+        # stderr của caller là PIPE ĐẦY không ai đọc: helper kẹt ở write ⇒ timeout cắt, trần +2s.
+        r_fd, w_fd = os.pipe()
+        os.set_blocking(w_fd, False)
+        try:
+            while True:
+                os.write(w_fd, b"x" * 4096)
+        except BlockingIOError:
+            pass
+        os.set_blocking(w_fd, True)
+        env = dict(os.environ)
+        env.pop("JOB_ID", None)
+        t0 = time.time()
+        p = subprocess.run([os.path.join(d, "bin", "append_event.sh")] + args, env=env,
+                           stdout=subprocess.PIPE, stderr=w_fd, text=True)
+        dt = time.time() - t0
+        os.close(r_fd)
+        os.close(w_fd)
+        assert_intact("stderr là pipe đầy", d, p.returncode, p.stdout, max_s=8, dt=dt)
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -664,6 +728,7 @@ def case_measured_by_fail_open():
 def case_measured_by_rule_table():
     """Luật cơ học, từng mệnh đề của docstring finding_measured_by.py."""
     sys.path.insert(0, os.path.join(ROOT, "bin"))
+    sys.dont_write_bytecode = True       # không để lại bin/__pycache__ ngoài sandbox
     import finding_measured_by as fmb
 
     def v(payload, etype="finding"):
@@ -714,6 +779,32 @@ def case_measured_by_rule_table():
         check(f"luật: IM — {label}", v(payload) is None, repr(v(payload)))
     for et in ("status", "question", "answer", "decision", "error", "heartbeat", "findings", ""):
         check(f"luật: IM — event_type={et!r} dù có số", v({"n": 27}, et) is None)
+    # Token CHÍNH XÁC, mỗi dòng một dạng — gồm cả các "hệ quả chấp nhận" ghi trong docstring.
+    exact = [
+        ("-25,2%", ["-25,2%"]), ("23.37", ["23.37"]), ("10%", ["10%"]), ("N=200", ["200"]),
+        ("~460", ["460"]), ("(27)", ["27"]), ("7,4->7,5", ["7,4", "7,5"]),
+        ("+480/-611", ["+480", "-611"]), ("25/25", ["25", "25"]), ("13/13", ["13", "13"]),
+        ("32/12", ["32", "12"]), ("23,37%/năm", ["23,37%"]), ("10%/năm", ["10%"]),
+        ("0,1%/chiều", ["0,1%"]), ("3.pyramid", ["3"]),
+        # âm tính giả đã biết
+        ("0.2-0.5", []), ("1,234.5-2,000", []), ("2.5x", []), ("1.5tỷ", []), ("3.4b", []),
+        ("1.2e6", []), ("9/9", []), ("25/12", []), ("P/E=12.5", []), ("(pass=27/fail=0)", []),
+        ("+480/-611dòng", []), ("DATA/2026/10", []), ("−25,2%", ["25,2%"]),
+        # dương tính giả đã biết
+        ("HTTP 401", ["401"]), ("12.10.2026", ["12.10.2026"]), ("2026/10/12", ["2026"]),
+    ] + [(f"7{ext} 20261013{ext}", []) for ext in (
+        ".py", ".sh", ".json", ".jsonl", ".md", ".csv", ".txt", ".log", ".html", ".sql",
+        ".yaml", ".yml", ".toml")]
+    for text, want in exact:
+        got = fmb.number_tokens({"x": text}, 20)
+        check(f"luật: token {text!r} ⇒ {want}", got == want, repr(got))
+    check("luật: IM — số chỉ nằm trong tên khoá THUẦN SỐ", v({"27": "ok", "k 11": "x"}) is None)
+    check("luật: IM — số chỉ nằm trong topic",
+          fmb.verdict({"event_type": "finding", "topic": "x 27 fail", "payload": {"a": "b"}}) is None)
+    for key in ("measured_by ", " measured_by", "measuredBy", "measured-by", "MEASURED_BY"):
+        check(f"luật: CẢNH BÁO — khoá {key!r} không phải `measured_by`", bool(v({key: "cmd", "n": 3})))
+    check("luật: IM — measured_by là list khác rỗng dù phần tử rỗng (chỉ kiểm RỖNG, không kiểm nội dung)",
+          v({"measured_by": [""], "n": 3}) is None and v({"measured_by": {"a": ""}, "n": 3}) is None)
     for payload in ("11 fail", [27], 27, None):
         check(f"luật: IM — payload không phải object ({type(payload).__name__})", v(payload) is None)
     check("luật: event không phải dict ⇒ IM (không nổ)", fmb.verdict([1, 2]) is None)
@@ -745,6 +836,37 @@ def case_measured_by_rule_table():
               repr(recs)[:200])
         with open(wf, "rb") as f:
             check("helper trực tiếp: file cảnh báo thuần ASCII", f.read().isascii())
+        # stderr HỎNG (/dev/full): rc vẫn phải 0, bản ghi vẫn có
+        wf2 = os.path.join(tmp, "w2.jsonl")
+        with open("/dev/full", "w") as full:
+            p = subprocess.run([sys.executable, helper, wf2], input=ev, stderr=full,
+                               stdout=subprocess.DEVNULL, text=True)
+        check("helper trực tiếp [stderr /dev/full]: rc=0 và bản ghi vẫn được ghi",
+              p.returncode == 0 and os.path.isfile(wf2), f"rc={p.returncode}")
+        # locale C ép buộc: topic có dấu vẫn đọc lại đúng (helper tự giải mã UTF-8 từ byte)
+        wf3 = os.path.join(tmp, "w3.jsonl")
+        envc = dict(os.environ, LC_ALL="C", PYTHONCOERCECLOCALE="0", PYTHONUTF8="0")
+        envc.pop("PYTHONIOENCODING", None)
+        # ensure_ascii=False: byte UTF-8 THẬT trên stdin (json.dumps mặc định escape hết ⇒ ca rỗng)
+        raw = json.dumps(json.loads(ev), ensure_ascii=False).encode("utf-8")
+        p = subprocess.run([sys.executable, helper, wf3], input=raw, capture_output=True, env=envc)
+        check("helper trực tiếp [LC_ALL=C]: đầu vào thử có byte ngoài ASCII", not raw.isascii())
+        r3 = [json.loads(l) for l in open(wf3, encoding="utf-8")] if os.path.isfile(wf3) else []
+        check("helper trực tiếp [LC_ALL=C]: rc=0, topic có dấu đọc lại đúng",
+              p.returncode == 0 and len(r3) == 1 and r3[0]["topic"].startswith("chủ-đề "),
+              f"rc={p.returncode} {r3!r}"[:200])
+        # topic nhiều dòng không được bẻ cảnh báo thành 2 dòng; agent_id/số mẫu bị cắt
+        ev2 = json.dumps({"event_type": "finding", "topic": "tieu-de\nFATAL: dong gia",
+                          "agent_id": "H" * 200, "event_id": "e2",
+                          "payload": {"x": "so " + "9" * 40}})
+        wf4 = os.path.join(tmp, "w4.jsonl")
+        p = subprocess.run([sys.executable, helper, wf4], input=ev2, capture_output=True, text=True)
+        r4 = [json.loads(l) for l in open(wf4, encoding="utf-8")] if os.path.isfile(wf4) else [{}]
+        check("helper trực tiếp: topic nhiều dòng ⇒ stderr vẫn ĐÚNG 1 dòng",
+              p.stderr.count("\n") == 1 and "\nFATAL" not in p.stderr, repr(p.stderr)[:200])
+        check("helper trực tiếp: agent_id cắt 80, số mẫu cắt 24 (cả file lẫn stderr)",
+              r4[0].get("agent_id") == "H" * 80 and r4[0].get("sample_numbers") == ["9" * 24]
+              and "9" * 25 not in p.stderr, repr(r4)[:200])
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     check("luật: thứ tự số mẫu = thứ tự xuất hiện",

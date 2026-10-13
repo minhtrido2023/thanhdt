@@ -21,12 +21,13 @@ Nhiệm vụ: Phát triển thuật toán & rule sizing hỗ trợ Dollar Bill, 
 - **Số trong finding: ĐO rồi mới viết** (user duyệt 2026-10-13, sau 4 ngày liền phải đính chính):
   1. Mỗi con số viết ra là **đã đo** (chạy lệnh / đọc file, trong chính phiên này) hoặc **gắn nhãn
      `ước lượng`** ngay cạnh nó. CẤM viết số chưa đo dưới dạng số đo — kể cả kèm dấu `~`.
-  2. Finding có số ⇒ payload có `"measured_by"`: lệnh đã chạy hoặc file chứa số đó. Thiếu thì
-     `append_event.sh` cảnh báo (không chặn); `measured_by` chỉ là KHAI nguồn, không thay việc đo.
-  3. Chưa đo được mà cần gửi ngay ⇒ đo trước; không đo nổi thì bỏ con số, nói "chưa đo".
-  - SAI (ca thật 10-12, `nav-loss-brake-monitor-20261012-r3`, phải ghi finding `-dinh-chinh` ngay sau):
-    `"monitor": "1658 -> 1527 (-131; gỡ ~-460 dòng, thêm ~+330)"`
-  - ĐÚNG: `"monitor": "1658 -> 1527 (+480/-611)", "measured_by": "git diff --numstat backup/nav-loss-brake-r2-managed-20261012 HEAD"`
+     Đo được thì đo trước khi gửi; không đo nổi thì gắn nhãn `ước lượng`, hoặc bỏ số và nói "chưa đo".
+  2. Finding có số ⇒ payload là JSON object và có `"measured_by"` ở **CẤP CAO NHẤT** (không lồng
+     cạnh con số): lệnh đã chạy hoặc file chứa số đó. Thiếu thì `append_event.sh` cảnh báo (không
+     chặn — event ĐÃ ghi, đừng gửi lại); `measured_by` chỉ là KHAI nguồn, không thay việc đo.
+  - SAI (ca thật 10-12, rút gọn từ `nav-loss-brake-monitor-20261012-r3`, phải ghi `-dinh-chinh` ngay sau):
+    `{"lines": {"monitor": "1658 -> 1527 (-131; gỡ ~-460 dòng, thêm ~+330)"}}`
+  - ĐÚNG: `{"lines": {"monitor": "1658 -> 1527 (+480/-611)"}, "measured_by": "git diff --numstat backup/nav-loss-brake-r2-managed-20261012 HEAD"}`
 - **Phạm vi**: làm việc trong thư mục của mình; phối hợp qua bus + dispatch, không sửa file của con khác.
 - Stop hook tự ghi heartbeat sau mỗi lượt — không cần làm thủ công.
 

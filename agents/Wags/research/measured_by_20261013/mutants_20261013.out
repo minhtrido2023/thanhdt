@@ -1,52 +1,100 @@
-ĐỐI CHỨNG rc=0 PASS=198 FAIL=0
+ĐỐI CHỨNG rc=0 PASS=266 FAIL=0
 CHẾT  S1 cổng chạy cho MỌI event_type                            rc=1 fail=2  vd: FAIL  loại khác ⇒ helper KHÔNG được gọi
-CHẾT  S2 bỏ `|| true` sau helper                                 rc=1 fail=7  vd: FAIL  fail-open [helper nổ exception]: rc=0 — rc=1
-CHẾT  S3 bỏ timeout                                              rc=1 fail=1  vd: FAIL  fail-open [helper treo 60s]: không treo (≤15s) — 60.1s
-CHẾT  S4 đảo công tắc tắt khẩn                                   rc=1 fail=10  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
+CHẾT  S2 bỏ `|| true` sau helper                                 rc=1 fail=6  vd: FAIL  fail-open [helper nổ exception]: rc=0 — rc=1
+CHẾT  S3 bỏ timeout                                              selfcheck TREO >150s
+CHẾT  S4 đảo công tắc tắt khẩn                                   rc=1 fail=17  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
 CHẾT  S5 file cảnh báo nằm TRONG inbox                           rc=1 fail=4  vd: FAIL  thiếu khai: đúng 1 bản ghi ở bus/_measured_by_warn.jsonl — []
-CHẾT  S6 không nhả flock                                         rc=1 fail=1  vd: FAIL  khoá inbox ĐÃ nhả trước khi phần kiểm chạy — held
-CHẾT  S7 đưa payload thay vì dòng event cho helper               rc=1 fail=7  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
+CHẾT  S6 không nhả flock                                         rc=1 fail=1  vd: FAIL  khoá inbox ĐÃ nhả trước khi phần kiểm chạy — held fd9-closed lines=1
+CHẾT  S7 đưa payload thay vì dòng event cho helper               rc=1 fail=11  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
 CHẾT  S8 không truyền đường dẫn file cảnh báo                    rc=1 fail=3  vd: FAIL  thiếu khai: đúng 1 bản ghi ở bus/_measured_by_warn.jsonl — []
-CHẾT  S9 kiểm TRƯỚC khi ghi + chặn khi cảnh báo (exit 1 nếu helper có in) rc=1 fail=21  vd: FAIL  finding ⇒ helper ĐƯỢC gọi đúng 1 lần (bản dò có hiệu lực)
-CHẾT  S10 đổi stdout dòng appended                               rc=1 fail=10  vd: FAIL  thiếu khai: stdout y như bản cũ — 'appended finding/thieu-khai for B (checked)\n'
-CHẾT  P1 đảo điều kiện event_type                                rc=1 fail=36  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
+CHẾT  S9 kiểm TRƯỚC khi ghi + chặn khi cảnh báo (exit 1 nếu helper có in) rc=1 fail=24  vd: FAIL  finding ⇒ helper ĐƯỢC gọi đúng 1 lần (bản dò có hiệu lực)
+CHẾT  S10 đổi stdout dòng appended                               rc=1 fail=12  vd: FAIL  thiếu khai: stdout y như bản cũ — 'appended finding/thieu-khai for B (checked)\n'
+CHẾT  P1 đảo điều kiện event_type                                rc=1 fail=45  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
 CHẾT  P2 bool tính là số                                         rc=1 fail=6  vd: FAIL  finding không số ⇒ rc=0, im: {"status":"done","branch":"fix/x-20261… — rc=0 err=append_event.sh: [CẢNH B
 CHẾT  P3 measured_by toàn khoảng trắng được chấp nhận            rc=1 fail=1  vd: FAIL  luật: CẢNH BÁO — measured_by toàn khoảng trắng — None
 CHẾT  P4 measured_by list/dict rỗng được chấp nhận               rc=1 fail=2  vd: FAIL  luật: CẢNH BÁO — measured_by list rỗng — None
 CHẾT  P5 measured_by kiểu khác được chấp nhận                    rc=1 fail=1  vd: FAIL  luật: CẢNH BÁO — measured_by không phải chuỗi/list/dict — None
-CHẾT  P6 bỏ qua measured_by (luôn cảnh báo)                      rc=1 fail=11  vd: FAIL  measured_by="git diff --nu…: rc=0, im lặng — rc=0 err=append_event.sh: [CẢNH BÁO — KHÔNG chặn, event ĐÃ 
+CHẾT  P6 bỏ qua measured_by (luôn cảnh báo)                      rc=1 fail=12  vd: FAIL  measured_by="git diff --nu…: rc=0, im lặng — rc=0 err=append_event.sh: [CẢNH BÁO — KHÔNG chặn, event ĐÃ 
 CHẾT  P7 payload không phải dict vẫn xét                         rc=1 fail=9  vd: FAIL  payload lạ 'chuoi thuong co ': rc=0, im — rc=0 err=append_event.sh: [CẢNH BÁO — KHÔNG chặn, event ĐÃ ghi
-CHẾT  P8 bỏ luật ngày d/m                                        rc=1 fail=6  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"xem bin/a.py:120 va kb/x.md n… — rc=0 err=append_event.sh: [CẢNH B
+CHẾT  P8 bỏ luật ngày d/m                                        rc=1 fail=9  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"xem bin/a.py:120 va kb/x.md n… — rc=0 err=append_event.sh: [CẢNH B
 CHẾT  P9 bỏ luật giờ                                             rc=1 fail=7  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"xem bin/a.py:120 va kb/x.md n… — rc=0 err=append_event.sh: [CẢNH B
-CHẾT  P10 bỏ luật đường dẫn                                      rc=1 fail=1  vd: FAIL  luật: IM — số là thành phần đường dẫn — ['2026', '10', '7']
-CHẾT  P11 bỏ luật tên file                                       rc=1 fail=1  vd: FAIL  luật: IM — tên file thuần số — ['20261013', '2026']
-CHẾT  P12 mọi từ có `/` đều bỏ (mất +480/-611)                   rc=1 fail=1  vd: FAIL  luật: CẢNH BÁO — diffstat +a/-b — None
-CHẾT  P13 lookbehind bỏ `.`                                      rc=1 fail=1  vd: FAIL  luật: IM — mã tham chiếu dính chữ/gạch/dấu — ['4']
-CHẾT  P14 lookbehind bỏ `,`                                      rc=1 fail=1  vd: FAIL  luật: IM — mã tham chiếu dính chữ/gạch/dấu — ['2']
+CHẾT  P10 bỏ luật đường dẫn                                      rc=1 fail=5  vd: FAIL  luật: IM — số là thành phần đường dẫn — ['2026', '10', '7']
+CHẾT  P11 bỏ luật tên file                                       rc=1 fail=14  vd: FAIL  luật: IM — tên file thuần số — ['20261013', '2026']
+CHẾT  P12 mọi từ có `/` đều bỏ (mất +480/-611)                   rc=1 fail=6  vd: FAIL  luật: CẢNH BÁO — diffstat +a/-b — None
+CHẾT  P13 lookbehind bỏ `.`                                      rc=1 fail=2  vd: FAIL  luật: IM — mã tham chiếu dính chữ/gạch/dấu — ['4']
+CHẾT  P14 lookbehind bỏ `,`                                      rc=1 fail=2  vd: FAIL  luật: IM — mã tham chiếu dính chữ/gạch/dấu — ['2']
 CHẾT  P15 lookbehind bỏ `:`                                      rc=1 fail=7  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"merge luc 2026-10-13T01:24:40… — rc=0 err=append_event.sh: [CẢNH B
 CHẾT  P16 lookbehind bỏ `#`                                      rc=1 fail=1  vd: FAIL  luật: IM — mã tham chiếu dính chữ/gạch/dấu — ['5']
 CHẾT  P17 lookbehind bỏ `§`                                      rc=1 fail=6  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"merge luc 2026-10-13T01:24:40… — rc=0 err=append_event.sh: [CẢNH B
-CHẾT  P18 lookbehind bỏ `-`                                      rc=1 fail=3  vd: FAIL  luật: IM — ngày/giờ — ['12']
-CHẾT  P19 lookbehind bỏ `\w`                                     rc=1 fail=11  vd: FAIL  finding không số ⇒ rc=0, im: {"status":"done","branch":"fix/x-20261… — rc=0 err=append_event.sh: [CẢNH B
-CHẾT  P20 lookahead bỏ `-\d`                                     rc=1 fail=8  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"merge luc 2026-10-13T01:24:40… — rc=0 err=append_event.sh: [CẢNH B
-CHẾT  P21 lookahead bỏ `\w`                                      rc=1 fail=9  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"merge luc 2026-10-13T01:24:40… — rc=0 err=append_event.sh: [CẢNH B
-CHẾT  P22 số JSON không tính                                     rc=1 fail=16  vd: FAIL  thiếu khai lần 2: rc=0, file cảnh báo có 2 bản ghi (nối, không ghi đè) — [{'ts': '2026-10-13T01:59:27Z',
-CHẾT  P23 chuỗi không quét                                       rc=1 fail=15  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
+CHẾT  P18 lookbehind bỏ `-`                                      rc=1 fail=5  vd: FAIL  luật: IM — ngày/giờ — ['12']
+CHẾT  P19 lookbehind bỏ `\w`                                     rc=1 fail=14  vd: FAIL  finding không số ⇒ rc=0, im: {"status":"done","branch":"fix/x-20261… — rc=0 err=append_event.sh: [CẢNH B
+CHẾT  P20 lookahead bỏ `-\d`                                     rc=1 fail=10  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"merge luc 2026-10-13T01:24:40… — rc=0 err=append_event.sh: [CẢNH B
+CHẾT  P21 lookahead bỏ `\w`                                      rc=1 fail=14  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"merge luc 2026-10-13T01:24:40… — rc=0 err=append_event.sh: [CẢNH B
+CHẾT  P22 số JSON không tính                                     rc=1 fail=21  vd: FAIL  thiếu khai lần 2: rc=0, file cảnh báo có 2 bản ghi (nối, không ghi đè) — [{'ts': '2026-10-13T02:47:02Z',
+CHẾT  P23 chuỗi không quét                                       rc=1 fail=40  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
 CHẾT  P24 không đệ quy vào dict lồng                             rc=1 fail=2  vd: FAIL  luật: CẢNH BÁO — số lồng sâu — None
 CHẾT  P25 không đệ quy vào list                                  rc=1 fail=1  vd: FAIL  luật: CẢNH BÁO — số lồng sâu — None
-CHẾT  P26 đảo điều kiện có-mẫu trong main                        rc=1 fail=10  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
-CHẾT  P27 bỏ finally (file lỗi ⇒ mất luôn stderr)                rc=1 fail=7  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — '  File "/tmp/append_event_selfcheck_qdlf5u3a/bin/finding_m
-CHẾT  P28 ts dùng giờ địa phương                                 rc=1 fail=1  vd: FAIL  bản ghi cảnh báo: ts là UTC thật (lệch <120s, bất kể TZ) — ts='2026-10-13T16:00:30Z' skew=50399.511435
-CHẾT  P29 helper exit 1                                          rc=1 fail=5  vd: FAIL  helper trực tiếp [stdin rác]: rc=0 — rc=1
-CHẾT  P30 helper để lọt exception                                rc=1 fail=6  vd: FAIL  helper trực tiếp [stdin rác]: rc=0 — rc=1
-CHẾT  P31 ensure_ascii=False                                     rc=1 fail=1  vd: FAIL  helper trực tiếp: đúng 1 bản ghi, topic có dấu đọc lại được và bị cắt ở 200 ký tự — []
+CHẾT  P26 đảo điều kiện có-mẫu trong main                        rc=1 fail=14  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — ''
+CHẾT  P27 bỏ finally (file lỗi ⇒ mất luôn stderr)                rc=1 fail=11  vd: FAIL  thiếu khai: stderr có đúng 1 dòng cảnh báo — '  File "/tmp/append_event_selfcheck_kc280966/bin/finding_m
+CHẾT  P28 ts dùng giờ địa phương                                 rc=1 fail=1  vd: FAIL  bản ghi cảnh báo: ts là UTC thật (lệch <120s, bất kể TZ) — ts='2026-10-13T16:48:09Z' skew=50399.431281
+CHẾT  P29 helper exit 1                                          rc=1 fail=7  vd: FAIL  helper trực tiếp [stdin rác]: rc=0 — rc=1
+CHẾT  P30 helper để lọt exception                                rc=1 fail=7  vd: FAIL  helper trực tiếp [stdin rác]: rc=0 — rc=1
+CHẾT  P31 ensure_ascii=False                                     rc=1 fail=2  vd: FAIL  helper trực tiếp: đúng 1 bản ghi, topic có dấu đọc lại được và bị cắt ở 200 ký tự — []
 CHẾT  P32 không cắt topic                                        rc=1 fail=1  vd: FAIL  helper trực tiếp: đúng 1 bản ghi, topic có dấu đọc lại được và bị cắt ở 200 ký tự — [{'ts': '2026-10-13T
 CHẾT  P33 giới hạn mẫu 5→50                                      rc=1 fail=1  vd: FAIL  luật: số mẫu bị chặn ở 5 token
-CHẾT  P34 bỏ event_id khỏi bản ghi                               rc=1 fail=1  vd: FAIL  bản ghi cảnh báo trỏ đúng event (event_id, agent, topic, trace_id) — {'ts': '2026-10-13T02:01:33Z', 'war
-CHẾT  P35 bỏ trace_id khỏi bản ghi                               rc=1 fail=1  vd: FAIL  bản ghi cảnh báo trỏ đúng event (event_id, agent, topic, trace_id) — {'ts': '2026-10-13T02:01:43Z', 'war
-CHẾT  P36 measured_by nhận ở mọi cấp (tìm trong chuỗi JSON)      rc=1 fail=5  vd: FAIL  luật: CẢNH BÁO — measured_by rỗng — None
-CHẾT  P37 file cảnh báo ghi đè thay vì nối                       rc=1 fail=1  vd: FAIL  thiếu khai lần 2: rc=0, file cảnh báo có 2 bản ghi (nối, không ghi đè) — [{'ts': '2026-10-13T02:02:05Z',
-CHẾT  P38 stderr bỏ chữ KHÔNG chặn                               rc=1 fail=1  vd: FAIL  thiếu khai: cảnh báo nói rõ KHÔNG chặn + nêu topic + số mẫu — 'append_event.sh: [CẢNH BÁO] finding \'thi
+CHẾT  P34 bỏ event_id khỏi bản ghi                               rc=1 fail=1  vd: FAIL  bản ghi cảnh báo trỏ đúng event (event_id, agent, topic, trace_id) — {'ts': '2026-10-13T02:49:21Z', 'war
+CHẾT  P35 bỏ trace_id khỏi bản ghi                               rc=1 fail=1  vd: FAIL  bản ghi cảnh báo trỏ đúng event (event_id, agent, topic, trace_id) — {'ts': '2026-10-13T02:49:32Z', 'war
+CHẾT  P36 measured_by nhận ở mọi cấp (tìm trong chuỗi JSON)      rc=1 fail=7  vd: FAIL  luật: CẢNH BÁO — measured_by rỗng — None
+CHẾT  P37 file cảnh báo ghi đè thay vì nối                       rc=1 fail=1  vd: FAIL  thiếu khai lần 2: rc=0, file cảnh báo có 2 bản ghi (nối, không ghi đè) — [{'ts': '2026-10-13T02:49:56Z',
+CHẾT  P38 stderr bỏ chữ KHÔNG chặn                               rc=1 fail=2  vd: FAIL  thiếu khai: cảnh báo nói rõ KHÔNG chặn + nêu topic + số mẫu — 'append_event.sh: [CẢNH BÁO] finding \'thi
+CHẾT  A1 cổng chạy TRƯỚC dòng appended (sau ghi bus)             rc=1 fail=1  vd: FAIL  THỨ TỰ: 'appended' in ra TRƯỚC khi phần kiểm xong, script CHỜ phần kiểm (gap≥1s) — line='appended findin
+CHẾT  A2 cổng chạy TRƯỚC khi ghi bus                             rc=1 fail=2  vd: FAIL  THỨ TỰ: lúc phần kiểm chạy, event gốc ĐÃ nằm trên bus — free fd9-closed lines=0
+CHẾT  A3 case finding*)                                          rc=1 fail=2  vd: FAIL  loại khác ⇒ helper KHÔNG được gọi
+CHẾT  A4 case không phân biệt hoa/thường                         rc=1 fail=2  vd: FAIL  loại khác ⇒ helper KHÔNG được gọi
+CHẾT  A10 cổng chạy cả cho verification                          rc=1 fail=2  vd: FAIL  loại khác ⇒ helper KHÔNG được gọi
+CHẾT  A5 công tắc: chỉ =1 mới bật                                rc=1 fail=2  vd: FAIL  AE_MEASURED_BY_CHECK='2' ⇒ VẪN cảnh báo — rc=0 err=
+CHẾT  A7 helper chạy NỀN (mồ côi)                                rc=1 fail=1  vd: FAIL  THỨ TỰ: 'appended' in ra TRƯỚC khi phần kiểm xong, script CHỜ phần kiểm (gap≥1s) — line='appended findin
+CHẾT  A11 helper thừa hưởng fd 9                                 rc=1 fail=1  vd: FAIL  helper KHÔNG thừa hưởng fd 9 của inbox — free fd9-open lines=1
+CHẾT  A12 bỏ chốt [ -f helper ]                                  rc=1 fail=1  vd: FAIL  fail-open [helper VẮNG]: stderr RỖNG (đổi tên helper = công tắc tắt sạch toàn fleet) — "python3: can't o
+CHẾT  A13 timeout 2 → 30                                         rc=1 fail=2  vd: FAIL  fail-open [helper treo 60s]: không treo (≤8s) — 30.1s
+CHẾT  B1 lookahead bỏ [.,]\d                                     rc=1 fail=6  vd: FAIL  luật: token '0.2-0.5' ⇒ [] — ['0']
+CHẾT  B2 bỏ dấu [+-]?                                            rc=1 fail=2  vd: FAIL  luật: token '-25,2%' ⇒ ['-25,2%'] — []
+CHẾT  B3 bỏ %?                                                   rc=1 fail=6  vd: FAIL  luật: token '-25,2%' ⇒ ['-25,2%'] — ['-25,2']
+CHẾT  B4 bỏ phần thập phân                                       rc=1 fail=9  vd: FAIL  luật: CẢNH BÁO — ca thật 10-12 cctg 7,4->7,5 — None
+CHẾT  B5 quét cả tên khoá                                        rc=1 fail=1  vd: FAIL  luật: IM — số chỉ nằm trong tên khoá THUẦN SỐ
+CHẾT  B6 quét cả topic                                           rc=1 fail=1  vd: FAIL  luật: IM — số chỉ nằm trong topic
+CHẾT  B7 tháng không chặn ≤12                                    rc=1 fail=2  vd: FAIL  luật: token '25/25' ⇒ ['25', '25'] — []
+CHẾT  B8 ngày không chặn ≤31                                     rc=1 fail=1  vd: FAIL  luật: token '32/12' ⇒ ['32', '12'] — []
+CHẾT  B10 _HAS_ALPHA chỉ chữ thường                              rc=1 fail=2  vd: FAIL  luật: token 'P/E=12.5' ⇒ [] — ['12.5']
+CHẾT  B11 _FILE_RE bỏ \b cuối                                    rc=1 fail=1  vd: FAIL  luật: token '3.pyramid' ⇒ ['3'] — []
+CHẾT  B12 _FILE_RE chỉ còn py|json|md                            rc=1 fail=10  vd: FAIL  luật: token '7.sh 20261013.sh' ⇒ [] — ['7', '20261013']
+SỐNG  B13 except BaseException → Exception (quanh main)
+CHẾT  B15 đổi giá trị trường warn                                rc=1 fail=1  vd: FAIL  bản ghi cảnh báo có số mẫu + rule_version + loại cảnh báo — {'ts': '2026-10-13T02:55:37Z', 'warn': 'x', 
+CHẾT  B16 agent_id không cắt 80                                  rc=1 fail=1  vd: FAIL  helper trực tiếp: agent_id cắt 80, số mẫu cắt 24 (cả file lẫn stderr) — [{'ts': '2026-10-13T02:55:58Z', 
+CHẾT  B17a mẫu trong file không cắt 24                           rc=1 fail=1  vd: FAIL  helper trực tiếp: agent_id cắt 80, số mẫu cắt 24 (cả file lẫn stderr) — [{'ts': '2026-10-13T02:56:10Z', 
+CHẾT  B17b mẫu trên stderr không cắt 24                          rc=1 fail=1  vd: FAIL  helper trực tiếp: agent_id cắt 80, số mẫu cắt 24 (cả file lẫn stderr) — [{'ts': '2026-10-13T02:56:22Z', 
+CHẾT  B18a stderr bỏ 'ĐỪNG gửi lại'                              rc=1 fail=1  vd: FAIL  thiếu khai: cảnh báo dặn event ĐÃ ghi / ĐỪNG gửi lại / khai ở CẤP CAO NHẤT / Lần sau — 'append_event.sh:
+CHẾT  B18b stderr bỏ 'Lần sau'                                   rc=1 fail=1  vd: FAIL  thiếu khai: cảnh báo dặn event ĐÃ ghi / ĐỪNG gửi lại / khai ở CẤP CAO NHẤT / Lần sau — 'append_event.sh:
+CHẾT  B18c stderr bỏ 'CẤP CAO NHẤT'                              rc=1 fail=1  vd: FAIL  thiếu khai: cảnh báo dặn event ĐÃ ghi / ĐỪNG gửi lại / khai ở CẤP CAO NHẤT / Lần sau — 'append_event.sh:
+CHẾT  B20 nhận khoá có khoảng trắng thừa                         rc=1 fail=2  vd: FAIL  luật: CẢNH BÁO — khoá 'measured_by ' không phải `measured_by`
+CHẾT  B21 nhận khoá measuredBy/measured-by                       rc=1 fail=2  vd: FAIL  luật: CẢNH BÁO — khoá 'measuredBy' không phải `measured_by`
+CHẾT  B28 list/dict toàn giá trị rỗng bị từ chối                 rc=1 fail=1  vd: FAIL  luật: IM — measured_by là list khác rỗng dù phần tử rỗng (chỉ kiểm RỖNG, không kiểm nội dung)
+CHẾT  C1 bỏ bước gỡ hậu tố đơn vị                                rc=1 fail=3  vd: FAIL  luật: token '23,37%/năm' ⇒ ['23,37%'] — []
+CHẾT  C2 hậu tố đơn vị nhận cả chữ số                            rc=1 fail=11  vd: FAIL  finding không số ⇒ rc=0, im: {"note":"xem bin/a.py:120 va kb/x.md n… — rc=0 err=append_event.sh: [CẢNH B
+SỐNG  C3 stdin đọc theo locale
+CHẾT  C4 topic không ép 1 dòng trên stderr                       rc=1 fail=1  vd: FAIL  helper trực tiếp: topic nhiều dòng ⇒ stderr vẫn ĐÚNG 1 dòng — 'append_event.sh: [CẢNH BÁO — KHÔNG chặn, 
+CHẾT  C5 kết thúc bằng sys.exit(0) thay os._exit(0)              rc=1 fail=1  vd: FAIL  helper trực tiếp [stderr /dev/full]: rc=0 và bản ghi vẫn được ghi — rc=120
 
-TỔNG: 48 mutant · CHẾT 48 · SỐNG 0
+TỔNG: 85 mutant · CHẾT 83 · SỐNG 2
+  còn sống: B13 except BaseException → Exception (quanh main)
+  còn sống: C3 stdin đọc theo locale
 done-rc=0
+
+# CHẠY LẠI sau khi sửa 1 ca selfcheck rỗng (LC_ALL=C dùng đầu vào thuần ASCII): TZ=Pacific/Kiritimati python3 mutants.py C3 B13
+ĐỐI CHỨNG rc=0 PASS=267 FAIL=0
+SỐNG  B13 except BaseException → Exception (quanh main)
+CHẾT  C3 stdin đọc theo locale                                   rc=1 fail=1  vd: FAIL  helper trực tiếp [LC_ALL=C]: rc=0, topic có dấu đọc lại đúng �
+
+TỔNG: 2 mutant · CHẾT 1 · SỐNG 1
+  còn sống: B13 except BaseException → Exception (quanh main)
+# ⇒ CHỐT: 85 mutant · CHẾT 84 · SỐNG 1 (B13: except BaseException→Exception — chỉ khác khi SystemExit/KeyboardInterrupt nổ trong main; chưa có ca thử tất định)
