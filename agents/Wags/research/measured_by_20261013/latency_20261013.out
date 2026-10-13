@@ -1,0 +1,4 @@
+finding thiếu measured_by (đường cảnh báo)   N=100  trước min 71.3 median 104.4 p95 208.7 | sau min 90.3 median 142.6 p95 298.9 | Δmin +19.0ms Δmedian +38.2ms
+finding có measured_by                       N=100  trước min 70.0 median 120.1 p95 242.4 | sau min 91.2 median 150.7 p95 278.7 | Δmin +21.3ms Δmedian +30.6ms
+heartbeat (loại khác)                        N=100  trước min 67.6 median 69.2 p95 198.6 | sau min 67.6 median 69.0 p95 136.1 | Δmin +0.0ms Δmedian -0.2ms
+status (loại khác)                           N=100  trước min 67.7 median 69.0 p95 72.9 | sau min 67.9 median 68.9 p95 73.6 | Δmin +0.2ms Δmedian -0.0ms

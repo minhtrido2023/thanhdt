@@ -177,3 +177,24 @@ exec 9>>"$BUS/inbox/$id.jsonl"
 flock 9
 printf '%s\n' "$line" >&9
 echo "appended $etype/$topic for $id"
+
+# --- Cổng `measured_by` cho finding: CHỈ CẢNH BÁO (user duyệt 2026-10-13, retro Pattern G/H) ---
+# Họ lỗi: finding nêu số TRƯỚC khi đo rồi phải đính chính (retro 10-09 → 10-12, 4 ngày liền).
+# Luật cơ học + giới hạn: docstring bin/finding_measured_by.py (một nơi duy nhất, đừng chép).
+# BẤT BIẾN của khối này — script này là lõi dùng chung, executor cũng gọi trong phiên:
+#   · Đứng SAU dòng ghi bus và SAU dòng "appended": event gốc đã xong y như trước, từng byte;
+#     khối này không còn cách nào chặn/hoãn/sửa nó.
+#   · Chỉ event_type=finding. Loại khác không chạy thêm lệnh nào.
+#   · Fail-open: helper vắng / python lỗi / treo (timeout 5s) / stderr đóng ⇒ nuốt hết, rc vẫn 0.
+#   · Nhả flock TRƯỚC khi kiểm để không giữ khoá inbox của agent lâu hơn bản cũ.
+#   · Cảnh báo đi stderr + bus/_measured_by_warn.jsonl (KHÔNG phải bus/inbox/ — cùng lý do
+#     với _rejected.jsonl ở trên): không reader nào nuốt, không đệ quy, không sinh question.
+# Tắt khẩn: AE_MEASURED_BY_CHECK=0.
+case "$etype" in finding)
+  if [ "${AE_MEASURED_BY_CHECK:-1}" != 0 ]; then
+    flock -u 9 2>/dev/null || true
+    printf '%s\n' "$line" \
+      | timeout 5 python3 "$ROOT/bin/finding_measured_by.py" "$BUS/_measured_by_warn.jsonl" \
+      || true
+  fi
+;; esac

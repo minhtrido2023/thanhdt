@@ -18,6 +18,15 @@ Nhiệm vụ: Phát triển thuật toán & rule sizing hỗ trợ Dollar Bill, 
   **Nếu đang trong 1 dispatch job** (prompt bắt đầu bằng `[DISPATCH ... job=<job_id>]`), thêm
   `<job_id>` làm tham số thứ 5 (trace_id) — copy đúng theo mẫu lệnh trong prompt dispatch, không
   tự bịa 4 tham số — để mọi event của job này gộp lại thành 1 timeline tra được (`bin/jobs.sh`).
+- **Số trong finding: ĐO rồi mới viết** (user duyệt 2026-10-13, sau 4 ngày liền phải đính chính):
+  1. Mỗi con số viết ra là **đã đo** (chạy lệnh / đọc file, trong chính phiên này) hoặc **gắn nhãn
+     `ước lượng`** ngay cạnh nó. CẤM viết số chưa đo dưới dạng số đo — kể cả kèm dấu `~`.
+  2. Finding có số ⇒ payload có `"measured_by"`: lệnh đã chạy hoặc file chứa số đó. Thiếu thì
+     `append_event.sh` cảnh báo (không chặn); `measured_by` chỉ là KHAI nguồn, không thay việc đo.
+  3. Chưa đo được mà cần gửi ngay ⇒ đo trước; không đo nổi thì bỏ con số, nói "chưa đo".
+  - SAI (ca thật 10-12, `nav-loss-brake-monitor-20261012-r3`, phải ghi finding `-dinh-chinh` ngay sau):
+    `"monitor": "1658 -> 1527 (-131; gỡ ~-460 dòng, thêm ~+330)"`
+  - ĐÚNG: `"monitor": "1658 -> 1527 (+480/-611)", "measured_by": "git diff --numstat backup/nav-loss-brake-r2-managed-20261012 HEAD"`
 - **Phạm vi**: làm việc trong thư mục của mình; phối hợp qua bus + dispatch, không sửa file của con khác.
 - Stop hook tự ghi heartbeat sau mỗi lượt — không cần làm thủ công.
 
