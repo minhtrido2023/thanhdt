@@ -112,6 +112,8 @@ NGOẠI LỆ (user duyệt 2026-10-12): KHÔNG tìm được nguồn độc lậ
 
 === CHUỖI 5: CCTG NHÓM NGÂN HÀNG NGAY SAU BIG-4 — VPB, MB, TCB, ACB (user duyệt 2026-10-13) ===
 CHỈ THU THẬP + HIỂN THỊ. File RIÊNG; KHÔNG vào effective rate / kill-switch A / DCF / rating, và KHÔNG tính vào cảnh báo xu hướng hạ (định nghĩa đó chỉ gồm Big-4).
+THỨ TỰ BẮT BUỘC: làm chuỗi 5 SAU CÙNG. TRƯỚC khi bắt đầu chuỗi 5 phải đã bắn xong event done/question + dòng báo Discord cho chuỗi 1-4 (chuỗi 5 dài, nếu hết giờ giữa chừng thì chuỗi 1-4 không được mất kết quả).
+Chạy TUẦN TỰ từng lệnh chuỗi 5 — xong lệnh này (thấy dòng OK/SKIP/ERROR) rồi mới chạy lệnh kế; KHÔNG chạy song song (không dùng & / xargs -P / nhiều lệnh Bash cùng lúc).
 Với TỪNG ngân hàng (VPBank=VPB, MB=MB, Techcombank=TCB, ACB=ACB), ĐỘC LẬP nhau:
 1. WebSearch nguồn có NGÀY CỤ THỂ (trong ~25 ngày) nêu lợi suất CCTG của ngân hàng đó. Lấy mức CAO NHẤT trong các khoảng thời gian nắm giữ/kỳ hạn <= 12 tháng (dải vắt qua 12 tháng, vd 184-389 ngày, tính là có).
 2. RIÊNG từng mệnh giá: nếu ngân hàng niêm yết biểu riêng cho mệnh giá 10 triệu và 100 triệu (vd VPBank Super Thịnh Vượng) thì ghi HAI dòng (--denom 10tr và --denom 100tr). Ngân hàng không chia theo 2 mệnh giá này hoặc nguồn không nêu mệnh giá thì BỎ --denom và nêu mức mua tối thiểu trong --note. Bậc chỉ dành cho khoản rất lớn (vd từ 1 tỷ) KHÔNG phải mức của chuỗi này — chỉ nhắc trong --note.
@@ -119,16 +121,17 @@ Với TỪNG ngân hàng (VPBank=VPB, MB=MB, Techcombank=TCB, ACB=ACB), ĐỘC L
 4. Ngân hàng (hoặc mệnh giá) nào KHÔNG tìm đủ số thì KHÔNG ghi: KHÔNG điền 0, KHÔNG suy từ ngân hàng khác, KHÔNG suy từ mệnh giá khác, KHÔNG lấy lãi tiết kiệm thay cho CCTG. Báo \"không có số\" cho ngân hàng đó — đây KHÔNG phải escalate.
 5. --product = tên sản phẩm đúng như nguồn gọi; --holding = khoảng thời gian nắm giữ mà mức đó áp dụng, đúng như nguồn ghi (vd \"184-389 ngày\", \"6-9 tháng\").
 Ghi (mỗi ngân hàng x mệnh giá một lệnh): python3 append_cctg_rate.py --series tier2 --bank <VPB|MB|TCB|ACB> --product \"<tên sản phẩm>\" [--denom <10tr|100tr>] --holding \"<khoảng nắm giữ>\" --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
-⚠️ Guard của chuỗi 5 tính RIÊNG từng (ngân hàng, mệnh giá): lệch >=1,0pp so với kỳ trước của CHÍNH khoá đó thì lệnh từ chối ⇒ escalate nhắc xác nhận tay. Một bài báo dùng được cho nhiều ngân hàng; KHÔNG dùng lại đúng URL kỳ trước cho cùng một khoá.
+⚠️ Guard của chuỗi 5 tính RIÊNG từng (ngân hàng, mệnh giá): lệch >=1,0pp so với kỳ trước của CHÍNH khoá đó thì lệnh từ chối. Khoá MỚI (ngân hàng/mệnh giá chưa có dòng) do bạn mở cũng bị kiểm cơ học: phải gần số đã có (<1pp so với khoá cùng ngân hàng, hoặc trong dải ±1pp của các ngân hàng khác) và không được đổi kiểu mệnh giá (bỏ --denom ⇄ có --denom) của ngân hàng đã có dòng — bị từ chối thì ĐỪNG đổi --denom/--bank để lách, ghi vào note để người seed bằng manual_verify. Một bài báo dùng được cho nhiều ngân hàng; KHÔNG dùng lại đúng URL kỳ trước cho cùng một khoá.
+CHUỖI 5 KHÔNG mở question: lệnh bị từ chối / 2 nguồn mâu thuẫn / không có số ⇒ ghi nguyên văn vào note của event done và vào dòng Discord của chuỗi 5 (chuỗi 5 chỉ hiển thị; question mở sẽ đốt một job tự sửa mỗi ngày).
 
-CẢ 3 LỆNH append_* (chuỗi 1-3, và chuỗi 5 dùng chung append_cctg_rate.py) tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (MỌI chuỗi — chuỗi 1 có guard này KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
+CẢ 3 LỆNH append_* (chuỗi 1-3; chuỗi 5 dùng chung append_cctg_rate.py nhưng KHÔNG escalate, xem trên) tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (MỌI chuỗi — chuỗi 1 có guard này KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này ở chuỗi 1-4 — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
 
 Idempotent — nếu hôm nay đã ghi rồi (effective_date trùng), lệnh tự SKIP rc=0, không lỗi, coi là hoàn thành bình thường. Có thể 1 chuỗi ghi được, chuỗi kia escalate — xử lý ĐỘC LẬP, không phải tất-cả-hoặc-không-gì.
 
 BẮT BUỘC HÀNH ĐỘNG CUỐI (để Mike xác minh job này đã xử lý, không treo giữa chừng) — với MỖI chuỗi (1, 2, 3, 4 và 5), chọn ĐÚNG MỘT:
   - Chạy thành công (kể cả SKIP idempotent): 'mike/bin/append_event.sh Winston status deposit-cctg-weekly-done \"<JSON: series, rate, changed true/false, note>\"'.
   - Escalate: 'mike/bin/append_event.sh Winston question deposit-cctg-weekly-question \"<JSON tóm tắt chuỗi nào, số nào mâu thuẫn>\"'.
-(Dù các chuỗi đều escalate hoặc đều done, vẫn gọi riêng mỗi chuỗi 1 event — field series = big4_12m / cctg_12m / cctg_6m / sbv_policy / cctg_tier2 — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem. Chuỗi 5 gọi MỘT event cho cả nhóm, note liệt kê từng ngân hàng: ghi số nào, mệnh giá nào, hay \"không có số\"; chỉ dùng question khi có lệnh bị từ chối vì lệch >=1,0pp hoặc 2 nguồn mâu thuẫn.)
+(Dù các chuỗi đều escalate hoặc đều done, vẫn gọi riêng mỗi chuỗi 1 event — field series = big4_12m / cctg_12m / cctg_6m / sbv_policy / cctg_tier2 — để Mike tách được chuỗi nào ổn, chuỗi nào cần xem. Chuỗi 5 gọi MỘT event DONE (status, KHÔNG BAO GIỜ question) cho cả nhóm, note liệt kê từng ngân hàng: ghi số nào, mệnh giá nào, hay \"không có số\", và nguyên văn mọi lệnh bị từ chối / nguồn mâu thuẫn.)
 
 BÁO CÁO NGAY TRONG NGÀY vào Discord Trading Daily (notify.sh) — dù ĐỔI hay KHÔNG ĐỔI cho mỗi chuỗi, nêu rõ 2 loại ngày (ngày xác nhận ${TODAY} vs ngày nguồn công bố thật trong --sources), báo CẢ CCTG 6 tháng (chuỗi 3) cạnh CCTG 12 tháng, báo lãi điều hành NHNN (chuỗi 4: tái cấp vốn / tái chiết khấu / OMO nếu có, nguồn nào, verified hay bị từ chối vì sao), báo thêm MỘT dòng riêng cho chuỗi 5 (CCTG nhóm ngay sau Big-4: từng ngân hàng VPB/MB/TCB/ACB — sản phẩm, mệnh giá, khoảng nắm giữ, lợi suất, hoặc \"không có số\"; ghi rõ đây là số THAM KHẢO, không vào mô hình, không tính vào cảnh báo xu hướng), và với CCTG luôn ghi rõ ngân hàng + kỳ hạn của số được chọn (chuẩn 12 THÁNG cao nhất Big-4 từ 2026-10-05; trước đó chuỗi là 6 tháng — đừng gộp lẫn khi báo cáo)."
 
@@ -137,7 +140,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
   echo "[--dry-run] skipping real dispatch.sh call; prompt length=${#PROMPT} chars"
   DISPATCH_RC=0
 else
-  DISCORD_THREAD_ID="1521470705563340910" "$WORKDIR_8L/mike/bin/dispatch.sh" Winston "$PROMPT" >> "$LOG" 2>&1
+  DISCORD_THREAD_ID="1521470705563340910" "$WORKDIR_8L/mike/bin/dispatch.sh" Winston "$PROMPT" --timeout 1200 --max-turns 80 >> "$LOG" 2>&1
   DISPATCH_RC=$?
 fi
 echo "dispatch.sh Winston exit_code=${DISPATCH_RC} (dry_run=${DRY_RUN})" >> "$LOG"
@@ -148,13 +151,15 @@ echo "dispatch.sh Winston exit_code=${DISPATCH_RC} (dry_run=${DRY_RUN})" >> "$LO
 if [ "$DRY_RUN" -eq 1 ]; then
   CONFIRMED="no"
 else
-CONFIRMED="$($PY - "$RUN_START_UTC" <<'PYEOF' 2>>"$LOG"
+POSTCOND="$($PY - "$RUN_START_UTC" <<'PYEOF' 2>>"$LOG"
 import json, sys
 from datetime import datetime
 start = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%SZ")
 path = "mike/bus/inbox/Winston.jsonl"
 allowed = {"deposit-cctg-weekly-done": "status", "deposit-cctg-weekly-question": "question"}
 found = False
+seen = set()
+REQUIRED = ["big4_12m", "cctg_12m", "cctg_6m", "sbv_policy", "cctg_tier2"]
 try:
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -175,11 +180,19 @@ try:
                 continue
             if rts >= start:
                 found = True
-    print("yes" if found else "no")
+                pl = rec.get("payload")
+                if isinstance(pl, dict) and pl.get("series"):
+                    seen.add(str(pl["series"]))
 except FileNotFoundError:
-    print("no")
+    pass
+print("yes" if found else "no")
+print(",".join(sorted(seen)))
+print(",".join(x for x in REQUIRED if x not in seen))
 PYEOF
 )"
+  CONFIRMED="$(printf '%s\n' "$POSTCOND" | sed -n 1p)"
+  SEEN_SERIES="$(printf '%s\n' "$POSTCOND" | sed -n 2p)"
+  MISSING_SERIES="$(printf '%s\n' "$POSTCOND" | sed -n 3p)"
 fi
 echo "post-condition check (deposit-cctg-weekly-done/question found after run start): ${CONFIRMED:-no} (dry_run=${DRY_RUN})" >> "$LOG"
 
@@ -187,6 +200,12 @@ if [ "$DRY_RUN" -eq 1 ]; then
   echo "[--dry-run] skipping fallback-notify branch" >> "$LOG"
 elif [ "$DISPATCH_RC" -eq 5 ]; then
   echo "dispatch queued for usage-limit auto-resume (rc=5) — no fallback" >> "$LOG"
+elif [ "${CONFIRMED:-no}" = "yes" ] && [ -n "${SEEN_SERIES:-}" ] && [ -n "${MISSING_SERIES:-}" ] && [ "$DISPATCH_RC" -ne 0 ]; then
+  # Một phần chuỗi ĐÃ có event (vd chuỗi 1-4 xong, chuỗi 5 hết giờ): KHÔNG báo "không có kết quả" cho chuỗi đã xong.
+  MSG="⚠️ Xác nhận lãi suất huy động + CCTG tuần ${TODAY} dừng giữa chừng (dispatch exit=${DISPATCH_RC}). ĐÃ có event cho: ${SEEN_SERIES}. CHƯA có kết quả xác nhận được cho: ${MISSING_SERIES} — chỉ các chuỗi này cần xem lại (chuỗi đã có event KHÔNG cần làm lại). Log: ${LOG}"
+  if [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
+    "$WORKDIR_8L/mike/bin/notify_thread.sh" "$MSG" trading_daily >> "$LOG" 2>&1 || true
+  fi
 elif [ "$DISPATCH_RC" -ne 0 ] || [ "${CONFIRMED:-no}" != "yes" ]; then
   MSG="⚠️ Tự động xác nhận lãi suất huy động + CCTG tuần này (${TODAY}) KHÔNG có kết quả xác nhận được (dispatch exit=${DISPATCH_RC}, post-condition=${CONFIRMED:-no}) — rơi về nhắc thủ công.
 Giá trị đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG (12M cao nhất; 6M trước 05/10) = ${CUR_CCTG}%.

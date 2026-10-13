@@ -8,21 +8,28 @@ Phần B (ranh giới cứng): effective_deposit_rate / macro_killswitch_a_statu
 consumer_deposit_rate* / chuỗi của deposit_cctg_trend_check / dcf_valuation.discount_rate cho
 kết quả giống hệt từng byte khi file tier2 VẮNG so với khi CÓ (kể cả dòng 9,2% và 15%), và không
 lần nào mở/dò file đó; quét tĩnh: không consumer nào nhắc tới file hay import writer.
-Chạy từ chính thư mục chứa file (tự định vị, chạy được trong worktree)."""
+Chạy từ chính thư mục chứa file (tự định vị, chạy được trong worktree).
+
+Vòng 2 (arch-review, job Taylor_20261013_090057): ghi song song (flock), khoá mới không lách được
+guard lệch >=1pp, selfcheck không rơi sang cây PRODUCTION (sys.path), không phụ thuộc env ngoài."""
 import ast
 import builtins
+import contextlib
 import csv
 import glob
+import io
 import hashlib
 import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+os.environ.pop("DEPOSIT_RATE_CCTG_OVERLAY", None)  # B1: không phụ thuộc rollback knob của môi trường gọi
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import append_cctg_rate as acr  # noqa: E402
@@ -32,8 +39,22 @@ import deposit_cctg_trend_check as trend  # noqa: E402
 import dcf_valuation as dcf  # noqa: E402
 import pandas as pd  # noqa: E402
 
-for _m in (acr, cctg, dep, trend, dcf):
-    assert os.path.dirname(os.path.abspath(_m.__file__)) == HERE, f"nạp nhầm {_m.__name__} ngoài cây này"
+# A2: dcf_valuation chèn thư mục PRODUCTION lên đầu sys.path (dcf_valuation.py:55-56); từ đây về sau
+# importlib.reload(cctg_rate_vn) (lượt 12m của writer) sẽ nạp file production nếu không ghim lại HERE.
+sys.path.insert(0, HERE)
+TREE_MODULES = ("append_cctg_rate", "cctg_rate_vn", "deposit_rate_vn", "deposit_cctg_trend_check", "dcf_valuation")
+
+
+def assert_tree(where):
+    for n in TREE_MODULES:
+        m = sys.modules[n]
+        assert os.path.dirname(os.path.abspath(m.__file__)) == HERE, f"[{where}] nạp nhầm {n} ngoài cây này: {m.__file__}"
+    import importlib.util
+    spec = importlib.util.find_spec("cctg_rate_vn")  # đúng thứ importlib.reload sẽ tìm
+    assert os.path.dirname(os.path.abspath(spec.origin)) == HERE, f"[{where}] reload sẽ nạp {spec.origin}"
+
+
+assert_tree("sau import")
 _TODAY_D = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()
 TODAY = _TODAY_D.isoformat()
 TOMORROW = (_TODAY_D + timedelta(days=1)).isoformat()
@@ -42,6 +63,7 @@ EXPECTED_HEADER = ["effective_date", "bank", "product", "denomination", "holding
                    "collected_date", "source", "note"]
 FAILS = []
 N = 0
+LAST_OUT = ""
 
 
 def check(label, cond):
@@ -58,11 +80,16 @@ def run(argv, job_id=None):
     os.environ.pop("JOB_ID", None)
     if job_id:
         os.environ["JOB_ID"] = job_id
+    global LAST_OUT
+    buf = io.StringIO()
     try:
-        return (acr.main() or 0), ""
+        with contextlib.redirect_stdout(buf):
+            return (acr.main() or 0), ""
     except SystemExit as e:
         return 1, str(e.code)
     finally:
+        LAST_OUT = buf.getvalue()
+        sys.stdout.write(LAST_OUT)
         sys.argv = old_argv
         os.environ.pop("JOB_ID", None)
         if old_job is not None:
@@ -139,8 +166,16 @@ try:
           raw(csv12) == bytes12 and not os.path.exists(csv6))
     check("W6d ghi tay không tạo sidecar nào", not glob.glob(os.path.join(d, "*last_auto_sources*")))
 
-    rc, msg = run(t2("VPB", 9.2, TODAY, "100tr"))
-    check("W7 cùng (ngày, VPB, 100tr) chạy lại SKIP rc=0", rc == 0 and len(rows(csvt)) == 1)
+    rc, msg = run(t2("VPB", 9.2, TODAY, "100tr", product="CCTG Super Thịnh Vượng"))
+    check("W7 cùng (ngày, VPB, 100tr) + cùng sản phẩm + cùng lợi suất chạy lại: SKIP rc=0, thông báo nêu khoá",
+          rc == 0 and len(rows(csvt)) == 1 and "SKIP" in LAST_OUT and "[tier2 VPB 100tr]" in LAST_OUT)
+    b_t = raw(csvt)
+    rc, msg = run(t2("VPB", 9.2, TODAY, "100tr", product="CCTG Khác"))
+    check("W7b cùng khoá cùng ngày NHƯNG KHÁC sản phẩm: rc != 0, in dòng đang có, không ghi",
+          rc != 0 and "CCTG Super Thịnh Vượng" in msg and "9.2" in msg and "[tier2 VPB 100tr]" in msg and raw(csvt) == b_t)
+    rc, msg = run(t2("VPB", 9.3, TODAY, "100tr", product="CCTG Super Thịnh Vượng"))
+    check("W7c cùng khoá cùng ngày NHƯNG KHÁC lợi suất: rc != 0, in dòng đang có (9.2), không ghi",
+          rc != 0 and "rate=9.2%" in msg and "9.3%" in msg and raw(csvt) == b_t)
     rc, msg = run(t2("VPB", 7.5, TODAY, "10tr", holding="184-389 ngày"))
     rt = rows(csvt)
     check("W8 VPB 10tr cùng ngày là khoá RIÊNG -> ghi thêm, giữ holding_period",
@@ -150,11 +185,15 @@ try:
     check("W9 MB 7,1% (lệch 2,1pp so với VPB) vẫn ghi — không so chéo ngân hàng; denomination để trống",
           rc == 0 and len(rt) == 3 and rt[2]["bank"] == "MB" and rt[2]["denomination"] == "")
     rc, msg = run(t2("VPB", 10.3, TOMORROW, "100tr"))
-    check("W10 VPB 100tr lệch 1,1pp so với kỳ trước CÙNG khoá bị chặn",
-          rc == 1 and "differs" in msg and len(rows(csvt)) == 3)
+    check("W10 VPB 100tr lệch 1,1pp so với kỳ trước CÙNG khoá bị chặn; thông báo nêu khoá [tier2 VPB 100tr]",
+          rc == 1 and "differs" in msg and "[tier2 VPB 100tr]" in msg and len(rows(csvt)) == 3)
     rc, msg = run(t2("VPB", 9.2, YESTERDAY, "100tr"))
-    check("W11 VPB 100tr ngày cũ hơn dòng cuối cùng khoá bị chặn",
-          rc == 1 and "not newer" in msg and len(rows(csvt)) == 3)
+    check("W11 VPB 100tr ngày cũ hơn dòng cuối cùng khoá bị chặn; thông báo nêu khoá và KHÔNG nhắc cctg_events_df()",
+          rc == 1 and "not newer" in msg and "[tier2 VPB 100tr]" in msg and "cctg_events_df" not in msg
+          and len(rows(csvt)) == 3)
+    rc6_, msg6_ = run(["--series", "6m", "--rate", "7.5", "--effective", "2026-09-01", "--source", "manual_verify"])
+    check("W11a chuỗi 6m: thông báo 'không mới hơn' cũng không nhắc cctg_events_df() (hàm đó chỉ đọc file 12M)",
+          rc6_ == 1 and "not newer" in msg6_ and "cctg_events_df" not in msg6_)
     rc, msg = run(t2("ACB", 7.2, YESTERDAY, holding="3 tháng"))
     check("W11b ACB ngày hôm qua vẫn ghi (ngày mới-hơn tính riêng từng khoá)", rc == 0 and len(rows(csvt)) == 4)
     check("W12 thứ tự dòng = thứ tự ghi (append-only, không xáo)",
@@ -215,7 +254,206 @@ try:
           and sorted((r["bank"], r["denomination"], r["cctg_rate"]) for r in rt if r["bank"] != "VPB" or r["denomination"] != "100tr")
           == sorted([("VPB", "10tr", "7.5"), ("MB", "", "7.1"), ("ACB", "", "7.2"), ("ACB", "", "7.2"), ("TCB", "", "8")]))
 
+
+    # ---------- A3: đổi khoá không được lách guard lệch >=1pp ----------
+    def fresh():
+        for pth in [csvt, csvt + ".lock"] + glob.glob(os.path.join(d, "cctg_tier2_*")):
+            if os.path.exists(pth):
+                os.remove(pth)
+
+    def seed(bank, rate, eff, denom=None, product="CCTG X"):
+        r_, m_ = run(t2(bank, rate, eff, denom, product=product))  # người: không JOB_ID
+        assert r_ == 0, m_
+
+    def agent_run(bank, rate, eff, denom=None, tag="k"):
+        pub = [src("VietnamNet", f"https://vietnamnet.vn/{tag}-{bank}-{denom}-{rate}", rate),
+               src("Nghe An", f"https://baonghean.vn/{tag}-{bank}-{denom}-{rate}", rate)]
+        return run(t2(bank, rate, eff, denom, source="web_crosscheck_auto",
+                      extra=["--collected", TODAY, "--note", "x", "--sources", json.dumps(pub)]), job_id="selfcheck_job")
+
+    fresh()
+    seed("VPB", 9.2, YESTERDAY, "100tr")
+    rc, msg = run(t2("VPB", 12.0, TODAY, "100tr"))
+    check("K1 [gốc] VPB 100tr 9,2% có sẵn, người ghi 12,0% vào CÙNG khoá: bị từ chối", rc == 1 and "differs" in msg)
+    n0 = len(rows(csvt))
+    rc, msg = run(t2("VPB", 12.0, TODAY))  # bỏ --denom ⇒ khoá '' (khoá mới)
+    check("K2 [A3a] người bỏ --denom để lách (khoá '' cho VPB đang có khoá 100tr): bị từ chối", rc == 1 and "KHOÁ MỚI" in msg and len(rows(csvt)) == n0)
+    rc, msg = agent_run("VPB", 12.0, TODAY, None)
+    check("K3 [A3a] agent bỏ --denom để lách: bị từ chối", rc == 1 and "KHOÁ MỚI" in msg and len(rows(csvt)) == n0)
+    rc, msg = run(t2("VPB", 9.4, TODAY, "10tr"))
+    check("K4 người seed khoá 10tr cho VPB (đã có 100tr) vẫn ghi được (không rơi vào A3a; người không bị A3b/c)",
+          rc == 0 and len(rows(csvt)) == n0 + 1)
+    rc, msg = run(t2("VPB", 12.0, TODAY, extra=["--force"]))
+    check("K5 [A3a] người có --force được mở khoá '' (lối thoát có chủ đích của người)", rc == 0 and len(rows(csvt)) == n0 + 2)
+    fresh()
+    seed("VPB", 9.2, YESTERDAY, "100tr")
+    rc, msg = agent_run("VPB", 12.0, TODAY, "10tr")
+    check("K6 [A3b] agent mở khoá MỚI VPB 10tr 12,0% (lệch 2,8pp so với khoá cùng ngân hàng): bị từ chối, nhắc người seed",
+          rc == 1 and "seed" in msg and len(rows(csvt)) == 1)
+    rc, msg = agent_run("VPB", 9.7, TODAY, "10tr")
+    check("K7 [A3b] agent mở khoá MỚI VPB 10tr 9,7% (lệch 0,5pp): ghi được", rc == 0 and len(rows(csvt)) == 2)
+    rc, msg = agent_run("TCB", 29.9, TODAY)
+    check("K8 [A3c] agent mở ngân hàng CHƯA có dòng TCB 29,9%: ngoài dải (8,2; 10,7) -> bị từ chối",
+          rc == 1 and "ngoài dải" in msg and "seed" in msg and len(rows(csvt)) == 2)
+    rc, msg = agent_run("TCB", 8.0, TODAY)
+    check("K9 [A3c] TCB 8,0% vẫn ngoài dải (8,2; 10,7): bị từ chối", rc == 1 and len(rows(csvt)) == 2)
+    res_ = [agent_run("TCB", r_, TODAY, tag=f"b{r_}") for r_ in (12.0, 10.8, 7.0)]
+    check("K9b [A3c] biên dải (8,2; 10,7): TCB 12,0% / 10,8% (trên) và 7,0% (dưới) đều bị từ chối vì 'ngoài dải'",
+          all(rc_ == 1 and "ngoài dải" in m_ for rc_, m_ in res_) and len(rows(csvt)) == 2)
+    rc, msg = agent_run("TCB", 9.0, TODAY)
+    check("K10 [A3c] TCB 9,0% trong dải (8,2; 10,7): ghi được", rc == 0 and len(rows(csvt)) == 3)
+    fresh()
+    rc, msg = agent_run("TCB", 9.0, TODAY)
+    check("K11 [A3c] file RỖNG, agent mở khoá đầu tiên: không có mốc ⇒ bị từ chối (fail-safe), file không được tạo",
+          rc == 1 and "chưa có dòng nào" in msg and not rows(csvt))
+    fresh()
+    seed("MB", 7.1, YESTERDAY)
+    seed("ACB", 7.2, YESTERDAY)
+    rc1, _ = agent_run("MB", 7.3, TODAY, None, tag="mb")
+    rc2, _ = agent_run("ACB", 7.2, TODAY, None, tag="acb")
+    check("K12 dòng mốc MB/ACB hiện có (khoá mệnh giá rỗng) vẫn ghi tiếp được bằng agent (cùng khoá, không phải khoá mới)",
+          rc1 == 0 and rc2 == 0 and len(rows(csvt)) == 4)
+    rc, msg = agent_run("MB", 7.3, TOMORROW, "10tr", tag="mb2")
+    check("K13 [A3a] MB đang có khoá '' mà agent mở khoá 10tr: bị từ chối (đổi kiểu mệnh giá)",
+          rc == 1 and "KHOÁ MỚI" in msg and len(rows(csvt)) == 4)
+    # B4: mốc NGƯỜI trong delta guard của tier2 (agent trôi dần 0,7pp/lần không vượt được mốc người 1pp)
+    fresh()
+    d3, d2, d1 = [(_TODAY_D - timedelta(days=k)).isoformat() for k in (3, 2, 1)]
+    seed("MB", 7.0, d3)
+    rc1, _ = run(t2("MB", 7.6, d2, source="web_crosscheck_auto",
+                    extra=["--collected", TODAY, "--note", "x", "--sources", json.dumps(
+                        [src("VietnamNet", "https://vietnamnet.vn/h1", 7.6), src("Nghe An", "https://baonghean.vn/h1", 7.6)])]),
+                  job_id="selfcheck_job")
+    rc2, msg2 = run(t2("MB", 8.2, d1, source="web_crosscheck_auto",
+                       extra=["--collected", TODAY, "--note", "x", "--sources", json.dumps(
+                           [src("VietnamNet", "https://vietnamnet.vn/h2", 8.2), src("Nghe An", "https://baonghean.vn/h2", 8.2)])]),
+                    job_id="selfcheck_job")
+    check("B4a mốc NGƯỜI trong delta guard của tier2: 7,0 (người) -> 7,6 (agent) ghi; 8,2 (agent) lệch 0,6pp so với kỳ trước "
+          "nhưng 1,2pp so với mốc người => bị chặn",
+          rc1 == 0 and rc2 == 1 and "differs" in msg2 and "[tier2 MB" in msg2 and len(rows(csvt)) == 2)
+    # B4: sidecar tách theo mệnh giá của CÙNG ngân hàng
+    fresh()
+    seed("VPB", 9.2, YESTERDAY, "100tr")
+    seed("VPB", 9.2, YESTERDAY, "10tr")
+    same = [src("VietnamNet", "https://vietnamnet.vn/sd", 9.2), src("Nghe An", "https://baonghean.vn/sd", 9.2)]
+
+    def agent_same(denom, eff):
+        return run(t2("VPB", 9.2, eff, denom, source="web_crosscheck_auto",
+                      extra=["--collected", TODAY, "--note", "x", "--sources", json.dumps(same)]), job_id="selfcheck_job")
+    r_a, _ = agent_same("100tr", TODAY)
+    r_b, _ = agent_same("10tr", TODAY)  # cùng URL, mệnh giá KHÁC của cùng ngân hàng: sidecar riêng ⇒ vẫn ghi
+    r_c, m_c = agent_same("100tr", TOMORROW)  # cùng URL, CÙNG khoá, kỳ sau ⇒ chặn
+    check("B4b sidecar tách theo mệnh giá của cùng ngân hàng: 2 file riêng; URL dùng cho 10tr không cản 100tr; dùng lại trong "
+          "cùng khoá thì bị chặn",
+          r_a == 0 and r_b == 0 and r_c == 1 and "already used" in m_c
+          and sorted(os.path.basename(x) for x in glob.glob(os.path.join(d, "cctg_tier2_*sources.json")))
+          == ["cctg_tier2_VPB_100tr_last_auto_sources.json", "cctg_tier2_VPB_10tr_last_auto_sources.json"])
+    # B4: --product toàn khoảng trắng; pin danh sách ngân hàng / mệnh giá
+    rc, msg = run(t2("VPB", 9.2, TOMORROW, "100tr", product="   "))
+    check("B4c --product toàn khoảng trắng bị chặn", rc == 1 and "--product" in msg)
+    check("B4d TIER2_BANKS ghim đúng (VPB, MB, TCB, ACB) — thêm ngân hàng phải sửa selfcheck có chủ đích",
+          acr.TIER2_BANKS == ("VPB", "MB", "TCB", "ACB"))
+    check("B4e TIER2_DENOMS ghim đúng (10tr, 100tr)", acr.TIER2_DENOMS == ("10tr", "100tr"))
+    rc, msg = run(t2("HDB", 7.0, TOMORROW))
+    rc2, msg2 = run(t2("VPB", 9.2, TOMORROW, "1ty"))
+    check("B4f --bank HDB và --denom 1ty bị chặn", rc == 1 and rc2 == 1 and "--bank" in msg and "--denom" in msg2)
+    fresh()
+
+    # ---------- A1: ghi song song không được làm mất dòng ----------
+    DRIVER = (
+        "import os, sys, time\n"
+        "sys.path.insert(0, os.environ['T2_HERE'])\n"
+        "import append_cctg_rate as a\n"
+        "a.CSV_PATH_TIER2 = os.environ['T2_CSV']\n"
+        "tag, go = sys.argv[1], os.environ['T2_GO']\n"
+        "open(go + '.ready.' + tag, 'w').close()\n"
+        "t0 = time.time()\n"
+        "while not os.path.exists(go) and time.time() - t0 < 90:\n"
+        "    time.sleep(0.005)\n"
+        "sys.argv = ['append_cctg_rate.py'] + sys.argv[2:]\n"
+        "sys.exit(a.main() or 0)\n")
+    PROCS = [("VPB", "10tr", "7.5"), ("VPB", "100tr", "9.2"), ("MB", "", "7.1"), ("TCB", "", "8.0"), ("ACB", "", "7.2"),
+             ("VPB", "100tr", "9.2"), ("VPB", "100tr", "9.2"), ("MB", "", "7.1")]  # 3 lệnh TRÙNG khoá+ngày cuối: phải SKIP
+    EXPECT_ROWS = 5
+    bad_rounds, detail = 0, []
+    for rnd in range(3):
+        cdir = tempfile.mkdtemp(prefix="cctg_t2conc_")
+        ccsv, go = os.path.join(cdir, "cctg_rate_vn_tier2_events.csv"), os.path.join(cdir, "go")
+        env = {k: v for k, v in os.environ.items() if k != "JOB_ID"}
+        env.update(T2_HERE=HERE, T2_CSV=ccsv, T2_GO=go)
+        ps = []
+        for i, (bk, dn, rt) in enumerate(PROCS):
+            argv = ["--series", "tier2", "--bank", bk, "--product", "CCTG X", "--rate", rt, "--effective", TODAY,
+                    "--source", "manual_verify"] + (["--denom", dn] if dn else [])
+            ps.append(subprocess.Popen([sys.executable, "-c", DRIVER, str(i)] + argv, env=env, cwd=cdir,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
+        t0 = datetime.now()
+        while len(glob.glob(go + ".ready.*")) < len(ps) and (datetime.now() - t0).seconds < 90:
+            if any(p_.poll() is not None for p_ in ps):
+                break
+            pass
+        open(go, "w").close()
+        outs = [p_.communicate(timeout=120) for p_ in ps]
+        n_ok = sum(o[0].count("OK: appended") for o in outs)
+        n_skip = sum(o[0].count("SKIP:") for o in outs)
+        got = rows(ccsv)
+        keys = sorted((r["bank"], r["denomination"]) for r in got)
+        if not (n_ok == len(got) == EXPECT_ROWS and n_skip == len(PROCS) - EXPECT_ROWS and len(set(keys)) == EXPECT_ROWS
+                and all(p_.returncode == 0 for p_ in ps)):
+            bad_rounds += 1
+            detail.append((rnd, n_ok, n_skip, len(got), [p_.returncode for p_ in ps], [o[1][-200:] for o in outs if o[1]]))
+        shutil.rmtree(cdir, ignore_errors=True)
+    check(f"A1a 3 vòng x {len(PROCS)} tiến trình --series tier2 chạy ĐỒNG THỜI (có rào xuất phát): số dòng == số 'OK: appended' "
+          f"== {EXPECT_ROWS}, 3 lệnh trùng khoá đều SKIP, không dòng nào mất (vòng lỗi: {bad_rounds} {detail[:1]})", bad_rounds == 0)
+    # sidecar không mất: agent chạy đồng thời trên 5 khoá có sẵn; sau đó dùng lại URL ở khoá nào cũng phải bị chặn
+    cdir = tempfile.mkdtemp(prefix="cctg_t2conc_")
+    ccsv, go = os.path.join(cdir, "cctg_rate_vn_tier2_events.csv"), os.path.join(cdir, "go")
+    old_csvt = acr.CSV_PATH_TIER2
+    acr.CSV_PATH_TIER2 = ccsv
+    try:
+        for bk, dn, rt in PROCS[:5]:
+            seed(bk, float(rt), YESTERDAY, dn or None)
+    finally:
+        acr.CSV_PATH_TIER2 = old_csvt
+    env = {k: v for k, v in os.environ.items()}
+    env.update(T2_HERE=HERE, T2_CSV=ccsv, T2_GO=go, JOB_ID="selfcheck_job")
+    ps = []
+    for i, (bk, dn, rt) in enumerate(PROCS[:5]):
+        pub = json.dumps([{"publisher": "VietnamNet", "url": f"https://vietnamnet.vn/c-{i}", "date": TODAY, "rate": float(rt)},
+                          {"publisher": "Nghe An", "url": f"https://baonghean.vn/c-{i}", "date": TODAY, "rate": float(rt)}])
+        argv = ["--series", "tier2", "--bank", bk, "--product", "CCTG X", "--rate", rt, "--effective", TODAY,
+                "--source", "web_crosscheck_auto", "--collected", TODAY, "--note", "x", "--sources", pub] + (["--denom", dn] if dn else [])
+        ps.append(subprocess.Popen([sys.executable, "-c", DRIVER, str(i)] + argv, env=env, cwd=cdir,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
+    t0 = datetime.now()
+    while len(glob.glob(go + ".ready.*")) < len(ps) and (datetime.now() - t0).seconds < 90 and not any(p_.poll() is not None for p_ in ps):
+        pass
+    open(go, "w").close()
+    outs = [p_.communicate(timeout=120) for p_ in ps]
+    got = rows(ccsv)
+    check(f"A1b 5 agent ghi đồng thời lên 5 khoá có sẵn: 10 dòng (5 seed + 5 mới), 5 sidecar riêng đều còn "
+          f"({len(got)} dòng, {sorted(os.path.basename(x) for x in glob.glob(os.path.join(cdir, 'cctg_tier2_*')))})",
+          len(got) == 10 and sum(o[0].count("OK: appended") for o in outs) == 5
+          and len(glob.glob(os.path.join(cdir, "cctg_tier2_*sources.json"))) == 5)
+    shutil.rmtree(cdir, ignore_errors=True)
+
+    # B9: help không còn nói --rate là 'Big-4' cho mọi chuỗi
+    old_argv_ = sys.argv
+    sys.argv = ["append_cctg_rate.py", "--help"]
+    hb = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(hb):
+            acr.main()
+    except SystemExit:
+        pass
+    finally:
+        sys.argv = old_argv_
+    help_txt = " ".join(hb.getvalue().split())
+    check("B9 --help: --rate mô tả cả tier2 (không chỉ 'Big-4 CCTG rate')",
+          "Big-4 CCTG rate" not in help_txt and "tier2: that bank" in help_txt and "VPB/MB/TCB/ACB" in help_txt)
+
     # ---------- B: ranh giới cứng ----------
+    assert_tree("trước phần B")
     with open(csv12, "w", encoding="utf-8") as f:
         f.write(SEED12)
     cctg._EVENTS_CSV = csv12  # lượt 12m ở W17 reload cctg_rate_vn -> đường dẫn về mặc định; gắn lại fixture
@@ -261,14 +499,20 @@ try:
             out.append(("trend.heartbeat", repr(trend._heartbeat_lines(series, date(2026, 10, 13)))))
             out.append(("trend.declines", repr(trend.check_declines(series, {}))))
             out.append(("trend.staleness", repr(trend.check_staleness(series, {}, date(2026, 10, 13)))))
+            old_argv, buf = sys.argv, io.StringIO()
+            sys.argv = ["deposit_cctg_trend_check.py", "--dry-run"]
+            try:
+                with contextlib.redirect_stdout(buf):
+                    rc_main = trend.main()
+            finally:
+                sys.argv = old_argv
+            out.append(("trend.main --dry-run", repr((rc_main, buf.getvalue()))))
             return out
         finally:
             (builtins.open, os.path.exists, os.path.isfile, os.stat, os.listdir, os.scandir,
              glob.glob, pd.read_csv) = real
 
-    os.remove(csvt)
-    for p in glob.glob(os.path.join(d, "cctg_tier2_*")):
-        os.remove(p)
+    fresh()
     snap_absent = snapshot()
     touched_absent = list(touched)
     rc1, _ = run(t2("VPB", 9.2, TODAY, "100tr", product="CCTG Super Thịnh Vượng"))
@@ -279,11 +523,11 @@ try:
     del touched[:]
     snap_present = snapshot()
     h = lambda s: hashlib.sha256(repr(s).encode("utf-8")).hexdigest()  # noqa: E731
-    check(f"B1 {len(snap_absent)} đầu ra (effective/kill-switch A/consumer*/DCF r/trend) giống hệt từng byte "
+    check(f"B1 {len(snap_absent)} đầu ra (effective/kill-switch A/consumer*/DCF r/trend/trend.main --dry-run) giống hệt từng byte "
           f"vắng vs có file tier2 [sha256 {h(snap_absent)[:12]}]",
           len(snap_absent) >= 40 and h(snap_absent) == h(snap_present))
     for name in ("effective_deposit_rate", "macro_killswitch_a_status", "consumer_deposit_rate_detail",
-                 "consumer_deposit_rate", "dcf.discount_rate", "trend._load_series"):
+                 "consumer_deposit_rate", "dcf.discount_rate", "trend._load_series", "trend.main --dry-run"):
         a_ = [x for x in snap_absent if x[0] == name]
         b_ = [x for x in snap_present if x[0] == name]
         check(f"B1 {name}: {len(a_)} giá trị, vắng == có", bool(a_) and a_ == b_)
@@ -315,9 +559,24 @@ try:
                  "dna_report.py", "trading_bot/due_diligence.py",
                  "deploy_golive_dt5g_v4/golive_recommend_v23.py"]
     files = []
-    for pat in ("*.py", "*.sh", "trading_bot/**/*.py", "deploy_golive_dt5g_v4/**/*.py", "mike/bin/*"):
+    for pat in ("*.py", "*.sh", "trading_bot/**/*.py", "deploy_golive_dt5g_v4/**/*.py"):
         files += [p for p in glob.glob(os.path.join(HERE, pat), recursive=True) if os.path.isfile(p)]
-    offenders, importers = [], []
+    # B3: mike/bin chỉ có ở cây canonical (nested repo, không nằm trong worktree) — nói rõ quét hay không, không im lặng
+    CANON_MIKEBIN = "/home/trido/thanhdt/WorkingClaude/mike/bin"
+    own_mb = os.path.join(HERE, "mike", "bin")
+    if os.path.isdir(own_mb):
+        mb_dir, mb_note = own_mb, "mike/bin: QUÉT (của cây này)"
+    elif os.path.isdir(CANON_MIKEBIN):
+        mb_dir, mb_note = CANON_MIKEBIN, f"mike/bin: cây này KHÔNG có mike/bin -> QUÉT THAY bằng bản canonical {CANON_MIKEBIN}"
+    else:
+        mb_dir, mb_note = None, "mike/bin: KHÔNG QUÉT (cây này và canonical đều vắng) — phạm vi quét hẹp hơn đủ"
+    print("S0 " + mb_note)
+    if mb_dir:
+        files += [p for p in glob.glob(os.path.join(mb_dir, "*")) if os.path.isfile(p)]
+    # Người đọc ĐÃ BIẾT, user duyệt 2026-10-13 15:21 ICT (commit 0adc1293f): ngưỡng Macro Watch (6) nằm trong PROMPT của
+    # vn_realestate_monthly_check.py, bảo agent đọc số kỳ trước ở file tier2 — đọc để HIỂN THỊ/escalate, không phải code số.
+    PROMPT_READERS = {"vn_realestate_monthly_check.py"}
+    offenders, importers, prompt_readers = [], [], []
     for p in sorted(set(files)):
         rel = os.path.relpath(p, HERE)
         try:
@@ -326,7 +585,10 @@ try:
         except (UnicodeDecodeError, OSError):
             continue
         if TOKEN.search(text) and rel not in ALLOWED:
-            offenders.append(rel)
+            if mb_dir and os.path.dirname(p) == mb_dir and os.path.basename(p) in PROMPT_READERS:
+                prompt_readers.append(os.path.basename(p))
+            else:
+                offenders.append(rel)
         if rel.endswith(".py") and "append_cctg_rate" in text and rel != "append_cctg_rate.py":
             try:
                 tree = ast.parse(text)
@@ -337,13 +599,48 @@ try:
                          else [node.module or ""] if isinstance(node, ast.ImportFrom) else [])
                 if any(n.split(".")[0] == "append_cctg_rate" for n in names):
                     importers.append(rel)
-    check(f"S1 quét {len(set(files))} file: chỉ writer/selfcheck/wrapper tuần nhắc tới chuỗi tier2 (vi phạm: {offenders})",
+    check(f"S1 quét {len(set(files))} file [{mb_note}]: chỉ writer/selfcheck/wrapper tuần nhắc tới chuỗi tier2 (vi phạm: {offenders}; người đọc đã biết qua prompt: {prompt_readers})",
           len(set(files)) > 50 and offenders == [])
     missing = [c for c in CONSUMERS if not os.path.isfile(os.path.join(HERE, c))]
     check(f"S2 đủ {len(CONSUMERS)} file consumer được nêu tên nằm trong phạm vi quét (thiếu: {missing})", missing == [])
     check(f"S3 chỉ selfcheck mới import writer append_cctg_rate (import: {sorted(set(importers))})",
           all(os.path.basename(r).endswith("_selfcheck.py") for r in importers)
           and not set(importers) & set(CONSUMERS))
+    # B5: AST — trong file consumer ngoài 3 module chính, MỌI hằng chuỗi một-token chứa 'cctg' phải thuộc danh sách nhãn đã
+    # biết; bắt đường dẫn ghép chuỗi ("cctg_rate_vn_" + "tier" + ...), glob "cctg_*.csv", duckdb/pd.read_csv — thứ mà quét
+    # regex trên văn bản không thấy. KHÔNG bắt được: chuỗi tạo hoàn toàn động ("cc" + "tg") — khoảng hở đã biết.
+    CCTG_LABELS_OK = {"cctg_6m", "cctg_note"}  # nhãn khoá dict/hiển thị (value_radar.py, dna_report.py), không phải đường dẫn
+    ast_bad, ast_scanned = [], 0
+    for c in CONSUMERS:
+        if os.path.basename(c) in ("deposit_rate_vn.py", "cctg_rate_vn.py", "deposit_cctg_trend_check.py"):
+            continue
+        pth = os.path.join(HERE, c)
+        if not os.path.isfile(pth):
+            continue
+        try:
+            tree_ = ast.parse(open(pth, encoding="utf-8").read())
+        except SyntaxError:
+            ast_bad.append((c, "SyntaxError"))
+            continue
+        ast_scanned += 1
+        for node in ast.walk(tree_):
+            if (isinstance(node, ast.Constant) and isinstance(node.value, str) and "cctg" in node.value.lower()
+                    and re.fullmatch(r"\S+", node.value) and node.value not in CCTG_LABELS_OK):
+                ast_bad.append((c, node.lineno, node.value[:80]))
+    # 3 module chính: chỉ được nhắc đúng các file CCTG đã biết (đường dẫn thật)
+    KNOWN_FILES = {"cctg_rate_vn_events.csv", "cctg_rate_vn_6m_events.csv", "cctg_rate_last_auto_sources.json",
+                   "cctg6m_rate_last_auto_sources.json", "cctg_trend_alert_state.json"}
+    path_bad = []
+    for c in ("deposit_rate_vn.py", "cctg_rate_vn.py", "deposit_cctg_trend_check.py"):
+        pth = os.path.join(HERE, c)
+        for node in ast.walk(ast.parse(open(pth, encoding="utf-8").read())):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                for m_ in re.findall(r"cctg[\w*]*\.(?:csv|json)", node.value):
+                    if m_ not in KNOWN_FILES:
+                        path_bad.append((c, node.lineno, m_))
+    check(f"S6 [AST] {ast_scanned} consumer ngoài 3 module chính: không hằng chuỗi 'cctg' nào ngoài nhãn đã biết "
+          f"({ast_bad}); 3 module chính chỉ nhắc file CCTG đã biết ({path_bad})",
+          ast_bad == [] and path_bad == [] and ast_scanned >= 8)
     globby = [c for c in CONSUMERS if os.path.isfile(os.path.join(HERE, c))
               and re.search(r"cctg_rate_vn[^\"'\n]*\*", open(os.path.join(HERE, c), encoding="utf-8").read())]
     check(f"S4 không consumer nào glob 'cctg_rate_vn*' (vi phạm: {globby})", globby == [])
@@ -357,6 +654,48 @@ try:
     check("S5c wrapper tuần chỉ gọi trend check đúng như cũ (không truyền tham số tier2)",
           re.findall(r"deposit_cctg_trend_check\.py[^\n]*", sh).count('deposit_cctg_trend_check.py >> "$LOG" 2>&1') == 1
           and not re.search(r"deposit_cctg_trend_check\.py[^\n]*tier2", sh))
+    # ---------- B7 / B8: wrapper cron ----------
+    check("B7a dispatch của wrapper đặt --timeout 1200 --max-turns 80",
+          re.search(r'dispatch\.sh"? Winston "\$PROMPT" --timeout 1200 --max-turns 80', sh) is not None)
+    check("B7b prompt buộc làm chuỗi 5 SAU CÙNG: event done + Discord cho chuỗi 1-4 TRƯỚC khi bắt đầu chuỗi 5",
+          "làm chuỗi 5 SAU CÙNG" in sh and "TRƯỚC khi bắt đầu chuỗi 5" in sh)
+    check("A1c prompt buộc chạy TUẦN TỰ từng lệnh chuỗi 5", "Chạy TUẦN TỰ từng lệnh chuỗi 5" in sh and "KHÔNG chạy song song" in sh)
+    check("B8 chuỗi 5 KHÔNG mở question: prompt nói rõ chỉ event DONE, mâu thuẫn ghi vào note + Discord",
+          "CHUỖI 5 KHÔNG mở question" in sh and "KHÔNG BAO GIỜ question" in sh and "chỉ dùng question khi" not in sh
+          and "escalate nhắc xác nhận tay" not in sh)
+    m_pc = re.search(r"<<'PYEOF' 2>>\"\$LOG\"\n(.*?)\nPYEOF\n", sh, re.S)
+    check("B7c tách được khối post-condition python từ wrapper", m_pc is not None)
+    if m_pc:
+        def postcond(events):
+            cw = tempfile.mkdtemp(prefix="cctg_t2pc_")
+            os.makedirs(os.path.join(cw, "mike", "bus", "inbox"))
+            start = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            ts = (datetime.utcnow() + timedelta(seconds=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            with open(os.path.join(cw, "mike", "bus", "inbox", "Winston.jsonl"), "w", encoding="utf-8") as f:
+                for topic, et, series in events:
+                    f.write(json.dumps({"ts": ts, "agent_id": "Winston", "event_type": et, "topic": topic,
+                                        "payload": {"series": series}}) + "\n")
+            r_ = subprocess.run([sys.executable, "-c", m_pc.group(1), start], cwd=cw, capture_output=True, text=True)
+            shutil.rmtree(cw, ignore_errors=True)
+            return r_.stdout.strip().splitlines(), r_.returncode
+        done = "deposit-cctg-weekly-done"
+        out_, rc_ = postcond([(done, "status", s_) for s_ in ("big4_12m", "cctg_12m", "cctg_6m", "sbv_policy")])
+        check("B7d chuỗi 1-4 có event, chuỗi 5 chưa: post-condition = yes, thiếu đúng 'cctg_tier2' (không báo hỏng cho chuỗi cũ)",
+              rc_ == 0 and len(out_) >= 3 and out_[0] == "yes" and out_[2] == "cctg_tier2" and "big4_12m" in out_[1] and "cctg_tier2" not in out_[1])
+        out_, rc_ = postcond([])
+        check("B7e không event nào: post-condition = no, thiếu cả 5 chuỗi", rc_ == 0 and len(out_) >= 3 and out_[0] == "no" and len(out_[2].split(",")) == 5)
+        out_, rc_ = postcond([(done, "status", s_) for s_ in ("big4_12m", "cctg_12m", "cctg_6m", "sbv_policy", "cctg_tier2")])
+        check("B7f đủ 5 chuỗi: không thiếu chuỗi nào", rc_ == 0 and out_[0] == "yes" and (len(out_) < 3 or out_[2] == ""))
+        # nhánh thông báo của wrapper: chuỗi 5 hỏng + dispatch rc != 0 -> KHÔNG dùng câu 'KHÔNG có kết quả xác nhận được'
+        i_part = sh.find('elif [ "${CONFIRMED:-no}" = "yes" ] && [ -n "${SEEN_SERIES:-}" ]')
+        i_old = sh.find('elif [ "$DISPATCH_RC" -ne 0 ] || [ "${CONFIRMED:-no}" != "yes" ]; then')
+        part_branch = sh[i_part:i_old] if 0 <= i_part < i_old else ""
+        i_part = i_part if part_branch else i_old + 1
+        check("B7g nhánh 'dừng giữa chừng' đứng TRƯỚC nhánh cũ, nêu chuỗi đã xong + chuỗi thiếu, không chứa câu "
+              "'KHÔNG có kết quả xác nhận được'",
+              i_part < i_old and "${SEEN_SERIES}" in part_branch and "${MISSING_SERIES}" in part_branch
+              and "KHÔNG có kết quả xác nhận được" not in part_branch and "KHÔNG cần làm lại" in part_branch)
+    assert_tree("cuối file")
 finally:
     acr.CSV_PATH, acr.CSV_PATH_6M, acr.CSV_PATH_TIER2, cctg._EVENTS_CSV, dep._EVENTS_CSV = orig
     shutil.rmtree(d, ignore_errors=True)

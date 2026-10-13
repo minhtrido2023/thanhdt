@@ -41,7 +41,9 @@ Usage (--series tier2 — VPB/MB/TCB/ACB, collect + display only, own file, key 
 Idempotent: re-running with an effective_date already present is skipped (unless --force).
 """
 import argparse
+import contextlib
 import csv
+import fcntl
 import json
 import os
 import sys
@@ -76,9 +78,13 @@ SEED_6M = ("2026-09-30", 7.5)
 # --series tier2 (user duyệt 2026-10-13): CCTG của nhóm ngân hàng NGAY SAU Big-4. CHỈ THU THẬP +
 # HIỂN THỊ — file RIÊNG, KHÔNG consumer nào đọc (cctg_tier2_series_selfcheck.py chứng minh:
 # effective rate / kill-switch A / consumer_deposit_rate* / trend check không mở file này).
-# Khác 12m/6m: MỘT file chứa nhiều chuỗi con, khoá = (bank, denomination). Mọi guard (idempotent,
-# ngày mới hơn, lệch >=1,0pp, URL dùng lại) tính RIÊNG từng khoá — không bao giờ suy số ngân hàng
-# này từ ngân hàng khác; không có mốc đông cứng (khoá chưa có dòng nào ⇒ không có số tham chiếu).
+# Khác 12m/6m: MỘT file chứa nhiều chuỗi con, khoá = (bank, denomination). Guard (idempotent,
+# ngày mới hơn, lệch >=1,0pp, URL dùng lại) tính RIÊNG từng khoá, không có mốc đông cứng. Số của
+# ngân hàng này KHÔNG BAO GIỜ được dùng để SUY số ngân hàng khác; nhưng để guard lệch >=1,0pp không
+# lách được bằng ĐỔI KHOÁ (job Taylor_20261013_090057, arch-review A3), một khoá MỚI do agent mở
+# phải qua kiểm tra cơ học (_tier2_new_key_guard): người (không JOB_ID) seed khoá mới thì không bị
+# chặn; ngân hàng đã có khoá kiểu 10tr/100tr thì từ chối khoá "" và ngược lại (trừ --force của người).
+# Ghi song song: toàn bộ đọc→ghi→sidecar của tier2 nằm trong flock <csv>.lock (A1).
 CSV_PATH_TIER2 = os.path.join(HERE, "data", "cctg_rate_vn_tier2_events.csv")
 TIER2_BANKS = ("VPB", "MB", "TCB", "ACB")
 TIER2_DENOMS = ("10tr", "100tr")  # "" = nguồn không nêu / ngân hàng không chia theo 2 mệnh giá này
@@ -105,6 +111,68 @@ FLOAT_EPS = 1e-6
 RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 30.0  # matches cctg_rate_vn.py's own sanity fence
 
 
+@contextlib.contextmanager
+def _tier2_flock(csv_path):
+    """Khoá loại trừ cho cả đọc→ghi→sidecar của file tier2 (nhiều lệnh --series tier2 chạy cùng lúc
+    từng làm mất dòng im lặng). Khoá giữ trên <csv>.lock, nhả khi thoát khối (kể cả sys.exit)."""
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    with open(csv_path + ".lock", "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lk, fcntl.LOCK_UN)
+
+
+def _tier2_key_str(bank, denom):
+    return f"[tier2 {bank} {denom or 'mệnh giá n/a'}]"
+
+
+def _latest_by_key(all_rows):
+    """{(bank, denom): rate mới nhất theo effective_date} — chỉ để so khoá mới, không suy số."""
+    best = {}
+    for r in all_rows:
+        k = (r.get("bank"), r.get("denomination") or "")
+        if k not in best or r["effective_date"] >= best[k][0]:
+            best[k] = (r["effective_date"], float(r["cctg_rate"]))
+    return {k: v[1] for k, v in best.items()}
+
+
+def _tier2_new_key_guard(all_rows, bank, denom, rate, is_agent, force):
+    """Trả None nếu được ghi, hoặc chuỗi lý do từ chối. Chỉ gọi khi khoá (bank, denom) CHƯA có dòng.
+    (a) ngân hàng đã có khoá kiểu mệnh giá ⇄ khoá '' : từ chối (người có --force thì qua);
+    (b) agent mở khoá mới cho ngân hàng ĐÃ có dòng: phải lệch <1pp so với ít nhất một khoá cùng
+        ngân hàng; (c) agent mở khoá cho ngân hàng CHƯA có dòng: phải nằm trong (min-1, max+1) của
+        dòng mới nhất mọi khoá ngân hàng khác; file rỗng ⇒ không có mốc ⇒ từ chối (fail-safe)."""
+    latest = _latest_by_key(all_rows)
+    same_bank = {k: v for k, v in latest.items() if k[0] == bank}
+    kstr = _tier2_key_str(bank, denom)
+    if same_bank and not force:
+        has_denom = any(k[1] for k in same_bank)
+        has_blank = any(not k[1] for k in same_bank)
+        if (denom and has_blank and not has_denom) or (not denom and has_denom):
+            return (f"{kstr} mở KHOÁ MỚI cho {bank} đang có khoá {sorted(k[1] or '(rỗng)' for k in same_bank)} "
+                    f"— đổi kiểu mệnh giá (rỗng ⇄ 10tr/100tr) làm guard lệch >=1pp mất tác dụng. "
+                    f"Từ chối; người xác nhận rồi ghi bằng --force.")
+    if not is_agent:
+        return None
+    if same_bank:
+        gaps = [abs(rate - v) for v in same_bank.values()]
+        if min(gaps) >= NONINERT_DELTA_PP:
+            return (f"{kstr} khoá MỚI do agent mở, lệch {min(gaps):.2f}pp (>= {NONINERT_DELTA_PP}pp) so với mọi khoá "
+                    f"đã có của {bank} {sorted(same_bank.items())} — từ chối. Nhờ người seed khoá này (manual_verify).")
+        return None
+    others = list(latest.values())
+    if not others:
+        return (f"{kstr} khoá MỚI do agent mở nhưng file tier2 chưa có dòng nào làm mốc — từ chối. "
+                f"Nhờ người seed (manual_verify) trước.")
+    lo, hi = min(others) - NONINERT_DELTA_PP, max(others) + NONINERT_DELTA_PP
+    if not (lo < rate < hi):
+        return (f"{kstr} ngân hàng CHƯA có dòng nào, rate {rate:g}% nằm ngoài dải ({lo:g}, {hi:g}) của dòng mới nhất "
+                f"các ngân hàng khác — từ chối. Nhờ người seed (manual_verify).")
+    return None
+
+
 def _read_rows(path=None):
     path = path or CSV_PATH
     if not os.path.exists(path):
@@ -118,8 +186,13 @@ def _valid_date(s):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Append one Big-4 CCTG rate anchor (12M highest, see cctg_rate_vn.py) (append-only).")
-    ap.add_argument("--rate", type=float, required=True, help="Big-4 CCTG rate, %%/yr (12M highest-of-Big-4; e.g. 7.4)")
+    with contextlib.ExitStack() as stack:
+        return _main_impl(stack)
+
+
+def _main_impl(stack):
+    ap = argparse.ArgumentParser(description="Append one CCTG rate anchor (append-only): --series 12m/6m = highest-of-Big-4 (see cctg_rate_vn.py); --series tier2 = one of VPB/MB/TCB/ACB.")
+    ap.add_argument("--rate", type=float, required=True, help="CCTG rate, %%/yr (12m/6m: highest-of-Big-4, e.g. 7.4; tier2: that bank's highest holding<=12m)")
     ap.add_argument("--effective", required=True, help="effective date YYYY-MM-DD")
     ap.add_argument("--source", required=True, help="one of: " + " | ".join(sorted(VALID_SOURCES)))
     ap.add_argument("--collected", default=None, help="real collection date YYYY-MM-DD (default: today)")
@@ -209,11 +282,23 @@ def main():
     # (rc=0), firing a false Winston escalate-question every time the cron (or a human) re-ran on
     # a day already confirmed. append_deposit_rate.py never had this ordering bug because it has
     # no equivalent "not newer" pre-check — only this CCTG script does.
+    if is_tier2:
+        stack.enter_context(_tier2_flock(csv_path))  # A1: đọc→ghi→sidecar là MỘT đoạn găng
     rows = _read_rows(csv_path)
     all_rows = rows  # tier2: cả file, giữ nguyên thứ tự; `rows` bên dưới chỉ còn khoá đang ghi
     if is_tier2:
         rows = [r for r in rows if (r.get("bank"), r.get("denomination") or "") == (bank, denom)]
     existing = {r["effective_date"] for r in rows}
+    if args.effective in existing and not args.force and is_tier2:
+        prev = [r for r in rows if r["effective_date"] == args.effective][0]
+        same = (prev.get("product", "") == product and abs(float(prev["cctg_rate"]) - args.rate) <= FLOAT_EPS)
+        if not same:
+            sys.exit(f"ERROR: {_tier2_key_str(bank, denom)} {args.effective} ĐÃ có dòng KHÁC: product='{prev.get('product', '')}' "
+                     f"rate={prev['cctg_rate']}% (source={prev.get('source')}) — lệnh này đòi product='{product}' "
+                     f"rate={args.rate:g}%. Không ghi; người xác nhận rồi --force.")
+        print(f"SKIP: {_tier2_key_str(bank, denom)} effective_date {args.effective} already present, cùng sản phẩm + "
+              f"lợi suất (use --force to override). No write — CSV unchanged.")
+        return 0
     if args.effective in existing and not args.force:
         print(f"SKIP: effective_date {args.effective} already present (use --force to override). "
               f"No write — CSV unchanged.")
@@ -243,6 +328,10 @@ def main():
         else:
             existing_ev = cctg_rate_vn.cctg_events_df()
             last_date = existing_ev["time"].max().date()
+    if eff <= last_date and (is_tier2 or is_6m):
+        # cctg_events_df() chỉ đọc file 12M — không nhắc nó với 2 chuỗi này (§29: thông báo phải đúng)
+        sys.exit(f"ERROR: {_tier2_key_str(bank, denom) + ' ' if is_tier2 else '[6m] '}--effective {eff} is not newer than the "
+                 f"last anchor {last_date} of this series. Refuse to write (typo'd year? duplicate run?).")
     if eff <= last_date:
         sys.exit(f"ERROR: --effective {eff} is not newer than the last anchor {last_date} — "
                  f"cctg_events_df() treats this as corrupt/duplicate data and will raise loudly "
@@ -308,6 +397,10 @@ def main():
     # --- delta guard vs current + last human-confirmed anchor ---
     # (rows/existing already loaded by the idempotency check above — nothing has written to disk
     # since, so reusing them here is safe and avoids a second redundant _read_rows() call)
+    if is_tier2 and not rows:  # A3: khoá chưa có dòng nào ⇒ không có số cùng khoá; kiểm cơ học khoá MỚI
+        why = _tier2_new_key_guard(all_rows, bank, denom, args.rate, is_dispatched_agent, args.force)
+        if why:
+            sys.exit(f"ERROR: {why}")
     if is_tier2:
         _allk = sorted(rows, key=lambda r: r["effective_date"])
         current_rate = float(_allk[-1]["cctg_rate"]) if _allk else None
@@ -324,6 +417,10 @@ def main():
                              (SEED_6M[1] if is_6m else cctg_rate_vn.CCTG_EVENTS[-1][1])))
     bases = [b for b in (current_rate, last_human_rate) if b is not None]
     deltas = [abs(args.rate - b) for b in bases]
+    if deltas and max(deltas) >= NONINERT_DELTA_PP and not args.force and is_tier2:
+        sys.exit(f"ERROR: {_tier2_key_str(bank, denom)} rate {args.rate:g}% differs from reference(s) {bases} by up to "
+                 f"{max(deltas):.2f}pp (>= {NONINERT_DELTA_PP}pp) — refuse to write. Escalate for "
+                 f"human review (--force is human-only).")
     if deltas and max(deltas) >= NONINERT_DELTA_PP and not args.force:
         sys.exit(f"ERROR: rate {args.rate:g}% differs from reference(s) {bases} by up to "
                  f"{max(deltas):.2f}pp (>= {NONINERT_DELTA_PP}pp) — refuse to write. Escalate for "
