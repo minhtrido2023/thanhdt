@@ -540,7 +540,8 @@ FIN_BREADTH_SAT_PCT=90     # cohort >= 90% số mã quý trước = mùa đã ho
 
 read -r EXPECTED_Q IN_SEASON <<< "$(python3 -c "
 import datetime as dt, calendar
-today = dt.date.today()
+from zoneinfo import ZoneInfo
+today = dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()   # neo ICT tường minh (§16), không phụ thuộc TZ cron
 q_end_month = ((today.month - 1) // 3) * 3   # 0,3,6,9 — tháng cuối của quý VỪA KẾT THÚC
 if q_end_month == 0:
     q_end = dt.date(today.year - 1, 12, 31); q_num, q_year = 4, today.year - 1
