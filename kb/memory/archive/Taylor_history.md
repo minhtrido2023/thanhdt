@@ -1166,3 +1166,12 @@
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-12T07:08:26Z] ĐANG DỞ job Taylor_20261012_070816 (vòng 2 gate-source-check: B1 bỏ pipe tee + R0 curl timeout + N1-N5,N7 trong 1 commit trên feat/gate-source-check-publish-20261012, wt-gatesrc-1012, KHÔNG merge): bắt đầu | NEXT: đọc bq_freshness_check.sh:660-700, gate_source_check.py, notify_discord.sh, sửa, selfcheck 3 TZ + mutation, bus finding gate-source-check-publish-20261012-r2
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T07:21:54Z] [gate-source check r2, 10-12] XONG: feat/gate-source-check-publish-20261012 @b1b8619d4 (wt-gatesrc-1012, CHƯA merge); finding gate-source-check-publish-20261012-r2 trace Taylor_20261012_070816. Chờ Mike merge + duyệt 2 file .proposed (registry gate_source_alert, runbook). Mở: notify_discord.sh vẫn exit 0 khi hết trần (giữ hợp đồng) — Mike/user quyết có cần mã lỗi. (Thay dòng ĐANG DỞ job 070816 và dòng 04:27 gate-source.)
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T12:34:39Z] [loss-brake] r2 XONG, nhánh feat/nav-loss-brake-monitor-20261012 @e650f7ce0 (ops_health là commit cuối; bản tuyến tính cũ ở backup/nav-loss-brake-r2-linear-20261012) CHỜ Mike/arch-review + user: duyệt 27 bản khai market_only máy sinh khi seed, tên khoá số ngưỡng episode, luật đẩy tin nav_is_estimate. Chưa merge/cài cron.
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T13:43:12Z] [quỹ mở bước 2] nhánh feat/fund-cashflow-detect-20261012 @ea9d6969a CHỜ Mike arch-review + merge (finding fund-cashflow-detect-20261012). Sau merge: SpaceX mang 2 cảnh báo CHỜ KHAI (07-03, 08-28) tới khi user chép market_only — đề xuất ở research/fund_cashflow_detect_20261012/proposed_acks.json

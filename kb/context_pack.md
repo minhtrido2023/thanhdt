@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3855)
+# Mike fleet — context pack (v3856)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-13T03:25:19] Wags/finding — finding-measured-by-gate-20261013: {"job": "Wags_20261013_012440", "status": "DONE_ON_BRANCH_NOT_MERGED — cho Mike kiem roi merge sau gio giao dich", "branch": "feat/finding-measured-by-20261013" …
 - [2026-10-13T06:31:32] Taylor/finding — tv1-sb5-ppa-price-verify-20261013: {"job": "Taylor_20261013_061651", "label": "XAC NHAN MOT PHAN bang van ban goc (huong + co che); MOC 2027 va MUC 500-600 CHI co loi lanh dao qua KBSV; phu luc P …
 - [2026-10-13T06:33:58] Taylor/finding — tv1-sotp-redo-sb5-price-step-20261013: {"job": "Taylor_20261013_061651", "conclusion": "Bien an toan SOTP goc (>=40%) KHONG CON. O dai gia lanh dao neu (500-600 d/kWh sau 2027) TV1 xap xi DUNG GIA; k …
 - [2026-10-13T08:42:22] Taylor/finding — cctg-tier2-banks-series-20261013: {"job": "Taylor_20261013_082516", "status": "DONE_ON_BRANCH_NOT_MERGED", "branch": "feat/cctg-tier2-banks-series-20261013", "commit": "7ec10026", "repo": "/home …
 - [2026-10-13T09:28:39] Taylor/finding — cctg-tier2-banks-series-20261013-r2: {"job": "Taylor_20261013_090057", "status": "DONE_ON_BRANCH_NOT_MERGED", "branch": "feat/cctg-tier2-banks-series-20261013", "commits": ["07c858c2", "d6c60ecd (t …
+- [2026-10-13T11:52:45] Taylor/finding — ftse-upgrade-revalidate-20261013: {"job": "Taylor_20261013_114456", "label": "MEASURED — chi do, KHONG doi tham so", "conclusion": "GIU NGUYEN ca 3 tang. 0/24 dai luong nam ngoai dai p5-p95. Du  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -110,10 +110,9 @@ quant-skeptic.md`) — audit định kỳ vẫn cần vì đòn 8 chỉ bắt Đ
 ## Macro watch — rủi ro cấu trúc BĐS VN (mở 2026-08-26)
 Bobby classify STRUCTURAL_ACCUMULATION/AMBIGUOUS. Thesis + lead indicators + playbook đã chốt:
 `kb/projects/vn-realestate-structural-risk-20260826.md`. KHÔNG đổi V2.4/DT5G/margin theo thesis này.
-**Review quý — next ~2026-11-26: dispatch Bobby refresh bảng lead indicators + quét
-`kb/structural_break_watch.json`** (6 sự kiện cấu trúc: nâng hạng, KRX, T+, luật margin, room
-ngoại, sản phẩm mới). Protocol: `kb/projects/amh-structural-break-protocol-20260910.md` —
-sự kiện kích hoạt ⇒ BẮT BUỘC re-validate đúng tầng, mặc định vẫn là KHÔNG đổi tham số.
+**Review quý — next ~2026-11-26: Bobby refresh lead indicators + quét `kb/structural_break_watch.json`**
+(protocol `kb/projects/amh-structural-break-protocol-20260910.md`; mặc định KHÔNG đổi tham số).
+🔴 **FTSE nâng hạng ĐÃ KÍCH HOẠT, hiệu lực 2026-09-21** (user chốt 10-13) ⇒ backtest mới TÁCH trước/sau ngày đó: `kb/projects/ftse-upgrade-structural-break-20260921.md`
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate 2026-07-07)
 Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu, BOT_STOP. Chi tiết: `kb/ops_runbook.md`.

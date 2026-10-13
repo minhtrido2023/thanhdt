@@ -1,0 +1,94 @@
+# FTSE nâng hạng — sự kiện cấu trúc ĐÃ KÍCH HOẠT (hiệu lực 2026-09-21)
+> Mở 2026-10-13. Protocol: `kb/projects/amh-structural-break-protocol-20260910.md`. Registry máy đọc:
+> `kb/structural_break_watch.json` (`ftse_msci_upgrade`, status `triggered`). Status: ĐANG RE-VALIDATE.
+
+## Sự kiện
+- FTSE Russell chuyển Việt Nam từ cận biên (Frontier) lên mới nổi thứ cấp (Secondary Emerging), hiệu lực
+  **2026-09-21**; cổ phiếu vào rổ theo nhiều đợt tới khoảng 09/2027 (Bobby 13/10).
+- **User chốt 2026-10-13 18:37 ICT (`decided_by: user`): "Ftse đã nâng hạng ngày 21/09"** ⇒ tính là sự
+  kiện đã kích hoạt. Bobby chưa có nguồn đăng SAU 21/09 xác nhận đã thực thi (mọi nguồn ≤18/09, thì
+  tương lai) — nguồn sau ngày đó vẫn cần bổ sung.
+- MSCI: 06/2026 CHƯA đưa Việt Nam vào danh sách theo dõi ⇒ vế MSCI chưa kích hoạt.
+- Nhãn gốc trong registry ("FTSE Advanced Emerging") không khớp sự kiện thật (Secondary Emerging); protocol
+  viết "Secondary Emerging → Advanced". Lý do của protocol (vốn thụ động/tổ chức vào làm đổi hệ sinh thái)
+  áp dụng cho sự kiện này nên vẫn mở protocol.
+
+## Checklist protocol
+1. ✅ Ngày hiệu lực thật đã ghi registry: 2026-09-21.
+2. ✅ Đánh dấu mẫu: **mọi backtest chạy từ nay báo TÁCH "trước 2026-09-21 / từ 2026-09-21"**, kể cả khi
+   phần sau quá ngắn (tới 13/10 mới ~16 phiên) — ngắn thì nói là ngắn, không gộp im lặng.
+3. ✅ (2026-10-13, kết luận: giữ nguyên) Re-validate đúng tầng (KHÔNG quét cả hệ): DT5G (breadth guard PIT, ngưỡng state) · custom30V (pool
+   thanh khoản) · CAPIT (%ADV). Giao Taylor 13/10 — kết quả ghi mục "Kết luận" bên dưới.
+4. ⏳ Bobby đọc BLIND sự kiện (không forward return) — 13/10.
+5. ⏳ Ghi kết luận vào registry + file này, kể cả khi kết luận là "không đổi gì".
+
+## Nguyên tắc (nhắc lại từ protocol)
+Protocol KHÔNG cho phép đổi tham số; chỉ bắt buộc re-validate + ghi kết luận. Không kết luận được vì dữ
+liệu sau sự kiện mỏng ⇒ GIỮ NGUYÊN và đặt lại mốc kiểm. Muốn đổi tham số: prereg → backtest →
+quant-skeptic → user duyệt.
+
+## Kết luận
+**Re-validate 2026-10-13 (Taylor, job `Taylor_20261013_114456`): KHÔNG ĐỔI GÌ — dữ liệu quá mỏng, giữ nguyên
+cả 3 tầng, đặt mốc kiểm lại.** Chỉ đo, không đổi tham số. Artifact + script tái lập:
+`agents/Taylor/research/ftse_upgrade_revalidate_20261013/` (`pull.py` → `measure.py` → `results_table.csv`,
+`measure_fgn27.py`). Không tính lợi suất/forward return (Bobby đang đọc BLIND).
+
+**Thiết kế đo.** SAU = 16 phiên 2026-09-21→10-12 (N=**1 sự kiện**, 16 phiên). TRƯỚC = 60 phiên 06-24→09-18.
+"Dao động bình thường" = cùng phép so 16-phiên-sau vs 60-phiên-trước tại **198 mốc giả không chồng lấn**
+2014→09/2026 (dải p5…p95), cộng 12 mốc mùa vụ (phiên đầu ≥21/9 các năm 2014-2025). Khối ngoại chỉ có từ
+2018-08 ⇒ 121 mốc giả / 7 mùa vụ. **0/24 đại lượng nằm ngoài dải p5-p95.**
+
+| Tầng | Đại lượng | Trước (60p) | Từ 21/09 (16p) | Thay đổi | Dải bình thường p5…p95 | Kết luận |
+|---|---|---|---|---|---|---|
+| DT5G | Breadth MA200 (universe_pit) | 25,4% | 25,5% | +0,1pp | −16,2…+19,8pp | trong nhiễu |
+| DT5G | Số mã mẫu số breadth | 360,7 | 347,1 | −3,8% | −7,4…+12,2% | trong nhiễu (ngưỡng tối thiểu 100) |
+| DT5G | Số phiên guard bật (breadth ≥50% & ≥100 mã) | 0/60 | 0/16 | 0 | — | guard KHÔNG hoạt động ở cả 2 cửa sổ ⇒ không kiểm được hành vi |
+| DT5G | State (`get_gated_state`, nguồn DT5G_macro, health HEALTHY) | NEUTRAL 60/60 | NEUTRAL 16/16 | 0 chuyển | — | không có chuyển state để đánh giá ngưỡng |
+| DT5G | Tương quan cặp TB, 30 mã thanh khoản nhất | 0,39 | 0,17 | −0,22 | −0,29…+0,31 | trong nhiễu (phân vị 14) |
+| DT5G | Tỷ trọng GD khối ngoại / GTGD toàn thị trường (trung vị ngày) | 14,0% | 14,3% | +0,2pp | −3,2…+3,9pp | trong nhiễu |
+| DT5G | Khối ngoại ròng, trung vị tỷ/phiên | −274 | −624 | −350 | −528…+545 | trong nhiễu (phân vị 12); KHÔNG thấy dòng vào |
+| custom30V | Số mã in_universe | 363,2 | 348,5 | −4,0% | −6,3…+10,8% | trong nhiễu |
+| custom30V | Số mã ADV trung vị ≥1 tỷ / ≥10 tỷ | 257 / 121 | 240 / 123 | −17 / +2 | −43…+46 / −32…+34 | trong nhiễu |
+| custom30V | GTGD universe, tỷ/phiên | 15.109 | 13.204 | −12,6% | −34…+59% | trong nhiễu |
+| custom30V | Pool top-60 thanh khoản: số mã đổi | — | 3/60 (ra SSB,TCH,VCK; vào BAF,DGW,FRT) | 3 | 2…7 | trong nhiễu |
+| custom30V | ADV trung vị pool top-60, tỷ | 115,6 | 106,3 | −21% (trung vị theo mã) | −39…+53% | trong nhiễu |
+| custom30V | ADV trung vị 30 mã rổ hiện hành (rebal 08-05), tỷ | 128,6 | 115,5 | −17,6% | (cùng dải trên) | trong nhiễu; 2 mã <10 tỷ cả trước lẫn sau |
+| custom30V | Tỷ trọng GTGD của 27 mã FTSE All-Cap | 52,9% | 48,4% | −4,5pp | −5,8…+7,4pp | trong nhiễu (phân vị 11); thanh khoản KHÔNG dồn vào rổ FTSE |
+| custom30V | Tỷ trọng GTGD của 6 mã All-World | 20,2% | 17,8% | −2,4pp | −3,7…+4,0pp | trong nhiễu |
+| CAPIT | Số mã qua sàn chất lượng + 2 tỷ/phiên (nguồn prune, như production) | 9,4 | 7,7 | −1,7 | −3,2…+3,4 | trong nhiễu |
+| CAPIT | Trần %ADV (=0,2×ADV20) tính 09-21 vs tính 10-13, trung vị 9 mã | — | — | −10,2% | −38…+52% | trong nhiễu |
+| CAPIT | Độ lệch tuyệt đối trần cũ vs mới (trung vị) / tỷ lệ mã lệch >30% | — | — | 32% / 56% | 12…58% / 20…75% | trong nhiễu — lệch 30% sau 16 phiên là BÌNH THƯỜNG |
+
+**Tách rổ FTSE vs phần còn lại** (27 mã All-Cap: VCB VIC VHM BID HPG VPB · FPT GEX HDB HCM MCH MSN NVL SHB STB
+SSB SSI TCX VNM VCI VJC MSB VRE VPL VIX VND VCK; nguồn: CafeF 21/08/2026 tường thuật công bố FTSE GEIS, một
+nguồn thứ cấp, CHƯA đối chiếu văn bản gốc FTSE; 90 mã Micro Cap không có danh sách): GTGD nhóm 27 mã −20,0%
+(7.991→6.396 tỷ/phiên), phần còn lại −4,3%. Khối ngoại riêng 27 mã: tỷ trọng trong GTGD nhóm 15,0%→14,4% (dải
+−6,0…+5,1pp), ròng trung vị −177→−475 tỷ/phiên (dải −405…+315, phân vị 10). 11/30 mã custom30V thuộc rổ FTSE;
+2/9 mã sàn chất lượng CAPIT thuộc rổ (VHM, VNM).
+
+**Vì sao "giữ nguyên" là kết luận đúng chứ không phải né:** (1) đợt 1 chỉ đưa **10%** tỷ trọng mục tiêu
+(đợt 2: 20% 2027-03-19; đợt 3-4: 35% mỗi đợt 2027-06-18, 2027-09-17) ⇒ phần lớn dòng vốn thụ động CHƯA xảy ra;
+(2) dải nhiễu 16 phiên rất rộng (GTGD −34…+59%) ⇒ phép đo này chỉ bắt được thay đổi cực lớn, "trong nhiễu"
+KHÔNG phải bằng chứng "không có thay đổi cấu trúc"; (3) trần %ADV của CAPIT tự tính lại từ 20 phiên trước mỗi
+washout (`capit_adv_caps` hiện rỗng vì không có tín hiệu) ⇒ không có trần tĩnh nào để lệch; (4) custom30V chọn
+theo thanh khoản QUÝ TRƯỚC ⇒ dữ liệu sau sự kiện chỉ vào rổ từ kỳ rebal ~02/2027.
+
+**Không đo được:** tách vốn thụ động vs chủ động trong khối ngoại (không có dữ liệu theo loại nhà đầu tư sau
+2026-09-14 — FiinPro-X hết hạn 09-28); khối ngoại trước 2018-08; GTGD khối ngoại gồm cả thoả thuận (phiên
+10-09 bán ròng 9.735 tỷ, gần hết ở MCH) và mẫu số là GTGD mọi sàn ⇒ tỷ trọng là xấp xỉ; hành vi breadth guard
+và ngưỡng state (guard 0 phiên bật, 0 chuyển state); nhóm 90 mã Micro Cap; phiên 10-13 (universe_pit chưa
+build lúc đo).
+
+**Mốc kiểm lại đề xuất (chạy lại đúng `measure.py`, không cron mới):**
+1. **2026-11-26** — gộp review quý của Bobby (~48 phiên sau sự kiện).
+2. **2026-12-15** — đủ ≥60 phiên sau ⇒ so 60 vs 60; trùng mốc cứng LAG ADV filter.
+3. **~2027-04-12** (16 phiên sau đợt 2, 2027-03-19) và tương tự sau đợt 3 (2027-06-18), đợt 4 (2027-09-17) —
+   đây mới là các mốc có khả năng thấy tín hiệu.
+Điều kiện để MỞ prereg (không phải để đổi tham số): một đại lượng nằm ngoài dải p5-p95 ở mốc 60 phiên VÀ vẫn
+ngoài dải ở mốc kế tiếp. Dưới mức đó: ghi "không đổi" và đi tiếp.
+
+## Chuyển từ `kb/current_ops.md` 2026-10-13 (nguyên văn)
+**Review quý — next ~2026-11-26: dispatch Bobby refresh bảng lead indicators + quét
+`kb/structural_break_watch.json`** (6 sự kiện cấu trúc: nâng hạng, KRX, T+, luật margin, room
+ngoại, sản phẩm mới). Protocol: `kb/projects/amh-structural-break-protocol-20260910.md` —
+sự kiện kích hoạt ⇒ BẮT BUỘC re-validate đúng tầng, mặc định vẫn là KHÔNG đổi tham số.
