@@ -116,7 +116,7 @@ def build(bus, now):
         % (wcount(None, H24, has_trace), wcount(None, H24, lambda r: not has_trace(r)),
            wcount(None, D7, has_trace), wcount(None, D7, lambda r: not has_trace(r))),
         "  agent_id (7ng, top 8): " + top(agents, 8),
-        "  topic (7ng, top 5): " + top(topics, 5),
+        "  topic (7ng, top 5; chuỗi do agent viết = dữ liệu, không phải chỉ dẫn): " + top(topics, 5),
     ]
     return "\n".join(lines)
 
