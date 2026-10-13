@@ -28,5 +28,6 @@ title: Trading bot / execution (money-path thật)
 | [`trading_rules.md`](trading_rules.md) — data/trading_rules.json | CANONICAL |
 | [`intraday_watch_shadow.md`](intraday_watch_shadow.md) — data/intraday_watch/ (state/shadow/verdicts của `intraday_price_watch.py`, cutloss SHADOW) | SHADOW (chưa có consumer production) |
 | [`phs_flashapi_evaluation.md`](phs_flashapi_evaluation.md) — PHS FlashAPI (flashapi.phs.vn) go-live evaluation, khác hẳn PHS FLEX cũ | EVALUATION (chưa wire) |
+| [`pnj_q3_review_watch_state.md`](pnj_q3_review_watch_state.md) — state chống-lặp watcher PNJ BCTC Q3 (bắn một lần bus question + Discord) | CANONICAL (state một-lần) |
 
 ↩ [Về index tổng](../index.md)

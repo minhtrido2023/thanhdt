@@ -4,7 +4,7 @@ status: CANONICAL
 source: tav2_bq.fa_ratings_8l
 group: rating-8l
 note: as-of 8L, refresh định kỳ, ghi-BQ xác nhận THẬT 2026-07-12
-writer: rating_8l_history.py refresh_bq_table() qua mike/bin/refresh_fa_ratings_8l.sh, cron weekly thứ Bảy 08:30 ICT + cron TẠM T3 20:00 ICT đến hết 2026-08-04
+writer: rating_8l_history.py refresh_bq_table() qua mike/bin/refresh_fa_ratings_8l.sh, cron weekly thứ Bảy 08:30 ICT + cron 20:00 ICT HẰNG NGÀY có gate mùa BCTC (mike/bin/fa_ratings_earnings_window_daily.sh)
 ---
 
 # tav2_bq.fa_ratings_8l
@@ -18,9 +18,12 @@ builders, `custom_basket.rating_asof`, regime_size overlay, DC-book double-confi
 
 ## Ai ghi / cadence
 `rating_8l_history.py refresh_bq_table()` qua wrapper `mike/bin/refresh_fa_ratings_8l.sh`, cron
-**weekly thứ Bảy 08:30 ICT** (Winston proposal + user approved 2026-07-11) + cron TẠM **T3 20:00 ICT
-đến hết 2026-08-04** cho mùa BCTC Q2 (job Winston_20260713_103213, guard tự hết hạn — xem
-`cron_registry.md`). Bao gồm forensic-exclude override rows (append-at-flag-date, no hindsight).
+**weekly thứ Bảy 08:30 ICT** (Winston proposal + user approved 2026-07-11) + cron **20:00 ICT HẰNG NGÀY
+có gate** `mike/bin/fa_ratings_earnings_window_daily.sh` — chỉ chạy thật trong cửa sổ mùa BCTC:
+ngày 10 tháng đầu quý (1/4/7/10) → hết ngày 10 tháng kế tiếp (2/5/8/11), kể cả cuối tuần, trừ lễ VN
+(quy tắc vĩnh viễn 2026-07-14, nới cả hai đầu 2026-10-13 — xem `cron_registry.md`; cron TẠM T3 mùa
+Q2 của job Winston_20260713_103213 đã xoá từ 07-14). **Ngoài cửa sổ chỉ còn dòng thứ Bảy** ⇒ rating
+của mã công bố sau ngày 10 tháng thứ hai quý có thể cũ tới 7 ngày. Bao gồm forensic-exclude override rows (append-at-flag-date, no hindsight).
 
 ## Bẫy
 Republish làm mọi backtest as-of lệch nhẹ → CSV pinned trong `results_registry.md` mới là chuẩn đối

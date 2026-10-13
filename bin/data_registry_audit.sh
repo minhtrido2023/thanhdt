@@ -97,7 +97,7 @@ check_bq_fresh() {
 
 check_bq_fresh "vnindex_5state_dt5g_live" 3  "DT5G production regime state"
 check_bq_fresh "custom30v_8l"             5  "custom30V parking basket (production money-path)"
-check_bq_fresh "fa_ratings_8l"            9  "8L fundamentals as-of (cron weekly Sat 08:30 ICT + daily 20:00 ICT trong cửa sổ mùa BCTC 15..hết tháng 1/4/7/10 — fa_ratings_earnings_window_daily.sh; expect <7d gaps)"
+check_bq_fresh "fa_ratings_8l"            9  "8L fundamentals as-of (cron weekly Sat 08:30 ICT + daily 20:00 ICT trong cửa sổ mùa BCTC ngày 10 tháng 1/4/7/10 .. ngày 10 tháng 2/5/8/11 — fa_ratings_earnings_window_daily.sh; expect <7d gaps)"
 check_bq_fresh "fa_ratings"               9  "legacy tier A-E, SIGNAL_V11 fa_tier input (append-only refresh cron weekly Sat 09:15 ICT + daily 20:45 ICT trong cửa sổ mùa BCTC, sau 8L 45 phút)"
 
 # ── C. Reference-count drift on known DEPRECATED/DEAD sources ──────────────────────────────
