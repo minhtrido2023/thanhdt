@@ -37,6 +37,12 @@
 #   earnings_surprise_data.pkl probe  WARN  — content catch-up pkl vs ticker_financial: nguồn LAG live
 #                                             candidacy, golive except-path nuốt lỗi im lặng
 #                                             (audit Spyros_20260712_131501 M1)
+#   PNJ BCTC Q3 review-trigger watch  WARN  — PNJ có dòng quarter=2026Q3 trong ticker_financial ⇒ MỘT
+#                                             LẦN: bus question + Discord (bin/pnj_q3_review_watch.py)
+#
+# Bước pipeline (sau khi ALL FRESH): 1 publish_gated_state · 1b universe_pit · 1c universe_pit_quality ·
+#   1d refresh_earnings_surprise_pkl (BQ SỐNG → pkl LAG, WARN-only, 2026-10-13) · 2 golive_recommend_v23 ·
+#   3 push_recommend_v23_to_bq · 4 dispatch DollarBill
 #
 # Usage: bin/bq_freshness_check.sh [--quiet]
 set -uo pipefail
@@ -651,6 +657,17 @@ else
   fi
 fi
 
+# --- PNJ BCTC Q3 review-trigger watch (audit BCTC Q3 finding L2; user duyệt 2026-10-13, job
+# Taylor_20261013_125149). PNJ bị loại khỏi 2 account từ 09-30, điều kiện xét lại = "khi PNJ công bố
+# BCTC Q3" (kb/current_ops.md) — trước đây chỉ là văn xuôi, không ai canh. Script tự chống lặp bằng
+# state file ghi nguyên tử (data/pnj_q3_review_watch_state.json) và fail-closed khi lỗi đọc; ở đây
+# chỉ gọi + giới hạn thời gian. KHÔNG đếm vào WARNED, KHÔNG chặn pipeline, KHÔNG đụng excluded_tickers.
+if _pnj_out="$(cd "$ROOT" && timeout 300 python3 bin/pnj_q3_review_watch.py ${QUIET:+--quiet} 2>&1)"; then
+  [ -n "$_pnj_out" ] && echo "$_pnj_out"
+else
+  echo "  [WARN] pnj_q3_review_watch.py exit=$? (124 = timeout 300s) — không chặn pipeline. Output thật: ${_pnj_out:-<rỗng>}"
+fi
+
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
 # --- [pipeline-0] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 PHIÊN trên mã đang giữ
@@ -721,6 +738,31 @@ else
   "$ROOT/bin/notify_thread.sh" "$_pq_err" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   echo "=== FAILED (build_universe_pit_quality) — DollarBill KHÔNG được dispatch ==="
   exit 1
+fi
+
+# [pipeline-1d] làm mới data/earnings_surprise_data.pkl từ BQ SỐNG ngay trước golive (audit BCTC Q3
+# finding L1; user duyệt 2026-10-13, job Taylor_20261013_125149). golive lấy sự kiện LAG mới từ pkl
+# này, mà bản 15:30 (refresh_lagged_caches.py [3]) đọc qua BQ_LOCAL_CACHE = cache sync 23:45 ĐÊM
+# TRƯỚC ⇒ BCTC ingest ~16:36 hôm nay chỉ tới golive ở 19:00 NGÀY MAI (đo 10-13: pkl 15:30 = 58.233
+# dòng/max 08-21 = y hệt parquet cache; BQ sống đã có KBC 2026Q3). Bước này bỏ hẳn phiên trễ đó.
+# WARN-only: lỗi/timeout/dữ liệu đáng ngờ ⇒ script GIỮ pkl 15:30 (ghi nguyên tử, không bao giờ để
+# pkl nửa vời) và golive vẫn chạy như trước khi có bước này. Đo thật 10-13: ~14-15s/lượt (3 lượt),
+# RSS ~316MB; timeout 300s. CỐ Ý không dùng _run_pipeline để phân biệt được timeout (rc=124) và
+# đẩy WARN lên Discord — hỏng ở đây nghĩa là LAG lặng lẽ quay về trễ 1 phiên giữa mùa BCTC.
+# Probe lag-pkl ở trên đo pkl TRƯỚC bước này ⇒ vẫn canh độc lập đường làm mới 15:30.
+LAG_PKL_REFRESH_TIMEOUT_S="${LAG_PKL_REFRESH_TIMEOUT_S:-300}"   # env override CHỈ cho selfcheck
+echo; echo "--- [pipeline-1d] refresh_earnings_surprise_pkl (BQ sống → pkl LAG) ---"
+_pkl_t0="$(date +%s)"
+if _pkl_out="$(timeout "$LAG_PKL_REFRESH_TIMEOUT_S" $PY refresh_earnings_surprise_pkl.py 2>&1)"; then
+  echo "$_pkl_out" | tail -3
+  echo "  [ok] [pipeline-1d] refresh_earnings_surprise_pkl ($(( $(date +%s) - _pkl_t0 ))s)"
+else
+  _pkl_rc=$?
+  echo "$_pkl_out" | tail -5
+  _pkl_why="$(echo "$_pkl_out" | tail -1)"
+  [ "$_pkl_rc" -eq 124 ] && _pkl_why="timeout ${LAG_PKL_REFRESH_TIMEOUT_S}s (bị kill; file tạm mồ côi sẽ được dọn ở lượt sau)"
+  echo "  [WARN exit $_pkl_rc] [pipeline-1d] refresh_earnings_surprise_pkl — GIỮ pkl 15:30, tiếp tục pipeline ($(( $(date +%s) - _pkl_t0 ))s)"
+  "$ROOT/bin/notify_thread.sh" "🟡 LAG PKL REFRESH WARN ($TODAY $NOW_ICT): bước làm mới earnings_surprise_data.pkl từ BQ sống trước golive KHÔNG xong (exit $_pkl_rc) — golive vẫn chạy trên pkl 15:30 (cache đêm trước), tức BCTC ingest hôm nay sẽ tới LAG trễ 1 phiên như trước 10-13. Lý do thật: ${_pkl_why:-<không có output>}. Không chặn plan." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
 fi
 
 _run_pipeline "[pipeline-2] golive_recommend_v23"     deploy_golive_dt5g_v4/golive_recommend_v23.py

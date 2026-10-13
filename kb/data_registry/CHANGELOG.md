@@ -10,6 +10,13 @@ note: >
 
 # Lịch sử biên tập Data Registry
 
+- 2026-10-13 (Taylor, job Taylor_20261013_125149, user duyệt 4 việc từ audit BCTC Q3): (1) `rating-8l/fa_ratings_8l.md`
+  + `rating-8l/fa_ratings.md` — hết ghi "cron TẠM T3 đến 08-04" (đã xoá từ 07-14), ghi đúng cron 20:00 hằng ngày
+  có gate mùa BCTC, cửa sổ mới ngày 10 tháng 1/4/7/10 → ngày 10 tháng 2/5/8/11 (L4 + M1a); (2)
+  `lag-book/lag_caches.md` — writer thứ hai 19:00 cho `earnings_surprise_data.pkl` + bẫy "bản 15:30 đọc cache đêm
+  trước, không phải BQ sống" (đo 10-13) + bẫy ghi không nguyên tử (L1); (3)
+  `market-state/golive_v23_recommendations.md` — 3 khoá `lag_rating_stale*` cảnh-báo-only (M1b); (4) MỚI
+  `trading-bot/pnj_q3_review_watch_state.md` (L2).
 - 2026-10-11 (Taylor, job Taylor_20261010_182122, N11): `account_inception.md` — thêm consumer `daily_nav_snapshot.py`; ghi bẫy "mốc DUY NHẤT cho mọi phần trăm hiệu suất" (dòng "Từ go-live" của báo cáo ngày từng dùng mốc 1 tỷ: 28/28 báo cáo ngày ZaloPay lệch −1,127…−1,220 điểm %, nguồn đo: `agents/Taylor/research/fund_unit_ledger_20261011/round2/n11_daily_reports_wrong_baseline.txt`).
 - 2026-10-11 (Taylor, job Taylor_20261010_182122, sau arch-review @feaa33b5): `nav_unit_ledger.md` đổi trạng thái thành **NOT-YET-SEALED** — KHÔNG chốt sổ thật trước bước 3, `--seal` từ chối thư mục dữ liệu thật, file là BẢN ĐỐI CHỨNG chứ không phải nguồn của tỉ suất, không consumer nào đọc. `account_cash_flows.md`: bỏ mặc định `timing`, `time_ict` BẮT BUỘC, thêm mục "Luật gán" (code tự suy `bod`/`eod` từ ngày + giờ + `balance_ts`).
 - 2026-10-11 (Taylor, job Taylor_20261010_170004): thêm **3 nguồn** vào `trading-bot/` cho bước 1 chính sách "tài khoản = quỹ mở" — `nav_unit_ledger.md` (`data/execution_logs/nav_unit_ledger_<account>.csv`, sổ đơn vị quỹ chỉ-ghi-thêm, MỚI; status CANONICAL nhưng file thật CHƯA chốt lần đầu và chưa có cron), và hai đầu vào của nó vốn đang được dùng mà CHƯA có entry: `account_cash_flows.md` (`data/account_cash_flows.json`, đo 2026-10-11: 0 bản ghi cả 2 account; `timing` mặc định đổi `bod`→`eod` từ 2026-10-10) và `account_inception.md` (`data/account_inception.json`). Status ghi theo bằng chứng đo: `ls` file thật, `crontab -l` (0 dòng gọi `nav_unit_ledger`), `git check-ignore` (cả 3 file dữ liệu đều ngoài git).
