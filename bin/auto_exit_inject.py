@@ -202,31 +202,46 @@ def _load_block_alert_state():
 
 
 def _new_block_alert_lines(account, blocked_notes, capped_notes, today):
-    """Lọc blocked/capped theo KEY (ticker,book,reason/capped_qty) đã alert ĐÚNG NGÀY hôm nay —
-    mã bị chặn/cắt nhiều ngày liên tiếp với CÙNG nội dung chỉ lên Discord 1 lần/ngày, KHÔNG phải
-    1 lần/lượt chạy cron (§29, arch-review vòng 3). Khoá có `reason`/`capped_qty` (vòng 4) — mã
-    cùng ticker+book nhưng NỘI DUNG đổi trong ngày (reason khác, hoặc cắt xuống số khác ở lượt
-    chạy sau) vẫn phải báo lại, không bị khoá cũ (ghi lúc 9:05) che mất lúc 21:00. Trả
-    `(lines, state_mới_để_ghi)`; `lines` rỗng ⇒ không có gì MỚI để gửi."""
+    """Lọc blocked/capped theo KEY (ticker,book,reason/capped_qty) đã alert và CÒN HIỆN HÀNH —
+    mã bị chặn/cắt nhiều ngày liên tiếp với CÙNG nội dung chỉ lên Discord 1 LẦN cho tới khi nội
+    dung đổi (user duyệt 2026-10-13: cảnh báo hiển nhiên lặp mỗi ngày là nhiễu). Khoá có
+    `reason`/`capped_qty` (§29 vòng 4) — cùng ticker+book nhưng NỘI DUNG đổi (reason khác, cắt
+    xuống số khác) là khoá MỚI ⇒ báo lại. State mới CHỈ giữ khoá của lượt này ⇒ mã biến mất rồi
+    xuất hiện lại cũng báo lại. Giá trị state = ngày báo đầu (khoá cũ dạng ngày vẫn đọc được).
+    Trả `(lines, state_mới_để_ghi)`; `lines` rỗng ⇒ không có gì MỚI để gửi."""
     state = _load_block_alert_state()
-    acct_state = dict(state.get(account) or {})
+    old = dict(state.get(account) or {})
+    new_acct = {}
     lines = []
     for b in blocked_notes:
         reason_s = str(b.get("reason") or "")[:150]
         key = f"{b.get('ticker')}|{b.get('book')}|blocked|{reason_s}"
-        if acct_state.get(key) == today:
+        if key in old:
+            new_acct[key] = old[key]
             continue
         lines.append(f"⛔ {b.get('ticker') or '(book-level)'} ({b.get('book','?')}): {reason_s}")
-        acct_state[key] = today
+        new_acct[key] = today
     for c in capped_notes:
         key = f"{c.get('ticker')}|{c.get('book')}|capped|{c.get('capped_qty')}"
-        if acct_state.get(key) == today:
+        if key in old:
+            new_acct[key] = old[key]
             continue
         lines.append(f"⚠️ {c.get('ticker','?')} ({c.get('book','?')}): "
                      f"{c.get('desired_qty','?')}cp → {c.get('capped_qty','?')}cp")
-        acct_state[key] = today
-    state[account] = acct_state
+        new_acct[key] = today
+    state[account] = new_acct
     return lines, state
+
+
+def _prune_block_alert_state(account):
+    """Lượt chạy KHÔNG còn mã nào bị chặn/cắt ⇒ xoá khoá của account, để mã xuất hiện lại sau đó
+    được báo lại (nếu không, `_send_block_alert` không được gọi và khoá cũ ở lại mãi)."""
+    if os.environ.get("AUTO_EXIT_TEST_MODE") == "1" or os.environ.get("PYTEST_CURRENT_TEST"):
+        return
+    state = _load_block_alert_state()
+    if state.get(account):
+        state[account] = {}
+        _atomic_write_json(BLOCK_ALERT_STATE_PATH, state)
 
 
 def _send_block_alert(account, blocked_notes, capped_notes):
@@ -234,8 +249,8 @@ def _send_block_alert(account, blocked_notes, capped_notes):
     GUARD test-mode §5b (mirror `_send_capit_reminder`), MỘT guard duy nhất che cả 2 kênh. §29:
     mọi exit bị bỏ qua/cắt bớt PHẢI hiện ra cho NGƯỜI duyệt plan, không chỉ nằm im trong KB/log
     stdout của cron (arch-review vòng 3: không ai đọc bus mỗi ngày để duyệt plan). Dedup THEO
-    NGÀY qua `_new_block_alert_lines` — mã bị chặn liên tiếp nhiều ngày không spam Discord mỗi
-    lượt chạy."""
+    NỘI DUNG qua `_new_block_alert_lines` — mã bị chặn liên tiếp nhiều ngày với cùng nội dung
+    không spam Discord (báo 1 lần tới khi nội dung đổi)."""
     payload = json.dumps({"account": account, "blocked": blocked_notes, "capped": capped_notes},
                          ensure_ascii=False)
     if os.environ.get("AUTO_EXIT_TEST_MODE") == "1" or os.environ.get("PYTEST_CURRENT_TEST"):
@@ -249,6 +264,7 @@ def _send_block_alert(account, blocked_notes, capped_notes):
     today = now_ict().date().isoformat()
     lines, new_state = _new_block_alert_lines(account, blocked_notes, capped_notes, today)
     if not lines:
+        _atomic_write_json(BLOCK_ALERT_STATE_PATH, new_state)  # tỉa khoá của mã đã hết bị chặn
         return
     msg = (f"🚨 auto-exit {account}: {len(lines)} mã bị CHẶN/CẮT (LAG/BAL/CAPIT), KHÔNG tự chèn "
            f"đủ lệnh — kiểm plan trước khi duyệt:\n" + "\n".join(lines))
@@ -496,6 +512,8 @@ def process_account(account, plan_date, signal_date, dry_run):
               f"sell trong plan (không chèn lại) — {skipped_existing}")
     else:
         print(f"[auto-exit] {account} {plan_date}: không có candidate tới mốc exit.")
+    if not dry_run and not (blocked_notes or capped_notes):
+        _prune_block_alert_state(account)
     return 0
 
 
