@@ -26,6 +26,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -387,8 +388,8 @@ try:
                     "--source", "manual_verify"] + (["--denom", dn] if dn else [])
             ps.append(subprocess.Popen([sys.executable, "-c", DRIVER, str(i)] + argv, env=env, cwd=cdir,
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
-        t0 = datetime.now()
-        while len(glob.glob(go + ".ready.*")) < len(ps) and (datetime.now() - t0).seconds < 90:
+        t0 = time.monotonic()
+        while len(glob.glob(go + ".ready.*")) < len(ps) and (time.monotonic() - t0) < 90:
             if any(p_.poll() is not None for p_ in ps):
                 break
             pass
@@ -425,8 +426,8 @@ try:
                 "--source", "web_crosscheck_auto", "--collected", TODAY, "--note", "x", "--sources", pub] + (["--denom", dn] if dn else [])
         ps.append(subprocess.Popen([sys.executable, "-c", DRIVER, str(i)] + argv, env=env, cwd=cdir,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
-    t0 = datetime.now()
-    while len(glob.glob(go + ".ready.*")) < len(ps) and (datetime.now() - t0).seconds < 90 and not any(p_.poll() is not None for p_ in ps):
+    t0 = time.monotonic()
+    while len(glob.glob(go + ".ready.*")) < len(ps) and (time.monotonic() - t0) < 90 and not any(p_.poll() is not None for p_ in ps):
         pass
     open(go, "w").close()
     outs = [p_.communicate(timeout=120) for p_ in ps]
@@ -669,8 +670,8 @@ try:
         def postcond(events):
             cw = tempfile.mkdtemp(prefix="cctg_t2pc_")
             os.makedirs(os.path.join(cw, "mike", "bus", "inbox"))
-            start = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-            ts = (datetime.utcnow() + timedelta(seconds=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            start = datetime.now(ZoneInfo('UTC')).strftime("%Y-%m-%dT%H:%M:%SZ")
+            ts = (datetime.now(ZoneInfo('UTC')) + timedelta(seconds=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
             with open(os.path.join(cw, "mike", "bus", "inbox", "Winston.jsonl"), "w", encoding="utf-8") as f:
                 for topic, et, series in events:
                     f.write(json.dumps({"ts": ts, "agent_id": "Winston", "event_type": et, "topic": topic,
