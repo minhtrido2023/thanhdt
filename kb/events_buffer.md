@@ -1009,3 +1009,13 @@
 - [2026-10-13T16:57:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261013_163831", "source": "watcher"}
 - [2026-10-13T16:58:36Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261013_163831", "source": "watcher"}
 - [2026-10-13T16:59:36Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+
+## Consolidation 2026-10-13T17:07:02Z
+- [2026-10-13T17:00:36Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T17:01:37Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T17:02:37Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T17:03:37Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T17:04:37Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T17:04:42Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "in_progress", "note": "viec 1 do xong lan 1 (IC khong phan biet duoc, FV hom nay -15% duoi ma12); doc ket qua + cho quet selfcheck nen"}
+- [2026-10-13T17:05:37Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T17:06:37Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261013_163831", "source": "watcher"}
