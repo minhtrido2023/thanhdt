@@ -1175,3 +1175,6 @@
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-12T13:43:12Z] [quỹ mở bước 2] nhánh feat/fund-cashflow-detect-20261012 @ea9d6969a CHỜ Mike arch-review + merge (finding fund-cashflow-detect-20261012). Sau merge: SpaceX mang 2 cảnh báo CHỜ KHAI (07-03, 08-28) tới khi user chép market_only — đề xuất ở research/fund_cashflow_detect_20261012/proposed_acks.json
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T14:18:05Z] ĐANG DỞ job Taylor_20261012_141756 (quỹ mở bước 2 VÒNG 2: sửa C1,C2,S1-S9,G3,G6,G7,G8 theo arch_review_ea9d6969a/REVIEW.md; nhánh feat/fund-cashflow-detect-20261012, worktree agents/Taylor/wt-fundcf-1012; KHÔNG merge): bắt đầu | NEXT: đọc REVIEW.md, sửa, selfcheck 3 TZ + mutant, bus finding

@@ -14,6 +14,7 @@ last_update_3: 2026-08-31 (Bobby — 5 episode mới, BLIND, dispatch riêng: EP
 last_update_4: 2026-09-30 (Bobby — WATCH real-time CD/lãi suất huy động tăng, BLIND, dispatch từ Mike: MIXED ambiguous, phần CONFIDENCE_LIQUIDITY (O/N spike 21-09) CONTAINABLE; không nâng cấp cảnh báo, củng cố watch STRUCTURAL_ACCUMULATION BĐS đã mở)
 last_update_5: 2026-09-30 (Bobby — REGIME READ real-time BLIND: Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~60/40; 7 lead indicator + điều kiện đổi phân loại; KHÔNG phải episode)
 last_update_6: 2026-10-13 (Bobby — REGIME READ #2 real-time BLIND, rà soát quý kéo sớm: CHƯA phải episode; nền GIỮ Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~55/45; 0/7 chỉ báo ở cột xác nhận; ĐÍNH CHÍNH đọc NPL Q2 (77,7% mức tăng là Sacombank); kênh mới: biên độ trái phiếu cấp 2 Big-4 +1,05 → +2,25/+2,8)
+last_update_7: 2026-10-13 (Bobby — STRUCTURAL EVENT READ, BLIND: FTSE Frontier → Secondary Emerging hiệu lực 2026-09-21 ĐÃ thực thi (nguồn FTSE 06/10/2026); phân loại ĐỔI DẦN nhiều quý, biên độ nhỏ cấp thị trường, CHƯA đổi chế độ tại 13/10; mốc kiểm 19/03, 18/06, 17/09/2027)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1389,6 +1390,90 @@ Không giống 2022: không trigger có tên, không đóng băng TPDN, liên NH
 dụng BĐS/NPL/bao phủ Q3; giao dịch BĐS Q3; biểu phân bậc T10 của VPB/MB/TCB/ACB; kết quả Agribank 07/2026 và
 BIDV đợt 1/2026; GDP Q3 9,95% (1 nguồn); VPBank online 7,9% (chỉ thấy tiêu đề 13/10). Review tiếp: sau BCTC Q3
 (~2026-11-26 như lịch), sớm hơn nếu #3/#5 chạm.
+
+---
+
+## STRUCTURAL EVENT READ (không phải episode) — FTSE Russell: Việt Nam Frontier → Secondary Emerging, hiệu lực 2026-09-21 (Bobby, BLIND, đọc 2026-10-13)
+
+**Dispatch bởi Mike theo `kb/projects/amh-structural-break-protocol-20260910.md` checklist mục 4.** Không tra/dùng
+lợi suất VNINDEX hay giá cổ phiếu sau 21/09/2026; không dùng dòng tiền ngoại sau 21/09; không được cho biết nhận
+định của ai. Số BQ tự đo đều chặn `time <= 2026-09-18` (KHỐI LƯỢNG/giá trị giao dịch, không phải lợi suất). Lộ
+ngoài ý muốn: 1 tiêu đề kết quả tìm kiếm nêu biến động vốn hoá HOSE tháng 9 — KHÔNG mở, KHÔNG dùng.
+
+### Xác minh (nguồn SAU ngày hiệu lực)
+- **Đã thực thi.** FTSE "Equity Country Classification September 2026 Annual Announcement", đăng **06/10/2026**: bảng
+  phân loại tại 06/10/2026 xếp Vietnam ở Secondary Emerging, chú thích "reclassified from Frontier to Secondary
+  Emerging market status, effective from Monday 21 September 2026"; mục 3: "initial 10% implementation from the
+  open on Monday 21 September 2026, followed by three further tranches in March 2027, June 2027 and September
+  2027". Vietnam KHÔNG có mục theo dõi/Watch List nào trong văn bản này. Đối chiếu: Mondaq/Duane Morris 12/10/2026,
+  VietnamFinance qua Stockbiz 07/10/2026.
+- **Lịch (FTSE FAQ v1.3, 08/2026):** hệ số 10% (mở cửa T2 21/09/2026) → 30% (T2 22/03/2027) → 65% (T2 21/06/2027) →
+  100% (T2 20/09/2027); quỹ chỉ số giao dịch ở phiên đóng cửa thứ Sáu liền trước: 18/09/2026, 19/03/2027, 18/06/2027,
+  17/09/2027. Xoá khỏi FTSE Frontier: MỘT đợt tại 09/2026. **Điều kiện còn treo:** "Following each tranche, FTSE
+  Russell will evaluate the ability of index trackers to replicate the benchmark changes prior to proceeding with
+  the subsequent tranche"; lý do chia đợt gồm "support adequate NPF funding and liquidity"; việc còn lại của mô hình
+  môi giới toàn cầu = hoàn tất hợp đồng song phương. Mã bị loại ở kỳ sau ⇒ các đợt còn lại của mã đó không thực hiện.
+- **Rổ:** 27 mã vào FTSE Global All Cap (dữ liệu chốt 30/06/2026): Large VCB, VIC, VHM · Mid BID, HPG, VPB (6 mã này
+  vào FTSE All-World/FTSE Emerging) · Small 21 mã: FPT, GEX, HDB, HCM, MCH, MSN, NVL, STB, SHB, SSB, SSI, TCX, VCI,
+  VJC, VNM, MSB, VRE, VPL, VIX, VND, VCK. (117 mã nếu tính cả micro cap — báo chí/ACBS, chưa đối chiếu file FTSE.)
+  Có sàng "foreign headroom". Bản chốt 04/09/2026: chưa có nguồn xác nhận không đổi.
+- **Tỷ trọng dự phóng (FTSE FAQ, giá 21/08/2026):** ở hệ số 100%: FTSE Emerging 0,3089% · Emerging All Cap 0,4880% ·
+  All-World 0,0311% · Global All Cap 0,0490%; ở hệ số 10% hiện nay: 0,0310% / 0,0490% / 0,0031% / 0,0049%.
+- **Dòng vốn thụ động (ước tính bên bán, KHÔNG phải số đo):** Vietcap ~1,5 tỷ USD (VIC ~559 tr, VHM ~156 tr ⇒ ~48%
+  vào 2 mã); ASEAN SC 1,0-1,5 tỷ ròng (lý thuyết 2,2); MBS ~1,8 tỷ; Agriseco 2,2-3 tỷ. ⇒ khoảng **1,0-3,0 tỷ USD**
+  cho cả 4 đợt. Gồm cả chủ động: HSBC ~3,4 tỷ; WB 3-5 tỷ "vài năm đầu"; Agriseco 7-9 tỷ; FTSE ~6 tỷ (qua báo).
+- **MSCI:** rà soát 23/06/2026 KHÔNG đưa Việt Nam vào danh sách theo dõi; vướng chính: room ngoại (>10% vốn hoá),
+  ngoại hối, đăng ký/mở tài khoản qua VSDC, chưa có khung không ký quỹ trước đầy đủ; CCP mục tiêu đầu 2027.
+
+### Số tự đo trước sự kiện (BQ `tav2_bq.ticker`, `Trading_Value`, 61 phiên 22/06→17/09/2026)
+Trung vị toàn thị trường 14,7 nghìn tỷ/phiên (báo chí: HOSE khớp lệnh T8/2026 14,2 nghìn tỷ); 27 mã = 7,7 nghìn tỷ
+= **52%** giá trị toàn thị trường; 6 mã Large/Mid = 3,0 nghìn tỷ (19,8%); VIC+VHM = 1,63 nghìn tỷ. Phiên 18/09/2026
+(phiên quỹ chỉ số giao dịch đợt 1): toàn thị trường 22,7 (1,54×), 27 mã 15,9 (2,06×), 6 mã 7,6 (2,53×), VIC+VHM 4,53
+(2,79×). KHÔNG quy hết cho FTSE: trùng kỳ cơ cấu quý của các ETF nội/ngoại.
+Quy đổi (suy ra, 26.100 đ/USD): cả 4 đợt 1,0-3,0 tỷ USD ≈ 26-78 nghìn tỷ ≈ 1,8-5,3 phiên giao dịch của TOÀN thị
+trường, ≈ 0,7-2,1% giá trị giao dịch một năm. Riêng VIC+VHM (theo Vietcap ~18,7 nghìn tỷ cả 4 đợt): đợt 3 và đợt 4
+mỗi đợt ≈ 6,5 nghìn tỷ ≈ **4 phiên** thanh khoản thường của 2 mã, dồn vào một phiên đóng cửa.
+
+### Phân loại
+- **Đổi DẦN nhiều quý, biên độ NHỎ ở cấp toàn thị trường; tại 13/10/2026 CHƯA phải đổi chế độ** (mới 10% tỷ trọng;
+  90% phần cơ học còn phía trước, 70% dồn vào 06/2027 và 09/2027). Đáng kể CỤC BỘ ở 2 chỗ: (i) vài mã nhận phần lớn
+  dòng tiền (VIC, VHM, HPG > 50%); (ii) các phiên thứ Sáu cơ cấu (khối lượng dồn về đóng cửa).
+- Độ tin cậy: CAO cho "không đổi chế độ ngay" (tỷ trọng từ văn bản FTSE, thanh khoản tự đo); TRUNG BÌNH cho "đổi
+  dần" (khoảng ước tính dòng vốn rộng 3 lần; phản ứng nhà đầu tư trong nước chưa đo); THẤP cho độ lớn cuối cùng.
+- Kênh NGAY: hành vi quanh ngày cơ cấu; lệch ADV sau phiên cơ cấu. Kênh DẦN: tập trung thanh khoản/vốn hoá vào mã
+  trong rổ; nguồn cung mới (IPO được "fast entry" từ 21/09/2026; TCX, VCK, VPL, MCH trong rổ là hàng mới niêm yết/
+  chuyển sàn 2025-26); tương quan nhóm mã lớn với dòng EM toàn cầu. Kênh KHÔNG đáng kể (suy ra từ quy mô): tỷ
+  trọng lệnh cá nhân (75-80% theo VCBF 2026; FiinTrade 2024 >80%; khối ngoại 11,44% giá trị giao dịch T8/2026), bán
+  cưỡng bức khi quỹ EM bị rút (0,49% × quy mô rút).
+- Tiền lệ (cấu trúc, không phải lợi suất): Kuwait FTSE 09+12/2018 (12 mã, ~0,5% Emerging All Cap — cùng cỡ tỷ trọng
+  với Việt Nam; thụ động ước 0,7-1,1 tỷ USD; vốn ngoại ròng 0,2 tỷ 2017 → 0,7 tỷ nửa cuối 2018 — OBG); Saudi 2019
+  (phiên 28/05/2019 kéo dài đóng cửa, 21,27 tỷ SAR so với ước thụ động 18,75 tỷ; 07/2026 sở hữu ngoại vẫn chỉ 4,63%
+  vốn hoá — Argaam); Trung Quốc A (tổ chức 18% → 24,6% cổ phiếu lưu hành 2019→2021 — SAIF; cá nhân vẫn chi phối
+  giao dịch); Pakistan MSCI 2017 (tỷ trọng nhỏ trong rổ lớn, khối ngoại bán ròng 1,3-1,9 tỷ USD sau đó, 2021 bị
+  hạ lại). Việt Nam khác Kuwait/Saudi ở chỗ dòng thụ động NHỎ so với thanh khoản nội; giống Trung Quốc A ở chỗ cá
+  nhân chi phối giao dịch; khác Pakistan ở chỗ MSCI vẫn xếp Frontier nên quỹ cận biên theo MSCI không bị ép bán.
+
+### Điều gì đổi phân loại
+- **→ đổi chế độ thật:** MSCI đưa vào danh sách theo dõi (sớm nhất kỳ ~06/2027) rồi nâng hạng; nới room ngoại làm
+  tăng tỷ trọng đầu tư được; tỷ trọng 27 mã trong giá trị giao dịch >60% bền 60 phiên (nền 52%); khối ngoại >15%
+  giá trị giao dịch 3 tháng liên tiếp (nền 6-11%, T8/2026 11,44%).
+- **→ hạ xuống "không đáng kể":** FTSE hoãn một đợt (đánh giá khả năng mô phỏng sau mỗi đợt); mã lớn rớt sàng room.
+- Mốc kiểm (gắn lịch thật): cơ cấu quý 12/2026 (đóng cửa 18/12/2026; không có đợt tăng hệ số); công bố kỳ 03/2027
+  ~19/02/2027 (suy từ lệ 4 tuần, chưa có lịch FTSE) → đóng cửa **19/03/2027** (+20%); FTSE công bố rà soát giữa kỳ
+  **06/04/2027**; ~21/05/2027 → **18/06/2027** (+35%); MSCI ~cuối 06/2027; ~20/08/2027 → **17/09/2027** (+35%).
+  Đo lại mỗi tầng sau mỗi đợt ≥10 phiên.
+
+**Không xác minh được:** thông cáo UBCKNN/HOSE sau 21/09; bản chốt danh sách 04/09; tỷ trọng từng mã; lượng thụ động
+THỰC mua ở đợt 1; AUM bám chỉ số FTSE (1,4 nghìn tỷ USD — 1 nguồn Vietcap qua báo); tỷ trọng cá nhân 2026 (ước
+tính, không phải thống kê sở); sở hữu ngoại hiện tại (số gần nhất 15,61% là 10/2025); ngày vận hành CCP; số liệu
+tiền lệ Saudi/Trung Quốc về tỷ trọng giao dịch cá nhân (nguồn thứ cấp/không ghi năm).
+
+**Nguồn:** lseg.com `ftse-country-classification-update-latest.pdf` (06/10/2026) · lseg.com
+`ftse-faq-document-vietnam-reclassification.pdf` (v1.3, 25/08/2026) · mondaq.com 1853862 (12/10/2026) · stockbiz.vn
+42153357 (07/10/2026) · vietstock.vn 145-1494141 (21/09/2026) · vietnamnet.vn 2548735 (02/09/2026) · elibook.vn
+22/08/2026 · aseansc.com.vn báo cáo chuyên đề · theinvestor.vn d19394 (24/06/2026) · vneconomy.vn "bán ròng kỷ lục"
+(03/10/2025) · oxfordbusinessgroup.com Kuwait 2019 · argaam.com 611745 (28/05/2019), 1925291 (30/07/2026) ·
+en.saif.sjtu.edu.cn/faculty-perspectives/details/26 · profit.pakistantoday.com.pk (12/09/2021).
 
 ---
 

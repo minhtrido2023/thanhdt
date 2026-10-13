@@ -852,3 +852,19 @@
 - [2026-10-13T11:52:58Z] Taylor/heartbeat — Taylor_20261013_114456: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261013_114456", "source": "watcher"}
 - [2026-10-13T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-10-13", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-10-13T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-10-13T12:03:46Z
+- [2026-10-13T12:02:54Z] DollarBill/heartbeat — DollarBill_20261013_120244: {"status": "in_progress", "note": "start plan ZaloPay 10-14"}
+- [2026-10-13T12:02:56Z] DollarBill/heartbeat — DollarBill_20261013_120246: {"status": "in_progress", "note": "start SpaceX plan 10-14"}
+- [2026-10-13T12:03:38Z] DollarBill/decision — plan-2026-10-14-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-14", "decision": "HOLD_ALL", "orders": 0, "active_nav": 597631443, "egg": 319188568, "dt5g": "NEUTRAL", "bal": 0, "lag_due": 0, "capit_sessions": 58, "l1": "BLOCKED_ALL_NAMES", "l2": "NO_JIT_NEEDED"}
+- [2026-10-13T12:03:45Z] DollarBill/heartbeat — DollarBill_20261013_120244: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261013_120244", "source": "watcher"}
+- [2026-10-13T11:53:55Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T11:54:56Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T11:55:56Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T11:56:56Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T11:57:56Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T11:58:56Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T11:59:57Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T12:00:57Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T12:01:57Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261013_114453", "source": "watcher"}
+- [2026-10-13T12:02:57Z] Taylor/heartbeat — Taylor_20261013_114453: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261013_114453", "source": "watcher"}
