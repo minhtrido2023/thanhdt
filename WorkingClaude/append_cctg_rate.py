@@ -412,8 +412,10 @@ def _main_impl(stack):
     human_rows = sorted(
         (r for r in rows if r.get("source") not in SOURCES_REQUIRING_STRUCTURED_SOURCES),
         key=lambda r: r["effective_date"])
+    # tier2 chưa có dòng người: lấy DÒNG ĐẦU TIÊN của khoá làm mốc (user duyệt 2026-10-13 18:37 ICT) —
+    # không có mốc thì guard chỉ so với kỳ liền trước và agent trôi được 0,9pp mỗi lượt không giới hạn.
     last_human_rate = (float(human_rows[-1]["cctg_rate"]) if human_rows
-                       else (None if is_tier2 else
+                       else ((float(_allk[0]["cctg_rate"]) if _allk else None) if is_tier2 else
                              (SEED_6M[1] if is_6m else cctg_rate_vn.CCTG_EVENTS[-1][1])))
     bases = [b for b in (current_rate, last_human_rate) if b is not None]
     deltas = [abs(args.rate - b) for b in bases]

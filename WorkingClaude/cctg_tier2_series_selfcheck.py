@@ -332,6 +332,22 @@ try:
     check("B4a mốc NGƯỜI trong delta guard của tier2: 7,0 (người) -> 7,6 (agent) ghi; 8,2 (agent) lệch 0,6pp so với kỳ trước "
           "nhưng 1,2pp so với mốc người => bị chặn",
           rc1 == 0 and rc2 == 1 and "differs" in msg2 and "[tier2 MB" in msg2 and len(rows(csvt)) == 2)
+    # B4g: khoá tier2 CHƯA có dòng người => mốc = DÒNG ĐẦU TIÊN của khoá (user duyệt 2026-10-13)
+    fresh()
+    seed("VPB", 9.2, d3, "100tr")
+
+    def _auto(rate, day, tag):
+        return run(t2("MB", rate, day, source="web_crosscheck_auto",
+                      extra=["--collected", TODAY, "--note", "x", "--sources", json.dumps(
+                          [src("VietnamNet", "https://vietnamnet.vn/" + tag, rate),
+                           src("Nghe An", "https://baonghean.vn/" + tag, rate)])]),
+                   job_id="selfcheck_job")
+    rg1, _ = _auto(9.0, d3, "g1")
+    rg2, _ = _auto(9.8, d2, "g2")
+    rg3, msg3 = _auto(10.4, d1, "g3")
+    check("B4g khoá chỉ có dòng tự động: mốc = dòng ĐẦU của khoá — 9,0 -> 9,8 ghi; 10,4 lệch 0,6pp so với kỳ trước "
+          "nhưng 1,4pp so với dòng đầu => bị chặn",
+          rg1 == 0 and rg2 == 0 and rg3 == 1 and "differs" in msg3 and "[tier2 MB" in msg3 and len(rows(csvt)) == 3)
     # B4: sidecar tách theo mệnh giá của CÙNG ngân hàng
     fresh()
     seed("VPB", 9.2, YESTERDAY, "100tr")
@@ -696,6 +712,41 @@ try:
               "'KHÔNG có kết quả xác nhận được'",
               i_part < i_old and "${SEEN_SERIES}" in part_branch and "${MISSING_SERIES}" in part_branch
               and "KHÔNG có kết quả xác nhận được" not in part_branch and "KHÔNG cần làm lại" in part_branch)
+    # B7h/B7i: chạy THẬT chuỗi if/elif báo kết quả của wrapper với notify giả
+    m_ch = re.search(r'\nif \[ "\$DRY_RUN" -eq 1 \]; then\n  echo "\[--dry-run\] skipping fallback-notify branch".*?\nfi\n(?=\n# --- trend check)',
+                     sh, re.S)
+    check("B7h tách được chuỗi if/elif báo kết quả từ wrapper", m_ch is not None)
+    check("B7h2 wrapper ghi chuỗi đã/chưa có event vào LOG",
+          'echo "series with event after run start: seen=${SEEN_SERIES:-} missing=${MISSING_SERIES:-}" >> "$LOG"' in sh)
+    if m_ch:
+        def chain(rc_d, confirmed, seen, missing):
+            cw = tempfile.mkdtemp(prefix="cctg_t2ch_")
+            os.makedirs(os.path.join(cw, "mike", "bin"))
+            nf = os.path.join(cw, "notify.out")
+            stub = os.path.join(cw, "mike", "bin", "notify_thread.sh")
+            with open(stub, "w", encoding="utf-8") as f:
+                f.write('#!/bin/bash\nprintf "%s\\n---\\n" "$1" >> "' + nf + '"\n')
+            os.chmod(stub, 0o755)
+            env = dict(os.environ, DRY_RUN="0", DISPATCH_RC=str(rc_d), CONFIRMED=confirmed, SEEN_SERIES=seen,
+                       MISSING_SERIES=missing, TODAY="2099-01-05", LOG=os.path.join(cw, "log"), CUR_DEP="6.8",
+                       CUR_CCTG="7.4", WORKDIR_8L=cw)
+            r_ = subprocess.run(["bash", "-c", m_ch.group(0)], env=env, capture_output=True, text=True)
+            out = open(nf, encoding="utf-8").read() if os.path.exists(nf) else ""
+            shutil.rmtree(cw, ignore_errors=True)
+            return r_.returncode, out
+        four = "big4_12m,cctg_12m,cctg_6m,sbv_policy"
+        rc_c, out_c = chain(0, "yes", four, "cctg_tier2")
+        check("B7i dispatch exit=0 nhưng thiếu chuỗi 5: CÓ thông báo, nêu đúng chuỗi thiếu + chuỗi đã có, không báo hỏng oan chuỗi cũ",
+              rc_c == 0 and out_c.count("---") == 1 and "CHƯA có event cho: cctg_tier2" in out_c and four in out_c
+              and "KHÔNG có kết quả xác nhận được" not in out_c)
+        rc_c, out_c = chain(0, "yes", four + ",cctg_tier2", "")
+        check("B7j dispatch exit=0 và đủ chuỗi: KHÔNG thông báo gì", rc_c == 0 and out_c == "")
+        rc_c, out_c = chain(124, "yes", four, "cctg_tier2")
+        check("B7k dispatch exit!=0, chuỗi 1-4 có event: vẫn là thông báo 'dừng giữa chừng' (1 tin, không trùng với B7i)",
+              rc_c == 0 and out_c.count("---") == 1 and "dừng giữa chừng" in out_c and "chạy xong" not in out_c)
+        rc_c, out_c = chain(1, "no", "", "big4_12m,cctg_12m,cctg_6m,sbv_policy,cctg_tier2")
+        check("B7l không event nào: thông báo cũ 'KHÔNG có kết quả xác nhận được' (1 tin)",
+              rc_c == 0 and out_c.count("---") == 1 and "KHÔNG có kết quả xác nhận được" in out_c)
     assert_tree("cuối file")
 finally:
     acr.CSV_PATH, acr.CSV_PATH_6M, acr.CSV_PATH_TIER2, cctg._EVENTS_CSV, dep._EVENTS_CSV = orig

@@ -195,6 +195,7 @@ PYEOF
   MISSING_SERIES="$(printf '%s\n' "$POSTCOND" | sed -n 3p)"
 fi
 echo "post-condition check (deposit-cctg-weekly-done/question found after run start): ${CONFIRMED:-no} (dry_run=${DRY_RUN})" >> "$LOG"
+echo "series with event after run start: seen=${SEEN_SERIES:-} missing=${MISSING_SERIES:-}" >> "$LOG"
 
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "[--dry-run] skipping fallback-notify branch" >> "$LOG"
@@ -212,6 +213,13 @@ Giá trị đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG (12M cao nhất; 6M trư�
 Nếu đã đổi, chạy (số phải xác nhận thật):
   python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source manual_verify
   python3 append_cctg_rate.py --rate <X> --effective ${TODAY} --source manual_verify"
+  if [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
+    "$WORKDIR_8L/mike/bin/notify_thread.sh" "$MSG" trading_daily >> "$LOG" 2>&1 || true
+  fi
+elif [ "$DISPATCH_RC" -eq 0 ] && [ -n "${MISSING_SERIES:-}" ]; then
+  # dispatch exit=0 và có event, nhưng THIẾU chuỗi (vd chuỗi 5 không bắn event): trước đây im lặng hoàn toàn —
+  # chuỗi 5 không có monitor độ tươi nào khác nên chết im là không ai biết (arch-review 2026-10-13).
+  MSG="⚠️ Xác nhận lãi suất huy động + CCTG tuần ${TODAY} chạy xong (dispatch exit=0) nhưng CHƯA có event cho: ${MISSING_SERIES}. ĐÃ có event cho: ${SEEN_SERIES:-}. Chỉ các chuỗi thiếu cần xem lại (chuỗi đã có event KHÔNG cần làm lại). Log: ${LOG}"
   if [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
     "$WORKDIR_8L/mike/bin/notify_thread.sh" "$MSG" trading_daily >> "$LOG" 2>&1 || true
   fi
