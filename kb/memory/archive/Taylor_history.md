@@ -1187,3 +1187,6 @@
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-12T16:44:30Z] ĐANG DỞ job Taylor_20261012_162001 (quỹ mở bước 2 vòng 2, wt-fundcf-1012, CHƯA COMMIT): code + selfcheck xong (cash_identity_selfcheck 327, e2e 67, ledger 4736), repro reviewer đạt, nghiệm thu 1+4 đạt (research/.../r2/acceptance/), proposed_acks.json đã viết lại (3 bản ghi) | ĐANG: mutant r2/run_r2.py {rev,new,step2,ar3} → r2/out_*.txt | NEXT: giết mutant sống, docs .proposed (cash_identity.md + policy), nghiệm thu 5/6 trích từ selfcheck, 3 TZ, pre-commit, commit, finding
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T16:49:28Z] ĐANG DỞ job Taylor_20261012_162001 (quỹ mở bước 2 vòng 2, wt-fundcf-1012, CHƯA COMMIT): mutant lượt 1 xong (research/.../r2/out_{rev,new,step2,ar3}.txt: rev 64/71, new 63/66, step2 83/86, ar3 71/71) | NEXT: thêm test giết N32/C59 (ghi chú rút Trứng vàng), C20/C21 (ack sai from/to), N02 (side thường), N26 (CSV xáo), X73 (ô 400 chữ số), X60 (e2e main ops_today≠ops_lines); chạy lại mutant sống; quét rộng §23 (broad_scan.sh, sandbox /tmp/ar3/WC); 3 TZ; README r2; pre-commit; commit; finding
