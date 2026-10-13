@@ -662,10 +662,15 @@ fi
 # BCTC Q3" (kb/current_ops.md) — trước đây chỉ là văn xuôi, không ai canh. Script tự chống lặp bằng
 # state file ghi nguyên tử (data/pnj_q3_review_watch_state.json) và fail-closed khi lỗi đọc; ở đây
 # chỉ gọi + giới hạn thời gian. KHÔNG đếm vào WARNED, KHÔNG chặn pipeline, KHÔNG đụng excluded_tickers.
-if _pnj_out="$(cd "$ROOT" && timeout 300 python3 bin/pnj_q3_review_watch.py ${QUIET:+--quiet} 2>&1)"; then
+if _pnj_out="$(cd "$ROOT" && timeout 60 python3 bin/pnj_q3_review_watch.py ${QUIET:+--quiet} 2>&1)"; then
   [ -n "$_pnj_out" ] && echo "$_pnj_out"
 else
-  echo "  [WARN] pnj_q3_review_watch.py exit=$? (124 = timeout 300s) — không chặn pipeline. Output thật: ${_pnj_out:-<rỗng>}"
+  echo "  [WARN] pnj_q3_review_watch.py exit=$? (124 = timeout 60s) — không chặn pipeline. Output thật: ${_pnj_out:-<rỗng>}"
+fi
+if printf '%s\n' "$_pnj_out" | grep -q '^ALERT pnj-q3-watch:'; then
+  # watcher chết lặng = đúng lỗi nó sinh ra để vá (arch-review 13/10 R2) ⇒ báo người, không chỉ log
+  "$ROOT/bin/notify_thread.sh" "🔴 pnj_q3_review_watch KHÔNG hoạt động đúng ($TODAY): $(printf '%s\n' "$_pnj_out" | grep -E '^(WARN|ALERT) pnj-q3-watch' | head -3 | cut -c1-600)" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  WARNED=$((WARNED + 1))
 fi
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
@@ -747,10 +752,10 @@ fi
 # dòng/max 08-21 = y hệt parquet cache; BQ sống đã có KBC 2026Q3). Bước này bỏ hẳn phiên trễ đó.
 # WARN-only: lỗi/timeout/dữ liệu đáng ngờ ⇒ script GIỮ pkl 15:30 (ghi nguyên tử, không bao giờ để
 # pkl nửa vời) và golive vẫn chạy như trước khi có bước này. Đo thật 10-13: ~14-15s/lượt (3 lượt),
-# RSS ~316MB; timeout 300s. CỐ Ý không dùng _run_pipeline để phân biệt được timeout (rc=124) và
+# RSS ~316MB; timeout 90s. CỐ Ý không dùng _run_pipeline để phân biệt được timeout (rc=124) và
 # đẩy WARN lên Discord — hỏng ở đây nghĩa là LAG lặng lẽ quay về trễ 1 phiên giữa mùa BCTC.
 # Probe lag-pkl ở trên đo pkl TRƯỚC bước này ⇒ vẫn canh độc lập đường làm mới 15:30.
-LAG_PKL_REFRESH_TIMEOUT_S="${LAG_PKL_REFRESH_TIMEOUT_S:-300}"   # env override CHỈ cho selfcheck
+LAG_PKL_REFRESH_TIMEOUT_S="${LAG_PKL_REFRESH_TIMEOUT_S:-90}"   # env override CHỈ cho selfcheck
 echo; echo "--- [pipeline-1d] refresh_earnings_surprise_pkl (BQ sống → pkl LAG) ---"
 _pkl_t0="$(date +%s)"
 if _pkl_out="$(timeout "$LAG_PKL_REFRESH_TIMEOUT_S" $PY refresh_earnings_surprise_pkl.py 2>&1)"; then

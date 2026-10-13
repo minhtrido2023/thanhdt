@@ -88,7 +88,7 @@ r, sink, _ = run_block(PKL, {"STUB_SLEEP": "5", "LAG_PKL_REFRESH_TIMEOUT_S": "1"
 check("1d treo quá timeout → bị kill (rc 124), WARN nêu 'timeout 1s', chuỗi đi tiếp",
       r.returncode == 0 and "[WARN exit 124]" in r.stdout and "timeout 1s" in sink and "AFTER_BLOCK" in r.stdout, r.stdout + sink)
 r, sink, _ = run_block(PKL, {"STUB_RC": "0"}, pre="unset LAG_PKL_REFRESH_TIMEOUT_S")
-check("1e timeout mặc định = 300s khi không override", 'LAG_PKL_REFRESH_TIMEOUT_S="${LAG_PKL_REFRESH_TIMEOUT_S:-300}"' in PKL and r.returncode == 0)
+check("1e timeout mặc định = 90s khi không override", 'LAG_PKL_REFRESH_TIMEOUT_S="${LAG_PKL_REFRESH_TIMEOUT_S:-90}"' in PKL and r.returncode == 0)
 check("1f chạy bằng $PY (= $DNA_PYEXE, pandas 3), không phải python3 hệ thống",
       'timeout "$LAG_PKL_REFRESH_TIMEOUT_S" $PY refresh_earnings_surprise_pkl.py' in PKL and 'PY="${DNA_PYEXE:-python3}"' in SRC)
 i1c, i1d, i2 = SRC.find("[pipeline-1c] build_universe_pit_quality"), SRC.find(A_PKL), SRC.find(B_PKL)
@@ -110,8 +110,14 @@ check("2d script exit≠0 → [WARN] kèm output thật, chuỗi đi tiếp, WAR
       r.returncode == 0 and "[WARN] pnj_q3_review_watch.py exit=3" in r.stdout and "Traceback: boom" in r.stdout
       and "AFTER_BLOCK WARNED=0 FAILED=0" in r.stdout, r.stdout + r.stderr)
 check("2e có timeout, không có `exit`, không đụng WARNED/FAILED/excluded_tickers",
-      "timeout 300 python3 bin/pnj_q3_review_watch.py" in PNJ and "exit 1" not in PNJ and "WARNED=$((" not in PNJ
+      "timeout 60 python3 bin/pnj_q3_review_watch.py" in PNJ and "exit 1" not in PNJ
+      and PNJ.count("WARNED=$((") == 1 and PNJ.index("WARNED=$((") > PNJ.index("^ALERT pnj-q3-watch:")
       and "FAILED=" not in PNJ and "trading_bot_accounts" not in PNJ)
+r, sink, _ = run_block(PNJ, {"STUB_RC": "0", "STUB_OUT": "WARN pnj-q3-watch: KHÔNG đọc được state — lỗi thật: boom\nALERT pnj-q3-watch: state_unreadable — watcher KHÔNG hoạt động đúng"})
+check("2g dòng ALERT (state/bus hỏng) → notify Discord trading_daily mang lỗi thật + WARNED=1, vẫn không chặn chuỗi",
+      r.returncode == 0 and sink.startswith("trading_daily\t") and "boom" in sink and "AFTER_BLOCK WARNED=1 FAILED=0" in r.stdout, r.stdout + sink)
+r, sink, _ = run_block(PNJ, {"STUB_RC": "0", "STUB_OUT": "OK   pnj-q3-watch: not_yet (PNJ 2026Q3)"})
+check("2h không ALERT → KHÔNG notify, WARNED=0", sink == "" and "AFTER_BLOCK WARNED=0 FAILED=0" in r.stdout, r.stdout + sink)
 i_pnj, i_failed = SRC.find(A_PNJ), SRC.find('if [ "$FAILED" -ne 0 ]; then')
 check("2f đặt TRƯỚC cổng FAILED/exit (ngày BQ stale vẫn canh được PNJ)", 0 < i_pnj < i_failed, f"{i_pnj} {i_failed}")
 

@@ -26,8 +26,8 @@ tức cổng 8L≤3 đang chấm bằng rating QUÝ TRƯỚC. `gate=PASS` = cổ
 cổng loại bằng rating cũ. **KHÔNG mã nào bị loại/thêm vì cờ này** (cổng user chốt 07-27 giữ nguyên; siết
 thành fail-closed là việc của user sau khi đo thêm 1 mùa). `lag_rating_stale_error != null` ⇒ KHÔNG kiểm
 được, khác "không có mã nào cũ". **Bẫy**: cờ chỉ có nghĩa ở lượt chạy LIVE — replay lịch sử không tái hiện
-được vì dòng rating quý mới được đóng dấu `time = Release_Date` dù ghi vào bảng muộn hơn. Telegram 18:00 đọc
-status của lượt golive HÔM TRƯỚC (18:00 < 19:00) ⇒ dòng cảnh báo trên Telegram trễ 1 phiên so với `.md`.
+được vì dòng rating quý mới được đóng dấu `time = Release_Date` dù ghi vào bảng muộn hơn. Telegram (`telegram_run_daily`, cron 19:35 ICT) đọc
+status của lượt golive CÙNG NGÀY (19:00 < 19:35) ⇒ dòng cảnh báo trên Telegram cùng ngày với `.md` (arch-review 13/10 N3 đính chính bản trước ghi "18:00 hôm trước").
 Nguồn: `lag_rating_filter.lag_rating_stale_flags`; selfcheck `lag_rating_stale_selfcheck.py`.
 
 ## ⚠️ Bẫy #1 — `golive_v23_status.json` là SNAPSHOT BỊ GHI ĐÈ, KHÔNG phải sổ lịch sử

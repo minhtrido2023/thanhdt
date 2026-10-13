@@ -31,6 +31,7 @@ Self-check: bin/pnj_q3_review_watch_selfcheck.py
 """
 import argparse
 import glob
+import gzip
 import json
 import os
 import subprocess
@@ -85,12 +86,20 @@ def save_state(path, st):
 
 
 # ── phụ thuộc ngoài (thay được trong selfcheck) ──────────────────────────────────────────
+def build_sql():
+    """SQL đếm BCTC thật của PNJ quý đích. Loại dòng GIỮ CHỖ (BQ có dòng mang nhãn quý nhưng
+    Release_Date/NP_P0 NULL — arch-review 13/10: 893/7.534 dòng từ 2025Q1): watcher chỉ bắn MỘT
+    lần nên dòng giữ chỗ không được phép đốt trigger. Cùng bộ lọc với pkl LAG."""
+    return (f"SELECT COUNT(*) AS n, CAST(MIN(t.Release_Date) AS STRING) AS release_date, "
+            f"CAST(MIN(t.time) AS STRING) AS fin_time "
+            f"FROM `{PROJECT}.tav2_bq.ticker_financial` AS t "
+            f"WHERE t.ticker = '{TICKER}' AND t.quarter = '{QUARTER}' "
+            f"AND t.Release_Date IS NOT NULL AND t.NP_P0 IS NOT NULL")
+
+
 def query_bq():
     """Trả dict {"n", "release_date", "time"} của PNJ quý đích. Raise khi không đọc được."""
-    sql = (f"SELECT COUNT(*) AS n, CAST(MIN(t.Release_Date) AS STRING) AS release_date, "
-           f"CAST(MIN(t.time) AS STRING) AS fin_time "
-           f"FROM `{PROJECT}.tav2_bq.ticker_financial` AS t "
-           f"WHERE t.ticker = '{TICKER}' AND t.quarter = '{QUARTER}'")
+    sql = build_sql()
     r = subprocess.run(["bq", "query", "--use_legacy_sql=false", f"--project_id={PROJECT}",
                         "--format=json", "--quiet", sql],
                        capture_output=True, text=True, timeout=BQ_TIMEOUT_S)
@@ -104,14 +113,18 @@ def query_bq():
 
 
 def bus_has_question(bus_dir=None):
-    """True nếu bus ĐÃ có question đúng topic của agent này. Quét mọi tầng .jsonl dưới bus/
-    (inbox + batches + archive…, §17). Khớp theo TRƯỜNG JSON, không theo chuỗi con: finding khác
+    """True nếu bus ĐÃ có question đúng topic của agent này. Quét mọi tầng .jsonl VÀ .jsonl.gz dưới bus/
+    (inbox + batches + inbox/archive đã nén…, §17). Khớp theo TRƯỜNG JSON, không theo chuỗi con: finding khác
     có thể nhắc tên topic trong payload. Raise khi không quét được."""
     bus_dir = bus_dir or os.path.join(ROOT, "bus")
     if not os.path.isdir(bus_dir):
         raise RuntimeError(f"không thấy thư mục bus: {bus_dir}")
-    for path in glob.glob(os.path.join(bus_dir, "**", "*.jsonl"), recursive=True):
-        with open(path, encoding="utf-8", errors="replace") as f:
+    paths = (glob.glob(os.path.join(bus_dir, "**", "*.jsonl"), recursive=True)
+             + glob.glob(os.path.join(bus_dir, "**", "*.jsonl.gz"), recursive=True))
+    for path in paths:
+        opener = (lambda p: gzip.open(p, "rt", encoding="utf-8", errors="replace")) if path.endswith(".gz") \
+            else (lambda p: open(p, encoding="utf-8", errors="replace"))
+        with opener(path) as f:
             for line in f:
                 if TOPIC not in line:
                     continue
@@ -167,6 +180,9 @@ def build_discord(det):
             f"account từ 09-30. Cần chạy lại due-diligence đầy đủ (kiểu fundamental-skeptic) trước "
             f"khi quyết; KHÔNG tự khôi phục, excluded_tickers giữ nguyên. Bus question: {TOPIC}. "
             f"(Tin này chỉ gửi một lần.)")
+
+
+ALERT_RESULTS = ("state_unreadable", "bus_unreadable", "bus_post_failed")
 
 
 # ── lõi ──────────────────────────────────────────────────────────────────────────────────
@@ -245,6 +261,10 @@ def main():
     except Exception as ex:   # WARN-only: tuyệt đối không làm đổ chuỗi 19:00
         print(f"WARN pnj-q3-watch: lỗi không lường trước — {type(ex).__name__}: {ex}")
         return 0
+    if res in ALERT_RESULTS:
+        # bq_freshness_check.sh grep tiền tố này ⇒ notify Discord (không chỉ nằm trong log, §29)
+        print(f"ALERT pnj-q3-watch: {res} — watcher KHÔNG hoạt động đúng, trigger review PNJ Q3 có thể "
+              f"bị bỏ lỡ; xem dòng WARN phía trên (lỗi thật), sửa tay rồi chạy lại bin/pnj_q3_review_watch.py.")
     if not args.quiet and res in ("not_yet", "already_fired"):
         print(f"OK   pnj-q3-watch: {res} ({TICKER} {QUARTER})")
     return 0

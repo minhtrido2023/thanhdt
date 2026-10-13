@@ -249,6 +249,36 @@ except Exception:
     ok = True
 check("8g không có thư mục bus → raise (caller fail-closed), không trả False giả", ok)
 
+# 8h (arch-review N1): question nằm trong tầng NÉN inbox/archive/*.jsonl.gz → True
+import gzip as _gz
+_d = _bus({"inbox/Taylor.jsonl": [F]})
+os.makedirs(os.path.join(_d, "inbox", "archive"), exist_ok=True)
+with _gz.open(os.path.join(_d, "inbox", "archive", "Taylor_2026-09.jsonl.gz"), "wt", encoding="utf-8") as _f:
+    _f.write(Q + "\n")
+check("8h question nằm trong .jsonl.gz lưu trữ → True (§17)", W.bus_has_question(_d) is True)
+
+print("=" * 78); print("  8x. SQL tĩnh (arch-review R1: mutant bỏ lọc ticker từng sống 52/52)"); print("=" * 78)
+_sql = W.build_sql()
+check("8x-a SQL lọc đúng ticker", "t.ticker = 'PNJ'" in _sql, _sql)
+check("8x-b SQL lọc đúng quý", "t.quarter = '2026Q3'" in _sql, _sql)
+check("8x-c SQL loại dòng giữ chỗ (Release_Date IS NOT NULL)", "t.Release_Date IS NOT NULL" in _sql, _sql)
+check("8x-d SQL loại dòng giữ chỗ (NP_P0 IS NOT NULL)", "t.NP_P0 IS NOT NULL" in _sql, _sql)
+check("8x-e query_bq dùng chính build_sql() (không còn SQL nội tuyến)", "sql = build_sql()" in open(TARGET, encoding="utf-8").read())
+
+print("=" * 78); print("  8y. ALERT cho 3 mã lỗi cần người (arch-review R2)"); print("=" * 78)
+import io, contextlib
+for _code in ("state_unreadable", "bus_unreadable", "bus_post_failed", "query_failed", "not_yet"):
+    _o, _orig_run, _argv0 = io.StringIO(), W.run, sys.argv
+    try:
+        sys.argv = ["pnj_q3_review_watch.py", "--quiet"]
+        W.run = lambda _c=_code, **k: _c
+        with contextlib.redirect_stdout(_o):
+            _rc = W.main()
+    finally:
+        W.run, sys.argv = _orig_run, _argv0
+    _want = _code in ("state_unreadable", "bus_unreadable", "bus_post_failed")
+    check(f"8y {_code}: ALERT {'CÓ' if _want else 'KHÔNG'} in, exit 0", ("ALERT pnj-q3-watch" in _o.getvalue()) == _want and _rc == 0, _o.getvalue()[:120])
+
 print("=" * 78); print("  9. main(): WARN-only, luôn exit 0"); print("=" * 78)
 _orig_run, _argv = W.run, sys.argv
 try:
@@ -271,6 +301,15 @@ if "--live" in sys.argv:
           ("OK   pnj-q3-watch: not_yet" in r.stdout or "DRY-RUN pnj-q3-watch" in r.stdout
            or "OK   pnj-q3-watch: already_fired" in r.stdout) and "WARN" not in r.stdout, r.stdout[:200])
     check("10c dry-run không tạo/sửa state thật", os.path.exists(W.STATE_PATH) == st_before)
+    # 10d (arch-review R1): đối chiếu ĐỘC LẬP — đếm dòng PNJ 2026Q3 thật bằng truy vấn khác, trong Python
+    _r = subprocess.run(["bq", "query", "--use_legacy_sql=false", f"--project_id={W.PROJECT}", "--format=json", "--quiet",
+                         f"SELECT t.ticker, t.quarter, CAST(t.Release_Date AS STRING) AS rd, t.NP_P0 AS np "
+                         f"FROM `{W.PROJECT}.tav2_bq.ticker_financial` AS t WHERE t.ticker = '{W.TICKER}' AND t.quarter = '{W.QUARTER}'"],
+                        capture_output=True, text=True, timeout=180)
+    _rows = json.loads(_r.stdout) if _r.returncode == 0 else None
+    _real = None if _rows is None else sum(1 for x in _rows if x.get("rd") and x.get("np") not in (None, ""))
+    _got = W.query_bq()["n"]
+    check("10d n của query_bq() == số dòng PNJ-Q3 thật (rd & NP khác NULL) đếm độc lập", _real is not None and _got == _real, f"watcher={_got} độc lập={_real}")
 
 print("=" * 78)
 print(f"  TỔNG: {PASS} PASS / {FAIL} FAIL   (target={TARGET})")
