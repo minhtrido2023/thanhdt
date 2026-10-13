@@ -33,7 +33,7 @@ H24, H48, D7 = dt.timedelta(hours=24), dt.timedelta(hours=48), dt.timedelta(days
 
 
 def parse_ts(s):
-    """ISO-Z → datetime UTC aware; mọi dạng khác ⇒ None."""
+    """ISO-Z (hoặc có offset) → datetime UTC aware; naive = UTC; không parse được ⇒ None."""
     if not isinstance(s, str):
         return None
     try:
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         main(sys.argv)
     except BaseException:  # noqa: BLE001 — fail-open tuyệt đối: retro không được đổ vì khối thông tin này
         try:
-            print(NO_DATA)
+            print(NO_DATA.replace("không đọc được)", "không đọc được; hoặc helper lỗi)", 1))
         except BaseException:  # noqa: BLE001
             pass
     sys.exit(0)

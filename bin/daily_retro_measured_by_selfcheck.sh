@@ -78,5 +78,6 @@ ok "[real] số đếm THẬT của helper vào prompt (cảnh báo: 24h=1, agen
 for k in absent crash empty; do ok "[$k] mục 2f rơi về ĐÚNG câu fallback 'helper không chạy được'" "$(grep -q 'helper không chạy được' "$T/$k/prompt.1" && echo 1 || echo 0)"; done
 ok "[hang] helper treo 60s bị timeout cắt: retro xong <20s (thực $(cat "$T/hang/elapsed")s)" "$([ "$(cat "$T/hang/elapsed")" -lt 20 ] && echo 1 || echo 0)"
 ok "[hang] mục 2f rơi về ĐÚNG câu fallback (timeout cắt)" "$(grep -q 'helper không chạy được' "$T/hang/prompt.1" && echo 1 || echo 0)"
+ok "mặc định timeout helper trong daily_retro.sh = 20s (selfcheck đặt 2s nên phải ghim tĩnh)" "$(grep -q 'DAILY_RETRO_MB_TIMEOUT:-20}' "${RETRO_SRC:-$ROOT/bin/daily_retro.sh}" && echo 1 || echo 0)"
 echo "---"; echo "PASS=$pass FAIL=$fail"
 [ "$fail" -eq 0 ]

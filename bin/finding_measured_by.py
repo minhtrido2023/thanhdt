@@ -54,7 +54,7 @@ VÌ SAO FILE CẠNH BUS CHỨ KHÔNG PHẢI EVENT: mọi reader của bus glob `
 của cả fleet, (2) tự kích lại chính cổng này nếu là finding, (3) thành việc cho
 ops_health_check nếu là question. `bus/_measured_by_warn.jsonl` theo đúng tiền lệ
 `bus/_rejected.jsonl`: nằm trên bus, không reader nào nuốt, không thể đệ quy.
-KHÔNG có reader tự động nào đọc file này (cố ý — không đẩy việc cho ai); muốn xem thì mở tay.
+Chỉ daily_retro.sh đọc, qua measured_by_warn_report.py (đếm, đọc-only; topic ≤50 ký tự vào prompt draft mục 2f); không ai khác.
 CHƯA được rotate: fleet_housekeeping.sh chỉ rotate `_rejected.jsonl` (đo 2026-10-13: ~5,8 KB/ngày,
 tức ~2 MB/năm) — thêm vào rotate là việc theo sau, phải kèm selfcheck cho script đó.
 

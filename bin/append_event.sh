@@ -193,7 +193,7 @@ echo "appended $etype/$topic for $id"
 #     không ai đọc. Bình thường: xem latency_*.out trong thư mục research của cổng này.
 #   · Nhả flock và không cho helper thừa hưởng fd 9: không giữ khoá inbox lâu hơn bản cũ.
 #   · Cảnh báo đi stderr + bus/_measured_by_warn.jsonl (KHÔNG phải bus/inbox/ — cùng lý do
-#     với _rejected.jsonl ở trên): không reader nào nuốt, không đệ quy, không sinh question.
+#     với _rejected.jsonl ở trên): không reader nào nuốt (ngoại lệ: daily_retro.sh đếm đọc-only qua measured_by_warn_report.py), không đệ quy, không sinh question.
 # Tắt cho RIÊNG một caller: AE_MEASURED_BY_CHECK=0 (chỉ đúng chuỗi "0"; giá trị khác = vẫn bật).
 case "$etype" in finding)
   if [ "${AE_MEASURED_BY_CHECK:-1}" != 0 ] && [ -r "$ROOT/bin/finding_measured_by.py" ]; then

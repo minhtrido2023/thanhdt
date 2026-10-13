@@ -86,6 +86,8 @@ w(d, "_measured_by_warn.jsonl", [
     warn("2026-10-12T05:00:00Z", "Wags", "B", "   "),                   # trace chỉ khoảng trắng ⇒ cron
     warn("2026-10-12T00:29:59Z", "Winston", "C", "W_1"),                # 24h00m01s: NGOÀI 24h, trong 48h
     warn("2026-10-12T00:30:00Z", "Winston", "C", "W_2"),                # đúng 24h00m00s: TRONG 24h (biên đóng)
+    warn("2026-10-12T07:29:59+07:00", "Yy", "Y", "y1"),                # offset = 00:29:59Z: NGOÀI 24h (đọc nhầm UTC thì lọt vào)
+    warn("2026-10-12T00:30:00", "Yy", "Y", "y2"),                       # naive = UTC: đúng 24h, TRONG (đọc theo giờ local thì rớt)
     warn("2026-10-11T00:29:59Z", "Zed", "Z", "z1"),                     # 48h00m01s: NGOÀI "24h trước", trong 7ng
     warn("2026-10-11T00:30:00Z", "Mike", "D", None),                    # đúng 48h: trong 7ng, "24h trước" (biên)
     warn("2026-10-06T00:30:01Z", "Mike", "D", None),                    # 6d23h59m59s: trong 7ng
@@ -102,13 +104,13 @@ rc, out, err = run(d)
 print(out)
 check("rc=0", rc == 0)
 check("đúng 5 dòng (1 khối ngắn)", len(out.strip().splitlines()) == 5, out)
-# 24h: Taylor×2 + Wags×3 + W_2 = 6 ; 24h trước (24h,48h]: W_1 + Mike(đúng 48h) = 2 ; 7ng (tuổi ≤7d, biên đóng) = 6+2+Mike(6d23h)+Mike(đúng 7d) = 10
-check("cảnh báo 24h=6, 24h trước=2 (biên trên 48h00m01s loại), 7ng=11", "24h=6 (24h trước đó=2) · 7ng=11" in out, out)
+# 24h: Taylor×2 + Wags×3 + W_2 = 6 ; 24h trước (24h,48h]: W_1 + Mike(đúng 48h) = 2 ; 7ng (tuổi ≤7d, biên đóng) = 6+2+Mike(6d23h)+Mike(đúng 7d)+Zed(48h00m01s) = 11
+check("cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13", "24h=7 (24h trước đó=3) · 7ng=13" in out, out)
 # finding: 24h = Taylor 1 + Wags 2 = 3 ; 7ng = 3 + Taylor(đúng 7d) = 4 (10-05T10 = 7d14h ⇒ ngoài)
 check("finding 24h=3, 7ng=4 (status/hỏng/tương lai/7d14h bị loại; đúng 7d tính)", "finding: 24h=3 · 7ng=4" in out, out)
-check("tỉ lệ 24h=200.0% 7ng=275.0% (đếm theo code, mẫu số riêng)", "24h=200.0% · 7ng=275.0%" in out, out)
-check("nguồn 24h: có trace=3 · không trace=3", "24h: có trace_id (agent dispatch)=3 · không trace_id (script/cron)=3" in out, out)
-check("nguồn 7ng: có trace=5 · không trace=6", "7ng: 5 · 6" in out, out)
+check("tỉ lệ 24h=233.3% 7ng=325.0% (đếm theo code, mẫu số riêng)", "24h=233.3% · 7ng=325.0%" in out, out)
+check("nguồn 24h: có trace=3 · không trace=3", "24h: có trace_id (agent dispatch)=4 · không trace_id (script/cron)=3" in out, out)
+check("nguồn 7ng: có trace=5 · không trace=6", "7ng: 7 · 6" in out, out)
 check("agent top: Mike=3, Wags=3 (hoà ⇒ theo tên), Taylor=2, Winston=2", "Mike=3, Wags=3, Taylor=2, Winston=2" in out, out)
 check("topic top: B=3, D=3, A=2, C=2", "B=3, D=3, A=2, C=2" in out, out)
 check("không có 'Future'/'Cũ' (ngoài cửa sổ/tương lai)", "Future" not in out and "Cũ" not in out, out)
@@ -145,6 +147,7 @@ head, _, tail = src.partition('if __name__ == "__main__":')
 patched = os.path.join(d, "patched.py")
 open(patched, "w", encoding="utf-8").write(head + '\nif __name__ == "__main__":' + tail)
 p = subprocess.run([sys.executable, patched, "--bus", d, "--now", NOW], capture_output=True, text=True, timeout=30)
+check("build() nổ ⇒ dòng phân biệt được với 'file trống': có 'helper lỗi'", "helper lỗi" in p.stdout, p.stdout)
 check("build() nổ ZeroDivisionError ⇒ rc=0 và 'chưa có dữ liệu'", p.returncode == 0 and "chưa có dữ liệu" in p.stdout,
       "rc=%s out=%r err=%r" % (p.returncode, p.stdout, p.stderr[-200:]))
 shutil.rmtree(d)
