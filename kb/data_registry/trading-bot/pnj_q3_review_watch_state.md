@@ -33,3 +33,7 @@ file = "chưa bắn", không phải lỗi. Ghi nguyên tử (tmp + `os.replace`)
 4. Đây là watcher MỘT mã MỘT quý (hằng số `TICKER`/`QUARTER` trong script). Sau khi review PNJ xong, script +
    file này hết việc — gỡ bước gọi trong `bq_freshness_check.sh` khi đóng question.
 5. Watcher KHÔNG đụng `excluded_tickers`; khôi phục PNJ vẫn cần user duyệt sau due-diligence.
+
+## Follow-up GỠ watcher (user duyệt 2026-10-13)
+
+GỠ khối `pnj_q3_review_watch` khỏi `bin/bq_freshness_check.sh` (và file state này) NGAY KHI review PNJ Q3 xong và bus question `pnj-bctc-q3-review-trigger` đã đóng. Watcher hardcode PNJ/2026Q3, bắn đúng 1 lần — để nguyên sẽ thành mã chết. Con trỏ ở `kb/current_ops.md` mục PNJ (REVIEW TRIGGER).
