@@ -87,8 +87,7 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
         năm +2,0 (chưa có số bán) · BIDV 09/2026 7-10 năm +2,25/+2,3 (bán 80,3%) · CTG 10/2026
         6 năm +2,25 (đang chào bán). "Bán không hết" ĐÃ xảy ra 3 đợt nên một mình nó không còn
         là ngưỡng.
-     ⚠️ Con số ngưỡng của (6)(7) do Mike đặt TẠM 13/10, user duyệt việc THÊM chuỗi chứ chưa xác
-     nhận từng con số — hỏi lại user trước khi coi là đã chốt.
+     ✅ Con số ngưỡng của (6)(7): user XÁC NHẬN 2026-10-13 18:37 ICT (`decided_by: user`).
      Thiếu số liệu một ô ⇒ ghi "không có số", KHÔNG coi là chạm, KHÔNG coi là an toàn.
    - **TỰ ĐỘNG HOÁ XONG 2026-08-31**: cron `0 20 6 * *` = **20:00 UTC ngày 6** (= **03:00 ICT ngày 7**, host là Etc/UTC; dòng `TZ=` đầu crontab chỉ set env cho script, KHÔNG đổi cách cron parse giờ — chỉ `CRON_TZ=` làm việc đó. Bằng chứng: bus event ts `2026-09-06T20:02:38Z`. Ghi chú cũ "20:00 ICT ngày 6" là SAI, sửa 2026-09-09) → `mike/bin/
      vn_realestate_monthly_check.sh` (chi tiết đầy đủ + 2 bug đã bắt qua test end-to-end thật:
