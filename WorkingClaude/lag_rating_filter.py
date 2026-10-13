@@ -203,6 +203,6 @@ def format_lag_rating_stale_line(flags, error=None, html=False):
             parts.append(f"+{other} sự kiện ngoài cửa sổ entry")
         return (f"⚠️ {b0}lag_rating_stale{b1} — rating 8L CŨ hơn BCTC của sự kiện (CHỈ CẢNH BÁO, không "
                 f"loại/thêm lệnh nào; cổng 8L≤3 giữ nguyên): " + " · ".join(parts)
-                + ". Kiểm lại sau lượt re-rate 20:00 trước khi duyệt.")
+                + ". Re-rate 8L chạy 17:30 (cửa sổ mùa BCTC) nhưng chưa phản ánh BCTC này — kiểm lại rating trước khi duyệt.")
     except Exception as ex:
         return f"⚠️ lag_rating_stale: không dựng được dòng cảnh báo ({type(ex).__name__})"
