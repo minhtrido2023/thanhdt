@@ -34,6 +34,10 @@ Usage (agent, web_crosscheck_auto):
                        {"publisher":"VnExpress","url":"https://vnexpress.net/...","date":"2026-10-07","rate":7.6}]' \
           --note "..."
 
+Usage (--series tier2 — VPB/MB/TCB/ACB, collect + display only, own file, key = bank x denomination):
+  python3 append_cctg_rate.py --series tier2 --bank VPB --product "CCTG Super Thịnh Vượng" \
+          --denom 100tr --holding "184-389 ngày" --rate 9.2 --effective 2026-10-13 --source ...
+
 Idempotent: re-running with an effective_date already present is skipped (unless --force).
 """
 import argparse
@@ -68,6 +72,22 @@ LAST_AUTO_SOURCES_NAME = "cctg_rate_last_auto_sources.json"
 CSV_PATH_6M = os.path.join(HERE, "data", "cctg_rate_vn_6m_events.csv")
 LAST_AUTO_SOURCES_NAME_6M = "cctg6m_rate_last_auto_sources.json"
 SEED_6M = ("2026-09-30", 7.5)
+
+# --series tier2 (user duyệt 2026-10-13): CCTG của nhóm ngân hàng NGAY SAU Big-4. CHỈ THU THẬP +
+# HIỂN THỊ — file RIÊNG, KHÔNG consumer nào đọc (cctg_tier2_series_selfcheck.py chứng minh:
+# effective rate / kill-switch A / consumer_deposit_rate* / trend check không mở file này).
+# Khác 12m/6m: MỘT file chứa nhiều chuỗi con, khoá = (bank, denomination). Mọi guard (idempotent,
+# ngày mới hơn, lệch >=1,0pp, URL dùng lại) tính RIÊNG từng khoá — không bao giờ suy số ngân hàng
+# này từ ngân hàng khác; không có mốc đông cứng (khoá chưa có dòng nào ⇒ không có số tham chiếu).
+CSV_PATH_TIER2 = os.path.join(HERE, "data", "cctg_rate_vn_tier2_events.csv")
+TIER2_BANKS = ("VPB", "MB", "TCB", "ACB")
+TIER2_DENOMS = ("10tr", "100tr")  # "" = nguồn không nêu / ngân hàng không chia theo 2 mệnh giá này
+HEADER_TIER2 = ["effective_date", "bank", "product", "denomination", "holding_period", "cctg_rate",
+                "collected_date", "source", "note"]
+
+
+def _tier2_sidecar_name(bank, denom):
+    return f"cctg_tier2_{bank}_{denom or 'na'}_last_auto_sources.json"
 
 
 def _last_auto_sources_path():
@@ -107,18 +127,44 @@ def main():
     ap.add_argument("--sources", default=None,
                     help='JSON array of {"publisher","url","date","rate"} — REQUIRED for '
                          '--source web_crosscheck_auto')
-    ap.add_argument("--series", choices=("12m", "6m"), default="12m",
-                    help="12m (mặc định, chuỗi production) | 6m (chuỗi phụ, file riêng, display-only)")
+    ap.add_argument("--series", choices=("12m", "6m", "tier2"), default="12m",
+                    help="12m (mặc định, chuỗi production) | 6m (chuỗi phụ, file riêng, display-only) "
+                         "| tier2 (VPB/MB/TCB/ACB, file riêng, display-only)")
+    ap.add_argument("--bank", default=None, help="[tier2] một trong: " + " | ".join(TIER2_BANKS))
+    ap.add_argument("--product", default=None, help="[tier2] tên sản phẩm CCTG")
+    ap.add_argument("--denom", default=None,
+                    help="[tier2] mệnh giá: " + " | ".join(TIER2_DENOMS) + " (bỏ trống nếu nguồn không nêu)")
+    ap.add_argument("--holding", default=None,
+                    help="[tier2] khoảng thời gian nắm giữ mà mức này áp dụng (vd '184-389 ngày'); "
+                         "bỏ trống nếu chưa đối chiếu được")
     ap.add_argument("--force", action="store_true",
                     help="append even if effective_date exists / override delta guard. REFUSED "
                          "when JOB_ID env is set.")
     args = ap.parse_args()
     is_6m = args.series == "6m"
+    is_tier2 = args.series == "tier2"
+    tier2_given = [n for n in ("bank", "product", "denom", "holding") if getattr(args, n) is not None]
+    if not is_tier2 and tier2_given:
+        sys.exit(f"ERROR: --{'/--'.join(tier2_given)} chỉ dùng với --series tier2 — từ chối để một "
+                 f"dòng ngân hàng ngoài Big-4 không lọt vào chuỗi {args.series}.")
+    bank = denom = product = holding = ""
+    if is_tier2:
+        bank, denom = args.bank or "", (args.denom or "").strip()
+        product, holding = (args.product or "").strip(), (args.holding or "").strip()
+        if bank not in TIER2_BANKS:
+            sys.exit(f"ERROR: --series tier2 cần --bank thuộc {TIER2_BANKS}, nhận '{bank}'.")
+        if not product:
+            sys.exit("ERROR: --series tier2 cần --product (tên sản phẩm CCTG) không rỗng.")
+        if denom and denom not in TIER2_DENOMS:
+            sys.exit(f"ERROR: --denom '{denom}' không thuộc {TIER2_DENOMS} (hoặc bỏ trống).")
     # Locals, không gán lại global: selfcheck gọi main() nhiều lần trong 1 process và monkeypatch
     # CSV_PATH/CSV_PATH_6M — gán global sẽ làm lượt 12m sau một lượt 6m ghi nhầm file 6m.
-    csv_path = CSV_PATH_6M if is_6m else CSV_PATH
-    sidecar_path = (os.path.join(os.path.dirname(CSV_PATH_6M), LAST_AUTO_SOURCES_NAME_6M)
-                    if is_6m else _last_auto_sources_path())
+    csv_path = CSV_PATH_TIER2 if is_tier2 else (CSV_PATH_6M if is_6m else CSV_PATH)
+    if is_tier2:
+        sidecar_path = os.path.join(os.path.dirname(CSV_PATH_TIER2), _tier2_sidecar_name(bank, denom))
+    else:
+        sidecar_path = (os.path.join(os.path.dirname(CSV_PATH_6M), LAST_AUTO_SOURCES_NAME_6M)
+                        if is_6m else _last_auto_sources_path())
 
     is_dispatched_agent = os.environ.get("JOB_ID") is not None
     if is_dispatched_agent and args.force:
@@ -164,6 +210,9 @@ def main():
     # a day already confirmed. append_deposit_rate.py never had this ordering bug because it has
     # no equivalent "not newer" pre-check — only this CCTG script does.
     rows = _read_rows(csv_path)
+    all_rows = rows  # tier2: cả file, giữ nguyên thứ tự; `rows` bên dưới chỉ còn khoá đang ghi
+    if is_tier2:
+        rows = [r for r in rows if (r.get("bank"), r.get("denomination") or "") == (bank, denom)]
     existing = {r["effective_date"] for r in rows}
     if args.effective in existing and not args.force:
         print(f"SKIP: effective_date {args.effective} already present (use --force to override). "
@@ -179,7 +228,11 @@ def main():
     # ngày nhỏ hơn mốc đông cứng trong code (CCTG_EVENTS/SEED_6M — không ai được sửa qua CLI này).
     import cctg_rate_vn
     is_correction = args.force and args.effective in existing
-    if is_6m:
+    if is_tier2:
+        other_dates = [_valid_date(r["effective_date"]) for r in rows
+                       if not (is_correction and r["effective_date"] == args.effective)]
+        last_date = max(other_dates) if other_dates else date.min  # khoá chưa có dòng nào
+    elif is_6m:
         other_dates = ([_valid_date(SEED_6M[0])] +
                        [_valid_date(r["effective_date"]) for r in rows
                         if not (is_correction and r["effective_date"] == args.effective)])
@@ -255,7 +308,10 @@ def main():
     # --- delta guard vs current + last human-confirmed anchor ---
     # (rows/existing already loaded by the idempotency check above — nothing has written to disk
     # since, so reusing them here is safe and avoids a second redundant _read_rows() call)
-    if is_6m:
+    if is_tier2:
+        _allk = sorted(rows, key=lambda r: r["effective_date"])
+        current_rate = float(_allk[-1]["cctg_rate"]) if _allk else None
+    elif is_6m:
         _all6 = sorted(rows, key=lambda r: r["effective_date"])
         current_rate = float(_all6[-1]["cctg_rate"]) if _all6 else SEED_6M[1]
     else:
@@ -264,7 +320,8 @@ def main():
         (r for r in rows if r.get("source") not in SOURCES_REQUIRING_STRUCTURED_SOURCES),
         key=lambda r: r["effective_date"])
     last_human_rate = (float(human_rows[-1]["cctg_rate"]) if human_rows
-                       else (SEED_6M[1] if is_6m else cctg_rate_vn.CCTG_EVENTS[-1][1]))
+                       else (None if is_tier2 else
+                             (SEED_6M[1] if is_6m else cctg_rate_vn.CCTG_EVENTS[-1][1])))
     bases = [b for b in (current_rate, last_human_rate) if b is not None]
     deltas = [abs(args.rate - b) for b in bases]
     if deltas and max(deltas) >= NONINERT_DELTA_PP and not args.force:
@@ -276,13 +333,19 @@ def main():
         rows = [r for r in rows if r["effective_date"] != args.effective]
     new_row = {"effective_date": args.effective, "cctg_rate": f"{args.rate:g}",
                "collected_date": collected, "source": args.source, "note": args.note}
+    if is_tier2:
+        new_row.update({"bank": bank, "product": product, "denomination": denom,
+                        "holding_period": holding})
+        rows = [r for r in all_rows
+                if not (args.force and r["effective_date"] == args.effective
+                        and (r.get("bank"), r.get("denomination") or "") == (bank, denom))]
     rows.append(new_row)
 
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(csv_path), prefix=".cctg_", suffix=".csv")
     try:
         with os.fdopen(fd, "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=HEADER)
+            w = csv.DictWriter(f, fieldnames=HEADER_TIER2 if is_tier2 else HEADER)
             w.writeheader()
             w.writerows(rows)
         os.replace(tmp, csv_path)
@@ -294,6 +357,10 @@ def main():
     if args.source in SOURCES_REQUIRING_STRUCTURED_SOURCES:
         _save_last_auto_urls(sidecar_path, args.effective, urls)
 
+    if is_tier2:
+        print(f"OK: appended [tier2 {bank} {denom or 'mệnh giá n/a'}] {args.effective} = {args.rate:g}% "
+              f"(source={args.source}, collected={collected}) -> {csv_path}")
+        return 0
     if is_6m:
         print(f"OK: appended [6m] {args.effective} = {args.rate:g}% (source={args.source}, "
               f"collected={collected}) -> {csv_path}")
