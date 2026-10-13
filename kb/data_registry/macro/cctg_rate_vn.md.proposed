@@ -240,7 +240,10 @@ re-verify trong round này — 26 ở đây là số **DEPOSIT_EVENTS anchor Big
   ngân hàng và RIÊNG từng mệnh giá (10tr / 100tr; trống = nguồn không nêu hoặc ngân hàng không chia
   theo hai mệnh giá này). Lý do thu: user nhận định Big-4 phản ứng chậm do áp lực NHNN, nhóm ngay
   sau phản ánh thị trường vốn sớm hơn.
-- **Status: CHỈ THU THẬP + HIỂN THỊ.** KHÔNG consumer nào đọc: không vào `effective_deposit_rate()`,
+- **Status: CHỈ THU THẬP + HIỂN THỊ.** KHÔNG consumer SỐ nào đọc (người đọc duy nhất ngoài writer: ngưỡng Macro Watch
+  (6) trong PROMPT của `mike/bin/vn_realestate_monthly_check.py` — user duyệt 13/10 15:21 ICT, commit `0adc1293f` — bảo
+  agent đọc số kỳ trước ở file này để HIỂN THỊ/escalate, không vào mô hình; selfcheck liệt kê tên nó thành ngoại lệ có
+  chủ đích, file khác nhắc tới file này là đỏ). Không đi vào: không vào `effective_deposit_rate()`,
   `macro_killswitch_a_status()`, `consumer_deposit_rate*()`, rating_8l, chuỗi DCF, due_diligence,
   `custom30_yield_labels`, cổng CAPIT; `deposit_cctg_trend_check.py` (cảnh báo "xu hướng hạ" để bật
   lại park) cũng KHÔNG đọc — định nghĩa user chốt chỉ gồm Big-4 12M và CCTG Big-4. Muốn wire vào
@@ -253,13 +256,22 @@ re-verify trong round này — 26 ở đây là số **DEPOSIT_EVENTS anchor Big
   cctg_rate, collected_date, source, note`. Khoá = `(bank, denomination)`; một ngày có nhiều dòng.
 - **Guard** (cùng họ với 12M/6M, nhưng tính RIÊNG từng khoá): ≥2 nguồn khác chủ, mỗi nguồn tự mang
   số, lệch ≤0,1pp, `--rate` khớp một số đã cite; lệch ≥1,0pp so với kỳ trước CỦA CHÍNH KHOÁ ĐÓ ⇒ từ
-  chối, nhắc xác nhận tay; ngày phải mới hơn dòng cuối của khoá; sidecar URL riêng từng khoá
+  chối, nhắc xác nhận tay; ngày phải mới hơn dòng cuối của khoá; **khoá MỚI không lách được guard lệch** (job Taylor_20261013_090057, A3): ngân hàng
+  đã có khoá kiểu 10tr/100tr thì khoá '' bị từ chối và ngược lại (trừ `--force` của người, không JOB_ID); agent mở khoá
+  mới cho ngân hàng ĐÃ có dòng phải lệch <1,0pp so với ít nhất một khoá cùng ngân hàng; agent mở ngân hàng CHƯA có dòng
+  phải nằm trong dải (min−1pp, max+1pp) của dòng mới nhất mọi khoá khác; file rỗng ⇒ không có mốc ⇒ từ chối — tất cả
+  nhắc người seed bằng `manual_verify`. Người (không JOB_ID) seed khoá mới thì không bị chặn bởi (b)/(c). **Ghi song
+  song** an toàn: đọc→ghi→sidecar của tier2 nằm trong `flock` trên `data/cctg_rate_vn_tier2_events.csv.lock`
+  (không có nó, 6 lệnh đồng thời cho 6 dòng "OK" nhưng file còn 1 dòng). Sidecar URL riêng từng khoá
   (`data/cctg_tier2_<BANK>_<denom|na>_last_auto_sources.json`) — một bài báo dùng được cho nhiều
   ngân hàng, không dùng lại cho cùng khoá kỳ sau. Không có mốc đông cứng: khoá chưa có dòng nào thì
-  dòng đầu không có số tham chiếu. Lợi suất 0 bị từ chối (ngân hàng không có số thì KHÔNG ghi).
-- **Chứng minh ranh giới**: `cctg_tier2_series_selfcheck.py` — 48 kiểm tra, 4 môi trường TZ; đầu ra
-  của các hàm trên giống hệt từng byte khi file vắng so với khi có dòng 9,2% và 15%; bẫy mở-file
-  không ghi nhận lần đọc nào; quét tĩnh 1.108 file. Đo thêm trên code + dữ liệu production trước/sau
+  không có số CÙNG KHOÁ để so — người seed tự chịu trách nhiệm, agent bị kiểm cơ học như trên. Lợi suất 0 bị từ chối (ngân hàng không có số thì KHÔNG ghi).
+- **Chứng minh ranh giới**: `cctg_tier2_series_selfcheck.py` — 83 kiểm tra (vòng 2), 4 môi trường TZ + overlay
+  =0 + JOB_ID đặt sẵn; ghim `sys.path` về đúng cây đang kiểm (dcf_valuation chèn thư mục PRODUCTION lên đầu `sys.path`,
+  nên không ghim thì `importlib.reload(cctg_rate_vn)` nạp file production và mutant trong cây kiểm sống), khẳng định lại
+  `__file__` của 5 module trước phần B và ở cuối; đầu ra của các hàm trên (+ `deposit_cctg_trend_check.main --dry-run`)
+  giống hệt từng byte khi file vắng so với khi có dòng 9,2% và 15%; bẫy mở-file không ghi nhận lần đọc nào; quét tĩnh
+  + quét AST hằng chuỗi 'cctg' trong consumer. Đo thêm trên code + dữ liệu production trước/sau
   khi ghi 3 dòng mốc: sha256 `6e561b6c…` không đổi.
 - **Chưa có loader Python**; đọc thẳng CSV.
 

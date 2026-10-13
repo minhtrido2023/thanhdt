@@ -1163,3 +1163,6 @@
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-12T06:15:22Z] [strategy-fit tier3 r2, 10-12] XONG: feat/strategy-fit-tier3-20261012 @aaaf60a3b (wt-stratfit3-1012, CHƯA merge); finding strategy-fit-tier3-20261012-r2 trace Taylor_20261012_061001. Chờ Mike merge. (Thay 2 dòng ĐANG DỞ job 040250/044300.)
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T07:08:26Z] ĐANG DỞ job Taylor_20261012_070816 (vòng 2 gate-source-check: B1 bỏ pipe tee + R0 curl timeout + N1-N5,N7 trong 1 commit trên feat/gate-source-check-publish-20261012, wt-gatesrc-1012, KHÔNG merge): bắt đầu | NEXT: đọc bq_freshness_check.sh:660-700, gate_source_check.py, notify_discord.sh, sửa, selfcheck 3 TZ + mutation, bus finding gate-source-check-publish-20261012-r2
