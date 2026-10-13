@@ -981,3 +981,31 @@
 
 ## Consolidation 2026-10-13T14:07:02Z
 - [2026-10-13T13:40:01Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [], "capped": [{"ticker": "VPB", "book": "LAG", "desired_qty": 282, "capped_qty": 0, "reason": "VPB book=LAG: Σ SELL kế hoạch (282cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+
+## Consolidation 2026-10-13T17:00:01Z
+- [2026-10-13T16:38:55Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "in_progress", "note": "doc deposit_rate_vn + cctg_rate_vn, xac minh huong fallback"}
+- [2026-10-13T16:39:32Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:40:23Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "in_progress", "note": "doc xong dcf_valuation + study scripts; tra data_registry + consumer"}
+- [2026-10-13T16:40:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:41:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:42:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:43:05Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "in_progress", "note": "baseline selfcheck 14 file tren worktree; sap sua effective_deposit_rate"}
+- [2026-10-13T16:43:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:44:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:44:55Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "in_progress", "note": "viec 2: code fallback-hold xong tren wt-dcffb-1013, dang viet selfcheck + mutation"}
+- [2026-10-13T16:45:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:46:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:47:33Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:48:34Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:49:34Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:50:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:51:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:52:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:53:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:54:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:55:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:56:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:56:42Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "in_progress", "note": "viec 2 selfcheck moi 11/11 mutant bat, lich su trung fingerprint; 3TZ + quet consumer chay nen; bat dau viec 1 do rf-cham"}
+- [2026-10-13T16:57:35Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:58:36Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261013_163831", "source": "watcher"}
+- [2026-10-13T16:59:36Z] Taylor/heartbeat — Taylor_20261013_163831: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261013_163831", "source": "watcher"}
