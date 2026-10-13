@@ -104,8 +104,15 @@ echo "$(date -Iseconds) [time-claim-audit] $TODAY count=$_time_claim_count" >> "
 # --- Đếm cảnh báo cổng `measured_by` (user duyệt 2026-10-13) --------------------------------
 # Số đếm THÔNG TIN, đọc-only (bin/measured_by_warn_report.py), đưa vào mục 2f của prompt draft.
 # FAIL-OPEN: helper vắng/lỗi/treo ⇒ chuỗi rỗng ⇒ dùng câu "chưa có dữ liệu"; retro chạy y như cũ.
-_mb_warn_block="$(timeout "${DAILY_RETRO_MB_TIMEOUT:-20}" python3 "$ROOT/bin/measured_by_warn_report.py" 2>/dev/null || true)"
+_mb_err="$(mktemp 2>/dev/null)" || _mb_err=/dev/null
+_mb_warn_block="$(timeout "${DAILY_RETRO_MB_TIMEOUT:-20}" python3 "$ROOT/bin/measured_by_warn_report.py" 2>"$_mb_err" || true)"
 [ -n "$_mb_warn_block" ] || _mb_warn_block="[measured_by warn] chưa có dữ liệu (helper không chạy được)"
+# 1 dòng vào $LOG mỗi lần (như [time-claim-audit]): helper hỏng vĩnh viễn thì prompt chỉ ghi "chưa có dữ liệu" mỗi
+# ngày và mục 2f dặn "không đổi đáng kể thì không nêu" ⇒ không có dòng này sẽ không ai biết.
+_mb_note="$(head -c 200 "$_mb_err" 2>/dev/null | tr '\n' ' ')"
+[ "$_mb_err" = /dev/null ] || rm -f "$_mb_err"
+case "$_mb_warn_block" in *"chưa có dữ liệu"*) _mb_note="KHÔNG-CÓ-SỐ-ĐẾM ${_mb_note:-(không có stderr: file cảnh báo chưa có, hoặc helper treo/vắng)}";; esac
+echo "$(date -Iseconds) [measured-by-warn] $TODAY ${_mb_note:-ok}" >> "$LOG"
 
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial

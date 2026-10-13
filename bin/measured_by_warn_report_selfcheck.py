@@ -60,19 +60,19 @@ def finding(ts, et="finding"):
 # --- ca "chưa có dữ liệu" (fail-open, rc=0) ---
 d = mk()
 rc, out, _ = run(d)
-check("file thiếu ⇒ chưa có dữ liệu, rc=0", rc == 0 and "chưa có dữ liệu" in out, out)
+check("file thiếu ⇒ chưa có dữ liệu, rc=0", rc == 0 and "chưa có dữ liệu" in out and "helper lỗi" not in out, out)
 w(d, "_measured_by_warn.jsonl", [])
 rc, out, _ = run(d)
-check("file rỗng ⇒ chưa có dữ liệu, rc=0", rc == 0 and "chưa có dữ liệu" in out, out)
+check("file rỗng ⇒ chưa có dữ liệu, rc=0", rc == 0 and "chưa có dữ liệu" in out and "helper lỗi" not in out, out)
 w(d, "_measured_by_warn.jsonl", ["{hỏng", "[1,2]", '"x"', json.dumps({"ts": "không-phải-ngày"}), json.dumps({"no": "ts"})])
 rc, out, _ = run(d)
-check("toàn dòng hỏng/không ts ⇒ chưa có dữ liệu, rc=0", rc == 0 and "chưa có dữ liệu" in out, out)
+check("toàn dòng hỏng/không ts ⇒ chưa có dữ liệu, rc=0", rc == 0 and "chưa có dữ liệu" in out and "helper lỗi" not in out, out)
 rc, out, _ = run(os.path.join(d, "không-có-thư-mục-này"))
-check("bus không tồn tại ⇒ rc=0 chưa có dữ liệu", rc == 0 and "chưa có dữ liệu" in out, out)
+check("bus không tồn tại ⇒ rc=0 chưa có dữ liệu", rc == 0 and "chưa có dữ liệu" in out and "helper lỗi" not in out, out)
 bad = os.path.join(d, "afile")
 open(bad, "w").close()
 rc, out, _ = run(bad)
-check("bus là FILE ⇒ rc=0 chưa có dữ liệu", rc == 0 and "chưa có dữ liệu" in out, out)
+check("bus là FILE ⇒ rc=0 chưa có dữ liệu", rc == 0 and "chưa có dữ liệu" in out and "helper lỗi" not in out, out)
 shutil.rmtree(d)
 
 # --- ca đếm ---
@@ -104,13 +104,14 @@ rc, out, err = run(d)
 print(out)
 check("rc=0", rc == 0)
 check("đúng 5 dòng (1 khối ngắn)", len(out.strip().splitlines()) == 5, out)
-# 24h: Taylor×2 + Wags×3 + W_2 = 6 ; 24h trước (24h,48h]: W_1 + Mike(đúng 48h) = 2 ; 7ng (tuổi ≤7d, biên đóng) = 6+2+Mike(6d23h)+Mike(đúng 7d)+Zed(48h00m01s) = 11
+# 24h: Taylor×2 + Wags×3 + W_2 + y2(naive=UTC đúng 24h) = 7 ; 24h trước (24h,48h]: W_1 + y1(+07:00 ⇒ 24h00m01s) + Mike(đúng 48h) = 3 ;
+# 7ng (tuổi ≤7d, biên đóng) = 7+3+Mike(6d23h)+Mike(đúng 7d)+Zed(48h00m01s) = 13
 check("cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13", "24h=7 (24h trước đó=3) · 7ng=13" in out, out)
 # finding: 24h = Taylor 1 + Wags 2 = 3 ; 7ng = 3 + Taylor(đúng 7d) = 4 (10-05T10 = 7d14h ⇒ ngoài)
 check("finding 24h=3, 7ng=4 (status/hỏng/tương lai/7d14h bị loại; đúng 7d tính)", "finding: 24h=3 · 7ng=4" in out, out)
 check("tỉ lệ 24h=233.3% 7ng=325.0% (đếm theo code, mẫu số riêng)", "24h=233.3% · 7ng=325.0%" in out, out)
-check("nguồn 24h: có trace=3 · không trace=3", "24h: có trace_id (agent dispatch)=4 · không trace_id (script/cron)=3" in out, out)
-check("nguồn 7ng: có trace=5 · không trace=6", "7ng: 7 · 6" in out, out)
+check("nguồn 24h: có trace=4 · không trace=3", "24h: có trace_id (agent dispatch)=4 · không trace_id (script/cron)=3" in out, out)
+check("nguồn 7ng: có trace=7 · không trace=6", "7ng: 7 · 6" in out, out)
 check("agent top: Mike=3, Wags=3 (hoà ⇒ theo tên), Taylor=2, Winston=2", "Mike=3, Wags=3, Taylor=2, Winston=2" in out, out)
 check("topic top: B=3, D=3, A=2, C=2", "B=3, D=3, A=2, C=2" in out, out)
 check("không có 'Future'/'Cũ' (ngoài cửa sổ/tương lai)", "Future" not in out and "Cũ" not in out, out)
@@ -140,16 +141,39 @@ shutil.rmtree(d)
 # --- lớp bảo vệ CUỐI ở main: build() nổ bất kỳ ngoại lệ nào ⇒ in "chưa có dữ liệu", rc=0 ---
 d = mk()
 w(d, "_measured_by_warn.jsonl", [warn("2026-10-12T20:00:00Z", "a", "t", None)])
-src = open(HELPER, encoding="utf-8").read().replace("def build(", "def _orig_build(") \
-    + "\n\ndef build(*a, **k):\n    raise ZeroDivisionError('mô phỏng lỗi bất ngờ')\n"
-# `__main__` guard nằm trước def build ⇒ phải đặt guard SAU: tách main-guard ra cuối.
+src = open(HELPER, encoding="utf-8").read().replace("def build(", "def _orig_build(")
+# build() giả PHẢI nằm TRƯỚC main-guard (nếu đặt sau thì main() gặp NameError chứ không phải lỗi mô phỏng).
 head, _, tail = src.partition('if __name__ == "__main__":')
 patched = os.path.join(d, "patched.py")
-open(patched, "w", encoding="utf-8").write(head + '\nif __name__ == "__main__":' + tail)
+open(patched, "w", encoding="utf-8").write(
+    head + "\n\ndef build(*a, **k):\n    raise ZeroDivisionError('mô phỏng lỗi bất ngờ')\n\n" + 'if __name__ == "__main__":' + tail)
 p = subprocess.run([sys.executable, patched, "--bus", d, "--now", NOW], capture_output=True, text=True, timeout=30)
 check("build() nổ ⇒ dòng phân biệt được với 'file trống': có 'helper lỗi'", "helper lỗi" in p.stdout, p.stdout)
+check("build() nổ ⇒ stderr ghi đúng loại ngoại lệ (cho daily_retro.sh ghi $LOG)", "ZeroDivisionError" in p.stderr, p.stderr[-200:])
 check("build() nổ ZeroDivisionError ⇒ rc=0 và 'chưa có dữ liệu'", p.returncode == 0 and "chưa có dữ liệu" in p.stdout,
       "rc=%s out=%r err=%r" % (p.returncode, p.stdout, p.stderr[-200:]))
+shutil.rmtree(d)
+
+# --- 1 dòng xấu không được xoá cả số đếm: ts cực đoan có offset (OverflowError), dòng list, file inbox không đọc được ---
+d = mk()
+w(d, "_measured_by_warn.jsonl", [warn("2026-10-12T20:00:00Z", "a", "t", "tr"), warn("0001-01-01T00:00:00+07:00", "b", "t", "tr"),
+                                 warn("9999-12-31T23:59:59-07:00", "c", "t", "tr"), "[1,2]", "{hỏng"])
+w(d, "inbox/Ok.jsonl", [finding("2026-10-12T20:00:00Z"), "[1,2]"])
+locked = os.path.join(d, "inbox", "Locked.jsonl")
+open(locked, "w").write("{}\n")
+os.chmod(locked, 0)
+rc, out, _ = run(d)
+check("ts cực đoan + dòng list + inbox không đọc được ⇒ VẪN đếm (24h=1), không rơi về 'helper lỗi'",
+      rc == 0 and "24h=1" in out and "helper lỗi" not in out and "chưa có dữ liệu" not in out, out)
+os.chmod(locked, 0o600)
+shutil.rmtree(d)
+
+# --- stdout hỏng (/dev/full) vẫn rc=0 ---
+d = mk()
+w(d, "_measured_by_warn.jsonl", [warn("2026-10-12T20:00:00Z", "a", "t", "tr")])
+with open("/dev/full", "w") as _full:
+    p = subprocess.run([sys.executable, HELPER, "--bus", d, "--now", NOW], stdout=_full, stderr=subprocess.PIPE, text=True, timeout=30)
+check("stdout=/dev/full ⇒ rc=0", p.returncode == 0, "rc=%s err=%r" % (p.returncode, p.stderr[-200:]))
 shutil.rmtree(d)
 
 # --- topic dài/nhiều dòng bị cắt, không phá khối 5 dòng ---
@@ -158,6 +182,7 @@ w(d, "_measured_by_warn.jsonl", [warn("2026-10-12T20:00:00Z", "a", "x\n" + "y" *
 rc, out, _ = run(d)
 check("topic nhiều dòng/quá dài không phá khối (vẫn 5 dòng, mỗi dòng ≤300 ký tự)",
       len(out.strip().splitlines()) == 5 and max(len(l) for l in out.splitlines()) < 300, out)
+check("topic cắt ĐÚNG 50 ký tự (x, cách, rồi 48 chữ y)", "y" * 48 in out and "y" * 49 not in out, out)
 shutil.rmtree(d)
 
 print("\n" + ("OK: toàn bộ assertion PASS" if not _fails else "FAIL: %d assertion: %s" % (len(_fails), _fails)))

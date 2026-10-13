@@ -81,7 +81,7 @@ M += [
  ("A5 công tắc: chỉ =1 mới bật", SH, '"${AE_MEASURED_BY_CHECK:-1}" != 0', '"${AE_MEASURED_BY_CHECK:-1}" = 1'),
  ("A7 helper chạy NỀN (mồ côi)", SH, ' 9>&- \\\n      || true\n', ' 9>&- \\\n      || true &\n'),
  ("A11 helper thừa hưởng fd 9", SH, '"$BUS/_measured_by_warn.jsonl" 9>&- \\', '"$BUS/_measured_by_warn.jsonl" \\'),
- ("A12 bỏ chốt [ -f helper ]", SH, ' && [ -r "$ROOT/bin/finding_measured_by.py" ]; then', '; then'),
+ ("A12 bỏ chốt [ -r helper ]", SH, ' && [ -r "$ROOT/bin/finding_measured_by.py" ]; then', '; then'),
  ("A13 timeout 2 → 30", SH, "| timeout 2 python3", "| timeout 30 python3"),
  ("B1 lookahead bỏ [.,]\\d", PY, "(?!\\w|-\\d|[.,]\\d)", "(?!\\w|-\\d)"),
  ("B2 bỏ dấu [+-]?", PY, "[\\w.,:#§-])[+-]?\\d+", "[\\w.,:#§-])\\d+"),

@@ -15,7 +15,8 @@ phụ thuộc biến TZ của caller).
 Nhóm nguồn: `trace_id` có giá trị ⇒ "agent dispatch"; null/rỗng ⇒ "script/cron".
 
 FAIL-OPEN: file thiếu / rỗng / không dòng nào hợp lệ / bất kỳ ngoại lệ nào ⇒ in
-"chưa có dữ liệu" và rc=0. Dòng hỏng bị bỏ qua. Không bao giờ làm retro đổ.
+"chưa có dữ liệu" và rc=0 (kể cả stdout hỏng/pipe đóng: flush có bọc lỗi rồi os._exit(0)); ngoại lệ
+thật được ghi 1 dòng ra stderr để daily_retro.sh ghi vào $LOG. Dòng hỏng bị bỏ qua. Không bao giờ làm retro đổ.
 
     python3 bin/measured_by_warn_report.py [--bus DIR] [--now 2026-10-13T00:30:00Z]
 (--bus mặc định <root>/bus; --now chỉ để test.)
@@ -38,9 +39,9 @@ def parse_ts(s):
         return None
     try:
         t = dt.datetime.fromisoformat(s.strip().replace("Z", "+00:00"))
-    except ValueError:
+        return t.replace(tzinfo=dt.timezone.utc) if t.tzinfo is None else t.astimezone(dt.timezone.utc)
+    except (ValueError, OverflowError):  # OverflowError: ts cực đoan có offset (0001-01-01T00:00:00+07:00)
         return None
-    return t.replace(tzinfo=dt.timezone.utc) if t.tzinfo is None else t.astimezone(dt.timezone.utc)
 
 
 def read_jsonl(path):
@@ -140,9 +141,19 @@ def main(argv):
 if __name__ == "__main__":
     try:
         main(sys.argv)
-    except BaseException:  # noqa: BLE001 — fail-open tuyệt đối: retro không được đổ vì khối thông tin này
+    except BaseException as _e:  # noqa: BLE001 — fail-open tuyệt đối: retro không được đổ vì khối thông tin này
+        try:
+            # stderr: daily_retro.sh giữ lại và ghi 1 dòng vào $LOG (không thì helper hỏng vĩnh viễn mà không ai thấy)
+            sys.stderr.write("measured_by_warn_report: %s: %s\n" % (type(_e).__name__, " ".join(str(_e).split())[:200]))
+        except BaseException:  # noqa: BLE001
+            pass
         try:
             print(NO_DATA.replace("không đọc được)", "không đọc được; hoặc helper lỗi)", 1))
         except BaseException:  # noqa: BLE001
             pass
-    sys.exit(0)
+    for _s in (sys.stdout, sys.stderr):  # stdout/stderr hỏng (/dev/full, pipe đóng) không được đổi rc
+        try:
+            _s.flush()
+        except BaseException:  # noqa: BLE001
+            pass
+    os._exit(0)

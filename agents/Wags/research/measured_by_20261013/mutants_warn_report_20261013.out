@@ -1,0 +1,44 @@
+ĐỐI CHỨNG measured_by_warn_report_selfcheck.py rc=0
+ĐỐI CHỨNG daily_retro_measured_by_selfcheck.sh rc=0
+CHẾT  W1 cửa sổ 24h thành 25h                                 fail=4 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W2 cửa sổ 24h thành 23h                                 fail=5 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W3 cửa sổ 7 ngày thành 6 ngày                           fail=7 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W4 biên 24h mở (tuổi < 24h)                             fail=8 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W5 ts tương lai được đếm                                fail=7 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W6 nhầm nhóm trace_id (đảo)                             fail=3 vd: FAIL  nguồn 24h: có trace=4 · không trace=3 — [measured_by warn] tính đến 13/10/2026 07:30 ICT (số đ
+CHẾT  W7 trace_id chỉ khoảng trắng tính là có trace           fail=3 vd: FAIL  nguồn 24h: có trace=4 · không trace=3 — [measured_by warn] tính đến 13/10/2026 07:30 ICT (số đ
+CHẾT  W8 trace_id None thành chuỗi 'None' (có trace)          fail=3 vd: FAIL  nguồn 24h: có trace=4 · không trace=3 — [measured_by warn] tính đến 13/10/2026 07:30 ICT (số đ
+CHẾT  W9 dòng hỏng làm nổ (bỏ except ValueError)              fail=14 vd: FAIL  toàn dòng hỏng/không ts ⇒ chưa có dữ liệu, rc=0 — [measured_by warn] chưa có dữ liệu (file cản
+CHẾT  W9b dòng lồng sâu làm nổ (bỏ RecursionError)            fail=2 vd: FAIL  dòng lồng 200000 tầng: rc=0, bản ghi hợp lệ vẫn đếm — [measured_by warn] chưa có dữ liệu (file
+SỐNG  W10 bỏ fail-open ở main (ngoại lệ lọt ra, rc≠0)
+CHẾT  W11 exit code 1 khi không dữ liệu                       fail=11 vd: FAIL  file thiếu ⇒ chưa có dữ liệu, rc=0 — [measured_by warn] chưa có dữ liệu (file cảnh báo thiếu/r
+CHẾT  W24 parse_ts bỏ OverflowError (1 ts cực đoan xoá cả số đếm) fail=2 vd: FAIL  ts cực đoan + dòng list + inbox không đọc được ⇒ VẪN đếm (24h=1), không rơi về 'helper lỗi' — 
+CHẾT  W25 kết thúc bằng sys.exit(0) thay os._exit(0) (rc=120 khi stdout hỏng) fail=2 vd: FAIL  stdout=/dev/full ⇒ rc=0 — rc=120 err="Exception ignored in: <_io.TextIOWrapper name='<stdout>'
+CHẾT  W26 bỏ except OSError ở read_jsonl (file inbox không đọc được làm nổ) fail=5 vd: FAIL  file thiếu ⇒ chưa có dữ liệu, rc=0 — [measured_by warn] chưa có dữ liệu (file cảnh báo thiếu/r
+CHẾT  W27 bỏ isinstance(obj, dict) (dòng list làm nổ)         fail=3 vd: FAIL  toàn dòng hỏng/không ts ⇒ chưa có dữ liệu, rc=0 — [measured_by warn] chưa có dữ liệu (file cản
+CHẾT  W28 helper nổ không ghi stderr (daily_retro không có gì để log) fail=2 vd: FAIL  build() nổ ⇒ stderr ghi đúng loại ngoại lệ (cho daily_retro.sh ghi $LOG) —
+CHẾT  D7 bỏ dòng [measured-by-warn] khỏi $LOG                 fail=11 vd: FAIL [real] đúng 1 dòng [measured-by-warn] trong $LOG
+CHẾT  W12 top agent 8 → 3                                     fail=3 vd: FAIL  agent top: Mike=3, Wags=3 (hoà ⇒ theo tên), Taylor=2, Winston=2 — [measured_by warn] tính đến 
+CHẾT  W13 top topic 5 → 9                                     fail=2 vd: FAIL  top 8 agent / top 5 topic — ag00=1, ag01=1, ag02=1, ag03=1, ag04=1, ag05=1, ag06=1, ag07=1 | t
+CHẾT  W14 mẫu số tính mọi event_type                          fail=3 vd: FAIL  finding 24h=3, 7ng=4 (status/hỏng/tương lai/7d14h bị loại; đúng 7d tính) — [measured_by warn] 
+CHẾT  W15 giờ in theo giờ local, không ICT                    fail=2 vd: FAIL  giờ in ra theo ICT: 13/10/2026 07:30 — [measured_by warn] tính đến 13/10/2026 14:30 ICT (số đế
+CHẾT  W16 chia 0 không bảo vệ                                 fail=6 vd: FAIL  top 8 agent / top 5 topic —  |
+CHẾT  W17 ghi file (không đọc-only)                           fail=2 vd: FAIL  ĐỌC-ONLY: bus không đổi byte/mtime —
+CHẾT  W18 không cắt topic nhiều dòng                          fail=3 vd: FAIL  topic nhiều dòng/quá dài không phá khối (vẫn 5 dòng, mỗi dòng ≤300 ký tự) — [measured_by warn]
+CHẾT  W19 24h-trước dùng cùng cửa sổ 24h                      fail=2 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+SỐNG  D1 [TƯƠNG ĐƯƠNG: retro không có set -e] bỏ || true
+CHẾT  D6 timeout mặc định 20 -> 0 (không giới hạn)            fail=1 vd: FAIL mặc định timeout helper trong daily_retro.sh = 20s (selfcheck đặt 2s nên phải ghim tĩnh)
+CHẾT  W21 ts có offset coi như UTC                            fail=4 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W22 ts naive coi như giờ local                          fail=4 vd: FAIL  cảnh báo 24h=7, 24h trước=3 (biên trên 48h00m01s loại; offset/naive đúng), 7ng=13 — [measured_
+CHẾT  W23 lỗi helper in y câu 'không đọc được)' (không phân biệt) fail=2 vd: FAIL  build() nổ ⇒ dòng phân biệt được với 'file trống': có 'helper lỗi' — [measured_by warn] chưa c
+CHẾT  D2 bỏ timeout của helper                                fail=2 vd: FAIL [hang] helper treo 60s bị timeout cắt: retro xong <20s (thực 60s)
+CHẾT  D3 bỏ câu KHÔNG escalate                                fail=5 vd: FAIL [real] mục 2f có câu KHÔNG escalate
+CHẾT  D4 mục 2f rỗng khi helper không ra gì (bỏ fallback)     fail=8 vd: FAIL [absent] mục 2f rơi về ĐÚNG câu fallback 'helper không chạy được'
+CHẾT  D5 helper chạy làm đổi prompt Wags                      fail=4 vd: FAIL [absent] prompt Wags giống real
+
+TỔNG: 35 mutant · CHẾT 33 · SỐNG 2
+  còn sống: W10 bỏ fail-open ở main (ngoại lệ lọt ra, rc≠0)
+  còn sống: D1 [TƯƠNG ĐƯƠNG: retro không có set -e] bỏ || true
+
+# SAU KHI SỬA mutant W10 (bản cũ bắt ZeroDivisionError trùng đúng ngoại lệ mà test mô phỏng ⇒ sống giả): chạy lại riêng W10 ⇒ CHẾT (fail=3).
+# ⇒ 35 mutant · CHẾT 34 · SỐNG 1 (D1 — tương đương: retro không có set -e).

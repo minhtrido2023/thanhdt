@@ -79,5 +79,11 @@ for k in absent crash empty; do ok "[$k] mục 2f rơi về ĐÚNG câu fallback
 ok "[hang] helper treo 60s bị timeout cắt: retro xong <20s (thực $(cat "$T/hang/elapsed")s)" "$([ "$(cat "$T/hang/elapsed")" -lt 20 ] && echo 1 || echo 0)"
 ok "[hang] mục 2f rơi về ĐÚNG câu fallback (timeout cắt)" "$(grep -q 'helper không chạy được' "$T/hang/prompt.1" && echo 1 || echo 0)"
 ok "mặc định timeout helper trong daily_retro.sh = 20s (selfcheck đặt 2s nên phải ghim tĩnh)" "$(grep -q 'DAILY_RETRO_MB_TIMEOUT:-20}' "${RETRO_SRC:-$ROOT/bin/daily_retro.sh}" && echo 1 || echo 0)"
+# $LOG: mỗi lần chạy đúng 1 dòng [measured-by-warn] — để helper hỏng vĩnh viễn không bị im lặng (review 13/10, C3).
+lg() { grep -h '\[measured-by-warn\]' "$T/$1/logs/daily_retro.log" 2>/dev/null; }
+for k in real absent crash hang empty; do ok "[$k] đúng 1 dòng [measured-by-warn] trong \$LOG" "$([ "$(lg $k | wc -l)" = 1 ] && echo 1 || echo 0)"; done
+ok "[real] dòng log báo 'ok' (có số đếm thật)" "$(lg real | grep -q ' ok$' && echo 1 || echo 0)" "$(lg real)"
+for k in absent crash hang empty; do ok "[$k] dòng log đánh dấu KHÔNG-CÓ-SỐ-ĐẾM" "$(lg $k | grep -q 'KHÔNG-CÓ-SỐ-ĐẾM' && echo 1 || echo 0)" "$(lg $k)"; done
+ok "[crash] dòng log mang stderr thật của helper ('boom')" "$(lg crash | grep -q 'boom' && echo 1 || echo 0)" "$(lg crash)"
 echo "---"; echo "PASS=$pass FAIL=$fail"
 [ "$fail" -eq 0 ]
