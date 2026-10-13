@@ -1178,3 +1178,6 @@
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-12T14:18:05Z] ĐANG DỞ job Taylor_20261012_141756 (quỹ mở bước 2 VÒNG 2: sửa C1,C2,S1-S9,G3,G6,G7,G8 theo arch_review_ea9d6969a/REVIEW.md; nhánh feat/fund-cashflow-detect-20261012, worktree agents/Taylor/wt-fundcf-1012; KHÔNG merge): bắt đầu | NEXT: đọc REVIEW.md, sửa, selfcheck 3 TZ + mutant, bus finding
+
+## Archived 2026-10-13 (keep=12 days=0 require_done=False)
+- [2026-10-12T16:20:14Z] ĐANG DỞ job Taylor_20261012_162001 (resume #3 quỹ mở bước 2 vòng 2): wt-fundcf-1012 có bin/cash_identity.py viết lại CHƯA COMMIT | NEXT: kiểm file compile, sửa tiếp consumer (nav_period_returns, daily_nav_snapshot, report gate), selfcheck, mutant, finding
