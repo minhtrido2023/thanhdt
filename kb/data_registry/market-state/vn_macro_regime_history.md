@@ -13,6 +13,7 @@ last_update_2: 2026-08-31 (Bobby — addendum granular cửa sổ 2008Q4-2009Q3:
 last_update_3: 2026-08-31 (Bobby — 5 episode mới, BLIND, dispatch riêng: EP-2014-09 OPEC/oil CONFIDENCE_LIQUIDITY/EXTERNAL_CYCLE clean; EP-2015-07 China devaluation CONFIDENCE_LIQUIDITY ambiguous/EXTERNAL_CYCLE clean; EP-2023-09 FX-defense/margin/VIC-VHM CONFIDENCE_LIQUIDITY clean/CONTAINABLE dominant+EXTERNAL_CYCLE phụ ambiguous; EP-2025-03 Liberation Day tariff CONFIDENCE_LIQUIDITY clean/CONTAINABLE(tranh chấp)+EXTERNAL_CYCLE(nền) ambiguous; EP-2026-01 credit/BĐS+chiến tranh dầu MIXED ambiguous, N/A trục 2 hai timeline — nghi vấn CHƯA XÁC NHẬN liên hệ với episode 07/2026 đã có trong fleet)
 last_update_4: 2026-09-30 (Bobby — WATCH real-time CD/lãi suất huy động tăng, BLIND, dispatch từ Mike: MIXED ambiguous, phần CONFIDENCE_LIQUIDITY (O/N spike 21-09) CONTAINABLE; không nâng cấp cảnh báo, củng cố watch STRUCTURAL_ACCUMULATION BĐS đã mở)
 last_update_5: 2026-09-30 (Bobby — REGIME READ real-time BLIND: Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~60/40; 7 lead indicator + điều kiện đổi phân loại; KHÔNG phải episode)
+last_update_6: 2026-10-13 (Bobby — REGIME READ #2 real-time BLIND, rà soát quý kéo sớm: CHƯA phải episode; nền GIỮ Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~55/45; 0/7 chỉ báo ở cột xác nhận; ĐÍNH CHÍNH đọc NPL Q2 (77,7% mức tăng là Sacombank); kênh mới: biên độ trái phiếu cấp 2 Big-4 +1,05 → +2,25/+2,8)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1299,6 +1300,95 @@ giá 30/09 từ nguồn sơ cấp; chuỗi tự do FiinPro hết hạn 28/09/202
 TTTC Tiền tệ có sai lệch ngày trong bản tóm tắt (25.641 "Sept 25" vs 17/09) — dùng ≈25.640 làm mức tham
 chiếu, kiểm lại bằng NHNN. Review định kỳ: ~2026-11-26 (sau BCTC Q3) như lịch đã chốt; sớm hơn nếu #3 hoặc #5
 chạm ngưỡng.
+
+---
+
+## REGIME READ #2 (không phải episode) — rà soát quý kéo sớm, dữ liệu tới 2026-10-13 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike (kỳ quý vốn hẹn ~2026-11-26, user kéo lên 13/10).** Không forward-return, không định giá cổ
+phiếu, không nhận định của user/Mike được cung cấp hay dùng. (Entry 09-30 phía trên có ghi 1 dòng P/E do caller
+đưa lúc đó — KHÔNG dùng ở đây.) BCTC Q3/2026 CHƯA công bố ⇒ các ô nợ xấu/BĐS vẫn là số Q2.
+
+### Phân loại
+- **CHƯA phải một episode** (không có trigger/giá được giao để phân loại; không có sự kiện căng thẳng rời rạc mới
+  sau cú O/N 21/09).
+- **Regime nền: GIỮ `STRUCTURAL_ACCUMULATION` (Loại-1) sớm-giữa, mức nhẹ — confidence `ambiguous`, ~55/45**
+  (09-30: ~60/40). Hạ nhẹ vì 2 chỉ báo "xác nhận" của chính entry 09-30 KHÔNG xác nhận (#1 tín dụng, #2 core) và
+  nợ xấu Q2 hoá ra tập trung ở 1 ngân hàng; không hạ thêm vì kênh vốn dài hạn (trái phiếu cấp 2 Big-4) vẫn đang
+  định giá lại lên và chính sách tiếp tục NỚI ràng buộc cung tín dụng.
+- Trục 2: không áp dụng cho nền. Hợp phần Fed = `EXTERNAL_CYCLE` (Fed 3,75-4,00% từ 16/09; thị trường nghiêng
+  giữ 27-28/10, còn khả năng tăng 12/2026).
+
+### Số đo mới (ngày số liệu · nguồn)
+1. Tín dụng **+11,59% YTD, +16,69% YoY** (30/09; NHNN họp báo 07/10 — TTTCTT/Thanh tra/Mekong ASEAN). YoY giảm
+   tốc: 18,26% (28/04) → 18,1% (26/06) → 16,69% (30/09). Khảo sát TCTD quý IV: cả năm tín dụng 16,4% (nâng từ
+   14,5%), huy động 14,3%.
+2. Cùng phạm vi, cùng mốc (Cục Thống kê, 28/09): **huy động +9,78% vs tín dụng +10,89% ⇒ chênh 1,11pp** (cùng kỳ
+   2025: 9,99% vs 13,37% = 3,38pp). Nguồn: TC Kinh tế-Tài chính 05/10 trích báo cáo NSO — chưa đọc PDF gốc.
+3. Lãi suất bình quân giao dịch mới: huy động 6,38% (20/09, +1,15pp YTD; NHNN) / 6,46% (30/09, +1,22pp; Bộ Tài
+   chính 09/10); cho vay **9,12%** (30/09, +1,03pp YTD; Bộ Tài chính — 1 nguồn).
+4. CPI T9 5,08% YoY, core **4,45%** (giảm từ 4,55%), bình quân 9T 4,52% (NSO 02/10).
+5. Liên NH (NHNN qua VBMA, tự đọc PDF): bình quân tuần 3M = 7,25 / 6,72 / 6,86 / 7,08 / 6,78 (5 tuần 31/08→02/10)
+   ⇒ **bình quân tháng 9 ≈ 6,98%**; ON 2,73%, 1W 3,57%, 1M 5,04%, 3M 6,73%, 6M 9,0%, 9M 8,55% (02/10, kỳ dài rất
+   mỏng). OMO lưu hành 248 (04/09) → 219 → 156 → 187 → **133 nghìn tỷ** (02/10). Tuần 05-09/10: VBMA chưa đăng.
+6. Tỷ giá: trung tâm 25.629 (09-10/10); VCB bán 26.255 → 26.170 (02/10) → 26.070 (10/10). Tự do: không có số T10.
+7. Niêm yết: Big-4 12M online 6,8% / quầy 5,9%; 6M online 6,6% / quầy 3,5%; CCTG VCB 6M 7,5%, BIDV/CTG 12M 7,4%
+   (CSV nội bộ 12/10 + TTTCTT 01/10). ACB online 12M 7,8% → **8,0%** (≈05/10; +0,3pp ở 6-9M).
+8. **Trái phiếu cấp 2 chào bán công chúng Big-4 (biên độ trên lãi tham chiếu = bình quân tiết kiệm 12M Big-4):**
+   CTG 12/2024-01/2025 8Y +1,05 / 10Y +1,15 (bán ~hết 4.000 tỷ) → CTG 15/12/2025-20/01/2026 8Y +1,25 (**bán 55,5%**)
+   → BIDV đợt 2 (đến 20/05/2026) +1,8/+1,9 (**bán 36,9%**) → BIDV đợt 3 (kết thúc 09/09/2026) 7Y +2,25 / 8Y +2,3 /
+   10Y +2,25 (**bán 80,3%**) → CTG NQ 16/09/2026: 16.000 tỷ, 6Y, biên **tối đa +2,8**, dừng các đợt 2025 dở.
+   Agribank 2024 10Y +2,0 (bán 100%); Agribank 07/2026 15.000 tỷ 10Y +2,0 (kết quả: không có số). VCB: chỉ riêng lẻ
+   (2026: 7,87-8% cố định). Nguồn: doanhnhan.baophapluat 14/09 + 19/09, Mekong ASEAN 23/05, VNBA 17/09, vneconomy.
+   ⇒ trong CÙNG tổ chức phát hành, biên độ nới >1pp trong ~9-20 tháng và có đợt bán không hết. Đây là kênh bán-
+   hành-chính lộ giá rõ nhất kỳ này. Lưu ý (suy luận): biên độ gồm cả phần bù kỳ hạn/thứ cấp và nhu cầu vốn cấp 2
+   do tín dụng tăng + TT50 (trái phiếu NH chỉ tính vào mẫu số LDR mới nếu là vốn cấp 2) ⇒ không thuần là giá thanh khoản.
+9. Văn bản mới: CV 8509 (16/09, nới — loại khách sạn/du lịch khỏi room BĐS); NĐ 359/2026 (17/09, VAMC, hiệu lực
+   06/11); QĐ 1890/QĐ-TTg (18/09, đề án có hợp phần xử lý TCTD yếu kém); **TT 50/2026/TT-NHNN (30/09, hiệu lực
+   01/12/2026: trần LDR 85→95% theo công thức mới khi NH chuyển sang LCR/NSFR, chậm nhất 01/10/2028; LCR 50→100%
+   2028-2033; NSFR 90→100% 2028-2030)** — nới ngắn hạn, siết chất lượng dài hạn (SSI). Không có văn bản SIẾT hệ thống.
+
+### ĐÍNH CHÍNH đọc nợ xấu Q2 (entry 08-31/09-30 và tracker ghi "1,97%, tăng tốc")
+Số 1,97% là gộp 27 NH niêm yết. Theo TCBS (Báo Đấu thầu 21/09; Người Quan Sát): **Sacombank chiếm 77,7% mức tăng**
+(NPL 6,41% → 7,54%, nhóm 5 từ 1,77% → 5,07% dư nợ); **26 NH còn lại NPL GIẢM 2,02% → 1,78%**. NHNN: nợ xấu nội
+bảng 1,51% (30/06, không gồm 5 NH kiểm soát đặc biệt), giảm từ 1,69% cuối 2025. Phần xấu đi diện rộng là ở tầng
+SỚM hơn: nợ nhóm 2 1,17% → 1,38%, bao phủ 78,8% (143,2% Q3/2022), lãi dự thu 230,7 nghìn tỷ (+61,3 nghìn tỷ YoY).
+⇒ câu "NPL tăng tốc theo đúng cơ chế trễ 2011→2012" ở mức ngành là ĐỌC QUÁ; đúng hơn: 1 ca cá biệt lớn + xấu đi
+sớm diện rộng mức nhẹ. (Cùng một gốc TCBS qua 2 báo — coi là 1 nguồn.)
+
+### 7 lead indicator của entry 09-30 — trạng thái
+| # | Chỉ báo | Số | Cột |
+|---|---|---|---|
+| 1 | Tín dụng hết T9 | YTD 11,59% · YoY 16,69% | GIỮA (không xác nhận: cần >12,5% & ≥17%; không bác: cần ≤11% & <16%) |
+| 2 | CPI + core | 5,08% (1 tháng >5%) · core 4,45% | GIỮA, nghiêng bác (core giảm, <4,7%) |
+| 3 | O/N, OMO | ON 0,87-2,73% sau 22/09; OMO lưu hành giảm còn 133 nghìn tỷ | nghiêng BÁC (chưa đủ 4 tuần hết bơm ròng) |
+| 4 | Chi phí vốn biên | CCTG Big-4 ≤7,5% (bác) NHƯNG biên cấp 2 Big-4 nới tới +2,25/+2,8 | PHÂN KỲ |
+| 5 | FX | trung tâm 25.629 (<25.800) | BÁC (premium/dự trữ: không có số) |
+| 6 | NPL Q3 | chưa công bố | không có số |
+| 7 | Tín dụng BĐS Q3 | chưa công bố | không có số |
+⇒ 0/7 ở cột "xác nhận Loại-1"; 1-2/7 ở cột "bác"; quy tắc đổi nhãn 09-30 KHÔNG kích hoạt theo chiều nào.
+
+### Giai đoạn lịch sử giống nhất
+Về CƠ CHẾ: 2010 → đầu 2011 trước NQ 11 (lãi suất niêm yết bị neo hành chính, giá vốn thật lộ ở kênh lách; mục tiêu
+tăng trưởng khiến không siết). Về ĐỘ LỚN và QUỸ ĐẠO: gần 2017 → 2018 hơn (tín dụng 18-19% rồi được ghìm dần bằng
+hành chính, không vỡ). Khác 2010-11: CPI 5% vs 12-18%, tín dụng 17% vs 32%, tỷ giá yên, không vàng/USD hoá. Khác
+2017-18: tín dụng/GDP ~145% (vs ~125-130%), LDR thuần >110%, chính sách đang nới chứ không ghìm, Fed đang tăng.
+Không giống 2022: không trigger có tên, không đóng băng TPDN, liên NH yên.
+
+### Điều gì đổi phân loại
+- **→ Loại-1 rõ hơn (clean):** core ≥4,7% hoặc tăng nhanh hơn CPI chung 2 tháng (NSO ~06/11, ~06/12); tín dụng YoY
+  quay lại ≥17% trong khi huy động cùng mốc kém ≥2pp; NHNN siết hệ thống (nâng lãi suất điều hành/cắt room diện
+  rộng); BCTC Q3: NPL trừ-Sacombank quay lại tăng, nhóm 2 +>20% QoQ, bao phủ <75%; biên cấp 2 Big-4 thực phát
+  ≥2,5% kèm bán <60% hoặc CCTG Big-4 ≥8%; 3M liên NH bình quân tháng >7,5%.
+- **→ Loại-2 (chỉ khi có episode):** trigger có TÊN (1 ngân hàng/1 tổ chức phát hành) + phản ứng chính sách nhắm
+  đích + #1/#2 ở cột bác. Nền Loại-1 chưa tan ⇒ đọc mặc định của episode như vậy vẫn là MIXED/ambiguous.
+- **→ Bình thường hoá:** tín dụng YoY <15% bền + huy động ≥ tín dụng; biên cấp 2 Big-4 <1,5%; CCTG Big-4 <7%;
+  core <4%; tín dụng BĐS QoQ <5% — 2 quý liên tiếp.
+
+**Không xác minh được:** liên NH/OMO tuần 05-09/10; USD tự do T10; dự trữ ngoại hối sau 18/06 (87,6 tỷ USD); tín
+dụng BĐS/NPL/bao phủ Q3; giao dịch BĐS Q3; biểu phân bậc T10 của VPB/MB/TCB/ACB; kết quả Agribank 07/2026 và
+BIDV đợt 1/2026; GDP Q3 9,95% (1 nguồn); VPBank online 7,9% (chỉ thấy tiêu đề 13/10). Review tiếp: sau BCTC Q3
+(~2026-11-26 như lịch), sớm hơn nếu #3/#5 chạm.
 
 ---
 
