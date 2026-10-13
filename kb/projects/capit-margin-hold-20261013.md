@@ -10,6 +10,22 @@ duyệt khi user trả lời riêng câu đó. **Khoá cơ học: user DUYỆT l
 `approve_plan_simple.sh` + `approve_margin_day.py` kiểm, hỏng/không đọc được ⇒ coi như ĐANG GIỮ. Cho tới
 khi nhánh đó merge VÀ file giữ được bật, luật bằng chữ ở trên vẫn là chốt duy nhất.
 
+## ⚠️ KHÔNG duyệt margin CHƯA ĐỦ — plan đã sizing đòn bẩy vẫn nguy hiểm (phát hiện 2026-10-13 19:10 ICT)
+Taylor đọc code + đo trên fixture (job `Taylor_20261013_114453`), Mike đọc lại xác nhận:
+- Thiếu bản duyệt margin ⇒ `trading_bot/plan.py:1263-1271` chỉ GỠ cờ vay (`lever_f`, `loan_package_id`),
+  **KHÔNG giảm khối lượng** (khối lượng đã sizing ×1,3 từ tầng plan — `plan.py:1336-1339`).
+- Sau đó một trong hai: (a) tổng MUA vượt sức mua ⇒ `plan_funding_gate.py:392` BLOCK ⇒ `bot_execute.py`
+  bỏ qua CẢ account (kể cả lệnh không đòn bẩy, kể cả lệnh BÁN); (b) đủ sức mua ⇒ mua ĐỦ khối lượng ×1,3
+  bằng gói mặc định của account (chưa xác minh với DNSE gói đó có phải gói không vay).
+- Hành vi này có từ TRƯỚC (mọi ngày thiếu bản duyệt margin đều vậy). Hôm nay chưa phơi nhiễm: lever không
+  active (dd52 −10,7% > −20%), chưa plan nào sizing ×1,3.
+⇒ **Trong thời gian giữ, nếu plan sizing đòn bẩy xuất hiện: KHÔNG duyệt plan đó. Báo user, lập lại plan
+không đòn bẩy.** Chặn gốc đúng chỗ là tầng SIZING: `golive_recommend_v23.py:1057` chỉ sizing ×1,3 khi
+`capit_margin_lever.enabled` = true (`data/trading_rules.json`) ⇒ tắt công tắc tổng là hết đường sinh plan
+đòn bẩy. Đổi `trading_rules.json` là ranh giới cứng — CHỜ USER quyết (trình 13/10 19:1x).
+Nhánh `feat/capit-margin-hold-lock-20261013` @ `0d0702856` (file giữ + 3 script, selfcheck 127/127) CHƯA
+review, CHƯA merge — treo tới khi user chọn hướng.
+
 ## Vì sao
 Chi phí vốn tăng ngầm mà bộ lọc "khủng hoảng cơ cấu" của lever không thấy: `pit_deposit_threshold` 9%
 đọc Big-4 12M online = 6,8% (`golive_recommend_v23.py`, cố ý Big-4-only theo quyết định 2026-10-01).
