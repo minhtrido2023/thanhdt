@@ -64,7 +64,12 @@ dùng đúng số mới nhất nếu đã sửa):
   (1) spread CCTG Big-4 cao nhất (6M và 12M, đo riêng) − Big-4 tiết kiệm 12M online ≥1,0pp HOẶC
       nới ≥0,3pp so với kỳ trước; (2) bình quân top-5 NH tư nhân 12M biểu chuẩn +≥0,3pp trong 3
       tháng HOẶC ≥15 NH trả ≥7%; (3) liên NH 3 tháng bình quân tháng >7,5%; (4) tín dụng YTD −
-      huy động YTD (cùng phạm vi + mốc ngày) ≥2pp; (5) tiền gửi lớn cao nhất ≥10% kéo dài 2 tháng.
+      huy động YTD (cùng phạm vi + mốc ngày) ≥2pp; (5) tiền gửi lớn cao nhất ≥10% kéo dài 2 tháng;
+      (6) CCTG nhóm ngay sau Big-4 (VPB/MB/TCB/ACB), lợi suất cao nhất nắm giữ ≤12 tháng, đo riêng
+      mệnh giá 10 triệu và 100 triệu: +≥0,3pp so với kỳ trước HOẶC bậc 100 triệu ≥9,5% (mốc 13/10:
+      VPB 100 triệu 9,2%; số kỳ trước đọc ở data/cctg_rate_vn_tier2_events.csv); (7) biên độ trái
+      phiếu vốn cấp 2 chào bán công chúng của Big-4 so với lãi tham chiếu: đợt mới ≥2,75pp HOẶC
+      biên ≥2,5pp kèm bán dưới 60% (mốc: CTG 10/2026 6 năm +2,25; BIDV 09/2026 +2,25 bán 80,3%).
   Ô thiếu số ⇒ ghi "không có số", KHÔNG coi là chạm và KHÔNG coi là an toàn.
 - Có thông tư/quyết định SIẾT MỚI (đảo hướng so với xu hướng NỚI đã ghi nhận 30/05/2026)
 - Tin NPL/bank-run cụ thể ngoài chu kỳ công bố quý thường lệ

@@ -62,7 +62,7 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
      bất kỳ tin NPL/bank-run cụ thể nào ngoài chu kỳ công bố quý thường lệ.
    - **Ngưỡng escalate "TĂNG NGẦM" chi phí vốn (user duyệt 2026-10-07)** — vì số Big-4 12M bị neo
      hành chính (CV 2342/TB 117/CV 3972 năm 2026), ngưỡng "+0,3pp/tháng" ở trên mù về cấu trúc;
-     5 ngưỡng sau đo ở kênh kiểm soát yếu hơn. Mốc so sánh đầu tiên:
+     các ngưỡng sau (5 gốc + 2 thêm 13/10) đo ở kênh kiểm soát yếu hơn. Mốc so sánh đầu tiên:
      `vn_realestate_monthly_checks/2026-10-multiproxy.md`. Chạm BẤT KỲ ngưỡng nào ⇒ escalate:
      1. Spread CCTG Big-4 cao nhất (đo RIÊNG kỳ hạn 6M và 12M) − Big-4 tiết kiệm 12M online
         ≥1,0pp, HOẶC nới rộng ≥0,3pp so với kỳ trước (mốc 10/2026: 12M 0,6pp · 6M 0,7pp).
@@ -72,6 +72,23 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
      4. Tín dụng YTD − huy động YTD (CÙNG phạm vi, CÙNG mốc ngày) ≥2pp (mốc 22/08: −0,4pp VND).
      5. Tiền gửi lớn cao nhất thị trường ≥10% kéo dài 2 tháng liền (mốc: PVcomBank 10% cho khoản từ 2.000 tỷ,
         nguồn 07/09; tháng 10 chưa xác nhận).
+     6. (thêm 2026-10-13, user duyệt) CCTG nhóm NGAY SAU Big-4 (VPB, MB, TCB, ACB) — lợi suất cao
+        nhất cho thời gian nắm giữ ≤12 tháng, đo RIÊNG mệnh giá 10 triệu và 100 triệu: tăng ≥0,3pp
+        so với kỳ trước, HOẶC bậc 100 triệu ≥9,5%. Mốc 13/10 (file `data/cctg_rate_vn_tier2_events.csv`,
+        Taylor đối chiếu ≥2 nguồn): VPB Super Thịnh Vượng 9,2% [100tr; khoảng nắm giữ 2 nguồn lệch
+        nhau: 184-389 ngày vs 4 tháng-1 năm] · VPB 10tr KHÔNG có số (3 nguồn 3 số 7,2/7,5/7,8) ·
+        MB 7,1% [6-9 tháng, bậc thường; bậc từ 1 tỷ ~9,1%, 1 nguồn] · ACB 7,2% [3 tháng] · TCB
+        KHÔNG có số (8,0 vs 8,2). User: nhóm này phản ánh thị trường vốn tốt hơn Big-4 (Big-4
+        phản ứng chậm do áp lực NHNN).
+     7. (thêm 2026-10-13, user duyệt) Biên độ trái phiếu vốn cấp 2 chào bán CÔNG CHÚNG của Big-4 so
+        với lãi tham chiếu (bình quân tiết kiệm 12M Big-4): đợt mới ≥2,75pp, HOẶC biên ≥2,5pp kèm
+        bán dưới 60%. Mốc (Bobby 13/10): CTG 12/2024 8 năm +1,05 (bán ~100%) · CTG 12/2025 8 năm
+        +1,25 (bán 55,5%) · BIDV 05/2026 7-10 năm +1,8/+1,9 (bán 36,9%) · Agribank 07/2026 10
+        năm +2,0 (chưa có số bán) · BIDV 09/2026 7-10 năm +2,25/+2,3 (bán 80,3%) · CTG 10/2026
+        6 năm +2,25 (đang chào bán). "Bán không hết" ĐÃ xảy ra 3 đợt nên một mình nó không còn
+        là ngưỡng.
+     ⚠️ Con số ngưỡng của (6)(7) do Mike đặt TẠM 13/10, user duyệt việc THÊM chuỗi chứ chưa xác
+     nhận từng con số — hỏi lại user trước khi coi là đã chốt.
      Thiếu số liệu một ô ⇒ ghi "không có số", KHÔNG coi là chạm, KHÔNG coi là an toàn.
    - **TỰ ĐỘNG HOÁ XONG 2026-08-31**: cron `0 20 6 * *` = **20:00 UTC ngày 6** (= **03:00 ICT ngày 7**, host là Etc/UTC; dòng `TZ=` đầu crontab chỉ set env cho script, KHÔNG đổi cách cron parse giờ — chỉ `CRON_TZ=` làm việc đó. Bằng chứng: bus event ts `2026-09-06T20:02:38Z`. Ghi chú cũ "20:00 ICT ngày 6" là SAI, sửa 2026-09-09) → `mike/bin/
      vn_realestate_monthly_check.sh` (chi tiết đầy đủ + 2 bug đã bắt qua test end-to-end thật:
