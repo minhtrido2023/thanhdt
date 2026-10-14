@@ -1,0 +1,143 @@
+====================================================================================================
+rf_slow_measure — interpreter /home/trido/thanhdt/wc_venv/bin/python
+data vintage: ticker max=2026-10-13  universe_pit max=2026-10-13 (ruleset_version [1])  ticker_financial max=2026-10-12
+TODAY (latest date with BOTH price and universe) = 2026-10-13
+tickers: Study-B candidates 1094, ever in universe_pit 772, union 1211
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+base inputs computed: 26439 release-points (1039 tickers)
+
+SELF-CHECK 1  spot series == production discount_rate - ERP on every release: max|diff| = 2.78e-17
+cap binds (cpi+gdp > spot rf) on 100.0% of releases; since 2014: 100.0%
+SELF-CHECK 2  control leg V0 (analytic) vs production D.fair_value on 26439 releases: max|rel diff| = 1.55e-15
+constant-rate control: deposit 5.97% -> r 12.47%
+
+====================================================================================================
+A) TODAY'S BASKET — universe_pit members on 2026-10-13, price = Price on that date (BQ cache; research use)
+  spot rf 7.40%  ma12 6.15%  ma36 5.29%  cpi+gdp 9.66%  r 13.90%
+  r - g_T by variant: cap_rf=6.50pp  ma12=7.75pp  min_spot_ma12=7.75pp  ma36=8.61pp  min_spot_ma36=8.61pp
+  members 344, priced 344, DCF computed 151; not computed 193: {'CF_OA_3Y <= 0 (operating cash gate fails) — DCF not meaningful': 74, 'fcfe_negative_buildout': 59, 'financial_sector_excluded': 59, 'insufficient_history': 1}
+  SELF-CHECK 3  patched V0 == unpatched production on today's basket: max|rel diff| = 0.00e+00
+
+  variant           %CHEAP  n CHEAP  robust CHEAP  median MoS  median dFV vs V0  CHEAP->RICH  RICH->CHEAP
+  cap_rf              64.2       97            88      +31.1%             +0.0%            0            0
+  ma12                57.6       87            81      +18.7%            -15.3%           10            0
+  min_spot_ma12       57.6       87            81      +18.7%            -15.3%           10            0
+  ma36                55.0       83            76      +10.4%            -23.1%           14            0
+  min_spot_ma36       55.0       83            76      +10.4%            -23.1%           14            0
+
+  CHEAP -> RICH under ma12 (10 names; MoS V0 -> MoS ma12):
+   VGI(+0->-18)  PPC(+2->-15)  VNM(+4->-13)  TNI(+5->-11)  MWG(+5->-12)  MST(+6->-10)  CSV(+7->-10)  CLX(+9->-7)  SGP(+10->-7)  AIG(+15->-0)
+  robust-CHEAP under V0 that are no longer robust-CHEAP under ma12: 7
+
+  CHEAP -> RICH under ma36 (14 names; MoS V0 -> MoS ma36):
+   VGI(+0->-30)  PPC(+2->-27)  VNM(+4->-24)  TNI(+5->-22)  MWG(+5->-24)  MST(+6->-21)  CSV(+7->-20)  CLX(+9->-18)  SGP(+10->-18)  AIG(+15->-11)  VGT(+15->-10)  SAS(+16->-9)  PCH(+17->-7)  DRI(+22->-1)
+  robust-CHEAP under V0 that are no longer robust-CHEAP under ma36: 12
+
+====================================================================================================
+B) CROSS-SECTIONAL MoS IC (Study-B mould): monthly first trading row, FV as-of latest release <=460d old
+
+  FRAME: StudyB (ever-rated<=3 cand, rating<=3 as-of)   rows=52825 months=147 tickers=963 median names/month=390
+   mean within-month rank corr of MoS vs V0: ma12=0.9996  min_spot_ma12=0.9999  ma36=0.9987  min_spot_ma36=0.9998  const=1.0000
+   IS 2014-2019:  mean IC (NW t) | paired diff vs V0: mean dIC (NW t)
+     cap_rf         n= 65  1M +0.0419 (+4.6) | +0.0000 (+nan)   2M +0.0517 (+4.8) | +0.0000 (+nan)   3M +0.0697 (+5.4) | +0.0000 (+nan)
+     ma12           n= 65  1M +0.0418 (+4.6) | -0.0001 (-0.8)   2M +0.0515 (+4.8) | -0.0001 (-1.0)   3M +0.0696 (+5.4) | -0.0001 (-0.7)
+     min_spot_ma12  n= 65  1M +0.0418 (+4.6) | -0.0001 (-1.2)   2M +0.0515 (+4.8) | -0.0001 (-1.2)   3M +0.0696 (+5.4) | -0.0001 (-0.8)
+     ma36           n= 65  1M +0.0416 (+4.6) | -0.0004 (-0.7)   2M +0.0509 (+4.7) | -0.0008 (-1.9)   3M +0.0689 (+5.4) | -0.0008 (-2.0)
+     min_spot_ma36  n= 65  1M +0.0417 (+4.6) | -0.0002 (-2.0)   2M +0.0514 (+4.7) | -0.0003 (-1.8)   3M +0.0695 (+5.4) | -0.0003 (-1.6)
+     const          n= 65  1M +0.0420 (+4.6) | +0.0001 (+1.0)   2M +0.0517 (+4.8) | +0.0001 (+1.3)   3M +0.0698 (+5.5) | +0.0001 (+1.3)
+   OOS 2020+:  mean IC (NW t) | paired diff vs V0: mean dIC (NW t)
+     cap_rf         n= 81  1M +0.0460 (+5.5) | +0.0000 (+nan)   2M +0.0602 (+6.2) | +0.0000 (+nan)   3M +0.0671 (+6.3) | +0.0000 (+nan)
+     ma12           n= 81  1M +0.0457 (+5.5) | -0.0003 (-1.3)   2M +0.0597 (+6.1) | -0.0005 (-1.6)   3M +0.0668 (+6.3) | -0.0002 (-0.9)
+     min_spot_ma12  n= 81  1M +0.0459 (+5.5) | -0.0001 (-0.9)   2M +0.0600 (+6.2) | -0.0002 (-1.4)   3M +0.0669 (+6.3) | -0.0002 (-1.2)
+     ma36           n= 81  1M +0.0460 (+5.5) | -0.0000 (-0.1)   2M +0.0598 (+6.1) | -0.0004 (-1.4)   3M +0.0667 (+6.3) | -0.0004 (-1.6)
+     min_spot_ma36  n= 81  1M +0.0460 (+5.5) | +0.0000 (+0.3)   2M +0.0601 (+6.2) | -0.0001 (-0.8)   3M +0.0671 (+6.3) | -0.0000 (-0.1)
+     const          n= 81  1M +0.0460 (+5.5) | -0.0000 (-0.8)   2M +0.0603 (+6.2) | +0.0000 (+1.1)   3M +0.0671 (+6.3) | +0.0000 (+0.5)
+   ALL:  mean IC (NW t) | paired diff vs V0: mean dIC (NW t)
+     cap_rf         n=146  1M +0.0442 (+7.2) | +0.0000 (+nan)   2M +0.0564 (+7.8) | +0.0000 (+nan)   3M +0.0683 (+8.3) | +0.0000 (+nan)
+     ma12           n=146  1M +0.0440 (+7.2) | -0.0002 (-1.5)   2M +0.0560 (+7.7) | -0.0003 (-1.8)   3M +0.0681 (+8.3) | -0.0002 (-1.2)
+     min_spot_ma12  n=146  1M +0.0441 (+7.2) | -0.0001 (-1.4)   2M +0.0562 (+7.7) | -0.0002 (-1.8)   3M +0.0681 (+8.3) | -0.0001 (-1.5)
+     ma36           n=146  1M +0.0440 (+7.2) | -0.0002 (-0.7)   2M +0.0558 (+7.7) | -0.0006 (-2.4)   3M +0.0677 (+8.3) | -0.0006 (-2.6)
+     min_spot_ma36  n=146  1M +0.0441 (+7.2) | -0.0001 (-0.9)   2M +0.0562 (+7.7) | -0.0002 (-1.8)   3M +0.0681 (+8.3) | -0.0001 (-1.2)
+     const          n=146  1M +0.0442 (+7.2) | +0.0000 (+0.1)   2M +0.0564 (+7.8) | +0.0001 (+1.7)   3M +0.0683 (+8.3) | +0.0000 (+1.3)
+
+  FRAME: universe_pit member as-of AND rating<=3   rows=17856 months=147 tickers=503 median names/month=113
+   mean within-month rank corr of MoS vs V0: ma12=0.9995  min_spot_ma12=0.9998  ma36=0.9989  min_spot_ma36=0.9998  const=1.0000
+   IS 2014-2019:  mean IC (NW t) | paired diff vs V0: mean dIC (NW t)
+     cap_rf         n= 65  1M +0.0187 (+1.2) | +0.0000 (+nan)   2M +0.0176 (+1.1) | +0.0000 (+nan)   3M +0.0189 (+0.9) | +0.0000 (+nan)
+     ma12           n= 65  1M +0.0186 (+1.2) | -0.0001 (-0.3)   2M +0.0173 (+1.0) | -0.0003 (-1.2)   3M +0.0187 (+0.9) | -0.0003 (-0.8)
+     min_spot_ma12  n= 65  1M +0.0186 (+1.2) | -0.0000 (-0.3)   2M +0.0176 (+1.1) | -0.0000 (-0.2)   3M +0.0188 (+0.9) | -0.0001 (-0.5)
+     ma36           n= 65  1M +0.0191 (+1.2) | +0.0004 (+0.5)   2M +0.0171 (+1.0) | -0.0005 (-0.7)   3M +0.0182 (+0.9) | -0.0007 (-0.7)
+     min_spot_ma36  n= 65  1M +0.0184 (+1.2) | -0.0003 (-1.3)   2M +0.0173 (+1.0) | -0.0004 (-1.3)   3M +0.0185 (+0.9) | -0.0005 (-1.4)
+     const          n= 65  1M +0.0187 (+1.2) | +0.0001 (+0.8)   2M +0.0176 (+1.1) | -0.0000 (-0.1)   3M +0.0189 (+0.9) | -0.0001 (-0.6)
+   OOS 2020+:  mean IC (NW t) | paired diff vs V0: mean dIC (NW t)
+     cap_rf         n= 81  1M +0.0310 (+2.7) | +0.0000 (+nan)   2M +0.0478 (+3.0) | +0.0000 (+nan)   3M +0.0600 (+3.6) | +0.0000 (+nan)
+     ma12           n= 81  1M +0.0308 (+2.7) | -0.0002 (-0.5)   2M +0.0475 (+3.0) | -0.0003 (-0.7)   3M +0.0599 (+3.6) | -0.0002 (-0.5)
+     min_spot_ma12  n= 81  1M +0.0307 (+2.6) | -0.0003 (-1.3)   2M +0.0475 (+3.0) | -0.0003 (-1.7)   3M +0.0598 (+3.6) | -0.0002 (-1.5)
+     ma36           n= 81  1M +0.0309 (+2.7) | -0.0001 (-0.3)   2M +0.0472 (+3.0) | -0.0006 (-1.3)   3M +0.0597 (+3.6) | -0.0003 (-0.9)
+     min_spot_ma36  n= 81  1M +0.0310 (+2.7) | -0.0000 (-0.1)   2M +0.0476 (+3.0) | -0.0001 (-0.8)   3M +0.0600 (+3.6) | -0.0000 (-0.0)
+     const          n= 81  1M +0.0310 (+2.7) | -0.0000 (-0.2)   2M +0.0478 (+3.0) | +0.0001 (+0.8)   3M +0.0601 (+3.6) | +0.0001 (+1.6)
+   ALL:  mean IC (NW t) | paired diff vs V0: mean dIC (NW t)
+     cap_rf         n=146  1M +0.0255 (+2.7) | +0.0000 (+nan)   2M +0.0342 (+2.9) | +0.0000 (+nan)   3M +0.0415 (+3.1) | +0.0000 (+nan)
+     ma12           n=146  1M +0.0254 (+2.7) | -0.0002 (-0.6)   2M +0.0339 (+2.9) | -0.0003 (-1.3)   3M +0.0413 (+3.1) | -0.0002 (-0.8)
+     min_spot_ma12  n=146  1M +0.0253 (+2.7) | -0.0002 (-1.3)   2M +0.0341 (+2.9) | -0.0002 (-1.5)   3M +0.0413 (+3.1) | -0.0002 (-1.4)
+     ma36           n=146  1M +0.0256 (+2.7) | +0.0001 (+0.2)   2M +0.0337 (+2.9) | -0.0005 (-1.3)   3M +0.0410 (+3.1) | -0.0005 (-1.0)
+     min_spot_ma36  n=146  1M +0.0254 (+2.7) | -0.0001 (-0.9)   2M +0.0340 (+2.9) | -0.0002 (-1.5)   3M +0.0413 (+3.1) | -0.0002 (-1.2)
+     const          n=146  1M +0.0256 (+2.7) | +0.0000 (+0.4)   2M +0.0343 (+2.9) | +0.0000 (+0.4)   3M +0.0415 (+3.1) | +0.0000 (+0.3)
+
+====================================================================================================
+B2) WHERE THE VARIANTS DIFFER IN LEVEL — months with spot - ma12 > 0.5pp (rate rising fast)
+  months with gap>0.5pp: 24 in 3 separate episode(s): 2017-01..2017-06; 2022-10..2023-05; 2026-01..2026-10
+           n  spot  ma12  gap  cheap_v0  cheap_ma12  med_fwd3m  med_fwd12m
+ym                                                                        
+2017-01  107   6.5   5.5  1.0      53.3        53.3        4.9        10.6
+2017-02   96   6.5   5.6  0.9      53.1        47.9        3.3         6.7
+2017-03   88   6.5   5.7  0.8      53.4        50.0        4.9         3.2
+2017-04   90   6.5   5.8  0.7      54.4        52.2        4.0         1.1
+2017-05   95   6.5   5.8  0.7      55.8        53.7        3.5         4.2
+2017-06   95   6.5   5.9  0.6      52.6        50.5        2.4        -3.5
+2022-10  156   6.8   5.5  1.3      60.3        60.3      -18.5        10.0
+2022-11  160   6.8   5.6  1.2      62.5        54.4        3.0         6.4
+2022-12  153   7.5   5.7  1.8      66.0        61.4        1.8        19.0
+2023-01  151   7.5   5.9  1.6      68.9        62.9        3.4        21.3
+2023-02  135   7.5   6.1  1.4      59.3        51.9        1.0        18.7
+2023-03  128   7.2   6.2  1.0      60.9        53.1        7.4        24.9
+2023-04  122   7.2   6.4  0.8      56.6        50.8       12.9        28.1
+2023-05  118   7.2   6.5  0.7      55.1        52.5       16.2        21.9
+2026-01  133   6.0   5.0  1.0      51.9        50.4       -2.5         NaN
+2026-02  152   6.0   5.0  1.0      55.9        50.0       -5.4         NaN
+2026-03  145   6.0   5.1  0.9      56.6        51.7       -8.9         NaN
+2026-04  147   6.0   5.2  0.8      59.9        55.8       -5.2         NaN
+2026-05  148   6.0   5.3  0.7      62.2        59.5      -12.4         NaN
+2026-06  147   6.8   5.4  1.4      63.9        61.2       -5.5         NaN
+2026-07  131   6.8   5.6  1.2      62.6        58.8       -3.9         NaN
+2026-08  118   6.8   5.8  1.0      66.9        58.5        NaN         NaN
+2026-09  113   6.8   5.9  0.9      64.6        57.5        NaN         NaN
+2026-10  113   7.5   6.1  1.4      65.5        62.8        NaN         NaN
+
+  months with gap<-0.5pp (rate FALLING fast; plain ma12 lets g_T exceed spot rf): 29; %CHEAP V0 57.6 vs ma12 60.8 vs min_spot_ma12 57.4
+
+====================================================================================================
+C) RATE SCENARIOS on today's basket (151 names): rate steps up tomorrow and stays; fundamentals + price frozen.
+   Index 100 = production FV today. Median across names; %CHEAP in brackets.
+   cap_rf         +0pp/  0d 100.0 [64.2%] | +0pp/182d 100.0 [64.2%] | +0pp/365d 100.0 [64.2%] | +1pp/  0d  98.7 [63.6%] | +1pp/182d  98.7 [63.6%] | +1pp/365d  98.7 [63.6%] | +2pp/  0d  97.5 [62.9%] | +2pp/182d  97.5 [62.9%] | +2pp/365d  97.5 [62.9%]
+   ma12           +0pp/  0d  84.7 [57.6%] | +0pp/182d  94.8 [60.9%] | +0pp/365d 100.0 [64.2%] | +1pp/  0d  74.7 [53.6%] | +1pp/182d  87.6 [58.3%] | +1pp/365d  98.7 [63.6%] | +2pp/  0d  66.8 [49.7%] | +2pp/182d  81.4 [55.6%] | +2pp/365d  97.5 [62.9%]
+   min_spot_ma12  +0pp/  0d  84.7 [57.6%] | +0pp/182d  94.8 [60.9%] | +0pp/365d 100.0 [64.2%] | +1pp/  0d  74.7 [53.6%] | +1pp/182d  87.6 [58.3%] | +1pp/365d  98.7 [63.6%] | +2pp/  0d  66.8 [49.7%] | +2pp/182d  81.4 [55.6%] | +2pp/365d  97.5 [62.9%]
+   ma36           +0pp/  0d  76.9 [55.0%] | +0pp/182d  80.2 [55.6%] | +0pp/365d  84.5 [57.0%] | +1pp/  0d  68.6 [50.3%] | +1pp/182d  72.4 [52.3%] | +1pp/365d  77.3 [55.0%] | +2pp/  0d  61.8 [47.7%] | +2pp/182d  65.9 [49.0%] | +2pp/365d  71.2 [51.7%]
+   min_spot_ma36  +0pp/  0d  76.9 [55.0%] | +0pp/182d  80.2 [55.6%] | +0pp/365d  84.5 [57.0%] | +1pp/  0d  68.6 [50.3%] | +1pp/182d  72.4 [52.3%] | +1pp/365d  77.3 [55.0%] | +2pp/  0d  61.8 [47.7%] | +2pp/182d  65.9 [49.0%] | +2pp/365d  71.2 [51.7%]
+
+====================================================================================================
+D) CPI coverage gap
+      time  cpi_yoy  is_real_nso
+2026-04-01     5.46         True
+2026-05-01     5.60         True
+2026-06-01     4.69         True
+2026-07-01     4.45        False
+2026-08-01     4.89        False
+2026-09-01     3.40        False
+2026-10-01     3.40        False
+2026-11-01     3.40        False
+2026-12-01     3.40        False
+  today: 5y-avg CPI 3.44% + 15y real GDP 6.22% = 9.66% vs spot rf 7.40% (headroom 2.26pp) / ma12 6.15% (headroom 3.52pp)
+  5y window: 60 months, of which non-NSO since 2026-07: 4. For the cap to stop binding the 5y average would have to fall by 2.26pp, i.e. those 4 months would each have to be overstated by 34pp.
+
+wrote results.json, today_basket_by_variant.csv, monthly_cheap_share_by_variant.csv

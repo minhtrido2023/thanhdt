@@ -1,0 +1,68 @@
+
+[preload] deposit_rate_vn in use at exit: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-dcffb-1013/WorkingClaude/deposit_rate_vn.py
+
+[A] ca thật signal 2026-07-27 (EVF/PSI/VCI — SpaceX áp lăng kính, ZaloPay skip)
+  ✓ đủ 3 mã
+  ✓ EVF floor_fail=True
+  ✓ EVF verdict CHEAP
+  ✓ EVF decision KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ EVF dùng lăng kính chứng khoán
+  ✓ PSI floor_fail=True
+  ✓ PSI verdict CHEAP
+  ✓ PSI decision KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ PSI dùng lăng kính chứng khoán
+  ✓ VCI floor_fail=True
+  ✓ VCI verdict CHEAP
+  ✓ VCI decision KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ VCI dùng lăng kính chứng khoán
+  ✓ EVF chi tiết khớp số SpaceX đã viết tay (P/B 0.91, ROE_TTM 9.6%)
+  ✓ PSI chi tiết khớp số SpaceX đã viết tay (P/B 0.75, ROE_TTM 8.8%)
+  ✓ VCI chi tiết khớp số SpaceX đã viết tay (P/B 1.33, ROE_TTM 9.2%)
+  ✓ nguồn là CSV point-in-time, không phải snapshot hôm nay
+  ✓ không mã nào mang caveat non-PIT
+
+[A2] --floor-fail-only trên cùng CSV: có đủ 3 loại quyết định
+  ✓ mọi mã trả về đều FLOOR_FAIL
+  ✓ EVF/PSI/VCI nằm trong kết quả
+  ✓ có ca RICH → SKIP_CO_CAN_CU (vd AGR/FTS/HCM)
+  ✓ có ca fallback 8L → CAN_NGUOI_QUYET
+  ✓ counts cộng đúng tổng số kết quả
+  ✓ ca RICH có verdict RICH (không phải nhãn lệch)
+
+[A3] ca 2026-08-03: mã KHÔNG có lăng kính, và mã DCF chạy được
+  ✓ AMC (không có lăng kính) → CAN_NGUOI_QUYET
+  ✓ APF có DCF chạy được → trục DCF, không dùng fallback
+
+[B] round-trip qua hàm thật alt_valuation_lens.format_alt_lens()
+  ✓ TBANK: parse ngược ra đúng lens+verdict
+  ✓ TBANK: decision = KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ TSEC: parse ngược ra đúng lens+verdict
+  ✓ TSEC: decision = KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ TINS: parse ngược ra đúng lens+verdict
+  ✓ TINS: decision = CAN_NGUOI_QUYET
+  ✓ TSHIP: parse ngược ra đúng lens+verdict
+  ✓ TSHIP: decision = KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ TPORT: parse ngược ra đúng lens+verdict
+  ✓ TPORT: decision = KHONG_SKIP_VI_FLOOR_FAIL
+  ✓ TTEL: parse ngược ra đúng lens+verdict
+  ✓ TTEL: decision = SKIP_CO_CAN_CU
+  ✓ TFALL: parse ngược ra đúng lens+verdict
+  ✓ TFALL: decision = CAN_NGUOI_QUYET
+  ✓ mã không có dữ liệu → parse trả None (không bịa verdict)
+
+[C] fail-safe
+  ✓ _parse_* chịu được đầu vào ''
+  ✓ _parse_* chịu được đầu vào None
+  ✓ _parse_* chịu được đầu vào 'DCF: NOT_COMPUTED'
+  ✓ _parse_* chịu được đầu vào '→ thay thế: rác không đóng ngoặc'
+  ✓ _parse_* chịu được đầu vào '🔴 DD cờ đỏ: X | DCF: NOT_COMPUTED (y)'
+  ✓ mã lạ → rơi về nhánh live, có caveat, không raise
+  ✓ mã lạ không có lăng kính → CAN_NGUOI_QUYET
+  ✓ CSV thiếu → note cảnh báo + vẫn chạy live
+
+[D] CLI + độc lập TZ
+  ✓ CLI exit 0 + JSON hợp lệ
+  ✓ kết quả giống hệt ở 4 cấu hình TZ (kể cả env -u TZ)
+
+=== 51/51 PASS ===
+rc=0

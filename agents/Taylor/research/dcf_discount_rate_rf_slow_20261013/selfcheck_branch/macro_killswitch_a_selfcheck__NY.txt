@@ -1,0 +1,42 @@
+=== macro_killswitch_a_status selfcheck ===
+  ok: T1 rate=6.8% (2026-06 anchor)
+  ok: T1 not armed
+  ok: T1 not stale
+  ok: T1 threshold=0.075
+  ok: T1 reason mentions CLEAR
+  ok: T2 historical call not stale by default
+  ok: T2 rate=9.0% (2012-10 anchor)
+  ok: T2 armed
+  ok: T2 reason mentions SUSPEND
+  ok: T3 boundary rate=7.5% exactly
+  ok: T3 boundary NOT armed (strictly > required)
+  ok: T4 current-era rate=6.8%
+  ok: T4 not armed at current level
+  ok: T5 stale -> armed=True (fail-closed)
+  ok: T5 stale flag set
+  ok: T5 reason mentions stale
+  ok: T5 age_days > limit
+  ok: T5b historical default not stale
+  ok: T5b historical default not armed by staleness
+  ok: T6 no-data -> armed=True (fail-closed)
+  ok: T6 no-data rate is None
+  ok: T6 no-data stale flag True
+  ok: T7 age==limit not stale (> required, not >=)
+  ok: T7c default stale_days_limit=45 (50d old -> stale)
+  ok: T7b new CSV anchor picked up (rate=7.1%)
+  ok: T7b new CSV anchor fresh (5d old, not stale)
+  ok: T7b new CSV anchor not armed (7.1% <= 7.5%)
+  ok: T9 rate=7.2% (2023-03 anchor)
+  ok: T9 not armed (kills 0.07-threshold mutant)
+  ok: T10 rate=7.6% (injected fixture)
+  ok: T10 armed (kills 0.08-threshold mutant)
+  ok: T11 out-of-range rate -> armed (fail-closed)
+  ok: T11 out-of-range rate -> stale (fail-closed)
+  ok: T11 reason mentions rate_pct
+  ok: T12 corrupt CSV -> armed (fail-closed)
+  ok: T12 corrupt CSV -> stale (fail-closed)
+  ok: T12 corrupt CSV -> reason mentions error
+  ok: T8 TZ-independent (explicit asof)
+
+=== 38 assertions PASS ===
+rc=0

@@ -1,0 +1,32 @@
+decide() — band + boundary:
+  [PASS] delta 1.5pp > 1 → refresh
+  [PASS] delta 0.5pp < 1 → skip
+  [PASS] delta 0.99pp < 1 → skip
+  [PASS] delta exactly 1.0pp → refresh (inclusive)
+  [PASS] delta 1.01pp → refresh
+  [PASS] float 6.8-5.8=1.0pp → refresh (no float-eq miss)
+  [PASS] downward move -1.2pp → refresh (abs)
+  [PASS] no state → refresh (first run)
+  [PASS] empty state dict → refresh
+  [PASS] strict mode: exactly 1.0pp → skip
+  [PASS] strict mode: 1.01pp → refresh
+
+run_gate() — persistence + idempotency (tmp paths, forced asof):
+  [PASS] first run → refresh
+  [PASS] state persisted last_used_rate
+  [PASS] state has last_used_date
+  [PASS] second run same date → skip
+  [PASS] last_used_rate unchanged on skip
+  [PASS] last_check_date advanced
+  [PASS] log has 2 append lines
+  [PASS] log lines are valid json
+
+fail-safe:
+  [PASS] gate error → refresh=True (fail-safe)
+  [PASS] gate error → reason flagged
+
+dry-run isolation:
+  [PASS] dry run writes no state file
+
+ALL PASS
+rc=0

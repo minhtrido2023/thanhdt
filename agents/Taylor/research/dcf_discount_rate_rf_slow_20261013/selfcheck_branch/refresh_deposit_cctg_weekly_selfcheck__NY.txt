@@ -1,0 +1,146 @@
+=== Part A: append_cctg_rate.py guards ===
+OK: appended 2026-10-14 = 7.6% (source=web_crosscheck_auto, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+  ok: A1 happy path writes OK (rc=0)
+  ok: A1 row written
+OK: appended 2026-10-14 = 7.6% (source=web_crosscheck_auto, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+SKIP: effective_date 2026-10-14 already present (use --force to override). No write — CSV unchanged.
+  ok: A2 first write OK
+  ok: A2 second run does not error (idempotent SKIP, not a false 'not newer' refusal)
+  ok: A2 idempotent: still exactly 1 row (no duplicate)
+  ok: A3 same-owner-group refused (rc!=0)
+  ok: A3 no row written
+  ok: A4 single source refused (rc!=0)
+  ok: A4 no row written
+  ok: A5 out-of-range rate refused (rc!=0)
+  ok: A5 no row written
+  ok: A6 not-newer-than-anchor refused (rc!=0)
+  ok: A6 no row written
+  ok: A7 cross-source disagreement (0.2pp) refused (rc!=0)
+  ok: A7 no row written
+OK: appended 2026-10-14 = 7.5% (source=web_crosscheck_auto, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+  ok: A7b exactly-at-tolerance (0.1pp) allowed (rc=0)
+  ok: A8 synthesized --rate not matching any source refused (rc!=0)
+  ok: A8 no row written
+  ok: A9 >=1.0pp delta vs anchor refused (rc!=0)
+  ok: A9 no row written
+  ok: A10 dispatched agent + manual_verify refused (rc!=0)
+  ok: A10 no row written
+  ok: A11 dispatched agent + --force refused (rc!=0)
+  ok: A12 falsified --collected refused (rc!=0)
+  ok: A12 no row written
+  ok: A13 stale source date refused (rc!=0)
+  ok: A13 no row written
+OK: appended 2026-10-14 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-14 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok: A14 per-source rates agree, --rate matches -> OK (rc=0)
+  ok: A14 row written
+  ok: A15 per-source rates disagree 0.2pp -> refused (rc!=0)
+  ok: A15 no row written
+  ok: A16 synthesized --rate not matching any source -> refused (rc!=0)
+  ok: A16 no row written
+OK: appended 2026-10-14 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-14 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok: A17 human caller (no JOB_ID): no 'rate' field on any source -> still OK (rc=0)
+  ok: A17 row written
+  ok: A17b B2-2 repro: dispatched agent, no 'rate' field anywhere -> refused (rc!=0)
+  ok: A17b no row written (current_deposit_rate() never sees a 7.6% write here)
+  ok: A18 mixed rate-field presence -> refused (rc!=0)
+  ok: A18 no row written
+  ok: A18b dispatched agent, partial rate-field presence -> refused (rc!=0)
+  ok: A18b no row written
+OK: appended 2026-10-14 = 7.6% (source=web_crosscheck_auto, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+  ok: A19 first write (establishes sidecar) -> OK
+  ok: A19 sidecar written with write #1's URLs, NORMALIZED form
+  ok: A20 write #2 reuses write #1's URL -> refused (rc!=0)
+  ok: A20 refusal message names the reused URL
+  ok: A20 still exactly 1 row (no write happened)
+OK: appended 2026-10-15 = 7.6% (source=web_crosscheck_auto, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+  ok: A21 write #2-retry with fresh URLs -> OK (rc=0)
+  ok: A21 now 2 rows written
+OK: appended 2026-10-14 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-14 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok: A22 first deposit write (establishes OWN sidecar) -> OK
+  ok: A22 deposit sidecar name differs from CCTG's
+  ok: A22 deposit sidecar written
+  ok: A23 deposit write #2 reuses write #1's URL -> refused (rc!=0)
+  ok: A23 no 2nd row written
+OK: appended 2026-10-15 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-15 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok: A24 deposit write #2-retry with fresh URLs -> OK (rc=0)
+  ok: A24 now 2 deposit rows written
+OK: appended 2026-10-14 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-14 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok: A25pre baseline write establishes sidecar -> OK (rc=0)
+  ok: A25 case+trailing-slash variant of a reused URL -> refused (rc!=0)
+  ok: A25 no row written
+  ok: A26 query-string+fragment variant of a reused URL -> refused (rc!=0)
+  ok: A26 no row written
+  ok: A27 scheme+www variant of a reused URL -> refused (rc!=0)
+  ok: A27 no row written
+OK: appended 2026-10-15 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-15 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok: A28 genuinely different path -> NOT blocked (rc=0)
+  ok: A28 now 2 rows written
+Part A: 64 checks so far, 0 fail(s)
+=== Part B: deposit_cctg_trend_check.py decline/staleness logic ===
+  ok: B1 decline detected for cctg_6m
+  ok: B1 only 1 decline event (big4 has <2 points)
+  ok: B2 idempotent: already-alerted pair not re-fired
+  ok: B3 flat rate -> no decline
+  ok: B3b rising rate -> no decline
+  ok: B4 single point -> no decline
+  ok: B5 new decline pair (different from alerted) fires
+  ok: B5 new pair is the latest one
+  ok: B6 fresh (1d) -> no staleness warning
+  ok: B7 age=35 (>= 45-10) triggers staleness warning
+  ok: B8 idempotent: same last_date not re-warned
+  ok: B9 new last_date (not matching stored warned-date) re-eligible
+  ok: B10 _load_series returns both series keys
+  ok: B10 big4_12m matches frozen DEPOSIT_EVENTS (sorted, no CSV)
+  ok: B10 cctg_6m matches frozen CCTG_EVENTS (sorted, no CSV)
+  ok: B10 cctg_6m entries are (str, float) tuples
+  ok: B11a tiny decline (0.05pp) tagged within_noise_band
+  ok: B11b large decline (0.50pp) NOT tagged within_noise_band
+  ok: B11c exactly-at-tolerance decline (0.10pp) tagged within_noise_band (boundary inclusive)
+Part B done, 83 checks total so far, 0 fail(s)
+  ok: A-ICT clock pinned 2026-10-11T16:59Z: --collected 2026-10-11 accepted (reaches rate guard)
+  ok: A-ICT clock pinned 2026-10-11T16:59Z: --collected 2026-10-12 refused, real_today=2026-10-11
+  ok: A-ICT clock pinned 2026-10-11T17:00Z: --collected 2026-10-12 accepted (reaches rate guard)
+  ok: A-ICT clock pinned 2026-10-11T17:00Z: --collected 2026-10-11 refused, real_today=2026-10-12
+  ok: A-ICT nothing written (every call exits before the CSV write)
+=== Part C: TZ sensitivity spot-check ===
+  ok: C1 check_declines/check_staleness never read date.today() internally (today is a param)
+=== Part D: mutation testing (source-level, throwaway copy) ===
+OK: appended 2026-10-14 = 7.5% (source=web_crosscheck_auto, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+  ok (mutant killed): D1 CROSS_SOURCE_TOLERANCE_PP mutant (0.1->10.0) lets 0.2pp disagreement through
+  ok (mutant killed): D2 decline-direction mutant (>= -> <=) misses a real 7.5->7.3 decline
+OK: appended 2026-09-30 = 7.5% (source=manual_verify, collected=2026-09-30).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+  ok (mutant killed): D3 date-newer-guard mutant (<= -> <) stops refusing a same-date duplicate itself
+OK: appended 2026-10-14 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-14 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+OK: appended 2026-10-15 = 6.8% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-15 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok (mutant killed): D4 sidecar-raw-storage mutant lets a case/slash-variant reused URL through
+OK: appended 2026-10-14 = 7.6% (source=web_crosscheck_auto, collected=2026-10-14).
+    deposit_events_df() now has 26 anchors; current_deposit_rate() = 6.80%.
+    WARNING: 2026-10-14 did NOT enter the live series — deposit_events_df() only appends anchors newer than the last frozen anchor 2026-06-01. Row saved to CSV but INERT until an effective_date > 2026-06-01 is added.
+  ok (mutant killed): D5 agent-mandatory-rate-guard-deleted mutant lets an unevidenced 7.6% write through
+
+=== TOTAL: 94 checks, 0 fail(s) ===
+ALL PASS
+rc=0

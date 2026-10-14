@@ -1,0 +1,68 @@
+effective_deposit_rate(asof=2026-11-20): CCTG stale (46d > 45d, last 2026-10-05) -> HOLDING last known CCTG 8.00%, not dropping to Big-4 6.00%
+=== cctg_rate_vn + effective_deposit_rate overlay selfcheck ===
+  ok: T1 pre-anchor asof -> rate is None
+  ok: T1 pre-anchor asof -> date is None
+  ok: T2 post-anchor rate=7.5%
+  ok: T2 post-anchor date=2026-09-30
+  ok: T3 pre-CCTG call: rate_source=big4_12m
+  ok: T3 pre-CCTG call: rate unchanged (7.2%)
+  ok: T4 CCTG wins: rate=7.5%
+  ok: T4 CCTG wins: rate_source starts with cctg_6m
+  ok: T4 CCTG wins: not armed (7.5% <= 7.5% strict)
+  ok: T4b effective_deposit_rate agrees: rate_pct=7.5
+  ok: T4b effective_deposit_rate agrees: source=cctg
+  ok: T4b effective_deposit_rate: big4_rate_pct=6.5 preserved
+  ok: T4b effective_deposit_rate: cctg_rate_pct=7.5 preserved
+  ok: T5 stale CCTG excluded: rate_source=big4_12m
+  ok: T5 stale CCTG excluded: rate=6.5% (not 7.5%)
+  ok: T5 (round-6) stale CCTG, last==7.5%: stale=True
+  ok: T5 (round-6) stale CCTG, last==7.5%: armed=True (forced, not silently dropped)
+  ok: T6 Big-4 (8.0%) > CCTG (7.5%): rate_source=big4_12m
+  ok: T6 Big-4 (8.0%) > CCTG (7.5%): rate=8.0%, armed
+  ok: T7 effective_deposit_events_df columns
+  ok: T7 pre-anchor rows byte-identical to deposit_events_df()
+  ok: T8 CCTG anchor date present as its own row
+  ok: T8 CCTG anchor row value = 7.5 (max(6.8, 7.5))
+  ok: T9 downstream as-of lookup on 2026-10-01 -> 7.5%
+  ok: T10 corrupt CCTG CSV: Big-4 rate preserved (6.0%, not overridden)
+  ok: T10 corrupt CCTG CSV: stale=True (surfaced, not silently CLEAR)
+  ok: T10 corrupt CCTG CSV: reason mentions CCTG
+  ok: T10 corrupt CCTG CSV: force-armed (unvalidated CCTG != provably CLEAR, round-3 fix 2)
+  ok: T11 out-of-range CCTG: rate_source=big4_12m (bad value never used)
+  ok: T11 out-of-range CCTG: stale=True (surfaced)
+  ok: T11 out-of-range CCTG: reason mentions CCTG
+  ok: T11 out-of-range CCTG: force-armed (round-3 fix 2)
+  ok: T12 CCTG stale-but-was-high: armed=True (forced, not silently dropped)
+  ok: T12 CCTG stale-but-was-high: stale=True
+  ok: T12 CCTG stale-but-was-high: reason mentions CCTG
+  ok: T12 CCTG stale-but-was-high: Big-4 reading itself would have been CLEAR (6.0%)
+  ok: T13 (M16) exact anchor day -> rate=7.5% (not None)
+  ok: T13 (M16) exact anchor day -> date=2026-09-30
+  ok: T14 typo '85' in effective_deposit_events_df() raises (not silently 85%)
+  ok: T15 current_cctg_rate_checked() range guard fires on out-of-range rate=85
+  ok: T16 CCTG age==45d NOT stale -> CCTG still active (rate=8.0%)
+  ok: T16 CCTG age==45d NOT stale -> stale=False
+  ok: T16 CCTG age==46d stale -> excluded, falls back to Big-4 (rate=6.0%)
+  ok: T16 CCTG age==46d stale -> stale=True
+  ok: T16 CCTG age==46d stale but last-known 8.0%>7.5% -> armed=True anyway
+  ok: T17 effective_date strictly before anchor (year typo) raises, not silently dropped
+  ok: T17 effective_date == anchor date (boundary) also raises (kills > vs >= mutant)
+  ok: T18 CCTG age==45d NOT stale -> effective_deposit_rate still uses CCTG (rate_pct=8.0)
+  ok: T18 CCTG age==46d stale -> effective_deposit_rate HOLDS CCTG 8.0, labelled as a stale hold
+  ok: T19 CCTG stale, last<7.5%: rate_source falls back to big4_12m
+  ok: T19 CCTG stale, last<7.5%: rate=6.0% (Big-4's own, not CCTG's 5.0%)
+  ok: T19 CCTG stale, last<7.5%: stale=True
+  ok: T19 CCTG stale, last<7.5%: armed=True (forced, NOT silently dropped -- the round-6 fix)
+  ok: T19 CCTG stale, last<7.5%: reason mentions CCTG
+  ok: T20 fresh CCTG==7.5%: rate_source=cctg_6m
+  ok: T20 fresh CCTG==7.5%: rate=7.5%
+  ok: T20 fresh CCTG==7.5%: stale=False
+  ok: T20 fresh CCTG==7.5%: armed=False (7.5% not strictly > 7.5%, must read CLEAR)
+  ok: T21a (C1a) malformed date + VALID rate raises (not silently dropped)
+  ok: T21b (C1b) valid date + unparseable rate raises (not silently dropped)
+  ok: T22 (C2, equivalent-mutant-documented) wrong header raises either way
+  ok: T23 (D6) current_cctg_rate_checked() catches non-ValueError exceptions too
+  ok: T_tz TZ-independent
+
+=== 63 assertions PASS ===
+rc=0

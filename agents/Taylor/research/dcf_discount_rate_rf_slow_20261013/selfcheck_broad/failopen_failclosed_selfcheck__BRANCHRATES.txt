@@ -1,0 +1,12 @@
+
+[preload] deposit_rate_vn in use at exit: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-dcffb-1013/WorkingClaude/deposit_rate_vn.py
+TZ=Asia/Ho_Chi_Minh  python=3.12.13  tree=/home/trido/thanhdt/WorkingClaude  OLD_REF=74dfd6ee^
+  PASS t_r8_default_canonical
+  PASS t_r8_missing_is_fatal_and_old_was_silent
+  PASS t_r8_env_empty_is_explicit_optout
+  PASS t_r8_env_bad_path_no_silent_fallback
+  PASS t_pt_workdir_warns_on_tree_mismatch
+  PASS t_pt_lag_failclosed_two_sided
+
+PASS  (32 assertion)
+rc=0
