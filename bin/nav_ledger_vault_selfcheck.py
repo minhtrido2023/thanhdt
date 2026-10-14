@@ -942,6 +942,9 @@ def v11_external_anchor(tmp):
        f"V11: mốc cũ (phần đầu manifest) và mốc mới đều khớp: rc={p.returncode} {p.stdout[-300:]} {p.stderr[-200:]}")
     ok(nul.verify_anchor(str(box.sealed), "SpaceX", a1) == {"seq": 1, "md5": a1.split()[2]},
        "V11: verify_anchor trả đúng bản ghi ứng với mốc")
+    up = " ".join(a2.split()[:2] + [x.upper() for x in a2.split()[2:]])
+    ok(box.cli("--verify-anchor", up).returncode == 0,
+       "V11/F9: md5 viết HOA (mốc chép tay) vẫn khớp, không bị chẩn đoán sai là 'manifest bị cắt'")
     # Hoàn tác ĐỒNG THỜI file sổ + đuôi manifest về lần chốt #1 ⇒ đối chiếu thường KHỚP, mốc #2 bắt được.
     data1 = box.sealed.read_bytes()[: len(box.sealed.read_bytes())]
     lines = box.manifest.read_bytes().splitlines(keepends=True)

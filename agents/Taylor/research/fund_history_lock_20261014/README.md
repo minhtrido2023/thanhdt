@@ -173,7 +173,10 @@ không đổi (−1,67% / −3,59%). Đã post `error` riêng cho số này (lư
    ghi chú SpaceX (12,37 → 12,80; 17,3 → 17,4); (d) thời điểm chốt sổ thật; (e) **tin EOD Discord SpaceX
    08-07 đã in "+0,12% so với hôm trước"** — sau chèn 08-06 đúng là +1,098% (bậc 3, error
    `eod-discord-spacex-0807-day-pct-sai` đã post) ⇒ có đính chính tin cũ hay không.
-4. `fund_restatement.py apply --account SpaceX --nav-dir /home/trido/thanhdt/WorkingClaude/data/execution_logs
+4. TRƯỚC khi áp: `pgrep -af 'daily_nav_snapshot|nav_sync_retry|eod_trading_report|nav_snapshot_daily'` PHẢI rỗng
+   (không có đường ghi nav_history nào đang chạy), và báo cáo impact bước 2 đã lưu bền (chép vào
+   `agents/Taylor/research/fund_history_lock_20261014/impact_<TK>_<ngày>.json`, md5 có trong nhật ký).
+   `fund_restatement.py apply --account SpaceX --nav-dir /home/trido/thanhdt/WorkingClaude/data/execution_logs
    --correction … --impact-report /tmp/impact_SpaceX.json --approved-by "user <ngày>" --real-data` (rồi
    ZaloPay). Công cụ tự chép byte nav_history cũ vào `data/execution_logs/restatement_backups/
    <account>_<giờ>_<md5>.csv` trước khi ghi và in ĐƯỜNG LUI.
@@ -187,14 +190,17 @@ không đổi (−1,67% / −3,59%). Đã post `error` riêng cho số này (lư
 8. `nav_unit_ledger.py --account SpaceX --seal --real-data --accept-preclose 2026-08-24="<lý do ở
    C_seal/log.txt>"` (rồi ZaloPay). Mỗi lần chốt in `SEAL_MD5 <TK> <md5 sổ> <md5 manifest>` ⇒ **post dòng
    đó lên bus** (B13; runbook trong `nav_unit_ledger.md.proposed`).
-9. `nav_unit_ledger.py --account <TK> --ledger-dir data/execution_logs --verify-anchor "SEAL_MD5 …"`
-   (dòng vừa post ở bước 8) ⇒ rc=0 "khớp chuỗi dựng lại" + "mốc ngoài kho KHỚP".
+9. `nav_unit_ledger.py --account <TK> --ledger-dir /home/trido/thanhdt/WorkingClaude/data/execution_logs
+   --verify-anchor "SEAL_MD5 …"` (ĐƯỜNG TUYỆT ĐỐI; dòng vừa post ở bước 8) ⇒ rc=0 "khớp chuỗi dựng lại" +
+   "mốc ngoài kho KHỚP". Lịch đối chiếu định kỳ sau này phải dùng mốc MỚI NHẤT. Sau ≤30 phút grep lại dòng
+   `SEAL_MD5` trong `kb/events_buffer.md` (bus/ bị gitignore; mốc vào git qua consolidate).
 10. Lên lịch "một dòng ghi chú ở báo cáo kế tiếp" cho các mục bậc 2 (theo quyết định 3a/3c).
 11. Áp các file `kb/data_registry/trading-bot/*.proposed` (nav_history, account_cash_flows,
     nav_unit_ledger, nav_history_corrections) + cập nhật mục bước 3 ở policy.
 
-**Đường lui**: TRƯỚC bước 8 = `cp data/execution_logs/restatement_backups/<file> nav_history_<TK>.csv` +
-một đính chính NGƯỢC (để nhật ký ghi nhận) + trả `cash_identity_acks.json` về bản sao lưu; SAU bước 8 =
+**Đường lui**: TRƯỚC bước 8 = áp một đính chính NGƯỢC lên file HIỆN TẠI (impact → apply, có sao lưu + nhật
+ký) + trả `cash_identity_acks.json` về bản sao lưu; CHỈ khi công cụ hỏng mới `cp restatement_backups/<file>`
+rồi ghi tay dòng nhật ký `rolled_back_manual` (chép tay xong mà áp đính chính ngược sẽ bị từ chối "ĐÃ ÁP"); SAU bước 8 =
 chỉ đường đính chính (`fund_restatement.py impact --sealed-ledger …` rồi `nav_unit_ledger.py --restate`).
 
 ## Giả định tự đặt

@@ -514,6 +514,7 @@ def verify_anchor(path: str, account: str, anchor: str) -> dict:
     if len(parts) != 4 or parts[0] != "SEAL_MD5":
         raise AnchorError(f"mốc {anchor!r} không đúng dạng 'SEAL_MD5 <account> <md5 sổ> <md5 manifest>'")
     _, who, want_ledger, want_manifest = parts
+    want_ledger, want_manifest = want_ledger.lower(), want_manifest.lower()
     if who != account:
         raise AnchorError(f"mốc {anchor!r} là của tài khoản {who!r}, đang đối chiếu {account!r} (§12)")
     data = _read_bytes(manifest_path(path))

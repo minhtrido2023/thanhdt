@@ -641,6 +641,48 @@ def r8_gaps(tmp):
        and "ĐÃ ÁP từ trước" in a2.stdout and w.nav_path.read_bytes() == after and len(log) == 1,
        f"R8: xoá hai lần — lần hai phải rc=0 'ĐÃ ÁP từ trước', được rc={a2.returncode} {a2.stderr[-200:]}")
 
+    # F2 (N8 của review lần 2): "ĐÃ ÁP từ trước" CHỈ khi nhật ký có bản ghi đã áp của file này. Xoá một ngày
+    # KHÔNG tồn tại (gõ nhầm) ⇒ mọi mục "đã có sẵn" nhưng không có bản ghi ⇒ phải báo lỗi, không rc=0 im lặng.
+    w = World(tmp, "r8_delete_typo")
+    c = w.correction([{"op": "delete", "date": "2026-07-11", "expect": {"nav": "1040000000"},
+                       "reason": "gõ nhầm ngày", "evidence": "x"}])
+    _, _, out = w.impact(c)
+    before = w.nav_path.read_bytes()
+    a = w.apply(c, out)
+    ok(a.returncode == 2 and "KHÔNG có bản ghi đã áp" in a.stderr and w.nav_path.read_bytes() == before
+       and not (w.nav_dir / fr.AUDIT_LOG).exists(),
+       f"R8/F2: xoá ngày không tồn tại ⇒ rc=2 'KHÔNG có bản ghi đã áp', không ghi gì: rc={a.returncode} {a.stderr[-250:]}")
+    # F1: chép tay bản sao lưu về rồi áp đính chính NGƯỢC ⇒ trước đây im lặng 'ĐÃ ÁP từ trước' (nhật ký sai); nay lỗi.
+    w = World(tmp, "r8_manual_rollback", nav=[x for x in NAV if x[0] != "2026-07-08"])
+    c = w.correction([{"op": "insert", "date": "2026-07-08", "row": row("2026-07-08", 1040),
+                       "reason": "thiếu dòng", "evidence": "dnse_raw"}])
+    _, _, out = w.impact(c)
+    orig = w.nav_path.read_bytes()
+    a1 = w.apply(c, out)
+    ok(a1.returncode == 0 and w.nav_path.read_bytes() != orig, f"R8/F1: áp xuôi: {a1.stderr[-200:]}")
+    backup = next((w.nav_dir / "restatement_backups").iterdir())
+    w.nav_path.write_bytes(backup.read_bytes())                  # lui TAY bằng bản sao lưu
+    inv = w.correction([{"op": "delete", "date": "2026-07-08", "expect": {"nav": "1040000000"},
+                         "reason": "lui", "evidence": "x"}], name="inv.json")
+    _, _, out_inv = w.impact(inv, out="impact_inv.json")
+    a2 = w.apply(inv, out_inv)
+    n_log = len((w.nav_dir / fr.AUDIT_LOG).read_text(encoding="utf-8").splitlines())
+    ok(a2.returncode == 2 and "KHÔNG có bản ghi đã áp" in a2.stderr and n_log == 1,
+       f"R8/F1: lui tay rồi áp đính chính ngược KHÔNG được báo 'ĐÃ ÁP từ trước': rc={a2.returncode} {a2.stderr[-250:]}")
+    ok("đính chính NGƯỢC lên file hiện tại" in a1.stdout and "rolled_back_manual" in a1.stdout,
+       f"R8/F1: dòng ĐƯỜNG LUI in ra phải nêu cách lui ĐÚNG: {a1.stdout[-400:]}")
+    # Bản ghi nhật ký chỉ tính khi ĐÚNG (tài khoản, md5 file đính chính, md5 sau) và đã áp thật.
+    cur_md5, inv_md5 = md5(w.nav_path.read_bytes()), md5(Path(inv).read_bytes())
+    jlog = str(w.nav_dir / fr.AUDIT_LOG)
+    for label, rec in (("file đính chính KHÁC", {"correction_md5": "0" * 32, "md5_after": cur_md5}),
+                       ("status aborted", {"correction_md5": inv_md5, "md5_after": cur_md5, "status": "aborted"}),
+                       ("status rolled_back_manual", {"correction_md5": inv_md5, "md5_after": cur_md5,
+                                                      "status": "rolled_back_manual"})):
+        fr._append_log(jlog, dict({"account": "SpaceX"}, **rec))
+        a3 = w.apply(inv, out_inv)
+        ok(a3.returncode == 2 and "KHÔNG có bản ghi đã áp" in a3.stderr,
+           f"R8/F2: bản ghi nhật ký {label} KHÔNG được tính là 'đã áp': rc={a3.returncode} {a3.stderr[-200:]}")
+
 # ------------------------------------------------------------------ R9. vòng 2 (arch-review B2/B4/B7/B14)
 def _log_records(w):
     return [json.loads(x) for x in (w.nav_dir / fr.AUDIT_LOG).read_text(encoding="utf-8").splitlines()]
@@ -1080,6 +1122,67 @@ def r10_eod_logs(tmp):
     ok([m["name"] for m in fr.list_eod_messages(str(only_title), "SpaceX")[0]] == ["only_title.log:4"]
        and [m["name"] for m in fr.list_eod_messages(str(only_title), "ZaloPay")[0]] == ["only_title.log:2"],
        "R10: tiêu đề 'Báo cáo giao dịch ngày — X' tự nó phải chuyển tài khoản")
+
+    # ---- arch-review vòng 3 (F4/F5): dấu âm, tài khoản không mang sang file khác, dòng lệnh lạ, dòng NAV
+    # không đọc/gán được phải ĐƯỢC ĐẾM (không rơi im lặng).
+    neg = w.dir / "neg.log"
+    neg.write_text("📊 **EOD Trading Report — SpaceX (2026-07-10)**\n"
+                   "💰 **NAV 2026-07-10: 1,020,000,000 VND** (-15,000,000 VND, -1.45% so với hôm trước)\n",
+                   encoding="utf-8")
+    nm, _, nun = fr.list_eod_messages_ex(str(neg), "SpaceX")
+    ok(len(nm) == 1 and nm[0]["printed"]["day_pct"] == -1.45 and nun == 0,
+       f"R10/F4: tin EOD có % ÂM phải được đọc đúng DẤU: {[m['printed'] for m in nm]} chưa-gán={nun}")
+    (w.dir / "carry_a.log").write_text("📊 **EOD Trading Report — ZaloPay (2026-07-10)**\n"
+                                       "💰 **NAV 2026-07-10: 1,020,000,000 VND** (+0 VND, +0.50% so với hôm trước)\n",
+                                       encoding="utf-8")
+    (w.dir / "carry_b.log").write_text("💰 **NAV 2026-07-11: 1,030,000,000 VND** (+0 VND, +0.97% so với hôm trước)\n",
+                                       encoding="utf-8")
+    zm, _, zun = fr.list_eod_messages_ex(str(w.dir / "carry_*.log"), "ZaloPay")
+    ok([m["name"] for m in zm] == ["carry_a.log:2"] and zun == 1,
+       f"R10/F5 §12: tài khoản KHÔNG mang sang file log kế tiếp; dòng NAV mở đầu file thứ hai không gán được "
+       f"phải được đếm: {[m['name'] for m in zm]} chưa-gán={zun}")
+    (w.dir / "odd.log").write_text(
+        "=== /x/eod_trading_report.sh --account SpaceX ===\n"
+        "📈 **Báo cáo giao dịch ngày — SpaceX (2026-07-15)**\n"
+        "💰 **NAV 2026-07-15: 1,070,000,000 VND** (+5,000,000 VND, +0.47% so với hôm trước)\n"
+        "=== /x/eod_trading_report.sh --account=ZaloPay ===\n"
+        "💰 **NAV 2026-07-15: 1,070,000,000 VND** (+0 VND, +0.10% so với hôm trước)\n", encoding="utf-8")
+    sm, _, sun = fr.list_eod_messages_ex(str(w.dir / "odd.log"), "SpaceX")
+    zm2, _, zun2 = fr.list_eod_messages_ex(str(w.dir / "odd.log"), "ZaloPay")
+    ok([m["name"] for m in sm] == ["odd.log:3"] and sun == 1 and zm2 == [] and zun2 == 1,
+       f"R10/F5 §12: dòng lệnh dạng lạ `--account=ZaloPay` KHÔNG được gán cho SpaceX và phải được đếm: "
+       f"{[m['name'] for m in sm]} {sun} / {zm2} {zun2}")
+    (w.dir / "dot.log").write_text("📊 **EOD Trading Report — SpaceX (2026-08-07)**\n"
+                                   "💰 **NAV 2026-08-07: 961.311.265 VND** (+1.098.000 VND, +0,12% so với hôm trước)\n",
+                                   encoding="utf-8")
+    dm, _, dun = fr.list_eod_messages_ex(str(w.dir / "dot.log"), "SpaceX")
+    ok(dm == [] and dun == 1, f"R10/F5: dòng NAV định dạng chấm/phẩy không đọc được phải được đếm: {dm} {dun}")
+    ok(fr.list_eod_messages(str(w.dir / "neg.log"), "SpaceX")[0][0]["name"] == "neg.log:2",
+       "R10: list_eod_messages (2 phần tử) vẫn dùng được cho caller cũ")
+
+    # So với SỐ ĐÃ IN: NAV in KHÁC NAV mới (so với dữ liệu MỚI, không phải CŨ), còn % ngày khớp ⇒ chỉ số hạng NAV
+    # bắt được. printed_dev phải đúng |1051/1060 − 1|·100 (NAV mới 1051), KHÔNG phải so với NAV cũ 1050.
+    w3 = World(tmp, "r10_f4_nav")
+    (w3.dir / "logs").mkdir()
+    (w3.dir / "logs" / "eod_trading_report.log").write_text(
+        "📊 **EOD Trading Report — SpaceX (2026-07-10)**\n"
+        "💰 **NAV 2026-07-10: 1,060,000,000 VND** (+10,000,000 VND, +1.55% so với hôm trước)\n", encoding="utf-8")
+    p3, imp3n, _ = w3.impact(w3.correction([replace_item("2026-07-10", 1050, 1051)]))
+    e3 = by_name(imp3n).get("eod_trading_report.log:2", {}) if imp3n else {}
+    want = abs(1051 / 1060 - 1) * 100
+    ok(p3.returncode == 0 and e3 and abs(e3["printed_dev"] - want) < 1e-9 and e3["tier_printed"] == 3,
+       f"R10/F4: lệch so với NAV ĐÃ IN phải tính theo NAV MỚI ({want:.4f}): {e3.get('printed_dev')} {p3.stderr[-200:]}")
+    # Không có số mới (xoá dòng đầu tiên, tin ở ngày đó) ⇒ lệch vô cực, KHÔNG phải 0.
+    w4 = World(tmp, "r10_f4_inf")
+    (w4.dir / "logs").mkdir()
+    (w4.dir / "logs" / "eod_trading_report.log").write_text(
+        "📊 **EOD Trading Report — SpaceX (2026-07-02)**\n"
+        "💰 **NAV 2026-07-02: 1,010,000,000 VND** (+0 VND, +0.00% so với hôm trước)\n", encoding="utf-8")
+    p4, imp4, _ = w4.impact(w4.correction([{"op": "delete", "date": "2026-07-02", "expect": {"nav": "1010000000"},
+                                              "reason": "dòng trùng", "evidence": "x"}]))
+    e4 = by_name(imp4).get("eod_trading_report.log:2", {}) if imp4 else {}
+    ok(p4.returncode == 0 and e4 and e4["printed_dev"] == float("inf") and e4["tier_printed"] == 3,
+       f"R10/F4: không có số mới để so ⇒ lệch số in VÔ CỰC (bậc 3): {e4.get('printed_dev')} {p4.stderr[-200:]}")
 
     # Chèn dòng 07-08 (NAV 1040) ⇒ tin EOD 07-09 "+0,49% so với hôm trước" giờ là 1035/1040 − 1.
     ins = {"op": "insert", "date": "2026-07-08", "row": row("2026-07-08", 1040), "reason": "thiếu dòng",

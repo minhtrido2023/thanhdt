@@ -77,8 +77,9 @@ Lịch sử đổi có chủ đích (sửa nav_history, backfill, khai dòng ti�
      ⇒ xoá ĐÚNG dòng hỏng (không sửa dòng nào khác) rồi chạy lại đúng lệnh chốt; KHÁC ⇒ dừng, báo user
      (file đã bị đổi ngoài công cụ, hoặc nhiều hơn một lần ghi bị hỏng).
   4. Đối chiếu mốc `SEAL_MD5` trên bus (mục trên) trước và sau khi sửa; ghi việc sửa tay vào bus (`error`).
-- **Đường lui**: TRƯỚC khi chốt sổ — đính chính nav_history lui được bằng bản sao lưu
-  `restatement_backups/` + một đính chính ngược (xem [`nav_history_corrections.md`](nav_history_corrections.md));
+- **Đường lui**: TRƯỚC khi chốt sổ — đính chính nav_history lui được bằng một đính chính NGƯỢC áp lên file
+  hiện tại (bản sao lưu `restatement_backups/` chỉ dùng khi công cụ hỏng, kèm dòng nhật ký
+  `rolled_back_manual`; xem [`nav_history_corrections.md`](nav_history_corrections.md));
   SAU khi chốt — chỉ còn đường đính chính (`--restate`), sổ cũ nằm ở `.superseded.*`.
 
 ## Ai ghi / ai đọc
