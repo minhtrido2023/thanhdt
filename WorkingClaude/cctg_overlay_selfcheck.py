@@ -296,8 +296,8 @@ try:
     dep._EVENTS_CSV = _tmp_dep_csv16
     cctg._EVENTS_CSV = _tmp_cctg_csv16
     r16a = dep.macro_killswitch_a_status(asof="2026-11-19", stale_days_limit=45, check_freshness=True)
-    check("T16 CCTG age==45d NOT stale -> CCTG still active (rate=8.0%)",
-          abs(r16a["rate"] - 0.08) < 1e-9 and r16a["rate_source"].startswith("cctg_6m"))
+    check("T16 CCTG age==45d NOT stale -> CCTG still active (rate=8.0%, post-rebase label cctg_12m)",
+          abs(r16a["rate"] - 0.08) < 1e-9 and r16a["rate_source"] == "cctg_12m(2026-10-05)")
     check("T16 CCTG age==45d NOT stale -> stale=False", r16a["stale"] is False)
     r16b = dep.macro_killswitch_a_status(asof="2026-11-20", stale_days_limit=45, check_freshness=True)
     check("T16 CCTG age==46d stale -> excluded, falls back to Big-4 (rate=6.0%)",
@@ -361,7 +361,7 @@ try:
     cctg._EVENTS_CSV = _tmp_cctg_csv18
     r18a = dep.effective_deposit_rate(asof="2026-11-19", stale_days_limit=45, check_freshness=True)
     check("T18 CCTG age==45d NOT stale -> effective_deposit_rate still uses CCTG (rate_pct=8.0)",
-          abs(r18a["rate_pct"] - 8.0) < 1e-9 and r18a["rate_source"].startswith("cctg_6m"))
+          abs(r18a["rate_pct"] - 8.0) < 1e-9 and r18a["rate_source"] == "cctg_12m(2026-10-05)")
     r18b = dep.effective_deposit_rate(asof="2026-11-20", stale_days_limit=45, check_freshness=True)
     # rate_source format changed 2026-10-01 (round-2 fix R2, job Taylor_20261001_064225): a stale
     # CCTG fallback now names the real reason ("big4_12m(cctg_stale: <age>d)") instead of a bare

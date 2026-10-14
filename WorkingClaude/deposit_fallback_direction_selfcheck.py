@@ -23,6 +23,7 @@ each has its own isolated `data/` CSV location and nothing here reads or writes 
 Run: $DNA_PYEXE deposit_fallback_direction_selfcheck.py [--full-daily]
      and again under `env -u TZ`, `TZ=America/New_York`, `TZ=Pacific/Kiritimati` (§16/§19).
 """
+import ast
 import hashlib
 import importlib.util
 import inspect
@@ -32,6 +33,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 
 import pandas as pd
 
@@ -154,7 +156,7 @@ def scenario_checks(pair, sink=None):
             check("S1 a WARNING saying HOLDING was logged",
                   any("CCTG stale" in m and "HOLDING" in m for m in cap.messages), sink)
             s2 = det("2026-11-14")                              # age 45 -> still fresh
-            check("S2 age==45d is still fresh: 7.5, labelled cctg_6m(2026-09-30)",
+            check("S2 age==45d is still fresh: 7.5, labelled cctg_6m(2026-09-30) (pre-rebase 6M anchor)",
                   abs(s2["rate_pct"] - 7.5) < 1e-9 and s2["rate_source"] == "cctg_6m(2026-09-30)", sink)
 
             # ---- S3: never below the level already observed, however long the feed stays dark
@@ -165,8 +167,8 @@ def scenario_checks(pair, sink=None):
             # ---- S4: the way out is a newer CONFIRMED row -- which may be lower
             pair.set_csv(cctg_text=CCTG_HDR + "2027-01-10,7.0,2027-01-10,t,down\n")
             s4 = det("2027-01-10")
-            check("S4 a newer confirmed CCTG row ends the hold (7.0, fresh label)",
-                  abs(s4["rate_pct"] - 7.0) < 1e-9 and s4["rate_source"] == "cctg_6m(2027-01-10)", sink)
+            check("S4 a newer confirmed CCTG row ends the hold (7.0, fresh 12M label)",
+                  abs(s4["rate_pct"] - 7.0) < 1e-9 and s4["rate_source"] == "cctg_12m(2027-01-10)", sink)
             pair.set_csv(cctg_text=CCTG_HDR + "2027-01-10,6.5,2027-01-10,t,below big4\n")
             s4b = det("2027-06-30")                             # stale AND below Big-4
             check("S4 a confirmed CCTG below Big-4 -> plain Big-4 6.8 (no hold, no label)",
@@ -302,6 +304,24 @@ def _grid(end, start=None):
     return [str(d.date()) for d in sorted(d for d in g if d <= pd.Timestamp(end))]
 
 
+# 2026-10-14 (job Taylor_20261014_135258, user-approved LABEL-only change): a fresh CCTG anchor
+# dated >= 2026-10-05 is now labelled "cctg_12m(<date>)" instead of "cctg_6m(<date>)" (series
+# rebased to 12M that day). The H-section below must still prove NUMBERS byte-identical to PIN_REV,
+# so it folds exactly that rename back before hashing/comparing -- nothing else is normalised.
+def _label_norm(text):
+    return text.replace("cctg_12m(", "cctg_6m(")
+
+
+def _code_norm(src):
+    """Function source minus its docstring, with the one-line label rename folded back."""
+    src = src.replace("cctg_source_label(cctg_date)", 'f"cctg_6m({cctg_date.date()})"')
+    fn = ast.parse(textwrap.dedent(src)).body[0]
+    if fn.body and isinstance(fn.body[0], ast.Expr) and isinstance(getattr(fn.body[0], "value", None), ast.Constant) \
+            and isinstance(fn.body[0].value.value, str):
+        fn.body = fn.body[1:]
+    return ast.unparse(fn)
+
+
 def history_fingerprint(pair, end=HIST_END, start=None):
     """Every consumer-path output for every asof <= end, both knob states -> one sha256."""
     dep = pair.dep
@@ -318,7 +338,7 @@ def history_fingerprint(pair, end=HIST_END, start=None):
                        dep.effective_deposit_rate(a, check_freshness=True),
                        dep.effective_deposit_rate(a, check_freshness=False),
                        dep.current_deposit_rate(a))
-                h.update(repr(row).encode("utf-8"))
+                h.update(_label_norm(repr(row)).encode("utf-8"))
     finally:
         lg.setLevel(old_level)
     return h.hexdigest()
@@ -342,7 +362,8 @@ def killswitch_fingerprint(pair, dep_text=None, cctg_text=None):
             pair.set_csv(dep_text=dt, cctg_text=cctg_text)
             for a in dates:
                 for cf in (True, False):
-                    h.update(repr((a, cf, dep.macro_killswitch_a_status(a, check_freshness=cf))).encode("utf-8"))
+                    h.update(_label_norm(repr((a, cf, dep.macro_killswitch_a_status(a, check_freshness=cf))))
+                             .encode("utf-8"))
     pair.set_csv()
     return h.hexdigest()
 
@@ -424,8 +445,8 @@ if old is not None:
     same_src += [("cctg_rate_vn", n) for n in ("cctg_events_df", "current_cctg_rate", "current_cctg_rate_checked")]
     for modname, fn_name in same_src:
         check(f"H4 {modname}.{fn_name}: source unchanged vs {PIN_REV}",
-              inspect.getsource(getattr(old.mods[modname], fn_name))
-              == inspect.getsource(getattr(new.mods[modname], fn_name)))
+              _code_norm(inspect.getsource(getattr(old.mods[modname], fn_name)))
+              == _code_norm(inspect.getsource(getattr(new.mods[modname], fn_name))))
     check("H4 frozen anchors unchanged (DEPOSIT_EVENTS, CCTG_EVENTS)",
           old.dep.DEPOSIT_EVENTS == new.dep.DEPOSIT_EVENTS and old.cctg.CCTG_EVENTS == new.cctg.CCTG_EVENTS)
 
@@ -439,8 +460,8 @@ if old is not None:
 print("\nM — source-level mutants (each must be CAUGHT; a mutant that does not apply is a FAIL):")
 MUTANTS = [
     ("M1 REVERSED DIRECTION, stale branch (drop to Big-4 again)", "dep",
-     "        rate_pct = cctg_pct\n        if not cctg_stale:\n            rate_source = f\"cctg_6m({cctg_date.date()})\"",
-     "        if not cctg_stale:\n            rate_pct = cctg_pct\n            rate_source = f\"cctg_6m({cctg_date.date()})\"", "S"),
+     "        rate_pct = cctg_pct\n        if not cctg_stale:\n            rate_source = cctg_source_label(cctg_date)",
+     "        if not cctg_stale:\n            rate_pct = cctg_pct\n            rate_source = cctg_source_label(cctg_date)", "S"),
     ("M2 REVERSED DIRECTION, error branch (drop to Big-4 again)", "dep",
      "            rate_pct = held_pct\n", "            rate_pct = big4_pct\n", "S"),
     ("M3 silent hold (stale WARNING removed)", "dep",
@@ -448,7 +469,7 @@ MUTANTS = [
      "            _log.debug(\"effective_deposit_rate(asof=%s): CCTG stale (%dd > %dd, last %s) -> \"\n                         \"HOLDING", "S"),
     ("M4 held value mislabelled as fresh", "dep",
      "rate_source = f\"cctg_held({cctg_date.date()}; cctg_stale: {cctg_age}d)\"",
-     "rate_source = f\"cctg_6m({cctg_date.date()})\"", "S"),
+     "rate_source = cctg_source_label(cctg_date)", "S"),
     ("M5 rollback knob ignored", "dep",
      "if os.environ.get(\"DEPOSIT_RATE_CCTG_OVERLAY\", \"1\") == \"0\":",
      "if os.environ.get(\"DEPOSIT_RATE_CCTG_OVERLAY\", \"1\") == \"never\":", "S"),

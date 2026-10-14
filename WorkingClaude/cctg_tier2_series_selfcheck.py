@@ -626,7 +626,7 @@ try:
     # B5: AST — trong file consumer ngoài 3 module chính, MỌI hằng chuỗi một-token chứa 'cctg' phải thuộc danh sách nhãn đã
     # biết; bắt đường dẫn ghép chuỗi ("cctg_rate_vn_" + "tier" + ...), glob "cctg_*.csv", duckdb/pd.read_csv — thứ mà quét
     # regex trên văn bản không thấy. KHÔNG bắt được: chuỗi tạo hoàn toàn động ("cc" + "tg") — khoảng hở đã biết.
-    CCTG_LABELS_OK = {"cctg_6m", "cctg_note"}  # nhãn khoá dict/hiển thị (value_radar.py, dna_report.py), không phải đường dẫn
+    CCTG_LABELS_OK = {"cctg_12m", "cctg_6m", "cctg_note"}  # nhãn khoá dict/hiển thị (value_radar.py, dna_report.py), không phải đường dẫn
     ast_bad, ast_scanned = [], 0
     for c in CONSUMERS:
         if os.path.basename(c) in ("deposit_rate_vn.py", "cctg_rate_vn.py", "deposit_cctg_trend_check.py"):

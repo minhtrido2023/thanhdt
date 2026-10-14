@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # refresh_deposit_cctg_weekly.sh — WEEKLY cross-check of BOTH the Big-4 12M term-deposit rate AND
-# the Big-4 CCTG 6M rate, built so a decline shows up within a week instead of waiting for the
+# the Big-4 CCTG rate (12M from 2026-10-05, 6M before), built so a decline shows up within a week instead of waiting for the
 # existing monthly Big-4-only refresh (refresh_deposit_rate_vn.sh, still runs separately as its own
 # cron job -- NOT replaced by this file, though append_deposit_rate.py itself is a SHARED writer,
 # see note below). User directive (2026-10-01, job Taylor_20261001_054108):

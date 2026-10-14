@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-deposit_cctg_trend_check.py — detect a DECLINE in the Big-4 12M deposit rate OR the Big-4 CCTG 6M
-rate (the two triggers the user defined, job Taylor_20261001_054108: "lãi suất huy động tháng sau
+deposit_cctg_trend_check.py — detect a DECLINE in the Big-4 12M deposit rate OR the Big-4 CCTG
+rate (12M from 2026-10-05, 6M before) (the two triggers the user defined, job Taylor_20261001_054108: "lãi suất huy động tháng sau
 giảm so với tháng trước" / "chứng chỉ tiền gửi phát hành đợt sau thấp hơn đợt trước") and raise a
 WARNING-ONLY alert. This NEVER writes to any series CSV and NEVER touches park/sizing state —
 park 0% is a user-only reversal decision (CLAUDE.md macro-killswitch section), this script's only
@@ -42,6 +42,9 @@ SERIES = {
         "label": "Lãi suất huy động 12 tháng Big-4 (online)",
         "tenor": "12M",
     },
+    # Key "cctg_6m" is a LEGACY STATE KEY for the main CCTG series (cctg_rate_vn, now 12M) -- kept
+    # because data/deposit_cctg_trend_alert_state.json is keyed on it (renaming re-fires alerts).
+    # NOT the separate 6M series (cctg_rate_vn_6m_events.csv) of refresh_deposit_cctg_weekly.sh.
     "cctg_6m": {
         "label": "Chứng chỉ tiền gửi (CCTG) Big-4 (12 tháng cao nhất từ 05/10/2026; trước đó 6 tháng)",
         "tenor": "12M",

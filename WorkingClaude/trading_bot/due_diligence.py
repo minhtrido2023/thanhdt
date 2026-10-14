@@ -461,7 +461,7 @@ def _deposit_rate_pct(asof):
     cả giá lẫn cổ tức cũng thiếu; ở đây chỉ trả cờ để caller ghi rõ nguồn.
 
     Nguồn trả về (`deposit_rate_source` ở _yield_floor) phải nói rõ DRIVER thật (big4_12m vs
-    cctg_6m(<date>), hoặc big4_12m(cctg_unavailable:...)/big4_12m(cctg_stale:...) khi CCTG hỏng/cũ
+    cctg_12m(<date>) — cctg_6m(<date>) nếu anchor trước 05/10 —, hoặc big4_12m(cctg_unavailable:...)/big4_12m(cctg_stale:...) khi CCTG hỏng/cũ
     — xem `deposit_rate_vn.effective_deposit_rate()`'s round-2 fix R2), không gộp mù thành
     "deposit_rate_vn" chung chung — bẫy #1, mike/kb/data_registry/macro/cctg_rate_vn.md."""
     key = ("_deprate", str(asof)[:10])

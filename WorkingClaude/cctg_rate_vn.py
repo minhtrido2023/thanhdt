@@ -18,11 +18,11 @@ mức bảo hiểm 350 triệu VND), lãi CCTG được miễn thuế TNCN giố
 hạn >=6 tháng do thị trường quyết định (không trần SBV). Vẫn là MỘT CÔNG CỤ KHÁC VỀ KỲ HẠN so với
 sổ tiết kiệm 12 tháng: đây là lý do dùng max(), không gộp mù hai chuỗi khác kỳ hạn thành một.
 
-Tenor mismatch (must NOT be papered over): deposit_rate_vn.py's series is **12-month**; this
-series is **6-month**. A 6M rate sitting above a 12M rate is itself a market signal (inverted
-curve / banks bidding up short tenor for liquidity) — effective_deposit_rate() surfacing that via
-max() is intentional, not a bug, but any report citing the number must say which tenor is driving
-it (see deposit_rate_vn.effective_deposit_rate()'s `driver` field).
+Tenor (must NOT be papered over): deposit_rate_vn.py's series is a 12-month TERM DEPOSIT; this
+series was a **6-month** CCTG up to 2026-10-04 and is a **12-month** CCTG from 2026-10-05. Any
+report citing the effective number must say which series is driving it -- see
+deposit_rate_vn.effective_deposit_rate()'s `rate_source` ("cctg_12m(<date>)", or "cctg_6m(<date>)"
+for the pre-rebase 2026-09-30 anchor; label switched 2026-10-14, job Taylor_20261014_135258).
 
 First anchor only so far:
   - 2026-09-30: Big-4 CCTG 6-thang = 7.5%/nam (VietnamNet, 30/09/2026; mot so NH co phan toi 9.4%,

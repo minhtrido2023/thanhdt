@@ -1042,7 +1042,7 @@ if not _lever_err and _gate_pass:
                            f"NIỀM TIN/THANH KHOẢN có thể chứa được (Loại 2), PIT filter cho qua")
 
 # HIỂN THỊ-ONLY (user duyệt 2026-10-01, job Taylor_20261001_094254): effective (max Big-4 12M,
-# CCTG 6M) cạnh số Big-4 PIT ở trên — cổng VẪN Big-4-only, field dưới KHÔNG được chạm
+# CCTG 12M; 6M trước 05/10) cạnh số Big-4 PIT ở trên — cổng VẪN Big-4-only, field dưới KHÔNG được chạm
 # _pit_structural/_lever_active/_pit_reason. Lỗi tính effective fail-silent-nhưng-có-log, KHÔNG
 # ném ra ngoài khối (pipeline 19:00 chạm cổng vay margin thật).
 _pit_deposit_rate_effective = _pit_deposit_effective_driver = None

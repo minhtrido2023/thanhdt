@@ -70,6 +70,8 @@ CHEAP_MAX, EXPENSIVE_MIN = 33.0, 67.0
 REFETCH_TAIL = 10         # luôn kéo lại N phiên cuối (BQ hay bị restate) rồi ghi đè cache
 
 _LABEL_VN = {"CHEAP": "RẺ", "FAIR": "TRUNG TÍNH", "EXPENSIVE": "ĐẮT"}
+# deposit_rate_source -> display tag. CCTG = 12T from 2026-10-05, 6T before (series tenor rebase).
+_DEP_TAG = {"cctg_12m": "CCTG 12T", "cctg_6m": "CCTG 6T"}
 
 _SQL = """
 WITH base AS (
@@ -212,7 +214,7 @@ def load_series(update=True, rebuild=False):
 
     if W not in sys.path:
         sys.path.insert(0, W)
-    # effective_deposit_events_df() = max(Big-4 12M, Big-4 CCTG 6M) wherever a CCTG anchor exists
+    # effective_deposit_events_df() = max(Big-4 12M, Big-4 CCTG 12M; 6M before 2026-10-05) wherever a CCTG anchor exists
     # (wired 2026-10-01, user directive) -- byte-identical to deposit_events_df() before CCTG's
     # first anchor (2026-09-30). Value Radar is DISPLAY-ONLY (CLAUDE.md §6b), so this is the
     # explicitly-approved wiring; see mike/kb/data_registry/macro/cctg_rate_vn.md consumer table.
@@ -223,13 +225,17 @@ def load_series(update=True, rebuild=False):
     d["spread"] = d["ey"] - d["deposit_rate"]
 
     # deposit_rate_source: tenor/driver tag (quant-skeptic round-2 fix 4, 2026-10-01) -- the
-    # displayed rate is max(Big-4 12M, CCTG 6M); any report citing it must say WHICH tenor is
+    # displayed rate is max(Big-4 12M, CCTG); any report citing it must say WHICH series is
     # driving the number (CLAUDE.md §6b's "effective rate" caveat) instead of a bare "lãi suất
-    # huy động X%" that silently assumed 12M even on days CCTG (6M) is the higher/binding leg.
+    # huy động X%". CCTG tenor: 6M up to 2026-10-04, 12M from 2026-10-05 (series rebase) -- the
+    # tag follows the row date (deposit_rate_vn.CCTG_TENOR_REBASE_DATE).
     big4_only = _big4_events_df().sort_values("time").rename(columns={"deposit_rate": "_big4_only"})
     d = pd.merge_asof(d, big4_only, on="time", direction="backward")
+    from deposit_rate_vn import CCTG_TENOR_REBASE_DATE
     d["deposit_rate_source"] = np.where(d["deposit_rate"] > d["_big4_only"] + 1e-9,
-                                         "cctg_6m", "big4_12m")
+                                         np.where(d["time"] >= CCTG_TENOR_REBASE_DATE,
+                                                  "cctg_12m", "cctg_6m"),
+                                         "big4_12m")
     d = d.drop(columns=["_big4_only"])
 
     d["p_pe"] = _roll_pct(d["pe_cap10"])
@@ -254,7 +260,7 @@ def value_radar_now(update=True, ttl=900):
 
     dict: score/label (rolling-10Y = bản chính), score_expanding/label_expanding (đối chiếu),
           pe_cap10/pb_cap10/spread + phân vị từng thành phần, deposit_rate,
-          deposit_rate_source ("big4_12m"|"cctg_6m" -- tenor đang driving số deposit_rate, thêm
+          deposit_rate_source ("big4_12m"|"cctg_12m"|"cctg_6m" trước 05/10/2026 -- tenor đang driving số deposit_rate, thêm
           2026-10-01), asof."""
     import time as _t
     if _CACHE_NOW["val"] is not None and (_t.time() - _CACHE_NOW["t"]) < ttl:
@@ -295,9 +301,9 @@ def build_value_radar_line(html=True, update=True):
     asof = f"[dữ liệu tới {c['asof']}]"
     asof = f"<i>{asof}</i>" if html else asof
     head = B("%.1f %s" % (c["score"], vn))
-    # tenor tag (quant-skeptic round-2 fix 4, 2026-10-01): spread = EY - max(Big-4 12M, CCTG 6M);
+    # tenor tag (quant-skeptic round-2 fix 4, 2026-10-01): spread = EY - max(Big-4 12M, CCTG);
     # must name which tenor is driving it, never a bare "tiết kiệm" that silently assumed 12M.
-    dep_tag = "CCTG 6T" if c.get("deposit_rate_source") == "cctg_6m" else "Big-4 12T"
+    dep_tag = _DEP_TAG.get(c.get("deposit_rate_source"), "Big-4 12T")
     return (
         f"Value Radar: {emo} {head}"
         f" (phân vị 10 năm) · P/E {c['pe_cap10']:.2f} (p{c['p_pe']:.0f})"
@@ -362,7 +368,7 @@ if __name__ == "__main__":
         print("value_radar: n/a")
         sys.exit(1)
     print(build_value_radar_line(html=False))
-    _dep_tag = "CCTG 6T" if c.get("deposit_rate_source") == "cctg_6m" else "Big-4 12T"
+    _dep_tag = _DEP_TAG.get(c.get("deposit_rate_source"), "Big-4 12T")
     print(f"\n(đối chiếu) expanding-2008 = {c['score_expanding']:.1f} "
           f"{_LABEL_VN.get(c['label_expanding'], '')} · lãi suất huy động ({_dep_tag}) "
           f"{c['deposit_rate']:.2f}%")

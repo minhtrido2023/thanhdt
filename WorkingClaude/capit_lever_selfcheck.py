@@ -2242,7 +2242,7 @@ with tempfile.TemporaryDirectory() as TMP:
     check("M2 sau anchor CCTG (2026-10-05) → effective (CCTG 7,5%) KHÁC Big-4 (6,8%) nhưng "
           "active/structural vẫn đúng Loại 2 (cả hai dưới ngưỡng 9%)",
           lev_m2["pit_deposit_rate"] == 6.8 and lev_m2["pit_deposit_rate_effective"] == 7.5
-          and "cctg_6m" in str(lev_m2["pit_deposit_effective_driver"])
+          and str(lev_m2["pit_deposit_effective_driver"]).startswith(("cctg_12m", "cctg_6m"))
           and lev_m2["pit_filter_structural"] is False and lev_m2["active"] is True,
           detail=str({k: lev_m2[k] for k in
                       ("pit_deposit_rate", "pit_deposit_rate_effective",
