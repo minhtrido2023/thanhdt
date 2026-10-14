@@ -1203,3 +1203,12 @@
 
 ## Archived 2026-10-14 (keep=12 days=0 require_done=False)
 - [2026-10-13T12:08:57Z] [CAPIT margin hold lock, 10-13] XONG: feat/capit-margin-hold-lock-20261013 @0d0702856 (wt-capithold-1013, CHƯA merge); finding capit-margin-hold-lock-20261013 trace Taylor_20261013_114453. CHỜ Mike arch-review + user quyết: thiếu bản duyệt margin thì bot giữ qty x1,3 → funding gate chặn cả account hoặc mua đủ (đề xuất A: golive đọc file giữ ⇒ active=false). Khi bật giữ PHẢI apply capit_lever_selfcheck_pin_hold.patch (repo ngoài) kẻo L2+L4 đỏ. (Thay 2 dòng ĐANG DỞ job 114453.)
+
+## Archived 2026-10-14 (keep=12 days=0 require_done=False)
+- [2026-10-13T12:36:32Z] ĐANG DỞ job Taylor_20261013_123622 (audit sẵn sàng BCTC Q3 góc tín hiệu, CHỈ ĐỌC+ĐO): bắt đầu | NEXT: đọc kb/projects/bctc-q2-readiness-audit.md, lag_live_schedule.py, đo 6 mục, bus finding bctc-q3-readiness-signal-20261013
+
+## Archived 2026-10-14 (keep=12 days=0 require_done=False)
+- [2026-10-13T12:44:49Z] [BCTC Q3 readiness 10-13] XONG: finding bctc-q3-readiness-signal-20261013 trace Taylor_20261013_123622 — 0 CRIT/1 MED/4 LOW, CHƯA sửa gì. CHỜ user/Mike duyệt M1 (nới gate fa_ratings_earnings_window sang ngày ≤10 tháng 2/5/8/11 + cờ lag_rating_stale; ca thật TVN 08-05) và watcher PNJ Q3. Artifact research/bctc_q3_readiness_20261013/. (Thay dòng ĐANG DỞ job 123622.)
+
+## Archived 2026-10-14 (keep=12 days=0 require_done=False)
+- [2026-10-13T12:52:01Z] ĐANG DỞ job Taylor_20261013_125149 (BCTC Q3 4 việc: M1a gate fa_ratings, M1b cờ lag_rating_stale, L2 watcher PNJ, L1 pkl LAG refresh 19:00; nhánh fix/bctc-q3-m1-gate-20261013, KHÔNG merge): bắt đầu | NEXT: tạo worktree, đọc fa_ratings_earnings_window_daily.sh
