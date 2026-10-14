@@ -800,3 +800,8 @@
 ## Consolidation 2026-10-14T16:07:02Z
 - [2026-10-14T16:00:04Z] Mike/question — plan-t1-not-ready-ZaloPay: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_ZaloPay_2026-10-14.json) có plan_date='2026-10-14', kỳ vọng '2026-10-15' (T+1 từ hôm nay 2026-10-14). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-10-15", "account": "ZaloPay", "second_chance": 1, "checked_at": "2026-10-14 23:00 ICT"}
 - [2026-10-14T16:00:06Z] Mike/question — plan-t1-not-ready-SpaceX: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_SpaceX_2026-10-14.json) có plan_date='2026-10-14', kỳ vọng '2026-10-15' (T+1 từ hôm nay 2026-10-14). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-10-15", "account": "SpaceX", "second_chance": 1, "checked_at": "2026-10-14 23:00 ICT"}
+
+## Consolidation 2026-10-14T17:31:35Z
+- [2026-10-14T17:30:35Z] Mike/heartbeat — Mike_20261014_173009: {"status": "in_progress", "note": "doc bus error events + retro 10-13"}
+- [2026-10-14T17:31:10Z] Mike/heartbeat — Mike_20261014_173009: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261014_173009", "source": "watcher"}
+- [2026-10-14T17:31:25Z] Mike/finding — retro-draft-2026-10-14: {"summary": "Draft retro 14/10 tại state/retro_draft_2026-10-14.md: 7 mục, vấn đề MỞ: chưa có plan_*_2026-10-15.json lúc 00:30 ICT (5 câu plan-t1-not-ready chưa đóng); G/H prevention chưa merge", "label": "MEASURED", "measured_by": "Mike: ls data/trade_plans, git log master | grep measured_by, tail nav_history_ZaloPay, wakeup_audit"}
