@@ -252,6 +252,26 @@ def bq_raw_prices(tickers, date):
     return prices, prev, None
 
 
+def parse_raw_price_overrides(items, from_raw, evidence):
+    """`--raw-price-override MÃ=GIÁ` → {mã: giá}. Chỉ hợp lệ cùng `--from-raw` và phải kèm bằng
+    chứng: đây là lối ra có ghi dấu cho ca BQ `Price` sai (đông cứng), không phải lối tắt bỏ BQ."""
+    out = {}
+    for item in items or []:
+        ticker, sep, raw = item.partition("=")
+        try:
+            price = float(raw)
+        except ValueError:
+            price = float("nan")
+        if not sep or not ticker.strip() or not (price == price and 0 < price < float("inf")):
+            raise ValueError(f"--raw-price-override {item!r}: phải là MÃ=GIÁ với giá > 0")
+        out[ticker.strip().upper()] = price
+    if out and not from_raw:
+        raise ValueError("--raw-price-override chỉ dùng cùng --from-raw (đường live lấy giá broker)")
+    if out and not str(evidence or "").strip():
+        raise ValueError("--raw-price-override cần --raw-price-evidence (nguồn của giá thay)")
+    return out
+
+
 def classify_raw_price_gap(ticker, date, price, prev_price, market_price, tol_pct, actions=None):
     """Giải thích lệch giữa BQ `Price` và `marketPrice` của vị thế trong dnse_raw — PURE.
 
@@ -1076,7 +1096,20 @@ def main():
     ap.add_argument("--from-raw", action="store_true",
                     help="backfill ngày QUÁ KHỨ chỉ từ dnse_raw_{date}.jsonl (positions+balances cuối "
                          "ngày) + BQ Price thô, không gọi broker; ghi nav_is_estimate=True")
+    ap.add_argument("--raw-price-override", action="append", default=[], metavar="MÃ=GIÁ",
+                    help="CHỈ với --from-raw: thay BQ Price của một mã bằng giá đã đối chiếu tay "
+                         "(BQ `Price` đông cứng quanh ngày không hưởng quyền — VHM 2026-08-06). "
+                         "Giá thay vẫn phải qua cổng lệch ≤5% so với marketPrice của vị thế; cần "
+                         "--raw-price-evidence")
+    ap.add_argument("--raw-price-evidence", default="",
+                    help="bằng chứng cho --raw-price-override (ghi vào nav_source + snapshot JSON)")
     args = ap.parse_args()
+    try:
+        price_overrides = parse_raw_price_overrides(args.raw_price_override, args.from_raw,
+                                                    args.raw_price_evidence)
+    except ValueError as e:
+        print(f"❌ [{args.date}] {e}", file=sys.stderr)
+        return 2
 
     # account_no: dùng --account-no nếu có, else tự tra secrets/trading_bot_accounts.json
     # theo label — tránh phải nhớ truyền tay mỗi lần gọi (và là điều kiện BẮT BUỘC để lọc
@@ -1189,6 +1222,16 @@ def main():
         if prices is None:
             print(f"❌ [{args.date}] Không lấy được giá BQ Price: {_perr}", file=sys.stderr)
             return 2
+        unknown = sorted(set(price_overrides) - set(tickers))
+        if unknown:
+            print(f"❌ [{args.date}] --raw-price-override cho mã KHÔNG có trong vị thế ngày này: "
+                  f"{unknown} (đang giữ: {tickers})", file=sys.stderr)
+            return 2
+        price_override_notes = []
+        for t, p_new in sorted(price_overrides.items()):
+            price_override_notes.append(f"{t}: BQ Price {prices.get(t)} thay bằng {p_new:,.0f} "
+                                        f"({args.raw_price_evidence.strip()})")
+            prices[t] = p_new
     else:
         prices, _perr = bq_close_prices(tickers, args.date)
         prices = prices or {}
@@ -1450,6 +1493,7 @@ def main():
     mismatched = []
     raw_price_notes = []
     if args.from_raw:
+        raw_price_notes.extend(price_override_notes)
         for t in tickers:
             if t in corp_action_recovered:
                 # KL của mã này ĐÃ được quy ngược ở gate trên bằng qty_multiplier CONFIRMED —
@@ -1584,7 +1628,10 @@ def main():
                        "cum_dividend_excl": f"{cum_div['amount']:.0f}",
                        "nav_is_estimate": "True" if args.from_raw else "False",
                        "nav_source": (f"backfill dnse_raw positions@{positions_ts} balances@{bal['ts']} "
-                                      f"+ BQ Price" if args.from_raw else "live")})
+                                      f"+ BQ Price"
+                                      + ("".join(f" + giá thay {t}={p:.0f}" for t, p in
+                                                 sorted(price_overrides.items())))
+                                      if args.from_raw else "live")})
     hist_rows.sort(key=lambda r: r["date"])
     # `cash` = tiền THẬT của broker TRỪ cổ tức phải thu chưa qua ex-date (cum_dividend_excl),
     # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets luôn đúng trên mọi dòng.

@@ -613,7 +613,18 @@ def build_cases(verdict):
                 ("bản ghi dòng tiền thiếu giờ", {"account": "SpaceX", "inception": SYN_INC, "flows": [
                     {"date": _dtm.date(2026, 7, 3), "amount_vnd": 2e8, "kind": "deposit",
                      "evidence": "x", "timing": None, "time_ict": None}]}, "không có time_ict")):
-            perf, err = _dns.unit_price_performance(kw.pop("account"), "2026-07-03", SYN, **kw)
+            # Ca "không có mốc khởi điểm" đi qua `load_inception(account)` mặc định ⇒ trước đây
+            # đọc data/account_inception.json THẬT (đỏ ở cây không có data/ — G1). Trỏ nó vào
+            # fixture đóng băng: vẫn là đúng nhánh "account không có entry".
+            import functools as _ft
+            import nav_period_returns as _npr
+            _orig_li = _npr.load_inception
+            _npr.load_inception = _ft.partial(
+                _orig_li, inception_path=os.path.join(FIX, "account_inception.json"))
+            try:
+                perf, err = _dns.unit_price_performance(kw.pop("account"), "2026-07-03", SYN, **kw)
+            finally:
+                _npr.load_inception = _orig_li
             if perf is not None or not err or need not in err:
                 f.append(f"{label}: phải trả (None, lỗi có {need!r}), được {(perf, err)!r}")
                 continue

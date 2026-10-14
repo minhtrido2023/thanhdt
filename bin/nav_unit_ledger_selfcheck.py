@@ -3,7 +3,7 @@
 """Selfcheck cho SỔ ĐƠN VỊ QUỸ (`nav_unit_ledger.py`) và các số `nav_period_returns.py` lấy từ nó
 (chính sách "tài khoản = quỹ mở", user duyệt 2026-10-10, bước 1/4).
 
-Phủ: (A) fixture ĐÓNG BĂNG chép từ dữ liệu thật 2026-10-09 ⇒ đúng số đã công bố, và dữ liệu sống;
+Phủ: (A) hai fixture ĐÓNG BĂNG chép từ dữ liệu thật (asof 2026-10-09 và 2026-10-13) ⇒ đúng số đã công bố;
 (B) ca tổng hợp có dòng tiền — luật gán D1 (ngày + giờ + `balance_ts`), đáp án tính tay hoặc dựng
 từ tỉ suất biết trước; (C) sổ trên đĩa chỉ-ghi-thêm, khoá, ghi nguyên tử, từ chối thư mục dữ liệu
 thật; (D) lãi/lỗ VND, tỉ suất gia quyền theo tiền, chặn quy năm; (E) module dòng tiền + cổng 5%;
@@ -165,6 +165,8 @@ def pcts(r):
 # ------------------------------------------------------------------ A. số đã công bố
 PUBLISHED = {"SpaceX": (-1.33, 1.024, 0.519), "ZaloPay": (-4.907, -1.162, -2.01)}   # asof 2026-10-09
 FROZEN_EST = {"SpaceX": 8, "ZaloPay": 6}        # số dòng nav_is_estimate=True trong fixture
+FIXTURE_1013 = BIN / "fixtures" / "nav_unit_ledger_asof_20261013"
+PUBLISHED_1013 = {"SpaceX": (-2.091, -0.771, -0.256), "ZaloPay": (-6.199, -1.359, -3.342)}  # asof 2026-10-13
 
 
 def _no_flow_checks(account, rows, inception, flows, label):
@@ -233,23 +235,33 @@ def part_a_published():
     ok([r["unit_price"] for r in sx[-5:]] != [r["unit_price"] for r in zp[-5:]],
        "§12: sổ SpaceX và ZaloPay phải KHÁC nhau (giống nhau = đọc chung không lọc account)")
 
-    # --- A2. Dữ liệu SỐNG: chỉ bỏ qua khi account ĐÃ CÓ dòng tiền amount != 0 (khi đó
-    # nav1/nav0 không còn là đáp án), và bỏ qua thì IN RÕ.
-    for account in PUBLISHED:
-        rows = npr.load_nav_history(account)
-        inception = npr.load_inception(account)
-        flows = must(lambda: acf.load_flows(account, require_file=True), f"sống {account}: đọc flows")
+    # --- A2. Lịch sử DÀI HƠN, cũng ĐÓNG BĂNG (chép từ data/ ngày 2026-10-14, dòng cuối
+    # 2026-10-13, kèm sổ dòng tiền lúc đó). Trước 2026-10-14 khối này đọc data/ SỐNG ⇒ số
+    # assertion đổi theo mỗi dòng nav_history mới (4716 ↔ 4736 ↔ 4754) và selfcheck đỏ ở cây
+    # không có data/ — sổ đã chốt cần test tất định (arch-review bước 2, G1).
+    # Chỉ bỏ qua khối "nav1/nav0" khi fixture ĐÃ CÓ dòng tiền amount != 0, và bỏ qua thì IN RÕ.
+    inc13 = str(FIXTURE_1013 / "account_inception.json")
+    flows13 = str(FIXTURE_1013 / "account_cash_flows.json")
+    for account, want in PUBLISHED_1013.items():
+        rows = nul.load_nav_history(account, str(FIXTURE_1013))
+        inception = nul.load_inception(account, inc13)
+        flows = must(lambda: acf.load_flows(account, flows_path=flows13, require_file=True),
+                     f"fixture 10-13 {account}: đọc flows")
+        ok(rows[-1][0] == D(2026, 10, 13), f"fixture 10-13 {account}: dòng cuối phải 2026-10-13")
+        got = pcts(must(lambda: npr.compute_period_returns(account, D(2026, 10, 13), rows,
+                                                           inception, flows), f"fixture 10-13 {account}"))
+        ok(got == want, f"fixture 10-13 {account} asof 2026-10-13 phải ra số đã công bố {want}, được {got}")
         f0, _ = npr._inception_baseline(rows, inception)
         real = [f for f in flows if f["amount_vnd"] and f["date"] > f0]
         if real:
-            print(f"BỎ QUA khối 'không dòng tiền ⇒ nav1/nav0' trên dữ liệu SỐNG của {account}: "
+            print(f"BỎ QUA khối 'không dòng tiền ⇒ nav1/nav0' trên fixture 10-13 của {account}: "
                   f"đã có {len(real)} dòng tiền amount != 0 sau {f0} (đầu tiên {real[0]['date']} "
-                  f"{real[0]['amount_vnd']:+,.0f} VND). Neo số công bố vẫn chạy trên fixture.")
+                  f"{real[0]['amount_vnd']:+,.0f} VND). Neo số công bố vẫn chạy trên fixture 10-09.")
             check_invariant(must(lambda: nul.build_ledger(
-                rows, flows, *npr._inception_baseline(rows, inception)), f"sống {account}")[0],
-                f"sống {account}")
+                rows, flows, *npr._inception_baseline(rows, inception)), f"fixture 10-13 {account}")[0],
+                f"fixture 10-13 {account}")
             continue
-        _no_flow_checks(account, rows, inception, flows, f"sống {account}")
+        _no_flow_checks(account, rows, inception, flows, f"fixture 10-13 {account}")
 
 
 # ------------------------------------------------------------------ B. ca tổng hợp có dòng tiền

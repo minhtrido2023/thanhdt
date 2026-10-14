@@ -1,0 +1,5 @@
+{
+  "_doc": "Dòng tiền NGOẠI SINH (nạp/rút vốn) theo account. Nguồn sự thật cho số hạng flow của tỉ suất công bố (mike/bin/nav_period_returns.py) và cho cổng chặn fail-closed trong mike/bin/report_delivery_gate.py. DNSE OpenAPI KHÔNG có sổ nạp/rút (đã quét dnse_api.py + 86 file dnse_raw_*.jsonl 2026-09-27) ⇒ file này do NGƯỜI ghi, mỗi bản ghi PHẢI có bằng chứng. Schema + quy ước timing: mike/bin/account_cash_flows.py. amount_vnd: DƯƠNG=nạp, ÂM=rút. kind: deposit|withdraw|market_only (market_only = khẳng định có bằng chứng rằng bước nhảy NAV ngày đó là biến động thị trường, amount_vnd=0). VỐN KHỞI ĐIỂM KHÔNG ghi ở đây — nó nằm trong data/account_inception.json. CÀI: cp mike/templates/account_cash_flows.json data/account_cash_flows.json (file thiếu = chưa có dòng tiền nào, hợp lệ).",
+  "SpaceX": [],
+  "ZaloPay": []
+}

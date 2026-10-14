@@ -1,0 +1,28 @@
+---
+kind: local-file
+status: NOT-YET-CREATED (công cụ ghi có từ 2026-10-14, nhánh feat/fund-history-lock-20261014; file thật xuất hiện ở lần đính chính đầu tiên Mike áp)
+source: data/execution_logs/nav_history_corrections.jsonl
+group: trading-bot
+role: nhật ký chỉ-thêm của mọi lần SỬA TAY nav_history (đính chính số đã công bố — chính sách quỹ mở điểm 4)
+writer: "mike/bin/fund_restatement.py apply --real-data (chạy TAY, Mike, sau khi user duyệt)"
+---
+
+# data/execution_logs/nav_history_corrections.jsonl
+
+DÙNG CHUNG cho mọi tài khoản — mỗi dòng có `account`; **lọc `account` ở dòng đầu tiên khi đọc (§12)**.
+
+## Là gì
+Mỗi dòng = một lần `fund_restatement.py apply`: `account, applied_at_ict, approved_by, correction_md5,
+impact_report_md5, md5_before, md5_after` (md5 của `nav_history_<account>.csv` trước/sau),
+`changes[]` = `{op: replace|insert|delete, date, old, new, reason, evidence}`.
+
+## Ai ghi / ai đọc
+- Ghi: chỉ `fund_restatement.py apply`. Nhật ký TRƯỚC, nav_history SAU; chạy lại sau khi chết giữa chừng
+  nhận ra bản ghi đang dở (cùng account + correction_md5 + cặp md5) và KHÔNG ghi bản ghi thứ hai.
+- Đọc: chưa có consumer; để người/auditor tra "dòng nav_history này từng bị sửa chưa, ai duyệt, vì sao".
+
+## Bẫy
+- **`daily_nav_snapshot.py --from-raw` và việc chạy lại snapshot KHÔNG ghi vào nhật ký này** — chúng sửa
+  nav_history theo đường riêng. Nhật ký chỉ phủ đính chính đi qua `fund_restatement.py`.
+- File không nằm trong git (`.gitignore` chặn `data/`).
+- Dòng cuối hỏng (JSON cắt cụt) ⇒ `apply` từ chối ghi tiếp, phải kiểm tay.
