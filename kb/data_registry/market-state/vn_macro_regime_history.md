@@ -15,6 +15,7 @@ last_update_4: 2026-09-30 (Bobby — WATCH real-time CD/lãi suất huy động 
 last_update_5: 2026-09-30 (Bobby — REGIME READ real-time BLIND: Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~60/40; 7 lead indicator + điều kiện đổi phân loại; KHÔNG phải episode)
 last_update_6: 2026-10-13 (Bobby — REGIME READ #2 real-time BLIND, rà soát quý kéo sớm: CHƯA phải episode; nền GIỮ Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~55/45; 0/7 chỉ báo ở cột xác nhận; ĐÍNH CHÍNH đọc NPL Q2 (77,7% mức tăng là Sacombank); kênh mới: biên độ trái phiếu cấp 2 Big-4 +1,05 → +2,25/+2,8)
 last_update_7: 2026-10-13 (Bobby — STRUCTURAL EVENT READ, BLIND: FTSE Frontier → Secondary Emerging hiệu lực 2026-09-21 ĐÃ thực thi (nguồn FTSE 06/10/2026); phân loại ĐỔI DẦN nhiều quý, biên độ nhỏ cấp thị trường, CHƯA đổi chế độ tại 13/10; mốc kiểm 19/03, 18/06, 17/09/2027)
+last_update_8: 2026-10-14 (Bobby — SECTOR READ real-time BLIND nhóm CNTT FPT/CMG/ELC: C hỗn hợp ambiguous, nghiêng B (AI giảm phát dịch vụ phần mềm toàn cầu) ở bội số ~55/45, A ở dòng vốn ngoại/lãi suất/JPY; trục 2 EXTERNAL_CYCLE; 5 chỉ báo theo dõi; không phải episode VNINDEX)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1474,6 +1475,52 @@ tiền lệ Saudi/Trung Quốc về tỷ trọng giao dịch cá nhân (nguồn 
 22/08/2026 · aseansc.com.vn báo cáo chuyên đề · theinvestor.vn d19394 (24/06/2026) · vneconomy.vn "bán ròng kỷ lục"
 (03/10/2025) · oxfordbusinessgroup.com Kuwait 2019 · argaam.com 611745 (28/05/2019), 1925291 (30/07/2026) ·
 en.saif.sjtu.edu.cn/faculty-perspectives/details/26 · profit.pakistantoday.com.pk (12/09/2021).
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Định giá lại nhóm CNTT niêm yết VN (FPT/CMG/ELC), 01→14/10/2026 (Bobby, real-time BLIND, đọc 2026-10-14)
+
+**Dispatch bởi Mike.** Caller chỉ đưa hành động giá (3 mã −34…−46%/1 năm, FPT đáy 52 tuần 13/10, khối ngoại
+bán ròng nhiều phiên). KHÔNG có forward-return/luận điểm đầu tư nào được đưa hay dùng. Đây là đọc nguyên
+nhân cấp NGÀNH, không phải episode thị trường — không đưa vào N_effective.
+
+### Phân loại: **C — HỖN HỢP, `ambiguous`; nghiêng B ở phần BỘI SỐ (~55/45), A ở phần DÒNG TIỀN**
+- Trục 1 (gốc): KHÔNG phải mất cân đối vĩ mô nội địa. Gốc = câu chuyện ngoại sinh toàn cầu (AI giảm phát
+  dịch vụ phần mềm) + dòng vốn ngoại rút tập trung. Trục 2: `EXTERNAL_CYCLE` — không có hành động chính
+  sách VN nào giải quyết được; mốc kết thúc do peer toàn cầu/AI quyết định, KHÔNG phải CONTAINABLE.
+
+### Bằng chứng (nguồn · ngày)
+1. **Riêng ngành, không phải cả thị trường** (BQ `tav2_bq.ticker`, Close 14/10/2025→13/10/2026): VNINDEX
+   1.761→1.719 (−2,4%); FPT 82.000→56.300 (−31%), CMG −45%, ELC −39%. P/E FPT 18,3→10,6; CMG 22,8→11,4;
+   ELC 20,6→9,8. Caveat: Close có thể đã điều chỉnh corp-action (FPT thưởng 10:1, giao T10/2026).
+2. **Lợi nhuận FPT CHƯA gãy ⇒ thuần co bội số**: 6T/2026 LNTT +18,1%, DT CNTT nước ngoài +13,4%, Nhật
+   +24,4%, ký mới nước ngoài ~1 tỷ USD +32,3%, 14 HĐ >10 triệu USD (TTTCTT 16/07; MBS 31/07/2026).
+3. **Mốc khởi phát trùng cú sốc toàn cầu**: khối ngoại bán FPT từ đầu T2/2026, 10 phiên ~4.000 tỷ tới 24/02,
+   gắn với plugin Claude Cowork/Anthropic đầu T2 (nhadautu, T2-T3/2026); Nifty IT đỉnh 03/02/2026, −24% tới
+   11/06 (ICICI Direct, T6/2026). FPT bán ròng ngoại >16.000 tỷ YTD, sở hữu ngoại 49% (2022)→28,5%,
+   hở room 22% (mekongasean/baophapluat, T7-T9/2026); toàn thị trường ~53.000 tỷ tới T5 (CafeF).
+4. **Peer: dấu hiệu B có thật nhưng chưa đồng nhất**: Infosys hạ guidance FY27 còn 1,5-3% cc, nêu
+   pricing/AI deflation, organic ~0 (T7/2026). Ngược lại: Accenture Q4 FY26 vượt guidance, kỷ lục 141 HĐ
+   ≥100 triệu USD, FY27 +3-6% LC (01/10/2026); TCS Q2 FY27 TCV 9,6 tỷ USD, AI 3,1 tỷ USD/năm, cp +5,5%
+   (08/10/2026) — sau khi TCS −14,5% trong T9; Cognizant nâng EPS guide (29/07/2026).
+5. **Hợp phần chu kỳ (A)**: lãi vay bình quân mới 9,12% (+1,03pp YTD, BTC 09/10); Fed +25bp 16/09; JPY
+   ~157-158/USD cuối T9, yếu nhất ~40 năm (primexbt 23/09) — gió ngược quy đổi cho doanh thu Nhật.
+   CMG: chi phí lãi vay +48% YoY, nợ vay 3.820 tỷ (BCTC Q2, DNSE); ELC: dự án đầu tư công, lãnh đạo đăng ký
+   bán (T6/2026) ⇒ 2 mã này có thêm yếu tố riêng nội địa, không thuần AI-outsourcing.
+6. Nền vĩ mô VN (REGIME READ #2 ở trên): Loại-1 nhẹ ambiguous; FTSE hiệu lực 21/09 — KHÔNG giải thích được
+   chênh −30pp so với VNINDEX ⇒ yếu tố vĩ mô nội địa chỉ là phụ.
+
+### Chỉ báo theo dõi 1-2 quý (xác nhận B ⇔ xác nhận A)
+| # | Chỉ báo | B (cấu trúc) | A (chu kỳ, đảo ngược) |
+|---|---|---|---|
+| 1 | FPT KQKD 9T (~20/10) + cả năm: ký mới & DT CNTT nước ngoài YoY | ký mới <+10% hoặc DT nước ngoài <+10%, biên gộp offshore giảm | ký mới ≥+20%, DT nước ngoài ≥+13%, biên giữ |
+| 2 | Guidance peer: Infosys Q2 FY27 (~T10), HCL/Cognizant Q3 (cuối T10), Accenture Q1 FY27 (~T12) | Infosys hạ tiếp <1,5% / Accenture về đáy dải 3% + nói pricing | guidance giữ/nâng, bookings ≥ doanh thu (book-to-bill >1) |
+| 3 | Đơn giá: DT/kỹ sư FPT, bình luận pricing của peer, tỷ trọng HĐ fixed-price/outcome | DT/đầu người giảm trong khi headcount tăng | DT/đầu người đi ngang/tăng |
+| 4 | Khối ngoại FPT sau FTSE 21/09 + spread P/E FPT vs Nifty IT/ACN | bán ròng tiếp CÙNG lúc peer toàn cầu cũng co ⇒ nhân tố toàn cầu | peer hồi bội số mà FPT vẫn bị bán ⇒ dòng tiền VN-riêng (A, đảo ngược được) |
+| 5 | JPY + DT Nhật tính theo JPY; lãi vay VN | DT Nhật tính JPY chậm lại (cầu thật) | chỉ DT quy VND chậm, theo JPY vẫn ≥+15% ⇒ thuần tỷ giá |
+
+**Đổi phân loại**: →B clean nếu #1 VÀ #2 cùng cột B trong 2 quý; →A clean nếu #1 cột A và #4 cho thấy FPT co
+riêng khi peer hồi. **Không phải khuyến nghị mua/bán.** Review: sau FPT 9T + Infosys/Accenture (~T12/2026).
 
 ---
 
