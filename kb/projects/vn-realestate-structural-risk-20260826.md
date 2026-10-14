@@ -17,6 +17,8 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
 | Tín dụng BĐS/tổng tín dụng (NHNN, tháng) | >28% | >30% |
 | Vi phạm trái phiếu DN BĐS (12m rolling) | >2% | >5% |
 | Volume giao dịch BĐS HN/HCM | −50% YoY 2 quý liên tiếp | đóng băng |
+| (thêm 14/10, user duyệt) LƯỢNG BÁN căn hộ sơ cấp HN/HCM theo CBRE, so YoY (dùng lượng, KHÔNG dùng tỷ lệ hấp thụ vì cung mới làm méo) | −30% YoY 2 quý liên tiếp (khớp định nghĩa kịch bản B) | chưa đặt |
+| (thêm 14/10, user duyệt) Tài sản nhận gán nợ / TSĐB chờ xử lý trên BCTC quý của NH niêm yết, so QoQ | chưa đặt — ghi mốc đầu từ BCTC Q3 (20/10-14/11), đặt ngưỡng sau khi có ≥2 điểm | chưa đặt |
 | Interbank overnight | >6% đột biến | kéo dài |
 | NPL công bố NHNN | >3% | >5% |
 | VND | mất giá >3%/tháng | >10% + dự trữ <$60 tỷ |
@@ -179,3 +181,4 @@ Nguồn (ngày công bố cụ thể):
 - 2026-09-07: interim tháng 2026-09 = **ESCALATE** (CPI YoY tháng 8/2026 relapse lên 4,89% (vượt lại trần 4,5% sau khi đã xuống 4,45% ở tháng 7), khớp đúng ngưỡng escalate #1 đã chốt với user 2026-08-31.) — chi tiết `/home/trido/thanhdt/WorkingClaude/mike/kb/projects/vn_realestate_monthly_checks/2026-09.md`
 - 2026-10-07: interim tháng 2026-10 = **BINH_THUONG** (CPI T9 5,08% chỉ nối tiếp đợt vượt trần đã escalate kỳ trước, do xăng dầu (chi phí đẩy), còn lạm phát cơ bản giảm xuống 4,45%; lãi suất Big-4 giữ 6,8%; văn bản mới (CV 8509) là nới chứ không siết; không có tin nợ xấu hay rút tiền hàng loạt ngoài chu kỳ.) — chi tiết `/home/trido/thanhdt/WorkingClaude/mike/kb/projects/vn_realestate_monthly_checks/2026-10.md`
 - 2026-10-14: Bobby MACRO UPDATE sau họp BCĐ TW nhà ở/BĐS 13/10 — GIỮ STRUCTURAL_ACCUMULATION, giai đoạn **sớm-giữa → GIỮA**, vẫn AMBIGUOUS; (a) **hạ cấp** luận điểm bảo vệ "thặng dư vãng lai" (9T nhập siêu 19,42 tỷ USD vs xuất siêu 16,87 tỷ cùng kỳ 2025); (b) **TT 50/2026 nới LDR 85%→95% (hiệu lực 01/12) là sự kiện nới lượng mới**; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm — chi tiết `mike/reports/bobby_vn_macro_update_20261014.md`, registry `vn_macro_regime_history.md` mục MACRO UPDATE.
+- 2026-10-14 (b): user duyệt thêm 2 chỉ báo vào bảng lead indicator (lượng bán CBRE YoY; tài sản gán nợ QoQ) theo addendum Bobby `mike/reports/bobby_vn_macro_addendum_20261014b.md` mục 3. "Đấu giá thất bại nhiều lần" chỉ theo dõi định tính. CHƯA làm (Bobby cũng đề xuất, chưa được user duyệt riêng): tách dòng NPL thành NHNN (1,51% @30/6) và 27 NH niêm yết (2,01%); đọc lãi vay mua nhà (~13%, 1 nguồn) cùng kill-switch A.
