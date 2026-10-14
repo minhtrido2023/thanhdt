@@ -4,8 +4,8 @@
   "tier2_from": 0.05,
   "tier3_above": 0.5
  },
- "n_reports_scanned": 63,
- "n_reports_affected": 5,
+ "n_reports_scanned": 114,
+ "n_reports_affected": 6,
  "reports": [
   {
    "report": "SpaceX_ZaloPay_monthly_report_2026-07.md",
@@ -340,6 +340,61 @@
    "affected": true,
    "action": "không đổi",
    "needs_human_look": true
+  },
+  {
+   "report": "eod_trading_report.log.1.gz:899",
+   "kind": "eod",
+   "period": [
+    "2026-08-07",
+    "2026-08-07"
+   ],
+   "headline": {
+    "nav": {
+     "old": 961311265.0,
+     "new": 961311265.0,
+     "dev_pct": 0.0
+    },
+    "day": {
+     "old": 0.12446075582028815,
+     "new": 1.0979342575041517,
+     "dev_pp": 0.9734735016838636
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 961311265.0,
+      "nav_new": 961311265.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.9734735016838636
+     }
+    ],
+    "rows_added_or_removed": 0
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-07",
+    "new": "2026-08-07"
+   },
+   "headline_dev": 0.9734735016838636,
+   "tier_headline": 3,
+   "window_dev": 0.9734735016838636,
+   "tier_window": 3,
+   "affected": true,
+   "printed": {
+    "nav": 961311265.0,
+    "day_pct": 0.12,
+    "new_nav": 961311265.0,
+    "new_day_pct": 1.0979342575041517
+   },
+   "printed_dev": 0.9779342575041517,
+   "tier_printed": 3,
+   "action": "PHÁT HÀNH LẠI báo cáo — cần user duyệt",
+   "needs_human_look": false
   }
  ],
  "unaffected_reports": [
@@ -400,11 +455,80 @@
   "SpaceX_weekly_report_2026-09-21_to_2026-09-25.md",
   "SpaceX_weekly_report_2026-09-28_to_2026-10-02.md",
   "SpaceX_weekly_report_2026-10-05_to_2026-10-09.md",
-  "SpaceX_weekly_report_2026-10-05_to_2026-10-09.md.bak_sent_20261010"
+  "SpaceX_weekly_report_2026-10-05_to_2026-10-09.md.bak_sent_20261010",
+  "eod_trading_report.log:79",
+  "eod_trading_report.log:179",
+  "eod_trading_report.log:289",
+  "eod_trading_report.log:347",
+  "eod_trading_report.log:392",
+  "eod_trading_report.log:448",
+  "eod_trading_report.log:507",
+  "eod_trading_report.log.1.gz:127",
+  "eod_trading_report.log.1.gz:154",
+  "eod_trading_report.log.1.gz:181",
+  "eod_trading_report.log.1.gz:207",
+  "eod_trading_report.log.1.gz:221",
+  "eod_trading_report.log.1.gz:262",
+  "eod_trading_report.log.1.gz:294",
+  "eod_trading_report.log.1.gz:358",
+  "eod_trading_report.log.1.gz:530",
+  "eod_trading_report.log.1.gz:570",
+  "eod_trading_report.log.1.gz:630",
+  "eod_trading_report.log.1.gz:683",
+  "eod_trading_report.log.1.gz:723",
+  "eod_trading_report.log.1.gz:746",
+  "eod_trading_report.log.1.gz:768",
+  "eod_trading_report.log.1.gz:790",
+  "eod_trading_report.log.1.gz:812",
+  "eod_trading_report.log.1.gz:834",
+  "eod_trading_report.log.1.gz:1202",
+  "eod_trading_report.log.1.gz:1261",
+  "eod_trading_report.log.1.gz:1321",
+  "eod_trading_report.log.1.gz:1429",
+  "eod_trading_report.log.1.gz:1475",
+  "eod_trading_report.log.1.gz:1507",
+  "eod_trading_report.log.1.gz:1539",
+  "eod_trading_report.log.1.gz:1571",
+  "eod_trading_report.log.1.gz:1618",
+  "eod_trading_report.log.1.gz:1682",
+  "eod_trading_report.log.1.gz:1730",
+  "eod_trading_report.log.1.gz:1767",
+  "eod_trading_report.log.1.gz:1798",
+  "eod_trading_report.log.1.gz:1878",
+  "eod_trading_report.log.1.gz:1905",
+  "eod_trading_report.log.1.gz:1973",
+  "eod_trading_report.log.1.gz:2002",
+  "eod_trading_report.log.1.gz:2031",
+  "eod_trading_report.log.1.gz:2152",
+  "eod_trading_report.log.1.gz:2282",
+  "eod_trading_report.log.1.gz:2423",
+  "eod_trading_report.log.1.gz:2588",
+  "eod_trading_report.log.1.gz:2631",
+  "eod_trading_report.log.1.gz:2871",
+  "eod_trading_report.log.1.gz:3154"
  ],
  "unparsed_report_names": [],
  "skipped_non_md": [],
+ "scan_scope": {
+  "reports_dir": "/tmp/fl2/app/mike/reports",
+  "n_report_files": 63,
+  "eod_log_glob": "/tmp/fl2/app/mike/logs/eod_trading_report.log*",
+  "eod_log_files": [
+   "eod_trading_report.log",
+   "eod_trading_report.log.1.gz"
+  ],
+  "n_eod_messages": 51,
+  "eod_dates": [
+   "2026-07-08",
+   "2026-10-13"
+  ],
+  "note": "file .md: báo cáo ngày có từ 2026-08-17 (trước đó chỉ trên Discord); tin EOD Discord: chỉ những tin còn trong log eod_trading_report.log* (log xoay vòng); kênh khác KHÔNG quét"
+ },
  "queue_user_decision": [
+  {
+   "report": "eod_trading_report.log.1.gz:899",
+   "why": "bậc 3 — số chính lệch 0.9735, so với số ĐÃ IN lệch 0.9779 (ngưỡng > 0.5): phát hành lại / đính chính cần user duyệt"
+  },
   {
    "report": "SpaceX_ZaloPay_monthly_report_2026-07.md",
    "why": "số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
@@ -434,7 +558,7 @@
   "SpaceX_monthly_report_2026-08.md",
   "SpaceX_weekly_report_2026-07-03.md"
  ],
- "generated_at_ict": "2026-10-14T10:50:33+07:00",
+ "generated_at_ict": "2026-10-14T11:14:23+07:00",
  "old_nav_history_md5": "12ee9b87add3038c7201dd4effb029d9",
  "new_nav_history_md5": "49b8f59fe3398b312bf17f83d4b57d43",
  "correction_md5": "547d4e0222e7b6ba6a86cac675dd6ecd",

@@ -1,21 +1,22 @@
-UNSET | nav_ledger_vault_selfcheck | rc=0 | OK — 199 assertion PASS (nav_ledger_vault_selfcheck.py) 
-UNSET | fund_restatement_selfcheck | rc=0 | OK — 182 assertion PASS (fund_restatement_selfcheck.py) 
-UNSET | nav_unit_ledger_selfcheck | rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
-UNSET | nav_jump_flow_gate_selfcheck | rc=0 |   __RESULT__ cases=25 fails=0 PASS 
-UNSET | daily_nav_snapshot_from_raw_selfcheck | rc=0 |   ✓ (7c) nghỉ lễ 31/08–02/09: T6 28/08 → phiên kế tiếp 03/09 ⇒ KHỚP   ✓ (7d) 31/08 là ngày NGHỈ ⇒ không bao giờ là 'phiên kế t
-UNSET | cash_identity_selfcheck | rc=0 | OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210) 
-UNSET | nav_corpaction_gate_e2e_selfcheck | rc=0 | 
-America/New_York | nav_ledger_vault_selfcheck | rc=0 | OK — 199 assertion PASS (nav_ledger_vault_selfcheck.py) 
-America/New_York | fund_restatement_selfcheck | rc=0 | OK — 182 assertion PASS (fund_restatement_selfcheck.py) 
-America/New_York | nav_unit_ledger_selfcheck | rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
-America/New_York | nav_jump_flow_gate_selfcheck | rc=0 |   __RESULT__ cases=25 fails=0 PASS 
-America/New_York | daily_nav_snapshot_from_raw_selfcheck | rc=0 |   ✓ (7c) nghỉ lễ 31/08–02/09: T6 28/08 → phiên kế tiếp 03/09 ⇒ KHỚP   ✓ (7d) 31/08 là ngày NGHỈ ⇒ không bao giờ là 'phiên kế t
-America/New_York | cash_identity_selfcheck | rc=0 | OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210) 
-America/New_York | nav_corpaction_gate_e2e_selfcheck | rc=0 | 
-Pacific/Kiritimati | nav_ledger_vault_selfcheck | rc=0 | OK — 199 assertion PASS (nav_ledger_vault_selfcheck.py) 
-Pacific/Kiritimati | fund_restatement_selfcheck | rc=0 | OK — 182 assertion PASS (fund_restatement_selfcheck.py) 
-Pacific/Kiritimati | nav_unit_ledger_selfcheck | rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
-Pacific/Kiritimati | nav_jump_flow_gate_selfcheck | rc=0 |   __RESULT__ cases=25 fails=0 PASS 
-Pacific/Kiritimati | daily_nav_snapshot_from_raw_selfcheck | rc=0 |   ✓ (7c) nghỉ lễ 31/08–02/09: T6 28/08 → phiên kế tiếp 03/09 ⇒ KHỚP   ✓ (7d) 31/08 là ngày NGHỈ ⇒ không bao giờ là 'phiên kế t
-Pacific/Kiritimati | cash_identity_selfcheck | rc=0 | OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210) 
-Pacific/Kiritimati | nav_corpaction_gate_e2e_selfcheck | rc=0 | 
+# WC_ROOT=/tmp/fl2/codeonly: code symlink (trading_bot, *.py gốc, mike->worktree), data/ RỖNG, wc_env.sh rỗng. 2026-10-14 11:09:07 ICT
+UNSET | nav_ledger_vault_selfcheck | rc=0 | OK — 214 assertion PASS (nav_ledger_vault_selfcheck.py)
+UNSET | fund_restatement_selfcheck | rc=0 | OK — 195 assertion PASS (fund_restatement_selfcheck.py)
+UNSET | nav_unit_ledger_selfcheck | rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+UNSET | nav_jump_flow_gate_selfcheck | rc=0 |   __RESULT__ cases=25 fails=0
+UNSET | daily_nav_snapshot_from_raw_selfcheck | rc=0 | 83 PASS, 0 FAIL
+UNSET | cash_identity_selfcheck | rc=0 | OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+UNSET | nav_corpaction_gate_e2e_selfcheck | rc=0 | 68 PASS, 0 FAIL
+America/New_York | nav_ledger_vault_selfcheck | rc=0 | OK — 214 assertion PASS (nav_ledger_vault_selfcheck.py)
+America/New_York | fund_restatement_selfcheck | rc=0 | OK — 195 assertion PASS (fund_restatement_selfcheck.py)
+America/New_York | nav_unit_ledger_selfcheck | rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+America/New_York | nav_jump_flow_gate_selfcheck | rc=0 |   __RESULT__ cases=25 fails=0
+America/New_York | daily_nav_snapshot_from_raw_selfcheck | rc=0 | 83 PASS, 0 FAIL
+America/New_York | cash_identity_selfcheck | rc=0 | OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+America/New_York | nav_corpaction_gate_e2e_selfcheck | rc=0 | 68 PASS, 0 FAIL
+Pacific/Kiritimati | nav_ledger_vault_selfcheck | rc=0 | OK — 214 assertion PASS (nav_ledger_vault_selfcheck.py)
+Pacific/Kiritimati | fund_restatement_selfcheck | rc=0 | OK — 195 assertion PASS (fund_restatement_selfcheck.py)
+Pacific/Kiritimati | nav_unit_ledger_selfcheck | rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+Pacific/Kiritimati | nav_jump_flow_gate_selfcheck | rc=0 |   __RESULT__ cases=25 fails=0
+Pacific/Kiritimati | daily_nav_snapshot_from_raw_selfcheck | rc=0 | 83 PASS, 0 FAIL
+Pacific/Kiritimati | cash_identity_selfcheck | rc=0 | OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+Pacific/Kiritimati | nav_corpaction_gate_e2e_selfcheck | rc=0 | 68 PASS, 0 FAIL

@@ -283,7 +283,7 @@ def r3_replace(tmp):
        and imp["old_nav_history_md5"] == md5(w.nav_path.read_bytes()),
        "R3: giờ tạo ICT, md5 nav_history cũ, không gắn sổ khi không truyền --sealed-ledger")
     ok("KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại" in p.stdout and "CẦN USER QUYẾT: 5" in p.stdout
-       and "KHÔNG đo sai số của số đã in" in p.stdout and "chỉ có trên Discord" in p.stdout
+       and "KHÔNG đo sai số của số đã in" in p.stdout and "trước 2026-08-17 chỉ có trên Discord" in p.stdout
        and "⚠ CẦN NGƯỜI XEM" in p.stdout and "KHÔNG đọc được kỳ" in p.stdout
        and "bỏ qua 1 file không phải .md" in p.stdout,
        f"R3: bảng in phải có hàng đợi + cảnh báo tên hỏng + file bỏ qua: {p.stdout[-600:]}")
@@ -947,7 +947,8 @@ def r9_impact_layers(tmp):
        f"R9 B7(iv): lý do trong hàng đợi phải nói báo cáo có in NAV dòng chèn không: {q}")
     doc = fr.__doc__
     ok("KHÔNG đo sai số của số ĐÃ IN" in doc and "TÁC ĐỘNG CỦA THAY ĐỔI NÀY" in doc
-       and "trước 2026-08-17 chỉ tồn tại trên Discord" in doc and "bak_sent" in doc
+       and "có file từ 2026-08-17 (trước đó chỉ trên Discord)" in doc and "bak_sent" in doc
+       and "eod_trading_report.log*" in doc and "SỐ ĐÃ IN" in doc
        and "19:00–21:45" in doc and "restatement_backups" in doc,
        "R9 B7(i): docstring phải nói rõ phép đo là tác động của thay đổi, không phải sai số của số đã in")
 
@@ -1019,6 +1020,117 @@ def r9_impact_layers(tmp):
        and recs[1]["md5_before"] == recs[0]["md5_after"] and recs[1]["changes"][0]["date"] == "2026-07-08",
        f"R9 G26: đính chính thứ hai phải có bản ghi nhật ký RIÊNG (không nhận bản ghi trước là 'dở'): {len(recs)}")
 
+# ------------------------------------------------------------------ R10. tin EOD Discord qua log (arch-review lần 2, R2)
+def r10_eod_logs(tmp):
+    import gzip
+    w = World(tmp, "r10", nav=[x for x in NAV if x[0] != "2026-07-08"])
+    logs = w.dir / "logs"                         # mặc định: thư mục logs/ cạnh --reports-dir
+    logs.mkdir()
+    old_body = ("=== eod_trading_report.sh --account SpaceX ===\n"
+                "📊 **EOD Trading Report — SpaceX (2026-07-07)**\n"
+                "💰 **NAV 2026-07-07: 1,030,000,000 VND** (+15,000,000 VND, +1.48% so với hôm trước)\n"
+                "📊 **EOD Trading Report — ZaloPay (2026-07-09)**\n"
+                "💰 **NAV 2026-07-09: 1,035,000,000 VND** (+0 VND, +0.00% so với hôm trước)\n")
+    with gzip.open(logs / "eod_trading_report.log.1.gz", "wt", encoding="utf-8") as f:
+        f.write(old_body)
+    (logs / "eod_trading_report.log").write_text(
+        "💰 **NAV 2026-07-09: 1,035,000,000 VND** (+1 VND, +0.10% so với hôm trước)\n"     # trước mọi header
+        "📊 **EOD Trading Report — SpaceX (2026-07-09)**\n"
+        "💰 **NAV 2026-07-09: 1,035,000,000 VND** (+5,000,000 VND, +0.49% so với hôm trước)\n"
+        "📊 **EOD Trading Report — SpaceX (2026-07-10)**\n"
+        "💰 **NAV 2026-07-10: 1,050,000,000 VND** (+15,000,000 VND, +1.45% so với hôm trước)\n"
+        # Tiêu đề MỚI (không còn 'EOD Trading Report') sau một khối ZaloPay: phải gán theo dòng lệnh.
+        "=== /x/eod_trading_report.sh --account ZaloPay ===\n"
+        "📊 **EOD Trading Report — ZaloPay (2026-07-13)**\n"
+        "💰 **NAV 2026-07-13: 1,060,000,000 VND** (+0 VND, +0.95% so với hôm trước)\n"
+        "=== /x/eod_trading_report.sh --account SpaceX ===\n"
+        "📈 **Báo cáo giao dịch ngày — SpaceX (2026-07-13)**\n"
+        "💰 **NAV 2026-07-13: 1,060,000,000 VND** (+10,000,000 VND, +0.95% so với hôm trước)\n"
+        "🔴 NAV 2026-07-14 (SpaceX) TỰ CHẶN KHÔNG ĐĂNG: 1,065,000,000 VND (biến động ...)\n"
+        # Tiêu đề chưa biết ⇒ chỉ dòng lệnh --account cho biết khối của ai.
+        "=== /x/eod_trading_report.sh --account ZaloPay ===\n"
+        "📊 **EOD Trading Report — ZaloPay (2026-07-14)**\n"
+        "💰 **NAV 2026-07-14: 1,065,000,000 VND** (+0 VND, +0.47% so với hôm trước)\n"
+        "=== /x/eod_trading_report.sh --account SpaceX ===\n"
+        "📉 **Tiêu đề khác — SpaceX (2026-07-14)**\n"
+        "💰 **NAV 2026-07-14: 1,065,000,000 VND** (+5,000,000 VND, +0.47% so với hôm trước)\n",
+        encoding="utf-8")
+    (logs / "khac.log").write_text("📊 **EOD Trading Report — SpaceX (2026-07-09)**\n"
+                                   "💰 **NAV 2026-07-09: 1,035,000,000 VND** (+0 VND, +9.99% so với hôm trước)\n",
+                                   encoding="utf-8")
+    msgs, files = fr.list_eod_messages(str(logs / fr.EOD_LOG_GLOB), "SpaceX")
+    ok([m["name"] for m in msgs] == ["eod_trading_report.log:3", "eod_trading_report.log:5",
+                                     "eod_trading_report.log:11", "eod_trading_report.log:18",
+                                     "eod_trading_report.log.1.gz:3"]
+       and [os.path.basename(x) for x in files] == ["eod_trading_report.log", "eod_trading_report.log.1.gz"],
+       f"R10: chỉ tin của SpaceX (theo header gần nhất), đọc cả .gz, bỏ dòng trước mọi header: {[m['name'] for m in msgs]}")
+    ok(msgs[0]["printed"] == {"nav": 1_035_000_000.0, "day_pct": 0.49} and msgs[0]["end"] == D(2026, 7, 9)
+       and msgs[0]["kind"] == "eod", f"R10: đọc đúng NAV + % đã in: {msgs[0]}")
+    z, _ = fr.list_eod_messages(str(logs / fr.EOD_LOG_GLOB), "ZaloPay")
+    ok([m["name"] for m in z] == ["eod_trading_report.log:8", "eod_trading_report.log:15",
+                                  "eod_trading_report.log.1.gz:5"],
+       f"R10 §12: phía ZaloPay riêng — khối SpaceX tiêu đề mới KHÔNG bị gán nhầm sang ZaloPay: {[m['name'] for m in z]}")
+    # Tiêu đề MỚI không có dòng lệnh `--account` đi trước: chính tiêu đề phải chuyển tài khoản.
+    only_title = w.dir / "only_title.log"
+    only_title.write_text("📊 **EOD Trading Report — ZaloPay (2026-07-13)**\n"
+                          "💰 **NAV 2026-07-13: 1,060,000,000 VND** (+0 VND, +0.95% so với hôm trước)\n"
+                          "📈 **Báo cáo giao dịch ngày — SpaceX (2026-07-13)**\n"
+                          "💰 **NAV 2026-07-13: 1,060,000,000 VND** (+10,000,000 VND, +0.95% so với hôm trước)\n",
+                          encoding="utf-8")
+    ok([m["name"] for m in fr.list_eod_messages(str(only_title), "SpaceX")[0]] == ["only_title.log:4"]
+       and [m["name"] for m in fr.list_eod_messages(str(only_title), "ZaloPay")[0]] == ["only_title.log:2"],
+       "R10: tiêu đề 'Báo cáo giao dịch ngày — X' tự nó phải chuyển tài khoản")
+
+    # Chèn dòng 07-08 (NAV 1040) ⇒ tin EOD 07-09 "+0,49% so với hôm trước" giờ là 1035/1040 − 1.
+    ins = {"op": "insert", "date": "2026-07-08", "row": row("2026-07-08", 1040), "reason": "thiếu dòng",
+           "evidence": "dnse_raw"}
+    p, imp, _ = w.impact(w.correction([ins]))
+    rep = by_name(imp) if imp else {}
+    e9 = rep.get("eod_trading_report.log:3", {})
+    new_day = (1035 / 1040 - 1) * 100
+    ok(p.returncode == 0 and e9.get("kind") == "eod" and set(e9["headline"]) == {"nav", "day"}
+       and abs(e9["headline"]["day"]["dev_pp"] - (new_day - (1035 / 1030 - 1) * 100)) < 1e-9
+       and e9["tier_headline"] == 3,
+       f"R10: tin EOD 07-09 — 'so với hôm trước' đổi mốc ⇒ bậc 3: {e9.get('headline')} {p.stderr[-200:]}")
+    ok(abs(e9["printed_dev"] - abs(new_day - 0.49)) < 1e-9 and e9["tier_printed"] == 3
+       and e9["printed"]["day_pct"] == 0.49 and abs(e9["printed"]["new_day_pct"] - new_day) < 1e-9,
+       f"R10: so với SỐ ĐÃ IN (+0,49%) phải đo đúng: {e9.get('printed')} {e9.get('printed_dev')}")
+    q = {x["report"]: x["why"] for x in imp["queue_user_decision"]}
+    ok("eod_trading_report.log:3" in q and "so với số ĐÃ IN lệch" in q["eod_trading_report.log:3"]
+       and "eod_trading_report.log:5" in imp["unaffected_reports"]
+       and "eod_trading_report.log.1.gz:3" in imp["unaffected_reports"],
+       f"R10: tin EOD bậc 3 vào hàng đợi user; tin ngày khác không bị kéo vào: {sorted(q)}")
+    sc = imp["scan_scope"]
+    ok(sc["n_eod_messages"] == 5 and sc["eod_log_files"] == ["eod_trading_report.log", "eod_trading_report.log.1.gz"]
+       and sc["eod_dates"] == ["2026-07-07", "2026-07-14"] and sc["n_report_files"] == 9
+       and sc["eod_log_glob"].endswith("logs/eod_trading_report.log*") and "log xoay vòng" in sc["note"]
+       and "phạm vi quét: 9 file báo cáo" in p.stdout and "5 tin EOD từ 2 log" in p.stdout
+       and "tin EOD đã in NAV 1,035,000,000 (+0.49%)" in p.stdout,
+       f"R10: đầu ra phải ghi rõ phạm vi quét: {sc} {p.stdout[-400:]}")
+    # Tin EOD lệch số in ≥ bậc 2 ⇒ quyết định theo bậc LỚN NHẤT (số chính, số in).
+    ok("eod_trading_report.log:3" not in imp["fix_forward_only"] and "eod_trading_report.log:3" not in imp["note_next_report"],
+       "R10: tin bậc 3 không được xếp 'chỉ sửa từ nay'")
+    # --eod-logs '' ⇒ không quét log; trỏ glob khác ⇒ quét đúng glob đó.
+    p, imp2, _ = w.impact(w.correction([ins], "c2.json"), out="i2.json", extra=("--eod-logs", ""))
+    ok(p.returncode == 0 and imp2["scan_scope"]["n_eod_messages"] == 0 and imp2["scan_scope"]["eod_log_glob"] is None
+       and not any(r["kind"] == "eod" for r in imp2["reports"]), "R10: --eod-logs '' ⇒ không quét log")
+    p, imp3, _ = w.impact(w.correction([ins], "c3.json"), out="i3.json", extra=("--eod-logs", str(logs / "khac.log")))
+    ok(p.returncode == 0 and imp3["scan_scope"]["n_eod_messages"] == 1
+       and by_name(imp3)["khac.log:2"]["tier_printed"] == 3, "R10: --eod-logs trỏ glob tuỳ chọn")
+    ok(fr.HEADLINE_KEYS["eod"] == ("day",), "R10: số chính của tin EOD = NAV + so với hôm trước")
+    # Số chính chỉ lệch bậc 2 nhưng số ĐÃ IN lệch bậc 3 ⇒ quyết theo bậc lớn nhất (vào hàng đợi user).
+    w2 = World(tmp, "r10_printed")
+    (w2.dir / "logs").mkdir()
+    (w2.dir / "logs" / "eod_trading_report.log").write_text(
+        "📊 **EOD Trading Report — SpaceX (2026-07-10)**\n"
+        "💰 **NAV 2026-07-10: 1,050,000,000 VND** (+15,000,000 VND, +3.00% so với hôm trước)\n", encoding="utf-8")
+    p, imp, _ = w2.impact(w2.correction([replace_item("2026-07-10", 1050, 1049)]))
+    e = by_name(imp).get("eod_trading_report.log:2", {}) if imp else {}
+    q = {x["report"]: x["why"] for x in imp["queue_user_decision"]} if imp else {}
+    ok(p.returncode == 0 and e.get("tier_headline") == 2 and e.get("tier_printed") == 3
+       and "bậc 3" in q.get("eod_trading_report.log:2", "") and "eod_trading_report.log:2" not in imp["note_next_report"],
+       f"R10: bậc 2 theo số chính + bậc 3 theo số in ⇒ hàng đợi user: {e.get('tier_headline')} {e.get('tier_printed')} {q}")
+
 
 def main():
     with tempfile.TemporaryDirectory(prefix="fund_restatement_selfcheck_") as tmp:
@@ -1034,6 +1146,7 @@ def main():
         r9_apply_window(tmp)
         r9_backup(tmp)
         r9_impact_layers(tmp)
+        r10_eod_logs(tmp)
     if FAILS:
         print(f"FAIL — {len(FAILS)}/{N} assertion hỏng (fund_restatement_selfcheck.py)")
         return 1

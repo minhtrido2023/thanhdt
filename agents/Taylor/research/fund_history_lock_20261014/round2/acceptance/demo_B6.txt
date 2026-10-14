@@ -4,7 +4,7 @@ $ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agen
 nav_unit_ledger T: 3 dòng dựng được (2026-07-01 → 2026-07-03), 0 dòng nav_is_estimate, 0 ngày có dòng tiền
 sổ đã chốt: /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv — 3 dòng, tới 2026-07-03; vừa THÊM 3 dòng
 kho bất biến: manifest #1 (seal) md5 4fafa2a578feb7bb1985d21c3c118087 — 3 dòng tới 2026-07-03, giá đơn vị cuối 10200.0000; dòng chụp trước đóng cửa đã nhận: 2026-07-02
-SEAL_MD5 T 4fafa2a578feb7bb1985d21c3c118087 3d5e62ef95fc764eccfc53445d8666f3
+SEAL_MD5 T 4fafa2a578feb7bb1985d21c3c118087 15798805f493f46ae3037c14bfd1fbd5
 date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
 rc=0
 $ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/bin/fund_restatement.py impact --account T --old-nav-dir /tmp/fl2/demo_b6/old --new-nav-dir /tmp/fl2/demo_b6 --inception-path /tmp/fl2/demo_b6/inc.json --flows-path /tmp/fl2/demo_b6/flows.json --reports-dir /tmp/fl2/demo_b6/rep --sealed-ledger /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv --out /tmp/fl2/demo_b6/imp.json
@@ -15,9 +15,10 @@ báo cáo                                                     số chính bậc 
 -- CẦN USER QUYẾT: 0
 -- ghi chú ở báo cáo kế tiếp (bậc 2): 0
 -- chỉ sửa từ nay (bậc 0–1): 0
-Phép đo = tác động của THAY ĐỔI này (dữ liệu cũ tính lại → dữ liệu mới tính lại); KHÔNG đo sai số của số đã in. Báo cáo ngày trước 2026-08-17 chỉ có trên Discord: không quét.
+-- phạm vi quét: 0 file báo cáo trong /tmp/fl2/demo_b6/rep; 0 tin EOD từ 0 log (/tmp/fl2/demo_b6/logs/eod_trading_report.log*)
+Phép đo = tác động của THAY ĐỔI này (dữ liệu cũ tính lại → dữ liệu mới tính lại); KHÔNG đo sai số của số đã in (trừ tin EOD: có so thêm với số in). Báo cáo ngày trước 2026-08-17 chỉ có trên Discord: chỉ quét được phần còn trong log EOD.
 Công cụ này KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại báo cáo nào.
-báo cáo tác động: /tmp/fl2/demo_b6/imp.json (md5 f9ed43b21fdcfc2316250fa35fb086dd)
+báo cáo tác động: /tmp/fl2/demo_b6/imp.json (md5 a2a2486e17e9e4320076ccfb1c21383b)
 rc=0
 ## restate KHÔNG nhận lại ⇒ phải bị CHẶN (lời nhận cũ là của dòng NAV 1010 lúc 10:00)
 $ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/bin/nav_unit_ledger.py --account T --nav-dir /tmp/fl2/demo_b6 --inception-path /tmp/fl2/demo_b6/inc.json --flows-path /tmp/fl2/demo_b6/flows.json --ledger-dir /tmp/fl2/demo_b6/L --tail 0 --restate --impact-report /tmp/fl2/demo_b6/imp.json --reason x --approved-by x
@@ -34,10 +35,10 @@ $ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agen
 nav_unit_ledger T: 3 dòng dựng được (2026-07-01 → 2026-07-03), 0 dòng nav_is_estimate, 0 ngày có dòng tiền
 sổ đã chốt: /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv — 3 dòng, tới 2026-07-03; khớp chuỗi dựng lại
 kho bất biến: manifest #2 (restate) md5 d063a8fc02ffe6c0707652f5db5fbbb8 — 3 dòng tới 2026-07-03, giá đơn vị cuối 10200.0000; dòng chụp trước đóng cửa đã nhận: 2026-07-02
-SEAL_MD5 T d063a8fc02ffe6c0707652f5db5fbbb8 b27c17f789d9f534bbfcbe8e6b807807
+SEAL_MD5 T d063a8fc02ffe6c0707652f5db5fbbb8 5611ec39a334eaeaa51a01ab6d6c2ada
 ĐÃ ĐÍNH CHÍNH: 2 chỗ lệch; sổ cũ (md5 4fafa2a578feb7bb1985d21c3c118087) lưu ở nav_unit_ledger_T.csv.superseded.2.4fafa2a578fe.csv; người duyệt x
 date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
 rc=0
 $ tail -1 /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv.manifest.jsonl
-{"accepted_preclose": {"2026-07-02": {"balance_ts": "2026-07-02T11:00:00", "nav": 1005.0, "reason": "rà lại: NAV 1005 lúc 11:00"}}, "account": "T", "approved_by": "x", "archived_as": "nav_unit_ledger_T.csv.superseded.2.4fafa2a578fe.csv", "cash_flows_md5": "1af75e9c2ac6c1fd0adcd82e7a5f7c35", "diffs": ["2026-07-02 nav: đã chốt 1,010.00 → dựng lại 1,005.00 (lệch -5.00 VND)", "2026-07-02 unit_price: đã chốt 10100.0 → dựng lại 10050.0 (lệch -50.000000 = -0.495050%)"], "first_date": "2026-07-01", "impact_report_md5": "f9ed43b21fdcfc2316250fa35fb086dd", "inception_md5": "2015700ee5279bef0dddc87f4e22dc04", "kind": "restate", "last_date": "2026-07-03", "last_unit_price": "10200.0", "md5": "d063a8fc02ffe6c0707652f5db5fbbb8", "md5_before": "4fafa2a578feb7bb1985d21c3c118087", "n_diffs": 2, "nav_history_md5": "2a35879c3a758182c2a1853522af8d82", "reason": "x", "rows_added": 0, "rows_before": 3, "rows_total": 3, "sealed_at_ict": "2026-10-14T10:51:06+07:00", "seq": 2, "tool": "nav_unit_ledger.py"}
+{"accepted_preclose": {"2026-07-02": {"balance_ts": "2026-07-02T11:00:00", "nav": 1005.0, "reason": "rà lại: NAV 1005 lúc 11:00"}}, "account": "T", "approved_by": "x", "archived_as": "nav_unit_ledger_T.csv.superseded.2.4fafa2a578fe.csv", "cash_flows_md5": "1af75e9c2ac6c1fd0adcd82e7a5f7c35", "diffs": ["2026-07-02 nav: đã chốt 1,010.00 → dựng lại 1,005.00 (lệch -5.00 VND)", "2026-07-02 unit_price: đã chốt 10100.0 → dựng lại 10050.0 (lệch -50.000000 = -0.495050%)"], "first_date": "2026-07-01", "impact_report_md5": "a2a2486e17e9e4320076ccfb1c21383b", "inception_md5": "2015700ee5279bef0dddc87f4e22dc04", "kind": "restate", "last_date": "2026-07-03", "last_unit_price": "10200.0", "md5": "d063a8fc02ffe6c0707652f5db5fbbb8", "md5_before": "4fafa2a578feb7bb1985d21c3c118087", "n_diffs": 2, "nav_history_md5": "2a35879c3a758182c2a1853522af8d82", "reason": "x", "rows_added": 0, "rows_before": 3, "rows_total": 3, "sealed_at_ict": "2026-10-14T11:14:57+07:00", "seq": 2, "tool": "nav_unit_ledger.py"}
 rc=0

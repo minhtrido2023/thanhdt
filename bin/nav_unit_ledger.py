@@ -36,8 +36,10 @@ HAI CHẾ ĐỘ CHỐT (bước 3 của chính sách, 2026-10-14):
   · KHO BẤT BIẾN (coding_guidelines §8c) — BẮT BUỘC với thư mục dữ liệu thật, tự bật khi thư mục
     đã có manifest, hoặc `--immutable`: mỗi lần chốt ghi một bản ghi vào
     `nav_unit_ledger_{account}.csv.manifest.jsonl` (chỉ-thêm; md5 trước/sau nối thành chuỗi).
-    Mọi lần đọc/chốt kiểm md5 file == md5 của bản ghi cuối ⇒ cắt bớt dòng cuối, xoá file, sửa tay
-    đều bị bắt (rc=2) — thứ mà so từng dòng không thấy. Chốt mà không có dòng mới (md5 trùng) ⇒
+    Mọi lần đọc/chốt kiểm md5 file == md5 của bản ghi cuối ⇒ cắt bớt dòng cuối, xoá file sổ, sửa tay
+    đều bị bắt (rc=2) — thứ mà so từng dòng không thấy. ⚠️ Xoá CẢ file sổ lẫn manifest, hoặc hoàn tác
+    đồng thời file + đuôi manifest, thì trong kho KHÔNG còn gì để so (cả hai ngoài git) ⇒ chỉ bắt được
+    bằng MỐC NGOÀI KHO: `--verify-anchor "SEAL_MD5 …"` (dòng in ra ở mỗi lần chốt, Mike post lên bus). Chốt mà không có dòng mới (md5 trùng) ⇒
     rc=2, không có `--force`. Cổng trước khi chốt: chỉ chốt ngày TRƯỚC hôm nay (ICT — dòng hôm
     nay còn bị `daily_nav_snapshot.py` ghi đè); không thiếu dòng của phiên nào trong đoạn chốt;
     `balance_ts` đọc được; dòng chụp TRƯỚC giờ đóng cửa của chính phiên nó phải được nhận tường
@@ -498,6 +500,44 @@ def _vault_state(path: str, ledger: list, write: bool) -> tuple:
     return old, _parse_sealed(old.decode("utf-8"), path), manifest, resumed
 
 
+class AnchorError(ValueError):
+    """Sổ trên đĩa không còn khớp một mốc ngoài kho (`SEAL_MD5 …` đã post lên bus)."""
+
+
+def verify_anchor(path: str, account: str, anchor: str) -> dict:
+    """Đối chiếu sổ `path` với MỘT mốc ngoài kho `SEAL_MD5 <account> <md5 sổ> <md5 manifest>` (in ra
+    ở lần chốt/đính chính đó). Đạt khi manifest hiện tại có một PHẦN ĐẦU (cắt ở biên dòng) mang đúng
+    md5 manifest của mốc — tức lịch sử tới mốc còn nguyên, chỉ được nối thêm — và bản ghi cuối của
+    phần đầu đó mang đúng md5 sổ của mốc. Mất file/manifest, cắt đuôi manifest, hoàn tác đồng thời file
+    + manifest ⇒ AnchorError. Trả {seq, md5} của bản ghi ứng với mốc."""
+    parts = str(anchor or "").split()
+    if len(parts) != 4 or parts[0] != "SEAL_MD5":
+        raise AnchorError(f"mốc {anchor!r} không đúng dạng 'SEAL_MD5 <account> <md5 sổ> <md5 manifest>'")
+    _, who, want_ledger, want_manifest = parts
+    if who != account:
+        raise AnchorError(f"mốc {anchor!r} là của tài khoản {who!r}, đang đối chiếu {account!r} (§12)")
+    data = _read_bytes(manifest_path(path))
+    if not data:
+        raise AnchorError(
+            f"{manifest_path(path)} {'KHÔNG tồn tại' if data is None else 'rỗng'} nhưng mốc ngoài kho "
+            f"{anchor!r} nói sổ {account} ĐÃ chốt ⇒ sổ/manifest đã bị xoá. KHÔNG chốt lại đè lên; "
+            f"khôi phục từ bản sao lưu rồi đối chiếu lại.")
+    lines = data.splitlines(keepends=True)
+    for k in range(1, len(lines) + 1):
+        head = b"".join(lines[:k])
+        if _md5(head) == want_manifest:
+            rec = json.loads(lines[k - 1])
+            if rec.get("md5") != want_ledger:
+                raise AnchorError(
+                    f"mốc {anchor!r}: phần đầu manifest khớp md5 nhưng bản ghi #{rec.get('seq')} mang md5 "
+                    f"sổ {rec.get('md5')} ≠ {want_ledger} — mốc tự mâu thuẫn, kiểm bằng tay.")
+            return {"seq": rec.get("seq"), "md5": rec.get("md5")}
+    raise AnchorError(
+        f"{manifest_path(path)} ({len(lines)} bản ghi, md5 {_md5(data)}) KHÔNG còn chứa nguyên vẹn lịch "
+        f"sử tới mốc ngoài kho {anchor!r}: không phần đầu nào mang md5 {want_manifest} ⇒ manifest bị "
+        f"cắt/sửa/thay (kể cả khi chuỗi md5 bên trong vẫn nối đúng). KHÔNG ghi gì; kiểm bằng tay.")
+
+
 def _row_capture(row: dict):
     """(lúc chụp số dư | None, phiên đóng cửa gần nhất lúc chụp | None) của một dòng sổ."""
     ts = row.get("balance_ts")
@@ -806,6 +846,9 @@ def main() -> int:
                     help="ĐÍNH CHÍNH sổ kho bất biến đã chốt bằng chuỗi dựng lại (cần "
                          "--impact-report, --reason, --approved-by)")
     ap.add_argument("--impact-report", help="đầu ra JSON của fund_restatement.py impact")
+    ap.add_argument("--verify-anchor", action="append", metavar="'SEAL_MD5 TK MD5 MD5'",
+                    help="chỉ-đọc: đối chiếu sổ ở --ledger-dir với mốc ngoài kho (dòng SEAL_MD5 đã post "
+                         "lên bus); lặp được; lệch ⇒ rc=2")
     ap.add_argument("--reason")
     ap.add_argument("--approved-by")
     args = ap.parse_args()
@@ -813,6 +856,8 @@ def main() -> int:
         ap.error("--seal và --restate không đi cùng nhau")
     if args.restate and not args.impact_report:
         ap.error("--restate cần --impact-report")
+    if args.verify_anchor and (not args.ledger_dir or args.seal or args.restate):
+        ap.error("--verify-anchor chỉ đi với --ledger-dir, không cùng --seal/--restate")
 
     path = ledger_path(args.account, args.ledger_dir or NAV_HISTORY_DIR)
     flows_path = args.flows_path or _acf.FLOWS_PATH
@@ -833,9 +878,13 @@ def main() -> int:
                                accept_preclose=accept, meta=meta)
             sealed, added = seal(path, ledger, write=False)
         elif args.seal or args.ledger_dir:
+            # Mốc ngoài kho TRƯỚC: khi sổ + manifest đã bị xoá, đối chiếu thường thấy "0 dòng, khớp".
+            anchored = [(a, verify_anchor(path, args.account, a)) for a in args.verify_anchor or []]
             sealed, added = seal(path, ledger, asof, write=args.seal,
                                  immutable=True if args.immutable else None,
                                  real_data=args.real_data, accept_preclose=accept, meta=meta)
+            for a, rec in anchored:
+                print(f"mốc ngoài kho KHỚP: {a} ⇒ manifest #{rec['seq']} còn nguyên, chỉ được nối thêm")
     except SealRefused as e:
         print(f"nav_unit_ledger ({args.account}): {e}", file=sys.stderr)
         return 3
@@ -845,7 +894,7 @@ def main() -> int:
               f"fund_restatement.py impact … --out rồi nav_unit_ledger.py --restate.",
               file=sys.stderr)
         return 2
-    except (SealIntegrityError, NothingToSeal, SealGateError) as e:
+    except (SealIntegrityError, NothingToSeal, SealGateError, AnchorError) as e:
         print(f"TỪ CHỐI nav_unit_ledger ({args.account}) [{type(e).__name__}]: {e}\n  ⇒ KHÔNG ghi "
               f"gì vào sổ.", file=sys.stderr)
         return 2

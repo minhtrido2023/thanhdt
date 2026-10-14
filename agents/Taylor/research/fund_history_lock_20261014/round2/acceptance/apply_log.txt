@@ -17,8 +17,8 @@ $ sb <app> fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execu
 ĐÃ ÁP 2 đính chính vào <app>/data/execution_logs/nav_history_SpaceX.csv: md5 12ee9b87add3038c7201dd4effb029d9 → 49b8f59fe3398b312bf17f83d4b57d43; nhật ký <app>/data/execution_logs/nav_history_corrections.jsonl
    replace 2026-07-02: nav 994733747 → 990304455
    insert 2026-08-06: nav — → 950871323
-sao lưu trước khi áp: <app>/data/execution_logs/restatement_backups/SpaceX_20261014T105033_12ee9b87add3038c7201dd4effb029d9.csv (md5 12ee9b87add3038c7201dd4effb029d9)
-ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp <app>/data/execution_logs/restatement_backups/SpaceX_20261014T105033_12ee9b87add3038c7201dd4effb029d9.csv <app>/data/execution_logs/nav_history_SpaceX.csv rồi áp một đính chính NGƯỢC để nhật ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).
+sao lưu trước khi áp: <app>/data/execution_logs/restatement_backups/SpaceX_20261014T111423_12ee9b87add3038c7201dd4effb029d9.csv (md5 12ee9b87add3038c7201dd4effb029d9)
+ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp <app>/data/execution_logs/restatement_backups/SpaceX_20261014T111423_12ee9b87add3038c7201dd4effb029d9.csv <app>/data/execution_logs/nav_history_SpaceX.csv rồi áp một đính chính NGƯỢC để nhật ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).
 rc=0
 ## áp lần hai ⇒ ĐÃ ÁP từ trước
 $ sb <app> fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/round2/acceptance/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
@@ -42,8 +42,8 @@ rc=2
 $ sb <app> fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
 ĐÃ ÁP 1 đính chính vào <app>/data/execution_logs/nav_history_ZaloPay.csv: md5 f8b6a9787e5b323395b888c360065843 → 0ee74a1587b568deaba172b75a120d37; nhật ký <app>/data/execution_logs/nav_history_corrections.jsonl
    insert 2026-08-06: nav — → 937070077
-sao lưu trước khi áp: <app>/data/execution_logs/restatement_backups/ZaloPay_20261014T105034_f8b6a9787e5b323395b888c360065843.csv (md5 f8b6a9787e5b323395b888c360065843)
-ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp <app>/data/execution_logs/restatement_backups/ZaloPay_20261014T105034_f8b6a9787e5b323395b888c360065843.csv <app>/data/execution_logs/nav_history_ZaloPay.csv rồi áp một đính chính NGƯỢC để nhật ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).
+sao lưu trước khi áp: <app>/data/execution_logs/restatement_backups/ZaloPay_20261014T111424_f8b6a9787e5b323395b888c360065843.csv (md5 f8b6a9787e5b323395b888c360065843)
+ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp <app>/data/execution_logs/restatement_backups/ZaloPay_20261014T111424_f8b6a9787e5b323395b888c360065843.csv <app>/data/execution_logs/nav_history_ZaloPay.csv rồi áp một đính chính NGƯỢC để nhật ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).
 rc=0
 ## áp lần hai ⇒ ĐÃ ÁP từ trước
 $ sb <app> fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data

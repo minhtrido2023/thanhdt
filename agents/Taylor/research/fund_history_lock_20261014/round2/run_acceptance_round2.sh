@@ -15,6 +15,7 @@ mkdir -p "$OUT"; rm -f "$OUT"/*
 sb() { local S="$1"; shift; local P="$1"; shift; WC_ROOT="$S" TZ=Asia/Ho_Chi_Minh python3 "$S/mike/bin/$P" "$@"; }
 run() { echo "\$ $*" | sed "s#$BASE#<base>#g; s#$APP#<app>#g; s#$R#<research>#g"; "$@" 2>&1 | sed "s#$BASE#<base>#g; s#$APP#<app>#g; s#$R#<research>#g"; echo "rc=${PIPESTATUS[0]}"; }
 "$OLD/mk_sandbox.sh" "$BASE" "$WT" >/dev/null; "$OLD/mk_sandbox.sh" "$APP" "$WT" >/dev/null
+for S in "$BASE" "$APP"; do mkdir -p "$S/mike/logs"; cp -p "$REAL"/mike/logs/eod_trading_report.log* "$S/mike/logs/"; done   # R2: tin EOD Discord
 md5sum "$REAL"/data/execution_logs/nav_history_{SpaceX,ZaloPay}.csv > "$OUT/real_md5_before.txt"
 
 # ---- 1. 18 số công bố: dữ liệu THẬT (chỉ đọc) + code NHÁNH; bản sao chưa sửa; bản sao đã áp

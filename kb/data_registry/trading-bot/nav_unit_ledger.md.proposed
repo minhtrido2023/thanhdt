@@ -62,8 +62,13 @@ Lịch sử đổi có chủ đích (sửa nav_history, backfill, khai dòng ti�
 - **Sau MỖI lần chốt/đính chính thật** (Mike): post dòng `SEAL_MD5 …` mà lệnh in ra lên bus —
   `append_event.sh Mike finding "nav-unit-ledger-seal-<account>-<ngày>" '{"seal_md5":"SEAL_MD5 …"}'`. Đó là
   mốc NGOÀI kho: ai đó hoàn tác đồng thời file sổ + đuôi manifest (cả hai cùng thư mục, ngoài git) thì
-  chuỗi md5 trong manifest vẫn nối đúng, chỉ so với mốc trên bus mới thấy. Kiểm: `md5sum
-  nav_unit_ledger_<account>.csv{,.manifest.jsonl}` so với event mới nhất cùng topic.
+  chuỗi md5 trong manifest vẫn nối đúng, chỉ so với mốc trên bus mới thấy. Kiểm bằng lệnh chỉ-đọc
+  `nav_unit_ledger.py --account <TK> --ledger-dir data/execution_logs --verify-anchor "SEAL_MD5 …"` (lặp
+  được cho nhiều mốc): rc=0 khi manifest hiện tại có một PHẦN ĐẦU mang đúng md5 manifest của mốc (lịch sử
+  tới mốc còn nguyên, chỉ được nối thêm) và bản ghi đó mang đúng md5 sổ; xoá cả sổ + manifest, cắt đuôi,
+  hoàn tác đồng thời file + manifest ⇒ rc=2 `AnchorError`. Không có `--verify-anchor` thì xoá CẢ HAI file
+  chỉ hiện "0 dòng, khớp" (rc=0) — giới hạn đã biết, mốc ngoài kho là cách duy nhất bắt được. Lịch chạy
+  định kỳ: Mike lo (chưa có cron).
 - **Manifest bị cắt dòng cuối** (máy sập giữa lúc ghi; `read_manifest` báo "dòng N: không đọc được") ⇒ mọi
   lệnh rc=2, kẹt cho tới khi người xử lý — KHÔNG có lối tự sửa, cố ý. Đường xử lý:
   1. Chép nguyên thư mục sổ (`.csv`, `.manifest.jsonl`, `.superseded.*`) sang chỗ an toàn trước khi đụng gì.

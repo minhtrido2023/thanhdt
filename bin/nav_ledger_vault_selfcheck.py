@@ -929,6 +929,68 @@ def v10_lock_gap_md5(tmp):
     p = box.cli()
     ok(p.returncode == 2 and "CHƯA thay file" in p.stderr, "V10 B12: không ai giữ khoá ⇒ báo chết giữa chừng")
 
+# ------------------------------------------------------------------ V11. mốc ngoài kho (arch-review lần 2, R1)
+def v11_external_anchor(tmp):
+    box = Box(tmp, "v11", NAV4)
+    p = box.cli("--immutable", "--seal", "--asof", "2026-07-03")
+    a1 = next(x for x in p.stdout.splitlines() if x.startswith("SEAL_MD5 "))
+    box.write_nav(NAV4)
+    p = box.cli("--seal")
+    a2 = next(x for x in p.stdout.splitlines() if x.startswith("SEAL_MD5 "))
+    p = box.cli("--verify-anchor", a1, "--verify-anchor", a2)
+    ok(p.returncode == 0 and "mốc ngoài kho KHỚP" in p.stdout and "manifest #1" in p.stdout and "manifest #2" in p.stdout,
+       f"V11: mốc cũ (phần đầu manifest) và mốc mới đều khớp: rc={p.returncode} {p.stdout[-300:]} {p.stderr[-200:]}")
+    ok(nul.verify_anchor(str(box.sealed), "SpaceX", a1) == {"seq": 1, "md5": a1.split()[2]},
+       "V11: verify_anchor trả đúng bản ghi ứng với mốc")
+    # Hoàn tác ĐỒNG THỜI file sổ + đuôi manifest về lần chốt #1 ⇒ đối chiếu thường KHỚP, mốc #2 bắt được.
+    data1 = box.sealed.read_bytes()[: len(box.sealed.read_bytes())]
+    lines = box.manifest.read_bytes().splitlines(keepends=True)
+    keep_ledger, keep_manifest = box.sealed.read_bytes(), box.manifest.read_bytes()
+    box.manifest.write_bytes(lines[0])
+    first = nul._content(box.ledger(), D(2026, 7, 3))
+    box.sealed.write_bytes(first)
+    box.write_nav(NAV4[:2])
+    p = box.cli()
+    ok(p.returncode == 0 and "khớp chuỗi dựng lại" in p.stdout,
+       "V11: (giới hạn đã biết) hoàn tác đồng thời file + đuôi manifest thì đối chiếu thường KHÔNG thấy")
+    p = box.cli("--verify-anchor", a2)
+    ok(p.returncode == 2 and "AnchorError" in p.stderr and "KHÔNG còn chứa nguyên vẹn" in p.stderr,
+       f"V11: mốc ngoài kho phải bắt được hoàn tác đồng thời: rc={p.returncode} {p.stderr[-300:]}")
+    ok(box.cli("--verify-anchor", a1).returncode == 0, "V11: mốc #1 vẫn khớp sau khi hoàn tác về #1")
+    box.sealed.write_bytes(keep_ledger)
+    box.manifest.write_bytes(keep_manifest)
+    box.write_nav(NAV4)
+    # Xoá CẢ file sổ + manifest ⇒ đối chiếu thường thấy "0 dòng" (rc=0), mốc ngoài kho rc=2.
+    box.sealed.unlink()
+    box.manifest.unlink()
+    p = box.cli()
+    ok(p.returncode == 0, "V11: (giới hạn đã biết) xoá cả sổ lẫn manifest ⇒ đối chiếu thường không thấy")
+    p = box.cli("--verify-anchor", a2)
+    ok(p.returncode == 2 and "KHÔNG tồn tại" in p.stderr and "ĐÃ chốt" in p.stderr,
+       f"V11: xoá cả sổ + manifest ⇒ mốc ngoài kho rc=2: {p.stderr[-300:]}")
+    box.manifest.write_bytes(b"")
+    p = box.cli("--verify-anchor", a2)
+    ok(p.returncode == 2 and "rỗng" in p.stderr, "V11: manifest rỗng ⇒ rc=2")
+    box.manifest.unlink()
+    # Mốc sai dạng / tài khoản khác / mốc tự mâu thuẫn / dùng sai cờ.
+    box.sealed.write_bytes(keep_ledger)
+    box.manifest.write_bytes(keep_manifest)
+    for bad, needle in (("SEAL_MD5 SpaceX abc", "không đúng dạng"), ("MD5 SpaceX a b", "không đúng dạng"),
+                        (a2.replace("SpaceX", "ZaloPay"), "§12"),
+                        (" ".join(a2.split()[:2] + ["0" * 32, a2.split()[3]]), "tự mâu thuẫn")):
+        p = box.cli("--verify-anchor", bad)
+        ok(p.returncode == 2 and needle in p.stderr, f"V11: mốc {bad!r} ⇒ rc=2 nêu {needle!r}: {p.stderr[-200:]}")
+    p = box.cli("--verify-anchor", a2, "--seal")
+    ok(p.returncode == 2 and "--verify-anchor chỉ đi với" in p.stderr, "V11: --verify-anchor không đi cùng --seal")
+    p = subprocess.run([sys.executable, str(BIN / "nav_unit_ledger.py"), "--account", "SpaceX", "--nav-dir",
+                        str(box.dir), "--inception-path", box.inc_path, "--flows-path", box.flows_path,
+                        "--verify-anchor", a2], capture_output=True, text=True)
+    ok(p.returncode == 2 and "--ledger-dir" in p.stderr, "V11: --verify-anchor cần --ledger-dir")
+    doc = nul.__doc__
+    ok("Xoá CẢ file sổ lẫn manifest" in doc and "--verify-anchor" in doc,
+       "V11: docstring không được hứa bắt 'xoá file' khi xoá cả hai")
+    del data1
+
 
 def main():
     with tempfile.TemporaryDirectory(prefix="nav_vault_selfcheck_") as tmp:
@@ -942,6 +1004,7 @@ def main():
         v8_real_dir_by_content(tmp)
         v9_accept_identity(tmp)
         v10_lock_gap_md5(tmp)
+        v11_external_anchor(tmp)
     if FAILS:
         print(f"FAIL — {len(FAILS)}/{N} assertion hỏng (nav_ledger_vault_selfcheck.py)")
         return 1

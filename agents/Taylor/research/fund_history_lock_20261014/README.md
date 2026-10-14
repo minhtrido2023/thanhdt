@@ -170,7 +170,9 @@ không đổi (−1,67% / −3,59%). Đã post `error` riêng cho số này (lư
    /tmp/impact_SpaceX.json` (rồi ZaloPay).
 3. Trình user, chờ quyết: (a) bảng D + đề xuất ghi chú; (b) **B3** — chọn phương án 1 hoặc 2 cho lời xác
    nhận đẳng thức tiền; (c) **biến động ZaloPay tháng 8 đã in 25,58% → 18,27%** (bậc 3 so với số in) và
-   ghi chú SpaceX (12,37 → 12,80; 17,3 → 17,4); (d) thời điểm chốt sổ thật.
+   ghi chú SpaceX (12,37 → 12,80; 17,3 → 17,4); (d) thời điểm chốt sổ thật; (e) **tin EOD Discord SpaceX
+   08-07 đã in "+0,12% so với hôm trước"** — sau chèn 08-06 đúng là +1,098% (bậc 3, error
+   `eod-discord-spacex-0807-day-pct-sai` đã post) ⇒ có đính chính tin cũ hay không.
 4. `fund_restatement.py apply --account SpaceX --nav-dir /home/trido/thanhdt/WorkingClaude/data/execution_logs
    --correction … --impact-report /tmp/impact_SpaceX.json --approved-by "user <ngày>" --real-data` (rồi
    ZaloPay). Công cụ tự chép byte nav_history cũ vào `data/execution_logs/restatement_backups/
@@ -185,7 +187,8 @@ không đổi (−1,67% / −3,59%). Đã post `error` riêng cho số này (lư
 8. `nav_unit_ledger.py --account SpaceX --seal --real-data --accept-preclose 2026-08-24="<lý do ở
    C_seal/log.txt>"` (rồi ZaloPay). Mỗi lần chốt in `SEAL_MD5 <TK> <md5 sổ> <md5 manifest>` ⇒ **post dòng
    đó lên bus** (B13; runbook trong `nav_unit_ledger.md.proposed`).
-9. `nav_unit_ledger.py --account <TK> --ledger-dir data/execution_logs` ⇒ rc=0 "khớp chuỗi dựng lại".
+9. `nav_unit_ledger.py --account <TK> --ledger-dir data/execution_logs --verify-anchor "SEAL_MD5 …"`
+   (dòng vừa post ở bước 8) ⇒ rc=0 "khớp chuỗi dựng lại" + "mốc ngoài kho KHỚP".
 10. Lên lịch "một dòng ghi chú ở báo cáo kế tiếp" cho các mục bậc 2 (theo quyết định 3a/3c).
 11. Áp các file `kb/data_registry/trading-bot/*.proposed` (nav_history, account_cash_flows,
     nav_unit_ledger, nav_history_corrections) + cập nhật mục bước 3 ở policy.
@@ -245,10 +248,25 @@ chỉ đường đính chính (`fund_restatement.py impact --sealed-ledger …` 
 1. `git diff master -- bin/daily_nav_snapshot.py` rỗng; `daily_nav_snapshot_from_raw_selfcheck` 83 PASS.
 2. 18 số công bố: dữ liệu THẬT + code nhánh = bản sao chưa sửa = bản sao đã áp, Δ = 0 (`published_18.txt`).
 3. Mutant: reviewer (trừ Sa–Sh, N10 thay bằng B6*) + 40 mới (B2×7, B4×9, B6×6, B7×10, B14×4, B12, B13×2,
-   G19b) = 72/72 chết dưới gỡ-TZ và Pacific/Kiritimati; 78 mutant vòng 1: 65 chết, 0 sống, 6 S* không còn
-   code, 7 cái đổi dòng ⇒ port (`*p`) 7/7 chết.
+   G19b) + R1×5 + R2×9 + G7p — chạy lại sau R1/R2: 93 dựng, **92 chết, 0 sống**, 1 lỗi dựng (G7 gốc: dòng
+   `look` đổi sau R2 ⇒ port G7p, chết) dưới gỡ-TZ và Pacific/Kiritimati; 78 mutant vòng 1: 65 chết, 0 sống,
+   6 S* không còn code, 7 cái đổi dòng ⇒ port (`*p`) 7/7 chết.
 4. B2 (WC_ROOT khác + thư mục có dnse_raw) và B6 (demo đổi NAV sau khi nhận) bị CHẶN — `apply_log.txt`,
    `demo_B6.txt`, selfcheck R9/V8/V9.
-5. Selfcheck (WC_ROOT = sandbox rỗng; gỡ TZ · America/New_York · Pacific/Kiritimati, rc=0 cả 3):
-   vault 199 · fund_restatement 182 · nav_unit_ledger 4758 · nav_jump_flow_gate 25 ca · from_raw 83 ·
-   cash_identity 348 · nav_corpaction_gate_e2e 68.
+5. Selfcheck (gỡ TZ · America/New_York · Pacific/Kiritimati, rc=0 cả 3): vault 214 · fund_restatement 195 ·
+   nav_unit_ledger 4758 · nav_jump_flow_gate 25 ca · from_raw 83 · cash_identity 348 · nav_corpaction_gate_e2e 68.
+   WC_ROOT = `/tmp/fl2/codeonly`: `wc_env.sh` rỗng + symlink code (`trading_bot`, `*.py` gốc, `mike`→worktree),
+   `data/` RỖNG. ⚠️ Bản ghi ở commit 755be49f0 đo SAI cách: WC_ROOT trỏ thư mục không có `wc_env.sh` ⇒
+   `wc_env` BỎ QUA nó và rơi về cây thật (stderr "bỏ qua WC_ROOT"); WC_ROOT rỗng tuyệt đối thì
+   `import trading_bot` hỏng (4 selfcheck đỏ vì môi trường, không phải vì code) ⇒ dùng sandbox code-only.
+
+### Vòng 2b — arch-review lần 2 (`arch_review_2nd_3642e43a1_residual.md`, R1 + R2, ngoài danh sách B)
+| # | Đã làm |
+|---|---|
+| R1 | `nav_unit_ledger.py --verify-anchor "SEAL_MD5 <TK> <md5 sổ> <md5 manifest>"` (chỉ-đọc, lặp được): đạt khi manifest có PHẦN ĐẦU mang đúng md5 manifest của mốc + bản ghi đó mang đúng md5 sổ; xoá sổ+manifest / cắt đuôi / hoàn tác đồng thời ⇒ rc=2 `AnchorError`. Docstring ghi giới hạn: không có mốc thì xoá CẢ HAI file chỉ ra "0 dòng". Selfcheck V11. Không làm cron, không pin_ledger (Mike lo lịch + nơi giữ mốc = bus). |
+| R2 | `fund_restatement.py impact` quét thêm tin EOD Discord từ `eod_trading_report.log*` (cả `.gz`; mặc định `<cha của --reports-dir>/logs/`; `--eod-logs ''` tắt): gán tài khoản theo dòng lệnh `--account X ===` hoặc tiêu đề (cũ/mới), §12; mỗi dòng `NAV <ngày>: … (±x% so với hôm trước)` = một báo cáo loại `eod` (số chính `day`) và so THÊM với số ĐÃ IN (`printed_dev`, `tier_printed`); xếp hàng đợi theo bậc lớn nhất. Đầu ra có `scan_scope`. Selfcheck R10. |
+
+Kết quả trên dữ liệu thật (bản sao): SpaceX 51 tin EOD còn trong log (07-08 → 10-13), ZaloPay 52 (07-07 → 10-13).
+Chỉ **1** tin vượt bậc 1: SpaceX 08-07 "+0,12%" → đúng +1,098% (lệch số in 0,978 điểm %, bậc 3) — NAV 08-07 in
+đúng, chỉ % ngày sai (mốc "hôm trước" là 08-05 vì thiếu dòng 08-06). ZaloPay 08-07 không có tin NAV (tin lỗi
+state file). Tin EOD cũ hơn log còn giữ: KHÔNG quét được.

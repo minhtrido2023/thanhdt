@@ -10,8 +10,13 @@ dữ liệu CŨ so với số tính lại trên dữ liệu MỚI, xếp bậc t
 ⚠️ Nó KHÔNG đo sai số của số ĐÃ IN: nếu số in trong báo cáo vốn đã khác số tính lại trên dữ liệu cũ
 (phương pháp lúc in khác, dữ liệu lúc in khác — vd biến động tháng 8 ZaloPay in 25,58% trong khi dữ
 liệu cũ tính lại ra 21,35%) thì độ lệch đó NẰM NGOÀI phép đo này và phải rà riêng bằng mắt.
-⚠️ Chỉ quét được file trong `--reports-dir` (kể cả bản `*.md.bak_sent_*` = đúng bản đã gửi). Báo
-cáo NGÀY trước 2026-08-17 chỉ tồn tại trên Discord, không có file ⇒ KHÔNG quét được.
+⚠️ Phạm vi quét (ghi vào `scan_scope` của đầu ra): (1) file trong `--reports-dir` (kể cả bản
+`*.md.bak_sent_*` = đúng bản đã gửi) — báo cáo NGÀY có file từ 2026-08-17 (trước đó chỉ trên Discord); (2) tin EOD đã lên Discord,
+đọc lại từ log `eod_trading_report.log*` (cả `.gz`; mặc định thư mục `logs/` cạnh `--reports-dir`):
+mỗi dòng `NAV <ngày>: <số> VND (… <±x>% so với hôm trước)` dưới dấu hiệu tài khoản của khối
+là một "báo cáo" loại `eod` (số chính: NAV + so với hôm trước), và vì số in đọc được chính xác, nó
+còn được so với SỐ ĐÃ IN (`printed_dev`). Log xoay vòng: tin cũ hơn log còn giữ KHÔNG quét được; tin
+Discord không đi qua hai kênh trên cũng không.
 
     độ lệch < 0,05        ⇒ bậc 1: sửa từ nay, không đính chính
     0,05 <= độ lệch <= 0,5 ⇒ bậc 2: sửa sổ + một dòng ghi chú ở báo cáo kế tiếp
@@ -68,6 +73,8 @@ import argparse
 import calendar
 import csv
 import datetime
+import glob
+import gzip
 import hashlib
 import io
 import json
@@ -95,7 +102,8 @@ TIER_ACTION = {
     2: "sửa sổ + một dòng ghi chú ở báo cáo kế tiếp",
     3: "PHÁT HÀNH LẠI báo cáo — cần user duyệt",
 }
-HEADLINE_KEYS = {"daily": ("day", "wtd", "mtd", "inception"),
+HEADLINE_KEYS = {"eod": ("day",),
+                 "daily": ("day", "wtd", "mtd", "inception"),
                  "weekly": ("wtd", "mtd", "inception"),
                  "monthly": ("mtd", "qtd", "ytd", "inception")}
 NAV_INVARIANT_TOL = 1.0        # đồng
@@ -113,6 +121,14 @@ TEST_NOW_ENV = "FUND_RESTATEMENT_TEST_NOW_ICT"
 # `<…>.md.bak_sent_<nhãn>` = bản ĐÃ GỬI được giữ lại khi báo cáo bị soạn lại ⇒ cũng phải đo.
 REPORT_RE = re.compile(r"^(?P<who>[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*)_(?P<kind>daily|weekly|monthly)"
                        r"_report_(?P<rest>.+?)\.md(?:\.bak_sent_(?P<bak>.+))?$")
+EOD_LOG_GLOB = "eod_trading_report.log*"
+# Dấu hiệu tài khoản của một khối trong log EOD — đổi dạng theo thời gian, nhận CẢ BA: dòng lệnh
+# `=== …eod_trading_report.sh --account X ===`, tiêu đề cũ `EOD Trading Report — X (ngày)`, tiêu đề
+# mới (SpaceX từ 09-2026) `Báo cáo giao dịch ngày — X (ngày)`.
+_EOD_HEADER_RE = re.compile(r"(?:--account (?P<acct1>[A-Za-z0-9_]+) ===|(?:EOD Trading Report|Báo cáo giao "
+                            r"dịch ngày) — (?P<acct2>[A-Za-z0-9_]+) \(\d{4}-\d{2}-\d{2}\))")
+_EOD_NAV_RE = re.compile(r"NAV (?P<date>\d{4}-\d{2}-\d{2}): (?P<nav>[\d,]+) VND\*{0,2} \((?P<vnd>[+-]?[\d,]+) VND, "
+                         r"(?P<pct>[+-]?\d+(?:\.\d+)?)% so với hôm trước\)")
 _RANGE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})(?:_(.+))?$")
 _DAY_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:_(.+))?$")
 _MONTH_RE = re.compile(r"^(\d{4})-(\d{2})(?:_(.+))?$")
@@ -415,6 +431,37 @@ def list_reports(reports_dir: str, account: str) -> tuple:
     return found, unparsed, skipped
 
 
+def _read_log_text(path: str) -> str:
+    opener = gzip.open if path.endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8", errors="replace") as f:
+        return f.read()
+
+
+def list_eod_messages(pattern: str, account: str) -> tuple:
+    """(tin EOD của `account` đọc từ log khớp `pattern`, [file đã quét]). Mỗi tin = một "báo cáo"
+    loại `eod`: {name, kind, start=end=ngày NAV, printed: {nav, day_pct}, text}. Gán tài khoản theo
+    dấu hiệu tài khoản gần nhất phía trên (`_EOD_HEADER_RE`, §12); dòng NAV trước mọi dấu hiệu bị bỏ."""
+    files = sorted(glob.glob(pattern))
+    out = []
+    for path in files:
+        who = None
+        for n, line in enumerate(_read_log_text(path).splitlines(), start=1):
+            h = _EOD_HEADER_RE.search(line)
+            if h:
+                who = h.group("acct1") or h.group("acct2")
+                continue
+            m = _EOD_NAV_RE.search(line)
+            if not m or who != account:
+                continue
+            day = datetime.date.fromisoformat(m.group("date"))
+            out.append({"name": f"{os.path.basename(path)}:{n}", "kind": "eod", "who": [account],
+                        "start": day, "end": day, "suffix": None, "bak_sent": None,
+                        "printed": {"nav": float(m.group("nav").replace(",", "")),
+                                    "day_pct": float(m.group("pct"))},
+                        "text": line})
+    return out, files
+
+
 def _nav_literals(nav: float) -> list:
     whole = f"{nav:,.0f}"
     return [whole.replace(",", "."), whole, whole.replace(",", "")]
@@ -501,6 +548,18 @@ def assess_report(meta: dict, old: Side, new: Side, changed_dates: dict, text: s
     out["tier_window"] = tier(out["window_dev"])
     out["affected"] = bool(out["headline_dev"] or out["window_dev"] or structural
                            or out["component_changes"])
+    printed = meta.get("printed")
+    if printed is not None:
+        # Tin EOD: số in đọc được chính xác ⇒ đo THÊM lệch so với SỐ ĐÃ IN (không chỉ so với dữ liệu
+        # cũ tính lại). In 2 chữ số thập phân ⇒ sai số làm tròn ≤ 0,005 (bậc 1) là nền, không phải lỗi.
+        pdevs = []
+        if b is not None:
+            pdevs.append(abs(b["nav"] / printed["nav"] - 1) * 100)
+            if b["day"] is not None:
+                pdevs.append(abs(b["day"] - printed["day_pct"]))
+        out["printed"] = dict(printed, new_nav=b and b["nav"], new_day_pct=b and b["day"])
+        out["printed_dev"] = max(pdevs) if pdevs else float("inf")
+        out["tier_printed"] = tier(out["printed_dev"])
     out["action"] = TIER_ACTION[out["tier_headline"]]
     # Bậc 1 theo chính sách là "sửa từ nay, không đính chính" ⇒ số ngày lệch dưới 0,05 không
     # đáng gọi người; từ bậc 2 trở lên mà số chính của báo cáo không phản ánh thì phải có người xem.
@@ -526,16 +585,20 @@ def _look_reason(r: dict) -> str:
               f"chèn — người phải xem báo cáo có in số ngày đó không")
 
 
-def build_impact(account, old: Side, new: Side, changed_dates: dict, reports_dir: str) -> dict:
+def build_impact(account, old: Side, new: Side, changed_dates: dict, reports_dir: str,
+                 eod_glob: str = None) -> dict:
     reports, unparsed, skipped = list_reports(reports_dir, account)
     rows = []
     for meta in reports:
         with open(os.path.join(reports_dir, meta["name"]), "r", encoding="utf-8") as f:
             text = f.read()
         rows.append(assess_report(meta, old, new, changed_dates, text))
+    eod, eod_files = list_eod_messages(eod_glob, account) if eod_glob else ([], [])
+    for meta in eod:
+        rows.append(assess_report(meta, old, new, changed_dates, meta["text"]))
     affected = [r for r in rows if r["affected"]]
-    reissue = [r for r in affected if r["tier_headline"] == 3]
-    look = [r for r in affected if r["needs_human_look"] and r["tier_headline"] < 3]
+    reissue = [r for r in affected if max(r["tier_headline"], r.get("tier_printed", 0)) == 3]
+    look = [r for r in affected if r["needs_human_look"] and r not in reissue]
     return {
         "account": account,
         "thresholds": {"tier2_from": TIER_NOTE_FROM, "tier3_above": TIER_REISSUE_ABOVE},
@@ -543,13 +606,26 @@ def build_impact(account, old: Side, new: Side, changed_dates: dict, reports_dir
         "reports": affected,
         "unaffected_reports": [r["report"] for r in rows if not r["affected"]],
         "unparsed_report_names": unparsed, "skipped_non_md": skipped,
+        "scan_scope": {
+            "reports_dir": reports_dir,
+            "n_report_files": sum(1 for r in rows if r["kind"] != "eod"),
+            "eod_log_glob": eod_glob, "eod_log_files": [os.path.basename(x) for x in eod_files],
+            "n_eod_messages": len(eod),
+            "eod_dates": ([min(m["end"] for m in eod).isoformat(), max(m["end"] for m in eod).isoformat()]
+                          if eod else None),
+            "note": "file .md: báo cáo ngày có từ 2026-08-17 (trước đó chỉ trên Discord); tin EOD Discord: chỉ những tin còn trong "
+                    "log eod_trading_report.log* (log xoay vòng); kênh khác KHÔNG quét"},
         # Hàng đợi: công cụ không tự gửi/phát hành lại gì.
         "queue_user_decision": (
-            [{"report": r["report"], "why": f"bậc 3 — số chính lệch {r['headline_dev']:.4f} > "
-              f"{TIER_REISSUE_ABOVE}: phát hành lại cần user duyệt"} for r in reissue]
+            [{"report": r["report"], "why": f"bậc 3 — số chính lệch {r['headline_dev']:.4f}"
+              + (f", so với số ĐÃ IN lệch {r['printed_dev']:.4f}" if "printed_dev" in r else "")
+              + f" (ngưỡng > {TIER_REISSUE_ABOVE}): phát hành lại / đính chính cần user duyệt"}
+             for r in reissue]
             + [{"report": r["report"], "why": _look_reason(r)} for r in look]),
-        "note_next_report": [r["report"] for r in affected if r["tier_headline"] == 2],
-        "fix_forward_only": [r["report"] for r in affected if r["tier_headline"] <= 1],
+        "note_next_report": [r["report"] for r in affected
+                             if max(r["tier_headline"], r.get("tier_printed", 0)) == 2],
+        "fix_forward_only": [r["report"] for r in affected
+                             if max(r["tier_headline"], r.get("tier_printed", 0)) <= 1],
     }
 
 
@@ -587,6 +663,11 @@ def _print_table(impact: dict, show_all: bool) -> None:
     print(f"{'báo cáo':58s} {'số chính':>9s} bậc {'theo ngày':>9s} bậc  hành động")
     for r in impact["reports"]:
         mark = "  ⚠ CẦN NGƯỜI XEM" if r["needs_human_look"] else ""
+        if "printed" in r:
+            p = r["printed"]
+            mark += (f"  [tin EOD đã in NAV {p['nav']:,.0f} ({p['day_pct']:+.2f}%); tính lại "
+                     + ("—" if p["new_day_pct"] is None else f"{p['new_day_pct']:+.3f}%")
+                     + f" ⇒ lệch số in {r['printed_dev']:.4f} bậc {r['tier_printed']}]")
         print(f"{r['report'][:58]:58s} {r['headline_dev']:9.4f}  {r['tier_headline']}  "
               f"{r['window_dev']:9.4f}  {r['tier_window']}   {r['action']}{mark}")
         for key, v in r["headline"].items():
@@ -620,13 +701,18 @@ def _print_table(impact: dict, show_all: bool) -> None:
     print(f"-- ghi chú ở báo cáo kế tiếp (bậc 2): {len(impact['note_next_report'])}"
           + (": " + ", ".join(impact["note_next_report"]) if impact["note_next_report"] else ""))
     print(f"-- chỉ sửa từ nay (bậc 0–1): {len(impact['fix_forward_only'])}")
+    sc = impact["scan_scope"]
+    print(f"-- phạm vi quét: {sc['n_report_files']} file báo cáo trong {sc['reports_dir']}; "
+          f"{sc['n_eod_messages']} tin EOD từ {len(sc['eod_log_files'])} log ({sc['eod_log_glob']}"
+          + (f", ngày {sc['eod_dates'][0]} → {sc['eod_dates'][1]}" if sc["eod_dates"] else "") + ")")
     for msg in impact["unparsed_report_names"]:
         print(f"⚠️ KHÔNG đọc được kỳ của báo cáo (chưa đo): {msg}")
     if impact["skipped_non_md"]:
         print(f"ℹ️ bỏ qua {len(impact['skipped_non_md'])} file không phải .md: "
               + ", ".join(impact["skipped_non_md"]))
     print("Phép đo = tác động của THAY ĐỔI này (dữ liệu cũ tính lại → dữ liệu mới tính lại); KHÔNG "
-          "đo sai số của số đã in. Báo cáo ngày trước 2026-08-17 chỉ có trên Discord: không quét.")
+          "đo sai số của số đã in (trừ tin EOD: có so thêm với số in). Báo cáo ngày trước 2026-08-17 chỉ có "
+          "trên Discord: chỉ quét được phần còn trong log EOD.")
     print("Công cụ này KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại báo cáo nào.")
 
 
@@ -650,7 +736,9 @@ def cmd_impact(args) -> int:
                acf.load_flows(args.account, flows_path=args.new_flows_path or args.flows_path,
                               require_file=True))
     changed = _changed_dates(old_table, new_table)
-    impact = build_impact(args.account, old, new, changed, args.reports_dir)
+    eod_glob = (args.eod_logs if args.eod_logs is not None else os.path.join(
+        os.path.dirname(os.path.abspath(args.reports_dir)), "logs", EOD_LOG_GLOB))
+    impact = build_impact(args.account, old, new, changed, args.reports_dir, eod_glob or None)
     impact.update({
         "generated_at_ict": datetime.datetime.now(ICT).isoformat(timespec="seconds"),
         "old_nav_history_md5": _md5(old_bytes), "new_nav_history_md5": _md5(new_bytes),
@@ -847,6 +935,8 @@ def main(argv=None) -> int:
     imp.add_argument("--new-flows-path")
     imp.add_argument("--reports-dir", default=REPORTS_DIR)
     imp.add_argument("--sealed-ledger", help="sổ đơn vị đã chốt mà bản đính chính này sẽ thay")
+    imp.add_argument("--eod-logs", help="glob log tin EOD Discord (mặc định <thư mục cha của "
+                                        "--reports-dir>/logs/eod_trading_report.log*; '' = không quét)")
     imp.add_argument("--out")
     imp.add_argument("--all", action="store_true", help="in cả báo cáo không đổi")
     app = sub.add_parser("apply", help="ghi đính chính vào nav_history của --nav-dir")

@@ -104,6 +104,32 @@ NEW = [
     # ---------------- G19 tầng áp
     ("G19b", F, "        if not isinstance(item.get(\"expect\"), dict):\n            raise RestatementError(f\"{where}: thiếu expect",
      "        if False:\n            raise RestatementError(f\"{where}: thiếu expect", "apply_corrections: KeyError trần", (R, V)),
+    # ---------------- arch-review lần 2: R1 mốc ngoài kho, R2 tin EOD qua log
+    ("R1a", L, "        if _md5(head) == want_manifest:", "        if _md5(data) == want_manifest:",
+     "mốc chỉ khớp khi manifest KHÔNG nối thêm", (V,)),
+    ("R1b", L, "    if who != account:\n        raise AnchorError", "    if False:\n        raise AnchorError",
+     "mốc của tài khoản khác được nhận", (V,)),
+    ("R1c", L, "            if rec.get(\"md5\") != want_ledger:", "            if False:", "không kiểm md5 sổ của mốc", (V,)),
+    ("R1d", L, "    if not data:\n        raise AnchorError", "    if data is None:\n        raise AnchorError",
+     "manifest rỗng không báo đúng", (V,)),
+    ("R1e", L, "            anchored = [(a, verify_anchor(path, args.account, a)) for a in args.verify_anchor or []]",
+     "            anchored = []", "CLI bỏ qua --verify-anchor", (V,)),
+    ("R2a", F, "            if not m or who != account:", "            if not m:", "tin EOD tài khoản khác bị tính (§12)", (R,)),
+    ("R2b", F, '                who = h.group("acct1") or h.group("acct2")', '                who = who or h.group("acct1") or h.group("acct2")',
+     "không đổi tài khoản theo header", (R,)),
+    ("R2g", F, '                who = h.group("acct1") or h.group("acct2")', '                who = h.group("acct2") or who',
+     "bỏ dấu hiệu dòng lệnh --account (tiêu đề mới bị gán nhầm)", (R,)),
+    ("R2h", F, '(?:EOD Trading Report|Báo cáo giao "\n                            r"dịch ngày)', '(?:EOD Trading Report|Báo cáo giao "\n                            r"dịch ngàyX)',
+     "không nhận tiêu đề 'Báo cáo giao dịch ngày'", (R,)),
+    ("R2c", F, "    opener = gzip.open if path.endswith(\".gz\") else open", "    opener = open", "không đọc log .gz", (R,)),
+    ("R2d", F, "                pdevs.append(abs(b[\"day\"] - printed[\"day_pct\"]))", "                pass",
+     "không so % đã in", (R,)),
+    ("R2e", F, '    reissue = [r for r in affected if max(r["tier_headline"], r.get("tier_printed", 0)) == 3]',
+     '    reissue = [r for r in affected if r["tier_headline"] == 3]', "bậc theo số in không vào hàng đợi", (R,)),
+    # G7 (reviewer) không dựng được sau R2 (dòng `look` đổi điều kiện) — port cùng ý đồ.
+    ("G7p", F, '    look = [r for r in affected if r["needs_human_look"] and r not in reissue]',
+     '    look = [r for r in affected if r["needs_human_look"]]', "hàng đợi user trùng bậc 3", (R, V)),
+    ("R2f", F, "    for meta in eod:\n        rows.append", "    for meta in []:\n        rows.append", "không đo tin EOD", (R,)),
     # ---------------- 7 mutant vòng 1 (mutants.py) không dựng được trên code vòng 2 — port cùng ý đồ
     ("L25p", L, "            problems, accepted = seal_gate(ledger, rows[0][\"date\"], rows, accept_preclose or {},\n"
      "                                           carried=_accepted_so_far(manifest))",
