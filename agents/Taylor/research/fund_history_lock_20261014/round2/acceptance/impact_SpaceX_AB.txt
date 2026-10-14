@@ -1,0 +1,33 @@
+== Tác động đính chính — SpaceX: 6/114 báo cáo đã gửi bị ảnh hưởng (ngưỡng: <0.05 bậc 1 · 0.05–0.5 bậc 2 · >0.5 bậc 3)
+báo cáo                                                     số chính bậc theo ngày bậc  hành động
+SpaceX_ZaloPay_monthly_report_2026-07.md                      0.0000  0     0.4453  2   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-07-02: NAV 994,733,747 → 990,304,455 (-0.4453%), tỉ suất ngày -0.4429 điểm %
+      ngày 2026-07-03: NAV 988,629,520 → 988,629,520 (+0.0000%), tỉ suất ngày +0.4445 điểm %
+SpaceX_ZaloPay_monthly_report_2026-08.md                      0.0000  0     0.9735  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 950,871,323)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md      0.0000  0     0.9735  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 950,871,323)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+SpaceX_monthly_report_2026-08.md                              0.0000  0     0.9735  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 950,871,323)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+SpaceX_weekly_report_2026-07-03.md                            0.0000  0     0.4453  2   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-07-02: NAV 994,733,747 → 990,304,455 (-0.4453%), tỉ suất ngày -0.4429 điểm %
+      ngày 2026-07-03: NAV 988,629,520 → 988,629,520 (+0.0000%), tỉ suất ngày +0.4445 điểm %
+eod_trading_report.log.1.gz:899                               0.9735  3     0.9735  3   PHÁT HÀNH LẠI báo cáo — cần user duyệt  [tin EOD đã in NAV 961,311,265 (+0.12%); tính lại +1.098% ⇒ lệch số in 0.9779 bậc 3]
+      day: +0.124% → +1.098% (+0.9735 điểm %)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+-- CẦN USER QUYẾT: 6
+   eod_trading_report.log.1.gz:899: bậc 3 — số chính lệch 0.9735, so với số ĐÃ IN lệch 0.9779 (ngưỡng > 0.5): phát hành lại / đính chính cần user duyệt
+   SpaceX_ZaloPay_monthly_report_2026-07.md: số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không
+   SpaceX_ZaloPay_monthly_report_2026-08.md: số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không
+   SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md: số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không
+   SpaceX_monthly_report_2026-08.md: số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không
+   SpaceX_weekly_report_2026-07-03.md: số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không
+-- ghi chú ở báo cáo kế tiếp (bậc 2): 0
+-- chỉ sửa từ nay (bậc 0–1): 5
+-- phạm vi quét: 63 file báo cáo trong /tmp/fl2/app/mike/reports; 51 tin EOD từ 2 log (/tmp/fl2/app/mike/logs/eod_trading_report.log*, ngày 2026-07-08 → 2026-10-13)
+Phép đo = tác động của THAY ĐỔI này (dữ liệu cũ tính lại → dữ liệu mới tính lại); KHÔNG đo sai số của số đã in (trừ tin EOD: có so thêm với số in). Báo cáo ngày trước 2026-08-17 chỉ có trên Discord: chỉ quét được phần còn trong log EOD.
+Công cụ này KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại báo cáo nào.
+báo cáo tác động: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/agents/Taylor/research/fund_history_lock_20261014/round2/acceptance/impact_SpaceX_AB.json (md5 c269f005f57eb1a85397423fba8e552e)

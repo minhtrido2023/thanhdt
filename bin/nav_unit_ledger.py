@@ -30,27 +30,63 @@ SỔ TRÊN ĐĨA LÀ CHỈ-GHI-THÊM: `nav_unit_ledger_{account}.csv`. `--seal` 
 cuối (đọc file MỘT lần dưới khoá `fcntl.flock`, ghi qua file tạm + `os.replace`). Dựng lại mà
 một dòng ĐÃ CHỐT khác đi (NAV nguồn bị sửa, dòng tiền khai lùi ngày, dòng bị xoá/chen) ⇒ rc=2,
 in từng dòng lệch bao nhiêu, KHÔNG ghi gì.
-⚠️ CHƯA CHỐT SỔ THẬT TRƯỚC BƯỚC 3 của chính sách (rà các ngày `nav_is_estimate`, có đường đính
-chính): `--seal` TỪ CHỐI ghi vào thư mục dữ liệu mặc định (rc=3) — chỉ ghi khi truyền
-`--ledger-dir` trỏ nơi khác (test/research). `nav_period_returns.py` KHÔNG đọc sổ trên đĩa.
+
+HAI CHẾ ĐỘ CHỐT (bước 3 của chính sách, 2026-10-14):
+  · Thư mục thử/research (`--ledger-dir D`): như trên, không manifest.
+  · KHO BẤT BIẾN (coding_guidelines §8c) — BẮT BUỘC với thư mục dữ liệu thật, tự bật khi thư mục
+    đã có manifest, hoặc `--immutable`: mỗi lần chốt ghi một bản ghi vào
+    `nav_unit_ledger_{account}.csv.manifest.jsonl` (chỉ-thêm; md5 trước/sau nối thành chuỗi).
+    Mọi lần đọc/chốt kiểm md5 file == md5 của bản ghi cuối ⇒ cắt bớt dòng cuối, xoá file sổ, sửa tay
+    đều bị bắt (rc=2) — thứ mà so từng dòng không thấy. ⚠️ Xoá CẢ file sổ lẫn manifest, hoặc hoàn tác
+    đồng thời file + đuôi manifest, thì trong kho KHÔNG còn gì để so (cả hai ngoài git) ⇒ chỉ bắt được
+    bằng MỐC NGOÀI KHO: `--verify-anchor "SEAL_MD5 …"` (dòng in ra ở mỗi lần chốt, Mike post lên bus). Chốt mà không có dòng mới (md5 trùng) ⇒
+    rc=2, không có `--force`. Cổng trước khi chốt: chỉ chốt ngày TRƯỚC hôm nay (ICT — dòng hôm
+    nay còn bị `daily_nav_snapshot.py` ghi đè); không thiếu dòng của phiên nào trong đoạn chốt;
+    `balance_ts` đọc được; dòng chụp TRƯỚC giờ đóng cửa của chính phiên nó phải được nhận tường
+    minh (`--accept-preclose NGÀY=lý do`; manifest ghi {lý do, balance_ts, nav} của ĐÚNG dòng
+    được nhận — dòng đó đổi balance_ts hoặc NAV thì lời nhận hết hiệu lực, phải nhận lại); dòng
+    chụp SAU khi phiên kế đã đóng cửa ⇒ từ chối (phải đính chính nav_history trước).
+    Thứ tự ghi: manifest TRƯỚC, file sổ SAU ⇒ chết giữa chừng thì lần chạy kế thấy md5 file ==
+    `md5_before` của bản ghi cuối và HOÀN TẤT đúng lần chốt dở (chỉ khi dựng lại ra đúng md5 đã
+    ghi); không đoán, không ghi bản ghi thứ hai.
+  · Thư mục dữ liệu thật: phải có `--real-data` (không phải `--force`: mọi cổng trên vẫn chạy);
+    thiếu ⇒ rc=3. "Thật" = cây cố định `CANONICAL_REAL_DIR` của máy, HOẶC mọi thư mục có
+    `dnse_raw_*.jsonl`, HOẶC NAV_HISTORY_DIR suy từ WC_ROOT (`is_real_data_dir`) — đổi WC_ROOT
+    không lách được. Người chạy là Mike sau khi user duyệt — xem `kb/data_registry/trading-bot/
+    nav_unit_ledger.md`. Mỗi lần chốt/đính chính in một dòng máy-đọc-được
+    `SEAL_MD5 <account> <md5 file sổ> <md5 manifest>` để post lên bus làm mốc NGOÀI kho.
+ĐÍNH CHÍNH SỔ ĐÃ CHỐT (`--restate`): lịch sử đổi CÓ CHỦ ĐÍCH (sửa nav_history, backfill, khai dòng
+tiền lùi ngày) không bao giờ sửa tại chỗ. Phải có báo cáo tác động của `fund_restatement.py impact`
+mang ĐÚNG md5 sổ đang chốt và md5 sổ sau đính chính (báo cáo của một thay đổi khác ⇒ từ chối),
+`--reason`, `--approved-by`. Sổ cũ được chép nguyên byte sang
+`nav_unit_ledger_{account}.csv.superseded.<seq>.<md5>.csv` rồi mới thay; manifest ghi bản ghi
+`restate` (md5 cũ, md5 mới, file lưu, lý do, người duyệt, md5 báo cáo tác động, từng dòng lệch).
+`nav_period_returns.py` KHÔNG đọc sổ trên đĩa: tỉ suất luôn tính từ chuỗi dựng trong bộ nhớ.
 
 Dùng:
     python3 mike/bin/nav_unit_ledger.py --account SpaceX                      # dựng + in
     python3 mike/bin/nav_unit_ledger.py --account SpaceX --ledger-dir D       # + đối chiếu sổ ở D
     python3 mike/bin/nav_unit_ledger.py --account SpaceX --ledger-dir D --seal
+    python3 mike/bin/nav_unit_ledger.py --account SpaceX --ledger-dir D --immutable --seal \
+        [--accept-preclose 2026-08-24="lý do"]
+    python3 mike/bin/nav_unit_ledger.py --account SpaceX --ledger-dir D --restate \
+        --impact-report impact.json --reason "..." --approved-by "..."
 Selfcheck: python3 mike/bin/nav_unit_ledger_selfcheck.py
 """
 import argparse
 import csv
 import datetime
 import fcntl
+import hashlib
 import json
 import math
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import account_cash_flows as _acf  # noqa: E402
 from account_cash_flows import (NavRow, attach_flows_to_rows,  # noqa: E402,F401
                                 load_flows, require_strictly_increasing)
 from wc_paths import find_wc_root  # noqa: E402
@@ -58,6 +94,8 @@ from wc_paths import find_wc_root  # noqa: E402
 WC_ROOT = find_wc_root(__file__)
 INCEPTION_PATH = os.path.join(WC_ROOT, "data", "account_inception.json")
 NAV_HISTORY_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
+ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+MANIFEST_SUFFIX = ".manifest.jsonl"
 
 UNIT_PRICE_0 = 10_000.0
 LEDGER_FIELDS = ["date", "nav", "flow_bod_vnd", "flow_eod_vnd", "units_issued", "units",
@@ -79,7 +117,20 @@ class LedgerDriftError(ValueError):
 
 
 class SealRefused(ValueError):
-    """Từ chối chốt sổ vào thư mục dữ liệu thật — chưa được phép trước bước 3 của chính sách."""
+    """Từ chối chốt sổ vào thư mục dữ liệu thật khi không có `--real-data` (rc=3)."""
+
+
+class SealIntegrityError(ValueError):
+    """Kho bất biến: file sổ / manifest không còn là thứ công cụ này đã ghi (md5 lệch, chuỗi
+    manifest đứt, lần chốt dở không hoàn tất được)."""
+
+
+class NothingToSeal(ValueError):
+    """Kho bất biến: không có dòng mới để chốt / không có gì để đính chính (md5 sẽ trùng)."""
+
+
+class SealGateError(ValueError):
+    """Kho bất biến: đoạn sắp chốt chưa đủ điều kiện (thiếu phiên, dòng chụp trước đóng cửa…)."""
 
 
 def _parse_date(s: str) -> datetime.date:
@@ -154,7 +205,7 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
     price = UNIT_PRICE_0
     ledger = [{"date": inception_from, "nav": inception_nav0, "flow_bod_vnd": 0.0,
                "flow_eod_vnd": 0.0, "units_issued": 0.0, "units": units, "unit_price": price,
-               "nav_is_estimate": base_est, "flows": []}]
+               "nav_is_estimate": base_est, "flows": [], "balance_ts": None}]
     for row in nav_rows:
         d, nav = row[0], row[1]
         if not math.isfinite(nav):
@@ -179,7 +230,7 @@ def build_ledger(rows: list, flows: list, inception_from: datetime.date,
         ledger.append({"date": d, "nav": nav, "flow_bod_vnd": f_bod, "flow_eod_vnd": f_eod,
                        "units_issued": units - before, "units": units, "unit_price": price,
                        "nav_is_estimate": bool(getattr(row, "is_estimate", False)),
-                       "flows": day})
+                       "flows": day, "balance_ts": getattr(row, "balance_ts", None)})
     return ledger, {"dropped": dropped, "pending": pending}
 
 
@@ -298,23 +349,453 @@ def _seal_locked(path, ledger, asof, write):
     return sealed, new
 
 
-def seal(path: str, ledger: list, asof: datetime.date = None, write: bool = True) -> tuple:
+# ---------------------------------------------------------------- kho bất biến (§8c)
+# Cây dữ liệu thật của máy này — CỐ ĐỊNH, không suy từ WC_ROOT: đổi WC_ROOT sang sandbox không
+# được làm thư mục thật thôi là "thật".
+CANONICAL_REAL_DIR = "/home/trido/thanhdt/WorkingClaude/data/execution_logs"
+
+
+def is_canonical_dir(directory: str) -> bool:
+    """`directory` là CHÍNH thư mục dữ liệu thật: cây cố định của máy, hoặc NAV_HISTORY_DIR (suy
+    từ WC_ROOT)."""
+    real = os.path.realpath(os.path.abspath(directory))
+    return real in (os.path.realpath(CANONICAL_REAL_DIR), os.path.realpath(NAV_HISTORY_DIR))
+
+
+def is_real_data_dir(directory: str) -> bool:
+    """Thư mục phải có `--real-data` mới được ghi: (a) cây cố định của máy, (b) MỌI thư mục chứa
+    `dnse_raw_*.jsonl` (bản ghi broker — kể cả bản sao: ghi nhầm lên bản sao của cây thật cũng
+    phải gọi tường minh), (c) NAV_HISTORY_DIR suy từ WC_ROOT."""
+    if is_canonical_dir(directory):
+        return True
+    try:
+        names = os.listdir(os.path.realpath(os.path.abspath(directory)))
+    except OSError:                     # chưa có thư mục ⇒ không thể là nơi chứa bản ghi broker
+        return False
+    return any(n.startswith("dnse_raw_") and n.endswith(".jsonl") for n in names)
+
+
+def _is_real_dir(path: str) -> bool:
+    return is_real_data_dir(os.path.dirname(os.path.abspath(path)))
+
+
+def manifest_path(path: str) -> str:
+    return path + MANIFEST_SUFFIX
+
+
+def _md5(data):
+    return None if data is None else hashlib.md5(data).hexdigest()
+
+
+def _read_bytes(path: str):
+    if not os.path.exists(path):
+        return None
+    with open(path, "rb") as f:
+        return f.read()
+
+
+def read_manifest(path: str) -> list:
+    """Bản ghi manifest của sổ `path`, cũ → mới. Chưa có file ⇒ []. Dòng không đọc được, hoặc
+    `md5_before`/`seq` không nối với bản ghi trước ⇒ SealIntegrityError (manifest là chỉ-thêm)."""
+    mp = manifest_path(path)
+    if not os.path.exists(mp):
+        return []
+    out = []
+    with open(mp, "r", encoding="utf-8") as f:
+        for n, line in enumerate(f, start=1):
+            try:
+                rec = json.loads(line)
+                for key in ("seq", "kind", "md5", "md5_before", "rows_total", "last_date"):
+                    rec[key]
+            except (ValueError, KeyError, TypeError) as exc:
+                raise SealIntegrityError(
+                    f"{mp} dòng {n}: không đọc được ({type(exc).__name__}: {exc}): "
+                    f"{line[:120]!r}") from exc
+            prev = out[-1]["md5"] if out else None
+            if rec["md5_before"] != prev or rec["seq"] != len(out) + 1:
+                raise SealIntegrityError(
+                    f"{mp} dòng {n}: chuỗi manifest ĐỨT — bản ghi seq {rec['seq']} có md5_before "
+                    f"{rec['md5_before']}, không nối với bản ghi trước (seq {len(out)}, md5 {prev}). "
+                    f"Manifest là chỉ-thêm: có dòng bị xoá, sửa hoặc chen.")
+            out.append(rec)
+    return out
+
+
+def _content(ledger: list, upto: datetime.date) -> bytes:
+    """Nội dung file sổ dựng từ đầu cho mọi dòng có ngày <= `upto`."""
+    return (",".join(LEDGER_FIELDS) + "\n"
+            + "".join(_csv_line(r) for r in ledger if r["date"] <= upto)).encode("utf-8")
+
+
+def _atomic_write(path: str, data: bytes) -> None:
+    tmp = f"{path}.tmp.{os.getpid()}"
+    try:
+        with open(tmp, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def _append_manifest(path: str, rec: dict) -> None:
+    with open(manifest_path(path), "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False, sort_keys=True) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def _pending_content(ledger: list, rec: dict, old: bytes) -> bytes:
+    """Nội dung mà lần chốt `rec` (đã ghi manifest, chưa thay file) định ghi, dựng lại từ nguồn."""
+    upto = _parse_date(rec["last_date"])
+    if rec["kind"] == "restate":
+        return _content(ledger, upto)
+    if old is None:
+        return _content(ledger, upto)
+    last = _parse_sealed(old.decode("utf-8"), "sổ trước lần chốt dở")[-1]["date"]
+    return old + "".join(_csv_line(r) for r in ledger if last < r["date"] <= upto).encode("utf-8")
+
+
+def _vault_state(path: str, ledger: list, write: bool) -> tuple:
+    """`(byte file sổ | None, dòng đã chốt, manifest, vừa_hoàn_tất_lần_chốt_dở)` của một sổ kho bất biến, SAU khi kiểm md5
+    file == md5 bản ghi manifest cuối. md5 file == `md5_before` của bản ghi cuối = lần chốt đó
+    đã ghi manifest nhưng chết trước khi thay file: khi `write` thì hoàn tất ĐÚNG lần đó (chỉ khi
+    dựng lại ra đúng md5 đã ghi), không thì báo. Mọi lệch khác ⇒ SealIntegrityError."""
+    manifest = read_manifest(path)
+    old = _read_bytes(path)
+    if not manifest:
+        if old is not None:
+            raise SealIntegrityError(
+                f"{path}: có file sổ ({len(old)} byte, md5 {_md5(old)}) nhưng "
+                f"{manifest_path(path)} không có bản ghi nào — file này không do chế độ kho bất "
+                f"biến chốt. KHÔNG ghi gì; kiểm bằng tay.")
+        return None, [], [], False
+    last = manifest[-1]
+    have = _md5(old)
+    resumed = False
+    if have != last["md5"]:
+        seen = "KHÔNG có file" if old is None else f"{len(old)} byte"
+        if have != last["md5_before"]:
+            raise SealIntegrityError(
+                f"{path}: md5 đọc được {have} ({seen}) khác md5 đã ghi ở manifest #{last['seq']} "
+                f"({last['md5']}: {last['rows_total']} dòng tới {last['last_date']}) và khác cả md5 "
+                f"trước lần chốt đó ({last['md5_before']}) ⇒ file sổ đã bị đổi NGOÀI công cụ (sửa "
+                f"tay, cắt dòng, xoá, chép đè). KHÔNG ghi gì.")
+        want = _pending_content(ledger, last, old)
+        if _md5(want) != last["md5"]:
+            raise SealIntegrityError(
+                f"{path}: lần chốt #{last['seq']} ({last['kind']}) đã ghi manifest nhưng chưa thay "
+                f"file sổ (md5 file {have} = md5 trước lần chốt); dựng lại bây giờ ra md5 "
+                f"{_md5(want)}, khác {last['md5']} đã ghi ⇒ nguồn đã đổi từ lúc đó. Không hoàn tất "
+                f"hộ; kiểm bằng tay.")
+        if not write:
+            raise SealIntegrityError(
+                f"{path}: lần chốt #{last['seq']} ({last['kind']}) đã ghi manifest nhưng CHƯA thay "
+                f"file sổ (chết giữa chừng). Chạy lại đúng lệnh chốt đó để hoàn tất; lệnh chỉ-đọc "
+                f"này không ghi gì.")
+        _atomic_write(path, want)
+        old, resumed = want, True
+    return old, _parse_sealed(old.decode("utf-8"), path), manifest, resumed
+
+
+class AnchorError(ValueError):
+    """Sổ trên đĩa không còn khớp một mốc ngoài kho (`SEAL_MD5 …` đã post lên bus)."""
+
+
+def verify_anchor(path: str, account: str, anchor: str) -> dict:
+    """Đối chiếu sổ `path` với MỘT mốc ngoài kho `SEAL_MD5 <account> <md5 sổ> <md5 manifest>` (in ra
+    ở lần chốt/đính chính đó). Đạt khi manifest hiện tại có một PHẦN ĐẦU (cắt ở biên dòng) mang đúng
+    md5 manifest của mốc — tức lịch sử tới mốc còn nguyên, chỉ được nối thêm — và bản ghi cuối của
+    phần đầu đó mang đúng md5 sổ của mốc. Mất file/manifest, cắt đuôi manifest, hoàn tác đồng thời file
+    + manifest ⇒ AnchorError. Trả {seq, md5} của bản ghi ứng với mốc."""
+    parts = str(anchor or "").split()
+    if len(parts) != 4 or parts[0] != "SEAL_MD5":
+        raise AnchorError(f"mốc {anchor!r} không đúng dạng 'SEAL_MD5 <account> <md5 sổ> <md5 manifest>'")
+    _, who, want_ledger, want_manifest = parts
+    if who != account:
+        raise AnchorError(f"mốc {anchor!r} là của tài khoản {who!r}, đang đối chiếu {account!r} (§12)")
+    data = _read_bytes(manifest_path(path))
+    if not data:
+        raise AnchorError(
+            f"{manifest_path(path)} {'KHÔNG tồn tại' if data is None else 'rỗng'} nhưng mốc ngoài kho "
+            f"{anchor!r} nói sổ {account} ĐÃ chốt ⇒ sổ/manifest đã bị xoá. KHÔNG chốt lại đè lên; "
+            f"khôi phục từ bản sao lưu rồi đối chiếu lại.")
+    lines = data.splitlines(keepends=True)
+    for k in range(1, len(lines) + 1):
+        head = b"".join(lines[:k])
+        if _md5(head) == want_manifest:
+            rec = json.loads(lines[k - 1])
+            if rec.get("md5") != want_ledger:
+                raise AnchorError(
+                    f"mốc {anchor!r}: phần đầu manifest khớp md5 nhưng bản ghi #{rec.get('seq')} mang md5 "
+                    f"sổ {rec.get('md5')} ≠ {want_ledger} — mốc tự mâu thuẫn, kiểm bằng tay.")
+            return {"seq": rec.get("seq"), "md5": rec.get("md5")}
+    raise AnchorError(
+        f"{manifest_path(path)} ({len(lines)} bản ghi, md5 {_md5(data)}) KHÔNG còn chứa nguyên vẹn lịch "
+        f"sử tới mốc ngoài kho {anchor!r}: không phần đầu nào mang md5 {want_manifest} ⇒ manifest bị "
+        f"cắt/sửa/thay (kể cả khi chuỗi md5 bên trong vẫn nối đúng). KHÔNG ghi gì; kiểm bằng tay.")
+
+
+def _row_capture(row: dict):
+    """(lúc chụp số dư | None, phiên đóng cửa gần nhất lúc chụp | None) của một dòng sổ."""
+    ts = row.get("balance_ts")
+    if not ts:
+        return None, None
+    try:
+        snap = datetime.datetime.fromisoformat(str(ts))
+    except ValueError:
+        return None, None
+    if snap.tzinfo is not None:
+        snap = snap.astimezone(ICT).replace(tzinfo=None)
+    return snap, _acf._last_session_closed_by(snap)
+
+
+def seal_gate(ledger: list, start_date: datetime.date, new_rows: list, accept_preclose: dict,
+              carried: dict = None) -> tuple:
+    """Cổng của kho bất biến cho đoạn sắp chốt. Trả `(vấn đề chặn, lời nhận)`; lời nhận =
+    {ngày ISO: {reason, balance_ts, nav}} — gắn với ĐÚNG dòng được nhận, không chỉ với ngày.
+    `start_date`: ngày dòng đã chốt cuối (hoặc mốc khởi điểm) đứng ngay trước `new_rows`.
+    `accept_preclose` = {ngày ISO: lý do} người gọi vừa gõ. `carried` = lời nhận của các lần chốt
+    trước (dạng lưu trong manifest): chỉ còn hiệu lực khi dòng vẫn mang đúng `balance_ts` và `nav`
+    lúc được nhận — dòng đã đổi thì phải nhận lại."""
+    problems, accepted = [], {}
+    carried = carried or {}
+    have = {r["date"] for r in ledger}
+    prev = start_date
+    for row in new_rows:
+        d = row["date"]
+        gap = prev + datetime.timedelta(days=1)
+        while gap < d:
+            if gap not in have and _acf._is_session_day(gap):
+                problems.append(
+                    f"{gap}: nav_history THIẾU dòng của phiên này (nằm giữa {prev} và {d}) — chốt "
+                    f"thì giá đơn vị {d} gộp biến động hai phiên và backfill về sau thành dòng "
+                    f"chen. Backfill trước: daily_nav_snapshot.py --account <TK> --date {gap} "
+                    f"--from-raw")
+            gap += datetime.timedelta(days=1)
+        prev = d
+        if row["balance_ts"] is None and d == ledger[0]["date"]:
+            continue                                    # mốc khởi điểm: không phải lần chụp nào
+        snap, seen = _row_capture(row)
+        if snap is None:
+            problems.append(f"{d}: balance_ts không đọc được (đọc được: {row.get('balance_ts')!r}) "
+                            f"— không biết NAV dòng này chụp lúc nào")
+            continue
+        session = _acf._is_session_day(d)
+        want = d if session else _acf._last_session_closed_by(
+            datetime.datetime.combine(d, datetime.time(0, 0)))
+        if session and snap < datetime.datetime.combine(d, _acf.SESSION_CLOSE_ICT):
+            key = d.isoformat()
+            ident = {"balance_ts": row["balance_ts"], "nav": row["nav"]}
+            old = carried.get(key)
+            if key in accept_preclose:
+                accepted[key] = dict(ident, reason=accept_preclose[key])
+            elif isinstance(old, dict) and {k: old.get(k) for k in ident} == ident:
+                accepted[key] = old
+            elif old is not None:
+                was = (f"balance_ts {old.get('balance_ts')!r}, NAV {old.get('nav')!r}"
+                       if isinstance(old, dict) else "bản ghi cũ không ghi balance_ts/NAV")
+                problems.append(
+                    f"{d}: lời nhận --accept-preclose cũ ({was}) KHÔNG còn là của dòng này — dòng "
+                    f"hiện có balance_ts {row['balance_ts']!r}, NAV {row['nav']!r}, vẫn chụp TRƯỚC "
+                    f"giờ đóng cửa {_acf.SESSION_CLOSE_ICT:%H:%M}. Lời nhận gắn với đúng một dòng; "
+                    f"đã rà dòng MỚI thì nhận lại: --accept-preclose {d}=\"<lý do + bằng chứng>\"")
+            else:
+                problems.append(
+                    f"{d}: dòng chụp số dư lúc {row['balance_ts']} — TRƯỚC giờ đóng cửa "
+                    f"{_acf.SESSION_CLOSE_ICT:%H:%M} của chính phiên đó ⇒ NAV có thể không phải "
+                    f"giá chốt. Đính chính dòng nav_history, hoặc nếu ĐÃ RÀ và NAV đúng là giá "
+                    f"chốt thì nhận tường minh: --accept-preclose {d}=\"<lý do + bằng chứng>\"")
+        elif seen != want:
+            problems.append(
+                f"{d}: dòng chụp số dư lúc {row['balance_ts']} — khi đó phiên đóng cửa gần nhất "
+                f"là {seen}, không phải {want} ⇒ NAV dòng này không phải giá chốt phiên {want} "
+                f"(chạy lại snapshot ngày cũ theo đường live?). Phải đính chính nav_history; "
+                f"không có lối nhận tường minh.")
+    for key in sorted(set(accept_preclose) - set(accepted)):
+        problems.append(f"--accept-preclose {key}: trong đoạn sắp chốt không có dòng nào của ngày "
+                        f"đó chụp trước giờ đóng cửa (gõ nhầm ngày?)")
+    return problems, accepted
+
+
+def _accepted_so_far(manifest: list) -> dict:
+    out = {}
+    for rec in manifest:
+        out.update(rec.get("accepted_preclose") or {})
+    return out
+
+
+def _seal_immutable_locked(path, ledger, asof, today, accept_preclose, meta):
+    old, sealed, manifest, resumed = _vault_state(path, ledger, write=True)
+    diffs = diff_against_sealed(ledger, sealed)
+    if diffs:
+        raise LedgerDriftError(path, diffs)
+    if resumed and manifest[-1]["kind"] == "seal":
+        # Lần chạy này vừa hoàn tất lần chốt dở #seq: đó là kết quả của nó, không chốt gì thêm.
+        k = manifest[-1]["rows_added"]
+        return sealed[:len(sealed) - k], [r for r in ledger if r["date"] in
+                                          {x["date"] for x in sealed[len(sealed) - k:]}]
+    cutoff = today - datetime.timedelta(days=1)
+    if asof is not None and asof > cutoff:
+        raise SealGateError(
+            f"--asof {asof} không trước hôm nay ({today}, giờ ICT): dòng nav_history của hôm nay "
+            f"còn bị daily_nav_snapshot.py ghi đè khi chạy lại ⇒ chỉ chốt tới {cutoff}.")
+    upto = asof or cutoff
+    last = sealed[-1]["date"] if sealed else None
+    new = [r for r in ledger if (last is None or r["date"] > last) and r["date"] <= upto]
+    if not new:
+        raise NothingToSeal(
+            f"{path}: không có dòng mới để chốt tới {upto}"
+            + (f" — sổ đã chốt {len(sealed)} dòng tới {last}, md5 {manifest[-1]['md5']} (manifest "
+               f"#{manifest[-1]['seq']}). Chốt lại sẽ ra đúng md5 đó ⇒ từ chối."
+               if sealed else " (nav_history chưa có dòng nào trước hôm nay)."))
+    problems, accepted = seal_gate(ledger, last if last is not None else new[0]["date"],
+                                   new, accept_preclose or {})
+    if problems:
+        raise SealGateError(f"{path}: đoạn {new[0]['date']} → {new[-1]['date']} CHƯA đủ điều kiện "
+                            f"chốt ({len(problems)} chỗ):\n  " + "\n  ".join(problems))
+    base = old if old is not None else (",".join(LEDGER_FIELDS) + "\n").encode("utf-8")
+    data = base + "".join(_csv_line(r) for r in new).encode("utf-8")
+    rec = dict(meta or {}, seq=len(manifest) + 1, kind="seal", md5_before=_md5(old), md5=_md5(data),
+               rows_before=len(sealed), rows_added=len(new), rows_total=len(sealed) + len(new),
+               first_date=(sealed[0]["date"] if sealed else new[0]["date"]).isoformat(),
+               last_date=new[-1]["date"].isoformat(), last_unit_price=repr(float(new[-1]["unit_price"])),
+               accepted_preclose=accepted,
+               sealed_at_ict=datetime.datetime.now(ICT).isoformat(timespec="seconds"))
+    _append_manifest(path, rec)                 # manifest TRƯỚC: chết ở đây ⇒ lần sau hoàn tất
+    _atomic_write(path, data)
+    return sealed, new
+
+
+def seal(path: str, ledger: list, asof: datetime.date = None, write: bool = True, *,
+         immutable: bool = None, real_data: bool = False, today: datetime.date = None,
+         accept_preclose: dict = None, meta: dict = None) -> tuple:
     """Đối chiếu `ledger` với sổ đã chốt rồi (khi `write`) THÊM vào cuối sổ mọi dòng có ngày sau
     dòng đã chốt cuối cùng (và <= `asof`). Trả `(dòng_đã_chốt_trước_đó, dòng_vừa_thêm)`.
-    Lệch với dòng đã chốt ⇒ LedgerDriftError, KHÔNG ghi gì. Ghi vào thư mục dữ liệu thật ⇒
-    SealRefused (chưa chốt sổ thật trước bước 3). Khi ghi: giữ khoá độc quyền `<path>.lock`
-    suốt đọc→ghi, để hai tiến trình chốt cùng lúc không sinh dòng trùng."""
+    Lệch với dòng đã chốt ⇒ LedgerDriftError, KHÔNG ghi gì. Khi ghi: giữ khoá độc quyền
+    `<path>.lock` suốt đọc→ghi, để hai tiến trình chốt cùng lúc không sinh dòng trùng.
+    `immutable` (kho bất biến, xem docstring module): None ⇒ tự bật khi thư mục đã có manifest;
+    LUÔN bật với thư mục dữ liệu thật, nơi còn cần `real_data=True` (thiếu ⇒ SealRefused)."""
+    real = _is_real_dir(path)
+    if immutable is None:
+        immutable = os.path.exists(manifest_path(path))
+    immutable = immutable or real
     if not write:
-        return _seal_locked(path, ledger, asof, False)
-    if os.path.realpath(os.path.dirname(os.path.abspath(path))) == os.path.realpath(NAV_HISTORY_DIR):
+        if not immutable:
+            return _seal_locked(path, ledger, asof, False)
+        # Lệnh chỉ-đọc KHÔNG tạo file khoá; nhưng nếu khoá đã có thì chờ (khoá chia sẻ) lần chốt
+        # đang chạy xong — không thì đọc đúng lúc "manifest đã ghi, file chưa thay" và báo nhầm
+        # "chết giữa chừng". Tiến trình chết thật không còn giữ khoá ⇒ vẫn báo đúng.
+        lock_path = f"{path}.lock"
+        if not os.path.exists(lock_path):
+            _, sealed, _, _ = _vault_state(path, ledger, write=False)
+        else:
+            with open(lock_path, "r", encoding="utf-8") as lock:
+                fcntl.flock(lock, fcntl.LOCK_SH)
+                try:
+                    _, sealed, _, _ = _vault_state(path, ledger, write=False)
+                finally:
+                    fcntl.flock(lock, fcntl.LOCK_UN)
+        diffs = diff_against_sealed(ledger, sealed)
+        if diffs:
+            raise LedgerDriftError(path, diffs)
+        return sealed, []
+    if real and not real_data:
         raise SealRefused(
-            f"TỪ CHỐI chốt sổ vào thư mục dữ liệu thật {NAV_HISTORY_DIR}: chưa chốt sổ đơn vị thật "
-            f"trước bước 3 của chính sách (kb/projects/fund-unit-performance-policy-20261010.md). "
-            f"Truyền --ledger-dir trỏ thư mục khác nếu đang test/research.")
+            f"TỪ CHỐI chốt sổ vào thư mục dữ liệu thật {os.path.dirname(os.path.abspath(path))} "
+            f"(cây dữ liệu thật, hoặc thư mục có dnse_raw_*.jsonl): chốt sổ đơn vị thật là "
+            f"thao tác ghi-một-lần, phải gọi tường minh với --real-data sau khi user duyệt "
+            f"(kb/projects/fund-unit-performance-policy-20261010.md, bước 3). Truyền --ledger-dir "
+            f"trỏ thư mục khác nếu đang test/research.")
+    if today is None:
+        today = datetime.datetime.now(ICT).date()
     with open(f"{path}.lock", "a", encoding="utf-8") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         try:
+            if immutable:
+                return _seal_immutable_locked(path, ledger, asof, today, accept_preclose, meta)
             return _seal_locked(path, ledger, asof, True)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def restate(path: str, ledger: list, *, impact_report: str, reason: str, approved_by: str,
+            real_data: bool = False, accept_preclose: dict = None, meta: dict = None) -> dict:
+    """ĐÍNH CHÍNH một sổ kho bất biến: thay toàn bộ đoạn đã chốt bằng chuỗi dựng lại (cùng ngày
+    cuối), SAU KHI chép nguyên byte sổ cũ sang file `.superseded.*` và ghi bản ghi `restate` vào
+    manifest. Trả bản ghi manifest vừa thêm. Từ chối khi: chuỗi dựng lại không khác sổ đã chốt;
+    báo cáo tác động (`fund_restatement.py impact --out`) không mang đúng md5 sổ đang chốt và md5
+    sổ sau đính chính; thiếu lý do / người duyệt; đoạn đính chính không qua `seal_gate`."""
+    real = _is_real_dir(path)
+    if real and not real_data:
+        raise SealRefused(
+            f"TỪ CHỐI đính chính sổ ở thư mục dữ liệu thật "
+            f"{os.path.dirname(os.path.abspath(path))} khi không có "
+            f"--real-data (thao tác của Mike sau khi user duyệt).")
+    if not str(reason or "").strip() or not str(approved_by or "").strip():
+        raise SealGateError("đính chính sổ đã chốt phải có --reason và --approved-by (không rỗng)")
+    with open(f"{path}.lock", "a", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            old, sealed, manifest, resumed = _vault_state(path, ledger, write=True)
+            if not manifest:
+                raise NothingToSeal(f"{path}: chưa có sổ kho bất biến nào để đính chính — chốt lần "
+                                    f"đầu bằng --seal.")
+            if resumed and manifest[-1]["kind"] == "restate":
+                return manifest[-1]             # vừa hoàn tất đúng lần đính chính dở
+            diffs = diff_against_sealed(ledger, sealed)
+            if not diffs:
+                raise NothingToSeal(f"{path}: chuỗi dựng lại KHỚP sổ đã chốt (md5 "
+                                    f"{manifest[-1]['md5']}) — không có gì để đính chính.")
+            last = sealed[-1]["date"]
+            data = _content(ledger, last)
+            with open(impact_report, "rb") as f:
+                report_bytes = f.read()
+            try:
+                report = json.loads(report_bytes.decode("utf-8"))
+                bind = report["ledger_binding"]
+                got = (report["account"], bind["sealed_md5"], bind["restated_md5"])
+            except (ValueError, KeyError, TypeError) as exc:
+                raise SealGateError(
+                    f"báo cáo tác động {impact_report} không đọc được hoặc thiếu account / "
+                    f"ledger_binding.sealed_md5 / restated_md5 ({type(exc).__name__}: {exc}) — "
+                    f"phải là đầu ra của fund_restatement.py impact --sealed-ledger … --out") from exc
+            want = ((meta or {}).get("account"), _md5(old), _md5(data))
+            if got != want:
+                raise SealGateError(
+                    f"báo cáo tác động {impact_report} KHÔNG phải của thay đổi này: nó ghi "
+                    f"(tài khoản, md5 sổ đang chốt, md5 sổ sau đính chính) = {got}, thực tế là "
+                    f"{want}. Chạy lại fund_restatement.py impact trên đúng dữ liệu hiện tại.")
+            rows = [r for r in ledger if r["date"] <= last]
+            # Lời nhận cũ chỉ theo sang khi dòng của nó còn nguyên balance_ts + NAV (seal_gate);
+            # lời nhận cũ của một ngày nay không còn chụp trước đóng cửa thì tự rơi, không lỗi.
+            problems, accepted = seal_gate(ledger, rows[0]["date"], rows, accept_preclose or {},
+                                           carried=_accepted_so_far(manifest))
+            if problems:
+                raise SealGateError(f"{path}: sổ sau đính chính CHƯA đủ điều kiện chốt "
+                                    f"({len(problems)} chỗ):\n  " + "\n  ".join(problems))
+            seq = len(manifest) + 1
+            archive = f"{path}.superseded.{seq}.{_md5(old)[:12]}.csv"
+            existing = _read_bytes(archive)
+            if existing is not None and existing != old:
+                raise SealIntegrityError(f"{archive} đã tồn tại với nội dung KHÁC sổ đang chốt — "
+                                         f"file lưu là ghi-một-lần; kiểm bằng tay.")
+            if existing is None:
+                _atomic_write(archive, old)
+            rec = dict(meta or {}, seq=seq, kind="restate", md5_before=_md5(old), md5=_md5(data),
+                       rows_before=len(sealed), rows_total=len(rows),
+                       rows_added=len(rows) - len(sealed), first_date=rows[0]["date"].isoformat(),
+                       last_date=last.isoformat(),
+                       last_unit_price=repr(float(rows[-1]["unit_price"])),
+                       accepted_preclose=accepted, archived_as=os.path.basename(archive),
+                       reason=str(reason).strip(), approved_by=str(approved_by).strip(),
+                       impact_report_md5=_md5(report_bytes), n_diffs=len(diffs), diffs=diffs[:200],
+                       sealed_at_ict=datetime.datetime.now(ICT).isoformat(timespec="seconds"))
+            _append_manifest(path, rec)
+            _atomic_write(path, data)
+            return rec
         finally:
             fcntl.flock(lock, fcntl.LOCK_UN)
 
@@ -327,35 +808,95 @@ def build_account_ledger(account, nav_dir=NAV_HISTORY_DIR, inception_path=INCEPT
     return build_ledger(rows, flows, *_inception_baseline(rows, inception))
 
 
+def _file_md5(path):
+    return _md5(_read_bytes(path)) if path else None
+
+
+def _parse_accept(items) -> dict:
+    out = {}
+    for item in items or []:
+        day, sep, why = item.partition("=")
+        if not sep or not why.strip():
+            raise SealGateError(f"--accept-preclose {item!r}: phải là NGÀY=lý do (lý do không rỗng)")
+        out[_parse_date(day.strip()).isoformat()] = why.strip()
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--account", required=True)
     ap.add_argument("--seal", action="store_true",
-                    help="THÊM các dòng chưa chốt vào sổ ở --ledger-dir (KHÔNG phải thư mục dữ "
-                         "liệu thật — bị từ chối trước bước 3)")
-    ap.add_argument("--asof", help="YYYY-MM-DD — chỉ chốt tới ngày này (mặc định: dòng cuối)")
+                    help="THÊM các dòng chưa chốt vào sổ ở --ledger-dir (thư mục dữ liệu thật: "
+                         "phải thêm --real-data)")
+    ap.add_argument("--asof", help="YYYY-MM-DD — chỉ chốt tới ngày này (mặc định: dòng cuối; kho "
+                                   "bất biến: hôm qua, giờ ICT)")
     ap.add_argument("--tail", type=int, default=5, help="số dòng cuối in ra (mặc định 5)")
     ap.add_argument("--ledger-dir", help="thư mục sổ để đối chiếu/chốt; bỏ trống = chỉ dựng + in")
     ap.add_argument("--nav-dir", default=NAV_HISTORY_DIR)
     ap.add_argument("--inception-path", default=INCEPTION_PATH)
     ap.add_argument("--flows-path")
+    ap.add_argument("--immutable", action="store_true",
+                    help="chốt theo chế độ kho bất biến (manifest + md5 + cổng) ở thư mục thử; "
+                         "thư mục dữ liệu thật và thư mục đã có manifest thì LUÔN bật")
+    ap.add_argument("--real-data", action="store_true",
+                    help="cho phép --seal/--restate ghi vào thư mục dữ liệu thật (mọi cổng vẫn chạy)")
+    ap.add_argument("--accept-preclose", action="append", metavar="NGÀY=LÝ DO",
+                    help="nhận một dòng chụp trước giờ đóng cửa ĐÃ RÀ là giá chốt (ghi vào manifest)")
+    ap.add_argument("--restate", action="store_true",
+                    help="ĐÍNH CHÍNH sổ kho bất biến đã chốt bằng chuỗi dựng lại (cần "
+                         "--impact-report, --reason, --approved-by)")
+    ap.add_argument("--impact-report", help="đầu ra JSON của fund_restatement.py impact")
+    ap.add_argument("--verify-anchor", action="append", metavar="'SEAL_MD5 TK MD5 MD5'",
+                    help="chỉ-đọc: đối chiếu sổ ở --ledger-dir với mốc ngoài kho (dòng SEAL_MD5 đã post "
+                         "lên bus); lặp được; lệch ⇒ rc=2")
+    ap.add_argument("--reason")
+    ap.add_argument("--approved-by")
     args = ap.parse_args()
+    if args.seal and args.restate:
+        ap.error("--seal và --restate không đi cùng nhau")
+    if args.restate and not args.impact_report:
+        ap.error("--restate cần --impact-report")
+    if args.verify_anchor and (not args.ledger_dir or args.seal or args.restate):
+        ap.error("--verify-anchor chỉ đi với --ledger-dir, không cùng --seal/--restate")
 
     path = ledger_path(args.account, args.ledger_dir or NAV_HISTORY_DIR)
-    sealed = added = None
+    flows_path = args.flows_path or _acf.FLOWS_PATH
+    sealed = added = restated = None
     try:
         asof = _parse_date(args.asof) if args.asof else None
+        accept = _parse_accept(args.accept_preclose)
         ledger, info = build_account_ledger(args.account, args.nav_dir, args.inception_path,
                                             args.flows_path)
-        if args.seal or args.ledger_dir:
-            sealed, added = seal(path, ledger, asof, write=args.seal)
+        meta = {"account": args.account, "tool": "nav_unit_ledger.py",
+                "nav_history_md5": _file_md5(os.path.join(args.nav_dir,
+                                                          f"nav_history_{args.account}.csv")),
+                "inception_md5": _file_md5(args.inception_path),
+                "cash_flows_md5": _file_md5(flows_path)}
+        if args.restate:
+            restated = restate(path, ledger, impact_report=args.impact_report, reason=args.reason,
+                               approved_by=args.approved_by, real_data=args.real_data,
+                               accept_preclose=accept, meta=meta)
+            sealed, added = seal(path, ledger, write=False)
+        elif args.seal or args.ledger_dir:
+            # Mốc ngoài kho TRƯỚC: khi sổ + manifest đã bị xoá, đối chiếu thường thấy "0 dòng, khớp".
+            anchored = [(a, verify_anchor(path, args.account, a)) for a in args.verify_anchor or []]
+            sealed, added = seal(path, ledger, asof, write=args.seal,
+                                 immutable=True if args.immutable else None,
+                                 real_data=args.real_data, accept_preclose=accept, meta=meta)
+            for a, rec in anchored:
+                print(f"mốc ngoài kho KHỚP: {a} ⇒ manifest #{rec['seq']} còn nguyên, chỉ được nối thêm")
     except SealRefused as e:
         print(f"nav_unit_ledger ({args.account}): {e}", file=sys.stderr)
         return 3
     except LedgerDriftError as e:
         print(f"LỆCH SỔ nav_unit_ledger ({args.account}): {e}\n  ⇒ KHÔNG ghi gì. Dòng đã chốt "
-              f"không được đổi; tính lại lịch sử có chủ đích là đường riêng (chưa có).",
+              f"không được đổi tại chỗ; lịch sử đổi có chủ đích đi đường đính chính: "
+              f"fund_restatement.py impact … --out rồi nav_unit_ledger.py --restate.",
               file=sys.stderr)
+        return 2
+    except (SealIntegrityError, NothingToSeal, SealGateError, AnchorError) as e:
+        print(f"TỪ CHỐI nav_unit_ledger ({args.account}) [{type(e).__name__}]: {e}\n  ⇒ KHÔNG ghi "
+              f"gì vào sổ.", file=sys.stderr)
         return 2
     except (FileNotFoundError, ValueError, KeyError) as e:      # CashFlowError là ValueError
         print(f"LỖI nav_unit_ledger ({args.account}): {e}", file=sys.stderr)
@@ -373,13 +914,29 @@ def main() -> int:
           f"{sum(1 for r in ledger if r['nav_is_estimate'])} dòng nav_is_estimate, "
           f"{sum(1 for r in ledger if r['flow_bod_vnd'] or r['flow_eod_vnd'])} ngày có dòng tiền")
     if sealed is None:
-        print("sổ trên đĩa: KHÔNG đối chiếu (không truyền --ledger-dir; sổ thật chưa chốt trước "
-              "bước 3)")
+        print("sổ trên đĩa: KHÔNG đối chiếu (không truyền --ledger-dir)")
     else:
         last_sealed = (added or sealed or [None])[-1]
         print(f"sổ đã chốt: {path} — {len(sealed) + len(added)} dòng"
               + (f", tới {last_sealed['date']}" if last_sealed else " (chưa chốt dòng nào)")
               + (f"; vừa THÊM {len(added)} dòng" if args.seal else "; khớp chuỗi dựng lại"))
+        manifest = read_manifest(path)
+        if manifest:
+            m = manifest[-1]
+            print(f"kho bất biến: manifest #{m['seq']} ({m['kind']}) md5 {m['md5']} — "
+                  f"{m['rows_total']} dòng tới {m['last_date']}, giá đơn vị cuối "
+                  f"{float(m['last_unit_price']):.4f}"
+                  + (f"; dòng chụp trước đóng cửa đã nhận: "
+                     f"{', '.join(sorted(_accepted_so_far(manifest)))}"
+                     if _accepted_so_far(manifest) else ""))
+            if args.seal or args.restate:
+                # B13 — mốc NGOÀI kho: Mike post dòng này lên bus sau mỗi lần chốt. Hoàn tác
+                # đồng thời file sổ + đuôi manifest thì md5 ở đây không còn khớp mốc đã post.
+                print(f"SEAL_MD5 {args.account} {_file_md5(path)} {_file_md5(manifest_path(path))}")
+        if restated:
+            print(f"ĐÃ ĐÍNH CHÍNH: {restated['n_diffs']} chỗ lệch; sổ cũ (md5 "
+                  f"{restated['md5_before']}) lưu ở {restated['archived_as']}; người duyệt "
+                  f"{restated['approved_by']}")
     print(",".join(LEDGER_FIELDS))
     for r in ledger[-args.tail:] if args.tail > 0 else []:
         print(_csv_line(r), end="")
