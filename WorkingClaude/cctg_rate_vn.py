@@ -175,9 +175,10 @@ def last_known_good_cctg(asof=None):
 
     Tolerant on purpose (the strict, loud loader cctg_events_df() stays the only NORMAL path and
     is unchanged): starts from the frozen in-code CCTG_EVENTS, then reads _EVENTS_CSV row by row
-    and keeps only rows that parse, sit inside [RATE_MIN_PCT, RATE_MAX_PCT] and are strictly newer
-    than the frozen anchor -- the same rows cctg_events_df() would have accepted; the offending
-    row(s) are skipped, never guessed. An unreadable file -> frozen anchors only.
+    and keeps only rows whose date is strict ISO YYYY-MM-DD, whose rate parses and sits inside
+    [RATE_MIN_PCT, RATE_MAX_PCT], and that are strictly newer than the frozen anchor; every other
+    row is skipped, never guessed (this can be a SUBSET of what cctg_events_df() accepts, never a
+    superset). Total: it does not raise on CSV content. An unreadable file -> frozen anchors only.
 
     Returns (rate_pct, date) or (None, None) if nothing is known at/before asof."""
     import csv
@@ -190,14 +191,17 @@ def last_known_good_cctg(asof=None):
                 if None in row or None in row.values():      # wrong field count -> not a clean row
                     continue
                 try:
-                    d = pd.to_datetime(row["effective_date"])
+                    # strict ISO like the loader: a day-first "12/10/2026" or a tz-aware "...Z"
+                    # row is skipped, never guessed. Whole row is total (any error -> skip), so
+                    # one bad row can never make this salvage raise and drop the rate to Big-4.
+                    d = pd.to_datetime(row["effective_date"], format="%Y-%m-%d")
                     r = float(row["cctg_rate"])
-                except (KeyError, TypeError, ValueError):
+                    if pd.isna(d) or not (RATE_MIN_PCT <= r <= RATE_MAX_PCT) or d <= frozen_max:
+                        continue
+                    known.append((d, r))
+                except Exception:
                     continue
-                if pd.isna(d) or not (RATE_MIN_PCT <= r <= RATE_MAX_PCT) or d <= frozen_max:
-                    continue
-                known.append((d, r))
-    except (OSError, csv.Error, UnicodeDecodeError):
+    except Exception:           # unreadable file / csv error -> frozen anchors only
         pass
     known = [(d, r) for d, r in known if d <= asof_ts]
     if not known:

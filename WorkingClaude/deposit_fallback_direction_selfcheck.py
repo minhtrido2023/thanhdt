@@ -10,11 +10,11 @@ fair value goes UP, on a feed lapse. After: the last known CCTG value is HELD (+
 What this file proves (the consumer call paths themselves — dcf_valuation.discount_rate,
 dcf_refresh_gate, custom30_yield_labels._label_one, due_diligence._deposit_rate_pct — are covered
 by cctg_deposit_wiring_selfcheck.py §7/§8, updated in the same commit):
-  S*  scenario behaviour of the central function (stale hold, 9 kinds of read error, knob, way out)
+  S*  scenario behaviour of the central function (stale hold, 13 kinds of read error, knob, way out)
   H*  HISTORY IS BYTE-IDENTICAL to the pre-change code (PIN_REV) for every asof <= HIST_END, on the
       frozen fixtures AND on a copy of the live CSVs; macro_killswitch_a_status() identical on a
       grid that extends PAST HIST_END (it must not have been touched at all)
-  M*  11 source-level mutants, each must turn at least one check red (reversed fallback
+  M*  14 source-level mutants, each must turn at least one check red (reversed fallback
       direction on the stale branch = M1, on the error branch = M2)
 
 Both code versions are loaded from SOURCE TEXT into private temp dirs (never via sys.path), so
@@ -227,10 +227,32 @@ def scenario_checks(pair, sink=None):
                 r = det(ERR_ASOF)
             finally:
                 cctg.last_known_good_cctg = orig_lkg
-            check("S5i nothing readable at all -> Big-4 6.8, and the label says exactly that",
-                  abs(r["rate_pct"] - 6.8) < 1e-9
-                  and r["rate_source"].startswith("big4_12m(cctg_unavailable: ")
+            check("S5i the last-known lookup itself failing -> frozen in-code anchor 7.5 is HELD (not Big-4), cause named",
+                  abs(r["rate_pct"] - 7.5) < 1e-9
+                  and r["rate_source"].startswith("cctg_held(2026-09-30; cctg_unavailable: ")
                   and "lkg down" in r["rate_source"], sink)
+
+            # S5k: tz-aware / 'Z' date row must not make the salvage raise (arch-review B1)
+            for lbl, bad in (("Z", "2026-10-19T00:00:00Z"), ("+07:00", "2026-10-19T00:00:00+07:00")):
+                pair.set_csv(cctg_text=CCTG_GOOD + f"{bad},7.9,2026-10-19,t,tz\n")
+                r = det(ERR_ASOF)
+                check(f"S5k tz-aware date row ({lbl}) is skipped: HELD at 7.4, not Big-4 6.8",
+                      abs(r["rate_pct"] - 7.4) < 1e-9 and r["rate_source"].startswith("cctg_held("), sink)
+            # S5l: day-first date is never guessed (12/10/2026 must not become Dec 10 = 8.0)
+            pair.set_csv(cctg_text=CCTG_GOOD + "12/10/2026,8.0,2026-10-12,t,dayfirst\n")
+            r = det("2026-12-15")
+            check("S5l day-first date row is skipped, not guessed (7.4 held, not 8.0)",
+                  abs(r["rate_pct"] - 7.4) < 1e-9, sink)
+            # S5m (kills X1): error + last good CCTG BELOW Big-4 -> Big-4 6.8, never below it
+            pair.set_csv(cctg_text=CCTG_HDR + "2026-10-12,6.5,2026-10-12,t,low\n2026-10-19,74,2026-10-19,t,typo\n")
+            r = det(ERR_ASOF)
+            check("S5m error + last good CCTG 6.5 < Big-4 6.8 -> 6.8 big4_12m(cctg_unavailable...)",
+                  abs(r["rate_pct"] - 6.8) < 1e-9 and r["rate_source"].startswith("big4_12m(cctg_unavailable: "), sink)
+            # S5n (kills X2): a row on the frozen-anchor date must not displace the anchor
+            pair.set_csv(cctg_text=CCTG_HDR + "2026-09-30,6.9,2026-09-30,t,same-day\n2026-10-19,74,2026-10-19,t,typo\n")
+            r = det(ERR_ASOF)
+            check("S5n a row dated on the frozen anchor day (6.9) does not displace 7.5",
+                  abs(r["rate_pct"] - 7.5) < 1e-9, sink)
 
             # ---- S6: read error BEFORE anything is known on the CCTG side -> Big-4 (as before)
             pair.set_csv(cctg_text=CCTG_GOOD + "2026-10-19,74,2026-10-19,t,typo\n")
@@ -444,6 +466,14 @@ MUTANTS = [
     ("M10 kill-switch A weakened (stale CCTG no longer forces ARMED)", "dep",
      "                if cctg_stale:\n                    cctg_force_armed = True",
      "                if cctg_stale:\n                    cctg_force_armed = False", "K"),
+    ("M12 error branch holds a value BELOW Big-4 (comparison dropped)", "dep",
+     "        if held_pct is not None and held_pct > big4_pct:\n            rate_pct = held_pct\n            rate_source = f\"cctg_held({held_date.date()}; cctg_unavailable",
+     "        if held_pct is not None:\n            rate_pct = held_pct\n            rate_source = f\"cctg_held({held_date.date()}; cctg_unavailable", "S"),
+    ("M13 salvage lets a row on/before the frozen anchor date through", "cctg",
+     " or d <= frozen_max:\n                        continue", ":\n                        continue", "S"),
+    ("M14 salvage reverts to the old loose parse (no strict ISO, compare outside the row guard)", "cctg",
+     "                try:\n                    # strict ISO like the loader",
+     "                try:\n                    d = pd.to_datetime(row[\"effective_date\"])\n                    r = float(row[\"cctg_rate\"])\n                except (KeyError, TypeError, ValueError):\n                    continue\n                if pd.isna(d) or not (RATE_MIN_PCT <= r <= RATE_MAX_PCT) or d <= frozen_max:\n                    continue\n                known.append((d, r))\n                continue\n                try:\n                    # strict ISO like the loader", "S"),
     ("M11 a CCTG BELOW Big-4 is allowed to drive (rate can fall under Big-4)", "dep",
      "    elif cctg_pct is not None and cctg_pct > big4_pct:\n        cctg_age",
      "    elif cctg_pct is not None and cctg_pct > 0:\n        cctg_age", "S"),

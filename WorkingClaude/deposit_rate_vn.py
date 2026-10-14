@@ -362,6 +362,13 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
             held_pct, held_date = last_known_good_cctg(str(asof_ts.date()))
         except Exception as exc:
             cctg_err = f"{cctg_err}; last-known lookup failed: {exc!r}"
+            try:        # lookup itself failed: the frozen in-code anchor is always known
+                from cctg_rate_vn import CCTG_EVENTS
+                _fz = [(pd.Timestamp(d), float(r)) for d, r in CCTG_EVENTS if pd.Timestamp(d) <= asof_ts]
+                if _fz:
+                    held_date, held_pct = max(_fz, key=lambda t: t[0])
+            except Exception:
+                pass
         if held_pct is not None and held_pct > big4_pct:
             rate_pct = held_pct
             rate_source = f"cctg_held({held_date.date()}; cctg_unavailable: {cctg_err})"
