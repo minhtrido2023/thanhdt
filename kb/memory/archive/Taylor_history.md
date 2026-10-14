@@ -1212,3 +1212,6 @@
 
 ## Archived 2026-10-14 (keep=12 days=0 require_done=False)
 - [2026-10-13T12:52:01Z] ĐANG DỞ job Taylor_20261013_125149 (BCTC Q3 4 việc: M1a gate fa_ratings, M1b cờ lag_rating_stale, L2 watcher PNJ, L1 pkl LAG refresh 19:00; nhánh fix/bctc-q3-m1-gate-20261013, KHÔNG merge): bắt đầu | NEXT: tạo worktree, đọc fa_ratings_earnings_window_daily.sh
+
+## Archived 2026-10-14 (keep=12 days=0 require_done=False)
+- [2026-10-13T13:25:41Z] ĐANG DỞ job Taylor_20261013_125149 (BCTC Q3 4 việc): CODE+SELFCHECK+MUTATION XONG, ĐÃ COMMIT 2 nhánh fix/bctc-q3-m1-gate-20261013: mike @7c1c00579 (wt agents/Taylor/wt-bctcq3-1013), repo ngoài @866d549a (wt WorkingClaude/wt-bctcq3-1013). Artifact research/bctc_q3_m1_gate_impl_20261013/ | NEXT: đọc broad_scan_branch vs broad_scan_baseline (summary.txt), viết README, bus finding bctc-q3-m1-gate-impl-20261013 (trace Taylor_20261013_125149)
