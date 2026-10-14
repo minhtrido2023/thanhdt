@@ -1,0 +1,15 @@
+# Quỹ bước 4 — CHỈ ĐỀ XUẤT, CHƯA CÀI (job Taylor_20261014_060642). Tra kb/cron_registry.md §11 trước khi cài;
+# crontab host chạy giờ UTC (vd sync_bq_cache_daily 45 16 = 23:45 ICT). Cài SAU merge nhánh
+# feat/fund-step4-benchmark-20261014 và SAU khi tạo data/benchmark/ + data/sleeve_*.json (registry .proposed).
+#
+# (1) 00:30 ICT T3–T7 — VN-Index có cổ tức: sau BQ sync 23:45 + snapshot corporate_action 23:50. Tự chặn khi BQ
+#     thiếu phiên mà DNSE có (BuildRefused, rc≠0) ⇒ không cần chờ cổng bq_freshness 19:00 (cổng đó chạy TRƯỚC sync).
+30 17 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && TZ=Asia/Ho_Chi_Minh timeout 900 python3 mike/bin/vnindex_total_return.py --update >> /home/trido/thanhdt/WorkingClaude/mike/logs/vnindex_total_return.log 2>&1   # 00:30 ICT T3-T7 — quỹ bước 4 A3
+# (2) 00:45 ICT T3–T7 — chuỗi "phần bot quản lý" ZaloPay: sau nav_snapshot_daily 19:50 / nav_sync_retry ≤21:45 và
+#     BQ sync (giá DGC). S1/S2 (đề xuất chưa xác nhận / KL đổi không giải thích) ⇒ dòng bị chặn, báo cáo in
+#     "chưa có số", không ảnh hưởng chuỗi a.
+45 17 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && TZ=Asia/Ho_Chi_Minh timeout 600 python3 mike/bin/nav_sleeve.py --account ZaloPay --write >> /home/trido/thanhdt/WorkingClaude/mike/logs/nav_sleeve.log 2>&1   # 00:45 ICT T3-T7 — quỹ bước 4 B
+# (3) 07:40 ICT Thứ Bảy — bảng sàn HOSE (G7 chặn khi > 35 ngày), TRƯỚC weekly 09:00 ICT T7.
+40 0 * * 6 cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && TZ=Asia/Ho_Chi_Minh timeout 600 python3 mike/bin/hose_membership_refresh.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/hose_membership_refresh.log 2>&1   # 07:40 ICT T7 — quỹ bước 4 A3
+#
+# CHƯA làm (SPEC A3): post diff mã vào/ra HOSE lên Trading Daily — hose_membership_refresh.py hiện chỉ in ra log.

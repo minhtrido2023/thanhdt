@@ -1,0 +1,4 @@
+# Thêm vào kb/cron_registry.md (§11) — trạng thái ĐỀ XUẤT, chưa cài
+| 00:30 (T3-T7) — ĐỀ XUẤT 2026-10-14, chưa cài | `mike/bin/vnindex_total_return.py --update` | BQ `tav2_bq.ticker` (Price/OShares, VNINDEX), `tav2_bq.corporate_action` (DIV executed), DNSE chart-api VNINDEX (src2), `data/benchmark/hose_membership_latest.json` | `data/benchmark/vnindex_tr_daily.csv` (dòng mới `provisional`, `sealed` sau 5 phiên; dựng lại sealed lệch > 0,1 bp ⇒ rc=2 không ghi) |
+| 00:45 (T3-T7) — ĐỀ XUẤT 2026-10-14, chưa cài | `mike/bin/nav_sleeve.py --account ZaloPay --write` | `nav_history_ZaloPay.csv`, `dnse_raw_*.jsonl` (lọc account_no), `data/sleeve_scope.json`, `data/sleeve_transfers.json`, BQ giá mã ngoài bot | `data/execution_logs/nav_sleeve_history_ZaloPay.csv` |
+| 07:40 (T7) — ĐỀ XUẤT 2026-10-14, chưa cài | `mike/bin/hose_membership_refresh.py` | VNDirect danh sách mã 3 sàn, corporate_action, panel | `data/benchmark/hose_membership_<vintage>.json` + `_latest.json` |

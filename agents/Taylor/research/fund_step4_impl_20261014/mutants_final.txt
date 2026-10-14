@@ -1,0 +1,60 @@
+A1   CHẾT        vốn hoá phiên t thay t-1 | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca1 y D2 0.00558035714285714 != 0.005555555555555556
+A2   CHẾT        bỏ lọc executed | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca2 CCC announced/not_executed không vào y: 0.00402144772117962
+A3   CHẾT        k của tr_net = 1 | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca1 tr_net D2 995.611111111111 != 995.3305555555556
+A4   CHẾT        bỏ điều kiện phiên liền trước | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca4 FFF phiên nối lại không vào y: 0.00836120401337793
+A5   CHẾT        gộp nhầm hai đợt cùng ngày | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca2 y D4 0.00804289544235925 != 0.013404825737265416
+A6   CHẾT        không bỏ dòng trùng | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca1 y D2 0.0111111111111111 != 0.005555555555555556
+A7   CHẾT        ngày rời sàn tính cả ngày cuối | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca3 EEE đã rời HOSE D7 — cổ tức không vào y: 0.00418060200668896
+A8   CHẾT        không kiểm dòng sealed | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca6 phải ném SealedChanged
+A9   CHẾT        không chặn khi BQ thiếu phiên | vnindex_total_return_selfcheck.py rc=1 AssertionError: ca6e thông điệp DNSE: 1 phiên VNINDEX không có mã nào trong rổ: [datetime.date(2030, 3, 20)]
+A10  CHẾT        G1 phiên cuối tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G1 phiên cuối: []
+A11  CHẾT        G2 tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G2 phải nổ: []
+A12  CHẾT        G3 tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G3 phải nổ: []
+A13  CHẾT        G4 vốn hoá tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G4 phải nổ: []
+A14  CHẾT        G5 tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G5 phải nổ: []
+A15  CHẾT        G6 tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G6 phải nổ: []
+A16  CHẾT        G7 tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G7 phải nổ: []
+A17  CHẾT        G8 tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G8 phải nổ: []
+A18  CHẾT        cổng hỏng vẫn in số có cổ tức | vnindex_total_return_selfcheck.py rc=1 AssertionError: benchmark_period khi G4 hỏng: {'vnindex_price_pct': 0.401, 'vnindex_tr_gross_pct': 0.401, 'vnindex_tr_net_pct': 0.401, 'stat
+A19  CHẾT        đóng dấu sealed ngay | vnindex_total_return_selfcheck.py rc=1 AssertionError: status ['sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'sealed', 'seale
+A20  CHẾT        G4 số mã tắt | vnindex_total_return_selfcheck.py rc=1 AssertionError: G4 phải nổ: []
+B1   CHẾT        bỏ recv | nav_sleeve_selfcheck.py rc=1 AssertionError: ca2 từ đầu (b) 0.9353% ≠ −0,790%
+B2   CHẾT        dòng vào (b) dùng số gộp | nav_sleeve_selfcheck.py rc=1 AssertionError: ca2 dòng vào (b) [{'date': datetime.date(2026, 9, 25), 'amount_vnd': 80000000.0, 'kind': 'deposit', 'evidence': 'sleeve divi
+B3   CHẾT        phạm vi lẫn excluded_tickers (PNJ) | nav_sleeve_selfcheck.py rc=1 KeyError: '2026-07-06'
+B4   CHẾT        ghi đè lô | nav_sleeve_selfcheck.py rc=1 AssertionError: ca6 cộng lô: {'DGC': 10, 'MBB': 50} gap 30.0
+B5   CHẾT        positions_at bỏ lọc account (§12) | nav_sleeve_selfcheck.py rc=1 AssertionError: ca6 cộng lô: {'DGC': 99} gap 0.0
+B6   CHẾT        không gắn cờ vị thế lệch giờ | nav_sleeve_selfcheck.py rc=1 AssertionError: ca6 lệch 10'30" ⇒ cờ stale: 630.0
+B7   CHẾT        S1 tắt | nav_sleeve_selfcheck.py rc=1 AssertionError: ca4 chưa xác nhận ⇒ S1 từ ngày khớp: ['2026-07-08', '2026-07-09']
+B8   CHẾT        S2 tắt | nav_sleeve_selfcheck.py rc=1 AssertionError: ca4 KL xác nhận không khớp ⇒ S2:
+B9   CHẾT        tin bản ghi số dư hỏng | nav_sleeve_selfcheck.py rc=1 AssertionError: ca6 dò ngày tiền về bỏ bản ghi hỏng: {'proposal_id': 'dividend:DGC:2026-07-07', 'source': 'dividend', 'ticker': 'DGC', 'ex_d
+B10  CHẾT        S7 tắt | nav_sleeve_selfcheck.py rc=1 AssertionError: S7 phải từ chối mốc (b) < 5%
+B11  CHẾT        S6 ghi tắt | nav_sleeve_selfcheck.py rc=1 AssertionError: S6 ghi phải từ chối
+B12  CHẾT        consumer không kiểm nav_a | nav_sleeve_selfcheck.py rc=1 AssertionError: consumer phải từ chối: nav_history nav
+B13  CHẾT        S3 tắt | nav_sleeve_selfcheck.py rc=1 TypeError: 'NoneType' object is not subscriptable
+B14  CHẾT        đề xuất cổ tức số gộp | nav_sleeve_selfcheck.py rc=1 AssertionError: ca6 dò ngày tiền về bỏ bản ghi hỏng: {'proposal_id': 'dividend:DGC:2026-07-07', 'source': 'dividend', 'ticker': 'DGC', 'ex_d
+B15  CHẾT        recv còn tính ngày tiền về | nav_sleeve_selfcheck.py rc=1 AssertionError: ca2 recv: 0 trước GDKHQ, 80tr từ 14/09 tới trước 25/09, 0 ngày về
+B16  CHẾT        S6 consumer tắt | nav_sleeve_selfcheck.py rc=1 AssertionError: S6 consumer phải từ chối
+B17  CHẾT        consumer bỏ qua dòng bị chặn | nav_sleeve_selfcheck.py rc=1 AssertionError: consumer phải từ chối dòng bị chặn
+C1   CHẾT        mốc chỉ số không theo dòng sổ của kỳ | nav_period_benchmark_selfcheck.py rc=1 AssertionError: 2030-05-08/wtd: anchor 2030-04-29→2030-05-08 ≠ kỳ 2030-05-03→2030-05-08
+C2   CHẾT        chênh tính theo gross dù cờ = net | nav_period_benchmark_selfcheck.py rc=1 AssertionError: chênh: {'anchor_date': '2030-04-29', 'end_date': '2030-06-06', 'index_anchor_date': '2030-04-29', 'index_end_date': '2030-06
+C3   CHẾT        thiếu số ⇒ chênh 0 thay vì None | nav_period_benchmark_selfcheck.py rc=1 AssertionError: thiếu chuỗi ⇒ chênh None: {'anchor_date': '2030-04-29', 'end_date': '2030-06-06', 'vnindex_price_pct': None, 'vnindex_tr_gro
+C4   CHẾT        chuỗi b không gắn nhãn | nav_period_benchmark_selfcheck.py rc=1 KeyError: 'series'
+C5   CHẾT        --sleeve bot không có số vẫn rc=0 | nav_period_benchmark_selfcheck.py rc=1 }
+C6   CHẾT        luôn thêm khối benchmark (phá byte-identical) | nav_period_benchmark_selfcheck.py rc=1 AssertionError: 2030-05-02: bỏ khối benchmark phải ra ĐÚNG từng byte đầu ra cũ
+C7   CHẾT        cờ Q2 không có tác dụng | nav_period_benchmark_selfcheck.py rc=1 AssertionError: cờ Q2 = tr_gross phải đổi cột, không sửa code: {'anchor_date': '2030-04-29', 'end_date': '2030-06-06', 'index_anchor_date': 
+C8   CHẾT        rơi im lặng về chỉ số giá | nav_period_benchmark_selfcheck.py rc=1 AssertionError: G4 hỏng: {'anchor_date': '2030-04-29', 'end_date': '2030-06-06', 'index_anchor_date': '2030-04-29', 'index_end_date': '2030-
+C9   CHẾT        dòng sổ ngày nghỉ không ánh xạ phiên | nav_period_benchmark_selfcheck.py rc=1 AssertionError: dòng sổ ngày nghỉ ⇒ mức chỉ số đóng cửa 2030-05-31 + ghi chú: {'anchor_date': '2030-05-31', 'end_date': '2030-06-01', 'index
+C10  CHẾT        mặc định Q2 sai (gross) | nav_period_benchmark_selfcheck.py rc=1 AssertionError: Q2 mặc định: {'anchor_date': '2030-04-29', 'end_date': '2030-06-06', 'index_anchor_date': '2030-04-29', 'index_end_date': '2
+D1   CHẾT        dung sai 0,05 thay 0,005 | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('VN-Index có cổ tức', '+2.900'))
+D2   CHẾT        Q9 tắt (cột có cổ tức thiếu số vẫn gửi) | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('Q9', 'G4'))
+D3   CHẾT        CLI không có số mà bảng ghi số vẫn qua | period_table_32_selfcheck.py rc=1 AssertionError: thông điệp phải trích 'KHÔNG thay bằng số khác': benchmark-table BLOCK (X_weekly.md): cột 'VN-Index có cổ tức' dòng 'Từ khi 
+D4   CHẾT        bỏ cột có cổ tức vẫn qua | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('thiếu cột', 'VN-Index có cổ tức'))
+D5   CHẾT        không kiểm chú thích | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('thiếu chú thích', 'tr_net'))
+D6   CHẾT        dòng lạ có số vẫn qua | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('Từ đầu năm',))
+D7   CHẾT        chuỗi b chưa có số mà bảng ghi số vẫn qua | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('chưa có số', 'nav_sleeve_history'))
+D8   CHẾT        render thay giá vào cột có cổ tức | period_table_32_selfcheck.py rc=1 AssertionError: thông điệp phải trích 'Q9': benchmark-table BLOCK (X_weekly.md): dòng 'Từ khi bắt đầu hoạt động (29/04 → 06/06)' cột 'VN-Ind
+D9   CHẾT        deliver() không gọi cổng bảng | period_table_32_selfcheck.py rc=1 AssertionError: deliver() phải gọi cổng bảng ngay sau cổng period-return
+D10  CHẾT        bỏ qua rc≠0 của CLI | period_table_32_selfcheck.py rc=1 AssertionError: phải CHẶN (cần ('rc=1', 'lỗi giả'))
+D11  CHẾT        cổng gọi CLI của cây đang chạy thay cây canonical | period_table_32_selfcheck.py rc=1 AssertionError: cổng gọi CLI của cây canonical với report-date từ tên file: ('ZaloPay', '2026-10-09', False, None)
+TỔNG 58 mutant, 58 chết, 0 sống/lỗi
+exit=0
