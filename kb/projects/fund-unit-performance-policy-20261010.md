@@ -181,3 +181,11 @@ trừ **Q2**: user yêu cầu chỉ số có cổ tức phản ánh **số thự
 cột chỉ số có cổ tức trong báo cáo dùng **`tr_net` (sau thuế 5%)**, KHÔNG phải `tr_gross`. `tr_gross` vẫn lưu trong
 `vnindex_tr_daily.csv` để đối chiếu, không hiển thị làm số chính. Chú thích báo cáo phải nêu "sau thuế TNCN 5% trên cổ tức".
 Mike diễn giải "số thực" = sau thuế (nhà đầu tư thật chỉ nhận ròng; danh mục cũng ghi cổ tức ròng) — chờ user xác nhận nếu hiểu khác.
+
+### Bước 4 — arch-review 2026-10-14 & quyết định user 16:11 ICT (`decided_by: user`)
+Arch-review nhánh `feat/fund-step4-benchmark-20261014` (HEAD 6a60a0bbc): **NEEDS_CHANGES**. Blocking: (1) mốc chỉ số "từ khi bắt đầu"
+SpaceX đang lấy đóng cửa 01/07 trong khi NAV gốc là số dư SÁNG 01/07 ⇒ mốc đúng = đóng cửa 30/06 (SpaceX −4,913% vs −5,280% tới 09-30;
+báo cáo tháng 9 đã công bố −4,91% = mốc 30/06); (2) `--sleeve bot` rc=1 khi thiếu `sleeve_scope.json` (phải rc=3 "chưa có số");
+(3) hẹn giờ: G1 dùng lịch lễ chưa khai Tết ⇒ chặn weekly/monthly từ ~02/2027.
+**User duyệt (1): mốc SpaceX = đóng cửa 30/06/2026** (mốc theo TÀI KHOẢN trong `account_inception.json`; ZaloPay giữ 06/07 vì số dư 06/07 21:35 khớp NAV gốc).
+**User duyệt giao Taylor vòng 2** sửa (1)(2)(3) + 4 mutant sống + cổng bảng. Việc đã công bố nào dùng mốc 01/07 ⇒ liệt kê để đính chính qua cơ chế bước 3, KHÔNG sửa báo cáo cũ.
