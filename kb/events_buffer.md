@@ -732,3 +732,8 @@
 
 ## Consolidation 2026-10-14T11:07:01Z
 - [2026-10-14T10:31:18Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53686}
+
+## Consolidation 2026-10-14T12:07:01Z
+- [2026-10-14T11:15:51Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12712}
+- [2026-10-14T11:10:05Z] Winston/status — new-listings-daily: {"date": "2026-10-14", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-10-14T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
