@@ -123,7 +123,10 @@ def fetch_live():
     import pandas as pd
     lists = {}
     for fl in FLOORS:
-        with urllib.request.urlopen(VND_URL.format(fl=fl), timeout=60) as r:
+        # VNDirect trả 403 cho User-Agent mặc định "Python-urllib" (đo 2026-10-14; curl 200)
+        req = urllib.request.Request(VND_URL.format(fl=fl), headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64)",
+                                                                     "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as r:
             j = json.loads(r.read().decode("utf-8"))
         if j.get("totalElements", 0) > len(j.get("data", [])):
             raise RuntimeError(f"VNDirect {fl}: totalElements {j.get('totalElements')} > "

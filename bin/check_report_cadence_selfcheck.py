@@ -415,7 +415,7 @@ if _wk:
     # Biến bash được phép nội suy trong thân PROMPT; còn lại (backtick, $(…), ${khác}) là command
     # substitution âm thầm làm rơi/đổi chữ — `bash -n` không bắt được (mutation M10/M11).
     _ALLOWED = ("${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}", "${DELEGATE_STEP}",
-                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
+                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${CORR_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
     for _nm, _body in (("weekly", _wk.group(1)), ("monthly", _wk.group(2))):
         _need = ["Toàn cảnh thị trường", "Outlook", "${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}",
                  "${PORTFOLIO_STEP}", "${BENCH_STEP}"]
