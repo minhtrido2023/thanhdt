@@ -15,9 +15,11 @@ Chạy tuần một lần; in DIFF mã vào/ra HOSE so với `_latest` cũ (stdo
   python3 mike/bin/hose_membership_refresh.py [--out-dir DIR] [--from-files DIR --ca-parquet P --panel-parquet P]
 """
 import argparse
+import glob
 import json
 import os
 import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vnindex_total_return as VTR  # noqa: E402
@@ -25,6 +27,8 @@ import vnindex_total_return as VTR  # noqa: E402
 FAR = "2100-01-01"
 FLOORS = ("HOSE", "HNX", "UPCOM")
 VND_URL = "https://api-finfo.vndirect.com.vn/v4/stocks?q=type:STOCK~floor:{fl}&size=3000"
+COUNT_TOL = 0.05          # N-d vòng 2: số mã HOSE đổi > 5% so với _latest ⇒ không ghi đè (nghi nguồn hỏng)
+STALE_TMP_S = 3600        # file .tmp.<pid> cũ hơn 1 giờ = lần chạy bị giết giữa chừng ⇒ dọn
 LEAVE_RE = r"từ HOSE sang|Hủy niêm yết.*HOSE|GDCC trên HOSE"
 ENTER_RE = r"niêm yết.*trên (?:sàn )?HOSE|sang HOSE|giao dịch trên sàn HOSE"
 
@@ -80,13 +84,38 @@ def diff(old: dict, new: dict) -> dict:
     return {"added": sorted(b - a), "removed": sorted(a - b), "old_vintage": old.get("vintage")}
 
 
+def implausible(old: dict, new: dict, tol: float = COUNT_TOL):
+    """Lý do (chuỗi) nếu số mã HOSE hiện tại đổi quá `tol` so với `_latest` cũ, ngược lại None. Bảng sàn
+    thật đổi vài mã/tuần; nhảy > 5% gần như chắc là nguồn trả thiếu/thừa (cắt trang, đổi API)."""
+    n0, n1 = len(old.get("hose_now") or []), len(new.get("hose_now") or [])
+    if n0 and abs(n1 - n0) > tol * n0:
+        return (f"số mã HOSE {old.get('vintage')} = {n0} → {new.get('vintage')} = {n1} "
+                f"({n1 - n0:+d}, > {tol:.0%} của {n0})")
+    return None
+
+
+def sweep_stale_tmp(out_dir: str, now: float = None) -> list:
+    """Xoá `hose_membership_*.json.tmp.*` cũ hơn STALE_TMP_S (lần chạy bị giết sau khi mở file tạm)."""
+    now = time.time() if now is None else now
+    gone = []
+    for f in glob.glob(os.path.join(out_dir, "hose_membership_*.json.tmp.*")):
+        if now - os.path.getmtime(f) > STALE_TMP_S:
+            os.remove(f)
+            gone.append(os.path.basename(f))
+    return gone
+
+
 def _atomic_json(path: str, obj) -> None:
     tmp = f"{path}.tmp.{os.getpid()}"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(obj, f, ensure_ascii=False, indent=0, sort_keys=True)
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp, path)
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=0, sort_keys=True)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
 
 
 def fetch_live():
@@ -121,6 +150,8 @@ def main(argv=None) -> int:
     ap.add_argument("--ca-parquet")
     ap.add_argument("--panel-parquet")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--accept-count-change", action="store_true",
+                    help=f"ghi dù số mã HOSE đổi > {COUNT_TOL:.0%} (đã kiểm bằng mắt là thật)")
     a = ap.parse_args(argv)
     vintage = a.vintage or VTR.now_ict().date().isoformat()
     if a.from_files:
@@ -146,8 +177,15 @@ def main(argv=None) -> int:
     if d["old_vintage"] and (d["added"] or d["removed"]):
         print(f"📋 Bảng sàn HOSE {d['old_vintage']} → {vintage}: vào {d['added'] or '—'}; "
               f"ra {d['removed'] or '—'}")
+    bad = implausible(old, snap)
+    if bad and not a.accept_count_change:
+        print(f"🔴 hose_membership_refresh: KHÔNG ghi — {bad}. Kiểm nguồn {sources.get('floors')}; thật thì "
+              f"chạy lại với --accept-count-change.", file=sys.stderr)
+        return 2
     if not a.dry_run:
         os.makedirs(a.out_dir, exist_ok=True)
+        for g in sweep_stale_tmp(a.out_dir):
+            print(f"hose_membership_refresh: dọn file tạm cũ {g}", file=sys.stderr)
         _atomic_json(os.path.join(a.out_dir, f"hose_membership_{vintage}.json"), snap)
         _atomic_json(latest, snap)
     return 0
