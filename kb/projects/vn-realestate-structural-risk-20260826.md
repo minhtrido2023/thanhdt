@@ -20,7 +20,8 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
 | (thêm 14/10, user duyệt) LƯỢNG BÁN căn hộ sơ cấp HN/HCM theo CBRE, so YoY (dùng lượng, KHÔNG dùng tỷ lệ hấp thụ vì cung mới làm méo) | −30% YoY 2 quý liên tiếp (khớp định nghĩa kịch bản B) | chưa đặt |
 | (thêm 14/10, user duyệt) Tài sản nhận gán nợ / TSĐB chờ xử lý trên BCTC quý của NH niêm yết, so QoQ | chưa đặt — ghi mốc đầu từ BCTC Q3 (20/10-14/11), đặt ngưỡng sau khi có ≥2 điểm | chưa đặt |
 | Interbank overnight | >6% đột biến | kéo dài |
-| NPL công bố NHNN | >3% | >5% |
+| NPL toàn hệ thống — NHNN công bố (mốc 30/6/2026: 1,51%, đang giảm) | >3% | >5% |
+| NPL gộp 27 NH niêm yết (mốc Q2/2026: 2,01%; cuối 2025: 1,87%; nguồn TCBS) — theo dõi RIÊNG, KHÔNG trộn với dòng NHNN hay với số SSI 13 NH (1,97%) | >3% | >5% |
 | VND | mất giá >3%/tháng | >10% + dự trữ <$60 tỷ |
 **Point of no return**: bank systemic (>500K tỷ tài sản) bị run · rollover fail >100K tỷ TPDN BĐS/quý · dự trữ <$60 tỷ + VND −10% · CPI >10% khi GDP <3%.
 
@@ -74,6 +75,9 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
      4. Tín dụng YTD − huy động YTD (CÙNG phạm vi, CÙNG mốc ngày) ≥2pp (mốc 22/08: −0,4pp VND).
      5. Tiền gửi lớn cao nhất thị trường ≥10% kéo dài 2 tháng liền (mốc: PVcomBank 10% cho khoản từ 2.000 tỷ,
         nguồn 07/09; tháng 10 chưa xác nhận).
+        **Làm rõ 2026-10-14 (user duyệt): mốc PVcomBank 10% (07/09) là mốc THAM CHIẾU, KHÔNG phải sự kiện kích hoạt** —
+        đồng hồ 2 tháng chỉ bắt đầu từ lần xác nhận ≥10% đầu tiên có ngày ≥13/10/2026 (ngày ngưỡng được đặt); chưa có số
+        tháng 10 ⇒ chưa chạm.
      6. (thêm 2026-10-13, user duyệt) CCTG nhóm NGAY SAU Big-4 (VPB, MB, TCB, ACB) — lợi suất cao
         nhất cho thời gian nắm giữ ≤12 tháng, đo RIÊNG mệnh giá 10 triệu và 100 triệu: tăng ≥0,3pp
         so với kỳ trước, HOẶC bậc 100 triệu ≥9,5%. Mốc 13/10 (file `data/cctg_rate_vn_tier2_events.csv`,
@@ -182,3 +186,4 @@ Nguồn (ngày công bố cụ thể):
 - 2026-10-07: interim tháng 2026-10 = **BINH_THUONG** (CPI T9 5,08% chỉ nối tiếp đợt vượt trần đã escalate kỳ trước, do xăng dầu (chi phí đẩy), còn lạm phát cơ bản giảm xuống 4,45%; lãi suất Big-4 giữ 6,8%; văn bản mới (CV 8509) là nới chứ không siết; không có tin nợ xấu hay rút tiền hàng loạt ngoài chu kỳ.) — chi tiết `/home/trido/thanhdt/WorkingClaude/mike/kb/projects/vn_realestate_monthly_checks/2026-10.md`
 - 2026-10-14: Bobby MACRO UPDATE sau họp BCĐ TW nhà ở/BĐS 13/10 — GIỮ STRUCTURAL_ACCUMULATION, giai đoạn **sớm-giữa → GIỮA**, vẫn AMBIGUOUS; (a) **hạ cấp** luận điểm bảo vệ "thặng dư vãng lai" (9T nhập siêu 19,42 tỷ USD vs xuất siêu 16,87 tỷ cùng kỳ 2025); (b) **TT 50/2026 nới LDR 85%→95% (hiệu lực 01/12) là sự kiện nới lượng mới**; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm — chi tiết `mike/reports/bobby_vn_macro_update_20261014.md`, registry `vn_macro_regime_history.md` mục MACRO UPDATE.
 - 2026-10-14 (b): user duyệt thêm 2 chỉ báo vào bảng lead indicator (lượng bán CBRE YoY; tài sản gán nợ QoQ) theo addendum Bobby `mike/reports/bobby_vn_macro_addendum_20261014b.md` mục 3. "Đấu giá thất bại nhiều lần" chỉ theo dõi định tính. CHƯA làm (Bobby cũng đề xuất, chưa được user duyệt riêng): tách dòng NPL thành NHNN (1,51% @30/6) và 27 NH niêm yết (2,01%); đọc lãi vay mua nhà (~13%, 1 nguồn) cùng kill-switch A.
+- 2026-10-14 (c): user duyệt toàn bộ đề xuất Bobby còn lại: (1) tách dòng NPL thành NHNN (1,51% @30/6) và 27 NH niêm yết (2,01%) — đã làm trong bảng lead indicator; (2) QUY TẮC ĐỌC: mỗi lần báo kill-switch A / lãi huy động hiệu dụng (escalate hay review tháng/quý) PHẢI đọc kèm lãi vay mua nhà thả nổi (Savills ~13%, +4pp YoY, 1 nguồn CHƯA kiểm — kiểm lại trước khi trích), vì kênh chi phí vốn → lãi vay sau ưu đãi → hấp thụ là kênh chính của kịch bản B; KHÔNG đổi ngưỡng; (3) ngưỡng #5 làm rõ ở mục trên; (4) nhãn `rate_source` cctg_6m→12m trong code: đang giao Taylor trên nhánh riêng, chờ arch-review rồi mới merge (job Taylor_20261014_135258).
