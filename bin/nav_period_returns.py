@@ -337,12 +337,16 @@ def main() -> int:
             try:
                 result = compute_sleeve_period_returns(args.account, report_date, rows, inception,
                                                        benchmark=_benchmark_fn())
-            except nav_sleeve.SleeveUnavailable as e:
-                # Chuỗi (b) không có số: báo cáo in đúng "chưa có số (<lý do>)", không chặn chuỗi (a).
+            except (nav_sleeve.SleeveUnavailable, nav_sleeve.SleeveError, OSError, ValueError, KeyError,
+                    CashFlowError) as e:
+                # Chuỗi (b) không có số — kể cả file phạm vi/chuyển giao THIẾU hoặc HỎNG (SleeveError,
+                # JSONDecodeError ⊂ ValueError): báo cáo in đúng "chưa có số (<lý do>)", không chặn chuỗi
+                # (a) (SPEC B4; arch-review bước 4 vòng 1 #2). Lý do = thông điệp lỗi thật (§29).
+                why = str(e) if isinstance(e, nav_sleeve.SleeveUnavailable) else _exc_text(e)
                 print(json.dumps({"account": args.account, "report_date": report_date.isoformat(),
-                                  "series": "bot", "status": "unavailable", "reason": str(e)},
+                                  "series": "bot", "status": "unavailable", "reason": why},
                                  ensure_ascii=False, indent=2))
-                print(f"nav_period_returns ({args.account} --sleeve bot): chưa có số — {e}",
+                print(f"nav_period_returns ({args.account} --sleeve bot): chưa có số — {why}",
                       file=sys.stderr)
                 return 3
         else:

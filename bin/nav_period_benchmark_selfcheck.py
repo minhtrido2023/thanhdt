@@ -222,6 +222,65 @@ def t_cli(D, series, inc, rows):
          nav_sleeve.sleeve_inputs_for_report, sys.argv) = saved
 
 
+def t_cli_sleeve_files(D, series, inc, rows):
+    """B2 (arch-review vòng 1 #2): file phạm vi/chuyển giao THIẾU hoặc HỎNG ⇒ `--sleeve bot` rc=3 +
+    JSON `unavailable` + lý do trích lỗi thật — KHÔNG traceback rc=1 (rc=1 làm cổng chặn cả báo cáo)."""
+    import functools
+    tmp = tempfile.mkdtemp(prefix="npr_sleeve_files_sc_")
+    scope_ok = os.path.join(tmp, "scope_ok.json")
+    with open(scope_ok, "w", encoding="utf-8") as f:
+        json.dump({"ZaloPay": [{"ticker": "DGC", "from": D[40].isoformat()}]}, f)
+    md5 = nav_sleeve.scope_md5(nav_sleeve.load_scope("ZaloPay", scope_ok))
+    with open(nav_sleeve.history_path("ZaloPay", tmp), "w", encoding="utf-8") as f:
+        f.write(f"date,scope_md5\n{D[40].isoformat()},{md5}\n")
+
+    def put(name, text):
+        p = os.path.join(tmp, name)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(text)
+        return p
+    cases = [  # (tên, scope_path, transfers_path, report_date, chuỗi phải có trong lý do)
+        ("thiếu sleeve_scope.json", os.path.join(tmp, "absent_scope.json"), "/nonexistent/t.json",
+         D[66], "absent_scope.json"),
+        ("sleeve_scope.json JSON hỏng", put("bad_scope.json", '{"ZaloPay": [{"ticker": "DGC",'),
+         "/nonexistent/t.json", D[66], "JSONDecodeError"),
+        ("scope rỗng", put("empty_scope.json", '{"ZaloPay": []}'), "/nonexistent/t.json", D[66],
+         "không có mục trong sleeve_scope.json"),
+        ("scope thiếu 'from'", put("nofrom_scope.json", '{"ZaloPay": [{"ticker": "DGC"}]}'),
+         "/nonexistent/t.json", D[66], "thiếu ticker/from"),
+        # report_date = mốc ⇒ không dòng nào cần lịch sử b ⇒ tới bước đọc transfers
+        ("sleeve_transfers.json JSON hỏng", scope_ok, put("bad_tr.json", '{"ZaloPay": [{'), D[40],
+         "JSONDecodeError"),
+        ("sleeve_transfers.json thiếu trường", scope_ok,
+         put("miss_tr.json", '{"ZaloPay": [{"proposal_id": "p1", "source": "dividend"}]}'), D[40],
+         "thiếu 'ticker'"),
+    ]
+    saved = (npr.load_nav_history, npr.load_inception, npr.load_flows, npr._benchmark_fn,
+             nav_sleeve.sleeve_inputs_for_report, sys.argv)
+    orig = nav_sleeve.sleeve_inputs_for_report
+    try:
+        npr.load_nav_history = lambda acc: rows
+        npr.load_inception = lambda acc: inc
+        npr.load_flows = lambda acc, require_file=False: []
+        npr._benchmark_fn = lambda: bm_fn(series)
+        for name, sp, tp, rd, must in cases:
+            nav_sleeve.sleeve_inputs_for_report = functools.partial(
+                orig, exec_dir=tmp, scope_path=sp, transfers_path=tp, seed_path="/nonexistent/seed.json")
+            out, err = io.StringIO(), io.StringIO()
+            sys.argv = ["nav_period_returns.py", "--account", "ZaloPay", "--report-date", rd.isoformat(),
+                        "--sleeve", "bot"]
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                rc = npr.main()
+            j = json.loads(out.getvalue())
+            ok(rc == 3 and j["status"] == "unavailable" and must in j["reason"]
+               and "chưa có số" in err.getvalue() and "Traceback" not in err.getvalue(),
+               f"B2 {name}: rc={rc} (phải 3), reason={j.get('reason')!r} (phải chứa {must!r}), "
+               f"stderr={err.getvalue()[-300:]!r}")
+    finally:
+        (npr.load_nav_history, npr.load_inception, npr.load_flows, npr._benchmark_fn,
+         nav_sleeve.sleeve_inputs_for_report, sys.argv) = saved
+
+
 def main() -> int:
     D, series, inc, rows, sat = fixture()
     t_byte_identity_and_anchor(D, series, inc, rows, sat)
@@ -230,6 +289,7 @@ def main() -> int:
     t_non_session_row(D, series, inc, rows, sat)
     t_sleeve(D, series, inc, rows)
     t_cli(D, series, inc, rows)
+    t_cli_sleeve_files(D, series, inc, rows)
     print(f"OK — {N_OK} assertion PASS (nav_period_benchmark_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
 
