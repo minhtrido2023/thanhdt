@@ -1230,3 +1230,6 @@
 
 ## Archived 2026-10-14 (keep=12 days=0 require_done=False)
 - [2026-10-13T17:13:18Z] ĐANG DỞ job Taylor_20261013_163831: VIỆC 2 ĐÃ COMMIT 0b29d2d1 (repo ngoài, nhánh fix/dcf-fallback-direction-20261013, wt agents/Taylor/wt-dcffb-1013, CHƯA merge); VIỆC 1 đo xong (research/dcf_discount_rate_rf_slow_20261013/out_rf_slow_measure.txt + results.json): IC không phân biệt được, FV hôm nay -15% (ma12)/-23% (ma36), 10/14 mã CHEAP->RICH; nền còn chạy: selfcheck_branch/fallback_dir_FULLDAILY.txt + selfcheck_broad/_ALL_DONE | NEXT: viết README.md, đọc 2 kết quả nền, bus finding dcf-discount-rate-rf-slow-20261013 (trace Taylor_20261013_163831)
+
+## Archived 2026-10-14 (keep=12 days=0 require_done=False)
+- [2026-10-13T17:30:12Z] [DCF rf-chậm + fallback, 10-14] XONG: finding dcf-discount-rate-rf-slow-20261013 trace Taylor_20261013_163831. Việc 2 = fix/dcf-fallback-direction-20261013 @0b29d2d1 (repo ngoài, wt-dcffb-1013, CHƯA merge) — CHỜ Mike arch-review + duyệt kb/data_registry/macro/cctg_rate_vn.md.proposed. Việc 1 = IC không phân biệt được, khuyến nghị GIỮ cap_rf + dòng hiển thị phụ min(spot,MA12); CHỜ user chọn A/B/C + quant-skeptic trước khi wire. README research/dcf_discount_rate_rf_slow_20261013/. (Thay các dòng ĐANG DỞ job 163831.)
