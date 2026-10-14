@@ -254,6 +254,32 @@ def _check_period_returns(report: Path) -> None:
           f"canonical {canonical:+.3f}% (lệch {diff:.3f}pp)")
 
 
+# Benchmark-table gate (quỹ bước 4, SPEC §A5/§B4) — weekly/monthly SpaceX + ZaloPay: ô VN-Index (giá /
+# có cổ tức) + 2 cột chênh trong bảng 3.2 phải bằng đầu ra `nav_period_returns.py` (⩽ 0,005 điểm %);
+# cột có cổ tức `chưa có số` ⇒ CHẶN (Q9, user 2026-10-14); dòng chuỗi b `chưa có số` ⇒ cho qua. Logic +
+# render chung một module: `period_table_32.py`. Daily không có bảng này.
+_CADENCE_RE = re.compile(r"^(SpaceX|ZaloPay)_(weekly|monthly)_report_")
+
+
+def _check_benchmark_table(report: Path) -> None:
+    m = _CADENCE_RE.match(report.name)
+    if not m:
+        return
+    report_date = _extract_report_date(report.name)
+    if report_date is None:
+        raise RuntimeError(f"benchmark-table BLOCK ({report.name}): không suy được report-date từ tên file")
+    import period_table_32 as pt  # noqa: E402
+
+    def cli(account, d, sleeve):
+        return pt.run_cli(account, d, sleeve, bin_dir=str(ROOT / "bin"))
+    try:
+        for line in pt.check_report(report.name, report.read_text(encoding="utf-8"), m.group(1),
+                                    report_date, cli=cli):
+            print(f"report_delivery_gate: {line}")
+    except pt.TableBlock as exc:
+        raise RuntimeError(str(exc)) from exc
+
+
 # NAV-flow gate (FAIL-H, audit measurement-integrity 2026-09-27) — CỐ Ý FAIL-CLOSED, như
 # `_check_period_returns` ở trên (cổng đó cũng fail-closed từ 2026-10-12; nó chỉ còn bỏ qua khi báo
 # cáo không có dòng nào để so). Cổng này canh một BƯỚC NHẢY NAV không giải thích được —
@@ -431,6 +457,7 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                     run_checked([sys.executable, str(ROOT / "bin" / "report_return_gate.py"),
                                  "--report", str(report)])
                     _check_period_returns(report)
+                    _check_benchmark_table(report)
                     _check_nav_flow_records(report)
                     _warn_cash_flows(report)
                 record["artifact_validated_at"] = now()
