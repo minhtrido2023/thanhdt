@@ -44,8 +44,11 @@ với đường ghi đó ⇒ áp trong khung ấy có thể bị ghi đè mất.
 `os.replace`; đổi giữa chừng ⇒ không ghi, nhật ký thêm bản ghi `aborted`.
 Trước khi ghi, byte nav_history hiện có được chép sang
 `<nav_dir>/restatement_backups/<account>_<giờ ICT>_<md5>.csv` (chỉ-thêm, không ghi đè). ĐƯỜNG LUI:
-trước khi chốt sổ = chép bản sao lưu đó về lại + áp một đính chính NGƯỢC (để nhật ký ghi nhận);
-sau khi chốt sổ = chỉ còn đường đính chính (`nav_unit_ledger.py --restate`).
+trước khi chốt sổ = áp một đính chính NGƯỢC lên file HIỆN TẠI (impact → apply: có sao lưu + nhật ký);
+CHỈ khi công cụ hỏng mới chép bản sao lưu về, rồi ghi tay MỘT dòng nhật ký
+`{"status": "rolled_back_manual", "md5_before", "md5_after", "by"}` — chép bản sao lưu rồi áp
+đính chính ngược sẽ cho "ĐÃ ÁP từ trước" vì mọi mục đã có sẵn; sau khi chốt sổ = chỉ còn đường
+đính chính (`nav_unit_ledger.py --restate`).
 
 Dùng:
     # (sổ cũ, sổ mới) — hai thư mục nav_history
@@ -129,6 +132,8 @@ _EOD_HEADER_RE = re.compile(r"(?:--account (?P<acct1>[A-Za-z0-9_]+) ===|(?:EOD T
                             r"dịch ngày) — (?P<acct2>[A-Za-z0-9_]+) \(\d{4}-\d{2}-\d{2}\))")
 _EOD_NAV_RE = re.compile(r"NAV (?P<date>\d{4}-\d{2}-\d{2}): (?P<nav>[\d,]+) VND\*{0,2} \((?P<vnd>[+-]?[\d,]+) VND, "
                          r"(?P<pct>[+-]?\d+(?:\.\d+)?)% so với hôm trước\)")
+# Dòng NAV dạng lỏng: dùng để ĐẾM những dòng không đọc/gán được (không để rơi im lặng — F5).
+_EOD_NAV_LOOSE_RE = re.compile(r"NAV \d{4}-\d{2}-\d{2}: [\d.,]+ VND")
 _RANGE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})(?:_(.+))?$")
 _DAY_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:_(.+))?$")
 _MONTH_RE = re.compile(r"^(\d{4})-(\d{2})(?:_(.+))?$")
@@ -438,11 +443,20 @@ def _read_log_text(path: str) -> str:
 
 
 def list_eod_messages(pattern: str, account: str) -> tuple:
-    """(tin EOD của `account` đọc từ log khớp `pattern`, [file đã quét]). Mỗi tin = một "báo cáo"
+    """(tin EOD của `account`, [file đã quét]) — xem `list_eod_messages_ex` (thêm số dòng NAV không
+    gán được tài khoản)."""
+    out, files, _ = list_eod_messages_ex(pattern, account)
+    return out, files
+
+
+def list_eod_messages_ex(pattern: str, account: str) -> tuple:
+    """(tin EOD của `account` đọc từ log khớp `pattern`, [file đã quét], số dòng NAV KHÔNG gán được
+    tài khoản hoặc không đọc được). Mỗi tin = một "báo cáo"
     loại `eod`: {name, kind, start=end=ngày NAV, printed: {nav, day_pct}, text}. Gán tài khoản theo
     dấu hiệu tài khoản gần nhất phía trên (`_EOD_HEADER_RE`, §12); dòng NAV trước mọi dấu hiệu bị bỏ."""
     files = sorted(glob.glob(pattern))
     out = []
+    unattributed = 0
     for path in files:
         who = None
         for n, line in enumerate(_read_log_text(path).splitlines(), start=1):
@@ -450,7 +464,13 @@ def list_eod_messages(pattern: str, account: str) -> tuple:
             if h:
                 who = h.group("acct1") or h.group("acct2")
                 continue
+            if "eod_trading_report.sh" in line:
+                who = None            # dòng lệnh dạng lạ (vd `--account=X`): KHÔNG mang tài khoản cũ sang (§12)
+                continue
             m = _EOD_NAV_RE.search(line)
+            if _EOD_NAV_LOOSE_RE.search(line) and (not m or who is None):
+                unattributed += 1     # có dạng "NAV <ngày>:" nhưng không đọc/gán được ⇒ đếm, không bỏ im lặng
+                continue
             if not m or who != account:
                 continue
             day = datetime.date.fromisoformat(m.group("date"))
@@ -459,7 +479,27 @@ def list_eod_messages(pattern: str, account: str) -> tuple:
                         "printed": {"nav": float(m.group("nav").replace(",", "")),
                                     "day_pct": float(m.group("pct"))},
                         "text": line})
-    return out, files
+    return out, files, unattributed
+
+
+def _journal_has_applied(log: str, account: str, correction_md5: str, md5_after: str) -> bool:
+    """Nhật ký đính chính có bản ghi ĐÃ ÁP (không `aborted`, không `rolled_back_manual`) của đúng
+    (tài khoản, md5 file đính chính, md5 sau)? Đọc không được dòng nào ⇒ coi là không có."""
+    if not os.path.exists(log):
+        return False
+    with open(log, "r", encoding="utf-8") as f:
+        for ln in f.read().splitlines():
+            if not ln.strip():
+                continue
+            try:
+                rec = json.loads(ln)
+            except ValueError:
+                continue
+            if (rec.get("account") == account and rec.get("correction_md5") == correction_md5
+                    and rec.get("md5_after") == md5_after
+                    and rec.get("status") not in ("aborted", "rolled_back_manual")):
+                return True
+    return False
 
 
 def _nav_literals(nav: float) -> list:
@@ -593,7 +633,8 @@ def build_impact(account, old: Side, new: Side, changed_dates: dict, reports_dir
         with open(os.path.join(reports_dir, meta["name"]), "r", encoding="utf-8") as f:
             text = f.read()
         rows.append(assess_report(meta, old, new, changed_dates, text))
-    eod, eod_files = list_eod_messages(eod_glob, account) if eod_glob else ([], [])
+    eod, eod_files, eod_unattributed = (list_eod_messages_ex(eod_glob, account) if eod_glob
+                                        else ([], [], 0))
     for meta in eod:
         rows.append(assess_report(meta, old, new, changed_dates, meta["text"]))
     affected = [r for r in rows if r["affected"]]
@@ -610,7 +651,7 @@ def build_impact(account, old: Side, new: Side, changed_dates: dict, reports_dir
             "reports_dir": reports_dir,
             "n_report_files": sum(1 for r in rows if r["kind"] != "eod"),
             "eod_log_glob": eod_glob, "eod_log_files": [os.path.basename(x) for x in eod_files],
-            "n_eod_messages": len(eod),
+            "n_eod_messages": len(eod), "eod_unattributed_lines": eod_unattributed,
             "eod_dates": ([min(m["end"] for m in eod).isoformat(), max(m["end"] for m in eod).isoformat()]
                           if eod else None),
             "note": "file .md: báo cáo ngày có từ 2026-08-17 (trước đó chỉ trên Discord); tin EOD Discord: chỉ những tin còn trong "
@@ -705,6 +746,11 @@ def _print_table(impact: dict, show_all: bool) -> None:
     print(f"-- phạm vi quét: {sc['n_report_files']} file báo cáo trong {sc['reports_dir']}; "
           f"{sc['n_eod_messages']} tin EOD từ {len(sc['eod_log_files'])} log ({sc['eod_log_glob']}"
           + (f", ngày {sc['eod_dates'][0]} → {sc['eod_dates'][1]}" if sc["eod_dates"] else "") + ")")
+    if sc.get("eod_unattributed_lines"):
+        print(f"⚠️ {sc['eod_unattributed_lines']} dòng NAV trong log EOD KHÔNG gán được tài khoản hoặc "
+              f"không đọc được (chưa đo): xem tay log {sc['eod_log_glob']}")
+    if sc["eod_log_glob"] and not sc["eod_log_files"]:
+        print(f"⚠️ glob log EOD {sc['eod_log_glob']} không khớp file nào — KHÔNG quét được tin EOD Discord")
     for msg in impact["unparsed_report_names"]:
         print(f"⚠️ KHÔNG đọc được kỳ của báo cáo (chưa đo): {msg}")
     if impact["skipped_non_md"]:
@@ -847,6 +893,13 @@ def cmd_apply(args) -> int:
             f"{bound[:2]}, không phải của {(args.account, correction_md5)} — đo lại tác động cho "
             f"đúng file đính chính này.")
     if _md5(cur_bytes) == bound[3] and all(c.get("already") for c in changes):
+        if not _journal_has_applied(os.path.join(args.nav_dir, AUDIT_LOG), args.account,
+                                    correction_md5, bound[3]):
+            raise RestatementError(
+                f"{path}: mọi mục của file đính chính này đã có sẵn trong nav_history, nhưng nhật ký "
+                f"{AUDIT_LOG} KHÔNG có bản ghi đã áp của (tài khoản, md5 file đính chính, md5 sau) = "
+                f"{(args.account, correction_md5, bound[3])} ⇒ đây không phải lần áp lặp. Kiểm ngày/giá "
+                f"trị trong file đính chính (gõ nhầm ngày? đã chép tay bản sao lưu?). KHÔNG ghi gì.")
         print(f"ĐÃ ÁP từ trước: {path} đang mang md5 sau đính chính {bound[3]} — không ghi gì.")
         return 0
     if (_md5(cur_bytes), _md5(new_bytes)) != (bound[2], bound[3]):
@@ -916,8 +969,10 @@ def cmd_apply(args) -> int:
         new_nav = c["new"]["nav"] if c["new"] else "—"
         print(f"   {c['op']} {c['date']}: nav {old_nav} → {new_nav}")
     print(f"sao lưu trước khi áp: {backup} (md5 {bound[2]})\n"
-          f"ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp {backup} {path} rồi áp một đính chính NGƯỢC để nhật "
-          f"ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).")
+          f"ĐƯỜNG LUI — TRƯỚC khi chốt sổ: áp một đính chính NGƯỢC lên file hiện tại (impact → apply; "
+          f"có sao lưu + nhật ký). Chỉ khi công cụ hỏng: cp {backup} {path} rồi ghi tay một dòng nhật ký "
+          f"status=rolled_back_manual. SAU khi chốt sổ: chỉ còn đường đính chính "
+          f"(nav_unit_ledger.py --restate).")
     return 0
 
 

@@ -27,13 +27,19 @@ impact_report_md5, md5_before, md5_after` (md5 của `nav_history_<account>.csv`
   19:00–21:45 `nav_sync_retry` mỗi 15', 19:10 EOD, 19:50 +2 retry; không có khoá chung). Nhật ký TRƯỚC,
   nav_history SAU; chạy lại sau khi chết giữa chừng nhận ra bản ghi đang dở (cùng account +
   correction_md5 + cặp md5, không phải `aborted`) và KHÔNG ghi bản ghi thứ hai.
-- Đường lui TRƯỚC khi chốt sổ đơn vị: `cp restatement_backups/<file> nav_history_<account>.csv` rồi áp
-  một đính chính NGƯỢC (để nhật ký ghi nhận); SAU khi chốt: chỉ còn `nav_unit_ledger.py --restate`.
+- Đường lui TRƯỚC khi chốt sổ đơn vị: áp một đính chính NGƯỢC lên file HIỆN TẠI (impact → apply: có sao lưu +
+  nhật ký). CHỈ khi công cụ hỏng: chép `restatement_backups/<file>` về `nav_history_<account>.csv` rồi ghi
+  tay một dòng nhật ký `{"status":"rolled_back_manual", md5_before, md5_after, by}` (KHÔNG áp đính chính
+  ngược sau khi chép tay — mọi mục đã có sẵn ⇒ công cụ từ chối "ĐÃ ÁP" vì nhật ký không có bản ghi của file
+  đó). SAU khi chốt: chỉ còn `nav_unit_ledger.py --restate`.
+- "ĐÃ ÁP từ trước" (rc=0, không ghi gì) chỉ khi nhật ký có bản ghi đã áp của (tài khoản, md5 file đính chính,
+  md5 sau); không có ⇒ lỗi (gõ nhầm ngày, hoặc chép tay bản sao lưu).
 - Đọc: chưa có consumer; để người/auditor tra "dòng nav_history này từng bị sửa chưa, ai duyệt, vì sao".
 
 ## Bẫy
 - Thư mục có `dnse_raw_*.jsonl` (kể cả bản sao trong /tmp) là "dữ liệu thật" ⇒ `apply` cần `--real-data`;
-  biến giờ giả `FUND_RESTATEMENT_TEST_NOW_ICT` (chỉ selfcheck) bị TỪ CHỐI ở cây dữ liệu thật.
+  biến giờ giả `FUND_RESTATEMENT_TEST_NOW_ICT` (chỉ selfcheck) bị TỪ CHỐI ở thư mục canonical và ở
+  NAV_HISTORY_DIR suy từ WC_ROOT (vẫn được nhận ở bản sao có dnse_raw khác — vô hại, không cron nào ghi vào đó).
 - **`daily_nav_snapshot.py --from-raw` và việc chạy lại snapshot KHÔNG ghi vào nhật ký này** — chúng sửa
   nav_history theo đường riêng. Nhật ký chỉ phủ đính chính đi qua `fund_restatement.py`.
 - File không nằm trong git (`.gitignore` chặn `data/`).
