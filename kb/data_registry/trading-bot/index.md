@@ -32,3 +32,4 @@ title: Trading bot / execution (money-path thật)
 | [`pnj_q3_review_watch_state.md`](pnj_q3_review_watch_state.md) — state chống-lặp watcher PNJ BCTC Q3 (bắn một lần bus question + Discord) | CANONICAL (state một-lần) |
 
 ↩ [Về index tổng](../index.md)
+| [`nav_sleeve_history.md`](nav_sleeve_history.md) — data/execution_logs/nav_sleeve_history_<account>.csv (+ data/sleeve_scope.json, data/sleeve_transfers.json) — chuỗi "phần bot quản lý" | CANONICAL |

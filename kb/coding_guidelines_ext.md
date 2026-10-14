@@ -531,6 +531,21 @@ khi cần chart "since inception", KHÔNG auto-áp cho chart weekly/monthly theo
 NAV/VNINDEX lệch mốc index=100).*
 
 
+**Từ khi có VN-Index có cổ tức (2026-10, quỹ bước 4):** bảng 3.2 weekly/monthly của CẢ SpaceX và ZaloPay KHÔNG tự
+gõ nữa — dán nguyên đầu ra:
+
+```bash
+python3 mike/bin/period_table_32.py --account SpaceX  --report-date <YYYY-MM-DD>
+python3 mike/bin/period_table_32.py --account ZaloPay --report-date <YYYY-MM-DD> --with-sleeve
+```
+
+6 cột `Giai đoạn | <TK> | VN-Index (giá) | VN-Index có cổ tức | Chênh so giá | Chênh so có cổ tức` + chú thích cố định
+("sau thuế TNCN 5% trên cổ tức" theo cờ Q2). Mốc VN-Index = ngày dòng sổ đơn vị làm mốc kỳ (ZaloPay 06/07, không phải
+03/07 — Q1). `report_delivery_gate._check_benchmark_table` chặn: ô lệch CLI > 0,005 điểm %, cột có cổ tức `chưa có số`
+(Q9), bỏ cột, thiếu chú thích, dòng có số mà CLI không có kỳ đó. Dòng "Phần bot quản lý" `chưa có số` thì vẫn gửi.
+Báo cáo tháng so SpaceX ↔ ZaloPay: dùng chuỗi b (`--sleeve bot`) và SpaceX CÙNG cửa sổ từ 06/07.
+
+
 ## Dọn 2026-10-09 (instructions-dedup)
 
 > Nguyên văn các khối chuyển từ `kb/coding_guidelines.md` (job `Wags_20261009_153812`, user duyệt 09/10,

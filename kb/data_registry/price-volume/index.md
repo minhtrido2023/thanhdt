@@ -26,3 +26,4 @@ title: Giá / khối lượng cổ phiếu
 | [`vnindex_pe_mirror_col.md`](vnindex_pe_mirror_col.md) — cột mirror t.VNINDEX_PE trên hàng CỔ PHIẾU (trong tav2_bq.ticker VÀ ticker_prune) | TRAP (pending fix) |
 
 ↩ [Về index tổng](../index.md)
+| [`vnindex_total_return.md`](vnindex_total_return.md) — data/benchmark/vnindex_tr_daily.csv (+ hose_membership, acks, benchmark_config) — VN-Index có cổ tức tự dựng | CANONICAL |
