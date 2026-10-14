@@ -16,6 +16,7 @@ last_update_5: 2026-09-30 (Bobby — REGIME READ real-time BLIND: Loại-1 STRUC
 last_update_6: 2026-10-13 (Bobby — REGIME READ #2 real-time BLIND, rà soát quý kéo sớm: CHƯA phải episode; nền GIỮ Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~55/45; 0/7 chỉ báo ở cột xác nhận; ĐÍNH CHÍNH đọc NPL Q2 (77,7% mức tăng là Sacombank); kênh mới: biên độ trái phiếu cấp 2 Big-4 +1,05 → +2,25/+2,8)
 last_update_7: 2026-10-13 (Bobby — STRUCTURAL EVENT READ, BLIND: FTSE Frontier → Secondary Emerging hiệu lực 2026-09-21 ĐÃ thực thi (nguồn FTSE 06/10/2026); phân loại ĐỔI DẦN nhiều quý, biên độ nhỏ cấp thị trường, CHƯA đổi chế độ tại 13/10; mốc kiểm 19/03, 18/06, 17/09/2027)
 last_update_8: 2026-10-14 (Bobby — SECTOR READ real-time BLIND nhóm CNTT FPT/CMG/ELC: C hỗn hợp ambiguous, nghiêng B (AI giảm phát dịch vụ phần mềm toàn cầu) ở bội số ~55/45, A ở dòng vốn ngoại/lãi suất/JPY; trục 2 EXTERNAL_CYCLE; 5 chỉ báo theo dõi; không phải episode VNINDEX)
+last_update_9: 2026-10-14 (Bobby — MACRO UPDATE tài chính+BĐS sau họp BCĐ nhà ở 13/10: GIỮ STRUCTURAL_ACCUMULATION, giai đoạn sớm-giữa → GIỮA, vẫn AMBIGUOUS; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1680,3 +1681,13 @@ chiếu gián tiếp qua mốc 37,5% (2009) của ADDENDUM.
 Vốn hoá/GDP chỉ dùng cho Value Radar DISPLAY-ONLY; chuỗi 2018→2026Q2 (vintage `old_pre2021`
 2020Q4 2.121 nghìn tỷ → `revised_2021plus` 2021Q1 1.953 nghìn tỷ, gãy 2021) chỉ 8 năm + 1 lần
 đổi cơ sở ⇒ chưa kết luận gì, không nạp vào phân loại episode.
+
+## MACRO UPDATE (không phải episode) — tài chính + BĐS 6-12 tháng, sau họp BCĐ TW nhà ở/BĐS 13/10 (Bobby, prospective, đọc 2026-10-14)
+
+Báo cáo đầy đủ: `reports/bobby_vn_macro_update_20261014.md`. Không dùng forward-return.
+- **Phân loại:** GIỮ trục 1 STRUCTURAL_ACCUMULATION, trục 2 KHÔNG CONTAINABLE bằng một can thiệp; giai đoạn dời **sớm-giữa → GIỮA**, vẫn **AMBIGUOUS**. Lý do: NHNN tự nêu rủi ro lệch kỳ hạn đồng thời nới LDR 85%→95% (TT 50/2026, hiệu lực 01/12); bộ đệm vãng lai mỏng đi (9T nhập siêu 19,42 tỷ USD vs xuất siêu 16,87 tỷ cùng kỳ 2025 → hạ cấp luận điểm "thặng dư vãng lai" của thesis 08-26); tồn kho BĐS tăng (51.950 căn/lô, 27/34 địa phương, số do chủ đầu tư báo), giao dịch Q3 = 92% quý trước.
+- **Lãi huy động chính = effective rate của team 7,4%/năm (as-of 12/10/2026)** = max(Big-4 12M 6,8%; CCTG BIDV/VietinBank 12M 7,4%), cách kill-switch A (>7,5%) đúng **0,1pp** (armed=False). Số NHNN bình quân giao dịch mới ~6,4% (20/09, +1,2pp YTD) chỉ là proxy PHỤ, khác bản chất, KHÔNG thế chỗ. CCTG 12M lên 7,6% ⇒ kill-switch A ARM.
+- **Ngưỡng:** 0/7 ngưỡng "tăng ngầm" chạm; tín dụng BĐS/tổng 25,39% (<28%); vi phạm TPDN 12T 0,24%. Ô #5 (tiền gửi lớn ≥10%) có vấn đề định nghĩa — mốc PVcomBank 10% đã nằm sẵn trước khi đặt ngưỡng, chờ user chốt tính từ mốc.
+- **Kịch bản 6-12T (JUDGMENT):** A tích tụ tiếp có quản lý 50-55% · B đóng băng thanh khoản BĐS cục bộ 20-25% (nguy hiểm nhất với hệ mình) · C stress hệ thống 5-10% · D hạ cánh mềm sớm 15-20%.
+- **Mốc:** 17/10 QH khai mạc (3 luật Đất đai/Nhà ở/KDBĐS) · ~20/10-14/11 BCTC Q3 · 07/11 check tháng · 01/12 TT 50 · T12-T1 CCTG Big-4 ≥7,7% hoặc liên NH 3M >7,5%.
+- **Không đổi** V2.4/DT5G/margin (playbook thesis 08-26). Đính chính trong ngày: bản sáng dùng 6,4% làm lãi huy động chính, đã sửa chiều 14/10 theo chỉ đạo user.
