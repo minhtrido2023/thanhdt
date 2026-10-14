@@ -174,3 +174,10 @@ hết đính chính mốc VN-Index của báo cáo ZaloPay (03/07 → 06/07).
   `dnse_raw_2026-10-11.jsonl`, `verified_snapshot_*_2026-10-11.json`, nav_history thật có dòng
   10-11 trong ~23 giây rồi được khôi phục) ⇒ cần sandbox hoá; `portfolio_status_selfcheck` không
   khép kín (BigQuery + ghi `data/value_radar_series.csv`).
+
+## Bước 4 — quyết định user 2026-10-14 13:05 ICT (`decided_by: user`)
+Q1–Q10 trong `agents/Taylor/research/fund_step4_20261014/SPEC.md` § "Câu hỏi cần user quyết": **chọn MẶC ĐỊNH cả 10 câu**,
+trừ **Q2**: user yêu cầu chỉ số có cổ tức phản ánh **số thực nhận về hiệu suất thực tế, không phải số trên sổ** ⇒
+cột chỉ số có cổ tức trong báo cáo dùng **`tr_net` (sau thuế 5%)**, KHÔNG phải `tr_gross`. `tr_gross` vẫn lưu trong
+`vnindex_tr_daily.csv` để đối chiếu, không hiển thị làm số chính. Chú thích báo cáo phải nêu "sau thuế TNCN 5% trên cổ tức".
+Mike diễn giải "số thực" = sau thuế (nhà đầu tư thật chỉ nhận ròng; danh mục cũng ghi cổ tức ròng) — chờ user xác nhận nếu hiểu khác.
