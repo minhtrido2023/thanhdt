@@ -656,7 +656,8 @@ def cell_env_value(ct, now, prov):
         c.as_of = str(d_last)
         c.stale, c.stale_why = session_stale(d_last, now.date())
         lab = {"CHEAP": "RẺ", "FAIR": "TRUNG TÍNH", "EXPENSIVE": "ĐẮT"}.get(v.get("label"), v.get("label"))
-        dep = "CCTG 6T" if v.get("deposit_rate_source") == "cctg_6m" else "Big-4 12T"
+        # CCTG = 12T từ 05/10/2026 (rebase chuỗi), 6T trước đó — value_radar.deposit_rate_source
+        dep = {"cctg_12m": "CCTG 12T", "cctg_6m": "CCTG 6T"}.get(v.get("deposit_rate_source"), "Big-4 12T")
         c.body = (
             f'<p class="big">{vn(v.get("score"), 1)} <span class="vd">{esc(lab)}</span></p>'
             + _table(["Thành phần", "Giá trị", "Phân vị 10 năm"], [
@@ -675,7 +676,7 @@ def cell_env_value(ct, now, prov):
 def cell_env_rates(data_dir, ct, now, prov):
     dep, g = "deposit_rate_vn.py", "deploy_golive_dt5g_v4/golive_recommend_v23.py"
     c = Cell("env_rates", "Lãi suất huy động — khoảng cách tới hai ngưỡng", 2,
-             source="<code>deposit_rate_vn.macro_killswitch_a_status()</code> (effective = max(Big-4 12T, CCTG 6T)) + "
+             source="<code>deposit_rate_vn.macro_killswitch_a_status()</code> (effective = max(Big-4 12T, CCTG 12T; 6T trước 05/10)) + "
                     "<code>current_deposit_rate()</code> (Big-4 12T); registry: CANONICAL-PROXY",
              cadence="xác nhận thủ công hằng tháng; CŨ theo đúng luật của nguồn: quá 45 ngày chưa xác nhận lại")
     a_thr, a_cite = ct.const(dep, r"^\s*THRESHOLD\s*=\s*([0-9.]+)")
