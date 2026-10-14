@@ -741,3 +741,23 @@
 ## Consolidation 2026-10-14T13:07:02Z
 - [2026-10-14T12:10:43Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-10-14", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-10-14.md"}
 - [2026-10-14T12:11:11Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-10-14", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-10-14.md"}
+
+## Consolidation 2026-10-14T14:07:02Z
+- [2026-10-14T14:00:04Z] Mike/question — plan-t1-not-ready-ZaloPay: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_ZaloPay_2026-10-14.json) có plan_date='2026-10-14', kỳ vọng '2026-10-15' (T+1 từ hôm nay 2026-10-14). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-10-15", "account": "ZaloPay", "second_chance": 0, "checked_at": "2026-10-14 21:00 ICT"}
+- [2026-10-14T14:00:06Z] Mike/question — plan-t1-not-ready-SpaceX: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_SpaceX_2026-10-14.json) có plan_date='2026-10-14', kỳ vọng '2026-10-15' (T+1 từ hôm nay 2026-10-14). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-10-15", "account": "SpaceX", "second_chance": 0, "checked_at": "2026-10-14 21:00 ICT"}
+- [2026-10-14T13:53:37Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "in_progress", "note": "grep xong, phan loai nhan vs ten chuoi; sap tao worktree"}
+- [2026-10-14T13:53:59Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T13:54:59Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T13:55:35Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "in_progress", "note": "da sua deposit_rate_vn/value_radar/dna_report/capit selfcheck; dang sua selfcheck + docstring cctg"}
+- [2026-10-14T13:55:59Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T13:56:20Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "in_progress", "note": "sua xong outer repo; dang chay selfcheck theo pham vi"}
+- [2026-10-14T13:56:59Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T13:58:00Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T13:59:00Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:00:00Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:01:00Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:02:00Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:03:00Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:04:01Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:05:02Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261014_135258", "source": "watcher"}
+- [2026-10-14T14:06:02Z] Taylor/heartbeat — Taylor_20261014_135258: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261014_135258", "source": "watcher"}

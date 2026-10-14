@@ -41,3 +41,4 @@
 - [2026-10-14T09:29:47Z] ĐANG DỞ job Taylor_20261014_091148 attempt2: commit B2/B1/B3/B4/N-b có sẵn (10e84dd2c) | NEXT: N-a,N-c,N-d,N-e + verify (TZ, §23, harness reviewer, byte master vs nhánh) + bus
 - [2026-10-14T09:34:30Z] ĐANG DỞ job 091148 attempt2: TẤT CẢ B1-B4 + N-a..e đã commit (HEAD 8d39846be) | NEXT: verify (harness /tmp/archrev_s4/mut/run.py, TZ, §23, byte proof) + bus finding
 - [2026-10-14T09:46:34Z] [Quỹ bước 4 vòng 2, 10-14] XONG nhánh @246f3ba53 (B1-B4 + N-a..e), finding fund-step4-round2-20261014 trace 091148; CHỜ Mike arch-review hẹp vòng 2. Merge PHẢI kèm data/account_inception.json. Sự cố: dòng sót nav_history_ZaloPay 10-14 16:38 (cron 19:10 tự thay) — kiểm sau 19:10. (Thay dòng ĐANG DỞ job 091148.)
+- [2026-10-14T13:53:08Z] ĐANG DỞ job Taylor_20261014_135258 (đổi nhãn rate_source cctg_6m→cctg_12m, worktree riêng, KHÔNG merge): bắt đầu | NEXT: grep + tạo worktree
