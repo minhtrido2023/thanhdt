@@ -22,7 +22,9 @@ lại cho bot hay bị rút, giờ tiền dùng được, phí/thuế thật ⇒
 chỉ có hiệu lực khi có bản ghi `decision: confirmed` (hoặc `rejected`) mang đúng `proposal_id`.
 
 CỔNG (SPEC §B3): S1 đề xuất chưa xử lý / S2 KL đổi không được giải thích ⇒ chuỗi b từ ngày đó `chưa có
-số` (chuỗi a không ảnh hưởng) · S3 thiếu giá mã ngoài ⇒ từ chối · S4 NAV_a − NAV_b − ngoài ≠ 0 ⇒ rc≠0 ·
+số` (chuỗi a không ảnh hưởng) · S3 thiếu giá mã ngoài ⇒ từ chối · S4 (phía consumer, file lịch sử b) dòng có NAV_a − NAV_b − ngoài
+≠ 0 = file bị sửa tay ⇒ `chưa có số` — lúc DỰNG thì NAV_b ĐỊNH NGHĨA bằng NAV_a − ngoài nên không có
+gì để kiểm (vòng 2: bỏ kiểm tra hằng đúng); đối soát ĐỘC LẬP duy nhất lúc dựng là S5 ·
 S5 `recon_diff` > 0,05% NAV (dòng không ước tính) ⇒ cảnh báo, không chặn · S6 `sleeve_scope` đổi so với
 lần dựng trước ⇒ từ chối tới khi dựng lại + ghi chú đính chính · S7 NAV_b ≤ 0 hoặc mốc b < 5% NAV_a ⇒
 từ chối.
@@ -361,8 +363,6 @@ def build_sleeve_rows(account: str, nav_rows: list, inception: dict, scope: list
         mv, recv, used = outside_value(d, oq, tk, price_fn, transfers)
         nav_a = float(r["nav"])
         nav_b = nav_a - mv - recv
-        if abs(nav_a - nav_b - mv - recv) > 0.0:
-            raise SleeveError(f"S4: {d} NAV_a {nav_a} − NAV_b {nav_b} − ngoài {mv + recv} ≠ 0")
         if nav_b <= 0:
             raise SleeveError(f"S7: {d} NAV_b = {nav_b:,.0f} <= 0 (NAV_a {nav_a:,.0f}, ngoài {mv + recv:,.0f})")
         recon = None
@@ -404,12 +404,12 @@ def build_sleeve_ledger(table: list, inception: dict, base_b: float, flows_b: li
 
 
 def reconcile(built: dict, ledger_flows: list, inception: dict) -> dict:
-    """Ba phép đối soát (README nghiên cứu): (1) a = b + ngoài từng dòng; (2) dựng từ dưới lên;
-    (3) lãi/lỗ cộng được cả kỳ."""
+    """Đối soát lúc dựng: (1) dựng từ dưới lên (`recon_diff`, S5 — phép ĐỘC LẬP duy nhất: cộng mã trong
+    bot × giá BQ + tiền − nợ, không đi qua NAV_a); (2) lãi/lỗ cộng được cả kỳ (chỉ kiểm phần dòng tiền —
+    NAV_b định nghĩa từ NAV_a nên a = b + ngoài từng dòng là hằng đúng, không báo như một phép kiểm)."""
     t = built["table"]
     if not t:
         return {"rows": 0}
-    ident = max(abs(x["nav_a"] - x["nav_b"] - x["outside_mv"] - x["outside_recv"]) for x in t)
     rec = [x for x in t if x["recon_diff"] is not None]
     warn = [{"date": x["date"], "recon_diff": round(x["recon_diff"]), "nav_is_estimate": x["nav_is_estimate"]}
             for x in rec if abs(x["recon_diff"]) > RECON_WARN_FRAC * x["nav_a"]]
@@ -419,7 +419,7 @@ def reconcile(built: dict, ledger_flows: list, inception: dict) -> dict:
     pa = last["nav_a"] - cap
     pb = last["nav_b"] - built["base_b"] - fl
     po = last["outside_mv"] + last["outside_recv"] - built["outside0"] + fl
-    return {"rows": len(t), "identity_max_abs_vnd": ident,
+    return {"rows": len(t),
             "recon_rows": len(rec), "recon_zero_rows": sum(1 for x in rec if abs(x["recon_diff"]) < 1),
             "recon_warn_S5": warn,
             "pnl_vnd": {"a": pa, "b": pb, "outside": po, "residual": pa - pb - po}}
@@ -500,6 +500,12 @@ def sleeve_inputs_for_report(account: str, report_date, nav_rows: list, inceptio
                                     f"dựng chuỗi b (nav_history đổi/đính chính sau đó) — dựng lại")
         if h["blocked_reason"]:
             raise SleeveUnavailable(f"{d}: {h['blocked_reason']}")
+        # S4 — file lịch sử b phải tự nhất quán (sửa tay nav_b/outside_* ⇒ không dùng)
+        resid = float(h["nav_a"]) - float(h["nav_b"]) - float(h["outside_mv"]) - float(h["outside_recv"])
+        if abs(resid) > 0.5:
+            raise SleeveUnavailable(f"S4: {d} trong {os.path.basename(hp)}: nav_a {h['nav_a']} − nav_b "
+                                    f"{h['nav_b']} − ngoài ({h['outside_mv']} + {h['outside_recv']}) = "
+                                    f"{resid:+,.0f} đ ≠ 0 — file bị sửa sau khi dựng, dựng lại")
         rows_b.append(NavRow(d, float(h["nav_b"]), is_estimate=nr.is_estimate if hasattr(nr, "is_estimate") else False,
                              balance_ts=getattr(nr, "balance_ts", None)))
     transfers = load_transfers(account, transfers_path)
@@ -669,8 +675,6 @@ def main(argv=None) -> int:
                          key=lambda f: (f["date"], f["time_ict"] or ""))
         ledger, info = build_sleeve_ledger(built["table"], inception, built["base_b"], flows_b)
         rec = reconcile(built, [f for f in flows_b if f["date"] > _d(start)], inception)
-        if rec["identity_max_abs_vnd"] != 0:
-            raise SleeveError(f"S4: đẳng thức a = b + ngoài lệch {rec['identity_max_abs_vnd']} đ")
         if a.write:
             write_history(history_path(a.account, a.exec_dir), built["table"], scope, a.allow_scope_change)
         print(json.dumps({"account": a.account, "base_b": built["base_b"], "outside0": built["outside0"],

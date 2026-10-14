@@ -102,7 +102,7 @@ def t_prototype_fixture():
     ok(round(100 * r, 3) == -0.790, f"ca2 từ đầu (b) {100 * r:.4f}% ≠ −0,790%")
     ok(not info["pending"] and not info["dropped"], "ca2 không dòng tiền treo/loại")
     rec = S.reconcile(b, flows, fx["inception"])
-    ok(rec["identity_max_abs_vnd"] == 0.0, "ca2 a = b + ngoài")
+    ok("identity_max_abs_vnd" not in rec, "ca2 không báo phép kiểm hằng đúng a = b + ngoài (N-b vòng 2)")
     ok(rec["pnl_vnd"] == {"a": -61_234_124.0, "b": -3_734_124.0, "outside": -57_500_000.0, "residual": 0.0},
        f"ca2 lãi/lỗ cộng được {rec['pnl_vnd']}")
     t = {x["date"]: x for x in b["table"]}
@@ -278,6 +278,23 @@ def t_gates(tmp):
             ok(False, f"consumer phải từ chối: {why}")
         except S.SleeveUnavailable as exc:
             ok(why in str(exc), f"consumer {why}: {exc}")
+    # S4 (vòng 2): file lịch sử b bị sửa tay (nav_b đổi, outside_* giữ) ⇒ consumer từ chối, trích số
+    with open(hp, encoding="utf-8") as f:
+        orig = f.read()
+    lines = orig.splitlines(keepends=True)
+    hdr = lines[0].strip().split(",")
+    cells = lines[1].rstrip("\n").split(",")
+    cells[hdr.index("nav_b")] = repr(float(cells[hdr.index("nav_b")]) + 1000.0)
+    with open(hp, "w", encoding="utf-8") as f:
+        f.write("".join([lines[0], ",".join(cells) + "\n"] + lines[2:]))
+    try:
+        S.sleeve_inputs_for_report("A1", "2026-07-08", nr, INC, [], exec_dir=ex, scope_path=sp,
+                                   transfers_path=os.path.join(tmp, "none.json"), seed_path=seedp)
+        ok(False, "S4 file lịch sử b bị sửa tay phải SleeveUnavailable")
+    except S.SleeveUnavailable as exc:
+        ok(str(exc).startswith("S4:") and "-1,000" in str(exc).replace("−", "-"), f"S4 consumer: {exc}")
+    with open(hp, "w", encoding="utf-8") as f:
+        f.write(orig)
     # dòng bị chặn (S1: KL đổi chưa ai xác nhận) ⇒ consumer từ chối, nêu lý do
     props = [{"proposal_id": "needs_human:DGC:2026-07-08", "source": "needs_human", "ticker": "DGC",
               "qty": -1, "date": "2026-07-08", "note": "selfcheck"}]
