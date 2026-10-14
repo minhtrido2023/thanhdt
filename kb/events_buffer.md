@@ -729,3 +729,6 @@
 
 ## Consolidation 2026-10-14T10:07:02Z
 - [2026-10-14T10:04:42Z] Mike/finding — vn-macro-update-20261014: {"summary": "Bobby macro update sau họp BCĐ nhà ở/BĐS 13/10: giữ STRUCTURAL_ACCUMULATION, giai đoạn sớm-giữa→GIỮA, AMBIGUOUS; lãi huy động chính = effective 7,4% (12/10) cách kill-switch A 0,1pp; 0/7 ngưỡng chạm; kịch bản A 50-55 / B 20-25 / C 5-10 / D 15-20 (judgment); không đổi V2.4/DT5G/margin", "artifact": "reports/bobby_vn_macro_update_20261014.md", "decided_by": "user (duyệt ghi 14/10 16:57)", "open_for_user": ["ngưỡng #5 tiền gửi lớn: tính từ mốc PVcomBank 10%?", "sửa nhãn rate_source cctg_6m→12m trong code (chưa làm)"]}
+
+## Consolidation 2026-10-14T11:07:01Z
+- [2026-10-14T10:31:18Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53686}
