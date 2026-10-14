@@ -215,7 +215,9 @@ def _flow_note(f: dict, reason: str) -> dict:
 
 
 def compute_period_returns(account: str, report_date: datetime.date, rows: list, inception: dict,
-                            flows: list = None) -> dict:
+                            flows: list = None, benchmark=None) -> dict:
+    """`benchmark` (tuỳ chọn): hàm `(from_date, to_date) -> dict` — thêm khối `benchmark` vào mỗi kỳ
+    (CLI dùng `vnindex_total_return.report_benchmark`). Không truyền ⇒ đầu ra như cũ, từng byte."""
     nav1_row = _last_on_or_before(rows, report_date)
     if nav1_row is None:
         raise ValueError(f"không có dòng nav_history nào <= {report_date} cho {account}")
@@ -231,12 +233,17 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
         # khong duoc doan `[]` (mot lan NAP thanh LAI — sai theo huong co loi cho minh).
         flows = load_flows(account, require_file=True)
     ledger, info = build_ledger(rows, flows, inception_from, inception_nav0)
+    return _assemble(account, report_date, ledger, info, inception_from, benchmark)
+
+
+def _assemble(account: str, report_date: datetime.date, ledger: list, info: dict,
+              inception_from: datetime.date, benchmark=None) -> dict:
     i1 = max(i for i, row in enumerate(ledger) if row["date"] <= report_date)
 
     monday = report_date - datetime.timedelta(days=report_date.weekday())
     month_start = report_date.replace(day=1)
 
-    return {
+    out = {
         "account": account,
         "report_date": report_date.isoformat(),
         "inception": _period_result(ledger, 0, i1),
@@ -253,6 +260,56 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
                                         f"vốn khởi điểm, không phải dòng tiền")
                           for f in info["dropped"]],
     }
+    if benchmark is not None:
+        for key in ("inception", "wtd", "mtd", "day"):
+            p = out[key]
+            if p is not None:
+                # Mốc chỉ số = NGÀY CỦA DÒNG SỔ làm mốc kỳ (dòng 0 = inception_date) — không do người
+                # soạn chọn (đóng lỗi ZaloPay neo 03/07 thay vì 06/07, quỹ bước 4).
+                bm = benchmark(p["from_date"], p["to_date"])
+                for k, col in (("excess_vs_price_pp", "vnindex_price_pct"),
+                               ("excess_vs_tr_pp", "vnindex_tr_pct")):
+                    bm[k] = (round(p["return_pct"] - bm[col], 3) if bm.get(col) is not None else None)
+                p["benchmark"] = bm
+    return out
+
+
+def compute_sleeve_period_returns(account: str, report_date: datetime.date, rows: list,
+                                  inception: dict, flows: list = None, benchmark=None,
+                                  sleeve_paths: dict = None) -> dict:
+    """Chuỗi (b) "phần bot quản lý" (`nav_sleeve.py`) — cùng cấu trúc đầu ra, thêm `series: "bot"`,
+    `outside_scope`. Chỉ đọc file đã dựng (`nav_sleeve_history_<account>.csv`); chưa có số ⇒
+    `nav_sleeve.SleeveUnavailable` (người gọi in `chưa có số (<lý do>)`, chuỗi a không ảnh hưởng)."""
+    import nav_sleeve
+    if flows is None:
+        flows = load_flows(account, require_file=True)
+    sb = nav_sleeve.sleeve_inputs_for_report(account, report_date, rows, inception, flows,
+                                             **(sleeve_paths or {}))
+    if not sb["rows"]:
+        raise nav_sleeve.SleeveUnavailable(f"chuỗi b chưa có dòng nào sau mốc {sb['inception_from']}")
+    ledger, info = build_ledger(sb["rows"], sb["flows"], sb["inception_from"], sb["nav0"])
+    out = _assemble(account, report_date, ledger, info, sb["inception_from"], benchmark)
+    out["series"] = "bot"
+    out["outside_scope"] = sb["outside_scope"]
+    out["outside_at_inception_vnd"] = sb["outside0_vnd"]
+    return out
+
+
+def _benchmark_fn():
+    """Khối benchmark (VN-Index giá + có cổ tức) — đường CẢNH BÁO: lỗi import/đọc không được làm mất
+    số tỉ suất; ô chỉ số khi đó mang `status: unavailable` + lý do (KHÔNG thay bằng chỉ số giá)."""
+    try:
+        import vnindex_total_return as vtr
+        series = vtr.read_series(vtr.SERIES_PATH)
+    except Exception as exc:                # noqa: BLE001
+        err = _exc_text(exc)
+
+        def unavailable(a, b):
+            return {"anchor_date": a, "end_date": b, "vnindex_price_pct": None,
+                    "vnindex_tr_gross_pct": None, "vnindex_tr_net_pct": None, "vnindex_tr_pct": None,
+                    "status": "unavailable", "reason": f"không đọc được chuỗi VN-Index: {err}"}
+        return unavailable
+    return lambda a, b: vtr.report_benchmark(a, b, series=series)
 
 
 def main() -> int:
@@ -260,6 +317,8 @@ def main() -> int:
     ap.add_argument("--account", choices=["SpaceX", "ZaloPay"])
     ap.add_argument("--report-date", help="YYYY-MM-DD (giờ ICT); mặc định hôm nay ICT")
     ap.add_argument("--selfcheck", action="store_true")
+    ap.add_argument("--sleeve", choices=["bot"],
+                    help="chuỗi 'phần bot quản lý' (nav_sleeve.py) thay vì cả tài khoản")
     args = ap.parse_args()
 
     if args.selfcheck:
@@ -273,7 +332,22 @@ def main() -> int:
                         else datetime.datetime.now(ICT).date())
         rows = load_nav_history(args.account)
         inception = load_inception(args.account)
-        result = compute_period_returns(args.account, report_date, rows, inception)
+        if args.sleeve:
+            import nav_sleeve
+            try:
+                result = compute_sleeve_period_returns(args.account, report_date, rows, inception,
+                                                       benchmark=_benchmark_fn())
+            except nav_sleeve.SleeveUnavailable as e:
+                # Chuỗi (b) không có số: báo cáo in đúng "chưa có số (<lý do>)", không chặn chuỗi (a).
+                print(json.dumps({"account": args.account, "report_date": report_date.isoformat(),
+                                  "series": "bot", "status": "unavailable", "reason": str(e)},
+                                 ensure_ascii=False, indent=2))
+                print(f"nav_period_returns ({args.account} --sleeve bot): chưa có số — {e}",
+                      file=sys.stderr)
+                return 3
+        else:
+            result = compute_period_returns(args.account, report_date, rows, inception,
+                                            benchmark=_benchmark_fn())
     except (FileNotFoundError, ValueError, KeyError, CashFlowError) as e:
         print(f"LỖI nav_period_returns: {e}", file=sys.stderr)
         return 1

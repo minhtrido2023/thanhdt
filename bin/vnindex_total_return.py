@@ -513,6 +513,86 @@ def benchmark_period(start_date, end_date, series_path: str = SERIES_PATH, acks_
     return out
 
 
+# ─────────────────────────────────────────────────────────── cho báo cáo (nav_period_returns)
+
+CONFIG_PATH = os.path.join(BENCH_DIR, "benchmark_config.json")
+# Q2 (user 2026-10-14): cột "VN-Index có cổ tức" hiển thị số SAU thuế 5% (số thực nhận) — `tr_net`.
+# Đổi sang `tr_gross` bằng file cấu hình, không sửa code: {"report_tr_kind": "tr_gross"}.
+DEFAULT_REPORT_TR_KIND = "tr_net"
+TR_FOOTNOTE = {
+    "tr_net": ("VN-Index có cổ tức: đội tự tính từ cổ tức tiền mặt của cổ phiếu HOSE, tái đầu tư tại "
+               "ngày GDKHQ, sau thuế TNCN 5% trên cổ tức; HOSE không công bố bản có cổ tức của VN-Index."),
+    "tr_gross": ("VN-Index có cổ tức: đội tự tính từ cổ tức tiền mặt của cổ phiếu HOSE, tái đầu tư tại "
+                 "ngày GDKHQ, trước thuế; HOSE không công bố bản có cổ tức của VN-Index."),
+}
+
+
+def report_tr_kind(path: str = CONFIG_PATH) -> str:
+    """Loại chỉ số có cổ tức hiển thị trong báo cáo. Thiếu file ⇒ mặc định user chốt (`tr_net`);
+    giá trị lạ ⇒ ValueError (không đoán)."""
+    if not os.path.exists(path):
+        return DEFAULT_REPORT_TR_KIND
+    with open(path, encoding="utf-8") as f:
+        k = json.load(f).get("report_tr_kind", DEFAULT_REPORT_TR_KIND)
+    if k not in TR_FOOTNOTE:
+        raise ValueError(f"{path}: report_tr_kind={k!r} không thuộc {sorted(TR_FOOTNOTE)}")
+    return k
+
+
+def index_session_for(series: list, d) -> tuple:
+    """(phiên của chỉ số ứng với dòng sổ ngày d, ghi chú). d là phiên có trong chuỗi ⇒ chính nó. d là
+    ngày KHÔNG giao dịch theo lịch (T7/CN/lễ đã khai) ⇒ phiên gần nhất trước đó — NAV của dòng sổ
+    ngày nghỉ được định giá bằng giá đóng cửa phiên đó, nên đây là mức chỉ số CÙNG thời điểm, không
+    phải tự lùi mốc. Thiếu phiên (theo lịch) ⇒ (None, lý do)."""
+    _import_vn_market()
+    d = _d(d)
+    dates = [r["date"] for r in series]
+    if d in dates:
+        return d, None
+    if _calendar_session(d):
+        return None, (f"G1: {d} là phiên theo lịch nhưng chuỗi không có (chuỗi "
+                      f"{dates[0] if dates else None} → {dates[-1] if dates else None})")
+    prev = d - dt.timedelta(days=1)
+    while not _calendar_session(prev):
+        prev -= dt.timedelta(days=1)
+    if prev not in dates:
+        return None, f"G1: {d} không giao dịch; phiên liền trước {prev} chưa có trong chuỗi"
+    return prev, f"{d} không giao dịch ⇒ mức chỉ số đóng cửa {prev} (giá dùng cho NAV dòng đó)"
+
+
+def report_benchmark(anchor_date, end_date, series_path: str = SERIES_PATH, acks_path: str = ACKS_PATH,
+                     config_path: str = CONFIG_PATH, series: list = None) -> dict:
+    """Khối `benchmark` của một kỳ báo cáo. `anchor_date` = ngày của DÒNG SỔ ĐƠN VỊ làm mốc kỳ (không do
+    người soạn chọn). Không bao giờ ném lỗi; thiếu số ⇒ ô None + `reason`."""
+    out = {"anchor_date": str(anchor_date)[:10], "end_date": str(end_date)[:10],
+           "index_anchor_date": None, "index_end_date": None}
+    try:
+        kind = report_tr_kind(config_path)
+        if series is None:
+            series = read_series(series_path)
+    except Exception as exc:                                        # noqa: BLE001
+        out.update({"vnindex_price_pct": None, "vnindex_tr_gross_pct": None, "vnindex_tr_net_pct": None,
+                    "tr_kind": None, "vnindex_tr_pct": None, "status": "unavailable",
+                    "reason": f"{type(exc).__name__} ({exc})"})
+        return out
+    a, na = index_session_for(series, anchor_date)
+    b, nb = index_session_for(series, end_date)
+    notes = [n for n in (na, nb) if n and not n.startswith("G1")]
+    if a is None or b is None:
+        res = {"vnindex_price_pct": None, "vnindex_tr_gross_pct": None, "vnindex_tr_net_pct": None,
+               "status": "unavailable", "reason": "; ".join(n for n in (na, nb) if n and n.startswith("G1"))}
+    else:
+        res = benchmark_period(a, b, series=series, acks_path=acks_path)
+        out.update({"index_anchor_date": a.isoformat(), "index_end_date": b.isoformat()})
+    out.update(res)
+    out["tr_kind"] = kind
+    out["vnindex_tr_pct"] = res.get(f"vnindex_{kind}_pct")
+    out["footnote"] = TR_FOOTNOTE[kind]
+    if notes:
+        out["notes"] = notes
+    return out
+
+
 # ─────────────────────────────────────────────────────────── nguồn dữ liệu (--update)
 
 def fetch_dnse_vnindex(start: dt.date, end: dt.date, timeout: int = 30) -> dict:
