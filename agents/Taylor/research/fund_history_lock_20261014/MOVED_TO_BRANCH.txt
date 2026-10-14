@@ -1,0 +1,5 @@
+2026-10-14 (job Taylor_20261014_033336, vòng 2): README.md + corrections/ của thư mục này nay nằm TRONG
+nhánh feat/fund-history-lock-20261014 (commit 755be49f0, cùng đường dẫn) — B16 của arch-review.
+Bản vòng 1 (untracked) dời sang _superseded_pre_final_code/{README_round1.md,corrections_round1/} để
+lúc merge không vướng "untracked file would be overwritten". Đọc bản hiện hành trong worktree
+agents/Taylor/wt-fundlock-1014/agents/Taylor/research/fund_history_lock_20261014/ (hoặc sau khi merge).

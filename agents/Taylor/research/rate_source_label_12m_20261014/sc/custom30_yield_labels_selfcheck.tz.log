@@ -1,0 +1,15 @@
+[setup] rebal 2026-08-05, 30 ma tu data/custom30v_8l_publish.csv
+[BQ_LOCAL_CACHE] ready — 15 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+corporate_action feed cu 70 ngay (max_ingested=2026-08-05) — bo qua exdate
+[A] batch vs _yield_floor: 30/30 khop
+    phan bo: BANKING_EXCLUDED=13, NO_DATA=10, BELOW_FLOOR=4, ABOVE_FLOOR=3
+  [yield_floor] batch loi -> toan bo NO_DATA: bq down (selfcheck)
+[B] bq hong -> fail-open: PASS (30 cap)
+[C] thieu key: 0 | nhan rong: 0
+[D] feed cu -> lich su (2026-05-05) GIU NGUYEN: PASS | ky mo (2026-10-14) ve NO_DATA: PASS
+[E] CSV sinh ngay 2026-10-14 (ICT, mtime) — cach hom nay 0d
+[E] ky da dong: label_asof==rebal_date PASS (1440 dong) | ky mo: label_asof=<ArrowStringArray>
+['2026-10-14']
+Length: 1, dtype: str (ky vong=2026-10-14) PASS
+
+SELFCHECK PASS (A+B+C+D+E)

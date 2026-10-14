@@ -1,0 +1,23 @@
+---
+kind: local-file
+status: PROPOSED (chưa tồn tại — đặc tả ở agents/Taylor/research/fund_step4_20261014/SPEC.md phần B)
+source: data/execution_logs/nav_sleeve_history_<account>.csv (+ data/sleeve_scope.json, data/sleeve_transfers.json)
+group: trading-bot
+role: chuỗi "phần bot quản lý" (chính sách quỹ mở điểm 2b) — NAV tài khoản trừ vị thế ngoài bot
+writer: mike/bin/nav_sleeve.py
+---
+
+# nav_sleeve_history_<account>.csv
+
+## Là gì
+`NAV_b = NAV_a − Σ KL × giá của mã trong sleeve_scope − cổ tức phải thu (gộp) của các mã đó`. Tiền, Trứng
+vàng, nợ thuộc trọn phần bot. Tỉ suất = `nav_unit_ledger.build_ledger` trên chuỗi NAV_b với dòng tiền
+ở `sleeve_transfers.json` (cổ tức ròng về tiền, tiền bán/mua mã ngoài bot).
+
+## Bẫy
+- Phạm vi lấy từ `sleeve_scope.json`, KHÔNG từ `excluded_tickers` (danh sách cấm giao dịch; có PNJ vị thế 0).
+- `positions` của DNSE có nhiều lô cùng mã ⇒ CỘNG (đọc ghi đè thiếu 24,4tr ở ZaloPay 11/08–28/09).
+- Tối trước ngày GDKHQ, DNSE ghi sẵn KL mới (VHM 05/08, VPB 23/09) ⇒ KL × giá còn quyền sai hệ quy chiếu.
+- Cổ tức DGC 80tr: phải thu ghi 11/09 (nav_history đã loại khỏi NAV ngày đó), nằm trong tiền 14/09–24/09,
+  về tiền 25/09 (ròng 76tr).
+- Số tham chiếu ZaloPay 06/07 → 13/10: (a) −6,199% · (b) −0,790% · mốc (b) 525.365.567.

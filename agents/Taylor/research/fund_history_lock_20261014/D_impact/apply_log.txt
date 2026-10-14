@@ -1,0 +1,21 @@
+$ <research>/sbx.sh <applied> fund_restatement.py apply --account SpaceX --nav-dir <applied>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/D_impact/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor)
+fund_restatement: TỪ CHỐI ghi đính chính vào thư mục dữ liệu thật <applied>/data/execution_logs khi không có --real-data (thao tác của Mike sau khi user duyệt).
+rc=3
+$ <research>/sbx.sh <applied> fund_restatement.py apply --account SpaceX --nav-dir <applied>/data/execution_logs --real-data --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/D_impact/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor)
+ĐÃ ÁP 2 đính chính vào <applied>/data/execution_logs/nav_history_SpaceX.csv: md5 12ee9b87add3038c7201dd4effb029d9 → b82ed85ffbab8027c4787bec729a7e0f; nhật ký <applied>/data/execution_logs/nav_history_corrections.jsonl
+   replace 2026-07-02: nav 994733747 → 990304455
+   insert 2026-08-06: nav — → 950871323
+rc=0
+$ <research>/sbx.sh <applied> fund_restatement.py apply --account SpaceX --nav-dir <applied>/data/execution_logs --real-data --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/D_impact/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor)
+ĐÃ ÁP từ trước: <applied>/data/execution_logs/nav_history_SpaceX.csv đang mang md5 sau đính chính b82ed85ffbab8027c4787bec729a7e0f — không ghi gì.
+rc=0
+$ <research>/sbx.sh <applied> fund_restatement.py apply --account ZaloPay --nav-dir <applied>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/D_impact/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor)
+fund_restatement: TỪ CHỐI ghi đính chính vào thư mục dữ liệu thật <applied>/data/execution_logs khi không có --real-data (thao tác của Mike sau khi user duyệt).
+rc=3
+$ <research>/sbx.sh <applied> fund_restatement.py apply --account ZaloPay --nav-dir <applied>/data/execution_logs --real-data --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/D_impact/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor)
+ĐÃ ÁP 1 đính chính vào <applied>/data/execution_logs/nav_history_ZaloPay.csv: md5 f8b6a9787e5b323395b888c360065843 → a46b0c1ff5ddde755ef2b0edec8551b9; nhật ký <applied>/data/execution_logs/nav_history_corrections.jsonl
+   insert 2026-08-06: nav — → 937070077
+rc=0
+$ <research>/sbx.sh <applied> fund_restatement.py apply --account ZaloPay --nav-dir <applied>/data/execution_logs --real-data --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/D_impact/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor)
+ĐÃ ÁP từ trước: <applied>/data/execution_logs/nav_history_ZaloPay.csv đang mang md5 sau đính chính a46b0c1ff5ddde755ef2b0edec8551b9 — không ghi gì.
+rc=0

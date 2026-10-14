@@ -1,0 +1,82 @@
+{
+ "FPT_G1": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 56.7,
+    "matchQtty": 10,
+    "side": "SELL",
+    "avgPrice": 56.546,
+    "totalVolumeTraded": 395950,
+    "grossTradeAmount": 223.89363,
+    "highestPrice": 57.7,
+    "lowestPrice": 55.8,
+    "openPrice": 56.3,
+    "time": "2026-10-14 11:29:58.240"
+   }
+  ]
+ },
+ "FOX_G1": {
+  "trades": [
+   {
+    "marketId": "UPX",
+    "boardId": "G1",
+    "isin": "VN000000FOX6",
+    "symbol": "FOX",
+    "matchPrice": 55.4,
+    "matchQtty": 30,
+    "side": "SELL",
+    "avgPrice": 55.297,
+    "totalVolumeTraded": 2510,
+    "grossTradeAmount": 1.38796,
+    "highestPrice": 56.9,
+    "lowestPrice": 54.3,
+    "openPrice": 55.2,
+    "time": "2026-10-14 11:21:09.436"
+   }
+  ]
+ },
+ "CMG_G1": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000CMG2",
+    "symbol": "CMG",
+    "matchPrice": 19.1,
+    "matchQtty": 30,
+    "side": "SELL",
+    "avgPrice": 19.213,
+    "totalVolumeTraded": 9010,
+    "grossTradeAmount": 1.731125,
+    "highestPrice": 19.4,
+    "lowestPrice": 19.1,
+    "openPrice": 19.2,
+    "time": "2026-10-14 11:29:27.362"
+   }
+  ]
+ },
+ "ELC_G1": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000ELC9",
+    "symbol": "ELC",
+    "matchPrice": 11.45,
+    "matchQtty": 30,
+    "side": "SELL",
+    "avgPrice": 11.458,
+    "totalVolumeTraded": 9240,
+    "grossTradeAmount": 1.05873,
+    "highestPrice": 11.55,
+    "lowestPrice": 11.4,
+    "openPrice": 11.55,
+    "time": "2026-10-14 11:29:48.180"
+   }
+  ]
+ }
+}

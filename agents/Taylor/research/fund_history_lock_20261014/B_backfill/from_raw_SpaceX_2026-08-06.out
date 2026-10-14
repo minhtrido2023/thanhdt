@@ -1,0 +1,6 @@
+💰 **NAV 2026-08-06: 950,871,323 VND** (-9,244,974 VND, -0.96% so với hôm trước)
+   Cổ phiếu 936,275,000 · Tiền mặt 14,596,323 · Nợ margin 0
+   Từ go-live: -49,128,677 VND (-4.91%)
+   ℹ️ from-raw: bỏ cross-check verify_account_snapshot (advisory, không vào NAV).
+   ℹ️ BACKFILL ƯỚC TÍNH (nav_is_estimate=True): positions 2026-08-06T19:10:34, balances 2026-08-06T19:10:34, giá BQ Price thô
+   ℹ️ VHM: BQ Price 153000.0 thay bằng 77,100 (BQ ticker.Price VHM 2026-08-06 = 153000 dong cung (bang gia 08-05, truoc chia thuong 1:1 ex 08-06 theo corp_actions VHM-2026-08-06-STOCK-DIVIDEND); gia dong cua 08-06 sau chia = BQ Close 77100 (Price=Close tu 08-07 den nay, khong co dieu chinh ve sau); incident 2026-08-17 corp-action-gate-false-refuse-stale-price)
