@@ -38,12 +38,23 @@ def close(a, b, rel=1e-12):
 
 
 def sessions(n, start=dt.date(2030, 3, 4)):
+    """Phiên giả = T2–T6 (chuỗi tự là nguồn tập phiên — B3 vòng 2 — không cần lịch lễ)."""
     out, d = [], start
     while len(out) < n:
-        if V._calendar_session(d):
+        if d.weekday() < 5:
             out.append(d)
         d += dt.timedelta(days=1)
     return out
+
+
+def rechain(rows):
+    """Tính lại tr_gross/tr_net từ vnindex + y_gross (giữ chuỗi nối được — G1 kiểm điều này)."""
+    rows = [dict(r) for r in rows]
+    for p, r in zip(rows, rows[1:]):
+        y = r["y_gross"] or 0.0
+        r["tr_gross"] = p["tr_gross"] * (r["vnindex"] / p["vnindex"] + y)
+        r["tr_net"] = p["tr_net"] * (r["vnindex"] / p["vnindex"] + (1 - V.DIV_TAX_RATE) * y)
+    return rows
 
 
 def md5(path):
@@ -237,13 +248,16 @@ def t_gates():
         day = (day or D[64]).isoformat()
         e = [x for x in gates(rows, a, b) if x.startswith(g) and day in x]
         ok(not e, f"{g} KHÔNG được nổ (sát ngưỡng): {e}")
-    # G1 — phiên cuối thiếu / phiên giữa thiếu
+    # G1 — phiên cuối thiếu / phiên giữa thiếu (B3 vòng 2: tập phiên = dòng chuỗi, không lịch lễ)
     e = gates(base[:66], a, b)
     ok(any(x.startswith("G1") and D[66].isoformat() in x for x in e), f"G1 phiên cuối: {e}")
-    rows = base[:64] + base[65:]
-    e = gates(rows, a, b)
-    ok(any(x.startswith("G1") and D[64].isoformat() in x for x in e), f"G1 phiên giữa: {e}")
+    wy = rechain([dict(r, y_gross=0.001) if 63 <= i <= 66 else r for i, r in enumerate(base)])
+    ok(gates(wy, a, b) == [], f"chuỗi có cổ tức nối đúng phải qua: {gates(wy, a, b)}")
+    e = gates(wy[:64] + wy[65:], a, b)        # xoá dòng D64 ⇒ D65 không nối từ D63
+    ok(any(x.startswith("G1") and D[65].isoformat() in x and D[63].isoformat() in x and "không nối" in x
+           for x in e), f"G1 dòng giữa bị xoá: {e}")
     ok(not [x for x in gates(base, a, b) if x.startswith("G1")], "G1 chuỗi đủ không nổ")
+    t_g1_sessions(D, base)
     # G2 — 0,011% nổ; 0,009% không
     one(mod(64, vnindex_src2=base[64]["vnindex"] / 1.00011), "G2", (D[64].isoformat(), "+0.011%"))
     none(mod(64, vnindex_src2=base[64]["vnindex"] / 1.00009), "G2")
@@ -298,8 +312,78 @@ def t_gates():
     ok(bp["status"] == "unavailable" and bp["vnindex_price_pct"] is None, f"ca7 benchmark_period: {bp}")
 
 
+def t_g1_sessions(D, base):
+    """B3 vòng 2 — G1/index_session_for lấy tập phiên từ chuỗi + mốc 'đã đối chiếu tới' (built_at dòng cuối)."""
+    stamp = lambda d, hh: f"{d.isoformat()}T{hh}+07:00"          # noqa: E731
+    # (1) nghỉ dài kiểu Tết: 10 ngày lịch không có dòng (5 ngày thường) ⇒ KHÔNG báo G1 (ca thật 2026-02-16…20)
+    tet = rechain([dict(r, date=r["date"] + dt.timedelta(days=7)) if i >= 30 else r for i, r in enumerate(base)])
+    gap = (tet[30]["date"] - tet[29]["date"]).days
+    ok(8 <= gap <= V.G1_MAX_GAP_DAYS, f"fixture Tết {gap} ngày")
+    ok(not [x for x in gates(tet, tet[25]["date"], tet[40]["date"]) if x.startswith("G1")],
+       f"nghỉ Tết {gap} ngày không được báo G1: {gates(tet, tet[25]['date'], tet[40]['date'])}")
+    a_ = tet[29]["date"] + dt.timedelta(days=3)             # một ngày thường trong kỳ nghỉ
+    ok(V.index_session_for(tet, a_)[0] == tet[29]["date"], f"ngày thường trong kỳ nghỉ ⇒ phiên trước: "
+       f"{V.index_session_for(tet, a_)}")
+    # (2) khoảng trống > G1_MAX_GAP_DAYS ⇒ G1 (chuỗi mất dòng)
+    big = rechain([dict(r, date=r["date"] + dt.timedelta(days=14)) if i >= 30 else r for i, r in enumerate(base)])
+    e = gates(big, big[25]["date"], big[40]["date"])
+    ok(any(x.startswith("G1") and big[29]["date"].isoformat() in x and "không có dòng" in x for x in e),
+       f"khoảng trống {(big[30]['date'] - big[29]['date']).days} ngày phải G1: {e}")
+    # (3) kỳ kết thúc SAU dòng cuối: tin khi lần dựng cuối đã đối chiếu tới hết kỳ (sau 15:00 ICT)
+    s = [dict(r) for r in base[:66]]                 # dòng cuối D[65]; D[66] coi như ngày nghỉ
+    s[-1]["built_at_ict"] = stamp(D[66], "23:50:00")
+    ok(V.checked_through(s) == D[66], f"checked_through {V.checked_through(s)}")
+    ok(not [x for x in gates(s, D[62], D[66]) if x.startswith("G1")], f"đã đối chiếu tới {D[66]}: "
+       f"{gates(s, D[62], D[66])}")
+    ok(V.index_session_for(s, D[66])[0] == D[65], f"ngày nghỉ sau dòng cuối ⇒ dòng cuối: {V.index_session_for(s, D[66])}")
+    bm = V.report_benchmark(D[62], D[66], series=s, acks_path="/nonexistent/a.json", config_path="/nonexistent/c.json")
+    ok(bm["status"] == "ok" and bm["index_end_date"] == D[65].isoformat(), f"report_benchmark ngày nghỉ cuối kỳ: {bm}")
+    for st, why in ((stamp(D[66], "14:59:59"), "trước 15:00 ⇒ mới chắc tới hôm trước"),
+                    (stamp(D[65], "23:50:00"), "lần dựng cuối trước ngày cuối kỳ"),
+                    ("", "built_at rỗng"), ("2030-06-01T23:00:00", "thiếu múi giờ")):
+        s[-1]["built_at_ict"] = st
+        e = gates(s, D[62], D[66])
+        ok(any(x.startswith("G1") and D[66].isoformat() in x for x in e), f"G1 phải nổ ({why}): {e}")
+        ok(V.index_session_for(s, D[66])[0] is None, f"index_session_for phải None ({why})")
+    ok(V.index_session_for(base, D[0] - dt.timedelta(days=3))[0] is None, "trước đầu chuỗi ⇒ None")
+    # (4) không còn phụ thuộc trading_bot.vn_market
+    src = open(V.__file__, encoding="utf-8").read()
+    ok("import is_holiday" not in src and "_calendar_session" not in src, "vnindex_total_return không dùng lịch lễ")
+
+
+def t_update_checked_through(tmp):
+    """--update: DNSE phải được hỏi tới mốc built_at; DNSE có phiên BQ chưa có ⇒ BuildRefused; dựng
+    offline (src2 tiêm) ⇒ built_at bị chặn ở phiên cuối của dữ liệu DNSE."""
+    D, inp, mem, src2 = fixture()
+    mp = write_mem(tmp, mem)
+    sp = os.path.join(tmp, "s_ct.csv")
+    last = max(src2)
+    V.update(sp, mp, inputs=inp, src2=src2, built_at=f"{last.isoformat()}T23:50:00+07:00",
+             first_date=D[0].isoformat())
+    ok(V.checked_through(V.read_series(sp)) == last, f"checked_through = {V.checked_through(V.read_series(sp))}")
+    h = md5(sp)
+    nxt = last + dt.timedelta(days=1 if last.weekday() < 4 else 3)
+    try:
+        V.update(sp, mp, inputs=inp, src2={**src2, nxt: 1.0},
+                 built_at=f"{nxt.isoformat()}T23:50:00+07:00")
+        ok(False, "DNSE có phiên sau phiên cuối của BQ (BQ chưa sync) phải BuildRefused")
+    except V.BuildRefused as exc:
+        ok("DNSE" in str(exc) and nxt.isoformat() in str(exc), f"thông điệp: {exc}")
+    ok(md5(sp) == h, "BuildRefused ⇒ file không đổi")
+    far = last + dt.timedelta(days=30)
+    V.update(sp, mp, inputs=inp, src2=src2, built_at=f"{far.isoformat()}T23:50:00+07:00")
+    ct = V.checked_through(V.read_series(sp))
+    ok(ct == last, f"offline: built_at phải chặn ở phiên cuối của DNSE {last}, không phải {far}: {ct}")
+    try:
+        V.update(sp, mp, inputs=inp, src2=src2, built_at="2030-01-01 23:50")
+        ok(False, "built_at thiếu múi giờ phải BuildRefused")
+    except V.BuildRefused as exc:
+        ok("múi giờ" in str(exc), f"{exc}")
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="vtr_sc_") as tmp:
+        t_update_checked_through(tmp)
         t_build_by_hand(tmp)
         t_sealed(tmp)
     t_gates()

@@ -21,7 +21,7 @@ import nav_period_returns as npr  # noqa: E402
 import nav_sleeve  # noqa: E402
 import vnindex_total_return as V  # noqa: E402
 from account_cash_flows import NavRow  # noqa: E402
-from vnindex_total_return_selfcheck import mk_series  # noqa: E402
+from vnindex_total_return_selfcheck import mk_series, rechain  # noqa: E402
 
 N_OK = 0
 NO_ACKS = "/nonexistent/vnindex_tr_acks.json"
@@ -51,9 +51,10 @@ def fixture():
     dòng D[41..66] + một dòng THỨ BẢY sau D[60]."""
     D, series = mk_series(70)
     series = [dict(r) for r in series]
-    for i, r in enumerate(series):            # tr_gross ≠ tr_net ⇒ phân biệt được cờ Q2
-        r["tr_gross"] = r["vnindex"] * (1.0002 ** i)
-        r["tr_net"] = r["vnindex"] * (1.0001 ** i)
+    for i, r in enumerate(series):            # cổ tức 0,02%/phiên ⇒ tr_gross ≠ tr_net (phân biệt cờ Q2)
+        if i:
+            r["y_gross"] = 0.0002
+    series = rechain(series)                  # chuỗi TR nối được (G1 vòng 2 kiểm điều này)
     # index_anchor_date = phiên TRƯỚC inception_date (ca SpaceX: NAV gốc = số dư sáng ⇒ mốc = đóng cửa hôm trước)
     inc = {"inception_date": D[40].isoformat(), "starting_capital": 1_000_000_000,
            "index_anchor_date": D[39].isoformat()}

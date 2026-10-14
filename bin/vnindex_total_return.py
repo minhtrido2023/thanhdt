@@ -76,6 +76,12 @@ G5_TOL = 0.005                     # 0,5 điểm %
 G6_DY = 0.30
 G7_MAX_AGE_DAYS = 35
 G8_MAX_SHARE = 0.005
+# G1 (vòng 2, B3): tập phiên = CHÍNH các dòng của chuỗi (mỗi dòng là phiên BQ VNINDEX, `--update` từ chối
+# khi DNSE có phiên BQ thiếu) — KHÔNG dùng bảng lễ nhập tay `trading_bot.vn_market` (chưa có Tết; 2025
+# thiếu 8 phiên ⇒ G1 báo oan, chặn mọi weekly/monthly từ Tết 2027). Hai lớp chống "dòng bị mất":
+G1_MAX_GAP_DAYS = 14               # khoảng trống giữa 2 dòng liền nhau; đo 2014→2026-10-13: dài nhất 11 ngày (Tết 2015)
+G1_CHAIN_TOL = 1e-9                # TR_t/TR_{t-1} phải = VNINDEX_t/VNINDEX_{t-1} + k·y_t (đo: lệch ≤ 9e-15)
+SESSION_CLOSE_ICT = dt.time(15, 0)  # sau giờ này DNSE/BQ đã có nến của ngày (ATC HOSE xong 14:45)
 
 COLUMNS = ["date", "vnindex", "vnindex_src2", "y_gross", "n_members", "mc_members_vnd",
            "div_cash_vnd", "tr_gross", "tr_net", "k2_synth_pr", "status", "membership_vintage",
@@ -342,14 +348,24 @@ def append_series(path: str, rebuilt: list, write: bool = True) -> dict:
 
 # ─────────────────────────────────────────────────────────── kỳ + cổng
 
-def _calendar_session(d: dt.date) -> bool:
-    from trading_bot.vn_market import is_holiday
-    return d.weekday() < 5 and not is_holiday(d)
+def _checked_through_stamp(stamp: str):
+    """Ngày cuối mà một lần dựng ở thời điểm `stamp` (ISO có múi giờ) đã đối chiếu BQ ∪ DNSE: trước
+    15:00 ICT ⇒ hôm trước (nến ngày chưa chốt). Không đọc được / thiếu múi giờ ⇒ None (fail-closed)."""
+    try:
+        t = dt.datetime.fromisoformat(stamp or "")
+    except ValueError:
+        return None
+    if t.tzinfo is None:
+        return None
+    t = t.astimezone(ICT)
+    return t.date() if t.time() >= SESSION_CLOSE_ICT else t.date() - dt.timedelta(days=1)
 
 
-def _import_vn_market():
-    if WC_ROOT not in sys.path:
-        sys.path.insert(0, WC_ROOT)
+def checked_through(series: list):
+    """Chuỗi đã được đối chiếu BQ ∪ DNSE tới ngày nào: `built_at_ict` của dòng CUỐI — dòng cuối luôn
+    `provisional` nên MỖI lần `--update` thành công đều ghi lại nó (lần bị từ chối không ghi gì ⇒ mốc
+    cũ, fail-closed). Ngày thường không có dòng trong (dòng cuối, mốc này] = không phải phiên."""
+    return _checked_through_stamp(series[-1]["built_at_ict"]) if series else None
 
 
 def _index_of(series: list, d: dt.date):
@@ -392,34 +408,36 @@ def load_acks(path: str = ACKS_PATH) -> set:
 
 def check_period(series: list, start_date, end_date, acks: set = None, today: dt.date = None) -> list:
     """Danh sách lỗi cổng (rỗng = qua) cho kỳ (start, end]. Mỗi lỗi: 'Gx: <giá trị đã đọc>'."""
-    _import_vn_market()
     a, b = _d(start_date), _d(end_date)
     acks = set() if acks is None else acks
     errs = []
     if not series:
         return ["G1: chuỗi rỗng"]
     last = series[-1]["date"]
-    # G1 — phiên cuối của kỳ + phiên giữa kỳ (lịch: T2–T6 trừ lễ đã khai ở trading_bot.vn_market)
-    d = b
-    while not _calendar_session(d):
-        d -= dt.timedelta(days=1)
-    if d > last:
-        errs.append(f"G1: chuỗi dừng ở {last}, thiếu phiên cuối của kỳ {d} (kỳ tới {b})")
-    have = {r["date"] for r in series}
-    gaps, d = [], a + dt.timedelta(days=1)
-    while d <= min(b, last):
-        if _calendar_session(d) and d not in have:
-            gaps.append(d.isoformat())
-        d += dt.timedelta(days=1)
-    if gaps:
-        errs.append(f"G1: thiếu {len(gaps)} phiên giữa kỳ: {', '.join(gaps[:5])}"
-                    + (" …" if len(gaps) > 5 else ""))
+    # G1 — phiên cuối của kỳ: chuỗi phải đã được đối chiếu BQ ∪ DNSE tới hết kỳ (tập phiên = dòng chuỗi)
+    ct = checked_through(series)
+    if b > last and (ct is None or b > ct):
+        errs.append(f"G1: chuỗi dừng ở {last}; lần --update thành công cuối (built_at_ict "
+                    f"{series[-1]['built_at_ict']!r}) mới đối chiếu BQ ∪ DNSE tới {ct} — chưa biết có "
+                    f"phiên nào trong ({max(last, ct) if ct else last}, {b}] (kỳ tới {b})")
     ia = _index_of(series, a)
     if ia is None:
         errs.append(f"G1: mốc {a} không phải phiên có trong chuỗi")
         return errs
     ib = max(i for i, r in enumerate(series) if r["date"] <= b)
     rows = series[ia:ib + 1]
+    # G1 — dòng bị mất giữa kỳ: khoảng trống quá dài, hoặc chuỗi TR không nối được từ dòng liền trước
+    for p, r in zip(rows, rows[1:]):
+        if (r["date"] - p["date"]).days > G1_MAX_GAP_DAYS:
+            errs.append(f"G1: {p['date']} → {r['date']} không có dòng nào ({(r['date'] - p['date']).days} "
+                        f"ngày lịch > {G1_MAX_GAP_DAYS}) — chuỗi mất dòng?")
+        y = r["y_gross"] or 0.0
+        for col, k in (("tr_gross", 1.0), ("tr_net", 1.0 - DIV_TAX_RATE)):
+            dev = r[col] / p[col] - (r["vnindex"] / p["vnindex"] + k * y)
+            if abs(dev) > G1_CHAIN_TOL:
+                errs.append(f"G1: {r['date']} {col} không nối từ dòng liền trước {p['date']} (lệch "
+                            f"{dev:+.2e}) — có dòng bị xoá/sửa giữa hai dòng này")
+                break
     for i, r in enumerate(rows):
         # G2 — cả dòng mốc (mức chỉ số của nó đi vào tỉ suất)
         s2 = r["vnindex_src2"]
@@ -540,23 +558,23 @@ def report_tr_kind(path: str = CONFIG_PATH) -> str:
 
 
 def index_session_for(series: list, d) -> tuple:
-    """(phiên của chỉ số ứng với dòng sổ ngày d, ghi chú). d là phiên có trong chuỗi ⇒ chính nó. d là
-    ngày KHÔNG giao dịch theo lịch (T7/CN/lễ đã khai) ⇒ phiên gần nhất trước đó — NAV của dòng sổ
-    ngày nghỉ được định giá bằng giá đóng cửa phiên đó, nên đây là mức chỉ số CÙNG thời điểm, không
-    phải tự lùi mốc. Thiếu phiên (theo lịch) ⇒ (None, lý do)."""
-    _import_vn_market()
+    """(phiên của chỉ số ứng với dòng sổ ngày d, ghi chú). d là phiên có trong chuỗi ⇒ chính nó. d KHÔNG
+    phải phiên (không có dòng, nằm trong vùng chuỗi đã đối chiếu BQ ∪ DNSE) ⇒ phiên gần nhất trước đó —
+    NAV của dòng sổ ngày nghỉ được định giá bằng giá đóng cửa phiên đó, nên đây là mức chỉ số CÙNG thời
+    điểm, không phải tự lùi mốc. d sau vùng đã đối chiếu / trước đầu chuỗi ⇒ (None, lý do G1)."""
     d = _d(d)
     dates = [r["date"] for r in series]
     if d in dates:
         return d, None
-    if _calendar_session(d):
-        return None, (f"G1: {d} là phiên theo lịch nhưng chuỗi không có (chuỗi "
-                      f"{dates[0] if dates else None} → {dates[-1] if dates else None})")
-    prev = d - dt.timedelta(days=1)
-    while not _calendar_session(prev):
-        prev -= dt.timedelta(days=1)
-    if prev not in dates:
-        return None, f"G1: {d} không giao dịch; phiên liền trước {prev} chưa có trong chuỗi"
+    if not dates or d < dates[0]:
+        return None, f"G1: {d} trước đầu chuỗi ({dates[0] if dates else 'chuỗi rỗng'})"
+    if d > dates[-1]:
+        ct = checked_through(series)
+        if ct is None or d > ct:
+            return None, (f"G1: {d} sau phiên cuối của chuỗi {dates[-1]}; lần --update thành công cuối "
+                          f"(built_at_ict {series[-1]['built_at_ict']!r}) mới đối chiếu BQ ∪ DNSE tới {ct} "
+                          f"— chưa biết {d} có phải phiên không")
+    prev = max(x for x in dates if x < d)
     return prev, f"{d} không giao dịch ⇒ mức chỉ số đóng cửa {prev} (giá dùng cho NAV dòng đó)"
 
 
@@ -679,12 +697,24 @@ def update(series_path: str = SERIES_PATH, membership_path: str = MEMBERSHIP_LAT
         raise BuildRefused(f"BQ không có dòng VNINDEX ngày mốc {since} (dòng đầu: "
                            f"{idx.index[0].date() if len(idx) else None})")
     sess = [t.date() for t in idx.index]
+    # `built_at` của dòng cuối = mốc "đã đối chiếu BQ ∪ DNSE tới" mà G1 tin (checked_through) ⇒ DNSE phải
+    # được hỏi tới đúng mốc đó; DNSE có phiên BQ chưa có (BQ chưa sync) ⇒ từ chối, không ghi.
+    ct = _checked_through_stamp(built_at)
+    if ct is None:
+        raise BuildRefused(f"built_at {built_at!r} không phải thời điểm ISO có múi giờ")
     if src2 is None:
-        src2 = fetch_dnse_vnindex(since, sess[-1])
-    missing = sorted(d for d in src2 if since < d <= sess[-1] and d not in set(sess))
+        src2 = fetch_dnse_vnindex(since, max(sess[-1], ct))
+    elif src2:
+        # dựng offline (src2 tiêm vào): chỉ vouch được tới phiên cuối của dữ liệu DNSE đưa vào
+        cap = dt.datetime.combine(max(src2), dt.time(23, 59, 59), ICT)
+        if dt.datetime.fromisoformat(built_at) > cap:
+            built_at = cap.isoformat(timespec="seconds")
+            ct = _checked_through_stamp(built_at)
+    missing = sorted(d for d in src2 if since < d <= max(sess[-1], ct) and d not in set(sess))
     if missing:
         raise BuildRefused(f"DNSE có {len(missing)} phiên mà BQ VNINDEX không có: "
-                           f"{[d.isoformat() for d in missing[:5]]} — không dựng chuỗi có lỗ")
+                           f"{[d.isoformat() for d in missing[:5]]} (BQ tới {sess[-1]}, đối chiếu tới {ct}) "
+                           f"— không dựng chuỗi có lỗ")
     day = div_yield_daily(panel[panel.ticker != "VNINDEX"], spells, dividends(ca), idx, after=since)
     day = day.join(idx.rename("vnindex"))
     # phiên chỉ số không có thành viên nào ⇒ không suy được y: từ chối thay vì bỏ qua im lặng
