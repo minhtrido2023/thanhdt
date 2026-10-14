@@ -1,0 +1,51 @@
+## B2: thư mục có dnse_raw_*.jsonl (bản sao) mà thiếu --real-data ⇒ rc=3
+$ sb <app> fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/round2/acceptance/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2)
+fund_restatement: TỪ CHỐI ghi đính chính vào thư mục dữ liệu thật <app>/data/execution_logs (cây dữ liệu thật của máy, hoặc thư mục có dnse_raw_*.jsonl) khi không có --real-data (thao tác của Mike sau khi user duyệt).
+rc=3
+## B2: WC_ROOT = sandbox RỖNG khác, --nav-dir = bản sao có dnse_raw ⇒ vẫn rc=3
+$ env WC_ROOT=/tmp/fl2/empty TZ=Asia/Ho_Chi_Minh python3 <app>/mike/bin/fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/round2/acceptance/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2)
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('<app>') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('<app>') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+fund_restatement: TỪ CHỐI ghi đính chính vào thư mục dữ liệu thật <app>/data/execution_logs (cây dữ liệu thật của máy, hoặc thư mục có dnse_raw_*.jsonl) khi không có --real-data (thao tác của Mike sau khi user duyệt).
+rc=3
+## B4: giờ giả bị từ chối ở thư mục dữ liệu thật (NAV_HISTORY_DIR của WC_ROOT)
+$ env FUND_RESTATEMENT_TEST_NOW_ICT=2026-10-14T10:00:00 WC_ROOT=<app> TZ=Asia/Ho_Chi_Minh python3 <app>/mike/bin/fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/round2/acceptance/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
+LỖI fund_restatement [RestatementError]: biến môi trường FUND_RESTATEMENT_TEST_NOW_ICT='2026-10-14T10:00:00' đang đặt trong khi --nav-dir <app>/data/execution_logs là thư mục dữ liệu thật — biến này chỉ dành cho selfcheck. Gỡ biến rồi chạy lại.
+rc=2
+## áp thật trên bản sao (giờ thật, trong khung)
+$ sb <app> fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/round2/acceptance/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
+ĐÃ ÁP 2 đính chính vào <app>/data/execution_logs/nav_history_SpaceX.csv: md5 12ee9b87add3038c7201dd4effb029d9 → 49b8f59fe3398b312bf17f83d4b57d43; nhật ký <app>/data/execution_logs/nav_history_corrections.jsonl
+   replace 2026-07-02: nav 994733747 → 990304455
+   insert 2026-08-06: nav — → 950871323
+sao lưu trước khi áp: <app>/data/execution_logs/restatement_backups/SpaceX_20261014T105033_12ee9b87add3038c7201dd4effb029d9.csv (md5 12ee9b87add3038c7201dd4effb029d9)
+ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp <app>/data/execution_logs/restatement_backups/SpaceX_20261014T105033_12ee9b87add3038c7201dd4effb029d9.csv <app>/data/execution_logs/nav_history_SpaceX.csv rồi áp một đính chính NGƯỢC để nhật ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).
+rc=0
+## áp lần hai ⇒ ĐÃ ÁP từ trước
+$ sb <app> fund_restatement.py apply --account SpaceX --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_SpaceX_AB.json --impact-report <research>/round2/acceptance/impact_SpaceX_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
+ĐÃ ÁP từ trước: <app>/data/execution_logs/nav_history_SpaceX.csv đang mang md5 sau đính chính 49b8f59fe3398b312bf17f83d4b57d43 — không ghi gì.
+rc=0
+## B2: thư mục có dnse_raw_*.jsonl (bản sao) mà thiếu --real-data ⇒ rc=3
+$ sb <app> fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2)
+fund_restatement: TỪ CHỐI ghi đính chính vào thư mục dữ liệu thật <app>/data/execution_logs (cây dữ liệu thật của máy, hoặc thư mục có dnse_raw_*.jsonl) khi không có --real-data (thao tác của Mike sau khi user duyệt).
+rc=3
+## B2: WC_ROOT = sandbox RỖNG khác, --nav-dir = bản sao có dnse_raw ⇒ vẫn rc=3
+$ env WC_ROOT=/tmp/fl2/empty TZ=Asia/Ho_Chi_Minh python3 <app>/mike/bin/fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2)
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('<app>') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('<app>') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+fund_restatement: TỪ CHỐI ghi đính chính vào thư mục dữ liệu thật <app>/data/execution_logs (cây dữ liệu thật của máy, hoặc thư mục có dnse_raw_*.jsonl) khi không có --real-data (thao tác của Mike sau khi user duyệt).
+rc=3
+## B4: giờ giả bị từ chối ở thư mục dữ liệu thật (NAV_HISTORY_DIR của WC_ROOT)
+$ env FUND_RESTATEMENT_TEST_NOW_ICT=2026-10-14T10:00:00 WC_ROOT=<app> TZ=Asia/Ho_Chi_Minh python3 <app>/mike/bin/fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
+LỖI fund_restatement [RestatementError]: biến môi trường FUND_RESTATEMENT_TEST_NOW_ICT='2026-10-14T10:00:00' đang đặt trong khi --nav-dir <app>/data/execution_logs là thư mục dữ liệu thật — biến này chỉ dành cho selfcheck. Gỡ biến rồi chạy lại.
+rc=2
+## áp thật trên bản sao (giờ thật, trong khung)
+$ sb <app> fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
+ĐÃ ÁP 1 đính chính vào <app>/data/execution_logs/nav_history_ZaloPay.csv: md5 f8b6a9787e5b323395b888c360065843 → 0ee74a1587b568deaba172b75a120d37; nhật ký <app>/data/execution_logs/nav_history_corrections.jsonl
+   insert 2026-08-06: nav — → 937070077
+sao lưu trước khi áp: <app>/data/execution_logs/restatement_backups/ZaloPay_20261014T105034_f8b6a9787e5b323395b888c360065843.csv (md5 f8b6a9787e5b323395b888c360065843)
+ĐƯỜNG LUI — TRƯỚC khi chốt sổ: cp <app>/data/execution_logs/restatement_backups/ZaloPay_20261014T105034_f8b6a9787e5b323395b888c360065843.csv <app>/data/execution_logs/nav_history_ZaloPay.csv rồi áp một đính chính NGƯỢC để nhật ký ghi nhận; SAU khi chốt sổ: chỉ còn đường đính chính (nav_unit_ledger.py --restate).
+rc=0
+## áp lần hai ⇒ ĐÃ ÁP từ trước
+$ sb <app> fund_restatement.py apply --account ZaloPay --nav-dir <app>/data/execution_logs --correction <research>/corrections/correction_ZaloPay_AB.json --impact-report <research>/round2/acceptance/impact_ZaloPay_AB.json --approved-by THU NGHIEM tren ban sao /tmp (Taylor, vong 2) --real-data
+ĐÃ ÁP từ trước: <app>/data/execution_logs/nav_history_ZaloPay.csv đang mang md5 sau đính chính 0ee74a1587b568deaba172b75a120d37 — không ghi gì.
+rc=0

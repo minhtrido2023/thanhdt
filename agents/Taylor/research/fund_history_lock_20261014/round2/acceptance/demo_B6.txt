@@ -1,0 +1,43 @@
+$ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/bin/nav_unit_ledger.py --account T --nav-dir /tmp/fl2/demo_b6 --inception-path /tmp/fl2/demo_b6/inc.json --flows-path /tmp/fl2/demo_b6/flows.json --ledger-dir /tmp/fl2/demo_b6/L --tail 0 --immutable --seal --accept-preclose 2026-07-02=đã rà NAV 1010 là giá chốt
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+nav_unit_ledger T: 3 dòng dựng được (2026-07-01 → 2026-07-03), 0 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv — 3 dòng, tới 2026-07-03; vừa THÊM 3 dòng
+kho bất biến: manifest #1 (seal) md5 4fafa2a578feb7bb1985d21c3c118087 — 3 dòng tới 2026-07-03, giá đơn vị cuối 10200.0000; dòng chụp trước đóng cửa đã nhận: 2026-07-02
+SEAL_MD5 T 4fafa2a578feb7bb1985d21c3c118087 3d5e62ef95fc764eccfc53445d8666f3
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/bin/fund_restatement.py impact --account T --old-nav-dir /tmp/fl2/demo_b6/old --new-nav-dir /tmp/fl2/demo_b6 --inception-path /tmp/fl2/demo_b6/inc.json --flows-path /tmp/fl2/demo_b6/flows.json --reports-dir /tmp/fl2/demo_b6/rep --sealed-ledger /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv --out /tmp/fl2/demo_b6/imp.json
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+== Tác động đính chính — T: 0/0 báo cáo đã gửi bị ảnh hưởng (ngưỡng: <0.05 bậc 1 · 0.05–0.5 bậc 2 · >0.5 bậc 3)
+báo cáo                                                     số chính bậc theo ngày bậc  hành động
+-- CẦN USER QUYẾT: 0
+-- ghi chú ở báo cáo kế tiếp (bậc 2): 0
+-- chỉ sửa từ nay (bậc 0–1): 0
+Phép đo = tác động của THAY ĐỔI này (dữ liệu cũ tính lại → dữ liệu mới tính lại); KHÔNG đo sai số của số đã in. Báo cáo ngày trước 2026-08-17 chỉ có trên Discord: không quét.
+Công cụ này KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại báo cáo nào.
+báo cáo tác động: /tmp/fl2/demo_b6/imp.json (md5 f9ed43b21fdcfc2316250fa35fb086dd)
+rc=0
+## restate KHÔNG nhận lại ⇒ phải bị CHẶN (lời nhận cũ là của dòng NAV 1010 lúc 10:00)
+$ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/bin/nav_unit_ledger.py --account T --nav-dir /tmp/fl2/demo_b6 --inception-path /tmp/fl2/demo_b6/inc.json --flows-path /tmp/fl2/demo_b6/flows.json --ledger-dir /tmp/fl2/demo_b6/L --tail 0 --restate --impact-report /tmp/fl2/demo_b6/imp.json --reason x --approved-by x
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+TỪ CHỐI nav_unit_ledger (T) [SealGateError]: /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv: sổ sau đính chính CHƯA đủ điều kiện chốt (1 chỗ):
+  2026-07-02: lời nhận --accept-preclose cũ (balance_ts '2026-07-02T10:00:00', NAV 1010.0) KHÔNG còn là của dòng này — dòng hiện có balance_ts '2026-07-02T11:00:00', NAV 1005.0, vẫn chụp TRƯỚC giờ đóng cửa 14:45. Lời nhận gắn với đúng một dòng; đã rà dòng MỚI thì nhận lại: --accept-preclose 2026-07-02="<lý do + bằng chứng>"
+  ⇒ KHÔNG ghi gì vào sổ.
+rc=2
+## nhận lại tường minh ⇒ qua
+$ env WC_ROOT=/tmp/fl2/empty python3 /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-fundlock-1014/bin/nav_unit_ledger.py --account T --nav-dir /tmp/fl2/demo_b6 --inception-path /tmp/fl2/demo_b6/inc.json --flows-path /tmp/fl2/demo_b6/flows.json --ledger-dir /tmp/fl2/demo_b6/L --tail 0 --restate --impact-report /tmp/fl2/demo_b6/imp.json --reason x --approved-by x --accept-preclose 2026-07-02=rà lại: NAV 1005 lúc 11:00
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fl2/empty' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+nav_unit_ledger T: 3 dòng dựng được (2026-07-01 → 2026-07-03), 0 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv — 3 dòng, tới 2026-07-03; khớp chuỗi dựng lại
+kho bất biến: manifest #2 (restate) md5 d063a8fc02ffe6c0707652f5db5fbbb8 — 3 dòng tới 2026-07-03, giá đơn vị cuối 10200.0000; dòng chụp trước đóng cửa đã nhận: 2026-07-02
+SEAL_MD5 T d063a8fc02ffe6c0707652f5db5fbbb8 b27c17f789d9f534bbfcbe8e6b807807
+ĐÃ ĐÍNH CHÍNH: 2 chỗ lệch; sổ cũ (md5 4fafa2a578feb7bb1985d21c3c118087) lưu ở nav_unit_ledger_T.csv.superseded.2.4fafa2a578fe.csv; người duyệt x
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ tail -1 /tmp/fl2/demo_b6/L/nav_unit_ledger_T.csv.manifest.jsonl
+{"accepted_preclose": {"2026-07-02": {"balance_ts": "2026-07-02T11:00:00", "nav": 1005.0, "reason": "rà lại: NAV 1005 lúc 11:00"}}, "account": "T", "approved_by": "x", "archived_as": "nav_unit_ledger_T.csv.superseded.2.4fafa2a578fe.csv", "cash_flows_md5": "1af75e9c2ac6c1fd0adcd82e7a5f7c35", "diffs": ["2026-07-02 nav: đã chốt 1,010.00 → dựng lại 1,005.00 (lệch -5.00 VND)", "2026-07-02 unit_price: đã chốt 10100.0 → dựng lại 10050.0 (lệch -50.000000 = -0.495050%)"], "first_date": "2026-07-01", "impact_report_md5": "f9ed43b21fdcfc2316250fa35fb086dd", "inception_md5": "2015700ee5279bef0dddc87f4e22dc04", "kind": "restate", "last_date": "2026-07-03", "last_unit_price": "10200.0", "md5": "d063a8fc02ffe6c0707652f5db5fbbb8", "md5_before": "4fafa2a578feb7bb1985d21c3c118087", "n_diffs": 2, "nav_history_md5": "2a35879c3a758182c2a1853522af8d82", "reason": "x", "rows_added": 0, "rows_before": 3, "rows_total": 3, "sealed_at_ict": "2026-10-14T10:51:06+07:00", "seq": 2, "tool": "nav_unit_ledger.py"}
+rc=0

@@ -1,0 +1,6 @@
+current SpaceX cua_so 71 nghi_van 1 [('2026-07-02T14:45:00', '2026-07-03T21:57:33', 'cần xác nhận khoản nội bộ')]
+current ZaloPay cua_so 68 nghi_van 0 []
+option1_rekey SpaceX cua_so 71 nghi_van 0 []
+option1_rekey ZaloPay cua_so 68 nghi_van 0 []
+option2_keep_old_add_new SpaceX cua_so 71 nghi_van 0 []
+option2_keep_old_add_new ZaloPay cua_so 68 nghi_van 0 []

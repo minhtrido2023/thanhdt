@@ -24,6 +24,10 @@ sys.path.insert(0, str(BIN))
 import fund_restatement as fr                         # noqa: E402
 import nav_unit_ledger as nul                         # noqa: E402
 
+# `apply` chỉ chạy 09:00–18:30 ICT ⇒ selfcheck đặt giờ giả (biến chỉ-cho-test; bị từ chối ở thư
+# mục dữ liệu thật — R9 kiểm chính điều đó).
+os.environ[fr.TEST_NOW_ENV] = "2026-10-14T10:00:00"
+
 D = datetime.date
 N = 0
 FAILS = []
@@ -47,6 +51,7 @@ REPORTS = {
     "ZaloPay_daily_report_2026-07-06.md": "NAV 1.015.000.000 (tài khoản khác)",
     "paper_programs_daily_report_2026-07-06.md": "không phải báo cáo tài khoản",
     "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711": "bản sao lưu",
+    "SpaceX_daily_report_2026-07-07.md.orig": "không phải .md",
     "SpaceX_daily_report_ngay-la.md": "tên hỏng",
     "ghi_chu.md": "không liên quan",
 }
@@ -174,7 +179,7 @@ def r2_report_names(tmp):
     p = fr.parse_report_name
     m = p("SpaceX_daily_report_2026-07-06.md")
     ok(m == {"who": ["SpaceX"], "kind": "daily", "start": D(2026, 7, 6), "end": D(2026, 7, 6),
-             "suffix": None}, f"R2 daily: {m}")
+             "suffix": None, "bak_sent": None}, f"R2 daily: {m}")
     m = p("SpaceX_ZaloPay_weekly_report_2026-07-06_to_2026-07-10_CORRECTION_VIB.md")
     ok(m["who"] == ["SpaceX", "ZaloPay"] and (m["start"], m["end"]) == (D(2026, 7, 6), D(2026, 7, 10))
        and m["suffix"] == "CORRECTION_VIB", f"R2 weekly khoảng + hậu tố: {m}")
@@ -184,6 +189,14 @@ def r2_report_names(tmp):
     ok((m["start"], m["end"]) == (D(2026, 2, 1), D(2026, 2, 28)), f"R2 monthly tháng 2: {m}")
     m = p("SpaceX_monthly_report_2028-02.md")
     ok(m["end"] == D(2028, 2, 29), "R2 monthly năm nhuận")
+    m = p("SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711")
+    ok(m["bak_sent"] == "20260711" and (m["start"], m["end"]) == (D(2026, 7, 6), D(2026, 7, 10))
+       and m["suffix"] is None, f"R2: bản .md.bak_sent_* là báo cáo ĐÃ GỬI, đọc được kỳ: {m}")
+    m = p("SpaceX_weekly_report_2026-07-06_to_2026-07-10_CORRECTION_VIB.md.bak_sent_x")
+    ok(m["suffix"] == "CORRECTION_VIB" and m["bak_sent"] == "x", f"R2: hậu tố + bak_sent: {m}")
+    m = p("SpaceX_monthly_report_2026-07-31.md")
+    ok((m["start"], m["end"]) == (D(2026, 7, 1), D(2026, 7, 31)),
+       f"R2 monthly đặt tên theo MỘT NGÀY ⇒ kỳ từ ngày 1 của tháng (không phải 1 ngày): {m}")
     ok(p("ghi_chu.md") is None and p("SpaceX_daily_report_2026-07-06.md.bak") is None
        and p("SpaceX_plan_2026-07-06.md") is None, "R2: tên không phải báo cáo ⇒ None")
     for bad in ("SpaceX_daily_report_ngay-la.md", "SpaceX_weekly_report_2026-07-10_to_2026-07-06.md",
@@ -192,12 +205,13 @@ def r2_report_names(tmp):
     w = World(tmp, "r2")
     found, unparsed, skipped = fr.list_reports(str(w.reports), "SpaceX")
     names = [x["name"] for x in found]
-    ok(len(names) == 8 and "ZaloPay_daily_report_2026-07-06.md" not in names
+    ok(len(names) == 9 and "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711" in names
+       and "ZaloPay_daily_report_2026-07-06.md" not in names
        and "paper_programs_daily_report_2026-07-06.md" not in names
        and "SpaceX_ZaloPay_monthly_report_2026-07.md" in names,
        f"R2 §12: chỉ báo cáo của SpaceX (kể cả báo cáo gộp), được {names}")
     ok(len(unparsed) == 1 and "ngay-la" in unparsed[0], f"R2: tên hỏng phải được NÊU, không bỏ im: {unparsed}")
-    ok(skipped == ["SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711"],
+    ok(skipped == ["SpaceX_daily_report_2026-07-07.md.orig"],
        f"R2: file không phải .md phải được liệt kê là bỏ qua: {skipped}")
     z, _, _ = fr.list_reports(str(w.reports), "ZaloPay")
     ok(sorted(x["name"] for x in z) == ["SpaceX_ZaloPay_monthly_report_2026-07.md",
@@ -210,8 +224,8 @@ def r3_replace(tmp):
     p, imp, _ = w.impact(w.correction([replace_item("2026-07-06", 1015, 1012)]))
     ok(p.returncode == 0 and imp is not None, f"R3: impact phải rc=0: {p.stderr[:300]}")
     rep = by_name(imp)
-    ok(imp["n_reports_scanned"] == 8 and imp["n_reports_affected"] == 6,
-       f"R3: quét 8, ảnh hưởng 6; được {imp['n_reports_scanned']}/{imp['n_reports_affected']}: {sorted(rep)}")
+    ok(imp["n_reports_scanned"] == 9 and imp["n_reports_affected"] == 7,
+       f"R3: quét 9 (cả bản .bak_sent), ảnh hưởng 7; được {imp['n_reports_scanned']}/{imp['n_reports_affected']}: {sorted(rep)}")
     d6 = rep["SpaceX_daily_report_2026-07-06.md"]
     want_nav = (1012 / 1015 - 1) * 100
     ok(abs(d6["headline"]["nav"]["dev_pct"] - want_nav) < 1e-9
@@ -243,8 +257,12 @@ def r3_replace(tmp):
        and d10["tier_window"] == 2 and d10["needs_human_look"],
        f"R3 daily 07-10: ngoài kỳ nhưng TRÍCH NGUYÊN NAV cũ (1.015.000.000) ⇒ phải vào danh sách xem: {d10}")
     mo = rep["SpaceX_ZaloPay_monthly_report_2026-07.md"]
-    ok(mo["tier_headline"] == 0 and mo["needs_human_look"] and set(mo["headline"]) == {"nav", "mtd", "inception"},
-       f"R3 monthly: chỉ đo NAV/MTD/từ đầu; số ngày lệch ⇒ cần người xem: {mo['headline']}")
+    ok(mo["tier_headline"] == 0 and mo["needs_human_look"]
+       and set(mo["headline"]) == {"nav", "mtd", "qtd", "ytd", "inception"},
+       f"R3 monthly: đo NAV/MTD/QTD/YTD/từ đầu (§6); số ngày lệch ⇒ cần người xem: {mo['headline']}")
+    bak = rep["SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711"]
+    ok(bak["tier_window"] == 2 and bak["needs_human_look"] and bak["period"] == wk["period"],
+       f"R3: bản .bak_sent (bản đã gửi) phải được đo như báo cáo tuần gốc: {bak}")
     ok(set(d6["headline"]) == {"nav", "day", "wtd", "mtd", "inception"}
        and set(wk["headline"]) == {"nav", "wtd", "mtd", "inception"}, "R3: bộ số chính theo loại báo cáo")
     ok(imp["note_next_report"] == ["SpaceX_daily_report_2026-07-06.md", "SpaceX_daily_report_2026-07-07.md"],
@@ -252,17 +270,20 @@ def r3_replace(tmp):
     q = [x["report"] for x in imp["queue_user_decision"]]
     ok(q == ["SpaceX_ZaloPay_monthly_report_2026-07.md", "SpaceX_daily_report_2026-07-10.md",
              "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md",
+             "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711",
              "SpaceX_weekly_report_2026-07-06_to_2026-07-10_CORRECTION_VIB.md"],
        f"R3: hàng đợi user = các báo cáo cần người xem: {q}")
     ok(all("người phải xem" in x["why"] for x in imp["queue_user_decision"]),
        "R3: lý do trong hàng đợi phải nói rõ việc của người")
-    ok(len(imp["fix_forward_only"]) == 4 and imp["changed_rows"] == [
-        {"date": "2026-07-06", "nav_old": 1015000000.0, "nav_new": 1012000000.0}],
+    ok(len(imp["fix_forward_only"]) == 5 and imp["changed_rows"] == [
+        {"date": "2026-07-06", "nav_old": 1015000000.0, "nav_new": 1012000000.0,
+         "columns": ["mtm_stock", "nav"]}],
        f"R3: changed_rows / fix_forward_only sai: {imp['changed_rows']} {imp['fix_forward_only']}")
     ok(imp["generated_at_ict"].endswith("+07:00") and imp["ledger_binding"] is None
        and imp["old_nav_history_md5"] == md5(w.nav_path.read_bytes()),
        "R3: giờ tạo ICT, md5 nav_history cũ, không gắn sổ khi không truyền --sealed-ledger")
-    ok("KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại" in p.stdout and "CẦN USER QUYẾT: 4" in p.stdout
+    ok("KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại" in p.stdout and "CẦN USER QUYẾT: 5" in p.stdout
+       and "KHÔNG đo sai số của số đã in" in p.stdout and "chỉ có trên Discord" in p.stdout
        and "⚠ CẦN NGƯỜI XEM" in p.stdout and "KHÔNG đọc được kỳ" in p.stdout
        and "bỏ qua 1 file không phải .md" in p.stdout,
        f"R3: bảng in phải có hàng đợi + cảnh báo tên hỏng + file bỏ qua: {p.stdout[-600:]}")
@@ -310,7 +331,8 @@ def r4_insert_delete_flows(tmp):
     ok(abs(wk["window_dev"] - abs((1035 / 1040 - 1035 / 1030) * 100)) < 1e-9 and wk["tier_window"] == 3,
        f"R4 chèn: tỉ suất ngày 07-09 đổi mốc so sánh ⇒ lệch {wk['window_dev']}")
     ok("SpaceX_daily_report_2026-07-10.md" in imp["unaffected_reports"]
-       and imp["changed_rows"] == [{"date": "2026-07-08", "nav_old": None, "nav_new": 1040000000.0}],
+       and imp["changed_rows"] == [{"date": "2026-07-08", "nav_old": None, "nav_new": 1040000000.0,
+                                    "columns": []}],
        "R4 chèn: báo cáo ngày 07-10 không đổi; changed_rows ghi dòng thêm")
     w2 = World(tmp, "r4_del")
     dele = {"op": "delete", "date": "2026-07-08", "expect": {"nav": "1040000000"},
@@ -472,6 +494,8 @@ def r6_apply(tmp):
     kept = w4.nav_path.read_bytes()
     orig = nul.NAV_HISTORY_DIR
     nul.NAV_HISTORY_DIR = str(w4.nav_dir)
+    fake_now, orig_clock = os.environ.pop(fr.TEST_NOW_ENV), fr._clock
+    fr._clock = lambda: datetime.datetime(2026, 10, 14, 10, 0, tzinfo=fr.ICT)
     try:
         base = ["apply", "--account", "SpaceX", "--correction", corr4, "--impact-report", imp4,
                 "--approved-by", "user"]
@@ -486,6 +510,8 @@ def r6_apply(tmp):
            and w4.nav_path.read_bytes() != kept, "R6: có --real-data thì áp được (mọi kiểm tra khác vẫn chạy)")
     finally:
         nul.NAV_HISTORY_DIR = orig
+        fr._clock = orig_clock
+        os.environ[fr.TEST_NOW_ENV] = fake_now
 
     # Chết giữa nhật ký và file ⇒ chạy lại ghi nốt file, không ghi bản ghi nhật ký thứ hai.
     w5 = World(tmp, "r6_crash")
@@ -586,7 +612,8 @@ def r8_gaps(tmp):
             "set": {"balance_ts": "2026-07-06T14:45:00"}, "reason": "giờ chụp", "evidence": "x"}
     p, imp, _ = w.impact(w.correction([item]))
     ok(p.returncode == 0 and imp["changed_rows"] == [
-        {"date": "2026-07-06", "nav_old": 1015000000.0, "nav_new": 1015000000.0}]
+        {"date": "2026-07-06", "nav_old": 1015000000.0, "nav_new": 1015000000.0,
+         "columns": ["balance_ts"]}]
        and imp["n_reports_affected"] == 0 and imp["old_nav_history_md5"] != imp["new_nav_history_md5"],
        f"R8: sửa riêng balance_ts ⇒ changed_rows có dòng đó, 0 báo cáo lệch: {imp and imp['changed_rows']}")
 
@@ -614,6 +641,384 @@ def r8_gaps(tmp):
        and "ĐÃ ÁP từ trước" in a2.stdout and w.nav_path.read_bytes() == after and len(log) == 1,
        f"R8: xoá hai lần — lần hai phải rc=0 'ĐÃ ÁP từ trước', được rc={a2.returncode} {a2.stderr[-200:]}")
 
+# ------------------------------------------------------------------ R9. vòng 2 (arch-review B2/B4/B7/B14)
+def _log_records(w):
+    return [json.loads(x) for x in (w.nav_dir / fr.AUDIT_LOG).read_text(encoding="utf-8").splitlines()]
+
+
+def r9_real_dir_gate(tmp):
+    """B2: 'thư mục dữ liệu thật' = cây cố định HOẶC có dnse_raw_*.jsonl HOẶC NAV_HISTORY_DIR."""
+    plain = Path(tmp) / "r9_plain"
+    plain.mkdir()
+    ok(nul.CANONICAL_REAL_DIR == "/home/trido/thanhdt/WorkingClaude/data/execution_logs",
+       "R9 B2: cây dữ liệu thật là hằng số CỐ ĐỊNH, không suy từ WC_ROOT")
+    orig = nul.NAV_HISTORY_DIR
+    nul.NAV_HISTORY_DIR = str(plain / "khong_lien_quan")
+    try:
+        ok(nul.is_real_data_dir(nul.CANONICAL_REAL_DIR) and nul.is_canonical_dir(nul.CANONICAL_REAL_DIR)
+           and nul.is_real_data_dir(nul.CANONICAL_REAL_DIR + "/../execution_logs/"),
+           "R9 B2(a): cây cố định là thật dù NAV_HISTORY_DIR (WC_ROOT) trỏ nơi khác")
+        ok(not nul.is_real_data_dir(str(plain)) and not nul.is_canonical_dir(str(plain))
+           and not nul.is_real_data_dir(str(plain / "chua_co")),
+           "R9 B2: thư mục thử trống / chưa tồn tại không phải thật")
+        (plain / "dnse_raw_ghi_chu.txt").write_text("x", encoding="utf-8")
+        (plain / "raw_2026-07-02.jsonl").write_text("x", encoding="utf-8")
+        ok(not nul.is_real_data_dir(str(plain)), "R9 B2(b): chỉ đúng mẫu dnse_raw_*.jsonl mới tính")
+        nul.NAV_HISTORY_DIR = str(plain)
+        ok(nul.is_real_data_dir(str(plain)) and nul.is_canonical_dir(str(plain)),
+           "R9 B2(c): NAV_HISTORY_DIR suy từ WC_ROOT là thật")
+    finally:
+        nul.NAV_HISTORY_DIR = orig
+
+    # Tái hiện của reviewer: WC_ROOT = sandbox A (khác), --nav-dir = thư mục B có dnse_raw ⇒ CHẶN.
+    w = World(tmp, "r9_b2")
+    (w.nav_dir / "dnse_raw_2026-07-02.jsonl").write_text("{}\n", encoding="utf-8")
+    ok(nul.is_real_data_dir(str(w.nav_dir)) and not nul.is_canonical_dir(str(w.nav_dir)),
+       "R9 B2(b): thư mục có dnse_raw_*.jsonl là dữ liệu thật (nhưng không phải cây canonical)")
+    sandbox_a = Path(tmp) / "r9_wc_root_a"
+    sandbox_a.mkdir()
+    (sandbox_a / "wc_env.sh").write_text("", encoding="utf-8")
+    corr = w.correction([replace_item("2026-07-06", 1015, 1012)])
+    _, _, imp_path = w.impact(corr)
+    kept = w.nav_path.read_bytes()
+    args = ["apply", "--account", "SpaceX", "--nav-dir", str(w.nav_dir), "--correction", corr,
+            "--impact-report", imp_path, "--approved-by", "user"]
+    env = dict(os.environ, WC_ROOT=str(sandbox_a))
+
+    def run(*extra, nav_dir=None):
+        a = list(args)
+        if nav_dir:
+            a[a.index("--nav-dir") + 1] = nav_dir
+        return subprocess.run([sys.executable, str(BIN / "fund_restatement.py"), *a, *extra],
+                              capture_output=True, text=True, env=env)
+    r = run()
+    ok(r.returncode == 3 and "--real-data" in r.stderr and "dnse_raw_*.jsonl" in r.stderr
+       and w.nav_path.read_bytes() == kept and not (w.nav_dir / fr.AUDIT_LOG).exists()
+       and not (w.nav_dir / fr.BACKUP_DIR).exists(),
+       f"R9 B2: WC_ROOT khác + --nav-dir có dnse_raw mà thiếu --real-data ⇒ rc=3, không ghi gì; "
+       f"được rc={r.returncode} {r.stderr[-200:]}")
+    link = w.dir / "link_b2"
+    os.symlink(w.nav_dir, link)
+    r = run(nav_dir=str(link))
+    ok(r.returncode == 3 and w.nav_path.read_bytes() == kept, "R9 B2: qua symlink cũng bị chặn")
+    r = run("--real-data")
+    ok(r.returncode == 0 and w.nav_path.read_bytes() != kept,
+       f"R9 B2: có --real-data thì áp được, rc={r.returncode} {r.stderr[-200:]}")
+
+
+def r9_apply_window(tmp):
+    """B4: khung 09:00–18:30 ICT; giờ giả chỉ cho test; md5 đọc lại ngay trước khi thay file."""
+    ok(fr.APPLY_WINDOW_ICT == (datetime.time(9, 0), datetime.time(18, 30)), "R9 B4: khung 09:00–18:30")
+
+    def fresh(name):
+        w = World(tmp, name)
+        corr = w.correction([replace_item("2026-07-06", 1015, 1012)])
+        _, _, imp_path = w.impact(corr)
+        return w, corr, imp_path
+
+    def at(when, name):
+        w, corr, imp_path = fresh(name)
+        kept = w.nav_path.read_bytes()
+        r = subprocess.run([sys.executable, str(BIN / "fund_restatement.py"), "apply", "--account",
+                            "SpaceX", "--nav-dir", str(w.nav_dir), "--correction", corr,
+                            "--impact-report", imp_path, "--approved-by", "user"],
+                           capture_output=True, text=True, env=dict(os.environ, **{fr.TEST_NOW_ENV: when}))
+        wrote = w.nav_path.read_bytes() != kept
+        clean = not (w.nav_dir / fr.AUDIT_LOG).exists() and not (w.nav_dir / fr.BACKUP_DIR).exists()
+        return r, wrote, clean
+
+    for n, (when, allowed) in enumerate((
+            ("2026-10-14T08:59:59", False), ("2026-10-14T09:00:00", True),
+            ("2026-10-14T18:30:00", True), ("2026-10-14T18:30:01", False),
+            ("2026-10-14T19:10:00", False), ("2026-10-14T21:45:00", False),
+            ("2026-10-14T00:30:00", False), ("2026-10-14T03:00:00+00:00", True),      # 10:00 ICT
+            ("2026-10-14T12:00:00+00:00", False))):                                   # 19:00 ICT
+        r, wrote, clean = at(when, f"r9_win_{n}")
+        if allowed:
+            ok(r.returncode == 0 and wrote, f"R9 B4: {when} trong khung ⇒ áp được, rc={r.returncode} {r.stderr[-200:]}")
+        else:
+            ok(r.returncode == 2 and "chỉ áp đính chính trong khung 09:00–18:30 ICT" in r.stderr
+               and "19:00–21:45" in r.stderr and not wrote and clean,
+               f"R9 B4: {when} ngoài khung ⇒ rc=2, không ghi file/nhật ký/sao lưu; rc={r.returncode} {r.stderr[-200:]}")
+    r, wrote, clean = at("chiều nay", "r9_win_bad")
+    ok(r.returncode == 2 and "không phải giờ ISO" in r.stderr and not wrote and clean,
+       "R9 B4: giờ giả không đọc được ⇒ rc=2 (không lặng lẽ dùng giờ thật)")
+
+    # "ĐÃ ÁP từ trước" không ghi gì ⇒ không bị khung giờ chặn.
+    w, corr, imp_path = fresh("r9_win_again")
+    ok(w.apply(corr, imp_path).returncode == 0, "R9 B4: áp lần đầu")
+    r = subprocess.run([sys.executable, str(BIN / "fund_restatement.py"), "apply", "--account", "SpaceX",
+                        "--nav-dir", str(w.nav_dir), "--correction", corr, "--impact-report", imp_path,
+                        "--approved-by", "user"], capture_output=True, text=True,
+                       env=dict(os.environ, **{fr.TEST_NOW_ENV: "2026-10-14T20:00:00"}))
+    ok(r.returncode == 0 and "ĐÃ ÁP từ trước" in r.stdout, "R9 B4: kiểm 'đã áp' (chỉ đọc) chạy được ngoài khung")
+
+    # Giờ giả bị TỪ CHỐI ở chính thư mục dữ liệu thật; giờ thật (đồng hồ) ngoài khung cũng chặn.
+    w, corr, imp_path = fresh("r9_win_real")
+    kept = w.nav_path.read_bytes()
+    base = ["apply", "--account", "SpaceX", "--nav-dir", str(w.nav_dir), "--correction", corr,
+            "--impact-report", imp_path, "--approved-by", "user", "--real-data"]
+    orig, orig_clock = nul.NAV_HISTORY_DIR, fr._clock
+    nul.NAV_HISTORY_DIR = str(w.nav_dir)
+    try:
+        ok(fr.main(base) == 2 and w.nav_path.read_bytes() == kept and not (w.nav_dir / fr.AUDIT_LOG).exists(),
+           "R9 B4: biến giờ giả đặt + thư mục dữ liệu thật ⇒ rc=2, không ghi")
+        raises(fr.RestatementError, lambda: fr._now_ict(str(w.nav_dir)), "R9 B4: _now_ict ở thư mục thật",
+               ["chỉ dành cho selfcheck", fr.TEST_NOW_ENV])
+        fake = os.environ.pop(fr.TEST_NOW_ENV)
+        try:
+            fr._clock = lambda: datetime.datetime(2026, 10, 14, 19, 5, tzinfo=fr.ICT)
+            ok(fr.main(base) == 2 and w.nav_path.read_bytes() == kept,
+               "R9 B4: thư mục thật, đồng hồ 19:05 ICT ⇒ rc=2")
+            fr._clock = lambda: datetime.datetime(2026, 10, 14, 11, 0, tzinfo=datetime.timezone.utc)
+            ok(fr.main(base) == 0 and w.nav_path.read_bytes() != kept,
+               "R9 B4: thư mục thật, đồng hồ 11:00 UTC = 18:00 ICT ⇒ áp được (so theo giờ ICT)")
+        finally:
+            os.environ[fr.TEST_NOW_ENV] = fake
+    finally:
+        nul.NAV_HISTORY_DIR, fr._clock = orig, orig_clock
+    ok(_log_records(w)[-1]["applied_at_ict"] == "2026-10-14T18:00:00+07:00",
+       "R9 B4: giờ áp trong nhật ký là giờ ICT của đồng hồ")
+
+    # Tiến trình khác ghi nav_history GIỮA lúc đọc và lúc thay ⇒ không đè, nhật ký ghi 'aborted'.
+    w, corr, imp_path = fresh("r9_race")
+    before = w.nav_path.read_bytes()
+    concurrent = fr.write_nav_table(FIELDS, [row(d, v) for d, v in NAV] + [row("2026-07-15", 1070)], "\r\n")
+    real_append, state = fr._append_log, {"n": 0}
+
+    def racing_append(log, record):
+        real_append(log, record)
+        state["n"] += 1
+        if state["n"] == 1:
+            w.nav_path.write_bytes(concurrent)          # "snapshot 19:10" chen vào
+    args = ["apply", "--account", "SpaceX", "--nav-dir", str(w.nav_dir), "--correction", corr,
+            "--impact-report", imp_path, "--approved-by", "user"]
+    fr._append_log = racing_append
+    try:
+        rc = fr.main(args)
+    finally:
+        fr._append_log = real_append
+    recs = _log_records(w)
+    ok(rc == 2 and w.nav_path.read_bytes() == concurrent
+       and not [x for x in w.nav_dir.iterdir() if ".tmp." in x.name],
+       f"R9 B4: file đổi ngay trước khi thay ⇒ rc=2, bản của tiến trình kia còn NGUYÊN, không sót file tạm; rc={rc}")
+    ok(len(recs) == 2 and recs[1].get("status") == "aborted" and recs[1]["md5_seen"] == md5(concurrent)
+       and recs[1]["md5_before"] == md5(before) and recs[1]["correction_md5"] == recs[0]["correction_md5"]
+       and recs[1]["aborted_at_ict"].endswith("+07:00") and "status" not in recs[0],
+       f"R9 B4: nhật ký phải có bản ghi 'aborted' nêu md5 đọc được: {recs[1:]}")
+    # Sau lần huỷ: file trở lại byte cũ rồi áp lại ⇒ bản ghi 'aborted' KHÔNG được coi là lần áp dở.
+    w.nav_path.write_bytes(before)
+    ok(fr.main(args) == 0 and len(_log_records(w)) == 3 and "status" not in _log_records(w)[2]
+       and md5(w.nav_path.read_bytes()) == _log_records(w)[2]["md5_after"],
+       "R9 B4: áp lại sau lần huỷ phải ghi một bản ghi nhật ký MỚI (không nhận 'aborted' là dở)")
+    body = (BIN / "fund_restatement.py").read_text(encoding="utf-8")
+    ok(body.index("seen = _md5(_read_bytes(path))") < body.index("os.replace(tmp, path)")
+       and body.count("os.replace(tmp, path)") == 1, "R9 B4: đọc lại md5 đứng NGAY trước os.replace")
+
+
+def r9_backup(tmp):
+    """B14: sao lưu byte trước khi áp, chỉ-thêm, có đường lui."""
+    w = World(tmp, "r9_bak")
+    before = w.nav_path.read_bytes()
+    corr = w.correction([replace_item("2026-07-06", 1015, 1012)])
+    _, _, imp_path = w.impact(corr)
+    bdir = w.nav_dir / fr.BACKUP_DIR
+    # Mọi lần TỪ CHỐI không được sinh thư mục sao lưu.
+    w.apply(w.correction([replace_item("2026-07-06", 1015, 1011)], "other.json"), imp_path)
+    ok(not bdir.exists(), "R9 B14: lần áp bị từ chối không tạo sao lưu")
+    r = w.apply(corr, imp_path)
+    want = bdir / f"SpaceX_20261014T100000_{md5(before)}.csv"
+    rec = _log_records(w)[0]
+    ok(r.returncode == 0 and [x.name for x in bdir.iterdir()] == [want.name] and want.read_bytes() == before,
+       f"R9 B14: sao lưu NGUYÊN BYTE trước khi áp, tên <account>_<giờ ICT>_<md5>.csv: {list(bdir.iterdir()) if bdir.exists() else None}")
+    ok(rec["backup"] == f"{fr.BACKUP_DIR}/{want.name}" and str(want) in r.stdout and "ĐƯỜNG LUI" in r.stdout
+       and "đính chính NGƯỢC" in r.stdout and "--restate" in r.stdout,
+       f"R9 B14: nhật ký + stdout phải ghi đường lui: {rec.get('backup')} {r.stdout[-300:]}")
+    # Đường lui thật: chép bản sao lưu về ⇒ đúng byte cũ.
+    w.nav_path.write_bytes(want.read_bytes())
+    ok(md5(w.nav_path.read_bytes()) == rec["md5_before"], "R9 B14: chép bản sao lưu về lại ra đúng md5 trước khi áp")
+    # Áp lại (cùng byte) ⇒ dùng lại bản sao lưu đã có, không chép bản hai.
+    r = w.apply(corr, imp_path)
+    ok(r.returncode == 0 and [x.name for x in bdir.iterdir()] == [want.name],
+       "R9 B14: cùng byte ⇒ không sinh bản sao lưu thứ hai")
+    # Tên trùng nhưng nội dung khác ⇒ từ chối, KHÔNG ghi đè bản sao lưu, không áp.
+    w2 = World(tmp, "r9_bak_clash")
+    b2 = w2.nav_path.read_bytes()
+    corr2 = w2.correction([replace_item("2026-07-06", 1015, 1012)])
+    _, _, imp2 = w2.impact(corr2)
+    (w2.nav_dir / fr.BACKUP_DIR).mkdir()
+    clash = w2.nav_dir / fr.BACKUP_DIR / f"SpaceX_20261014T100000_{md5(b2)}.csv"
+    clash.write_bytes(b"khac")
+    r = w2.apply(corr2, imp2)
+    ok(r.returncode == 2 and "chỉ-thêm" in r.stderr and clash.read_bytes() == b"khac"
+       and w2.nav_path.read_bytes() == b2 and not (w2.nav_dir / fr.AUDIT_LOG).exists(),
+       f"R9 B14: bản sao lưu trùng tên khác nội dung ⇒ rc=2, không ghi đè, không áp: rc={r.returncode} {r.stderr[-200:]}")
+    # Chết giữa nhật ký và file ⇒ chạy lại vẫn chỉ MỘT bản sao lưu.
+    w3 = World(tmp, "r9_bak_crash")
+    corr3 = w3.correction([replace_item("2026-07-06", 1015, 1012)])
+    _, _, imp3 = w3.impact(corr3)
+    args = ["apply", "--account", "SpaceX", "--nav-dir", str(w3.nav_dir), "--correction", corr3,
+            "--impact-report", imp3, "--approved-by", "user"]
+    real_replace = os.replace
+    os.replace = lambda a, b: (_ for _ in ()).throw(OSError("mất điện (giả lập)"))
+    try:
+        raises(OSError, lambda: fr.cmd_apply(fr.argparse.Namespace(
+            account="SpaceX", nav_dir=str(w3.nav_dir), correction=corr3, impact_report=imp3,
+            approved_by="user", real_data=False)), "R9 B14: chết khi thay file")
+    finally:
+        os.replace = real_replace
+    os.environ[fr.TEST_NOW_ENV] = "2026-10-14T11:11:11"
+    try:
+        rc = fr.main(args)
+    finally:
+        os.environ[fr.TEST_NOW_ENV] = "2026-10-14T10:00:00"
+    ok(rc == 0 and len(list((w3.nav_dir / fr.BACKUP_DIR).iterdir())) == 1 and len(_log_records(w3)) == 1,
+       "R9 B14: chạy lại sau khi chết ⇒ vẫn 1 bản sao lưu, 1 bản ghi nhật ký")
+
+
+def r9_impact_layers(tmp):
+    """B7 + các mutant G7 / G11 / G19 / G25 / G26."""
+    # (ii) QTD / YTD của báo cáo tháng — số tính tay.
+    nav = [("2025-12-30", 1010), ("2025-12-31", 1020), ("2026-03-30", 1100), ("2026-03-31", 1110),
+           ("2026-04-30", 1150), ("2026-05-29", 1200)]
+    w = World(tmp, "r9_qtd", nav=nav)
+    Path(w.inc).write_text(json.dumps({"SpaceX": {"inception_date": "2025-12-29",
+                                                  "starting_capital": 1_000_000_000}}), encoding="utf-8")
+    (w.reports / "SpaceX_monthly_report_2026-05.md").write_text("tháng 5\n", encoding="utf-8")
+    _, imp, _ = w.impact(w.correction([replace_item("2026-03-31", 1110, 1100)]))
+    mo = by_name(imp)["SpaceX_monthly_report_2026-05.md"]["headline"]
+    want = (1200 / 1100 - 1200 / 1110) * 100
+    ok(abs(mo["qtd"]["dev_pp"] - want) < 1e-9 and abs(mo["qtd"]["old"] - (1200 / 1110 - 1) * 100) < 1e-9
+       and mo["mtd"]["dev_pp"] == 0 and mo["ytd"]["dev_pp"] == 0 and mo["inception"]["dev_pp"] == 0
+       and by_name(imp)["SpaceX_monthly_report_2026-05.md"]["tier_headline"] == 3,
+       f"R9 B7(ii): sửa dòng cuối quý trước ⇒ CHỈ QTD của báo cáo tháng lệch {want:.4f} (bậc 3): {mo}")
+    _, imp, _ = w.impact(w.correction([replace_item("2025-12-31", 1020, 1019)], "c_ytd.json"), out="i_ytd.json")
+    rep = by_name(imp)["SpaceX_monthly_report_2026-05.md"]
+    want = (1200 / 1019 - 1200 / 1020) * 100
+    ok(abs(rep["headline"]["ytd"]["dev_pp"] - want) < 1e-9 and rep["headline"]["qtd"]["dev_pp"] == 0
+       and rep["headline"]["mtd"]["dev_pp"] == 0 and rep["tier_headline"] == 2,
+       f"R9 B7(ii): sửa dòng cuối năm trước ⇒ CHỈ YTD lệch {want:.4f} (bậc 2): {rep['headline']}")
+    ok(fr.HEADLINE_KEYS["monthly"] == ("mtd", "qtd", "ytd", "inception")
+       and fr.HEADLINE_KEYS["weekly"] == ("wtd", "mtd", "inception")
+       and fr.HEADLINE_KEYS["daily"] == ("day", "wtd", "mtd", "inception"), "R9 B7(ii): bộ số chính")
+
+    # (iii) Đổi cột tiền/cổ phiếu mà GIỮ NAV ⇒ hàng đợi người xem, không phải "không ảnh hưởng".
+    w = World(tmp, "r9_cols")
+    item = {"op": "replace", "date": "2026-07-06", "expect": {"nav": "1015000000", "cash": "100000000"},
+            "set": {"cash": "90000000", "mtm_stock": "925000000"}, "reason": "tách sai tiền/cổ phiếu",
+            "evidence": "x"}
+    p, imp, _ = w.impact(w.correction([item]))
+    rep = by_name(imp)
+    d6 = rep.get("SpaceX_daily_report_2026-07-06.md", {})
+    ok(p.returncode == 0 and d6.get("affected") and d6["needs_human_look"] and d6["tier_headline"] == 0
+       and d6["tier_window"] == 0 and d6["literal_hits"] == []
+       and d6["component_changes"] == [{"date": "2026-07-06", "columns": ["cash", "mtm_stock"]}],
+       f"R9 B7(iii): đổi cash/mtm_stock giữ NAV ⇒ báo cáo ngày đó phải cần người xem: {d6}")
+    q = {x["report"]: x["why"] for x in imp["queue_user_decision"]}
+    ok(sorted(q) == ["SpaceX_ZaloPay_monthly_report_2026-07.md", "SpaceX_daily_report_2026-07-06.md",
+                     "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md",
+                     "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711",
+                     "SpaceX_weekly_report_2026-07-06_to_2026-07-10_CORRECTION_VIB.md"]
+       and "ngày 2026-07-06 đổi cột cash, mtm_stock mà NAV giữ nguyên" in q["SpaceX_daily_report_2026-07-06.md"],
+       f"R9 B7(iii): hàng đợi = đúng các báo cáo có 07-06 trong kỳ, nêu cột đổi: {q}")
+    ok("SpaceX_daily_report_2026-07-07.md" in imp["unaffected_reports"]
+       and "SpaceX_daily_report_2026-07-10.md" in imp["unaffected_reports"]
+       and "đổi cột cash, mtm_stock, NAV giữ nguyên" in p.stdout,
+       "R9 B7(iii): báo cáo ngoài kỳ (kể cả bản trích NAV không đổi) không bị kéo vào")
+    ok(imp["changed_rows"] == [{"date": "2026-07-06", "nav_old": 1015000000.0, "nav_new": 1015000000.0,
+                                "columns": ["cash", "mtm_stock"]}], f"R9 B7(iii): changed_rows nêu cột đổi: {imp['changed_rows']}")
+
+    # (iv) Tìm NAV MỚI của dòng chèn trong báo cáo.
+    w = World(tmp, "r9_new_literal", nav=[x for x in NAV if x[0] != "2026-07-08"])
+    (w.reports / "SpaceX_weekly_report_2026-07-06_to_2026-07-10.md").write_text(
+        "| 07/07 | ... |\n| 08/07 | 1.040.000.000 |\n", encoding="utf-8")
+    ins = {"op": "insert", "date": "2026-07-08", "row": row("2026-07-08", 1040, est="True"),
+           "reason": "thiếu dòng phiên", "evidence": "dnse_raw"}
+    p, imp, _ = w.impact(w.correction([ins]))
+    rep = by_name(imp)
+    wk = rep["SpaceX_weekly_report_2026-07-06_to_2026-07-10.md"]
+    bak = rep["SpaceX_weekly_report_2026-07-06_to_2026-07-10.md.bak_sent_20260711"]
+    ok(wk["literal_hits_new"] == [{"date": "2026-07-08", "nav_new": 1040000000.0, "lines": [2]}]
+       and bak["literal_hits_new"] == [] and bak["needs_human_look"],
+       f"R9 B7(iv): phải thấy báo cáo đã in đúng NAV của dòng chèn: {wk['literal_hits_new']}")
+    q = {x["report"]: x["why"] for x in imp["queue_user_decision"]}
+    ok("1 dòng in đúng NAV của dòng chèn" in q[wk["report"]] and "0 dòng in đúng NAV của dòng chèn" in q[bak["report"]]
+       and "in ĐÚNG NAV của dòng chèn 2026-07-08 (1,040,000,000) ở dòng [2]" in p.stdout,
+       f"R9 B7(iv): lý do trong hàng đợi phải nói báo cáo có in NAV dòng chèn không: {q}")
+    doc = fr.__doc__
+    ok("KHÔNG đo sai số của số ĐÃ IN" in doc and "TÁC ĐỘNG CỦA THAY ĐỔI NÀY" in doc
+       and "trước 2026-08-17 chỉ tồn tại trên Discord" in doc and "bak_sent" in doc
+       and "19:00–21:45" in doc and "restatement_backups" in doc,
+       "R9 B7(i): docstring phải nói rõ phép đo là tác động của thay đổi, không phải sai số của số đã in")
+
+    # G7: báo cáo bậc 3 đồng thời 'cần người xem' ⇒ chỉ MỘT mục trong hàng đợi.
+    w = World(tmp, "r9_g7")
+    items = [replace_item("2026-07-10", 1050, 1040),
+             {"op": "replace", "date": "2026-07-07", "expect": {"nav": "1030000000"},
+              "set": {"cash": "90000000", "mtm_stock": "940000000"}, "reason": "r", "evidence": "e"}]
+    _, imp, _ = w.impact(w.correction(items))
+    wk = by_name(imp)["SpaceX_weekly_report_2026-07-06_to_2026-07-10.md"]
+    names = [x["report"] for x in imp["queue_user_decision"]]
+    ok(wk["tier_headline"] == 3 and wk["needs_human_look"] and names.count(wk["report"]) == 1
+       and len(names) == len(set(names))
+       and "bậc 3" in next(x["why"] for x in imp["queue_user_decision"] if x["report"] == wk["report"]),
+       f"R9 G7: báo cáo bậc 3 không được xuất hiện hai lần trong hàng đợi: {names}")
+
+    # G25: một số chính CHỈ có ở một phía (cũ không có 'so với hôm trước') ⇒ không đo được ⇒ bậc 3.
+    w = World(tmp, "r9_g25", nav=NAV[1:])                    # dòng đầu 07-03 = mốc khởi điểm
+    Path(w.inc).write_text(json.dumps({"SpaceX": {"inception_date": "2026-07-03",
+                                                  "starting_capital": None}}), encoding="utf-8")
+    ins = {"op": "insert", "date": "2026-07-02", "row": row("2026-07-02", 1020),
+           "reason": "thiếu dòng đầu", "evidence": "e"}
+    p, imp, _ = w.impact(w.correction([ins]))
+    d3 = by_name(imp).get("SpaceX_daily_report_2026-07-03.md", {}) if imp else {}
+    ok(p.returncode == 0 and d3.get("headline", {}).get("day") == {"old": None, "new": 0.0, "dev_pp": None}
+       and d3["headline_dev"] == float("inf") and d3["tier_headline"] == 3
+       and any(x["report"] == d3["report"] and "bậc 3" in x["why"] for x in imp["queue_user_decision"]),
+       f"R9 G25: số chính có ở một phía ⇒ vô cực ⇒ bậc 3 (không phải 0): {d3.get('headline')} {p.stderr[-200:]}")
+
+    # G11: 'đã áp' phải kiểm md5 — nav_history có thêm dòng sau khi áp thì KHÔNG được báo "đã áp".
+    w = World(tmp, "r9_g11")
+    corr = w.correction([replace_item("2026-07-06", 1015, 1012)])
+    _, _, imp_path = w.impact(corr)
+    ok(w.apply(corr, imp_path).returncode == 0, "R9 G11: áp lần đầu")
+    applied = fr.read_nav_table(w.nav_path.read_bytes(), "x")[1]
+    w.write_nav(applied + [row("2026-07-15", 1070)])
+    r = w.apply(corr, imp_path)
+    ok(r.returncode == 2 and "đã đổi từ lúc đo" in r.stderr and "ĐÃ ÁP từ trước" not in r.stdout
+       and len(_log_records(w)) == 1,
+       f"R9 G11: file khác md5 đã đo thì không được nói 'đã áp' (rc=2): rc={r.returncode} {r.stdout[-120:]}")
+
+    # G19: delete thiếu expect ⇒ chẩn đoán đúng ở CẢ hai tầng, không KeyError trần (§29).
+    w = World(tmp, "r9_g19")
+    no_expect = {"op": "delete", "date": "2026-07-08", "reason": "dòng trùng", "evidence": "x"}
+    path = w.correction([no_expect])
+    raises(fr.RestatementError, lambda: fr.load_correction(path, "SpaceX"), "R9 G19: load delete thiếu expect",
+           ["corrections[0]", "delete cần expect = giá trị hiện có"])
+    for op, extra in (("delete", {}), ("replace", {"set": {"nav": "1"}})):
+        raises(fr.RestatementError,
+               lambda: fr.apply_corrections(FIELDS, [row(d, v) for d, v in NAV], [dict(no_expect, op=op, **extra)]),
+               f"R9 G19: apply_corrections {op} thiếu expect", ["thiếu expect", "đọc được nav '1040000000'"])
+    p, _, _ = w.impact(path)
+    ok(p.returncode == 2 and "[RestatementError]" in p.stderr and "delete cần expect" in p.stderr
+       and "KeyError" not in p.stderr, f"R9 G19 CLI: rc=2 với chẩn đoán đúng: {p.stderr[-200:]}")
+    p, _, _ = w.impact(w.correction([dict(no_expect, expect={"nav": "1040000000"})], "ok_del.json"))
+    ok(p.returncode == 0, "R9 G19: delete có expect đúng thì đo được")
+
+    # G26: nhật ký có bản ghi của đính chính KHÁC (cùng tài khoản) ⇒ lần áp sau vẫn phải ghi bản ghi riêng.
+    w = World(tmp, "r9_g26")
+    c1 = w.correction([replace_item("2026-07-06", 1015, 1012)], "c1.json")
+    _, _, i1 = w.impact(c1, out="i1.json")
+    ok(w.apply(c1, i1).returncode == 0, "R9 G26: áp đính chính thứ nhất")
+    c2 = w.correction([replace_item("2026-07-08", 1040, 1041)], "c2.json")
+    _, _, i2 = w.impact(c2, out="i2.json")
+    r = w.apply(c2, i2)
+    recs = _log_records(w)
+    ok(r.returncode == 0 and len(recs) == 2
+       and [x["correction_md5"] for x in recs] == [md5(Path(c1).read_bytes()), md5(Path(c2).read_bytes())]
+       and recs[1]["md5_before"] == recs[0]["md5_after"] and recs[1]["changes"][0]["date"] == "2026-07-08",
+       f"R9 G26: đính chính thứ hai phải có bản ghi nhật ký RIÊNG (không nhận bản ghi trước là 'dở'): {len(recs)}")
+
 
 def main():
     with tempfile.TemporaryDirectory(prefix="fund_restatement_selfcheck_") as tmp:
@@ -625,6 +1030,10 @@ def main():
         r6_apply(tmp)
         r7_cli_and_guards(tmp)
         r8_gaps(tmp)
+        r9_real_dir_gate(tmp)
+        r9_apply_window(tmp)
+        r9_backup(tmp)
+        r9_impact_layers(tmp)
     if FAILS:
         print(f"FAIL — {len(FAILS)}/{N} assertion hỏng (fund_restatement_selfcheck.py)")
         return 1

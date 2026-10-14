@@ -1,0 +1,325 @@
+{
+ "account": "ZaloPay",
+ "thresholds": {
+  "tier2_from": 0.05,
+  "tier3_above": 0.5
+ },
+ "n_reports_scanned": 61,
+ "n_reports_affected": 3,
+ "reports": [
+  {
+   "report": "SpaceX_ZaloPay_monthly_report_2026-08.md",
+   "kind": "monthly",
+   "period": [
+    "2026-08-01",
+    "2026-08-31"
+   ],
+   "headline": {
+    "nav": {
+     "old": 952365940.0,
+     "new": 952365940.0,
+     "dev_pct": 0.0
+    },
+    "mtd": {
+     "old": 7.148447888762455,
+     "new": 7.148447888762455,
+     "dev_pp": 0.0
+    },
+    "qtd": {
+     "old": -3.593568617621423,
+     "new": -3.593568617621423,
+     "dev_pp": 0.0
+    },
+    "ytd": {
+     "old": -3.593568617621423,
+     "new": -3.593568617621423,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -3.593568617621423,
+     "new": -3.593568617621423,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-06",
+      "change": "thêm dòng",
+      "nav_old": null,
+      "nav_new": 937070077.0
+     },
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 950719172.0,
+      "nav_new": 950719172.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": -2.6913707916272234
+     }
+    ],
+    "rows_added_or_removed": 1
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-31",
+    "new": "2026-08-31"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 2.6913707916272234,
+   "tier_window": 3,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md",
+   "kind": "weekly",
+   "period": [
+    "2026-08-03",
+    "2026-08-07"
+   ],
+   "headline": {
+    "nav": {
+     "old": 950719172.0,
+     "new": 950719172.0,
+     "dev_pct": 0.0
+    },
+    "wtd": {
+     "old": 6.963173901294062,
+     "new": 6.963173901294062,
+     "dev_pp": 0.0
+    },
+    "mtd": {
+     "old": 6.963173901294062,
+     "new": 6.963173901294062,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -3.7602682228117357,
+     "new": -3.7602682228117357,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-06",
+      "change": "thêm dòng",
+      "nav_old": null,
+      "nav_new": 937070077.0
+     },
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 950719172.0,
+      "nav_new": 950719172.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": -2.6913707916272234
+     }
+    ],
+    "rows_added_or_removed": 1
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-07",
+    "new": "2026-08-07"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 2.6913707916272234,
+   "tier_window": 3,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "ZaloPay_monthly_report_2026-08.md",
+   "kind": "monthly",
+   "period": [
+    "2026-08-01",
+    "2026-08-31"
+   ],
+   "headline": {
+    "nav": {
+     "old": 952365940.0,
+     "new": 952365940.0,
+     "dev_pct": 0.0
+    },
+    "mtd": {
+     "old": 7.148447888762455,
+     "new": 7.148447888762455,
+     "dev_pp": 0.0
+    },
+    "qtd": {
+     "old": -3.593568617621423,
+     "new": -3.593568617621423,
+     "dev_pp": 0.0
+    },
+    "ytd": {
+     "old": -3.593568617621423,
+     "new": -3.593568617621423,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -3.593568617621423,
+     "new": -3.593568617621423,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-06",
+      "change": "thêm dòng",
+      "nav_old": null,
+      "nav_new": 937070077.0
+     },
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 950719172.0,
+      "nav_new": 950719172.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": -2.6913707916272234
+     }
+    ],
+    "rows_added_or_removed": 1
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-31",
+    "new": "2026-08-31"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 2.6913707916272234,
+   "tier_window": 3,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  }
+ ],
+ "unaffected_reports": [
+  "SpaceX_ZaloPay_daily_report_2026-08-11.md",
+  "SpaceX_ZaloPay_monthly_report_2026-07.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-06_to_2026-07-10.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-13_to_2026-07-17.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-20_to_2026-07-24.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-27_to_2026-07-31.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14_CORRECTION_VIB.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-17_to_2026-08-21.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md",
+  "ZaloPay_daily_report_2026-08-17.md",
+  "ZaloPay_daily_report_2026-08-18.md",
+  "ZaloPay_daily_report_2026-08-19.md",
+  "ZaloPay_daily_report_2026-08-20.md",
+  "ZaloPay_daily_report_2026-08-21.md",
+  "ZaloPay_daily_report_2026-08-24.md",
+  "ZaloPay_daily_report_2026-08-25.md",
+  "ZaloPay_daily_report_2026-08-26.md",
+  "ZaloPay_daily_report_2026-08-27.md",
+  "ZaloPay_daily_report_2026-08-28.md",
+  "ZaloPay_daily_report_2026-09-03.md",
+  "ZaloPay_daily_report_2026-09-04.md",
+  "ZaloPay_daily_report_2026-09-07.md",
+  "ZaloPay_daily_report_2026-09-08.md",
+  "ZaloPay_daily_report_2026-09-09.md",
+  "ZaloPay_daily_report_2026-09-10.md",
+  "ZaloPay_daily_report_2026-09-11.md",
+  "ZaloPay_daily_report_2026-09-14.md",
+  "ZaloPay_daily_report_2026-09-15.md",
+  "ZaloPay_daily_report_2026-09-16.md",
+  "ZaloPay_daily_report_2026-09-17.md",
+  "ZaloPay_daily_report_2026-09-18.md",
+  "ZaloPay_daily_report_2026-09-21.md",
+  "ZaloPay_daily_report_2026-09-22.md",
+  "ZaloPay_daily_report_2026-09-23.md",
+  "ZaloPay_daily_report_2026-09-24.md",
+  "ZaloPay_daily_report_2026-09-25.md",
+  "ZaloPay_daily_report_2026-09-28.md",
+  "ZaloPay_daily_report_2026-09-29.md",
+  "ZaloPay_daily_report_2026-09-30.md",
+  "ZaloPay_daily_report_2026-10-01.md",
+  "ZaloPay_daily_report_2026-10-02.md",
+  "ZaloPay_daily_report_2026-10-05.md",
+  "ZaloPay_daily_report_2026-10-06.md",
+  "ZaloPay_daily_report_2026-10-07.md",
+  "ZaloPay_daily_report_2026-10-08.md",
+  "ZaloPay_daily_report_2026-10-09.md",
+  "ZaloPay_daily_report_2026-10-12.md",
+  "ZaloPay_daily_report_2026-10-13.md",
+  "ZaloPay_monthly_report_2026-09.md",
+  "ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md",
+  "ZaloPay_weekly_report_2026-08-31_to_2026-09-04.md",
+  "ZaloPay_weekly_report_2026-09-07_to_2026-09-11.md",
+  "ZaloPay_weekly_report_2026-09-14_to_2026-09-18.md",
+  "ZaloPay_weekly_report_2026-09-21_to_2026-09-25.md",
+  "ZaloPay_weekly_report_2026-09-28_to_2026-10-02.md",
+  "ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md",
+  "ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md.bak_sent_20261010"
+ ],
+ "unparsed_report_names": [],
+ "skipped_non_md": [],
+ "queue_user_decision": [
+  {
+   "report": "SpaceX_ZaloPay_monthly_report_2026-08.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 3 (2.6914) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  },
+  {
+   "report": "SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 3 (2.6914) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  },
+  {
+   "report": "ZaloPay_monthly_report_2026-08.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 3 (2.6914) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  }
+ ],
+ "note_next_report": [],
+ "fix_forward_only": [
+  "SpaceX_ZaloPay_monthly_report_2026-08.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md",
+  "ZaloPay_monthly_report_2026-08.md"
+ ],
+ "generated_at_ict": "2026-10-14T10:50:33+07:00",
+ "old_nav_history_md5": "f8b6a9787e5b323395b888c360065843",
+ "new_nav_history_md5": "0ee74a1587b568deaba172b75a120d37",
+ "correction_md5": "e0ab1c877aad95eed134b17362febeec",
+ "changed_rows": [
+  {
+   "nav_old": null,
+   "nav_new": 937070077.0,
+   "columns": [],
+   "date": "2026-08-06"
+  }
+ ],
+ "corrections_applied": [
+  {
+   "op": "insert",
+   "date": "2026-08-06",
+   "old": null,
+   "new": {
+    "date": "2026-08-06",
+    "nav": "937070077",
+    "mtm_stock": "924797500",
+    "cash": "12272577",
+    "margin_debt": "0",
+    "offbook_assets": "0",
+    "egg_assets": "0",
+    "balance_ts": "2026-08-06T19:10:07",
+    "cum_dividend_excl": "0",
+    "nav_is_estimate": "True",
+    "nav_source": "backfill dnse_raw positions+balances@2026-08-06T19:10:07 + BQ Price; VHM=77100 (BQ Price 08-06 dung o gia truoc chia thuong) - chen qua file dinh chinh 2026-10-14"
+   }
+  }
+ ],
+ "ledger_binding": null
+}

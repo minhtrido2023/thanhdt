@@ -1,0 +1,50 @@
+$ sb <app> nav_unit_ledger.py --account SpaceX --seal --tail 0
+nav_unit_ledger (SpaceX): TỪ CHỐI chốt sổ vào thư mục dữ liệu thật <app>/data/execution_logs (cây dữ liệu thật, hoặc thư mục có dnse_raw_*.jsonl): chốt sổ đơn vị thật là thao tác ghi-một-lần, phải gọi tường minh với --real-data sau khi user duyệt (kb/projects/fund-unit-performance-policy-20261010.md, bước 3). Truyền --ledger-dir trỏ thư mục khác nếu đang test/research.
+rc=3
+$ sb <app> nav_unit_ledger.py --account SpaceX --seal --real-data --tail 0
+TỪ CHỐI nav_unit_ledger (SpaceX) [SealGateError]: <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv: đoạn 2026-07-01 → 2026-10-13 CHƯA đủ điều kiện chốt (1 chỗ):
+  2026-08-24: dòng chụp số dư lúc 2026-08-24T04:49:59 — TRƯỚC giờ đóng cửa 14:45 của chính phiên đó ⇒ NAV có thể không phải giá chốt. Đính chính dòng nav_history, hoặc nếu ĐÃ RÀ và NAV đúng là giá chốt thì nhận tường minh: --accept-preclose 2026-08-24="<lý do + bằng chứng>"
+  ⇒ KHÔNG ghi gì vào sổ.
+rc=2
+$ sb <app> nav_unit_ledger.py --account SpaceX --seal --real-data --tail 0 --accept-preclose 2026-08-24=so du chup ~04:50 = so du luc dong cua: 0 lenh khop ngay 08-24, phan du dang thuc tien hai cua so ke <= 33d; gia = BQ Price 08-24 (ra soat job Taylor_20261014_020334)
+nav_unit_ledger SpaceX: 73 dòng dựng được (2026-07-01 → 2026-10-13), 10 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv — 73 dòng, tới 2026-10-13; vừa THÊM 73 dòng
+kho bất biến: manifest #1 (seal) md5 141f8bb35c07aed7adbbfcf193f8e9f7 — 73 dòng tới 2026-10-13, giá đơn vị cuối 9790.8754; dòng chụp trước đóng cửa đã nhận: 2026-08-24
+SEAL_MD5 SpaceX 141f8bb35c07aed7adbbfcf193f8e9f7 dfa5bf6030da61aac17bcfc4ecaedc1b
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ sb <app> nav_unit_ledger.py --account SpaceX --ledger-dir <app>/data/execution_logs --tail 0
+nav_unit_ledger SpaceX: 73 dòng dựng được (2026-07-01 → 2026-10-13), 10 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv — 73 dòng, tới 2026-10-13; khớp chuỗi dựng lại
+kho bất biến: manifest #1 (seal) md5 141f8bb35c07aed7adbbfcf193f8e9f7 — 73 dòng tới 2026-10-13, giá đơn vị cuối 9790.8754; dòng chụp trước đóng cửa đã nhận: 2026-08-24
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ md5sum <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv.manifest.jsonl
+141f8bb35c07aed7adbbfcf193f8e9f7  <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv
+dfa5bf6030da61aac17bcfc4ecaedc1b  <app>/data/execution_logs/nav_unit_ledger_SpaceX.csv.manifest.jsonl
+rc=0
+$ sb <app> nav_unit_ledger.py --account ZaloPay --seal --tail 0
+nav_unit_ledger (ZaloPay): TỪ CHỐI chốt sổ vào thư mục dữ liệu thật <app>/data/execution_logs (cây dữ liệu thật, hoặc thư mục có dnse_raw_*.jsonl): chốt sổ đơn vị thật là thao tác ghi-một-lần, phải gọi tường minh với --real-data sau khi user duyệt (kb/projects/fund-unit-performance-policy-20261010.md, bước 3). Truyền --ledger-dir trỏ thư mục khác nếu đang test/research.
+rc=3
+$ sb <app> nav_unit_ledger.py --account ZaloPay --seal --real-data --tail 0
+TỪ CHỐI nav_unit_ledger (ZaloPay) [SealGateError]: <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv: đoạn 2026-07-06 → 2026-10-13 CHƯA đủ điều kiện chốt (1 chỗ):
+  2026-08-24: dòng chụp số dư lúc 2026-08-24T04:50:08 — TRƯỚC giờ đóng cửa 14:45 của chính phiên đó ⇒ NAV có thể không phải giá chốt. Đính chính dòng nav_history, hoặc nếu ĐÃ RÀ và NAV đúng là giá chốt thì nhận tường minh: --accept-preclose 2026-08-24="<lý do + bằng chứng>"
+  ⇒ KHÔNG ghi gì vào sổ.
+rc=2
+$ sb <app> nav_unit_ledger.py --account ZaloPay --seal --real-data --tail 0 --accept-preclose 2026-08-24=so du chup ~04:50 = so du luc dong cua: 0 lenh khop ngay 08-24, phan du dang thuc tien hai cua so ke <= 33d; gia = BQ Price 08-24 (ra soat job Taylor_20261014_020334)
+nav_unit_ledger ZaloPay: 70 dòng dựng được (2026-07-06 → 2026-10-13), 7 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv — 70 dòng, tới 2026-10-13; vừa THÊM 70 dòng
+kho bất biến: manifest #1 (seal) md5 379315ab2f87d4526b3cb33d4b58049b — 70 dòng tới 2026-10-13, giá đơn vị cuối 9380.1371; dòng chụp trước đóng cửa đã nhận: 2026-08-24
+SEAL_MD5 ZaloPay 379315ab2f87d4526b3cb33d4b58049b 71c9b3c7096791291bbc1a9bc4602b42
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ sb <app> nav_unit_ledger.py --account ZaloPay --ledger-dir <app>/data/execution_logs --tail 0
+nav_unit_ledger ZaloPay: 70 dòng dựng được (2026-07-06 → 2026-10-13), 7 dòng nav_is_estimate, 0 ngày có dòng tiền
+sổ đã chốt: <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv — 70 dòng, tới 2026-10-13; khớp chuỗi dựng lại
+kho bất biến: manifest #1 (seal) md5 379315ab2f87d4526b3cb33d4b58049b — 70 dòng tới 2026-10-13, giá đơn vị cuối 9380.1371; dòng chụp trước đóng cửa đã nhận: 2026-08-24
+date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate
+rc=0
+$ md5sum <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv.manifest.jsonl
+379315ab2f87d4526b3cb33d4b58049b  <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv
+71c9b3c7096791291bbc1a9bc4602b42  <app>/data/execution_logs/nav_unit_ledger_ZaloPay.csv.manifest.jsonl
+rc=0

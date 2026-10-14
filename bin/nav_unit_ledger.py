@@ -41,14 +41,18 @@ HAI CHẾ ĐỘ CHỐT (bước 3 của chính sách, 2026-10-14):
     rc=2, không có `--force`. Cổng trước khi chốt: chỉ chốt ngày TRƯỚC hôm nay (ICT — dòng hôm
     nay còn bị `daily_nav_snapshot.py` ghi đè); không thiếu dòng của phiên nào trong đoạn chốt;
     `balance_ts` đọc được; dòng chụp TRƯỚC giờ đóng cửa của chính phiên nó phải được nhận tường
-    minh (`--accept-preclose NGÀY=lý do`, ghi vào manifest); dòng chụp SAU khi phiên kế đã đóng
-    cửa ⇒ từ chối (phải đính chính nav_history trước).
+    minh (`--accept-preclose NGÀY=lý do`; manifest ghi {lý do, balance_ts, nav} của ĐÚNG dòng
+    được nhận — dòng đó đổi balance_ts hoặc NAV thì lời nhận hết hiệu lực, phải nhận lại); dòng
+    chụp SAU khi phiên kế đã đóng cửa ⇒ từ chối (phải đính chính nav_history trước).
     Thứ tự ghi: manifest TRƯỚC, file sổ SAU ⇒ chết giữa chừng thì lần chạy kế thấy md5 file ==
     `md5_before` của bản ghi cuối và HOÀN TẤT đúng lần chốt dở (chỉ khi dựng lại ra đúng md5 đã
     ghi); không đoán, không ghi bản ghi thứ hai.
   · Thư mục dữ liệu thật: phải có `--real-data` (không phải `--force`: mọi cổng trên vẫn chạy);
-    thiếu ⇒ rc=3. Người chạy là Mike sau khi user duyệt — xem `kb/data_registry/trading-bot/
-    nav_unit_ledger.md`.
+    thiếu ⇒ rc=3. "Thật" = cây cố định `CANONICAL_REAL_DIR` của máy, HOẶC mọi thư mục có
+    `dnse_raw_*.jsonl`, HOẶC NAV_HISTORY_DIR suy từ WC_ROOT (`is_real_data_dir`) — đổi WC_ROOT
+    không lách được. Người chạy là Mike sau khi user duyệt — xem `kb/data_registry/trading-bot/
+    nav_unit_ledger.md`. Mỗi lần chốt/đính chính in một dòng máy-đọc-được
+    `SEAL_MD5 <account> <md5 file sổ> <md5 manifest>` để post lên bus làm mốc NGOÀI kho.
 ĐÍNH CHÍNH SỔ ĐÃ CHỐT (`--restate`): lịch sử đổi CÓ CHỦ ĐÍCH (sửa nav_history, backfill, khai dòng
 tiền lùi ngày) không bao giờ sửa tại chỗ. Phải có báo cáo tác động của `fund_restatement.py impact`
 mang ĐÚNG md5 sổ đang chốt và md5 sổ sau đính chính (báo cáo của một thay đổi khác ⇒ từ chối),
@@ -344,9 +348,33 @@ def _seal_locked(path, ledger, asof, write):
 
 
 # ---------------------------------------------------------------- kho bất biến (§8c)
+# Cây dữ liệu thật của máy này — CỐ ĐỊNH, không suy từ WC_ROOT: đổi WC_ROOT sang sandbox không
+# được làm thư mục thật thôi là "thật".
+CANONICAL_REAL_DIR = "/home/trido/thanhdt/WorkingClaude/data/execution_logs"
+
+
+def is_canonical_dir(directory: str) -> bool:
+    """`directory` là CHÍNH thư mục dữ liệu thật: cây cố định của máy, hoặc NAV_HISTORY_DIR (suy
+    từ WC_ROOT)."""
+    real = os.path.realpath(os.path.abspath(directory))
+    return real in (os.path.realpath(CANONICAL_REAL_DIR), os.path.realpath(NAV_HISTORY_DIR))
+
+
+def is_real_data_dir(directory: str) -> bool:
+    """Thư mục phải có `--real-data` mới được ghi: (a) cây cố định của máy, (b) MỌI thư mục chứa
+    `dnse_raw_*.jsonl` (bản ghi broker — kể cả bản sao: ghi nhầm lên bản sao của cây thật cũng
+    phải gọi tường minh), (c) NAV_HISTORY_DIR suy từ WC_ROOT."""
+    if is_canonical_dir(directory):
+        return True
+    try:
+        names = os.listdir(os.path.realpath(os.path.abspath(directory)))
+    except OSError:                     # chưa có thư mục ⇒ không thể là nơi chứa bản ghi broker
+        return False
+    return any(n.startswith("dnse_raw_") and n.endswith(".jsonl") for n in names)
+
+
 def _is_real_dir(path: str) -> bool:
-    return (os.path.realpath(os.path.dirname(os.path.abspath(path)))
-            == os.path.realpath(NAV_HISTORY_DIR))
+    return is_real_data_dir(os.path.dirname(os.path.abspath(path)))
 
 
 def manifest_path(path: str) -> str:
@@ -484,10 +512,16 @@ def _row_capture(row: dict):
     return snap, _acf._last_session_closed_by(snap)
 
 
-def seal_gate(ledger: list, start_date: datetime.date, new_rows: list, accept_preclose: dict) -> tuple:
-    """Cổng của kho bất biến cho đoạn sắp chốt. Trả `(vấn đề chặn, {ngày ISO: lý do} đã nhận)`.
-    `start_date`: ngày dòng đã chốt cuối (hoặc mốc khởi điểm) đứng ngay trước `new_rows`."""
+def seal_gate(ledger: list, start_date: datetime.date, new_rows: list, accept_preclose: dict,
+              carried: dict = None) -> tuple:
+    """Cổng của kho bất biến cho đoạn sắp chốt. Trả `(vấn đề chặn, lời nhận)`; lời nhận =
+    {ngày ISO: {reason, balance_ts, nav}} — gắn với ĐÚNG dòng được nhận, không chỉ với ngày.
+    `start_date`: ngày dòng đã chốt cuối (hoặc mốc khởi điểm) đứng ngay trước `new_rows`.
+    `accept_preclose` = {ngày ISO: lý do} người gọi vừa gõ. `carried` = lời nhận của các lần chốt
+    trước (dạng lưu trong manifest): chỉ còn hiệu lực khi dòng vẫn mang đúng `balance_ts` và `nav`
+    lúc được nhận — dòng đã đổi thì phải nhận lại."""
     problems, accepted = [], {}
+    carried = carried or {}
     have = {r["date"] for r in ledger}
     prev = start_date
     for row in new_rows:
@@ -513,8 +547,21 @@ def seal_gate(ledger: list, start_date: datetime.date, new_rows: list, accept_pr
         want = d if session else _acf._last_session_closed_by(
             datetime.datetime.combine(d, datetime.time(0, 0)))
         if session and snap < datetime.datetime.combine(d, _acf.SESSION_CLOSE_ICT):
-            if d.isoformat() in accept_preclose:
-                accepted[d.isoformat()] = accept_preclose[d.isoformat()]
+            key = d.isoformat()
+            ident = {"balance_ts": row["balance_ts"], "nav": row["nav"]}
+            old = carried.get(key)
+            if key in accept_preclose:
+                accepted[key] = dict(ident, reason=accept_preclose[key])
+            elif isinstance(old, dict) and {k: old.get(k) for k in ident} == ident:
+                accepted[key] = old
+            elif old is not None:
+                was = (f"balance_ts {old.get('balance_ts')!r}, NAV {old.get('nav')!r}"
+                       if isinstance(old, dict) else "bản ghi cũ không ghi balance_ts/NAV")
+                problems.append(
+                    f"{d}: lời nhận --accept-preclose cũ ({was}) KHÔNG còn là của dòng này — dòng "
+                    f"hiện có balance_ts {row['balance_ts']!r}, NAV {row['nav']!r}, vẫn chụp TRƯỚC "
+                    f"giờ đóng cửa {_acf.SESSION_CLOSE_ICT:%H:%M}. Lời nhận gắn với đúng một dòng; "
+                    f"đã rà dòng MỚI thì nhận lại: --accept-preclose {d}=\"<lý do + bằng chứng>\"")
             else:
                 problems.append(
                     f"{d}: dòng chụp số dư lúc {row['balance_ts']} — TRƯỚC giờ đóng cửa "
@@ -598,14 +645,27 @@ def seal(path: str, ledger: list, asof: datetime.date = None, write: bool = True
     if not write:
         if not immutable:
             return _seal_locked(path, ledger, asof, False)
-        _, sealed, _, _ = _vault_state(path, ledger, write=False)
+        # Lệnh chỉ-đọc KHÔNG tạo file khoá; nhưng nếu khoá đã có thì chờ (khoá chia sẻ) lần chốt
+        # đang chạy xong — không thì đọc đúng lúc "manifest đã ghi, file chưa thay" và báo nhầm
+        # "chết giữa chừng". Tiến trình chết thật không còn giữ khoá ⇒ vẫn báo đúng.
+        lock_path = f"{path}.lock"
+        if not os.path.exists(lock_path):
+            _, sealed, _, _ = _vault_state(path, ledger, write=False)
+        else:
+            with open(lock_path, "r", encoding="utf-8") as lock:
+                fcntl.flock(lock, fcntl.LOCK_SH)
+                try:
+                    _, sealed, _, _ = _vault_state(path, ledger, write=False)
+                finally:
+                    fcntl.flock(lock, fcntl.LOCK_UN)
         diffs = diff_against_sealed(ledger, sealed)
         if diffs:
             raise LedgerDriftError(path, diffs)
         return sealed, []
     if real and not real_data:
         raise SealRefused(
-            f"TỪ CHỐI chốt sổ vào thư mục dữ liệu thật {NAV_HISTORY_DIR}: chốt sổ đơn vị thật là "
+            f"TỪ CHỐI chốt sổ vào thư mục dữ liệu thật {os.path.dirname(os.path.abspath(path))} "
+            f"(cây dữ liệu thật, hoặc thư mục có dnse_raw_*.jsonl): chốt sổ đơn vị thật là "
             f"thao tác ghi-một-lần, phải gọi tường minh với --real-data sau khi user duyệt "
             f"(kb/projects/fund-unit-performance-policy-20261010.md, bước 3). Truyền --ledger-dir "
             f"trỏ thư mục khác nếu đang test/research.")
@@ -631,7 +691,8 @@ def restate(path: str, ledger: list, *, impact_report: str, reason: str, approve
     real = _is_real_dir(path)
     if real and not real_data:
         raise SealRefused(
-            f"TỪ CHỐI đính chính sổ ở thư mục dữ liệu thật {NAV_HISTORY_DIR} khi không có "
+            f"TỪ CHỐI đính chính sổ ở thư mục dữ liệu thật "
+            f"{os.path.dirname(os.path.abspath(path))} khi không có "
             f"--real-data (thao tác của Mike sau khi user duyệt).")
     if not str(reason or "").strip() or not str(approved_by or "").strip():
         raise SealGateError("đính chính sổ đã chốt phải có --reason và --approved-by (không rỗng)")
@@ -668,14 +729,10 @@ def restate(path: str, ledger: list, *, impact_report: str, reason: str, approve
                     f"(tài khoản, md5 sổ đang chốt, md5 sổ sau đính chính) = {got}, thực tế là "
                     f"{want}. Chạy lại fund_restatement.py impact trên đúng dữ liệu hiện tại.")
             rows = [r for r in ledger if r["date"] <= last]
-            carried = _accepted_so_far(manifest)
-            ask = dict(carried, **(accept_preclose or {}))
-            problems, accepted = seal_gate(ledger, rows[0]["date"], rows, ask)
-            # Lời nhận cũ của một ngày nay không còn chụp trước đóng cửa (vừa được đính chính)
-            # không phải lỗi gõ; lời nhận MỚI không khớp dòng nào thì vẫn là lỗi.
-            problems = [p for p in problems
-                        if not any(p.startswith(f"--accept-preclose {k}:") for k in carried
-                                   if k not in (accept_preclose or {}))]
+            # Lời nhận cũ chỉ theo sang khi dòng của nó còn nguyên balance_ts + NAV (seal_gate);
+            # lời nhận cũ của một ngày nay không còn chụp trước đóng cửa thì tự rơi, không lỗi.
+            problems, accepted = seal_gate(ledger, rows[0]["date"], rows, accept_preclose or {},
+                                           carried=_accepted_so_far(manifest))
             if problems:
                 raise SealGateError(f"{path}: sổ sau đính chính CHƯA đủ điều kiện chốt "
                                     f"({len(problems)} chỗ):\n  " + "\n  ".join(problems))
@@ -823,6 +880,10 @@ def main() -> int:
                   + (f"; dòng chụp trước đóng cửa đã nhận: "
                      f"{', '.join(sorted(_accepted_so_far(manifest)))}"
                      if _accepted_so_far(manifest) else ""))
+            if args.seal or args.restate:
+                # B13 — mốc NGOÀI kho: Mike post dòng này lên bus sau mỗi lần chốt. Hoàn tác
+                # đồng thời file sổ + đuôi manifest thì md5 ở đây không còn khớp mốc đã post.
+                print(f"SEAL_MD5 {args.account} {_file_md5(path)} {_file_md5(manifest_path(path))}")
         if restated:
             print(f"ĐÃ ĐÍNH CHÍNH: {restated['n_diffs']} chỗ lệch; sổ cũ (md5 "
                   f"{restated['md5_before']}) lưu ở {restated['archived_as']}; người duyệt "

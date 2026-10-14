@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Selfcheck cho chế độ KHO BẤT BIẾN của sổ đơn vị quỹ (`nav_unit_ledger.py`: manifest md5, cổng
-trước khi chốt, hoàn tất lần chốt dở, `--real-data`, `--restate`) và `--raw-price-override` của
-`daily_nav_snapshot.py` — bước 3/4 của chính sách "tài khoản = quỹ mở".
+trước khi chốt, hoàn tất lần chốt dở, `--real-data`, `--restate`, lời nhận gắn với dòng, khoá) —
+bước 3/4 của chính sách "tài khoản = quỹ mở".
 
 KHÉP KÍN: mọi file nằm ở tempdir; "thư mục dữ liệu thật" trong các ca dưới là một tempdir gán vào
 `nul.NAV_HISTORY_DIR`. Không broker, không BigQuery, không đọc/ghi `data/`. Lịch phiên lấy từ
@@ -13,11 +13,13 @@ Chạy: python3 mike/bin/nav_ledger_vault_selfcheck.py
 """
 import datetime
 import hashlib
+import fcntl
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 BIN = Path(__file__).resolve().parent
@@ -423,7 +425,9 @@ def v5_gates(tmp):
            "V5: nhận nhầm ngày", ["--accept-preclose 2026-07-07", "gõ nhầm ngày", "(2 chỗ)"])
     _, added = box.seal(accept_preclose={"2026-07-06": "0 lệnh ngày đó; đẳng thức tiền dư 33 đ"})
     rec = box.records()[0]
-    ok(len(added) == 5 and rec["accepted_preclose"] == {"2026-07-06": "0 lệnh ngày đó; đẳng thức tiền dư 33 đ"},
+    ok(len(added) == 5 and rec["accepted_preclose"] == {"2026-07-06": {
+        "reason": "0 lệnh ngày đó; đẳng thức tiền dư 33 đ", "balance_ts": "2026-07-06T04:49:59",
+        "nav": 1_015_000_000.0}},
        f"V5: nhận tường minh ⇒ chốt được và lý do nằm trong manifest: {rec.get('accepted_preclose')}")
     p = box.cli()
     ok(p.returncode == 0 and "dòng chụp trước đóng cửa đã nhận: 2026-07-06" in p.stdout,
@@ -467,7 +471,7 @@ def v5_gates(tmp):
         ok(p.returncode == 2 and "NGÀY=lý do" in p.stderr and not box.sealed.exists(),
            f"V5 CLI: --accept-preclose {bad!r} phải rc=2, được rc={p.returncode} {p.stderr[:160]}")
     p = box.cli("--immutable", "--seal", "--accept-preclose", "2026-07-06=đã rà, 0 lệnh")
-    ok(p.returncode == 0 and box.records()[0]["accepted_preclose"] == {"2026-07-06": "đã rà, 0 lệnh"},
+    ok(p.returncode == 0 and box.records()[0]["accepted_preclose"]["2026-07-06"]["reason"] == "đã rà, 0 lệnh",
        f"V5 CLI: nhận tường minh phải chốt được, rc={p.returncode} {p.stderr[:200]}")
 
 
@@ -714,42 +718,216 @@ def v7_restate(tmp):
     box.write_nav([("2026-07-02", 1_005_000_000.0)] + pre[1:])
     rc, out3 = impact(box, str(box.sealed))
     rec = do_restate(box, out3)
-    ok(rc.returncode == 0 and rec["accepted_preclose"] == {"2026-07-06": "đã rà"},
+    ok(rc.returncode == 0 and rec["accepted_preclose"] == {"2026-07-06": {
+        "reason": "đã rà", "balance_ts": "2026-07-06T04:49:59", "nav": 1_015_000_000.0}},
        f"V7: lời nhận của lần chốt trước phải theo sang bản ghi restate: {rec['accepted_preclose']}")
     box2, _ = setup("v7_new_preclose", NAV4[:2] + [("2026-07-06", 1_014_000_000.0, "2026-07-06T09:00:00"), NAV4[3]])
     rc, out2 = impact(box2, str(box2.sealed))
     raises(nul.SealGateError, lambda: do_restate(box2, out2), "V7: đính chính sinh dòng chụp trước đóng cửa",
            "TRƯỚC giờ đóng cửa")
     ok(do_restate(box2, out2, accept_preclose={"2026-07-06": "rà rồi"})["accepted_preclose"]
-       == {"2026-07-06": "rà rồi"}, "V7: nhận tường minh khi đính chính")
+       == {"2026-07-06": {"reason": "rà rồi", "balance_ts": "2026-07-06T09:00:00", "nav": 1_014_000_000.0}},
+       "V7: nhận tường minh khi đính chính")
     ok(fr.TIER_REISSUE_ABOVE == 0.5 and fr.TIER_NOTE_FROM == 0.05, "V7: ngưỡng chính sách điểm 4")
 
 
-# ------------------------------------------------------------------ V8. giá thay của --from-raw
-def v8_price_override():
-    import daily_nav_snapshot as dns
-    f = dns.parse_raw_price_overrides
-    ok(f([], False, "") == {} and f(None, True, "") == {}, "V8: không có giá thay ⇒ {}")
-    ok(f(["VHM=77100", "dgc=43350.5"], True, "BQ Close") == {"VHM": 77100.0, "DGC": 43350.5},
-       "V8: MÃ=GIÁ, mã viết thường được chuẩn hoá")
-    for items, from_raw, ev, needle in (
-            (["VHM=77100"], False, "x", "chỉ dùng cùng --from-raw"),
-            (["VHM=77100"], True, "", "cần --raw-price-evidence"),
-            (["VHM=77100"], True, "   ", "cần --raw-price-evidence"),
-            (["VHM"], True, "x", "MÃ=GIÁ"), (["VHM="], True, "x", "MÃ=GIÁ"),
-            (["=77100"], True, "x", "MÃ=GIÁ"), (["VHM=abc"], True, "x", "MÃ=GIÁ"),
-            (["VHM=0"], True, "x", "giá > 0"), (["VHM=-5"], True, "x", "giá > 0"),
-            (["VHM=nan"], True, "x", "giá > 0"), (["VHM=inf"], True, "x", "giá > 0")):
-        raises(ValueError, lambda: f(items, from_raw, ev), f"V8: {items} from_raw={from_raw} ev={ev!r}", needle)
-    src = (BIN / "daily_nav_snapshot.py").read_text(encoding="utf-8")
-    main_src = src.split("def main(")[1]
-    ok("parse_raw_price_overrides(args.raw_price_override, args.from_raw," in main_src
-       and "prices[t] = p_new" in main_src and "set(price_overrides) - set(tickers)" in main_src
-       and "raw_price_notes.extend(price_override_notes)" in main_src
-       and "+ giá thay {t}={p:.0f}" in main_src,
-       "V8: main() phải đọc giá thay qua parser, chặn mã không giữ, và ghi dấu vào nav_source + notes")
-    ok(main_src.index("prices[t] = p_new") < main_src.index("classify_raw_price_gap(t, args.date, prices.get(t)"),
-       "V8: giá thay phải được đặt TRƯỚC cổng lệch ≤5% với marketPrice (giá thay vẫn bị kiểm)")
+# ------------------------------------------------------------------ V8. thư mục thật theo nội dung (B2)
+def v8_real_dir_by_content(tmp):
+    box = Box(tmp, "v8", NAV4)
+    (box.ledger_dir / "dnse_raw_2026-07-02.jsonl").write_text("{}\n", encoding="utf-8")
+    sandbox_a = Path(tmp) / "v8_wc_root_a"
+    sandbox_a.mkdir()
+    (sandbox_a / "wc_env.sh").write_text("", encoding="utf-8")
+    import trading_bot.vn_market                      # lịch phiên: sandbox A trỏ đúng gói đang dùng
+    os.symlink(Path(trading_bot.vn_market.__file__).resolve().parent, sandbox_a / "trading_bot")
+    env = dict(os.environ, WC_ROOT=str(sandbox_a))
+
+    def cli(*extra):
+        return subprocess.run(
+            [sys.executable, str(BIN / "nav_unit_ledger.py"), "--account", "SpaceX",
+             "--nav-dir", str(box.dir), "--inception-path", box.inc_path, "--flows-path", box.flows_path,
+             "--ledger-dir", str(box.ledger_dir), *extra], capture_output=True, text=True, env=env)
+    p = cli("--seal")
+    ok(p.returncode == 3 and "--real-data" in p.stderr and "dnse_raw_*.jsonl" in p.stderr
+       and sorted(x.name for x in box.ledger_dir.iterdir()) == ["dnse_raw_2026-07-02.jsonl"],
+       f"V8 B2: WC_ROOT khác + --ledger-dir có dnse_raw ⇒ --seal rc=3, không tạo file; rc={p.returncode} {p.stderr[-200:]}")
+    p = cli("--seal", "--immutable")
+    ok(p.returncode == 3 and not box.sealed.exists(), "V8 B2: --immutable không thay được --real-data")
+    raises(nul.SealRefused, lambda: nul.restate(str(box.sealed), box.ledger(), impact_report="x",
+                                                reason="r", approved_by="a"),
+           "V8 B2: đính chính thư mục có dnse_raw không real_data", "--real-data")
+    p = cli("--seal", "--real-data")
+    ok(p.returncode == 0 and box.manifest.is_file() and "kho bất biến: manifest #1" in p.stdout,
+       f"V8 B2: có --real-data ⇒ chốt ở chế độ kho bất biến (không cần --immutable): rc={p.returncode} {p.stderr[-200:]}")
+    ok(nul.is_real_data_dir(str(box.ledger_dir)) and not nul.is_real_data_dir(str(box.dir)),
+       "V8 B2: chỉ thư mục có dnse_raw mới là thật")
+
+
+# ------------------------------------------------------------------ V9. lời nhận gắn với dòng (B6)
+def v9_accept_identity(tmp):
+    pre = NAV4[:2] + [("2026-07-06", 1_015_000_000.0, "2026-07-06T04:49:59"), NAV4[3]]
+    ident = {"reason": "đã rà", "balance_ts": "2026-07-06T04:49:59", "nav": 1_015_000_000.0}
+
+    def setup(name):
+        box = Box(tmp, name, pre)
+        (box.dir / "old").mkdir()
+        (box.dir / "reports").mkdir()
+        (box.dir / "old" / "nav_history_SpaceX.csv").write_bytes((box.dir / "nav_history_SpaceX.csv").read_bytes())
+        box.seal(accept_preclose={"2026-07-06": "đã rà"})
+        return box
+
+    def impact(box, name):
+        out = str(box.dir / name)
+        p = subprocess.run([sys.executable, str(BIN / "fund_restatement.py"), "impact", "--account", "SpaceX",
+                            "--old-nav-dir", str(box.dir / "old"), "--new-nav-dir", str(box.dir),
+                            "--inception-path", box.inc_path, "--flows-path", box.flows_path,
+                            "--reports-dir", str(box.dir / "reports"), "--sealed-ledger", str(box.sealed),
+                            "--out", out], capture_output=True, text=True)
+        ok(p.returncode == 0, f"V9: impact {name} rc={p.returncode} {p.stderr[-200:]}")
+        return out
+
+    def restate(box, out, **kw):
+        return nul.restate(str(box.sealed), box.ledger(), impact_report=out, reason="sửa", approved_by="user",
+                           meta={"account": "SpaceX"}, **kw)
+
+    box = setup("v9_demo")
+    ok(box.records()[0]["accepted_preclose"] == {"2026-07-06": ident},
+       f"V9: manifest lưu lời nhận kèm balance_ts + NAV của dòng: {box.records()[0]['accepted_preclose']}")
+    # Demo của reviewer: lời nhận cho "NAV 1015 lúc 04:49" KHÔNG được tự áp cho "NAV 1005 lúc 11:00".
+    box.write_nav(NAV4[:2] + [("2026-07-06", 1_005_000_000.0, "2026-07-06T11:00:00"), NAV4[3]])
+    out = impact(box, "i1.json")
+    sealed_bytes = box.sealed.read_bytes()
+    raises(nul.SealGateError, lambda: restate(box, out), "V9 B6: dòng đã đổi NAV + giờ chụp",
+           ["KHÔNG còn là của dòng này", "'2026-07-06T04:49:59'", "1015000000.0", "'2026-07-06T11:00:00'",
+            "--accept-preclose 2026-07-06="])
+    ok(box.sealed.read_bytes() == sealed_bytes and len(box.records()) == 1, "V9 B6: bị chặn thì sổ/manifest không đổi")
+    rec = restate(box, out, accept_preclose={"2026-07-06": "rà lại: 1005 lúc 11:00"})
+    ok(rec["accepted_preclose"] == {"2026-07-06": {"reason": "rà lại: 1005 lúc 11:00",
+                                                   "balance_ts": "2026-07-06T11:00:00", "nav": 1_005_000_000.0}},
+       f"V9 B6: nhận lại thì lời nhận mới mang danh tính dòng mới: {rec['accepted_preclose']}")
+    p = box.cli()
+    ok(p.returncode == 0 and "đã nhận: 2026-07-06" in p.stdout, "V9: CLI vẫn in ngày đã nhận")
+
+    # Chỉ đổi giờ chụp (NAV giữ) — kèm một dòng khác đổi để có gì đính chính ⇒ vẫn phải nhận lại.
+    box = setup("v9_ts")
+    box.write_nav([("2026-07-02", 1_005_000_000.0), NAV4[1],
+                   ("2026-07-06", 1_015_000_000.0, "2026-07-06T10:00:00"), NAV4[3]])
+    raises(nul.SealGateError, lambda: restate(box, impact(box, "i2.json")), "V9 B6: chỉ đổi balance_ts",
+           "KHÔNG còn là của dòng này")
+    # Chỉ đổi NAV (giờ chụp giữ) ⇒ phải nhận lại.
+    box = setup("v9_nav")
+    box.write_nav(NAV4[:2] + [("2026-07-06", 1_014_000_000.0, "2026-07-06T04:49:59"), NAV4[3]])
+    raises(nul.SealGateError, lambda: restate(box, impact(box, "i3.json")), "V9 B6: chỉ đổi NAV",
+           "KHÔNG còn là của dòng này")
+    # Dòng giữ nguyên ⇒ lời nhận cũ theo sang NGUYÊN (lý do cũ, danh tính cũ).
+    box = setup("v9_keep")
+    box.write_nav([("2026-07-02", 1_005_000_000.0)] + pre[1:])
+    ok(restate(box, impact(box, "i4.json"))["accepted_preclose"] == {"2026-07-06": ident},
+       "V9 B6: dòng không đổi ⇒ lời nhận cũ theo sang nguyên vẹn")
+    # Lời nhận dạng cũ (chỉ là chuỗi, không danh tính) không được mang sang.
+    ledger = Box(tmp, "v9_legacy", pre).ledger()
+    problems, accepted = nul.seal_gate(ledger, ledger[0]["date"], ledger, {},
+                                       carried={"2026-07-06": "lý do kiểu cũ"})
+    ok(accepted == {} and len(problems) == 1 and "bản ghi cũ không ghi balance_ts/NAV" in problems[0],
+       f"V9 B6: lời nhận kiểu cũ (chuỗi) không có danh tính ⇒ không mang sang: {problems}")
+    problems, accepted = nul.seal_gate(ledger, ledger[0]["date"], ledger, {}, carried={"2026-07-06": ident})
+    ok(problems == [] and accepted == {"2026-07-06": ident}, "V9 B6: seal_gate mang lời nhận khớp danh tính")
+    problems, _ = nul.seal_gate(ledger, ledger[0]["date"], ledger, {},
+                                carried={"2026-07-06": dict(ident, nav=1_015_000_001.0)})
+    ok(len(problems) == 1 and "KHÔNG còn là của dòng này" in problems[0], "V9 B6: lệch 1 đồng NAV cũng phải nhận lại")
+
+
+# ------------------------------------------------------------------ V10. khoá, phiên thiếu, SEAL_MD5
+def _blocked_while_locked(lock_path, cmd, during=None):
+    """Giữ khoá độc quyền `lock_path`, chạy `cmd`: trả (có bị chặn không, tiến trình đã xong)."""
+    with open(lock_path, "a", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        deadline = time.monotonic() + 1.5
+        while time.monotonic() < deadline and proc.poll() is None:
+            time.sleep(0.05)
+        blocked = proc.poll() is None
+        if during:
+            during()
+        fcntl.flock(lock, fcntl.LOCK_UN)
+    out, err = proc.communicate(timeout=60)
+    return blocked, proc.returncode, out, err
+
+
+def v10_lock_gap_md5(tmp):
+    # N21: thiếu phiên NGAY SAU dòng đã chốt cuối.
+    box = Box(tmp, "v10_gap", NAV4)
+    box.seal(asof=D(2026, 7, 2))
+    box.write_nav([NAV4[0], NAV4[2], NAV4[3]])
+    raises(nul.SealGateError, box.seal, "V10 N21: thiếu 07-03 ngay sau dòng đã chốt cuối 07-02",
+           ["2026-07-03: nav_history THIẾU dòng", "giữa 2026-07-02 và 2026-07-06"])
+    ok(len(box.records()) == 1, "V10 N21: bị chặn thì manifest không thêm bản ghi")
+
+    # B13: mỗi lần chốt / đính chính in SEAL_MD5 <account> <md5 sổ> <md5 manifest>; đối chiếu thì không.
+    box = Box(tmp, "v10_md5", NAV4)
+    p = box.cli("--immutable", "--seal")
+    line = f"SEAL_MD5 SpaceX {md5(box.sealed.read_bytes())} {md5(box.manifest.read_bytes())}"
+    ok(p.returncode == 0 and line in p.stdout.splitlines(), f"V10 B13: --seal phải in đúng dòng {line!r}: {p.stdout[-300:]}")
+    p = box.cli()
+    ok(p.returncode == 0 and "SEAL_MD5" not in p.stdout, "V10 B13: đối chiếu chỉ-đọc không in SEAL_MD5")
+    p = box.cli("--seal")
+    ok(p.returncode == 2 and "SEAL_MD5" not in p.stdout, "V10 B13: chốt bị từ chối không in SEAL_MD5")
+
+    # N2: --restate phải giữ khoá độc quyền.
+    box = Box(tmp, "v10_restate_lock", NAV4)
+    (box.dir / "old").mkdir()
+    (box.dir / "reports").mkdir()
+    (box.dir / "old" / "nav_history_SpaceX.csv").write_bytes((box.dir / "nav_history_SpaceX.csv").read_bytes())
+    box.seal()
+    box.write_nav([("2026-07-02", 1_005_000_000.0)] + NAV4[1:])
+    out = str(box.dir / "impact.json")
+    subprocess.run([sys.executable, str(BIN / "fund_restatement.py"), "impact", "--account", "SpaceX",
+                    "--old-nav-dir", str(box.dir / "old"), "--new-nav-dir", str(box.dir), "--inception-path",
+                    box.inc_path, "--flows-path", box.flows_path, "--reports-dir", str(box.dir / "reports"),
+                    "--sealed-ledger", str(box.sealed), "--out", out], capture_output=True, text=True)
+    cmd = [sys.executable, str(BIN / "nav_unit_ledger.py"), "--account", "SpaceX", "--nav-dir", str(box.dir),
+           "--inception-path", box.inc_path, "--flows-path", box.flows_path, "--ledger-dir", str(box.ledger_dir),
+           "--restate", "--impact-report", out, "--reason", "sửa 07-02", "--approved-by", "user"]
+    sealed_before, seen = box.sealed.read_bytes(), {}
+    blocked, rc, so, se = _blocked_while_locked(
+        str(box.sealed) + ".lock", cmd,
+        during=lambda: seen.update(same=box.sealed.read_bytes() == sealed_before, n=len(box.records())))
+    ok(blocked and seen == {"same": True, "n": 1},
+       f"V10 N2: --restate phải CHỜ (không đụng sổ/manifest) khi tiến trình khác giữ khoá: {seen} rc={rc} {se[-200:]}")
+    line = f"SEAL_MD5 SpaceX {md5(box.sealed.read_bytes())} {md5(box.manifest.read_bytes())}"
+    ok(rc == 0 and "ĐÃ ĐÍNH CHÍNH" in so and box.records()[-1]["kind"] == "restate" and line in so.splitlines(),
+       f"V10 N2/B13: nhả khoá ⇒ đính chính xong, in SEAL_MD5: rc={rc} {so[-300:]} {se[-200:]}")
+
+    # B12: lệnh chỉ-đọc chạy SONG SONG lần chốt đang giữ khoá (manifest đã ghi, file chưa thay) phải
+    # CHỜ rồi báo khớp — không báo nhầm "chết giữa chừng".
+    box = Box(tmp, "v10_ro", NAV4)
+    box.seal(asof=D(2026, 7, 3))
+    real_write = nul._atomic_write
+
+    def boom(path, data):
+        raise OSError("đang ghi (giả lập)")
+    nul._atomic_write = boom
+    try:
+        raises(OSError, box.seal, "V10 B12: tạo trạng thái 'manifest đã ghi, file chưa thay'")
+    finally:
+        nul._atomic_write = real_write
+    ledger = box.ledger()
+    cmd = [sys.executable, str(BIN / "nav_unit_ledger.py"), "--account", "SpaceX", "--nav-dir", str(box.dir),
+           "--inception-path", box.inc_path, "--flows-path", box.flows_path, "--ledger-dir", str(box.ledger_dir)]
+    blocked, rc, so, se = _blocked_while_locked(
+        str(box.sealed) + ".lock", cmd,
+        during=lambda: nul._vault_state(str(box.sealed), ledger, write=True))   # "người chốt" ghi xong
+    ok(blocked and rc == 0 and "khớp chuỗi dựng lại" in so and "CHƯA thay file" not in se,
+       f"V10 B12: đối chiếu chỉ-đọc phải chờ khoá rồi báo khớp: blocked={blocked} rc={rc} {se[-200:]}")
+    # Tiến trình chốt CHẾT thật (không ai giữ khoá) ⇒ vẫn báo đúng "chết giữa chừng".
+    nul._atomic_write = boom
+    try:
+        box.write_nav(NAV4 + [("2026-07-08", 1_040_000_000.0)])
+        raises(OSError, box.seal, "V10 B12: chết thật")
+    finally:
+        nul._atomic_write = real_write
+    p = box.cli()
+    ok(p.returncode == 2 and "CHƯA thay file" in p.stderr, "V10 B12: không ai giữ khoá ⇒ báo chết giữa chừng")
 
 
 def main():
@@ -761,7 +939,9 @@ def main():
         v5_gates(tmp)
         v6_real_dir(tmp)
         v7_restate(tmp)
-        v8_price_override()
+        v8_real_dir_by_content(tmp)
+        v9_accept_identity(tmp)
+        v10_lock_gap_md5(tmp)
     if FAILS:
         print(f"FAIL — {len(FAILS)}/{N} assertion hỏng (nav_ledger_vault_selfcheck.py)")
         return 1
