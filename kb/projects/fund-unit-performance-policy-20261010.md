@@ -92,6 +92,22 @@ KHÔNG phải nạp/rút:
 vào `data/cash_identity_acks.json`, ghi người xác nhận = user, ngày 2026-10-12. CHƯA làm (file và
 cơ chế chưa ở master). Review vòng 1: `.../arch_review_ea9d6969a/REVIEW.md`.
 
+## Quyết định của user — bước 3 (2026-10-14 11:00 ICT, `decided_by: user`)
+Sau arch-review nhánh `feat/fund-history-lock-20261014` (reviewer dựng lại độc lập: SpaceX 07-02 NAV đúng
+990.304.455 — thấp hơn số đang lưu 4.429.292 đ; chèn 08-06 = 950.871.323 / 937.070.077):
+1. **Lời xác nhận cash_identity cho cửa sổ SpaceX 07-02→07-03 ĐỔI KHOÁ** theo dòng đã đính chính
+   (`balance_ts` 14:45:00): user xác nhận lại với khoá mới ⇒ sửa bản ghi hiện có, `confirmed_by` = user,
+   ngày 2026-10-14 (không dùng bản ghi đứng tên Mike).
+2. **Đính chính số đã công bố = MỘT dòng ghi chú ở báo cáo kế tiếp, KHÔNG phát hành lại** — áp cho các
+   số lệch do sửa sổ (biến động tháng 8 ZaloPay in 25,58% đúng 18,27%; SpaceX 12,37 → 12,80; tháng 7
+   17,3 → 17,4) và các số theo ngày đổi vì chèn 08-06 / sửa 07-02.
+3. **Thứ tự thao tác dữ liệu thật**: áp đính chính trong khung 09:00–18:30 ICT, ĐỢI ≥ 1 chu kỳ 19:10, kiểm
+   lại rồi mới CHỐT sổ (chốt gần như không đảo ngược).
+4. **Duyệt thêm kiểm lệch sổ đã chốt** (chỉ-đọc, cảnh báo — không chặn gửi) vào chuỗi tối hoặc
+   `report_delivery_gate`; cron/đường chạy cụ thể Mike tra `kb/cron_registry.md` (§11) trước khi cài.
+Còn MỞ với user: các câu Q1–Q10 của bước 4 (`agents/Taylor/research/fund_step4_20261014/SPEC.md`), trước
+hết đính chính mốc VN-Index của báo cáo ZaloPay (03/07 → 06/07).
+
 ## Nợ đã biết sau bước 1 (đưa vào bước 2/3, không chặn)
 - ✅ **ĐÃ KIỂM lượt cron thật đầu tiên 19:10 ICT 2026-10-12 — sạch**: SpaceX "Từ go-live" −1,38%
   (CLI −1,375), ZaloPay −5,71% (CLI −5,712, mốc 987.865.567; mốc cũ 1 tỷ sẽ in −6,86%; con số
