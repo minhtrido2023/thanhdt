@@ -1,16 +1,16 @@
 ---
 kind: local-file
-status: NOT-YET-SEALED (cơ chế có từ 2026-10-11; KHÔNG chốt sổ thật trước bước 3 — xem "Trạng thái")
-source: data/execution_logs/nav_unit_ledger_<account>.csv
+status: NOT-YET-SEALED (cơ chế kho bất biến có từ 2026-10-14, nhánh feat/fund-history-lock-20261014; sổ thật CHỜ Mike chạy sau khi user duyệt — xem "Trạng thái")
+source: data/execution_logs/nav_unit_ledger_<account>.csv (+ .manifest.jsonl, .superseded.<seq>.<md5>.csv, .lock)
 group: trading-bot
 role: sổ đơn vị quỹ — chuỗi "giá một đơn vị quỹ" chốt theo ngày; BẢN ĐỐI CHỨNG của chuỗi dựng trong bộ nhớ
-writer: "mike/bin/nav_unit_ledger.py --account <account> --ledger-dir <dir> --seal (chạy TAY; từ chối thư mục dữ liệu thật)"
+writer: "mike/bin/nav_unit_ledger.py --account <account> --seal --real-data (chạy TAY, Mike, sau khi user duyệt)"
 ---
 
 # data/execution_logs/nav_unit_ledger_<account>.csv
 
-**Status: CHƯA TỒN TẠI, CHƯA ĐƯỢC PHÉP TẠO.** Chính sách "tài khoản = quỹ mở" (user duyệt 2026-10-10 —
-`kb/projects/fund-unit-performance-policy-20261010.md`) có 4 bước; đây mới là bước 1.
+Chính sách "tài khoản = quỹ mở" (user duyệt 2026-10-10 — `kb/projects/fund-unit-performance-policy-20261010.md`),
+bước 3/4: khoá lịch sử + cơ chế đính chính.
 
 ## Là gì
 Mỗi dòng = một ngày chốt. Cột: `date, nav, flow_bod_vnd, flow_eod_vnd, units_issued, units,
@@ -18,35 +18,92 @@ unit_price, nav_is_estimate`. Dòng đầu = mốc khởi điểm (`data/account
 số đơn vị = vốn khởi điểm / 10.000. Nạp ⇒ phát hành đơn vị, rút ⇒ huỷ đơn vị ở giá chốt; giá đơn vị
 chỉ đổi vì lãi/lỗ. Bất biến: `units × unit_price = nav` từng dòng.
 
-Dựng từ ĐÚNG ba nguồn: [`nav_history.md`](nav_history.md) (NAV + cờ `nav_is_estimate` + `balance_ts`),
-[`account_cash_flows.md`](account_cash_flows.md) (nạp/rút), [`account_inception.md`](account_inception.md)
-(mốc khởi điểm). Công thức ở MỘT chỗ: `nav_unit_ledger.build_ledger`.
+Dựng từ ĐÚNG ba nguồn: [`nav_history.md`](nav_history.md), [`account_cash_flows.md`](account_cash_flows.md),
+[`account_inception.md`](account_inception.md). Công thức ở MỘT chỗ: `nav_unit_ledger.build_ledger`.
 
-**File trên đĩa là BẢN ĐỐI CHỨNG, không phải nguồn của tỉ suất.** Tỉ suất theo kỳ luôn tính từ chuỗi
-`build_ledger` dựng trong bộ nhớ; file chỉ để phát hiện lịch sử bị đổi sau khi đã chốt.
+**File trên đĩa là BẢN ĐỐI CHỨNG, không phải nguồn của tỉ suất.** `nav_period_returns.py` KHÔNG đọc sổ
+trên đĩa; file chỉ để phát hiện lịch sử bị đổi sau khi đã chốt.
+
+## Kho bất biến (coding_guidelines §8c) — bắt buộc với thư mục dữ liệu thật
+- `nav_unit_ledger_<account>.csv.manifest.jsonl` — chỉ-thêm; mỗi lần chốt/đính chính một bản ghi:
+  `seq, kind (seal|restate), md5_before, md5, rows_total, last_date, last_unit_price,
+  accepted_preclose, nav_history_md5, inception_md5, cash_flows_md5, sealed_at_ict` (+ `reason,
+  approved_by, impact_report_md5, archived_as, diffs` với `restate`). `md5_before` nối với `md5` bản ghi
+  trước ⇒ xoá/sửa/chen một bản ghi là bị bắt.
+- Mọi lần đọc/chốt kiểm md5 file sổ == md5 bản ghi cuối ⇒ cắt dòng cuối, xoá file, sửa tay ⇒ rc=2.
+- Chốt mà không có dòng mới ⇒ rc=2 (`NothingToSeal`); KHÔNG có `--force`.
+- Thứ tự ghi: manifest TRƯỚC, file SAU. Chết giữa chừng ⇒ lần chạy kế hoàn tất ĐÚNG lần chốt dở (chỉ khi
+  dựng lại ra đúng md5 đã ghi); lệnh chỉ-đọc không tự ghi.
+- **Cổng trước khi chốt**: chỉ chốt ngày TRƯỚC hôm nay (ICT); không thiếu dòng của phiên nào trong đoạn
+  chốt; `balance_ts` đọc được; dòng chụp TRƯỚC giờ đóng cửa của chính phiên nó phải nhận tường minh
+  `--accept-preclose NGÀY="lý do"`; manifest ghi `{reason, balance_ts, nav}` của ĐÚNG dòng được nhận —
+  dòng đó đổi `balance_ts` hoặc NAV (đính chính về sau) thì lời nhận HẾT hiệu lực, phải nhận lại); dòng
+  chụp SAU khi phiên kế đã đóng cửa (K3) ⇒ từ chối, không có lối nhận.
+- Thư mục dữ liệu thật: thiếu `--real-data` ⇒ rc=3. `--real-data` KHÔNG tắt cổng nào. "Thật"
+  (`nav_unit_ledger.is_real_data_dir`) = cây cố định `/home/trido/thanhdt/WorkingClaude/data/execution_logs`
+  (KHÔNG suy từ WC_ROOT), HOẶC mọi thư mục có `dnse_raw_*.jsonl` (kể cả bản sao), HOẶC NAV_HISTORY_DIR suy
+  từ WC_ROOT. Đặt WC_ROOT sang sandbox không lách được.
+- Mỗi lần chốt/đính chính in một dòng máy-đọc-được `SEAL_MD5 <account> <md5 file sổ> <md5 manifest>`.
+- Lệnh chỉ-đọc (đối chiếu) chờ khoá chia sẻ khi file `.lock` đã có ⇒ chạy song song lần chốt không báo
+  nhầm "chết giữa chừng"; nó KHÔNG tạo file khoá khi chưa có.
+
+## Đính chính sổ đã chốt
+Lịch sử đổi có chủ đích (sửa nav_history, backfill, khai dòng tiền lùi ngày) không sửa tại chỗ:
+1. `fund_restatement.py impact --account A --correction C.json --sealed-ledger <sổ> --out J` — đo tác
+   động lên TỪNG báo cáo đã gửi, xếp bậc theo chính sách điểm 4 (<0,05 · 0,05–0,5 · >0,5), ra hàng đợi
+   "cần user quyết". Chỉ đọc. KHÔNG gửi/sửa/phát hành lại gì.
+2. `fund_restatement.py apply … --impact-report J --approved-by "…" [--real-data]` — ghi nav_history
+   (giữ CRLF) + nhật ký [`nav_history_corrections.md`](nav_history_corrections.md).
+3. `nav_unit_ledger.py --account A --restate --impact-report J --reason "…" --approved-by "…"
+   [--real-data]` — sổ cũ chép nguyên byte sang `.superseded.<seq>.<md5>.csv`, manifest ghi bản ghi
+   `restate`. Báo cáo tác động phải mang ĐÚNG (tài khoản, md5 sổ đang chốt, md5 sổ sau đính chính).
+
+## Runbook
+- **Sau MỖI lần chốt/đính chính thật** (Mike): post dòng `SEAL_MD5 …` mà lệnh in ra lên bus —
+  `append_event.sh Mike finding "nav-unit-ledger-seal-<account>-<ngày>" '{"seal_md5":"SEAL_MD5 …"}'`. Đó là
+  mốc NGOÀI kho: ai đó hoàn tác đồng thời file sổ + đuôi manifest (cả hai cùng thư mục, ngoài git) thì
+  chuỗi md5 trong manifest vẫn nối đúng, chỉ so với mốc trên bus mới thấy. Kiểm bằng lệnh chỉ-đọc
+  `nav_unit_ledger.py --account <TK> --ledger-dir data/execution_logs --verify-anchor "SEAL_MD5 …"` (lặp
+  được cho nhiều mốc): rc=0 khi manifest hiện tại có một PHẦN ĐẦU mang đúng md5 manifest của mốc (lịch sử
+  tới mốc còn nguyên, chỉ được nối thêm) và bản ghi đó mang đúng md5 sổ; xoá cả sổ + manifest, cắt đuôi,
+  hoàn tác đồng thời file + manifest ⇒ rc=2 `AnchorError`. Không có `--verify-anchor` thì xoá CẢ HAI file
+  chỉ hiện "0 dòng, khớp" (rc=0) — giới hạn đã biết, mốc ngoài kho là cách duy nhất bắt được. Lịch chạy
+  định kỳ: Mike lo (chưa có cron).
+- **Manifest bị cắt dòng cuối** (máy sập giữa lúc ghi; `read_manifest` báo "dòng N: không đọc được") ⇒ mọi
+  lệnh rc=2, kẹt cho tới khi người xử lý — KHÔNG có lối tự sửa, cố ý. Đường xử lý:
+  1. Chép nguyên thư mục sổ (`.csv`, `.manifest.jsonl`, `.superseded.*`) sang chỗ an toàn trước khi đụng gì.
+  2. Xác định dòng hỏng là bản ghi ĐANG GHI dở: nó là dòng CUỐI, các dòng trước đọc được và nối md5.
+  3. So md5 file sổ hiện tại với `md5` của bản ghi đọc được cuối cùng: TRÙNG ⇒ lần chốt dở chưa thay file
+     ⇒ xoá ĐÚNG dòng hỏng (không sửa dòng nào khác) rồi chạy lại đúng lệnh chốt; KHÁC ⇒ dừng, báo user
+     (file đã bị đổi ngoài công cụ, hoặc nhiều hơn một lần ghi bị hỏng).
+  4. Đối chiếu mốc `SEAL_MD5` trên bus (mục trên) trước và sau khi sửa; ghi việc sửa tay vào bus (`error`).
+- **Đường lui**: TRƯỚC khi chốt sổ — đính chính nav_history lui được bằng một đính chính NGƯỢC áp lên file
+  hiện tại (bản sao lưu `restatement_backups/` chỉ dùng khi công cụ hỏng, kèm dòng nhật ký
+  `rolled_back_manual`; xem [`nav_history_corrections.md`](nav_history_corrections.md));
+  SAU khi chốt — chỉ còn đường đính chính (`--restate`), sổ cũ nằm ở `.superseded.*`.
 
 ## Ai ghi / ai đọc
-- Ghi: `nav_unit_ledger.py --ledger-dir <dir> --seal` — CHỈ-GHI-THÊM (đọc file một lần dưới khoá
-  `fcntl.flock` trên `<file>.lock`, ghi qua file tạm + `os.replace`). Ghi vào thư mục dữ liệu thật ⇒
-  **rc=3, từ chối**.
-- Đọc: KHÔNG consumer nào. `nav_period_returns.py` (CLI lẫn hàm) không đọc sổ trên đĩa ở bước này.
+- Ghi: `nav_unit_ledger.py --seal|--restate` (tay). Chưa có cron chốt hằng ngày — quyết định riêng.
+- Đọc: KHÔNG consumer nào (cổng công bố không đối chiếu sổ — xem "Việc chưa làm").
 
-## Trạng thái (2026-10-11)
-**KHÔNG chốt sổ thật trước bước 3.** Lý do (arch-review @feaa33b5, K2): `daily_nav_snapshot.py` ghi đè
-dòng nav_history của chính ngày chạy khi chạy lại, nên một sổ đã chốt sẽ tự lệch; nếu đường công bố
-đối chiếu sổ thì lệch ⇒ `nav_period_returns.py` rc=1 ⇒ cổng tỉ suất của `report_delivery_gate.py`
-fail-open ⇒ báo cáo ghi số sai KHÔNG bị chặn. Bước 3 (rà các ngày `nav_is_estimate`, có đường đính chính,
-quyết định cổng xử lý lệch sổ thế nào) phải xong trước khi có file thật và trước khi bất kỳ consumer
-nào đọc nó.
+## Trạng thái (2026-10-14)
+Sổ thật CHƯA tồn tại. Chốt thử trên bản sao `/tmp` sau khi áp đính chính A+B: SpaceX 73 dòng tới
+2026-10-13, giá đơn vị cuối 9.790,8754, md5 `141f8bb35c07aed7adbbfcf193f8e9f7`; ZaloPay 70 dòng,
+9.380,1371, md5 `379315ab2f87d4526b3cb33d4b58049b` (md5 sẽ KHÁC nếu chốt thật sau ngày 10-14 vì có
+thêm dòng). Thứ tự thao tác dữ liệu thật: README của
+`agents/Taylor/research/fund_history_lock_20261014/`.
 
 ## Bẫy
-- **Dòng đã chốt không được đổi.** Sửa `nav_history` của một ngày đã chốt, khai dòng tiền lùi ngày, xoá
-  hay chen một dòng quá khứ ⇒ `nav_unit_ledger.py` rc=2, in từng dòng lệch bao nhiêu, KHÔNG ghi. Chưa
-  có đường tính lại lịch sử có chủ đích (đính chính) — đừng xoá file để "dựng lại cho khớp".
-- `daily_nav_snapshot.py` GHI ĐÈ dòng nav_history của chính ngày chạy khi chạy lại (và `--from-raw` vá
-  lùi ngày) ⇒ chốt một ngày trước khi NAV ngày đó ổn định sẽ tự gây lệch sổ.
-- **File KHÔNG nằm trong git** (`.gitignore` của repo ngoài chặn `*.csv`, giống `nav_history`): tính
-  "chỉ-ghi-thêm" do công cụ cưỡng chế, không có lịch sử git chống lưng.
-- `nav_is_estimate=True` được MANG THEO nguyên trạng, không phải dấu hiệu dòng đó đã được rà.
-- Giá đơn vị là của TOÀN tài khoản. ZaloPay còn DGC + vị thế legacy trong NAV — chuỗi "phần bot quản lý"
-  là chuỗi khác, chưa có (bước 4).
+- **Sổ chưa sửa KHÔNG chốt được**: nav_history thật hiện thiếu phiên 2026-08-06 (cả 2 tài khoản) và có
+  dòng chụp trước đóng cửa (SpaceX 07-02 09:46; cả hai 08-24 ~04:50) ⇒ cổng rc=2 cho tới khi áp đính chính.
+- Dòng SpaceX 07-02 sau đính chính mang `balance_ts` QUY ƯỚC 14:45:00 (= số dư giờ đóng cửa) ⇒ qua
+  cổng chụp-trước-đóng-cửa không cần nhận tường minh — xem [`nav_history.md`](nav_history.md) mục Bẫy.
+- `daily_nav_snapshot.py` GHI ĐÈ dòng nav_history của chính ngày chạy khi chạy lại ⇒ cổng chỉ cho chốt
+  tới HÔM QUA (ICT). Chạy lại snapshot một ngày ĐÃ chốt ⇒ lệch sổ (rc=2) — đúng thiết kế, đi đường đính chính.
+- **File KHÔNG nằm trong git** (`.gitignore` repo ngoài chặn `*.csv`): tính bất biến do công cụ + manifest
+  cưỡng chế, không có lịch sử git chống lưng. Mất CẢ file lẫn manifest thì không phát hiện được.
+- Manifest chỉ có MỘT bản ghi mà file sổ bị xoá: không phân biệt được với "lần chốt đầu chết trước khi
+  ghi file" ⇒ công cụ chỉ trả lại đúng nội dung đã ghi md5 khi nguồn không đổi; nguồn đổi ⇒ từ chối.
+- `nav_is_estimate=True` được MANG THEO nguyên trạng. 14 dòng ước tính hiện có đã rà 2026-10-14 (tiền/nợ/
+  Trứng vàng khớp bản ghi balances sau đóng cửa; cổ phiếu = KL × BQ `Price`) — giữ nguyên + gắn nhãn.
+- Giá đơn vị là của TOÀN tài khoản. Chuỗi ZaloPay "phần bot quản lý" là chuỗi khác (bước 4).

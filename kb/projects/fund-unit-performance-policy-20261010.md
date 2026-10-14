@@ -78,6 +78,16 @@ cửa gần nhất; `balance_ts` thiếu/không tăng nghiêm ngặt; số tiề
   Nghiệm thu asof 2026-10-09 không đổi: SpaceX −1,33 / 1,024 / 0,519; ZaloPay −4,907 / −1,162 / −2,01.
   Review + bằng chứng: `agents/Taylor/research/fund_unit_ledger_20261011/` (REVIEW.md, REVIEW2.md).
 - **CHƯA chốt sổ thật** (`data/execution_logs/nav_unit_ledger_*.csv` chưa tồn tại) — thuộc bước 3.
+- **Bước 3: ĐÃ MERGE master (2026-10-14)** — nhánh `feat/fund-history-lock-20261014`: vòng 1 (`3642e43a1`) →
+  arch-review NEEDS_CHANGES (B1 chặn: cờ `--raw-price-override` lách cổng ≤5% ⇒ GỠ hẳn, `daily_nav_snapshot.py`
+  = master) → vòng 2/2b (`755be49f0`, `27d74c383`: B2-B16 + R1 mốc ngoài kho `--verify-anchor` + R2 quét tin EOD
+  Discord) → review hẹp (không lỗi chặn) → Mike tự sửa F1-F5, F9, F10 (`9211c1589`). Có: kho bất biến
+  (`nav_unit_ledger.py --seal/--restate/--verify-anchor`, manifest chỉ-thêm), công cụ đính chính
+  `bin/fund_restatement.py` (impact/apply, bậc chính sách điểm 4, sao lưu, nhật ký), selfcheck khép kín.
+  Evidence + README thao tác: `agents/Taylor/research/fund_history_lock_20261014/`.
+  **CHƯA áp lên dữ liệu thật**: chuỗi 0-11 trong README đó (đính chính SpaceX 07-02 sửa NAV −4.429.292 đ, chèn
+  08-06 cả 2 TK; đổi khoá lời xác nhận cash_identity; đợi ≥1 chu kỳ 19:10; rồi chốt sổ + post `SEAL_MD5` lên bus;
+  rồi lịch kiểm lệch sổ chốt — user đã duyệt cả 4 việc 14/10 11:00).
 - **Bước 2: ĐÃ MERGE master (2026-10-13)** — nhánh `feat/fund-cashflow-detect-20261012`: vòng 1 (`ea9d6969a`) → arch-review NEEDS_CHANGES → vòng 2 (`985821452`, `e6820cdc8`) → arch-review hẹp (không lỗi chặn) → vòng 2b Mike tự sửa N1-N4, N6-N8 (`b7d0576c6`). Chi tiết ở mục dưới. Bước 3-4 chưa giao.
 
 ## Xác nhận của user — 2 cửa sổ lệch tiền SpaceX KHÔNG phải nạp/rút (2026-10-12 23:17 ICT, `decided_by: user`)
