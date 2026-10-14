@@ -299,8 +299,16 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     not call `effective_deposit_rate()` ad-hoc. See mike/kb/data_registry/macro/cctg_rate_vn.md
     for the full consumer inventory + diff table.
 
-    Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"),
-    big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
+    FALLBACK DIRECTION (changed 2026-10-13, job Taylor_20261013_163831): a STALE or UNREADABLE
+    CCTG no longer drops the number to Big-4-only -- the last known CCTG value is HELD (see the
+    comment block above the CCTG lookup below). So "CCTG only wins if fresh" above now reads:
+    a fresh CCTG wins as `cctg_6m(<date>)`; a stale/unreadable one still wins, labelled
+    `cctg_held(...)` + WARNING. The number never falls below a level already observed.
+
+    Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"
+    |"cctg_held(<date>; cctg_stale: <age>d)"|"cctg_held(<date>; cctg_unavailable: <err>)"
+    |"big4_12m(cctg_unavailable: <err>)"), big4_rate_pct(float), cctg_rate_pct(float|None),
+    last_update(str date)."""
     if check_freshness is None:
         check_freshness = asof is None
     asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
@@ -329,6 +337,17 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     # ("big4_12m(cctg_unavailable: ...)" / "big4_12m(cctg_stale: ...)") instead of a bare
     # "big4_12m" -- callers that only read rate_pct are unaffected (still Big-4-only), callers that
     # display rate_source now see the truth.
+    #
+    # Fallback DIRECTION fix (2026-10-13, job Taylor_20261013_163831, user-approved): both degrade
+    # branches used to drop the consumer number to Big-4-only. That LOWERS the DCF discount rate /
+    # yield hurdle -- i.e. RAISES fair value -- at the moment a feed breaks or goes unconfirmed,
+    # and it does so exactly when CCTG > Big-4 (a rising-rate regime). Now both branches HOLD the
+    # last known CCTG value (rate = max(Big-4, last-known CCTG), never below a level already
+    # observed) and say so: WARNING + rate_source "cctg_held(<date>; cctg_stale: <age>d)" /
+    # "cctg_held(<date>; cctg_unavailable: <err>)". The hold has NO expiry -- the only way out is
+    # a newer confirmed CCTG row (which may be lower). Only when nothing at all is known on the
+    # CCTG side does the number still read Big-4-only ("big4_12m(cctg_unavailable: ...)").
+    # macro_killswitch_a_status() is NOT affected (own code path, fail-closed ARMED as before).
     cctg_pct = None
     try:
         from cctg_rate_vn import current_cctg_rate_checked
@@ -337,18 +356,41 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
         cctg_pct, cctg_err = None, f"exception: {exc!r}"
     if cctg_err is not None:
         cctg_pct = None
-        rate_source = f"big4_12m(cctg_unavailable: {cctg_err})"
-        _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable -> Big-4-only (%s)",
-                     asof_ts.date(), cctg_err)
+        held_pct = held_date = None
+        try:
+            from cctg_rate_vn import last_known_good_cctg
+            held_pct, held_date = last_known_good_cctg(str(asof_ts.date()))
+        except Exception as exc:
+            cctg_err = f"{cctg_err}; last-known lookup failed: {exc!r}"
+            try:        # lookup itself failed: the frozen in-code anchor is always known
+                from cctg_rate_vn import CCTG_EVENTS
+                _fz = [(pd.Timestamp(d), float(r)) for d, r in CCTG_EVENTS if pd.Timestamp(d) <= asof_ts]
+                if _fz:
+                    held_date, held_pct = max(_fz, key=lambda t: t[0])
+            except Exception:
+                pass
+        if held_pct is not None and held_pct > big4_pct:
+            rate_pct = held_pct
+            rate_source = f"cctg_held({held_date.date()}; cctg_unavailable: {cctg_err})"
+            _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable (%s) -> HOLDING last "
+                         "known CCTG %.2f%% (%s), not dropping to Big-4 %.2f%%",
+                         asof_ts.date(), cctg_err, held_pct, held_date.date(), big4_pct)
+        else:
+            rate_source = f"big4_12m(cctg_unavailable: {cctg_err})"
+            _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable -> Big-4-only (%s)",
+                         asof_ts.date(), cctg_err)
     elif cctg_pct is not None and cctg_pct > big4_pct:
         cctg_age = (asof_ts - cctg_date).days
         cctg_stale = check_freshness and cctg_age > stale_days_limit
+        rate_pct = cctg_pct
         if not cctg_stale:
-            rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
+            rate_source = f"cctg_6m({cctg_date.date()})"
         else:
-            rate_source = f"big4_12m(cctg_stale: {cctg_age}d)"
+            rate_source = f"cctg_held({cctg_date.date()}; cctg_stale: {cctg_age}d)"
             _log.warning("effective_deposit_rate(asof=%s): CCTG stale (%dd > %dd, last %s) -> "
-                         "Big-4-only", asof_ts.date(), cctg_age, stale_days_limit, cctg_date.date())
+                         "HOLDING last known CCTG %.2f%%, not dropping to Big-4 %.2f%%",
+                         asof_ts.date(), cctg_age, stale_days_limit, cctg_date.date(),
+                         cctg_pct, big4_pct)
     return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
             "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
 
@@ -378,7 +420,12 @@ def consumer_deposit_rate_detail(asof=None):
     `check_freshness=True` here is evaluated RELATIVE TO `asof` itself (PIT-causal: "is the CCTG
     reading stale AS OF the date being queried"), not relative to wall-clock "today" -- so every
     historical asof before cctg_rate_vn's only anchor (2026-09-30) stays byte-identical
-    (current_cctg_rate_checked returns None there regardless of the freshness flag)."""
+    (current_cctg_rate_checked returns None there regardless of the freshness flag).
+
+    2026-10-13 (job Taylor_20261013_163831): the freshness flag still decides the LABEL, no longer
+    the NUMBER -- once stale, the last known CCTG value is held with a WARNING instead of the
+    6.8 Big-4-only drop described above (that drop lowered every consumer's rate on a feed
+    lapse). The knob below is unchanged: DEPOSIT_RATE_CCTG_OVERLAY=0 is still Big-4-only."""
     if os.environ.get("DEPOSIT_RATE_CCTG_OVERLAY", "1") == "0":
         return {"rate_pct": current_deposit_rate(asof), "rate_source": "big4_12m(cctg_overlay_disabled)"}
     return effective_deposit_rate(asof, check_freshness=True)

@@ -368,8 +368,11 @@ try:
     # "big4_12m" indistinguishable from the normal no-CCTG-data case -- see
     # deposit_rate_vn.effective_deposit_rate()'s docstring for why (§29, diagnosis must cite
     # evidence). rate_pct (the actual number used downstream) is unaffected by this label change.
-    check("T18 CCTG age==46d stale -> effective_deposit_rate falls back to Big-4 (rate_pct=6.0)",
-          abs(r18b["rate_pct"] - 6.0) < 1e-9 and r18b["rate_source"] == "big4_12m(cctg_stale: 46d)")
+    # 2026-10-13 (job Taylor_20261013_163831): the boundary now flips the LABEL only -- a stale
+    # CCTG is HELD at its last known value instead of dropping to Big-4 (fallback-direction fix).
+    check("T18 CCTG age==46d stale -> effective_deposit_rate HOLDS CCTG 8.0, labelled as a stale hold",
+          abs(r18b["rate_pct"] - 8.0) < 1e-9
+          and r18b["rate_source"] == "cctg_held(2026-10-05; cctg_stale: 46d)")
 finally:
     dep._EVENTS_CSV = _orig_dep_csv
     cctg._EVENTS_CSV = _orig_cctg_csv
