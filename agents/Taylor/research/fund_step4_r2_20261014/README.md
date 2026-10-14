@@ -21,7 +21,7 @@ cron, `data/` thật không sửa (xem "Sự cố" — có 1 dòng sót do selfc
 
 ## §23 / §16
 32 selfcheck phụ thuộc (grep import các module đã sửa) × {`env -u TZ`, `TZ=Pacific/Kiritimati`}:
-- sandbox /tmp: nhánh 25/32 PASS; 7 lỗi GIỐNG HỆT master cùng sandbox (thiếu git/module/cấu hình trong /tmp).
+- sandbox /tmp: nhánh 25/32 PASS; 7 lỗi GIỐNG HỆT master cùng sandbox (thiếu git/module/cấu hình trong /tmp); CÒN 1 lỗi CHỈ trên nhánh: nav_unit_ledger_selfcheck (fixture account_inception.json thiếu index_anchor_date ⇒ CLI rc=1) — arch-review vòng 2 bắt, Mike đã vá 2 fixture (nav_unit_ledger_asof_20261009/20261013), 4758 assertion PASS dưới env -u TZ + Pacific/Chatham.
 - 7 cái đó chạy tại chỗ: eod_trading_report_account_filter, exdate_frame, failopen_batch1, report_return_gate,
   nav_scripts_2account PASS cả 2 TZ ở worktree; paper_report_render + report_delivery_ledger lỗi ở worktree NHƯNG
   lỗi y hệt ở worktree đối chứng master cùng độ sâu (đường `../../paper_entry_adjust.py`, sổ canonical) ⇒ bố cục

@@ -3,12 +3,14 @@
   "SpaceX": {
     "account_no": "0002023347",
     "inception_date": "2026-07-01",
+    "index_anchor_date": "2026-06-30",
     "starting_capital": 1000000000,
     "note": "Clean-slate account. Starting capital = 1B VND deposited day 1. First nav_history row (07-02) is post-first-day-trading — use starting_capital as inception baseline, NOT first row."
   },
   "ZaloPay": {
     "account_no": "0001743768",
     "inception_date": "2026-07-06",
+    "index_anchor_date": "2026-07-06",
     "starting_capital": 987865567,
     "note": "DUYỆT user 2026-09-27 13:38 ICT (Option A, job Taylor_20260927_053033): baseline = NAV thật đêm trước phiên go-live đầu tiên 2026-07-06 = 987.865.567 (cash 4.919.567 + MTM 982.946.000 − debt 0, cùng mốc data/account_seed_capital.json). Bản cũ null ⇒ dòng nav_history đầu 07-07 = 986.585.454 là snapshot SAU phiên bot đầu tiên (lớp lỗi §31), che P&L ngày go-live −1.280.113đ. Số công bố 'từ khi bắt đầu' asof 2026-09-25: −3,097% (cũ −2,971%). WTD/MTD không đổi. Chi tiết: mike/agents/Taylor/research/dsr_family_manifest_20260927/REPORT.md §2."
   }
