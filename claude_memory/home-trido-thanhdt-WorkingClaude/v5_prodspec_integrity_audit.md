@@ -88,9 +88,9 @@ OOS24: V5 34.07%, V4 28.37%, V1 25.44%. **DT4 beats TQ34b on CAGR across ALL sys
 **Trade-off**: DT4 buys return with LESS defense → higher DD on V1 (-21.6 vs -19.9) and V5 (-20.8 vs -18.4); V2/V3 DD fine. Best risk-adj = V3/V4 DT4 (Sharpe 1.55-1.56). Realistic forward (-1.5pp): V5 ~22% / V4 ~21% / V1 ~18%, still ~2x VNI.
 **Caveats**: backtest (not live fills); 2014+ only (DT V-recovery lag + pre-2014 risk); DT4 higher beta in bull. NAV: `data/5sys_dt4_nav.csv`.
 
-## Paper-trade A/B: DT4-foundation vs TQ34b, V1-V5 (2026-01-01 → [REDACTED]30 GO-LIVE decision)
+## Paper-trade A/B: DT4-foundation vs TQ34b, V1-V5 (2026-01-01 → [REDACTED] GO-LIVE decision)
 `pt_dt4_vs_tq34b_ab.py` — V1-V5 under each state foundation, live-faithful (fresh SIGNAL_V11 with state5 per foundation, real E1VFVN30, t1_open, prod-spec). Sim runs contiguous from 2025-01-01 (warmup) then NAV sliced+rebased to 2026-01-01 (YTD of a running book). Decision = which foundation goes LIVE.
-- **Wired into `papertrade_daily.bat` step [7]** (daily). **Scheduled task `DT4FoundationDecision`** fires [REDACTED]30 09:00 → runs `dt4_foundation_decision.bat` → writes `data/DT4_FOUNDATION_DECISION.md` + popup. Report auto-shows 🟢/🔴 verdict on/after 06-30 (🟡 before).
+- **Wired into `papertrade_daily.bat` step [7]** (daily). **Scheduled task `DT4FoundationDecision`** fires [REDACTED] 09:00 → runs `dt4_foundation_decision.bat` → writes `data/DT4_FOUNDATION_DECISION.md` + popup. Report auto-shows 🟢/🔴 verdict on/after 06-30 (🟡 before).
 - **Initial reading (2026 YTD → 05-26): DT4 wins ALL 5 systems** (vote 5-0). V5 DT4 -0.41% vs TQ34b -10.81% (Δ+10.4pp, DD -13.9 vs -17.3); V4 -2.24 vs -9.28 (+7.0pp); V1 +6.9pp. 2026 is a hard/choppy period (both negative) but DT4 less defensive (fewer AVOID_bear) → loses far less + better DD. Decision pending end-June.
 - ⚠️ **BUG FIXED during build (reusable lesson)**: E1VFVN30 data lags (~stops 05-18 while VNI/state go to 05-26). The ETF-parking `vn30_underlying` fallback MUST rescale the VNINDEX proxy to ETF scale (~25 vs ~1400) — raw proxy = 56x price jump → KELLY-parked NAV explodes → bogus -50/-79%. Also: never start `simulate` on a date-sliced list mid-history; run contiguous from a warmup start then slice+rebase the NAV. Both bugs gave catastrophic numbers before the fix.
 

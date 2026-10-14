@@ -4,11 +4,11 @@ scored 140 tickers | weights encode: cheapness + engine/runway + cash-machine + 
   # tkr  route      verdict             engine           score     5F   liqB  components
   1 HAH  COMPOUNDER CHEAP_QUALITY       COMPOUNDER◆      112.5            61  L1_cash+13 L1_value+36 L2_engine+22 L3_cash+10 L4_moat+10 L6_runway+8 dislocation+8 liq+8 liq_rising+2
   2 FPT  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        93.0 NARROW    336  L1_cash+4 L1_value+40 L2_engine+22 L4_moat+10 L6_runway+5 dislocation+8 liq+8
-  3 HSG  CYCLICAL   TROUGH_BUY          nan               92.6            21  PB+10 cmdty_pctile+17 dislocation+15 liq+6 regime+45
-  4 NKG  CYCLICAL   TROUGH_BUY          nan               92.6            18  PB+10 cmdty_pctile+17 dislocation+15 liq+6 regime+45
-  5 CTR  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        92.5            17  L1_cash+4 L1_value+36 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+5 liq+6
-  6 PTB  COMPOUNDER CHEAP_QUALITY       COMPOUNDER◆       92.0             4  L1_cash+4 L1_value+40 L2_engine+22 L3_cash+10 L4_moat+5 L6_runway+1 dislocation+8 liq+4 liq_rising+2
-  7 NNC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        90.5 NARROW      2  L1_cash+7 L1_value+40 L2_engine+22 L4_moat+10 L6_runway+8 dislocation+8
+  3 NKG  CYCLICAL   TROUGH_BUY          nan               92.6            18  PB+10 cmdty_pctile+17 dislocation+15 liq+6 regime+45
+  4 CTR  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        92.5            17  L1_cash+4 L1_value+36 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+5 liq+6
+  5 PTB  COMPOUNDER CHEAP_QUALITY       COMPOUNDER◆       92.0             4  L1_cash+4 L1_value+40 L2_engine+22 L3_cash+10 L4_moat+5 L6_runway+1 dislocation+8 liq+4 liq_rising+2
+  6 NNC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        90.5 NARROW      2  L1_cash+7 L1_value+40 L2_engine+22 L4_moat+10 L6_runway+8 dislocation+8
+  7 HSG  CYCLICAL   TROUGH_BUY          nan               89.6            21  PB+10 cmdty_pctile+17 dislocation+12 liq+6 regime+45
   8 SMC  CYCLICAL   TROUGH_BUY          nan               86.6             1  PB+10 cmdty_pctile+17 dislocation+15 regime+45
   9 SCS  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        86.5 NARROW      4  L1_cash+7 L1_value+34 L2_engine+22 L4_moat+15 L6_runway+5 dislocation+5 liq+2
  10 NCT  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        86.0 NARROW      1  L1_value+43 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+2
@@ -39,11 +39,11 @@ scored 140 tickers | weights encode: cheapness + engine/runway + cash-machine + 
  35 PVC  COMPOUNDER CHEAP_QUALITY       nan               54.0            10  L1_value+38 L2_engine+6 L6_runway-2 dislocation+8 liq+6 liq_rising+2
 
 ## Prioritized TOP-20 (by 8L composite)
-  HAH(112), FPT(93), HSG(93), NKG(93), CTR(92), PTB(92), NNC(90), SMC(87), SCS(86), NCT(86), FMC(80), IDC(74), VNM(72), TCL(72), NTC(69), BMP(68), DMC(68), LIX(68), KTS(67), DHA(66)
+  HAH(112), FPT(93), NKG(93), CTR(92), PTB(92), NNC(90), HSG(90), SMC(87), SCS(86), NCT(86), FMC(80), IDC(74), VNM(72), TCL(72), NTC(69), BMP(68), DMC(68), LIX(68), KTS(67), DHA(66)
 
 ## TOP-20 by route
   BANK (0): 
-  CYCLICAL (3): HSG(93), NKG(93), SMC(87)
+  CYCLICAL (3): NKG(93), HSG(90), SMC(87)
   SUGAR (1): KTS(67)
   COMPOUNDER (16): HAH(112), FPT(93), CTR(92), PTB(92), NNC(90), SCS(86), NCT(86), FMC(80), IDC(74), VNM(72), TCL(72), NTC(69), BMP(68), DMC(68), LIX(68), DHA(66)
 
