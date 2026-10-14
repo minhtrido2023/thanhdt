@@ -99,10 +99,10 @@ def fake_providers(*, last="2026-10-09", source="DT5G_macro", ks=None, big4=6.8,
         value_radar=lambda: dict(score=22.4, label="CHEAP", score_expanding=31.9, pe_cap10=11.1,
                                  p_pe=float("nan") if nan else 5.8, pb_cap10=1.87, p_pb=23.0,
                                  spread=1.6, p_sp=38.5, deposit_rate=7.4,
-                                 deposit_rate_source="cctg_6m", asof=vr_asof),
+                                 deposit_rate_source="cctg_12m", asof=vr_asof),
         killswitch=lambda: ks or dict(armed=False, rate=0.074, threshold=0.075, stale=False,
-                                      last_update="2026-10-03", age_days=8, rate_source="cctg_6m(2026-10-05)",
-                                      reason="cctg_6m(2026-10-05) 7.40% <= 7.5% -> CLEAR"),
+                                      last_update="2026-10-03", age_days=8, rate_source="cctg_12m(2026-10-05)",
+                                      reason="cctg_12m(2026-10-05) 7.40% <= 7.5% -> CLEAR"),
         big4_rate=lambda: big4,
         capit=lambda: dict(n=12, full_mean=14.2, full_hit=0.75, rec_mean=10.0, rec_hit=0.75,
                            last=-1.2, verdict="HEALTHY", max_carve=0.70),
@@ -160,6 +160,8 @@ def t1_full():
               and "06/2026" in c["edge_ic"].body and "07/2026" in c["edge_ic"].body)
         check("T1j ô mô tả ghi đúng câu chuẩn", page.count(D.DESCRIPTIVE) == 3, page.count(D.DESCRIPTIVE))
         check("T1k không có chuỗi profit_", "profit_" not in page)
+        check("T1k2 ô Value Radar ghi đúng tenor CCTG 12T (nhãn cctg_12m, rebase 05/10)",
+              "CCTG 12T" in c["env_value"].body and "CCTG 6T" not in c["env_value"].body)
         check("T1l mean12 −0,59 < 4 ⇒ chạm ngưỡng w_LAG", any("w_LAG mục tiêu 0,50" in t for t in c["edge_lag"].touched))
         check("T1m số kiểu VN (dấu phẩy, dấu trừ U+2212)", "−0,59" in c["edge_lag"].body and "-0.59" not in page)
         check("T1n có viewport + lang=vi + một cột", 'name="viewport"' in page and 'lang="vi"' in page)
