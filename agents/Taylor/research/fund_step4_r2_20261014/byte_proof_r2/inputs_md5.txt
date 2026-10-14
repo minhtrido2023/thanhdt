@@ -1,0 +1,2 @@
+9688236e0d8eb2757b303ab7b33ef786  /tmp/s4r2_sbx/data/benchmark/vnindex_tr_daily.csv
+ee76955af9d1f061ee5d7b5885f0400d  /home/trido/thanhdt/WorkingClaude/data/account_inception.json

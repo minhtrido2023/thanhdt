@@ -1,0 +1,128 @@
+scb unset eod_delivery_wiring_selfcheck.py rc=0 :: eod_delivery_wiring_selfcheck: 9/9 PASS
+scb unset daily_nav_snapshot_corpaction_error_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scb unset discretionary_margin_gate_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scb unset daily_nav_snapshot_from_raw_selfcheck.py rc=0 :: 83 PASS, 0 FAIL
+scb unset exdate_frame_selfcheck.py rc=1 :: ModuleNotFoundError: No module named 'oshares_live'
+scb unset bus_question_housekeeping_selfcheck.py rc=0 :: 5/5 PASS
+scb unset fund_bench_cron_selfcheck.py rc=0 :: OK — 9 assertion PASS (fund_bench_cron_selfcheck.py, TZ=None)
+scb unset failopen_batch1_selfcheck.py rc=1 :: FAIL  (20 assertion, 4 test FAIL)
+scb unset hose_membership_refresh_selfcheck.py rc=0 :: OK — 8 assertion PASS (hose_membership_refresh_selfcheck.py, TZ=None)
+scb unset nav_exdate_forecast_selfcheck.py rc=0 :: PASS=111 FAIL=0
+scb unset nav_corpaction_gate_e2e_selfcheck.py rc=0 :: 68 PASS, 0 FAIL
+scb unset check_report_cadence_selfcheck.py rc=0 :: ✅ PASS 58/58
+scb unset exrights_price_basis_selfcheck.py rc=0 :: KẾT QUẢ: 38 PASS / 0 FAIL
+scb unset eod_trading_report_account_filter_selfcheck.py rc=1 ::   · bản trước vá KHÔNG có fail-closed (đúng là bản cũ)
+scb unset nav_sleeve_selfcheck.py rc=0 :: OK — 40 assertion PASS (nav_sleeve_selfcheck.py, TZ=None)
+scb unset nav_jump_flow_gate_selfcheck.py rc=0 :: PASS
+scb unset nav_scripts_2account_selfcheck.py rc=1 ::   - ZaloPay: verify_account_snapshot.py rc=4 stderr=XÁC MINH THẤT BẠI — không tự tra được account_id cho 'ZaloPay' trong tradi
+scb unset period_table_32_selfcheck.py rc=0 :: OK — 55 assertion PASS (period_table_32_selfcheck.py, TZ=None)
+scb unset paper_report_render_selfcheck.py rc=1 :: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/s4r2_scb/mike/bin/../../paper_entry_adjust.py'
+scb unset corp_action_broker_detect_selfcheck.py rc=0 :: 788 PASS / 0 FAIL  (TZ=None, py=3.10.12)
+scb unset report_delivery_ledger_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scb/mike', 'rev-list', 'HEAD', '--', 'bin/report_delivery_gate.py']' return
+scb unset report_return_gate_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scb/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned
+scb unset nav_period_benchmark_selfcheck.py rc=0 :: OK — 69 assertion PASS (nav_period_benchmark_selfcheck.py, TZ=None)
+scb unset cash_identity_selfcheck.py rc=0 :: OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+scb unset worktree_stale_check_selfcheck.py rc=0 :: ✅ SELFCHECK PASS
+scb kir bus_question_housekeeping_selfcheck.py rc=0 :: 5/5 PASS
+scb unset vnindex_total_return_selfcheck.py rc=0 :: OK — 102 assertion PASS (vnindex_total_return_selfcheck.py, TZ=None)
+scb kir check_report_cadence_selfcheck.py rc=0 :: ✅ PASS 58/58
+scb unset strategy_fit_email_attach_selfcheck.py rc=0 :: strategy_fit_email_attach_selfcheck: PASS (113/113) [TZ env=<unset>, hôm nay ICT=2026-10-14]
+scb kir daily_nav_snapshot_corpaction_error_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scb kir daily_nav_snapshot_from_raw_selfcheck.py rc=0 :: 83 PASS, 0 FAIL
+scb kir discretionary_margin_gate_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scb kir eod_delivery_wiring_selfcheck.py rc=0 :: eod_delivery_wiring_selfcheck: 9/9 PASS
+scb unset report_delivery_gate_selfcheck.py rc=0 :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+scb kir exdate_frame_selfcheck.py rc=1 :: ModuleNotFoundError: No module named 'oshares_live'
+scb kir exrights_price_basis_selfcheck.py rc=0 :: KẾT QUẢ: 38 PASS / 0 FAIL
+scb kir cash_identity_selfcheck.py rc=0 :: OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+scb kir fund_bench_cron_selfcheck.py rc=0 :: OK — 9 assertion PASS (fund_bench_cron_selfcheck.py, TZ='Pacific/Kiritimati')
+scb kir corp_action_broker_detect_selfcheck.py rc=0 :: 788 PASS / 0 FAIL  (TZ='Pacific/Kiritimati', py=3.10.12)
+scb kir failopen_batch1_selfcheck.py rc=1 :: FAIL  (20 assertion, 4 test FAIL)
+scb kir nav_corpaction_gate_e2e_selfcheck.py rc=0 :: 68 PASS, 0 FAIL
+scb kir nav_exdate_forecast_selfcheck.py rc=0 :: PASS=111 FAIL=0
+scb kir hose_membership_refresh_selfcheck.py rc=0 :: OK — 8 assertion PASS (hose_membership_refresh_selfcheck.py, TZ='Pacific/Kiritimati')
+scb unset nav_flow_term_selfcheck.py rc=0 :: OK — 186 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 139 cặp phiên thật kiểm false-positive
+scb kir eod_trading_report_account_filter_selfcheck.py rc=1 ::   · bản trước vá KHÔNG có fail-closed (đúng là bản cũ)
+scb kir nav_scripts_2account_selfcheck.py rc=1 ::   - ZaloPay: verify_account_snapshot.py rc=4 stderr=XÁC MINH THẤT BẠI — không tự tra được account_id cho 'ZaloPay' trong tradi
+scb kir nav_jump_flow_gate_selfcheck.py rc=0 :: PASS
+scb kir nav_sleeve_selfcheck.py rc=0 :: OK — 40 assertion PASS (nav_sleeve_selfcheck.py, TZ='Pacific/Kiritimati')
+scb kir paper_report_render_selfcheck.py rc=1 :: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/s4r2_scb/mike/bin/../../paper_entry_adjust.py'
+scb kir period_table_32_selfcheck.py rc=0 :: OK — 55 assertion PASS (period_table_32_selfcheck.py, TZ='Pacific/Kiritimati')
+scb unset nav_unit_ledger_selfcheck.py rc=1 :: ASSERT-FAIL (sau 4731 assertion PASS): F: CLI sandbox SpaceX phải rc=0: LỖI nav_period_returns: account_inception.json[SpaceX] thiếu '
+scb unset portfolio_status_selfcheck.py rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+scb kir report_delivery_ledger_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scb/mike', 'rev-list', 'HEAD', '--', 'bin/report_delivery_gate.py']' return
+scb kir report_return_gate_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scb/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned
+scb kir nav_period_benchmark_selfcheck.py rc=0 :: OK — 69 assertion PASS (nav_period_benchmark_selfcheck.py, TZ='Pacific/Kiritimati')
+scb kir vnindex_total_return_selfcheck.py rc=0 :: OK — 102 assertion PASS (vnindex_total_return_selfcheck.py, TZ='Pacific/Kiritimati')
+scb kir worktree_stale_check_selfcheck.py rc=0 :: ✅ SELFCHECK PASS
+scm unset bus_question_housekeeping_selfcheck.py rc=0 :: 5/5 PASS
+scb kir report_delivery_gate_selfcheck.py rc=0 :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+scb kir strategy_fit_email_attach_selfcheck.py rc=0 :: strategy_fit_email_attach_selfcheck: PASS (113/113) [TZ env=Pacific/Kiritimati, hôm nay ICT=2026-10-14]
+scb unset nav_cum_dividend_selfcheck.py rc=0 :: === SELFCHECK: 38 PASS / 0 FAIL ===
+scm unset daily_nav_snapshot_corpaction_error_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scm unset daily_nav_snapshot_from_raw_selfcheck.py rc=0 :: 83 PASS, 0 FAIL
+scm unset discretionary_margin_gate_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scm unset eod_delivery_wiring_selfcheck.py rc=0 :: eod_delivery_wiring_selfcheck: 9/9 PASS
+scb kir nav_flow_term_selfcheck.py rc=0 :: OK — 186 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 139 cặp phiên thật kiểm false-positive
+scm unset exdate_frame_selfcheck.py rc=1 :: ModuleNotFoundError: No module named 'oshares_live'
+scm unset check_report_cadence_selfcheck.py rc=0 :: ✅ PASS 58/58
+scm unset cash_identity_selfcheck.py rc=0 :: OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+scm unset fund_bench_cron_selfcheck.py MISSING
+scm unset hose_membership_refresh_selfcheck.py MISSING
+scm unset failopen_batch1_selfcheck.py rc=1 :: FAIL  (20 assertion, 4 test FAIL)
+scm unset exrights_price_basis_selfcheck.py rc=0 :: KẾT QUẢ: 38 PASS / 0 FAIL
+scm unset nav_exdate_forecast_selfcheck.py rc=0 :: PASS=111 FAIL=0
+scm unset nav_corpaction_gate_e2e_selfcheck.py rc=0 :: 68 PASS, 0 FAIL
+scm unset eod_trading_report_account_filter_selfcheck.py rc=1 ::   · bản trước vá KHÔNG có fail-closed (đúng là bản cũ)
+scm unset nav_period_benchmark_selfcheck.py MISSING
+scm unset nav_jump_flow_gate_selfcheck.py rc=0 :: PASS
+scm unset nav_sleeve_selfcheck.py MISSING
+scm unset nav_scripts_2account_selfcheck.py rc=1 ::   - ZaloPay: verify_account_snapshot.py rc=4 stderr=XÁC MINH THẤT BẠI — không tự tra được account_id cho 'ZaloPay' trong tradi
+scm unset corp_action_broker_detect_selfcheck.py rc=0 :: 788 PASS / 0 FAIL  (TZ=None, py=3.10.12)
+scm unset period_table_32_selfcheck.py MISSING
+scb kir nav_unit_ledger_selfcheck.py rc=1 :: ASSERT-FAIL (sau 4731 assertion PASS): F: CLI sandbox SpaceX phải rc=0: LỖI nav_period_returns: account_inception.json[SpaceX] thiếu '
+scb kir portfolio_status_selfcheck.py rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+scm unset report_delivery_ledger_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scm/mike', 'rev-list', 'HEAD', '--', 'bin/report_delivery_gate.py']' return
+scm unset paper_report_render_selfcheck.py rc=1 :: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/s4r2_scm/mike/bin/../../paper_entry_adjust.py'
+scm unset report_return_gate_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scm/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned
+scm unset vnindex_total_return_selfcheck.py MISSING
+scm unset worktree_stale_check_selfcheck.py rc=0 :: ✅ SELFCHECK PASS
+scm kir bus_question_housekeeping_selfcheck.py rc=0 :: 5/5 PASS
+scb kir nav_cum_dividend_selfcheck.py rc=0 :: === SELFCHECK: 38 PASS / 0 FAIL ===
+scm kir cash_identity_selfcheck.py rc=0 :: OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+scm unset strategy_fit_email_attach_selfcheck.py rc=0 :: strategy_fit_email_attach_selfcheck: PASS (113/113) [TZ env=<unset>, hôm nay ICT=2026-10-14]
+scm kir daily_nav_snapshot_corpaction_error_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scm kir daily_nav_snapshot_from_raw_selfcheck.py rc=0 :: 83 PASS, 0 FAIL
+scm kir discretionary_margin_gate_selfcheck.py rc=0 :: Tat ca selfcheck PASS.
+scm kir eod_delivery_wiring_selfcheck.py rc=0 :: eod_delivery_wiring_selfcheck: 9/9 PASS
+scm unset report_delivery_gate_selfcheck.py rc=0 :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+scm kir exdate_frame_selfcheck.py rc=1 :: ModuleNotFoundError: No module named 'oshares_live'
+scm kir check_report_cadence_selfcheck.py rc=0 :: ✅ PASS 58/58
+scm kir failopen_batch1_selfcheck.py rc=1 :: FAIL  (20 assertion, 4 test FAIL)
+scm kir fund_bench_cron_selfcheck.py MISSING
+scm kir hose_membership_refresh_selfcheck.py MISSING
+scm kir exrights_price_basis_selfcheck.py rc=0 :: KẾT QUẢ: 38 PASS / 0 FAIL
+scm kir nav_corpaction_gate_e2e_selfcheck.py rc=0 :: 68 PASS, 0 FAIL
+scm kir nav_exdate_forecast_selfcheck.py rc=0 :: PASS=111 FAIL=0
+scm kir eod_trading_report_account_filter_selfcheck.py rc=1 ::   · bản trước vá KHÔNG có fail-closed (đúng là bản cũ)
+scm unset nav_flow_term_selfcheck.py rc=0 :: OK — 186 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 139 cặp phiên thật kiểm false-positive
+scm kir nav_period_benchmark_selfcheck.py MISSING
+scm kir corp_action_broker_detect_selfcheck.py rc=0 :: 788 PASS / 0 FAIL  (TZ='Pacific/Kiritimati', py=3.10.12)
+scm kir nav_sleeve_selfcheck.py MISSING
+scm kir nav_jump_flow_gate_selfcheck.py rc=0 :: PASS
+scm kir nav_scripts_2account_selfcheck.py rc=1 ::   - ZaloPay: verify_account_snapshot.py rc=4 stderr=XÁC MINH THẤT BẠI — không tự tra được account_id cho 'ZaloPay' trong tradi
+scm kir period_table_32_selfcheck.py MISSING
+scm kir paper_report_render_selfcheck.py rc=1 :: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/s4r2_scm/mike/bin/../../paper_entry_adjust.py'
+scm unset portfolio_status_selfcheck.py rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+scm kir report_delivery_ledger_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scm/mike', 'rev-list', 'HEAD', '--', 'bin/report_delivery_gate.py']' return
+scm kir report_return_gate_selfcheck.py rc=1 :: subprocess.CalledProcessError: Command '['git', '-C', '/tmp/s4r2_scm/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned
+scm unset nav_unit_ledger_selfcheck.py rc=0 :: OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+scm kir vnindex_total_return_selfcheck.py MISSING
+scm kir worktree_stale_check_selfcheck.py rc=0 :: ✅ SELFCHECK PASS
+scm unset nav_cum_dividend_selfcheck.py rc=0 :: === SELFCHECK: 38 PASS / 0 FAIL ===
+scm kir strategy_fit_email_attach_selfcheck.py rc=0 :: strategy_fit_email_attach_selfcheck: PASS (113/113) [TZ env=Pacific/Kiritimati, hôm nay ICT=2026-10-14]
+scm kir report_delivery_gate_selfcheck.py rc=0 :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+scm kir nav_flow_term_selfcheck.py rc=0 :: OK — 186 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 139 cặp phiên thật kiểm false-positive
+scm kir portfolio_status_selfcheck.py rc=0 :: SELFCHECK PASSED — mọi assertion OK.
+scm kir nav_unit_ledger_selfcheck.py rc=0 :: OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+scm kir nav_cum_dividend_selfcheck.py rc=0 :: === SELFCHECK: 38 PASS / 0 FAIL ===

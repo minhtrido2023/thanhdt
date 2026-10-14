@@ -1,0 +1,16 @@
+rc=0 bus_question_housekeeping_selfcheck :: 5/5 PASS
+rc=0 cash_identity_selfcheck :: OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest e6008659119ff210)
+rc=0 check_report_cadence_selfcheck :: ✅ PASS 58/58
+rc=0 eod_delivery_wiring_selfcheck :: eod_delivery_wiring_selfcheck: 9/9 PASS
+rc=0 eod_trading_report_account_filter_selfcheck :: KẾT QUẢ: 36 PASS / 0 FAIL
+rc=0 nav_flow_term_selfcheck :: OK — 186 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 139 cặp phiên thật kiểm false-positive
+rc=0 nav_unit_ledger_selfcheck :: OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+rc=0 period_table_32_selfcheck :: OK — 39 assertion PASS (period_table_32_selfcheck.py, TZ=None)
+rc=0 report_delivery_gate_selfcheck :: report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+rc=1 report_delivery_ledger_selfcheck :: ❌ SELFCHECK FAIL — 5 test: env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không
+rc=0 report_return_gate_selfcheck :: ✅ SELFCHECK PASS
+rc=0 strategy_fit_email_attach_selfcheck :: strategy_fit_email_attach_selfcheck: PASS (113/113) [TZ env=<unset>, hôm nay ICT=2026-10-14]
+rc=0 worktree_stale_check_selfcheck :: ✅ SELFCHECK PASS
+rc=0 nav_period_benchmark_selfcheck :: OK — 56 assertion PASS (nav_period_benchmark_selfcheck.py, TZ=None)
+rc=0 nav_sleeve_selfcheck :: OK — 37 assertion PASS (nav_sleeve_selfcheck.py, TZ=None)
+rc=0 vnindex_total_return_selfcheck :: OK — 63 assertion PASS (vnindex_total_return_selfcheck.py, TZ=None)

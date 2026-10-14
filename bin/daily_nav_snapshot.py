@@ -1631,6 +1631,20 @@ def main():
             lines.append(f"   ℹ️ {n}")
     print("\n".join(lines))
 
+    # Quỹ bước 4 (`nav_sleeve.py`): KL + giá ĐÚNG giá vừa định giá NAV của mã NGOÀI bot
+    # (`data/sleeve_scope.json`) ⇒ chuỗi "phần bot quản lý" không phải định giá lại. Không đổi `nav`.
+    # Đường cảnh báo: chưa có file phạm vi ⇒ None; lỗi khác ⇒ ghi lý do, không chặn NAV.
+    sleeve_outside, sleeve_outside_error = None, None
+    try:
+        import nav_sleeve
+        if os.path.exists(nav_sleeve.SCOPE_PATH):
+            in_scope = nav_sleeve.scope_tickers(nav_sleeve.load_scope(args.account),
+                                                datetime.date.fromisoformat(args.date))
+            sleeve_outside = {t: {"qty": positions[t]["qty"], "price": prices[t]}
+                              for t in sorted(in_scope) if t in positions}
+    except Exception as exc:                # noqa: BLE001
+        sleeve_outside_error = _exc_text(exc)
+
     snapshot_path = os.path.join(EXEC_DIR, f"nav_snapshot_{args.account}_{args.date}.json")
     out = {"account": args.account, "date": args.date, "nav": nav,
            "mtm_stock": mtm_stock, "cash": cash, "cash_broker": cash_broker,
@@ -1655,6 +1669,7 @@ def main():
            "cash_flow_investor_line": identity["investor_line"],
            "cash_flow_ops": cash_flow_ops_record(snapshot_path, identity["ops_today"]),
            "nav_is_estimate": bool(args.from_raw), "positions_ts": positions_ts,
+           "sleeve_outside": sleeve_outside, "sleeve_outside_error": sleeve_outside_error,
            "raw_price_notes": raw_price_notes, "corp_action_qty_adj": corp_action_adj,
            # [5] arch-review vòng 2: P4 trước chỉ ghi bằng chứng ở nhánh rc=5 + cash_div_confirmed
            # ⇒ không audit được ca gate INERT (không mã nào khớp) hay ca gate bị TẮT TIẾNG vì

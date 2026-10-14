@@ -1,0 +1,1 @@
+LỖI nav_period_returns: account_inception.json[ZaloPay] thiếu 'index_anchor_date' — mốc VN-Index kỳ 'từ khi bắt đầu' phải khai theo tài khoản (giá đóng cửa của phiên MÀ NAV GỐC phản ánh), không suy từ dòng sổ 0 2026-07-06

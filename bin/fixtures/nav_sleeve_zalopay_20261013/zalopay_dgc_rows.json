@@ -1,0 +1,638 @@
+{
+"_doc": "ĐÓNG BĂNG 2026-10-14 từ dữ liệu thật (nav_history_ZaloPay.csv md5 0ee74a15…, dnse_raw lọc account 0001743768, BQ ticker.Price DGC) — chỉ các trường chuỗi (b) cần. Dùng cho nav_sleeve_selfcheck ca 2 (khép kín).",
+"inception": {
+"account_no": "0001743768",
+"inception_date": "2026-07-06",
+"starting_capital": 987865567
+},
+"seed_legacy_positions": {
+"DGC": {
+"qty": 10000,
+"price": 46250,
+"mtm": 462500000
+}
+},
+"rows": [
+{
+"date": "2026-07-07",
+"nav": "986585454",
+"balance_ts": "2026-07-07T20:19:27",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 45850.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-08",
+"nav": "996802048",
+"balance_ts": "2026-07-08T15:00:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 46550.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-09",
+"nav": "990078413",
+"balance_ts": "2026-07-09T15:00:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 46700.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-10",
+"nav": "978346744",
+"balance_ts": "2026-07-10T15:00:11",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 46200.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-13",
+"nav": "962178035",
+"balance_ts": "2026-07-13T15:00:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 45300.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-14",
+"nav": "963451542",
+"balance_ts": "2026-07-14T19:03:21",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 45400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-15",
+"nav": "950227003",
+"balance_ts": "2026-07-15T19:10:08",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 44850.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-16",
+"nav": "953188885",
+"balance_ts": "2026-07-16T19:10:08",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 44800.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-17",
+"nav": "949864227",
+"balance_ts": "2026-07-17T19:36:40",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 44800.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-20",
+"nav": "920371884",
+"balance_ts": "2026-07-20T19:10:08",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-21",
+"nav": "918078637",
+"balance_ts": "2026-07-21T19:10:08",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-22",
+"nav": "885251313",
+"balance_ts": "2026-07-22T19:10:21",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 40500.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-23",
+"nav": "859738008",
+"balance_ts": "2026-07-23T19:10:22",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 37950.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-24",
+"nav": "846871112",
+"balance_ts": "2026-07-24T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 36850.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-27",
+"nav": "833856620",
+"balance_ts": "2026-07-28T09:15:15",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 36000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-28",
+"nav": "845328035",
+"balance_ts": "2026-07-28T19:10:20",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 36750.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-29",
+"nav": "859640167",
+"balance_ts": "2026-07-29T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 37850.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-30",
+"nav": "886256349",
+"balance_ts": "2026-07-30T19:10:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 39050.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-07-31",
+"nav": "888828498",
+"balance_ts": "2026-07-31T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 39100.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-03",
+"nav": "901985831",
+"balance_ts": "2026-08-03T19:10:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 39400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-04",
+"nav": "906684413",
+"balance_ts": "2026-08-04T19:10:12",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 39600.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-05",
+"nav": "912854495",
+"balance_ts": "2026-08-05T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 40550.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-06",
+"nav": "937070077",
+"balance_ts": "2026-08-06T19:10:07",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 43350.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-07",
+"nav": "950719172",
+"balance_ts": "2026-08-07T19:05:27",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 44200.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-10",
+"nav": "949892932",
+"balance_ts": "2026-08-10T19:10:56",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 43600.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-11",
+"nav": "953799018",
+"balance_ts": "2026-08-11T19:52:30",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 44100.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-12",
+"nav": "954017365",
+"balance_ts": "2026-08-12T19:10:28",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43800.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-13",
+"nav": "950699574",
+"balance_ts": "2026-08-13T19:10:23",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43900.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-14",
+"nav": "939887091",
+"balance_ts": "2026-08-14T20:15:02",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43200.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-17",
+"nav": "919774803",
+"balance_ts": "2026-08-17T19:10:05",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 41200.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-18",
+"nav": "926799815",
+"balance_ts": "2026-08-18T19:10:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 41800.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-19",
+"nav": "920801944",
+"balance_ts": "2026-08-19T19:10:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 41250.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-20",
+"nav": "924911276",
+"balance_ts": "2026-08-20T19:10:08",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 41400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-21",
+"nav": "948266511",
+"balance_ts": "2026-08-21T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43050.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-24",
+"nav": "958333248",
+"balance_ts": "2026-08-24T04:50:08",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43900.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-25",
+"nav": "965945298",
+"balance_ts": "2026-08-25T20:15:01",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 44950.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-26",
+"nav": "964373145",
+"balance_ts": "2026-08-26T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 44400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-27",
+"nav": "953793571",
+"balance_ts": "2026-08-27T22:16:11",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 43200.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-28",
+"nav": "952338703",
+"balance_ts": "2026-08-28T19:10:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-08-31",
+"nav": "952365940",
+"balance_ts": "2026-08-31T20:15:02",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 43000.0,
+"dgc_price_src": "bq_price_T-3"
+},
+{
+"date": "2026-09-03",
+"nav": "967938562",
+"balance_ts": "2026-09-03T19:10:06",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 44900.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-04",
+"nav": "991380088",
+"balance_ts": "2026-09-04T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 47100.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-07",
+"nav": "986247657",
+"balance_ts": "2026-09-07T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 47000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-08",
+"nav": "977782670",
+"balance_ts": "2026-09-08T23:03:12",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 45650.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-09",
+"nav": "984968983",
+"balance_ts": "2026-09-09T21:15:13",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 46600.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-10",
+"nav": "990336744",
+"balance_ts": "2026-09-10T19:10:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 47000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-11",
+"nav": "981012771",
+"balance_ts": "2026-09-11T21:15:07",
+"nav_is_estimate": "",
+"dgc_qty": 10000,
+"dgc_price": 46750.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-14",
+"nav": "966798467",
+"balance_ts": "2026-09-14T19:10:29",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 37400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-15",
+"nav": "958351658",
+"balance_ts": "2026-09-15T19:10:07",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 36050.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-16",
+"nav": "948338649",
+"balance_ts": "2026-09-16T19:10:07",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-17",
+"nav": "953317076",
+"balance_ts": "2026-09-17T19:10:28",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35300.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-18",
+"nav": "958732611",
+"balance_ts": "2026-09-18T19:10:30",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35950.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-21",
+"nav": "950813808",
+"balance_ts": "2026-09-21T21:15:14",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 35350.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-22",
+"nav": "959993551",
+"balance_ts": "2026-09-22T19:10:10",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35800.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-23",
+"nav": "955586647",
+"balance_ts": "2026-09-23T23:39:59",
+"nav_is_estimate": "True",
+"dgc_qty": 10000,
+"dgc_price": 35450.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-24",
+"nav": "951368626",
+"balance_ts": "2026-09-24T19:50:06",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35300.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-25",
+"nav": "957269620",
+"balance_ts": "2026-09-25T19:10:10",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35950.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-28",
+"nav": "961759336",
+"balance_ts": "2026-09-28T19:10:06",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 36550.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-29",
+"nav": "965250181",
+"balance_ts": "2026-09-29T19:30:15",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 36400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-09-30",
+"nav": "958666279",
+"balance_ts": "2026-09-30T19:10:14",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 36000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-01",
+"nav": "951182854",
+"balance_ts": "2026-10-01T19:10:21",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35400.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-02",
+"nav": "950434410",
+"balance_ts": "2026-10-02T19:10:17",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35500.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-05",
+"nav": "948296456",
+"balance_ts": "2026-10-05T19:10:18",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 35100.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-06",
+"nav": "941824936",
+"balance_ts": "2026-10-06T19:10:19",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 34350.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-07",
+"nav": "930757202",
+"balance_ts": "2026-10-07T19:10:07",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 33150.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-08",
+"nav": "926780212",
+"balance_ts": "2026-10-08T19:10:08",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 32500.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-09",
+"nav": "939394841",
+"balance_ts": "2026-10-09T19:10:08",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 33800.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-12",
+"nav": "931434028",
+"balance_ts": "2026-10-12T19:10:08",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 33000.0,
+"dgc_price_src": "bq_price"
+},
+{
+"date": "2026-10-13",
+"nav": "926631443",
+"balance_ts": "2026-10-13T19:10:07",
+"nav_is_estimate": "False",
+"dgc_qty": 10000,
+"dgc_price": 32900.0,
+"dgc_price_src": "bq_price"
+}
+]
+}

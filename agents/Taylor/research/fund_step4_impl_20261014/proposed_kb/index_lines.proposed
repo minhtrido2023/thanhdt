@@ -1,0 +1,6 @@
+# Thêm vào kb/data_registry/price-volume/index.md
+| [`vnindex_total_return.md`](vnindex_total_return.md) — data/benchmark/vnindex_tr_daily.csv (+ hose_membership, acks, benchmark_config) — VN-Index có cổ tức tự dựng | PROPOSED |
+# Thêm vào kb/data_registry/trading-bot/index.md
+| [`nav_sleeve_history.md`](nav_sleeve_history.md) — data/execution_logs/nav_sleeve_history_<account>.csv (+ data/sleeve_scope.json, data/sleeve_transfers.json) — chuỗi "phần bot quản lý" | PROPOSED |
+# kb/data_registry/CHANGELOG.md
+- 2026-10-14 (Taylor, job Taylor_20261014_060642): +vnindex_total_return, +nav_sleeve_history (PROPOSED, nhánh feat/fund-step4-benchmark-20261014); vnindex_mirror_col: hàng gốc VNINDEX 2025-04-09 SAI (Q10).
