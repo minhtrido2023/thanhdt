@@ -258,6 +258,7 @@ def t_gates():
            for x in e), f"G1 dòng giữa bị xoá: {e}")
     ok(not [x for x in gates(base, a, b) if x.startswith("G1")], "G1 chuỗi đủ không nổ")
     t_g1_sessions(D, base)
+    t_acks(D, base, a, b)
     # G2 — 0,011% nổ; 0,009% không
     one(mod(64, vnindex_src2=base[64]["vnindex"] / 1.00011), "G2", (D[64].isoformat(), "+0.011%"))
     none(mod(64, vnindex_src2=base[64]["vnindex"] / 1.00009), "G2")
@@ -267,6 +268,7 @@ def t_gates():
         "G3", (D[64].isoformat(),))
     none(mod(64, ca_max_ingested_at=D[64].isoformat() + "T00:00:01+07:00"), "G3")
     # G4 — số mã đổi > 5%; vốn hoá lệch chỉ số > 3%
+    one(mod(63, n_members=94), "G4", ("100 → 94", D[63].isoformat()))    # phiên ĐẦU kỳ (ngay sau mốc D62) — mutant N11
     one(mod(64, n_members=94), "G4", ("100 → 94",))
     none(mod(64, n_members=95), "G4")
     mc_exp = base[63]["mc_members_vnd"] * base[63]["vnindex"] / base[62]["vnindex"]
@@ -310,6 +312,49 @@ def t_gates():
         ok(sat.isoformat() in str(exc) and "không tự lùi" in str(exc), f"ca7 thông điệp: {exc}")
     bp = V.benchmark_period(sat, b, series=base, acks_path="/nonexistent/acks.json")
     ok(bp["status"] == "unavailable" and bp["vnindex_price_pct"] is None, f"ca7 benchmark_period: {bp}")
+
+
+def t_acks(D, base, a, b):
+    """G6 (mutant N6 vòng 1): mục xác nhận PHẢI có `confirmed_by` (bằng chứng có NGƯỜI xác nhận) +
+    date + ticker; thiếu ⇒ ValueError, và benchmark_period ra unavailable (không lặng lẽ bỏ qua G6)."""
+    rows = [dict(r) for r in base]
+    rows[64].update(max_dy=0.31, max_dy_ticker="ZZZ")
+    with tempfile.TemporaryDirectory(prefix="vtr_acks_") as tmp:
+        good, bad = os.path.join(tmp, "good.json"), os.path.join(tmp, "bad.json")
+        with open(good, "w", encoding="utf-8") as f:
+            json.dump({"G6": [{"date": D[64].isoformat(), "ticker": "ZZZ", "confirmed_by": "user 2030-06-01"}]}, f)
+        ok(V.load_acks(good) == {(D[64].isoformat(), "ZZZ")}, "ack hợp lệ")
+        ok(V.benchmark_period(a, b, series=rows, acks_path=good)["status"] == "ok", "G6 có ack (confirmed_by) ⇒ qua")
+        for name, entry in (("thiếu confirmed_by", {"date": D[64].isoformat(), "ticker": "ZZZ"}),
+                            ("confirmed_by rỗng", {"date": D[64].isoformat(), "ticker": "ZZZ", "confirmed_by": ""}),
+                            ("thiếu ticker", {"date": D[64].isoformat(), "confirmed_by": "user"})):
+            with open(bad, "w", encoding="utf-8") as f:
+                json.dump({"G6": [entry]}, f)
+            try:
+                V.load_acks(bad)
+                ok(False, f"ack {name} phải ValueError")
+            except ValueError as exc:
+                ok("confirmed_by" in str(exc), f"ack {name}: {exc}")
+            bp = V.benchmark_period(a, b, series=rows, acks_path=bad)
+            ok(bp["status"] == "unavailable" and bp["vnindex_tr_net_pct"] is None and "confirmed_by" in bp["reason"],
+               f"ack {name} ⇒ benchmark unavailable: {bp}")
+
+
+def t_dy_corrupt(tmp):
+    """DY_CORRUPT (mutant N1 vòng 1): cổ tức > 50% giá phiên trước = dữ liệu hỏng ⇒ KHÔNG vào y (vẫn ghi
+    max_dy để G6 thấy); 46,7% (dưới ngưỡng) vẫn vào y."""
+    for v, want_in in ((20000, False), (14000, True)):           # DDD giá 30.000 ⇒ dy 66,7% / 46,7%
+        D, inp, mem, src2 = fixture(ca_extra=[("DDD", 9, v, "Đợt 9")])
+        sp = os.path.join(tmp, f"s_dy_{v}.csv")
+        V.update(sp, write_mem(tmp, mem), inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                 first_date=D[0].isoformat())
+        r = {x["date"]: x for x in V.read_series(sp)}[D[9]]
+        ok(r["max_dy_ticker"] == "DDD" and abs(r["max_dy"] - v / 30000) < 1e-7, f"dy {v}: max_dy {r}")
+        if want_in:
+            ok(r["y_gross"] > 0 and r["div_cash_vnd"] == 1e6 * v, f"dy {v / 300:.1f}% (< 50%) phải vào y: {r}")
+        else:
+            ok(r["y_gross"] == 0 and r["div_cash_vnd"] == 0, f"dy {v / 300:.1f}% (> 50%) là dữ liệu hỏng, KHÔNG "
+               f"được vào y: y={r['y_gross']} div_cash={r['div_cash_vnd']}")
 
 
 def t_g1_sessions(D, base):
@@ -384,6 +429,7 @@ def t_update_checked_through(tmp):
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="vtr_sc_") as tmp:
         t_update_checked_through(tmp)
+        t_dy_corrupt(tmp)
         t_build_by_hand(tmp)
         t_sealed(tmp)
     t_gates()

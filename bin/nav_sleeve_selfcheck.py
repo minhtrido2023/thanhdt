@@ -217,6 +217,25 @@ def t_positions(tmp):
        and props[0]["amount_vnd"] == 9_500.0, f"ca6 dò ngày tiền về bỏ bản ghi hỏng: {props[0]}")
 
 
+def t_raw_div_recv_two_accounts(tmp):
+    """§12 (mutant N9 vòng 1): `raw_div_recv_and_fills` đọc file dnse_raw DÙNG CHUNG ⇒ lọc account ở
+    dòng đầu; hai tài khoản cùng file phải ra kết quả KHÁC nhau, không lẫn bản ghi của nhau."""
+    d = os.path.join(tmp, "raw2acct")
+    os.makedirs(d, exist_ok=True)
+    bal = lambda acct, ts, v: {"ts": ts, "kind": "balances", "account_no": acct,           # noqa: E731
+                               "payload": {"stock": {"cashDividendReceiving": v}}}
+    odr = lambda acct, ts, sym, q: {"ts": ts, "kind": "orders", "account_no": acct,        # noqa: E731
+                                    "payload": {"orders": [{"symbol": sym, "fillQuantity": q}]}}
+    _raw(d, "2026-07-08", [bal("A1", "2026-07-08T19:00:00", 10_000.0), bal("B2", "2026-07-08T19:00:05", 777.0),
+                           odr("A1", "2026-07-08T15:00:00", "DGC", 100), odr("B2", "2026-07-08T15:00:09", "MBB", 5)])
+    ra, fa = S.raw_div_recv_and_fills("A1", d)
+    rb, fb = S.raw_div_recv_and_fills("B2", d)
+    ok(ra == [("2026-07-08T19:00:00", 10_000.0)] and rb == [("2026-07-08T19:00:05", 777.0)],
+       f"§12 cổ tức chờ về lẫn tài khoản: A1 {ra} B2 {rb}")
+    ok([o["symbol"] for o in fa["2026-07-08"]] == ["DGC"] and [o["symbol"] for o in fb["2026-07-08"]] == ["MBB"],
+       f"§12 lệnh khớp lẫn tài khoản: A1 {fa} B2 {fb}")
+
+
 def t_gates(tmp):
     """S3, S6, S7, freshness của consumer + chống đọc excluded_tickers."""
     rows = nav_rows([1_000_000, 1_000_000])
@@ -310,6 +329,7 @@ def main() -> int:
     t_needs_human()
     with tempfile.TemporaryDirectory(prefix="nsl_sc_") as tmp:
         t_positions(tmp)
+        t_raw_div_recv_two_accounts(tmp)
         t_gates(tmp)
     print(f"OK — {N_OK} assertion PASS (nav_sleeve_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
