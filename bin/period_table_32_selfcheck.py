@@ -167,9 +167,27 @@ def main() -> int:
                        "|---|---:|---:|---:|---:|---:|\n| Từ đầu năm (YTD) | +1,00% | — | — | — | — |\n")
     passes(doc(extra2), cli)
 
+    # 8b. N-a vòng 2: NFD + 'Luỹ kế' vẫn nhận bảng; thiếu bảng khi chuỗi đã cài ⇒ CHẶN (chưa cài ⇒ SKIP);
+    #     cột tỉ suất TK + ô WTD/MTD đối chiếu CLI; thiếu dòng kỳ CLI có ⇒ CHẶN; cột 2 sai tên TK ⇒ CHẶN
+    import unicodedata
+    nfd = unicodedata.normalize("NFD", doc(t).replace("Hiệu suất lũy kế", "Hiệu suất Luỹ kế"))
+    ok(nfd != doc(t) and "(b) inception: khớp CLI" in passes(nfd, cli), "NFD + 'Luỹ' ⇒ vẫn đối chiếu")
+    notab = "# Báo cáo tuần\n\n### 3.2 Hiệu suất\n\nkhông có bảng\n"
+    blocks(notab, cli, ("không có bảng", "bắt buộc có bảng 3.2"))
+    sk = pt.check_report("X_weekly.md", notab, "ZaloPay", "2030-06-06", cli=cli, series_installed=lambda: False)
+    ok("SKIP" in sk[0], f"chưa cài chuỗi ⇒ SKIP: {sk}")
+    blocks(replace_cell(doc(t), "Tuần này", "ZaloPay", pt.fmt_num(a["wtd"]["return_pct"] + 0.02, "%")), cli,
+           ("Tuần này", "'ZaloPay'", f"{a['wtd']['return_pct']:+.3f}"))
+    blocks(replace_cell(doc(t), "Từ đầu tháng", pt.COL_PRICE,
+                        pt.fmt_num(a["mtd"]["benchmark"]["vnindex_price_pct"] + 0.02, "%")), cli,
+           ("Từ đầu tháng", pt.COL_PRICE))
+    nomtd = "\n".join(ln for ln in doc(t).splitlines() if not ln.startswith("| Từ đầu tháng")) + "\n"
+    blocks(nomtd, cli, ("thiếu dòng", "mtd"))
+    blocks(doc(t).replace("| Giai đoạn | ZaloPay |", "| Giai đoạn | SpaceX |"), cli, ("cột 2 tên 'ZaloPay'",))
+
     # 9. đường nối report_delivery_gate: daily ⇒ không chạy; weekly lệch ⇒ RuntimeError; khớp ⇒ qua
     td = Path(tempfile.mkdtemp(prefix="pt32_sc_"))
-    saved = pt.run_cli
+    saved, saved_inst = pt.run_cli, pt._series_installed
     calls = []
 
     def fake(account, d, sleeve=False, bin_dir=None):
@@ -194,8 +212,22 @@ def main() -> int:
         mo.write_text(doc(pt.render(dict(a, account="SpaceX"), None)), encoding="utf-8")
         rdg._check_benchmark_table(mo)
         ok(calls[-1][:3] == ("SpaceX", "2026-09-30", False), f"monthly ⇒ ngày cuối tháng: {calls[-1]}")
+        # N-e vòng 2: báo cáo gộp SpaceX_ZaloPay_* — mỗi TK một bảng; thiếu bảng của 1 TK ⇒ chặn
+        sa = pt.render(dict(a, account="SpaceX"), None)
+        both = td / "SpaceX_ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md"
+        both.write_text(doc(sa) + doc(pt.render(a, b)), encoding="utf-8")
+        del calls[:]
+        rdg._check_benchmark_table(both)
+        ok({c[0] for c in calls} == {"SpaceX", "ZaloPay"}, f"gộp ⇒ đối chiếu cả 2 TK: {calls}")
+        both.write_text(doc(sa), encoding="utf-8")
+        pt._series_installed = lambda: True
+        try:
+            rdg._check_benchmark_table(both)
+            ok(False, "gộp thiếu bảng ZaloPay phải RuntimeError")
+        except RuntimeError as e:
+            ok("ZaloPay" in str(e) and "không có bảng" in str(e), f"{e}")
     finally:
-        pt.run_cli = saved
+        pt.run_cli, pt._series_installed = saved, saved_inst
     src = Path(rdg.__file__).read_text(encoding="utf-8")
     ok(src.count("_check_benchmark_table(report)") == 1
        and src.index("_check_period_returns(report)\n") < src.index("_check_benchmark_table(report)"),

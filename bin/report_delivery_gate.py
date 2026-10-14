@@ -258,7 +258,9 @@ def _check_period_returns(report: Path) -> None:
 # có cổ tức) + 2 cột chênh trong bảng 3.2 phải bằng đầu ra `nav_period_returns.py` (⩽ 0,005 điểm %);
 # cột có cổ tức `chưa có số` ⇒ CHẶN (Q9, user 2026-10-14); dòng chuỗi b `chưa có số` ⇒ cho qua. Logic +
 # render chung một module: `period_table_32.py`. Daily không có bảng này.
-_CADENCE_RE = re.compile(r"^(SpaceX|ZaloPay)_(weekly|monthly)_report_")
+# N-e vòng 2: báo cáo gộp cũ `SpaceX_ZaloPay_*` (deprecated nhưng vẫn có thể bị gửi bù) cũng qua cổng, mỗi
+# TK một bảng.
+_CADENCE_RE = re.compile(r"^(SpaceX_ZaloPay|SpaceX|ZaloPay)_(weekly|monthly)_report_")
 
 
 def _check_benchmark_table(report: Path) -> None:
@@ -273,9 +275,10 @@ def _check_benchmark_table(report: Path) -> None:
     def cli(account, d, sleeve):
         return pt.run_cli(account, d, sleeve, bin_dir=str(ROOT / "bin"))
     try:
-        for line in pt.check_report(report.name, report.read_text(encoding="utf-8"), m.group(1),
-                                    report_date, cli=cli):
-            print(f"report_delivery_gate: {line}")
+        for account in m.group(1).split("_"):
+            for line in pt.check_report(report.name, report.read_text(encoding="utf-8"), account,
+                                        report_date, cli=cli):
+                print(f"report_delivery_gate: {line}")
     except pt.TableBlock as exc:
         raise RuntimeError(str(exc)) from exc
 

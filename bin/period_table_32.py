@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -125,27 +126,41 @@ def parse_cell(cell: str):
     return v if math.isfinite(v) else None
 
 
-def find_table(text: str):
-    """(header_cells, [row_cells...]) của bảng NGAY dưới tiêu đề chứa 'Hiệu suất lũy kế', hoặc None."""
-    lines = text.splitlines()
+def norm(s: str) -> str:
+    """NFC + chính tả 'luỹ' → 'lũy' (hai cách bỏ dấu cùng một chữ; NFD/NFC khác byte cùng một chữ) — để
+    tiêu đề/nhãn dòng soạn tay không lọt cổng chỉ vì khác cách gõ (N-a vòng 2)."""
+    return unicodedata.normalize("NFC", s).replace("luỹ", "lũy").replace("Luỹ", "Lũy")
+
+
+def find_tables(text: str) -> list:
+    """[(header_cells, [row_cells...]), ...] — mỗi bảng NGAY dưới một tiêu đề chứa 'Hiệu suất lũy kế'
+    (so sau `norm`, không phân biệt hoa thường). Tiêu đề không có bảng ngay dưới ⇒ bỏ qua."""
+    lines = norm(text).splitlines()
+    out = []
     for i, ln in enumerate(lines):
-        if ln.lstrip().startswith("#") and "Hiệu suất lũy kế" in ln:
+        if ln.lstrip().startswith("#") and "hiệu suất lũy kế" in ln.lower():
             j = i + 1
             while j < len(lines) and not lines[j].strip().startswith("|"):
                 if lines[j].lstrip().startswith("#"):
-                    return None
+                    break
                 j += 1
             rows = []
             while j < len(lines) and lines[j].strip().startswith("|"):
                 rows.append([c.strip() for c in lines[j].strip().strip("|").split("|")])
                 j += 1
-            if len(rows) < 2:
-                return None
-            return rows[0], [r for r in rows[2:]]
-    return None
+            if len(rows) >= 2:
+                out.append((rows[0], rows[2:]))
+    return out
+
+
+def find_table(text: str):
+    """Bảng 'Hiệu suất lũy kế' đầu tiên (header_cells, [row_cells...]) hoặc None."""
+    t = find_tables(text)
+    return t[0] if t else None
 
 
 def _period_of(label: str):
+    label = norm(label)
     sleeve = SLEEVE_LABEL.split(" (")[0] in label
     for key, kw in PERIODS:
         if kw in label:
@@ -178,13 +193,29 @@ def _series_installed() -> bool:
 
 
 def check_report(name: str, text: str, account: str, report_date: str, cli=run_cli,
-                 series_installed=_series_installed) -> list:
+                 series_installed=None) -> list:
     """Trả list dòng PASS (để in); vi phạm ⇒ TableBlock (thông điệp trích đúng ô + số CLI — §29).
-    Chỉ gọi cho weekly/monthly. Không có bảng 3.2 ⇒ [] (cổng period-return cũ lo phần đó)."""
-    t = find_table(text)
-    if t is None:
-        return [f"benchmark-table SKIP ({name}): không có bảng 'Hiệu suất lũy kế'"]
-    header, rows = t
+    Chỉ gọi cho weekly/monthly. Bảng của `account` = bảng 'Hiệu suất lũy kế' có cột thứ 2 tên `account`
+    (báo cáo gộp SpaceX_ZaloPay_* có một bảng mỗi TK). Không có bảng: chuỗi có cổ tức đã cài ⇒ CHẶN
+    (N-a vòng 2 — weekly/monthly bắt buộc có bảng 3.2), chưa cài ⇒ SKIP."""
+    series_installed = series_installed or _series_installed      # tra lúc gọi (selfcheck thay được)
+    text = norm(text)
+    tables = find_tables(text)
+    mine = [t for t in tables if len(t[0]) > 1 and t[0][1] == account]
+    if not mine and len(tables) == 1 and "SpaceX_ZaloPay" not in name:
+        mine = tables                         # báo cáo 1 TK: cột TK sai tên bị chặn ở dưới
+    if not mine:
+        if series_installed():
+            raise TableBlock(f"benchmark-table BLOCK ({name}): không có bảng 'Hiệu suất lũy kế' của {account} "
+                             f"(thấy {len(tables)} bảng, cột 2 = {[t[0][1] for t in tables if len(t[0]) > 1]}) "
+                             f"— weekly/monthly bắt buộc có bảng 3.2 khi chuỗi VN-Index có cổ tức đã có; render "
+                             f"bằng `period_table_32.py --account {account} --report-date {report_date}`")
+        return [f"benchmark-table SKIP ({name}): không có bảng 'Hiệu suất lũy kế' của {account} (chuỗi VN-Index "
+                f"có cổ tức chưa cài)"]
+    if len(mine) > 1:
+        raise TableBlock(f"benchmark-table BLOCK ({name}): {len(mine)} bảng 'Hiệu suất lũy kế' cho {account} — "
+                         f"không biết đối chiếu bảng nào")
+    header, rows = mine[0]
     idx = {c: header.index(c) for c in (COL_PRICE, COL_TR, COL_XP, COL_XT) if c in header}
     if COL_TR not in idx:
         if series_installed():
@@ -198,6 +229,10 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
     if missing:
         raise TableBlock(f"benchmark-table BLOCK ({name}): có cột '{COL_TR}' nhưng thiếu {missing} "
                          f"(header {header})")
+    if len(header) < 2 or header[1] != account:
+        raise TableBlock(f"benchmark-table BLOCK ({name}): cột tỉ suất tài khoản phải là cột 2 tên "
+                         f"'{account}', header = {header}")
+    idx[account] = 1                           # N-a vòng 2: ô tỉ suất TK cũng đối chiếu CLI
     need_sleeve = any(_period_of(r[0])[0] for r in rows if r)
     out = {}
     rc, j, err = cli(account, report_date, False)
@@ -213,14 +248,14 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
                              f"--report-date {report_date} --sleeve bot rc={rc}. stderr: "
                              f"{(err or '').strip()[-400:] or '(rỗng)'}")
         out[True] = j
-    passes = []
+    passes, seen = [], set()
     for r in rows:
         if not r or len(r) <= max(idx.values()):
             continue
         sleeve, key = _period_of(r[0])
         cells = {c: (r[i], parse_cell(r[i])) for c, i in idx.items()}
         if key is None:
-            nums = [c for c, (_, v) in cells.items() if isinstance(v, float)]
+            nums = [c for c, (_, v) in cells.items() if isinstance(v, float) and c != account]
             if nums:
                 raise TableBlock(f"benchmark-table BLOCK ({name}): dòng {r[0]!r} có số ở cột {nums} nhưng "
                                  f"không thuộc kỳ nào CLI đưa ra (Tuần này / Từ đầu tháng / Từ khi bắt đầu "
@@ -241,7 +276,8 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
             raise TableBlock(f"benchmark-table BLOCK ({name}): CLI không có kỳ {key} / khối benchmark "
                              f"cho dòng {r[0]!r}")
         want = {COL_PRICE: bm.get("vnindex_price_pct"), COL_TR: bm.get("vnindex_tr_pct"),
-                COL_XP: bm.get("excess_vs_price_pp"), COL_XT: bm.get("excess_vs_tr_pp")}
+                COL_XP: bm.get("excess_vs_price_pp"), COL_XT: bm.get("excess_vs_tr_pp"),
+                account: p.get("return_pct")}
         for c, (raw, v) in cells.items():
             w = want[c]
             if w is None:
@@ -262,10 +298,15 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
                                  f"= {w:+.3f} — lệch {abs(v - w):.3f} > {CELL_TOL_PP} điểm %")
         if not sleeve:
             foot = bm.get("footnote")
-            if foot and foot not in text:
+            if foot and norm(foot) not in text:
                 raise TableBlock(f"benchmark-table BLOCK ({name}): thiếu chú thích cố định dưới bảng: "
                                  f"{foot!r} (cờ {bm.get('tr_kind')})")
         passes.append(f"{tag}: khớp CLI")
+        seen.add((sleeve, key))
+    lack = [k for k, _ in PERIODS if out[False].get(k) is not None and (False, k) not in seen]
+    if lack:
+        raise TableBlock(f"benchmark-table BLOCK ({name}): CLI có kỳ {lack} nhưng bảng 'Hiệu suất lũy kế' "
+                         f"của {account} thiếu dòng tương ứng (đã khớp: {sorted(k for _, k in seen)})")
     if not passes:
         raise TableBlock(f"benchmark-table BLOCK ({name}): có cột '{COL_TR}' nhưng không dòng nào đối "
                          f"chiếu được")
