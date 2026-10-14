@@ -389,3 +389,15 @@
 - [2026-10-14T02:04:37Z] Taylor/heartbeat — Taylor_20261014_020336: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261014_020336", "source": "watcher"}
 - [2026-10-14T02:04:46Z] Taylor/heartbeat — Taylor_20261014_020345: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261014_020345", "source": "watcher"}
 - [2026-10-14T02:05:08Z] Taylor/heartbeat — Taylor_20261014_020334: {"status": "in_progress", "note": "A: ra 14 dong nav_is_estimate + giai doan Trung vang tren dnse_raw (chi doc)"}
+
+## Consolidation 2026-10-14T02:07:01Z
+- [2026-10-14T02:05:15Z] Taylor/heartbeat — Taylor_20261014_020336: {"status": "in_progress", "note": "viec 2: da trich vi the ZaloPay theo ngay; dang xac dinh pham vi ngoai-bot (DGC/TV1/DRI) + nguon gia"}
+- [2026-10-14T02:05:35Z] Taylor/heartbeat — Taylor_20261014_020345: {"status": "in_progress", "note": "chan doan xong (stale = so dung yen, lech ve ma thanh khoan); dang so REDUCE/DEFER vs KEEP"}
+- [2026-10-14T02:05:35Z] Taylor/heartbeat — Taylor_20261014_020334: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261014_020334", "source": "watcher"}
+- [2026-10-14T02:05:37Z] Taylor/heartbeat — Taylor_20261014_020336: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261014_020336", "source": "watcher"}
+- [2026-10-14T02:05:46Z] Taylor/heartbeat — Taylor_20261014_020345: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261014_020345", "source": "watcher"}
+- [2026-10-14T02:06:35Z] Taylor/heartbeat — Taylor_20261014_020334: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261014_020334", "source": "watcher"}
+- [2026-10-14T02:06:37Z] Taylor/heartbeat — Taylor_20261014_020336: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261014_020336", "source": "watcher"}
+- [2026-10-14T02:06:46Z] Taylor/heartbeat — Taylor_20261014_020345: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261014_020345", "source": "watcher"}
+- [2026-10-14T02:06:56Z] Taylor/heartbeat — Taylor_20261014_020336: {"status": "in_progress", "note": "viec 1: tim nguon TRI chinh thuc + kiem cot san/von hoa noi bo"}
+- [2026-10-14T02:06:56Z] Taylor/heartbeat — Taylor_20261014_020345: {"status": "in_progress", "note": "so sanh xong; dang kiem chung gate 2 (journal vs baseline) + selfcheck + tim bus question"}
