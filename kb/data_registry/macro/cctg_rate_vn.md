@@ -45,6 +45,20 @@ trung bình, không bao giờ để CCTG lấn Big-4 khi CCTG đang stale/thiế
 `current_cctg_rate()` trả `None` cho mọi asof ⇒ mọi backtest pin trước ngày này **byte-identical**
 với thế giới chưa có module này.
 
+**ĐỔI HƯỚNG FALLBACK (LIVE từ 2026-10-14, merge WC `b1b8db83`, job `Taylor_20261013_163831`, user duyệt 2026-10-13 23:37 + 2026-10-14 07:55 ICT, arch-review NEEDS_CHANGES đã vá):** trên đường 5 consumer (`effective_deposit_rate()` qua `consumer_deposit_rate_detail()`),
+CCTG cũ quá 45 ngày HOẶC đọc lỗi **không còn hạ số về Big-4**. Số được GIỮ ở giá trị CCTG gần nhất
+đã biết (`rate = max(Big-4, CCTG đã biết)`), kèm WARNING và `rate_source` =
+`cctg_held(<ngày>; cctg_stale: Nd)` / `cctg_held(<ngày>; cctg_unavailable: <lỗi>)`. Lý do: hướng cũ
+làm GIẢM r của DCF và sàn yield đúng lúc nguồn gãy, trong pha lãi suất tăng. Việc giữ không có hạn;
+lối ra duy nhất là một dòng CCTG mới được xác nhận (có thể thấp hơn). Độ tươi nay chỉ quyết định
+NHÃN, không quyết định SỐ. Khi lỗi, giá trị "đã biết" lấy từ `cctg_rate_vn.last_known_good_cctg()`
+(đọc khoan dung từng dòng, ngày phải đúng ISO YYYY-MM-DD, bỏ dòng hỏng / có múi giờ / ngày kiểu ngày-trước; file không mở được hoặc chính lookup lỗi ⇒ anchor đông cứng 7,5% ngày 30/09; chỉ khi chưa biết gì mới Big-4).
+KHÔNG đổi: `macro_killswitch_a_status()` (vẫn ép ARMED khi CCTG stale/lỗi), knob
+`DEPOSIT_RATE_CCTG_OVERLAY=0`, Value Radar, `merge_deposit`/cổng CAPIT PIT. Lịch sử byte-identical
+cho mọi asof ≤ 2026-10-13. Mốc stale thật với CSV sống ngày 13/10: **2026-11-27** (anchor 12/10 +
+46 ngày), không phải 15/11. Selfcheck: `deposit_fallback_direction_selfcheck.py`. Câu "CHỈ KHI CCTG
+fresh" ở đầu mục và mô tả "rơi về Big-4" ở bẫy #7 dưới đây là hành vi TRƯỚC thay đổi này.
+
 ⚠️ **"Fresh" là PIT-CAUSAL theo `asof` được truyền vào, không phải theo giờ hệ thống** — và điều
 này chỉ ĐÚNG ĐỒNG LOẠT cho cả 5 consumer kể từ round-2 fix (2026-10-01, job
 Taylor_20261001_064225, R1 BLOCKING). Trước fix: `effective_deposit_rate()`'s `check_freshness`
