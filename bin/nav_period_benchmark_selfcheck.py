@@ -54,7 +54,9 @@ def fixture():
     for i, r in enumerate(series):            # tr_gross ≠ tr_net ⇒ phân biệt được cờ Q2
         r["tr_gross"] = r["vnindex"] * (1.0002 ** i)
         r["tr_net"] = r["vnindex"] * (1.0001 ** i)
-    inc = {"inception_date": D[40].isoformat(), "starting_capital": 1_000_000_000}
+    # index_anchor_date = phiên TRƯỚC inception_date (ca SpaceX: NAV gốc = số dư sáng ⇒ mốc = đóng cửa hôm trước)
+    inc = {"inception_date": D[40].isoformat(), "starting_capital": 1_000_000_000,
+           "index_anchor_date": D[39].isoformat()}
     rows = [NavRow(D[38], 990_000_000.0)]
     nav = 1_000_000_000.0
     for i in range(41, 67):
@@ -85,17 +87,27 @@ def t_byte_identity_and_anchor(D, series, inc, rows, sat):
             if p is None:
                 continue
             bm = p["benchmark"]
-            # Mốc chỉ số = ngày dòng sổ làm mốc kỳ — không do người soạn chọn
-            ok(bm["anchor_date"] == p["from_date"] and bm["end_date"] == p["to_date"],
-               f"{rd}/{k}: anchor {bm['anchor_date']}→{bm['end_date']} ≠ kỳ {p['from_date']}→{p['to_date']}")
+            # Mốc chỉ số = ngày dòng sổ làm mốc kỳ — không do người soạn chọn; kỳ neo ở dòng 0 (vốn gốc)
+            # dùng index_anchor_date của tài khoản (B1 vòng 2)
+            row0 = p["from_date"] == D[40].isoformat()
+            want = (inc["index_anchor_date"], "index_anchor_date") if row0 else (p["from_date"], "ledger_row")
+            ok((bm["anchor_date"], bm["anchor_source"]) == want and bm["end_date"] == p["to_date"],
+               f"{rd}/{k}: anchor {bm['anchor_date']}/{bm.get('anchor_source')}→{bm['end_date']} ≠ {want}"
+               f"→{p['to_date']}")
     r = npr.compute_period_returns("SpaceX", D[66], rows, inc, [], benchmark=bm_fn(series))
     bm = r["inception"]["benchmark"]
-    ok(bm["anchor_date"] == D[40].isoformat() and bm["index_anchor_date"] == D[40].isoformat(),
-       f"Q1: mốc inception phải = inception_date {D[40]} (không phải dòng sổ {D[38]} trước đó): {bm}")
+    ok(bm["anchor_date"] == D[39].isoformat() and bm["index_anchor_date"] == D[39].isoformat(),
+       f"B1: mốc inception phải = index_anchor_date {D[39]} (không phải dòng sổ 0 {D[40]}, không phải "
+       f"dòng sổ {D[38]} trước đó): {bm}")
     ok(bm["status"] == "ok", f"chuỗi sạch phải ok: {bm}")
-    ok(bm["vnindex_price_pct"] == pct(series, D[40], D[66], "vnindex"), f"giá: {bm}")
-    ok(bm["vnindex_tr_gross_pct"] == pct(series, D[40], D[66], "tr_gross"), f"tr_gross: {bm}")
-    ok(bm["vnindex_tr_net_pct"] == pct(series, D[40], D[66], "tr_net"), f"tr_net: {bm}")
+    ok(bm["vnindex_price_pct"] == pct(series, D[39], D[66], "vnindex"), f"giá: {bm}")
+    ok(bm["vnindex_tr_gross_pct"] == pct(series, D[39], D[66], "tr_gross"), f"tr_gross: {bm}")
+    ok(bm["vnindex_tr_net_pct"] == pct(series, D[39], D[66], "tr_net"), f"tr_net: {bm}")
+    # ca ZaloPay: index_anchor_date = inception_date ⇒ mốc = chính dòng sổ 0
+    bz = npr.compute_period_returns("ZaloPay", D[66], rows, dict(inc, index_anchor_date=D[40].isoformat()),
+                                    [], benchmark=bm_fn(series))["inception"]["benchmark"]
+    ok(bz["index_anchor_date"] == D[40].isoformat()
+       and bz["vnindex_price_pct"] == pct(series, D[40], D[66], "vnindex"), f"mốc = inception_date: {bz}")
     ok(bm["vnindex_tr_gross_pct"] != bm["vnindex_tr_net_pct"], "fixture phải tách gross/net")
     # Q2 mặc định (user 2026-10-14): cột có cổ tức = tr_net, chú thích nói rõ sau thuế 5%
     ok(bm["tr_kind"] == "tr_net" and bm["vnindex_tr_pct"] == bm["vnindex_tr_net_pct"], f"Q2 mặc định: {bm}")
@@ -176,7 +188,8 @@ def t_sleeve(D, series, inc, rows):
         ok(b["series"] == "bot" and b["outside_scope"] == [] and b["outside_at_inception_vnd"] == 0, f"field b: {b}")
         bb = {k: v for k, v in b.items() if k not in ("series", "outside_scope", "outside_at_inception_vnd")}
         ok(dump(bb) == dump(a), "không có phần ngoài bot ⇒ (b) ≡ (a) từng byte")
-        ok(b["inception"]["benchmark"]["anchor_date"] == D[40].isoformat(), "mốc chỉ số chuỗi b = inception_date")
+        ok(b["inception"]["benchmark"]["anchor_date"] == inc["index_anchor_date"],
+           "mốc chỉ số chuỗi b = index_anchor_date của tài khoản")
         # chưa có dòng nào ⇒ SleeveUnavailable (không phải kết quả rỗng)
         empty = dict(same, rows=[])
         nav_sleeve.sleeve_inputs_for_report = lambda *a, **k: empty
@@ -220,6 +233,39 @@ def t_cli(D, series, inc, rows):
     finally:
         (npr.load_nav_history, npr.load_inception, npr.load_flows, npr._benchmark_fn,
          nav_sleeve.sleeve_inputs_for_report, sys.argv) = saved
+
+
+def t_index_anchor_field(D, series, inc, rows):
+    """B1: thiếu/hỏng `index_anchor_date` ⇒ ValueError (CLI rc=1 + lý do), KHÔNG rơi về dòng sổ 0.
+    Không truyền benchmark ⇒ không đòi trường (đầu ra cũ giữ nguyên byte)."""
+    bad = {k: v for k, v in inc.items() if k != "index_anchor_date"}
+    ok(dump(npr.compute_period_returns("SpaceX", D[66], rows, bad, []))
+       == dump(npr.compute_period_returns("SpaceX", D[66], rows, inc, [])),
+       "không benchmark ⇒ không cần index_anchor_date")
+    for name, v, must in (("thiếu", None, "thiếu 'index_anchor_date'"),
+                          ("sau inception", D[41].isoformat(), "phải trong"),
+                          ("quá sớm", (D[40] - dt.timedelta(days=15)).isoformat(), "phải trong"),
+                          ("không phải ngày", "30/06/2026", "không phải YYYY-MM-DD")):
+        cfg = dict(bad) if v is None else dict(bad, index_anchor_date=v)
+        try:
+            npr.compute_period_returns("SpaceX", D[66], rows, cfg, [], benchmark=bm_fn(series))
+            ok(False, f"index_anchor_date {name} phải ValueError")
+        except ValueError as e:
+            ok(must in str(e), f"{name}: {e}")
+    saved = (npr.load_nav_history, npr.load_inception, npr.load_flows, npr._benchmark_fn, sys.argv)
+    try:
+        npr.load_nav_history = lambda acc: rows
+        npr.load_inception = lambda acc: bad
+        npr.load_flows = lambda acc, require_file=False: []
+        npr._benchmark_fn = lambda: bm_fn(series)
+        out, err = io.StringIO(), io.StringIO()
+        sys.argv = ["nav_period_returns.py", "--account", "SpaceX", "--report-date", D[66].isoformat()]
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            rc = npr.main()
+        ok(rc == 1 and out.getvalue() == "" and "index_anchor_date" in err.getvalue(),
+           f"CLI thiếu index_anchor_date: rc={rc} stdout={out.getvalue()[:80]!r} stderr={err.getvalue()!r}")
+    finally:
+        (npr.load_nav_history, npr.load_inception, npr.load_flows, npr._benchmark_fn, sys.argv) = saved
 
 
 def t_cli_sleeve_files(D, series, inc, rows):
@@ -290,6 +336,7 @@ def main() -> int:
     t_sleeve(D, series, inc, rows)
     t_cli(D, series, inc, rows)
     t_cli_sleeve_files(D, series, inc, rows)
+    t_index_anchor_field(D, series, inc, rows)
     print(f"OK — {N_OK} assertion PASS (nav_period_benchmark_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
 

@@ -233,11 +233,38 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
         # khong duoc doan `[]` (mot lan NAP thanh LAI — sai theo huong co loi cho minh).
         flows = load_flows(account, require_file=True)
     ledger, info = build_ledger(rows, flows, inception_from, inception_nav0)
-    return _assemble(account, report_date, ledger, info, inception_from, benchmark)
+    return _assemble(account, report_date, ledger, info, inception_from, benchmark, inception)
+
+
+# Mốc VN-Index kỳ "từ khi bắt đầu" được sớm hơn inception_date tối đa ngần này ngày lịch (chặn gõ nhầm
+# năm/tháng; khoảng nghỉ dài nhất giữa hai phiên VNINDEX 2014→2026 đo được = 11 ngày, Tết 2015).
+INDEX_ANCHOR_MAX_LEAD_DAYS = 14
+
+
+def index_anchor_date(account: str, inception: dict) -> str:
+    """Mốc VN-Index của kỳ "từ khi bắt đầu" — khai THEO TÀI KHOẢN (`index_anchor_date` trong
+    `account_inception.json`), không suy từ dòng sổ 0: NAV gốc SpaceX là số dư SÁNG 01/07 (bot khớp
+    lệnh ngay 01/07) ⇒ mốc = đóng cửa 30/06; ZaloPay NAV gốc là số dư 21:35 ngày 06/07 ⇒ mốc = 06/07
+    (user duyệt 2026-10-14 16:11 ICT). Thiếu/hỏng ⇒ ValueError (CLI rc=1), KHÔNG rơi về dòng sổ 0."""
+    v = inception.get("index_anchor_date")
+    if not v:
+        raise ValueError(f"account_inception.json[{account}] thiếu 'index_anchor_date' — mốc VN-Index kỳ "
+                         f"'từ khi bắt đầu' phải khai theo tài khoản (giá đóng cửa của phiên MÀ NAV GỐC "
+                         f"phản ánh), không suy từ dòng sổ 0 {inception.get('inception_date')}")
+    try:
+        a = _parse_date(str(v))
+    except ValueError:
+        raise ValueError(f"account_inception.json[{account}].index_anchor_date = {v!r} không phải "
+                         f"YYYY-MM-DD") from None
+    inc = _parse_date(inception["inception_date"])
+    if not (0 <= (inc - a).days <= INDEX_ANCHOR_MAX_LEAD_DAYS):
+        raise ValueError(f"account_inception.json[{account}].index_anchor_date = {a} phải trong "
+                         f"[inception_date − {INDEX_ANCHOR_MAX_LEAD_DAYS} ngày, inception_date {inc}]")
+    return a.isoformat()
 
 
 def _assemble(account: str, report_date: datetime.date, ledger: list, info: dict,
-              inception_from: datetime.date, benchmark=None) -> dict:
+              inception_from: datetime.date, benchmark=None, inception: dict = None) -> dict:
     i1 = max(i for i, row in enumerate(ledger) if row["date"] <= report_date)
 
     monday = report_date - datetime.timedelta(days=report_date.weekday())
@@ -261,12 +288,16 @@ def _assemble(account: str, report_date: datetime.date, ledger: list, info: dict
                           for f in info["dropped"]],
     }
     if benchmark is not None:
+        inc_anchor = index_anchor_date(account, inception or {})
         for key in ("inception", "wtd", "mtd", "day"):
             p = out[key]
             if p is not None:
-                # Mốc chỉ số = NGÀY CỦA DÒNG SỔ làm mốc kỳ (dòng 0 = inception_date) — không do người
-                # soạn chọn (đóng lỗi ZaloPay neo 03/07 thay vì 06/07, quỹ bước 4).
-                bm = benchmark(p["from_date"], p["to_date"])
+                # Mốc chỉ số = NGÀY CỦA DÒNG SỔ làm mốc kỳ — không do người soạn chọn (đóng lỗi ZaloPay
+                # neo 03/07 thay vì 06/07). Riêng kỳ dùng dòng 0 (mốc vốn gốc): `index_anchor_date` của
+                # tài khoản (B1 vòng 2 — SpaceX 30/06, không phải đóng cửa 01/07).
+                at_row0 = p["from_date"] == ledger[0]["date"].isoformat()
+                bm = benchmark(inc_anchor if at_row0 else p["from_date"], p["to_date"])
+                bm["anchor_source"] = "index_anchor_date" if at_row0 else "ledger_row"
                 for k, col in (("excess_vs_price_pp", "vnindex_price_pct"),
                                ("excess_vs_tr_pp", "vnindex_tr_pct")):
                     bm[k] = (round(p["return_pct"] - bm[col], 3) if bm.get(col) is not None else None)
@@ -288,7 +319,7 @@ def compute_sleeve_period_returns(account: str, report_date: datetime.date, rows
     if not sb["rows"]:
         raise nav_sleeve.SleeveUnavailable(f"chuỗi b chưa có dòng nào sau mốc {sb['inception_from']}")
     ledger, info = build_ledger(sb["rows"], sb["flows"], sb["inception_from"], sb["nav0"])
-    out = _assemble(account, report_date, ledger, info, sb["inception_from"], benchmark)
+    out = _assemble(account, report_date, ledger, info, sb["inception_from"], benchmark, inception)
     out["series"] = "bot"
     out["outside_scope"] = sb["outside_scope"]
     out["outside_at_inception_vnd"] = sb["outside0_vnd"]

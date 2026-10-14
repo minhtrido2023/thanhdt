@@ -78,7 +78,8 @@ def main() -> int:
     a = json.loads(json.dumps(a))
     # chuỗi b giả: NAV b = 60% NAV a (ngoài bot 40%) — chỉ cần đúng cấu trúc đầu ra --sleeve bot
     rows_b = [type(r)(r[0], r[1] * 0.6) for r in rows if D[40] < r[0] <= rd]
-    b = npr._assemble("ZaloPay", rd, *npr.build_ledger(rows_b, [], D[40], 600_000_000.0), D[40], bm_fn(series))
+    b = npr._assemble("ZaloPay", rd, *npr.build_ledger(rows_b, [], D[40], 600_000_000.0), D[40], bm_fn(series),
+                      inc)
     b.update({"series": "bot", "outside_scope": [{"ticker": "DGC", "from": D[40].isoformat(), "to": None}],
               "outside_at_inception_vnd": 400_000_000})
     b = json.loads(json.dumps(b))
@@ -94,6 +95,10 @@ def main() -> int:
     t = pt.render(a, b)
     ok(pt.COL_TR in t and "sau thuế TNCN 5%" in t and "DGC" in t and "40,00% NAV" in t, f"render:\n{t}")
     ok(t.count(pt.SLEEVE_LABEL) == 4, "3 dòng b + 1 chú thích")      # 3 dòng + chú thích
+    # B1 vòng 2: mốc VN-Index theo tài khoản ≠ dòng sổ 0 ⇒ chú thích nêu đúng ngày mốc đã dùng
+    ia = a["inception"]["benchmark"]["index_anchor_date"]
+    ok(ia == inc["index_anchor_date"] and f"giá đóng cửa {ia[8:10]}/{ia[5:7]}/{ia[:4]}" in t,
+       f"chú thích mốc VN-Index {ia}:\n{t}")
     cli = mkcli(a, b)
     ok("(b) inception: khớp CLI" in passes(doc(t), cli), "render → PASS")
     bm = a["inception"]["benchmark"]

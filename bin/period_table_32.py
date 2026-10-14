@@ -96,6 +96,12 @@ def render(main: dict, sleeve: dict = None) -> str:
     foot = next((main[k]["benchmark"]["footnote"] for k in ("inception", "mtd", "wtd")
                  if main.get(k) and main[k].get("benchmark", {}).get("footnote")), None)
     notes = [foot] if foot else []
+    ibm = (main.get("inception") or {}).get("benchmark") or {}
+    if ibm.get("index_anchor_date") and ibm["index_anchor_date"] != main["inception"]["from_date"]:
+        # B1 vòng 2: mốc VN-Index theo tài khoản (SpaceX 30/06 — NAV gốc là số dư sáng 01/07)
+        notes.append(f"Mốc VN-Index của dòng \"Từ khi bắt đầu hoạt động\": giá đóng cửa "
+                     f"{ibm['index_anchor_date'][8:10]}/{ibm['index_anchor_date'][5:7]}/"
+                     f"{ibm['index_anchor_date'][:4]} — phiên mà vốn gốc của tài khoản phản ánh.")
     if sleeve is not None and sleeve.get("status") != "unavailable" and sleeve.get("inception"):
         nav_a, nav_b = main["inception"]["nav1"], sleeve["inception"]["nav1"]
         tick = ", ".join(e["ticker"] for e in sleeve.get("outside_scope", [])) or "—"
