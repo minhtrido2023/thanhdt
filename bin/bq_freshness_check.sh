@@ -732,6 +732,19 @@ PIPELINE_START_EPOCH="$(date +%s)"
 
 _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
 
+# [pipeline-1a] gap-fill universe_pit/_quality cho các phiên THIẾU trước hôm nay (WARN-only, 2026-10-15).
+# Sự cố 2026-10-15: phiên 14/10 không được build (chuỗi hôm đó bị chặn) ⇒ golive_recommend_v23
+# assert_universe_covers dừng ⇒ DollarBill không lập plan T+1. Cổng đó ĐÚNG và giữ nguyên; bước
+# này chỉ lấp chỗ thiếu bằng chính builder (cùng B8, append-only). Lỗi/quá MAX_GAPS ⇒ chỉ cảnh báo,
+# vì cổng thật nằm ở golive (chặn nếu panel vẫn thiếu phiên). Chạy TRƯỚC 1b để thứ tự phiên tăng dần.
+echo; echo "--- [pipeline-1a] universe gap-fill (< $TODAY) ---"
+$PY mike/bin/universe_gap_fill.py --today "$TODAY"
+_gap_rc=$?
+if [ "$_gap_rc" -ne 0 ]; then
+  echo "  [WARN exit $_gap_rc] [pipeline-1a] universe gap-fill — tiếp tục; golive sẽ chặn nếu panel còn thiếu phiên"
+  "$ROOT/bin/notify_thread.sh" "🟡 UNIVERSE GAP-FILL WARN ($TODAY $NOW_ICT): lấp phiên thiếu của universe_pit exit $_gap_rc (1=build lỗi, 2=thiếu quá nhiều phiên, không tự lấp) — xem mike/logs/bq_freshness.log. Pipeline vẫn chạy; golive_recommend_v23 sẽ dừng nếu panel còn thiếu phiên." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+fi
+
 # [pipeline-1b] build universe_pit — BLOCK on real fail.
 # build_universe_pit.py exit 1 cả khi: (a) fail thật, (b) B8_DUPLICATE (data đã có = idempotent).
 # Phân biệt bằng BQ count: n>0 sau exit≠0 → idempotent OK; n=0 → fail thật → BLOCK.
