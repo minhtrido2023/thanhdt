@@ -5,6 +5,8 @@ Nguồn (xác định, không LLM — rẻ và tái lập được):
   1. Bus question chưa đóng (`bus_question_audit.py --json`) — lấy summary/options/recommendation
      từ event question gốc. `selfcheck-red` gộp thành 1 dòng đếm (nhiễu, không phải quyết định).
   2. Mục `## Chờ user` trong kb/memory/Mike.md (working memory của Mike).
+  4. Toàn cảnh E–I (thị trường · hiệu suất TK · 8L mùa BCTC · mốc đến hạn/paper · research gợi ý) —
+     `bin/daily_dashboard.py`, user yêu cầu 2026-10-15.
   3. Funnel 8L discretionary (`discretionary_candidate_funnel.py --print-block`) — ĐỌC file kết quả
      cron 19:35 tối trước, KHÔNG chạy lại funnel; kết quả cũ ⇒ khối tự in cảnh báo.
 
@@ -121,7 +123,21 @@ def build(now):
     lines.append(f"**C. Nhiễu tự động**: {len(noise)} câu `selfcheck-red` đang mở (Wags xử lý, không cần anh quyết).")
     lines.append("")
     lines.append(funnel_section())
+    lines.append("")
+    lines.append("━━━━━━━━ **TOÀN CẢNH HỆ THỐNG** ━━━━━━━━")
+    lines.append("")
+    lines.append(dashboard_section(now))
     return "\n".join(lines)
+
+
+def dashboard_section(now):
+    """Khối E–I (bin/daily_dashboard.py). Lỗi ⇒ in nguyên lỗi thật (§29), bản tin việc-cần-quyết vẫn đi."""
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "bin"))
+        from daily_dashboard import build_sections
+        return build_sections(now)
+    except Exception as e:
+        return f"**Toàn cảnh**: ⚠️ daily_dashboard lỗi: {type(e).__name__}: {e}"
 
 
 def funnel_section():
