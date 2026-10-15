@@ -13,7 +13,8 @@ Cách làm (không đụng cổng, không đụng builder):
   - lấp tăng dần theo ngày bằng chính `build_universe_pit.py --date D` rồi `build_universe_pit_quality.py
     --date D` (cùng cổng B8; point-in-time vì builder chỉ nhìn dữ liệu <= D; append-only).
 
-Exit: 0 = không thiếu / lấp xong hết · 1 = có phiên lấp lỗi · 2 = quá MAX_GAPS (không làm gì).
+Exit: 0 = không thiếu / lấp xong hết · 1 = có phiên lấp lỗi · 3 = không đọc được BQ (_load) ·
+4 = quá MAX_GAPS (không làm gì). (2 dành cho argparse; 124 do `timeout` của caller.)
 Caller (`bq_freshness_check.sh`) coi mọi exit ≠ 0 là WARN, KHÔNG chặn: cổng thật vẫn là
 `assert_universe_covers` trong golive.
 
@@ -31,7 +32,7 @@ sys.path.insert(0, HERE)
 
 LOOKBACK_DAYS = 30      # cửa sổ lịch tìm phiên thiếu
 MAX_GAPS = 5            # quá số này ⇒ không tự lấp
-B8_RAW_DEPTH = 0.90     # trùng build_universe_pit.B8_RAW_DEPTH (stub = dưới ngưỡng này so trung vị)
+B8_RAW_DEPTH = 0.90     # PHẢI bằng build_universe_pit.B8_RAW_DEPTH — selfcheck chốt không trôi (stub = dưới ngưỡng này)
 
 
 def find_gap_dates(src_counts, pit_days, today, lookback_days=LOOKBACK_DAYS,
@@ -84,7 +85,11 @@ def main():
     args = ap.parse_args()
     today = dt.date.fromisoformat(args.today)
 
-    src, pit = _load(today)
+    try:
+        src, pit = _load(today)
+    except Exception as e:  # noqa: BLE001 — lỗi BQ/auth/mạng: nói thật nguyên nhân, mã riêng
+        print(f"  [gap-fill] ✗ không đọc được BQ: {type(e).__name__}: {e}", file=sys.stderr)
+        return 3
     gaps, stubs = find_gap_dates(src, pit, today)
     for d in stubs:
         print(f"  [gap-fill] bỏ qua {d}: dòng thô {src[d]} quá mỏng (stub) — builder sẽ REFUSE")
@@ -95,7 +100,7 @@ def main():
     if len(gaps) > MAX_GAPS:
         print(f"  [gap-fill] ✗ thiếu {len(gaps)} > {MAX_GAPS} phiên — KHÔNG tự lấp, cần người xem "
               f"(build_universe_pit.py --date ... từng ngày)", file=sys.stderr)
-        return 2
+        return 4
     if args.dry_run:
         print("  [gap-fill] dry-run — không ghi")
         return 0

@@ -738,11 +738,14 @@ _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publ
 # này chỉ lấp chỗ thiếu bằng chính builder (cùng B8, append-only). Lỗi/quá MAX_GAPS ⇒ chỉ cảnh báo,
 # vì cổng thật nằm ở golive (chặn nếu panel vẫn thiếu phiên). Chạy TRƯỚC 1b để thứ tự phiên tăng dần.
 echo; echo "--- [pipeline-1a] universe gap-fill (< $TODAY) ---"
-$PY mike/bin/universe_gap_fill.py --today "$TODAY"
+_gap_out="$(timeout "${UNIVERSE_GAP_FILL_TIMEOUT_S:-900}" $PY mike/bin/universe_gap_fill.py --today "$TODAY" 2>&1)"
 _gap_rc=$?
+echo "$_gap_out"
 if [ "$_gap_rc" -ne 0 ]; then
+  _gap_why="$(echo "$_gap_out" | grep -E '✗|Traceback|Error' | tail -2 | tr '\n' ' ')"
+  [ "$_gap_rc" -eq 124 ] && _gap_why="timeout ${UNIVERSE_GAP_FILL_TIMEOUT_S:-900}s (bị kill; an toàn vì job_id tiền định)"
   echo "  [WARN exit $_gap_rc] [pipeline-1a] universe gap-fill — tiếp tục; golive sẽ chặn nếu panel còn thiếu phiên"
-  "$ROOT/bin/notify_thread.sh" "🟡 UNIVERSE GAP-FILL WARN ($TODAY $NOW_ICT): lấp phiên thiếu của universe_pit exit $_gap_rc (1=build lỗi, 2=thiếu quá nhiều phiên, không tự lấp) — xem mike/logs/bq_freshness.log. Pipeline vẫn chạy; golive_recommend_v23 sẽ dừng nếu panel còn thiếu phiên." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "🟡 UNIVERSE GAP-FILL WARN ($TODAY $NOW_ICT): lấp phiên thiếu của universe_pit exit $_gap_rc — ${_gap_why:-không có dòng lỗi, xem mike/logs/bq_freshness.log}. Pipeline vẫn chạy; golive_recommend_v23 sẽ dừng nếu panel còn thiếu phiên." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
 fi
 
 # [pipeline-1b] build universe_pit — BLOCK on real fail.
