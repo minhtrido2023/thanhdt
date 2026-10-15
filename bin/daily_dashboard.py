@@ -6,9 +6,9 @@ không bỏ mục im lặng và không giết cả bản tin. Số nào không �
 
   E. Thị trường        — DT5G gate + Value Radar (dna_report), VN-Index từ cache BQ
   F. Hiệu suất TK      — nav_period_returns.py (số chính thức, chain-link theo giá đơn vị quỹ)
-  G. 8L mùa BCTC       — snapshot data/rating_8l_daily + ticker_financial (tiến độ công bố Q3)
+  G. 8L mùa BCTC       — snapshot data/rating_8l_daily + ticker_financial (tiến độ công bố BCTC quý gần nhất, suy từ ngày)
   H. Mốc đến hạn/paper — kb/paper_programs_registry.json + kb/dashboard_watchlist.json
-  I. Research gợi ý    — kb/dashboard_watchlist.json research_backlog + mã funnel vừa công bố Q3
+  I. Research gợi ý    — kb/dashboard_watchlist.json research_backlog + mã funnel vừa công bố BCTC
 
 Usage: daily_dashboard.py            # in cả 5 khối (không đăng)
 """
@@ -27,6 +27,7 @@ WC = "/home/trido/thanhdt/WorkingClaude"
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 ACCOUNTS = ("SpaceX", "ZaloPay")
 UPCOMING_DAYS = 21
+RECENT_DAYS = 7
 CLOSED_RE = re.compile(r"^(closed|graduated|review-done)", re.I)
 
 
@@ -47,24 +48,40 @@ def _vnd_m(v):
 
 
 def _wc_python(code, timeout=150):
-    """Chạy `code` dưới môi trường WC (wc_env.sh: BQ creds + đúng interpreter)."""
-    cmd = f"cd {WC} && source wc_env.sh >/dev/null 2>&1 && python3 -W ignore -c \"$CODE\""
+    """Chạy `code` dưới môi trường WC (wc_env.sh: BQ creds, TZ, PATH gcloud). Trả (stdout, stderr).
+    Lưu ý: `python3` ở đây là interpreter hệ thống (pandas 2.x), KHÔNG phải $DNA_PYEXE — chỉ dùng cho
+    đọc parquet/dna_report, không dùng cho phép tính cần pandas 3. stderr trả về cả khi rc=0 vì
+    dna_report nuốt lỗi (ghi stderr, trả None) — caller phải hiển thị khi thiếu dữ liệu."""
+    cmd = (f"cd {WC} && source wc_env.sh >/dev/null 2>&1 || {{ echo 'source wc_env.sh thất bại' >&2; exit 97; }}; "
+           "python3 -W ignore -c \"$CODE\"")
     r = subprocess.run(["bash", "-c", cmd], capture_output=True, text=True, timeout=timeout,
                        env={**os.environ, "CODE": code})
     if r.returncode != 0:
         raise RuntimeError((r.stderr.strip() or "stderr rỗng")[-300:])
-    return r.stdout.strip()
+    return r.stdout.strip(), r.stderr.strip()
 
 
 # ------------------------------------------------------------------ E. thị trường
+_DNA_LINES = (("build_dt_gate_line", True), ("build_value_radar_line", True), ("build_neutral_base_line", False))
+
+
 def market_block():
     out = ["**E. Thị trường**"]
-    code = ("from dna_report import build_dt_gate_line, build_value_radar_line, build_neutral_base_line\n"
-            "for f in (build_dt_gate_line, build_value_radar_line, build_neutral_base_line):\n"
-            "    print(f(html=False))")
+    code = ("import dna_report as d\n"
+            + "".join(f"v=d.{n}(html=False)\nprint('##{n}')\nprint('' if v is None else v)\n" for n, _ in _DNA_LINES))
     try:
-        lines = [ln for ln in _wc_python(code).splitlines() if ln.strip() and not ln.lstrip().startswith("↳ ⓘ")]
-        out += [f"{ln.strip()}" for ln in lines]
+        stdout, stderr = _wc_python(code)
+        got = {}
+        for chunk in stdout.split("##")[1:]:
+            name, _, body = chunk.partition("\n")
+            got[name.strip()] = [ln.strip() for ln in body.splitlines()
+                                 if ln.strip() and not ln.lstrip().startswith("↳ ⓘ")]
+        for name, required in _DNA_LINES:
+            if got.get(name):
+                out += got[name]
+            elif required:      # None ⇒ dna_report đã nuốt lỗi vào stderr — nói thẳng, không bỏ im lặng
+                out.append(f"⚠️ {name}: không có dòng — stderr: {(stderr or 'rỗng')[-200:]}")
+            # build_neutral_base_line trả None theo hợp đồng khi state không NEUTRAL ⇒ bỏ dòng, không phải lỗi
     except Exception as e:
         out.append(f"⚠️ dna_report lỗi: {e}")
     try:
@@ -75,25 +92,31 @@ def market_block():
 
 
 def _vnindex_line():
+    """Đọc cache `ticker/<năm>.parquet` (cùng nguồn preflight; ticker_1m.parquet trễ hơn 1 phiên)."""
     import pyarrow.dataset as ds
-    d = ds.dataset(os.path.join(WC, "data/bq_cache/ticker_1m.parquet"))
-    t = d.to_table(columns=["time", "Close", "Trading_Value", "VNINDEX_PE"],
-                   filter=ds.field("ticker") == "VNINDEX").to_pandas().sort_values("time").drop_duplicates("time")
-    if len(t) < 6:
+    import pandas as pd
+    year = datetime.now(ICT).year
+    frames = []
+    for y in (year - 1, year):
+        path = os.path.join(WC, f"data/bq_cache/ticker/{y}.parquet")
+        if os.path.exists(path):
+            frames.append(ds.dataset(path).to_table(columns=["time", "Close", "Trading_Value"],
+                                                    filter=ds.field("ticker") == "VNINDEX").to_pandas())
+    t = pd.concat(frames).sort_values("time").drop_duplicates("time")
+    if len(t) < 21:
         return f"VN-Index: n/a — cache chỉ có {len(t)} phiên"
     c = t["Close"].tolist()
-    chg1, chg5 = c[-1] / c[-2] - 1, c[-1] / c[-6] - 1
-    tv = t["Trading_Value"]
-    tv_ratio = tv.iloc[-1] / tv.tail(20).mean()
+    tv_ratio = t["Trading_Value"].iloc[-1] / t["Trading_Value"].tail(20).mean()
     last = str(t["time"].iloc[-1])
-    line = (f"VN-Index {_n(c[-1], ',.2f')} ({last}): {_pct(chg1 * 100)} 1 phiên · {_pct(chg5 * 100)} 5 phiên · "
-            f"P/E {_n(t['VNINDEX_PE'].iloc[-1], '.2f')} · GTGD {_n(tv_ratio, '.2f')}× TB20 phiên")
+    line = (f"VN-Index {_n(c[-1], ',.2f')} ({last}): {_pct((c[-1] / c[-2] - 1) * 100)} 1 phiên · "
+            f"{_pct((c[-1] / c[-6] - 1) * 100)} 5 phiên · {_pct((c[-1] / c[-21] - 1) * 100)} 20 phiên · "
+            f"GTGD {_n(tv_ratio, '.2f')}× TB20 phiên")
     try:
         nav_last = _last_nav_date("SpaceX")[0]
         if last < nav_last:
-            line += f"\n⚠️ cache BQ ticker_1m cũ hơn NAV ({last} < {nav_last}) — số VN-Index trễ, kiểm sync_bq_cache_daily"
-    except Exception:
-        pass
+            line += f"\n⚠️ cache BQ ticker cũ hơn NAV ({last} < {nav_last}) — số VN-Index trễ, kiểm sync_bq_cache_daily"
+    except Exception as e:
+        line += f"\n⚠️ không so được độ tươi cache với NAV: {e}"
     return line
 
 
@@ -155,7 +178,20 @@ def perf_block():
 
 # ------------------------------------------------------------------ G. 8L mùa BCTC
 def _in_window(d):
+    """Cửa sổ re-rate hằng ngày — CHÉP từ bin/fa_ratings_earnings_window_daily.sh (nguồn thật của gate)."""
     return (d.month in (1, 4, 7, 10) and d.day >= 10) or (d.month in (2, 5, 8, 11) and d.day <= 10)
+
+
+def season(today):
+    """Quý báo cáo gần nhất đã kết thúc + cửa sổ re-rate của nó. Suy từ `today`, không hardcode quý."""
+    q = (today.month - 1) // 3
+    year, qn = (today.year - 1, 4) if q == 0 else (today.year, q)
+    first_m = qn * 3 + 1                                    # tháng đầu của quý kế tiếp
+    wy, wm = (year + 1, 1) if qn == 4 else (year, first_m)
+    start = date(wy, wm, 10)
+    end = date(wy, wm + 1, 10)
+    pq = (year - 1, 4) if qn == 1 else (year, qn - 1)
+    return {"q": f"{year}Q{qn}", "label": f"Q{qn}/{year}", "prev_q": f"{pq[0]}Q{pq[1]}", "start": start, "end": end}
 
 
 def _rating_snapshots():
@@ -168,46 +204,50 @@ def _read_ratings(path):
 
 
 def eightl_block(today):
+    se = season(today)
     out = ["**G. Hệ thống 8L — mùa BCTC**"]
-    out.append(f"Cửa sổ re-rate hằng ngày (10/10→10/11): {'ĐANG MỞ' if _in_window(today) else 'đóng'}")
+    state = "ĐANG MỞ" if se["start"] <= today <= se["end"] else ("chưa mở" if today < se["start"] else "đã đóng")
+    out.append(f"Cửa sổ re-rate hằng ngày cho {se['label']} ({se['start']:%d/%m}→{se['end']:%d/%m}): {state}")
     snaps = _rating_snapshots()
     if len(snaps) < 2:
         out.append("⚠️ chưa đủ snapshot rating_8l_daily để so sánh")
-        return "\n".join(out)
-    cur_p, prev_p = snaps[-1], snaps[-6] if len(snaps) >= 6 else snaps[0]
-    cur, prev = _read_ratings(cur_p), _read_ratings(prev_p)
-    cur_d = os.path.basename(cur_p)[10:20]
-    prev_d = os.path.basename(prev_p)[10:20]
-    dist = {k: sum(1 for v in cur.values() if v == k) for k in range(1, 6)}
-    out.append(f"Phân bố rating {cur_d} (1=tốt nhất): " + " · ".join(f"{k}:{n}" for k, n in dist.items())
-               + f" · tổng {len(cur)} mã")
-    common = sorted(set(cur) & set(prev))
-    up = [(t, prev[t], cur[t]) for t in common if cur[t] < prev[t]]
-    dn = [(t, prev[t], cur[t]) for t in common if cur[t] > prev[t]]
-    out.append(f"So với {prev_d} ({len(common)} mã chung; universe đổi {len(prev)}→{len(cur)}): "
-               f"nâng hạng {len(up)} · hạ hạng {len(dn)}")
-    for nm, lst in (("Nâng", up), ("Hạ", dn)):
-        if lst:
-            out.append(f"  {nm}: " + ", ".join(f"{t} {a}→{b}" for t, a, b in lst[:12])
-                       + (f" … +{len(lst) - 12}" if len(lst) > 12 else ""))
+    else:
+        cur_p, prev_p = snaps[-1], snaps[-6] if len(snaps) >= 6 else snaps[0]
+        cur, prev = _read_ratings(cur_p), _read_ratings(prev_p)
+        cur_d = os.path.basename(cur_p)[10:20]
+        prev_d = os.path.basename(prev_p)[10:20]
+        dist = {k: sum(1 for v in cur.values() if v == k) for k in range(1, 6)}
+        out.append(f"Phân bố rating {cur_d} (1=tốt nhất): " + " · ".join(f"{k}:{n}" for k, n in dist.items())
+                   + f" · tổng {len(cur)} mã")
+        common = sorted(set(cur) & set(prev))
+        up = [(t, prev[t], cur[t]) for t in common if cur[t] < prev[t]]
+        dn = [(t, prev[t], cur[t]) for t in common if cur[t] > prev[t]]
+        out.append(f"So với {prev_d} ({len(common)} mã chung; universe đổi {len(prev)}→{len(cur)}): "
+                   f"nâng hạng {len(up)} · hạ hạng {len(dn)}")
+        for nm, lst in (("Nâng", up), ("Hạ", dn)):
+            if lst:
+                out.append(f"  {nm}: " + ", ".join(f"{t} {a}→{b}" for t, a, b in lst[:12])
+                           + (f" … +{len(lst) - 12}" if len(lst) > 12 else ""))
     try:
-        rel = _q3_releasers()
-        out.append(f"Tiến độ công bố BCTC Q3/2026: {len(rel['tickers'])}/{rel['universe']} mã "
-                   f"({_n(100 * len(rel['tickers']) / max(rel['universe'], 1), '.1f')}%), công bố mới nhất {rel['max_known']}")
-        out.append("  (hạn công bố quý 3: 30/10; rating mã chưa công bố vẫn là rating quý 2)")
+        rel = _releasers(se)
+        n, den = len(rel["released"]), rel["universe"]
+        out.append(f"Tiến độ công bố BCTC {se['label']}: {n}/{den} mã đã công bố quý trước "
+                   f"({_n(100 * n / max(den, 1), '.1f')}%), công bố mới nhất {rel['max_known']}")
+        out.append(f"  (mã chưa công bố {se['label']} vẫn chấm 8L theo số liệu quý trước)")
     except Exception as e:
-        out.append(f"⚠️ tiến độ công bố Q3 lỗi: {e}")
+        out.append(f"⚠️ tiến độ công bố {se['label']} lỗi: {e}")
     return "\n".join(out)
 
 
-def _q3_releasers():
-    code = ("import pandas as pd\n"
+def _releasers(se):
+    """{'released': {ticker: Release_Date}, 'universe': #mã đã công bố quý trước, 'max_known': ngày}."""
+    code = ("import pandas as pd, json\n"
             "f=pd.read_parquet('data/bq_cache/ticker_financial.parquet',columns=['ticker','quarter','Release_Date'])\n"
-            "q=f[f.quarter=='2026Q3']\n"
-            "import json\n"
-            "print(json.dumps({'tickers':sorted(set(q.ticker)),'universe':int(f.ticker.nunique()),"
-            "'max_known':str(q.Release_Date.max()) if len(q) else 'n/a'}))")
-    return json.loads(_wc_python(code))
+            f"q=f[f.quarter=={se['q']!r}]\n"
+            f"p=f[f.quarter=={se['prev_q']!r}]\n"
+            "print(json.dumps({'released':{r.ticker:str(r.Release_Date) for r in q.itertuples()},"
+            "'universe':int(p.ticker.nunique()),'max_known':str(q.Release_Date.max()) if len(q) else 'n/a'}))")
+    return json.loads(_wc_python(code)[0])
 
 
 # ------------------------------------------------------------------ H. mốc đến hạn / paper
@@ -281,25 +321,42 @@ def research_block(today):
     except Exception as e:
         return "\n".join(out + [f"⚠️ đọc watchlist lỗi: {e}"])
     try:
+        se = season(today)
         funnel = _load_json(os.path.join(WC, "data/discretionary_funnel_latest.json"))
         watched = {c["ticker"]: c.get("lane") for c in funnel.get("candidates", [])}
-        hit = sorted(set(watched) & set(_q3_releasers()["tickers"]))
+        rel = _releasers(se)["released"]
+        cutoff = str(today - timedelta(days=RECENT_DAYS))
+        hit = sorted(t for t in watched if t in rel and rel[t] >= cutoff)
+        older = sum(1 for t in watched if t in rel and rel[t] < cutoff)
         if hit:
-            out.append("• Mã trong funnel 8L VỪA công bố BCTC Q3 — cần đọc lại số liệu/rating: "
+            out.append(f"• Mã trong funnel 8L công bố BCTC {se['label']} trong {RECENT_DAYS} ngày qua — cần đọc lại số liệu/rating: "
                        + ", ".join(f"{t} (làn {watched[t]})" for t in hit))
         else:
-            out.append("• Chưa mã nào trong funnel 8L (%d mã) công bố BCTC Q3." % len(watched))
+            out.append(f"• Không mã nào trong funnel 8L ({len(watched)} mã) công bố BCTC {se['label']} trong {RECENT_DAYS} ngày qua"
+                       + (f" ({older} mã đã công bố trước đó)." if older else "."))
     except Exception as e:
-        out.append(f"⚠️ đối chiếu funnel × Q3 lỗi: {e}")
+        out.append(f"⚠️ đối chiếu funnel × BCTC lỗi: {e}")
     for it in sorted(watch.get("research_backlog", []), key=lambda x: x.get("priority", 99)):
-        out.append(f"• {it['idea']}  _(nguồn: {it.get('source', 'n/a')})_")
+        out.append(f"• {it.get('idea', '⚠️ mục backlog thiếu `idea`: ' + str(it.get('id')))}  _(nguồn: {it.get('source', 'n/a')})_")
     return "\n".join(out)
+
+
+def _safe(name, fn, *args):
+    try:
+        return fn(*args)
+    except Exception as e:      # §29: in lỗi thật, các khối khác vẫn đi
+        return f"**{name}**: ⚠️ khối lỗi {type(e).__name__}: {e}"
 
 
 def build_sections(now=None):
     now = now or datetime.now(ICT)
     today = now.date()
-    return "\n\n".join([market_block(), perf_block(), eightl_block(today), due_block(today), research_block(today)])
+    return "\n\n".join([
+        _safe("E. Thị trường", market_block),
+        _safe("F. Hiệu suất tài khoản", perf_block),
+        _safe("G. 8L mùa BCTC", eightl_block, today),
+        _safe("H. Mốc đến hạn", due_block, today),
+        _safe("I. Research", research_block, today)])
 
 
 if __name__ == "__main__":

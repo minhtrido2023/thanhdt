@@ -154,15 +154,29 @@ def funnel_section():
 
 
 def chunks(text):
+    """Gói theo KHỐI (ngăn bởi dòng trống) để không cắt giữa khối; khối > CHUNK mới cắt theo dòng."""
     out, cur = [], ""
-    for ln in text.split("\n"):
-        if len(cur) + len(ln) + 1 > CHUNK and cur:
-            out.append(cur)
-            cur = ""
-        cur += ln + "\n"
+    for blk in text.split("\n\n"):
+        for piece in ([blk] if len(blk) <= CHUNK else _split_lines(blk)):
+            if cur and len(cur) + len(piece) + 2 > CHUNK:
+                out.append(cur)
+                cur = ""
+            cur += (("\n\n" if cur else "") + piece)
     if cur.strip():
         out.append(cur)
     return out
+
+
+def _split_lines(blk):
+    parts, cur = [], ""
+    for ln in blk.split("\n"):
+        if cur and len(cur) + len(ln) + 1 > CHUNK:
+            parts.append(cur)
+            cur = ""
+        cur += ("\n" if cur else "") + ln
+    if cur:
+        parts.append(cur)
+    return parts
 
 
 def post(payload):
@@ -196,6 +210,11 @@ def main():
     if not tid:
         print(f"LỖI: /api/notify không trả thread_id: {res}", file=sys.stderr)
         return 1
+    # Marker NGAY khi thread đã tạo: post phụ lỗi giữa chừng thì lần chạy lại KHÔNG tạo topic thứ hai.
+    os.makedirs(MARKER_DIR, exist_ok=True)
+    with open(marker + ".tmp", "w") as f:
+        json.dump({"thread_id": str(tid), "name": name, "posted_at": now.isoformat(), "parts": len(parts)}, f)
+    os.replace(marker + ".tmp", marker)
     for extra in parts[1:]:
         post({"message": extra, "channel_id": int(tid), "format": "text"})
     # @mention chủ ⇒ Discord tự thêm vào thread (hiện thanh bên + thông báo). Best-effort.
@@ -205,11 +224,6 @@ def main():
         post({"message": f"<@{owner}> topic việc cần quyết {name}", "channel_id": int(tid), "format": "text"})
     except Exception as e:
         print(f"CẢNH BÁO: không @mention được chủ: {e}", file=sys.stderr)
-    os.makedirs(MARKER_DIR, exist_ok=True)
-    tmp = marker + ".tmp"
-    with open(tmp, "w") as f:
-        json.dump({"thread_id": str(tid), "name": name, "posted_at": now.isoformat()}, f)
-    os.replace(tmp, marker)      # marker ghi SAU khi post thành công
     # Thread con của #mikefleet do bot tạo KHÔNG sinh thông báo (user không thấy 04/10, 05/10) ⇒
     # nhắc 1 dòng kèm link <#id> vào Trading Daily — kênh user đang theo dõi. Best-effort.
     try:
