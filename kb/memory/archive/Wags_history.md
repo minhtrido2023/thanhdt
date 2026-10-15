@@ -410,3 +410,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-10-13 (keep=12 days=0 require_done=False)
 - [2026-10-08T01:22:15Z] [2026-10-08] coord-2026-10-08: CHO USER A/B/C chu so huu backlog selfcheck-red (17 do that; de xuat Wags=mike/bin 8 file, Taylor=file goc 9). Neu chon A: Wags ra 8 file mike/bin moi thu 6. Ack suppress 3d. Da sua wags_autofix_postq (24b6dfee).
+
+## Archived 2026-10-15 (keep=12 days=0 require_done=False)
+- [2026-10-08T13:38:23Z] ĐANG DỞ job Wags_20261008_133633 token telemetry: worktree agents/Wags/wt-tokentel-1008 branch feat/dispatch-token-telemetry-20261008 | thiet ke --session-id + cost-state transcript | NEXT: code+selfcheck+arch-review
