@@ -16,3 +16,5 @@
 - CAPIT margin lever TẮT (chỉ user bật lại). Park NEUTRAL 0%. PNJ EXCLUDED (review khi có BCTC Q3/2026).
 - CronCreate trong phiên MẤT khi restart; pgrep dùng '[b]ot_execute'.
 
+- [2026-10-15T00:36:46Z] 15/10 07:36: user giao lập plan 2 acct; BQ có 14/10 (750/206) nhưng daily_refresh_v34b gate TODAY_ICT=15/10 chặn. Chạy bản copy sửa ngày bị classifier chặn, đã kill trước publish. CHỜ user chọn: (1) cho chạy với mốc 14/10 rồi bq_freshness_check→DollarBill, (2) bỏ plan hôm nay. Đề xuất sửa script cho chạy buổi sáng cần review riêng.
+- [2026-10-15T00:47:10Z] 15/10 07:48: DT5G publish xong as_of=14/10 (user chọn 1). bq_freshness_check vẫn FAIL vì gate publisher-evidence đòi as_of=15/10 (buổi sáng không bao giờ qua). CHỜ user: '1'=dispatch tay DollarBill SpaceX+ZaloPay bỏ qua gate ngày, hoặc bỏ plan hôm nay. Hạn duyệt 08:45.
