@@ -56,10 +56,12 @@ TODAY_ICT="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 # cutoff 17:00 ICT) thay vì ngày lịch — nếu không, buổi sáng ticker_prune "hôm nay" luôn = 0 và script
 # chờ ~1,5h rồi die. Cron KHÔNG đặt biến này ⇒ hành vi 18:30 y nguyên. Ngưỡng MIN_TICKERS giữ nguyên.
 if [ "${MIKE_MORNING_RUN:-0}" = "1" ]; then
-  _sess="$(python3 "$WORKDIR_8L/mike/bin/expected_session.py" --session 2>/dev/null)"
-  [[ "$_sess" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || die "MIKE_MORNING_RUN=1 nhưng expected_session.py không trả ngày hợp lệ (got: '$_sess')"
+  # MORNING-BEGIN
+  _sess="$(python3 "$WORKDIR_8L/mike/bin/expected_session.py" --session 2>&1)"
+  [[ "$_sess" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || die "MIKE_MORNING_RUN=1 nhưng expected_session.py không trả ngày hợp lệ — output thật: '$_sess'"
   echo "  MORNING MODE: kiểm tra ingest theo phiên $_sess (thay vì $TODAY_ICT)"
   TODAY_ICT="$_sess"
+  # MORNING-END
 fi
 MIN_TICKERS=200   # historical daily count is ~260-270; 200 comfortably excludes a partial trickle
 ready=0
