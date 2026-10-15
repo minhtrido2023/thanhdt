@@ -782,3 +782,24 @@ Xử lý tại chỗ, không điều tra lại:
 2. Mike (phiên tương tác) kiểm artifact: `git log main..<branch>`, selfcheck chạy lại, verdict thật trên bus — rồi tự chạy lệnh. Tiền thật/trading_rules vẫn cần user duyệt như thường lệ.
 3. Trần chấp nhận: ~1-2h trễ/lần. Nếu tần suất >2 lần/tuần → xem lại phương án B (git write production dispatch dạng tương tác ngay từ đầu).
 (bus: Mike/retro-pattern-recurring-classifier-blocks-headless-agent-production-write)
+
+## Chạy TAY buổi sáng khi BQ xong muộn — `MIKE_MORNING_RUN=1` (thêm 2026-10-15, sau sự cố plan 15/10)
+Sự cố gốc: 14/10 ticker_prune về BQ sau 19:45 ICT ⇒ 18:30 `daily_refresh_v34b` die, 19:00 gate publisher đòi
+`as_of` = ngày lịch ⇒ plan 15/10 không lập; sáng 15/10 BQ đã đủ nhưng cả 2 script đều khóa theo NGÀY LỊCH nên
+buổi sáng không có đường chạy hợp lệ. Cơ chế opt-in (cron KHÔNG đặt biến ⇒ 18:30/19:00 y nguyên):
+- `bin/expected_session.py` — phiên gần nhất đã kỳ vọng có EOD (cutoff 17:00 ICT). `--morning` còn là RÀO:
+  exit 3 nếu plan đích = HÔM NAY mà đã ≥ 08:30 ICT (preflight 08:45/bot 09:05 đã qua hoặc phiên đang chạy).
+- Trình tự (đúng thứ tự, ĐỀU từ terminal của anh hoặc phiên có quyền; không có bước nào bỏ qua gate AN TOÀN dữ liệu):
+  1. `MIKE_MORNING_RUN=1 /home/trido/thanhdt/WorkingClaude/daily_refresh_v34b_linux.sh` (kiểm ingest theo phiên, publish DT5G `as_of`=phiên).
+  2. `MIKE_MORNING_RUN=1 mike/bin/bq_freshness_check.sh` — TODAY=phiên, plan đích=NEXT; gate publisher: mtime ∈ [phiên, hôm nay].
+     Plan đích ĐÃ TỒN TẠI ⇒ `[SKIP-MORNING]` không ghi đè (ép: `MIKE_MORNING_FORCE=1`, chỉ khi chắc plan cũ chưa duyệt).
+  3. ⚠️ **Chuỗi hạ nguồn KHÔNG theo morning mode** — chúng nhắm `next_trading_day(ngày lịch hôm nay)` ⇒ sáng T5 sẽ nhắm T6:
+     `auto_exit_inject.py --account <A> --plan-date <NEXT>` (lệnh thoát T+25/T+45/T+60), `inject_discretionary_orders.sh`,
+     `plan_position_drift_check.py`, `send_plan_report.sh` (EXPECTED_DATE không có tham số ghi đè), `late_plan_catchup.sh`.
+     Phải chạy tay/đối chiếu từng cái cho ngày NEXT; đã chạy: ghi vào Discord để user duyệt trước 08:45.
+  4. Prompt DollarBill ở morning mode tự ép `requires_user_approval=true` + ghi rõ "chạy tay buổi sáng".
+- Hạn chế đã biết (arch-review 2026-10-15, NON-BLOCKING): CSV `golive_v23_recommendations_{ngày lịch}.csv` ≠ `signal_date` ⇒
+  pipeline-3 push partition phiên đó thất bại (chỉ WARN); lần 19:00 cùng ngày ghi đè file khuyến nghị. Chưa chạy
+  end-to-end pipeline-2/3 ở morning mode lần nào — lần đầu dùng thật phải theo dõi tay.
+- Selfcheck: `bin/expected_session_selfcheck.py`, `bin/dt5g_publisher_gate_selfcheck.sh` (ca M1-M9),
+  `bin/bq_freshness_morning_selfcheck.sh`, `WorkingClaude/daily_refresh_morning_selfcheck.sh`.
