@@ -70,16 +70,6 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "immutable_publish_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-14T22:11:49Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: immutable_publish_selfcheck.py",
-      "escalated_utc": "2026-10-14T22:11:49Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "lag_rating_stale_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-10-14T22:11:49Z",
@@ -96,16 +86,6 @@
       "status": "FAIL",
       "auto": true,
       "topic": "selfcheck-red: mike/bin/dt5g_writer_watch_selfcheck.sh",
-      "escalated_utc": "2026-10-14T22:11:49Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "universe_pit_p3_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-14T22:11:49Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: universe_pit_p3_selfcheck.py",
       "escalated_utc": "2026-10-14T22:11:49Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
