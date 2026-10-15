@@ -99,6 +99,21 @@ MAX_RR_QAGE=135      # calendar days từ NGÀY CUỐI QUÝ của MAX(quarter) t
                      # = sync_bq_cache/preflight cache list, KHÔNG có consumer production trong chuỗi
                      # chọn-mã) → block sẽ chặn oan DollarBill vì 1 bảng research chết.
 TODAY="$(date +%Y-%m-%d)"
+# MORNING MODE (opt-in, 2026-10-15, user duyệt): MIKE_MORNING_RUN=1 ⇒ chạy tay buổi sáng khi BQ xong muộn
+# sau chuỗi 18:30 hôm trước. TODAY = PHIÊN gần nhất đã có dữ liệu EOD (bin/expected_session.py, cutoff
+# 17:00 ICT) thay vì ngày lịch; NEXT_TRADING_DAY = ngày giao dịch kế tiếp sau phiên đó (= hôm nay).
+# Cron KHÔNG đặt biến này ⇒ hành vi 19:00 y nguyên. Mọi cổng khác GIỮ NGUYÊN; chỉ điều kiện mtime của
+# publisher DT5G đổi (xem gate dưới): phải >= phiên và <= hôm nay thay vì == hôm nay.
+MORNING="${MIKE_MORNING_RUN:-0}"
+if [ "$MORNING" = "1" ]; then
+  _sess="$(python3 "$(dirname "${BASH_SOURCE[0]}")/expected_session.py" 2>/dev/null)"
+  TODAY="${_sess%% *}"; MORNING_NEXT="${_sess##* }"
+  if ! [[ "$TODAY" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ && "$MORNING_NEXT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    echo "FATAL: MIKE_MORNING_RUN=1 nhưng expected_session.py không trả 2 ngày hợp lệ (got: '$_sess') — dừng" >&2
+    exit 1
+  fi
+  echo "MORNING MODE: phiên=$TODAY, plan cho=$MORNING_NEXT (MIKE_MORNING_RUN=1)"
+fi
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 FAILED=0
 WARNED=0
@@ -115,6 +130,7 @@ from trading_bot.vn_market import next_trading_day
 import datetime as dt
 print(next_trading_day(dt.date.today()))
 " 2>/dev/null)"
+[ "$MORNING" = "1" ] && NEXT_TRADING_DAY="$MORNING_NEXT"
 if [ -z "$NEXT_TRADING_DAY" ]; then
   echo "FATAL: không tính được NEXT_TRADING_DAY (next_trading_day() lỗi) — dừng, không dispatch DollarBill với ngày rỗng" >&2
   exit 1
@@ -462,6 +478,11 @@ print(d.get('as_of', '?'), 'ok' if d.get('bq_publish_ok') else 'FAIL')
     dt5g_pub_reason="golive_state_today.json as_of=${DT5G_AS_OF:-?} ≠ phiên gần nhất $LAST_TRADING_DAY"
   elif [ "${DT5G_PUB_OK:-FAIL}" != "ok" ]; then
     dt5g_pub_reason="golive_state_today.json bq_publish_ok=false — publish lên BQ đã HỎNG"
+  elif [ "$MORNING" = "1" ]; then
+    # Morning mode: publisher phải chạy SAU phiên (mtime >= phiên) và không ở tương lai (<= hôm nay lịch).
+    if [[ "$DT5G_JSON_MDATE" < "$TODAY" || "$DT5G_JSON_MDATE" > "$(date +%Y-%m-%d)" ]]; then
+      dt5g_pub_reason="golive_state_today.json mtime=$DT5G_JSON_MDATE ngoài [$TODAY, hôm nay] — publisher của ta KHÔNG chạy sau phiên $TODAY"
+    fi
   elif [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_JSON_MDATE" != "$TODAY" ]; then
     dt5g_pub_reason="golive_state_today.json mtime=$DT5G_JSON_MDATE ≠ hôm nay $TODAY — publisher của ta KHÔNG chạy hôm nay"
   fi
@@ -475,7 +496,7 @@ if [ -n "$dt5g_pub_reason" ]; then
 else
   [ -z "$QUIET" ] && echo "OK   DT5G publisher-evidence: golive_state_today.json as_of=$DT5G_AS_OF (phiên gần nhất), bq_publish_ok=true, mtime=$DT5G_JSON_MDATE"
   DT5G_CSV_MDATE="$(date -d @"$(stat -c %Y "$DT5G_CSV_F" 2>/dev/null || echo 0)" +%Y-%m-%d 2>/dev/null)"
-  if [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_CSV_MDATE" != "$TODAY" ]; then
+  if [ "$MORNING" != "1" ] && [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_CSV_MDATE" != "$TODAY" ]; then
     csv_msg="🟡 DT5G CSV MIRROR ($TODAY $NOW_ICT): data/vnindex_5state_dt5g_live.csv mtime=${DT5G_CSV_MDATE:-MISSING} ≠ hôm nay dù publish BQ OK — export CSV từ BQ đã lỗi. Production (BQ) vẫn ĐÚNG; nhóm script nghiên cứu đọc CSV này đang dùng bản cũ. Không chặn pipeline."
     echo "WARN DT5G csv mirror: mtime=${DT5G_CSV_MDATE:-MISSING} ≠ $TODAY — non-blocking"
     "$ROOT/bin/notify_thread.sh" "$csv_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
