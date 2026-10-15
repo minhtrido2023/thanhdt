@@ -60,4 +60,25 @@ if [ -n "$FAIL_REASON" ]; then
 fi
 
 echo "OK: refreshed — lastModified $(date -d @"$LM_S" +'%F %T'), rows=$NUM_ROWS"
+
+# Dong eff_date TUONG LAI (Release_Date NULL ⇒ rating_8l_history.py dung q_time+45, vd PMT 2026-10-18).
+# Chi CANH BAO (khong fail): consumer doc "dong moi nhat" khong loc ngay se doc rating chua hieu luc.
+# Dedupe bang state file ⇒ chi bao khi TAP ma thay doi, khong lap lai moi ngay. Loi truy van in ra that (§29).
+FUT_STATE="$MIKE/state/fa_ratings_8l_future_rows.txt"
+_fut_out="$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
+  "SELECT STRING_AGG(CONCAT(f.ticker,'@',CAST(f.time AS STRING)), ',' ORDER BY f.ticker) AS fut FROM ${TABLE} AS f WHERE f.time > CURRENT_DATE('Asia/Ho_Chi_Minh')" 2>&1)"
+if [ "$(printf '%s\n' "$_fut_out" | head -n1)" != "fut" ]; then   # bq in loi ra STDOUT, khong phai stderr
+  echo "WARN: khong kiem duoc dong eff_date tuong lai — loi that: $(printf '%s' "$_fut_out" | tr '\n' ' ' | cut -c1-300)"
+else
+  FUT="$(printf '%s\n' "$_fut_out" | sed -n 2p | tr -d '"')"   # NULL ⇒ csv in ""
+  if [ -n "$FUT" ]; then
+    echo "WARN: fa_ratings_8l co dong eff_date TUONG LAI: $FUT"
+    if [ "$(cat "$FUT_STATE" 2>/dev/null)" != "$FUT" ]; then
+      printf '%s' "$FUT" > "$FUT_STATE"
+      "$MIKE/bin/notify_thread.sh" "⚠️ fa_ratings_8l có dòng eff_date TƯƠNG LAI (Release_Date NULL ⇒ q_time+45): $FUT. Cổng golive/hit_details đã lọc theo ngày as-of nên không đọc sớm; consumer MỚI đọc 'dòng mới nhất' phải tự lọc f.time <= as-of." "$DISCORD_TRADING_DAILY" 2>/dev/null || true
+    fi
+  else
+    rm -f "$FUT_STATE"
+  fi
+fi
 "$MIKE/bin/append_event.sh" Winston status "fa_ratings_8l-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true
