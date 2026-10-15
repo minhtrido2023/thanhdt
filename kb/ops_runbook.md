@@ -793,12 +793,19 @@ buổi sáng không có đường chạy hợp lệ. Cơ chế opt-in (cron KHÔ
   1. `MIKE_MORNING_RUN=1 /home/trido/thanhdt/WorkingClaude/daily_refresh_v34b_linux.sh` (kiểm ingest theo phiên, publish DT5G `as_of`=phiên).
   2. `MIKE_MORNING_RUN=1 mike/bin/bq_freshness_check.sh` — TODAY=phiên, plan đích=NEXT; gate publisher: mtime ∈ [phiên, hôm nay].
      Plan đích ĐÃ TỒN TẠI ⇒ `[SKIP-MORNING]` không ghi đè (ép: `MIKE_MORNING_FORCE=1`, chỉ khi chắc plan cũ chưa duyệt).
-  3. ⚠️ **Chuỗi hạ nguồn KHÔNG theo morning mode** — chúng nhắm `next_trading_day(ngày lịch hôm nay)` ⇒ sáng T5 sẽ nhắm T6:
-     `auto_exit_inject.py --account <A> --plan-date <NEXT>` (lệnh thoát T+25/T+45/T+60), `inject_discretionary_orders.sh`,
-     `plan_position_drift_check.py`, `send_plan_report.sh` (EXPECTED_DATE không có tham số ghi đè), `late_plan_catchup.sh`.
-     Phải chạy tay/đối chiếu từng cái cho ngày NEXT; đã chạy: ghi vào Discord để user duyệt trước 08:45.
+  3. ⚠️ **Chuỗi hạ nguồn KHÔNG theo morning mode** (nhắm `next_trading_day(ngày lịch hôm nay)` ⇒ sáng T5 sẽ nhắm T6).
+     **CHỜ DollarBill xong TRƯỚC**: bước 2 dispatch `--bg` nên script trả về khi plan CHƯA có. Chạy `bin/jobs.sh status <job_id>`
+     = done VÀ xác nhận `data/trade_plans/plan_<A>_<NEXT>.json` tồn tại. Chạy `auto_exit_inject` khi plan chưa có ⇒ in
+     "CHƯA có plan file — no-op" và rc=0 (KHÔNG báo lỗi) ⇒ user duyệt plan THIẾU lệnh thoát T+25/T+45/T+60. Rồi, cho từng account A:
+     - `python3 mike/bin/auto_exit_inject.py --account <A> --plan-date <NEXT>` — đọc output, KHÔNG được là dòng no-op. ⚠️ nó lấy
+       `signal_date` = ngày lịch hôm nay ⇒ sessions_held lệch +1 so với cron (lệnh thoát có thể bắn SỚM 1 phiên) — soát từng lệnh thoát.
+     - `python3 mike/bin/discretionary_accumulation_inject.py --account <A> --plan-date <NEXT>` (KHÔNG phải `inject_discretionary_orders.sh`, không có tham số ngày).
+     - `python3 mike/bin/plan_position_drift_check.py --account <A> --date <PHIÊN>` (tự suy plan = next_trading_day(PHIÊN); truyền NEXT là SAI).
+     - `send_plan_report.sh` nhắm next_trading_day(hôm nay) và không có tham số ghi đè ⇒ KHÔNG dùng được buổi sáng: đọc plan trực tiếp và gửi tóm tắt cho user duyệt qua Discord.
+     - KHÔNG chạy được buổi sáng (cổng giờ): `late_plan_catchup.sh` (BEFORE_WINDOW trước 21:00), `park_trim_daily`/`jit_unpark_daily`/`merge_park_daily` (từ chối trước 15:00). Park đang 0% ⇒ coi như no-op, GHI RÕ "đã bỏ qua" khi báo user.
+     - Xác nhận file plan rơi ĐÚNG `data/trade_plans/` (prompt DollarBill cũ ghi `data/plan_...` ở thư mục gốc; tồn tại `data/plan_ZaloPay_2026-10-14.json` ngoài `trade_plans/`).
   4. Prompt DollarBill ở morning mode tự ép `requires_user_approval=true` + ghi rõ "chạy tay buổi sáng".
-- Hạn chế đã biết (arch-review 2026-10-15, NON-BLOCKING): CSV `golive_v23_recommendations_{ngày lịch}.csv` ≠ `signal_date` ⇒
+- Hạn chế đã biết (arch-review 2026-10-15 vòng 1+2, NON-BLOCKING): rào 08:30 chỉ kiểm LÚC KHỞI ĐỘNG (pipeline 0-3 + DollarBill có thể kéo dài qua 08:45); `requires_user_approval` chỉ do prompt ép (mặc định code = False); không có lock (chạy 2 lần liên tiếp có thể dispatch DollarBill 2 lần); pipeline-0..3 vẫn chạy kể cả khi mọi plan đích đã tồn tại; prompt/`CAL_TODAY` chưa có test (mutation M10/M11/M17 lọt); CSV `golive_v23_recommendations_{ngày lịch}.csv` ≠ `signal_date` ⇒
   pipeline-3 push partition phiên đó thất bại (chỉ WARN); lần 19:00 cùng ngày ghi đè file khuyến nghị. Chưa chạy
   end-to-end pipeline-2/3 ở morning mode lần nào — lần đầu dùng thật phải theo dõi tay.
 - Selfcheck: `bin/expected_session_selfcheck.py`, `bin/dt5g_publisher_gate_selfcheck.sh` (ca M1-M9),
