@@ -313,9 +313,8 @@ echo "$1" >> "$CALLS"
 case "$1" in
   *macro_healthcheck.py)
     case "$HC_MODE" in
-      rc0|rc1|rc2) mkdir -p data; : > data/macro_health.json; exit "${HC_MODE#rc}" ;;
-      crash1) exit 1 ;;
-      crash2) exit 2 ;;
+      rc0|rc1|rc2) mkdir -p data; : > data/macro_health.json; sleep 1.2; exit "${HC_MODE#rc}" ;;
+      crash1|crash2) exit "${HC_MODE#crash}" ;;
       rc*)  exit "${HC_MODE#rc}" ;;
       kill) kill -9 $$ ;;
       hang) exec sleep 20 ;;
@@ -357,7 +356,7 @@ with tempfile.TemporaryDirectory() as sbx:
         f'PY="{sbin}/stubpy"; LOG="{sbx}/refresh.log"; WORKDIR_8L="{sbx}"',
         'step() { echo "--- $* ---"; }',
         'die() { echo "!!! ABORT: $*"; exit 1; }',
-        'rm -f "$PWD/data/macro_health.json"',
+        'mkdir -p "$PWD/data"; touch -d "1 day ago" "$PWD/data/macro_health.json"',   # production LUÔN có JSON cũ
         blk_run,
         "echo CHAIN_CONTINUED",
         "",

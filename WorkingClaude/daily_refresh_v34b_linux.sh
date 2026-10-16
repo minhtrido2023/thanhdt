@@ -247,7 +247,7 @@ step "[11c] macro_healthcheck.py (update macro_health.json — TRƯỚC publish)
 # crash, 127) cũng vậy: log refresh không ai quét, nên bước này tự notify (cùng đường với [12]).
 # notify chạy ĐỒNG BỘ ngay trước publish ⇒ MỖI lệnh notify bọc `timeout -k 5 20`: bridge treo thì
 # bỏ tin chứ không được giữ publish DT5G. notify hỏng/treo KHÔNG được chặn chuỗi.
-hc_rc=0
+hc_rc=0; hc_what=""
 hc_t0=$(date +%s)
 timeout -k 10 300 $PY macro_healthcheck.py || hc_rc=$?
 hc_json_m=$(stat -c %Y data/macro_health.json 2>/dev/null || echo 0)
