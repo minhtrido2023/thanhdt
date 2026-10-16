@@ -1,6 +1,6 @@
 # DGC — Nghi Sơn GĐ1: rà soát infographic user gửi 16/10/2026 (cập nhật đánh giá)
 
-Nguồn: ảnh chụp màn hình infographic "Nhà máy hóa chất Đức Giang – Nghi Sơn" do user gửi (không rõ tác giả/ngày, KHÔNG xác nhận là công bố của DGC — coi là mô hình bên thứ ba). So với `agents/Taylor/research/dgc_nghison_phase1_estimate_20260723.md`. Phân tích: Mike, 16/10, số học tự tính (chưa qua quant-skeptic / fundamental-skeptic).
+Nguồn: ảnh chụp màn hình infographic "Nhà máy hóa chất Đức Giang – Nghi Sơn" do user gửi. **User xác nhận 16/10: đây là GIẢ ĐỊNH do AI tạo bởi một bên nghiên cứu — không phải công bố/guidance của DGC** (⇒ không gửi thư IR; mọi số trong ảnh chưa có nguồn). So với `agents/Taylor/research/dgc_nghison_phase1_estimate_20260723.md`. Phân tích: Mike, 16/10, số học tự tính (chưa qua quant-skeptic / fundamental-skeptic).
 
 ## Ảnh nói gì (base, steady-state, 100% tải)
 - Vốn 2.400 tỷ, 151.000 t/năm, vận hành TM Q1/2027. Doanh thu **2.363 tỷ** (NaOH 650, Javen 459, Ca(OCl)2 444, nhóm phốt pho 280, PAC 210, Chloramine B 120, HCl 105, khác 95).
@@ -28,15 +28,20 @@ Nguồn: ảnh chụp màn hình infographic "Nhà máy hóa chất Đức Giang
 | Năm 1 (2027), tải 60%, giá −5% | ~0–50 |
 ⇒ Mỗi 1% giá ≈ ±19 tỷ LNST (~6% base): đòn bẩy hoạt động rất lớn. Base thận trọng của Taylor (165 tỷ) nằm đúng ở "ảnh + giảm nhẹ tải/giá"; ước 2027 của Taylor (80–180) có thể cao do đòn bẩy này.
 
-## Cập nhật đánh giá
-- Đóng góp GĐ1 so với LNST kế hoạch 2026 (1.600 tỷ): ảnh base 19–22% (bear 11–14%, bull 25–28%); điều chỉnh (140–190 tỷ) ~9–12%; Taylor 23/07 base 10,3%.
-- Hiệu suất vốn: LNST 140–190 / 2.400 = 5,8–7,9% — ngang lãi huy động hiệu dụng sau thuế (7,4% × 0,8 = 5,9%); chỉ ảnh base (13,5%) rõ ràng hơn tiền gửi.
-- Nền DGC (BQ 16/10): giá 32.750, vốn hoá 12,44 nghìn tỷ, BVPS Q2 42.744 ⇒ PB ~0,77; LNST Q2/2026 380 tỷ (Q2/2025 842 → −55% YoY), H1/2026 789 tỷ; PE forward theo kế hoạch 1.600 tỷ ≈ 7,8x. Giá giảm ~9% từ 36.000 (30/09).
-- Tiến độ: chưa có xác nhận chạy thử đến 16/10; ĐHĐCĐ 08/05 nêu cuối Q3/đầu Q4; ảnh ghi TM Q1/2027 (thêm một lần trượt hoặc chỉ là phân biệt "thương mại").
-- Verdict giữ nguyên: QUALIFIED YES vị thế nhỏ (≤0,5–1% NAV) theo `dgc-tv1-fearbuy-discretionary.md`; DGC vẫn `excluded_tickers` (HOSE hạn chế giao dịch ~11–12/2026). Ảnh KHÔNG đủ cơ sở nâng size. WARNING pháp lý: vụ án lãnh đạo, giữ nguyên.
+## Cập nhật đánh giá (SỬA 16/10 sau phản biện fundamental-skeptic: REFUTED, độ tin cậy trung bình — bản đầu của ghi chú này có lỗi)
+Hướng "KHÔNG nâng size theo ảnh" đứng vững. Các số/khung sau đây đã sửa:
+- **Dải GĐ1 điều chỉnh: ~0–190 tỷ (0–12% LNST kế hoạch 1.600 tỷ)**, KHÔNG phải 140–190. Bản đầu bỏ dòng Javen 6 tr/t (101) và dòng kết hợp (38); kết hợp tải 90% + giá −5% + Javen 6 tr/t ra khoảng −24 tỷ; KH 160 (Taylor) thay 140 giảm thêm ~16. **Năm 2027 có thể âm** (tải 60% ≈ −2 tỷ, chưa tính chạy thử/hết vốn hoá lãi vay).
+- **Neo doanh thu:** ảnh 2.363 tỷ @100% tải ≈ 1,8–2,4× neo HSC dẫn trong note Taylor 23/07 (1.000–1.300 tỷ @70–100%). Ảnh còn ghi Javen 30.000 t trong khi tài liệu dẫn công suất Javel cả tổ hợp 10.000 t (20.000 t "phụ phẩm" chưa ai kiểm chứng).
+- **PB ~0,91–0,94, KHÔNG phải 0,77:** BVPS BQ 42.744 là sổ 30/06, trước khi chi cổ tức 8.000đ/cp (GDKHQ 14/09, ~3.038 tỷ). BVPS sau cổ tức ≈ 34.700 (+LN Q3 ⇒ ~35–36k). Giá đã giảm −15,5% từ GDKHQ (38.750 điều chỉnh → 32.750).
+- **ROI so tiền gửi sai phương pháp (quá thận trọng):** (LNST+KH)/2.400 = 11,7–13,8%; vốn đã chi ~95% là chi phí chìm. Câu "ngang tiền gửi" bỏ.
+- **ĐHĐCĐ 2026 họp 13/08** (không phải 08/05 như bản đầu trích từ web search). Mốc vận hành Q4/2026 là tin nguoiquansat 10/09.
+- **WARNING bổ sung (theo luật user 27/09: vẫn phân tích, chỉ cảnh báo):** BCTC 2025 bị kiểm toán ngoại trừ tồn kho 950,9 tỷ; BCTC soát xét bán niên 2026 bị UHY ngoại trừ vì đang phối hợp cơ quan điều tra; tồn kho Q2 nhảy 1.784→2.460 tỷ (+38% QoQ) trong khi doanh thu giảm; HoSE hạn chế giao dịch từ 03/09, lượt quét 11/09 kết luận cổng chỉ đóng THEO VỤ ÁN, không theo kỳ kiểm toán ⇒ mốc "~11–12/2026" lỗi thời.
+- **Vị thế thật ≠ "≤0,5–1% NAV":** `data/execution_logs/active_nav_ZaloPay.json` (15/10): `excluded_value` 327,5 tr (DGC 10.000 cp) / `total_nav` 919,6 tr = **35,6% NAV ZaloPay**, gấp ~9–18× trần §3 (2–4%/tên). Khung "≤0,5–1%" chỉ áp cho TIỀN MỚI. Cần quyết định tường minh cho vị thế legacy + điều kiện thoát (HARD ABANDON §3) + time-stop — hiện CHƯA có.
+- **Nhãn:** note này từng trích QUALIFIED YES (`dgc-tv1-fearbuy-discretionary.md`, 23–28/07), trong khi mọi lượt quét backstop 24/07–12/10 ghi AMBIGUOUS-nghiêng-constructive (06/08, 11/09 hạ tin cậy). Dùng nhãn **AMBIGUOUS-nghiêng-constructive** cho tới khi user chốt khác.
+- BQ đã kiểm đúng: giá 32.750 (15/10), vốn hoá 12.438 tỷ, NP Q2/26 380,1 (Q2/25 842,2, −54,9%), H1 788,9; CF_OA Q2 BQ = 852,6 (không phải +1.083 như RE-DO; vẫn >NP). LNST BQ có thể là phần cổ đông mẹ (báo chí 440,77) — ghi rõ cơ sở khi trích. PE forward 7,8x là cận dưới, thực tế ~8–8,5x.
 
-## Việc xác nhận để đổi kết luận
-1. Truy nguồn ảnh (hỏi IR DGC / tài liệu ĐHĐCĐ 2026 / báo cáo CTCK).
-2. Giá Javen, Ca(OCl)2, NaOH thực tế trong nước + hợp đồng bao tiêu.
-3. BCTC Q3/2026 (dự kiến cuối 10/2026): CIP, giải ngân, tiến độ chạy thử.
-4. fundamental-skeptic phản biện trước khi đổi bất kỳ verdict.
+## Việc tiếp theo (user duyệt 16/10: skeptic ✔ đã chạy; thư IR ✘ không cần; mốc BCTC Q3 ✔)
+1. Mốc cứng: **BCTC Q3/2026 (dự kiến cuối 10/2026)** — CIP, tồn kho, CF_OA, tiến độ chạy thử; xem lại verdict khi ra.
+2. Chờ user quyết: vị thế legacy DGC 35,6% NAV ZaloPay (giữ ngoài khung hay đưa về trần) + HARD ABANDON/time-stop §3.
+3. Chưa làm: tra tin pháp lý/hoạt động 14/09–16/10 giải thích cú giảm −15,5% sau GDKHQ (kết luận điều tra, mỏ 25, giấy phép, kê biên).
+4. Chưa làm: thống nhất nhãn giữa `calculated_fear_state_backstop.md` và `dgc-tv1-fearbuy-discretionary.md`; dựng lại base GĐ1 từ neo HSC thay vì ảnh AI.
