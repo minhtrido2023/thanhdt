@@ -16,7 +16,7 @@
   CÙNG commit + ghi changelog. **Trước khi bật lại phải xử lý lỗ hổng ở mục ⚠️ bên dưới** (thiếu bản duyệt
   margin không làm giảm khối lượng ×1,3) hoặc user chấp nhận nó bằng văn bản.
 - Nhánh khoá bằng file giữ `feat/capit-margin-hold-lock-20261013` @ `0d0702856`: KHÔNG merge. Với công tắc
-  tổng tắt thì không còn plan đòn bẩy nào để nó chặn ⇒ thừa; giữ nhánh làm tư liệu.
+  tổng tắt thì không còn plan đòn bẩy nào để nó chặn ⇒ thừa; tư liệu đã lưu ở agents/Taylor/research/capit_margin_hold_lock_20261013/ (nhánh đã xoá 16/10, commit 0d0702856 còn trong reflog; archive 0bcd6b561).
 - Luật bằng chữ ở mục "Luật" dưới đây nay là lớp dự phòng (chỉ còn nghĩa nếu ai đó bật lại công tắc).
 
 ## Luật
