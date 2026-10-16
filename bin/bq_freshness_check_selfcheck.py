@@ -546,6 +546,21 @@ def case_gate_source_recovered_rerun_and_helper_crash():
               "gate_source_check.py thoát rc=2" in out and "__END__ FAILED=0" in out, extra=out)
 
 
+def case_gate_source_kill_cleans_tmp():
+    """Cron bị kill (SIGTERM) NGAY sau khi publish xong, trước dòng `rm` ⇒ trap EXIT vẫn dọn file tạm."""
+    src_lines = Path(GS_SCRIPT).read_text(encoding="utf-8")
+    kill_src = src_lines.replace('  cat "$GATE_PUB_OUT"\n', '  kill -TERM $$\n', 1)
+    check("gate-source kill: tiêm được SIGTERM vào bản sao script (bất biến của test)", kill_src != src_lines)
+    with tempfile.TemporaryDirectory() as td:
+        gs_sandbox(td)
+        mut = Path(td) / "script_kill.sh"
+        mut.write_text(kill_src, encoding="utf-8")
+        out, err = gs_run(td, "DT4_only", script=str(mut))
+        left = sorted(x.name for x in Path(td).glob("tmp.*"))
+        check("gate-source kill giữa chừng (SIGTERM trước rm): KHÔNG còn file mktemp trong TMPDIR",
+              left == [] and "__END__" not in out, extra=f"left={left} out={out[-120:]!r}")
+
+
 def case_gate_source_mktemp_fails():
     """mktemp hỏng ⇒ rơi về /dev/null: output publish vẫn ra log nguyên vẹn, vẫn báo nguồn cổng, tin
     nói thẳng là không giữ được output (không giả vờ 'không tìm thấy dòng cổng'), stderr không có lỗi cat/rm."""
@@ -698,6 +713,7 @@ def case_gate_source_dedupe_is_per_date_source_pair():
 
 if __name__ == "__main__":
     case_gate_source_mktemp_fails()
+    case_gate_source_kill_cleans_tmp()
     case_gate_source_orphan_holding_stdout_does_not_hang()
     case_gate_source_marker_unwritable_still_alerts()
     case_gate_source_publish_time_is_ict_anchored()

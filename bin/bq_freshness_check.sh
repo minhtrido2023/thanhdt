@@ -739,6 +739,7 @@ PIPELINE_START_EPOCH="$(date +%s)"
 # File thường không có đầu đọc nào phải chờ EOF. mktemp hỏng ⇒ chạy trần y như trước khi có bước
 # kiểm. stderr của publisher KHÔNG đi qua file (ra thẳng như cũ).
 if GATE_PUB_OUT="$(mktemp)"; then
+  trap '[ "$GATE_PUB_OUT" = /dev/null ] || rm -f "$GATE_PUB_OUT"' EXIT   # cron bị kill giữa chừng không để rác /tmp
   _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py > "$GATE_PUB_OUT"
   cat "$GATE_PUB_OUT"
 else
