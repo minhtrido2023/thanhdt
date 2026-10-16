@@ -1253,3 +1253,6 @@
 - [2026-10-14T04:17:01Z] [Quỹ mở bước 3 vòng 2, 10-14] XONG: nhánh feat/fund-history-lock-20261014 @27d74c383 (755be49f0 B1–B16 + R1/R2 arch-review lần 2), CHƯA merge; finding fund-history-lock-step3-round2-20261014 + error eod-discord-spacex-0807 trace Taylor_20261014_033336. CHỜ Mike review hẹp + user (B3/B5, tin EOD 08-07). Selfcheck: WC_ROOT phải có wc_env.sh + code symlink, không thì rơi về cây thật. (Thay dòng ĐANG DỞ job 033336.)
 - [2026-10-14T05:13:39Z] ĐANG DỞ job Taylor_20261014_051329 (DCF FPT hậu ngừng hợp nhất FPT Telecom, CHỈ nghiên cứu, out agents/Taylor/research/fpt_dcf_deconsol_20261014/) | NEXT: đọc README fpt_dd_tech + dcf_valuation.py, khai báo trước tổ hợp cơ sở
 - [2026-10-14T05:57:06Z] [FPT DCF hậu ngừng hợp nhất 10-14] XONG: FV khai trước 33,9k/49,6k/65,1k (MOS cơ sở −14% @56,7k); rút 'mua chia đợt' theo DCF, chờ 9T (~20–25/10, trigger CFO core Q3 ≥2,6k tỷ); finding fpt-dcf-deconsol-20261014 trace Taylor_20261014_055001. (Thay dòng ĐANG DỞ job 051329.)
+
+## Archived 2026-10-16 (keep=12 days=0 require_done=False)
+- [2026-10-14T06:06:52Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2: CÀI ĐẶT theo research/fund_step4_20261014/SPEC.md, wt riêng nhánh feat/fund-step4-benchmark-20261014, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc README+SPEC, tạo worktree
