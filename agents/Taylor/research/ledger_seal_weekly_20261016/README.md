@@ -51,6 +51,14 @@ T7 20/02 → 05/02.
    wrapper so md5 sổ + md5 manifest hiện tại với mốc MỚI NHẤT của TK ⇒ lệch ⇒ rc=1 "sổ đã chốt quá mốc,
    chưa có mốc". Cách vá: đối chiếu manifest rồi chép tay dòng SEAL_MD5 (in trong thông điệp). Wrapper
    cố ý KHÔNG tự thêm mốc từ trạng thái đĩa — làm vậy là hợp thức hoá đúng thứ mốc ngoài kho phải bắt.
+   **Vòng 3 (Mike tự sửa sau arch-review hẹp):** kiểm trên chỉ bắt khi lượt kế tiếp là NothingToSeal (chạy lại cùng
+   tuần). Ở nhịp cron tuần sau có dòng mới (CLI rc=0) nên wrapper ghi mốc mới và lấp im lặng đoạn chốt-không-mốc.
+   Vá: `check_continuity()` chạy TRƯỚC `append_anchor` ở nhánh rc=0 — manifest bỏ bản ghi cuối phải khớp md5
+   manifest của mốc mới nhất VÀ `md5_before` của bản ghi cuối phải khớp md5 sổ của mốc; lệch ⇒ rc=1 "thiếu liên
+   tục", KHÔNG ghi mốc/bus. Selfcheck B8 (now=2026-10-21) + mutation gỡ kiểm ⇒ B8 FAIL (bị bắt). Knob
+   `LSW_TEST_SKIP_CONTINUITY=1` chỉ do stub selfcheck (A*) đặt vì stub không dựng nổi chuỗi manifest+mốc;
+   B1–B8 tích hợp chạy kiểm thật. Lưu ý vận hành: ca "chốt rc=0 mà dòng cuối < asof" và ca rc=1 do thiếu mốc
+   lặp lại mỗi lượt cho tới khi người xử lý; không có cờ bỏ qua (cố ý).
    Cùng vòng 2: NothingToSeal chỉ là "không có dòng mới", nên wrapper còn đòi `last_date` bản ghi cuối
    manifest ≥ asof (writer nav_history chết cả tuần ⇒ rc=1 kèm ngày thật); chốt rc=0 mà dòng cuối < asof
    cũng rc=1 (sau khi đã ghi mốc + bus đoạn vừa chốt). Không đổi `ledger_anchor_check.py`: selfcheck của

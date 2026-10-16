@@ -118,7 +118,8 @@ def run_stub(plan, anchors=HDR, now="2026-10-24T07:30", bus_rc=0, proc=None, ext
                    LEDGER_SEAL_LOCK=os.path.join(d, "x.lock"), LEDGER_SEAL_PROC_DIR=procd,
                    LEDGER_SEAL_NOW_ICT=now, STUB_LOG=os.path.join(d, "cli.log"),
                    STUB_BUS_LOG=os.path.join(d, "bus.log"), STUB_BUS_RC=str(bus_rc),
-                   STUB_PLAN=json.dumps(plan), WC_ROOT=DECOY_WC, LEDGER_SEAL_LEDGER_DIR=ld)
+                   STUB_PLAN=json.dumps(plan), WC_ROOT=DECOY_WC, LEDGER_SEAL_LEDGER_DIR=ld,
+                   LSW_TEST_SKIP_CONTINUITY="1")   # stub không dựng nổi chuỗi manifest+mốc liên tục; B8 kiểm thật
         env.update(extra_env or {})
         r = subprocess.run([sys.executable, SCRIPT], capture_output=True, text=True, env=env, timeout=120)
         rd = lambda n: open(os.path.join(d, n)).read() if os.path.exists(os.path.join(d, n)) else ""
@@ -363,22 +364,22 @@ def run_sbx(s, now):
     return r.returncode, r.stdout + r.stderr, anc, (open(bl).read().splitlines() if os.path.exists(bl) else [])
 
 
-S = mk_sandbox("2026-10-02")
+S = mk_sandbox("2026-10-02", anchors=True)   # thực tế: mỗi TK luôn có mốc từ lần chốt tay 16/10
 try:
     led = lambda a: md5(os.path.join(S, "data", "execution_logs", f"nav_unit_ledger_{a}.csv"))
     z0 = led("ZaloPay")
     old = set_bts(S, "ZaloPay", "2026-10-07", "2026-10-07T11:00:00")
     rc, out, anc, bus = run_sbx(S, "2026-10-17T07:30")
     check("B1 ZaloPay có dòng chụp trước đóng cửa ⇒ rc≠0; SpaceX ĐÃ chốt + mốc + bus, ZaloPay sổ không đổi",
-          rc != 0 and len(anchors_of(anc, "SpaceX")) == 1 and not anchors_of(anc, "ZaloPay")
+          rc != 0 and len(anchors_of(anc, "SpaceX")) == 2 and len(anchors_of(anc, "ZaloPay")) == 1
           and len(bus) == 1 and led("ZaloPay") == z0 and "[SealGateError]" in out, out)
-    check("B1 mốc SpaceX == md5 thật của sổ + manifest sandbox", anchors_of(anc, "SpaceX")[0].split()[2:] == [
+    check("B1 mốc SpaceX == md5 thật của sổ + manifest sandbox", anchors_of(anc, "SpaceX")[-1].split()[2:] == [
         led("SpaceX"), md5(os.path.join(S, "data", "execution_logs", "nav_unit_ledger_SpaceX.csv.manifest.jsonl"))],
         anc)
     set_bts(S, "ZaloPay", "2026-10-07", old)
     rc, out, anc2, bus = run_sbx(S, "2026-10-17T07:30")
     check("B2 sửa dòng ⇒ chạy lại: SpaceX NothingToSeal, ZaloPay chốt tới 2026-10-09, rc=0",
-          rc == 0 and len(anchors_of(anc2, "SpaceX")) == 1 and len(anchors_of(anc2, "ZaloPay")) == 1
+          rc == 0 and len(anchors_of(anc2, "SpaceX")) == 2 and len(anchors_of(anc2, "ZaloPay")) == 2
           and len(bus) == 2 and "SpaceX: NothingToSeal" in out
           and json.loads(bus[1].split("\t")[3])["through"] == "2026-10-09", out)
     rc, out, anc3, bus = run_sbx(S, "2026-10-17T07:30")
@@ -447,6 +448,21 @@ try:
                        capture_output=True, text=True, env=env, timeout=300)
     check("B7 (ghi nhận sự thật) ledger_anchor_check KHÔNG bắt ca này: rc=0 — chỉ wrapper bắt",
           r.returncode == 0, r.stdout + r.stderr)
+finally:
+    shutil.rmtree(S, ignore_errors=True)
+
+S = mk_sandbox("2026-10-02", anchors=True)
+try:
+    a0 = open(os.path.join(S, "mike", "kb", "fund_ledger_anchors.txt")).read()
+    r = subprocess.run([sys.executable, os.path.join(S, "mike", "bin", "nav_unit_ledger.py"), "--account", "SpaceX",
+                        "--seal", "--real-data", "--asof", "2026-10-09"], capture_output=True, text=True,
+                       env={k: v for k, v in os.environ.items() if k != "WC_ROOT"})
+    assert r.returncode == 0, r.stdout + r.stderr       # chốt không mốc tới 09/10, KHÔNG ai chạy lại trong tuần
+    rc, out, anc, bus = run_sbx(S, "2026-10-21T07:30")   # nhịp cron tuần sau: có dòng mới ⇒ CLI rc=0
+    check("B8 B2 nhịp tuần: chốt không mốc tới 09/10 rồi wrapper chạy tuần sau (có dòng mới, CLI rc=0) ⇒ rc=1 "
+          "'chưa có mốc/thiếu liên tục', file mốc KHÔNG đổi, KHÔNG bus, dừng trước ZaloPay",
+          rc == 1 and "thiếu liên tục" in out.replace("THIẾU liên tục", "thiếu liên tục") and anc == a0
+          and bus == [] and "ZaloPay:" not in out and "ĐÃ CHỐT" not in out, out)
 finally:
     shutil.rmtree(S, ignore_errors=True)
 

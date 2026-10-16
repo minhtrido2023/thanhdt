@@ -159,7 +159,8 @@ def run_cli(account: str, asof: datetime.date):
         return 124, part + (f"\n[ledger_seal_weekly: CLI quá {CLI_TIMEOUT}s, đã bị giết — lần chốt dở (nếu "
                             f"có) được CLI tự hoàn tất ở lượt sau. Nếu CLI con đã chốt xong mà mốc chưa ghi: "
                             f"ledger_anchor_check KHÔNG bắt ca này (manifest chỉ nối thêm sau mốc cũ vẫn khớp); "
-                            f"lượt wrapper kế tiếp bắt bằng so md5 sổ+manifest với mốc mới nhất ⇒ rc=1]")
+                            f"lượt wrapper kế tiếp bắt: cùng tuần ⇒ NothingToSeal so md5 với mốc mới nhất; tuần sau "
+                            f"có dòng mới ⇒ check_continuity trước khi ghi mốc ⇒ rc=1]")
     return r.returncode, r.stdout
 
 
@@ -273,6 +274,37 @@ def check_nothing_to_seal(account: str, asof: datetime.date) -> str:
     return ""
 
 
+def check_continuity(account: str) -> str:
+    """Nhánh rc=0 (vừa có lần chốt MỚI): trạng thái TRƯỚC lần chốt này phải đúng là mốc mới nhất — manifest bỏ
+    bản ghi cuối khớp md5 manifest của mốc, VÀ md5_before của bản ghi cuối khớp md5 sổ của mốc. Lệch ⇒ có
+    đoạn đã chốt mà không có mốc (wrapper chết giữa CLI-xong và ghi-mốc ở lượt trước) ⇒ KHÔNG ghi mốc mới
+    che lấp nó. Trả chuỗi lỗi (kèm số thật đã đọc), rỗng nếu liên tục. (arch-review vòng 2, B2 nhịp tuần.)"""
+    mpath = ledger_file(account) + ".manifest.jsonl"
+    try:
+        anchor = latest_anchor(account)
+        with open(mpath, "rb") as f:
+            raw = f.read()
+    except OSError as e:
+        return f"không đọc được mốc/manifest: {type(e).__name__}: {e}"
+    m = ANCHOR_RE.match(anchor) if anchor else None
+    if m is None:
+        return f"không có mốc nào của {account} trong {ANCHORS} để đối chiếu liên tục"
+    lines = raw.splitlines(keepends=True)
+    if len(lines) < 2:
+        return f"manifest {mpath} chỉ có {len(lines)} bản ghi — không thể có mốc trước lần chốt này"
+    try:
+        last = json.loads(lines[-1])
+    except ValueError as e:
+        return f"bản ghi cuối manifest không phải JSON: {e}"
+    prev_md5 = hashlib.md5(b"".join(lines[:-1])).hexdigest()
+    if prev_md5 != m.group(3) or last.get("md5_before") != m.group(2):
+        return (f"trước lần chốt này, manifest-bỏ-bản-ghi-cuối md5 {prev_md5} / md5_before {last.get('md5_before')} "
+                f"≠ mốc mới nhất {m.group(2)} / {m.group(3)} ⇒ có đoạn sổ đã chốt mà KHÔNG có mốc ngoài kho "
+                f"(lượt trước chết giữa chốt và ghi mốc?). Đối chiếu manifest, chép tay dòng SEAL_MD5 của "
+                f"trạng thái đúng rồi chạy lại; wrapper KHÔNG ghi mốc mới che lấp đoạn đó")
+    return ""
+
+
 def estimate_rows(account: str, added):
     """Số dòng nav_is_estimate=True trong `added` dòng cuối của sổ vừa chốt; None nếu không đọc được."""
     try:
@@ -314,6 +346,13 @@ def seal_all(now: datetime.datetime) -> int:
                   f"{TAIL_LINES} dòng cuối đầu ra thật của nav_unit_ledger:", flush=True)
             print(tail(out), flush=True)
             print(f"🔴 tóm tắt: {acct} LỖI ({why.split(' — ')[0]}); đã chốt+ghi mốc: "
+                  f"{', '.join(sealed) or 'không TK nào'}", flush=True)
+            return 1
+        gap = "" if os.environ.get("LSW_TEST_SKIP_CONTINUITY") == "1" else check_continuity(acct)   # knob CHỈ cho stub selfcheck (A*); B8 chạy kiểm thật
+        if gap:
+            print(f"🔴 ledger_seal_weekly: {acct} VỪA CHỐT ({anchor}) nhưng {gap}; KHÔNG ghi mốc, KHÔNG post bus, "
+                  f"KHÔNG chốt gì thêm.", flush=True)
+            print(f"🔴 tóm tắt: {acct} chốt MỚI nhưng THIẾU liên tục với mốc; đã chốt+ghi mốc: "
                   f"{', '.join(sealed) or 'không TK nào'}", flush=True)
             return 1
         total, through, added = parse_rows(out)
