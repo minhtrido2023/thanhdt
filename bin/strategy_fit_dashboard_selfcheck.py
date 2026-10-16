@@ -92,14 +92,14 @@ def write_real(data, account, navs, capital, *, flows=(), start="2026-10-05", in
     return days
 
 
-def write_registry(kb, *, count=0, target=10, review="fill-vs-open hybrid = +13,4 bps (se 14,4, n=6) x", lm=True, loo=True):
+def write_registry(kb, *, count=0, target=10, review="fill-vs-open hybrid = +13,4 bps (se 14,4, n=6) x", lm=True, loo=True, since="2026-08-26"):
     prog = {"id": "fill_timing", "status": "graduated-live 2026-08-26", "review_short": review, "progress": {},
             "gate_criteria": [{"text": "a", "note": "x"}, {"text": "b", "note": "leave-one-out cho sigma tu 1,59 toi 3,34, "
                                + ("mean tu +2,9 den +23,7 bps." if loo else "khong ghi khoang.")}]}
     if lm:
         prog["progress"]["live_monitoring"] = {
             "target_sessions": target, "count_current_measured": count, "measured_sessions": [],
-            "since": "2026-08-26", "note_2026-09-02": "0/10", "criterion": "phien LIVE co >=1 lenh MUA hybrid",
+            "since": since, "note_2026-09-02": "0/10", "criterion": "phien LIVE co >=1 lenh MUA hybrid",
             "rollback_condition": "mean fill-vs-open > +22 bps (1 tick) ben vung -> rollback flip"}
     json.dump({"programs": [{"id": "other"}, prog]}, open(os.path.join(kb, "paper_programs_registry.json"), "w"))
 
@@ -624,6 +624,12 @@ def t10_tier3():
         sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
         check("T10H registry mất khối live_monitoring ⇒ ô lỗi, ngưỡng vẫn hiện", "live_monitoring" in (sl.error or "")
               and "current_ops.md:" in D.render_cell(sl))
+        for bad_since in (None, "None", "26/08/2026"):
+            write_registry(kb, since=bad_since)
+            sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
+            check(f"T10J registry `since`={bad_since!r} không phải YYYY-MM-DD ⇒ ô LỖI nêu `since` (không đếm im lặng từ «None»)",
+                  "since" in (sl.error or "") and "từ None" not in D.render_cell(sl), sl.error)
+        write_registry(kb)
         open(os.path.join(kb, "paper_programs_registry.json"), "w").write("{hỏng")
         sl = D.cell_live_slippage(data, kb, D.Citer(D.WC_ROOT), NOW)
         check("T10I registry hỏng JSON ⇒ ô lỗi kèm lỗi thật", "JSONDecodeError" in (sl.error or ""), sl.error)
@@ -708,6 +714,17 @@ def t11_enforcement():
         t = [re.sub(r"<[^>]+>", "", x) for x in c["live_dd_spacex"].thr]
         check("T11i crontab CÓ dòng risk_monitor ⇒ «1 dòng đang bật», không còn câu «chưa có tiến trình»",
               "1 dòng đang bật" in t[0] and "chưa có tiến trình định kỳ" not in t[0] and "có lịch chạy" in t[0], t[0])
+        c2, page2, _d2 = _cells(r, ledger_prov(LEDGER_OK),
+                                crontab=lambda: "5 15 * * 1-5 python3 /x/mike/bin/nav_loss_brake_monitor.py\n# 0 13 * * 1-5 python3 risk_monitor.py\n",
+                                code_refs=lambda needle: (10, []))
+        t2 = re.sub(r"<[^>]+>", "", c2["live_dd_spacex"].thr[0])
+        check("T11n crontab có nav_loss_brake_monitor (BẬT) ⇒ nói monitor «chỉ cảnh báo», phanh «không được cưỡng chế»",
+              "nav_loss_brake_monitor" in t2 and "chỉ cảnh báo" in t2 and "không được cưỡng chế" in t2, t2)
+        c3, _p3, _d3 = _cells(r, ledger_prov(LEDGER_OK),
+                              crontab=lambda: "# 5 15 * * 1-5 python3 /x/mike/bin/nav_loss_brake_monitor.py\n",
+                              code_refs=lambda needle: (10, []))
+        check("T11o dòng nav_loss_brake_monitor bị # ⇒ KHÔNG nhắc monitor (không tính dòng tắt)",
+              "nav_loss_brake_monitor" not in re.sub(r"<[^>]+>", "", c3["live_dd_spacex"].thr[0]))
         check("T11j có file nhắc khoá ⇒ liệt kê file, KHÔNG nói «chưa có code nào đọc», không khẳng định là đã thực thi",
               "1 file nhắc tới daily_loss_limit_pct" in t[1] and "trading_bot/halt.py" in t[1]
               and "chưa có code nào đọc" not in t[1] and "không xác minh được" in t[1], t[1])
