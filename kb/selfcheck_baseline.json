@@ -40,16 +40,6 @@
       "triaged_utc": "2026-09-29T08:45:00Z",
       "triaged_by": "Taylor"
     },
-    "mike/bin/production_manifest_selfcheck.sh": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-12T22:10:13Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/production_manifest_selfcheck.sh",
-      "escalated_utc": "2026-10-12T22:10:13Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "mike/bin/snapshot_corp_action_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-10-13T22:11:26Z",
@@ -70,23 +60,13 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "lag_rating_stale_selfcheck.py": {
+    "basket_price_basis_audit_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-14T22:11:49Z",
+      "since": "2026-10-16T19:50:17Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: lag_rating_stale_selfcheck.py",
-      "escalated_utc": "2026-10-14T22:11:49Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/dt5g_writer_watch_selfcheck.sh": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-14T22:11:49Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/dt5g_writer_watch_selfcheck.sh",
-      "escalated_utc": "2026-10-14T22:11:49Z",
+      "topic": "selfcheck-red: basket_price_basis_audit_selfcheck.py",
+      "escalated_utc": "2026-10-16T19:50:17Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
