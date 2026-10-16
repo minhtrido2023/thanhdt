@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3943)
+# Mike fleet — context_taylor_mini (v3944)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-16T09:38:18] Taylor/finding — selfcheck-red-owner-sweep-2026-10-16-Taylor: {"date": "2026-10-16", "owner": "Taylor", "job": "Taylor_20261016_093005", "head_before": "f69741b21", "summary": "2/2 CLOSED, 0 OPEN", "rows": [{"file": "depos …
 - [2026-10-16T12:04:44] DollarBill/decision — plan-2026-10-19-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-19", "file": "data/trade_plans/plan_ZaloPay_2026-10-19.json", "orders": 0, "decision": "HOLD ALL", "dt5g": "NEUTRAL …
 - [2026-10-16T12:04:46] DollarBill/decision — plan-2026-10-19-SpaceX: {"account": "SpaceX", "plan_date": "2026-10-19", "decision": "HOLD_ALL 0 lenh", "dt5g": "NEUTRAL", "active_nav_vnd": 969426082, "egg_vnd": 501352538, "l1": "BLO …
 - [2026-10-16T17:31:32] Mike/finding — daily-retro-draft-2026-10-16: {"summary": "Draft retro 16/10: 4 sự cố, 2 pattern (plan T+1 bị cổng giá TV1 lệch 7,6% chặn; nhánh chưa merge 4 retro liên tiếp, đã re-escalate)", "draft": "sta …
 - [2026-10-16T17:32:44] Wags/finding — retro-draft-2026-10-16-verify: GAPS FOUND (3): {"verdict": "GAPS FOUND", "gaps": ["G1 (sai su that): ban nhap noi ledger-seal-weekly va 6 nhanh \"VAN chua merge\"; git cho thay f22dccbbb (ledger-seal, 16/10  …
+- [2026-10-16T17:34:05] Mike/finding — daily-retro-final-2026-10-16: {"summary": "Retro 16/10 ghi kb/incidents/retro/retro-2026-10-16.md; Wags GAPS FOUND (3) đã sửa; 4 sự cố, 2 pattern; không question mới (đã escalate bước 1)"}
 <!--RECENT-END-->
 
 ## Kill-switches
