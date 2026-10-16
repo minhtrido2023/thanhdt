@@ -1,0 +1,401 @@
+event_uid,dropped_id,survivor_id,ticker,event_code,exright_date,public_date,value_per_share,exercise_ratio,dividend_stage_vi,event_title_vi
+002396ad82cf9947,6708f3640ec61045ab7e3a41,6708f3640ec61045ab7e3a42,DIG,AIS,,2019-05-15,,,,DIG - Niêm yết bổ sung 47.463.661 cổ phiếu
+0075c5354c37bca1,6708f3720ec61045ab7e61bf,6708f3720ec61045ab7e61c0,BKG,AIS,,2022-06-01,,,,"BKG - Niêm yết bổ sung 20,000,000 cổ phiếu"
+0131472317dc175f,6708f3f30ec61045ab7ffb47,6708f3f40ec61045ab7ffe3c,TS4,ISS,,2018-04-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+021658a1ea7a1e3c,6708f36d0ec61045ab7e5467,6708f36d0ec61045ab7e5469,RAL,AIS,,2021-05-24,,,,RAL - Niêm yết bổ sung 115.000 cổ phiếu
+021658a1ea7a1e3c,6708f36d0ec61045ab7e5468,6708f36d0ec61045ab7e5469,RAL,AIS,,2021-05-24,,,,RAL - Niêm yết bổ sung 115.000 cổ phiếu
+02a0c9b3e2e974f5,6708f3f00ec61045ab7ff012,6708f3f80ec61045ab80094c,HAG,ISS,,2015-04-15,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+02a0c9b3e2e974f5,6708f3f00ec61045ab7fee04,6708f3f80ec61045ab80094c,HAG,ISS,,2014-04-18,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+02a0c9b3e2e974f5,6708f3f00ec61045ab7fee05,6708f3f80ec61045ab80094c,HAG,ISS,,2014-04-18,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+03316da06191f8bf,6708f3f00ec61045ab7fee80,6708f3f00ec61045ab7fee81,VAT,ISS,,2014-05-24,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+0370160f6e5894d9,6708f30d0ec61045ab7d30c1,6708f30d0ec61045ab7d30c6,TBX,AIS,,2011-03-10,,,,Niêm yết thêm
+03dfb2a03eb9d074,6708f36f0ec61045ab7e585b,6708f36f0ec61045ab7e585c,CRE,AIS,,2021-11-29,,,,CRE - Niêm yết bổ sung 1.439.997 cổ phiếu
+03dfb2a03eb9d074,6708f36f0ec61045ab7e585a,6708f36f0ec61045ab7e585c,CRE,AIS,,2021-11-29,,,,CRE - Niêm yết bổ sung 4.185.702 cổ phiếu
+03dfb2a03eb9d074,6708f36f0ec61045ab7e5859,6708f36f0ec61045ab7e585c,CRE,AIS,,2021-11-29,,,,CRE - Niêm yết bổ sung 98.533.953 cổ phiếu
+03eb9e6ee45193a5,6708f36f0ec61045ab7e58f0,6708f36f0ec61045ab7e58f1,HHP,AIS,,2021-12-28,,,,HHP - Niêm yết bổ sung 9.000.000 cổ phiếu
+043ff8c1853c80b2,6708f3f40ec61045ab7ffe4b,6708f3f60ec61045ab80043f,TTZ,ISS,,2019-06-28,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+043ff8c1853c80b2,6708f3f00ec61045ab7ff090,6708f3f60ec61045ab80043f,TTZ,ISS,,2015-04-27,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+043ff8c1853c80b2,6708f3f50ec61045ab8000ad,6708f3f60ec61045ab80043f,TTZ,ISS,,2020-08-08,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+04b8e0e32af4e5a3,6708f36d0ec61045ab7e54b0,6708f36d0ec61045ab7e54b1,TOW,AIS,,2021-06-02,,,,TOW - Giao dịch bổ sung 2.515.778 cổ phiếu
+051cb44971869c17,6708f3f30ec61045ab7ffabf,6708f3f30ec61045ab7ffac0,GMD,ISS,2018-08-24,2018-05-16,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+05b48f0d8a49de1d,68759fdef00c716e3cb76fc8,68dc754082ba4d1dc754b818,ABI,ISS,2025-09-11,2025-09-04,,0.2,,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 20.0%
+05b98b503a04ca96,6708f3ef0ec61045ab7fedac,6708f3f30ec61045ab7ffb5c,IVS,ISS,,2014-03-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+05e2cc523ad59d61,6708f3f10ec61045ab7ff447,6708f3f50ec61045ab8001bb,HNG,ISS,,2016-09-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+05e2cc523ad59d61,6708f3f50ec61045ab8001ba,6708f3f50ec61045ab8001bb,HNG,ISS,,2021-06-07,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+05e2cc523ad59d61,6708f3f30ec61045ab7ffbf6,6708f3f50ec61045ab8001bb,HNG,ISS,,2018-09-17,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+06c7e7aed29d8d15,6708f3f60ec61045ab800303,6708f3f80ec61045ab800941,PDB,ISS,,2022-05-04,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+06c7e7aed29d8d15,6708f3f10ec61045ab7ff33c,6708f3f80ec61045ab800941,PDB,ISS,,2016-04-24,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+07190a3b323eeee7,6708f3f20ec61045ab7ff69b,6708f3f30ec61045ab7ffbd0,VKC,ISS,,2017-04-22,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+07190a3b323eeee7,6708f3f10ec61045ab7ff366,6708f3f30ec61045ab7ffbd0,VKC,ISS,,2016-04-29,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+08bd731ea28d507d,6708f36e0ec61045ab7e57f0,6708f36e0ec61045ab7e57f1,SHS,AIS,,2021-11-16,,,,SHS - Niêm yết bổ sung 112.523.419 cổ phiếu
+08edb41a13eaa9e5,6708f3600ec61045ab7e2e33,6708f3600ec61045ab7e2e34,HCD,AIS,,2018-04-05,,,,"HCD - Niêm yết thêm 8,079,619 cổ phiếu"
+08f68683bb97b7ce,6708f3f40ec61045ab7ffd40,6708f3f50ec61045ab80002d,VJC,ISS,,2019-04-19,,0.25,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 25.0%
+09626071be44b1e6,6708f3f60ec61045ab800564,6708f3f80ec61045ab800970,DBT,ISS,,2022-03-30,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+09626071be44b1e6,6708f3f60ec61045ab800259,6708f3f80ec61045ab800970,DBT,ISS,,2021-04-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+0a82beccaeaa4f50,6708f3300ec61045ab7d9cda,6708f3300ec61045ab7d9cdb,CLL,AIS,,2015-08-07,,,,Niêm yết thêm
+0a83307d9e2c97b2,6708f3710ec61045ab7e6184,6708f3710ec61045ab7e6185,RAL,AIS,,2022-05-23,,,,"RAL - Niêm yết bổ sung 10,772,419 cổ phiếu"
+0a94391259a3732d,6708f35c0ec61045ab7e2437,6708f36a0ec61045ab7e4b47,SSI,AIS,,2018-02-08,,,,SSI-Niêm yết bổ sung 5.000.000 cổ phiếu
+0adc3681451e9f65,6708f3f30ec61045ab7ffbd8,6708f3f60ec61045ab8004ef,HNM,ISS,,2018-06-30,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+0bd36ec9220092c5,6708f36e0ec61045ab7e57a2,6708f36e0ec61045ab7e57a3,HDC,AIS,,2021-11-04,,,,HDC - Niêm yết bổ sung 609.608 cổ phiếu
+0c4155776a65e8a6,6708f3660ec61045ab7e3f60,6708f3660ec61045ab7e3f61,NVL,AIS,,2019-12-26,,,,NVL - Niêm yết bổ sung 804.123 cổ phiếu
+0c4c1151a4b71e38,6708f36c0ec61045ab7e5281,6708f36c0ec61045ab7e5282,SCI,AIS,,2021-04-13,,,,SCI - Niêm yết bổ sung 12.613.616 cổ phiếu
+0c7ed04db380b0f8,6708f36e0ec61045ab7e56e4,6708f36e0ec61045ab7e56e5,DCL,AIS,,2021-10-06,,,,DCL - Niêm yết bổ sung 1.745.800 cổ phiếu
+0cc7ae20019b563c,6708f3f00ec61045ab7ff01b,6708f3f60ec61045ab800258,DBT,ISS,,2015-04-17,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+0cc7ae20019b563c,6708f3f20ec61045ab7ff703,6708f3f60ec61045ab800258,DBT,ISS,,2017-04-28,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+0d8556d322bcbf2d,6708f3f70ec61045ab80075e,6708f3f80ec61045ab800934,VJC,ISS,,2022-05-30,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+0d8556d322bcbf2d,6708f3f60ec61045ab8003c5,6708f3f80ec61045ab800934,VJC,ISS,,2021-07-01,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+0d9cc6b3ca85a3a2,6708f3f20ec61045ab7ff73c,6708f3f50ec61045ab800020,BCG,ISS,,2017-05-25,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+0ebe962ad746b9ee,6708f3f70ec61045ab800718,6708f3f80ec61045ab800987,IDJ,ISS,,2022-09-21,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+0f02f0426bc45a82,6708f3f70ec61045ab800631,6708f3f80ec61045ab800a7d,GEE,ISS,,2022-04-22,,0.0,,Phát hành cổ phiếu - Phát hành rộng rãi qua đấu giá
+0f6b950c60460d17,6708f36f0ec61045ab7e5a95,6708f36f0ec61045ab7e5a96,TPP,AIS,,2022-02-17,,,,TPP - Niêm yết bổ sung 9.057.360 cổ phiếu
+0ff175bb81d1e287,6708f3f60ec61045ab80029b,6708f3f70ec61045ab80077b,TSC,ISS,,2021-04-27,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+1039b69c2edf4137,6708f3f70ec61045ab8006ef,6708f3f70ec61045ab8006f0,VHE,ISS,2022-09-20,2022-09-21,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+1086282b05aa9ab8,6708f3650ec61045ab7e3c05,6708f3650ec61045ab7e3c04,EMC,AIS,,2019-08-07,,,,EMC - Niêm yết bổ sung 219.667 cổ phiếu hạn chế chuyển nhượng
+10946874ea3241b9,6708f3f20ec61045ab7ff682,6708f3f70ec61045ab8006ab,BID,ISS,,2017-04-22,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+10946874ea3241b9,6708f3f50ec61045ab7fff47,6708f3f70ec61045ab8006ab,BID,ISS,,2021-03-12,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+113f9fc0cf2d0270,6708f3710ec61045ab7e6028,6708f3710ec61045ab7e6029,PLP,AIS,,2022-04-19,,,,"PLP - Niêm yết bổ sung 19,319,214 cổ phiếu"
+11b28f31a134ef36,6708f3720ec61045ab7e6243,6708f3720ec61045ab7e6244,NHH,AIS,,2022-06-30,,,,"NHH - Niêm yết bổ sung 30,353,584 cổ phiếu"
+12547d20c97b6610,6708f3f70ec61045ab800736,6708f3f70ec61045ab8008c5,ANT,ISS,,2022-05-10,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+125d0400c255dff1,6708f3f50ec61045ab7fff1e,6708f3f70ec61045ab800662,VC2,ISS,,2020-03-19,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+12b4c57654612a05,6708f3680ec61045ab7e45ae,6708f3680ec61045ab7e45af,DGW,AIS,,2020-05-07,,,,DGW - Niêm yết bổ sung 600.000 cổ phiếu
+136415b498a2aad4,6708f3650ec61045ab7e3e4a,6708f3650ec61045ab7e3e4c,GIL,AIS,,2019-10-22,,,,GIL - Niêm yết bổ sung 306.270 cổ phiếu
+136415b498a2aad4,6708f3650ec61045ab7e3e4b,6708f3650ec61045ab7e3e4c,GIL,AIS,,2019-10-22,,,,GIL - Niêm yết bổ sung 306.376 cổ phiếu
+139826fee47c40aa,6708f3690ec61045ab7e4a08,6708f3690ec61045ab7e4a09,TLD,AIS,,2020-10-28,,,,TLD - Niêm yết bổ sung 7.134.289 cổ phiếu
+13f9930da903b0c8,6708f35a0ec61045ab7e1d05,6708f35a0ec61045ab7e1d06,KDH,AIS,,2017-11-17,,,,KDH-Niêm yết thêm 92.365.247 cổ phiếu
+152f5704d3936c03,6708f3f70ec61045ab8007c0,6708f3f80ec61045ab8009ed,LDG,ISS,,2022-07-01,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+15ef970cbe6fb072,6708f3f70ec61045ab8006c4,6708f3f80ec61045ab800955,VE8,ISS,,2022-05-20,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+15ef970cbe6fb072,6708f3f50ec61045ab800205,6708f3f80ec61045ab800955,VE8,ISS,,2021-04-05,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+15f03da41974dfba,6708f3f20ec61045ab7ff617,6708f3f70ec61045ab80072f,MHL,ISS,,2017-03-24,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+15f03da41974dfba,6708f3f50ec61045ab8001bc,6708f3f70ec61045ab80072f,MHL,ISS,,2021-01-08,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+165bc8c539e92c76,6708f3f60ec61045ab800508,6708f3f80ec61045ab80099e,API,ISS,,2022-05-12,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+165bc8c539e92c76,6708f3f20ec61045ab7ff7d7,6708f3f80ec61045ab80099e,API,ISS,,2017-06-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+165bc8c539e92c76,6708f3f00ec61045ab7ff0ad,6708f3f80ec61045ab80099e,API,ISS,,2015-05-08,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+169cd19d5886b2aa,6708f3710ec61045ab7e5f24,6708f3710ec61045ab7e5f25,ABB,AIS,,2022-03-23,,,,ABB - Giao dịch bổ sung 37.281.913 cổ phiếu
+169cd19d5886b2aa,6708f3710ec61045ab7e5f23,6708f3710ec61045ab7e5f25,ABB,AIS,,2022-03-23,,,,ABB - Giao dịch bổ sung 60.234.404 cổ phiếu
+18d5889a93af748e,6708f3280ec61045ab7d8341,6708f3280ec61045ab7d8342,LSS,AIS,,2014-12-25,,,,Niêm yết thêm
+18e6493fdb0fbad6,6708f3600ec61045ab7e304c,6708f3600ec61045ab7e304d,HII,AIS,,2018-06-29,,,,HII - Niêm yết bổ sung 14.250.000 cổ phiếu
+18f0d391010a8aca,6708f36d0ec61045ab7e5420,6708f36d0ec61045ab7e5421,FPT,AIS,,2021-05-17,,,,FPT - Niêm yết bổ sung 3.919.468 cổ phiếu
+1b21a9a323ee8a77,6708f3f40ec61045ab7ffe2a,6708f3f70ec61045ab8007cb,TAR,ISS,,2019-04-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+1b91b33204617070,6708f36d0ec61045ab7e538d,6708f36d0ec61045ab7e5390,MWG,AIS,,2021-05-07,,,,MWG - Niêm yết bổ sung 2.326.742 cổ phiếu
+1b91b33204617070,6708f36d0ec61045ab7e538e,6708f36d0ec61045ab7e5390,MWG,AIS,,2021-05-07,,,,MWG - Niêm yết bổ sung 2.326.742 cổ phiếu
+1b91b33204617070,6708f36d0ec61045ab7e538f,6708f36d0ec61045ab7e5390,MWG,AIS,,2021-05-07,,,,MWG - Niêm yết bổ sung 2.326.742 cổ phiếu
+1c75014df0467bc9,6708f36d0ec61045ab7e54bf,6708f36d0ec61045ab7e54c0,AAA,AIS,,2021-06-04,,,,AAA - Niêm yết bổ sung 74.999.642 cổ phiếu
+1cc75ad330399ca8,6708f36e0ec61045ab7e57e8,6708f36e0ec61045ab7e57e9,VFS,AIS,,2021-11-12,,,,VFS - Giao dịch bổ sung 9.808.066 cổ phiếu
+1e1153a29ed1f0f8,6708f3f70ec61045ab800691,6708f3f80ec61045ab800b48,HDB,ISS,,2022-11-21,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+1e3d40369b3a1738,6708f32e0ec61045ab7d978d,6708f32e0ec61045ab7d978e,DAG,AIS,,2015-06-09,,,,Niêm yết thêm
+1eb8a2d1a400722d,6708f3f40ec61045ab7ffd0c,6708f3f60ec61045ab800522,EVS,ISS,,2019-04-06,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+1ed75249bc25c4f9,6708f3f60ec61045ab8002db,6708f3f70ec61045ab8008ef,LPB,ISS,,2021-05-04,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+1ed75249bc25c4f9,6708f3f70ec61045ab8006ad,6708f3f70ec61045ab8008ef,LPB,ISS,,2022-04-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+1ed75249bc25c4f9,6708f3f50ec61045ab80003d,6708f3f70ec61045ab8008ef,LPB,ISS,,2020-06-25,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+1ee71c0b65fa0dcd,6708f36f0ec61045ab7e5857,6708f36f0ec61045ab7e5858,CRC,AIS,,2021-11-30,,,,CRC - Niêm yết bổ sung 11.217.011 cổ phiếu
+1f332c5a8e2860d7,6708f3f60ec61045ab80031a,6708f3f80ec61045ab800bdd,VE3,ISS,,2021-05-07,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+2100b94c5600094c,6708f3f40ec61045ab7ffd67,6708f3f70ec61045ab8006d5,VPB,ISS,,2019-04-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+2109a5812deb8f9a,6708f3f40ec61045ab7ffd12,6708f3f80ec61045ab800b12,DCL,ISS,,2019-04-12,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+2109a5812deb8f9a,6708f3f30ec61045ab7ffadc,6708f3f80ec61045ab800b12,DCL,ISS,,2018-04-21,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+215aea1e2101389a,682bcc070e8a716db6fe75df,69b207bcf2d24c49e822f4b1,KDM,ISS,,2025-05-13,,0.0461,,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 4.6%
+21c539335907e000,6708f3f80ec61045ab80096f,69f938a2db487120c6970a3b,DBT,ISS,,2023-05-11,,0.07,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 7.0%
+2200cd3e7c7982b6,6708f3700ec61045ab7e5c0d,6708f3700ec61045ab7e5c0e,SSH,AIS,,2022-03-03,,,,SSH - Giao dịch bổ sung 124.998.400 cổ phiếu
+223cca48857d9175,6708f3610ec61045ab7e3142,6708f3610ec61045ab7e3144,VFG,AIS,,2018-08-27,,,,VFG - Niêm yết bổ sung 713.106 cổ phiếu
+223cca48857d9175,6708f3610ec61045ab7e3143,6708f3610ec61045ab7e3144,VFG,AIS,,2018-08-27,,,,VFG - Niêm yết bổ sung 713.106 cổ phiếu
+237e2ca42cc3b5b0,6708f3610ec61045ab7e3097,6708f3610ec61045ab7e309a,FPT,AIS,,2018-07-16,,,,FPT - Niêm yết thêm 80.021.111 cổ phiếu
+237e2ca42cc3b5b0,6708f3610ec61045ab7e3099,6708f3610ec61045ab7e309a,FPT,AIS,,2018-07-16,,,,FPT - Niêm yết thêm 80.021.111 cổ phiếu
+237e2ca42cc3b5b0,6708f3610ec61045ab7e3098,6708f3610ec61045ab7e309a,FPT,AIS,,2018-07-16,,,,FPT - Niêm yết thêm 80.021.111 cổ phiếu
+23c0b4d7dbad24cb,6708f3060ec61045ab7d1c8e,6708f3080ec61045ab7d2201,GGG,AIS,,2010-07-21,,,,Niêm yết thêm
+23f4d5806c81542a,6708f36d0ec61045ab7e5558,6708f36d0ec61045ab7e5559,CMV,AIS,,2021-07-01,,,,CMV - Niêm yết bổ sung 4.359.477 cổ phiếu
+24f7e8ebb7f86e19,6708f3f30ec61045ab7ff9e7,6708f3f80ec61045ab8009d5,BTN,ISS,,2018-02-06,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+255e3779fdca0a3c,6708f3f00ec61045ab7ff0b0,6708f3f10ec61045ab7ff2a0,UNI,ISS,,2015-05-09,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+258552a2f1099488,6708f3f70ec61045ab8005ee,6708f3f70ec61045ab8008b7,TCD,ISS,,2022-04-15,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+2639419d3586fc32,6708f36e0ec61045ab7e55e9,6708f36e0ec61045ab7e55ea,TCD,AIS,,2021-07-29,,,,TCD - Niêm yết bổ sung 4.114.562 cổ phiếu
+2726d62f93cb4533,6708f36f0ec61045ab7e5912,6708f36f0ec61045ab7e5913,PHC,AIS,,2022-01-04,,,,PHC - Niêm yết bổ sung 22.617.451 cổ phiếu
+28779b6300770282,6708f3f80ec61045ab800bcf,686f086763f1e526ca8e477b,D11,ISS,,2026-06-12,,0.06,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 6.0%
+28f646dca15e1e7f,6708f3ef0ec61045ab7feb51,6708f3ef0ec61045ab7feb52,MKP,ISS,2012-03-30,2012-03-30,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+2a5eafbbe74d5536,6708f3f70ec61045ab800777,6a1a2e236c972745c9ee88c6,TRS,ISS,,2022-06-13,,0.15,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+2aba377bce0f631c,6708f3f00ec61045ab7ff01e,6708f3f70ec61045ab8008b2,PVT,ISS,,2015-04-17,,0.1,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+2aec143df514540b,6708f3f70ec61045ab8005ef,6708f3f80ec61045ab800ad2,TCD,ISS,,2022-04-15,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+2c26bcaff6fa8dfe,6708f3f60ec61045ab800467,6708f3f70ec61045ab80081b,SBT,ISS,,2021-10-21,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+2cccaa9680199c68,6708f3f70ec61045ab80078a,6708f3f80ec61045ab800b10,DHC,ISS,,2022-06-20,,0.1,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+2dc6b850f3695029,682bcc070e8a716db6fe75e3,68dc754082ba4d1dc754b81a,VC3,ISS,2025-08-01,2025-07-25,,0.09,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 9.0%
+2f2924c055043d61,6708f3f70ec61045ab8006d3,6708f3f80ec61045ab800b3a,VPB,ISS,,2022-05-04,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+2f2924c055043d61,6708f3f60ec61045ab8002c1,6708f3f80ec61045ab800b3a,VPB,ISS,,2021-04-29,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+2f704c1dd200f6d9,6708f32f0ec61045ab7d99ee,6708f32f0ec61045ab7d99ef,FPT,AIS,,2015-07-13,,,,Niêm yết thêm
+2f704c1dd200f6d9,6708f32f0ec61045ab7d99ed,6708f32f0ec61045ab7d99ef,FPT,AIS,,2015-07-13,,,,Niêm yết thêm
+30638679224a15c7,6708f3710ec61045ab7e601b,6708f3710ec61045ab7e601c,HAP,AIS,,2022-04-18,,,,"HAP - Niêm yết bổ sung 48,512,119 cổ phiếu"
+306f7e2d808550f5,6708f36d0ec61045ab7e5357,6708f36d0ec61045ab7e5358,APH,AIS,,2021-05-05,,,,APH - Niêm yết bổ sung 55.583.445 cổ phiếu
+30ac4dd8bbc564d9,6708f3f20ec61045ab7ff805,6708f3f70ec61045ab80079a,TVB,ISS,,2017-07-05,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+30ac4dd8bbc564d9,6708f3f40ec61045ab7ffd87,6708f3f70ec61045ab80079a,TVB,ISS,,2019-04-23,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+323ab882d69adc9e,6708f3f40ec61045ab7ffc61,6708f3f40ec61045ab7ffcf2,FIR,ISS,,2018-05-25,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+3242f8beb835f056,6708f3700ec61045ab7e5b2e,6708f3700ec61045ab7e5b2f,APG,AIS,,2022-02-23,,,,APG - Niêm yết bổ sung 72.361.790 cổ phiếu
+326e0fd154bb1399,6708f3f60ec61045ab800253,6708f3f70ec61045ab800787,FIT,ISS,,2021-04-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+330e40d78bf9b456,6708f3700ec61045ab7e5de6,6708f3700ec61045ab7e5de7,ACC,AIS,,2022-03-11,,,,ACC - Niêm yết bổ sung 74.732.629 cổ phiếu
+3372f94635cb8ac3,6708f36a0ec61045ab7e4a9c,6708f36a0ec61045ab7e4a9e,DC4,AIS,,2020-11-20,,,,DC4 - Niêm yết bổ sung 1.499.758 cổ phiếu
+338095301187b7f9,6708f3710ec61045ab7e5fe2,6708f3710ec61045ab7e5fe3,CFV,AIS,,2022-04-08,,,,"CFV - Đăng ký giao dịch bổ sung 1,506,800 cổ phiếu"
+339fb234821f66fa,6708f3f30ec61045ab7ff981,6708f3f60ec61045ab800448,SPI,ISS,,2017-12-25,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+34a9ed8239b3e38d,6708f3e90ec61045ab7fd7f3,6708f3e90ec61045ab7fd803,NT2,DIV,,2022-09-26,650.0,0.065,Đợt 2,Trả cổ tức bằng tiền mặt - Đợt 2 2021 - 650 VND
+36661c7c4f31c142,6708f3f50ec61045ab800105,6708f3f80ec61045ab800b9d,TDG,ISS,,2022-05-31,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+36a745fa7912b24c,6708f36d0ec61045ab7e52cd,6708f36d0ec61045ab7e52ce,MCM,AIS,,2021-04-20,,,,MCM - Đăng ký giao dịch bổ sung 3.335.811 cổ phiếu
+38418e190225e8a2,6708f3f30ec61045ab7ff8de,6708f3f80ec61045ab800acb,KDM,ISS,,2017-10-04,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+39495d4599532e26,6708f3f40ec61045ab7ffd1d,6708f3f50ec61045ab800008,HBC,ISS,,2019-10-23,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+396c69e6ed7ff16b,6708f36b0ec61045ab7e4e46,6708f36b0ec61045ab7e4e47,TCD,AIS,,2021-03-02,,,,TCD - Niêm yết bổ sung 9.500.000 cổ phiếu
+3a7b98fe20447b0c,68d5dd8c82ba4d1dc74deb1c,6a4852d3279ac17a86eab12b,IPA,ISS,,2025-09-24,,0.2338,,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 23.4%
+3ad71c7284e8b60a,6708f31e0ec61045ab7d630c,6708f32f0ec61045ab7d9a52,SBT,AIS,,2013-09-12,,,,Niêm yết thêm
+3ae53749351f31db,6708f3640ec61045ab7e3b22,6708f3640ec61045ab7e3b23,LDG,AIS,,2019-06-18,,,,LDG - Niêm yết bổ sung 49.597.997 cổ phiếu
+3b980a793688985d,6708f36c0ec61045ab7e50e7,6708f36c0ec61045ab7e50e8,CTF,AIS,,2021-03-17,,,,CTF - Niêm yết bổ sung 22.678.210 cổ phiếu
+3bd187b7ca898750,6708f3f70ec61045ab8006a1,6708f3f70ec61045ab8008d3,MSR,ISS,,2022-04-27,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+3bd187b7ca898750,6708f3f50ec61045ab800222,6708f3f70ec61045ab8008d3,MSR,ISS,,2021-04-13,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+3c0b7ed8b857d010,688c0970a6a4d755dbae5db0,68dc754082ba4d1dc754b80e,GAS,ISS,2025-08-28,2025-08-05,,0.03,,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 3.0%
+3c3c7f95f1780372,6708f3720ec61045ab7e6269,6708f3720ec61045ab7e626a,VIB,AIS,,2022-07-06,,,,"VIB - Niêm yết bổ sung 486,084,050 cổ phiếu"
+3c6297c94aeadfb6,6708f3660ec61045ab7e3ed3,6708f3660ec61045ab7e3ed4,TVB,AIS,,2019-11-19,,,,TVB - Niêm yết bổ sung 24.210.959 cổ phiếu
+3cf321da56bd66e8,6708f36d0ec61045ab7e54c6,6708f36d0ec61045ab7e54c7,VXT,AIS,,2021-06-07,,,,VXT - Giao dịch bổ sung 1.212.799 cổ phiếu
+3df4dca91bb1487f,6708f3610ec61045ab7e3253,6708f3610ec61045ab7e3254,LDG,AIS,,2018-10-24,,,,LDG - Niêm yết bổ sung 1.865.000 cổ phiếu
+3df4dca91bb1487f,6708f3610ec61045ab7e3252,6708f3610ec61045ab7e3254,LDG,AIS,,2018-10-24,,,,LDG - Niêm yết bổ sung 1.865.000 cổ phiếu
+3e36e2c124120e7e,6708f3f10ec61045ab7ff3f4,6708f3f70ec61045ab800761,HCD,ISS,,2016-01-10,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+3f474fb61378301b,6708f3f00ec61045ab7fee55,6708f3f70ec61045ab80068d,TTF,ISS,,2014-04-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+3f474fb61378301b,6708f3f50ec61045ab7fff51,6708f3f70ec61045ab80068d,TTF,ISS,,2020-04-27,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+3f474fb61378301b,6708f3f10ec61045ab7ff2da,6708f3f70ec61045ab80068d,TTF,ISS,,2016-04-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+3ffcd52b6fe8b3ba,6708f3f70ec61045ab80075f,6708f3f80ec61045ab800b5f,VJC,ISS,,2023-10-18,,0.2,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+40eb74fe334b22a7,6708f36d0ec61045ab7e52e9,6708f36d0ec61045ab7e52ea,HVH,AIS,,2021-04-22,,,,HVH - Niêm yết bổ sung 9.485.791 cổ phiếu
+40fa26ae7f27967f,6708f3710ec61045ab7e60fd,6708f3710ec61045ab7e60fe,VIX,AIS,,2022-05-11,,,,"VIX - Niêm yết bổ sung 271,661,082 cổ phiếu"
+417e4155b97e2c50,6708f36a0ec61045ab7e4b54,6708f36a0ec61045ab7e4b56,TPB,AIS,,2020-12-21,,,,TPB - Niêm yết bổ sung 14.286.680 cổ phiếu
+417e4155b97e2c50,6708f36a0ec61045ab7e4b53,6708f36a0ec61045ab7e4b56,TPB,AIS,,2020-12-21,,,,TPB - Niêm yết bổ sung 181.112.516 cổ phiếu
+417e4155b97e2c50,6708f36a0ec61045ab7e4b55,6708f36a0ec61045ab7e4b56,TPB,AIS,,2020-12-21,,,,TPB - Niêm yết bổ sung 4.067.440 cổ phiếu
+41a09faa3a49788e,6708f36f0ec61045ab7e58f8,6708f36f0ec61045ab7e58f9,SSB,AIS,,2021-12-29,,,,SSB - Niêm yết bổ sung 133.046.199 cổ phiếu
+41d2d57cc0a6ed34,6708f3f40ec61045ab7ffdf4,681aa86d86e9541d8ab67a23,C4G,ISS,,2019-04-26,,0.05,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+431c90c20840fea0,6708f3f00ec61045ab7ff095,6708f3f80ec61045ab800c06,VND,ISS,,2015-04-23,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+431c90c20840fea0,6708f3f30ec61045ab7ffa71,6708f3f80ec61045ab800c06,VND,ISS,,2019-04-18,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+431c90c20840fea0,6708f3f00ec61045ab7fee34,6708f3f80ec61045ab800c06,VND,ISS,,2014-04-25,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+431c90c20840fea0,6708f3f60ec61045ab8004ac,6708f3f80ec61045ab800c06,VND,ISS,,2023-06-19,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+431c90c20840fea0,6708f3f80ec61045ab8009b2,6708f3f80ec61045ab800c06,VND,ISS,,2023-06-19,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+443a92d52660043c,6708f3720ec61045ab7e6230,6708f3720ec61045ab7e6231,NVB,AIS,,2022-06-24,,,,"NVB - Niêm yết bổ sung 148,525,112 cổ phiếu"
+44643cc0868f357e,6708f3690ec61045ab7e490b,6708f3690ec61045ab7e490c,TV2,AIS,,2020-09-14,,,,TV2- Niêm yết bổ sung 11.686.659 cổ phiếu
+45bbf7c694d924ed,6708f3610ec61045ab7e31b5,6708f3610ec61045ab7e31b6,DRH,AIS,,2018-09-19,,,,DRH - Niêm yết bổ sung 2.200.000 cổ phiếu
+461880088845566e,6708f36c0ec61045ab7e521e,6708f36c0ec61045ab7e521f,QST,AIS,,2021-04-02,,,,QST - Niêm yết bổ sung 1.434.988 cổ phiếu
+47276e5bfe065411,6708f3ef0ec61045ab7feda9,6708f3f30ec61045ab7ff891,FCN,ISS,,2014-03-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+4740e3acbfb7c8c1,6708f3600ec61045ab7e3059,6708f3600ec61045ab7e305a,LGL,AIS,,2018-07-04,,,,LGL - Niêm yết bổ sung 15.403.316 cổ phiếu
+4751f5ee942c67b8,6708f3f40ec61045ab7ffce6,6708f3f50ec61045ab8001e2,VIB,ISS,,2019-03-28,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+4751f5ee942c67b8,6708f3f30ec61045ab7ffb7e,6708f3f50ec61045ab8001e2,VIB,ISS,,2018-03-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+47939a193dfa4ab2,6708f3f00ec61045ab7ff102,6708f3f00ec61045ab7ff103,GMD,ISS,2015-10-21,2015-07-15,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+48b888b1f58fd4f4,6708f36f0ec61045ab7e584b,6708f36f0ec61045ab7e584c,FTS,AIS,,2021-11-29,,,,FTS - Niêm yết bổ sung 1.037.100 cổ phiếu
+48cf01195e330d4f,6708f36e0ec61045ab7e57df,6708f36e0ec61045ab7e57e0,SHE,AIS,,2021-11-12,,,,SHE - Niêm yết bổ sung 1.314.950 cổ phiếu
+49558ad740bb6565,6708f36a0ec61045ab7e4c3d,6708f36a0ec61045ab7e4c3e,PNJ,AIS,,2021-01-25,,,,PNJ - Niêm yết bổ sung 695.626 cổ phiếu
+49558ad740bb6565,6708f36a0ec61045ab7e4c3c,6708f36a0ec61045ab7e4c3e,PNJ,AIS,,2021-01-25,,,,PNJ - Niêm yết bổ sung 695.626 cổ phiếu
+4a8b8c00634038bc,6708f3710ec61045ab7e5fee,6708f3710ec61045ab7e5fef,IDJ,AIS,,2022-04-13,,,,"IDJ - Niêm yết bổ sung 72,515,076 cổ phiếu"
+4a8cd423c613bf6a,6708f3f30ec61045ab7ffa1f,6708f3f40ec61045ab7ffce1,TNA,ISS,,2018-03-24,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+4aa288c0fea01853,6708f30b0ec61045ab7d2aa5,6708f30b0ec61045ab7d2ab7,PXL,NLIS,,2010-12-01,,,,Niêm yết mới
+4be453e19e118255,6708f3640ec61045ab7e3b47,6708f3640ec61045ab7e3b49,FPT,AIS,,2019-06-21,,,,FPT - Niêm yết bổ sung 303.673  cổ phiếu hạn chế chuyển nhượng từ ngày 04/04/2017 đến ngày 03/04/2020
+4be453e19e118255,6708f3640ec61045ab7e3b48,6708f3640ec61045ab7e3b49,FPT,AIS,,2019-06-21,,,,FPT - Niêm yết bổ sung 305.225  cổ phiếu hạn chế chuyển nhượng từ ngày 03/04/2018 đến ngày 02/04/2021
+4be453e19e118255,6708f3640ec61045ab7e3b46,6708f3640ec61045ab7e3b49,FPT,AIS,,2019-06-21,,,,FPT - Niêm yết bổ sung 60.739.121  cổ phiếu tự do chuyển nhượng
+4c65c45b76daeb2b,6708f3610ec61045ab7e3109,6708f3610ec61045ab7e310a,KSH,AIS,,2018-08-09,,,,KSH -  Niêm yết bổ sung 29.456.175 cổ phiếu
+4ca3d06639a09fe4,6708f3610ec61045ab7e31de,6708f3610ec61045ab7e31df,SMC,AIS,,2018-09-27,,,,SMC - Niêm yết bổ sung 12.992.399 cổ phiếu
+4ca3d06639a09fe4,6708f3610ec61045ab7e31dd,6708f3610ec61045ab7e31df,SMC,AIS,,2018-09-27,,,,SMC - Niêm yết bổ sung 12.992.399 cổ phiếu
+4e2209353ea0e1eb,6708f3f40ec61045ab7ffd1a,6708f3f50ec61045ab7fff27,AAA,ISS,,2019-04-16,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+4e3f876d8528b2e7,6708f3f40ec61045ab7ffe0b,6708f3f60ec61045ab8003ab,RAL,ISS,,2019-05-04,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+4f355a406f259d9e,6708f3f60ec61045ab800375,6708f3f80ec61045ab800978,BVB,ISS,,2021-12-28,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+4fc5d7ad65172979,6708f3640ec61045ab7e3a5e,6708f3640ec61045ab7e3a5f,FRT,AIS,,2019-05-21,,,,FRT - Niêm yết bổ sung 680.000 cổ phiếu
+4fec86b2af698dc7,6708f3f60ec61045ab80046e,6708f3f80ec61045ab80093e,SMT,ISS,,2021-10-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+50102fb9aba0fad0,6708f3680ec61045ab7e46f2,6708f3680ec61045ab7e46f1,TVS,AIS,,2020-05-25,,,,TVS - Niêm yết bổ sung 10.000.000 cổ phiếu
+502693bd5c47bb53,6708f3f70ec61045ab8007c8,6708f3f80ec61045ab8009ab,APS,ISS,,2022-07-04,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+50d28d597f2f5c44,6708f3600ec61045ab7e2f4f,6708f3600ec61045ab7e2f50,VND,AIS,,2018-05-23,,,,VND-Niêm yết thêm 65.432.004 cổ phiếu
+5217ff35068412fc,6708f36c0ec61045ab7e51e5,6708f36c0ec61045ab7e51e6,EVG,AIS,,2021-03-30,,,,EVG - Niêm yết bổ sung 27.631.307 cổ phiếu
+53fd132f856eff1b,6708f3f20ec61045ab7ff673,6708f3f80ec61045ab800935,VJC,ISS,,2017-04-20,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+53fd132f856eff1b,6708f3f60ec61045ab8003c4,6708f3f80ec61045ab800935,VJC,ISS,,2021-07-01,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+548850a1a6bfabf0,6708f3700ec61045ab7e5b97,6708f3700ec61045ab7e5b98,VPG,AIS,,2022-02-28,,,,VPG - Niêm yết bổ sung 21.348.084 cổ phiếu
+5488603c4f62f75a,6708f3710ec61045ab7e5ee4,6708f3710ec61045ab7e5ee5,EVG,AIS,,2022-03-22,,,,EVG - Niêm yết bổ sung 60.463.554 cổ phiếu
+54f2df5026a70505,6708f3f10ec61045ab7ff42a,6708f3f10ec61045ab7ff42b,HHV,ISS,,2016-08-12,,0.0,,Phát hành cổ phiếu - Phát hành rộng rãi qua đấu giá
+55cbb0c8ea0aefa0,6708f36c0ec61045ab7e5188,6708f36c0ec61045ab7e5189,BCE,AIS,,2021-03-23,,,,BCE - Niêm yết bổ sung 4.980.573 cổ phiếu
+57440f9f205698d4,6708f3f10ec61045ab7ff3a0,6708f3f20ec61045ab7ff65f,TVC,ISS,,2016-05-07,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+58248910520f0b43,6708f36e0ec61045ab7e579e,6708f36e0ec61045ab7e579f,PJT,AIS,,2021-11-03,,,,PJT - Niêm yết bổ sung 7.230.395 cổ phiếu
+595eb80e0e7aa627,6708f36f0ec61045ab7e5acb,6708f36f0ec61045ab7e5acc,SHB,AIS,,2022-02-21,,,,SHB - Niêm yết bổ sung 522.389.450 cổ phiếu
+59ab99579bdf0142,6708f3080ec61045ab7d22d1,6708f3090ec61045ab7d2332,VIC,AIS,,2010-07-29,,,,Niêm yết thêm
+5b1d3fe76c76e656,6708f3f70ec61045ab8006a0,6708f3f80ec61045ab800b2e,MSR,ISS,,2022-06-30,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+5b1d3fe76c76e656,6708f3f70ec61045ab8008d2,6708f3f80ec61045ab800b2e,MSR,ISS,,2023-04-19,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+5b1ded0ab949729f,6708f3f60ec61045ab8002d8,6708f3f80ec61045ab800ab7,OCB,ISS,,2022-08-24,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+5bcc15ac3533c16e,6708f3060ec61045ab7d1bc5,6708f3060ec61045ab7d1cb4,LGL,NLIS,,2009-10-08,,,,Niêm yết mới
+5c0c309bddaf43ae,6708f3f60ec61045ab800593,6708f3f70ec61045ab800880,DTG,ISS,,2022-10-12,,3.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 300.0%
+5c364eff53f7e0d4,6708f3f80ec61045ab800a11,6708f3f80ec61045ab800b23,GKM,ISS,,2023-10-10,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+5ca94ccb6034485b,6708f3f80ec61045ab800bb2,6859f09ebffa71495b6fc5c3,ATG,ISS,,2024-05-28,,0.657,,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 65.7%
+5d05c2fde6b9c52e,6708f3f70ec61045ab800594,6708f3f70ec61045ab80087f,DTG,ISS,,2022-04-07,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+5d1d4fd198bafb71,6708f3f40ec61045ab7ffc3f,6708f3f40ec61045ab7ffd76,MPT,ISS,,2018-11-18,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5d9974ea0e477191,6708f3540ec61045ab7e0b89,6708f3600ec61045ab7e2fe9,VFG,AIS,,2017-07-14,,,,VFG-Niêm yết bổ sung 600.000 cổ phiếu
+5d9974ea0e477191,6708f3600ec61045ab7e2fe8,6708f3600ec61045ab7e2fe9,VFG,AIS,,2018-06-12,,,,VFG-Niêm yết bổ sung 600.000 cổ phiếu
+5dd7569e2a4ed558,6708f3f30ec61045ab7ffbce,6708f3f40ec61045ab7ffe6e,NHT,ISS,,2018-07-28,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5e193a6ad02de2da,6708f3ef0ec61045ab7fedb3,6708f3f80ec61045ab8009aa,APS,ISS,,2014-03-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5e193a6ad02de2da,6708f3f70ec61045ab8007c7,6708f3f80ec61045ab8009aa,APS,ISS,,2022-07-04,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5e193a6ad02de2da,6708f3f30ec61045ab7ffa60,6708f3f80ec61045ab8009aa,APS,ISS,,2018-04-14,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5e193a6ad02de2da,6708f3f60ec61045ab800493,6708f3f80ec61045ab8009aa,APS,ISS,,2021-11-17,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5e998ba6e6b04e2b,6708f3f00ec61045ab7fee64,6708f3f00ec61045ab7fee65,SDH,ISS,,2014-05-08,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+5ef1a23dc46a3aa3,6708f36c0ec61045ab7e50cf,6708f36c0ec61045ab7e50d0,VDP,AIS,,2021-03-16,,,,VDP - Niêm yết bổ sung 1.650.000 cổ phiếu
+5fcfd77eb92409ce,6708f3f40ec61045ab7ffcfe,6708f3f70ec61045ab800603,CSI,ISS,,2019-03-31,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+601f688e6b7062ee,6708f3f40ec61045ab7ffd3d,6708f3f70ec61045ab8008d8,S72,ISS,,2019-04-18,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+601f688e6b7062ee,6708f3f70ec61045ab80065e,6708f3f70ec61045ab8008d8,S72,ISS,,2022-04-25,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+601f688e6b7062ee,6708f3f30ec61045ab7ffbf0,6708f3f70ec61045ab8008d8,S72,ISS,,2018-05-18,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+601f688e6b7062ee,6708f3f60ec61045ab80024f,6708f3f70ec61045ab8008d8,S72,ISS,,2021-04-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+6079051ef69f1b1e,6708f35e0ec61045ab7e28ec,6708f3610ec61045ab7e30d3,PAN,AIS,,2018-03-15,,,,PAN-Niêm yết bổ sung 2.478.000 cổ phiếu
+60d99566c8fafc2f,6708f36f0ec61045ab7e5940,6708f36f0ec61045ab7e5941,TVB,AIS,,2022-01-12,,,,TVB - Niêm yết bổ sung 2.650.000 cổ phiếu
+619723bca941fb12,6708f3f40ec61045ab7ffd65,6708f3f60ec61045ab800266,VCB,ISS,,2019-04-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+619723bca941fb12,6708f3f50ec61045ab80001d,6708f3f60ec61045ab800266,VCB,ISS,,2020-06-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+619723bca941fb12,6708f3f10ec61045ab7ff2df,6708f3f60ec61045ab800266,VCB,ISS,,2016-04-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+62e5ff3d845bba3c,6708f3f80ec61045ab800bbe,672025e4e66a6e1fd927db50,HKT,ISS,,2024-06-03,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+639ea9ff66a1160b,6708f3f50ec61045ab80007a,6708f3f70ec61045ab8007b0,PXL,ISS,,2020-06-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+63c5bbf7b468d3c9,6708f3f80ec61045ab8009da,6708f3f80ec61045ab8009d9,POM,ISS,,2023-07-14,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+63f3a1396ef67cf5,6708f36d0ec61045ab7e53fd,6708f36d0ec61045ab7e53fe,TVB,AIS,,2021-05-13,,,,TVB - Niêm yết bổ sung 15.909.701 cổ phiếu
+63f45ccb58ee78f0,6708f3f60ec61045ab800406,6708f3f60ec61045ab800524,VTD,ISS,,2021-12-08,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+64b53a7ef151fdd8,6708f3e90ec61045ab7fd7d3,6708f3e90ec61045ab7fd7fe,PSN,DIV,,2022-09-16,700.0,0.07,Cả năm,Trả cổ tức bằng tiền mặt - Cả năm 2021 - 700 VND
+6588cb871007e22f,6708f3650ec61045ab7e3c34,6708f3650ec61045ab7e3c36,VFG,AIS,,2019-08-19,,,,VFG - Niêm yết bổ sung 142.620  cổ phiếu
+6588cb871007e22f,6708f3650ec61045ab7e3c35,6708f3650ec61045ab7e3c36,VFG,AIS,,2019-08-20,,,,VFG - Niêm yết bổ sung 142.620  cổ phiếu
+661413a6edf163fb,6708f3620ec61045ab7e33eb,6708f3620ec61045ab7e33ec,GDT,AIS,,2019-02-01,,,,GDT - Niêm yết bổ sung 371.396 cổ phiếu
+6622ddae5a796c42,6708f36a0ec61045ab7e4be9,6708f36a0ec61045ab7e4bea,ACC,AIS,,2021-01-13,,,,ACC - Niêm yết bổ sung 18.704.739 cổ phiếu
+662ca2bed84f0adb,6708f3600ec61045ab7e2f76,6708f3600ec61045ab7e2f77,FCN,AIS,,2018-05-29,,,,FCN-Niêm yết bổ sung 2.500.000 cổ phiếu
+6701a98a46d4a394,6708f3f70ec61045ab800726,6708f3f80ec61045ab800998,VE3,ISS,,2022-09-16,,0.08,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 8.0%
+670517f9953fc223,69f7e74adb487120c6944fa8,69f7e74adb487120c6944fa9,DBD,ISS,,2026-04-28,,0.00795,,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.8%
+686f547e8daa341b,6708f3f00ec61045ab7fee17,6708f3f70ec61045ab800681,MBB,ISS,,2014-04-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+686f547e8daa341b,6708f3f60ec61045ab800296,6708f3f70ec61045ab800681,MBB,ISS,,2021-04-28,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+68f705d2303a0430,6708f3f20ec61045ab7ff6d1,6708f3f70ec61045ab80085a,TIG,ISS,,2017-04-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+68f705d2303a0430,6708f3f40ec61045ab7ffe42,6708f3f70ec61045ab80085a,TIG,ISS,,2019-04-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+68f705d2303a0430,6708f3f50ec61045ab800045,6708f3f70ec61045ab80085a,TIG,ISS,,2020-06-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+69750abc857de250,6708f36d0ec61045ab7e54eb,6708f36d0ec61045ab7e54ec,BVB,AIS,,2021-06-11,,,,BVB - Giao dịch bổ sung 19.793.052 cổ phiếu
+69ec578ae14f6652,6708f3f50ec61045ab800032,6708f3f50ec61045ab800208,NGC,ISS,,2020-06-22,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+6a3ea10df18982dc,6708f36c0ec61045ab7e5149,6708f36c0ec61045ab7e514a,VSH,AIS,,2021-03-19,,,,VSH - Niêm yết bổ sung 29.696.212 cổ phiếu
+6ac6f761aacc1b75,6708f3f50ec61045ab800024,6708f3f70ec61045ab8005fc,LGL,ISS,,2021-10-25,,0.1,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6b200527d2a19328,6708f3f00ec61045ab7ff03c,6708f3f10ec61045ab7ff43a,DAG,ISS,,2015-04-21,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+6b6e48c41bfa4ad5,6708f3f30ec61045ab7ffb96,6708f3f70ec61045ab8005da,HAG,ISS,,2018-08-16,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+6bb1626d138babac,685f368b6cc7f571c1afba3c,6a4852d3279ac17a86eab12a,IPA,ISS,,2025-06-26,,0.15,,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+6c6276a66f26d774,6708f3f00ec61045ab7fee7a,6708f3f70ec61045ab8007c1,AMV,ISS,,2014-04-25,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+6d05e15b69535c70,6708f3f70ec61045ab8005dd,6708f3f70ec61045ab8008a0,VFS,ISS,,2022-04-12,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+6dcb754f995c0c3d,6708f3660ec61045ab7e3f3d,6708f3660ec61045ab7e3f46,CCA,NLIS,,2019-12-18,,,,CCA - Chính thức giao dịch trên sàn UPCoM
+6ec8bd1fd468d2e2,6708f3f10ec61045ab7ff404,6708f3f30ec61045ab7ffbbb,FID,ISS,,2016-07-09,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+6ecac1dc2c64c074,6708f3f10ec61045ab7ff342,6708f3f50ec61045ab80003f,DGW,ISS,,2016-04-26,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+6ecc2e04bc248091,6708f3f50ec61045ab800081,6708f3f70ec61045ab8005de,VFS,ISS,,2020-04-18,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+6f527c0c3eff8bbc,6708f3710ec61045ab7e610b,6708f3710ec61045ab7e610c,TTN,AIS,,2022-05-11,,,,"TTN - Đăng ký giao dịch bổ sung  9,448,713 cổ phiếu"
+6f5b1f9b620343bb,6708f36e0ec61045ab7e5812,6708f36e0ec61045ab7e5813,GKM,AIS,,2021-11-19,,,,GKM - Niêm yết bổ sung 8.786.158 cổ phiếu
+6fc647daae1ca4ab,6708f3600ec61045ab7e2ffa,6708f3600ec61045ab7e2ffb,PTB,AIS,,2018-06-13,,,,PTB - Niêm yết bổ sung 5.183.554 cổ phiếu
+6ff0dbe85f67e9c2,6708f3f00ec61045ab7ff02c,6708f3f30ec61045ab7ffa58,PHC,ISS,,2015-04-18,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+709636e10a0bcca1,6708f3f30ec61045ab7ffbb7,6708f3f60ec61045ab800587,CIG,ISS,,2018-06-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+709636e10a0bcca1,6708f3f60ec61045ab800261,6708f3f60ec61045ab800587,CIG,ISS,,2021-04-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+70d28d2e0d90d7b4,6708f3f60ec61045ab800527,6a3b235ea3320c07054c91e5,TCI,ISS,,2023-06-13,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+7139ed18c608dec9,6708f3f00ec61045ab7ff08e,6708f3f60ec61045ab8004ea,WSS,ISS,,2015-04-25,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+71e93db4c3e8df59,6708f3f00ec61045ab7fedde,6708f3f00ec61045ab7feddf,CSC,ISS,2014-06-25,2014-04-15,,0.05,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+722cf546c4773562,6708f3ef0ec61045ab7fedca,6708f3f00ec61045ab7ff005,VNT,ISS,,2014-04-05,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+729aa4ab58be3341,6708f3f30ec61045ab7ff9fc,6708f3f40ec61045ab7ffcbf,AGP,ISS,,2018-03-16,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+729df65414d33140,6708f3f60ec61045ab8004e0,6708f3f70ec61045ab800794,HTP,ISS,,2021-12-27,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+73296781594a5302,68759fdef00c716e3cb76fc7,68dc754082ba4d1dc754b819,ABI,ISS,2025-09-11,2025-09-04,,0.2,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+73629d64a5d8c165,6708f3f40ec61045ab7ffe52,6708f3f40ec61045ab7ffe53,CNT,ISS,,2019-03-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+7378c40055b09453,6708f3f80ec61045ab800b9a,6a0e5085a6ca51ba73a0c150,TIG,ISS,,2024-05-15,,0.2583,,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 25.8%
+74248eb49e162d03,6708f3f70ec61045ab80060e,6708f3f80ec61045ab800b81,NVL,ISS,,2022-04-20,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+74248eb49e162d03,6708f3f70ec61045ab800885,6708f3f80ec61045ab800b81,NVL,ISS,,2023-03-24,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+74248eb49e162d03,6708f3f60ec61045ab8002a4,6708f3f80ec61045ab800b81,NVL,ISS,,2021-04-28,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+74430cf67041c20e,6708f36a0ec61045ab7e4b92,6708f36a0ec61045ab7e4b93,NHH,AIS,,2020-12-30,,,,NHH - Niêm yết bổ sung 1.978.128 cổ phiếu
+750513ffa832ec15,6708f3f50ec61045ab8001e7,6708f3f70ec61045ab8006bb,HSL,ISS,2022-07-22,2022-07-19,,0.05,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+757f830c28ce9d6a,6708f3610ec61045ab7e32df,6708f3610ec61045ab7e32e0,TPB,AIS,,2018-11-30,,,,TPB - Niêm yết bổ sung 116.842.075 cổ phiếu
+76103c8b871ba8ef,6708f3680ec61045ab7e4636,6708f3680ec61045ab7e4637,SSI,AIS,,2020-05-14,,,,SSI - Niêm yết bổ sung 800.000 cổ phiếu
+76103c8b871ba8ef,6708f3680ec61045ab7e4635,6708f3680ec61045ab7e4637,SSI,AIS,,2020-05-14,,,,SSI - Niêm yết bổ sung 81.281.929 cổ phiếu
+76282f7b08376045,6708f3620ec61045ab7e351d,6708f3620ec61045ab7e351e,DHC,AIS,,2019-02-26,,,,DHC - Niêm yết bổ sung 3.445.977 cổ phiếu
+76df7db8ba8ae5a8,6708f36e0ec61045ab7e5699,6708f36e0ec61045ab7e569a,ADG,AIS,,2021-09-24,,,,ADG - Niêm yết bổ sung 1.799.965 cổ phiếu
+7819b7fcf357ac46,6708f3f20ec61045ab7ff666,6708f3f50ec61045ab7fff70,DID,ISS,,2018-05-05,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+78af3821f131a2bf,6708f3f40ec61045ab7ffd7b,6708f3f80ec61045ab800af0,TNG,ISS,,2019-04-21,,0.1,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+78af3821f131a2bf,6708f3f70ec61045ab8006a6,6708f3f80ec61045ab800af0,TNG,ISS,,2022-04-28,,0.1,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+78af3821f131a2bf,6708f3f70ec61045ab800909,6708f3f80ec61045ab800af0,TNG,ISS,,2023-04-25,,0.1,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+78af3821f131a2bf,6708f3f30ec61045ab7ffa90,6708f3f80ec61045ab800af0,TNG,ISS,,2018-04-22,,0.1,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+78af3821f131a2bf,6708f3f50ec61045ab7fff86,6708f3f80ec61045ab800af0,TNG,ISS,,2020-05-17,,0.1,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+791ef9bc37b16a30,6708f3f80ec61045ab800adb,68dc754082ba4d1dc754b81c,BVB,ISS,2025-04-15,2025-04-10,,0.125,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 12.5%
+79252a9f846255c9,6708f36e0ec61045ab7e55ad,6708f36e0ec61045ab7e55ae,MBS,AIS,,2021-07-20,,,,MBS - Niêm yết bổ sung 93.959.939 cổ phiếu
+7948e9e4347cf9ec,6708f3f40ec61045ab7ffd90,6708f3f70ec61045ab80064f,SBV,ISS,,2019-10-11,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+794b085e9a50f371,6708f36c0ec61045ab7e5174,6708f36c0ec61045ab7e5175,AIC,AIS,,2021-03-22,,,,AIC - Đăng ký giao dịch bổ sung 18.830.265 cổ phiếu
+7a2531e26500ca24,6708f3f60ec61045ab8002a1,6708f3f80ec61045ab800be5,ASG,ISS,,2023-06-21,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+7a27aebfdba32ee0,6708f33a0ec61045ab7dbdc1,6708f33a0ec61045ab7dbdc2,STG,AIS,,2016-03-29,,,,STG-Niêm yết thêm 12.398.321 cổ phiếu
+7b0df797e28e0afd,6708f3600ec61045ab7e2ec0,6708f3600ec61045ab7e2ec1,DHM,AIS,,2018-05-02,,,,DHM-Niêm yết thêm 2.203.057 cổ phiếu
+7b42c63c1a1c201e,6708f36e0ec61045ab7e563d,6708f36e0ec61045ab7e563e,TVC,AIS,,2021-09-09,,,,TVC - Niêm yết bổ sung 29.898.972 cổ phiếu
+7c3261719d57f8a4,6708f3720ec61045ab7e61b2,6708f3720ec61045ab7e61b3,FPT,AIS,,2022-05-31,,,,"FPT - Niêm yết bổ sung 4,537,265 cổ phiếu"
+7cee392bd7552958,6708f36f0ec61045ab7e5a67,6708f36f0ec61045ab7e5a69,TDT,AIS,,2022-02-16,,,,TDT - Niêm yết bổ sung 6.282.544 cổ phiếu
+7cee392bd7552958,6708f36f0ec61045ab7e5a68,6708f36f0ec61045ab7e5a69,TDT,AIS,,2022-02-16,,,,TDT - Niêm yết bổ sung 650.000 cổ phiếu
+7ebb73f4596da6dc,6708f3f70ec61045ab800725,6708f3f80ec61045ab800999,VE3,ISS,,2022-05-09,,0.92,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 92.0%
+7f3fd5107c76e3ce,6708f3f60ec61045ab8004f9,6708f3f70ec61045ab8008b0,DAG,ISS,,2022-04-29,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+7f3fd5107c76e3ce,6708f3f70ec61045ab8008ae,6708f3f70ec61045ab8008b0,DAG,ISS,,2023-04-07,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+7f3fd5107c76e3ce,6708f3f00ec61045ab7ff03e,6708f3f70ec61045ab8008b0,DAG,ISS,,2018-04-19,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+7f3fd5107c76e3ce,6708f3ef0ec61045ab7feb8d,6708f3f70ec61045ab8008b0,DAG,ISS,,2012-04-24,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+7f455091c5ee0c02,6708f3db0ec61045ab7fa24f,6708f3de0ec61045ab7fafbc,TCT,DIV,2008-09-09,2008-08-27,1500.0,0.15,Đợt 1,"Trả cổ tức bằng tiền mặt - Đợt 1 2008 - 1,500 VND"
+81473018836bd945,6708f36a0ec61045ab7e4cab,6708f36a0ec61045ab7e4cae,MWG,AIS,,2021-02-03,,,,MWG - Niêm yết bổ sung 3.228.560 cổ phiếu
+81473018836bd945,6708f36a0ec61045ab7e4cad,6708f36a0ec61045ab7e4cae,MWG,AIS,,2021-02-03,,,,MWG - Niêm yết bổ sung 3.228.560 cổ phiếu
+81473018836bd945,6708f36a0ec61045ab7e4cac,6708f36a0ec61045ab7e4cae,MWG,AIS,,2021-02-03,,,,MWG - Niêm yết bổ sung 3.228.560 cổ phiếu
+8153a77eec460200,6708f3f40ec61045ab7ffe72,6708f3f80ec61045ab800967,VTR,ISS,,2019-04-20,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+8196636f8de05fda,6708f3f00ec61045ab7fefa3,6708f3f30ec61045ab7ff90d,KLF,ISS,,2015-03-04,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+827c2ec233be74db,6708f36f0ec61045ab7e58d4,6708f36f0ec61045ab7e58d5,DDG,AIS,,2021-12-23,,,,DDG - Niêm yết bổ sung 27.652.904 cổ phiếu cổ phiếu
+82898d5114f3200c,6708f3e60ec61045ab7fcc32,6708f3e70ec61045ab7fd0f7,SDT,DIV,2020-04-14,2020-03-20,200.0,0.02,Đợt 2,Trả cổ tức bằng tiền mặt - Đợt 2 2018 - 200 VND
+82a6984c13acbaa2,6708f3f10ec61045ab7ff3f7,6708f3f80ec61045ab8009c8,CT3,ISS,,2016-06-28,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+82f930b7173efbbc,6816b3ec86e9541d8aaffd59,69f938a2db487120c6970a2d,PC1,ISS,,2025-04-28,,0.03,,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.0%
+832efac454b846de,680d7953b3bb8d7911f8e8f4,680d7953b3bb8d7911f8e8f5,NVL,ISS,2025-10-09,2025-10-10,,0.025,,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 2.5%
+847fc8da0d633104,6708f3f80ec61045ab800a08,6708f3f80ec61045ab800a09,VNZ,ISS,,2023-09-14,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+84bd80cb1737dab7,6708f3f50ec61045ab7fffb8,6708f3f70ec61045ab800720,RDP,ISS,,2020-06-06,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+84fe34fc3942dd94,6708f3660ec61045ab7e3ee1,6708f3690ec61045ab7e491b,SCS,AIS,,2019-11-26,,,,SCS - Niêm yết bổ sung 190.000 cổ phiếu
+856b9588bfc1087f,6708f3620ec61045ab7e338c,6708f3620ec61045ab7e338d,NVL,AIS,,2019-01-17,,,,NVL - Niêm yết bổ sung 22.670.000 cổ phiếu
+8587ad459a70e161,6708f3620ec61045ab7e33d8,6708f3620ec61045ab7e33da,MWG,AIS,,2019-01-28,,,,MWG - Niêm yết bổ sung 3.182.377 cổ phiếu
+8587ad459a70e161,6708f3620ec61045ab7e33d9,6708f3620ec61045ab7e33da,MWG,AIS,,2019-01-28,,,,MWG - Niêm yết bổ sung 3.182.377 cổ phiếu
+8587ad459a70e161,6708f3620ec61045ab7e33d7,6708f3620ec61045ab7e33da,MWG,AIS,,2019-01-28,,,,MWG - Niêm yết bổ sung 3.182.377 cổ phiếu
+85afa84664df0204,6708f3f40ec61045ab7ffe5c,6708f3f80ec61045ab800a0c,BT6,ISS,,2019-08-09,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+85afa84664df0204,6708f3f80ec61045ab800a0b,6708f3f80ec61045ab800a0c,BT6,ISS,,2023-09-22,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+85afa84664df0204,6708f3f00ec61045ab7fee97,6708f3f80ec61045ab800a0c,BT6,ISS,,2014-06-20,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+85cc7344d5079623,6708f3f40ec61045ab7ffdf5,6708f3f50ec61045ab800074,C4G,ISS,,2019-04-26,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+885c538a0825164c,6708f3f00ec61045ab7ff044,6708f3f10ec61045ab7ff35e,HMH,ISS,,2015-04-19,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+886b1a208d447796,6708f3f00ec61045ab7fedfa,6708f3f00ec61045ab7fedfb,PEC,ISS,,2014-04-19,,0.12,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 12.0%
+8891d6a7c4b79834,6708f3f60ec61045ab8003b3,6708f3f70ec61045ab80074c,CC1,ISS,,2021-06-29,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+890d6ef859324bc0,685f368b6cc7f571c1afba3d,6a4d982a279ac17a86f2f27f,NCG,ISS,,2025-06-26,,0.05,,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 5.0%
+89136d8316c69772,6708f3f00ec61045ab7fee7d,6708f3f00ec61045ab7ff0e9,HHS,ISS,,2014-05-24,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+895c9d86f3a9b4e4,6708f3f00ec61045ab7fee0d,6708f3f80ec61045ab800b2d,SCL,ISS,,2014-04-23,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+8a177673750c493b,6708f3f40ec61045ab7ffdfd,6708f3f60ec61045ab800292,APP,ISS,,2019-04-25,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+8a177673750c493b,6708f3f30ec61045ab7ffb9c,6708f3f60ec61045ab800292,APP,ISS,,2018-05-16,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+8a231a0d62894906,6708f3640ec61045ab7e3b7f,6708f3640ec61045ab7e3b82,HCM,AIS,,2019-07-08,,,,HCM - Niêm yết bổ sung 176.125.505 cổ phiếu
+8a231a0d62894906,6708f3640ec61045ab7e3b81,6708f3640ec61045ab7e3b82,HCM,AIS,,2019-07-08,,,,HCM - Niêm yết bổ sung 176.125.505 cổ phiếu
+8a231a0d62894906,6708f3640ec61045ab7e3b80,6708f3640ec61045ab7e3b82,HCM,AIS,,2019-07-08,,,,HCM - Niêm yết bổ sung 176.125.505 cổ phiếu
+8b0aad0e0c83a2b6,6708f32e0ec61045ab7d97a2,6708f32e0ec61045ab7d97a3,TSC,AIS,,2015-06-10,,,,Niêm yết thêm
+8b2e8bbfd1305768,6708f3710ec61045ab7e60ce,6708f3710ec61045ab7e60cf,DTP,AIS,,2022-05-06,,,,"DTP - Đăng ký giao dịch bổ sung 4,052,731 cổ phiếu"
+8b6f1cc8b29ff069,6708f3f60ec61045ab800533,6708f3f70ec61045ab8008d9,ORS,ISS,,2022-03-14,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+8b8650899a8f155e,6708f36b0ec61045ab7e4ea6,6708f36b0ec61045ab7e4ea7,C47,AIS,,2021-03-03,,,,C47 - Niêm yết bổ sung 1.701.201 cổ phiếu
+8badfe6ef1ecc903,6708f3f00ec61045ab7fefb5,6708f3f40ec61045ab7ffd35,VCS,ISS,,2015-03-24,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+8badfe6ef1ecc903,6708f3f00ec61045ab7feec9,6708f3f40ec61045ab7ffd35,VCS,ISS,,2014-08-05,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+8badfe6ef1ecc903,6708f3f10ec61045ab7ff288,6708f3f40ec61045ab7ffd35,VCS,ISS,,2016-03-31,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+8c12d506a2919416,6708f3f00ec61045ab7ff027,6708f3f20ec61045ab7ff678,ST8,ISS,,2015-04-18,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+8c12d506a2919416,6708f3f10ec61045ab7ff37d,6708f3f20ec61045ab7ff678,ST8,ISS,,2016-04-26,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+8c34e013ba1b26e1,6708f36f0ec61045ab7e5986,6708f36f0ec61045ab7e5987,TCD,AIS,,2022-01-21,,,,TCD - Niêm yết bổ sung 86.929.244 cổ phiếu
+8c8543282f0b0f29,6708f3590ec61045ab7e1b31,6708f3650ec61045ab7e3e31,MBB,AIS,,2017-10-31,,,,MBB-Niêm yết bổ sung 85.637.045 cổ phiếu
+8cc4245a5503a46a,6708f3f70ec61045ab800697,6708f3f80ec61045ab800964,QHD,ISS,,2022-04-27,,0.2,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+8cff8e6d5e2ab292,6708f3f60ec61045ab800350,6708f3f70ec61045ab8006c3,PPE,ISS,,2021-05-17,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+8cff8e6d5e2ab292,6708f3f10ec61045ab7ff38b,6708f3f70ec61045ab8006c3,PPE,ISS,,2016-05-05,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+8cff8e6d5e2ab292,6708f3f50ec61045ab8001bd,6708f3f70ec61045ab8006c3,PPE,ISS,,2021-01-15,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+8ea954328d785953,6708f36a0ec61045ab7e4ab9,6708f36a0ec61045ab7e4aba,TMS,AIS,,2020-11-26,,,,TMS - Niêm yết bổ sung 7.335.751 cổ phiếu
+8eadefb2b7332736,6708f3f00ec61045ab7fee60,6708f3f00ec61045ab7ff007,DNP,ISS,,2014-05-04,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+8f362540041b20ec,6708f3650ec61045ab7e3e50,6708f3650ec61045ab7e3e51,TMS,AIS,,2019-10-23,,,,TMS - Niêm yết bổ sung 6.694.985 cổ phiếu
+8f990bc344efa529,6708f3dd0ec61045ab7fac87,6708f3dd0ec61045ab7facb9,SMA,DIV,2012-07-25,2012-07-10,125.0,0.0125,Đợt 3,Trả cổ tức bằng tiền mặt - Đợt 3 2010 - 125 VND
+8fa3933492bf9c9f,6708f3f60ec61045ab8002e0,6708f3f60ec61045ab800496,TVC,ISS,,2021-05-04,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+8fa3933492bf9c9f,6708f3f20ec61045ab7ff660,6708f3f60ec61045ab800496,TVC,ISS,,2018-04-26,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+901fe169c754123d,6708f3f50ec61045ab8000a8,6708f3f60ec61045ab8002d9,OCB,ISS,,2020-06-30,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+901fe169c754123d,6708f3f10ec61045ab7ff38e,6708f3f60ec61045ab8002d9,OCB,ISS,,2016-04-14,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+909dbe5cea3b182d,6708f3f20ec61045ab7ff7e1,6708f3f70ec61045ab8007b4,SRA,ISS,,2017-06-25,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+909dbe5cea3b182d,6708f3f10ec61045ab7ff44a,6708f3f70ec61045ab8007b4,SRA,ISS,,2016-09-17,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+9115adc6a347baac,6708f3660ec61045ab7e3f01,6708f3660ec61045ab7e3f09,AGP,AIS,,2019-12-04,,,,AGP - Đăng ký giao dịch bổ sung 3.208.794 cổ phiếu
+921803d945481870,6708f36e0ec61045ab7e5702,6708f36e0ec61045ab7e5703,CMX,AIS,,2021-10-12,,,,CMX - Niêm yết bổ sung 28.482.551 cổ phiếu
+9239f70bce49c802,6708f36d0ec61045ab7e52b1,6708f36d0ec61045ab7e52b2,BMJ,AIS,,2021-04-16,,,,BMJ - Niêm yết bổ sung 20.327.320 cổ phiếu
+9287cf5e5c736321,6708f3f80ec61045ab800b70,69f14f8edb487120c68b4cee,S99,ISS,,2024-05-03,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+9287cf5e5c736321,67fda753d2606e49d1e15fae,69f14f8edb487120c68b4cee,S99,ISS,,2025-04-14,,0.5,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+92d84af7f6de85e3,6708f32f0ec61045ab7d9840,6708f32f0ec61045ab7d9841,HPG,AIS,,2015-06-16,,,,Niêm yết thêm
+93b9ebd363a8da8c,6708f3f70ec61045ab8006a7,6708f3f70ec61045ab80090a,TNG,ISS,,2022-04-28,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+93b9ebd363a8da8c,6708f3f30ec61045ab7ffa92,6708f3f70ec61045ab80090a,TNG,ISS,,2018-04-22,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+93e9e1b84f00e98d,6708f3f70ec61045ab800650,6708f3f70ec61045ab8008c3,TLH,ISS,,2022-04-25,,1.0,,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+94025ad85670f932,6708f3f60ec61045ab80054f,6708f3f70ec61045ab800809,DST,ISS,,2022-05-19,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+94025ad85670f932,6708f3f30ec61045ab7ffb0f,6708f3f70ec61045ab800809,DST,ISS,,2018-04-23,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+95e3911aac128391,6708f3630ec61045ab7e3948,6708f3630ec61045ab7e3949,TVB,AIS,,2019-04-09,,,,TVB - Niêm yết bổ sung 7.988.966 cổ phiếu
+960507ebb3de79d5,6708f3f60ec61045ab8004d9,6708f3f80ec61045ab800b19,ELC,ISS,,2022-01-27,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+960507ebb3de79d5,6708f3f20ec61045ab7ff6bc,6708f3f80ec61045ab800b19,ELC,ISS,,2018-04-23,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+965d4f4c1b52bfc7,6708f3f40ec61045ab7ffe40,6708f3f70ec61045ab8007a3,HDA,ISS,,2021-10-06,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+965d4f4c1b52bfc7,6708f3f00ec61045ab7ff0f4,6708f3f70ec61045ab8007a3,HDA,ISS,,2018-06-23,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+9700519a1b5f970b,6708f3600ec61045ab7e2e50,6708f3600ec61045ab7e2e51,FCN,AIS,,2018-04-13,,,,FCN-Giao dịch thêm 32.507.809 cổ phiếu
+97489b65dbbe4e34,6708f36d0ec61045ab7e5533,6708f36d0ec61045ab7e5534,SSI,AIS,,2021-06-25,,,,SSI - Niêm yết bổ sung 3.750.000 cổ phiếu
+9799c9786a2cdd69,6708f3f30ec61045ab7ffb1a,6708f3f40ec61045ab7ffd45,BAB,ISS,,2018-04-24,,0.0,,Phát hành cổ phiếu - Phát hành cho CBCNV
+98245bbac9c9e062,6708f36d0ec61045ab7e546d,6708f36d0ec61045ab7e546e,TVC,AIS,,2021-05-24,,,,TVC - Niêm yết bổ sung 21.318.921 cổ phiếu
+982f9657a97b7d77,6708f3f30ec61045ab7ffaaa,69effda3db487120c6897f21,SHB,ISS,,2018-04-23,,0.1,Cả năm,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+98fe2ae70e0f2f33,6708f3610ec61045ab7e3250,6708f3610ec61045ab7e3251,HDG,AIS,,2018-10-24,,,,HDG - Niêm yết bổ sung 18.983.956 cổ phiếu
+98fe2ae70e0f2f33,6708f3610ec61045ab7e324f,6708f3610ec61045ab7e3251,HDG,AIS,,2018-10-24,,,,HDG - Niêm yết bổ sung 18.983.956 cổ phiếu
+991db8469af61f03,6708f3640ec61045ab7e3b86,6708f3640ec61045ab7e3b87,SHI,AIS,,2019-07-09,,,,SHI - Niêm yết bổ sung 1.700.844 cổ phiếu
+994abab93a3a2970,6708f36f0ec61045ab7e592e,6708f36f0ec61045ab7e592f,ADS,AIS,,2022-01-10,,,,ADS - Niêm yết bổ sung 9.817.678 cổ phiếu
+995de7d354bc673e,6708f3610ec61045ab7e30d1,6708f3610ec61045ab7e30d2,HAH,AIS,,2018-08-01,,,,HAH - Niêm yết bổ sung 14.274.933 cổ phiếu
+9969983397e2c96f,6708f3f70ec61045ab8006dd,6708f3f70ec61045ab8008f4,BMS,ISS,,2022-05-04,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+9969983397e2c96f,6708f3f60ec61045ab800339,6708f3f70ec61045ab8008f4,BMS,ISS,,2021-05-14,,0.0,,Phát hành cổ phiếu - Phát hành riêng lẻ
+9a724c12d4b3cb82,6708f3610ec61045ab7e31b9,6708f3610ec61045ab7e31ba,GMD,AIS,,2018-09-21,,,,GMD - Niêm yết bổ sung 8.648.000 cổ phiếu

@@ -1,0 +1,60 @@
+{
+  "generated_from_table": "lithe-record-440915-m9.tav2_bq.corporate_action",
+  "n_raw_rows": 36170,
+  "n_ledger_events": 35465,
+  "n_rows_collapsed_by_dedup": 705,
+  "n_events_with_multiple_raw_rows": 521,
+  "subtype_counts": {
+    "CASH_DIVIDEND": 17059,
+    "ADDITIONAL_LISTING": 4584,
+    "PRIVATE_PLACEMENT": 2894,
+    "STOCK_DIVIDEND": 2627,
+    "RIGHTS": 2139,
+    "ESOP": 1581,
+    "BONUS": 1531,
+    "NEW_LISTING": 1363,
+    "SUSPENSION": 681,
+    "EXCHANGE_MOVE": 431,
+    "CONVERTIBLE": 256,
+    "AUCTION": 174,
+    "MERGER": 113,
+    "MERGER_ACQUISITION": 17,
+    "UNKNOWN": 15
+  },
+  "taxonomy_rule_counts": {
+    "event_code": 24135,
+    "issue_method_code": 11315,
+    "unmatched": 15
+  },
+  "taxonomy_unknown_pct": 0.042,
+  "iss_ratio_title_vs_column": {
+    "n_checked": 6669,
+    "n_agree": 6669,
+    "n_disagree": 0,
+    "pct_agree": 100.0,
+    "note": "event_title_vi is mechanically built from issue_method_name_vi, so it CANNOT corroborate the subtype label; only the embedded ratio is an independent read."
+  },
+  "known_date_confidence_counts": {
+    "WEAK_UNVERIFIED_VINTAGE": 30830,
+    "UNUSABLE_NOT_BEFORE_EVENT": 4635
+  },
+  "fleet_known_from": "2026-08-12",
+  "cash_dividend": {
+    "n_events": 17059,
+    "n_executed": 16940,
+    "n_cancelled": 0,
+    "n_announced_only": 119,
+    "n_actionable": 16940,
+    "n_no_exright": 82,
+    "n_no_value": 0,
+    "n_same_exdate_other_family": 921,
+    "n_pit_unusable": 823,
+    "n_distinct_ticker_exdate": 16559
+  },
+  "issuance": {
+    "n_events": 11330,
+    "n_cancelled": 1419,
+    "n_unknown_subtype": 15,
+    "n_ratio_unusable": 4661
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "ex_date_range": [
+    "2014-01-01",
+    "2026-06-30"
+  ],
+  "n_events_sql": 12416,
+  "n_events_with_exdate_session": 9273,
+  "n_ledger_actionable_div_pairs_all_years": 16522,
+  "n_sql_pairs_not_in_ledger": 0,
+  "n_ledger_pairs_not_in_sql_same_window": 4106,
+  "n_in_universe_pit": 2993,
+  "n_univ_backfilled": 9270,
+  "n_oshares_matched": 8907,
+  "oshares_coverage_pct": 96.05,
+  "vnindex_sessions": 3397,
+  "ew_sessions": 3396,
+  "ew_impossible_returns_total": 2,
+  "ew_median_names": 306
+}
