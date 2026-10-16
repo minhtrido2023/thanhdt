@@ -15,3 +15,4 @@
 ## Đã xong 16/10
 - ledger-seal SpaceX/ZaloPay chốt + merge f22dccbbb; nav-loss-brake merge d6cf8f276 (mốc xem lại 2026-11-09); cctg-tier2, fund-cashflow, dcf-rf đã merge từ trước.
 
+- [2026-10-16T21:09:55Z] [17/10 weekly audit] EOD report 16/10 cả 2 account đã gửi THIẾU khối giao dịch (bug ATC price=None, đã sửa 87441a7bc) — chờ user quyết gửi lại hay không; report_delivery_gate không bắt được báo cáo mất khối giao dịch (lỗ hổng phủ, chưa vá).
