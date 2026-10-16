@@ -1,0 +1,5 @@
+# Mốc NGOÀI kho của sổ đơn vị quỹ (git-tracked, chỉ THÊM). Mỗi lần chốt sổ in dòng SEAL_MD5 → chép thêm vào cuối file này.
+# bin/ledger_anchor_check.py đối chiếu theo mốc MỚI NHẤT mỗi tài khoản (cron chỉ-đọc, cảnh báo không chặn).
+# 2026-10-16 10:3x ICT — chốt lần đầu, user duyệt thứ tự bước 3 ngày 14/10.
+SEAL_MD5 SpaceX cad84a2c264369b4c837d0c8346a7932 b5e596de3b90c5156a08023a6309d88f
+SEAL_MD5 ZaloPay b1095364176939f8c10e383d873b3b2d dacd6f9a2aceb547b39821de9c16e0e9
