@@ -59,16 +59,6 @@
       "escalated_utc": "2026-10-14T22:11:48Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "basket_price_basis_audit_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-16T19:50:17Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: basket_price_basis_audit_selfcheck.py",
-      "escalated_utc": "2026-10-16T19:50:17Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
