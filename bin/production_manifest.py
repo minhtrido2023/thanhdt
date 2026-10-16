@@ -112,6 +112,13 @@ ROOT_TIER = {
     "discretionary_candidate_funnel.py": T1,  # funnel ý tưởng 8L, đọc file đã chấm, không lệnh
     "adjfactor_drift_daily.sh": T1,         # detect-only lệch adj-factor BQ
     "refresh_deposit_cctg_weekly.sh": T1,   # feed lãi huy động/CCTG tuần (cùng họ refresh_deposit_rate_vn)
+    # Thêm 2026-10-16 (selfcheck-red owner sweep, job Wags_20261016_093002): 2 gốc cron mới 10-13..10-16.
+    # fund_bench_cron.sh là VỎ chung của 5 dòng cron (nav_sleeve --write, ledger_seal_weekly chốt sổ đơn
+    # vị quỹ, ledger_anchor_check, vnindex_total_return, hose_membership_refresh) ⇒ tầng của vỏ = tầng
+    # chặt nhất nó bọc: ghi sổ NAV/đơn vị quỹ ⇒ T0. nav_loss_brake_monitor: chỉ cảnh báo, nhưng đọc vị
+    # thế broker sống + NAV, cùng lập luận plan_position_drift_check ⇒ T0. T0 chỉ CHẶT hơn, không nới ranh giới tự-sửa.
+    "fund_bench_cron.sh": T0,          # vỏ cron việc quỹ bước 4 — bọc nav_sleeve --write + chốt sổ đơn vị
+    "nav_loss_brake_monitor.py": T0,   # phanh lỗ cấp NAV, CHỈ CẢNH BÁO (không tạo BOT_STOP)
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
