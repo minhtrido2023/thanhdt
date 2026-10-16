@@ -528,8 +528,11 @@ check("E5 golive: biến cờ được khởi tạo NGOÀI try (nguồn LAG hỏ
       0 < gl_new.find("lag_rating_stale, lag_rating_stale_error = [], None") < gl_new.find("from lag_live_schedule import"))
 # các gate khác không bị chạm: mọi dòng bị XOÁ so với bản gốc phải nằm trong danh sách cho phép
 if gl_base is not None:
-    removed = [ln for ln in gl_base.splitlines() if ln.strip() and ln not in set(gl_new.splitlines())]
-    check("E6 golive: so với bản gốc chỉ MẤT đúng 1 dòng (dòng import được viết lại)",
+    # bỏ dòng CHỈ-comment: commit sau được duyệt có quyền sửa chú thích (ea82525f0 đổi nhãn CCTG
+    # 6M→12M trong comment) — E6 canh dòng CODE của gate khác, không canh chữ trong comment
+    removed = [ln for ln in gl_base.splitlines()
+               if ln.strip() and not ln.strip().startswith("#") and ln not in set(gl_new.splitlines())]
+    check("E6 golive: so với bản gốc chỉ MẤT đúng 1 dòng code (dòng import được viết lại)",
           removed == ["from lag_rating_filter import lag_filter_low_rating"], f"{removed}")
 
 try:
