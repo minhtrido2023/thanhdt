@@ -1259,3 +1259,6 @@
 
 ## Archived 2026-10-16 (keep=12 days=0 require_done=False)
 - [2026-10-14T06:06:57Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2: CÀI ĐẶT theo research/fund_step4_20261014/SPEC.md, wt riêng nhánh feat/fund-step4-benchmark-20261014, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc README+SPEC, tạo worktree
+
+## Archived 2026-10-16 (keep=12 days=0 require_done=False)
+- [2026-10-14T06:37:49Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2, wt-step4-1014): bước 1-3 COMMIT (b58064f4f A, a51b7cb18 B, 7aeae5999 nav_period_returns benchmark+--sleeve); byte-proof research/fund_step4_impl_20261014/byte_proof.sh 11/11 | NEXT: bước 4 bảng 3.2 + report_delivery_gate (cổng ô chỉ số = CLI, chặn weekly/monthly khi cột cổ tức chưa có số), bước 5 registry+cron (chỉ soạn), bus finding

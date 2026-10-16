@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-14T06:37:49Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2, wt-step4-1014): bước 1-3 COMMIT (b58064f4f A, a51b7cb18 B, 7aeae5999 nav_period_returns benchmark+--sleeve); byte-proof research/fund_step4_impl_20261014/byte_proof.sh 11/11 | NEXT: bước 4 bảng 3.2 + report_delivery_gate (cổng ô chỉ số = CLI, chặn weekly/monthly khi cột cổ tức chưa có số), bước 5 registry+cron (chỉ soạn), bus finding
 - [2026-10-14T06:53:21Z] [Quỹ mở bước 4 phần 2, 10-14] XONG: nhánh feat/fund-step4-benchmark-20261014 @6a60a0bbc (5 commit, wt-step4-1014), CHƯA merge/cron; finding fund-step4-impl-20261014 trace Taylor_20261014_060642; README research/fund_step4_impl_20261014/. CHỜ Mike arch-review + user (merge, sleeve_*.json thật, cron, bq_admin Q10). Sau merge: weekly bảng 3.2 cũ bị chặn khi chuỗi TR đã dựng. (Thay dòng ĐANG DỞ job 060642.)
 - [2026-10-14T09:12:03Z] ĐANG DỞ job Taylor_20261014_091148 (Quỹ mở bước 4 VÒNG 2: B1-B4 + N-a..e, nhánh feat/fund-step4-benchmark-20261014 wt agents/Taylor/wt-step4-1014, KHÔNG merge/cron/data thật) | NEXT: đọc diff nhánh + review a9c014c85c30499ef + /tmp/archrev_s4
 - [2026-10-14T09:26:36Z] ĐANG DỞ job Taylor_20261014_091148: B2 94804b24a, B1 131ea7abf, B3 xong | NEXT: B4 4 mutant (N1 N6 N9 N11) + N-a..e + verify sweep
@@ -26,3 +25,4 @@
 - [2026-10-16T03:36:03Z] ĐANG DỞ job Taylor_20261016_033549 (cron chốt sổ đơn vị quỹ tuần, wrapper bin/ledger_seal_weekly.py, nhánh feat/ledger-seal-weekly-20261016 wt riêng, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc nav_unit_ledger.py + ledger_anchor_check.py + sandbox mẫu
 - [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
 - [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
+- [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)
