@@ -745,6 +745,7 @@ WHERE r.time <= DATE '{end_date}' ORDER BY r.ticker, r.time""")
     # Fundamentals floor in PLACE OF the rating gate: ROE_Min5Y>=0.10 AND CF_OA_3Y>0 AND FSCORE>=5,
     # missing = fail (hard gate semantics, same as gate_rating). As-of Release_Date, fallback
     # time+45d when Release_Date is missing — PIT-honest, independent of fa_ratings* tables.
+    # (CO Y giu +45: cong tac nghien cuu mac dinh TAT; KHAC fa_ratings_8l — rating_8l_history.eff_date_of nay la q_time, 2026-10-16.)
     # Default OFF = byte-identical.
     QFLOOR = os.environ.get("BASKET_QFLOOR", "") == "1"
     qf_by_tk = {}
@@ -1267,6 +1268,7 @@ GROUP BY t.time, sec""")
             raise ValueError(f"BASKET_DY_TIEBREAK={DY_BAND}: need 1 <= lo < hi")
         _dv = bq(f"""SELECT f.ticker, f.time, f.Release_Date, f.Dividend_Min3Y
 FROM tav2_bq.ticker_financial f WHERE f.time <= DATE '{end_date}' AND f.Dividend_Min3Y IS NOT NULL""")
+        # (CO Y giu +45, cong tac nghien cuu mac dinh TAT — khac rating_8l_history.eff_date_of = q_time tu 2026-10-16.)
         # Release_Date NULL -> time+45d: the same conservative public-availability fallback
         # dy_floor_test.py used. It can only ever DELAY a fact, never leak one early.
         _dv["eff"] = (pd.to_datetime(_dv["Release_Date"])

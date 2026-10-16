@@ -1,5 +1,5 @@
 """Selfcheck: moi query doc fa_ratings_8l 'dong moi nhat' PHAI loc f.time <= ngay as-of (PIT).
-fa_ratings_8l co dong eff_date TUONG LAI (Release_Date NULL ⇒ q_time+45; vd PMT 2026-10-18).
+fa_ratings_8l co dong eff_date TUONG LAI (vd PMT 2026-10-18 do fallback cu q_time+45, da bo 2026-10-16).
 Tai hien: (1) tinh — 2 file nguon co `f.time <= DATE`; (2) song — query da loc khong tra dong tuong lai,
 con query KHONG loc (mutant) thi tra (neu bang con dong tuong lai thi kiem chung duoc mutant bi bat)."""
 import os, re, sys

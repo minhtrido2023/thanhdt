@@ -738,7 +738,7 @@ if int(mexb.sum()): print(f"  [EXBULL] suppressed {int(mexb.sum())} momentum sig
 
 # ── 2c. regime_size weak flag: ABSOLUTE 8L rating >= 4 → half size ONLY in BEAR/CRISIS ──
 # PIT: chi lay dong co f.time <= LATEST. fa_ratings_8l co the chua dong eff_date TUONG LAI (Release_Date
-# NULL ⇒ eff = q_time+45, vd PMT 2026-10-18) — lay "dong moi nhat" khong loc ngay = doc rating chua hieu luc.
+# NULL ⇒ eff = q_time+45 trước 2026-10-16, vd PMT 2026-10-18; nay eff = q_time, nhưng vẫn lọc phòng `time` tương lai của vendor) — lay "dong moi nhat" khong loc ngay = doc rating chua hieu luc.
 r8 = bq(f"""SELECT f.ticker, f.rating FROM tav2_bq.fa_ratings_8l AS f
 WHERE f.time <= DATE '{pd.Timestamp(LATEST):%Y-%m-%d}'
 QUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1""")
