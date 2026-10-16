@@ -1,12 +1,12 @@
-# Fleet status — 2026-10-16T01:07:03 UTC
+# Fleet status — 2026-10-16T01:21:20 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-15T14:19:45Z | 647 |  |
-| Mike | Mike | child | dead | 2026-10-15T18:19:21Z | 407 |  |
-| Mike_1927121 | mike-0c | child | dead | 2026-10-14T04:30:01Z | 2677 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | dead | 2026-10-15T17:48:34Z | 438 |  |
-| Taylor_1721522 | taylor-03 | child | dead | 2026-10-14T02:20:01Z | 2807 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | dead | 2026-10-15T17:32:18Z | 454 |  |
-| workingclaude-47 | workingclaude-47 | child | dead | 2026-10-15T05:47:46Z | 1159 |  |
-| workingclaude-fa | workingclaude-fa | child | dead | 2026-10-15T01:23:19Z | 1423 |  |
+| DollarBill | DollarBill | child | dead | 2026-10-15T14:19:45Z | 661 |  |
+| Mike | Mike | child | dead | 2026-10-15T18:19:21Z | 421 |  |
+| Mike_1927121 | mike-0c | child | dead | 2026-10-14T04:30:01Z | 2691 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-10-15T17:48:34Z | 452 |  |
+| Taylor_1721522 | taylor-03 | child | dead | 2026-10-14T02:20:01Z | 2821 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | working | 2026-10-16T01:21:14Z | 0 |  |
+| workingclaude-47 | workingclaude-47 | child | dead | 2026-10-15T05:47:46Z | 1173 |  |
+| workingclaude-fa | workingclaude-fa | child | dead | 2026-10-15T01:23:19Z | 1438 |  |
