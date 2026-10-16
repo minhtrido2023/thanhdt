@@ -66,28 +66,36 @@ fi
 
 TRADING_REPORT_THREAD="trading_report"   # tên trong kb/discord_channels.json (đổi từ Trading Daily 2026-07-03, theo yêu cầu user)
 
-# Dashboard "độ phù hợp chiến lược" đi KÈM email daily (user chọn 2026-10-11 22:10 ICT). Nó là
-# tài liệu cấp THỊ TRƯỜNG, không theo account: lượt account đầu sinh, lượt sau thấy file của
-# $PLAN_DATE thì dùng lại. Đây là phần THÊM ngoài artifact được gate — hàm này không bao giờ
+# Dashboard "độ phù hợp chiến lược" đi KÈM email daily (user chọn 2026-10-11 22:10 ICT). Từ khi có
+# tầng 3 (drawdown thật TỪNG tài khoản, 2026-10-12) trang KHÔNG còn là tài liệu cấp thị trường: ô
+# drawdown đọc nav_history của từng account, mà dòng NAV hôm nay của account chỉ có SAU bước
+# _nav_section của CHÍNH lượt chạy account đó (thứ tự cron: ZaloPay rồi SpaceX). Vì vậy trang được
+# SINH LẠI ở MỖI lượt account, ngay trong _deliver_eod (tức sau _nav_section ở các nhánh có chụp
+# NAV) — không dùng lại file của lượt trước. Nhánh thoát sớm không chụp NAV (không plan / không
+# state) vẫn sinh trang: ô drawdown của account chưa có NAV hôm nay tự gắn CŨ (dashboard so với
+# mốc 19:10 ICT). Đây là phần THÊM ngoài artifact được gate — hàm này không bao giờ
 # trả lỗi và không chặn email: sinh lỗi/quá giờ ⇒ email vẫn đi, thân thêm MỘT dòng mang lỗi thật
-# (§29). Chỉ sinh khi $PLAN_DATE là hôm nay (ICT): dashboard đọc dữ liệu "hiện tại", sinh cho
-# ngày cũ sẽ ra số sai ngày — ngày cũ có sẵn file thì kèm, không có thì gửi không kèm.
+# (§29), KHÔNG kèm file của lượt trước. Chỉ sinh khi $PLAN_DATE là hôm nay (ICT): dashboard đọc dữ
+# liệu "hiện tại", sinh cho ngày cũ sẽ ra số sai ngày — ngày cũ có sẵn file thì kèm, không có thì
+# gửi không kèm.
 # Kết quả để ở mảng STRATEGY_FIT_ARGS (tham số chuyển cho report_delivery_gate.py).
 # STRATEGY_FIT_BEGIN — trích bởi strategy_fit_email_attach_selfcheck.py. Đổi/di chuyển marker ⇒ FATAL.
 _strategy_fit_attach_args() {
   STRATEGY_FIT_ARGS=()
   local dir="$ROOT/reports/dashboard"
   local dash="$dir/strategy_fit_${PLAN_DATE}.html"
-  local tmo="${STRATEGY_FIT_TIMEOUT_S:-120}" out rc last
-  # Dùng lại CHỈ khi file vừa sinh (<30 phút): file "của hôm nay" cũ hơn là số liệu trước lần
-  # publish 18:30/19:00 (vd một lượt chạy tay ban ngày) ⇒ sinh lại (~7 giây). Rỗng 0 byte = không có.
-  if [ -z "$(find "$dash" -mmin -30 -size +0c 2>/dev/null)" ] \
-     && [ "$PLAN_DATE" = "$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)" ]; then
+  local tmo="${STRATEGY_FIT_TIMEOUT_S:-120}" out rc last before
+  # Hôm nay ⇒ LUÔN sinh lại (~7 giây), kể cả khi file của lượt account trước vừa sinh xong: file đó
+  # chưa có NAV hôm nay của account này. Rỗng 0 byte = không có.
+  if [ "$PLAN_DATE" = "$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)" ]; then
+    # mtime (tới nano giây) của file lượt trước, rỗng nếu chưa có: sinh xong mà mtime KHÔNG đổi nghĩa là
+    # lượt này không ghi được file ⇒ không được kèm file của lượt account trước như thể là của lượt này.
+    before="$(stat -c %y "$dash" 2>/dev/null || true)"
     # Bắt RIÊNG stderr (nơi script ghi lỗi thật); stdout (trạng thái từng ô) vẫn chảy ra log.
     # Gộp 2>&1 thì dòng cuối là stdout bị đệm xả lúc thoát, không phải lỗi.
     { out="$(timeout -k 5 "$tmo" "${DNA_PYEXE:-python3}" "$ROOT/bin/strategy_fit_dashboard.py" --out-dir "$dir" 2>&1 >&3)"; rc=$?; } 3>&1
     [ -n "$out" ] && printf '%s\n' "$out" >&2
-    if [ "$rc" -ne 0 ] || [ ! -s "$dash" ]; then
+    if [ "$rc" -ne 0 ] || [ ! -s "$dash" ] || [ "$(stat -c %y "$dash" 2>/dev/null || true)" = "$before" ]; then
       if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
         last="quá ${tmo} giây, đã dừng (rc=$rc)"
       else
