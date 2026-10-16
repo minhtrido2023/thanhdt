@@ -31,7 +31,7 @@ def check(name, cond, detail=""):
     fails += 0 if cond else 1
 
 
-def run_block(rc, stdout, stderr="", boom=None):
+def run_block(rc, stdout, stderr="", boom=None, account="ZaloPay", runonce="ZaloPay"):
     lines, calls = [], []
 
     def fake_run(cmd, **kw):
@@ -41,7 +41,7 @@ def run_block(rc, stdout, stderr="", boom=None):
         return types.SimpleNamespace(returncode=rc, stdout=stdout, stderr=stderr)
 
     fake_sp = types.SimpleNamespace(run=fake_run, TimeoutExpired=subprocess.TimeoutExpired)
-    env = {"subprocess": fake_sp, "sys": sys, "os": os, "wc_root": "/WC", "account": "ZaloPay",
+    env = {"subprocess": fake_sp, "sys": sys, "os": os, "wc_root": "/WC", "account": account, "runonce_label": runonce,
            "lines": lines, "warn": 0}
 
     def W(s):
@@ -104,6 +104,20 @@ check("timeout ⇒ ⚠️ nêu tên lỗi", len(L) == 1 and "TimeoutExpired" in 
 
 L, _ = run_block(7, "dòng lạ\n")
 check("rc lạ ⇒ ⚠️, không ✅", len(L) == 1 and L[0].startswith("⚠️") and "rc=7" in L[0], f"{L}")
+
+# --- lỗi cấp FLEET (rc=2) chỉ route ở lượt account đầu; account sau chỉ hiển thị -------------------
+L, _ = run_block(2, "Phanh lỗ NAV [SpaceX]: file trạng thái CŨ — đang ghi phiên 2026-10-08\n", account="SpaceX", runonce="ZaloPay")
+check("rc=2 ở account KHÔNG phải lượt RUNONCE ⇒ [WARN-ONLY] (không route lần 2)",
+      len(L) == 1 and L[0].startswith("⚠️ [WARN-ONLY]") and not routable(L[0]), f"{L}")
+L, _ = run_block(2, "Phanh lỗ NAV [ZaloPay]: file trạng thái CŨ — đang ghi phiên 2026-10-08\n", account="ZaloPay", runonce="ZaloPay")
+check("rc=2 ở account RUNONCE ⇒ vẫn route", len(L) == 1 and routable(L[0]), f"{L}")
+L, _ = run_block(2, "Phanh lỗ NAV [SpaceX]: file CŨ\n", account="SpaceX", runonce="")
+check("rc=2 khi RUNONCE rỗng (không xác định) ⇒ vẫn route (kêu to, không im)", len(L) == 1 and routable(L[0]), f"{L}")
+L, _ = run_block(3, "Phanh lỗ NAV [SpaceX]: ❌ MONITOR LỖI x\n", account="SpaceX", runonce="ZaloPay")
+check("rc=3 (lỗi riêng từng account) ⇒ VẪN route ở account sau", len(L) == 1 and routable(L[0]), f"{L}")
+L, _ = run_block(1, "", stderr="Traceback (most recent call last):\n  File x\nKeyError: 'foo'")
+check("stderr nhiều dòng ⇒ gộp một dòng, giữ cả dòng lỗi cuối (ROUTING grep theo dòng)",
+      len(L) == 1 and "\n" not in L[0] and "KeyError: 'foo'" in L[0], f"{L}")
 
 check("khối ROUTING của ops_health_check.sh vẫn lọc bằng marker [WARN-ONLY]",
       "grep -vF '[WARN-ONLY]'" in SRC)
