@@ -1,0 +1,146 @@
+bin under test : /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-capithold-1013/bin
+trading_bot    : /home/trido/thanhdt/WorkingClaude/trading_bot (chỉ đọc)  ·  TZ=<unset>
+
+── A. read_hold — chỉ FileNotFoundError mới là 'không giữ' (mục 5) ───────────
+[PASS] A1 file KHÔNG tồn tại ⇒ không giữ, không báo hỏng
+[PASS] A2 file hợp lệ ⇒ ĐANG GIỮ, mang đủ since/decided_by/reason/ref
+[PASS] A3 describe() TRÍCH nội dung file: ai, từ khi nào, vì sao, ref
+[PASS] A4 report_line() đúng câu báo cáo yêu cầu (ngày + lý do + 'KHÔNG cấp margin')
+[PASS] A5 hỏng [JSON cụt] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [file rỗng] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [null] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [list] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [chuỗi] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [số 0] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [false] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [object rỗng] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [thiếu since] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [since rỗng] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [since không phải chuỗi] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [thiếu decided_by] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [decided_by rỗng] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [decided_by không phải chuỗi] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [thiếu reason] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [reason rỗng] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [reason không phải chuỗi] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [thiếu ref] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [ref rỗng] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [ref không phải chuỗi] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A5 hỏng [since không phải ISO] ⇒ vẫn ĐANG GIỮ + corrupt + có lỗi thật
+[PASS] A6 đường dẫn file giữ là THƯ MỤC ⇒ ĐANG GIỮ + corrupt
+[PASS] A7 symlink treo (lstat thấy, open không được) ⇒ ĐANG GIỮ + corrupt
+[PASS] A8 file không có quyền đọc ⇒ ĐANG GIỮ + corrupt (PermissionError nói ra)
+[PASS] A9 thư mục cha không vào được (không kiểm được có file hay không) ⇒ ĐANG GIỮ
+
+── B. capit_margin_hold.py on / off / status (mục 1) ─────────────────────────
+[PASS] B1 status khi không giữ ⇒ rc 0
+[PASS] B2 on --dry-run ⇒ KHÔNG ghi file, KHÔNG bus/Discord
+[PASS] B3 on với --reason trống ⇒ rc 2, không ghi file
+[PASS] B3 on với --ref trống ⇒ rc 2, không ghi file
+[PASS] B3 on với --by trống ⇒ rc 2, không ghi file
+[PASS] B4 on --since không phải ISO ⇒ rc 2, không ghi file
+[PASS] B5 on ⇒ rc 0, file có đủ 4 field bắt buộc
+[PASS] B6 …--since không kèm múi giờ được NEO ICT (+07:00), bất kể TZ của host (§16)
+[PASS] B7 …ghi nguyên tử: không để lại file .tmp
+[PASS] B8 …bus `decision` topic capit-margin-hold-on, payload mang hold + decided_by
+[PASS] B9 …Discord topic duyệt plan nhận tin BẬT GIỮ
+[PASS] B10 status khi đang giữ ⇒ rc 3, trích file
+[PASS] B11 on lần hai ⇒ rc 1, KHÔNG ghi đè, không bus
+[PASS] B12 off --by '' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by '  ' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'mike' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'Mike' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by ' TBD ' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'agent' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'auto' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'pending' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'null' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B12 off --by 'taylor' (placeholder) ⇒ rc 2, lệnh giữ còn nguyên, không bus
+[PASS] B13 off --dry-run ⇒ lệnh giữ còn nguyên, không bus
+[PASS] B14 off khi KHÔNG nạp được APPROVAL_PLACEHOLDERS ⇒ rc 2, lệnh giữ còn nguyên (không kiểm được --by thì không gỡ)
+[PASS] B15 off hợp lệ ⇒ rc 0, file giữ biến mất, status về rc 0
+[PASS] B16 …bản lưu giữ lại lệnh giữ cũ + nguyên văn xác nhận gỡ
+[PASS] B17 …bus `decision` capit-margin-hold-off + Discord topic duyệt plan
+[PASS] B18 off khi không giữ ⇒ rc 1, không bus
+[PASS] B19 status khi file hỏng ⇒ rc 4, nói FILE GIỮ HỎNG + lỗi thật + điều xảy ra 09:05
+[PASS] B20 on đè lên file HỎNG ⇒ thành lệnh giữ hợp lệ, bản hỏng được giữ lại
+[PASS] B21 off trên file HỎNG (user đã xác nhận gỡ) ⇒ gỡ được, bản lưu mang nội dung thô
+[PASS] B22 bus/Discord HỎNG ⇒ file giữ VẪN được ghi nhưng rc 3 + cảnh báo to
+[PASS] B23 on khi còn bản duyệt margin CHƯA thu hồi cho phiên tới ⇒ liệt kê đúng bản đó (không liệt kê bản đã thu hồi / bản quá khứ), cả trên Discord
+[PASS] B24 không khai --decided-by ⇒ bus ghi 'agent' (§20: không tự nhận là user)
+[PASS] B25 …off cũng vậy
+
+── C. approve_margin_day.py (mục 2) ──────────────────────────────────────────
+[PASS] C1 KHÔNG giữ: --dry-run thấy 2 lệnh đòn bẩy, rc 0, không có dòng 🔒 nào
+[PASS] C2 KHÔNG giữ: duyệt thật ⇒ ghi bản duyệt, KHÔNG có dấu vượt giữ
+[PASS] C3 ĐANG GIỮ: duyệt thật ⇒ rc 4, KHÔNG ghi bản duyệt, KHÔNG bus/Discord
+[PASS] C4 …thông báo TRÍCH file giữ (ai, từ khi nào, vì sao, ref) và nói phải làm gì (§29)
+[PASS] C5 ĐANG GIỮ: --dry-run vẫn chạy (rc 0), in preview + trạng thái giữ + 'sẽ bị TỪ CHỐI'
+[PASS] C6 file giữ HỎNG [JSON cụt] ⇒ rc 4, không ghi bản duyệt, nói rõ FILE GIỮ HỎNG
+[PASS] C6 file giữ HỎNG [thiếu reason] ⇒ rc 4, không ghi bản duyệt, nói rõ FILE GIỮ HỎNG
+[PASS] C6 file giữ HỎNG [rỗng] ⇒ rc 4, không ghi bản duyệt, nói rõ FILE GIỮ HỎNG
+[PASS] C7 --override-hold '' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold '  ' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold 'mike' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold 'AUTO' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold 'agent' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold 'tbd' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold 'pending' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C7 --override-hold 'dollarbill' (placeholder) ⇒ rc 2, không ghi bản duyệt
+[PASS] C8 vượt giữ nhưng --approved-by là placeholder ⇒ rc 2, không ghi bản duyệt
+[PASS] C9 vượt giữ + --dry-run ⇒ không ghi gì
+[PASS] C10 VƯỢT GIỮ hợp lệ ⇒ rc 0, bản duyệt được ghi
+[PASS] C11 …bản duyệt GHI RÕ là vượt giữ: hold_override (nguyên văn + lệnh giữ) + note
+[PASS] C12 …bus event GHI RÕ vượt giữ
+[PASS] C13 …Discord GHI RÕ vượt giữ, trích lệnh giữ + nguyên văn xác nhận
+[PASS] C14 …bản duyệt vượt giữ vẫn được trading_bot.plan.margin_day_approval THẬT nhận (field thêm không làm hỏng hợp đồng ghi↔đọc)
+[PASS] C15 ĐANG GIỮ: --revoke vẫn chạy (thu hồi là chiều an toàn)
+[PASS] C16 KHÔNG giữ mà có --override-hold ⇒ ghi như thường, KHÔNG gắn dấu vượt giữ
+
+── D. approve_plan_simple.sh (mục 3) ─────────────────────────────────────────
+[PASS] D1 KHÔNG giữ + plan có lệnh đòn bẩy ⇒ duyệt plan VÀ tự tạo bản duyệt margin (hành vi 2026-08-22 giữ nguyên)
+[PASS] D2 ĐANG GIỮ + plan có lệnh đòn bẩy ⇒ plan ĐÃ duyệt, KHÔNG có bản duyệt margin
+[PASS] D3 …in thông báo đúng: plan đã duyệt, margin KHÔNG, trích file giữ
+[PASS] D4 …nói ĐÚNG điều xảy ra lúc 09:05 (giữ nguyên khối lượng; chặn cả account HOẶC mua đủ) + lối --override-hold
+[PASS] D5 …bus `status` margin-day-approval-held-* + Discord topic duyệt plan
+[PASS] D6 file giữ HỎNG + plan có lệnh đòn bẩy ⇒ không tạo bản duyệt margin, nói rõ file hỏng
+[PASS] D7 KHÔNG chạy được capit_margin_hold.py status (dù không có file giữ) ⇒ coi như ĐANG GIỮ: không tạo bản duyệt margin, nói 'KHÔNG xác định được' + output thật
+[PASS] D8 plan KHÔNG có lệnh đòn bẩy: đang giữ ↔ không giữ cho đầu ra GIỐNG HỆT (stdout, stderr, rc, bus, Discord)
+[PASS] D9 DRY_RUN=1 khi đang giữ ⇒ không ghi gì, không bus
+
+── E. send_plan_report.sh --dry-run (mục 4) ──────────────────────────────────
+[PASS] E0 fixture render được báo cáo đầy đủ (không rơi vào ESCALATE) — nếu FAIL thì các ca E dưới không có nghĩa
+[PASS] E1 KHÔNG giữ + plan có lệnh đòn bẩy ⇒ vẫn câu 'duyệt margin tự động', không có 🔒
+[PASS] E2 ĐANG GIỮ + plan có lệnh đòn bẩy ⇒ hiện dòng giữ đúng mẫu (ngày + lý do + 'duyệt plan sẽ KHÔNG cấp margin')
+[PASS] E3 …và KHÔNG còn hứa 'duyệt margin tự động'; có nói điều xảy ra lúc 09:05
+[PASS] E4 file giữ HỎNG + plan có lệnh đòn bẩy ⇒ nói FILE GIỮ HỎNG, không hứa tự động
+[PASS] E5 KHÔNG nạp được capit_margin_hold ⇒ nói 'KHÔNG đọc được trạng thái giữ' + lỗi thật, không hứa tự động, dòng 🔺 vẫn còn
+[PASS] E6 plan KHÔNG có lệnh đòn bẩy: đang giữ ↔ không giữ cho báo cáo GIỐNG HỆT, không nhắc gì tới giữ
+[PASS] E7 ĐANG GIỮ + đã có bản duyệt VƯỢT GIỮ ⇒ báo cáo nói bản duyệt VẪN CÓ HIỆU LỰC, trích nguyên văn vượt + lối --revoke
+[PASS] E8 ĐANG GIỮ + bản duyệt KHÔNG mang dấu vượt (ghi trước khi giữ) ⇒ nói rõ điều đó
+[PASS] E9 KHÔNG giữ + đã có bản duyệt ⇒ y như cũ (không nhắc gì tới giữ)
+
+── F. Đối chứng với BẢN CŨ — đầu ra giống hệt từng byte khi không giữ / không đòn bẩy ────
+[PASS] F approve_margin_day --dry-run · không giữ · có đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_margin_day duyệt thật · không giữ · có đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_margin_day duyệt thật · không giữ · KHÔNG đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_margin_day placeholder · không giữ ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_plan_simple · không giữ · có đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_plan_simple · không giữ · KHÔNG đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_plan_simple · ĐANG GIỮ · KHÔNG đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F approve_plan_simple DRY_RUN=1 · không giữ · có đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F send_plan_report · không giữ · có đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F send_plan_report · không giữ · KHÔNG đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+[PASS] F send_plan_report · ĐANG GIỮ · KHÔNG đòn bẩy ⇒ cũ ↔ mới giống hệt (rc, stdout, stderr, bus, Discord, file ghi ra)
+
+── H. Câu 'lúc 09:05 sẽ ra sao' — chạy code trading_bot THẬT, không tin mô tả ────
+[PASS] H0 chạy được apply_capit_lever + check_plan_funding thật trên fixture
+[PASS] H1 thiếu bản duyệt ngày ⇒ bot GỠ cờ vay khỏi mọi lệnh (MARGIN_APPROVAL_REQUIRED)
+[PASS] H2 …nhưng GIỮ NGUYÊN khối lượng và KHÔNG bỏ lệnh nào (không sizing lại)
+[PASS] H3 …Σ MUA vượt sức mua đo sống ⇒ check_plan_funding = BLOCK (caller bỏ CẢ account)
+[PASS] H4 …đủ sức mua ⇒ không chặn: các lệnh đó đi ra ĐỦ khối lượng
+[PASS] H5 câu NO_MARGIN_AT_0905 nói đủ 3 ý vừa đo (giữ khối lượng · chặn cả account · mua đủ) và nêu việc cần làm
+[PASS] H6 bot_execute.py: nhánh BLOCK `continue` TRƯỚC khi tạo Executor ⇒ không lệnh nào của account đi ra (kể cả lệnh bán, lệnh không đòn bẩy)
+
+127/127 PASS
+rc=0

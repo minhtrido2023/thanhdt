@@ -1,0 +1,55 @@
+--- a/capit_lever_selfcheck.py	2026-10-11 10:08:56.800763282 +0700
++++ b/capit_lever_selfcheck.py
+@@ -2160,17 +2160,36 @@
+         "# ── ĐÒN BẨY MARGIN: nêu BẬT LOẠT", 2, lambda n: isinstance(n, ast.Try),
+         {"acct", "date"}, "L0")
+ 
+-    def run_margin(pv, rec, aerr=""):
++    # KHOÁ GIỮ CAPIT MARGIN (2026-10-13): khối MARGIN nay đọc `data/CAPIT_MARGIN_HOLD.json` qua
++    # `mike/bin/capit_margin_hold.read_hold()`. Không ghim thì nhóm L phụ thuộc trạng thái giữ
++    # THẬT của production: bật giữ là L2/L4 đỏ dù code không đổi. Ghim ở tầng MODULE (cùng lý do
++    # với _planmod bên dưới). Chưa có module (nhánh mike chưa merge) ⇒ bỏ qua, khối cũ không đọc.
++    _HOLD_OFF = {"held": False, "corrupt": False, "path": "-", "rec": None, "error": ""}
++    _HOLD_ON = {"held": True, "corrupt": False, "path": "-", "error": "",
++                "rec": {"since": "2026-10-13T15:21:00+07:00", "decided_by": "user (selfcheck)",
++                        "reason": "selfcheck giữ", "ref": "mike/kb/projects/capit-margin-hold-20261013.md"}}
++    sys.path.insert(1, os.path.join(HERE, "mike", "bin"))
++    try:
++        import capit_margin_hold as _cmh
++    except ImportError:
++        _cmh = None
++
++    def run_margin(pv, rec, aerr="", hold=None):
+         """exec khối production với preview/duyệt giả lập (vá ở tầng MODULE vì khối tự
+         `from trading_bot.plan import ...` — vá namespace sẽ bị chính dòng import ghi đè)."""
+         _o_pv, _o_ap = _planmod.preview_margin_day, _planmod.margin_day_approval
+         _planmod.preview_margin_day = lambda a, d, **k: pv
+         _planmod.margin_day_approval = lambda a, d, **k: (rec, aerr)
++        _o_rh = _cmh.read_hold if _cmh else None
++        if _cmh:
++            _cmh.read_hold = lambda *a, **k: (hold or _HOLD_OFF)
+         ns = {"acct": "SpaceX", "date": "2099-01-02"}
+         try:
+             exec(MARGIN_SRC, ns)
+         finally:
+             _planmod.preview_margin_day, _planmod.margin_day_approval = _o_pv, _o_ap
++            if _cmh:
++                _cmh.read_hold = _o_rh
+         return "\n".join(ns["margin_note"])
+ 
+     _PV_NONE = {"error": "", "orders": [], "tickers": [], "total_vnd": 0.0,
+@@ -2196,6 +2215,14 @@
+           and "--decided-by user" in _aps)
+     check("L4 …và nói rõ không duyệt thì KHÔNG bị chặn lệnh, chỉ chạy bằng vốn tự có",
+           "VỐN TỰ CÓ" in m_wait)
++    if _cmh:
++        m_held = run_margin(_PV_ON, None, "CHƯA CÓ duyệt riêng cho ngày 2099-01-02", hold=_HOLD_ON)
++        check("L4b ĐANG GIỮ CAPIT margin → báo cáo nói duyệt plan sẽ KHÔNG cấp margin và KHÔNG "
++              "còn hứa 'duyệt margin tự động'",
++              "CAPIT margin ĐANG GIỮ từ 2026-10-13" in m_held and "KHÔNG cấp margin" in m_held
++              and "duyệt margin tự động" not in m_held, detail=m_held[:160])
++        check("L4c …và plan KHÔNG có lệnh vay thì trạng thái giữ không thêm dòng nào",
++              run_margin(_PV_NONE, None, "chưa có duyệt", hold=_HOLD_ON) == "")
+ 
+     m_ok = run_margin(_PV_ON, {"approved_by": "user (John) 21:37",
+                                "max_lever_total_vnd": 130_000_000}, "")
