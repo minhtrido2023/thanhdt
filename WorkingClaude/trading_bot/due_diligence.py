@@ -461,7 +461,7 @@ def _deposit_rate_pct(asof):
     cả giá lẫn cổ tức cũng thiếu; ở đây chỉ trả cờ để caller ghi rõ nguồn.
 
     Nguồn trả về (`deposit_rate_source` ở _yield_floor) phải nói rõ DRIVER thật (big4_12m vs
-    cctg_6m(<date>), hoặc big4_12m(cctg_unavailable:...)/big4_12m(cctg_stale:...) khi CCTG hỏng/cũ
+    cctg_12m(<date>) — cctg_6m(<date>) nếu anchor trước 05/10 —, hoặc big4_12m(cctg_unavailable:...)/big4_12m(cctg_stale:...) khi CCTG hỏng/cũ
     — xem `deposit_rate_vn.effective_deposit_rate()`'s round-2 fix R2), không gộp mù thành
     "deposit_rate_vn" chung chung — bẫy #1, mike/kb/data_registry/macro/cctg_rate_vn.md."""
     key = ("_deprate", str(asof)[:10])
@@ -925,8 +925,11 @@ def dd_check_for_order(ticker, book=None, asof=None, est_value_vnd=None):
     """dict gọn để GẮN VÀO PlannedOrder.dd_check — analog _dcf_check_for_order().
 
     Cố ý KHÔNG chứa text dài (plan JSON đọc bằng mắt): chỉ cờ + bằng chứng 1 dòng thanh khoản.
-    skip_dcf=True — trục định giá đã có dcf_check riêng. KHÔNG BAO GIỜ raise."""
-    ctx = {"asof": asof or dt.date.today(), "skip_dcf": True, "skip_corp_flags": True}
+    skip_dcf=True — trục định giá đã có dcf_check riêng. KHÔNG BAO GIỜ raise.
+
+    ⚠️ KHÔNG còn caller production từ e802c08c (cq-20260913-remove-v23 gỡ đường sinh plan gọi
+    hàm này); tính tới 2026-10-12 chỉ selfcheck gọi. Plan hiện hành không tự gắn dd_check qua đây."""
+    ctx = {"asof": asof or _today_ict(), "skip_dcf": True, "skip_corp_flags": True}
     if est_value_vnd:
         ctx["est_value_vnd"] = est_value_vnd
     d = run_due_diligence(ticker, book, ctx, as_dict=True)
@@ -957,7 +960,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     KHÔNG BAO GIỜ raise.
     """
     ctx = context or {}
-    asof = str(ctx.get("asof") or dt.date.today())[:10]
+    asof = str(ctx.get("asof") or _today_ict())[:10]
     prefix = f"DD {ticker}" + (f" [{book}]" if book else "")
     is_buy = str(ctx.get("side", "buy")).lower() in ("buy", "mua", "b")
     has_override = bool(ctx.get("dd_override_reason") or ctx.get("has_override"))
@@ -990,8 +993,9 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
             parts["signal_mechanics"], _pead_red = _pead_part(row)
             red += _pead_red
         # 2 trường THÔNG TIN (2026-08-17) — chỉ vào dict, KHÔNG vào text, KHÔNG sinh cờ đỏ.
-        # `skip_corp_flags` cho đường SINH LỆNH (dd_check_for_order): 2 trường này không đi vào
-        # PlannedOrder.dd_check, nên ở đó chúng chỉ là ~1 query BQ/mã trên đúng đường găng 21:00.
+        # `skip_corp_flags` cho dd_check_for_order (đường SINH LỆNH cũ, hết caller production từ
+        # e802c08c): 2 trường này không đi vào PlannedOrder.dd_check, nên ở đó chúng chỉ là
+        # ~1 query BQ/mã thừa.
         if ctx.get("skip_corp_flags"):
             parts["upcoming_exdate"], parts["insider_net_sell"] = None, None
             parts["yield_floor"] = None

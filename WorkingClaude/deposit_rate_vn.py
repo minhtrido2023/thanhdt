@@ -108,6 +108,22 @@ def merge_deposit(df, time_col="time"):
                          direction="backward", suffixes=("", "_dep"))
 
 
+# CCTG series tenor rebase (cctg_rate_vn.py docstring): anchors dated before this are 6-month,
+# from this date on 12-month (highest Big-4). Used ONLY to name the tenor in rate_source labels --
+# never in any rate/threshold computation.
+CCTG_TENOR_REBASE_DATE = pd.Timestamp("2026-10-05")
+# Every rate_source prefix meaning "a fresh CCTG anchor drove the rate". Consumers parse with
+# str.startswith(CCTG_SOURCE_PREFIXES); "cctg_6m" stays accepted for pre-rebase anchors and for
+# labels already written to logs/reports before 2026-10-14.
+CCTG_SOURCE_PREFIXES = ("cctg_12m", "cctg_6m")
+
+
+def cctg_source_label(cctg_date):
+    """rate_source label for a fresh CCTG anchor, named by the anchor's real tenor."""
+    tenor = "12m" if pd.Timestamp(cctg_date) >= CCTG_TENOR_REBASE_DATE else "6m"
+    return f"cctg_{tenor}({pd.Timestamp(cctg_date).date()})"
+
+
 def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=None):
     """trading_rules.json::macro_kill_switches.A_sbv_rate_suspend, implemented LITERALLY as code
     for the first time (2026-10-01) — grepping 'macro_kill_switches'/'A_sbv_rate_suspend' across
@@ -129,7 +145,7 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     defaults OFF in pt_v23_audit_2014.py) — there is no live order flow for this function to gate
     yet. It exists so (a) the threshold has a real, testable implementation the day that sleeve
     (or any other consumer) goes live, and (b) the 7.5% level can be monitored today via
-    dna_report.build_macro_killswitch_a_line(), independent of the CCTG 6-month certificate rate
+    dna_report.build_macro_killswitch_a_line(), independent of the CCTG certificate rate (6M to 2026-10-04, 12M after)
     (a DIFFERENT instrument/tenor under separate legal-vn equivalence review — do not conflate).
 
     stale_days_limit=45 is an ARBITRARY choice (trading_rules.json's own spec text does not name a
@@ -162,9 +178,11 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     Before 2026-09-30 (CCTG series' first anchor) current_cctg_rate_checked() returns (None, None,
     None) for every asof, so every call on a date before that is byte-identical to the pre-CCTG
     implementation -- no historical backtest pinned against this function changes. New key in the
-    return dict: rate_source ("big4_12m" or "cctg_6m(<date>)", None on no-data/error) records which
-    series drove the final rate, since the two are different tenors (12M vs 6M) and a report
-    citing this number must say which one is active (see cctg_rate_vn.py module docstring).
+    return dict: rate_source ("big4_12m" or "cctg_12m(<date>)", None on no-data/error) records which
+    series drove the final rate; a report citing this number must say which one is active (see
+    cctg_rate_vn.py module docstring). The CCTG series was 6-month up to 2026-10-04 and 12-month
+    (highest Big-4) from 2026-10-05: a pre-rebase anchor (2026-09-30) is still labelled
+    "cctg_6m(<date>)" -- see cctg_source_label().
 
     ⚠ SYMMETRIC fail-closed on the CCTG side (round-2 fix 1 closed the original bare `except
     Exception: pass`; round-3 fix 2 closed one asymmetry; round-6 fix, 2026-10-01, user-approved
@@ -235,7 +253,7 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                                  f"(armed)")
                 elif cctg_pct > rate_pct:
                     rate_pct = cctg_pct
-                    rate_source = f"cctg_6m({cctg_date.date()})"
+                    rate_source = cctg_source_label(cctg_date)
         except Exception as exc:
             cctg_force_armed = True
             cctg_note = f"CCTG overlay lỗi không lường trước ({exc!r}) -> không xác thực được, fail-closed"
@@ -282,7 +300,7 @@ def current_deposit_rate(asof=None):
 
 
 def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None):
-    """max(Big-4 12M, Big-4 CCTG 6M) for DISPLAY-ONLY consumers (value_radar.py and future
+    """max(Big-4 12M, Big-4 CCTG 12M -- 6M before 2026-10-05) for DISPLAY-ONLY consumers (value_radar.py and future
     display-only callers) -- added 2026-10-01, same CCTG-overlay policy as
     macro_killswitch_a_status() (see that function's docstring): CCTG only wins if fresh and
     in-range, never averaged, never silently replaces Big-4 when Big-4 is higher. UNLIKE
@@ -299,8 +317,16 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     not call `effective_deposit_rate()` ad-hoc. See mike/kb/data_registry/macro/cctg_rate_vn.md
     for the full consumer inventory + diff table.
 
-    Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"),
-    big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
+    FALLBACK DIRECTION (changed 2026-10-13, job Taylor_20261013_163831): a STALE or UNREADABLE
+    CCTG no longer drops the number to Big-4-only -- the last known CCTG value is HELD (see the
+    comment block above the CCTG lookup below). So "CCTG only wins if fresh" above now reads:
+    a fresh CCTG wins as `cctg_12m(<date>)` (`cctg_6m(<date>)` for a pre-2026-10-05 anchor); a stale/unreadable one still wins, labelled
+    `cctg_held(...)` + WARNING. The number never falls below a level already observed.
+
+    Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_12m(<date>)"
+    |"cctg_6m(<date>)" [anchor before 2026-10-05]|"cctg_held(<date>; cctg_stale: <age>d)"|"cctg_held(<date>; cctg_unavailable: <err>)"
+    |"big4_12m(cctg_unavailable: <err>)"), big4_rate_pct(float), cctg_rate_pct(float|None),
+    last_update(str date)."""
     if check_freshness is None:
         check_freshness = asof is None
     asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
@@ -329,6 +355,17 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     # ("big4_12m(cctg_unavailable: ...)" / "big4_12m(cctg_stale: ...)") instead of a bare
     # "big4_12m" -- callers that only read rate_pct are unaffected (still Big-4-only), callers that
     # display rate_source now see the truth.
+    #
+    # Fallback DIRECTION fix (2026-10-13, job Taylor_20261013_163831, user-approved): both degrade
+    # branches used to drop the consumer number to Big-4-only. That LOWERS the DCF discount rate /
+    # yield hurdle -- i.e. RAISES fair value -- at the moment a feed breaks or goes unconfirmed,
+    # and it does so exactly when CCTG > Big-4 (a rising-rate regime). Now both branches HOLD the
+    # last known CCTG value (rate = max(Big-4, last-known CCTG), never below a level already
+    # observed) and say so: WARNING + rate_source "cctg_held(<date>; cctg_stale: <age>d)" /
+    # "cctg_held(<date>; cctg_unavailable: <err>)". The hold has NO expiry -- the only way out is
+    # a newer confirmed CCTG row (which may be lower). Only when nothing at all is known on the
+    # CCTG side does the number still read Big-4-only ("big4_12m(cctg_unavailable: ...)").
+    # macro_killswitch_a_status() is NOT affected (own code path, fail-closed ARMED as before).
     cctg_pct = None
     try:
         from cctg_rate_vn import current_cctg_rate_checked
@@ -337,18 +374,41 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
         cctg_pct, cctg_err = None, f"exception: {exc!r}"
     if cctg_err is not None:
         cctg_pct = None
-        rate_source = f"big4_12m(cctg_unavailable: {cctg_err})"
-        _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable -> Big-4-only (%s)",
-                     asof_ts.date(), cctg_err)
+        held_pct = held_date = None
+        try:
+            from cctg_rate_vn import last_known_good_cctg
+            held_pct, held_date = last_known_good_cctg(str(asof_ts.date()))
+        except Exception as exc:
+            cctg_err = f"{cctg_err}; last-known lookup failed: {exc!r}"
+            try:        # lookup itself failed: the frozen in-code anchor is always known
+                from cctg_rate_vn import CCTG_EVENTS
+                _fz = [(pd.Timestamp(d), float(r)) for d, r in CCTG_EVENTS if pd.Timestamp(d) <= asof_ts]
+                if _fz:
+                    held_date, held_pct = max(_fz, key=lambda t: t[0])
+            except Exception:
+                pass
+        if held_pct is not None and held_pct > big4_pct:
+            rate_pct = held_pct
+            rate_source = f"cctg_held({held_date.date()}; cctg_unavailable: {cctg_err})"
+            _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable (%s) -> HOLDING last "
+                         "known CCTG %.2f%% (%s), not dropping to Big-4 %.2f%%",
+                         asof_ts.date(), cctg_err, held_pct, held_date.date(), big4_pct)
+        else:
+            rate_source = f"big4_12m(cctg_unavailable: {cctg_err})"
+            _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable -> Big-4-only (%s)",
+                         asof_ts.date(), cctg_err)
     elif cctg_pct is not None and cctg_pct > big4_pct:
         cctg_age = (asof_ts - cctg_date).days
         cctg_stale = check_freshness and cctg_age > stale_days_limit
+        rate_pct = cctg_pct
         if not cctg_stale:
-            rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
+            rate_source = cctg_source_label(cctg_date)
         else:
-            rate_source = f"big4_12m(cctg_stale: {cctg_age}d)"
+            rate_source = f"cctg_held({cctg_date.date()}; cctg_stale: {cctg_age}d)"
             _log.warning("effective_deposit_rate(asof=%s): CCTG stale (%dd > %dd, last %s) -> "
-                         "Big-4-only", asof_ts.date(), cctg_age, stale_days_limit, cctg_date.date())
+                         "HOLDING last known CCTG %.2f%%, not dropping to Big-4 %.2f%%",
+                         asof_ts.date(), cctg_age, stale_days_limit, cctg_date.date(),
+                         cctg_pct, big4_pct)
     return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
             "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
 
@@ -378,7 +438,12 @@ def consumer_deposit_rate_detail(asof=None):
     `check_freshness=True` here is evaluated RELATIVE TO `asof` itself (PIT-causal: "is the CCTG
     reading stale AS OF the date being queried"), not relative to wall-clock "today" -- so every
     historical asof before cctg_rate_vn's only anchor (2026-09-30) stays byte-identical
-    (current_cctg_rate_checked returns None there regardless of the freshness flag)."""
+    (current_cctg_rate_checked returns None there regardless of the freshness flag).
+
+    2026-10-13 (job Taylor_20261013_163831): the freshness flag still decides the LABEL, no longer
+    the NUMBER -- once stale, the last known CCTG value is held with a WARNING instead of the
+    6.8 Big-4-only drop described above (that drop lowered every consumer's rate on a feed
+    lapse). The knob below is unchanged: DEPOSIT_RATE_CCTG_OVERLAY=0 is still Big-4-only."""
     if os.environ.get("DEPOSIT_RATE_CCTG_OVERLAY", "1") == "0":
         return {"rate_pct": current_deposit_rate(asof), "rate_source": "big4_12m(cctg_overlay_disabled)"}
     return effective_deposit_rate(asof, check_freshness=True)

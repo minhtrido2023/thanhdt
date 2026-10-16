@@ -227,13 +227,17 @@ dep.consumer_deposit_rate = _orig
 check("mutant (knob ignored) is caught by the knob=0 equality check", mutant_caught)
 
 # ---- 7. R1 regression: staleness must be PIT-causal (relative to asof), not "asof is None" -----
-# anchor = 2026-09-30. age>45d -> stale -> Big-4-only(6.8). age<=45d -> fresh -> CCTG(7.5) wins.
+# anchor = 2026-09-30. age<=45d -> fresh -> CCTG(7.5) wins, label cctg_6m(...). age>45d -> stale:
+# since 2026-10-13 (job Taylor_20261013_163831, fallback-DIRECTION fix) the last known CCTG 7.5 is
+# HELD with a WARNING + label cctg_held(...; cctg_stale: Nd) -- it used to drop to Big-4-only 6.8,
+# which lowered every consumer's rate on a feed lapse. Staleness now decides the LABEL, not the
+# NUMBER; central-function scenarios + mutants live in deposit_fallback_direction_selfcheck.py.
 # These two fixture dates straddle the EXACT boundary (age 44 fresh, age 46 stale) the docstrings
 # cite -- both are in the future relative to real "today" (2026-10-01) on purpose: a wall-clock-
 # relative check (the pre-fix bug) could never reproduce this with explicit past/future asof, only
 # a true PIT-causal check (relative to the asof argument itself) can.
 print("\nR1 regression — all 5 consumers age out CCTG identically, PIT-causal on asof:")
-STALE_DATE = "2026-11-15"   # anchor+46d -> age 46 > 45 -> stale -> Big-4-only expected
+STALE_DATE = "2026-11-15"   # anchor+46d -> age 46 > 45 -> stale -> CCTG HELD (7.5) expected
 FRESH_DATE = "2026-11-13"   # anchor+44d -> age 44 <= 45 -> still fresh -> CCTG expected
 BIG4_AT = dep.current_deposit_rate(STALE_DATE)
 CCTG_PCT = 7.5
@@ -243,25 +247,27 @@ check("fixture sanity: STALE_DATE is anchor+46d, FRESH_DATE is anchor+44d",
       (pd.Timestamp(STALE_DATE) - pd.Timestamp(ANCHOR)).days == 46
       and (pd.Timestamp(FRESH_DATE) - pd.Timestamp(ANCHOR)).days == 44)
 
-check("consumer_deposit_rate(stale) == Big-4-only (CCTG aged out)",
-      dep.consumer_deposit_rate(STALE_DATE) == BIG4_AT)
+check("consumer_deposit_rate(stale) == last known CCTG 7.5, HELD (not Big-4-only)",
+      dep.consumer_deposit_rate(STALE_DATE) == CCTG_PCT)
+check("consumer_deposit_rate_detail(stale) is labelled as a stale hold, not as fresh",
+      dep.consumer_deposit_rate_detail(STALE_DATE)["rate_source"] == "cctg_held(2026-09-30; cctg_stale: 46d)")
 check("consumer_deposit_rate(fresh) == CCTG 7.5 (not yet aged out)",
       dep.consumer_deposit_rate(FRESH_DATE) == CCTG_PCT)
 check("effective_deposit_rate(stale, check_freshness=True) agrees with consumer_deposit_rate",
-      dep.effective_deposit_rate(STALE_DATE, check_freshness=True)["rate_pct"] == BIG4_AT)
+      dep.effective_deposit_rate(STALE_DATE, check_freshness=True)["rate_pct"] == CCTG_PCT)
 
 DCF._RATE_CACHE.clear()
 dr_stale = DCF.discount_rate(STALE_DATE)
 DCF._RATE_CACHE.clear()
 dr_fresh = DCF.discount_rate(FRESH_DATE)
-check("dcf_valuation.discount_rate(stale) matches Big-4-only leg",
-      abs(dr_stale - (BIG4_AT + DCF.ERP) / 100.0) < 1e-9)
+check("dcf_valuation.discount_rate(stale) matches the HELD CCTG leg (r does not fall)",
+      abs(dr_stale - (CCTG_PCT + DCF.ERP) / 100.0) < 1e-9)
 check("dcf_valuation.discount_rate(fresh) matches CCTG leg",
       abs(dr_fresh - (CCTG_PCT + DCF.ERP) / 100.0) < 1e-9)
 
 import dcf_refresh_gate as DRG  # noqa: E402
-check("dcf_refresh_gate's consumer_deposit_rate(stale) == Big-4-only",
-      DRG._dep.consumer_deposit_rate(STALE_DATE) == BIG4_AT)
+check("dcf_refresh_gate's consumer_deposit_rate(stale) == held CCTG",
+      DRG._dep.consumer_deposit_rate(STALE_DATE) == CCTG_PCT)
 check("dcf_refresh_gate's consumer_deposit_rate(fresh) == CCTG",
       DRG._dep.consumer_deposit_rate(FRESH_DATE) == CCTG_PCT)
 
@@ -281,8 +287,8 @@ _thr = (0.9, 1.1, 999999)   # (near_lo, near_hi, icb_banking) -- 1234 never matc
 _cache_stale, _cache_fresh = {}, {}
 C30._label_one("AAA", _d_stale, _px_map, _div_by_tk, _cache_stale, dep.consumer_deposit_rate, _thr)
 C30._label_one("AAA", _d_fresh, _px_map, _div_by_tk, _cache_fresh, dep.consumer_deposit_rate, _thr)
-check("custom30_yield_labels._label_one (real call path) uses Big-4-only at stale date",
-      _cache_stale.get(str(_d_stale.date())) == BIG4_AT)
+check("custom30_yield_labels._label_one (real call path) uses held CCTG at stale date",
+      _cache_stale.get(str(_d_stale.date())) == CCTG_PCT)
 check("custom30_yield_labels._label_one (real call path) uses CCTG at fresh date",
       _cache_fresh.get(str(_d_fresh.date())) == CCTG_PCT)
 
@@ -290,13 +296,13 @@ DD._CACHE.clear()
 dd_stale, dd_stale_src = with_overlay("1", lambda: DD._deposit_rate_pct(STALE_DATE))
 DD._CACHE.clear()
 dd_fresh, dd_fresh_src = with_overlay("1", lambda: DD._deposit_rate_pct(FRESH_DATE))
-check("due_diligence._deposit_rate_pct(stale) == Big-4-only, labeled big4",
-      dd_stale == BIG4_AT and "big4" in dd_stale_src)
+check("due_diligence._deposit_rate_pct(stale) == held CCTG, labeled cctg_held + cctg_stale",
+      dd_stale == CCTG_PCT and "cctg_held" in dd_stale_src and "cctg_stale" in dd_stale_src)
 check("due_diligence._deposit_rate_pct(fresh) == CCTG, labeled cctg",
       dd_fresh == CCTG_PCT and "cctg" in dd_fresh_src)
 
 print("\nR1 mutant: effective_deposit_rate called with check_freshness forced False (the exact "
-      "pre-fix bug) must be caught by the stale-date equality check:")
+      "pre-fix bug) must be caught by the stale-date LABEL check (the number is held either way):")
 _orig_edr = dep.effective_deposit_rate
 
 
@@ -305,7 +311,7 @@ def _mutant_force_fresh(asof=None, stale_days_limit=45, check_freshness=None):
 
 
 dep.effective_deposit_rate = _mutant_force_fresh
-mutant_r1_caught = dep.consumer_deposit_rate(STALE_DATE) != BIG4_AT
+mutant_r1_caught = "cctg_stale" not in dep.consumer_deposit_rate_detail(STALE_DATE)["rate_source"]
 dep.effective_deposit_rate = _orig_edr
 check("R1 mutant (check_freshness forced False) is caught", mutant_r1_caught)
 
@@ -341,10 +347,10 @@ try:
 finally:
     cctg.current_cctg_rate_checked = _orig_checked
 
-check("R2: CCTG error -> still returns Big-4 rate (fail-open on the display number)",
-      broken_detail["rate_pct"] == dep.current_deposit_rate(POST_TODAY))
-check("R2: rate_source names the real cause (cctg_unavailable), not a bare big4_12m",
-      "cctg_unavailable" in broken_detail["rate_source"])
+check("R2: CCTG error -> last known CCTG 7.5 is HELD (2026-10-13 fix; was Big-4-only)",
+      broken_detail["rate_pct"] == CCTG_PCT and broken_detail["rate_pct"] > dep.current_deposit_rate(POST_TODAY))
+check("R2: rate_source names the real cause (cctg_held + cctg_unavailable), not a bare label",
+      broken_detail["rate_source"].startswith("cctg_held(") and "cctg_unavailable" in broken_detail["rate_source"])
 check("R2: a WARNING was actually logged for the CCTG error (not silently swallowed)",
       any("simulated CSV corruption" in m for m in _handler.messages))
 
@@ -365,7 +371,7 @@ def _mutant_silent_swallow(asof=None, stale_days_limit=45, check_freshness=None)
     """Mutant: reproduces the ORIGINAL round-1 bug -- cctg_err degrades to bare 'big4_12m', no
     annotation, no log."""
     d = _orig_edr2(asof, stale_days_limit, check_freshness)
-    if d["rate_source"].startswith("big4_12m("):
+    if d["rate_source"].startswith(("big4_12m(", "cctg_held(")):
         d = dict(d, rate_source="big4_12m")
     return d
 

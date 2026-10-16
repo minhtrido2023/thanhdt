@@ -80,7 +80,8 @@ from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
 from lag_liquidity_filter import lag_filter_illiquid, bal_filter_thin, ADV_MIN_VND
-from lag_rating_filter import lag_filter_low_rating
+from lag_rating_filter import (lag_filter_low_rating, lag_rating_stale_flags,
+                               annotate_stale_status, format_lag_rating_stale_line)
 from lag_forensic_filter import lag_filter_forensic_banned
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
@@ -736,7 +737,10 @@ sig.loc[mexb, "play_type"] = "AVOID_exbull"
 if int(mexb.sum()): print(f"  [EXBULL] suppressed {int(mexb.sum())} momentum signal rows in EX-BULL")
 
 # ── 2c. regime_size weak flag: ABSOLUTE 8L rating >= 4 → half size ONLY in BEAR/CRISIS ──
+# PIT: chi lay dong co f.time <= LATEST. fa_ratings_8l co the chua dong eff_date TUONG LAI (Release_Date
+# NULL ⇒ eff = q_time+45 trước 2026-10-16, vd PMT 2026-10-18; nay eff = q_time, nhưng vẫn lọc phòng `time` tương lai của vendor) — lay "dong moi nhat" khong loc ngay = doc rating chua hieu luc.
 r8 = bq(f"""SELECT f.ticker, f.rating FROM tav2_bq.fa_ratings_8l AS f
+WHERE f.time <= DATE '{pd.Timestamp(LATEST):%Y-%m-%d}'
 QUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1""")
 rating8l = dict(zip(r8["ticker"], r8["rating"]))
 
@@ -803,6 +807,7 @@ def td_offset(ref, off):
 lag_up, lag_recent, lag_source_error = [], [], None
 lag_liq_dropped, lag_liq_error = [], None
 lag_rating_dropped, lag_rating_error = [], None
+lag_rating_stale, lag_rating_stale_error = [], None
 lag_forensic_dropped, lag_forensic_error = [], None
 try:
     # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
@@ -829,6 +834,10 @@ try:
     # GATE CỨNG chất lượng 8L (user chốt 2026-07-27) — xem lag_filter_low_rating():
     # ứng viên LAG rating≥4 (RATING_FAIL) bị LOẠI THẬT khỏi danh sách, không escalate từng ca.
     # CHỈ book LAG; BAL/CAPIT/custom30V có gate rating riêng, không đụng.
+    # CỜ CẢNH BÁO rating cũ (user duyệt 2026-10-13) — đo TRƯỚC cổng để thấy cả mã cổng cho qua
+    # lẫn mã cổng loại bằng rating quý trước. Hàm không raise và không đụng `cand`: dòng ngay dưới
+    # nhận đúng `cand` như trước khi có cờ ⇒ quyết định lọc KHÔNG đổi (lag_rating_stale_selfcheck.py).
+    lag_rating_stale, lag_rating_stale_error = lag_rating_stale_flags(bq, cand, LATEST)
     cand, lag_rating_dropped, lag_rating_error = lag_filter_low_rating(bq, cand, LATEST)
     if lag_rating_dropped:
         print(f"  [lag-rating] loại {len(lag_rating_dropped)} ứng viên RATING_FAIL (8L≥4): "
@@ -857,6 +866,10 @@ except Exception as e:
     lag_source_error = f"{type(e).__name__}: {e}"
     print(f"  WARNING: LAG schedule unavailable ({e})")
 print(f"  LAG entries: {len(lag_up)} upcoming, {len(lag_recent)} entered in last sessions")
+annotate_stale_status(lag_rating_stale, lag_up, lag_recent)
+_lag_stale_line = format_lag_rating_stale_line(lag_rating_stale, lag_rating_stale_error)
+if _lag_stale_line:
+    print("  [lag-rating-stale] " + _lag_stale_line)
 
 # ── 5. Allocator: w_LAG target vs current (band ±10pp) ──
 w_tgt = w_lag_target(state_today, LATEST)   # edge-conditional (was hardcoded 65% until 2026-07-12)
@@ -1032,7 +1045,7 @@ if not _lever_err and _gate_pass:
                            f"NIỀM TIN/THANH KHOẢN có thể chứa được (Loại 2), PIT filter cho qua")
 
 # HIỂN THỊ-ONLY (user duyệt 2026-10-01, job Taylor_20261001_094254): effective (max Big-4 12M,
-# CCTG 6M) cạnh số Big-4 PIT ở trên — cổng VẪN Big-4-only, field dưới KHÔNG được chạm
+# CCTG 12M; 6M trước 05/10) cạnh số Big-4 PIT ở trên — cổng VẪN Big-4-only, field dưới KHÔNG được chạm
 # _pit_structural/_lever_active/_pit_reason. Lỗi tính effective fail-silent-nhưng-có-log, KHÔNG
 # ném ra ngoài khối (pipeline 19:00 chạm cổng vay margin thật).
 _pit_deposit_rate_effective = _pit_deposit_effective_driver = None
@@ -1282,6 +1295,13 @@ status = {
     "lag_rating_excluded": lag_rating_dropped,
     "n_lag_rating_excluded": len(lag_rating_dropped),
     "lag_rating_filter_error": lag_rating_error,
+    # CẢNH BÁO-ONLY (2026-10-13): sự kiện LAG mà dòng 8L rating mới nhất có time < Release_Date của
+    # sự kiện ⇒ cổng ở trên đang chấm bằng rating QUÝ TRƯỚC. KHÔNG mã nào bị loại/thêm vì cờ này.
+    # gate="PASS" = cổng cho qua bằng rating cũ; "RATING_FAIL" = cổng loại bằng rating cũ.
+    # `lag_rating_stale_error` != None ⇒ KHÔNG kiểm được (khác "không có mã nào cũ").
+    "lag_rating_stale": lag_rating_stale,
+    "n_lag_rating_stale": len(lag_rating_stale),
+    "lag_rating_stale_error": lag_rating_stale_error,
     # Ứng viên LAG bị loại vì GATE QUẢN TRỊ: BANNED vĩnh viễn hoặc cờ forensic severity=exclude.
     # `lag_forensic_filter_error` != None ⇒ CHỈ phần cờ forensic không chạy được (fail-open);
     # danh sách BANNED là hằng số trong code nên LUÔN áp, không phụ thuộc file.
@@ -1376,6 +1396,8 @@ if lag_recent:
     # chiếu vị thế thực, không mặc định vị thế đã tồn tại.
     L.append("\n_Cửa sổ entry đã qua trong các phiên gần nhất — đối chiếu vị thế thực, KHÔNG mặc định đã vào lệnh:_ "
              + ", ".join(f"{it['ticker']}({it['entry']})" for it in lag_recent))
+if _lag_stale_line:
+    L.append("\n" + _lag_stale_line)
 if lag_liq_error:
     L.append(f"\n⚠️ Bộ lọc thanh khoản LAG KHÔNG chạy được ({lag_liq_error}) — danh sách trên CHƯA "
              "lọc mã ADV≤0; executor (`cap_lag_orders`) vẫn fail-closed nên không mã nào lọt thành "

@@ -22,17 +22,20 @@ BOUNDARY (=exactly 1.0pp): treated INCLUSIVE → REFRESH. The user's phrasing wa
   to test with strict '>'. Flagged here so the user can flip to strict '>' (set THRESHOLD_INCLUSIVE
   = False) if preferred — this is the one judgment call in the gate.
 
-This gate DECIDES + PERSISTS; it does not itself run the (cheap) DCF recompute. The consumer that
-regenerates DCF numbers for a report/dashboard calls run_gate() first and only recomputes its
-fair values when the returned dict has refresh=True. Fail-safe: any error → returns refresh=True
-(recompute rather than silently serve stale on a broken gate) and logs the error.
+This gate DECIDES + PERSISTS; it does not itself run the (cheap) DCF recompute. Intended use: a
+consumer that regenerates DCF numbers calls run_gate() first and only recomputes its fair values
+when the returned dict has refresh=True. As of 2026-10-12 NO such consumer exists — the only caller
+is this file's CLI (monthly cron, 08:10 ICT day 11), so the gate is a drift monitor: state + log
+only, nothing reads refresh. Fail-safe: any error → returns refresh=True (recompute rather than
+silently serve stale on a broken gate) and logs the error.
 
 Run: $DNA_PYEXE dcf_refresh_gate.py            # evaluate + persist + log (real)
      $DNA_PYEXE dcf_refresh_gate.py --dry      # evaluate + print only, no state/log write
      $DNA_PYEXE dcf_refresh_gate.py --show      # print current state
 """
 import os, sys, json, argparse
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR)
@@ -46,11 +49,12 @@ _EPS = 1e-9
 
 
 def _now_ict_date(asof=None):
-    """Return the as-of date string. `asof` overridable for tests; else today (UTC date is fine —
-    the gate is monthly-granularity, no intraday boundary sensitivity)."""
+    """Return the as-of date string. `asof` overridable for tests; else today's calendar date in
+    ICT (Asia/Ho_Chi_Minh), independent of the process TZ. The date is an audit label only
+    (state last_check_date/last_used_date + log line) — decide() never compares it."""
     if asof is not None:
         return str(asof)[:10]
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d")
 
 
 def load_state(path=STATE_FP):

@@ -18,7 +18,7 @@ What each block defends (coding_guidelines §19 / verify-before-done):
   T4  a ticker with no established run (all noise) -> NaN -> route_of() = COMPOUNDER, i.e. the
       pre-existing behaviour for ICB_Code NULL. No silent row loss.
   T5  ICB_MIN_RUN threshold is actually enforced: a 19-session run is ignored, a 20-session one is not.
-  T6  eff_date formula inside attach_icb_pit matches main()'s (Release_Date, else q_time+45d) —
+  T6  eff_date formula (eff_date_of: Release_Date, else q_time+NULL_RD_EFF_OFFSET_DAYS=0) is ONE helper used by main/attach_icb_pit/bank_eff_date —
       §28: two places computing the same value must not drift.
   T7  ARTIFACT test on the real A/B pair (control CSV vs PIT CSV, both from today's live vintage):
       route changes are confined to the tickers whose ICB actually moved; every other ticker is
@@ -127,15 +127,35 @@ ok("T5b executable SQL filters by run_len, with no ANY_VALUE / MIN(icb_from) col
    f"stripped SQL still collapsing: {[k for k in ('ANY_VALUE','MIN(icb_from)') if k in _sql_code.upper()]}")
 
 # ---------------------------------------------------------------- T6 eff_date formula parity
-df6 = mkdf([("EEE", None, "2020-03-31")])            # no Release_Date -> q_time + 45d
+# Gia tri mong doi viet THANG (KHONG suy tu hang so): doi NULL_RD_EFF_OFFSET_DAYS / them +45 / bo Release_Date o
+# BAT KY cho nao trong 3 cho dung (main, attach_icb_pit, bank_eff_date) deu phai lam test do.
+ok("T6a pin NULL_RD_EFF_OFFSET_DAYS == 0 (doi gia tri la quyet dinh co chu dich, phai sua test nay)",
+   R.NULL_RD_EFF_OFFSET_DAYS == 0, f"offset={R.NULL_RD_EFF_OFFSET_DAYS}")
+_t = pd.Timestamp
+ok("T6b eff_date_of: RD NULL -> q_time (scalar & Series); RD co -> RD",
+   R.eff_date_of(None, "2020-03-31") == _t("2020-03-31")
+   and R.eff_date_of("2020-04-20", "2020-03-31") == _t("2020-04-20")
+   and list(R.eff_date_of(pd.Series([None, "2020-04-20"]), pd.Series(["2020-03-31", "2020-03-31"])))
+       == [_t("2020-03-31"), _t("2020-04-20")],
+   f"got {R.eff_date_of(None, '2020-03-31')}")
+ok("T6c bank_eff_date (cho AQ) dung cung cong thuc: RD NULL -> q_time; RD co -> RD",
+   R.bank_eff_date({"Release_Date": None, "q_time": "2020-03-31"}) == _t("2020-03-31")
+   and R.bank_eff_date({"Release_Date": "2020-04-20", "q_time": "2020-03-31"}) == _t("2020-04-20"),
+   f"got {R.bank_eff_date({'Release_Date': None, 'q_time': '2020-03-31'})}")
 icb6 = mkicb([("EEE", 8633, "2010-01-01"), ("EEE", 7535, "2020-05-10")])
-out6 = R.attach_icb_pit(df6, icb6)
-# q_time 2020-03-31 + 45d = 2020-05-15 >= 2020-05-10 -> must take 7535
-ok("T6 Release_Date fallback = q_time + 45 days (same formula as main())",
-   list(out6["ICB_Code"]) == [7535], f"got {list(out6['ICB_Code'])}")
-df6b = mkdf([("EEE", None, "2020-03-20")])           # +45d = 2020-05-04 < 2020-05-10 -> 8633
-ok("T6b and the 45-day offset is the boundary that decides",
-   list(R.attach_icb_pit(df6b, icb6)["ICB_Code"]) == [8633])
+ok("T6d attach_icb_pit: RD NULL, q_time 2020-05-10 -> eff = 2020-05-10 -> 7535 (dung bien)",
+   list(R.attach_icb_pit(mkdf([("EEE", None, "2020-05-10")]), icb6)["ICB_Code"]) == [7535])
+ok("T6e attach_icb_pit: RD NULL, q_time 2020-05-09 -> eff = 2020-05-09 < bien -> 8633",
+   list(R.attach_icb_pit(mkdf([("EEE", None, "2020-05-09")]), icb6)["ICB_Code"]) == [8633])
+ok("T6f attach_icb_pit: RD CO 2020-05-12 thang q_time 2020-03-31 -> 7535 (khong bo Release_Date)",
+   list(R.attach_icb_pit(mkdf([("EEE", "2020-05-12", "2020-03-31")]), icb6)["ICB_Code"]) == [7535])
+_src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rating_8l_history.py"), encoding="utf-8").read()
+ok("T6g main() gan eff_date CHINH XAC bang eff_date_of(Release_Date, q_time), khong cong them gi",
+   'df["eff_date"] = eff_date_of(df["Release_Date"], df["q_time"])\n' in _src,
+   "dong gan df['eff_date'] trong main() da bi sua")
+ok("T6h Timedelta(days=NULL_RD_EFF_OFFSET_DAYS) chi xuat hien 1 lan (trong helper), khong con ban sao cong thuc",
+   len(re.findall(r"Timedelta\(days=NULL_RD_EFF_OFFSET_DAYS\)", _src)) == 1,
+   f"so lan = {len(re.findall(r'Timedelta\(days=NULL_RD_EFF_OFFSET_DAYS\)', _src))}")
 
 # ---------------------------------------------------------------- T7 real A/B artifacts
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -315,7 +335,7 @@ if "--mutations" in sys.argv:
         i = i.copy(); i["icb_from"] = pd.to_datetime(i["icb_from"])
         o = d.copy()
         _rel = pd.to_datetime(o["Release_Date"], errors="coerce")
-        o["_eff"] = _rel.fillna(pd.to_datetime(o["q_time"], errors="coerce") + pd.Timedelta(days=45))
+        o["_eff"] = _rel.fillna(pd.to_datetime(o["q_time"], errors="coerce") + pd.Timedelta(days=R.NULL_RD_EFF_OFFSET_DAYS))
         o = o.sort_values("_eff")
         out = pd.merge_asof(o, i.sort_values("icb_from"), left_on="_eff", right_on="icb_from",
                             by="ticker", direction="forward")

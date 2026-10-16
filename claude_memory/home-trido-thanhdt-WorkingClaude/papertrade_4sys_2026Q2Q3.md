@@ -66,7 +66,7 @@ V121_ENS = V11 in this window (ensemble held V11/VN30, 0 flips). Divergence will
 
 ## GO-LIVE timeline PULLED FORWARD (2026-05-28)
 
-User wants to **go live early June 2026**, deciding the foundation **2026-05-29 (tomorrow)** — leaning **V4 + DT4-gate**. I rescheduled Windows task **`DT4FoundationDecision`** from [REDACTED]30 → **2026-05-29 16:00** (runs after the 15:30 daily refresh) and set `pt_dt4_vs_tq34b_ab.py` `DECISION_DATE="2026-05-29"`. That A/B (`data/pt_dt4_vs_tq34b_ab_report.md` / copied to `DT4_FOUNDATION_DECISION.md`) is the go-live evidence: V1–V5 on DT4 vs TQ34b foundation, fresh SIGNAL_V11, real E1VFVN30, prod-spec, 50B each.
+User wants to **go live early June 2026**, deciding the foundation **2026-05-29 (tomorrow)** — leaning **V4 + DT4-gate**. I rescheduled Windows task **`DT4FoundationDecision`** from [REDACTED] → **2026-05-29 16:00** (runs after the 15:30 daily refresh) and set `pt_dt4_vs_tq34b_ab.py` `DECISION_DATE="2026-05-29"`. That A/B (`data/pt_dt4_vs_tq34b_ab_report.md` / copied to `DT4_FOUNDATION_DECISION.md`) is the go-live evidence: V1–V5 on DT4 vs TQ34b foundation, fresh SIGNAL_V11, real E1VFVN30, prod-spec, 50B each.
 
 **Live A/B standing (window 2026-01-01 → 05-26): DT4 sweeps TQ34b 5-0.** V4: DT4 −2.24% vs TQ34b −9.28% (Δ+7.04pp, DD −13.3 vs −14.8). V5: DT4 −0.41% vs TQ34b −10.81% (Δ+10.40pp). All negative (captures the early-2026 drawdown window) → systems protecting capital; verdict label "🟡 INCONCLUSIVE (short window)".
 

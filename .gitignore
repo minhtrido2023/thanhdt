@@ -10,6 +10,8 @@ google-cloud-sdk/
 # Any JSON may hold credentials/tokens/runtime state -> ignore by
 # default, then allow-list known-safe files below.
 *.json
+# tmp của ghi atomic macro_health.json (macro_healthcheck.py): macro_health.json.tmp.<pid>
+WorkingClaude/data/*.tmp.*
 # ...but DO keep these non-secret JSONs:
 !**/*.template.json
 !**/bigquery_dictionary.json

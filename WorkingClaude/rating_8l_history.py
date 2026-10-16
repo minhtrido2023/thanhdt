@@ -69,6 +69,22 @@ except Exception: pass
 from io import StringIO
 import numpy as np, pandas as pd
 
+# Ngay hieu luc (eff_date) cua 1 dong rating khi vendor THIEU Release_Date = q_time + NULL_RD_EFF_OFFSET_DAYS.
+# 2026-10-16 (user chi dao uoc luong ngay hieu luc; doi tu +45): do tren ticker_financial 2014+ — dong CO Release_Date
+# thi time == Release_Date o 99,2% (=> `time` chinh la ngay cong bo/co du lieu); dong NULL la placeholder (qend+32,
+# ID_Release rong, khong co phan ung khoi luong) hoac late-filer (phan ung bat dau dung k=0 so voi `time`). Nen KHONG
+# cong 45 ngay (lam eff_date tuong lai, vd PMT 2026-10-18) va KHONG lui -1..3 ngay (khong co bang chung). Bao thu: qend+32
+# ~ p90 do tre cong bo that (trung vi 29). Doi gia tri o DAY — 3 cho dung no (main, attach_icb_pit, bank_eff_date).
+NULL_RD_EFF_OFFSET_DAYS = 0
+
+
+def eff_date_of(release_date, q_time):
+    """NGUON DUY NHAT cua eff_date: Release_Date, thieu thi q_time + NULL_RD_EFF_OFFSET_DAYS. Nhan Series HOAC
+    scalar (cung kieu dau vao => cung kieu dau ra). 3 noi dung: main(), attach_icb_pit(), bank_eff_date()."""
+    rel = pd.to_datetime(release_date, errors="coerce")
+    fb = pd.to_datetime(q_time, errors="coerce") + pd.Timedelta(days=NULL_RD_EFF_OFFSET_DAYS)
+    return rel.fillna(fb) if hasattr(rel, "fillna") else (fb if pd.isna(rel) else rel)
+
 WORKDIR = os.environ.get("WORKDIR_8L", r"/home/trido/thanhdt/WorkingClaude")
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = os.environ.get("BQ_BIN", (r"bq" if os.name=="nt" else "bq"))
@@ -187,12 +203,9 @@ def attach_icb_pit(df, icb):
     icb["icb_from"] = pd.to_datetime(icb["icb_from"]).astype(_RES)
     icb = icb.sort_values(["ticker", "icb_from"])
     left = df.copy()
-    # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main), nên dựng LẠI ĐÚNG công thức
-    # đó tại chỗ: Release_Date, thiếu thì q_time + 45 ngày. Đổi công thức ở một nơi mà quên nơi
-    # kia là đúng lớp lỗi §28 — nếu sửa, sửa cả hai.
-    _rel = pd.to_datetime(left["Release_Date"], errors="coerce").astype(_RES)
-    left["_eff"] = _rel.fillna(pd.to_datetime(left["q_time"], errors="coerce").astype(_RES)
-                               + pd.Timedelta(days=45)).astype(_RES)
+    # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main) ⇒ dùng CHUNG eff_date_of() với main()
+    # và bank_eff_date() — một nguồn duy nhất (§28), không dựng lại công thức ở từng nơi.
+    left["_eff"] = eff_date_of(left["Release_Date"], left["q_time"]).astype(_RES)
     left = left.sort_values("_eff")
     out = pd.merge_asof(left, icb.sort_values("icb_from"), left_on="_eff",
                         right_on="icb_from", by="ticker", direction="backward")
@@ -382,12 +395,8 @@ def bank_aq_asof(ticker, eff_date):
 
 
 def bank_eff_date(r):
-    """Same effective date main() stamps on the row: Release_Date, else quarter end + 45d."""
-    eff = pd.to_datetime(r.get("Release_Date"), errors="coerce")
-    if pd.isna(eff):
-        eff = pd.to_datetime(r.get("q_time"), errors="coerce")
-        eff = eff + pd.Timedelta(days=45) if pd.notna(eff) else pd.NaT
-    return eff
+    """Same effective date main() stamps on the row (eff_date_of): Release_Date, else q_time + NULL_RD_EFF_OFFSET_DAYS."""
+    return eff_date_of(r.get("Release_Date"), r.get("q_time"))
 
 
 def rate_bank_hist(r):
@@ -594,10 +603,8 @@ def main():
     # levered -> rating 5) without touching core_score, so force rating-5 names to the bottom tier (E).
     df.loc[df["rating"]==5, "tier"] = "E"
 
-    # effective date = Release_Date (public) ; fall back to quarter end + 45d if missing
-    df["eff_date"] = pd.to_datetime(df["Release_Date"], errors="coerce")
-    qd = pd.to_datetime(df["q_time"], errors="coerce") + pd.Timedelta(days=45)
-    df["eff_date"] = df["eff_date"].fillna(qd)
+    # effective date = Release_Date (public) ; fall back to q_time + NULL_RD_EFF_OFFSET_DAYS if missing (eff_date_of)
+    df["eff_date"] = eff_date_of(df["Release_Date"], df["q_time"])
     df = df.dropna(subset=["eff_date"])
 
     out = df[["ticker","eff_date","q_time","route","rating","core_score","tier"]].copy()

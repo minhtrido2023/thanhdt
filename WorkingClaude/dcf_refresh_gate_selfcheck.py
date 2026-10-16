@@ -6,10 +6,24 @@ Covers the decision logic across the 1pp band + the boundary, first-run init, pe
 and the fail-safe. Uses a tmp state/log path so it never touches the real data/dcf_refresh_state.json.
 Run: $DNA_PYEXE dcf_refresh_gate_selfcheck.py   → prints PASS/FAIL per case, exits non-zero on any FAIL.
 """
-import os, sys, json, tempfile
-WORKDIR = "/home/trido/thanhdt/WorkingClaude"
-sys.path.insert(0, WORKDIR)
-import dcf_refresh_gate as GATE
+import os, sys, json, tempfile, importlib.util
+HERE = os.path.dirname(os.path.abspath(__file__))   # code under test: cạnh file này (worktree-aware)
+
+
+def _load(name):
+    """Nạp module GỐC từ HERE theo đường dẫn file — module production tự chèn WORKDIR canonical vào
+    sys.path[0], nên `import <name>` từ worktree sẽ lặng lẽ lấy bản canonical (cùng mẫu
+    tz_asof_ict_dd_dcf_selfcheck.py)."""
+    spec = importlib.util.spec_from_file_location(name, os.path.join(HERE, name + ".py"))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    assert os.path.abspath(mod.__file__).startswith(HERE + os.sep), mod.__file__
+    return mod
+
+
+sys.path.insert(0, HERE)
+GATE = _load("dcf_refresh_gate")
 
 fails = []
 

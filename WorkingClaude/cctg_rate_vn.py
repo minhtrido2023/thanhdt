@@ -18,11 +18,11 @@ mức bảo hiểm 350 triệu VND), lãi CCTG được miễn thuế TNCN giố
 hạn >=6 tháng do thị trường quyết định (không trần SBV). Vẫn là MỘT CÔNG CỤ KHÁC VỀ KỲ HẠN so với
 sổ tiết kiệm 12 tháng: đây là lý do dùng max(), không gộp mù hai chuỗi khác kỳ hạn thành một.
 
-Tenor mismatch (must NOT be papered over): deposit_rate_vn.py's series is **12-month**; this
-series is **6-month**. A 6M rate sitting above a 12M rate is itself a market signal (inverted
-curve / banks bidding up short tenor for liquidity) — effective_deposit_rate() surfacing that via
-max() is intentional, not a bug, but any report citing the number must say which tenor is driving
-it (see deposit_rate_vn.effective_deposit_rate()'s `driver` field).
+Tenor (must NOT be papered over): deposit_rate_vn.py's series is a 12-month TERM DEPOSIT; this
+series was a **6-month** CCTG up to 2026-10-04 and is a **12-month** CCTG from 2026-10-05. Any
+report citing the effective number must say which series is driving it -- see
+deposit_rate_vn.effective_deposit_rate()'s `rate_source` ("cctg_12m(<date>)", or "cctg_6m(<date>)"
+for the pre-rebase 2026-09-30 anchor; label switched 2026-10-14, job Taylor_20261014_135258).
 
 First anchor only so far:
   - 2026-09-30: Big-4 CCTG 6-thang = 7.5%/nam (VietnamNet, 30/09/2026; mot so NH co phan toi 9.4%,
@@ -164,3 +164,47 @@ def current_cctg_rate_checked(asof=None):
         return None, None, (f"cctg rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
                              f"[{RATE_MIN_PCT},{RATE_MAX_PCT}]")
     return rate_pct, date, None
+
+
+def last_known_good_cctg(asof=None):
+    """FALLBACK-PATH ONLY salvage: the latest CCTG observation at/before asof that is still
+    readable, for deposit_rate_vn.effective_deposit_rate() to HOLD when the normal read
+    (current_cctg_rate_checked) errors out. Added 2026-10-13 (job Taylor_20261013_163831, user-
+    approved): before this, any CCTG read error made the 5 consumers drop to Big-4-only -- a
+    fallback that LOWERS the discount rate / yield hurdle exactly when a feed breaks.
+
+    Tolerant on purpose (the strict, loud loader cctg_events_df() stays the only NORMAL path and
+    is unchanged): starts from the frozen in-code CCTG_EVENTS, then reads _EVENTS_CSV row by row
+    and keeps only rows whose date is strict ISO YYYY-MM-DD, whose rate parses and sits inside
+    [RATE_MIN_PCT, RATE_MAX_PCT], and that are strictly newer than the frozen anchor; every other
+    row is skipped, never guessed (this can be a SUBSET of what cctg_events_df() accepts, never a
+    superset). Total: it does not raise on CSV content. An unreadable file -> frozen anchors only.
+
+    Returns (rate_pct, date) or (None, None) if nothing is known at/before asof."""
+    import csv
+    asof_ts = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) if asof is None else pd.to_datetime(asof)
+    known = [(pd.Timestamp(d), float(r)) for d, r in CCTG_EVENTS]
+    frozen_max = max(d for d, _ in known)
+    try:
+        with open(_EVENTS_CSV, newline="", encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                if None in row or None in row.values():      # wrong field count -> not a clean row
+                    continue
+                try:
+                    # strict ISO like the loader: a day-first "12/10/2026" or a tz-aware "...Z"
+                    # row is skipped, never guessed. Whole row is total (any error -> skip), so
+                    # one bad row can never make this salvage raise and drop the rate to Big-4.
+                    d = pd.to_datetime(row["effective_date"], format="%Y-%m-%d")
+                    r = float(row["cctg_rate"])
+                    if pd.isna(d) or not (RATE_MIN_PCT <= r <= RATE_MAX_PCT) or d <= frozen_max:
+                        continue
+                    known.append((d, r))
+                except Exception:
+                    continue
+    except Exception:           # unreadable file / csv error -> frozen anchors only
+        pass
+    known = [(d, r) for d, r in known if d <= asof_ts]
+    if not known:
+        return None, None
+    d, r = max(enumerate(known), key=lambda t: (t[1][0], t[0]))[1]   # latest date; ties -> last written
+    return r, d

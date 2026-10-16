@@ -612,7 +612,7 @@ def build_macro_killswitch_a_line(html=True):
     stale_tag = f" ⚠️STALE→fail-closed ({stale_cause})" if (v["stale"] and stale_cause) else (
         " ⚠️STALE→fail-closed" if v["stale"] else "")
     rate_source = v.get("rate_source")
-    if rate_source and rate_source.startswith("cctg_6m"):
+    if rate_source and rate_source.startswith(("cctg_12m", "cctg_6m")):  # 6m = anchor trước 05/10
         src_label = f"CCTG Big-4 (12 tháng cao nhất; 6 tháng trước 05/10) ({rate_source.split('(', 1)[-1].rstrip(')')})"
     elif rate_source == "big4_12m":
         src_label = "Big-4 12 tháng"

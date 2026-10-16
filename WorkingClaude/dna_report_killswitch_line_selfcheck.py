@@ -36,6 +36,11 @@ FIXTURES = {
                     "last_update": "2026-10-01", "age_days": 1,
                     "reason": "cctg_6m(2026-09-30) 7.50% <= 7.5% -> CLEAR",
                     "rate_source": "cctg_6m(2026-09-30)"},
+    # post-rebase label (2026-10-14): CCTG series is 12M from 2026-10-05 -> "cctg_12m(<date>)".
+    "cctg12_driven": {"armed": False, "rate": 0.074, "threshold": 0.075, "stale": False,
+                      "last_update": "2026-10-12", "age_days": 2,
+                      "reason": "cctg_12m(2026-10-12) 7.40% <= 7.5% -> CLEAR",
+                      "rate_source": "cctg_12m(2026-10-12)"},
     # no-data fail-closed path: rate_source=None (early-return shape, e.g. no deposit data at all
     # or a corrupt-CSV error) -- must fall back to "N/A" for the source label, not crash on
     # rate_source.startswith().
@@ -69,8 +74,11 @@ for label, fixture in FIXTURES.items():
         check(f"{label} html={html}: correct badge", badge in line)
         check(f"{label} html={html}: no stale legal-vn phrase", "chờ legal-vn" not in line)
         rsrc = fixture["rate_source"] or ""
-        if rsrc.startswith("cctg_6m"):
-            check(f"{label} html={html}: tail names CCTG 6 tháng", "CCTG" in line and "6 tháng" in line)
+        if rsrc.startswith(("cctg_12m", "cctg_6m")):
+            check(f"{label} html={html}: tail names CCTG 12 tháng (6 tháng trước 05/10)",
+                  "CCTG" in line and "12 tháng" in line and "6 tháng trước 05/10" in line)
+            check(f"{label} html={html}: tail carries the anchor date",
+                  rsrc.split("(", 1)[-1].rstrip(")") in line)
             check(f"{label} html={html}: tail does NOT mislabel as Big-4 12 tháng",
                   "Big-4 12 tháng" not in line)
         elif rsrc == "big4_12m":

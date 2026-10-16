@@ -61,7 +61,7 @@ def fetch_bal_raw(tickers, date):
     df = df.merge(fa, on="ticker", how="left")
     r8 = bq(f"""
         SELECT f.ticker, f.rating FROM tav2_bq.fa_ratings_8l AS f
-        WHERE f.ticker IN ({tl})
+        WHERE f.ticker IN ({tl}) AND f.time <= DATE '{date}'
         QUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1
     """)
     df = df.merge(r8, on="ticker", how="left")

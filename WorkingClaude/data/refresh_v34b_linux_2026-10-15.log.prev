@@ -1,0 +1,12 @@
+===================================================================
+v3.4b/DT5G Linux refresh START Thu Oct 15 07:24:23 +07 2026  acct=dtienthanh@gmail.com
+===================================================================
+
+--- [0-pre] dt5g_writer_watch (mẫu trước publish) ---
+=== dt5g_writer_watch (pre-publish-1830) — 2026-10-15 07:24:24 ===
+  lastModifiedTime = 2026-10-14 23:24:15 ICT  → writer_class=OTHER
+  rows=3187 dup_time=0 null_asof=5 (sealed 0) | so CSV công bố: chung=3186 state_lệch=0 raw_lệch=0 (sealed 0)
+  [WARN] đã cảnh báo: bảng được ghi lúc 2026-10-14 23:24 ICT — NGOÀI cả cửa sổ publisher của ta (18:25–19:20) lẫn cửa sổ EOD đã biết của kaffa_v2 (16:30–18:00) ⇒ writer LẠ hoặc kaffa chạy lệch giờ
+
+--- [0] freshness precheck: today's ticker_prune ingest complete? ---
+  not ready yet: ticker_prune has 0 tickers for 2026-10-15 (need >=200) — attempt 1/6, waiting 15m

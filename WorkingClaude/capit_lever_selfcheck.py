@@ -699,12 +699,14 @@ with tempfile.TemporaryDirectory() as TMP:
     plan, adj = apply_capit_lever(plan, "SpaceX", status_path=ART_ON)   # rules_path=None ⇒ FILE THẬT
     # C20 giữ NGUYÊN mục đích: chứng minh file chính sách THẬT là thứ quyết định lúc đặt lệnh,
     # kiểm qua chính đường MẶC ĐỊNH (rules_path=None) chứ không qua fixture. Chỉ chiều kỳ vọng
-    # đảo theo trạng thái thật: file đang BẬT (2026-08-22) ⇒ đường mặc định phải CẤP. Chiều TẮT
-    # vẫn được phủ đầy đủ ở C19 bằng fixture RULES_OFF, nên không mất độ phủ.
-    check("C20 artifact BẬT + file chính sách THẬT (mặc định, đang BẬT) → CẤP — "
+    # đảo theo trạng thái thật: file đang TẮT (user duyệt 2026-10-13 19:30 ICT — công tắc tổng OFF trong
+    # thời gian tạm giữ margin CAPIT; 2026-08-22 → 2026-10-13 là BẬT) ⇒ đường mặc định KHÔNG được cấp.
+    # Chiều BẬT vẫn được phủ đầy đủ ở C1.. bằng fixture RULES_ON, nên không mất độ phủ. Khi user cho bật
+    # lại công tắc thì đảo lại kỳ vọng ở đây trong CÙNG commit đổi trading_rules.json.
+    check("C20 artifact BẬT + file chính sách THẬT (mặc định, đang TẮT) → KHÔNG cấp + gỡ cờ có sẵn — "
           "trạng thái production hôm nay, kiểm bằng chính đường mặc định chứ không bằng fixture",
-          plan.orders[0].loan_package_id == 1840 and plan.orders[0].lever_f == 1.3
-          and not [a for a in adj if a["action"] == "STRIPPED"],
+          plan.orders[0].loan_package_id is None
+          and adj and adj[0]["action"] == "STRIPPED" and "enabled" in adj[0]["reason"],
           detail=f"pkg={plan.orders[0].loan_package_id} adj={adj[:1]}")
 
     # TRẦN TỔNG (arch-reviewer F4). Trần slot là PER-ORDER, `cap_capit_orders` cũng per-order,
@@ -2240,7 +2242,7 @@ with tempfile.TemporaryDirectory() as TMP:
     check("M2 sau anchor CCTG (2026-10-05) → effective (CCTG 7,5%) KHÁC Big-4 (6,8%) nhưng "
           "active/structural vẫn đúng Loại 2 (cả hai dưới ngưỡng 9%)",
           lev_m2["pit_deposit_rate"] == 6.8 and lev_m2["pit_deposit_rate_effective"] == 7.5
-          and "cctg_6m" in str(lev_m2["pit_deposit_effective_driver"])
+          and str(lev_m2["pit_deposit_effective_driver"]).startswith(("cctg_12m", "cctg_6m"))
           and lev_m2["pit_filter_structural"] is False and lev_m2["active"] is True,
           detail=str({k: lev_m2[k] for k in
                       ("pit_deposit_rate", "pit_deposit_rate_effective",
