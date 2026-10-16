@@ -568,3 +568,15 @@
 
 ## Consolidation 2026-10-16T11:07:02Z
 - [2026-10-16T10:31:05Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53703}
+
+## Consolidation 2026-10-16T12:04:53Z
+- [2026-10-16T12:04:00Z] DollarBill/heartbeat — DollarBill_20261016_120351: {"status": "in_progress", "note": "bat dau doc state/NAV ZaloPay"}
+- [2026-10-16T12:04:02Z] DollarBill/heartbeat — DollarBill_20261016_120353: {"status": "in_progress", "note": "bat dau lap plan SpaceX 10-19"}
+- [2026-10-16T12:04:19Z] DollarBill/heartbeat — DollarBill_20261016_120353: {"status": "in_progress", "note": "da co NAV/DT5G, chay L1/L2"}
+- [2026-10-16T12:04:25Z] DollarBill/heartbeat — DollarBill_20261016_120351: {"status": "in_progress", "note": "lay gia DNSE live, viet plan 10-19"}
+- [2026-10-16T12:04:44Z] DollarBill/decision — plan-2026-10-19-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-19", "file": "data/trade_plans/plan_ZaloPay_2026-10-19.json", "orders": 0, "decision": "HOLD ALL", "dt5g": "NEUTRAL", "active_nav_vnd": 592292705, "l1": "NO_TRIM", "capit_residual": "NCT 73cp, SIP 49cp - de xuat user xem xet ban not, khong tu dua vao orders", "approval": "cho user duyet truoc 08:45 ICT 19/10"}
+- [2026-10-16T12:04:46Z] DollarBill/decision — plan-2026-10-19-SpaceX: {"account": "SpaceX", "plan_date": "2026-10-19", "decision": "HOLD_ALL 0 lenh", "dt5g": "NEUTRAL", "active_nav_vnd": 969426082, "egg_vnd": 501352538, "l1": "BLOCKED_ALL_NAMES", "l2": "NO_TRIGGER", "capit": "da thoat het 16/10", "file": "data/trade_plans/plan_SpaceX_2026-10-19.json", "status": "cho user duyet truoc 08:45 ICT 19/10"}
+- [2026-10-16T12:04:52Z] DollarBill/heartbeat — DollarBill_20261016_120351: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261016_120351", "source": "watcher"}
+- [2026-10-16T11:15:50Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12712}
+- [2026-10-16T11:10:05Z] Winston/status — new-listings-daily: {"date": "2026-10-16", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-10-16T11:40:08Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
