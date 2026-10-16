@@ -1,13 +1,13 @@
-BẮT TZ=<unset> M1 gỡ fail-closed (TK lỗi ⇒ đi tiếp TK sau) — 11 FAIL:  cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG;  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  TK2 lỗi sau TK1 ⇒ rc≠0 nhưng mốc + bus của SpaceX ĐÃ
-BẮT TZ=Pacific/Kiritimati M1 gỡ fail-closed (TK lỗi ⇒ đi tiếp TK sau) — 11 FAIL:  cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG;  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  TK2 lỗi sau TK1 ⇒ rc≠0 nhưng mốc + bus của SpaceX ĐÃ
+BẮT TZ=<unset> M1 gỡ fail-closed (TK lỗi ⇒ đi tiếp TK sau) — 12 FAIL:  cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG;  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  N2 dòng CUỐI (sau tail) là tóm tắt 🔴 nêu TK lỗi + TK
+BẮT TZ=Pacific/Kiritimati M1 gỡ fail-closed (TK lỗi ⇒ đi tiếp TK sau) — 12 FAIL:  cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG;  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  N2 dòng CUỐI (sau tail) là tóm tắt 🔴 nêu TK lỗi + TK
 BẮT TZ=<unset> M2 gỡ idempotent mốc (luôn thêm) — 1 FAIL:  idempotent: chạy lại cùng SEAL_MD5 ⇒ rc=0, file mốc 
 BẮT TZ=Pacific/Kiritimati M2 gỡ idempotent mốc (luôn thêm) — 1 FAIL:  idempotent: chạy lại cùng SEAL_MD5 ⇒ rc=0, file mốc 
 BẮT TZ=<unset> M3 thêm --accept-preclose vào lệnh CLI — 3 FAIL:  CLI gọi ĐÚNG đối số (asof = thứ Sáu tuần trước), thứ;  CLI KHÔNG nhận --accept-preclose/--restate/--force/-;  ZaloPay có dòng chụp trước đóng cửa ⇒ rc≠0; SpaceX Đ
 BẮT TZ=Pacific/Kiritimati M3 thêm --accept-preclose vào lệnh CLI — 3 FAIL:  CLI gọi ĐÚNG đối số (asof = thứ Sáu tuần trước), thứ;  CLI KHÔNG nhận --accept-preclose/--restate/--force/-;  ZaloPay có dòng chụp trước đóng cửa ⇒ rc≠0; SpaceX Đ
-BẮT TZ=<unset> M4 mọi rc=2 coi là NothingToSeal — 6 FAIL:  cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG;  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  TK2 lỗi sau TK1 ⇒ rc≠0 nhưng mốc + bus của SpaceX ĐÃ
-BẮT TZ=Pacific/Kiritimati M4 mọi rc=2 coi là NothingToSeal — 6 FAIL:  cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG;  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  TK2 lỗi sau TK1 ⇒ rc≠0 nhưng mốc + bus của SpaceX ĐÃ
-BẮT TZ=<unset> M5 không gỡ WC_ROOT — 19 FAIL:  chốt cả 2 ⇒ rc=0, mỗi TK đúng 1 mốc mới cuối file;  bus: 2 finding của Mike, topic fund-unit-ledger-seal;  CLI gọi ĐÚNG đối số (asof = thứ Sáu tuần trước), thứ
-BẮT TZ=Pacific/Kiritimati M5 không gỡ WC_ROOT — 19 FAIL:  chốt cả 2 ⇒ rc=0, mỗi TK đúng 1 mốc mới cuối file;  bus: 2 finding của Mike, topic fund-unit-ledger-seal;  CLI gọi ĐÚNG đối số (asof = thứ Sáu tuần trước), thứ
+BẮT TZ=<unset> M4 mọi rc=2 coi là NothingToSeal — 3 FAIL:  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  ZaloPay có dòng chụp trước đóng cửa ⇒ rc≠0; SpaceX Đ;  cổng từ chối TK1 (SpaceX) ⇒ rc≠0, KHÔNG mốc, KHÔNG b
+BẮT TZ=Pacific/Kiritimati M4 mọi rc=2 coi là NothingToSeal — 3 FAIL:  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  ZaloPay có dòng chụp trước đóng cửa ⇒ rc≠0; SpaceX Đ;  cổng từ chối TK1 (SpaceX) ⇒ rc≠0, KHÔNG mốc, KHÔNG b
+BẮT TZ=<unset> M5 không gỡ WC_ROOT — 2 FAIL:  chốt cả 2 ⇒ rc=0, mỗi TK đúng 1 mốc mới cuối file;  bus: 2 finding của Mike, topic fund-unit-ledger-seal
+BẮT TZ=Pacific/Kiritimati M5 không gỡ WC_ROOT — 2 FAIL:  chốt cả 2 ⇒ rc=0, mỗi TK đúng 1 mốc mới cuối file;  bus: 2 finding của Mike, topic fund-unit-ledger-seal
 BẮT TZ=<unset> M6 asof bỏ điều kiện ≥5 phiên — 5 FAIL: 8 asof lịch thật 2026-10-21 (T4 chạy tay: thứ Sáu 16/; 8 asof lịch thật 2026-09-05 (sau lễ 31/8–2/9 (3 phiên; 8 asof lịch thật 2026-05-02 (lễ 30/4+1/5: 24/4 mới 3 
 BẮT TZ=Pacific/Kiritimati M6 asof bỏ điều kiện ≥5 phiên — 5 FAIL: 8 asof lịch thật 2026-10-21 (T4 chạy tay: thứ Sáu 16/; 8 asof lịch thật 2026-09-05 (sau lễ 31/8–2/9 (3 phiên; 8 asof lịch thật 2026-05-02 (lễ 30/4+1/5: 24/4 mới 3 
 BẮT TZ=<unset> M7 gỡ guard cây canonical — 1 FAIL: 7 CLI nằm trong cây thật nhưng không phải mike/bin ca
@@ -16,14 +16,26 @@ BẮT TZ=<unset> M8 gỡ kiểm tiến trình ghi nav_history — 2 FAIL: 3 có 
 BẮT TZ=Pacific/Kiritimati M8 gỡ kiểm tiến trình ghi nav_history — 2 FAIL: 3 có tiến trình daily_nav_snapshot.py ⇒ rc=4, không g; 4 có tiến trình eod_trading_report.sh ⇒ rc=4
 BẮT TZ=<unset> M9 nhận SEAL_MD5 của TK khác — 1 FAIL:  rc=0 nhưng SEAL_MD5 của TK khác ⇒ rc≠0, không mốc, d
 BẮT TZ=Pacific/Kiritimati M9 nhận SEAL_MD5 của TK khác — 1 FAIL:  rc=0 nhưng SEAL_MD5 của TK khác ⇒ rc≠0, không mốc, d
-BẮT TZ=<unset> M10 gỡ khung giờ 19:00-22:00 — 1 FAIL: 2 trong khung ghi nav_history 19:00–22:00 ⇒ rc=4, khô
-BẮT TZ=Pacific/Kiritimati M10 gỡ khung giờ 19:00-22:00 — 1 FAIL: 2 trong khung ghi nav_history 19:00–22:00 ⇒ rc=4, khô
+BẮT TZ=<unset> M10 gỡ khung giờ 19:00-22:00 — 2 FAIL: 2 trong khung ghi nav_history 19:00–22:00 ⇒ rc=4, khô; 2b N1 biên 21:30 (nav_sync_retry */15 tới 21:45) ⇒ rc
+BẮT TZ=Pacific/Kiritimati M10 gỡ khung giờ 19:00-22:00 — 2 FAIL: 2 trong khung ghi nav_history 19:00–22:00 ⇒ rc=4, khô; 2b N1 biên 21:30 (nav_sync_retry */15 tới 21:45) ⇒ rc
 BẮT TZ=<unset> M11 now() không neo ICT — 1 FAIL: 1 now_ict() neo ICT tường minh dưới TZ=<unset> (+07:0
 BẮT TZ=Pacific/Kiritimati M11 now() không neo ICT — 1 FAIL: 1 now_ict() neo ICT tường minh dưới TZ=Pacific/Kiriti
 BẮT TZ=<unset> M12 bus lỗi vẫn rc=0 — 1 FAIL: 0 bus lỗi ⇒ mốc SpaceX đã ghi, rc≠0, dừng trước ZaloP
 BẮT TZ=Pacific/Kiritimati M12 bus lỗi vẫn rc=0 — 1 FAIL: 0 bus lỗi ⇒ mốc SpaceX đã ghi, rc≠0, dừng trước ZaloP
 BẮT TZ=<unset> M14 timeout CLI nuốt im (rc=0) — 1 FAIL: 0b CLI treo quá trần ⇒ rc≠0, KHÔNG mốc (dù đã in SEAL
 BẮT TZ=Pacific/Kiritimati M14 timeout CLI nuốt im (rc=0) — 1 FAIL: 0b CLI treo quá trần ⇒ rc≠0, KHÔNG mốc (dù đã in SEAL
+BẮT TZ=<unset> M15 B1 gỡ kiểm last_date>=asof ở NothingToSeal — 2 FAIL: b B1 NothingToSeal nhưng manifest cuối last_date 2026;  B1 tái hiện: xoá dòng 05–09/10 nav_history SpaceX, s
+BẮT TZ=Pacific/Kiritimati M15 B1 gỡ kiểm last_date>=asof ở NothingToSeal — 2 FAIL: b B1 NothingToSeal nhưng manifest cuối last_date 2026;  B1 tái hiện: xoá dòng 05–09/10 nav_history SpaceX, s
+BẮT TZ=<unset> M16 B2 gỡ so md5 sổ+manifest với mốc mới nhất — 3 FAIL: c B2 NothingToSeal nhưng md5 sổ+manifest ≠ mốc mới nh; d B2 NothingToSeal mà TK KHÔNG có mốc nào ⇒ rc=1;  B2 tái hiện: sổ SpaceX đã chốt tới 09/10 mà mốc mới 
+BẮT TZ=Pacific/Kiritimati M16 B2 gỡ so md5 sổ+manifest với mốc mới nhất — 3 FAIL: c B2 NothingToSeal nhưng md5 sổ+manifest ≠ mốc mới nh; d B2 NothingToSeal mà TK KHÔNG có mốc nào ⇒ rc=1;  B2 tái hiện: sổ SpaceX đã chốt tới 09/10 mà mốc mới 
+BẮT TZ=<unset> M17 N1 thu hẹp khung giờ còn 19:00-21:00 — 1 FAIL: 2b N1 biên 21:30 (nav_sync_retry */15 tới 21:45) ⇒ rc
+BẮT TZ=Pacific/Kiritimati M17 N1 thu hẹp khung giờ còn 19:00-21:00 — 1 FAIL: 2b N1 biên 21:30 (nav_sync_retry */15 tới 21:45) ⇒ rc
+BẮT TZ=<unset> M18 gỡ kiểm dòng cuối < asof khi chốt rc=0 — 1 FAIL: e chốt rc=0 nhưng dòng cuối 2026-10-14 < asof ⇒ mốc+b
+BẮT TZ=Pacific/Kiritimati M18 gỡ kiểm dòng cuối < asof khi chốt rc=0 — 1 FAIL: e chốt rc=0 nhưng dòng cuối 2026-10-14 < asof ⇒ mốc+b
+BẮT TZ=<unset> M19 N2 gỡ dòng tóm tắt sau tail — 3 FAIL:  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  N2 dòng CUỐI (sau tail) là tóm tắt 🔴 nêu TK lỗi + TK;  N2 dòng cuối: tóm tắt 🔴 ZaloPay lỗi, đã chốt+ghi mốc
+BẮT TZ=Pacific/Kiritimati M19 N2 gỡ dòng tóm tắt sau tail — 3 FAIL:  in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng,;  N2 dòng CUỐI (sau tail) là tóm tắt 🔴 nêu TK lỗi + TK;  N2 dòng cuối: tóm tắt 🔴 ZaloPay lỗi, đã chốt+ghi mốc
+BẮT TZ=<unset> M20 N4 đếm nav_is_estimate sai cột — 1 FAIL:  N4 payload: số dòng nav_is_estimate trong đoạn vừa c
+BẮT TZ=Pacific/Kiritimati M20 N4 đếm nav_is_estimate sai cột — 1 FAIL:  N4 payload: số dòng nav_is_estimate trong đoạn vừa c
 BẮT TZ=<unset> M13 khớp writer theo chuỗi con — 1 FAIL: 5 dòng cron (sh -c) NHẮC tên writer trong comment ⇒ K
 BẮT TZ=Pacific/Kiritimati M13 khớp writer theo chuỗi con — 1 FAIL: 5 dòng cron (sh -c) NHẮC tên writer trong comment ⇒ K
-TỔNG: 28/28 bị bắt
+TỔNG: 40/40 bị bắt

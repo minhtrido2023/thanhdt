@@ -5,11 +5,11 @@ Nhánh `feat/ledger-seal-weekly-20261016`, CHƯA merge, CHƯA cài cron. Không 
 
 ## File
 - `bin/ledger_seal_weekly.py` — wrapper (docstring = đặc tả đầy đủ, mã thoát 0/1/4/64).
-- `bin/ledger_seal_weekly_selfcheck.py` — 46 assert: phần A dùng CLI giả (stub), phần B tích hợp
+- `bin/ledger_seal_weekly_selfcheck.py` — 58 assert (vòng 2): phần A dùng CLI giả (stub), phần B tích hợp
   `nav_unit_ledger.py` THẬT trên bản sao /tmp, cuối cùng kiểm md5 dữ liệu thật không đổi.
 - `CRON_PROPOSAL.md` — dòng crontab + dòng bảng chính + CHANGELOG + 4 câu hỏi §11 (CHỈ SOẠN).
 - `mutants.py` + `mutants_run.txt` — 14 đột biến × 2 TZ = 28/28 bị bắt.
-- `selfcheck_TZunset.txt`, `selfcheck_TZkiritimati.txt` — đầu ra thật, 46/46 mỗi TZ.
+- `selfcheck_TZunset.txt`, `selfcheck_TZkiritimati.txt` — đầu ra thật, 58/58 mỗi TZ (vòng 2); `mutants_run.txt` 40/40 bị bắt.
 - `demo_fund_bench_cron_tk2_fail.txt` — đầu ra thật khi bọc bằng `fund_bench_cron.sh` (stub notify), ca TK2 lỗi.
 
 ## Hành vi (đo, không giả định)
@@ -43,11 +43,18 @@ T7 20/02 → 05/02.
    Discord chỉ thấy 8 dòng cuối, tức là đúng 8 dòng CLI, nên mất dòng "đã chốt+ghi mốc: SpaceX" của
    wrapper (dòng đó vẫn còn trong log). Không sửa `fund_bench_cron.sh` vì đó là file dùng chung, ngoài
    phạm vi job. Đề xuất: biến `FUND_BENCH_HEADER` tuỳ chọn.
-4. **Kẽ hở đã biết:** nếu bị giết đúng giữa lúc "CLI chốt xong" và "ghi mốc" (cửa sổ cỡ mili-giây), sổ có
-   bản ghi mới mà file mốc không có. `ledger_anchor_check` 06:55 sáng hôm sau sẽ báo LỆCH (mốc mới nhất
-   ≠ md5 sổ) ⇒ phát hiện được, nhưng không tự vá. Lượt kế tiếp sẽ là NothingToSeal và cũng không vá.
-   Cách vá: chép tay dòng SEAL_MD5 lấy từ log, hoặc từ `--verify-anchor` sau khi kiểm manifest. Wrapper cố ý
-   KHÔNG tự suy mốc từ trạng thái đĩa, vì làm vậy là hợp thức hoá đúng thứ mốc ngoài kho có nhiệm vụ bắt.
+4. **Kẽ hở "sổ đã chốt nhưng chưa có mốc" (sửa vòng 2, job Taylor_20261016_040211).** Nếu wrapper chết
+   giữa "CLI chốt xong" và "ghi mốc" (vd timeout 1500 giết wrapper trong khi CLI con chạy tiếp), sổ có bản
+   ghi mới mà file mốc không có. Bản vòng 1 viết sai rằng `ledger_anchor_check` sẽ báo LỆCH: thực tế
+   `verify_anchor` chấp nhận manifest là phần nối thêm sau mốc cũ ⇒ anchor-check vẫn rc=0 OK (B7 của
+   selfcheck ghi nhận đúng sự thật này). Người bắt là WRAPPER ở lượt kế tiếp: CLI trả NothingToSeal ⇒
+   wrapper so md5 sổ + md5 manifest hiện tại với mốc MỚI NHẤT của TK ⇒ lệch ⇒ rc=1 "sổ đã chốt quá mốc,
+   chưa có mốc". Cách vá: đối chiếu manifest rồi chép tay dòng SEAL_MD5 (in trong thông điệp). Wrapper
+   cố ý KHÔNG tự thêm mốc từ trạng thái đĩa — làm vậy là hợp thức hoá đúng thứ mốc ngoài kho phải bắt.
+   Cùng vòng 2: NothingToSeal chỉ là "không có dòng mới", nên wrapper còn đòi `last_date` bản ghi cuối
+   manifest ≥ asof (writer nav_history chết cả tuần ⇒ rc=1 kèm ngày thật); chốt rc=0 mà dòng cuối < asof
+   cũng rc=1 (sau khi đã ghi mốc + bus đoạn vừa chốt). Không đổi `ledger_anchor_check.py`: selfcheck của
+   nó dùng CLI giả với md5 bịa, thêm so md5 manifest phải viết lại fixture ⇒ không "gọn", để việc riêng.
 5. **Commit file mốc:** `consolidate.sh` (cron `7 * * * *`) chạy `git add kb/` rồi commit `-- kb/` mỗi khi
    có event mới, và finding bus của wrapper chính là event mới đó. Vì vậy file mốc được commit trong ≤ 1
    giờ (≈ 08:07 thứ Bảy). Nếu commit kẹt, consolidate tự báo `⛔ … KHÔNG commit được` qua notify.sh.
@@ -56,7 +63,7 @@ T7 20/02 → 05/02.
 1. Arch-review nhánh, merge vào master của repo mike.
 2. Chạy lại selfcheck từ cây canonical, dưới cả hai TZ:
    `env -u TZ python3 mike/bin/ledger_seal_weekly_selfcheck.py` và
-   `TZ=Pacific/Kiritimati python3 mike/bin/ledger_seal_weekly_selfcheck.py`. Kỳ vọng 46/46 mỗi lần.
+   `TZ=Pacific/Kiritimati python3 mike/bin/ledger_seal_weekly_selfcheck.py`. Kỳ vọng 58/58 mỗi lần (vòng 2).
    Khi chạy từ canonical, A17 (guard) dùng thư mục tạm trong `mike/state/` và vẫn đúng.
 3. Kiểm thử chỉ-đọc: `python3 mike/bin/ledger_seal_weekly.py --print-asof`.
 4. Cài crontab theo `CRON_PROPOSAL.md` §1. Backup trước, cập nhật bảng chính + CHANGELOG CÙNG commit.

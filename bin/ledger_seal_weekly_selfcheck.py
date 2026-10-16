@@ -68,6 +68,15 @@ sys.exit(plan["rc"])
 '''
 STUB_BUS = "#!/usr/bin/env bash\nprintf '%s\\t%s\\t%s\\t%s\\n' \"$@\" >> \"$STUB_BUS_LOG\"\nexit \"${STUB_BUS_RC:-0}\"\n"
 HDR = "# header\nSEAL_MD5 SpaceX " + "0" * 32 + " " + "1" * 32 + "\n"
+# Sổ + manifest GIẢ trên đĩa cho phần A (wrapper đọc chúng ở nhánh NothingToSeal + đếm nav_is_estimate).
+LED_HDR = "date,nav,flow_bod_vnd,flow_eod_vnd,units_issued,units,unit_price,nav_is_estimate\n"
+FIX_LED = {a: LED_HDR + "".join(f"2026-10-{d:02d},1,0,0,0,1,1.0,{'True' if d in est else 'False'}\n"
+                                for d in (9, 12, 13, 14, 15, 16))
+           for a, est in (("SpaceX", {13, 15}), ("ZaloPay", set()))}
+fix_man = lambda last: json.dumps({"seq": 1, "kind": "seal", "rows_total": 6, "last_date": last}) + "\n"
+fix_anchor = lambda a, last="2026-10-16": (f"SEAL_MD5 {a} {hashlib.md5(FIX_LED[a].encode()).hexdigest()} "
+                                           f"{hashlib.md5(fix_man(last).encode()).hexdigest()}")
+HDR_OK = "# header\n" + "".join(fix_anchor(a) + "\n" for a in ACCTS)
 
 
 def ok_out(acct, h):
@@ -86,8 +95,13 @@ GATE = lambda a: ("".join(f"info dòng {i}\n" for i in range(12)) +
 
 
 def run_stub(plan, anchors=HDR, now="2026-10-24T07:30", bus_rc=0, proc=None, extra_env=None,
-             cli_dir=None):
+             cli_dir=None, man_last="2026-10-16"):
     with tempfile.TemporaryDirectory() as d:
+        ld = os.path.join(d, "ledgers")
+        os.makedirs(ld)
+        for a in ACCTS:
+            open(os.path.join(ld, f"nav_unit_ledger_{a}.csv"), "w").write(FIX_LED[a])
+            open(os.path.join(ld, f"nav_unit_ledger_{a}.csv.manifest.jsonl"), "w").write(fix_man(man_last))
         cli = os.path.join(cli_dir or d, "stub_cli.py")
         open(cli, "w").write(STUB_CLI)
         bus = os.path.join(d, "bus.sh")
@@ -104,7 +118,7 @@ def run_stub(plan, anchors=HDR, now="2026-10-24T07:30", bus_rc=0, proc=None, ext
                    LEDGER_SEAL_LOCK=os.path.join(d, "x.lock"), LEDGER_SEAL_PROC_DIR=procd,
                    LEDGER_SEAL_NOW_ICT=now, STUB_LOG=os.path.join(d, "cli.log"),
                    STUB_BUS_LOG=os.path.join(d, "bus.log"), STUB_BUS_RC=str(bus_rc),
-                   STUB_PLAN=json.dumps(plan), WC_ROOT=DECOY_WC)
+                   STUB_PLAN=json.dumps(plan), WC_ROOT=DECOY_WC, LEDGER_SEAL_LEDGER_DIR=ld)
         env.update(extra_env or {})
         r = subprocess.run([sys.executable, SCRIPT], capture_output=True, text=True, env=env, timeout=120)
         rd = lambda n: open(os.path.join(d, n)).read() if os.path.exists(os.path.join(d, n)) else ""
@@ -129,6 +143,9 @@ check("A1 bus: 2 finding của Mike, topic fund-unit-ledger-seal-20261024, paylo
                             for b in bus)
       and json.loads(bus[1].split("\t")[3])["SEAL_MD5_ZaloPay"].startswith("SEAL_MD5 ZaloPay")
       and json.loads(bus[0].split("\t")[3])["rows"] == {"SpaceX": 80}, "\n".join(bus))
+check("A1 N4 payload: số dòng nav_is_estimate trong đoạn vừa chốt (SpaceX 5 dòng cuối có 2 True, ZaloPay 0)",
+      json.loads(bus[0].split("\t")[3]).get("nav_is_estimate_rows_added") == {"SpaceX": 2}
+      and json.loads(bus[1].split("\t")[3]).get("nav_is_estimate_rows_added") == {"ZaloPay": 0}, "\n".join(bus))
 want = ["--account", "SpaceX", "--seal", "--real-data", "--asof", "2026-10-16"]
 check("A1 CLI gọi ĐÚNG đối số (asof = thứ Sáu tuần trước), thứ tự SpaceX→ZaloPay",
       [c["argv"] for c in calls] == [want, want[:1] + ["ZaloPay"] + want[2:]], json.dumps(calls))
@@ -147,21 +164,43 @@ check("A3 cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG g�
       rc != 0 and anc == HDR and bus == [] and len(calls) == 1, out)
 lines = out.rstrip().splitlines()
 check("A3 in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng, §29)",
-      lines[-8:] == GATE("SpaceX").rstrip().splitlines()[-8:] and "info dòng 3" not in out, out)
+      lines[-9:-1] == GATE("SpaceX").rstrip().splitlines()[-8:] and "info dòng 3" not in out, out)
+check("A3 N2 dòng CUỐI (sau tail) là tóm tắt 🔴 nêu TK lỗi + TK đã chốt", lines[-1].startswith("🔴 tóm tắt: SpaceX")
+      and lines[-1].endswith("đã chốt+ghi mốc: không TK nào"), out)
 
 rc, out, anc, calls, bus = run_stub({"SpaceX": {"rc": 0, "out": ok_out("SpaceX", "a")},
                                      "ZaloPay": {"rc": 2, "out": GATE("ZaloPay")}})
 check("A4 TK2 lỗi sau TK1 ⇒ rc≠0 nhưng mốc + bus của SpaceX ĐÃ ghi, ZaloPay không",
       rc != 0 and len(anchors_of(anc, "SpaceX")) == 2 and not anchors_of(anc, "ZaloPay") and len(bus) == 1
       and "SpaceX" in out.split("ZaloPay")[0], out)
+check("A4 N2 dòng cuối: tóm tắt 🔴 ZaloPay lỗi, đã chốt+ghi mốc: SpaceX",
+      out.rstrip().splitlines()[-1].startswith("🔴 tóm tắt: ZaloPay") and out.rstrip().endswith("đã chốt+ghi mốc: SpaceX"), out)
 
-rc, out, anc, calls, bus = run_stub({a: {"rc": 2, "out": NOTHING(a)} for a in ACCTS})
-check("A5 NothingToSeal cả 2 ⇒ rc=0, không mốc, không bus, vẫn gọi cả 2 TK",
-      rc == 0 and anc == HDR and bus == [] and len(calls) == 2, out)
+rc, out, anc, calls, bus = run_stub({a: {"rc": 2, "out": NOTHING(a)} for a in ACCTS}, anchors=HDR_OK)
+check("A5 NothingToSeal cả 2 (sổ tới asof, khớp mốc mới nhất) ⇒ rc=0, không mốc, không bus, gọi cả 2 TK",
+      rc == 0 and anc == HDR_OK and bus == [] and len(calls) == 2, out)
+
+rc, out, anc, calls, bus = run_stub({a: {"rc": 2, "out": NOTHING(a)} for a in ACCTS}, man_last="2026-10-09",
+                                    anchors="# h\n" + "".join(fix_anchor(a, "2026-10-09") + "\n" for a in ACCTS))
+check("A5b B1 NothingToSeal nhưng manifest cuối last_date 2026-10-09 < asof 2026-10-16 ⇒ rc=1, dừng, nêu số thật, "
+      "KHÔNG nói 'đã chốt tới/qua'", rc == 1 and len(calls) == 1 and "2026-10-09" in out and "asof 2026-10-16" in out
+      and "đã chốt tới/qua" not in out, out)
+
+rc, out, anc, calls, bus = run_stub({a: {"rc": 2, "out": NOTHING(a)} for a in ACCTS},
+                                    anchors="# h\n" + fix_anchor("ZaloPay") + "\n" + f"SEAL_MD5 SpaceX {'a' * 32} {'e' * 32}\n")
+check("A5c B2 NothingToSeal nhưng md5 sổ+manifest ≠ mốc mới nhất ⇒ rc=1, dừng, KHÔNG tự thêm mốc",
+      rc == 1 and len(calls) == 1 and "chưa có mốc" in out and len(anchors_of(anc, "SpaceX")) == 1 and bus == [], out)
+rc, out, anc, calls, bus = run_stub({a: {"rc": 2, "out": NOTHING(a)} for a in ACCTS}, anchors="# h\n")
+check("A5d B2 NothingToSeal mà TK KHÔNG có mốc nào ⇒ rc=1", rc == 1 and "không có mốc nào" in out, out)
+
+rc, out, anc, calls, bus = run_stub({"SpaceX": {"rc": 0, "out": ok_out("SpaceX", "a").replace("tới 2026-10-16", "tới 2026-10-14")},
+                                     "ZaloPay": {"rc": 0, "out": ok_out("ZaloPay", "b")}})
+check("A5e chốt rc=0 nhưng dòng cuối 2026-10-14 < asof ⇒ mốc+bus SpaceX ĐÃ ghi, rc=1, dừng trước ZaloPay",
+      rc == 1 and len(anchors_of(anc, "SpaceX")) == 2 and len(bus) == 1 and len(calls) == 1 and "< asof" in out, out)
 
 rc, out, anc, calls, bus = run_stub({"SpaceX": {"rc": 2, "out": NOTHING("SpaceX")},
-                                     "ZaloPay": {"rc": 0, "out": ok_out("ZaloPay", "b")}})
-check("A6 TK1 NothingToSeal + TK2 chốt ⇒ rc=0, chỉ mốc ZaloPay", rc == 0 and len(anchors_of(anc, "ZaloPay")) == 1
+                                     "ZaloPay": {"rc": 0, "out": ok_out("ZaloPay", "b")}}, anchors=HDR_OK)
+check("A6 TK1 NothingToSeal + TK2 chốt ⇒ rc=0, chỉ thêm mốc ZaloPay", rc == 0 and len(anchors_of(anc, "ZaloPay")) == 2
       and len(anchors_of(anc, "SpaceX")) == 1 and len(bus) == 1, out)
 
 rc, out, anc, calls, bus = run_stub({"SpaceX": {"rc": 2, "out": NOTHING("ZaloPay")},
@@ -195,6 +234,10 @@ check("A11 SEAL_MD5 trùng một mốc CŨ (không phải mới nhất) ⇒ khô
 
 rc, out, anc, calls, bus = run_stub(P_OK, now="2026-10-23T20:05")
 check("A12 trong khung ghi nav_history 19:00–22:00 ⇒ rc=4, không gọi CLI", rc == 4 and calls == [], out)
+rc, out, anc, calls, bus = run_stub(P_OK, now="2026-10-23T21:30")
+check("A12b N1 biên 21:30 (nav_sync_retry */15 tới 21:45) ⇒ rc=4", rc == 4 and calls == [], out)
+rc, out, anc, calls, bus = run_stub(P_OK, now="2026-10-24T22:00")
+check("A12c 22:00 đúng biên phải ⇒ được chạy (rc=0)", rc == 0 and len(calls) == 2, out)
 rc, out, anc, calls, bus = run_stub(P_OK, proc={"4242": ["python3", "/w/mike/bin/daily_nav_snapshot.py", "--account", "SpaceX"]})
 check("A13 có tiến trình daily_nav_snapshot.py ⇒ rc=4, không gọi CLI", rc == 4 and calls == [], out)
 rc, out, anc, calls, bus = run_stub(P_OK, proc={"4243": ["bash", "/w/mike/bin/for_each_live_account.sh",
@@ -262,7 +305,7 @@ check("A22 --print-asof (đồng hồ thật) == seal_asof(hôm nay ICT)",
 print("B. tích hợp (nav_unit_ledger.py thật trên bản sao /tmp)")
 
 
-def mk_sandbox(seal_to):
+def mk_sandbox(seal_to, anchors=False):
     s = tempfile.mkdtemp(prefix="lsw_sbx_", dir="/tmp")
     atexit.register(shutil.rmtree, s, True)
     open(os.path.join(s, "wc_env.sh"), "w").close()
@@ -285,6 +328,9 @@ def mk_sandbox(seal_to):
                             "--accept-preclose", "2026-08-24=sandbox setup (giống lần chốt thật 16/10)"],
                            capture_output=True, text=True, env={k: v for k, v in os.environ.items() if k != "WC_ROOT"})
         assert r.returncode == 0, f"dựng sandbox {a} lỗi: {r.stdout}{r.stderr}"
+        if anchors:
+            with open(os.path.join(s, "mike", "kb", "fund_ledger_anchors.txt"), "a") as f:
+                f.write([ln for ln in r.stdout.splitlines() if ln.startswith("SEAL_MD5 ")][0] + "\n")
     return s
 
 
@@ -356,6 +402,51 @@ try:
     check("B5 cổng từ chối TK1 (SpaceX) ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, ZaloPay không chạm",
           rc != 0 and anc == "# sandbox anchors\n" and bus == [] and "[SealGateError]" in out
           and md5(os.path.join(S, "data", "execution_logs", "nav_unit_ledger_ZaloPay.csv")) == z0, out)
+finally:
+    shutil.rmtree(S, ignore_errors=True)
+
+def drop_rows(s, acct, days):
+    p = os.path.join(s, "data", "execution_logs", f"nav_history_{acct}.csv")
+    rows = open(p).read().splitlines(True)
+    keep = [r for r in rows if r.split(",", 1)[0] not in days]
+    assert len(rows) - len(keep) == len(days), (acct, days)
+    open(p, "w").write("".join(keep))
+
+
+S = mk_sandbox("2026-10-02", anchors=True)
+try:
+    z0 = md5(os.path.join(S, "data", "execution_logs", "nav_unit_ledger_ZaloPay.csv"))
+    a0 = open(os.path.join(S, "mike", "kb", "fund_ledger_anchors.txt")).read()
+    drop_rows(S, "SpaceX", {f"2026-10-0{d}" for d in range(5, 10)})
+    rc, out, anc, bus = run_sbx(S, "2026-10-17T07:30")
+    check("B6 B1 tái hiện: xoá dòng 05–09/10 nav_history SpaceX, sổ chốt tới 02/10 ⇒ CLI NothingToSeal nhưng "
+          "wrapper rc=1 nêu 2026-10-02 < asof 2026-10-09, ZaloPay không chạm, không mốc/bus",
+          rc == 1 and "[NothingToSeal]" not in out and "2026-10-02" in out and "asof 2026-10-09" in out
+          and "đã chốt tới/qua" not in out and anc == a0 and bus == []
+          and md5(os.path.join(S, "data", "execution_logs", "nav_unit_ledger_ZaloPay.csv")) == z0, out)
+finally:
+    shutil.rmtree(S, ignore_errors=True)
+
+S = mk_sandbox("2026-10-02", anchors=True)
+try:
+    a0 = open(os.path.join(S, "mike", "kb", "fund_ledger_anchors.txt")).read()
+    r = subprocess.run([sys.executable, os.path.join(S, "mike", "bin", "nav_unit_ledger.py"), "--account", "SpaceX",
+                        "--seal", "--real-data", "--asof", "2026-10-09"], capture_output=True, text=True,
+                       env={k: v for k, v in os.environ.items() if k != "WC_ROOT"})
+    assert r.returncode == 0, r.stdout + r.stderr       # giả lập: CLI chốt xong, wrapper chết trước khi ghi mốc
+    rc, out, anc, bus = run_sbx(S, "2026-10-17T07:30")
+    check("B7 B2 tái hiện: sổ SpaceX đã chốt tới 09/10 mà mốc mới nhất vẫn 02/10 ⇒ wrapper rc=1 'chưa có mốc', "
+          "KHÔNG tự thêm mốc, KHÔNG bus, dừng trước ZaloPay",
+          rc == 1 and "chưa có mốc" in out and "2026-10-09" in out and anc == a0 and bus == []
+          and "ZaloPay:" not in out, out)
+    env = {k: v for k, v in os.environ.items() if k != "WC_ROOT"}
+    env.update(LEDGER_ANCHORS_FILE=os.path.join(S, "mike", "kb", "fund_ledger_anchors.txt"),
+               LEDGER_DIR=os.path.join(S, "data", "execution_logs"),
+               NAV_UNIT_LEDGER_CLI=os.path.join(S, "mike", "bin", "nav_unit_ledger.py"))
+    r = subprocess.run([sys.executable, os.path.join(S, "mike", "bin", "ledger_anchor_check.py")],
+                       capture_output=True, text=True, env=env, timeout=300)
+    check("B7 (ghi nhận sự thật) ledger_anchor_check KHÔNG bắt ca này: rc=0 — chỉ wrapper bắt",
+          r.returncode == 0, r.stdout + r.stderr)
 finally:
     shutil.rmtree(S, ignore_errors=True)
 

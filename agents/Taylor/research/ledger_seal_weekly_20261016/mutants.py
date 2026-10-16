@@ -5,7 +5,7 @@ import os, subprocess, sys
 BIN = os.path.abspath(sys.argv[1])
 SRC = open(os.path.join(BIN, "ledger_seal_weekly.py")).read()
 M = [
- ("M1 gỡ fail-closed (TK lỗi ⇒ đi tiếp TK sau)", "            print(tail(out), flush=True)\n            return 1", "            print(tail(out), flush=True)\n            continue"),
+ ("M1 gỡ fail-closed (TK lỗi ⇒ đi tiếp TK sau)", "\"{', '.join(sealed) or 'không TK nào'}\", flush=True)\n            return 1\n        total, through", "\"{', '.join(sealed) or 'không TK nào'}\", flush=True)\n            continue\n        total, through"),
  ("M2 gỡ idempotent mốc (luôn thêm)", "    if latest == line:\n        return False", "    if False:\n        return False"),
  ("M3 thêm --accept-preclose vào lệnh CLI", '"--asof", asof.isoformat()]', '"--asof", asof.isoformat(), "--accept-preclose", f"{asof}=auto"]'),
  ("M4 mọi rc=2 coi là NothingToSeal", "return rc == 2 and re.search(", "return rc == 2 or re.search("),
@@ -18,6 +18,12 @@ M = [
  ("M11 now() không neo ICT", "    return datetime.datetime.now(ICT)", "    return datetime.datetime.now()"),
  ("M12 bus lỗi vẫn rc=0", '                  f"{bout[-400:]} — post tay finding {topic}; KHÔNG chốt gì thêm.", flush=True)\n            return 1', '                  f"{bout[-400:]} — post tay finding {topic}; KHÔNG chốt gì thêm.", flush=True)\n            continue'),
  ("M14 timeout CLI nuốt im (rc=0)", "        return 124, part +", "        return 0, part +"),
+ ("M15 B1 gỡ kiểm last_date>=asof ở NothingToSeal", '    if last["last_date"] < asof.isoformat():', "    if False:"),
+ ("M16 B2 gỡ so md5 sổ+manifest với mốc mới nhất", "    if anchor != now_line:", "    if False:"),
+ ("M17 N1 thu hẹp khung giờ còn 19:00-21:00", "datetime.time(22, 0))", "datetime.time(21, 0))"),
+ ("M18 gỡ kiểm dòng cuối < asof khi chốt rc=0", "        if not through or through < asof.isoformat():", "        if False:"),
+ ("M19 N2 gỡ dòng tóm tắt sau tail", "            print(tail(out), flush=True)\n            print(", "            print(tail(out), flush=True)\n            (lambda *a, **k: None)("),
+ ("M20 N4 đếm nav_is_estimate sai cột", 'r.rsplit(",", 1)[-1].strip() == "True"', 'r.split(",")[1].strip() == "True"'),
  ("M13 khớp writer theo chuỗi con", "if any(os.path.basename(a) in NAV_WRITERS for a in args)", "if any(w.split('.')[0] in ' '.join(args) for w in NAV_WRITERS)"),
 ]
 caught = 0

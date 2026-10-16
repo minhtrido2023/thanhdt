@@ -12,8 +12,12 @@ Thiết kế user duyệt 2026-10-16 10:35 ICT, job Taylor_20261016_033549:
     --accept-preclose / --restate / --force. Env con đã gỡ WC_ROOT (CLI neo theo marker cây của nó).
   · FAIL-CLOSED: TK nào rc≠0 (trừ NothingToSeal) ⇒ dừng, KHÔNG chốt TK sau, in 8 dòng cuối đầu ra THẬT
     của CLI (§29 — không đoán nguyên nhân), rc≠0 để `fund_bench_cron.sh` báo Trading Daily.
-  · NothingToSeal (CLI rc=2 + dòng `TỪ CHỐI nav_unit_ledger (<TK>) [NothingToSeal]`) = đã chốt tới mốc
-    đó ⇒ bình thường, đi tiếp, rc=0. Mọi rc=2 KHÁC là từ chối thật.
+  · NothingToSeal (CLI rc=2 + dòng `TỪ CHỐI nav_unit_ledger (<TK>) [NothingToSeal]`) chỉ nói "không có
+    dòng MỚI" — KHÔNG nói sổ đã tới asof. Wrapper tự đọc trên đĩa rồi mới cho đi tiếp: (a) `last_date` của
+    bản ghi CUỐI manifest ≥ asof (không thì writer nav_history đã chết ⇒ rc=1); (b) md5 sổ + md5 manifest
+    HIỆN TẠI == mốc MỚI NHẤT của TK trong file mốc (không thì sổ đã chốt quá mốc mà chưa có mốc — vd lượt
+    trước bị giết giữa "CLI xong" và "ghi mốc" ⇒ rc=1; KHÔNG tự thêm mốc). Mọi rc=2 KHÁC là từ chối thật.
+    Chốt rc=0 mà dòng cuối < asof cũng là rc=1 (sau khi đã ghi mốc + post bus đoạn vừa chốt).
   · Mỗi TK chốt XONG ⇒ ngay lập tức (trước khi sang TK sau): parse đúng một dòng
     `SEAL_MD5 <TK> <md5 sổ> <md5 manifest>` → thêm vào cuối `kb/fund_ledger_anchors.txt` (chỉ-thêm,
     nguyên tử, idempotent: mốc mới nhất của TK đã là dòng đó ⇒ không thêm, không post lại) → post bus
@@ -32,11 +36,13 @@ Mã thoát: 0 OK (kể cả NothingToSeal) · 1 CLI từ chối/lỗi, thiếu d
 Dùng:  python3 mike/bin/ledger_seal_weekly.py [--print-asof]
 Selfcheck: python3 mike/bin/ledger_seal_weekly_selfcheck.py (env -u TZ và TZ=Pacific/Kiritimati).
 Biến môi trường chỉ để TEST (prod để trống): NAV_UNIT_LEDGER_CLI, LEDGER_ANCHORS_FILE, APPEND_EVENT_CMD,
-LEDGER_SEAL_LOCK, LEDGER_SEAL_PROC_DIR, LEDGER_SEAL_NOW_ICT (ISO, giờ ICT), LEDGER_SEAL_CLI_TIMEOUT (giây).
+LEDGER_SEAL_LOCK, LEDGER_SEAL_PROC_DIR, LEDGER_SEAL_NOW_ICT (ISO, giờ ICT), LEDGER_SEAL_CLI_TIMEOUT (giây),
+LEDGER_SEAL_LEDGER_DIR (thư mục sổ; mặc định <gốc cây của CLI>/data/execution_logs, đúng chỗ CLI ghi).
 """
 import argparse
 import datetime
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -71,6 +77,7 @@ APPEND_EVENT = os.environ.get("APPEND_EVENT_CMD", os.path.join(HERE, "append_eve
 LOCK = os.environ.get("LEDGER_SEAL_LOCK", os.path.join(ROOT, "state", "ledger_seal_weekly.lock"))
 PROC = os.environ.get("LEDGER_SEAL_PROC_DIR", "/proc")
 CLI_TIMEOUT = int(os.environ.get("LEDGER_SEAL_CLI_TIMEOUT", "600"))
+LEDGER_DIR_ENV = os.environ.get("LEDGER_SEAL_LEDGER_DIR")
 ANCHOR_RE = re.compile(r"^SEAL_MD5 (\S+) ([0-9a-f]{32}) ([0-9a-f]{32})$")
 
 
@@ -150,8 +157,9 @@ def run_cli(account: str, asof: datetime.date):
     except subprocess.TimeoutExpired as e:
         part = e.stdout.decode("utf-8", "replace") if isinstance(e.stdout, bytes) else (e.stdout or "")
         return 124, part + (f"\n[ledger_seal_weekly: CLI quá {CLI_TIMEOUT}s, đã bị giết — lần chốt dở (nếu "
-                            f"có) được CLI tự hoàn tất ở lượt sau; ledger_anchor_check báo LỆCH nếu sổ đổi "
-                            f"mà chưa có mốc]")
+                            f"có) được CLI tự hoàn tất ở lượt sau. Nếu CLI con đã chốt xong mà mốc chưa ghi: "
+                            f"ledger_anchor_check KHÔNG bắt ca này (manifest chỉ nối thêm sau mốc cũ vẫn khớp); "
+                            f"lượt wrapper kế tiếp bắt bằng so md5 sổ+manifest với mốc mới nhất ⇒ rc=1]")
     return r.returncode, r.stdout
 
 
@@ -209,6 +217,74 @@ def post_bus(topic: str, payload: str):
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
+def ledger_file(account: str) -> str:
+    d = LEDGER_DIR_ENV
+    if not d:
+        wc = _wc_root_of(CLI)
+        d = os.path.join(wc, "data", "execution_logs") if wc else ""
+    return os.path.join(d, f"nav_unit_ledger_{account}.csv")
+
+
+def _md5_file(path: str):
+    try:
+        with open(path, "rb") as f:
+            return hashlib.md5(f.read()).hexdigest()
+    except OSError:
+        return None
+
+
+def latest_anchor(account: str):
+    latest = None
+    with open(ANCHORS, encoding="utf-8") as f:
+        for ln in f:
+            m = ANCHOR_RE.match(ln.strip())
+            if m and m.group(1) == account:
+                latest = ln.strip()
+    return latest
+
+
+def check_nothing_to_seal(account: str, asof: datetime.date) -> str:
+    """NothingToSeal chỉ hợp lệ khi sổ trên đĩa đã tới asof VÀ đúng là trạng thái của mốc mới nhất.
+    Trả chuỗi lỗi (kèm số thật đã đọc), rỗng nếu đạt."""
+    path = ledger_file(account)
+    mpath = path + ".manifest.jsonl"
+    try:
+        with open(mpath, encoding="utf-8") as f:
+            recs = [ln for ln in f.read().splitlines() if ln.strip()]
+        last = json.loads(recs[-1]) if recs else None
+    except (OSError, ValueError) as e:
+        return f"không đọc được bản ghi cuối manifest {mpath}: {type(e).__name__}: {e}"
+    if not last or not last.get("last_date"):
+        return f"manifest {mpath} không có bản ghi nào mang last_date"
+    if last["last_date"] < asof.isoformat():
+        return (f"CLI báo NothingToSeal nhưng sổ chỉ chốt tới {last['last_date']} (manifest #{last.get('seq')}, "
+                f"{last.get('rows_total')} dòng) < asof {asof} ⇒ nav_history không có dòng nào trong "
+                f"({last['last_date']}, {asof}] — writer nav_history chết? Kiểm daily_nav_snapshot/nav_sync_retry")
+    try:
+        anchor = latest_anchor(account)
+    except OSError as e:
+        return f"không đọc được file mốc {ANCHORS}: {type(e).__name__}: {e}"
+    now_line = f"SEAL_MD5 {account} {_md5_file(path)} {_md5_file(mpath)}"
+    if anchor != now_line:
+        return (f"sổ đã chốt quá mốc, chưa có mốc — trạng thái đĩa hiện tại {now_line} (manifest "
+                f"#{last.get('seq')}, tới {last['last_date']}) ≠ mốc mới nhất trong {ANCHORS}: "
+                f"{anchor or '(không có mốc nào của TK)'}. Đối chiếu manifest rồi chép tay dòng SEAL_MD5 "
+                f"(wrapper KHÔNG tự thêm mốc)")
+    return ""
+
+
+def estimate_rows(account: str, added):
+    """Số dòng nav_is_estimate=True trong `added` dòng cuối của sổ vừa chốt; None nếu không đọc được."""
+    try:
+        with open(ledger_file(account), encoding="utf-8") as f:
+            rows = f.read().splitlines()[1:]
+    except OSError:
+        return None
+    if not isinstance(added, int) or added <= 0 or added > len(rows):
+        return None
+    return sum(1 for r in rows[-added:] if r.rsplit(",", 1)[-1].strip() == "True")
+
+
 def tail(out: str) -> str:
     lines = out.rstrip("\n").splitlines()[-TAIL_LINES:]
     return "\n".join(lines) if lines else "(CLI không in gì)"
@@ -221,7 +297,13 @@ def seal_all(now: datetime.datetime) -> int:
     for acct in ACCOUNTS:
         rc, out = run_cli(acct, asof)
         if is_nothing_to_seal(acct, rc, out):
-            print(f"{acct}: NothingToSeal — sổ đã chốt tới/qua {asof}, không làm gì", flush=True)
+            bad = check_nothing_to_seal(acct, asof)
+            if bad:
+                print(f"🔴 ledger_seal_weekly: {acct} {bad}; KHÔNG chốt gì thêm.", flush=True)
+                print(f"🔴 tóm tắt: {acct} LỖI (NothingToSeal không hợp lệ); đã chốt+ghi mốc: "
+                      f"{', '.join(sealed) or 'không TK nào'}", flush=True)
+                return 1
+            print(f"{acct}: NothingToSeal — sổ đã chốt tới/qua {asof}, khớp mốc mới nhất, không làm gì", flush=True)
             continue
         anchor = parse_anchor(acct, out) if rc == 0 else None
         if anchor is None:
@@ -231,6 +313,8 @@ def seal_all(now: datetime.datetime) -> int:
                   f"{', '.join(sealed) or 'không TK nào'}; KHÔNG chốt gì thêm. "
                   f"{TAIL_LINES} dòng cuối đầu ra thật của nav_unit_ledger:", flush=True)
             print(tail(out), flush=True)
+            print(f"🔴 tóm tắt: {acct} LỖI ({why.split(' — ')[0]}); đã chốt+ghi mốc: "
+                  f"{', '.join(sealed) or 'không TK nào'}", flush=True)
             return 1
         total, through, added = parse_rows(out)
         try:
@@ -249,6 +333,7 @@ def seal_all(now: datetime.datetime) -> int:
             "summary": f"Chốt sổ đơn vị quỹ tuần (cron ledger_seal_weekly.py) {acct} tới {through or asof}",
             f"SEAL_MD5_{acct}": anchor, "rows": {acct: total}, "rows_added": {acct: added},
             "through": through or asof.isoformat(), "asof": asof.isoformat(),
+            "nav_is_estimate_rows_added": {acct: estimate_rows(acct, added)},
             "anchors_file": "kb/fund_ledger_anchors.txt",
         }, ensure_ascii=False)
         brc, bout = post_bus(topic, payload)
@@ -256,6 +341,11 @@ def seal_all(now: datetime.datetime) -> int:
         if brc != 0:
             print(f"🔴 ledger_seal_weekly: {acct} đã chốt + ghi mốc nhưng post bus LỖI rc={brc}: "
                   f"{bout[-400:]} — post tay finding {topic}; KHÔNG chốt gì thêm.", flush=True)
+            return 1
+        if not through or through < asof.isoformat():
+            print(f"🔴 ledger_seal_weekly: {acct} đã chốt + ghi mốc nhưng dòng cuối {through} < asof {asof} — "
+                  f"nav_history thiếu dòng cuối đoạn (writer chết?); KHÔNG chốt gì thêm.", flush=True)
+            print(f"🔴 tóm tắt: {acct} chốt THIẾU tới {through}; đã chốt+ghi mốc: {', '.join(sealed)}", flush=True)
             return 1
     return 0
 
