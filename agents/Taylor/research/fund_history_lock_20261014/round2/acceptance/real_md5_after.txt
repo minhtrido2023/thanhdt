@@ -1,0 +1,2 @@
+12ee9b87add3038c7201dd4effb029d9  /home/trido/thanhdt/WorkingClaude/data/execution_logs/nav_history_SpaceX.csv
+f8b6a9787e5b323395b888c360065843  /home/trido/thanhdt/WorkingClaude/data/execution_logs/nav_history_ZaloPay.csv

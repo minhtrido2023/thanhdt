@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/capit_lever_selfcheck.py", line 63, in <module>
+    from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/trading_bot/account_ids.py", line 23, in <module>
+    SPACEX = _get_account_id("SpaceX")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/trading_bot/account_ids.py", line 13, in _get_account_id
+    with open(_ACCOUNTS_FILE, encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/secrets/trading_bot_accounts.json'

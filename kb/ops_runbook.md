@@ -586,6 +586,97 @@ nohup $DNA_PYEXE $WC/mike/bin/paper_programs_daily_report.py \
 # nohup $WC/daily_refresh_v34b_linux.sh > $WC/mike/logs/daily_refresh_recovery_$(date +%Y%m%d).log 2>&1 &
 ```
 
+## Phanh lỗ NAV — `nav_loss_brake_monitor.py` (CHỈ CẢNH BÁO)
+
+Monitor đo ba phanh mỗi tối (cron 22:05 + lượt hai 00:20 ICT, cài 2026-10-13) trên **NAV toàn tài khoản** của từng account
+(giá đơn vị quỹ, `nav_unit_ledger.build_ledger`) và **không bao giờ** tạo `data/BOT_STOP`, không huỷ
+lệnh, không gọi broker. Dừng giao dịch hay không là quyết định của user. `excluded_tickers` của
+account KHÔNG ảnh hưởng gì tới monitor. Đầu vào/đầu ra: `kb/data_registry/trading-bot/loss_brake_state.md`.
+Cron: `kb/cron_registry.md` hàng 22:05 / 00:20.
+
+### Mỗi loại tin thì NGƯỜI làm gì
+
+| Tin (đầu tin / dòng) | Nghĩa | Việc của người |
+|---|---|---|
+| 🚨 **PHANH LỖ NAV ĐÃ CHẠM** | Số CHỐT đã qua ngưỡng (ngày ≤ −5% · từ đỉnh ≤ −25% · từ điểm vào episode ≤ −15%) | User quyết. Muốn dừng: chạy đúng dòng `touch …/data/BOT_STOP` in trong tin. Monitor không làm hộ. Phiên sau còn vi phạm ⇒ báo lại |
+| 🚨 **SỐ TẠM TÍNH ĐÃ VƯỢT NGƯỠNG (chưa phải số chốt)** | Có số nhưng chưa phải giá chốt đã kiểm — và số đó ĐÃ qua ngưỡng | Coi như phanh chạm cho tới khi chứng minh ngược lại: đọc lý do sau chữ "chưa phải số chốt", kiểm NAV thật của phiên đó, rồi user quyết như dòng trên |
+| ⚠️ **KHÔNG ĐO ĐƯỢC** — "nav_history không có dòng …" | NAV phiên đó chưa ghi (cổng chặn rc=5/rc=6 — tin trích `gate_verdict` — hoặc EOD chưa chạy). Không có số tạm tính | Runbook "NAV thiếu dòng `nav_history`". Lượt 00:20 tự đo lại khi dòng về |
+| ⚠️ … "chụp số dư lúc … TRƯỚC giờ đóng cửa / SAU giờ mở cửa phiên kế" | Dòng NAV (của phiên, của mốc so, hoặc của điểm vào episode) không phải giá chốt | Ghi lại dòng NAV đúng giờ nếu còn làm được (`daily_nav_snapshot.py --from-raw`); không thì chấp nhận phiên đó + phiên kế chỉ có số tạm tính |
+| ⚠️ … "thiếu dòng của phiên liền trước … ⇒ con số là **gộp nhiều phiên**" | Dòng trước đó trong chuỗi cách hơn một phiên ⇒ "lỗ một ngày" thật ra là lỗ của nhiều phiên cộng lại | Vá dòng NAV của phiên thiếu (`--from-raw`). Số gộp mà đã vượt −5% thì tin là 🚨 tạm tính vượt ngưỡng — xử như dòng 🚨 |
+| ⚠️ … "mang cờ nav_is_estimate" | Dòng backfill ước tính | **Luật giảm tin (user duyệt 2026-10-12 21:31):** nếu đây là lý do DUY NHẤT và số tạm tính còn cách ngưỡng HƠN 2,0 điểm % thì KHÔNG có tin tối — chỉ hiện ở `status.json` + dòng kiểm sáng (`KHÔNG đẩy tin tối …`). Nhận được tin loại này nghĩa là số tạm tính đang cách ngưỡng ≤ 2,0pp hoặc còn lý do khác ⇒ đọc số, kiểm NAV thật |
+| ⚠️ … "**KHÔNG có sổ dòng tiền** …" / "sổ dòng tiền … không đọc được" | `data/account_cash_flows.json` mất hoặc hỏng ⇒ số tạm tính KHÔNG trừ nạp/rút (một lần rút sẽ hiện như lỗ) | Khôi phục file từ bản sao lưu (`fleet_backup`). KHÔNG tạo file rỗng để tin biến mất: file rỗng = khẳng định "chưa từng nạp/rút" |
+| ⚠️ … "dòng tiền **TREO** …" | Có bản ghi nạp/rút mà chưa dòng NAV nào chụp sau thời điểm tiền vào/ra ⇒ số tạm tính chưa tính dòng tiền đó | Thường tự hết ở lượt 00:20 / tối hôm sau khi có dòng NAV mới. Còn treo qua 1 phiên ⇒ kiểm `date`/`time_ict` của bản ghi trong `account_cash_flows.json` |
+| ⚠️ `❌ phanh '…' KHÔNG ĐO ĐƯỢC ngay từ cấu hình (**THIẾU NGƯỠNG** / sổ hỏng)` | `data/trading_rules.json` thiếu/sai khoá ngưỡng (`risk_circuit_breakers.daily_loss_limit_pct`, `macro_kill_switches.C_episode_drawdown_breaker.episode_drawdown_limit_pct`, `capit_margin_lever.loan_package_id`), hoặc khoá số episode LỆCH câu chữ `trigger`, hoặc `episodes.json` hỏng. Phanh đó vẫn kèm số tạm tính nhưng không so được ngưỡng | Sửa đúng khoá nêu trong tin. Đổi GIÁ TRỊ ngưỡng cần user duyệt; monitor không có mặc định ngầm và không chọn hộ khi hai nơi lệch nhau |
+| ⚠️ episode — "broker có vị thế dưới gói vay … nhưng KHÔNG có episode" | Đang vay mà phanh −15% không canh. Tin nêu các bản duyệt margin ĐỌC ĐƯỢC và vì sao chưa bản nào mở được episode (hoặc nói rõ không thấy bản duyệt nào) | Xác minh bản duyệt + ngày giải ngân, rồi `--open-episode <TK> --opened-date … --opened-by … --reason …` (điểm vào mặc định = giá chốt phiên trước ngày mở; đổi bằng `--entry-ref-date`) |
+| ⚠️ episode — "đang mở nhưng broker KHÔNG còn vị thế nào dưới gói vay" | Đã tất toán mà episode chưa đóng | `--close-episode <TK> --closed-by … --reason …`. Phiên của chính ngày đóng VẪN đo với episode; từ phiên sau mới thôi |
+| ⚠️/🚨 episode — "có bản duyệt margin MỚI ngày … trong lúc episode … còn mở" | Có thể là lần vay MỚI (điểm vào khác). Tin in cả hai số; số đem so ngưỡng là số XẤU hơn | Cùng episode (giải ngân thêm) ⇒ `--ack-approval <TK> --approval-date … --acked-by … --reason …` (bản duyệt phải có thật, ngày ≤ hôm nay). Lần vay mới ⇒ `--close-episode` rồi `--open-episode` |
+| ⚠️ episode — "KHÔNG kiểm được broker có vị thế dưới gói vay" | Không có bản ghi `positions` sau 14:45 của phiên đó, hoặc bản ghi không có danh sách `payload.positions` | Việc vận hành: vì sao `dnse_raw_<ngày>.jsonl` thiếu bản ghi tối (EOD 19:10 / park 23:30) |
+| ghi chú "phanh episode đo theo điểm vào XẤU hơn trong hai mốc …" | Lúc tự mở, phiên của ngày duyệt không đọc được positions ⇒ không biết vị thế có từ ngày duyệt hay phiên kế; monitor đo theo mốc xấu hơn | Biết ngày giải ngân thật ⇒ `--close-episode` rồi `--open-episode --entry-ref-date <mốc đúng>` |
+| 📝 **LỆNH TAY** `--open-episode` / `--close-episode` / `--ack-approval` | Có người vừa đổi state của monitor (một lệnh tay có thể làm phanh episode xanh). Tin ghi ai, lý do, trước/sau; lượt đo kế nhắc lại trong notes | Người KHÔNG ra lệnh đó đọc và xác nhận là đúng. Sai ⇒ sửa bằng lệnh ngược lại (không mổ `episodes.json` tay) |
+| 🛑 **MONITOR PHANH LỖ NAV LỖI** | Monitor tự hỏng (cấu hình/sổ không đọc được, không ghi được state-dir…); đêm đó không phanh nào được đo | Việc vận hành — sửa đúng lỗi in trong tin rồi chạy lại monitor |
+| "sổ đã-gửi … không đọc được … tin này có thể trùng" | `alerts_sent.json` hỏng; monitor vẫn gửi và tự dựng lại sổ (bản hỏng cất ở `alerts_sent.json.corrupt.*`) | Không cần làm gì; xem vì sao file hỏng nếu lặp lại |
+
+### Mã thoát
+**Lượt chạy:** 0 cả ba phanh OK · 1 có phanh chạm / tạm tính vượt / không đo được (việc của NGƯỜI) ·
+3 monitor lỗi hoặc không gửi được cảnh báo · **4 khoá bận** — một lượt khác (hoặc một lệnh tay) đang
+giữ `data/loss_brake/.lock` quá 60s; lượt này bỏ, KHÔNG ghi status, không gửi. Một lần là bình
+thường (lượt kia làm đúng việc đó); lặp lại ⇒ tìm tiến trình treo đang giữ khoá.
+
+**`--health-line`:** 0 ✅ · 1 không đo được · **5 phanh chạm / tạm tính vượt** · 2 monitor không chạy
+(file thiếu/cũ/hỏng) · 3 monitor lỗi / không gửi được cảnh báo.
+
+### Chạy tay — hai điều dễ nhầm
+- **Chạy tay TRƯỚC 21:50 ICT là đo phiên TRƯỚC**, không phải phiên hôm nay: phiên mặc định =
+  phiên gần nhất mà NAV chốt PHẢI đã có (`NAV_EXPECTED_AFTER_ICT` = 21:50, sau lượt `nav_sync_retry`
+  cuối 21:45). Muốn xem phiên hôm nay trước giờ đó: `--date <hôm nay>` (chạy khô).
+- `--date` của một phiên khác phiên mặc định là CHẠY KHÔ (không ghi, không gửi) trừ khi thêm
+  `--write-backdated`. `--now` bị TỪ CHỐI trên state sống — chạy thử thì thêm `--state-dir <tạm>`.
+
+### Dòng buổi sáng trong ops_health (khối LOSSBRAKE)
+rc=0 ✅ · rc=1 ⚠️ `[WARN-ONLY]` (không đo được — user quyết, KHÔNG route autofix; ca thuộc luật giảm
+tin cũng nằm ở đây, kèm số tạm tính) · **rc=5 dòng 🔴 `PHANH LỖ NAV CHẠM NGƯỠNG — USER QUYẾT`** (phanh
+chạm / tạm tính vượt; không mang `[WARN-ONLY]`, không route autofix, vẫn tính 1 warn) · rc=2 ⚠️ monitor
+không chạy · rc=3 ⚠️ monitor có chạy nhưng lỗi, hoặc không gửi được cảnh báo. rc=2 và rc=3 là lỗi
+vận hành ⇒ tới autofix.
+
+### `ops_autofix` ĐƯỢC và KHÔNG ĐƯỢC làm gì
+ĐƯỢC (chỉ với rc=2 / rc=3):
+- chạy lại `python3 mike/bin/nav_loss_brake_monitor.py` cho phiên mặc định (idempotent; cảnh báo đã
+  gửi không gửi lại; cảnh báo gửi lỗi được gửi bù);
+- sửa lỗi hạ tầng quanh nó: cron không chạy, khoá `.lock` kẹt do tiến trình chết, thiếu thư mục log,
+  biến `MIKE_LOSS_BRAKE_ALERT_SINK` lọt vào môi trường cron (monitor báo "tin CHỈ đi vào file sink").
+
+KHÔNG ĐƯỢC (mọi rc):
+- tạo/xoá `data/BOT_STOP`; sửa ngưỡng trong `data/trading_rules.json`, `DD_THRESHOLD` hay
+  `QUIET_ESTIMATE_MARGIN_PP`;
+- mở/đóng episode, `--ack-approval` — mỗi cái là một khẳng định về đòn bẩy cần người + bằng chứng;
+- tạo `data/account_cash_flows.json` rỗng, hay sửa nó, để tin "KHÔNG có sổ dòng tiền" biến mất;
+- xoá/sửa `alerts_sent.json`, `episodes.json`, `human_actions.jsonl` để "làm sạch" cảnh báo;
+- dùng `--date … --write-backdated` (ghi đè status + gửi cảnh báo cho phiên cũ);
+- xử lý dòng rc=1 / rc=5 dưới bất kỳ hình thức nào ngoài việc để nguyên cho người đọc.
+
+### Cài lần đầu (sau khi merge commit monitor)
+KHÔNG có bước seed — vòng 3 đã gỡ chuỗi mã loại trừ, sổ khai `managed_sleeve_flows.json` và 27 bản
+khai máy sinh. `data/loss_brake/` tự tạo ở lượt chạy đầu.
+```bash
+cd /home/trido/thanhdt/WorkingClaude
+R=mike/agents/Taylor/research/nav_loss_brake_20261012
+# 1) phải ra đúng bảng trong $R/replay_full_history.txt (cho tới ngày cuối của file đó) — chỉ đọc
+python3 mike/bin/nav_loss_brake_monitor.py --replay
+# 2) một lượt chạy thử KHÔNG chạm state sống, cảnh báo vào file thay vì Discord
+T=$(mktemp -d); MIKE_LOSS_BRAKE_ALERT_SINK=$T/sink.jsonl python3 mike/bin/nav_loss_brake_monitor.py --state-dir $T
+# 3) cài cron (kb/cron_registry.md.proposed); lượt cron đầu tiên tự tạo data/loss_brake/
+```
+
+### Việc còn mở (không nằm trong nhánh này)
+- **K12** (reviewer vòng 2) — ghi lại làm việc sau, chưa làm.
+- **N13** `strategy_fit_dashboard.py` (@aaaf60a3b:879-908) vẫn grep chữ `risk_monitor` để kết luận phanh
+  lỗ có ai canh — phải đổi sang đọc `data/loss_brake/status.json` sau khi monitor này cài xong.
+- **N14** `data/loss_brake/` phải nằm trong phạm vi `fleet_backup.sh` + `backup_freshness_check.sh`
+  (`episodes.json`, `human_actions.jsonl`, `alerts_sent.json` không dựng lại được từ nguồn khác).
+- Bộ máy "phần bot quản lý" (chuỗi mã loại trừ, bẫy sleeve, `--correct-excluded`, công cụ backfill)
+  đã gỡ; còn khôi phục được từ nhánh `backup/nav-loss-brake-r2-managed-20261012` (@e650f7ce0).
+
 ## Nhật ký & kinh nghiệm
 
 - Mọi sự cố ảnh hưởng workflow sống → **1 file mới** trong `kb/incidents/<YYYY-MM>/` (blameless,
@@ -691,3 +782,31 @@ Xử lý tại chỗ, không điều tra lại:
 2. Mike (phiên tương tác) kiểm artifact: `git log main..<branch>`, selfcheck chạy lại, verdict thật trên bus — rồi tự chạy lệnh. Tiền thật/trading_rules vẫn cần user duyệt như thường lệ.
 3. Trần chấp nhận: ~1-2h trễ/lần. Nếu tần suất >2 lần/tuần → xem lại phương án B (git write production dispatch dạng tương tác ngay từ đầu).
 (bus: Mike/retro-pattern-recurring-classifier-blocks-headless-agent-production-write)
+
+## Chạy TAY buổi sáng khi BQ xong muộn — `MIKE_MORNING_RUN=1` (thêm 2026-10-15, sau sự cố plan 15/10)
+Sự cố gốc: 14/10 ticker_prune về BQ sau 19:45 ICT ⇒ 18:30 `daily_refresh_v34b` die, 19:00 gate publisher đòi
+`as_of` = ngày lịch ⇒ plan 15/10 không lập; sáng 15/10 BQ đã đủ nhưng cả 2 script đều khóa theo NGÀY LỊCH nên
+buổi sáng không có đường chạy hợp lệ. Cơ chế opt-in (cron KHÔNG đặt biến ⇒ 18:30/19:00 y nguyên):
+- `bin/expected_session.py` — phiên gần nhất đã kỳ vọng có EOD (cutoff 17:00 ICT). `--morning` còn là RÀO:
+  exit 3 nếu plan đích = HÔM NAY mà đã ≥ 08:30 ICT (preflight 08:45/bot 09:05 đã qua hoặc phiên đang chạy).
+- Trình tự (đúng thứ tự, ĐỀU từ terminal của anh hoặc phiên có quyền; không có bước nào bỏ qua gate AN TOÀN dữ liệu):
+  1. `MIKE_MORNING_RUN=1 /home/trido/thanhdt/WorkingClaude/daily_refresh_v34b_linux.sh` (kiểm ingest theo phiên, publish DT5G `as_of`=phiên).
+  2. `MIKE_MORNING_RUN=1 mike/bin/bq_freshness_check.sh` — TODAY=phiên, plan đích=NEXT; gate publisher: mtime ∈ [phiên, hôm nay].
+     Plan đích ĐÃ TỒN TẠI ⇒ `[SKIP-MORNING]` không ghi đè (ép: `MIKE_MORNING_FORCE=1`, chỉ khi chắc plan cũ chưa duyệt).
+  3. ⚠️ **Chuỗi hạ nguồn KHÔNG theo morning mode** (nhắm `next_trading_day(ngày lịch hôm nay)` ⇒ sáng T5 sẽ nhắm T6).
+     **CHỜ DollarBill xong TRƯỚC**: bước 2 dispatch `--bg` nên script trả về khi plan CHƯA có. Chạy `bin/jobs.sh status <job_id>`
+     = done VÀ xác nhận `data/trade_plans/plan_<A>_<NEXT>.json` tồn tại. Chạy `auto_exit_inject` khi plan chưa có ⇒ in
+     "CHƯA có plan file — no-op" và rc=0 (KHÔNG báo lỗi) ⇒ user duyệt plan THIẾU lệnh thoát T+25/T+45/T+60. Rồi, cho từng account A:
+     - `python3 mike/bin/auto_exit_inject.py --account <A> --plan-date <NEXT>` — đọc output, KHÔNG được là dòng no-op. ⚠️ nó lấy
+       `signal_date` = ngày lịch hôm nay ⇒ sessions_held lệch +1 so với cron (lệnh thoát có thể bắn SỚM 1 phiên) — soát từng lệnh thoát.
+     - `python3 mike/bin/discretionary_accumulation_inject.py --account <A> --plan-date <NEXT>` (KHÔNG phải `inject_discretionary_orders.sh`, không có tham số ngày).
+     - `python3 mike/bin/plan_position_drift_check.py --account <A> --date <PHIÊN>` (tự suy plan = next_trading_day(PHIÊN); truyền NEXT là SAI).
+     - `send_plan_report.sh` nhắm next_trading_day(hôm nay) và không có tham số ghi đè ⇒ KHÔNG dùng được buổi sáng: đọc plan trực tiếp và gửi tóm tắt cho user duyệt qua Discord.
+     - KHÔNG chạy được buổi sáng (cổng giờ): `late_plan_catchup.sh` (BEFORE_WINDOW trước 21:00), `park_trim_daily`/`jit_unpark_daily`/`merge_park_daily` (từ chối trước 15:00). Park đang 0% ⇒ coi như no-op, GHI RÕ "đã bỏ qua" khi báo user.
+     - Xác nhận file plan rơi ĐÚNG `data/trade_plans/` (prompt DollarBill cũ ghi `data/plan_...` ở thư mục gốc; tồn tại `data/plan_ZaloPay_2026-10-14.json` ngoài `trade_plans/`).
+  4. Prompt DollarBill ở morning mode tự ép `requires_user_approval=true` + ghi rõ "chạy tay buổi sáng".
+- Hạn chế đã biết (arch-review 2026-10-15 vòng 1+2, NON-BLOCKING): rào 08:30 chỉ kiểm LÚC KHỞI ĐỘNG (pipeline 0-3 + DollarBill có thể kéo dài qua 08:45); `requires_user_approval` chỉ do prompt ép (mặc định code = False); không có lock (chạy 2 lần liên tiếp có thể dispatch DollarBill 2 lần); pipeline-0..3 vẫn chạy kể cả khi mọi plan đích đã tồn tại; prompt/`CAL_TODAY` chưa có test (mutation M10/M11/M17 lọt); CSV `golive_v23_recommendations_{ngày lịch}.csv` ≠ `signal_date` ⇒
+  pipeline-3 push partition phiên đó thất bại (chỉ WARN); lần 19:00 cùng ngày ghi đè file khuyến nghị. Chưa chạy
+  end-to-end pipeline-2/3 ở morning mode lần nào — lần đầu dùng thật phải theo dõi tay.
+- Selfcheck: `bin/expected_session_selfcheck.py`, `bin/dt5g_publisher_gate_selfcheck.sh` (ca M1-M9),
+  `bin/bq_freshness_morning_selfcheck.sh`, `WorkingClaude/daily_refresh_morning_selfcheck.sh`.

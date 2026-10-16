@@ -1,0 +1,764 @@
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+HOSE-Index Series 
+Data as at: 28 Feb 2025 
+HOSE-Index is a market-capitalization weighted investable index series comprised of companies listed on the Hochiminh Stock Exchange (HOSE). The constituents are 
+screened for eligibility, free-float and liquidity. HOSE-Index Series covers over 90% total traded value and 80% HOSE’s market capitalization. 
+HOSE-Index Structure  Features 
+VNAllshare is a market-capitalization weighted index comprises all HOSE -listed companies that passed screening for eligibility, free-
+float and liquidity. 
+VN30 is a market -capitalization weighted index which measures the performance of 30 large market-capitalization and high liquidity 
+stocks from VNAllshare. 
+VNMidcap is a market-capitalization weighted index which measures the performance of 70 medium market-capitalization companies 
+from VNAllshare. 
+VN100 is a market-capitalization weighted index combining constituents from both VN30 and VNMidcap. 
+VNSmallcap is a market -capitalization weighted index and designed to measure the performance of small market-capitalization 
+companies from VNAllshare. 
+VNAllshare Sector Indices is a series of sector index comprised of constituents from VNAllshare classified according to the Global 
+Industry Classification Standard (GICS®). 
+ 
+Objective 
+The indices are designed for use in the 
+creation of index track  funds, 
+derivatives and as a performance 
+benchmark. 
+Investability 
+Stocks are selected and calculated by 
+free-float to ensure index is 
+investable. 
+Liquidity 
+Stocks are screened to ensure index is 
+tradable. 
+Transparency 
+The indices use a transparent, rules -
+based construction process. Index 
+Rules are freely available on the  
+HOSE website. 
+Availability 
+The indices are calculated in real-time 
+or end of day. 
+Review Dates 
+Semi-annually in January and July. 
+Capping Limit 
+10%(Not applied for VNAllshare 
+Sector) 
+Index Methodology  
+Free-floatadjusted market-
+capitalization weighted index. 
+Industry Classification Benchmark 
+Index constituents are classified in 
+accordance with the Global Industry 
+Classification Standard (GICS®). 
+Indices Performance  
+ Performance (%) Annualized Performance (%) 
+  2022 2023 2024 1 month 3 months 6 months 1 year 3 years 5 years 3 years 5 years 
+VNAllShare -38.81% 14.75% 15.89% 2.37% 4.82% 2.80% 7.56% -10.76% 72.23% -3.72% 11.49% 
+VN30 -35.52% 8.04% 18.83% 1.41% 3.44% 1.87% 7.16% -10.60% 63.04% -3.66% 10.27% 
+VNMidcap -42.30% 28.82% 10.39% 4.57% 7.35% 3.80% 8.31% -6.71% 132.09% -2.29% 18.34% 
+VN100 -37.62% 13.95% 16.62% 2.05% 4.57% 2.56% 7.73% -9.20% 70.45% -3.17% 11.26% 
+VNSmallcap -51.74% 25.06% 5.92% 7.13% 8.52% 6.26% 4.95% -27.26% 112.19% -10.07% 16.24% 
+VN-Index -33.99% 8.24% 11.93% 3.19% 4.39% 1.67% 4.20% -12.40% 47.97% -4.32% 8.15% 
+ 
+Indices Volatility Correlation of Indices with VN Index 
+ 3 months 6 months 1 year 3 years 5 years 
+VNAllShare 5.47% 7.56% 14.57% 35.66% 48.01% 
+VN30 5.68% 7.82% 14.19% 34.68% 47.93% 
+VNMidcap 5.89% 8.15% 17.10% 41.61% 58.14% 
+VN100 5.59% 7.71% 14.69% 35.73% 49.61% 
+VNSmallcap 5.09% 6.81% 15.16% 38.83% 50.26% 
+VN Index 4.59% 6.61% 13.30% 32.35% 44.84% 
+ 
+ 3 months 6 months 1 year 3 years 5 years 
+VNAllShare 98.03% 98.06% 98.75% 98.80% 98.39% 
+VN30 95.54% 96.43% 96.27% 97.60% 97.35% 
+VNMidcap 92.28% 91.91% 94.95% 93.49% 82.11% 
+VN100 97.66% 97.83% 98.51% 98.76% 95.30% 
+VNSmallcap 78.23% 81.19% 86.60% 88.04% 84.25% 
+ 
+Indices Characteristics  
+ 
+ 
+VNAllshare VN30 VNMidcap VN100 VNSmallcap 
+Number of Constituents 291 30 70 100 191 
+Full Market-Capitalization (Billion VND) 5,088,802 3,785,629 1,019,667 4,805,295 283,507 
+Free-float adjusted Market-Capitalization (Billion VND) 2,246,989 1,509,352 590,823 2,100,175 146,814 
+Average 7,722 50,312 8,440 21,002 769 
+Max 175,432 175,432 33,725 175,432 5,000 
+Min 14 3,134 959 959 14 
+Median 1,125 41,244 6,728 8,106 458 
+Weighted capitalization of largest company 7.81% 11.62% 5.71% 8.35% 3.41% 
+Weighted capitalization of top-10 companies 42.86% 63.80% 37.45% 45.85% 23.81% 
+ 
+ 
+Disclaimer: "VN30", "VNMidcap", "VNSmallCap", “VN100”, “VNAllshare” and "VNAllshare Sector" (collectively called " HOSE-Index") are the registered trademarks and/or service 
+mark solely owned by, and proprietary to the Hochiminh Stock Exchange  (HOSE). HOSE-Index can be used to create a rang e of index -linked products including but not limited to tracker 
+funds, derivatives, etc. Such product creation is subject to approval by HOSE. For more information, please contact via e -mail: index@hsx.vn 
+All information is provided for information purpose s only. Every effort is made to ensure that all information given in this publication is accurate, but no responsibility or l iability can be 
+accepted by HOSE nor its directors, officers, employees, partners or licensors for any errors or for any loss from use of this publication or any of the information or data contained herein.  
+ 
+80
+85
+90
+95
+100
+105
+110
+28/02/2022 28/02/2023 29/02/2024 28/02/2025
+Indices performance from 28/02/2022 to 28/02/2025
+VN30
+VNMidcap
+VN100
+VNSmallcap
+VNAllshare
+VN Index
+* Indices values are simulatedly rebased to 100 at 28/02/2022
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+VNAllshare Index 
+Data as at: 28 Feb 2025 
+VNAllshare is a market-capitalization weighted index comprises all HOSE-listed companies that passed screening for eligibility, free-float and liquidity. 
+Index Characteristics  Information 
+ 
+Number of Constituents 
+291 
+Full Market-Capitalization (Billion VND) 5,088,802 
+Free-float adjusted Market-Capitalization (Billion VND) 2,246,989 
+Average 7,722 
+Max 175,432 
+Min 14 
+Median 1,125 
+Weighted capitalization of largest company 7.81% 
+Weighted capitalization of top-10 companies 42.86% 
+Base Date: 24/01/2014 
+Base Value: 560.19 
+Availability: Price and Total Return 
+Frequency:  
+- VNAllshare: every 5 seconds. 
+- VNAllshareTRI: End of day. 
+Capping limit: 10% 
+Calculation Method: Free-float adjusted market-capitalization weighted index. 
+Currency: VND 
+ 
+Index Volatility 
+ 3 months 6 months 1 year 3 years 5 years 
+VNAllshare 5.47% 7.56% 14.57% 35.66% 48.01% 
+ 
+Correlation with VN Index 
+ 3 months 6 months 1 year 3 years 5 years 
+VNAllshare 98.03% 98.06% 98.75% 98.80% 98.39% 
+ 
+Index Performance  
+ Performance (%) Annualized Performance (%) 
+ 2022 2023 2024 1 month 3 months 6 months 1 year 3 years 5 years 3 years 5 years 
+VNAllshare -38.81% 14.75% 15.89% 2.37% 4.82% 2.80% 7.56% -10.76% 72.23% -3.72% 11.49% 
+ 
+Sector Breakdown Top-10 Constituents of Market Capitalization 
+ 
+ 
+Disclaimer: "VN30", "VNMidcap", "VNSmallCap", “VN100”, “VNAllshare” and 
+"VNAllshare Sector " (collectively called " HOSE-Index") are the registered 
+trademarks and/or service mark solely owned by, and proprietary to the Hochiminh 
+Stock Exchange (HOSE). HOSE-Index can be used to create a range of index -linked 
+products including but not limited to tracker funds, derivatives, etc. Su ch product 
+creation is subject to approval by HOSE. For more information, please contact via e -
+mail: index@hsx.vn 
+All information is provided for information purposes only. Every effort is made to 
+ensure that all information given in this publication is ac curate, but no responsibility 
+or liability can be accepted by HOSE nor its  directors, officers, employees, partners 
+or licensors for any errors or for any loss from use of this publication or any of the 
+information or data contained herein. 
+ 
+ 
+ 
+ Stock Sector 
+Free-float adjusted 
+market-cap (Billion 
+VND) 
+Weight 
+(%) 
+1 FPT  Information 
+Technology  175,432 7.81% 
+2 TCB  Financials  119,855 5.33% 
+3 ACB  Financials  104,520 4.65% 
+4 LPB  Financials  102,591 4.57% 
+5 HPG  Materials  98,502 4.38% 
+6 VPB  Financials  84,219 3.75% 
+7 MBB  Financials  77,194 3.44% 
+8 STB  Financials  72,110 3.21% 
+9 MWG  Consumer 
+Discretionary  68,164 3.03% 
+10 HDB  Financials  60,421 2.69% 
+  Total 963,007 42.86% 
+Top-5 Sectors of Market Capitalization 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Sector Number of 
+Companies 
+Free-float adjusted 
+market-cap (Billion VND) 
+Weight 
+(%) 
+Financials 39 1,089,543 48.49% 
+Real Estate 41 230,421 10.25% 
+Industrials 76 204,537 9.10% 
+Information 
+Technology 5 186,526 8.30% 
+Materials 44 183,161 8.15% 
+80
+85
+90
+95
+100
+105
+28/02/2022 28/02/2023 29/02/2024 28/02/2025
+Indices performance from 28/02/2022 to 28/02/2025
+VNAllshare
+VN Index
+* Indices values are simulatedly rebased to 100 at 28/02/2022
+Financials, 
+48.49%
+Real 
+Estate, 
+10.25%
+Industrials, 
+9.10%
+Information 
+Technology, 
+8.30%
+Materials, 
+8.15%
+Others, 15.70%
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+VN30 Index 
+Data as at: 28 Feb 2025 
+VN30 is a market-capitalization weighted index which measures the performance of 30 large cap and high liquidity stocks from VNAllshare. 
+Index Characteristics  Information 
+ 
+Number of Constituents 30 
+Full Market-Capitalization (Billion VND) 3,785,629 
+Free-float adjusted Market-Capitalization (Billion VND) 1,509,352 
+Average 50,312 
+Max 175,432 
+Min 3,134 
+Median 41,244 
+Weighted capitalization of largest company 11.62% 
+Weighted capitalization of top-10 companies 63.80% 
+Base Date: 02/01/2009 
+Base Value: 313.34 
+Availability: Price and Total Return 
+Frequency:  
+- VN30: every 5 seconds. 
+- VN30TRI: End of day. 
+Capping limit: 10% 
+Calculation Method: Free-float adjusted market-capitalization weighted index. 
+Currency: VND 
+ 
+Index Volatility 
+ 3 months 6 months 1 year 3 years 5 years 
+VN30 5.68% 7.82% 14.19% 34.68% 47.93% 
+ 
+Correlation with VN Index 
+ 3 months 6 months 1 year 3 years 5 years 
+VN30 95.54% 96.43% 96.27% 97.60% 97.35% 
+ 
+Index Performance  
+ Performance (%) Annualized Performance (%) 
+ 2022 2023 2024 1 month 3 months 6 months 1 year 3 years 5 years 3 years 5 years 
+VN30 -35.52% 8.04% 18.83% 1.41% 3.44% 1.87% 7.16% -10.60% 63.04% -3.66% 10.27% 
+ 
+Sector Breakdown Top-10 Constituents of Market Capitalization 
+ 
+ 
+Disclaimer: "VN30", "VNMidcap", "VNSmallCap", “VN100”, “VNAllshare” and 
+"VNAllshare Sector " (collectively called " HOSE-Index") are the registered 
+trademarks and/or service mark solely owned by, and proprietary to the Hochiminh 
+Stock Exchange (HOSE). HOSE-Index can be used to create a range of index -linked 
+products including but not limited to tracker funds, derivatives, etc. Su ch product 
+creation is subject to approval by HOSE. For more information, please contact via e -
+mail: index@hsx.vn 
+All information is provided for information purposes only. Every effort is made to 
+ensure that all information given in this publication is ac curate, but no responsibility 
+or liability can be accepted by HOSE nor its  directors, officers, employees, partners 
+or licensors for any errors or for any loss from use of this publication or any of the 
+information or data contained herein. 
+ 
+ Stock Sector 
+Free-float adjusted 
+market-cap (Billion 
+VND) 
+Weight 
+(%) 
+1 FPT  Information 
+Technology  175,432 11.62% 
+2 TCB  Financials  119,855 7.94% 
+3 ACB  Financials  104,520 6.92% 
+4 LPB  Financials  102,591 6.80% 
+5 HPG  Materials  98,502 6.53% 
+6 VPB  Financials  84,219 5.58% 
+7 MBB  Financials  77,194 5.11% 
+8 STB  Financials  72,110 4.78% 
+9 MWG  Consumer 
+Discretionary  68,164 4.52% 
+10 HDB  Financials  60,421 4.00% 
+  Total 963,007 63.80% 
+Top-5 Sectors of Market Capitalization 
+ 
+ 
+ 
+ 
+ 
+  
+Sector Number of 
+Companies 
+Free-float adjusted 
+market-cap (Billion VND) 
+Weight 
+(%) 
+Financials 16 899,031 59.56% 
+Information 
+Technology 1 175,432 11.62% 
+Consumer Staples 3 112,821 7.47% 
+Real Estate 4 108,516 7.19% 
+Materials 2 103,846 6.88% 
+80
+85
+90
+95
+100
+105
+28/02/2022 28/02/2023 29/02/2024 28/02/2025
+Indices performance from 28/02/2022 to 28/02/2025
+VN30
+VNAllshare
+VN Index
+* Indices values are simulatedly rebased to 100 at 28/02/2022
+Financials, 
+59.56%
+Information 
+Technology, 
+11.62%
+Consumer 
+Staples, 7.47%
+Real Estate, 
+7.19%
+Materials, 
+6.88% Others, 
+7.27%
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+VNMidcap Index Data as at: 28 Feb 2025 
+VNMidcap is a market-capitalization weighted index which measures the performance of 70 medium market-capitalization companies from VNAllshare. 
+Index Characteristics  Information 
+ 
+Number of Constituents 70 
+Full Market-Capitalization (Billion VND) 1,019,667 
+Free-float adjusted Market-Capitalization (Billion VND) 590,823 
+Average 8,440 
+Max 33,725 
+Min 959 
+Median 6,728 
+Weighted capitalization of largest company 5.71% 
+Weighted capitalization of top-10 companies 37.45% 
+Base Date: 24/01/2014 
+Base Value: 560.19 
+Availability: Price and Total Return 
+Frequency:  
+- VNMidcap: every 5 seconds. 
+- VNMidcapTRI: End of day. 
+Capping limit: 10% 
+Calculation Method: Free-float adjusted market-capitalization weighted index. 
+Currency: VND 
+ 
+Index Volatility 
+ 3 months 6 months 1 year 3 years 5 years 
+VNMidcap 5.89% 8.15% 17.10% 41.61% 58.14% 
+ 
+Correlation with VN Index 
+ 3 months 6 months 1 year 3 years 5 years 
+VNMidcap 92.28% 91.91% 94.95% 93.49% 82.11% 
+ 
+Index Performance  
+ Performance (%) Annualized Performance (%) 
+ 2022 2023 2024 1 month 3 months 6 months 1 year 3 years 5 years 3 years 5 years 
+VNMidcap -42.30% 28.82% 10.39% 4.57% 7.35% 3.80% 8.31% -6.71% 132.09% -2.29% 18.34% 
+ 
+Sector Breakdown Top-10 Constituents of Market Capitalization 
+ 
+ 
+Disclaimer: "VN30", "VNMidcap", "VNSmallCap", “VN100”, “VNAllshare” and 
+"VNAllshare Sector " (collectively called " HOSE-Index") are the registered 
+trademarks and/or service mark solely owned by, and proprietary to the Hochiminh 
+Stock Exchange (HOSE). HOSE-Index can be used to create a range of index -linked 
+products including but not limited to tracker funds, derivatives, etc. Su ch product 
+creation is subject to approval by HOSE. For more information, please contact via e -
+mail: index@hsx.vn 
+All information is provided for information purposes only. Every effort is made to 
+ensure that all information given in this publication is ac curate, but no responsibility 
+or liability can be accepted by HOSE nor its  directors, officers, employees, partners 
+or licensors for any errors or for any loss from use of this publication or any of the 
+information or data contained herein. 
+ 
+ 
+ 
+ 
+ Stock Sector 
+Free-float adjusted 
+market-cap (Billion 
+VND) 
+Weight 
+(%) 
+1 EIB  Financials  33,725 5.71% 
+2 PNJ  Consumer 
+Discretionary  26,999 4.57% 
+3 MSB  Financials  26,559 4.50% 
+4 DGC  Materials  25,407 4.30% 
+5 GMD  Industrials  21,359 3.62% 
+6 NAB  Financials  21,068 3.57% 
+7 KDH  Real Estate  18,630 3.15% 
+8 KBC  Real Estate  15,959 2.70% 
+9 VIX  Financials  15,865 2.69% 
+10 VCI  Financials  15,705 2.66% 
+  Total 221,276 37.45% 
+Top-5 Sectors of Market Capitalization 
+ 
+Sector Number of 
+Companies 
+Free-float adjusted 
+market-cap (Billion VND) 
+Weight 
+(%) 
+Financials 12 174,356 29.51% 
+Industrials 19 132,557 22.44% 
+Real Estate 11 100,488 17.01% 
+Materials 8 58,346 9.88% 
+Consumer 
+Discretionary 3 43,794 7.41% 
+80
+85
+90
+95
+100
+105
+28/02/2022 28/02/2023 29/02/2024 28/02/2025
+Indices performance from 28/02/2022 to 28/02/2025
+VNMidcap
+VNAllshare
+VN Index
+* Indices values are simulatedly rebased to 100 at 28/02/2022
+Financials, 
+29.51%
+Industrials, 
+22.44%
+Real Estate, 
+17.01%
+Materials, 
+9.88%
+Consumer 
+Discretionary, 
+7.41%
+Others, 13.76%
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+VN100 Index 
+Data as at: 28 Feb 2025 
+VN100 is a market-capitalization weighted index combining constituents from both VN30 and VNMidcap. 
+Index Characteristics  Information 
+Number of Constituents 
+100 
+Full Market-Capitalization (Billion VND) 4,805,295 
+Free-float adjusted Market-Capitalization (Billion VND) 2,100,175 
+Average 21,002 
+Max 175,432 
+Min 959 
+Median 8,106 
+Weighted capitalization of largest company 8.35% 
+Weighted capitalization of top-10 companies 45.85% 
+ 
+Base Date: 24/01/2014 
+Base Value: 560.19 
+Availability: Price and Total Return 
+Frequency:  
+- VN100:  every 5 seconds. 
+- VN100TRI: End of day. 
+Capping limit: 10% 
+Calculation Method: Free-float adjusted market-capitalization weighted index. 
+Currency: VND 
+ 
+Index Volatility 
+ 3 months 6 months 1 year 3 years 5 years 
+VN100 5.59% 7.71% 14.69% 35.73% 49.61% 
+ 
+Correlation with VN Index 
+ 3 months 6 months 1 year 3 years 5 years 
+VN100 97.66% 97.83% 98.51% 98.76% 95.30% 
+ 
+Index Performance  
+ Performance (%) Annualized Performance (%) 
+ 2022 2023 2024 1 month 3 months 6 months 1 year 3 years 5 years 3 years 5 years 
+VN100 -37.62% 13.95% 16.62% 2.05% 4.57% 2.56% 7.73% -9.20% 70.45% -3.17% 11.26% 
+ 
+Sector Breakdown Top-10 Constituents of Market Capitalization 
+  Stock Sector 
+Free-float adjusted 
+market-cap (Billion 
+VND) 
+Weight 
+(%) 
+1 FPT  Information 
+Technology  175,432 8.35% 
+2 TCB  Financials  119,855 5.71% 
+3 ACB  Financials  104,520 4.98% 
+4 LPB  Financials  102,591 4.88% 
+5 HPG  Materials  98,502 4.69% 
+6 VPB  Financials  84,219 4.01% 
+7 MBB  Financials  77,194 3.68% 
+8 STB  Financials  72,110 3.43% 
+9 MWG  Consumer 
+Discretionary  68,164 3.25% 
+10 HDB  Financials  60,421 2.88% 
+  Total 963,007 45.85% 
+ 
+Disclaimer: "VN30", "VNMidcap", "VNSmallCap", “VN100”, “VNAllshare” and 
+"VNAllshare Sector " (collectively called " HOSE-Index") are the registered 
+trademarks and/or service mark solely owned by, and proprietary to the Hochiminh 
+Stock Exchange (HOSE). HOSE-Index can be used to create a range of index -linked 
+products including but not limited to tracker funds, derivatives, etc. Su ch product 
+creation is subject to approval by HOSE. For more information, please contact via e -
+mail: index@hsx.vn 
+All information is provided for information purposes only. Every effort is made to 
+ensure that all information given in this publication is ac curate, but no responsibility 
+or liability can be accepted by HOSE nor its  directors, officers, employees, partners 
+or licensors for any errors or for any loss from use of this publication or any of the 
+information or data contained herein. 
+ 
+Top-5 Sectors of Market Capitalization 
+Sector Number of 
+Companies 
+Free-float adjusted 
+market-cap (Billion VND) 
+Weight 
+(%) 
+Financials 28 1,073,387 51.11% 
+Real Estate 15 209,004 9.95% 
+Information 
+Technology 3 184,453 8.78% 
+Materials 10 162,193 7.72% 
+Industrials 20 161,154 7.67% 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+80
+85
+90
+95
+100
+105
+28/02/2022 28/02/2023 29/02/2024 28/02/2025
+Indices performance from 28/02/2022 to 28/02/2025
+VN100
+VNAllshare
+VN Index
+* Indices values are simulatedly rebased to 100 at 28/02/2022
+Financials, 
+51.11%
+Real Estate, 
+9.95%
+Information 
+Technology, 
+8.78%
+Materials, 
+7.72%
+Industrials, 
+7.67%
+Others, 14.76%
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+VNSmallcap Index 
+Data as at: 28 Feb  2025 
+VNSmallcap is a market-capitalization weighted index and designed to measure the performance of small market-capitalization companies from VNAllshare. 
+Index Characteristics  Information 
+Number of Constituents 191 148 140 140 140 141 149 149 152 152 143 128 122 123 142 142 
+Full Market-Capitalization (Billion VND) 283,507 177,988 84,399 84,321 85,106 86,206 89,226 89,386 93,290 87,895 77,677 61,472 60,143 62,141 69,199 69,199,458,047 
+Free-float adjusted Market-Capitalization (Billion VND) 146,814 85,052 41,486 41,670 41,856 42,531 44,212 44,367 46,383 43,860 36,873 31,052 31,198 32,674 35,332 35,331,539,078 
+Average 769 563 296 298 299 302 297 298 305 289 258 243 256 266 249 248,813,655 
+Max 5,000 4,261 1,286 1,174 1,158 1,223 1,789 1,802 1,802 1,739 1,148 891 1,293 1,512 1,415 1,414,862,094 
+Min 14 0 18 19 20 13 15 15 19 16 25 13 18 21 16 15,592,500 
+Median 458 357 233 230 244 240 223 224 247 219 165 189 190 198 166 166,309,110 
+Weighted capitalization of largest company 3.41% 5.01% 3.10% 2.82% 2.77% 2.88% 4.05% 4.06% 3.88% 3.96% 3.11% 2.87% 4.14% 4.63% 4.00% 4.00% 
+Weighted capitalization of top-10 companies 23.81% 27.50% 23.56% 23.25% 22.68% 22.38% 21.80% 22.13% 20.74% 20.94% 22.41% 22.84% 25.49% 24.33% 26.53% 26.53% 
+ 
+Base Date: 24/01/2014 
+Base Value: 560.19 
+Availability: Price and Total Return 
+Frequency:  
+- VNSmallcap:  every 5 seconds. 
+- VNSmallcapTRI: End of day. 
+Capping limit: 10% 
+Calculation Method: Free-float adjusted market-capitalization weighted index. 
+Currency: VND 
+ 
+Index Volatility 
+ 3 months 6 months 1 year 3 years 5 years 
+VNSmallcap 5.09% 6.81% 15.16% 38.83% 50.26% 
+ 
+Correlation with VN Index 
+ 3 months 6 months 1 year 3 years 5 years 
+VNSmallcap 78.23% 81.19% 86.60% 88.04% 84.25% 
+ 
+Index Performance  
+ Performance (%) Annualized Performance (%) 
+ 2022 2023 2024 1 month 3 months 6 months 1 year 3 years 5 years 3 years 5 years 
+VNSmallcap -51.74% 25.06% 5.92% 7.13% 8.52% 6.26% 4.95% -27.26% 112.19% -10.07% 16.24% 
+ 
+Sector Breakdown Top-10 Constituents of Market Capitalization 
+ 
+ Stock Sector 
+Free-float adjusted 
+market-cap (Billion 
+VND) 
+Weight 
+(%) 
+1 VSC  Industrials  5,000 3.41% 
+2 BAF  Consumer Staples  4,747 3.23% 
+3 ORS  Financials  4,733 3.22% 
+4 DBD  Health Care  4,356 2.97% 
+5 HAH  Industrials  4,196 2.86% 
+6 SAM  Industrials  2,873 1.96% 
+7 IJC  Industrials  2,795 1.90% 
+8 DHC  Materials  2,128 1.45% 
+9 SHI  Industrials  2,077 1.42% 
+10 TNH  Health Care  2,049 1.40% 
+  Total 34,954 23.81% 
+ 
+Disclaimer: "VN30", "VNMidcap", "VNSmallCap", “VN100”, “VNAllshare” and 
+"VNAllshare Sector " (collectively called " HOSE-Index") are the registered 
+trademarks and/or service mark solely owned by, and proprietary to the Hochiminh 
+Stock Exchange (HOSE). HOSE-Index can be used to create a range of index -linked 
+products including but not limited to tracker funds, derivatives, etc. Such product 
+creation is subject to approval by HOSE. For more information, please contact via e -
+mail: index@hsx.vn 
+All information is  provided for information purposes only. Every effort is made to 
+ensure that all information given in this publication is accurate, but no responsibility 
+or liability can be accepted by HOSE nor its  directors, officers, employees, partners 
+or licensors for  any errors or for any loss from use of this publication or any of the 
+information or data contained herein. 
+ 
+Top-5 Sectors of Market Capitalization 
+Sector Number of 
+Companies 
+Free-float adjusted 
+market-cap (Billion VND) 
+Weight 
+(%) 
+Industrials 
+56 43,382 29.55% 
+Real Estate 26 21,417 14.59% 
+Materials 34 20,968 14.28% 
+Consumer 
+Discretionary 26 16,405 11.17% 
+Financials 11 16,156 11.00% 
+ 
+80
+85
+90
+95
+100
+105
+110
+28/02/2022 28/02/2023 29/02/2024 28/02/2025
+Indices performance from 28/02/2022 to 28/02/2025
+VNSmallcap
+VNAllshare
+VN Index
+* Indices values are simulatedly rebased to 100 at 28/02/2022
+Industrials, 
+29.55%
+Real Estate, 
+14.59%
+Materials, 
+14.28%
+Consumer 
+Discretionary, 
+11.17%
+Financials, 
+11.00%
+Others, 19.40%
+  
+                                                                                                                                                                                Hochiminh Stock xchange  
+                                                                                                                                             16 Vo Van Kiet Street, District 1, Ho Chi Minh City 
+ Phone: (84.8) 3821.7713 - Fax: (84.8) 3821.7452 
+ Website: www.hsx.vn 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+SUMMARY OF HOSE-INDEX’S METHODOLOGY 
+Selection Criteria: 
+1. Eligibility: 
+• Must be listed and traded on HOSE for at least 6 (six) months prior Review Date.  
+• Must not violate disclosure requirement or subjected to controlled, special control or suspended at 
+least 3 months prior Review Date. 
+2. Free-float: Companies must have free-float ratio minimum of 10%. 
+3. Liquidity: Turnover ratio must be at least 0.05%. 
+Constituents Selection: 
+1. VNAllshare: Comprises the universe of all constituents that passed Selection Criteria. 
+2. VN30: 
+• Eligibility constituents for VN30: Must belong to top-listed accumulated 90% of traded value of 
+VNAllshare. 
+• 20 largest companies by market -capitalization are chosen. The remaining 10 companies are 
+selected from 21st to 40th ranked in market -capitalization with priority given to current 
+constituent(s) of VN30. 
+3. VNMidcap: 
+• Excluding the VN30 constituents, 40 largest companies by market -capitalization from the 
+remaining pool will be chosen. 
+• 30 Stocks from the 41st to 80th of market -capitalization are select with priority given to current 
+constituent(s) of VNMidcap index. 
+4. VN100: Comprises all constituents of VN30 and VNMidcap. 
+5. VNSmallcap: Comprises all constituents of VNAllshare excluding VN100. 
+GLOBAL INDUSTRY CLASSIFICATION STANDARD (GICS®) 
+GICS (Global Industry Classification Standard) is the industry classification standard for securities market 
+which developed and managed by MSCI and S&P. Information regarding to GICS classification shall be 
+managed and disclosed by MSCI and S&P. 
+Securities listing on HOSE shall be classified  by MSCI based on GICS  standard. Information on listed  
+companies is published on HOSE’s website: www.hsx.vn. 
+Industrial classification update of constituent stocks shall be made semi -annually on the same date as Review 
+Date. 
+ 

@@ -1,0 +1,23 @@
+==================== NGHIỆM THU 5a — ô số 'Từ khi bắt đầu hoạt động' hỏng ⇒ BLOCK kèm nguyên ô
+ô '+nan%': BLOCK — period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): dòng 'Từ khi bắt đầu hoạt động' có mặt nhưng ô số là '+nan%' — không đọc ra một tỉ suất hữu hạn nên không đối chiếu được với số chuẩn; báo cáo đang mang một ô hỏng
+ô 'n/a': BLOCK — period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): dòng 'Từ khi bắt đầu hoạt động' có mặt nhưng ô số là 'n/a' — không đọc ra một tỉ suất hữu hạn nên không đối chiếu được với số chuẩn; báo cáo đang mang một ô hỏng
+ô '—': BLOCK — period-return BLOCK (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): dòng 'Từ khi bắt đầu hoạt động' có mặt nhưng ô số là '—' — không đọc ra một tỉ suất hữu hạn nên không đối chiếu được với số chuẩn; báo cáo đang mang một ô hỏng
+ô '−1,33%': QUA — report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-10-05_to_2026-10-09.md): -1.33% vs canonical -1.330% (lệch 0.000pp)
+(số lần gọi CLI số chuẩn: 1 — chỉ ô đọc được mới gọi)
+==================== NGHIỆM THU 5b — cash_identity không import được ⇒ deliver() VẪN giao, lỗi ở stderr
+deliver() rc=0; các bước đã chạy: ['report_return_gate.py', 'notify', 'email']
+stdout: report_delivery_gate: COMPLETE ZaloPay_daily_report_2026-03-10.md (validated + Discord + email)
+stderr: report_delivery_gate: CẢNH BÁO (không chặn) ⚠️ Đẳng thức tiền (ZaloPay) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — ModuleNotFoundError (import of cash_identity halted; None in sys.modules)
+==================== NGHIỆM THU 6 — một bản ghi dnse_raw sai kiểu ở ngày 05/03 (có khoản rút 5tr chưa khai ngày 11/03)
+--- payload là list
+    cửa sổ kiểm được: 7/9; không kiểm được (kết thúc ngày): ['2026-03-05', '2026-03-06']; cửa sổ mở: ['2026-03-11']
+    ⚠️ Đẳng thức tiền (SpaceX) không kiểm được cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): 1 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: <tmp>/logs/dnse_raw_2026-03-05.jsonl dòng 5 — TypeError (payload của bản ghi orders là list, không phải object)
+    ⚠️ Đẳng thức tiền (SpaceX) không kiểm được cửa sổ 2026-03-05 (05/03 19:10) → 2026-03-06 (06/03 19:10): 1 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: <tmp>/logs/dnse_raw_2026-03-05.jsonl dòng 5 — TypeError (payload của bản ghi orders là list, không phải object)
+--- fillQuantity 'abc'
+    cửa sổ kiểm được: 7/9; không kiểm được (kết thúc ngày): ['2026-03-05', '2026-03-06']; cửa sổ mở: ['2026-03-11']
+    ⚠️ Đẳng thức tiền (SpaceX) không kiểm được cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): 1 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: <tmp>/logs/dnse_raw_2026-03-05.jsonl dòng 5 — ValueError (could not convert string to float: 'abc')
+    ⚠️ Đẳng thức tiền (SpaceX) không kiểm được cửa sổ 2026-03-05 (05/03 19:10) → 2026-03-06 (06/03 19:10): 1 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: <tmp>/logs/dnse_raw_2026-03-05.jsonl dòng 5 — ValueError (could not convert string to float: 'abc')
+--- dòng JSON hỏng
+    cửa sổ kiểm được: 7/9; không kiểm được (kết thúc ngày): ['2026-03-05', '2026-03-06']; cửa sổ mở: ['2026-03-11']
+    ⚠️ Đẳng thức tiền (SpaceX) không kiểm được cửa sổ 2026-03-04 (04/03 19:10) → 2026-03-05 (05/03 19:10): 1 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: <tmp>/logs/dnse_raw_2026-03-05.jsonl dòng 5 — JSONDecodeError (Expecting property name enclosed in double quotes: line 2 column 1 (char 89))
+    ⚠️ Đẳng thức tiền (SpaceX) không kiểm được cửa sổ 2026-03-05 (05/03 19:10) → 2026-03-06 (06/03 19:10): 1 bản ghi dnse_raw không đọc được nên lệnh khớp/vị thế/phải thu của cửa sổ này không đủ tin: <tmp>/logs/dnse_raw_2026-03-05.jsonl dòng 5 — JSONDecodeError (Expecting property name enclosed in double quotes: line 2 column 1 (char 89))

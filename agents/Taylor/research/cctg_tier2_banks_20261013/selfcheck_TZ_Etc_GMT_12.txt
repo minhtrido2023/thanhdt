@@ -1,0 +1,68 @@
+effective_deposit_rate(asof=2026-12-15): CCTG stale (71d > 45d, last 2026-10-05) -> Big-4-only
+effective_deposit_rate(asof=2026-12-15): CCTG stale (71d > 45d, last 2026-10-05) -> Big-4-only
+effective_deposit_rate(asof=2026-12-15): CCTG stale (71d > 45d, last 2026-10-05) -> Big-4-only
+effective_deposit_rate(asof=2026-12-15): CCTG stale (71d > 45d, last 2026-10-05) -> Big-4-only
+effective_deposit_rate(asof=2026-12-15): CCTG stale (71d > 45d, last 2026-10-05) -> Big-4-only
+effective_deposit_rate(asof=2026-12-15): CCTG stale (71d > 45d, last 2026-10-05) -> Big-4-only
+PASS W1 thiếu --bank bị chặn
+PASS W2 --bank VCB (Big-4, ngoài nhóm tier2) bị chặn
+PASS W3 --denom ngoài 10tr/100tr bị chặn
+PASS W4 thiếu --product bị chặn
+PASS W5 lợi suất 0 bị chặn (không điền 0 cho ngân hàng thiếu số)
+OK: appended [tier2 VPB 100tr] 2026-10-13 = 9.2% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W6 ghi tay VPB 100tr 9,2% -> đúng 1 dòng, đủ trường
+PASS W6b header file tier2 đúng 9 cột
+PASS W6c file 12M không đổi từng byte, file 6M không bị tạo
+PASS W6d ghi tay không tạo sidecar nào
+SKIP: effective_date 2026-10-13 already present (use --force to override). No write — CSV unchanged.
+PASS W7 cùng (ngày, VPB, 100tr) chạy lại SKIP rc=0
+OK: appended [tier2 VPB 10tr] 2026-10-13 = 7.5% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W8 VPB 10tr cùng ngày là khoá RIÊNG -> ghi thêm, giữ holding_period
+OK: appended [tier2 MB mệnh giá n/a] 2026-10-13 = 7.1% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W9 MB 7,1% (lệch 2,1pp so với VPB) vẫn ghi — không so chéo ngân hàng; denomination để trống
+PASS W10 VPB 100tr lệch 1,1pp so với kỳ trước CÙNG khoá bị chặn
+PASS W11 VPB 100tr ngày cũ hơn dòng cuối cùng khoá bị chặn
+OK: appended [tier2 ACB mệnh giá n/a] 2026-10-12 = 7.2% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W11b ACB ngày hôm qua vẫn ghi (ngày mới-hơn tính riêng từng khoá)
+PASS W12 thứ tự dòng = thứ tự ghi (append-only, không xáo)
+PASS W13 JOB_ID + manual_verify bị từ chối
+PASS W13b JOB_ID + --force bị từ chối
+PASS W14 2 nguồn cùng chủ bị chặn
+PASS W14b 2 nguồn lệch 0,2pp bị chặn
+PASS W14c --rate không nguồn nào nói bị chặn
+OK: appended [tier2 TCB mệnh giá n/a] 2026-10-13 = 8% (source=web_crosscheck_auto, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W15 auto hợp lệ TCB ghi được
+PASS W15b sidecar RIÊNG theo khoá (TCB, n/a); không tạo sidecar 12M/6M
+OK: appended [tier2 ACB mệnh giá n/a] 2026-10-13 = 7.2% (source=web_crosscheck_auto, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W16 cùng bài báo dùng cho ngân hàng KHÁC vẫn ghi (1 bài phủ nhiều ngân hàng)
+PASS W16b cùng URL dùng lại cho CÙNG khoá kỳ sau bị chặn
+PASS W16c khoá chỉ có dòng auto (TCB): kỳ sau lệch 1,1pp vẫn bị chặn
+OK: appended 2026-10-13 = 7.4% (source=manual_verify, collected=2026-10-13).
+    cctg_events_df() now has 3 anchors; current_cctg_rate() = 7.40% (as of 2026-10-12 00:00:00).
+PASS W17 lượt 12m mặc định SAU lượt tier2 ghi vào file 12M, không đụng file tier2
+PASS W18 --bank/--denom với chuỗi 12m/6m bị từ chối, không ghi
+OK: appended [tier2 VPB 100tr] 2026-10-13 = 9.1% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS W19 --force (người) đính chính đúng 1 dòng của đúng khoá, các khoá khác nguyên vẹn
+OK: appended [tier2 VPB 100tr] 2026-10-13 = 9.2% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+OK: appended [tier2 MB mệnh giá n/a] 2026-10-13 = 15% (source=manual_verify, collected=2026-10-13) -> /tmp/cctg_t2sc_wdpsapxp/cctg_rate_vn_tier2_events.csv
+PASS B0 dựng file tier2 có dòng 9,2% và 15% cạnh các file chuỗi production
+PASS B1 41 đầu ra (effective/kill-switch A/consumer*/DCF r/trend) giống hệt từng byte vắng vs có file tier2 [sha256 154ea48ba378]
+PASS B1 effective_deposit_rate: 5 giá trị, vắng == có
+PASS B1 macro_killswitch_a_status: 5 giá trị, vắng == có
+PASS B1 consumer_deposit_rate_detail: 5 giá trị, vắng == có
+PASS B1 consumer_deposit_rate: 5 giá trị, vắng == có
+PASS B1 dcf.discount_rate: 4 giá trị, vắng == có
+PASS B1 trend._load_series: 1 giá trị, vắng == có
+PASS B2 không consumer nào mở/dò file tier2 hay liệt kê thư mục chứa nó (cả 2 lượt; thấy: [])
+PASS B2b chuỗi trend check chỉ gồm đúng 2 khoá Big-4, không có 9,2/15
+PASS B2c 13/10 có file tier2 15%: effective = 7.4% (nguồn cctg_6m(2026-10-05)), kill-switch A armed=False
+PASS B3 đối chứng dương: bẫy ghi nhận được lần đọc file tier2 của chính writer
+PASS S1 quét 1108 file: chỉ writer/selfcheck/wrapper tuần nhắc tới chuỗi tier2 (vi phạm: [])
+PASS S2 đủ 11 file consumer được nêu tên nằm trong phạm vi quét (thiếu: [])
+PASS S3 chỉ selfcheck mới import writer append_cctg_rate (import: ['cctg6m_series_selfcheck.py', 'cctg_tier2_series_selfcheck.py', 'refresh_deposit_cctg_weekly_selfcheck.py'])
+PASS S4 không consumer nào glob 'cctg_rate_vn*' (vi phạm: [])
+PASS S5 wrapper tuần có lệnh --series tier2 với đủ --bank/--product/--denom/--holding và series=cctg_tier2
+PASS S5b wrapper tuần nêu đủ 4 ngân hàng và luật không-điền-0 / không-suy-từ-ngân-hàng-khác
+PASS S5c wrapper tuần chỉ gọi trend check đúng như cũ (không truyền tham số tier2)
+
+48/48 PASS

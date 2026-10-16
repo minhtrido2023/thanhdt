@@ -423,6 +423,30 @@ preserve_verbatim: >
   quanh ngày 11 → ngày 3 nằm trước). Không trùng phút với cron nào (08:00 commodity ngày 5/10 khác
   phút+ngày; 08:15 vcb_fx T2-T6). Freshness WARN >45 ngày ở `ops_health_check.sh` §8.
 - 2026-07-15 (Winston, job `Winston_20260715_061920`, user duyệt dispatch): đổi giờ 3 cron đọc `dt5g_live` để luôn đọc regime HÔM NAY thay vì hôm qua (fix M3 audit `Winston_20260712_142100`): (1) `eod_trading_report.sh` 15:00→19:10 ICT (`0 8` → `10 12` UTC); (2) `pt_8l_daily.sh` 17:45→19:20 ICT (`45 10` → `20 12` UTC); (3) `telegram_run_daily.sh` 18:00→19:35 ICT (`0 11` → `35 12` UTC). Buffer sau publish DT5G ~19:01: eod 9', pt_8l 19', telegram 34'. Không trùng phút với nhau hoặc với bq_freshness 19:00. sector_lens_monitor.py step [9] vẫn đọc cache T-1 — user xác nhận KHÔNG CẦN SỬA, known limitation, chỉ ảnh hưởng công cụ nghiên cứu nội bộ, không chạm trading production.
+- 2026-10-13 (Taylor, job `Taylor_20261013_125149`, **user duyệt 19:51 ICT**): NỚI CẢ HAI ĐẦU gate
+  của `mike/bin/fa_ratings_earnings_window_daily.sh` — từ "tháng ∈ {1,4,7,10} ∧ ngày ≥ 15" thành
+  "(tháng ∈ {1,4,7,10} ∧ ngày ≥ 10) ∨ (tháng ∈ {2,5,8,11} ∧ ngày ≤ 10)"; giữ nguyên: mọi ngày kể cả
+  cuối tuần, trừ lễ VN, 8L rồi fa_ratings sau 45'. **Dòng crontab KHÔNG đổi** (`0 13 * * *`), chỉ
+  đổi gate trong wrapper ⇒ 4 câu hỏi §11 giữ nguyên câu trả lời của mục 2026-07-14 bên dưới
+  (đầu vào `ticker_financial` ingest ~16:36-17:30; consumer = cổng LAG 8L≤3 lúc golive 19:00 phiên
+  SAU + rebalance custom30V; không trùng phút cron nào mới). Lý do: audit sẵn sàng BCTC Q3
+  finding M1 (`Taylor_20261013_123622`, bus `bctc-q3-readiness-signal-20261013`) — cửa sổ cũ đóng
+  cuối tháng đầu quý, đúng lúc nhóm công bố muộn ra báo cáo: mùa Q2 28/117 sự kiện LAG qualify bị
+  chấm bằng rating quý trước lúc lập plan, 5 ca đổi phía cổng, ca thật TVN. Chi phí thêm: ~15
+  lần chạy/quý (5 ngày đầu + 10 ngày đuôi). Test: `bin/fa_ratings_earnings_window_gate_selfcheck.sh`
+  142/142 PASS, 17 mutant bị giết (thay bộ 18 ca chạy tay cũ).
+- 2026-10-13 (Taylor, cùng job `Taylor_20261013_125149`, **user duyệt 19:51 ICT**): chuỗi **19:00**
+  `bq_freshness_check.sh` thêm 2 bước, **KHÔNG thêm/đổi dòng crontab nào**: (a) **pipeline-1d**
+  `refresh_earnings_surprise_pkl.py` ngay TRƯỚC pipeline-2 golive — kéo lại pkl sự kiện LAG từ BQ
+  SỐNG (bản 15:30 của `refresh_lagged_caches.py` [3] chạy dưới `BQ_LOCAL_CACHE` nên đọc cache sync
+  23:45 đêm trước; đo 10-13: pkl 15:30 = 58.233 dòng/max 08-21 = y hệt parquet cache, BQ sống đã có
+  KBC 2026Q3). 4 câu §11: (1) đầu vào `ticker_financial` BQ live, ingest ~16:36-17:30 ⇒ 19:00 đã có;
+  (2) cần T thật — chính là mục đích; (3) hỏng/timeout ⇒ giữ pkl 15:30, WARN Discord, không chặn
+  plan; (4) consumer duy nhất trong chuỗi = `golive_recommend_v23` chạy ngay sau; đo thật ~14-15s
+  (3 lượt) nên không đẩy giờ dispatch DollarBill/`send_plan_report` 21:00. (b) probe
+  `pnj_q3_review_watch.py` trong khối WARN — canh trigger review PNJ (BCTC Q3), bắn một lần,
+  state file nguyên tử, fail-closed khi lỗi đọc. Test: `bin/bctc_q3_chain_wiring_selfcheck.py` 16/16,
+  `bin/pnj_q3_review_watch_selfcheck.py` 49/49, `refresh_earnings_surprise_pkl_selfcheck.py` 45/45.
 - 2026-07-14 (Winston, job `Winston_20260714_160739`, **user directive trực tiếp — quy tắc vĩnh
   viễn mỗi quý**; **SỬA 2026-07-23, user directive trực tiếp**): thay 2 dòng T3 tạm thời (hết hạn
   08-04) bằng **1 dòng cron DAILY 20:00 ICT** gọi `mike/bin/fa_ratings_earnings_window_daily.sh`

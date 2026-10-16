@@ -1,0 +1,86 @@
+From bb700ab672ed714280764d6447d9c1d2e92fd5b3 Mon Sep 17 00:00:00 2001
+From: minhtrido2023 <minhtrido2023@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 23:35:39 +0700
+Subject: [PATCH] =?UTF-8?q?research(bal-maxpos):=20BAL=5FMAX=5FPOS=20knob?=
+ =?UTF-8?q?=20(default=2012)=20+=20SLOT=5FAUDIT=5FLOG=20instrumentation=20?=
+ =?UTF-8?q?=E2=80=94=20job=20Taylor=5F20261008=5F163222?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ WorkingClaude/pt_v23_audit_2014.py     |  2 +-
+ WorkingClaude/simulate_holistic_nav.py | 27 ++++++++++++++++++++++++++
+ 2 files changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/WorkingClaude/pt_v23_audit_2014.py b/WorkingClaude/pt_v23_audit_2014.py
+index 165be1bd..eedf61d9 100644
+--- a/WorkingClaude/pt_v23_audit_2014.py
++++ b/WorkingClaude/pt_v23_audit_2014.py
+@@ -801,7 +801,7 @@ if BAL_DROP_TIERS and BAL_DROP_TIERS != ["none"]:
+     assert not _unknown_drop, f"BAL_DROP_TIERS not in TIER_BAL: {_unknown_drop}"
+     TIER_BAL = [t for t in TIER_BAL if t not in BAL_DROP_TIERS]
+     print(f"  [MOM-closure probe] BAL entry set after BAL_DROP_TIERS={BAL_DROP_TIERS}: {TIER_BAL}")
+-MAX_POS_V11 = 12
++MAX_POS_V11 = int(os.environ.get("BAL_MAX_POS", "12"))   # RESEARCH knob (job Taylor_20261008_163222); default 12 = production
+ 
+ STATE_LAG_WEIGHT  = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}
+ ALLOC_REBAL_TC    = 0.001
+diff --git a/WorkingClaude/simulate_holistic_nav.py b/WorkingClaude/simulate_holistic_nav.py
+index 0f5d4c5a..8842ef05 100644
+--- a/WorkingClaude/simulate_holistic_nav.py
++++ b/WorkingClaude/simulate_holistic_nav.py
+@@ -397,6 +397,27 @@ def idle_lots_accrue(lots, rate_per_session):
+         lot[IDLE_LOT_TERM_DAYS] += 1
+ 
+ 
++# --- RESEARCH-ONLY instrumentation (job Taylor_20261008_163222, branch research/bal-maxpos-lag-idle-20261009) ---
++# SLOT_AUDIT_LOG=<csv> logs every first-fill decision of the named books: SLOT_BLOCK (rejected because
++# completed positions >= max_positions), CASH_SKIP (affordable size < 1M VND), FILL_START (sized+started).
++# Pure logging: no state is read-modified; unset => byte-identical (proved by the inertness leg).
++import atexit as _atexit
++_SLOT_AUDIT_PATH = os.environ.get("SLOT_AUDIT_LOG", "")
++_SLOT_AUDIT_BOOKS = set(os.environ.get("SLOT_AUDIT_BOOKS", "v23audit_BAL").split(","))
++_SLOT_AUDIT = []
++def _slot_audit_rec(today, name, entry, outcome, n_slots, cash, cur_nav, state_by_date, target=None):
++    _st = state_by_date.get(today) if state_by_date else None
++    _SLOT_AUDIT.append({"ymd": today, "book": name, "ticker": entry["ticker"], "play_type": entry["play_type"],
++                        "ta": entry.get("ta"), "seq_id": entry.get("seq_id"), "exec_start": entry.get("exec_start_date"),
++                        "outcome": outcome, "n_slots": n_slots, "cash": float(cash),
++                        "cur_nav": (float(cur_nav) if cur_nav is not None else None),
++                        "target": (float(target) if target is not None else None),
++                        "state": (int(_st) if _st is not None and not pd.isna(_st) else None)})
++def _slot_audit_dump():
++    if _SLOT_AUDIT_PATH and _SLOT_AUDIT:
++        pd.DataFrame(_SLOT_AUDIT).to_csv(_SLOT_AUDIT_PATH, index=False)
++_atexit.register(_slot_audit_dump)
++
+ def simulate(signals_df, prices, vni_dates, *,
+              allowed_tiers, max_positions,
+              hold_days=HOLD_DAYS, stop_loss=STOP_LOSS, min_hold=MIN_HOLD,
+@@ -1253,6 +1274,8 @@ def simulate(signals_df, prices, vni_dates, *,
+                                 and not (slot_exempt_tiers is not None
+                                          and p["play_type"] in slot_exempt_tiers))
+             if is_first_fill and not _slot_exempt and _n_slots >= max_positions:
++                if _SLOT_AUDIT_PATH and name in _SLOT_AUDIT_BOOKS:
++                    _slot_audit_rec(today, name, entry, "SLOT_BLOCK", _n_slots, cash, None, state_by_date)
+                 if not eviction:
+                     continue
+                 cur_pri = TIER_PRIORITY.get(play_type, 0)
+@@ -1379,8 +1402,12 @@ def simulate(signals_df, prices, vni_dates, *,
+                 if cash + _margin_room < target_value * 0.99:
+                     target_value = (cash + _margin_room) * 0.95
+                 if target_value < 1_000_000:
++                    if _SLOT_AUDIT_PATH and name in _SLOT_AUDIT_BOOKS:
++                        _slot_audit_rec(today, name, entry, "CASH_SKIP", _n_slots, cash, cur_nav, state_by_date)
+                     continue
+                 entry["target_value"] = target_value
++                if _SLOT_AUDIT_PATH and name in _SLOT_AUDIT_BOOKS:
++                    _slot_audit_rec(today, name, entry, "FILL_START", _n_slots, cash, cur_nav, state_by_date, target_value)
+ 
+             # Compute today's affordable buy
+             remaining_value = entry["target_value"] - entry["filled_cost"]
+-- 
+2.34.1
+

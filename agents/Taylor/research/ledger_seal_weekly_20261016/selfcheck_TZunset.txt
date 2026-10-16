@@ -1,0 +1,61 @@
+A. stub
+  OK   A1 chốt cả 2 ⇒ rc=0, mỗi TK đúng 1 mốc mới cuối file
+  OK   A1 bus: 2 finding của Mike, topic fund-unit-ledger-seal-20261024, payload có SEAL_MD5
+  OK   A1 N4 payload: số dòng nav_is_estimate trong đoạn vừa chốt (SpaceX 5 dòng cuối có 2 True, ZaloPay 0)
+  OK   A1 CLI gọi ĐÚNG đối số (asof = thứ Sáu tuần trước), thứ tự SpaceX→ZaloPay
+  OK   A1 CLI KHÔNG nhận --accept-preclose/--restate/--force/--immutable
+  OK   A1 env của CLI đã gỡ WC_ROOT
+  OK   A2 idempotent: chạy lại cùng SEAL_MD5 ⇒ rc=0, file mốc KHÔNG đổi, KHÔNG post bus lại
+  OK   A3 cổng từ chối TK1 ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, KHÔNG gọi ZaloPay
+  OK   A3 in đúng 8 dòng cuối đầu ra thật của CLI (bằng chứng, §29)
+  OK   A3 N2 dòng CUỐI (sau tail) là tóm tắt 🔴 nêu TK lỗi + TK đã chốt
+  OK   A4 TK2 lỗi sau TK1 ⇒ rc≠0 nhưng mốc + bus của SpaceX ĐÃ ghi, ZaloPay không
+  OK   A4 N2 dòng cuối: tóm tắt 🔴 ZaloPay lỗi, đã chốt+ghi mốc: SpaceX
+  OK   A5 NothingToSeal cả 2 (sổ tới asof, khớp mốc mới nhất) ⇒ rc=0, không mốc, không bus, gọi cả 2 TK
+  OK   A5b B1 NothingToSeal nhưng manifest cuối last_date 2026-10-09 < asof 2026-10-16 ⇒ rc=1, dừng, nêu số thật, KHÔNG nói 'đã chốt tới/qua'
+  OK   A5c B2 NothingToSeal nhưng md5 sổ+manifest ≠ mốc mới nhất ⇒ rc=1, dừng, KHÔNG tự thêm mốc
+  OK   A5d B2 NothingToSeal mà TK KHÔNG có mốc nào ⇒ rc=1
+  OK   A5e chốt rc=0 nhưng dòng cuối 2026-10-14 < asof ⇒ mốc+bus SpaceX ĐÃ ghi, rc=1, dừng trước ZaloPay
+  OK   A6 TK1 NothingToSeal + TK2 chốt ⇒ rc=0, chỉ thêm mốc ZaloPay
+  OK   A7 rc=2 mà dấu NothingToSeal của TK KHÁC ⇒ từ chối thật (rc≠0, dừng)
+  OK   A8 CLI rc=1 ⇒ rc≠0, dừng
+  OK   A9 rc=0 nhưng SEAL_MD5 không có ⇒ rc≠0, không mốc, dừng
+  OK   A9 rc=0 nhưng SEAL_MD5 của TK khác ⇒ rc≠0, không mốc, dừng
+  OK   A9 rc=0 nhưng SEAL_MD5 hai dòng ⇒ rc≠0, không mốc, dừng
+  OK   A10 bus lỗi ⇒ mốc SpaceX đã ghi, rc≠0, dừng trước ZaloPay
+  OK   A10b CLI treo quá trần ⇒ rc≠0, KHÔNG mốc (dù đã in SEAL_MD5), dừng, nói rõ timeout
+  OK   A11 SEAL_MD5 trùng một mốc CŨ (không phải mới nhất) ⇒ không ghi, rc≠0
+  OK   A12 trong khung ghi nav_history 19:00–22:00 ⇒ rc=4, không gọi CLI
+  OK   A12b N1 biên 21:30 (nav_sync_retry */15 tới 21:45) ⇒ rc=4
+  OK   A12c 22:00 đúng biên phải ⇒ được chạy (rc=0)
+  OK   A13 có tiến trình daily_nav_snapshot.py ⇒ rc=4, không gọi CLI
+  OK   A14 có tiến trình eod_trading_report.sh ⇒ rc=4
+  OK   A15 dòng cron (sh -c) NHẮC tên writer trong comment ⇒ KHÔNG bị coi là writer
+  OK   A16 khoá đang bị giữ ⇒ rc=4, không gọi CLI
+  OK   A17 CLI nằm trong cây thật nhưng không phải mike/bin canonical ⇒ rc=64, không gọi CLI
+  OK   A18 asof lịch thật 2026-10-17 (T7 thường) = 2026-10-09
+  OK   A18 asof lịch thật 2026-10-24 (T7 thường) = 2026-10-16
+  OK   A18 asof lịch thật 2026-10-25 (CN) = 2026-10-16
+  OK   A18 asof lịch thật 2026-10-21 (T4 chạy tay: thứ Sáu 16/10 mới 2 phiên ⇒ lùi đủ 5) = 2026-10-13
+  OK   A18 asof lịch thật 2026-09-05 (sau lễ 31/8–2/9 (3 phiên) ⇒ lùi tới đủ 5 phiên) = 2026-08-25
+  OK   A18 asof lịch thật 2026-09-12 (tuần sau lễ: thứ Sáu 4/9, có 5 phiên 7–11/9) = 2026-09-04
+  OK   A18 asof lịch thật 2026-05-02 (lễ 30/4+1/5: 24/4 mới 3 phiên ⇒ lùi đủ 5) = 2026-04-22
+  OK   A19 asof Tết 2027 tiêm 2027-02-13 (tuần Tết 0 phiên ⇒ lùi đủ 5 phiên) = 2027-01-29
+  OK   A19 asof Tết 2027 tiêm 2027-02-20 (thứ Sáu 12/2 là Tết ⇒ phiên trước, 5 phiên 15–19/2) = 2027-02-05
+  OK   A20 bất biến 2026-10-24: asof là phiên, < hôm nay, ≥5 phiên trễ
+  OK   A20 bất biến 2026-09-05: asof là phiên, < hôm nay, ≥5 phiên trễ
+  OK   A20 bất biến 2027-02-13: asof là phiên, < hôm nay, ≥5 phiên trễ
+  OK   A21 now_ict() neo ICT tường minh dưới TZ=<unset> (+07:00, lệch < 60s)
+  OK   A22 --print-asof (đồng hồ thật) == seal_asof(hôm nay ICT)
+B. tích hợp (nav_unit_ledger.py thật trên bản sao /tmp)
+  OK   B1 ZaloPay có dòng chụp trước đóng cửa ⇒ rc≠0; SpaceX ĐÃ chốt + mốc + bus, ZaloPay sổ không đổi
+  OK   B1 mốc SpaceX == md5 thật của sổ + manifest sandbox
+  OK   B2 sửa dòng ⇒ chạy lại: SpaceX NothingToSeal, ZaloPay chốt tới 2026-10-09, rc=0
+  OK   B3 chạy lần 3 ⇒ rc=0, file mốc y nguyên, không bus mới
+  OK   B4 ledger_anchor_check đọc mốc wrapper vừa ghi ⇒ cả 2 TK KHỚP (rc=0)
+  OK   B5 cổng từ chối TK1 (SpaceX) ⇒ rc≠0, KHÔNG mốc, KHÔNG bus, ZaloPay không chạm
+  OK   B6 B1 tái hiện: xoá dòng 05–09/10 nav_history SpaceX, sổ chốt tới 02/10 ⇒ CLI NothingToSeal nhưng wrapper rc=1 nêu 2026-10-02 < asof 2026-10-09, ZaloPay không chạm, không mốc/bus
+  OK   B7 B2 tái hiện: sổ SpaceX đã chốt tới 09/10 mà mốc mới nhất vẫn 02/10 ⇒ wrapper rc=1 'chưa có mốc', KHÔNG tự thêm mốc, KHÔNG bus, dừng trước ZaloPay
+  OK   B7 (ghi nhận sự thật) ledger_anchor_check KHÔNG bắt ca này: rc=0 — chỉ wrapper bắt
+  OK   Z dữ liệu thật KHÔNG đổi (md5 sổ + manifest 2 TK + file mốc canonical)
+TZ=<unset> — PASS: 0 lỗi

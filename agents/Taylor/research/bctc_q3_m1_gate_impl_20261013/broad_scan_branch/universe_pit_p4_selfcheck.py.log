@@ -1,0 +1,38 @@
+========================================================================================
+  universe_pit P4 selfcheck — CAPIT breadth + pool + ADV cap (C-conserv)
+========================================================================================
+  [PASS] T1a CAPIT_BREADTH_SOURCE='pit' — = 'pit'
+  [PASS] T1b CAPIT_TOPN=250 — = 250
+  [PASS] T1c WASHOUT_GATE=0.31 — = 0.31
+  [PASS] T1d CAPIT_POOL_SOURCE='prune' (còn ghim có chủ ý) — = 'prune'
+  [PASS] T2 rollback 'prune' ⇒ gate tự về 0.30 — gate=0.3
+  [PASS] T3a SQL breadth 'pit' không chạm ticker_prune
+  [PASS] T3b SQL pool đang GHIM ⇒ đọc ticker_prune, không chạm universe_pit
+  [PASS] T3c SQL breadth 'pit' dùng universe_pit_q + top-N
+  [PASS] T3d CAPIT_BREADTH_SOURCE lạ ⇒ raise (không đoán mò)
+  [PASS] T3e CAPIT_POOL_SOURCE lạ ⇒ raise
+  [PASS] T3f hai switch ĐỘC LẬP (lật pool không đụng breadth, và ngược lại)
+
+  … tải 2 chuỗi breadth 2014-01-01 → 2026-07-21 (SQL production, cả 2 nhánh; cửa sổ ghim vintage duyệt)
+    3,129 phiên khớp (old 3,129 / new 3,129)
+  [PASS] T4a THÊM 0 ngày fire (không có fire giả) — added=[]
+  [diff-benign] T4b 2014-05-09 mất thêm ngoài danh sách duyệt — br_old=0.30000, cách ngưỡng +0.00000 < 1 tên (0.00400) ⇒ ticker_prune rebuild lật ngày biên, KHÔNG phải đổi hành vi
+  [PASS] T4b MẤT đúng danh sách đã duyệt (bỏ qua ngày sát biên 1 tên) — mất 8 ngày; ngoài danh sách & XA biên=[]; thiếu so với duyệt & XA biên=[]
+  [PASS] T4c fire_new = fire_old − số ngày mất (tập con thật sự) — old=83 new=75 lost=8 (đo tới 2026-07-21; §4.4 đo tới 2026-07-21 là 82→75)
+  [PASS] T5 grind lật đúng 1 cặp ngày đã công bố (size ×2) — flips=['2015-08-24', '2015-08-25']
+
+  … A/B trên ngày LIVE (cổng 'không đổi đợt giải ngân đang dở') — cửa sổ tươi 2025-09-08 → 2026-10-13
+  [PASS] T6a fired giống nhau — live=2026-10-13 old br=0.1122→False / new br=0.1200→False
+  [PASS] T6b grind giống nhau — old=None new=None
+  [PASS] T6c pool production == pool legacy (ghim ⇒ trùng khít) — n=8 | lệch=[]
+  [PASS] T6c2 pool 'pit' chỉ THÊM tên, không bỏ tên nào của pool đang chạy — pit thêm=['NTC'] bớt=[] tại live=2026-10-13 (§4.4 đo 2026-07-21 ra ['HVT'] — tên đổi theo phiên là BÌNH THƯỜNG, đo lại trước khi trích)
+  [PASS] T6d ADV20 (⇒ trần %ADV) `ticker` vs `ticker_prune` không lệch 1 đồng trên pool live — n=8 mã
+
+  [PASS] T7a chuỗi breadth tươi ⇒ stale=False
+  [PASS] T7b chuỗi breadth chậm 1 ngày ⇒ stale=True (CAPIT fail-closed) — src_max=2026-10-13
+  [PASS] T7c chuỗi rỗng/NaT ⇒ stale=True
+  [PASS] T7d nhánh 'prune' ⇒ kiểm tra là no-op
+
+========================================================================================
+  ✅ PASS TẤT CẢ
+========================================================================================

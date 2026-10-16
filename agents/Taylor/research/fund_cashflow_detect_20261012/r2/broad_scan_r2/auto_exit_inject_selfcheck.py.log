@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/tmp/fcf_r2/broad/WC/mike/bin/auto_exit_inject_selfcheck.py", line 35, in <module>
+    import auto_exit_inject as aei  # noqa: E402
+  File "/tmp/fcf_r2/broad/WC/mike/bin/auto_exit_inject.py", line 44, in <module>
+    import auto_exit_rules as rules  # noqa: E402
+ModuleNotFoundError: No module named 'auto_exit_rules'

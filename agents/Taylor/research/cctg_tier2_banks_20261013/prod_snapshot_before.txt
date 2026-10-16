@@ -1,0 +1,2 @@
+37 6e561b6cec0f53be152be8d2436680e4733b0fe47bd92f3c4bf6e1ad375bd798
+[('effective_deposit_rate', None, "{'rate': 0.07400000000000001, 'rate_pct': 7.4, 'rate_source': 'cctg_6m(2026-10-12)', 'big4_rate_pct': 6.8, 'cctg_rate_pct': 7.4, 'last_update': '2026-10-12'}"), ('macro_killswitch_a_status', None, "{'armed': False, 'rate': 0.07400000000000001, 'threshold': 0.075, 'stale': False, 'last_update': '2026-10-12', 'age_days': 1, 'reason': 'cctg_6m(2026-10-12) 7.40% <= 7.5% -> CLEAR', 'rate_source': 'cctg_6m(2026-10-12)', 'big4_stale': False, 'cctg_note': None}")]

@@ -1,0 +1,10 @@
+
+[1] signal 2026-08-03 → plan 2026-08-04 (dữ liệu thật)
+  ✗ cổng lịch PASS  [{'ok': False, 'reason': 'thiếu CSV'}]
+  ✗ due_today gồm entry ngày chuẩn + residual ngày 2 DHD
+  ✗ DCM/PVT (T+2) + DRI/POW (T+3) nằm ở upcoming, KHÔNG ở due_today  [[]]
+  ✗ APF bị ZaloPay bỏ sót → script BẮT được
+Traceback (most recent call last):
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/bin/filter_lag_entry_window_selfcheck.py", line 67, in <module>
+    check("không có dòng nào unparsed", r["counts"]["unparsed"] == 0, str(r["unparsed"]))
+KeyError: 'unparsed'

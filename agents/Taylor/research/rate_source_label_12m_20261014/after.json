@@ -1,0 +1,330 @@
+{
+ "2026-06-01": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": null,
+   "last_update": "2026-06-01",
+   "rate": 0.068,
+   "rate_pct": 6.8,
+   "rate_source": "big4_12m"
+  },
+  "ks": {
+   "age_days": 0,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-06-01",
+   "rate": 0.068,
+   "rate_source": "big4_12m",
+   "reason": "big4_12m 6.80% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2026-09-29": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": null,
+   "last_update": "2026-09-04",
+   "rate": 0.068,
+   "rate_pct": 6.8,
+   "rate_source": "big4_12m"
+  },
+  "ks": {
+   "age_days": 25,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-09-04",
+   "rate": 0.068,
+   "rate_source": "big4_12m",
+   "reason": "big4_12m 6.80% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2026-09-30": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.5,
+   "last_update": "2026-09-04",
+   "rate": 0.075,
+   "rate_pct": 7.5,
+   "rate_source": "cctg_6m(2026-09-30)"
+  },
+  "ks": {
+   "age_days": 26,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-09-04",
+   "rate": 0.075,
+   "rate_source": "cctg_6m(2026-09-30)",
+   "reason": "cctg_6m(2026-09-30) 7.50% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2026-10-05": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-10-03",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-10-05)"
+  },
+  "ks": {
+   "age_days": 2,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-10-03",
+   "rate": 0.07400000000000001,
+   "rate_source": "cctg_12m(2026-10-05)",
+   "reason": "cctg_12m(2026-10-05) 7.40% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2026-10-14": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-10-12)"
+  },
+  "ks": {
+   "age_days": 2,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_source": "cctg_12m(2026-10-12)",
+   "reason": "cctg_12m(2026-10-12) 7.40% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2026-11-14": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-10-12)"
+  },
+  "ks": {
+   "age_days": 33,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_source": "cctg_12m(2026-10-12)",
+   "reason": "cctg_12m(2026-10-12) 7.40% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2026-11-25": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-10-12)"
+  },
+  "ks": {
+   "age_days": 44,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_source": "cctg_12m(2026-10-12)",
+   "reason": "cctg_12m(2026-10-12) 7.40% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "2027-03-01": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-10-12)"
+  },
+  "ks": {
+   "age_days": 140,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_source": "cctg_12m(2026-10-12)",
+   "reason": "cctg_12m(2026-10-12) 7.40% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "None": {
+  "eff": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-10-12)"
+  },
+  "ks": {
+   "age_days": 2,
+   "armed": false,
+   "big4_stale": false,
+   "cctg_note": null,
+   "last_update": "2026-10-12",
+   "rate": 0.07400000000000001,
+   "rate_source": "cctg_12m(2026-10-12)",
+   "reason": "cctg_12m(2026-10-12) 7.40% <= 7.5% -> CLEAR",
+   "stale": false,
+   "threshold": 0.075
+  }
+ },
+ "events_df": [
+  {
+   "deposit_rate": "14.0",
+   "time": "2011-01-01"
+  },
+  {
+   "deposit_rate": "12.0",
+   "time": "2012-04-01"
+  },
+  {
+   "deposit_rate": "9.0",
+   "time": "2012-10-01"
+  },
+  {
+   "deposit_rate": "7.5",
+   "time": "2013-06-01"
+  },
+  {
+   "deposit_rate": "7.0",
+   "time": "2014-01-01"
+  },
+  {
+   "deposit_rate": "6.3",
+   "time": "2014-07-01"
+  },
+  {
+   "deposit_rate": "5.5",
+   "time": "2015-01-01"
+  },
+  {
+   "deposit_rate": "5.5",
+   "time": "2016-01-01"
+  },
+  {
+   "deposit_rate": "6.5",
+   "time": "2017-01-01"
+  },
+  {
+   "deposit_rate": "6.8",
+   "time": "2018-01-01"
+  },
+  {
+   "deposit_rate": "7.0",
+   "time": "2019-01-01"
+  },
+  {
+   "deposit_rate": "6.5",
+   "time": "2020-01-01"
+  },
+  {
+   "deposit_rate": "5.7",
+   "time": "2020-07-01"
+  },
+  {
+   "deposit_rate": "5.5",
+   "time": "2021-01-01"
+  },
+  {
+   "deposit_rate": "5.5",
+   "time": "2022-01-01"
+  },
+  {
+   "deposit_rate": "6.8",
+   "time": "2022-10-01"
+  },
+  {
+   "deposit_rate": "7.5",
+   "time": "2022-12-01"
+  },
+  {
+   "deposit_rate": "7.2",
+   "time": "2023-03-01"
+  },
+  {
+   "deposit_rate": "6.3",
+   "time": "2023-06-01"
+  },
+  {
+   "deposit_rate": "5.5",
+   "time": "2023-09-01"
+  },
+  {
+   "deposit_rate": "5.0",
+   "time": "2023-12-01"
+  },
+  {
+   "deposit_rate": "4.7",
+   "time": "2024-04-01"
+  },
+  {
+   "deposit_rate": "4.8",
+   "time": "2025-01-01"
+  },
+  {
+   "deposit_rate": "5.2",
+   "time": "2025-09-01"
+  },
+  {
+   "deposit_rate": "6.0",
+   "time": "2026-01-01"
+  },
+  {
+   "deposit_rate": "6.8",
+   "time": "2026-06-01"
+  },
+  {
+   "deposit_rate": "6.8",
+   "time": "2026-07-20"
+  },
+  {
+   "deposit_rate": "6.8",
+   "time": "2026-09-04"
+  },
+  {
+   "deposit_rate": "7.5",
+   "time": "2026-09-30"
+  },
+  {
+   "deposit_rate": "7.5",
+   "time": "2026-10-03"
+  },
+  {
+   "deposit_rate": "7.4",
+   "time": "2026-10-05"
+  },
+  {
+   "deposit_rate": "7.4",
+   "time": "2026-10-12"
+  }
+ ]
+}

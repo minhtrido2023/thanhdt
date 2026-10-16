@@ -1,0 +1,315 @@
+
+A. Chính sách (golive_recommend_v23.py :: capit_lever_policy)
+  [PASS] A1 đọc được khối hợp lệ, không lỗi  — {'enabled': True, 'f': 1.3, 'loan_package_id': 1840, 'gate': 'dd52<=-0.20', 'scope': 'capit_only', 'accounts': ['SpaceX']} err=None
+  [PASS] A2 thiếu khối capit_margin_lever → báo lỗi, KHÔNG mặc định bật  — trading_rules.json không có khối capit_margin_lever
+  [PASS] A3 f<1 → coi như TẮT (không 'chạy tạm' với tham số vô lý)  — tham số capit_margin_lever không hợp lệ (f=0.5, lp=1840, scope=capit_only, accounts=['SpaceX']) — coi như TẮT
+  [PASS] A4 scope ≠ capit_only → TẮT (không cho nới phạm vi bằng cách sửa 1 chữ)  — tham số capit_margin_lever không hợp lệ (f=1.3, lp=1840, scope=whole_account, accounts=['SpaceX']) — coi như TẮT
+  [PASS] A5 thiếu loan_package_id → TẮT  — tham số capit_margin_lever không hợp lệ (f=1.3, lp=None, scope=capit_only, accounts=['SpaceX']) — coi như TẮT
+  [PASS] A8['false'] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = 'false' KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A8['no'] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = 'no' KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A8['0'] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = '0' KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A8['true'] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = 'true' KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A8[1] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = 1 KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A8[0] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = 0 KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A8['yes'] enabled không phải boolean JSON → TẮT + báo lỗi (không bao giờ đọc thành BẬT)  — enabled=False err=capit_margin_lever.enabled = 'yes' KHÔNG phải boolean JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu
+  [PASS] A9 …còn literal true THẬT thì vẫn bật được (sàn trên không chặn nhầm)  — None
+  [PASS] A10[f=5.0] JSON tự nới phạm vi → TẮT (nới thật phải sửa CODE + review)  — capit_margin_lever LỆCH phạm vi user duyệt (f=5.0 ≠ 1.3, lp=1840 ≠ 1840, accounts=['SpaceX'] ≠ ['SpaceX']) — coi như TẮT; nới phạm vi phải sửa CODE, không sửa JSON
+  [PASS] A10[thêm ZaloPay] JSON tự nới phạm vi → TẮT (nới thật phải sửa CODE + review)  — capit_margin_lever LỆCH phạm vi user duyệt (f=1.3 ≠ 1.3, lp=1840 ≠ 1840, accounts=['SpaceX', 'ZaloPay'] ≠ ['SpaceX']) — coi như TẮT; nới phạm vi phải sửa CODE, không sửa JSON
+  [PASS] A10[gói 9999] JSON tự nới phạm vi → TẮT (nới thật phải sửa CODE + review)  — capit_margin_lever LỆCH phạm vi user duyệt (f=1.3 ≠ 1.3, lp=9999 ≠ 1840, accounts=['SpaceX'] ≠ ['SpaceX']) — coi như TẮT; nới phạm vi phải sửa CODE, không sửa JSON
+  [PASS] A11 hằng phạm vi trong code == đúng bản user duyệt (f 1,3 · gói 1840 · SpaceX)  — {'CAPIT_LEVER_APPROVED_F': 1.3, 'CAPIT_LEVER_APPROVED_PACKAGE': 1840, 'CAPIT_LEVER_APPROVED_ACCOUNTS': ['SpaceX']}
+  [PASS] A11b golive IMPORT hằng phạm vi từ trading_bot.plan, KHÔNG tự khai lại (1 nguồn)  — golive tự khai APPROVED_*: []
+  [PASS] A6 data/trading_rules.json THẬT: đọc được, enabled là bool  — {'enabled': True, 'f': 1.3, 'loan_package_id': 1840, 'gate': 'dd52<=-0.20', 'scope': 'capit_only', 'accounts': ['SpaceX']} err=None
+  [PASS] A7 Khi enabled=true, tham số khớp phạm vi đã duyệt (CAPIT_LEVER_APPROVED_*) — enabled hiện tại là trạng thái vận hành, không phải bất biến  — enabled=True pol={'enabled': True, 'f': 1.3, 'loan_package_id': 1840, 'gate': 'dd52<=-0.20', 'scope': 'capit_only', 'accounts': ['SpaceX']}
+
+B. Tín hiệu §6a (source production giữa CAPIT_LEVER_BEGIN/END)
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] B1 BẬT + dd52 −25% + CAPIT đang fire → active=True  — đòn bẩy CAPIT ĐANG ÁP cho sự kiện này
+  [PASS] B2 …slot levered = slot gốc × 1,3 (50tr → 65tr), tổng 250tr → 325tr  — {'lever_f': 1.3, 'lever_loan_package_id': 1840, 'capit_total_target_vnd_levered': 325000000, 'capit_slot_target_vnd_levered': 65000000, 'lever_formula': 'slot_levered = capit_slot_target_vnd × f. Phần VƯỢT trên vốn tự có là VAY (gói 1840). Trần %ADV `capit_adv_caps` KHÔNG nhân f (trần đo tác động thị trường, không phụ thuộc nguồn vốn) ⇒ lệnh thật vẫn = min(mục tiêu, trần).'}
+  [PASS] B3 …trường GỐC (chưa đòn bẩy) giữ NGUYÊN giá trị — tầng dưới không đổi nghĩa
+  [PASS] B4 …ZaloPay (ngoài danh sách account) KHÔNG bị gắn trường đòn bẩy nào  — ['nav_basis_vnd', 'w_lag_target', 'capit_size', 'nav_book_lag_vnd', 'capit_total_target_vnd', 'capit_slot_target_vnd', 'n_slots']
+  [PASS] B5 cổng chưa đạt (dd52 −15% > −20%) → active=False, không levered field  — cổng dd52 chưa đạt (-15.00% > -20.0%)
+  [PASS] B6 dd52 đạt nhưng KHÔNG có sự kiện CAPIT → active=False (đòn bẩy bám sự kiện, không bám chỉ số)  — không có sự kiện CAPIT đang fire hôm nay
+  [PASS] B7 capit_size ~0 (sự kiện rỗng) → active=False  — không có sự kiện CAPIT đang fire hôm nay
+  WARNING: chính sách đòn bẩy CAPIT — gate khai trong trading_rules.json = 'dd52<=-0.10' ≠ ngưỡng code -20.0% — coi như TẮT (fail-closed: KHÔNG áp đòn bẩy)
+  [PASS] B8 ngưỡng file (−0.10) ≠ ngưỡng code (−20%) → TẮT + nêu lỗi (không tự hoà giải 2 nguồn)  — gate khai trong trading_rules.json = 'dd52<=-0.10' ≠ ngưỡng code -20.0% — coi như TẮT
+  WARNING: chính sách đòn bẩy CAPIT — dd52=-99.0 dưới sàn tỉnh táo -95.0% — gần như chắc chắn là sentinel thiếu dữ liệu, KHÔNG phải washout; coi như TẮT (fail-closed: KHÔNG áp đòn bẩy)
+  [PASS] B8b dd52 = sentinel −99.0 (chuỗi VNINDEX rỗng) → TẮT, KHÔNG đọc thành 'washout sâu kỷ lục' (sự cố dữ liệu không được mở đường vay tiền)  — dd52=-99.0 dưới sàn tỉnh táo -95.0% — gần như chắc chắn là sentinel thiếu dữ liệu, KHÔNG phải washout; coi như TẮT
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-60.0% ≤ -20.0%)
+  [PASS] B8c dd52 −60% (sụp thật, vẫn trên sàn tỉnh táo) → VẪN cấp đòn bẩy (sàn chống sentinel, không được cắt mất washout thật)  — đòn bẩy CAPIT ĐANG ÁP cho sự kiện này
+  [PASS] B9 TẮT + mọi điều kiện khác ĐỀU ĐẠT → vẫn active=False, 0 trường levered (đây là trạng thái production hôm nay)  — chính sách TẮT (enabled=false) — cần user xác nhận riêng mới bật
+  [PASS] B10 …artifact VẪN công bố loan_package_id khi tắt → lưới an toàn E vẫn có gì để soi  — 1840
+
+B-PIT. PIT filter Loại 1/Loại 2 (CPI YoY / lãi suất huy động)
+  WARNING: PIT filter chặn đòn bẩy CAPIT (nghi Loại 1 STRUCTURAL) — CPI YoY 22.16% >= ngưỡng 6.0% — dấu hiệu khủng hoảng CƠ CẤU (Loại 1 kiểu 2007-2012), KHÔNG áp đòn bẩy dù dd52 đã đạt cổng
+  [PASS] B11 ngày Loại-1 THẬT (2011-07-15, đuôi mega-crisis 2007-2012, CPI YoY thật ~21,6%) → active=False dù dd52/cổng/tín hiệu đều ĐẠT, pit_filter_structural=True  — cpi=22.16 deposit=14.0 reason=CPI YoY 22.16% >= ngưỡng 6.0% — dấu hiệu khủng hoảng CƠ CẤU (Loại 1 kiểu 2007-2012), KHÔNG áp đòn bẩy dù dd52 đã đạt cổng
+  [PASS] B11b …không trường lever nào bị gắn vào targets khi PIT chặn  — ['nav_basis_vnd', 'w_lag_target', 'capit_size', 'nav_book_lag_vnd', 'capit_total_target_vnd', 'capit_slot_target_vnd', 'n_slots']
+  WARNING: PIT filter chặn đòn bẩy CAPIT (nghi Loại 1 STRUCTURAL) — lãi suất huy động Big-4 12M 12.00%/năm >= ngưỡng 9.0%/năm — dấu hiệu khủng hoảng CƠ CẤU (Loại 1), KHÔNG áp đòn bẩy dù dd52 đã đạt cổng
+  [PASS] B11c ngày Loại-1 THẬT, đuôi cluster (2012-08-27, CPI YoY thật ~6,87% — sát ngưỡng 6,0%) → VẪN active=False (chặn đúng ca biên, không lọt qua vì gần ngưỡng)  — cpi=5.04 deposit=12.0
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] B12 ngày Loại-2 THẬT (2022-06-01, giữa episode SCB/Fed-hiking, CPI YoY thật ~3,4%) → active=True, PIT filter CHO QUA (không chặn oan khủng hoảng niềm tin/thanh khoản)  — cpi=3.37 deposit=5.5 reason=CPI YoY 3.37% < 6.0% và lãi suất huy động 5.50% < 9.0% — tương thích khủng hoảng NIỀM TIN/THANH KHOẢN có thể chứa được (Loại 2), PIT filter cho qua
+  [PASS] B12b …có trường lever khi PIT cho qua + mọi cổng khác đạt  — 1.3
+  WARNING: PIT filter chặn đòn bẩy CAPIT (nghi Loại 1 STRUCTURAL) — CPI/lãi suất huy động NaN tại 2008-09-01 (ngoài phạm vi dữ liệu, trước 2011-01) — fail-closed COI NHƯ Loại 1, KHÔNG áp đòn bẩy
+  [PASS] B13 ngày TRƯỚC 2011-01 (2008-09-01, chính đáy sâu nhất mega-crisis, dd52 thật -71,0%) → CPI/deposit_rate KHÔNG có anchor (NaN) → fail-closed COI NHƯ Loại 1, active=False. GIỚI HẠN PHẢI GHI RÕ: đây là fail-closed vì THIẾU DỮ LIỆU, KHÔNG phải bằng chứng bộ lọc đã được xác nhận trên chính ngày này  — reason=CPI/lãi suất huy động NaN tại 2008-09-01 (ngoài phạm vi dữ liệu, trước 2011-01) — fail-closed COI NHƯ Loại 1, KHÔNG áp đòn bẩy
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] B14 fixture mặc định (không truyền `latest`, dùng _PIT_PASS_DEFAULT_DATE 2019-06) vẫn PIT-pass — bảo vệ ca B1-B10 phía trên khỏi bị PIT filter âm thầm đổi kết quả nếu sau này ai đó sửa ngưỡng/anchor  — CPI YoY 2.16% < 6.0% và lãi suất huy động 7.00% < 9.0% — tương thích khủng hoảng NIỀM TIN/THANH KHOẢN có thể chứa được (Loại 2), PIT filter cho qua
+
+C. Cascade plan (trading_bot/plan.py :: apply_capit_lever)
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] C1 BẬT: lệnh MUA book CAPIT được gắn f=1,3 + gói 1840
+  [PASS] C2 …lệnh BAL/LAG KHÔNG được gắn (phạm vi chỉ CAPIT)
+  [PASS] C3 …lệnh BÁN CAPIT KHÔNG được gắn (chỉ chiều mua mới vay)
+  [PASS] C4 …báo cáo thay đổi đúng 2 dòng APPLIED  — [{'ticker': 'SAB', 'order_id': 'B1', 'action': 'APPLIED', 'lever_f': 1.3, 'loan_package_id': 1840, 'value': 20000000, 'reason': 'CAPIT buy, cổng dd52<=-20.0% đạt (dd52=-25.0%)'}, {'ticker': 'VNM', 'order_id': 'B2', 'action': 'APPLIED', 'lever_f': 1.3, 'loan_package_id': 1840, 'value': 20000000, 'reason': 'CAPIT buy, cổng dd52<=-20.0% đạt (dd52=-25.0%)'}]
+  [PASS] C5 plan TỰ VIẾT cờ vay vào lệnh BAL → bị GỠ SẠCH (nơi sinh plan không có quyền cấp đòn bẩy)  — [{'ticker': 'FPT', 'order_id': 'B1', 'action': 'STRIPPED', 'lever_f': 1.3, 'loan_package_id': 1840, 'reason': 'lệnh buy/BAL KHÔNG thuộc phạm vi đòn bẩy (chỉ CAPIT buy)'}, {'ticker': 'SAB', 'order_id': 'B2', 'action': 'APPLIED', 'lever_f': 1.3, 'loan_package_id': 1840, 'value': 20000000, 'reason': 'CAPIT buy, cổng dd52<=-20.0% đạt (dd52=-25.0%)'}]
+  [PASS] C6 giá trị plan tự khai bị GHI ĐÈ bằng artifact (f 9.9→1.3, gói 1234→1840)  — [{'ticker': 'SAB', 'order_id': 'B1', 'action': 'OVERRIDDEN', 'lever_f': 1.3, 'loan_package_id': 1840, 'value': 20000000, 'reason': 'plan ghi sẵn (f=9.9, lp=1234) — ghi đè bằng giá trị của artifact'}, {'ticker': 'FPT', 'order_id': 'B2', 'action': 'STRIPPED', 'lever_f': None, 'loan_package_id': 1840, 'reason': 'lệnh buy/BAL KHÔNG thuộc phạm vi đòn bẩy (chỉ CAPIT buy)'}]
+  [PASS] C7 …đồng thời gói 1840 lén trên lệnh BAL vẫn bị gỡ
+  [PASS] C8 chính sách TẮT → CAPIT buy KHÔNG được cấp, cờ tự khai bị gỡ  — [{'ticker': 'SAB', 'order_id': 'B1', 'action': 'STRIPPED', 'lever_f': None, 'loan_package_id': 1840, 'reason': 'capit_lever.active=False — chính sách TẮT (enabled=false) — cần user xác nhận riêng mới bật'}, {'ticker': '-', 'order_id': '-', 'action': 'PLAN_SIZED_LEVERED_BUT_OFF', 'lever_f': None, 'loan_package_id': None, 'reason': 'artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: capit_lever.active=False — chính sách TẮT (enabled=false) — cần user xác nhận riêng mới bật. Lệnh CAPIT có thể đã được sizing theo mục tiêu ĐÃ NHÂN f trong khi chỉ có vốn tự có — chờ đợi WAIT_CASH/khớp thiếu là HẬU QUẢ của việc này, không phải thiếu tiền bất thường. Muốn dừng đòn bẩy GIỮA PHIÊN thì dùng `data/BOT_STOP` (dừng hẳn), không dùng `enabled=false` (chỉ đổi cấp vốn, không đổi khối lượng plan đã chốt).'}]
+  [PASS] C9 artifact THIẾU FILE → fail-closed (gỡ, không đoán 'chắc là bật')  — không đọc được /tmp/tmpdf8ldppi/khong-ton-tai.json: FileNotFoundError: [Errno 2] No such f
+  [PASS] C10 artifact của signal_date KHÁC plan (stale) → KHÔNG cấp + GỠ cờ có sẵn  — [{'ticker': 'SAB', 'order_id': 'B1', 'action': 'STRIPPED', 'lever_f': None, 'loan_package_id': 1840, 'reason': 'golive_v23_status.json là của signal_date 2098-12-25 ≠ plan 2099-01-01 (artifact cũ) — KHÔNG áp đòn bẩy'}, {'ticker': '-', 'order_id': '-', 'action': 'LEVER_REFUSED_ARTIFACT_ACTIVE', 'lever_f': None, 'loan_package_id': None, 'value': 0, 'reason': 'artifact công bố `capit_lever.active=true` nhưng KHÔNG cấp được đòn bẩy: golive_v23_status.json là của signal_date 2098-12-25 ≠ plan 2099-01-01 (artifact cũ) — KHÔNG áp đòn bẩy. Phiên chạy bằng vốn tự có — đúng chiều an toàn, nhưng đây là DỮ LIỆU HỎNG cần người xem, không phải một ngày bình thường không có sự kiện.'}]
+  [PASS] C11 account NGOÀI phạm vi (ZaloPay cash-only) → không cấp + gỡ cờ lạ  — [{'ticker': 'SAB', 'order_id': 'B1', 'action': 'STRIPPED', 'lever_f': None, 'loan_package_id': 1840, 'reason': "account 'ZaloPay' KHÔNG trong phạm vi duyệt ['SpaceX'] — KHÔNG áp đòn bẩy"}, {'ticker': '-', 'order_id': '-', 'action': 'LEVER_REFUSED_ARTIFACT_ACTIVE', 'lever_f': None, 'loan_package_id': None, 'value': 0, 'reason': "artifact công bố `capit_lever.active=true` nhưng KHÔNG cấp được đòn bẩy: account 'ZaloPay' KHÔNG trong phạm vi duyệt ['SpaceX'] — KHÔNG áp đòn bẩy. Phiên chạy bằng vốn tự có — đúng chiều an toàn, nhưng đây là DỮ LIỆU HỎNG cần người xem, không phải một ngày bình thường không có sự kiện."}]
+  [PASS] C12 lệnh cash_only KHÔNG bị gắn đòn bẩy (2 cơ chế chọn gói vay không chồng nhau)  — []
+  [PASS] C13 TẮT + plan sạch → KHÔNG có thay đổi nào (0 nhiễu vào log vận hành hằng ngày)  — []
+  [PASS] C14 lệnh CAPIT vượt trần VND (200tr > 71,5tr) → GỠ đòn bẩy nhưng VẪN GIỮ lệnh (under-deploy là sai số lành; vay quá mức là margin call)  — ['DENIED', 'APPLIED']
+  [PASS] C15 …lệnh CAPIT đúng cỡ trong CÙNG plan vẫn được cấp bình thường
+  [PASS] C16 lệnh nhỉnh hơn slot nhưng trong đệm 10% (70tr) → VẪN cấp (đệm cho làm tròn lô, không chặt tay)  — [{'ticker': 'SAB', 'order_id': 'B1', 'action': 'APPLIED', 'lever_f': 1.3, 'loan_package_id': 1840, 'value': 70000000, 'reason': 'CAPIT buy, cổng dd52<=-20.0% đạt (dd52=-25.0%)'}]
+  [PASS] C17 artifact BẬT nhưng THIẾU capit_slot_targets → fail-closed, không cấp (không có trần thì không cho vay) VÀ để lại 1 dòng cho người đọc log — artifact hỏng không được trông giống một ngày không có sự kiện CAPIT  — [{'ticker': '-', 'order_id': '-', 'action': 'LEVER_REFUSED_ARTIFACT_ACTIVE', 'lever_f': None, 'loan_package_id': None, 'value': 0, 'reason': "artifact công bố `capit_lever.active=true` nhưng KHÔNG cấp được đòn bẩy: artifact BẬT đòn bẩy nhưng `capit_slot_targets` thiếu thừa số để tự kiểm ['nav_basis_vnd', 'w_lag_target', 'capit_size', 'nav_book_lag_vnd', 'capit_total_target_vnd', 'n_slots', 'capit_slot_target_vnd'] — không đối chiếu được mục tiêu VND với NAV/cơ sở nào, KHÔNG cấp đòn bẩy (fail-closed). Phiên chạy bằng vốn tự có — đúng chiều an toàn, nhưng đây là DỮ LIỆU HỎNG cần người xem, không phải một ngày bình thường không có sự kiện."}]
+  [PASS] C18 khoá fixture khớp schema capit_slot_targets THẬT của golive  — live_keys=(rỗng — chưa có phiên CAPIT)
+  [PASS] C19 artifact BẬT nhưng trading_rules.json TẮT → KHÔNG cấp + gỡ cờ có sẵn (công tắc vận hành có tác dụng LÚC ĐẶT LỆNH, không chỉ lúc sinh tín hiệu)  — capit_margin_lever.enabled=False (không phải literal JSON true) — chính sách đòn bẩy ĐANG 
+  [PASS] C20 artifact BẬT + file chính sách THẬT (mặc định, đang BẬT) → CẤP — trạng thái production hôm nay, kiểm bằng chính đường mặc định chứ không bằng fixture  — pkg=1840 adj=[{'ticker': 'SAB', 'order_id': 'B1', 'action': 'OVERRIDDEN', 'lever_f': 1.3, 'loan_package_id': 1840, 'value': 20000000, 'reason': 'plan ghi sẵn (f=None, lp=1840) — ghi đè bằng giá trị của artifact'}]
+  [PASS] C21 6 lệnh cùng mã, mỗi lệnh ĐÚNG trần slot → 5 lệnh đầu được cấp, lệnh thứ 6 bị trần TỔNG chặn (trần slot đơn lẻ KHÔNG chặn được N lệnh trùng mã)  — ['APPLIED', 'APPLIED', 'APPLIED', 'APPLIED', 'APPLIED', 'DENIED']
+  [PASS] C22 …và tổng giá trị được cấp đòn bẩy ≤ trần tổng levered × đệm (325tr ≤ 357,5tr)  — 325,000,000 VND
+  [PASS] C23 artifact BẬT nhưng THIẾU trần TỔNG → fail-closed (có trần slot vẫn không đủ)  — DENIED
+  [PASS] C24 lệnh nhãn book CAPIT nhưng mã NGOÀI rổ artifact → KHÔNG cấp đòn bẩy (không mượn thứ tự cascade để suy ra tư cách thành viên)  — [('SAB', 'APPLIED'), ('HAG', 'DENIED')]
+  [PASS] C25 artifact BẬT nhưng THIẾU capit_adv_caps → fail-closed toàn plan (không xác định được rổ thì không cho vay)  — artifact BẬT đòn bẩy nhưng `capit_adv_caps.SpaceX` rỗng — không xác định được rổ CAPIT của
+  [PASS] C26 artifact THỔI PHỒNG trần VND (10 tỷ) trong khi f=1,3 vẫn đúng envelope → trần NEO theo trường gốc × f duyệt vẫn chặn (lỗ hổng CAO vòng 2: ép tỷ lệ ≠ ép độ lớn)  — giá trị lệnh 1,000,000,000 VND vượt trần vay 71,500,000 (mốc neo = slot gốc × f duyệt 1.3 × đệm 1.1) — GỠ đòn 
+  [PASS] C27 …nhưng lệnh ĐÚNG cỡ neo (65tr) vẫn được cấp bình thường — trần neo chặn cái phồng, KHÔNG chặn nhầm cái hợp lệ  — ['APPLIED']
+  [PASS] C28 artifact THIẾU trường GỐC `capit_total_target_vnd` → fail-closed (không có mốc độc lập nào để soi trần vay thì không cho vay, dù trường levered vẫn có)  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấ
+  [PASS] C28b …và lý do nói thẳng THIẾU THỪA SỐ nào, không im lặng bỏ qua  — ['PLAN_SIZED_LEVERED_BUT_OFF']
+  [PASS] C29b sửa ĐỒNG BỘ cả trường gốc lẫn levered (mọi tỷ lệ vẫn đúng) → BỊ CHẶN bởi kiểm nhất quán nội tại (tổng ≠ nav_basis × w_lag × capit_size) — khe hai-trường ĐÃ ĐÓNG  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=195,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: artifact TỰ MÂU 
+  [PASS] C29c[w_lag_target ×3 (1,50)] sửa THỪA SỐ cho ba đẳng thức khớp lại → vẫn bị TRẦN NEO THEO STATE chặn (thừa số vượt bảng sizing của chính state phiên đó)  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=195,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: w_lag_
+  [PASS] C29c[capit_size ×3 (1,50)] sửa THỪA SỐ cho ba đẳng thức khớp lại → vẫn bị TRẦN NEO THEO STATE chặn (thừa số vượt bảng sizing của chính state phiên đó)  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=195,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: capit_
+  [PASS] C29d thổi ĐỒNG BỘ cả nav_basis_vnd (ba đẳng thức vẫn khớp) → tầng OFFLINE cho qua ĐÚNG NHƯ THIẾT KẾ; ca này thuộc về neo NAV SỐNG ở nhóm J, không phải chỗ này  — ranh giới hai tầng — J6 chứng minh nó bị chặn ở tầng broker sống
+  [PASS] C30 capit_size 0,375→1,0 (hợp lệ ở CRISIS, KHÔNG ở NEUTRAL), ba đẳng thức khớp, nav_basis KHÔNG đổi ⇒ neo NAV sống mù → TRẦN NEO THEO STATE chặn (trần phẳng cũ cho lọt 2,67×)  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=130,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: capit_size=1.0 n
+  [PASS] C30b …khai luôn `state=1` để mở trần → nguồn state ĐỘC LẬP bác (artifact 1 vs golive_state_today 3): một lời nói dối phải khớp ở HAI artifact khác tiến trình  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=130,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: artifact khai `s
+  [PASS] C30c artifact KHÔNG khai `state` → fail-closed (không biết state thì không biết trần nào đúng; fail-safe = không đòn bẩy, lệnh vẫn chạy vốn tự có)  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấ
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'main': ['chase_cap_vol_scale_enabled', 'dc_book_waterfall_enabled', 'expected_volume_pacing_enabled', 'extreme_regime_enabled', 'gap_adaptive_enabled']
+[config] ⚠ khóa lạ trong overrides account 'ZaloPay': ['cross_mode', 'extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'SpaceX': ['extreme_regime_enabled', 'fill_timing_hybrid_live_gate', 'fill_timing_live_gate']
+[config] ⚠ khóa lạ trong overrides account 'ab_cross': ['cross_mode']
+[config] ⚠ khóa lạ trong overrides account 'ab_dip': ['cross_mode']
+  [PASS] C30d state=99 khai KHỚP ở CẢ HAI nguồn → vẫn TỪ CHỐI (không rơi về trần NEUTRAL): state ngoài bảng sizing nghĩa là không trần nào áp được  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấ
+  [PASS] C30e nguồn state độc lập STALE (as_of=2098-12-31 ≠ signal_date 2099-01-01) → TỪ CHỐI: nó khớp do TRÙNG giá trị hôm qua, không phải do xác nhận phiên này  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấp: nguồn s
+  [PASS] C31 thiếu ADV20 của 1/5 mã (n_slots=5 vs 4 khoá adv_caps) → VẪN cấp đòn bẩy cho mã hợp lệ: đó là lỗ hổng dữ liệu thường lệ, không phải artifact bị giả mạo  — [('SAB', 'APPLIED')]
+  [PASS] C31b …nhưng n_slots(5) ≠ n_capit_basket(9) VẪN chặn — rổ mà mục tiêu chia theo KHÁC rổ của phiên là mâu thuẫn thật, không phải thiếu ADV20  — artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) nhưng đòn bẩy KHÔNG được cấ
+  [PASS] C29 đệm TỔNG là 1,02 (không phải 1,10) → tổng cấp đòn bẩy ≤ 331,5tr, KHÔNG phải 357,5tr — envelope thực tế bám f=1,3 thay vì trôi lên 1,43  — 325,000,000 VND (trần 331.500.000)
+  [PASS] C30 chính sách TẮT nhưng artifact ĐÃ có mục tiêu nhân f → cảnh báo cấp-PLAN (trước đây im lặng 0 dòng: plan sizing 1,3× chạy bằng vốn 1,0×, chỉ hiện ra dưới dạng WAIT_CASH không phân biệt được với thiếu tiền thường)  — ['PLAN_SIZED_LEVERED_BUT_OFF']
+  [PASS] C31 …và cảnh báo đó chỉ ra BOT_STOP là công cụ dừng giữa phiên, không phải enabled=false (tắt cấp vốn KHÔNG đổi khối lượng plan đã chốt)
+
+D. Broker (brokers.py :: _validate_lever_package / place_order)
+  [PASS] D1 gói 1840 hợp lệ cho mã → dùng đúng 1840
+  [PASS] D2 gói 1840 KHÔNG hợp lệ cho mã → rơi về gói default 1841, KHÔNG đòn bẩy (chiều fail-safe đúng)  — gói 1840 KHÔNG hợp lệ cho SAB (hợp lệ: ['1841'])
+  [PASS] D3 không kiểm được danh sách gói (mạng lỗi) → default 1841, không đòn bẩy  — không kiểm được danh sách gói vay (mạng lỗi)
+  [PASS] D4 place_order truyền ĐÚNG gói 1840 xuống client khi hợp lệ  — {'symbol': 'SAB', 'loan_package_id': 1840}
+[dnse] ⚠ ĐÒN BẨY KHÔNG ÁP ĐƯỢC cho SAB: gói 1840 KHÔNG hợp lệ cho SAB (hợp lệ: ['1841']) → dùng gói default 1841 (lệnh này KHÔNG có đòn bẩy — fail-safe, KHÔNG chặn lệnh)
+  [PASS] D5 gói không hợp lệ → vẫn GỬI trường (default 1841), KHÔNG bỏ trắng (bug TV1 07-28: thiếu trường = HTTP 400)  — {'symbol': 'SAB', 'loan_package_id': 1841}
+  [PASS] D6a lệnh THƯỜNG mainboard: default 1841 hợp lệ cho mã → GIỮ NGUYÊN default (BAL/LAG/CAPIT không đổi hành vi)  — {'symbol': 'FPT', 'loan_package_id': 1841}
+  [PASS] D6b lệnh THƯỜNG mã UPCOM: default KHÔNG hợp lệ → giải sang gói hợp lệ của MÃ (đây là bản vá WAIT_CASH vô hạn ca DRI 08-07)  — {'symbol': 'DRI', 'loan_package_id': 1122}
+[dnse] ⚠ loan_packages FPT lỗi (mạng lỗi) → gói default 1841
+  [PASS] D6c query gói lỗi → fail-safe về default, TUYỆT ĐỐI không bỏ trắng trường (thiếu loanPackageId = HTTP 400, bug TV1 07-28)  — {'symbol': 'FPT', 'loan_package_id': 1841}
+
+E. Lưới an toàn runtime (executor.py :: _lever_package_audit)
+  [PASS] E1 lệnh mang gói 1840 trên mã ĐƯỢC CẤP PHÉP → không tạm dừng  — set()
+  [PASS] E2 gói 1840 trên mã KHÔNG được cấp phép → TẠM DỪNG mã đó (đòn bẩy không ai duyệt, dù KL/mã đều khớp plan)  — [{'ticker': 'FPT', 'oid': '2', 'loan_package_id': 1840, 'in_plan': True, 'reason': "lệnh broker 2 trên FPT mang gói vay ĐÒN BẨY 1840 nhưng mã này KHÔNG được cấp phép đòn bẩy trong plan hôm nay (được cấp: ['SAB'])"}]
+  [PASS] E3 gói DEFAULT 1841 trên lệnh thường → không tạm dừng (không báo động giả)  — set()
+  [PASS] E3b lệnh gói 1840 ĐÃ HUỶ và 0 CP khớp → KHÔNG tạm dừng (không phát sinh nợ vay; đối xứng với _ghost_tickers)  — set()
+  [PASS] E3c gói 1840 trên mã NGOÀI plan hôm nay → không tạm dừng (vô ích) NHƯNG vẫn cảnh báo (người thật cần biết có đòn bẩy lạ trên tài khoản)  — [{'ticker': 'VIC', 'oid': '6', 'loan_package_id': 1840, 'in_plan': False, 'reason': "lệnh broker 6 trên VIC mang gói vay ĐÒN BẨY 1840 nhưng mã này KHÔNG được cấp phép đòn bẩy trong plan hôm nay (được cấp: ['SAB'])"}]
+  [PASS] E4 plan KHÔNG xin đòn bẩy (chính sách đang tắt) nhưng broker hiện lệnh gói 1840 → VẪN tạm dừng (guard vũ trang cả khi tính năng tắt)  — [{'ticker': 'FPT', 'oid': '4', 'loan_package_id': 1840, 'in_plan': True, 'reason': 'lệnh broker 4 trên FPT mang gói vay ĐÒN BẨY 1840 nhưng mã này KHÔNG được cấp phép đòn bẩy trong plan hôm nay (được cấp: KHÔNG MÃ NÀO)'}]
+  [PASS] E5 _place_slices BỎ QUA mã bị tạm dừng, không gọi broker
+  [PASS] E6a tiền đề: lưới GHOST KHÔNG bắt lệnh này (oid đã biết) — nên mọi lần tạm dừng dưới đây chỉ có thể đến từ lưới đòn bẩy  — set()
+  [PASS] E6 step() THẬT chuyển mã bị lưới đòn bẩy bắt xuống tầng đặt lệnh dưới dạng TẠM DỪNG (mối nối `ghost_tickers |= lever_pause`, trước đây chỉ có văn xuôi bảo đảm)  — {'place_slices': {'FPT'}}
+  [PASS] E7 …và sự cố được ghi ra bus dưới dạng LEVER_PACKAGE_UNAUTHORIZED  — {'FPT': '2099-01-02T09:20:00'}
+  [PASS] E8 HYBRID bật, TRONG block MUA, mã bị TẠM DỪNG ⇒ chặn bởi lưới đòn bẩy, KHÔNG phải HYBRID_DEFER (broker chưa bị chạm)  — events=[] quote_calls=[]
+  [PASS] E9 CHỨNG MINH NGƯỢC: cùng cấu hình/giờ, BỎ tạm dừng ⇒ luồng ĐI TỚI broker (lưới đòn bẩy mới là thứ chặn E8)  — quote_calls=['FPT'] events=['NO_QUOTE', 'event']
+  [PASS] E10 HYBRID bật, NGOÀI block ⇒ HYBRID_DEFER và broker KHÔNG bị chạm (đây chính là thứ làm E5 pass kể cả khi lưới đòn bẩy bị gỡ sạch)  — events=['HYBRID_DEFER', 'event'] quote_calls=[]
+
+F. DIỄN TẬP đầu–cuối (paper): tín hiệu → artifact → plan → lệnh
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] F1 [BẬT] tín hiệu công bố active=True
+  [PASS] F2 [BẬT] cả 5 lệnh CAPIT tới broker mang gói 1840 — cờ KHÔNG rớt ở lớp nào  — {'SAB': 1840, 'SIP': 1840, 'VNM': 1840, 'PVT': 1840, 'NCT': 1840}
+  [PASS] F3 [BẬT] lệnh BAL cùng plan vẫn KHÔNG mang gói vay  — None
+  [PASS] F4 [BẬT] mục tiêu vốn levered = 65tr/mã (50tr × 1,3)
+  [PASS] F5 [TẮT — cấu hình production hôm nay] active=False
+  [PASS] F6 [TẮT] KHÔNG lệnh nào mang gói vay (kể cả 5 lệnh CAPIT)  — {'SAB': None, 'SIP': None, 'VNM': None, 'PVT': None, 'NCT': None, 'FPT': None}
+  [PASS] F7 [TẮT] KHÔNG có trường sizing levered nào → tầng dưới thấy hệ y hệt V2.4
+  [PASS] F8 [TẮT] cascade không sinh thay đổi nào (0 dòng adj)  — []
+
+G. Chốt chặn: cấu hình THẬT trên đĩa
+  [PASS] G1 data/trading_rules.json :: capit_margin_lever.enabled là bool (công tắc vận hành, không pin giá trị sống)  — enabled=True
+  [PASS] G2 …live_requires_user_approval == true (bất kể enabled)
+  [PASS] G3 …khi enabled=true, phạm vi khớp bản duyệt: f=1,3 · gói 1840 · capit_only · chỉ SpaceX  — enabled=True blk={'_principle': 'Margin (borrowed capital) applied to the CAPIT bear-washout sleeve ONLY, on a FIXED leverage factor f, gated on VNINDEX 52-week drawdown <= -20%. DISTINCT from v25_leverage above: that one is state-blind + PE-pctile gated and covers the whole recovery vehicle; this one touches nothing but CAPIT buy orders of the single washout event whose gate fired. Approved scope (user John, 2026-08-03) = exactly what the p1-p5 research chain verified, no wider.', 'enabled': True, 'status': 'ENABLED - user confirmed 2026-08-22 via Discord (thread 1521735922066919515). Wiring complete + rehearsed 2026-08-03 (job Taylor_20260803_122554); vòng 3 (job Taylor_20260803_154258) đóng 2 khe known_limits + thêm CỔNG DUYỆT RIÊNG TỪNG NGÀY CÓ VAY, selfcheck 180/180 PASS trên 5 môi trường TZ. Second human gate required each day with leveraged orders: run approve_margin_day.py to create data/margin_approvals/margin_approval_<acct>_<date>.json.', 'f': 1.3, 'gate': 'dd52<=-0.20', 'gate_note': 'dd52 = VNINDEX Close / rolling-252d max Close - 1, computed in golive_recommend_v23.py (var dd52_now, in PERCENT: -20.0 == -0.20). Lever arms ONLY when the CAPIT washout signal itself fires (capit_signal_today AND capit_size>0) AND dd52 <= -20%. NOT a valuation gate (rejected p1 4.1: PE-pctile<=0.20 events averaged +6.16% vs +12.26% for the complement), NOT a NEUTRAL-only gate (insufficient evidence p3).', 'loan_package_id': 1840, 'loan_package_name': 'RocketX', 'borrow_rate_annual': 0.125, 'initial_rate': 0.5, 'scope': 'capit_only', 'accounts': ['SpaceX'], 'account_note': "SpaceX 0002023347 only (has margin). ZaloPay is cash-only and out of scope. Account default package stays 1841 'GD Tien mat' (secrets/trading_bot_accounts.json) — 1840 is a PER-ORDER override for gated CAPIT buys, never an account-level switch.", 'enforcement': {'config_declared_here': 'this block', 'signal_published_by': "deploy_golive_dt5g_v4/golive_recommend_v23.py -> data/golive_v23_status.json key 'capit_lever'", 'enforced_one_place': 'trading_bot/plan.py :: apply_capit_lever() called from bot_execute.py cascade (filter_excluded -> net -> cap_capit -> cap_lag -> lag_rating -> LEVER -> approval). Same pattern as filter_excluded_tickers/cap_capit_orders (coding_guidelines 7): the plan generator cannot grant leverage and cannot withhold it — the artifact decides, and every non-authorized order is STRIPPED of lever fields.', 'broker_layer': 'trading_bot/brokers.py :: DNSEBroker.place_order(loan_package_id=...) per-order override, validated against GET /accounts/{acc}/loan-packages?symbol=X. Invalid/unverifiable -> falls back to the account default (UNLEVERED, safe direction) + loud log.', 'runtime_guard': 'trading_bot/executor.py :: _lever_package_audit() every step() — any broker order carrying package 1840 on a ticker not authorized for leverage pauses that ticker (fail-safe-pause, same path as _ghost_tickers).'}, 'evidence': {'p1': 'Taylor_20260803_070954 — dd52<=-20% is the ONLY monotone axis (N=17 washouts: dd52<=-20% avg +17.62%, p=0.037; dd52>-10% +2.92%, p=0.684). State and breadth axes contradict each other -> not used as gates.', 'p2': 'Taylor_20260803_073714 — engine-tier S4 gate; exposed that a naive MGE knob borrows only 5-9% (engine spends cash first), which is why p5 needed a forced-borrow knob.', 'p3': 'Taylor_20260803_082141 — sizing axis (parking -> CAPIT) separated; LOO-by-event discipline established.', 'p4_proxy': 'Taylor_20260803_091342 — proxy tier, +1.82pp at f=1.3. SUPERSEDED: p5 showed the proxy tier inflates BOTH directions (2.7x on gain, 12x on MaxDD) and must not be a decision basis.', 'p5_engine': 'Taylor_20260803_101341 (quant-skeptic CONFIRMED-medium, mike/logs/verify_20260803_111110.log) — real engine tier at f=1.3, borrow 12.5%: dCAGR +0.663pp FULL (IS +0.487 / OOS +0.832), dMaxDD worse by only 0.067pp, DSR 1.0000, PBO 0.10-0.14, LOO max single-event share 18.7%, 0 margin calls, self-check 0 VND, control leg reproduces pinned R3 exactly. Peak simultaneous debt 30.55B/50B book, 835 days with debt, interest paid 4.48B.', 'capacity': 'Mafee_20260803_120648 (mike/agents/Mafee/research/spacex_pp0buy_capit_20260803.md) — SpaceX pp0Buy measured 425,209,429 VND (account-level, identical across 5 CAPIT names); qmaxBuy under 1840 is exactly 2x that of 1841, matching initialRate 0.5 vs 1.0.'}, 'sizing_effect': 'When active, the CAPIT capital target is multiplied by f: capit_total_target_vnd_levered = active_nav x w_lag_target x capit_size x f. The base (unlevered) fields keep their exact meaning and value so nothing downstream changes while disabled. The %ADV cap (capit_adv_caps) is NOT scaled by f — market-impact limits are independent of how the purchase is funded; leverage may therefore be partially clipped by liquidity at large NAV. Measured live scale (p5 1.3): heaviest single event borrows 25.9% of NAV (~243.5tr at NAV 938tr), average event 6.8% (~63.6tr) — and those are LOWER BOUNDS (p5 1.3 warning).', 'known_limits': ['N = 15 independent events. DSR/PBO computed on 3107 daily NAV points do NOT enlarge that N.', 'f* ~ 6.0 from the sleeve-level Kelly calc is NOT a recommendation — it assumes the historical event distribution repeats with no margin call and no liquidation slippage.', 'p5 4.2 could not explain why realized/predicted is 0.19x at f=1.1 and 0.41x at f=1.2 (it is 1.08x at f=1.3, 0.90x at f=1.5). f=1.3 was chosen because it is the best-explained level, not because it is optimal.', 'The transmission channel is narrow by construction: leverage lands on ~0.272 NAV-book of ONE of two books (~13.6% of total NAV), which is why a +4.52%/yr sleeve effect becomes +0.663pp portfolio-wide. Widening the channel is a DIFFERENT question with a different risk family — not researched, not approved.', "KHE ARTIFACT HAI-TRƯỜNG — ĐÃ THU HẸP, CHƯA ĐÓNG HẲN (đo lại 2026-08-03 vòng 4). Ba lớp offline/online: (1) 3 đẳng thức nội tại `nav_basis_vnd × w_lag_target × capit_size → capit_total_target_vnd → /n_slots`; (2) trần `capit_size`/`w_lag_target` NEO THEO `state`, với `state` chốt bằng nguồn độc lập golive_state_today.json (kiểm cả `as_of` khớp `signal_date`, state ngoài bảng ⇒ từ chối); (3) NEO NAV SỐNG từ sổ broker lúc thực thi, chặn chiều artifact khai NAV > thực tế quá 15%. SỐ ĐO THẬT (arch-reviewer probe, regime HIỆN TẠI state=3 NEUTRAL, w_lag_target=0,50 vì lag_edge_health mean12=0,48% < ngưỡng 4%, capit_size=0,375): trần PHẲNG ban đầu cho lọt 2,67×; trần NEO THEO STATE vẫn cho lọt **2,60×** (sửa w_lag 0,50→0,65 = 1,3× VÀ capit_size 0,375→0,75 = 2,0×), envelope tối đa **63,4% NAV** so với thiết kế 24,4% NAV — KHÔNG phải '≤2×' như bản ghi trước. (`capit_grind` KHÔNG được đọc ở tầng thực thi, đừng coi nó là điều kiện gì.) ⇒ CỔNG THẬT SỰ chặn quy mô là CỔNG NGƯỜI THỨ HAI: Σ VND trong báo cáo 21:00 tính từ LỆNH THẬT (không từ artifact) nên user nhìn thấy đúng số tiền sẽ vay. Đây KHÔNG phải chữ ký số — nó chứng minh 'các con số còn giải thích được lẫn nhau', không chứng minh 'chưa ai sửa file'. Rủi ro chưa hiện thực vì tính năng đang TẮT.", 'Sức mua (`ppse` qmaxBuy/pp0Buy) nay được đo THEO ĐÚNG gói vay của lệnh (brokers.get_max_buy_qty/get_buying_power nhận loan_package_id, 2026-08-03 arch-reviewer #2). Trước đó luôn đo bằng gói default 1841 (initialRate 1,0) trong khi lệnh đòn bẩy đi ra bằng 1840 (initialRate 0,5 ⇒ sức mua gấp đôi) — sẽ báo thiếu tiền đúng nửa phần vay và ghi would_block=true GIẢ vào data/plan_buying_power_shadow_log.csv (bộ dữ liệu đang tích luỹ để quyết P0→ACTIVE). Diễn tập paper KHÔNG phủ được tầng này (PaperBroker không có ppse) ⇒ phiên LIVE có đòn bẩy đầu tiên phải kiểm tay pp0Buy@1840 trước khi tin log.', 'CỔNG NGƯỜI THỨ HAI (user chốt 2026-08-03): `enabled=true` là điều kiện CẦN, KHÔNG ĐỦ. Mỗi NGÀY plan thực sự có lệnh được cấp đòn bẩy còn cần một bản ghi duyệt riêng `data/margin_approvals/margin_approval_<account>_<date>.json` (ghi bởi mike/bin/approve_margin_day.py khi user xác nhận thật; ràng buộc rổ mã + trần Σ VND + đúng ngày + đúng account). Thiếu/hỏng/không khớp ⇒ GỠ đòn bẩy, lệnh VẪN chạy bằng vốn tự có (fail-safe không bao giờ là chặn lệnh).', 'KIỂM TAY pp0Buy@1840 phiên LIVE đầu tiên vẫn là bước NGƯỜI, nhưng nay có lưới TỰ ĐỘNG chạy trước: lever_live_preflight đọc thật get_buying_power(..., loan_package_id=1840) và ghi 1 dòng log đọc được bằng mắt. Đọc KHÔNG được (None/exception) ⇒ GỠ đòn bẩy phiên đó. Đọc được nhưng =0 hoặc < Σ lệnh ⇒ CHỈ cảnh báo, KHÔNG gỡ (gỡ lúc thiếu tiền làm lệnh cần NHIỀU tiền hơn — sai chiều fail-safe).', "HAI LƯỢT CRON CÙNG PHIÊN (09:05 + 13:00 ICT): preflight chỉ GỠ khi phiên CHƯA đặt lệnh nào (đọc exec_<account>_<date>_state.json). Đã đặt rồi thì hạ xuống CẢNH BÁO — ở lượt 13:00, NAV sống/pp0Buy tụt là hệ quả BÌNH THƯỜNG của việc đang giải ngân (availableCash đã trừ tiền giữ cho lệnh treo; đo được −46% ở sizing CRISIS, −14,5% ở NEUTRAL), và gỡ khi đó vừa vô ích vừa làm Executor._lever_package_audit mất tập cấp phép ⇒ treo cả rổ CAPIT cả buổi chiều kèm sự cố NÓI SAI. Sổ plan._lever_authorized giữ 'ai đã được cấp phép hôm nay', tách khỏi 'lệnh này đi ra bằng gói nào'.", "[VÁ 2026-08-23, code-quality finding #2] NAV SỐNG trong lever_live_preflight nay dùng đúng cơ sở `totalCash − totalDebt` (DNSEBroker._cash_totalcash_minus_debt(), §25 'SỞ HỮU'), khớp compute_active_nav.py và NAV chuẩn tắc daily_nav_snapshot.py — dòng ghi trước đây (claim KHÔNG trừ totalDebt) đã LỖI THỜI, xoá theo bản vá này. Fallback duy nhất còn lại: broker không có method này (không phải DNSEBroker) ⇒ rơi về get_cash() (availableCash-family, §25 'TIÊU ĐƯỢC NGAY') — chỉ khiến neo CHẶT hơn (nav_live nhỏ hơn), không nới lỏng."], 'live_requires_user_approval': True}
+
+H. Cổng WARN cỡ deploy lúc duyệt plan (bin/send_plan_report.sh)
+  [PASS] H0a trích được khối từ send_plan_report.sh production  — n_marker=1
+  [PASS] H0b khối = 3 statement top-level đầu, dạng statement cuối đúng như ghim  — dạng=['Assign', 'Assign', 'If']
+  [PASS] H0c khối khép kín trên namespace harness cấp (không cuốn theo khối lân cận)  — tên tự do=['_order_price', 'acct', 'json', 'orders', 'os']; thiếu=[]
+  [PASS] H1 đòn bẩy BẬT + lệnh sizing theo slot ĐÃ nhân f → KHÔNG có cảnh báo sai (mốc so cùng cơ sở với mốc đã sizing)  — ✅ CAPIT: Σ lệnh mua 325tr khớp mục tiêu 325tr (lệch +0.0%) [đòn bẩy CAPIT ĐANG BẬT f=1.3 gói 1840 — mốc so là 
+  [PASS] H2 …và nói rõ mốc so là slot đã nhân f (người duyệt biết mình đang đọc cơ sở nào)  —  mục tiêu 325tr (lệch +0.0%) [đòn bẩy CAPIT ĐANG BẬT f=1.3 gói 1840 — mốc so là slot ĐÃ nhân f]
+  [PASS] H3 đòn bẩy TẮT + CÙNG bộ lệnh 65tr → VẪN cảnh báo lệch +30% (cổng 07-21 không bị fix này làm cùn đi)  — ⚠️ CAPIT: Σ lệnh mua 325tr vs mục tiêu 250tr (5 mã × 50.0tr) — lệch +30.0%. Nếu KHÔNG do trần %ADV/t
+  [PASS] H4 BẬT nhưng artifact thiếu trường levered → nói thẳng 'lệch dương ~f là bình thường', KHÔNG lặng lẽ in cảnh báo sai với vẻ chắc chắn  — arget_vnd_levered` — đối chiếu dưới đây dùng slot GỐC nên lệch dương ~f là BÌNH THƯỜNG, không phải lỗi sizing]
+  [PASS] H5 BẬT nhưng lệnh sizing SAI cỡ thật (40tr vs 65tr) → vẫn cảnh báo (fix này chỉ đổi MỐC SO, không tắt cổng)  — ⚠️ CAPIT: Σ lệnh mua 200tr vs mục tiêu 325tr (5 mã × 65.0tr) — lệch -38.5%. Nếu KHÔNG do trần %ADV/t
+
+I. Cổng duyệt RIÊNG từng ngày có vay (margin_day_approval)
+  [PASS] I1 mọi cổng KHÁC đều đạt nhưng CHƯA có duyệt riêng cho ngày này → KHÔNG lệnh nào mang cờ vay  — [('SAB', None), ('VNM', None)]
+  [PASS] I2 …và có ĐÚNG 1 dòng cấp-plan nói rõ thiếu duyệt + cách duyệt (không im lặng)  — ['DENIED', 'DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I3 …lệnh VẪN CÒN trong plan (fail-safe = không đòn bẩy, KHÔNG phải chặn lệnh)  — 2 lệnh
+  [PASS] I4 có bản duyệt HỢP LỆ cho đúng ngày → cấp bình thường (cổng mới không chặn nhầm ca đã duyệt)  — ['APPLIED', 'APPLIED']
+  [PASS] I5[approved_by rỗng] bản duyệt không hợp lệ (duyệt trống) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[approved_by='pending'] bản duyệt không hợp lệ (giữ chỗ) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[approved_by='agent'] bản duyệt không hợp lệ (agent tự duyệt bị nhận diện) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[plan_date của NGÀY KHÁC] bản duyệt không hợp lệ (duyệt ngày khác) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[account của account KHÁC] bản duyệt không hợp lệ (duyệt account khác) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[lever_f = 3,0] bản duyệt không hợp lệ (hệ số ngoài bản duyệt) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[gói vay 9999] bản duyệt không hợp lệ (gói ngoài bản duyệt) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[thiếu trần VND] bản duyệt không hợp lệ (duyệt khống) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[tickers rỗng] bản duyệt không hợp lệ (duyệt khống rổ) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[revoked=true] bản duyệt không hợp lệ (đã thu hồi) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[revoked='true' (chuỗi, sửa tay)] bản duyệt không hợp lệ (thu hồi viết tay) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[revoked=1 (int, sửa tay)] bản duyệt không hợp lệ (thu hồi viết tay) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I5[revoked='yes' (chuỗi lạ)] bản duyệt không hợp lệ (giá trị lạ vẫn phải nghiêng về HUỶ) → KHÔNG cấp đòn bẩy  — ['DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I6 Σ lệnh được cấp (130tr) VƯỢT trần user duyệt (100tr) → gỡ SẠCH, không cấp một phần (cấp một phần = tự quyết hộ user vay bao nhiêu)  — ['DENIED', 'DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I7 plan cấp cho mã NGOÀI rổ user đã duyệt (VNM ∉ [SAB]) → gỡ sạch, đòi duyệt lại (rổ đổi sau khi duyệt là một quyết định mới)  — ['DENIED', 'DENIED', 'MARGIN_APPROVAL_REQUIRED']
+  [PASS] I8 preview trả về None thay cho plan → KHÔNG có đối tượng plan mang cờ vay nào thoát ra, kể cả khi caller gán lại biến  — None
+  [PASS] I9 preview KHÔNG sửa plan gốc của caller (chạy trên bản sao)  — [('SAB', None), ('FPT', None)]
+  [PASS] I10 preview vẫn THẤY tập lệnh sẽ vay (dù chưa duyệt) — nếu không thì không ai duyệt được cái gì  — [('SAB', 'APPLIED')]
+  [PASS] I11 preview bỏ qua ĐÚNG cổng duyệt-ngày, KHÔNG bỏ qua cổng nào khác (chính sách TẮT ⇒ preview cũng rỗng)  — ['PLAN_SIZED_LEVERED_BUT_OFF']
+  [PASS] I12 giá trị VND đi kèm từng dòng cấp (bước duyệt cần số tiền, không chỉ tên mã)  — [('SAB', 20000000)]
+  [PASS] I13 approve_margin_day.py ghi ĐỦ mọi khoá mà margin_day_approval() bắt buộc (hợp đồng ghi↔đọc, kiểm trên source thật)  — thiếu: không
+  [PASS] I13b …và dùng CHUNG danh sách 'không phải người duyệt thật' với hàm đọc (import, không chép) — hai bản sao là cách để một chuỗi qua bên này chặn bên kia  — APPROVAL_PLACEHOLDERS
+  [PASS] I13c chạy THẬT preview_margin_day() đầu-cuối (không stub) → thấy ĐÚNG lệnh CAPIT sẽ vay, kèm Σ VND và phần vay — đây là số user nhìn thấy lúc duyệt  — ['SAB'] Σ=20,000,000 vay=4,615,385
+  [PASS] I13d …và preview KHÔNG ghi sổ cấp phép ra đĩa (chế độ xem trước không được để lại dấu vết cấp phép nào)
+  [PASS] I14 chạy THẬT approve_margin_day.py --dry-run trên cấu hình production (đang TẮT) → TỪ CHỐI ghi bản duyệt khống, exit≠0  — exit=2
+  [PASS] I15 …và KHÔNG tạo file duyệt nào trong data/margin_approvals/
+  [PASS] I16 _bus/_notify KIỂM returncode, không chỉ bắt exception — bus hỏng phải nói ra  — 2 chỗ kiểm rc
+  [PASS] I17 …và exit code phản ánh việc dấu vết KHÔNG để lại được (không nuốt im lặng)
+  [PASS] I18 `decided_by` KHÔNG hard-code 'user' — script chạy được bởi cả người lẫn agent nên phải KHAI, không TỰ NHẬN (coding_guidelines §20)
+  [PASS] I19 đường --revoke ghi NGUYÊN TỬ như đường tạo (§5) — bản ghi ủy quyền vay tiền không được để lại JSON cụt khi bị kill giữa chừng  — 2 chỗ os.replace
+
+J. Preflight sống trước lệnh đòn bẩy (neo NAV + pp0Buy@gói của lệnh)
+  [PASS] J1 NAV sống khớp artifact + đọc được pp0Buy → GIỮ đòn bẩy, 1 dòng log đọc được bằng mắt  — NAV sống 1,000,000,000 VND vs artifact `nav_basis_vnd` 1,000,000,000 (+0.0%, biên 15%) · sức mua pp0Buy@1840 đo trên SAB
+  [PASS] J2 …và pp0Buy được đo bằng ĐÚNG gói vay của lệnh (1840), KHÔNG phải gói default 1841 (đo sai gói ⇒ báo thiếu một nửa sức mua)  — [{'symbol': 'SAB', 'price': 20000, 'loan_package_id': 1840}]
+  [PASS] J3 KHÔNG đọc được sức mua (None) → GỠ đòn bẩy, lệnh VẪN chạy bằng vốn tự có (diễn tập paper không phủ được tầng ppse ⇒ không đọc được là không tin)  — đọc sức mua gói vay 1840 trả về None ⇒ chưa chứng minh được bot đặt được lệnh bằng tiền vay thật (kiểm tay `pp
+  [PASS] J4 ppse ném exception (mạng lỗi) → GỠ, không để exception thoát ra làm hỏng phiên  — đọc sức mua gói vay 1840 lỗi (RuntimeError: ppse timeout) ⇒ chưa chứng minh được bot đặt được lệnh b
+  [PASS] J5 pp0Buy đọc ĐƯỢC nhưng NHỎ HƠN Σ lệnh → CẢNH BÁO, KHÔNG gỡ (gỡ đòn bẩy lúc thiếu tiền làm lệnh cần NHIỀU tiền hơn — sai chiều fail-safe)  — ['LIVE_PREFLIGHT_OK', 'LIVE_PREFLIGHT_WARN']
+  [PASS] J6 artifact thổi `nav_basis_vnd` ×3 (ca C29d mà tầng offline cho qua) → NEO NAV SỐNG chặn — đây là mảnh cuối đóng khe artifact hai-trường  — artifact khai `nav_basis_vnd`=3,000,000,000 VND nhưng NAV SỐNG đo từ sổ broker = 1,000,000,000 VND (vượt +200.0% > biên 15%) ⇒ mục
+  [PASS] J7 NAV sống LỚN HƠN artifact (1,6 tỷ vs 1,0 tỷ) → KHÔNG chặn: chiều đó chỉ là sizing thận trọng, không sinh vay vượt mức (cổng bất đối xứng có chủ đích)  — ['LIVE_PREFLIGHT_OK']
+  [PASS] J8 mode=paper → bỏ qua có ghi log, KHÔNG gỡ (pp0Buy là khái niệm của broker thật; diễn tập paper nhóm F phải chạy được)  — ['LIVE_PREFLIGHT_SKIPPED']
+  [PASS] J9 plan KHÔNG có lệnh đòn bẩy nào → 0 dòng log, 0 lệnh gọi broker (mọi phiên thường lệ không tốn thêm gì)  — []
+  [PASS] J10 không định giá được một vị thế → GỠ (NAV sống không đủ tin cậy để làm mốc; KHÔNG đoán giá)  — không định giá được vị thế ['HAG'] ⇒ NAV sống không đủ tin cậy để làm mốc neo (fail-closed, không đo
+  [PASS] J11 broker lỗi khi đo NAV → GỠ (fail-closed, không bỏ qua bước neo)  — không đo được NAV sống từ broker (RuntimeError: balances API lỗi) ⇒ không xác minh được cơ sở vốn mà
+  [PASS] J12 vị thế excluded_tickers bị TRỪ khỏi NAV sống (đúng công thức active_nav mà golive dùng làm cơ sở) → 1,0 tỷ khớp artifact, không báo động giả  — ['LIVE_PREFLIGHT_OK']
+  [PASS] J12b …và nếu KHÔNG khai excluded thì NAV sống là 2,0 tỷ (> artifact) → vẫn không chặn: chứng minh J12 kiểm phép TRỪ chứ không phải trùng hợp
+  [PASS] J13 pp0Buy ĐỌC ĐƯỢC nhưng = 0 (sleeve đã giải ngân hết) → CẢNH BÁO, KHÔNG gỡ — 'hết sức mua' khác 'không đọc được', chỉ cái sau mới là bằng chứng chưa thông tuyến  — ['LIVE_PREFLIGHT_OK', 'LIVE_PREFLIGHT_WARN']
+  [PASS] J14 [lượt 09:05, phiên SẠCH] artifact thổi NAV → VẪN GỠ đầy đủ: lớp bảo vệ chính (chặn khoản vay ĐẦU TIÊN đi ra trên cơ sở vốn giả) KHÔNG bị nới  — LIVE_PREFLIGHT_STRIP
+  [PASS] J15 [lượt 13:00, phiên ĐÃ đặt lệnh] CÙNG đầu vào → KHÔNG gỡ, chỉ CẢNH BÁO: NAV sống tụt giữa lúc giải ngân là bình thường, còn gỡ thì treo cả rổ CAPIT  — artifact khai `nav_basis_vnd`=3,000,000,000 VND nhưng NAV SỐNG đo từ sổ broker = 1,000,000,000 VND (vượt +200.
+  [PASS] J15b [ĐƯỜNG THẬT: created_at RỖNG cả hai bên] plan phát hành lại giữa ngày có lệnh vay MỚI → VẪN GỠ nhờ vân tay id, không còn phụ thuộc `created_at` chết  — LIVE_PREFLIGHT_STRIP
+  [PASS] J15c plan v2 BỚT lệnh (không thêm lệnh vay mới) → KHÔNG gỡ, chỉ CẢNH BÁO: so bao hàm (⊆) chứ không bằng nhau, chiều nguy hiểm chỉ là chiều THÊM  — LIVE_PREFLIGHT_WARN
+  [PASS] J15d `created_at` lệch nhưng tập id lệnh vay khớp → KHÔNG gỡ: quyết định nay dựa vào NỘI DUNG, và lệch chiều này chỉ có thể GỠ chứ không bao giờ CẤP  — LIVE_PREFLIGHT_WARN
+  [PASS] J16 preflight STRIP → THU HỒI khỏi sổ cấp phép (cả RAM lẫn đĩa), không chỉ gỡ cờ trên lệnh — nếu không, lưới an toàn tầng lệnh mù đúng lúc cần nhất  — trước={'1840': {'SAB'}} sau={}
+  [PASS] J17 …nên audit VẪN bắt được lệnh gói 1840 thật trên mã vừa bị GỠ (ca state.json hỏng/bị xoá: preflight tưởng phiên sạch mà broker đang có lệnh sống)  — pause=['SAB'] warns=1
+[exec:SpaceX] resume từ /tmp/cmh_farm_new/data/execution_logs/exec_SpaceX_2099-01-02_state.json
+  [PASS] J18 nhánh WARN (phiên đã đặt lệnh) GIỮ sổ → audit KHÔNG dựng sự cố giả cho lệnh đã qua cả 2 cổng người sáng nay  — pause=[] sổ={'1840': {'SAB'}}
+[exec:SpaceX] resume từ /tmp/cmh_farm_new/data/execution_logs/exec_SpaceX_2099-01-02_state.json
+  [PASS] J19 tiến trình 13:00 với `enabled=false` (tắt giữa phiên) → sổ ĐỌC TỪ ĐĨA nên audit KHÔNG treo rổ CAPIT vì lệnh gói 1840 hợp lệ của buổi sáng (§5 idempotent)  — pause=[] sổ={'1840': {'SAB'}}
+[exec:SpaceX] resume từ /tmp/cmh_farm_new/data/execution_logs/exec_SpaceX_2099-01-02_state.json
+  [PASS] J19b …nhưng mã CHƯA TỪNG được cấp vẫn bị bắt — sổ không nới guard, nó chỉ vá chỗ guard đọc nhầm nguồn (đối chứng bắt buộc)  — ['VNM']
+[exec:SpaceX] resume từ /tmp/cmh_farm_new/data/execution_logs/exec_SpaceX_2099-01-02_state.json
+  [PASS] J20 plan phát hành lại giữa ngày + STRIP → sổ GIỮ bản ghi của lệnh tiến trình TRƯỚC đã đặt thật ⇒ audit KHÔNG treo rổ (thu hồi chỉ phần tiến trình này cấp)  — LIVE_PREFLIGHT_STRIP pause=[] sổ={'1840': {'SAB'}}
+  [PASS] J21 sổ hỏng chứa khoá gói DEFAULT 1841 → bị LỌC khi đọc, audit KHÔNG soi lệnh chạy gói mặc định (nếu không, 1 file hỏng đóng băng cả phiên BAL/LAG)  — pause=[] sổ={'1840': {'SAB'}}
+  [PASS] J21b …và value dạng CHUỖI được ép về tập 1 phần tử, không vỡ thành từng ký tự (set('SAB') = {'S','A','B'} là bẫy im lặng)  — {'1840': {'SAB'}}
+
+K. Mối nối cascade trong bot_execute.py
+  [PASS] K1 bot_execute.py có gọi lever_live_preflight
+  [PASS] K2 …SAU connect() (cần sổ broker sống) và TRƯỚC gate tiền `check_plan_funding` (gate phải đo theo trạng thái đòn bẩy CHUNG CUỘC)  — connect=15273 preflight=18082 check_plan_funding=19854
+  [PASS] K3 …và cascade vẫn gọi apply_capit_lever TRƯỚC đó (preflight chỉ GỠ, không cấp)
+  [PASS] K4 bot_execute.py KHÔNG BAO GIỜ gọi apply_capit_lever ở chế độ preview (preview bỏ qua cổng duyệt-ngày — đường thực thi tuyệt đối không được dùng)
+  [PASS] K5 …và in ra dòng riêng khi đòn bẩy bị gỡ vì thiếu duyệt riêng
+
+L. Khối cảnh báo MARGIN trong báo cáo duyệt plan
+  [PASS] L0a trích được khối từ send_plan_report.sh production  — n_marker=1
+  [PASS] L0b khối = 2 statement top-level đầu, dạng statement cuối đúng như ghim  — dạng=['Assign', 'Try']
+  [PASS] L0c khối khép kín trên namespace harness cấp (không cuốn theo khối lân cận)  — tên tự do=['acct', 'date']; thiếu=[]
+  [PASS] L1 plan KHÔNG có lệnh vay → KHÔNG thêm dòng nào (0 nhiễu vào báo cáo thường lệ)  — ''
+  [PASS] L2 plan CÓ vay + chưa duyệt riêng → nêu BẬT LOẠT: có margin, Σ tiền vay, và cơ chế duyệt tự động  — 🔺 **PLAN NÀY CÓ DÙNG MARGIN** — 2 lệnh CAPIT (SAB, VNM), Σ giá trị 130.0tr, **tiền VAY dự kiến ~30.0tr** (f=1.3, gói 1840).
+   ✅ *
+  [PASS] L3 …và cơ chế auto-approve THẬT tồn tại trong approve_plan_simple.sh (không chỉ so chuỗi mô tả báo cáo — §28)
+  [PASS] L4 …và nói rõ không duyệt thì KHÔNG bị chặn lệnh, chỉ chạy bằng vốn tự có
+  [PASS] L5 đã duyệt riêng → báo cáo xác nhận ai duyệt + trần Σ, không đòi duyệt lại  — ự kiến ~30.0tr** (f=1.3, gói 1840).
+   ✅ Đòn bẩy ĐÃ ĐƯỢC DUYỆT RIÊNG cho phiên này (user (John) 21:37) — trần Σ 130.0tr.
+  [PASS] L6 plan sizing theo ĐÒN BẨY nhưng sẽ chạy VỐN TỰ CÓ → báo cáo 21:00 PHẢI nói ra (trước đây im lặng, người duyệt chỉ thấy cảnh báo lệch +30% quy sai nguyên nhân)  — ⚠️ **Plan có dấu hiệu đã sizing theo ĐÒN BẨY nhưng phiên sẽ chạy bằng VỐN TỰ CÓ** — khối lượng tính cho 1.3× vốn mà chỉ có 1,0× vốn; triệu chứng sẽ là
+  [PASS] L7 …nhưng plan bình thường (không lý do nào) vẫn KHÔNG thêm dòng nào
+
+M. HIỂN THỊ effective-deposit-rate — KHÔNG đổi quyết định PIT/lever
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] M1 trước anchor CCTG (2019-06-01) → effective == Big-4 (7,0%), driver big4_12m  — {'pit_deposit_rate': 7.0, 'pit_deposit_rate_effective': 7.0, 'pit_deposit_effective_driver': 'big4_12m'}
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] M2 sau anchor CCTG (2026-10-05) → effective (CCTG 7,5%) KHÁC Big-4 (6,8%) nhưng active/structural vẫn đúng Loại 2 (cả hai dưới ngưỡng 9%)  — {'pit_deposit_rate': 6.8, 'pit_deposit_rate_effective': 7.5, 'pit_deposit_effective_driver': 'cctg_6m(2026-09-30)', 'pit_filter_structural': False, 'active': True}
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+  [PASS] M3 MUTANT effective giả 15% (>ngưỡng) nhưng Big-4 thật 6,8% (<ngưỡng) → active/structural KHÔNG đổi so với M2 (quyết định không phụ thuộc field hiển thị)  — {'pit_deposit_rate': 6.8, 'pit_deposit_rate_effective': 15.0, 'pit_deposit_effective_driver': 'test_mutant_above_threshold', 'pit_filter_structural': False, 'active': True}
+  [PASS] M4 lỗi tính effective (exception) → field None + WARNING log, quyết định không đổi, KHÔNG văng exception ra ngoài khối  — r: CCTG CSV hỏng (giả lập)) — chỉ ảnh hưởng hiển thị, quyết định PIT/lever KHÔNG đổi (vẫn dùng Big-4 6.80%)
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+
+  WARNING: PIT filter chặn đòn bẩy CAPIT (nghi Loại 1 STRUCTURAL) — CPI/lãi suất huy động NaN tại 2008-09-01 (ngoài phạm vi dữ liệu, trước 2011-01) — fail-closed COI NHƯ Loại 1, KHÔNG áp đòn bẩy
+  [PASS] M5 Big-4 PIT = None (trước 2011-01) → effective display CŨNG None
+  [PASS] M6 rate_pct=NaN → math.isfinite guard chặn, field None + WARNING log, quyết định không đổi (KHÔNG để NaN lọt vào dict artifact)  — ate_pct không hữu hạn: nan) — chỉ ảnh hưởng hiển thị, quyết định PIT/lever KHÔNG đổi (vẫn dùng Big-4 6.80%)
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+
+  [PASS] M7 detail dict thiếu khoá rate_source (KeyError) → field None + WARNING log, quyết định không đổi  — i (KeyError: 'rate_source') — chỉ ảnh hưởng hiển thị, quyết định PIT/lever KHÔNG đổi (vẫn dùng Big-4 6.80%)
+  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f=1.3 gói vay 1840 cho account ['SpaceX'] (dd52=-25.0% ≤ -20.0%)
+
+
+N. Dòng hiển thị PIT trong plan markdown
+  [PASS] N1 Big-4<ngưỡng, effective<ngưỡng → đúng 1 dòng, có cả 2 số, KHÔNG có cảnh báo lệch  — ['- Cổng PIT (lãi suất huy động): Big-4 6.80% (dùng cho quyết định, ngưỡng 9.0%) · effective 7.50% [cctg_6m(2026-09-30)] — chỉ hiển thị']
+  [PASS] N2 Big-4=None (PIT rỗng) → KHÔNG in dòng nào (đừng hiện 'None%' ra plan)
+  [PASS] N3 effective=None (lỗi tính) → dòng vẫn in, effective hiện 'n/a'  — ['- Cổng PIT (lãi suất huy động): Big-4 6.80% (dùng cho quyết định, ngưỡng 9.0%) · effective n/a — chỉ hiển thị']
+  [PASS] N4 effective giả ≥ ngưỡng, Big-4 thật < ngưỡng → có dòng cảnh báo, quyết định (không nằm trong scope test này) vẫn đứng ở M3 gốc  — ['- Cổng PIT (lãi suất huy động): Big-4 6.80% (dùng cho quyết định, ngưỡng 9.0%) · effective 15.00% [test_mutant_above_threshold] — chỉ hiển thị — ⚠️ effective đã ≥ ngưỡng (cổng vẫn theo Big-4, user chốt 2026-10-01); xem lại theo trigger trong current_ops']
+
+ENV: TZ='Asia/Ho_Chi_Minh' · python=3.10.12 · cwd=/tmp/cmh_farm_new
+
+✅ tất cả PASS — đòn bẩy CAPIT đã wire trọn đường và ĐANG TẮT
+rc=0

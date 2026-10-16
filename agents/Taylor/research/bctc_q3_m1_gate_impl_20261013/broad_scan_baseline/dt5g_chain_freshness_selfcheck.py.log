@@ -1,0 +1,27 @@
+
+A. bq_freshness_check.sh boundary (real _check(), mocked bq)
+  [PASS] A1 MAX_STATE_LAG tightened to 0  — found 0
+  [PASS] A2 _check() extractable from script
+  [PASS] A3 lag=0 vs MAX=0 -> PASS (normal day must not be blocked)
+  [PASS] A4 lag=1 vs MAX=0 -> FAIL (state 1 day behind now blocks DollarBill)
+  [PASS] A5 regression proof: lag=1 vs old MAX=1 passed under -le (07-10 tighten was a NO-OP)
+  [PASS] A6 lag=2 vs old MAX=1 would have failed (old setting only caught >=2)
+
+B. writer/reader path consistency
+  [PASS] B1 ew_v1 staging writer -> data/
+  [PASS] B2 ew_v1 diagnostics writer -> data/
+  [PASS] B3 ew_v1 has NO remaining root write of either output
+  [PASS] B4 vnindex_5state_dual_v3.py reads data/ and has no root read
+  [PASS] B4 compare_ew_vs_live.py reads data/ and has no root read
+  [PASS] B4 run_phase2_states.py reads data/ and has no root read
+  [PASS] B4 ngu_hanh_shadow_tracker.py reads data/ and has no root read
+  [PASS] B4 vnindex_5state_dual_v1.py reads data/ and has no root read
+  [PASS] B4 sweep_ew_liq_threshold.py reads data/ and has no root read
+Traceback (most recent call last):
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/dt5g_chain_freshness_selfcheck.py", line 149, in <module>
+    src = read(os.path.join(WC, rel))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/dt5g_chain_freshness_selfcheck.py", line 70, in read
+    with open(path, encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/agents/Taylor/bull_commit_breadth_check.py'

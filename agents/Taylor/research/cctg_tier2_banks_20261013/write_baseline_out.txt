@@ -1,0 +1,6 @@
+OK: appended [tier2 VPB 100tr] 2026-10-13 = 9.2% (source=web_crosscheck_auto, collected=2026-10-13) -> /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_tier2_events.csv
+VPB rc= 0
+OK: appended [tier2 MB mệnh giá n/a] 2026-10-13 = 7.1% (source=web_crosscheck_auto, collected=2026-10-13) -> /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_tier2_events.csv
+MB rc= 0
+OK: appended [tier2 ACB mệnh giá n/a] 2026-10-13 = 7.2% (source=web_crosscheck_auto, collected=2026-10-13) -> /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_tier2_events.csv
+ACB rc= 0

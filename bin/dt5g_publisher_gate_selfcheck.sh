@@ -20,6 +20,7 @@ set -uo pipefail
 
 REAL_MIKE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_WC="$(cd "$REAL_MIKE/.." && pwd)"
+[ -d "$REAL_WC/trading_bot" ] || REAL_WC="${WC_ROOT:-/home/trido/thanhdt/WorkingClaude}"   # worktree ngoài cây WorkingClaude: trading_bot nằm ở canonical (bẫy §23)
 SRC="$REAL_MIKE/bin/bq_freshness_check.sh"
 
 # TZ anchor guard (code-quality 2026-09-20): mọi mốc ngày mà gate bên dưới dùng (TODAY,
@@ -51,9 +52,9 @@ for n in notify.sh notify_thread.sh; do
 done
 
 FAILS=0
-# run_case <tên> <today> <as_of|-> <pub_ok true|false|-> <json_mtime|-> <csv_mtime|-> <expect_FAILED> <expect_WARNED>
+# run_case <tên> <today> <as_of|-> <pub_ok true|false|-> <json_mtime|-> <csv_mtime|-> <expect_FAILED> <expect_WARNED> [morning 0|1] [cal_today]
 run_case() {
-  local name="$1" today="$2" as_of="$3" pub_ok="$4" json_mt="$5" csv_mt="$6" exp_f="$7" exp_w="$8"
+  local name="$1" today="$2" as_of="$3" pub_ok="$4" json_mt="$5" csv_mt="$6" exp_f="$7" exp_w="$8" morning="${9:-0}" cal="${10:-}"
   local J="$SANDBOX/wc/deploy_golive_dt5g_v4/golive_state_today.json"
   local C="$SANDBOX/wc/data/vnindex_5state_dt5g_live.csv"
   rm -f "$J" "$C"
@@ -72,6 +73,7 @@ run_case() {
     export SANDBOX_LOG="$SANDBOX/notify.log"
     WORKDIR="$SANDBOX/wc"; ROOT="$SANDBOX/mike"; TODAY="$today"
     NOW_ICT="09:00 ICT"; QUIET=""; FAILED=0; WARNED=0
+    MORNING="$morning"; CAL_TODAY="$cal"; [ -n "$CAL_TODAY" ] || unset CAL_TODAY
     DISCORD_STALE_CHANNEL="stub-channel"
     eval "$GATE_SRC"
     echo "__RESULT__ FAILED=$FAILED WARNED=$WARNED"
@@ -118,8 +120,30 @@ run_case "9. CN, as_of=07-30 (bỏ lỡ phiên Fri 07-31) → PHẢI CHẶN" \
          2026-08-02 2026-07-30 true 2026-07-30 2026-07-30 1 0
 
 echo
+echo "--- MORNING MODE (MIKE_MORNING_RUN=1, 2026-10-15): today=PHIÊN, cal_today=ngày lịch ---"
+# 2026-10-14 Wed là phiên; sáng 2026-10-15 chạy tay: TODAY=10-14, CAL_TODAY=10-15
+run_case "M1. as_of=phiên, mtime=hôm nay lịch (publish sáng) → PASS" \
+         2026-10-14 2026-10-14 true 2026-10-15 2026-10-14 0 0 1 2026-10-15
+run_case "M2. as_of=phiên, mtime=phiên (publish tối trước) → PASS" \
+         2026-10-14 2026-10-14 true 2026-10-14 2026-10-14 0 0 1 2026-10-15
+run_case "M3. mtime TRƯỚC phiên (file cũ sót lại) → PHẢI CHẶN" \
+         2026-10-14 2026-10-14 true 2026-10-13 2026-10-14 1 0 1 2026-10-15
+run_case "M4. mtime ở TƯƠNG LAI so với ngày lịch → PHẢI CHẶN" \
+         2026-10-14 2026-10-14 true 2026-10-16 2026-10-14 1 0 1 2026-10-15
+run_case "M5. as_of=10-13 (bỏ lỡ phiên 10-14) → PHẢI CHẶN" \
+         2026-10-14 2026-10-13 true 2026-10-15 2026-10-14 1 0 1 2026-10-15
+run_case "M6. publish_ok=false → PHẢI CHẶN" \
+         2026-10-14 2026-10-14 false 2026-10-15 2026-10-14 1 0 1 2026-10-15
+run_case "M7. state json MẤT → PHẢI CHẶN" \
+         2026-10-14 - - - 2026-10-14 1 0 1 2026-10-15
+run_case "M8. CSV mirror cũ ở morning mode → KHÔNG cảnh báo (WARN tắt)" \
+         2026-10-14 2026-10-14 true 2026-10-15 2026-10-13 0 0 1 2026-10-15
+run_case "M9. cùng M3 nhưng mode TẮT → hành vi cron cũ vẫn CHẶN" \
+         2026-10-14 2026-10-14 true 2026-10-13 2026-10-14 1 0 0
+
+echo
 if [ "$FAILS" -eq 0 ]; then
-  echo "=== SELFCHECK OK — 9/9 ca đúng ==="
+  echo "=== SELFCHECK OK — 9 ca gốc + 9 ca morning đúng ==="
   echo "Không ping thật nào: $(wc -l < "$SANDBOX/notify.log" 2>/dev/null || echo 0) dòng vào stub log (Discord/Telegram thật KHÔNG bị gọi)."
   exit 0
 fi

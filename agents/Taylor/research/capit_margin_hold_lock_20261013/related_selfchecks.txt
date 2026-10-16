@@ -1,0 +1,7 @@
+== send_plan_report_state_gate_selfcheck.py rc=0 :: 9/9 PASS
+== send_plan_report_park_jit_selfcheck.py rc=0 :: KẾT QUẢ: 44 PASS / 0 FAIL
+== send_plan_report_aei_notes_selfcheck.py rc=0 :: KẾT QUẢ: 11 PASS / 0 FAIL
+== plan_position_drift_check_selfcheck.py rc=0 :: PASS 98 / FAIL 0  (python 3.10.12, TZ=Asia/Ho_Chi_Minh)
+== close_plan_approval_questions_selfcheck.py rc=0 :: ✅ ALL PASS
+== approve_plan_with_jit_selfcheck.py rc=0 :: PASS — toàn bộ selfcheck approve_plan_with_jit
+== ops_health_check_selfcheck.py rc=0 :: OK: toàn bộ assertion PASS

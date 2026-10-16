@@ -55,6 +55,17 @@ Chưa có R ⇒ TREO, hiện ở `pending_flows` của `nav_period_returns.py`.
   dòng vẫn được nhận (giá chốt phiên trước, đúng luật). "Phiên" = thứ Hai–Sáu không thuộc
   `trading_bot.vn_market.is_holiday` ⇒ **ngày nghỉ lễ chưa khai ở đó sẽ bị coi là phiên thiếu dòng**
   (từ chối oan, không sai số) — khai lịch nghỉ trước.
+- **Luật gán so với `balance_ts` — kể cả `balance_ts` QUY ƯỚC của dòng ĐÃ ĐÍNH CHÍNH có thể là QUY ƯỚC, không phải giờ chụp thật** (từ 2026-10-14,
+  nhánh feat/fund-history-lock-20261014). Dòng SpaceX 2026-07-02 sau đính chính mang
+  `balance_ts = 2026-07-02T14:45:00` = "số dư TẠI GIỜ ĐÓNG CỬA" dựng lại (số dư chụp 09:46:35 trừ lệnh
+  126631 bị khoá tiền sau lần chụp), KHÔNG phải lúc có bản ghi balances nào. 14:45:00 trùng đúng biên đóng
+  cửa — cổng "chụp trước đóng cửa" của `nav_unit_ledger.py` so chặt `<` nên dòng này qua cổng KHÔNG cần
+  `--accept-preclose`; đó là CHỦ ĐÍCH (giá trị dòng đã là số dư giờ đóng cửa), bằng chứng nằm ở
+  `nav_history_corrections.jsonl` + file đính chính
+  (`agents/Taylor/research/fund_history_lock_20261014/corrections/correction_SpaceX_AB.json`). Nhận
+  diện: `nav_source` bắt đầu bằng `dinh chinh` và ngày có bản ghi trong nhật ký đính chính. Với luật gán: tiền vào/ra SAU 14:45:00 ngày 07-02 được gán cho dòng
+  kế tiếp, đúng như khi dòng chụp sau đóng cửa thật. Đừng dùng
+  `balance_ts` của dòng như vậy để suy "lúc đó bot đang chạy" hay để ghép với bản ghi dnse_raw cùng giờ.
 - `balance_ts` phải tăng NGHIÊM NGẶT theo ngày của dòng (từ dòng liền trước dòng tiền đầu tiên trở đi);
   không thì bị từ chối — dòng sửa tay bằng số dư chụp muộn hơn dòng sau từng cho giá sai im lặng.
 - `time_ict` trùng PHÚT với `balance_ts` của dòng đang xét mà không có giây ⇒ bị từ chối (khai `HH:MM:SS`).

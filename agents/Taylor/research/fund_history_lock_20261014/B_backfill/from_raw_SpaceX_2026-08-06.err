@@ -1,0 +1,3 @@
+⚠️ [2026-08-06] corp_action_gate_v2 KHÔNG xác nhận được lịch corp-action: thiếu/không đọc được corp_action_daily_2026-08-06.json — gate KHÔNG biết mã nào có sự kiện tối nay (nhánh KHỐI LƯỢNG vẫn chạy; nhánh cổ tức tiền mặt và việc gán tỉ lệ thực hiện cho phần dư KL đều TẮT).
+⚠️  WC_ROOT='/tmp/fundlock_1014/ab' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/fundlock_1014/ab' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu

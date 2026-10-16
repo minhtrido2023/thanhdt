@@ -1,0 +1,7 @@
+rc=0 capit_lever_selfcheck.py
+rc=1 money_path_freshness_selfcheck.py
+rc=1 freshness_ops_selfcheck.py
+rc=1 dt5g_chain_freshness_selfcheck.py
+rc=0 mike/bin/tz_anchor_gate_selfcheck.py
+rc=1 mike/agents/Winston/freshness_warn_selfcheck.py
+rc=1 mike/bin/filter_lag_entry_window_selfcheck.py

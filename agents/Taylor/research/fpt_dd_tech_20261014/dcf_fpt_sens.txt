@@ -1,0 +1,18 @@
+ERP 7.5
+  discount rate r          : 14.90%   terminal g = 7.40% [cap_rf] (CPI window 22% REAL NSO / 78% PROXY)
+  FAIR VALUE / share       : 67,966 VND
+  MARGIN OF SAFETY         : +16.4%   -> CHEAP (below intrinsic)
+ERP 8.5
+  discount rate r          : 15.90%   terminal g = 7.40% [cap_rf] (CPI window 22% REAL NSO / 78% PROXY)
+  FAIR VALUE / share       : 59,746 VND
+  MARGIN OF SAFETY         : +4.9%   -> CHEAP (below intrinsic)
+term cpi_gdp_half
+  annual growth pts g1,g2,g3: ['+16.1%', '+20.6%', '+22.9%']   -> g_trailing +19.9%, g_explicit(shrunk→terminal) = +13.2%
+  discount rate r          : 13.90%   terminal g = 6.55% [cpi_gdp_half] (CPI window 22% REAL NSO / 78% PROXY)
+  FAIR VALUE / share       : 70,161 VND
+  MARGIN OF SAFETY         : +19.0%   -> CHEAP (below intrinsic)
+term cpi_gdp_full
+  annual growth pts g1,g2,g3: ['+16.1%', '+20.6%', '+22.9%']   -> g_trailing +19.9%, g_explicit(shrunk→terminal) = +14.8%
+  discount rate r          : 13.90%   terminal g = 9.66% [cpi_gdp_full] (CPI window 22% REAL NSO / 78% PROXY)
+  FAIR VALUE / share       : 118,308 VND
+  MARGIN OF SAFETY         : +52.0%   -> CHEAP (below intrinsic)

@@ -1,0 +1,11 @@
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+
+=== DCF fair value: FPT as-of 2026-10-14 (2026Q2) ===
+  base FCFE (norm 3y avg) : 6,335.1 bn VND/yr
+  annual growth pts g1,g2,g3: ['+16.1%', '+20.6%', '+22.9%']   -> g_trailing +19.9%, g_explicit(shrunk→terminal) = +13.6%
+  discount rate r          : 13.90%   terminal g = 7.40% [cap_rf] (CPI window 22% REAL NSO / 78% PROXY)
+  OShares                  : 1,714.3 M
+  FAIR VALUE / share       : 78,727 VND
+  market price             : 56,800 VND
+  MARGIN OF SAFETY         : +27.9%   -> CHEAP (below intrinsic)
+  sensitivity (fv %chg): r-1%=+19% r+1%=-14% | g-2%=-8% g+2%=+8%

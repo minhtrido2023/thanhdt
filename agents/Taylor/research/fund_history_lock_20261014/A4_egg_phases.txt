@@ -1,0 +1,54 @@
+===== SpaceX: 71 dòng
+  2026-07-02 → 2026-07-16 (11 dòng): offbook_assets trống | egg_assets trống
+  2026-07-17 → 2026-07-20 ( 2 dòng): offbook_assets >0    | egg_assets trống
+  2026-07-21 → 2026-07-22 ( 2 dòng): offbook_assets 0     | egg_assets 0
+  2026-07-23 → 2026-08-07 (11 dòng): offbook_assets 0     | egg_assets trống
+  2026-08-10 → 2026-08-10 ( 1 dòng): offbook_assets 0     | egg_assets 0
+  2026-08-11 → 2026-08-17 ( 5 dòng): offbook_assets 0     | egg_assets trống
+  2026-08-18 → 2026-08-18 ( 1 dòng): offbook_assets 0     | egg_assets 0
+  2026-08-19 → 2026-10-13 (38 dòng): offbook_assets 0     | egg_assets >0
+  bất biến nav = mtm + cash − debt + offbook + egg: 71/71 dòng khớp (≤1đ)
+  ranh 2026-07-16 → 2026-07-17: offbook+egg 0 → 302,108,211 | ΔNAV -5,254,963 (-0.5493%) | Δmtm -5,990,000 | Δ(tiền sở hữu gồm Trứng vàng) +735,037 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-07-20 → 2026-07-21: offbook+egg 302,108,211 → 0 | ΔNAV -2,580,704 (-0.2775%) | Δmtm +252,685,000 | Δ(tiền sở hữu gồm Trứng vàng) -255,265,704 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-07-22 → 2026-07-23: offbook+egg 0 → 0 | ΔNAV +1,540,269 (+0.1692%) | Δmtm -80,000 | Δ(tiền sở hữu gồm Trứng vàng) +1,620,269 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-07 → 2026-08-10: offbook+egg 0 → 0 | ΔNAV +8,965,743 (+0.9327%) | Δmtm -93,005,000 | Δ(tiền sở hữu gồm Trứng vàng) +101,970,743 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-10 → 2026-08-11: offbook+egg 0 → 0 | ΔNAV -2,652,052 (-0.2733%) | Δmtm +156,442,750 | Δ(tiền sở hữu gồm Trứng vàng) -159,094,802 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-17 → 2026-08-18: offbook+egg 0 → 0 | ΔNAV +761,299 (+0.0795%) | Δmtm +760,750 | Δ(tiền sở hữu gồm Trứng vàng) +549 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-18 → 2026-08-19: offbook+egg 0 → 100,223,898 | ΔNAV -792,030 (-0.0826%) | Δmtm -815,500 | Δ(tiền sở hữu gồm Trứng vàng) +23,470 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+===== ZaloPay: 68 dòng
+  2026-07-07 → 2026-07-16 ( 8 dòng): offbook_assets trống | egg_assets trống
+  2026-07-17 → 2026-07-20 ( 2 dòng): offbook_assets >0    | egg_assets trống
+  2026-07-21 → 2026-08-05 (12 dòng): offbook_assets 0     | egg_assets trống
+  2026-08-07 → 2026-08-10 ( 2 dòng): offbook_assets 0     | egg_assets 0
+  2026-08-11 → 2026-08-17 ( 5 dòng): offbook_assets 0     | egg_assets trống
+  2026-08-18 → 2026-08-18 ( 1 dòng): offbook_assets 0     | egg_assets 0
+  2026-08-19 → 2026-10-13 (38 dòng): offbook_assets 0     | egg_assets >0
+  bất biến nav = mtm + cash − debt + offbook + egg: 68/68 dòng khớp (≤1đ)
+  ranh 2026-07-16 → 2026-07-17: offbook+egg 0 → 147,473,247 | ΔNAV -3,324,658 (-0.3488%) | Δmtm -5,270,000 | Δ(tiền sở hữu gồm Trứng vàng) +1,945,342 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-07-20 → 2026-07-21: offbook+egg 147,473,247 → 0 | ΔNAV -2,293,247 (-0.2492%) | Δmtm +154,872,250 | Δ(tiền sở hữu gồm Trứng vàng) -157,165,497 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-05 → 2026-08-07: offbook+egg 0 → 0 | ΔNAV +37,864,677 (+4.1479%) | Δmtm +37,864,550 | Δ(tiền sở hữu gồm Trứng vàng) +127 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-10 → 2026-08-11: offbook+egg 0 → 0 | ΔNAV +3,906,086 (+0.4112%) | Δmtm +86,687,350 | Δ(tiền sở hữu gồm Trứng vàng) -82,781,264 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-17 → 2026-08-18: offbook+egg 0 → 0 | ΔNAV +7,025,012 (+0.7638%) | Δmtm +7,024,800 | Δ(tiền sở hữu gồm Trứng vàng) +212 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+  ranh 2026-08-18 → 2026-08-19: offbook+egg 0 → 38,768,598 | ΔNAV -5,997,871 (-0.6472%) | Δmtm -6,006,950 | Δ(tiền sở hữu gồm Trứng vàng) +9,079 | Δ(tiền sở hữu)+Δmtm−ΔNAV = +0
+
+== Phần dư đẳng thức tiền (cash_identity, bước 2) tại các cửa sổ ĐỔI CÁCH GHI Trứng vàng — dữ liệu thật chưa sửa
+  khoá 1 cửa sổ: ['ack_mismatch', 'acked', 'buy', 'candidates', 'checkable', 'date0', 'date1', 'declared', 'declared_flows', 'delta_k', 'dividend', 'egg_cost', 'egg_interest', 'egg_out', 'fees', 'info', 'kind', 'n_fills', 'nav0', 'notes', 'over', 'pct_nav', 'qty_gaps', 'qty_unverified', 'qty_values', 'residual', 'sell', 'snap0', 'snap1', 'suspect', 'unexplained']
+  SpaceX: 70 cửa sổ; |dư| lớn nhất 0.0000% NAV
+  ZaloPay: 67 cửa sổ; |dư| lớn nhất 0.0000% NAV
+
+== (đọc lại đúng khoá) Phần dư đẳng thức tiền tại cửa sổ kết thúc ở ngày ĐỔI CÁCH GHI Trứng vàng
+  SpaceX 2026-07-16 → 2026-07-17: dư +37 đ (+0.0000% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX 2026-07-20 → 2026-07-21: dư +141,801 đ (+0.0152% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX 2026-07-22 → 2026-07-23: dư +269 đ (+0.0000% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX 2026-08-07 → 2026-08-10: dư -8,680 đ (-0.0009% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX 2026-08-10 → 2026-08-11: dư +4,375 đ (+0.0005% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX 2026-08-17 → 2026-08-18: dư +549 đ (+0.0001% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX 2026-08-18 → 2026-08-19: dư +23,470 đ (+0.0024% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  SpaceX: 70 cửa sổ; 4 cửa sổ |dư| lớn nhất: 2026-08-27→2026-08-28 -0.1124% (đã xác nhận); 2026-07-02→2026-07-03 -0.0543% (đã xác nhận); 2026-07-31→2026-08-03 +0.0294%; 2026-07-20→2026-07-21 +0.0152%
+  ZaloPay 2026-07-16 → 2026-07-17: dư +14,648 đ (+0.0015% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  ZaloPay 2026-07-20 → 2026-07-21: dư +27,005 đ (+0.0029% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  ZaloPay 2026-08-05 → 2026-08-07: dư +127 đ (+0.0000% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  ZaloPay 2026-08-10 → 2026-08-11: dư -26,069 đ (-0.0027% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  ZaloPay 2026-08-17 → 2026-08-18: dư +212 đ (+0.0000% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  ZaloPay 2026-08-18 → 2026-08-19: dư +9,079 đ (+0.0010% NAV) | egg_out 0.0 egg_interest 0.0 egg_cost 0.0 | checkable=True suspect=False acked=None
+  ZaloPay: 67 cửa sổ; 4 cửa sổ |dư| lớn nhất: 2026-08-27→2026-08-28 -0.0217% (đã xác nhận); 2026-10-01→2026-10-02 -0.0106%; 2026-07-10→2026-07-13 -0.0078%; 2026-07-08→2026-07-09 -0.0064%

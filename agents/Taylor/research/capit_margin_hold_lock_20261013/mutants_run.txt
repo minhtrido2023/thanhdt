@@ -1,0 +1,102 @@
+M01  BỊ BẮT     mọi OSError khi kiểm file (kể cả PermissionError) ⇒ không giữ
+       ↳ A9
+M02  BỊ BẮT     os.path.exists thay lstat (symlink treo / thư mục cha khoá ⇒ không giữ)
+       ↳ A7,A9
+M03  BỊ BẮT     file hỏng ⇒ KHÔNG giữ (fail-open)
+       ↳ A5,A6,A7,A8,C6,C7,C8,C9,D6,E4
+M04  BỊ BẮT     bỏ gán held=True trước khi parse (file hỏng ⇒ không giữ; file tốt cũng mất held)
+       ↳ A2,A3,A5,A6,A7,A8
+M05  BỊ BẮT     bỏ kiểm field bắt buộc
+       ↳ A5
+M06  SỐNG       bỏ kiểm 'phải là object' (dự đoán TƯƠNG ĐƯƠNG: rec.get ném AttributeError, vẫn bị bắt thành hỏng)
+       ↳ 127/127 PASS
+M07  BỊ BẮT     bỏ kiểm since là ISO
+       ↳ A5
+M08  BỊ BẮT     field bắt buộc: chấp nhận số / chuỗi toàn dấu cách
+       ↳ A5
+M09  BỊ BẮT     status luôn rc 0 (shell tưởng không giữ)
+       ↳ B10,B19,D3,D4,D5
+M10  BỊ BẮT     off: bỏ kiểm placeholder
+       ↳ B12,B13,B14,B15,B16,B17
+M11  BỊ BẮT     off: so placeholder phân biệt hoa/thường
+       ↳ B12,B13,B14,B15,B16,B17
+M12  BỊ BẮT     off: không strip --by ("  " / " TBD " lọt)
+       ↳ B12,B13,B14,B15,B16,B17
+M13  BỊ BẮT     off: không xoá file giữ
+       ↳ B15,B18,B21
+M14  BỊ BẮT     on: ghi đè lệnh giữ đang có
+       ↳ B11,B12,B13,B14,B16
+M15  BỊ BẮT     on: --since không neo ICT
+       ↳ B6
+M16  BỊ BẮT     bật/gỡ KHÔNG ghi bus, KHÔNG báo Discord mà vẫn rc 0
+       ↳ B17,B22,B23,B8,B9
+M17  BỊ BẮT     off: không nạp được APPROVAL_PLACEHOLDERS ⇒ vẫn gỡ (fail-open)
+       ↳ B14,B15,B17
+M18  BỊ BẮT     on: liệt kê cả bản duyệt ĐÃ thu hồi
+       ↳ B23,B24
+M19  BỊ BẮT     on: liệt kê cả bản duyệt quá khứ
+       ↳ B23,B24
+M20  BỊ BẮT     on --dry-run vẫn ghi file
+       ↳ B2,B3,B4,B5,B6,B8,B9
+M21  BỊ BẮT     on: bus luôn tự nhận decided_by=user
+       ↳ B24
+M22  BỊ BẮT     on đè file hỏng mà không giữ bản hỏng
+       ↳ B20
+M23  BỊ BẮT     câu 09:05 nói SAI hành vi thật (hạ khối lượng)
+       ↳ B19,D4,E3
+N01  BỊ BẮT     approve_margin_day: bỏ cổng giữ
+       ↳ C11,C12,C13,C3,C4,C5,C6,C7,C8,C9
+N02  BỊ BẮT     in lời từ chối nhưng vẫn ghi bản duyệt
+       ↳ C3,C5,C6,C7,C8,C9
+N03  BỊ BẮT     --dry-run cũng bị từ chối khi đang giữ
+       ↳ C5
+N04  BỊ BẮT     --override-hold: bỏ kiểm placeholder
+       ↳ C7,C8,C9
+N05  BỊ BẮT     --override-hold: không strip ("  " lọt)
+       ↳ C7,C8,C9
+N06  BỊ BẮT     vượt giữ nhưng bản duyệt KHÔNG ghi dấu vượt
+       ↳ C11,C12
+N07  BỊ BẮT     vượt giữ nhưng Discord KHÔNG ghi dấu vượt
+       ↳ C13
+N08  BỊ BẮT     vượt giữ nhưng bus thiếu cờ overrode_capit_margin_hold
+       ↳ C12
+N09  BỊ BẮT     file giữ hỏng ⇒ approve_margin_day coi như không giữ
+       ↳ C6,C7,C8,C9
+N10  BỊ BẮT     không giữ mà có --override-hold ⇒ vẫn gắn dấu vượt giữ
+       ↳ C16
+N11  BỊ BẮT     đang giữ thì --revoke cũng bị chặn
+       ↳ C15
+N12  BỊ BẮT     vượt giữ: note của bản duyệt không ghi VƯỢT
+       ↳ C11
+P01  BỊ BẮT     approve_plan_simple: bỏ kiểm giữ (vẫn gọi approve_margin_day.py — lớp 2 sẽ tự từ chối)
+       ↳ D3,D4,D5
+P02  BỊ BẮT     rc lạ của status (script hỏng/thiếu) ⇒ coi như KHÔNG giữ
+       ↳ D7
+P03  BỊ BẮT     đang giữ: không báo Discord
+       ↳ D5
+P04  BỊ BẮT     đang giữ: không ghi bus
+       ↳ D5
+P05  BỊ BẮT     đang giữ: không nói điều xảy ra lúc 09:05
+       ↳ D4
+P06  BỊ BẮT     plan KHÔNG có lệnh đòn bẩy cũng đi vào nhánh giữ
+       ↳ D8
+P07  BỊ BẮT     rc lạ: không nói 'KHÔNG xác định được' (đổ lỗi chung chung)
+       ↳ D7
+S01  BỊ BẮT     send_plan_report: không bao giờ hiện dòng giữ
+       ↳ E2,E3,E4,E7,E8
+S02  BỊ BẮT     hiện dòng giữ cả khi KHÔNG giữ
+       ↳ E1,E9
+S03  BỊ BẮT     không đọc được trạng thái giữ ⇒ im lặng, vẫn hứa 'tự động' (fail-open)
+       ↳ E5
+S04  BỊ BẮT     đang giữ mà vẫn in 'Đồng ý plan = duyệt margin tự động'
+       ↳ E2,E3,E4,E5
+S05  BỊ BẮT     đang giữ: bỏ câu điều xảy ra lúc 09:05
+       ↳ E3
+S06  BỊ BẮT     đang giữ + đã có bản duyệt: không cảnh báo bản duyệt vẫn hiệu lực
+       ↳ E7,E8
+S07  BỊ BẮT     bản duyệt vượt giữ: báo cáo không trích nguyên văn vượt
+       ↳ E7
+S08  BỊ BẮT     send_plan_report: không đọc file giữ
+       ↳ E2,E3,E4,E7,E8
+
+49/50 mutant bị bắt · sống: ['M06'] · lỗi: không

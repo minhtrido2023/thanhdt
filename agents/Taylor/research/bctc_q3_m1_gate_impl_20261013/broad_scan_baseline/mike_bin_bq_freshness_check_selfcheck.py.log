@@ -1,0 +1,27 @@
+PASS: multiline-error-first-line-kept
+PASS: multiline-error-not-truncated-to-fragment
+PASS: multiline-error-labelled-query-failed-not-stale
+PASS: multiline-error-blocks-pipeline
+PASS: rc0-null-not-mislabelled-as-connection-failure
+PASS: rc0-null-labelled-as-data-anomaly
+PASS: rc0-null-mentions-not-connection-error
+PASS: rc0-null-still-blocks-pipeline
+PASS: real-staleness-still-labelled-stale
+PASS: real-staleness-not-mislabelled-query-failed
+PASS: real-staleness-still-blocks
+PASS: fresh-ok-no-fail
+PASS: fresh-ok-no-notify-sent
+PASS: warn-mode-query-fail-warns-not-blocks
+PASS: warn-mode-query-fail-only-thread-notify
+PASS: lastmod-show-fail-full-message-kept
+PASS: lastmod-show-fail-not-labelled-writer-dead
+PASS: lastmod-show-fail-warn-only-never-blocks
+PASS: lastmod-missing-field-warns-writer-dead
+PASS: lastmod-missing-field-does-not-block
+PASS: pipeline0-exdate-called-with---alert
+PASS: pipeline0-exdate-crash-is-nonblocking-WARN
+PASS: pipeline0-exdate-runs-BEFORE-bq-failed-gate (stale BQ không nuốt cảnh báo)
+PASS: pipeline0-failed-gate-still-blocks-after-exdate-crash
+PASS: exdate-forecast-selfcheck-green-incl-feed-status-cases
+
+bq_freshness_check_selfcheck: 25 PASS, 0 FAIL

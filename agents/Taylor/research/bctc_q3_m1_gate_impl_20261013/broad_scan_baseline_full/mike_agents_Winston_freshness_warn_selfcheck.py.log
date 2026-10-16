@@ -1,0 +1,56 @@
+== A. anomaly_flags.json — độ tươi CỦA FILE (khác TTL 30d của từng cờ) ==
+  PASS  A1 file THIẾU → is_stale 
+  PASS  A2 file HỎNG → is_stale 
+  PASS  A3 thiếu _meta.generated_at → is_stale + nêu lý do 
+  PASS  A3b gate loại trừ KHÔNG đổi khi thiếu _meta (fail-open y như cũ) 
+  PASS  A4 _meta cũ 6 ngày → is_stale (lần ghi cuối 2026-07-25 (ICT) ≠ ngày giao dịch 2026-07-31)
+  PASS  A4b nhưng cờ PNJ VẪN active theo TTL 30d — TTL không bị đụng 
+  PASS  A5 ranh giới ICT: 07-30T18:00Z (=07-31 01:00 ICT) → TƯƠI 
+  PASS  A6 ranh giới ICT: 07-30T16:59Z (=23:59 ICT 07-30) → CŨ 
+  PASS  A7 scan 08:20 ICT hôm nay → KHÔNG cảnh báo (chống WARN giả) ({'is_stale': False, 'generated_at': '2026-07-31T01:20:00Z', 'reason': ''})
+  PASS  A8 write_flags đóng dấu _meta.generated_at 
+  PASS  A8b ngày SẠCH (0 alert) vẫn đóng dấu → không sinh WARN giả ({'generated_at': '2026-10-13T13:33:28Z', 'scan_asof': '2026-07-30', 'n_alerts_this_run': 0})
+  PASS  A8c merge KHÔNG mất cờ cũ 
+  PASS  A8d _meta KHÔNG lọt vào set loại trừ (không có mã ảo '_meta') 
+  PASS  A9 khối cảnh báo còn nguyên trong production (2 điểm: log + bus) 
+  ⚠️ WARNING: anomaly_flags.json KHÔNG tươi hôm nay — lần ghi cuối 2026-07-25 (ICT) ≠ ngày giao dịch 2026-07-31
+  WARNING: không ghi được bus event anomaly-flags-stale ([Errno 2] No such file or directory: '/tmp/tmpz8uolqd_/mike/bin/append_event.sh')
+  PASS  A10 bus lỗi/không gọi được KHÔNG làm chết luồng lập plan (fail-open) 
+  PASS  A10b đường dẫn append_event.sh thật có tồn tại (WORKDIR thật) 
+  PASS  A11 báo cáo DollarBill/user đọc CÓ dòng cảnh báo, nằm TRƯỚC mục Regime (> ⚠️ **`anomaly_flags.json` KHÔNG tươi hôm nay** (generated_at=`2026-07-25T01:20…)
+  PASS  A11b file tươi → báo cáo KHÔNG có dòng cảnh báo giả 
+  [thật] anomaly_flags.json: is_stale=False generated_at=2026-10-13T05:45:10Z 
+== B. DT5G — bằng chứng publisher CỦA TA (golive_state_today.json) ==
+  PASS  B1 file THIẾU → is_stale 
+  PASS  B2 publisher chưa chạy hôm nay (as_of=T-1) → is_stale (as_of=2026-07-30 ≠ phiên gần nhất 2026-07-31)
+  PASS  B2b dòng cảnh báo có nội dung đọc được 
+  PASS  B3 as_of đúng nhưng bq_publish_ok=false → is_stale (bq_publish_ok=false — publish lên BQ đã HỎNG)
+  PASS  B4 as_of=hôm nay nhưng mtime=hôm qua (chain ta chết, kaffa che bảng) → is_stale (mtime=2026-07-30 ≠ hôm nay 2026-07-31 — publisher của ta KHÔNG chạy hôm nay)
+  PASS  B5 publisher chạy xong hôm nay → KHÔNG cảnh báo ({'is_stale': False, 'reason': '', 'as_of': '2026-07-31', 'published_at': '2026-07-31T11:35:00Z', 'bq_publish_ok': True, 'mtime_date': '2026-07-31', 'last_trading_day': '2026-07-31', 'is_trading_today': True})
+  PASS  B5b warn_line rỗng khi tươi 
+  PASS  B6 ngày KHÔNG giao dịch: as_of=phiên gần nhất, bỏ điều kiện mtime → KHÔNG báo oan (ltd=2026-07-31)
+  PASS  B6b nhận diện đúng phiên gần nhất của CN 08-02 là T6 07-31 
+  PASS  B7 ngày nghỉ mà as_of vẫn tụt 1 phiên → VẪN báo 
+  PASS  B8 file HỎNG → is_stale, KHÔNG raise (báo cáo không được chết) 
+  [thật] golive_state_today.json: is_stale=False as_of=2026-10-13 ok=True mtime=2026-10-13 ltd=2026-10-13 
+== B-wiring. 2 consumer 19:10 / 19:20 thật sự CHÈN được cảnh báo ==
+  PASS  B9 eod_trading_report: cảnh báo là DÒNG ĐẦU tin nhắn gửi đi (⚠️ Trạng thái DT5G có thể là dữ liệu HÔM QUA (stub) — xem lạ…)
+  PASS  B9b có dòng TRỐNG ngăn cách, không dính tiêu đề (bẫy $() nuốt newline) 
+  PASS  B9c phần báo cáo cũ VẪN nguyên vẹn (chỉ THÊM, không thay) 
+  PASS  B10 DT5G tươi → KHÔNG có cảnh báo giả, tin nhắn bắt đầu bằng tiêu đề (📈 **Báo cáo giao dịch ngày — SpaceX (2026-07-31)**…)
+  PASS  B11 pt_8l_daily: DT5G cũ → log [0-fresh] STALE + alert Telegram/Discord 
+  PASS  B12 pt_8l_daily: DT5G tươi → log 1 dòng heartbeat, KHÔNG alert (sent='')
+  PASS  B13 rating_8l.DT5G_STALE mặc định False — caller cũ không thấy gì mới 
+  PASS  B13b dt5g_freshness_flag() đặt cờ khớp bằng chứng thật (không chạm BQ) (stale=False reason=)
+== C. rating_8l.csv — file có được ghi hôm nay không (telegram_run_daily 19:35) ==
+  PASS  C1 file ghi HÔM NAY → rc=0, im lặng (không cảnh báo giả) (out='')
+  PASS  C2 file của HÔM QUA (pt_8l_daily fail im lặng) → rc=1 + đúng câu cảnh báo (out='⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm nay (file cũ). (ghi lần cuối 2026-07-30, mốc cần 2026-07-31)')
+  PASS  C3 file KHÔNG tồn tại → rc=1 + cảnh báo (out='⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm nay (file cũ). (KHÔNG TÌM THẤY file)')
+  PASS  C4 ranh giới ICT dưới TZ=unset: mtime 07-30T18:30Z → coi là HÔM NAY (rc=0 '')
+  PASS  C4 ranh giới ICT dưới TZ=UTC: mtime 07-30T18:30Z → coi là HÔM NAY (rc=0 '')
+  PASS  C4 ranh giới ICT dưới TZ=America/New_York: mtime 07-30T18:30Z → coi là HÔM NAY (rc=0 '')
+  PASS  C5 telegram_run_daily gọi checker + export EXTRA_WARN_HEADER trước khi build/send 
+  PASS  C6 tin nhắn Telegram: cảnh báo nằm DÒNG ĐẦU, trước tiêu đề báo cáo (<b>⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm n…)
+  PASS  C7 không có env (mọi caller khác + ngày file tươi) → tin nhắn KHÔNG đổi một chữ 
+
+== TỔNG: 46 PASS / 0 FAIL ==

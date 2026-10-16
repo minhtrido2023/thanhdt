@@ -1,0 +1,158 @@
+L1   chết       nav_unit_ledger.py       bỏ kiểm chuỗi manifest
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3 manifest xoá bản ghi đầu — chốt: phải ném SealIntegrityError, được NothingToSeal: /tmp/nav_vault_selfcheck_e380b1un/v3_chain/ledger/nav_unit_
+L2   chết       nav_unit_ledger.py       manifest: không kiểm seq
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3 manifest seq nhảy cóc (md5 vẫn nối) — chốt: phải ném SealIntegrityError, được NothingToSeal: /tmp/nav_vault_selfcheck_2lnudn5t/v3_chain/ledge
+L3   chết       nav_unit_ledger.py       không kiểm md5 file sổ == manifest
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3 cắt dòng cuối — chốt: phải ném SealIntegrityError, không ném gì
+L4   chết       nav_unit_ledger.py       file lệch bất kỳ được coi là lần chốt dở
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3 cắt dòng cuối — chốt: phải ném SealIntegrityError, không ném gì
+L5   chết       nav_unit_ledger.py       hoàn tất lần chốt dở dù dựng lại ra md5 khác
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3: xoá file rồi sửa nguồn để dựng lại: phải ném SealIntegrityError, không ném gì
+L6   chết       nav_unit_ledger.py       chốt lần hai không có dòng mới KHÔNG bị từ chối
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V1 chốt lần hai không có dòng mới: phải ném NothingToSeal, được IndexError: list index out of range
+L7   chết       nav_unit_ledger.py       cho chốt dòng của HÔM NAY
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V2: hôm nay 07-07 ⇒ chỉ chốt tới 07-06, được ['2026-07-01', '2026-07-02', '2026-07-03', '2026-07-06', '2026-07-07']
+L8   chết       nav_unit_ledger.py       --asof >= hôm nay không bị từ chối
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V2: --asof = hôm nay: phải ném SealGateError, không ném gì
+L9   chết       nav_unit_ledger.py       cổng: bỏ kiểm thiếu phiên
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V5 thieu_phien: phải ném SealGateError, không ném gì
+L10  chết       nav_unit_ledger.py       cổng: cuối tuần/ngày nghỉ bị coi là thiếu phiên
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1:     raise SealGateError(f"{path}: đoạn {new[0]['date']} → {new[-1]['date']} CHƯA đủ điều kiện "
+L11  chết       nav_unit_ledger.py       cổng: bỏ nhánh chụp-trước-đóng-cửa (rơi xuống nhánh K3)
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V5 chup_truoc_dong_cua: thông điệp thiếu 'TRƯỚC giờ đóng cửa 14:45': /tmp/nav_vault_selfcheck_5vo5ythc/chup_truoc_dong_cua/ledger/nav_unit_ledge
+L12  chết       nav_unit_ledger.py       cổng: biên — chụp ĐÚNG 14:45:00 bị coi là trước đóng cửa
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1:     raise SealGateError(f"{path}: đoạn {new[0]['date']} → {new[-1]['date']} CHƯA đủ điều kiện "
+L13  chết       nav_unit_ledger.py       cổng: bỏ điều kiện K3 (dòng chụp sau khi phiên kế đã đóng cửa)
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V5 k3: phải ném SealGateError, không ném gì
+L14  chết       nav_unit_ledger.py       --accept-preclose gõ nhầm ngày không bị bắt
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V5: nhận nhầm ngày: thông điệp thiếu '--accept-preclose 2026-07-07': /tmp/nav_vault_selfcheck_27u5r_ac/chup_truoc_dong_cua/ledger/nav_unit_ledge
+L15  chết       nav_unit_ledger.py       seal: ghi file sổ TRƯỚC manifest
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/nav_vault_selfcheck_p0lgo_gf/v4_first/ledger/nav_unit_ledger_SpaceX.csv.manifest.jsonl'
+L16  chết       nav_unit_ledger.py       thư mục dữ liệu thật không tự bật kho bất biến
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V6: chốt thư mục thật phải sinh manifest dù immutable=False
+L17  chết       nav_unit_ledger.py       seal vào thư mục thật không cần --real-data
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V6: thư mục thật không real_data: phải ném SealRefused, không ném gì
+L18  chết       nav_unit_ledger.py       restate vào thư mục thật không cần --real-data
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V6: đính chính thư mục thật không real_data: phải ném SealRefused, được NothingToSeal: /tmp/nav_vault_selfcheck_djchkd84/v6_fake_real/nav_unit_l
+L19  chết       nav_unit_ledger.py       restate không cần lý do / người duyệt
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: thiếu {'reason': ''}: phải ném SealGateError, không ném gì
+L20  chết       nav_unit_ledger.py       restate nhận báo cáo tác động của thay đổi khác
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: báo cáo tác động của tài khoản khác (§12): phải ném SealGateError, không ném gì
+L21  chết       nav_unit_ledger.py       restate: không ràng md5 sổ SAU đính chính
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: nguồn đổi sau khi đo tác động: phải ném SealGateError, không ném gì
+L22  chết       nav_unit_ledger.py       restate: không ràng tài khoản của báo cáo tác động
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: báo cáo tác động của tài khoản khác (§12): phải ném SealGateError, không ném gì
+L23  chết       nav_unit_ledger.py       restate không lưu sổ cũ
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: sổ cũ phải được lưu NGUYÊN BYTE, tên mang seq + md5: []
+L24  chết       nav_unit_ledger.py       restate khi không có gì khác vẫn ghi
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: đính chính lần hai không còn gì để sửa: phải ném NothingToSeal, được SealGateError: báo cáo tác động /tmp/nav_vault_selfcheck_gthd9307/v7/im
+L25  chết       nav_unit_ledger.py       restate bỏ qua cổng chốt
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: lời nhận của lần chốt trước phải theo sang bản ghi restate: {}
+L26  chết       nav_unit_ledger.py       restate: file lưu trùng tên nội dung khác không bị bắt
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: file lưu trùng tên khác nội dung: phải ném SealIntegrityError, không ném gì
+L27  chết       nav_unit_ledger.py       balance_ts có múi giờ không quy về ICT
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1:     raise SealGateError(f"{path}: đoạn {new[0]['date']} → {new[-1]['date']} CHƯA đủ điều kiện "
+L28  chết       nav_unit_ledger.py       đối chiếu chỉ-đọc kho bất biến không báo lệch dòng
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3: đối chiếu CHỈ-ĐỌC cũng phải báo lệch nguồn: phải ném LedgerDriftError, không ném gì
+L29  chết       nav_unit_ledger.py       seal kho bất biến không báo lệch dòng đã chốt
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3: NAV quá khứ đổi 1 đ: phải ném LedgerDriftError, được NothingToSeal: /tmp/nav_vault_selfcheck_jllw6wmy/v3_chain/ledger/nav_unit_ledger_SpaceX
+L30  chết       nav_unit_ledger.py       lệnh CHỈ-ĐỌC tự hoàn tất lần chốt dở (ghi file)
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3 xoá file sổ (1 bản ghi) — đối chiếu: phải ném SealIntegrityError, không ném gì
+L31  chết       nav_unit_ledger.py       cổng: dòng thiếu balance_ts được bỏ qua
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V5 thieu_ts: phải ném SealGateError, không ném gì
+L32  chết       nav_unit_ledger.py       file sổ không có manifest được nhận
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V3 mất manifest — chốt: phải ném SealIntegrityError, không ném gì
+L33  chết       nav_unit_ledger.py       hôm nay theo TZ máy thay vì ICT (chạy cả TZ lạ)
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V2 TZ=UTC: hôm nay phải tính theo ICT (chốt tới 07-07, giờ chốt 01:30+07:00), được rc=0 '2026-07-06 2026-07-08T01:30:00+07:00\n' 
+L34  chết       nav_unit_ledger.py       sau khi hoàn tất lần chốt dở vẫn chốt tiếp
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: nav_unit_ledger.NothingToSeal: /tmp/nav_vault_selfcheck_04vtc4bi/v3_del_first/ledger/nav_unit_ledger_SpaceX.csv: không có dòng mới để chốt tới 2026-07
+L35  chết       nav_unit_ledger.py       sau khi hoàn tất lần đính chính dở vẫn đính chính tiếp
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: nav_unit_ledger.NothingToSeal: /tmp/nav_vault_selfcheck_j4f1d5s3/v7_crash/ledger/nav_unit_ledger_SpaceX.csv: chuỗi dựng lại KHỚP sổ đã chốt (md5 75a6b
+L36  chết       nav_unit_ledger.py       restate quên lời nhận chụp-trước-đóng-cửa của các lần chốt trước
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1:     raise SealGateError(f"{path}: sổ sau đính chính CHƯA đủ điều kiện chốt "
+L37  chết       nav_unit_ledger.py       thư mục đã có manifest không tự bật kho bất biến
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V1: thư mục đã có manifest ⇒ chốt không truyền immutable vẫn là kho bất biến: phải ném NothingToSeal, không ném gì
+L38  chết       nav_unit_ledger.py       seal không ghi lời nhận chụp-trước-đóng-cửa vào manifest
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V5: nhận tường minh ⇒ chốt được và lý do nằm trong manifest: {}
+F1   chết       fund_restatement.py      biên 0,05 thành bậc 1
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R1: tier(0.05) phải = 2, được 1
+F2   chết       fund_restatement.py      biên 0,5 thành bậc 3
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R1: tier(0.5) phải = 2, được 3
+F3   chết       fund_restatement.py      độ lệch không đo được xếp bậc 0
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R1: tier(inf) phải = 3, được 0
+F4   chết       fund_restatement.py      ngưỡng bậc 3 = 5
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R1: tier(0.5000001) phải = 3, được 2
+F5   chết       fund_restatement.py      số chính không tính lệch NAV cuối kỳ
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R8: NAV lệch 0,06% (bậc 2) dù tỉ suất chỉ lệch 0,03 điểm % ⇒ bậc 2: {'nav': {'old': 500000000.0, 'new': 500300000.0, 'dev_pct': 0.05999999999999
+F6   chết       fund_restatement.py      lệch tỉ suất không lấy trị tuyệt đối
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3 daily 07-06: bậc 2 (0,3), được bậc 2 dev 0.2955665024630516
+F7   chết       fund_restatement.py      báo cáo ngày không đo tỉ suất ngày
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: KeyError: 'day'
+F8   chết       fund_restatement.py      số chính lấy min thay vì max
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3 daily 07-06: bậc 2 (0,3), được bậc 2 dev 0.2941176470588225
+F9   chết       fund_restatement.py      window không tính lệch tỉ suất ngày
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3 weekly: số chính không đổi nhưng số theo ngày lệch bậc 2 ⇒ CẦN NGƯỜI XEM: {'report': 'SpaceX_weekly_report_2026-07-06_to_2026-07-10.md', 'kin
+F10  chết       fund_restatement.py      §12: báo cáo của tài khoản khác bị tính
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R2 §12: chỉ báo cáo của SpaceX (kể cả báo cáo gộp), được ['SpaceX_ZaloPay_monthly_report_2026-07.md', 'SpaceX_daily_report_2026-07-03.md', 'Spac
+F11  chết       fund_restatement.py      báo cáo trích nguyên NAV cũ ngoài kỳ không tính vào window
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3: quét 8, ảnh hưởng 6; được 8/5: ['SpaceX_ZaloPay_monthly_report_2026-07.md', 'SpaceX_daily_report_2026-07-06.md', 'SpaceX_daily_report_2026-0
+F12  chết       fund_restatement.py      kỳ có dòng thêm/bỏ không gọi người xem
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R8: dòng chèn không đổi số nào vẫn phải vào hàng đợi người xem: {'report': 'SpaceX_weekly_report_2026-07-06_to_2026-07-10.md', 'kind': 'weekly',
+F13  chết       fund_restatement.py      window bậc 2 không gọi người xem
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3 weekly: số chính không đổi nhưng số theo ngày lệch bậc 2 ⇒ CẦN NGƯỜI XEM: {'report': 'SpaceX_weekly_report_2026-07-06_to_2026-07-10.md', 'kin
+F14  chết       fund_restatement.py      không kiểm expect của dòng bị sửa
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R5 expect lệch: phải ném RestatementError, không ném gì
+F15  chết       fund_restatement.py      không kiểm bất biến NAV của dòng sau sửa
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R5 vỡ bất biến nav: phải ném RestatementError, không ném gì
+F16  chết       fund_restatement.py      §12: file đính chính áp chéo tài khoản
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R5 §12 file của tài khoản khác: phải ném RestatementError, không ném gì
+F17  chết       fund_restatement.py      apply vào thư mục thật không cần --real-data
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R6: ghi thư mục thật không --real-data ⇒ rc=3, không ghi, được rc=0
+F18  chết       fund_restatement.py      apply nhận báo cáo tác động của file đính chính khác
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R6: báo cáo tác động của file đính chính khác ⇒ rc=2, không ghi: LỖI fund_restatement [RestatementError]: /tmp/fund_restatement_selfcheck_sbrkg6
+F19  chết       fund_restatement.py      apply khi nav_history đã đổi từ lúc đo
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R6: nav_history đổi sau khi đo ⇒ rc=2, không ghi: 
+F20  chết       fund_restatement.py      chạy lại sau khi chết ghi bản ghi nhật ký thứ hai
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R6: chạy lại ghi nốt nav_history, KHÔNG thêm dòng nhật ký thứ hai
+F21  chết       fund_restatement.py      ghi lại nav_history mất CRLF
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R4: đo bằng (thư mục cũ, thư mục mới) phải ra ĐÚNG kết quả của file đính chính
+F22  chết       fund_restatement.py      một ngày hai đính chính
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R5 xuất hiện hai lần: phải ném RestatementError, không ném gì
+F23  chết       fund_restatement.py      đính chính không cần lý do/bằng chứng
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R5 thiếu reason: phải ném RestatementError, không ném gì
+F24  chết       fund_restatement.py      bậc 3 không vào hàng đợi user
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3 bậc 3: phải vào hàng đợi phát hành lại: [{'report': 'SpaceX_ZaloPay_monthly_report_2026-07.md', 'why': 'số theo NGÀY trong kỳ lệch bậc 3 (0.8
+F25  chết       fund_restatement.py      bậc 3 lẫn vào danh sách ghi chú
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3 bậc 3: phải vào hàng đợi phát hành lại: [{'report': 'SpaceX_daily_report_2026-07-06.md', 'why': 'bậc 3 — số chính lệch 0.8000 > 0.5: phát hàn
+F26  chết       fund_restatement.py      apply lần hai không nhận ra đã áp
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R6: áp lần hai = không làm gì, không thêm dòng nhật ký
+F27  chết       fund_restatement.py      ledger_binding ghi sai md5 sổ sau đính chính
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V7: báo cáo tác động phải mang md5 sổ đang chốt + md5 sổ sau đính chính: {'sealed_ledger': 'nav_unit_ledger_SpaceX.csv', 'sealed_md5': 'feb950cc
+F28  chết       fund_restatement.py      apply không cần người duyệt
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R6: thiếu người duyệt ⇒ rc=2
+F29  chết       fund_restatement.py      báo cáo tuần tên 1 ngày: kỳ chỉ còn 1 ngày
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R2 weekly một ngày ⇒ từ thứ Hai: {'who': ['SpaceX'], 'kind': 'weekly', 'start': datetime.date(2026, 7, 3), 'end': datetime.date(2026, 7, 3), 'su
+F30  chết       fund_restatement.py      replace đã áp sẵn không được nhận là already
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1:     raise RestatementError(
+F31  chết       fund_restatement.py      changed_dates chỉ so cột nav
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R8: sửa riêng balance_ts ⇒ changed_rows có dòng đó, 0 báo cáo lệch: []
+F32  chết       fund_restatement.py      nav_history ngày lộn xộn/trùng được nhận
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R8: nav_history ngày lộn xộn phải rc=2, được rc=2 t [ValueError]: nav_history không tăng nghiêm ngặt theo ngày: dòng 2026-07-02 (nav 1,010,000,0
+F33  chết       fund_restatement.py      bậc 2 lẫn vào 'chỉ sửa từ nay'
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R3: changed_rows / fix_forward_only sai: [{'date': '2026-07-06', 'nav_old': 1015000000.0, 'nav_new': 1012000000.0}] ['SpaceX_ZaloPay_monthly_rep
+F34  chết       fund_restatement.py      delete dòng không tồn tại không còn idempotent (ném lỗi)
+       ↳ fund_restatement_selfcheck.py TZ=gỡ rc=1: FAIL: R8: xoá hai lần — lần hai phải rc=0 'ĐÃ ÁP từ trước', được rc=2 LỖI fund_restatement [RestatementError]: corrections[0] delete 2026-07-08: nav_h
+S1   chết       daily_nav_snapshot.py    giá thay dùng được ở đường live
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V8: ['VHM=77100'] from_raw=False ev='x': phải ném ValueError, không ném gì
+S2   chết       daily_nav_snapshot.py    giá thay không cần bằng chứng
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V8: ['VHM=77100'] from_raw=True ev='': phải ném ValueError, không ném gì
+S3   chết       daily_nav_snapshot.py    giá thay <= 0 / inf được nhận
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V8: ['VHM=0'] from_raw=True ev='x': phải ném ValueError, không ném gì
+S4   chết       daily_nav_snapshot.py    mã không quy về chữ hoa
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V8: MÃ=GIÁ, mã viết thường được chuẩn hoá
+S5   chết       daily_nav_snapshot.py    main: giá thay cho mã không giữ không bị từ chối
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V8: main() phải đọc giá thay qua parser, chặn mã không giữ, và ghi dấu vào nav_source + notes
+S6   chết       daily_nav_snapshot.py    main: giá thay không được áp vào giá
+       ↳ nav_ledger_vault_selfcheck.py TZ=gỡ rc=1: FAIL: V8: main() phải đọc giá thay qua parser, chặn mã không giữ, và ghi dấu vào nav_source + notes
+
+TỔNG: 78 mutant — 78 chết, 0 SỐNG, 0 lỗi dựng mutant

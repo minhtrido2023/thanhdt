@@ -1,0 +1,74 @@
+
+[1] signal 2026-08-03 → plan 2026-08-04 (dữ liệu thật)
+  ✓ cổng lịch PASS
+  ✓ due_today gồm entry ngày chuẩn + residual ngày 2 DHD
+  ✓ DCM/PVT (T+2) + DRI/POW (T+3) nằm ở upcoming, KHÔNG ở due_today
+  ✓ APF bị ZaloPay bỏ sót → script BẮT được
+  ✓ không có dòng nào unparsed
+  ✓ tổng số dòng LAG = 25 (mọi rổ, kể cả anchor_unavailable)
+  ✓ entry_date của scheduled entries == plan_date
+  ✓ V2.4 DRI ngày 2 là entry bình thường trong window
+  ✓ V2.4 DRI ngày 2 có anchor THẬT (số), không phải chỉ cờ boolean
+  ✓ V2.4 quá 2 phiên sau entry -> hết window
+
+[1b] fail-closed khi thiếu/hỏng nguồn anchor
+  ✓ không truyền fetcher → DRI ngày 2 BỊ LOẠI khỏi due_today
+  ✓ mã bị loại có drop_reason nói rõ lý do
+  ✓ nguồn anchor NỔ (BQ lỗi) → fail-closed, không thả vào due_today
+  ✓ lỗi hạ tầng được ghi vào drop_reason, không nuốt im lặng
+  ✓ mã không có dữ liệu giá ngày đó → BỊ LOẠI (không đoán giá thay thế)
+  ✓ entry ngày chuẩn (ngày 1) KHÔNG cần anchor — không bị gate chặn oan
+  ✓ cờ đỏ DD được echo (MAC/TV3 thanh khoản chết)
+
+[2] account-agnostic (2 account cùng CSV phải ra cùng due_today)
+  ✓ SpaceX vs ZaloPay cùng kết quả
+
+[3] signal 2026-07-27 → plan 2026-07-28 (dữ liệu thật)
+  ✓ cổng lịch PASS
+  ✓ EVF/PSI/VCI đều T+1 (due_today)
+
+[4] cổng lịch — plan_date sai thì TỪ CHỐI phân loại
+  ✓ calendar_check.ok == False
+  ✓ due_today rỗng khi cổng lịch FAIL
+  ✓ mọi dòng T+N rơi vào unparsed
+  ✓ expected_plan_date = 2026-08-04
+  ✓ note cảnh báo đứng đầu
+
+[4b] cổng lịch qua cuối tuần (signal thứ Sáu 2026-07-31 → thứ Hai 2026-08-03)
+  ✓ thứ Sáu 2026-07-31 là weekday 4
+  ✓ next_trading_day nhảy qua T7/CN
+  ✓ plan_date rơi vào thứ Bảy → FAIL
+
+[5] classify_status
+  ✓ classify_status('UPCOMING T+1 phiên tới')
+  ✓ classify_status('UPCOMING T+12 phiên tới')
+  ✓ classify_status('UPCOMING 2026-08-11')
+  ✓ classify_status('WINDOW_PASSED 2026-07-29')
+  ✓ classify_status('HALF_SIZE')
+  ✓ classify_status('')
+  ✓ classify_status(None)
+  ✓ classify_status('UPCOMING T+ phiên tới')
+
+[6] dạng UPCOMING <ngày> — CSV tổng hợp
+  ✓ AAA ngày chuẩn + CCC ngày 2 → due_today
+  ✓ BBB (ngày > plan_date) → upcoming
+  ✓ CCC (ngày < plan_date) vẫn active ngày 2
+  ✓ DDD (status lạ) → unparsed
+  ✓ dòng book=BAL bị bỏ qua
+  ✓ BBB floor_fail=True
+  ✓ CCC dd_red_flags parse đúng 2 cờ
+  ✓ có unparsed → note cảnh báo
+
+[7] thiếu CSV
+  ✓ trả error thay vì raise
+  ✓ calendar_check.ok == False
+
+[8] CLI + độc lập TZ
+  ✓ exit 0 khi cổng lịch PASS (env -u TZ)
+  ✓ file JSON được ghi
+  ✓ exit 2 khi cổng lịch FAIL
+  ✓ kết quả giống hệt nhau ở 4 cấu hình TZ (kể cả env -u TZ)
+  ✓ today_ict() == ngày ICT thật
+  ✓ plan_date mặc định = phiên kế tiếp của ngày ICT
+
+=== 52/52 PASS ===

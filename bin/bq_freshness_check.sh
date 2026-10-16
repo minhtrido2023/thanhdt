@@ -38,6 +38,12 @@
 #   earnings_surprise_data.pkl probe  WARN  — content catch-up pkl vs ticker_financial: nguồn LAG live
 #                                             candidacy, golive except-path nuốt lỗi im lặng
 #                                             (audit Spyros_20260712_131501 M1)
+#   PNJ BCTC Q3 review-trigger watch  WARN  — PNJ có dòng quarter=2026Q3 trong ticker_financial ⇒ MỘT
+#                                             LẦN: bus question + Discord (bin/pnj_q3_review_watch.py)
+#
+# Bước pipeline (sau khi ALL FRESH): 1 publish_gated_state · 1b universe_pit · 1c universe_pit_quality ·
+#   1d refresh_earnings_surprise_pkl (BQ SỐNG → pkl LAG, WARN-only, 2026-10-13) · 2 golive_recommend_v23 ·
+#   3 push_recommend_v23_to_bq · 4 dispatch DollarBill
 #
 # Usage: bin/bq_freshness_check.sh [--quiet]
 set -uo pipefail
@@ -94,6 +100,23 @@ MAX_RR_QAGE=135      # calendar days từ NGÀY CUỐI QUÝ của MAX(quarter) t
                      # = sync_bq_cache/preflight cache list, KHÔNG có consumer production trong chuỗi
                      # chọn-mã) → block sẽ chặn oan DollarBill vì 1 bảng research chết.
 TODAY="$(date +%Y-%m-%d)"
+# MORNING MODE (opt-in, 2026-10-15, user duyệt): MIKE_MORNING_RUN=1 ⇒ chạy tay buổi sáng khi BQ xong muộn
+# sau chuỗi 18:30 hôm trước. TODAY = PHIÊN gần nhất đã có dữ liệu EOD (bin/expected_session.py, cutoff
+# 17:00 ICT) thay vì ngày lịch; NEXT_TRADING_DAY = ngày giao dịch kế tiếp sau phiên đó (= hôm nay).
+# Cron KHÔNG đặt biến này ⇒ hành vi 19:00 y nguyên. Mọi cổng khác GIỮ NGUYÊN; chỉ điều kiện mtime của
+# publisher DT5G đổi (xem gate dưới): phải >= phiên và <= hôm nay thay vì == hôm nay.
+MORNING="${MIKE_MORNING_RUN:-0}"
+CAL_TODAY="$(date +%Y-%m-%d)"   # ngày LỊCH (khác TODAY=phiên ở morning mode)
+if [ "$MORNING" = "1" ]; then
+  _sess="$(python3 "$(dirname "${BASH_SOURCE[0]}")/expected_session.py" --morning 2>/tmp/.expected_session_err.$$)"; _sess_rc=$?
+  _sess_err="$(cat /tmp/.expected_session_err.$$ 2>/dev/null)"; rm -f /tmp/.expected_session_err.$$
+  TODAY="${_sess%% *}"; MORNING_NEXT="${_sess##* }"
+  if [ "$_sess_rc" -ne 0 ] || ! [[ "$TODAY" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ && "$MORNING_NEXT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    echo "FATAL: MIKE_MORNING_RUN=1 bị từ chối/lỗi (rc=$_sess_rc, got: '$_sess'): ${_sess_err:-không có stderr} — dừng" >&2
+    exit 1
+  fi
+  echo "MORNING MODE: phiên=$TODAY, plan cho=$MORNING_NEXT (MIKE_MORNING_RUN=1)"
+fi
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 FAILED=0
 WARNED=0
@@ -110,6 +133,7 @@ from trading_bot.vn_market import next_trading_day
 import datetime as dt
 print(next_trading_day(dt.date.today()))
 " 2>/dev/null)"
+[ "$MORNING" = "1" ] && NEXT_TRADING_DAY="$MORNING_NEXT"
 if [ -z "$NEXT_TRADING_DAY" ]; then
   echo "FATAL: không tính được NEXT_TRADING_DAY (next_trading_day() lỗi) — dừng, không dispatch DollarBill với ngày rỗng" >&2
   exit 1
@@ -457,12 +481,17 @@ print(d.get('as_of', '?'), 'ok' if d.get('bq_publish_ok') else 'FAIL')
     dt5g_pub_reason="golive_state_today.json as_of=${DT5G_AS_OF:-?} ≠ phiên gần nhất $LAST_TRADING_DAY"
   elif [ "${DT5G_PUB_OK:-FAIL}" != "ok" ]; then
     dt5g_pub_reason="golive_state_today.json bq_publish_ok=false — publish lên BQ đã HỎNG"
+  elif [ "${MORNING:-0}" = "1" ]; then
+    # Morning mode: publisher phải chạy SAU phiên (mtime >= phiên) và không ở tương lai (<= hôm nay lịch).
+    if [[ "$DT5G_JSON_MDATE" < "$TODAY" || "$DT5G_JSON_MDATE" > "${CAL_TODAY:-$(date +%Y-%m-%d)}" ]]; then
+      dt5g_pub_reason="golive_state_today.json mtime=$DT5G_JSON_MDATE ngoài [$TODAY, hôm nay] — publisher của ta KHÔNG chạy sau phiên $TODAY"
+    fi
   elif [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_JSON_MDATE" != "$TODAY" ]; then
     dt5g_pub_reason="golive_state_today.json mtime=$DT5G_JSON_MDATE ≠ hôm nay $TODAY — publisher của ta KHÔNG chạy hôm nay"
   fi
 fi
 if [ -n "$dt5g_pub_reason" ]; then
-  pub_msg="⚠️ DT5G PUBLISHER ($TODAY $NOW_ICT): $dt5g_pub_reason. Bảng vnindex_5state_dt5g_live CÓ THỂ vẫn tươi do writer thứ hai (pipeline kaffa_v2 team dữ liệu ~17:12 ICT) — nhưng đó KHÔNG PHẢI state của engine ta công bố. Chặn pipeline/DollarBill. Kiểm tra daily_refresh_v34b_linux.sh step [12] + data/refresh_v34b_linux_$TODAY.log"
+  pub_msg="⚠️ DT5G PUBLISHER ($TODAY $NOW_ICT): $dt5g_pub_reason. Bảng vnindex_5state_dt5g_live CÓ THỂ vẫn tươi do writer thứ hai (pipeline kaffa_v2 team dữ liệu ~17:12 ICT) — nhưng đó KHÔNG PHẢI state của engine ta công bố. Chặn pipeline/DollarBill. Kiểm tra daily_refresh_v34b_linux.sh step [12] + data/refresh_v34b_linux_${CAL_TODAY:-$TODAY}.log"
   echo "FAIL DT5G publisher-evidence: $dt5g_pub_reason"
   "$ROOT/bin/notify.sh" "$pub_msg" 2>/dev/null || true
   "$ROOT/bin/notify_thread.sh" "$pub_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
@@ -470,7 +499,7 @@ if [ -n "$dt5g_pub_reason" ]; then
 else
   [ -z "$QUIET" ] && echo "OK   DT5G publisher-evidence: golive_state_today.json as_of=$DT5G_AS_OF (phiên gần nhất), bq_publish_ok=true, mtime=$DT5G_JSON_MDATE"
   DT5G_CSV_MDATE="$(date -d @"$(stat -c %Y "$DT5G_CSV_F" 2>/dev/null || echo 0)" +%Y-%m-%d 2>/dev/null)"
-  if [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_CSV_MDATE" != "$TODAY" ]; then
+  if [ "${MORNING:-0}" != "1" ] && [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_CSV_MDATE" != "$TODAY" ]; then
     csv_msg="🟡 DT5G CSV MIRROR ($TODAY $NOW_ICT): data/vnindex_5state_dt5g_live.csv mtime=${DT5G_CSV_MDATE:-MISSING} ≠ hôm nay dù publish BQ OK — export CSV từ BQ đã lỗi. Production (BQ) vẫn ĐÚNG; nhóm script nghiên cứu đọc CSV này đang dùng bản cũ. Không chặn pipeline."
     echo "WARN DT5G csv mirror: mtime=${DT5G_CSV_MDATE:-MISSING} ≠ $TODAY — non-blocking"
     "$ROOT/bin/notify_thread.sh" "$csv_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
@@ -541,7 +570,8 @@ FIN_BREADTH_SAT_PCT=90     # cohort >= 90% số mã quý trước = mùa đã ho
 
 read -r EXPECTED_Q IN_SEASON <<< "$(python3 -c "
 import datetime as dt, calendar
-today = dt.date.today()
+from zoneinfo import ZoneInfo
+today = dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()   # neo ICT tường minh (§16), không phụ thuộc TZ cron
 q_end_month = ((today.month - 1) // 3) * 3   # 0,3,6,9 — tháng cuối của quý VỪA KẾT THÚC
 if q_end_month == 0:
     q_end = dt.date(today.year - 1, 12, 31); q_num, q_year = 4, today.year - 1
@@ -651,6 +681,22 @@ else
   fi
 fi
 
+# --- PNJ BCTC Q3 review-trigger watch (audit BCTC Q3 finding L2; user duyệt 2026-10-13, job
+# Taylor_20261013_125149). PNJ bị loại khỏi 2 account từ 09-30, điều kiện xét lại = "khi PNJ công bố
+# BCTC Q3" (kb/current_ops.md) — trước đây chỉ là văn xuôi, không ai canh. Script tự chống lặp bằng
+# state file ghi nguyên tử (data/pnj_q3_review_watch_state.json) và fail-closed khi lỗi đọc; ở đây
+# chỉ gọi + giới hạn thời gian. KHÔNG đếm vào WARNED, KHÔNG chặn pipeline, KHÔNG đụng excluded_tickers.
+if _pnj_out="$(cd "$ROOT" && timeout 60 python3 bin/pnj_q3_review_watch.py ${QUIET:+--quiet} 2>&1)"; then
+  [ -n "$_pnj_out" ] && echo "$_pnj_out"
+else
+  echo "  [WARN] pnj_q3_review_watch.py exit=$? (124 = timeout 60s) — không chặn pipeline. Output thật: ${_pnj_out:-<rỗng>}"
+fi
+if printf '%s\n' "$_pnj_out" | grep -q '^ALERT pnj-q3-watch:'; then
+  # watcher chết lặng = đúng lỗi nó sinh ra để vá (arch-review 13/10 R2) ⇒ báo người, không chỉ log
+  "$ROOT/bin/notify_thread.sh" "🔴 pnj_q3_review_watch KHÔNG hoạt động đúng ($TODAY): $(printf '%s\n' "$_pnj_out" | grep -E '^(WARN|ALERT) pnj-q3-watch' | head -3 | cut -c1-600)" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  WARNED=$((WARNED + 1))
+fi
+
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
 # --- [pipeline-0] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 PHIÊN trên mã đang giữ
@@ -714,6 +760,22 @@ python3 "$ROOT/bin/gate_source_check.py" --workdir "$WORKDIR" --publish-log "$GA
   || echo "  [WARN] gate_source_check.py thoát rc=$? — KHÔNG kiểm được nguồn cổng lượt publish này, không chặn pipeline; kiểm tay trường source trong deploy_golive_dt5g_v4/golive_state_today.json"
 [ "$GATE_PUB_OUT" = /dev/null ] || rm -f "$GATE_PUB_OUT"
 
+# [pipeline-1a] gap-fill universe_pit/_quality cho các phiên THIẾU trước hôm nay (WARN-only, 2026-10-15).
+# Sự cố 2026-10-15: phiên 14/10 không được build (chuỗi hôm đó bị chặn) ⇒ golive_recommend_v23
+# assert_universe_covers dừng ⇒ DollarBill không lập plan T+1. Cổng đó ĐÚNG và giữ nguyên; bước
+# này chỉ lấp chỗ thiếu bằng chính builder (cùng B8, append-only). Lỗi/quá MAX_GAPS ⇒ chỉ cảnh báo,
+# vì cổng thật nằm ở golive (chặn nếu panel vẫn thiếu phiên). Chạy TRƯỚC 1b để thứ tự phiên tăng dần.
+echo; echo "--- [pipeline-1a] universe gap-fill (< $TODAY) ---"
+_gap_out="$(timeout "${UNIVERSE_GAP_FILL_TIMEOUT_S:-900}" $PY mike/bin/universe_gap_fill.py --today "$TODAY" 2>&1)"
+_gap_rc=$?
+echo "$_gap_out"
+if [ "$_gap_rc" -ne 0 ]; then
+  _gap_why="$(echo "$_gap_out" | grep -E '✗|Traceback|Error' | tail -2 | tr '\n' ' ')"
+  [ "$_gap_rc" -eq 124 ] && _gap_why="timeout ${UNIVERSE_GAP_FILL_TIMEOUT_S:-900}s (bị kill; an toàn vì job_id tiền định)"
+  echo "  [WARN exit $_gap_rc] [pipeline-1a] universe gap-fill — tiếp tục; golive sẽ chặn nếu panel còn thiếu phiên"
+  "$ROOT/bin/notify_thread.sh" "🟡 UNIVERSE GAP-FILL WARN ($TODAY $NOW_ICT): lấp phiên thiếu của universe_pit exit $_gap_rc — ${_gap_why:-không có dòng lỗi, xem mike/logs/bq_freshness.log}. Pipeline vẫn chạy; golive_recommend_v23 sẽ dừng nếu panel còn thiếu phiên." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+fi
+
 # [pipeline-1b] build universe_pit — BLOCK on real fail.
 # build_universe_pit.py exit 1 cả khi: (a) fail thật, (b) B8_DUPLICATE (data đã có = idempotent).
 # Phân biệt bằng BQ count: n>0 sau exit≠0 → idempotent OK; n=0 → fail thật → BLOCK.
@@ -748,6 +810,31 @@ else
   "$ROOT/bin/notify_thread.sh" "$_pq_err" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   echo "=== FAILED (build_universe_pit_quality) — DollarBill KHÔNG được dispatch ==="
   exit 1
+fi
+
+# [pipeline-1d] làm mới data/earnings_surprise_data.pkl từ BQ SỐNG ngay trước golive (audit BCTC Q3
+# finding L1; user duyệt 2026-10-13, job Taylor_20261013_125149). golive lấy sự kiện LAG mới từ pkl
+# này, mà bản 15:30 (refresh_lagged_caches.py [3]) đọc qua BQ_LOCAL_CACHE = cache sync 23:45 ĐÊM
+# TRƯỚC ⇒ BCTC ingest ~16:36 hôm nay chỉ tới golive ở 19:00 NGÀY MAI (đo 10-13: pkl 15:30 = 58.233
+# dòng/max 08-21 = y hệt parquet cache; BQ sống đã có KBC 2026Q3). Bước này bỏ hẳn phiên trễ đó.
+# WARN-only: lỗi/timeout/dữ liệu đáng ngờ ⇒ script GIỮ pkl 15:30 (ghi nguyên tử, không bao giờ để
+# pkl nửa vời) và golive vẫn chạy như trước khi có bước này. Đo thật 10-13: ~14-15s/lượt (3 lượt),
+# RSS ~316MB; timeout 90s. CỐ Ý không dùng _run_pipeline để phân biệt được timeout (rc=124) và
+# đẩy WARN lên Discord — hỏng ở đây nghĩa là LAG lặng lẽ quay về trễ 1 phiên giữa mùa BCTC.
+# Probe lag-pkl ở trên đo pkl TRƯỚC bước này ⇒ vẫn canh độc lập đường làm mới 15:30.
+LAG_PKL_REFRESH_TIMEOUT_S="${LAG_PKL_REFRESH_TIMEOUT_S:-90}"   # env override CHỈ cho selfcheck
+echo; echo "--- [pipeline-1d] refresh_earnings_surprise_pkl (BQ sống → pkl LAG) ---"
+_pkl_t0="$(date +%s)"
+if _pkl_out="$(timeout "$LAG_PKL_REFRESH_TIMEOUT_S" $PY refresh_earnings_surprise_pkl.py 2>&1)"; then
+  echo "$_pkl_out" | tail -3
+  echo "  [ok] [pipeline-1d] refresh_earnings_surprise_pkl ($(( $(date +%s) - _pkl_t0 ))s)"
+else
+  _pkl_rc=$?
+  echo "$_pkl_out" | tail -5
+  _pkl_why="$(echo "$_pkl_out" | tail -1)"
+  [ "$_pkl_rc" -eq 124 ] && _pkl_why="timeout ${LAG_PKL_REFRESH_TIMEOUT_S}s (bị kill; file tạm mồ côi sẽ được dọn ở lượt sau)"
+  echo "  [WARN exit $_pkl_rc] [pipeline-1d] refresh_earnings_surprise_pkl — GIỮ pkl 15:30, tiếp tục pipeline ($(( $(date +%s) - _pkl_t0 ))s)"
+  "$ROOT/bin/notify_thread.sh" "🟡 LAG PKL REFRESH WARN ($TODAY $NOW_ICT): bước làm mới earnings_surprise_data.pkl từ BQ sống trước golive KHÔNG xong (exit $_pkl_rc) — golive vẫn chạy trên pkl 15:30 (cache đêm trước), tức BCTC ingest hôm nay sẽ tới LAG trễ 1 phiên như trước 10-13. Lý do thật: ${_pkl_why:-<không có output>}. Không chặn plan." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
 fi
 
 _run_pipeline "[pipeline-2] golive_recommend_v23"     deploy_golive_dt5g_v4/golive_recommend_v23.py
@@ -794,8 +881,20 @@ else
   FEE_NOTE="theo FEE_RATE_BUY_PCT trong mike/bin/dnse_fee_rates.py"
 fi
 
+MORNING_NOTE=""
+if [ "${MORNING:-0}" = "1" ]; then
+  MORNING_NOTE=" ⚠️ CHẠY TAY BUỔI SÁNG (MIKE_MORNING_RUN=1): dữ liệu/DT5G/recommend là của PHIÊN $TODAY (không phải ngày lịch ${CAL_TODAY}); plan này dành cho CHÍNH ngày $NEXT_TRADING_DAY. BẮT BUỘC đặt requires_user_approval=true cho mọi lệnh và nói rõ trong summary rằng đây là plan chạy tay buổi sáng cần user duyệt trước 08:45 ICT; chuỗi inject lệnh thoát theo thời gian (auto_exit_inject) và gửi plan có thể CHƯA chạy cho ngày này."
+fi
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
+  # MORNING-SKIP-BEGIN (arch-review 2026-10-15 B2): morning mode KHÔNG ghi đè plan đích đã tồn tại
+  # (có thể đã duyệt/đang chạy; run_bot 13:00 resume đọc file này). Ép: MIKE_MORNING_FORCE=1.
+  if [ "${MORNING:-0}" = "1" ] && [ -e "$WORKDIR/data/trade_plans/plan_${ACCT}_${NEXT_TRADING_DAY}.json" ] \
+     && [ "${MIKE_MORNING_FORCE:-0}" != "1" ]; then
+    echo "  [SKIP-MORNING] plan_${ACCT}_${NEXT_TRADING_DAY}.json ĐÃ TỒN TẠI — không ghi đè (ép: MIKE_MORNING_FORCE=1)"
+    continue
+  fi
+  # MORNING-SKIP-END
   HAS_EXCL="$(cd "$WORKDIR" && python3 -c "
 from trading_bot.config import load_config, load_accounts
 p = next(a for a in load_accounts(load_config()) if a['label'] == '$ACCT')
@@ -865,7 +964,7 @@ except Exception:
   # hiệu thị trường khi viết plan/summary.
   CORP_ACTION_NOTE="$(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --note "$ACCT" 2>/dev/null)"
   "$ROOT/bin/dispatch.sh" DollarBill \
-    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: ${CAL_TODAY:-$TODAY} (ICT).${MORNING_NOTE}${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
     --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 

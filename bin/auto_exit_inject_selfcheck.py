@@ -1035,7 +1035,7 @@ def main():
     # (lượt chạy sau nói lý do khác, hoặc cắt sâu hơn) vẫn phải báo lại; CÙNG ngày + CÙNG nội
     # dung mới bị nuốt; NGÀY khác luôn báo lại dù nội dung cũ (Mdedup_never_skip = nuốt mọi thứ
     # mãi mãi; Mdedup_always_skip = không bao giờ nuốt gì, mất tác dụng dedup). --------------
-    print("\n[Test23] _new_block_alert_lines — dedup theo (ticker,book,reason/capped_qty,ngày)")
+    print("\n[Test23] _new_block_alert_lines — dedup theo (ticker,book,reason/capped_qty) tới khi nội dung đổi")
     _tmp_dir23 = tempfile.mkdtemp(prefix="aei_dedup_")
     _state_path23 = os.path.join(_tmp_dir23, "state.json")
     _orig_state_path23 = aei.BLOCK_ALERT_STATE_PATH
@@ -1057,8 +1057,24 @@ def main():
               "Mdedup_always_skip chết)", len(lines_c) == 1, f"lines={lines_c}")
 
         lines_d, _ = aei._new_block_alert_lines("DedupAcct", _blocked_a, [], "2026-10-02")
-        check("Test23d: ngày KHÁC + nội dung CŨ ⇒ vẫn báo lại (dedup chỉ trong 1 ngày)",
-              len(lines_d) == 1, f"lines={lines_d}")
+        check("Test23d: ngày KHÁC + nội dung CŨ ⇒ vẫn bị nuốt (dedup tới khi nội dung đổi, "
+              "Mdedup_by_day chết)", len(lines_d) == 0, f"lines={lines_d}")
+
+        _, state_empty = aei._new_block_alert_lines("DedupAcct", [], [], "2026-10-02")
+        check("Test23h: lượt không còn mã nào ⇒ state tỉa khoá cũ",
+              state_empty.get("DedupAcct") == {}, f"state={state_empty}")
+        with open(_state_path23, "w", encoding="utf-8") as f:
+            json.dump(state_empty, f)
+        lines_i, _ = aei._new_block_alert_lines("DedupAcct", _blocked_a, [], "2026-10-03")
+        check("Test23i: mã biến mất rồi xuất hiện lại ⇒ báo lại (Mdedup_never_prune chết)",
+              len(lines_i) == 1, f"lines={lines_i}")
+        with open(_state_path23, "w", encoding="utf-8") as f:
+            json.dump(state_a, f)
+        _b_other = [{"ticker": "DEDUP9", "book": "LAG", "reason": "mã khác"}]
+        lines_j, state_j = aei._new_block_alert_lines("DedupAcct", _blocked_a + _b_other, [], "2026-10-04")
+        check("Test23j: 1 mã cũ + 1 mã mới ⇒ chỉ báo mã mới, giữ khoá cũ",
+              len(lines_j) == 1 and "DEDUP9" in lines_j[0] and len(state_j["DedupAcct"]) == 2,
+              f"lines={lines_j}")
 
         _capped_a = [{"ticker": "DEDUP2", "book": "BAL", "desired_qty": 1000, "capped_qty": 600}]
         lines_e, state_e = aei._new_block_alert_lines("DedupAcct", [], _capped_a, "2026-10-03")

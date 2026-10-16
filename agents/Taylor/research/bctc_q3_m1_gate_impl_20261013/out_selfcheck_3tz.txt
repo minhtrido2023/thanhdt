@@ -1,0 +1,21 @@
+### TZ=UNSET
+  TỔNG: 66 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude, base=3dc35467)
+  TỔNG: 45 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude/refresh_earnings_surprise_pkl.py)
+  TỔNG: 13 PASS / 0 FAIL
+  TỔNG: 49 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/pnj_q3_review_watch.py)
+  TỔNG: 16 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/bq_freshness_check.sh)
+fa_ratings_earnings_window gate selfcheck: 142/142 PASS (46 ca x 3 TZ + 3 ca hom-nay + 1 chot tinh; script=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/fa_ratings_earnings_window_daily.sh)
+### TZ=America/Los_Angeles
+  TỔNG: 66 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude, base=3dc35467)
+  TỔNG: 45 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude/refresh_earnings_surprise_pkl.py)
+  TỔNG: 13 PASS / 0 FAIL
+  TỔNG: 49 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/pnj_q3_review_watch.py)
+  TỔNG: 16 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/bq_freshness_check.sh)
+fa_ratings_earnings_window gate selfcheck: 142/142 PASS (46 ca x 3 TZ + 3 ca hom-nay + 1 chot tinh; script=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/fa_ratings_earnings_window_daily.sh)
+### TZ=Pacific/Kiritimati
+  TỔNG: 66 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude, base=3dc35467)
+  TỔNG: 45 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/wt-bctcq3-1013/WorkingClaude/refresh_earnings_surprise_pkl.py)
+  TỔNG: 13 PASS / 0 FAIL
+  TỔNG: 49 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/pnj_q3_review_watch.py)
+  TỔNG: 16 PASS / 0 FAIL   (target=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/bq_freshness_check.sh)
+fa_ratings_earnings_window gate selfcheck: 142/142 PASS (46 ca x 3 TZ + 3 ca hom-nay + 1 chot tinh; script=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-bctcq3-1013/bin/fa_ratings_earnings_window_daily.sh)

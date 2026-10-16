@@ -1,0 +1,18 @@
+1. rc=4, giờ TRONG cửa sổ (20:00) — im lặng chờ, KHÔNG xoá marker, KHÔNG stuck
+  [rc4-early] marker_gone(0=yes)=1 stuck_created(0=yes)=1
+  ✓ rc=4@20:00: marker vẫn còn (chờ lượt cron kế)
+  ✓ rc=4@20:00: chưa tạo .stuck (chưa tới cutoff)
+2. rc=4, giờ SAU cutoff (21:20) — phải escalate .stuck (hành vi hiện có, KHÔNG đổi)
+  [rc4-late] marker_gone(0=yes)=0 stuck_created(0=yes)=0
+  ✓ rc=4@21:20: marker đổi hậu tố .stuck_ (không còn tên gốc)
+  ✓ rc=4@21:20: .stuck ĐƯỢC tạo (retry 2h hết hạn → escalate)
+3. rc=5 (corp_action_gate_v2 share_event_block), giờ SAU cutoff (21:20)
+  [rc5-late] marker_gone(0=yes)=0 stuck_created(0=yes)=1
+  ✓ rc=5@21:20: marker bị XOÁ ngay (nhánh 'đổi loại lỗi', không chờ)
+  ✓ rc=5@21:20: KHÔNG tạo .stuck (không lẫn với ca PRICE_XCHECK rc=4)
+4. rc=5, giờ TRONG cửa sổ (20:00) — vẫn phải xoá NGAY, không đợi 2h như rc=4
+  [rc5-early] marker_gone(0=yes)=0 stuck_created(0=yes)=1
+  ✓ rc=5@20:00: marker bị XOÁ ngay (khác hẳn rc=4@20:00 ở case 1)
+  ✓ rc=5@20:00: KHÔNG tạo .stuck
+
+8 PASS, 0 FAIL

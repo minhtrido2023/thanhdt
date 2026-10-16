@@ -77,7 +77,6 @@
     "tbot/code/lib/okf.py": 2,
     "tbot/projects/dnse_dashboard/build_dashboard.py": 4,
     "telegram_recommend.py": 1,
-    "trading_bot/due_diligence.py": 2,
     "trading_bot/plan.py": 1,
     "trading_bot/strategies.py": 1,
     "universe_pit_p3_selfcheck.py": 4,

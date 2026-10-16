@@ -1,0 +1,5 @@
+=== park rail consistency (§28: so GIÁ TRỊ, không so văn xuôi) ===
+  R1 MUA    golive_recommend_v23.ETF_PARK[3]           = 0.0
+  R2 BÁN    compute_park_trim GIÁ TRỊ THỰC DÙNG        = 0.0
+  R3 POLICY trading_rules.default_park_of_idle_pct     = 0.0
+✅ các rail khớp = 0.0  (R2 lấy từ R3 bằng chính resolver của nó)

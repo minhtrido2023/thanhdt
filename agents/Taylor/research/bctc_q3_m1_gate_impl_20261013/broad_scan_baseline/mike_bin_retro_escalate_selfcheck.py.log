@@ -1,0 +1,173 @@
+== retro_escalate selfcheck (bug ack-topic-counter) ==
+
+-- case_constants_in_sync
+  PASS  ops_health_check.sh còn khai ACK_PREFIX/ACK_MAX_SUPPRESS_DAYS ở cột 0
+  PASS  ACK_PREFIX khớp giữa retro_escalate.py và ops_health_check.sh
+  PASS  ACK_MAX_SUPPRESS_DAYS khớp
+
+-- case_counter_slug_is_rejected
+  PASS  mọi slug kết thúc bằng số đều bị TỪ CHỐI (không tự cắt ⇒ không false-collapse)
+  PASS  slug sạch vẫn dùng được
+  PASS  số NẰM GIỮA slug không sao (chỉ đuôi mới bị chặn)
+
+-- case_no_false_collapse_between_patterns
+  PASS  2 slug mô tả khác nhau ⇒ 2 topic khác nhau
+  PASS  _same_pattern KHÔNG coi pattern account 767 là cùng pattern với 768
+  PASS  ack của pattern 767 KHÔNG nuốt im lặng escalation của pattern 768
+
+-- case_day_n_plus_1_still_covered
+  PASS  ngày N+1: decide() = SKIP (không mở câu hỏi thứ hai cho cùng pattern)
+  PASS  ngày N+1: ops_health_check THẬT xếp vào 'ĐÃ TRIAGE, chờ NGƯỜI quyết'
+  PASS  ngày N+1: ops_health_check THẬT KHÔNG escalate (không đốt job wags_autofix)
+  PASS  CONSIST ca 3: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_red_control_old_counter_shape
+  PASS  RED control: ack ngày 2 phủ ĐÚNG topic ngày 2
+  PASS  RED control: topic ngày 3 (bộ đếm tăng) KHÔNG được phủ ⇒ VẪN escalate — đây chính là bug ack-topic-counter
+  PASS  bản MỚI diệt ca này: cả 2 topic cũ đều thuộc CÙNG pattern ổn định
+
+-- case_expired_ack_reescalates
+  PASS  ack hết hạn: decide() = POST
+  PASS  ack hết hạn: CHECK5 thật cũng escalate lại
+  PASS  CONSIST ca 5: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_suppress_days_clamped
+  PASS  ack sd=99 đăng 20 ngày trước: bị clamp về 14d ⇒ hết hạn ⇒ POST
+  PASS  CHECK5 thật cũng coi là hết hạn
+  PASS  CONSIST ca 5b: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_first_time_posts
+  PASS  pattern lần đầu: decide() = POST
+
+-- case_ack_sd0_covers_existing_instance
+  PASS  ack sd=0: decide() = SKIP
+  PASS  ack sd=0: CHECK5 thật cũng coi là đã triage
+  PASS  CONSIST ca 7: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_ack_sd0_has_escape_hatch
+  PASS  câu hỏi acked 39 ngày tuổi (> trần 14d): POST
+
+-- case_legacy_counter_question_still_recognised
+  PASS  migration '-2days': đã ack ⇒ SKIP, không mở trùng
+  PASS  migration '-2days': CHECK5 thật cũng thấy đang được ack phủ
+  PASS  CONSIST ca 7b-2days: is_acked() của retro_escalate trùng phán quyết CHECK5
+  PASS  migration '-2-days': đã ack ⇒ SKIP, không mở trùng
+  PASS  migration '-2-days': CHECK5 thật cũng thấy đang được ack phủ
+  PASS  CONSIST ca 7b-2-days: is_acked() của retro_escalate trùng phán quyết CHECK5
+  PASS  migration '-3retros': đã ack ⇒ SKIP, không mở trùng
+  PASS  migration '-3retros': CHECK5 thật cũng thấy đang được ack phủ
+  PASS  CONSIST ca 7b-3retros: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_different_pattern_not_collapsed
+  PASS  pattern khác (chỉ trùng tiền tố) KHÔNG làm tắt escalation của pattern này
+
+-- case_unrelated_ack_does_not_cover
+  PASS  ack của topic KHÁC HẲN (selfcheck-red) KHÔNG phủ escalation retro ⇒ POST
+  PASS  CHECK5 thật cũng escalate
+  PASS  CONSIST ca 7d: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_ack_bare_topic_form_covers
+  PASS  ack dạng topic trần (không 'Agent/') vẫn phủ ⇒ SKIP
+  PASS  CHECK5 thật cũng coi là đã triage
+  PASS  CONSIST ca 7e: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_corrupt_ts_is_fail_closed
+  PASS  ack có ts HỎNG không được tắt escalate (fail-closed) ⇒ POST
+  PASS  CHECK5 thật cũng fail-closed
+  PASS  CONSIST ca 7f: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_archive_gz_is_read
+  PASS  câu hỏi + ack nằm trong archive .jsonl.gz vẫn được đọc ⇒ SKIP
+  PASS  CHECK5 thật cũng đọc được archive
+  PASS  CONSIST ca 7g: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_resolved_question_is_not_basis_for_skip
+  PASS  câu hỏi cũ ĐÃ có answer ⇒ lần tái diễn mới phải POST, không SKIP
+
+-- case_older_answer_does_not_preresolve
+  PASS  answer đăng TRƯỚC câu hỏi không được pre-resolve nó ⇒ vẫn xét ack, POST vì chưa ai ack
+  PASS  lý do phải là 'không ack nào phủ', KHÔNG phải 'đã có answer'
+
+-- case_missing_bus_fails_loud
+  PASS  thiếu bus/inbox ⇒ FAIL LOUD (không lặng lẽ POST)
+  PASS  CLI rc != 0 khi bus-root sai
+
+-- case_cli_dry_run_writes_nothing
+  PASS  CLI rc=0
+  PASS  CLI in TOPIC ổn định (retro-pattern-recurring-foo-bar)
+  PASS  CLI in DECISION=SKIP
+  PASS  --dry-run KHÔNG ghi thêm byte nào vào bus
+  PASS  CLI TỪ CHỐI --pattern mang bộ đếm (rc!=0, nói rõ lý do)
+
+-- case_reject_message_example_is_actually_valid
+  PASS  ví dụ trong thông điệp từ chối TỰ NÓ qua được stable_topic()
+  PASS  thông điệp từ chối có in ví dụ hợp lệ ra cho người đọc
+  PASS  thông điệp từ chối có ít nhất 1 tên GỢI Ý
+  PASS  chuỗi ví dụ 'acct0001743768-plan-t1-not-ready' trong thông điệp lỗi phải hợp lệ
+
+-- case_extra_counter_units_rejected
+  PASS  các đơn vị đếm bổ sung (d / lần / ngay / x / times) đều bị TỪ CHỐI
+
+-- case_fresh_window_ack_not_overridden_by_escape
+  PASS  câu hỏi 20 ngày tuổi nhưng ack sd=14 MỚI 1 ngày ⇒ vẫn SKIP
+
+-- case_escape_hatch_measures_ack_age
+  PASS  ack permanent MỚI 1 ngày (câu hỏi 40 ngày) ⇒ SKIP, đo theo tuổi ACK
+  PASS  lý do KHÔNG viện dẫn tuổi câu hỏi
+
+-- case_newest_question_wins
+  PASS  câu hỏi MỚI NHẤT (chưa ack) quyết định, không phải legacy đã ack ⇒ POST
+  PASS  CHECK5 thật cũng escalate câu hỏi mới đó
+  PASS  CONSIST ca 7j: is_acked() của retro_escalate trùng phán quyết CHECK5
+
+-- case_real_write_post_and_skip
+  PASS  ghi THẬT nhánh POST: rc=0
+  PASS  ghi THẬT nhánh POST: in WROTE=question
+  PASS  POST ghi đúng 1 event question
+  PASS  POST: topic = topic ỔN ĐỊNH
+  PASS  POST: payload.recurring_days == --days
+  PASS  ghi THẬT nhánh SKIP: rc=0
+  PASS  SKIP ghi đúng 1 event status (không mở question thứ hai)
+  PASS  SKIP: topic mang đúng hằng SKIP_STATUS_PREFIX ('retro-pattern-recurring-update:')
+  PASS  SKIP: payload vẫn giữ recurring_days (số ngày KHÔNG mất)
+
+-- case_skip_prefix_constant_in_sync
+  PASS  daily_retro.sh dùng ĐÚNG chuỗi SKIP_STATUS_PREFIX của retro_escalate.py
+
+-- case_daily_retro_wired
+  PASS  daily_retro.sh bước 6 trỏ vào bin/retro_escalate.py
+  PASS  daily_retro.sh KHÔNG còn ra lệnh nhúng bộ đếm vào topic
+  PASS  daily_retro.sh KHÔNG còn hứa 'tự cắt' (hành vi vòng 1 đã bị bác bỏ)
+
+-- case_daily_retro_guard_sees_skip_status
+  PASS  trích được khối guard chống-trùng trong daily_retro.sh
+  PASS  guard THẤY nhánh SKIP (status retro-pattern-recurring-update:…)
+  PASS  guard KHÔNG nhặt status không liên quan
+
+-- case_append_event_guard_is_mechanical
+  PASS  append_event.sh CHẶN question mang bộ đếm (rc!=0)
+  PASS  thông điệp chặn trỏ đúng sang retro_escalate.py
+  PASS  append_event.sh chặn biến thể '-2-days'
+  PASS  append_event.sh chặn biến thể '-3retros'
+  PASS  append_event.sh chặn biến thể '-4'
+  PASS  append_event.sh chặn biến thể '-3x'
+  PASS  append_event.sh chặn biến thể '-3d'
+  PASS  append_event.sh chặn biến thể '-2ngay'
+  PASS  append_event.sh CHO QUA topic ổn định (đối chứng — guard không chặn bừa)
+  PASS  guard KHÔNG đụng topic ngoài tiền tố retro (đối chứng phạm vi)
+  PASS  guard chỉ áp cho event_type=question (finding vẫn qua)
+
+-- case_counter_regex_copies_agree
+  PASS  2 bản sao regex đuôi đếm trùng phán quyết dưới C
+  PASS  nhóm đếm bị TỪ CHỐI dưới C (không phải cùng im lặng)
+  PASS  slug KHÔNG có bộ đếm được cho qua dưới C (không chặn oan)
+  PASS  2 bản sao regex đuôi đếm trùng phán quyết dưới C.UTF-8
+  PASS  nhóm đếm bị TỪ CHỐI dưới C.UTF-8 (không phải cùng im lặng)
+  PASS  slug KHÔNG có bộ đếm được cho qua dưới C.UTF-8 (không chặn oan)
+
+-- case_window_ack_wins_over_older_permanent
+  PASS  ack_of() chọn ack `window` (tươi) chứ không phải `permanent` (40 ngày)
+  PASS  ack permanent CŨ 40 ngày + ack window sd=14 MỚI 1 ngày ⇒ SKIP
+  PASS  lý do nêu đúng ack đang phủ (không viện dẫn đường thoát)
+
+✅ toàn bộ assertion PASS

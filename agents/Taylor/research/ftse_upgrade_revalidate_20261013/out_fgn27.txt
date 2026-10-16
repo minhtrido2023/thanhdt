@@ -1,0 +1,34 @@
+names 27 rows 48184 2018-08-30 2026-10-13
+fgn_share_of_ftse27_turnover           pre     0.1498 post     0.1441 chg    -0.0057 | placebo N=116 p5 -0.0602 p50 -0.0025 p95 +0.0506 pctile 45.7 | seasonal N=7 min -0.0897 med -0.0140 max +0.0427
+fgn_net_ftse27_bn_day                  pre  -177.4755 post  -475.3960 chg  -297.9205 | placebo N=116 p5 -404.6786 p50 -7.6115 p95 +314.5129 pctile 10.3 | seasonal N=7 min -431.8231 med -58.1504 max +85.2696
+ftse27_share_of_all_foreign_trading    pre     0.5763 post     0.5064 chg    -0.0699 | placebo N=116 p5 -0.0787 p50 +0.0013 p95 +0.0708 pctile 6.9 | seasonal N=7 min -0.1415 med -0.0663 max +0.0747
+cum foreign net FTSE27 post (bn): -18571 | pre60: -10893 | all-market post: -22382 pre60: -17001
+All-World 6: net bn/day median pre -157 post -147 | cum post -3555
+code
+MCH   -9420.0
+HDB   -3413.0
+VHM   -1262.0
+VPB   -1101.0
+VJC    -830.0
+FPT    -628.0
+VIC    -498.0
+VCB    -364.0
+MSB    -294.0
+TCX    -279.0
+BID    -263.0
+VIX    -241.0
+VCI    -208.0
+HPG    -141.0
+SSI    -136.0
+VND     -98.0
+VRE     -97.0
+NVL     -60.0
+VNM     -55.0
+VCK     -46.0
+STB     -33.0
+GEX     -14.0
+SSB      12.0
+HCM      13.0
+SHB     132.0
+VPL     162.0
+MSN     278.0

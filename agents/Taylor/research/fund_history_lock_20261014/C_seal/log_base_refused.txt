@@ -1,0 +1,13 @@
+$ <research>/sbx.sh <base> nav_unit_ledger.py --account SpaceX --seal --real-data --tail 0
+TỪ CHỐI nav_unit_ledger (SpaceX) [SealGateError]: <base>/data/execution_logs/nav_unit_ledger_SpaceX.csv: đoạn 2026-07-01 → 2026-10-13 CHƯA đủ điều kiện chốt (3 chỗ):
+  2026-07-02: dòng chụp số dư lúc 2026-07-02T09:46:35 — TRƯỚC giờ đóng cửa 14:45 của chính phiên đó ⇒ NAV có thể không phải giá chốt. Đính chính dòng nav_history, hoặc nếu ĐÃ RÀ và NAV đúng là giá chốt thì nhận tường minh: --accept-preclose 2026-07-02="<lý do + bằng chứng>"
+  2026-08-06: nav_history THIẾU dòng của phiên này (nằm giữa 2026-08-05 và 2026-08-07) — chốt thì giá đơn vị 2026-08-07 gộp biến động hai phiên và backfill về sau thành dòng chen. Backfill trước: daily_nav_snapshot.py --account <TK> --date 2026-08-06 --from-raw
+  2026-08-24: dòng chụp số dư lúc 2026-08-24T04:49:59 — TRƯỚC giờ đóng cửa 14:45 của chính phiên đó ⇒ NAV có thể không phải giá chốt. Đính chính dòng nav_history, hoặc nếu ĐÃ RÀ và NAV đúng là giá chốt thì nhận tường minh: --accept-preclose 2026-08-24="<lý do + bằng chứng>"
+  ⇒ KHÔNG ghi gì vào sổ.
+rc=2
+$ <research>/sbx.sh <base> nav_unit_ledger.py --account ZaloPay --seal --real-data --tail 0
+TỪ CHỐI nav_unit_ledger (ZaloPay) [SealGateError]: <base>/data/execution_logs/nav_unit_ledger_ZaloPay.csv: đoạn 2026-07-06 → 2026-10-13 CHƯA đủ điều kiện chốt (2 chỗ):
+  2026-08-06: nav_history THIẾU dòng của phiên này (nằm giữa 2026-08-05 và 2026-08-07) — chốt thì giá đơn vị 2026-08-07 gộp biến động hai phiên và backfill về sau thành dòng chen. Backfill trước: daily_nav_snapshot.py --account <TK> --date 2026-08-06 --from-raw
+  2026-08-24: dòng chụp số dư lúc 2026-08-24T04:50:08 — TRƯỚC giờ đóng cửa 14:45 của chính phiên đó ⇒ NAV có thể không phải giá chốt. Đính chính dòng nav_history, hoặc nếu ĐÃ RÀ và NAV đúng là giá chốt thì nhận tường minh: --accept-preclose 2026-08-24="<lý do + bằng chứng>"
+  ⇒ KHÔNG ghi gì vào sổ.
+rc=2

@@ -1,0 +1,6 @@
+TZ=(unset)  python=3.12.13  tree=/tmp/bctcq3_sb2/thanhdt/WorkingClaude  OLD_REF=1f7f1d6f^
+  PASS t_happy_path_unchanged
+  PASS t_fallback_is_loud_and_names_the_cause
+  PASS t_no_basis_at_all_is_loud
+
+PASS  (40 assertion)

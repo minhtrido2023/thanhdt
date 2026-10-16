@@ -1,0 +1,55 @@
+== CA 1: dispatch bình thường (Wags, không --thread) — override ghim + agent nhận ĐÚNG ID
+    ok   exit code = 0
+    ok   ID ghim trên job record = 1521475726329516122
+    ok   ID agent con thật sự nhận = 1521475726329516122
+== CA 2: --thread TÊN SAI ⇒ ABORT (không dispatch, không đoán topic khác)
+    ok   exit code khác 0 = yes
+    ok   claude KHÔNG được chạy = \<CLAUDE-KHONG-CHAY\>
+    ok   không tạo job record = 0
+    ok   stderr báo HUỶ = 1
+== CA 3: agent không override + không ambient nào ⇒ VẪN dispatch, Discord IM LẶNG
+    ok   exit code = 0
+    ok   ID ghim rỗng (không đoán) = ''
+    ok   agent con KHÔNG có topic (biến rỗng tường minh) = ''
+    ok   số tin nhắn Discord = 0
+== CA 4: registry HỎNG + agent CÓ override ⇒ VẪN chạy, pin RỖNG, Discord im lặng (S2/F4)
+    ok   exit code = 0
+    ok   job VẪN chạy (có job record) = 1
+    ok   ID ghim RỖNG (không đoán topic thay thế) = ''
+    ok   agent con KHÔNG có topic (biến rỗng tường minh) = ''
+    ok   số tin nhắn Discord = 0
+    ok   cảnh báo registry hỏng (notify.sh → #mikefleet) = 1
+    ok   ghi logs/notify_thread_errors.log (khâu GHI không chết cùng registry) = 1
+== CA 4b: pin RỖNG trong khi tiến trình cha CÓ ambient ⇒ agent con KHÔNG được thừa kế (M2)
+    ok   exit code = 0
+    ok   ID ghim RỖNG = ''
+    ok   agent con KHÔNG thừa kế ambient của cha = ''
+    ok   số tin nhắn Discord = 0
+== CA 5: registry hỏng + agent KHÔNG override + có ID trần ⇒ VẪN chạy (abort phải ĐÚNG chỗ)
+    ok   exit code = 0
+    ok   ID ghim = ID trần truyền vào = 1521475726329516122
+    ok   agent con nhận đúng ID = 1521475726329516122
+== CA 6: notify_thread.sh không có topic nào ⇒ THOÁT LỖI, không rơi về con trỏ toàn cục (R1)
+    ok   exit code khác 0 = yes
+    ok   báo không đoán topic = 1
+    ok   ghi vào notify_thread_errors.log = 1
+== CA 7: --thread= RỖNG (biến chưa set) ⇒ ABORT, không âm thầm tụt về ambient (F6)
+    ok   exit code khác 0 = yes
+    ok   claude KHÔNG được chạy = \<CLAUDE-KHONG-CHAY\>
+    ok   không tạo job record = 0
+== CA 8: pin RỖNG + con trỏ toàn cục xuất hiện GIỮA CHỪNG ⇒ 0 tin nhắn (S1, --bg)
+    ok   exit code = 0
+    ok   ID ghim rỗng = ''
+    ok   con trỏ toàn cục ĐÃ xuất hiện giữa chừng = 1521475726329516122
+    ok   số tin nhắn Discord = 0
+== CA 9: pin RỖNG ⇒ AUTO-CALLBACK vẫn chạy (pin rỗng không được GIẾT _bg_wrapper, F2)
+    ok   exit code = 0
+    ok   ID ghim rỗng = ''
+    ok   có job AUTO-CALLBACK (wrapper sống qua chỗ đọc pin rỗng) = 2
+    ok   job callback đúng là gửi về người gọi (Wags) = 1
+== CA 10: KHÔNG còn nơi nào ĐỌC con trỏ toàn cục (F1 + vòng 4: tầng đoán bỏ HẲN)
+    ok   số nơi ĐỌC con trỏ toàn cục (tầng đoán đã bỏ hẳn ⇒ phải là 0) = 0
+    ok   số nơi GHI con trỏ toàn cục = 1
+    ok   nơi GHI duy nhất là hooks/session_start.sh = 1
+
+PASS — 42/42 assertion đúng (S1 không-đoán + S2 abort-đúng-chỗ + R1 notify_thread)

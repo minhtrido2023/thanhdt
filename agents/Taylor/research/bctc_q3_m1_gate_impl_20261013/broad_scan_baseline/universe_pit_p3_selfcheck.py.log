@@ -1,0 +1,39 @@
+========================================================================================
+  universe_pit P3 selfcheck — golive_recommend_v23.py panel D1 RE_BACKLOG (ICB-8633)
+========================================================================================
+
+T1. Hằng số production
+  [PASS] T1.1 UNIVERSE_SOURCE == 'pit' — pit
+  [PASS] T1.2 trỏ đúng bảng universe_pit_q — lithe-record-440915-m9.tav2_mike.universe_pit_q
+
+T2. Không có đường fallback im lặng
+  [PASS] T2.1 predicate 'pit' đọc universe_pit_q theo NGÀY
+  [PASS] T2.2 predicate 'pit' KHÔNG chạm ticker_prune
+  [PASS] T2.3 SQL panel production không còn ticker_prune
+  [PASS] T2.4 UNIVERSE_SOURCE lạ → ValueError
+
+T3. Fail-safe thiếu ngày
+  [PASS] T3.1 thiếu ngày → RuntimeError — universe_pit thieu 3/80 phien co du lieu panel ICB-8633 trong [2026-01
+  [PASS] T3.2 nhánh 'prune' → assert no-op
+  [PASS] T3.3 cửa sổ LIVE hôm nay: universe_pit phủ đủ
+
+T4. Look-ahead VHM (niêm yết 2018) trong panel 2014
+  [PASS] T4.1 VHM CÓ trong panel 2014 nhánh 'prune' (bug đang sống)
+  [PASS] T4.2 VHM KHÔNG còn trong panel 2014 nhánh 'pit' (đã fix)
+       panel 2014: prune n=34 · pit n=39 · bị loại (6): C21, D2D, HDC, IDV, LHG, VHM
+       thêm vào (11): API, BII, FDC, HAR, ITA, NVT, PTL, PV2, PVL, PXA, PXL
+  [PASS] T4.3 panel 2014 nhánh 'pit' không rỗng — n=39
+
+T5. Cửa sổ LIVE hôm nay (đo diff thật, KHÔNG giả định = 0)
+       panel [2026-06-15..2026-10-13]: prune n=57 · pit n=60
+       RA (9): C21, EFI, HLD, IDV, OGC, SZB, TEG, VPH, VRC
+       VÀO (12): AAV, API, FIR, HAR, KOS, LGL, LSG, NRC, PV2, PXL, SGR, TAL
+  [PASS] T5.1 panel LIVE nhánh 'pit' không rỗng — n=60
+       tín hiệu RE_BACKLOG (ticker,ngày) qua mask d1m: prune=625 · pit=592
+       ngày tín hiệu gần nhất: 2026-10-13 00:00:00 | prune=['AGG', 'HLD', 'IDV', 'IJC', 'PDR', 'TEG', 'VIC', 'VPI'] | pit=['AGG', 'IJC', 'NRC', 'PDR', 'TAL', 'VIC', 'VPI']
+       *** DIFF tín hiệu = 369 cặp — KHÔNG assert = 0: P3 là sửa bug, đổi hành vi là CÓ CHỦ ĐÍCH. Tác động end-to-end phải đo bằng A/B chạy trọn script. ***
+  [PASS] T5.3 mọi thay đổi giải thích được bằng membership theo ngày của universe_pit — bỏ-sai=0 thêm-sai=0
+
+========================================================================================
+  KẾT QUẢ: PASS TẤT CẢ
+========================================================================================

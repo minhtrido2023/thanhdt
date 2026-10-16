@@ -1,0 +1,28 @@
+== Tác động đính chính — SpaceX: 5/62 báo cáo đã gửi bị ảnh hưởng (ngưỡng: <0.05 bậc 1 · 0.05–0.5 bậc 2 · >0.5 bậc 3)
+báo cáo                                                     số chính bậc theo ngày bậc  hành động
+SpaceX_ZaloPay_monthly_report_2026-07.md                      0.0000  0     0.4453  2   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-07-02: NAV 994,733,747 → 990,304,455 (-0.4453%), tỉ suất ngày -0.4429 điểm %
+      ngày 2026-07-03: NAV 988,629,520 → 988,629,520 (+0.0000%), tỉ suất ngày +0.4445 điểm %
+SpaceX_ZaloPay_monthly_report_2026-08.md                      0.0000  0     0.9735  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 950,871,323)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md      0.0000  0     0.9735  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 950,871,323)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+SpaceX_monthly_report_2026-08.md                              0.0000  0     0.9735  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 950,871,323)
+      ngày 2026-08-07: NAV 961,311,265 → 961,311,265 (+0.0000%), tỉ suất ngày +0.9735 điểm %
+SpaceX_weekly_report_2026-07-03.md                            0.0000  0     0.4453  2   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-07-02: NAV 994,733,747 → 990,304,455 (-0.4453%), tỉ suất ngày -0.4429 điểm %
+      ngày 2026-07-03: NAV 988,629,520 → 988,629,520 (+0.0000%), tỉ suất ngày +0.4445 điểm %
+-- CẦN USER QUYẾT: 5
+   SpaceX_ZaloPay_monthly_report_2026-07.md: số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+   SpaceX_ZaloPay_monthly_report_2026-08.md: số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+   SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md: số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+   SpaceX_monthly_report_2026-08.md: số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+   SpaceX_weekly_report_2026-07-03.md: số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+-- ghi chú ở báo cáo kế tiếp (bậc 2): 0
+-- chỉ sửa từ nay (bậc 0–1): 5
+ℹ️ bỏ qua 1 file không phải .md: SpaceX_weekly_report_2026-10-05_to_2026-10-09.md.bak_sent_20261010
+Công cụ này KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại báo cáo nào.
+báo cáo tác động: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/fund_history_lock_20261014/D_impact/impact_SpaceX_AB.json (md5 a6d863c253d5b9a96e5a473c8fd4f974)

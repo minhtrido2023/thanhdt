@@ -1,0 +1,14 @@
+== A. anomaly_flags.json — độ tươi CỦA FILE (khác TTL 30d của từng cờ) ==
+  PASS  A1 file THIẾU → is_stale 
+  PASS  A2 file HỎNG → is_stale 
+  PASS  A3 thiếu _meta.generated_at → is_stale + nêu lý do 
+  PASS  A3b gate loại trừ KHÔNG đổi khi thiếu _meta (fail-open y như cũ) 
+  PASS  A4 _meta cũ 6 ngày → is_stale (lần ghi cuối 2026-07-25 (ICT) ≠ ngày giao dịch 2026-07-31)
+  PASS  A4b nhưng cờ PNJ VẪN active theo TTL 30d — TTL không bị đụng 
+  PASS  A5 ranh giới ICT: 07-30T18:00Z (=07-31 01:00 ICT) → TƯƠI 
+  PASS  A6 ranh giới ICT: 07-30T16:59Z (=23:59 ICT 07-30) → CŨ 
+  PASS  A7 scan 08:20 ICT hôm nay → KHÔNG cảnh báo (chống WARN giả) ({'is_stale': False, 'generated_at': '2026-07-31T01:20:00Z', 'reason': ''})
+Traceback (most recent call last):
+  File "/tmp/bctcq3_sb0/thanhdt/WorkingClaude/mike/agents/Winston/freshness_warn_selfcheck.py", line 101, in <module>
+    import anomaly_scan
+ModuleNotFoundError: No module named 'anomaly_scan'

@@ -1,0 +1,5 @@
+BASE  XANH HẾT
+X10   SURVIVED                               cash_identity.py         | tương đương có chủ đích (kiểm bộ chạy): không đổi hành vi
+X60   KILLED by e2e                          daily_nav_snapshot.py    | kênh vận hành nhận chi tiết MỌI cửa sổ mỗi tối
+X73   KILLED by cashid                       report_delivery_gate.py  | bỏ kiểm hữu hạn ở ô số (regex đã chặn nan/inf ⇒ tương đương)
+== bộ new: 3 mutant · KILLED 2 · SURVIVED 1 · NOT_APPLIED 0

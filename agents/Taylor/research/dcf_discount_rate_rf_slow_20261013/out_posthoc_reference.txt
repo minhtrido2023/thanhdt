@@ -1,0 +1,39 @@
+POST-HOC REFERENCE (NOT in the pre-registered set; existing production mode, no new construct)
+cpi_gdp_half today: g_T=6.55%  r-g_T=7.35pp  median dFV vs cap_rf=-10.9%  %CHEAP=58.3  CHEAP->RICH=['CLX', 'CSV', 'MST', 'MWG', 'PPC', 'SGP', 'TNI', 'VGI', 'VNM']
+custom30v_8l cols: ['rebal_date', 'effective_from', 'effective_to', 'ticker', 'liq_rank', 'rating_8l', 'weight', 'quarter', 'yield_floor_note', 'is_stable_payer']
+custom30V latest basket (2026-08-05 00:00:00): 30 names
+SpaceX plan plan_SpaceX_2026-10-14.json: keys=['plan_date', 'account', 'broker', 'account_no', 'mode', 'strategy', 'strategy_version', 'state', 'state_name', 'state_source', 'state_note', 'dt4_gate_line'] n_pos=0
+ZaloPay plan plan_ZaloPay_2026-10-14.json: keys=['plan_date', 'account', 'broker', 'account_no', 'mode', 'strategy', 'strategy_version', 'state', 'state_name', 'state_source', 'state_note', 'dt4_gate_line'] n_pos=0
+
+CHEAP->RICH under ma12:
+  VGI   price    77,300  FV    77,490 ->    65,665  MoS  +0.2% -> -17.7%  robust_V0=False  
+  PPC   price     8,760  FV     8,916 ->     7,603  MoS  +1.7% -> -15.2%  robust_V0=False  
+  VNM   price    58,000  FV    60,549 ->    51,421  MoS  +4.2% -> -12.8%  robust_V0=False  
+  TNI   price     4,170  FV     4,388 ->     3,742  MoS  +5.0% -> -11.4%  robust_V0=False  
+  MWG   price    74,800  FV    78,779 ->    66,758  MoS  +5.1% -> -12.0%  robust_V0=False  
+  MST   price     9,300  FV     9,881 ->     8,425  MoS  +5.9% -> -10.4%  robust_V0=False  
+  CSV   price    21,900  FV    23,481 ->    19,994  MoS  +6.7% ->  -9.5%  robust_V0=False  
+  CLX   price    13,000  FV    14,301 ->    12,157  MoS  +9.1% ->  -6.9%  robust_V0=False  
+  SGP   price    20,500  FV    22,693 ->    19,230  MoS  +9.7% ->  -6.6%  robust_V0=False  
+  AIG   price    46,000  FV    54,096 ->    45,841  MoS +15.0% ->  -0.3%  robust_V0=True  
+
+CHEAP->RICH under ma36:
+  VGI   price    77,300  FV    77,490 ->    59,555  MoS  +0.2% -> -29.8%  robust_V0=False  
+  PPC   price     8,760  FV     8,916 ->     6,923  MoS  +1.7% -> -26.5%  robust_V0=False  
+  VNM   price    58,000  FV    60,549 ->    46,702  MoS  +4.2% -> -24.2%  robust_V0=False  
+  TNI   price     4,170  FV     4,388 ->     3,408  MoS  +5.0% -> -22.4%  robust_V0=False  
+  MWG   price    74,800  FV    78,779 ->    60,546  MoS  +5.1% -> -23.5%  robust_V0=False  
+  MST   price     9,300  FV     9,881 ->     7,672  MoS  +5.9% -> -21.2%  robust_V0=False  
+  CSV   price    21,900  FV    23,481 ->    18,191  MoS  +6.7% -> -20.4%  robust_V0=False  
+  CLX   price    13,000  FV    14,301 ->    11,048  MoS  +9.1% -> -17.7%  robust_V0=False  
+  SGP   price    20,500  FV    22,693 ->    17,441  MoS  +9.7% -> -17.5%  robust_V0=False  
+  AIG   price    46,000  FV    54,096 ->    41,576  MoS +15.0% -> -10.6%  robust_V0=True  
+  VGT   price    11,600  FV    13,691 ->    10,522  MoS +15.3% -> -10.2%  robust_V0=True  
+  SAS   price    35,700  FV    42,731 ->    32,841  MoS +16.5% ->  -8.7%  robust_V0=True  
+  PCH   price    18,000  FV    21,803 ->    16,757  MoS +17.4% ->  -7.4%  robust_V0=True  
+  DRI   price    16,100  FV    20,725 ->    15,928  MoS +22.3% ->  -1.1%  robust_V0=True  
+
+FV change distribution vs cap_rf (today, 151 names): 
+  ma12: min -17.1%  p25 -15.3%  median -15.3%  p75 -14.9%  max -14.7%
+  ma36: min -26.0%  p25 -23.1%  median -23.1%  p75 -22.6%  max -22.3%
+names with 0 < MoS(V0) < 25%: 16 -> still CHEAP under ma12: 6, under ma36: 2

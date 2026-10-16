@@ -1,0 +1,89 @@
+From 9c32ddce98db810511cd7060ae0cbaffa5f9ad36 Mon Sep 17 00:00:00 2001
+From: minhtrido2023 <minhtrido2023@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 22:37:52 +0700
+Subject: [PATCH] =?UTF-8?q?measure(FAIL-D):=20knob=20env-gated=20PARK=5FDI?=
+ =?UTF-8?q?V=5FTAX=5FDRAG=5FANNUAL=20=C4=91=E1=BB=83=20=C4=91o=20haircut?=
+ =?UTF-8?q?=20thu=E1=BA=BF=20c=E1=BB=95=20t=E1=BB=A9c?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+ĐO LƯỜNG, KHÔNG PHẢI PRODUCTION. Mặc định "" = 0,0 ⇒ truyền `etf_tracking_drag_annual=0.0`
+y như trước ⇒ chân control BYTE-IDENTICAL với pin canonical (verify: ledger md5
+4707bcbeb7e801d49a4a851ffd91d5e7, `cmp` sạch, 16.633 dòng).
+
+VÌ SAO: chuỗi level custom30V dùng `Close` ĐÃ ĐIỀU CHỈNH ⇒ total return với cổ tức tái đầu
+tư tức thì, GỘP, không thuế, không phí. Live là rổ 30 cổ phiếu TỰ QUẢN: cổ tức tiền về tài
+khoản, chịu thuế TNCN 5% (TT111/2013 Đ.10+Đ.25; Luật 109/2025/QH15 giữ 5%), rồi mới mua lại.
+`simulate_holistic_nav.py:888` chỉ trừ etf_mgmt_fee_annual/etf_tracking_drag_annual và cả hai
+= 0 cho nhánh basket tự quản ⇒ không có gì thay chỗ thuế cổ tức (FAIL-D của
+measurement_integrity_audit_20260927).
+
+CƠ CHẾ: dùng ĐÚNG hook đã có sẵn (shrink lot["shares"] mỗi phiên), không thêm đường tính mới.
+2 call site (BAL_KW + LAG). Giá trị hiệu chuẩn nằm ở runner, không hardcode trong engine.
+§8: trục này tự thêm hậu tố `_divtax<drag×1e6>` vào tên ledger khi > 0 ⇒ không thể ghi vào
+tên pin canonical. Ngoài [0, 0.5] ⇒ SystemExit.
+
+KẾT QUẢ (chi tiết: mike/agents/Taylor/research/faild_divtax_20260927/REPORT.md, branch
+research/faild-divtax-artifacts-2709): thuế 5% ⇒ CAGR 23,37% → 23,35% (−0,02pp), Sharpe
+không đổi 1,88, Calmar 1,60 → 1,59, NAV −1,46B; IS −0,02pp / OOS −0,02pp (đồng đều).
+Khớp đối chứng số học độc lập −0,0234pp. KHÔNG đổi quyết định park = 0,30.
+
+KHÔNG MERGE. KHÔNG re-pin.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+---
+ WorkingClaude/pt_v23_audit_2014.py | 23 +++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/WorkingClaude/pt_v23_audit_2014.py b/WorkingClaude/pt_v23_audit_2014.py
+index 43544ce6..9f75f506 100644
+--- a/WorkingClaude/pt_v23_audit_2014.py
++++ b/WorkingClaude/pt_v23_audit_2014.py
+@@ -329,6 +329,25 @@ if LAG_DISC_STATE and LAG_DISC_STATE not in ("c4", "c5"):
+ if LAG_DISC_STATE: _qs_tag += f"_lagdisc{LAG_DISC_STATE}"
+ EXP_TAG = os.environ.get("EXP_TAG", "").strip()
+ if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
++
++# ── FAIL-D: haircut THUẾ cổ tức trên sổ PARK (A/B ĐO LƯỜNG, mặc định TẮT) ────────────────────
++# VÌ SAO: chuỗi level custom30V dùng `Close` ĐÃ ĐIỀU CHỈNH ⇒ theo định nghĩa là total-return với
++# cổ tức tái đầu tư tức thì, **GỘP, không thuế, không phí**. Live thì đây là rổ 30 cổ phiếu TỰ
++# QUẢN (`PARK_TICKER="CUSTOM_VN30G"`): cổ tức TIỀN về tài khoản → chịu **thuế TNCN 5%** (TT111/2013,
++# thu nhập từ đầu tư vốn) → rồi mới mua lại (phí). `simulate_holistic_nav.py:888` chỉ trừ
++# `etf_mgmt_fee_annual`/`etf_tracking_drag_annual`, cả hai = 0 cho nhánh basket tự quản ⇒ KHÔNG có
++# gì thay chỗ thuế cổ tức. Đây là FAIL-D của `measurement_integrity_audit_20260927/REPORT.md`.
++#
++# CƠ CHẾ: dùng ĐÚNG hook đã có sẵn (`etf_tracking_drag_annual`, shrink shares mỗi phiên) — KHÔNG
++# thêm đường tính mới. Mặc định "" / 0 ⇒ truyền 0.0 y như trước ⇒ **BYTE-IDENTICAL** với pin.
++# Giá trị hiệu chuẩn nằm ở runner (research/faild_divtax_20260927/), không hardcode ở đây.
++PARK_DIV_TAX_DRAG_ANNUAL = float(os.environ.get("PARK_DIV_TAX_DRAG_ANNUAL", "").strip() or 0.0)
++if PARK_DIV_TAX_DRAG_ANNUAL < 0 or PARK_DIV_TAX_DRAG_ANNUAL > 0.5:
++    raise SystemExit(f"PARK_DIV_TAX_DRAG_ANNUAL={PARK_DIV_TAX_DRAG_ANNUAL!r} ngoài [0, 0.5] — từ chối chạy")
++if PARK_DIV_TAX_DRAG_ANNUAL > 0:
++    _qs_tag += f"_divtax{round(PARK_DIV_TAX_DRAG_ANNUAL*1e6)}"   # §8: trục đổi SỐ ⇒ đổi TÊN FILE
++    print(f"[faild-divtax] park sleeve drag = {PARK_DIV_TAX_DRAG_ANNUAL:.8f}/yr "
++          f"({PARK_DIV_TAX_DRAG_ANNUAL*100:.4f}%/yr) — chân NEW, KHÔNG phải production")
+ # ── UNIVERSE SOURCE (G6 re-pin A/B, ticker_prune_replacement_plan.md §5) ────────────────────
+ # "pit" (DEFAULT tu 2026-07-22, user quyet dinh cutover) = team-owned `tav2_mike.universe_pit_q`,
+ #                   membership PER TRADING DAY (no DISTINCT-ever look-ahead) -> baseline R3 CHINH THUC.
+@@ -1980,7 +1999,7 @@ BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
+               tier_weights_by_state=RS["tier_weights_by_state"],
+               deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
+-              etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
++              etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=PARK_DIV_TAX_DRAG_ANNUAL, etf_rebalance_friction=0.0015,
+               open_prices=open_prices, t1_open_exec=True,
+               entry_alt_prices=None,           # AUDIT: BQ-verifiable T+1 Open fills only
+               force_close_eod=False, **ETF_LIQ_KW)
+@@ -2033,7 +2052,7 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
+               count_inflight_slots=LAG_SLOT_INFLIGHT,
+               deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
+-              etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
++              etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=PARK_DIV_TAX_DRAG_ANNUAL, etf_rebalance_friction=0.0015,
+               fund_tiebreak_col=("_fund_tb" if _LAG_FUND_DNPR else None),   # Wave1/H8a within-tier reorder (OFF-default None = byte-identical)
+               open_prices=opens_lag, t1_open_exec=True, force_close_eod=False, **ETF_LIQ_KW)
+ def _lag_disc_twbs(tw):
+-- 
+2.34.1
+

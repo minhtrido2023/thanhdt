@@ -1,0 +1,32 @@
+
+===== SpaceX: 71 dòng, 8 dòng nav_is_estimate=True
+-- (1) dòng ước tính: mtm theo BQ Price (đã ghi) so với mtm theo marketPrice broker cùng bản ghi positions
+  2026-07-21 chụp 19:10:23 | pos 19:10:23 | balances sau 14:45: 3 bản | mtm BQ 877,265,000 vs broker 879,375,000 lệch -2,110,000 (-0.2276% NAV) | cash = debt = egg = | cú khớp cuối 14:20:48
+  2026-07-22 chụp 19:10:35 | pos 19:10:35 | balances sau 14:45: 5 bản | mtm BQ 860,150,000 vs broker 858,595,000 lệch +1,555,000 (+0.1709% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-08-10 chụp 19:12:13 | pos 19:12:13 | balances sau 14:45: 17 bản | mtm BQ 664,650,000 vs broker 655,605,000 lệch +9,045,000 (+0.9322% NAV) | cash = debt = egg = | cú khớp cuối 11:27:46
+  2026-08-25 chụp 20:15:03 | pos 23:30:05 | balances sau 14:45: 2 bản | mtm BQ 864,736,750 vs broker 865,866,750 lệch -1,130,000 (-0.1159% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-08-27 chụp 22:16:08 | pos 23:30:05 | balances sau 14:45: 4 bản | mtm BQ 875,249,500 vs broker 874,589,500 lệch +660,000 (+0.0670% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-09-21 chụp 21:15:07 | pos 23:30:15 | balances sau 14:45: 12 bản | mtm BQ 889,243,450 vs broker 885,253,450 lệch +3,990,000 (+0.4094% NAV) | cash = debt = egg = | cú khớp cuối 09:15:25
+  2026-09-23 chụp 23:39:58 | pos 23:39:58 | balances sau 14:45: 8 bản | mtm BQ 893,887,143 vs broker 893,148,400 lệch +738,743 (+0.0752% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-10-01 chụp 23:50:13 | pos 23:50:30 | balances sau 14:45: 6 bản | mtm BQ 627,966,600 vs broker 628,379,600 lệch -413,000 (-0.0422% NAV) | cash = debt = egg = | cú khớp cuối —
+-- (2) lần chụp so với giờ đóng cửa
+  2026-07-02 balance_ts 2026-07-02T09:46:35: CHỤP TRƯỚC giờ đóng cửa phiên của chính nó; số dư CŨ HƠN cú khớp cuối 09:46:55
+  2026-08-24 balance_ts 2026-08-24T04:49:59: CHỤP TRƯỚC giờ đóng cửa phiên của chính nó
+  2026-08-31 balance_ts 2026-08-31T20:15:05: ngày KHÔNG có phiên
+-- (3) phiên THIẾU dòng
+  2026-08-06: thiếu dòng; dnse_raw có 3 bản ghi balances (15:13:52 … 19:10:34)
+
+===== ZaloPay: 68 dòng, 6 dòng nav_is_estimate=True
+-- (1) dòng ước tính: mtm theo BQ Price (đã ghi) so với mtm theo marketPrice broker cùng bản ghi positions
+  2026-08-07 chụp 19:05:27 | pos 19:05:27 | balances sau 14:45: 1 bản | mtm BQ 938,446,500 vs broker 938,446,500 lệch +0 (+0.0000% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-08-10 chụp 19:10:56 | pos 19:10:56 | balances sau 14:45: 18 bản | mtm BQ 797,392,950 vs broker 797,826,200 lệch -433,250 (-0.0456% NAV) | cash = debt = egg = | cú khớp cuối 11:03:43
+  2026-08-25 chụp 20:15:01 | pos 23:30:04 | balances sau 14:45: 2 bản | mtm BQ 920,832,300 vs broker 921,462,300 lệch -630,000 (-0.0652% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-08-27 chụp 22:16:11 | pos 23:30:05 | balances sau 14:45: 4 bản | mtm BQ 908,704,000 vs broker 908,318,000 lệch +386,000 (+0.0405% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-09-21 chụp 21:15:14 | pos 23:30:14 | balances sau 14:45: 12 bản | mtm BQ 854,867,400 vs broker 852,817,400 lệch +2,050,000 (+0.2156% NAV) | cash = debt = egg = | cú khớp cuối —
+  2026-09-23 chụp 23:39:59 | pos 23:39:59 | balances sau 14:45: 8 bản | mtm BQ 847,561,688 vs broker 847,152,150 lệch +409,538 (+0.0429% NAV) | cash = debt = egg = | cú khớp cuối —
+-- (2) lần chụp so với giờ đóng cửa
+  2026-07-27 balance_ts 2026-07-28T09:15:15: chụp ngày 2026-07-28 09:15:15 (trước giờ đóng cửa phiên kế — hợp lệ)
+  2026-08-24 balance_ts 2026-08-24T04:50:08: CHỤP TRƯỚC giờ đóng cửa phiên của chính nó
+  2026-08-31 balance_ts 2026-08-31T20:15:02: ngày KHÔNG có phiên
+-- (3) phiên THIẾU dòng
+  2026-08-06: thiếu dòng; dnse_raw có 5 bản ghi balances (15:13:54 … 19:10:07)

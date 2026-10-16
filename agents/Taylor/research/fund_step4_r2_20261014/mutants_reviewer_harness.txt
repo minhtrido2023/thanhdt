@@ -1,0 +1,5 @@
+N1 CHẾT - không loại cổ tức hỏng >50% [('vnindex_total_return_selfcheck.py', 1, 'AssertionError: dy 66.7% (> 50%) là dữ liệu hỏng, KHÔNG được vào y: y=0.200803212851406 div_cash=20000000000.0')]
+N6 CHẾT - ack G6 không cần người xác nhận [('vnindex_total_return_selfcheck.py', 1, 'AssertionError: ack thiếu confirmed_by phải ValueError')]
+N9 CHẾT - div_recv/fills không lọc account (§12) [('nav_sleeve_selfcheck.py', 1, "AssertionError: §12 cổ tức chờ về lẫn tài khoản: A1 [('2026-07-08T19:00:00', 10000.0), ('2026-07-08T19:00:05',")]
+N10 SỐNG - khớp nhãn kỳ (đối chứng, kỳ vọng sống) [('period_table_32_selfcheck.py', 0, "⚠️  không tìm thấy checkout mike canonical (thử '/tmp/arm_N10_92e1nexr/mike') — dùng cây đang chạy '/tmp/arm_N")]
+N11 CHẾT - G4 bỏ phiên đầu kỳ [('vnindex_total_return_selfcheck.py', 1, "AssertionError: G4 thông điệp phải trích '100 → 94': G4: 2030-05-31 số mã rổ 94 → 100 (+6, > 5% của 94)")]

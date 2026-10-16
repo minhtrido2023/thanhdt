@@ -1,0 +1,20 @@
+== Tác động đính chính — ZaloPay: 3/60 báo cáo đã gửi bị ảnh hưởng (ngưỡng: <0.05 bậc 1 · 0.05–0.5 bậc 2 · >0.5 bậc 3)
+báo cáo                                                     số chính bậc theo ngày bậc  hành động
+SpaceX_ZaloPay_monthly_report_2026-08.md                      0.0000  0     2.6914  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 937,070,077)
+      ngày 2026-08-07: NAV 950,719,172 → 950,719,172 (+0.0000%), tỉ suất ngày -2.6914 điểm %
+SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md      0.0000  0     2.6914  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 937,070,077)
+      ngày 2026-08-07: NAV 950,719,172 → 950,719,172 (+0.0000%), tỉ suất ngày -2.6914 điểm %
+ZaloPay_monthly_report_2026-08.md                             0.0000  0     2.6914  3   không đổi  ⚠ CẦN NGƯỜI XEM
+      ngày 2026-08-06: thêm dòng (NAV 937,070,077)
+      ngày 2026-08-07: NAV 950,719,172 → 950,719,172 (+0.0000%), tỉ suất ngày -2.6914 điểm %
+-- CẦN USER QUYẾT: 3
+   SpaceX_ZaloPay_monthly_report_2026-08.md: số theo NGÀY trong kỳ lệch bậc 3 (2.6914) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+   SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md: số theo NGÀY trong kỳ lệch bậc 3 (2.6914) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+   ZaloPay_monthly_report_2026-08.md: số theo NGÀY trong kỳ lệch bậc 3 (2.6914) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ — người phải xem báo cáo có in số ngày đó không
+-- ghi chú ở báo cáo kế tiếp (bậc 2): 0
+-- chỉ sửa từ nay (bậc 0–1): 3
+ℹ️ bỏ qua 1 file không phải .md: ZaloPay_weekly_report_2026-10-05_to_2026-10-09.md.bak_sent_20261010
+Công cụ này KHÔNG gửi, KHÔNG sửa, KHÔNG phát hành lại báo cáo nào.
+báo cáo tác động: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/fund_history_lock_20261014/D_impact/impact_ZaloPay_AB.json (md5 d9bbc5a26e334a58df970870132994d2)

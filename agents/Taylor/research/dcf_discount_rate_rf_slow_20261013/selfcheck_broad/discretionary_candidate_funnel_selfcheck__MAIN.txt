@@ -1,0 +1,2 @@
+discretionary_candidate_funnel_selfcheck TZ=Asia/Ho_Chi_Minh: 267 PASS, 0 FAIL
+rc=0

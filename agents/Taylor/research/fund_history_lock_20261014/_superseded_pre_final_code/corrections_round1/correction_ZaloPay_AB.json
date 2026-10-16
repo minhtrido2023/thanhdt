@@ -1,0 +1,24 @@
+{
+ "account": "ZaloPay",
+ "corrections": [
+  {
+   "op": "insert",
+   "date": "2026-08-06",
+   "row": {
+    "date": "2026-08-06",
+    "nav": "937070077",
+    "mtm_stock": "924797500",
+    "cash": "12272577",
+    "margin_debt": "0",
+    "offbook_assets": "0",
+    "egg_assets": "0",
+    "balance_ts": "2026-08-06T19:10:07",
+    "cum_dividend_excl": "0",
+    "nav_is_estimate": "True",
+    "nav_source": "backfill dnse_raw positions@2026-08-06T19:10:07 balances@2026-08-06T19:10:07 + BQ Price + giá thay VHM=77100"
+   },
+   "reason": "nav_history thieu dong phien 2026-08-06 (dnse_raw ngay do co balances toi 19:10).",
+   "evidence": "dnse_raw_2026-08-06.jsonl: positions+balances 2026-08-06T19:10:07 (sau dong cua); gia = BQ ticker.Price 2026-08-06, rieng VHM lay 77.100 (BQ Price 153.000 dong cung o gia truoc chia thuong 1:1 ex 08-06; BQ Close 08-06 = 77.100, Price = Close tu 08-07; incident 2026-08-17 corp-action-gate-false-refuse-stale-price). Dung bang daily_nav_snapshot.py --from-raw --raw-price-override VHM=77100 tren ban sao /tmp (job Taylor_20261014_020334)."
+  }
+ ]
+}

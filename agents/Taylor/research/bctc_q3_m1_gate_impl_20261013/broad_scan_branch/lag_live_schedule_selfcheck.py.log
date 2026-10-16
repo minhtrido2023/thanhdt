@@ -1,0 +1,28 @@
+[A] parity vs verbatim old logic on real data (full history — takes ~1-2 min)...
+  [PASS] A1 every old event found in new source  — 0 missing of 51,952
+  [PASS] A2 prior_n_good identical outside same-day-sibling ties  — 8 mismatches, 0 outside ties
+  [PASS] A3 pa_HL3 identical outside same-day-sibling ties (atol 1e-9)  — 8 mismatches, 0 outside ties
+  [PASS] A4 surprise_B_MA identical  — 0 mismatches
+  [PASS] A5 tier identical
+  [PASS] A6 qualify identical outside same-day-sibling ties  — 0 mismatches, 0 outside ties / old qualifiers=5,489
+  [PASS] A6b every qualify flip is a same-day sibling AND the new side uses fewer priors (look-ahead removed, not added)  — no flips
+  [PASS] A7 new source additionally sees post-CSV releases  — 14 events after CSV max 2026-08-07
+[B] MBS 2026Q2 (released 2026-07-08) scored same-day...
+  [PASS] B1 MBS 2026-07-08 present in new source
+  [PASS] B2 NP_R scored in % (≈ +36)  — NP_R=36.0
+  [PASS] B3 prior_n_good = 23 (full history counted)  — prior_n_good=23
+  [PASS] B4 pa_HL3 ≈ 4.06 (< 5 gate)  — pa_HL3=4.06
+  [PASS] B5 qualify=False (pa_HL3 gate) — scored, not skipped
+  [PASS] B6 old CSV path đã bắt kịp MBS (release date đã trong cutoff CSV — đúng thiết kế +30-phiên, không phải gap)  — csv_max=2026-08-07
+[C] synthetic new event released today...
+  [PASS] C1 event released today visible immediately
+  [PASS] C2 qualifies (NP_R=40≥15, priors=5≥4, pa_HL3=10≥5)  — npr=40 prior=5 pa=10.0
+  [PASS] C3 tier LAG_HI (surprise=1.0>0.5)
+  [PASS] C4 schedules as UPCOMING T+5 (not entered, not stale)  — ahead=5
+  [PASS] C5 old CSV path cannot see the new event
+  [PASS] C6 negative control: 3 priors → qualify=False  — prior_n_good=3
+[D] wiring guard...
+  [PASS] D1 golive imports live_lag_candidates
+  [PASS] D2 golive no longer READS the classified CSV (name may remain in comments)
+
+✅ all lag_live_schedule checks passed

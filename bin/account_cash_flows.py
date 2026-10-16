@@ -34,6 +34,9 @@ SCHEMA `data/account_cash_flows.json`:
     KHẲNG ĐỊNH CÓ BẰNG CHỨNG rằng bước nhảy NAV ngày đó là biến động thị trường, không phải
     nạp/rút — đó là cách duy nhất để mở cổng chặn ở `report_delivery_gate`. Gán theo NGÀY (dòng
     nav_history đầu tiên có ngày >= `date`); không cần `time_ict`, không được khai `timing`.
+    Bản ghi này KHÔNG đóng được cửa sổ nào của đẳng thức tiền (`cash_identity.py`): nó không
+    mang số tiền nên từng che được khoản nạp bất kỳ cùng ngày. Lời xác nhận của đẳng thức tiền
+    nằm ở file riêng `data/cash_identity_acks.json` và mang phần dư đã xem.
   - `evidence`: bắt buộc, non-empty. Không có bằng chứng ⇒ không được ghi (§6).
   - `timing`: TUỲ CHỌN, "bod" | "eod". Không khai ⇒ code tự suy. Có khai mà KHÁC kết quả suy ra
     ⇒ CashFlowError nêu cả hai (không âm thầm chọn một bên).
@@ -63,6 +66,10 @@ tiên đã chứa khoản tiền).
     phiên đóng cửa gần nhất tính tới thời điểm tiền vào/ra ⇒ CashFlowError nêu tên phiên đó:
     nav_history THIẾU dòng của phiên ấy nên giá chốt thiếu biến động của nó (thật: cả hai TK
     thiếu dòng 2026-08-06). Phiên = thứ Hai–Sáu không thuộc `trading_bot.vn_market.is_holiday`.
+  * dòng cho giá chụp khi phiên đóng cửa gần nhất KHÁC phiên đóng cửa gần nhất tính tới thời
+    điểm tiền vào/ra ⇒ CashFlowError. Bắt cả chiều "chụp quá muộn": dòng mang ngày T nhưng chụp
+    sau khi phiên T+1 đã đóng cửa (chạy lại snapshot ngày cũ theo đường live) — NAV dòng đó đã
+    chứa biến động phiên T+1.
   * `balance_ts` (giờ ICT, `daily_nav_snapshot.py` ghi) phải TĂNG NGHIÊM NGẶT theo ngày của dòng,
     từ dòng liền trước dòng tiền đầu tiên tới hết ⇒ không thì CashFlowError (`attach_flows_to_rows`
     kiểm; dòng sửa tay bằng số dư chụp muộn hơn dòng sau từng cho giá sai im lặng).
@@ -336,9 +343,10 @@ def assign_flow(rows, flow, baseline_date=None):
                 f"dòng nav_history {rows[i][0]} (balance_ts {rows[i].balance_ts}) — không phân "
                 f"biệt được tiền vào/ra trước hay sau lần chụp. Khai time_ict tới giây (HH:MM:SS).")
         close = datetime.datetime.combine(rows[i][0], SESSION_CLOSE_ICT)
-        if snap < at < close:
+        if snap < at < close and _is_session_day(rows[i][0]):
             # Tiền tới SAU lần chụp của dòng này nhưng TRƯỚC giờ đóng cửa của nó (NAV chụp
-            # giữa/trước phiên). Cơ chế "dòng đầu tiên chụp SAU dòng tiền" sẽ đẩy khoản này sang
+            # giữa/trước phiên). Dòng của ngày KHÔNG có phiên thì không có giờ đóng cửa nào để
+            # đứng trước: nó chụp giờ nào cũng là giá chốt phiên trước đó. Cơ chế "dòng đầu tiên chụp SAU dòng tiền" sẽ đẩy khoản này sang
             # dòng kế tiếp, tức giao dịch ở giá chốt của CHÍNH dòng này — trái luật (tiền tới
             # trong phiên phải ở giá chốt phiên TRƯỚC), và NAV dòng này có thể đã chứa cổ phiếu
             # mua bằng tiền đó mà không chứa tiền. Không đoán: chụp lại NAV ngày đó sau đóng cửa.
@@ -374,7 +382,8 @@ def assign_flow(rows, flow, baseline_date=None):
             # Dòng cho giá phải là phiên đóng cửa GẦN NHẤT trước thời điểm tiền vào/ra. nav_history
             # thiếu dòng của một phiên (thật: 2026-08-06 cả hai TK) thì dòng cho giá lùi về phiên
             # trước nữa ⇒ giá chốt thiếu trọn biến động của phiên thiếu, không lỗi, không cảnh báo.
-            src_date = rows[i][0] if timing == "eod" else (rows[i - 1][0] if i > 0 else baseline_date)
+            src = rows[i] if timing == "eod" else (rows[i - 1] if i > 0 else None)
+            src_date = src[0] if src is not None else baseline_date
             last = _last_session_closed_by(at)
             if src_date is not None and src_date < last:
                 raise CashFlowError(
@@ -383,6 +392,21 @@ def assign_flow(rows, flow, baseline_date=None):
                     f"dòng của phiên {last} ⇒ giá chốt thiếu biến động của phiên đó. Backfill dòng "
                     f"đó (daily_nav_snapshot.py --account <TK> --date {last} --from-raw — cần "
                     f"dnse_raw_{last}.jsonl có balances sau giờ đóng cửa) rồi tính lại.")
+            if src is not None:
+                # Bất biến gộp: NAV của dòng cho giá phải là giá chốt của ĐÚNG phiên `last`, tức
+                # lúc chụp nó thì phiên đóng cửa gần nhất cũng là `last`. Hai chốt trên bắt chiều
+                # "chụp quá sớm"; chốt này bắt nốt chiều "chụp quá muộn": dòng mang ngày T nhưng
+                # chụp SAU khi phiên T+1 đã đóng cửa (chạy lại snapshot ngày cũ theo đường live đọc
+                # số dư HIỆN TẠI) ⇒ NAV dòng đó đã chứa biến động phiên T+1, không lỗi, không cảnh báo.
+                seen = _last_session_closed_by(_snapshot_moment(src, flow))
+                if seen != last:
+                    raise CashFlowError(
+                        f"flow {flow['date']} time_ict={flow['time_ict']}: giao dịch ở giá chốt phiên "
+                        f"{last} (phiên đóng cửa gần nhất trước khi tiền vào/ra), nhưng dòng cho giá "
+                        f"{src[0]} chụp số dư lúc {src.balance_ts} — khi đó phiên đóng cửa gần nhất "
+                        f"là {seen} ⇒ NAV dòng {src[0]} không phải giá chốt phiên {last}. Không gán "
+                        f"hộ; dòng nav_history {src[0]} phải được chụp lại/đính chính (bước 3 của "
+                        f"chính sách).")
             return i, timing
     return None, None
 

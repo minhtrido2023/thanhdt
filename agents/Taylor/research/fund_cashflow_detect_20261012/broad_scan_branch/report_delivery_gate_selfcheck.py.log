@@ -1,0 +1,12 @@
+⚠️  không tìm thấy checkout mike canonical (thử '/tmp/fundcf_sb/branch/WC/mike') — dùng cây đang chạy '/tmp/fundcf_sb/branch/WC/mike'; state dùng chung có thể bị phân mảnh
+INCOMPLETE: state malformed: /tmp/tmp2qxv4jp4/state.json: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+report_delivery_gate: WARN period-return check — không parse được dòng 'Từ khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế của SpaceX_weekly_report_2026-09-14_to_2026-09-18.md, bỏ qua
+report_delivery_gate: WARN period-return check — không suy được report-date từ tên file SpaceX_special_report.md, bỏ qua
+INCOMPLETE weekly_report_2026-08-10_to_2026-08-14.md
+report_delivery_gate: COMPLETE weekly_report_2026-08-10_to_2026-08-14.md (validated + Discord + email)
+COMPLETE weekly_report_2026-08-10_to_2026-08-14.md
+report_delivery_gate: COMPLETE (idempotent) weekly_report_2026-08-10_to_2026-08-14.md
+report_delivery_gate: COMPLETE weekly_report_2026-08-10_to_2026-08-14.md (validated + Discord + email)
+report_delivery_gate: COMPLETE weekly_report_2026-08-10_to_2026-08-14.md (validated + Discord + email)
+report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-09-11_to_2026-09-18.md): -2.18% vs canonical -2.177% (lệch 0.003pp)
+report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)

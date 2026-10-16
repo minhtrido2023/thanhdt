@@ -30,7 +30,7 @@ export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 START_EPOCH="$(date +%s)"
 echo "=== fa_ratings_8l weekly refresh — $(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT') ==="
 
-cd "$ROOT"
+cd "$ROOT" || exit 1
 python3 rating_8l_history.py
 PY_RC=$?
 
@@ -60,4 +60,31 @@ if [ -n "$FAIL_REASON" ]; then
 fi
 
 echo "OK: refreshed — lastModified $(date -d @"$LM_S" +'%F %T'), rows=$NUM_ROWS"
+
+# Dong eff_date TUONG LAI (truoc 2026-10-16 do fallback q_time+45, vd PMT 2026-10-18; nay chi con do `time` tuong lai cua vendor / forensic flag).
+# Chi CANH BAO (khong fail): consumer doc "dong moi nhat" khong loc ngay se doc rating chua hieu luc.
+# Dedupe bang state file ⇒ chi bao khi TAP ma thay doi, khong lap lai moi ngay. Loi truy van in ra that (§29).
+FUT_STATE="$MIKE/state/fa_ratings_8l_future_rows.txt"
+_fut_err="$(mktemp)"
+_fut_out="$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
+  "SELECT STRING_AGG(CONCAT(f.ticker,'@',CAST(f.time AS STRING)), ',' ORDER BY f.ticker) AS fut FROM ${TABLE} AS f WHERE f.time > CURRENT_DATE('Asia/Ho_Chi_Minh')" 2>"$_fut_err")"
+if [ "$(printf '%s\n' "$_fut_out" | head -n1)" != "fut" ]; then   # bq in loi ra STDOUT (stderr rieng chi la canh bao)
+  echo "WARN: khong kiem duoc dong eff_date tuong lai — loi that: $(printf '%s %s' "$_fut_out" "$(cat "$_fut_err")" | tr '\n' ' ' | cut -c1-300)"
+else
+  FUT="$(printf '%s\n' "$_fut_out" | sed -n 2p | tr -d '"')"   # NULL ⇒ csv in ""
+  if [ -n "$FUT" ]; then
+    echo "WARN: fa_ratings_8l co dong eff_date TUONG LAI: $FUT"
+    if [ "$(cat "$FUT_STATE" 2>/dev/null)" != "$FUT" ]; then
+      # Ghi state CHI KHI notify thanh cong (rc=0) — gui hong thi lan sau van bao lai. tmp+mv = atomic.
+      if "$MIKE/bin/notify_thread.sh" "⚠️ fa_ratings_8l có dòng eff_date TƯƠNG LAI (nguyên nhân cần tra: time tương lai của vendor hoặc forensic flag — fallback +45 đã bỏ 2026-10-16): $FUT. Cổng golive/hit_details đã lọc theo ngày as-of nên không đọc sớm; consumer MỚI đọc 'dòng mới nhất' phải tự lọc f.time <= as-of." "$DISCORD_TRADING_DAILY" >/dev/null 2>&1; then
+        printf '%s' "$FUT" > "$FUT_STATE.tmp" && mv -f "$FUT_STATE.tmp" "$FUT_STATE"
+      else
+        echo "WARN: notify_thread.sh that bai — chua ghi state, se bao lai lan sau"
+      fi
+    fi
+  else
+    rm -f "$FUT_STATE"
+  fi
+fi
+rm -f "$_fut_err"
 "$MIKE/bin/append_event.sh" Winston status "fa_ratings_8l-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true

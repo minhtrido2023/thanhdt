@@ -1,0 +1,28 @@
+GIỐNG  rc 0/0 | 12m manual ok
+GIỐNG  rc 0/0 | 12m SKIP lặp
+GIỐNG  rc 1/1 | 12m lệch >=1pp
+GIỐNG  rc 1/1 | 12m không mới hơn
+GIỐNG  rc 0/0 | 12m --force sửa dòng cũ
+GIỐNG  rc 1/1 | 12m rate 0
+GIỐNG  rc 1/1 | 12m --source sai
+KHÁC   rc 2/1 | 12m --bank lọt vào
+   main  : 'usage: append_cctg_rate.py [-h] --rate RATE --effective EFFECTIVE --source\n                           SOURCE [--collected COLLECTED] [--note NOTE]\n                           [--sources SOURCES] [--series {12m,6m}] [--force]\nappend_cctg_rate.py: error: unrecognized arguments: --bank VPB\n'
+   nhánh : 'ERROR: --bank chỉ dùng với --series tier2 — từ chối để một dòng ngân hàng ngoài Big-4 không lọt vào chuỗi 12m.\n'
+GIỐNG  rc 0/0 | 6m manual ok
+GIỐNG  rc 0/0 | 6m SKIP lặp
+GIỐNG  rc 1/1 | 6m lệch >=1pp
+KHÁC   rc 1/1 | 6m không mới hơn
+   main  : "ERROR: --effective 2026-09-01 is not newer than the last anchor 2026-10-02 — cctg_events_df() treats this as corrupt/duplicate data and will raise loudly on next load. Refuse to write (typo'd year? duplicate run?).\n"
+   nhánh : "ERROR: [6m] --effective 2026-09-01 is not newer than the last anchor 2026-10-02 of this series. Refuse to write (typo'd year? duplicate run?).\n"
+GIỐNG  rc 0/0 | 6m --force sửa dòng cũ
+GIỐNG  rc 0/0 | 12m agent auto ok
+GIỐNG  rc 1/1 | 12m agent dùng lại URL
+GIỐNG  rc 1/1 | 12m agent --force
+GIỐNG  rc 1/1 | 12m agent manual
+GIỐNG  rc 1/1 | 12m agent cùng chủ
+GIỐNG  rc 0/0 | 6m agent auto ok
+
+17/19 lệnh giống hệt (rc+stdout+stderr)
+md5 data/ main : {'cctg6m_rate_last_auto_sources.json': '7575eddf3e78139169816f1e299ee5ba', 'cctg_rate_last_auto_sources.json': '7575eddf3e78139169816f1e299ee5ba', 'cctg_rate_vn_6m_events.csv': '819b3f4618fa4dd4f7853d4dab74bef9', 'cctg_rate_vn_events.csv': 'bc620ab6b22873befb2fe978267735ce'}
+md5 data/ nhánh: {'cctg6m_rate_last_auto_sources.json': '7575eddf3e78139169816f1e299ee5ba', 'cctg_rate_last_auto_sources.json': '7575eddf3e78139169816f1e299ee5ba', 'cctg_rate_vn_6m_events.csv': '819b3f4618fa4dd4f7853d4dab74bef9', 'cctg_rate_vn_events.csv': 'bc620ab6b22873befb2fe978267735ce'}
+md5 GIỐNG HỆT

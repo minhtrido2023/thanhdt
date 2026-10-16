@@ -1,0 +1,20 @@
+⚠️  WC_ROOT='/tmp/exdate_sb_h5e3v778' khác cây chứa script ('/tmp/fcf_r2/broad/WC') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/exdate_sb_h5e3v778' khác cây chứa script ('/tmp/fcf_r2/broad/WC') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/exdate_sb_h5e3v778' khác cây chứa script ('/tmp/fcf_r2/broad/WC') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/exdate_sb_h5e3v778' khác cây chứa script ('/tmp/fcf_r2/broad/WC') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+⚠️  WC_ROOT='/tmp/exdate_sb_h5e3v778' khác cây chứa script ('/tmp/fcf_r2/broad/WC') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+== exdate_frame_selfcheck (TZ=(không đặt)) ==
+Traceback (most recent call last):
+  File "/tmp/fcf_r2/broad/WC/mike/bin/exdate_frame_selfcheck.py", line 583, in <module>
+    sys.exit(main())
+  File "/tmp/fcf_r2/broad/WC/mike/bin/exdate_frame_selfcheck.py", line 566, in main
+    t_classify(ef)
+  File "/tmp/fcf_r2/broad/WC/mike/bin/exdate_frame_selfcheck.py", line 175, in t_classify
+    cr, bl = ef.classify_positions(label, ACC[label], DATE,
+  File "/tmp/fcf_r2/broad/WC/mike/bin/exdate_frame.py", line 192, in classify_positions
+    snap = dns._corp_action_daily_snapshot(asof)
+  File "/tmp/fcf_r2/broad/WC/mike/bin/daily_nav_snapshot.py", line 279, in _corp_action_daily_snapshot
+    from corp_action_daily import snapshot_path as _ca_snapshot_path
+  File "/tmp/fcf_r2/broad/WC/mike/bin/corp_action_daily.py", line 141, in <module>
+    from corp_action_lib import events as ca_events, feed_freshness, is_price_adjusting  # noqa: E402
+ModuleNotFoundError: No module named 'corp_action_lib'

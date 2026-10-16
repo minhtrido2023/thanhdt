@@ -1,0 +1,48 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+universe (pit) doc loi (MQB): universe_pit chi co toi 2026-10-13 < asof 2026-10-14
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+universe (pit) doc loi (MQB): universe_pit chi co toi 2026-10-13 < asof 2026-10-14
+corporate_action freshness doc loi: BQ giả lập chết
+insider scan loi: BQ giả lập chết
+universe (pit) doc loi (MQB): universe_pit chi co toi 2026-10-13 < asof 2026-10-14
+universe (pit) doc loi (MQB): universe_pit chi co toi 2026-10-13 < asof 2026-10-14
+corporate_action feed cu 400 ngay (max_ingested=2025-09-09) — bo qua exdate
+# due_diligence corp-flags selfcheck — asof 2026-10-14 (ICT)
+  feed corporate_action: max_ingested=2026-10-13 15:49:55.839163+00 max_public=2026-10-12 n=36503
+  fixture: có ex-date=MQB · không ex-date=FPT · insider bị cờ=23 mã ['ASG', 'CLW', 'DIG', 'DNA', 'LDW', 'LM8']
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  PASS  A1. MQB: upcoming_exdate != None — {'exright_date': '2026-10-15', 'days_to_ex': 1, 'value_per_share': 400.0, 'ref_price': 5100.0, 'gross_yield_pct': 7.8431, 'cost_estimate_20d_pp': 3.92
+  PASS  A2. exright_date nằm TRONG cửa sổ tương lai — 2026-10-15
+  PASS  A3. note đúng chuỗi COST-INFO đã pin
+  PASS  A4. gross_yield_pct = value_per_share / giá tham chiếu × 100 — 7.8431 vs 7.8431
+  PASS  A5. cost_estimate_20d_pp = gross_yield × 0,50 — 3.9216
+  PASS  A6. giá tham chiếu lấy TRƯỚC ngày ex-date (cổng Sprint 1)
+  PASS  B1. FPT: upcoming_exdate is None — None
+  PASS  B2. key vẫn tồn tại (None ≠ thiếu key)
+  PASS  C1. BQ chết → upcoming_exdate None (fail-closed)
+  PASS  C2. BQ chết → insider_net_sell None (fail-closed)
+  PASS  C3. BQ chết → KHÔNG raise, dict vẫn có trục cũ
+  PASS  C4. BQ chết → KHÔNG tự sinh cờ đỏ mới
+  PASS  C5. BQ chết → nhánh text vẫn chạy, trả chuỗi
+  PASS  D. [mã thường] có đủ 2 key mới — ['insider_net_sell', 'upcoming_exdate']
+  PASS  D. [book LAG (có trục PEAD)] có đủ 2 key mới — ['insider_net_sell', 'upcoming_exdate']
+  PASS  D. [mã không tồn tại (nhánh lỗi)] có đủ 2 key mới — ['insider_net_sell', 'upcoming_exdate']
+  PASS  D. [skip_corp_flags (đường sinh lệnh)] có đủ 2 key mới — ['insider_net_sell', 'upcoming_exdate']
+  PASS  D5. skip_corp_flags ⇒ cả 2 = None (đường 21:00 không tốn query)
+  PASS  D6. dd_check_for_order KHÔNG đổi shape (không thêm key mới)
+  PASS  E1. hằng số khớp bản pin (ngưỡng/cửa sổ/stale)
+  PASS  E2. tập mã bị cờ khớp TUYỆT ĐỐI với insider_flags.scan() — ref 23 vs dd 23; lệch=set()
+  PASS  E3. ASG: net_sell_pct khớp bản pin — 0.03702 vs 0.03702
+  PASS  E4. cờ = AND của HAI vế (n_sellers > n_buyers, KHÔNG chỉ vế ≥1%)
+  PASS  E5. note đúng chuỗi RISK-INFO đã pin
+  PASS  E6. ASG: cờ đi ra tới run_due_diligence
+  PASS  E7. cờ insider KHÔNG sinh cờ đỏ / KHÔNG chặn (thuần thông tin)
+  PASS  F1. feed cũ 400 ngày ⇒ cổng chặn, KHÔNG đọc lịch ex-date
+  PASS  F1b. feed tươi hôm nay ⇒ cổng mở
+  PASS  F2. _sessions_between đếm T2-T6 (bỏ cuối tuần) — 6
+  PASS  F3. §16 — _today_ict() neo ZoneInfo, không theo TZ process
+
+OK — due_diligence corp-flags selfcheck PASS
+rc=0

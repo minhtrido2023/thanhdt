@@ -1,0 +1,22 @@
+PASS C1 6m effective == seed date bị chặn
+PASS C2 6m lệch 1,1pp so với seed bị chặn
+OK: appended [6m] 2026-10-14 = 7.5% (source=manual_verify, collected=2026-10-14) -> /tmp/cctg6m_selfcheck_2tnwnog2/cctg_rate_vn_6m_events.csv
+PASS C3 6m manual ghi đúng 1 dòng vào file 6M
+PASS C3b file 12M không đổi từng byte
+SKIP: effective_date 2026-10-14 already present (use --force to override). No write — CSV unchanged.
+PASS C4 6m chạy lại cùng ngày SKIP rc=0, không thêm dòng
+PASS C5 6m --force bị từ chối khi có JOB_ID
+PASS C6 6m 2 nguồn cùng chủ bị chặn
+PASS C7 6m 2 nguồn lệch 0,3pp bị chặn
+OK: appended [6m] 2026-10-14 = 7.5% (source=web_crosscheck_auto, collected=2026-10-14) -> /tmp/cctg6m_selfcheck_2tnwnog2/cctg_rate_vn_6m_events.csv
+PASS C8 6m auto hợp lệ ghi được
+PASS C8b sidecar 6M được ghi
+PASS C8c sidecar 12M KHÔNG bị tạo
+PASS C8d file 12M vẫn không đổi
+OK: appended 2026-10-14 = 7.4% (source=manual_verify, collected=2026-10-14).
+    cctg_events_df() now has 1 anchors; current_cctg_rate() = 7.50% (as of 2026-09-30 00:00:00).
+PASS C9 12m mặc định sau lượt 6m ghi vào file 12M
+PASS C9b file 6M không bị lượt 12m đụng
+
+14/14 PASS
+rc=0

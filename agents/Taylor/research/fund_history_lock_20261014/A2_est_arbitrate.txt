@@ -1,0 +1,94 @@
+SpaceX 2026-07-21: mtm sổ 877,265,000 | tính lại BQ 877,265,000 (lệch sổ +0) | nguồn 3 @ nan (sổ − nguồn 3 = +nan = +nan% NAV) | mã lệch: 11 do broker trễ (+690,000), 3 KHÁC (-2,800,000 = -0.3020% NAV)
+      BID: KL 1,900 BQ 36,800 broker 37,000 phiên trước 37,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -380,000 đ
+      CTG: KL 2,300 BQ 30,900 broker 30,800 phiên trước 30,800 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); +230,000 đ
+      HDB: KL 1,500 BQ 26,950 broker 26,850 phiên trước 26,850 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); +150,000 đ
+      LPB: KL 900 BQ 54,600 broker 53,500 phiên trước 53,500 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); +990,000 đ
+      MBB: KL 2,400 BQ 22,700 broker 22,800 phiên trước 22,800 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -240,000 đ
+      PVT: KL 3,000 BQ 16,300 broker 17,050 phiên trước 17,000 ⇒ KHÁC; nguồn 3 = None (); -2,250,000 đ
+      SAB: KL 1,100 BQ 47,000 broker 47,450 phiên trước 47,300 ⇒ KHÁC; nguồn 3 = None (); -495,000 đ
+      SIP: KL 1,100 BQ 46,950 broker 47,000 phiên trước 46,950 ⇒ KHÁC; nguồn 3 = None (); -55,000 đ
+      TCB: KL 2,000 BQ 29,800 broker 29,950 phiên trước 29,950 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -300,000 đ
+      VHM: KL 500 BQ 136,400 broker 136,900 phiên trước 136,900 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -250,000 đ
+      VIX: KL 700 BQ 12,500 broker 12,800 phiên trước 12,800 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -210,000 đ
+      VND: KL 300 BQ 17,150 broker 17,200 phiên trước 17,200 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -15,000 đ
+      VNM: KL 900 BQ 58,400 broker 58,500 phiên trước 58,500 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); -90,000 đ
+      VPB: KL 2,300 BQ 25,350 broker 25,000 phiên trước 25,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = None (); +805,000 đ
+SpaceX 2026-07-22: mtm sổ 860,150,000 | tính lại BQ 860,150,000 (lệch sổ +0) | nguồn 3 @ nan (sổ − nguồn 3 = +nan = +nan% NAV) | mã lệch: 0 do broker trễ (+0), 2 KHÁC (+1,555,000 = +0.1709% NAV)
+      CTG: KL 2,300 BQ 29,700 broker 29,250 phiên trước 30,900 ⇒ KHÁC; nguồn 3 = None (); +1,035,000 đ
+      VCB: KL 1,300 BQ 54,500 broker 54,100 phiên trước 56,700 ⇒ KHÁC; nguồn 3 = None (); +520,000 đ
+SpaceX 2026-08-10: mtm sổ 664,650,000 | tính lại BQ 664,650,000 (lệch sổ +0) | nguồn 3 @08-11T02:35 nan (sổ − nguồn 3 = +nan = +nan% NAV) | mã lệch: 18 do broker trễ (+8,945,000), 1 KHÁC (+100,000 = +0.0103% NAV)
+      ACB: KL 800 BQ 22,650 broker 22,400 phiên trước 22,400 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +200,000 đ
+      BID: KL 1,000 BQ 39,500 broker 39,050 phiên trước 39,050 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +450,000 đ
+      CTG: KL 1,000 BQ 32,800 broker 32,500 phiên trước 32,500 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +300,000 đ
+      HDB: KL 700 BQ 26,950 broker 26,550 phiên trước 26,550 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +280,000 đ
+      LPB: KL 200 BQ 52,300 broker 52,900 phiên trước 52,900 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); -120,000 đ
+      MBB: KL 1,100 BQ 24,250 broker 24,150 phiên trước 24,150 ⇒ broker trễ (=giá phiên trước); nguồn 3 = 20200 (08-11T02:35); +110,000 đ
+      PVT: KL 3,500 BQ 19,400 broker 18,350 phiên trước 18,350 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +3,675,000 đ
+      SAB: KL 1,100 BQ 46,500 broker 44,750 phiên trước 44,750 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +1,925,000 đ
+      SHB: KL 100 BQ 12,000 broker 11,700 phiên trước 11,700 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +30,000 đ
+      SIP: KL 1,700 BQ 51,100 broker 50,900 phiên trước 50,900 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +340,000 đ
+      TCB: KL 1,000 BQ 31,350 broker 29,700 phiên trước 29,700 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +1,650,000 đ
+      TPB: KL 500 BQ 14,750 broker 14,600 phiên trước 14,600 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +75,000 đ
+      TV1: KL 400 BQ 19,800 broker 19,700 phiên trước 19,700 ⇒ broker trễ (=giá phiên trước); nguồn 3 = broker cũ (08-11T02:35); +40,000 đ
+      VCB: KL 500 BQ 60,300 broker 60,100 phiên trước 59,700 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:35); +100,000 đ
+      VHM: KL 900 BQ 71,600 broker 73,000 phiên trước 73,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); -1,260,000 đ
+      VIX: KL 300 BQ 13,950 broker 13,600 phiên trước 13,600 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +105,000 đ
+      VND: KL 300 BQ 17,050 broker 16,650 phiên trước 16,650 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +120,000 đ
+      VNM: KL 900 BQ 62,100 broker 62,000 phiên trước 62,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +90,000 đ
+      VPB: KL 1,100 BQ 25,850 broker 25,000 phiên trước 25,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:35); +935,000 đ
+SpaceX 2026-08-25: mtm sổ 864,736,750 | tính lại BQ 864,736,750 (lệch sổ +0) | nguồn 3 @08-26T04:51 865,866,750 (sổ − nguồn 3 = -1,130,000 = -0.1159% NAV) | mã lệch: 0 do broker trễ (+0), 3 KHÁC (-1,130,000 = -0.1159% NAV)
+      DRI: KL 3,700 BQ 13,800 broker 13,900 phiên trước 14,100 ⇒ KHÁC; nguồn 3 = broker cũ (08-26T04:51); -370,000 đ
+      SCL: KL 1,500 BQ 26,300 broker 26,500 phiên trước 26,000 ⇒ KHÁC; nguồn 3 = broker cũ (08-26T04:51); -300,000 đ
+      TV1: KL 2,300 BQ 20,600 broker 20,800 phiên trước 20,700 ⇒ KHÁC; nguồn 3 = broker cũ (08-26T04:51); -460,000 đ
+SpaceX 2026-08-27: mtm sổ 875,249,500 | tính lại BQ 876,819,500 (lệch sổ -1,570,000) | nguồn 3 @08-28T04:49 874,589,500 (sổ − nguồn 3 = +660,000 = +0.0670% NAV) | mã lệch: 1 do broker trễ (+370,000), 2 KHÁC (+1,860,000 = +0.1888% NAV)
+      DRI: KL 3,700 BQ 14,200 broker 14,100 phiên trước 14,100 ⇒ broker trễ (=giá phiên trước); nguồn 3 = broker cũ (08-28T04:49); +370,000 đ
+      MSB: KL 600 BQ 15,700 broker 13,100 phiên trước 15,350 ⇒ KHÁC; nguồn 3 = broker cũ (08-28T04:49); +1,560,000 đ
+      SCL: KL 1,500 BQ 27,000 broker 26,800 phiên trước 26,600 ⇒ KHÁC; nguồn 3 = broker cũ (08-28T04:49); +300,000 đ
+SpaceX 2026-09-21: mtm sổ 889,243,450 | tính lại BQ 889,243,450 (lệch sổ +0) | nguồn 3 @09-22T04:51 885,253,450 (sổ − nguồn 3 = +3,990,000 = +0.4094% NAV) | mã lệch: 0 do broker trễ (+0), 3 KHÁC (+3,990,000 = +0.4094% NAV)
+      DRI: KL 3,700 BQ 14,800 broker 13,700 phiên trước 14,800 ⇒ KHÁC; nguồn 3 = broker cũ (09-22T04:51); +4,070,000 đ
+      SCL: KL 1,500 BQ 25,600 broker 25,500 phiên trước 26,000 ⇒ KHÁC; nguồn 3 = broker cũ (09-22T04:51); +150,000 đ
+      TV1: KL 2,300 BQ 19,800 broker 19,900 phiên trước 19,800 ⇒ KHÁC; nguồn 3 = broker cũ (09-22T04:51); -230,000 đ
+SpaceX 2026-09-23: mtm sổ 893,887,143 | tính lại BQ 901,847,900 (lệch sổ -7,960,757) | nguồn 3 @09-24T04:51 893,148,400 (sổ − nguồn 3 = +738,743 = +0.0752% NAV) | mã lệch: 1 do broker trễ (-460,000), 3 KHÁC (+9,159,500 = +0.9318% NAV)
+      DRI: KL 3,700 BQ 14,500 broker 14,300 phiên trước 14,000 ⇒ KHÁC; nguồn 3 = broker cũ (09-24T04:51); +740,000 đ
+      SCL: KL 1,500 BQ 27,100 broker 26,800 phiên trước 26,200 ⇒ KHÁC; nguồn 3 = broker cũ (09-24T04:51); +450,000 đ
+      TV1: KL 2,300 BQ 19,800 broker 20,000 phiên trước 20,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = broker cũ (09-24T04:51); -460,000 đ
+      VPB: KL 1,386 BQ 27,800 broker 22,050 phiên trước 28,000 ⇒ KHÁC; nguồn 3 = broker cũ (09-24T04:51); +7,969,500 đ
+SpaceX 2026-10-01: mtm sổ 627,966,600 | tính lại BQ 628,398,600 (lệch sổ -432,000) | nguồn 3 @10-02T08:45 628,379,600 (sổ − nguồn 3 = -413,000 = -0.0422% NAV) | mã lệch: 0 do broker trễ (+0), 3 KHÁC (+19,000 = +0.0019% NAV)
+      DRI: KL 3,700 BQ 15,500 broker 15,700 phiên trước 15,600 ⇒ KHÁC; nguồn 3 = broker cũ (10-02T08:45); -740,000 đ
+      TPB: KL 230 BQ 14,400 broker 12,100 phiên trước 14,450 ⇒ KHÁC; nguồn 3 = broker cũ (10-02T08:45); +529,000 đ
+      TV1: KL 2,300 BQ 20,400 broker 20,300 phiên trước 20,600 ⇒ KHÁC; nguồn 3 = broker cũ (10-02T08:45); +230,000 đ
+ZaloPay 2026-08-07: mtm sổ 938,446,500 | tính lại BQ 938,446,500 (lệch sổ +0) | nguồn 3 @08-10T07:50 938,446,500 (sổ − nguồn 3 = +0 = +0.0000% NAV) | mã lệch: 0 do broker trễ (+0), 0 KHÁC (+0 = +0.0000% NAV)
+
+ZaloPay 2026-08-10: mtm sổ 797,392,950 | tính lại BQ 797,392,950 (lệch sổ +0) | nguồn 3 @08-11T02:24 nan (sổ − nguồn 3 = +nan = +nan% NAV) | mã lệch: 8 do broker trễ (-2,154,550), 7 KHÁC (+1,721,300 = +0.1812% NAV)
+      BID: KL 300 BQ 39,500 broker 39,450 phiên trước 39,050 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:24); +15,000 đ
+      CSV: KL 1,000 BQ 22,350 broker 22,000 phiên trước 22,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); +350,000 đ
+      CTG: KL 450 BQ 32,800 broker 32,700 phiên trước 32,500 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:24); +45,000 đ
+      DGC: KL 10,000 BQ 43,600 broker 44,200 phiên trước 44,200 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); -6,000,000 đ
+      HDB: KL 459 BQ 26,950 broker 26,450 phiên trước 26,550 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:24); +229,500 đ
+      LPB: KL 352 BQ 52,300 broker 52,900 phiên trước 52,900 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); -211,200 đ
+      MBB: KL 202 BQ 24,250 broker 24,150 phiên trước 24,150 ⇒ broker trễ (=giá phiên trước); nguồn 3 = 20200 (08-11T02:24); +20,200 đ
+      PVT: KL 2,071 BQ 19,400 broker 18,350 phiên trước 18,350 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); +2,174,550 đ
+      SAB: KL 744 BQ 46,500 broker 44,750 phiên trước 44,750 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); +1,302,000 đ
+      SCL: KL 1,000 BQ 23,300 broker 23,100 phiên trước 24,200 ⇒ KHÁC; nguồn 3 = 23400 (08-11T02:24); +200,000 đ
+      SIP: KL 749 BQ 51,100 broker 50,900 phiên trước 50,900 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); +149,800 đ
+      TCB: KL 356 BQ 31,350 broker 29,800 phiên trước 29,700 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:24); +551,800 đ
+      VCB: KL 100 BQ 60,300 broker 60,000 phiên trước 59,700 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:24); +30,000 đ
+      VNM: KL 601 BQ 62,100 broker 62,000 phiên trước 62,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = BQ (08-11T02:24); +60,100 đ
+      VPB: KL 1,300 BQ 25,850 broker 25,350 phiên trước 25,000 ⇒ KHÁC; nguồn 3 = BQ (08-11T02:24); +650,000 đ
+ZaloPay 2026-08-25: mtm sổ 920,832,300 | tính lại BQ 920,832,300 (lệch sổ +0) | nguồn 3 @08-26T04:51 921,462,300 (sổ − nguồn 3 = -630,000 = -0.0652% NAV) | mã lệch: 0 do broker trễ (+0), 3 KHÁC (-630,000 = -0.0652% NAV)
+      DRI: KL 1,900 BQ 13,800 broker 13,900 phiên trước 14,100 ⇒ KHÁC; nguồn 3 = broker cũ (08-26T04:51); -190,000 đ
+      SCL: KL 1,000 BQ 26,300 broker 26,500 phiên trước 26,000 ⇒ KHÁC; nguồn 3 = broker cũ (08-26T04:51); -200,000 đ
+      TV1: KL 1,200 BQ 20,600 broker 20,800 phiên trước 20,700 ⇒ KHÁC; nguồn 3 = broker cũ (08-26T04:51); -240,000 đ
+ZaloPay 2026-08-27: mtm sổ 908,704,000 | tính lại BQ 909,332,000 (lệch sổ -628,000) | nguồn 3 @08-28T04:50 908,318,000 (sổ − nguồn 3 = +386,000 = +0.0405% NAV) | mã lệch: 1 do broker trễ (+190,000), 2 KHÁC (+824,000 = +0.0864% NAV)
+      DRI: KL 1,900 BQ 14,200 broker 14,100 phiên trước 14,100 ⇒ broker trễ (=giá phiên trước); nguồn 3 = broker cũ (08-28T04:50); +190,000 đ
+      MSB: KL 240 BQ 15,700 broker 13,100 phiên trước 15,350 ⇒ KHÁC; nguồn 3 = broker cũ (08-28T04:50); +624,000 đ
+      SCL: KL 1,000 BQ 27,000 broker 26,800 phiên trước 26,600 ⇒ KHÁC; nguồn 3 = broker cũ (08-28T04:50); +200,000 đ
+ZaloPay 2026-09-21: mtm sổ 854,867,400 | tính lại BQ 854,867,400 (lệch sổ +0) | nguồn 3 @09-22T04:51 852,817,400 (sổ − nguồn 3 = +2,050,000 = +0.2156% NAV) | mã lệch: 0 do broker trễ (+0), 3 KHÁC (+2,050,000 = +0.2156% NAV)
+      DRI: KL 1,900 BQ 14,800 broker 13,700 phiên trước 14,800 ⇒ KHÁC; nguồn 3 = broker cũ (09-22T04:51); +2,090,000 đ
+      SCL: KL 1,000 BQ 25,600 broker 25,500 phiên trước 26,000 ⇒ KHÁC; nguồn 3 = broker cũ (09-22T04:51); +100,000 đ
+      TV1: KL 1,400 BQ 19,800 broker 19,900 phiên trước 19,800 ⇒ KHÁC; nguồn 3 = broker cũ (09-22T04:51); -140,000 đ
+ZaloPay 2026-09-23: mtm sổ 847,561,688 | tính lại BQ 856,246,150 (lệch sổ -8,684,462) | nguồn 3 @09-24T04:51 847,152,150 (sổ − nguồn 3 = +409,538 = +0.0429% NAV) | mã lệch: 1 do broker trễ (-280,000), 3 KHÁC (+9,374,000 = +0.9810% NAV)
+      DRI: KL 1,900 BQ 14,500 broker 14,300 phiên trước 14,000 ⇒ KHÁC; nguồn 3 = broker cũ (09-24T04:51); +380,000 đ
+      SCL: KL 1,000 BQ 27,100 broker 26,800 phiên trước 26,200 ⇒ KHÁC; nguồn 3 = broker cũ (09-24T04:51); +300,000 đ
+      TV1: KL 1,400 BQ 19,800 broker 20,000 phiên trước 20,000 ⇒ broker trễ (=giá phiên trước); nguồn 3 = broker cũ (09-24T04:51); -280,000 đ
+      VPB: KL 1,512 BQ 27,800 broker 22,050 phiên trước 28,000 ⇒ KHÁC; nguồn 3 = broker cũ (09-24T04:51); +8,694,000 đ

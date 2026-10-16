@@ -1,0 +1,8 @@
+KILLED   F12 rating không ép int  ← 1 FAIL (vd: FAIL  A17b cột rating lẫn NULL (float) → rating vẫn là int 3 / None  [{'ticker': 'FL', 'rating': 3.0, 'rating_)
+KILLED   F13 NaT rating time không bỏ qua  ← 1 FAIL (vd: FAIL  A18 time rác ở 1 mã → bỏ qua mã đó, mã còn lại VẪN có cờ, err=None  [] TypeError: Cannot compare NaT wit)
+KILLED   P01 đổi nhãn UPCOMING↔WINDOW_PASSED  ← 4 FAIL (vd: FAIL  C3 … status của cờ TVN TRÙNG status dòng order TVN trong recs (UPCOMING T+2 phiên tới)  {'ticker': 'TVN')
+KILLED   P02 khớp status chỉ theo ticker  ← 8 FAIL (vd: FAIL  C3 … status của cờ TVN TRÙNG status dòng order TVN trong recs (UPCOMING T+2 phiên tới)  {'ticker': 'TVN')
+KILLED   G06 bỏ annotate status  ← 3 FAIL (vd: FAIL  C3 … status của cờ TVN TRÙNG status dòng order TVN trong recs (UPCOMING T+2 phiên tới)  {'ticker': 'TVN')
+KILLED   G11 annotate đảo tham số  ← 2 FAIL (vd: FAIL  C3 … status của cờ TVN TRÙNG status dòng order TVN trong recs (UPCOMING T+2 phiên tới)  {'ticker': 'TVN')
+
+TỔNG: 6 killed / 0 survived / 0 not-applied / 6 mutant

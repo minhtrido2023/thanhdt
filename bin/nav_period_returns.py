@@ -33,6 +33,11 @@ audit measurement-integrity 2026-09-27.)
     `starting_capital`, đừng ghi thành flow — nếu không sẽ tính hai lần.
   - Dòng tiền TREO (chưa dòng nav_history nào chụp sau thời điểm tiền vào/ra) không thuộc kỳ đo
     nào và HIỆN ở `pending_flows` + cảnh báo stderr — không bao giờ vô hình.
+  - Dòng tiền CHƯA KHAI: CLI in thêm hai trường của đẳng thức tiền (`cash_identity.py`) tới ngày
+    báo cáo. `cash_flow_investor_line` = MỘT dòng trung tính (hoặc null) — báo cáo tuần/tháng gửi
+    nhà đầu tư chép ĐÚNG dòng này, không thêm gì (cổng giao báo cáo nhắc nếu thiếu).
+    `cash_flow_warnings` = chi tiết VẬN HÀNH (mã, số lượng, phân rã, tên file) — cho người soạn
+    đọc, KHÔNG chép vào báo cáo.
 
 HAI SỐ CỦA CHỦ TÀI KHOẢN, tách khỏi tỉ suất gia quyền thời gian (không trộn):
   - `pnl_vnd` = nav1 − nav0 − dòng tiền ròng của kỳ — lãi/lỗ bằng tiền.
@@ -57,6 +62,7 @@ import argparse
 import datetime
 import json
 import os
+import re
 import sys
 from zoneinfo import ZoneInfo
 
@@ -71,6 +77,14 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 ANNUALIZE_MIN_DAYS = 365
 DAYS_PER_YEAR = 365.25            # số mũ quy năm — cùng quy ước với backtest của repo
+
+_ERRNO_RE = re.compile(r"\[Errno -?\d+\] ?")
+
+
+def _exc_text(exc) -> str:
+    """Lỗi → "TênLỗi (thông điệp)" cho dòng CẢNH BÁO: bỏ cụm "[Errno N]" và không viết "TênLỗi:" —
+    hai dạng đó khớp `ERROR_RE` của `cron_health_check.py`, mà các dòng này vào log cron mỗi tối."""
+    return f"{type(exc).__name__} ({_ERRNO_RE.sub('', str(exc))})"
 
 
 def _last_on_or_before(rows: list, d: datetime.date):
@@ -201,7 +215,9 @@ def _flow_note(f: dict, reason: str) -> dict:
 
 
 def compute_period_returns(account: str, report_date: datetime.date, rows: list, inception: dict,
-                            flows: list = None) -> dict:
+                            flows: list = None, benchmark=None) -> dict:
+    """`benchmark` (tuỳ chọn): hàm `(from_date, to_date) -> dict` — thêm khối `benchmark` vào mỗi kỳ
+    (CLI dùng `vnindex_total_return.report_benchmark`). Không truyền ⇒ đầu ra như cũ, từng byte."""
     nav1_row = _last_on_or_before(rows, report_date)
     if nav1_row is None:
         raise ValueError(f"không có dòng nav_history nào <= {report_date} cho {account}")
@@ -217,12 +233,44 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
         # khong duoc doan `[]` (mot lan NAP thanh LAI — sai theo huong co loi cho minh).
         flows = load_flows(account, require_file=True)
     ledger, info = build_ledger(rows, flows, inception_from, inception_nav0)
+    return _assemble(account, report_date, ledger, info, inception_from, benchmark, inception)
+
+
+# Mốc VN-Index kỳ "từ khi bắt đầu" được sớm hơn inception_date tối đa ngần này ngày lịch (chặn gõ nhầm
+# năm/tháng; khoảng nghỉ dài nhất giữa hai phiên VNINDEX 2014→2026 đo được = 11 ngày, Tết 2015).
+INDEX_ANCHOR_MAX_LEAD_DAYS = 14
+
+
+def index_anchor_date(account: str, inception: dict) -> str:
+    """Mốc VN-Index của kỳ "từ khi bắt đầu" — khai THEO TÀI KHOẢN (`index_anchor_date` trong
+    `account_inception.json`), không suy từ dòng sổ 0: NAV gốc SpaceX là số dư SÁNG 01/07 (bot khớp
+    lệnh ngay 01/07) ⇒ mốc = đóng cửa 30/06; ZaloPay NAV gốc là số dư 21:35 ngày 06/07 ⇒ mốc = 06/07
+    (user duyệt 2026-10-14 16:11 ICT). Thiếu/hỏng ⇒ ValueError (CLI rc=1), KHÔNG rơi về dòng sổ 0."""
+    v = inception.get("index_anchor_date")
+    if not v:
+        raise ValueError(f"account_inception.json[{account}] thiếu 'index_anchor_date' — mốc VN-Index kỳ "
+                         f"'từ khi bắt đầu' phải khai theo tài khoản (giá đóng cửa của phiên MÀ NAV GỐC "
+                         f"phản ánh), không suy từ dòng sổ 0 {inception.get('inception_date')}")
+    try:
+        a = _parse_date(str(v))
+    except ValueError:
+        raise ValueError(f"account_inception.json[{account}].index_anchor_date = {v!r} không phải "
+                         f"YYYY-MM-DD") from None
+    inc = _parse_date(inception["inception_date"])
+    if not (0 <= (inc - a).days <= INDEX_ANCHOR_MAX_LEAD_DAYS):
+        raise ValueError(f"account_inception.json[{account}].index_anchor_date = {a} phải trong "
+                         f"[inception_date − {INDEX_ANCHOR_MAX_LEAD_DAYS} ngày, inception_date {inc}]")
+    return a.isoformat()
+
+
+def _assemble(account: str, report_date: datetime.date, ledger: list, info: dict,
+              inception_from: datetime.date, benchmark=None, inception: dict = None) -> dict:
     i1 = max(i for i, row in enumerate(ledger) if row["date"] <= report_date)
 
     monday = report_date - datetime.timedelta(days=report_date.weekday())
     month_start = report_date.replace(day=1)
 
-    return {
+    out = {
         "account": account,
         "report_date": report_date.isoformat(),
         "inception": _period_result(ledger, 0, i1),
@@ -239,6 +287,60 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
                                         f"vốn khởi điểm, không phải dòng tiền")
                           for f in info["dropped"]],
     }
+    if benchmark is not None:
+        inc_anchor = index_anchor_date(account, inception or {})
+        for key in ("inception", "wtd", "mtd", "day"):
+            p = out[key]
+            if p is not None:
+                # Mốc chỉ số = NGÀY CỦA DÒNG SỔ làm mốc kỳ — không do người soạn chọn (đóng lỗi ZaloPay
+                # neo 03/07 thay vì 06/07). Riêng kỳ dùng dòng 0 (mốc vốn gốc): `index_anchor_date` của
+                # tài khoản (B1 vòng 2 — SpaceX 30/06, không phải đóng cửa 01/07).
+                at_row0 = p["from_date"] == ledger[0]["date"].isoformat()
+                bm = benchmark(inc_anchor if at_row0 else p["from_date"], p["to_date"])
+                bm["anchor_source"] = "index_anchor_date" if at_row0 else "ledger_row"
+                for k, col in (("excess_vs_price_pp", "vnindex_price_pct"),
+                               ("excess_vs_tr_pp", "vnindex_tr_pct")):
+                    bm[k] = (round(p["return_pct"] - bm[col], 3) if bm.get(col) is not None else None)
+                p["benchmark"] = bm
+    return out
+
+
+def compute_sleeve_period_returns(account: str, report_date: datetime.date, rows: list,
+                                  inception: dict, flows: list = None, benchmark=None,
+                                  sleeve_paths: dict = None) -> dict:
+    """Chuỗi (b) "phần bot quản lý" (`nav_sleeve.py`) — cùng cấu trúc đầu ra, thêm `series: "bot"`,
+    `outside_scope`. Chỉ đọc file đã dựng (`nav_sleeve_history_<account>.csv`); chưa có số ⇒
+    `nav_sleeve.SleeveUnavailable` (người gọi in `chưa có số (<lý do>)`, chuỗi a không ảnh hưởng)."""
+    import nav_sleeve
+    if flows is None:
+        flows = load_flows(account, require_file=True)
+    sb = nav_sleeve.sleeve_inputs_for_report(account, report_date, rows, inception, flows,
+                                             **(sleeve_paths or {}))
+    if not sb["rows"]:
+        raise nav_sleeve.SleeveUnavailable(f"chuỗi b chưa có dòng nào sau mốc {sb['inception_from']}")
+    ledger, info = build_ledger(sb["rows"], sb["flows"], sb["inception_from"], sb["nav0"])
+    out = _assemble(account, report_date, ledger, info, sb["inception_from"], benchmark, inception)
+    out["series"] = "bot"
+    out["outside_scope"] = sb["outside_scope"]
+    out["outside_at_inception_vnd"] = sb["outside0_vnd"]
+    return out
+
+
+def _benchmark_fn():
+    """Khối benchmark (VN-Index giá + có cổ tức) — đường CẢNH BÁO: lỗi import/đọc không được làm mất
+    số tỉ suất; ô chỉ số khi đó mang `status: unavailable` + lý do (KHÔNG thay bằng chỉ số giá)."""
+    try:
+        import vnindex_total_return as vtr
+        series = vtr.read_series(vtr.SERIES_PATH)
+    except Exception as exc:                # noqa: BLE001
+        err = _exc_text(exc)
+
+        def unavailable(a, b):
+            return {"anchor_date": a, "end_date": b, "vnindex_price_pct": None,
+                    "vnindex_tr_gross_pct": None, "vnindex_tr_net_pct": None, "vnindex_tr_pct": None,
+                    "status": "unavailable", "reason": f"không đọc được chuỗi VN-Index: {err}"}
+        return unavailable
+    return lambda a, b: vtr.report_benchmark(a, b, series=series)
 
 
 def main() -> int:
@@ -246,6 +348,8 @@ def main() -> int:
     ap.add_argument("--account", choices=["SpaceX", "ZaloPay"])
     ap.add_argument("--report-date", help="YYYY-MM-DD (giờ ICT); mặc định hôm nay ICT")
     ap.add_argument("--selfcheck", action="store_true")
+    ap.add_argument("--sleeve", choices=["bot"],
+                    help="chuỗi 'phần bot quản lý' (nav_sleeve.py) thay vì cả tài khoản")
     args = ap.parse_args()
 
     if args.selfcheck:
@@ -259,7 +363,26 @@ def main() -> int:
                         else datetime.datetime.now(ICT).date())
         rows = load_nav_history(args.account)
         inception = load_inception(args.account)
-        result = compute_period_returns(args.account, report_date, rows, inception)
+        if args.sleeve:
+            import nav_sleeve
+            try:
+                result = compute_sleeve_period_returns(args.account, report_date, rows, inception,
+                                                       benchmark=_benchmark_fn())
+            except (nav_sleeve.SleeveUnavailable, nav_sleeve.SleeveError, OSError, ValueError, KeyError,
+                    CashFlowError) as e:
+                # Chuỗi (b) không có số — kể cả file phạm vi/chuyển giao THIẾU hoặc HỎNG (SleeveError,
+                # JSONDecodeError ⊂ ValueError): báo cáo in đúng "chưa có số (<lý do>)", không chặn chuỗi
+                # (a) (SPEC B4; arch-review bước 4 vòng 1 #2). Lý do = thông điệp lỗi thật (§29).
+                why = str(e) if isinstance(e, nav_sleeve.SleeveUnavailable) else _exc_text(e)
+                print(json.dumps({"account": args.account, "report_date": report_date.isoformat(),
+                                  "series": "bot", "status": "unavailable", "reason": why},
+                                 ensure_ascii=False, indent=2))
+                print(f"nav_period_returns ({args.account} --sleeve bot): chưa có số — {why}",
+                      file=sys.stderr)
+                return 3
+        else:
+            result = compute_period_returns(args.account, report_date, rows, inception,
+                                            benchmark=_benchmark_fn())
     except (FileNotFoundError, ValueError, KeyError, CashFlowError) as e:
         print(f"LỖI nav_period_returns: {e}", file=sys.stderr)
         return 1
@@ -269,6 +392,21 @@ def main() -> int:
             print(f"⚠️ nav_period_returns ({args.account}): dòng tiền {label} — {f['date']} "
                   f"{f['time_ict'] or ''} {f['amount_vnd']:+,.0f} VND ({f['kind']}) KHÔNG nằm "
                   f"trong tỉ suất nào ở trên: {f['reason']}", file=sys.stderr)
+    # Biến động tiền mà đẳng thức tiền (`cash_identity.py`) chưa đối chiếu xong: người soạn báo
+    # cáo phải thấy chi tiết (stderr + `cash_flow_warnings`), báo cáo chỉ mang một dòng trung tính.
+    # Đường CẢNH BÁO: lỗi ở đây (kể cả lỗi import) không được làm mất số tỉ suất đã tính xong.
+    try:
+        from cash_identity import report as cash_identity_report
+        identity = cash_identity_report(args.account, asof=report_date)
+        result["cash_flow_warnings"] = identity["ops_lines"]
+        result["cash_flow_investor_line"] = identity["investor_line"]
+    except Exception as exc:                # noqa: BLE001
+        result["cash_flow_warnings"] = [
+            f"⚠️ Đẳng thức tiền ({args.account}) KHÔNG chạy được nên chưa kiểm được dòng tiền "
+            f"chưa khai — {_exc_text(exc)}"]
+        result["cash_flow_investor_line"] = None
+    for line in result["cash_flow_warnings"]:
+        print(f"nav_period_returns: {line}", file=sys.stderr)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 

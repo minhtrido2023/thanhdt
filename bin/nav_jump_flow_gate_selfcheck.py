@@ -356,6 +356,32 @@ def build_cases(verdict):
                     f.append(f"message thiếu {need!r}: {msg!r}")
         finally:
             os.remove(p)
+        # Bản ghi của một ngày SAU ngày đang chụp (chạy lại snapshot ngày cũ) cũng "treo" so với
+        # chuỗi dòng tới ngày đó, nhưng nó không bị đẩy đi đâu cả ⇒ KHÔNG được in ghi chú đó cho nó.
+        p = flows_file([{"date": "2026-09-28", "time_ict": "10:00", "amount_vnd": 200_000_000,
+                         "kind": "deposit", "evidence": "nạp tuần sau"}])
+        try:
+            ok, msg = verdict("SpaceX", TODAY, PREV, 1_200_000_000.0, 15.0, HIST,
+                              components=COMP, flows_path=p)
+            if ok or "Bản ghi 2026-09-28" in (msg or "") or "bị đẩy sang phiên sau" in (msg or ""):
+                f.append(f"bản ghi của ngày sau ngày đang chụp không được nhận ghi chú đẩy phiên: ok={ok} {msg!r}")
+            if "gần nhất trong ±3 ngày: 2026-09-28" not in (msg or ""):
+                f.append(f"bản ghi 09-28 vẫn phải hiện ở danh sách ±3 ngày: {msg!r}")
+        finally:
+            os.remove(p)
+        # Bản ghi treo có ngày TRƯỚC ngày đang chụp vẫn bị đẩy sang phiên sau ⇒ PHẢI được nêu, không
+        # chỉ bản ghi đúng ngày. Chỉ dựng được với dòng của ngày KHÔNG có phiên mang số dư chụp từ
+        # hôm trước (dòng thứ Bảy, số dư tối thứ Sáu 21:00, tiền vào thứ Sáu 22:00): dòng của ngày
+        # có phiên mà chụp trước khi tiền vào thì đã bị từ chối ở bước gán.
+        p = flows_file([{"date": "2026-09-25", "time_ict": "22:00", "amount_vnd": 200_000_000,
+                         "kind": "deposit", "evidence": "nạp tối thứ Sáu"}])
+        try:
+            ok, msg = verdict("SpaceX", "2026-09-26", PREV, 1_200_000_000.0, 15.0, HIST_FRI,
+                              components=COMP, flows_path=p, balance_ts="2026-09-25T21:00:00")
+            if ok or "Bản ghi 2026-09-25 time_ict=22:00 +200,000,000 VND ĐÃ khai" not in (msg or ""):
+                f.append(f"bản ghi treo của ngày TRƯỚC ngày đang chụp phải được nêu: ok={ok} {msg!r}")
+        finally:
+            os.remove(p)
         # Không có bản ghi nào treo (không khai gì) ⇒ KHÔNG được in ghi chú "bị đẩy sang phiên sau".
         p = flows_file([])
         try:
@@ -587,7 +613,18 @@ def build_cases(verdict):
                 ("bản ghi dòng tiền thiếu giờ", {"account": "SpaceX", "inception": SYN_INC, "flows": [
                     {"date": _dtm.date(2026, 7, 3), "amount_vnd": 2e8, "kind": "deposit",
                      "evidence": "x", "timing": None, "time_ict": None}]}, "không có time_ict")):
-            perf, err = _dns.unit_price_performance(kw.pop("account"), "2026-07-03", SYN, **kw)
+            # Ca "không có mốc khởi điểm" đi qua `load_inception(account)` mặc định ⇒ trước đây
+            # đọc data/account_inception.json THẬT (đỏ ở cây không có data/ — G1). Trỏ nó vào
+            # fixture đóng băng: vẫn là đúng nhánh "account không có entry".
+            import functools as _ft
+            import nav_period_returns as _npr
+            _orig_li = _npr.load_inception
+            _npr.load_inception = _ft.partial(
+                _orig_li, inception_path=os.path.join(FIX, "account_inception.json"))
+            try:
+                perf, err = _dns.unit_price_performance(kw.pop("account"), "2026-07-03", SYN, **kw)
+            finally:
+                _npr.load_inception = _orig_li
             if perf is not None or not err or need not in err:
                 f.append(f"{label}: phải trả (None, lỗi có {need!r}), được {(perf, err)!r}")
                 continue

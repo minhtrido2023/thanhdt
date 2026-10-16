@@ -1,0 +1,8 @@
+[real, file có sẵn=False] old sha256=4cbc101d99dce479 new sha256=4cbc101d99dce479 bytes=2021 byte-identical=True dir_old=['macro_health.json'] dir_new=['macro_health.json'] mode_old=0o664 mode_new=0o664
+[real, file có sẵn=True] old sha256=4cbc101d99dce479 new sha256=4cbc101d99dce479 bytes=2021 byte-identical=True dir_old=['macro_health.json'] dir_new=['macro_health.json'] mode_old=0o664 mode_new=0o664
+[real] output bản MỚI == byte file data/macro_health.json đang sống: True (ts='2026-10-11T10:23:04+07:00')
+[synthetic, file có sẵn=False] old sha256=84508f76ed887b9c new sha256=84508f76ed887b9c bytes=325 byte-identical=True dir_old=['macro_health.json'] dir_new=['macro_health.json'] mode_old=0o664 mode_new=0o664
+[synthetic, file có sẵn=True] old sha256=84508f76ed887b9c new sha256=84508f76ed887b9c bytes=325 byte-identical=True dir_old=['macro_health.json'] dir_new=['macro_health.json'] mode_old=0o664 mode_new=0o664
+khối ghi CŨ : ["with open(os.path.join(DATADIR, 'macro_health.json'), 'w', encoding='utf-8') as f:\n    json.dump(report, f, indent=2, ensure_ascii=False)"]
+khối ghi MỚI: ["HEALTH_PATH = os.path.join(DATADIR, 'macro_health.json')", "_health_tmp = f'{HEALTH_PATH}.tmp.{os.getpid()}'", "with open(_health_tmp, 'w', encoding='utf-8') as f:\n    json.dump(report, f, indent=2, ensure_ascii=False)", 'os.replace(_health_tmp, HEALTH_PATH)']
+RESULT: PASS

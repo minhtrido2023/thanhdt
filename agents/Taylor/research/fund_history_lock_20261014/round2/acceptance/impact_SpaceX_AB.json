@@ -1,0 +1,636 @@
+{
+ "account": "SpaceX",
+ "thresholds": {
+  "tier2_from": 0.05,
+  "tier3_above": 0.5
+ },
+ "n_reports_scanned": 114,
+ "n_reports_affected": 6,
+ "reports": [
+  {
+   "report": "SpaceX_ZaloPay_monthly_report_2026-07.md",
+   "kind": "monthly",
+   "period": [
+    "2026-07-01",
+    "2026-07-31"
+   ],
+   "headline": {
+    "nav": {
+     "old": 938435711.0,
+     "new": 938435711.0,
+     "dev_pct": 0.0
+    },
+    "mtd": {
+     "old": -6.156428899999988,
+     "new": -6.156428899999988,
+     "dev_pp": 0.0
+    },
+    "qtd": {
+     "old": -6.156428899999988,
+     "new": -6.156428899999988,
+     "dev_pp": 0.0
+    },
+    "ytd": {
+     "old": -6.156428899999988,
+     "new": -6.156428899999988,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -6.156428899999988,
+     "new": -6.156428899999988,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-07-02",
+      "change": "đổi số",
+      "nav_old": 994733747.0,
+      "nav_new": 990304455.0,
+      "nav_dev_pct": -0.4452741262029436,
+      "day_return_dev_pp": -0.44292919999999736
+     },
+     {
+      "date": "2026-07-03",
+      "change": "đổi số",
+      "nav_old": 988629520.0,
+      "nav_new": 988629520.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.4445210192015492
+     }
+    ],
+    "rows_added_or_removed": 0
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-07-31",
+    "new": "2026-07-31"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 0.4452741262029436,
+   "tier_window": 2,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "SpaceX_ZaloPay_monthly_report_2026-08.md",
+   "kind": "monthly",
+   "period": [
+    "2026-08-01",
+    "2026-08-31"
+   ],
+   "headline": {
+    "nav": {
+     "old": 985617905.0,
+     "new": 985617905.0,
+     "dev_pct": 0.0
+    },
+    "mtd": {
+     "old": 5.027749205081133,
+     "new": 5.027749205081133,
+     "dev_pp": 0.0
+    },
+    "qtd": {
+     "old": -1.4382094999999984,
+     "new": -1.4382094999999984,
+     "dev_pp": 0.0
+    },
+    "ytd": {
+     "old": -1.4382094999999984,
+     "new": -1.4382094999999984,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -1.4382094999999984,
+     "new": -1.4382094999999984,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-06",
+      "change": "thêm dòng",
+      "nav_old": null,
+      "nav_new": 950871323.0
+     },
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 961311265.0,
+      "nav_new": 961311265.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.9734735016838636
+     }
+    ],
+    "rows_added_or_removed": 1
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-31",
+    "new": "2026-08-31"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 0.9734735016838636,
+   "tier_window": 3,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md",
+   "kind": "weekly",
+   "period": [
+    "2026-08-03",
+    "2026-08-07"
+   ],
+   "headline": {
+    "nav": {
+     "old": 961311265.0,
+     "new": 961311265.0,
+     "dev_pct": 0.0
+    },
+    "wtd": {
+     "old": 2.4376261188551185,
+     "new": 2.4376261188551185,
+     "dev_pp": 0.0
+    },
+    "mtd": {
+     "old": 2.4376261188551185,
+     "new": 2.4376261188551185,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -3.868873500000014,
+     "new": -3.868873500000014,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-06",
+      "change": "thêm dòng",
+      "nav_old": null,
+      "nav_new": 950871323.0
+     },
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 961311265.0,
+      "nav_new": 961311265.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.9734735016838636
+     }
+    ],
+    "rows_added_or_removed": 1
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-07",
+    "new": "2026-08-07"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 0.9734735016838636,
+   "tier_window": 3,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "SpaceX_monthly_report_2026-08.md",
+   "kind": "monthly",
+   "period": [
+    "2026-08-01",
+    "2026-08-31"
+   ],
+   "headline": {
+    "nav": {
+     "old": 985617905.0,
+     "new": 985617905.0,
+     "dev_pct": 0.0
+    },
+    "mtd": {
+     "old": 5.027749205081133,
+     "new": 5.027749205081133,
+     "dev_pp": 0.0
+    },
+    "qtd": {
+     "old": -1.4382094999999984,
+     "new": -1.4382094999999984,
+     "dev_pp": 0.0
+    },
+    "ytd": {
+     "old": -1.4382094999999984,
+     "new": -1.4382094999999984,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -1.4382094999999984,
+     "new": -1.4382094999999984,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-06",
+      "change": "thêm dòng",
+      "nav_old": null,
+      "nav_new": 950871323.0
+     },
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 961311265.0,
+      "nav_new": 961311265.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.9734735016838636
+     }
+    ],
+    "rows_added_or_removed": 1
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-31",
+    "new": "2026-08-31"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 0.9734735016838636,
+   "tier_window": 3,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "SpaceX_weekly_report_2026-07-03.md",
+   "kind": "weekly",
+   "period": [
+    "2026-06-29",
+    "2026-07-03"
+   ],
+   "headline": {
+    "nav": {
+     "old": 988629520.0,
+     "new": 988629520.0,
+     "dev_pct": 0.0
+    },
+    "wtd": {
+     "old": -1.137047999999996,
+     "new": -1.137047999999996,
+     "dev_pp": 0.0
+    },
+    "mtd": {
+     "old": -1.137047999999996,
+     "new": -1.137047999999996,
+     "dev_pp": 0.0
+    },
+    "inception": {
+     "old": -1.137047999999996,
+     "new": -1.137047999999996,
+     "dev_pp": 0.0
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-07-02",
+      "change": "đổi số",
+      "nav_old": 994733747.0,
+      "nav_new": 990304455.0,
+      "nav_dev_pct": -0.4452741262029436,
+      "day_return_dev_pp": -0.44292919999999736
+     },
+     {
+      "date": "2026-07-03",
+      "change": "đổi số",
+      "nav_old": 988629520.0,
+      "nav_new": 988629520.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.4445210192015492
+     }
+    ],
+    "rows_added_or_removed": 0
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-07-03",
+    "new": "2026-07-03"
+   },
+   "headline_dev": 0.0,
+   "tier_headline": 0,
+   "window_dev": 0.4452741262029436,
+   "tier_window": 2,
+   "affected": true,
+   "action": "không đổi",
+   "needs_human_look": true
+  },
+  {
+   "report": "eod_trading_report.log.1.gz:899",
+   "kind": "eod",
+   "period": [
+    "2026-08-07",
+    "2026-08-07"
+   ],
+   "headline": {
+    "nav": {
+     "old": 961311265.0,
+     "new": 961311265.0,
+     "dev_pct": 0.0
+    },
+    "day": {
+     "old": 0.12446075582028815,
+     "new": 1.0979342575041517,
+     "dev_pp": 0.9734735016838636
+    }
+   },
+   "window": {
+    "days": [
+     {
+      "date": "2026-08-07",
+      "change": "đổi số",
+      "nav_old": 961311265.0,
+      "nav_new": 961311265.0,
+      "nav_dev_pct": 0.0,
+      "day_return_dev_pp": 0.9734735016838636
+     }
+    ],
+    "rows_added_or_removed": 0
+   },
+   "literal_hits": [],
+   "literal_hits_new": [],
+   "component_changes": [],
+   "asof_row": {
+    "old": "2026-08-07",
+    "new": "2026-08-07"
+   },
+   "headline_dev": 0.9734735016838636,
+   "tier_headline": 3,
+   "window_dev": 0.9734735016838636,
+   "tier_window": 3,
+   "affected": true,
+   "printed": {
+    "nav": 961311265.0,
+    "day_pct": 0.12,
+    "new_nav": 961311265.0,
+    "new_day_pct": 1.0979342575041517
+   },
+   "printed_dev": 0.9779342575041517,
+   "tier_printed": 3,
+   "action": "PHÁT HÀNH LẠI báo cáo — cần user duyệt",
+   "needs_human_look": false
+  }
+ ],
+ "unaffected_reports": [
+  "SpaceX_ZaloPay_daily_report_2026-08-11.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-06_to_2026-07-10.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-13_to_2026-07-17.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-20_to_2026-07-24.md",
+  "SpaceX_ZaloPay_weekly_report_2026-07-27_to_2026-07-31.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14_CORRECTION_VIB.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-17_to_2026-08-21.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md",
+  "SpaceX_daily_report_2026-08-17.md",
+  "SpaceX_daily_report_2026-08-18.md",
+  "SpaceX_daily_report_2026-08-19.md",
+  "SpaceX_daily_report_2026-08-20.md",
+  "SpaceX_daily_report_2026-08-21.md",
+  "SpaceX_daily_report_2026-08-23.md",
+  "SpaceX_daily_report_2026-08-24.md",
+  "SpaceX_daily_report_2026-08-25.md",
+  "SpaceX_daily_report_2026-08-26.md",
+  "SpaceX_daily_report_2026-08-27.md",
+  "SpaceX_daily_report_2026-08-28.md",
+  "SpaceX_daily_report_2026-09-03.md",
+  "SpaceX_daily_report_2026-09-04.md",
+  "SpaceX_daily_report_2026-09-07.md",
+  "SpaceX_daily_report_2026-09-08.md",
+  "SpaceX_daily_report_2026-09-09.md",
+  "SpaceX_daily_report_2026-09-10.md",
+  "SpaceX_daily_report_2026-09-11.md",
+  "SpaceX_daily_report_2026-09-14.md",
+  "SpaceX_daily_report_2026-09-15.md",
+  "SpaceX_daily_report_2026-09-16.md",
+  "SpaceX_daily_report_2026-09-17.md",
+  "SpaceX_daily_report_2026-09-18.md",
+  "SpaceX_daily_report_2026-09-21.md",
+  "SpaceX_daily_report_2026-09-22.md",
+  "SpaceX_daily_report_2026-09-23.md",
+  "SpaceX_daily_report_2026-09-24.md",
+  "SpaceX_daily_report_2026-09-25.md",
+  "SpaceX_daily_report_2026-09-28.md",
+  "SpaceX_daily_report_2026-09-29.md",
+  "SpaceX_daily_report_2026-09-30.md",
+  "SpaceX_daily_report_2026-10-01.md",
+  "SpaceX_daily_report_2026-10-02.md",
+  "SpaceX_daily_report_2026-10-05.md",
+  "SpaceX_daily_report_2026-10-06.md",
+  "SpaceX_daily_report_2026-10-07.md",
+  "SpaceX_daily_report_2026-10-08.md",
+  "SpaceX_daily_report_2026-10-09.md",
+  "SpaceX_daily_report_2026-10-12.md",
+  "SpaceX_daily_report_2026-10-13.md",
+  "SpaceX_monthly_report_2026-09.md",
+  "SpaceX_weekly_report_2026-08-24_to_2026-08-28.md",
+  "SpaceX_weekly_report_2026-08-31_to_2026-09-04.md",
+  "SpaceX_weekly_report_2026-09-07_to_2026-09-11.md",
+  "SpaceX_weekly_report_2026-09-14_to_2026-09-18.md",
+  "SpaceX_weekly_report_2026-09-21_to_2026-09-25.md",
+  "SpaceX_weekly_report_2026-09-28_to_2026-10-02.md",
+  "SpaceX_weekly_report_2026-10-05_to_2026-10-09.md",
+  "SpaceX_weekly_report_2026-10-05_to_2026-10-09.md.bak_sent_20261010",
+  "eod_trading_report.log:79",
+  "eod_trading_report.log:179",
+  "eod_trading_report.log:289",
+  "eod_trading_report.log:347",
+  "eod_trading_report.log:392",
+  "eod_trading_report.log:448",
+  "eod_trading_report.log:507",
+  "eod_trading_report.log.1.gz:127",
+  "eod_trading_report.log.1.gz:154",
+  "eod_trading_report.log.1.gz:181",
+  "eod_trading_report.log.1.gz:207",
+  "eod_trading_report.log.1.gz:221",
+  "eod_trading_report.log.1.gz:262",
+  "eod_trading_report.log.1.gz:294",
+  "eod_trading_report.log.1.gz:358",
+  "eod_trading_report.log.1.gz:530",
+  "eod_trading_report.log.1.gz:570",
+  "eod_trading_report.log.1.gz:630",
+  "eod_trading_report.log.1.gz:683",
+  "eod_trading_report.log.1.gz:723",
+  "eod_trading_report.log.1.gz:746",
+  "eod_trading_report.log.1.gz:768",
+  "eod_trading_report.log.1.gz:790",
+  "eod_trading_report.log.1.gz:812",
+  "eod_trading_report.log.1.gz:834",
+  "eod_trading_report.log.1.gz:1202",
+  "eod_trading_report.log.1.gz:1261",
+  "eod_trading_report.log.1.gz:1321",
+  "eod_trading_report.log.1.gz:1429",
+  "eod_trading_report.log.1.gz:1475",
+  "eod_trading_report.log.1.gz:1507",
+  "eod_trading_report.log.1.gz:1539",
+  "eod_trading_report.log.1.gz:1571",
+  "eod_trading_report.log.1.gz:1618",
+  "eod_trading_report.log.1.gz:1682",
+  "eod_trading_report.log.1.gz:1730",
+  "eod_trading_report.log.1.gz:1767",
+  "eod_trading_report.log.1.gz:1798",
+  "eod_trading_report.log.1.gz:1878",
+  "eod_trading_report.log.1.gz:1905",
+  "eod_trading_report.log.1.gz:1973",
+  "eod_trading_report.log.1.gz:2002",
+  "eod_trading_report.log.1.gz:2031",
+  "eod_trading_report.log.1.gz:2152",
+  "eod_trading_report.log.1.gz:2282",
+  "eod_trading_report.log.1.gz:2423",
+  "eod_trading_report.log.1.gz:2588",
+  "eod_trading_report.log.1.gz:2631",
+  "eod_trading_report.log.1.gz:2871",
+  "eod_trading_report.log.1.gz:3154"
+ ],
+ "unparsed_report_names": [],
+ "skipped_non_md": [],
+ "scan_scope": {
+  "reports_dir": "/tmp/fl2/app/mike/reports",
+  "n_report_files": 63,
+  "eod_log_glob": "/tmp/fl2/app/mike/logs/eod_trading_report.log*",
+  "eod_log_files": [
+   "eod_trading_report.log",
+   "eod_trading_report.log.1.gz"
+  ],
+  "n_eod_messages": 51,
+  "eod_dates": [
+   "2026-07-08",
+   "2026-10-13"
+  ],
+  "note": "file .md: báo cáo ngày có từ 2026-08-17 (trước đó chỉ trên Discord); tin EOD Discord: chỉ những tin còn trong log eod_trading_report.log* (log xoay vòng); kênh khác KHÔNG quét"
+ },
+ "queue_user_decision": [
+  {
+   "report": "eod_trading_report.log.1.gz:899",
+   "why": "bậc 3 — số chính lệch 0.9735, so với số ĐÃ IN lệch 0.9779 (ngưỡng > 0.5): phát hành lại / đính chính cần user duyệt"
+  },
+  {
+   "report": "SpaceX_ZaloPay_monthly_report_2026-07.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  },
+  {
+   "report": "SpaceX_ZaloPay_monthly_report_2026-08.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  },
+  {
+   "report": "SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  },
+  {
+   "report": "SpaceX_monthly_report_2026-08.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 3 (0.9735) cao hơn số chính (bậc 0); kỳ báo cáo có 1 dòng NAV thêm/bỏ; 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  },
+  {
+   "report": "SpaceX_weekly_report_2026-07-03.md",
+   "why": "số theo NGÀY trong kỳ lệch bậc 2 (0.4453) cao hơn số chính (bậc 0); 0 dòng trích nguyên NAV cũ, 0 dòng in đúng NAV của dòng chèn — người phải xem báo cáo có in số ngày đó không"
+  }
+ ],
+ "note_next_report": [],
+ "fix_forward_only": [
+  "SpaceX_ZaloPay_monthly_report_2026-07.md",
+  "SpaceX_ZaloPay_monthly_report_2026-08.md",
+  "SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md",
+  "SpaceX_monthly_report_2026-08.md",
+  "SpaceX_weekly_report_2026-07-03.md"
+ ],
+ "generated_at_ict": "2026-10-14T11:14:23+07:00",
+ "old_nav_history_md5": "12ee9b87add3038c7201dd4effb029d9",
+ "new_nav_history_md5": "49b8f59fe3398b312bf17f83d4b57d43",
+ "correction_md5": "547d4e0222e7b6ba6a86cac675dd6ecd",
+ "changed_rows": [
+  {
+   "nav_old": 994733747.0,
+   "nav_new": 990304455.0,
+   "columns": [
+    "balance_ts",
+    "cash",
+    "nav",
+    "nav_is_estimate",
+    "nav_source"
+   ],
+   "date": "2026-07-02"
+  },
+  {
+   "nav_old": null,
+   "nav_new": 950871323.0,
+   "columns": [],
+   "date": "2026-08-06"
+  }
+ ],
+ "corrections_applied": [
+  {
+   "op": "replace",
+   "date": "2026-07-02",
+   "old": {
+    "date": "2026-07-02",
+    "nav": "994733747",
+    "mtm_stock": "1399620000",
+    "cash": "-404886253",
+    "margin_debt": "0",
+    "offbook_assets": "",
+    "egg_assets": "",
+    "balance_ts": "2026-07-02T09:46:35",
+    "cum_dividend_excl": "",
+    "nav_is_estimate": "",
+    "nav_source": ""
+   },
+   "new": {
+    "date": "2026-07-02",
+    "nav": "990304455",
+    "mtm_stock": "1399620000",
+    "cash": "-409315545",
+    "margin_debt": "0",
+    "offbook_assets": "",
+    "egg_assets": "",
+    "balance_ts": "2026-07-02T14:45:00",
+    "cum_dividend_excl": "",
+    "nav_is_estimate": "True",
+    "nav_source": "dinh chinh 2026-10-14: so du tai gio dong cua = so du chup 09:46:35 (-404886253) - lenh 126631 (VGC 100x44250 + phi 4292) bi khoa tien sau lan chup"
+   }
+  },
+  {
+   "op": "insert",
+   "date": "2026-08-06",
+   "old": null,
+   "new": {
+    "date": "2026-08-06",
+    "nav": "950871323",
+    "mtm_stock": "936275000",
+    "cash": "14596323",
+    "margin_debt": "0",
+    "offbook_assets": "0",
+    "egg_assets": "0",
+    "balance_ts": "2026-08-06T19:10:34",
+    "cum_dividend_excl": "0",
+    "nav_is_estimate": "True",
+    "nav_source": "backfill dnse_raw positions+balances@2026-08-06T19:10:34 + BQ Price; VHM=77100 (BQ Price 08-06 dung o gia truoc chia thuong) - chen qua file dinh chinh 2026-10-14"
+   }
+  }
+ ],
+ "ledger_binding": null
+}

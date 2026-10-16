@@ -1,0 +1,50 @@
+BASELINE rc=0 fails=[] 
+BỊ BẮT  A1  bỏ flock (khoá no-op) | A1a 3 vòng x 8 tiến trình --se; A1b 5 agent ghi đồng thời lên 
+BỊ BẮT  A1' khoá chỉ bọc đoạn ghi, không bọc đọc | IndentationError: expected an indented block after 'if' statement on line 285
+BỊ BẮT  A3a bỏ chặn đổi kiểu mệnh giá ''<->10tr/100tr | K2 [A3a] người bỏ --denom để l; K3 [A3a] agent bỏ --denom để l; K4 người seed khoá 10tr cho VP
+BỊ BẮT  A3a' --force của AGENT cũng qua (không phân biệt) | K3 [A3a] agent bỏ --denom để l; K13 [A3a] MB đang có khoá '' m
+BỊ BẮT  A3b bỏ kiểm khoá mới cùng ngân hàng (agent) | K6 [A3b] agent mở khoá MỚI VPB; K7 [A3b] agent mở khoá MỚI VPB
+BỊ BẮT  A3c bỏ kiểm dải ngân hàng chưa có dòng | K8 [A3c] agent mở ngân hàng CH; K9 [A3c] TCB 8,0% vẫn ngoài dả; K10 [A3c] TCB 9,0% trong dải (
+BỊ BẮT  A3c' file rỗng + agent: cho qua | K11 [A3c] file RỖNG, agent mở 
+BỊ BẮT  A3  tắt toàn bộ guard khoá mới | K2 [A3a] người bỏ --denom để l; K3 [A3a] agent bỏ --denom để l; K4 người seed khoá 10tr cho VP
+SỐNG    A3d dải dùng max+5pp (nới) | 
+BỊ BẮT  B6a SKIP luôn rc=0 dù KHÁC sản phẩm/lợi suất | W7b cùng khoá cùng ngày NHƯNG ; W7c cùng khoá cùng ngày NHƯNG 
+BỊ BẮT  B6b thông báo SKIP tier2 không nêu khoá | W7 cùng (ngày, VPB, 100tr) + c
+BỊ BẮT  B6c thông báo lệch tier2 không nêu khoá | W10 VPB 100tr lệch 1,1pp so vớ; B4a mốc NGƯỜI trong delta guar
+BỊ BẮT  B6d 'không mới hơn' tier2/6m lại nhắc cctg_events_df() | W11 VPB 100tr ngày cũ hơn dòng; W11a chuỗi 6m: thông báo 'khôn
+BỊ BẮT  B4a TIER2_BANKS thêm HDB | B4d TIER2_BANKS ghim đúng (VPB; B4f --bank HDB và --denom 1ty 
+BỊ BẮT  B4b TIER2_DENOMS thêm 1ty | B4e TIER2_DENOMS ghim đúng (10; B4f --bank HDB và --denom 1ty 
+BỊ BẮT  B4c --product khoảng trắng qua được | B4c --product toàn khoảng trắn
+BỊ BẮT  B4d bỏ mốc NGƯỜI khỏi delta guard tier2 | B4a mốc NGƯỜI trong delta guar
+BỊ BẮT  B4e sidecar chung theo ngân hàng (bỏ mệnh giá) | B4b sidecar tách theo mệnh giá; A1b 5 agent ghi đồng thời lên 
+BỊ BẮT  B9  help --rate lại nói 'Big-4 CCTG rate' | B9 --help: --rate mô tả cả tie
+BỊ BẮT  B7a bỏ --timeout/--max-turns khỏi dispatch | B7a dispatch của wrapper đặt -
+BỊ BẮT  B7b bỏ ràng buộc chuỗi 5 làm SAU CÙNG | B7b prompt buộc làm chuỗi 5 SA
+BỊ BẮT  B7c post-condition không báo chuỗi thiếu | IndexError: list index out of range
+BỊ BẮT  B7d bỏ nhánh 'dừng giữa chừng' (chuỗi cũ bị báo hỏng) | ValueError: substring not found
+BỊ BẮT  B7e nhánh 'giữa chừng' lại nói 'KHÔNG có kết quả xác nhận được' | B7g nhánh 'dừng giữa chừng' đứ
+BỊ BẮT  A1c bỏ câu chạy TUẦN TỰ chuỗi 5 | A1c prompt buộc chạy TUẦN TỰ t
+BỊ BẮT  B8  chuỗi 5 được mở question lại | B8 chuỗi 5 KHÔNG mở question: 
+BỊ BẮT  B8' bỏ dòng 'CHUỖI 5 KHÔNG mở question' | B8 chuỗi 5 KHÔNG mở question: 
+BỊ BẮT  M01 tier2 ghi vào file 12M | W6 ghi tay VPB 100tr 9,2% -> đ
+SỐNG    M05 tắt chặn lệch >=1pp cho tier2 | 
+BỊ BẮT  M03 khoá bỏ bank+denom | W8 VPB 10tr cùng ngày là khoá ; W9 MB 7,1% (lệch 2,1pp so với ; W10 VPB 100tr lệch 1,1pp so vớ
+BỊ BẮT  M07 nới lệch 2 nguồn 0,1->0,5 | W14b 2 nguồn lệch 0,2pp bị chặ; W14c --rate không nguồn nào nó; W16b cùng URL dùng lại cho CÙN
+BỊ BẮT  M10 agent dùng manual_verify | W13 JOB_ID + manual_verify bị ; W14 2 nguồn cùng chủ bị chặn; W14b 2 nguồn lệch 0,2pp bị chặ
+BỊ BẮT  M11 --bank lọt vào 12m/6m | W18 --bank/--denom với chuỗi 1
+BỊ BẮT  M18 cho phép lợi suất 0 | W5 lợi suất 0 bị chặn (không đ; W6 ghi tay VPB 100tr 9,2% -> đ; W7 cùng (ngày, VPB, 100tr) + c
+BỊ BẮT  M19 lượt tier2 rò global sang 12m | W17 lượt 12m mặc định SAU lượt
+BỊ BẮT  M23 wrapper truyền tier2 cho trend check | S5c wrapper tuần chỉ gọi trend
+BỊ BẮT  A2  selfcheck bỏ ghim sys.path về HERE sau dcf import | AssertionError: [trước phần B] nạp nhầm cctg_rate_vn ngoài cây này: /home/trido/thanhdt/Wo
+BỊ BẮT  MC' current_cctg_rate_checked() max với file tier2 (effective 15%, kill-switch armed) | B1 42 đầu ra (effective/kill-s; B1 effective_deposit_rate: 5 g; B1 macro_killswitch_a_status: 
+BỊ BẮT  MB1 consumer_deposit_rate_detail max với tier2 [chạy kèm env OVERLAY=0 bên ngoài] | B1 42 đầu ra (effective/kill-s; B1 consumer_deposit_rate_detai; B1 consumer_deposit_rate: 5 gi
+BỊ BẮT  MB2 trend.main() chèn dòng tier2 vào series_data | B1 42 đầu ra (effective/kill-s; B1 trend.main --dry-run: 1 giá; B2 không consumer nào mở/dò fi
+BỊ BẮT  MB5a dcf discount_rate đọc WORKDIR/data/cctg_*.csv (glob) | B1 42 đầu ra (effective/kill-s; B1 dcf.discount_rate: 4 giá tr; B2 không consumer nào mở/dò fi
+BỊ BẮT  M41 rating_8l.py đọc tier2 bằng đường dẫn ghép chuỗi (khoảng hở vòng 1) | S6 [AST] 8 consumer ngoài 3 mo
+BỊ BẮT  MB5b custom30_yield_labels duckdb/read_csv chuỗi f-string 'cctg_' | S6 [AST] 8 consumer ngoài 3 mo
+BỊ BẮT  M30 effective_deposit_rate max với tier2 | B1 42 đầu ra (effective/kill-s; B1 effective_deposit_rate: 5 g; B1 consumer_deposit_rate_detai
+BỊ BẮT  M32 kill-switch A armed theo tier2 | B1 42 đầu ra (effective/kill-s; B1 macro_killswitch_a_status: ; B2 không consumer nào mở/dò fi
+BỊ BẮT  M37 rating_8l.py nhắc tên file tier2 (tĩnh) | S1 quét 1484 file [mike/bin: c; S6 [AST] 8 consumer ngoài 3 mo
+BỊ BẮT  M38 due_diligence import writer (tĩnh) | S3 chỉ selfcheck mới import wr
+
+45/47 mutant bị bắt, 2 sống: ['A3d dải dùng max+5pp (nới)', 'M05 tắt chặn lệch >=1pp cho tier2']

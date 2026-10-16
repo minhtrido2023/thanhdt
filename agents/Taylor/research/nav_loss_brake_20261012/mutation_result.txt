@@ -1,0 +1,62 @@
+M01 so ngưỡng: <= → <                                      CHẾT  B1 đúng −5,00% ⇒ BREACH  { | B1 đúng −5,00% ⇒ BREACH ·  | t_daily_edges chạy hết khô | B4b vẫn BREACH nhờ EPS  {'
+M02 bỏ EPS khi so ngưỡng                                   CHẾT  B4b vẫn BREACH nhờ EPS  {'
+M03 episode dùng nhầm ngưỡng daily                         CHẾT  D10 −14,999999% ⇒ OK  {'st | R56 episode của account L  | T6 mỗi phanh xét RIÊNG: ep | G21 đóng episode TRƯỚC lượ
+M05 DD_THRESHOLD 0.25 → 0.20                               CHẾT  A5 DD_THRESHOLD = 0.25 (ri | C2 −24,999999% ⇒ OK  {'sta | T5 tạm tính vượt ngưỡng (n
+M06 positions: lấy bản ghi account nào cũng được (§12)     CHẾT  R56 episode của account L  | X12 MỘT account nổ khi đo  | X13 ...account kia vẫn đo  | X14 ops_health: account nổ
+M07 bỏ kiểm cờ ước tính                                    CHẾT  F1 dòng nav_is_estimate ⇒  | t_fail_loud chạy hết không | W2 dòng ước tính −8% ⇒ BRE | W4 tin đỏ: đầu tin TẠM TÍN
+M07b daily: bỏ kiểm MỐC SO                                 CHẾT  F4 hôm sau: mốc so là dòng | V12 hôm sau: MỐC SO là dòn | T4 cờ ước tính ở dòng MỐC 
+M07c bỏ kiểm dòng của phiên (cả ba phanh)                  CHẾT  F1 dòng nav_is_estimate ⇒  | t_fail_loud chạy hết không | V10 dòng D2 chụp 04:49 ⇒ l | V11 ...lỗ từ đỉnh cũng vậy
+B1a giờ chụp: bỏ cận dưới (trước đóng cửa)                 CHẾT  V2 14:44:59 ⇒ trước giờ đó | V10 dòng D2 chụp 04:49 ⇒ l | V11 ...lỗ từ đỉnh cũng vậy | V12 hôm sau: MỐC SO là dòn
+B1b giờ chụp: bỏ cận trên (sau mở cửa phiên kế)            CHẾT  V4 09:00:00 phiên kế ⇒ đã  | V6 thứ Sáu chụp 09:00 thứ  | V14 dòng chụp 09:15 HÔM SA
+M09 không ghi dấu đã gửi                                   CHẾT  t_provisional_breach chạy  | t_idempotent chạy hết khôn | t_monitor_failures chạy hế
+M10 gửi lỗi vẫn đánh dấu                                   CHẾT  K5 tin đi vào sink khi sta | K7 gửi lỗi ⇒ KHÔNG đánh dấ | K8 lượt sau gửi được ⇒ gửi | K9 mất status.json nhưng d
+M11 dedupe: gửi lại mọi lần                                CHẾT  W8 chạy lại: không gửi trù | K3 chạy lại cùng phiên: KH | K4 chạy lại sáng hôm sau ( | K5 phiên sau còn vi phạm (
+B6 tạm tính vượt ngưỡng không còn là trạng thái riêng      CHẾT  E4 MẤT sổ dòng tiền ⇒ KHÔN | E4c mất sổ + tạm tính −1%  | E6 dòng tiền TREO + tạm tí | P3 số gộp nhiều phiên mà Đ
+M18 thiếu phiên liền trước: bỏ kiểm                        CHẾT  P1 thiếu dòng phiên liền t | P3 số gộp nhiều phiên mà Đ
+M19 mốc so: luôn dòng liền trước                           CHẾT  O2 mốc so = dòng của phiên
+M20 health: bỏ kiểm phiên                                  CHẾT  H3 monitor không chạy tối  | H5 thứ Bảy: phiên phải có 
+N2 expected_session: bỏ mốc 21:50                          CHẾT  W2 dòng ước tính −8% ⇒ BRE | W4 tin đỏ: đầu tin TẠM TÍN | W5 khoá chống-trùng mang t | W7 dòng ops_health: rc=5 +
+N10 --date phiên cũ không còn chạy khô                     CHẾT  N10 --date khác phiên phải
+M21 bỏ dòng tiền nạp/rút                                   CHẾT  E1 rút 150tr (NAV 200→50)  | E2 nạp không đẩy đỉnh lên  | E5 dòng tiền TREO (chưa dò | E6 dòng tiền TREO + tạm tí
+M22 sổ dòng tiền thiếu/lỗi ⇒ im lặng coi như rỗng          CHẾT  E4 MẤT sổ dòng tiền ⇒ KHÔN | t_flows chạy hết không nổ 
+M37 dòng tiền treo: bỏ qua                                 CHẾT  E5 dòng tiền TREO (chưa dò | E6 dòng tiền TREO + tạm tí
+K1a thiếu ngưỡng: không kèm số tạm tính                    CHẾT  A7b K1: thiếu ngưỡng nhưng
+Q1 luật giảm tin: bỏ điều kiện 'chỉ cờ ước tính'           CHẾT  E4c mất sổ + tạm tính −1%  | E5 dòng tiền TREO (chưa dò | P1 thiếu dòng phiên liền t | V10 dòng D2 chụp 04:49 ⇒ l
+Q2 luật giảm tin: biên 2,0 → 1,0                           CHẾT  T0 hằng số có tên = 2,0 đi | T1 −3,00% (cách ngưỡng ĐÚN | T1b −3,00% mà dấu phẩy độn | T6 mỗi phanh xét RIÊNG: ep
+Q3 luật giảm tin: bỏ EPS ở biên                            CHẾT  T1b −3,00% mà dấu phẩy độn
+Q6 phanh quiet vẫn đẩy tin (luật tắt)                      CHẾT  F3 chỉ vướng cờ ước tính + | T2 −2,9999% (cách 2,0001pp | T2b ca không đẩy: status v | T2d nhật ký lượt chạy ghi 
+Q8 dòng chụp lệch giờ bị coi là 'ước tính'                 CHẾT  V10 dòng D2 chụp 04:49 ⇒ l | V12 hôm sau: MỐC SO là dòn | T3 có THÊM lý do khác ngoà | K11c dòng điểm vào episode
+Q9 thiếu phiên liền trước bị coi là 'ước tính'             CHẾT  P1 thiếu dòng phiên liền t
+Q10 sổ dòng tiền lỗi bị coi là 'ước tính'                  CHẾT  E4c mất sổ + tạm tính −1% 
+Q10b dòng tiền treo bị coi là 'ước tính'                   CHẾT  E5 dòng tiền TREO (chưa dò
+Q11 không đọc được vị thế vay bị coi là 'ước tính'         CHẾT  G1b episode đang mở mà KHÔ
+Q12 episode mở mà hết vị thế bị coi là 'ước tính'          CHẾT  G1 episode đang mở mà brok
+Q13 bản duyệt mới chưa ack bị coi là 'ước tính'            CHẾT  HA0 bản duyệt mới chưa ack
+R56 active_episode bỏ lọc account (§12)                    CHẾT  R56 episode của account L 
+K2a phiên của ngày đóng không còn đo với episode           CHẾT  G21 đóng episode TRƯỚC lượ | G21 đóng episode TRƯỚC lượ
+K2a2 ngày đóng: hết vị thế vay lại thành 'không đo được'   CHẾT  G21 đóng episode TRƯỚC lượ
+K2b ack: bỏ kiểm ngày tương lai                            CHẾT  HA1 ack bản duyệt ngày TƯƠ
+K2c ack: bỏ kiểm bản duyệt tồn tại                         CHẾT  HA2 ack bản duyệt KHÔNG TỒ | HA4 sổ lệnh tay có một dòn
+K2d lệnh tay không gửi dòng báo                            CHẾT  G13b ...và gửi MỘT dòng bá | HA3 ack hợp lệ ⇒ rc=0 + ĐÚ | HA8 lệnh tay ghi được stat
+K2e lượt đo kế không nêu lệnh tay                          CHẾT  G14b lượt đo kế NÊU lệnh t | HA5 lượt đo kế NÊU lệnh ta | HA7 sổ lệnh tay cụt ⇒ note
+K2f lệnh tay: bỏ lọc account (§12)                         CHẾT  HA5b ...account KHÁC trong
+K2g lệnh tay: nhắc lại mãi (bỏ mốc thời gian)              CHẾT  HA6 lượt đo phiên SAU nữa 
+K3 --now trên state sống không bị từ chối                  CHẾT  K3 --now khi state là stat | K4 state-dir không tạo/kho | K5 tin đi vào sink khi sta
+K4 OSError ở state-dir không còn đi đường crashed          CHẾT  t_k_items chạy hết không n
+K5 sink trên state sống vẫn tính đã gửi                    CHẾT  K5 tin đi vào sink khi sta
+K6 health-line: phanh chạm vẫn rc=1                        CHẾT  W7 dòng ops_health: rc=5 + | X14 ops_health: account nổ | H6 phiên trước có vi phạm 
+K11a so mã gói vay theo kiểu (chuỗi '1840' trượt)          CHẾT  G10d vị thế vay mà KHÔNG c | G14 ...và phanh −15% đo đư
+K11b positions thiếu khoá ⇒ coi là rỗng                    CHẾT  K11a bản ghi positions thi
+K11c không kiểm giờ chụp dòng điểm vào                     CHẾT  K11c dòng điểm vào episode
+K11d không in ghi chú (đỉnh chưa phải giá chốt)            CHẾT  K11d ghi chú 'đỉnh chưa ph
+B5a ngày duyệt không đọc được ⇒ không thử phiên kế         CHẾT  G10 ngày duyệt không đọc đ | G10b phanh đo theo điểm và
+B5b không lấy điểm vào XẤU hơn                             CHẾT  G10b phanh đo theo điểm và
+B5c câu lý do không đọc danh sách bản duyệt                CHẾT  G10c có vị thế vay, có bản
+R3 khoá số lệch câu chữ vẫn nhận                           CHẾT  A13b khoá số −0.12 LỆCH câ
+G8 positions chụp trước đóng cửa vẫn nhận                  CHẾT  G8 positions chỉ có bản ch | G10 ngày duyệt không đọc đ | G10b phanh đo theo điểm và
+D14 bản duyệt thu hồi vẫn mở episode                       CHẾT  D14 bản duyệt đã thu hồi ⇒ | G23 revoked='true' ⇒ ĐÃ th | G23 revoked=1 ⇒ ĐÃ thu hồi | G23 revoked='yes' ⇒ ĐÃ thu
+G2 bản duyệt mới: không lấy số xấu nhất                    CHẾT  G2 bản duyệt MỚI trong lúc
+G24 openQuantity=0 vẫn là vị thế                           CHẾT  G24 dòng gói vay openQuant
+X5 sổ episode hỏng làm hỏng cả lượt                        CHẾT  X5 sổ episode cụt ⇒ hai ph
+
+60/60 mutant chết. Còn sống: không

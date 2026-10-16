@@ -1,0 +1,9 @@
+('L25p', 'chết', 'nav_unit_ledger.py', 'restate bỏ qua cổng chốt', 'nav_ledger_vault_selfcheck.py rc=1: FAIL: V7: lời nhận của lần chốt trước phải theo sang bản ghi restate: {}')
+('L28p', 'chết', 'nav_unit_ledger.py', 'đối chiếu chỉ-đọc kho bất biến không báo lệch dòng', 'nav_ledger_vault_selfcheck.py rc=1: FAIL: V3: đối chiếu CHỈ-ĐỌC cũng phải báo lệch nguồn: phải ném LedgerDriftError, không ném gì')
+('L36p', 'chết', 'nav_unit_ledger.py', 'restate quên lời nhận của các lần chốt trước', 'nav_ledger_vault_selfcheck.py rc=1:     raise SealGateError(f"{path}: sổ sau đính chính CHƯA đủ điều kiện chốt "')
+('F12p', 'chết', 'fund_restatement.py', 'kỳ có dòng thêm/bỏ không gọi người xem', "fund_restatement_selfcheck.py rc=1: FAIL: R8: dòng chèn không đổi số nào vẫn phải vào hàng đợi người xem: {'report': 'SpaceX_weekly_report_2026-07-06_to_2026-07-10.md', 'kind': 'weekly', 'period': ['2")
+('F17p', 'chết', 'fund_restatement.py', 'apply vào thư mục thật không cần --real-data', 'fund_restatement_selfcheck.py rc=1: FAIL: R6: ghi thư mục thật không --real-data ⇒ rc=3, không ghi, được rc=0')
+('F20p', 'chết', 'fund_restatement.py', 'chạy lại sau khi chết ghi bản ghi nhật ký thứ hai', 'fund_restatement_selfcheck.py rc=1: FAIL: R6: chạy lại ghi nốt nav_history, KHÔNG thêm dòng nhật ký thứ hai')
+('F31p', 'chết', 'fund_restatement.py', 'changed_dates chỉ so cột nav', 'fund_restatement_selfcheck.py rc=1: FAIL: R8: sửa riêng balance_ts ⇒ changed_rows có dòng đó, 0 báo cáo lệch: []')
+
+TỔNG 7 chết 7 SỐNG 0 lỗi 0  (tz=gỡ TZ)

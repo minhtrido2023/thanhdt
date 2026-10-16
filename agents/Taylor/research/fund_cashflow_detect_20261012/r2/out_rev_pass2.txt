@@ -1,0 +1,9 @@
+BASE  XANH HẾT
+N01   SURVIVED                               cash_identity.py         | ngưỡng > thành >= [chuyển sang code vòng 2]
+N02   KILLED by cashid                       cash_identity.py         | bỏ upper() của side [chuyển sang code vòng 2]
+N16   SURVIVED                               cash_identity.py         | bỏ phần lẻ giây của modifiedDate
+N26   KILLED by cashid                       cash_identity.py         | không sắp nav_history theo ngày
+N32   KILLED by cashid                       cash_identity.py         | ghi chú rút Trứng vàng gần như không bao giờ hiện [chuyển sang code vòng 2]
+N34   SURVIVED                               cash_identity.py         | tương đương (>= thành >)
+G06   SURVIVED                               report_delivery_gate.py  | cổng: dung sai >= thành >
+== bộ rev: 7 mutant · KILLED 3 · SURVIVED 4 · NOT_APPLIED 0

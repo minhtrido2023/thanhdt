@@ -45,6 +45,9 @@ for marker in "$MARKER_DIR"/*.log; do
     NAV_LINE="$(printf '%s\n' "$OUT" | grep -v '^\[dnse\]')"
     "$ROOT/bin/notify_thread.sh" "✅ NAV $ACCOUNT ($PLAN_DATE) đã cập nhật bù — giá vị thế broker đã đồng bộ xong:
 $NAV_LINE" "trading_report" 2>/dev/null || true
+    # Chi tiết đẳng thức tiền của lượt chụp bù → kênh vận hành (như eod_trading_report.sh).
+    python3 "$ROOT/bin/cash_identity.py" --account "$ACCOUNT" --notify-snapshot "$PLAN_DATE" \
+      --channel trading_daily >&2 || true
     continue
   fi
 

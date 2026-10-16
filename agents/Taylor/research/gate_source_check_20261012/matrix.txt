@@ -1,0 +1,79 @@
+selfcheck                                      mặc-định env -u TZ  America/Los_Angeles    Pacific/Kiritimati  
+bq_freshness_check_selfcheck.py                 rc=0       rc=0       rc=0       rc=0      
+send_plan_report_state_gate_selfcheck.py        rc=0       rc=0       rc=0       rc=0      
+send_plan_report_aei_notes_selfcheck.py         rc=0       rc=0       rc=0       rc=0      
+send_plan_report_park_jit_selfcheck.py          rc=0       rc=0       rc=0       rc=0      
+--- FAIL dt5g_publisher_gate_selfcheck.sh [default] rc=1 ---
+        | __RESULT__ FAILED=1 WARNED=0
+
+--- Ca CHÍNH: publisher CỦA TA không chạy, nhưng bảng BQ vẫn tươi nhờ writer kaffa ---
+PASS  4. as_of=hôm qua (publisher ta chết) → PHẢI CHẶN  FAILED=1 WARNED=0
+PASS  5. as_of hôm nay nhưng mtime=hôm qua (file cũ sót lại) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  6. bq_publish_ok=false (publish BQ hỏng) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  7. golive_state_today.json KHÔNG TỒN TẠI → PHẢI CHẶN FAILED=1 WARNED=0
+
+--- Ca NGÀY KHÔNG GIAO DỊCH (CN 2026-08-02): không được chặn oan ---
+FAIL  8. CN, as_of=phiên gần nhất (Fri 07-31), mtime cũ → PASS got FAILED=1 WARNED=0, muốn FAILED=0 WARNED=0
+        | FAIL DT5G publisher-evidence: không tính được phiên giao dịch gần nhất (trading_bot.vn_market lỗi)
+        | __RESULT__ FAILED=1 WARNED=0
+PASS  9. CN, as_of=07-30 (bỏ lỡ phiên Fri 07-31) → PHẢI CHẶN FAILED=1 WARNED=0
+
+=== SELFCHECK FAIL — 4 ca sai ===
+--- FAIL dt5g_publisher_gate_selfcheck.sh [unset] rc=1 ---
+        | __RESULT__ FAILED=1 WARNED=0
+
+--- Ca CHÍNH: publisher CỦA TA không chạy, nhưng bảng BQ vẫn tươi nhờ writer kaffa ---
+PASS  4. as_of=hôm qua (publisher ta chết) → PHẢI CHẶN  FAILED=1 WARNED=0
+PASS  5. as_of hôm nay nhưng mtime=hôm qua (file cũ sót lại) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  6. bq_publish_ok=false (publish BQ hỏng) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  7. golive_state_today.json KHÔNG TỒN TẠI → PHẢI CHẶN FAILED=1 WARNED=0
+
+--- Ca NGÀY KHÔNG GIAO DỊCH (CN 2026-08-02): không được chặn oan ---
+FAIL  8. CN, as_of=phiên gần nhất (Fri 07-31), mtime cũ → PASS got FAILED=1 WARNED=0, muốn FAILED=0 WARNED=0
+        | FAIL DT5G publisher-evidence: không tính được phiên giao dịch gần nhất (trading_bot.vn_market lỗi)
+        | __RESULT__ FAILED=1 WARNED=0
+PASS  9. CN, as_of=07-30 (bỏ lỡ phiên Fri 07-31) → PHẢI CHẶN FAILED=1 WARNED=0
+
+=== SELFCHECK FAIL — 4 ca sai ===
+--- FAIL dt5g_publisher_gate_selfcheck.sh [LA] rc=1 ---
+        | __RESULT__ FAILED=1 WARNED=0
+
+--- Ca CHÍNH: publisher CỦA TA không chạy, nhưng bảng BQ vẫn tươi nhờ writer kaffa ---
+PASS  4. as_of=hôm qua (publisher ta chết) → PHẢI CHẶN  FAILED=1 WARNED=0
+PASS  5. as_of hôm nay nhưng mtime=hôm qua (file cũ sót lại) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  6. bq_publish_ok=false (publish BQ hỏng) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  7. golive_state_today.json KHÔNG TỒN TẠI → PHẢI CHẶN FAILED=1 WARNED=0
+
+--- Ca NGÀY KHÔNG GIAO DỊCH (CN 2026-08-02): không được chặn oan ---
+FAIL  8. CN, as_of=phiên gần nhất (Fri 07-31), mtime cũ → PASS got FAILED=1 WARNED=0, muốn FAILED=0 WARNED=0
+        | FAIL DT5G publisher-evidence: không tính được phiên giao dịch gần nhất (trading_bot.vn_market lỗi)
+        | __RESULT__ FAILED=1 WARNED=0
+PASS  9. CN, as_of=07-30 (bỏ lỡ phiên Fri 07-31) → PHẢI CHẶN FAILED=1 WARNED=0
+
+=== SELFCHECK FAIL — 4 ca sai ===
+--- FAIL dt5g_publisher_gate_selfcheck.sh [KI] rc=1 ---
+        | __RESULT__ FAILED=1 WARNED=0
+
+--- Ca CHÍNH: publisher CỦA TA không chạy, nhưng bảng BQ vẫn tươi nhờ writer kaffa ---
+PASS  4. as_of=hôm qua (publisher ta chết) → PHẢI CHẶN  FAILED=1 WARNED=0
+PASS  5. as_of hôm nay nhưng mtime=hôm qua (file cũ sót lại) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  6. bq_publish_ok=false (publish BQ hỏng) → PHẢI CHẶN FAILED=1 WARNED=0
+PASS  7. golive_state_today.json KHÔNG TỒN TẠI → PHẢI CHẶN FAILED=1 WARNED=0
+
+--- Ca NGÀY KHÔNG GIAO DỊCH (CN 2026-08-02): không được chặn oan ---
+FAIL  8. CN, as_of=phiên gần nhất (Fri 07-31), mtime cũ → PASS got FAILED=1 WARNED=0, muốn FAILED=0 WARNED=0
+        | FAIL DT5G publisher-evidence: không tính được phiên giao dịch gần nhất (trading_bot.vn_market lỗi)
+        | __RESULT__ FAILED=1 WARNED=0
+PASS  9. CN, as_of=07-30 (bỏ lỡ phiên Fri 07-31) → PHẢI CHẶN FAILED=1 WARNED=0
+
+=== SELFCHECK FAIL — 4 ca sai ===
+dt5g_publisher_gate_selfcheck.sh                rc=1       rc=1       rc=1       rc=1      
+bq_price_freeze_gate_selfcheck.py               rc=0       rc=0       rc=0       rc=0      
+plan_position_drift_check_selfcheck.py          rc=0       rc=0       rc=0       rc=0      
+wait_for_artifact_selfcheck.py                  rc=0       rc=0       rc=0       rc=0      
+retro_escalate_selfcheck.py                     rc=0       rc=0       rc=0       rc=0      
+dispatch_round_cap_selfcheck.py                 rc=0       rc=0       rc=0       rc=0      
+dispatch_discord_topic_selfcheck.sh             rc=0       rc=0       rc=0       rc=0      
+code_quality_autodispatch_selfcheck.sh          rc=0       rc=0       rc=0       rc=0      
+ops_health_check_selfcheck.py                   rc=0       rc=0       rc=0       rc=0      
+TỔNG: 52 lượt chạy, 4 lượt rc≠0

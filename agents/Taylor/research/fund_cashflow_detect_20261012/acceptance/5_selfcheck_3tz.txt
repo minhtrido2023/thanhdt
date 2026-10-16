@@ -1,0 +1,24 @@
+TZ=UNSET rc=0 nav_unit_ledger_selfcheck.py | OK — 4716 assertion PASS (nav_unit_ledger_selfcheck.py)
+TZ=UNSET rc=0 nav_flow_term_selfcheck.py | OK — 180 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive
+TZ=UNSET rc=0 nav_jump_flow_gate_selfcheck.py | PASS
+TZ=UNSET rc=0 cash_identity_selfcheck.py | OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)
+TZ=UNSET rc=0 nav_period_returns.py --selfcheck | OK — 9 assertion PASS (nav_period_returns.py)
+TZ=UNSET rc=0 nav_corpaction_gate_e2e_selfcheck.py | 65 PASS, 0 FAIL
+TZ=UNSET rc=0 report_delivery_gate_selfcheck.py | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+TZ=UNSET rc=1 report_return_gate_selfcheck.py | subprocess.CalledProcessError: Command '['git', '-C', '/tmp/fundcf_tz3/WC/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned non-zero exit 
+TZ=America/New_York rc=0 nav_unit_ledger_selfcheck.py | OK — 4716 assertion PASS (nav_unit_ledger_selfcheck.py)
+TZ=America/New_York rc=0 nav_flow_term_selfcheck.py | OK — 180 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive
+TZ=America/New_York rc=0 nav_jump_flow_gate_selfcheck.py | PASS
+TZ=America/New_York rc=0 cash_identity_selfcheck.py | OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)
+TZ=America/New_York rc=0 nav_period_returns.py --selfcheck | OK — 9 assertion PASS (nav_period_returns.py)
+TZ=America/New_York rc=0 nav_corpaction_gate_e2e_selfcheck.py | 65 PASS, 0 FAIL
+TZ=America/New_York rc=0 report_delivery_gate_selfcheck.py | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+TZ=America/New_York rc=1 report_return_gate_selfcheck.py | subprocess.CalledProcessError: Command '['git', '-C', '/tmp/fundcf_tz3/WC/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned non-zero exit 
+TZ=Pacific/Kiritimati rc=0 nav_unit_ledger_selfcheck.py | OK — 4716 assertion PASS (nav_unit_ledger_selfcheck.py)
+TZ=Pacific/Kiritimati rc=0 nav_flow_term_selfcheck.py | OK — 180 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 133 cặp phiên thật kiểm false-positive
+TZ=Pacific/Kiritimati rc=0 nav_jump_flow_gate_selfcheck.py | PASS
+TZ=Pacific/Kiritimati rc=0 cash_identity_selfcheck.py | OK — 146 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (digest 32d4ae34eab55eef)
+TZ=Pacific/Kiritimati rc=0 nav_period_returns.py --selfcheck | OK — 9 assertion PASS (nav_period_returns.py)
+TZ=Pacific/Kiritimati rc=0 nav_corpaction_gate_e2e_selfcheck.py | 65 PASS, 0 FAIL
+TZ=Pacific/Kiritimati rc=0 report_delivery_gate_selfcheck.py | report_delivery_gate_selfcheck: PASS (7/7 delivery + 5/5 period-return)
+TZ=Pacific/Kiritimati rc=1 report_return_gate_selfcheck.py | subprocess.CalledProcessError: Command '['git', '-C', '/tmp/fundcf_tz3/WC/mike', 'rev-list', 'HEAD', '--', 'bin/report_return_gate.py']' returned non-zero exit 

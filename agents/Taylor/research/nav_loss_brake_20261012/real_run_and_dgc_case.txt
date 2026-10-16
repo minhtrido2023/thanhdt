@@ -1,0 +1,50 @@
+### 1) CHẠY THẬT trên dữ liệu thật (state = thư mục RỖNG, cảnh báo → sink), --now 2026-10-12T22:05:00
+✅ SpaceX phiên 2026-10-12 (NAV toàn tài khoản): Lỗ một ngày: -0,05% (ngưỡng -5%, cách 4,95pp) · Lỗ từ đỉnh: -1,38% (ngưỡng -25%, cách 23,62pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+✅ ZaloPay phiên 2026-10-12 (NAV toàn tài khoản): Lỗ một ngày: -0,85% (ngưỡng -5%, cách 4,15pp) · Lỗ từ đỉnh: -6,56% (ngưỡng -25%, cách 18,44pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+--- lần 2, lượt 00:20 hôm sau (idempotent)
+✅ SpaceX phiên 2026-10-12 (NAV toàn tài khoản): Lỗ một ngày: -0,05% (ngưỡng -5%, cách 4,95pp) · Lỗ từ đỉnh: -1,38% (ngưỡng -25%, cách 23,62pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+✅ ZaloPay phiên 2026-10-12 (NAV toàn tài khoản): Lỗ một ngày: -0,85% (ngưỡng -5%, cách 4,15pp) · Lỗ từ đỉnh: -6,56% (ngưỡng -25%, cách 18,44pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+sink lines: 0
+run_log.jsonl:
+{"at": "2026-10-12T22:05:00+07:00", "session": "2026-10-12", "rc": 0, "overall": "OK", "error": null, "accounts": {"SpaceX": "OK", "ZaloPay": "OK"}, "sent": [], "suppressed": []}
+{"at": "2026-10-13T00:20:00+07:00", "session": "2026-10-12", "rc": 0, "overall": "OK", "error": null, "accounts": {"SpaceX": "OK", "ZaloPay": "OK"}, "sent": [], "suppressed": []}
+file trong state-dir sau 2 lượt: .lock run_log.jsonl status.json 
+
+### 2) dòng ops_health sáng 13/10 (đọc status.json vừa ghi)
+Phanh lỗ NAV [SpaceX] phiên 12/10 (NAV toàn tài khoản): Lỗ một ngày: -0,05% (ngưỡng -5%, cách 4,95pp) · Lỗ từ đỉnh: -1,38% (ngưỡng -25%, cách 23,62pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+Phanh lỗ NAV [ZaloPay] phiên 12/10 (NAV toàn tài khoản): Lỗ một ngày: -0,85% (ngưỡng -5%, cách 4,15pp) · Lỗ từ đỉnh: -6,56% (ngưỡng -25%, cách 18,44pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+rc=0
+
+### 3) --date của phiên cũ ⇒ CHẠY KHÔ (không ghi status, không gửi) — đối chiếu số 09/10 đã báo user
+✅ SpaceX phiên 2026-10-09 (NAV toàn tài khoản): Lỗ một ngày: -0,07% (ngưỡng -5%, cách 4,93pp) · Lỗ từ đỉnh: -1,33% (ngưỡng -25%, cách 23,67pp, đỉnh 2026-07-01) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+✅ ZaloPay phiên 2026-10-09 (NAV toàn tài khoản): Lỗ một ngày: +1,36% (ngưỡng -5%, cách 6,36pp) · Lỗ từ đỉnh: -5,76% (ngưỡng -25%, cách 19,24pp, đỉnh 2026-07-08) · Lỗ từ điểm vào episode: không có episode đang mở (ngưỡng -15%)
+(CHẠY KHÔ: --date 2026-10-09 khác phiên phải đo 2026-10-12 ⇒ không ghi status, không gửi. Muốn ghi/gửi cho phiên cũ: thêm --write-backdated.)
+rc=0
+sink lines: 0
+
+### 4) --now trên state SỐNG bị từ chối (K3) — không ghi gì
+❌ TỪ CHỐI --now trên state sống (/home/trido/thanhdt/WorkingClaude/data/loss_brake): đồng hồ giả sẽ ghi status / khoá chống-trùng / ngày đóng episode sai ngày. Chạy thử thì thêm --state-dir <thư mục tạm>.
+rc=2
+
+### 5) CA DGC — cổ tức tiền (GDKHQ 14/09, trả 25/09) trên NAV TỔNG của ZaloPay
+ZaloPay — NAV TỔNG quanh cổ tức tiền DGC (10.000 cp × 8.000đ; GDKHQ 14/09, trả 25/09)
+phiên                 NAV      cổ phiếu         tiền          egg   phải thu ước tính    giá ĐV    ngày  từ đỉnh     DGC DGC ngày  monitor
+2026-09-10    990,336,744   945,410,950    5,957,452   38,968,342          0 -        10,025.02  +0,54%   -0,65%  47,000        -  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-11    981,012,771   936,077,800    5,957,550   38,977,421 80,000,000 -         9,930.63  -0,94%   -1,58%  46,750   -0,53%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-14    966,798,467   845,819,750   81,974,059   39,004,658          0 False     9,786.74  -1,45%   -3,01%  37,400  -20,00%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-15    958,351,658   837,363,850   81,974,070   39,013,738          0 False     9,701.24  -0,87%   -3,86%  36,050   -3,61%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-16    948,338,649   827,341,750   81,974,081   39,022,818          0 False     9,599.88  -1,04%   -4,86%  35,000   -2,91%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-17    953,317,076   838,579,900  106,923,128    7,814,048          0 False     9,650.27  +0,52%   -4,36%  35,300   +0,86%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-18    958,732,611   862,791,700   88,125,046    7,815,865          0 False     9,705.09  +0,57%   -3,82%  35,950   +1,84%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-21    950,813,808   854,867,400   88,125,090    7,821,318  1,900,000 True      9,624.93  -0,83%   -4,61%  35,350   -1,67%  daily=UNMEASURABLE(không đẩy) · drawdown=UNMEASURABLE(không đẩy) · episode=NO_EPISODE
+2026-09-22    959,993,551   851,970,500  100,199,916    7,823,135          0 False     9,717.86  +0,97%   -3,69%  35,800   +1,27%  daily=UNMEASURABLE(không đẩy) · drawdown=OK · episode=NO_EPISODE
+2026-09-23    955,586,647   847,561,688  100,200,005    7,824,954          0 True      9,673.25  -0,46%   -4,13%  35,450   -0,98%  daily=UNMEASURABLE(không đẩy) · drawdown=UNMEASURABLE(không đẩy) · episode=NO_EPISODE
+2026-09-24    951,368,626   843,341,750  100,200,105    7,826,771          0 False     9,630.55  -0,44%   -4,56%  35,300   -0,42%  daily=UNMEASURABLE(không đẩy) · drawdown=OK · episode=NO_EPISODE
+2026-09-25    957,269,620   851,040,300    4,107,343  102,121,977          0 False     9,690.28  +0,62%   -3,97%  35,950   +1,84%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-28    961,759,336   855,458,300    4,107,343  102,193,693          0 False     9,735.73  +0,47%   -3,52%  36,550   +1,67%  daily=OK · drawdown=OK · episode=NO_EPISODE
+2026-09-29    965,250,181   816,135,150   46,897,433  102,217,598          0 False     9,771.07  +0,36%   -3,17%  36,400   -0,41%  daily=OK · drawdown=OK · episode=NO_EPISODE
+
+Biến động ngày trong cửa sổ (giá đơn vị, dòng-so-dòng): giảm mạnh nhất -1,45% ngày 2026-09-14 · tăng mạnh nhất +0,97% ngày 2026-09-22 · ngưỡng phanh ngày -5%.

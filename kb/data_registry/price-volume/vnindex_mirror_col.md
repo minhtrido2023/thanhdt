@@ -30,3 +30,12 @@ thay vì JOIN hàng VNINDEX gốc — sai số nhỏ (MA200 lệch ≤0,016%, l�
 ảnh hưởng cửa sổ 6 tháng ~cuối 10/2026, MA200 ~giữa 2/2027). Còn 1 điểm lệch RIÊNG chưa gộp vào đây:
 `2025-04-09` mirror=1132,79 vs Close thật=1094,30 (lệch 38,49 điểm, dấu hiệu khác — nghi sai ngày/dịch
 hàng, chưa điều tra sâu). **Chưa báo bq_admin, chưa sửa** — quyết định chờ user.
+
+## Bổ sung 2026-10-14 (quỹ bước 4)
+Mục "Bẫy" đang ghi hàng `ticker='VNINDEX'` gốc SẠCH và điểm lệch 2025-04-09 thuộc cột mirror.
+Đo 2026-10-14 (job Taylor_20261014_020336): **chính hàng gốc sai** — `Price`=`Close`=1.132,79 ngày
+2025-04-09, bằng đúng giá 2025-04-08; DNSE chart-api cho 1.094,30. Trên 3.151 phiên chung từ 2014 còn
+58 phiên khác lệch > 0,05% (phần lớn là phiên cuối tháng DNSE làm tròn số nguyên 2016–2017, vài phiên
+0,3–0,5% năm 2014/2015/2018 chưa điều tra). Bằng chứng:
+`agents/Taylor/research/fund_step4_20261014/out_tr_checks.txt`. Q10 (user 2026-10-14, mặc định): báo bq_admin — nội dung soạn sẵn ở `bq_admin_Q10_vnindex_20250409.md`; KHÔNG tự sửa BQ. Sau khi bq_admin sửa: đo lại và gỡ dòng này.
+User đã báo bq_admin (14/10 22:24 ICT). Chỉ cột `Price` sai, `Close` đúng (Mike đối chiếu lại BQ/DNSE).

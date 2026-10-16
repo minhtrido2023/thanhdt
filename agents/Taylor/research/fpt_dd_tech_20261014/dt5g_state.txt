@@ -1,0 +1,12 @@
+[BQ_LOCAL_CACHE] ready — 15 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+[get_macro_state] WARNING: BQ base state max=2026-10-13 < requested end=2026-10-14 → base is STALE. Run the v3.4b refresh+deploy chain. (NOT falling back to local.)
+[get_gated_state] DT5G_macro: health=HEALTHY -> DT5G_macro
+         time  state  base_state  macro_state      source  stale
+41 2026-10-02      3           3            3  DT5G_macro  False
+42 2026-10-05      3           3            3  DT5G_macro  False
+43 2026-10-06      3           3            3  DT5G_macro  False
+44 2026-10-07      3           3            3  DT5G_macro  False
+45 2026-10-08      3           3            3  DT5G_macro  False
+46 2026-10-09      3           3            3  DT5G_macro  False
+47 2026-10-12      3           3            3  DT5G_macro  False
+48 2026-10-13      3           3            3  DT5G_macro  False

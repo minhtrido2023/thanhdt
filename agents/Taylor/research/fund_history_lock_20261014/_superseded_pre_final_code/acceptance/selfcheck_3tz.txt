@@ -1,0 +1,20 @@
+TZ=<gỡ> nav_ledger_vault_selfcheck rc=0 | OK — 183 assertion PASS (nav_ledger_vault_selfcheck.py) 
+TZ=<gỡ> fund_restatement_selfcheck rc=0 | OK — 118 assertion PASS (fund_restatement_selfcheck.py) 
+TZ=<gỡ> nav_unit_ledger_selfcheck rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
+TZ=<gỡ> nav_jump_flow_gate_selfcheck rc=0 |   __RESULT__ cases=25 fails=0 PASS 
+TZ=<gỡ> daily_nav_snapshot_from_raw_selfcheck rc=0 |   ✓ (6e) status=FAILED / usable=False ⇒ active=False 83 PASS, 0 FAIL 
+TZ=America/New_York nav_ledger_vault_selfcheck rc=0 | OK — 183 assertion PASS (nav_ledger_vault_selfcheck.py) 
+TZ=America/New_York fund_restatement_selfcheck rc=0 | OK — 118 assertion PASS (fund_restatement_selfcheck.py) 
+TZ=America/New_York nav_unit_ledger_selfcheck rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
+TZ=America/New_York nav_jump_flow_gate_selfcheck rc=0 |   __RESULT__ cases=25 fails=0 PASS 
+TZ=America/New_York daily_nav_snapshot_from_raw_selfcheck rc=0 |   ✓ (6e) status=FAILED / usable=False ⇒ active=False 83 PASS, 0 FAIL 
+TZ=Pacific/Kiritimati nav_ledger_vault_selfcheck rc=0 | OK — 183 assertion PASS (nav_ledger_vault_selfcheck.py) 
+TZ=Pacific/Kiritimati fund_restatement_selfcheck rc=0 | OK — 118 assertion PASS (fund_restatement_selfcheck.py) 
+TZ=Pacific/Kiritimati nav_unit_ledger_selfcheck rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
+TZ=Pacific/Kiritimati nav_jump_flow_gate_selfcheck rc=0 |   __RESULT__ cases=25 fails=0 PASS 
+TZ=Pacific/Kiritimati daily_nav_snapshot_from_raw_selfcheck rc=0 |   ✓ (6e) status=FAILED / usable=False ⇒ active=False 83 PASS, 0 FAIL 
+TZ=Asia/Ho_Chi_Minh nav_ledger_vault_selfcheck rc=0 | OK — 183 assertion PASS (nav_ledger_vault_selfcheck.py) 
+TZ=Asia/Ho_Chi_Minh fund_restatement_selfcheck rc=0 | OK — 118 assertion PASS (fund_restatement_selfcheck.py) 
+TZ=Asia/Ho_Chi_Minh nav_unit_ledger_selfcheck rc=0 | OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py) 
+TZ=Asia/Ho_Chi_Minh nav_jump_flow_gate_selfcheck rc=0 |   __RESULT__ cases=25 fails=0 PASS 
+TZ=Asia/Ho_Chi_Minh daily_nav_snapshot_from_raw_selfcheck rc=0 |   ✓ (6e) status=FAILED / usable=False ⇒ active=False 83 PASS, 0 FAIL 

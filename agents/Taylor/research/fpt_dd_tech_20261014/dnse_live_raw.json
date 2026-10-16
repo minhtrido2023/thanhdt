@@ -1,0 +1,415 @@
+{
+ "FPT_lt": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 56.8,
+    "matchQtty": 330,
+    "side": "SELL",
+    "avgPrice": 56.535,
+    "totalVolumeTraded": 375240,
+    "grossTradeAmount": 212.14197,
+    "highestPrice": 57.7,
+    "lowestPrice": 55.8,
+    "openPrice": 56.3,
+    "time": "2026-10-14 11:04:24.230"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "G4",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 57.2,
+    "matchQtty": 10,
+    "side": "SELL",
+    "avgPrice": 56.719,
+    "totalVolumeTraded": 16506,
+    "grossTradeAmount": 0.9362053,
+    "highestPrice": 57.8,
+    "lowestPrice": 56.2,
+    "openPrice": 56.3,
+    "time": "2026-10-14 11:04:14.136"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "T1",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 56.126,
+    "matchQtty": 4860,
+    "side": "SELL",
+    "avgPrice": 57.644,
+    "totalVolumeTraded": 123490,
+    "grossTradeAmount": 71.1839974,
+    "highestPrice": 0,
+    "lowestPrice": 0,
+    "openPrice": 0,
+    "time": "2026-10-14 10:19:18.102"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "T3",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 60.501,
+    "matchQtty": 4110,
+    "side": "UNSPECIFIED",
+    "avgPrice": 60.501,
+    "totalVolumeTraded": 4110,
+    "grossTradeAmount": 2.4865911,
+    "highestPrice": 0,
+    "lowestPrice": 0,
+    "openPrice": 0,
+    "time": "2026-10-06 14:48:06.997"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "T4",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 73,
+    "matchQtty": 99,
+    "side": "SELL",
+    "avgPrice": 73,
+    "totalVolumeTraded": 1600,
+    "grossTradeAmount": 0.1168,
+    "highestPrice": 0,
+    "lowestPrice": 0,
+    "openPrice": 0,
+    "time": "2026-09-03 10:04:16.627"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "T6",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 73.907,
+    "matchQtty": 2.7,
+    "side": "SELL",
+    "avgPrice": 73.907,
+    "totalVolumeTraded": 720,
+    "grossTradeAmount": 0.5321304,
+    "highestPrice": 0,
+    "lowestPrice": 0,
+    "openPrice": 0,
+    "time": "2026-09-10 14:51:05.603"
+   }
+  ]
+ },
+ "VNINDEX_lt": {
+  "trades": []
+ },
+ "CMG_lt": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000CMG2",
+    "symbol": "CMG",
+    "matchPrice": 19.2,
+    "matchQtty": 30,
+    "side": "BUY",
+    "avgPrice": 19.229,
+    "totalVolumeTraded": 6780,
+    "grossTradeAmount": 1.303735,
+    "highestPrice": 19.4,
+    "lowestPrice": 19.1,
+    "openPrice": 19.2,
+    "time": "2026-10-14 11:02:46.551"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "G4",
+    "isin": "VN000000CMG2",
+    "symbol": "CMG",
+    "matchPrice": 19.2,
+    "matchQtty": 3,
+    "side": "SELL",
+    "avgPrice": 19.311,
+    "totalVolumeTraded": 649,
+    "grossTradeAmount": 0.0125328,
+    "highestPrice": 20.25,
+    "lowestPrice": 19.15,
+    "openPrice": 19.35,
+    "time": "2026-10-14 11:03:14.885"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "T1",
+    "isin": "VN000000CMG2",
+    "symbol": "CMG",
+    "matchPrice": 19,
+    "matchQtty": 2420,
+    "side": "SELL",
+    "avgPrice": 19,
+    "totalVolumeTraded": 6149,
+    "grossTradeAmount": 1.16831,
+    "highestPrice": 0,
+    "lowestPrice": 0,
+    "openPrice": 0,
+    "time": "2026-10-07 14:13:46.333"
+   }
+  ]
+ },
+ "ELC_lt": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000ELC9",
+    "symbol": "ELC",
+    "matchPrice": 11.45,
+    "matchQtty": 50,
+    "side": "SELL",
+    "avgPrice": 11.461,
+    "totalVolumeTraded": 8640,
+    "grossTradeAmount": 0.99025,
+    "highestPrice": 11.55,
+    "lowestPrice": 11.4,
+    "openPrice": 11.55,
+    "time": "2026-10-14 10:53:22.606"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "G4",
+    "isin": "VN000000ELC9",
+    "symbol": "ELC",
+    "matchPrice": 11.55,
+    "matchQtty": 1,
+    "side": "SELL",
+    "avgPrice": 11.606,
+    "totalVolumeTraded": 9,
+    "grossTradeAmount": 0.00010445,
+    "highestPrice": 11.65,
+    "lowestPrice": 11.55,
+    "openPrice": 11.65,
+    "time": "2026-10-14 10:17:34.629"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "T1",
+    "isin": "VN000000ELC9",
+    "symbol": "ELC",
+    "matchPrice": 11.25,
+    "matchQtty": 25000,
+    "side": "UNSPECIFIED",
+    "avgPrice": 11.25,
+    "totalVolumeTraded": 25000,
+    "grossTradeAmount": 2.8125,
+    "highestPrice": 0,
+    "lowestPrice": 0,
+    "openPrice": 0,
+    "time": "2026-10-12 11:18:43.813"
+   }
+  ]
+ },
+ "FPT_sd": [
+  {
+   "marketId": "STO",
+   "boardId": "G1",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.757"
+  },
+  {
+   "marketId": "STO",
+   "boardId": "G4",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.767"
+  },
+  {
+   "marketId": "STO",
+   "boardId": "G7",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.777"
+  },
+  {
+   "marketId": "STO",
+   "boardId": "T1",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.787"
+  },
+  {
+   "marketId": "STO",
+   "boardId": "T3",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.797"
+  },
+  {
+   "marketId": "STO",
+   "boardId": "T4",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.807"
+  },
+  {
+   "marketId": "STO",
+   "boardId": "T6",
+   "isin": "VN000000FPT1",
+   "symbol": "FPT",
+   "productGrpId": "STO",
+   "securityGroupId": "ST",
+   "basicPrice": 56.3,
+   "ceilingPrice": 60.2,
+   "floorPrice": 52.4,
+   "securityStatus": "NO_HALT",
+   "symbolAdminStatusCode": "NRM",
+   "symbolTradingMethodStatusCode": "NRM",
+   "symbolTradingSanctionStatusCode": "NRM",
+   "finalTradeDate": null,
+   "listingDate": "2006-12-13T00:00:00Z",
+   "time": "2026-10-14 08:00:19.817"
+  }
+ ],
+ "FPT_q": {
+  "quotes": [
+   {
+    "marketId": "STO",
+    "boardId": "G4",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "bid": [
+     {
+      "price": 57.1,
+      "quantity": 237
+     },
+     {
+      "price": 57,
+      "quantity": 1992
+     },
+     {
+      "price": 56.9,
+      "quantity": 1254
+     }
+    ],
+    "offer": [
+     {
+      "price": 57.3,
+      "quantity": 47
+     },
+     {
+      "price": 57.4,
+      "quantity": 64
+     },
+     {
+      "price": 57.5,
+      "quantity": 31
+     }
+    ],
+    "totalOfferQtty": 0,
+    "totalBidQtty": 0,
+    "time": "2026-10-14 11:04:25.030"
+   },
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "bid": [
+     {
+      "price": 56.8,
+      "quantity": 1080
+     },
+     {
+      "price": 56.7,
+      "quantity": 1910
+     },
+     {
+      "price": 56.6,
+      "quantity": 2940
+     }
+    ],
+    "offer": [
+     {
+      "price": 56.9,
+      "quantity": 2490
+     },
+     {
+      "price": 57,
+      "quantity": 2030
+     },
+     {
+      "price": 57.1,
+      "quantity": 1080
+     }
+    ],
+    "totalOfferQtty": 0,
+    "totalBidQtty": 0,
+    "time": "2026-10-14 11:04:28.536"
+   }
+  ]
+ }
+}

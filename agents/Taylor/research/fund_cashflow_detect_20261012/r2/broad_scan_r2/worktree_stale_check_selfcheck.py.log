@@ -1,0 +1,10 @@
+✅ cây tiền-vá ĐANG DÙNG ⇒ báo
+✅ cây tiền-vá NẰM IM (mtime 60 ngày) ⇒ không báo, chỉ đếm
+✅ sổ lạc có báo cáo ĐÃ GỬI mà canonical không biết ⇒ báo
+✅ … và nói ra nguy cơ gửi TRÙNG bằng chữ
+✅ sổ canonical đã có entry ⇒ IM (không WARN-rác)
+✅ cùng tên nhưng khác hash ⇒ KHÔNG báo là đã gửi (khoá theo hash, không theo tên)
+✅ mọi cây đã vá + không sổ lạc ⇒ checker KHÔNG in gì
+
+7/7 check
+✅ SELFCHECK PASS

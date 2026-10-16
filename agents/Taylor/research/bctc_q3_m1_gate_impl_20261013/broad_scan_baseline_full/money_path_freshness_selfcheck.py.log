@@ -1,0 +1,37 @@
+A. F1 — compute_active_nav.resolve_prices: today→DNSE, past→BQ, miss→marked fallback
+  [PASS] A1 asof=None → DNSE-live branch, BQ untouched  — calls={'dnse': 1, 'bq': 0} src={'DGC': 'dnse_g1_today', 'VPB': 'dnse_g1_today'}
+  [PASS] A2 asof=today → DNSE-live branch, BQ untouched  — calls={'dnse': 1, 'bq': 0}
+  [PASS] A3 asof=past date → BQ branch, DNSE untouched  — calls={'dnse': 0, 'bq': 1} src={'DGC': 'bq_close', 'VPB': 'bq_close'}
+  [PASS] A4 DNSE misses a ticker → per-ticker BQ fallback MARKED bq_close_stale + loud warning  — src={'DGC': 'dnse_g1_today', 'XXX': 'bq_close_stale'}
+B. F2 — rec field 'close' renamed: generator emits no bare 'close'; readers parse new+old
+  [PASS] B1 golive_recommend_v23 rec_df columns: renamed field present, bare 'close' gone  — cols=['book', 'ticker', 'play_type', 'ta', 'close_bq_stale_DO_NOT_USE_AS_REFPRICE', 'sector', 'weight_pct', 'weight_base', 'status', 'capit_cap_total_vnd', 'due_diligence']
+  [PASS] B2 newest real recommendations CSV header uses renamed field, no bare 'close'  — golive_v23_recommendations_2026-10-13.csv: ['book', 'ticker', 'play_type', 'ta', 'close_bq_stale_DO_NOT_USE_AS_REFPRICE', 'sector', 'weight_pct', 'weight_base', 'status', 'capit_cap_total_vnd', 'due_diligence']
+  [PASS] B3 Mafee pusher: new-header CSV → BQ column close=121.5, renamed col not in extra  — row={'signal_date': '2099-01-01', 'book': 'BAL', 'ticker': 'FPT', 'play_type': 'MEGA', 'ta': 85.0, 'close': 121.5, 'sector': 1, 'weight_pct': 10.0, 'status': 'FULL', 'extra': None}
+  [PASS] B4 Mafee pusher: old-header CSV (pre-rename archive) still parses close=24.8  — row={'signal_date': '2099-01-02', 'book': 'BAL', 'ticker': 'ACB', 'play_type': 'MEGA', 'ta': 80.0, 'close': 24.8, 'sector': 1, 'weight_pct': 10.0, 'status': 'FULL', 'extra': None}
+C. F5 — bq_freshness_check.sh: artifact mtime assertion dies BEFORE DollarBill dispatch
+  [PASS] C1 _assert_fresh_artifact() exists in the script
+  [PASS] C2 stale artifact (pipeline step silently failed) → exit 1, dispatch NOT reached  — === FAILED (artifact stale: L) — alert đã gửi, DollarBill KHÔNG được dispatch ===
+  [PASS] C3 missing artifact → exit 1, dispatch NOT reached
+  [PASS] C4 fresh artifact → passes through to dispatch (no false positive)  — [fresh-ok] L (mtime >= gate start)
+REACHED-DISPATCH
+  [PASS] C5 boundary mtime == gate start counts as fresh (>= semantics)
+  [PASS] C6 ordering: epoch capture < pipeline-1 < pipeline-3 < both assertions < dispatch loop  — pos={'epoch': 47496, 'p1': 47547, 'p3': 50671, 'a_state': 51651, 'a_recs': 51789, 'dispatch': 51986}
+  [PASS] C7 bash syntax still valid
+D. F6 — verify_account_snapshot.pnl_coverage_warnings: legacy positions never silent
+  [PASS] D1 legacy positions → one loud per-ticker warning each, exact phrase  — legacy=['DGC', 'VIB']
+  [PASS] D2 full coverage → no warnings, empty legacy list
+  [PASS] D3 unreadable broker positions → explicit cannot-verify warning (not silence)
+  [PASS] D4 covered-but-already-sold ticker is NOT flagged (only live-without-fills matters)
+E. F7 — daily_nav_snapshot._write_nav_history: atomic, kill-mid-write leaves old file intact
+  [PASS] E1 normal write: file has header+row, no .tmp left behind
+  [PASS] E2 kill mid-write → canonical file byte-identical to pre-crash state
+  [PASS] E3 recovery write succeeds; stray legacy column ignored (extrasaction)
+F. F3 — SIGNAL_V11 state5 source: trackers read DT5G gated, books clean of fake-BULL entries
+  [PASS] F1 SIGNAL_V11 raw SQL contains the .replace target exactly once (alias drift = silent no-op)  — count=1
+  [PASS] F2 patched SQL: zero bare base-table reads, exactly one dt5g_live read  — base_left=0
+  [PASS] F3 pt_v4_dt5g.py: STATE_TABLE is dt5g_live AND SIGNAL_V11 goes through the .replace (no raw use)
+  [PASS] F3 pt_v22_dt5g.py: STATE_TABLE is dt5g_live AND SIGNAL_V11 goes through the .replace (no raw use)
+  [PASS] F4 pt_v4_dt5g open book: no fake-BULL-window entry survives replay  — 12 rows clean
+  [PASS] F4 pt_v22_dt5g open book: no fake-BULL-window entry survives replay  — 28 rows clean
+
+✅ ALL CHECKS PASS

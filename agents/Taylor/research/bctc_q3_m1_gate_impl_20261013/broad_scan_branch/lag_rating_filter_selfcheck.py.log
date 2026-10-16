@@ -1,0 +1,19 @@
+==============================================================================
+  UNIT (bq giả lập)
+==============================================================================
+  PASS  rating≤3 → giữ nguyên
+  PASS  rating=4 → loại
+  PASS  … mã ≤3 KHÔNG bị loại lây
+  PASS  … dropped ghi đúng rating
+  PASS  rating≥5 → loại tất
+  PASS  rating == 3 → GIỮ
+  PASS  rating == 4 → LOẠI
+  PASS  missing rating → LOẠI (fail-closed)
+  WARNING: không đọc được 8L rating cho ứng viên LAG (BQ down) — GIỮ nguyên danh sách (fail-open). LƯU Ý: lưới executor (filter_lag_rating_orders) cũng fail-open khi nguồn hỏng, xem lag_rating_filter_error trong status.json
+  PASS  BQ lỗi → fail-OPEN, giữ nguyên
+  PASS  … và báo lỗi qua lag_rating_filter_error
+  PASS  rổ rỗng → no-op
+  PASS  cand=None → no-op
+  PASS  giữ nguyên thứ tự + cột
+==============================================================================
+  TỔNG: 13 PASS / 0 FAIL

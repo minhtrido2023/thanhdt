@@ -1,0 +1,30 @@
+---
+kind: local-file
+status: PROPOSED (chưa tồn tại — đặc tả ở agents/Taylor/research/fund_step4_20261014/SPEC.md phần A)
+source: data/benchmark/vnindex_tr_daily.csv
+group: price-volume
+role: VN-Index CÓ cổ tức (tự dựng) — mốc so sánh thứ hai của báo cáo hiệu suất
+writer: mike/bin/vnindex_total_return.py --update (cron sau bq_freshness, đề xuất 00:30 ICT)
+---
+
+# data/benchmark/vnindex_tr_daily.csv
+
+## Là gì
+Chuỗi ngày: chỉ số GIÁ chính thức + điểm % cổ tức tự ước (`y_gross`) ⇒ `tr_gross`, `tr_net` (thuế 5%).
+`y_t = Σ OShares_{t-1} × DIV_t / Σ Price_{t-1} × OShares_{t-1}` trên rổ mã HOSE theo thời điểm.
+HOSE KHÔNG công bố bản có cổ tức của VN-Index (chỉ có VN30/VN100/VNMidcap/VNSmallcap/VNAllshare TRI,
+tính cuối ngày — factsheet HOSE-Index 03/2025).
+
+## Nguồn vào
+`tav2_bq.ticker` (Price, OShares) · `tav2_bq.corporate_action` (DIV executed) · bảng sàn
+`data/benchmark/hose_membership_*.json` · chỉ số giá đối chiếu DNSE chart-api.
+
+## Bẫy
+- KHÔNG dùng `universe_pit`/`ticker_prune` làm rổ: đó là rổ lọc thanh khoản, không phải thành phần VN-Index.
+- Dùng mọi mã 3 sàn thay HOSE làm `y` cao giả 0,07–0,37 điểm %/năm (đo 2018–2026).
+- Danh sách HOSE "hôm nay" áp ngược quá khứ: 2024 lệch +0,40 điểm %.
+- Trước 2018 rổ kém tin (chỉ số giá tổng hợp lệch chính thức 1,6–4,0 điểm %/năm 2014–2016).
+- Hàng `ticker='VNINDEX'` của BQ SAI ngày 2025-04-09 (1.132,79 = lặp giá 08/04; DNSE 1.094,30) ⇒ luôn đối
+  chiếu nguồn thứ hai.
+- Dòng DIV có thể vào bảng sau ngày GDKHQ ⇒ 5 phiên gần nhất là `provisional`.
+- Số đo tham chiếu (2026-10-13): 2023 y=1,68 · 2024 1,87 · 2025 1,62 · kỳ 2026-07-01→10-13 chênh gộp 0,64.

@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3810)
+# Mike fleet — context pack (v3927)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-12T01:42:36] Mike/answer — deposit-cctg-weekly-question: {"resolution": "User duyệt 2026-10-12 08:41 ICT phương án (a): chấp nhận nguồn B East Asia Forum 06/10/2026 (còn trong cửa sổ 120 ngày) cho sbv_policy tuần này. …
-- [2026-10-12T01:44:11] Taylor/finding — cq-2026-10-11-hard-boundary-fix-r2: {"branch": "fix/cctg-deposit-asof-ict-20261012", "commit": "e9c991fd", "base": "2b679283", "merged": false, "worktree": "mike/agents/Taylor/wt-asofict-1012", "j …
-- [2026-10-12T01:57:19] Mike/answer — cq-2026-10-11-hard-boundary: {"resolution": "Cả 2 phát hiện đã vá và merge. #1 macro_state_live.py:305 (tuổi health lệch TZ): vá bằng 7db41261 + 2175a0fa, user duyệt 2026-10-11. #2 cctg_rat …
-- [2026-10-12T02:02:05] Taylor/finding — dashboard-dt5g-followups-20261012-r2: {"branch": "fix/dashboard-dt5g-followups-20261012", "commit": "d2f846c92", "base": "f40409246", "merged": false, "selfcheck": {"ops_health_check_selfcheck": "PA …
-- [2026-10-12T02:22:59] Taylor/finding — cctg-selfcheck-followups-20261012: {"branch": "fix/cctg-selfcheck-followups-20261012", "commit": "c95836b4", "base": "e9c991fd", "merged": false, "worktree": "mike/agents/Taylor/wt-selfcheckfu-10 …
+- [2026-10-16T01:22:13] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-10-16 — question that, khong phai checker bug; khong sua gi: {"finding_topic": "wags-fix: coord-2026-10-16 — question that, khong phai checker bug; khong sua gi", "verdict": "NEEDS_CHANGES", "confidence": "high", "summary …
+- [2026-10-16T03:23:57] Mike/finding — fund-unit-ledger-seal-20261016: {"summary": "Chốt sổ đơn vị quỹ thật 16/10 10:3x ICT (user duyệt thứ tự bước 3 ngày 14/10)", "SEAL_MD5_SpaceX": "SEAL_MD5 SpaceX cad84a2c264369b4c837d0c8346a793 …
+- [2026-10-16T03:53:05] Taylor/finding — ledger-seal-weekly-20261016: {"label": "MEASURED", "source": "selfcheck_TZunset.txt + selfcheck_TZkiritimati.txt + mutants_run.txt trong nhánh feat/ledger-seal-weekly-20261016 (chạy lại tại …
+- [2026-10-16T03:54:39] Taylor/finding — branch-audit-taylor-20261016: {"job": "Taylor_20261016_034834", "report": "mike/agents/Taylor/research/branch_audit_20261016/report.md", "read_only": true, "deleted": 0, "xoa_ngay": ["MIKE f …
+- [2026-10-16T04:09:32] Taylor/finding — ledger-seal-weekly-round2-20261016: {"label": "MEASURED", "branch": "feat/ledger-seal-weekly-20261016", "commit": "9900c56e5", "parent": "256bfcca6", "B1": "NothingToSeal => đọc last_date bản ghi  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -35,9 +35,13 @@
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
-- ✅ **CCTG + Big-4 12M có auto-fetch HÀNG TUẦN** (cron `5 1 * * 1` = 08:05 ICT thứ Hai, LIVE từ 2026-10-01; 2 nguồn khác chủ + chéo ≤0,1pp + guard URL tái dùng; lệch/thiếu ⇒ KHÔNG ghi, nhắc xác nhận tay `manual_verify`; log `logs/refresh_deposit_cctg_weekly.log`). Rủi ro còn lại không code chặn được: tác tử bịa nhất quán cả URL lẫn rate. (Trước đó nhập tay.) Anchor 2026-09-30 = 7,5%; không cập nhật ⇒ stale >45 ngày ⇒ **ARMED vĩnh viễn từ 2026-11-15**. Big-4 stale ≈ 2026-10-20 (cùng cơ chế fail-closed).
+- ✅ **CCTG + Big-4 12M có auto-fetch HÀNG TUẦN** (thứ Hai 08:05 ICT; chi tiết guard: `kb/projects/deposit-rate-effective-rate-20261001.md`). Anchor 2026-09-30 = 7,5%; không cập nhật ⇒ stale >45 ngày ⇒ **ARMED vĩnh viễn từ 2026-11-15**. Big-4 stale ≈ 2026-10-20 (cùng cơ chế fail-closed).
 - Trước khi wire vào gate thật: siết `deposit_rate_vn.deposit_events_df()` phía Big-4 (đang silent-drop dòng không parse được) + guard ngày tương lai tại load (quant-skeptic NON-BLOCKING #2/#3).
 - ✅ **rating_8l NEUTRAL tilt + chuỗi DCF (dcf_valuation, dcf_refresh_gate, custom30_yield_labels, due_diligence) DÙNG effective rate = max(Big-4 12M, CCTG 6M)** — LIVE trên WC main từ 2026-10-01 (merge `d87a6f89`, user duyệt 12:40, quant-skeptic vòng 2 CONFIRMED). **Fail-closed**: CCTG stale >45 ngày hoặc lỗi ⇒ cả 5 consumer rơi về Big-4 6,8% + WARNING (không phải ARMED). **Knob lùi**: env `DEPOSIT_RATE_CCTG_OVERLAY=0` (chỉ nhận đúng chuỗi "0"; lan tới mọi launcher source `wc_env.sh`, NGOẠI LỆ cron `dcf_refresh_gate` không source). `golive_recommend_v23.py:~991` (cổng CAPIT margin PIT, ngưỡng 9,0%) CỐ Ý vẫn Big-4-only — user chốt 2026-10-01 16:42: GIỮ Big-4, chỉ THÊM dòng hiển thị "effective vs 9%". **TRIGGER XEM LẠI đổi sang effective** = CCTG có ≥3 tháng dữ liệu + cron tuần chạy ổn, HOẶC effective ≥ ~8% (lúc đó dispatch Taylor đo khoảng cách CCTG−Big-4 lịch sử rồi quant-skeptic + user duyệt riêng). Tác động đo, dòng hiển thị PIT, follow-up: `kb/projects/deposit-rate-effective-rate-20261001.md`.
+
+## CAPIT đòn bẩy TẮT từ 2026-10-13 (`capit_margin_lever.enabled=false`, user duyệt): KHÔNG plan nào sizing ×1,3, KHÔNG cấp margin; chỉ user bật lại: `kb/projects/capit-margin-hold-20261013.md`
+
+## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13 (cron 22:05 + 00:20 ICT): tin đỏ ở Trading Daily ⇒ báo user ngay, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; **mốc xem lại 2026-11-09**: `kb/projects/nav-loss-brake-monitor-20261013.md`
 
 ## Cutloss SHADOW — mốc OOS: `agents/Taylor/research/intraday_cutloss_replay_v2_20261009/PREREG.md`
 - `bin/intraday_price_watch.py` (chạy thử, KHÔNG đặt lệnh thật). Tin nhắn dạng **"SHADOW GIỮ/BÁN/BÁN 50% <MÃ>"** trong Trading Daily là lệnh cho script chạy thử — **Mike KHÔNG coi là lệnh giao dịch thật, KHÔNG dispatch Mafee/DollarBill theo dòng đó.** Chỉ hành động khi user nói rõ ngoài tiền tố SHADOW.
@@ -61,7 +65,7 @@
 - **EXTREME-regime gate** (`extreme_regime_enabled=True`) — LIVE SpaceX+ZaloPay từ **2026-08-22** (account overrides `secrets/trading_bot_accounts.json`). Default config=False, override=True. Alert pipeline: `bin/extreme_regime_dd_alert.sh` hook trong `run_bot.sh`. Commit `07726527`.
 - **Vol-scale buy chase-cap** (`chase_cap_vol_scale_enabled=True`) — LIVE toàn bộ từ **2026-08-04** (`config.py:190`). k=2.0, ceil=4%, clamp static→ceil theo 20d rvol.
 - **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
-- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
+- **CAPIT margin lever** — **TẮT từ 2026-10-13** (LIVE 08-24→10-13), xem mục CAPIT đòn bẩy TẮT ở trên.
 - **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
 - **close_repair.py — Layer 2 self-computed back-adjustment khi vendor backfill kẹt vĩnh viễn** (`MIKE_CLOSE_REPAIR` mặc định ON) — LIVE từ **2026-09-28**, commit `3c55c249`. Tự tính hệ số (xác nhận 2 nguồn độc lập, lệch <0,006%), fail-closed khi không đủ bằng chứng. Vòng review + VND/VNM: `kb/projects/corp-action-nav-chain-20260922.md`.
 - **NAV corp-action L1 — cảnh báo TRƯỚC ex-date** (`bin/nav_exdate_forecast.py`) — LIVE từ **2026-09-22**, commit `2a7dd54e`. Wire `[pipeline-0]` trong `bq_freshness_check.sh` (TRƯỚC `exit 1` đầu tiên) ⇒ chuỗi 19:00 in cảnh báo corp-action của mã ĐANG GIỮ vào plan report + Discord. Selfcheck 58/58.
@@ -106,10 +110,9 @@ quant-skeptic.md`) — audit định kỳ vẫn cần vì đòn 8 chỉ bắt Đ
 ## Macro watch — rủi ro cấu trúc BĐS VN (mở 2026-08-26)
 Bobby classify STRUCTURAL_ACCUMULATION/AMBIGUOUS. Thesis + lead indicators + playbook đã chốt:
 `kb/projects/vn-realestate-structural-risk-20260826.md`. KHÔNG đổi V2.4/DT5G/margin theo thesis này.
-**Review quý — next ~2026-11-26: dispatch Bobby refresh bảng lead indicators + quét
-`kb/structural_break_watch.json`** (6 sự kiện cấu trúc: nâng hạng, KRX, T+, luật margin, room
-ngoại, sản phẩm mới). Protocol: `kb/projects/amh-structural-break-protocol-20260910.md` —
-sự kiện kích hoạt ⇒ BẮT BUỘC re-validate đúng tầng, mặc định vẫn là KHÔNG đổi tham số.
+**Review quý — next ~2026-11-26: Bobby refresh lead indicators + quét `kb/structural_break_watch.json`**
+(protocol `kb/projects/amh-structural-break-protocol-20260910.md`; mặc định KHÔNG đổi tham số).
+🔴 **FTSE nâng hạng ĐÃ KÍCH HOẠT, hiệu lực 2026-09-21** (user chốt 10-13) ⇒ backtest mới TÁCH trước/sau ngày đó: `kb/projects/ftse-upgrade-structural-break-20260921.md`
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate 2026-07-07)
 Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu, BOT_STOP. Chi tiết: `kb/ops_runbook.md`.

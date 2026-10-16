@@ -1,0 +1,68 @@
+BASE  XANH HẾT
+X01   KILLED by cashid                       cash_identity.py         | lời xác nhận không bao giờ lệch số tiền (S1 quay lại)
+X02   KILLED by cashid                       cash_identity.py         | bỏ so phần dư với số đã xác nhận (S1 quay lại)
+X03   KILLED by cashid                       cash_identity.py         | bỏ so số lượng đã xác nhận
+X04   KILLED by cashid                       cash_identity.py         | hai lời xác nhận cùng cửa sổ ⇒ dùng cái đầu
+X05   KILLED by cashid                       cash_identity.py         | lời xác nhận không cần bằng chứng
+X06   KILLED by cashid                       cash_identity.py         | acked_residual_vnd NaN lọt (so với NaN luôn False ⇒ đóng mọi cửa sổ)
+X07   KILLED by cashid                       cash_identity.py         | lời xác nhận của tài khoản khác cũng dùng (§12)
+X08   KILLED by cashid                       cash_identity.py         | file lời xác nhận hỏng ⇒ im lặng
+X09   KILLED by cashid                       cash_identity.py         | acked_residual_vnd = true được nhận như 1
+X10   SURVIVED                               cash_identity.py         | tương đương có chủ đích (kiểm bộ chạy): không đổi hành vi
+X11   KILLED by cashid                       cash_identity.py         | sự kiện cổ phiếu CHƯA KÝ cũng giải thích số lượng
+X12   KILLED by cashid                       cash_identity.py         | sự kiện đã ký giải thích MỌI số lượng lệch của mã đó
+X13   KILLED by cashid                       cash_identity.py         | sự kiện ngoài cửa sổ cũng giải thích
+X14   KILLED by cashid                       cash_identity.py         | lệnh bán tính như mua khi đối chiếu số lượng
+X15   KILLED by cashid                       cash_identity.py         | thiếu vị thế MỘT đầu vẫn đối chiếu
+X16   KILLED by cashid                       cash_identity.py         | bỏ ghi chú không đối chiếu được số lượng
+X17   KILLED by cashid                       cash_identity.py         | lượt chụp thiếu vị thế không báo kênh vận hành
+X18   KILLED by cashid                       cash_identity.py         | không ước giá trị số lượng lệch
+X19   KILLED by cashid                       cash_identity.py         | không bao giờ thấy số lượng lệch (C1 quay lại)
+X21   KILLED by cashid                       cash_identity.py         | bỏ dòng nhắc khi đẳng thức khép nhờ ước tính lớn (R5)
+X22   KILLED by cashid                       cash_identity.py         | bỏ khấu trừ rút Trứng vàng khỏi đẳng thức (S2 quay lại)
+X23   KILLED by cashid                       cash_identity.py         | hằng số khấu trừ rút Trứng vàng lệch
+X24   KILLED by cashid                       cash_identity.py         | bỏ ứng viên lãi vay (R6 thành nghi rút)
+X25   KILLED by cashid                       cash_identity.py         | ứng viên lãi vay không có trần
+X26   KILLED by cashid                       cash_identity.py         | ứng viên cổ tức không có trần
+X27   KILLED by cashid                       cash_identity.py         | ứng viên khấu trừ Trứng vàng không có trần
+X28   KILLED by cashid                       cash_identity.py         | luôn gọi là nghi nạp/rút (S2 quay lại)
+X29   KILLED by cashid                       cash_identity.py         | trần khấu trừ Trứng vàng nới 3 lần
+X30   KILLED by cashid                       cash_identity.py         | sai số lãi suất Trứng vàng bị coi là RÚT Trứng vàng
+X31   KILLED by cashid,e2e                   cash_identity.py         | cửa sổ đang mở bị cộng lần nữa vào tổng trôi
+X32   KILLED by cashid                       cash_identity.py         | chỉ thấy trôi chiều dương (rút nhỏ giọt lọt)
+X33   KILLED by cashid                       cash_identity.py         | dòng trôi gửi chi tiết MỌI tối
+X34   KILLED by cashid                       cash_identity.py         | lượt đầu tiên thấy trôi không gửi chi tiết
+X35   KILLED by cashid                       cash_identity.py         | dòng trôi biến mất khỏi chi tiết vận hành
+X36   KILLED by cashid                       cash_identity.py         | dòng trôi (không ai đóng được) vào báo cáo nhà đầu tư
+X41   KILLED by cashid                       cash_identity.py         | bản ghi dnse_raw hỏng bị bỏ qua im lặng (S6)
+X42   KILLED by cashid                       cash_identity.py         | bản ghi sai KIỂU làm chết cả tài khoản (S6)
+X43   KILLED by cashid                       cash_identity.py         | dòng lỗi khớp bộ dò của cron_health_check (G8)
+X44   KILLED by cashid                       cash_identity.py         | viết VND (S7)
+X45   KILLED by cashid                       cash_identity.py         | phần trăm mang dấu (S7)
+X46   KILLED by cashid                       cash_identity.py         | không in số bản ghi hỏng còn lại (S6)
+X51   KILLED by cashid                       cash_identity.py         | chi tiết cửa sổ cũ lặp lại mỗi tối (C2)
+X52   KILLED by cashid,e2e                   cash_identity.py         | mọi cửa sổ coi như kết thúc hôm nay
+X53   KILLED by cashid                       cash_identity.py         | bước gửi không idempotent (§5)
+X54   KILLED by cashid                       cash_identity.py         | bỏ chốt chế độ test (§5b)
+X55   KILLED by cashid                       cash_identity.py         | gửi hỏng vẫn ghi 'đã gửi'
+X56   KILLED by cashid                       cash_identity.py         | không ghi trạng thái gửi vào nav_snapshot
+X57   KILLED by cashid                       cash_identity.py         | chỉ gửi dòng đầu
+X58   KILLED by cashid                       daily_nav_snapshot.py    | chụp lại cùng ngày ⇒ gửi lại (§5)
+X59   KILLED by cashid                       daily_nav_snapshot.py    | nội dung ĐỔI vẫn giữ 'đã gửi' (không gửi cái mới)
+X60   SURVIVED                               daily_nav_snapshot.py    | kênh vận hành nhận chi tiết MỌI cửa sổ mỗi tối
+X61   KILLED by e2e                          daily_nav_snapshot.py    | chi tiết vận hành vào thân báo cáo ngày (C2 quay lại)
+X62   KILLED by cashid                       eod_trading_report.sh    | gọi bước gửi cả khi NAV chưa ghi
+X63   KILLED by cashid                       eod_trading_report.sh    | đầu ra bước gửi không sang stderr (vẫn không vào NAV_SECTION — tương đương về thân báo cáo)
+X64   KILLED by cashid                       eod_trading_report.sh    | chi tiết vận hành gửi nhầm kênh báo cáo
+X65   KILLED by cashid                       nav_sync_retry.sh        | nav_sync_retry gọi sai tham số ngày (TODAY == PLAN_DATE ở nhánh này ⇒ tương đương)
+X66   KILLED by cashid                       report_delivery_gate.py  | cổng không nhắc khi báo cáo mang dòng vận hành
+X67   KILLED by cashid                       report_delivery_gate.py  | cổng không lấy dòng nhà đầu tư
+X71   KILLED by cashid                       report_delivery_gate.py  | ô số hỏng ⇒ bỏ qua (S4 quay lại)
+X72   KILLED by cashid                       report_delivery_gate.py  | dòng thiếu cột số ⇒ coi như không có dòng
+X73   SURVIVED                               report_delivery_gate.py  | bỏ kiểm hữu hạn ở ô số (regex đã chặn nan/inf ⇒ tương đương)
+X74   KILLED by cashid                       report_delivery_gate.py  | đường cảnh báo ném lỗi ra deliver() (S5 quay lại)
+X75   KILLED by cashid                       report_delivery_gate.py  | import cash_identity hỏng không còn ra dòng lỗi riêng (S5)
+X76   KILLED by cashid                       report_delivery_gate.py  | deliver() không gọi cảnh báo dòng tiền
+X81   KILLED by cashid                       cash_identity.py         | không liệt kê cửa sổ mốc khởi điểm (G3)
+X82   KILLED by cashid                       cash_identity.py         | lượt chụp đầu của tài khoản mới không báo cửa sổ mốc khởi điểm (G3)
+== bộ new: 66 mutant · KILLED 63 · SURVIVED 3 · NOT_APPLIED 0

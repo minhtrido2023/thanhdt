@@ -1,0 +1,7 @@
+TZ=(unset)  python=3.12.13  OLD_REF=68c0aeef^
+  PASS t1a_dt5g_tri_state
+  PASS t3_telegram_header
+  PASS t2a_state_no_guess
+  PASS t2b_missing_rating_is_weak
+
+PASS  (24 assertion)

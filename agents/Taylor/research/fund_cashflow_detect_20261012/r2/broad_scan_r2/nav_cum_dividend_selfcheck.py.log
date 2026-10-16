@@ -1,0 +1,19 @@
+=== 1) Cổ tức phải thu chưa qua ex-date (dữ liệu thật, 2 chế độ) ===
+  [FAIL] SpaceX 2026-07-08: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-09: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-16: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-23: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-24: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-27: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-28: không có bản ghi balances để kiểm
+  [FAIL] SpaceX 2026-07-31: không có bản ghi balances để kiểm
+  [FAIL] ZaloPay 2026-07-16: không có bản ghi balances để kiểm
+  [FAIL] ZaloPay 2026-07-22: không có bản ghi balances để kiểm
+  [FAIL] ZaloPay 2026-07-24: không có bản ghi balances để kiểm
+  [FAIL] ZaloPay 2026-07-31: không có bản ghi balances để kiểm
+
+=== 2) Bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets ===
+  [PASS] SpaceX: bất biến NAV trên 69 dòng
+  [PASS] ZaloPay: bất biến NAV trên 66 dòng
+
+=== SELFCHECK: 2 PASS / 12 FAIL ===

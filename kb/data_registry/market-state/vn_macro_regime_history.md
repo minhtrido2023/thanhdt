@@ -13,6 +13,10 @@ last_update_2: 2026-08-31 (Bobby — addendum granular cửa sổ 2008Q4-2009Q3:
 last_update_3: 2026-08-31 (Bobby — 5 episode mới, BLIND, dispatch riêng: EP-2014-09 OPEC/oil CONFIDENCE_LIQUIDITY/EXTERNAL_CYCLE clean; EP-2015-07 China devaluation CONFIDENCE_LIQUIDITY ambiguous/EXTERNAL_CYCLE clean; EP-2023-09 FX-defense/margin/VIC-VHM CONFIDENCE_LIQUIDITY clean/CONTAINABLE dominant+EXTERNAL_CYCLE phụ ambiguous; EP-2025-03 Liberation Day tariff CONFIDENCE_LIQUIDITY clean/CONTAINABLE(tranh chấp)+EXTERNAL_CYCLE(nền) ambiguous; EP-2026-01 credit/BĐS+chiến tranh dầu MIXED ambiguous, N/A trục 2 hai timeline — nghi vấn CHƯA XÁC NHẬN liên hệ với episode 07/2026 đã có trong fleet)
 last_update_4: 2026-09-30 (Bobby — WATCH real-time CD/lãi suất huy động tăng, BLIND, dispatch từ Mike: MIXED ambiguous, phần CONFIDENCE_LIQUIDITY (O/N spike 21-09) CONTAINABLE; không nâng cấp cảnh báo, củng cố watch STRUCTURAL_ACCUMULATION BĐS đã mở)
 last_update_5: 2026-09-30 (Bobby — REGIME READ real-time BLIND: Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~60/40; 7 lead indicator + điều kiện đổi phân loại; KHÔNG phải episode)
+last_update_6: 2026-10-13 (Bobby — REGIME READ #2 real-time BLIND, rà soát quý kéo sớm: CHƯA phải episode; nền GIỮ Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~55/45; 0/7 chỉ báo ở cột xác nhận; ĐÍNH CHÍNH đọc NPL Q2 (77,7% mức tăng là Sacombank); kênh mới: biên độ trái phiếu cấp 2 Big-4 +1,05 → +2,25/+2,8)
+last_update_7: 2026-10-13 (Bobby — STRUCTURAL EVENT READ, BLIND: FTSE Frontier → Secondary Emerging hiệu lực 2026-09-21 ĐÃ thực thi (nguồn FTSE 06/10/2026); phân loại ĐỔI DẦN nhiều quý, biên độ nhỏ cấp thị trường, CHƯA đổi chế độ tại 13/10; mốc kiểm 19/03, 18/06, 17/09/2027)
+last_update_8: 2026-10-14 (Bobby — SECTOR READ real-time BLIND nhóm CNTT FPT/CMG/ELC: C hỗn hợp ambiguous, nghiêng B (AI giảm phát dịch vụ phần mềm toàn cầu) ở bội số ~55/45, A ở dòng vốn ngoại/lãi suất/JPY; trục 2 EXTERNAL_CYCLE; 5 chỉ báo theo dõi; không phải episode VNINDEX)
+last_update_9: 2026-10-14 (Bobby — MACRO UPDATE tài chính+BĐS sau họp BCĐ nhà ở 13/10: GIỮ STRUCTURAL_ACCUMULATION, giai đoạn sớm-giữa → GIỮA, vẫn AMBIGUOUS; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1302,6 +1306,225 @@ chạm ngưỡng.
 
 ---
 
+## REGIME READ #2 (không phải episode) — rà soát quý kéo sớm, dữ liệu tới 2026-10-13 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike (kỳ quý vốn hẹn ~2026-11-26, user kéo lên 13/10).** Không forward-return, không định giá cổ
+phiếu, không nhận định của user/Mike được cung cấp hay dùng. (Entry 09-30 phía trên có ghi 1 dòng P/E do caller
+đưa lúc đó — KHÔNG dùng ở đây.) BCTC Q3/2026 CHƯA công bố ⇒ các ô nợ xấu/BĐS vẫn là số Q2.
+
+### Phân loại
+- **CHƯA phải một episode** (không có trigger/giá được giao để phân loại; không có sự kiện căng thẳng rời rạc mới
+  sau cú O/N 21/09).
+- **Regime nền: GIỮ `STRUCTURAL_ACCUMULATION` (Loại-1) sớm-giữa, mức nhẹ — confidence `ambiguous`, ~55/45**
+  (09-30: ~60/40). Hạ nhẹ vì 2 chỉ báo "xác nhận" của chính entry 09-30 KHÔNG xác nhận (#1 tín dụng, #2 core) và
+  nợ xấu Q2 hoá ra tập trung ở 1 ngân hàng; không hạ thêm vì kênh vốn dài hạn (trái phiếu cấp 2 Big-4) vẫn đang
+  định giá lại lên và chính sách tiếp tục NỚI ràng buộc cung tín dụng.
+- Trục 2: không áp dụng cho nền. Hợp phần Fed = `EXTERNAL_CYCLE` (Fed 3,75-4,00% từ 16/09; thị trường nghiêng
+  giữ 27-28/10, còn khả năng tăng 12/2026).
+
+### Số đo mới (ngày số liệu · nguồn)
+1. Tín dụng **+11,59% YTD, +16,69% YoY** (30/09; NHNN họp báo 07/10 — TTTCTT/Thanh tra/Mekong ASEAN). YoY giảm
+   tốc: 18,26% (28/04) → 18,1% (26/06) → 16,69% (30/09). Khảo sát TCTD quý IV: cả năm tín dụng 16,4% (nâng từ
+   14,5%), huy động 14,3%.
+2. Cùng phạm vi, cùng mốc (Cục Thống kê, 28/09): **huy động +9,78% vs tín dụng +10,89% ⇒ chênh 1,11pp** (cùng kỳ
+   2025: 9,99% vs 13,37% = 3,38pp). Nguồn: TC Kinh tế-Tài chính 05/10 trích báo cáo NSO — chưa đọc PDF gốc.
+3. Lãi suất bình quân giao dịch mới: huy động 6,38% (20/09, +1,15pp YTD; NHNN) / 6,46% (30/09, +1,22pp; Bộ Tài
+   chính 09/10); cho vay **9,12%** (30/09, +1,03pp YTD; Bộ Tài chính — 1 nguồn).
+4. CPI T9 5,08% YoY, core **4,45%** (giảm từ 4,55%), bình quân 9T 4,52% (NSO 02/10).
+5. Liên NH (NHNN qua VBMA, tự đọc PDF): bình quân tuần 3M = 7,25 / 6,72 / 6,86 / 7,08 / 6,78 (5 tuần 31/08→02/10)
+   ⇒ **bình quân tháng 9 ≈ 6,98%**; ON 2,73%, 1W 3,57%, 1M 5,04%, 3M 6,73%, 6M 9,0%, 9M 8,55% (02/10, kỳ dài rất
+   mỏng). OMO lưu hành 248 (04/09) → 219 → 156 → 187 → **133 nghìn tỷ** (02/10). Tuần 05-09/10: VBMA chưa đăng.
+6. Tỷ giá: trung tâm 25.629 (09-10/10); VCB bán 26.255 → 26.170 (02/10) → 26.070 (10/10). Tự do: không có số T10.
+7. Niêm yết: Big-4 12M online 6,8% / quầy 5,9%; 6M online 6,6% / quầy 3,5%; CCTG VCB 6M 7,5%, BIDV/CTG 12M 7,4%
+   (CSV nội bộ 12/10 + TTTCTT 01/10). ACB online 12M 7,8% → **8,0%** (≈05/10; +0,3pp ở 6-9M).
+8. **Trái phiếu cấp 2 chào bán công chúng Big-4 (biên độ trên lãi tham chiếu = bình quân tiết kiệm 12M Big-4):**
+   CTG 12/2024-01/2025 8Y +1,05 / 10Y +1,15 (bán ~hết 4.000 tỷ) → CTG 15/12/2025-20/01/2026 8Y +1,25 (**bán 55,5%**)
+   → BIDV đợt 2 (đến 20/05/2026) +1,8/+1,9 (**bán 36,9%**) → BIDV đợt 3 (kết thúc 09/09/2026) 7Y +2,25 / 8Y +2,3 /
+   10Y +2,25 (**bán 80,3%**) → CTG NQ 16/09/2026: 16.000 tỷ, 6Y, biên **tối đa +2,8**, dừng các đợt 2025 dở.
+   Agribank 2024 10Y +2,0 (bán 100%); Agribank 07/2026 15.000 tỷ 10Y +2,0 (kết quả: không có số). VCB: chỉ riêng lẻ
+   (2026: 7,87-8% cố định). Nguồn: doanhnhan.baophapluat 14/09 + 19/09, Mekong ASEAN 23/05, VNBA 17/09, vneconomy.
+   ⇒ trong CÙNG tổ chức phát hành, biên độ nới >1pp trong ~9-20 tháng và có đợt bán không hết. Đây là kênh bán-
+   hành-chính lộ giá rõ nhất kỳ này. Lưu ý (suy luận): biên độ gồm cả phần bù kỳ hạn/thứ cấp và nhu cầu vốn cấp 2
+   do tín dụng tăng + TT50 (trái phiếu NH chỉ tính vào mẫu số LDR mới nếu là vốn cấp 2) ⇒ không thuần là giá thanh khoản.
+9. Văn bản mới: CV 8509 (16/09, nới — loại khách sạn/du lịch khỏi room BĐS); NĐ 359/2026 (17/09, VAMC, hiệu lực
+   06/11); QĐ 1890/QĐ-TTg (18/09, đề án có hợp phần xử lý TCTD yếu kém); **TT 50/2026/TT-NHNN (30/09, hiệu lực
+   01/12/2026: trần LDR 85→95% theo công thức mới khi NH chuyển sang LCR/NSFR, chậm nhất 01/10/2028; LCR 50→100%
+   2028-2033; NSFR 90→100% 2028-2030)** — nới ngắn hạn, siết chất lượng dài hạn (SSI). Không có văn bản SIẾT hệ thống.
+
+### ĐÍNH CHÍNH đọc nợ xấu Q2 (entry 08-31/09-30 và tracker ghi "1,97%, tăng tốc")
+Số 1,97% là gộp 27 NH niêm yết. Theo TCBS (Báo Đấu thầu 21/09; Người Quan Sát): **Sacombank chiếm 77,7% mức tăng**
+(NPL 6,41% → 7,54%, nhóm 5 từ 1,77% → 5,07% dư nợ); **26 NH còn lại NPL GIẢM 2,02% → 1,78%**. NHNN: nợ xấu nội
+bảng 1,51% (30/06, không gồm 5 NH kiểm soát đặc biệt), giảm từ 1,69% cuối 2025. Phần xấu đi diện rộng là ở tầng
+SỚM hơn: nợ nhóm 2 1,17% → 1,38%, bao phủ 78,8% (143,2% Q3/2022), lãi dự thu 230,7 nghìn tỷ (+61,3 nghìn tỷ YoY).
+⇒ câu "NPL tăng tốc theo đúng cơ chế trễ 2011→2012" ở mức ngành là ĐỌC QUÁ; đúng hơn: 1 ca cá biệt lớn + xấu đi
+sớm diện rộng mức nhẹ. (Cùng một gốc TCBS qua 2 báo — coi là 1 nguồn.)
+
+### 7 lead indicator của entry 09-30 — trạng thái
+| # | Chỉ báo | Số | Cột |
+|---|---|---|---|
+| 1 | Tín dụng hết T9 | YTD 11,59% · YoY 16,69% | GIỮA (không xác nhận: cần >12,5% & ≥17%; không bác: cần ≤11% & <16%) |
+| 2 | CPI + core | 5,08% (1 tháng >5%) · core 4,45% | GIỮA, nghiêng bác (core giảm, <4,7%) |
+| 3 | O/N, OMO | ON 0,87-2,73% sau 22/09; OMO lưu hành giảm còn 133 nghìn tỷ | nghiêng BÁC (chưa đủ 4 tuần hết bơm ròng) |
+| 4 | Chi phí vốn biên | CCTG Big-4 ≤7,5% (bác) NHƯNG biên cấp 2 Big-4 nới tới +2,25/+2,8 | PHÂN KỲ |
+| 5 | FX | trung tâm 25.629 (<25.800) | BÁC (premium/dự trữ: không có số) |
+| 6 | NPL Q3 | chưa công bố | không có số |
+| 7 | Tín dụng BĐS Q3 | chưa công bố | không có số |
+⇒ 0/7 ở cột "xác nhận Loại-1"; 1-2/7 ở cột "bác"; quy tắc đổi nhãn 09-30 KHÔNG kích hoạt theo chiều nào.
+
+### Giai đoạn lịch sử giống nhất
+Về CƠ CHẾ: 2010 → đầu 2011 trước NQ 11 (lãi suất niêm yết bị neo hành chính, giá vốn thật lộ ở kênh lách; mục tiêu
+tăng trưởng khiến không siết). Về ĐỘ LỚN và QUỸ ĐẠO: gần 2017 → 2018 hơn (tín dụng 18-19% rồi được ghìm dần bằng
+hành chính, không vỡ). Khác 2010-11: CPI 5% vs 12-18%, tín dụng 17% vs 32%, tỷ giá yên, không vàng/USD hoá. Khác
+2017-18: tín dụng/GDP ~145% (vs ~125-130%), LDR thuần >110%, chính sách đang nới chứ không ghìm, Fed đang tăng.
+Không giống 2022: không trigger có tên, không đóng băng TPDN, liên NH yên.
+
+### Điều gì đổi phân loại
+- **→ Loại-1 rõ hơn (clean):** core ≥4,7% hoặc tăng nhanh hơn CPI chung 2 tháng (NSO ~06/11, ~06/12); tín dụng YoY
+  quay lại ≥17% trong khi huy động cùng mốc kém ≥2pp; NHNN siết hệ thống (nâng lãi suất điều hành/cắt room diện
+  rộng); BCTC Q3: NPL trừ-Sacombank quay lại tăng, nhóm 2 +>20% QoQ, bao phủ <75%; biên cấp 2 Big-4 thực phát
+  ≥2,5% kèm bán <60% hoặc CCTG Big-4 ≥8%; 3M liên NH bình quân tháng >7,5%.
+- **→ Loại-2 (chỉ khi có episode):** trigger có TÊN (1 ngân hàng/1 tổ chức phát hành) + phản ứng chính sách nhắm
+  đích + #1/#2 ở cột bác. Nền Loại-1 chưa tan ⇒ đọc mặc định của episode như vậy vẫn là MIXED/ambiguous.
+- **→ Bình thường hoá:** tín dụng YoY <15% bền + huy động ≥ tín dụng; biên cấp 2 Big-4 <1,5%; CCTG Big-4 <7%;
+  core <4%; tín dụng BĐS QoQ <5% — 2 quý liên tiếp.
+
+**Không xác minh được:** liên NH/OMO tuần 05-09/10; USD tự do T10; dự trữ ngoại hối sau 18/06 (87,6 tỷ USD); tín
+dụng BĐS/NPL/bao phủ Q3; giao dịch BĐS Q3; biểu phân bậc T10 của VPB/MB/TCB/ACB; kết quả Agribank 07/2026 và
+BIDV đợt 1/2026; GDP Q3 9,95% (1 nguồn); VPBank online 7,9% (chỉ thấy tiêu đề 13/10). Review tiếp: sau BCTC Q3
+(~2026-11-26 như lịch), sớm hơn nếu #3/#5 chạm.
+
+---
+
+## STRUCTURAL EVENT READ (không phải episode) — FTSE Russell: Việt Nam Frontier → Secondary Emerging, hiệu lực 2026-09-21 (Bobby, BLIND, đọc 2026-10-13)
+
+**Dispatch bởi Mike theo `kb/projects/amh-structural-break-protocol-20260910.md` checklist mục 4.** Không tra/dùng
+lợi suất VNINDEX hay giá cổ phiếu sau 21/09/2026; không dùng dòng tiền ngoại sau 21/09; không được cho biết nhận
+định của ai. Số BQ tự đo đều chặn `time <= 2026-09-18` (KHỐI LƯỢNG/giá trị giao dịch, không phải lợi suất). Lộ
+ngoài ý muốn: 1 tiêu đề kết quả tìm kiếm nêu biến động vốn hoá HOSE tháng 9 — KHÔNG mở, KHÔNG dùng.
+
+### Xác minh (nguồn SAU ngày hiệu lực)
+- **Đã thực thi.** FTSE "Equity Country Classification September 2026 Annual Announcement", đăng **06/10/2026**: bảng
+  phân loại tại 06/10/2026 xếp Vietnam ở Secondary Emerging, chú thích "reclassified from Frontier to Secondary
+  Emerging market status, effective from Monday 21 September 2026"; mục 3: "initial 10% implementation from the
+  open on Monday 21 September 2026, followed by three further tranches in March 2027, June 2027 and September
+  2027". Vietnam KHÔNG có mục theo dõi/Watch List nào trong văn bản này. Đối chiếu: Mondaq/Duane Morris 12/10/2026,
+  VietnamFinance qua Stockbiz 07/10/2026.
+- **Lịch (FTSE FAQ v1.3, 08/2026):** hệ số 10% (mở cửa T2 21/09/2026) → 30% (T2 22/03/2027) → 65% (T2 21/06/2027) →
+  100% (T2 20/09/2027); quỹ chỉ số giao dịch ở phiên đóng cửa thứ Sáu liền trước: 18/09/2026, 19/03/2027, 18/06/2027,
+  17/09/2027. Xoá khỏi FTSE Frontier: MỘT đợt tại 09/2026. **Điều kiện còn treo:** "Following each tranche, FTSE
+  Russell will evaluate the ability of index trackers to replicate the benchmark changes prior to proceeding with
+  the subsequent tranche"; lý do chia đợt gồm "support adequate NPF funding and liquidity"; việc còn lại của mô hình
+  môi giới toàn cầu = hoàn tất hợp đồng song phương. Mã bị loại ở kỳ sau ⇒ các đợt còn lại của mã đó không thực hiện.
+- **Rổ:** 27 mã vào FTSE Global All Cap (dữ liệu chốt 30/06/2026): Large VCB, VIC, VHM · Mid BID, HPG, VPB (6 mã này
+  vào FTSE All-World/FTSE Emerging) · Small 21 mã: FPT, GEX, HDB, HCM, MCH, MSN, NVL, STB, SHB, SSB, SSI, TCX, VCI,
+  VJC, VNM, MSB, VRE, VPL, VIX, VND, VCK. (117 mã nếu tính cả micro cap — báo chí/ACBS, chưa đối chiếu file FTSE.)
+  Có sàng "foreign headroom". Bản chốt 04/09/2026: chưa có nguồn xác nhận không đổi.
+- **Tỷ trọng dự phóng (FTSE FAQ, giá 21/08/2026):** ở hệ số 100%: FTSE Emerging 0,3089% · Emerging All Cap 0,4880% ·
+  All-World 0,0311% · Global All Cap 0,0490%; ở hệ số 10% hiện nay: 0,0310% / 0,0490% / 0,0031% / 0,0049%.
+- **Dòng vốn thụ động (ước tính bên bán, KHÔNG phải số đo):** Vietcap ~1,5 tỷ USD (VIC ~559 tr, VHM ~156 tr ⇒ ~48%
+  vào 2 mã); ASEAN SC 1,0-1,5 tỷ ròng (lý thuyết 2,2); MBS ~1,8 tỷ; Agriseco 2,2-3 tỷ. ⇒ khoảng **1,0-3,0 tỷ USD**
+  cho cả 4 đợt. Gồm cả chủ động: HSBC ~3,4 tỷ; WB 3-5 tỷ "vài năm đầu"; Agriseco 7-9 tỷ; FTSE ~6 tỷ (qua báo).
+- **MSCI:** rà soát 23/06/2026 KHÔNG đưa Việt Nam vào danh sách theo dõi; vướng chính: room ngoại (>10% vốn hoá),
+  ngoại hối, đăng ký/mở tài khoản qua VSDC, chưa có khung không ký quỹ trước đầy đủ; CCP mục tiêu đầu 2027.
+
+### Số tự đo trước sự kiện (BQ `tav2_bq.ticker`, `Trading_Value`, 61 phiên 22/06→17/09/2026)
+Trung vị toàn thị trường 14,7 nghìn tỷ/phiên (báo chí: HOSE khớp lệnh T8/2026 14,2 nghìn tỷ); 27 mã = 7,7 nghìn tỷ
+= **52%** giá trị toàn thị trường; 6 mã Large/Mid = 3,0 nghìn tỷ (19,8%); VIC+VHM = 1,63 nghìn tỷ. Phiên 18/09/2026
+(phiên quỹ chỉ số giao dịch đợt 1): toàn thị trường 22,7 (1,54×), 27 mã 15,9 (2,06×), 6 mã 7,6 (2,53×), VIC+VHM 4,53
+(2,79×). KHÔNG quy hết cho FTSE: trùng kỳ cơ cấu quý của các ETF nội/ngoại.
+Quy đổi (suy ra, 26.100 đ/USD): cả 4 đợt 1,0-3,0 tỷ USD ≈ 26-78 nghìn tỷ ≈ 1,8-5,3 phiên giao dịch của TOÀN thị
+trường, ≈ 0,7-2,1% giá trị giao dịch một năm. Riêng VIC+VHM (theo Vietcap ~18,7 nghìn tỷ cả 4 đợt): đợt 3 và đợt 4
+mỗi đợt ≈ 6,5 nghìn tỷ ≈ **4 phiên** thanh khoản thường của 2 mã, dồn vào một phiên đóng cửa.
+
+### Phân loại
+- **Đổi DẦN nhiều quý, biên độ NHỎ ở cấp toàn thị trường; tại 13/10/2026 CHƯA phải đổi chế độ** (mới 10% tỷ trọng;
+  90% phần cơ học còn phía trước, 70% dồn vào 06/2027 và 09/2027). Đáng kể CỤC BỘ ở 2 chỗ: (i) vài mã nhận phần lớn
+  dòng tiền (VIC, VHM, HPG > 50%); (ii) các phiên thứ Sáu cơ cấu (khối lượng dồn về đóng cửa).
+- Độ tin cậy: CAO cho "không đổi chế độ ngay" (tỷ trọng từ văn bản FTSE, thanh khoản tự đo); TRUNG BÌNH cho "đổi
+  dần" (khoảng ước tính dòng vốn rộng 3 lần; phản ứng nhà đầu tư trong nước chưa đo); THẤP cho độ lớn cuối cùng.
+- Kênh NGAY: hành vi quanh ngày cơ cấu; lệch ADV sau phiên cơ cấu. Kênh DẦN: tập trung thanh khoản/vốn hoá vào mã
+  trong rổ; nguồn cung mới (IPO được "fast entry" từ 21/09/2026; TCX, VCK, VPL, MCH trong rổ là hàng mới niêm yết/
+  chuyển sàn 2025-26); tương quan nhóm mã lớn với dòng EM toàn cầu. Kênh KHÔNG đáng kể (suy ra từ quy mô): tỷ
+  trọng lệnh cá nhân (75-80% theo VCBF 2026; FiinTrade 2024 >80%; khối ngoại 11,44% giá trị giao dịch T8/2026), bán
+  cưỡng bức khi quỹ EM bị rút (0,49% × quy mô rút).
+- Tiền lệ (cấu trúc, không phải lợi suất): Kuwait FTSE 09+12/2018 (12 mã, ~0,5% Emerging All Cap — cùng cỡ tỷ trọng
+  với Việt Nam; thụ động ước 0,7-1,1 tỷ USD; vốn ngoại ròng 0,2 tỷ 2017 → 0,7 tỷ nửa cuối 2018 — OBG); Saudi 2019
+  (phiên 28/05/2019 kéo dài đóng cửa, 21,27 tỷ SAR so với ước thụ động 18,75 tỷ; 07/2026 sở hữu ngoại vẫn chỉ 4,63%
+  vốn hoá — Argaam); Trung Quốc A (tổ chức 18% → 24,6% cổ phiếu lưu hành 2019→2021 — SAIF; cá nhân vẫn chi phối
+  giao dịch); Pakistan MSCI 2017 (tỷ trọng nhỏ trong rổ lớn, khối ngoại bán ròng 1,3-1,9 tỷ USD sau đó, 2021 bị
+  hạ lại). Việt Nam khác Kuwait/Saudi ở chỗ dòng thụ động NHỎ so với thanh khoản nội; giống Trung Quốc A ở chỗ cá
+  nhân chi phối giao dịch; khác Pakistan ở chỗ MSCI vẫn xếp Frontier nên quỹ cận biên theo MSCI không bị ép bán.
+
+### Điều gì đổi phân loại
+- **→ đổi chế độ thật:** MSCI đưa vào danh sách theo dõi (sớm nhất kỳ ~06/2027) rồi nâng hạng; nới room ngoại làm
+  tăng tỷ trọng đầu tư được; tỷ trọng 27 mã trong giá trị giao dịch >60% bền 60 phiên (nền 52%); khối ngoại >15%
+  giá trị giao dịch 3 tháng liên tiếp (nền 6-11%, T8/2026 11,44%).
+- **→ hạ xuống "không đáng kể":** FTSE hoãn một đợt (đánh giá khả năng mô phỏng sau mỗi đợt); mã lớn rớt sàng room.
+- Mốc kiểm (gắn lịch thật): cơ cấu quý 12/2026 (đóng cửa 18/12/2026; không có đợt tăng hệ số); công bố kỳ 03/2027
+  ~19/02/2027 (suy từ lệ 4 tuần, chưa có lịch FTSE) → đóng cửa **19/03/2027** (+20%); FTSE công bố rà soát giữa kỳ
+  **06/04/2027**; ~21/05/2027 → **18/06/2027** (+35%); MSCI ~cuối 06/2027; ~20/08/2027 → **17/09/2027** (+35%).
+  Đo lại mỗi tầng sau mỗi đợt ≥10 phiên.
+
+**Không xác minh được:** thông cáo UBCKNN/HOSE sau 21/09; bản chốt danh sách 04/09; tỷ trọng từng mã; lượng thụ động
+THỰC mua ở đợt 1; AUM bám chỉ số FTSE (1,4 nghìn tỷ USD — 1 nguồn Vietcap qua báo); tỷ trọng cá nhân 2026 (ước
+tính, không phải thống kê sở); sở hữu ngoại hiện tại (số gần nhất 15,61% là 10/2025); ngày vận hành CCP; số liệu
+tiền lệ Saudi/Trung Quốc về tỷ trọng giao dịch cá nhân (nguồn thứ cấp/không ghi năm).
+
+**Nguồn:** lseg.com `ftse-country-classification-update-latest.pdf` (06/10/2026) · lseg.com
+`ftse-faq-document-vietnam-reclassification.pdf` (v1.3, 25/08/2026) · mondaq.com 1853862 (12/10/2026) · stockbiz.vn
+42153357 (07/10/2026) · vietstock.vn 145-1494141 (21/09/2026) · vietnamnet.vn 2548735 (02/09/2026) · elibook.vn
+22/08/2026 · aseansc.com.vn báo cáo chuyên đề · theinvestor.vn d19394 (24/06/2026) · vneconomy.vn "bán ròng kỷ lục"
+(03/10/2025) · oxfordbusinessgroup.com Kuwait 2019 · argaam.com 611745 (28/05/2019), 1925291 (30/07/2026) ·
+en.saif.sjtu.edu.cn/faculty-perspectives/details/26 · profit.pakistantoday.com.pk (12/09/2021).
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Định giá lại nhóm CNTT niêm yết VN (FPT/CMG/ELC), 01→14/10/2026 (Bobby, real-time BLIND, đọc 2026-10-14)
+
+**Dispatch bởi Mike.** Caller chỉ đưa hành động giá (3 mã −34…−46%/1 năm, FPT đáy 52 tuần 13/10, khối ngoại
+bán ròng nhiều phiên). KHÔNG có forward-return/luận điểm đầu tư nào được đưa hay dùng. Đây là đọc nguyên
+nhân cấp NGÀNH, không phải episode thị trường — không đưa vào N_effective.
+
+### Phân loại: **C — HỖN HỢP, `ambiguous`; nghiêng B ở phần BỘI SỐ (~55/45), A ở phần DÒNG TIỀN**
+- Trục 1 (gốc): KHÔNG phải mất cân đối vĩ mô nội địa. Gốc = câu chuyện ngoại sinh toàn cầu (AI giảm phát
+  dịch vụ phần mềm) + dòng vốn ngoại rút tập trung. Trục 2: `EXTERNAL_CYCLE` — không có hành động chính
+  sách VN nào giải quyết được; mốc kết thúc do peer toàn cầu/AI quyết định, KHÔNG phải CONTAINABLE.
+
+### Bằng chứng (nguồn · ngày)
+1. **Riêng ngành, không phải cả thị trường** (BQ `tav2_bq.ticker`, Close 14/10/2025→13/10/2026): VNINDEX
+   1.761→1.719 (−2,4%); FPT 82.000→56.300 (−31%), CMG −45%, ELC −39%. P/E FPT 18,3→10,6; CMG 22,8→11,4;
+   ELC 20,6→9,8. Caveat: Close có thể đã điều chỉnh corp-action (FPT thưởng 10:1, giao T10/2026).
+2. **Lợi nhuận FPT CHƯA gãy ⇒ thuần co bội số**: 6T/2026 LNTT +18,1%, DT CNTT nước ngoài +13,4%, Nhật
+   +24,4%, ký mới nước ngoài ~1 tỷ USD +32,3%, 14 HĐ >10 triệu USD (TTTCTT 16/07; MBS 31/07/2026).
+3. **Mốc khởi phát trùng cú sốc toàn cầu**: khối ngoại bán FPT từ đầu T2/2026, 10 phiên ~4.000 tỷ tới 24/02,
+   gắn với plugin Claude Cowork/Anthropic đầu T2 (nhadautu, T2-T3/2026); Nifty IT đỉnh 03/02/2026, −24% tới
+   11/06 (ICICI Direct, T6/2026). FPT bán ròng ngoại >16.000 tỷ YTD, sở hữu ngoại 49% (2022)→28,5%,
+   hở room 22% (mekongasean/baophapluat, T7-T9/2026); toàn thị trường ~53.000 tỷ tới T5 (CafeF).
+4. **Peer: dấu hiệu B có thật nhưng chưa đồng nhất**: Infosys hạ guidance FY27 còn 1,5-3% cc, nêu
+   pricing/AI deflation, organic ~0 (T7/2026). Ngược lại: Accenture Q4 FY26 vượt guidance, kỷ lục 141 HĐ
+   ≥100 triệu USD, FY27 +3-6% LC (01/10/2026); TCS Q2 FY27 TCV 9,6 tỷ USD, AI 3,1 tỷ USD/năm, cp +5,5%
+   (08/10/2026) — sau khi TCS −14,5% trong T9; Cognizant nâng EPS guide (29/07/2026).
+5. **Hợp phần chu kỳ (A)**: lãi vay bình quân mới 9,12% (+1,03pp YTD, BTC 09/10); Fed +25bp 16/09; JPY
+   ~157-158/USD cuối T9, yếu nhất ~40 năm (primexbt 23/09) — gió ngược quy đổi cho doanh thu Nhật.
+   CMG: chi phí lãi vay +48% YoY, nợ vay 3.820 tỷ (BCTC Q2, DNSE); ELC: dự án đầu tư công, lãnh đạo đăng ký
+   bán (T6/2026) ⇒ 2 mã này có thêm yếu tố riêng nội địa, không thuần AI-outsourcing.
+6. Nền vĩ mô VN (REGIME READ #2 ở trên): Loại-1 nhẹ ambiguous; FTSE hiệu lực 21/09 — KHÔNG giải thích được
+   chênh −30pp so với VNINDEX ⇒ yếu tố vĩ mô nội địa chỉ là phụ.
+
+### Chỉ báo theo dõi 1-2 quý (xác nhận B ⇔ xác nhận A)
+| # | Chỉ báo | B (cấu trúc) | A (chu kỳ, đảo ngược) |
+|---|---|---|---|
+| 1 | FPT KQKD 9T (~20/10) + cả năm: ký mới & DT CNTT nước ngoài YoY | ký mới <+10% hoặc DT nước ngoài <+10%, biên gộp offshore giảm | ký mới ≥+20%, DT nước ngoài ≥+13%, biên giữ |
+| 2 | Guidance peer: Infosys Q2 FY27 (~T10), HCL/Cognizant Q3 (cuối T10), Accenture Q1 FY27 (~T12) | Infosys hạ tiếp <1,5% / Accenture về đáy dải 3% + nói pricing | guidance giữ/nâng, bookings ≥ doanh thu (book-to-bill >1) |
+| 3 | Đơn giá: DT/kỹ sư FPT, bình luận pricing của peer, tỷ trọng HĐ fixed-price/outcome | DT/đầu người giảm trong khi headcount tăng | DT/đầu người đi ngang/tăng |
+| 4 | Khối ngoại FPT sau FTSE 21/09 + spread P/E FPT vs Nifty IT/ACN | bán ròng tiếp CÙNG lúc peer toàn cầu cũng co ⇒ nhân tố toàn cầu | peer hồi bội số mà FPT vẫn bị bán ⇒ dòng tiền VN-riêng (A, đảo ngược được) |
+| 5 | JPY + DT Nhật tính theo JPY; lãi vay VN | DT Nhật tính JPY chậm lại (cầu thật) | chỉ DT quy VND chậm, theo JPY vẫn ≥+15% ⇒ thuần tỷ giá |
+
+**Đổi phân loại**: →B clean nếu #1 VÀ #2 cùng cột B trong 2 quý; →A clean nếu #1 cột A và #4 cho thấy FPT co
+riêng khi peer hồi. **Không phải khuyến nghị mua/bán.** Review: sau FPT 9T + Infosys/Accenture (~T12/2026).
+
+---
+
 ## APPENDIX: MACRO CONTEXT 2016-2019 — GROWTH REGIME (không phải episode khủng hoảng)
 
 **Phân tích thêm ngày 2026-08-25** — theo yêu cầu xác định đặc trưng vĩ mô giai đoạn này để làm
@@ -1458,3 +1681,13 @@ chiếu gián tiếp qua mốc 37,5% (2009) của ADDENDUM.
 Vốn hoá/GDP chỉ dùng cho Value Radar DISPLAY-ONLY; chuỗi 2018→2026Q2 (vintage `old_pre2021`
 2020Q4 2.121 nghìn tỷ → `revised_2021plus` 2021Q1 1.953 nghìn tỷ, gãy 2021) chỉ 8 năm + 1 lần
 đổi cơ sở ⇒ chưa kết luận gì, không nạp vào phân loại episode.
+
+## MACRO UPDATE (không phải episode) — tài chính + BĐS 6-12 tháng, sau họp BCĐ TW nhà ở/BĐS 13/10 (Bobby, prospective, đọc 2026-10-14)
+
+Báo cáo đầy đủ: `reports/bobby_vn_macro_update_20261014.md`. Không dùng forward-return.
+- **Phân loại:** GIỮ trục 1 STRUCTURAL_ACCUMULATION, trục 2 KHÔNG CONTAINABLE bằng một can thiệp; giai đoạn dời **sớm-giữa → GIỮA**, vẫn **AMBIGUOUS**. Lý do: NHNN tự nêu rủi ro lệch kỳ hạn đồng thời nới LDR 85%→95% (TT 50/2026, hiệu lực 01/12); bộ đệm vãng lai mỏng đi (9T nhập siêu 19,42 tỷ USD vs xuất siêu 16,87 tỷ cùng kỳ 2025 → hạ cấp luận điểm "thặng dư vãng lai" của thesis 08-26); tồn kho BĐS tăng (51.950 căn/lô, 27/34 địa phương, số do chủ đầu tư báo), giao dịch Q3 = 92% quý trước.
+- **Lãi huy động chính = effective rate của team 7,4%/năm (as-of 12/10/2026)** = max(Big-4 12M 6,8%; CCTG BIDV/VietinBank 12M 7,4%), cách kill-switch A (>7,5%) đúng **0,1pp** (armed=False). Số NHNN bình quân giao dịch mới ~6,4% (20/09, +1,2pp YTD) chỉ là proxy PHỤ, khác bản chất, KHÔNG thế chỗ. CCTG 12M lên 7,6% ⇒ kill-switch A ARM.
+- **Ngưỡng:** 0/7 ngưỡng "tăng ngầm" chạm; tín dụng BĐS/tổng 25,39% (<28%); vi phạm TPDN 12T 0,24%. Ô #5 (tiền gửi lớn ≥10%) có vấn đề định nghĩa — mốc PVcomBank 10% đã nằm sẵn trước khi đặt ngưỡng, chờ user chốt tính từ mốc.
+- **Kịch bản 6-12T (JUDGMENT):** A tích tụ tiếp có quản lý 50-55% · B đóng băng thanh khoản BĐS cục bộ 20-25% (nguy hiểm nhất với hệ mình) · C stress hệ thống 5-10% · D hạ cánh mềm sớm 15-20%.
+- **Mốc:** 17/10 QH khai mạc (3 luật Đất đai/Nhà ở/KDBĐS) · ~20/10-14/11 BCTC Q3 · 07/11 check tháng · 01/12 TT 50 · T12-T1 CCTG Big-4 ≥7,7% hoặc liên NH 3M >7,5%.
+- **Không đổi** V2.4/DT5G/margin (playbook thesis 08-26). Đính chính trong ngày: bản sáng dùng 6,4% làm lãi huy động chính, đã sửa chiều 14/10 theo chỉ đạo user.

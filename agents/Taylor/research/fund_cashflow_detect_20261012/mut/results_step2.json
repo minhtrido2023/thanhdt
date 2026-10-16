@@ -1,0 +1,3508 @@
+[
+ {
+  "id": "BASE",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "không mutant — phải xanh hết",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C01",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "K bỏ cum_dividend_excl",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 107 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, 0), (5, -4000000), (6, 4000001), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C02",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "K bỏ nợ ký quỹ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 9), 100000073.72592022), (datetime.date(2026, 3, 11), -100000000.06410556)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C03",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "K bỏ off-book",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 107 assertion PASS): G4: chuyển sang off-book + cổ tức đang bị loại khỏi cột cash ⇒ đẳng thức vẫn khép, được [(3, 0), (4, -120000000), (5, 0), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C04",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "K bỏ Trứng vàng",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 5), -150070223.84892005)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C05",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ thuế bán",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4 assertion PASS): A: SpaceX phần dư lớn nhất phải < 500đ (chỉ còn lãi kép), được 200,000.00"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C06",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "phí mua tính trên bán",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4 assertion PASS): A: SpaceX phần dư lớn nhất phải < 500đ (chỉ còn lãi kép), được 194,000.00"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C07",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "đảo dấu phí",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 3), -788000.0)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C08",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ cổ tức",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 4), 5999999.577411734)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C09",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ lãi Trứng vàng",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4 assertion PASS): A: SpaceX phần dư lớn nhất phải < 500đ (chỉ còn lãi kép), được 316,155.00"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C10",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "đảo mua/bán",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 3), 400000000.0), (datetime.date(2026, 3, 4), -100000000.42258826), (datetime.date(2026, 3, 9), -179999926.2740798)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C11",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "chi trả cổ tức coi như mất cả khoản",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 10), 5700000.60452139)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C12",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ thuế cổ tức lúc chi trả",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4 assertion PASS): A: SpaceX phần dư lớn nhất phải < 500đ (chỉ còn lãi kép), được 299,999.40"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C13",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "chốt quyền chỉ tính 5%",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 4), 5699999.577411734)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C14",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "lãi Trứng vàng luôn 1 ngày",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4 assertion PASS): A: SpaceX phần dư lớn nhất phải < 500đ (chỉ còn lãi kép), được 210,794.58"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C15",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "lãi tính trên số dư CUỐI cửa sổ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4 assertion PASS): A: SpaceX phần dư lớn nhất phải < 500đ (chỉ còn lãi kép), được 35,111.78"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C16",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "đảo dấu dòng tiền đã khai",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 87 assertion PASS): D: khai đúng ngày giờ số tiền ⇒ hết cảnh báo, được [(datetime.date(2026, 3, 10), 10000000.60452139)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C17",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ dòng tiền đã khai",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 87 assertion PASS): D: khai đúng ngày giờ số tiền ⇒ hết cảnh báo, được [(datetime.date(2026, 3, 10), 5000000.60452139)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C18",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "biên cửa sổ của dòng tiền đã khai",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 88 assertion PASS): D: tiền vào ĐÚNG giây chụp (đã nằm trong số dư) khai đúng giây đó ⇒ thuộc cửa sổ kết thúc ở lần chụp ấy"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C19",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "dòng tiền cũ tính lại ở mọi cửa sổ sau",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 87 assertion PASS): D: khai đúng ngày giờ số tiền ⇒ hết cảnh báo, được [(datetime.date(2026, 3, 11), -5000000.06410556), (datetime.date(2026, 3, 12), -5000000.73834779), (datetime.date(2026, 3, 13), -4999999.4182053)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C20",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "market_only phủ cả cửa sổ kế",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 94 assertion PASS): D: market_only ngày 2026-03-09 KHÔNG thuộc cửa sổ → 10/03 ⇒ vẫn cảnh báo"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C21",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "market_only đúng ngày dòng không phủ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 92 assertion PASS): D: bản ghi market_only đúng ngày ⇒ thôi cảnh báo nhưng phần dư vẫn hiện trong bảng"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C22",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "market_only bất kỳ phủ mọi cửa sổ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 94 assertion PASS): D: market_only ngày 2026-03-09 KHÔNG thuộc cửa sổ → 10/03 ⇒ vẫn cảnh báo"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C23",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ market_only",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 92 assertion PASS): D: bản ghi market_only đúng ngày ⇒ thôi cảnh báo nhưng phần dư vẫn hiện trong bảng"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C24",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "chỉ bắt chiều nạp",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 26 assertion PASS): B: rút 505,051 (trong phiên, ngưỡng 503,051) phải bị bắt ở cửa sổ → 10, được []"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C25",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "ngưỡng gấp đôi",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 14 assertion PASS): B: nạp 505,051 (trong phiên, ngưỡng 503,051) phải bị bắt ở cửa sổ → 10, được []"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C26",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "ngưỡng một nửa",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 21 assertion PASS): B: nạp 501,051 (trong phiên, ngưỡng 503,051) phải KHÔNG bị bắt, được [10]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C27",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "% theo NAV cuối cửa sổ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 16 assertion PASS): B: nạp 505,051 (trong phiên, ngưỡng 503,051): %NAV phải tính trên NAV ĐẦU cửa sổ (1,006,102,313)"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C28",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "ngưỡng 0,1",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 0 assertion PASS): ngưỡng phải là 0,05% NAV (đo 2026-10-12), được 0.1"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C30",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ lọc account_no ở bản ghi",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 68 assertion PASS): B: nạp 504,937 (cuối tuần, ngưỡng 502,937): lệnh đủ log ⇒ phải nói phần dư không đến từ lệnh thiếu log; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-06 (06/03 19:10) và 2026-03-09 (09/03 19:10) có 505,011 "
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C31",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "nhận balances không gắn tài khoản",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 109 assertion PASS): G5/§12: bản ghi balances không gắn tài khoản không được tính là của SpaceX (coi như không có)"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C32",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ lọc accountNo từng lệnh",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 110 assertion PASS): G6/§12: bản ghi orders không gắn tài khoản — SpaceX chỉ nhận lệnh 901 của mình, được 2 lệnh, bán 56,000,000"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C33",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "phải thu: lấy bản ghi SAU lần chụp",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 112 assertion PASS): G7: bản ghi balances 23:00 (sau lần chụp 19:10) không được dùng cho lần chụp 04/03, được cổ tức 0"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C34",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "lệnh gán theo NGÀY, không theo giờ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 4), -199606000.42258826), (datetime.date(2026, 3, 5), 50048500.15107994), (datetime.date(2026, 3, 10), 90087300.6045214)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C35",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "biên cửa sổ của lệnh",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 97 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, -5004850), (5, 5004850), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C36",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "mọi lệnh là mua",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 3), 399800000.0)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C37",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "modifiedDate không đổi UTC→ICT",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 97 assertion PASS): E: chụp 10:00 giữa phiên — lệnh chia đúng theo giờ ⇒ phần dư ~0, được [(3, 0), (4, 40097600), (5, -40097600), (6, 1), (9, 49), (10, 0), (11, 1), (12, -1), (13, 1)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C38",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "(chuẩn bị) nhận lệnh chưa khớp — vô hại nếu value=0",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 110 assertion PASS): G6/§12: bản ghi orders không gắn tài khoản — SpaceX chỉ nhận lệnh 901 của mình, được 2 lệnh, bán 6,000,000"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C39",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "fill xác nhận tính ở MỌI cửa sổ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 102 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức khép, hết cảnh báo"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C40",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ lệnh trong dnse_raw",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 3 assertion PASS): A: SpaceX chỉ có khoản nội bộ ⇒ 0 chờ khai, được [(datetime.date(2026, 3, 3), 199606000.0), (datetime.date(2026, 3, 4), -50048500.422588274), (datetime.date(2026, 3, 9), -90087226.27407978)]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C41",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "fill xác nhận luôn là mua",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 102 assertion PASS): F: fill broker xác nhận trong account_seed_capital ⇒ đẳng thức khép, hết cảnh báo"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C42",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "fill xác nhận lấy của tài khoản ĐẦU file",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 103 assertion PASS): F/§12: fill xác nhận của SpaceX không được tính cho ZaloPay"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C50",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "chỉ kiểm lần chụp của dòng sau",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": true,
+    "fails": [
+     "Traceback (most recent call last):"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C51",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ kiểm lần chụp tăng",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 116 assertion PASS): H: lần chụp không tăng ⇒ cửa sổ không kiểm được, nêu hai lần chụp"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C52",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "asof loại chính ngày đó",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 117 assertion PASS): I: asof trước ngày có dòng tiền ⇒ chưa thấy; asof đúng ngày ⇒ thấy"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C53",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ asof",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4699 assertion PASS): F: cash_flow_warnings phải tính tới ngày báo cáo, được 27 (07-10) / 27 (10-09)"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 117 assertion PASS): I: asof trước ngày có dòng tiền ⇒ chưa thấy; asof đúng ngày ⇒ thấy"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C54",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "thiếu sổ dòng tiền coi như rỗng",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 120 assertion PASS): I: thiếu sổ dòng tiền ⇒ một dòng nêu đúng lỗi, không ném; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NAV) nghi NẠP vào mà sổ dòng"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C55",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "giấu cửa sổ không kiểm được",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 115 assertion PASS): H: cửa sổ không kiểm được phải hiện ở cảnh báo, được []"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C56",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "đảo chiều nạp/rút trong cảnh báo",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 19 assertion PASS): B: nạp 505,051 (trong phiên, ngưỡng 503,051): cảnh báo phải nêu tài khoản, chiều, số tiền, ngày, bằng chứng; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 505"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C57",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ bằng chứng lệnh/vị thế",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 20 assertion PASS): B: nạp 505,051 (trong phiên, ngưỡng 503,051): lệnh đủ log ⇒ phải nói phần dư không đến từ lệnh thiếu log; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 505,05"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C58",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bằng chứng vị thế: bán cộng như mua",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 119 assertion PASS): I: có lệnh BÁN đủ log + bản ghi vị thế 23:30 (sau lần chụp) ⇒ vị thế vẫn phải khớp; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NA"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C59",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ ghi chú rút Trứng vàng",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 104 assertion PASS): G: rút Trứng vàng mất 600k ⇒ cảnh báo kèm ghi chú Trứng vàng; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 600,000 VND (-0.060% NAV) nghi RÚT ra mà sổ dòng "
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C60",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ ghi chú dư nợ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 105 assertion PASS): G: cửa sổ có dư nợ ⇒ ghi chú lãi vay ước tính; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 1,000,000 VND (-0.100% NAV) nghi RÚT ra mà sổ dòng tiền chưa có "
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C61",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "bỏ ghi chú ngày không có bản ghi orders",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 101 assertion PASS): F: phải nói dnse_raw không có bản ghi orders những ngày nào; được ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-04 (04/03 19:10) và 2026-03-05 (05/03 19:10) có 5,988,180 VND (+0.599% NAV) nghi NẠP vào mà sổ dòn"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "C62",
+  "applied": true,
+  "file": "cash_identity.py",
+  "note": "vị thế: lấy bản ghi cuối ngày bất kể giờ",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 119 assertion PASS): I: có lệnh BÁN đủ log + bản ghi vị thế 23:30 (sau lần chụp) ⇒ vị thế vẫn phải khớp; được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NA"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "D40",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "dòng NAV bỏ asof",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 124 assertion PASS): J: ngày trước dòng tiền / tài khoản khác ⇒ không có dòng cảnh báo nào"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "D41",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "dòng NAV không thụt lề",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 123 assertion PASS): J: dòng 💰 NAV phải mang cảnh báo chờ khai (thụt 3 dấu cách), được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NAV) nghi NẠP vào mà sổ d"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError: /tmp/tmphqgavuja/account_inception.json: không có account_n"
+    ]
+   }
+  }
+ },
+ {
+  "id": "D42",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "main() không in cảnh báo đẳng thức tiền",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [])]"
+    ]
+   }
+  }
+ },
+ {
+  "id": "D43",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "main() tính nhưng không in vào dòng NAV",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [\"⚠️ Đẳng thức tiền (SpaceX) KHÔNG chạy được nên chưa kiểm được dòng tiền chưa khai — CashIdentityError: /tmp/tmp_554hrwd/account_inception.json: không có account_n"
+    ]
+   }
+  }
+ },
+ {
+  "id": "D44",
+  "applied": true,
+  "file": "daily_nav_snapshot.py",
+  "note": "main() không ghi cảnh báo vào JSON",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l4b) đẳng thức tiền nối vào main(): dòng lỗi thật có ở cả stdout lẫn JSON, rc vẫn 0   [(0, [])]"
+    ]
+   }
+  }
+ },
+ {
+  "id": "P60",
+  "applied": true,
+  "file": "nav_period_returns.py",
+  "note": "CLI không in cash_flow_warnings",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": true,
+    "fails": [
+     "ASSERT-FAIL (sau 4691 assertion PASS): F: CLI sandbox SpaceX phải rc=0: Traceback (most recent call last):"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "P61",
+  "applied": true,
+  "file": "nav_period_returns.py",
+  "note": "CLI bỏ asof của cảnh báo",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4699 assertion PASS): F: cash_flow_warnings phải tính tới ngày báo cáo, được 27 (07-10) / 27 (10-09)"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R01",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng tỉ suất fail-open khi CLI rc≠0 (hành vi cũ)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4710 assertion PASS): F: CLI rc=1 ⇒ cổng tỉ suất phải CHẶN báo cáo ghi +9,99% (fail-closed), được ROOT=/tmp/nav_unit_ledger_selfcheck_3vshk6w3/sandbox/WC/mike"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 134 assertion PASS): K: CLI rc=1 ⇒ báo cáo KHÔNG qua cổng, thông điệp trích lỗi của CLI; được PASS "
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R02",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng tỉ suất fail-open khi đầu ra hỏng",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 135 assertion PASS): K: đầu ra không phải JSON ⇒ CHẶN; được PASS "
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R03",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "bỏ TypeError (inception không phải object)",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": true,
+    "fails": [
+     "Traceback (most recent call last):"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R04",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng: dòng tiền treo tính trên cả nav_history sau ngày báo cáo",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 128 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được []"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R05",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng: tính cả bản ghi sau ngày báo cáo",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 128 assertion PASS): J: báo cáo ngày 10/03 — khoản khai 20:00 (sau lần chụp) còn TREO tính tới ngày đó; được ['⚠️ DÒNG TIỀN TREO (ZaloPay): deposit 2026-03-10 20:00 +3,000,000 VND đã khai nhưng tới 2026-03-10 chưa dòng nav_history nào chụp sau"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R06",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng bỏ asof của đẳng thức tiền",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 129 assertion PASS): J: báo cáo ngày 09/03 — chưa có gì để cảnh báo"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R07",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng không đọc khoản chờ khai",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 126 assertion PASS): J: cổng phải thấy khoản chờ khai của SpaceX, được []"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R08",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng không đọc dòng tiền treo",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 127 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NAV) nghi NẠP vào mà sổ dòng tiền chư"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R09",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "cổng không nói báo cáo thiếu cảnh báo",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 131 assertion PASS): J: cổng phải in cảnh báo và nói báo cáo đã mang nó hay chưa (KHÔNG có cụm 'DÒNG TIỀN CHỜ KHAI'); được report_delivery_gate: CẢNH BÁO (không chặn) ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) v"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "R10",
+  "applied": true,
+  "file": "report_delivery_gate.py",
+  "note": "deliver() không gọi cảnh báo dòng tiền",
+  "checks": {
+   "ledger": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 133 assertion PASS): J: deliver() phải gọi _warn_cash_flows sau cổng nav-flow và trước khi đóng dấu đã kiểm, được [2081, -1, 2129]"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K21",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K2: bỏ điều kiện ngày có phiên (hành vi cũ)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4479 assertion PASS): dựng sổ b16_sat: đầu vào hợp lệ không được raise, được CashFlowError: flow 2026-07-04 time_ict=11:00 tới TRONG phiên, nhưng dòng nav_history 2026-07-04 chụp số dư lúc 2026-07-04T10:00:00 — trước khi tiền vào/ra và trước g"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 1,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K22",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K2: đảo điều kiện",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 2630 assertion PASS): B8b tiền 04:50 trong phiên có NAV chụp trước phiên: thông điệp thiếu 'tới TRONG phiên': flow 2026-08-24 time_ict=04:50 được gán bod trên phiên 2026-08-25 ⇒ giao dịch ở giá chốt của dòng nav_history 2026-08-24, nhưng dòng "
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 1,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K31",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K3: chỉ bắt chiều chụp quá muộn",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4487 assertion PASS): B17 dòng thứ Bảy chụp giữa phiên thứ Sáu: phải raise CashFlowError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K32",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K3: chỉ bắt chiều chụp quá sớm",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4482 assertion PASS): B17 dòng 07-03 chụp sau khi phiên 07-06 đóng cửa: phải raise CashFlowError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K33",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K3: bỏ bất biến (hành vi cũ)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4482 assertion PASS): B17 dòng 07-03 chụp sau khi phiên 07-06 đóng cửa: phải raise CashFlowError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K34",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K3: so với chính thời điểm tiền vào",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4482 assertion PASS): B17 dòng 07-03 chụp sau khi phiên 07-06 đóng cửa: phải raise CashFlowError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K35",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "K3: bod lấy nhầm dòng R làm dòng cho giá",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 2474 assertion PASS): tính kỳ b1_E_1000: đầu vào hợp lệ không được raise, được CashFlowError: flow 2026-07-03 time_ict=10:00: giao dịch ở giá chốt phiên 2026-07-02 (phiên đóng cửa gần nhất trước khi tiền vào/ra), nhưng dòng cho giá 2026-07-03 "
+    ]
+   },
+   "flowterm": {
+    "rc": 1,
+    "traceback": true,
+    "fails": [
+     "Traceback (most recent call last):"
+    ]
+   },
+   "jump": {
+    "rc": 1,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 127 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NAV) nghi NẠP vào mà sổ dòng tiền chư"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l1) rc=0, dòng 💰 NAV in tỉ suất giá đơn vị + tách nạp/rút ròng (sổ dòng tiền THẬT SỰ được đọc)   [(0, '💰 **NAV 2026-09-09: 15,490,411 VND** (+5,390,411 VND so với hôm trước; tỉ suất KHÔNG tính được — xem dòng dưới)\\n   Cổ phiếu 10,490,411 · Tiền mặt 5,000",
+     "  ✗ (l2) JSON day_change_pct = tỉ suất giá đơn vị của ngày (không phải tỉ số NAV thô)   [(None, 2.586)]",
+     "  ✗ (l3) JSON since_inception_pct = tỉ suất từ mốc khởi điểm; since_inception = NAV − vốn khởi điểm   [(None, 3.611, None)]"
+    ]
+   }
+  }
+ },
+ {
+  "id": "B01n",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "dòng cho giá luôn là R (vô hiệu bod)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 2474 assertion PASS): tính kỳ b1_E_1000: đầu vào hợp lệ không được raise, được CashFlowError: flow 2026-07-03 time_ict=10:00: giao dịch ở giá chốt phiên 2026-07-02 (phiên đóng cửa gần nhất trước khi tiền vào/ra), nhưng dòng cho giá 2026-07-03 "
+    ]
+   },
+   "flowterm": {
+    "rc": 1,
+    "traceback": true,
+    "fails": [
+     "Traceback (most recent call last):"
+    ]
+   },
+   "jump": {
+    "rc": 1,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 127 assertion PASS): J: cổng phải thấy cả dòng tiền TREO của ZaloPay, được ['⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX): giữa lần chụp NAV 2026-03-09 (09/03 19:10) và 2026-03-10 (10/03 19:10) có 5,000,001 VND (+0.497% NAV) nghi NẠP vào mà sổ dòng tiền chư"
+    ]
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l1) rc=0, dòng 💰 NAV in tỉ suất giá đơn vị + tách nạp/rút ròng (sổ dòng tiền THẬT SỰ được đọc)   [(0, '💰 **NAV 2026-09-09: 15,490,411 VND** (+5,390,411 VND so với hôm trước; tỉ suất KHÔNG tính được — xem dòng dưới)\\n   Cổ phiếu 10,490,411 · Tiền mặt 5,000",
+     "  ✗ (l2) JSON day_change_pct = tỉ suất giá đơn vị của ngày (không phải tỉ số NAV thô)   [(None, 2.586)]",
+     "  ✗ (l3) JSON since_inception_pct = tỉ suất từ mốc khởi điểm; since_inception = NAV − vốn khởi điểm   [(None, 3.611, None)]"
+    ]
+   }
+  }
+ },
+ {
+  "id": "B02n",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "bỏ mốc khởi điểm (i==0)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4459 assertion PASS): B13d thiếu dòng 07-02, tiền sau đóng cửa 07-02: phải raise CashFlowError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "B03n",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "eod không kiểm thiếu phiên",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4450 assertion PASS): B13a eod trên dòng cũ hơn phiên đóng cửa gần nhất: phải raise CashFlowError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "B08n",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "i>0 → i>1 ở dòng cho giá",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 2474 assertion PASS): tính kỳ b1_E_1000: đầu vào hợp lệ không được raise, được CashFlowError: flow 2026-07-03 time_ict=10:00: phiên 2026-07-02 đã đóng cửa trước khi tiền vào/ra nhưng dòng cho giá là 2026-07-01 — nav_history THIẾU dòng của phiê"
+    ]
+   },
+   "flowterm": {
+    "rc": 1,
+    "traceback": true,
+    "fails": [
+     "Traceback (most recent call last):"
+    ]
+   },
+   "jump": {
+    "rc": 1,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "  ✗ (l1) rc=0, dòng 💰 NAV in tỉ suất giá đơn vị + tách nạp/rút ròng (sổ dòng tiền THẬT SỰ được đọc)   [(0, '💰 **NAV 2026-09-09: 15,490,411 VND** (+5,390,411 VND so với hôm trước; tỉ suất KHÔNG tính được — xem dòng dưới)\\n   Cổ phiếu 10,490,411 · Tiền mặt 5,000",
+     "  ✗ (l2) JSON day_change_pct = tỉ suất giá đơn vị của ngày (không phải tỉ số NAV thô)   [(None, 2.586)]",
+     "  ✗ (l3) JSON since_inception_pct = tỉ suất từ mốc khởi điểm; since_inception = NAV − vốn khởi điểm   [(None, 3.611, None)]"
+    ]
+   }
+  }
+ },
+ {
+  "id": "B09n",
+  "applied": true,
+  "file": "account_cash_flows.py",
+  "note": "i==0 lấy chính R làm dòng cho giá",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 2727 assertion PASS): dựng sổ b11_1: đầu vào hợp lệ không được raise, được CashFlowError: flow 2026-07-02 time_ict=10:00: giao dịch ở giá chốt phiên 2026-07-01 (phiên đóng cửa gần nhất trước khi tiền vào/ra), nhưng dòng cho giá 2026-07-02 chụp"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 1,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K51",
+  "applied": true,
+  "file": "nav_unit_ledger.py",
+  "note": "K5: bỏ kiểm hữu hạn vốn khởi điểm (inf lọt)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4502 assertion PASS): B19 vốn khởi điểm = inf: thông điệp thiếu 'vốn khởi điểm phải > 0': 2026-07-02: nav 1,000,000,000 − dòng tiền eod 0 <= 0 — không tính được giá đơn vị (số tiền khai có đúng không?)"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K52",
+  "applied": true,
+  "file": "nav_unit_ledger.py",
+  "note": "K5: hành vi cũ (nan lọt)",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4501 assertion PASS): B19 vốn khởi điểm = nan: phải raise ValueError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ },
+ {
+  "id": "K53",
+  "applied": true,
+  "file": "nav_unit_ledger.py",
+  "note": "K5: bỏ kiểm nav hữu hạn",
+  "checks": {
+   "ledger": {
+    "rc": 1,
+    "traceback": false,
+    "fails": [
+     "ASSERT-FAIL (sau 4497 assertion PASS): B19 nav = nan: phải raise ValueError"
+    ]
+   },
+   "flowterm": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "jump": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "cashid": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "npr": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   },
+   "e2e": {
+    "rc": 0,
+    "traceback": false,
+    "fails": []
+   }
+  }
+ }
+]
