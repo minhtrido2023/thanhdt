@@ -51,14 +51,19 @@ BASKET = ['ACB', 'BID', 'CTG', 'DBC', 'DCM', 'DGC', 'EVF', 'HAH', 'HDB', 'HHV', 
 # after the last real print, so Close/Price has drifted off 1.0. This is the failure mode the fix
 # exists for, not a hypothetical.
 STALE = ['TRT', 'VHF', 'DKC', 'BCB', 'VTS', 'DLT', 'CDG', 'DNN', 'HLY', 'STS', 'PTE', 'SSN']
+# The STALE fixture is pinned to the bars it was curated from (authoring date 2026-08-02). Read
+# "latest bar" live, names that later resume trading print Close==Price again and silently drop
+# out of the control (2026-10-16: TRT/VTS/DLT/DNN/HLY resumed -> 7/12, sweep RED).
+STALE_ASOF = "2026-08-02"
 
 
-def last_bar(tickers):
+def last_bar(tickers, asof=None):
     inl = ",".join(f"'{t}'" for t in tickers)
+    cut = f" AND t.time <= DATE '{asof}'" if asof else ""
     return bq(f"""
     WITH last AS (SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close) AS pxw,
              ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) rn
-           FROM tav2_bq.ticker AS t WHERE t.ticker IN ({inl}) AND t.Close IS NOT NULL)
+           FROM tav2_bq.ticker AS t WHERE t.ticker IN ({inl}) AND t.Close IS NOT NULL{cut})
     SELECT ticker, time, Close, pxw FROM last WHERE rn=1""")
 
 
@@ -71,7 +76,7 @@ check("NEGATIVE: current basket weights identical on both bases",
       gap_basket < 1e-12,
       f"n={len(b)}, max |Δweight| = {gap_basket:.3e} (Close==Price for every member)")
 
-s = last_bar(STALE)
+s = last_bar(STALE, asof=STALE_ASOF)
 s["ratio"] = s.Close / s.pxw
 check("POSITIVE: stale/suspended names diverge between bases",
       (s.ratio.sub(1).abs() > 0.005).sum() >= 8,
