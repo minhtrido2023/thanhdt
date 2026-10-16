@@ -1,0 +1,22 @@
+SpaceX: ĐÃ CHỐT tới 2026-10-16 (+5 dòng, tổng 80); mốc đã ghi: SEAL_MD5 SpaceX aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+🔴 ledger_seal_weekly: ZaloPay rc=2 (asof 2026-10-16); đã chốt+ghi mốc: SpaceX; KHÔNG chốt gì thêm. 8 dòng cuối đầu ra thật của nav_unit_ledger:
+info 5
+info 6
+info 7
+info 8
+info 9
+TỪ CHỐI nav_unit_ledger (ZaloPay) [SealGateError]: đoạn 2026-10-12 → 2026-10-16 CHƯA đủ điều kiện chốt (1 chỗ):
+  2026-10-14: dòng chụp số dư lúc 2026-10-14T11:00 — TRƯỚC giờ đóng cửa
+  ⇒ KHÔNG ghi gì vào sổ.
+[NOTIFY to trading_daily]
+🔴 **Quỹ bước 4 — ledger_seal_weekly lỗi (rc=1)** — chuỗi benchmark/bot KHÔNG được cập nhật lần này; bảng 3.2 sẽ in "chưa có số" nếu không sửa trước báo cáo tuần. Đầu ra thật (8 dòng cuối):
+```
+info 5
+info 6
+info 7
+info 8
+info 9
+TỪ CHỐI nav_unit_ledger (ZaloPay) [SealGateError]: đoạn 2026-10-12 → 2026-10-16 CHƯA đủ điều kiện chốt (1 chỗ):
+  2026-10-14: dòng chụp số dư lúc 2026-10-14T11:00 — TRƯỚC giờ đóng cửa
+  ⇒ KHÔNG ghi gì vào sổ.
+```
