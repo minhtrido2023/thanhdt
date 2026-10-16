@@ -1256,3 +1256,6 @@
 
 ## Archived 2026-10-16 (keep=12 days=0 require_done=False)
 - [2026-10-14T06:06:52Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2: CÀI ĐẶT theo research/fund_step4_20261014/SPEC.md, wt riêng nhánh feat/fund-step4-benchmark-20261014, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc README+SPEC, tạo worktree
+
+## Archived 2026-10-16 (keep=12 days=0 require_done=False)
+- [2026-10-14T06:06:57Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2: CÀI ĐẶT theo research/fund_step4_20261014/SPEC.md, wt riêng nhánh feat/fund-step4-benchmark-20261014, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc README+SPEC, tạo worktree
