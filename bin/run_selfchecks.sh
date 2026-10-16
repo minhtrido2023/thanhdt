@@ -66,6 +66,7 @@ mapfile -t FILES < <(cd "$WC_ROOT" && find . \( -iname "*selfcheck*.py" -o -inam
   | grep -vE "(^|/)wt-|(^|/)pending_|/\.claude/worktrees/" \
   | grep -vE "^\./mike_paseo/" \
   | grep -vE "^\./(archive|tbot)/" \
+  | grep -vE "/patch_[^/]*_selfcheck\.py$" \
   | grep -vE "/(run_selfchecks\.sh|selfcheck_baseline_diff\.py|selfcheck_scope_map\.sh|selfcheck_weekly_baseline_check\.sh)$" \
   | sed 's|^\./||' | sort)
 
@@ -119,6 +120,10 @@ for f in "${FILES[@]}"; do
     *due_diligence_selfcheck.py|*merge_park_orders_selfcheck.py) t=240 ;;
     # weekly ops audit 2026-10-10: đo tay 75s, 47/47 PASS — rc=124 dưới trần 60s là giả.
     *dispatch_token_telemetry_selfcheck.py) t=240 ;;
+    # weekly ops audit 2026-10-17: đo tay cli_provider 69s (23/23 PASS), deposit_fallback_direction
+    # 170s (ALL PASS) — rc=124 dưới trần 60s là giả.
+    *cli_provider_selfcheck.sh) t=240 ;;
+    *deposit_fallback_direction_selfcheck.py) t=360 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124

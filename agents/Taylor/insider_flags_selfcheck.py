@@ -82,8 +82,12 @@ check("mọi cờ trả về đều có last_alert <= asof (chống look-ahead)"
 before = insider_sell_flagged("2026-04-01")
 check("replay ngày quá khứ TRƯỚC mọi cờ → rỗng (không áp cờ tương lai)", before == {},
       f"min last_alert trong file = {las[0]}")
-future = insider_sell_flagged("2027-01-01")
-check("asof quá xa (mọi cờ hết TTL 90d) → rỗng", future == {})
+# Mốc "quá xa" phải TRƯỢT theo file thật (cố định 2027-01-01 hỏng khi cron ghi cờ last_alert
+# >= 2026-10-03 — vẫn trong TTL 90d; ca thật weekly-ops-audit 2026-10-17, cờ 2026-10-12).
+import datetime as _dt
+_far = (_dt.date.fromisoformat(las[-1][:10]) + _dt.timedelta(days=91)).isoformat()
+future = insider_sell_flagged(_far)
+check(f"asof quá xa ({_far}, mọi cờ hết TTL 90d) → rỗng", future == {})
 edge = insider_sell_flagged(las[-1])
 check("asof == last_alert mới nhất → cờ đó vẫn active (biên trên inclusive)",
       len(edge) > 0)
