@@ -69,6 +69,14 @@ except Exception: pass
 from io import StringIO
 import numpy as np, pandas as pd
 
+# Ngay hieu luc (eff_date) cua 1 dong rating khi vendor THIEU Release_Date = q_time + NULL_RD_EFF_OFFSET_DAYS.
+# 2026-10-16 (user chi dao uoc luong ngay hieu luc; doi tu +45): do tren ticker_financial 2014+ — dong CO Release_Date
+# thi time == Release_Date o 99,2% (=> `time` chinh la ngay cong bo/co du lieu); dong NULL la placeholder (qend+32,
+# ID_Release rong, khong co phan ung khoi luong) hoac late-filer (phan ung bat dau dung k=0 so voi `time`). Nen KHONG
+# cong 45 ngay (lam eff_date tuong lai, vd PMT 2026-10-18) va KHONG lui -1..3 ngay (khong co bang chung). Bao thu: qend+32
+# ~ p90 do tre cong bo that (trung vi 29). Doi gia tri o DAY — 3 cho dung no (main, attach_icb_pit, bank_eff_date).
+NULL_RD_EFF_OFFSET_DAYS = 0
+
 WORKDIR = os.environ.get("WORKDIR_8L", r"/home/trido/thanhdt/WorkingClaude")
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = os.environ.get("BQ_BIN", (r"bq" if os.name=="nt" else "bq"))
@@ -188,11 +196,11 @@ def attach_icb_pit(df, icb):
     icb = icb.sort_values(["ticker", "icb_from"])
     left = df.copy()
     # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main), nên dựng LẠI ĐÚNG công thức
-    # đó tại chỗ: Release_Date, thiếu thì q_time + 45 ngày. Đổi công thức ở một nơi mà quên nơi
+    # đó tại chỗ: Release_Date, thiếu thì q_time + NULL_RD_EFF_OFFSET_DAYS. Đổi công thức ở một nơi mà quên nơi
     # kia là đúng lớp lỗi §28 — nếu sửa, sửa cả hai.
     _rel = pd.to_datetime(left["Release_Date"], errors="coerce").astype(_RES)
     left["_eff"] = _rel.fillna(pd.to_datetime(left["q_time"], errors="coerce").astype(_RES)
-                               + pd.Timedelta(days=45)).astype(_RES)
+                               + pd.Timedelta(days=NULL_RD_EFF_OFFSET_DAYS)).astype(_RES)
     left = left.sort_values("_eff")
     out = pd.merge_asof(left, icb.sort_values("icb_from"), left_on="_eff",
                         right_on="icb_from", by="ticker", direction="backward")
@@ -382,11 +390,11 @@ def bank_aq_asof(ticker, eff_date):
 
 
 def bank_eff_date(r):
-    """Same effective date main() stamps on the row: Release_Date, else quarter end + 45d."""
+    """Same effective date main() stamps on the row: Release_Date, else q_time + NULL_RD_EFF_OFFSET_DAYS."""
     eff = pd.to_datetime(r.get("Release_Date"), errors="coerce")
     if pd.isna(eff):
         eff = pd.to_datetime(r.get("q_time"), errors="coerce")
-        eff = eff + pd.Timedelta(days=45) if pd.notna(eff) else pd.NaT
+        eff = eff + pd.Timedelta(days=NULL_RD_EFF_OFFSET_DAYS) if pd.notna(eff) else pd.NaT
     return eff
 
 
@@ -594,9 +602,9 @@ def main():
     # levered -> rating 5) without touching core_score, so force rating-5 names to the bottom tier (E).
     df.loc[df["rating"]==5, "tier"] = "E"
 
-    # effective date = Release_Date (public) ; fall back to quarter end + 45d if missing
+    # effective date = Release_Date (public) ; fall back to q_time + NULL_RD_EFF_OFFSET_DAYS if missing
     df["eff_date"] = pd.to_datetime(df["Release_Date"], errors="coerce")
-    qd = pd.to_datetime(df["q_time"], errors="coerce") + pd.Timedelta(days=45)
+    qd = pd.to_datetime(df["q_time"], errors="coerce") + pd.Timedelta(days=NULL_RD_EFF_OFFSET_DAYS)
     df["eff_date"] = df["eff_date"].fillna(qd)
     df = df.dropna(subset=["eff_date"])
 

@@ -127,15 +127,21 @@ ok("T5b executable SQL filters by run_len, with no ANY_VALUE / MIN(icb_from) col
    f"stripped SQL still collapsing: {[k for k in ('ANY_VALUE','MIN(icb_from)') if k in _sql_code.upper()]}")
 
 # ---------------------------------------------------------------- T6 eff_date formula parity
-df6 = mkdf([("EEE", None, "2020-03-31")])            # no Release_Date -> q_time + 45d
+_off = pd.Timedelta(days=R.NULL_RD_EFF_OFFSET_DAYS)
+_b = pd.Timestamp("2020-05-10")                      # icb_from cua 7535
+df6 = mkdf([("EEE", None, (_b - _off).strftime("%Y-%m-%d"))])   # no Release_Date -> q_time + offset == dung bien
 icb6 = mkicb([("EEE", 8633, "2010-01-01"), ("EEE", 7535, "2020-05-10")])
 out6 = R.attach_icb_pit(df6, icb6)
-# q_time 2020-03-31 + 45d = 2020-05-15 >= 2020-05-10 -> must take 7535
-ok("T6 Release_Date fallback = q_time + 45 days (same formula as main())",
+ok("T6 Release_Date fallback = q_time + NULL_RD_EFF_OFFSET_DAYS (same formula as main())",
    list(out6["ICB_Code"]) == [7535], f"got {list(out6['ICB_Code'])}")
-df6b = mkdf([("EEE", None, "2020-03-20")])           # +45d = 2020-05-04 < 2020-05-10 -> 8633
-ok("T6b and the 45-day offset is the boundary that decides",
+df6b = mkdf([("EEE", None, (_b - _off - pd.Timedelta(days=1)).strftime("%Y-%m-%d"))])   # lech 1 ngay truoc bien
+ok("T6b and the offset is the boundary that decides",
    list(R.attach_icb_pit(df6b, icb6)["ICB_Code"]) == [8633])
+
+_src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rating_8l_history.py"), encoding="utf-8").read()
+_uses = len(re.findall(r"Timedelta\(days=NULL_RD_EFF_OFFSET_DAYS\)", _src))
+ok("T6c 3 cho dung fallback (main, attach_icb_pit, bank_eff_date) CUNG dung hang so, khong con literal 45 rieng",
+   _uses == 3, f"so cho dung NULL_RD_EFF_OFFSET_DAYS = {_uses} (mong 3)")
 
 # ---------------------------------------------------------------- T7 real A/B artifacts
 HERE = os.path.dirname(os.path.abspath(__file__))
