@@ -90,3 +90,10 @@ Bản vá FAIL-G: audit `measurement-integrity-audit-2026-09-27` PART2 §C, bran
 `fix/rating8l-icb-pit`, báo cáo + mọi CSV lớp lệch:
 `mike/agents/Taylor/research/failg_icb_pit_20260927/`. Selfcheck:
 `WorkingClaude/rating8l_icb_pit_selfcheck.py` (24/24 PASS × 4 biến thể TZ, 4 mutation KILLED).
+
+## eff_date khi vendor thiếu `Release_Date` (đổi 2026-10-16, user chỉ đạo "ước lượng ngày hiệu lực")
+- Công thức một nguồn: `rating_8l_history.eff_date_of()` = `Release_Date`, thiếu thì `q_time + NULL_RD_EFF_OFFSET_DAYS` (**= 0**; trước là **+45**). Dùng ở `main()`, `attach_icb_pit()`, `bank_eff_date()`. Selfcheck: `rating8l_icb_pit_selfcheck.py` T6a–T6h (6 mutant bị bắt).
+- Căn cứ đo (ticker_financial 2014+): dòng CÓ `Release_Date` thì `time == Release_Date` ở 99,2%; dòng NULL (6.387/53.713, `ID_Release` rỗng, 360/1.291 mã, ~100 mã ≥80% NULL) phần lớn là placeholder `time = cuối quý + 32..35 ngày`, không có phản ứng khối lượng; ~189 late-filer có phản ứng đúng k=0 quanh `time`. Không có bằng chứng cho "lùi 1–3 ngày".
+- Tác động đo bằng chạy thật (cùng dữ liệu, code cũ vs mới): chỉ `eff_date` đổi (6.387 dòng, −45 ngày); `rating`/`tier`/`route`/`core_score` **0 khác**; `eff_date` tương lai 1→0 (PMT 2026-10-18→2026-09-03). Rating as-of trong universe_pit lệch ~0,1–0,3% (ticker,tháng), lật cổng ≤3 ~0,1%.
+- Rủi ro còn lại: ngày NULL trung bình trễ hơn trung vị công bố riêng của mã 3,6 ngày; ~3,5% dòng mã thường công bố muộn hơn ≥7 ngày ⇒ có thể đọc sớm vài ngày (nhỏ).
+- Pin R3/park0 dùng cache đóng băng `bq_cache_asof20260729_postrestate` ⇒ tái lập được; chạy lại trên cache sống lệch ~0,1% ô cổng. `custom_basket.py` QFLOOR/DY_TIEBREAK (tắt mặc định) CỐ Ý giữ `time+45d`. `bq_monthly_pin` 2026-11-01 sẽ WARN (~28% mã bị restate trong `fa_ratings_8l`) — dự kiến.
