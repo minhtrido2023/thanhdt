@@ -313,6 +313,9 @@ echo "$1" >> "$CALLS"
 case "$1" in
   *macro_healthcheck.py)
     case "$HC_MODE" in
+      rc0|rc1|rc2) mkdir -p data; : > data/macro_health.json; exit "${HC_MODE#rc}" ;;
+      crash1) exit 1 ;;
+      crash2) exit 2 ;;
       rc*)  exit "${HC_MODE#rc}" ;;
       kill) kill -9 $$ ;;
       hang) exec sleep 20 ;;
@@ -346,7 +349,7 @@ with tempfile.TemporaryDirectory() as sbx:
     put(os.path.join(sbin, "stubpy"), STUB_PY)
     put(os.path.join(sbin, "timeout"), STUB_TIMEOUT)
     for nm in ("notify.sh", "notify_thread.sh", "bq", "gcloud"):
-        put(os.path.join(sbin, nm), '#!/usr/bin/env bash\necho "$0" >> "$CALLS"\n[ -n "${NOTIFY_FAIL:-}" ] && exit 1\nexit 0\n')
+        put(os.path.join(sbin, nm), '#!/usr/bin/env bash\necho "$0" >> "$CALLS"\n[ -n "${NOTIFY_HANG:-}" ] && exec sleep 15\n[ -n "${NOTIFY_FAIL:-}" ] && exit 1\nexit 0\n')
     harness = os.path.join(sbx, "harness.sh")
     put(harness, "\n".join([
         "#!/usr/bin/env bash",
@@ -354,17 +357,20 @@ with tempfile.TemporaryDirectory() as sbx:
         f'PY="{sbin}/stubpy"; LOG="{sbx}/refresh.log"; WORKDIR_8L="{sbx}"',
         'step() { echo "--- $* ---"; }',
         'die() { echo "!!! ABORT: $*"; exit 1; }',
+        'rm -f "$PWD/data/macro_health.json"',
         blk_run,
         "echo CHAIN_CONTINUED",
         "",
     ]))
 
-    def run_block(mode, notify_fail=False):
-        calls = os.path.join(sbx, f"calls_{mode}{'_nf' if notify_fail else ''}.log")
+    def run_block(mode, notify_fail=False, notify_hang=False):
+        calls = os.path.join(sbx, f"calls_{mode}{'_nf' if notify_fail else ''}{'_nh' if notify_hang else ''}.log")
         env = dict(os.environ, PATH=sbin + os.pathsep + "/usr/bin:/bin",
                    CALLS=calls, HC_MODE=mode, REAL_TIMEOUT=real_timeout)
         if notify_fail:
             env["NOTIFY_FAIL"] = "1"
+        if notify_hang:
+            env["NOTIFY_HANG"] = "1"
         t0 = time.monotonic()
         r = subprocess.run(["bash", harness], cwd=sbx, env=env, capture_output=True,
                            text=True, timeout=120)
@@ -377,6 +383,8 @@ with tempfile.TemporaryDirectory() as sbx:
     modes = (("rc0", "HEALTHY rc=0", False, None, None),
              ("rc1", "DEGRADED rc=1", False, "DEGRADED", "FAILED"),
              ("rc2", "FAILED rc=2", False, "FAILED", "DEGRADED"),
+             ("crash1", "rc=1 nhưng JSON KHÔNG làm mới (Python crash)", True, "LỖI CHẠY", "DEGRADED"),
+             ("crash2", "rc=2 nhưng JSON KHÔNG làm mới (thiếu script)", True, "LỖI CHẠY", "FAILED"),
              ("rc124", "rc=124", True, "TIMEOUT", "DEGRADED"),
              ("rc137", "rc=137", True, "TIMEOUT", "DEGRADED"),
              ("rc127", "interpreter/script hỏng rc=127", True, "LỖI CHẠY", "TIMEOUT"),
@@ -393,6 +401,11 @@ with tempfile.TemporaryDirectory() as sbx:
             check(f"E7 [{tag}] healthcheck first, publish STILL runs, chain continues; "
                   f"notify {'đúng 1 lần (notify.sh+notify_thread.sh)' if notif else '0 lần'}",
                   got == want and "CHAIN_CONTINUED" in r.stdout and r.returncode == 0 and dt < 10,
+                  f"calls={got} rc={r.returncode} {dt:.1f}s")
+        if notif and mode in ("rc124", "crash1"):
+            r, got, dt = run_block(mode, notify_hang=True)
+            check(f"E7 [{label} + notify TREO] publish VẪN chạy trong trần thời gian (notify bọc timeout), chain continues",
+                  got == [HC] + NTF + [PUB] and "CHAIN_CONTINUED" in r.stdout and r.returncode == 0 and dt < 10,
                   f"calls={got} rc={r.returncode} {dt:.1f}s")
         if mode != "rc0":
             r, got, dt = run_block(mode)
