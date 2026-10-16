@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v3932)
+# Mike fleet — context pack (v3933)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
