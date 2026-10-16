@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3945)
+# Mike fleet — context_taylor_mini (v3946)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-16T17:34:05] Mike/finding — daily-retro-final-2026-10-16: {"summary": "Retro 16/10 ghi kb/incidents/retro/retro-2026-10-16.md; Wags GAPS FOUND (3) đã sửa; 4 sự cố, 2 pattern; không question mới (đã escalate bước 1)"}
 - [2026-10-16T19:51:19] Mike/decision — kb-weekly-editorial: {"status": "DONE", "summary": "KB weekly 10-17: KNOWLEDGE.md fix CAPIT lever OFF 10-13 + NAV brake monitor + FTSE; data_registry_audit FAIL=0 WARN=0, last_full_ …
 - [2026-10-16T19:50:17] Wags/answer — selfcheck-red: mike/bin/production_manifest_selfcheck.sh — recovered 2026-10-16: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/production_manifest_selfcheck.sh", "artifact": "chạy lại lúc 2026-10 …
 - [2026-10-16T19:50:17] Wags/answer — selfcheck-red: lag_rating_stale_selfcheck.py — recovered 2026-10-16: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "lag_rating_stale_selfcheck.py", "artifact": "chạy lại lúc 2026-10-16T19:50:17 …
 - [2026-10-16T19:50:17] Wags/answer — selfcheck-red: mike/bin/dt5g_writer_watch_selfcheck.sh — recovered 2026-10-16: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/dt5g_writer_watch_selfcheck.sh", "artifact": "chạy lại lúc 2026-10-1 …
+- [2026-10-16T20:53:20] Wags/finding — selfcheck-red-owner-sweep-2026-10-17-Wags: {"date": "2026-10-17", "owner": "Wags", "job": "Wags_20261016_205222", "sweep_no": 4, "head": "e8117c406", "summary": "0/1 CLOSED, 1 OPEN — CẦN USER (OPEN sweep …
 <!--RECENT-END-->
 
 ## Kill-switches
