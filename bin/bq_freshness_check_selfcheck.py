@@ -275,7 +275,7 @@ def gs_extract(script=None, baseline=False):
     f0 = next((i for i, ln in enumerate(lines) if ln == "_run_pipeline() {"), None)
     f1 = next((i for i in range(f0 or 0, len(lines)) if lines[i] == "}"), None)
     s = next((i for i, ln in enumerate(lines) if ln.startswith("PIPELINE_START_EPOCH=")), None)
-    e = next((i for i, ln in enumerate(lines) if ln.startswith("# [pipeline-1b]")), None)
+    e = next((i for i, ln in enumerate(lines) if ln.startswith("# [pipeline-1a]")), None)
     if None in (f0, f1, s, e) or not any(_PUB_CALL in ln for ln in lines[s:e]):
         print("FAIL: anchors _run_pipeline / PIPELINE_START_EPOCH= / [pipeline-1] / [pipeline-1b] "
               "not found — selfcheck stale", file=sys.stderr)

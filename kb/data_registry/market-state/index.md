@@ -20,6 +20,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`dt5g_ext_2008_research.md`](dt5g_ext_2008_research.md) — agents/Taylor/research/dt5g_ext_2008_20260904/dt5g_ext_2008_full.csv (chuỗi DT5G mở rộng về 2008, ad-hoc KHÔNG cron) | RESEARCH-ONLY |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
 | [`pt_v22_dt5g_open_positions.md`](pt_v22_dt5g_open_positions.md) — data/pt_v22_dt5g_open_positions.csv | DERIVED |
+| [`gate_source_alert.md`](gate_source_alert.md) — data/gate_source_alert.json (bin/gate_source_check.py) | DERIVED (cảnh báo nguồn cổng DT5G, 1 tin/ngày/nguồn) |
 | [`value_radar_series.md`](value_radar_series.md) — data/value_radar_series.csv (+ value_radar.py) | CANONICAL (DISPLAY-ONLY, cấm consumer quyết định) |
 | [`vn30f_daily.md`](vn30f_daily.md) — tav2_bq.vn30f_daily | DEAD |
 | [`vn_macro_regime_history.md`](vn_macro_regime_history.md) — sổ phân loại nguyên nhân vĩ mô episode (macro-strategist, blind-to-outcome) | CANONICAL |
