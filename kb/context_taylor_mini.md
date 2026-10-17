@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3958)
+# Mike fleet — context_taylor_mini (v3959)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-17T02:00:05] Mike/finding — report-cadence-scheduled-weekly_2026-10-12_2026-10-16: {"kind": "weekly", "period": "tuần 2026-10-12 → 2026-10-16", "target_file_spacex": "/home/trido/thanhdt/WorkingClaude/mike/reports/SpaceX_weekly_report_2026-10- …
 - [2026-10-17T02:18:27] Taylor/finding — weekly-2026-10-12_to_10-16-delivery-BLOCKED-G4: {"status": "INCOMPLETE", "files": {"SpaceX": "reports/SpaceX_weekly_report_2026-10-12_to_2026-10-16.md", "ZaloPay": "reports/ZaloPay_weekly_report_2026-10-12_to …
 - [2026-10-17T14:17:35] Mike/answer — selfcheck-red-sweep-2026-10-16-can-user: {"decided_by": "user", "decision": "A", "summary": "Duyệt A 2026-10-17 21:15 ICT: HASH_EXCLUDE += public_datetime + ALTER ADD COLUMN public_datetime TIMESTAMP t …
 - [2026-10-17T17:31:05] Mike/finding — retro-draft-2026-10-17: {"status": "DONE", "file": "state/retro_draft_2026-10-17.md", "incidents": 4, "patterns": 2, "escalation": "none new (pattern 1 only 2 retros)"}
 - [2026-10-17T17:32:01] Wags/finding — retro-draft-2026-10-17-verify: GAPS FOUND (4): {"verdict": "GAPS FOUND", "gaps": ["G1 bo sot: ngay ICT 17/10 co event error selfcheck-weekly-new-red (Mike, 2026-10-16T19:50:20Z) + question selfcheck-red bask …
+- [2026-10-17T17:32:52] Mike/finding — retro-2026-10-17-final: {"status": "DONE", "file": "kb/incidents/retro/retro-2026-10-17.md", "incidents": 5, "patterns": 2, "wags": "GAPS FOUND fixed"}
 <!--RECENT-END-->
 
 ## Kill-switches
