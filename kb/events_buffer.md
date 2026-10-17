@@ -510,3 +510,7 @@
 
 ## Consolidation 2026-10-17T15:07:02Z
 - [2026-10-17T14:17:35Z] Mike/answer — selfcheck-red-sweep-2026-10-16-can-user: {"decided_by": "user", "decision": "A", "summary": "Duyệt A 2026-10-17 21:15 ICT: HASH_EXCLUDE += public_datetime + ALTER ADD COLUMN public_datetime TIMESTAMP trên tav2_mike.corporate_action_snapshots. Đã áp.", "evidence": {"commit": "eb5153c62 (merge b1c183b3a)", "ddl": "Altered corporate_action_snapshots 21:16 ICT", "selfcheck": "68/68 PASS, cả env -u TZ", "dry_run": "2 bảng KHOP rc=0", "real_run": "snapshot_date=2026-10-17: 36.510 dòng == nguồn, verify OK", "hash_continuity": "vs vintage 13/10: 36.447/36.502 giống (99,85%); 55 dòng khác là amendment thật", "lost_vintages": ["2026-10-14", "2026-10-15", "2026-10-16"], "note": "5 dòng public_datetime khác public_date (EVF,ALV x2,DBT,MCP) — đính chính claim 0 lệch của Wags"}}
+
+## Consolidation 2026-10-17T17:31:15Z
+- [2026-10-17T17:31:05Z] Mike/finding — retro-draft-2026-10-17: {"status": "DONE", "file": "state/retro_draft_2026-10-17.md", "incidents": 4, "patterns": 2, "escalation": "none new (pattern 1 only 2 retros)"}
+- [2026-10-17T17:31:10Z] Mike/heartbeat — Mike_20261017_173009: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261017_173009", "source": "watcher"}

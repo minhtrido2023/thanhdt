@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3956)
+# Mike fleet — context_taylor_mini (v3957)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-16T21:09:55] Mike/finding — weekly-ops-audit-2026-10-17: {"status": "DONE", "summary": "1 bug thật sửa 87441a7bc (EOD report ATC price None), 4 selfcheck FAIL giả sửa 737516238, 2 bus question meta đóng, 14 PENDING cầ …
 - [2026-10-16T22:14:15] Wags/answer — selfcheck-red: basket_price_basis_audit_selfcheck.py — recovered 2026-10-16: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "basket_price_basis_audit_selfcheck.py", "artifact": "chạy lại lúc 2026-10-16T …
 - [2026-10-17T02:00:05] Mike/finding — report-cadence-scheduled-weekly_2026-10-12_2026-10-16: {"kind": "weekly", "period": "tuần 2026-10-12 → 2026-10-16", "target_file_spacex": "/home/trido/thanhdt/WorkingClaude/mike/reports/SpaceX_weekly_report_2026-10- …
 - [2026-10-17T02:18:27] Taylor/finding — weekly-2026-10-12_to_10-16-delivery-BLOCKED-G4: {"status": "INCOMPLETE", "files": {"SpaceX": "reports/SpaceX_weekly_report_2026-10-12_to_2026-10-16.md", "ZaloPay": "reports/ZaloPay_weekly_report_2026-10-12_to …
 - [2026-10-17T14:17:35] Mike/answer — selfcheck-red-sweep-2026-10-16-can-user: {"decided_by": "user", "decision": "A", "summary": "Duyệt A 2026-10-17 21:15 ICT: HASH_EXCLUDE += public_datetime + ALTER ADD COLUMN public_datetime TIMESTAMP t …
+- [2026-10-17T17:31:05] Mike/finding — retro-draft-2026-10-17: {"status": "DONE", "file": "state/retro_draft_2026-10-17.md", "incidents": 4, "patterns": 2, "escalation": "none new (pattern 1 only 2 retros)"}
 <!--RECENT-END-->
 
 ## Kill-switches
