@@ -16,3 +16,5 @@
 - ledger-seal SpaceX/ZaloPay chốt + merge f22dccbbb; nav-loss-brake merge d6cf8f276 (mốc xem lại 2026-11-09); cctg-tier2, fund-cashflow, dcf-rf đã merge từ trước.
 
 - [2026-10-16T21:09:55Z] [17/10 weekly audit] EOD report 16/10 cả 2 account đã gửi THIẾU khối giao dịch (bug ATC price=None, đã sửa 87441a7bc) — chờ user quyết gửi lại hay không; report_delivery_gate không bắt được báo cáo mất khối giao dịch (lỗ hổng phủ, chưa vá).
+- [2026-10-17T14:13:14Z] [17/10 21:15] Điều tra lỗi corp action: snapshot_corp_action_daily FAIL 4 đêm (14-17/10) do cột public_datetime; đã đưa phương án A′ cho user, chờ duyệt DDL+HASH_EXCLUDE trước cron 06:50 ICT 18/10. Wags nói 0 lệch public_date nhưng đo lại có 5 dòng lệch.
+- [2026-10-17T14:17:35Z] [17/10 21:20] snapshot corp_action ĐÃ FIX (A duyệt): merge b1c183b3a, ALTER xong, vintage 17/10 ghi tay OK. Mất 14,15,16/10. TODO: ghi data_registry corporate_action_bq.md (public_datetime từ vintage 17/10; ≤13/10 NULL; thiếu 14-16/10) qua .proposed §13.
