@@ -86,7 +86,11 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo timezone tường minh, 
 #     này sinh ra để tránh. Revision của 2 cột này vẫn dò được bằng LAG() trên chính cột đã lưu.
 #     Bảng không có cột này (insider_transaction) thì exclude là no-op.
 #     Quyết định A′ — bus question corp-action-snapshot-schema-drift-20260914.
-HASH_EXCLUDE = ("ingested_at", "source_news_id", "first_disclosure_datetime")
+#   - public_datetime: vendor THÊM vào corporate_action ~2026-10-14 (vị trí 38, cuối bảng) ⇒ run
+#     14-17/10 fail-closed, 4 vintage mất. Cùng lý do loại khỏi hash như 2 cột trên. Cột vẫn được
+#     lưu; ~5 dòng mang giá trị gốc khác public_date (vendor sửa public_date về sau) dò được bằng LAG().
+#     User duyệt A 2026-10-17 — bus question selfcheck-red-sweep-2026-10-16-can-user.
+HASH_EXCLUDE = ("ingested_at", "source_news_id", "first_disclosure_datetime", "public_datetime")
 META_COLS = ("snapshot_date", "row_sha256")
 
 # Cổng chống chụp giữa lúc vendor TRUNCATE+INSERT: nguồn co dưới tỉ lệ này so với snapshot gần
