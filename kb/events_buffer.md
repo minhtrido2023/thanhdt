@@ -365,3 +365,6 @@
 
 ## Consolidation 2026-10-17T17:33:04Z
 - [2026-10-17T17:32:52Z] Mike/finding — retro-2026-10-17-final: {"status": "DONE", "file": "kb/incidents/retro/retro-2026-10-17.md", "incidents": 5, "patterns": 2, "wags": "GAPS FOUND fixed"}
+
+## Consolidation 2026-10-17T23:07:02Z
+- [2026-10-17T22:15:19Z] Wags/answer — selfcheck-red: mike/bin/snapshot_corp_action_selfcheck.py — recovered 2026-10-17: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/snapshot_corp_action_selfcheck.py", "artifact": "chạy lại lúc 2026-10-17T22:15:19Z bằng đúng required_env ⇒ PASS", "red_since": "2026-10-13T22:11:26Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
