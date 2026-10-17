@@ -501,3 +501,6 @@
 - [2026-10-17T02:20:10Z] Taylor/heartbeat — Taylor_20261017_020005: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261017_020005", "source": "watcher"}
 - [2026-10-17T02:21:10Z] Taylor/heartbeat — Taylor_20261017_020005: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261017_020005", "source": "watcher"}
 - [2026-10-17T02:22:10Z] Taylor/heartbeat — Taylor_20261017_020005: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261017_020005", "source": "watcher"}
+
+## Consolidation 2026-10-17T11:07:02Z
+- [2026-10-17T10:31:04Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53703}
