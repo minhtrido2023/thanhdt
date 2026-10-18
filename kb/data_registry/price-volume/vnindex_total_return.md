@@ -32,6 +32,7 @@ tính cuối ngày — factsheet HOSE-Index 03/2025).
 ## File đi kèm (cùng thư mục `data/benchmark/`)
 - `hose_membership_<vintage>.json` + `hose_membership_latest.json` — bảng sàn HOSE theo thời điểm; G7 chặn khi > 35 ngày.
 - `vnindex_tr_acks.json` — xác nhận của NGƯỜI cho G6 (cổ tức > 30% giá): `{"G6": [{"date","ticker","confirmed_by"}]}`.
+  Thêm (18/10/2026): mục `"G4": [{"date","n_prev","n","confirmed_by","reason"}]` — người xác nhận NGÀY rổ đổi >5% số mã do BQ `ticker` thiếu dòng (ca 14/10: n_prev=351, n=333). Ràng cả GIÁ TRỊ đã xem (dòng `provisional` bị dựng lại mỗi `--update`: số mã khác ⇒ G4 nổ lại). Chỉ che nhánh SỐ MÃ của đúng ngày đó; nhánh vốn hoá và gate khác không có ack; ngày bật lại >5% là G4 riêng cần ack riêng. `benchmark_period` trả `acked_g4_days` để báo cáo chú thích. **Tiền điều kiện trước khi ghi ack**: mã thiếu ngày D (và D+1, vì `t1_ok` làm mã rơi tiếp) không có GDKHQ cổ tức tiền trong `tav2_bq.corporate_action`. Ưu tiên lấp dữ liệu BQ hơn ack.
 - `benchmark_config.json` — cờ Q2: `{"report_tr_kind": "tr_net"}` (mặc định khi thiếu file, user chốt 2026-10-14)
   hoặc `"tr_gross"`; giá trị lạ ⇒ ô `chưa có số`, KHÔNG đoán. Đổi cờ ⇒ chú thích bảng 3.2 đổi theo, cổng giao báo
   cáo chặn bảng cũ tới khi render lại.

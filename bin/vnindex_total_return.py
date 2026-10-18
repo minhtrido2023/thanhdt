@@ -40,6 +40,7 @@ import io
 import json
 import math
 import os
+import re
 import sys
 from zoneinfo import ZoneInfo
 
@@ -71,6 +72,13 @@ G2_TOL = 1e-4                      # BQ vs DNSE > 0,01%
 # trong cùng cửa sổ). Ngưỡng dùng: |Δ| > 5% số mã phiên trước (đo: chỉ 2026-06-25, −24/395, nổ).
 G4_MAX_N_CHANGE_FRAC = 0.05
 G4_MC_TOL = 0.03
+G4_ACK_PREFIX = "@G4_N"            # khoá ack nhánh số mã: (date, "@G4_N:<n_prev>><n>") — ràng GIÁ TRỊ đã xem
+
+
+def g4_ack_key(date, n_prev: int, n: int) -> tuple:
+    """Khoá ack G4-số-mã. Gắn cả (n_prev, n): dòng `provisional` bị dựng lại mỗi lần --update, nên ack
+    chỉ có hiệu lực khi số mã quan sát được Y HỆT số người đã xem (đổi hướng/độ lớn ⇒ G4 nổ lại)."""
+    return (date if isinstance(date, str) else date.isoformat(), f"{G4_ACK_PREFIX}:{n_prev}>{n}")
 G5_WINDOW = 60
 G5_TOL = 0.005                     # 0,5 điểm %
 G6_DY = 0.30
@@ -392,8 +400,26 @@ def period_return(series: list, start_date, end_date, kind: str) -> float:
     return series[ib][col] / series[ia][col] - 1
 
 
+def _ack_str(e: dict, k: str, path: str, sect: str):
+    v = e.get(k)
+    if not isinstance(v, str) or not v.strip():
+        raise ValueError(f"{path}: mục {sect} thiếu/rỗng {k} (cần chuỗi không rỗng): {e}")
+    return v
+
+
+def _ack_date(e: dict, path: str, sect: str) -> str:
+    d = _ack_str(e, "date", path, sect)
+    try:
+        if dt.date.fromisoformat(d).isoformat() != d:
+            raise ValueError
+    except ValueError:
+        raise ValueError(f"{path}: mục {sect} date phải dạng YYYY-MM-DD: {e}") from None
+    return d
+
+
 def load_acks(path: str = ACKS_PATH) -> set:
-    """{(date, ticker)} đã được NGƯỜI xác nhận cho G6. Thiếu file = không có xác nhận nào."""
+    """Tập khoá đã được NGƯỜI xác nhận: (date, ticker) cho G6; (date, '@G4_N:<n_prev>><n>') cho G4-số-mã.
+    Thiếu file = không có xác nhận nào. Mục hỏng ⇒ ValueError (không lặng lẽ bỏ qua)."""
     if not os.path.exists(path):
         return set()
     with open(path, encoding="utf-8") as f:
@@ -402,7 +428,20 @@ def load_acks(path: str = ACKS_PATH) -> set:
     for e in a.get("G6", []):
         if not (e.get("confirmed_by") and e.get("date") and e.get("ticker")):
             raise ValueError(f"{path}: mục G6 thiếu confirmed_by/date/ticker: {e}")
+        if not re.fullmatch(r"[A-Z0-9]{2,}", str(e["ticker"])):        # chặn giả khoá G4 qua mục G6
+            raise ValueError(f"{path}: mục G6 ticker không hợp lệ: {e}")
         out.add((e["date"], e["ticker"]))
+    # G4 (chỉ nhánh SỐ MÃ): ngày rổ đổi do BQ `ticker` thiếu dòng, đã có người xác nhận CHÍNH số mã đã xem.
+    # Nhánh vốn hoá (G4_MC_TOL) KHÔNG có ack. Tiền điều kiện ghi ack: mã thiếu không có GDKHQ cổ tức
+    # tiền ở ngày D và D+1 (xem kb/data_registry/price-volume/vnindex_total_return.md).
+    for e in a.get("G4", []):
+        d = _ack_date(e, path, "G4")
+        _ack_str(e, "confirmed_by", path, "G4")
+        _ack_str(e, "reason", path, "G4")
+        for k in ("n_prev", "n"):
+            if type(e.get(k)) is not int or e[k] <= 0:
+                raise ValueError(f"{path}: mục G4 thiếu/sai {k} (số nguyên dương: số mã rổ đã xem): {e}")
+        out.add(g4_ack_key(d, e["n_prev"], e["n"]))
     return out
 
 
@@ -457,9 +496,12 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
         p = series[ia + i - 1]
         if p["n_members"] is not None and r["n_members"] is not None:
             dn = r["n_members"] - p["n_members"]
-            if abs(dn) > G4_MAX_N_CHANGE_FRAC * p["n_members"]:
+            if abs(dn) > G4_MAX_N_CHANGE_FRAC * p["n_members"] and \
+                    g4_ack_key(r["date"], p["n_members"], r["n_members"]) not in acks:
                 errs.append(f"G4: {r['date']} số mã rổ {p['n_members']} → {r['n_members']} "
-                            f"({dn:+d}, > {100 * G4_MAX_N_CHANGE_FRAC:g}% của {p['n_members']})")
+                            f"({dn:+d}, > {100 * G4_MAX_N_CHANGE_FRAC:g}% của {p['n_members']}) — "
+                            f"chờ lấp dữ liệu BQ hoặc người xác nhận (n_prev={p['n_members']}, n={r['n_members']}) "
+                            f"ở vnindex_tr_acks.json mục G4")
             pp = series[ia + i - 2] if ia + i - 2 >= 0 else None
             if pp is not None and p["mc_members_vnd"]:
                 exp = pp_ratio = p["vnindex"] / pp["vnindex"]
@@ -496,6 +538,19 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
     return errs
 
 
+def _acked_g4_days(series: list, start_date, end_date, acks: set) -> list:
+    """Các ngày trong kỳ mà G4-số-mã đã nổ nhưng được người ack: [{date, n_prev, n}] — để chú thích báo cáo."""
+    a, b = _d(start_date), _d(end_date)
+    out = []
+    for p, r in zip(series, series[1:]):
+        if not (a < r["date"] <= b) or p["n_members"] is None or r["n_members"] is None:
+            continue
+        if abs(r["n_members"] - p["n_members"]) > G4_MAX_N_CHANGE_FRAC * p["n_members"] and \
+                g4_ack_key(r["date"], p["n_members"], r["n_members"]) in acks:
+            out.append({"date": r["date"].isoformat(), "n_prev": p["n_members"], "n": r["n_members"]})
+    return out
+
+
 def benchmark_period(start_date, end_date, series_path: str = SERIES_PATH, acks_path: str = ACKS_PATH,
                      series: list = None) -> dict:
     """Khối benchmark cho consumer (nav_period_returns). Không bao giờ ném lỗi: thiếu số ⇒
@@ -506,7 +561,8 @@ def benchmark_period(start_date, end_date, series_path: str = SERIES_PATH, acks_
     try:
         if series is None:
             series = read_series(series_path)
-        errs = check_period(series, start_date, end_date, load_acks(acks_path))
+        acks = load_acks(acks_path)            # đọc MỘT lần: cổng và danh sách ngày ack cùng một tập
+        errs = check_period(series, start_date, end_date, acks)
     except Exception as exc:                                        # noqa: BLE001
         out["reason"] = f"{type(exc).__name__} ({exc})"
         return out
@@ -528,6 +584,9 @@ def benchmark_period(start_date, end_date, series_path: str = SERIES_PATH, acks_
                 and r["status"] == "provisional"]
         if prov:
             out["provisional_sessions"] = len(prov)
+        acked = _acked_g4_days(series, start_date, end_date, acks)
+        if acked:                    # dữ liệu cho consumer; CHƯA có consumer nào in ra báo cáo (18/10)
+            out["acked_g4_days"] = acked
     return out
 
 
