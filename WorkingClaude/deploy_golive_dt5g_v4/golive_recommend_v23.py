@@ -449,7 +449,7 @@ def _account_nav_basis(label):
     p = os.path.join(WORKDIR, "data", "execution_logs", f"active_nav_{label}.json")
     try:
         d = json.load(open(p, encoding="utf-8"))
-        age = (pd.Timestamp.now().normalize() - pd.Timestamp(d["computed_at"])).days
+        age = (pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) - pd.Timestamp(d["computed_at"])).days
         nav = float(d["active_nav"])
         if 0 <= age <= ACTIVE_NAV_MAX_AGE_D and nav > 0:
             return nav, f"active_nav @{d['computed_at']}"

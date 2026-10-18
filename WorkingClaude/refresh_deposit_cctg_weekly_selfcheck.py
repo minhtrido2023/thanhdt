@@ -22,7 +22,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -794,6 +794,107 @@ series_new_anchor2 = {"cctg_6m": [("2026-08-20", 7.4), ("2026-08-27", 7.5)]}
 state4 = {"cctg_6m": {"staleness_warned_for_date": "2026-07-01"}}  # old last_date, now stale by itself
 w2 = trend.check_staleness(series_new_anchor2, state4, today_t)
 check("B9 new last_date (not matching stored warned-date) re-eligible", len(w2) == 1)
+
+# B11: main() sends each channel (Discord / bus) at most once per decline pair — a failure of one
+# channel must not make the next run repeat the other (coding_guidelines §5, finding cq-2026-10-18).
+import types as _types
+_today_ict = datetime.now(_ICT).date()
+_SER = {"cctg_6m": [((_today_ict - timedelta(days=10)).isoformat(), 7.5),
+                      ((_today_ict - timedelta(days=3)).isoformat(), 7.3)]}
+
+
+def _run_trend_main(state_path, discord, bus_rc):
+    """One main() run against `state_path`; returns (exit_code, discord_calls, bus_calls)."""
+    calls = {"d": 0, "b": 0}
+    saved = (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, trend.subprocess.run,
+             sys.argv)
+
+    def _fake_discord(msg):
+        if msg.startswith("⚠️ XU HƯỚNG HẠ"):
+            calls["d"] += 1
+        return discord
+
+    def _fake_run(cmd, **kw):
+        calls["b"] += 1
+        return _types.SimpleNamespace(returncode=bus_rc)
+
+    trend.STATE_PATH, trend._load_series = state_path, lambda: _SER
+    trend._send_trading_daily, trend.subprocess.run, sys.argv = _fake_discord, _fake_run, ["x"]
+    try:
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            rc = trend.main()
+    finally:
+        (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, trend.subprocess.run,
+         sys.argv) = saved
+    return rc, calls["d"], calls["b"]
+
+
+_td = tempfile.mkdtemp(prefix="trend_main_selfcheck_")
+try:
+    _sp = os.path.join(_td, "s1.json")
+    r1 = _run_trend_main(_sp, "sent", 1)       # Discord out, bus append fails
+    st1 = json.load(open(_sp))["cctg_6m"]
+    check("B11ma Discord sent + bus failed -> exit 1, discord_pair saved, no alerted_pair",
+          r1 == (1, 1, 1) and "discord_pair" in st1 and "bus_pair" not in st1 and "alerted_pair" not in st1)
+    r1b = _run_trend_main(_sp, "sent", 0)      # retry: bus ok
+    st1b = json.load(open(_sp))["cctg_6m"]
+    check("B11mb retry sends ONLY the missing bus channel (Discord not re-posted), then alerted_pair set",
+          r1b == (0, 0, 1) and "alerted_pair" in st1b)
+    check("B11mc after both channels done -> next run is a no-op", _run_trend_main(_sp, "sent", 0) == (0, 0, 0))
+
+    _sp = os.path.join(_td, "s2.json")
+    r2 = _run_trend_main(_sp, "suppressed", 0)  # NOTIFY_OFF: bus ok, Discord held back
+    st2 = json.load(open(_sp))["cctg_6m"]
+    check("B11md NOTIFY_OFF -> bus_pair saved, discord_pair/alerted_pair NOT",
+          r2 == (0, 1, 1) and "bus_pair" in st2 and "discord_pair" not in st2 and "alerted_pair" not in st2)
+    r2b = _run_trend_main(_sp, "suppressed", 0)
+    check("B11me NOTIFY_OFF still on -> Discord retried but bus finding NOT appended again",
+          r2b == (0, 1, 0))
+    r2c = _run_trend_main(_sp, "sent", 0)
+    check("B11mf NOTIFY_OFF lifted -> Discord sent, bus not repeated, alerted_pair set",
+          r2c == (0, 1, 0) and "alerted_pair" in json.load(open(_sp))["cctg_6m"])
+
+    _sp = os.path.join(_td, "s3.json")
+    r3 = _run_trend_main(_sp, "failed", 0)     # Discord fails, bus ok
+    check("B11mg Discord failed + bus ok -> exit 1, bus_pair saved",
+          r3 == (1, 1, 1) and "bus_pair" in json.load(open(_sp))["cctg_6m"])
+    r3b = _run_trend_main(_sp, "sent", 0)
+    check("B11mh retry re-sends Discord only", r3b == (0, 1, 0))
+
+    # B11i/j: crash window — process dies right after one channel succeeded (the final state save
+    # at the end of main() is never reached): the immediate per-send save must already be on disk.
+    class _Killed(BaseException):
+        pass
+
+    _sp = os.path.join(_td, "s4.json")
+    _saved_run = trend.subprocess.run
+    _real_run_trend_main = _run_trend_main
+
+    def _kill_run(cmd, **kw):
+        raise _Killed()
+    trend.subprocess.run = _kill_run
+    died = False
+    try:
+        # _run_trend_main swaps subprocess.run for its fake, so drive main() directly here
+        _sv = (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, sys.argv)
+        trend.STATE_PATH, trend._load_series = _sp, lambda: _SER
+        trend._send_trading_daily, sys.argv = (lambda m: "sent"), ["x"]
+        try:
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                trend.main()
+        except _Killed:
+            died = True
+        finally:
+            trend.STATE_PATH, trend._load_series, trend._send_trading_daily, sys.argv = _sv
+    finally:
+        trend.subprocess.run = _saved_run
+    st4 = json.load(open(_sp)).get("cctg_6m", {}) if os.path.exists(_sp) else {}
+    check("B11mi killed between Discord and bus -> discord_pair ALREADY on disk (immediate save)",
+          died and "discord_pair" in st4 and "alerted_pair" not in st4)
+    check("B11mj restart after that kill does NOT re-post Discord, only appends the bus finding",
+          _run_trend_main(_sp, "sent", 0) == (0, 0, 1))
+finally:
+    shutil.rmtree(_td, ignore_errors=True)
 
 # B10: _load_series() wraps deposit_rate_vn.deposit_events_df() + cctg_rate_vn.cctg_events_df()
 # correctly (sorted ascending, (date_str, float) tuples) — untested until now (coord job

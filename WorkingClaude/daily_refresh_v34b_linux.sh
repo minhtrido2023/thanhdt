@@ -101,7 +101,7 @@ step "[3] ew_v1 (BQ ticker pull; retry x3 on flaky failure)"
 ok=0
 for try in 1 2 3; do
   if $PY vnindex_5state_ew_v1.py; then ok=1; break; fi
-  echo "  ew_v1 attempt $try failed; clearing cache + retry"; rm -f _cache_universe_2013_now.pkl; sleep 5
+  echo "  ew_v1 attempt $try failed; clearing cache + retry"; rm -f data/_cache_universe_2013_now.pkl; sleep 5
 done
 [ "$ok" = 1 ] || die "ew_v1 failed after 3 attempts"
 

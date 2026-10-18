@@ -1322,7 +1322,16 @@ WHERE t.time IN ({_dy_rebal_in}) AND t.Price IS NOT NULL""")
         return gated[:lo - 1] + out + gated[hi:]
 
     def route_asof(tk, q):
-        """PIT route of `tk` as of selection quarter `q`; None when never routed."""
+        """PIT route of `tk` as of selection quarter `q`; None when never routed.
+
+        Unlike roemin_asof, q BEFORE the first known route falls back to the EARLIEST known route
+        on purpose: value_panel_2014.csv starts 2014Q1, so a 2013 selection quarter has no route
+        row yet, and a route is a static sector class, not a published figure that can leak. Measured
+        2026-10-18: 0 of 1283 routed tickers ever change fin-status (BANK/INSURANCE/SECURITIES vs
+        other) across their history, so the earliest route is as point-in-time as the panel itself
+        (a static label, not a published figure). Returning
+        None here would mislabel pre-2014 banks as non-financial (wrong score in eyfin, wrong cap
+        in fincap), not remove a look-ahead."""
         r = route_by_tq.get((tk, pd.Timestamp(q)))
         if r is not None: return r
         e = route_hist.get(tk)

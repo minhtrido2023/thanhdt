@@ -11,8 +11,9 @@ TWO-WAY by design — a fix that only ever changes nothing is indistinguishable 
 never reached, and a fix that changes everything is indistinguishable from a broken one:
   POSITIVE control — on data where Close != Price the two bases MUST diverge (the expression is
                      live and discriminating).
-  NEGATIVE control — on the current 30-name basket, where every member trades through the latest
-                     session and Close == Price, the two bases MUST agree to the cent (the fix
+  NEGATIVE control — on the members of the current 30-name basket that print on the latest
+                     session (Close == Price there; a member that stopped trading is excluded and
+                     listed, and >=80% must remain), the two bases MUST agree to the cent (the fix
                      introduces no spurious change into today's published reports).
 
 The RETURN leg (`cls` in custom30_core_select_audit.py) is deliberately NOT touched by the fix and
@@ -69,6 +70,17 @@ def last_bar(tickers, asof=None):
 
 print("[1] concentration scripts — mcap cross-sectional weight base")
 b = last_bar(BASKET)
+# Close==Price holds only at a name's CURRENT bar: the adjusted series is restated back through
+# history at every later corporate action, so an as-of pin cannot freeze this leg (measured: at
+# 2026-08-02 12/30 members already differ). What goes stale on live state is a member that stops
+# trading — its last bar drifts off 1.0 (2026-10-16 STALE-leg incident). So keep only members
+# printing on the latest session, and guard that the control did not shrink to nothing.
+_latest = pd.to_datetime(b.time).max()
+_off = b[pd.to_datetime(b.time) != _latest].ticker.tolist()
+b = b[pd.to_datetime(b.time) == _latest].copy()
+check("NEGATIVE control kept enough live members (not silently hollowed out)",
+      len(b) >= 0.8 * len(BASKET),
+      f"{len(b)}/{len(BASKET)} members print on latest session {_latest.date()}; excluded (stopped/suspended): {_off}")
 b["w_close"] = b.Close / b.Close.sum()
 b["w_pxw"] = b.pxw / b.pxw.sum()
 gap_basket = (b.w_close - b.w_pxw).abs().max()

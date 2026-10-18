@@ -8,21 +8,24 @@ Sibling of append_deposit_rate.py (Big-4 12M term deposit) — SEPARATE series, 
 merges into or overwrites the deposit CSV. Reuses append_deposit_rate.py's owner-group domain
 logic (`_owner_group`, `SAME_OWNER_GROUPS`) by import rather than duplicating it — that logic is
 already hardened through 8 rounds of adversarial review (see that file's docstring) and must not
-drift into two copies that silently diverge.
+drift into two copies that silently diverge. The `--sources` validation block in main() is NOT
+shared: it is a parallel copy of append_deposit_rate.py's, kept separate on purpose so this file
+never edits that CONFIRMED production guard. The two have diverged deliberately (see below); a
+change to the evidence rules in one must be mirrored by hand in the other.
 
 Caller-identity gating (JOB_ID-bound, never a self-declared flag) is IDENTICAL in spirit to
 append_deposit_rate.py: a dispatched agent may only use --source web_crosscheck_auto, --force is
 human-only, --collected must be today. See that file's docstring for the full threat-model
 rationale — not re-litigated here.
 
-NEW requirement vs the Big-4 script (user directive, job Taylor_20261001_054108, weekly CCTG
-mechanism): each --sources entry must carry its OWN cited `rate` (%, not just publisher/url/date).
+Divergence vs the Big-4 script (user directive, job Taylor_20261001_054108, weekly CCTG
+mechanism): here each --sources entry must ALWAYS carry its OWN cited `rate` (%, not just
+publisher/url/date), for every caller; sane band (RATE_MIN_PCT, RATE_MAX_PCT) = (0.5, 30).
 The script mechanically checks that (a) all cited rates agree within CROSS_SOURCE_TOLERANCE_PP of
 each other, and (b) --rate itself matches at least one cited source within FLOAT_EPS — so the
-agent cannot synthesize a number no single source actually said. This is a genuine gap the Big-4
-script does NOT close (its --sources schema has no rate field at all) — deliberately NOT
-retrofitted into append_deposit_rate.py here to avoid touching an already-CONFIRMED production
-guard outside the scope of this job; flagged for Mike/user to consider porting back separately.
+agent cannot synthesize a number no single source actually said. append_deposit_rate.py has since
+gained the same cross-check, but there it is mandatory only for a dispatched agent (JOB_ID set),
+optional for an interactive human ("all entries cite a rate or none"), and its band is (0, 30).
 
 Usage (human, interactive):
   python3 append_cctg_rate.py --rate 7.6 --effective 2026-10-08 --source manual_verify \

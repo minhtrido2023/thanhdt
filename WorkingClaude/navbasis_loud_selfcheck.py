@@ -140,7 +140,19 @@ def t_no_basis_at_all_is_loud():
        f"bản CŨ phải trả lý do TRỐNG RỖNG: {source_o!r}")
 
 
-TESTS = [t_happy_path_unchanged, t_fallback_is_loud_and_names_the_cause, t_no_basis_at_all_is_loud]
+def t_age_anchored_ict_not_host_tz():
+    """computed_at = ngày ICT hôm nay ⇒ PHẢI tươi dù TZ host lệch (host ở UTC-x trong 00:00-07:00 ICT
+    thì pd.Timestamp.now() trần cho tuổi -1 ⇒ rơi nhầm về TỔNG NAV). Chỉ phân biệt được khi chạy
+    dưới TZ lệch (vd TZ=Pacific/Honolulu) VÀ chỉ khi ngày ICT ≠ ngày TZ đó (~00:00-17:00 ICT với
+    Honolulu); dưới TZ=ICT hoặc ngoài khung giờ đó thì đúng cả bản lỗi lẫn bản sửa."""
+    ict_today = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().strftime("%Y-%m-%d")
+    nav, source, out = call(None, active={"computed_at": ict_today, "active_nav": 7.5e8}, hist_nav=1e9)
+    ok(nav == 7.5e8 and source.startswith("active_nav @"),
+       f"active_nav ghi hôm nay (ICT {ict_today}) bị coi quá hạn dưới TZ host lệch: {nav} {source} {out!r}")
+
+
+TESTS = [t_happy_path_unchanged, t_fallback_is_loud_and_names_the_cause, t_no_basis_at_all_is_loud,
+         t_age_anchored_ict_not_host_tz]
 
 if __name__ == "__main__":
     print(f"TZ={os.environ.get('TZ', '(unset)')}  python={sys.version.split()[0]}  "

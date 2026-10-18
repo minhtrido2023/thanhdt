@@ -257,33 +257,48 @@ def main():
         if args.dry_run:
             continue
 
-        notify_status = _send_trading_daily(msg)
-        payload = json.dumps({
-            "series": d["key"], "tenor": d["tenor"],
-            "prev_date": d["prev_date"], "prev_rate": d["prev_rate"],
-            "new_date": d["new_date"], "new_rate": d["new_rate"],
-            "within_noise_band": d["within_noise_band"],
-            "note": "park 0% khong tu doi, cho user"
-        }, ensure_ascii=False)
-        bus_rc = subprocess.run([
-            os.path.join(MIKE_BIN, "append_event.sh"), "Taylor", "finding",
-            f"deposit-cctg-trend-decline-{d['key']}", payload,
-        ], check=False).returncode
+        # Per-channel "already sent for THIS pair" flags, persisted right after each success
+        # (coding_guidelines §5): a kill / bus failure between the two sends must not make the next
+        # run re-post the channel that already went out. `alerted_pair` (what check_declines reads)
+        # is set only once BOTH channels are done.
+        pair = [d["prev_date"], d["prev_rate"], d["new_date"], d["new_rate"]]
+        st = state.setdefault(d["key"], {})
+        notify_status = "sent" if st.get("discord_pair") == pair else None
+        if notify_status is None:
+            notify_status = _send_trading_daily(msg)
+            if notify_status == "sent":
+                st["discord_pair"] = pair
+                _write_state_atomic(state)
+        bus_rc = 0 if st.get("bus_pair") == pair else None
+        if bus_rc is None:
+            payload = json.dumps({
+                "series": d["key"], "tenor": d["tenor"],
+                "prev_date": d["prev_date"], "prev_rate": d["prev_rate"],
+                "new_date": d["new_date"], "new_rate": d["new_rate"],
+                "within_noise_band": d["within_noise_band"],
+                "note": "park 0% khong tu doi, cho user"
+            }, ensure_ascii=False)
+            bus_rc = subprocess.run([
+                os.path.join(MIKE_BIN, "append_event.sh"), "Taylor", "finding",
+                f"deposit-cctg-trend-decline-{d['key']}", payload,
+            ], check=False).returncode
+            if bus_rc == 0:
+                st["bus_pair"] = pair
+                _write_state_atomic(state)
 
-        # Only mark alerted_pair when BOTH channels confirm: the Discord send actually succeeded
-        # (not just "notify.sh never fails") AND the bus finding was actually appended (rc==0).
-        # NOTIFY_OFF ('suppressed') deliberately does NOT mark state either — see
-        # _send_trading_daily's docstring. Any real failure on either channel -> retry next run.
+        # alerted_pair only when BOTH channels confirm: the Discord send actually succeeded (not just
+        # "notify.sh never fails") AND the bus finding was appended (rc==0). NOTIFY_OFF
+        # ('suppressed') leaves discord_pair unset so Discord re-sends once lifted (see
+        # _send_trading_daily's docstring), but the bus finding is already flagged and not repeated.
         if notify_status == "sent" and bus_rc == 0:
-            state.setdefault(d["key"], {})["alerted_pair"] = [
-                d["prev_date"], d["prev_rate"], d["new_date"], d["new_rate"]]
+            st["alerted_pair"] = pair
         elif notify_status == "suppressed" and bus_rc == 0:
-            print(f"  state NOT marked (NOTIFY_OFF) — Discord alert will (re-)send next run "
-                  f"once NOTIFY_OFF is lifted; bus finding recorded now regardless.")
+            print(f"  alerted_pair NOT marked (NOTIFY_OFF) — Discord alert will (re-)send next run "
+                  f"once NOTIFY_OFF is lifted; bus finding recorded (not repeated).")
         else:
             any_failed = True
-            print(f"  state NOT marked (notify={notify_status}, bus_rc={bus_rc}) — will retry "
-                  f"next run.", file=sys.stderr)
+            print(f"  alerted_pair NOT marked (notify={notify_status}, bus_rc={bus_rc}) — will retry "
+                  f"the channel(s) still missing next run.", file=sys.stderr)
 
     for w in staleness:
         if w["days_to_stale"] >= 0:

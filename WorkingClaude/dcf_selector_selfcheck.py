@@ -3,10 +3,12 @@
 (custom_basket.py, job Taylor_20260714_070221).
 
 Checks the three things that can silently invalidate the backtest:
-  [1] the cache-based status/robust EXACTLY reproduces production's
-      trading_bot/strategies.py::_dcf_check_for_order on real (ticker, date, price) samples;
+  [1] custom_basket.py's REAL `dcf_at` (extracted from source and exec'd, not re-typed here)
+      EXACTLY reproduces production's trading_bot/strategies.py::_dcf_check_for_order on real
+      (ticker, date, price) samples;
   [2] NOT_COMPUTED is a NEUTRAL pass-through in BOTH variants (never dropped in A, mid-rank 0.5
-      in B) — the bug class that has already bitten the golden-floor gate twice;
+      in B) — the bug class that has already bitten the golden-floor gate twice. Runs the REAL
+      variant-A `_keep` and variant-B `mos_r` statements extracted from custom_basket.py;
   [3] the overlay is OFF by default (no env -> selection code path unchanged / byte-identical).
 
 Run: $DNA_PYEXE dcf_selector_selfcheck.py
@@ -42,39 +44,54 @@ def check(cond, label):
     if not cond: FAILS.append(label)
 
 
-# ---- shared: live status/robust (same code as custom_basket's dcf_at) --------------------------
-# Mirrors the harness verbatim: fair_value(asof=d) resolves BOTH the release-as-of-d AND the
-# discount rate / terminal g at d. An earlier version of this overlay read a per-release FV cache
-# instead, which prices r/g at rel_time, not d -> 14/40 samples disagreed with production incl. a
-# CHEAP/RICH flip at MoS~=0. Kept live on purpose; the cache parquet is no longer a dependency.
+# ---- shared: the REAL dcf_at, extracted from custom_basket.py ---------------------------------
+# dcf_at is a closure inside build_pit, so it cannot be imported. Re-typing it here (an earlier
+# version of this file did) lets the selfcheck stay green while the real function drifts from
+# production. Instead pull its source out with `ast` and exec it against the same free names it
+# closes over (_px_map, _dcfv, _fin, _dcf_memo, _dcf_stat). fair_value(asof=d) resolves BOTH the
+# release-as-of-d AND the discount rate / terminal g at d — kept live on purpose (a per-release FV
+# cache prices r/g at rel_time, not d -> 14/40 samples disagreed with production).
+import ast as _ast, textwrap
+
+_CB_SRC = open(os.path.join(HERE, "custom_basket.py"), encoding="utf-8").read()
+_CB_TREE = _ast.parse(_CB_SRC)
+
+
+def _one(nodes, what):
+    nodes = list(nodes)
+    assert len(nodes) == 1, f"expected exactly 1 {what} in custom_basket.py, found {len(nodes)}"
+    return textwrap.dedent(_ast.get_source_segment(_CB_SRC, nodes[0]))
+
+
+def _extract_func(name):
+    return _one((n for n in _ast.walk(_CB_TREE) if isinstance(n, _ast.FunctionDef) and n.name == name),
+                f"def {name}")
+
+
+def _extract_assign(target):
+    return _one((n for n in _ast.walk(_CB_TREE) if isinstance(n, _ast.Assign) and len(n.targets) == 1
+                 and isinstance(n.targets[0], _ast.Name) and n.targets[0].id == target),
+                f"assignment to {target}")
+
+
 _dcfv = _load("dcf_valuation")
 _FIN = _dcfv._load_financials()
+_PX_MAP = {}                                         # (ticker, Timestamp) -> Price, filled per sample
+_DCF_NS = {"pd": pd, "np": np, "_dcfv": _dcfv, "_fin": _FIN, "_px_map": _PX_MAP,
+           "_dcf_memo": {}, "_dcf_stat": {"CHEAP": 0, "RICH": 0, "NOT_COMPUTED": 0}}
+exec(_extract_func("dcf_at"), _DCF_NS)
+dcf_at = _DCF_NS["dcf_at"]
 
 
 def status_live(tk, d, px):
-    if not px or px <= 0:
-        return ("NOT_COMPUTED", np.nan, False)
-    try:
-        res = _dcfv.fair_value(tk, pd.Timestamp(d), price=float(px), fin=_FIN)
-    except Exception:
-        return ("NOT_COMPUTED", np.nan, False)
-    if not res.get("ok"):
-        return ("NOT_COMPUTED", np.nan, False)
-    mos = res.get("margin_of_safety")
-    if mos is None or pd.isna(mos):
-        return ("NOT_COMPUTED", np.nan, False)
-    # the 4 box keys ONLY — `sensitivity` also carries a bare `base_fv_ps` float, and folding that
-    # in would add a 5th point production never counts (and crash on .get). Same list production uses.
-    _sens = res.get("sensitivity") or {}
-    signs = [((f - px) / f) > 0 for f in
-             ((_sens.get(k) or {}).get("fv") for k in ("r-1%", "r+1%", "g-2%", "g+2%"))
-             if f and f > 0]
-    robust = bool(signs) and all(s == (mos > 0) for s in signs)
-    return (("CHEAP" if mos > 0 else "RICH"), float(mos), robust)
+    """The REAL custom_basket.dcf_at at (tk, d) with price `px` injected into its price map."""
+    _PX_MAP[(tk, pd.Timestamp(d))] = float(px)
+    _DCF_NS["_dcf_memo"].pop((tk, pd.Timestamp(d)), None)
+    return dcf_at(tk, d)
 
 
 # ---- [1] parity with the production dcf_check producer ----------------------------------------
-print("\n[1] live status/robust == production _dcf_check_for_order (real samples)")
+print("\n[1] custom_basket.dcf_at (real code) == production _dcf_check_for_order (real samples)")
 sys.path.insert(0, HERE)                                # dcf_valuation vừa chèn WORKDIR canonical lên đầu
 import trading_bot.strategies as _strat
 assert os.path.abspath(_strat.__file__).startswith(HERE + os.sep), _strat.__file__
@@ -105,23 +122,28 @@ check(n_rich > 0 and n_cheap > 0 and n_nc > 0, "sample covers all three statuses
 
 # ---- [2] NOT_COMPUTED neutrality in both variants ---------------------------------------------
 print("\n[2] NOT_COMPUTED = neutral pass-through (not auto-cheap, not auto-rich)")
-# synthetic pool replicating the exact overlay code paths in custom_basket.py
+# synthetic pool fed through the REAL overlay statements extracted from custom_basket.py
 POOL = [("RICHROB", ("RICH", -0.50, True)), ("RICHSOFT", ("RICH", -0.02, False)),
         ("CHEAPROB", ("CHEAP", 0.40, True)), ("NC1", ("NOT_COMPUTED", np.nan, False)),
         ("NC2", ("NOT_COMPUTED", np.nan, False))]
 SM = dict(POOL)
 pool = [(t, 2) for t, _ in POOL]
+_stub = lambda t, d: SM[t]
 
-# variant A path (verbatim logic from custom_basket.py)
-keep = [(t, rt) for t, rt in pool if not (lambda s: s[0] == "RICH" and s[2])(SM[t])]
+# variant A: the real `_keep = [...]` statement
+_ns_a = {"pool": pool, "dcf_at": _stub, "d": None}
+exec(_extract_assign("_keep"), _ns_a)
+keep = _ns_a["_keep"]
 kept = {t for t, _ in keep}
 check("NC1" in kept and "NC2" in kept, "A: NOT_COMPUTED kept in pool (not dropped)")
 check("RICHROB" not in kept, "A: RICH+robust dropped")
 check("RICHSOFT" in kept, "A: RICH but non-robust kept (sensitivity box flipped sign)")
 check("CHEAPROB" in kept, "A: CHEAP kept")
 
-# variant B path (verbatim logic)
-mos_r = pd.Series({t: SM[t][1] for t, _ in pool}).rank(pct=True).fillna(0.5)
+# variant B: the real `mos_r = ...` statement
+_ns_b = {"pool": pool, "dcf_at": _stub, "d": None, "pd": pd}
+exec(_extract_assign("mos_r"), _ns_b)
+mos_r = _ns_b["mos_r"]
 check(abs(mos_r["NC1"] - 0.5) < 1e-9 and abs(mos_r["NC2"] - 0.5) < 1e-9,
       "B: NOT_COMPUTED gets neutral 0.5 mid-rank (same convention as a missing 1/PE)")
 check(mos_r["CHEAPROB"] > 0.5 > mos_r["RICHROB"],
@@ -158,8 +180,6 @@ check("if DCF_MODE:" in src and "dcf_at = None" in src,
 # ==") == 2` and went red on 2026-08-08 purely because the placebo modes turned one `== "..."` into
 # `in ("...", "...")` — three correctly-guarded call-sites, zero behaviour change. Check the
 # structure with `ast` so a refactor that keeps the guard keeps the test green.
-import ast as _ast
-
 _tree = _ast.parse(src)
 _guarded = []      # line ranges of `if dcf_at is not None ...:` bodies
 _uses = []         # linenos of every `dcf_at(...)` call
