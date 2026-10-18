@@ -485,3 +485,12 @@
 - [2026-10-18T17:44:09Z] Taylor/heartbeat — Taylor_20261018_173105: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261018_173105", "source": "watcher"}
 - [2026-10-18T17:45:09Z] Taylor/heartbeat — Taylor_20261018_173105: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261018_173105", "source": "watcher"}
 - [2026-10-18T17:45:16Z] Taylor/finding — sunday-plan-round-built-20261019: {"commit": "d570de2c9", "branch": "feat/sunday-plan-round-20261019 (worktree wt-Taylor_20261018_173105, KHÔNG merge, KHÔNG cài cron)", "files": ["bin/sunday_plan_round.sh", "bin/sunday_plan_round_lib.py", "bin/sunday_plan_round_selfcheck.sh", "kb/cron_registry.md", "kb/cron_registry/CHANGELOG.md", "kb/projects/sunday-plan-round-20261019.md"], "selfcheck": "88 assertion x 3 TZ (unset, America/Los_Angeles, Pacific/Kiritimati) = 264 PASS; 12/12 mutant chết", "gate_phat_hien": "data/macro_health.json >1440 phút vào CN => get_gated_state rơi DT4_only; wrapper chạy lại macro_healthcheck.py trước bq_freshness", "cron_de_xuat": ["0 12 * * 0 sunday_plan_round.sh >> logs/sunday_plan_round.log 2>&1", "0 16 * * 0 for_each_live_account.sh send_plan_report.sh --second-chance"], "measured_by": "bin/sunday_plan_round_selfcheck.sh (chạy trong worktree)"}
+
+## Consolidation 2026-10-18T18:07:01Z
+- [2026-10-18T18:01:22Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "in_progress", "note": "vong2 sunday-plan: doc code"}
+- [2026-10-18T18:02:14Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261018_180113", "source": "watcher"}
+- [2026-10-18T18:03:14Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261018_180113", "source": "watcher"}
+- [2026-10-18T18:03:53Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "in_progress", "note": "doc xong code+park; bat dau viet lib/wrapper vong2"}
+- [2026-10-18T18:04:14Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261018_180113", "source": "watcher"}
+- [2026-10-18T18:05:14Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261018_180113", "source": "watcher"}
+- [2026-10-18T18:06:14Z] Taylor/heartbeat — Taylor_20261018_180113: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261018_180113", "source": "watcher"}
