@@ -504,6 +504,7 @@ plan_tickers = {o.get('ticker') for o in plan.get('orders', [])}
 dnse_raw_file = os.path.join(wc_root, 'data', 'execution_logs', f'dnse_raw_{plan_date}.jsonl')
 real_filled_by_ticker = {}
 reconciled = False
+latest_by_oid = {}  # order id thật -> bản ghi DNSE mới nhất (giá khớp ATC/MP, xem vòng fills dưới)
 # Lấy account_no cho account này để filter dnse_raw (file chung cả SpaceX+ZaloPay).
 # FAIL-CLOSED (§12, code-quality 2026-09-13): không tra được account ⇒ BỎ đối soát và nói rõ lỗi;
 # trước đây `except: pass` + lọc có điều kiện ⇒ gộp order của MỌI account ⇒ lệch giả/che lệch thật.
@@ -538,7 +539,6 @@ if os.path.exists(dnse_raw_file) and _target_account_err:
         print(f"eod_trading_report: notify.sh lỗi: {type(_ne).__name__}: {_ne}", file=sys.stderr)
 elif os.path.exists(dnse_raw_file):
     reconciled = True
-    latest_by_oid = {}
     with open(dnse_raw_file, encoding='utf-8') as f:
         for line in f:
             try:
@@ -640,8 +640,21 @@ for oid, p in parents.items():
     filled = p.get('filled', 0)
 
     fills = [c for c in p.get('children', []) if c.get('filled')]
-    if fills:
-        avg_price = sum(c['filled'] * c['price'] for c in fills) / sum(c['filled'] for c in fills)
+    # Lệnh ATC/MP: child 'price' = None (bot không đặt giá) ⇒ lấy averagePrice DNSE theo order id
+    # thật. Không có nguồn giá nào ⇒ bỏ child đó khỏi bình quân thay vì crash cả báo cáo (sự cố
+    # 2026-10-16: SELL-*-AUTOEXIT-CAPIT ATC làm mất toàn bộ phần giao dịch ở cả 2 account).
+    def _fill_px(c):
+        if c.get('price'):
+            return c['price']
+        try:
+            b = latest_by_oid.get(int(c.get('oid')))
+        except (TypeError, ValueError):
+            b = None
+        return (b or {}).get('averagePrice') or None
+    priced = [(c['filled'], _fill_px(c)) for c in fills]
+    priced = [(q, px) for q, px in priced if px]
+    if priced:
+        avg_price = sum(q * px for q, px in priced) / sum(q for q, _ in priced)
     else:
         avg_price = 0
 

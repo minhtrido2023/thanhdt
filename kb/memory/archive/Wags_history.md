@@ -413,3 +413,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-10-15 (keep=12 days=0 require_done=False)
 - [2026-10-08T13:38:23Z] ĐANG DỞ job Wags_20261008_133633 token telemetry: worktree agents/Wags/wt-tokentel-1008 branch feat/dispatch-token-telemetry-20261008 | thiet ke --session-id + cost-state transcript | NEXT: code+selfcheck+arch-review
+
+## Archived 2026-10-16 (keep=12 days=0 require_done=False)
+- [2026-10-08T13:55:19Z] [2026-10-08] context-pack-trim DUNG o NEEDS_CHANGES: branch chore/context-pack-trim-20261008 @f10b0326 (worktree agents/Wags/wt-ctxtrim-1008) CHUA merge. Cho user/Mike chon vong 2 (8 required_change trong bus finding context-pack-trim) hoac bo. Neu bo: git worktree remove + xoa branch.

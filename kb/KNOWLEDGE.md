@@ -134,9 +134,12 @@
   SpaceX-now. **Caveat: DSR phần excess chỉ 0.775 (<0.95 ngưỡng)** — bảo hiểm hợp lý, CHƯA phải
   alpha tin cậy cao → giữ paper. Review event-anchored, trần ~2026-10-06 (tránh mùa BCTC Q3),
   trượt theo nếu LAG refill trượt lịch — trạng thái sống: `kb/projects/rnd-pipeline-tracker.md`.
-- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — đã GO-LIVE **2026-08-24** (mục mới,
-  không có trong ghi chép "paper" trước đó — đi thẳng từ R&D/duyệt user sang live). Ngày có CAPIT
-  margin phải chạy `approve_margin_day.py` TRƯỚC bot. Chi tiết: `kb/current_ops.md`.
+- **CAPIT margin lever** (`capit_margin_lever.enabled=False`) — LIVE 2026-08-24→2026-10-13, **TẮT từ
+  2026-10-13** (user duyệt; không sizing ×1,3, không cấp margin; chỉ user bật lại). Chi tiết:
+  `kb/projects/capit-margin-hold-20261013.md`.
+- **Phanh lỗ cấp NAV** — monitor CHỈ CẢNH BÁO (`bin/nav_loss_brake_monitor.py`) LIVE từ 2026-10-13;
+  KHÔNG tự tạo BOT_STOP, `risk_monitor.py` không phải cổng; xem lại 2026-11-09.
+- **FTSE nâng hạng hiệu lực 2026-09-21** ⇒ backtest mới tách trước/sau ngày đó.
 
 **Đã thử, BỊ LOẠI — không wire:**
 - Custom30V permanent-exclude 7 tên: HURTS −1.0pp (walk-forward bác). DO NOT wire.

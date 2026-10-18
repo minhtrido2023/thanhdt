@@ -1,0 +1,1 @@
+SELECT ticker,time,in_universe,backfilled FROM `lithe-record-440915-m9.tav2_mike.universe_pit` WHERE time BETWEEN DATE '2014-01-01' AND DATE '2026-06-30' AND in_universe

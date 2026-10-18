@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-14T06:53:21Z] [Quỹ mở bước 4 phần 2, 10-14] XONG: nhánh feat/fund-step4-benchmark-20261014 @6a60a0bbc (5 commit, wt-step4-1014), CHƯA merge/cron; finding fund-step4-impl-20261014 trace Taylor_20261014_060642; README research/fund_step4_impl_20261014/. CHỜ Mike arch-review + user (merge, sleeve_*.json thật, cron, bq_admin Q10). Sau merge: weekly bảng 3.2 cũ bị chặn khi chuỗi TR đã dựng. (Thay dòng ĐANG DỞ job 060642.)
 - [2026-10-14T09:12:03Z] ĐANG DỞ job Taylor_20261014_091148 (Quỹ mở bước 4 VÒNG 2: B1-B4 + N-a..e, nhánh feat/fund-step4-benchmark-20261014 wt agents/Taylor/wt-step4-1014, KHÔNG merge/cron/data thật) | NEXT: đọc diff nhánh + review a9c014c85c30499ef + /tmp/archrev_s4
 - [2026-10-14T09:26:36Z] ĐANG DỞ job Taylor_20261014_091148: B2 94804b24a, B1 131ea7abf, B3 xong | NEXT: B4 4 mutant (N1 N6 N9 N11) + N-a..e + verify sweep
 - [2026-10-14T09:29:47Z] ĐANG DỞ job Taylor_20261014_091148 attempt2: commit B2/B1/B3/B4/N-b có sẵn (10e84dd2c) | NEXT: N-a,N-c,N-d,N-e + verify (TZ, §23, harness reviewer, byte master vs nhánh) + bus
@@ -26,3 +25,4 @@
 - [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
 - [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
 - [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)
+- [2026-10-17T02:18:27Z] [weekly 10-12→10-16] 2 file md + 6 chart XONG, delivery gate BLOCK G4 (cột VN-Index có cổ tức). CHỜ Mike/bq_admin gỡ G4 rồi chạy lại report_delivery_gate cho 2 file (sha trong bus finding weekly-...BLOCKED-G4).

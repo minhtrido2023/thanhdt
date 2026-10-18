@@ -878,12 +878,16 @@ def _enforce_status(prov, data_dir):
     lim (code nhắc khoá daily_loss_limit_pct), epi (file trạng thái episode + code nhắc tới nó)."""
     out = {}
     try:
-        n = sum(1 for ln in prov["crontab"]().splitlines()
-                if "risk_monitor" in ln and not ln.lstrip().startswith("#"))
+        _cron = [ln for ln in prov["crontab"]().splitlines() if not ln.lstrip().startswith("#")]
+        n = sum(1 for ln in _cron if "risk_monitor" in ln)
+        n_lb = sum(1 for ln in _cron if "nav_loss_brake_monitor" in ln)
         out["cron"] = (f"crontab của người dùng đang chạy trang có <b>{n} dòng đang bật</b> gọi <code>risk_monitor</code>"
                        + (" ⇒ theo crontab này <b>hiện chưa có tiến trình định kỳ nào</b> đánh giá luật trên NAV live "
                           "(trang không kiểm systemd)" if n == 0 else
-                          " ⇒ có lịch chạy; trang không kiểm lượt chạy gần nhất có thành công hay không"))
+                          " ⇒ có lịch chạy; trang không kiểm lượt chạy gần nhất có thành công hay không")
+                       + (f"; ngoài ra có <b>{n_lb} dòng đang bật</b> gọi <code>nav_loss_brake_monitor</code> — monitor "
+                          "<b>chỉ cảnh báo</b> (không tạo BOT_STOP, không chặn lệnh): phanh lỗ được <b>giám sát và báo</b>, "
+                          "<b>không được cưỡng chế</b>" if n_lb else ""))
     except Exception as e:
         out["cron"] = (f"<b>không xác định được</b> có tiến trình định kỳ nào chạy <code>risk_monitor</code> hay không — "
                        f"không đọc được crontab (<code>{esc(_err(e))}</code>)")
@@ -1092,7 +1096,10 @@ def cell_live_slippage(data_dir, kb_dir, ct, now):
         lm = (p.get("progress") or {}).get("live_monitoring")
         if not isinstance(lm, dict):
             raise ValueError("fill_timing.progress.live_monitoring không có trong registry")
-        since, target, cnt = str(lm.get("since")), lm.get("target_sessions"), lm.get("count_current_measured")
+        since = lm.get("since")
+        if not (isinstance(since, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", since)):
+            raise ValueError(f"fill_timing.progress.live_monitoring.since thiếu hoặc không phải YYYY-MM-DD (đọc được: {since!r})")
+        target, cnt = lm.get("target_sessions"), lm.get("count_current_measured")
         notes = sorted(k[5:] for k in lm if re.fullmatch(r"note_\d{4}-\d{2}-\d{2}", k))
         c.as_of = (f"bộ đếm registry ghi {notes[-1]}" if notes else f"bộ đếm registry mở {since}, chưa ghi lần đếm nào")
         per = {a: hybrid_block_buy_sessions(data_dir, a, since) for a in LIVE_ACCOUNTS}

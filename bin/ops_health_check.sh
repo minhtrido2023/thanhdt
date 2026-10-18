@@ -2024,11 +2024,16 @@ try:
         warn += 1
         lines.append("🔴 PHANH LỖ NAV CHẠM NGƯỠNG — USER QUYẾT (không autofix): "
                      + _lb_line.replace("⚠️", "⚠").replace("❌", "✗"))
+    elif _lb.returncode == 2 and _lb_line and runonce_label and account != runonce_label:
+        # rc=2 = lỗi cấp FLEET (status.json thiếu/cũ/hỏng) — cùng một lỗi hiện ở mọi account; chỉ lượt
+        # account đầu (cùng cổng RUNONCE) được route sang autofix, lượt sau chỉ hiển thị ⇒ 1 job/lỗi.
+        W(f"[WARN-ONLY] {_lb_line}")
     elif _lb.returncode in (2, 3) and _lb_line:
         W(_lb_line)
     else:
+        _lb_err = ((_lb.stderr or "").strip()[-200:] or "(rỗng)").replace("\n", " | ")   # ROUTING grep theo dòng
         W(f"Phanh lỗ NAV [{account}]: nav_loss_brake_monitor.py --health-line rc={_lb.returncode} "
-          f"không in dòng trạng thái nào — stderr: {(_lb.stderr or '').strip()[-200:] or '(rỗng)'}")
+          f"không in dòng trạng thái nào — stderr: {_lb_err}")
 except Exception as _elb:
     W(f"Phanh lỗ NAV [{account}]: không chạy được nav_loss_brake_monitor.py --health-line "
       f"({type(_elb).__name__}: {str(_elb)[:160]})")

@@ -1,0 +1,3 @@
+2026-10-16 (job Taylor_20261016_033549): README.md, CRON_PROPOSAL.md, mutants.py + đầu ra selfcheck/mutation nằm TRONG nhánh
+feat/ledger-seal-weekly-20261016 (commit 256bfcca6, cùng đường dẫn) — để lúc merge không vướng "untracked file would be overwritten".
+Đọc: git show feat/ledger-seal-weekly-20261016:agents/Taylor/research/ledger_seal_weekly_20261016/README.md

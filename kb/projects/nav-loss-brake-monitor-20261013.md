@@ -15,7 +15,7 @@
 - `agents/Spyros/risk_monitor.py` vẫn KHÔNG chạy và không phải cổng. Phanh −5% đo trong phiên: CHƯA có.
 
 ## Còn mở (2026-10-13)
-- Commit nối `bin/ops_health_check.sh` (`3e0a9f7a7`) chưa merge — chờ một đêm cron chạy ổn.
+- Commit nối `bin/ops_health_check.sh` (`3e0a9f7a7`) ĐÃ MERGE 2026-10-16 (arch-review APPROVED, 7 đêm cron rc=0). Việc nhỏ còn lại: lỗi cấp fleet rc=2/3 bị route 2 lần/lượt (mỗi account), stderr nhiều dòng chỉ route dòng đầu.
 - Ba mục nhỏ reviewer nêu, chờ user duyệt cho Mike tự sửa: F1 khoá chống trùng nuốt tin "tạm tính sát
   ngưỡng" khi dòng ước tính về sau 22:05 (`:1049`); F2 dòng ước tính của ngày có `nav_gate_block` vẫn
   được giảm tin (`:664-708`); F4 gửi lỗi (rc=3) che phanh chạm (rc=5) ở dòng sáng (`:1085-1091`).

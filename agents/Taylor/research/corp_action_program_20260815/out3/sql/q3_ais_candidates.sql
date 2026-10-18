@@ -1,0 +1,6 @@
+
+SELECT ticker,effective_date ais_date,shares_delta,shares_total_after
+FROM `lithe-record-440915-m9.tav2_bq.corporate_action`
+WHERE event_code='AIS' AND event_status='executed' AND effective_date IS NOT NULL
+  AND effective_date BETWEEN DATE '2014-01-01' AND DATE '2027-06-30'
+ ORDER BY ticker,ais_date

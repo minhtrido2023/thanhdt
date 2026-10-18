@@ -282,7 +282,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 > ⚠️ **Phanh lỗ cấp NAV CHƯA có tiến trình nào thực thi** (phát hiện 2026-10-12):
 > `agents/Spyros/risk_monitor.py` chưa từng được lên lịch, `daily_loss_limit_pct` không code nào
 > đọc — ĐỪNG coi đó là gate đang chạy. Monitor thay thế (chỉ cảnh báo, giá chốt, user duyệt
-> 2026-10-12) đang dựng: nhánh `feat/nav-loss-brake-monitor-20261012`. Sửa dòng này khi nó live.
+> 2026-10-12) ĐÃ LIVE từ 2026-10-13 (`bin/nav_loss_brake_monitor.py`, cron 22:05+00:20 ICT; dòng ops_health đã merge 16/10).
 
 **Khi nào dùng native agent:**
 - Task không cần working memory tích lũy của agent đó
