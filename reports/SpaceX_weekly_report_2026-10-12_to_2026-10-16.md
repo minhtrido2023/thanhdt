@@ -79,9 +79,9 @@ Cả tuần **−1,75%** so với VN-Index **−1,68%** — chênh lệch **−0
 
 | Giai đoạn | SpaceX | VN-Index (giá) | VN-Index có cổ tức | Chênh so giá | Chênh so có cổ tức |
 |---|---:|---:|---:|---:|---:|
-| Tuần này (09/10 → 16/10) | −1,75% | −1,68% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | −0,07pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Từ đầu tháng 10 (MTD, 30/09 → 16/10) | −1,24% | −3,55% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | +2,31pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Từ khi bắt đầu hoạt động (01/07 → 16/10) | −3,06% | −8,29% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | +5,23pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
+| Tuần này (09/10 → 16/10) | −1,75% | −1,68% | −1,68% | −0,07pp | −0,07pp |
+| Từ đầu tháng 10 (MTD, 30/09 → 16/10) | −1,24% | −3,55% | −3,50% | +2,31pp | +2,26pp |
+| Từ khi bắt đầu hoạt động (01/07 → 16/10) | −3,06% | −8,29% | −7,68% | +5,23pp | +4,62pp |
 
 _VN-Index có cổ tức: đội tự tính từ cổ tức tiền mặt của cổ phiếu HOSE, tái đầu tư tại ngày GDKHQ, sau thuế TNCN 5% trên cổ tức; HOSE không công bố bản có cổ tức của VN-Index._
 _Mốc VN-Index của dòng "Từ khi bắt đầu hoạt động": giá đóng cửa 30/06/2026 — phiên mà vốn gốc của tài khoản phản ánh._

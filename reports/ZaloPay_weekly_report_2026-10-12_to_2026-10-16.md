@@ -85,12 +85,12 @@ Cả tuần **−2,03%** so với VN-Index **−1,68%** — chênh lệch **−0
 
 | Giai đoạn | ZaloPay | VN-Index (giá) | VN-Index có cổ tức | Chênh so giá | Chênh so có cổ tức |
 |---|---:|---:|---:|---:|---:|
-| Tuần này (09/10 → 16/10) | −2,03% | −1,68% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | −0,35pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Từ đầu tháng 10 (MTD, 30/09 → 16/10) | −4,00% | −3,55% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | −0,46pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Từ khi bắt đầu hoạt động (06/07 → 16/10) | −6,84% | −7,46% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | +0,62pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Phần bot quản lý (không gồm DGC) — Tuần này (09/10 → 16/10) | −1,51% | −1,68% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | +0,17pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Phần bot quản lý (không gồm DGC) — Từ đầu tháng 10 (MTD, 30/09 → 16/10) | −1,06% | −3,55% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | +2,48pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
-| Phần bot quản lý (không gồm DGC) — Từ khi bắt đầu hoạt động (06/07 → 16/10) | −1,68% | −7,46% | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) | +5,79pp | chưa có số (G4: 2026-10-14 số mã rổ 351 → 333 (-18, > 5% của 351)) |
+| Tuần này (09/10 → 16/10) | −2,03% | −1,68% | −1,68% | −0,35pp | −0,35pp |
+| Từ đầu tháng 10 (MTD, 30/09 → 16/10) | −4,00% | −3,55% | −3,50% | −0,46pp | −0,50pp |
+| Từ khi bắt đầu hoạt động (06/07 → 16/10) | −6,84% | −7,46% | −6,85% | +0,62pp | +0,01pp |
+| Phần bot quản lý (không gồm DGC) — Tuần này (09/10 → 16/10) | −1,51% | −1,68% | −1,68% | +0,17pp | +0,17pp |
+| Phần bot quản lý (không gồm DGC) — Từ đầu tháng 10 (MTD, 30/09 → 16/10) | −1,06% | −3,55% | −3,50% | +2,48pp | +2,44pp |
+| Phần bot quản lý (không gồm DGC) — Từ khi bắt đầu hoạt động (06/07 → 16/10) | −1,68% | −7,46% | −6,85% | +5,79pp | +5,18pp |
 
 _VN-Index có cổ tức: đội tự tính từ cổ tức tiền mặt của cổ phiếu HOSE, tái đầu tư tại ngày GDKHQ, sau thuế TNCN 5% trên cổ tức; HOSE không công bố bản có cổ tức của VN-Index._
 _Dòng "Phần bot quản lý (không gồm DGC)": loại phần ngoài bot (DGC) ≈ 35,64% NAV ngày 16/10; số chính thức của tài khoản là các dòng phía trên._
