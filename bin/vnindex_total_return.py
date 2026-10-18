@@ -71,6 +71,7 @@ G2_TOL = 1e-4                      # BQ vs DNSE > 0,01%
 # trong cùng cửa sổ). Ngưỡng dùng: |Δ| > 5% số mã phiên trước (đo: chỉ 2026-06-25, −24/395, nổ).
 G4_MAX_N_CHANGE_FRAC = 0.05
 G4_MC_TOL = 0.03
+G4_ACK_KEY = "@G4_N"               # khoá ack nhánh số mã (không thể trùng mã cổ phiếu: có "@")
 G5_WINDOW = 60
 G5_TOL = 0.005                     # 0,5 điểm %
 G6_DY = 0.30
@@ -403,6 +404,12 @@ def load_acks(path: str = ACKS_PATH) -> set:
         if not (e.get("confirmed_by") and e.get("date") and e.get("ticker")):
             raise ValueError(f"{path}: mục G6 thiếu confirmed_by/date/ticker: {e}")
         out.add((e["date"], e["ticker"]))
+    # G4 (chỉ nhánh SỐ MÃ): ngày rổ tụt do BQ `ticker` thiếu dòng, đã có người xác nhận. Khoá (date, G4_ACK_KEY)
+    # — không đụng được mã thật nào. Nhánh vốn hoá (G4_MC_TOL) KHÔNG có ack.
+    for e in a.get("G4", []):
+        if not (e.get("confirmed_by") and e.get("date") and e.get("reason")):
+            raise ValueError(f"{path}: mục G4 thiếu confirmed_by/date/reason: {e}")
+        out.add((e["date"], G4_ACK_KEY))
     return out
 
 
@@ -457,9 +464,11 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
         p = series[ia + i - 1]
         if p["n_members"] is not None and r["n_members"] is not None:
             dn = r["n_members"] - p["n_members"]
-            if abs(dn) > G4_MAX_N_CHANGE_FRAC * p["n_members"]:
+            if abs(dn) > G4_MAX_N_CHANGE_FRAC * p["n_members"] and \
+                    (r["date"].isoformat(), G4_ACK_KEY) not in acks:
                 errs.append(f"G4: {r['date']} số mã rổ {p['n_members']} → {r['n_members']} "
-                            f"({dn:+d}, > {100 * G4_MAX_N_CHANGE_FRAC:g}% của {p['n_members']})")
+                            f"({dn:+d}, > {100 * G4_MAX_N_CHANGE_FRAC:g}% của {p['n_members']}) — "
+                            f"chờ lấp dữ liệu BQ hoặc người xác nhận ở vnindex_tr_acks.json mục G4")
             pp = series[ia + i - 2] if ia + i - 2 >= 0 else None
             if pp is not None and p["mc_members_vnd"]:
                 exp = pp_ratio = p["vnindex"] / pp["vnindex"]

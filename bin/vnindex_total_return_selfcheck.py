@@ -259,6 +259,7 @@ def t_gates():
     ok(not [x for x in gates(base, a, b) if x.startswith("G1")], "G1 chuỗi đủ không nổ")
     t_g1_sessions(D, base)
     t_acks(D, base, a, b)
+    t_g4_acks(D, base, a, b)
     # G2 — 0,011% nổ; 0,009% không
     one(mod(64, vnindex_src2=base[64]["vnindex"] / 1.00011), "G2", (D[64].isoformat(), "+0.011%"))
     none(mod(64, vnindex_src2=base[64]["vnindex"] / 1.00009), "G2")
@@ -338,6 +339,48 @@ def t_acks(D, base, a, b):
             bp = V.benchmark_period(a, b, series=rows, acks_path=bad)
             ok(bp["status"] == "unavailable" and bp["vnindex_tr_net_pct"] is None and "confirmed_by" in bp["reason"],
                f"ack {name} ⇒ benchmark unavailable: {bp}")
+
+
+def t_g4_acks(D, base, a, b):
+    """G4 ack (18/10): ngày rổ tụt vì BQ thiếu dòng có NGƯỜI xác nhận ⇒ nhánh SỐ MÃ qua đúng ngày đó;
+    ngày khác, nhánh vốn hoá, và mục thiếu confirmed_by/reason KHÔNG được qua."""
+    day = D[64].isoformat()
+
+    def g4(rows, acks):
+        return [x for x in V.check_period(rows, a, b, acks) if x.startswith("G4")]
+    dip = [dict(r) for r in base]
+    for i in (64, 65, 66):        # rổ tụt rồi GIỮ mức mới tới hết kỳ ⇒ chỉ ngày tụt (D64) cần ack
+        dip[i]["n_members"] = 94
+    rebound = [dict(r) for r in base]
+    rebound[64]["n_members"] = 94
+    ok(any(D[65].isoformat() in x for x in g4(rebound, {(day, V.G4_ACK_KEY)})),
+       "ngày bật lại >5% là một G4 RIÊNG, ack ngày tụt không che nó")
+    ok(any(day in x for x in g4(dip, set())), "G4 số mã nổ khi chưa ack")
+    ok(not any(day in x for x in g4(dip, {(day, V.G4_ACK_KEY)})), "G4 số mã có ack đúng ngày ⇒ qua")
+    ok(any(day in x for x in g4(dip, {(D[63].isoformat(), V.G4_ACK_KEY)})), "ack ngày khác KHÔNG cứu")
+    ok(any(day in x for x in g4(dip, {(day, "ZZZ")})), "ack kiểu G6 cùng ngày KHÔNG cứu G4")
+    mc = [dict(r) for r in base]
+    mc[64]["mc_members_vnd"] = mc[64]["mc_members_vnd"] * 1.05
+    ok(any("vốn hoá" in x for x in g4(mc, {(day, V.G4_ACK_KEY)})), "ack G4 KHÔNG che nhánh vốn hoá")
+    with tempfile.TemporaryDirectory(prefix="vtr_g4acks_") as tmp:
+        good, bad = os.path.join(tmp, "good.json"), os.path.join(tmp, "bad.json")
+        with open(good, "w", encoding="utf-8") as f:
+            json.dump({"G4": [{"date": day, "confirmed_by": "user 2030-06-01", "reason": "BQ thiếu 20 mã"}]}, f)
+        ok(V.load_acks(good) == {(day, V.G4_ACK_KEY)}, "ack G4 hợp lệ")
+        ok(V.benchmark_period(a, b, series=dip, acks_path=good)["status"] == "ok", "benchmark ok khi có ack G4")
+        for name, entry in (("thiếu confirmed_by", {"date": day, "reason": "x"}),
+                            ("thiếu reason", {"date": day, "confirmed_by": "user"}),
+                            ("reason rỗng", {"date": day, "confirmed_by": "user", "reason": ""}),
+                            ("thiếu date", {"confirmed_by": "user", "reason": "x"})):
+            with open(bad, "w", encoding="utf-8") as f:
+                json.dump({"G4": [entry]}, f)
+            try:
+                V.load_acks(bad)
+                ok(False, f"ack G4 {name} phải ValueError")
+            except ValueError as exc:
+                ok("G4" in str(exc), f"ack G4 {name}: {exc}")
+            ok(V.benchmark_period(a, b, series=dip, acks_path=bad)["status"] == "unavailable",
+               f"ack G4 {name} ⇒ benchmark unavailable")
 
 
 def t_dy_corrupt(tmp):
