@@ -342,46 +342,79 @@ def t_acks(D, base, a, b):
 
 
 def t_g4_acks(D, base, a, b):
-    """G4 ack (18/10): ngày rổ tụt vì BQ thiếu dòng có NGƯỜI xác nhận ⇒ nhánh SỐ MÃ qua đúng ngày đó;
-    ngày khác, nhánh vốn hoá, và mục thiếu confirmed_by/reason KHÔNG được qua."""
+    """G4 ack (18/10, arch-review vòng 1): ack ràng (date, n_prev, n) — CHỈ che nhánh SỐ MÃ của đúng ngày
+    và đúng số đã xem; không che nhánh vốn hoá, không che gate khác, không giả được qua mục G6; mục hỏng
+    ⇒ ValueError."""
     day = D[64].isoformat()
+    key = V.g4_ack_key(day, 100, 94)
 
-    def g4(rows, acks):
-        return [x for x in V.check_period(rows, a, b, acks) if x.startswith("G4")]
+    def errs(rows, acks, g="G4"):
+        return [x for x in V.check_period(rows, a, b, acks) if x.startswith(g)]
     dip = [dict(r) for r in base]
     for i in (64, 65, 66):        # rổ tụt rồi GIỮ mức mới tới hết kỳ ⇒ chỉ ngày tụt (D64) cần ack
         dip[i]["n_members"] = 94
     rebound = [dict(r) for r in base]
     rebound[64]["n_members"] = 94
-    ok(any(D[65].isoformat() in x for x in g4(rebound, {(day, V.G4_ACK_KEY)})),
+    ok(any(D[65].isoformat() in x for x in errs(rebound, {key})),
        "ngày bật lại >5% là một G4 RIÊNG, ack ngày tụt không che nó")
-    ok(any(day in x for x in g4(dip, set())), "G4 số mã nổ khi chưa ack")
-    ok(not any(day in x for x in g4(dip, {(day, V.G4_ACK_KEY)})), "G4 số mã có ack đúng ngày ⇒ qua")
-    ok(any(day in x for x in g4(dip, {(D[63].isoformat(), V.G4_ACK_KEY)})), "ack ngày khác KHÔNG cứu")
-    ok(any(day in x for x in g4(dip, {(day, "ZZZ")})), "ack kiểu G6 cùng ngày KHÔNG cứu G4")
+    ok(any(day in x for x in errs(dip, set())), "G4 số mã nổ khi chưa ack")
+    ok(not errs(dip, {key}), f"G4 số mã có ack đúng ngày + đúng số ⇒ qua: {errs(dip, {key})}")
+    ok(any(day in x for x in errs(dip, {V.g4_ack_key(D[63].isoformat(), 100, 94)})), "ack ngày khác KHÔNG cứu")
+    ok(any(day in x for x in errs(dip, {(day, "ZZZ")})), "ack kiểu G6 cùng ngày KHÔNG cứu G4")
+    # ràng GIÁ TRỊ: dòng provisional bị dựng lại ⇒ độ lớn/hướng khác phải nổ lại
+    for name, n in (("tụt sâu hơn", 50), ("tụt rất sâu", 10), ("tăng ngược chiều", 500), ("tụt nhẹ hơn nhưng vẫn >5%", 93)):
+        w = [dict(r) for r in dip]
+        for i in (64, 65, 66):
+            w[i]["n_members"] = n
+        ok(any(day in x for x in errs(w, {key})), f"ack 100→94 KHÔNG che '{name}' (100→{n})")
     mc = [dict(r) for r in base]
     mc[64]["mc_members_vnd"] = mc[64]["mc_members_vnd"] * 1.05
-    ok(any("vốn hoá" in x for x in g4(mc, {(day, V.G4_ACK_KEY)})), "ack G4 KHÔNG che nhánh vốn hoá")
+    ok(any(day in x and "vốn hoá" in x for x in errs(mc, {V.g4_ack_key(day, 100, 100)})),
+       "ack G4 KHÔNG che nhánh vốn hoá (cùng ngày)")
+    mcdip = [dict(r) for r in dip]
+    mcdip[64]["mc_members_vnd"] = mcdip[64]["mc_members_vnd"] * 1.05
+    ok(any(day in x and "vốn hoá" in x for x in errs(mcdip, {key})), "ack số mã đúng ngày KHÔNG che nhánh vốn hoá")
+    # ack G4 không che gate KHÁC trên cùng ngày (G3 G6 G7 G8)
+    for g, kw in (("G3", {"ca_max_ingested_at": "2000-01-01"}), ("G6", {"max_dy": 0.31, "max_dy_ticker": "ZZZ"}),
+                  ("G7", {"membership_vintage": "2000-01-01"}), ("G8", {"osh_missing_max_pct": 0.5, "osh_missing_ticker": "ZZZ"})):
+        w = [dict(r) for r in dip]
+        w[64].update(kw)
+        ok(any(day in x for x in errs(w, {key}, g)), f"ack G4 KHÔNG che {g} cùng ngày")
     with tempfile.TemporaryDirectory(prefix="vtr_g4acks_") as tmp:
         good, bad = os.path.join(tmp, "good.json"), os.path.join(tmp, "bad.json")
+        ent = {"date": day, "n_prev": 100, "n": 94, "confirmed_by": "user 2030-06-01", "reason": "BQ thiếu 20 mã"}
         with open(good, "w", encoding="utf-8") as f:
-            json.dump({"G4": [{"date": day, "confirmed_by": "user 2030-06-01", "reason": "BQ thiếu 20 mã"}]}, f)
-        ok(V.load_acks(good) == {(day, V.G4_ACK_KEY)}, "ack G4 hợp lệ")
-        ok(V.benchmark_period(a, b, series=dip, acks_path=good)["status"] == "ok", "benchmark ok khi có ack G4")
-        for name, entry in (("thiếu confirmed_by", {"date": day, "reason": "x"}),
-                            ("thiếu reason", {"date": day, "confirmed_by": "user"}),
-                            ("reason rỗng", {"date": day, "confirmed_by": "user", "reason": ""}),
-                            ("thiếu date", {"confirmed_by": "user", "reason": "x"})):
+            json.dump({"G4": [ent]}, f)
+        ok(V.load_acks(good) == {key}, "ack G4 hợp lệ")
+        bp = V.benchmark_period(a, b, series=dip, acks_path=good)
+        ok(bp["status"] == "ok" and bp.get("acked_g4_days") == [{"date": day, "n_prev": 100, "n": 94}],
+           f"benchmark ok + chú thích ngày đã ack: {bp}")
+        bp = V.benchmark_period(a, b, series=base, acks_path=good)
+        ok(bp["status"] == "ok" and "acked_g4_days" not in bp, "không có ngày nào cần ack ⇒ không chú thích")
+        for name, e, sect in (("thiếu confirmed_by", {**ent, "confirmed_by": None}, "G4"),
+                              ("confirmed_by toàn dấu cách", {**ent, "confirmed_by": "  "}, "G4"),
+                              ("confirmed_by không phải chuỗi", {**ent, "confirmed_by": 1}, "G4"),
+                              ("thiếu reason", {**ent, "reason": None}, "G4"),
+                              ("reason rỗng", {**ent, "reason": ""}, "G4"),
+                              ("reason là list", {**ent, "reason": ["x"]}, "G4"),
+                              ("thiếu date", {**ent, "date": None}, "G4"),
+                              ("date sai định dạng", {**ent, "date": "14/10/2026"}, "G4"),
+                              ("date thừa dấu cách", {**ent, "date": day + " "}, "G4"),
+                              ("thiếu n_prev", {**ent, "n_prev": None}, "G4"),
+                              ("n là chuỗi", {**ent, "n": "94"}, "G4"),
+                              ("n là bool", {**ent, "n": True}, "G4"),
+                              ("n âm", {**ent, "n": -1}, "G4"),
+                              ("giả khoá G4 qua mục G6", {"date": day, "ticker": V.G4_ACK_PREFIX + ":100>94",
+                                                          "confirmed_by": "x"}, "G6")):
             with open(bad, "w", encoding="utf-8") as f:
-                json.dump({"G4": [entry]}, f)
+                json.dump({sect: [e]}, f)
             try:
                 V.load_acks(bad)
-                ok(False, f"ack G4 {name} phải ValueError")
+                ok(False, f"ack {name} phải ValueError")
             except ValueError as exc:
-                ok("G4" in str(exc), f"ack G4 {name}: {exc}")
+                ok(sect in str(exc), f"ack {name}: {exc}")
             ok(V.benchmark_period(a, b, series=dip, acks_path=bad)["status"] == "unavailable",
-               f"ack G4 {name} ⇒ benchmark unavailable")
-
+               f"ack {name} ⇒ benchmark unavailable")
 
 def t_dy_corrupt(tmp):
     """DY_CORRUPT (mutant N1 vòng 1): cổ tức > 50% giá phiên trước = dữ liệu hỏng ⇒ KHÔNG vào y (vẫn ghi
