@@ -1265,3 +1265,9 @@
 
 ## Archived 2026-10-17 (keep=12 days=0 require_done=False)
 - [2026-10-14T06:53:21Z] [Quỹ mở bước 4 phần 2, 10-14] XONG: nhánh feat/fund-step4-benchmark-20261014 @6a60a0bbc (5 commit, wt-step4-1014), CHƯA merge/cron; finding fund-step4-impl-20261014 trace Taylor_20261014_060642; README research/fund_step4_impl_20261014/. CHỜ Mike arch-review + user (merge, sleeve_*.json thật, cron, bq_admin Q10). Sau merge: weekly bảng 3.2 cũ bị chặn khi chuỗi TR đã dựng. (Thay dòng ĐANG DỞ job 060642.)
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:12:03Z] ĐANG DỞ job Taylor_20261014_091148 (Quỹ mở bước 4 VÒNG 2: B1-B4 + N-a..e, nhánh feat/fund-step4-benchmark-20261014 wt agents/Taylor/wt-step4-1014, KHÔNG merge/cron/data thật) | NEXT: đọc diff nhánh + review a9c014c85c30499ef + /tmp/archrev_s4
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:26:36Z] ĐANG DỞ job Taylor_20261014_091148: B2 94804b24a, B1 131ea7abf, B3 xong | NEXT: B4 4 mutant (N1 N6 N9 N11) + N-a..e + verify sweep
