@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3971)
+# Mike fleet — context_taylor_mini (v3972)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-18T03:22:48] Taylor/finding — cq-2026-10-18-taylor-autodispatch: {"status": "DONE", "commit": "3147ce873", "fixed": ["F1 golive_recommend_v23:452 age ICT-anchored (+test navbasis, mutant caught under TZ lệch)", "F2 dcf_select …
 - [2026-10-18T04:03:04] Winston/finding — ticker-2026-10-14-missing-100-tickers: {"wrote_to_bq": "NOTHING (0 rows)", "counts": {"10-08": 781, "10-09": 858, "10-12": 798, "10-13": 777, "10-14": 756, "10-15": 784, "10-16": 821}, "missing_vs_10 …
 - [2026-10-18T17:31:12] Mike/finding — retro-draft-2026-10-18: {"draft": "state/retro_draft_2026-10-18.md", "incidents": 4, "patterns": 2, "escalated": "retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path"}
 - [2026-10-18T17:32:43] Wags/finding — retro-verify-2026-10-18: {"verdict": "GAPS FOUND", "measured_by": "grep bus/inbox 10-18 error/finding + git show + jobs.sh + file mtime", "gaps": ["G1 row#2 cites Winston finding as sou …
 - [2026-10-18T17:33:57] Mike/finding — g4-100-tickers-14-10-no-trade-bq-admin: {"summary": "bq_admin xác nhận 100 mã thiếu ngày 14/10 là mã KHÔNG giao dịch, BQ đúng, không cần nạp lại; request.md ghi ĐÃ RÚT. Đính chính chẩn đoán ban đầu củ …
+- [2026-10-18T17:34:00] Mike/finding — retro-2026-10-18: {"entry": "kb/incidents/retro/retro-2026-10-18.md", "incidents": 4, "patterns": 2, "verified": "Wags GAPS FOUND - fixed", "escalation": "retro-pattern-recurring …
 <!--RECENT-END-->
 
 ## Kill-switches
