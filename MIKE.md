@@ -307,8 +307,10 @@ Lịch sử gỡ daemon + bảng 2-tier cũ (nguyên văn): `MIKE_ext.md` § D�
 Quy trình đầy đủ đã tách sang `kb/mike_model_routing.md` để core này luôn dưới ngưỡng 40KB.
 Mỗi lần dispatch gọi skill `dispatch-routing` (checklist 1 phút, `~/.claude/skills/`; `dispatch.sh` tự nhắc vòng ≥3 qua `bin/dispatch_loop_hint.py`), chi tiết đọc file đó: chọn provider trước, rồi model/effort theo độ phức tạp
 của task; không gắn model cố định theo agent. Tóm tắt (đời 5.5, user duyệt 2026-10-11): chỉ-đọc
-ngắn kiểm được → haiku; việc thường ngày → sonnet/medium (omit); việc khó → opus/medium; phản
-biện, chạm tiền, thiết kế mới → opus/high; Q3 hiếm → fable/high (chỉ lên kế hoạch).
+ngắn kiểm được → haiku; việc thường ngày (kể cả dựng theo đặc tả đã duyệt, vòng 2 áp required_change)
+→ sonnet/medium (omit); Opus CHỈ khi phản biện / chạm tiền / thiết kế mới / lỗi chưa rõ nguyên nhân
+(medium; `high` chỉ phản biện, chạm tiền, review toàn nhánh) — siết 2026-10-18, user duyệt; Q3 hiếm →
+fable/high (chỉ lên kế hoạch).
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một

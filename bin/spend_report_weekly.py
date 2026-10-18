@@ -11,6 +11,7 @@ state/spend_report_emailed.json.
 import argparse
 import csv
 import datetime
+import glob
 import json
 import os
 import subprocess
@@ -83,6 +84,31 @@ def _int(row, key):
     return int(_num(row, key))
 
 
+def scan_cost_by_tier(root, days):
+    """Chi phí USD theo (tầng model, effort) từ bus/jobs. `default` (omit --model) ≡ sonnet
+    vì cả 8 agent ghi alias `sonnet` (routing đời 5.5, 2026-10-11). Chỉ job claude."""
+    since_ts = int(time.time()) - days * 86400
+    out = {}
+    for path in glob.glob(os.path.join(root, "bus", "jobs", "*.json")):
+        try:
+            with open(path, encoding="utf-8") as f:
+                rec = json.load(f)
+            started = float(rec.get("started_at") or 0)
+        except Exception:
+            continue
+        if started < since_ts or (rec.get("provider") or "claude") != "claude":
+            continue
+        tier = rec.get("model") or "sonnet"
+        if tier not in ("haiku", "sonnet", "opus", "fable"):
+            tier = "sonnet"
+        key = (tier, rec.get("effort") or "medium")
+        row = out.setdefault(key, {"jobs": 0, "cost": 0.0, "retried": 0})
+        row["jobs"] += 1
+        row["retried"] += 1 if _num(rec, "attempt") > 1 else 0
+        row["cost"] += _num(rec, "total_cost_usd")
+    return out
+
+
 def compute_summary(root, days):
     since_ts = int(time.time()) - days * 86400
     spend_report.ROOT = root
@@ -152,6 +178,7 @@ def compute_summary(root, days):
         "agent_effort": agent_effort,
         "retry_stats": retry_stats,
         "cache_usage": cache_usage,
+        "cost_by_tier": scan_cost_by_tier(root, days),
         "commit_counts": commit_counts,
         "commit_total": commit_total,
         "total_jobs": total_jobs,
@@ -461,6 +488,24 @@ def build_report(report_date, summary, previous, charts):
     lines.append("## Commits by type")
     lines.append("")
     lines.append(f"![Commits by type]({charts['commits']})")
+    lines.append("")
+
+    lines.append("## Chi phí theo tầng model / effort")
+    lines.append("")
+    tiers = summary.get("cost_by_tier") or {}
+    total_cost = sum(v["cost"] for v in tiers.values())
+    if tiers and total_cost:
+        rows = []
+        for (tier, eff), v in sorted(tiers.items(), key=lambda kv: -kv[1]["cost"]):
+            rows.append([tier, eff, v["jobs"], f"${v['cost']:.1f}", f"{100 * v['cost'] / total_cost:.0f}%",
+                         f"${v['cost'] / v['jobs']:.2f}", f"{v['retried']}/{v['jobs']}"])
+        lines += _md_table(["Model (default≡sonnet)", "Effort", "Job", "Chi phí", "%", "TB/job", "Chạy lại"], rows)
+        opus_share = 100 * sum(v["cost"] for (t, _), v in tiers.items() if t == "opus") / total_cost
+        lines.append("")
+        lines.append(f"Opus chiếm **{opus_share:.0f}%** chi phí. Luật 2026-10-18: Opus chỉ cho phản biện / "
+                     "chạm tiền-cổng an toàn / thiết kế mới / lỗi chưa rõ nguyên nhân; việc còn lại Sonnet.")
+    else:
+        lines.append("Chưa có dữ liệu chi phí (`total_cost_usd`) trong cửa sổ.")
     lines.append("")
 
     lines.append("## Token / retry watch")
