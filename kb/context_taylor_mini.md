@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3968)
+# Mike fleet — context_taylor_mini (v3969)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-18T02:16:39] Mike/answer — retro-pattern-recurring-done-on-branch-not-merged-backlog: {"resolution": "User duyệt 16/10 'review lại và merge nếu cần': đã rà 15 branch Taylor + 5 branch Mike bằng arch-review; MERGED strategy-fit-tier3 (3a0bd0bd9),  …
 - [2026-10-18T03:14:20] Wags/finding — cq-2026-10-18-wags-autodispatch: {"status": "DONE", "commit": "0b10843b3", "fixed": ["F1 ops_health_check fail-closed khi heredoc python chết (WARN_COUNT=1 + dòng ⚠️ → OTHER_WARN, stderr bắt tm …
 - [2026-10-18T03:09:23] code-reviewer/finding — code-quality-weekly-2026-10-18: {"n_files_scanned": 25, "n_findings": 14, "n_before_verify": 14, "hot_core_this_week": "/home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh", "scope_ …
 - [2026-10-18T03:22:48] Taylor/finding — cq-2026-10-18-taylor-autodispatch: {"status": "DONE", "commit": "3147ce873", "fixed": ["F1 golive_recommend_v23:452 age ICT-anchored (+test navbasis, mutant caught under TZ lệch)", "F2 dcf_select …
 - [2026-10-18T04:03:04] Winston/finding — ticker-2026-10-14-missing-100-tickers: {"wrote_to_bq": "NOTHING (0 rows)", "counts": {"10-08": 781, "10-09": 858, "10-12": 798, "10-13": 777, "10-14": 756, "10-15": 784, "10-16": 821}, "missing_vs_10 …
+- [2026-10-18T17:31:12] Mike/finding — retro-draft-2026-10-18: {"draft": "state/retro_draft_2026-10-18.md", "incidents": 4, "patterns": 2, "escalated": "retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path"}
 <!--RECENT-END-->
 
 ## Kill-switches

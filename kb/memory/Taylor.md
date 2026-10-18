@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-14T09:29:47Z] ĐANG DỞ job Taylor_20261014_091148 attempt2: commit B2/B1/B3/B4/N-b có sẵn (10e84dd2c) | NEXT: N-a,N-c,N-d,N-e + verify (TZ, §23, harness reviewer, byte master vs nhánh) + bus
 - [2026-10-14T09:34:30Z] ĐANG DỞ job 091148 attempt2: TẤT CẢ B1-B4 + N-a..e đã commit (HEAD 8d39846be) | NEXT: verify (harness /tmp/archrev_s4/mut/run.py, TZ, §23, byte proof) + bus finding
 - [2026-10-14T09:46:34Z] [Quỹ bước 4 vòng 2, 10-14] XONG nhánh @246f3ba53 (B1-B4 + N-a..e), finding fund-step4-round2-20261014 trace 091148; CHỜ Mike arch-review hẹp vòng 2. Merge PHẢI kèm data/account_inception.json. Sự cố: dòng sót nav_history_ZaloPay 10-14 16:38 (cron 19:10 tự thay) — kiểm sau 19:10. (Thay dòng ĐANG DỞ job 091148.)
 - [2026-10-14T13:53:08Z] ĐANG DỞ job Taylor_20261014_135258 (đổi nhãn rate_source cctg_6m→cctg_12m, worktree riêng, KHÔNG merge): bắt đầu | NEXT: grep + tạo worktree
@@ -26,3 +25,4 @@
 - [2026-10-17T02:18:27Z] [weekly 10-12→10-16] 2 file md + 6 chart XONG, delivery gate BLOCK G4 (cột VN-Index có cổ tức). CHỜ Mike/bq_admin gỡ G4 rồi chạy lại report_delivery_gate cho 2 file (sha trong bus finding weekly-...BLOCKED-G4).
 - [2026-10-18T03:16:52Z] ĐANG DỞ job Taylor_20261018_030925 (cq-2026-10-18 autodispatch, 7 finding): sửa xong 6 + F7 chỉ docstring, working tree CHƯA commit (9 file ở WorkingClaude/); arch-reviewer ae94d13e chạy nền | NEXT: nhận verdict, commit CHỈ 9 file (cấm git add -A), bus finding topic cq-2026-10-18-taylor-autodispatch, notify_thread.sh architecture
 - [2026-10-18T03:22:49Z] [cq-2026-10-18 autodispatch] XONG commit 3147ce873 (9 file), chờ Mike/arch-review vòng 2 nếu muốn; chưa merge/push. (Thay dòng ĐANG DỞ job 030925.)
+- [2026-10-18T17:25:58Z] ĐANG DỞ job Taylor_20261018_172548 (VN-Index TR carry-forward v2, wt riêng, KHÔNG merge/data thật) | NEXT: đọc bin/vnindex_total_return.py + registry

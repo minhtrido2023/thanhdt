@@ -1271,3 +1271,6 @@
 
 ## Archived 2026-10-18 (keep=12 days=0 require_done=False)
 - [2026-10-14T09:26:36Z] ĐANG DỞ job Taylor_20261014_091148: B2 94804b24a, B1 131ea7abf, B3 xong | NEXT: B4 4 mutant (N1 N6 N9 N11) + N-a..e + verify sweep
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:29:47Z] ĐANG DỞ job Taylor_20261014_091148 attempt2: commit B2/B1/B3/B4/N-b có sẵn (10e84dd2c) | NEXT: N-a,N-c,N-d,N-e + verify (TZ, §23, harness reviewer, byte master vs nhánh) + bus

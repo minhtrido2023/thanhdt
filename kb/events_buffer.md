@@ -427,3 +427,15 @@
 
 ## Consolidation 2026-10-18T15:07:02Z
 - [2026-10-18T15:00:13Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 230, "deleted_bytes": 8001944, "archived_items": 118, "archived_bytes": 2249226, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-10-18T17:31:19Z
+- [2026-10-18T17:30:50Z] Mike/question — retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path: {"summary": "Pattern cổng fail-closed đúng nhưng KHÔNG có đường phục hồi có chủ tái diễn 3 retro liên tiếp (10-16, 10-17, 10-18): weekly 12-16/10 bị G4 chờ tới 18/10 17:50 ICT mới gỡ nhờ user xác nhận; plan T+1 19/10 vẫn chưa dựng lại (mtime 16/10 23:30) sát giờ mở cửa; ZaloPay weekly đã gửi còn 2 câu sai chưa sửa.", "options": ["A: mỗi cổng BLOCK tự mở bus question có owner+deadline và có lệnh recover một dòng; cron nhắc lại tới khi đóng", "B: giữ nguyên, chỉ nhắc thủ công", "C: carry-forward giá mã không khớp lệnh để G4 không còn chặn (Taylor_20261018_172548 đang đo)"], "recommendation": "A (cơ chế, không thêm văn xuôi) + C song song", "urgency": "medium", "recurring_days": 3, "topic_stable": true}
+- [2026-10-18T17:31:08Z] Mike/heartbeat — Mike_20261018_173008: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261018_173008", "source": "watcher"}
+- [2026-10-18T17:31:12Z] Mike/finding — retro-draft-2026-10-18: {"draft": "state/retro_draft_2026-10-18.md", "incidents": 4, "patterns": 2, "escalated": "retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path"}
+- [2026-10-18T17:26:48Z] Taylor/heartbeat — Taylor_20261018_172548: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261018_172548", "source": "watcher"}
+- [2026-10-18T17:27:02Z] Taylor/heartbeat — Taylor_20261018_172548: {"status": "in_progress", "note": "đọc code + registry xong, tạo worktree"}
+- [2026-10-18T17:27:48Z] Taylor/heartbeat — Taylor_20261018_172548: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261018_172548", "source": "watcher"}
+- [2026-10-18T17:28:49Z] Taylor/heartbeat — Taylor_20261018_172548: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261018_172548", "source": "watcher"}
+- [2026-10-18T17:29:49Z] Taylor/heartbeat — Taylor_20261018_172548: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261018_172548", "source": "watcher"}
+- [2026-10-18T17:30:49Z] Taylor/heartbeat — Taylor_20261018_172548: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261018_172548", "source": "watcher"}
+- [2026-10-18T17:31:14Z] Taylor/heartbeat — Taylor_20261018_173105: {"status": "in_progress", "note": "bắt đầu đọc code"}
