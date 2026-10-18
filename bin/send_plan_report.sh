@@ -649,6 +649,21 @@ lines.append(f"🧭 Thị trường: {state}{src_vn} · NAV cơ sở: {nav_str}"
 # khi có điều CẦN GIẢI THÍCH (chưa đối chiếu được / mismatch / nhãn mâu thuẫn, đều có ⚠️).
 if state_verify_note and "⚠️" in state_verify_note:
     lines.append(f"   {state_verify_note}")
+# Nguồn cổng get_gated_state() của bản publish plan này dựa vào (retro 2026-10-11 Pattern I, user
+# duyệt 2026-10-12): khác DT5G_macro ⇒ MỘT dòng ⚠️, không chặn. Nguồn = golive_state_today.json;
+# bằng chứng nguyên nhân = data/gate_source_alert.json do bước kiểm 19:00 ghi (bin/gate_source_check.py).
+# DT5G_macro ⇒ chuỗi rỗng ⇒ report y như cũ. Lỗi ⇒ NÓI RA trong report, không bỏ qua câm.
+try:
+    _gs_bin = os.environ.get("SEND_PLAN_MIKE_BIN")
+    if _gs_bin and _gs_bin not in sys.path:
+        sys.path.insert(1, _gs_bin)
+    from gate_source_check import plan_report_line as _gate_src_line
+    _gs_line = _gate_src_line(os.getcwd())
+except Exception as _e:
+    _gs_line = (f"⚠️ KHÔNG kiểm được nguồn cổng DT5G của bản publish hôm nay ({type(_e).__name__}: "
+                f"{_e}) — không chặn plan, tự xem trường source trong golive_state_today.json")
+if _gs_line:
+    lines.append(f"   {_gs_line}")
 
 # DT4-gate candidate streak clock — đã wire vào eod_trading_report.sh (2026-07-10) nhưng
 # CHƯA vào plan T+1 report này (khoảng trống user phát hiện 2026-08-11). Tái dùng
