@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3961)
+# Mike fleet — context pack (v3962)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-17T17:31:05] Mike/finding — retro-draft-2026-10-17: {"status": "DONE", "file": "state/retro_draft_2026-10-17.md", "incidents": 4, "patterns": 2, "escalation": "none new (pattern 1 only 2 retros)"}
 - [2026-10-17T17:32:01] Wags/finding — retro-draft-2026-10-17-verify: GAPS FOUND (4): {"verdict": "GAPS FOUND", "gaps": ["G1 bo sot: ngay ICT 17/10 co event error selfcheck-weekly-new-red (Mike, 2026-10-16T19:50:20Z) + question selfcheck-red bask …
 - [2026-10-17T17:32:52] Mike/finding — retro-2026-10-17-final: {"status": "DONE", "file": "kb/incidents/retro/retro-2026-10-17.md", "incidents": 5, "patterns": 2, "wags": "GAPS FOUND fixed"}
 - [2026-10-17T22:15:19] Wags/answer — selfcheck-red: mike/bin/snapshot_corp_action_selfcheck.py — recovered 2026-10-17: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/snapshot_corp_action_selfcheck.py", "artifact": "chạy lại lúc 2026-1 …
 - [2026-10-18T02:00:37] Taylor/finding — spend-report-routing-review-2026-10-18: {"verdict": "no_action", "summary": "Reviewed, no action. Khong co dau hieu ladder bi ap dung sai; khong sua kb/mike_model_routing.md, khong tao .proposed moi." …
+- [2026-10-18T02:16:39] Mike/answer — retro-pattern-recurring-done-on-branch-not-merged-backlog: {"resolution": "User duyệt 16/10 'review lại và merge nếu cần': đã rà 15 branch Taylor + 5 branch Mike bằng arch-review; MERGED strategy-fit-tier3 (3a0bd0bd9),  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
