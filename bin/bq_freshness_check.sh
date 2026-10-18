@@ -884,7 +884,7 @@ fi
 
 MORNING_NOTE=""
 if [ "${MORNING:-0}" = "1" ]; then
-  MORNING_NOTE=" ⚠️ CHẠY TAY BUỔI SÁNG (MIKE_MORNING_RUN=1): dữ liệu/DT5G/recommend là của PHIÊN $TODAY (không phải ngày lịch ${CAL_TODAY}); plan này dành cho CHÍNH ngày $NEXT_TRADING_DAY. BẮT BUỘC đặt requires_user_approval=true cho mọi lệnh và nói rõ trong summary rằng đây là plan chạy tay buổi sáng cần user duyệt trước 08:45 ICT; chuỗi inject lệnh thoát theo thời gian (auto_exit_inject) và gửi plan có thể CHƯA chạy cho ngày này."
+  MORNING_NOTE=" ⚠️ CHẠY TAY BUỔI SÁNG (MIKE_MORNING_RUN=1): dữ liệu/DT5G/recommend là của PHIÊN $TODAY (không phải ngày lịch ${CAL_TODAY}); plan này dành cho CHÍNH ngày $NEXT_TRADING_DAY. ${MIKE_MORNING_NOTE_TAIL:-BẮT BUỘC đặt requires_user_approval=true cho mọi lệnh và nói rõ trong summary rằng đây là plan chạy tay buổi sáng cần user duyệt trước 08:45 ICT; chuỗi inject lệnh thoát theo thời gian (auto_exit_inject) và gửi plan có thể CHƯA chạy cho ngày này.}"
 fi
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"

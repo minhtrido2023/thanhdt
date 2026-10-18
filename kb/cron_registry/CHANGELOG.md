@@ -509,3 +509,4 @@ preserve_verbatim: >
   `kb/current_ops.md`).
 
 ↩ [Về cron_registry (bảng chính)](../cron_registry.md) · [index nhóm _rules](index.md)
+- 2026-10-19 (Taylor, job `Taylor_20261018_180113`, vòng 2 áp arch-review): dòng đề xuất đổi — `0 16 * * 0` nay là `sunday_plan_round.sh --second-chance` (verify + gate mùa BCTC trong wrapper, thay vì `for_each_live_account.sh send_plan_report.sh --second-chance` chạy quanh năm); thêm đề xuất `30 1 * * 1 sunday_plan_round.sh --verify` (08:30 ICT T2). CHƯA cài.
