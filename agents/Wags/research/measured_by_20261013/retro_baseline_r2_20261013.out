@@ -1,0 +1,41 @@
+PASS [real] rc retro = rc của biến thể real (0)
+PASS [real] đúng 3 dispatch Mike→Wags→Mike
+PASS [real] prompt Wags giống real
+PASS [real] prompt finalize giống real
+PASS [real] prompt draft chỉ khác trong mục 2f
+PASS [real] mục 2f có câu KHÔNG escalate
+PASS [absent] rc retro = rc của biến thể real (0)
+PASS [absent] đúng 3 dispatch Mike→Wags→Mike
+PASS [absent] prompt Wags giống real
+PASS [absent] prompt finalize giống real
+PASS [absent] prompt draft chỉ khác trong mục 2f
+PASS [absent] mục 2f có câu KHÔNG escalate
+PASS [crash] rc retro = rc của biến thể real (0)
+PASS [crash] đúng 3 dispatch Mike→Wags→Mike
+PASS [crash] prompt Wags giống real
+PASS [crash] prompt finalize giống real
+PASS [crash] prompt draft chỉ khác trong mục 2f
+PASS [crash] mục 2f có câu KHÔNG escalate
+PASS [hang] rc retro = rc của biến thể real (0)
+PASS [hang] đúng 3 dispatch Mike→Wags→Mike
+PASS [hang] prompt Wags giống real
+PASS [hang] prompt finalize giống real
+PASS [hang] prompt draft chỉ khác trong mục 2f
+PASS [hang] mục 2f có câu KHÔNG escalate
+PASS [empty] rc retro = rc của biến thể real (0)
+PASS [empty] đúng 3 dispatch Mike→Wags→Mike
+PASS [empty] prompt Wags giống real
+PASS [empty] prompt finalize giống real
+PASS [empty] prompt draft chỉ khác trong mục 2f
+PASS [empty] mục 2f có câu KHÔNG escalate
+PASS [old] rc retro = rc của biến thể real (0)
+PASS [old] đúng 3 dispatch Mike→Wags→Mike
+PASS [old] prompt Wags giống real
+PASS [old] prompt finalize giống real
+PASS [old] prompt draft chỉ khác trong mục 2f
+PASS [real] mục 2f chứa khối đếm do helper in (chưa có dữ liệu — sandbox không có bus)
+PASS [crash] mục 2f rơi về câu 'chưa có dữ liệu'
+PASS [hang] helper treo 60s bị timeout cắt: retro xong <20s (thực 2s)
+PASS [hang] mục 2f rơi về 'chưa có dữ liệu' (timeout cắt)
+---
+PASS=39 FAIL=0

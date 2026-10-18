@@ -1,0 +1,5 @@
+[measured_by warn] tính đến 13/10/2026 10:46 ICT (số đếm THÔNG TIN, đếm từ bus/_measured_by_warn.jsonl + bus/inbox)
+  cảnh báo: 24h=21 (24h trước đó=22) · 7ng=128 | finding: 24h=23 · 7ng=132 | tỉ lệ cảnh báo/finding: 24h=91.3% · 7ng=97.0%
+  theo nguồn — 24h: có trace_id (agent dispatch)=19 · không trace_id (script/cron)=2 | 7ng: 111 · 17
+  agent_id (7ng, top 8): Taylor=74, Wags=19, Mike=18, Winston=10, DollarBill=5, code-reviewer=1, macro-strategist=1
+  topic (7ng, top 5): canary-sonnet55-plan-SpaceX=3, sbv-weekly-check-2026-10-09=3, context-pack-trim=2, dispatch-token-telemetry=2, spend-report-routing-review-2026-10-11=2

@@ -11,13 +11,23 @@ Nhiệm vụ: Phát triển thuật toán & rule sizing hỗ trợ Dollar Bill, 
   Không hỏi lại những điều KB chung đã ghi — kết quả của agent khác xuất hiện ở mục "MỚI NHẤT".
 - **Khi tạo ra tri thức bền** (kết luận / số liệu / quyết định), ghi ngay lên bus:
   ```bash
-  /home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh Taylor finding "<chủ đề ngắn>" '<payload JSON hoặc chuỗi>'
+  /home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh Taylor finding "<chủ đề ngắn>" '<payload JSON object khi finding có số>'
   ```
   Dùng `decision` cho quyết định, `answer` khi trả lời dispatch/directive (kèm context trong payload),
   `error`/`status` cho sự cố/tiến độ. Consolidator sẽ gộp lên KB cho cả fleet thấy.
   **Nếu đang trong 1 dispatch job** (prompt bắt đầu bằng `[DISPATCH ... job=<job_id>]`), thêm
   `<job_id>` làm tham số thứ 5 (trace_id) — copy đúng theo mẫu lệnh trong prompt dispatch, không
   tự bịa 4 tham số — để mọi event của job này gộp lại thành 1 timeline tra được (`bin/jobs.sh`).
+- **Số trong finding: ĐO rồi mới viết** (user duyệt 2026-10-13, sau 4 ngày liền phải đính chính):
+  1. Mỗi con số viết ra là **đã đo** (chạy lệnh / đọc file, trong chính phiên này) hoặc **gắn nhãn
+     `ước lượng`** ngay cạnh nó. CẤM viết số chưa đo dưới dạng số đo — kể cả kèm dấu `~`.
+     Đo được thì đo trước khi gửi; không đo nổi thì gắn nhãn `ước lượng`, hoặc bỏ số và nói "chưa đo".
+  2. Finding có số ⇒ payload là JSON object và có `"measured_by"` ở **CẤP CAO NHẤT** (không lồng
+     cạnh con số): lệnh đã chạy hoặc file chứa số đó. Thiếu thì `append_event.sh` cảnh báo (không
+     chặn — event ĐÃ ghi, đừng gửi lại); `measured_by` chỉ là KHAI nguồn, không thay việc đo.
+  - SAI (ca thật 10-12, rút gọn từ `nav-loss-brake-monitor-20261012-r3`, phải ghi `-dinh-chinh` ngay sau):
+    `{"lines": {"monitor": "1658 -> 1527 (-131; gỡ ~-460 dòng, thêm ~+330)"}}`
+  - ĐÚNG: `{"lines": {"monitor": "1658 -> 1527 (+480/-611)"}, "measured_by": "git diff --numstat backup/nav-loss-brake-r2-managed-20261012 HEAD"}`
 - **Phạm vi**: làm việc trong thư mục của mình; phối hợp qua bus + dispatch, không sửa file của con khác.
 - Stop hook tự ghi heartbeat sau mỗi lượt — không cần làm thủ công.
 

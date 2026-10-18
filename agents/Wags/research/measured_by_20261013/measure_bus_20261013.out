@@ -1,0 +1,83 @@
+events_all=2299 findings=299 dict_payload=298 would_warn=292 (97.7%) has_measured_by=0
+non_finding_flagged=0 (phải = 0)
+would_warn theo agent: [('Taylor', 177), ('Wags', 38), ('Mike', 31), ('Winston', 30), ('DollarBill', 9), ('macro-strategist', 3), ('Mafee', 2), ('code-reviewer', 2)]
+would_warn KHÔNG trace_id (script/cron): 35 [('sbv-weekly-check-D', 14), ('corp-action-daily D OK', 10), ('plan-position-drift-cannot-check-ZaloPay-D', 3), ('code-quality-weekly-D', 2), ('nav-exdate-forecast D', 2), ('watch-cd-deposit-rate-D', 1)]
+finding KHÔNG bị cảnh báo: [('DollarBill', 'plan-SpaceX-2026-09-30-done'), ('Mike', 'report-cadence-scheduled-monthly_2026-09'), ('Mike', 'report-cadence-scheduled-weekly_2026-09-28_2026-10-02'), ('DollarBill', 'plan-2026-10-06-corp-action'), ('Wags', 'wags-fix: coord-2026-10-09'), ('Mike', 'report-cadence-scheduled-weekly_2026-10-05_2026-10-09'), ('Mike', 'retro-2026-10-12-finalized')]
+CA 2026-10-12T13:42:43Z | fund-cashflow-detect-20261012 | type=finding | warn=['2', '-1.33', '0.519', '1.024', '-4.907']
+CA 2026-10-12T16:39:53Z | nav-loss-brake-monitor-20261012-r3 | type=finding | warn=['2', '2', '1658', '1527', '-131']
+CA 2026-10-12T01:09:23Z | deposit-cctg-weekly-done | type=status | warn=None
+CA 2026-10-12T01:09:23Z | deposit-cctg-weekly-done | type=status | warn=None
+CA 2026-10-12T01:09:23Z | deposit-cctg-weekly-done | type=status | warn=None
+CA 2026-10-12T01:09:31Z | cctg_6m dinh chinh | type=finding | warn=['7,4', '7,5', '7,5']
+
+[0] 2026-10-10T12:02 Taylor | K1+P1: nhánh fix/daily-report-return-gate-20261010 @53b48b76 — báo cáo | trace=True | ['1', '1', '1', '1', '+5.60%', '29', '+37,81%', '+34,58%', '3', '1', '0', '0']
+    {"context": "answer cho dispatch job Taylor_20261010_105705 (attempt 2/2 — hoàn tất phần dở của attempt 1, không viết lại). K1 báo cáo ngày qua công cụ §21 + P1 _broker_touched. CHƯA merge, KHÔNG gửi báo cáo, KHÔNG sửa mike/reports, KHÔNG đụng crontab.", "bran
+
+[1] 2026-10-01T21:51 Winston | sbv-weekly-check-2026-10-02 | trace=False | ['4.5']
+    {"date": "2026-10-02", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+[2] 2026-10-06T04:43 Taylor | discretionary-funnel-lane-c-build-r2 | trace=True | ['5', '0', '300%', '3.004', '+300%', '22', '67624', '210', '210', '3.10', '3.12', '56']
+    {"status": "built_not_merged", "branch": "feat/funnel-lane-c-20261006", "commit": "ce0d4aa8", "parent": "9cf42868", "worktree": "mike/agents/Taylor/wt-lanec-1006", "blocking_fixed": {"1_mutate_inplace": "mutate_lane_c.py chay tren ban copy tmpdir rieng moi dot
+
+[3] 2026-10-10T20:41 Taylor | fund-unit-ledger VÒNG 3: nhánh feat/fund-unit-ledger-20261011 @e102ebe | trace=True | ['1', '3', '75060709', '11', '+589', '51', '+8,197%', '+10,0%', '0', '2', '10', '0']
+    {"context": "answer cho dispatch job Taylor_20261010_201420 (attempt 2/2: hoàn tất phần dở của attempt 1 — code+test đã viết, lần này kiểm lại toàn bộ trên code cuối rồi commit). VÒNG 3 = áp required_change của REVIEW2.md, không thiết kế lại.", "branch": "feat
+
+[4] 2026-09-30T16:22 Taylor | dc-fixed-tilt-3070-dsr-pbo | trace=True | ['0.30', '5', '0.2', '0.3', '0.4', '0.5', '0.7', '0', '0', '5', '1', '23.15']
+    {"task": "DSR/PBO cho trục trộn cố định X% DC-book/(100-X)% custom30V trên phần park=0.30", "script": "mike/agents/Taylor/research/dcwf_regen_20260930/fixed_tilt_dsr_pbo.py", "n_trials_declared": 5, "shares_tested": [0.2, 0.3, 0.4, 0.5, 0.7], "selfcheck_A_pass
+
+[5] 2026-10-09T08:00 Winston | sbv-weekly-check-2026-10-09 | trace=False | ['4.5']
+    {"date": "2026-10-09", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+[6] 2026-09-30T01:50 Winston | vnm-exright-date-off-by-one-confirmed | trace=True | ['1.0', '0.999115', '1.0', '06', '-25', '2', '2', '-1', '-2', '1', '2']
+    {"job": "Winston_20260930_014855", "ticker": "VNM", "event": "DIV 1850d, record_date=2026-06-29", "bq_recorded_exright_date": "2026-06-26", "actual_exright_date": "2026-06-25", "evidence_1_price_ratio": "tav2_bq.ticker Price/Close ratio VNM 06-15..06-30: on ha
+
+[7] 2026-10-02T19:26 Winston | sbv-weekly-check-2026-10-03 | trace=False | ['4.5']
+    {"date": "2026-10-03", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+[8] 2026-09-30T04:24 Taylor | wire-confirmed-fixA-fixB-2fixes-live | trace=True | ['2', '30', '2']
+    {"fixA": {"commit": "91eb663d", "repo": "WorkingClaude", "files": ["custom30_history.py", "custom30_yield_labels.py"], "status": "canonical file, no flag needed, wires automatically next papertrade_daily.sh [6b] run cron 15:30 ICT hom nay 2026-09-30"}, "fixB":
+
+[9] 2026-09-29T03:44 Taylor | paper-report-fpt-double-adjust-fix-20260929-viec3-price-xcheck | trace=True | ['2', '3', '2', '3', '1.235', '0.3%', '1.43%', '6.16%', '8.77%', '13.64%', '28.35%', '4']
+    {"context": "Tiep noi paper-report-fpt-double-adjust-fix-20260929 (Viec 1/2 da xong, 2 vong quant-skeptic CONFIRMED moi viec). User duyet Viec nho 3: dong lo hong con lai ma quant-skeptic phat hien o Viec nho 2 - bat bien don dieu (REPAIR_INCONSISTENT) chi bat
+
+[10] 2026-10-02T08:45 Taylor | oddlot-full-exit-done | trace=True | ['0', '1', '1', '1', '220', '200', '20', '1', '1', '3', '1', '0']
+    {"job": "Taylor_20261002_082525", "result": "DONE - committed, CHUA merge", "branch": "fix/oddlot-full-exit-20261002", "commit": "688d0784", "base": "a9ee5f4a", "worktree": "mike/agents/Taylor/wt-oddlot-1002", "rule": "full_exit_qty(lot_qty, book_left, sellabl
+
+[11] 2026-10-12T16:40 Taylor | nav-loss-brake-monitor-20261012-r3-dinh-chinh | trace=True | ['-460', '+330', '+480', '-611', '-131', '1658', '1527', '+419', '-552', '-133', '1574', '1441']
+    {"job": "Taylor_20261012_161627", "corrects": "finding nav-loss-brake-monitor-20261012-r3, truong lines.monitor", "wrong": "go ~-460 dong, them ~+330 (uoc luong, khong do)", "correct_value": "git diff --numstat backup/nav-loss-brake-r2-managed-20261012 HEAD: m
+
+[12] 2026-09-30T17:40 Mike | daily-retro-2026-09-30-finalized | trace=True | ['4', '0', '4', '0', '4']
+    {"summary": "Retro 2026-09-30 finalized: 4 incidents (0 pre-logged, 4 gaps added), Wags CONFIRMED (0 gaps). Pattern bus-closure-channel-gap (escalated 09-29) CLOSED mechanically today via question_commit_hint.py wired into dispatch.sh completion path (both --b
+
+[13] 2026-10-03T03:36 Wags | merge-9311ac03-audit: 1 PORT LAI (prompt investor-grade), 4 DA CO, 1 C | trace=True | ['6', '1', '4', '1', '5', '5%', '5', '5', '5', '02', '1', '02']
+    {"summary": "Audit 6 commit vs master HIEN TAI: 1 muc PORT LAI (prompt investor-grade weekly/monthly trong check_report_cadence.sh), 4 DA CO, 1 CO Y BO (early_corp_action_price -> corp_action_gate_v2 rc=5). Chi doc, khong sua code.", "items": [{"commit": "9f8c
+
+[14] 2026-10-01T04:11 Taylor | scl-spacex-reconcile-dd-email-complete-20261001 | trace=True | ['28300', '0', '28300', '23600.0001', '1400', '28300', '0002023347', '0', '151685000', '166620850', '7049999.85', '79806']
+    {"account": "SpaceX", "ticker": "SCL", "event": "manual sell outside plan, 2026-09-30 ~14:43 ICT, 1500cp@28300, book LAG (BUY-SCL-LAG-03)", "independent_sources": ["dnse_raw_2026-09-30.jsonl positions modifiedDate=2026-09-30T07:43:39Z qty1500->0 avgClosePrice=
+
+[15] 2026-10-02T01:21 Wags | wags-fix: coord-2026-10-02 | trace=True | ['2', '1', '25', '25', '5', '2', '1', '2', '2']
+    {"root_cause": "2 question treo: (1) spacex-tpb-reconcile-20261001 đã được giải bằng hành động (user duyệt ghi tay corp_actions.json + DollarBill regen plan reconcile ok 25/25) nhưng không ai phát event answer — Pattern B lần 5; (2) tpb-price-frame-gate-blocke
+
+[16] 2026-10-10T07:35 Taylor | total-return-gips-fix §21: nhánh fix/total-return-gips-20261010 @d0294 | trace=True | ['1', '224', '0', '163', '163', '3', '0', '0', '52', '52', '0', '0']
+    {"context": "answer cho dispatch job Taylor_20261010_043938 — vá công cụ tỉ suất per-position §21 theo chuẩn tỉ suất tổng (GIPS/tax-lot). CHƯA merge, chờ Mike arch-review.", "branch": "fix/total-return-gips-20261010", "worktree": "/home/trido/thanhdt/WorkingCl
+
+[17] 2026-10-11T04:00 DollarBill | canary-sonnet55_b-plan-SpaceX | trace=True | ['0']
+    {"file": "/tmp/canary_sonnet55_b/plan_SpaceX_2026-10-12.json", "n_orders": 0, "decision": "HOLD_ALL", "dt5g": "NEUTRAL"}
+
+[18] 2026-10-01T05:45 Winston | ops-autofix-done: ops-health-ZaloPay | trace=True | ['7', '24', '24']
+    {"root_cause": "Taylor append_event ad-hoc Bash bi word-split (argc=7) luc 2026-10-01T04:43:56Z, finding scl-monthly-report-202609-review; khong mat event", "fix": "Khong co code de va (call site ad-hoc). Taylor da tu ghi lai +67s event f37ae796 cung trace Tay
+
+[19] 2026-09-29T21:51 Winston | sbv-weekly-check-2026-09-30 | trace=False | ['4.5']
+    {"date": "2026-09-30", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+[20] 2026-10-01T04:45 Taylor | trading-rules-A-sbv-trigger-text-proposal-cctg-20261001-v3 | trace=True | ['45', '7.5%', '7.5%', '0.075', '7.5%', '0.075', '7.5%', '0.5,30', '2', '6', '2', '1']
+    {"scope": "DE XUAT VAN BAN v3 (khong tu sua file - cho Mike ap sau khi merge). Thay ban v1+v2.", "what_changed_from_v2": "v2 viet SAI: stale qua 45 ngay thi force armed=True NGAY, khong con dieu kien lan-doc-cuoi. Code THAT CHI force armed khi (a) loi doc/pars
+
+[21] 2026-10-02T09:23 Taylor | oddlot-full-exit-round2-done | trace=True | ['2', '330', '600', '900', '930', '300', '600', '200', '220', '200', '252', '100']
+    {"job": "Taylor_20261002_091435", "result": "DONE vong 2 - committed, CHUA merge", "branch": "fix/oddlot-full-exit-20261002", "commit": "see git log HEAD", "B1": "full_exit_qty them dieu kien broker_left<=sellable (compute_park_trim L1 truyen bpos[tk].qty; com
+
+[22] 2026-10-01T13:17 Taylor | lag-autoexit-blindspot-fix-ready-for-review | trace=True | ['0', '47', '4', '2', '1000', '44', '200', '35', '882', '45', '400', '10']
+    {"job": "Taylor_20261001_125451", "branch": "wt-lagexit-mike-1001 (mike repo, branch fix/lag-autoexit-blindspot-20261001, commit cbdc6cd4)", "status": "DONE, chua merge", "root_cause": "portfolio_status.lag_entry_dates()/_first_fill_dates() chi quet journal (c
+
+[23] 2026-10-06T04:25 Taylor | discretionary-funnel-lane-c-build | trace=True | ['3', '0.3', '30%', '0', '0', '0', '12', '300%', '5', '300%', '50000', '0']
+    {"status": "built_not_merged", "branch": "feat/funnel-lane-c-20261006", "commit": "9cf42868", "parent": "c050554d", "worktree": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-lanec-1006", "lane_c": "C1 GARP: rating<=3, golden floor, no redflag/BANNED
