@@ -561,7 +561,8 @@ def benchmark_period(start_date, end_date, series_path: str = SERIES_PATH, acks_
     try:
         if series is None:
             series = read_series(series_path)
-        errs = check_period(series, start_date, end_date, load_acks(acks_path))
+        acks = load_acks(acks_path)            # đọc MỘT lần: cổng và danh sách ngày ack cùng một tập
+        errs = check_period(series, start_date, end_date, acks)
     except Exception as exc:                                        # noqa: BLE001
         out["reason"] = f"{type(exc).__name__} ({exc})"
         return out
@@ -583,8 +584,8 @@ def benchmark_period(start_date, end_date, series_path: str = SERIES_PATH, acks_
                 and r["status"] == "provisional"]
         if prov:
             out["provisional_sessions"] = len(prov)
-        acked = _acked_g4_days(series, start_date, end_date, load_acks(acks_path))
-        if acked:                                                    # báo cáo PHẢI chú thích ngày đã ack
+        acked = _acked_g4_days(series, start_date, end_date, acks)
+        if acked:                    # dữ liệu cho consumer; CHƯA có consumer nào in ra báo cáo (18/10)
             out["acked_g4_days"] = acked
     return out
 

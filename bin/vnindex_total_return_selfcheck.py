@@ -376,10 +376,20 @@ def t_g4_acks(D, base, a, b):
     ok(any(day in x and "vốn hoá" in x for x in errs(mcdip, {key})), "ack số mã đúng ngày KHÔNG che nhánh vốn hoá")
     # ack G4 không che gate KHÁC trên cùng ngày (G3 G6 G7 G8)
     for g, kw in (("G3", {"ca_max_ingested_at": "2000-01-01"}), ("G6", {"max_dy": 0.31, "max_dy_ticker": "ZZZ"}),
-                  ("G7", {"membership_vintage": "2000-01-01"}), ("G8", {"osh_missing_max_pct": 0.5, "osh_missing_ticker": "ZZZ"})):
+                  ("G7", {"membership_vintage": "2000-01-01"}), ("G2", {"vnindex_src2": 1.0}), ("G8", {"osh_missing_max_pct": 0.5, "osh_missing_ticker": "ZZZ"})):
         w = [dict(r) for r in dip]
         w[64].update(kw)
         ok(any(day in x for x in errs(w, {key}, g)), f"ack G4 KHÔNG che {g} cùng ngày")
+    # phạm vi chú thích: ack ngoài kỳ / ở mốc đầu kỳ / cặp số dưới ngưỡng KHÔNG được vào acked_g4_days
+    ack_days = lambda rows, acks: V._acked_g4_days(rows, a, b, acks)           # noqa: E731
+    ok(ack_days(dip, {key}) == [{"date": day, "n_prev": 100, "n": 94}], "acked_g4_days đúng ngày/cặp")
+    ok(ack_days(dip, {V.g4_ack_key(D[61].isoformat(), 100, 94)}) == [], "ack ngoài kỳ không vào danh sách")
+    anchor = [dict(r) for r in base]
+    anchor[62]["n_members"] = 94
+    ok(ack_days(anchor, {V.g4_ack_key(a.isoformat(), 100, 94)}) == [], "ngày mốc đầu kỳ (a) không thuộc kỳ (a, b]")
+    small = [dict(r) for r in base]
+    small[64]["n_members"] = 96
+    ok(ack_days(small, {V.g4_ack_key(day, 100, 96)}) == [], "cặp dưới ngưỡng 5% không vào danh sách")
     with tempfile.TemporaryDirectory(prefix="vtr_g4acks_") as tmp:
         good, bad = os.path.join(tmp, "good.json"), os.path.join(tmp, "bad.json")
         ent = {"date": day, "n_prev": 100, "n": 94, "confirmed_by": "user 2030-06-01", "reason": "BQ thiếu 20 mã"}
@@ -400,6 +410,7 @@ def t_g4_acks(D, base, a, b):
                               ("thiếu date", {**ent, "date": None}, "G4"),
                               ("date sai định dạng", {**ent, "date": "14/10/2026"}, "G4"),
                               ("date thừa dấu cách", {**ent, "date": day + " "}, "G4"),
+                              ("date dạng liền", {**ent, "date": day.replace("-", "")}, "G4"),
                               ("thiếu n_prev", {**ent, "n_prev": None}, "G4"),
                               ("n là chuỗi", {**ent, "n": "94"}, "G4"),
                               ("n là bool", {**ent, "n": True}, "G4"),
