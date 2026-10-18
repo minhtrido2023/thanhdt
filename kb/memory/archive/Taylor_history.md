@@ -1274,3 +1274,6 @@
 
 ## Archived 2026-10-18 (keep=12 days=0 require_done=False)
 - [2026-10-14T09:29:47Z] ĐANG DỞ job Taylor_20261014_091148 attempt2: commit B2/B1/B3/B4/N-b có sẵn (10e84dd2c) | NEXT: N-a,N-c,N-d,N-e + verify (TZ, §23, harness reviewer, byte master vs nhánh) + bus
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:34:30Z] ĐANG DỞ job 091148 attempt2: TẤT CẢ B1-B4 + N-a..e đã commit (HEAD 8d39846be) | NEXT: verify (harness /tmp/archrev_s4/mut/run.py, TZ, §23, byte proof) + bus finding
