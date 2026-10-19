@@ -1292,3 +1292,9 @@
 
 ## Archived 2026-10-19 (keep=12 days=0 require_done=False)
 - [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)

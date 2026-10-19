@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
-- [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)
 - [2026-10-17T02:18:27Z] [weekly 10-12→10-16] 2 file md + 6 chart XONG, delivery gate BLOCK G4 (cột VN-Index có cổ tức). CHỜ Mike/bq_admin gỡ G4 rồi chạy lại report_delivery_gate cho 2 file (sha trong bus finding weekly-...BLOCKED-G4).
 - [2026-10-18T03:16:52Z] ĐANG DỞ job Taylor_20261018_030925 (cq-2026-10-18 autodispatch, 7 finding): sửa xong 6 + F7 chỉ docstring, working tree CHƯA commit (9 file ở WorkingClaude/); arch-reviewer ae94d13e chạy nền | NEXT: nhận verdict, commit CHỈ 9 file (cấm git add -A), bus finding topic cq-2026-10-18-taylor-autodispatch, notify_thread.sh architecture
 - [2026-10-18T03:22:49Z] [cq-2026-10-18 autodispatch] XONG commit 3147ce873 (9 file), chờ Mike/arch-review vòng 2 nếu muốn; chưa merge/push. (Thay dòng ĐANG DỞ job 030925.)
@@ -26,3 +24,5 @@
 - [2026-10-19T02:41:32Z] [sunday-plan-round vòng 3 10-19] XONG chờ Mike merge+cài cron: nhánh feat/sunday-plan-round-20261019 @6501e3011. (Thay dòng @bc6f53eab.)
 - [2026-10-19T05:21:56Z] ĐANG DỞ job Taylor_20261019_052148 (AIS chain-order rule oshares_live, wt ../wt-Taylor_20261019_052148 nhánh feat/ais-chain-order-20261019, KHÔNG merge) | NEXT: đọc oshares_live + selfcheck + registry
 - [2026-10-19T05:40:07Z] [ais-chain-order 10-19] XONG chờ Mike arch-review+quant-skeptic+merge: nhánh feat/ais-chain-order-20261019 @c22ce4c60 (wt /home/trido/thanhdt/wt-Taylor_20261019_052148), finding ais-chain-order-20261019. (Thay dòng ĐANG DỞ job 052148.)
+- [2026-10-19T16:01:43Z] ĐANG DỞ job Taylor_20261019_160133 (DT gate candidate BEAR/CRISIS recount, read-only) | NEXT: đọc get_dt_gate_clock + DT gate trong macro_state_live.py, tái dựng chuỗi 29/09-19/10
+- [2026-10-19T16:04:07Z] [dt-gate-badzone 10-19] XONG job Taylor_20261019_160133: khuyến nghị A giữ nguyên; REPORT research/dt_badzone_count_20261019/. Mốc: CRISIS 25/25 sớm nhất ~10/11 nếu không đứt. (Thay dòng ĐANG DỞ job 160133.)
