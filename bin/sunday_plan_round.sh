@@ -91,7 +91,7 @@ take_lock() {  # rc: 0 ok · 1 không tạo được state dir · 2 đang có l�
 CUR_PID=""
 run_wait() {  # run_wait <outfile> <cmd...>   (RW_CD=<dir> để cd trước)
   local out="$1"; shift
-  ( [ -n "${RW_CD:-}" ] && cd "$RW_CD"; exec "$@" ) >"$out" 2>&1 9>&- &
+  ( if [ -n "${RW_CD:-}" ]; then cd "$RW_CD" || exit 1; fi; exec "$@" ) >"$out" 2>&1 9>&- &
   CUR_PID=$!
   wait "$CUR_PID"; local rc=$?
   CUR_PID=""
@@ -115,9 +115,9 @@ do_verify() {
   [ -n "$out" ] && log "verify rc=$rc:
 $out"
   if [ "$rc" -ne 0 ]; then
-    note "🔴 Vòng plan CN — KIỂM CUỐI ĐÊM phát hiện plan LỆCH quyết định (rc=$rc): đã gỡ dấu duyệt, plan cần user xem lại TRƯỚC phiên.
-$(printf '%s\n' "$out" | grep -E 'MISMATCH|WARN' | cut -c1-600)"
-    bus_err "sunday-plan-round-verify" "status=mismatch" "rc=$rc" "evidence=$(printf '%s' "$out" | grep -E 'MISMATCH|WARN' | head -3 | tr '\n' ' ' | cut -c1-500)" "measured_by=sunday_plan_round_lib.py verify (so content md5 manifest vs dia)"
+    note "🔴 Vòng plan CN — KIỂM CUỐI ĐÊM đã SỬA file plan hoặc phát hiện lệch (rc=$rc): khôi phục bản đã quyết / gỡ dấu duyệt / recover vòng bị ngắt — plan cần user xem lại TRƯỚC phiên.
+$(printf '%s\n' "$out" | grep -E 'MISMATCH|WARN|RECOVER' | cut -c1-600)"
+    bus_err "sunday-plan-round-verify" "status=mismatch" "rc=$rc" "evidence=$(printf '%s' "$out" | grep -E 'MISMATCH|WARN|RECOVER' | head -3 | tr '\n' ' ' | cut -c1-500)" "measured_by=sunday_plan_round_lib.py verify (so content md5 manifest vs dia)"
   fi
   return "$rc"
 }
@@ -277,6 +277,8 @@ while :; do
     case "$rc" in
       0) STATUS[$a]="ok" ;;
       1|4) STATUS[$a]="job_fail"; DETAIL[$a]="DollarBill job ${JOBID[$a]} status rc=$rc: $(tail -n 2 "$RUN_DIR/job_${a}.status" | tr '\n' ' ' | cut -c1-300)" ;;
+      5) STATUS[$a]="job_resume_pending"   # usage_limited/maxturns_pending: resume_pending.py (cron */10) sẽ bắn job MỚI — không chờ hết JOB_TMO, gỡ bản ghi resume ở 3b rồi khôi phục
+         DETAIL[$a]="DollarBill job ${JOBID[$a]} o trang thai cho-resume (rc=5): $(tail -n 2 "$RUN_DIR/job_${a}.status" | tr '\n' ' ' | cut -c1-200)" ;;
       *) pend=1 ;;
     esac
   done
@@ -301,7 +303,7 @@ for a in $LABELS; do
   line="$(printf '%s\n' "$SETTLE_LINES" | grep -E "^(UN)?SETTLED $a ${JOBID[$a]} " | head -1)"
   case "$line" in
     UNSETTLED*) STATUS[$a]="job_unsettled"; DETAIL[$a]="${DETAIL[$a]:+${DETAIL[$a]} | }${line#UNSETTLED $a } ";;
-    SETTLED*)   [ "${STATUS[$a]}" = "job_timeout" ] && DETAIL[$a]="${DETAIL[$a]} → DA XAC MINH: ${line#SETTLED $a ${JOBID[$a]} }" ;;
+    SETTLED*)   case "${STATUS[$a]}" in job_timeout|job_resume_pending) DETAIL[$a]="${DETAIL[$a]} → DA XAC MINH: ${line#SETTLED $a ${JOBID[$a]} }" ;; esac ;;
   esac
 done
 SCAN_LINE="$(printf '%s\n' "$SETTLE_LINES" | grep -E '^SCAN-UNSETTLED' | head -2 | tr '\n' ' ')"

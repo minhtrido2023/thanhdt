@@ -409,6 +409,14 @@ PY
   ck "J9: guard không bịa 'đã khôi phục' khi không còn gì để khôi phục" hasnt "$SC/notify.log" "đã khôi phục plan thứ Sáu từ stash"
   ck "J9: guard nói rõ KHÔNG có account nào cần khôi phục" has "$SC/notify.log" "KHÔNG có account nào cần khôi phục"
   ck "J9: plan (b) của ZaloPay KHÔNG bị guard chép đè"   notF ZaloPay
+  # (10) LOW-3: job ở trạng thái chờ-resume (rc=5) ⇒ settle NGAY, không chờ hết JOB_TIMEOUT (20s trong sandbox)
+  reset_sb; T0=$(date +%s); STUB_JOB_SpaceX=usage run_wrap; T1=$(date +%s)
+  ck "J10: job rc=5 ⇒ vòng xong < 12s (không chờ hết trần 20s)" test $((T1 - T0)) -lt 12
+  ck "J10: bản ghi resume bị gỡ ngay"                    test ! -e "$SC/bus/pending_resumes/JOB_SpaceX.json"
+  ck "J10: SpaceX = thứ Sáu"                              sameF SpaceX
+  ck "J10: lý do nêu cho-resume + đã xác minh"            has "$SC/notify.log" "cho-resume"
+  ck "J10: KHÔNG nói 'chua xong sau'"                     hasnt "$SC/notify.log" "chua xong sau"
+  ck "J10: ZaloPay (job ok) vẫn (a)"                      sameF ZaloPay
   fi
 
   # ── park (MED-5) ──
@@ -574,6 +582,33 @@ PY
   reset_sb; run_bg env STUB_KILL=kill9 STUB_ACCT_SpaceX=diff STUB_ACCT_ZaloPay=diff; sleep 1.5
   run_wrap --verify
   ck "V8: manifest running → verify tự recover (SpaceX = thứ Sáu)" sameF SpaceX
+  # MED-2: recover trong --verify (kill -9 rồi 08:30 khôi phục) KHÔNG được im lặng
+  reset_sb; run_bg env STUB_KILL=kill9 STUB_ACCT_SpaceX=diff STUB_ACCT_ZaloPay=diff; sleep 1.5
+  : >"$SC/notify.log"; : >"$SC/bus.log"; run_wrap --verify
+  ck "V9: verify có recover ⇒ rc=4 (không phải 0)"        eq "$(rcv)" 4
+  ck "V9: verify có recover ⇒ notify KIỂM CUỐI ĐÊM"       has "$SC/notify.log" "KIỂM CUỐI ĐÊM"
+  ck "V9: notify nêu RECOVER thật"                        has "$SC/notify.log" "RECOVER SpaceX"
+  ck "V9: bus error sunday-plan-round-verify"             has "$SC/bus.log" "sunday-plan-round-verify"
+  # MED-1: writer muộn ghi nội dung khác (mang dấu duyệt cũ) → verify 23:00 khôi phục bản đã quyết + gỡ duyệt;
+  #        user duyệt lại bản khôi phục → verify 08:30 KHÔNG gỡ (manifest đã khớp bản đã quyết)
+  reset_sb; run_wrap
+  python3 "$SC/stubs/writeplan.py" "$(P SpaceX)" late SpaceX
+  ck "V10: tiền đề — plan bị ghi muộn có lệnh BUY-NEW"    has "$(P SpaceX)" "BUY-NEW"
+  : >"$SC/notify.log"; run_wrap --verify
+  ck "V10: verify 23:00 rc=4"                             eq "$(rcv)" 4
+  ck "V10: lệnh của writer muộn bị loại (BUY-NEW vắng)"   hasnt "$(P SpaceX)" "BUY-NEW"
+  ck "V10: đã khôi phục NỘI DUNG bản đã quyết (= thứ Sáu, bỏ dấu duyệt)" eq "$(python3 -c "
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location('l', sys.argv[1]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+print(m._content_md5_file(sys.argv[2]) == m._content_md5_file(sys.argv[3]))" "$LIBF" "$(P SpaceX)" "$(F SpaceX)")" True
+  ck "V10: dấu duyệt đã gỡ"                               hasnt "$(P SpaceX)" "approved_by"
+  ck "V10: bản của writer muộn được CẤT ở superseded/"    has "$(ls "$SC"/state/2026-10-19/superseded/plan_SpaceX_*.verify.*.json | head -1)" "BUY-NEW"
+  ck "V10: notify nêu đã khôi phục bản đã quyết"          has "$SC/notify.log" "DA KHOI PHUC ban da quyet dinh"
+  ck "V10: ZaloPay không bị đụng"                         sameF ZaloPay
+  set_key "$(P SpaceX)" approved_by '"user (Discord 2026-10-19 08:00)"'; set_key "$(P SpaceX)" requires_user_approval false
+  MIKE_NOW_ICT="2026-10-19T08:30:00" run_wrap --verify
+  ck "V10b: user duyệt lại bản khôi phục → verify 08:30 rc=0 (idempotent)" eq "$(rcv)" 0
+  ck "V10b: dấu duyệt của user được GIỮ"                  has "$(P SpaceX)" "user (Discord 2026-10-19 08:00)"
   fi
 
   # ── bq_freshness_check: MORNING_NOTE mặc định KHÔNG đổi byte so với bản gốc d570de2c9 (hành vi T2-T6) ──
@@ -677,9 +712,9 @@ run_mut M20-fd9-ro-ri         "jobs" sh '>"$out" 2>&1 9>&- &' '>"$out" 2>&1 &'
 run_mut M21-guard-noi-doi     "jobs" sh '  if [ -z "$r" ]; then' '  if false; then'
 run_mut M22-decide-khong-bao-account "isolation" lib '        return _crash(plan_dir, run_dir, ntd, acct, ent, e)' '        raise'
 run_mut M23-recover-ca-loat   "isolation" sh '--state-dir "$STATE_DIR" --account "$a" 2>&1)"' '--state-dir "$STATE_DIR" 2>&1)"'
-run_mut M24-trap-bi-hoan      "jobs" sh '( [ -n "${RW_CD:-}" ] && cd "$RW_CD"; exec "$@" ) >"$out" 2>&1 9>&- &
+run_mut M24-trap-bi-hoan      "jobs" sh '( if [ -n "${RW_CD:-}" ]; then cd "$RW_CD" || exit 1; fi; exec "$@" ) >"$out" 2>&1 9>&- &
   CUR_PID=$!
-  wait "$CUR_PID"; local rc=$?' '( [ -n "${RW_CD:-}" ] && cd "$RW_CD"; exec "$@" ) >"$out" 2>&1 9>&-; local rc=$?'
+  wait "$CUR_PID"; local rc=$?' '( if [ -n "${RW_CD:-}" ]; then cd "$RW_CD" || exit 1; fi; exec "$@" ) >"$out" 2>&1 9>&-; local rc=$?'
 run_mut M25-bo-prune          "prune" sh 'python3 "$LIB" prune --state-dir' ': "$LIB" prune --state-dir'
 run_mut M26-pending-mat-van-ok "jobs" lib '        if not os.path.exists(pf):
             return False, (f"status={st} nhung' '        if False:
@@ -687,6 +722,12 @@ run_mut M26-pending-mat-van-ok "jobs" lib '        if not os.path.exists(pf):
 run_mut M27-freshfail-khong-parse-job "jobs" sh 'while read -r acct jid; do [ -n "$jid" ] && JOBID[$acct]="$jid"; done < <(python3 "$LIB" jobs "$FRESH_LOG" 2>/dev/null)
 if [ "$FRESH_RC" -eq 0 ]; then' 'if [ "$FRESH_RC" -eq 0 ]; then'
 # so sánh theo phần executor dùng: mỗi trường một mutant
+# vòng 3
+run_mut M28-verify-khong-khoi-phuc "verify" lib 'if snap and os.path.exists(snap):   # khôi phục BẢN ĐÃ QUYẾT' 'if False:   # khôi phục BẢN ĐÃ QUYẾT'
+run_mut M29-verify-nuot-ban-muon "verify" lib '                shutil.copyfile(path, sup)' '                pass'
+run_mut M30-verify-recover-im-lang "verify" lib 'mism += rn + rbad' 'pass'
+run_mut M31-khong-chup-ban-da-quyet "verify" lib 'if ent["final_exists"] and ent["final_content_md5"] != "CORRUPT":' 'if False:'
+run_mut M32-rc5-cho-het-han "jobs" sh '      5) STATUS[$a]="job_resume_pending"' '      55) STATUS[$a]="job_resume_pending"'
 run_mut MF1-bo-qty       "fields" lib 'int(o.qty), _tick(o.ref_price, tk)' '0, _tick(o.ref_price, tk)'
 run_mut MF2-bo-ref       "fields" lib '_tick(o.ref_price, tk), str(o.urgency)' '0, str(o.urgency)'
 run_mut MF3-bo-urgency   "fields" lib 'str(o.urgency)' '"x"'

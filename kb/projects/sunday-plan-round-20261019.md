@@ -50,3 +50,28 @@ mà plan thứ Sáu (đã qua `merge_park_orders.py --write`) có. Wrapper KHÔN
 hành vi `jobs.sh cancel`/`bus/pending_resumes` trên bản ghi THẬT (selfcheck dùng stub mô phỏng đúng mã thoát/ngữ nghĩa đọc từ `mike_json.py`, không gọi bản thật);
 `load_plan`+`resolve_buy_ceiling` với ceiling_rule "A" (chỉ test trần cũ); `macro_healthcheck.py` thật.
 Không làm (tuỳ chọn): mẫu "file ứng viên" cần sửa prompt dispatch trong `bq_freshness_check.sh` (sửa hành vi T2-T6) — mục 1+2 đã đủ chốt chặn.
+
+## Vòng 3 hẹp (2026-10-19, job Taylor_20261019_021516) — thay đổi + rủi ro còn lại
+- **MED-1** `--verify` lệch nội dung: `_finalize` chụp bản đã quyết vào `state/.../<ntd>/decided/`; lệch ⇒ cất bản trên đĩa vào `superseded/plan_<A>_<ntd>.verify.<epoch>.json`,
+  khôi phục bản đã quyết, gỡ `approv*`/`mafee*`, `requires_user_approval=true`. Manifest không cần đổi md5 (bản khôi phục CÓ nội dung = bản đã quyết) ⇒ user duyệt lại bản đó thì
+  `--verify` 08:30 khớp, KHÔNG gỡ (idempotent). FILE VẮNG cũng khôi phục từ `decided/`. Không có bản chụp (CORRUPT lúc quyết) ⇒ hành vi cũ (chỉ gỡ duyệt).
+- **MED-2** `--verify` trả rc≠0 (4) khi có bất kỳ RECOVER trong lượt (kill -9 rồi 08:30 khôi phục) ⇒ notify + bus `sunday-plan-round-verify`.
+- **LOW-3** poll gặp rc=5 (usage_limited/maxturns_pending) ⇒ `job_resume_pending` NGAY, settle gỡ `bus/pending_resumes/<job>.json`, khôi phục; không chờ hết 25'.
+- **LOW-7** `cd "$RW_CD" || exit 1` (SC2164).
+- **LOW-6 KHÔNG làm**: `--verify` không gỡ pending của job DollarBill lạ (cần đọc `started_at` manifest + quét `bus/jobs` + gỡ resume ≈ >15 dòng và thêm bề mặt lỗi).
+  Rủi ro còn lại: job DollarBill KHÔNG nằm trong `freshness.log` mà resume bắn muộn sau 23:00 vẫn có thể ghi plan; `--verify` chỉ PHÁT HIỆN (so nội dung) + khôi phục, không ngăn.
+  `manifest.started_at` đã lưu sẵn (ISO UTC) nếu sau này muốn làm.
+
+## Khai bổ sung: tác dụng phụ & tên agent
+- `bq_freshness_check.sh` (morning+force) chạy Chủ nhật **gửi Telegram/Discord** như ngày thường: `pub_msg` (DT5G PUBLISHER, qua `notify.sh` + `notify_thread.sh` kênh stale),
+  `STALE_SUMMARY`, `UNIVERSE GAP-FILL WARN`, `LAG PKL WARN`… — user sẽ thấy các tin này vào tối CN.
+- `bus_err` của wrapper (`sunday_plan_round.sh:74`) ghi event `error` dưới tên agent **"Taylor"** (tác giả), dù tiến trình chạy do cron — lọc bus theo topic `sunday-plan-round-*`, không theo agent.
+
+## Checklist QUAN SÁT cho lần chạy thật đầu tiên — Chủ nhật 2026-10-25 (chưa kiểm được trước đó)
+1. DNSE cuối tuần: `compute_active_nav_all` lấy giá DNSE thứ Bảy/CN ra sao; giá tham chiếu TV1 (`inject_discretionary_orders`) có đúng phiên thứ Sáu.
+2. Injector CN thật: `inject_discretionary_orders.sh`/`auto_exit_inject_daily.sh` có tự bỏ qua CN hay chèn; chèn lần 2 cùng `plan_date` có bị dedupe không (ledger).
+3. `macro_healthcheck.py` thật: rc, `data/macro_health.json` mtime mới, `get_gated_state()` ra DT5G (không rơi DT4_only).
+4. `ceiling_rule` "A": `load_plan` + `resolve_buy_ceiling` với plan DollarBill thật (selfcheck chỉ test trần cũ).
+5. `jobs.sh cancel` / `bus/pending_resumes` trên bản ghi THẬT (selfcheck dùng stub).
+6. DollarBill ghi đúng `data/trade_plans/` (không lạc `data/plan_*`); log `state/sunday_plan_round/<ntd>/freshness.log` có `DISPATCHED … (job=`.
+7. `--verify` 23:00: VERIFY-OK cho cả 2 account nếu user chưa đụng; thử duyệt tay 1 account rồi chờ 08:30 xem KHÔNG bị gỡ.

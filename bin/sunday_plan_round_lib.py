@@ -295,6 +295,12 @@ def _finalize(run_dir, plan_dir, ntd, acct, result):
     ent["final_exists"] = os.path.exists(path)
     ent["final_md5"] = _md5_file(path) if ent["final_exists"] else None
     ent["final_content_md5"] = _content_md5_file(path)
+    ent["decided_snapshot"] = None
+    if ent["final_exists"] and ent["final_content_md5"] != "CORRUPT":   # bản ĐÃ QUYẾT, để --verify khôi phục khi file bị ghi muộn
+        snap = os.path.join(run_dir, "decided", f"plan_{acct}_{ntd}.json")
+        os.makedirs(os.path.dirname(snap), exist_ok=True)
+        _atomic_copy(path, snap)
+        ent["decided_snapshot"] = snap
     if all(e["decided"] for e in m["accounts"].values()):
         m["phase"] = "done"
     _write_json(_manifest_path(run_dir), m)
@@ -378,7 +384,8 @@ def verify(plan_dir_default, state_dir):
             continue
         if m.get("phase") == "running":
             print(f"VERIFY-NOTE {d}: manifest con 'running' — chay recover truoc")
-            recover(plan_dir_default, state_dir)
+            rn, rbad = recover(plan_dir_default, state_dir)
+            mism += rn + rbad   # recover ĐÃ ghi đè file plan (hoặc lỗi) ⇒ rc≠0 để wrapper notify (không im lặng)
             m = _load_manifest(rd)
         pdir = m.get("plan_dir") or plan_dir_default
         for a, ent in m["accounts"].items():
@@ -393,17 +400,40 @@ def verify(plan_dir_default, state_dir):
                 continue
             mism += 1
             if have is None:
-                print(f"VERIFY-MISMATCH {a} {m['ntd']}: luc quyet dinh '{ent['decided']}' co plan (content md5 {want}) nhung nay FILE VANG — can nguoi xu ly")
+                snap = ent.get("decided_snapshot")
+                if snap and os.path.exists(snap):
+                    _atomic_copy(snap, path)
+                    with open(path, encoding="utf-8") as f:
+                        _strip_approval(path, json.load(f))
+                    print(f"VERIFY-MISMATCH {a} {m['ntd']}: luc quyet dinh '{ent['decided']}' co plan (content md5 {want}) nhung nay FILE VANG — "
+                          f"DA KHOI PHUC ban da quyet dinh tu {snap}, go dau duyet; CAN user xem lai")
+                else:
+                    print(f"VERIFY-MISMATCH {a} {m['ntd']}: luc quyet dinh '{ent['decided']}' co plan (content md5 {want}) nhung nay FILE VANG — can nguoi xu ly")
                 continue
             stripped = []
-            if have != "CORRUPT":
+            snap = ent.get("decided_snapshot")
+            if snap and os.path.exists(snap):   # khôi phục BẢN ĐÃ QUYẾT (idempotent: user duyệt lại bản này ⇒ lần verify sau OK)
+                before = approval_desc(path)
+                os.makedirs(os.path.join(rd, "superseded"), exist_ok=True)
+                sup = os.path.join(rd, "superseded", f"plan_{a}_{m['ntd']}.verify.{int(time.time())}.json")
+                shutil.copyfile(path, sup)   # cất bản trên đĩa TRƯỚC khi ghi đè — không nuốt mất
+                _atomic_copy(snap, path)
+                with open(path, encoding="utf-8") as f:
+                    cur = json.load(f)
+                stripped = _strip_approval(path, cur)
+                ent["verify_restored_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
+                _write_json(_manifest_path(rd), m)
+                print(f"VERIFY-MISMATCH {a} {m['ntd']}: noi dung plan tren dia (md5 {have}) KHAC luc quyet dinh '{ent['decided']}' "
+                      f"(md5 {want}) — co job/tien trinh ghi sau quyet dinh. Truoc khi go: {before}. DA KHOI PHUC ban da quyet dinh tu {snap} "
+                      f"(ban tren dia cat o {sup}), go dau duyet {stripped}, dat requires_user_approval=true. CAN user xem lai plan nay truoc phien.")
+            elif have != "CORRUPT":
                 with open(path, encoding="utf-8") as f:
                     cur = json.load(f)
                 before = approval_desc(path)
                 stripped = _strip_approval(path, cur)
                 print(f"VERIFY-MISMATCH {a} {m['ntd']}: noi dung plan tren dia (md5 {have}) KHAC luc quyet dinh '{ent['decided']}' "
-                      f"(md5 {want}) — co job/tien trinh ghi sau quyet dinh. Truoc khi go: {before}. DA GO dau duyet {stripped}, "
-                      f"dat requires_user_approval=true. CAN user xem lai plan nay truoc phien.")
+                      f"(md5 {want}) — co job/tien trinh ghi sau quyet dinh (khong co ban chup da quyet dinh de khoi phuc). Truoc khi go: {before}. "
+                      f"DA GO dau duyet {stripped}, dat requires_user_approval=true. CAN user xem lai plan nay truoc phien.")
             else:
                 print(f"VERIFY-MISMATCH {a} {m['ntd']}: file plan HONG (khong doc duoc JSON) — executor se khong nap duoc; can nguoi xu ly (stash: {ent.get('stash')})")
     return mism
