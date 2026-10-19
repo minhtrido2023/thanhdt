@@ -472,3 +472,7 @@
 - [2026-10-19T11:15:52Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12711}
 - [2026-10-19T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-10-19", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-10-19T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-10-19T12:04:29Z
+- [2026-10-19T12:04:18Z] DollarBill/heartbeat — DollarBill_20261019_120318: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261019_120318", "source": "watcher"}
+- [2026-10-19T12:04:20Z] DollarBill/decision — plan-2026-10-20-SpaceX: {"plan": "HOLD ALL 0 lenh", "nav": 970111486, "dt5g": "NEUTRAL", "reason": "n_bal=0, LAG due=0, L1 BLOCKED_ALL_NAMES, TV1 paused theo user 10-19", "capit": "SpaceX da thoat het 16/10 (dispatch ghi con giu la stale)", "file": "data/trade_plans/plan_SpaceX_2026-10-20.json"}
