@@ -22,3 +22,6 @@ pharma 0,0→69,0% · aviation INFRA 0,0→53,4% · logistics PORT 0,0→37,1% �
 retail_compounder 0,0→21,1%). ⇒ **kết luận "sleeve này bổ sung alpha mới, không lặp 8L" KHÔNG
 còn suy được từ những con số cũ.** Muốn kết luận lại thì phải đo lại, không phải đọc lại.
 
+
+## Gán nhãn STALE 2026-10-19 (user duyệt)
+Sidecar `data/STALE_screen_sort_bug_20260927.md` (WorkingClaude) liệt kê 16 verdict mang `ortho_8l` theo bug; KHÔNG sinh lại, chỉ chạy lại từng screen khi thật cần dùng.
