@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-08T14:33:34Z] ĐANG DỞ job Wags_20261008_143324 tokentel VÒNG 2: worktree agents/Wags/wt-tokentel-1008 | NEXT: S1 trap/telemetry-after-terminal, S2 job_telemetry.py whitelist, S3 chain union-find, 2 test, rebase, arch-review 1 lần
 - [2026-10-08T14:42:20Z] [2026-10-08] context-pack-trim R2 DUNG NEEDS_CHANGES: branch chore/context-pack-trim-20261008 @e143a7cb (wt-ctxtrim-1008) CHUA merge. 1 blocker (V2.5 NO-GO mat khoi hot path) + 4 should-fix, bus finding context-pack-trim. Cho user/Mike cho 1 luot sua nho hoac bo; bo thi git worktree remove + xoa branch.
 - [2026-10-08T15:00:48Z] [2026-10-08] dispatch-token-telemetry R2 DUNG o NEEDS_CHANGES: branch feat/dispatch-token-telemetry-20261008 @eacd6dfb (wt-tokentel-1008) CHUA merge; con SF1 round_cap selfcheck do (docstring spend_report:244) + nit. Cho Mike/user cho vong 3 hoac bo.
 - [2026-10-09T09:59:14Z] [2026-10-09] selfcheck-red sweep#1: 8/10 CLOSED; OPEN annualization (no moi R&D Taylor, chu Taylor) + nav_2account (SCL ban tay 30/09, question can-user). Sweep sau: 2 cau nay OPEN lan 2 => CAN USER + post Architecture.
@@ -27,3 +26,4 @@
 - [2026-10-16T09:36:44Z] [2026-10-16] selfcheck-red sweep#3: 2/3 CLOSED; OPEN snapshot_corp_action (public_datetime, DDL cần user — question selfcheck-red-sweep-2026-10-16-can-user). Sweep sau: còn OPEN ⇒ CẦN USER + post Architecture.
 - [2026-10-16T20:53:24Z] [2026-10-17] selfcheck-red sweep#4: snapshot_corp_action OPEN lan 2 => CAN USER (da post Architecture). Cho user tra question selfcheck-red-sweep-2026-10-16-can-user (A: HASH_EXCLUDE+ALTER ADD COLUMN); duyet xong => ap + rerun T3.7 + dong cau.
 - [2026-10-19T01:21:50Z] [2026-10-19] Cho user tra A/B/C cau Mike/retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path (da post Architecture 08:2x ICT). Tra loi => close_bus_question.py --decided-by-user + mo viec A / merge nhanh carry-forward C.
+- [2026-10-19T05:47:58Z] [2026-10-19] Chờ user trả A/B câu Winston/deposit-cctg-weekly-question (đã post trading_daily 12:5x ICT; im lặng = giữ 6,80/7,40). Có trả lời ⇒ close_bus_question.py --decided-by-user (B thì nhờ Winston chạy append_deposit_rate.py).

@@ -419,3 +419,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-10-18 (keep=12 days=0 require_done=False)
 - [2026-10-08T14:06:19Z] [2026-10-08] dispatch-token-telemetry (job 133633) DUNG o NEEDS_CHANGES: branch feat/dispatch-token-telemetry-20261008 @bba411f3 (worktree agents/Wags/wt-tokentel-1008) CHUA merge; cho Mike/user cho vong 2 (S1 trap-window sync, S2 whitelist/tach job_telemetry.py, S3 union-find chain). Bus finding co du danh sach.
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-08T14:33:34Z] ĐANG DỞ job Wags_20261008_143324 tokentel VÒNG 2: worktree agents/Wags/wt-tokentel-1008 | NEXT: S1 trap/telemetry-after-terminal, S2 job_telemetry.py whitelist, S3 chain union-find, 2 test, rebase, arch-review 1 lần
