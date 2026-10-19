@@ -3457,3 +3457,102 @@ PNJ ĐHĐCĐ bất thường 21/10 → BCTC Q3/2026 cuối 10 (cổng DHC, PAN, 
 [Công Luận — Chủ tịch công ty du lịch bị khởi tố vì tham ô](https://congluan.vn/lap-tai-khoan-ngan-hang-mat-chu-tich-hdqt-bo-tui-rieng-tien-ban-tau-cua-cong-ty-post363433.html)
 
 ---
+
+### 2026-10-19 — QUÉT SÁNG THỨ HAI (job `Taylor_20261019_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 1 AMBIGUOUS-yếu mới (DRC, không giữ) · 1 không-phải-case (BVH) · 9 mã gác rà qua (4 NH + 5 ngoài NH)** · ★★ **CÓ LỆNH MUA phiên 19/10: TV1 SpaceX 300cp + ZaloPay 200cp (LO ≤19.900, injector discretionary) — 0 tin mới về TV1 trong cửa sổ ⇒ luận điểm KHÔNG gãy, KHÔNG có lý do RÚT** · ★ **DRC: TGĐ bị khởi tố "tham ô tài sản" (VKS phê chuẩn 16/10, công bố SAU phiên 16/10) ⇒ 19/10 là phiên phản ứng đầu tiên**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **watchlist TƯƠI** (`active_nav` computed_at **2026-10-16**).
+Phiên cuối trong cache = **16/10**. Universe 246 mã (H:9 / W:243). Không có cảnh báo QUÁ HẠN.
+
+#### Việc 1 — anomaly_scan: 1 mã MỚI chưa từng phân loại (BVH)
+
+```
+[W] 2026-10-15 BVH: IDIOCRASH | ret −6,1% (VNI −0,4%, idio −5,7%) vol 1,4× val 103,6B close 71.400   ← MỚI
+[W] 2026-10-09 DHC: IDIOCRASH (không-phải-case từ 10-12)
+[W] 2026-10-14 F88: CEIL2 +10,3% (cờ trần)
+[W] 2026-10-12 PNJ: IDIOCRASH (NON từ 09-28)
+```
+
+- **BVH (Bảo Việt; KHÔNG giữ, KHÔNG trong plan)** — `Price == Close` cả cửa sổ ⇒ biến động thật, không phải
+  corp-action. **Nguyên nhân = bán theo NGÀNH + ngày đáo hạn phái sinh 15/10**: nhóm bảo hiểm −3,38% (BVH, BIC,
+  MIG, ABI), VN-Index thủng 1.700; **0 công bố riêng** của BVH. Hồi +0,8% phiên 16/10 (72.000). PE 16,1 vs
+  PE_MA5Y 19,3 · PB 2,00 · FSCORE 6. ⇒ **Không-phải-case** (không trigger §0.5; idio −5,7% là phần ngành
+  bảo hiểm mà mô hình beta-VNI không tách được).
+
+#### Việc 2/3 — quét rộng: 1 case mới ngoài danh mục — **DRC → AMBIGUOUS-yếu**
+
+- **Sự kiện**: Cơ quan ANĐT CA TP Đà Nẵng khởi tố vụ án 03/10, khởi tố bị can **TGĐ Lê Hoàng Khánh Nhựt** tội
+  **tham ô tài sản** (khoản 2 Đ.353); VKS phê chuẩn (QĐ 521 ngày 14/10, DRC nhận 16/10). **Chưa công bố số
+  tiền / hành vi / thiệt hại.** HĐQT miễn nhiệm TGĐ + người đại diện pháp luật; PTGĐ Văn Trung Tâm điều hành
+  tạm; Chủ tịch Nguyễn Xuân Bắc làm đại diện PL; **Vinachem** rút uỷ quyền đại diện vốn của ông Nhựt (phần
+  10% chuyển sang ông Bắc: 10,51% → 20,51%), yêu cầu ĐHĐCĐ bất thường miễn nhiệm TV HĐQT. Tổng tỷ lệ Vinachem:
+  **chưa verify trong phiên này**.
+- **Giá**: tin ra SAU phiên 16/10 (DRC đóng 9.880, +0,3%) ⇒ **chưa có sự kiện sợ hãi trên giá**; 19/10 là phiên
+  phản ứng đầu tiên.
+- **Áp trục quyết định**: "tham ô" = DN là **NẠN NHÂN**, cá nhân chiếm đoạt tài sản công ty ⇒ chạm CÁ NHÂN,
+  không có dấu hiệu pháp nhân bị điều tra (0 nguồn nhắc). Tài sản lõi (nhà máy lốp Đà Nẵng) vẫn vận hành; ban
+  điều hành thay thế trong cùng ngày. ⇒ tiêu chí #1 §2 **nghiêng ĐẠT**, nhưng chưa biết quy mô tham ô so với
+  vốn CSH (có kéo theo điều chỉnh BCTC không — chỗ PNJ/OGC tách nhau).
+- **Số BQ (16/10)**: PE **12,2** vs PE_MA5Y 13,1 (chỉ −7%) · PB **0,80** vs PB_MA5Y 1,57 · Debt/Eq 0,89 ·
+  FSCORE 8 · ROE_Min3Y 6,1%. **CF_OA 4Q = 355,0 tỷ vs NP 4Q = 125,0 tỷ** (P0..P3: CF 140,6/−95,1/203,7/105,8;
+  NP 31,8/16,2/36,8/40,1) ⇒ CF_OA ≥ NP **ĐẠT**. NP H1/2026 = 48 tỷ (BQ khớp số báo, soát xét). Nền yếu đã
+  biết: LNST 2025 = 118 tỷ (thấp nhất từ 2012), Mỹ 28% doanh thu chịu thuế 301 12,5% (phễu 09-04).
+- ⇒ **AMBIGUOUS-yếu**: trụ #1 + CF đạt, nhưng **tiêu chí #5 sàn định giá CHƯA ĐẠT trên trục lợi nhuận** (PE
+  sát trung bình 5 năm; PB rẻ chỉ vì ROE thấp) và chưa có cú sập giá. **Cổng**: (a) công bố số tiền tham ô /
+  có điều chỉnh hồi tố BCTC không; (b) BCTC Q3/2026 (cuối 10); (c) phản ứng giá 19/10+ — chỉ đáng xét lại nếu
+  giá rơi tới PE ≲ 8 mà (a) vẫn nhỏ so với vốn CSH. **Không đề xuất hành động.**
+
+#### Việc 2 — read-through 9 mã gác (cửa sổ 17→18/10, + phiên 16/10)
+
+- **4 mã ngân hàng (MBB TPB VIB VPB)**: **0 sự kiện rủi ro** (0 kiểm soát đặc biệt / chuyển giao bắt buộc /
+  khởi tố lãnh đạo / rút tiền / sân sau / thao túng). Tin có thật: MBB khối ngoại mua ròng mạnh nhất tuần
+  (~230 tỷ); VPB tự doanh mua ròng lớn nhất; VIB + VPB trong nhóm 9 NH tài trợ ~75.300 tỷ cho CII (cao tốc).
+  **Vĩ mô ngành**: NHNN yêu cầu giảm ≥0,5đpt lãi huy động kỳ hạn ≥6T và 1,5–2đpt lãi cho vay ⇒ áp lực NIM, không
+  phải sự kiện đuôi. **SHB (AMBIGUOUS-yếu từ 10-12)**: đã nhận toàn bộ tiền chuyển nhượng SHBFinance từ Krungsri;
+  **cổng vốn điều lệ trên Giấy phép + niêm yết bổ sung CHƯA thấy đóng** — còn ~2 tuần của hạn "tháng 10".
+- **5 mã ngoài NH (DGC DRI NCT SIP TV1)**: **0 sự kiện riêng lẻ** trong cửa sổ. **TV1**: 0 công bố mới; giá trôi
+  19.300 → 18.500 (09→16/10), KL 16/10 = 51.200 (~3× các phiên trước), 0 tin giải thích; cổ tức 1.500đ trả
+  29/10; đại án điện vẫn 47–48 bị can, chưa kết luận điều tra. **DGC**: không có tin tháng 10 (vẫn hạn chế giao
+  dịch + cắt margin Q4). NCT/SIP/DRI: không có tin.
+- **Case cũ — PNJ (NON, excluded)**: giảm sàn lại 12/10 sau phiên trần; thêm quỹ ngoại thoái vốn tuần 12–16/10.
+  Cổng ĐHĐCĐ bất thường **21/10** giữ nguyên ⇒ **giữ NON**.
+- **Ngoài danh mục**: KOS sàn **phiên thứ 20** (không-phải-case từ 09-21). VDS lỗ >100 tỷ Q3 (tự doanh) — KQKD,
+  không phải trigger. 0 vụ khởi tố lãnh đạo DN niêm yết khác tìm được.
+- **Nền**: VN-Index **1.705,91** (16/10); tuần −29,18 điểm (−1,68%), **tuần giảm thứ 4 liên tiếp**; VIC+VHM lấy
+  gần 25 điểm; ngoại bán ròng 5 phiên ~3.007 tỷ; Nasdaq −4,5% tuần; Brent 109,8 USD.
+
+#### Việc 4 — ẢNH HƯỞNG TỚI PHÍA MUA: **1 lệnh MUA trên kênh discretionary (TV1), luận điểm KHÔNG gãy**
+
+`plan_SpaceX_2026-10-19`: `orders` = **BUY TV1 300cp** (LO 19.900, trần no-chase 20.000, `DISCRETIONARY_SPECIAL`,
+injector 16/10 20:30, đã khớp 2.300/2.600). `plan_ZaloPay_2026-10-19`: **BUY TV1 200cp** (cùng điều kiện) +
+2 lệnh BÁN CAPIT (NCT 73, SIP 49). Cả hai `requires_user_approval = True`, **`approved_by = None`** lúc quét.
+`park_trim` SpaceX `BLOCKED_ALL_NAMES` / ZaloPay `NO_TRIM`; `jit_unpark` cả hai `NO_TRIGGER`.
+⇒ **TV1 không có dữ kiện mới trong cửa sổ** (đại án vẫn chỉ cá nhân, chưa kết luận điều tra) ⇒ **không có cơ
+sở RÚT lệnh**. DRC và BVH không nằm trong vị thế hay rổ ứng viên.
+Ghi nhận phụ (không phải việc lượt này): `limit_price_vnd` 19.900 cao hơn close BQ 16/10 (18.500) **+7,6%** —
+lệnh LO mua sẽ khớp theo giá chào tốt nhất nên không hại, nhưng trần no-chase 20.000 trên thực tế không ràng
+buộc; injector lại in `[FAILSAFE] TV1: luật A ... biên độ +14,674% ≠ ±15%` → band cố định (lần 2 sau 09/10).
+
+#### Việc 7 — phễu candidate hệ thống
+
+**KHÔNG có khối "PHỄU CANDIDATE HỆ THỐNG" trong dispatch lượt này** (cadence sáng thứ Hai) ⇒ không rà.
+
+**Kết luận lượt này:** **9 mã gác rà qua** · 246 mã anomaly_scan × 7 phiên · 11 truy vấn tin + 3 WebFetch + 3
+truy vấn BQ + đọc 6 artifact plan + log injector · **0 QUALIFY · 1 AMBIGUOUS-yếu (DRC) · 1 không-phải-case
+(BVH) · watchlist TƯƠI · 1 lệnh mua TV1 (2 account), luận điểm còn nguyên ⇒ không RÚT.**
+
+**Mốc phải theo, gần → xa: phản ứng giá DRC 19/10 → PNJ ĐHĐCĐ bất thường 21/10 → TV1 trả cổ tức 29/10 →
+cổng SHB (vốn điều lệ, hạn tháng 10) → BCTC Q3/2026 cuối 10 (DRC, DHC, PAN, PTB, KSB, CMG) → kết luận điều
+tra đại án điện (cổng TV1).**
+
+**Nguồn (cửa sổ 16→19/10/2026):**
+[Vietstock — 19/10: Đọc gì trước giờ giao dịch](https://vietstock.vn/2026/10/1910-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1503459.htm) ·
+[Người Quan Sát — 1 phút trước giờ giao dịch 19/10](https://nguoiquansat.vn/1-phut-truoc-gio-giao-dich-phien-19-10-nhnn-yeu-cau-giam-lai-suat-quoc-hoi-xem-xet-sua-luat-chung-khoan-loat-doanh-nghiep-day-nhanh-thoai-von-322767.html) ·
+[Người Quan Sát — DRC công bố thông tin bất thường](https://nguoiquansat.vn/lanh-dao-moi-bi-khoi-to-doanh-nghiep-quy-mo-nghin-ty-lap-tuc-cong-bo-thong-tin-bat-thuong-322423.html) ·
+[Thanh Niên — TGĐ Cao su Đà Nẵng bị khởi tố](https://thanhnien.vn/tong-giam-doc-cong-ty-co-phan-cao-su-da-nang-bi-khoi-to-185261016204140641.htm) ·
+[VietnamNet — Khởi tố TGĐ DRC](https://vietnamnet.vn/khoi-to-tong-giam-doc-cong-ty-cp-cao-su-da-nang-2565566.html) ·
+[Nhân Dân — 15/10: năng lượng, bảo hiểm lao dốc, VN-Index mất 1.700](https://nhandan.vn/chung-khoan-ngay-1510-co-phieu-nang-luong-bao-hiem-lao-doc-vn-index-mat-moc-1700-diem-post995455.html) ·
+[CafeF — Cổ phiếu BĐS giảm sàn phiên thứ 20 (KOS)](https://cafef.vn/mot-co-phieu-bat-dong-san-giam-san-phien-thu-20-188261016215822844.chn) ·
+[Tuổi Trẻ — PNJ lại giảm sàn 12/10](https://tuoitre.vn/chung-khoan-tram-lang-dau-tuan-pnj-lai-giam-san-100261012154235352.htm) ·
+[Báo Pháp Luật — TV1 chi >40 tỷ cổ tức](https://doanhnhan.baophapluat.vn/tu-van-xay-dung-dien-1-tv1-chi-hon-40-ty-dong-tra-co-tuc-tien-mat-loi-nhuan-ban-nien-di-lui.html)
+
+---

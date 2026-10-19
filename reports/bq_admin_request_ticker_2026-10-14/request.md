@@ -1,3 +1,5 @@
+> **ĐÃ RÚT 19/10 — bq_admin trả lời: các mã này không có giao dịch ngày 14/10, dữ liệu BQ đúng. Không cần nạp lại.**
+
 **Gửi bq_admin — nạp lại dữ liệu `tav2_bq.ticker` ngày 14/10/2026**
 
 Anh/chị bq_admin,
