@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-14T14:35:49Z] [rate-source-label-12m 10-14] XONG chờ arch-review: nhánh fix/rate-source-label-12m-20261014 ở CẢ 2 repo (WC ea82525f, mike 53fd6909b), CHƯA merge. (Thay dòng ĐANG DỞ job 135258.)
 - [2026-10-16T03:36:03Z] ĐANG DỞ job Taylor_20261016_033549 (cron chốt sổ đơn vị quỹ tuần, wrapper bin/ledger_seal_weekly.py, nhánh feat/ledger-seal-weekly-20261016 wt riêng, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc nav_unit_ledger.py + ledger_anchor_check.py + sandbox mẫu
 - [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
 - [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
@@ -26,3 +25,4 @@
 - [2026-10-18T17:38:45Z] [vnindex-tr carry-forward v2 10-19] XONG chờ Mike gọi quant-skeptic rồi trình user: nhánh research/vnindex-tr-carry-forward-20261019 @37aa83657 (wt WorkingClaude/wt-Taylor_20261018_172548), finding vnindex-tr-carry-forward-v2-20261019. Mở: 1 ô ZaloPay -6,85→-6,86 nếu weekly 12-16/10 đã gửi bằng v1. (Thay dòng ĐANG DỞ job 172548.)
 - [2026-10-18T17:45:16Z] [sunday-plan-round 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @d570de2c9 (wt-Taylor_20261018_173105). Thêm 1 dòng: cổng macro_health CN.
 - [2026-10-18T18:53:56Z] [sunday-plan-round vòng 2 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @bc6f53eab (wt-Taylor_20261018_173105). (Thay dòng XONG @d570de2c9.)
+- [2026-10-19T02:41:32Z] [sunday-plan-round vòng 3 10-19] XONG chờ Mike merge+cài cron: nhánh feat/sunday-plan-round-20261019 @6501e3011. (Thay dòng @bc6f53eab.)

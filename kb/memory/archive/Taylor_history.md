@@ -1283,3 +1283,6 @@
 
 ## Archived 2026-10-18 (keep=12 days=0 require_done=False)
 - [2026-10-14T13:53:08Z] ĐANG DỞ job Taylor_20261014_135258 (đổi nhãn rate_source cctg_6m→cctg_12m, worktree riêng, KHÔNG merge): bắt đầu | NEXT: grep + tạo worktree
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-14T14:35:49Z] [rate-source-label-12m 10-14] XONG chờ arch-review: nhánh fix/rate-source-label-12m-20261014 ở CẢ 2 repo (WC ea82525f, mike 53fd6909b), CHƯA merge. (Thay dòng ĐANG DỞ job 135258.)
