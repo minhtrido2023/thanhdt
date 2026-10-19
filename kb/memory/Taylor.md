@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-16T03:36:03Z] ĐANG DỞ job Taylor_20261016_033549 (cron chốt sổ đơn vị quỹ tuần, wrapper bin/ledger_seal_weekly.py, nhánh feat/ledger-seal-weekly-20261016 wt riêng, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc nav_unit_ledger.py + ledger_anchor_check.py + sandbox mẫu
-- [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
 - [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
 - [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)
 - [2026-10-17T02:18:27Z] [weekly 10-12→10-16] 2 file md + 6 chart XONG, delivery gate BLOCK G4 (cột VN-Index có cổ tức). CHỜ Mike/bq_admin gỡ G4 rồi chạy lại report_delivery_gate cho 2 file (sha trong bus finding weekly-...BLOCKED-G4).
@@ -26,3 +24,5 @@
 - [2026-10-18T17:45:16Z] [sunday-plan-round 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @d570de2c9 (wt-Taylor_20261018_173105). Thêm 1 dòng: cổng macro_health CN.
 - [2026-10-18T18:53:56Z] [sunday-plan-round vòng 2 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @bc6f53eab (wt-Taylor_20261018_173105). (Thay dòng XONG @d570de2c9.)
 - [2026-10-19T02:41:32Z] [sunday-plan-round vòng 3 10-19] XONG chờ Mike merge+cài cron: nhánh feat/sunday-plan-round-20261019 @6501e3011. (Thay dòng @bc6f53eab.)
+- [2026-10-19T05:21:56Z] ĐANG DỞ job Taylor_20261019_052148 (AIS chain-order rule oshares_live, wt ../wt-Taylor_20261019_052148 nhánh feat/ais-chain-order-20261019, KHÔNG merge) | NEXT: đọc oshares_live + selfcheck + registry
+- [2026-10-19T05:40:07Z] [ais-chain-order 10-19] XONG chờ Mike arch-review+quant-skeptic+merge: nhánh feat/ais-chain-order-20261019 @c22ce4c60 (wt /home/trido/thanhdt/wt-Taylor_20261019_052148), finding ais-chain-order-20261019. (Thay dòng ĐANG DỞ job 052148.)

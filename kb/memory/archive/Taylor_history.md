@@ -1286,3 +1286,9 @@
 
 ## Archived 2026-10-19 (keep=12 days=0 require_done=False)
 - [2026-10-14T14:35:49Z] [rate-source-label-12m 10-14] XONG chờ arch-review: nhánh fix/rate-source-label-12m-20261014 ở CẢ 2 repo (WC ea82525f, mike 53fd6909b), CHƯA merge. (Thay dòng ĐANG DỞ job 135258.)
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T03:36:03Z] ĐANG DỞ job Taylor_20261016_033549 (cron chốt sổ đơn vị quỹ tuần, wrapper bin/ledger_seal_weekly.py, nhánh feat/ledger-seal-weekly-20261016 wt riêng, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc nav_unit_ledger.py + ledger_anchor_check.py + sandbox mẫu
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
