@@ -58,7 +58,7 @@ def ais(t, days_ago, delta, total, title=None):
             "shares_total_after": None if total is None else str(total), "title": title}
 
 
-def make_runner(events, ais_rows, raise_on=None, log=None, fin_rows=None):
+def make_runner(events, ais_rows, raise_on=None, log=None):
     def runner(sql):
         if log is not None:
             log.append(sql)
@@ -68,14 +68,12 @@ def make_runner(events, ais_rows, raise_on=None, log=None, fin_rows=None):
             return events
         if "treasury_window:ais" in sql:
             return ais_rows
-        if "treasury_window:fin" in sql:
-            return fin_rows or []
         raise AssertionError(f"SQL lạ: {sql[:80]}")
     return runner
 
 
 def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=None,
-             fin_rows=None, seen=None):
+             seen=None):
     sent = []
 
     def _notifier(msg):
@@ -83,7 +81,7 @@ def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=N
         return (True, "ok") if notifier is None else notifier(msg)
     buf = io.StringIO()
     with redirect_stdout(buf):
-        rc = c.main(list(argv), runner=make_runner(events, ais_rows, raise_on, fin_rows=fin_rows),
+        rc = c.main(list(argv), runner=make_runner(events, ais_rows, raise_on),
                     notifier=_notifier, today=TODAY,
                     seen_file=seen or os.path.join(tempfile.mkdtemp(prefix="tbm_sc_"), "seen.json"))
     return rc, buf.getvalue(), sent
@@ -173,39 +171,6 @@ def run_cases(c):
     rc, out, sent = run_main(c, [ev("KDC", W + 28)], [], argv=("--dry-run",))
     check("D6. --dry-run ⇒ không post, rc=1", rc == 1 and not sent, (rc, sent))
 
-    # G. Bằng chứng BCTC + dedupe (user duyệt 2026-10-19)
-    def fin(t, days_ago, v):
-        return {"ticker": t, "d": ago(days_ago), "OShares": str(v)}
-
-    r = c.evaluate(TODAY, [ev("BCT", 100)], [], [fin("BCT", 130, 1_000_000), fin("BCT", 60, 998_000)])
-    check("G1. BCTC sau sự kiện giảm 0,2% ⇒ đóng, close_src=BCTC, lag=40",
-          len(r["closed"]) == 1 and r["closed"][0]["close_src"] == "BCTC"
-          and r["closed"][0]["lag"] == 40 and not r["warn"], r)
-    r = c.evaluate(TODAY, [ev("ELC", 100)], [], [fin("ELC", 130, 110_067_693), fin("ELC", 60, 110_047_218)])
-    check("G2. ca ELC thật: BCTC giảm chỉ −0,019% (< 0,05%) ⇒ KHÔNG đóng, vẫn WARN",
-          len(r["warn"]) == 1 and not r["closed"], r)
-    r = c.evaluate(TODAY, [ev("UP", 100)], [], [fin("UP", 130, 1_000_000), fin("UP", 60, 1_100_000)])
-    check("G3. BCTC TĂNG OShares ⇒ không đóng", len(r["warn"]) == 1 and not r["closed"], r)
-    r = c.evaluate(TODAY, [ev("BEF", 100)], [], [fin("BEF", 160, 1_000_000), fin("BEF", 130, 900_000),
-                                                 fin("BEF", 60, 900_000)])
-    check("G4. BCTC giảm TRƯỚC ngày sự kiện ⇒ không đóng", len(r["warn"]) == 1 and not r["closed"], r)
-    r = c.evaluate(TODAY, [ev("LAT", 100)], [], [fin("LAT", 130, 1_000_000)])
-    check("G5. chỉ 1 dòng BCTC (không có dòng liền trước để so) ⇒ không đóng",
-          len(r["warn"]) == 1 and not r["closed"], r)
-    r = c.evaluate(TODAY, [ev("OLD2", M + 300)], [], [fin("OLD2", M + 330, 1_000_000),
-                                                      fin("OLD2", 10, 900_000)])
-    check("G6. BCTC giảm quá M ngày sau sự kiện ⇒ không đóng", not r["closed"], r)
-    r = c.evaluate(TODAY, [ev("NOF", 100)], [])
-    check("G7. không truyền dòng BCTC ⇒ hành vi cũ (WARN)", len(r["warn"]) == 1, r)
-    r = c.evaluate(TODAY, [ev("BA", 100)], [ais("BA", 70, -5, 95)],
-                   [fin("BA", 130, 1_000_000), fin("BA", 60, 900_000)])
-    check("G8. AIS step-down thắng BCTC (close_src=AIS)",
-          r["closed"][0]["close_src"] == "AIS", r)
-    q = c.sql_fin(TODAY)
-    check("G9. SQL fin: bảng ticker_financial có alias, lọc OShares NOT NULL + ≤ hôm nay + mã buy_done",
-          all(x in q for x in ("ticker_financial` AS f", "f.OShares IS NOT NULL",
-                               f"<= DATE '{TODAY}'", "action_type = 'buy_done'")), q)
-
     # H. Dedupe "chỉ báo sự kiện mới"
     sf = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
     e1 = [ev("AAA", W + 30), ev("BBB", W + 40)]
@@ -237,6 +202,32 @@ def run_cases(c):
     d = c.next_seen({"AAA|2026-01-01": "2026-02-01"}, {"warn": [{"ticker": "AAA", "date": _dt.date(2026, 1, 1)}]},
                     TODAY, True)
     check("H8. next_seen giữ NGÀY báo gốc, không ghi đè", d == {"AAA|2026-01-01": "2026-02-01"}, d)
+
+    # H9+. Va chạm khoá, ghi atomic, lỗi ghi state (arch-review 2026-10-19)
+    sf4 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    run_main(c, [ev("DUP", W + 30)], [], argv=(), seen=sf4)
+    rc, out, sent = run_main(c, [ev("DUP", W + 30), ev("DUP", W + 31)], [], argv=(), seen=sf4)
+    check("H9. cùng ticker, 2 ngày, 1 ngày đã báo ⇒ ngày kia VẪN được báo (khoá gồm cả ngày)",
+          rc == 1 and len(sent) == 1 and f"• DUP buy_done {ago(W + 31)}" in sent[0]
+          and f"• DUP buy_done {ago(W + 30)}" not in sent[0], (rc, sent))
+    rep = []
+    orig_replace = c.os.replace
+    c.os.replace = lambda a_, b_: (rep.append((a_, b_)), orig_replace(a_, b_))[1]
+    try:
+        sf5 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+        run_main(c, [ev("ATM", W + 30)], [], argv=(), seen=sf5)
+    finally:
+        c.os.replace = orig_replace
+    check("H10. state ghi qua tmp + os.replace (atomic), không ghi thẳng file đích",
+          len(rep) == 1 and rep[0][0] != sf5 and rep[0][1] == sf5 and ".tmp." in rep[0][0], rep)
+    bad = os.path.join(sf5, "x", "seen.json")   # cha là FILE ⇒ makedirs/open lỗi OSError
+    rc, out, sent = run_main(c, [ev("ERR", W + 30)], [], argv=(), seen=bad)
+    check("H11. ghi state lỗi ⇒ in STATE_WRITE_FAILED, rc vẫn 1 (không traceback)",
+          rc == 1 and "STATE_WRITE_FAILED" in out and len(sent) == 1, (rc, out[-200:]))
+    before = c.load_seen(sf4)
+    rc, out, sent = run_main(c, [], [], argv=(), seen=sf4, raise_on="treasury_window:events")
+    check("H12. BQ lỗi (rc=2) KHÔNG đụng state (khác rỗng, y nguyên)",
+          rc == 2 and before and c.load_seen(sf4) == before, (rc, before, c.load_seen(sf4)))
 
     # E. Lỗi
     rc, out, sent = run_main(c, [], [], argv=(), raise_on="treasury_window:ais")
@@ -273,7 +264,8 @@ def run_cases(c):
     log = []
     try:
         with redirect_stdout(io.StringIO()):
-            c.main(["--dry-run"], runner=make_runner([], [], log=log), notifier=lambda m: (True, ""))
+            c.main(["--dry-run"], runner=make_runner([], [], log=log), notifier=lambda m: (True, ""),
+                   seen_file=os.path.join(tempfile.mkdtemp(prefix="tbm_tz_"), "seen.json"))
     finally:
         c.dt = orig
     q = next((s for s in log if "treasury_window:events" in s), "")
@@ -287,10 +279,6 @@ def run_cases(c):
 
 # ── mutation ──────────────────────────────────────────────────────────────────────────────
 MUTATIONS = (
-    ("fin-close-off", '            fc = fin_close(fins[t], d)', '            fc = None'),
-    ("fin-threshold", "v <= pv * (1 - FIN_STEPDOWN_MIN)", "v < pv"),
-    ("fin-before-date", "if d <= qd and (qd - d).days <= MATCH_MAX_DAYS", "if (qd - d).days <= MATCH_MAX_DAYS"),
-    ("fin-unbounded", "if d <= qd and (qd - d).days <= MATCH_MAX_DAYS", "if d <= qd"),
     ("dedupe-off", "    new = [i for i in res[\"warn\"] if warn_key(i) not in seen]",
      "    new = list(res[\"warn\"])"),
     ("seen-no-prune", "    nxt = {warn_key(i): prev[warn_key(i)] for i in res[\"warn\"] if warn_key(i) in prev}",

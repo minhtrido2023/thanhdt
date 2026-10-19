@@ -12,7 +12,8 @@ ngày kể từ ngày thanh toán xong. Ngoại lệ: cổ phiếu mua lại t�
 Kiến trúc đã chốt: KHÔNG overlay trừ OShares, KHÔNG sửa `oshares_live.py`. Gap post-2021 phải TỰ
 ĐÓNG qua AIS "Giảm niêm yết" mới — `oshares_live.py` đã đọc đúng AIS đó. Monitor
 này chỉ canh trường hợp gap KHÔNG tự đóng. Cùng lớp với `corp_action_feed_canary.py`: chỉ ĐỌC BQ,
-in log, post topic `architecture` khi có WARN; không ghi state, không chặn cổng publish nào.
+in log, post topic `architecture` khi có WARN; không chặn cổng publish nào. Từ 2026-10-19 có MỘT
+file state riêng chỉ để nhớ sự kiện đã báo (xem CẬP NHẬT cuối docstring) — không state nào khác.
 
 LOGIC
 -----
@@ -78,12 +79,15 @@ CẬP NHẬT 2026-10-19 (user duyệt, sau khi bảng WARN hằng tuần lặp l
   (2) `WARN_MAX_DAYS` = 180: quá 180 ngày chưa đóng ⇒ STALE (chỉ log). 180 vì 23/29 ca có
       step-down đã đóng ≤180 ngày (đo 2026-09-17, xem trên). `MATCH_MAX_DAYS`=365 vẫn là cửa sổ
       TÌM bằng chứng đóng — hai ngưỡng khác nhau cho hai câu hỏi khác nhau.
-  (3) ĐÓNG BẰNG BẰNG CHỨNG BCTC: dòng `ticker_financial` sau ngày sự kiện (trong MATCH_MAX_DAYS) mà
-      OShares GIẢM ≥ `FIN_STEPDOWN_MIN`=0,05% so với dòng liền trước ⇒ đóng (`close_src`=BCTC).
-      CÓ BCTC mới hơn KHÔNG đủ: đo 2026-10-19 trên 14 sự kiện — ELC 4 đợt mua, BCTC sau đó vẫn
-      ~110,05tr (−0,01…−0,02%) trong khi AIS 24/08 mới giảm còn 104,85tr ⇒ BCTC chưa phản ánh.
-      Giảm OShares trên BCTC cũng có thể do nguyên nhân khác (huỷ ESOP, làm tròn) — đó là bằng
-      chứng ĐỦ để ngừng nhắc, không phải chứng minh pháp lý.
+  (3) ĐÃ THỬ VÀ GỠ (arch-review cùng ngày): đóng sự kiện khi `ticker_financial.OShares` giảm
+      ≥0,05% KHÔNG dùng được. OShares (BCTC) = cổ phiếu LƯU HÀNH cuối quý, loại trừ cổ phiếu quỹ ⇒
+      nó giảm vì CHÍNH lần mua, dù cổ phiếu được huỷ (đúng luật) hay giữ lại làm quỹ (đúng khoảng
+      trống monitor này canh). GLT (live BQ): AIS niêm yết 10.049.528, BCTC 11/2024 giảm 24.200 =
+      đúng lượng mua, KHÔNG BAO GIỜ có AIS giảm niêm yết — rule đó đóng cả 2 sự kiện GLT sau 15
+      ngày. 0/11 ca "đóng nhờ BCTC" có AIS step-down trong 365 ngày; 8/11 đóng trong ≤45 ngày
+      (chưa kịp post lần nào); và nó KHÔNG bớt WARN nào hôm nay (6 → 6). Spam đã được (1) giải
+      quyết. Cột này cũng là TRAP (kb/data_registry/fundamentals/ticker_financial_oshares.md).
+      ĐỪNG thêm lại bằng chứng BCTC cho việc "đóng" — nếu cần, chỉ dùng làm thông tin hiển thị.
 
 Mã thoát: 0 = không WARN (hoặc chỉ có sự kiện đã báo trước đó) (1 dòng log) · 1 = có WARN MỚI (đã post) · 2 = monitor lỗi (đã post, trích
 lỗi thật) · 3 = post Discord thất bại (`NOTIFY_FAILED`).
@@ -91,6 +95,8 @@ lỗi thật) · 3 = post Discord thất bại (`NOTIFY_FAILED`).
 Dùng:  python3 mike/bin/treasury_buyback_window_monitor.py [--dry-run] [--asof YYYY-MM-DD]
 Selfcheck: `treasury_buyback_window_monitor_selfcheck.py` (hermetic, không BQ).
 Registry: `mike/kb/data_registry/price-volume/treasury_news_buyback.md`.
+State: `mike/state/treasury_buyback_window_monitor_seen.json` (env TREASURY_MONITOR_SEEN_PATH) — duy
+nhất file script này ghi: atomic, tự dọn khoá hết WARN, chỉ ghi SAU khi post thành công.
 """
 from __future__ import annotations
 
@@ -118,7 +124,6 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 TREASURY_TABLE = "lithe-record-440915-m9.tav2_bq.treasury_news"
 CA_TABLE = "lithe-record-440915-m9.tav2_bq.corporate_action"
-FIN_TABLE = "lithe-record-440915-m9.tav2_bq.ticker_financial"
 NOTIFY_TOPIC = "architecture"
 
 SCOPE_START = dt.date(2021, 1, 1)   # hiệu lực Luật DN 2020 + Luật CK 2019
@@ -126,7 +131,6 @@ CLOSE_WINDOW_DAYS = 45              # 10 ngày luật định + đệm độ tr�
 MATCH_MAX_DAYS = 365                # NGƯỠNG PHÁN ĐOÁN, không phải khoảng trống tự nhiên — xem
                                     # đoạn MATCH_MAX_DAYS trong docstring module
 WARN_MAX_DAYS = 180                 # quá ngưỡng này chưa đóng ⇒ STALE (log), không còn WARN
-FIN_STEPDOWN_MIN = 0.0005           # BCTC OShares giảm ≥0,05% so dòng trước ⇒ bằng chứng đóng
 ORIGIN_HINT_RE = re.compile(
     r"esop|người lao động|cbnv|cbcnv|cán bộ|nhân viên|nghỉ việc|thu hồi|ưu đãi|cổ phiếu lẻ"
     r"|phát sinh từ",
@@ -150,16 +154,6 @@ def sql_ais(today):
             f"AND ticker IN (SELECT DISTINCT ticker FROM `{TREASURY_TABLE}` "
             f"WHERE action_type = 'buy_done' "
             f"AND public_date >= DATE '{SCOPE_START.isoformat()}')")
-
-
-def sql_fin(today):
-    lo = (SCOPE_START - dt.timedelta(days=400)).isoformat()   # cần dòng LIỀN TRƯỚC sự kiện đầu tiên
-    return (f"/* treasury_window:fin */\nSELECT f.ticker, CAST(f.time AS STRING) AS d, f.OShares "
-            f"FROM `{FIN_TABLE}` AS f WHERE f.OShares IS NOT NULL AND f.time >= DATE '{lo}' "
-            f"AND f.time <= DATE '{today.isoformat()}' "
-            f"AND f.ticker IN (SELECT DISTINCT t.ticker FROM `{TREASURY_TABLE}` AS t "
-            f"WHERE t.action_type = 'buy_done' "
-            f"AND t.public_date >= DATE '{SCOPE_START.isoformat()}')")
 
 
 # ── logic thuần ───────────────────────────────────────────────────────────────────────────
@@ -198,41 +192,17 @@ def ais_series(rows):
     return by
 
 
-def fin_series(rows):
-    """{ticker: [(ngày, OShares)]} tăng dần theo ngày, gộp trùng ngày (lấy dòng cuối)."""
-    by = {}
-    for r in rows or []:
-        by.setdefault(r["ticker"], {})[dt.date.fromisoformat(r["d"])] = float(r["OShares"])
-    return {t: sorted(m.items()) for t, m in by.items()}
-
-
-def fin_close(seq, d):
-    """Dòng BCTC đầu tiên trong [d, d+MATCH_MAX_DAYS] mà OShares giảm ≥FIN_STEPDOWN_MIN so với dòng
-    liền trước (dòng liền trước có thể nằm TRƯỚC d). Không có ⇒ None."""
-    for k in range(1, len(seq)):
-        (qd, v), (_, pv) = seq[k], seq[k - 1]
-        if d <= qd and (qd - d).days <= MATCH_MAX_DAYS and pv > 0 and v <= pv * (1 - FIN_STEPDOWN_MIN):
-            return {"d": qd, "total": int(v), "prev_total": int(pv), "pct": v / pv - 1}
-    return None
-
-
-def evaluate(today, event_rows, ais_rows, fin_rows=None):
+def evaluate(today, event_rows, ais_rows):
     events = group_events(event_rows)
     series = ais_series(ais_rows)
-    fins = fin_series(fin_rows)
     res = {"scope_events": len(events), "scope_tickers": len({t for t, _ in events}),
            "open_in_window": [], "closed": [], "warn": [], "stale": []}
     for (t, d), ev in sorted(events.items()):
         seq = series.get(t, [])
         close = next((a for a in seq if a["step_down"]
                       and 0 <= (a["d"] - d).days <= MATCH_MAX_DAYS), None)
-        close_src = "AIS"
-        if close is None and fins.get(t):
-            fc = fin_close(fins[t], d)
-            if fc is not None:
-                close, close_src = fc, "BCTC"
         elapsed = (today - d).days
-        item = {"close_src": close_src, "ticker": t, "date": d, "elapsed": elapsed,
+        item = {"ticker": t, "date": d, "elapsed": elapsed,
                 "n_news": ev["n"], "hint": ev["hint"],
                 "title": ev["title"],
                 "ais_before": next((a for a in reversed(seq) if a["d"] < d), None),
@@ -275,14 +245,12 @@ def warn_key(item):
 def render(today, res, new=None, carried=0):
     """`new` = các sự kiện CHƯA từng báo (mặc định: toàn bộ WARN); `carried` = số đã báo trước đó."""
     new = res["warn"] if new is None else new
-    n_bctc = sum(1 for i in res["closed"] if i.get("close_src") == "BCTC")
     head = (f"🏦 treasury_buyback_window_monitor {today}: {len(new)} sự kiện buy_done MỚI quá "
             f"{CLOSE_WINDOW_DAYS} ngày chưa thấy AIS giảm niêm yết"
             + (f" (+{carried} sự kiện đã báo trước đó, vẫn chưa đóng — không liệt kê lại)"
                if carried else "")
             + f" — phạm vi {res['scope_events']} sự kiện/{res['scope_tickers']} mã từ "
-            f"{SCOPE_START} (đã đóng {len(res['closed'])}, trong đó {n_bctc} nhờ BCTC giảm "
-            f"OShares; trong cửa sổ {len(res['open_in_window'])}, STALE >{WARN_MAX_DAYS}d chỉ ghi "
+            f"{SCOPE_START} (đã đóng {len(res['closed'])}, trong cửa sổ {len(res['open_in_window'])}, STALE >{WARN_MAX_DAYS}d chỉ ghi "
             f"log {len(res['stale'])}). WARN-ONLY, không chặn gì. Nguồn gốc ESOP KHÔNG phân biệt "
             f"được bằng field — ⚑ chỉ là từ khoá tiêu đề.")
     return "\n".join([head] + [render_warn(i) for i in new])
@@ -366,8 +334,7 @@ def main(argv=None, runner=default_runner, notifier=default_notifier, today=None
     prev = load_seen(seen_file)
     new = carried = None
     try:
-        res = evaluate(today, runner(sql_events(today)), runner(sql_ais(today)),
-                       runner(sql_fin(today)))
+        res = evaluate(today, runner(sql_events(today)), runner(sql_ais(today)))
     except Exception as e:  # monitor tự hỏng ⇒ báo kèm lỗi thật, không đoán nguyên nhân
         msg = (f"🛠️ treasury_buyback_window_monitor {today}: MONITOR KHÔNG CHẠY ĐƯỢC — "
                f"{type(e).__name__}: {str(e).strip()[-600:]}")
@@ -381,7 +348,10 @@ def main(argv=None, runner=default_runner, notifier=default_notifier, today=None
         def _persist(posted):
             nxt = next_seen(prev, res, today, posted)
             if nxt != prev and not a.dry_run:
-                save_seen(nxt, seen_file)
+                try:
+                    save_seen(nxt, seen_file)
+                except OSError as e:   # mất state ⇒ tệ nhất là mai báo lại; KHÔNG đổi rc
+                    print(f"STATE_WRITE_FAILED {seen_file or seen_path()}: {e}")
 
         if not new:
             _persist(False)

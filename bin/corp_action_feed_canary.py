@@ -11,6 +11,9 @@ trị `event_code`/`event_status` ⇒ mọi `WHERE event_status = "executed"` â
 
 WARN-ONLY TUYỆT ĐỐI: script này KHÔNG import/đụng state, file publish hay `_FAILED` của
 `corp_action_daily`. Nó chỉ ĐỌC BQ, in log, và post Discord topic `architecture` khi có WARN.
+Ngoại lệ DUY NHẤT (2026-10-19): state ack RIÊNG `mike/state/corp_action_feed_canary_ack.json` (env
+CANARY_ACK_PATH) — nhớ giá trị MỚI đã báo (kèm số dòng; TĂNG ⇒ báo lại), atomic, tự dọn khi giá
+trị biến mất, chỉ ghi SAU khi post thành công. Hỏng thật (biến mất / 0 dòng gần đây) KHÔNG ack được.
 
 BỐN KIỂM TRA (mỗi mục ra PASS/WARN kèm số đọc được — §29, không hardcode nguyên nhân)
 ---------------------------------------------------------------------------------
@@ -282,24 +285,30 @@ def check_schema(schema_rows, code_cols):
     return _res("a.schema", not probs, ev)
 
 
-def check_values(value_rows, need_codes, need_statuses, acked=()):
-    """`acked` = tập khoá `kind=v` của giá trị MỚI đã báo ít nhất một lần (xem `load_acked`).
+def check_values(value_rows, need_codes, need_statuses, acked=None):
+    """`acked` = {khoá `kind=v`: {"d": ngày báo đầu, "n": số dòng lúc báo}} (xem `load_acked`).
 
-    Giá trị MỚI đã báo rồi không thành WARN nữa (ca MANUAL_FILL: cùng một giá trị mới bị post 23
-    ngày liền cho tới khi ai đó sửa `KNOWN_STATUSES`) — nó chỉ còn là ghi chú trong evidence PASS.
-    BIẾN MẤT / 0 dòng trong cửa sổ KHÔNG bao giờ được ack: đó là hỏng thật, không phải thêm mới.
-    Kết quả mang `new_keys` = mọi giá trị MỚI đang hiện diện (đã ack hay chưa) để caller dọn state.
+    Giá trị MỚI đã báo rồi KHÔNG thành WARN nữa (ca MANUAL_FILL: cùng một giá trị mới bị post 23
+    ngày liền) — NHƯNG chỉ khi số dòng KHÔNG TĂNG so với lúc báo: ack theo (giá trị, n_all), nên
+    một giá trị mới đang lớn dần vẫn báo lại. BIẾN MẤT / 0 dòng trong cửa sổ KHÔNG bao giờ được ack.
+    Kết quả mang `new_keys` = {khoá: n_all} của MỌI giá trị MỚI đang hiện diện (để caller dọn state)
+    và `acked_note` (rỗng nếu không có) để main in ra log đầy đủ (evidence PASS bị cắt 90 ký tự).
     """
+    acked = acked or {}
     seen = {("code" if r["kind"] == "code" else "status", r["v"]):
             (int(r["n_all"]), int(r["n_recent"])) for r in value_rows}
-    probs, acked_now, new_keys = [], [], []
+    probs, acked_now, new_keys = [], [], {}
     for (kind, v), (n_all, _) in sorted(seen.items()):
         known = KNOWN_CODES if kind == "code" else KNOWN_STATUSES
         if v not in known:
             key = f"{kind}={v}"
-            new_keys.append(key)
-            if key in acked:
-                acked_now.append(f"{key} ({n_all} dòng)")
+            new_keys[key] = n_all
+            prior = acked.get(key)
+            if prior is not None and n_all <= int(prior.get("n", -1)):
+                acked_now.append(f"{key} ({n_all} dòng, báo {prior.get('d', '?')})")
+            elif prior is not None:
+                probs.append(f"giá trị MỚI {kind}=`{v}` TĂNG {prior.get('n')} → {n_all} dòng "
+                             f"(đã báo {prior.get('d', '?')})")
             else:
                 probs.append(f"giá trị MỚI {kind}=`{v}` ({n_all} dòng)")
     for kind, need in (("code", need_codes), ("status", need_statuses)):
@@ -315,10 +324,9 @@ def check_values(value_rows, need_codes, need_statuses, acked=()):
     else:
         summary = ", ".join(f"{k}={v}:{a}/{r}" for (k, v), (a, r) in sorted(seen.items()))
         ev = f"[toàn bảng/{RECENT_DAYS}d] {summary}"
-        if acked_now:
-            ev += " — giá trị mới ĐÃ BÁO trước đó: " + ", ".join(acked_now)
     out = _res("b.values", not probs, ev)
     out["new_keys"] = new_keys
+    out["acked_note"] = ("giá trị mới ĐÃ BÁO (không tăng): " + ", ".join(acked_now)) if acked_now else ""
     return out
 
 
@@ -357,7 +365,7 @@ def _guard(name, fn):
                             f"{str(e).strip()[-600:]}"}
 
 
-def run_checks(today, runner, sources=SQL_SOURCES, scan_files=VALUE_SCAN_FILES, acked=()):
+def run_checks(today, runner, sources=SQL_SOURCES, scan_files=VALUE_SCAN_FILES, acked=None):
     out = []
     cols = {}
 
@@ -393,11 +401,11 @@ def ack_path():
 
 
 def load_acked(path=None):
-    """{khoá `kind=v`: ngày báo}. File thiếu/hỏng ⇒ {} (fail-open về phía BÁO: tệ nhất là báo lại)."""
+    """{khoá `kind=v`: {"d": ngày báo, "n": số dòng}}. File thiếu/hỏng ⇒ {} (fail-open về phía BÁO: tệ nhất là báo lại)."""
     try:
         with open(path or ack_path(), encoding="utf-8") as f:
             d = json.load(f).get("acked", {})
-        return d if isinstance(d, dict) else {}
+        return {k: v for k, v in d.items() if isinstance(v, dict)} if isinstance(d, dict) else {}
     except (OSError, ValueError, AttributeError):
         return {}
 
@@ -413,11 +421,13 @@ def save_acked(acked, path=None):
 
 def next_acked(prev, new_keys, today, posted):
     """State kế tiếp: chỉ giữ giá trị MỚI còn hiện diện (biến mất rồi quay lại ⇒ báo lại). Khoá
-    chưa ack chỉ được ack khi tin cảnh báo ĐÃ ĐI (`posted`) — post lỗi ⇒ mai báo lại."""
-    nxt = {k: prev[k] for k in new_keys if k in prev}
+    chưa ack — hoặc đã ack nhưng n_all TĂNG — chỉ được ghi khi tin cảnh báo ĐÃ đi (`posted`);
+    post lỗi ⇒ mai báo lại. Giữ NGÀY báo gốc."""
+    nxt = {k: dict(prev[k]) for k in new_keys if k in prev}
     if posted:
-        for k in new_keys:
-            nxt.setdefault(k, today.isoformat())
+        for k, n in new_keys.items():
+            if k not in nxt or n > int(nxt[k].get("n", -1)):
+                nxt[k] = {"d": nxt.get(k, {}).get("d", today.isoformat()), "n": n}
     return nxt
 
 
@@ -456,7 +466,7 @@ def main(argv=None, runner=default_runner, notifier=default_notifier, today=None
     today = today or (dt.date.fromisoformat(a.asof) if a.asof
                       else dt.datetime.now(ICT).date())
     prev = load_acked(ack_file)
-    results = run_checks(today, runner, sources, scan_files, acked=set(prev))
+    results = run_checks(today, runner, sources, scan_files, acked=prev)
     bres = next((r for r in results if r["check"] == "b.values" and "new_keys" in r), None)
     new_keys = bres["new_keys"] if bres else None   # None = b.values lỗi ⇒ KHÔNG đụng state
 
@@ -465,12 +475,17 @@ def main(argv=None, runner=default_runner, notifier=default_notifier, today=None
             return
         nxt = next_acked(prev, new_keys, today, posted)
         if nxt != prev:
-            save_acked(nxt, ack_file)
+            try:
+                save_acked(nxt, ack_file)
+            except OSError as e:   # mất state ⇒ tệ nhất là mai báo lại; KHÔNG đổi rc
+                print(f"STATE_WRITE_FAILED {ack_file or ack_path()}: {e}")
 
     if all(r["status"] == "PASS" for r in results):
         _persist(False)
         print(f"{dt.datetime.now(ICT):%Y-%m-%d %H:%M} corp_action_feed_canary {today}: PASS "
               f"{len(results)}/{len(results)} — " + " | ".join(r["evidence"][:90] for r in results))
+        if bres and bres.get("acked_note"):
+            print("  " + bres["acked_note"])      # evidence PASS bị cắt 90 ký tự ⇒ in riêng, đủ
         return 0
     msg = render(today, results)
     print(msg)
