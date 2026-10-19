@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3994)
+# Mike fleet — context pack (v3995)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-19T05:47:53] Wags/finding — wags-fix: coord-2026-10-19: {"root_cause": "Khong co loi tooling. 3 cau treo: (1) run-bot-fail-ZaloPay da duoc user giai quyet 09:19 ICT nhung quyet dinh ghi duoi topic plan-approval-ZaloP …
 - [2026-10-19T05:51:33] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-10-19: {"finding_topic": "wags-fix: coord-2026-10-19", "verdict": "NEEDS_CHANGES", "confidence": "medium", "summary": "Các hành động (đóng run-bot-fail, gửi A/B lãi ti …
 - [2026-10-19T12:04:07] DollarBill/decision — plan-2026-10-20-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-20", "action": "HOLD ALL 0 lenh", "dt5g": "NEUTRAL", "active_nav_vnd": 592576337, "egg_vnd": 319635933, "bal": 0, " …
 - [2026-10-19T12:04:20] DollarBill/decision — plan-2026-10-20-SpaceX: {"plan": "HOLD ALL 0 lenh", "nav": 970111486, "dt5g": "NEUTRAL", "reason": "n_bal=0, LAG due=0, L1 BLOCKED_ALL_NAMES, TV1 paused theo user 10-19", "capit": "Spa …
 - [2026-10-19T16:04:07] Taylor/finding — dt-gate-badzone-count-review-20261019: {"verdict": "bo dem DUNG code (0 diff/3190 phien vs dt5g_live.state_raw); CRISIS 9/25 tu 07/10, BEAR 6/10 29/09-06/10 reset khi base doi nhan", "side_effect": " …
+- [2026-10-19T17:31:14] Mike/finding — retro-draft-2026-10-19: {"summary": "Draft retro 19/10: 4 sự cố, 2 pattern (fail-closed gate không owner tái diễn lần 4; kết luận từ tín hiệu gián tiếp). Escalation POST (trùng chủ đề  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -133,6 +133,9 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
 - CASH_VENDOR gate (số cổ tức từ `tav2_bq.corporate_action` khi broker không giải được) →
   `cash-vendor-gate-tracking.md` — user chốt 2026-08-15 **giữ ĐÓNG**; mở lại chỉ khi có ≥1 sự
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
+
+## DT gate — luật đếm candidate GIỮ NGUYÊN (user chốt 2026-10-20 00:09 ICT, `decided_by: user`, phương án A)
+Taylor `dt-gate-badzone-count-review-20261019` (job `Taylor_20261019_160133`): bộ đếm đúng code (0 lệch/3190 phiên). User chọn A = giữ nguyên gate, KHÔNG đổi luật đếm (B/C là re-tune theo lịch sử), KHÔNG hạ tỷ trọng tay (D). Ngưỡng xem lại "≥15 phiên + VNINDEX ≤−5%" đã kích hoạt kiểm tra này xong. Lưu ý: nền xấu đổi BEAR↔CRISIS làm commit CRISIS sớm nhất ~10/11 (cần 25 phiên CRISIS liên tục). Báo cáo: `agents/Taylor/research/dt_badzone_count_20261019/REPORT.md`.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-30. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

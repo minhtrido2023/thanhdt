@@ -121,3 +121,6 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
 - CASH_VENDOR gate (số cổ tức từ `tav2_bq.corporate_action` khi broker không giải được) →
   `cash-vendor-gate-tracking.md` — user chốt 2026-08-15 **giữ ĐÓNG**; mở lại chỉ khi có ≥1 sự
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
+
+## DT gate — luật đếm candidate GIỮ NGUYÊN (user chốt 2026-10-20 00:09 ICT, `decided_by: user`, phương án A)
+Taylor `dt-gate-badzone-count-review-20261019` (job `Taylor_20261019_160133`): bộ đếm đúng code (0 lệch/3190 phiên). User chọn A = giữ nguyên gate, KHÔNG đổi luật đếm (B/C là re-tune theo lịch sử), KHÔNG hạ tỷ trọng tay (D). Ngưỡng xem lại "≥15 phiên + VNINDEX ≤−5%" đã kích hoạt kiểm tra này xong. Lưu ý: nền xấu đổi BEAR↔CRISIS làm commit CRISIS sớm nhất ~10/11 (cần 25 phiên CRISIS liên tục). Báo cáo: `agents/Taylor/research/dt_badzone_count_20261019/REPORT.md`.
