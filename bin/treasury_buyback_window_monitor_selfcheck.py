@@ -58,7 +58,7 @@ def ais(t, days_ago, delta, total, title=None):
             "shares_total_after": None if total is None else str(total), "title": title}
 
 
-def make_runner(events, ais_rows, raise_on=None, log=None):
+def make_runner(events, ais_rows, raise_on=None, log=None, fin_rows=None):
     def runner(sql):
         if log is not None:
             log.append(sql)
@@ -68,11 +68,14 @@ def make_runner(events, ais_rows, raise_on=None, log=None):
             return events
         if "treasury_window:ais" in sql:
             return ais_rows
+        if "treasury_window:fin" in sql:
+            return fin_rows or []
         raise AssertionError(f"SQL lạ: {sql[:80]}")
     return runner
 
 
-def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=None):
+def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=None,
+             fin_rows=None, seen=None):
     sent = []
 
     def _notifier(msg):
@@ -80,8 +83,9 @@ def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=N
         return (True, "ok") if notifier is None else notifier(msg)
     buf = io.StringIO()
     with redirect_stdout(buf):
-        rc = c.main(list(argv), runner=make_runner(events, ais_rows, raise_on),
-                    notifier=_notifier, today=TODAY)
+        rc = c.main(list(argv), runner=make_runner(events, ais_rows, raise_on, fin_rows=fin_rows),
+                    notifier=_notifier, today=TODAY,
+                    seen_file=seen or os.path.join(tempfile.mkdtemp(prefix="tbm_sc_"), "seen.json"))
     return rc, buf.getvalue(), sent
 
 
@@ -99,11 +103,15 @@ def run_cases(c):
     r = c.evaluate(TODAY, [ev("AAA", W)], [])
     check("A3. biên: tuổi đúng W ⇒ trong cửa sổ, không WARN",
           len(r["open_in_window"]) == 1 and not r["warn"], r)
-    r = c.evaluate(TODAY, [ev("AAA", M + 1)], [])
-    check("A4. tuổi M+1 chưa đóng ⇒ STALE (không phải WARN)",
+    X = c.WARN_MAX_DAYS
+    r = c.evaluate(TODAY, [ev("AAA", X + 1)], [])
+    check("A4. tuổi X+1 (X=WARN_MAX_DAYS) chưa đóng ⇒ STALE (không phải WARN)",
           len(r["stale"]) == 1 and not r["warn"], r)
-    r = c.evaluate(TODAY, [ev("AAA", M)], [])
-    check("A5. biên: tuổi đúng M ⇒ vẫn WARN", len(r["warn"]) == 1 and not r["stale"], r)
+    r = c.evaluate(TODAY, [ev("AAA", X)], [])
+    check("A5. biên: tuổi đúng X ⇒ vẫn WARN", len(r["warn"]) == 1 and not r["stale"], r)
+    r = c.evaluate(TODAY, [ev("AAA", M - 20)], [ais("AAA", 10, -5, 95)])
+    check("A6. đóng bằng AIS vẫn tìm trong M ngày dù tuổi > X (hai ngưỡng khác nhau)",
+          len(r["closed"]) == 1 and not r["stale"], r)
 
     # B. Định nghĩa step-down
     r = c.evaluate(TODAY, [ev("ELC", W + 60)], [ais("ELC", W + 110, 4_163_848, 87_453_925),
@@ -165,6 +173,71 @@ def run_cases(c):
     rc, out, sent = run_main(c, [ev("KDC", W + 28)], [], argv=("--dry-run",))
     check("D6. --dry-run ⇒ không post, rc=1", rc == 1 and not sent, (rc, sent))
 
+    # G. Bằng chứng BCTC + dedupe (user duyệt 2026-10-19)
+    def fin(t, days_ago, v):
+        return {"ticker": t, "d": ago(days_ago), "OShares": str(v)}
+
+    r = c.evaluate(TODAY, [ev("BCT", 100)], [], [fin("BCT", 130, 1_000_000), fin("BCT", 60, 998_000)])
+    check("G1. BCTC sau sự kiện giảm 0,2% ⇒ đóng, close_src=BCTC, lag=40",
+          len(r["closed"]) == 1 and r["closed"][0]["close_src"] == "BCTC"
+          and r["closed"][0]["lag"] == 40 and not r["warn"], r)
+    r = c.evaluate(TODAY, [ev("ELC", 100)], [], [fin("ELC", 130, 110_067_693), fin("ELC", 60, 110_047_218)])
+    check("G2. ca ELC thật: BCTC giảm chỉ −0,019% (< 0,05%) ⇒ KHÔNG đóng, vẫn WARN",
+          len(r["warn"]) == 1 and not r["closed"], r)
+    r = c.evaluate(TODAY, [ev("UP", 100)], [], [fin("UP", 130, 1_000_000), fin("UP", 60, 1_100_000)])
+    check("G3. BCTC TĂNG OShares ⇒ không đóng", len(r["warn"]) == 1 and not r["closed"], r)
+    r = c.evaluate(TODAY, [ev("BEF", 100)], [], [fin("BEF", 160, 1_000_000), fin("BEF", 130, 900_000),
+                                                 fin("BEF", 60, 900_000)])
+    check("G4. BCTC giảm TRƯỚC ngày sự kiện ⇒ không đóng", len(r["warn"]) == 1 and not r["closed"], r)
+    r = c.evaluate(TODAY, [ev("LAT", 100)], [], [fin("LAT", 130, 1_000_000)])
+    check("G5. chỉ 1 dòng BCTC (không có dòng liền trước để so) ⇒ không đóng",
+          len(r["warn"]) == 1 and not r["closed"], r)
+    r = c.evaluate(TODAY, [ev("OLD2", M + 300)], [], [fin("OLD2", M + 330, 1_000_000),
+                                                      fin("OLD2", 10, 900_000)])
+    check("G6. BCTC giảm quá M ngày sau sự kiện ⇒ không đóng", not r["closed"], r)
+    r = c.evaluate(TODAY, [ev("NOF", 100)], [])
+    check("G7. không truyền dòng BCTC ⇒ hành vi cũ (WARN)", len(r["warn"]) == 1, r)
+    r = c.evaluate(TODAY, [ev("BA", 100)], [ais("BA", 70, -5, 95)],
+                   [fin("BA", 130, 1_000_000), fin("BA", 60, 900_000)])
+    check("G8. AIS step-down thắng BCTC (close_src=AIS)",
+          r["closed"][0]["close_src"] == "AIS", r)
+    q = c.sql_fin(TODAY)
+    check("G9. SQL fin: bảng ticker_financial có alias, lọc OShares NOT NULL + ≤ hôm nay + mã buy_done",
+          all(x in q for x in ("ticker_financial` AS f", "f.OShares IS NOT NULL",
+                               f"<= DATE '{TODAY}'", "action_type = 'buy_done'")), q)
+
+    # H. Dedupe "chỉ báo sự kiện mới"
+    sf = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    e1 = [ev("AAA", W + 30), ev("BBB", W + 40)]
+    rc, out, sent = run_main(c, e1, [], argv=(), seen=sf)
+    check("H1. lượt 1: 2 WARN mới ⇒ rc=1, post 1 lần, state ghi 2 khoá",
+          rc == 1 and len(sent) == 1 and len(c.load_seen(sf)) == 2, (rc, len(sent), c.load_seen(sf)))
+    rc, out, sent = run_main(c, e1, [], argv=(), seen=sf)
+    check("H2. lượt 2 cùng dữ liệu ⇒ rc=0, KHÔNG post, log nêu warn_đã_báo=2",
+          rc == 0 and not sent and "warn_đã_báo=2" in out, (rc, sent, out[-120:]))
+    rc, out, sent = run_main(c, e1 + [ev("CCC", W + 5 + 1)], [], argv=(), seen=sf)
+    msg = sent[0] if sent else ""
+    check("H3. thêm 1 sự kiện mới ⇒ post, liệt kê CHỈ CCC, tiêu đề nêu +2 đã báo",
+          rc == 1 and "• CCC" in msg and "• AAA" not in msg and "• BBB" not in msg
+          and "+2 sự kiện đã báo" in msg, (rc, msg))
+    rc, out, sent = run_main(c, [ev("BBB", W + 40)], [ais("AAA", 5, -1, 1)], argv=(), seen=sf)
+    check("H4. AAA/CCC không còn WARN ⇒ dọn khỏi state, chỉ còn BBB",
+          set(c.load_seen(sf)) == {c.warn_key({"ticker": "BBB", "date": _dt.date.fromisoformat(ago(W + 40))})},
+          c.load_seen(sf))
+    sf2 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    rc, out, sent = run_main(c, e1, [], argv=(), seen=sf2, notifier=lambda m: (False, "rc=7"))
+    check("H5. post THẤT BẠI ⇒ rc=3, KHÔNG ghi state (mai báo lại)",
+          rc == 3 and c.load_seen(sf2) == {}, (rc, c.load_seen(sf2)))
+    sf3 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    rc, out, sent = run_main(c, e1, [], argv=("--dry-run",), seen=sf3)
+    check("H6. --dry-run KHÔNG ghi state", rc == 1 and not os.path.exists(sf3), (rc,))
+    with open(sf3, "w") as fh:
+        fh.write("{hỏng")
+    check("H7. state hỏng ⇒ coi như rỗng (fail-open về phía BÁO)", c.load_seen(sf3) == {}, "")
+    d = c.next_seen({"AAA|2026-01-01": "2026-02-01"}, {"warn": [{"ticker": "AAA", "date": _dt.date(2026, 1, 1)}]},
+                    TODAY, True)
+    check("H8. next_seen giữ NGÀY báo gốc, không ghi đè", d == {"AAA|2026-01-01": "2026-02-01"}, d)
+
     # E. Lỗi
     rc, out, sent = run_main(c, [], [], argv=(), raise_on="treasury_window:ais")
     check("E1. BQ lỗi ⇒ rc=2, post kèm lỗi THẬT", rc == 2 and sent and "Access Denied" in sent[0],
@@ -180,6 +253,7 @@ def run_cases(c):
         n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
     code = "\n".join(ln for ln in body.split('"""', 2)[2].splitlines()
                      if not ln.lstrip().startswith("#"))  # bỏ docstring module + comment
+    code = re.sub(r"def save_seen\(.*?\n\n\n", "", code, flags=re.S)   # NGOẠI LỆ DUY NHẤT: state seen
     writes = re.findall(r"open\([^)]*[\"'][wax+]", code)
     forbidden = sorted(imported & {"oshares_live", "corp_action_daily", "pandas_gbq"}) + [
         w for w in ("to_gbq", "INSERT ", "UPDATE ", "DELETE ", "MERGE ", "os.replace") if w in code]
@@ -213,6 +287,16 @@ def run_cases(c):
 
 # ── mutation ──────────────────────────────────────────────────────────────────────────────
 MUTATIONS = (
+    ("fin-close-off", '            fc = fin_close(fins[t], d)', '            fc = None'),
+    ("fin-threshold", "v <= pv * (1 - FIN_STEPDOWN_MIN)", "v < pv"),
+    ("fin-before-date", "if d <= qd and (qd - d).days <= MATCH_MAX_DAYS", "if (qd - d).days <= MATCH_MAX_DAYS"),
+    ("fin-unbounded", "if d <= qd and (qd - d).days <= MATCH_MAX_DAYS", "if d <= qd"),
+    ("dedupe-off", "    new = [i for i in res[\"warn\"] if warn_key(i) not in seen]",
+     "    new = list(res[\"warn\"])"),
+    ("seen-no-prune", "    nxt = {warn_key(i): prev[warn_key(i)] for i in res[\"warn\"] if warn_key(i) in prev}",
+     "    nxt = dict(prev)"),
+    ("seen-before-post", "        _persist(ok)", "        _persist(True)"),
+    ("warn-horizon", "        elif elapsed > WARN_MAX_DAYS:", "        elif elapsed > MATCH_MAX_DAYS:"),
     ("close-no-stepdown", 'close = next((a for a in seq if a["step_down"]',
      'close = next((a for a in seq if True'),
     ("close-before-date", "and 0 <= (a[\"d\"] - d).days <= MATCH_MAX_DAYS)",
@@ -223,7 +307,7 @@ MUTATIONS = (
      'a["step_down"] = (a["total"] < 10**9 if a["delta"] is not None'),
     ("stepdown-null-title", 'else "giảm niêm yết" in a["title"].lower())', "else False)"),
     ("warn-boundary", "        elif elapsed > CLOSE_WINDOW_DAYS:", "        elif elapsed >= CLOSE_WINDOW_DAYS:"),
-    ("stale-off", "        elif elapsed > MATCH_MAX_DAYS:", "        elif False:"),
+    ("stale-off", "        elif elapsed > WARN_MAX_DAYS:", "        elif False:"),
     ("scope-filter", "        if key[1] < SCOPE_START:", "        if False:"),
     ("dedup-off", "key = (r[\"ticker\"], dt.date.fromisoformat(r[\"d\"]))",
      "key = (r[\"ticker\"], dt.date.fromisoformat(r[\"d\"]), r[\"id\"])"),
@@ -232,7 +316,7 @@ MUTATIONS = (
     ("hint-excludes", "            res[\"warn\"].append(item)",
      "            (None if item[\"hint\"] else res[\"warn\"].append(item))"),
     ("warn-no-before", "AIS trước: {_fmt_ais(item['ais_before'])}", "AIS trước: ?"),
-    ("post-on-clean", "        if not res[\"warn\"]:\n            return 0", "        if False:\n            return 0"),
+    ("post-on-clean", "        if not new:\n            _persist(False)\n            return 0", "        if False:\n            return 0"),
     ("error-no-post", "        rc = 2\n", "        return 2\n"),
     ("notify-fail-ignored", "    if not ok:\n        print(f\"NOTIFY_FAILED", "    if False:\n        print(f\"NOTIFY_FAILED"),
     ("tz-naive-now", "else dt.datetime.now(ICT).date())", "else dt.datetime.now().date())"),
