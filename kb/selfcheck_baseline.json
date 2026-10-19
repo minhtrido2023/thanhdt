@@ -69,6 +69,46 @@
       "escalated_utc": "2026-10-18T22:16:18Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "basket_price_basis_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-19T22:17:38Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: basket_price_basis_selfcheck.py",
+      "escalated_utc": "2026-10-19T22:17:38Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "custom30_yield_labels_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-19T22:17:38Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: custom30_yield_labels_selfcheck.py",
+      "escalated_utc": "2026-10-19T22:17:38Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/sunday_plan_round_selfcheck.sh": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-19T22:17:38Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/sunday_plan_round_selfcheck.sh",
+      "escalated_utc": "2026-10-19T22:17:38Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "quote_l2_logging_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-19T22:17:39Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: quote_l2_logging_selfcheck.py",
+      "escalated_utc": "2026-10-19T22:17:39Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
