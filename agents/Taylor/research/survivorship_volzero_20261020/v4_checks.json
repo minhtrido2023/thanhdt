@@ -1,0 +1,34 @@
+{
+ "p30_pin0": {
+  "lots": 1503,
+  "lots_open_resid_gt1pct": 1,
+  "lots_without_buy": 1,
+  "pnl_lots_bn": 386.448,
+  "pnl_alloc_bn": 386.448,
+  "pnl_unalloc_bn": 0.515
+ },
+ "p30_pin1M": {
+  "lots": 1545,
+  "lots_open_resid_gt1pct": 1,
+  "lots_without_buy": 1,
+  "pnl_lots_bn": 428.23,
+  "pnl_alloc_bn": 428.23,
+  "pnl_unalloc_bn": 0.515
+ },
+ "p0_pin0": {
+  "lots": 1516,
+  "lots_open_resid_gt1pct": 1,
+  "lots_without_buy": 1,
+  "pnl_lots_bn": 401.298,
+  "pnl_alloc_bn": 401.298,
+  "pnl_unalloc_bn": 0.515
+ },
+ "p0_pin1M": {
+  "lots": 1553,
+  "lots_open_resid_gt1pct": 1,
+  "lots_without_buy": 1,
+  "pnl_lots_bn": 472.389,
+  "pnl_alloc_bn": 472.389,
+  "pnl_unalloc_bn": 0.515
+ }
+}
