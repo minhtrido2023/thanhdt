@@ -2563,7 +2563,6 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
-    "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `25 1 * * 1-5` cron_health_check_daily.sh",
@@ -2572,7 +2571,6 @@
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 0 * * 6` fund_bench_cron.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
-    "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -3925,7 +3923,6 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
-    "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `16 4 * * 2,4` paper_main_early_check.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 17 * * 1-5` nav_loss_brake_monitor.py",
@@ -3938,7 +3935,6 @@
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 1 * * 1-5` intraday_price_watch.py",
     "cron `30 1 * * 1` sunday_plan_round.sh",
-    "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -4679,6 +4675,21 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/fa_ratings_ticker_gate_selfcheck.sh": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/notify.sh",
+    "mike/bin/refresh_fa_ratings.sh",
+    "mike/bin/refresh_fa_ratings_8l.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/notify.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/failopen_batch1_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
@@ -4771,7 +4782,6 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
-    "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `25 1 * * 1-5` cron_health_check_daily.sh",
@@ -4780,7 +4790,6 @@
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 0 * * 6` fund_bench_cron.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
-    "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -5233,7 +5242,6 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
-    "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `25 1 * * 1-5` cron_health_check_daily.sh",
@@ -5242,7 +5250,6 @@
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 0 * * 6` fund_bench_cron.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
-    "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -5512,7 +5519,6 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
-    "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh",
     "cron `25 1 * * 1-5` cron_health_check_daily.sh",
@@ -5521,7 +5527,6 @@
     "cron `30 0 * * 2-6` paper_programs_daily_report.sh",
     "cron `30 0 * * 6` fund_bench_cron.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
-    "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -6172,7 +6177,6 @@
     "cron `10 12 * * 1-5` eod_trading_report.sh",
     "cron `10 2 * * 1,3,5` bot_execute.py",
     "cron `15 13 * * 1-5` compute_active_nav_all.sh",
-    "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `16 4 * * 2,4` paper_main_early_check.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
     "cron `20 17 * * 1-5` nav_loss_brake_monitor.py",
@@ -6184,7 +6188,6 @@
     "cron `30 0 * * 6` fund_bench_cron.sh",
     "cron `30 1 * * *` check_report_cadence.sh",
     "cron `30 1 * * 1-5` intraday_price_watch.py",
-    "cron `30 1 * * 6` refresh_fa_ratings_8l.sh",
     "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh",
     "cron `30 12 * * 1-5` park_trim_daily.sh",
     "cron `30 13 * * 1-5` inject_discretionary_orders.sh",
@@ -10594,7 +10597,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-10-20T08:26:33Z",
+ "generated_at": "2026-10-20T09:15:35Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
