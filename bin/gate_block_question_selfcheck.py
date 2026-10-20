@@ -680,6 +680,46 @@ def round3_core(target: Path) -> None:
     check(r.returncode == 0 and b"OPENED" in r.stdout and len(qs) == 1 and "\ufffd" in qs[0]["payload"]["question"],
           "NB-1: argv byte lạ ⇒ thay U+FFFD, vẫn OPENED (không crash)")
 
+    followups_core(target)
+
+
+def followups_core(target: Path) -> None:
+    """Followups vòng 3: NB-B (không prune khi còn lượt open), NB-D (đóng ngoài sweep), A2 (ack theo --topic)."""
+    dargs = ["open", "--gate", "delivery", "--key", "rpt.md", "--owner", "Taylor", "--deadline", "2026-10-21T08:30",
+             "--recover", "x", "--probe", "false", "--reason", "stuck", "--thread", "trading_report",
+             "--remind-every-min", "240", "--expires-in-days", "3", "--max-reminders", "20"]
+    R = mkroot()
+    run(target, R, *dargs, now="2026-10-20T08:30:00+07:00")
+    run(target, R, "sweep", now="2026-10-23T09:00:00+07:00")          # expired
+    rid = "delivery__rpt.md"
+    check(st(R, rid)["status"] == "expired", "NB-B: tiền đề — bản ghi delivery đã expired")
+    run(target, R, *dargs, now="2026-10-30T08:30:00+07:00")           # d10: còn người gọi open
+    check(st(R, rid).get("last_open_call_at", "").startswith("2026-10-30"), "NB-B: open lên bản ghi expired ghi last_open_call_at")
+    run(target, R, "sweep", now="2026-11-23T09:00:00+07:00")          # d34 từ expire, d24 từ lượt open cuối
+    check((R / "state/gate_blocks" / f"{rid}.json").exists(), "NB-B: còn lượt open gần đây ⇒ sweep KHÔNG prune")
+    rc, out = run(target, R, *dargs, now="2026-11-23T09:30:00+07:00")
+    check("ALREADY_EXPIRED" in out and len(questions(R)) == 1, "NB-B: open sau đó vẫn ALREADY_EXPIRED, không mở câu trùng")
+    run(target, R, "sweep", now="2026-12-30T09:00:00+07:00")          # >30d kể từ lượt open cuối
+    check(not (R / "state/gate_blocks" / f"{rid}.json").exists(), "NB-B: hết lượt open >30 ngày ⇒ vẫn prune (không giữ vĩnh viễn)")
+
+    # NB-D: audit stub báo không còn pending (người đóng ngoài sweep) ⇒ open kế tiếp in ALREADY_CLOSED
+    R = mkroot()
+    run(target, R, *open_args(probe="false"), now="2026-10-20T09:06:00+07:00")
+    rc, out = run(target, R, *open_args(probe="false"), now="2026-10-20T09:10:00+07:00")
+    check("ALREADY_OPEN" in out and st(R)["status"] == "open", "NB-D đối chứng: còn pending ⇒ ALREADY_OPEN, sổ vẫn open")
+    with open(R / "bus/inbox/Mike.jsonl", "a") as f:   # người đóng tay: event resolves ngoài sweep
+        f.write(json.dumps({"event_id": "x", "ts": "2026-10-20T02:15:00Z", "agent_id": "Mike", "event_type": "answer",
+                            "topic": "manual", "payload": {"resolves": ["Mike/gate-block-approval-2026-10-20-SpaceX"]}}) + "\n")
+    rc, out = run(target, R, *open_args(probe="false"), now="2026-10-20T09:20:00+07:00")
+    check("ALREADY_CLOSED" in out and st(R)["status"] == "closed", "NB-D: bus đã đóng ngoài sweep ⇒ ALREADY_CLOSED (caller mở câu mới), sổ closed")
+
+    # A2: --topic tuỳ biến ⇒ ack nhắm ĐÚNG topic đó (CHECK5 so ack với topic câu hỏi)
+    R = mkroot()
+    run(target, R, *open_args(probe="false"), "--topic", "custom-topic-xyz", now="2026-10-20T09:06:00+07:00")
+    acks = events(R, "Mike", "status")
+    check(len(acks) == 1 and acks[0]["topic"].endswith(" custom-topic-xyz") and "gate-block-approval" not in acks[0]["topic"],
+          "A2: ack dùng rec['topic'] (--topic tuỳ biến), không phải topic mặc định gate-key")
+
 
 def extract(path: Path, begin: str, end: str) -> str:
     s = path.read_text()
@@ -720,6 +760,7 @@ def arg_of(call: str, flag: str) -> str:
 
 def wiring(bin_dir: Path) -> None:
     round3_wiring(bin_dir)
+    followups_wiring(bin_dir)
     cadence_reason(bin_dir)
     W = Path(tempfile.mkdtemp(prefix="gbq_wire_"))
     TMP.append(W)
@@ -863,6 +904,87 @@ def round3_wiring(bin_dir: Path) -> None:
           f"vòng3-B1 chiều 2: đóng câu theo ngày KHÔNG đóng lây câu legacy (close rc={c.returncode})")
 
 
+def followups_wiring(bin_dir: Path) -> None:
+    """NB-A (r2), NB-C/E1/E2 (ERROR_PATTERNS), R2 (timeout probe), D1 (TZ), D2 (remind) — hành vi thật, không so chuỗi nguồn."""
+    # NB-A: ALREADY_CLOSED/EXPIRED ⇒ gọi helper LẦN HAI với key -r2 + topic tiền tố r2 (không chứa topic cũ)
+    blk = extract(bin_dir / "send_plan_report.sh", "GATE_BLOCK_PLAN_T1_BEGIN", "GATE_BLOCK_PLAN_T1_END")
+    W = Path(tempfile.mkdtemp(prefix="gbq_fu_")); TMP.append(W)
+    (W / "mike/bin").mkdir(parents=True)
+    h = W / "mike/bin/gate_block_question.py"; h.write_text(STUB_HELPER_R2); h.chmod(0o755)
+    ap = W / "mike/bin/append_event.sh"
+    ap.write_text('#!/usr/bin/env bash\necho "append $*" >> "$(dirname "$0")/../fallback.log"\n'); ap.chmod(0o755)
+    log, fb = W / "mike/helper_calls.log", W / "mike/fallback.log"
+    script = ("set -uo pipefail\nROOT=%s\nACCOUNT=ZaloPay\nEXPECTED_DATE=2026-10-21\nTODAY=2026-10-20\n"
+              "REASON=missing\nMARKER_DIR=/m\nWORKDIR=/w\nDISCORD_PLAN_CHANNEL=plan_approval\n_QPAYLOAD='{}'\n%s\n") % (W / "mike", blk)
+    for first, second, want_calls, want_fb in (("closed", "ok", 2, False), ("expired", "ok", 2, False),
+                                               ("closed", "closed", 2, True), ("ok", "ok", 1, False)):
+        for f in (log, fb):
+            if f.exists():
+                f.unlink()
+        subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=60,
+                       env=dict(os.environ, STUB_FIRST=first, STUB_SECOND=second))
+        calls_ = [x for x in (log.read_text().split("\n") if log.exists() else []) if x.startswith("open")]
+        check(len(calls_) == want_calls and fb.exists() == want_fb,
+              f"NB-A: helper {first}→{second} ⇒ {want_calls} lượt open, fallback trần={want_fb}")
+        if want_calls == 2:
+            a, b = calls_
+            check(arg_of(a, "--topic") == "plan-t1-not-ready-2026-10-21-ZaloPay"
+                  and arg_of(b, "--key") == "2026-10-21-ZaloPay-r2"
+                  and arg_of(b, "--topic") == "plan-t1-not-ready-r2-2026-10-21-ZaloPay"
+                  and arg_of(a, "--topic") not in arg_of(b, "--topic"),
+                  "NB-A: lượt 2 key '-r2', topic tiền tố r2 KHÔNG chứa topic cũ (ack cũ không tắt lây)")
+
+    # NB-C / E1 / E2: ERROR_PATTERNS thật bắt từng dấu hiệu sweep
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("chc_probe", bin_dir / "cron_health_check.py")
+    chc = importlib.util.module_from_spec(spec); spec.loader.exec_module(chc)
+    for sample in ("gate_block_question: SWEEP_ERROR x.json: ValueError: y", "cron: failed to run command",
+                   "gate_block_question: EXPIRED_UNPOSTED delivery__x — chưa từng post", "gate_block_question: POST_FAILED question x rc=1",
+                   "gate_block_question: AUDIT_UNREADABLE (ValueError: x) — coi như còn mở",
+                   "gate_block_question: REMIND_UNDELIVERED x — không kênh nào nhận"):
+        check(bool(chc.ERROR_RE.search(sample)), f"NB-C/E1/E2: ERROR_RE bắt {sample.split(':')[1].split()[0] if 'gate_block' in sample else sample[:25]!r}")
+    check(not chc.ERROR_RE.search("gate_block_question: STILL_OPEN x (nhắc gần đây)"), "NB-C: dòng bình thường STILL_OPEN không bị bắt")
+
+    # R2: probe run_bot chạy dưới `timeout 60` (shim timeout ghi argv)
+    sh = W / "shim"; sh.mkdir()
+    (sh / "timeout").write_text('#!/usr/bin/env bash\necho "$*" >> "%s/timeout.log"; shift; exec "$@"\n' % W); (sh / "timeout").chmod(0o755)
+    (W / "mike/bin/gate_block_question.py").write_text(STUB_HELPER); botlog = W / "bot2.log"
+    blk2 = extract(bin_dir / "run_bot.sh", "GATE_BLOCK_APPROVAL_BEGIN", "GATE_BLOCK_APPROVAL_END")
+    script2 = ("set -euo pipefail\nROOT=%s\nWC_ROOT=%s\nACCOUNT=SpaceX\nPLAN_DATE=2026-10-20\nLOG=%s\n_tid=trading_daily\nrc=2\n%s\n") % (
+        W / "mike", W, botlog, blk2)
+    tl = W / "timeout.log"
+    if tl.exists():
+        tl.unlink()
+    subprocess.run(["bash", "-c", script2], capture_output=True, text=True, timeout=60,
+                   env=dict(os.environ, PATH=f"{sh}:{os.environ['PATH']}", STUB_PROBE_RC="10"))
+    probe_lines = [l for l in (tl.read_text().splitlines() if tl.exists() else []) if "probe approval" in l and " open " not in l]
+    check(len(probe_lines) == 1 and probe_lines[0].startswith("60 "), "R2: lệnh probe approval của run_bot chạy dưới `timeout 60`")
+
+    # D1 / D2: cadence — deadline neo ICT (shim date phân biệt TZ) + nhắc 240'
+    (sh / "date").write_text('#!/usr/bin/env bash\nif [ "${TZ:-}" = "Asia/Ho_Chi_Minh" ]; then echo 2031-03-04; else echo 1999-01-01; fi\n'); (sh / "date").chmod(0o755)
+    blk3 = extract(bin_dir / "check_report_cadence.sh", "GATE_BLOCK_DELIVERY_BEGIN", "GATE_BLOCK_DELIVERY_END")
+    if log.exists():
+        log.unlink()
+    script3 = ("set -uo pipefail\nROOT=%s\nFNAME=SpaceX_weekly_report_2026-10-16.md\nf=/r/x.md\nTRADING_REPORT_THREAD=trading_report\n"
+               "GATE_RC=1\nGATE_OUT=x\n%s\n") % (W / "mike", blk3)
+    subprocess.run(["bash", "-c", script3], capture_output=True, text=True, timeout=60,
+                   env=dict(os.environ, PATH=f"{sh}:{os.environ['PATH']}", TZ="Pacific/Kiritimati", STUB_OPEN="ok"))
+    c = log.read_text() if log.exists() else ""
+    check(arg_of(c, "--deadline") == "2031-03-04T08:30", "D1: deadline delivery neo TZ=Asia/Ho_Chi_Minh, không theo TZ host")
+    check(arg_of(c, "--remind-every-min") == "240", "D2: delivery nhắc mỗi 240 phút")
+
+
+STUB_HELPER_R2 = r'''#!/usr/bin/env python3
+import os, sys
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(root, "helper_calls.log"), "a") as f:
+    f.write("\x1e".join(sys.argv[1:]) + "\n")
+n = sum(1 for _ in open(os.path.join(root, "helper_calls.log")))
+mode = os.environ.get("STUB_FIRST" if n == 1 else "STUB_SECOND", "ok")
+print("gate_block_question: " + ("OPENED" if mode == "ok" else "ALREADY_" + mode.upper()) + " x")
+'''
+
+
 def cadence_reason(bin_dir: Path) -> None:
     """NB-1/NB-2: reason của câu hỏi delivery lấy từ _RC_WHY (đã lọc), không cắt byte."""
     blk = extract(bin_dir / "check_report_cadence.sh", "GATE_BLOCK_DELIVERY_BEGIN", "GATE_BLOCK_DELIVERY_END")
@@ -906,7 +1028,7 @@ MUTATIONS = [
     ("bỏ check output CLOSED", "if c.returncode == 0 and CLOSED_LINE.search(c.stdout or \"\"):", "if c.returncode == 0:"),
     ("N5 khớp chuỗi con CLOSED", "if c.returncode == 0 and CLOSED_LINE.search(c.stdout or \"\"):", "if c.returncode == 0 and \"CLOSED\" in text:"),
     ("throttle < thành <=", "< dt.timedelta(minutes=rec[\"remind_every_min\"])", "<= dt.timedelta(minutes=rec[\"remind_every_min\"])"),
-    ("CLOSED_EXTERNALLY khi audit None", "if still_pending(rec[\"agent\"], rec[\"topic\"]) is False:", "if not still_pending(rec[\"agent\"], rec[\"topic\"]):"),
+    ("CLOSED_EXTERNALLY khi audit None", "\n    if still_pending(rec[\"agent\"], rec[\"topic\"]) is False:", "\n    if not still_pending(rec[\"agent\"], rec[\"topic\"]):"),
     ("bỏ CLOSED_EXTERNALLY", "if still_pending(rec[\"agent\"], rec[\"topic\"]) is False:", "if False:"),
     ("still_pending bỏ lọc agent", "q.get(\"agent\") == agent and q.get(\"topic\") == topic", "q.get(\"topic\") == topic"),
     ("probe timeout ⇒ rc0", "return 124, f\"probe timeout", "return 0, f\"probe timeout"),
@@ -956,6 +1078,11 @@ MUTATIONS = [
     ("NB-4 save lỗi để lại tmp", "    except BaseException:\n        os.unlink(tmp)\n        raise\n\n\ndef claim", "    except BaseException:\n        raise\n\n\ndef claim"),
     ("NB-1 argv không làm sạch", ".decode(\"utf-8\", \"replace\")\n            for x in", ".decode(\"utf-8\", \"surrogateescape\")\n            for x in"),
     ("N3 claim không dọn tmp", "    finally:\n        os.unlink(tmp)", "    finally:\n        pass"),
+    # followups vòng 3 (A2/D1/D2/R2/E1/E2 là 6 mutant sống của arch-review; NB-B/NB-D mới)
+    ("A2 ack topic mặc định thay rec['topic']", 'f"{ACK_PREFIX} {rec[\'topic\']}"', 'f"{ACK_PREFIX} gate-block-{rec[\'gate\']}-{rec[\'key\']}"'),
+    ("NB-B prune bỏ qua last_open_call_at", 'rec.get("closed_at") or rec.get("expired_at"), rec.get("last_open_call_at")', 'rec.get("closed_at") or rec.get("expired_at")'),
+    ("NB-B open không ghi last_open_call_at", '                rec["last_open_call_at"] = now.isoformat(timespec="seconds")\n                save(path, rec)\n', ''),
+    ("NB-D open không kiểm still_pending", '                if still_pending(rec["agent"], rec["topic"]) is False:\n                    rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện ở lượt open)")', '                if False:\n                    rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện ở lượt open)")'),
 ]
 
 
@@ -963,10 +1090,22 @@ MUTATIONS = [
 WIRE_MUTATIONS = [
     ("send_plan_report.sh", "W1 fallback chỉ nhận OPENED", "(OPENED|ALREADY_OPEN|ALREADY_POSTING)([[:space:]]|$)", "(OPENED|ALREADY_)"),
     ("send_plan_report.sh", "W1b fallback bỏ qua ALREADY_CLOSED", "(OPENED|ALREADY_OPEN|ALREADY_POSTING)([[:space:]]|$)", "(OPENED|ALREADY_OPEN|ALREADY_POSTING|ALREADY_CLOSED)([[:space:]]|$)"),
-    ("send_plan_report.sh", "B1 topic helper không ngày", '--topic "plan-t1-not-ready-${_GB_KEY}"', '--topic "plan-t1-not-ready-${ACCOUNT}"'),
+    ("send_plan_report.sh", "B1 topic helper không ngày", '_gb_open "$_GB_KEY" "plan-t1-not-ready-${_GB_KEY}"', '_gb_open "$_GB_KEY" "plan-t1-not-ready-${ACCOUNT}"'),
     ("send_plan_report.sh", "B1 topic fallback không ngày", 'question "plan-t1-not-ready-${_GB_KEY}"', 'question "plan-t1-not-ready-${ACCOUNT}"'),
     ("run_bot.sh", "W2 mở question cả khi probe rc=11", 'if [ "$_prc" -eq 10 ]; then', 'if [ "$_prc" -eq 10 ] || [ "$_prc" -eq 11 ]; then'),
     ("run_bot.sh", "W3 bỏ --max-reminders", " --max-reminders 24", ""),
+    ("send_plan_report.sh", "NB-A bỏ lượt open r2", 'ALREADY_(CLOSED|EXPIRED)([[:space:]]|$)', 'ALREADY_NEVER([[:space:]]|$)'),
+    ("send_plan_report.sh", "NB-A topic r2 chứa topic cũ", '"plan-t1-not-ready-r2-${_GB_KEY}"', '"plan-t1-not-ready-${_GB_KEY}-r2"'),
+    ("send_plan_report.sh", "NB-A key r2 trùng key cũ", '"${_GB_KEY}-r2"', '"${_GB_KEY}"'),
+    ("run_bot.sh", "R2 bỏ timeout 60 trên probe", "timeout 60 $_probe 2>&1", "$_probe 2>&1"),
+    ("check_report_cadence.sh", "D1 deadline theo TZ host", "$(TZ='Asia/Ho_Chi_Minh' date -d 'tomorrow' +%Y-%m-%d)T08:30", "$(date -d 'tomorrow' +%Y-%m-%d)T08:30"),
+    ("check_report_cadence.sh", "D2 nhắc 15'", "--remind-every-min 240", "--remind-every-min 15"),
+    ("cron_health_check.py", "E1 bỏ SWEEP_ERROR", '    r"SWEEP_ERROR",\n', ''),
+    ("cron_health_check.py", "E2 bỏ failed to run command", '    r"failed to run command",\n', ''),
+    ("cron_health_check.py", "NB-C bỏ EXPIRED_UNPOSTED", '    r"EXPIRED_UNPOSTED",\n', ''),
+    ("cron_health_check.py", "NB-C bỏ POST_FAILED", '    r"POST_FAILED",\n', ''),
+    ("cron_health_check.py", "NB-C bỏ AUDIT_UNREADABLE", '    r"AUDIT_UNREADABLE",\n', ''),
+    ("cron_health_check.py", "NB-C bỏ REMIND_UNDELIVERED", '    r"REMIND_UNDELIVERED",\n', ''),
     ("check_report_cadence.sh", "W4 bỏ --max-reminders", "--expires-in-days 3 --max-reminders 20", "--expires-in-days 3"),
     ("check_report_cadence.sh", "NB-2 reason lại lấy dòng cuối GATE_OUT thô", '${_RC_WHY:-không xác định (đã báo INCOMPLETE trong ngày — xem logs/check_report_cadence.log hoặc report_delivery_gate.py --status)}', "$(printf '%s\\n' \"$GATE_OUT\" | tail -n 1 | cut -c1-200)"),
 ]
@@ -1020,7 +1159,7 @@ def main() -> int:
     for fname, name, old, new in WIRE_MUTATIONS:
         d = Path(tempfile.mkdtemp(prefix="gbq_wmut_"))
         for f in ("run_bot.sh", "send_plan_report.sh", "check_report_cadence.sh", "bus_question_audit.py",
-                  "close_bus_question.py", "gate_block_question.py", "ops_health_check.sh"):
+                  "close_bus_question.py", "gate_block_question.py", "ops_health_check.sh", "cron_health_check.py"):
             shutil.copy(HERE / f, d / f)
         t = (d / fname).read_text()
         if t.count(old) < 1:

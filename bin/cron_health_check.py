@@ -75,6 +75,12 @@ ERROR_PATTERNS = [
     # in SWEEP_ERROR cho bản ghi hỏng. Thiếu cả hai ⇒ sweep chết im lặng (arch-review vòng 2 B2).
     r"failed to run command",
     r"SWEEP_ERROR",
+    # Các dòng helper tự in ra stderr khi sweep KHÔNG làm được việc nhưng vẫn rc=0 (NB-C vòng 3):
+    # câu hỏi chưa từng lên bus, audit không đọc được, nhắc không kênh nào nhận.
+    r"EXPIRED_UNPOSTED",
+    r"POST_FAILED",
+    r"AUDIT_UNREADABLE",
+    r"REMIND_UNDELIVERED",
 ]
 ERROR_RE = re.compile("|".join(ERROR_PATTERNS), re.MULTILINE)
 
