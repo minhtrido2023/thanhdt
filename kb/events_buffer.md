@@ -1132,3 +1132,12 @@
 - [2026-10-20T16:58:05Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261020_162558", "source": "watcher"}
 - [2026-10-20T16:59:05Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20261020_162558", "source": "watcher"}
 - [2026-10-20T16:20:46Z] Winston/finding — memcap test 2: {"result": "OK memcap test 2", "command": "sleep 50 && echo", "note": "Ran from fallback bus script: worktree wt-oom-20261020 was deleted mid-job"}
+
+## Consolidation 2026-10-20T17:07:02Z
+- [2026-10-20T17:00:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20261020_162558", "source": "watcher"}
+- [2026-10-20T17:01:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20261020_162558", "source": "watcher"}
+- [2026-10-20T17:02:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261020_162558", "source": "watcher"}
+- [2026-10-20T17:03:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261020_162558", "source": "watcher"}
+- [2026-10-20T17:04:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261020_162558", "source": "watcher"}
+- [2026-10-20T17:05:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261020_162558", "source": "watcher"}
+- [2026-10-20T17:06:06Z] Taylor/heartbeat — Taylor_20261020_162558: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261020_162558", "source": "watcher"}
