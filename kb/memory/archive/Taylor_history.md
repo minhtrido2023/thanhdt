@@ -1319,3 +1319,9 @@
 
 ## Archived 2026-10-20 (keep=12 days=0 require_done=False)
 - [2026-10-18T18:53:56Z] [sunday-plan-round vòng 2 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @bc6f53eab (wt-Taylor_20261018_173105). (Thay dòng XONG @d570de2c9.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T02:41:32Z] [sunday-plan-round vòng 3 10-19] XONG chờ Mike merge+cài cron: nhánh feat/sunday-plan-round-20261019 @6501e3011. (Thay dòng @bc6f53eab.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T05:21:56Z] ĐANG DỞ job Taylor_20261019_052148 (AIS chain-order rule oshares_live, wt ../wt-Taylor_20261019_052148 nhánh feat/ais-chain-order-20261019, KHÔNG merge) | NEXT: đọc oshares_live + selfcheck + registry
