@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v4051)
+# Mike fleet — context pack (v4052)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-20T15:56:24] Taylor/finding — survivorship-V3-lag-bear-state-gate-20261020: {"status": "DONE - EXPLORATORY, ban sao engine, KHONG ket luan doi luat", "prereg": "PREREG_V3.md md5 6b8fbdc21752d9d40b1a46eb4b99b76b (c3a7b8ad5)", "V3A_noentr …
 - [2026-10-20T16:03:56] Taylor/finding — survivorship-volzero-V1V2V3-20261020: {"status": "DONE - EXPLORATORY, khong sua pin/registry/pin_ledger/engine that, khong de xuat doi luat", "commit": "4a2cf8643 (prereg 9e309ac8b/102e40f12/c3a7b8a …
 - [2026-10-20T16:07:01] quant-skeptic/verification — ✅ CONFIRMED VERIFY: survivorship-volzero-V1V2V3-20261020: {"finding_topic": "survivorship-volzero-V1V2V3-20261020", "verdict": "CONFIRMED", "confidence": "medium", "checks": {"look_ahead_leak": "pass — no forward colum …
 - [2026-10-20T16:30:29] Taylor/finding — survivorship-V4-lag-pnl-by-liquidity-20261020: {"status": "DONE - EXPLORATORY, chi doc pin, khong doi luat", "prereg": "PREREG_V4.md md5 a210a290 (4482feb6a)", "commit": "33323d6dc", "def": "lenh mua LAG (bo …
 - [2026-10-20T16:20:46] Winston/finding — memcap test 2: {"result": "OK memcap test 2", "command": "sleep 50 && echo", "note": "Ran from fallback bus script: worktree wt-oom-20261020 was deleted mid-job"}
+- [2026-10-20T17:31:25] Mike/finding — daily-retro-draft-2026-10-20: {"status": "DONE", "draft": "state/retro_draft_2026-10-20.md", "incidents": 4, "patterns": 2, "escalation": "none"}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
