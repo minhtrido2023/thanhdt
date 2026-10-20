@@ -43,3 +43,4 @@
 - [2026-10-20T08:30:47Z] [fa-ratings ticker-gate 10-20] XONG chờ Mike arch-review+merge+gỡ #PAUSED cron: feat/fa-ratings-ticker-gate-20261020 @057d22a25 (wt-Taylor_20261020_082306). LƯU Ý: wt/mike là SYMLINK về repo live — sửa file ở wt/bin, không qua wt/mike.
 - [2026-10-20T08:38:37Z] [survivorship-sensitivity 10-20] XONG job Taylor_20261020_082308: nhãn 'vượt sàn ở kịch bản X' (λ*≈0,16-0,55 mã/năm nắm trọn 12th); neo post-hoc λ_eff≈0,01. Mở: đề xuất đo giá ~10 mã lớn đã mất (FLC/ROS…) chờ Mike/user. (Thay dòng ĐANG DỞ 082308.)
 - [2026-10-20T08:49:07Z] [fa-ratings ticker-gate fix 10-20] XONG chờ Mike merge: feat/fa-ratings-ticker-gate-20261020 @c12bb294a (wt-Taylor_20261020_082306). Thay dòng @057d22a25.
+- [2026-10-20T09:38:01Z] [survivorship v2 10-20] XONG job Taylor_20261020_091621: lam* theo book thap hon v1 1,2-1,5x; REPORT survivorship_sensitivity_v2_20261020. Mo: gia FLC/ROS/HAI (phuong an B Winston) chua do.
