@@ -1325,3 +1325,6 @@
 
 ## Archived 2026-10-20 (keep=12 days=0 require_done=False)
 - [2026-10-19T05:21:56Z] ĐANG DỞ job Taylor_20261019_052148 (AIS chain-order rule oshares_live, wt ../wt-Taylor_20261019_052148 nhánh feat/ais-chain-order-20261019, KHÔNG merge) | NEXT: đọc oshares_live + selfcheck + registry
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T05:40:07Z] [ais-chain-order 10-19] XONG chờ Mike arch-review+quant-skeptic+merge: nhánh feat/ais-chain-order-20261019 @c22ce4c60 (wt /home/trido/thanhdt/wt-Taylor_20261019_052148), finding ais-chain-order-20261019. (Thay dòng ĐANG DỞ job 052148.)

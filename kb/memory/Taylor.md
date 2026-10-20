@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-19T05:40:07Z] [ais-chain-order 10-19] XONG chờ Mike arch-review+quant-skeptic+merge: nhánh feat/ais-chain-order-20261019 @c22ce4c60 (wt /home/trido/thanhdt/wt-Taylor_20261019_052148), finding ais-chain-order-20261019. (Thay dòng ĐANG DỞ job 052148.)
 - [2026-10-19T16:01:43Z] ĐANG DỞ job Taylor_20261019_160133 (DT gate candidate BEAR/CRISIS recount, read-only) | NEXT: đọc get_dt_gate_clock + DT gate trong macro_state_live.py, tái dựng chuỗi 29/09-19/10
 - [2026-10-19T16:04:07Z] [dt-gate-badzone 10-19] XONG job Taylor_20261019_160133: khuyến nghị A giữ nguyên; REPORT research/dt_badzone_count_20261019/. Mốc: CRISIS 25/25 sớm nhất ~10/11 nếu không đứt. (Thay dòng ĐANG DỞ job 160133.)
 - [2026-10-20T03:14:43Z] ĐANG DỞ job Taylor_20261020_031433 (gate-block owned recovery, phương án A; wt nhánh feat/gate-block-owned-recovery-20261020, KHÔNG merge) | NEXT: kiểm kê cổng BLOCK bằng grep
@@ -26,3 +25,4 @@
 - [2026-10-20T03:44:21Z] [rating-8l-lag p1+p3 10-20] XONG job Taylor_20261020_032153, REPORT research/rating_8l_lag_20261020/. Mở: 7 ca RD chép quý trước + 125 ca Q1 RD đầu 4 — đề xuất vá eff_date chờ Mike/user; Phần 2 chờ snapshot hằng ngày. (Thay dòng ĐANG DỞ job 032153.)
 - [2026-10-20T03:45:58Z] ĐANG DỞ job Taylor_20261020_034545 (rating 8L lag P2 event-study, read-only, out agents/Taylor/research/rating_8l_lag_p2_20261020/) | NEXT: đọc REPORT P1 + data_registry
 - [2026-10-20T03:55:05Z] [rating-8l-lag p2 10-20] XONG job Taylor_20261020_034545, REPORT research/rating_8l_lag_p2_20261020/. G1 drift ngan han +1.1-1.4% toi +20/40, chua tach PEAD. (Thay dong DANG DO job 034545.)
+- [2026-10-20T04:08:54Z] [gate-block vòng 2 10-20] XONG chờ Mike arch-review lại+merge+cài cron sweep: nhánh feat/gate-block-owned-recovery-20261020 @8bbb6ffe9 (wt-Taylor_20261020_031433). (Thay dòng @28f128801 + ĐANG DỞ 033928.)
