@@ -1,0 +1,620 @@
+p30_pin0 {
+"n_lots": 1503,
+"n_bear_open": 107,
+"n_bear_reenabled": 42,
+"bear_sessions_med": 5.0,
+"bear_max_sessions": 62,
+"bear_flagged": [
+{
+"hid": "ABC_20220808_2253",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.13114754098360648,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "AMC_20221026_2302",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 24,
+"ret": 0.08662175168431174,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BED_20221024_2286",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 26,
+"ret": -0.03850931677018643,
+"closed_at_end": false,
+"tk_last_row": "2026-06-18",
+"cap_reenabled": true
+},
+{
+"hid": "BLF_20220802_2249",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 22,
+"ret": -0.09090909090909094,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "BMP_20200312_1401",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.5144312393887946,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BST_20221021_2282",
+"sessions": 27,
+"max_nontrade_run": 5,
+"nontrade_days": 17,
+"ret": -0.005555555555555536,
+"closed_at_end": false,
+"tk_last_row": "2025-08-29",
+"cap_reenabled": true
+},
+{
+"hid": "CVT_20200312_1398",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.24833899306068208,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": true
+},
+{
+"hid": "DCS_20220801_2248",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "GLT_20220803_2251",
+"sessions": 27,
+"max_nontrade_run": 13,
+"nontrade_days": 24,
+"ret": -0.08316909735908551,
+"closed_at_end": false,
+"tk_last_row": "2026-07-13",
+"cap_reenabled": true
+},
+{
+"hid": "HPG_20220616_2239",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.04153147306943539,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "L10_20230201_2408",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 24,
+"ret": 0.13636363636363646,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": false
+},
+{
+"hid": "LBE_20221020_2278",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 20,
+"ret": -0.10231516056758772,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "NAV_20221020_2279",
+"sessions": 5,
+"max_nontrade_run": 5,
+"nontrade_days": 5,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": false
+},
+{
+"hid": "NT2_20200312_1402",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.23023758099352043,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "PNP_20230201_2403",
+"sessions": 27,
+"max_nontrade_run": 27,
+"nontrade_days": 27,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-
+p30_pin1M {
+"n_lots": 1545,
+"n_bear_open": 109,
+"n_bear_reenabled": 42,
+"bear_sessions_med": 5.0,
+"bear_max_sessions": 62,
+"bear_flagged": [
+{
+"hid": "ABC_20220808_2242",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.13114754098360648,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "AMC_20221026_2291",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 24,
+"ret": 0.08662175168431174,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BED_20221024_2275",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 26,
+"ret": -0.03850931677018643,
+"closed_at_end": false,
+"tk_last_row": "2026-06-18",
+"cap_reenabled": true
+},
+{
+"hid": "BLF_20220802_2238",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 22,
+"ret": -0.09090909090909094,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "BMP_20200312_1396",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.5132059713957615,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BST_20221021_2271",
+"sessions": 27,
+"max_nontrade_run": 5,
+"nontrade_days": 17,
+"ret": -0.005555555555555536,
+"closed_at_end": false,
+"tk_last_row": "2025-08-29",
+"cap_reenabled": true
+},
+{
+"hid": "CVT_20200312_1393",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.24833899306068208,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": true
+},
+{
+"hid": "DCS_20220801_2237",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "GLT_20220803_2240",
+"sessions": 27,
+"max_nontrade_run": 13,
+"nontrade_days": 24,
+"ret": -0.08316909735908551,
+"closed_at_end": false,
+"tk_last_row": "2026-07-13",
+"cap_reenabled": true
+},
+{
+"hid": "HPG_20220616_2228",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.04153147306943539,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "L10_20230201_2395",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 24,
+"ret": 0.13636363636363646,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": false
+},
+{
+"hid": "LBE_20221020_2267",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 20,
+"ret": -0.10231516056758772,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "NAV_20221020_2268",
+"sessions": 5,
+"max_nontrade_run": 5,
+"nontrade_days": 5,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": false
+},
+{
+"hid": "NT2_20200312_1397",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.23023758099352043,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "PNP_20230201_2390",
+"sessions": 27,
+"max_nontrade_run": 27,
+"nontrade_days": 27,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-
+p0_pin0 {
+"n_lots": 1516,
+"n_bear_open": 109,
+"n_bear_reenabled": 43,
+"bear_sessions_med": 5.0,
+"bear_max_sessions": 62,
+"bear_flagged": [
+{
+"hid": "ABC_20220808_2262",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.13114754098360648,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "AMC_20221026_2311",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 24,
+"ret": 0.08662175168431174,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BED_20221024_2295",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 26,
+"ret": -0.03850931677018643,
+"closed_at_end": false,
+"tk_last_row": "2026-06-18",
+"cap_reenabled": true
+},
+{
+"hid": "BLF_20220802_2258",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 22,
+"ret": -0.09090909090909094,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "BMP_20200312_1409",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.5132059713957615,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BST_20221021_2291",
+"sessions": 27,
+"max_nontrade_run": 5,
+"nontrade_days": 17,
+"ret": -0.005555555555555536,
+"closed_at_end": false,
+"tk_last_row": "2025-08-29",
+"cap_reenabled": true
+},
+{
+"hid": "CTT_20221101_2341",
+"sessions": 27,
+"max_nontrade_run": 17,
+"nontrade_days": 25,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-06-26",
+"cap_reenabled": true
+},
+{
+"hid": "CVT_20200312_1405",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.24833899306068208,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": true
+},
+{
+"hid": "DCS_20220801_2257",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "GLT_20220803_2260",
+"sessions": 27,
+"max_nontrade_run": 13,
+"nontrade_days": 24,
+"ret": -0.08316909735908551,
+"closed_at_end": false,
+"tk_last_row": "2026-07-13",
+"cap_reenabled": true
+},
+{
+"hid": "HPG_20220616_2248",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.04153147306943539,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "L10_20230201_2417",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 24,
+"ret": 0.13636363636363646,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": false
+},
+{
+"hid": "LBE_20221020_2287",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 20,
+"ret": -0.10231516056758772,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "NAV_20221020_2288",
+"sessions": 5,
+"max_nontrade_run": 5,
+"nontrade_days": 5,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": false
+},
+{
+"hid": "NT2_20200312_1410",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.23023758099352043,
+"closed_at_end": false,
+"tk_last_row": "2026-07-
+p0_pin1M {
+"n_lots": 1553,
+"n_bear_open": 110,
+"n_bear_reenabled": 43,
+"bear_sessions_med": 5.0,
+"bear_max_sessions": 62,
+"bear_flagged": [
+{
+"hid": "ABC_20220808_2237",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.13114754098360648,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "AMC_20221026_2286",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 24,
+"ret": 0.08662175168431174,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BED_20221024_2270",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 26,
+"ret": -0.03850931677018643,
+"closed_at_end": false,
+"tk_last_row": "2026-06-18",
+"cap_reenabled": true
+},
+{
+"hid": "BLF_20220802_2233",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 22,
+"ret": -0.09090909090909094,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "BMP_20200312_1405",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.5132059713957615,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "BST_20221021_2266",
+"sessions": 27,
+"max_nontrade_run": 5,
+"nontrade_days": 17,
+"ret": -0.005555555555555536,
+"closed_at_end": false,
+"tk_last_row": "2025-08-29",
+"cap_reenabled": true
+},
+{
+"hid": "CVT_20200312_1401",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.24833899306068208,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": true
+},
+{
+"hid": "DCS_20220801_2232",
+"sessions": 27,
+"max_nontrade_run": 7,
+"nontrade_days": 23,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-24",
+"cap_reenabled": true
+},
+{
+"hid": "GLT_20220803_2235",
+"sessions": 27,
+"max_nontrade_run": 13,
+"nontrade_days": 24,
+"ret": -0.08316909735908551,
+"closed_at_end": false,
+"tk_last_row": "2026-07-13",
+"cap_reenabled": true
+},
+{
+"hid": "HPG_20220616_2223",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.04153147306943539,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "L10_20230201_2390",
+"sessions": 27,
+"max_nontrade_run": 19,
+"nontrade_days": 24,
+"ret": 0.13636363636363646,
+"closed_at_end": false,
+"tk_last_row": "2026-07-27",
+"cap_reenabled": false
+},
+{
+"hid": "LBE_20221020_2262",
+"sessions": 27,
+"max_nontrade_run": 15,
+"nontrade_days": 20,
+"ret": -0.10231516056758772,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "NAV_20221020_2263",
+"sessions": 5,
+"max_nontrade_run": 5,
+"nontrade_days": 5,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": false
+},
+{
+"hid": "NT2_20200312_1406",
+"sessions": 62,
+"max_nontrade_run": 0,
+"nontrade_days": 0,
+"ret": 0.23632575099843733,
+"closed_at_end": false,
+"tk_last_row": "2026-07-29",
+"cap_reenabled": true
+},
+{
+"hid": "PNP_20230201_2385",
+"sessions": 27,
+"max_nontrade_run": 27,
+"nontrade_days": 27,
+"ret": 0.0,
+"closed_at_end": false,
+"tk_last_row": "2026-07-
