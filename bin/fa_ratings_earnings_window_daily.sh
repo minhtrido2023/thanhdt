@@ -96,6 +96,12 @@ START_EPOCH="$(date +%s)"
 RC1=$?
 echo "[$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')] refresh_fa_ratings_8l.sh exit=$RC1 (chi tiet: $LOG_8L)"
 
+# exit 3 = cổng ticker-gate chặn (tav2_bq.ticker thiếu mã): refresh_fa_ratings.sh cũng đọc ticker ⇒ bỏ qua.
+if [ "$RC1" -eq 3 ]; then
+  echo "[$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')] ticker-gate chan (rc=3) — bo qua refresh_fa_ratings.sh, thu lai o lan cron ke"
+  exit 3
+fi
+
 # Đợi cho đủ 45' kể từ START (nếu 8l chạy lâu hơn 45' thì chạy fa_ratings ngay).
 ELAPSED=$(( $(date +%s) - START_EPOCH ))
 WAIT=$(( SPACING_S - ELAPSED ))

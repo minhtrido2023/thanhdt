@@ -25,13 +25,21 @@ PROJECT="lithe-record-440915-m9"
 TABLE="tav2_bq.fa_ratings_8l"
 MIN_ROWS=50000                      # last known good: 52,433 (2026-06-20); rows only grow
 DISCORD_TRADING_DAILY="trading_daily"
+NOTIFY="${FA8L_NOTIFY:-$MIKE/bin/notify_thread.sh}"      # ghi đè được cho selfcheck
+EVENT="${FA8L_EVENT:-$MIKE/bin/append_event.sh}"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 
 START_EPOCH="$(date +%s)"
 echo "=== fa_ratings_8l weekly refresh — $(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT') ==="
 
 cd "$ROOT" || exit 1
-python3 rating_8l_history.py
+
+# Cổng fail-closed số mã tav2_bq.ticker (job Taylor_20261020_082306): ticker thiếu mã ⇒ ICB_SQL route sai
+# ⇒ rating lệch hàng nghìn dòng mà MIN_ROWS bên dưới KHÔNG thấy. Chặn TRƯỚC khi ghi bảng; exit 3 (≠ 1).
+# Cổng tự cảnh báo Trading Daily + bus 1 lần/ngày. Dùng chung cho cron T7, cron mùa BCTC và chạy tay.
+"${FA8L_GATE_CMD:-$MIKE/bin/fa_ratings_ticker_gate.sh}" || exit 3
+
+${FA8L_HISTORY_CMD:-python3 rating_8l_history.py}
 PY_RC=$?
 
 _table_meta() {  # prints "<lastModified_epoch_s> <numRows>"
@@ -53,8 +61,8 @@ FAIL_REASON=""
 
 if [ -n "$FAIL_REASON" ]; then
   MSG="⛔ fa_ratings_8l WEEKLY REFRESH FAILED ($(TZ='Asia/Ho_Chi_Minh' date +'%F %H:%M ICT')): $FAIL_REASON. Bảng vẫn là bản cũ — consumers (custom30 builder, golive sizing, DC-book, SIGNAL_V11 re-tune) đọc rating cũ. Check mike/logs/fa_ratings_8l_refresh.log"
-  "$MIKE/bin/notify_thread.sh" "$MSG" "$DISCORD_TRADING_DAILY" 2>/dev/null || true
-  "$MIKE/bin/append_event.sh" Winston error "fa_ratings_8l-refresh-failed" "{\"reason\":\"$FAIL_REASON\"}" 2>/dev/null || true
+  "$NOTIFY" "$MSG" "$DISCORD_TRADING_DAILY" 2>/dev/null || true
+  "$EVENT" Winston error "fa_ratings_8l-refresh-failed" "{\"reason\":\"$FAIL_REASON\"}" 2>/dev/null || true
   echo "FAILED: $FAIL_REASON"
   exit 1
 fi
@@ -76,7 +84,7 @@ else
     echo "WARN: fa_ratings_8l co dong eff_date TUONG LAI: $FUT"
     if [ "$(cat "$FUT_STATE" 2>/dev/null)" != "$FUT" ]; then
       # Ghi state CHI KHI notify thanh cong (rc=0) — gui hong thi lan sau van bao lai. tmp+mv = atomic.
-      if "$MIKE/bin/notify_thread.sh" "⚠️ fa_ratings_8l có dòng eff_date TƯƠNG LAI (nguyên nhân cần tra: time tương lai của vendor hoặc forensic flag — fallback +45 đã bỏ 2026-10-16): $FUT. Cổng golive/hit_details đã lọc theo ngày as-of nên không đọc sớm; consumer MỚI đọc 'dòng mới nhất' phải tự lọc f.time <= as-of." "$DISCORD_TRADING_DAILY" >/dev/null 2>&1; then
+      if "$NOTIFY" "⚠️ fa_ratings_8l có dòng eff_date TƯƠNG LAI (nguyên nhân cần tra: time tương lai của vendor hoặc forensic flag — fallback +45 đã bỏ 2026-10-16): $FUT. Cổng golive/hit_details đã lọc theo ngày as-of nên không đọc sớm; consumer MỚI đọc 'dòng mới nhất' phải tự lọc f.time <= as-of." "$DISCORD_TRADING_DAILY" >/dev/null 2>&1; then
         printf '%s' "$FUT" > "$FUT_STATE.tmp" && mv -f "$FUT_STATE.tmp" "$FUT_STATE"
       else
         echo "WARN: notify_thread.sh that bai — chua ghi state, se bao lai lan sau"
@@ -87,4 +95,4 @@ else
   fi
 fi
 rm -f "$_fut_err"
-"$MIKE/bin/append_event.sh" Winston status "fa_ratings_8l-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true
+"$EVENT" Winston status "fa_ratings_8l-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true
