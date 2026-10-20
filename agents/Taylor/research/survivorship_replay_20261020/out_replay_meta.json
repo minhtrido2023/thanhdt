@@ -1,0 +1,360 @@
+{
+ "p30_pin0": {
+  "metric_err": 0.0,
+  "base": {
+   "cagr": 0.2336876855359784,
+   "sharpe_252": 1.878065772761689,
+   "max_dd": -0.14642652702283832
+  },
+  "w_median_v2": {
+   "BAL": 0.02036859537380774,
+   "LAG": 0.03020426259356453
+  },
+  "book_fraction_alloc": {
+   "BAL": 0.06294754375342582,
+   "LAG": 0.04978797315847373
+  },
+  "years": 12.459958932238193
+ },
+ "tickers": {
+  "ROS": {
+   "orig": "HOSE",
+   "LT": "2022-08-11",
+   "DL": "2022-08-31",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1441
+  },
+  "FLC": {
+   "orig": "HOSE",
+   "LT": "2022-09-08",
+   "DL": "2023-02-17",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 2183
+  },
+  "GAB": {
+   "orig": "HOSE",
+   "LT": "2022-03-25",
+   "DL": "2023-07-06",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 388
+  },
+  "KLF": {
+   "orig": "HNX",
+   "LT": "2023-03-10",
+   "DL": "2024-01-30",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 2196
+  },
+  "ART": {
+   "orig": "HNX",
+   "LT": "2022-11-18",
+   "DL": "2023-08-10",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1284
+  },
+  "HAI": {
+   "orig": "HOSE",
+   "LT": "2022-09-08",
+   "DL": "2023-04-17",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1988
+  },
+  "AMD": {
+   "orig": "HOSE",
+   "LT": "2023-03-08",
+   "DL": "2023-07-06",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 2028
+  },
+  "SJF": {
+   "orig": "HOSE",
+   "LT": "2023-11-10",
+   "DL": "2024-10-31",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1550
+  },
+  "PSH": {
+   "orig": "HOSE",
+   "LT": "2025-03-11",
+   "DL": "2025-06-24",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1138
+  },
+  "TTB": {
+   "orig": "HOSE",
+   "LT": "2023-07-06",
+   "DL": "2024-01-05",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 2014
+  },
+  "KSA": {
+   "orig": "HOSE",
+   "LT": "2018-05-16",
+   "DL": "2018-08-01",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1021
+  },
+  "TGG": {
+   "orig": "HOSE",
+   "LT": "2023-09-15",
+   "DL": "2023-12-15",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1070
+  },
+  "DAG": {
+   "orig": "HOSE",
+   "LT": "2024-08-14",
+   "DL": "2024-10-21",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 2322
+  },
+  "NHP": {
+   "orig": "HNX",
+   "LT": "2021-04-02",
+   "DL": "2021-06-23",
+   "U_date": "2021-07-02",
+   "U_px": 900.0,
+   "days_in_univ": 789
+  },
+  "HVG": {
+   "orig": "HOSE",
+   "LT": "2020-05-14",
+   "DL": "2020-08-04",
+   "U_date": "2020-08-14",
+   "U_px": 4800.0,
+   "days_in_univ": 1601
+  },
+  "KSH": {
+   "orig": "HOSE",
+   "LT": "2019-06-19",
+   "DL": "2019-09-04",
+   "U_date": "2019-09-20",
+   "U_px": 800.0,
+   "days_in_univ": 1419
+  },
+  "TNA": {
+   "orig": "HOSE",
+   "LT": "2024-09-13",
+   "DL": "2024-11-18",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1649
+  },
+  "KHB": {
+   "orig": "HNX",
+   "LT": "2018-07-27",
+   "DL": "2019-06-17",
+   "U_date": "2019-06-28",
+   "U_px": 700.0,
+   "days_in_univ": 1076
+  },
+  "VIS": {
+   "orig": "HOSE",
+   "LT": "2022-04-21",
+   "DL": "2022-04-21",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1202
+  },
+  "CAV": {
+   "orig": "HOSE",
+   "LT": "2024-07-17",
+   "DL": "2024-07-17",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 920
+  },
+  "DPS": {
+   "orig": "HNX",
+   "LT": "2020-07-17",
+   "DL": "2021-06-23",
+   "U_date": "2021-07-02",
+   "U_px": 400.0,
+   "days_in_univ": 740
+  },
+  "VMI": {
+   "orig": "HNX",
+   "LT": "2019-07-19",
+   "DL": "2021-06-23",
+   "U_date": "2021-07-02",
+   "U_px": 800.0,
+   "days_in_univ": 800
+  },
+  "AVF": {
+   "orig": "HOSE",
+   "LT": "2015-06-09",
+   "DL": "2015-06-09",
+   "U_date": "2015-06-18",
+   "U_px": 1600.0,
+   "days_in_univ": 363
+  },
+  "KSS": {
+   "orig": "HOSE",
+   "LT": "2016-06-07",
+   "DL": "2016-08-11",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 438
+  },
+  "RDP": {
+   "orig": "HOSE",
+   "LT": "2024-11-27",
+   "DL": "2025-04-23",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 992
+  },
+  "SIC": {
+   "orig": "HNX",
+   "LT": "2023-07-20",
+   "DL": "2023-07-20",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 467
+  },
+  "IBC": {
+   "orig": "HOSE",
+   "LT": "2023-09-15",
+   "DL": "2023-12-05",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1656
+  },
+  "CEE": {
+   "orig": "HOSE",
+   "LT": "2022-07-21",
+   "DL": "2022-07-21",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 227
+  },
+  "PPI": {
+   "orig": "HOSE",
+   "LT": "2019-05-17",
+   "DL": "2019-05-17",
+   "U_date": "2019-05-27",
+   "U_px": 900.0,
+   "days_in_univ": 1140
+  },
+  "SPI": {
+   "orig": "HNX",
+   "LT": "2025-02-14",
+   "DL": "2025-07-09",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1061
+  },
+  "GTT": {
+   "orig": "HOSE",
+   "LT": "2016-05-27",
+   "DL": "2016-05-27",
+   "U_date": "2016-06-07",
+   "U_px": 900.0,
+   "days_in_univ": 423
+  },
+  "NDF": {
+   "orig": "HNX",
+   "LT": "2018-07-27",
+   "DL": "2019-11-08",
+   "U_date": "2019-11-22",
+   "U_px": 1400.0,
+   "days_in_univ": 433
+  },
+  "KSK": {
+   "orig": "HNX",
+   "LT": "2019-11-22",
+   "DL": "2020-05-27",
+   "U_date": "2020-06-05",
+   "U_px": 200.0,
+   "days_in_univ": 806
+  },
+  "KPF": {
+   "orig": "HOSE",
+   "LT": "2025-02-25",
+   "DL": "2025-06-25",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 1145
+  },
+  "ASA": {
+   "orig": "HNX",
+   "LT": "2018-09-14",
+   "DL": "2019-06-12",
+   "U_date": "2019-06-21",
+   "U_px": 900.0,
+   "days_in_univ": 537
+  },
+  "BGM": {
+   "orig": "HOSE",
+   "LT": "2017-03-29",
+   "DL": "2017-08-09",
+   "U_date": null,
+   "U_px": null,
+   "days_in_univ": 672
+  }
+ },
+ "p30_pin1M": {
+  "metric_err": 0.0,
+  "base": {
+   "cagr": 0.2570606725435387,
+   "sharpe_252": 2.0567290902615,
+   "max_dd": -0.1402664006263159
+  },
+  "w_median_v2": {
+   "BAL": 0.02044667668934128,
+   "LAG": 0.029176893978145643
+  },
+  "book_fraction_alloc": {
+   "BAL": 0.06192223497666448,
+   "LAG": 0.047848549921644015
+  },
+  "years": 12.459958932238193
+ },
+ "p0_pin0": {
+  "metric_err": 0.0,
+  "base": {
+   "cagr": 0.2212070836714919,
+   "sharpe_252": 1.9328857058885351,
+   "max_dd": -0.16231313361254973
+  },
+  "w_median_v2": {
+   "BAL": 0.024516989813911646,
+   "LAG": 0.03994331632914572
+  },
+  "book_fraction_alloc": {
+   "BAL": 0.08066736455750616,
+   "LAG": 0.0625
+  },
+  "years": 12.459958932238193
+ },
+ "p0_pin1M": {
+  "metric_err": 0.0,
+  "base": {
+   "cagr": 0.25419622320387103,
+   "sharpe_252": 2.1708167469116355,
+   "max_dd": -0.1385064680332554
+  },
+  "w_median_v2": {
+   "BAL": 0.02563428004908887,
+   "LAG": 0.040729567658297855
+  },
+  "book_fraction_alloc": {
+   "BAL": 0.0787107399685781,
+   "LAG": 0.06402792949389186
+  },
+  "years": 12.459958932238193
+ }
+}
