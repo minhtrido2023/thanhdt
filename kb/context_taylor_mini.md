@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v4054)
+# Mike fleet — context_taylor_mini (v4055)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-20T16:07:01] quant-skeptic/verification — ✅ CONFIRMED VERIFY: survivorship-volzero-V1V2V3-20261020: {"finding_topic": "survivorship-volzero-V1V2V3-20261020", "verdict": "CONFIRMED", "confidence": "medium", "checks": {"look_ahead_leak": "pass — no forward colum …
 - [2026-10-20T16:30:29] Taylor/finding — survivorship-V4-lag-pnl-by-liquidity-20261020: {"status": "DONE - EXPLORATORY, chi doc pin, khong doi luat", "prereg": "PREREG_V4.md md5 a210a290 (4482feb6a)", "commit": "33323d6dc", "def": "lenh mua LAG (bo …
 - [2026-10-20T16:20:46] Winston/finding — memcap test 2: {"result": "OK memcap test 2", "command": "sleep 50 && echo", "note": "Ran from fallback bus script: worktree wt-oom-20261020 was deleted mid-job"}
 - [2026-10-20T17:31:25] Mike/finding — daily-retro-draft-2026-10-20: {"status": "DONE", "draft": "state/retro_draft_2026-10-20.md", "incidents": 4, "patterns": 2, "escalation": "none"}
 - [2026-10-20T17:32:17] Wags/finding — retro-draft-2026-10-20-verify: {"verdict": "GAPS FOUND", "gaps": ["Bo sot: Winston finding 03:15Z DMX/moi niem yet tu 05/2026 thieu hoan toan trong BQ (MISSING_REAL_SYSTEMIC) la su co 20/10,  …
+- [2026-10-20T17:33:20] Mike/finding — daily-retro-final-2026-10-20: {"status": "DONE", "entry": "kb/incidents/retro/retro-2026-10-20.md", "incidents": 6, "patterns": 2, "wags": "GAPS FOUND - fixed", "escalation": "none"}
 <!--RECENT-END-->
 
 ## Kill-switches
