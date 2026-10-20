@@ -150,8 +150,8 @@ ok("T6e attach_icb_pit: RD NULL, q_time 2020-05-09 -> eff = 2020-05-09 < bien ->
 ok("T6f attach_icb_pit: RD CO 2020-05-12 thang q_time 2020-03-31 -> 7535 (khong bo Release_Date)",
    list(R.attach_icb_pit(mkdf([("EEE", "2020-05-12", "2020-03-31")]), icb6)["ICB_Code"]) == [7535])
 _src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rating_8l_history.py"), encoding="utf-8").read()
-ok("T6g main() gan eff_date CHINH XAC bang eff_date_of(Release_Date, q_time), khong cong them gi",
-   'df["eff_date"] = eff_date_of(df["Release_Date"], df["q_time"])\n' in _src,
+ok("T6g main() gan eff_date CHINH XAC bang eff_date_of(Release_Date, q_time, rd_untrusted), khong cong them gi",
+   'df["eff_date"] = eff_date_of(df["Release_Date"], df["q_time"], df["rd_untrusted"])\n' in _src,
    "dong gan df['eff_date'] trong main() da bi sua")
 ok("T6h Timedelta(days=NULL_RD_EFF_OFFSET_DAYS) chi xuat hien 1 lan (trong helper), khong con ban sao cong thuc",
    len(re.findall(r"Timedelta\(days=NULL_RD_EFF_OFFSET_DAYS\)", _src)) == 1,
