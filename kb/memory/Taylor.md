@@ -36,3 +36,4 @@
 - [2026-10-20T05:56:54Z] [rating-8l-pit-2010 10-20] XONG job Taylor_20261020_054959: DUNG DUOC CO DIEU KIEN (survivorship 100%, RD 2012-13 = qend+32 batch). Cho user quyet co dung tiep + PREREG moi. (Thay dong DANG DO Taylor_20261020_054959.)
 - [2026-10-20T06:03:56Z] ĐANG DỞ job Taylor_20261020_055002: B1 XONG (wt-Taylor_20261020_055002 @68b34b377, finding đã ghi) | NEXT: B2 kéo px pin -> control C0/C1 -> BT sleeve
 - [2026-10-20T06:12:26Z] [rating-8l forward+bt 10-20] XONG job Taylor_20261020_055002: B1 tracker nhánh feat/rating-8l-forward-tracker-20261020 @68b34b377 (wt-Taylor_20261020_055002) chờ Mike review+cron; B2 nhãn 'thiếu N'. MỞ: verdict P2v2 sai do px thiếu 113 mã — pin cho G1 đạt (a)-(d), chờ Mike/quant-skeptic. (Thay dòng ĐANG DỞ 055002.)
+- [2026-10-20T06:29:59Z] [gate-block followups 10-20] XONG chờ Mike arch-review+user duyệt merge: nhánh feat/gate-block-followups-20261020 @9534292e0 (wt-Taylor-gb-followups).
