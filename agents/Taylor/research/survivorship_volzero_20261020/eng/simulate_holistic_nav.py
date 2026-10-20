@@ -324,12 +324,20 @@ def _finalize_partial(entry, positions, tk, play_type, ticker_sector_map, vni_da
 #   block_advbuy -> block + tran MUA/ngay = ZVF_ADV_PCT x Volume_ngay x Price_ngay (THAY ADV 3M).
 #   block_advboth-> block_advbuy + tran BAN/ngay cung cong thuc (phan con lai nam lai pending_exits).
 _ZVF_MODE = os.environ.get("ZVF_MODE", "off").strip().lower()
-if _ZVF_MODE not in ("off", "block", "block_advbuy", "block_advboth"):
+if _ZVF_MODE not in ("off", "block", "block_advbuy", "block_advboth", "block_trail"):
     raise ValueError(f"ZVF_MODE={_ZVF_MODE!r} khong hop le")
 _ZVF_PCT = float(os.environ.get("ZVF_ADV_PCT", "0.20"))
 _ZVF_CACHE = os.environ.get("ZVF_CACHE", "/home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate/ticker")
 _zvf_dv = None
 _zvf_stats = {"buy_blocked": 0, "sell_blocked": 0, "buy_capped": 0, "sell_capped": 0}
+# V1E (job Taylor_20261020_162558): block_trail -> tran MUA = ZVF_ADV_PCT x trung vi dv tren cac phien Volume>0 trong
+#   ZVF_TRAIL_N dong cache LIEN TRUOC ngay khop (khong gom ngay khop). Khong co phien Volume>0 nao -> 0 (khong khop).
+_ZVF_TRAIL_N = int(os.environ.get("ZVF_TRAIL_N", "20"))
+_zvf_trail = None
+# V1D (job Taylor_20261020_162558): V1D_SELL=1 -> lenh ban T+1 Open bi hoan khi liquidity_lookup<=0/thieu,
+#   chi o simulate() co liquidity_require_positive=True (book LAG khi LIQ_ZERO_BLOCK=lag).
+_V1D_SELL = os.environ.get("V1D_SELL", "0").strip() == "1"
+_v1d_stats = {"sell_deferred": 0}
 
 
 def _zvf_dayval(tk, d):
@@ -350,6 +358,23 @@ def _zvf_dayval(tk, d):
     return None if (v is None or pd.isna(v)) else float(v)
 
 
+def _zvf_trailcap(tk, d):
+    """V1E: ZVF_ADV_PCT x median(dv | Volume>0) tren ZVF_TRAIL_N dong truoc d; 0.0 neu khong co. Nhan qua."""
+    global _zvf_trail
+    if _zvf_trail is None:
+        _zvf_dayval("", pd.Timestamp("1900-01-01"))       # nap _zvf_dv
+        import numpy as _np
+        _zvf_trail = {}
+        for t, m in _zvf_dv.items():
+            ds = sorted(m)
+            v = pd.Series([m[x] for x in ds], index=ds, dtype=float)
+            pos = v.where(v > 0)                            # Volume=0 (dv=0) / NaN -> loai khoi trung vi
+            med = pos.rolling(_ZVF_TRAIL_N, min_periods=1).median().shift(1)   # chi dong TRUOC d
+            _zvf_trail[t] = dict(zip(ds, med.fillna(0.0).values))
+        print(f"  [ZVF] trail cap N={_ZVF_TRAIL_N} built for {len(_zvf_trail):,} tickers")
+    return _ZVF_PCT * float(_zvf_trail.get(tk, {}).get(d, 0.0))
+
+
 def _zvf_blocked(tk, d):
     return _ZVF_MODE != "off" and _zvf_dayval(tk, d) == 0.0
 # ====================================================================================================
@@ -360,7 +385,7 @@ def _zvf_blocked(tk, d):
 #   noentry_bear  -> lenh LAG chua khop phan nao bi HUY neu phien khop co state==2 (BEAR, w_lag_tgt=0).
 #   close_reopen  -> lo LAG co state(ngay vao)==2 bi dong (T+1 Open, reason V3_REOPEN) o phien dau tien state!=2.
 _V3_MODE = os.environ.get("V3_MODE", "off").strip().lower()
-if _V3_MODE not in ("off", "noentry_bear", "close_reopen"):
+if _V3_MODE not in ("off", "noentry_bear", "close_reopen", "noentry_bear_t1"):
     raise ValueError(f"V3_MODE={_V3_MODE!r} khong hop le")
 _v3_stats = {"entry_dropped": 0, "closed_reopen": 0}
 # ====================================================================================================
@@ -782,6 +807,12 @@ def simulate(signals_df, prices, vni_dates, *,
                     _zvf_stats["sell_blocked"] += 1
                     still_pending.append(entry)
                     continue
+                if _V1D_SELL and liquidity_require_positive and liquidity_lookup is not None:
+                    _lq = liquidity_lookup.get((tk, today))      # V1D: ADV3M<=0/thieu -> hoan ban
+                    if not (_lq and _lq > 0):
+                        _v1d_stats["sell_deferred"] += 1
+                        still_pending.append(entry)
+                        continue
                 if _ZVF_MODE == "block_advboth":                  # ZVF: tran ban theo KL thuc ngay
                     _dv = _zvf_dayval(tk, today)
                     if _dv is not None and _dv > 0 and pos["shares"] * open_px > _ZVF_PCT * _dv * 1.000001:
@@ -1284,8 +1315,9 @@ def simulate(signals_df, prices, vni_dates, *,
                         px = prices.get(tk, {}).get(today)  # fallback
                 else:
                     px = prices.get(tk, {}).get(today)
-            if (_v3_on and _V3_MODE == "noentry_bear" and entry["filled_shares"] == 0
-                    and state_by_date.get(today) is not None and int(state_by_date.get(today)) == 2):
+            _v3_sd = (today if _V3_MODE == "noentry_bear" else (vni_dates[i - 1] if i > 0 else None))   # V3A': state(t-1)
+            if (_v3_on and _V3_MODE in ("noentry_bear", "noentry_bear_t1") and entry["filled_shares"] == 0 and _v3_sd is not None
+                    and state_by_date.get(_v3_sd) is not None and int(state_by_date.get(_v3_sd)) == 2):
                 _v3_stats["entry_dropped"] += 1
                 continue                                           # V3: huy lenh LAG chua khop trong BEAR
             if px is not None and not pd.isna(px) and px > 0 and _zvf_blocked(tk, today):
@@ -1498,6 +1530,11 @@ def simulate(signals_df, prices, vni_dates, *,
                     if _ZVF_PCT * _dv < remaining_value:
                         _zvf_stats["buy_capped"] += 1
                     daily_max = _ZVF_PCT * _dv
+            if _ZVF_MODE == "block_trail" and liquidity_volume_pct is not None and liquidity_lookup is not None:
+                _tc = _zvf_trailcap(tk, today)                    # V1E: THAY ADV 3M bang trung vi nhan qua
+                if _tc < remaining_value:
+                    _zvf_stats["buy_capped"] += 1
+                daily_max = _tc
             _mg_ok2 = (max_gross_exposure is not None
                        and (margin_tiers is None or play_type in margin_tiers))
             _bp = cash + ((max_gross_exposure - 1.0) *
@@ -1866,6 +1903,8 @@ def simulate(signals_df, prices, vni_dates, *,
         print(f"  [V3] {name}: cumulative {_v3_stats}")
     if _ZVF_MODE != "off":
         print(f"  [ZVF] {name}: cumulative {_zvf_stats}")
+    if _V1D_SELL:
+        print(f"  [V1D] {name}: cumulative {_v1d_stats}")
     return nav_df, trades_df
 
 
