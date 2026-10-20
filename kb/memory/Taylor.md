@@ -47,3 +47,4 @@
 - [2026-10-20T09:42:18Z] ĐANG DỞ job Taylor_20261020_094204 (survivorship replay BAL/LAG trên mã lớn đã mất, EXPLORATORY, out agents/Taylor/research/survivorship_replay_20261020/) | NEXT: đọc Winston report + v2 REPORT + PREREG
 - [2026-10-20T10:14:00Z] [survivorship-replay 10-20] XONG job Taylor_20261020_094204 @55fdfc689: LB duoi san (MIX +0,14..+0,32pp), UB ALLOC* -1,7..-2,7pp. Mo: cach engine xu ly lo LAG mo trong BEAR chờ Mike/user. (Thay dong DANG DO 094204.)
 - [2026-10-20T11:36:59Z] ĐANG DỞ job Taylor_20261020_113646 (survivorship follow-up A-D, EXPLORATORY) | NEXT: đọc v2 overlay + replay REPORT + 2 log skeptic
+- [2026-10-20T12:12:21Z] [survivorship follow-up ABCD 10-20] XONG job Taylor_20261020_113646. Mo: Winston xac nhan BQ Volume=0 (31% gia tri mua LAG khop ngay KL=0, chua do CAGR); dong gop lo LAG mo luc BEAR can engine co cong state - cho Mike/user.
