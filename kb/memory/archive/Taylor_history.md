@@ -1307,3 +1307,6 @@
 
 ## Archived 2026-10-20 (keep=12 days=0 require_done=False)
 - [2026-10-18T03:22:49Z] [cq-2026-10-18 autodispatch] XONG commit 3147ce873 (9 file), chờ Mike/arch-review vòng 2 nếu muốn; chưa merge/push. (Thay dòng ĐANG DỞ job 030925.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T17:25:58Z] ĐANG DỞ job Taylor_20261018_172548 (VN-Index TR carry-forward v2, wt riêng, KHÔNG merge/data thật) | NEXT: đọc bin/vnindex_total_return.py + registry
