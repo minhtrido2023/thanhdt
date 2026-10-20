@@ -1310,3 +1310,6 @@
 
 ## Archived 2026-10-20 (keep=12 days=0 require_done=False)
 - [2026-10-18T17:25:58Z] ĐANG DỞ job Taylor_20261018_172548 (VN-Index TR carry-forward v2, wt riêng, KHÔNG merge/data thật) | NEXT: đọc bin/vnindex_total_return.py + registry
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T17:38:45Z] [vnindex-tr carry-forward v2 10-19] XONG chờ Mike gọi quant-skeptic rồi trình user: nhánh research/vnindex-tr-carry-forward-20261019 @37aa83657 (wt WorkingClaude/wt-Taylor_20261018_172548), finding vnindex-tr-carry-forward-v2-20261019. Mở: 1 ô ZaloPay -6,85→-6,86 nếu weekly 12-16/10 đã gửi bằng v1. (Thay dòng ĐANG DỞ job 172548.)
