@@ -164,8 +164,8 @@ def core(target: Path) -> None:
     check(qs and qs[0]["topic"] == "gate-block-approval-2026-10-20-SpaceX", "topic mặc định gate-block-<gate>-<key>")
     acks = events(R, etype="status")
     check(len(acks) == 1 and acks[0]["topic"] == "triaged-needs-human: gate-block-approval-2026-10-20-SpaceX"
-          and acks[0]["payload"].get("suppress_days") == 1,
-          "B4: status 'triaged-needs-human: <topic>' + suppress_days=1 (hạn trong ngày)")
+          and acks[0]["payload"].get("suppress_days") == 2,
+          "B4/vòng3-B3: status 'triaged-needs-human: <topic>' + suppress_days>=2 (CHECK5 xét câu hỏi 48h, kể cả khi hạn trong ngày)")
     ohc = (HERE / "ops_health_check.sh")
     if ohc.exists():
         check('ACK_PREFIX = "triaged-needs-human:"' in ohc.read_text(), "B4: ACK_PREFIX helper khớp ops_health_check.sh")
@@ -509,7 +509,7 @@ def core(target: Path) -> None:
     marker.write_text(json.dumps({"sent_at": "2026-10-20 21:00 ICT", "content_md5": "OLD"}))
     os.utime(marker, (ts("2026-10-20T21:00:05+07:00"),) * 2)
     probe = f"python3 {target} probe plan-t1 --account SpaceX --date 2026-10-21 --marker-dir {md} --plan-dir {pd}"
-    a = ["open", "--gate", "plan-t1-not-ready", "--key", "2026-10-21-SpaceX", "--topic", "plan-t1-not-ready-SpaceX",
+    a = ["open", "--gate", "plan-t1-not-ready", "--key", "2026-10-21-SpaceX", "--topic", "plan-t1-not-ready-2026-10-21-SpaceX",
          "--owner", "Mike", "--deadline", "2026-10-21T08:30", "--recover", "x", "--probe", probe,
          "--reason", "Plan T+1 chưa sẵn sàng (plan_unparseable)", "--thread", "plan_approval",
          "--remind-every-min", "60", "--expires-at", "2026-10-21T23:59", "--extra", "{}"]
@@ -536,6 +536,149 @@ def core(target: Path) -> None:
     check(run(target, R17, "probe", "plan-t1", "--account", "SpaceX", "--date", "2026-10-21", "--since",
               "2026-10-20T23:00:30+07:00", "--marker-dir", str(md), "--plan-dir", str(pd))[0] == 11,
           "probe plan-t1: plan hiện tại biến mất ⇒ 11")
+    # P3: md5 marker rỗng + plan biến mất (cur "") KHÔNG được coi là khớp
+    marker.write_text(json.dumps({"sent_at": "2026-10-20 23:20 ICT", "content_md5": ""}))
+    os.utime(marker, (ts("2026-10-20T23:21:00+07:00"),) * 2)
+    check(run(target, R17, "probe", "plan-t1", "--account", "SpaceX", "--date", "2026-10-21", "--since",
+              "2026-10-20T23:00:30+07:00", "--marker-dir", str(md), "--plan-dir", str(pd))[0] == 11,
+          "P3: marker content_md5 rỗng + plan không có ⇒ 11 (rỗng ≠ khớp)")
+    # P4: khoá requires_user_approval cũng bị loại khỏi hash (khớp send_plan_report)
+    plan.write_text(json.dumps({"orders": [{"t": "FPT"}], "requires_user_approval": True, "approved_by": "u"}))
+    check(mod.plan_content_hash(plan) == good, "P4: hash bỏ cả requires_user_approval")
+    round3_core(target)
+
+
+def _at(root: Path, args, now):
+    return run(HELPER_UNDER_TEST[0], root, *args, now=now)
+
+
+HELPER_UNDER_TEST: list[Path] = []
+
+
+def round3_core(target: Path) -> None:
+    """Vòng 3 arch-review: ack CHECK5 thật, sổ read-only, posting hết hạn, tmp mồ côi, argv bẩn,
+    expired không bị sweep lại (E6)."""
+    HELPER_UNDER_TEST[:] = [target]
+    # --- B3: khối CHECK5 THẬT của ops_health_check.sh ở +3/+20/+27/+40/+47h (+49h = quá 48h) ---
+    ohc = HERE / "ops_health_check.sh"
+    if ohc.exists():
+        m = re.search(r"^# CHECK5_BEGIN.*?\n(.*?)^# CHECK5_END", ohc.read_text(), re.S | re.M)
+        if not m:
+            print("FATAL: CHECK5_BEGIN/END không thấy"); sys.exit(2)
+        blk = m.group(1)
+
+        def scenario(gate, key, opened_ict, expires, no_ack=False):
+            W = Path(tempfile.mkdtemp(prefix="gbq_c5_")); TMP.append(W)
+            R = mkroot(); shutil.move(str(R), str(W / "mike")); R = W / "mike"
+            if no_ack:
+                (R / "APPEND_FAIL_STATUS").write_text("x")
+            run(target, R, *open_args(key=key, gate=gate, expires=expires, probe="false"), now=opened_ict)
+            opened_utc = _dt.datetime.fromisoformat(opened_ict).astimezone(_dt.timezone.utc)
+            inbox = R / "bus/inbox/Mike.jsonl"
+            evs = [dict(e, ts=opened_utc.strftime("%Y-%m-%dT%H:%M:%SZ"), event_id=f"e{i}")
+                   for i, e in enumerate(map(json.loads, inbox.read_text().splitlines()))]
+            inbox.write_text("".join(json.dumps(e, ensure_ascii=False) + "\n" for e in evs))
+            topic = f"gate-block-{gate}-{key}"
+            out = {}
+            for h in (3, 20, 27, 40, 47, 49):
+                lines: list[str] = []
+                os.environ["CHECK5_NOW"] = (opened_utc + _dt.timedelta(hours=h)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                import glob as _glob, gzip as _gzip
+                ns = {"glob": _glob, "gzip": _gzip, "json": json, "os": os, "re": re, "wc_root": str(W),
+                      "W": lambda x: lines.append("W " + x), "OK": lambda x: lines.append("OK " + x),
+                      "lines": lines}
+                try:
+                    exec(compile(blk, "CHECK5", "exec"), ns)
+                finally:
+                    os.environ.pop("CHECK5_NOW", None)
+                out[h] = [l for l in lines if topic in l and "[WARN-ONLY]" not in l]
+            return out
+
+        o = scenario("approval", "2026-10-20-SpaceX", "2026-10-20T09:06:00+07:00", "2026-10-20T15:00")
+        check(all(not o[h] for h in (3, 20, 27, 40, 47)),
+              "vòng3-B3: approval — CHECK5 KHÔNG dispatch Wags ở +3/20/27/40/47h (ack phủ đủ cửa sổ 48h)")
+        o = scenario("plan-t1-not-ready", "2026-10-21-SpaceX", "2026-10-20T21:00:00+07:00", "2026-10-21T23:59")
+        check(all(not o[h] for h in (3, 20, 27, 40, 47)),
+              "vòng3-B3: plan-t1 — CHECK5 KHÔNG dispatch Wags ở +3/20/27/40/47h")
+        o = scenario("approval", "2026-10-20-SpaceX", "2026-10-20T09:06:00+07:00", "2026-10-20T15:00", no_ack=True)
+        check(bool(o[27]), "vòng3-B3 đối chứng: KHÔNG có ack ⇒ CHECK5 CÓ route Wags ở +27h (test nhạy)")
+
+    # --- NB-3: sổ read-only ⇒ KHÔNG gửi (nhắc / tin cuối) rồi mới thất bại ---
+    if os.geteuid() != 0:
+        R = mkroot()
+        run(target, R, *open_args(probe="false", every="15"), now="2026-10-20T09:06:00+07:00")
+        run(target, R, "sweep", now="2026-10-20T09:10:00+07:00")
+        base = calls(R).count("CỔNG CHẶN CHƯA PHỤC HỒI")
+        sd = R / "state" / "gate_blocks"
+        os.chmod(sd, 0o555)
+        try:
+            for t in ("2026-10-20T12:00:00+07:00", "2026-10-20T12:30:00+07:00"):
+                run(target, R, "sweep", now=t)
+            check(calls(R).count("CỔNG CHẶN CHƯA PHỤC HỒI") == base,
+                  "NB-3: sổ read-only ⇒ KHÔNG gửi nhắc (ghi sổ trước khi gửi)")
+            for t in ("2026-10-20T15:00:00+07:00", "2026-10-20T15:15:00+07:00", "2026-10-20T15:30:00+07:00"):
+                run(target, R, "sweep", now=t)
+            check("NGỪNG NHẮC" not in calls(R), "NB-3: sổ read-only ⇒ KHÔNG gửi tin cuối (t_rofs.py)")
+            check(not list(sd.glob(".tmp_*")), "NB-4: save thất bại không để tmp mồ côi")
+        finally:
+            os.chmod(sd, 0o755)
+        run(target, R, "sweep", now="2026-10-20T15:45:00+07:00")
+        check(st(R)["status"] == "expired" and [l for l in calls(R).splitlines() if l.startswith("notify.sh ") and "NGỪNG NHẮC" in l].__len__() == 1,
+              "NB-3: sổ ghi lại được ⇒ expire đúng 1 tin cuối")
+
+    # --- E6: expired KHÔNG bị sweep lại (không tin cuối thứ hai, reminders giữ nguyên) ---
+    R = mkroot()
+    run(target, R, *open_args(probe="false", every="15"), now="2026-10-20T09:06:00+07:00")
+    run(target, R, "sweep", now="2026-10-20T15:05:00+07:00")
+    r0 = st(R)
+    rc16, out16 = run(target, R, "sweep", now="2026-10-20T16:00:00+07:00")
+    run(target, R, "sweep", now="2026-10-20T17:00:00+07:00")
+    check(rc16 == 0 and "SWEEP_ERROR" not in out16, "E6: sweep qua bản ghi expired ⇒ rc 0, không SWEEP_ERROR 'status lạ'")
+    check(r0["status"] == "expired" and st(R) == r0 and [l for l in calls(R).splitlines() if l.startswith("notify.sh ") and "NGỪNG NHẮC" in l].__len__() == 1,
+          "E6: expired ⇒ sweep sau KHÔNG gửi lại, sổ không đổi")
+
+    # --- NB-4: save() lỗi ở os.replace (đích là thư mục) ⇒ không để tmp mồ côi ---
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gbq_save_probe", target)
+    sm = importlib.util.module_from_spec(spec); spec.loader.exec_module(sm)
+    D = Path(tempfile.mkdtemp(prefix="gbq_save_")); TMP.append(D)
+    (D / "x.json").mkdir()
+    try:
+        sm.save(D / "x.json", {"a": 1})
+        raised = False
+    except OSError:
+        raised = True
+    check(raised and not list(D.glob(".tmp_*")), "NB-4: os.replace lỗi ⇒ save() dọn tmp rồi mới raise")
+
+    # --- NB-4: sổ 'posting' (post bus hỏng) có hạn; tmp mồ côi bị dọn ---
+    R = mkroot()
+    (R / "APPEND_FAIL").write_text("x")
+    rc, out = run(target, R, *open_args(probe="false"), now="2026-10-20T09:06:00+07:00")
+    check(rc == 1 and st(R)["status"] == "posting", "NB-4: post hỏng ⇒ sổ posting, rc 1")
+    run(target, R, "sweep", now="2026-10-20T12:00:00+07:00")
+    check(st(R)["status"] == "posting", "NB-4: posting chưa tới hạn ⇒ vẫn thử lại")
+    rc, out = run(target, R, "sweep", now="2026-10-20T15:05:00+07:00")
+    check(st(R)["status"] == "expired" and "EXPIRED_UNPOSTED" in out and not questions(R),
+          "NB-4: posting quá hạn ⇒ expired (EXPIRED_UNPOSTED), không còn kẹt vĩnh viễn")
+    sd = R / "state" / "gate_blocks"
+    old, fresh = sd / ".tmp_orphan", sd / ".tmp_fresh"
+    old.write_text("x"); fresh.write_text("x")
+    os.utime(old, (_dt.datetime.now().timestamp() - 7200,) * 2)
+    run(target, R, "sweep", "--dry-run", now="2026-10-20T15:10:00+07:00")
+    check(old.exists(), "NB-4: dry-run KHÔNG xoá tmp")
+    run(target, R, "sweep", now="2026-10-20T15:10:00+07:00")
+    check(not old.exists() and fresh.exists(), "NB-4: sweep xoá tmp mồ côi >1h, giữ tmp mới")
+
+    # --- NB-1: argv có byte không phải UTF-8 vẫn mở được câu hỏi ---
+    R = mkroot()
+    args = open_args(probe="false")
+    args[args.index("--reason") + 1] = "lệch nguồn \udcc3 cắt dở"
+    env = dict(os.environ, GATE_BLOCK_ROOT=str(R), GATE_BLOCK_WC_ROOT=str(R), GATE_BLOCK_NOW="2026-10-20T09:06:00+07:00")
+    r = subprocess.run([sys.executable, str(target), *[os.fsencode(x) for x in args]], env=env,
+                       capture_output=True, timeout=60)
+    qs = questions(R)
+    check(r.returncode == 0 and b"OPENED" in r.stdout and len(qs) == 1 and "\ufffd" in qs[0]["payload"]["question"],
+          "NB-1: argv byte lạ ⇒ thay U+FFFD, vẫn OPENED (không crash)")
 
 
 def extract(path: Path, begin: str, end: str) -> str:
@@ -559,6 +702,12 @@ if sys.argv[1] == "probe":
 mode = os.environ.get("STUB_OPEN", "ok")
 if mode == "ok":
     print("gate_block_question: OPENED x"); sys.exit(0)
+if mode in ("closed", "expired"):
+    print("gate_block_question: ALREADY_" + mode.upper() + " x"); sys.exit(0)
+if mode == "alreadyopen":
+    print("gate_block_question: ALREADY_OPEN x"); sys.exit(0)
+if mode == "posting":
+    print("gate_block_question: ALREADY_POSTING x"); sys.exit(0)
 if mode == "crash":
     print("Traceback boom", file=sys.stderr); sys.exit(2)
 '''
@@ -570,6 +719,8 @@ def arg_of(call: str, flag: str) -> str:
 
 
 def wiring(bin_dir: Path) -> None:
+    round3_wiring(bin_dir)
+    cadence_reason(bin_dir)
     W = Path(tempfile.mkdtemp(prefix="gbq_wire_"))
     TMP.append(W)
     (W / "mike/bin").mkdir(parents=True)
@@ -605,6 +756,9 @@ def wiring(bin_dir: Path) -> None:
     check("VẪN CHẶN — requires_user_approval chua duyet" in arg_of(o, "--reason")
           and "probe approval rc=10: probe approval: VẪN CHẶN" in bl and "OPENED" in bl,
           "N4: reason nội suy từ output probe; output probe + helper ghi vào LOG")
+    check(arg_of(o, "--max-reminders") == "24", "W3: run_bot truyền --max-reminders 24")
+    r, c, bl = rb(2, 11)
+    check("FINAL_RC=2" in r.stdout and "open" not in c, "W2: run_bot probe rc=11 (đã duyệt, chưa chạy lại) ⇒ KHÔNG open")
     r, c, bl = rb(2, 12)
     check("FINAL_RC=2" in r.stdout and "open" not in c and "probe rc=12" in bl,
           "N4: rc=2 + probe 12 (không có plan) ⇒ không open, ghi log tách biệt")
@@ -619,18 +773,22 @@ def wiring(bin_dir: Path) -> None:
     script2 = ("set -uo pipefail\nROOT=%s\nACCOUNT=ZaloPay\nEXPECTED_DATE=2026-10-21\nTODAY=2026-10-20\n"
                "REASON=missing\nMARKER_DIR=/m\nWORKDIR=/w\nDISCORD_PLAN_CHANNEL=plan_approval\n_QPAYLOAD='{}'\n%s\n") % (W / "mike", blk)
     fb = W / "mike/fallback.log"
-    for mode, want_fb in (("ok", False), ("crash", True), ("silent", True)):
+    for mode, want_fb in (("ok", False), ("alreadyopen", False), ("posting", False),
+                          ("closed", True), ("expired", True), ("crash", True), ("silent", True)):
         for f in (fb, log):
             if f.exists():
                 f.unlink()
         subprocess.run(["bash", "-c", script2], capture_output=True, text=True, timeout=60,
                        env=dict(os.environ, STUB_OPEN=mode))
         c = log.read_text() if log.exists() else ""
-        check(fb.exists() == want_fb and arg_of(c, "--topic") == "plan-t1-not-ready-ZaloPay"
+        check(fb.exists() == want_fb and arg_of(c, "--topic") == "plan-t1-not-ready-2026-10-21-ZaloPay"
               and arg_of(c, "--key") == "2026-10-21-ZaloPay" and arg_of(c, "--expires-at") == "2026-10-21T23:59"
               and arg_of(c, "--probe").endswith("gate_block_question.py probe plan-t1 --account ZaloPay "
                                                  "--date 2026-10-21 --marker-dir /m --plan-dir /w/data/trade_plans"),
-              f"send_plan_report: helper={mode} ⇒ fallback append={want_fb}, topic cũ, probe plan-t1, EXPIRED hết T+1")
+              f"send_plan_report: helper={mode} ⇒ fallback append={want_fb}, topic THEO NGÀY, probe plan-t1, EXPIRED hết T+1")
+        if want_fb:
+            check("plan-t1-not-ready-2026-10-21-ZaloPay" in fb.read_text() and "plan-t1-not-ready-ZaloPay" not in fb.read_text().replace("plan-t1-not-ready-2026-10-21-ZaloPay", ""),
+                  f"vòng3-B1/B4: fallback ({mode}) post cùng topic theo ngày, không dùng topic không ngày")
 
     blk = extract(bin_dir / "check_report_cadence.sh", "GATE_BLOCK_DELIVERY_BEGIN", "GATE_BLOCK_DELIVERY_END")
     for tag, owner in (("VENDOR_MISMATCH_ALERT|x", "Winston"), ("❌ CHẶN — số sai", "Taylor")):
@@ -645,6 +803,86 @@ def wiring(bin_dir: Path) -> None:
               and arg_of(c, "--expires-in-days") == "3"
               and "report_delivery_gate.py /r/SpaceX_weekly_report_2026-10-16.md --status" in arg_of(c, "--probe"),
               f"cadence: tag {tag.split('|')[0][:20]!r} ⇒ owner {owner}, probe --status, EXPIRED 3 ngày")
+        check(arg_of(c, "--max-reminders") == "20", "W4: cadence truyền --max-reminders 20")
+
+
+STUB_APPEND_TS = r'''#!/usr/bin/env python3
+import datetime, json, os, sys, uuid
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+a, et, t, p = sys.argv[1:5]
+os.makedirs(os.path.join(root, "bus", "inbox"), exist_ok=True)
+with open(os.path.join(root, "bus", "inbox", a + ".jsonl"), "a") as f:
+    f.write(json.dumps({"event_id": str(uuid.uuid4()),
+                        "ts": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "agent_id": a, "event_type": et, "topic": t, "payload": json.loads(p)},
+                       ensure_ascii=False) + "\n")
+'''
+
+
+def round3_wiring(bin_dir: Path) -> None:
+    """B1: topic plan-t1 dùng lại không đụng câu legacy — chạy audit + close_bus_question THẬT, 2 chiều."""
+    blk = extract(bin_dir / "send_plan_report.sh", "GATE_BLOCK_PLAN_T1_BEGIN", "GATE_BLOCK_PLAN_T1_END")
+
+    def fixture():
+        R = mkroot()
+        for name in ("bus_question_audit.py", "close_bus_question.py", "gate_block_question.py"):
+            shutil.copy(bin_dir / name, R / "bin" / name)
+        (R / "bin" / "append_event.sh").write_text(STUB_APPEND_TS)
+        for name in ("bus_question_audit.py", "close_bus_question.py", "gate_block_question.py"):
+            (R / "bin" / name).chmod(0o755)
+        legacy = {"event_id": "old", "ts": "2026-10-16T14:00:09Z", "agent_id": "Mike", "event_type": "question",
+                  "topic": "plan-t1-not-ready-SpaceX", "payload": {"reason": "plan_missing"}}
+        (R / "bus/inbox").mkdir(parents=True)
+        (R / "bus/inbox/Mike.jsonl").write_text(json.dumps(legacy) + "\n")
+        script = ("set -uo pipefail\nROOT=%s\nACCOUNT=SpaceX\nEXPECTED_DATE=2026-10-21\nTODAY=2026-10-20\n"
+                  "REASON=plan_unparseable\nMARKER_DIR=%s/m\nWORKDIR=%s/w\nDISCORD_PLAN_CHANNEL=plan_approval\n"
+                  "_QPAYLOAD='{\"legacy\":1}'\n%s\n") % (R, R, R, blk)
+        env = dict(os.environ, GATE_BLOCK_WC_ROOT=str(R), GATE_BLOCK_NOW="2026-10-20T21:00:00+07:00")
+        subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=90, env=env)
+        return R
+
+    def pending(R):
+        o = subprocess.run([sys.executable, str(R / "bin/bus_question_audit.py"), "--json"],
+                           env=dict(os.environ, BUS_AUDIT_ROOT=str(R)), capture_output=True, text=True)
+        return [q["topic"] for q in json.loads(o.stdout)["pending"]]
+
+    def close(R, topic):
+        return subprocess.run([sys.executable, str(R / "bin/close_bus_question.py"), f"Mike/{topic}",
+                               "--resolution", "x", "--evidence", "y", "--source-topic", "manual",
+                               "--actor", "Mike"], capture_output=True, text=True)
+
+    new_t, old_t = "plan-t1-not-ready-2026-10-21-SpaceX", "plan-t1-not-ready-SpaceX"
+    R = fixture()
+    check(sorted(pending(R)) == sorted([new_t, old_t]), "vòng3-B1: bus có CẢ câu legacy lẫn câu theo ngày đang pending")
+    c = close(R, old_t)
+    check(new_t in pending(R) and old_t not in pending(R),
+          f"vòng3-B1 chiều 1: đóng câu legacy KHÔNG đóng lây câu helper (close rc={c.returncode})")
+    R = fixture()
+    c = close(R, new_t)
+    check(old_t in pending(R) and new_t not in pending(R),
+          f"vòng3-B1 chiều 2: đóng câu theo ngày KHÔNG đóng lây câu legacy (close rc={c.returncode})")
+
+
+def cadence_reason(bin_dir: Path) -> None:
+    """NB-1/NB-2: reason của câu hỏi delivery lấy từ _RC_WHY (đã lọc), không cắt byte."""
+    blk = extract(bin_dir / "check_report_cadence.sh", "GATE_BLOCK_DELIVERY_BEGIN", "GATE_BLOCK_DELIVERY_END")
+    check("cut -c" not in blk, "NB-1: khối delivery không dùng `cut -c` (cắt byte làm vỡ UTF-8)")
+    W = Path(tempfile.mkdtemp(prefix="gbq_cad_")); TMP.append(W)
+    (W / "mike/bin").mkdir(parents=True)
+    h = W / "mike/bin/gate_block_question.py"; h.write_text(STUB_HELPER); h.chmod(0o755)
+    log = W / "mike/helper_calls.log"
+    long_out = "❌ CHẶN — " + "ế" * 150
+    for why, want in (("dòng cuối cổng in ra: lý do thật", "report_delivery_gate rc=1: dòng cuối cổng in ra: lý do thật"),
+                      ("", "report_delivery_gate rc=1: không xác định")):
+        if log.exists():
+            log.unlink()
+        script = ("set -uo pipefail\nROOT=%s\nFNAME=SpaceX_weekly_report_2026-10-16.md\nf=/r/x.md\n"
+                  "TRADING_REPORT_THREAD=trading_report\nGATE_RC=1\nGATE_OUT=%s\n_RC_WHY=%s\n%s\n") % (
+                      W / "mike", json.dumps(long_out, ensure_ascii=False), json.dumps(why, ensure_ascii=False), blk)
+        subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=60)
+        reason = arg_of(log.read_text() if log.exists() else "", "--reason")
+        check(reason.startswith(want) and "ế" * 20 not in reason,
+              f"NB-2: reason delivery lấy từ _RC_WHY ({'có' if why else 'rỗng'}), không phải dòng cuối GATE_OUT thô")
 
 
 # (tên, đoạn gốc, đoạn thay). Gồm 8 mutant vòng 1 + 18 mutant harness arch-reviewer (/tmp/arch_mut/run.py,
@@ -659,7 +897,8 @@ MUTATIONS = [
     ("audit hỏng ⇒ coi như đã đóng", "        return None\n    return any(", "        return False\n    return any("),
     ("probe approval bỏ check journal", "if not journal.exists() or since is None or mtime_ict(journal) <= since:", "if False:"),
     # harness arch-reviewer
-    ("dry-run vẫn gửi notify", "    if dry:\n        return\n    if send(msg", "    if send(msg"),
+    ("dry-run remind vẫn gửi/ghi", "    if dry:\n        return\n    # Ghi sổ TRƯỚC khi gửi", "    # Ghi sổ TRƯỚC khi gửi"),
+    ("dry-run expire vẫn gửi/ghi", "    if dry:\n        return\n    # Ghi status expired", "    # Ghi status expired"),
     ("dry-run vẫn post bù", "    if dry and st == \"posting\":", "    if False:"),
     ("bỏ skip closed", "    if st in DONE:\n", "    if False:\n"),
     ("bỏ cô lập lỗi per-record", "        except Exception as exc:  # một bản ghi", "        except ZeroDivisionError as exc:  # một bản ghi"),
@@ -703,17 +942,45 @@ MUTATIONS = [
     ("N2 bỏ flock", "        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)", "        pass"),
     ("N8 không dọn", "            path.unlink()\n            print(f\"gate_block_question: PRUNED", "            print(f\"gate_block_question: PRUNED"),
     ("N8 dọn cả dry-run", "        if not dry and done_at and now", "        if done_at and now"),
+    # vòng 3 (gồm E6/P3/P4 sống ở vòng 2)
+    ("E6 expired vẫn bị sweep tiếp", "DONE = (\"closed\", \"expired\")", "DONE = (\"closed\",)"),
+    ("P3 plan-t1 bỏ guard md5 rỗng", "    if not cur or m.get(\"content_md5\") != cur:", "    if m.get(\"content_md5\") != cur:"),
+    ("P4 hash không bỏ requires_user_approval", " or k == \"requires_user_approval\")}", ")}"),
+    ("B3v3 ack suppress_days chỉ >=1", "sd = max(2, min(", "sd = max(1, min("),
+    ("NB-3 remind gửi trước khi ghi sổ", "    save(path, rec)\n    if not send(msg, rec.get(\"thread\")):", "    if not send(msg, rec.get(\"thread\")):"),
+    ("NB-3 expire gửi trước khi ghi sổ", "    save(path, rec)\n    rec[\"final_notice_delivered\"] = send(", "    rec[\"final_notice_delivered\"] = send("),
+    ("NB-3 remind gửi hỏng không hoàn tác", "        rec[\"reminders\"], rec[\"last_reminded_at\"] = prev\n", "        pass\n"),
+    ("NB-4 posting không hết hạn", "        if now >= parse_ict(rec[\"expires_at\"]):\n            rec.update(status=\"expired\", expired_at=now.isoformat(timespec=\"seconds\"),\n                       expired_why=\"hết hạn khi", "        if False:\n            rec.update(status=\"expired\", expired_at=now.isoformat(timespec=\"seconds\"),\n                       expired_why=\"hết hạn khi"),
+    ("NB-4 không dọn tmp mồ côi", "                    tmp.unlink()\n                    print(f\"gate_block_question: PRUNED_TMP", "                    print(f\"gate_block_question: PRUNED_TMP"),
+    ("NB-4 dry-run vẫn dọn tmp", "    if not a.dry_run:\n        for tmp in STATE_DIR", "    if True:\n        for tmp in STATE_DIR"),
+    ("NB-4 save lỗi để lại tmp", "    except BaseException:\n        os.unlink(tmp)\n        raise\n\n\ndef claim", "    except BaseException:\n        raise\n\n\ndef claim"),
+    ("NB-1 argv không làm sạch", ".decode(\"utf-8\", \"replace\")\n            for x in", ".decode(\"utf-8\", \"surrogateescape\")\n            for x in"),
     ("N3 claim không dọn tmp", "    finally:\n        os.unlink(tmp)", "    finally:\n        pass"),
+]
+
+
+# (file, tên, đoạn gốc, đoạn thay) — mutant cho 3 điểm wire; chạy `--core --wiring-only` trên bản sao.
+WIRE_MUTATIONS = [
+    ("send_plan_report.sh", "W1 fallback chỉ nhận OPENED", "(OPENED|ALREADY_OPEN|ALREADY_POSTING)([[:space:]]|$)", "(OPENED|ALREADY_)"),
+    ("send_plan_report.sh", "W1b fallback bỏ qua ALREADY_CLOSED", "(OPENED|ALREADY_OPEN|ALREADY_POSTING)([[:space:]]|$)", "(OPENED|ALREADY_OPEN|ALREADY_POSTING|ALREADY_CLOSED)([[:space:]]|$)"),
+    ("send_plan_report.sh", "B1 topic helper không ngày", '--topic "plan-t1-not-ready-${_GB_KEY}"', '--topic "plan-t1-not-ready-${ACCOUNT}"'),
+    ("send_plan_report.sh", "B1 topic fallback không ngày", 'question "plan-t1-not-ready-${_GB_KEY}"', 'question "plan-t1-not-ready-${ACCOUNT}"'),
+    ("run_bot.sh", "W2 mở question cả khi probe rc=11", 'if [ "$_prc" -eq 10 ]; then', 'if [ "$_prc" -eq 10 ] || [ "$_prc" -eq 11 ]; then'),
+    ("run_bot.sh", "W3 bỏ --max-reminders", " --max-reminders 24", ""),
+    ("check_report_cadence.sh", "W4 bỏ --max-reminders", "--expires-in-days 3 --max-reminders 20", "--expires-in-days 3"),
+    ("check_report_cadence.sh", "NB-2 reason lại lấy dòng cuối GATE_OUT thô", '${_RC_WHY:-không xác định (đã báo INCOMPLETE trong ngày — xem logs/check_report_cadence.log hoặc report_delivery_gate.py --status)}', "$(printf '%s\\n' \"$GATE_OUT\" | tail -n 1 | cut -c1-200)"),
 ]
 
 
 def main() -> int:
     if "--core" in sys.argv:
         target = Path(sys.argv[sys.argv.index("--target") + 1]) if "--target" in sys.argv else HELPER
+        bd = Path(sys.argv[sys.argv.index("--bin-dir") + 1]) if "--bin-dir" in sys.argv else HERE
         try:
-            core(target)
+            if "--wiring-only" not in sys.argv:
+                core(target)
             if "--no-wiring" not in sys.argv:
-                wiring(HERE)
+                wiring(bd)
         finally:
             for r in TMP:
                 shutil.rmtree(r, ignore_errors=True)
@@ -729,6 +996,9 @@ def main() -> int:
         print(f"[TZ={tzenv or 'env -u TZ'}] {last}")
         if r.returncode:
             print(r.stdout + r.stderr); rc_all = 1
+    if "--mutation" not in sys.argv:
+        print("SELFCHECK", "PASS" if rc_all == 0 else "FAIL", "(chưa chạy mutation — thêm --mutation)")
+        return rc_all
     src = HELPER.read_text()
     killed, alive = 0, []
     for name, old, new in MUTATIONS:
@@ -746,8 +1016,29 @@ def main() -> int:
             alive.append(name)
         print(f"[mutation] {'KILLED' if dead else 'SURVIVED'}: {name}")
         shutil.rmtree(d, ignore_errors=True)
-    print(f"mutation {killed}/{len(MUTATIONS)} killed; sống: {alive}")
-    if killed != len(MUTATIONS):
+    total = len(MUTATIONS)
+    for fname, name, old, new in WIRE_MUTATIONS:
+        d = Path(tempfile.mkdtemp(prefix="gbq_wmut_"))
+        for f in ("run_bot.sh", "send_plan_report.sh", "check_report_cadence.sh", "bus_question_audit.py",
+                  "close_bus_question.py", "gate_block_question.py", "ops_health_check.sh"):
+            shutil.copy(HERE / f, d / f)
+        t = (d / fname).read_text()
+        if t.count(old) < 1:
+            print(f"[mutation] FATAL: không tìm thấy đoạn cho '{name}'"); rc_all = 1; alive.append(name); total += 1; continue
+        (d / fname).write_text(t.replace(old, new, 1))
+        env = {k: v for k, v in os.environ.items() if k != "TZ"}
+        env["TZ"] = "Pacific/Kiritimati"
+        r = subprocess.run([sys.executable, __file__, "--core", "--wiring-only", "--bin-dir", str(d)],
+                           env=env, capture_output=True, text=True)
+        dead = r.returncode != 0
+        killed += dead
+        total += 1
+        if not dead:
+            alive.append(name)
+        print(f"[mutation] {'KILLED' if dead else 'SURVIVED'}: {name}")
+        shutil.rmtree(d, ignore_errors=True)
+    print(f"mutation {killed}/{total} killed; sống: {alive}")
+    if killed != total:
         rc_all = 1
     print("SELFCHECK", "PASS" if rc_all == 0 else "FAIL")
     return rc_all

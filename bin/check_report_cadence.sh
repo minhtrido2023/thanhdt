@@ -106,6 +106,7 @@ except Exception as e:
     # SWEEP_ATTACH_END
     GATE_OUT="$(python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" "${ATTACH_ARGS[@]}" 2>&1)"
     GATE_RC=$?
+    _RC_WHY=""   # đặt lại mỗi file: biến sống qua vòng lặp, khối GATE_BLOCK_DELIVERY không được đọc lý do của file trước
     printf '%s\n' "$GATE_OUT"
     VENDOR_RC=0
     printf '%s\n' "$GATE_OUT" | "$ROOT/bin/vendor_mismatch_alert.sh" \
@@ -210,7 +211,7 @@ except BaseException:
         --deadline "$(TZ='Asia/Ho_Chi_Minh' date -d 'tomorrow' +%Y-%m-%d)T08:30" \
         --recover "python3 $ROOT/bin/report_delivery_gate.py $f --topic $TRADING_REPORT_THREAD" \
         --probe "python3 $ROOT/bin/report_delivery_gate.py $f --status" \
-        --reason "report_delivery_gate rc=$GATE_RC: $(printf '%s\n' "$GATE_OUT" | grep -v '^[[:space:]]*$' | tail -n 1 | cut -c1-200)" \
+        --reason "report_delivery_gate rc=$GATE_RC: ${_RC_WHY:-không xác định (đã báo INCOMPLETE trong ngày — xem logs/check_report_cadence.log hoặc report_delivery_gate.py --status)}" \
         --thread "$TRADING_REPORT_THREAD" --remind-every-min 240 \
         --expires-in-days 3 --max-reminders 20 \
         --extra "{\"artifact\":\"${FNAME}\"}" || true

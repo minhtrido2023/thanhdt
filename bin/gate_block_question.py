@@ -58,6 +58,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 from zoneinfo import ZoneInfo
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
@@ -72,6 +73,8 @@ ACK_PREFIX = "triaged-needs-human:"   # khớp ops_health_check.sh ACK_PREFIX
 ACK_MAX_SUPPRESS_DAYS = 14            # khớp ops_health_check.sh ACK_MAX_SUPPRESS_DAYS
 DEFAULT_MAX_REMINDERS = 40
 RETAIN_DAYS = 30
+TMP_PREFIX = ".tmp_"
+TMP_MAX_AGE_S = 3600   # tmp mồ côi (bị kill giữa mkstemp và replace/link) quá 1 giờ ⇒ sweep xoá
 DONE = ("closed", "expired")
 
 
@@ -92,14 +95,23 @@ def state_path(gate: str, key: str) -> Path:
 
 
 def _write_tmp(dirpath: Path, rec: dict) -> str:
-    fd, tmp = tempfile.mkstemp(dir=dirpath, prefix=".tmp_")
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        json.dump(rec, fh, ensure_ascii=False, indent=1)
+    fd, tmp = tempfile.mkstemp(dir=dirpath, prefix=TMP_PREFIX)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(rec, fh, ensure_ascii=False, indent=1)
+    except BaseException:
+        os.unlink(tmp)
+        raise
     return tmp
 
 
 def save(path: Path, rec: dict) -> None:
-    os.replace(_write_tmp(path.parent, rec), path)
+    tmp = _write_tmp(path.parent, rec)
+    try:
+        os.replace(tmp, path)
+    except BaseException:
+        os.unlink(tmp)
+        raise
 
 
 def claim(path: Path, rec: dict) -> bool:
@@ -173,9 +185,9 @@ def post_question(rec: dict) -> bool:
 
 def post_ack(rec: dict) -> bool:
     """status triaged-needs-human (ops_health_check ACK_PREFIX) — chủ đã gán + sweep đang nhắc
-    ⇒ CHECK5 không dispatch Wags. suppress_days phủ tới hết hạn (trần 14 theo checker)."""
+    ⇒ CHECK5 không dispatch Wags. suppress_days phủ tới hết hạn VÀ tối thiểu 2 ngày (CHECK5 dispatch Wags cho câu hỏi <48h; trần 14 theo checker)."""
     days = (parse_ict(rec["expires_at"]) - parse_ict(rec["opened_at"])).total_seconds() / 86400
-    sd = max(1, min(ACK_MAX_SUPPRESS_DAYS, int(days) + 1))
+    sd = max(2, min(ACK_MAX_SUPPRESS_DAYS, int(days) + 1))   # >=2: CHECK5 xét câu hỏi 48h
     return append(rec["agent"], "status", f"{ACK_PREFIX} {rec['topic']}",
                   {"gate_block_id": rec["id"], "suppress_days": sd, "owner": rec["owner"],
                    "note": "gate_block_question: đã gán chủ + hạn, sweep nhắc tới khi probe đóng/hết hạn"},
@@ -295,7 +307,7 @@ def send(msg: str, thread: str) -> bool:
     return ok
 
 
-def remind(rec: dict, now: dt.datetime, probe_rc: int, probe_out: str, dry: bool) -> None:
+def remind(path: Path, rec: dict, now: dt.datetime, probe_rc: int, probe_out: str, dry: bool) -> None:
     last = rec.get("last_reminded_at")
     if last and now - dt.datetime.fromisoformat(last) < dt.timedelta(minutes=rec["remind_every_min"]):
         print(f"gate_block_question: STILL_OPEN {rec['id']} (nhắc gần đây, bỏ qua lượt này)")
@@ -312,22 +324,29 @@ def remind(rec: dict, now: dt.datetime, probe_rc: int, probe_out: str, dry: bool
     print(f"gate_block_question: REMIND {rec['id']} — {msg}")
     if dry:
         return
-    if send(msg, rec.get("thread")):
-        rec["reminders"] = n
-        rec["last_reminded_at"] = now.isoformat(timespec="seconds")
-    else:
+    # Ghi sổ TRƯỚC khi gửi (§5): sổ không ghi được (đĩa đầy/read-only) ⇒ save() nổ, KHÔNG gửi — thà
+    # im lặng một lượt hơn nhắc lặp mỗi 15 phút. Gửi hỏng ⇒ hoàn tác để lượt sau gửi lại.
+    prev = (rec.get("reminders"), rec.get("last_reminded_at"))
+    rec["reminders"] = n
+    rec["last_reminded_at"] = now.isoformat(timespec="seconds")
+    save(path, rec)
+    if not send(msg, rec.get("thread")):
+        rec["reminders"], rec["last_reminded_at"] = prev
+        save(path, rec)
         print(f"gate_block_question: REMIND_UNDELIVERED {rec['id']} — không kênh nào nhận, lượt sau gửi lại")
 
 
-def expire(rec: dict, now: dt.datetime, why: str, probe_rc: int, probe_out: str, dry: bool) -> None:
+def expire(path: Path, rec: dict, now: dt.datetime, why: str, probe_rc: int, probe_out: str, dry: bool) -> None:
     msg = (f"🛑 NGỪNG NHẮC — cổng {rec['gate']} [{rec['key']}] vẫn CHƯA phục hồi ({why}) · chủ: "
            f"{rec['owner']} · probe rc={probe_rc}: {probe_out[-160:]} · đây là tin CUỐI; câu hỏi bus "
            f"{rec['agent']}/{rec['topic']} vẫn MỞ — đóng tay bằng close_bus_question.py khi xử lý xong")
     print(f"gate_block_question: EXPIRED {rec['id']} — {msg}")
     if dry:
         return
-    rec["final_notice_delivered"] = send(msg, rec.get("thread"))
+    # Ghi status expired TRƯỚC khi gửi tin cuối: sổ read-only ⇒ save() nổ, không gửi (không lặp tin cuối).
     rec.update(status="expired", expired_at=now.isoformat(timespec="seconds"), expired_why=why)
+    save(path, rec)
+    rec["final_notice_delivered"] = send(msg, rec.get("thread"))
 
 
 def sweep_one(path: Path, dry: bool) -> None:
@@ -346,6 +365,15 @@ def sweep_one(path: Path, dry: bool) -> None:
         print(f"gate_block_question: POSTING_RETRY_PENDING {rec['id']} (dry-run, không post)")
         return
     if not dry and not finish_posting(path, rec):
+        # Post bus hỏng liên tục ⇒ sổ 'posting' không được nằm vĩnh viễn: tới hạn thì expired
+        # (câu hỏi CHƯA từng lên bus — nói rõ để người biết cổng vẫn chặn mà không có câu hỏi).
+        if now >= parse_ict(rec["expires_at"]):
+            rec.update(status="expired", expired_at=now.isoformat(timespec="seconds"),
+                       expired_why="hết hạn khi vẫn chưa post được question lên bus (POST_FAILED liên tục)")
+            save(path, rec)
+            print(f"gate_block_question: EXPIRED_UNPOSTED {rec['id']} — chưa từng post được question; "
+                  f"cổng vẫn chặn, xử lý tay")
+            return
         print(f"gate_block_question: POSTING_RETRY_PENDING {rec['id']}")
         return
     ref = f"{rec['agent']}/{rec['topic']}"
@@ -378,11 +406,11 @@ def sweep_one(path: Path, dry: bool) -> None:
         out = f"probe rc=0 nhưng close_bus_question rc={c.returncode}: {' '.join(text.split())[-200:]}"
     cap = int(rec.get("max_reminders") or DEFAULT_MAX_REMINDERS)
     if now >= parse_ict(rec["expires_at"]):
-        expire(rec, now, f"hết hạn nhắc {rec['expires_at']} ICT", rc, out, dry)
+        expire(path, rec, now, f"hết hạn nhắc {rec['expires_at']} ICT", rc, out, dry)
     elif int(rec.get("reminders") or 0) >= cap:
-        expire(rec, now, f"đạt trần {cap} lần nhắc", rc, out, dry)
+        expire(path, rec, now, f"đạt trần {cap} lần nhắc", rc, out, dry)
     else:
-        remind(rec, now, rc, out, dry)
+        remind(path, rec, now, rc, out, dry)
     if not dry:
         save(path, rec)
 
@@ -398,6 +426,14 @@ def cmd_sweep(a) -> int:
         print("gate_block_question: SWEEP_BUSY (sweep khác đang chạy — bỏ lượt này)")
         return 0
     bad = 0
+    if not a.dry_run:
+        for tmp in STATE_DIR.glob(TMP_PREFIX + "*"):
+            try:
+                if time.time() - tmp.stat().st_mtime > TMP_MAX_AGE_S:
+                    tmp.unlink()
+                    print(f"gate_block_question: PRUNED_TMP {tmp.name}")
+            except OSError:
+                pass
     for path in sorted(STATE_DIR.glob("*.json")):
         try:
             sweep_one(path, a.dry_run)
@@ -527,6 +563,10 @@ def main(argv=None) -> int:
     p.add_argument("--since", default="", help="mặc định env GATE_BLOCK_OPENED_AT (sweep đặt)")
     p.add_argument("--marker-dir", default="")
     p.add_argument("--plan-dir", default="")
+    # argv có byte không phải UTF-8 (nhãn từ output cổng bị cắt giữa ký tự) ⇒ surrogate làm json.dumps
+    # / ghi sổ nổ; thay bằng U+FFFD để sổ + câu hỏi vẫn mở được (thà mất 1 ký tự hơn mất cả câu hỏi).
+    argv = [x.encode("utf-8", "surrogateescape").decode("utf-8", "replace")
+            for x in (sys.argv[1:] if argv is None else argv)]
     a = ap.parse_args(argv)
     if a.cmd == "open":
         return cmd_open(a)
