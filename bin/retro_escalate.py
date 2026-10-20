@@ -118,6 +118,14 @@ def stable_topic(pattern):
             "vào topic — đó chính là bug ack-topic-counter. Nếu con số là một phần của "
             "danh tính (số tài khoản, id thread) thì viết lại cho nó KHÔNG đứng cuối, "
             f"vd {_REJECT_EXAMPLE!r}.")
+    # Đuôi `-recurring` thừa (TOPIC_PREFIX đã nói "recurring") nhưng tạo topic MỚI ⇒ né
+    # dedup, mở câu trùng câu gốc đang chờ user (sự cố coord-2026-10-20: `…-recovery-path`
+    # 18/10 + `…-recovery-path-recurring` 19/10). Từ chối fail-loud như đuôi đếm.
+    if re.search(r"[-_ ]recurring$", s, re.IGNORECASE):
+        raise SystemExit(
+            f"FAIL: --pattern {str(pattern)!r} kết thúc bằng '-recurring' — thừa (tiền tố "
+            f"đã là {TOPIC_PREFIX!r}) và đẻ topic mới né dedup. Dùng ĐÚNG slug của câu "
+            "đang mở; số ngày tái diễn đi vào --days.")
     return TOPIC_PREFIX + s
 
 

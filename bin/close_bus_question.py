@@ -42,6 +42,10 @@ def main() -> int:
                          " đóng theo mà KHÔNG có resolver độc lập nào trên chính rollup đó."
                          " Không truyền cờ này thì lệnh bị chặn khi rơi vào ca đó (coord-2026-09-10,"
                          " tránh cả chùm câu hỏi biến mất im lặng qua rollup_of circular closure)")
+    ap.add_argument("--ack-substring-collateral", action="store_true",
+                    help="xác nhận: biết answer dưới topic này cũng đóng LÂY câu pending khác có"
+                         " topic là chuỗi con của nó (matcher `q_topic in r`). Không truyền cờ"
+                         " ⇒ chặn rc=5 (coord-2026-10-20: đóng `X-recurring` đóng nhầm `X`)")
     ap.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     a = ap.parse_args()
 
@@ -52,11 +56,23 @@ def main() -> int:
     if not q_agent or not topic:
         ap.error("question_ref must contain a non-empty Agent and topic")
 
-    matches = [q for q in pending(a.root)
+    open_qs = pending(a.root)
+    matches = [q for q in open_qs
                if q.get("agent") == q_agent and q.get("topic") == topic]
     if not matches:
         print(f"close_bus_question: ALREADY_CLOSED_OR_UNKNOWN {a.question_ref}")
         return 0
+
+    # Matcher của audit + ops_health_check check #5 coi answer topic `r` là resolver của MỌI
+    # câu có `q_topic in r` ⇒ answer `X-recurring` đóng luôn `X`. Chặn TRƯỚC khi append.
+    collateral = sorted({f"{q.get('agent')}/{q.get('topic')}" for q in open_qs
+                         if q.get("topic") and q.get("topic") != topic
+                         and q.get("topic") in topic})
+    if collateral and not a.ack_substring_collateral:
+        print(f"close_bus_question: BLOCKED — answer topic {topic!r} chứa nguyên topic của câu"
+              f" pending khác [{', '.join(collateral)}] nên sẽ đóng LÂY chúng (matcher substring)."
+              f" Thêm --ack-substring-collateral nếu thật sự muốn đóng cả.", file=sys.stderr)
+        return 5
 
     if not a.ack_rollup_auto_closes:
         env = dict(os.environ)
