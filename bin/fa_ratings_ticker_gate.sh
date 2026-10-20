@@ -20,7 +20,7 @@
 # Bảng khôi phục ⇒ lần chạy kế PASS, tự đi tiếp, không cần tay.
 #
 # Env (selfcheck/ghi đè): GATE_FAKE_MEASURE="n_distinct,n_universe,n_cov,max_t,univ_date" hoặc "ERROR:<text>",
-#   GATE_FAKE_LM (ngày sửa bảng), GATE_STATE_DIR, FA8L_NOTIFY, FA8L_EVENT, GATE_MIN_DISTINCT/COV/UNIVERSE.
+#   GATE_FAKE_LM (ngày sửa bảng), FA8L_BQ_CMD (thay lệnh `bq`), GATE_BQ_TIMEOUT (s), GATE_STATE_DIR, FA8L_NOTIFY, FA8L_EVENT, GATE_MIN_DISTINCT/COV/UNIVERSE.
 set -uo pipefail
 
 ROOT="/home/trido/thanhdt/WorkingClaude"
@@ -48,14 +48,17 @@ if [ -n "${GATE_FAKE_MEASURE:-}" ]; then
   RAW="$GATE_FAKE_MEASURE"
   LM="${GATE_FAKE_LM:-unknown}"
 else
-  _out="$(source "$ROOT/wc_env.sh" 2>/dev/null; bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet "$SQL" 2>&1)"
+  # stderr tách riêng (warning của SDK không làm hỏng header); rc≠0/timeout vẫn fail-closed.
+  _errf="$(mktemp)"
+  _out="$(source "$ROOT/wc_env.sh" 2>/dev/null; timeout "${GATE_BQ_TIMEOUT:-180}" ${FA8L_BQ_CMD:-bq} query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet "$SQL" 2>"$_errf")"
   _rc=$?
   if [ "$_rc" -eq 0 ] && [ "$(printf '%s\n' "$_out" | head -n1)" = "n_distinct,n_universe,n_cov,max_t,univ_date" ]; then
     RAW="$(printf '%s\n' "$_out" | sed -n 2p | tr -d '\r')"
   else
-    RAW="ERROR:bq rc=$_rc: $(printf '%s' "$_out" | tr '\n' ' ' | cut -c1-300)"
+    RAW="ERROR:bq rc=$_rc: $(printf '%s %s' "$_out" "$(cat "$_errf")" | tr '\n' ' ' | cut -c1-300)"
   fi
-  LM="$(source "$ROOT/wc_env.sh" 2>/dev/null; bq show --format=prettyjson "${PROJECT}:tav2_bq.ticker" 2>/dev/null | python3 -c "
+  rm -f "$_errf"
+  LM="$(source "$ROOT/wc_env.sh" 2>/dev/null; ${FA8L_BQ_CMD:-bq} show --format=prettyjson "${PROJECT}:tav2_bq.ticker" 2>/dev/null | python3 -c "
 import json,sys,datetime as dt
 try: print(dt.datetime.fromtimestamp(int(json.load(sys.stdin)['lastModifiedTime'])/1000, dt.timezone(dt.timedelta(hours=7))).strftime('%F %H:%M ICT'))
 except Exception: print('unknown')" 2>/dev/null)"
@@ -87,6 +90,9 @@ else:
     print(f"PASS|✅ fa_ratings_8l ticker-gate PASS: {meas}. {thr}")
 PY
 )"
+if [ -z "$VERDICT" ]; then   # Python đánh giá crash ⇒ vẫn chặn, nói rõ "không đo được"
+  VERDICT="FAIL|❌ fa_ratings_8l ticker-gate: KHÔNG ĐO ĐƯỢC (bước đánh giá số đo lỗi/không trả kết quả; số đo thô='${RAW:0:120}') — chặn theo fail-closed"
+fi
 KIND="${VERDICT%%|*}"; MSG="${VERDICT#*|}"
 echo "$MSG"
 
@@ -104,6 +110,6 @@ if [ "$(cat "$STATE" 2>/dev/null)" != "$TODAY" ]; then
     echo "WARN: notify thất bại — chưa ghi state, lần sau báo lại"
   fi
   _payload="$(python3 -c 'import json,sys;print(json.dumps({"detail":sys.argv[1],"measured_by":"fa_ratings_ticker_gate.sh query tav2_bq.ticker + tav2_mike.universe_pit"}))' "$MSG")"
-  "$EVENT" Taylor error "fa-ratings-ticker-gate-blocked" "$_payload" >/dev/null 2>&1 || true
+  "$EVENT" Winston error "fa-ratings-ticker-gate-blocked" "$_payload" >/dev/null 2>&1 || true
 fi
 exit 3

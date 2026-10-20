@@ -36,7 +36,7 @@ cd "$ROOT" || exit 1
 
 # Cổng fail-closed số mã tav2_bq.ticker (job Taylor_20261020_082306): ticker thiếu mã ⇒ ICB_SQL route sai
 # ⇒ rating lệch hàng nghìn dòng mà MIN_ROWS bên dưới KHÔNG thấy. Chặn TRƯỚC khi ghi bảng; exit 3 (≠ 1).
-# Cổng tự cảnh báo Trading Daily + bus 1 lần/ngày. Dùng chung cho cron T7, cron mùa BCTC và chạy tay.
+# Cổng tự cảnh báo Trading Daily + bus 1 lần/ngày. T7 có 2 dòng cron (08:30 script này, 09:15 refresh_fa_ratings.sh) — cả hai script đều gọi cổng; cũng phủ cron mùa BCTC và chạy tay.
 "${FA8L_GATE_CMD:-$MIKE/bin/fa_ratings_ticker_gate.sh}" || exit 3
 
 ${FA8L_HISTORY_CMD:-python3 rating_8l_history.py}

@@ -27,13 +27,21 @@ TABLE="tav2_bq.fa_ratings"
 MIN_ROWS=12000                     # frozen history alone is 12,367 minus at most the 2
                                    # open quarters' churn; anything under 12k = truncated
 DISCORD_TRADING_DAILY="trading_daily"
+NOTIFY="${FA8L_NOTIFY:-$MIKE/bin/notify_thread.sh}"      # ghi đè được cho selfcheck
+EVENT="${FA8L_EVENT:-$MIKE/bin/append_event.sh}"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 
 START_EPOCH="$(date +%s)"
 echo "=== fa_ratings weekly append-only refresh — $(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT') ==="
 
-cd "$ROOT"
-python3 refresh_fa_ratings.py
+cd "$ROOT" || exit 1
+
+# Cổng fail-closed số mã tav2_bq.ticker (job Taylor_20261020_084428): fundamental_rating.py INNER JOIN ticker,
+# refresh DELETE+INSERT 2 quý mở ⇒ ticker thiếu mã = mất ~10% mã thanh khoản khỏi fa_ratings (cổng fa_tier của BAL).
+# Sàn 80%/85% của refresh_fa_ratings.py không chặn nổi mức đó. Chặn TRƯỚC khi ghi; exit 3 (≠ 1).
+"${FA8L_GATE_CMD:-$MIKE/bin/fa_ratings_ticker_gate.sh}" || exit 3
+
+${FA_REFRESH_CMD:-python3 refresh_fa_ratings.py}
 PY_RC=$?
 
 _table_meta() {  # prints "<lastModified_epoch_s> <numRows>"
@@ -55,11 +63,11 @@ FAIL_REASON=""
 
 if [ -n "$FAIL_REASON" ]; then
   MSG="⛔ fa_ratings WEEKLY REFRESH FAILED ($(TZ='Asia/Ho_Chi_Minh' date +'%F %H:%M ICT')): $FAIL_REASON. Bảng vẫn là bản cũ — consumers (SIGNAL_V11 fa_tier gate của book BAL, pt_v22/pt_v23, bq_cache) đọc rating cũ; quý mới BCTC không vào. Check mike/logs/fa_ratings_refresh.log"
-  "$MIKE/bin/notify_thread.sh" "$MSG" "$DISCORD_TRADING_DAILY" 2>/dev/null || true
-  "$MIKE/bin/append_event.sh" Taylor error "fa_ratings-refresh-failed" "{\"reason\":\"$FAIL_REASON\"}" 2>/dev/null || true
+  "$NOTIFY" "$MSG" "$DISCORD_TRADING_DAILY" 2>/dev/null || true
+  "$EVENT" Taylor error "fa_ratings-refresh-failed" "{\"reason\":\"$FAIL_REASON\"}" 2>/dev/null || true
   echo "FAILED: $FAIL_REASON"
   exit 1
 fi
 
 echo "OK: refreshed — lastModified $(date -d @"$LM_S" +'%F %T'), rows=$NUM_ROWS"
-"$MIKE/bin/append_event.sh" Taylor status "fa_ratings-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true
+"$EVENT" Taylor status "fa_ratings-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true

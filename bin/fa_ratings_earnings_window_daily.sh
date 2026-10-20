@@ -45,9 +45,9 @@ set -uo pipefail
 
 ROOT="/home/trido/thanhdt/WorkingClaude"
 MIKE="$ROOT/mike"
-LOG_8L="$MIKE/logs/fa_ratings_8l_refresh.log"
-LOG_FA="$MIKE/logs/fa_ratings_refresh.log"
-SPACING_S=2700   # 45 phút giữa lúc BẮT ĐẦU 8l và lúc bắt đầu fa_ratings
+LOG_8L="${FA8L_WINDOW_LOG_8L:-$MIKE/logs/fa_ratings_8l_refresh.log}"   # FA8L_WINDOW_* : ghi đè cho selfcheck
+LOG_FA="${FA8L_WINDOW_LOG_FA:-$MIKE/logs/fa_ratings_refresh.log}"
+SPACING_S="${FA8L_WINDOW_SPACING_S:-2700}"   # 45 phút giữa lúc BẮT ĐẦU 8l và lúc bắt đầu fa_ratings
 
 # --check YYYY-MM-DD: chỉ in RUN/SKIP cho ngày mô phỏng, không chạy gì (dùng để test logic).
 CHECK_DATE="${2:-}"
@@ -83,7 +83,7 @@ if [ "$MODE" = "--check" ]; then
 fi
 
 TODAY_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')"
-GATE="$(_gate "")"
+GATE="$(_gate "${FA8L_WINDOW_RUN_DATE:-}")"
 if [ "$GATE" != "RUN" ]; then
   echo "[$TODAY_ICT] $GATE"
   exit 0
@@ -92,7 +92,7 @@ fi
 echo "[$TODAY_ICT] RUN — trong cua so mua BCTC (ngay 10 thang dau quy .. ngay 10 thang ke tiep, moi ngay ke ca cuoi tuan, tru le VN)"
 START_EPOCH="$(date +%s)"
 
-"$MIKE/bin/refresh_fa_ratings_8l.sh" >> "$LOG_8L" 2>&1
+"${FA8L_WINDOW_CHILD_8L:-$MIKE/bin/refresh_fa_ratings_8l.sh}" >> "$LOG_8L" 2>&1
 RC1=$?
 echo "[$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')] refresh_fa_ratings_8l.sh exit=$RC1 (chi tiet: $LOG_8L)"
 
@@ -107,7 +107,7 @@ ELAPSED=$(( $(date +%s) - START_EPOCH ))
 WAIT=$(( SPACING_S - ELAPSED ))
 [ "$WAIT" -gt 0 ] && sleep "$WAIT"
 
-"$MIKE/bin/refresh_fa_ratings.sh" >> "$LOG_FA" 2>&1
+"${FA8L_WINDOW_CHILD_FA:-$MIKE/bin/refresh_fa_ratings.sh}" >> "$LOG_FA" 2>&1
 RC2=$?
 echo "[$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')] refresh_fa_ratings.sh exit=$RC2 (chi tiet: $LOG_FA)"
 

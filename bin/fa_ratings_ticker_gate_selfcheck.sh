@@ -5,6 +5,7 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GATE_SRC="$HERE/fa_ratings_ticker_gate.sh"; WRAP_SRC="$HERE/refresh_fa_ratings_8l.sh"
+FA_SRC="$HERE/refresh_fa_ratings.sh"; WIN_SRC="$HERE/fa_ratings_earnings_window_daily.sh"
 if [ -z "${_GATE_SC_INNER:-}" ]; then
   rc=0
   for mode in "env -u TZ" "env TZ=Pacific/Kiritimati" "env TZ=America/Los_Angeles"; do
@@ -93,25 +94,114 @@ wiring(){  # <wrapper> <gate> tag
 }
 wiring "$WRAP_SRC" "$GATE_SRC" real
 
+
+echo "== đường BQ thật (stub bq): rc/header/stderr/NULL/âm/float/timeout"
+cat > "$TMP/bq_stub.sh" <<'S'
+#!/usr/bin/env bash
+[ "$1" = show ] && { echo '{}'; exit 0; }
+H="n_distinct,n_universe,n_cov,max_t,univ_date"; G="1294,343,343,2026-10-20,2026-10-19"
+case "$BQ_MODE" in
+  good)    printf '%s\n%s\n' "$H" "$G" ;;
+  rc1good) printf '%s\n%s\n' "$H" "$G"; echo "boom-rc1" >&2; exit 1 ;;
+  empty)   : ;;
+  header)  printf '%s\n' "$H" ;;
+  warn)    echo "WARNING: gcloud deprecated thing" >&2; printf '%s\n%s\n' "$H" "$G" ;;
+  null)    printf '%s\n%s\n' "$H" "1294,343,,2026-10-20,2026-10-19" ;;
+  neg)     printf '%s\n%s\n' "$H" "-5,343,343,2026-10-20,2026-10-19" ;;
+  float)   printf '%s\n%s\n' "$H" "1294.5,343,343,2026-10-20,2026-10-19" ;;
+  cols)    printf '%s\n%s\n' "$H" "1294,343,343" ;;
+  slow)    sleep 5; printf '%s\n%s\n' "$H" "$G" ;;
+esac
+S
+chmod +x "$TMP/bq_stub.sh"
+bqrun(){  # <gate> <mode> → G_OUT/G_RC (KHÔNG đặt GATE_FAKE_MEASURE ⇒ đi đường bq thật)
+  rm -rf "$TMP/state"; : > "$TMP/n.log"; : > "$TMP/e.log"
+  G_OUT="$(env -u GATE_FAKE_MEASURE BQ_MODE="$2" FA8L_BQ_CMD="$TMP/bq_stub.sh" GATE_BQ_TIMEOUT=1 GATE_STATE_DIR="$TMP/state" \
+     FA8L_NOTIFY="$TMP/notify.sh" FA8L_EVENT="$TMP/event.sh" NOTIFY_LOG="$TMP/n.log" EVENT_LOG="$TMP/e.log" bash "$1" 2>&1)"; G_RC=$?
+}
+bqexpect(){  # <gate> <mode> <want_rc> [substr]
+  bqrun "$1" "$2"
+  [ "$G_RC" -eq "$3" ] || { bad "bq[$2]: rc=$G_RC want $3 | $G_OUT"; return; }
+  [ -z "${4:-}" ] || grep -qF -- "$4" <<<"$G_OUT" || { bad "bq[$2]: thiếu '$4' | $G_OUT"; return; }
+  ok
+}
+bqsuite(){
+  local g="$1"
+  bqexpect "$g" good    0 "PASS"
+  bqexpect "$g" warn    0 "PASS"          # stderr có warning + dữ liệu hợp lệ ⇒ PASS
+  bqexpect "$g" rc1good 3 "bq rc=1"       # rc≠0 kèm stdout tốt ⇒ FAIL
+  bqexpect "$g" empty   3 "LỖI"
+  bqexpect "$g" header  3 "không parse"
+  bqexpect "$g" null    3 "không parse"
+  bqexpect "$g" neg     3 "n_mã -5 < 1250"
+  bqexpect "$g" float   3 "không parse"
+  bqexpect "$g" cols    3 "không parse"
+  bqexpect "$g" slow    3 "bq rc=124"     # timeout
+}
+bqsuite "$GATE_SRC"
+echo "== NB2: bước đánh giá crash ⇒ vẫn chặn, nói rõ 'không đo được'"
+mkdir -p "$TMP/badpy"; printf '#!/bin/sh\nexit 1\n' > "$TMP/badpy/python3"; chmod +x "$TMP/badpy/python3"
+nb2(){ rm -rf "$TMP/state"; : > "$TMP/n.log"; : > "$TMP/e.log"
+  G_OUT="$(env PATH="$TMP/badpy:$PATH" GATE_FAKE_MEASURE="1294,343,343,x,y" GATE_FAKE_LM=x GATE_STATE_DIR="$TMP/state" FA8L_NOTIFY="$TMP/notify.sh" FA8L_EVENT="$TMP/event.sh" NOTIFY_LOG="$TMP/n.log" EVENT_LOG="$TMP/e.log" bash "$1" 2>&1)"; G_RC=$?
+  [ "$G_RC" -eq 3 ] && grep -qF "KHÔNG ĐO ĐƯỢC" <<<"$G_OUT" && grep -qF "KHÔNG ĐO ĐƯỢC" "$TMP/n.log" && ok || bad "NB2: rc=$G_RC out=$G_OUT"; }
+nb2 "$GATE_SRC"
+
+echo "== wiring refresh_fa_ratings.sh (cron T7 09:15): gate FAIL ⇒ rc3 & KHÔNG gọi python"
+cat > "$TMP/fa_stub.sh" <<S
+#!/usr/bin/env bash
+echo called >> "$TMP/fa_called"
+exit 0
+S
+chmod +x "$TMP/fa_stub.sh"
+fawrap(){  # <wrapper> <fake>
+  rm -f "$TMP/fa_called"; rm -rf "$TMP/state"; : > "$TMP/n.log"; : > "$TMP/e.log"
+  env GATE_FAKE_MEASURE="$2" GATE_FAKE_LM=x GATE_STATE_DIR="$TMP/state" FA8L_NOTIFY="$TMP/notify.sh" FA8L_EVENT="$TMP/event.sh" \
+    NOTIFY_LOG="$TMP/n.log" EVENT_LOG="$TMP/e.log" FA8L_GATE_CMD="$TMP/gate_under_test.sh" FA_REFRESH_CMD="$TMP/fa_stub.sh" \
+    timeout 120 bash "$1" >/dev/null 2>&1; W_RC=$?
+}
+fawiring(){  # <wrapper> tag
+  cp "$GATE_SRC" "$TMP/gate_under_test.sh"; chmod +x "$TMP/gate_under_test.sh"
+  fawrap "$1" "1066,343,310,x,y"
+  [ "$W_RC" -eq 3 ] && [ ! -e "$TMP/fa_called" ] && ok || bad "$2: fail ⇒ want rc3 & python KHÔNG gọi (rc=$W_RC called=$([ -e "$TMP/fa_called" ] && echo yes || echo no))"
+  fawrap "$1" "1294,343,343,x,y"
+  [ -e "$TMP/fa_called" ] && ok || bad "$2: pass ⇒ python phải được gọi"
+}
+fawiring "$FA_SRC" fa
+
+echo "== R2: fa_ratings_earnings_window_daily.sh — child 8l rc=3 ⇒ bỏ child fa_ratings"
+for r in 0 1 3; do printf '#!/usr/bin/env bash\necho c8 >> "%s/c8_called"; exit %s\n' "$TMP" "$r" > "$TMP/c8_$r.sh"; chmod +x "$TMP/c8_$r.sh"; done
+printf '#!/usr/bin/env bash\necho cfa >> "%s/cfa_called"; exit 0\n' "$TMP" > "$TMP/cfa.sh"; chmod +x "$TMP/cfa.sh"
+winrun(){  # <script> <rc8l> → W_RC; c8_called/cfa_called
+  rm -f "$TMP/c8_called" "$TMP/cfa_called"
+  env FA8L_WINDOW_RUN_DATE=2026-10-20 FA8L_WINDOW_SPACING_S=0 FA8L_WINDOW_LOG_8L="$TMP/l8.log" FA8L_WINDOW_LOG_FA="$TMP/lfa.log" \
+    FA8L_WINDOW_CHILD_8L="$TMP/c8_$2.sh" FA8L_WINDOW_CHILD_FA="$TMP/cfa.sh" timeout 60 bash "$1" >/dev/null 2>&1; W_RC=$?
+}
+winsuite(){
+  local w="$1" n="$2"
+  winrun "$w" 3; [ "$W_RC" -eq 3 ] && [ -e "$TMP/c8_called" ] && [ ! -e "$TMP/cfa_called" ] && ok || bad "$n: 8l=3 ⇒ rc3 & fa KHÔNG chạy (rc=$W_RC fa=$([ -e "$TMP/cfa_called" ] && echo yes || echo no))"
+  winrun "$w" 0; [ "$W_RC" -eq 0 ] && [ -e "$TMP/cfa_called" ] && ok || bad "$n: 8l=0 ⇒ rc0 & fa chạy (rc=$W_RC)"
+  winrun "$w" 1; [ "$W_RC" -eq 1 ] && [ -e "$TMP/cfa_called" ] && ok || bad "$n: 8l=1 ⇒ rc1 & fa vẫn chạy (rc=$W_RC)"
+}
+winsuite "$WIN_SRC" real
+
 echo "== mutants (mỗi mutant PHẢI bị bắt)"
 CAUGHT=0; TOTAL=0
-mut(){  # name file sed_expr  (file = gate|wrap)
+mut(){  # name which(gate|bq|nb2|wrap|fa|win) sed_expr
   local name="$1" which="$2" expr="$3" src dst
-  [ "$which" = gate ] && src="$GATE_SRC" || src="$WRAP_SRC"
+  case "$which" in gate|bq|nb2) src="$GATE_SRC";; wrap) src="$WRAP_SRC";; fa) src="$FA_SRC";; win) src="$WIN_SRC";; esac
   dst="$TMP/mut_$name.sh"; sed -E "$expr" "$src" > "$dst"; chmod +x "$dst"
   if cmp -s "$src" "$dst"; then bad "mutant $name: sed không đổi gì (mutant vô hiệu)"; return; fi
-  TOTAL=$((TOTAL+1)); local before=$FAIL
-  if [ "$which" = gate ]; then suite "$dst" >/dev/null 2>&1; FAIL_OUT=$(suite "$dst" 2>&1 | grep -c FAIL); else FAIL_OUT=0; fi
+  TOTAL=$((TOTAL+1)); local before=$FAIL caught=0 out
+  case "$which" in
+    gate) out="$(suite "$dst" 2>&1)"; grep -q '  FAIL:' <<<"$out" && caught=1 ;;
+    bq)   out="$(bqsuite "$dst" 2>&1)"; grep -q '  FAIL:' <<<"$out" && caught=1 ;;
+    nb2)  out="$(nb2 "$dst" 2>&1)"; grep -q '  FAIL:' <<<"$out" && caught=1 ;;
+    wrap) cp "$GATE_SRC" "$TMP/gate_under_test.sh"; wrap "$dst" "1066,343,310,x,y"; { [ -e "$TMP/hist_called" ] || [ "$W_RC" -ne 3 ]; } && caught=1 ;;
+    fa)   cp "$GATE_SRC" "$TMP/gate_under_test.sh"; fawrap "$dst" "1066,343,310,x,y"; { [ -e "$TMP/fa_called" ] || [ "$W_RC" -ne 3 ]; } && caught=1 ;;
+    win)  out="$(winsuite "$dst" m 2>&1)"; grep -q '  FAIL:' <<<"$out" && caught=1 ;;
+  esac
   FAIL=$before
-  if [ "$which" = gate ]; then
-    # chạy lại, đếm số FAIL do mutant
-    local out; out="$(suite "$dst" 2>&1)"; local n; n="$(grep -c '  FAIL:' <<<"$out")"; FAIL=$before
-    [ "$n" -gt 0 ] && { CAUGHT=$((CAUGHT+1)); echo "  caught $name ($n)"; } || bad "mutant $name SỐNG"
-  else
-    cp "$GATE_SRC" "$TMP/gate_under_test.sh"; chmod +x "$TMP/gate_under_test.sh"
-    wrap "$dst" "1066,343,310,x,y"
-    if [ -e "$TMP/hist_called" ] || [ "$W_RC" -ne 3 ]; then CAUGHT=$((CAUGHT+1)); echo "  caught $name"; else bad "mutant $name SỐNG"; fi
-  fi
+  [ "$caught" -eq 1 ] && { CAUGHT=$((CAUGHT+1)); echo "  caught $name"; } || bad "mutant $name SỐNG"
 }
 mut M1-n-cmp-flipped       gate 's/if nd < min_d/if nd > min_d/'
 mut M2-cov-cmp-flipped     gate 's/if cov < min_c/if cov > min_c/'
@@ -128,6 +218,15 @@ mut M12-univ-cond-removed  gate 's/if nu < min_u: bad/if False: bad/'
 mut M13-state-before-notify gate 's/then$/then :/;s/^  if "\$NOTIFY"/  if true || "$NOTIFY"/'
 mut W1-gate-bypassed       wrap 's/\|\| exit 3$/|| true/'
 mut W2-gate-removed        wrap 's/^"\$\{FA8L_GATE_CMD:-.*$/true/'
+mut B1-rc-cond-dropped     bq   's/\[ "\$_rc" -eq 0 \] && //'
+mut B2-header-check-dropped bq  's/ && \[ "\$\(printf .%s\\n. "\$_out" \| head -n1\)" = "n_distinct[^]]*\]//'
+mut B3-stderr-merged       bq   's/2>"\$_errf"\)"/2>\&1)"/'
+mut B4-timeout-removed     bq   's/timeout "\$\{GATE_BQ_TIMEOUT:-180\}" //'
+mut N1-empty-verdict-unchecked nb2 's/^if \[ -z "\$VERDICT" \]; then/if false; then/'
+mut F1-fa-gate-bypassed    fa   's/\|\| exit 3$/|| true/'
+mut F2-fa-gate-removed     fa   's/^"\$\{FA8L_GATE_CMD:-.*$/true/'
+mut R2a-rc3-cmp-changed    win  's/-eq 3 \]/-eq 4 ]/'
+mut R2b-rc3-skip-removed   win  's/^  exit 3$/  :/'
 echo "mutants caught: $CAUGHT/$TOTAL"
 [ "$CAUGHT" -eq "$TOTAL" ] || FAIL=$((FAIL+1))
 echo "assertions ok=$PASS fail=$FAIL"
