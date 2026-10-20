@@ -19,3 +19,4 @@
 - nav-loss-brake 11-09; review BĐS 11-26; measurement audit ~12-27; LAG checkpoint 12-15.
 - TODO nhỏ: data_registry corporate_action_bq.md qua .proposed; ZaloPay DNSE 401 chưa giao Winston; worktree wt-Taylor_20261018_173105, wt-1521183164364754974, wt-Taylor_20261019_052148 dọn sau.
 
+- [2026-10-20T03:14:53Z] 20/10 10:15 ICT: user bảo 'làm EOD + escalation'. EOD 16/10: nguyên nhân = ATC price=None crash (vá 87441a7bc); đang dựng lại báo cáo (staging /tmp/eod1016, SpaceX_new.md xong, ZaloPay chờ block.py) rồi ghi đè reports/*_daily_report_2026-10-16.md + report_delivery_gate (gửi lại). Escalation: chọn A+C — dispatch Taylor_20261020_031433 (A, nhánh feat/gate-block-owned-recovery-20261020, opus), Taylor_20261020_031436 (C vòng sửa a-e), Winston_20261020_031438 (DMX). Sau đó: arch-review A, quant-skeptic vòng 2 C, đóng 2 câu bus (decided_by user).

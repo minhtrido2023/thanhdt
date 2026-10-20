@@ -1298,3 +1298,6 @@
 
 ## Archived 2026-10-19 (keep=12 days=0 require_done=False)
 - [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-17T02:18:27Z] [weekly 10-12→10-16] 2 file md + 6 chart XONG, delivery gate BLOCK G4 (cột VN-Index có cổ tức). CHỜ Mike/bq_admin gỡ G4 rồi chạy lại report_delivery_gate cho 2 file (sha trong bus finding weekly-...BLOCKED-G4).
