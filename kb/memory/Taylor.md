@@ -39,3 +39,5 @@
 - [2026-10-20T06:29:59Z] [gate-block followups 10-20] XONG chờ Mike arch-review+user duyệt merge: nhánh feat/gate-block-followups-20261020 @9534292e0 (wt-Taylor-gb-followups).
 - [2026-10-20T08:13:38Z] [rating-8l forward tracker fix 10-20] XONG chờ Mike merge+cài cron: nhánh feat/rating-8l-forward-tracker-20261020 @d3a3e04ac (wt-Taylor_20261020_055002).
 - [2026-10-20T08:17:53Z] [gate-block tests 10-20] XONG chờ Mike merge: feat/gate-block-tests-20261020 @b3ac05a69 (wt-Taylor-gb-tests).
+- [2026-10-20T08:23:26Z] ĐANG DỞ job Taylor_20261020_082308 (survivorship sensitivity, EXPLORATORY, out agents/Taylor/research/survivorship_sensitivity_20261020/) | NEXT: đọc report Winston + PREREG
+- [2026-10-20T08:30:47Z] [fa-ratings ticker-gate 10-20] XONG chờ Mike arch-review+merge+gỡ #PAUSED cron: feat/fa-ratings-ticker-gate-20261020 @057d22a25 (wt-Taylor_20261020_082306). LƯU Ý: wt/mike là SYMLINK về repo live — sửa file ở wt/bin, không qua wt/mike.
