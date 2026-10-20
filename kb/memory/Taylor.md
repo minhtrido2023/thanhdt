@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-18T17:45:16Z] [sunday-plan-round 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @d570de2c9 (wt-Taylor_20261018_173105). Thêm 1 dòng: cổng macro_health CN.
-- [2026-10-18T18:53:56Z] [sunday-plan-round vòng 2 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @bc6f53eab (wt-Taylor_20261018_173105). (Thay dòng XONG @d570de2c9.)
 - [2026-10-19T02:41:32Z] [sunday-plan-round vòng 3 10-19] XONG chờ Mike merge+cài cron: nhánh feat/sunday-plan-round-20261019 @6501e3011. (Thay dòng @bc6f53eab.)
 - [2026-10-19T05:21:56Z] ĐANG DỞ job Taylor_20261019_052148 (AIS chain-order rule oshares_live, wt ../wt-Taylor_20261019_052148 nhánh feat/ais-chain-order-20261019, KHÔNG merge) | NEXT: đọc oshares_live + selfcheck + registry
 - [2026-10-19T05:40:07Z] [ais-chain-order 10-19] XONG chờ Mike arch-review+quant-skeptic+merge: nhánh feat/ais-chain-order-20261019 @c22ce4c60 (wt /home/trido/thanhdt/wt-Taylor_20261019_052148), finding ais-chain-order-20261019. (Thay dòng ĐANG DỞ job 052148.)
@@ -26,3 +24,5 @@
 - [2026-10-20T03:21:01Z] [vnindex-tr carry-forward vòng 2 10-20] XONG chờ Mike quant-skeptic vòng 2: nhánh research/vnindex-tr-carry-forward-20261019 (wt-Taylor_20261018_172548). Mở: báo cáo ZaloPay tuần 12-16/10 dòng 90+93 nếu gửi bằng v1; DMX/AAN/LPS thiếu giá chờ bq_admin.
 - [2026-10-20T03:22:02Z] ĐANG DỞ job Taylor_20261020_032153 (rating 8L lag phần 1+3, read-only, out agents/Taylor/research/rating_8l_lag_20261020/) | NEXT: data_registry + rating_8l_history.py
 - [2026-10-20T03:26:19Z] [gate-block-owned-recovery 10-20] XONG chờ Mike arch-review+merge+cài cron sweep: nhánh feat/gate-block-owned-recovery-20261020 @28f128801 (wt /home/trido/thanhdt/wt-Taylor_20261020_031433), finding gate-block-owned-recovery-20261020. (Thay dòng ĐANG DỞ job 031433.)
+- [2026-10-20T03:39:50Z] ĐANG DỞ job Taylor_20261020_033928 (vòng 2 gate-block-owned-recovery, B1-B4+N1-N5,N8; wt-Taylor_20261020_031433) | NEXT: đọc review + code
+- [2026-10-20T03:44:21Z] [rating-8l-lag p1+p3 10-20] XONG job Taylor_20261020_032153, REPORT research/rating_8l_lag_20261020/. Mở: 7 ca RD chép quý trước + 125 ca Q1 RD đầu 4 — đề xuất vá eff_date chờ Mike/user; Phần 2 chờ snapshot hằng ngày. (Thay dòng ĐANG DỞ job 032153.)
