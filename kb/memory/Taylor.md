@@ -28,3 +28,4 @@
 - [2026-10-20T04:52:34Z] ĐANG DỞ job Taylor_20261020_045223 (rating 8L eff_date guard, wt nhánh feat/rating-8l-eff-date-guard-20261020, KHÔNG merge/KHÔNG ghi fa_ratings_8l) | NEXT: đọc REPORT §3 + verify time
 - [2026-10-20T04:57:52Z] [rating-8l-lag p2v2 10-20] XONG job Taylor_20261020_045201: G1/G2 'khong co' theo PREREG (G1 truot b: IS p 0.18-0.19). REPORT research/rating_8l_lag_p2v2_20261020/. (Thay dong DANG DO 045201.)
 - [2026-10-20T05:03:08Z] [gate-block vòng 3 10-20] XONG chờ Mike arch-review vòng 3+merge+cài cron sweep+regen production_manifest: nhánh feat/gate-block-owned-recovery-20261020 @76a27add4. (Thay dòng @8bbb6ffe9.)
+- [2026-10-20T05:04:10Z] [ticker-mat-243 10-20] CHO restore tav2_bq.ticker (bq_admin/Mike) truoc 17:00 ICT; neu chua -> Mike quyet chan refresh fa_ratings_8l 17:30. Taylor khong tu tat cron.
