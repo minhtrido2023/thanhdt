@@ -35,15 +35,15 @@ Cột "mất khỏi data" = không có dòng nào trong `ticker_financial`. `n_u
 | 2025 | 14 | 26 | 0 | 0 | 1 | 41 | 21 | 11 | 471 |
 | 2026* | 7 | 34 | 1 | 0 | 0 | 42 | 19 | 8 | 451 |
 
-\*đến 2026-10-12. Theo sàn (tổng rời sàn, bảng đầy đủ `.d/by_year_exchange.csv`): HNX 175, HOSE 104, UPCOM 170 mã (+ ~26 không xác định sàn, chủ yếu 2009-2014).
-Số "bắt buộc" HOSE+HNX mỗi năm 2015-2025: 5→24 mã; đỉnh 2019 (31 mã) và 2023-24 (26/24 mã) — chiến dịch siết CBTT/kiểm toán.
+\*đến 2026-10-12. Theo sàn (tổng rời sàn, bảng đầy đủ `.d/by_year_exchange.csv`): HNX 155, HOSE 93, UPCOM 172 mã (sàn lấy từ tiêu đề/mô tả; mã 2009-2013 thiếu sàn được gán theo ngữ cảnh nếu có).
+Số "bắt buộc" HOSE+HNX mỗi năm 2015-2025: 10-26 mã (2015:15, 2016:12, 2017:10, 2018:13, 2019:21, 2020:14, 2021:16, 2022:15, 2023:26, 2024:24, 2025:14).
 **Sáp nhập/hợp nhất:** 17 dòng `MA` (16 mã, 2010-04→2026-03) + 12 mã phân loại sáp nhập từ lý do; con số này gần như chắc chắn **thiếu** — sáp nhập thường được nhập vào ISS/AIS, không phải SUSP/MA. **Chuyển sàn:** 432 sự kiện `MOVE` / 395 mã (không biến mất, đã tách riêng).
 **Đình chỉ kéo dài:** nguồn chỉ có "tạm dừng niêm yết" 2009-2013 dạng tiêu đề chung; không có cờ "đình chỉ giao dịch" cho mã đang sống ngoài `SUSP`. Chưa đếm được riêng — xem mục thiếu.
 
 ### Độ phủ & tin cậy của từng nguồn
 | Nguồn | Phủ | Tin cậy | Ghi chú |
 |---|---|---|---|
-| `tav2_bq.corporate_action` SUSP | 2009→2026-10, 581 mã | **Cao 2019+, trung bình 2014-18, thấp 2009-13** | 2009-13 chỉ 63 sự kiện, nhiều dòng tiêu đề chung "Tạm dừng Niêm yết", 26 mã không rõ sàn. Bảng nạp 1 lần 2026-08-12 (TRAP trong registry); đây là snapshot, chưa kiểm refresh. Thông báo tạm ngừng có thể trùng thông báo hủy. |
+| `tav2_bq.corporate_action` SUSP | 2009→2026-10, 581 mã | **Cao 2019+, trung bình 2014-18, thấp 2009-13** | 2009-13 chỉ 60 sự kiện / 55 mã, nhiều dòng tiêu đề chung "Tạm dừng Niêm yết", một số mã không rõ sàn. Bảng nạp 1 lần 2026-08-12 (TRAP trong registry); đây là snapshot, chưa kiểm refresh. Thông báo tạm ngừng có thể trùng thông báo hủy. |
 | Phân loại tự động (regex trên lý do) | cả 581 | Trung bình | Dựng bằng từ khoá; 44 mã "không rõ"; "mất tư cách CTĐC" gộp cả bị cưỡng chế và chủ động. Không kiểm tay từng ca. |
 | `ticker_financial` / `fa_ratings_8l` / `ticker_pin` | 1291-1294 mã | Chính xác cho việc đo "còn trong data" | Chỉ chứa mã còn sống sau 2025-05. |
 | Không dùng: danh sách HOSE/HNX/VSDC/Vietstock/CafeF | — | — | **Chưa tra** (phiên headless, không xác minh được nguồn ngoài). Muốn đối chiếu độc lập phải làm thêm. |
@@ -69,12 +69,12 @@ Mẫu: 127 mã **bắt buộc hủy niêm yết HOSE/HNX, thông báo đầu ti�
 | Giá: median thay đổi 12 tháng trước thông báo (nhóm 10 mã) | −38% (mean −46%); tất cả 10 mã đều giảm ≥ −9% trừ IDC (+5%) |
 
 10 mã: PHH 2015, ATA 2017, PIV 2018, ALV 2019, IDC 2019 (rating 2, 203 ngày!), LMH 2020, PXS 2022, PHP 2022 (rating 2-3, 250 ngày), BII 2023, DNM 2023. **IDC** (HNX, vi phạm CBTT, rating 2 cả 4 quý) và **PHP** (ngoại trừ kiểm toán, rating 2-3) cho thấy 8L **không** chặn mọi ca — rating dựa trên số BCTC đã công bố, trong khi lý do hủy là vi phạm CBTT hoặc ý kiến kiểm toán.
-**Giới hạn của kết luận:** (i) mẫu này là các mã **còn data** — thiên về mã nhẹ hơn mã nổ; (ii) 78 mã bắt buộc HOSE/HNX **không có data** (FLC, ROS, HAI, AMD, GAB, ART, TGG, TTB, IBC, SJF, KLF, DAG…) — lý do trong `corporate_action` đa số "vi phạm nghiêm trọng nghĩa vụ CBTT"/kiểm toán từ chối: BCTC trễ hoặc không có thì 8L không có số mới → nhiều khả năng rating cũ/NaN, **nhưng không đo được** vì không có BCTC trong data; (iii) tôi chưa tra BCTC công khai của các ca nổi tiếng (không xác minh được nguồn trong phiên này) — đừng trích tên ca nổi tiếng như bằng chứng; (iv) rating tại mốc thông báo, chưa mô phỏng danh mục thật.
+**Giới hạn của kết luận:** (i) mẫu này là các mã **còn data** — thiên về mã nhẹ hơn mã nổ; (ii) 64 mã bắt buộc HOSE/HNX (2013+) **không có data** (FLC, ROS, HAI, AMD, GAB, ART, TGG, TTB, IBC, SJF, KLF, DAG…) — lý do trong `corporate_action` đa số "vi phạm nghiêm trọng nghĩa vụ CBTT"/kiểm toán từ chối: BCTC trễ hoặc không có thì 8L không có số mới → nhiều khả năng rating cũ/NaN, **nhưng không đo được** vì không có BCTC trong data; (iii) tôi chưa tra BCTC công khai của các ca nổi tiếng (không xác minh được nguồn trong phiên này) — đừng trích tên ca nổi tiếng như bằng chứng; (iv) rating tại mốc thông báo, chưa mô phỏng danh mục thật.
 
 ## 4. Thiên lệch survivorship — thô, định tính
-- **UPCOM mất tư cách CTĐC (164 mã, 62% số vụ 2021-26):** thanh khoản thấp, 0/32 mẫu 2025-26 từng ở `universe_pit` ⇒ **bỏ qua**.
-- **Nhóm quan trọng: 78 mã bắt buộc HOSE/HNX mất khỏi data (2013-2025).** Nếu hành xử như mẫu 127 mã (38% từng ở universe, 7,9% vừa ở universe vừa ≤3) ⇒ ~30 mã từng ở universe, **~6 mã** từng nằm vùng mua trong 2015-2025 (≈0,5 mã/năm trên n_univ_pit 300-600 ⇒ **~0,1-0,2% số mã/năm**). Nếu rỗng BCTC làm rating xấu hơn mẫu ⇒ thấp hơn; nếu mã lớn như FLC/ROS từng thanh khoản cao 2021 ⇒ cao hơn.
-- **Độ lớn:** mỗi mã nổ ~−60% trong danh mục 30 mã đồng trọng ≈ −2% NAV một lần. 6 mã/11 năm ⇒ ~−0,1-0,2 pp CAGR/năm; kể cả gấp 3 (mã lớn, mất 100%, trọng số cao) vẫn ≲ −0,5 pp. **Chiều: số backtest hiện tại CAO hơn thực tế (lạc quan).** Sharpe lệch cùng chiều nhẹ (đuôi trái thiếu).
+- **UPCOM mất tư cách CTĐC (164 mã, 158 mã từ 2021, 151 là UPCOM):** thanh khoản thấp, 0/32 mẫu 2025-26 từng ở `universe_pit` ⇒ **bỏ qua**.
+- **Nhóm quan trọng: 64 mã bắt buộc HOSE/HNX mất khỏi data (2013-2025).** Nếu hành xử như mẫu 127 mã (38% từng ở universe, 7,9% vừa ở universe vừa ≤3) ⇒ ~24 mã từng ở universe, **~5 mã** từng nằm vùng mua trong 2015-2025 (≈0,45 mã/năm trên n_univ_pit 300-600 ⇒ **~0,1-0,2% số mã/năm**). Nếu rỗng BCTC làm rating xấu hơn mẫu ⇒ thấp hơn; nếu mã lớn như FLC/ROS từng thanh khoản cao 2021 ⇒ cao hơn.
+- **Độ lớn:** mỗi mã nổ ~−60% trong danh mục 30 mã đồng trọng ≈ −2% NAV một lần. 5 mã/11 năm ⇒ ~−0,1-0,2 pp CAGR/năm; kể cả gấp 3 (mã lớn, mất 100%, trọng số cao) vẫn ≲ −0,5 pp. **Chiều: số backtest hiện tại CAO hơn thực tế (lạc quan).** Sharpe lệch cùng chiều nhẹ (đuôi trái thiếu).
 - Không đặt con số này vào số pin R3/V2.4 — nó nhỏ hơn dải 23,37-25,71% và hệ số "CAGR thật ≈ backtest −1,5%" đã bao trùm bậc độ lớn đó, nhưng **chưa được tách riêng** trong hệ số đó.
 - Hiệu ứng khác không đo: hai lớp lệch cùng chiều — (1) mã có data đến UPCOM vẫn "được cứu" bằng giá UPCOM sau khi hủy (px_ann_to_p60 median −9% trong nhóm universe, nhưng thanh khoản UPCOM khó thoát thật); (2) backtest thoát vị thế ở giá đóng cửa, thực tế không bán được khi bị ngừng giao dịch.
 
@@ -82,8 +82,8 @@ Mẫu: 127 mã **bắt buộc hủy niêm yết HOSE/HNX, thông báo đầu ti�
 | Phương án | Công sức | Rủi ro / giới hạn |
 |---|---|---|
 | **A. Dựng bảng `delisted_events` từ `corporate_action` SUSP (đã có 581 mã, ngày, lý do)** + mô phỏng "sự kiện loại" ở backtest: giả định −X% trong N phiên trước ngày hủy cho mã từng ở universe | ~0,5-1 ngày, đa số dùng lại CSV này | Cần giá cuối; nếu không có phải giả định (−40% median là từ mẫu 10 mã, rất nhỏ) |
-| **B. Lấy giá lịch sử đến ngày giao dịch cuối cho ~78 mã mất data** (nguồn công khai: HOSE/HNX hoặc nhà cung cấp dữ liệu có hồ sơ delisted) rồi nạp vào bảng riêng `tav2_mike.*` (không ghi canonical) | 2-4 ngày + chi phí/giấy phép | Giá điều chỉnh sự kiện công ty; BCTC vẫn thiếu ⇒ rating 8L không dựng được ⇒ chỉ dùng cho test độ nhạy |
-| **C. Stress test độ nhạy:** chèn 0,5 mã/năm × (−60..−100%) vào backtest R3/V2.4 để thấy ΔCAGR | ~0,5 ngày (Taylor) | Là giả định, không phải dữ liệu thật |
+| **B. Lấy giá lịch sử đến ngày giao dịch cuối cho ~64 mã mất data** (nguồn công khai: HOSE/HNX hoặc nhà cung cấp dữ liệu có hồ sơ delisted) rồi nạp vào bảng riêng `tav2_mike.*` (không ghi canonical) | 2-4 ngày + chi phí/giấy phép | Giá điều chỉnh sự kiện công ty; BCTC vẫn thiếu ⇒ rating 8L không dựng được ⇒ chỉ dùng cho test độ nhạy |
+| **C. Stress test độ nhạy:** chèn 0,45 mã/năm × (−60..−100%) vào backtest R3/V2.4 để thấy ΔCAGR | ~0,5 ngày (Taylor) | Là giả định, không phải dữ liệu thật |
 | **D. Để sau:** thêm cột `delist_flag` vào universe PIT để chặn mã có thông báo hủy trong T-90 (đã live-usable; thông báo CBTT/kiểm toán xuất hiện trước ngày hủy 30-60 ngày) | 0,5 ngày + Taylor duyệt | Đây là thay đổi luật LIVE ⇒ cần user duyệt; không liên quan survivorship của quá khứ |
 Khuyến nghị: **C trước** (rẻ nhất, cho biên độ thật), A nếu muốn lưu danh mục sự kiện lâu dài; B chỉ khi C cho ra ΔCAGR >0,3 pp.
 
