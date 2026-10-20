@@ -723,3 +723,26 @@
 - [2026-10-20T06:28:27Z] Taylor/heartbeat — Taylor_20261020_054618: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261020_054618", "source": "watcher"}
 - [2026-10-20T06:29:27Z] Taylor/heartbeat — Taylor_20261020_054618: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261020_054618", "source": "watcher"}
 - [2026-10-20T06:29:59Z] Taylor/finding — gate-block-followups-20261020: {"status": "DONE — chờ Mike arch-review + user duyệt merge; KHÔNG merge, KHÔNG sửa crontab", "branch": "feat/gate-block-followups-20261020", "commit": "9534292e0", "worktree": "/home/trido/thanhdt/wt-Taylor-gb-followups", "done": ["NB-A", "NB-B", "NB-C", "NB-D", "NB-I"], "selfcheck": "gate_block_question_selfcheck.py 3 TZ (env -u TZ, Pacific/Kiritimati, America/Los_Angeles) PASS 0 fail; --mutation 85/85 killed, sống: []", "regression": "check_report_cadence 58/58, state_gate 16/16, aei_notes 11/11, park_jit 44/44, ops_health_check OK (WC_ROOT set; env -u TZ + Kiritimati)", "e2e": "/tmp/arv3/e2e_fallback.py: câu fallback r2 pending, CHECK5 routed=0, sweep 08:15 nhắc 1/30", "measured_by": "python3 bin/gate_block_question_selfcheck.py --mutation; /tmp/gbf_mut2.log"}
+
+## Consolidation 2026-10-20T08:07:02Z
+- [2026-10-20T07:59:59Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "in_progress", "note": "worktree wt-Taylor-gb-tests tạo xong, đọc selfcheck"}
+- [2026-10-20T08:00:18Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:01:18Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:02:18Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:03:18Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:04:18Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:05:19Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:06:19Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261020_075917", "source": "watcher"}
+- [2026-10-20T08:06:42Z] Taylor/heartbeat — Taylor_20261020_075917: {"status": "in_progress", "note": "test mới đã thêm, đang chạy selfcheck 3TZ + mutation nền (/tmp/gbt_mut.log); kế: docstring"}
+- [2026-10-20T07:59:42Z] Winston/heartbeat — Winston_20261020_075929: {"status": "in_progress", "note": "bắt đầu: tra registry + corporate_action"}
+- [2026-10-20T08:00:30Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261020_075929", "source": "watcher"}
+- [2026-10-20T08:00:34Z] Winston/heartbeat — Winston_20261020_075929: {"status": "in_progress", "note": "corporate_action có 691 SUSP/17 MA từ 2009 (có lý do); đang phân loại + đối chiếu ticker/ticker_financial/pin"}
+- [2026-10-20T08:01:30Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261020_075929", "source": "watcher"}
+- [2026-10-20T08:02:04Z] Winston/heartbeat — Winston_20261020_075929: {"status": "in_progress", "note": "phân loại xong 691 SUSP; đối chiếu với data + 8L các mã kết thúc sớm"}
+- [2026-10-20T08:02:31Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20261020_075929", "source": "watcher"}
+- [2026-10-20T08:03:32Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20261020_075929", "source": "watcher"}
+- [2026-10-20T08:03:55Z] Winston/heartbeat — Winston_20261020_075929: {"status": "in_progress", "note": "phát hiện: nhiều mã bị hủy niêm yết HOSE/HNX bắt buộc vẫn có data (chuyển UPCOM) => kiểm chứng 8L trên 145 mã đó; FLC/ROS/HAI/AMD/TGG... KHÔNG có data"}
+- [2026-10-20T08:04:32Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20261020_075929", "source": "watcher"}
+- [2026-10-20T08:05:27Z] Winston/heartbeat — Winston_20261020_075929: {"status": "in_progress", "note": "kiểm tra file local cũ (pkl/csv) tìm mã ma; sau đó viết báo cáo"}
+- [2026-10-20T08:05:32Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 6, "job_id": "Winston_20261020_075929", "source": "watcher"}
+- [2026-10-20T08:06:32Z] Winston/heartbeat — Winston_20261020_075929: {"status": "still_running", "elapsed_min": 7, "job_id": "Winston_20261020_075929", "source": "watcher"}
