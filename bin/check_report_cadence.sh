@@ -194,6 +194,25 @@ except BaseException:
     raise
 "
       fi
+      # GATE_BLOCK_DELIVERY_BEGIN — question CÓ CHỦ + HẠN + LỆNH RECOVER cho file kẹt, sweep nhắc
+      # tới khi `report_delivery_gate.py --status` (sổ hash-bound của chính cổng) báo COMPLETE
+      # (retro 10-16→10-19 Pattern 1, phương án A 2026-10-20). Ngoài khối de-dup trên vì helper
+      # tự idempotent theo TÊN FILE (một câu cho cả vòng đời file kẹt, kể cả qua nhiều ngày).
+      # Chủ suy từ TAG THẬT cổng vừa in (§29), không đoán: VENDOR_* ⇒ Winston; còn lại ⇒ Taylor.
+      if printf '%s\n' "$GATE_OUT" | grep -qE '^VENDOR_(MISMATCH_ALERT|LOOKUP_FAILED)\|'; then
+        _GB_OWNER="Winston (data-ops: nguồn cổ tức vendor)"
+      else
+        _GB_OWNER="Taylor (soạn/sửa báo cáo theo dòng CHẶN của cổng)"
+      fi
+      timeout 60 python3 "$ROOT/bin/gate_block_question.py" open --gate delivery \
+        --key "$FNAME" --owner "$_GB_OWNER" \
+        --deadline "$(TZ='Asia/Ho_Chi_Minh' date -d 'tomorrow' +%Y-%m-%d)T08:30" \
+        --recover "python3 $ROOT/bin/report_delivery_gate.py $f --topic $TRADING_REPORT_THREAD" \
+        --probe "python3 $ROOT/bin/report_delivery_gate.py $f --status" \
+        --reason "report_delivery_gate rc=$GATE_RC: $(printf '%s\n' "$GATE_OUT" | grep -v '^[[:space:]]*$' | tail -n 1 | cut -c1-200)" \
+        --thread "$TRADING_REPORT_THREAD" --remind-every-min 240 \
+        --extra "{\"artifact\":\"${FNAME}\"}" || true
+      # GATE_BLOCK_DELIVERY_END
     fi
   fi
 done

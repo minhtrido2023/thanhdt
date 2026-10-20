@@ -120,6 +120,28 @@ else
     "run_bot.sh --account $ACCOUNT (plan $PLAN_DATE) thoát rc=$rc sau $((elapsed/60)) phút. Log: $LOG. Tail: $tail_preview — Việc cần làm: (1) xác định root cause thật trong log; (2) kiểm tra bot đã tự hồi phục chưa (heartbeat autoheal, log $ROOT/logs/run_bot_${ACCOUNT}_autoheal_*.log + journal exec_${ACCOUNT}_${PLAN_DATE}_journal.csv trong data/execution_logs/); (3) nếu còn lệnh kẹt/bot chết trong giờ giao dịch → ưu tiên khôi phục an toàn trong ranh giới cho phép, còn lại escalate." 2>/dev/null || true
 fi
 
+# Cổng approval chặn (bot_execute.py exit 2) ⇒ mở 1 bus question CÓ CHỦ + HẠN + LỆNH RECOVER,
+# sweep cron nhắc tới khi probe artifact chứng minh đã duyệt VÀ bot đã chạy lại (retro 10-16→10-19
+# Pattern 1, phương án A user chốt 2026-10-20). Điều kiện mở đọc lại ARTIFACT bằng đúng hàm cổng
+# dùng (probe rc=10), không suy từ rc=2. Chạy SAU khi rc đã chốt, bọc timeout + `|| true`: không đổi
+# rc, không đổi quyết định chặn. Idempotent theo (account, plan_date) ⇒ lượt 13:00 không mở trùng.
+# GATE_BLOCK_APPROVAL_BEGIN — trích bởi gate_block_question_selfcheck.py
+if [ "$rc" -eq 2 ]; then
+  _gbq="$ROOT/bin/gate_block_question.py"
+  _probe="python3 $_gbq probe approval --account $ACCOUNT --date $PLAN_DATE"
+  _prc=0
+  ( cd "$WC_ROOT" && timeout 60 $_probe >/dev/null 2>&1 ) || _prc=$?
+  if [ "$_prc" -eq 10 ]; then
+    timeout 60 python3 "$_gbq" open --gate approval --key "${PLAN_DATE}-${ACCOUNT}" \
+      --owner "user duyệt plan; Mike chạy lại bot" --deadline "${PLAN_DATE}T10:00" \
+      --recover "$ROOT/bin/approve_plan_simple.sh $ACCOUNT $PLAN_DATE \"user - <kênh duyệt>\" && $ROOT/bin/run_bot.sh --account $ACCOUNT --auto-otp" \
+      --probe "$_probe" --reason "APPROVAL_GATE_BLOCK: plan $PLAN_DATE [$ACCOUNT] requires_user_approval=true, approved_by trống — bot không đặt lệnh nào" \
+      --thread "$_tid" --remind-every-min 15 \
+      --extra "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"log\":\"$LOG\"}" || true
+  fi
+fi
+# GATE_BLOCK_APPROVAL_END
+
 "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
 
 # EXTREME-regime gate alert: quét journal sau phiên, gửi email nếu gate đã fire
