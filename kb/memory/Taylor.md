@@ -34,3 +34,4 @@
 - [2026-10-20T05:50:11Z] ĐANG DỞ job Taylor_20261020_054959 (rating 8L PIT 2010-2014 feasibility, read-only, out agents/Taylor/research/rating_8l_pit_2010_20261020/) | NEXT: đọc rating_8l_history.py + data_registry
 - [2026-10-20T05:50:31Z] ĐANG DỞ job Taylor_20261020_055002 (8L forward tracker B1 + costed BT B2, out agents/Taylor/research/rating_8l_forward_bt_20261020/, wt nhánh feat/rating-8l-forward-tracker-20261020, KHÔNG merge) | NEXT: đọc p2v2 REPORT + verify log
 - [2026-10-20T05:56:54Z] [rating-8l-pit-2010 10-20] XONG job Taylor_20261020_054959: DUNG DUOC CO DIEU KIEN (survivorship 100%, RD 2012-13 = qend+32 batch). Cho user quyet co dung tiep + PREREG moi. (Thay dong DANG DO Taylor_20261020_054959.)
+- [2026-10-20T06:03:56Z] ĐANG DỞ job Taylor_20261020_055002: B1 XONG (wt-Taylor_20261020_055002 @68b34b377, finding đã ghi) | NEXT: B2 kéo px pin -> control C0/C1 -> BT sleeve
