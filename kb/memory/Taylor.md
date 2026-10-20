@@ -41,3 +41,4 @@
 - [2026-10-20T08:17:53Z] [gate-block tests 10-20] XONG chờ Mike merge: feat/gate-block-tests-20261020 @b3ac05a69 (wt-Taylor-gb-tests).
 - [2026-10-20T08:23:26Z] ĐANG DỞ job Taylor_20261020_082308 (survivorship sensitivity, EXPLORATORY, out agents/Taylor/research/survivorship_sensitivity_20261020/) | NEXT: đọc report Winston + PREREG
 - [2026-10-20T08:30:47Z] [fa-ratings ticker-gate 10-20] XONG chờ Mike arch-review+merge+gỡ #PAUSED cron: feat/fa-ratings-ticker-gate-20261020 @057d22a25 (wt-Taylor_20261020_082306). LƯU Ý: wt/mike là SYMLINK về repo live — sửa file ở wt/bin, không qua wt/mike.
+- [2026-10-20T08:38:37Z] [survivorship-sensitivity 10-20] XONG job Taylor_20261020_082308: nhãn 'vượt sàn ở kịch bản X' (λ*≈0,16-0,55 mã/năm nắm trọn 12th); neo post-hoc λ_eff≈0,01. Mở: đề xuất đo giá ~10 mã lớn đã mất (FLC/ROS…) chờ Mike/user. (Thay dòng ĐANG DỞ 082308.)
