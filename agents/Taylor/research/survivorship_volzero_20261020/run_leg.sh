@@ -2,7 +2,8 @@
 # job Taylor_20261020_122917 — ban sao run_leg.sh (survivorship_replay_20261020), CHI doi OUT; SRC = eng/ (ban sao engine).
 # Usage: run_leg.sh <TAG> KEY=VAL...   (leg env + ZVF_MODE/V3 knobs)
 O=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/survivorship_volzero_20261020
-SRC=$O/eng; CACHE=data/bq_cache_asof20260729_postrestate; TAG="$1"; shift 1
+for _a in "$@"; do case "$_a" in ENGDIR=*) ENGDIR="${_a#ENGDIR=}";; esac; done
+SRC=$O/${ENGDIR:-eng}; CACHE=data/bq_cache_asof20260729_postrestate; TAG="$1"; shift 1
 WC=/home/trido/thanhdt/WorkingClaude
 OUT=$O/logs
 cd "$WC" || exit 9

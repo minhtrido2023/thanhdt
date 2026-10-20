@@ -1,0 +1,540 @@
+{
+ "p30_pin0": {
+  "BAL_buy": {
+   "n": 1054,
+   "n_zero": 0,
+   "n_missing": 0,
+   "amt_bn": 2520.137,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "BAL_sell": {
+   "n": 409,
+   "n_zero": 1,
+   "n_missing": 0,
+   "amt_bn": 2697.005,
+   "amt_zero_bn": 16.572,
+   "amt_share_zero": 0.0061,
+   "zero_carry_n": 1,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 1.0,
+   "top3": [
+    {
+     "ticker": "HPX",
+     "ymd": "2023-10-10",
+     "amt_bn": 16.57,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "TIME": {
+     "n": 1,
+     "amt_bn": 16.57
+    }
+   }
+  },
+  "ETF_PARK_buy": {
+   "n": 488,
+   "n_zero": 0,
+   "n_missing": 488,
+   "amt_bn": 2647.228,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "ETF_PARK_sell": {
+   "n": 1087,
+   "n_zero": 0,
+   "n_missing": 1087,
+   "amt_bn": 2510.797,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "LAG_buy": {
+   "n": 4267,
+   "n_zero": 500,
+   "n_missing": 0,
+   "amt_bn": 8459.044,
+   "amt_zero_bn": 2618.694,
+   "amt_share_zero": 0.3096,
+   "zero_carry_n": 496,
+   "zero_flat_only_n": 4,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.989,
+   "top3": [
+    {
+     "ticker": "L10",
+     "ymd": "2026-01-28",
+     "amt_bn": 50.75,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "NAP",
+     "ymd": "2026-04-28",
+     "amt_bn": 47.54,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "DAN",
+     "ymd": "2026-01-28",
+     "amt_bn": 46.16,
+     "reason": "ENTRY_FILL"
+    }
+   ]
+  },
+  "LAG_sell": {
+   "n": 1503,
+   "n_zero": 263,
+   "n_missing": 0,
+   "amt_bn": 8918.639,
+   "amt_zero_bn": 2424.669,
+   "amt_share_zero": 0.2719,
+   "zero_carry_n": 260,
+   "zero_flat_only_n": 3,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9906,
+   "top3": [
+    {
+     "ticker": "ATS",
+     "ymd": "2026-03-11",
+     "amt_bn": 52.02,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "L10",
+     "ymd": "2026-03-12",
+     "amt_bn": 50.75,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "L10",
+     "ymd": "2024-08-30",
+     "amt_bn": 48.69,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "ABANDONED_REFUND": {
+     "n": 76,
+     "amt_bn": 4.03
+    },
+    "TIME": {
+     "n": 187,
+     "amt_bn": 2420.64
+    }
+   }
+  }
+ },
+ "p30_pin1M": {
+  "BAL_buy": {
+   "n": 1150,
+   "n_zero": 0,
+   "n_missing": 0,
+   "amt_bn": 3155.249,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "BAL_sell": {
+   "n": 444,
+   "n_zero": 1,
+   "n_missing": 0,
+   "amt_bn": 3395.317,
+   "amt_zero_bn": 18.208,
+   "amt_share_zero": 0.0054,
+   "zero_carry_n": 1,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 1.0,
+   "top3": [
+    {
+     "ticker": "HPX",
+     "ymd": "2023-10-10",
+     "amt_bn": 18.21,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "TIME": {
+     "n": 1,
+     "amt_bn": 18.21
+    }
+   }
+  },
+  "ETF_PARK_buy": {
+   "n": 504,
+   "n_zero": 0,
+   "n_missing": 504,
+   "amt_bn": 3087.815,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "ETF_PARK_sell": {
+   "n": 1109,
+   "n_zero": 0,
+   "n_missing": 1109,
+   "amt_bn": 2915.165,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "LAG_buy": {
+   "n": 4479,
+   "n_zero": 505,
+   "n_missing": 0,
+   "amt_bn": 9763.449,
+   "amt_zero_bn": 3046.786,
+   "amt_share_zero": 0.3121,
+   "zero_carry_n": 501,
+   "zero_flat_only_n": 4,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9894,
+   "top3": [
+    {
+     "ticker": "L10",
+     "ymd": "2026-01-28",
+     "amt_bn": 59.64,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "NAP",
+     "ymd": "2026-04-28",
+     "amt_bn": 56.03,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "DAN",
+     "ymd": "2026-01-28",
+     "amt_bn": 54.24,
+     "reason": "ENTRY_FILL"
+    }
+   ]
+  },
+  "LAG_sell": {
+   "n": 1545,
+   "n_zero": 265,
+   "n_missing": 0,
+   "amt_bn": 10276.097,
+   "amt_zero_bn": 2817.353,
+   "amt_share_zero": 0.2742,
+   "zero_carry_n": 262,
+   "zero_flat_only_n": 3,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9918,
+   "top3": [
+    {
+     "ticker": "ATS",
+     "ymd": "2026-03-11",
+     "amt_bn": 61.14,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "L10",
+     "ymd": "2026-03-12",
+     "amt_bn": 59.64,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "LAW",
+     "ymd": "2025-08-26",
+     "amt_bn": 57.37,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "ABANDONED_REFUND": {
+     "n": 76,
+     "amt_bn": 4.03
+    },
+    "TIME": {
+     "n": 189,
+     "amt_bn": 2813.32
+    }
+   }
+  }
+ },
+ "p0_pin0": {
+  "BAL_buy": {
+   "n": 1008,
+   "n_zero": 0,
+   "n_missing": 0,
+   "amt_bn": 2181.805,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "BAL_sell": {
+   "n": 395,
+   "n_zero": 2,
+   "n_missing": 0,
+   "amt_bn": 2337.738,
+   "amt_zero_bn": 16.142,
+   "amt_share_zero": 0.0069,
+   "zero_carry_n": 2,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 1.0,
+   "top3": [
+    {
+     "ticker": "HPX",
+     "ymd": "2023-10-10",
+     "amt_bn": 13.64,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "KKC",
+     "ymd": "2021-09-10",
+     "amt_bn": 2.5,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "TIME": {
+     "n": 2,
+     "amt_bn": 16.14
+    }
+   }
+  },
+  "LAG_buy": {
+   "n": 4310,
+   "n_zero": 498,
+   "n_missing": 0,
+   "amt_bn": 8814.92,
+   "amt_zero_bn": 2733.194,
+   "amt_share_zero": 0.3101,
+   "zero_carry_n": 494,
+   "zero_flat_only_n": 4,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9891,
+   "top3": [
+    {
+     "ticker": "L10",
+     "ymd": "2026-01-28",
+     "amt_bn": 49.48,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "NAP",
+     "ymd": "2026-04-28",
+     "amt_bn": 46.02,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "DAN",
+     "ymd": "2026-01-28",
+     "amt_bn": 45.01,
+     "reason": "ENTRY_FILL"
+    }
+   ]
+  },
+  "LAG_sell": {
+   "n": 1516,
+   "n_zero": 262,
+   "n_missing": 0,
+   "amt_bn": 9292.379,
+   "amt_zero_bn": 2522.903,
+   "amt_share_zero": 0.2715,
+   "zero_carry_n": 259,
+   "zero_flat_only_n": 3,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9911,
+   "top3": [
+    {
+     "ticker": "L10",
+     "ymd": "2024-08-30",
+     "amt_bn": 50.93,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "ATS",
+     "ymd": "2026-03-11",
+     "amt_bn": 50.59,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "L10",
+     "ymd": "2026-03-12",
+     "amt_bn": 49.48,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "ABANDONED_REFUND": {
+     "n": 76,
+     "amt_bn": 4.21
+    },
+    "TIME": {
+     "n": 186,
+     "amt_bn": 2518.69
+    }
+   }
+  }
+ },
+ "p0_pin1M": {
+  "BAL_buy": {
+   "n": 1118,
+   "n_zero": 0,
+   "n_missing": 0,
+   "amt_bn": 3018.605,
+   "amt_zero_bn": 0.0,
+   "amt_share_zero": 0.0,
+   "zero_carry_n": 0,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": null,
+   "top3": []
+  },
+  "BAL_sell": {
+   "n": 417,
+   "n_zero": 1,
+   "n_missing": 0,
+   "amt_bn": 3252.563,
+   "amt_zero_bn": 18.208,
+   "amt_share_zero": 0.0056,
+   "zero_carry_n": 1,
+   "zero_flat_only_n": 0,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 1.0,
+   "top3": [
+    {
+     "ticker": "HPX",
+     "ymd": "2023-10-10",
+     "amt_bn": 18.21,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "TIME": {
+     "n": 1,
+     "amt_bn": 18.21
+    }
+   }
+  },
+  "LAG_buy": {
+   "n": 4500,
+   "n_zero": 502,
+   "n_missing": 0,
+   "amt_bn": 10612.444,
+   "amt_zero_bn": 3322.2,
+   "amt_share_zero": 0.313,
+   "zero_carry_n": 498,
+   "zero_flat_only_n": 4,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9893,
+   "top3": [
+    {
+     "ticker": "L10",
+     "ymd": "2026-01-28",
+     "amt_bn": 62.13,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "NAP",
+     "ymd": "2026-04-28",
+     "amt_bn": 57.98,
+     "reason": "ENTRY_FILL"
+    },
+    {
+     "ticker": "DAN",
+     "ymd": "2026-01-28",
+     "amt_bn": 56.5,
+     "reason": "ENTRY_FILL"
+    }
+   ]
+  },
+  "LAG_sell": {
+   "n": 1553,
+   "n_zero": 264,
+   "n_missing": 0,
+   "amt_bn": 11176.621,
+   "amt_zero_bn": 3085.254,
+   "amt_share_zero": 0.276,
+   "zero_carry_n": 261,
+   "zero_flat_only_n": 3,
+   "zero_eqprev_only_n": 0,
+   "zero_neither_n": 0,
+   "zero_carry_amt_share": 0.9922,
+   "top3": [
+    {
+     "ticker": "L10",
+     "ymd": "2024-08-30",
+     "amt_bn": 63.71,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "ATS",
+     "ymd": "2026-03-11",
+     "amt_bn": 63.51,
+     "reason": "TIME"
+    },
+    {
+     "ticker": "L10",
+     "ymd": "2026-03-12",
+     "amt_bn": 62.13,
+     "reason": "TIME"
+    }
+   ],
+   "zero_by_reason": {
+    "ABANDONED_REFUND": {
+     "n": 75,
+     "amt_bn": 4.23
+    },
+    "TIME": {
+     "n": 189,
+     "amt_bn": 3081.03
+    }
+   }
+  }
+ }
+}

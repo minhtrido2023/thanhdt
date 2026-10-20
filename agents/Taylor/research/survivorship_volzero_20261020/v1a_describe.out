@@ -1,0 +1,52 @@
+== p30_pin0
+  BAL_buy        n= 1054 zero=   0 miss=  0 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  BAL_sell       n=  409 zero=   1 miss=  0 share_zero=0.0061 carry=1 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=1.0
+      top3=[{'ticker': 'HPX', 'ymd': '2023-10-10', 'amt_bn': 16.57, 'reason': 'TIME'}]
+      by_reason={'TIME': {'n': 1, 'amt_bn': np.float64(16.57)}}
+  ETF_PARK_buy   n=  488 zero=   0 miss=488 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  ETF_PARK_sell  n= 1087 zero=   0 miss=1087 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  LAG_buy        n= 4267 zero= 500 miss=  0 share_zero=0.3096 carry=496 flat_only=4 eqprev_only=0 neither=0 carry_amt_share=0.989
+      top3=[{'ticker': 'L10', 'ymd': '2026-01-28', 'amt_bn': 50.75, 'reason': 'ENTRY_FILL'}, {'ticker': 'NAP', 'ymd': '2026-04-28', 'amt_bn': 47.54, 'reason': 'ENTRY_FILL'}, {'ticker': 'DAN', 'ymd': '2026-01-28', 'amt_bn': 46.16, 'reason': 'ENTRY_FILL'}]
+  LAG_sell       n= 1503 zero= 263 miss=  0 share_zero=0.2719 carry=260 flat_only=3 eqprev_only=0 neither=0 carry_amt_share=0.9906
+      top3=[{'ticker': 'ATS', 'ymd': '2026-03-11', 'amt_bn': 52.02, 'reason': 'TIME'}, {'ticker': 'L10', 'ymd': '2026-03-12', 'amt_bn': 50.75, 'reason': 'TIME'}, {'ticker': 'L10', 'ymd': '2024-08-30', 'amt_bn': 48.69, 'reason': 'TIME'}]
+      by_reason={'ABANDONED_REFUND': {'n': 76, 'amt_bn': np.float64(4.03)}, 'TIME': {'n': 187, 'amt_bn': np.float64(2420.64)}}
+== p30_pin1M
+  BAL_buy        n= 1150 zero=   0 miss=  0 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  BAL_sell       n=  444 zero=   1 miss=  0 share_zero=0.0054 carry=1 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=1.0
+      top3=[{'ticker': 'HPX', 'ymd': '2023-10-10', 'amt_bn': 18.21, 'reason': 'TIME'}]
+      by_reason={'TIME': {'n': 1, 'amt_bn': np.float64(18.21)}}
+  ETF_PARK_buy   n=  504 zero=   0 miss=504 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  ETF_PARK_sell  n= 1109 zero=   0 miss=1109 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  LAG_buy        n= 4479 zero= 505 miss=  0 share_zero=0.3121 carry=501 flat_only=4 eqprev_only=0 neither=0 carry_amt_share=0.9894
+      top3=[{'ticker': 'L10', 'ymd': '2026-01-28', 'amt_bn': 59.64, 'reason': 'ENTRY_FILL'}, {'ticker': 'NAP', 'ymd': '2026-04-28', 'amt_bn': 56.03, 'reason': 'ENTRY_FILL'}, {'ticker': 'DAN', 'ymd': '2026-01-28', 'amt_bn': 54.24, 'reason': 'ENTRY_FILL'}]
+  LAG_sell       n= 1545 zero= 265 miss=  0 share_zero=0.2742 carry=262 flat_only=3 eqprev_only=0 neither=0 carry_amt_share=0.9918
+      top3=[{'ticker': 'ATS', 'ymd': '2026-03-11', 'amt_bn': 61.14, 'reason': 'TIME'}, {'ticker': 'L10', 'ymd': '2026-03-12', 'amt_bn': 59.64, 'reason': 'TIME'}, {'ticker': 'LAW', 'ymd': '2025-08-26', 'amt_bn': 57.37, 'reason': 'TIME'}]
+      by_reason={'ABANDONED_REFUND': {'n': 76, 'amt_bn': np.float64(4.03)}, 'TIME': {'n': 189, 'amt_bn': np.float64(2813.32)}}
+== p0_pin0
+  BAL_buy        n= 1008 zero=   0 miss=  0 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  BAL_sell       n=  395 zero=   2 miss=  0 share_zero=0.0069 carry=2 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=1.0
+      top3=[{'ticker': 'HPX', 'ymd': '2023-10-10', 'amt_bn': 13.64, 'reason': 'TIME'}, {'ticker': 'KKC', 'ymd': '2021-09-10', 'amt_bn': 2.5, 'reason': 'TIME'}]
+      by_reason={'TIME': {'n': 2, 'amt_bn': np.float64(16.14)}}
+  LAG_buy        n= 4310 zero= 498 miss=  0 share_zero=0.3101 carry=494 flat_only=4 eqprev_only=0 neither=0 carry_amt_share=0.9891
+      top3=[{'ticker': 'L10', 'ymd': '2026-01-28', 'amt_bn': 49.48, 'reason': 'ENTRY_FILL'}, {'ticker': 'NAP', 'ymd': '2026-04-28', 'amt_bn': 46.02, 'reason': 'ENTRY_FILL'}, {'ticker': 'DAN', 'ymd': '2026-01-28', 'amt_bn': 45.01, 'reason': 'ENTRY_FILL'}]
+  LAG_sell       n= 1516 zero= 262 miss=  0 share_zero=0.2715 carry=259 flat_only=3 eqprev_only=0 neither=0 carry_amt_share=0.9911
+      top3=[{'ticker': 'L10', 'ymd': '2024-08-30', 'amt_bn': 50.93, 'reason': 'TIME'}, {'ticker': 'ATS', 'ymd': '2026-03-11', 'amt_bn': 50.59, 'reason': 'TIME'}, {'ticker': 'L10', 'ymd': '2026-03-12', 'amt_bn': 49.48, 'reason': 'TIME'}]
+      by_reason={'ABANDONED_REFUND': {'n': 76, 'amt_bn': np.float64(4.21)}, 'TIME': {'n': 186, 'amt_bn': np.float64(2518.69)}}
+== p0_pin1M
+  BAL_buy        n= 1118 zero=   0 miss=  0 share_zero=0.0 carry=0 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=None
+      top3=[]
+  BAL_sell       n=  417 zero=   1 miss=  0 share_zero=0.0056 carry=1 flat_only=0 eqprev_only=0 neither=0 carry_amt_share=1.0
+      top3=[{'ticker': 'HPX', 'ymd': '2023-10-10', 'amt_bn': 18.21, 'reason': 'TIME'}]
+      by_reason={'TIME': {'n': 1, 'amt_bn': np.float64(18.21)}}
+  LAG_buy        n= 4500 zero= 502 miss=  0 share_zero=0.313 carry=498 flat_only=4 eqprev_only=0 neither=0 carry_amt_share=0.9893
+      top3=[{'ticker': 'L10', 'ymd': '2026-01-28', 'amt_bn': 62.13, 'reason': 'ENTRY_FILL'}, {'ticker': 'NAP', 'ymd': '2026-04-28', 'amt_bn': 57.98, 'reason': 'ENTRY_FILL'}, {'ticker': 'DAN', 'ymd': '2026-01-28', 'amt_bn': 56.5, 'reason': 'ENTRY_FILL'}]
+  LAG_sell       n= 1553 zero= 264 miss=  0 share_zero=0.276 carry=261 flat_only=3 eqprev_only=0 neither=0 carry_amt_share=0.9922
+      top3=[{'ticker': 'L10', 'ymd': '2024-08-30', 'amt_bn': 63.71, 'reason': 'TIME'}, {'ticker': 'ATS', 'ymd': '2026-03-11', 'amt_bn': 63.51, 'reason': 'TIME'}, {'ticker': 'L10', 'ymd': '2026-03-12', 'amt_bn': 62.13, 'reason': 'TIME'}]
+      by_reason={'ABANDONED_REFUND': {'n': 75, 'amt_bn': np.float64(4.23)}, 'TIME': {'n': 189, 'amt_bn': np.float64(3081.03)}}
