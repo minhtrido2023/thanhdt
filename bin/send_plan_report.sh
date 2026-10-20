@@ -1141,17 +1141,28 @@ if [ "$STATUS" = "ESCALATE" ]; then
     # không mở câu thứ hai. Helper hỏng (không in OPENED/ALREADY_) ⇒ rơi về đúng lệnh post cũ —
     # thà trùng còn hơn mất câu hỏi của account tiền thật.
     _GB_KEY="${EXPECTED_DATE:-$TODAY}-${ACCOUNT}"
-    _GB_OUT="$(timeout 60 python3 "$ROOT/bin/gate_block_question.py" open --gate plan-t1-not-ready \
-      --key "$_GB_KEY" --topic "plan-t1-not-ready-${_GB_KEY}" \
-      --owner "Mike (dispatch DollarBill dựng lại plan)" --deadline "${EXPECTED_DATE:-$TODAY}T08:30" \
-      --recover "DISPATCH_FROM=Mike $ROOT/bin/dispatch.sh DollarBill \"dựng lại plan T+1 ${EXPECTED_DATE} ${ACCOUNT}: $REASON\" && $ROOT/bin/send_plan_report.sh --account $ACCOUNT --second-chance" \
-      --probe "python3 $ROOT/bin/gate_block_question.py probe plan-t1 --account $ACCOUNT --date ${EXPECTED_DATE:-$TODAY} --marker-dir $MARKER_DIR --plan-dir $WORKDIR/data/trade_plans" \
-      --expires-at "${EXPECTED_DATE:-$TODAY}T23:59" --max-reminders 30 \
-      --reason "Plan T+1 chưa sẵn sàng ($REASON)" --thread "$DISCORD_PLAN_CHANNEL" \
-      --remind-every-min 60 --extra "$_QPAYLOAD" 2>&1)"
+    _gb_open() {   # $1=key  $2=topic
+      timeout 60 python3 "$ROOT/bin/gate_block_question.py" open --gate plan-t1-not-ready \
+        --key "$1" --topic "$2" \
+        --owner "Mike (dispatch DollarBill dựng lại plan)" --deadline "${EXPECTED_DATE:-$TODAY}T08:30" \
+        --recover "DISPATCH_FROM=Mike $ROOT/bin/dispatch.sh DollarBill \"dựng lại plan T+1 ${EXPECTED_DATE} ${ACCOUNT}: $REASON\" && $ROOT/bin/send_plan_report.sh --account $ACCOUNT --second-chance" \
+        --probe "python3 $ROOT/bin/gate_block_question.py probe plan-t1 --account $ACCOUNT --date ${EXPECTED_DATE:-$TODAY} --marker-dir $MARKER_DIR --plan-dir $WORKDIR/data/trade_plans" \
+        --expires-at "${EXPECTED_DATE:-$TODAY}T23:59" --max-reminders 30 \
+        --reason "Plan T+1 chưa sẵn sàng ($REASON)" --thread "$DISCORD_PLAN_CHANNEL" \
+        --remind-every-min 60 --extra "$_QPAYLOAD" 2>&1
+    }
+    _GB_OUT="$(_gb_open "$_GB_KEY" "plan-t1-not-ready-${_GB_KEY}")"
     echo "$_GB_OUT"
-    # Chỉ bỏ qua khi helper XÁC NHẬN có câu hỏi đang sống. ALREADY_CLOSED/ALREADY_EXPIRED nghĩa là
-    # câu cũ đã tắt mà plan lại hỏng (23:00 sau khi 21:45 đóng) ⇒ vẫn phải có câu hỏi mới (B4).
+    # ALREADY_CLOSED/ALREADY_EXPIRED: câu cũ đã tắt mà plan lại hỏng (23:00 sau khi 21:45 đóng) ⇒ mở
+    # câu MỚI qua helper với key `-r2` (chủ + nhắc + ack riêng; sweep theo dõi). Topic `-r2` đặt
+    # TIỀN TỐ (`plan-t1-not-ready-r2-<ngày>-<ACC>`) để KHÔNG chứa topic cũ làm chuỗi con — ack cũ
+    # không tắt lây câu mới khỏi CHECK5 (NB-A arch-review vòng 3).
+    if printf '%s\n' "$_GB_OUT" | grep -qE '^gate_block_question: ALREADY_(CLOSED|EXPIRED)([[:space:]]|$)'; then
+      _GB_OUT="$(_gb_open "${_GB_KEY}-r2" "plan-t1-not-ready-r2-${_GB_KEY}")"
+      echo "$_GB_OUT"
+    fi
+    # Chỉ bỏ qua khi helper XÁC NHẬN có câu hỏi đang sống. Còn lại (helper hỏng, r2 cũng đã tắt) ⇒
+    # post trần như cũ — thà trùng còn hơn mất câu hỏi của account tiền thật.
     if ! printf '%s\n' "$_GB_OUT" | grep -qE '^gate_block_question: (OPENED|ALREADY_OPEN|ALREADY_POSTING)([[:space:]]|$)'; then
       "$ROOT/bin/append_event.sh" Mike question "plan-t1-not-ready-${_GB_KEY}" "$_QPAYLOAD" \
         2>/dev/null || true

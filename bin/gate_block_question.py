@@ -253,6 +253,18 @@ def cmd_open(a) -> int:
         if rec.get("status") != "posting":
             if rec.get("status") == "open":
                 finish_posting(path, rec)   # chỉ bù ack nếu lần trước hụt
+                # NB-D: người đóng câu hỏi NGOÀI lượt sweep ⇒ sổ vẫn 'open' dù bus đã tắt; báo
+                # ALREADY_OPEN lúc này làm caller bỏ qua và mất câu hỏi cho tới sweep kế. Chốt đóng
+                # ngay để caller (fallback ALREADY_CLOSED) mở câu mới.
+                if still_pending(rec["agent"], rec["topic"]) is False:
+                    rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),
+                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện ở lượt open)")
+                    save(path, rec)
+            elif rec.get("status") in DONE:
+                # NB-B: còn lượt open gần đây ⇒ sweep KHÔNG được xoá bản ghi (xoá ⇒ lượt open kế
+                # mở lại câu hỏi y hệt, nhắc lại từ đầu).
+                rec["last_open_call_at"] = now.isoformat(timespec="seconds")
+                save(path, rec)
             print(f"gate_block_question: ALREADY_{str(rec.get('status')).upper()} {rec['id']}")
             return 0
     if not finish_posting(path, rec):
@@ -354,7 +366,8 @@ def sweep_one(path: Path, dry: bool) -> None:
     st = rec.get("status")
     now = now_ict()
     if st in DONE:
-        done_at = rec.get("closed_at") or rec.get("expired_at")
+        done_at = max(filter(None, (rec.get("closed_at") or rec.get("expired_at"), rec.get("last_open_call_at"))),
+                      key=dt.datetime.fromisoformat, default=None)
         if not dry and done_at and now - dt.datetime.fromisoformat(done_at) > dt.timedelta(days=RETAIN_DAYS):
             path.unlink()
             print(f"gate_block_question: PRUNED {rec['id']} ({st} > {RETAIN_DAYS} ngày)")
