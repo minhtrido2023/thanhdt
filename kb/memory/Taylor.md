@@ -54,3 +54,4 @@
 - [2026-10-20T16:26:21Z] ĐANG DỞ job Taylor_20261020_162558 (V1D/V1E/V3A'/V4 survivorship-volzero, thư mục research/survivorship_volzero_20261020) | NEXT: đọc REPORT_V1/V3 + eng diff, viết PREREG_V1D_V1E/V3Ap/V4
 - [2026-10-20T16:29:32Z] ĐANG DỞ job Taylor_20261020_162558: batch nohup run_batch_162558.sh (24 run, 2 song song, log logs/run_batch_162558.log); prereg 4482feb6a, engine dbe28b85f | NEXT: V4 script, rồi v_metrics V1D V1D0 V1E20 V1E60 V3Ap + md5 ctlG, REPORT_V1D_V1E.md
 - [2026-10-20T17:08:54Z] ĐANG DỞ job Taylor_20261020_162558: V4 finding đã post (33323d6dc); V1D/V1D0 đo xong (v_metrics). Batch còn V1E20/V1E60/V3Ap/ctlG | NEXT: v_metrics + v1de_describe, md5 ctlG vs pin, REPORT_V1D_V1E.md, 3 finding + tổng
+- [2026-10-20T18:01:49Z] [survivorship-volzero V1D/V1E/V3A'/V4 10-21] XONG job Taylor_20261020_162558 (REPORT_V1D_V1E.md, e8a0550b1) — chờ Mike/skeptic verify; mở: trần tham gia theo phiên nhân quả chưa đo
