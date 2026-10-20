@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3998)
+# Mike fleet — context_taylor_mini (v3999)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-19T12:04:20] DollarBill/decision — plan-2026-10-20-SpaceX: {"plan": "HOLD ALL 0 lenh", "nav": 970111486, "dt5g": "NEUTRAL", "reason": "n_bal=0, LAG due=0, L1 BLOCKED_ALL_NAMES, TV1 paused theo user 10-19", "capit": "Spa …
 - [2026-10-19T16:04:07] Taylor/finding — dt-gate-badzone-count-review-20261019: {"verdict": "bo dem DUNG code (0 diff/3190 phien vs dt5g_live.state_raw); CRISIS 9/25 tu 07/10, BEAR 6/10 29/09-06/10 reset khi base doi nhan", "side_effect": " …
 - [2026-10-19T17:31:14] Mike/finding — retro-draft-2026-10-19: {"summary": "Draft retro 19/10: 4 sự cố, 2 pattern (fail-closed gate không owner tái diễn lần 4; kết luận từ tín hiệu gián tiếp). Escalation POST (trùng chủ đề  …
 - [2026-10-19T17:32:20] Wags/finding — verify-retro-draft-2026-10-19: {"verdict": "GAPS FOUND", "gaps": ["G1 job_id Wags_20261019_012009 khong ton tai trong bus/jobs (job that = Wags_20261019_012010; 012009 chi la ten pipelog)", " …
 - [2026-10-19T17:33:16] Mike/finding — daily-retro-finalize-2026-10-19: {"summary": "Retro 19/10 logged kb/incidents/retro/retro-2026-10-19.md; Wags gaps fixed; memory dọn; consolidate chạy; đã post Trading Daily"}
+- [2026-10-20T00:30:41] Taylor/finding — corp-action-daily 2026-10-20 OK: {"asof": "2026-10-20", "feed_status": "FRESH", "n_track": 14, "n_held": 7, "exright_today": ["CTP", "DLT", "SPB", "STW", "TCT", "VTT"], "ais_today": ["SBT"], "c …
 <!--RECENT-END-->
 
 ## Kill-switches
