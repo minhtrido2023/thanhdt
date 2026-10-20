@@ -269,3 +269,6 @@
 
 ## Archived 2026-10-19 (keep=6 days=5 require_done=True)
 - [2026-10-12T12:03:35Z] [2026-10-12 19:xx ICT] Plan SpaceX 2026-10-13 XONG (job DollarBill_20261012_120252): HOLD ALL 0 lenh, NAV 986,25tr, DT5G NEUTRAL, L1 BLOCKED, CAPIT 57 phien. Cho user duyet truoc 08:45 ICT 13/10.
+
+## Archived 2026-10-20 (keep=6 days=5 require_done=True)
+- [2026-10-12T12:03:48Z] [2026-10-12 19:xx ICT] Plan ZaloPay 10-13 XONG HOLD ALL 0 lenh (job DollarBill_20261012_120250); CAPIT 57/60; cho user duyet truoc 08:45 ICT 13/10.
