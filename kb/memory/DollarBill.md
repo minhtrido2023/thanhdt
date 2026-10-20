@@ -9,3 +9,4 @@
 - [2026-10-15T14:19:40Z] [2026-10-15 21:3x ICT] Plan SpaceX 10-16 XONG (job DollarBill_20261015_141835): 1 lenh SELL MSB 100cp (L1 trim), NAV 969,20tr, DT5G NEUTRAL, CAPIT ~59 phien giu nguyen. Cho user duyet truoc 08:45 ICT 16/10.
 - [2026-10-16T12:04:44Z] [2026-10-16 19:xx ICT] Plan ZaloPay 10-19 XONG HOLD ALL 0 lenh (job DollarBill_20261016_120351); CAPIT du NCT73/SIP49 de xuat user; cho duyet truoc 08:45 ICT 19/10
 - [2026-10-19T12:04:08Z] [2026-10-19 19:xx ICT] Plan ZaloPay 10-20 XONG HOLD ALL 0 lenh (job DollarBill_20261019_120317); cho duyet truoc 08:45 ICT 20/10
+- [2026-10-20T12:04:23Z] [2026-10-20 19:xx ICT] Plan ZaloPay 10-21 XONG HOLD ALL 0 lenh (job DollarBill_20261020_120333); LAG HT1/SCL/VPB vao ~10-26 can cash (avail chi 10,23tr, egg 515tr); cho duyet truoc 08:45 ICT 21/10
