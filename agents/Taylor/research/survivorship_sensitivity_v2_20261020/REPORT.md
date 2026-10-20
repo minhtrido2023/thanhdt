@@ -1,5 +1,7 @@
 # Survivorship stress test v2 — trọng số phantom theo book (job Taylor_20261020_091621, EXPLORATORY)
 
+> ⚠️ **SUPERSEDED một phần (2026-10-20, job Taylor_20261020_113646):** bảng λ*, trọng số và tỉ lệ so v1 của 2 chân park 0,3 sai do bug book_counts (đếm rổ custom30). Xem `REPORT_A.md`.
+
 Không ghi registry / pin_ledger, không kết luận lại số pin R3. PREREG `PREREG.md` md5 `f9092a9e…`, commit `2453de34c`
 (trước khi tính MC). Thư mục v1 `../survivorship_sensitivity_20261020/` giữ nguyên.
 
