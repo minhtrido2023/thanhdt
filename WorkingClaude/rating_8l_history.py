@@ -9,7 +9,8 @@ compounder monotonicity and FIXES the cyclical inversion the flat composite has.
 
 Point-in-time honesty:
   - Each rating is computed ONLY from that quarter's financial row (no future data).
-  - Effective date = Release_Date (when the financials became public) -> first tradable day >= that.
+  - Effective date = Release_Date (when the financials became public) -> first tradable day >= that;
+    untrusted Release_Date (copied from prior quarter or before quarter end) -> ticker_financial.time.
   - COMPOUNDER / CYCLICAL / REALESTATE / SECURITIES / INSURANCE: reconstructed EXACTLY (all inputs are in
     ticker_financial historically).
   - BANK: AQ-AWARE since 2026-09-27 (H1 wire, job Taylor_20260927_022319). rate_bank_hist() ports
@@ -78,12 +79,45 @@ import numpy as np, pandas as pd
 NULL_RD_EFF_OFFSET_DAYS = 0
 
 
-def eff_date_of(release_date, q_time):
-    """NGUON DUY NHAT cua eff_date: Release_Date, thieu thi q_time + NULL_RD_EFF_OFFSET_DAYS. Nhan Series HOAC
-    scalar (cung kieu dau vao => cung kieu dau ra). 3 noi dung: main(), attach_icb_pit(), bank_eff_date()."""
+def eff_date_of(release_date, q_time, rd_untrusted=None):
+    """NGUON DUY NHAT cua eff_date: Release_Date, thieu thi q_time + NULL_RD_EFF_OFFSET_DAYS; Release_Date KHONG
+    DANG TIN (rd_untrusted, xem release_date_untrusted) thi q_time DUNG BANG (khong cong offset — luat user duyet
+    2026-10-20 la "eff_date = time"). Nhan Series HOAC scalar (cung kieu dau vao => cung kieu dau ra).
+    3 noi dung: main(), attach_icb_pit(), bank_eff_date()."""
     rel = pd.to_datetime(release_date, errors="coerce")
-    fb = pd.to_datetime(q_time, errors="coerce") + pd.Timedelta(days=NULL_RD_EFF_OFFSET_DAYS)
-    return rel.fillna(fb) if hasattr(rel, "fillna") else (fb if pd.isna(rel) else rel)
+    qt = pd.to_datetime(q_time, errors="coerce")
+    fb = qt + pd.Timedelta(days=NULL_RD_EFF_OFFSET_DAYS)
+    if hasattr(rel, "fillna"):
+        out = rel.fillna(fb)
+        if rd_untrusted is not None:
+            bad = pd.Series(rd_untrusted, index=out.index).fillna(False).astype(bool)
+            out = out.mask(bad, qt)
+        return out
+    if rd_untrusted is not None and pd.notna(rd_untrusted) and bool(rd_untrusted) and pd.notna(rel):
+        return qt
+    return fb if pd.isna(rel) else rel
+
+
+# GUARD Release_Date (user duyet 2026-10-20, job Taylor_20261020_045223; bang chung:
+# mike/agents/Taylor/research/rating_8l_lag_20261020/REPORT.md §0.3, §3). Vendor co luc CHEP Release_Date cua quy
+# truoc sang quy moi (vd BGE 2026Q1: RD 2026-02-02 = RD 2025Q4, time 2026-05-04) => eff_date som ~91 ngay va ghi de
+# dung dong rating quy truoc trong fa_ratings_8l. Luat: RD <= RD cua quy LIEN TRUOC (cung ma) HOAC RD < ngay cuoi
+# quy => RD khong dang tin, eff_date = q_time (= ticker_financial.time). Co y KHONG ap cho cum RD 01-07/04 cua Q1
+# 2025/2026 (chi "kha nang cao", khong chung minh duoc). Quy truoc thieu / RD quy truoc NULL => chi xet ve cuoi quy.
+def release_date_untrusted(df):
+    """Bool Series (cung index df) — True khi Release_Date khong dang tin theo luat tren. Can cot ticker, quarter
+    ('YYYYQn'), Release_Date. RD NULL => False (da co fallback rieng trong eff_date_of)."""
+    rd = pd.to_datetime(df["Release_Date"], errors="coerce")
+    qs = df["quarter"].astype(str).str.extract(r"^(\d{4})Q([1-4])$")
+    yr = pd.to_numeric(qs[0], errors="coerce"); qn = pd.to_numeric(qs[1], errors="coerce")
+    qend = pd.to_datetime(dict(year=yr, month=qn * 3, day=1), errors="coerce") + pd.offsets.MonthEnd(0)
+    qidx = yr * 4 + qn
+    key = pd.DataFrame({"ticker": df["ticker"].values, "qidx": qidx.values, "rd": rd.values})
+    prev = key.dropna(subset=["qidx"]).drop_duplicates(["ticker", "qidx"]).assign(qidx=lambda k: k["qidx"] + 1)
+    prev_rd = key[["ticker", "qidx"]].merge(prev.rename(columns={"rd": "prev_rd"}), on=["ticker", "qidx"],
+                                            how="left")["prev_rd"]
+    prev_rd = pd.Series(pd.to_datetime(prev_rd.values), index=df.index)
+    return ((rd <= prev_rd) | (rd < qend)).fillna(False) & rd.notna()
 
 WORKDIR = os.environ.get("WORKDIR_8L", r"/home/trido/thanhdt/WorkingClaude")
 PROJECT = "lithe-record-440915-m9"
@@ -126,7 +160,7 @@ def bq(sql):
 
 # Pull FULL financial history. One row per (ticker, quarter). Includes _P4 leverage for the power proxy.
 HIST_SQL = """
-SELECT f.ticker, f.time AS q_time, f.Release_Date,
+SELECT f.ticker, f.quarter, f.time AS q_time, f.Release_Date,
   f.ROIC3Y, f.ROIC_Min3Y, f.ROE_Min3Y, f.ROIC_Trailing, f.ROIC5Y, f.ROIC_Min5Y, f.ROE_Min5Y, f.ROE3Y, f.ROE5Y,
   f.ROE_Trailing, f.Debt_Eq_P0, f.Debt_Eq_P4, f.STLTDebt_Eq_P0, f.STLTDebt_Eq_P4, f.FSCORE,
   f.CF_OA_P0, f.CF_OA_P1, f.CF_OA_P2, f.CF_OA_P3, f.CF_OA_5Y,
@@ -205,7 +239,7 @@ def attach_icb_pit(df, icb):
     left = df.copy()
     # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main) ⇒ dùng CHUNG eff_date_of() với main()
     # và bank_eff_date() — một nguồn duy nhất (§28), không dựng lại công thức ở từng nơi.
-    left["_eff"] = eff_date_of(left["Release_Date"], left["q_time"]).astype(_RES)
+    left["_eff"] = eff_date_of(left["Release_Date"], left["q_time"], left.get("rd_untrusted")).astype(_RES)
     left = left.sort_values("_eff")
     out = pd.merge_asof(left, icb.sort_values("icb_from"), left_on="_eff",
                         right_on="icb_from", by="ticker", direction="backward")
@@ -395,8 +429,9 @@ def bank_aq_asof(ticker, eff_date):
 
 
 def bank_eff_date(r):
-    """Same effective date main() stamps on the row (eff_date_of): Release_Date, else q_time + NULL_RD_EFF_OFFSET_DAYS."""
-    return eff_date_of(r.get("Release_Date"), r.get("q_time"))
+    """Same effective date main() stamps on the row (eff_date_of): Release_Date, else q_time + NULL_RD_EFF_OFFSET_DAYS;
+    Release_Date khong dang tin (rd_untrusted) => q_time."""
+    return eff_date_of(r.get("Release_Date"), r.get("q_time"), r.get("rd_untrusted"))
 
 
 def rate_bank_hist(r):
@@ -564,6 +599,9 @@ def refresh_bq_table(csv_path):
 def main():
     print("pulling financial history ...")
     df = bq(HIST_SQL)
+    # PHAI tinh TRUOC attach_icb_pit / rate_row: ca 3 cho dung eff_date_of doc cot nay.
+    df["rd_untrusted"] = release_date_untrusted(df)
+    print(f"  [rd-guard] {int(df['rd_untrusted'].sum())} dong Release_Date khong dang tin -> eff_date = q_time")
     icb = bq(ICB_SQL)
     df = attach_icb_pit(df, icb)
     print(f"  {len(df)} financial rows, {df['ticker'].nunique()} tickers")
@@ -603,8 +641,9 @@ def main():
     # levered -> rating 5) without touching core_score, so force rating-5 names to the bottom tier (E).
     df.loc[df["rating"]==5, "tier"] = "E"
 
-    # effective date = Release_Date (public) ; fall back to q_time + NULL_RD_EFF_OFFSET_DAYS if missing (eff_date_of)
-    df["eff_date"] = eff_date_of(df["Release_Date"], df["q_time"])
+    # effective date = Release_Date (public) ; fall back to q_time + NULL_RD_EFF_OFFSET_DAYS if missing, q_time if
+    # Release_Date untrusted (eff_date_of / release_date_untrusted)
+    df["eff_date"] = eff_date_of(df["Release_Date"], df["q_time"], df["rd_untrusted"])
     df = df.dropna(subset=["eff_date"])
 
     out = df[["ticker","eff_date","q_time","route","rating","core_score","tier"]].copy()
