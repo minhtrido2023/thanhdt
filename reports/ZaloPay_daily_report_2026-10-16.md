@@ -1,3 +1,59 @@
+📊 **EOD Trading Report — ZaloPay (2026-10-16)**
+
+─────────────────────────────────────────────────
+📋 **TÌNH TRẠNG DANH MỤC — ZaloPay (2026-10-16)**
+Chiến lược: **V2.4** | Regime: **NEUTRAL** (DT5G) | Park target: **0%** idle cash
+NAV: **920.3M** | Hôm nay: **+0.07%** | Từ khi bắt đầu hoạt động: **-6.84%**
+─────────────────────────────────────────────────
+
+**Cơ cấu danh mục**
+
+| Sleeve | Giá trị | % NAV | Lãi/Lỗ CK | Ghi chú |
+|--------|--------:|------:|----------:|---------|
+| PARK custom30V (4 mã) | 336.9M | 36.6% | -15.0% | Rebal gần nhất: 2026-08-05 | kế tiếp: ~2026-12-01 (ước tính Q4) |
+| CAPIT (2 mã) | 8.4M | 0.9% | -2.3% | Bear-washout overflow |
+| Discretionary (2 mã) | 55.6M | 6.0% | +10.9% | Fear-buy/special situation |
+| Trứng vàng | 319.4M | 34.7% | — | DNSE bond-like (off-book) |
+| Cash | 199.8M | 21.7% | 0% | Idle |
+
+ⓘ Tỉ suất từng mã tính trên giá đóng cửa của phiên, đã cộng cổ tức tiền mặt sau thuế; cột giá trị tính trên giá do công ty chứng khoán ghi cuối ngày. Hai giá có thể lệch nhau ở mã giao dịch trên UPCOM, nên giá trị và tỉ suất của cùng một mã không quy đổi trực tiếp sang nhau.
+
+**Chi tiết PARK custom30V (4 mã)**
+  DGC 328.0M, -15.44% · VPB 7.6M, +15.43% · MBB 1.0M, -3.22% · VIB 0.3M, +1.78%
+
+**Chi tiết CAPIT (2 mã)**
+  NCT 6.1M, -3.92% — ĐÃ QUA hạn cố định T+60 (62 phiên) — tới hạn thoát toàn bộ rổ · SIP 2.4M, +2.46% — ĐÃ QUA hạn cố định T+60 (62 phiên) — tới hạn thoát toàn bộ rổ
+
+**Chi tiết Discretionary (2 mã)**
+  DRI 29.8M, +25.54% — ⚠️ 45 phiên từ 2026-08-11 — chờ ý kiến PM về exit · TV1 25.8M, -1.99% — ⚠️ 43 phiên từ 2026-08-13 — chờ ý kiến PM về exit
+
+**Cờ theo dõi**
+- PARK: rổ hiện hành chốt 2026-08-05 (chu kỳ ~quý, kế tiếp ~2026-12-01 (ước tính)).
+- ⚠️ Discretionary: DRI (45p), TV1 (43p) — chờ ý kiến PM về exit
+- CAPIT: 2 mã đang trong episode overflow — ĐÃ QUA hạn cố định T+60 (62 phiên) — tới hạn thoát toàn bộ rổ.
+
+✅ Đối soát broker: fill thật khớp đúng state nội bộ, không lệch.
+
+✅ Leg 3 (statement DNSE, độc lập với state/dnse_raw): số khớp trùng khớp state nội bộ, không có fill ngoài kế hoạch.
+📉 **Broker xác nhận KHỚP THIẾU so với kế hoạch** — chưa đạt mục tiêu, KHÔNG được đọc là "đã bán đủ" (§27):
+  • NCT (bán): chỉ khớp 300/373 đặt (80%) — phần thiếu 73cp
+  • SIP (bán): chỉ khớp 700/749 đặt (93%) — phần thiếu 49cp
+💸 Phí/thuế THẬT theo statement: 189,417đ phí + 215,274đ thuế trên 195.3M giá trị khớp (= 0.0970% giá trị).
+
+Tổng lệnh: **7** (0 mua / 7 bán) | Khớp đủ: 5 | Khớp một phần: 2 | Chưa khớp: 0
+
+| Chiều | Lệnh | Khớp đủ | Khớp thiếu | Chưa khớp | Giá trị |
+|-------|:----:|:-------:|:----------:|:---------:|--------:|
+| Bán   | 7 | 5 | 2 | 0 | 195.3M |
+
+**Chi tiết đáng chú ý:**
+  • BÁN SIP: 700/749 (93%) @ 48,264đ → 33.8M
+  • BÁN NCT: 300/373 (80%) @ 83,100đ → 24.9M
+
+
+**Tổng giá trị giao dịch: 195.3M / kế hoạch 202.8M (96%)**
+
+
 
 
 💰 **NAV 2026-10-16: 920,292,705 VND** (+664,979 VND, +0.07% so với hôm trước)

@@ -1,0 +1,3 @@
+SELECT EXTRACT(YEAR FROM time) AS yr, COUNT(DISTINCT ticker) AS n_tk, COUNT(DISTINCT IF(ICB_Code IS NOT NULL, ticker, NULL)) AS n_tk_icb,
+  ROUND(COUNTIF(ICB_Code IS NULL)/COUNT(*),3) AS icb_null_rows
+FROM tav2_pin.ticker_pin_202610 WHERE time BETWEEN '2009-01-01' AND '2015-12-31' GROUP BY yr ORDER BY yr

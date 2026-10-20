@@ -1,0 +1,231 @@
+ticker,n,first,last,floor_last,cut,maxval,med60,maxmed60,exch2,cat,reason
+TBT,3123,2013-01-02,2025-07-10,UPCOM,2025-07-10,239590000.0,0.0,125000.0,UPCOM,khac_khong_ro,Bị thu hồi giấy chứng nhận đăng ký doanh nghiệp
+DLM,279,2023-01-06,2024-02-22,UPCOM,2024-02-22,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+LGM,1425,2019-12-18,2025-09-04,UPCOM,2025-09-04,32597000000.0,0.0,13980000.0,UPCOM,mat_tu_cach_DC,"Hủy tư cách là công ty đại chúng | (Cổ đông lớn nắm giữ 90,7% số cổ phiếu có quyền biểu quyết)"
+DNB,696,2019-06-25,2022-04-01,UPCOM,2022-04-01,276000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+CDH,2352,2016-06-23,2025-11-14,UPCOM,2025-11-14,1205185400.0,1690000.0,24802600.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+AGE,276,2022-08-15,2023-09-21,UPCOM,2023-09-21,33370000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đủ điều kiện là công ty đại chúng
+HCB,1376,2019-12-18,2025-06-25,UPCOM,2025-06-25,487500000.0,0.0,6925000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải có tối thiểu 10% số cổ phiếu có quyền biểu quyết được nắm giữ bởi ít nhất 100 cổ đông không phải là cổ đông lớn)
+HD3,80,2019-06-14,2019-10-04,UPCOM,,180000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Công ty không còn đáp ứng điều kiện là công ty đại chúng
+PTN,288,2022-10-14,2023-12-06,UPCOM,2023-12-06,114300000.0,0.0,4702250.0,UPCOM,mat_tu_cach_DC,Chưa đủ điều kiện là công ty đại chúng
+S27,2808,2013-01-02,2025-10-17,UPCOM,2013-05-17,228780000.0,0.0,230000.0,HNX,khac_khong_ro,
+FPC,0,,,,,,,,,bat_buoc,"Công ty có kết quả sản xuất kinh doanh bị lỗ trong ba năm liên tục căn cứ quy định tại Khoản 21 Điều 1 Nghị định 84/2010/NĐ-CP ngày 02/08/2010 sửa đổi, bổ sung một số điều của Nghị định 14/2007/NĐ-CP"
+PID,3419,2013-01-02,2026-10-20,UPCOM,2015-07-01,302600000.0,0.0,490000.0,HNX,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin | - Ngày hủy niêm yết: 01/07/2015 | Link tin
+VKP,3141,2013-11-15,2026-06-22,UPCOM,,702180000.0,0.0,62402000.0,,bat_buoc,"Công ty Cổ phần Nhựa Tân Hóa đã có lợi nhuận sau thuế là số âm trong 03 năm liên tiếp căn cứ theo báo cáo tài chính kiểm toán: năm 2009 là -50,26 tỷ đồng, năm 2010 là -35,73 tỷ đồng và năm 2011 là - 58,59 tỷ đồng, thuộc diện hủy niêm yết theo quy định tại khoản 21 điều 1 Nghị định 84/2010/NĐ-CP ngày 2/8/2010"
+DZM,3362,2013-01-02,2026-07-08,UPCOM,2024-01-30,7969286900.0,0.0,386103000.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin và cổ phiếu không có giao dịch tại HNX trong thời hạn 12 tháng
+KSA,1388,2013-01-02,2018-08-01,HOSE,2018-08-02,72228406000.0,0.0,17762037500.0,HOSE,bat_buoc,Do vi phạm nghiêm trọng nghĩa vũ công bố thông tin
+TS4,3267,2013-01-02,2026-02-25,UPCOM,2021-06-22,8553575000.0,0.0,1385045000.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+CAV,2391,2014-12-08,2024-07-17,HOSE,2024-07-17,63340981000.0,717345000.0,9741260000.0,HOSE,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+TTB,2913,2015-01-26,2026-10-20,UPCOM,,78625405000.0,0.0,24996035500.0,HNX,khac_khong_ro,Chuyển dăng ký niêm yết sang sở DGCK TP Hồ Chí MInh
+MTC,3112,2013-01-02,2025-06-25,UPCOM,2025-06-25,64680000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải có tối thiểu 10% số cổ phiếu có quyền biểu quyết được nắm giữ bởi ít nhất 100 cổ đông không phải là cổ đông lớn)
+TAP,1485,2016-09-07,2022-08-11,UPCOM,2022-08-11,58140000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HLE,1155,2017-11-14,2022-06-29,UPCOM,2022-06-29,393450000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HTK,889,2018-09-12,2022-04-01,UPCOM,2022-04-01,695000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+LYF,397,2021-05-19,2022-12-13,UPCOM,2022-12-13,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+TB8,2328,2016-12-30,2026-05-04,UPCOM,2026-05-04,183000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ đồng)
+TGG,2091,2018-05-25,2026-10-20,UPCOM,2023-09-15,125475240000.0,0.0,18807792500.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+DMS,730,2023-06-15,2026-05-21,UPCOM,2026-05-21,3360010000.0,71700.0,13707750.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+MHP,264,2020-11-06,2021-11-25,UPCOM,2021-11-25,40822792000.0,0.0,12290000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CBC,356,2019-11-25,2021-04-28,UPCOM,2021-04-28,316501300.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+LWS,1357,2017-12-22,2023-06-01,UPCOM,2023-06-01,129840000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CTC,3004,2013-01-02,2025-01-13,HNX,2025-01-13,28440770500.0,0.0,3799969100.0,HNX,bat_buoc,Bị thu hồi giấy chứng nhuận đăng ký doanh nghiệp và cổ phiếu không có giao dịch tại Sở giao dịch chứng khoán trong thời hạn 12 tháng
+SVL,1157,2017-08-24,2022-04-08,UPCOM,2022-04-08,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+GTK,557,2020-01-08,2022-04-01,UPCOM,2022-04-01,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+DSV,1880,2016-12-02,2024-06-13,UPCOM,2024-06-13,166940000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+VDM,1021,2018-04-26,2022-05-26,UPCOM,2022-05-26,4250000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HLG,2617,2013-01-02,2023-07-12,UPCOM,,175104000000.0,0.0,285435500.0,HOSE,bat_buoc,Do vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+BHT,2570,2013-01-02,2023-04-27,UPCOM,,3229515000.0,0.0,24560000.0,HNX,bat_buoc,"Kết quả sản xuất kinh doanh bị thua lỗ trong 3 năm liên tiếp. (2015, 2016, 2017), đồng thời tổng số lỗ lũy kế của HBT cũng vượt quá số vốn điều lệ thực góp tại ngày 31/12/2017"
+TKC,3283,2013-01-02,2026-05-27,UPCOM,2023-12-21,3444392200.0,0.0,334336000.0,HNX,bat_buoc,"Vi phạm nghiêm trọng nghĩa vụ công bố thông tin, không hoàn thành nghĩa vụ tài chính với HNX"
+ART,2288,2017-08-02,2026-10-20,UPCOM,2023-08-10,219337717600.0,0.0,81899219000.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+RGC,1647,2017-06-19,2024-01-11,UPCOM,2024-01-11,7678720600.0,33145000.0,1578343000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+SPI,3430,2013-01-02,2026-10-20,UPCOM,2025-07-09,22387590000.0,0.0,6610665000.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+NTB,3174,2013-01-02,2026-03-24,UPCOM,2013-07-23,9339336400.0,0.0,1152110000.0,,bat_buoc,Tổ chức kiểm toán đã có ý kiến từ chối đối với Báo cáo tài chính năm 2012 của Công ty
+MC3,1271,2017-06-14,2022-07-11,UPCOM,2022-07-11,1341200000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+TAG,2466,2013-01-02,2023-02-02,UPCOM,,12024464100.0,0.0,299602500.0,HNX,khac_khong_ro,"Tìm kiếm đối tác chiến lược, tái cơ cấu lại công ty"
+HVG,3241,2013-01-02,2026-01-08,UPCOM,2020-05-14,134605596000.0,0.0,51642745000.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+LCW,1626,2016-11-30,2023-06-05,UPCOM,2023-06-05,30780000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DNR,1270,2016-06-24,2021-07-19,UPCOM,2021-07-19,263117400.0,10660000.0,10660000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+GE2,416,2021-05-07,2022-12-28,UPCOM,2022-12-28,860000000.0,6770000.0,11240000.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+EAD,1430,2016-09-30,2022-06-20,UPCOM,2022-06-20,1488450000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+ASA,3266,2013-01-02,2026-02-10,UPCOM,,65117720000.0,0.0,5676015000.0,HNX,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+EMC,2625,2013-01-02,2023-07-13,HOSE,2023-07-13,69470195000.0,11405000.0,245733500.0,HOSE,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DX2,938,2018-07-04,2022-04-01,UPCOM,,306000000.0,4775000.0,4775000.0,UPCOM,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin báo cáo tài chính kiểm toán năm 2018
+BCO,269,2023-12-04,2024-12-30,UPCOM,2024-12-30,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+SBC,525,2013-01-02,2015-02-11,HOSE,2015-02-12,12473296000.0,1797094000.0,1993412000.0,HOSE,tu_nguyen,Thực hiện Nghị quyết của ĐHĐCĐ thường niên năm 2014 số 01/2014/NQ-ĐHĐCĐ ngày 09/06/2014 của công ty thông qua phương án hủy niêm yết tự nguyện để thích ứng với thực tế hoạt động hiện tại và phù hợp với định hướng tái cấu trúc của công ty trong thời gian sắp tới
+SD1,3222,2013-01-02,2025-12-22,UPCOM,2015-05-15,1457225500.0,0.0,173050000.0,HNX,bat_buoc,Thua lỗ 3 năm liên tiếp và lỗ lũy kế vượt quá vốn điều lệ thực góp | Ngày hủy niêm yết: 15/5/2015
+TNM,3317,2013-01-02,2026-04-21,UPCOM,2026-04-21,646800000.0,0.0,3480000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty không đáp ứng điều kiện có tối thiểu 10% số cổ phiếu có quyền biểu quyết được nắm giữ bởi ít nhất 100 cổ đông không phải là cổ đông lớn)
+TA3,1641,2018-01-05,2024-08-01,UPCOM,2024-08-01,408471500.0,0.0,3460000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KHB,2403,2013-01-02,2022-08-30,UPCOM,,90086313900.0,0.0,13285634500.0,HNX,bat_buoc,Tổ chức kiểm toán từ chối đưa ra ý kiến đối với báo cáo tài chính năm 2017 và 2018 của công ty
+KHL,3279,2013-01-02,2026-03-05,UPCOM,,3170970000.0,0.0,385320000.0,HNX,bat_buoc,Tổ chức kiểm toán từ chối cho ý kiến đối với Báo cáo tài chính năm 2017 của KHL
+PSG,3004,2013-01-02,2026-05-04,UPCOM,2014-06-04,22376365900.0,0.0,1047905000.0,,khac_khong_ro,
+HFT,613,2018-01-18,2020-07-06,UPCOM,,23567370000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Công ty không còn đáp ứng điều kiện là công ty đại chúng
+TLI,1744,2019-01-25,2026-01-20,UPCOM,2026-01-20,1791410000.0,1960000.0,75855250.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải có vốn điều lệ đã góp từ 30 tỷ đồng trở lên và có tối thiểu 10% số cổ phiếu có quyền biểu quyết do ít nhất 100 nhà đầu tư không phải là cổ đông lớn nắm giữ)
+BAM,504,2014-11-04,2016-11-09,HNX,2016-11-10,16810970000.0,0.0,4021965000.0,HNX,bat_buoc,vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+SCV,397,2021-05-19,2022-12-13,UPCOM,2022-12-13,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+TMW,3437,2013-01-02,2026-10-14,UPCOM,2026-10-14,1200000000.0,0.0,10485000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+CVH,994,2017-06-20,2021-06-08,UPCOM,2021-06-08,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+PVA,3217,2013-01-02,2026-03-24,UPCOM,2014-06-09,21143000000.0,0.0,2392645000.0,HNX,khac_khong_ro,
+DTN,1585,2014-06-23,2020-10-20,UPCOM,2020-10-20,215400000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Không còn đáp ứng điều kiện là công ty đại chúng
+SDB,3239,2013-01-02,2026-01-23,UPCOM,2014-06-04,1089200000.0,0.0,55410000.0,HNX,khac_khong_ro,
+FSC,334,2017-06-30,2018-10-25,UPCOM,,4800000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,CTCP Chứng khoán Yuanta Việt Nam không còn đáp ứng đủ điều kiện là công ty đại chúng
+SPP,2546,2013-01-02,2023-03-24,UPCOM,,22611839400.0,0.0,1440517700.0,HNX,bat_buoc,Công ty có tổng số lỗ lũy kế vượt quá số vốn góp điều lệ tại báo cáo tài chính kiểm toán năm 2019
+VPC,3431,2013-01-02,2026-10-20,UPCOM,2015-05-15,2165825000.0,0.0,195580000.0,HNX,bat_buoc,Kết quả SXKD bị thua lỗ 3 năm liên tiếp | Ngày hủy niêm yết: 15/5/2015
+DPS,2704,2015-05-06,2026-03-05,UPCOM,2021-06-23,34070670000.0,0.0,9663685000.0,HNX,bat_buoc,Chậm nộp BCTC trong 3 năm liên tiếp
+VKD,2418,2013-01-02,2022-09-12,UPCOM,2022-09-12,40769507000.0,0.0,2476922400.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+NEM,421,2024-01-05,2025-09-17,UPCOM,2025-09-17,4255420000.0,0.0,10796850.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Cơ cấu cổ đông không đáp ứng điều kiện là công ty đại chúng)
+S96,3201,2013-01-02,2026-01-23,UPCOM,2014-05-30,10421720000.0,0.0,392708250.0,HNX,khac_khong_ro,
+HLR,1896,2016-11-28,2024-07-01,UPCOM,2024-07-01,65280000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+GTT,3435,2013-01-02,2026-10-20,UPCOM,2016-05-30,48634580000.0,0.0,6609190000.0,HOSE,bat_buoc,Tổng số lỗ lũy kế vượt quá số vốn điều lệ
+C12,2293,2016-12-26,2026-03-05,UPCOM,2026-03-05,424780000.0,0.0,900000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+BLW,1331,2018-10-19,2024-02-19,UPCOM,2024-02-19,50990000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+GLC,1940,2019-01-09,2026-10-20,UPCOM,,83362500000.0,0.0,0.0,UPCOM,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin báo cáo tài chính kiểm toán năm 2018
+SPA,1410,2016-12-28,2022-08-18,UPCOM,2022-08-18,24268120000.0,0.0,3370000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DNS,2126,2013-01-02,2021-07-12,UPCOM,2021-07-12,2656428000.0,65750000.0,70284000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DAG,3431,2013-01-02,2026-10-20,UPCOM,2024-08-14,110853055000.0,0.0,17594396250.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+DAC,3436,2013-01-02,2026-10-20,UPCOM,2016-04-01,138020200.0,0.0,565000.0,HNX,bat_buoc,Lỗ lũy kế vượt quá số vốn điều lệ thực góp tại ngày 31/12/2015 theo BCTC năm 2015
+QLT,1438,2017-04-03,2022-12-26,UPCOM,2022-12-26,1388500000.0,8985000.0,44290000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+IKH,877,2018-01-08,2021-07-13,UPCOM,2021-07-13,548400000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HGR,439,2020-07-02,2022-04-01,UPCOM,2022-04-01,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+PSH,1569,2020-06-24,2026-10-20,UPCOM,2025-03-11,198026850000.0,0.0,27913282500.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+MDT,278,2019-12-31,2021-02-05,UPCOM,2021-02-05,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng đủ điều kiện là công ty đại chúng
+DAP,2266,2013-01-02,2022-01-27,UPCOM,2022-01-27,386654000.0,0.0,3925000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KSK,1995,2014-02-19,2022-02-18,UPCOM,,16736196600.0,0.0,5832485000.0,HNX,bat_buoc,Công ty chậm nộp báo cáo tài chính trong 3 năm liên tiếp
+GAB,1613,2019-07-11,2025-12-30,UPCOM,2023-02-24,138800184000.0,0.0,15199378000.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+PXC,2239,2017-02-09,2026-01-20,UPCOM,2026-01-20,450000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải có vốn điều lệ đã góp từ 30 tỷ đồng trở lên và có tối thiểu 10% số cổ phiếu có quyền biểu quyết do ít nhất 100 nhà đầu tư không phải là cổ đông lớn nắm giữ)
+KHA,2598,2013-01-02,2023-06-14,UPCOM,2018-05-03,142512782500.0,3520000.0,708861000.0,HOSE,tu_nguyen,Hủy niêm yết tự nguyện
+SUM,977,2018-01-05,2021-12-01,UPCOM,2021-12-01,159040000.0,0.0,1415000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KTT,3431,2013-01-02,2026-10-20,UPCOM,2024-12-26,3499890000.0,0.0,189555000.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+SSF,3366,2013-01-02,2026-07-02,UPCOM,2026-07-02,671560000.0,0.0,13870000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+MEG,694,2019-09-09,2022-06-16,UPCOM,2022-06-16,14300000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HHR,1841,2017-02-17,2024-06-27,UPCOM,2024-06-27,135000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+FBT,110,2013-01-02,2013-06-17,HOSE,,50000000.0,0.0,0.0,,bat_buoc,"Căn cứ quy định tại Điểm đ Khoản 1 Điều 60 Nghị định 58/2012/NĐ-CP ngày 20/07/2012 và báo cáo tài chính đã được kiểm toán năm 2012 của CTCP Xuất Nhập khẩu Lâm Thủy sản Bến Tre, công ty có lỗ lũy kế đến ngày 31/12/2012 là 291,414 tỷ đồng vượt quá vốn điều lệ thực góp của công ty là 150 tỷ đồng"
+THI,1502,2017-06-15,2023-06-28,HOSE,2023-06-28,29161500000.0,28625000.0,1521378750.0,HOSE,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+PCN,2248,2015-12-18,2024-12-20,UPCOM,,919979500.0,0.0,2620000.0,HNX,bat_buoc,Kết quả kinh doanh của công ty bị thua lỗ trong 3 năm liên tiếp
+MCD,282,2022-10-20,2023-12-04,UPCOM,2023-12-04,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+NHP,2753,2015-03-11,2026-03-24,UPCOM,2021-06-23,26030350000.0,0.0,9487385000.0,HNX,bat_buoc,Chậm nộp BCTC trong 3 năm liên tiếp
+V15,3249,2013-01-02,2026-01-15,UPCOM,2015-07-14,3247059500.0,0.0,285080000.0,HNX,bat_buoc,Tổ chức kiểm toán từ chối cho ý kiến về báo cáo tài chính năm 2014 và bị thua lỗ 3 năm niêm tiếp | Ngày hủy niêm yết: 14/7/2015
+SDH,2379,2013-01-02,2022-07-22,UPCOM,2017-09-08,9856740000.0,0.0,1533210000.0,HNX,bat_buoc,Công ty bị lỗ trong 3 năm liên tiếp
+GQN,556,2020-01-09,2022-04-01,UPCOM,2022-04-01,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+TTP,2647,2013-01-02,2025-01-07,UPCOM,2015-10-15,8717710000.0,46720000.0,379650000.0,HOSE,tu_nguyen,Thực hiện Theo Nghị quyết Đại hội đồng cổ đông thường niên năm 2014 ngày 28/05/2014 và Nghị quyết Đại hội đồng cổ đông thường niên năm 2015 ngày 06/06/2015 của TTP đã thông qua việc hủy niêm yết tự nguyện do tập trung việc tái cơ cấu doanh nghiệp nhằm nâng cao hơn nữa hiệu quả sản xuất kinh doanh; tập trung phát triển doanh nghiệp | Tải file gốc
+BLU,778,2019-02-25,2022-04-01,UPCOM,2022-04-01,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+AVF,3320,2013-01-02,2026-05-07,UPCOM,2015-06-10,30330295500.0,0.0,7813612000.0,HOSE,bat_buoc,"Tổ chức niêm yết vi phạm nghiêm trọng nghĩa vụ công bố thông tin, thuộc trường hợp chứng khoán bị hủy niêm yết theo quy định tại Tiết m Khoản 1 Điều 60 Nghị định 58/2012/NĐ-CP ngày 20/07/2012"
+SDJ,2707,2013-01-02,2025-05-28,UPCOM,2013-05-21,1848150000.0,0.0,132628000.0,HNX,khac_khong_ro,
+CC4,1967,2017-07-28,2025-06-12,UPCOM,2025-06-12,7505670000.0,0.0,29250000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+TVG,3441,2013-01-02,2026-10-20,UPCOM,,57700000.0,0.0,0.0,UPCOM,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin báo cáo tài chính kiểm toán năm 2018
+TBH,1110,2021-08-13,2026-01-22,UPCOM,2026-01-22,32214760200.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+CEG,1962,2017-05-17,2025-03-19,UPCOM,2025-03-19,1006430000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+VIS,2318,2013-01-02,2022-04-21,HOSE,2022-04-21,34426134000.0,175557500.0,9812182500.0,HOSE,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HDO,3195,2013-01-02,2025-10-29,UPCOM,2017-05-26,7554829000.0,0.0,994006300.0,HNX,bat_buoc,Tổ chức kiểm toán từ chối cho ý kiến đối với BCTC năm 2016
+BUD,1005,2018-03-28,2022-04-01,UPCOM,2022-04-01,694048000.0,8145000.0,72010000.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+CIC,178,2013-01-02,2013-09-20,HNX,2013-09-20,505000000.0,0.0,58270000.0,HNX,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+GTH,2559,2013-01-02,2023-04-05,UPCOM,2023-04-05,549242000.0,1049000.0,47780000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+VSP,2465,2013-01-02,2022-11-16,UPCOM,2022-11-16,9803445000.0,0.0,1289104500.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KAC,3157,2013-01-02,2025-09-11,UPCOM,,2146808000.0,0.0,27622500.0,HOSE,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+HIZ,862,2018-07-27,2021-12-31,UPCOM,2021-12-31,5154960000.0,6380000.0,11025000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KTU,676,2018-02-21,2020-10-29,UPCOM,2020-10-29,5856720000.0,0.0,0.0,UPCOM,khac_khong_ro,Doanh nghiệp cổ phần hóa đăng ký giao dịch không đáp ứng về điều kiện cổ đông
+TVP,1548,2017-08-17,2023-10-24,UPCOM,2023-10-24,2585440000.0,120401500.0,152432500.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CE1,1975,2017-04-10,2025-03-03,UPCOM,2025-03-03,1106172000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CTN,3254,2013-01-02,2026-01-22,UPCOM,2016-05-19,600600000.0,0.0,60572750.0,HNX,bat_buoc,Lỗ lũy kế vượt quá vốn điều lệ thực góp
+PPI,3434,2013-01-02,2026-10-20,UPCOM,,33126282000.0,0.0,6766859500.0,HOSE,bat_buoc,"Công ty kinh doanh thua lỗ trong 3 năm liên tiếp (2016,2017,2018)"
+XDC,270,2022-12-01,2023-12-28,UPCOM,2023-12-28,686700000.0,0.0,1935000.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+DKW,272,2024-12-30,2026-02-02,UPCOM,2026-02-02,11420000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+SHX,1768,2016-10-11,2023-11-02,UPCOM,2023-11-02,26000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+LBC,1783,2017-08-16,2024-10-02,UPCOM,2024-10-02,427500000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+NNQ,531,2020-02-20,2022-04-01,UPCOM,2022-04-01,1013970000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+PDT,838,2018-11-22,2022-04-01,UPCOM,2022-04-01,183300000.0,0.0,19485000.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+RDP,3366,2013-01-02,2026-07-16,UPCOM,2024-11-27,49270122000.0,0.0,7392088500.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+QBR,1191,2016-11-09,2021-08-12,UPCOM,2021-08-12,68000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+MIM,3246,2013-01-02,2026-01-15,UPCOM,2024-01-30,4080000000.0,0.0,19370000.0,HNX,bat_buoc,Tổ chức kiểm toán từ chối cho ý kiến đối với báo cáo tài chính gần nhất và công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+VAT,2550,2013-01-02,2023-04-05,UPCOM,2021-12-23,7528950000.0,0.0,1953100000.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+BXT,707,2019-06-10,2022-04-01,UPCOM,2022-04-01,337080000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+SIC,2632,2013-01-02,2023-07-20,HNX,2023-07-20,66872603999.99999,0.0,7376982000.0,HNX,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+MDN,569,2018-11-16,2021-03-01,UPCOM,2021-03-01,567600000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Bị hủy tư cách là công ty đại chúng
+QLD,1156,2018-01-05,2022-08-22,UPCOM,2022-08-22,637500000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CVP,294,2022-05-04,2023-07-04,UPCOM,2023-07-04,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+HAI,3235,2013-01-02,2025-12-30,UPCOM,2022-09-08,303515493500.0,0.0,56901324500.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+TTZ,3415,2013-01-29,2026-10-20,UPCOM,2024-01-26,10281956200.0,0.0,1430276200.0,HNX,bat_buoc,Không có giao dịch tại HNX trong thời hạn 12 tháng và vi phạm nghiêm trọng nghĩa vụ CBTT
+TPH,3125,2013-01-02,2025-07-14,HNX,2025-07-14,579800000.0,0.0,3360000.0,HNX,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty có vốn điều lệ dưới)
+DSS,1035,2017-04-24,2021-06-10,UPCOM,2021-06-10,64000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+I10,1459,2016-04-07,2022-01-28,UPCOM,2022-01-27,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DTV,2872,2013-01-02,2024-07-08,UPCOM,2024-07-08,357720000.0,0.0,1015000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+B82,2906,2013-01-02,2024-09-09,UPCOM,2018-08-20,4080858900.0,0.0,12705000.0,HNX,bat_buoc,Công ty chậm nộp báo cáo tài chính năm kiểm toán trong 3 năm liên tiếp
+MVY,1116,2017-01-25,2021-07-14,UPCOM,2021-07-14,112800000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KSS,896,2013-01-02,2016-08-11,HOSE,2016-08-12,35600463000.0,0.0,7549109000.0,HOSE,bat_buoc,"Công ty kiểm toán từ chối cho ý kiến đối với Báo cáo tài chính kết thúc năm 2015 của Công ty, | Ngày hủy niêm yết có hiệu lực: 12/08/2016"
+LCC,3326,2013-01-02,2026-05-07,UPCOM,2026-05-07,48840000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty không đáp ứng điều kiện có tối thiểu 10% số cổ phiếu có quyền biểu quyết được nắm giữ bởi ít nhất 100 cổ đông không phải là cổ đông lớn)
+KSH,3246,2013-01-02,2026-01-21,UPCOM,,68211169700.0,0.0,17734043900.0,HOSE,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+SCA,413,2021-01-04,2022-08-30,UPCOM,2022-08-30,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HEM,1839,2017-01-03,2024-05-16,UPCOM,2024-05-16,3223059600.0,1720000.0,49359300.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+TKG,1114,2021-04-09,2025-10-21,UPCOM,2024-12-26,17641287300.0,0.0,3465127150.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin và không hoàn thành nghĩa vụ tài chính với Sở
+HGW,1880,2017-01-11,2024-07-22,UPCOM,2024-07-22,109000000.0,0.0,2310000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+IBC,2278,2016-10-25,2025-12-19,UPCOM,2023-09-15,33298869000.0,0.0,7087768250.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+HAW,439,2020-07-02,2022-04-01,UPCOM,2022-04-01,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+ROS,1500,2016-09-01,2022-08-31,HOSE,2022-08-11,1552020695000.0,11287758000.0,754922944500.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+NS3,1375,2016-12-26,2022-06-28,UPCOM,2022-06-28,191052800000.0,0.0,5500000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+TDI,155,2022-12-29,2023-08-15,UPCOM,2023-08-15,36000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+BGM,1145,2013-01-02,2017-08-09,HOSE,2017-08-10,27188635000.0,0.0,5243859500.0,HOSE,bat_buoc,Tổ chức niêm yết vi phạm nghiêm trọng nghĩa vụ công bố thông tin | Ngày hủy niêm yết có hiệu lực: 10/08/2017
+CLG,3268,2013-01-02,2026-02-24,UPCOM,2020-12-22,9133768000.0,0.0,1616547000.0,HOSE,bat_buoc,"Lỗ lũy kế tại 31/12/2020 vượt quá vốn điều lệ thực góp, và tổ chức kiểm toán từ chối cho ý kiến với BCTC năm 2020"
+C71,1582,2015-08-03,2021-11-22,UPCOM,,9500950000.0,25850500.0,39372500.0,UPCOM,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin báo cáo tài chính kiểm toán năm 2018
+MHL,3434,2013-01-02,2026-10-20,UPCOM,2024-09-10,1239391500.0,0.0,259770000.0,HNX,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+BKH,1045,2019-06-26,2023-08-24,UPCOM,2023-08-24,195360000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+RHN,1074,2017-03-16,2021-06-29,UPCOM,2021-06-29,12000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+VHI,557,2020-01-08,2022-04-01,UPCOM,2022-04-01,2560000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+DBW,1493,2017-01-09,2022-12-26,UPCOM,2022-12-26,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HDS,296,2024-04-24,2025-07-02,UPCOM,2025-07-02,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Là doanh nghiệp cổ phần hóa sau 1 năm kể từ ngày giao dịch đầu tiên vẫn chưa đáp ứng điều kiện là công ty đại chúng
+SDE,2099,2013-01-02,2021-06-10,UPCOM,,360880000.0,0.0,4465000.0,HNX,bat_buoc,Công ty kinh doanh thua lỗ trong 3 năm liên tiếp
+KTW,262,2024-01-08,2025-01-23,UPCOM,2025-01-23,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+NNG,2082,2015-03-31,2023-07-24,UPCOM,2023-07-24,5643810000.0,10561750.0,541784200.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+MTX,261,2024-09-04,2025-09-19,UPCOM,2025-09-19,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ đồng)
+AUM,1664,2016-09-26,2023-05-23,UPCOM,2023-05-23,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DAR,1290,2017-05-11,2022-07-04,UPCOM,2022-07-04,724980000.0,0.0,790000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+AMD,2770,2014-11-11,2025-12-30,UPCOM,2023-03-08,257588584000.0,0.0,50053924000.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+SGO,1971,2015-12-16,2023-11-09,UPCOM,,33479710000.0,0.0,4134525000.0,HNX,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+FDG,1808,2013-01-02,2022-07-11,UPCOM,2014-05-15,18552382000.0,0.0,10964000.0,HOSE,khac_khong_ro,
+SON,1063,2018-01-05,2022-04-08,UPCOM,2022-04-08,186990000.0,0.0,2655000.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+D17,262,2024-01-08,2025-01-23,UPCOM,2025-01-23,144820000.0,0.0,4185000.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+KLM,1111,2019-12-30,2024-06-13,UPCOM,2024-06-13,255000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CAB,1332,2019-09-06,2024-12-30,UPCOM,2024-12-30,238950000.0,1975150.0,13130000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+SSU,1412,2016-12-19,2022-08-11,UPCOM,2022-08-11,320250000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+KLF,3058,2013-09-23,2025-12-30,UPCOM,2024-01-30,484777543900.0,0.0,115534373350.0,HNX,bat_buoc,Do vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+MCI,1987,2015-09-08,2023-08-14,UPCOM,2023-08-14,1725826500.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+BT6,3126,2013-01-02,2026-10-20,UPCOM,2015-11-27,3053387800.0,0.0,153341500.0,HOSE,khac_khong_ro,"tập trung việc tái cơ cấu doanh nghiệp nhằm nâng cao hiệu quả sản xuất kinh doanh, tập trung phát triển doanh nghiệp"
+TEL,2089,2017-09-26,2026-02-02,UPCOM,2026-02-02,3037375000.0,0.0,220540000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+HNT,1400,2016-11-30,2022-07-07,UPCOM,2022-07-07,227900000.0,1300000.0,2905000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DTB,1511,2019-07-22,2025-08-05,UPCOM,2025-08-05,912600000.0,4070000.0,4070000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ)
+VMI,1979,2014-10-09,2022-09-16,UPCOM,2021-06-23,28704780000.0,0.0,9395940000.0,HNX,bat_buoc,Chậm nộp BCTC trong 3 năm liên tiếp
+CTA,3321,2013-01-02,2026-05-07,UPCOM,,1455675500.0,0.0,105175000.0,HNX,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+PEC,3259,2013-01-02,2026-01-22,UPCOM,2026-01-22,7184400000.0,0.0,7835000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải đáp ứng điều kiện có tối thiểu 10% số cổ phiếu có quyền biểu quyết được nắm giữ bởi ít nhất 100 cổ đông không phải là cổ đông lớn)
+TNA,3431,2013-01-02,2026-10-20,UPCOM,2024-09-13,71860165000.0,0.0,16494036250.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+KWA,265,2024-12-19,2026-01-13,UPCOM,2026-01-13,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải có vốn điều lệ đã góp từ 30 tỷ đồng trở lên và có tối thiểu 10% số cổ phiếu có quyền biểu quyết do ít nhất 100 nhà đầu tư không phải là cổ đông lớn nắm giữ)
+HTR,1615,2017-02-22,2023-08-03,UPCOM,2023-08-03,1736500000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+PBK,769,2017-11-20,2020-12-14,UPCOM,2020-12-14,88874240000.0,0.0,0.0,UPCOM,bat_buoc,Chấm dứt tồn tại do bị giải thể
+TEC,1305,2017-04-24,2022-07-08,UPCOM,2022-07-08,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+FLC,3228,2013-01-02,2025-12-30,UPCOM,2023-02-17,3097766915000.0,0.0,387154510000.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+NVN,573,2013-01-02,2015-05-04,HOSE,2015-05-04,584671000.0,1670000.0,20471500.0,HOSE,sap_nhap,"Lợi nhuận sau thuế của cổ đông Công ty mẹ năm 2014 là -37,24 tỷ đồng, lợi nhuận sau thuế của cổ đông công ty mẹ năm 2013 là -43,61 tỷ đồng và Lợi nhuận sau thuế của cổ đông công ty mẹ năm 2012 là -51,32 tỷ đồng và tại ngày 31/12/2014, tổng số lỗ lũy kế vượt quá số vốn điều lệ thực góp của NVN căn cứ Báo cáo tài chính hợp nhất kiểm toán các năm 2014, năm 2013 và năm 2012 của NVN, thuộc trường hợp chứng khoán bị hủy niêm yết theo quy định tại Tiết đ Khoản 1 Điều 60 Nghị định 58/2012/NĐ-CP ngày 20/07/2012 có hiệu lực từ ngày 15/09/2012 và Tiết 2 Khoản 1 Điều 19 quy định tại Quy chế niêm yết chứng khoán tại SGDCK Tp.HCM ban hành kèm theo Quyết định số 10/QĐ-SGDHCM ngày 13/01/2014 | Ngày hủy niêm yết có hiệu lực: 05/05/2015 | Ngày giao dịch cuối cùng: 04/05/2015"
+EPC,1763,2018-10-03,2025-10-23,UPCOM,2025-10-23,11031040000.0,0.0,680000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có tối thiểu 10% số cổ phiếu có quyền biểu quyết do ít nhất 100 nhà đầu tư không phải là cổ đông lớn nắm giữ)
+SJF,2312,2017-07-05,2026-10-20,UPCOM,2023-11-10,285498095000.0,0.0,39408236500.0,HOSE,bat_buoc,Vi phạm ngiêm trọng nghĩa vụ công bố thông tin
+HTW,1638,2016-12-14,2023-07-05,UPCOM,2023-07-05,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+HNE,536,2020-02-13,2022-04-01,UPCOM,2022-04-01,9325000000.0,253985000.0,253985000.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+HAB,1058,2018-01-05,2022-04-01,UPCOM,2022-04-01,67200000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+C36,1157,2017-05-31,2022-01-06,UPCOM,2022-01-06,100000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+CEE,1299,2017-05-15,2022-07-21,HOSE,2022-07-21,90226213000.0,36585000.0,6894386000.0,HOSE,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DKP,428,2018-10-10,2020-06-29,UPCOM,,130000000.0,0.0,0.0,UPCOM,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin báo cáo tài chính kiểm toán năm 2018
+SD8,2784,2013-01-02,2026-10-20,UPCOM,2013-05-09,805660000.0,0.0,2330000.0,HNX,sap_nhap,"Căn cứ quy định tại Điểmđ Khoản 1 Điều 60 Nghị định 58/2012/NĐCP ngày 20/07/2012 và BCTC kiểm toán hợp nhất năm 2012 của CTCP Sông Đà 8, Công ty có lỗ lũy kế đến ngày 31/12/2012 là 40.765.036.669 đồng, vượt quá vốn điều lệ thực góp là 28.000.000.000 đồng"
+CGL,401,2020-12-03,2022-07-14,UPCOM,2022-07-14,3400000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+TQN,2329,2017-02-08,2026-06-04,UPCOM,2026-06-04,178200000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+FBA,3284,2013-01-02,2026-03-05,UPCOM,2026-03-05,109600000.0,0.0,1215000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+KPF,2648,2016-03-02,2026-10-20,UPCOM,2025-06-25,26477737000.0,0.0,5822028000.0,HOSE,bat_buoc,Vi phạm nghiêm trọng nghĩa vụ CBTT
+PX1,3315,2013-01-02,2026-04-17,UPCOM,2026-04-17,22000000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện có ít nhất 10% cổ phiếu có quyền biểu quyết được nắm giữ bởi tối thiểu 100 cổ đông nhỏ lẻ)
+DT4,1495,2016-07-19,2022-07-07,UPCOM,2022-07-07,78000000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+SJC,3268,2013-01-02,2026-02-12,UPCOM,2021-06-23,28972280800.0,0.0,323000300.0,HNX,bat_buoc,Chậm nộp BCTC trong 3 năm liên tiếp
+TAN,1788,2019-06-10,2026-08-03,UPCOM,2026-08-03,22585350000.0,0.0,171620000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ)
+DNT,2081,2013-01-02,2026-10-20,UPCOM,2014-09-12,336720000.0,0.0,0.0,UPCOM,khac_khong_ro,
+HLA,3413,2013-01-02,2026-10-20,UPCOM,2015-02-12,19239212000.0,0.0,3346501500.0,HOSE,bat_buoc,"Lợi nhuận sau thuế chưa phân phối (lỗ lũy kế) tại ngày 30/09/2014 là – 656,42 tỷ đồng vượt quá vốn điều lệ thực góp là 344,59 tỷ đồng căn cứ trên Báo cáo tài chính kiểm toán năm 2014, thuộc trường hợp chứng khoán bị hủy niêm yết theo quy định tại Điểm đ Khoản 1 Điều 60 Nghị định 58/2012/NĐ-CP ngày 20/07/2012 | Ngày hủy niêm yết có hiệu lực: 12/02/2015"
+TVW,1437,2017-12-11,2023-09-12,UPCOM,2023-09-12,920000000.0,53800.0,3350000.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng
+DVT,277,2025-07-18,2026-08-26,UPCOM,2026-08-26,233400000.0,0.0,350000.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng sau 1 năm cổ phần hóa
+HTH,320,2021-07-23,2022-11-01,UPCOM,2022-11-01,12187520000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+STL,3292,2013-01-02,2026-07-06,UPCOM,2013-07-25,3452930000.0,0.0,260705000.0,,bat_buoc,
+IBN,399,2021-05-17,2022-12-13,UPCOM,2022-12-13,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa đáp ứng điều kiện là công ty đại chúng
+SDX,2497,2015-09-24,2025-09-18,UPCOM,,139150000.0,0.0,670000.0,UPCOM,bat_buoc,Công ty vi phạm nghĩa vụ công bố thông tin báo cáo tài chính kiểm toán năm 2018
+HUX,394,2020-09-04,2022-04-01,UPCOM,2022-04-01,0.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Chưa được Ủy ban Chứng khoán xác nhận hoàn tất việc đăng ký là công ty đại chúng
+NDF,3006,2014-09-12,2026-10-02,UPCOM,,26411130000.0,0.0,6241405000.0,HNX,bat_buoc,Công ty vi phạm nghiêm trọng nghĩa vụ công bố thông tin
+DBH,1524,2016-06-08,2022-07-07,UPCOM,2022-07-07,69600000.0,0.0,0.0,UPCOM,mat_tu_cach_DC,Hủy tư cách là công ty đại chúng

@@ -96,7 +96,7 @@ _VN-Index có cổ tức: đội tự tính từ cổ tức tiền mặt của c
 _Dòng "Phần bot quản lý (không gồm DGC)": loại phần ngoài bot (DGC) ≈ 35,64% NAV ngày 16/10; số chính thức của tài khoản là các dòng phía trên._
 _Mốc VN-Index "từ khi bắt đầu hoạt động": giá đóng cửa 06/07/2026 (mốc đúng theo Mục 4)._
 
-**Gap đã biết:** cột "VN-Index có cổ tức" chưa có số cho cả 6 dòng — chuỗi tổng lợi suất VN-Index bị chặn vì số mã rổ đổi 351 → 333 ngày 14/10 (vượt ngưỡng 5%); đã để nguyên "chưa có số", không thay bằng số tự tính. Cổng giao báo cáo có thể chặn vì lý do này (xem Mục 6).
+**Lưu ý nguồn số:** cột "VN-Index có cổ tức" có số đầy đủ cả 6 dòng. Ngày 14/10 khoảng 100 mã kém thanh khoản (26 mã HOSE) không có giao dịch nên không vào rổ tính chỉ số hôm đó (rổ 351 → 333 mã, hồi lại 337 và 346 mã ở 15/10 và 16/10); đã kiểm các mã này không có ngày giao dịch không hưởng quyền cổ tức tiền trong 14–15/10, và người dùng đã xác nhận chấp nhận (18/10). Các mã này chiếm khoảng 0,4% vốn hoá rổ nên ảnh hưởng tới số công bố là rất nhỏ.
 
 **Rủi ro (từ khi bắt đầu, NAV chốt cuối ngày, 72 quan sát từ 07/07):** mức sụt giảm tối đa từ đỉnh **−16,35%**; độ biến động hằng ngày 1,26% (quy năm khoảng 20,0%). DGC chiếm 35,6% NAV nên là nguồn rủi ro đơn lẻ lớn nhất của tài khoản.
 
@@ -209,7 +209,7 @@ Các nhận định trên là kịch bản có điều kiện, không phải khu
 
 ## 6. GAP / GIỚI HẠN CÒN MỞ
 
-1. **VN-Index có cổ tức: chưa có số** (6/6 ô) — số mã rổ đổi 351 → 333 ngày 14/10 (>5%) làm chuỗi tổng lợi suất bị chặn. Không tự tính thay thế. Nếu cổng giao báo cáo chặn, gap này là nguyên nhân.
+1. **VN-Index có cổ tức: có số, kèm lưu ý nguồn** — ngày 14/10 khoảng 100 mã kém thanh khoản không giao dịch nên rổ tính chỉ số tụt 351 → 333 mã; đã kiểm không có cổ tức tiền bị bỏ sót và được xác nhận chấp nhận (xem Mục 3.2).
 2. **Residual tiền mặt 16/10: −1.421 VND** chưa giải thích (Mục 3.3).
 3. Tăng trưởng lợi nhuận, dòng tiền khối ngoại, diễn biến lãi suất mới trong tuần: không có số liệu đối soát nên không đưa nhận định.
 4. Track record ngắn (72 phiên từ 07/07) — so sánh với VN-Index mang tính mô tả.
