@@ -16,6 +16,7 @@ Selfcheck: mike/bin/rating_8l_forward_tracker_selfcheck.py
 """
 import argparse
 import datetime as dt
+import hashlib
 import os
 import sys
 from zoneinfo import ZoneInfo
@@ -27,10 +28,17 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 WC_ROOT = "/home/trido/thanhdt/WorkingClaude"
 EVENTS_CSV = os.path.join(WC_ROOT, "data/rating_8l_forward_events.csv")
 CAR_CSV = os.path.join(WC_ROOT, "data/rating_8l_forward_car.csv")
+HERE = os.path.dirname(os.path.abspath(__file__))
+LOCK_DIR = os.path.join(HERE, "..", "agents/Taylor/research/rating_8l_forward_bt_20261020")
 PREREG_MD5 = "4ad20803a74b046af74a9b128085019c"
+LOCKED = {                                      # file khoá → md5; lệch ⇒ dừng, KHÔNG ghi ledger (NB2)
+    "PREREG_FORWARD.md": PREREG_MD5,
+    "event_study_v2_frozen.py": "a857d81bfc95be8b7dac507f6cf9dbad",
+    "PREREG_FORWARD_ADDENDUM_20261020.md": "aace4e50089c28518550019846cfe1d8",
+}
 EFF_AFTER = pd.Timestamp("2026-07-31")          # sự kiện phải có eff > mốc này (PREREG §1)
 WPRE, WPOST, NEED_AFTER = 60, 40, 42            # CAR cần đủ 42 phiên sau phiên 0
-MIN_TICKERS, MIN_UNIV_COVER = 1200, 0.98        # cổng độ phủ (PREREG §2; n = mã TOÀN BẢNG, xem price_source)
+MIN_TICKERS, MIN_UNIV_COVER, MIN_UNIV_N = 1200, 0.98, 300        # cổng độ phủ (PREREG §2; n = mã TOÀN BẢNG, xem price_source)
 WIN = {"[2,20]": (2, 20), "[2,40]": (2, 40)}
 EV_COLS = ["ticker", "quarter", "eff_date", "route", "rating_prev", "rating_new", "grp",
            "x_null", "x_definite", "x_early7", "excl", "first_seen", "prereg_md5"]
@@ -80,6 +88,8 @@ def coverage_gate(n_tickers_latest, n_univ_latest, n_univ_covered):
     if not n_univ_latest or n_tickers_latest is None or n_univ_covered is None:
         return False, float("nan"), "thiếu số liệu độ phủ"
     cover = n_univ_covered / n_univ_latest
+    if n_univ_latest < MIN_UNIV_N:
+        return False, cover, f"mẫu số universe {n_univ_latest} < {MIN_UNIV_N}"
     if n_tickers_latest < MIN_TICKERS:
         return False, cover, f"số mã {n_tickers_latest} < {MIN_TICKERS}"
     if cover < MIN_UNIV_COVER:
@@ -120,11 +130,25 @@ def compute_cars(events, close, univ, src_meta, computed_at):
     return pd.DataFrame(rows, columns=CAR_COLS)
 
 
+def locked_mismatches(base, locked):
+    """Danh sách mô tả file khoá bị thiếu/lệch md5 (rỗng = sạch)."""
+    bad = []
+    for name, want in locked.items():
+        p = os.path.join(base, name)
+        if not os.path.exists(p):
+            bad.append(f"{name}: thiếu file")
+            continue
+        got = hashlib.md5(open(p, "rb").read()).hexdigest()
+        if got != want:
+            bad.append(f"{name}: md5 {got} != khai báo {want}")
+    return bad
+
+
 def append_only(path, new, cols, key=("ticker", "quarter")):
     """Ghi thêm dòng có khoá chưa tồn tại; tmp + os.replace. Trả số dòng đã thêm. Không bao giờ sửa dòng cũ."""
     old = pd.read_csv(path, dtype=str, keep_default_na=False) if os.path.exists(path) else pd.DataFrame(columns=cols)
     if list(old.columns) != cols:
-        raise SystemExit(f"{path}: header lệch schema {list(old.columns)} != {cols} — dừng, không ghi")
+        raise SystemExit(f"❌ {path}: header lệch schema {list(old.columns)} != {cols} — dừng, không ghi")
     have = set(zip(*[old[k] for k in key])) if len(old) else set()
     new = new[[tuple(str(v) for v in t) not in have for t in zip(*[new[k] for k in key])]] if len(new) else new
     if not len(new):
@@ -178,6 +202,11 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="in kết quả, không ghi CSV")
     a = ap.parse_args()
     now = dt.datetime.now(ICT).strftime("%Y-%m-%dT%H:%M:%S%z")
+    print(f"[rating_8l_forward_tracker] bắt đầu {now} (ICT)")
+    bad = locked_mismatches(LOCK_DIR, LOCKED)
+    if bad:
+        print("❌ file khoá lệch md5 — dừng, KHÔNG ghi ledger: " + "; ".join(bad))
+        return 2
     c = _bq()
     fa = _q(c, "SELECT f.ticker, f.time, f.route, f.rating FROM tav2_bq.fa_ratings_8l AS f WHERE f.time >= '2025-06-01'")
     tf = _q(c, "SELECT t.ticker, t.quarter, t.time, t.Release_Date FROM tav2_bq.ticker_financial AS t WHERE t.time >= '2025-01-01'")
@@ -202,7 +231,7 @@ def main():
     for t in tried:
         print(f"[car] cổng nguồn giá: {t}")
     if tbl is None:
-        print(f"[car] BLOCKED — không nguồn giá nào qua cổng độ phủ; KHÔNG tính CAR ({len(todo)} sự kiện chờ)")
+        print(f"❌ BLOCKED — không nguồn giá nào qua cổng độ phủ; KHÔNG tính CAR ({len(todo)} sự kiện chờ)")
         return 0
     lo = (pd.to_datetime(todo.eff_date).min() - pd.Timedelta(days=130)).strftime("%Y-%m-%d")
     px = _q(c, f"SELECT p.ticker, p.time, p.Close FROM {tbl} AS p WHERE p.time >= '{lo}' AND p.ticker IN "
