@@ -1133,8 +1133,9 @@ if [ "$STATUS" = "ESCALATE" ]; then
     "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
     _QPAYLOAD="{\"reason\":\"$REASON\",\"detail\":$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$DETAIL"),\"expected_date\":\"$EXPECTED_DATE\",\"account\":\"$ACCOUNT\",\"second_chance\":$SECOND_CHANCE,\"checked_at\":\"$TODAY $NOW_ICT\"}"
     # GATE_BLOCK_PLAN_T1_BEGIN — question CÓ CHỦ + HẠN + LỆNH RECOVER, sweep nhắc tới khi marker
-    # "đã gửi plan" (artifact do CHÍNH script này ghi khi gửi OK) xuất hiện (retro 10-16→10-19
-    # Pattern 1, phương án A 2026-10-20). Giữ NGUYÊN topic `plan-t1-not-ready-<ACC>` + payload cũ
+    # "đã gửi plan" (artifact do CHÍNH script này ghi khi gửi OK) được ghi SAU lúc mở VÀ md5 khớp
+    # plan hiện tại (`probe plan-t1`; marker cũ của lượt 21:00 KHÔNG đóng — arch-review B2) (retro
+    # 10-16→10-19 Pattern 1, phương án A 2026-10-20). Hết ngày T+1 ⇒ EXPIRED, 1 tin cuối rồi dừng. Giữ NGUYÊN topic `plan-t1-not-ready-<ACC>` + payload cũ
     # (ops_health_check/close helpers đọc topic này). Idempotent theo (ACC, ngày T+1): lượt 23:00
     # không mở câu thứ hai. Helper hỏng (không in OPENED/ALREADY_) ⇒ rơi về đúng lệnh post cũ —
     # thà trùng còn hơn mất câu hỏi của account tiền thật.
@@ -1143,7 +1144,8 @@ if [ "$STATUS" = "ESCALATE" ]; then
       --key "$_GB_KEY" --topic "plan-t1-not-ready-${ACCOUNT}" \
       --owner "Mike (dispatch DollarBill dựng lại plan)" --deadline "${EXPECTED_DATE:-$TODAY}T08:30" \
       --recover "DISPATCH_FROM=Mike $ROOT/bin/dispatch.sh DollarBill \"dựng lại plan T+1 ${EXPECTED_DATE} ${ACCOUNT}: $REASON\" && $ROOT/bin/send_plan_report.sh --account $ACCOUNT --second-chance" \
-      --probe "test -s $MARKER_DIR/${ACCOUNT}_${EXPECTED_DATE:-$TODAY}.json" \
+      --probe "python3 $ROOT/bin/gate_block_question.py probe plan-t1 --account $ACCOUNT --date ${EXPECTED_DATE:-$TODAY} --marker-dir $MARKER_DIR --plan-dir $WORKDIR/data/trade_plans" \
+      --expires-at "${EXPECTED_DATE:-$TODAY}T23:59" --max-reminders 30 \
       --reason "Plan T+1 chưa sẵn sàng ($REASON)" --thread "$DISCORD_PLAN_CHANNEL" \
       --remind-every-min 60 --extra "$_QPAYLOAD" 2>&1)"
     echo "$_GB_OUT"
