@@ -1138,7 +1138,8 @@ if [ "$STATUS" = "ESCALATE" ]; then
     # 10-16→10-19 Pattern 1, phương án A 2026-10-20). Hết ngày T+1 ⇒ EXPIRED, 1 tin cuối rồi dừng. Topic THEO NGÀY `plan-t1-not-ready-<ngày T+1>-<ACC>` (vòng 3
     # arch-review B1: topic không ngày `plan-t1-not-ready-<ACC>` là chuỗi con của câu legacy cùng
     # topic ⇒ đóng/mở lây hai chiều; bus thật có 10 câu legacy pending từ 10-16) + payload cũ. Idempotent theo (ACC, ngày T+1): lượt 23:00
-    # không mở câu thứ hai. Helper hỏng (không in OPENED/ALREADY_) ⇒ rơi về đúng lệnh post cũ —
+    # khi câu 21:xx còn MỞ ⇒ không mở câu thứ hai (ALREADY_OPEN); khi câu đó đã đóng/hết hạn mà plan
+    # lại hỏng ⇒ mở câu MỚI key `-r2` (xem dưới). Helper hỏng (không in OPENED/ALREADY_) ⇒ rơi về đúng lệnh post cũ —
     # thà trùng còn hơn mất câu hỏi của account tiền thật.
     _GB_KEY="${EXPECTED_DATE:-$TODAY}-${ACCOUNT}"
     _gb_open() {   # $1=key  $2=topic
