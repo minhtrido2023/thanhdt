@@ -355,6 +355,17 @@ def _zvf_blocked(tk, d):
 # ====================================================================================================
 
 
+# === V3 — BAN SAO R&D, job Taylor_20261020_122917: cong state cho book LAG (chi khi name bat dau "v23audit_LAG") ===
+#   V3_MODE=off (mac dinh) -> byte-identical.
+#   noentry_bear  -> lenh LAG chua khop phan nao bi HUY neu phien khop co state==2 (BEAR, w_lag_tgt=0).
+#   close_reopen  -> lo LAG co state(ngay vao)==2 bi dong (T+1 Open, reason V3_REOPEN) o phien dau tien state!=2.
+_V3_MODE = os.environ.get("V3_MODE", "off").strip().lower()
+if _V3_MODE not in ("off", "noentry_bear", "close_reopen"):
+    raise ValueError(f"V3_MODE={_V3_MODE!r} khong hop le")
+_v3_stats = {"entry_dropped": 0, "closed_reopen": 0}
+# ====================================================================================================
+
+
 def idle_lots_reconcile(lots, target_cash, order="fifo", new_lot_tail=()):
     """Bring the age-ordered cash-lot ledger `lots` (mutated IN PLACE) to `target_cash`.
 
@@ -734,6 +745,8 @@ def simulate(signals_df, prices, vni_dates, *,
         gross_after = (pmv2 + pend_mv + etf_mv) / nav2 if nav2 > 0 else 0.0
         return (sell_vnd, gross_before, gross_after)
 
+    _v3_on = (_V3_MODE != "off" and str(name).startswith("v23audit_LAG") and state_by_date is not None)
+    _v3_prev_st = None
     for i, today in enumerate(vni_dates):
         # 0z) IDLE-CASH AGE GATE: every surviving lot is one session older as this session opens.
         #     Done BEFORE any cash moves so a lot created later today starts at age 0 and must
@@ -842,6 +855,18 @@ def simulate(signals_df, prices, vni_dates, *,
                 del positions[tk]
             pending_exits = still_pending
 
+        # V3 close_reopen: phien dau tien roi BEAR -> xep lenh ban T+1 Open cho lo mo luc BEAR
+        if _v3_on and _V3_MODE == "close_reopen":
+            _st_today = state_by_date.get(today)
+            if _v3_prev_st == 2 and _st_today is not None and int(_st_today) != 2:
+                _pend = {e["ticker"] for e in pending_exits}
+                for _tk, _pos in positions.items():
+                    _es = state_by_date.get(_pos["entry_date"])
+                    if _es is not None and int(_es) == 2 and _tk not in _pend:
+                        pending_exits.append({"ticker": _tk, "reason": "V3_REOPEN", "trigger_date": today})
+                        _v3_stats["closed_reopen"] += 1
+            if _st_today is not None:
+                _v3_prev_st = int(_st_today)
         # 1) Mark-to-market positions, increment days_held, track peak
         for tk, pos in positions.items():
             cur_price = prices.get(tk, {}).get(today)
@@ -1259,6 +1284,10 @@ def simulate(signals_df, prices, vni_dates, *,
                         px = prices.get(tk, {}).get(today)  # fallback
                 else:
                     px = prices.get(tk, {}).get(today)
+            if (_v3_on and _V3_MODE == "noentry_bear" and entry["filled_shares"] == 0
+                    and state_by_date.get(today) is not None and int(state_by_date.get(today)) == 2):
+                _v3_stats["entry_dropped"] += 1
+                continue                                           # V3: huy lenh LAG chua khop trong BEAR
             if px is not None and not pd.isna(px) and px > 0 and _zvf_blocked(tk, today):
                 _zvf_stats["buy_blocked"] += 1
                 px = None                                          # ZVF: Volume=0 -> nhanh carry-over san co
@@ -1833,6 +1862,8 @@ def simulate(signals_df, prices, vni_dates, *,
         # Attach open positions snapshot as attribute for caller
         nav_df.attrs["open_positions_final"] = pd.DataFrame(open_positions_final)
         nav_df.attrs["etf_lots_final"] = pd.DataFrame(etf_lots_final)
+    if _V3_MODE != "off":
+        print(f"  [V3] {name}: cumulative {_v3_stats}")
     if _ZVF_MODE != "off":
         print(f"  [ZVF] {name}: cumulative {_zvf_stats}")
     return nav_df, trades_df
