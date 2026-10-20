@@ -70,6 +70,11 @@ ERROR_PATTERNS = [
     # backup_freshness_check.sh writes this literal marker when a notify call (Discord/bus)
     # itself fails silently — same coord-2026-09-10 fix, same reasoning as the two above.
     r"NOTIFY_FAILED",
+    # gate_block_question.py sweep (cron đề xuất 2026-10-20): file mode 644 ⇒ cron/bash báo
+    # "failed to run command"/"Permission denied" rc=126 và KHÔNG có dòng nào của helper; helper tự
+    # in SWEEP_ERROR cho bản ghi hỏng. Thiếu cả hai ⇒ sweep chết im lặng (arch-review vòng 2 B2).
+    r"failed to run command",
+    r"SWEEP_ERROR",
 ]
 ERROR_RE = re.compile("|".join(ERROR_PATTERNS), re.MULTILINE)
 

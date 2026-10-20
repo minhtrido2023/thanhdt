@@ -120,6 +120,38 @@ else
     "run_bot.sh --account $ACCOUNT (plan $PLAN_DATE) thoát rc=$rc sau $((elapsed/60)) phút. Log: $LOG. Tail: $tail_preview — Việc cần làm: (1) xác định root cause thật trong log; (2) kiểm tra bot đã tự hồi phục chưa (heartbeat autoheal, log $ROOT/logs/run_bot_${ACCOUNT}_autoheal_*.log + journal exec_${ACCOUNT}_${PLAN_DATE}_journal.csv trong data/execution_logs/); (3) nếu còn lệnh kẹt/bot chết trong giờ giao dịch → ưu tiên khôi phục an toàn trong ranh giới cho phép, còn lại escalate." 2>/dev/null || true
 fi
 
+# Cổng approval chặn (bot_execute.py exit 2) ⇒ mở 1 bus question CÓ CHỦ + HẠN + CHỈ DẪN PHỤC HỒI,
+# sweep cron nhắc tới khi probe artifact chứng minh đã duyệt VÀ bot đã chạy lại SAU lúc mở (retro
+# 10-16→10-19 Pattern 1, phương án A user chốt 2026-10-20). Điều kiện mở đọc lại ARTIFACT bằng đúng
+# hàm cổng dùng (probe rc=10 = VẪN CHẶN; 12 = không có plan ⇒ KHÔNG mở, việc khác), không suy từ
+# rc=2. Output probe ghi vào $LOG, reason nội suy từ output đó (§29). Chạy SAU khi rc đã chốt, bọc
+# timeout + `|| true`: không đổi rc, không đổi quyết định chặn. Idempotent theo (account, plan_date).
+# Ranh giới quyền (arch-review B3): phục hồi = CHỈ DẪN cho USER (duyệt); KHÔNG có lệnh máy đọc nối
+# approve && run_bot. Bước Mike (chạy lại bot) chỉ hiện trong lời nhắc khi probe đã thấy duyệt (rc=11).
+# Hết phiên PLAN_DATE (15:00) ⇒ EXPIRED: 1 tin cuối rồi dừng.
+# GATE_BLOCK_APPROVAL_BEGIN — trích bởi gate_block_question_selfcheck.py
+if [ "$rc" -eq 2 ]; then
+  _gbq="$ROOT/bin/gate_block_question.py"
+  _probe="python3 $_gbq probe approval --account $ACCOUNT --date $PLAN_DATE"
+  _prc=0
+  _pout="$( cd "$WC_ROOT" && timeout 60 $_probe 2>&1 )" || _prc=$?
+  echo "[gate_block] probe approval rc=$_prc: $_pout" >> "$LOG" 2>/dev/null || true
+  if [ "$_prc" -eq 10 ]; then
+    timeout 60 python3 "$_gbq" open --gate approval --key "${PLAN_DATE}-${ACCOUNT}" \
+      --owner "user duyệt plan; Mike chạy lại bot" --deadline "${PLAN_DATE}T10:00" \
+      --expires-at "${PLAN_DATE}T15:00" --max-reminders 24 \
+      --recover-kind instructions \
+      --recover "USER: duyệt plan $PLAN_DATE [$ACCOUNT] ở topic duyệt plan. Agent CHỈ ghi approved_by (approve_plan_simple.sh) theo lời duyệt THẬT của user — không tự duyệt." \
+      --next-step "11=Mike: probe đã thấy approved_by, bot chưa chạy lại ⇒ chạy $ROOT/bin/run_bot.sh --account $ACCOUNT --auto-otp" \
+      --probe "$_probe" --reason "${_pout:0:300}" \
+      --thread "$_tid" --remind-every-min 15 \
+      --extra "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"log\":\"$LOG\"}" >> "$LOG" 2>&1 || true
+  elif [ "$_prc" -ne 0 ]; then
+    echo "[gate_block] rc=2 nhưng probe rc=$_prc (12=không có plan, 2=lỗi probe) ⇒ KHÔNG mở question approval" >> "$LOG" 2>/dev/null || true
+  fi
+fi
+# GATE_BLOCK_APPROVAL_END
+
 "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
 
 # EXTREME-regime gate alert: quét journal sau phiên, gửi email nếu gate đã fire
