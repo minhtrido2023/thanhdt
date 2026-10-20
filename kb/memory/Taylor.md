@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-18T03:16:52Z] ĐANG DỞ job Taylor_20261018_030925 (cq-2026-10-18 autodispatch, 7 finding): sửa xong 6 + F7 chỉ docstring, working tree CHƯA commit (9 file ở WorkingClaude/); arch-reviewer ae94d13e chạy nền | NEXT: nhận verdict, commit CHỈ 9 file (cấm git add -A), bus finding topic cq-2026-10-18-taylor-autodispatch, notify_thread.sh architecture
-- [2026-10-18T03:22:49Z] [cq-2026-10-18 autodispatch] XONG commit 3147ce873 (9 file), chờ Mike/arch-review vòng 2 nếu muốn; chưa merge/push. (Thay dòng ĐANG DỞ job 030925.)
 - [2026-10-18T17:25:58Z] ĐANG DỞ job Taylor_20261018_172548 (VN-Index TR carry-forward v2, wt riêng, KHÔNG merge/data thật) | NEXT: đọc bin/vnindex_total_return.py + registry
 - [2026-10-18T17:38:45Z] [vnindex-tr carry-forward v2 10-19] XONG chờ Mike gọi quant-skeptic rồi trình user: nhánh research/vnindex-tr-carry-forward-20261019 @37aa83657 (wt WorkingClaude/wt-Taylor_20261018_172548), finding vnindex-tr-carry-forward-v2-20261019. Mở: 1 ô ZaloPay -6,85→-6,86 nếu weekly 12-16/10 đã gửi bằng v1. (Thay dòng ĐANG DỞ job 172548.)
 - [2026-10-18T17:45:16Z] [sunday-plan-round 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @d570de2c9 (wt-Taylor_20261018_173105). Thêm 1 dòng: cổng macro_health CN.
@@ -26,3 +24,5 @@
 - [2026-10-19T16:01:43Z] ĐANG DỞ job Taylor_20261019_160133 (DT gate candidate BEAR/CRISIS recount, read-only) | NEXT: đọc get_dt_gate_clock + DT gate trong macro_state_live.py, tái dựng chuỗi 29/09-19/10
 - [2026-10-19T16:04:07Z] [dt-gate-badzone 10-19] XONG job Taylor_20261019_160133: khuyến nghị A giữ nguyên; REPORT research/dt_badzone_count_20261019/. Mốc: CRISIS 25/25 sớm nhất ~10/11 nếu không đứt. (Thay dòng ĐANG DỞ job 160133.)
 - [2026-10-20T03:14:43Z] ĐANG DỞ job Taylor_20261020_031433 (gate-block owned recovery, phương án A; wt nhánh feat/gate-block-owned-recovery-20261020, KHÔNG merge) | NEXT: kiểm kê cổng BLOCK bằng grep
+- [2026-10-20T03:17:56Z] ĐANG DỞ job Taylor_20261020_031433: wt /home/trido/thanhdt/wt-Taylor_20261020_031433 nhánh feat/gate-block-owned-recovery-20261020 | NEXT: helper bin/gate_block_question.py + wire run_bot.sh/send_plan_report.sh/check_report_cadence.sh + selfcheck
+- [2026-10-20T03:21:01Z] [vnindex-tr carry-forward vòng 2 10-20] XONG chờ Mike quant-skeptic vòng 2: nhánh research/vnindex-tr-carry-forward-20261019 (wt-Taylor_20261018_172548). Mở: báo cáo ZaloPay tuần 12-16/10 dòng 90+93 nếu gửi bằng v1; DMX/AAN/LPS thiếu giá chờ bq_admin.
