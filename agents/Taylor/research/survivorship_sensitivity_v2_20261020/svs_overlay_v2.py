@@ -1,4 +1,4 @@
-"""Survivorship sensitivity v2 — trọng số phantom theo book. Theo PREREG.md (md5 f9092a9e). EXPLORATORY.
+"""Survivorship sensitivity v2 — trọng số phantom theo book. Theo PREREG.md (md5 f9092a9e) + PREREG_A.md (fix book_counts). EXPLORATORY.
 Usage: $DNA_PYEXE svs_overlay_v2.py <out_dir> <label>=<ledger.csv> ...
 """
 import sys, json, os
@@ -11,19 +11,33 @@ LAM_GRID = [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0]
 
 
 def book_counts(d, tx):
-    """n_b(d): số vị thế cổ phiếu mở cuối mỗi ngày DAILY, theo book."""
+    """n_b(d): số vị thế CỔ PHIẾU mở cuối mỗi ngày DAILY, theo book.
+    Fix A (job Taylor_20261020_113646, PREREG_A.md): loại rổ ETF_PARK / CUSTOM_* (giá trị nằm ở *_etf_ref, không ở
+    tử số *_stocks_ref). Assert: mỗi ngày (trừ ngày cuối = thanh lý kết thúc audit) n_b>0 <=> b_stocks_ref>0 và
+    số rổ mở>0 <=> b_etf_ref>0."""
     tx = tx.sort_values("ymd", kind="stable")
     if not tx.action.str.startswith(("buy", "sell")).all():
         raise SystemExit(f"action lạ: {tx.action.unique()}")
-    tx = tx.assign(q=np.where(tx.action.str.startswith("buy"), 1.0, -1.0) * tx.shares)
+    is_etf = tx.play_type.eq("ETF_PARK") | tx.ticker.str.startswith("CUSTOM_")
+    if (tx.play_type.eq("ETF_PARK") != tx.ticker.str.startswith("CUSTOM_")).any():
+        raise SystemExit("ETF_PARK và CUSTOM_* không trùng nhau — xem lại phân loại")
+    tx = tx.assign(q=np.where(tx.action.str.startswith("buy"), 1.0, -1.0) * tx.shares, etf=is_etf)
     pos, by_day = {}, {k: g for k, g in tx.groupby("ymd")}
     out = {"BAL": [], "LAG": []}
-    for day in d.index:
+    bad = []
+    for i, day in enumerate(d.index):
         if day in by_day:
-            for (b, t), q in by_day[day].groupby(["book", "ticker"]).q.sum().items():
-                pos[(b, t)] = pos.get((b, t), 0.0) + q
+            for (b, t, e), q in by_day[day].groupby(["book", "ticker", "etf"]).q.sum().items():
+                pos[(b, t, e)] = pos.get((b, t, e), 0.0) + q
         for b in out:
-            out[b].append(sum(1 for (bb, t), q in pos.items() if bb == b and q > 1e-6))
+            ns = sum(1 for (bb, t, e), q in pos.items() if bb == b and not e and q > 1e-6)
+            ne = sum(1 for (bb, t, e), q in pos.items() if bb == b and e and q > 1e-6)
+            out[b].append(ns)
+            sv, ev = d[f"{b.lower()}_stocks_ref"].iloc[i], d[f"{b.lower()}_etf_ref"].iloc[i]
+            if i < len(d) - 1 and ((ns > 0) != (sv > 0.5) or (ne > 0) != (ev > 0.5)):
+                bad.append((day, b, ns, ne, sv, ev))
+    if bad:
+        raise SystemExit(f"tập n_b lệch tập định giá stocks_ref/etf_ref ở {len(bad)} ngày: {bad[:5]}")
     return {b: pd.Series(v, index=d.index) for b, v in out.items()}
 
 
