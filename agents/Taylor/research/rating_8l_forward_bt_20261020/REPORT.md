@@ -49,7 +49,7 @@ Biên quá mỏng (~0,01 p): seed bootstrap khác có thể lật kết quả (q
   pin 10-01). Cổng giá: live `tav2_bq.ticker` **FAIL** (1.051 mã < 1.200; phủ universe 0,904) → pin `ticker_pin_202610` OK
   (1.294; phủ 1,000).
 - **Đề xuất cron (CHƯA cài; Mike quyết sau review):**
-  `15 18 * * * cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && $DNA_PYEXE mike/bin/rating_8l_forward_tracker.py >> mike/logs/rating_8l_forward_tracker.log 2>&1`
+  `15 11 * * * cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && flock -n mike/state/rating_8l_forward_tracker.cron.lock timeout 900 $DNA_PYEXE mike/bin/rating_8l_forward_tracker.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/rating_8l_forward_tracker.log 2>&1` (UTC 11:15 = 18:15 ICT; `.` thay `source` vì cron dùng dash; log đường dẫn tuyệt đối)
   (18:15 ICT, sau `fa_ratings_8l` 17:30; tracker chỉ đọc BQ; trùng lần chạy thì idempotent theo khoá ticker+quarter).
 - Sai lệch so với PREREG_FORWARD:
   1. §2 ghi "số mã có giá tại phiên mới nhất ≥ 1.200". Đo thật thì số mã mỗi phiên dao động 774-1.259 ngay trên pin lành

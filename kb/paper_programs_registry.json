@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-10-14",
+  "updated": "2026-10-20",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -720,6 +720,40 @@
       "notes": "Đăng ký 2026-08-19 (job Taylor_20260819_124845), dispatch từ Mike theo quyết định user (decided_by=user, Discord topic 1521183164364754974). Script mới bal_shadow_paper.py (WC_ROOT root, ~140 dòng): mỗi lần chạy đọc rec CSV mới nhất, thêm entry mới nếu ticker BAL FULL/HALF_SIZE chưa có trong ledger (dedupe theo ticker — không log lại tín hiệu cũ), entry price = BQ Close ngày signal (quy ước MTM giống dc_book_waterfall_paper.py, đây là shadow R&D không phải lệnh thật nên không cần giá DNSE live theo §6). Test thật 2026-08-19: thêm VPI (entry 62.100đ 2026-08-19) thành công, idempotent khi chạy lại. ⚠️ GIỚI HẠN ĐÃ BIẾT: (1) mẫu sẽ RẤT NHỎ trong 4 tuần (book vừa rỗng, tín hiệu BAL không fire mỗi ngày) — checkpoint 2026-09-16 nhiều khả năng chỉ có 1-3 entry, không đủ để test thống kê, chỉ đủ để MÔ TẢ xu hướng + đối chiếu regime, ĐỪNG kết luận 'BAL tốt/xấu' từ mẫu này; (2) chỉ log tín hiệu MỞ MỚI (status FULL/HALF_SIZE) — không mirror vị thế BAL cũ vì book đang rỗng, nếu sau này book có vị thế từ nguồn khác (vd resume sớm) cần mở rộng ledger để không bỏ sót; (3) BQ Close trễ 1 ngày so với phiên thật (sync 23:45 ICT) — MTM hiển thị luôn lệch 1 ngày, không phải bug.",
       "review_short": "ĐÓNG 2026-09-17: user đã RESUME BAL (09-16). Gate1 FAIL thiếu mẫu (2 tín hiệu VPI+VIC <3), gate2 cùng chiều (+9,6% bq đã điều chỉnh quyền, vs VNINDEX +1–4,5%; probe −2,99% là lỗi đo), gate3 NEUTRAL 100% phiên. Không cần theo dõi tiếp; bal_shadow_paper.py còn 2 lỗi đo nếu tái dùng.",
       "status": "closed 2026-09-17 — user RESUME BAL 2026-09-16"
+    },
+    {
+      "id": "rating_8l_g1_forward_oos",
+      "name": "Rating 8L G1 (≥4→≤3) — tích luỹ OOS đi tới",
+      "owner": "Taylor",
+      "objective": "Kiểm chứng tiếp (KHÔNG phải wire) drift sau sự kiện rating 8L cải thiện ≥4→≤3 (G1). Vòng 2 (rating_8l_lag_p2v2_20261020, quant-skeptic CONFIRMED) cho G1−G0* khớp SUE +1,06% [2,20] / +1,55% [2,40] nhưng trượt tiêu chí nửa IS 2014-19 (p≈0,18-0,21, thiếu power). User duyệt 2026-10-20 tích luỹ forward theo thiết kế khoá trong PREREG_FORWARD.md (md5 4ad20803a74b046af74a9b128085019c, commit 2991ee58d): sự kiện eff > 2026-07-31, cửa sổ quyết định DUY NHẤT [2,40], B3 loại chính mã, ô khớp quý × mom5 × SUE5 × bank, code event_study_v2_frozen.py (md5 a857d81b…). Không đổi gate/luật.",
+      "start": "2026-10-20",
+      "end": "2027-10-20",
+      "review_date": "2027-10-20",
+      "end_or_trigger": "Review NĂM, lần đầu 2027-10-20 (PREREG_FORWARD §4), sau đó cuộn `end` thêm 12 tháng. Dừng sớm: futility (N≥300 và cận trên CI95 của δ [2,40] < 0), hoặc fa_ratings_8l đổi định nghĩa rating, hoặc user/Mike chấm dứt. Forcing function: paper_checkpoint_escalation.sh (cron 16:10) escalate + dispatch Taylor khi `end` qua mà gate còn `pending`.",
+      "gate_criteria": [
+        {
+          "text": "Tracker chạy đều (data/rating_8l_forward_events.csv có sự kiện của mùa BCTC Q3/2026 và Q4/2026; data/rating_8l_forward_car.csv có CAR cho sự kiện đủ 42 phiên) — mỗi lần CAR bị BLOCKED do cổng độ phủ giá phải có dòng log, không im lặng",
+          "status": "pending"
+        },
+        {
+          "text": "Verdict theo PREREG_FORWARD §3 tại review: 'có (forward xác nhận)' chỉ khi N G1 khớp ≥ N_min = 3.398 VÀ p_boot < 0,05 VÀ δ>0; futility nếu N≥300 và cận trên CI95 < 0; còn lại 'không phân biệt được (thiếu N)'. Ước lượng ~90 G1/năm ⇒ N_min cần ~35-40 năm (ước lượng): các review trong chân trời thực tế là MÔ TẢ.",
+          "status": "pending"
+        }
+      ],
+      "feature_flag": "N/A — paper-only, không có đường code production nào đọc ledger này",
+      "reporting": false,
+      "reporting_reason": "Cadence NĂM, sự kiện chỉ phát sinh trong mùa BCTC và CAR cần 42 phiên ⇒ render hằng ngày là nhiễu. Vẫn được paper_checkpoint_escalation.sh bắt khi quá hạn (không lọc theo `reporting`).",
+      "today_activity": {
+        "mode": "none_available",
+        "reason": "Chương trình thuần quan sát: không sinh lệnh, không có sleeve NAV. Sản phẩm = 2 ledger append-only (sự kiện + CAR mô tả)."
+      },
+      "data_sources": [
+        "tav2_bq.fa_ratings_8l + tav2_bq.ticker_financial (Release_Date) — sự kiện",
+        "tav2_bq.ticker (nếu qua cổng độ phủ) hoặc tav2_pin.ticker_pin_YYYYMM mới nhất — giá CAR; tav2_mike.universe_pit — B3/in_universe",
+        "mike/bin/rating_8l_forward_tracker.py → data/rating_8l_forward_events.csv, data/rating_8l_forward_car.csv"
+      ],
+      "notes": "Job Taylor_20261020_055002. Research + PREREG: mike/agents/Taylor/research/rating_8l_forward_bt_20261020/. Cron CHƯA cài (Mike đề xuất sau review; dòng đề xuất trong REPORT.md). first_seen của lô đầu (295 sự kiện Q2/2026, eff 2026-08-03→) = 2026-10-20 ⇒ lô này KHÔNG PIT tuyệt đối (rating có thể đã restate giữa eff và 10-20); từ mùa Q3/2026 trở đi tracker chạy hằng ngày thì first_seen ≈ eff.",
+      "review_short": "2027-10-20 — chạy event_study_v2_frozen.py trên sự kiện forward (eff>2026-07-31): N G1, δ [2,40] + CI + p; verdict theo PREREG_FORWARD §3."
     }
   ]
 }
