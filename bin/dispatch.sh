@@ -1677,9 +1677,19 @@ $_commit_hint}" \
      && systemd-run --user --scope --quiet --collect /bin/true >/dev/null 2>&1; then
     _detach_ok=1
   fi
-  _detached_spawn() {  # $1 = bash command string, $2 = human description
+  # Trần RAM cho scope của job (sự cố treo container 2026-10-20: LXC 40GB, KHÔNG swap, 8 engine
+  # ~3,2GB/proc song song). Vượt trần ⇒ kernel giết RIÊNG tiến trình lớn nhất trong scope,
+  # container vẫn sống. DISPATCH_JOB_MEM_MAX_GB=0 tắt. Slice mike-jobs.slice (nếu đã cài bằng
+  # bin/install_mike_jobs_slice.sh) giới hạn TỔNG mọi job cùng lúc.
+  _mem_props=()
+  if [ "${DISPATCH_JOB_MEM_MAX_GB:-18}" != "0" ]; then
+    _mem_props=(-p "MemoryMax=${DISPATCH_JOB_MEM_MAX_GB:-18}G" -p MemorySwapMax=0 --slice=mike-jobs.slice)
+  fi
+  _detached_spawn() {  # $1 = bash command string, $2 = human description, $3 = "mem" để áp trần RAM
     if [ "$_detach_ok" = "1" ]; then
-      systemd-run --user --scope --quiet --collect --description="$2" \
+      local _props=()
+      [ "${3:-}" = "mem" ] && _props=("${_mem_props[@]}")
+      systemd-run --user --scope --quiet --collect --description="$2" "${_props[@]}" \
         bash -c "$1" </dev/null >/dev/null 2>&1 &
     elif command -v setsid >/dev/null 2>&1; then
       setsid bash -c "$1" </dev/null >/dev/null 2>&1 &
@@ -1687,7 +1697,7 @@ $_commit_hint}" \
       bash -c "$1" </dev/null >/dev/null 2>&1 &
     fi
   }
-  _detached_spawn '_bg_wrapper' "mike-dispatch $job_id ($from → $id)"
+  _detached_spawn '_bg_wrapper' "mike-dispatch $job_id ($from → $id)" mem
   disown 2>/dev/null || true
   pid=$!
   # Watcher: milestone progress + anomaly detection (empty/stale log). Detached the

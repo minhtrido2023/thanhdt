@@ -42,6 +42,7 @@ Gặp đúng tình huống thì `Read` file đó.
 | **§25** "Tiền" không phải một con số — bảng field cash per-consumer, số neo, ngoại lệ L2 | Viết/sửa BẤT KỲ code nào đọc số dư tiền từ broker (NAV, sizing, gate tiền, park/unpark) |
 | **§27** "Lệnh đã đặt" ≠ "lệnh đã khớp" — đối soát fill thật | Trước khi báo 1 lệnh/plan "đã thực thi"/"đã đạt X% NAV" |
 | **§31** Bảng "Hiệu suất lũy kế" báo cáo SpaceX phải qua `nav_period_returns.py` | Soạn dòng WTD/MTD/"Từ khi bắt đầu hoạt động" trong weekly/monthly SpaceX |
+| **§32** Job nền song song phải có trần RAM (container 40GB, KHÔNG swap) | Mở ≥2 tiến trình nặng song song (backtest/engine), hoặc sửa `dispatch.sh` / cgroup |
 | **Dọn 2026-10-09** — §8c bẫy git · §16 chi tiết cổng `tz_anchor_gate` · §29 số đo `diagnosis_evidence_gate` | Cổng pre-commit chặn mà cần lối thoát/chi tiết; viết cổng mới |
 
 ⚠️ **Con trỏ này CỐ Ý không dùng cú pháp `@`.** `@`-import của Claude Code là **đệ quy** — viết
