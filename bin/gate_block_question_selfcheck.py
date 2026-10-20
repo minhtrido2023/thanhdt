@@ -712,6 +712,24 @@ def followups_core(target: Path) -> None:
                             "topic": "manual", "payload": {"resolves": ["Mike/gate-block-approval-2026-10-20-SpaceX"]}}) + "\n")
     rc, out = run(target, R, *open_args(probe="false"), now="2026-10-20T09:20:00+07:00")
     check("ALREADY_CLOSED" in out and st(R)["status"] == "closed", "NB-D: bus đã đóng ngoài sweep ⇒ ALREADY_CLOSED (caller mở câu mới), sổ closed")
+    check(st(R).get("closed_at", "").startswith("2026-10-20T09:20"), "NB-D: ghi closed_at (để sweep dọn sổ theo hạn)")
+
+    # NB-D / M1: audit KHÔNG đọc được (None) ⇒ coi như còn mở, KHÔNG đóng nhầm câu đang sống
+    R = mkroot()
+    run(target, R, *open_args(probe="false"), now="2026-10-20T09:06:00+07:00")
+    (R / "AUDIT_BROKEN").write_text("1")
+    rc, out = run(target, R, *open_args(probe="false"), now="2026-10-20T09:10:00+07:00")
+    check("ALREADY_OPEN" in out and st(R)["status"] == "open" and not st(R).get("closed_at"),
+          "NB-D: audit trả None (hỏng) ⇒ ALREADY_OPEN, sổ vẫn open, không đóng nhầm")
+
+    # NB-B / M4: bản ghi CLOSED (qua sweep+probe) cũng ghi last_open_call_at khi còn người gọi open
+    R = mkroot()
+    run(target, R, *open_args(probe="true"), now="2026-10-20T09:06:00+07:00")
+    run(target, R, "sweep", now="2026-10-20T09:30:00+07:00")
+    check(st(R)["status"] == "closed", "NB-B(closed): tiền đề — probe rc=0 ⇒ sổ closed")
+    rc, out = run(target, R, *open_args(probe="true"), now="2026-10-25T09:00:00+07:00")
+    check("ALREADY_CLOSED" in out and st(R).get("last_open_call_at", "").startswith("2026-10-25"),
+          "NB-B(closed): open lên bản ghi closed ghi last_open_call_at")
 
     # A2: --topic tuỳ biến ⇒ ack nhắm ĐÚNG topic đó (CHECK5 so ack với topic câu hỏi)
     R = mkroot()
@@ -917,7 +935,8 @@ def followups_wiring(bin_dir: Path) -> None:
     script = ("set -uo pipefail\nROOT=%s\nACCOUNT=ZaloPay\nEXPECTED_DATE=2026-10-21\nTODAY=2026-10-20\n"
               "REASON=missing\nMARKER_DIR=/m\nWORKDIR=/w\nDISCORD_PLAN_CHANNEL=plan_approval\n_QPAYLOAD='{}'\n%s\n") % (W / "mike", blk)
     for first, second, want_calls, want_fb in (("closed", "ok", 2, False), ("expired", "ok", 2, False),
-                                               ("closed", "closed", 2, True), ("ok", "ok", 1, False)):
+                                               ("closed", "closed", 2, True), ("ok", "ok", 1, False),
+                                               ("open", "ok", 1, False), ("prefixed", "ok", 1, True)):
         for f in (log, fb):
             if f.exists():
                 f.unlink()
@@ -944,6 +963,9 @@ def followups_wiring(bin_dir: Path) -> None:
                    "gate_block_question: REMIND_UNDELIVERED x — không kênh nào nhận"):
         check(bool(chc.ERROR_RE.search(sample)), f"NB-C/E1/E2: ERROR_RE bắt {sample.split(':')[1].split()[0] if 'gate_block' in sample else sample[:25]!r}")
     check(not chc.ERROR_RE.search("gate_block_question: STILL_OPEN x (nhắc gần đây)"), "NB-C: dòng bình thường STILL_OPEN không bị bắt")
+    for neg in ("gate_block_question: PRUNED delivery__x", "gate_block_question: CLOSED_EXTERNALLY x", "gate_block_question: ALREADY_OPEN x",
+                "gate_block_question: OPENED Mike/t owner=o", "report_gate summary: 0 FAILED, 12 passed"):
+        check(not chc.ERROR_RE.search(neg), f"C1: log mẫu âm không bị bắt (regex không bị nới): {neg[:48]!r}")
 
     # R2: probe run_bot chạy dưới `timeout 60` (shim timeout ghi argv)
     sh = W / "shim"; sh.mkdir()
@@ -959,6 +981,14 @@ def followups_wiring(bin_dir: Path) -> None:
                    env=dict(os.environ, PATH=f"{sh}:{os.environ['PATH']}", STUB_PROBE_RC="10"))
     probe_lines = [l for l in (tl.read_text().splitlines() if tl.exists() else []) if "probe approval" in l and " open " not in l]
     check(len(probe_lines) == 1 and probe_lines[0].startswith("60 "), "R2: lệnh probe approval của run_bot chạy dưới `timeout 60`")
+
+    # W2: lượt `open` của plan-t1 cũng chạy dưới `timeout 60` (helper treo không được kẹt send_plan_report)
+    if tl.exists():
+        tl.unlink()
+    subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=60,
+                   env=dict(os.environ, PATH=f"{sh}:{os.environ['PATH']}", STUB_OPEN="ok"))
+    open_lines = [l for l in (tl.read_text().splitlines() if tl.exists() else []) if "gate_block_question.py open" in l]
+    check(len(open_lines) == 1 and open_lines[0].startswith("60 "), "W2: lệnh `open` plan-t1 chạy dưới `timeout 60`")
 
     # D1 / D2: cadence — deadline neo ICT (shim date phân biệt TZ) + nhắc 240'
     (sh / "date").write_text('#!/usr/bin/env bash\nif [ "${TZ:-}" = "Asia/Ho_Chi_Minh" ]; then echo 2031-03-04; else echo 1999-01-01; fi\n'); (sh / "date").chmod(0o755)
@@ -981,7 +1011,10 @@ with open(os.path.join(root, "helper_calls.log"), "a") as f:
     f.write("\x1e".join(sys.argv[1:]) + "\n")
 n = sum(1 for _ in open(os.path.join(root, "helper_calls.log")))
 mode = os.environ.get("STUB_FIRST" if n == 1 else "STUB_SECOND", "ok")
-print("gate_block_question: " + ("OPENED" if mode == "ok" else "ALREADY_" + mode.upper()) + " x")
+if mode == "prefixed":   # dòng ALREADY_CLOSED KHÔNG ở đầu dòng (vd lẫn trong cảnh báo) — không được kích hoạt r2
+    print("warn: gate_block_question: ALREADY_CLOSED x")
+else:
+    print("gate_block_question: " + ("OPENED" if mode == "ok" else "ALREADY_" + mode.upper()) + " x")
 '''
 
 
@@ -1083,6 +1116,10 @@ MUTATIONS = [
     ("NB-B prune bỏ qua last_open_call_at", 'rec.get("closed_at") or rec.get("expired_at"), rec.get("last_open_call_at")', 'rec.get("closed_at") or rec.get("expired_at")'),
     ("NB-B open không ghi last_open_call_at", '                rec["last_open_call_at"] = now.isoformat(timespec="seconds")\n                save(path, rec)\n', ''),
     ("NB-D open không kiểm still_pending", '                if still_pending(rec["agent"], rec["topic"]) is False:\n                    rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện ở lượt open)")', '                if False:\n                    rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện ở lượt open)")'),
+    # reviewer arch-review vòng 3 (M1/M4/M6 sống ở ee8279538)
+    ("M1 NB-D audit None ⇒ đóng nhầm", 'if still_pending(rec["agent"], rec["topic"]) is False:\n                    rec.update(', 'if not still_pending(rec["agent"], rec["topic"]):\n                    rec.update('),
+    ("M4 NB-B chỉ ghi last_open cho expired", 'elif rec.get("status") in DONE:', 'elif rec.get("status") == "expired":'),
+    ("M6 NB-D không đặt closed_at", 'rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện', 'rec.update(status="closed",\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện'),
 ]
 
 
@@ -1107,6 +1144,11 @@ WIRE_MUTATIONS = [
     ("cron_health_check.py", "NB-C bỏ AUDIT_UNREADABLE", '    r"AUDIT_UNREADABLE",\n', ''),
     ("cron_health_check.py", "NB-C bỏ REMIND_UNDELIVERED", '    r"REMIND_UNDELIVERED",\n', ''),
     ("check_report_cadence.sh", "W4 bỏ --max-reminders", "--expires-in-days 3 --max-reminders 20", "--expires-in-days 3"),
+    # reviewer arch-review vòng 3 (W1/W2/W4/C1)
+    ("send_plan_report.sh", "W1 r2 cả khi ALREADY_OPEN", "ALREADY_(CLOSED|EXPIRED)([[:space:]]|$)", "ALREADY_(CLOSED|EXPIRED|OPEN)([[:space:]]|$)"),
+    ("send_plan_report.sh", "W2 bỏ timeout 60 trong _gb_open", "      timeout 60 python3 \"$ROOT/bin/gate_block_question.py\" open", "      python3 \"$ROOT/bin/gate_block_question.py\" open"),
+    ("send_plan_report.sh", "W4 r2 bỏ neo ^", "grep -qE '^gate_block_question: ALREADY_(CLOSED|EXPIRED)", "grep -qE 'gate_block_question: ALREADY_(CLOSED|EXPIRED)"),
+    ("cron_health_check.py", "C1 POST_FAILED -> FAILED (rộng)", '    r"POST_FAILED",', '    r"FAILED",'),
     ("check_report_cadence.sh", "NB-2 reason lại lấy dòng cuối GATE_OUT thô", '${_RC_WHY:-không xác định (đã báo INCOMPLETE trong ngày — xem logs/check_report_cadence.log hoặc report_delivery_gate.py --status)}', "$(printf '%s\\n' \"$GATE_OUT\" | tail -n 1 | cut -c1-200)"),
 ]
 

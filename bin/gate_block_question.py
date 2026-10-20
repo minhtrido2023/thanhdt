@@ -11,7 +11,15 @@ HỢP ĐỒNG (đọc trước khi wire vào cổng mới):
      làm cổng mở. Helper không ghi plan/report/state của cổng nào.
   2. Idempotent theo (gate, key): sổ `state/gate_blocks/<gate>__<key>.json`, claim nguyên tử bằng
      tmp + os.link (file sổ không bao giờ tồn tại ở dạng rỗng). Cùng cổng + cùng key ⇒ KHÔNG mở
-     câu thứ hai, kể cả khi câu đầu đã đóng/hết hạn (§5: thà thiếu một câu hơn spam).
+     câu thứ hai trong helper, kể cả khi câu đầu đã đóng/hết hạn: `open` in ALREADY_CLOSED /
+     ALREADY_EXPIRED và ghi `last_open_call_at` (§5: thà thiếu một câu hơn spam). Muốn câu MỚI
+     sau khi câu cũ tắt thì CALLER dùng key khác (plan-t1: hậu tố `-r2`, topic tiền tố `r2`).
+     CHỦ ĐÍCH: với `delivery`, người đã đóng câu hỏi trong khi file vẫn kẹt ⇒ gate_block KHÔNG
+     hỏi lại (không có key -r2 cho delivery); tín hiệu "vẫn kẹt" còn lại là INCOMPLETE của
+     report_delivery_gate/check_report_cadence, không phải câu hỏi bus mới.
+     `open` lên bản ghi `open` mà audit chính thống (`bus_question_audit.py`) báo KHÔNG còn
+     pending (đóng ngoài sweep) ⇒ chốt `closed` + closed_at ngay (NB-D) để caller mở câu mới;
+     audit không đọc được (None) ⇒ coi như còn mở, giữ ALREADY_OPEN.
      Bị kill giữa "claim" và "post" ⇒ sổ ở `posting`; lượt sau đọc BUS (nguồn sự thật bên ngoài,
      tìm `payload.gate_block_id`) trước khi post lại.
   3. Đóng CHỈ khi artifact chứng minh: probe (rc=0 ⇔ đã phục hồi) chạy trong `sweep` với env
@@ -27,8 +35,10 @@ HỢP ĐỒNG (đọc trước khi wire vào cổng mới):
      `recover_instructions`, KHÔNG có trường lệnh máy đọc); `--next-step RC=TEXT` ⇒ bước kế chỉ
      hiện khi probe trả đúng RC đó (vd approval: Mike chạy lại bot CHỈ sau khi probe thấy duyệt).
   7. Giờ: mọi so sánh hạn theo ICT tường minh (§16), không theo TZ của host.
-  8. Dọn sổ: bản ghi closed/expired quá RETAIN_DAYS ngày bị sweep xoá (key luôn chứa ngày ⇒
-     không mở lại nhầm).
+  8. Dọn sổ: bản ghi closed/expired bị sweep xoá khi quá RETAIN_DAYS ngày kể từ MỐC MUỘN NHẤT
+     của closed_at/expired_at và `last_open_call_at` (lượt `open` gần nhất của caller, NB-B) ⇒
+     còn caller gọi `open` thì không xoá (xoá ⇒ lượt open kế mở lại câu y hệt); key luôn chứa
+     ngày ⇒ không mở lại nhầm.
 
 CLI:
   open   --gate G --key K --owner O --deadline YYYY-MM-DDTHH:MM --recover TEXT --probe CMD
