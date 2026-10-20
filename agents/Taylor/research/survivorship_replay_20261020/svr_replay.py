@@ -10,7 +10,7 @@ from svr_lib import load_px, indicators, ta_px, universe
 HERE = os.path.dirname(os.path.abspath(__file__))
 WIN = "/home/trido/thanhdt/WorkingClaude/mike/agents/Winston/research/vanished_20261020"
 KBP = "/home/trido/thanhdt/WorkingClaude/mike/kb/projects"
-V2 = "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/survivorship_sensitivity_v2_20261020/out_summary.json"
+V2 = "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/survivorship_sensitivity_v2_20261020/out_summary_SUPERSEDED_bookcount_bug.json"  # ghim w v2 gốc mà replay CONFIRMED dùng; bản fix A ở out_summary.json
 M = "ROS FLC GAB KLF ART HAI AMD SJF PSH TTB KSA TGG DAG NHP".split()
 HVG = ["HVG"]
 E = "KSH TNA KHB VIS CAV DPS VMI AVF KSS RDP SIC IBC CEE PPI SPI GTT NDF KSK KPF ASA BGM".split()
