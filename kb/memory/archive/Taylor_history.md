@@ -1375,3 +1375,9 @@
 
 ## Archived 2026-10-21 (keep=12 days=0 require_done=False)
 - [2026-10-20T11:36:59Z] ĐANG DỞ job Taylor_20261020_113646 (survivorship follow-up A-D, EXPLORATORY) | NEXT: đọc v2 overlay + replay REPORT + 2 log skeptic
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T12:12:21Z] [survivorship follow-up ABCD 10-20] XONG job Taylor_20261020_113646. Mo: Winston xac nhan BQ Volume=0 (31% gia tri mua LAG khop ngay KL=0, chua do CAGR); dong gop lo LAG mo luc BEAR can engine co cong state - cho Mike/user.
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T12:29:29Z] ĐANG DỞ job Taylor_20261020_122917 (V1 Volume=0 fill / V2 delisted enumerate / V3 LAG BEAR gate, EXPLORATORY, out agents/Taylor/research/survivorship_volzero_20261020/) | NEXT: đọc followup REPORT_BC/D + skeptic log
