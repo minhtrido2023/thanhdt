@@ -393,6 +393,19 @@ def t_g4_acks(D, base, a, b):
     ack_days = lambda rows, acks: V._acked_g4_days(rows, a, b, acks)           # noqa: E731
     ok(ack_days(dip, {key}) == [{"date": day, "n_prev": 100, "n": 94}], "acked_g4_days đúng ngày/cặp")
     ok(ack_days(dip, {V.g4_ack_key(D[61].isoformat(), 100, 94)}) == [], "ack ngoài kỳ không vào danh sách")
+    mckey = V.g4_mc_ack_key(day, mcdip[63]["mc_members_vnd"], mcdip[64]["mc_members_vnd"])
+    ok(ack_days(mcdip, {mckey}) == [{"date": day, "mc_prev": int(round(mcdip[63]["mc_members_vnd"])),
+                                     "mc": int(round(mcdip[64]["mc_members_vnd"]))}],
+       "acked_g4_days liệt kê ngày đã ack nhánh vốn hoá (so với chỉ số dòng TRƯỚC p, khớp _g4_errs)")
+    ok(ack_days(mcdip, set()) == [], "chưa ack nhánh vốn hoá ⇒ không vào danh sách")
+    # ca dòng-lệch-1: vốn hoá +0,5% nhưng chỉ số dòng TRƯỚC (p) tăng +4% so với pp ⇒ lệch -3,37% > 3% (G4 nổ);
+    # nếu so p với chính nó (series[i]) tỉ số luôn =1 ⇒ dev=+0,5% ⇒ ngày đã ack bị bỏ khỏi danh sách (M1/M2)
+    lag = [dict(r) for r in base]
+    lag[63]["vnindex"] = lag[62]["vnindex"] * 1.04
+    lag[64]["mc_members_vnd"] = lag[63]["mc_members_vnd"] * 1.005
+    lagkey = V.g4_mc_ack_key(lag[64]["date"].isoformat(), lag[63]["mc_members_vnd"], lag[64]["mc_members_vnd"])
+    ok([x["date"] for x in ack_days(lag, {lagkey})] == [lag[64]["date"].isoformat()],
+       "acked_g4_days dùng chỉ số trễ pp→p (khớp _g4_errs), không phải p→p")
     anchor = [dict(r) for r in base]
     anchor[62]["n_members"] = 94
     ok(ack_days(anchor, {V.g4_ack_key(a.isoformat(), 100, 94)}) == [], "ngày mốc đầu kỳ (a) không thuộc kỳ (a, b]")

@@ -649,7 +649,7 @@ def _acked_g4_days(series: list, start_date, end_date, acks: set) -> list:
                 g4_ack_key(r["date"], p["n_members"], r["n_members"]) in acks:
             out.append({"date": r["date"].isoformat(), "n_prev": p["n_members"], "n": r["n_members"]})
         if i >= 1 and p["mc_members_vnd"] and r["mc_members_vnd"] and \
-                abs(r["mc_members_vnd"] / p["mc_members_vnd"] / (p["vnindex"] / series[i]["vnindex"]) - 1) > G4_MC_TOL \
+                abs(r["mc_members_vnd"] / p["mc_members_vnd"] / (p["vnindex"] / series[i - 1]["vnindex"]) - 1) > G4_MC_TOL \
                 and g4_mc_ack_key(r["date"], p["mc_members_vnd"], r["mc_members_vnd"]) in acks:
             out.append({"date": r["date"].isoformat(), "mc_prev": int(round(p["mc_members_vnd"])),
                         "mc": int(round(r["mc_members_vnd"]))})
