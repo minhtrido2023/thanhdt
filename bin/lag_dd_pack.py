@@ -71,6 +71,13 @@ LEGAL_FLAG_TYPES = {"fraud_confirmed", "legal", "legal_case", "criminal"}   # en
 EQ_BASE_LOW_RATIO = 0.5           # NP_P4 < 50% trung vị NP_P5..P7 ⇒ nền cùng kỳ thấp bất thường
 EQ_CFO_NP_MIN = 0.5               # ΣCFO 4 quý < 50% ΣLNST 4 quý ⇒ lợi nhuận chưa thành tiền
 EQ_WC_GAP_PP = 0.30               # phải thu/tồn kho tăng YoY nhanh hơn doanh thu > 30pp
+# AR_P0 = TỔNG phải thu ngắn hạn (gồm trả trước cho người bán, phải thu khác, trừ dự phòng). Tra
+# 2026-10-22: ticker_financial KHÔNG có cột tách phải thu KHÁCH HÀNG / trả trước người bán
+# (AdvCust_P* là NGƯỜI MUA trả trước — nợ phải trả, không phải cấu phần của AR) ⇒ cờ giữ trên tổng
+# (fail-closed, không đoán) và nói rõ điều đó trong bằng chứng. Ca SCL 2026Q3: user kiểm tay BCTC.
+AR_BASIS_NOTE = ("AR_P0 = TỔNG phải thu NH (gồm trả trước người bán + phải thu khác − dự phòng); "
+                 "ticker_financial không tách được phải thu khách hàng/trả trước ⇒ cờ tính trên tổng, "
+                 "kiểm thuyết minh BCTC trước khi kết luận")
 
 FLAG_CODES = {
     # --- DD cơ bản: echo cờ đỏ due_diligence.RED_FLAG_CODES (mã nào lạ cũng thành cờ) ---
@@ -387,12 +394,16 @@ def earnings_quality(rows, is_bank):
             continue
         if old == 0:                           # từ 0 lên >0: tăng vô hạn — không tính được %, vẫn đưa user xem
             wc[key] = {"now_vnd": cur, "year_ago_vnd": old, "yoy": None, "gap_vs_revenue": None}
-            flags.append(_f(code, f"{col} từ 0 lên {cur:,.0f} (doanh thu YoY {rev_g:+.0%})"))
+            flags.append(_f(code, f"{col} từ 0 lên {cur:,.0f} (doanh thu YoY {rev_g:+.0%})"
+                            + (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))
             continue
         g = cur / old - 1
         wc[key] = {"now_vnd": cur, "year_ago_vnd": old, "yoy": g, "gap_vs_revenue": g - rev_g}
         if g - rev_g > EQ_WC_GAP_PP:
-            flags.append(_f(code, f"{col} YoY {g:+.0%} vs doanh thu YoY {rev_g:+.0%}"))
+            flags.append(_f(code, f"{col} YoY {g:+.0%} vs doanh thu YoY {rev_g:+.0%}"
+                            + (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))
+    if isinstance(wc.get("receivables"), dict):
+        wc["receivables"]["basis"] = AR_BASIS_NOTE
     for k in ("DSO", "DIO"):
         a, b = _num(r.get(f"{k}_P0")), _num(r.get(f"{k}_P4"))
         wc[k] = {"P0": a, "P4": b} if a is not None and b is not None else "không đủ dữ liệu"
