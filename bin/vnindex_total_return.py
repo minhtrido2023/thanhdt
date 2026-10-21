@@ -329,9 +329,19 @@ def merge_rebuilt(path: str, rebuilt: list) -> bytes:
                             "(bước 3): " + "; ".join(diffs))
     last_sealed = old[len(keep) - 1]["date"] if keep else None
     tail = [r for d, r in sorted(by_date.items()) if last_sealed is None or _d(d) > last_sealed]
+    # Nối lại phần đuôi từ dòng sealed GIỮ BYTE: `rebuilt` được chain từ giá trị DỰNG LẠI của cửa sổ
+    # kiểm, lệch dòng đã ghi trong phạm vi SEALED_Y_TOL ⇒ không nối lại thì G1 nổ ở ranh giới.
+    prev = old[len(keep) - 1] if keep else None
     # đánh dấu sealed: dòng có >= SEAL_AFTER phiên sau nó trong file mới
     n = len(tail)
     for j, r in enumerate(tail):
+        if prev is not None:
+            ratio = float(r["vnindex"]) / prev["vnindex"]
+            y = float(r["y_gross"]) if r["y_gross"] else 0.0
+            r["tr_gross"] = _fmt(chain(prev["tr_gross"], ratio, y, 1.0), 15)
+            r["tr_net"] = _fmt(chain(prev["tr_net"], ratio, y, 1.0 - DIV_TAX_RATE), 15)
+        prev = {"vnindex": float(r["vnindex"]), "tr_gross": float(r["tr_gross"]),
+                "tr_net": float(r["tr_net"])}
         r["status"] = "sealed" if n - 1 - j >= SEAL_AFTER else "provisional"
     return (head + "".join(keep) + "".join(_row_line(r) for r in tail)).encode("utf-8")
 
