@@ -428,3 +428,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-10-21 (keep=12 days=0 require_done=False)
 - [2026-10-08T15:00:48Z] [2026-10-08] dispatch-token-telemetry R2 DUNG o NEEDS_CHANGES: branch feat/dispatch-token-telemetry-20261008 @eacd6dfb (wt-tokentel-1008) CHUA merge; con SF1 round_cap selfcheck do (docstring spend_report:244) + nit. Cho Mike/user cho vong 3 hoac bo.
+
+## Archived 2026-10-21 (keep=6 days=5 require_done=True)
+- [2026-10-13T03:30:00Z] [2026-10-13] measured_by gate XONG TREN NHANH feat/finding-measured-by-20261013 @3bb3597ac (wt-measuredby-1013) CHUA merge â€” cho Mike merge sau gio GD. Viec theo sau neu duoc giao: rotate bus/_measured_by_warn.jsonl trong fleet_housekeeping.sh KEM selfcheck; nit reviewer trong bus finding finding-measured-by-gate-20261013.
