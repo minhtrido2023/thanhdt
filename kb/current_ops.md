@@ -23,7 +23,7 @@
 
 ## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
 - Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
-- ⚠️ Còn treo: `compute_active_nav.py` fail-closed vì cổng KL chỉ đọc journal bot (không đọc statement broker) — chờ user duyệt fix; đừng escalate lại. Chi tiết nguyên văn: `kb/projects/dri-manual-sell-20261021.md`.
+- ✅ ĐÃ VÁ 22/10 (master `f0e293c30`, user duyệt, arch-review APPROVED): cổng KL `compute_active_nav.py` hợp nhất fill journal bot + statement DNSE (`dnse_khoplenh_broker_confirm_*.csv`); lệnh bán tay không còn bị rc=6 oan, phần dư không giải thích được vẫn chặn. Chi tiết nguyên văn: `kb/projects/dri-manual-sell-20261021.md`.
 
 ## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
 - **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 có tin VinCons chậm trả. Chi tiết: `kb/projects/scl-dd-research-20261021.md`.

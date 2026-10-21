@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v4085)
+# Mike fleet — context pack (v4086)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-21T15:28:14] Taylor/finding — lag-dd-gate-pilot-HT1-SCL-VPB-20261021: {"pilot": "HT1/SCL/VPB release 2026-10-19, vào lệnh ~2026-10-26, asof 2026-10-21", "branch": "feat/lag-dd-gate-20261021", "commit": "9ea37eaaa", "worktree": "/h …
-- [2026-10-21T15:32:46] Taylor/finding — lag-dd-gate-plan-gate-done-20261021: {"branch": "feat/lag-dd-gate-20261021", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-dd-gate-20261021", "commits": ["9ea37eaaa code A+B", "951f67712 hợ …
 - [2026-10-21T15:42:39] Taylor/finding — vnindex-tr-polish-6-muc-20261021: {"branch": "fix/vnindex-tr-polish-20261021", "commit": "f0645f5e1", "worktree": "/home/trido/thanhdt/wt_vnindex_tr_polish_20261021", "items": {"1": "retry_of ch …
 - [2026-10-21T15:50:09] Taylor/finding — lag-dd-gate-vong2-sua-4-blocking-20261021: {"branch": "feat/lag-dd-gate-20261021", "commit": "9969df217", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-dd-gate-20261021", "round": 2, "fixed": {"1 …
 - [2026-10-21T16:59:36] Taylor/finding — active-nav-broker-fills-20261021: {"branch": "fix/active-nav-broker-fills-20261021", "commit": "2f956fb2f", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-active-nav-broker-fills-20261021", " …
+- [2026-10-21T17:09:14] Mike/decision — active-nav-broker-fills-merged-20261022: {"summary": "cổng KL compute_active_nav hợp nhất fill journal + statement DNSE đã vào master f0e293c30 (kèm vá N1 NaN); user duyệt 22/10 00:07 ICT; arch-review  …
+- [2026-10-21T17:17:55] Taylor/finding — lag-per-share-surprise-rights-20261022: {"job": "Taylor_20261021_165514", "commit": "21c10df2f", "dir": "mike/agents/Taylor/research/lag_per_share_surprise_rights_20261022", "prereg_md5": "c60975e2e29 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -35,7 +35,7 @@
 
 ## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
 - Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
-- ⚠️ Còn treo: `compute_active_nav.py` fail-closed vì cổng KL chỉ đọc journal bot (không đọc statement broker) — chờ user duyệt fix; đừng escalate lại. Chi tiết nguyên văn: `kb/projects/dri-manual-sell-20261021.md`.
+- ✅ ĐÃ VÁ 22/10 (master `f0e293c30`, user duyệt, arch-review APPROVED): cổng KL `compute_active_nav.py` hợp nhất fill journal bot + statement DNSE (`dnse_khoplenh_broker_confirm_*.csv`); lệnh bán tay không còn bị rc=6 oan, phần dư không giải thích được vẫn chặn. Chi tiết nguyên văn: `kb/projects/dri-manual-sell-20261021.md`.
 
 ## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
 - **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 có tin VinCons chậm trả. Chi tiết: `kb/projects/scl-dd-research-20261021.md`.
