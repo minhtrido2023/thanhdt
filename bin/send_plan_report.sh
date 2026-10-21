@@ -176,6 +176,33 @@ if [ -n "$LAGCAL_CMD" ] && [ -n "$PLAN_FILE" ]; then
 fi
 export LAGCAL_BLOCK
 
+# --- Cổng nhất quán LAG + cảnh báo ứng viên LAG hợp lệ bị hoãn đúng phiên chuẩn (user duyệt
+# 2026-10-21, Taylor_20261021_102832 REPORT §5.2/5.3). CHỈ CẢNH BÁO (WARN + bus + Discord Trading
+# Daily, idempotent theo plan_date) — KHÔNG chặn gửi plan: chặn 21:00 làm user không thấy plan để
+# duyệt, tệ hơn gửi kèm khối đỏ. FAIL-SOFT nhưng không im lặng: script lỗi ⇒ dòng "KHÔNG KIỂM ĐƯỢC".
+# Sandbox selfcheck (SEND_PLAN_WORKDIR_OVERRIDE) không chạy trừ khi test tự cấp SEND_PLAN_LAGCHK_CMD.
+LAGCHK_BLOCK=""
+LAGCHK_CMD=""
+if [ -n "${SEND_PLAN_LAGCHK_CMD:-}" ]; then
+  LAGCHK_CMD="$SEND_PLAN_LAGCHK_CMD"
+elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
+  LAGCHK_CMD="$ROOT/bin/lag_plan_consistency_check.py"
+fi
+if [ -n "$LAGCHK_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
+  LAGCHK_ARGS=(--account "$ACCOUNT" --plan-file "$PLAN_FILE" --report-block)
+  [ "$DRY_RUN" = "1" ] && LAGCHK_ARGS+=(--dry-run)
+  LAGCHK_ERR="$(mktemp)"
+  LAGCHK_BLOCK="$(timeout "${SEND_PLAN_LAGCHK_TIMEOUT:-150}" python3 "$LAGCHK_CMD" "${LAGCHK_ARGS[@]}" 2>"$LAGCHK_ERR")"
+  LAGCHK_RC=$?
+  sed 's/^/[lagchk] /' "$LAGCHK_ERR" >&2
+  if { [ "$LAGCHK_RC" -ne 0 ] && [ "$LAGCHK_RC" -ne 2 ]; } || [ -z "$LAGCHK_BLOCK" ]; then
+    _lerr="$(tail -n 2 "$LAGCHK_ERR" | tr '\n' ' ' | cut -c1-200)"
+    LAGCHK_BLOCK="⚠️ **Cổng nhất quán LAG ($ACCOUNT): KHÔNG KIỂM ĐƯỢC** — rc=$LAGCHK_RC, lỗi: ${_lerr:-<không có stderr>}. Tự đối chiếu lag_analysis với orders[]/deferred_orders[] trước khi duyệt."
+  fi
+  rm -f "$LAGCHK_ERR"
+fi
+export LAGCHK_BLOCK
+
 RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os
 
@@ -1139,6 +1166,10 @@ for _dl in os.environ.get("DRIFT_BLOCK", "").splitlines():   # khối Q5 tính �
     if _dl.strip():
         lines.append(_dl)
 for _dl in os.environ.get("LAGCAL_BLOCK", "").splitlines():  # lịch/DD LAG khớp code (shell trên)
+    if _dl.strip():
+        lines.append(_dl)
+
+for _dl in os.environ.get("LAGCHK_BLOCK", "").splitlines():  # cổng nhất quán LAG (shell phía trên)
     if _dl.strip():
         lines.append(_dl)
 
