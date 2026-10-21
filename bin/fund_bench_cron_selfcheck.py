@@ -57,6 +57,20 @@ def main() -> int:
     rc, _, _, msg = run(f"echo '{sb}'")
     ok(rc == 0 and "seal bị chặn" in msg and "2026-10-14" in msg and "G4: 2026-10-14" in msg
        and "--ch=trading_daily" in msg, f"rc=0 + seal_blocked ⇒ báo Trading Daily kèm bằng chứng: {msg!r}")
+    ok("lặp mỗi ngày T3-T7 tới khi dòng được seal hoặc ack" in msg, f"tin nói rõ cảnh báo lặp lại: {msg!r}")
+    # cặp cần ack phải ở ĐẦU tin dù bằng chứng dài > 900 byte (cắt cuối làm mất cặp — lỗi gốc)
+    pad = ", ".join(f'"G1: pad{i} ' + "x" * 40 + '"' for i in range(30))
+    sb2 = ('{"changed": true, "seal_blocked": [{"date": "2026-10-14", "errors": [' + pad + ', "G4: 2026-10-14 vốn hoá '
+           'rổ đổi +5.00% vs chỉ số +1.00% (lệch +3.96%, > 3%) — chờ lấp dữ liệu BQ hoặc người xác nhận '
+           '(mc_prev=123456789012, mc=130000000000) ở vnindex_tr_acks.json mục G4_MC"]}, {"date": "2026-10-15", '
+           '"errors": ["G4: 2026-10-15 số mã rổ 100 → 94 (-6, > 5% của 100) — chờ (n_prev=100, n=94) ở mục G4"]}]}')
+    rc, _, _, msg = run(f"echo '{sb2}'")
+    ok("(mc_prev=123456789012, mc=130000000000)" not in msg.split("Bằng chứng")[-1], "cặp mc không nằm trong đoạn cắt 900")
+    head = msg.split("Bằng chứng")[0]
+    ok("2026-10-14 mc_prev=123456789012, mc=130000000000" in head and "2026-10-15 n_prev=100, n=94" in head,
+       f"cặp cần ack (ngày + giá trị, cả mc lẫn n) nằm TRƯỚC đoạn bằng chứng: {head!r}")
+    rc, _, _, msg = run("echo '{\"changed\": true, \"seal_blocked\": [{\"date\": \"2026-10-14\", \"errors\": [\"G1: link\"]}]}'")
+    ok("không trích được" in msg, f"lỗi G1 không có cặp ⇒ nói thẳng không trích được: {msg!r}")
     rc, _, _, msg = run("echo '{\"changed\": true, \"bytes\": 10}'")
     ok(rc == 0 and msg == "", f"rc=0 không seal_blocked ⇒ im lặng: {msg!r}")
 

@@ -630,6 +630,19 @@ def t_seal_guard(tmp):
                        first_date=D[0].isoformat(), acks_path=mc_acks("a5.json", a_, b_))
         ok(sealed_n(spw) == 3 and any("vốn hoá" in e for e in res["seal_blocked"][0]["errors"]),
            f"sg6c ack MC {tag} KHÔNG mở khoá: {res.get('seal_blocked')}")
+    # ack ĐÚNG mc_prev/mc nhưng SAI NGÀY (D[4] thay vì D[3]) KHÔNG mở khoá — khoá ràng cả ngày
+    pa = os.path.join(tmp, "a5d.json")
+    with open(pa, "w", encoding="utf-8") as f:
+        json.dump({"G4": [{"date": D[3].isoformat(), "n_prev": 5, "n": 4, "confirmed_by": "u", "reason": "r"}],
+                   "G4_MC": [{"date": D[4].isoformat(), "mc_prev": mc_prev, "mc": mc_cur, "confirmed_by": "u",
+                              "reason": "r"}]}, f)
+    spd = os.path.join(tmp, "sg6d.csv")
+    res = V.update(spd, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                   first_date=D[0].isoformat(), acks_path=pa)
+    ok(sealed_n(spd) == 3 and any("vốn hoá" in e for e in res["seal_blocked"][0]["errors"]),
+       f"sg6e ack MC đúng giá trị SAI NGÀY KHÔNG mở khoá: {res.get('seal_blocked')}")
+    ok(V.g4_mc_ack_key(D[3], mc_prev, mc_cur) != V.g4_mc_ack_key(D[4], mc_prev, mc_cur)
+       and V.g4_ack_key(D[3], 5, 4) != V.g4_ack_key(D[4], 5, 4), "sg6e khoá ack G4/G4_MC chứa NGÀY")
     ok(any("mục G4_MC" in e and f"mc_prev={int(round(mc_prev))}" in e and f"mc={int(round(mc_cur))}" in e
            for e in res["seal_blocked"][0]["errors"]), "sg6c thông báo lỗi nêu đúng số cần ack")
     for tag, bad in (("thiếu confirmed_by", {"date": D[3].isoformat(), "mc_prev": 1.0, "mc": 2.0, "reason": "r"}),
@@ -644,6 +657,27 @@ def t_seal_guard(tmp):
             ok(False, f"sg6d mục G4_MC {tag} phải ValueError")
         except ValueError:
             ok(True, f"sg6d {tag}")
+    # mục G4 / G4_MC / G6 không phải list (dict, chuỗi, phần tử không phải object) ⇒ ValueError RÕ RÀNG
+    for sect in ("G4", "G4_MC", "G6"):
+        for tag, val in (("dict", {"date": "2030-01-01"}), ("dict rỗng", {}), ("chuỗi", "x"),
+                         ("chuỗi rỗng", ""), ("phần tử chuỗi", ["x"])):
+            pa = os.path.join(tmp, "a7.json")
+            with open(pa, "w", encoding="utf-8") as f:
+                json.dump({sect: val}, f)
+            try:
+                V.load_acks(pa)
+                ok(False, f"sg6f mục {sect} {tag} phải ValueError")
+            except ValueError as exc:
+                ok(sect in str(exc) and "phải là list" in str(exc) or "không phải object" in str(exc),
+                   f"sg6f {sect} {tag}: {exc}")
+    pa = os.path.join(tmp, "a7.json")
+    with open(pa, "w", encoding="utf-8") as f:
+        json.dump([1], f)
+    try:
+        V.load_acks(pa)
+        ok(False, "sg6f gốc là list phải ValueError")
+    except ValueError as exc:
+        ok("object" in str(exc), f"sg6f gốc list: {exc}")
     # G1 là blocker: seal_blockers trên hai dòng không nối được
     rows = V.read_series(sp)
     r = dict(rows[2]); r["tr_gross"] *= 1.001
@@ -698,6 +732,7 @@ def t_restate(tmp):
         # (4) dry-run ⇒ không ghi gì nhưng trả dòng mới
         res = V.restate_sealed([D[6]], "r", "u", sp, inputs=inp2, write=False, **kw)
         ok(md5(sp) == h0 and not os.path.exists(log) and res["written"] is False, "rs4 dry-run không ghi")
+        ok("seal_blocked" not in res, f"rs4 --restate-sealed KHÔNG xuất khoá seal_blocked (chỉ --update): {sorted(res)}")
         ok(res["md5_before"] == h0 and D[6].isoformat() in res["rows_after"], f"rs4 {res}")
         # (5) đính chính thật
         res = V.restate_sealed([D[6]], "cổ tức BBB 100đ vào muộn", "user selfcheck", sp, inputs=inp2, **kw)
@@ -842,6 +877,149 @@ def t_restate_crash_noise(tmp):
         ok(md5(sp2) == h2 and not os.path.exists(log2), "x11 file + sổ không đổi")
 
 
+def t_undo_polish(tmp):
+    """Mục 1 (retry_of chỉ khi cùng dates+reason+confirmed_by) + mục 2 (undo có sổ, fail-closed, dòng sổ cũ
+    thiếu byte cũ ⇒ ValueError rõ ràng)."""
+    D, inp, mem, src2 = fixture()
+    mp = write_mem(tmp, mem)
+    noack = os.path.join(tmp, "noack.json")
+    _, inp2, _, _ = fixture(ca_extra=[("BBB", 6, 100, "Đợt 3")])
+    with g4_loose():
+        sp, log = os.path.join(tmp, "u.csv"), os.path.join(tmp, "u_log.jsonl")
+        kw = dict(membership_path=mp, src2=src2, acks_path=noack, log_path=log)
+        V.update(sp, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                 first_date=D[0].isoformat(), acks_path=noack)
+        b0 = open(sp, "rb").read()
+        h0 = md5(sp)
+        rd = lambda: [json.loads(x) for x in open(log, encoding="utf-8")]               # noqa: E731
+
+        def restore():
+            with open(sp, "wb") as f:
+                f.write(b0)
+        # (1) retry_of: đính chính ĐỘC LẬP (lý do khác) sau khi khôi phục file KHÔNG bị gắn retry_of
+        V.restate_sealed([D[6]], "lần đầu", "u1", sp, inputs=inp2, **kw)
+        restore()
+        V.restate_sealed([D[6]], "độc lập, lý do khác", "u1", sp, inputs=inp2, **kw)
+        ent = rd()
+        ok(ent[1]["md5_before"] == ent[0]["md5_before"] == h0 and "retry_of" not in ent[1],
+           f"u1 cùng md5_before nhưng KHÁC lý do ⇒ không phải retry: {ent[1].get('retry_of')}")
+        restore()
+        V.restate_sealed([D[6]], "độc lập, lý do khác", "u2", sp, inputs=inp2, **kw)
+        ok("retry_of" not in rd()[2], "u1 khác người xác nhận ⇒ không phải retry")
+        restore()
+        V.restate_sealed([D[6]], "độc lập, lý do khác", "u2", sp, inputs=inp2, **kw)
+        ok("retry_of" in rd()[3], "u1 cùng dates+lý do+người ⇒ vẫn là retry")
+        # (2) undo: thiếu lý do/người ⇒ từ chối, không đổi gì
+        h1, n_log = md5(sp), len(rd())
+        for r_, c_, word in ((None, "u", "reason"), ("  ", "u", "reason"), ("r", None, "confirmed-by"), ("r", "", "confirmed-by")):
+            try:
+                V.undo_last_restatement(r_, c_, sp, log_path=log)
+                ok(False, f"u2 thiếu {word} phải RestateRefused")
+            except V.RestateRefused as exc:
+                ok(word in str(exc), f"u2 {exc}")
+        ok(md5(sp) == h1 and len(rd()) == n_log, "u2 file + sổ không đổi")
+        # file đã đổi sau đính chính (md5 ≠ md5_after) ⇒ từ chối
+        with open(sp, "ab") as f:
+            f.write(b"x")
+        try:
+            V.undo_last_restatement("r", "u", sp, log_path=log)
+            ok(False, "u3 file đã đổi phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("md5_after" in str(exc), f"u3 {exc}")
+        cur = open(sp, "rb").read()[:-1]
+        with open(sp, "wb") as f:
+            f.write(cur)
+        ok(md5(sp) == h1 and len(rd()) == n_log, "u3 file + sổ không đổi")
+        # dry-run ⇒ không ghi
+        res = V.undo_last_restatement("r", "u", sp, write=False, log_path=log)
+        ok(res["written"] is False and md5(sp) == h1 and len(rd()) == n_log and res["md5_after"] == h0, "u4 dry-run")
+        # sổ TRƯỚC, file SAU: chết giữa chừng ⇒ có dòng undo mà file chưa đổi
+        real = V._write_atomic
+
+        def boom(path, data):
+            raise OSError("selfcheck: chết giữa ghi sổ và thay file")
+        V._write_atomic = boom
+        snap = open(log, "rb").read()
+        try:
+            V.undo_last_restatement("r", "u", sp, log_path=log)
+            ok(False, "u5 phải nổ")
+        except OSError:
+            ok(True, "u5")
+        finally:
+            V._write_atomic = real
+        ok(md5(sp) == h1 and len(rd()) == n_log + 1 and rd()[-1]["kind"] == "undo" and rd()[-1]["md5_after"] == h0,
+           "u5 sổ ĐÃ có dòng undo trước khi thay file")
+        with open(log, "wb") as f:                                   # bỏ dòng undo của ca chết giữa chừng
+            f.write(snap)
+        # undo thật
+        last_before = rd()[-1]
+        res = V.undo_last_restatement("sai số cổ tức BBB", "user selfcheck", sp, log_path=log)
+        ent = rd()
+        ok(open(sp, "rb").read() == b0 and md5(sp) == h0, "u6 undo dựng lại ĐÚNG byte file gốc")
+        u = ent[-1]
+        ok(len(ent) == n_log + 1 and u["kind"] == "undo" and u["md5_before"] == h1 and u["md5_after"] == h0
+           and u["undoes"] == last_before["md5_after"] == h1 and u["confirmed_by"] == "user selfcheck"
+           and u["reason"] == "sai số cổ tức BBB" and u["ts_ict"].endswith("+07:00")
+           and ent[:-1] == [json.loads(x) for x in snap.decode("utf-8").splitlines()], f"u6 dòng sổ undo: {u}")
+        ok(res["md5_after"] == h0 and res["kind"] == "undo", f"u6 {res}")
+        # undo chồng: dòng cuối đã là undo ⇒ từ chối
+        try:
+            V.undo_last_restatement("r", "u", sp, log_path=log)
+            ok(False, "u7 undo chồng phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("đã là một undo" in str(exc), f"u7 {exc}")
+        # N1: undo ĐÃ GHI SỔ nhưng file CHƯA thay (md5 file == md5_before của dòng undo) ⇒ thông báo nói đúng, không "đã là undo"
+        sp_n1 = os.path.join(os.path.dirname(sp), "n1_series.csv")
+        with open(sp_n1, "wb") as f:
+            f.write(b0)
+        log_n1 = os.path.join(os.path.dirname(sp), "n1_log.jsonl")
+        with open(log_n1, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"series": os.path.abspath(sp_n1), "kind": "undo", "ts_ict": "2030-01-01T00:00:00+07:00",
+                                "md5_before": md5(sp_n1), "md5_after": "0" * 32}) + "\n")
+        try:
+            V.undo_last_restatement("r", "u", sp_n1, log_path=log_n1)
+            ok(False, "n1 phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("CHƯA được thay" in str(exc) and "đã là một undo" not in str(exc), f"n1 {exc}")
+        # N2: đính chính CHƯA từng được áp (md5 file == md5_before của dòng sổ cuối) ⇒ thông báo nói đúng, không đoán --update
+        with open(log_n1, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"series": os.path.abspath(sp_n1), "kind": "restate", "ts_ict": "2030-01-01T00:00:00+07:00",
+                                "md5_before": md5(sp_n1), "md5_after": "0" * 32}) + "\n")
+        try:
+            V.undo_last_restatement("r", "u", sp_n1, log_path=log_n1)
+            ok(False, "n2 phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("CHƯA từng được áp" in str(exc) and "--update?" not in str(exc), f"n2 {exc}")
+        # sau undo, đính chính độc lập không bị gắn retry_of vào dòng undo
+        V.restate_sealed([D[6]], "r", "u", sp, inputs=inp2, **kw)
+        ok("retry_of" not in rd()[-1], "u8 prior là undo ⇒ không retry_of")
+        # (3) dòng sổ CŨ thiếu byte cũ (dạng dòng 12:34 21/10) ⇒ ValueError/RestateRefused rõ ràng, KHÔNG KeyError
+        old = {k: v for k, v in rd()[-1].items() if k not in ("rechained_sealed_before", "tail_before")}
+        try:
+            V.undo_restatement(old, open(sp, "rb").read())
+            ok(False, "u9 dòng sổ thiếu byte cũ phải ValueError")
+        except ValueError as exc:
+            ok("rechained_sealed_before" in str(exc) and "tail_before" in str(exc), f"u9 {exc}")
+        log2 = os.path.join(tmp, "u_log_old.jsonl")
+        with open(log2, "w", encoding="utf-8") as f:
+            f.write(json.dumps(old, ensure_ascii=False) + "\n")
+        h2 = md5(sp)
+        try:
+            V.undo_last_restatement("r", "u", sp, log_path=log2)
+            ok(False, "u10 phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("thiếu" in str(exc), f"u10 {exc}")
+        ok(md5(sp) == h2 and len(open(log2).read().splitlines()) == 1, "u10 file + sổ không đổi")
+        # CLI: thiếu --reason ⇒ rc=4; đủ ⇒ rc=0 + file về byte gốc
+        base = [sys.executable, os.path.join(HERE, "vnindex_total_return.py"), "--undo-last-restatement",
+                "--series", sp, "--restate-log", log]
+        cp = subprocess.run(base + ["--confirmed-by", "u"], capture_output=True, text=True)
+        ok(cp.returncode == 4 and "reason" in cp.stderr and md5(sp) == h2, f"u11 CLI thiếu reason rc={cp.returncode}")
+        cp = subprocess.run(base + ["--confirmed-by", "u", "--reason", "r"], capture_output=True, text=True)
+        ok(cp.returncode == 0 and md5(sp) == h0 and json.loads(cp.stdout)["kind"] == "undo",
+           f"u11 CLI undo rc={cp.returncode}: {cp.stderr[-200:]}")
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="vtr_sc_") as tmp:
         V.ACKS_PATH = os.path.join(tmp, "khong_co_acks.json")    # không đọc sổ ack thật của data/
@@ -852,6 +1030,7 @@ def main() -> int:
             t_sealed(tmp)
         t_seal_guard(tmp)
         t_restate(tmp)
+        t_undo_polish(tmp)
     t_gates()
     print(f"OK — {N_OK} assertion PASS (vnindex_total_return_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
