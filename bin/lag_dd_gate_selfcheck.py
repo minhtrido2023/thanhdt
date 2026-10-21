@@ -156,6 +156,28 @@ def run_inner():
            (codes(p2), p2["earnings_quality"]["working_capital"]))
         p3 = B(fin=[fin_row(AR_P0=50.0), {"quarter": "2025Q3", "AR_P0": 0.0, "Inventory_P0": 100.0}])
         ck("phải thu từ 0 lên >0 ⇒ EQ_PHAI_THU_TANG (không lọt)", "EQ_PHAI_THU_TANG" in codes(p3), codes(p3))
+        ck("phải thu từ 0 lên: bằng chứng cũng nói 'không tách được'", any(
+           "không tách được" in f["evidence"] for f in p3["flags"] if f["code"] == "EQ_PHAI_THU_TANG"), p3["flags"])
+        # SCL 2026Q3 số THẬT (tav2_bq.ticker_financial, đọc 2026-10-22): AR_P0 203,5 tỷ gồm 86,6 tỷ trả
+        # trước người bán (BCTC V.3–V.6) nhưng BQ không có cột tách ⇒ cờ VẪN giữ trên tổng + nói rõ.
+        scl = [fin_row(AR_P0=203497947567.0, AdvCust_P0=1798711058.0, Revenue_P0=277941239226.0,
+                       Revenue_P4=147251526187.0),
+               {"quarter": "2025Q3", "AR_P0": 78458871880.0, "Inventory_P0": 100.0}]
+        ps = B(fin=scl)
+        ev = " ".join(f["evidence"] for f in ps["flags"] if f["code"] == "EQ_PHAI_THU_TANG")
+        ck("SCL thật: AR tổng +159% vs DT +89% ⇒ VẪN EQ_PHAI_THU_TANG (không tách được trả trước)",
+           ps["status"] == "FLAG" and "EQ_PHAI_THU_TANG" in codes(ps), codes(ps))
+        ck("bằng chứng cờ phải thu nói rõ 'không tách được' trả trước", "không tách được" in ev, ev)
+        ck("working_capital.receivables ghi cơ sở tính (tổng phải thu)",
+           "không tách được" in str(ps["earnings_quality"]["working_capital"]["receivables"].get("basis")),
+           ps["earnings_quality"]["working_capital"]["receivables"])
+        pa = B(fin=fin_rows(AR_P0=200.0, AdvCust_P0=150.0))
+        ck("AdvCust (NGƯỜI MUA trả trước) lớn KHÔNG được trừ khỏi AR ⇒ vẫn cờ",
+           "EQ_PHAI_THU_TANG" in codes(pa), codes(pa))
+        pt = B(fin=fin_rows(Inventory_P0=200.0))
+        ck("cờ tồn kho KHÔNG kèm ghi chú phải thu",
+           all("không tách được" not in f["evidence"] for f in pt["flags"] if f["code"] == "EQ_TON_KHO_TANG"),
+           pt["flags"])
         d = fin_rows(AR_P0=200.0, DSO_P0=20.0, DSO_P4=40.0)
         p4 = B(fin=d)
         ck("DSO vendor đi ngược AR thô ⇒ ghi chú dữ liệu mâu thuẫn", any("MÂU THUẪN" in n for n in
@@ -439,6 +461,15 @@ def run_inner():
 
 # ── mutants: mỗi cái PHẢI làm selfcheck đỏ ─────────────────────────────────────────────────────
 MUTANTS = [
+    ("lag_dd_pack.py", '                            + (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n    if isinstance',
+     '                            ))\n    if isinstance'),
+    ("lag_dd_pack.py", '        wc["receivables"]["basis"] = AR_BASIS_NOTE', '        pass'),
+    ("lag_dd_pack.py", "        cur = _num(r.get(col))\n",
+     '        cur = (_num(r.get(col)) or 0) - (_num(r.get("AdvCust_P0")) or 0) if col == "AR_P0" else _num(r.get(col))\n'),
+    ("lag_dd_pack.py", '                            + (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n    if isinstance',
+     '                            + f" — {AR_BASIS_NOTE}"))\n    if isinstance'),
+    ("lag_dd_pack.py", '                            + (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n            continue',
+     '                            ))\n            continue'),
     ("lag_plan_consistency_check.py", 'return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker")) in lag_tk)',
      'return bool(_RE_LAG_BOOK.search(bk)) or _tk(o.get("ticker")) in lag_tk'),
     ("lag_plan_consistency_check.py", 'and not str(d.get("status") or "").strip().upper().startswith(("SKIP", "EXCLUD"))', 'and True'),

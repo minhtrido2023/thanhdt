@@ -1,0 +1,2 @@
+marketPrice=25400: pnl broker=-15.3% | so với TERP 25.395: +0.0% | stop-loss hit=False []
+marketPrice=23800: pnl broker=-20.7% | so với TERP 25.395: -6.3% | stop-loss hit=True [('SCL', 14000, 23800.0, -0.20666666666666667)]

@@ -1,0 +1,47 @@
+E=2026-10-26 T0(GDKHQ)=2026-11-09 PAY=2026-11-16 CREDIT=2026-12-03 LIST=2027-02-02 target R3=0.0
+
+== S0 trước GDKHQ asof=2026-11-06
+  park_holdings: reconcile_ok=True mismatches=[] unverified=[] sổ LAG=14000 broker SCL={'qty': 14000, 'market_price': 30000.0, 'sellable': 14000, 'broker_market_price': 30000.0}
+  L1 decision=TRIM pool=1,800.0tr delta=-1,350.0tr orders=[('FPT', 6000), ('MBB', 30000)]
+  L2 decision=NO_JIT_NEEDED cash_start=450.0tr orders=[]
+
+== S1 ngày GDKHQ (KL không đổi, giá tham chiếu giảm) asof=2026-11-09
+  park_holdings: reconcile_ok=True mismatches=[] unverified=[] sổ LAG=14000 broker SCL={'qty': 14000, 'market_price': 25400.0, 'sellable': 14000, 'broker_market_price': 25400.0}
+  L1 decision=TRIM pool=1,800.0tr delta=-1,350.0tr orders=[('FPT', 6000), ('MBB', 30000)]
+  L2 decision=NO_JIT_NEEDED cash_start=450.0tr orders=[]
+
+== S2 sau khi user nộp 62,5tr (CP chưa về) asof=2026-11-16
+  park_holdings: reconcile_ok=True mismatches=[] unverified=[] sổ LAG=14000 broker SCL={'qty': 14000, 'market_price': 25400.0, 'sellable': 14000, 'broker_market_price': 25400.0}
+  L1 decision=TRIM pool=1,737.5tr delta=-1,350.0tr orders=[('FPT', 6000), ('MBB', 30000)]
+  L2 decision=NO_JIT_NEEDED cash_start=387.5tr orders=[]
+
+== S3A CP mới vào openQuantity, chưa niêm yết (dạng A) asof=2026-12-03
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 14000, 'broker_qty': 19000, 'diff': -5000}] unverified=['SCL'] sổ LAG=14000 broker SCL={'qty': 19000, 'market_price': 25400.0, 'sellable': 14000, 'broker_market_price': 25400.0}
+  L1 decision=BLOCKED_RECONCILE pool=0.0tr delta=0.0tr orders=[]
+  L2 decision=BLOCKED_RECONCILE cash_start=0.0tr orders=[]
+  L1 note: sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. Lệch: [{'ticker': 'SCL', 'ledger_qty': 14000, 'broker_qty': 19000, 'diff': -5000}]
+
+== S3B dạng B — chưa niêm yết thì broker chưa hiện asof=2026-12-03
+  park_holdings: reconcile_ok=True mismatches=[] unverified=[] sổ LAG=14000 broker SCL={'qty': 14000, 'market_price': 25400.0, 'sellable': 14000, 'broker_market_price': 25400.0}
+  L1 decision=TRIM pool=1,737.5tr delta=-1,350.0tr orders=[('FPT', 6000), ('MBB', 30000)]
+  L2 decision=NO_JIT_NEEDED cash_start=387.5tr orders=[]
+
+== S4 sau niêm yết (19.000/19.000) asof=2027-02-02
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 14000, 'broker_qty': 19000, 'diff': -5000}] unverified=['SCL'] sổ LAG=14000 broker SCL={'qty': 19000, 'market_price': 25400.0, 'sellable': 19000, 'broker_market_price': 25400.0}
+  L1 decision=BLOCKED_RECONCILE pool=0.0tr delta=0.0tr orders=[]
+  L2 decision=BLOCKED_RECONCILE cash_start=0.0tr orders=[]
+  L1 note: sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. Lệch: [{'ticker': 'SCL', 'ledger_qty': 14000, 'broker_qty': 19000, 'diff': -5000}]
+
+== corp_actions: record event_type=RIGHTS (kể cả PROPOSED, chưa ký)
+  load_all: CorpActionError: corp_actions[0].event_type='RIGHTS' không thuộc ['BONUS_ISSUE', 'SPLIT', 'STOCK_DIVIDEND'] — cổ tức tiền mặt KHÔNG đi qua file này
+  load_corp_actions: CorpActionError: corp_actions[0].event_type='RIGHTS' không thuộc ['BONUS_ISSUE', 'SPLIT', 'STOCK_DIVIDEND'] — cổ tức tiền mặt KHÔNG đi qua file này
+
+== workaround BONUS_ISSUE ×19/14 tại S3A
+  reconcile_ok=True lô SCL=[('LAG', 19000, 22105, '2026-10-26')] (giá vốn thật = 25,395đ/cp)
+  L1=TRIM  L2=NO_JIT_NEEDED
+
+== Độ nhạy L1 với khoản nộp tiền quyền, target giả định 0.30 (mức trước 2026-10-01)
+  S1 trước nộp: decision=TRIM pool=1,800.0tr target_value=540.00tr delta=-810.00tr orders=[('FPT', 3300), ('MBB', 19200)]
+  S2 sau nộp: decision=TRIM pool=1,737.5tr target_value=521.25tr delta=-828.75tr orders=[('FPT', 3300), ('MBB', 19500)]
+
+sandbox=/tmp/lag_rights_b3_35poxa1l

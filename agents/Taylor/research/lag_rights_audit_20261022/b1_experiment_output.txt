@@ -1,0 +1,251 @@
+module files: {'corp_action_daily': '/home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022/bin/corp_action_daily.py', 'nav_exdate_forecast': '/home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022/bin/nav_exdate_forecast.py', 'exdate_frame': '/home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022/bin/exdate_frame.py', 'corp_action_broker_detect': '/home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022/bin/corp_action_broker_detect.py', 'corp_action_lib': '/home/trido/thanhdt/WorkingClaude/corp_action_lib.py'}
+
+====================================================================================================
+E1 — quyền mua 2025 đã thực hiện; fixture = dòng BQ thật, ép event_status='announced' (giả lập vintage trước GDKHQ; bảng nguồn bị upsert nên KHÔNG có vintage thật trước 2026-08-17)
+====================================================================================================
+BQ row: {"ticker": "DIG", "exercise_ratio": "0.232", "public_date": "2025-10-02", "exright_date": "2025-10-09", "record_date": "2025-10-10", "issue_volumn": "150000000", "total_value": "1.8E12", "issue_status_code": "D", "event_status": "executed"}
+BQ row: {"ticker": "NLG", "exercise_ratio": "0.26", "public_date": "2025-10-14", "exright_date": "2025-10-17", "record_date": "2025-10-20", "issue_volumn": "100022079", "total_value": "2.500551975E12", "issue_status_code": "D", "event_status": "executed"}
+BQ row: {"ticker": "SCL", "exercise_ratio": "0.35714286", "public_date": "2025-10-10", "exright_date": "2025-10-17", "record_date": "2025-10-20", "issue_volumn": "8000000", "total_value": "1.0E11", "issue_status_code": "D", "event_status": "executed"}
+[corp_action_daily.upcoming_events asof=2025-10-10] n=1
+    • **SCL** 2025-10-17 (còn 7n, exright_date) · ISS · tỉ lệ 0.3571 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+[corp_action_daily.upcoming_events asof=2025-10-14] n=1
+    • **SCL** 2025-10-17 (còn 3n, exright_date) · ISS · tỉ lệ 0.3571 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+[corp_action_daily.upcoming_events asof=2025-10-16] n=1
+    • **SCL** 2025-10-17 (còn 1n, exright_date) · ISS · tỉ lệ 0.3571 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=1
+    🚨 **SCL** ISS — Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 35.71%, ex-right PHIÊN KẾ TIẾP (2025-10-17) (giá tham chiếu dự kiến giảm ~26.32%, KL tăng ~35.71%). Sự kiện đang ở trạng thái `announced` (có thể bị huỷ/dời). Broker đổi giá/KL TỐI NAY. NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV phiên 2025-10-17. Đang giữ: SpaceX 14,000cp.
+[corp_action_daily.upcoming_events asof=2025-10-17] n=1
+    • **SCL** 2025-10-17 (còn 0n, exright_date) · ISS · tỉ lệ 0.3571 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=1
+    🚨 **SCL** ISS — Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 35.71%, ex-right HÔM NAY (giá tham chiếu dự kiến giảm ~26.32%, KL tăng ~35.71%). Sự kiện đang ở trạng thái `announced` (có thể bị huỷ/dời). NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV phiên 2025-10-17. Đang giữ: SpaceX 14,000cp.
+[corp_action_daily.upcoming_events asof=2025-10-02] n=1
+    • **DIG** 2025-10-09 (còn 7n, exright_date) · ISS · tỉ lệ 0.2320 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:10,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+[corp_action_daily.upcoming_events asof=2025-10-06] n=1
+    • **DIG** 2025-10-09 (còn 3n, exright_date) · ISS · tỉ lệ 0.2320 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:10,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+[corp_action_daily.upcoming_events asof=2025-10-08] n=1
+    • **DIG** 2025-10-09 (còn 1n, exright_date) · ISS · tỉ lệ 0.2320 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:10,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=1
+    🚨 **DIG** ISS — Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 23.20%, ex-right PHIÊN KẾ TIẾP (2025-10-09) (giá tham chiếu dự kiến giảm ~18.83%, KL tăng ~23.20%). Sự kiện đang ở trạng thái `announced` (có thể bị huỷ/dời). Broker đổi giá/KL TỐI NAY. NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV phiên 2025-10-09. Đang giữ: SpaceX 10,000cp.
+[corp_action_daily.upcoming_events asof=2025-10-14] n=1
+    • **NLG** 2025-10-17 (còn 3n, exright_date) · ISS · tỉ lệ 0.2600 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:5,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+[corp_action_daily.upcoming_events asof=2025-10-15] n=1
+    • **NLG** 2025-10-17 (còn 2n, exright_date) · ISS · tỉ lệ 0.2600 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:5,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+[corp_action_daily.upcoming_events asof=2025-10-16] n=1
+    • **NLG** 2025-10-17 (còn 1n, exright_date) · ISS · tỉ lệ 0.2600 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:5,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=1
+    🚨 **NLG** ISS — Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 26.00%, ex-right PHIÊN KẾ TIẾP (2025-10-17) (giá tham chiếu dự kiến giảm ~20.63%, KL tăng ~26.00%). Sự kiện đang ở trạng thái `announced` (có thể bị huỷ/dời). Broker đổi giá/KL TỐI NAY. NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV phiên 2025-10-17. Đang giữ: SpaceX 5,000cp.
+
+====================================================================================================
+E2 — vintage THẬT tav2_mike.corporate_action_snapshots: chạy upcoming_events(asof=snapshot_date, rows=vintage đó)
+====================================================================================================
+BVB snap=2026-09-05 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-06 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-07 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-08 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-09 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-10 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-11 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-12 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-13 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-15 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-16 st=P/announced pd=2026-07-10 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-17 st=P/announced pd=2026-09-15 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-18 st=P/announced pd=2026-09-15 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-19 st=P/announced pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=0 tv=0.0 → upcoming n=1  ALERT: • **BVB** 2026-09-23 (còn 4n, exright_date) · ISS · tỉ lệ 0.5000 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+BVB snap=2026-09-20 st=P/announced pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=0 tv=0.0 → upcoming n=1  ALERT: • **BVB** 2026-09-23 (còn 3n, exright_date) · ISS · tỉ lệ 0.5000 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+BVB snap=2026-09-21 st=P/announced pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=0 tv=0.0 → upcoming n=1  ALERT: • **BVB** 2026-09-23 (còn 2n, exright_date) · ISS · tỉ lệ 0.5000 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+BVB snap=2026-09-22 st=P/announced pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=0 tv=0.0 → upcoming n=1  ALERT: • **BVB** 2026-09-23 (còn 1n, exright_date) · ISS · tỉ lệ 0.5000 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+BVB snap=2026-09-23 st=P/announced pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=0 tv=0.0 → upcoming n=1  ALERT: • **BVB** 2026-09-23 (còn 0n, exright_date) · ISS · tỉ lệ 0.5000 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+BVB snap=2026-09-24 st=P/announced pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=0 tv=0.0 → upcoming n=0
+BVB snap=2026-09-25 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-09-26 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-09-27 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-09-28 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-09-29 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-09-30 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-01 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-02 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-03 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-04 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-05 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-06 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-07 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-08 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-09 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-10 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-11 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-12 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-13 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-17 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-18 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-19 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-20 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+BVB snap=2026-10-21 st=D/executed pd=2026-09-17 ex=2026-09-23 rd=2026-09-24 vol=320410000 tv=3.2041E12 → upcoming n=0
+NVL snap=2026-09-05 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-06 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-07 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-08 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-09 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-10 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-11 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-12 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-13 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-15 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-16 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-17 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-18 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-19 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-20 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-21 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-22 st=P/announced pd=2026-07-20 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-23 st=P/announced pd=2026-09-21 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-24 st=P/announced pd=2026-09-21 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-25 st=P/announced pd=2026-09-23 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-26 st=P/announced pd=2026-09-23 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-09-27 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=1  ALERT: • **NVL** 2026-09-30 (còn 3n, exright_date) · ISS · tỉ lệ 0.3333 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+NVL snap=2026-09-28 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=1  ALERT: • **NVL** 2026-09-30 (còn 2n, exright_date) · ISS · tỉ lệ 0.3333 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+NVL snap=2026-09-29 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=1  ALERT: • **NVL** 2026-09-30 (còn 1n, exright_date) · ISS · tỉ lệ 0.3333 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+NVL snap=2026-09-30 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=1  ALERT: • **NVL** 2026-09-30 (còn 0n, exright_date) · ISS · tỉ lệ 0.3333 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ] |     đang giữ: SpaceX:10,000cp
+NVL snap=2026-10-01 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-10-02 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-10-03 st=P/announced pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=0 tv=0.0 → upcoming n=0
+NVL snap=2026-10-04 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-05 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-06 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-07 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-08 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-09 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-10 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-11 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-12 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-13 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-17 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-18 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-19 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-20 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+NVL snap=2026-10-21 st=D/executed pd=2026-09-25 ex=2026-09-30 rd=2026-10-01 vol=800689324 tv=8.00689324E12 → upcoming n=0
+SCL snap=2026-09-05 st=P/announced pd=2026-05-07 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-06 st=P/announced pd=2026-05-07 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-07 st=P/announced pd=2026-05-07 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-08 st=P/announced pd=2026-05-07 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-09 st=P/announced pd=2026-05-07 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-10 st=P/announced pd=2026-05-07 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-11 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-12 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-13 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-15 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-16 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-17 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-18 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-19 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-20 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-21 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-22 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-23 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-24 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-25 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-26 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-27 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-28 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-29 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-09-30 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-01 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-02 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-03 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-04 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-05 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-06 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-07 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-08 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-09 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-10 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-11 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-12 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-13 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-17 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-18 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-19 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-20 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+SCL snap=2026-10-21 st=P/announced pd=2026-09-08 ex=None rd=None vol=0 tv=0.0 → upcoming n=0
+first asof có cảnh báo corp_action_daily: {'BVB': '2026-09-19', 'NVL': '2026-09-27'}
+
+====================================================================================================
+E3 — fixture SCL 15,38%: P/NULL ngày → P có exright/record (giả định) → D có KL/tổng giá trị
+====================================================================================================
+-- vintage st=P ex=None
+[corp_action_daily.upcoming_events asof=2026-10-22] n=0
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+-- vintage st=P ex=2026-11-05
+[corp_action_daily.upcoming_events asof=2026-10-30] n=1
+    • **SCL** 2026-11-05 (còn 6n, exright_date) · ISS · tỉ lệ 0.1538 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+-- vintage st=P ex=2026-11-05
+[corp_action_daily.upcoming_events asof=2026-11-03] n=1
+    • **SCL** 2026-11-05 (còn 2n, exright_date) · ISS · tỉ lệ 0.1538 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+-- vintage st=P ex=2026-11-05
+[corp_action_daily.upcoming_events asof=2026-11-04] n=1
+    • **SCL** 2026-11-05 (còn 1n, exright_date) · ISS · tỉ lệ 0.1538 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá · [announced — dự kiến, có thể đổi/huỷ]
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=1
+    🚨 **SCL** ISS — Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 15.38%, ex-right PHIÊN KẾ TIẾP (2026-11-05) (giá tham chiếu dự kiến giảm ~13.33%, KL tăng ~15.38%). Sự kiện đang ở trạng thái `announced` (có thể bị huỷ/dời). Broker đổi giá/KL TỐI NAY. NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV phiên 2026-11-05. Đang giữ: SpaceX 14,000cp.
+-- vintage st=D ex=2026-11-05
+[corp_action_daily.upcoming_events asof=2026-11-05] n=1
+    • **SCL** 2026-11-05 (còn 0n, exright_date) · ISS · tỉ lệ 0.1538 · Quyền mua CP cho Cổ đông hiện hữu · điều chỉnh giá
+        đang giữ: SpaceX:14,000cp
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=1
+    🚨 **SCL** ISS — Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 15.38%, ex-right HÔM NAY (giá tham chiếu dự kiến giảm ~13.33%, KL tăng ~15.38%). Sự kiện đang ở trạng thái `executed` (có thể bị huỷ/dời). NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV phiên 2026-11-05. Đang giữ: SpaceX 14,000cp.
+-- vintage st=D ex=2026-11-05
+[corp_action_daily.upcoming_events asof=2026-11-06] n=0
+[nav_exdate_forecast.relevant_events ≤1 phiên] n=0
+Cột corp_action_lib._events() SELECT (không có record_date/issue_volumn/total_value/id):
+False False False False
+
+====================================================================================================
+E4 — trading_bot.due_diligence._get_upcoming_exdate (BQ thật, chỉ đọc)
+====================================================================================================
+SCL asof=2025-10-10 → upcoming_exdate=None
+SCL asof=2025-10-14 → upcoming_exdate=None
+DIG asof=2025-10-02 → upcoming_exdate=None
+NLG asof=2025-10-14 → upcoming_exdate=None
+codes truyền vào pricing_events: [('DIV',), ('DIV',), ('DIV',), ('DIV',)]
+_recent_iss SCL asof 2025-10-24 (sau GDKHQ): {'has_recent_iss': True, 'days_since_iss': 7, 'iss_discount_pct': None, 'iss_note': 'RECENT_RIGHTS (7 ngày)', 'note': 'DOWNSIDE-INFO (DISPLAY_ONLY): rights offering trong 60 phiên gần đây — median BHAR60 -3,51pp (p=2,6e-4) NHƯNG chỉ trúng ~1,65% deal BAL/LAG (iss-median-study-20260821). Không phải gate, không phải tín hiệu bán.'}
+
+====================================================================================================
+E5 — exdate_frame.verify_post_event_price + broker_detect.decide_price_only với TERP quyền mua
+====================================================================================================
+SCL: cum 22,200 giá PH 12,500 r=0.35714286 ⇒ TERP 19,647.4 (giảm 11.50%); nav_exdate nói 'giảm ~26.32%, KL tăng ~35.71%'
+   verify_post_event_price(mult=1+r): (None, 'marketPrice 19,650 KHÔNG tái tạo được giá cum 22,200 qua hệ số 1.35714286 (kỳ vọng 16,357.9, lệch +3,292.1 > dung sai 200.0) — hai số này KHÔNG cùng một hệ quy chiếu, có thể là ca DNSE điều chỉnh THEO GÓI VAY chưa xong (price_frame.py §G4)')
+   decide_price_only[HOSE] → AMBIGUOUS: giá tham chiếu bị điều chỉnh (đóng cửa 22,200 → giá đêm 19,650) mà KL và tổng giá vốn KHÔNG đổi, không có chân tiền ⇒ KHÔNG đoán là cổ tức (quyền mua? CP thưởng về sau ex?) — người xác nhận
+   decide_price_only[HNX] → AMBIGUOUS: giá tham chiếu bị điều chỉnh (đóng cửa 22,200 → giá đêm 19,650) mà KL và tổng giá vốn KHÔNG đổi, không có chân tiền ⇒ KHÔNG đoán là cổ tức (quyền mua? CP thưởng về sau ex?) — người xác nhận
+   decide_price_only[UPCOM] → NOT_CANDIDATE: sàn UPCOM: giá không phải bằng chứng
+DIG: cum 21,550 giá PH 12,000 r=0.232 ⇒ TERP 19,751.6 (giảm 8.35%); nav_exdate nói 'giảm ~18.83%, KL tăng ~23.20%'
+   verify_post_event_price(mult=1+r): (None, 'marketPrice 19,750 KHÔNG tái tạo được giá cum 21,550 qua hệ số 1.232 (kỳ vọng 17,491.9, lệch +2,258.1 > dung sai 200.0) — hai số này KHÔNG cùng một hệ quy chiếu, có thể là ca DNSE điều chỉnh THEO GÓI VAY chưa xong (price_frame.py §G4)')
+   decide_price_only[HOSE] → AMBIGUOUS: giá tham chiếu bị điều chỉnh (đóng cửa 21,550 → giá đêm 19,750) mà KL và tổng giá vốn KHÔNG đổi, không có chân tiền ⇒ KHÔNG đoán là cổ tức (quyền mua? CP thưởng về sau ex?) — người xác nhận
+   decide_price_only[HNX] → AMBIGUOUS: giá tham chiếu bị điều chỉnh (đóng cửa 21,550 → giá đêm 19,750) mà KL và tổng giá vốn KHÔNG đổi, không có chân tiền ⇒ KHÔNG đoán là cổ tức (quyền mua? CP thưởng về sau ex?) — người xác nhận
+   decide_price_only[UPCOM] → NOT_CANDIDATE: sàn UPCOM: giá không phải bằng chứng
+NLG: cum 42,050 giá PH 25,000 r=0.26 ⇒ TERP 38,531.7 (giảm 8.37%); nav_exdate nói 'giảm ~20.63%, KL tăng ~26.00%'
+   verify_post_event_price(mult=1+r): (None, 'marketPrice 38,530 KHÔNG tái tạo được giá cum 42,050 qua hệ số 1.26 (kỳ vọng 33,373.0, lệch +5,157.0 > dung sai 200.0) — hai số này KHÔNG cùng một hệ quy chiếu, có thể là ca DNSE điều chỉnh THEO GÓI VAY chưa xong (price_frame.py §G4)')
+   decide_price_only[HOSE] → AMBIGUOUS: giá tham chiếu bị điều chỉnh (đóng cửa 42,050 → giá đêm 38,530) mà KL và tổng giá vốn KHÔNG đổi, không có chân tiền ⇒ KHÔNG đoán là cổ tức (quyền mua? CP thưởng về sau ex?) — người xác nhận
+   decide_price_only[HNX] → AMBIGUOUS: giá tham chiếu bị điều chỉnh (đóng cửa 42,050 → giá đêm 38,530) mà KL và tổng giá vốn KHÔNG đổi, không có chân tiền ⇒ KHÔNG đoán là cổ tức (quyền mua? CP thưởng về sau ex?) — người xác nhận
+   decide_price_only[UPCOM] → NOT_CANDIDATE: sàn UPCOM: giá không phải bằng chứng
+
+DONE — không có side effect nào được gọi (mọi notify/bus bị chặn bằng _boom).
