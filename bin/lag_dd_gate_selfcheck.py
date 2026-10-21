@@ -381,8 +381,27 @@ def run_inner():
         for bk in ("PEAD", "LAG-PEAD", "lag", "LAG_BOOK"):
             r = A(plan([o("SCL", book=bk)], []))
             ck(f"checker: book {bk!r} nhận là LAG", V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")], V(r))
+        # Arch-review vòng 2: cổng KHÔNG áp cho lệnh khai book non-LAG (BAL/CAPIT/DISCRETIONARY) dù mã là ứng viên LAG
+        for bk in ("BAL", "CAPIT", "DISCRETIONARY", "PARK"):
+            r = A(plan([o("SCL", book=bk)], [due("SCL", "SKIP")]))
+            ck(f"checker: lệnh book {bk} mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm", V(r) == [], V(r))
+        p_up = plan([o("SCL", book="BAL")], [])
+        p_up["lag_analysis"]["lag_upcoming_for_next_plans"] = [{"ticker": "SCL"}]
+        ck("checker: lệnh BAL mua mã LAG-upcoming ⇒ KHÔNG vi phạm", V(A(p_up)) == [], V(A(p_up)))
+        p_nb = plan([o("SCL", book="")], [])
+        p_nb["lag_analysis"]["lag_upcoming_for_next_plans"] = [{"ticker": "SCL"}]
+        ck("checker: lệnh THIẾU book mua mã LAG-upcoming ⇒ vẫn bị cổng", ("SCL", "LAG_DD_FLAG_NO_ACK") in V(A(p_nb)), V(A(p_nb)))
         r = A(plan([o("SCL", book="BAL")], [due("SCL", "BUY")]))
-        ck("checker: lệnh book BAL nhưng mã là ứng viên LAG ⇒ vẫn bị cổng", ("SCL", "LAG_DD_FLAG_NO_ACK") in V(r), V(r))
+        ck("checker: BAL mua SCL nhưng due_today SCL=BUY ⇒ vi phạm CHỈ vì due_today", V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")]
+           and str([f for f in r["findings"] if f["kind"] == "LAG_DD_GATE_VIOLATION"][0].get("evidence", "")).startswith("[due_today]"), V(r))
+        r = A(dict(plan([], []), deferred_orders=[dict(dfr("SCL"), status="SKIPPED_BY_GATE")]))
+        ck("checker: deferred status SKIPPED_BY_GATE (không qty) ⇒ không vi phạm", V(r) == [], V(r))
+        r = A(dict(plan([], []), deferred_orders=[dict(dfr("SCL"), status="EXCLUDED_DD")]))
+        ck("checker: deferred status EXCLUDED_DD ⇒ không vi phạm", V(r) == [], V(r))
+        r = A(dict(plan([], []), deferred_orders=[dict(dfr("SCL"), qty=0)]))
+        ck("checker: deferred WAIT_CASH qty=0 ⇒ không vi phạm", V(r) == [], V(r))
+        r = A(dict(plan([], []), deferred_orders=[dict(dfr("SCL"), qty=500)]))
+        ck("checker: deferred WAIT_CASH qty>0 ⇒ vi phạm", V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")], V(r))
         r = A(plan([o("SCL", side="BUY")], [due("SCL", "BUY")]))
         ck("checker: side 'BUY' hoa ⇒ nhận là mua", ("SCL", "LAG_DD_FLAG_NO_ACK") in V(r), V(r))
         r = A(plan([o("SCL", book="FLAGSHIP")], []))
@@ -420,6 +439,9 @@ def run_inner():
 
 # ── mutants: mỗi cái PHẢI làm selfcheck đỏ ─────────────────────────────────────────────────────
 MUTANTS = [
+    ("lag_plan_consistency_check.py", 'return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker")) in lag_tk)',
+     'return bool(_RE_LAG_BOOK.search(bk)) or _tk(o.get("ticker")) in lag_tk'),
+    ("lag_plan_consistency_check.py", 'and not str(d.get("status") or "").strip().upper().startswith(("SKIP", "EXCLUD"))', 'and True'),
     ("lag_dd_pack.py", 'status = "CLEARED" if not uniq else "FLAG"', 'status = "CLEARED"'),
     ("lag_dd_pack.py", '        flags.append(_f("INSIDER_NA", "_insider_scan trả None (lỗi/nguồn cũ)"))', "        pass"),
     ("lag_dd_pack.py", '            errors[name] = f"{type(e).__name__}: {str(e)[:200]}"\n            return None',
@@ -442,12 +464,12 @@ MUTANTS = [
     ("lag_dd_ack.py", '    if age > PACK_ASOF_MAX_DAYS or age < 0:', '    if False:'),
     ("lag_dd_ack.py", '        if g_na is None or g_best is None or g_na > g_best:', '        if False:'),
     ("lag_dd_ack.py", '        if release_date and m.group(2) != str(release_date)[:10]:', '        if False:'),
-    ("lag_plan_consistency_check.py", '    for d in plan.get("deferred_orders") or []:\n        if isinstance(d, dict) and', '    for d in []:\n        if isinstance(d, dict) and'),
+    ("lag_plan_consistency_check.py", '    for d in plan.get("deferred_orders") or []:\n        if (isinstance(d, dict) and', '    for d in []:\n        if (isinstance(d, dict) and'),
     ("lag_plan_consistency_check.py", '    for t in take:\n        hits.setdefault(t, []).append("due_today")', '    for t in []:\n        hits.setdefault(t, []).append("due_today")'),
     ("lag_plan_consistency_check.py", '        kept = [f for f in res["findings"] if not (f["kind"] == "FUNDING_ALERT" and f.get("ticker") in blocked)]',
      '        kept = list(res["findings"])'),
-    ("lag_plan_consistency_check.py", '    return bool(_RE_LAG_BOOK.search(_tk(o.get("book")))) or _tk(o.get("ticker")) in lag_tk',
-     '    return _tk(o.get("book")) == "LAG"'),
+    ("lag_plan_consistency_check.py", '        return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker")) in lag_tk)',
+     '        return bk == "LAG"'),
     ("lag_dd_ack.py", '    elif a.get("decided_by") != "user":', '    elif False:'),
     ("lag_dd_ack.py", '    elif a.get("flags_hash") != fh:', '    elif False:'),
     ("lag_dd_ack.py", '    if status == "CLEARED" and not fl:', '    if status == "CLEARED":'),

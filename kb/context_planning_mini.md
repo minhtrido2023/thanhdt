@@ -215,7 +215,8 @@ python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
     NGOÀI plan: ghi vào `lag_analysis.due_today[]` với `decision: "SKIP"`, `decision_why` bắt đầu bằng
     `LAG_DD_<state>` (vd `LAG_DD_FLAG_NO_ACK — chờ user trả lời DD`). KHÔNG dùng BUY/DEFER/WAIT_CASH/
     RESIDUAL/ORDER cho ca này, và KHÔNG đặt lệnh (kể cả vào `deferred_orders[]`) cho mã đó (checker coi mọi
-    decision TAKE trong `due_today`, mọi lệnh mua mã ứng viên LAG bất kể `book`, mọi mục `deferred_orders[]` LAG
+    decision TAKE trong `due_today`, mọi lệnh mua LAG (book LAG/PEAD, hoặc lệnh thiếu `book` mà mã là ứng viên LAG; lệnh BAL/CAPIT/DISCRETIONARY của
+    cùng mã KHÔNG bị cổng), mọi mục `deferred_orders[]` LAG có qty>0 và status không phải SKIP/EXCLUDED
     là vi phạm, và tắt đề xuất cấp vốn cho mã đó). Không có gói ≠ CLEARED.
   - Không tự ghi `ack.json`, không tự sinh lại gói để "hết cờ". `lag_plan_consistency_check.py` (chạy
     trong `send_plan_report.sh`) báo `LAG_DD_GATE_VIOLATION` ĐỎ cho lệnh MUA LAG sai luật này và in

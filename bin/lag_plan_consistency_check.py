@@ -18,8 +18,8 @@ HAI VIỆC trong một module (cùng đọc `lag_analysis.due_today[]` + `orders
   LAG_DD_GATE_VIOLATION (cổng DD trước plan, user duyệt 2026-10-21 22:10, job Taylor_20261021_151302)
     — mã LAG xuất hiện ở BA nơi: orders[] (mua, qty>0), deferred_orders[] (mua) hoặc
     lag_analysis.due_today với decision ∈ TAKE (BUY/DEFER/DEFERRED/BUY_DEFERRED/WAIT_CASH/RESIDUAL/
-    ORDER) — lệnh coi là LAG khi book khớp LAG/PEAD (mọi biến thể) HOẶC mã thuộc ứng viên LAG của plan
-    bất kể book — mà gói `data/lag_dd/<mã>_<release>.json` KHÔNG ở trạng thái CLEARED và KHÔNG có ack
+    ORDER) — lệnh coi là LAG khi book khớp LAG/PEAD (mọi biến thể) HOẶC lệnh thiếu book mà mã thuộc ứng
+    viên LAG của plan (lệnh khai book khác như BAL/CAPIT/DISCRETIONARY không bị cổng) — mà gói `data/lag_dd/<mã>_<release>.json` KHÔNG ở trạng thái CLEARED và KHÔNG có ack
     PROCEED decided_by=user khớp flags_hash (lag_dd_ack.dd_gate). Cause = `LAG_DD_<state>`
     (FLAG_NO_ACK, NO_PACK, PACK_STALE, ACK_DROP, ACK_RESEARCH, ACK_STALE, ACK_NOT_USER, PACK_UNREADABLE,
     ACK_UNREADABLE, GATE_UNAVAILABLE, NO_PLAN_DATE). Mã bị cổng chặn ⇒ FUNDING_ALERT cho mã đó bị TẮT
@@ -172,8 +172,9 @@ def _dd_gate_check(plan, res, dd_dir=None):
     """Cổng DD: ghi LAG_DD_GATE_VIOLATION vào res["findings"], mã chờ DD vào res["dd_pending"].
     Gác BA nơi: (1) orders[] mua qty>0, (2) deferred_orders[] mua, (3) lag_analysis.due_today có
     decision ∈ TAKE (_RE_BUY) — mã nào lọt vào một trong ba mà gate ∉ BUY_OK ⇒ vi phạm. Lệnh được coi
-    là LAG khi book khớp LAG/PEAD (mọi biến thể: "LAG-PEAD"…) HOẶC mã thuộc ứng viên LAG của plan
-    (due_today TAKE ∪ upcoming) bất kể book. Chạy CẢ KHI lag_analysis thiếu/hỏng."""
+    là LAG khi book khớp LAG/PEAD (mọi biến thể: "LAG-PEAD"…) HOẶC lệnh THIẾU book mà mã thuộc ứng viên
+    LAG của plan (due_today TAKE ∪ upcoming). Lệnh khai book khác (BAL/CAPIT/DISCRETIONARY…) không bị cổng.
+    Chạy CẢ KHI lag_analysis thiếu/hỏng."""
     plan_date = res["plan_date"]
     res["dd_pending"] = []
     la = plan.get("lag_analysis") if isinstance(plan.get("lag_analysis"), dict) else {}
@@ -185,14 +186,19 @@ def _dd_gate_check(plan, res, dd_dir=None):
     lag_tk = set(take) | {_tk(c.get("ticker")) for c in upc}
 
     def is_lag(o):
-        return bool(_RE_LAG_BOOK.search(_tk(o.get("book")))) or _tk(o.get("ticker")) in lag_tk
+        bk = _tk(o.get("book"))
+        # Lệnh có khai book KHÔNG phải LAG/PEAD (BAL/CAPIT/PARK/DISCRETIONARY…) KHÔNG thuộc phạm vi cổng
+        # (user chỉ duyệt cổng cho book LAG; arch-review vòng 2). Fallback theo mã CHỈ cho lệnh thiếu book.
+        return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker")) in lag_tk)
 
     hits = {}                                   # ticker → [nơi vi phạm]
     for o in plan.get("orders") or []:
         if isinstance(o, dict) and _is_buy_side(o) and (_num(o.get("qty")) or 0) > 0 and is_lag(o):
             hits.setdefault(_tk(o.get("ticker")), []).append("orders")
     for d in plan.get("deferred_orders") or []:
-        if isinstance(d, dict) and str(d.get("side") or "buy").strip().lower() == "buy" and is_lag(d):
+        if (isinstance(d, dict) and str(d.get("side") or "buy").strip().lower() == "buy" and is_lag(d)
+                and not str(d.get("status") or "").strip().upper().startswith(("SKIP", "EXCLUD"))
+                and (_num(d.get("qty")) is None or _num(d.get("qty")) > 0)):
             hits.setdefault(_tk(d.get("ticker")), []).append("deferred_orders")
     for t in take:
         hits.setdefault(t, []).append("due_today")
