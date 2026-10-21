@@ -1381,3 +1381,6 @@
 
 ## Archived 2026-10-21 (keep=12 days=0 require_done=False)
 - [2026-10-20T12:29:29Z] ĐANG DỞ job Taylor_20261020_122917 (V1 Volume=0 fill / V2 delisted enumerate / V3 LAG BEAR gate, EXPLORATORY, out agents/Taylor/research/survivorship_volzero_20261020/) | NEXT: đọc followup REPORT_BC/D + skeptic log
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T15:33:47Z] ĐANG DỞ job Taylor_20261020_153324 (tiếp 122917): kiểm kê xong — PREREG V1/V2/V3 md5 OK; ctl 4 chân + V1A EXIT=0; V1B/V1C 8 run CHẾT lúc reboot (cần chạy lại nohup); V2 replay log done 19:49 | NEXT: chạy lại V1B/V1C, V3
