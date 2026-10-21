@@ -180,16 +180,28 @@ def run_dd(ticker, asof):
         corp_ok = bool(dd._corp_action_feed_ok(dd._as_date(asof)))
     except Exception:
         corp_ok = False
-    anomaly_path = os.path.join(dd.DATA_DIR, "anomaly_flags.json")
-    try:
-        with open(anomaly_path, encoding="utf-8") as fh:
-            anomaly = (True, json.load(fh).get(ticker))
-    except Exception as e:
-        anomaly = (False, f"{type(e).__name__}: {str(e)[:120]}")
+    anomaly = anomaly_evidence(ticker, asof)
     return {"dd": d, "adv": adv, "adv_date": adv_date, "adv_err": adv_err,
             "adv_thin_vnd": dd.ADV_THIN_VND, "insider_ok": insider_ok, "corp_ok": corp_ok,
-            "anomaly_ok": anomaly[0], "anomaly_rec": anomaly[1] if anomaly[0] else None,
-            "anomaly_err": None if anomaly[0] else anomaly[1]}
+            "anomaly_ok": anomaly[0], "anomaly_rec": anomaly[1], "anomaly_err": anomaly[2]}
+
+
+def anomaly_evidence(ticker, asof):
+    """(ok, bản ghi|None, lỗi|None) qua anomaly_gate CANONICAL (cùng cổng với production + 3 sổ paper):
+    file cũ / thiếu `_meta` / không đọc được ⇒ ok=False ⇒ ANOMALY_NA (fail-closed — `anomaly_excluded`
+    gốc fail-OPEN và trả set rỗng, không thể dùng một mình làm bằng chứng "sạch"). Bản ghi chỉ tính khi
+    ticker ∈ anomaly_excluded(asof) = cửa sổ asof−ANOMALY_TTL_DAYS ≤ last_alert ≤ asof (không look-ahead).
+    Độ tươi so với ngày `asof`: gói hồi cứu (asof ≠ ngày file được ghi) ⇒ ANOMALY_NA, cố ý."""
+    import anomaly_gate as ag
+    fr = ag.anomaly_flags_freshness(asof)
+    if fr["is_stale"]:
+        return False, None, f"anomaly_flags.json cũ/không dùng được: {fr['reason']}"
+    try:
+        with open(os.path.join(ag.WORKDIR, "data", "anomaly_flags.json"), encoding="utf-8") as fh:
+            recs = json.load(fh)
+    except Exception as e:
+        return False, None, f"{type(e).__name__}: {str(e)[:120]}"
+    return True, (recs.get(ticker) if ticker in ag.anomaly_excluded(asof, quiet=True) else None), None
 
 
 def run_valuation(ticker, asof):
@@ -290,6 +302,8 @@ def earnings_quality(rows, is_bank):
     out["np_r_bq"] = _num(r.get("NP_R"))
     if np_[0] is None or np_[4] is None:
         flags.append(_f("FIN_NA", f"thiếu NP_P0/NP_P4 (NP_P0={np_[0]}, NP_P4={np_[4]})"))
+    missing = []                # tên trường thiếu ⇒ MỘT cờ FIN_NA cuối hàm (vắng dữ liệu KHÔNG BAO GIỜ là sạch)
+    missing += [f"NP_P{i}" for i in (5, 6, 7) if np_[i] is None]
     base = [v for v in np_[5:8] if v is not None]
     if len(base) == 3 and np_[4] is not None:
         med = sorted(base)[1]
@@ -304,15 +318,22 @@ def earnings_quality(rows, is_bank):
         flags.append(_f("QUY_LO_TRONG_NEN", "NP ≤ 0 ở " + ",".join(
             f"{q}={np_[int(q[1])]/1e9:,.1f} tỷ" for q in neg)))
 
-    rev0, rev4 = _num(r.get("Revenue_P0")), _num(r.get("Revenue_P4"))
-    rev_g = (rev0 / rev4 - 1) if rev0 is not None and rev4 and rev4 > 0 else None
-    out["revenue_yoy"] = rev_g if rev_g is not None else "không đủ dữ liệu"
-
     if is_bank:
+        out["revenue_yoy"] = "không áp dụng cho ngân hàng"
         out["cfo_vs_np"] = "không áp dụng cho ngân hàng (CFO NH phản ánh huy động/cho vay)"
         out["working_capital"] = "không áp dụng cho ngân hàng"
         out["non_operating_proxy"] = "không áp dụng cho ngân hàng (EBITM=0)"
+        if missing:
+            flags.append(_f("FIN_NA", "thiếu " + ", ".join(missing)))
         return out, flags
+
+    rev0, rev4 = _num(r.get("Revenue_P0")), _num(r.get("Revenue_P4"))
+    missing += [n for n, v in (("Revenue_P0", rev0), ("Revenue_P4", rev4)) if v is None]
+    if rev4 is not None and rev4 <= 0:
+        missing.append(f"Revenue_P4={rev4:g} (≤0, không tính được tăng trưởng)")
+    rev_g = (rev0 / rev4 - 1) if rev0 is not None and rev4 and rev4 > 0 else None
+    out["revenue_yoy"] = rev_g if rev_g is not None else "không đủ dữ liệu"
+    notes = out["data_notes"] = []
 
     cfo = [_num(r.get(f"CF_OA_P{i}")) for i in range(4)]
     if all(v is not None for v in cfo) and all(v is not None for v in np_[:4]):
@@ -328,7 +349,10 @@ def earnings_quality(rows, is_bank):
         flags.append(_f("FIN_NA", f"thiếu CF_OA_P0..P3 hoặc NP_P0..P3 (CF_OA={cfo})"))
 
     npm, ebm = _num(r.get("NPM_P0")), _num(r.get("EBITM_P0"))
-    if npm is not None and ebm:
+    missing += [n for n, v in (("NPM_P0", npm), ("EBITM_P0", ebm)) if v is None]
+    if npm == 0 and ebm == 0:
+        out["non_operating_proxy"] = "không áp dụng (NPM_P0 = EBITM_P0 = 0)"
+    elif npm is not None and ebm is not None:
         out["non_operating_proxy"] = {"NPM_P0": npm, "EBITM_P0": ebm,
                                       "note": "ticker_financial KHÔNG có cột LNTT/thu nhập khác ⇒ "
                                               "không đo được % thu nhập khác/LNTT; dùng proxy NPM>EBITM"}
@@ -347,8 +371,23 @@ def earnings_quality(rows, is_bank):
                            ("inventory", "Inventory_P0", "EQ_TON_KHO_TANG")):
         cur = _num(r.get(col))
         old = _num(prev.get(col)) if prev else (_num(r.get("Inventory_P4")) if col == "Inventory_P0" else None)
-        if cur is None or not old or old <= 0 or rev_g is None:
+        if cur is None:
+            missing.append(col)
+        if old is None:
+            missing.append(f"{col} cùng kỳ năm trước" + ("" if prev or col == "Inventory_P0" else
+                                                      " (không có dòng quý cùng kỳ)"))
+        if cur is None or old is None:
             wc[key] = "không đủ dữ liệu"
+            continue
+        if cur == 0 and old == 0:
+            wc[key] = "không áp dụng (=0 cả hai kỳ, vd dịch vụ không có tồn kho)"
+            continue
+        if rev_g is None:
+            wc[key] = "không đủ dữ liệu"       # Revenue thiếu đã vào `missing`
+            continue
+        if old == 0:                           # từ 0 lên >0: tăng vô hạn — không tính được %, vẫn đưa user xem
+            wc[key] = {"now_vnd": cur, "year_ago_vnd": old, "yoy": None, "gap_vs_revenue": None}
+            flags.append(_f(code, f"{col} từ 0 lên {cur:,.0f} (doanh thu YoY {rev_g:+.0%})"))
             continue
         g = cur / old - 1
         wc[key] = {"now_vnd": cur, "year_ago_vnd": old, "yoy": g, "gap_vs_revenue": g - rev_g}
@@ -357,7 +396,17 @@ def earnings_quality(rows, is_bank):
     for k in ("DSO", "DIO"):
         a, b = _num(r.get(f"{k}_P0")), _num(r.get(f"{k}_P4"))
         wc[k] = {"P0": a, "P4": b} if a is not None and b is not None else "không đủ dữ liệu"
+    ar = wc.get("receivables")
+    dso = wc.get("DSO")
+    if isinstance(ar, dict) and ar.get("yoy") is not None and isinstance(dso, dict) and dso["P4"]:
+        dd_ = dso["P0"] / dso["P4"] - 1
+        if abs(ar["yoy"]) > 0.10 and abs(dd_) > 0.10 and (ar["yoy"] > 0) != (dd_ > 0):
+            notes.append(f"DỮ LIỆU MÂU THUẪN: phải thu thô YoY {ar['yoy']:+.0%} nhưng DSO vendor "
+                         f"P0 {dso['P0']:.1f} vs P4 {dso['P4']:.1f} ({dd_:+.0%}) đi NGƯỢC chiều — "
+                         "kiểm tra nguồn trước khi tin cả hai")
     out["working_capital"] = wc
+    if missing:
+        flags.append(_f("FIN_NA", "thiếu " + ", ".join(missing)))
     return out, flags
 
 
@@ -490,11 +539,11 @@ def build_pack(ticker, asof, cand=None, release_date=None, macro_note=None, sour
     d = ev.get("dd") or {}
     icb = (d.get("yield_floor") or {}).get("icb_code") if isinstance(d, dict) else None
     is_bank = _num(icb) == BANK_ICB
-    if rows and not is_bank and all(_num(rows[0].get(c)) == 0 for c in ("EBITM_P0", "AR_P0", "Inventory_P0")):
-        is_bank = None                          # không rõ ngành mà cột = 0 ⇒ coi như thiếu dữ liệu
+    if rows and not is_bank and all(_num(rows[0].get(c)) in (0, None) for c in ("EBITM_P0", "AR_P0", "Inventory_P0")):
+        is_bank = None                          # không rõ ngành mà cột = 0/NULL ⇒ coi như thiếu dữ liệu
     eq, eq_flags = earnings_quality(rows or [], bool(is_bank))
     if is_bank is None:
-        eq_flags.append(_f("FIN_NA", "EBITM/AR/Inventory = 0 nhưng không xác nhận được là ngân hàng"))
+        eq_flags.append(_f("FIN_NA", "EBITM/AR/Inventory = 0 hoặc NULL nhưng không xác nhận được là ngân hàng"))
     flags += [f for f in eq_flags if not (f["code"] == "QUY_LO_TRONG_NEN"
                                          and any(x["code"] == "SURPRISE_PHONG_CO_HOC" for x in flags))]
     if is_bank:
@@ -591,12 +640,16 @@ def render_message(packs):
         if p["status"] == "CLEARED":
             lines.append(head + "✅ CLEARED")
             continue
-        lines.append(head + f"🚩 FLAG — {len(p['flags'])} cờ:")
+        lines.append(head + f"🚩 FLAG — {len(p['flags'])} cờ, hash `{p['flags_hash']}` "
+                            f"({','.join(sorted({f['code'] for f in p['flags']}))}):")
         for f in p["flags"]:
             mark = "⚠️ WARNING" if f["severity"] == "WARNING" else "•"
             lines.append(f"    {mark} `{f['code']}` — {f['evidence'][:220]}")
         lines.append(f"    ➜ Trả lời trước **{_deadline(c.get('entry_date'))}**: "
-                     f"(1) nghiên cứu thêm · (2) loại · (3) mua dù có cờ. Không trả lời = đứng ngoài plan.")
+                     f"(1) nghiên cứu thêm · (2) loại · (3) mua dù có cờ. Không trả lời = đứng ngoài plan. "
+                     f"(Ack gắn hash `{p['flags_hash']}`; gói đổi cờ sau tin này ⇒ ack bị từ chối, sẽ hỏi lại.)")
+        for note in (p.get("earnings_quality") or {}).get("data_notes") or []:
+            lines.append(f"    ℹ️ {note}")
         mn = p.get("macro_note") or {}
         if mn.get("path"):
             lines.append(f"    vĩ mô: {mn['path']}")

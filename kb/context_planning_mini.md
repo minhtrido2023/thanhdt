@@ -202,8 +202,8 @@ python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
 - **Checker cơ học**: `python3 mike/bin/lag_plan_calendar_check.py --plan <plan.json>` (tự ghép plan
   account kia cùng ngày). `send_plan_report.sh` tự chạy và in ✅/⛔ kèm MÃ nguyên nhân
   (`LAG_CAL_*`, `LAG_DD_*`, `LAG_X_*` — danh sách ở docstring script) vào report duyệt. Thấy ⛔
-  = sửa plan theo code rồi gửi lại, KHÔNG giải thích cho qua. NGOẠI LỆ: các mã `LAG_DD_*` là
-  HEURISTIC từ khoá (có thể báo nhầm) — đọc lý do rồi mới quyết; KHÔNG đổi một quyết định đúng (vd SKIP vì
+  = sửa plan theo code rồi gửi lại, KHÔNG giải thích cho qua. NGOẠI LỆ: CHỈ mã `LAG_DD_FLOOR_FAIL_NOT_GATE` (calendar check) là
+  HEURISTIC từ khoá (có thể báo nhầm; các mã `LAG_DD_<state>` của CỔNG DD bên dưới là CƠ HỌC, không ngoại lệ) — đọc lý do rồi mới quyết; KHÔNG đổi một quyết định đúng (vd SKIP vì
   giá trên anchor) chỉ để checker hết đỏ, hãy ghi rõ lý do trong `decision_why`.
 - **CỔNG DD TRƯỚC PLAN** (user duyệt 2026-10-21 22:10 ICT, job Taylor_20261021_151302): ứng viên LAG
   KHÔNG tự mặc định vào plan mua. Nguồn trạng thái DUY NHẤT = `data/lag_dd/` (gói
@@ -211,10 +211,12 @@ python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
   KHÔNG tự phán từ cột `due_diligence` của CSV. Tra 1 mã:
   `python3 mike/bin/lag_dd_ack.py --gate <MÃ> --plan-date <plan_date>` ⇒ `state`.
   - Được đưa vào `orders[]` CHỈ KHI `state` ∈ `CLEARED` (gói 0 cờ) / `ACK_PROCEED` (user chọn "mua dù có cờ").
-  - Mọi state khác (`FLAG_NO_ACK`, `NO_PACK`, `ACK_RESEARCH`, `ACK_DROP`, `ACK_STALE`, ...) ⇒ mã ĐỨNG
+  - Mọi state khác (`FLAG_NO_ACK`, `NO_PACK`, `PACK_STALE` (DD asof cách plan_date >7 ngày — chạy lại gói), `ACK_RESEARCH`, `ACK_DROP`, `ACK_STALE`, ...) ⇒ mã ĐỨNG
     NGOÀI plan: ghi vào `lag_analysis.due_today[]` với `decision: "SKIP"`, `decision_why` bắt đầu bằng
-    `LAG_DD_<state>` (vd `LAG_DD_FLAG_NO_ACK — chờ user trả lời DD`). KHÔNG dùng DEFER/WAIT_CASH cho ca
-    này (checker sẽ đòi lệnh/mục hoãn). Không có gói ≠ CLEARED.
+    `LAG_DD_<state>` (vd `LAG_DD_FLAG_NO_ACK — chờ user trả lời DD`). KHÔNG dùng BUY/DEFER/WAIT_CASH/
+    RESIDUAL/ORDER cho ca này, và KHÔNG đặt lệnh (kể cả vào `deferred_orders[]`) cho mã đó (checker coi mọi
+    decision TAKE trong `due_today`, mọi lệnh mua mã ứng viên LAG bất kể `book`, mọi mục `deferred_orders[]` LAG
+    là vi phạm, và tắt đề xuất cấp vốn cho mã đó). Không có gói ≠ CLEARED.
   - Không tự ghi `ack.json`, không tự sinh lại gói để "hết cờ". `lag_plan_consistency_check.py` (chạy
     trong `send_plan_report.sh`) báo `LAG_DD_GATE_VIOLATION` ĐỎ cho lệnh MUA LAG sai luật này và in
     dòng "⏳ Chờ DD" cho mã đứng ngoài — hiện CHỈ CẢNH BÁO, chưa chặn gửi. Mã `LAG_DD_<state>` của cổng

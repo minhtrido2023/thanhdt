@@ -127,10 +127,40 @@ def run_inner():
             ("thiếu CF_OA_P0", dict(fin=fin_rows(CF_OA_P0=None)), "FIN_NA"),
             ("thiếu NP_P4", dict(fin=fin_rows(NP_P4=float("nan"))), "FIN_NA"),
             ("EBITM/AR/Inventory = 0 mà không phải NH", dict(fin=fin_rows(EBITM_P0=0, AR_P0=0, Inventory_P0=0)), "FIN_NA"),
+            ("EBITM/AR/Inventory NULL mà không phải NH", dict(fin=fin_rows(EBITM_P0=None, AR_P0=None, Inventory_P0=None)), "FIN_NA"),
+            ("thiếu Revenue_P0", dict(fin=fin_rows(Revenue_P0=None)), "FIN_NA"),
+            ("thiếu Revenue_P4", dict(fin=fin_rows(Revenue_P4=None)), "FIN_NA"),
+            ("Revenue_P4 = 0", dict(fin=fin_rows(Revenue_P4=0)), "FIN_NA"),
+            ("thiếu AR_P0 (NH khác có số)", dict(fin=fin_rows(AR_P0=None)), "FIN_NA"),
+            ("thiếu Inventory_P0", dict(fin=fin_rows(Inventory_P0=None)), "FIN_NA"),
+            ("thiếu NPM_P0", dict(fin=fin_rows(NPM_P0=None)), "FIN_NA"),
+            ("thiếu EBITM_P0", dict(fin=fin_rows(EBITM_P0=None)), "FIN_NA"),
+            ("thiếu NP_P5", dict(fin=fin_rows(NP_P5=None)), "FIN_NA"),
+            ("thiếu NP_P7", dict(fin=fin_rows(NP_P7=float("nan"))), "FIN_NA"),
+            ("EBITM=0 + AR có số + thiếu Revenue_P4", dict(fin=fin_rows(EBITM_P0=0, Revenue_P4=None)), "FIN_NA"),
+            ("thiếu AR kỳ cùng kỳ năm trước", dict(fin=[fin_row()] + fin_rows()[1:4]), "FIN_NA"),
         ]
         for name, kw, code in cases:
             p = B(**kw)
             ck(f"fail-closed: {name} ⇒ {code}, FLAG", p["status"] == "FLAG" and code in codes(p), codes(p))
+        p = B(fin=fin_rows(EBITM_P0=None, AR_P0=None, Inventory_P0=None))
+        ck("is_bank bắt cả NULL: EBITM/AR/Inventory NULL ⇒ FIN_NA nêu 'không xác nhận được là ngân hàng'",
+           any("không xác nhận" in f["evidence"] for f in p["flags"] if f["code"] == "FIN_NA"), p["flags"])
+        p = B(fin=fin_rows(Revenue_P4=None, AR_P0=None, NPM_P0=None, NP_P6=None))
+        ev = " ".join(f["evidence"] for f in p["flags"] if f["code"] == "FIN_NA")
+        ck("FIN_NA nêu TÊN trường thiếu", all(n in ev for n in ("Revenue_P4", "AR_P0", "NPM_P0", "NP_P6")), ev)
+        p2 = B(fin=[dict(fin_row(AR_P0=0.0, Inventory_P0=0.0, Inventory_P4=0.0)),
+                    {"quarter": "2025Q3", "AR_P0": 0.0, "Inventory_P0": 0.0}])
+        ck("AR/tồn kho = 0 cả hai kỳ ⇒ 'không áp dụng', KHÔNG cờ FIN_NA/EQ",
+           p2["status"] == "CLEARED" and "không áp dụng" in str(p2["earnings_quality"]["working_capital"]["inventory"]),
+           (codes(p2), p2["earnings_quality"]["working_capital"]))
+        p3 = B(fin=[fin_row(AR_P0=50.0), {"quarter": "2025Q3", "AR_P0": 0.0, "Inventory_P0": 100.0}])
+        ck("phải thu từ 0 lên >0 ⇒ EQ_PHAI_THU_TANG (không lọt)", "EQ_PHAI_THU_TANG" in codes(p3), codes(p3))
+        d = fin_rows(AR_P0=200.0, DSO_P0=20.0, DSO_P4=40.0)
+        p4 = B(fin=d)
+        ck("DSO vendor đi ngược AR thô ⇒ ghi chú dữ liệu mâu thuẫn", any("MÂU THUẪN" in n for n in
+           p4["earnings_quality"]["data_notes"]), p4["earnings_quality"]["data_notes"])
+        ck("tin Discord nêu ghi chú mâu thuẫn DSO", "MÂU THUẪN" in P.render_message([p4]))
 
         # 3. cờ cơ học
         cases = [
@@ -175,6 +205,42 @@ def run_inner():
         h1, h2 = B(dd=dd_ok(adv=1.5e9))["flags_hash"], B(dd=dd_ok(adv=1.2e9))["flags_hash"]
         ck("flags_hash theo MÃ cờ, không theo số bằng chứng", h1 == h2 and h1 != B()["flags_hash"])
 
+        # 3b. anomaly qua anomaly_gate canonical (stale ⇒ NA; quá TTL / tương lai ⇒ không cờ)
+        import anomaly_gate as AG
+        agd = os.path.join(td, "ag")
+        os.makedirs(os.path.join(agd, "data"))
+        old_wd = AG.WORKDIR
+        AG.WORKDIR = agd
+
+        def put_anom(meta_gen="2026-10-21T01:00:00Z", **recs):
+            d = {k: {"last_alert": v, "tier": "H", "reasons": "x"} for k, v in recs.items()}
+            if meta_gen:
+                d["_meta"] = {"generated_at": meta_gen}
+            json.dump(d, open(os.path.join(agd, "data", "anomaly_flags.json"), "w"))
+        try:
+            put_anom(VPB="2026-10-10")
+            ok, rec, err = P.anomaly_evidence("VPB", "2026-10-21")
+            ck("anomaly: file tươi + last_alert trong TTL ⇒ có bản ghi", ok and rec and rec["last_alert"] == "2026-10-10", (ok, rec, err))
+            put_anom(VPB="2026-09-18")
+            ok, rec, err = P.anomaly_evidence("VPB", "2026-10-21")
+            ck("anomaly: last_alert 33 ngày > TTL 30 ⇒ KHÔNG cờ (ok, rec=None)", ok and rec is None, (ok, rec, err))
+            put_anom(VPB="2026-11-02")
+            ok, rec, err = P.anomaly_evidence("VPB", "2026-10-21")
+            ck("anomaly: last_alert TƯƠNG LAI ⇒ không cờ (không look-ahead)", ok and rec is None, (ok, rec, err))
+            put_anom(meta_gen="2026-10-15T01:00:00Z", VPB="2026-10-10")
+            ok, rec, err = P.anomaly_evidence("VPB", "2026-10-21")
+            ck("anomaly: file ghi ngày khác asof (stale) ⇒ ok=False", not ok and "cũ" in str(err), (ok, rec, err))
+            put_anom(meta_gen=None, VPB="2026-10-10")
+            ok, rec, err = P.anomaly_evidence("VPB", "2026-10-21")
+            ck("anomaly: thiếu _meta.generated_at ⇒ ok=False", not ok, (ok, rec, err))
+            os.remove(os.path.join(agd, "data", "anomaly_flags.json"))
+            ok, rec, err = P.anomaly_evidence("VPB", "2026-10-21")
+            ck("anomaly: file không có ⇒ ok=False", not ok, (ok, rec, err))
+            p = B(dd=dd_ok(anomaly_ok=ok, anomaly_err=err))
+            ck("anomaly: ok=False ⇒ pack FLAG ANOMALY_NA", "ANOMALY_NA" in codes(p), codes(p))
+        finally:
+            AG.WORKDIR = old_wd
+
         # 4. ghi gói + ack
         cleared, flagged = B(), B(dd=dd_ok(adv=1.5e9))
         P.write_atomic(P.pack_path("HT1", "2026-10-19"), dict(cleared, ticker="HT1"))
@@ -189,9 +255,10 @@ def run_inner():
         bad = [
             dict(decided_by="mike"), dict(decision="MAYBE"), dict(at="2026-10-25T18:30:00"),
             dict(ticker="ZZZ"), dict(release_date="2026-10-20"),
+            dict(flags_hash="0000000000000000"), dict(flags_hash=""), dict(source=""), dict(source="  "),
         ]
         base = dict(ticker="SCL", release_date="2026-10-19", decision="PROCEED", decided_by="user",
-                    at="2026-10-25T18:30:00+07:00")
+                    at="2026-10-25T18:30:00+07:00", flags_hash=flagged["flags_hash"], source="discord test msg")
         for b in bad:
             try:
                 K.record(**dict(base, **b))
@@ -202,10 +269,20 @@ def run_inner():
         ck("ack hỏng không ghi gì", not os.path.exists(K.ack_path()))
         K.record(**dict(base, decision="RESEARCH"))
         ck("gate: ack RESEARCH ⇒ không được mua", G("SCL") == "ACK_RESEARCH", G("SCL"))
+        regen = dict(B(dd=dd_ok(adv=1.5e9, anomaly_rec={"tier": "H"})), ticker="SCL")
+        P.write_atomic(P.pack_path("SCL", "2026-10-19"), regen)
+        try:
+            K.record(**base)
+            ok = False
+        except ValueError as e:
+            ok = "flags_hash" in str(e)
+        ck("ack: gói sinh lại giữa tin và trả lời ⇒ record từ chối (hash cũ), không đóng dấu bộ cờ mới", ok)
+        n_acks = len(json.load(open(K.ack_path()))["acks"])
+        ck("ack: lần từ chối không ghi thêm mục", n_acks == 1, n_acks)
+        P.write_atomic(P.pack_path("SCL", "2026-10-19"), dict(flagged, ticker="SCL"))
         K.record(**base)
         ck("gate: ack PROCEED mới nhất thắng ⇒ ACK_PROCEED", G("SCL") == "ACK_PROCEED", G("SCL"))
-        P.write_atomic(P.pack_path("SCL", "2026-10-19"),
-                       dict(B(dd=dd_ok(adv=1.5e9, anomaly_rec={"tier": "H"})), ticker="SCL"))
+        P.write_atomic(P.pack_path("SCL", "2026-10-19"), regen)
         ck("gate: gói sinh lại ra BỘ CỜ KHÁC ⇒ ack cũ ACK_STALE", G("SCL") == "ACK_STALE", G("SCL"))
         acks = json.load(open(K.ack_path()))["acks"]
         acks.append(dict(acks[-1], decided_by="agent"))
@@ -218,6 +295,23 @@ def run_inner():
         ck("gate: gói hỏng ⇒ PACK_UNREADABLE", G("BAD") == "PACK_UNREADABLE", G("BAD"))
         P.write_atomic(P.pack_path("LIE", "2026-10-19"), dict(flagged, ticker="LIE", status="CLEARED"))
         ck("gate: status CLEARED mà có cờ ⇒ KHÔNG coi là CLEARED", G("LIE") == "FLAG_NO_ACK", G("LIE"))
+
+        # 4b. độ tươi gói / gói NA mới hơn / gắn release ứng viên (n1)
+        old_pk = dict(cleared, ticker="STL", asof="2026-10-10")
+        P.write_atomic(P.pack_path("STL", "2026-10-19"), old_pk)
+        ck("gate: gói asof cách plan_date > 7 ngày ⇒ PACK_STALE (dù CLEARED)", G("STL") == "PACK_STALE", G("STL"))
+        P.write_atomic(P.pack_path("NAN", "2026-10-19"), dict(cleared, ticker="NAN", generated_at="2026-10-20T08:00:00+07:00"))
+        P.write_atomic(P.pack_path("NAN", None), dict(flagged, ticker="NAN", release_date=None,
+                                                      generated_at="2026-10-21T08:00:00+07:00"))
+        ck("gate: gói NA MỚI hơn ⇒ thắng gói CLEARED cũ (không dùng CLEARED cũ)", G("NAN") != "CLEARED", G("NAN"))
+        P.write_atomic(P.pack_path("NAO", "2026-10-19"), dict(cleared, ticker="NAO", generated_at="2026-10-21T08:00:00+07:00"))
+        P.write_atomic(P.pack_path("NAO", None), dict(flagged, ticker="NAO", release_date=None,
+                                                      generated_at="2026-10-20T08:00:00+07:00"))
+        ck("gate: gói NA CŨ hơn gói có release ⇒ dùng gói có release", G("NAO") == "CLEARED", G("NAO"))
+        ck("gate: release ứng viên khác release của gói ⇒ NO_PACK",
+           K.dd_gate("HT1", "2026-10-26", release_date="2026-10-12")["state"] == "NO_PACK")
+        ck("gate: release ứng viên khớp ⇒ CLEARED",
+           K.dd_gate("HT1", "2026-10-26", release_date="2026-10-19")["state"] == "CLEARED")
 
         # 5. checker: LAG_DD_GATE_VIOLATION + chờ DD
         def plan(orders, due, upc=()):
@@ -256,11 +350,43 @@ def run_inner():
         ck("checker: tin Discord (pending=False) không chứa dòng chờ DD",
            "Chờ DD" not in "\n".join(C.render(dict(r, dd_pending=[{"ticker": "X", "source": "s", "state": "s",
                                                                   "evidence": ""}]), pending=False)))
+        P.write_atomic(P.pack_path("SCL", "2026-10-19"), dict(flagged, ticker="SCL"))
         K.record(**base)       # ack cho bộ cờ hiện tại của SCL
         r = A(plan([o("SCL")], [due("SCL")]))
         ck("checker: ack PROCEED (user, khớp hash) ⇒ được mua", V(r) == [], V(r))
         r = C.analyze(plan([o("ZZZ")], []), crosscheck=False, dd_gate=False)
         ck("checker: --no-dd-gate tắt cổng", V(r) == [])
+
+        # 5b. vòng 2: due_today TAKE / deferred_orders / FUNDING_ALERT / nhận diện book
+        def dfr(t, book="LAG", side="buy"):
+            return {"ticker": t, "side": side, "book": book, "status": "WAIT_CASH", "reason": "thiếu tiền"}
+        os.remove(K.ack_path())
+        r = A(dict(plan([], [due("SCL", "BUY")]), deferred_orders=[dfr("SCL")]))
+        F = lambda r, k: sorted((f["ticker"]) for f in r["findings"] if f["kind"] == k)   # noqa: E731
+        ck("checker: SCL FLAG chưa ack + due BUY + deferred WAIT_CASH ⇒ VIOLATION",
+           V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")], V(r))
+        ck("checker: …và KHÔNG có FUNDING_ALERT cho SCL (tắt đề xuất cấp vốn cho mã bị chặn)",
+           F(r, "FUNDING_ALERT") == [], F(r, "FUNDING_ALERT"))
+        r0 = C.analyze(dict(plan([], [due("SCL", "BUY")]), deferred_orders=[dfr("SCL")]), crosscheck=False, dd_gate=False)
+        ck("control (chân không cổng): cùng plan ⇒ CÓ FUNDING_ALERT cho SCL", F(r0, "FUNDING_ALERT") == ["SCL"], F(r0, "FUNDING_ALERT"))
+        for dec in ("DEFER", "DEFERRED", "BUY_DEFERRED", "WAIT_CASH", "RESIDUAL", "ORDER"):
+            r = A(plan([], [due("SCL", dec)]))
+            ck(f"checker: due_today decision={dec} (không có lệnh) ⇒ vẫn bị cổng", V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")], V(r))
+        r = A(plan([], [due("SCL", "SKIP")]))
+        ck("checker: due_today SKIP ⇒ không vi phạm (chỉ chờ DD)", V(r) == [] and len(r["dd_pending"]) == 1, (V(r), r["dd_pending"]))
+        r = A(dict(plan([], []), deferred_orders=[dfr("SCL")]))
+        ck("checker: deferred_orders LAG (book LAG) không có due ⇒ bị cổng", V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")], V(r))
+        r = A(dict(plan([], []), deferred_orders=[dfr("HT1"), dfr("SCL", side="sell")]))
+        ck("checker: deferred mã CLEARED / lệnh bán ⇒ không vi phạm", V(r) == [], V(r))
+        for bk in ("PEAD", "LAG-PEAD", "lag", "LAG_BOOK"):
+            r = A(plan([o("SCL", book=bk)], []))
+            ck(f"checker: book {bk!r} nhận là LAG", V(r) == [("SCL", "LAG_DD_FLAG_NO_ACK")], V(r))
+        r = A(plan([o("SCL", book="BAL")], [due("SCL", "BUY")]))
+        ck("checker: lệnh book BAL nhưng mã là ứng viên LAG ⇒ vẫn bị cổng", ("SCL", "LAG_DD_FLAG_NO_ACK") in V(r), V(r))
+        r = A(plan([o("SCL", side="BUY")], [due("SCL", "BUY")]))
+        ck("checker: side 'BUY' hoa ⇒ nhận là mua", ("SCL", "LAG_DD_FLAG_NO_ACK") in V(r), V(r))
+        r = A(plan([o("SCL", book="FLAGSHIP")], []))
+        ck("checker: book chứa 'LAG' trong từ khác (FLAGSHIP) không bị nhận nhầm là LAG", V(r) == [], V(r))
 
         # 6. notify idempotent, chỉ ghi state sau khi gửi xong
         nlog = os.path.join(td, "n.log")
@@ -303,13 +429,30 @@ MUTANTS = [
     ("lag_dd_pack.py", "        write_atomic(sp, {\"sent\": sorted(sent | {_nkey(p) for p in new})})\n        return len(new), msg",
      "        return len(new), msg"),
     ("lag_dd_pack.py", '        if rc != 0:', '        if False:'),
+    ("lag_dd_pack.py", '        if cur is None:\n            missing.append(col)', '        if False:\n            missing.append(col)'),
+    ("lag_dd_pack.py", '    missing += [n for n, v in (("Revenue_P0", rev0), ("Revenue_P4", rev4)) if v is None]',
+     '    missing += []'),
+    ("lag_dd_pack.py", '    missing += [n for n, v in (("NPM_P0", npm), ("EBITM_P0", ebm)) if v is None]', '    missing += []'),
+    ("lag_dd_pack.py", '    missing += [f"NP_P{i}" for i in (5, 6, 7) if np_[i] is None]', '    missing += []'),
+    ("lag_dd_pack.py", 'in (0, None) for c in ("EBITM_P0"', 'in (0,) for c in ("EBITM_P0"'),
+    ("lag_dd_pack.py", '    if fr["is_stale"]:', '    if False:'),
+    ("lag_dd_pack.py", 'if ticker in ag.anomaly_excluded(asof, quiet=True) else None', 'if True else None'),
+    ("lag_dd_ack.py", '    if str(flags_hash).strip() != pk.get("flags_hash"):', '    if False:'),
+    ("lag_dd_ack.py", '    if not str(source or "").strip():', '    if False:'),
+    ("lag_dd_ack.py", '    if age > PACK_ASOF_MAX_DAYS or age < 0:', '    if False:'),
+    ("lag_dd_ack.py", '        if g_na is None or g_best is None or g_na > g_best:', '        if False:'),
+    ("lag_dd_ack.py", '        if release_date and m.group(2) != str(release_date)[:10]:', '        if False:'),
+    ("lag_plan_consistency_check.py", '    for d in plan.get("deferred_orders") or []:\n        if isinstance(d, dict) and', '    for d in []:\n        if isinstance(d, dict) and'),
+    ("lag_plan_consistency_check.py", '    for t in take:\n        hits.setdefault(t, []).append("due_today")', '    for t in []:\n        hits.setdefault(t, []).append("due_today")'),
+    ("lag_plan_consistency_check.py", '        kept = [f for f in res["findings"] if not (f["kind"] == "FUNDING_ALERT" and f.get("ticker") in blocked)]',
+     '        kept = list(res["findings"])'),
+    ("lag_plan_consistency_check.py", '    return bool(_RE_LAG_BOOK.search(_tk(o.get("book")))) or _tk(o.get("ticker")) in lag_tk',
+     '    return _tk(o.get("book")) == "LAG"'),
     ("lag_dd_ack.py", '    elif a.get("decided_by") != "user":', '    elif False:'),
     ("lag_dd_ack.py", '    elif a.get("flags_hash") != fh:', '    elif False:'),
     ("lag_dd_ack.py", '    if status == "CLEARED" and not fl:', '    if status == "CLEARED":'),
     ("lag_dd_ack.py", '    if decided_by != "user":', '    if False:'),
     ("lag_dd_ack.py", "        if rel <= d0 and (d0 - rel).days <= PACK_MAX_AGE_DAYS", "        if True"),
-    ("lag_plan_consistency_check.py", '        if book == "LAG" or (not book and _tk(o.get("ticker")) in buy_dec):',
-     '        if book == "LAG":'),
     ("lag_plan_consistency_check.py", '            if g["state"] in BUY_OK:\n                continue',
      '            if g["state"] != "NO_PACK":\n                continue'),
 ]

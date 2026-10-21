@@ -16,12 +16,15 @@ HAI VIỆC trong một module (cùng đọc `lag_analysis.due_today[]` + `orders
   FUNDING_ALERT (việc 2) — ứng viên BUY + entry_window_day==1 (phiên chuẩn) mà KHÔNG có lệnh mua
     thật (nằm trong deferred_orders / thiếu / qty 0) ⇒ cảnh báo ĐỎ + đề xuất cấp vốn + hạn chót.
   LAG_DD_GATE_VIOLATION (cổng DD trước plan, user duyệt 2026-10-21 22:10, job Taylor_20261021_151302)
-    — lệnh MUA LAG trong orders[] (qty>0; book=="LAG", hoặc thiếu book mà mã có decision BUY trong
-    lag_analysis.due_today) mà gói `data/lag_dd/<mã>_<release>.json` KHÔNG ở trạng thái CLEARED và
-    KHÔNG có ack PROCEED decided_by=user khớp flags_hash (lag_dd_ack.dd_gate). Cause = `LAG_DD_<state>`
-    (FLAG_NO_ACK, NO_PACK, ACK_DROP, ACK_RESEARCH, ACK_STALE, ACK_NOT_USER, PACK_UNREADABLE,
-    ACK_UNREADABLE, GATE_UNAVAILABLE, NO_PLAN_DATE). Mã LAG trong lag_analysis chưa qua cổng mà
-    KHÔNG có lệnh mua ⇒ dòng "⏳ chờ DD" (thông tin, không phải phát hiện). Vẫn CHỈ CẢNH BÁO như hai
+    — mã LAG xuất hiện ở BA nơi: orders[] (mua, qty>0), deferred_orders[] (mua) hoặc
+    lag_analysis.due_today với decision ∈ TAKE (BUY/DEFER/DEFERRED/BUY_DEFERRED/WAIT_CASH/RESIDUAL/
+    ORDER) — lệnh coi là LAG khi book khớp LAG/PEAD (mọi biến thể) HOẶC mã thuộc ứng viên LAG của plan
+    bất kể book — mà gói `data/lag_dd/<mã>_<release>.json` KHÔNG ở trạng thái CLEARED và KHÔNG có ack
+    PROCEED decided_by=user khớp flags_hash (lag_dd_ack.dd_gate). Cause = `LAG_DD_<state>`
+    (FLAG_NO_ACK, NO_PACK, PACK_STALE, ACK_DROP, ACK_RESEARCH, ACK_STALE, ACK_NOT_USER, PACK_UNREADABLE,
+    ACK_UNREADABLE, GATE_UNAVAILABLE, NO_PLAN_DATE). Mã bị cổng chặn ⇒ FUNDING_ALERT cho mã đó bị TẮT
+    (không đề xuất cấp vốn cho mã đang bị chặn). Ứng viên khác chưa qua cổng (SKIP/upcoming) ⇒ dòng
+    "⏳ chờ DD" (thông tin). Vẫn CHỈ CẢNH BÁO như hai
     loại trên — chặn cứng là quyết định của user, chưa bật.
 
 CHỌN WARN-và-bus, KHÔNG chặn gửi plan: send_plan_report.sh không có mẫu chặn-cứng cho kiểm tra
@@ -151,12 +154,26 @@ def analyze(plan, csv_path=None, crosscheck=True, dd_gate=True, dd_dir=None):
     res = _analyze_lag(plan, csv_path=csv_path, crosscheck=crosscheck)
     if dd_gate:
         _dd_gate_check(plan, res, dd_dir)
+        # Mã đang bị cổng DD chặn ⇒ KHÔNG đề xuất cấp vốn/unpark cho nó (đề xuất tiền cho đúng mã bị chặn).
+        blocked = {f["ticker"] for f in res["findings"] if f["kind"] == "LAG_DD_GATE_VIOLATION"} | \
+            {p["ticker"] for p in res.get("dd_pending") or []}
+        kept = [f for f in res["findings"] if not (f["kind"] == "FUNDING_ALERT" and f.get("ticker") in blocked)]
+        if len(kept) != len(res["findings"]):
+            res["notes"].append("FUNDING_ALERT bị tắt cho mã đang bị cổng DD chặn: " + ", ".join(sorted(
+                {f["ticker"] for f in res["findings"] if f["kind"] == "FUNDING_ALERT"} & blocked)))
+            res["findings"] = kept
     return res
+
+
+_RE_LAG_BOOK = re.compile(r"(^|[^A-Z])LAG([^A-Z]|$)|PEAD")
 
 
 def _dd_gate_check(plan, res, dd_dir=None):
     """Cổng DD: ghi LAG_DD_GATE_VIOLATION vào res["findings"], mã chờ DD vào res["dd_pending"].
-    Chạy CẢ KHI lag_analysis thiếu/hỏng — lệnh mua LAG trong orders[] vẫn phải có gói DD."""
+    Gác BA nơi: (1) orders[] mua qty>0, (2) deferred_orders[] mua, (3) lag_analysis.due_today có
+    decision ∈ TAKE (_RE_BUY) — mã nào lọt vào một trong ba mà gate ∉ BUY_OK ⇒ vi phạm. Lệnh được coi
+    là LAG khi book khớp LAG/PEAD (mọi biến thể: "LAG-PEAD"…) HOẶC mã thuộc ứng viên LAG của plan
+    (due_today TAKE ∪ upcoming) bất kể book. Chạy CẢ KHI lag_analysis thiếu/hỏng."""
     plan_date = res["plan_date"]
     res["dd_pending"] = []
     la = plan.get("lag_analysis") if isinstance(plan.get("lag_analysis"), dict) else {}
@@ -164,40 +181,48 @@ def _dd_gate_check(plan, res, dd_dir=None):
         if isinstance(la.get("due_today"), list) else []
     upc = [c for c in (la.get("lag_upcoming_for_next_plans") or []) if isinstance(c, dict)] \
         if isinstance(la.get("lag_upcoming_for_next_plans"), list) else []
-    buy_dec = {_tk(c.get("ticker")) for c in due if _is_buy_decision(c.get("decision"))}
-    lag_buys = []
+    take = {_tk(c.get("ticker")): c for c in due if _is_buy_decision(c.get("decision"))}
+    lag_tk = set(take) | {_tk(c.get("ticker")) for c in upc}
+
+    def is_lag(o):
+        return bool(_RE_LAG_BOOK.search(_tk(o.get("book")))) or _tk(o.get("ticker")) in lag_tk
+
+    hits = {}                                   # ticker → [nơi vi phạm]
     for o in plan.get("orders") or []:
-        if not isinstance(o, dict) or not _is_buy_side(o) or (_num(o.get("qty")) or 0) <= 0:
-            continue
-        book = _tk(o.get("book"))
-        if book == "LAG" or (not book and _tk(o.get("ticker")) in buy_dec):
-            lag_buys.append(_tk(o.get("ticker")))
+        if isinstance(o, dict) and _is_buy_side(o) and (_num(o.get("qty")) or 0) > 0 and is_lag(o):
+            hits.setdefault(_tk(o.get("ticker")), []).append("orders")
+    for d in plan.get("deferred_orders") or []:
+        if isinstance(d, dict) and str(d.get("side") or "buy").strip().lower() == "buy" and is_lag(d):
+            hits.setdefault(_tk(d.get("ticker")), []).append("deferred_orders")
+    for t in take:
+        hits.setdefault(t, []).append("due_today")
+    hits.pop("", None)
     gate = None
     try:
         from lag_dd_ack import dd_gate as gate, BUY_OK
-    except Exception as e:                       # fail-closed: không có cổng ⇒ mọi lệnh LAG đỏ
+    except Exception as e:                       # fail-closed: không có cổng ⇒ mọi mã LAG đỏ
         err = f"không import được lag_dd_ack: {type(e).__name__}: {str(e)[:160]}"
-    for t in sorted(set(lag_buys)):
+    for t, where in sorted(hits.items()):
         if not plan_date:
             cause, ev = "LAG_DD_NO_PLAN_DATE", "plan không có plan_date ⇒ không chọn được gói DD"
         elif gate is None:
             cause, ev = "LAG_DD_GATE_UNAVAILABLE", err
         else:
-            g = gate(t, plan_date, directory=dd_dir)
+            g = gate(t, plan_date, directory=dd_dir, release_date=(take.get(t) or {}).get("release_date"))
             if g["state"] in BUY_OK:
                 continue
             cause = f"LAG_DD_{g['state']}"
             ev = f"{g['evidence']}" + (f" ({os.path.basename(g['pack'])})" if g.get("pack") else "")
         res["findings"].append({"kind": "LAG_DD_GATE_VIOLATION", "cause": cause, "ticker": t,
-                                "evidence": ev[:400]})
+                                "evidence": f"[{','.join(sorted(set(where)))}] {ev}"[:400]})
     if gate is None or not plan_date:
         return
     for src, items in (("due_today", due), ("upcoming", upc)):
         for c in items:
             t = _tk(c.get("ticker"))
-            if not t or t in lag_buys or any(p["ticker"] == t for p in res["dd_pending"]):
+            if not t or t in hits or any(p["ticker"] == t for p in res["dd_pending"]):
                 continue
-            g = gate(t, plan_date, directory=dd_dir)
+            g = gate(t, plan_date, directory=dd_dir, release_date=c.get("release_date"))
             if g["state"] not in BUY_OK:
                 res["dd_pending"].append({"ticker": t, "source": src, "state": g["state"],
                                           "evidence": g["evidence"][:300]})

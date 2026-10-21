@@ -5,12 +5,15 @@ Chỉ Mike ghi ack, và CHỈ khi user đã trả lời thật (coding_guideline
 khi user xác nhận real-time). lag_dd_pack.py KHÔNG BAO GIỜ ghi file này.
 
 Mỗi mục: {ticker, release_date, decision: PROCEED|DROP|RESEARCH, decided_by: "user", at (ISO có
-múi giờ), flags_hash (đóng dấu từ gói lúc ghi), note, source}. Append-only; mục MỚI NHẤT theo
-(ticker, release_date) thắng. `flags_hash` khoá ack vào ĐÚNG bộ cờ user đã xem: gói sinh lại ra
-bộ cờ khác ⇒ ack cũ KHÔNG còn hiệu lực (ACK_STALE) ⇒ phải hỏi lại.
+múi giờ), flags_hash, note, source}. Append-only; mục MỚI NHẤT theo (ticker, release_date) thắng.
+`flags_hash` khoá ack vào ĐÚNG bộ cờ user đã xem: tin Discord in hash ngắn kèm mã cờ; `record()`
+BẮT BUỘC `--flags-hash` (hash trong tin user đã thấy) và TỪ CHỐI khi lệch hash gói hiện tại — gói sinh
+lại giữa lúc gửi tin và lúc user trả lời ⇒ ack bị từ chối, KHÔNG đóng dấu bộ cờ mới. `--source` bắt
+buộc khác rỗng (provenance, coding_guidelines §20). Gói sinh lại SAU khi ack đã ghi ⇒ ACK_STALE.
 
     python3 bin/lag_dd_ack.py --ticker SCL --release-date 2026-10-19 --decision PROCEED \
-        --decided-by user --at 2026-10-25T18:30:00+07:00 --note "..." --source "discord <link>"
+        --decided-by user --at 2026-10-25T18:30:00+07:00 --flags-hash <hash trong tin> \
+        --note "..." --source "discord <link>"
     python3 bin/lag_dd_ack.py --show
     python3 bin/lag_dd_ack.py --gate SCL --plan-date 2026-10-26     # trạng thái cổng 1 mã
 
@@ -31,6 +34,7 @@ from lag_dd_pack import dd_dir, write_atomic  # noqa: E402
 
 DECISIONS = ("PROCEED", "DROP", "RESEARCH")
 PACK_MAX_AGE_DAYS = 30     # gói có release_date cách plan_date > 30 ngày lịch ⇒ không phải sự kiện đang xét
+PACK_ASOF_MAX_DAYS = 7     # gói có asof cách plan_date > 7 ngày lịch ⇒ PACK_STALE (insider/ex-date/anomaly đã cũ)
 _RE_PACK = re.compile(r"^([A-Z0-9]{3,5})_(\d{4}-\d{2}-\d{2}|NA)\.json$")
 BUY_OK = ("CLEARED", "ACK_PROCEED")
 
@@ -63,8 +67,20 @@ def _read_pack(path):
         return json.load(fh)
 
 
-def find_pack(ticker, plan_date, directory=None):
-    """(path|None, lý do). Gói release_date ≤ plan_date, trong PACK_MAX_AGE_DAYS, mới nhất."""
+def _generated_at(path):
+    """datetime tz-aware của gói hoặc None (không đọc được ⇒ không so được thứ tự)."""
+    try:
+        v = dt.datetime.fromisoformat(str(_read_pack(path).get("generated_at")))
+        return v if v.tzinfo else None
+    except (OSError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def find_pack(ticker, plan_date, directory=None, release_date=None):
+    """(path|None, lý do). Gói release_date ≤ plan_date, trong PACK_MAX_AGE_DAYS, mới nhất; nếu
+    `release_date` (của ứng viên) được truyền ⇒ CHỈ gói đúng release đó. Gói `<MÃ>_NA` (không xác
+    định được release) sinh SAU gói có release ⇒ thắng (không dùng gói CLEARED cũ khi lần chạy mới
+    nhất đã báo RELEASE_NA)."""
     d0 = dt.date.fromisoformat(str(plan_date)[:10])
     best, na = None, None
     for p in glob.glob(os.path.join(directory or dd_dir(), f"{ticker}_*.json")):
@@ -74,9 +90,15 @@ def find_pack(ticker, plan_date, directory=None):
         if m.group(2) == "NA":
             na = p
             continue
+        if release_date and m.group(2) != str(release_date)[:10]:
+            continue
         rel = dt.date.fromisoformat(m.group(2))
         if rel <= d0 and (d0 - rel).days <= PACK_MAX_AGE_DAYS and (best is None or rel > best[0]):
             best = (rel, p)
+    if best and na:
+        g_best, g_na = _generated_at(best[1]), _generated_at(na)
+        if g_na is None or g_best is None or g_na > g_best:    # không so được ⇒ fail-closed: NA thắng
+            return na, f"gói {os.path.basename(na)} mới hơn (hoặc không so được) gói {os.path.basename(best[1])}"
     if best:
         return best[1], ""
     if na:
@@ -84,17 +106,18 @@ def find_pack(ticker, plan_date, directory=None):
     return None, f"không có data/lag_dd/{ticker}_<release>.json với release ≤ {plan_date} trong {PACK_MAX_AGE_DAYS} ngày"
 
 
-def dd_gate(ticker, plan_date, directory=None, acks=None):
+def dd_gate(ticker, plan_date, directory=None, acks=None, release_date=None):
     """Trạng thái cổng DD của 1 mã cho plan_date. KHÔNG raise.
 
     state ∈ CLEARED | ACK_PROCEED (được mua) · FLAG_NO_ACK | ACK_DROP | ACK_RESEARCH | ACK_STALE |
-    ACK_NOT_USER | NO_PACK | PACK_UNREADABLE | ACK_UNREADABLE (KHÔNG được mua).
+    ACK_NOT_USER | NO_PACK | PACK_STALE | PACK_UNREADABLE | ACK_UNREADABLE (KHÔNG được mua).
+    `release_date` (tuỳ chọn) = release của ứng viên: chỉ chấp nhận gói đúng release đó.
     """
     t = str(ticker or "").strip().upper()
     out = {"ticker": t, "plan_date": str(plan_date), "state": None, "pack": None,
            "release_date": None, "status": None, "flags": [], "ack": None, "evidence": ""}
     try:
-        path, why = find_pack(t, plan_date, directory)
+        path, why = find_pack(t, plan_date, directory, release_date)
     except (ValueError, OSError) as e:
         path, why = None, f"{type(e).__name__}: {e}"
     if not path:
@@ -108,6 +131,15 @@ def dd_gate(ticker, plan_date, directory=None, acks=None):
         out.update(state="PACK_UNREADABLE", evidence=f"{os.path.basename(path)}: {type(e).__name__}: {e}")
         return out
     out.update(release_date=rel, status=status, flags=[f.get("code") for f in fl if isinstance(f, dict)])
+    try:
+        age = (dt.date.fromisoformat(str(plan_date)[:10]) - dt.date.fromisoformat(str(pk["asof"])[:10])).days
+    except (KeyError, ValueError, TypeError):
+        out.update(state="PACK_STALE", evidence=f"{os.path.basename(path)}: không đọc được asof ({pk.get('asof')!r})")
+        return out
+    if age > PACK_ASOF_MAX_DAYS or age < 0:
+        out.update(state="PACK_STALE", evidence=f"{os.path.basename(path)}: DD asof {pk['asof']} cách plan_date "
+                                                f"{plan_date} {age} ngày (cho phép 0..{PACK_ASOF_MAX_DAYS}) — chạy lại lag_dd_pack.py")
+        return out
     if status == "CLEARED" and not fl:
         out.update(state="CLEARED", evidence=f"{os.path.basename(path)} CLEARED (0 cờ)")
         return out
@@ -142,9 +174,14 @@ def _parse_at(s):
     return v
 
 
-def record(ticker, release_date, decision, decided_by, at, note="", source="", directory=None):
-    """Validate + append 1 ack. Trả mục đã ghi. Raise ValueError khi không hợp lệ."""
+def record(ticker, release_date, decision, decided_by, at, flags_hash, source, note="", directory=None):
+    """Validate + append 1 ack. Trả mục đã ghi. Raise ValueError khi không hợp lệ (gồm: flags_hash
+    rỗng hoặc ≠ hash gói HIỆN TẠI — user đã xem bộ cờ khác; source rỗng)."""
     t = str(ticker).strip().upper()
+    if not str(source or "").strip():
+        raise ValueError("--source bắt buộc (link/trích tin nhắn user trả lời — provenance, §20)")
+    if not str(flags_hash or "").strip():
+        raise ValueError("--flags-hash bắt buộc (hash in trong tin Discord user đã xem)")
     if decision not in DECISIONS:
         raise ValueError(f"decision phải ∈ {DECISIONS}, nhận {decision!r}")
     if decided_by != "user":
@@ -159,6 +196,10 @@ def record(ticker, release_date, decision, decided_by, at, note="", source="", d
         raise ValueError(f"không đọc được gói {pack_p}: {e} — ack phải gắn với gói DD có thật")
     if pk.get("ticker") != t or str(pk.get("release_date")) != str(release_date):
         raise ValueError(f"gói {pack_p} ticker/release không khớp ({pk.get('ticker')}, {pk.get('release_date')})")
+    if str(flags_hash).strip() != pk.get("flags_hash"):
+        raise ValueError(f"flags_hash {flags_hash!r} ≠ gói hiện tại {pk.get('flags_hash')!r} "
+                         f"({[f.get('code') for f in pk.get('flags') or []]}) — gói đã sinh lại sau khi gửi tin; "
+                         "hỏi lại user với bộ cờ mới, KHÔNG ghi ack")
     entry = {"ticker": t, "release_date": str(release_date), "decision": decision,
              "decided_by": "user", "at": at_v.isoformat(), "flags_hash": pk.get("flags_hash"),
              "flags": [f.get("code") for f in pk.get("flags") or []], "pack_status": pk.get("status"),
@@ -181,7 +222,8 @@ def main(argv=None):
     ap.add_argument("--decided-by")
     ap.add_argument("--at", help="ISO có múi giờ: lúc user trả lời")
     ap.add_argument("--note", default="")
-    ap.add_argument("--source", default="", help="link/trích tin nhắn user")
+    ap.add_argument("--flags-hash", help="hash in trong tin Discord user đã xem (bắt buộc khi ghi ack)")
+    ap.add_argument("--source", default="", help="link/trích tin nhắn user (bắt buộc khi ghi ack)")
     ap.add_argument("--show", action="store_true")
     ap.add_argument("--gate", metavar="TICKER")
     ap.add_argument("--plan-date")
@@ -195,10 +237,11 @@ def main(argv=None):
                 ap.error("--gate cần --plan-date")
             print(json.dumps(dd_gate(a.gate, a.plan_date), ensure_ascii=False, indent=1, default=str))
             return 0
-        missing = [k for k in ("ticker", "release_date", "decision", "decided_by", "at") if not getattr(a, k)]
+        missing = [k for k in ("ticker", "release_date", "decision", "decided_by", "at", "flags_hash", "source")
+                   if not getattr(a, k)]
         if missing:
             ap.error("thiếu " + ", ".join("--" + m.replace("_", "-") for m in missing))
-        e = record(a.ticker, a.release_date, a.decision, a.decided_by, a.at, a.note, a.source)
+        e = record(a.ticker, a.release_date, a.decision, a.decided_by, a.at, a.flags_hash, a.source, a.note)
     except (ValueError, OSError) as e:
         print(f"❌ {e}", file=sys.stderr)
         return 1
