@@ -149,6 +149,60 @@ if [ -n "$DRIFT_CMD" ]; then
 fi
 export DRIFT_BLOCK
 
+# --- Lịch vào lệnh + DD book LAG khớp CODE (job Taylor_20261021_114050, user duyệt 21/10): CHỈ CỜ,
+# KHÔNG chặn gửi. lag_plan_calendar_check.py so lag_analysis/orders LAG của ĐÚNG file plan sắp gửi
+# (và plan account kia cùng ngày nếu có) với filter_lag_entry_window.py chạy offline ⇒ ✅ 1 dòng, hoặc ⛔ kèm MÃ
+# nguyên nhân (ca 24-27/07: entry thứ Bảy, 2 account 2 lịch). rc 0/1/3 đều in khối; rc khác/rỗng ⇒
+# "KHÔNG KIỂM ĐƯỢC" kèm lỗi thật (§29). Sandbox selfcheck không chạy trừ khi cấp SEND_PLAN_LAGCAL_CMD.
+LAGCAL_BLOCK=""
+LAGCAL_CMD=""
+if [ -n "${SEND_PLAN_LAGCAL_CMD:-}" ]; then
+  LAGCAL_CMD="$SEND_PLAN_LAGCAL_CMD"
+elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
+  LAGCAL_CMD="$ROOT/bin/lag_plan_calendar_check.py"
+fi
+if [ -n "$LAGCAL_CMD" ] && [ -n "$PLAN_FILE" ]; then
+  LAGCAL_ERR="$(mktemp)"
+  LAGCAL_BLOCK="$(timeout "${SEND_PLAN_LAGCAL_TIMEOUT:-60}" python3 "$LAGCAL_CMD" --plan "$PLAN_FILE" \
+    --report-block 2>"$LAGCAL_ERR")"
+  LAGCAL_RC=$?
+  sed 's/^/[lagcal] /' "$LAGCAL_ERR" >&2
+  if { [ "$LAGCAL_RC" -ne 0 ] && [ "$LAGCAL_RC" -ne 1 ] && [ "$LAGCAL_RC" -ne 3 ]; } || [ -z "$LAGCAL_BLOCK" ]; then
+    _lerr="$(tail -n 2 "$LAGCAL_ERR" | tr '\n' ' ' | cut -c1-200)"
+    [ "$LAGCAL_RC" = "124" ] && _lerr="treo quá ${SEND_PLAN_LAGCAL_TIMEOUT:-60}s (timeout) ${_lerr}"
+    LAGCAL_BLOCK="⚠️ **Lịch LAG ($ACCOUNT): KHÔNG KIỂM ĐƯỢC** — lag_plan_calendar_check rc=$LAGCAL_RC, lỗi: ${_lerr:-<không có stderr>}. Tự đối chiếu entry_date với filter_lag_entry_window.py trước khi duyệt."
+  fi
+  rm -f "$LAGCAL_ERR"
+fi
+export LAGCAL_BLOCK
+
+# --- Cổng nhất quán LAG + cảnh báo ứng viên LAG hợp lệ bị hoãn đúng phiên chuẩn (user duyệt
+# 2026-10-21, Taylor_20261021_102832 REPORT §5.2/5.3). CHỈ CẢNH BÁO (WARN + bus + Discord Trading
+# Daily, idempotent theo plan_date) — KHÔNG chặn gửi plan: chặn 21:00 làm user không thấy plan để
+# duyệt, tệ hơn gửi kèm khối đỏ. FAIL-SOFT nhưng không im lặng: script lỗi ⇒ dòng "KHÔNG KIỂM ĐƯỢC".
+# Sandbox selfcheck (SEND_PLAN_WORKDIR_OVERRIDE) không chạy trừ khi test tự cấp SEND_PLAN_LAGCHK_CMD.
+LAGCHK_BLOCK=""
+LAGCHK_CMD=""
+if [ -n "${SEND_PLAN_LAGCHK_CMD:-}" ]; then
+  LAGCHK_CMD="$SEND_PLAN_LAGCHK_CMD"
+elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
+  LAGCHK_CMD="$ROOT/bin/lag_plan_consistency_check.py"
+fi
+if [ -n "$LAGCHK_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
+  LAGCHK_ARGS=(--account "$ACCOUNT" --plan-file "$PLAN_FILE" --report-block)
+  [ "$DRY_RUN" = "1" ] && LAGCHK_ARGS+=(--dry-run)
+  LAGCHK_ERR="$(mktemp)"
+  LAGCHK_BLOCK="$(timeout "${SEND_PLAN_LAGCHK_TIMEOUT:-150}" python3 "$LAGCHK_CMD" "${LAGCHK_ARGS[@]}" 2>"$LAGCHK_ERR")"
+  LAGCHK_RC=$?
+  sed 's/^/[lagchk] /' "$LAGCHK_ERR" >&2
+  if { [ "$LAGCHK_RC" -ne 0 ] && [ "$LAGCHK_RC" -ne 2 ]; } || [ -z "$LAGCHK_BLOCK" ]; then
+    _lerr="$(tail -n 2 "$LAGCHK_ERR" | tr '\n' ' ' | cut -c1-200)"
+    LAGCHK_BLOCK="⚠️ **Cổng nhất quán LAG ($ACCOUNT): KHÔNG KIỂM ĐƯỢC** — rc=$LAGCHK_RC, lỗi: ${_lerr:-<không có stderr>}. Tự đối chiếu lag_analysis với orders[]/deferred_orders[] trước khi duyệt."
+  fi
+  rm -f "$LAGCHK_ERR"
+fi
+export LAGCHK_BLOCK
+
 RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os
 
@@ -1109,6 +1163,13 @@ else:
     lines.append("✅ Trạng thái: HOLD 0 lệnh — không cần duyệt, bot trực phiên đồng bộ trạng thái.")
 
 for _dl in os.environ.get("DRIFT_BLOCK", "").splitlines():   # khối Q5 tính ở shell phía trên
+    if _dl.strip():
+        lines.append(_dl)
+for _dl in os.environ.get("LAGCAL_BLOCK", "").splitlines():  # lịch/DD LAG khớp code (shell trên)
+    if _dl.strip():
+        lines.append(_dl)
+
+for _dl in os.environ.get("LAGCHK_BLOCK", "").splitlines():  # cổng nhất quán LAG (shell phía trên)
     if _dl.strip():
         lines.append(_dl)
 

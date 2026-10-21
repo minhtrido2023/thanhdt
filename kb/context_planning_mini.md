@@ -189,6 +189,22 @@ python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
   tự suy diễn cho qua.
 - Kết quả từ script cho 2 account CÙNG 1 CSV phải cho ra CÙNG danh sách T+1 — nếu thấy khác nhau,
   đó là dấu hiệu 1 trong 2 lần chạy dùng sai `--signal-date`, dừng lại kiểm tra tham số.
+- **CẤM tự cộng T+n ra ngày vào lệnh** (thêm 2026-10-21, user duyệt; ca 24-27/07: plan SpaceX ghi
+  "entry 07-25" = THỨ BẢY rồi "cửa sổ đã đóng", ZaloPay cùng ngày coi 07-27 là phiên chuẩn ⇒ SpaceX
+  mất 4 slot). Plan PHẢI chép NGUYÊN VĂN từ output script vào `lag_analysis`:
+  `signal_date`, `source_script` (chuỗi chứa `filter_lag_entry_window`), `due_today[]` mỗi mục có
+  `ticker`, `entry_date`, `entry_window_day`, `decision` (`BUY`/`DEFER`/`SKIP`), `decision_why`;
+  `lag_upcoming_for_next_plans[]` mỗi mục có `entry_date_est` đúng như script trả. Lệnh mua LAG
+  trong `orders[]`/`deferred_orders[]` mang `entry_window_day` + `entry_anchor_date` của script.
+- **SKIP khác account kia phải khai `skip_reason_code`** ∈ `EXCLUDED_TICKER` (phải có trong
+  `excluded_tickers` của account) / `ALREADY_HELD` / `CASH_ONLY`. Khác biệt DD giữa 2 account chỉ
+  được đến từ khai báo tường minh này — DD chạy MỘT lần ở engine, cả 2 account đọc cùng ô CSV.
+- **Checker cơ học**: `python3 mike/bin/lag_plan_calendar_check.py --plan <plan.json>` (tự ghép plan
+  account kia cùng ngày). `send_plan_report.sh` tự chạy và in ✅/⛔ kèm MÃ nguyên nhân
+  (`LAG_CAL_*`, `LAG_DD_*`, `LAG_X_*` — danh sách ở docstring script) vào report duyệt. Thấy ⛔
+  = sửa plan theo code rồi gửi lại, KHÔNG giải thích cho qua. NGOẠI LỆ: các mã `LAG_DD_*` là
+  HEURISTIC từ khoá (có thể báo nhầm) — đọc lý do rồi mới quyết; KHÔNG đổi một quyết định đúng (vd SKIP vì
+  giá trên anchor) chỉ để checker hết đỏ, hãy ghi rõ lý do trong `decision_why`.
 
 ## `book_note`/`book_breakdown_current` — dùng bootstrap snapshot + `park_holdings.py`, KHÔNG tự đoán → `context_planning_ext.md`
 Nguồn ĐÚNG: `python3 mike/bin/park_holdings.py --account <X> --json`, field `by_book` — KHÔNG tự
