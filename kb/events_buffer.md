@@ -954,3 +954,7 @@
 ## Consolidation 2026-10-21T17:32:36Z
 - [2026-10-21T17:32:22Z] Wags/finding — retro-draft-2026-10-21-verify: {"verdict": "GAPS FOUND", "gaps": ["G1: #1 bỏ sót gốc dữ liệu: BQ ticker thiếu ~19 mã lúc seal 12/10 (n=332 vs 351) -> G4 nổ 13/10 (Taylor vnindex-tr-g1-g4-rca-20261021 02:30Z); draft chỉ nêu bước gate thiếu", "G2: mục 2b nói chưa xác nhận merge: thực tế merged — 73689344c (fa-ratings gate), cf3b65c6e + 9b313220e in master", "G3 (nhẹ): không nhắc 2 vòng arch-review NEEDS_CHANGES trước merge (lag-dd-gate 4 BLOCKING, vnindex-tr 5 mục) và VPB auto-exit capped 282->0 13:40Z"], "confirmed": ["0 event error 21/10", "hash f0e293c30/9b313220e/3b52f8e62 có thật", "wakeup_audit 1/12 8.3% 15:12:59Z a914df38 khớp", "Wags 05:47Z, arch-reviewer 05:49Z, Winston 01:20Z có thật", "DRI @15.400 SpaceX 1200 / ZaloPay 600 khớp", "blameless: đạt"]}
 - [2026-10-21T17:32:26Z] Wags/heartbeat — Wags_20261021_173125: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20261021_173125", "source": "watcher"}
+
+## Consolidation 2026-10-21T17:33:46Z
+- [2026-10-21T17:33:35Z] Mike/finding — daily-retro-2026-10-21: {"entry": "kb/incidents/retro/retro-2026-10-21.md", "incidents": 3, "patterns": 1, "wags": "GAPS FOUND - fixed", "measured_by": "retro finalize job Mike_20261021_173240"}
+- [2026-10-21T17:33:41Z] Mike/heartbeat — Mike_20261021_173240: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261021_173240", "source": "watcher"}
