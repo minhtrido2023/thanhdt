@@ -461,8 +461,10 @@ def main():
     # ⇒ chạy nhưng in cảnh báo cổng BỊ TẮT (nhánh `elif tickers` cuối khối này).
     if tickers and (args.asof is None or args.asof == today_ict().isoformat()):
         import exdate_frame
+        # broker_statement=True: lệnh khớp TAY của user (ngoài bot) có trong statement DNSE,
+        # không có trong journal ⇒ phải hợp nhất, nếu không cổng chặn oan (DRI 21/10).
         credited, blocked = exdate_frame.classify_positions(
-            args.account, account_id, asof_ref, positions)
+            args.account, account_id, asof_ref, positions, broker_statement=True)
         for tk, detail in sorted(credited.items()):
             px_new, why = exdate_frame.verify_post_event_price(
                 prices.get(tk), (positions[tk] or {}).get("marketPrice"),
@@ -498,7 +500,8 @@ def main():
                   + "; ".join(f"{t}: {w}" for t, w in sorted(blocked.items())) +
                   ". Việc phải làm: (1) mã 'KHÔNG dựng được giá cùng hệ' — NGƯỜI xác minh giá "
                   "tham chiếu sau sự kiện (bảng giá sở/HOSE, thông báo GDKHQ) rồi đối chiếu với "
-                  "marketPrice broker; (2) mã 'CHƯA GIẢI THÍCH ĐƯỢC' — kiểm journal fill và lịch "
+                  "marketPrice broker; (2) mã 'CHƯA GIẢI THÍCH ĐƯỢC' — kiểm journal fill + statement "
+                  "DNSE (dnse_khoplenh_broker_confirm_<DD-MM-YYYY>.csv) và lịch "
                   "corp-action theo đúng vế đã nêu trong từng dòng trên. Chạy lại khi CHƯA có "
                   "thêm bằng chứng sẽ cho kết quả Y HỆT: script này không đọc "
                   "data/corp_actions.json, `corp_action_auto_confirm.py`/`--from-raw` là đường "
