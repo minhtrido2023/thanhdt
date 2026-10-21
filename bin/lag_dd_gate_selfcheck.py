@@ -282,7 +282,8 @@ def run_inner():
         n4, m4 = P.notify([dict(flagged, ticker="SCL", flags=flagged["flags"] + [P._f("DCF_RICH", "x")],
                                 flags_hash="khac")] + pk)
         ck("notify: bộ cờ đổi ⇒ gửi lại đúng mã đó", n4 == 1 and "SCL" in m4 and "HT1" not in m4, (n4, m4))
-        ck("tin có hạn trả lời 19:00 ngày trước phiên vào lệnh", "19:00 ICT 2026-10-25" in m4, m4)
+        ck("tin có hạn trả lời 19:00 CN trước phiên thứ Hai + mốc T6 ngoài mùa", "19:00 ICT CN 2026-10-25" in m4 and "19:00 T6 2026-10-23" in m4, m4)
+        ck("hạn trả lời ngày thường = 19:00 hôm trước", "19:00 ICT 2026-10-27" in P._deadline("2026-10-28"))
     finally:
         shutil.rmtree(td, ignore_errors=True)
     n_fail = RESULTS.count(False)

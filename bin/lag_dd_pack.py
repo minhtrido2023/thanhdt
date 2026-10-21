@@ -569,11 +569,18 @@ def candidates_from_csv(signal_date=None):
 
 # ── thông báo ────────────────────────────────────────────────────────────────────────────────
 def _deadline(entry_date):
+    """Vòng lập plan cuối cùng trước phiên vào lệnh. Vào lệnh thứ Hai: vòng CN 19:00 chỉ chạy mùa
+    BCTC (sunday_plan_round.sh tự gate) ⇒ nêu cả mốc thứ Sáu. Ngày lễ giữa tuần: chưa xử lý (ghi rõ)."""
     try:
-        d = dt.date.fromisoformat(str(entry_date)[:10]) - dt.timedelta(days=1)
-        return f"19:00 ICT {d.isoformat()} (vòng lập plan cho phiên {entry_date})"
+        e = dt.date.fromisoformat(str(entry_date)[:10])
     except (TypeError, ValueError):
         return "19:00 ICT ngày lập plan (không xác định được ngày vào lệnh)"
+    d = e - dt.timedelta(days=1)
+    if d.weekday() == 6:
+        fri = e - dt.timedelta(days=3)
+        return (f"19:00 ICT CN {d.isoformat()} (vòng plan CN mùa BCTC cho phiên {e}; ngoài mùa: "
+                f"19:00 T6 {fri.isoformat()})")
+    return f"19:00 ICT {d.isoformat()} (vòng lập plan cho phiên {e}; lệch nếu {d} là ngày lễ)"
 
 
 def render_message(packs):
