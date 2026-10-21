@@ -113,3 +113,6 @@
 
 ## Archived 2026-10-16 (keep=12 days=0 require_done=False)
 - [2026-10-15T18:19:14Z] 16/10 01:25: MERGED việc 1 (user duyệt): golive_recommend_v23.py:~742 + hit_details.py:64 lọc fa_ratings_8l f.time<=as-of (outer 15836bc9), cảnh báo dòng eff_date tương lai trong refresh_fa_ratings_8l.sh (mike 21ed48298, dedupe state, báo Trading Daily khi tập đổi; PMT@2026-10-18 sẽ báo 1 lần lúc re-rate 17:30). arch-review NEEDS_CHANGES→đã vá hết. Còn mở: (b) fallback eff_date q_time+45 (rating_8l_history.py:597), anomaly_scan.py:154 đọc dòng mới nhất không lọc ngày (paper), (d) idio-vol chỉ báo rủi ro.
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T18:03:11Z] 01:10 21/10: Taylor_20261020_162558 XONG (claimed; PREREG V1D 2c1a3a71/V1E 12daef05/V3Ap 4b52b717/V4 a210a290 khớp REPORT; control 4/4 byte-identical, 20/20 selfcheck 0 VND). V1D chặn ADV3M<=0 nhân quả: ΔCAGR +1,25..+2,03 (DƯƠNG) → phần Vol=0/ADV3M<=0 KHÔNG là nguồn lợi nhuận pin (31% giá trị mua nhưng 9-11% PnL); nhưng 41-47% giá trị mua LAG vẫn >20% giá trị khớp cùng ngày, nhóm X gánh 43% PnL (54% 2022-26) → CHƯA thể nói pin thực thi được ở 50B. ΔIS âm mọi biến thể, ΔOOS dương. V3A' không đổi nhãn. Skeptic survivorship-volzero-V1D-V1E-V3Ap-V4 chạy nền (logs/verify_survivorship_v1d_bg.log). Chờ user: stock_news.proposed; bước kế capacity (trần tham gia theo phiên).
