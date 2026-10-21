@@ -20,3 +20,4 @@
 - [2026-10-21T05:35:39Z] [vnindex-tr vòng 2 10-21] XONG job Taylor_20261021_052419: nhánh fix/vnindex-tr-restate-sealed-20261021 @577d605cd chờ Mike arch-review/merge; chuỗi thật đã đính chính 12-13/10 (md5 51cd88f4), không cần ack 14/10. (Thay dòng ĐANG DỞ 052419 + dòng mở 022501.)
 - [2026-10-21T05:49:29Z] [vnindex-tr vòng 2 arch-review 10-21] XONG job Taylor_20261021_054437, nhánh fix/vnindex-tr-restate-sealed-20261021 chờ Mike merge; hết vòng 2 — còn NEEDS_CHANGES thì dừng báo user
 - [2026-10-21T10:41:15Z] [lag-entry-window-width 10-21] XONG job Taylor_20261021_102832: giữ 3 phiên; lỗ hổng = vận hành phiên chuẩn (WAIT_CASH 58%, lỗi lịch 21%). Mở: chạy lại audit_live.py sau mùa Q3 (~11-15) — mẫu đầu tiên dưới Luật A.
+- [2026-10-21T11:51:40Z] [lag-calendar-dd 10-21] XONG job Taylor_20261021_114050: nhanh fix/lag-calendar-dd-checker-20261021 @d3020f553 (worktree wt-lag-cal-dd-20261021) cho Mike arch-review/merge truoc 24/10; mo: checker chi co, chua chan.
