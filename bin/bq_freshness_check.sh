@@ -868,6 +868,28 @@ _assert_fresh_artifact "golive_state_today.json (DT5G state DollarBill đọc)" 
 _assert_fresh_artifact "golive_v23_recommendations (recommend output DollarBill đọc)" \
   "$(ls -1t "$WORKDIR"/deploy_golive_dt5g_v4/out/golive_v23_recommendations_*.csv 2>/dev/null | head -1)"
 
+# [pipeline-3b] gói DD LAG trước plan (user duyệt 2026-10-21 23:28 ICT; design Taylor_20261021_151302,
+# arch-review vòng 1+2) — WARN-only, KHÔNG chặn DollarBill: thiếu gói ⇒ cổng coi là NO_PACK ⇒ mã LAG đứng
+# NGOÀI plan (fail-closed sẵn ở lag_plan_consistency_check). CHỈ chạy vòng 19:00 T2-T6 của cron:
+#  · MORNING mode (vòng CN `sunday_plan_round.sh` dùng morning+force, chạy tay buổi sáng) và T7/CN BỎ QUA —
+#    anomaly_scan chỉ chạy T2-T6 08:20 ⇒ file anomaly cũ ⇒ ANOMALY_NA hàng loạt ⇒ gói CLEARED hôm trước bị
+#    ghi đè thành FLAG và ack thành ACK_STALE (kb/ops_runbook.md § Cổng DD trước plan LAG, arch-review vòng 2).
+#    Gói thứ Sáu còn hiệu lực cho plan thứ Hai (PACK_ASOF_MAX_DAYS=7).
+_dd_dow="$(TZ='Asia/Ho_Chi_Minh' date +%u)"
+if [ "${MORNING:-0}" = "1" ] || [ "$_dd_dow" -ge 6 ]; then
+  echo; echo "--- [pipeline-3b] lag_dd_pack: BỎ QUA (morning mode hoặc T7/CN) — gói DD đã có giữ nguyên ---"
+else
+  echo; echo "--- [pipeline-3b] lag_dd_pack ---"
+  _dd_out="$(timeout "${LAG_DD_PACK_TIMEOUT_S:-420}" python3 "$ROOT/bin/lag_dd_pack.py" --notify 2>&1)"; _dd_rc=$?
+  echo "$_dd_out" | tail -20
+  # rc 0 = có gói, 2 = có mã FLAG (bình thường). Khác ⇒ cảnh báo, KHÔNG dừng chuỗi.
+  if [ "$_dd_rc" -ne 0 ] && [ "$_dd_rc" -ne 2 ]; then
+    [ "$_dd_rc" = "124" ] && _dd_why="treo quá ${LAG_DD_PACK_TIMEOUT_S:-420}s (timeout); " || _dd_why=""
+    "$ROOT/bin/notify_thread.sh" "🟡 LAG DD PACK WARN ($TODAY $NOW_ICT): lag_dd_pack rc=$_dd_rc — ${_dd_why}$(echo "$_dd_out" | tail -2 | tr '\n' ' ' | cut -c1-300). Mã LAG không có gói sẽ ĐỨNG NGOÀI plan." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED+1))
+  fi
+fi
+
 # [pipeline-4] dispatch DollarBill lập plan T+1 — lặp qua MỌI account live (enabled=true,
 # mode=live, broker=dnse trong secrets/trading_bot_accounts.json), không hardcode SpaceX —
 # thêm account mới vào file đó là tự động có plan T+1, không cần sửa gì ở đây. Xem
