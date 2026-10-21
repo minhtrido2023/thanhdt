@@ -200,6 +200,14 @@ def suite(verbose=True):
     check("C: SKIP viện thêm RICH ⇒ không báo FLOOR_FAIL_NOT_GATE",
           "LAG_DD_FLOOR_FAIL_NOT_GATE" not in _codes(C.check_plan(zlp_other, refC), ticker="EVF"))
 
+    # Arch-review 21/10: SKIP đúng (giá live trên anchor, không đuổi) trích nguyên token lăng kính ⇒ KHÔNG được báo
+    for why in ("sector_valuation_lens KHONG_SKIP_VI_FLOOR_FAIL — giá live vượt anchor, không đuổi giá",
+                "KHONG_SKIP_VI_FLOOR_FAIL; SKIP vì giá trên anchor 24.450",
+                "lens=KHONG_SKIP_VI_FLOOR_FAIL"):
+        zlp_tok = _plan("ZaloPay", "2026-07-28", "2026-07-27", _due_from_ref(refC, dict(
+            zlp_dec, EVF=("SKIP", why, {})), day1_only=True))
+        check(f"C: SKIP trích token lăng kính/anchor ({why[:30]}…) ⇒ KHÔNG báo FLOOR_FAIL_NOT_GATE",
+              "LAG_DD_FLOOR_FAIL_NOT_GATE" not in _codes(C.check_plan(zlp_tok, refC), ticker="EVF"))
     # ── D. Rỗng LAG + thiếu CSV ──────────────────────────────────────────────
     with tempfile.TemporaryDirectory() as td:
         resD = C.run([_plan("SpaceX", "2026-07-28", "2026-07-27")], td)

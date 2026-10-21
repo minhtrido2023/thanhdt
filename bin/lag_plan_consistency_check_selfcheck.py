@@ -108,6 +108,17 @@ def cases(m):
                       ("SKIP — KHÔNG PHẢI VÌ FLOOR_FAIL", False), (None, False)):
         r = A(plan([cand("XYZ", dec)], [], []))
         ck(f"decision {dec!r} ⇒ {'bắt' if want else 'bỏ qua'}", bool(r["findings"]) == want, kinds(r))
+    # 7b decision DEFER/WAIT_CASH/BUY_DEFERRED (hợp đồng mini file) vẫn phải bị kiểm — ca 58% vốn lỡ
+    for dec in ("DEFER", "WAIT_CASH", "BUY_DEFERRED", "deferred — thiếu tiền"):
+        r = A(plan([cand("DEF", dec, day=1)], [], []))
+        ck(f"decision {dec!r} thiếu cả lệnh lẫn mục hoãn ⇒ LAG_BUY_MISSING + FUNDING_ALERT",
+           {("CONSISTENCY_FAIL", "DEF", "LAG_BUY_MISSING"), ("FUNDING_ALERT", "DEF", "LAG_BUY_MISSING")} <= set(kinds(r)), kinds(r))
+        r = A(plan([cand("DEF", dec, day=1)], [], [{"ticker": "DEF", "side": "buy", "status": "WAIT_CASH",
+                                                      "deferred_reason": "sức mua broker 142 cp < 1800"}]))
+        ck(f"decision {dec!r} có mục hoãn kèm lý do ngày 1 ⇒ chỉ FUNDING_ALERT (không FAIL nhất quán)",
+           [k for k in kinds(r) if k[0] == "CONSISTENCY_FAIL"] == [] and any(k[0] == "FUNDING_ALERT" for k in kinds(r)), kinds(r))
+    r = A(plan([cand("DEF", "SKIP", day=1)], [], []))
+    ck("decision SKIP thiếu lệnh ⇒ vẫn sạch (không bắt nhầm SKIP)", r["findings"] == [], kinds(r))
     # 8 lệnh BÁN cùng mã không tính
     r = A(plan([cand("ABC", day=1)], [order("ABC", side="sell")]))
     ck("lệnh bán cùng mã KHÔNG thoả BUY", ("FUNDING_ALERT", "ABC", "LAG_BUY_MISSING") in kinds(r), kinds(r))
@@ -195,6 +206,7 @@ def cases(m):
 
 MUTANTS = [
     ("bỏ nhận BUY (decision luôn False)", "return bool(_RE_BUY.match(str(d or \"\")))", "return False"),
+    ("chỉ nhận BUY (bỏ DEFER/WAIT_CASH)", "_RE_BUY = re.compile(r\"^\\s*(BUY_DEFERRED|BUY|DEFERRED|DEFER|WAIT_CASH|RESIDUAL|ORDER)\\b\", re.I)", "_RE_BUY = re.compile(r\"^\\s*BUY\\b\", re.I)"),
     ("mã SKIP cũng bị bắt", "return bool(_RE_BUY.match(str(d or \"\")))", "return True"),
     ("qty 0 vẫn coi là có lệnh", "if (_num(o.get(\"qty\")) or 0) > 0]", "if True]"),
     ("lệnh bán cũng thoả BUY", "return str(o.get(\"side\") or \"\").strip().lower() == \"buy\"", "return True"),

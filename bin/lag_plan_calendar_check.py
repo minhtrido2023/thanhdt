@@ -88,7 +88,7 @@ ACCOUNT_SPECIFIC_SKIP = {"EXCLUDED_TICKER", "ALREADY_HELD", "CASH_ONLY"}
 # Từ khoá cho thấy lý do SKIP viện dẫn một cổng KHÁC FLOOR_FAIL (xem "Giới hạn" ở docstring).
 _OTHER_GATE = re.compile(
     r"RICH|cờ đỏ|co do|RED_FLAG|RATING|rating|8L|ADV|thanh khoản|thanh khoan|universe|BANNED|"
-    r"banned|forensic|excluded_tickers|đã giữ|ALREADY_HELD", re.IGNORECASE)
+    r"banned|forensic|excluded_tickers|đã giữ|ALREADY_HELD|anchor|đuổi giá|duoi gia|no.?chase|chase", re.IGNORECASE)
 
 
 def _d(x):
@@ -244,7 +244,10 @@ def check_plan(plan, ref):
         if (_decision(it) == "SKIP" and ref["lens"].get(tk) == "KHONG_SKIP_VI_FLOOR_FAIL"
                 and not ref["dd_red"].get(tk)):
             why = str(it.get("decision_why") or it.get("reason") or "")
-            if "FLOOR_FAIL" in why.upper() and not _OTHER_GATE.search(why):
+            # Token verdict của lăng kính (KHONG_SKIP_VI_FLOOR_FAIL) chứa chữ FLOOR_FAIL nhưng là lý do NGƯỢC LẠI
+            # ("không skip vì floor_fail"); DollarBill hay trích nguyên văn ⇒ gỡ trước khi dò (arch-review 21/10, SSI 08-11).
+            why_core = why.upper().replace("KHONG_SKIP_VI_FLOOR_FAIL", "")
+            if "FLOOR_FAIL" in why_core and not _OTHER_GATE.search(why):
                 out.append(_f("LAG_DD_FLOOR_FAIL_NOT_GATE", acct,
                               f"SKIP vì FLOOR_FAIL nhưng sector_valuation_lens (cùng CSV) = "
                               f"KHONG_SKIP_VI_FLOOR_FAIL; why={why[:80]!r}", tk))

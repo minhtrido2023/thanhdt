@@ -202,7 +202,9 @@ python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
 - **Checker cơ học**: `python3 mike/bin/lag_plan_calendar_check.py --plan <plan.json>` (tự ghép plan
   account kia cùng ngày). `send_plan_report.sh` tự chạy và in ✅/⛔ kèm MÃ nguyên nhân
   (`LAG_CAL_*`, `LAG_DD_*`, `LAG_X_*` — danh sách ở docstring script) vào report duyệt. Thấy ⛔
-  = sửa plan theo code rồi gửi lại, KHÔNG giải thích cho qua.
+  = sửa plan theo code rồi gửi lại, KHÔNG giải thích cho qua. NGOẠI LỆ: các mã `LAG_DD_*` là
+  HEURISTIC từ khoá (có thể báo nhầm) — đọc lý do rồi mới quyết; KHÔNG đổi một quyết định đúng (vd SKIP vì
+  giá trên anchor) chỉ để checker hết đỏ, hãy ghi rõ lý do trong `decision_why`.
 
 ## `book_note`/`book_breakdown_current` — dùng bootstrap snapshot + `park_holdings.py`, KHÔNG tự đoán → `context_planning_ext.md`
 Nguồn ĐÚNG: `python3 mike/bin/park_holdings.py --account <X> --json`, field `by_book` — KHÔNG tự

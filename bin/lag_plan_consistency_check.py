@@ -49,7 +49,9 @@ CHANNEL = "trading_daily"
 AGENT = "Wags"
 SUBPROC_TIMEOUT_S = 60
 APPROVAL_DEADLINE = "08:45 ICT (preflight_check)"
-_RE_BUY = re.compile(r"^\s*BUY\b", re.I)
+# Cùng tập TAKE với lag_plan_calendar_check.py (hợp đồng kb/context_planning_mini.md: decision ∈ BUY/DEFER/SKIP):
+# DEFER/WAIT_CASH/BUY_DEFERRED = ĐÚNG ca thiếu tiền ở phiên chuẩn (58% vốn lỡ) ⇒ vẫn phải có lệnh hoặc mục hoãn có lý do.
+_RE_BUY = re.compile(r"^\s*(BUY_DEFERRED|BUY|DEFERRED|DEFER|WAIT_CASH|RESIDUAL|ORDER)\b", re.I)
 
 
 def _env(name, default):
