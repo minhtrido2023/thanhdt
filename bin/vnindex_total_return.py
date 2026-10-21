@@ -79,12 +79,22 @@ G2_TOL = 1e-4                      # BQ vs DNSE > 0,01%
 G4_MAX_N_CHANGE_FRAC = 0.05
 G4_MC_TOL = 0.03
 G4_ACK_PREFIX = "@G4_N"            # khoá ack nhánh số mã: (date, "@G4_N:<n_prev>><n>") — ràng GIÁ TRỊ đã xem
+G4_MC_ACK_PREFIX = "@G4_MC"        # khoá ack nhánh vốn hoá: (date, "@G4_MC:<mc_prev>><mc>") — VND làm tròn nguyên
 
 
 def g4_ack_key(date, n_prev: int, n: int) -> tuple:
     """Khoá ack G4-số-mã. Gắn cả (n_prev, n): dòng `provisional` bị dựng lại mỗi lần --update, nên ack
     chỉ có hiệu lực khi số mã quan sát được Y HỆT số người đã xem (đổi hướng/độ lớn ⇒ G4 nổ lại)."""
     return (date if isinstance(date, str) else date.isoformat(), f"{G4_ACK_PREFIX}:{n_prev}>{n}")
+
+
+def g4_mc_ack_key(date, mc_prev, mc) -> tuple:
+    """Khoá ack G4-vốn-hoá. Như g4_ack_key, ràng cả hai giá trị vốn hoá rổ (VND, làm tròn về số nguyên):
+    dựng lại ra vốn hoá khác số người đã xem ⇒ ack không còn hiệu lực, G4 nổ lại."""
+    return (date if isinstance(date, str) else date.isoformat(),
+            f"{G4_MC_ACK_PREFIX}:{int(round(mc_prev))}>{int(round(mc))}")
+
+
 G5_WINDOW = 60
 G5_TOL = 0.005                     # 0,5 điểm %
 G6_DY = 0.30
@@ -473,7 +483,8 @@ def _ack_date(e: dict, path: str, sect: str) -> str:
 
 
 def load_acks(path: str = ACKS_PATH) -> set:
-    """Tập khoá đã được NGƯỜI xác nhận: (date, ticker) cho G6; (date, '@G4_N:<n_prev>><n>') cho G4-số-mã.
+    """Tập khoá đã được NGƯỜI xác nhận: (date, ticker) cho G6; (date, '@G4_N:<n_prev>><n>') cho G4-số-mã;
+    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá.
     Thiếu file = không có xác nhận nào. Mục hỏng ⇒ ValueError (không lặng lẽ bỏ qua)."""
     if not os.path.exists(path):
         return set()
@@ -487,7 +498,8 @@ def load_acks(path: str = ACKS_PATH) -> set:
             raise ValueError(f"{path}: mục G6 ticker không hợp lệ: {e}")
         out.add((e["date"], e["ticker"]))
     # G4 (chỉ nhánh SỐ MÃ): ngày rổ đổi do BQ `ticker` thiếu dòng, đã có người xác nhận CHÍNH số mã đã xem.
-    # Nhánh vốn hoá (G4_MC_TOL) KHÔNG có ack. Tiền điều kiện ghi ack: mã thiếu không có GDKHQ cổ tức
+    # Nhánh vốn hoá (mục G4_MC) cũng ràng GIÁ TRỊ: mc_prev, mc là vốn hoá rổ (VND) hai dòng liền nhau, lấy
+    # đúng số trong thông báo lỗi G4. Tiền điều kiện ghi ack: mã thiếu không có GDKHQ cổ tức
     # tiền ở ngày D và D+1 (xem kb/data_registry/price-volume/vnindex_total_return.md).
     for e in a.get("G4", []):
         d = _ack_date(e, path, "G4")
@@ -497,6 +509,15 @@ def load_acks(path: str = ACKS_PATH) -> set:
             if type(e.get(k)) is not int or e[k] <= 0:
                 raise ValueError(f"{path}: mục G4 thiếu/sai {k} (số nguyên dương: số mã rổ đã xem): {e}")
         out.add(g4_ack_key(d, e["n_prev"], e["n"]))
+    for e in a.get("G4_MC", []):
+        d = _ack_date(e, path, "G4_MC")
+        _ack_str(e, "confirmed_by", path, "G4_MC")
+        _ack_str(e, "reason", path, "G4_MC")
+        for k in ("mc_prev", "mc"):
+            v = e.get(k)
+            if type(v) not in (int, float) or not math.isfinite(v) or v <= 0:
+                raise ValueError(f"{path}: mục G4_MC thiếu/sai {k} (số dương: vốn hoá rổ VND đã xem): {e}")
+        out.add(g4_mc_ack_key(d, e["mc_prev"], e["mc"]))
     return out
 
 
@@ -518,7 +539,8 @@ def _g1_link_errs(p: dict, r: dict) -> list:
 
 def _g4_errs(pp, p: dict, r: dict, acks: set) -> list:
     """G4 của dòng r (đã parse): số mã đổi > G4_MAX_N_CHANGE_FRAC chưa ack; vốn hoá rổ lệch chỉ số
-    > G4_MC_TOL (nhánh này không có ack). `pp` = dòng trước p (None ⇒ bỏ nhánh vốn hoá)."""
+    > G4_MC_TOL chưa ack (khoá ràng cả hai giá trị vốn hoá). `pp` = dòng trước p (None ⇒ bỏ nhánh
+    vốn hoá)."""
     errs = []
     if p["n_members"] is None or r["n_members"] is None:
         return errs
@@ -532,10 +554,13 @@ def _g4_errs(pp, p: dict, r: dict, acks: set) -> list:
     if pp is not None and p["mc_members_vnd"]:
         exp = pp_ratio = p["vnindex"] / pp["vnindex"]
         dev = r["mc_members_vnd"] / p["mc_members_vnd"] / exp - 1
-        if abs(dev) > G4_MC_TOL:
+        if abs(dev) > G4_MC_TOL and \
+                g4_mc_ack_key(r["date"], p["mc_members_vnd"], r["mc_members_vnd"]) not in acks:
             errs.append(f"G4: {r['date']} vốn hoá rổ đổi {100 * (r['mc_members_vnd'] / p['mc_members_vnd'] - 1):+.2f}% "
                         f"vs chỉ số {100 * (pp_ratio - 1):+.2f}% (lệch {100 * dev:+.2f}%, "
-                        f"> {100 * G4_MC_TOL:g}%)")
+                        f"> {100 * G4_MC_TOL:g}%) — chờ lấp dữ liệu BQ hoặc người xác nhận "
+                        f"(mc_prev={int(round(p['mc_members_vnd']))}, mc={int(round(r['mc_members_vnd']))}) "
+                        f"ở vnindex_tr_acks.json mục G4_MC")
     return errs
 
 
@@ -613,15 +638,21 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
 
 
 def _acked_g4_days(series: list, start_date, end_date, acks: set) -> list:
-    """Các ngày trong kỳ mà G4-số-mã đã nổ nhưng được người ack: [{date, n_prev, n}] — để chú thích báo cáo."""
+    """Các ngày trong kỳ mà G4 đã nổ nhưng được người ack: [{date, n_prev, n}] (nhánh số mã) hoặc
+    [{date, mc_prev, mc}] (nhánh vốn hoá) — để chú thích báo cáo."""
     a, b = _d(start_date), _d(end_date)
     out = []
-    for p, r in zip(series, series[1:]):
+    for i, (p, r) in enumerate(zip(series, series[1:])):
         if not (a < r["date"] <= b) or p["n_members"] is None or r["n_members"] is None:
             continue
         if abs(r["n_members"] - p["n_members"]) > G4_MAX_N_CHANGE_FRAC * p["n_members"] and \
                 g4_ack_key(r["date"], p["n_members"], r["n_members"]) in acks:
             out.append({"date": r["date"].isoformat(), "n_prev": p["n_members"], "n": r["n_members"]})
+        if i >= 1 and p["mc_members_vnd"] and r["mc_members_vnd"] and \
+                abs(r["mc_members_vnd"] / p["mc_members_vnd"] / (p["vnindex"] / series[i]["vnindex"]) - 1) > G4_MC_TOL \
+                and g4_mc_ack_key(r["date"], p["mc_members_vnd"], r["mc_members_vnd"]) in acks:
+            out.append({"date": r["date"].isoformat(), "mc_prev": int(round(p["mc_members_vnd"])),
+                        "mc": int(round(r["mc_members_vnd"]))})
     return out
 
 
@@ -892,6 +923,34 @@ def _md5(b: bytes) -> str:
     return hashlib.md5(b).hexdigest()
 
 
+def _last_log_entry(log_path: str):
+    """Dòng sổ đính chính cuối (dict) hoặc None (không có/không đọc được — chỉ mất chú thích retry_of)."""
+    try:
+        with open(log_path, encoding="utf-8") as f:
+            last = [x for x in f.read().splitlines() if x.strip()][-1:]
+        return json.loads(last[0]) if last else None
+    except (OSError, ValueError):
+        return None
+
+
+def undo_restatement(entry: dict, new_bytes: bytes) -> bytes:
+    """Nội dung file TRƯỚC một đính chính, dựng từ chính dòng sổ + file ngay sau đính chính (md5_after) —
+    hoàn tác byte-exact không cần bản sao lưu ngoài. Chỉ đúng khi file chưa bị `--update` ghi tiếp."""
+    if _md5(new_bytes) != entry["md5_after"]:
+        raise ValueError(f"file hiện tại md5 {_md5(new_bytes)} ≠ md5_after {entry['md5_after']} của dòng sổ")
+    lines = new_bytes.decode("utf-8").splitlines(keepends=True)
+    rows = _parse_lines(lines, "undo")
+    first = min(entry["rows_before"])
+    k = [r["date"].isoformat() for r in rows].index(first)
+    old_by_date = {**entry["rechained_sealed_before"], **entry["rows_before"]}
+    end = [r["date"].isoformat() for r in rows].index(entry["last_sealed_before"])
+    mid = [old_by_date.get(rows[i]["date"].isoformat(), lines[1 + i]) for i in range(k, end + 1)]
+    out = "".join(lines[:1 + k] + mid + entry["tail_before"]).encode("utf-8")
+    if _md5(out) != entry["md5_before"]:
+        raise ValueError(f"dựng lại md5 {_md5(out)} ≠ md5_before {entry['md5_before']}")
+    return out
+
+
 def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SERIES_PATH,
                    membership_path: str = MEMBERSHIP_LATEST, inputs=None, src2=None, write: bool = True,
                    built_at: str = None, acks_path: str = None, log_path: str = None) -> dict:
@@ -933,6 +992,7 @@ def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SER
         # vùng sealed [k, last_sealed]: dòng được nêu ⇒ thay bằng dòng dựng lại; dòng khác ⇒ giữ trường,
         # chỉ nối lại tr (hệ quả toán học). Mọi dòng được nối lại từ dòng mốc old[k-1] giữ byte.
         prev, new_sealed, rechained, rows_before, rows_after = old[k - 1], [], [], {}, {}
+        rechained_before = {}
         for i in range(k, last_sealed + 1):
             d = old[i]["date"].isoformat()
             raw = dict(zip(COLUMNS, next(csv.reader([lines[1 + i]]))))
@@ -952,6 +1012,7 @@ def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SER
                 rows_before[d], rows_after[d] = lines[1 + i], line
             elif line != lines[1 + i]:
                 rechained.append(d)
+                rechained_before[d] = lines[1 + i]
             new_sealed.append(line)
             prev = r
         staged = lines[:1 + k] + new_sealed + lines[2 + last_sealed:]
@@ -974,18 +1035,27 @@ def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SER
         if still:
             raise RestateRefused(f"sau đính chính dòng vẫn nổ cổng (ack trước, hoặc chờ BQ lấp): {still}")
         old_b = "".join(lines).encode("utf-8")
-        # "không đổi" xét trên VÙNG SEALED, bỏ qua built_at_ict (mỗi lần dựng một dấu thời gian mới; đuôi
-        # provisional luôn được dựng lại) — nếu không, chạy lại cùng lệnh sẽ ghi sổ một đính chính rỗng
-        if [_without_built_at(x) for x in new_sealed] == [_without_built_at(x) for x in lines[1 + k:2 + last_sealed]]:
-            raise RestateRefused("dựng lại ra đúng số cũ ở vùng sealed — không có gì để đính chính, không ghi sổ")
+        # "không đổi" xét trên CÁC DÒNG ĐƯỢC NÊU, bỏ qua built_at_ict (mỗi lần dựng một dấu thời gian mới;
+        # đuôi provisional luôn được dựng lại). Dòng chỉ bị nối lại (nhiễu float trong G1_CHAIN_TOL) KHÔNG
+        # tính là đổi — nếu không, chạy lại cùng lệnh hoặc đính chính "không có gì" vẫn ghi sổ một đính chính rỗng
+        if all(_without_built_at(rows_after[d]) == _without_built_at(rows_before[d]) for d in rows_after):
+            raise RestateRefused("dựng lại ra đúng số cũ ở các dòng được nêu — không có gì để đính chính, không ghi sổ")
         entry = {"ts_ict": now_ict().isoformat(timespec="seconds"), "series": os.path.abspath(series_path),
                  "dates": [d.isoformat() for d in want], "reason": reason.strip(),
                  "confirmed_by": confirmed_by.strip(), "md5_before": _md5(old_b), "md5_after": _md5(new),
                  "anchor": since.isoformat(), "rows_before": rows_before, "rows_after": rows_after,
-                 "rechained_sealed": rechained, "ca_max_ingested_ict": ca_ing,
+                 "rechained_sealed": rechained, "rechained_sealed_before": rechained_before,
+                 "last_sealed_before": old[last_sealed]["date"].isoformat(),
+                 "tail_before": lines[2 + last_sealed:], "ca_max_ingested_ict": ca_ing,
                  "membership_vintage": membership_vintage(membership_path)}
         if blocked:
             entry["seal_blocked"] = blocked
+        prior = _last_log_entry(log_path)
+        if prior and prior.get("series") == entry["series"] and prior.get("md5_before") == entry["md5_before"] \
+                and prior.get("md5_after") != entry["md5_before"]:
+            # lần trước ghi sổ rồi chết trước khi thay file (file vẫn md5_before của nó) ⇒ đây là CHẠY LẠI,
+            # không phải một đính chính độc lập thứ hai
+            entry["retry_of"] = {"ts_ict": prior.get("ts_ict"), "md5_after": prior.get("md5_after")}
         if write:
             # sổ TRƯỚC, file SAU: chết giữa chừng ⇒ có dòng sổ mà md5_after không khớp file (phát hiện
             # được); ngược lại sẽ là file đã sửa mà không có sổ = đường im lặng.

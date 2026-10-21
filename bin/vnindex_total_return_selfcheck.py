@@ -593,6 +593,44 @@ def t_seal_guard(tmp):
                    first_date=D[0].isoformat(), acks_path=write_acks(tmp, "a3.json", [(D[3], 5, 4)]))
     ok(sealed_n(sp) == 3 and any("vốn hoá" in e for e in res["seal_blocked"][0]["errors"]),
        f"sg6 G4 vốn hoá nổ ⇒ chặn seal (không ack được): {res.get('seal_blocked')}")
+    # ack nhánh vốn hoá ràng GIÁ TRỊ (date, mc_prev, mc): đúng ⇒ mở khoá D3; sai giá trị ⇒ vẫn chặn
+    rows = V.read_series(sp)
+    mc_prev, mc_cur = rows[2]["mc_members_vnd"], rows[3]["mc_members_vnd"]
+
+    def mc_acks(name, mp_, m_):
+        pa = os.path.join(tmp, name)
+        with open(pa, "w", encoding="utf-8") as f:
+            json.dump({"G4": [{"date": D[3].isoformat(), "n_prev": 5, "n": 4, "confirmed_by": "u", "reason": "r"}],
+                       "G4_MC": [{"date": D[3].isoformat(), "mc_prev": mp_, "mc": m_, "confirmed_by": "u",
+                                  "reason": "r"}]}, f)
+        return pa
+    spm = os.path.join(tmp, "sg6b.csv")
+    res = V.update(spm, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                   first_date=D[0].isoformat(), acks_path=mc_acks("a4.json", mc_prev, mc_cur))
+    ok(sealed_n(spm) > 3 and not any(b["date"] == D[3].isoformat() for b in res.get("seal_blocked", [])),
+       f"sg6b ack MC đúng giá trị ⇒ D3 hết bị chặn: {statuses(spm)} {res.get('seal_blocked')}")
+    for tag, (a_, b_) in (("mc_prev lệch", (mc_prev + 1e6, mc_cur)), ("mc lệch", (mc_prev, mc_cur + 1e6))):
+        spw = os.path.join(tmp, "sg6c.csv")
+        if os.path.exists(spw):
+            os.remove(spw)
+        res = V.update(spw, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                       first_date=D[0].isoformat(), acks_path=mc_acks("a5.json", a_, b_))
+        ok(sealed_n(spw) == 3 and any("vốn hoá" in e for e in res["seal_blocked"][0]["errors"]),
+           f"sg6c ack MC {tag} KHÔNG mở khoá: {res.get('seal_blocked')}")
+    ok(any("mục G4_MC" in e and f"mc_prev={int(round(mc_prev))}" in e and f"mc={int(round(mc_cur))}" in e
+           for e in res["seal_blocked"][0]["errors"]), "sg6c thông báo lỗi nêu đúng số cần ack")
+    for tag, bad in (("thiếu confirmed_by", {"date": D[3].isoformat(), "mc_prev": 1.0, "mc": 2.0, "reason": "r"}),
+                     ("mc <= 0", {"date": D[3].isoformat(), "mc_prev": 1.0, "mc": 0, "confirmed_by": "u", "reason": "r"}),
+                     ("mc là chuỗi", {"date": D[3].isoformat(), "mc_prev": 1.0, "mc": "2", "confirmed_by": "u", "reason": "r"}),
+                     ("thiếu reason", {"date": D[3].isoformat(), "mc_prev": 1.0, "mc": 2.0, "confirmed_by": "u"})):
+        pa = os.path.join(tmp, "a6.json")
+        with open(pa, "w", encoding="utf-8") as f:
+            json.dump({"G4_MC": [bad]}, f)
+        try:
+            V.load_acks(pa)
+            ok(False, f"sg6d mục G4_MC {tag} phải ValueError")
+        except ValueError:
+            ok(True, f"sg6d {tag}")
     # G1 là blocker: seal_blockers trên hai dòng không nối được
     rows = V.read_series(sp)
     r = dict(rows[2]); r["tr_gross"] *= 1.001
@@ -660,6 +698,21 @@ def t_restate(tmp):
         ok(ent[0]["rows_before"][D[6].isoformat()] == lines0[i6]
            and ent[0]["rows_after"][D[6].isoformat()] == lines1[i6], "rs5 sổ giữ dòng cũ/mới nguyên byte")
         ok(lines1[:i6] == lines0[:i6], "rs5 mọi dòng TRƯỚC dòng đính chính giữ nguyên byte")
+        # sổ giữ BYTE CŨ của dòng sealed bị nối lại + đuôi provisional cũ ⇒ hoàn tác byte-exact không cần backup
+        i7 = 1 + [x["date"] for x in V.read_series(sp)].index(D[7])
+        ok(ent[0]["rechained_sealed_before"].get(D[7].isoformat()) == lines0[i7]
+           and set(ent[0]["rechained_sealed_before"]) == set(ent[0]["rechained_sealed"]),
+           "rs5 sổ giữ byte cũ của MỌI dòng sealed bị nối lại")
+        ok(ent[0]["tail_before"] and ent[0]["tail_before"] == lines0[1 + len(
+            [1 for x in V._parse_lines(lines0, "l0") if x["status"] == "sealed"]):],
+           "rs5 sổ giữ đuôi provisional cũ")
+        ok(V.undo_restatement(ent[0], "".join(lines1).encode("utf-8")) == "".join(lines0).encode("utf-8"),
+           "rs5 undo_restatement dựng lại ĐÚNG byte file trước đính chính (md5_before)")
+        try:
+            V.undo_restatement(ent[0], "".join(lines1).encode("utf-8") + b"x")
+            ok(False, "rs5 undo trên file đã đổi phải ValueError")
+        except ValueError:
+            ok(True, "rs5 undo từ chối file không khớp md5_after")
         rows1 = V.read_series(sp)
         r6 = rows1[i6 - 1]
         ok(r6["status"] == "sealed" and r6["y_gross"] > V._parse_lines(lines0, "lines0")[i6 - 1]["y_gross"],
@@ -690,6 +743,7 @@ def t_restate(tmp):
             log2 = f.read()
         ok(log2.startswith(log1) and len(log2.splitlines()) == 2, "rs7 sổ chỉ-thêm")
         e2 = json.loads(log2.splitlines()[1])
+        ok("retry_of" not in e2, f"rs7 đính chính độc lập thứ hai KHÔNG bị đánh dấu retry: {e2.get('retry_of')}")
         ok(e2["md5_before"] == h1 and e2["md5_after"] == md5(sp), f"rs7 md5 lần 2: {e2['md5_before']} vs {h1}")
         ok(not [e for e in gates(V.read_series(sp), D[0], D[-1]) if e.startswith("G1")], "rs7 G1 sạch")
     # (8) bất biến C cho đính chính: dòng đính chính vẫn nổ G4 chưa ack (ngưỡng thật) ⇒ từ chối
@@ -700,12 +754,79 @@ def t_restate(tmp):
     except V.RestateRefused as exc:
         ok("G4" in str(exc), f"rs8 {exc}")
     ok(md5(sp) == h and len(open(log).read().splitlines()) == 2, "rs8 file + sổ không đổi")
+    # X7: đính chính NHIỀU ngày, dòng nổ G4 ở NGÀY ĐẦU (D3) — kiểm bất biến phải quét từ want[0], không từ want[-1]
+    try:
+        V.restate_sealed([D[3], D[6]], "r", "u", sp, inputs=inp3, **kw)
+        ok(False, "x7 nhiều ngày, G4 nổ ở ngày đầu phải RestateRefused")
+    except V.RestateRefused as exc:
+        ok("G4" in str(exc) and D[3].isoformat() in str(exc), f"x7 {exc}")
+    ok(md5(sp) == h and len(open(log).read().splitlines()) == 2, "x7 file + sổ không đổi")
     # (9) CLI: thiếu --reason ⇒ rc=4, file không đổi
     cp = subprocess.run([sys.executable, os.path.join(HERE, "vnindex_total_return.py"), "--restate-sealed",
                          D[6].isoformat(), "--confirmed-by", "u", "--series", sp, "--membership", mp,
                          "--acks", noack, "--restate-log", log], capture_output=True, text=True)
     ok(cp.returncode == 4 and "reason" in cp.stderr, f"rs9 CLI rc={cp.returncode}: {cp.stderr[-300:]}")
     ok(md5(sp) == h, "rs9 CLI file không đổi")
+    t_restate_crash_noise(tmp)
+
+
+def t_restate_crash_noise(tmp):
+    """X9 (chết giữa ghi sổ và thay file) + mục 5 (chạy lại ⇒ retry_of) + X11 (dòng chỉ-nối-lại không phải đổi)."""
+    D, inp, mem, src2 = fixture()
+    mp = write_mem(tmp, mem)
+    noack = os.path.join(tmp, "noack.json")
+    _, inp2, _, _ = fixture(ca_extra=[("BBB", 6, 100, "Đợt 3")])
+    with g4_loose():
+        sp, log = os.path.join(tmp, "x9.csv"), os.path.join(tmp, "x9_log.jsonl")
+        kw = dict(membership_path=mp, src2=src2, acks_path=noack, log_path=log)
+        V.update(sp, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                 first_date=D[0].isoformat(), acks_path=noack)
+        b0 = open(sp, "rb").read()
+        h0 = md5(sp)
+
+        def boom(path, data):
+            raise OSError("selfcheck: chết giữa ghi sổ và thay file")
+        real = V._write_atomic
+        V._write_atomic = boom
+        try:
+            V.restate_sealed([D[6]], "r", "u", sp, inputs=inp2, **kw)
+            ok(False, "x9 _write_atomic hỏng phải nổ lên")
+        except OSError:
+            ok(True, "x9")
+        finally:
+            V._write_atomic = real
+        ent = [json.loads(x) for x in open(log, encoding="utf-8")]
+        ok(md5(sp) == h0 and open(sp, "rb").read() == b0, "x9 file KHÔNG đổi khi chết trước khi thay")
+        ok(len(ent) == 1 and ent[0]["md5_before"] == h0 and ent[0]["md5_after"] != h0 and "retry_of" not in ent[0],
+           f"x9 sổ ĐÃ có dòng (sổ trước, file sau), md5_after ≠ file hiện tại: {ent}")
+        # chạy lại ⇒ dòng sổ mới đánh dấu retry_of dòng trước, không trông như đính chính độc lập
+        V.restate_sealed([D[6]], "r", "u", sp, inputs=inp2, **kw)
+        ent = [json.loads(x) for x in open(log, encoding="utf-8")]
+        ok(len(ent) == 2 and ent[1]["retry_of"] == {"ts_ict": ent[0]["ts_ict"], "md5_after": ent[0]["md5_after"]}
+           and ent[1]["md5_before"] == h0 and ent[1]["md5_after"] == md5(sp),
+           f"mục5 chạy lại sau crash ⇒ retry_of dòng trước: {ent[1:]}")
+        ok(V.undo_restatement(ent[1], open(sp, "rb").read()) == b0, "mục5 undo từ dòng retry ra đúng byte gốc")
+        # X11: dòng KHÔNG được nêu chỉ lệch do nối lại (nhiễu float trong G1_CHAIN_TOL) không phải đính chính
+        sp2, log2 = os.path.join(tmp, "x11.csv"), os.path.join(tmp, "x11_log.jsonl")
+        kw2 = dict(membership_path=mp, src2=src2, acks_path=noack, log_path=log2)
+        V.update(sp2, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                 first_date=D[0].isoformat(), acks_path=noack)
+        with open(sp2, encoding="utf-8") as f:
+            ls = f.readlines()
+        i7 = 1 + [x["date"] for x in V.read_series(sp2)].index(D[7])
+        rr = dict(zip(V.COLUMNS, next(__import__("csv").reader([ls[i7]]))))
+        rr["tr_gross"] = V._fmt(float(rr["tr_gross"]) * (1 + 1e-13), 15)
+        ls[i7] = V._row_line(rr)
+        with open(sp2, "w", encoding="utf-8") as f:
+            f.writelines(ls)
+        ok(not [e for e in gates(V.read_series(sp2), D[0], D[-1]) if e.startswith("G1")], "x11 nhiễu 1e-13 chưa nổ G1")
+        h2 = md5(sp2)
+        try:
+            V.restate_sealed([D[6]], "r", "u", sp2, inputs=inp, **kw2)
+            ok(False, "x11 chỉ có dòng bị nối lại ⇒ phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("không có gì" in str(exc), f"x11 {exc}")
+        ok(md5(sp2) == h2 and not os.path.exists(log2), "x11 file + sổ không đổi")
 
 
 def main() -> int:

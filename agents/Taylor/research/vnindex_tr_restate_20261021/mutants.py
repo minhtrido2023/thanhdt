@@ -8,6 +8,8 @@ import sys
 WT = sys.argv[1]
 SRC = os.path.join(WT, "bin", "vnindex_total_return.py")
 SC = os.path.join(WT, "bin", "vnindex_total_return_selfcheck.py")
+CRON = os.path.join(WT, "bin", "fund_bench_cron.sh")
+CRON_SC = os.path.join(WT, "bin", "fund_bench_cron_selfcheck.py")
 
 MUT = {
     "A1 đính chính không ghi sổ": (
@@ -39,7 +41,7 @@ MUT = {
         "        if still:\n            raise RestateRefused(",
         "        if False:\n            raise RestateRefused("),
     "A8 'không đổi' so cả byte (built_at mới ⇒ ghi sổ đính chính rỗng)": (
-        "        if [_without_built_at(x) for x in new_sealed] == [_without_built_at(x) for x in lines[1 + k:2 + last_sealed]]:",
+        "        if all(_without_built_at(rows_after[d]) == _without_built_at(rows_before[d]) for d in rows_after):",
         "        if new == old_b:"),
     "C1 bỏ seal-guard": (
         "        if seal and hist:\n            errs = seal_blockers(",
@@ -50,23 +52,58 @@ MUT = {
     "C3 seal-guard bỏ qua ack": (
         "            errs = seal_blockers(hist[-2] if len(hist) > 1 else None, hist[-1], pr, acks)",
         "            errs = seal_blockers(hist[-2] if len(hist) > 1 else None, hist[-1], pr, set())"),
+    "X7 bất biến C quét từ want[-1] thay vì want[0]": (
+        "        for i in range(npos[want[0]], len(nrows)):",
+        "        for i in range(npos[want[-1]], len(nrows)):"),
+    "X9 ghi file TRƯỚC sổ (chết giữa chừng ⇒ file đổi mà không có sổ)": [
+        ("        if write:\n            # sổ TRƯỚC, file SAU",
+         "        if write:\n            _write_atomic(series_path, new)\n            # sổ TRƯỚC, file SAU"),
+        ("            _write_atomic(series_path, new)\n    return {", "            pass\n    return {")],
+    "X11 dòng chỉ-nối-lại được tính là có đổi": (
+        "        if all(_without_built_at(rows_after[d]) == _without_built_at(rows_before[d]) for d in rows_after):",
+        "        if [_without_built_at(x) for x in new_sealed] == [_without_built_at(x) for x in lines[1 + k:2 + last_sealed]]:"),
+    "B3a sổ không lưu byte cũ dòng sealed bị nối lại": (
+        "                rechained_before[d] = lines[1 + i]", "                pass"),
+    "B3b sổ không lưu đuôi provisional cũ": (
+        '"tail_before": lines[2 + last_sealed:],', '"tail_before": [],'),
+    "B5 chạy lại sau crash không đánh dấu retry_of": (
+        '        if prior and prior.get("series") == entry["series"]',
+        '        if False and prior and prior.get("series") == entry["series"]'),
+    "B2a ack vốn hoá không ràng giá trị": (
+        'f"{G4_MC_ACK_PREFIX}:{int(round(mc_prev))}>{int(round(mc))}")',
+        'f"{G4_MC_ACK_PREFIX}")'),
+    "B2b ack vốn hoá bị bỏ qua": (
+        '                g4_mc_ack_key(r["date"], p["mc_members_vnd"], r["mc_members_vnd"]) not in acks:',
+        '                True:'),
+    "B1 cron không báo seal_blocked": (
+        '  if [ -n "$SEAL" ]; then', '  if false; then', "cron"),
     "C4 sổ ack hỏng ⇒ coi như không có ack (im lặng)": (
         "    try:\n        return load_acks(acks_path)\n    except (OSError, ValueError) as exc:              # sổ ack hỏng ⇒ không seal theo giả định",
         "    try:\n        return load_acks(acks_path)\n    except (OSError, ValueError) as exc:              # sổ ack hỏng ⇒ không seal theo giả định\n        return set()"),
 }
 
-orig = open(SRC, encoding="utf-8").read()
+def patch(text, pairs):
+    for a, b in pairs:
+        assert text.count(a) == 1, f"mẫu không khớp đúng 1 lần ({text.count(a)}): {a[:70]!r}"
+        text = text.replace(a, b)
+    return text
+
+
+origs = {p: open(p, encoding="utf-8").read() for p in (SRC, CRON)}
 dead = alive = 0
 try:
-    for name, pair in MUT.items():
-        if pair is None:
-            continue
-        a, b = pair
-        assert orig.count(a) == 1, f"{name}: mẫu không khớp đúng 1 lần ({orig.count(a)})"
-        with open(SRC, "w", encoding="utf-8") as f:
-            f.write(orig.replace(a, b))
-        cp = subprocess.run([sys.executable, SC], capture_output=True, text=True, env={**os.environ, "TZ": ""})
+    for name, spec in MUT.items():
+        which = "vtr"
+        if isinstance(spec, tuple) and len(spec) == 3:
+            spec, which = spec[:2], spec[2]
+        pairs = spec if isinstance(spec, list) else [spec]
+        target, check = (CRON, CRON_SC) if which == "cron" else (SRC, SC)
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(patch(origs[target], pairs))
+        cp = subprocess.run([sys.executable, check], capture_output=True, text=True, env={**os.environ, "TZ": ""})
         last = (cp.stdout + cp.stderr).strip().splitlines()[-1][:160]
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(origs[target])
         if cp.returncode != 0:
             dead += 1
             print(f"CHẾT  {name}: {last}")
@@ -74,7 +111,8 @@ try:
             alive += 1
             print(f"SỐNG  {name}: {last}")
 finally:
-    with open(SRC, "w", encoding="utf-8") as f:
-        f.write(orig)
+    for p, t in origs.items():
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(t)
 print(f"mutant chết {dead}/{dead + alive}")
 sys.exit(1 if alive else 0)
