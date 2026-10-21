@@ -57,3 +57,5 @@ Kỳ vọng: 2023 = 1,68 · 2025 = 1,62 · 07-01→10-13 giá −7,915 / gộp �
 
 ## Dựng lần đầu trên cây thật (2026-10-14)
 BQ chạm trần 1.000.000 dòng khi `--update` kéo cả lịch sử ⇒ lần đầu phải tải panel theo từng năm vào parquet rồi `--update --from-cache <dir> --src2-csv <dnse.csv>` (DNSE cắt tới 13/10 vì BQ VNINDEX chưa có phiên 14/10 — đúng cổng G1). Từ phiên sau cron `--update` chỉ kéo từ mốc sealed nên không chạm trần. `hose_membership_refresh.py` phải gửi User-Agent (VNDirect 403 với `Python-urllib`).
+
+Đính chính + hoàn tác (thêm 21/10/2026): dòng `sealed` bất biến; đường DUY NHẤT sửa là `vnindex_total_return.py --restate-sealed DATE… --reason --confirmed-by` (và `--undo-last-restatement`), ghi sổ chỉ-thêm `data/benchmark/vnindex_tr_restatements.jsonl` (md5 trước/sau, byte cũ của dòng bị nối lại, `retry_of`/`undoes`) TRƯỚC khi thay file. `--update` giữ dòng ở `provisional` nếu G1/G4 của nó đang nổ chưa ack (`seal_blocked`, cron báo 🔒). Quy trình: `kb/ops_runbook.md` § "VN-Index có cổ tức".
