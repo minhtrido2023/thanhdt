@@ -82,7 +82,7 @@ lệnh thoát tới GDKHQ, vì code chưa có cơ chế; P3 bên dưới cần u
 - Dry-run thật 2026-10-22: 7 mã đang giữ, 0 quyền mua (ĐO). Với vị thế giả SCL 14.000 trên BQ thật: báo ANNOUNCE
   15,38% ⇒ 2.153 CP, chưa có giá; asof 2025-10-13 ⇒ REMIND 5.000 CP × 12.500 = 62.500.000đ (ĐO).
   ⚠️ Hồi cứu dùng dòng BQ hiện tại; bảng bị ghi đè tại chỗ, nên giá/trạng thái lúc đó có thể chưa có (B1.7).
-- Selfcheck `bin/rights_issue_alert_selfcheck.py`: 22 case, **3 TZ PASS, 11/11 mutant killed** (ĐO).
+- Selfcheck `bin/rights_issue_alert_selfcheck.py`: 21 case, **3 TZ PASS, 11/11 mutant killed** (ĐO).
 - Để wire (cần duyệt): cron T2-T6 sau `corp_action_daily` (tra `kb/cron_registry.md` §11) với `--send` ⇒ Trading Daily
   (`trading_daily`).
 
