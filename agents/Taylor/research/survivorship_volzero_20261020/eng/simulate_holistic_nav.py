@@ -338,6 +338,44 @@ _zvf_trail = None
 #   chi o simulate() co liquidity_require_positive=True (book LAG khi LIQ_ZERO_BLOCK=lag).
 _V1D_SELL = os.environ.get("V1D_SELL", "0").strip() == "1"
 _v1d_stats = {"sell_deferred": 0}
+# F1/F2/F3 (job Taylor_20261021_012028) — mac dinh off -> byte-identical.
+#   F1_N>0: lenh ban bi hoan (ZVF/V1D) >= F1_N phien -> ep ban toan lo o open_px*(1-F1_H) (PREREG_F1).
+#   F2_DUMP=<f>: ghi khoa (name,ticker,exec_start) lenh LAG da khop; F2_WL=<f>: LAG chi xep tin hieu trong whitelist (PREREG_F2).
+#   F3_MODE=lag|both: tran MUA = ZVF_ADV_PCT x F(tk,t) [x m_Y cho LAG], F = trung vi dv 20 dong truoc (tinh 0) (PREREG_F3).
+_F1_N = int(os.environ.get("F1_N", "0"))
+_F1_H = float(os.environ.get("F1_H", "0"))
+_f1_stats = {}
+_F2_DUMP = os.environ.get("F2_DUMP", "")
+_F2_WL = os.environ.get("F2_WL", "")
+_f2_seen = set()
+_f2_wl = None
+if _F2_WL:
+    import json as _json_f2
+    _f2_wl = {tuple(k) for k in _json_f2.load(open(_F2_WL))}
+_F3_MODE = os.environ.get("F3_MODE", "off").strip().lower()
+if _F3_MODE not in ("off", "lag", "both"):
+    raise ValueError(f"F3_MODE={_F3_MODE!r} khong hop le")
+_F3_MULT = {int(a): float(b) for a, b in (x.split(":") for x in os.environ.get("F3_MULT", "").split(",") if x)}
+_f3_fc = None
+_f3_stats = {}
+
+
+def _f3_cap(tk, d, is_lag):
+    """F3: ZVF_ADV_PCT x median(dv, Volume=0 tinh 0) tren 20 dong TRUOC d [x m_Y neu LAG]; 0.0 neu khong co."""
+    global _f3_fc
+    if _f3_fc is None:
+        _zvf_dayval("", pd.Timestamp("1900-01-01"))
+        _f3_fc = {}
+        for t, m in _zvf_dv.items():
+            ds = sorted(m)
+            v = pd.Series([m[x] for x in ds], index=ds, dtype=float)
+            med = v.rolling(20, min_periods=1).median().shift(1)
+            _f3_fc[t] = dict(zip(ds, med.fillna(0.0).values))
+        print(f"  [F3] forecast med20(incl0) built for {len(_f3_fc):,} tickers; mult={_F3_MULT}")
+    f = float(_f3_fc.get(tk, {}).get(d, 0.0))
+    if is_lag:
+        f *= _F3_MULT.get(d.year, 1.0)
+    return _ZVF_PCT * f
 
 
 def _zvf_dayval(tk, d):
@@ -803,14 +841,24 @@ def simulate(signals_df, prices, vni_dates, *,
                 if open_px is None or pd.isna(open_px):
                     still_pending.append(entry)  # keep trying tomorrow
                     continue
+                _f1_block = None
                 if _zvf_blocked(tk, today):                       # ZVF: Volume=0 -> khong khop, thu lai
-                    _zvf_stats["sell_blocked"] += 1
-                    still_pending.append(entry)
-                    continue
-                if _V1D_SELL and liquidity_require_positive and liquidity_lookup is not None:
+                    _f1_block = "zvf"
+                elif _V1D_SELL and liquidity_require_positive and liquidity_lookup is not None:
                     _lq = liquidity_lookup.get((tk, today))      # V1D: ADV3M<=0/thieu -> hoan ban
                     if not (_lq and _lq > 0):
-                        _v1d_stats["sell_deferred"] += 1
+                        _f1_block = "v1d"
+                if _f1_block is not None:
+                    if _F1_N > 0 and entry.get("_f1d", 0) >= _F1_N:   # F1: hoan qua N phien -> ep ban, chiet khau H
+                        open_px = open_px * (1.0 - _F1_H)
+                        reason = reason + "_F1FORCE"
+                        _f1_stats[pos.get("holding_id", tk)] = _f1_block
+                    else:
+                        if _f1_block == "zvf":
+                            _zvf_stats["sell_blocked"] += 1
+                        else:
+                            _v1d_stats["sell_deferred"] += 1
+                        entry["_f1d"] = entry.get("_f1d", 0) + 1
                         still_pending.append(entry)
                         continue
                 if _ZVF_MODE == "block_advboth":                  # ZVF: tran ban theo KL thuc ngay
@@ -879,9 +927,10 @@ def simulate(signals_df, prices, vni_dates, *,
                         "cash_after": float(cash),
                         "reason": reason,
                     })
-                if reentry_blacklist_days > 0 and reason in ("STOP", "TRAIL"):
+                _rbl = reason[:-len("_F1FORCE")] if reason.endswith("_F1FORCE") else reason
+                if reentry_blacklist_days > 0 and _rbl in ("STOP", "TRAIL"):
                     blacklist[tk] = reentry_blacklist_days
-                elif pt_blacklist_days > 0 and reason == "PROFIT_TARGET":
+                elif pt_blacklist_days > 0 and _rbl == "PROFIT_TARGET":
                     blacklist[tk] = pt_blacklist_days
                 del positions[tk]
             pending_exits = still_pending
@@ -1535,6 +1584,13 @@ def simulate(signals_df, prices, vni_dates, *,
                 if _tc < remaining_value:
                     _zvf_stats["buy_capped"] += 1
                 daily_max = _tc
+            if _F3_MODE != "off" and liquidity_volume_pct is not None and liquidity_lookup is not None:
+                _is_lag = str(name).startswith("v23audit_LAG")
+                if _is_lag or _F3_MODE == "both":                 # F3: THAY ADV 3M bang du bao nhan qua
+                    _tc = _f3_cap(tk, today, _is_lag)
+                    if _tc < remaining_value:
+                        _f3_stats[name] = _f3_stats.get(name, 0) + 1
+                    daily_max = _tc
             _mg_ok2 = (max_gross_exposure is not None
                        and (margin_tiers is None or play_type in margin_tiers))
             _bp = cash + ((max_gross_exposure - 1.0) *
@@ -1550,6 +1606,8 @@ def simulate(signals_df, prices, vni_dates, *,
                 entry["filled_cost"] += cost
                 if entry["first_fill_date"] is None:
                     entry["first_fill_date"] = today
+                    if _F2_DUMP and str(name).startswith("v23audit_LAG"):
+                        _f2_seen.add((str(name), tk, entry["exec_start_date"].strftime("%Y-%m-%d")))
                 # Event log: capture this BUY fill (one row per fill day for multi-day fills)
                 # Semantics (per user 2026-05-18):
                 #   buy_amount = shares × market price (CLEAN cost of shares, excludes fees)
@@ -1649,6 +1707,10 @@ def simulate(signals_df, prices, vni_dates, *,
                 held_or_pending = set(positions.keys()) | {p["ticker"] for p in pending_entries}
                 for _, sig in todays_sig.iterrows():
                     if sig["ticker"] in held_or_pending:
+                        continue
+                    if (_f2_wl is not None and str(name).startswith("v23audit_LAG")
+                            and (str(name), sig["ticker"], exec_date.strftime("%Y-%m-%d")) not in _f2_wl):
+                        _f3_stats["f2_skip_" + str(name)] = _f3_stats.get("f2_skip_" + str(name), 0) + 1
                         continue
                     _entry_seq += 1
                     pending_entries.append({
@@ -1905,6 +1967,24 @@ def simulate(signals_df, prices, vni_dates, *,
         print(f"  [ZVF] {name}: cumulative {_zvf_stats}")
     if _V1D_SELL:
         print(f"  [V1D] {name}: cumulative {_v1d_stats}")
+    if _ZVF_MODE != "off" or _V1D_SELL:
+        _stk = {e["ticker"] for e in pending_exits if e.get("_f1d", 0) > 0 and e["ticker"] in positions}
+        _stv = sum(positions[t]["shares"] * positions[t]["last_price"] for t in _stk)
+        _nl = nav_history[-1]["nav"] if nav_history else float("nan")
+        _nf = {}
+        for _v in _f1_stats.values():
+            _nf[_v] = _nf.get(_v, 0) + 1
+        print(f"  [F1] {name}: forced_lots={len(_f1_stats)} by={_nf} stuck_end n={len(_stk)} value_vnd={_stv:.2f} "
+              f"book_nav_last={_nl:.2f} tickers={sorted(_stk)}")
+        _f1_stats.clear()
+    if _F3_MODE != "off" or _f2_wl is not None:
+        print(f"  [F3F2] {name}: {_f3_stats}")
+    if _F2_DUMP and str(name).startswith("v23audit_LAG"):
+        import json as _json_f2d
+        _old = _json_f2d.load(open(_F2_DUMP)) if os.path.exists(_F2_DUMP) else []
+        _keep = [k for k in _old if k[0] != str(name)] + sorted(k for k in _f2_seen if k[0] == str(name))
+        _json_f2d.dump(_keep, open(_F2_DUMP, "w"))
+        print(f"  [F2] dump {name}: {sum(1 for k in _f2_seen if k[0] == str(name))} keys -> {_F2_DUMP}")
     return nav_df, trades_df
 
 
