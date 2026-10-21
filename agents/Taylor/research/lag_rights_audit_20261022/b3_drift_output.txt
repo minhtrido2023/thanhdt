@@ -1,0 +1,27 @@
+
+== D1 tối trước GDKHQ: batch DNSE hạ marketPrice SCL 30.000→25.400 sau 19:05 (2026-11-06) rc=0
+   ⚠️ **VỊ THẾ ĐỔI SAU KHI LẬP PLAN (nghi corp-action credit muộn)** — tài khoản RightsAcct 8888888888 (kiểm 20:45; MÔ PHỎNG từ bản ghi dnse_raw 20:45:00 (không có bản đọc sống lúc 20:50:59))
+      • SCL [sau lần đọc đầu của plan, mốc 19:05]: KL 14.000→14.000; giá 30.000→25.400 (15,3%)
+      👉 Plan có thể dùng KL/giá ref/trần TRƯỚC sự kiện ⇒ lệnh có thể ngoài biên độ, không khớp. Xem lại lệnh các mã trên trước khi duyệt (cờ báo, KHÔNG tự chặn).
+      · sổ lệnh DNSE lúc kiểm rỗng — dùng bản orders cuối trong dnse_raw (20:46)
+      · SCL: không xác định được sàn ⇒ dùng biên độ HOSE ±7% (chặt nhất)
+      · không đối chiếu được lệnh plan: chưa thấy plan_RightsAcct_2026-11-09.json
+
+== D2 ngày user nộp tiền quyền (vị thế không đổi) (2026-11-16) rc=0
+   ✅ Vị thế không đổi sau plan (kiểm 20:45, mốc 19:05 — MÔ PHỎNG)
+
+== D3 tối credit 5.000cp quyền (sau 19:05, chưa niêm yết) (2026-12-03) rc=0
+   ⚠️ **VỊ THẾ ĐỔI SAU KHI LẬP PLAN (nghi corp-action credit muộn)** — tài khoản RightsAcct 8888888888 (kiểm 20:45; MÔ PHỎNG từ bản ghi dnse_raw 20:45:00 (không có bản đọc sống lúc 20:50:59))
+      • SCL [sau lần đọc đầu của plan, mốc 19:05]: KL 14.000→19.000 (×1,3571); giá 25.400→25.400 (0,0%)
+      👉 Plan có thể dùng KL/giá ref/trần TRƯỚC sự kiện ⇒ lệnh có thể ngoài biên độ, không khớp. Xem lại lệnh các mã trên trước khi duyệt (cờ báo, KHÔNG tự chặn).
+      · sổ lệnh DNSE lúc kiểm rỗng — dùng bản orders cuối trong dnse_raw (20:46)
+      · không đối chiếu được lệnh plan: chưa thấy plan_RightsAcct_2026-12-04.json
+
+== D3b credit TRƯỚC 18:50 (bản 19:05 đã thấy 19.000) (2026-12-04) rc=0
+   ⚠️ **VỊ THẾ ĐỔI SAU KHI LẬP PLAN (nghi corp-action credit muộn)** — tài khoản RightsAcct 8888888888 (kiểm 20:45; MÔ PHỎNG từ bản ghi dnse_raw 20:45:00 (không có bản đọc sống lúc 20:50:59))
+      • SCL [sau phiên, TRƯỚC/TRONG lúc lập plan, mốc 04:50]: KL 14.000→19.000 (×1,3571); giá 25.400→25.400 (0,0%)
+      👉 Plan có thể dùng KL/giá ref/trần TRƯỚC sự kiện ⇒ lệnh có thể ngoài biên độ, không khớp. Xem lại lệnh các mã trên trước khi duyệt (cờ báo, KHÔNG tự chặn).
+      · sổ lệnh DNSE lúc kiểm rỗng — dùng bản orders cuối trong dnse_raw (20:46)
+      · không đối chiếu được lệnh plan: chưa thấy plan_RightsAcct_2026-12-07.json
+
+sandbox=/tmp/lag_rights_drift_ogxbzlta  (state dir rỗng? True)
