@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 205 file (105 sự cố + 99 RETRO + 1 mục open-items chung)
+entries: 207 file (106 sự cố + 100 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-10-20 | [2026-10/2026-10-20-container-freeze-memory-suspected.md](2026-10/2026-10-20-container-freeze-memory-suspected.md) | ? |
 | 2026-10-16 | [2026-10/2026-10-16-eod-report-atc-fill-null-price-crash.md](2026-10/2026-10-16-eod-report-atc-fill-null-price-crash.md) | fixed |
 | 2026-10-06 | [2026-10/2026-10-06-zalopay-bid-sell-split-across-loan-packages.md](2026-10/2026-10-06-zalopay-bid-sell-split-across-loan-packages.md) | ? |
 
@@ -106,6 +107,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
