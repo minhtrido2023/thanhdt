@@ -1384,3 +1384,9 @@
 
 ## Archived 2026-10-21 (keep=12 days=0 require_done=False)
 - [2026-10-20T15:33:47Z] ĐANG DỞ job Taylor_20261020_153324 (tiếp 122917): kiểm kê xong — PREREG V1/V2/V3 md5 OK; ctl 4 chân + V1A EXIT=0; V1B/V1C 8 run CHẾT lúc reboot (cần chạy lại nohup); V2 replay log done 19:49 | NEXT: chạy lại V1B/V1C, V3
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T16:03:56Z] [survivorship V1/V2/V3 10-20] XONG job Taylor_20261020_153324 @4a2cf8643: V1A -0,2..-1,0pp (2/4), V2 dưới sàn, V3 +0,3..+0,5pp (2/4). Mở: quant-skeptic verify; ~44% mua LAG ở mã ADV3M<=0 bỏ trần thanh khoản — chờ Mike/user. (Thay dòng ĐANG DỞ 122917.)
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T18:01:49Z] [survivorship-volzero V1D/V1E/V3A'/V4 10-21] XONG job Taylor_20261020_162558 (REPORT_V1D_V1E.md, e8a0550b1) — chờ Mike/skeptic verify; mở: trần tham gia theo phiên nhân quả chưa đo

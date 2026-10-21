@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v4083)
+# Mike fleet — context pack (v4084)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-21T15:32:11] Mike/answer — spacex-dri-sell-ngoai-plan-20261021: {"resolution": "User xác nhận 21/10 (22:29 ICT): ĐÃ TỰ BÁN TAY DRI theo research discretionary sleeve — KHÔNG bất thường, không điều tra Mafee/Spyros. Áp dụng c …
 - [2026-10-21T15:28:14] Taylor/finding — lag-dd-gate-pilot-HT1-SCL-VPB-20261021: {"pilot": "HT1/SCL/VPB release 2026-10-19, vào lệnh ~2026-10-26, asof 2026-10-21", "branch": "feat/lag-dd-gate-20261021", "commit": "9ea37eaaa", "worktree": "/h …
 - [2026-10-21T15:32:46] Taylor/finding — lag-dd-gate-plan-gate-done-20261021: {"branch": "feat/lag-dd-gate-20261021", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-dd-gate-20261021", "commits": ["9ea37eaaa code A+B", "951f67712 hợ …
 - [2026-10-21T15:42:39] Taylor/finding — vnindex-tr-polish-6-muc-20261021: {"branch": "fix/vnindex-tr-polish-20261021", "commit": "f0645f5e1", "worktree": "/home/trido/thanhdt/wt_vnindex_tr_polish_20261021", "items": {"1": "retry_of ch …
 - [2026-10-21T15:50:09] Taylor/finding — lag-dd-gate-vong2-sua-4-blocking-20261021: {"branch": "feat/lag-dd-gate-20261021", "commit": "9969df217", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-dd-gate-20261021", "round": 2, "fixed": {"1 …
+- [2026-10-21T16:59:36] Taylor/finding — active-nav-broker-fills-20261021: {"branch": "fix/active-nav-broker-fills-20261021", "commit": "2f956fb2f", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-active-nav-broker-fills-20261021", " …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -33,11 +33,13 @@
 
 - **[2026-10-03 10:34 ICT, user chốt] Định nghĩa XU HƯỚNG HẠ (chính xác hoá)**: ngay khi Big-4 điều chỉnh GIẢM lãi tiết kiệm 12 tháng HOẶC lãi chứng chỉ tiền gửi 6 tháng THẤP HƠN so với tuần thống kê trước ⇒ cảnh báo user (cron tuần `refresh_deposit_cctg_weekly.sh` + `deposit_cctg_trend_check.py`); vẫn CHỈ cảnh báo, không tự khôi phục park. User cũng DUYỆT rating_8l/DCF dùng effective rate (đã LIVE từ 10-01).
 
-## DRI — user BÁN TAY 21/10/2026 theo research discretionary sleeve (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
-- DRI bán @15.400 ngày 21/10: **SpaceX −1.200cp (3.700→2.500)**, **ZaloPay −600cp (1.900→1.300)**. Bằng chứng broker: `data/execution_logs/dnse_khoplenh_broker_confirm_21-10-2026.csv` + `dnse_raw` positions. Bus question `DollarBill/spacex-dri-sell-ngoai-plan-20261021` đã ĐÓNG.
-- **KHÔNG phải sự kiện bất thường**: không điều tra Mafee/Spyros, không escalate, không coi là corp-action (DRI không có sự kiện nào; `ADJFACTOR_PRICE_FIELD_MISMATCH|DRI|…|tick_offset` là chuyện khác, đã biết). Cờ `plan-position-drift` DRIFT SpaceX/ZaloPay 21/10 = đúng điều này (cờ-only).
-- Vị thế DRI còn lại (2.500 + 1.300cp) vẫn là vị thế bot đang giữ; plan T+1 chỉ cần dùng số dư mới. **Lệnh bán tay của user ngoài plan là hợp lệ khi user đã nói** — chỉ hỏi lại nếu SỐ LƯỢNG broker khác số user xác nhận ở trên.
-- ⚠️ **Còn treo (cần xử lý code, chưa làm):** `compute_active_nav.py` vẫn fail-closed (rc≠0) cho cả 2 account vì cổng KL chỉ đọc journal bot (`exec_*_journal.csv`), không đọc statement broker → `active_nav_*.json` KHÔNG làm mới. Không phải sự cố mới; sizing lùi về file cũ/`nav_history` (≤5 ngày). Đừng escalate lại — chờ user duyệt fix cho cổng đọc `dnse_khoplenh_broker_confirm_*.csv`.
+## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
+- Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
+- ⚠️ Còn treo: `compute_active_nav.py` fail-closed vì cổng KL chỉ đọc journal bot (không đọc statement broker) — chờ user duyệt fix; đừng escalate lại. Chi tiết nguyên văn: `kb/projects/dri-manual-sell-20261021.md`.
+
+## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
+- **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 có tin VinCons chậm trả. Chi tiết: `kb/projects/scl-dd-research-20261021.md`.
+- **Mọi mã LAG đang giữ có quyền mua trong kỳ giữ**: KHÔNG bán trước ex-date; **user TỰ thực hiện ĐẦY ĐỦ quyền mua** (bot không mua/chuyển nhượng quyền); mua quyền/KL tăng do user là HỢP LỆ, không điều tra. SCL: quyền mua 15,38% (status P, chưa giá/ngày chốt).
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
