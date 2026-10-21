@@ -15,6 +15,17 @@ HAI VIỆC trong một module (cùng đọc `lag_analysis.due_today[]` + `orders
     1 theo CSV mà `lag_analysis` không hề nhắc tới).
   FUNDING_ALERT (việc 2) — ứng viên BUY + entry_window_day==1 (phiên chuẩn) mà KHÔNG có lệnh mua
     thật (nằm trong deferred_orders / thiếu / qty 0) ⇒ cảnh báo ĐỎ + đề xuất cấp vốn + hạn chót.
+  LAG_DD_GATE_VIOLATION (cổng DD trước plan, user duyệt 2026-10-21 22:10, job Taylor_20261021_151302)
+    — mã LAG xuất hiện ở BA nơi: orders[] (mua, qty>0), deferred_orders[] (mua) hoặc
+    lag_analysis.due_today với decision ∈ TAKE (BUY/DEFER/DEFERRED/BUY_DEFERRED/WAIT_CASH/RESIDUAL/
+    ORDER) — lệnh coi là LAG khi book khớp LAG/PEAD (mọi biến thể) HOẶC lệnh thiếu book mà mã thuộc ứng
+    viên LAG của plan (lệnh khai book khác như BAL/CAPIT/DISCRETIONARY không bị cổng) — mà gói `data/lag_dd/<mã>_<release>.json` KHÔNG ở trạng thái CLEARED và KHÔNG có ack
+    PROCEED decided_by=user khớp flags_hash (lag_dd_ack.dd_gate). Cause = `LAG_DD_<state>`
+    (FLAG_NO_ACK, NO_PACK, PACK_STALE, ACK_DROP, ACK_RESEARCH, ACK_STALE, ACK_NOT_USER, PACK_UNREADABLE,
+    ACK_UNREADABLE, GATE_UNAVAILABLE, NO_PLAN_DATE). Mã bị cổng chặn ⇒ FUNDING_ALERT cho mã đó bị TẮT
+    (không đề xuất cấp vốn cho mã đang bị chặn). Ứng viên khác chưa qua cổng (SKIP/upcoming) ⇒ dòng
+    "⏳ chờ DD" (thông tin). Vẫn CHỈ CẢNH BÁO như hai
+    loại trên — chặn cứng là quyết định của user, chưa bật.
 
 CHỌN WARN-và-bus, KHÔNG chặn gửi plan: send_plan_report.sh không có mẫu chặn-cứng cho kiểm tra
 "nội dung" (chỉ chặn khi plan không đọc được/sai ngày/thiếu orders), và chặn 21:00 sẽ làm user
@@ -139,7 +150,91 @@ def _crosscheck_day1(plan, csv_path):
     return {_tk(i["ticker"]) for i in res.get("due_today", []) if i.get("entry_window_day") == 1}, ""
 
 
-def analyze(plan, csv_path=None, crosscheck=True):
+def analyze(plan, csv_path=None, crosscheck=True, dd_gate=True, dd_dir=None):
+    res = _analyze_lag(plan, csv_path=csv_path, crosscheck=crosscheck)
+    if dd_gate:
+        _dd_gate_check(plan, res, dd_dir)
+        # Mã đang bị cổng DD chặn ⇒ KHÔNG đề xuất cấp vốn/unpark cho nó (đề xuất tiền cho đúng mã bị chặn).
+        blocked = {f["ticker"] for f in res["findings"] if f["kind"] == "LAG_DD_GATE_VIOLATION"} | \
+            {p["ticker"] for p in res.get("dd_pending") or []}
+        kept = [f for f in res["findings"] if not (f["kind"] == "FUNDING_ALERT" and f.get("ticker") in blocked)]
+        if len(kept) != len(res["findings"]):
+            res["notes"].append("FUNDING_ALERT bị tắt cho mã đang bị cổng DD chặn: " + ", ".join(sorted(
+                {f["ticker"] for f in res["findings"] if f["kind"] == "FUNDING_ALERT"} & blocked)))
+            res["findings"] = kept
+    return res
+
+
+_RE_LAG_BOOK = re.compile(r"(^|[^A-Z])LAG([^A-Z]|$)|PEAD")
+
+
+def _dd_gate_check(plan, res, dd_dir=None):
+    """Cổng DD: ghi LAG_DD_GATE_VIOLATION vào res["findings"], mã chờ DD vào res["dd_pending"].
+    Gác BA nơi: (1) orders[] mua qty>0, (2) deferred_orders[] mua, (3) lag_analysis.due_today có
+    decision ∈ TAKE (_RE_BUY) — mã nào lọt vào một trong ba mà gate ∉ BUY_OK ⇒ vi phạm. Lệnh được coi
+    là LAG khi book khớp LAG/PEAD (mọi biến thể: "LAG-PEAD"…) HOẶC lệnh THIẾU book mà mã thuộc ứng viên
+    LAG của plan (due_today TAKE ∪ upcoming). Lệnh khai book khác (BAL/CAPIT/DISCRETIONARY…) không bị cổng.
+    Chạy CẢ KHI lag_analysis thiếu/hỏng."""
+    plan_date = res["plan_date"]
+    res["dd_pending"] = []
+    la = plan.get("lag_analysis") if isinstance(plan.get("lag_analysis"), dict) else {}
+    due = [c for c in (la.get("due_today") or []) if isinstance(c, dict)] \
+        if isinstance(la.get("due_today"), list) else []
+    upc = [c for c in (la.get("lag_upcoming_for_next_plans") or []) if isinstance(c, dict)] \
+        if isinstance(la.get("lag_upcoming_for_next_plans"), list) else []
+    take = {_tk(c.get("ticker")): c for c in due if _is_buy_decision(c.get("decision"))}
+    lag_tk = set(take) | {_tk(c.get("ticker")) for c in upc}
+
+    def is_lag(o):
+        bk = _tk(o.get("book"))
+        # Lệnh có khai book KHÔNG phải LAG/PEAD (BAL/CAPIT/PARK/DISCRETIONARY…) KHÔNG thuộc phạm vi cổng
+        # (user chỉ duyệt cổng cho book LAG; arch-review vòng 2). Fallback theo mã CHỈ cho lệnh thiếu book.
+        return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker")) in lag_tk)
+
+    hits = {}                                   # ticker → [nơi vi phạm]
+    for o in plan.get("orders") or []:
+        if isinstance(o, dict) and _is_buy_side(o) and (_num(o.get("qty")) or 0) > 0 and is_lag(o):
+            hits.setdefault(_tk(o.get("ticker")), []).append("orders")
+    for d in plan.get("deferred_orders") or []:
+        if (isinstance(d, dict) and str(d.get("side") or "buy").strip().lower() == "buy" and is_lag(d)
+                and not str(d.get("status") or "").strip().upper().startswith(("SKIP", "EXCLUD"))
+                and (_num(d.get("qty")) is None or _num(d.get("qty")) > 0)):
+            hits.setdefault(_tk(d.get("ticker")), []).append("deferred_orders")
+    for t in take:
+        hits.setdefault(t, []).append("due_today")
+    hits.pop("", None)
+    gate = None
+    try:
+        from lag_dd_ack import dd_gate as gate, BUY_OK
+    except Exception as e:                       # fail-closed: không có cổng ⇒ mọi mã LAG đỏ
+        err = f"không import được lag_dd_ack: {type(e).__name__}: {str(e)[:160]}"
+    for t, where in sorted(hits.items()):
+        if not plan_date:
+            cause, ev = "LAG_DD_NO_PLAN_DATE", "plan không có plan_date ⇒ không chọn được gói DD"
+        elif gate is None:
+            cause, ev = "LAG_DD_GATE_UNAVAILABLE", err
+        else:
+            g = gate(t, plan_date, directory=dd_dir, release_date=(take.get(t) or {}).get("release_date"))
+            if g["state"] in BUY_OK:
+                continue
+            cause = f"LAG_DD_{g['state']}"
+            ev = f"{g['evidence']}" + (f" ({os.path.basename(g['pack'])})" if g.get("pack") else "")
+        res["findings"].append({"kind": "LAG_DD_GATE_VIOLATION", "cause": cause, "ticker": t,
+                                "evidence": f"[{','.join(sorted(set(where)))}] {ev}"[:400]})
+    if gate is None or not plan_date:
+        return
+    for src, items in (("due_today", due), ("upcoming", upc)):
+        for c in items:
+            t = _tk(c.get("ticker"))
+            if not t or t in hits or any(p["ticker"] == t for p in res["dd_pending"]):
+                continue
+            g = gate(t, plan_date, directory=dd_dir, release_date=c.get("release_date"))
+            if g["state"] not in BUY_OK:
+                res["dd_pending"].append({"ticker": t, "source": src, "state": g["state"],
+                                          "evidence": g["evidence"][:300]})
+
+
+def _analyze_lag(plan, csv_path=None, crosscheck=True):
     plan_date = str(plan.get("plan_date") or plan.get("date") or "")
     res = {"account": plan.get("account"), "plan_date": plan_date, "findings": [], "notes": []}
     la = plan.get("lag_analysis")
@@ -248,11 +343,17 @@ def _proposal(f, account, plan_date):
     return lines
 
 
-def render(res):
+def render(res, pending=True):
     acct, d = res["account"], res["plan_date"]
     out = []
     alerts = [f for f in res["findings"] if f["kind"] == "FUNDING_ALERT"]
     fails = [f for f in res["findings"] if f["kind"] == "CONSISTENCY_FAIL"]
+    ddv = [f for f in res["findings"] if f["kind"] == "LAG_DD_GATE_VIOLATION"]
+    if ddv:
+        out.append(f"🔴 **LAG {acct} {d}: lệnh MUA LAG CHƯA QUA CỔNG DD** (cần gói CLEARED hoặc user "
+                   f"trả lời PROCEED — data/lag_dd)")
+        for f in ddv:
+            out.append(f"- {f['ticker']} — {f['cause']}: {f['evidence']}")
     if alerts:
         out.append(f"🔴 **LAG {acct} {d}: ứng viên hợp lệ KHÔNG có lệnh ở PHIÊN CHUẨN**")
         for f in alerts:
@@ -262,6 +363,18 @@ def render(res):
         out.append(f"🔴 **Plan {acct} {d} KHÔNG nhất quán (LAG)**")
         for f in fails:
             out.append(f"- {f['cause']}: {f['ticker'] or '-'} — {f['evidence']}")
+    if pending:
+        out.extend(render_pending(res))
+    return out
+
+
+def render_pending(res):
+    pend = res.get("dd_pending") or []
+    if not pend:
+        return []
+    out = [f"⏳ **Chờ DD — đứng NGOÀI plan {res['plan_date']}** (user chưa trả lời / chưa có gói):"]
+    for p in pend:
+        out.append(f"- {p['ticker']} [{p['source']}] {p['state']}: {p['evidence']}")
     return out
 
 
@@ -302,7 +415,7 @@ def emit(res, trace_id=None):
         if not new:
             return 0
         sub = dict(res, findings=new)
-        msg = "\n".join(render(sub))
+        msg = "\n".join(render(sub, pending=False))   # "chờ DD" chỉ vào report, không vào tin cảnh báo
         notify = _env("MIKE_LAGCHK_NOTIFY", os.path.join(HERE, "notify_thread.sh"))
         bus = _env("MIKE_LAGCHK_APPEND_EVENT", os.path.join(HERE, "append_event.sh"))
         topic = f"lag-plan-check-{res['account']}-{res['plan_date']}"
@@ -327,6 +440,7 @@ def main(argv=None):
     ap.add_argument("--plan-file", required=True)
     ap.add_argument("--csv", default=None, help="CSV khuyến nghị cho đối chiếu (mặc định theo signal_date)")
     ap.add_argument("--no-crosscheck", action="store_true")
+    ap.add_argument("--no-dd-gate", action="store_true", help="bỏ cổng DD (chỉ để chẩn đoán)")
     ap.add_argument("--dry-run", action="store_true", help="không Discord/bus/state")
     ap.add_argument("--report-block", action="store_true", help="in khối chữ cho report")
     ap.add_argument("--json", action="store_true")
@@ -341,13 +455,15 @@ def main(argv=None):
         print(f"plan.account={plan.get('account') if isinstance(plan, dict) else '?'!r} "
               f"≠ --account {a.account!r}", file=sys.stderr)
         return 1
-    res = analyze(plan, csv_path=a.csv, crosscheck=not a.no_crosscheck)
+    res = analyze(plan, csv_path=a.csv, crosscheck=not a.no_crosscheck, dd_gate=not a.no_dd_gate)
     for n in res["notes"]:
         print(f"  ℹ {n}", file=sys.stderr)
     if a.json:
         print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
     if a.report_block:
-        print("\n".join(render(res)) or f"✅ LAG nhất quán ({a.account}): mọi mã BUY đều có lệnh/lý do hoãn.")
+        print("\n".join(render(res) if res["findings"] else
+                        [f"✅ LAG nhất quán ({a.account}): mọi mã BUY đều có lệnh/lý do hoãn, lệnh LAG đều qua cổng DD."]
+                        + render_pending(res)))
     if not res["findings"]:
         return 0
     if not a.dry_run:

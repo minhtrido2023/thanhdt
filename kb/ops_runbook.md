@@ -877,3 +877,18 @@ buổi sáng không có đường chạy hợp lệ. Cơ chế opt-in (cron KHÔ
   (hàng trăm KB/dòng) — chấp nhận vì hiếm.
 - **Dòng sổ 12:34 21/10 KHÔNG undo được bằng hàm** (ghi trước khi sổ giữ byte cũ; lệnh từ chối rõ ràng). Khôi phục từ
   `data/benchmark/vnindex_tr_daily.csv.bak_pre_restate_20261021` — bản sao này dọn được sau 24/10.
+
+## Cổng DD trước plan LAG — Mike ghi ack + hợp đồng NO_PACK (thêm 2026-10-21, job Taylor_20261021_154311)
+Mã LAG (due_today/upcoming) CHỈ vào `orders[]` khi `data/lag_dd/<mã>_<release>.json` CLEARED hoặc user ack PROCEED.
+- **Ai quyết**: CHỈ USER. Mike chỉ chép lại câu trả lời thật của user (coding_guidelines §20: `decided_by=user`).
+- **Quy trình ghi ack** (user trả lời trên Discord topic plan_approval cho tin "🧾 DD trước plan"): tin in `hash`
+  của bộ cờ user đã xem. Mike chạy
+  `python3 mike/bin/lag_dd_ack.py --ticker <MÃ> --release-date <D> --decision PROCEED|DROP|RESEARCH --decided-by user --at <ISO có múi giờ lúc user trả lời> --flags-hash <hash TRONG TIN user đã trả lời> --source "<link/trích tin user>"`.
+  `--flags-hash` và `--source` BẮT BUỘC; hash lệch gói hiện tại (gói đã sinh lại sau khi gửi tin) ⇒ lệnh TỪ CHỐI, KHÔNG ghi:
+  khi đó chạy lại `lag_dd_pack.py --notify`, hỏi lại user với bộ cờ mới. Kiểm: `lag_dd_ack.py --gate <MÃ> --plan-date <D>` ⇒ `ACK_PROCEED`.
+  Tuyệt đối không sửa tay `ack.json`, không lấy hash từ gói mới để "cho khớp".
+- **NO_PACK ⇒ SKIP có hiệu lực NGAY khi merge**, trong khi hook 19:00 sinh gói CHƯA cài ⇒ ứng viên LAG mới
+  đứng NGOÀI plan cho tới khi ai đó chạy `python3 mike/bin/lag_dd_pack.py [--signal-date D] --notify` (tay hoặc hook).
+  Mùa BCTC: chạy trước 19:00 ICT mỗi ngày có ứng viên mới; gói quá 7 ngày so với plan_date ⇒ `PACK_STALE` (chạy lại).
+  Gói <MÃ>_NA mới hơn gói có release thắng gói cũ (không dùng CLEARED cũ khi lần chạy mới nhất báo RELEASE_NA).
+- **Không chạy `lag_dd_pack.py` vào T7/CN, trước 08:20, hoặc khi `ops_health_check`/`anomaly_scan` chết** (arch-review vòng 2): file anomaly cũ ⇒ ANOMALY_NA hàng loạt ⇒ gói CLEARED hôm trước bị hạ FLAG, `flags_hash` đổi ⇒ ack cũ thành ACK_STALE và phải hỏi lại user. `PACK_ASOF_MAX_DAYS=7`: kỳ nghỉ dài (Tết) chắc chắn ra PACK_STALE — chạy lại pack sau khi `anomaly_scan` đã chạy phiên giao dịch gần nhất.
