@@ -18,3 +18,4 @@
 - [2026-10-20T18:01:49Z] [survivorship-volzero V1D/V1E/V3A'/V4 10-21] XONG job Taylor_20261020_162558 (REPORT_V1D_V1E.md, e8a0550b1) — chờ Mike/skeptic verify; mở: trần tham gia theo phiên nhân quả chưa đo
 - [2026-10-21T04:31:09Z] [survivorship-volzero F1-F3 10-21] XONG commit c7cef9792, chờ Mike/skeptic. Mở: phần dư OOS F2 (+39..+64 tỷ lô khớp được) chưa phân rã; F2F1 hậu kỳ cần prereg nếu dùng.
 - [2026-10-21T05:35:39Z] [vnindex-tr vòng 2 10-21] XONG job Taylor_20261021_052419: nhánh fix/vnindex-tr-restate-sealed-20261021 @577d605cd chờ Mike arch-review/merge; chuỗi thật đã đính chính 12-13/10 (md5 51cd88f4), không cần ack 14/10. (Thay dòng ĐANG DỞ 052419 + dòng mở 022501.)
+- [2026-10-21T05:49:29Z] [vnindex-tr vòng 2 arch-review 10-21] XONG job Taylor_20261021_054437, nhánh fix/vnindex-tr-restate-sealed-20261021 chờ Mike merge; hết vòng 2 — còn NEEDS_CHANGES thì dừng báo user
