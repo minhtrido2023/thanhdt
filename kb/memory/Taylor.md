@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-20T09:42:18Z] ĐANG DỞ job Taylor_20261020_094204 (survivorship replay BAL/LAG trên mã lớn đã mất, EXPLORATORY, out agents/Taylor/research/survivorship_replay_20261020/) | NEXT: đọc Winston report + v2 REPORT + PREREG
 - [2026-10-20T10:14:00Z] [survivorship-replay 10-20] XONG job Taylor_20261020_094204 @55fdfc689: LB duoi san (MIX +0,14..+0,32pp), UB ALLOC* -1,7..-2,7pp. Mo: cach engine xu ly lo LAG mo trong BEAR chờ Mike/user. (Thay dong DANG DO 094204.)
 - [2026-10-20T11:36:59Z] ĐANG DỞ job Taylor_20261020_113646 (survivorship follow-up A-D, EXPLORATORY) | NEXT: đọc v2 overlay + replay REPORT + 2 log skeptic
 - [2026-10-20T12:12:21Z] [survivorship follow-up ABCD 10-20] XONG job Taylor_20261020_113646. Mo: Winston xac nhan BQ Volume=0 (31% gia tri mua LAG khop ngay KL=0, chua do CAGR); dong gop lo LAG mo luc BEAR can engine co cong state - cho Mike/user.
@@ -26,3 +25,4 @@
 - [2026-10-20T17:08:54Z] ĐANG DỞ job Taylor_20261020_162558: V4 finding đã post (33323d6dc); V1D/V1D0 đo xong (v_metrics). Batch còn V1E20/V1E60/V3Ap/ctlG | NEXT: v_metrics + v1de_describe, md5 ctlG vs pin, REPORT_V1D_V1E.md, 3 finding + tổng
 - [2026-10-20T18:01:49Z] [survivorship-volzero V1D/V1E/V3A'/V4 10-21] XONG job Taylor_20261020_162558 (REPORT_V1D_V1E.md, e8a0550b1) — chờ Mike/skeptic verify; mở: trần tham gia theo phiên nhân quả chưa đo
 - [2026-10-21T01:20:46Z] ĐANG DỞ job Taylor_20261021_012028 (F1 trần hoãn bán/F2 tách tái phân bổ/F3 trần dự báo KL; dir research/survivorship_volzero_20261020) | NEXT: đọc eng diff V1D, viết PREREG_F1-F3
+- [2026-10-21T01:26:18Z] ĐANG DỞ job Taylor_20261021_012028: batch nohup run_batch_012028.sh (40 run, log logs/run_batch_012028.log; ctlD dump F2 → F1×16,F2,F2C,F3L,F3B,ctlZ) | NEXT: chờ xong ~2.5h, rồi v_metrics + f1_adjust + describe, REPORT_F1_F3.md
