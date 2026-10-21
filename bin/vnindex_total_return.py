@@ -465,6 +465,17 @@ def period_return(series: list, start_date, end_date, kind: str) -> float:
     return series[ib][col] / series[ia][col] - 1
 
 
+def _ack_section(a: dict, sect: str, path: str) -> list:
+    """Mục ack phải là LIST các object. dict/chuỗi/… ⇒ ValueError rõ ràng (trước đây AttributeError khó đọc)."""
+    v = a.get(sect, [])
+    if not isinstance(v, list):
+        raise ValueError(f"{path}: mục {sect} phải là list các object, không phải {type(v).__name__}")
+    for e in v:
+        if not isinstance(e, dict):
+            raise ValueError(f"{path}: mục {sect} có phần tử không phải object ({type(e).__name__}): {e!r}")
+    return v
+
+
 def _ack_str(e: dict, k: str, path: str, sect: str):
     v = e.get(k)
     if not isinstance(v, str) or not v.strip():
@@ -490,8 +501,10 @@ def load_acks(path: str = ACKS_PATH) -> set:
         return set()
     with open(path, encoding="utf-8") as f:
         a = json.load(f)
+    if not isinstance(a, dict):
+        raise ValueError(f"{path}: gốc phải là object có các mục G6/G4/G4_MC, không phải {type(a).__name__}")
     out = set()
-    for e in a.get("G6", []):
+    for e in _ack_section(a, "G6", path):
         if not (e.get("confirmed_by") and e.get("date") and e.get("ticker")):
             raise ValueError(f"{path}: mục G6 thiếu confirmed_by/date/ticker: {e}")
         if not re.fullmatch(r"[A-Z0-9]{2,}", str(e["ticker"])):        # chặn giả khoá G4 qua mục G6
@@ -501,7 +514,7 @@ def load_acks(path: str = ACKS_PATH) -> set:
     # Nhánh vốn hoá (mục G4_MC) cũng ràng GIÁ TRỊ: mc_prev, mc là vốn hoá rổ (VND) hai dòng liền nhau, lấy
     # đúng số trong thông báo lỗi G4. Tiền điều kiện ghi ack: mã thiếu không có GDKHQ cổ tức
     # tiền ở ngày D và D+1 (xem kb/data_registry/price-volume/vnindex_total_return.md).
-    for e in a.get("G4", []):
+    for e in _ack_section(a, "G4", path):
         d = _ack_date(e, path, "G4")
         _ack_str(e, "confirmed_by", path, "G4")
         _ack_str(e, "reason", path, "G4")
@@ -509,7 +522,7 @@ def load_acks(path: str = ACKS_PATH) -> set:
             if type(e.get(k)) is not int or e[k] <= 0:
                 raise ValueError(f"{path}: mục G4 thiếu/sai {k} (số nguyên dương: số mã rổ đã xem): {e}")
         out.add(g4_ack_key(d, e["n_prev"], e["n"]))
-    for e in a.get("G4_MC", []):
+    for e in _ack_section(a, "G4_MC", path):
         d = _ack_date(e, path, "G4_MC")
         _ack_str(e, "confirmed_by", path, "G4_MC")
         _ack_str(e, "reason", path, "G4_MC")
@@ -933,9 +946,20 @@ def _last_log_entry(log_path: str):
         return None
 
 
+UNDO_KEYS = ("md5_before", "md5_after", "rows_before", "rechained_sealed_before", "last_sealed_before",
+             "tail_before")
+
+
 def undo_restatement(entry: dict, new_bytes: bytes) -> bytes:
     """Nội dung file TRƯỚC một đính chính, dựng từ chính dòng sổ + file ngay sau đính chính (md5_after) —
-    hoàn tác byte-exact không cần bản sao lưu ngoài. Chỉ đúng khi file chưa bị `--update` ghi tiếp."""
+    hoàn tác byte-exact không cần bản sao lưu ngoài. Chỉ đúng khi file chưa bị `--update` ghi tiếp.
+    Dòng sổ cũ thiếu byte cũ (vd dòng 12:34 21/10: không có rechained_sealed_before/tail_before) ⇒ ValueError."""
+    if entry.get("kind") == "undo":
+        raise ValueError("dòng sổ này là một undo, không phải đính chính — không hoàn tác được")
+    miss = [k for k in UNDO_KEYS if k not in entry]
+    if miss:
+        raise ValueError(f"dòng sổ {entry.get('ts_ict')} thiếu {miss} (ghi trước khi sổ giữ byte cũ) — "
+                         f"không undo được bằng hàm; khôi phục từ bản sao lưu")
     if _md5(new_bytes) != entry["md5_after"]:
         raise ValueError(f"file hiện tại md5 {_md5(new_bytes)} ≠ md5_after {entry['md5_after']} của dòng sổ")
     lines = new_bytes.decode("utf-8").splitlines(keepends=True)
@@ -951,6 +975,60 @@ def undo_restatement(entry: dict, new_bytes: bytes) -> bytes:
     return out
 
 
+def _append_log(log_path: str, entry: dict):
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def _need_reason_who(reason, confirmed_by, flag: str):
+    if not isinstance(reason, str) or not reason.strip():
+        raise RestateRefused(f"thiếu --reason (lý do {flag}, trích số thật) — không làm")
+    if not isinstance(confirmed_by, str) or not confirmed_by.strip():
+        raise RestateRefused("thiếu --confirmed-by (người xác nhận + thời điểm) — không làm")
+
+
+def undo_last_restatement(reason: str, confirmed_by: str, series_path: str = SERIES_PATH,
+                          write: bool = True, log_path: str = None) -> dict:
+    """Hoàn tác đính chính CUỐI trong sổ. Fail-closed (RestateRefused, không ghi gì) khi: thiếu lý do/người
+    xác nhận; sổ trống/không đọc được; dòng sổ cuối thuộc chuỗi khác hoặc đã là undo; md5 file hiện tại ≠
+    md5_after của dòng cuối (đã có --update/đính chính khác chạm vào); dòng sổ thiếu byte cũ. Ghi dòng
+    {"kind":"undo"} vào sổ TRƯỚC, rồi mới thay file (flock + tmp + os.replace)."""
+    _need_reason_who(reason, confirmed_by, "hoàn tác")
+    log_path = RESTATE_LOG if log_path is None else log_path
+    abs_series = os.path.abspath(series_path)
+    with open(series_path + ".lock", "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        try:
+            with open(log_path, encoding="utf-8") as f:
+                rows = [x for x in f.read().splitlines() if x.strip()]
+            last = json.loads(rows[-1])
+        except (OSError, IndexError, ValueError) as exc:
+            raise RestateRefused(f"không đọc được dòng sổ cuối {log_path}: {type(exc).__name__} ({exc})") from None
+        if last.get("series") != abs_series:
+            raise RestateRefused(f"dòng sổ cuối thuộc chuỗi {last.get('series')}, không phải {abs_series}")
+        if last.get("kind") == "undo":
+            raise RestateRefused(f"dòng sổ cuối ({last.get('ts_ict')}) đã là một undo — không hoàn tác chồng")
+        with open(series_path, "rb") as f:
+            cur = f.read()
+        if _md5(cur) != last.get("md5_after"):
+            raise RestateRefused(f"file hiện tại md5 {_md5(cur)} ≠ md5_after {last.get('md5_after')} của dòng "
+                                 f"sổ cuối — chuỗi đã đổi sau đính chính (--update?), không undo được")
+        try:
+            out = undo_restatement(last, cur)
+        except ValueError as exc:
+            raise RestateRefused(str(exc)) from None
+        entry = {"kind": "undo", "ts_ict": now_ict().isoformat(timespec="seconds"), "series": abs_series,
+                 "md5_before": _md5(cur), "md5_after": _md5(out), "undoes": last["md5_after"],
+                 "undoes_ts_ict": last.get("ts_ict"), "confirmed_by": confirmed_by.strip(),
+                 "reason": reason.strip()}
+        if write:
+            _append_log(log_path, entry)
+            _write_atomic(series_path, out)
+    return {"written": bool(write), **{k: entry[k] for k in ("kind", "md5_before", "md5_after", "undoes")}}
+
+
 def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SERIES_PATH,
                    membership_path: str = MEMBERSHIP_LATEST, inputs=None, src2=None, write: bool = True,
                    built_at: str = None, acks_path: str = None, log_path: str = None) -> dict:
@@ -959,10 +1037,7 @@ def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SER
     (atomic, dưới flock). Từ chối (RestateRefused, không ghi gì) khi: thiếu lý do/người xác nhận; ngày
     không phải dòng sealed / là dòng mốc; dòng sealed KHÁC trong vùng dựng lại lệch > ngưỡng (phải nêu tên
     nó); dòng đính chính vẫn nổ G1/G4 chưa ack; không có gì thay đổi."""
-    if not isinstance(reason, str) or not reason.strip():
-        raise RestateRefused("thiếu --reason (lý do đính chính, trích số thật) — không đính chính")
-    if not isinstance(confirmed_by, str) or not confirmed_by.strip():
-        raise RestateRefused("thiếu --confirmed-by (người xác nhận + thời điểm) — không đính chính")
+    _need_reason_who(reason, confirmed_by, "đính chính")
     want = sorted({_d(x) for x in dates})
     if not want:
         raise RestateRefused("không có ngày nào để đính chính")
@@ -1051,21 +1126,21 @@ def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SER
         if blocked:
             entry["seal_blocked"] = blocked
         prior = _last_log_entry(log_path)
-        if prior and prior.get("series") == entry["series"] and prior.get("md5_before") == entry["md5_before"] \
-                and prior.get("md5_after") != entry["md5_before"]:
-            # lần trước ghi sổ rồi chết trước khi thay file (file vẫn md5_before của nó) ⇒ đây là CHẠY LẠI,
-            # không phải một đính chính độc lập thứ hai
+        if prior and prior.get("kind") != "undo" and prior.get("series") == entry["series"] \
+                and prior.get("md5_before") == entry["md5_before"] \
+                and prior.get("md5_after") != entry["md5_before"] \
+                and all(prior.get(k_) == entry[k_] for k_ in ("dates", "reason", "confirmed_by")):
+            # lần trước ghi sổ rồi chết trước khi thay file (file vẫn md5_before của nó) VÀ cùng ngày + lý do +
+            # người xác nhận ⇒ đây là CHẠY LẠI. Chỉ khớp md5 chưa đủ: sau khi khôi phục file, một đính chính
+            # độc lập (ngày/lý do khác) cũng có md5_before trùng — không được gắn nhầm retry_of
             entry["retry_of"] = {"ts_ict": prior.get("ts_ict"), "md5_after": prior.get("md5_after")}
         if write:
             # sổ TRƯỚC, file SAU: chết giữa chừng ⇒ có dòng sổ mà md5_after không khớp file (phát hiện
             # được); ngược lại sẽ là file đã sửa mà không có sổ = đường im lặng.
-            with open(log_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-                f.flush()
-                os.fsync(f.fileno())
+            _append_log(log_path, entry)
             _write_atomic(series_path, new)
     return {"written": bool(write), **{k_: entry[k_] for k_ in ("dates", "md5_before", "md5_after",
-            "anchor", "rows_before", "rows_after", "rechained_sealed")}, "seal_blocked": blocked}
+            "anchor", "rows_before", "rows_after", "rechained_sealed")}}
 
 
 # ─────────────────────────────────────────────────────────── CLI
@@ -1085,13 +1160,26 @@ def main(argv=None) -> int:
     ap.add_argument("--selfcheck", action="store_true")
     ap.add_argument("--restate-sealed", nargs="+", metavar="DATE",
                     help="ĐÍNH CHÍNH dòng sealed: dựng lại từ dữ liệu hiện tại + nối lại đuôi + ghi sổ")
-    ap.add_argument("--reason", help="lý do đính chính (bắt buộc với --restate-sealed; trích số thật)")
-    ap.add_argument("--confirmed-by", help="người xác nhận + thời điểm (bắt buộc với --restate-sealed)")
+    ap.add_argument("--undo-last-restatement", action="store_true",
+                    help="HOÀN TÁC đính chính cuối trong sổ (chỉ khi file còn đúng md5_after của nó); ghi dòng undo")
+    ap.add_argument("--reason", help="lý do (bắt buộc với --restate-sealed / --undo-last-restatement; trích số thật)")
+    ap.add_argument("--confirmed-by", help="người xác nhận + thời điểm (bắt buộc với --restate-sealed / --undo-last-restatement)")
     ap.add_argument("--restate-log", default=RESTATE_LOG, help="sổ đính chính chỉ-thêm (JSONL)")
     a = ap.parse_args(argv)
     if a.selfcheck:
         import vnindex_total_return_selfcheck as sc
         return sc.main()
+    if a.undo_last_restatement:
+        if a.update or a.restate_sealed:
+            ap.error("--undo-last-restatement là việc riêng — chạy từng lệnh")
+        try:
+            res = undo_last_restatement(a.reason, a.confirmed_by, a.series, write=not a.dry_run,
+                                        log_path=a.restate_log)
+        except RestateRefused as exc:
+            print(f"LỖI vnindex_total_return --undo-last-restatement: {exc}", file=sys.stderr)
+            return 4
+        print(json.dumps(res, ensure_ascii=False))
+        return 0
     if a.update or a.restate_sealed:
         inputs = src2 = None
         if a.from_cache:
