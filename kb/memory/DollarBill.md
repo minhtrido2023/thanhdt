@@ -9,3 +9,5 @@
 - [2026-10-16T12:04:44Z] [2026-10-16 19:xx ICT] Plan ZaloPay 10-19 XONG HOLD ALL 0 lenh (job DollarBill_20261016_120351); CAPIT du NCT73/SIP49 de xuat user; cho duyet truoc 08:45 ICT 19/10
 - [2026-10-19T12:04:08Z] [2026-10-19 19:xx ICT] Plan ZaloPay 10-20 XONG HOLD ALL 0 lenh (job DollarBill_20261019_120317); cho duyet truoc 08:45 ICT 20/10
 - [2026-10-20T12:04:23Z] [2026-10-20 19:xx ICT] Plan ZaloPay 10-21 XONG HOLD ALL 0 lenh (job DollarBill_20261020_120333); LAG HT1/SCL/VPB vao ~10-26 can cash (avail chi 10,23tr, egg 515tr); cho duyet truoc 08:45 ICT 21/10
+- [2026-10-21T12:04:34Z] [2026-10-21 19:xx ICT] Plan ZaloPay 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120332); DRI -600cp ngoai lenh, cho user xac nhan; active_nav chua refresh; cho duyet truoc 08:45 ICT 22/10
+- [2026-10-21T12:04:39Z] [2026-10-21 19:xx ICT] Plan SpaceX 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120334). DRI bi ban 1200cp ngoai plan -> bus question spacex-dri-sell-ngoai-plan-20261021 + Trading Daily; active_nav chua cap nhat (compute_active_nav tu choi). Cho user xac nhan + duyet truoc 08:45 ICT 22/10
