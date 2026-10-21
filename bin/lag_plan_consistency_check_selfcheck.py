@@ -69,7 +69,8 @@ def cases(m):
     def ck(name, cond, detail=""):
         out.append((name, bool(cond), detail))
 
-    A = lambda p, **k: m.analyze(p, crosscheck=False, **k)       # noqa: E731
+    # dd_gate=False: file này kiểm logic NHẤT QUÁN; cổng DD có selfcheck riêng (lag_dd_gate_selfcheck.py)
+    A = lambda p, **k: m.analyze(p, crosscheck=False, dd_gate=False, **k)       # noqa: E731
 
     # 1 ca bình thường
     r = A(plan([cand("ABC", day=1)], [order("ABC")]))
@@ -268,7 +269,7 @@ def run_cli():
         write_exec(os.path.join(td, "b.sh"), "#!/bin/bash\nexit 0\n")
         env = dict(os.environ, MIKE_LAGCHK_STATE_DIR=os.path.join(td, "st"),
                    MIKE_LAGCHK_NOTIFY=os.path.join(td, "n.sh"), MIKE_LAGCHK_APPEND_EVENT=os.path.join(td, "b.sh"))
-        base = [sys.executable, CHECKER, "--account", "SpaceX", "--plan-file", pf, "--no-crosscheck"]
+        base = [sys.executable, CHECKER, "--account", "SpaceX", "--plan-file", pf, "--no-crosscheck", "--no-dd-gate"]
         r = subprocess.run(base + ["--dry-run", "--report-block"], capture_output=True, text=True, env=env)
         c1 = r.returncode == 2 and "SSI" in r.stdout and not os.path.exists(nlog)
         r = subprocess.run(base + ["--report-block"], capture_output=True, text=True, env=env)

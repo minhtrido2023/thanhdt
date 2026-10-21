@@ -15,6 +15,14 @@ HAI VIỆC trong một module (cùng đọc `lag_analysis.due_today[]` + `orders
     1 theo CSV mà `lag_analysis` không hề nhắc tới).
   FUNDING_ALERT (việc 2) — ứng viên BUY + entry_window_day==1 (phiên chuẩn) mà KHÔNG có lệnh mua
     thật (nằm trong deferred_orders / thiếu / qty 0) ⇒ cảnh báo ĐỎ + đề xuất cấp vốn + hạn chót.
+  LAG_DD_GATE_VIOLATION (cổng DD trước plan, user duyệt 2026-10-21 22:10, job Taylor_20261021_151302)
+    — lệnh MUA LAG trong orders[] (qty>0; book=="LAG", hoặc thiếu book mà mã có decision BUY trong
+    lag_analysis.due_today) mà gói `data/lag_dd/<mã>_<release>.json` KHÔNG ở trạng thái CLEARED và
+    KHÔNG có ack PROCEED decided_by=user khớp flags_hash (lag_dd_ack.dd_gate). Cause = `LAG_DD_<state>`
+    (FLAG_NO_ACK, NO_PACK, ACK_DROP, ACK_RESEARCH, ACK_STALE, ACK_NOT_USER, PACK_UNREADABLE,
+    ACK_UNREADABLE, GATE_UNAVAILABLE, NO_PLAN_DATE). Mã LAG trong lag_analysis chưa qua cổng mà
+    KHÔNG có lệnh mua ⇒ dòng "⏳ chờ DD" (thông tin, không phải phát hiện). Vẫn CHỈ CẢNH BÁO như hai
+    loại trên — chặn cứng là quyết định của user, chưa bật.
 
 CHỌN WARN-và-bus, KHÔNG chặn gửi plan: send_plan_report.sh không có mẫu chặn-cứng cho kiểm tra
 "nội dung" (chỉ chặn khi plan không đọc được/sai ngày/thiếu orders), và chặn 21:00 sẽ làm user
@@ -139,7 +147,63 @@ def _crosscheck_day1(plan, csv_path):
     return {_tk(i["ticker"]) for i in res.get("due_today", []) if i.get("entry_window_day") == 1}, ""
 
 
-def analyze(plan, csv_path=None, crosscheck=True):
+def analyze(plan, csv_path=None, crosscheck=True, dd_gate=True, dd_dir=None):
+    res = _analyze_lag(plan, csv_path=csv_path, crosscheck=crosscheck)
+    if dd_gate:
+        _dd_gate_check(plan, res, dd_dir)
+    return res
+
+
+def _dd_gate_check(plan, res, dd_dir=None):
+    """Cổng DD: ghi LAG_DD_GATE_VIOLATION vào res["findings"], mã chờ DD vào res["dd_pending"].
+    Chạy CẢ KHI lag_analysis thiếu/hỏng — lệnh mua LAG trong orders[] vẫn phải có gói DD."""
+    plan_date = res["plan_date"]
+    res["dd_pending"] = []
+    la = plan.get("lag_analysis") if isinstance(plan.get("lag_analysis"), dict) else {}
+    due = [c for c in (la.get("due_today") or []) if isinstance(c, dict)] \
+        if isinstance(la.get("due_today"), list) else []
+    upc = [c for c in (la.get("lag_upcoming_for_next_plans") or []) if isinstance(c, dict)] \
+        if isinstance(la.get("lag_upcoming_for_next_plans"), list) else []
+    buy_dec = {_tk(c.get("ticker")) for c in due if _is_buy_decision(c.get("decision"))}
+    lag_buys = []
+    for o in plan.get("orders") or []:
+        if not isinstance(o, dict) or not _is_buy_side(o) or (_num(o.get("qty")) or 0) <= 0:
+            continue
+        book = _tk(o.get("book"))
+        if book == "LAG" or (not book and _tk(o.get("ticker")) in buy_dec):
+            lag_buys.append(_tk(o.get("ticker")))
+    gate = None
+    try:
+        from lag_dd_ack import dd_gate as gate, BUY_OK
+    except Exception as e:                       # fail-closed: không có cổng ⇒ mọi lệnh LAG đỏ
+        err = f"không import được lag_dd_ack: {type(e).__name__}: {str(e)[:160]}"
+    for t in sorted(set(lag_buys)):
+        if not plan_date:
+            cause, ev = "LAG_DD_NO_PLAN_DATE", "plan không có plan_date ⇒ không chọn được gói DD"
+        elif gate is None:
+            cause, ev = "LAG_DD_GATE_UNAVAILABLE", err
+        else:
+            g = gate(t, plan_date, directory=dd_dir)
+            if g["state"] in BUY_OK:
+                continue
+            cause = f"LAG_DD_{g['state']}"
+            ev = f"{g['evidence']}" + (f" ({os.path.basename(g['pack'])})" if g.get("pack") else "")
+        res["findings"].append({"kind": "LAG_DD_GATE_VIOLATION", "cause": cause, "ticker": t,
+                                "evidence": ev[:400]})
+    if gate is None or not plan_date:
+        return
+    for src, items in (("due_today", due), ("upcoming", upc)):
+        for c in items:
+            t = _tk(c.get("ticker"))
+            if not t or t in lag_buys or any(p["ticker"] == t for p in res["dd_pending"]):
+                continue
+            g = gate(t, plan_date, directory=dd_dir)
+            if g["state"] not in BUY_OK:
+                res["dd_pending"].append({"ticker": t, "source": src, "state": g["state"],
+                                          "evidence": g["evidence"][:300]})
+
+
+def _analyze_lag(plan, csv_path=None, crosscheck=True):
     plan_date = str(plan.get("plan_date") or plan.get("date") or "")
     res = {"account": plan.get("account"), "plan_date": plan_date, "findings": [], "notes": []}
     la = plan.get("lag_analysis")
@@ -248,11 +312,17 @@ def _proposal(f, account, plan_date):
     return lines
 
 
-def render(res):
+def render(res, pending=True):
     acct, d = res["account"], res["plan_date"]
     out = []
     alerts = [f for f in res["findings"] if f["kind"] == "FUNDING_ALERT"]
     fails = [f for f in res["findings"] if f["kind"] == "CONSISTENCY_FAIL"]
+    ddv = [f for f in res["findings"] if f["kind"] == "LAG_DD_GATE_VIOLATION"]
+    if ddv:
+        out.append(f"🔴 **LAG {acct} {d}: lệnh MUA LAG CHƯA QUA CỔNG DD** (cần gói CLEARED hoặc user "
+                   f"trả lời PROCEED — data/lag_dd)")
+        for f in ddv:
+            out.append(f"- {f['ticker']} — {f['cause']}: {f['evidence']}")
     if alerts:
         out.append(f"🔴 **LAG {acct} {d}: ứng viên hợp lệ KHÔNG có lệnh ở PHIÊN CHUẨN**")
         for f in alerts:
@@ -262,6 +332,18 @@ def render(res):
         out.append(f"🔴 **Plan {acct} {d} KHÔNG nhất quán (LAG)**")
         for f in fails:
             out.append(f"- {f['cause']}: {f['ticker'] or '-'} — {f['evidence']}")
+    if pending:
+        out.extend(render_pending(res))
+    return out
+
+
+def render_pending(res):
+    pend = res.get("dd_pending") or []
+    if not pend:
+        return []
+    out = [f"⏳ **Chờ DD — đứng NGOÀI plan {res['plan_date']}** (user chưa trả lời / chưa có gói):"]
+    for p in pend:
+        out.append(f"- {p['ticker']} [{p['source']}] {p['state']}: {p['evidence']}")
     return out
 
 
@@ -302,7 +384,7 @@ def emit(res, trace_id=None):
         if not new:
             return 0
         sub = dict(res, findings=new)
-        msg = "\n".join(render(sub))
+        msg = "\n".join(render(sub, pending=False))   # "chờ DD" chỉ vào report, không vào tin cảnh báo
         notify = _env("MIKE_LAGCHK_NOTIFY", os.path.join(HERE, "notify_thread.sh"))
         bus = _env("MIKE_LAGCHK_APPEND_EVENT", os.path.join(HERE, "append_event.sh"))
         topic = f"lag-plan-check-{res['account']}-{res['plan_date']}"
@@ -327,6 +409,7 @@ def main(argv=None):
     ap.add_argument("--plan-file", required=True)
     ap.add_argument("--csv", default=None, help="CSV khuyến nghị cho đối chiếu (mặc định theo signal_date)")
     ap.add_argument("--no-crosscheck", action="store_true")
+    ap.add_argument("--no-dd-gate", action="store_true", help="bỏ cổng DD (chỉ để chẩn đoán)")
     ap.add_argument("--dry-run", action="store_true", help="không Discord/bus/state")
     ap.add_argument("--report-block", action="store_true", help="in khối chữ cho report")
     ap.add_argument("--json", action="store_true")
@@ -341,13 +424,15 @@ def main(argv=None):
         print(f"plan.account={plan.get('account') if isinstance(plan, dict) else '?'!r} "
               f"≠ --account {a.account!r}", file=sys.stderr)
         return 1
-    res = analyze(plan, csv_path=a.csv, crosscheck=not a.no_crosscheck)
+    res = analyze(plan, csv_path=a.csv, crosscheck=not a.no_crosscheck, dd_gate=not a.no_dd_gate)
     for n in res["notes"]:
         print(f"  ℹ {n}", file=sys.stderr)
     if a.json:
         print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
     if a.report_block:
-        print("\n".join(render(res)) or f"✅ LAG nhất quán ({a.account}): mọi mã BUY đều có lệnh/lý do hoãn.")
+        print("\n".join(render(res) if res["findings"] else
+                        [f"✅ LAG nhất quán ({a.account}): mọi mã BUY đều có lệnh/lý do hoãn, lệnh LAG đều qua cổng DD."]
+                        + render_pending(res)))
     if not res["findings"]:
         return 0
     if not a.dry_run:
