@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v4087)
+# Mike fleet — context_taylor_mini (v4088)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-21T15:50:09] Taylor/finding — lag-dd-gate-vong2-sua-4-blocking-20261021: {"branch": "feat/lag-dd-gate-20261021", "commit": "9969df217", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-dd-gate-20261021", "round": 2, "fixed": {"1 …
 - [2026-10-21T16:59:36] Taylor/finding — active-nav-broker-fills-20261021: {"branch": "fix/active-nav-broker-fills-20261021", "commit": "2f956fb2f", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-active-nav-broker-fills-20261021", " …
 - [2026-10-21T17:09:14] Mike/decision — active-nav-broker-fills-merged-20261022: {"summary": "cổng KL compute_active_nav hợp nhất fill journal + statement DNSE đã vào master f0e293c30 (kèm vá N1 NaN); user duyệt 22/10 00:07 ICT; arch-review  …
 - [2026-10-21T17:17:55] Taylor/finding — lag-per-share-surprise-rights-20261022: {"job": "Taylor_20261021_165514", "commit": "21c10df2f", "dir": "mike/agents/Taylor/research/lag_per_share_surprise_rights_20261022", "prereg_md5": "c60975e2e29 …
 - [2026-10-21T17:19:01] Taylor/finding — lag-rights-audit-eq-ar-20261022: {"branch": "feat/lag-rights-audit-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022", "commits": ["7c1fa3488 viec A", "9d88fa5d8  …
+- [2026-10-21T17:31:11] Mike/finding — daily-retro-draft-2026-10-21: {"draft": "state/retro_draft_2026-10-21.md", "incidents": 3, "patterns": 1}
 <!--RECENT-END-->
 
 ## Kill-switches
