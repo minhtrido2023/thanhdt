@@ -163,13 +163,21 @@ def t_sealed(tmp):
         ok("y_gross" in str(exc) and D[8].isoformat() in str(exc), f"ca6 thông điệp trích giá trị: {exc}")
     ok(md5(sp) == h0, "ca6 file KHÔNG đổi sau SealedChanged")
     # (b) sát ngưỡng: Δy < 0,1 điểm cơ bản trên dòng sealed ⇒ không lỗi, phần sealed giữ nguyên byte
-    _, inp3, _, _ = fixture(ca_extra=[("BBB", 8, 0.3, "Đợt 3")])         # Δy = 2e6·0,3/~1e11 ≈ 6e-6
+    # Δy = 2e6·0,3/~1e11 ≈ 6e-6; + cổ tức ở D11 (provisional, sau ranh giới) để ca6b2 bắt nối sai dòng
+    _, inp3, _, _ = fixture(ca_extra=[("BBB", 8, 0.3, "Đợt 3"), ("BBB", 11, 400, "Đợt 5")])
     with open(sp, encoding="utf-8") as f:
         sealed0 = [ln for ln in f if ",sealed," in ln]
     V.update(sp, mp, inputs=inp3, src2=src2)
     with open(sp, encoding="utf-8") as f:
         sealed1 = [ln for ln in f if ",sealed," in ln]
     ok(sealed1 == sealed0, "ca6b phần sealed giữ nguyên byte khi Δy dưới ngưỡng")
+    # (b2) ca thật 12-13/10/2026: Δy dưới ngưỡng ở dòng sealed trong cửa sổ kiểm ⇒ dòng provisional ĐẦU
+    # TIÊN sau phần sealed phải nối từ dòng sealed GIỮ BYTE (không từ giá trị dựng lại trong bộ nhớ),
+    # nếu không G1 nổ (đo thật: lệch +8,23e-06 / −8,94e-06).
+    rows6b = V.read_series(sp)
+    g1 = [e for e in gates(rows6b, D[0], D[-1]) if e.startswith("G1")]
+    ok(not g1, f"ca6b2 G1 phải nối qua ranh giới sealed/provisional sau Δy dưới ngưỡng: {g1}")
+    ok(next(x for x in rows6b if x["date"] == D[11])["y_gross"] > 0, "ca6b2 D11 có cổ tức (đuôi có y≠0)")
     # (c) dòng DIV vào muộn cho phiên PROVISIONAL ⇒ dựng lại, không lỗi
     _, inp4, _, _ = fixture(ca_extra=[("BBB", 12, 400, "Đợt 4")])
     V.update(sp, mp, inputs=inp4, src2=src2)
