@@ -1008,13 +1008,22 @@ def undo_last_restatement(reason: str, confirmed_by: str, series_path: str = SER
             raise RestateRefused(f"không đọc được dòng sổ cuối {log_path}: {type(exc).__name__} ({exc})") from None
         if last.get("series") != abs_series:
             raise RestateRefused(f"dòng sổ cuối thuộc chuỗi {last.get('series')}, không phải {abs_series}")
-        if last.get("kind") == "undo":
-            raise RestateRefused(f"dòng sổ cuối ({last.get('ts_ict')}) đã là một undo — không hoàn tác chồng")
         with open(series_path, "rb") as f:
             cur = f.read()
+        if last.get("kind") == "undo":
+            if _md5(cur) == last.get("md5_before"):
+                raise RestateRefused(
+                    f"dòng sổ cuối ({last.get('ts_ict')}) là undo đã GHI SỔ nhưng file CHƯA được thay "
+                    f"(md5 file {_md5(cur)} = md5_before của dòng undo — chết giữa sổ và os.replace); "
+                    f"không chạy lại mù, xem runbook mục 'undo dở dang'")
+            raise RestateRefused(f"dòng sổ cuối ({last.get('ts_ict')}) đã là một undo — không hoàn tác chồng")
+        if _md5(cur) == last.get("md5_before"):
+            raise RestateRefused(
+                f"file hiện tại md5 {_md5(cur)} = md5_before của dòng sổ cuối ({last.get('ts_ict')}): đính chính "
+                f"này CHƯA từng được áp lên file (chết giữa sổ và os.replace) — không có gì để hoàn tác")
         if _md5(cur) != last.get("md5_after"):
             raise RestateRefused(f"file hiện tại md5 {_md5(cur)} ≠ md5_after {last.get('md5_after')} của dòng "
-                                 f"sổ cuối — chuỗi đã đổi sau đính chính (--update?), không undo được")
+                                 f"sổ cuối — chuỗi đã đổi sau đính chính (có thể do --update), không undo được")
         try:
             out = undo_restatement(last, cur)
         except ValueError as exc:

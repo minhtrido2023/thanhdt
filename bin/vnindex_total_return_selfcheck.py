@@ -968,6 +968,28 @@ def t_undo_polish(tmp):
             ok(False, "u7 undo chồng phải RestateRefused")
         except V.RestateRefused as exc:
             ok("đã là một undo" in str(exc), f"u7 {exc}")
+        # N1: undo ĐÃ GHI SỔ nhưng file CHƯA thay (md5 file == md5_before của dòng undo) ⇒ thông báo nói đúng, không "đã là undo"
+        sp_n1 = os.path.join(os.path.dirname(sp), "n1_series.csv")
+        with open(sp_n1, "wb") as f:
+            f.write(b0)
+        log_n1 = os.path.join(os.path.dirname(sp), "n1_log.jsonl")
+        with open(log_n1, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"series": os.path.abspath(sp_n1), "kind": "undo", "ts_ict": "2030-01-01T00:00:00+07:00",
+                                "md5_before": md5(sp_n1), "md5_after": "0" * 32}) + "\n")
+        try:
+            V.undo_last_restatement("r", "u", sp_n1, log_path=log_n1)
+            ok(False, "n1 phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("CHƯA được thay" in str(exc) and "đã là một undo" not in str(exc), f"n1 {exc}")
+        # N2: đính chính CHƯA từng được áp (md5 file == md5_before của dòng sổ cuối) ⇒ thông báo nói đúng, không đoán --update
+        with open(log_n1, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"series": os.path.abspath(sp_n1), "kind": "restate", "ts_ict": "2030-01-01T00:00:00+07:00",
+                                "md5_before": md5(sp_n1), "md5_after": "0" * 32}) + "\n")
+        try:
+            V.undo_last_restatement("r", "u", sp_n1, log_path=log_n1)
+            ok(False, "n2 phải RestateRefused")
+        except V.RestateRefused as exc:
+            ok("CHƯA từng được áp" in str(exc) and "--update?" not in str(exc), f"n2 {exc}")
         # sau undo, đính chính độc lập không bị gắn retry_of vào dòng undo
         V.restate_sealed([D[6]], "r", "u", sp, inputs=inp2, **kw)
         ok("retry_of" not in rd()[-1], "u8 prior là undo ⇒ không retry_of")
