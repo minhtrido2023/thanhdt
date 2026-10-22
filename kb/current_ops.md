@@ -23,11 +23,11 @@
 
 ## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
 - Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
-- ✅ ĐÃ VÁ 22/10 (master `f0e293c30`, user duyệt, arch-review APPROVED): cổng KL `compute_active_nav.py` hợp nhất fill journal bot + statement DNSE (`dnse_khoplenh_broker_confirm_*.csv`); lệnh bán tay không còn bị rc=6 oan, phần dư không giải thích được vẫn chặn. Chi tiết nguyên văn: `kb/projects/dri-manual-sell-20261021.md`.
+- ✅ ĐÃ VÁ 22/10 (master `f0e293c30`, user duyệt): cổng KL `compute_active_nav.py` hợp nhất fill journal bot + statement DNSE (`dnse_khoplenh_broker_confirm_*.csv`); phần dư không giải thích được vẫn chặn. Chi tiết: `kb/projects/dri-manual-sell-20261021.md`.
 
 ## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
-- **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 có tin VinCons chậm trả. Chi tiết: `kb/projects/scl-dd-research-20261021.md`.
-- **Mã LAG giữ có quyền mua**: KHÔNG bán trước ex-date; user TỰ thực hiện ĐẦY ĐỦ (bot không mua/chuyển quyền); mua quyền/KL tăng của user HỢP LỆ. **Lô cp quyền mua KẾ THỪA entry gốc (user 22/10, phương án A)**, bán phiên đầu được phép. SCL 15,38% (P).
+- **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 VinCons chậm trả: `kb/projects/scl-dd-research-20261021.md`.
+- **Mã LAG giữ có quyền mua**: KHÔNG bán trước ex-date; user TỰ thực hiện ĐẦY ĐỦ (bot không mua); user mua quyền HỢP LỆ. **Lô cp quyền KẾ THỪA entry gốc (user 22/10, A)**, bán phiên đầu được phép. ✅ `771daf4ea`; sau nộp tiền báo Mike số CP mua từng account (runbook: `agents/Taylor/research/lag_rights_n1_20261022/REPORT.md`). SCL 15,38% (P).
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
