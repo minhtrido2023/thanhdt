@@ -12,6 +12,7 @@ source "$ROOT/hooks/_resolve_id.sh"   # sets $id from $1 or stdin session_id; ex
 cur="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; cur="${cur:-0}"
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/mike_kbver_$id"
 mkdir -p "$(dirname "$cache")"
+_old_seen="$(cat "$cache" 2>/dev/null || echo -1)"
 printf '%s' "$cur" > "$cache"
 
 # INTERACTIVE_TID — "this session IS the user's live Discord session, in that topic".
@@ -65,6 +66,14 @@ fi
 # every single dispatch. CLAUDE.md is now the SOLE source of the shared context pack,
 # which also keeps it framed as authoritative "project instructions" rather than
 # lower-priority hook stdout.
+
+# Khối MỚI NHẤT (tách khỏi context_pack.md từ 2026-10-22, xem publish_context.sh): ccdb resume
+# mỗi tin nhắn ⇒ SessionStart chạy mỗi lượt, nên chỉ bơm khi version KB đã đổi từ lần agent này
+# thấy trước (hoặc job headless — luôn là phiên mới tinh). Chỉ cho agent có import context_pack.
+if { [ "$cur" != "$_old_seen" ] || [ -n "${JOB_ID:-}" ]; } && [ -s "$KB/context_recent.md" ] \
+   && grep -qs 'context_pack' "$ROOT/agents/$id/CLAUDE.md"; then
+  cat "$KB/context_recent.md"
+fi
 
 # Personal working memory (curated by the agent via remember.sh) — durable across restarts,
 # higher-signal than the raw recap below. The agent's own priorities / open threads / next steps.
