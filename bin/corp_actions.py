@@ -165,13 +165,41 @@ def validate(rec, idx=0):
     }
 
 
-def load_all(path=REGISTRY):
-    """MỌI record (kể cả chưa duyệt), đã chuẩn hoá. Sổ vắng mặt = danh sách rỗng, KHÔNG lỗi —
-    tuyệt đại đa số phiên không có corp action nào, đó là trạng thái bình thường."""
+def load_all(path=REGISTRY, skipped=None):
+    """MỌI record hợp lệ (kể cả chưa duyệt), đã chuẩn hoá. Sổ vắng mặt = danh sách rỗng, KHÔNG lỗi —
+    tuyệt đại đa số phiên không có corp action nào, đó là trạng thái bình thường.
+
+    Record KHÔNG hợp lệ (X3, user duyệt 2026-10-22 — audit lag_rights_audit_20261022 F5):
+      • `_status` CONFIRMED mà hỏng, loại sự kiện được hỗ trợ ⇒ RAISE như cũ (fail-closed: sổ lô
+        sắp sai). Đây là record người đã ký — hỏng là phải dừng.
+      • loại sự kiện CHƯA hỗ trợ (vd RIGHTS) ở MỌI trạng thái, hoặc record chưa CONFIRMED bị hỏng
+        ⇒ BỎ QUA + cảnh báo stderr (tên record + lý do), và append `{idx,id,ticker,status,reason}`
+        vào `skipped` nếu caller truyền list. Trước đây một record như vậy (kể cả PROPOSED) raise
+        cho TOÀN hệ thống ⇒ park_trim/jit_unpark crash, auto-exit chặn mọi book mọi account. Bỏ
+        qua không làm sổ lô đổi: record đó vốn không được áp (chưa ký / không có ngữ nghĩa sổ lô);
+        lệch KL thật (nếu có) vẫn bị cổng reconcile chặn theo từng mã."""
     if not os.path.exists(path):
         return []
     blob = json.load(open(path, encoding="utf-8"))
-    return [validate(r, i) for i, r in enumerate(blob.get("actions") or [])]
+    out = []
+    for i, r in enumerate(blob.get("actions") or []):
+        try:
+            out.append(validate(r, i))
+        except CorpActionError as e:
+            rec = r if isinstance(r, dict) else {}
+            status = str(rec.get("_status", ""))
+            etype = str(rec.get("event_type") or "").strip().upper()
+            unsupported = bool(etype) and etype not in QTY_EVENT_TYPES
+            if status.upper().startswith(CONFIRMED_PREFIX) and not unsupported:
+                raise
+            info = {"idx": i, "id": rec.get("id"), "ticker": rec.get("ticker"), "status": status[:40],
+                    "reason": ("loại sự kiện chưa hỗ trợ" if unsupported else "record chưa CONFIRMED hỏng")
+                              + f": {e}"}
+            print(f"⚠️ corp_actions: BỎ QUA record[{i}] id={info['id']!r} ticker={info['ticker']!r} "
+                  f"_status={info['status']!r} — {info['reason'][:300]}", file=sys.stderr)
+            if skipped is not None:
+                skipped.append(info)
+    return out
 
 
 def load_corp_actions(path=REGISTRY, ticker=None):
