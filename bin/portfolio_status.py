@@ -370,6 +370,8 @@ def book_lot_snapshot(account, book_label, asof=None, plan_dir=None, exec_dir=No
             # N1: phần CP quyền mua user khai — có thể CHƯA niêm yết/chưa bán được (auto_exit tách
             # phần khoá thay vì báo cắt-sellable mỗi tối). Chỉ thêm key khi có ⇒ output cũ y nguyên.
             d["rights_qty"] = d.get("rights_qty", 0) + lot["qty"]
+            # B1 vòng 2: kèm ngày credit/niêm yết từng lô ⇒ auto_exit chỉ khoá phần CHƯA niêm yết, có hạn.
+            d.setdefault("rights_lots", []).append(dict(lot["rights_subscription"], qty=lot["qty"]))
         if lot["entry_date"] < d["entry_date"]:
             d["entry_date"] = lot["entry_date"]
     # X2 (audit lag_rights_audit_20261022 F2): MỒ CÔI = broker có, sổ lô = 0 ở MỌI book (vd CP

@@ -47,7 +47,19 @@ if "--mutants" in sys.argv[1:]:
          "                             and False)]"),
         # <<< N4
         ("M6 auto_exit bỏ tách lô khoá", "auto_exit_inject.py",
-         "    if 0 < short <= rights_qty:", "    if False:"),
+         "    return qty - locked, locked", "    return qty, 0"),
+        # >>> B1 vòng 2 (arch-review): khoá chỉ phần CHƯA niêm yết, có hạn, không nuốt thiếu hụt khác
+        ("M17 khoá không giới hạn bởi phần broker không cho bán (nuốt SELL book khác)", "auto_exit_inject.py",
+         "max(int(held) - int(sellable), 0))", "int(qty))"),
+        ("M18 khoá cả lô đã tới listing_date", "auto_exit_inject.py",
+         "            if ld > plan_date:", "            if True:"),
+        ("M19 khoá không hết hạn credit_date+10 phiên", "auto_exit_inject.py",
+         "        elif n <= RIGHTS_LOCK_MAX_SESSIONS:", "        elif True:"),
+        ("M20 cảnh báo cắt bỏ chẩn đoán lô quyền hết khoá", "auto_exit_inject.py",
+         "        if lock_diag:", "        if False:"),
+        ("M21 alert bỏ dòng khoá chờ niêm yết", "auto_exit_inject.py",
+         "    for lk in locked_notes or []:", "    for lk in []:"),
+        # <<< B1 vòng 2
         ("M7 verify bỏ khai báo", "verify_account_snapshot.py",
          "    for date, evs in sorted(rights_sub.fill_events(", "    for date, evs in sorted([] if True else rights_sub.fill_events("),
         ("M8 verify bỏ đối chiếu KL broker", "verify_account_snapshot.py",
@@ -285,11 +297,12 @@ def raw(ex, date, lag_open, lag_trade, lag_mp=25_400):
             f.write(json.dumps(r) + "\n")
 
 
-def sub(qty=5000, credit=PAY, account=ACC, account_no=ACC_NO, registered=None, ex=T0):
+def sub(qty=5000, credit=PAY, account=ACC, account_no=ACC_NO, registered=None, ex=T0, listing=None):
     return {"account": account, "account_no": account_no, "ticker": TK, "event_id": EVID, "event_hash": H,
             "exright_date": ex.isoformat(), "exercise_ratio": 0.35714286, "issue_price_vnd": 12500.0,
             "subscribed_qty": qty, "payment_date": credit.isoformat(), "credit_date": credit.isoformat(),
-            "registered_date": registered, "listing_date": None, "decided_by": "user",
+            "registered_date": registered, "listing_date": listing.isoformat() if listing else None,
+            "decided_by": "user",
             "at": "2026-11-16T10:00:00+07:00", "source": "fixture"}
 
 
@@ -317,7 +330,7 @@ def wire(ex, pl, td, acts=(), subs=()):
 _PH_DEFAULTS = ph.park_holdings.__defaults__
 
 
-def run_exit(tag, signal, broker, fills=(), acts=(), subs=(), lag_buys=((E, 14_000),)):
+def run_exit(tag, signal, broker, fills=(), acts=(), subs=(), lag_buys=((E, 14_000),), pre_orders=()):
     td, ex, pl = sandbox(tag)
     for d, q in lag_buys:
         journal(ex, d.isoformat(), [(TK, "buy", q, 30_000, "LAG")])
@@ -328,8 +341,8 @@ def run_exit(tag, signal, broker, fills=(), acts=(), subs=(), lag_buys=((E, 14_0
     plan_date = next_trading_day(signal).isoformat()
     pp = os.path.join(pl, f"plan_{ACC}_{plan_date}.json")
     with open(pp, "w") as f:
-        json.dump({"plan_date": plan_date, "orders": [], "account": ACC}, f)
-    m0 = os.path.getmtime(pp)
+        json.dump({"plan_date": plan_date, "orders": list(pre_orders), "account": ACC}, f)
+    m0 = _real_open(pp).read()   # so NỘI DUNG, không so mtime (độ phân giải mtime làm ca chập chờn)
     with contextlib.redirect_stdout(io.StringIO()) as out:
         aei.process_account(ACC, plan_date, signal.isoformat(), dry_run=False)
     plan = json.load(_real_open(pp))
@@ -337,7 +350,7 @@ def run_exit(tag, signal, broker, fills=(), acts=(), subs=(), lag_buys=((E, 14_0
     lots, ok, _r, blk = ps.book_lot_snapshot(ACC, "LAG", asof=signal.isoformat())
     notes = plan.get("auto_exit_inject_notes") or []
     return {"sells": [(o["ticker"], o["qty"]) for o in plan["orders"]], "notes": notes,
-            "written": os.path.getmtime(pp) != m0, "h": h, "lots": lots, "blk": blk, "out": out.getvalue()}
+            "written": _real_open(pp).read() != m0, "h": h, "lots": lots, "blk": blk, "out": out.getvalue()}
 
 
 def _k(r, key):
@@ -347,7 +360,7 @@ def _k(r, key):
 r = run_exit("p0_control_no_decl", T25, (19_000, 14_000))
 check("P0 ĐỐI CHỨNG (không khai báo): sổ lệch broker ⇒ SCL chặn (hành vi cũ)",
       not r["h"]["reconcile"]["ok"] and TK in r["blk"] and r["sells"] == [], r["h"]["reconcile"])
-r = run_exit("p1_credit_before_t25", T25, (19_000, 14_000), subs=[sub()])
+r = run_exit("p1_credit_before_t25", T25, (19_000, 14_000), subs=[sub(listing=LIST)])
 lag = [l for l in r["h"]["lots"] if l["ticker"] == TK]
 check("P1a sổ khớp broker 19.000 khi có khai báo; L1/L2 hết BLOCKED_RECONCILE",
       r["h"]["reconcile"]["ok"], r["h"]["reconcile"]["mismatches"])
@@ -359,11 +372,14 @@ check("P1c T+25: bán 14.000 (phần sellable), 5.000 ghi 'khoá chờ niêm y�
       and not _k(r, "capped") and not _k(r, "blocked"), (r["sells"], r["notes"]))
 S26 = nth(T25, 1)
 r = run_exit("p2_locked_after_sale", nth(T25, 20), (5_000, 0),
-             fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))], subs=[sub()])
-check("P2 đã bán 14.000, 5.000 chưa niêm yết: không mồ côi, không lệnh, không cờ, KHÔNG ghi plan",
-      r["h"]["reconcile"]["ok"] and r["sells"] == [] and not r["notes"] and not r["written"]
-      and "khoá chờ niêm yết" in r["out"], (r["h"]["reconcile"], r["notes"], r["blk"]))
-r = run_exit("p3_listing", LIST, (5_000, 5_000), fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))], subs=[sub()])
+             fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))], subs=[sub(listing=LIST)])
+check("P2 đã bán 14.000, 5.000 chưa niêm yết (listing_date tương lai): không mồ côi, không lệnh, không cờ "
+      "cắt/chặn; plan GHI note rights_locked để báo cáo hiện ra (B1 vòng 2)",
+      r["h"]["reconcile"]["ok"] and r["sells"] == [] and not _k(r, "capped") and not _k(r, "blocked")
+      and [x["locked_qty"] for x in _k(r, "rights_locked")] == [5000] and r["written"]
+      and "[RIGHTS-LOCKED]" in r["out"], (r["h"]["reconcile"], r["notes"], r["blk"]))
+r = run_exit("p3_listing", LIST, (5_000, 5_000), fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))],
+             subs=[sub(listing=LIST)])
 check("P3 phiên đầu tiên sellable: auto-exit bán ngay 5.000 (quá hạn vì entry kế thừa)",
       r["sells"] == [(TK, 5_000)] and not _k(r, "capped"), (r["sells"], r["notes"]))
 r = run_exit("p4_sold_after_ex_before_credit", T25, (5_000, 0),
@@ -403,6 +419,49 @@ r = run_exit("p10_n4_registered", before_t25, (20_710, 15_260),
 check("P10 N4 đối chứng: đã ghi nhận trước GDKHQ cổ tức ⇒ lô quyền cũng hưởng (5.000→5.450)",
       r["h"]["reconcile"]["ok"], r["h"]["reconcile"]["mismatches"])
 # <<< N4
+# >>> B1 vòng 2 (arch-review): khoá chỉ phần CHƯA niêm yết, có hạn, thiếu hụt khác vẫn cảnh báo cắt
+r = run_exit("p12_listed_still_short", LIST, (5_000, 0), fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))],
+             subs=[sub(listing=LIST)])
+cp = _k(r, "capped")
+check("P12 (a) đã tới listing_date nhưng broker tradeQuantity vẫn 0 ⇒ KHÔNG khoá, cảnh báo cắt 5.000→0 "
+      "kèm chẩn đoán nêu listing_date",
+      r["sells"] == [] and not _k(r, "rights_locked") and [(c["desired_qty"], c["capped_qty"]) for c in cp] == [(5000, 0)]
+      and LIST.isoformat() in cp[0].get("rights_diag", "") and "niêm yết" in cp[0]["reason"], r["notes"])
+OTHER_SELL = {"id": "SELL-SCL-PARKMERGE-X", "ticker": TK, "side": "sell", "qty": 2000, "book": "custom30V_parking"}
+r = run_exit("p13_other_book_sell", T25, (19_000, 16_000), subs=[sub(listing=LIST)], pre_orders=[OTHER_SELL])
+cp = _k(r, "capped")
+check("P13 (b) SELL book khác chiếm 2.000 sellable: khoá chỉ 3.000 (= open−trade), 16.000 cắt còn 14.000 "
+      "⇒ CÓ cảnh báo cắt (bản vòng 1 nuốt im lặng: khoá 5.000, không cắt)",
+      [x["locked_qty"] for x in _k(r, "rights_locked")] == [3000]
+      and [(c["desired_qty"], c["capped_qty"]) for c in cp] == [(16000, 14000)]
+      and (TK, 14_000) in r["sells"], (r["sells"], r["notes"]))
+r = run_exit("p14_expired_no_listing", T25, (19_000, 14_000), subs=[sub()])
+cp = _k(r, "capped")
+n_exp = ps.count_trading_days(PAY, next_trading_day(T25))
+check(f"P14 (c) chưa khai listing_date, plan_date = credit_date + {n_exp} phiên > 10 ⇒ HẾT khoá, cảnh báo "
+      "cắt 19.000→14.000 kèm chẩn đoán số phiên + credit_date",
+      n_exp > 10 and not _k(r, "rights_locked") and [(c["desired_qty"], c["capped_qty"]) for c in cp] == [(19000, 14000)]
+      and f"đã {n_exp} phiên" in cp[0].get("rights_diag", "") and PAY.isoformat() in cp[0]["rights_diag"]
+      and r["sells"] == [(TK, 14_000)], (n_exp, r["notes"]))
+CR_LATE = nth(T0, 9)      # credit trễ: plan_date T25+1 chỉ cách credit vài phiên
+r = run_exit("p15_within_window_no_listing", T25, (19_000, 14_000), subs=[sub(credit=CR_LATE)])
+check("P15 ĐỐI CHỨNG cho P14: chưa khai listing_date nhưng còn trong 10 phiên ⇒ vẫn khoá 5.000, không cắt",
+      ps.count_trading_days(CR_LATE, next_trading_day(T25)) <= 10
+      and [x["locked_qty"] for x in _k(r, "rights_locked")] == [5000] and not _k(r, "capped"), r["notes"])
+check("P16 probe arch-review: thiếu openQuantity ⇒ không khoá (19.000,0); có ⇒ khoá đúng phần broker giữ",
+      aei._rights_locked_split(TK, 19000, 5000, {TK: {"sellable": 16000}}) == (19000, 0)
+      and aei._rights_locked_split(TK, 19000, 5000, {TK: {"sellable": 16000, "qty": 19000}}) == (16000, 3000))
+LK = [{"ticker": TK, "book": "LAG", "locked_qty": 5000, "reason": "SCL book=LAG: 5000cp CP quyền mua KHOÁ fixture"}]
+CPD = [{"ticker": TK, "book": "LAG", "desired_qty": 19000, "capped_qty": 14000, "reason": "x",
+        "rights_diag": "lô quyền mua 5000cp ... đã 11 phiên > hạn 10 phiên"}]
+aei.BLOCK_ALERT_STATE_PATH = os.path.join(ROOT_TMP, "alert_state_p17.json")
+l1, st = aei._new_block_alert_lines(ACC, [], [], "2026-12-01", LK)
+aei._atomic_write_json(aei.BLOCK_ALERT_STATE_PATH, st)
+l2, _st = aei._new_block_alert_lines(ACC, [], [], "2026-12-02", LK)
+l3, _st = aei._new_block_alert_lines(ACC, [], CPD, "2026-12-02", [])
+check("P17 alert: khoá báo ℹ️ 1 lần (dedup ngày sau); hết hạn ⇒ ⚠️ cắt kèm chẩn đoán",
+      len(l1) == 1 and l1[0].startswith("ℹ️") and l2 == [] and len(l3) == 1 and "đã 11 phiên" in l3[0], (l1, l2, l3))
+# <<< B1 vòng 2
 check("P11 không gọi subprocess thật (bus/Discord)", CALLS == [], CALLS)
 
 # ================================ N. chuỗi NAV ================================

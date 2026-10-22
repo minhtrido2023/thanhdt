@@ -1021,6 +1021,15 @@ if _aei_notes:
         for c in _aei_manual_capped[:8]:
             lines.append(f"   • {c.get('ticker','?')} ({c.get('book','?')}): "
                          f"{c.get('capped_from','?')}cp → {c.get('capped_to','?')}cp (duyệt tay)")
+    # B1 vòng 2 (N1): CP quyền mua khoá chờ niêm yết — lấy entry auto MỚI NHẤT có khoá (trạng
+    # thái hiện hành, không cộng dồn các lượt chạy lại trong ngày).
+    _aei_locked = next((_n.get("rights_locked") for _n in reversed(_aei_auto)
+                        if _n.get("rights_locked")), None) or []
+    if _aei_locked:
+        lines.append(f"ℹ️ **{len(_aei_locked)} lô CP quyền mua KHOÁ chờ niêm yết (đã khai, tự bán khi broker cho bán):**")
+        for lk in _aei_locked[:8]:
+            if isinstance(lk, dict):
+                lines.append(f"   • {str(lk.get('reason') or '')[:220]}")
 
 # ── MỤC RIÊNG 1: L1 park_trim_proposal ──────────────────────────────────────────────────
 # Ngang hàng với orders[], KHÔNG phải câu phụ trong đoạn văn: đây là lệnh BÁN THẬT cần user
