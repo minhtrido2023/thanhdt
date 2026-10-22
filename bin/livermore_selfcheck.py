@@ -313,7 +313,11 @@ def inner():
     check("score-close-lệch-fail", rc == 1 and not C.parse_scores(C.read_registry()))
     # cổng giải thể
     def gate(n_entries, livermore_right):
-        sp = [(i, "UP" if livermore_right else "DOWN", 0.9 if livermore_right else 0.1, 1, 3) for i in range(n_entries)]
+        sp = []
+        for i in range(n_entries):
+            y_ = i % 2
+            up_ = bool(y_) == livermore_right
+            sp.append((i, "UP" if up_ else "DOWN", 0.9 if up_ else 0.1, y_, 3))
         mk_entries(sp)
         return S.main(["--today", str(days[60]), "--notify"])
     check("gate-11-không", gate(11, False) == 0)
@@ -322,9 +326,17 @@ def inner():
     check("gate-12-sai-hết-giải-thể", rc == 20 and "GIẢI THỂ" in open(env["FAKE_NOTIFY_LOG"]).read(), f"rc={rc}")
     rc = gate(12, True)
     check("gate-12-đúng-hết-không", rc == 0, f"rc={rc}")
-    # 12 entry, y toàn 1: Livermore UP .9 hit 100% = luôn UP ⇒ không *hơn* luôn-UP/DT5G, nhưng hơn đồng xu ⇒ không giải thể
+    # 12 entry, y toàn 1: Livermore hơn đồng xu nhưng KHÔNG hơn "luôn UP" ⇒ giải thể (phải hơn CẢ 3)
     c = S.cumulative([{"hit": 1, "brier": .01, "y": 1, "dt_hit": 1.0, "dt_brier": .09}] * 12)
-    check("gate-hơn-đồng-xu-thì-không-giải-thể", not c["dissolve"] and c["beats"]["coin"] and not c["beats"]["always_up"])
+    check("gate-hơn-đồng-xu-nhưng-thua-luôn-UP-thì-giải-thể", c["dissolve"] and c["beats"]["coin"] and not c["beats"]["always_up"])
+    # hơn đồng xu + luôn-UP nhưng thua DT5G ⇒ giải thể
+    rows_ = [{"hit": 1, "brier": .2, "y": 1, "dt_hit": 1.0, "dt_brier": .01}] * 6 + [{"hit": 1, "brier": .2, "y": 0, "dt_hit": 1.0, "dt_brier": .01}] * 6
+    c = S.cumulative(rows_)
+    check("gate-thua-DT5G-thì-giải-thể", c["dissolve"] and c["beats"]["coin"] and not c["beats"]["dt5g"], str(c["beats"]))
+    # hơn cả 3 ⇒ không giải thể
+    rows_ = [{"hit": 1, "brier": .04, "y": 1, "dt_hit": 0.0, "dt_brier": .5}] * 6 + [{"hit": 1, "brier": .04, "y": 0, "dt_hit": 0.0, "dt_brier": .9}] * 6
+    c = S.cumulative(rows_)
+    check("gate-hơn-cả-3-không-giải-thể", not c["dissolve"] and all(c["beats"].values()), str(c["beats"]))
     c = S.cumulative([{"hit": 0, "brier": .5, "y": 1, "dt_hit": None, "dt_brier": None}] * 12)
     check("gate-dt5g-NA", c["dissolve"] and c["n_dt5g"] == 0)
 
@@ -353,6 +365,7 @@ MUTANTS = [
     ("livermore_score.py", "y = 1 if b20[\"close\"] > bars[i0][\"close\"] else 0", "y = 1 if b20[\"close\"] < bars[i0][\"close\"] else 0", "đảo dấu hit"),
     ("livermore_score.py", "return 20 if c.get(\"dissolve\") else 0", "return 0", "bỏ rc giải thể"),
     ("livermore_score.py", "dissolve\": n >= GATE_N and", "dissolve\": n >= 1 and", "cổng giải thể không chờ 12"),
+    ("livermore_score.py", "not all(beats.values())", "not any(beats.values())", "giải thể chỉ khi thua cả 3 (sai luật)"),
     ("livermore_run.sh", "grep -q \"^### LVR-$AS_OF\\$\" \"$REG\"", "false", "run.sh mất idempotent"),
 ]
 

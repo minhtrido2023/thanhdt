@@ -3,8 +3,9 @@
 
 Mỗi entry đến hạn + đủ 20 bar sau as-of → ghi 1 dòng `SCORE|...` vào registry (entry KHÔNG bị sửa).
 Baseline: đồng xu 50% · "luôn UP" · DT5G-implied (state DT5G TẠI as-of, từ vnindex_5state_dt5g_live).
-Cổng giải thể: ≥12 entry đã chấm mà Livermore KHÔNG hơn (hit VÀ Brier, nghiêm ngặt) cả 3 baseline
-⇒ in "GIẢI THỂ ĐỀ XUẤT" (rc=20). Chỉ đề xuất — người quyết định.
+Cổng giải thể: ≥12 entry đã chấm mà Livermore KHÔNG hơn CẢ 3 baseline (mỗi baseline: hit VÀ Brier, nghiêm ngặt)
+⇒ in "GIẢI THỂ ĐỀ XUẤT" (rc=20). Giữ vai CHỈ KHI hơn đồng xu VÀ luôn-UP VÀ DT5G-implied; thua dù chỉ một ⇒ giải thể.
+Chỉ đề xuất — người quyết định.
 
 Quy ước: y=1 nếu close[D+20] > close[D], ngược lại y=0 (bằng nhau = 0). hit = (dir==UP) == (y==1).
 Brier = (P_UP − y)². "Luôn UP" = P_UP 1.0. DT5G-implied: P_UP = min(%vốn,100)/100 theo state
@@ -84,7 +85,7 @@ def cumulative(rows):
     beats = {"coin": L[0] > coin[0] and L[1] < coin[1], "always_up": L[0] > up[0] and L[1] < up[1],
              "dt5g": bool(dtb and L_dt[0] > dtb[0] and L_dt[1] < dtb[1])}
     return {"n": n, "L": L, "coin": coin, "up": up, "dt5g": dtb, "L_vs_dt5g": L_dt, "n_dt5g": len(dtr),
-            "beats": beats, "dissolve": n >= GATE_N and not any(beats.values())}
+            "beats": beats, "dissolve": n >= GATE_N and not all(beats.values())}
 
 
 def render(c):
@@ -98,11 +99,13 @@ def render(c):
            f"  DT5G-implied   : {t(c['dt5g'])} (n={c['n_dt5g']}; Livermore cùng tập: {t(c['L_vs_dt5g'])})"
            f"   → hơn? {'CÓ' if c['beats']['dt5g'] else 'KHÔNG'}"]
     if c["dissolve"]:
-        out.append(f"GIẢI THỂ ĐỀ XUẤT: sau {c['n']} entry, Livermore không hơn cả 3 baseline (hit VÀ Brier).")
+        lost = [k for k, v in c["beats"].items() if not v]
+        out.append(f"GIẢI THỂ ĐỀ XUẤT: sau {c['n']} entry, Livermore không hơn đủ 3 baseline (hit VÀ Brier); "
+                   f"không hơn: {','.join(lost)}.")
     elif c["n"] < GATE_N:
         out.append(f"Cổng giải thể: chưa đánh giá (còn {GATE_N - c['n']} entry).")
     else:
-        out.append("Cổng giải thể: không đề xuất (hơn ít nhất 1 baseline).")
+        out.append("Cổng giải thể: không đề xuất (hơn cả 3 baseline).")
     return "\n".join(out)
 
 
