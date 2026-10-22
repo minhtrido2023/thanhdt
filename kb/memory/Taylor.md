@@ -35,3 +35,5 @@
 - [2026-10-22T10:01:34Z] ĐANG DỞ job Taylor_20261022_095008: 8 chân engine chạy nền (logs/ trong research/bal_concentration_cap_20261022, worktree wt-balcap-20261022) | NEXT: legs_metrics.py + bootstrap_nav, REPORT
 - [2026-10-22T10:11:53Z] [bal-concentration-cap 10-22] XONG job Taylor_20261022_095008: NO-GO trần BAL; sizing live=backtest; đính chính 'BAL bt luôn đa dạng hoá' SAI
 - [2026-10-22T11:01:13Z] [livermore-stock-pilot 10-22] XONG job Taylor_20261022_104625: NO-GO sát biên (a đạt AUC 0,629; b hụt ΔAUC +0,024 CI chứa 0); không wire; chờ Mike
+- [2026-10-22T14:33:07Z] ĐANG DỞ job Taylor_20261022_143258: vá park_holdings.py đối soát bán tay DRI (tái dùng f0e293c30) | NEXT: đọc commit, worktree wt-park-manual-sell-20261022
+- [2026-10-22T14:42:41Z] [park-holdings-manual-sell 10-22] XONG job Taylor_20261022_143258: fix/park-holdings-manual-sell-20261022 @30fe3ba7b chờ arch-review/merge
