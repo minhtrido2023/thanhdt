@@ -89,7 +89,7 @@ def realized_pnl_from_events(events_by_date, asof, corp_actions, seed_lots=None)
         books[tk].buy(qty * corp_action_multiplier(tk, date, asof, corp_actions), qty * price, date)
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
-            m = corp_action_multiplier(tk, date, asof, corp_actions)
+            m = corp_action_multiplier(tk, date, asof, corp_actions, key=_key)
             book = books[tk]
             value = qty * price
             if side != "sell":

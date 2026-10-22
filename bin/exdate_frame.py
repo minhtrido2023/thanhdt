@@ -287,6 +287,8 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
     snap = dns._corp_action_daily_snapshot(asof)
     ca_active, ca_note = dns._corp_action_gate_status(snap, asof)
     credited, blocked, fill_cache = {}, {}, {}
+    import rights_subscription as rights_sub
+    rights_subs = rights_sub.load_subscriptions(account_label, account_no=account_no)
     for tk in sorted(positions):
         p = positions[tk] or {}
         qty_now = p.get("total", p.get("qty"))
@@ -310,7 +312,11 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
             except Exception as e:   # registry hỏng ⇒ KHÔNG đoán, chặn đúng mã này (§29: lỗi thật)
                 blocked[tk] = f"không đọc được data/corp_actions.json để tra sự kiện: {e}"
                 continue
-        verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+        # N4: CP quyền mua user khai đang chờ VSDC ghi nhận tại ex-date ⇒ không hưởng sự kiện CP
+        pend = (rights_sub.pending_qty(account_label, tk, ev["date"], prev_d, subs=rights_subs)
+                if prev_d and ev and ev.get("date") else 0.0)
+        verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d,
+                                                    pending_rights=pend)
         if verdict == "qty_unexplained" and detail["residual"] > 0:
             # N3: user nộp tiền mua quyền (lệnh tay hợp lệ) — KL tăng, giá không đổi hệ ⇒ không chặn,
             # không phải "credited" (không có gì để quy đổi giá).

@@ -505,7 +505,11 @@ class LotBook:
         pool = [l for l in self.lots if l["ticker"] == ticker]
         if not pool:
             return 0                                   # không giữ mã này — no-op, không phải lỗi
-        entitled = [l for l in pool if l["entry_date"] < ex_date]
+        # N4 (legal-vn 22/10): lô CP QUYỀN MUA đang chờ VSDC ghi nhận tại ex_date KHÔNG hưởng quyền
+        # (entry_date kế thừa lô gốc nên điều kiện entry_date < ex_date một mình sẽ nhân nhầm).
+        entitled = [l for l in pool if l["entry_date"] < ex_date
+                    and not (l.get("rights_subscription")
+                             and rights_sub.pending_at(l["rights_subscription"], ex_date))]
         if not entitled:
             self.warnings.append(
                 f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier}: đang giữ "

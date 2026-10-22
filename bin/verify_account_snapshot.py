@@ -100,7 +100,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions  # noqa: E402
 
 
-def corp_action_multiplier(ticker, fill_date, asof, actions):
+def corp_action_multiplier(ticker, fill_date, asof, actions, key=None):
     """Hệ số nhân KL cho 1 fill ngày `fill_date`, dùng để cộng dồn đúng vào raw_agg/journal_agg.
 
     Cùng quy tắc thời điểm với LotBook.corp_action_split (park_holdings.py) — lô mua TRƯỚC
@@ -113,10 +113,14 @@ def corp_action_multiplier(ticker, fill_date, asof, actions):
     Script này gộp fill theo NGÀY (không giữ lot rời như LotBook) nên không xử lý được ca bán
     xen giữa các lô có ex_date khác nhau của CÙNG mã — chưa gặp thực tế, nếu xảy ra sẽ cần
     nâng cấp lên lot-based giống park_holdings.py.
+
+    `key` = khoá fill; fill CP QUYỀN MUA (rights_subscription) đang CHỜ VSDC ghi nhận tại ex_date của
+    sự kiện ⇒ KHÔNG hưởng (N4, legal-vn 22/10) ⇒ bỏ qua sự kiện đó.
     """
     mult = 1.0
     for a in actions:
-        if a["ticker"] == ticker and fill_date < a["ex_date"] <= asof:
+        if a["ticker"] == ticker and fill_date < a["ex_date"] <= asof \
+                and not (key and rights_sub.exempt_from(key, a["ex_date"])):
             mult *= a["qty_multiplier"]
     return mult
 
@@ -187,7 +191,7 @@ def build_cost_books(events_by_date, asof, corp_actions, recover_legacy=False):
     books = defaultdict(lambda: CostBook(recover_legacy=recover_legacy))
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
-            m = corp_action_multiplier(tk, date, asof, corp_actions)
+            m = corp_action_multiplier(tk, date, asof, corp_actions, key=_key)
             if side == "sell":
                 books[tk].sell(qty * m, date)
             else:
@@ -750,7 +754,7 @@ def main():
                                                    account_no=args.account_no).items()):
         for ev in evs:
             tk, q, px = ev[2], ev[4], ev[5]
-            m = corp_action_multiplier(tk, date, args.asof, corp_actions)
+            m = corp_action_multiplier(tk, date, args.asof, corp_actions, key=ev[1])
             for agg, events in ((raw_agg, raw_events), (journal_agg, journal_events)):
                 agg[tk][0] += q * m
                 agg[tk][1] += q * m

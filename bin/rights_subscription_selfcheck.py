@@ -41,6 +41,11 @@ if "--mutants" in sys.argv[1:]:
          "            timeline.append((r[\"credit_date\"] + \"T23:59:58\", 2, r, \"rights_subscriptions.json\"))\n"),
         ("M4 bỏ chặn khai vượt quyền", "park_holdings.py",
          "        if not entitled or qty > cap:", "        if not entitled:"),
+        # >>> N4 (PHẦN 2 — legal-vn 22/10)
+        ("M5 N4 park: nhân cả lô quyền đang chờ", "park_holdings.py",
+         "                             and rights_sub.pending_at(l[\"rights_subscription\"], ex_date))]",
+         "                             and False)]"),
+        # <<< N4
         ("M6 auto_exit bỏ tách lô khoá", "auto_exit_inject.py",
          "    if 0 < short <= rights_qty:", "    if False:"),
         ("M7 verify bỏ khai báo", "verify_account_snapshot.py",
@@ -49,12 +54,25 @@ if "--mutants" in sys.argv[1:]:
          "        if abs(raw_agg[tk][0] - bq_) > 1e-6:", "        if False:"),
         ("M9 cash_identity tính phí lô quyền", "cash_identity.py",
          'if fx["side"] == "buy" and not fx.get("fee_free"))', 'if fx["side"] == "buy")'),
+        # >>> N4 (PHẦN 2 — legal-vn 22/10)
+        ("M10 N4 NAV: bỏ trừ lô chờ ở KL kỳ vọng", "daily_nav_snapshot.py",
+         "        expected = (qty_prev - pending_rights) * ratio if pending_rights else qty_prev * ratio",
+         "        expected = qty_prev * ratio"),
+        ("M11 N4 verify: bỏ miễn nhân hệ số cho lô chờ", "verify_account_snapshot.py",
+         "                and not (key and rights_sub.exempt_from(key, a[\"ex_date\"])):", ":"),
+        # <<< N4
         ("M12 sổ chấp nhận decided_by≠user", "rights_subscription.py",
          '    if rec["decided_by"] != "user":', '    if False:'),
         ("M13 sổ không lọc account (§12)", "rights_subscription.py",
          '        if r["account"] != account:\n            continue\n', ''),
         ("M14 reconcile bỏ khai báo", "reconcile_equity.py",
          "        events_by_date.setdefault(d, []).extend(evs)", "        pass"),
+        # >>> N4 (PHẦN 2 — legal-vn 22/10)
+        ("M16 exdate_frame (active_nav) bỏ trừ lô chờ", "exdate_frame.py",
+         "                if prev_d and ev and ev.get(\"date\") else 0.0)", "                if False else 0.0)"),
+        ("M15 pending_at: chờ kết thúc ngay khi credit", "rights_subscription.py",
+         "    return sub[\"credit_date\"] <= d and (end is None or d < end)", "    return False"),
+        # <<< N4
     ]
     import wc_paths
     wc = wc_paths.find_wc_root(__file__)
@@ -368,6 +386,23 @@ check("P7 chia Hamilton theo lô hưởng quyền: 10.000→3.571 (entry E), 4.0
 r = run_exit("p8_other_account", T25, (19_000, 14_000),
              subs=[sub(account="OtherAcct", account_no=OTHER_NO)])
 check("P8 §12: khai báo của account khác không vào sổ account này", not r["h"]["reconcile"]["ok"])
+# >>> N4 (PHẦN 2 — legal-vn 22/10)
+SDX = nth(PAY, 3)                  # cổ tức CP 9% GDKHQ nằm trong khoảng chờ VSDC
+sdiv = {"id": "SCL-SDIV", "ticker": TK, "event_type": "STOCK_DIVIDEND", "qty_multiplier": 1.09,
+        "ex_date": SDX.isoformat(), "record_date": SDX.isoformat(),
+        "broker_effective_ts": f"{(SDX - dt.timedelta(days=1)).isoformat()}T19:30:00",
+        "_status": "CONFIRMED fixture", "evidence": []}
+before_t25 = nth(SDX, 1)
+r = run_exit("p9_n4_pending", before_t25, (20_260, 15_260), subs=[sub()], acts=[sdiv])
+check("P9 N4: cổ tức CP 9% trong khoảng chờ ⇒ chỉ lô gốc nhân (14.000→15.260), lô quyền giữ 5.000",
+      r["h"]["reconcile"]["ok"] and sorted(l["qty"] for l in r["h"]["lots"] if l["ticker"] == TK) == [5000, 15260],
+      (r["h"]["reconcile"]["mismatches"], [(l["qty"], l.get("rights_subscription") is not None)
+                                          for l in r["h"]["lots"] if l["ticker"] == TK]))
+r = run_exit("p10_n4_registered", before_t25, (20_710, 15_260),
+             subs=[sub(registered=nth(PAY, 1).isoformat())], acts=[sdiv])
+check("P10 N4 đối chứng: đã ghi nhận trước GDKHQ cổ tức ⇒ lô quyền cũng hưởng (5.000→5.450)",
+      r["h"]["reconcile"]["ok"], r["h"]["reconcile"]["mismatches"])
+# <<< N4
 check("P11 không gọi subprocess thật (bus/Discord)", CALLS == [], CALLS)
 
 # ================================ N. chuỗi NAV ================================
@@ -511,6 +546,23 @@ check("N1b khai sai KL (4.999) ⇒ vẫn chặn rc=5 (fail-closed)", rc == 5, rc
 rc, snap, err = run_nav(ndir("n1c_wrong_day", [nsub(credit="2025-10-24")]), **pay_kw)
 check("N1c khai sai ngày credit ⇒ vẫn chặn rc=5", rc == 5, rc)
 # N4 — cổ tức CP 9% (GDKHQ 11-06) trong khoảng chờ: broker credit 1.260 (chỉ 14.000 hưởng)
+# >>> N4 (PHẦN 2 — legal-vn 22/10)
+sd_kw = dict(prev="2025-11-04", date="2025-11-05", q_prev=Q0 + RQ, q_now=Q0 + RQ + 1260, mp_prev=19900,
+             mp_now=round(20500 / 1.09), cash_prev=CASH_PAID, cash_now=CASH_PAID, events=[SDIV_EV])
+rc, snap, err = run_nav(ndir("n4_control_no_decl", actions=[SDIV_CONFIRMED]), **sd_kw)
+check("N4a ĐỐI CHỨNG (CONFIRMED ×1,09, không khai báo): 20.260/1,09 = 18.587 ≠ 19.000 ⇒ rc=5 (audit A5)",
+      rc == 5, rc)
+rc, snap, err = run_nav(ndir("n4_pending", [nsub()], [SDIV_CONFIRMED]), **sd_kw)
+check("N4b lô quyền chờ: (20.260−5.000)/1,09 + 5.000 = 19.000 ⇒ --from-raw phục hồi rc=0, KL quy ngược 19.000",
+      rc == 0 and snap and abs(snap["nav"] - ((Q0 + RQ) * 20500 + CASH_PAID)) < 1, (rc, err[-500:]))
+rc, snap, err = run_nav(ndir("n4_pending_broker_1710", [nsub()], [SDIV_CONFIRMED]), **dict(sd_kw, q_now=Q0 + RQ + 1710))
+check("N4c lô quyền chờ nhưng broker credit 1.710 ⇒ KHÔNG khớp kỳ vọng mới ⇒ chặn (không nới)",
+      rc == 5 and "CHƯA GIẢI THÍCH" in err, (rc, err[-300:]))
+det_p = D.classify_qty_residual(SDIV_EV, Q0 + RQ + 1260, Q0 + RQ, 0.0, "2025-11-04", pending_rights=RQ)
+det_0 = D.classify_qty_residual(SDIV_EV, Q0 + RQ + 1260, Q0 + RQ, 0.0, "2025-11-04")
+check("N4d classify_qty_residual: pending ⇒ share_event_credit (1.260); mặc định 0 ⇒ qty_unexplained như cũ",
+      det_p[0] == "share_event_credit" and det_0[0] == "qty_unexplained", (det_p[0], det_0[0]))
+# <<< N4
 
 
 def run_ef(tag, subs, prev, date, q_prev, q_now, mp, events=()):
@@ -539,6 +591,15 @@ cr, bl = run_ef("pay_control", [], **ef_pay)
 check("E0 ĐỐI CHỨNG active_nav ngày nộp tiền không khai báo (N3 tắt) ⇒ SCL blocked (rc=6)", TK in bl, bl)
 cr, bl = run_ef("pay_decl", [nsub()], **ef_pay)
 check("E1 có khai báo ⇒ active_nav không chặn", not bl and not cr, (cr, bl))
+# >>> N4 (PHẦN 2 — legal-vn 22/10)
+ef_sd = dict(prev="2025-11-04", date="2025-11-05", q_prev=Q0 + RQ, q_now=Q0 + RQ + 1260, mp=round(20500 / 1.09),
+             events=[SDIV_EV])
+cr, bl = run_ef("sd_control", [], **ef_sd)
+check("E2 ĐỐI CHỨNG cổ tức CP 9%, lô quyền chưa khai: credit 1.260 ⇒ blocked", TK in bl, (cr, bl))
+cr, bl = run_ef("sd_pending", [nsub()], **ef_sd)
+check("E3 N4 lô quyền chờ: credit 1.260 = (19.000−5.000)×9% ⇒ credited, không chặn",
+      TK in cr and not bl and cr[TK].get("pending_rights_qty") == RQ, (cr, bl))
+# <<< N4
 
 
 def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False):
@@ -590,6 +651,14 @@ _, _, rc, res = run_vas("decl_wrong", [nsub(qty=4999)], broker_qty=Q0 + RQ)
 check("V2 khai 4.999 nhưng broker 19.000 ⇒ WARN qty ⇒ verified=False, exit 1",
       rc == 1 and not res["verified"], (rc, res["warnings"]))
 # N4 ở giá vốn: lô quyền chờ không nhân hệ số cổ tức CP
+# >>> N4 (PHẦN 2 — legal-vn 22/10)
+acts = [{"ticker": TK, "ex_date": "2025-11-06", "qty_multiplier": 1.09}]
+key = RS.event_key(RS.validate(nsub()))
+m_rights = V.corp_action_multiplier(TK, P, "2025-11-10", acts, key=key)
+m_norm = V.corp_action_multiplier(TK, "2025-10-01", "2025-11-10", acts, key="1")
+check("V3 N4: hệ số cổ tức CP không áp lô quyền đang chờ (1,0), vẫn áp lô thường (1,09)",
+      m_rights == 1.0 and m_norm == 1.09, (m_rights, m_norm))
+# <<< N4
 
 # reconcile_equity trên snapshot V1
 old = (V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv, RE.__dict__.get("load_corp_actions"))
