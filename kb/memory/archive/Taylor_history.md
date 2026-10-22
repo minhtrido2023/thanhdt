@@ -1427,3 +1427,6 @@
 
 ## Archived 2026-10-22 (keep=12 days=0 require_done=False)
 - [2026-10-21T17:17:55Z] [lag-per-share-rights 10-22] XONG job Taylor_20261021_165514 (commit 21c10df2f): PS2 HI->LO -4.6pp (N=60) chờ Mike quant-skeptic; mở: full-engine test tầng PS2 nếu duyệt
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T17:19:01Z] [lag-rights-audit 10-22] XONG job Taylor_20261021_165512: nhánh feat/lag-rights-audit-20261022 (wt-lag-rights-20261022) chờ Mike arch-review; mở: N1-N4/X1-X3 cần user duyệt, rights_issue_alert chưa wire

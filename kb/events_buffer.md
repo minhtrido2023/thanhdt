@@ -675,3 +675,17 @@
 
 ## Consolidation 2026-10-22T06:07:02Z
 - [2026-10-22T06:00:03Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-22", "elapsed_s": 1, "rc": 0}
+
+## Consolidation 2026-10-22T07:07:02Z
+- [2026-10-22T07:02:23Z] Taylor/heartbeat — Taylor_20261022_070208: {"status": "in_progress", "note": "start: đọc báo cáo cũ + harness"}
+- [2026-10-22T07:02:57Z] Taylor/heartbeat — Taylor_20261022_070212: {"status": "in_progress", "note": "worktree wt-livermore-live-20261022 tao xong, viet livermore_trigger_check.py"}
+- [2026-10-22T07:03:09Z] Taylor/heartbeat — Taylor_20261022_070208: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261022_070208", "source": "watcher"}
+- [2026-10-22T07:03:13Z] Taylor/heartbeat — Taylor_20261022_070212: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261022_070212", "source": "watcher"}
+- [2026-10-22T07:04:09Z] Taylor/heartbeat — Taylor_20261022_070208: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261022_070208", "source": "watcher"}
+- [2026-10-22T07:04:13Z] Taylor/heartbeat — Taylor_20261022_070212: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261022_070212", "source": "watcher"}
+- [2026-10-22T07:04:29Z] Taylor/heartbeat — Taylor_20261022_070208: {"status": "in_progress", "note": "đã đọc 4 báo cáo cũ + ledger R3 park0 537e349b/a6ba34d8; đang viết PREREG"}
+- [2026-10-22T07:05:09Z] Taylor/heartbeat — Taylor_20261022_070208: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261022_070208", "source": "watcher"}
+- [2026-10-22T07:05:13Z] Taylor/heartbeat — Taylor_20261022_070212: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261022_070212", "source": "watcher"}
+- [2026-10-22T07:06:09Z] Taylor/heartbeat — Taylor_20261022_070208: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261022_070208", "source": "watcher"}
+- [2026-10-22T07:06:13Z] Taylor/heartbeat — Taylor_20261022_070212: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261022_070212", "source": "watcher"}
+- [2026-10-22T07:06:40Z] Taylor/heartbeat — Taylor_20261022_070212: {"status": "in_progress", "note": "run.sh+score.py commit xong; viet trigger_check.py roi selfcheck"}
