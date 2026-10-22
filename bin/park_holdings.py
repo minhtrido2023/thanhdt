@@ -21,6 +21,9 @@ CƠ CHẾ (đúng §F2 của thiết kế):
      oldest-first + gắn cờ UNVERIFIED cho toàn bộ ticker đó. Số UNVERIFIED **CẤM** dùng làm
      cơ sở sinh lệnh trim (§21 coding_guidelines — cùng tinh thần "không đưa số chưa đối
      soát vào quyết định").
+  4b. Lệnh BÁN TAY của user (ngoài bot) chỉ có ở statement DNSE → `statement_extra_sells`
+     thêm phần statement − journal theo (ngày, mã, chiều), đi nhánh FIFO theo ticker của mục 4
+     (2026-10-22, ca DRI 21/10). MUA chỉ-có-ở-statement KHÔNG thêm lô (để đối soát chặn).
   5. park_mv = Σ(qty × GIÁ ĐÓNG CỬA đã xác minh) trên các lô book == "PARK".
      KHÔNG dùng `positions[].marketPrice` (sửa 2026-09-09): field đó không phải giá ATC —
      ca SCL 2026-08-28 đứng im 27.600 trong khi phiên đóng 27.800. Xem resolve_close_prices():
@@ -632,8 +635,76 @@ def _fill_deltas(path):
                    "qty": delta, "price": px, "parent_id": row.get("parent_id") or ""}
 
 
+_STATEMENT_RE = re.compile(r"^dnse_khoplenh_broker_confirm_(?P<d>\d{2})-(?P<m>\d{2})-(?P<y>\d{4})\.csv$")
+
+
+def statement_extra_sells(account_label, journal_qty, since_date, until_date, exec_dir=EXEC_DIR):
+    """Lệnh BÁN có trong statement DNSE mà journal bot KHÔNG có (lệnh đặt TAY của user).
+
+    VÌ SAO (ca thật DRI 21/10/2026, user DUYỆT 22/10 21:32): user bán tay DRI ngoài bot (SpaceX
+    −1.200cp, ZaloPay −600cp @15.400). Sổ lô chỉ replay journal executor ⇒ DRI 3.700/1.900 vs
+    broker 2.500/1.300 ⇒ reconcile.ok=False ⇒ L1/L2 BLOCKED_RECONCILE cả 2 account.
+
+    CÙNG HỢP ĐỒNG với `exdate_frame.net_fills_journal_and_broker` (f0e293c30, arch-review APPROVED):
+      · Đọc statement qua `broker_fill_confirm.load_broker_fills(allow_fetch=False)` — lọc ĐÚNG
+        tiểu khoản (§12, dtype=str giữ số 0 dẫn đầu), không tự gọi Gmail từ đường sizing.
+      · KHỬ TRÙNG theo (ngày, mã, chiều) = `max(journal, statement)`, KHÔNG cộng ⇒ phần thêm vào
+        sổ = statement − journal (>0). Fill của bot nằm ở CẢ HAI nguồn nên không bị trừ lần 2.
+      · Statement thiếu / không parse được ⇒ ngày đó giữ hành vi CŨ (chỉ journal), có ghi chú.
+
+    `journal_qty` = {(ngày, mã, chiều): KL} của CHÍNH các fill journal mà sổ đã replay (sau lọc
+    snapshot) — so với cái sổ đã áp, không với một bản đếm khác.
+
+    CHỈ chiều BÁN được áp (FIFO theo ticker, không tag book ⇒ UNVERIFIED — docstring mục 4).
+    MUA chỉ có ở statement KHÔNG được thêm lô: không có book để gán ⇒ để lệch đối soát chặn
+    (fail-closed), chỉ ghi chú. Phần lệch còn lại sau bước này vẫn làm reconcile.ok=False.
+
+    Statement không có giờ khớp ⇒ lệnh bán tay đặt ở cuối ngày (`<ngày>T23:59:59`): sau mọi
+    fill bot cùng ngày, nên không bao giờ bán trước lô mua cùng phiên.
+
+    Trả (events, notes): events cùng dạng `_fill_deltas` (book="" ⇒ nhánh FIFO theo ticker).
+    """
+    from broker_fill_confirm import BrokerFills, load_broker_fills
+    wc_root = os.path.dirname(os.path.dirname(os.path.abspath(exec_dir)))
+    days = []
+    for path in glob.glob(os.path.join(exec_dir, "dnse_khoplenh_broker_confirm_*.csv")):
+        m = _STATEMENT_RE.match(os.path.basename(path))
+        if not m:
+            continue
+        d = f"{m.group('y')}-{m.group('m')}-{m.group('d')}"
+        if since_date <= d <= until_date:
+            days.append((d, os.path.basename(path)))
+    events, notes = [], []
+    for d, fname in sorted(days):
+        try:
+            bf = load_broker_fills(d, account_label, wc_root, allow_fetch=False)
+        except Exception as e:   # dòng statement hỏng (vd khối lượng NaN) KHÔNG được làm sập sổ
+            bf = BrokerFills(False, f"không parse được: {type(e).__name__}: {e}")
+        if not bf.available:
+            notes.append(f"{d} statement DNSE KHÔNG dùng được ({bf.reason}) ⇒ ngày này chỉ journal")
+            continue
+        keys = set(bf.by_key) | {(tk, sd) for (dd, tk, sd) in journal_qty if dd == d}
+        for tk, side in sorted(keys):
+            j, b = journal_qty.get((d, tk, side), 0), int(bf.qty(tk, side))
+            if j > b:
+                notes.append(f"{d} {tk} {side}: journal {j:,} > statement {b:,} (giữ journal)")
+            elif b > j and side == "buy":
+                notes.append(f"{d} {tk} MUA +{b - j:,}cp chỉ có ở statement DNSE — không có book, "
+                             f"KHÔNG thêm lô (để đối soát chặn)")
+            elif b > j:
+                v = bf.by_key[(tk, side)]
+                events.append({"ts": f"{d}T23:59:59", "ticker": tk, "side": "sell", "book": "",
+                               "play_type": "", "qty": b - j,
+                               "price": v["value"] / v["qty"] if v["qty"] else 0.0,
+                               "parent_id": "broker_statement", "_file": fname})
+                notes.append(f"{d} {tk} BÁN +{b - j:,}cp chỉ có ở statement DNSE (ngoài journal bot) "
+                             f"⇒ trừ lô FIFO theo ticker")
+    return events, notes
+
+
 def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR,
-                  broker=None, corp_actions=None, price_fn=None, need_price=True, rights_subs=None):
+                  broker=None, corp_actions=None, price_fn=None, need_price=True, rights_subs=None,
+                  broker_statement=True):
     """Vị thế theo book tại `asof` (mặc định hôm nay ICT).
 
     `broker` = (positions, cash, meta) truyền sẵn — chỉ dùng cho selfcheck; production để None.
@@ -650,6 +721,9 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
     `compute_jit_unpark` KHÔNG được đổi mặc định này: `park_mv` là mẫu số cấp tài khoản, một mã
     thiếu giá phải chặn CẢ LƯỢT tính pool (lý do nằm ở `resolve_close_prices` docstring), khác hẳn
     `book_lot_snapshot` — số lượng bán theo từng mã không phụ thuộc giá mã khác.
+
+    `broker_statement=True` (2026-10-22): replay thêm lệnh BÁN TAY có trong statement DNSE mà
+    journal bot không có — xem `statement_extra_sells`. False = hành vi cũ (chỉ journal).
     """
     asof = asof or today_ict()
     prof = account_profile(account_label)
@@ -684,6 +758,17 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                 for path in journal_files(account_label, day0, asof, exec_dir)
                 for ev in _fill_deltas(path)
                 if not (snap_ts and ev["ts"] and ev["ts"] <= snap_ts)]
+    if broker_statement:
+        jq = {}
+        for _ts, _k, ev, _f in timeline:
+            k = (ev["ts"][:10], ev["ticker"], ev["side"])
+            jq[k] = jq.get(k, 0) + ev["qty"]
+        # ngày chụp snapshot đã nằm trong bootstrap ⇒ statement chỉ tính từ ngày SAU đó
+        since = max(day0, (dt.date.fromisoformat(snap_ts[:10]) + dt.timedelta(days=1)).isoformat()) \
+            if snap_ts else day0
+        st_events, st_notes = statement_extra_sells(account_label, jq, since, asof, exec_dir)
+        timeline += [(ev["ts"], 0, ev, ev["_file"]) for ev in st_events]
+        book.warnings.extend(st_notes)
     timeline += [(a["broker_effective_ts"], 1, a, "corp_actions.json") for a in acts]
     # N1 — quyền mua user đã khai: (2) chụp lô hưởng quyền ở ĐẦU phiên GDKHQ (trước mọi fill của
     # ngày đó: "YYYY-MM-DD" < "YYYY-MM-DDT09:.."), (3) thêm lô mới lúc CP về broker (credit_date).
