@@ -1,0 +1,22 @@
+[BQ_LOCAL_CACHE] ready — 15 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/entry_risk_tech_20261022/lag_events.py:83: RuntimeWarning: Mean of empty slice
+  px_impr_bps=np.nanmean(impr) * 1e4, mean_Y_var=yv.mean()))
+[control] N=5361 mã=789 mùa=51 | Y TB 4.551% (pin nghiên cứu 10-22: 4,551%) | Open cache vs buyO0 |dev|>1bps: 0.00% | Close e+25 vs exA0 |dev|>1bps: 0.06%
+[đặc trưng NaN] VOL60=0, RUN20=0, DIST52=0, GAP=0
+
+[Q1 LAG-event] Δ = Y_biến_thể − Y_control (pp), CI cụm-mùa; không khớp ⇒ lãi nhàn rỗi (pin0=0 / pin1M=dep1m)
+rule   pin      d  ci_lo  ci_hi     p   d_IS  d_OOS  loyo_min  loyo_max  nofill  nofill_top  px_impr_bps  mean_Y_var  holm
+  R1  pin0 -1.787 -2.808 -0.881 0.000 -1.091 -2.158    -2.085    -1.183  48.032      53.050        222.2       2.764  True
+  R1 pin1M -1.636 -2.647 -0.735 0.000 -0.901 -2.029    -1.930    -1.033  48.032      53.050        222.2       2.915  True
+  R2  pin0 -0.104 -0.315  0.114 0.372 -0.204 -0.051    -0.149    -0.015   6.230       5.036          NaN       4.447 False
+  R2 pin1M -0.084 -0.295  0.135 0.469 -0.179 -0.033    -0.128     0.006   6.230       5.036          NaN       4.467 False
+  R3  pin0 -0.331 -0.693 -0.007 0.044 -0.046 -0.483    -0.388    -0.145   0.000       0.000        -34.6       4.220 False
+  R3 pin1M -0.331 -0.693 -0.007 0.044 -0.046 -0.483    -0.388    -0.145   0.000       0.000        -34.6       4.220 False
+
+[Q2 LAG-event] ngưỡng IS: VOL60≥0.593 RUN20≥0.093 DIST52≤-0.304
+ group  n_grp  hit_grp  hit_rest  d_hit  ci_lo  ci_hi     p  d_IS  d_OOS  loyo_min  loyo_max  mae_grp  mae_rest  d_mae  d_mae_lo  d_mae_hi  p5_grp  p5_rest  Y_grp  Y_rest   dY  dY_lo  dY_hi  holm    c1   c2   c3
+ G_VOL   1266    30.49     12.80  17.69  14.30  21.60 0.000 19.36  16.79     16.96     18.69   -11.92     -7.54  -4.38     -5.24     -3.59  -22.97   -14.29   5.09    4.38 0.71  -1.42   3.01  True  True True True
+ G_RUN   1081    20.91     15.98   4.93  -0.96  10.34 0.093  5.62   4.55      3.53      8.29    -9.52     -8.34  -1.18     -2.42      0.25  -19.12   -14.96   4.66    4.52 0.14  -1.76   2.03 False False True True
+G_DEEP   1466    24.69     14.07  10.62   2.21  19.42 0.001  6.29  12.11      3.44     12.41   -10.59     -7.82  -2.77     -4.97     -0.80  -17.90   -14.82   4.91    4.42 0.49  -2.06   3.24  True  True True True
+[G_VOL] ΔP5 lợi suất = -8.69pp CI95 cụm [-10.96; -6.00]
+[ghi] lag_events_features.csv, q1_lag_events.csv, q2_lag_events.csv
