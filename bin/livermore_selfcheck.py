@@ -130,10 +130,12 @@ def inner():
     check("dt-enter-15", T.dt_kinds(clk()) == ["DT_ENTER_CRISIS"])
     check("dt-enter-14", T.dt_kinds({**clk(), "k": 14}) == [])
     check("dt-enter-exbull", T.dt_kinds({**clk(), "cand": 5, "k": 20}) == ["DT_ENTER_EXBULL"])
-    check("dt-need25-BULL-không", T.dt_kinds({**clk(), "cand": 4}) == [])
-    check("dt-exit-5", T.dt_kinds(dict(active=True, cand=3, k=5, need=10, committed=1)) == ["DT_EXIT_CRISIS"])
+    check("dt-exit-5", T.dt_kinds(dict(active=True, cand=3, k=5, need=10, committed=1)) == ["DT_MOVE_CRISIS_TO_NEUTRAL"])
     check("dt-exit-4", T.dt_kinds(dict(active=True, cand=3, k=4, need=10, committed=1)) == [])
-    check("dt-neutral→bear-không", T.dt_kinds(dict(active=True, cand=2, k=9, need=10, committed=3)) == [])
+    check("dt-neutral→bear-k9-bắn", T.dt_kinds(dict(active=True, cand=2, k=9, need=10, committed=3)) == ["DT_MOVE_NEUTRAL_TO_BEAR"])
+    check("dt-neutral→bear-k4-không", T.dt_kinds(dict(active=True, cand=2, k=4, need=10, committed=3)) == [])
+    check("dt-need10-k5-bắn", T.dt_kinds(dict(active=True, cand=4, k=5, need=10, committed=3)) == ["DT_MOVE_NEUTRAL_TO_BULL"])
+    check("dt-need25-k14-không", T.dt_kinds(dict(active=True, cand=5, k=14, need=25, committed=4)) == [])
     check("dt-inactive", T.dt_kinds(dict(active=False, committed=1)) == [] and T.dt_kinds(None) == [])
     dates = [D(2026, 10, 1)]
     while len(dates) < 12:
@@ -353,6 +355,7 @@ def inner():
 MUTANTS = [
     ("livermore_trigger_check.py", "COOLDOWN = 5", "COOLDOWN = 1", "bỏ dedupe 5 phiên"),
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 25, 5", "ngưỡng vào 15→25"),
+    ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 15, 10", "ngưỡng need10 5→10"),
     ("livermore_trigger_check.py", "NEAR_PCT, HI_LO_WIN, BREAK_WIN = 0.02,", "NEAR_PCT, HI_LO_WIN, BREAK_WIN = 0.05,", "biên 2%→5%"),
     ("livermore_trigger_check.py", "    if as_of < exp:", "    if False:", "bỏ kiểm as-of lệch"),
     ("livermore_trigger_check.py", 'if run0 and run0.get("status") == "done" and not dry:', "if False:", "bỏ idempotent/resume báo"),

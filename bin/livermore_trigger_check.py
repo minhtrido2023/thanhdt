@@ -2,8 +2,8 @@
 """Cò kích hoạt Livermore "đọc sống" — chạy T2-T6 SAU 19:01 ICT (DT5G publish xong).
 
 Kích hoạt (đủ MỘT):
-  (i)  DT gate candidate (dna_report.get_dt_gate_clock): VÀO CRISIS/EX-BULL (need=25) với k>=15,
-       hoặc RA CRISIS/EX-BULL (need=10, committed đang là CRISIS/EX-BULL) với k>=5;
+  (i)  DT gate candidate (dna_report.get_dt_gate_clock): need=25 với k>=15, hoặc need=10 với k>=5
+       (MỌI candidate, kể cả NEUTRAL→BEAR);
   (ii) VNINDEX đóng cửa cách đỉnh/đáy ĐÓNG CỬA 252 phiên <=2%, hoặc đóng cửa phá biên đóng cửa 60 phiên TRƯỚC.
 Dedupe: cùng (loại, as-of) chạy lại = no-op; mỗi loại tối đa 1 lần / 5 phiên (cooldown theo bar).
 Mỗi as-of tối đa 1 lần gọi livermore_run.sh. WARN-only: lỗi ở đây KHÔNG chặn gì khác (cron độc lập).
@@ -32,13 +32,15 @@ STATE_FILE = lambda: os.path.join(C.STATE_DIR, "livermore_trigger.json")      # 
 
 
 def dt_kinds(clock):
+    """Candidate đang tích luỹ: need==25 (VÀO CRISIS/EX-BULL) với k>=15; need==10 (mọi chuyển khác,
+    kể cả NEUTRAL→BEAR) với k>=5."""
     if not clock or not clock.get("active"):
         return []
     cand, k, need, com = clock["cand"], clock["k"], clock["need"], clock.get("committed")
-    if need == 25 and cand in (CRISIS, EXBULL) and k >= ENTER_K:
-        return [f"DT_ENTER_{STATE_NAME[cand]}"]
-    if need == 10 and com in (CRISIS, EXBULL) and k >= EXIT_K:
-        return [f"DT_EXIT_{STATE_NAME[com]}"]
+    if need == 25 and k >= ENTER_K:
+        return [f"DT_ENTER_{STATE_NAME.get(cand, cand)}"]
+    if need == 10 and k >= EXIT_K:
+        return [f"DT_MOVE_{STATE_NAME.get(com, com)}_TO_{STATE_NAME.get(cand, cand)}"]
     return []
 
 
