@@ -60,6 +60,9 @@ if "--mutants" in sys.argv[1:]:
         ("M21 alert bỏ dòng khoá chờ niêm yết", "auto_exit_inject.py",
          "    for lk in locked_notes or []:", "    for lk in []:"),
         # <<< B1 vòng 2
+        ("M22 B2 net_fills_journal_and_broker (đường sizing broker_statement=True) bỏ cộng lô quyền", "exdate_frame.py",
+         "    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():",
+         "    for d, evs in {}.items():"),
         ("M7 verify bỏ khai báo", "verify_account_snapshot.py",
          "    for date, evs in sorted(rights_sub.fill_events(", "    for date, evs in sorted([] if True else rights_sub.fill_events("),
         ("M8 verify bỏ đối chiếu KL broker", "verify_account_snapshot.py",
@@ -154,6 +157,7 @@ import verify_account_snapshot as V  # noqa: E402
 import reconcile_equity as RE  # noqa: E402
 import dividend_adjusted_return as DAR  # noqa: E402
 import cash_identity as CI  # noqa: E402
+import broker_fill_confirm as BFC  # noqa: E402 — B2: thay statement DNSE bằng bản giả (hermetic)
 import exdate_frame as EF  # noqa: E402
 import corp_action_daily as CAD  # noqa: E402 — chèn mike/bin (master) lên đầu sys.path ⇒ import SAU CÙNG
 sys.path.insert(0, HERE)                    # …và đặt lại bin/ của cây đang kiểm lên đầu
@@ -624,8 +628,10 @@ check("N4d classify_qty_residual: pending ⇒ share_event_credit (1.260); mặc 
 # <<< N4
 
 
-def run_ef(tag, subs, prev, date, q_prev, q_now, mp, events=()):
-    """exdate_frame.classify_positions — cổng của compute_active_nav (mẫu số sizing)."""
+def run_ef(tag, subs, prev, date, q_prev, q_now, mp, events=(), broker_statement=False):
+    """exdate_frame.classify_positions — cổng của compute_active_nav (mẫu số sizing).
+    `broker_statement=True` = đường production (`compute_active_nav.py` gọi đúng cờ này): statement DNSE
+    giả CÓ mặt nhưng KHÔNG có dòng SCL nào (CP quyền về không qua lệnh sàn) — hermetic, không đọc data/ thật."""
     d = ndir("E_" + tag, subs)
     write_raw(d, prev, [pos_rec(f"{prev}T19:05:00", q_prev, mp), bal_rec(f"{prev}T19:05:10", CASH_PAID)])
     write_raw(d, date, [pos_rec(f"{date}T19:10:00", q_now, mp), bal_rec(f"{date}T19:10:20", CASH_PAID)])
@@ -634,15 +640,17 @@ def run_ef(tag, subs, prev, date, q_prev, q_now, mp, events=()):
     with open(os.path.join(d, f"corp_action_daily_{date}.json"), "w") as f:
         json.dump({"asof": date, "status": "OK", "usable": True, "feed_status": "FRESH",
                    "upcoming_events_held": list(events)}, f)
-    old = (D.EXEC_DIR, V.EXEC_DIR, CAD.snapshot_path, D.rights_subscription_check)
+    old = (D.EXEC_DIR, V.EXEC_DIR, CAD.snapshot_path, D.rights_subscription_check, BFC.load_broker_fills)
+    BFC.load_broker_fills = lambda *a, **k: BFC.BrokerFills(True, "selfcheck statement rỗng", "fx")
     D.EXEC_DIR = V.EXEC_DIR = d
     CAD.snapshot_path = lambda x, failed=False: os.path.join(d, f"corp_action_daily_{x}.json")
     D.rights_subscription_check = lambda *a, **k: (False, "selfcheck: N3 tắt")
     try:
         with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-            return EF.classify_positions(ACCT, ACCT_NO, date, {TK: {"total": q_now, "marketPrice": mp}})
+            return EF.classify_positions(ACCT, ACCT_NO, date, {TK: {"total": q_now, "marketPrice": mp}},
+                                         broker_statement=broker_statement)
     finally:
-        D.EXEC_DIR, V.EXEC_DIR, CAD.snapshot_path, D.rights_subscription_check = old
+        D.EXEC_DIR, V.EXEC_DIR, CAD.snapshot_path, D.rights_subscription_check, BFC.load_broker_fills = old
 
 
 ef_pay = dict(prev=P_PREV, date=P, q_prev=Q0, q_now=Q0 + RQ, mp=20000)
@@ -659,6 +667,18 @@ cr, bl = run_ef("sd_pending", [nsub()], **ef_sd)
 check("E3 N4 lô quyền chờ: credit 1.260 = (19.000−5.000)×9% ⇒ credited, không chặn",
       TK in cr and not bl and cr[TK].get("pending_rights_qty") == RQ, (cr, bl))
 # <<< N4
+# >>> B2 vòng 2 (arch-review): đường sizing PRODUCTION (compute_active_nav ⇒ broker_statement=True)
+cr, bl = run_ef("pay_control_bs", [], broker_statement=True, **ef_pay)
+check("E0b ĐỐI CHỨNG broker_statement=True, không khai báo ⇒ SCL blocked", TK in bl, bl)
+cr, bl = run_ef("pay_decl_bs", [nsub()], broker_statement=True, **ef_pay)
+check("E1b broker_statement=True + khai báo ⇒ lô quyền cộng vào lệnh khớp thật ⇒ không chặn",
+      not bl and not cr, (cr, bl))
+cr, bl = run_ef("sd_control_bs", [], broker_statement=True, **ef_sd)
+check("E2b ĐỐI CHỨNG broker_statement=True, cổ tức CP, lô quyền chưa khai ⇒ blocked", TK in bl, (cr, bl))
+cr, bl = run_ef("sd_pending_bs", [nsub()], broker_statement=True, **ef_sd)
+check("E3b broker_statement=True + N4 lô chờ ⇒ credited 1.260, không chặn",
+      TK in cr and not bl and cr[TK].get("pending_rights_qty") == RQ, (cr, bl))
+# <<< B2 vòng 2
 
 
 def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False):
