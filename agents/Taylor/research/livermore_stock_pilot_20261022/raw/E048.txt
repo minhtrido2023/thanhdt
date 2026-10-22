@@ -1,0 +1,9 @@
+Cấu trúc 250 phiên: giá giảm từ 100 về đáy 63.8 (i118, khối lượng 1.78). Sau đó là pha tích luỹ với khối lượng bùng lên (i127–i151, có phiên 9.68). Pha markup đi từ 78 (i199) lên 128.45 (i244), vượt hẳn vùng đỉnh cũ 100–106 nên không còn cung kẹt phía trên.
+
+Tuy vậy, 12 phiên gần nhất cho thấy churn trong biên 117–128 với khối lượng cao liên tục (3–7×). Phiên i244 là upthrust: đỉnh 128.45 nhưng đóng 121.9, vol 6.74. Phiên i247 quét xuống 118.27. Khối lượng chưa cạn khi điều chỉnh, nên có dấu hiệu phân phối sớm sau một nhịp tăng +60%. Đỡ gần là 117. Bên dưới là vùng 107–113 (i220–229). Mức −15% rơi khoảng 104, ngay mép breakout 100–106. Mức đó chạm được nếu biên này vỡ.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 117 (đáy biên i238–i247) với khối lượng lớn; mục tiêu kế tiếp là vùng 107–113.
+CONTAMINATION: NONE

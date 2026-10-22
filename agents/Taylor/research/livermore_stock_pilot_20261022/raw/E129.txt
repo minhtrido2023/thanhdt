@@ -1,0 +1,7 @@
+Cổ phiếu biến động thấp, đang trong pha markup đều ở cả 3 thang. Giá đi từ vùng nền 95–103 (i≈100–150) lên 128 với chuỗi đáy cao dần: 105 (i179), 113 (i206), 120 (i220–223), 121.3 (i239). Hai tuần gần nhất (i235–248) nén chặt trong biên 122–127. Có dấu hiệu hấp thụ cung: i244 khối lượng 3.41x nhưng giá đứng yên. Phiên i249 phá lên đỉnh mới 128.5 với khối lượng 3.21x, đóng cửa sát đỉnh phiên. Không có đỉnh cũ nào phía trên nên không có cung kẹt. Mức −15% (~109) nằm dưới hai bậc nền 113–116 và 120–122, khó chạm với biên độ ngày chỉ khoảng 1–2%. Rủi ro chính là mua sau phiên tăng mạnh và breakout thất bại kéo giá về lại biên nền.
+
+P_HIT15: 0.11
+RISK: LOW
+P_POS: 0.58
+INVALIDATION: Đóng cửa dưới 121.3 (đáy nền i239), tức breakout i249 thất bại và mất cấu trúc đáy cao dần
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu đang ở pha markup trên cả ba thang thời gian. Ở thang 250 phiên, giá tăng từ khoảng 76 lên 226. Ở thang 60 phiên, cầu bùng nổ từ i174 với khối lượng 6x median. Ở thang 20 phiên, giá đi thẳng đứng, tăng khoảng 80% từ đáy shakeout 129.89 (i229) lên 235.70 (i247) trong khoảng 18 phiên.
+
+Rủi ro nằm ở độ dốc. Tại i248, giá bị từ chối ở 235.70 với khối lượng 4.24, và i249 là thanh inside đóng thấp hơn. Có dấu hiệu sớm của climax/churn, nhưng chưa có thanh đảo chiều khối lượng lớn.
+
+Mã này từng có những cú rũ sâu: i221 có râu dưới chạm 149.10, i228 rơi về 134.84. Mỗi cú như vậy giảm khoảng 15–20% chỉ trong vài phiên. Vùng hỗ trợ gần nhất là mép breakout 194–206 (i239–243), sát mức −15% (khoảng 192). Bên dưới vùng này là air-pocket xuống 170–175.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 194 (mép breakout i239–242) với khối lượng >3x thì xác nhận phân phối; còn vượt và giữ trên 236 với khối lượng giảm thì xu hướng tăng tiếp tục.
+CONTAMINATION: NONE

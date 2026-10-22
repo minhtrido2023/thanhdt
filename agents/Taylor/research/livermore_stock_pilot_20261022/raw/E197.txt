@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, giá đã đi trọn một vòng. Pha markup từ nền 84–92 (i55–87) lên đỉnh 214.84 (i126) với khối lượng climax 15–17x tại i109–114. Sau đó là phân phối, đẩy giá xuống 105–120. Nhịp hồi thứ hai chỉ lên 172.43 (i214), tức là một đỉnh thấp hơn. Từ đó pha markdown kéo giá về 95.57 (i246).
+
+Ở thang 20 phiên, cú hồi từ 98 lên 111 diễn ra trên khối lượng cạn (0.31, 0.18). Đây không phải follow-through, giống một nhịp hồi kỹ thuật trong xu hướng giảm hơn.
+
+Ngưỡng −15% tính từ giá vào khoảng 111 là ≈94.7, nằm ngay dưới đáy i246. Biên độ ngày lớn và thanh khoản mỏng, nên ngưỡng này dễ bị chạm. Hỗ trợ cấu trúc thật nằm ở nền 84–92. Cung kẹt phía trên rất dày ở vùng 120–143.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 123–127 kèm khối lượng >2x (phá vùng gãy i237–241) thì luận điểm giảm bị vô hiệu.
+CONTAMINATION: NONE

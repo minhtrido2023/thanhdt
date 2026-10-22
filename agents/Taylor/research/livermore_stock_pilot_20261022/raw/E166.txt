@@ -1,0 +1,7 @@
+Trên thang 250 phiên, cổ phiếu là một range rất mỏng, nhiều phiên Volume 0, quanh vùng 68–87 với các cú đâm và giật cực đoan. Đáy range nằm ở 65.3–69 (i=96, 99, 87). Phiên climax tại i=195 có Volume ×103 kéo giá lên 90.9 nhưng không có follow-through. Sau đó giá phân phối trong vùng 82–88, rồi chuyển sang markdown từ i=204. Chuỗi đỉnh thấp dần: 81.5 (i=218), 79.6 (i=222), 78.3 (i=228), 73.2 (i=240). Hiện giá đã thủng đáy range, đóng cửa ở mức thấp 250 phiên là 64.5. Khối lượng nhích lên ở các phiên giảm (i=246, 248) và không có climax bán nào. Phía trên là nguồn cung bị kẹt dày ở 69–78. Thanh khoản mỏng nên dễ hình thành air-pocket. Mức −15% tương ứng khoảng 54.8, không có hỗ trợ nào trong dữ liệu.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Đóng cửa lấy lại trên 72–73 (vào lại range, vượt đỉnh i=240) với khối lượng >2× median thì luận điểm giảm bị vô hiệu.
+CONTAMINATION: NONE

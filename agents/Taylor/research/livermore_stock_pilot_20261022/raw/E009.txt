@@ -1,0 +1,7 @@
+Cổ phiếu đang trong pha markup dạng parabol. Giá đi từ đáy 53.9 (i=133, sau một pha markdown dài) lên 180.4, tức +235%. Riêng 20 phiên gần nhất tăng khoảng +70%, từ vùng 104–110 lên 180. Giá đã vượt xa đỉnh cũ 124 (i=21), nên phía trên không còn cung kẹt. Tuy nhiên khối lượng các phiên 245–249 lên tới 4–6 lần median, kèm biên độ rộng. Phiên 247 đóng cửa ở đáy, còn phiên 248 có khối lượng 6.03 nhưng giá chỉ đóng hồi về vùng cũ. Đây là dấu hiệu churning hoặc climax. Phiên 249 gap lên và đóng ở đỉnh, tức là mua đuổi. Biên độ ngày khoảng 5–7%, nên một nhịp điều chỉnh bình thường về lấp gap 147–150 (i=241/242) đã tương đương −17%. Rủi ro margin rút gấp khi đảo chiều là cao.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Mất vùng 162–168 (đáy phiên 247–248) với khối lượng lớn thì xác nhận climax; luận điểm tăng chỉ còn nếu giữ được trên 168 và khối lượng co lại khi tích luỹ.
+CONTAMINATION: NONE

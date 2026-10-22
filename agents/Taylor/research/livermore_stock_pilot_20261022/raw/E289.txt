@@ -1,0 +1,13 @@
+**Phân tích:** Cổ phiếu thanh khoản rất mỏng, nhiều phiên Volume bằng 0. Giá đi ngang trong biên khoảng 94–128 suốt khoảng 200 phiên, đáy biên quanh 93.5–96 (i=180, 201, 167, 187).
+
+Từ i=240 đến 242, khối lượng bùng lên 25–51 lần median ngay tại vùng 105–116, tức là phân phối. Sau đó giá thủng đáy biên: i=246 và 247 giảm trần liên tiếp, mỗi phiên khoảng −10%, xuống 79.
+
+Ở i=248–249, khối lượng 31–35 lần median và i=249 đóng cửa 83.63 ở sát đỉnh phiên. Đây có thể là climax hoặc nỗ lực bắt đáy. Tuy vậy chưa có phiên follow-through nào, và vùng 94–97 vừa bị phá giờ thành cung kẹt dày phía trên.
+
+Biên độ dao động lớn, đã có hai phiên sàn liên tiếp, và cả cấu trúc 250 phiên chuyển sang markdown. Vì vậy khả năng Low chạm khoảng 71 (−15% so với giá vào) là đáng kể.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 78.7 (đáy phiên climax i=248–249) với khối lượng lớn là luận điểm bắt đáy sai; đóng cửa lại trên 97 với khối lượng là đáy climax được xác nhận.
+CONTAMINATION: NONE

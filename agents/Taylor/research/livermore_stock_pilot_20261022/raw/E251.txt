@@ -1,0 +1,11 @@
+Giá đi từ khoảng 100 lên 205 (i160) theo pha markup. Sau đó có một cú markdown/climax rất mạnh: từ 205 rơi xuống 118 tại i190 (Low), khối lượng 2.2–2.6 ở các phiên i162, i169, i180, i186. Phiên i190 rút chân rồi bật lại ngay.
+
+Từ i195 đến i243, giá tích luỹ trong vùng 163–193. Các phiên quét xuống 166–169 (i219, i224, i229, i231, i245) đều mở thấp rồi bị kéo lên, chứng tỏ cầu đỡ tốt. Hiện giá đã thoát lên 198–200, khối lượng 2.29 ở i249. Tuy vậy, giá đang đâm thẳng vào vùng cung kẹt 201–205 của đỉnh i160, nơi có lượng hàng đu đỉnh trước cú sập 42%.
+
+Cấu trúc tích cực nhưng điểm vào nằm ngay dưới trần. Biên dao động ngày lớn nên mức −15% (≈170) vẫn nằm trong tầm với nếu breakout thất bại.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 184 (đáy nền gần) với khối lượng lớn, tức breakout qua 201–205 thất bại và giá quay lại trong range.
+CONTAMINATION: NONE

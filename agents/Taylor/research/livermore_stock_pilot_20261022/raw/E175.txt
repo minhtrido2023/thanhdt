@@ -1,0 +1,9 @@
+Ở thang 250 phiên, cổ phiếu đang trong pha markup rõ ràng. Đáy là vùng 80–85 (i92–105, có climax khối lượng 4.4). Sau đó giá tạo các đáy cao dần và tích lũy phẳng ở 126–136 (i196–238, khối lượng cạn 0.1–0.3). Giá breakout khỏi vùng 137–139 tại i239 và i245 với khối lượng 2.1 và 2.56.
+
+Điểm cần lưu ý: giá đã tăng khoảng 10% trong 5 phiên lên 151. Thanh i249 có biên độ rộng nhưng khối lượng chỉ 0.39, tức cầu ở đỉnh mỏng và giá vào bị kéo căng. Phía trên không còn cung kẹt. Hỗ trợ gần là mép breakout 137–139 (khoảng −9%). Mức −15% (khoảng 128) trùng với đáy nền 126–129, nên chỉ bị chạm nếu breakout thất bại hoàn toàn.
+
+P_HIT15: 0.24
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 136 (mất mép breakout 137–139) với khối lượng tăng, tức breakout thất bại và quay về nền.
+CONTAMINATION: NONE

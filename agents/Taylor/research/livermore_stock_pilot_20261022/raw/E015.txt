@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu ở pha markup bậc thang từ khoảng 130 lên đỉnh 252–263 (i185–199). Từ i199, giá chuyển sang biên ngang/phân phối 220–253 trong khoảng 50 phiên, với khối lượng cao ở các nhịp giảm (i209 4.21, i211 3.89).
+
+Phiên i241–243 phá đáy biên 219, rơi xuống 202.6. Sau đó giá kéo lại rất nhanh: i246 tăng lên 222.85 với khối lượng 2.93, i249 đóng 229.8 với khối lượng 2.28. Đây là dạng spring/shakeout được hấp thụ, khá tích cực. Tuy vậy, cung kẹt ở 236–253 còn dày và cổ phiếu có lịch sử sập mạnh (i127→132 giảm khoảng 35%).
+
+Mức −15% tính từ giá vào khoảng 230 là ≈195.5, nằm dưới đáy spring 202.6.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 202 (thủng đáy spring i243) thì cấu trúc tích lũy bị vô hiệu, dễ có air-pocket về vùng 175–195.
+CONTAMINATION: NONE

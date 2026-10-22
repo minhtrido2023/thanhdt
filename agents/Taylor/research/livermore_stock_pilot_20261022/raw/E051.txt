@@ -1,0 +1,13 @@
+**Phân tích:** Ở cả ba thang, cổ phiếu đang trong pha markup. Giá đi từ 100 lên 300, đáy sau cao hơn đáy trước, và khối lượng tăng dần qua các phiên 167–228. Thanh 227 (V 3.66) cùng gap 228 lên 310.44 là một cú climax ngắn hạn.
+
+Nhịp điều chỉnh sau đó về 276.58 (i=239, V 2.09) bị hấp thụ: thanh này rút chân dài và đóng cửa ở 285. Khối lượng khi giá đi ngang 240–242 cạn dần, rồi giá hồi lên 300.32 với khối lượng vừa phải.
+
+Vùng cung gần nhất là 303–310, nơi người mua ở đỉnh gap đang bị kẹt. Chưa có follow-through khối lượng lớn để vượt vùng này.
+
+Mức −15% tương ứng khoảng 255, trùng nền breakout 255–262 (i=181–193). Để chạm mức đó cần một pha distribution thật sự. Rủi ro này không thấp vì giá đã tăng gấp ba, nhưng biên độ ngày hiện tại hẹp.
+
+P_HIT15: 0.24
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 276.5 (đáy i=239) với khối lượng >1.5× thì cấu trúc higher-low bị phá, nguy cơ trôi về 255–262.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu tăng khoảng 2,7 lần trong khoảng 75 phiên, từ nền ~105–140 (i=133–172) lên 275. Đây là pha markup dốc, khối lượng gấp hàng chục lần trung vị. Từ i=207 giá đi ngang trong vùng phân phối/tích luỹ rộng 201–274: i=221 rút xuống 201,8, i=240 xuống 213. Đỉnh i=237 (273,9, KL 29,5) là breakout thất bại, kéo giá về 221.
+
+Hai phiên cuối là i=248 (+7%, KL 25) và i=249 (đóng cửa tại mức cao nhất 275,5, KL 26,5). Giá vượt đỉnh 274 nhưng mang dấu hiệu climax. Giá mua ở phiên mở cửa kế tiếp nhiều khả năng có gap lên.
+
+Biên độ ngày khoảng 8–12%. Mức −15% tính từ ~280 là ~238, nằm ngay giữa vùng nền cũ. Nếu breakout thất bại lần hai, giá dễ quay về 220–235. Theo lập luận, follow-through là có thể nhưng không cân xứng với rủi ro.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Giá đóng cửa trở lại dưới 249 (đáy phiên i=249) với khối lượng lớn → breakout thất bại, mục tiêu về 221–213.
+CONTAMINATION: NONE

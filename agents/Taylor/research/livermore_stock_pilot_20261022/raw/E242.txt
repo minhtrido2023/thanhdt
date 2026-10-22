@@ -1,0 +1,14 @@
+Cổ phiếu rất kém thanh khoản: nhiều phiên khối lượng bằng 0, giá nhảy theo bước ±5–7%. Ở thang 250 phiên, giá đi ngang rộng trong vùng 88.5–125.6 và chưa có xu hướng. Lõi giá nằm ở 95–112.
+
+- **Phía dưới:** sàn 88.5–90 đã được giữ nhiều lần (i=24, 41, 62, 69, 145, 219, 246).
+- **Phía trên:** cung chặn ở 112–121. Các nhịp lên i=172–175 và i=225 đều thất bại.
+- **Phiên i=246:** khối lượng 157× median và chạm 88.52. Đây là climax tại đáy range nhưng không có follow-through: i=249 lại mở gap xuống 95.93.
+- **Giá hiện tại:** 98.33, giữa range.
+
+Để thủng −15% (khoảng 83.5) cần phá sàn một năm. Rủi ro này có thật vì thanh khoản mỏng, nhưng chưa phải kịch bản chính. Kỳ vọng lợi suất gần trung tính, dao động nhiễu lớn.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 88.5 (thủng sàn range 250 phiên) kèm khối lượng lớn
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên đây là một pha markup theo bậc. Nền giá 125–140 kéo dài khoảng 90 phiên (i135–227), có các lần kiểm tra đáy 124–126 (i144, 203). Cổ phiếu bứt khỏi nền ở i228–232 với khối lượng 10–21 lần median, để lại gap 155.6→165.9 ở i231. Sau đó là 17 phiên tích luỹ hẹp 163–176 với khối lượng vẫn cao (3–19 lần). Giá giữ trên mép gap và các đáy nâng dần quanh 163–164, nên đây giống hấp thụ cung hơn là phân phối. i249 tăng 5.4%, đóng cửa 175.96, đúng mức đóng cửa cao nhất của i232, khối lượng 7.7 lần. Đây là nỗ lực vượt hộp, nhưng vùng 176–181 (đỉnh i233) là cung kẹt. Nếu breakout thất bại, túi khí hướng về vùng lấp gap 155 (khoảng −12%). Mức −15% (khoảng 150) nằm dưới vùng gap.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.55
+INVALIDATION: Đóng cửa dưới 163 (đáy hộp sau breakout); thủng 155.5 (lấp gap) thì cấu trúc markup bị phá.
+CONTAMINATION: NONE

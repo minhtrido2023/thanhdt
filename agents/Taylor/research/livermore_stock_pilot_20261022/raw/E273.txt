@@ -1,0 +1,7 @@
+**Đọc băng:** Từ i=136 đến 159 là pha markdown xuống vùng 100–102. Sau đó giá đi ngang trong range 101–112. Thanh i=235 phá lên với khối lượng 5.76 nhưng không có follow-through. Thanh i=240 vọt lên 119.98 rồi bị đạp xuống, khối lượng 4.1, tức là bẫy tăng giá (bull trap). Tiếp theo là ba phiên sập: i=247 gap xuống −6.6% (khối lượng 2.93), i=248 gap xuống tiếp với khối lượng 4.36, i=249 đóng cửa gần giá sàn tại 94.63 (khối lượng 3.03). Giá đã thủng đáy range 100–101 và về sát đáy năm 92.5. Mất khoảng 17% trong ba phiên với khối lượng lớn mà chưa có thanh climax đảo chiều nào. Đây là dấu hiệu bán giải chấp margin, tức air-pocket. Vùng 100–104 giờ thành cung kẹt phía trên. Phiên kế tiếp nhiều khả năng còn gap xuống.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa lấy lại trên 101–104 (đáy range cũ) với khối lượng lớn thì luận điểm giảm bị vô hiệu; thủng 92.5 thì xác nhận tiếp tục markdown.
+CONTAMINATION: NONE

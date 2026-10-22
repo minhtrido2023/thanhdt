@@ -1,0 +1,7 @@
+Trên 250 phiên, cổ phiếu ở pha markup: đáy hoảng loạn 70 (i106, air-pocket kiểu margin), rồi đi lên từ i161, đỉnh 133.6 (i218, KL 3.59). Trên 20 phiên, giá đi ngang rộng 110–134. Các nhịp rũ i238–239 (Low 110.2–110.8) bị hấp thụ, giá đóng cửa hồi lại và KL không bùng nổ. Lần retest đỉnh ở i247 (131.9) có KL 1.47, thấp hơn i218. Như vậy cầu yếu đi gần vùng cung kẹt 128–134 và có nguy cơ hình thành hai đỉnh. Giá vào khoảng 127 thì ngưỡng −15% là khoảng 108. Mức này nằm ngay dưới vùng đáy 110 và trên pivot 106.5 (i200). Nếu thủng 110, cú rơi có thể nhanh như i103–106. Phá lên 134 kèm KL sẽ mở xu hướng tiếp diễn.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 110 (đáy i239) kèm khối lượng tăng, tức vùng tích luỹ 110–134 thất bại.
+CONTAMINATION: NONE

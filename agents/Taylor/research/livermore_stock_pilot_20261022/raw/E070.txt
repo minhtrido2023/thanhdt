@@ -1,0 +1,7 @@
+**Phân tích:** Giá bị markdown mạnh từ 104 xuống khoảng 48 (i113), sau đó tạo đáy climax bằng khối lượng lớn ở i113–122 và hồi chữ V lên 82.8 (i126). Tiếp theo là khoảng 120 phiên tích luỹ trong vùng 64–80. Các đáy nâng dần: 63.9 (i184/187), rồi khoảng 74 (i208–222), rồi 75.7 (i234). Biên độ co hẹp còn 77–81 trong khi khối lượng tăng dần. Phiên i249 đóng ở 81.09, sát đỉnh range, với khối lượng 3.46, mức cao nhất từ giai đoạn climax. Đây là thanh đang ép vào vùng cung 81.4–82.8 (i126, i225, i243). Phía trên còn cung kẹt từ vùng 90–104. Nếu phá được 83 thì có khoảng trống lên 88–90. Nếu breakout thất bại thì giá về đáy range 75.7–74. Mức −15% (khoảng 69) chỉ bị chạm khi cấu trúc tích luỹ hỏng hẳn.
+
+P_HIT15: 0.18
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 75.5 (thủng đáy i234) với khối lượng lớn, tức breakout thất bại và quay về range 68–80.
+CONTAMINATION: NONE

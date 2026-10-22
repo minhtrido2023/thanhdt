@@ -1,0 +1,9 @@
+**Phân tích:** Ở thang 250 phiên, giá đã qua ba pha. Pha markup đầu đi từ 100 lên 205 (i0–40). Sau đó là một range rộng 153–240 kéo dài khoảng 100 phiên, với các nhịp giảm sâu −36% và −25%. Giá thoát range ở i156–159 với khối lượng 2x, rồi tạo đỉnh 290.76 ở i213. Pullback sau đó về 247.84 (i229), khoảng −15%. Trong nhịp này volume cạn (0.38–0.65), cho thấy cung yếu.
+
+Giá đang test lại vùng đỉnh 287–291. Phiên i248 có volume 1.91 nhưng bị từ chối tại 289.98. Phiên i249 là inside bar, volume thấp 0.64, chưa có follow-through. Cung kẹt tại đỉnh cũ là có thật. Biến động ngày 3–4% khiến ngưỡng −15% (khoảng 241) nằm trong biên dao động lịch sử. Xu hướng lớn vẫn là markup.
+
+P_HIT15: 0.33
+RISK: MED
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 265 (đáy nền i244–246), mạnh hơn là thủng 247.8 (đáy pullback i229) thì cấu trúc higher-low bị phá.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Cổ phiếu chuyển từ gần như không có thanh khoản (i0–140) sang trạng thái khối lượng gấp 10–30 lần median từ i144. Giá đi lên qua nhiều nấc markup: 190 → 323 → 394 → 418, tức gần ×4 trong khoảng 100 phiên. Ở thang 20 phiên, phiên i243 gap lên mở cửa ngay tại đỉnh 418 với V=30 rồi đóng 389. Đây là dấu hiệu climax hoặc breakout thất bại, kéo theo cung kẹt ở vùng 390–418. Các phiên sau đó vẫn giữ trên vùng nền 329–357 (i226–241) nhưng khối lượng chưa cạn. Mức −15% từ vùng ~379 là ~322, rơi đúng đáy nền 323–329. Phá vùng này sẽ mở ra air-pocket về 300 rồi 265 do margin. Biến động ngày thường 5–8%, nên xác suất chạm mức này là đáng kể.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 418 với khối lượng duy trì cao (vượt đỉnh climax i243) thì kịch bản phân phối bị vô hiệu; ngược lại, đóng dưới 323 xác nhận markdown.
+CONTAMINATION: NONE

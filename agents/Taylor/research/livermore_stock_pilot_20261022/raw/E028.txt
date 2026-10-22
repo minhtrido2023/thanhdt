@@ -1,0 +1,7 @@
+**Phân tích:** Khung lớn là nền tích luỹ 92–110 kéo dài khoảng 150 phiên, sau đó là markup dốc từ i=155. Đợt tăng tăng tốc theo kiểu parabol và đạt climax ở i=228: đỉnh 255.83, đóng cửa quay đầu về 214, khối lượng 2.83. Các phiên 228–236 là vùng phân phối 213–237, rồi markdown xuống 174.23 ở i=247. Hai phiên cuối là cú bật rất mạnh: i=248 tăng khoảng 9.7% và i=249 tăng khoảng 10%, khối lượng đều quanh 2.8–2.95. Đây là cầu thật, nhưng giá đang lao thẳng vào vùng cung kẹt 213–237. Biên độ ngày khoảng 8–10% (sàn ±10% hoặc ±15%). Giá vào dự kiến khoảng 210, nên mức −15% là khoảng 178.5, nằm sát đáy 174. Nhịp hồi có thể đi tiếp, nhưng rủi ro thất bại tại vùng cung để kiểm lại đáy là lớn.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 174 (thủng đáy i=247) xác nhận markdown tiếp diễn; muốn đổi sang tích cực cần đóng cửa trên 237 với khối lượng lớn.
+CONTAMINATION: NONE

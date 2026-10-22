@@ -1,0 +1,13 @@
+Đây là một mã cực kém thanh khoản, giá thấp, mỗi bước giá khoảng 2%, có nhiều phiên Volume 0 và nhiều râu ±7% gần như vô nghĩa.
+
+**Cấu trúc 250 phiên:** markdown từ 100 xuống đáy 61.11 (i146–174, volume khô gần như tuyệt đối). Sau đó là range 57–86.
+
+**60 phiên gần đây:** range 63.9–80.6. Vùng 80.6–86.1 bị từ chối hai lần (i222, i225–226). Đợt bán i243–245 có volume 434–720 kéo giá về 62.5, rồi i248 có râu dưới chạm 58.33 trên volume rất nhỏ. Giá hiện ở nửa dưới range, sát đáy cũ 57–61.
+
+Mốc −15% tương ứng khoảng 55.5, chỉ dưới đáy range 2–3 bước giá. Với độ biến động và các khoảng trống thanh khoản, khả năng chạm là đáng kể. Phía trên có cung kẹt ở 75 và 80.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 56.9 (đáy i182/i248) kèm khối lượng nghĩa là range bị phá, markdown tiếp diễn.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá markup chậm từ 100 lên khoảng 130. Ở thang 60 phiên, giá đi ngang rất hẹp trong vùng 127,5–132 từ phiên 190, thanh khoản mỏng. Phiên 243 bùng nổ khối lượng 78,7 lần median, chạm 141,61 nhưng chỉ đóng cửa 134,58. Ba phiên sau giá rơi xuống 121,33 với khối lượng 37,4 ở phiên 246, tức là breakout thất bại kèm climax. Như vậy vùng 132–141 là cung kẹt thật. Giá hồi về 131,31 với khối lượng thấp, chưa có follow-through. Đáy đuôi 121–124,6 là hỗ trợ gần. Hỗ trợ sâu hơn là đáy range cũ ở vùng 116–120 (phiên 165–174). Mức −15% tương ứng khoảng 111,6, nằm dưới cả hai vùng hỗ trợ. Biến động lịch sử thấp nên khả năng chạm mức này có hạn, nhưng kỳ vọng tăng bị chặn bởi vùng cung phía trên.
+
+P_HIT15: 0.15
+RISK: MED
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 121 (đáy phiên 246) với khối lượng lớn thì vùng range bị phá. Ngược lại, đóng cửa trên 135 với khối lượng lớn mới xác nhận breakout.
+CONTAMINATION: NONE

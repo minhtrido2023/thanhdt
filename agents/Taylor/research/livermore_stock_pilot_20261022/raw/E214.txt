@@ -1,0 +1,13 @@
+**Cấu trúc:** Cổ phiếu tăng parabol từ ~90 lên đỉnh 877 (i=155), gấp khoảng 9 lần trong 30 phiên, với khối lượng climax 20–36x median. Sau đó là pha phân phối trong vùng 600–780 kéo dài khoảng 70 phiên.
+
+**Khối lượng tại pivot:** Cú đẩy i=225–227 lên 745 thất bại, đóng cửa yếu với khối lượng gần 10x. Đây là upthrust. Tiếp theo là markdown, thủng sàn 550–600 (i=241–244) và rơi tới 385 (i=246).
+
+**Nhịp hồi hiện tại:** Giá hồi kỹ thuật về 505 trên khối lượng thấp (0.70–1.10). Phiên i=249 mở gap lên 522, chạm 547 rồi bị đẩy ngược, đóng 505. Đây là dấu hiệu từ chối ngay dưới đáy vỡ 550.
+
+**Rủi ro:** Cung kẹt dày ở 550–650. Biên độ ngày 7–10% nên mức −15% (~430) rất dễ bị chạm.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Đóng cửa trên 600 với khối lượng >3x median, lấy lại vùng phân phối cũ; ngược lại, thủng 385 xác nhận markdown tiếp diễn.
+CONTAMINATION: NONE

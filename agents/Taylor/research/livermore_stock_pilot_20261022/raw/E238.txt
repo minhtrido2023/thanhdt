@@ -1,0 +1,9 @@
+Chuỗi giá có ba pha. Từ i0 đến i122 là tích luỹ thanh khoản mỏng, giá đi ngang trong vùng 78–93, nhiều phiên khối lượng bằng 0. Từ i123 đến i159 là markup lên 140.67, kèm climax khối lượng 22.75 và 22.46 ở i158–159. Sau đó giá điều chỉnh khoảng −20%, xuống 113 ở i197. Tiếp theo là range 138–149 với khối lượng rất lớn (21–38) ở i217–236, rồi breakout ở i240 (22.86) và gap lên 163.
+
+Giá hiện tại 175.6 đã tăng khoảng gấp đôi từ nền 87. Phiên i242 có biên độ 172→151 trên khối lượng 16.9, đây là dấu hiệu churning gần đỉnh. Giá vào lệnh trừ 15% là khoảng 149.5, rơi vào mép trên range cũ 147–149. Phía trên mức đó có air-pocket mép gap 154–163. Mã này đã từng điều chỉnh khoảng −20% sau climax.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 151 (đáy i242, lấp gap i241) sẽ phá cấu trúc breakout và mở đường về range 138–149.
+CONTAMINATION: NONE

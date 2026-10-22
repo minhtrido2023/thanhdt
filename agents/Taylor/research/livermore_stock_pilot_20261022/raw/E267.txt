@@ -1,0 +1,9 @@
+Giá thoát khỏi nền tích lũy dài 78–90 (i≈60–200) bằng một pha tăng giá trên khối lượng bùng nổ: i174 (8.9), i208 (22.3), i230 (11.65), i234 (16.1). Mặt bằng khối lượng đã đổi hẳn, cho thấy dòng tiền mới vào. Giá hiện ép vào vùng đỉnh đầu năm 101–103, nơi có cung kẹt.
+
+i246–247 vượt lên 104.70 với khối lượng 8.45–12.2, nhưng i248–249 trả lại về 100.63. Đây là dấu hiệu breakout chưa được xác nhận, có nguy cơ thất bại. Hỗ trợ gần là 98.3/95.9 (i243), sâu hơn là 91–88.7 (i218–223). Cổ phiếu biến động thấp, nên mốc −15% (≈85.5) nằm dưới cả nền trên, khó chạm nếu cấu trúc còn nguyên.
+
+P_HIT15: 0.15
+RISK: MED
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 95.9 (đáy i243) với khối lượng lớn, tức xác nhận breakout 104.7 thất bại và quay lại vùng 88–92.
+CONTAMINATION: NONE

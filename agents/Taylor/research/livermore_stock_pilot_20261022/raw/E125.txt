@@ -1,0 +1,13 @@
+**Phân tích:** Trong khoảng 200 phiên đầu, cổ phiếu đi ngang rộng ở vùng 84–100. Thanh khoản rất mỏng, nhiều phiên khối lượng bằng 0 và giá đứng yên một mức. Cung lớn từng xuất hiện ở vùng 92–99 (phiên 96–103, 143, 147).
+
+Từ phiên 204, giá chuyển sang pha giảm (markdown). Đáy cũ 81–84 bị thủng ở phiên 215 với khối lượng 31.9. Phiên 226 bán mạnh với khối lượng 43.8. Sau đó các đáy liên tục thấp dần: 73.9 → 70.8 → 70.4 ở phiên 249.
+
+Hai cú bán lớn này không phải climax đảo chiều, vì không có phiên bật lên kèm khối lượng xác nhận. Đỉnh hồi ngày càng thấp (85.8 → 80.7 → 77.9). Vùng 76–82 giờ là cung bị kẹt.
+
+Giá vào khoảng 73. Mức −15% tương ứng khoảng 62, chưa có hỗ trợ nào bên dưới. Thanh khoản mỏng nên dễ xảy ra các cú rơi hụt hẫng (air-pocket).
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Tín hiệu giảm bị vô hiệu nếu giá đóng cửa trên 81–82 với khối lượng lớn. Ngược lại, đóng cửa dưới 70 xác nhận pha giảm tiếp diễn.
+CONTAMINATION: NONE

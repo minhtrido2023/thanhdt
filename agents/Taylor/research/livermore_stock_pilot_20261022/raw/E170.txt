@@ -1,0 +1,13 @@
+Cổ phiếu tăng liền mạch cả năm, từ 100 lên khoảng 269, qua các nền 205–210 (i=180–211) rồi breakout tại i=213 và i=221. Tuy nhiên 15 phiên gần nhất có dấu hiệu khuấy đảo (churning) trong vùng 257–285 với khối lượng rất lớn:
+- **i=236 (4.10x):** đảo chiều từ 279 xuống 265.
+- **i=247 (4.31x):** đẩy lên 279.
+- **i=248:** lập đỉnh mới 284.9 nhưng đạp xuống 261 rồi đóng 273, có thể là upthrust.
+- **i=249:** tiếp tục yếu.
+
+Giá tiến ít trong khi khối lượng lớn, nghiêng về phân phối hoặc climax. Tiền lệ i=116–118 cho thấy cổ phiếu từng rơi 20% trong 3 phiên. Mức −15% (~228) trùng vùng breakout 231–236, nên là hỗ trợ hợp lý nhưng vẫn có thể bị chạm.
+
+P_HIT15: 0.32
+RISK: HIGH
+P_POS: 0.48
+INVALIDATION: Đóng cửa trên 285 với khối lượng lớn và giữ được thì luận điểm phân phối sai; ngược lại, đóng dưới 253 (đáy i=242) xác nhận phân phối.
+CONTAMINATION: NONE

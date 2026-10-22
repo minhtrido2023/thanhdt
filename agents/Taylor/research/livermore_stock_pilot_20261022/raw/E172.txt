@@ -1,0 +1,11 @@
+**Cấu trúc.** Ở thang 250 phiên, cổ phiếu tăng mạnh từ ~100 lên đỉnh 318 (i=204). Ở thang 60 phiên, cấu trúc đã chuyển sang phân phối rồi giảm giá. Phiên 207–208 là cú sập đầu tiên, KL 2.56 và 1.98. Nhịp hồi sau đó chỉ lên tới 301 (i=229), tạo đỉnh thấp hơn. Phiên 237–238 gãy khỏi vùng 262–265 với KL 2.18, rồi phiên 242 lập đáy thấp hơn ở 202.6 (KL 1.33).
+
+**Nhịp hồi hiện tại.** Từ 203 lên 236.5 nhưng KL cạn hẳn (0.37–0.67), không có cầu xác nhận. Giá đang đi vào vùng gãy 240–242, nơi i=240–241 đã bị từ chối. Phía trên là vùng 262–300 dày người bị kẹt.
+
+**Rủi ro.** Biên độ ngày rất rộng (5–10%). Mức −15% từ giá vào (~201) trùng đáy 202.6, nên một lần retest thất bại là chạm. Pha 20 phiên là hồi kỹ thuật trong xu hướng giảm.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 265 với KL >1.3 thì cấu trúc giảm bị phủ định; thủng 202 với KL lớn xác nhận markdown tiếp.
+CONTAMINATION: NONE

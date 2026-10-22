@@ -1,0 +1,206 @@
+{
+ "SpaceX": {
+  "peak_trough_since_0901": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "nav0": 987341794.0,
+   "nav1": 969196007.0,
+   "dnav": -18145787,
+   "dnav_pct": -1.838,
+   "by_book": {
+    "LAG": -43200000,
+    "CAPIT": -8945000,
+    "BAL": -5760000,
+    "DISCRETIONARY_SPECIAL": -4710000,
+    "PARK": 345758
+   },
+   "by_book_pct_nav": {
+    "LAG": -4.375,
+    "CAPIT": -0.906,
+    "BAL": -0.583,
+    "DISCRETIONARY_SPECIAL": -0.477,
+    "PARK": 0.035
+   },
+   "residual": 44123455,
+   "top_losers": [
+    {
+     "ticker": "SCL",
+     "book": "LAG",
+     "pnl": -43200000.0
+    },
+    {
+     "ticker": "PVT",
+     "book": "CAPIT",
+     "pnl": -6650000.0
+    },
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -5760000.0
+    },
+    {
+     "ticker": "DRI",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -3330000.0
+    },
+    {
+     "ticker": "SIP",
+     "book": "CAPIT",
+     "pnl": -1615000.0
+    }
+   ]
+  },
+  "fixed_0916_1020": {
+   "start": "2026-09-16",
+   "end": "2026-10-20",
+   "nav0": 977178384.0,
+   "nav1": 971687907.0,
+   "dnav": -5490477,
+   "dnav_pct": -0.562,
+   "by_book": {
+    "BAL": -10446757,
+    "PARK": -6716147,
+    "DISCRETIONARY_SPECIAL": 1590000,
+    "LAG": 3408824,
+    "CAPIT": 11635012
+   },
+   "by_book_pct_nav": {
+    "BAL": -1.069,
+    "PARK": -0.687,
+    "DISCRETIONARY_SPECIAL": 0.163,
+    "LAG": 0.349,
+    "CAPIT": 1.191
+   },
+   "residual": -4961409,
+   "top_losers": [
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -10446757.0
+    },
+    {
+     "ticker": "TV1",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -3220000.0
+    },
+    {
+     "ticker": "VNM",
+     "book": "CAPIT",
+     "pnl": -1820314.0
+    },
+    {
+     "ticker": "ACB",
+     "book": "PARK",
+     "pnl": -1368420.0
+    },
+    {
+     "ticker": "LPB",
+     "book": "PARK",
+     "pnl": -1261854.0
+    }
+   ]
+  }
+ },
+ "ZaloPay": {
+  "peak_trough_since_0901": {
+   "start": "2026-09-04",
+   "end": "2026-10-15",
+   "nav0": 991380088.0,
+   "nav1": 919627726.0,
+   "dnav": -71752362,
+   "dnav_pct": -7.238,
+   "by_book": {
+    "PARK": -6951972,
+    "BAL": -5244231,
+    "DISCRETIONARY_SPECIAL": 996139,
+    "CAPIT": 1823450,
+    "LAG": 28993302
+   },
+   "by_book_pct_nav": {
+    "PARK": -0.701,
+    "BAL": -0.529,
+    "DISCRETIONARY_SPECIAL": 0.1,
+    "CAPIT": 0.184,
+    "LAG": 2.925
+   },
+   "residual": -91369051,
+   "top_losers": [
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -5244231.0
+    },
+    {
+     "ticker": "VNM",
+     "book": "CAPIT",
+     "pnl": -2824700.0
+    },
+    {
+     "ticker": "TV1",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -2043861.0
+    },
+    {
+     "ticker": "CSV",
+     "book": "LAG",
+     "pnl": -2014405.0
+    },
+    {
+     "ticker": "VHM",
+     "book": "PARK",
+     "pnl": -1960001.0
+    }
+   ]
+  },
+  "fixed_0916_1020": {
+   "start": "2026-09-16",
+   "end": "2026-10-20",
+   "nav0": 948338649.0,
+   "nav1": 929949168.0,
+   "dnav": -18389481,
+   "dnav_pct": -1.939,
+   "by_book": {
+    "BAL": -5258403,
+    "PARK": -3514445,
+    "DISCRETIONARY_SPECIAL": 510000,
+    "CAPIT": 580480,
+    "LAG": 32243302
+   },
+   "by_book_pct_nav": {
+    "BAL": -0.554,
+    "PARK": -0.371,
+    "DISCRETIONARY_SPECIAL": 0.054,
+    "CAPIT": 0.061,
+    "LAG": 3.4
+   },
+   "residual": -42950415,
+   "top_losers": [
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -5258403.0
+    },
+    {
+     "ticker": "TV1",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -1960000.0
+    },
+    {
+     "ticker": "VNM",
+     "book": "CAPIT",
+     "pnl": -1225289.0
+    },
+    {
+     "ticker": "CSV",
+     "book": "LAG",
+     "pnl": -764405.0
+    },
+    {
+     "ticker": "SAB",
+     "book": "CAPIT",
+     "pnl": -732895.0
+    }
+   ]
+  }
+ }
+}

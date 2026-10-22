@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu tăng mạnh từ 100 lên đỉnh khoảng 527 (i=141), sau đó vào pha phân phối. Giá trượt dần về nền 300–330 trong giai đoạn i=213–241, khi đó khối lượng cạn rõ (0.2–0.4).
+
+Phiên i=244–245 thủng nền xuống 268 rồi kéo ngược lên ngay, trông như một cú spring. Ba phiên cuối (247–249) tăng lên 373 với khối lượng khoảng 2.0–2.5, nghĩa là có follow-through thật.
+
+Rủi ro nằm ở phía trên. Vùng 400–430 (i=163–179) là nơi nhiều người bị kẹt, và phiên i=211 từng bị đánh bật mạnh tại 403. Giá vào khoảng 373 đã cao hơn nền 15–20%. Biên dao động ngày thường 5–8% và các cú sập 20% trong vài phiên đã lặp lại (211→214, 242→245). Vì vậy khả năng giá rơi về 317 (−15%) là đáng kể.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 307 (mất nền tích luỹ) thì cú spring thất bại; ngược lại, vượt 430 với khối lượng lớn sẽ mở lại xu hướng tăng.
+CONTAMINATION: NONE

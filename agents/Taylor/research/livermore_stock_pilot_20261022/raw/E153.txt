@@ -1,0 +1,11 @@
+Ba thanh cuối đã phá vỡ nền: i=247 giảm −6% xuống 94.1 và thủng hộp tích lũy 96–101 kéo dài từ i=210 đến 246. i=248 mở gap xuống 91.5, chạm đáy 88.06. i=249 mở sát giá sàn 85.12, sau đó hồi lên đóng cửa 90.18. Khối lượng chỉ 1.65 / 1.07 / 0.73, nghĩa là không có climax bán tháo, nên phe mua chưa hấp thụ thật sự. Lực cầu cuối ngày ở 249 có xuất hiện nhưng thanh khoản mỏng.
+
+Cấu trúc 250 phiên gồm ba pha: markup lên 124, phân phối trong vùng 113–124, rồi markdown. Lần phá nền này mở ra một khoảng trống giá (air-pocket), vì dưới 96 không có vùng đỡ lịch sử nào trong dữ liệu. Cung kẹt dày ở vùng 96–101.
+
+Mua quanh 90 thì kịch bản tốt nhất là hồi kỹ thuật về mép nền 94–96. Nếu không có cầu, mức −15% (khoảng 76.5) hoàn toàn có thể chạm tới qua thêm vài phiên giảm sàn hoặc margin call.
+
+P_HIT15: 0.33
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 85 (thủng đáy phiên 249) với khối lượng tăng; ngược lại, kịch bản xấu bị phủ định nếu giá đóng cửa trở lại trên 96–97 (vào lại nền).
+CONTAMINATION: NONE

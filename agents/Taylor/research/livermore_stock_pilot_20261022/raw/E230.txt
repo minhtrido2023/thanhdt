@@ -1,0 +1,11 @@
+**Phân tích:** Suốt khoảng 200 phiên, giá đi ngang trong vùng 92–120. Đợt markup thật sự bắt đầu khi giá phá 111 (i=221) và vượt đỉnh cũ 128 (i=133) ở i=231. Sau đó giá chạy lên 156 (i=242) với khối lượng kiểu climax (5.47 tại i=232, 5.37 tại i=238).
+
+Nhịp điều chỉnh về 132.7–135 (i=244–247) có khối lượng giảm dần, từ 3.51 xuống 1.36. Đó là dry-up lành mạnh. Phiên i=249 tăng gần trần, đóng cửa tại đỉnh 148.64 với khối lượng 3.05, cho thấy follow-through.
+
+Rủi ro: giá đã tăng khoảng 40% trong 30 phiên và còn kéo căng. Tiền lệ i=130–133 cho thấy cú bật lên 128 rồi xả về 92. Mốc −15% so với giá vào ≈127, tức vùng breakout 122–130. Giá vào nằm sát cung tại 151–156.
+
+P_HIT15: 0.33
+RISK: HIGH
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 132.7 (đáy nhịp điều chỉnh i=247) với khối lượng tăng → nhiều khả năng xả về vùng breakout 122–128.
+CONTAMINATION: NONE

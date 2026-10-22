@@ -1,0 +1,7 @@
+Cổ phiếu đang trong pha markup ở cả 3 thang: tăng từ ~100 lên ~184. Thanh khoản thay đổi hẳn từ i134 (24.5x), rồi gap-markup ở i164–166 và i199–201 (13.5x). Từ i201 giá đi ngang trong vùng 157–184: đỉnh i225 (183.7) và đáy i237 (158.8) hay i211 (152.3). Phiên i240 có climax 33.6x nhưng không giữ được, giá rút về 162.7 ở i243. Sau đó i244–246 bật lên với khối lượng 10.3x và 9.2x, vượt đỉnh i225, đạt 186.98. Hai phiên cuối khối lượng giảm (2.1x) và giá giữ trên 179.8, giống kiểm định chứ chưa phải phân phối. Tuy vậy, giá đã cách đáy năm khoảng 85%, biên độ ngày lớn, và mức −15% (~156) nằm ngay dưới đáy range. Nếu breakout thất bại, giá dễ rơi vào túi khí do margin.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 162–163 (đáy i243, mép dưới range) kèm khối lượng lớn, tức breakout trên 184 thất bại và giá quay lại phân phối.
+CONTAMINATION: NONE

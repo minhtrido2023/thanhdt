@@ -1,0 +1,7 @@
+Cấu trúc 250 phiên là một bong bóng hoàn chỉnh. Giá markup từ 100 lên 431 (i108), sập về 204, hồi lên 376 (i156), rồi markdown đến 108 (i216), tức mất 75% từ đỉnh. Tại 108–125 có khối lượng cao, giống climax bán. Từ đó giá hồi lên 172 với các đáy cao dần: 116.5, 132.5 (i235–236), 144.3 (i240), 161.7 (i247). Gap i243 có follow-through vừa phải. Giá đang tiến vào vùng cung kẹt 180–215 (i178–207, giao dịch dày) với khối lượng không bùng nổ. Biên dao động ngày thường 5–7% nên cú lùi −15% (về khoảng 146) rất khả thi, kể cả khi xu hướng hồi vẫn còn.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 160 (lấp gap i243 và thủng đáy i247), hoặc bị từ chối tại 185–200 kèm khối lượng >1.5x.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Cổ phiếu vừa có cú dựng đứng kiểu climax. Giá bật từ nền 88.9–95.2 (phiên 220–243) lên 149.40 chỉ trong 6 phiên, tức khoảng +60%. Khối lượng bùng nổ 9–13 lần median ở các phiên 244, 245, 247, 248. Phiên 249 tăng +15% đóng cửa ở đỉnh nhưng khối lượng tụt còn 4.29, nhiều khả năng là phiên trần với thanh khoản cạn (biên ±15% gợi ý sàn UPCoM). Giá đã vượt vùng đỉnh cũ 129.6 (phiên 34) nên phía trên không còn cung kẹt. Nhưng mua ở Open phiên kế tiếp là mua đúng điểm đuổi giá, xa mọi nền đỡ. Vùng hỗ trợ gần nhất là 121–130, cách giá vào khoảng −15%. Kế đến là gap 104–108, khoảng −30%. Sau những cú dựng đứng của cổ phiếu thanh khoản mỏng, việc trả lại 1/3 đến 1/2 quãng tăng là phổ biến. Phiên 246 (giảm về 108) cho thấy dao động mạnh có thể xảy ra.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa dưới 121 (đáy phiên 248, mất vùng breakout 130) xác nhận đã có đỉnh climax và giá đi vào pha phân phối.
+CONTAMINATION: NONE

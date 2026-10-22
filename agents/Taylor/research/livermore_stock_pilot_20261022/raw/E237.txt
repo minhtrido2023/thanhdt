@@ -1,0 +1,7 @@
+Cấu trúc 60 phiên là một chu kỳ markup rồi phân phối. Giá tăng từ đáy 69–72 (i171–172) lên đỉnh 135 (i220) với khối lượng mở rộng. Vùng 120–135 (i220–242) là pha phân phối, kết thúc bằng phiên gãy i235–236 (V 4.04 rồi 6.94, đóng 112.5). Nhịp hồi i242 (121) tạo đỉnh thấp hơn, sau đó giá sập liên tiếp i243–246 về 91.8 trên khối lượng 2.8–3.3, tức pha markdown kèm air-pocket do margin. Phiên i246 hồi khá mạnh từ 91.8 nhưng i247–249 không có follow-through, giá trôi dần về 95. Cung kẹt phía trên nằm ở 110–130. Đỡ gần là base 82–88 (i181–198); dưới đó trống tới 70–75. Ngưỡng −15% (~80.7) nằm ngay dưới base này.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa trên 105–106 (lấp gap i245–246) kèm khối lượng thì luận điểm markdown bị vô hiệu; thủng 91.8 (đáy i246) xác nhận markdown tiếp diễn về 82–85.
+CONTAMINATION: NONE

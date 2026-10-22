@@ -1,0 +1,11 @@
+Giá đi markup trên 250 phiên, từ ~100 lên đỉnh 160.14 (i157). Sau đó là phân phối kèm sập: i158–160 giảm trên khối lượng lớn (2.87), đáy 111.2 ở i186. Giá hồi lại thành nền 133–151. Khối lượng cạn dần ở i213–227 (0.3–0.5), rồi i228 bật lên với khối lượng 3.01.
+
+Phiên i248 phá đỉnh nền 151 với khối lượng 2.70. Phiên i249 chạm 160.28, đúng vùng cung kẹt 156–160 của đỉnh i149–157, nhưng khối lượng giảm còn 1.49. Giá vào khoảng 158 nằm ngay đỉnh cũ, chưa có follow-through xác nhận.
+
+Mức −15% tương đương khoảng 134, nằm dưới hỗ trợ 140–143 và ở đáy nền. Biến động lịch sử từng cho thấy cú sập −30%, nên rủi ro này là có thật. Bù lại, cấu trúc lớn vẫn là xu hướng tăng.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa lại dưới 147 (thủng mép breakout i248) hoặc dưới 140 (đáy i237) với khối lượng lớn, tức breakout thất bại tại đỉnh cũ.
+CONTAMINATION: NONE

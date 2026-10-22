@@ -1,0 +1,7 @@
+Đây là mã gần như không có thanh khoản. Từ i≈78 trở đi có hàng chục phiên Volume 0. Giá nhảy từng nấc lớn (92→103→90→113→92→78) mà gần như không có khối lượng, biên độ ngày vượt xa ±7%. Trục trung tâm cả năm là vùng 90–93, nơi giá liên tục bị kéo về. Đợt bật i=238–242 đẩy lên đỉnh 143 với một thanh 24.85 tại i=241, rồi sập về 100 ngay ở i=243–244. Đó là dấu hiệu phân phối hoặc breakout thất bại. Giá vào khoảng 115 nằm ở cận trên vùng giằng co. Mức −15% tương ứng khoảng 98, nằm trong biên dao động thường ngày nên rất dễ chạm. Thêm vào đó, sổ lệnh mỏng gây trượt giá.
+
+P_HIT15: 0.72
+RISK: HIGH
+P_POS: 0.36
+INVALIDATION: Giá đóng cửa giữ trên 124–127 kèm khối lượng >5× median liên tiếp nhiều phiên, vượt đỉnh 143.
+CONTAMINATION: NONE

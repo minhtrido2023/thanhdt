@@ -1,0 +1,12 @@
+**Phân tích:** Markup rõ ở cả ba thang. Giá đi từ ~100 lên ~303, các đáy liên tục nâng cao. Thanh khoản rất mỏng: nhiều phiên có volume ≈0 và nhiều thanh giá phẳng.
+
+- **Air-pocket thật:** phiên i=205 gap xuống −12% (267→230) gần như không có khối lượng. Lực bán bất ngờ có thể đẩy giá tụt mạnh.
+- **Breakout gần đây:** phiên i=241 vượt vùng 290–298 với volume 6.2x, lên 311. Sau đó giá đi ngang 295–311, volume ~1.3–3.4x. Volume mức này là phân phối nhẹ hoặc hấp thụ, không phải dry-up.
+- **Vùng hỗ trợ:** 282–290 là nền breakout. Mức −15% từ giá vào ~303 là ~258, nằm dưới nền breakout nhưng trên mép gap 230–240.
+- **Đánh giá:** xu hướng vẫn tăng nhưng đã kéo dài parabol. Thanh khoản mỏng làm cú trượt sâu dễ xảy ra.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 282 (thủng nền breakout 282–290) kèm volume tăng thì cấu trúc markup bị vô hiệu.
+CONTAMINATION: NONE

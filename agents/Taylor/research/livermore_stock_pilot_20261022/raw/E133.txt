@@ -1,0 +1,7 @@
+**Phân tích:** Cả ba thang đều đang ở pha markup. Giá tăng từ 100 lên khoảng 228 qua 250 phiên, các đáy nâng dần: 163 (i161), rồi 186 (i209), rồi 215 (i238). Mười hai phiên gần nhất đi ngang trong vùng 215–235. Khối lượng ở vùng này cao gấp 2–7 lần median: i243 tăng lên 233 với khối lượng 7.44, thanh này có follow-through nhưng không bứt hẳn qua 235. Râu trên 255 (i236) và 244 (i234) cho thấy cung đang chặn ở 235–245. Cổ phiếu thanh khoản mỏng nên râu dưới rất sâu và lặp lại. Các phiên i239, i240, i242 và i247 đều có Low khoảng 186–192, tức sâu hơn −14% so với giá vào khoảng 228. Vì vậy ngưỡng −15% (khoảng 194) dễ bị một lệnh quét chạm tới, dù giá đóng cửa vẫn giữ. Xu hướng còn nguyên, nhưng vùng phân phối tiềm năng ở 235–255 chưa được hấp thụ.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.55
+INVALIDATION: Đóng cửa dưới 215 (đáy i238) với khối lượng lớn, phá cấu trúc đáy nâng dần, mục tiêu tiếp theo là 186–190.
+CONTAMINATION: NONE

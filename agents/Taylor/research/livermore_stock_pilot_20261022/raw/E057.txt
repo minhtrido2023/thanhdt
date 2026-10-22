@@ -1,0 +1,7 @@
+Đây là một mã cực kỳ kém thanh khoản: rất nhiều phiên có Volume 0, giá khớp đơn lẻ, và các cú gap ±8–12% xảy ra liên tục, nên rủi ro "air-pocket" là có thật. Ở thang 250 phiên, giá đi từ 100 lên ~145 theo kiểu markup bậc thang. Ở thang 20 phiên, nhịp tăng 132→158 (i=240) bị đảo bằng gap xuống 142.67 (i=241), sau đó giá đứng im ở 145.32 với khối lượng gần như bằng 0. Đây không phải dry-up có cầu đỡ, chỉ là thiếu giao dịch. Vùng đỡ 123–125 (i=219–222) đã nhiều lần bị chạm bằng các bản in đơn lẻ, và nó nằm ngay sát ngưỡng −15% (~123.5). Xu hướng dài hạn vẫn hướng lên nhưng biên độ dao động quá rộng so với thanh khoản.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới vùng 123 (đáy i=219–222) với khối lượng thật thì cấu trúc markup bị phá, nhiều khả năng quay về vùng 110–117.
+CONTAMINATION: NONE

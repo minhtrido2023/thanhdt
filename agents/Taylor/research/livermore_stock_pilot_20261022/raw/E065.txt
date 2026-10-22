@@ -1,0 +1,11 @@
+Giá vừa tăng dựng đứng từ nền ~75 (i=150–200) lên 150 trong khoảng 40 phiên. Khối lượng ở đợt này gấp 20–57 lần median, tại một mã vốn rất mỏng (có phiên V≈0). Đó là dấu hiệu đầu cơ hoặc thao túng.
+
+Từ i=239 giá đi ngang và phân phối trong vùng 135–152. Đỉnh 152.14 bị từ chối ba lần (i=239, 243, 246), mỗi lần khối lượng cao nhưng giá không đi tiếp. Khối lượng giờ giảm dần (5.2, 4.3) trong khi giá trượt về đáy biên 135–140.
+
+Dưới 135 là khoảng trống tới vùng 115–125 (gap i=228, nền i=229–236). Mức −15% so với giá vào (~117.8) nằm ngay trong vùng đó. Với một mã mỏng vừa tăng ~85% thì xả về là kịch bản phổ biến, chỉ cần ít phiên sàn liên tiếp là chạm.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.36
+INVALIDATION: Đóng cửa trên 152.14 với khối lượng lớn và giữ được vài phiên sau đó (thoát khỏi vùng phân phối); ngược lại, đóng dưới 135 xác nhận đổ vỡ.
+CONTAMINATION: NONE

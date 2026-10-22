@@ -1,0 +1,11 @@
+**Phân tích:** Cấu trúc 250 phiên là một pha markdown rõ ràng. Đỉnh phân phối nằm ở i40 (H 116.3, khối lượng 26.5x, đóng cửa dưới đỉnh). Sau đó giá sập ở i50–57 về vùng 67, nền giữa đặt quanh 69–80 ở i60–157, rồi gãy tiếp ở i158–184 về khoảng 51.
+
+60 phiên gần nhất là một range 45–58 với khối lượng cạn kiệt, nhiều phiên dưới 0.1x và có phiên bằng 0. Đây là cạn cung kiểu "không ai giao dịch", không phải hấp thụ. Phiên i189 có khối lượng 25.8x nhưng giá đứng im, nhiều khả năng là giao dịch thỏa thuận. Chưa có phiên tăng nào kèm khối lượng để xác nhận tích lũy.
+
+Mức −15% từ khoảng 52.6 rơi vào quanh 44.7, chỉ sát dưới đáy range (44.97 ở i200). Thanh khoản mỏng nên dễ có râu nến sâu. Cung kẹt dày ở 56–58, rồi tiếp ở 67–80.
+
+P_HIT15: 0.33
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 46 (đáy range i199–200) kèm khối lượng tăng thì kịch bản nền tích lũy bị phủ định.
+CONTAMINATION: NONE

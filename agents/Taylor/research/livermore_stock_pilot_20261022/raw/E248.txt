@@ -1,0 +1,17 @@
+Đây là cổ phiếu tăng parabol rồi chuyển sang phân phối ở vùng 290–327, với rủi ro thủng đáy khá cao.
+
+**Cấu trúc:** Thang 250 phiên là pha markup mạnh, giá tăng từ ~100 lên đỉnh 367 (i=207). Pha cuối là parabol từ i=196 đến 207, kèm khối lượng climax: 7.93 ở i=200 và 5.85 ở i=206.
+
+**Cú gãy:** Gap-down ở i=209 (V 6.55). Sau đó i=220 rơi về 278 với V 7.96, khối lượng cao nhất chuỗi, rồi chạm đáy 262 ở i=221.
+
+**Hồi phục yếu:** Nhịp hồi lên 337 (i=224) bị bán ngay. Từ i=226, giá đi ngang 290–327 với đỉnh thấp dần (327→325→319). Khối lượng không cạn khi giảm: i=231 V 4.65, i=245 V 1.77. Đây là dạng phân phối sau climax, chưa phải tích luỹ.
+
+**Cung treo:** Lượng hàng kẹt ở vùng 337–367 rất lớn.
+
+**Mức then chốt:** Nếu thủng 292–296, khoảng trống tới 262 và thấp hơn là có thật. Mức −15% tính từ ~305 là ~259, nằm ngay dưới đáy 262.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 327 với khối lượng >2x, xác nhận thoát range; ngược lại, đóng dưới 292 xác nhận markdown.
+CONTAMINATION: NONE

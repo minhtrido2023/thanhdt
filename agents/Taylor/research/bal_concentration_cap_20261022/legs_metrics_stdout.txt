@@ -1,0 +1,14 @@
+ctrl_p0  md5 4707bcbe ctrl_ok=True CAGR  23.37 Sh 1.87 DD -14.64 Cal 1.60 | IS 20.00/-13.89 OOS 26.57/-14.08 | w21 p01 -7.04 roll-min -12.81 | BALw med 2.38 max 6.62
+cap3_p0  md5 f34e4b23 ctrl_ok=None CAGR  22.74 Sh 1.89 DD -14.34 Cal 1.59 | IS 19.70/-10.81 OOS 25.62/-12.60 | w21 p01 -6.79 roll-min -11.32 | BALw med 2.88 max 5.34 over 22
+          Δ {'cagr': np.float64(-0.63), 'maxdd': 0.307, 'sharpe': np.float64(0.026), 'calmar': np.float64(-0.01), 'IS_cagr': np.float64(-0.3), 'OOS_cagr': np.float64(-0.952), 'IS_maxdd': 3.084, 'OOS_maxdd': 1.485, 'win21_p01': 0.251, 'win21_rolling_min': 1.495}
+cap4_p0  md5 588045a2 ctrl_ok=None CAGR  23.56 Sh 1.91 DD -14.77 Cal 1.59 | IS 20.00/-12.27 OOS 26.95/-13.46 | w21 p01 -7.06 roll-min -12.18 | BALw med 2.65 max 5.42 over 15
+          Δ {'cagr': np.float64(0.192), 'maxdd': -0.131, 'sharpe': np.float64(0.04), 'calmar': np.float64(-0.001), 'IS_cagr': np.float64(0.001), 'OOS_cagr': np.float64(0.379), 'IS_maxdd': 1.62, 'OOS_maxdd': 0.629, 'win21_p01': -0.021, 'win21_rolling_min': 0.631}
+cap5_p0  md5 0d419a0b ctrl_ok=None CAGR  22.77 Sh 1.84 DD -14.71 Cal 1.55 | IS 19.99/-13.90 OOS 25.40/-14.07 | w21 p01 -7.15 roll-min -12.80 | BALw med 2.43 max 6.20 over 11
+          Δ {'cagr': np.float64(-0.604), 'maxdd': -0.064, 'sharpe': np.float64(-0.028), 'calmar': np.float64(-0.048), 'IS_cagr': np.float64(-0.015), 'OOS_cagr': np.float64(-1.176), 'IS_maxdd': -0.01, 'OOS_maxdd': 0.01, 'win21_p01': -0.11, 'win21_rolling_min': 0.01}
+ctrl_1m  md5 bcd0469f ctrl_ok=True CAGR  25.71 Sh 2.05 DD -14.03 Cal 1.83 | IS 22.47/-14.03 OOS 28.78/-13.02 | w21 p01 -7.13 roll-min -11.87 | BALw med 2.16 max 6.18
+cap3_1m  md5 e9d32750 ctrl_ok=None CAGR  24.75 Sh 2.07 DD -12.24 Cal 2.02 | IS 22.29/-10.06 OOS 27.07/-11.31 | w21 p01 -6.30 roll-min -10.16 | BALw med 2.71 max 4.99 over 15
+          Δ {'cagr': np.float64(-0.958), 'maxdd': 1.787, 'sharpe': np.float64(0.025), 'calmar': np.float64(0.189), 'IS_cagr': np.float64(-0.184), 'OOS_cagr': np.float64(-1.709), 'IS_maxdd': 3.964, 'OOS_maxdd': 1.716, 'win21_p01': 0.825, 'win21_rolling_min': 1.709}
+cap4_1m  md5 4b9c0e6a ctrl_ok=None CAGR  26.07 Sh 2.13 DD -13.13 Cal 1.99 | IS 22.41/-11.03 OOS 29.57/-12.44 | w21 p01 -6.91 roll-min -11.29 | BALw med 2.04 max 4.99 over 9
+          Δ {'cagr': np.float64(0.368), 'maxdd': 0.896, 'sharpe': np.float64(0.082), 'calmar': np.float64(0.153), 'IS_cagr': np.float64(-0.058), 'OOS_cagr': np.float64(0.784), 'IS_maxdd': 2.999, 'OOS_maxdd': 0.584, 'win21_p01': 0.214, 'win21_rolling_min': 0.578}
+cap5_1m  md5 bdf33571 ctrl_ok=None CAGR  25.48 Sh 2.04 DD -13.45 Cal 1.89 | IS 22.56/-13.45 OOS 28.24/-12.95 | w21 p01 -6.55 roll-min -11.80 | BALw med 2.28 max 6.04 over 7
+          Δ {'cagr': np.float64(-0.231), 'maxdd': 0.572, 'sharpe': np.float64(-0.001), 'calmar': np.float64(0.061), 'IS_cagr': np.float64(0.091), 'OOS_cagr': np.float64(-0.543), 'IS_maxdd': 0.572, 'OOS_maxdd': 0.071, 'win21_p01': 0.574, 'win21_rolling_min': 0.07}

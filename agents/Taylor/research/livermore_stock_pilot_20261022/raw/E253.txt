@@ -1,0 +1,7 @@
+Ở thang 250 phiên, giá đi từ đẩy giá lên đỉnh 142 (i59, khối lượng 8–15x), sang phân phối và đi ngang 105–120 (i75–175). Sau đó là pha đẩy giá xuống: thủng 95 (i210) và rơi về 71.9 (i216), dù khối lượng thấp, không có climax bán. Nhịp hồi lên 89–92 cũng trên khối lượng mỏng (0.1–0.8). Đáy i233 ở 79.5 cao hơn đáy cũ, tạo cấu trúc đáy cao dần ngắn hạn. Giá vào khoảng 91.5 nằm ngay dưới vùng nền cũ 95–103 (i185–209), nơi người mua trước đó đang kẹt, nên cung phía trên dày. Không có follow-through bằng khối lượng. Mức −15% ≈ 77.8 nằm dưới đáy 79.5, và cổ phiếu này biến động mạnh, thanh khoản mỏng.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 79 (thủng đáy cao i233) mở đường về vùng 72; tích cực chỉ khi vượt 103 kèm khối lượng >1.5x.
+CONTAMINATION: NONE

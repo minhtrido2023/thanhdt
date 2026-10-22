@@ -1,0 +1,7 @@
+Đây là một cổ phiếu rất kém thanh khoản: nhiều phiên Volume bằng 0 và giá đi theo bước tick. Ở thang 250 phiên, giá phân phối quanh 96–106 (i=32–49, khối lượng 20+), rồi giảm dần xuống. Phiên i=164 là climax bán, Low 74.31 với khối lượng 36x, sau đó giá bật lại. Từ i=178 đến nay, giá đi ngang trong vùng 84–94. Nhịp đẩy ở i=230 lên 101.13 (khối lượng 9.3) thất bại ngay: i=232 rơi về 91.92 với khối lượng rất thấp, tạo cung kẹt quanh 94–101. Phiên cuối đóng ở 91.92, tức mép trên của biên, khối lượng cạn. Ngưỡng −15% (≈78) nằm dưới đáy biên 84 và gần vùng climax 74–81. Muốn chạm được mức đó cần phá biên, điều có thể xảy ra nhưng không phải kịch bản chính. Mua ở mép trên biên, ngay dưới vùng cung, nên kỳ vọng lời lỗ chỉ quanh trung tính.
+
+P_HIT15: 0.17
+RISK: MED
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 84 (đáy biên i=211–243) kèm khối lượng tăng; mở ra đường về vùng climax 74–81.
+CONTAMINATION: NONE

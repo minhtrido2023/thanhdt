@@ -1,0 +1,15 @@
+**Phân tích:** Đây là một đợt markup parabol: giá đi từ vùng nền khoảng 85 (i 30–87) lên đỉnh 540 (i=240), tức gấp khoảng 6 lần. Khối lượng tăng vọt lên 15–20 lần median, kiểu climax.
+
+Từ đỉnh 540, cấu trúc đảo chiều rõ:
+- **i=240–246:** đỉnh thất bại, sau đó giá rơi liên tục về 431.
+- **i=247:** giảm sàn với thanh một giá 400.8, thanh khoản cạn.
+- **i=248:** mở cửa giảm sàn 372.8, rồi đảo ngược lên kịch trần 428.8.
+- **i=249:** vol 12.37 nhưng giá bị đẩy ngược từ 449.6 về 428.
+
+Phiên 249 là cung tại vùng 430–450, tức mép gap của i=246/247. Đây nhiều khả năng là nhịp hồi trong pha phân phối sau blow-off. Biên độ ngày thường xuyên 7–10%. Mức −15% tính từ khoảng 430 là quanh 365, chỉ ngay dưới đáy 372.8 của phiên i=248. Margin tháo chạy dễ tạo air-pocket xuyên mức này.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa dưới 372.8 (đáy i=248) xác nhận markdown; ngược lại, phe tăng chỉ có lý khi đóng cửa vượt 470–480 kèm khối lượng giữ cao.
+CONTAMINATION: NONE

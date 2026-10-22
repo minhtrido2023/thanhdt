@@ -1,0 +1,13 @@
+**Phân tích:** Ở cả ba thang thời gian, cổ phiếu đang trong pha markdown kéo dài, không có dấu hiệu tích luỹ thật.
+
+- **Thang 250 phiên:** đỉnh climax tại 121 (i16, V 15.7). Lần thử lại tại 117.86 (i35, V 15) thất bại. Sau đó giá đi theo bậc thang đáy thấp dần: 89 → 78 → 71 → 64, và phiên cuối thủng xuống 60.71.
+- **Phiên phục hồi i209 thất bại:** giá gap lên 85.71 với V 6.8, nhưng bị bán ngay về 71 ngay phiên sau. Vùng 75–86 trở thành cung kẹt phía trên.
+- **Các phiên khối lượng cao:** i225 và i234 có V 5.5–6.9 tại 64.29 nhưng không tạo được follow-through. Đây là phân phối tiếp diễn, không phải climax bán.
+- **Thanh khoản và bước giá:** thanh khoản mỏng, mỗi bước giá khoảng 5%. Chỉ cần thêm khoảng 3 tick giảm là chạm mức −15%.
+- **Nhịp giảm gần đây:** khoảng 1 tick mỗi 20–40 phiên. Nếu nhịp này tiếp diễn, mức −15% nằm trong tầm vài tháng nắm giữ.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.28
+INVALIDATION: Đóng cửa ≥75 kèm khối lượng >3x được giữ vững 3 phiên (phá cấu trúc đỉnh thấp dần); ngược lại đóng <60.71 xác nhận markdown tiếp diễn.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Cổ phiếu rất kém thanh khoản: nhiều phiên Volume 0, bước giá thô, và có thanh dao động 12–15% trong ngày (giống biên độ UPCoM). Ở thang 250 phiên, giá đi lên từng bậc: nền 94–101, rồi 107–129, rồi 121–129 trong pha i150–199. Từ i200, giá markup lên vùng 134–150 với khối lượng tăng tại i211–218. Đỉnh 153 (i214) và cú spike 161.56 (i239, Volume chỉ 4.75) đều bị bán trả ngay về 145.5. Đây là breakout thất bại, nên cung phía trên vùng 147–161 là có thật. Ở thang 20 phiên, giá đi ngang 134–147, khối lượng cạn dần. Hỗ trợ gần là 133.5–134.8 (i234, i245). Thủng vùng này thì giá dễ rơi vào khoảng trống về nền 121–129, tức chạm mức −15% (≈122.5). Thanh khoản mỏng làm rủi ro gap cao.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 133.5 (đáy i234/i245) → kịch bản giữ nền bị phá, mục tiêu về 121–129
+CONTAMINATION: NONE

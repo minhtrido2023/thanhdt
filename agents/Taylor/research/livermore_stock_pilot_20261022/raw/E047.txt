@@ -1,0 +1,11 @@
+**Đọc băng.** Ở thang 250 phiên, giá đi ngang 98–115 trong khoảng 180 phiên. Sau đó có một nhịp markup lên 127.7 (i185), rồi phân phối: i188–189 giảm với khối lượng ≈2, các đỉnh thấp dần trong vùng 107–113.
+
+Vùng 102–104 bị phá ở i226. Tiếp theo là chuỗi giảm sàn liên tiếp với khối lượng climax (i227–232, khoảng 2–2.5) xuống 73.8. Thanh 233 khối lượng 0.12 là phiên cạn cung, sau đó giá hồi chữ V. Phiên i241 (khối lượng 2.97) cùng gap lên ở i242 cho thấy có cầu thật. Nhịp chỉnh i244–245 giữ được quanh 98 với khối lượng vừa phải.
+
+Giá hiện ở 105.6, đã quay lại trong vùng range cũ. Phía trên là cung kẹt dày ở 107–112 (vùng i203–218) và 114–117. Lực hồi tốt nhưng đang tiến vào kháng cự, nên đà tăng tiếp nhiều khả năng bị chậm lại. Muốn giảm −15% (về khoảng 90) thì giá phải xoá phần lớn nhịp hồi chữ V.
+
+P_HIT15: 0.18
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 98 (lấp gap i242 và thủng đáy i244–245) kèm khối lượng >1.5
+CONTAMINATION: NONE (mẫu sập sàn liên tiếp rồi hồi chữ V gợi nhớ cú sốc thị trường VN đầu 4/2025, nhưng không xác định được mã)

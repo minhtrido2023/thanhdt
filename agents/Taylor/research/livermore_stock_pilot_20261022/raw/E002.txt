@@ -1,0 +1,7 @@
+Cổ phiếu tăng khoảng 11 lần trong 250 phiên qua ba sóng markup parabol (i51–93, i161–172, i193–211). Từ i211 (đỉnh 1430, V 10.2) giá đi ngang rộng trong vùng 997–1349 với khối lượng rất lớn, có dáng phân phối ở thang 20–60 phiên. Cụm i243–248 là climax khối lượng (21–30 lần median). Đợt đẩy lên 1309 ở i245 thất bại dưới đỉnh 1430. Ngay sau đó i246 sập về 1136 trên V 25.8, tức cung chủ động đang áp đảo. Mức −15% từ giá vào khoảng 1150 là ≈978, chỉ hơi dưới đáy range 997–1007 (i228, i234). Thủng vùng này sẽ mở ra air-pocket do margin tháo chạy về 800–900, nơi không có đỡ khối lượng. Biến động ngày khoảng 5–7%, nên xác suất chạm −15% cao.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 1310 với khối lượng lớn và giữ được trên đó (hấp thụ xong cung tại i245/i211) thì luận điểm phân phối bị vô hiệu.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+Ở thang 250 phiên, cổ phiếu đang trong pha markdown. Đỉnh phân phối nằm ở 130–133 (i116–118), sau đó là chuỗi đỉnh thấp dần: 116 (i152) và 116 (i160). Giá thủng đáy 86 (i172) ở i217, rồi rơi dốc từ 92 xuống 47 (i210–238), tức khoảng −50% trong 30 phiên. Khối lượng khi rơi chỉ khoảng 0.5–1.2, không có climax bán tháo rõ ràng.
+
+Từ i238 giá đi ngang trong vùng 47–62. Nhịp hồi lên 62.18 ở i246 bị bán ngay, i247 giảm −8% với khối lượng 1.16, lớn hơn các phiên hồi. Hồi yếu và bị cung đè, chưa có follow-through.
+
+Giá vào khoảng 55. Mức −15% rơi vào quanh 47, gần trùng đáy 46.99 của i238. Biến động ngày thường 5–10%, nên chỉ cần thủng đáy là chạm ngưỡng. Phía trên, vùng cung kẹt nằm ở 74–80.
+
+P_HIT15: 0.47
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 47 (thủng đáy i238) là vô hiệu kịch bản tích luỹ; ngược lại, vượt 62.2 với khối lượng >1.5 mới xác nhận đáy.
+CONTAMINATION: NONE

@@ -1,0 +1,13 @@
+**Phân tích:** Đây là cổ phiếu đầu cơ, thanh khoản mỏng, chạy theo từng đợt kéo trần nối tiếp rồi sập mạnh.
+- **Các đợt sập trước:** đỉnh 218 ở i109 rơi về 141 ở i117 (−35%). Đỉnh 260.8 ở i218, có climax khối lượng 17.2 kèm râu trên dài, rơi về 179.7 chỉ trong 6 phiên (−31%).
+- **Nền hiện tại:** giá tích lũy 190–211 trong khoảng i222–236, rồi gap tăng ở i237 với khối lượng 10.7.
+- **Thanh i247:** mở 246 nhưng đóng 220, khối lượng 9.1. Đây là breakout thất bại ngay dưới vùng cung 245–261 của đỉnh i218.
+- **Giá vào:** khoảng 222–226. Mức −15% tương ứng ≈190, tức đáy vùng nền. Biên độ ngày thường 5–7%, nên chạm mức này khá dễ.
+- **Phía trên:** cung kẹt dày, vì đây là đỉnh cũ của nhà đầu tư cá nhân dùng margin.
+- **Phía dưới:** đỡ yếu. Nếu mất 207 thì có air-pocket về 190.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 247 với khối lượng lớn, vượt dứt khoát vùng cung 245–261 (luận điểm rủi ro bị vô hiệu); phía xấu là đóng dưới 207.
+CONTAMINATION: NONE

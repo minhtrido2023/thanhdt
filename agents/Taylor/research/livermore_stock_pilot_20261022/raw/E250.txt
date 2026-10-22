@@ -1,0 +1,13 @@
+Ở cả ba thang, cổ phiếu đang trong pha markdown. Giá giảm từ vùng 106–108 (i8–16) về 65.75 (i211), các đỉnh thấp dần và từng nhịp hồi đều bị bán.
+
+Nhịp hồi i217–233 lên 78.6 với khối lượng 2–3.3 không vượt được cung kẹt tại vùng 78–83 (vùng gap i130 và đỉnh i145–147). Sau đó giá trôi xuống trong khi khối lượng cạn kiệt (0.11–0.22).
+
+Phiên i249 mở gần giá sàn 66.58, chạm lại vùng đáy 65.75–67.3, rồi đóng ở đỉnh phiên 71.10 với khối lượng 1.53. Đây là dấu hiệu spring/rũ bỏ có cầu đỡ, tuy khối lượng chưa phải climax.
+
+Vào lệnh quanh 71 thì mốc −15% là khoảng 60.4. Mức này nằm thấp hơn đáy 65.75 khoảng 8%. Muốn chạm, giá phải thủng đáy và có air-pocket do margin, điều hoàn toàn có thể xảy ra trong xu hướng giảm dài. Phía trên, cung tại 76–78.6 sẽ cản giá.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 65.7 (thủng đáy i211 và đáy phiên i249) kèm khối lượng tăng → spring thất bại, markdown tiếp diễn.
+CONTAMINATION: NONE

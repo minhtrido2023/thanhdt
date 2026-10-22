@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu thanh khoản rất mỏng, nhiều phiên có Volume gần 0, và biên độ trong ngày thường 5–10%. Ở thang 250 phiên, giá markup từ ~100 lên đỉnh ~207 (i167–171). Climax xảy ra trên khối lượng vừa phải, rồi giá markdown về ~150 (i207–209).
+
+Ở thang 60 phiên, giá nằm trong range 147–168, các đáy được đỡ quanh 143–150 (i241–243). Phiên i246 có khối lượng lớn (18.8x), thanh rộng 150–166 và đóng cửa 160. Đây là hấp thụ, nhưng chưa có follow-through: i248 khối lượng bằng 0, i249 khối lượng 0.25.
+
+Cung kẹt tại 168–185 (đỉnh cũ) chặn đà tăng. Mốc −15% từ ~162 là ~137.6, nằm dưới đáy range chỉ ~4–7%. Với độ biến động gap kiểu này, thủng range kéo giá xuống mốc đó là khá khả thi.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 143 (thủng đáy range 143–150) kèm khối lượng tăng, tức phân phối tiếp diễn về vùng 133–137.
+CONTAMINATION: NONE

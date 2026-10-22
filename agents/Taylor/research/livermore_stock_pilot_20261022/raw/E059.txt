@@ -1,0 +1,13 @@
+**Phân tích:** Đây là cổ phiếu thanh khoản rất mỏng, có hai pha markup thẳng đứng.
+
+- **Pha 1 (i=87–92):** chuỗi trần với khối lượng 16–25x, đỉnh 162.9. Sau đó giá phân phối và rơi về 123 (≈−24%), rồi đi ngang 125–140 trong khoảng 100 phiên.
+- **Pha 2 (i=223–226):** breakout khỏi vùng 145–153 với khối lượng 22.6x, rồi climax tại 221.7 (i=230).
+- **Dấu hiệu phân phối:** i=233 giảm mạnh với khối lượng 11x. Thanh i=235 mở 210 nhưng đóng 183, một nỗ lực thất bại. Từ i=238 giá trôi trong vùng 168–183 với khối lượng gần 0. Đây là trạng thái thiếu cầu chứ chưa phải dry-up lành mạnh.
+- **Điểm vào:** giá vào khoảng 175–178. Mức −15% rơi vào khoảng 150, đúng mép gap/breakout 151–165. Phía dưới gần như là khoảng trống (air-pocket).
+- **Tham chiếu:** ở pha 1, giá đã thoái lui 24% sau đỉnh.
+
+P_HIT15: 0.47
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 166 (đáy i=249/242) kèm khối lượng tăng sẽ mở đường về 150–153. Ngược lại, vượt 192–196 với khối lượng >3x thì kịch bản phân phối bị vô hiệu.
+CONTAMINATION: NONE

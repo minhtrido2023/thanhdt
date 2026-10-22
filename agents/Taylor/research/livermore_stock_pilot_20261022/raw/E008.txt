@@ -1,0 +1,13 @@
+Cấu trúc ở cả ba thang là markdown. Thang 250 phiên đi từ vùng 115–125 xuống 52–56. Thang 60 phiên tạo đỉnh thấp dần: 83 (i193) → 70.8 (i233) → 68.75 (i244). Ở thang 20 phiên, đáy mới 52.08 (i246–247) thủng cả 54.17 (i235/240).
+
+Thanh khoản rất mỏng, nhiều phiên Volume bằng 0, và mỗi bước giá khoảng 3.7%. Vì vậy chỉ cần trượt khoảng 4 bước giá là đã mất 15%.
+
+i249 có khối lượng 14.6× median, đóng 56.25 sát đỉnh phiên. Đây có thể là cầu hấp thụ tại đáy, nhưng mới chỉ một thanh, chưa có follow-through và chưa vượt cung 60–62.5. Phía trên còn kẹt hàng ở 60–64.5 và 72–83.
+
+Điểm vô hiệu là 52 và rất gần. Thủng 52 thì không còn đáy tham chiếu nào bên dưới.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 52.08 (đáy i246–247) trên khối lượng lớn; ngược lại, cấu trúc chỉ cải thiện khi đóng trên 62.5 có follow-through.
+CONTAMINATION: NONE

@@ -1,0 +1,14 @@
+**Phân tích:** Cổ phiếu nền nông, thanh khoản mỏng, bước giá thô khoảng 2,6–2,9%.
+
+- **Nền dài:** giá đi ngang 77–97 trong khoảng 150 phiên (i=60–196), khối lượng cạn.
+- **Markup thẳng đứng:** i=199–207 chạy chuỗi trần liên tiếp lên đỉnh 188 (i=207). Phiên đó khối lượng 13x và đảo chiều, tức climax.
+- **Range phân phối:** sau đó giá đi ngang 116–152. Khối lượng rất lớn tập trung quanh 125–145 (i=211, 213–220, 225).
+- **Breakout gần nhất thất bại:** i=245 nhảy gap lên 146,8 với khối lượng 15,6x. Ngay i=246 mở 152 rồi đảo xuống, các phiên sau trả lại toàn bộ về 124,7.
+- **Giá vào và rủi ro:** điểm vào khoảng 130–138, nằm giữa range. Mức −15% rơi vào khoảng 112–115, ngay dưới đáy range 116.
+- **Kịch bản xấu:** nếu thủng 116, phía dưới là air-pocket về vùng nền 97–90.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 116 (đáy range i=226–227) với khối lượng lớn thì luận điểm giữ range bị phá, mục tiêu chuyển về vùng nền 90–97.
+CONTAMINATION: NONE

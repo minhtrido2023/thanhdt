@@ -1,0 +1,7 @@
+**Phân tích:** Giá tích lũy dài ở vùng 99–104 (i=0–134). Sau đó là pha markup mạnh với khối lượng climax: i=135 (6.85), i=140 (7.13), i=151 (6.08). Giá lên đỉnh 141.35 ở i=166 rồi phân phối trong vùng 129–138. Thanh i=172 phá vỡ với khối lượng 5.31, mở đầu pha markdown. Từ đó các đỉnh thấp dần: 125.78, 123.95, 118.26, 116.43 và gần nhất là 108.49 (i=246). Giá đã trả lại gần như toàn bộ đợt tăng và về vùng 101.8–103, đúng gốc breakout cũ. Khối lượng khi giảm cạn dần (0.4–1.25), không có climax bán, nên chưa thấy cầu thật quay lại. Hỗ trợ là vùng 100–102, kế đến là 92.5 (i=114). Mức −15% tương đương khoảng 87.3, nằm dưới đáy của cả 250 phiên, nên cần thủng hai tầng hỗ trợ mới chạm tới.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 99.5 với khối lượng tăng sẽ vô hiệu kịch bản giữ nền và mở đường về 92.5. Kịch bản tích cực chỉ được xác nhận khi vượt 108.5 với khối lượng >1.5.
+CONTAMINATION: NONE

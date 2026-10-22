@@ -1,0 +1,9 @@
+Phiên 194–210 là pha markup rõ từ ~105 lên 133, khối lượng tăng dần. Sau đó giá đi ngang 131–140, rồi phiên 222 có spike 150 bị bán ngược về 138.6, kèm đuôi trên dài. Đây là dấu hiệu blow-off/distribution. Tiếp theo là markdown gap: phiên 225 về 117, đáy 109.4 ở phiên 226.
+
+Phiên 228–249 hồi lên với khối lượng rất cao (1.5–3.3×), các phiên tăng chiếm ưu thế (237, 239, 240, 245, 249). Phiên 243 quét xuống 118.95 rồi rút chân. Giá 128 đang nằm sát trần vùng hồi 129–130, ngay dưới cung kẹt 131–140 từ đỉnh phân phối và gap 224–225. Mức −15% là ~109, xấp xỉ đáy crash, cần phá cấu trúc mới chạm. Biến động cao, cung trên đầu dày.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 119 (đáy 236/243) với khối lượng lớn, tức nền hồi 119–130 thất bại và mở đường về 109.
+CONTAMINATION: NONE

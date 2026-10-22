@@ -1,0 +1,9 @@
+Trên thang 250 phiên, cổ phiếu tăng mạnh từ 100 lên đỉnh climax 368.8 (i94, khối lượng lên tới 11.55×). Sau đó giá đi vào pha phân phối/range rộng trong vùng 192–334. Các đáy gần đây cao dần: 192 (i165), 242 (i196), 250 (i207), 263 (i216), 283 (i244), cho thấy lực cầu đang tích luỹ lại. Phiên i249 tăng mạnh lên 322 với khối lượng 2.67×, đóng cửa sát đỉnh phiên.
+
+Tuy vậy, giá vào lệnh nằm ngay dưới vùng cung 321–334. Vùng này đã nhiều lần từ chối giá: i194 lên 334 rồi đảo chiều, i222 bị chặn ở 321, i237 ở 331, i242 sập về 299. Phía trên còn vùng kẹt hàng 345–368. Biên độ ngày khoảng 5% nên mức −15% (≈274) vẫn nằm trong range cũ. Nếu bứt phá thất bại lần nữa, giá dễ rơi về 283–290.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 283 (đáy i244) phá chuỗi đáy cao dần; tín hiệu tích cực chỉ được xác nhận khi đóng cửa trên 335 với khối lượng lớn.
+CONTAMINATION: NONE

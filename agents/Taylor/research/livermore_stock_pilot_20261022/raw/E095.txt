@@ -1,0 +1,7 @@
+**Phân tích:** Đây là cổ phiếu từng rất kém thanh khoản. Có khoảng 170 phiên đi ngang trong vùng 74–110, nhiều phiên Volume bằng 0. Từ i=199, cổ phiếu chuyển sang pha markup gần như parabol, đi từ khoảng 137 lên khoảng 295, tức gấp hơn 2 lần trong 50 phiên. Khối lượng bùng nổ climax: i=238 đạt 773× median, sau đó các phiên 239–248 liên tục ở mức 120–360×. Phiên i=248 chạm 314 rồi đóng 292,6, để lại bóng trên dài. Phiên i=249 tiếp tục có bóng trên tới 305,6 trong khi khối lượng giảm xuống 155. Đây là dấu hiệu churning hoặc phân phối sớm tại đỉnh. Vùng đỡ gần nhất là khoảng gap 236–248, cách giá vào khoảng 15–20%. Bên dưới vùng này là air-pocket do margin. Biên độ ngày đang khoảng 10%, nên việc chạm mức −15% là rất dễ xảy ra.
+
+P_HIT15: 0.68
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa dưới 236 (lấp vùng gap/breakout 238–239) xác nhận đỉnh phân phối; chỉ khi vượt và giữ trên 314 với khối lượng duy trì thì kịch bản tăng mới tiếp tục.
+CONTAMINATION: NONE

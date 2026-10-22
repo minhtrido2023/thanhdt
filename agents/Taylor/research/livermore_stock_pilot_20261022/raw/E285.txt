@@ -1,0 +1,7 @@
+Từ đáy 76 (i103) cổ phiếu tăng mạnh lên 177 (i204/211), có climax khối lượng tại i200 (4.48). Sau đó là vùng phân phối 136–177: đỉnh thấp dần 177→172 (i219)→170 (i235)→155 (i244). Khối lượng lớn nằm ở các phiên giảm i221–222 (3.09/3.85) và i236–237 (2.44/2.80). Breakout i234–235 (4.18/3.41) thất bại ngay. Đáy cũng thấp dần: 144.6→136.7→129 (i247). Thanh i247 quét xuống 129 rồi đóng cửa 145.8 với khối lượng 2.31, là dấu hiệu từ chối giá thấp. Tuy vậy hai phiên sau không có follow-through, khối lượng chỉ 1.14 và 0.80. Biên độ ngày khoảng 5–8% nên mức −15% (≈122) nằm trong tầm. Cung kẹt ở 150–170 còn dày, còn dưới 129 là khoảng trống tới vùng 120 trước đợt markup i168.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 129 (đáy i247) với khối lượng >1.5 thì cấu trúc phân phối chuyển sang markdown.
+CONTAMINATION: NONE

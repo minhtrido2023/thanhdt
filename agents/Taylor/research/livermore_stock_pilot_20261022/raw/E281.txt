@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá đi từ một vùng tích lũy dài (98), qua pha markdown xuống đáy 74.9 (i=173–177), rồi vào pha markup dựng đứng: hơn 3 lần trong khoảng 70 phiên. Chuỗi trần i=215–218 có khối lượng rất mỏng (0.34–0.61), kèm gap 143.6→157.5. Khối lượng climax xuất hiện ở i=219–221 (~2.0), sau đó giá rơi −15.6% xuống 197.9 chỉ trong 3 phiên. Nhịp hai bứt lên ở i=243–244 (vol ~1.95) nhưng để lại râu trên tại 275.7, đóng cửa 256. Từ đó giá nén chặt ở 257–264 với khối lượng giảm dần: đây là cờ, chưa phải phân phối rõ. Dù vậy, nền đỡ gần nhất ở 225–228 (đáy breakout i=242), cách giá vào ~14%. Biến động rất lớn, nên rủi ro chạm −15% cao.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.43
+INVALIDATION: Đóng cửa dưới 249 (đáy i=245) kèm khối lượng >1.5 thì vô hiệu cờ tăng; mục tiêu kế tiếp là vùng 225–228, rồi 198–211.
+CONTAMINATION: NONE

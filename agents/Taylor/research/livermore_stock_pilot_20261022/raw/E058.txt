@@ -1,0 +1,7 @@
+Chuỗi 250 phiên là một xu hướng tăng bậc thang chậm, thanh khoản mỏng: nền 121–124 (i116–169) có khối lượng dày, markup lên 139.7 (i185), rồi điều chỉnh về 124–126 và tích luỹ (i190–228). Từ i229 giá markup lại, phá đỉnh cũ 139.7–140.65 ở i245–249 với khối lượng 4–5x, cao nhất cả chuỗi. Đây là follow-through, chưa phải climax đảo chiều. Râu trên ở i243 (147.2) và i249 (151.4) cho thấy có cung ở vùng cao. Giá vào khoảng 148, nên mức −15% là khoảng 126. Mức này nằm dưới vùng retest 138–140 và chạm nền 124–127. Với biên độ dao động thấp của mã này, xác suất chạm mức đó không cao.
+
+P_HIT15: 0.15
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 137 (thủng vùng đỉnh cũ 138–140 vừa phá) kèm khối lượng lớn = breakout thất bại
+CONTAMINATION: NONE

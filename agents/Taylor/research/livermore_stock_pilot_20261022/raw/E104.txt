@@ -1,0 +1,13 @@
+**Phân tích:** Đây là cổ phiếu rất kém thanh khoản, có nhiều phiên khối lượng bằng 0 và biên độ trong phiên lên tới khoảng 10%.
+
+- **Thang 250 phiên:** giá đi ngang quanh 90–107 (i=0–143), sau đó có pha markup từ 104 lên khoảng 131 (i=144–158). Pha này kèm khối lượng lớn ở i=149 (124 lần median) và i=151 (64 lần).
+- **Từ i=158 đến nay (khoảng 90 phiên):** giá đi ngang rộng trong vùng 127–157. Mọi lần chạm khoảng 152–157 (i=182, 194, 233) đều bị bán trả lại. Lần thủng đáy sâu nhất là i=191 (Low 114.5) và được kéo lên ngay.
+- **Gần đây:** i=243 và i=245 có khối lượng 39 và 78 lần median, giá được đỡ quanh 128–130. Đây là dấu hiệu hấp thụ cung ở mép dưới vùng đi ngang, nhưng chưa có follow-through.
+- **Điểm vào:** dự kiến khoảng 143–147, tức giữa đến trên vùng đi ngang. Cung kẹt ở 150–157 nằm ngay phía trên.
+- **Ngưỡng −15%:** khoảng 122–125. Ngưỡng này nằm dưới đáy vùng đi ngang, nhưng biên độ trong phiên lớn nên khả năng bị chạm là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 127 (đáy vùng đi ngang i=199/236) kèm khối lượng lớn, tức xác nhận phân phối và rơi về vùng 114–118.
+CONTAMINATION: NONE

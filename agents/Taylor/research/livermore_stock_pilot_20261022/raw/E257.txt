@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu tích lũy dài quanh 95–100 (i0–160). Sau đó là pha markup dạng parabol từ ~117 lên 259 (i166–183), kết thúc bằng climax khối lượng (i178: 8.25×, i185: 7.99×). Tiếp theo là pha phân phối trong vùng 150–200 với các đỉnh thấp dần: 196 (i225) rồi 180 (i239).
+
+Vùng hỗ trợ 153–155 đã bị phá ở i247 (−6.6%). Hai phiên i248 và i249 giảm sàn trắng bên mua, H=L, khối lượng chỉ 0.51× và 0.19×. Đây là kiểu "air-pocket" do bán giải chấp margin: phe bán bị kẹt, chưa có cầu xuất hiện. Phiên mở cửa kế tiếp nhiều khả năng vẫn yếu.
+
+Vùng đỡ hợp lý gần nhất là mép breakout cũ 112–125 (i155–166). Nếu vùng này thủng, đích kế tiếp là nền 100–110. Lực cung phía trên dày đặc ở 150–185.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Có phiên đảo chiều với khối lượng lớn giữ được vùng 112–118, rồi đóng cửa lấy lại trên 155 (vùng hỗ trợ đã bị phá); nếu không có tín hiệu này thì giả định mua bắt đáy bị vô hiệu.
+CONTAMINATION: NONE

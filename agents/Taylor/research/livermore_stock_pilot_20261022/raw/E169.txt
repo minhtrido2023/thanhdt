@@ -1,0 +1,7 @@
+Ở thang 250 phiên, cổ phiếu vẫn trong xu hướng giảm. Đỉnh cao trào là i88-89 (122.37, khối lượng 10-12.6x), sau đó có hai đợt sập: i124-126 về 54.6 và i138-140 về 41.35. Thang 60 phiên là pha tích luỹ 61-73 trong khoảng i160-230, khối lượng cạn dần, có phiên chỉ 0.03-0.1x. Thang 20 phiên là pha markup: i232 và i237 (4.55x) phá vùng 71-73, vượt luôn vùng kẹt 74-79 của i149-151. Giá lên tới 87.9 rồi i249 lùi nhẹ với khối lượng thấp (0.48x), chưa thấy dấu hiệu phân phối. Phía trên, vùng 95-111 (i91-113) là nơi nhiều người đang kẹt lệnh. Mức −15% tương ứng khoảng 72, đúng mép trên nền cũ. Lịch sử cổ phiếu cho thấy các cú gap-down và sập liên tiếp 7% xảy ra thường xuyên, nên xác suất chạm mức này khá cao.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới ~76 (đáy i240-241), tức thủng chân sóng breakout; dưới 71 thì nền tích luỹ thất bại.
+CONTAMINATION: NONE

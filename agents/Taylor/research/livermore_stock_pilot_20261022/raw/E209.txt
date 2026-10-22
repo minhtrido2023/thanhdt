@@ -1,0 +1,9 @@
+**Phân tích:** Nền tích luỹ dài 85–95 (i0–112). Sau đó có đợt markup lên 140 (i127), phân phối, rồi một air-pocket rơi xuống 86 (i160–163, vol 8x). Pha hiện tại là markup thứ hai: khối lượng nền tăng lên 5–25x từ i199, tạo range 121–137 (i201–242). Phiên i243 bứt phá kịch trần (147.6, vol 29x), sau đó đẩy liên tiếp lên đỉnh 173.6 (i247). Mức này đã +35% khỏi range chỉ trong 5 phiên, đúng dạng climax.
+
+Phiên i248 mở 172.9, đóng 162 với vol 19x: đỉnh bị từ chối, cung xuất hiện. Giá vào khoảng 163–165 nằm xa vùng hỗ trợ thật, tức mép breakout 137–147. Biên độ ngày khoảng 7%, và cổ phiếu này từng có tiền lệ sập 38%. Một nhịp retest về 140 là kịch bản rất khả dĩ.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 147 (mép gap i243) với khối lượng lớn thì breakout thất bại, mục tiêu về vùng 130–137. Ngược lại, vượt và giữ trên 174 với khối lượng giảm khi điều chỉnh thì kịch bản rủi ro bị vô hiệu.
+CONTAMINATION: NONE

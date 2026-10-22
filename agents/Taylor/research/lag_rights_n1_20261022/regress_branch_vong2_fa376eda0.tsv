@@ -1,0 +1,35 @@
+compute_jit_unpark_selfcheck.py	0	6	5	✅ MA TRẬN TZ: mọi môi trường PASS và digest ĐỒNG NHẤT
+auto_exit_inject_selfcheck.py	0	114	10	113 PASS, 0 FAIL
+daily_nav_snapshot_corpaction_error_selfcheck.py	0	2	1	Tat ca selfcheck PASS.
+corp_actions_skip_unsupported_selfcheck.py	0	55	0	TỔNG: PASS
+corp_actions_verify_cashleg_selfcheck.py	0	5	0	4/4 PASS
+eod_trading_report_account_filter_selfcheck.py	0	1	1	KẾT QUẢ: 36 PASS / 0 FAIL
+nav_corpaction_gate_e2e_selfcheck.py	0	1	1	68 PASS, 0 FAIL
+nav_cum_dividend_selfcheck.py	0	27	1	=== SELFCHECK: 38 PASS / 0 FAIL ===
+oddlot_full_exit_selfcheck.py	0	65	2	64 PASS / 0 FAIL
+paper_report_render_selfcheck.py	0	49	1	ALL PASS (48/48)  (tmp: /tmp/ppdr_selfcheck_psvuo8lm)
+reconcile_equity_realized_selfcheck.py	0	1	1	32 PASS, 0 FAIL
+nav_jump_flow_gate_selfcheck.py	0	1	0	PASS
+verify_account_snapshot_bq_price_date_selfcheck.py	0	1	1	KẾT QUẢ: 14 PASS / 0 FAIL
+verify_account_snapshot_lot_reset_selfcheck.py	0	1	1	KẾT QUẢ: 32 PASS / 0 FAIL
+verify_account_snapshot_corp_action_selfcheck.py	0	1	1	KẾT QUẢ: 12 PASS / 0 FAIL
+rights_subscription_qty_selfcheck.py	0	112	0	TỔNG: PASS
+corp_action_selfcheck.py	0	1	1	KẾT QUẢ: 93 PASS / 0 FAIL
+reconcile_equity_egg_selfcheck.py	0	1	0	✅ 16/16 assertion PASS
+discretionary_accumulation_inject_selfcheck.py	0	48	2	✅ ALL PASS
+exdate_frame_cashleg_selfcheck.py	0	1	0	25/25 PASS
+ledger_seal_weekly_selfcheck.py	0	1	0	TZ=<unset> — PASS: 0 lỗi
+cash_identity_selfcheck.py	0	1	0	OK — 348 assertion PASS (cash_identity_selfcheck.py) · bất biến dưới 4 môi trường TZ (
+exrights_price_basis_selfcheck.py	0	1	2	KẾT QUẢ: 38 PASS / 0 FAIL
+corp_action_broker_detect_selfcheck.py	0	1	3	788 PASS / 0 FAIL  (TZ=None, py=3.10.12)
+portfolio_status_selfcheck.py	0	77	0	SELFCHECK PASSED — mọi assertion OK.
+daily_nav_snapshot_from_raw_selfcheck.py	0	1	3	83 PASS, 0 FAIL
+compute_park_trim_selfcheck.py	0	123	2	=== 122 PASS / 0 FAIL ===
+compute_active_nav_broker_fills_selfcheck.py	0	27	0	ALL PASS
+nav_unit_ledger_selfcheck.py	0	1	0	OK — 4758 assertion PASS (nav_unit_ledger_selfcheck.py)
+exdate_frame_selfcheck.py	0	1	0	63/63 PASS
+lag_rights_exit_hold_selfcheck.py	0	145	0	TỔNG: PASS
+orphan_lot_blocked_selfcheck.py	0	31	0	TỔNG: PASS
+discretionary_margin_gate_selfcheck.py	0	2	3	Tat ca selfcheck PASS.
+rights_terp_price_gate_selfcheck.py	0	109	0	TỔNG: PASS
+verify_account_snapshot_broker_positions_marketprice_selfcheck.py	0	2	1	✅ ALL PASS

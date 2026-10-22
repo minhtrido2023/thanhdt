@@ -1,0 +1,7 @@
+Giá tăng mạnh ở cả ba thang. Ở thang 250 phiên, giá đi từ 100 lên khoảng 198. Pha tăng tốc bắt đầu từ i=186, khi giá gap lên 146.9 với khối lượng 4.0x. Từ i=218, khối lượng tăng vọt lên 2.5–5.4x nhưng giá chỉ đi ngang trong vùng 180–198. Đây là dấu hiệu churn kiểu phân phối: thanh 226–227 có khối lượng 5.2–5.4x mà giá không tăng thêm. Đỉnh 197.9 ở i=235–236 không có follow-through. Tại i=244, giá thủng vùng đáy 180–182 (đáy của các phiên 222, 231, 232) với khối lượng 4.28x, rồi xuống 174.5. Nhịp hồi 247–249 có khối lượng cạn dần (1.0x) và vẫn nằm dưới vùng đã gãy, nên đây là rebound yếu, chưa phải hấp thụ cung. Hỗ trợ kế tiếp là 160–168 (vùng 205–212). Mức −15% tương ứng khoảng 150, trùng mép gap 147–150, nơi lực bán giải chấp margin có thể kéo giá xuống.
+
+P_HIT15: 0.32
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trở lại trên 188 với khối lượng lớn thì luận điểm phân phối/suy yếu bị vô hiệu; ngược lại, đóng dưới 174.5 kèm khối lượng thì xác nhận pha markdown về 160–150.
+CONTAMINATION: NONE

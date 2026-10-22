@@ -1,0 +1,7 @@
+**Phân tích:** Đây là cổ phiếu penny, mỗi bước giá khoảng 2.8%. Suốt 250 phiên giá đi ngang trong biên 83–125. Có bốn đợt kéo giá với khối lượng đột biến: i82–83, i94–95, i145–146 và i240–241 (V tới 30.5). Cả bốn đều thất bại và rơi về vùng 90–100 trong vài phiên. Đợt mới nhất có dấu hiệu phân phối rõ: i242 tạo đỉnh 116.67 rồi đóng tại 100, i243 giảm sàn với V 13.4, i245 đảo chiều với V 18.2. Giá hiện về 94.44, giữa biên, khối lượng đang co lại. Đáy hỗ trợ nằm ở 80.56–83.33 (i209, i68). Nếu vào lệnh ở 97.22 thì một nhịp về 80.56 đã tương đương −17%. Không có xu hướng, kỳ vọng lợi nhuận gần 0 và rủi ro nghiêng về phía giảm.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 80.56 (thủng đáy biên i209/i68) với khối lượng lớn.
+CONTAMINATION: NONE

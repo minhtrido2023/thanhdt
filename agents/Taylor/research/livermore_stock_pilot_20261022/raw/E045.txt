@@ -1,0 +1,9 @@
+Chuỗi đang ở pha markup dạng parabol trên cả 3 thang: từ đáy ~58 (i16) lên ~274, khoảng 4.7 lần. Nền 187–227 (i221–243) bị phá lên ở i244: tăng trần với khối lượng 6.51, mức lớn nhất 250 phiên. Sau đó là gap i245 và i247 biên rộng (vol 4.27). Thanh i248 mở 277 đóng 269, dấu hiệu hấp thụ cung đầu tiên. i249 vol giảm còn 2.42.
+
+Giá đã cách mép trên của nền (~227) khoảng 20%, nên bên dưới là một air-pocket không có hỗ trợ. Biến động thực tế rất lớn: nhịp i226–231 rơi 23% chỉ trong 5 phiên. Vì vậy mức −15% (≈233) rất dễ chạm nếu xảy ra climax/phân phối. Đà tăng vẫn còn, nhưng mua đuổi ở điểm này có tỷ lệ rủi ro/lợi nhuận kém.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 252 (đáy thanh gap i245–247) với khối lượng lớn, tức gap breakout thất bại; dưới ~220 thì cấu trúc markup bị phá.
+CONTAMINATION: NONE

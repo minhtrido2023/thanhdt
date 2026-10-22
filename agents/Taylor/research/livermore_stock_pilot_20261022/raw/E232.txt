@@ -1,0 +1,7 @@
+Cấu trúc 250 phiên: markup từ 77 lên 135 (i6–108), rồi phân phối trong vùng 120–135 (i108–152). Sau đó là markdown: i153 đánh thủng 122, đáy sau lần lượt thấp hơn 108, rồi 100. Có một nền phẳng 100–106 kéo dài khoảng 20 phiên (i226–244) với khối lượng cạn. Nền này bị phá ở i245 (V 1.43). i246 gap xuống 91 với V 2.33, cao nhất cụm, nhưng chưa đủ để gọi là climax. i248 chạm 83. i249 hồi lên 89.4 với V 1.19, không có follow-through rõ. Vùng 100–105 giờ là cung bị kẹt ngay phía trên. Hỗ trợ cấu trúc kế tiếp là đáy năm 77–83 (i5–6). Mốc −15% từ khoảng 89 rơi vào ~76, sát đáy đó. Đây là pha markdown ở cả 3 thang, nên rủi ro xuyên đáy là đáng kể.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 83 (đáy i248) với khối lượng lớn, hoặc thủng 77 (đáy năm), thì xác nhận markdown tiếp diễn. Chỉ khi giá lấy lại 100–105 mới trung hoà luận điểm giảm.
+CONTAMINATION: NONE

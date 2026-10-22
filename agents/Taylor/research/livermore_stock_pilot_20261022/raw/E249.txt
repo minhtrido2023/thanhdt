@@ -1,0 +1,7 @@
+**Phân tích.** Ở thang 250 phiên, cổ phiếu tăng giá mạnh từ khoảng 75 lên đỉnh 293 (phiên 218–219). Đỉnh này đi kèm khối lượng cao trào (3.02) và phiên 220–221 bị đạp sập với khối lượng 2.81. Từ đó, thang 60 phiên chuyển sang pha phân phối với các đỉnh thấp dần: 293 → 258 (phiên 235) → 230 (phiên 242). Các đáy nằm trong vùng 188–215 và phiên 243 thủng xuống 196 với khối lượng 2.69. Nhịp hồi 248–249 có khối lượng khá (2.04) nhưng phiên 249 đóng giữa thân, ngay dưới vùng cung 230–258. Biến động ngày rất lớn, ±5–7% là chuyện thường. Mốc −15% tính từ khoảng 222 rơi vào quanh 189, trùng đáy 188 của phiên 244. Nếu thủng vùng này, giá dễ rơi qua khoảng trống xuống 168–180.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 188 (thủng đáy range) xác nhận markdown; ngược lại, vượt 258 với khối lượng lớn thì phân phối bị vô hiệu.
+CONTAMINATION: NONE

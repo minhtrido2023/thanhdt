@@ -1,0 +1,13 @@
+Cổ phiếu cực kỳ kém thanh khoản: nhiều phiên khối lượng 0 và nhiều thanh giá phẳng. Giá tăng khoảng 9,7 lần trong 250 phiên, theo kiểu leo bậc thang bằng các phiên trần.
+
+Ở cả ba thang, đây là pha markup dạng parabol, không có nền tích luỹ đáng kể. Các nhịp hồi trước đó đều sâu: i193 từ 907 về 695 (−23%), i237 từ 1050 về 886 (−16%).
+
+Tín hiệu đáng ngại nhất là i247. Khối lượng 215 lần median, giá đập xuống 900, tức có phân phối thật. Phiên i248 kéo lại 968 chỉ với khối lượng 0,5, nghĩa là phần hồi phục không có cầu.
+
+Đỉnh 1050 là vùng cung kẹt. Phía dưới gần như là khoảng trống tới 832–845, rồi tới 750. Với biên độ ±7% và lệnh khớp mỏng, sụt −15% chỉ cần 2–3 phiên sàn.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa vượt 1050 với khối lượng ≥ vài lần median và giữ được trên 968 mà không quay lại thủng 900.
+CONTAMINATION: NONE

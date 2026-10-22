@@ -1,0 +1,7 @@
+**Phân tích:** Pha 250 phiên là markdown dài. Giá rơi từ khoảng 107 xuống 26–30, tích luỹ ở đó (i60–130), markup lên khoảng 46 (i170–179), rồi lại markdown. Vùng nền 26–30 bị phá qua chuỗi phiên giảm gần sàn i242–245 (28.84 → 23.34), khối lượng 1.1–1.6, không có climax rõ. Giá lập đáy mới 20.33 tại i248. Phiên i249 đóng cửa tại đỉnh ngày 22.45 với khối lượng thấp 0.70: đây là nhịp hồi kỹ thuật, chưa có follow-through hay cầu xác nhận. Phía trên, vùng 26–30 giờ là cung kẹt dày, nên nếu có hồi thì cũng dễ bị chặn. Biến động ngày lớn, giá trơ và margin có thể còn bị xả, nên khả năng chạm −15% (khoảng 19.1) là đáng kể.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa dưới 20.3 (đáy i248) với khối lượng tăng sẽ xác nhận markdown tiếp diễn. Kịch bản tích cực chỉ được xác nhận khi giá lấy lại vùng 26–27 với khối lượng lớn hơn 1.5.
+CONTAMINATION: NONE

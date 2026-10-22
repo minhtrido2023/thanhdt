@@ -1,0 +1,7 @@
+Ở thang 250 phiên, giá giảm xuống đáy 73.4 (i=74) với khối lượng cao, sau đó tăng mạnh từ 78 lên 175 (i=81–113). Đợt điều chỉnh tiếp theo dừng ở 140.7 và giá tăng lại lên khoảng 200. Từ i=176 đến 245, giá đi ngang trong vùng 184–206 suốt khoảng 70 phiên. Khối lượng giảm dần, các đáy nông dần (184.1, rồi 186.3, rồi 191–193), cho thấy cung đang được hấp thụ. Phiên i=246 phá lên trên 206 với khối lượng 4.99, mức lớn nhất cả chuỗi. Ba phiên sau giữ trên 204.8 với khối lượng khoảng 2.5. Cú phá vỡ có follow-through và chưa thất bại. Giá vào dự kiến quanh 210, nên mức −15% là khoảng 178.5. Mức này nằm dưới đáy vùng tích lũy (184), tức chỉ bị chạm nếu cú phá vỡ thất bại hoàn toàn. Rủi ro chính là giá đã tăng khoảng 2.7 lần, có thể bắt đầu phân phối ở vùng đỉnh.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.57
+INVALIDATION: Đóng cửa quay lại dưới 204.8 (trong range cũ), và đặc biệt dưới 191 kèm khối lượng lớn, thì cú phá vỡ bị coi là thất bại.
+CONTAMINATION: NONE

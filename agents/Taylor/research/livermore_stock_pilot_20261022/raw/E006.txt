@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, giá đi lên bền từ ~83 (i=24) lên ~190. Ở thang 60 phiên, giá đi ngang/phân phối trong vùng 175–194. Vùng 192–194 đã chặn giá ba lần: i=220, i=223–224 và i=234 (193.33).
+
+Nhịp rũ i=227–229 có khối lượng 2.63 và đẩy giá về 160.45, sau đó hồi nhanh. Đợt điều chỉnh i=237–247 có khối lượng cạn dần (0.5–1.0), đáy cao dần ở 173.5. Đây là dấu hiệu tích cực.
+
+Phiên i=249 gap lên với khối lượng 4.38, cao nhất năm, nhưng đóng cửa 189.6, vẫn dưới mép cung 192–194. Đây có thể là phiên breakout hoặc phiên climax ngay tại kháng cự. Lệnh mua sát đỉnh nên rủi ro bị kẹt cao nếu không có follow-through. Mức −15% tương đương khoảng 161, trùng đáy i=229, nên có thể xảy ra nếu breakout thất bại.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 173.5 (đáy i=242–243) với khối lượng lớn, tức breakout 192–194 thất bại; dưới 160 thì cấu trúc tăng gãy.
+CONTAMINATION: NONE

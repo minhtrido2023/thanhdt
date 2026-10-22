@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu có một pha markup lớn từ 100 lên 290 (i0–65). Sau đó là phân phối trong vùng 195–275 (i65–165), kết thúc bằng thanh khối lượng climax 5.0 ở i165 phá xuống. Tiếp theo là markdown về 128 (i190).
+
+Ở thang 60 phiên, giá đã hồi lên với các đáy cao dần: 128 → 137 (i216) → 160 (i228) → 192 (i242). Khối lượng nhịp hồi chỉ khoảng 0.7–1.0, thấp hơn rõ so với khối lượng lúc phân phối.
+
+Giá hiện tại 215 đang đi vào vùng cung kẹt 215–245, gồm range i130–164 và mép gap i165. Phiên i249 thu hẹp, khối lượng cạn (0.48). Đây là tích cực ngắn hạn nhưng chưa có follow-through. Biên độ ngày 3–5% cũng khiến mốc −15% (≈183, vùng breakout i229–230) không xa.
+
+P_HIT15: 0.35
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 192 (đáy i242), tức phá chuỗi đáy cao dần của nhịp hồi.
+CONTAMINATION: NONE

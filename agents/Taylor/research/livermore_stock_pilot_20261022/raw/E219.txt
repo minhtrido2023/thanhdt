@@ -1,0 +1,7 @@
+**Đọc băng:** Giá giảm dài từ 100 xuống đáy ~58–64 (i149–187), nền tích luỹ khô cung. Pha markup bắt đầu i211–222 với khối lượng lớn, đỉnh 116.39. Nhịp điều chỉnh về 92.9–96 (i230–232) có khối lượng giảm dần, là dry-up lành mạnh. Lần test lại 116.39 ở i246–247 thất bại: i247 có thanh biên rộng 104–116, đóng giữa thanh, khối lượng cao. Tiếp đó i248 đóng sát đáy. Như vậy đỉnh đôi 116 có cung thật. Giá vào ~104 nằm giữa vùng. Hỗ trợ là vùng 93–99. Mức −15% (~88.5) nằm dưới vùng này, trong air-pocket gap i213–216 (84–92). Cổ phiếu giá thấp, mỗi bước giá ~3%, nên biến động lớn.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 92.9 (đáy i231–232) với khối lượng tăng → cấu trúc markup hỏng, mở đường về 84.
+CONTAMINATION: NONE

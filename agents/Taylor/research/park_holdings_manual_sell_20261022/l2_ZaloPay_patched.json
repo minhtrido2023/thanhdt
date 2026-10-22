@@ -1,0 +1,27 @@
+{
+ "layer": "L2_JIT_UNPARK",
+ "account_label": "ZaloPay",
+ "asof": "2026-10-22",
+ "park_mv_vnd": 1622250.0,
+ "cash_available_vnd": 19449483.0,
+ "egg_assets_vnd": 515770079.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [
+  "DRI"
+ ],
+ "excluded_tickers": [
+  "DGC",
+  "PNJ"
+ ],
+ "margin_room_vnd": 0.0,
+ "friction": 0.0015,
+ "orders": [],
+ "buy_amendments": [],
+ "blocked": [],
+ "notes": [
+  "không có lệnh MUA book BAL/LAG trong plan ⇒ L2 no-op (đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)"
+ ],
+ "plan_path": "plan_ZaloPay_2026-10-23.json",
+ "n_buy_orders_bal_lag": 0,
+ "decision": "NO_TRIGGER"
+}

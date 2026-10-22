@@ -1,0 +1,9 @@
+Cổ phiếu này có biến động cực đoan. Giá rơi từ 124.8 xuống 40.8 (i163), sau đó bật lên 108.6 (i193). Ngay sau đó là chuỗi giảm sàn liên tiếp với thanh khoản cạn (i194–200 về 64.4), một túi khí kiểu bán giải chấp margin. Giá lại thủng xuống 43.8 (i211), rồi tăng gấp hơn 2 lần lên 107.6 (i245).
+
+Hiện giá đang nằm đúng vùng cung 103–108.6, nơi đỉnh i193 từng sập. Phiên i244–249 có khối lượng 4–7 lần median nhưng giá đi ngang 98–107, không có follow-through. Đây là dấu hiệu phân phối hoặc churning tại kháng cự. Biên dao động ngày khoảng 5–8%, lịch sử từng giảm sàn nhiều phiên liền. Mất 15% chỉ cần 2–3 phiên xấu.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 108.6 kèm khối lượng lớn và giữ được vài phiên sẽ phủ định kịch bản phân phối. Ngược lại, đóng cửa dưới 86.8 (đáy i240) xác nhận breakout thất bại.
+CONTAMINATION: NONE

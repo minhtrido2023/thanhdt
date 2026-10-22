@@ -1,0 +1,7 @@
+**Phân tích.** Cổ phiếu rất kém thanh khoản: nhiều phiên Volume 0 và giá in một mức duy nhất. Có những bước nhảy −10% đến −14% chỉ trong một thanh (i=199, 223, 249), vượt biên ±7% của HOSE, nên nhiều khả năng mã này thuộc sàn biên độ rộng. Trong khoảng 250 phiên, giá đi ngang trong vùng 90–118, các đỉnh thấp dần (130 → 113 → 106.5). Khối lượng đột biến ở i=132, 139–140 trùng vùng 98–113, đó là phân phối chứ không phải tích luỹ. Phiên i=249 mở 94, đóng 91.64 với volume 18x, rơi về sát đáy năm 90.08–90.41 (i=234, i=59). Đáy này đã giữ hai lần, nên có thể hồi về 98–102. Tuy nhiên, thủng 90 thì bên dưới không có cấu trúc đỡ. Một lệnh bán tháo đơn lẻ cũng có thể in thẳng −15% (khoảng 78).
+
+P_HIT15: 0.28
+RISK: HIGH
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 90 (đáy năm 90.08) kèm khối lượng thì luận điểm giữ vùng đáy bị vô hiệu hoá.
+CONTAMINATION: NONE

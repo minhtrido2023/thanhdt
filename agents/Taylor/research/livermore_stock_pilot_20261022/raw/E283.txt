@@ -1,0 +1,7 @@
+Chuỗi 250 phiên cho thấy một cổ phiếu cực kém thanh khoản: mỗi bước giá khoảng 2,5–3%, nhiều phiên khối lượng gần 0. Thang 250 phiên là pha markdown từ 100 xuống 61,78 (i130–147). Sau đó là tích luỹ khối lượng lớn ở vùng 62–72 (i129–164), rồi markup lên vùng 79,6–82,5 (i182–193, khối lượng 10–21x). Cú climax i205–208 (KL 12–21x) đẩy giá lên 115,23, nhưng thất bại ngay. Giá rơi về 85–96 và đi ngang với khối lượng cạn (0,1–1,6x). Đây là pha range sau climax, chưa có follow-through. Cung kẹt ở 98–115. Hỗ trợ ở 85, sau đó là vùng 79,6. Ngưỡng −15% (≈79,4) chỉ cách hỗ trợ đó một bước giá. Thanh khoản mỏng làm tăng rủi ro trượt giá.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 85 kèm khối lượng >3x (thủng đáy range i226/i240) thì kịch bản nền giữ bị phá, mục tiêu là vùng 79,6–76,7.
+CONTAMINATION: NONE

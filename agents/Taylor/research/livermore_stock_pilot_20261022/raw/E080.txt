@@ -1,0 +1,11 @@
+**Phân tích.** Cấu trúc 250 phiên là một chu kỳ trọn vẹn. Giai đoạn i=92–200 là pha markup từ 117 lên 192, với các thanh khối lượng lớn ở i=111, i=160 và i=191 (8.95). Vùng đỉnh i=198–218 (180–192) là phân phối: khối lượng cao nhưng giá không đi lên, kèm breakdown ở i=205.
+
+Sau đó là markdown mạnh, đỉnh sau thấp hơn đỉnh trước: nhịp hồi i=235 bị chặn ở 153.8, gãy đáy 129.9 của i=232 ở i=245–246. Phiên i=249 thủng tiếp mức 125.5, đóng cửa sát đáy 118.94 với khối lượng 1.83, cho thấy chưa có climax hay test cạn cung.
+
+Giá đã giảm 38% từ đỉnh và đang thử vùng nền 116–120 (i=92–110). Nếu vùng này vỡ, khoảng trống phía dưới khá mỏng, kéo về vùng 104–110 (i=46–70). Mức −15% tính từ giá vào là khoảng 101.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.36
+INVALIDATION: Đóng cửa trên 134 (lấy lại nền i=241–246) với khối lượng >1.5 thì luận điểm markdown bị vô hiệu; nếu thủng 116 thì rủi ro tăng tiếp.
+CONTAMINATION: NONE

@@ -1,0 +1,9 @@
+Ở thang 250 phiên, giá đi vòng hết một chu kỳ. Nền ban đầu ở 100–105. Sau đó là các cú bùng nổ khối lượng (i32–33, 53–54, 64) lên vùng 150. Tiếp theo là một range dài 118–125 kéo dài khoảng 140 phiên. Đợt markup thứ hai (i199–215) đạt 150 thì thất bại. Từ i233, đợt markdown bắt đầu với khối lượng mở rộng (5–9×) và phá thủng range 118–125, biến vùng này thành cung kẹt dày phía trên.
+
+Phiên i245–246 có dáng climax: khối lượng 12.5×, low 88.8, đóng cửa gần đỉnh phiên. Nhịp hồi sau đó yếu, khối lượng cạn và chỉ lấy lại được 102. Giá vào khoảng 102 thì mức −15% rơi vào quanh 86.7, tức là ngay dưới đáy climax. Kiểm định lại đáy là khả năng cao. Thanh khoản mỏng nên dễ xuất hiện air-pocket.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 88.8 (thủng đáy climax i246) thì mất cấu trúc tạo đáy; tín hiệu tích cực chỉ có khi lấy lại 113–115 với khối lượng lớn.
+CONTAMINATION: NONE

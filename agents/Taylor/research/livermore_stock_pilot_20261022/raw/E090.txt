@@ -1,0 +1,7 @@
+**Phân tích:** Đây là cổ phiếu rất kém thanh khoản, có nhiều phiên Volume bằng 0, và đã đi ngang trong biên 96–106 gần cả năm. Đáy cứng là vùng 96.5: các phiên i42–63 tích luỹ tại đây, có phiên i46 với Volume 27x. Mọi cú bứt lên trên 106 đều thất bại và quay lại biên: i101 (đỉnh 127), i146 (114 với Volume 16.9x), i155 (116.7), i160 (109.65). Phiên i246 bứt lên 109.65 với Volume 18.5x, i247 chạm 114 nhưng không có follow-through. i248–249 lùi về 107 với Volume cạn. Mẫu hình giống các cú spike trước đó, nên xác suất quay về 102–105 là cao. Giá vào khoảng 107 nằm trên biên. Mốc −15% là khoảng 91, nằm dưới mọi đáy kể từ i39, nên rủi ro thủng sâu thấp. Rủi ro thực tế chủ yếu là trượt giá do thanh khoản.
+
+P_HIT15: 0.08
+RISK: MED
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 101 (về lại giữa biên, breakout i246 thất bại hoàn toàn); xác nhận tích cực nếu đóng cửa trên 114 kèm khối lượng.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá tăng mạnh từ 100 lên 229 (i114) với khối lượng bùng nổ (3–6x ở i40–88). Sau đó giá phân phối trong biên 170–215 (i114–210). Biên này bị phá bằng gap xuống ở i212 (169→157.5), đáy markdown 147.2 tại i222. Nhịp hồi sau đó lên 175.7 (i242) với khối lượng chỉ 0.3–0.8, tức thiếu cầu. Nhịp hồi bị chặn ngay dưới mép gap và đáy biên cũ 168–176, nơi người mua trong biên phân phối đang bị kẹt. Giá hiện 164.4 trôi xuống với khối lượng cạn (0.12). Đây là cạn cung nhưng cũng không có cầu. Mốc −15% (~139.7) nằm dưới đáy 147. Muốn chạm, giá phải thủng đáy 147, điều khả thi trong pha markdown nhưng chưa chắc xảy ra.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 176 kèm khối lượng >1.5x (lấy lại mép gap/đáy biên cũ) thì luận điểm giảm bị vô hiệu; thủng 147 thì nhiều khả năng xuống tiếp.
+CONTAMINATION: NONE

@@ -1,0 +1,13 @@
+**Cấu trúc.** Ở thang 250 phiên, giá bị markdown mạnh từ 100 xuống 67. Đáy có climax ở i23–25 (V 7–13.6), sau đó là pha tích luỹ dài 67–75 (i25–135). Đợt markup i137–138 (V 8.9) đưa giá lên 87.
+
+Ở thang 60 phiên, giá đi ngang 80–89. Mép trên 87–91 đã bị từ chối nhiều lần (i186 91.33, i218 89.43, i236 89.77). Khối lượng cạn kiệt cực độ ở i194–233, nhiều phiên V≈0. Đây là cổ phiếu rất mỏng, rủi ro gap và air-pocket.
+
+Ở thang 20 phiên, lần thử 89 tại i235 không có follow-through, và các phiên gần đây đóng cửa yếu về 83.
+
+Giá vào khoảng 83, mức −15% là ≈70.6. Muốn chạm mức này, giá phải xuyên vùng 80 rồi 75. Phía trên, cung kẹt tại 87–91 và 100.
+
+P_HIT15: 0.18
+RISK: MED
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 79.7 (đáy range i220–232) kèm khối lượng tăng → mở đường về 75 rồi 70.
+CONTAMINATION: NONE

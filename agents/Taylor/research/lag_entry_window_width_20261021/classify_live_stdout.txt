@@ -1,0 +1,36 @@
+== mã nguyên nhân theo account (ứng viên×account)
+  SpaceX  ALREADY_HELD               3
+  SpaceX  EXCLUDED_DD                13
+  SpaceX  EXCLUDED_USER_BANNED       3
+  SpaceX  FILLED_LATE                1
+  SpaceX  PLAN_CALENDAR_ERROR        4
+  SpaceX  PLAN_DECIDED_NOT_ORDERED   1
+  SpaceX  PLAN_EMPTY_BLOCKED         2
+  SpaceX  SIG_FILTER_ADV_UNIV        33
+  SpaceX  WAIT_CASH                  7
+  ZaloPay ALREADY_HELD               1
+  ZaloPay EXCLUDED_DD                12
+  ZaloPay EXCLUDED_DD_INCONSISTENT   3
+  ZaloPay EXCLUDED_USER_BANNED       3
+  ZaloPay FILLED_D1                  2
+  ZaloPay PARTIAL_LATE               1
+  ZaloPay PLAN_DECIDED_NOT_ORDERED   1
+  ZaloPay SIG_FILTER_ADV_UNIV        35
+  ZaloPay WAIT_CASH                  9
+
+== ứng viên MỤC TIÊU (qua lọc tín hiệu của chính fleet): 28 / 134 ứng viên×account
+  SpaceX  mục tiêu   1201.8tr | KHÔNG triển khai  1110.8tr (92%) | triển khai TRỄ (phiên 3)   91.0tr (8%)
+  ZaloPay mục tiêu    314.0tr | KHÔNG triển khai   247.3tr (79%) | triển khai TRỄ (phiên 3)   18.0tr (6%)
+  TỔNG   mục tiêu   1515.9tr | không triển khai  1358.0tr (90%) | trễ 109.1tr (7%)
+
+== vốn KHÔNG triển khai theo mã nguyên nhân CHÍNH (tr VND, ƯỚC LƯỢNG slot):
+  WAIT_CASH                    781.1tr  (58%)
+  PLAN_CALENDAR_ERROR          291.3tr  (21%)
+  PLAN_EMPTY_BLOCKED           182.1tr  (13%)
+  PLAN_DECIDED_NOT_ORDERED      94.5tr  (7%)
+  PARTIAL_LATE                   9.0tr  (1%)
+  FILLED_D1                      0.0tr  (0%)
+  FILLED_LATE                    0.0tr  (0%)
+
+  trong đó ca có trần/hết cửa sổ là quân domino CUỐI (sau khi phiên 1 đã mất vì vận hành): 303.7tr (22%)
+  ca mà trần/cửa sổ là nguyên nhân CHÍNH (phiên 1 có lệnh hợp lệ đủ tiền mà vẫn không khớp): 0

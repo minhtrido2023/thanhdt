@@ -1,0 +1,15 @@
+Cổ phiếu thị giá thấp với bước giá thô (mỗi tick ≈3.5–4%), hiện ở pha markup dựng đứng lần hai.
+
+- **Nền 250 phiên:** tích luỹ dài 110–120 (i100–197), khối lượng cạn kiệt, có phiên V=0.
+- **Breakout i198–199:** V 5.9 và 5.7, mở pha markup.
+- **Climax lần 1 (i221–227):** chuỗi trần, V 15.7 và 12.5 tại đỉnh 260. Sau đó sập về 170 trong 5 phiên (−35%), tức air-pocket margin điển hình.
+- **Lần hai (i246–249):** bốn phiên trần liên tiếp lên 280, vượt đỉnh 260. V 9.9 và 7.5 lớn nhưng thấp hơn climax cũ.
+- **Điểm vào:** sau chuỗi tăng dọc ≈+55% trong 4 phiên. Cung kẹt tại vùng 230–260. Hỗ trợ thật chỉ ở nền 180–200, tức −30% đến −35% so với giá vào.
+
+Khả năng xảy ra pullback ≥15% trong vài tuần là rất cao.
+
+P_HIT15: 0.70
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Giá giữ trên 260 (đỉnh climax cũ) với khối lượng co lại khi điều chỉnh rồi tiếp tục lập đỉnh mới thì luận điểm phân phối/sập sai.
+CONTAMINATION: NONE

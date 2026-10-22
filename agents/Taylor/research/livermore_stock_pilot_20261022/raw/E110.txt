@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đã có một pha markup mạnh từ i171 đến i195, đi từ khoảng 115 lên đỉnh 157. Sau đó là một range rộng 133–162. Đỉnh i221–222 (162.6) chỉ vượt nhẹ đỉnh cũ trên khối lượng lớn rồi thất bại, kéo theo nhịp rơi i237 về 137 với khối lượng 2.77. Đây là dấu hiệu phân phối ở thang 60 phiên.
+
+Đáy range quanh 132–133 đã bị xuyên ở i247–248 (low 126.5). Lực cầu đỡ i248 có khối lượng 1.71. Tuy vậy, i249 hồi rất yếu (khối lượng 0.44), đóng cửa sát đáy ở 132.
+
+Phía trên là cung kẹt dày ở vùng 138–148. Phía dưới, vùng 127–121 khá trống, hỗ trợ thật nằm ở vùng nền breakout 114–121 (i180–185). Ngưỡng −15% tính từ giá vào khoảng 132 rơi vào mức ~112, gần với vùng này. Biên độ dao động ngày lớn, khoảng 4–5%.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa lại trên 141–142 với khối lượng >1.5 (tức là range 133–148 được giành lại) thì kịch bản phân phối/breakdown bị vô hiệu; ngược lại, thủng 126.5 thì mục tiêu là vùng 121–115.
+CONTAMINATION: NONE

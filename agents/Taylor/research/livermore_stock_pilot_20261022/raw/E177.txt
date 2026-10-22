@@ -1,0 +1,7 @@
+Chuỗi giá đang ở pha markup thẳng đứng. Trong 4 phiên (246→249) giá tăng từ 74 lên 105, khoảng +42%. Khối lượng phiên 248 lên tới 49,6x median, có tính climax, và phiên 249 vẫn 23x. Giá đang đâm vào vùng cung cũ 100–112, gồm đỉnh đầu chuỗi (i=2, H 112) và đỉnh của nhịp tăng trước (i=211–212, H 101,7). Nhịp tăng đó cũng có khối lượng lớn rồi thất bại, rơi về 72 chỉ sau 3 phiên. Nền tích luỹ gần nhất nằm ở 72–77, tức là bên dưới có một air-pocket khoảng 25–30%. Đây là cổ phiếu thanh khoản mỏng, bước giá thô. Mua ở Open sau một phiên gap-up và climax nên rủi ro hồi về mép gap 90–96 rất lớn. Ngưỡng −15% từ khoảng 105 là quanh 89, nằm ngay trong vùng đó.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Giá giữ trên 98 (mép dưới phiên 249) với khối lượng co lại, sau đó đóng cửa vượt 112 bền vững.
+CONTAMINATION: NONE

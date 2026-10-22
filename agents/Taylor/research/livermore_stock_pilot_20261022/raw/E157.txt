@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá đã tăng khoảng 4 lần, từ 100 lên đỉnh 431 (i202), sau đó là một vùng phân phối rộng 330–400 với khối lượng cao (i198–i238). Nhịp i237 (396, V 6.84) là breakout thất bại. Ngay sau đó là chuỗi markdown kiểu bán giải chấp margin: giá rơi từ 396 xuống 228 chỉ trong 7 phiên (−42%), mỗi phiên khối lượng khoảng 1.4–3.2, chưa có thanh climax nào thật rõ. Các nhịp hồi i246–i248 bị bán mạnh: i247 gap lên 291 rồi đóng cửa 252.63. Phiên i249 khối lượng cạn (0.43) nhưng đóng cửa ở đáy phiên. Biên độ ngày 8–15% cho thấy biến động cực lớn. Vùng 330–360 giờ là cung kẹt dày đặc phía trên. Mức đáy 224.6–228 chỉ cách giá vào khoảng 13%. Nếu thủng, khoảng trống tiếp theo là 200–210.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 224 (thủng đáy i244–i245), nhiều khả năng giá tiếp tục rơi về 200 hoặc thấp hơn.
+CONTAMINATION: NONE

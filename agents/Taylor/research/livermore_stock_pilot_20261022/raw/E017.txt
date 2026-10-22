@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên đây là một pha markdown kéo dài, giá giảm từ khoảng 105 xuống 60. Trong pha này có một nhịp hồi 176–198 với khối lượng mở rộng (7.94, 4.90, 4.67), đưa giá lên 77, nhưng thất bại tại vùng cung 75–77, cũng là chân vùng tích luỹ cũ 73–77. Sau đó giá trượt dần trên khối lượng cạn kiệt và đã xoá gần hết nhịp hồi. Hiện giá đang thử lại vùng đáy 59.2–60.2 (các đáy i=154, 166, 241, 247) lần thứ tư. Thanh khoản rất mỏng (0.01–0.3) nên có thể là cạn cung, nhưng chưa có thanh cầu nào xác nhận. Đáy bị kiểm tra nhiều lần càng dễ gãy. Nếu gãy dưới 59, phía dưới không có vùng neo, dễ tạo air-pocket xuống quanh 51–53.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 59.0 với khối lượng tăng thì vùng đáy vô hiệu. Kịch bản tăng chỉ được xác nhận khi giá vượt 64–65 kèm volume lớn hơn 2.
+CONTAMINATION: NONE

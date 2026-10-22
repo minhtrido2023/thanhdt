@@ -1,0 +1,7 @@
+Sau pha markup gần như theo chiều dọc từ ~100 (i119) lên đỉnh 259 (i188, V=57.5), cổ phiếu chuyển sang một range rộng 189–254 suốt khoảng 60 phiên. Đây giống phân phối hơn là tích luỹ. Dấu hiệu: đáy thấp dần (198 → 196 → 189), còn các phiên giật trần đều bị bán ngược. Thanh i241 có V=158 (khối lượng lớn nhất cả chuỗi) nhưng không có follow-through. Thanh i248 mở 248 ngay mép trên range rồi rơi về 220 với V=15.5, tức breakout thất bại tại vùng cung kẹt 248–259. Thanh khoản cực mỏng, giá dao động ±7% mỗi ngày, nên rủi ro air-pocket là thật. Mức −15% từ ~213 là khoảng 181, chỉ thấp hơn đáy range 189 vài phần trăm.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa vững trên 255–259 với khối lượng lớn và có follow-through; ngược lại, thủng 189 xác nhận markdown.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá giảm mạnh từ ~100 xuống ~47 (i0–69). Cú bơm thẳng đứng i89–93 lên 106 thất bại. Climax bán ở i129 với khối lượng 40.6x. Từ i130 đến nay, giá đi ngang trong range 46.5–57.4. Sàn 46.5 giữ nhiều lần (i140–144, 148, 152, 161, 172, 238). Hai nhịp phá lên đều thất bại: i187 (vol 16.6) và i204–208 (râu trên 63–65 rồi bị bán về). Mười lăm phiên gần nhất khối lượng tăng vọt (6–19x) nhưng giá kẹt ở 48–53. Phiên i246 vol 19.4 đóng 53.49, ngay sau đó i247 về lại 48.84. Cung chặn ở 53–57 đang hấp thụ toàn bộ cầu. Chưa có follow-through. Giá vào ~49.6 nằm sát sàn. Mức −15% (~42.2) đòi hỏi sàn 46.5 vỡ, điều có thể xảy ra nhanh vì thanh khoản mỏng.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 46.5 kèm khối lượng lớn, tức vỡ sàn range 120 phiên (luận điểm tích lũy mất hiệu lực).
+CONTAMINATION: NONE

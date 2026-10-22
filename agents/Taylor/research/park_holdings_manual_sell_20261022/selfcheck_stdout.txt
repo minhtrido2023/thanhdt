@@ -1,0 +1,21 @@
+== bản thật ==
+  PASS  T1_ok_both
+  PASS  T1_dri
+  PASS  T1_fpt_once
+  PASS  T1_accounts_differ
+  PASS  T1_dri_unverified
+  PASS  T3_residual_blocks
+  PASS  T1_note_mentions_statement
+  PASS  T2_flag_off_old_behavior
+  PASS  T4_missing_statement_old_behavior
+  PASS  T5_corrupt_statement_no_crash_old_behavior
+  PASS  T6_manual_buy_not_added
+  PASS  T7_snapshot_day_ignored
+  PASS  T8_journal_gt_statement_keeps_journal
+== mutant ==
+  PASS  M1_no_subaccount_filter_killed
+  PASS  M2_no_double_count_guard_killed
+  PASS  M3_residual_passes_killed
+  PASS  M4_apply_manual_buys_killed
+
+PASS (0 lỗi)

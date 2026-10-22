@@ -1,0 +1,15 @@
+**Cấu trúc.** Thang 250 phiên: markup mạnh từ 100 lên 243 (i149). Sau đó là phân phối ở vùng 205–243 (i139–177), với các thanh giảm khối lượng lớn tại i139, i150 và i154. Tiếp theo là markdown về 171–175 (i179–191), rồi tích luỹ thành range 171–199.
+
+Thang 20–60 phiên:
+- **i230:** breakout với khối lượng 20x lên 209. Ngay i231 (24.7x) breakout thất bại, đuôi trên tới 217.
+- **i231–i238:** giá trả về 170.9.
+- **i238:** khối lượng 15.7x, đóng cửa ở đỉnh phiên. Đây là dấu hiệu cầu hấp thụ.
+- **Hiện tại:** giá hồi về 193.7 với khối lượng duy trì 2–5x, đáy cao dần.
+
+**Rủi ro.** Giá vào sát trần range 195–199. Phía trên là cung kẹt của nhà đầu tư mua đuổi i230–232 ở 195–217. Mức −15% (khoảng 165) nằm dưới đáy range 171. Cổ phiếu này hay có đuôi nến sâu (i168, i184, i189), nên mức đó vẫn có thể bị chạm.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 170.9 (đáy i238) với khối lượng lớn, tức hấp thụ thất bại và range bị phá xuống.
+CONTAMINATION: NONE

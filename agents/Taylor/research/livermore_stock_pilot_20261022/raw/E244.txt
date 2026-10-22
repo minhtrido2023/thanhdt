@@ -1,0 +1,11 @@
+**Phân tích:** Cấu trúc 250 phiên gồm ba pha. Đầu tiên là phân phối và markdown từ 118 xuống đáy hoảng loạn 67 (i164-167, ba phiên sàn liên tiếp). Tiếp theo là tích luỹ trong vùng 92-106. Cuối cùng là markup dạng parabol, từ 93 (i207) lên 161.9 (i246), tức khoảng +70% trong 6 tuần, kèm các gap trần ở i243 và i245.
+
+Phiên i246 là buying climax điển hình. Giá mở trần 161.9 rồi bị bán xuống 143, khối lượng 10.3x, cao nhất cả chuỗi. Phiên i248 xác nhận cung: đỉnh 154 nhưng đóng cửa tại đáy 136, khối lượng 6.9x. Phiên i249 không có follow-through.
+
+Giá vào khoảng 138. Mức −15% rơi vào khoảng 117, nằm ngay trong vùng gap chưa lấp 112-131 (i238-243). Bên dưới vùng này là air-pocket do margin. Xác suất retrace về lấp gap là cao.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa vượt 154-162 (đỉnh climax i246/i248) với khối lượng lớn sẽ vô hiệu kịch bản phân phối; ngược lại, đóng dưới 131 (gap i243) xác nhận đà về 112-120.
+CONTAMINATION: NONE

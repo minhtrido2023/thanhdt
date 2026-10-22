@@ -1,0 +1,11 @@
+**Phân tích:** Giai đoạn markup mạnh từ vùng 95 (i130) lên đỉnh 287.8 (i202) với chuỗi gap tăng. Sau đó cấu trúc chuyển sang phân phối. Lần thử lại đỉnh ở 268 (i238) thất bại với khối lượng lớn: 4.83 rồi 5.04 khi giá đảo chiều xuống. Đỉnh sau thấp hơn đỉnh trước.
+
+Ở thang 20 phiên, giá đang trong pha markdown. Giá đã thủng đáy vùng 187–192 (i214, i220, i224), xuống 173 ở i248, hiện ở 185. Khối lượng cạn dần (0.58, 0.33) khi giá rơi. Đây có thể là bên bán cạn, nhưng chưa có phiên cầu nào xác nhận.
+
+Đỡ gần nhất là nền 168–180 (i188–195). Dưới đó là air-pocket tới mép gap 144–156 (i181–182). Biến động ngày vào khoảng 5–8%, nên mốc −15% (≈157) nằm trong tầm với. Cung kẹt ở 205–230 phía trên.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 168 (thủng nền i188–195) xác nhận markdown tới 145; ngược lại, vượt 210 với KL >2 mới phủ nhận pha phân phối.
+CONTAMINATION: NONE

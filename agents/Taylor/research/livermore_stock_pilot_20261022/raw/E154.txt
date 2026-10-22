@@ -1,0 +1,15 @@
+**Phân tích:** Ở cả 3 thang, giá ở pha markup: từ ~100 lên ~206.
+
+- **Thanh 228 (shakeout):** low 135.4, phá đáy cũ ~156 rồi hồi ngay.
+- **Thanh 230–236:** khối lượng cạn (0.16–0.6).
+- **Thanh 237–239 (breakout):** khối lượng lớn (3.8 / 4.3 / 2.6), vượt vùng đỉnh 178 cũ (thanh 213–219).
+- **Thanh 240–246:** nền chặt 193–206, khối lượng giảm dần. Đây là dấu hiệu hấp thụ tốt.
+- **Thanh 247 và 249:** thanh 247 vọt lên 213 với volume 2.76 nhưng không giữ được. Thanh 249 đóng 205.75 sau khi chạm 201.7.
+
+**Rủi ro:** Giá vào ~206–208 cao hơn vùng breakout ~178 khoảng 15%. Khoảng 178–193 gần như không có giao dịch (air-pocket). Cổ phiếu này biến động mạnh và đã từng sập 15–22% trong vài phiên (thanh 159, thanh 221–228). Nếu nền 193 thủng, giá dễ rơi về lại vùng 178 cũ, tức đúng ngưỡng −15%.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 193 (đáy nền thanh 240–246) với khối lượng tăng, tức breakout thất bại và giá dễ rơi qua air-pocket về 178.
+CONTAMINATION: NONE

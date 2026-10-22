@@ -1,0 +1,13 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đi ngang rộng trong vùng 112–138. Đã có hai nhịp climax: i60 (V 7.06, đỉnh 132.8) và i166 (V 4.83, đỉnh 137.96). Sau mỗi nhịp, cung phân phối đè giá xuống.
+
+Ở thang 60 phiên, đỉnh thấp dần: 137.96 → 129.1 (i198) → 127.2 (i220). Giá đang trượt chậm về 115–117 với khối lượng cạn (0.2–0.6). Đây là markdown yếu lực, chưa phải bán tháo.
+
+Vùng hỗ trợ là 112–114.5, gồm đáy i49, i109–111 và i185. Mức đáy sâu nhất là 105.8 (i112). Giá vào khoảng 117, nên mốc −15% rơi vào khoảng 99.5, thấp hơn toàn bộ đáy trong năm. Muốn chạm mốc này phải thủng hẳn cấu trúc range.
+
+Khối lượng cạn ngay sát hỗ trợ có thể là tích luỹ, nhưng chưa có thanh cầu xác nhận nào. Cung kẹt phía trên ở 121–127 khá dày.
+
+P_HIT15: 0.15
+RISK: MED
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 112 kèm khối lượng >1.5 lần median (thủng đáy range), mục tiêu kế tiếp là 105.8.
+CONTAMINATION: NONE

@@ -1,0 +1,15 @@
+**Phân tích:** Sau nền tích luỹ khoảng 200 phiên quanh 89–95 (i 0–196, khối lượng cạn), giá bùng nổ từ i=197 và tăng theo dạng parabol lên 210, tức khoảng +130% trong 50 phiên. Cụm i=216–229 là pha rung lắc với khối lượng cao nhất (8.96, 8.85) và đợt chỉnh sâu khoảng 22% (165→129), trước khi trend tiếp diễn.
+
+Bốn phiên cuối cho thấy giá chững lại dù xu hướng vẫn mạnh:
+- i=246 gap lên 217.75 nhưng đóng ở 208.
+- i=247 bị bán từ 219.
+- i=249 có biên độ rộng (193.5–212) và đóng hồi ở 210, đây là cú rũ trong phiên.
+- Khối lượng giảm dần, không có follow-through.
+
+Giá đang ở vùng quá đà. Biên độ phiên khoảng 8–10%, nên một nhịp hồi về gap 190–197 và sâu hơn (mốc −15% ≈ 178.5) là khá dễ xảy ra.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 193.5 (đáy i=249) và lấp gap 190, khi đó pha markup chuyển sang phân phối.
+CONTAMINATION: NONE

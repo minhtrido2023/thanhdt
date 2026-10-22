@@ -1,0 +1,9 @@
+Cổ phiếu tăng mạnh từ 56 (i167) lên 145 (i216) với khối lượng lớn. Đợt sập i217–230 xuống 102 cho thấy phân phối. Nhịp hồi lên 125.9 (i245) tạo đỉnh thấp hơn, khối lượng thấp hơn đợt đẩy giá trước. Bốn phiên cuối giảm từ 124.7 xuống 101.9, khối lượng tăng dần (2.5→3.4→3.5→3.55). Phiên i249 gap down, đóng sàn ngay tại đáy i230 (101.91), không có lực cầu đỡ.
+
+Cấu trúc 60 phiên là phân phối và đang chuyển sang markdown. Nếu thủng 102, bên dưới gần như không có hỗ trợ đến vùng 87–90 (i185–199), rồi đến 70s. Biên độ dao động của mã rất lớn: tiền lệ i150–167 giảm 47% trong 17 phiên. Chạm −15% (~86) là kịch bản khá khả dĩ.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Giữ được vùng 101–102 trong vài phiên, khối lượng cạn dần, rồi đóng cửa trên 112 thì cấu trúc markdown bị vô hiệu.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Cổ phiếu tăng dạng parabol từ nền khoảng 105 (i138) lên đỉnh 429 (i214), tức hơn 4 lần trong khoảng 75 phiên. Khối lượng climax xuất hiện ở i202 (36x) và i213–216 (44x, 32x). Sau đó là pha phân phối rồi giảm. Các đỉnh thấp dần: 432 (i215), 365 (i236), 308 (i247/249). Phiên i238–239 giảm với khối lượng 25–32x, cho thấy cung chủ động. Đáy cũ 300 (i225/229) đã bị thủng xuống 273 (i246). Phiên i249 có râu dưới dài (283.8 lên 303.3) với khối lượng 21x, là dấu hiệu có lực cầu nhưng chưa phải follow-through. Biên độ ngày khoảng 5–7%. Mức −15% từ giá vào khoảng 303 là quanh 258. Dưới vùng 273–285 là air-pocket về vùng gap 240–250 (i196–198). Lượng hàng kẹt trên đỉnh 340–430 rất lớn.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 273 (đáy i246) với khối lượng lớn mở đường về 240; ngược lại, đóng cửa vượt 330–365 kèm khối lượng sẽ phủ định kịch bản markdown.
+CONTAMINATION: NONE

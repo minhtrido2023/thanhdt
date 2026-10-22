@@ -1,0 +1,7 @@
+**Phân tích:** Ba thang đều là markup: giá đi từ 100 lên 331. Đợt phân phối/rũ bỏ gần nhất ở i180–191 (từ 248 về 178, khối lượng cao) đã được hấp thụ. Sau đó giá vượt đỉnh cũ 248 tại i222–226 và có follow-through tốt (i236, KL 2.73). Tuy nhiên 14 phiên cuối tăng dựng đứng từ 247 lên 331 (+34%). i248 tăng gần trần +6.9%, i249 gap lên 323 rồi đóng 331, khối lượng 1.8–1.9 nhưng chưa phải climax. Giá vào lệnh sẽ ở xa mọi nền hỗ trợ. Nền gần nhất là 284–290 (i243–246), cách khoảng −13%. Gap air-pocket ở 315–323 chưa được lấp. Đợt điều chỉnh trước sâu −19%, nên một nhịp hồi −15% về vùng 282 là khá khả thi dù xu hướng còn nguyên.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới ~284 (đáy nền i243–246) với khối lượng lớn, tức là breakout parabolic thất bại.
+CONTAMINATION: NONE

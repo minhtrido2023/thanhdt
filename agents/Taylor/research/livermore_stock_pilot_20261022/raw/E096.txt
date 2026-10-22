@@ -1,0 +1,12 @@
+**Phân tích:** Ba thang thời gian đều đang ở pha markup. Riêng 10 phiên cuối chuyển sang dạng parabol: giá đi từ 444 (i=237) lên 713 (i=249), tăng khoảng 60%.
+
+- **Khối lượng cao trào:** i=245–248 đạt 3.0–4.7 lần trung vị. Phiên i=247 có biên độ rất rộng (535–632) dù vẫn đóng cửa cao, dấu hiệu cung đã bắt đầu ra.
+- **Gap lớn ở phiên cuối:** i=249 mở cửa tại đỉnh 723 (khoảng +10%) rồi đóng thấp hơn. Khối lượng giảm còn 2.36, tức đà mua đuổi đang yếu dần.
+- **Rủi ro dưới giá vào:** bên dưới là air-pocket do margin. Mép gap ở 657, vùng 575–535 là đáy các thanh i=247–248. Đợt điều chỉnh gần nhất (i=196–198) đã rơi khoảng 21% chỉ trong 3 phiên, nên nhịp rơi kiểu này có tiền lệ.
+- **Kết luận:** Vào lệnh ở open phiên kế tiếp là mua đuổi ngay tại vùng blow-off. Xác suất chạm −15% (khoảng 606) trong vài tuần là rất cao.
+
+P_HIT15: 0.68
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Kịch bản rủi ro sai nếu giá giữ trên 657 (mép gap) với khối lượng co lại dưới 1.5 lần và tạo nền đi ngang; đóng cửa dưới 575 xác nhận phân phối.
+CONTAMINATION: NONE

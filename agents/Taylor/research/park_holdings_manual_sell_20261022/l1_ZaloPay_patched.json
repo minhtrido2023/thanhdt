@@ -1,0 +1,40 @@
+{
+ "account_label": "ZaloPay",
+ "asof": "2026-10-22",
+ "target_park": 0.0,
+ "trim_band": 0.005,
+ "orders": [],
+ "blocked": [],
+ "notes": [
+  "PARK 1.6tr vs target 0.0tr (pool 538.9tr) — vượt 1.6tr, chưa quá ngưỡng 2.7tr"
+ ],
+ "at_or_below_target": [],
+ "park_mv_vnd": 1622250.0,
+ "cash_available_vnd": 19449483.0,
+ "cash_total_vnd": 21551437.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [
+  "DRI"
+ ],
+ "excluded_tickers": [
+  "DGC",
+  "PNJ"
+ ],
+ "state": {
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "date": "2026-10-22",
+  "etf_park_frac_live": 0.0
+ },
+ "cash_basis": "total_cash",
+ "cash_dividend_receiving_vnd": 2100000.0,
+ "cash_debt_vnd": 0.0,
+ "egg_assets_vnd": 515770079.0,
+ "excluded_dividend_receivable_pending_vnd": 0.0,
+ "excluded_dividend_receivable_detail": [],
+ "pool_vnd": 538943766.0,
+ "target_park_vnd": 0.0,
+ "delta_vnd": -1622250.0,
+ "threshold_vnd": 2694718.83,
+ "decision": "NO_TRIM"
+}

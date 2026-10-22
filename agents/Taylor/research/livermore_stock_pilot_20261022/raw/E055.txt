@@ -1,0 +1,7 @@
+**Cấu trúc:** Đây là mã cực kỳ kém thanh khoản. Nhiều phiên có V=0, các thanh chỉ có một mức giá, và giá nhảy từng bậc khoảng 7–10%/phiên. Biên độ này giống UPCoM/HNX hơn HOSE. Ở thang 250 phiên, giá chủ yếu đi ngang trong vùng 94–140. Riêng nhịp i=195–212 bốc lên 175.58 rồi sụp về 94.19 (i=218), trong khi khối lượng tại đỉnh gần như không có. Đó là nhịp kéo/xả trên sổ lệnh mỏng chứ không phải tích luỹ. Từ i=225 đến i=249, giá dao động hỗn loạn trong vùng 94–144. Điểm vào ≈121 nằm giữa biên độ đó, sau ba phiên tăng liền với khối lượng chỉ ~1. Nhịp tăng này không có lực cầu xác nhận. Chỉ hai bước giảm sàn liên tiếp là đã chạm mức −15% (≈103). Vùng đáy 94–100 từng bị thủng nhiều lần (i=162, 218, 244).
+
+P_HIT15: 0.68
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 102 (đáy i=242–243) mở đường về 94; bối cảnh tích cực chỉ có nếu vượt 137–144 với khối lượng >10.
+CONTAMINATION: NONE

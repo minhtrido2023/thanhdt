@@ -1,0 +1,12 @@
+Ở cả ba thang, cổ phiếu đang trong pha **markup**. Giá đi từ nền 102–109 (i140) lên 151.04 (i243), với khối lượng mở rộng từ ~0.3 lên ~1.0–2.6 kể từ i107.
+
+- **Lực cầu còn sống:** shakeout i237 (L 132.86, vol 1.49) được đảo ngược ngay. i239 bật +5.8% với vol 1.87, xác nhận cầu.
+- **Dấu hiệu chững:** sau đỉnh 151.04, nhịp lùi về 143.9 diễn ra với vol ~1.0, không có climax bán. Tuy vậy, giá đóng sát đáy phiên ở i248–249, và vùng 141–146 đã chặn giá suốt i214–235.
+- **Rủi ro −15% (~122):** giá phải thủng 132.86 rồi rơi về mép gap i186 (119–125). Kịch bản này cần phân phối rõ ràng, hiện chưa thấy.
+- **Biến động thấp:** biên ngày ~2%, nên xác suất chạm −15% là vừa phải.
+
+P_HIT15: 0.18
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 132.8 (đáy shakeout i237) với khối lượng >1.3 → cấu trúc markup gãy, mục tiêu vùng gap 119–125
+CONTAMINATION: NONE

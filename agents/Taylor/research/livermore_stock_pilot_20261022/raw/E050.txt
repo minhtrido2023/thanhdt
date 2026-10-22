@@ -1,0 +1,13 @@
+**Phân tích:** Cổ phiếu cực kém thanh khoản, nhiều phiên có Volume 0.
+
+- **Nền tảng:** Giá tích luỹ trong vùng 95–103 suốt khoảng 120 phiên.
+- **Đợt tăng đầu tiên:** Phiên 120–121 gap lên vùng 117–134, khối lượng 78.9 có dạng climax. Sau đó giá phân phối và trượt dần về khoảng 101 (phiên 190).
+- **Đợt tăng thứ hai:** Phiên 205–227 đẩy lên vùng 120–133 nhưng khối lượng mỏng. Râu trên ở phiên 227 và 231 cho thấy bị bán ngược ngay.
+- **Hiện tại:** Các phiên 240, 243 và 245 đều có râu dưới chạm 101.9–103.8 rồi đóng cửa quanh 117–119. Phiên 240 có khối lượng 44. Đây có thể là sổ lệnh mỏng bị quét, cũng có thể là có người hấp thụ cung, nhưng chưa xác nhận được.
+- **Cấu trúc tổng thể:** Biên độ rộng 101–125, cung phía trên dày ở 124–125. Giá đóng gần nhất 112.08 nằm giữa biên. Mức −15% tương ứng khoảng 95, đúng đáy của nền cũ. Thanh khoản mỏng khiến vùng này có thể bị chạm.
+
+P_HIT15: 0.27
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 101.9 (đáy các râu phiên 240/243) kèm khối lượng tăng sẽ phá cấu trúc và mở đường về vùng 95.
+CONTAMINATION: NONE

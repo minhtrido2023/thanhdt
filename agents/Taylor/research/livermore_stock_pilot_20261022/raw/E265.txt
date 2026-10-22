@@ -1,0 +1,7 @@
+**Phân tích:** Đây là cổ phiếu thị giá rất thấp: mỗi bước giá khoảng 6%, và có nhiều phiên khớp 0 lệnh. Giá tăng parabol từ vùng 110 (i=142) lên đỉnh 617 (i=172). Sau đó sập về 265 (i=188). Nhịp hồi thứ hai lên 476–518 (i=229–230) tạo đỉnh thấp hơn, kèm khối lượng cực lớn (i=228: 13.5; i=231: 9.8). Đó là phân phối. Đợt giảm sau đó cũng đi với khối lượng lớn (i=238: 10.7). Giá hiện ở vùng 295–320, sát đáy pivot 265–270 (i=188, i=249 low 270.6). Phiên i=249 rút chân từ 270 lên 306, cho thấy có cầu đỡ ngắn hạn. Tuy vậy, cấu trúc 60 phiên là markdown với đỉnh thấp dần, và lượng hàng kẹt ở 400–476 rất lớn. Biên độ ngày khoảng 7%, nên mức −15% (≈260) chỉ nằm ngay dưới đáy cũ. Nếu thủng vùng này, giá dễ rơi vào air-pocket do margin.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa dưới 265 (đáy i=188/i=249) với khối lượng lớn là xác nhận markdown tiếp diễn; luận điểm tăng chỉ có khi vượt lại 350–370 với khối lượng follow-through.
+CONTAMINATION: NONE

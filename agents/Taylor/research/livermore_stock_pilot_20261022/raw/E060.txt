@@ -1,0 +1,13 @@
+**Đọc cấu trúc.** Ở thang 250 phiên, giá đi từ 100 lên 164 (markup), có một nhịp phân phối và giảm mạnh từ đỉnh 156.7 (i154) về 105 (i188), tức khoảng −32% trong 34 phiên. Cổ phiếu từng giảm sâu thật, không chỉ trên lý thuyết.
+
+Từ i188 giá phục hồi theo dạng đáy cao dần. i232 gap lên 158 với volume 3.10 và vượt đỉnh cũ 155. Sau đó là nền chặt 148–158 trong 15 phiên, volume co lại (0.38–0.8), nghĩa là cung tại đỉnh cũ đã được hấp thụ.
+
+i248 bứt khỏi nền với volume 3.44, i249 là thanh inside, volume 0.97, chưa có follow-through rõ.
+
+Vùng đỡ là 148–155, gồm nền và mép gap 148.6–153.8. Mức −15% từ giá vào khoảng 164 là 139.5, nằm dưới nền khá xa. Bối cảnh tích cực nhưng giá đã kéo xa và biên độ biến động lớn.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 148 (lấp gap i232 và thủng đáy nền), breakout coi như thất bại.
+CONTAMINATION: NONE

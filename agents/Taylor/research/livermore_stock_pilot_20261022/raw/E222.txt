@@ -1,0 +1,7 @@
+Giá nằm đáy phẳng 84–96 suốt khoảng 150 phiên (i0–154), thanh khoản cạn. Từ i155 bắt đầu pha markup, rồi tăng thẳng đứng từ i216 với khối lượng 13–50 lần median. Đỉnh climax ở i226 (H 292, V 61.4) đóng cửa gần đáy phiên. Sau đó là pha phân phối: i235 có V 57 nhưng không vượt đỉnh. Các đáy 207.7 (i238), 211.3 (i242) và 207.7 (i249) bị thử lại liên tục, và cầu yếu dần (V giảm xuống 4–8). Đỉnh sau thấp hơn đỉnh trước: 292 → 288 → 269 → 257 → 238. Mức −15% từ giá ~223 là khoảng 190. Nếu thủng 207, phía dưới gần như không có hỗ trợ cho tới vùng gap 185–200 (i218–219), thậm chí 150–160. Biên độ ngày khoảng 7–10% và margin bị kẹt phía trên khiến rủi ro này cao.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.36
+INVALIDATION: Đóng cửa vượt 257 (i243–244) với khối lượng mở rộng mà vùng 207 vẫn giữ, tức phân phối chuyển thành tích luỹ lại.
+CONTAMINATION: NONE

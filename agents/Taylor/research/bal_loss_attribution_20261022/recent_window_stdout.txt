@@ -1,0 +1,407 @@
+{
+ "SpaceX": {
+  "nav_first": [
+   "2026-07-02",
+   990304455.0
+  ],
+  "nav_last": [
+   "2026-10-20",
+   971687907.0
+  ],
+  "peak": [
+   "2026-07-02",
+   990304455.0
+  ],
+  "trough": [
+   "2026-07-27",
+   897128641.0
+  ],
+  "maxdd_pct": -9.409,
+  "bal": {
+   "tickers": [
+    "VPI"
+   ],
+   "qty_buy": 800.0,
+   "qty_sell": 800.0,
+   "buy_value": 49900000.0,
+   "sell_value": 39540000.0,
+   "fee_est": 86757,
+   "pnl_net": -10446757,
+   "pnl_gross": -10360000,
+   "avg_buy": 62375.0,
+   "avg_sell": 49425.0,
+   "ret_gross_pct": -20.762,
+   "ret_net_pct": -20.915,
+   "nav_before": 977178384.0,
+   "pnl_pct_nav": -1.069,
+   "buy_value_pct_nav": 5.107,
+   "broker": {
+    "qty_buy": 800,
+    "qty_sell": 800,
+    "buy_value": 49900000,
+    "sell_value": 39540000,
+    "diff_buy_vnd": 0,
+    "diff_sell_vnd": 0
+   }
+  },
+  "window_by_book": {
+   "PARK": -73974334,
+   "CAPIT": -24651767,
+   "custom30V_parking": 126466
+  },
+  "window_dnav": -93175814,
+  "window_residual": 5323821,
+  "window_top_losers": [
+   {
+    "ticker": "BID",
+    "book": "PARK",
+    "pnl": -16105391.0
+   },
+   {
+    "ticker": "SIP",
+    "book": "CAPIT",
+    "pnl": -14941248.0
+   },
+   {
+    "ticker": "CTG",
+    "book": "PARK",
+    "pnl": -12429954.0
+   },
+   {
+    "ticker": "TCB",
+    "book": "PARK",
+    "pnl": -11313037.0
+   },
+   {
+    "ticker": "VCB",
+    "book": "PARK",
+    "pnl": -10558061.0
+   },
+   {
+    "ticker": "MBB",
+    "book": "PARK",
+    "pnl": -9684594.0
+   }
+  ],
+  "bal_positions_2026_10_21": []
+ },
+ "ZaloPay": {
+  "nav_first": [
+   "2026-07-07",
+   986585454.0
+  ],
+  "nav_last": [
+   "2026-10-20",
+   929949168.0
+  ],
+  "peak": [
+   "2026-07-08",
+   996802048.0
+  ],
+  "trough": [
+   "2026-07-27",
+   833856620.0
+  ],
+  "maxdd_pct": -16.347,
+  "bal": {
+   "tickers": [
+    "VPI"
+   ],
+   "qty_buy": 400.0,
+   "qty_sell": 400.0,
+   "buy_value": 24980000.0,
+   "sell_value": 19765000.0,
+   "fee_est": 43403,
+   "pnl_net": -5258403,
+   "pnl_gross": -5215000,
+   "avg_buy": 62450.0,
+   "avg_sell": 49412.5,
+   "ret_gross_pct": -20.877,
+   "ret_net_pct": -21.03,
+   "nav_before": 948338649.0,
+   "pnl_pct_nav": -0.554,
+   "buy_value_pct_nav": 2.634,
+   "broker": {
+    "qty_buy": 400,
+    "qty_sell": 400,
+    "buy_value": 24980000,
+    "sell_value": 19765000,
+    "diff_buy_vnd": 0,
+    "diff_sell_vnd": 0
+   }
+  },
+  "window_by_book": {
+   "CAPIT": -24563185,
+   "PARK": 112774700,
+   "legacy_orphan": 115322029,
+   "LAG": 145255051
+  },
+  "window_dnav": -162945428,
+  "window_residual": -511734023,
+  "window_top_losers": [
+   {
+    "ticker": "SIP",
+    "book": "CAPIT",
+    "pnl": -14582455.0
+   },
+   {
+    "ticker": "VCB",
+    "book": "PARK",
+    "pnl": -5981691.0
+   },
+   {
+    "ticker": "BID",
+    "book": "PARK",
+    "pnl": -5495589.0
+   },
+   {
+    "ticker": "VHM",
+    "book": "PARK",
+    "pnl": -5328712.0
+   },
+   {
+    "ticker": "LPB",
+    "book": "PARK",
+    "pnl": -4931599.0
+   },
+   {
+    "ticker": "CTG",
+    "book": "PARK",
+    "pnl": -4058186.0
+   }
+  ],
+  "bal_positions_2026_10_21": []
+ },
+ "VPI": {
+  "beta_250d": 0.512,
+  "corr_250d": 0.38,
+  "n_obs": 250,
+  "vni_close_pre_entry": 1810.11,
+  "vni_close_exit": 1705.91,
+  "R_vni_pct": -5.757,
+  "R_vpi_gross_pct": -20.8,
+  "beta_part_pct": -2.946,
+  "resid_pct": -17.854,
+  "resid_beta1_pct": -15.043,
+  "icb": 8633,
+  "avg_buy": 62400,
+  "max20": 62600.0,
+  "max250": 62600.0,
+  "buy_vs_max20_pct": -0.32,
+  "buy_vs_max250_pct": -0.32,
+  "ret60_pre_pct": 15.87,
+  "close_2026_10_21": 54100.0,
+  "vni_ret_2026_10_21_pct": 2.76,
+  "vpi_ret_2026_10_21_pct": 5.458,
+  "vpi_21_vs_avg_sell_pct": 9.47,
+  "vpi_min_close_window": 48100.0,
+  "vpi_min_close_date": "2026-10-16"
+ }
+}
+=====RECENT
+{
+ "SpaceX": {
+  "peak_trough_since_0901": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "nav0": 987341794.0,
+   "nav1": 969196007.0,
+   "dnav": -18145787,
+   "dnav_pct": -1.838,
+   "by_book": {
+    "LAG": -43200000,
+    "CAPIT": -8945000,
+    "BAL": -5760000,
+    "DISCRETIONARY_SPECIAL": -4710000,
+    "PARK": 345758
+   },
+   "by_book_pct_nav": {
+    "LAG": -4.375,
+    "CAPIT": -0.906,
+    "BAL": -0.583,
+    "DISCRETIONARY_SPECIAL": -0.477,
+    "PARK": 0.035
+   },
+   "residual": 44123455,
+   "top_losers": [
+    {
+     "ticker": "SCL",
+     "book": "LAG",
+     "pnl": -43200000.0
+    },
+    {
+     "ticker": "PVT",
+     "book": "CAPIT",
+     "pnl": -6650000.0
+    },
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -5760000.0
+    },
+    {
+     "ticker": "DRI",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -3330000.0
+    },
+    {
+     "ticker": "SIP",
+     "book": "CAPIT",
+     "pnl": -1615000.0
+    }
+   ]
+  },
+  "fixed_0916_1020": {
+   "start": "2026-09-16",
+   "end": "2026-10-20",
+   "nav0": 977178384.0,
+   "nav1": 971687907.0,
+   "dnav": -5490477,
+   "dnav_pct": -0.562,
+   "by_book": {
+    "BAL": -10446757,
+    "PARK": -6716147,
+    "DISCRETIONARY_SPECIAL": 1590000,
+    "LAG": 3408824,
+    "CAPIT": 11635012
+   },
+   "by_book_pct_nav": {
+    "BAL": -1.069,
+    "PARK": -0.687,
+    "DISCRETIONARY_SPECIAL": 0.163,
+    "LAG": 0.349,
+    "CAPIT": 1.191
+   },
+   "residual": -4961409,
+   "top_losers": [
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -10446757.0
+    },
+    {
+     "ticker": "TV1",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -3220000.0
+    },
+    {
+     "ticker": "VNM",
+     "book": "CAPIT",
+     "pnl": -1820314.0
+    },
+    {
+     "ticker": "ACB",
+     "book": "PARK",
+     "pnl": -1368420.0
+    },
+    {
+     "ticker": "LPB",
+     "book": "PARK",
+     "pnl": -1261854.0
+    }
+   ]
+  }
+ },
+ "ZaloPay": {
+  "peak_trough_since_0901": {
+   "start": "2026-09-04",
+   "end": "2026-10-15",
+   "nav0": 991380088.0,
+   "nav1": 919627726.0,
+   "dnav": -71752362,
+   "dnav_pct": -7.238,
+   "by_book": {
+    "PARK": -6951972,
+    "BAL": -5244231,
+    "DISCRETIONARY_SPECIAL": 996139,
+    "CAPIT": 1823450,
+    "LAG": 28993302
+   },
+   "by_book_pct_nav": {
+    "PARK": -0.701,
+    "BAL": -0.529,
+    "DISCRETIONARY_SPECIAL": 0.1,
+    "CAPIT": 0.184,
+    "LAG": 2.925
+   },
+   "residual": -91369051,
+   "top_losers": [
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -5244231.0
+    },
+    {
+     "ticker": "VNM",
+     "book": "CAPIT",
+     "pnl": -2824700.0
+    },
+    {
+     "ticker": "TV1",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -2043861.0
+    },
+    {
+     "ticker": "CSV",
+     "book": "LAG",
+     "pnl": -2014405.0
+    },
+    {
+     "ticker": "VHM",
+     "book": "PARK",
+     "pnl": -1960001.0
+    }
+   ]
+  },
+  "fixed_0916_1020": {
+   "start": "2026-09-16",
+   "end": "2026-10-20",
+   "nav0": 948338649.0,
+   "nav1": 929949168.0,
+   "dnav": -18389481,
+   "dnav_pct": -1.939,
+   "by_book": {
+    "BAL": -5258403,
+    "PARK": -3514445,
+    "DISCRETIONARY_SPECIAL": 510000,
+    "CAPIT": 580480,
+    "LAG": 32243302
+   },
+   "by_book_pct_nav": {
+    "BAL": -0.554,
+    "PARK": -0.371,
+    "DISCRETIONARY_SPECIAL": 0.054,
+    "CAPIT": 0.061,
+    "LAG": 3.4
+   },
+   "residual": -42950415,
+   "top_losers": [
+    {
+     "ticker": "VPI",
+     "book": "BAL",
+     "pnl": -5258403.0
+    },
+    {
+     "ticker": "TV1",
+     "book": "DISCRETIONARY_SPECIAL",
+     "pnl": -1960000.0
+    },
+    {
+     "ticker": "VNM",
+     "book": "CAPIT",
+     "pnl": -1225289.0
+    },
+    {
+     "ticker": "CSV",
+     "book": "LAG",
+     "pnl": -764405.0
+    },
+    {
+     "ticker": "SAB",
+     "book": "CAPIT",
+     "pnl": -732895.0
+    }
+   ]
+  }
+ }
+}

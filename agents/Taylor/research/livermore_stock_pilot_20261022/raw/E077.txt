@@ -1,0 +1,11 @@
+Cổ phiếu thanh khoản mỏng, tích luỹ phẳng ~150 phiên quanh 118–126. Breakout tại i216 (8.6x), markup có follow-through ở i219 và i227 (21x). Sau đó là cú tăng thẳng đứng i238–240 (24x và 26x, từ 140 lên 164, +17% trong 3 phiên). Đây là dấu hiệu climax mua.
+
+Mười phiên gần nhất đi ngang 156–168. Đỉnh 166.99–167.82 bị test ba lần (i240, i244, i247) nhưng không vượt được. Khối lượng giảm dần (3.3–3.7x), có thể là nghỉ lành mạnh, nhưng cũng có thể là phân phối tại đỉnh.
+
+Giá vào khoảng 163. Mốc −15% là 138.6, nằm ngay trên nền 135–140 (i228–237). Phía dưới 156 là air-pocket do gap của i238 (140→153) chưa được lấp. Rủi ro hồi về vùng này là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 155.9 (đáy i242) với khối lượng tăng → mở đường lấp gap về 140–137
+CONTAMINATION: NONE

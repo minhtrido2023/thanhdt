@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá tăng mạnh từ 100 lên đỉnh 348 (i=169), với khối lượng climax tại i=161–169. Sau đó là phân phối và markdown xuống vùng 216–232. Ở thang 60 phiên, giá đi ngang giảm dần, đáy thấp dần (240 → 224 → 216). Cú bật i=245 (V=24.4, lên 248) đã thất bại ngay. Phiên i=246 gap lên 256 rồi đóng 240. Phiên i=247 giảm với V=7.25, cho thấy cung chủ động hấp thụ hết lực cầu của breakout. Giá vào khoảng 229, sát đáy range 216. Nếu thủng 216, bên dưới là khoảng trống thanh khoản về vùng 186–200 (nền i=154–158). Mức −15% tương đương 195. Bước giá rất thô (~2.5%) và thanh khoản mỏng nên biến động mạnh.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa thủng 216 trên khối lượng lớn thì luận điểm tích luỹ bị phá. Ngược lại, chỉ khi đóng trên 250–256 kèm follow-through thì cấu trúc mới chuyển tích cực.
+CONTAMINATION: NONE

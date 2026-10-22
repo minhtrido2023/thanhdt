@@ -1,0 +1,11 @@
+Cổ phiếu thanh khoản mỏng và biến động mạnh. Pha markup diễn ra từ i120 đến i137 (giá 180→270, khối lượng 8–12x). Sau đó giá phân phối và trượt dần về 200 (i140–200). Cú bùng nổ ở i212–214 có khối lượng climax 40x, đỉnh 305. Nhịp này thất bại ngay: i216 có khối lượng 12x và đóng cửa 235. Vì vậy cung bị kẹt dày ở vùng 230–280.
+
+Hiện giá quay về vùng đáy 188–200, nơi đã được test ở i181, i186 và i242–246. Khối lượng phiên giảm còn 4–5x, chưa có dấu hiệu cạn cung. Cây nến i246 có râu dưới tới 172 (khoảng −16% so với 204) rồi được kéo lại. Như vậy hỗ trợ có cầu đỡ nhưng rất dễ bị xuyên thủng trong phiên.
+
+Ở thang 60 phiên, xu hướng là markdown/range lệch xuống. Ở thang 250 phiên, giá vẫn nằm trên nền 120–180.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 188 kèm khối lượng >3x (mất nền 188–200); ngược lại, đóng trên 240 sẽ phủ nhận kịch bản tiếp diễn phân phối.
+CONTAMINATION: NONE

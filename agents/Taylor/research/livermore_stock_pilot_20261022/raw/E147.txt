@@ -1,0 +1,7 @@
+**Phân tích:** Trong khung 250 phiên, giá đi ngang rộng trong vùng 88–134. Phiên 222–225 có một cú sập do bán tháo kèm khối lượng lớn (4.33, rồi 2.79) xuống đáy 70.59. Sau đó giá hồi chữ V rất dốc, tăng khoảng 88% trong 25 phiên, có gap tăng ở phiên 233 (vùng 105–112). Hiện giá đang ép sát trần 133.87. Mốc này là đỉnh phiên 38, nơi giá từng thất bại rồi rơi về 88. Mốc này đã bị chạm lại ở các phiên 241, 248 và 249. Phiên 248 tăng với khối lượng 3.46 và đóng cửa gần đỉnh, có lực cầu thật. Tuy vậy, cung kẹt tại đỉnh cũ cộng với nhịp markup quá dốc làm rủi ro điều chỉnh về vùng 113–118 rất cao. Lấp gap 105–112 nghĩa là lỗ hơn 15%. Nếu phá được 134 kèm follow-through, đây là breakout đỉnh 1 năm. Kịch bản này chiếm khoảng một nửa khả năng.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 123 (đáy phiên 247–248), hoặc breakout trên 134 thất bại và đóng cửa quay lại dưới 128 với khối lượng lớn.
+CONTAMINATION: NONE

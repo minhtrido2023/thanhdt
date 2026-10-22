@@ -1,0 +1,11 @@
+Pha 250 phiên: nền tích luỹ thanh khoản mỏng 100–112 (i0–136), rồi markup (i137–176) với các thanh vol cao 26.5 (i138), 37.3 (i155), 14.1 (i172), đỉnh 143.4. Từ i182–184 xuất hiện markdown (vol 10.4), và kể từ đó giá phân phối/trượt dần trong vùng 119–127 với các đỉnh thấp dần.
+
+Gần đây, i238 thủng 115.1 (vol 7.5) rồi hồi lên. Nhịp bật i246 lên 125 (vol 11.4) thất bại ngay. i248–249 bán mạnh (vol 8.0 và 6.9) về 117–120. Đây là cung chặn rõ ở 123–125, còn đáy vùng 115 đã bị thử nhiều lần.
+
+Mức −15% tính từ ~120 là khoảng 102, tức đỉnh nền cũ. Muốn chạm phải gãy hẳn 115 và xả hết pha markup. Điều này có thể xảy ra nhưng không phải kịch bản cơ sở. Kỳ vọng lệch nhẹ về phía giảm.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 115 với vol lớn → mở air-pocket về 106–110; ngược lại đóng trên 125.5 kèm follow-through mới xác nhận phe mua.
+CONTAMINATION: NONE

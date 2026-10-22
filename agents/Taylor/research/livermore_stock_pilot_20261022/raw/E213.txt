@@ -1,0 +1,9 @@
+**Phân tích:** Cổ phiếu thanh khoản rất mỏng, có hai đợt markup dựng đứng. Đợt một ở i=82–88, từ khoảng 102 lên 172. Đợt hai ở i=146–149, lên đỉnh 228.75 với volume 12.4/6.5. Sau đó là phân phối trong vùng 155–200 (i=150–199). Bar i=199 là cú đảo chiều mạnh, đi từ 190 xuống 145. Tiếp theo là pha markdown từ 176 về 117 (i=200–239).
+
+Trong 12 phiên gần nhất, giá đi ngang trong vùng 116–128 và volume cạn kiệt (0.01–0.6). Chưa có phiên cầu nào follow-through. Phiên 248–249 nhảy lên 126 trên volume gần 0, nên giá này không đáng tin. Cung kẹt dày phía trên ở 131–150. Đỡ thật nằm ở nền cũ 100–107, tức gần mức −15%. Biên độ ngày lớn khiến việc chạm −15% hoàn toàn khả thi.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 115 (đáy i=242) trên volume tăng → markdown tiếp về nền 100–107; tích cực chỉ khi vượt 140 với volume >2.
+CONTAMINATION: NONE

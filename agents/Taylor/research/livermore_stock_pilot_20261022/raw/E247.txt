@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đang trong pha markup, giá tăng từ khoảng 100 lên 205. Thanh 146 bứt phá với khối lượng 6.97x, mở đầu một đợt tăng thẳng đứng lên 197.6 (thanh 173). Sau đó giá sập 30% về 138.7 (thanh 183), cho thấy air-pocket margin là có thật. Từ thanh 199 đến 248, giá tích luỹ trong biên 170–200 và đã thủng xuống 171.85 hai lần (216 và 236–239). Thanh 249 phá đỉnh 200.56 (thanh 230), đóng cửa 205 sát đỉnh phiên với khối lượng 3.99x, mức lớn nhất kể từ thanh 146. Đây là breakout có cầu thật, nhưng có thể chỉ là climax ngắn hạn sau ba phiên tăng mạnh liên tiếp. Mức −15% tính từ giá vào khoảng 205 là ~174, tức ngay đáy biên vốn đã bị test nhiều lần. Biên độ dao động lớn nên xác suất chạm mức này không nhỏ.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.53
+INVALIDATION: Đóng cửa trở lại dưới 196 (thất bại breakout, quay về trong biên) với khối lượng lớn; thủng 171 thì cấu trúc markup bị phá.
+CONTAMINATION: NONE

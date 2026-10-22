@@ -1,0 +1,9 @@
+Giá dao động rộng 76–144 suốt 250 phiên, biên độ rất lớn. Các đỉnh thấp dần: 144 (i110), 127 (i213), 110 (i235), 103.5 (i243). Phiên i215 (V 3.97) và i239–240 (V 3.71/3.03) là phân phối rõ. Phiên i249 đóng ở đáy phiên 87.75, khối lượng 2.74, ngay mép vùng hỗ trợ 84–88. Vùng này từng đỡ giá ở i164–172, i229 và i241. Chưa thấy khối lượng cạn khi giá điều chỉnh, cũng chưa có thanh climax đảo chiều.
+
+Nếu thủng 84, khoảng trống phía dưới chỉ có 77–78 (i55, i128). Mức −15% tính từ giá vào khoảng 74.5, tức nằm dưới đáy 250 phiên. Ở pha 20 phiên, cổ phiếu đang markdown. Ở pha 250 phiên, đây là range rộng. Hỗ trợ đã bị test nhiều lần nên có thể yếu đi.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 84 với khối lượng lớn (hỗ trợ range gãy) → mục tiêu 77 và thấp hơn; ngược lại vượt 103.5 với follow-through mới phủ định xu hướng giảm.
+CONTAMINATION: NONE

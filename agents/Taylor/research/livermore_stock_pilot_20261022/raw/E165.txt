@@ -1,0 +1,7 @@
+Cổ phiếu đã có một pha markup ở thang 250 phiên, từ ~91 lên ~181, và gần gấp đôi. Đỉnh xu hướng có follow-through rõ là i179 (V 10.35) và i198 (V 13.7). Từ i201 đến nay, giá đi ngang trong vùng 161–195, chưa vượt được đỉnh i201 (191) và i238 (195). Hai thanh i238 và i243 tạo mép trên râu dài và gap xuống, cho thấy cung neo ở 187–195. Khối lượng trong range khô kiệt, nhiều phiên V=0. Thanh khoản mỏng nên râu dưới rất sâu: i212 xuống 155.85, i220–221 xuống 161, tức đã có lần chạm khoảng −14%. Phiên i249 có V 5.0 và đóng ở 180.85, cầu đỡ quanh 177–181. Đây là pha range hoặc phân phối sau markup, chưa có breakout. Rủi ro râu dưới cao do khớp lệnh mỏng.
+
+P_HIT15: 0.32
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 161 (đáy range i221) kèm khối lượng >2× là phá range, chuyển sang markdown; ngược lại, đóng trên 195 với khối lượng lớn là tái markup.
+CONTAMINATION: NONE

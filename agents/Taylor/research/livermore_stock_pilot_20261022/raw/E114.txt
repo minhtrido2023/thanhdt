@@ -1,0 +1,11 @@
+Cổ phiếu biến động cực mạnh: thanh ngày thường dao động 5–10%, và có gap giảm sâu như i178 (−11%) và i210 (−13%). Thanh khoản đã cạn hẳn sau i178, khối lượng chỉ còn 0.03–0.5 lần median, nên air-pocket là rủi ro thật.
+
+Pha 60 phiên là hồi phục từ đáy 115 (i217) lên 155 với khối lượng rất mỏng, i249 chỉ có 0.04, tức không có follow-through. Giá đang tiến vào vùng cung 160–212. Đây là vùng phân phối i161–185, nơi nhiều người mua bị kẹt và giá đã bị bán xuống mạnh. Cấu trúc 250 phiên là đỉnh thấp dần 212→160→155.
+
+Hỗ trợ gần nhất ở 142–146, sâu hơn là 115–120. Chạm mức −15% (khoảng 131) là khá khả thi.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.43
+INVALIDATION: Đóng cửa trên 165 với khối lượng >1.0 median thì phá vỡ vùng cung, kịch bản giảm bị vô hiệu; đóng dưới 142 xác nhận hồi phục thất bại.
+CONTAMINATION: NONE

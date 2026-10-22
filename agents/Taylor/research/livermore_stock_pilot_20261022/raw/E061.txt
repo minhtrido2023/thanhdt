@@ -1,0 +1,7 @@
+Đây là pha phân phối kéo dài sau cú markup lớn. Giá tăng từ 100 lên 197 (i0–43) trên khối lượng rất lớn, rồi có climax phân phối ở i44–45 (V 14–20). Sau đó giá đi ngang khô cạn trong vùng 137–158 suốt khoảng 120 phiên. Cú breakout i216–217 lên 167 thất bại: giá bị đẩy lại và thủng đáy range 132–137. Lực bán mạnh ở i236 (V 5.98, xuống 125.45). Hai lần test 123.6 (i237, i242) đều giữ được. Hồi phục i244–249 có khối lượng khá (2–2.7), nay giá ở 141.8, tức đang test lại mép dưới cũ 137–140 từ phía dưới, nơi cung bị kẹt. Bước giá thô và thanh khoản mỏng làm biến động cao. Nếu thủng 123.6, mức −15% (~120.5) chỉ còn cách vài tick.
+
+P_HIT15: 0.32
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 123.6 (đáy kép i237/i242) với khối lượng tăng
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Trên 250 phiên, cổ phiếu tăng từ 100 lên khoảng 134, nhưng từ i=170 giá đi ngang trong biên 122–141. Cung tập trung ở 137–141, thể hiện qua các thanh khối lượng lớn mà giá không tiến (i=181–195). Phiên i=232 có khối lượng 5.94, chạm 139.46 rồi đóng thấp: đây là một nhịp vượt đỉnh thất bại (upthrust), và i=233 khối lượng 3.94 xác nhận. Sau đó giá nén chặt trong vùng 131–135 với khối lượng giảm dần. Đây là sự tích luỹ trung tính, chưa có tín hiệu bùng nổ. Hỗ trợ nằm ở 127.8 (i=200, 204) và 121.9 (đáy i=208). Mức −15% tính từ khoảng 134 là khoảng 114. Muốn chạm mức này, giá phải thủng toàn bộ nền 122 rồi rơi vào vùng 111–118. Kịch bản này có thể xảy ra nếu phân phối hoàn tất, nhưng không phải kịch bản chính. Lợi thế hai chiều gần như cân bằng, vì vẫn còn bị đè bởi cung ở 137–141.
+
+P_HIT15: 0.17
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 127.8 kèm khối lượng lớn (tiếp đó là 121.9) thì luận điểm tích luỹ hỏng; đóng trên 141 kèm khối lượng thì luận điểm tích cực được xác nhận.
+CONTAMINATION: NONE

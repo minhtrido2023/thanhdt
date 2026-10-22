@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, giá tăng kiểu parabol từ khoảng 90 lên đỉnh 406.6 (i=222). Hai cú bùng nổ chính là i=149–151 và i=194–197. Cả hai đều có khối lượng cao (2.9–3.4) lúc khởi động.
+
+Sau i=200, khối lượng sụp hẳn, chỉ còn 0.01–0.13 lần median. Giá vẫn chạy lên 406 mà gần như không có thanh khoản, nên đây là markup "rỗng", không có follow-through thật. Đỉnh 406 bị đạp ngay (i=224–225), rồi giá đi ngang–xuống trong vùng 297–345 (thang 20 phiên). Lần hồi lên 345 ở i=247 cũng thất bại ngay ở i=248.
+
+Bên dưới là air-pocket lớn. Vùng 297 là sàn gần nhất, thủng thì khoảng trống 230–270 (chuỗi trần i=195–197) gần như không có hỗ trợ. Lệnh vào khoảng 319, nên mức −15% là khoảng 271, nằm ngay trong vùng rỗng đó. Thanh khoản cạn khiến chỉ cần ít lệnh bán là giá trượt sâu.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 296 (thủng đáy range i=236–240) thì luận điểm giữ vô hiệu; luận điểm giảm sai nếu giá vượt 345 với khối lượng >1.0.
+CONTAMINATION: NONE

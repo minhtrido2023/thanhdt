@@ -1,0 +1,7 @@
+**Phân tích:** Đây là mã thanh khoản mỏng, từng tăng parabol từ 100 lên đỉnh 643 (i=191). Đà tăng kết thúc bằng climax khối lượng: 22.87 tại i=189 và 12.46 tại i=190, sau đó là markdown về vùng 323–445. Từ i=205 giá đi ngang trong range, nhưng các đỉnh thấp dần: 466 (i=224), 419 (i=234), 413 (i=247). Khối lượng cạn hẳn (0.03–0.55), nghĩa là không có cầu chủ động. Phiên i=249 thủng xuống 329, sát đáy range 323, rồi kéo lên đóng cửa 384 với khối lượng chỉ 0.34. Lực kéo đó không đáng tin. Biên độ trong ngày 10–15% là thường xuyên, nên mức −15% (~320–325) nằm ngay dưới đáy range. Nếu thủng vùng này, phía dưới là air-pocket về 280–300.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa trên 420–445 với khối lượng >2× median (phá chuỗi đỉnh thấp dần); ngược lại, đóng cửa dưới 323 xác nhận markdown tiếp diễn.
+CONTAMINATION: NONE

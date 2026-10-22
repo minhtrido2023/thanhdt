@@ -1,0 +1,11 @@
+Cổ phiếu đang ở cuối pha markup dạng parabol. Từ nền tích lũy 120–130 (i208–219) giá tăng lên đỉnh 237.3 (i244), khoảng +85% trong 25 phiên, khối lượng 3–7 lần median. Nó đã vượt rõ vùng cung cũ 150–165 (đỉnh i96 và i152, i194).
+
+Cảnh báo phân phối nằm ở i247: phiên giảm mạnh xuống 207.4 với khối lượng 7.85, lớn nhất cả chuỗi. i249 hồi lại 228 nhưng khối lượng chỉ 2.33, chưa xác nhận.
+
+Giá vào khoảng 228 nằm ngay dưới vùng đỉnh 230–237. Biên dao động ngày đang 5–8%. Mốc −15% là khoảng 194, gần vùng gap/đỉnh cũ i239–240 (186–196). Cấu trúc climax này thường rơi về đó, có khi về hẳn 165–180.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 200 (đáy i248) với khối lượng lớn là xác nhận phân phối. Kịch bản tăng chỉ còn hiệu lực nếu vượt 238 với follow-through khối lượng.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+Đây là một range phẳng kéo dài cả năm, khoảng 90–111, thanh khoản cực mỏng. Từ khoảng phiên 130 trở đi có nhiều phiên Volume 0 và nhiều thanh đứng một giá. Các nhịp vượt 108–114 đều thất bại. Phiên 79–80 lên 121 với khối lượng 14.8 rồi rơi ngược về 102. Phiên 222 và 229 có râu lên 108–110, nhưng bị bán ngay.
+
+Phiên 244 tăng vọt lên 114 với Volume 4.2, không có follow-through. Phiên 245–249 đứng yên ở 106.76 với khối lượng 0, tức là không có cầu thật. Giá vào nằm sát mép trên range, nơi cung kẹt nhiều lần. Kịch bản dễ xảy ra hơn là quay về giữa range 96–100.
+
+Mức −15% là khoảng 90.7. Mức này nằm ngay đáy range (90.35 ở phiên 220–221), và các râu dưới cũ từng chạm 85–88. Với thanh khoản mỏng, các cú print ±7% có thể dễ dàng chạm tới vùng đó.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa trên 114 với khối lượng >3x median và giữ được trong 3–5 phiên sẽ phủ nhận luận điểm range; thủng 90 với khối lượng sẽ mở ra markdown.
+CONTAMINATION: NONE

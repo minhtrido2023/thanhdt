@@ -1,0 +1,7 @@
+Cổ phiếu sập từ khoảng 115 xuống 52 (i20–46), có bán tháo cao trào ở vol 7.98 và 7.39. Sau đó giá markup lên đỉnh 123 (i146), rồi phân phối trong vùng 98–118 (i147–190). Từ i191 giá trôi xuống trong biên 93.5–102, khối lượng cạn kiệt ở mức 0.1–0.3. Đáy 93.5 bị test nhiều lần (i219, 232–233, 247–248) và đều giữ được. Nhịp bật ở i248–249 lên 100.36 chỉ có vol 0.56/0.39, chưa có follow-through. Nguồn cung phía trên nằm ở 102–105 (i200, 238) và dày hơn ở 110–118. Nếu thủng 93.5 thì bên dưới là khoảng trống tới vùng 78–85 (i122–127). Cạn kiệt ở cả hai phía cho thấy sideway, nhưng xu hướng 60 phiên vẫn nghiêng xuống.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 93.0 kèm khối lượng tăng (>0.6) thì kịch bản nền tích lũy bị phá vỡ.
+CONTAMINATION: NONE

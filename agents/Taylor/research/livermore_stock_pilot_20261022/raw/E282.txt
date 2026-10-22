@@ -1,0 +1,13 @@
+Đây là mã thanh khoản cực mỏng: phần lớn các phiên có Volume 0, và giá nhảy theo bậc khoảng 8–10%/phiên. Biên độ này vượt ±7%, nên có lẽ là sàn UPCoM.
+
+- **Nền giá:** suốt 214 phiên, giá đi ngang trong vùng 85–101.
+- **Tiền lệ (i30–37):** chuỗi tăng trần với khối lượng rất nhỏ đẩy giá lên 164. Trong khoảng 10 phiên sau, giá rơi thẳng về khoảng 93.
+- **Hiện tại (i214–218):** lặp lại kịch bản đó. Giá tăng trần từ 93 lên 142 với volume chỉ khoảng 2–29. Đỉnh 152.68 ở i228 thất bại ngay. Giá bị đạp về 111.27 ở i237, rồi kéo lại lên 132 cũng bằng volume khoảng 0.
+- **Rủi ro ở giá 132:** không có cầu thật đỡ phía dưới. Vùng 111 nằm sát ngưỡng −15% (khoảng 112), còn nền giá thật nằm ở 93–101.
+- **Thanh khoản:** gần như không thể thoát lệnh khi giá rơi.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.30
+INVALIDATION: Giá giữ trên 124 và vượt 152.68 với khối lượng thật (>100 so với median) trong nhiều phiên liên tiếp.
+CONTAMINATION: NONE

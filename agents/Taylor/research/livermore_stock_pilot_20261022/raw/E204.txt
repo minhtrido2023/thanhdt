@@ -1,0 +1,7 @@
+Cổ phiếu đã sập từ ~100 xuống ~32 với chuỗi giảm sàn trắng bên mua (i68–82, volume 0). Phiên i83 có cầu bắt đáy cực lớn (53.6x), nhưng giá tiếp tục trôi xuống 15–16. Từ i130 đến nay giá tích lũy trong vùng 15.3–18.9, đáy hẹp và volume khô dần, đây là pha accumulation/range. Hai lần bật trước (i167–168, i210–214) đều chạm 18–18.9 rồi rơi về 15.4–15.6 trong khoảng 15 phiên. Lần này i247 vượt lên 19.69 với volume 5.5x, nhưng i248 đảo chiều về 18.04 với volume 3.4x. Đó là dấu hiệu breakout thất bại tại vùng cung 18.4–19.7. Giá vào khoảng 18.4 thì mức −15% là ~15.6, trùng đúng sàn range mà giá từng về nhiều lần.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 17.0 (mất giữa range sau breakout hụt) là sai; ngược lại, đóng trên 19.7 với volume >3x thì phe tăng xác nhận.
+CONTAMINATION: NONE

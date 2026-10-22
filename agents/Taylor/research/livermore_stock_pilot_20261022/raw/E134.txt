@@ -1,0 +1,11 @@
+Chuỗi giá có ba pha chính. Từ i=0 đến i=160 là pha markup dài, giá đi từ khoảng 91 lên đỉnh 190.79. Ở i=161–163 có phân phối mạnh: khối lượng 2.58 và 3.65, giá rơi về 156. Đáy được test ở i=189 (132.28, khối lượng 1.91) rồi giá V-rebound. Từ i=196 đến nay, giá đi ngang trong biên khoảng 159–178.
+
+Thanh i=235 bứt lên với khối lượng 3.08. Sau đó giá nén chặt ở 170–178, đáy nâng dần (168.84 rồi 172.19) và chưa có phiên bán tháo. Đây là cấu trúc tích cực, nhưng giá đang nằm sát mép trên 177.86. Phía trên còn cung bị kẹt ở vùng 184–191 (i=154–161).
+
+Mức −15% tương đương khoảng 149, thấp hơn đáy biên 155. Mức này chỉ bị chạm nếu biên bị phá và xuất hiện air-pocket do margin.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 168 (thủng đáy i=243 và vùng nền 170) với khối lượng lớn, tức nỗ lực breakout i=235 đã thất bại.
+CONTAMINATION: NONE

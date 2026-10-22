@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá đi từ 100 lên 210 (i50), sập về 146, hồi lên 239 (i80), rồi phân phối và giảm về đáy 151 (i173). Sau đó tích luỹ trong vùng 156–180, khối lượng cạn (0.3–0.5). Pha markup bắt đầu từ i212 với thanh 177.87, khối lượng 1.25. Giá vượt đỉnh cũ 239 tại i240 và giữ được: các nhịp chỉnh i243–248 có đáy 245–248, khối lượng chỉ 0.9–1.3, không có climax bán. Phiên i249 đóng cửa 268, đỉnh mới, khối lượng 1.69, đóng gần đỉnh thanh. Đây là follow-through lành mạnh, chưa có dấu hiệu cao trào. Rủi ro nằm ở độ biến động: cổ phiếu này từng có hai đợt sụt ~30%. Mức −15% (~228) nằm dưới vùng breakout 239–245, nên nếu breakout thất bại thì giá có thể rơi qua khoảng trống trên.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 245 (đáy nhịp chỉnh i245–246), tức breakout trên 239 thất bại và giá quay lại vùng đỉnh cũ.
+CONTAMINATION: NONE

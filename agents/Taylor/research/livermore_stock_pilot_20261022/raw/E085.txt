@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá đi từ khoảng 100 lên khoảng 480, tức một pha markup gần như parabol với nhiều gap (190→191, 105→106). Ở thang 60 phiên, cao trào nằm ở các phiên 223–226: đỉnh 557.85, khối lượng 4.23 và 3.46, rồi thanh 226 đảo chiều đóng tại đáy. Sau đó giá chuyển sang biên độ rộng 394–530 với các thanh giảm có khối lượng lớn (230: 3.60; 240: 2.97), giống pha phân phối. Ở thang 20 phiên, giá hồi từ 405 lên 481 với khối lượng cao. Tuy vậy phiên 249 bị từ chối ở 481–483 với khối lượng 3.15 và đóng thấp hơn, tạo đỉnh thấp hơn ngay dưới vùng cung 480–530. Mỗi phiên dao động 5–10%, nên mức −15% (khoảng 398) chỉ là đáy biên độ 394–406. Thủng vùng này thì phía dưới là khoảng trống tới vùng gap 330–360.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 404 (đáy phiên 235/240) là phá biên phân phối; ngược lại, đóng trên 530 với khối lượng lớn sẽ vô hiệu kịch bản phân phối.
+CONTAMINATION: NONE

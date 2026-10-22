@@ -1,0 +1,13 @@
+**Phân tích:** Mã này cực kỳ kém thanh khoản, có lẽ niêm yết trên UPCoM vì có những bước giá ±10–15% vượt biên độ HOSE. Phần lớn các phiên có Volume 0–1, nên giá chỉ do vài lệnh lẻ quyết định chứ không phản ánh cung cầu thật.
+
+- **Thang 250 phiên:** giá đi ngang rộng trong vùng 93–129. Đỉnh 137 (i101/104) là râu do khớp đơn lẻ.
+- **Thang 60 phiên:** giá giật qua lại giữa 103 và 115, có một lần thủng xuống 92.92 (i232).
+- **Thanh cuối (i248):** giá nhảy từ 102.04 lên 111.92 chỉ với volume 1. Không có follow-through, nên đây không phải breakout.
+
+Giá vào khoảng 112, tức nửa trên của biên độ. Mức −15% là ≈95, vùng đã từng bị chạm. Rủi ro lớn nhất là thanh khoản: có thể không bán được, và một lệnh lẻ có thể kéo giá sâu.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Giá đóng cửa dưới 103 (đáy dao động lặp lại i216–218) là kịch bản mua sai; dưới 92.9 (đáy i232) thì cấu trúc biên độ bị phá vỡ.
+CONTAMINATION: NONE

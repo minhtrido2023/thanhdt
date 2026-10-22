@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, giá tăng từ ~100 lên đỉnh 194.6 (i150). Sau đó là pha phân phối 145–188 trong các phiên i145–160, với khối lượng rất lớn (2–3.4×). Tiếp theo là pha giảm có đỉnh thấp dần: 155 (i210), 141 (i230), 131.7 (i244).
+
+Hai lần thủng hỗ trợ đều không có climax khối lượng: i235 về 110 (V 1.14) và i247 về 106.7 (V 0.53). Đáy i247 thấp hơn đáy i236, nên chưa xác nhận được đáy đôi. Nhịp hồi lên 121.9 diễn ra với khối lượng cạn (0.21–0.37), tức là thiếu cầu chủ động. Phía trên, vùng 125–131 là nơi người mua bị kẹt (nền i238–244), cung chờ ở đó là thực.
+
+Ngưỡng −15% từ giá vào ~122 là ~103.7, chỉ cách đáy 106.7 khoảng 3%. Xu hướng 60 phiên vẫn là giảm.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 106.5 (thủng đáy i247) làm luận điểm mua vô hiệu; luận điểm giảm chỉ bị phủ định nếu giá vượt 132 với khối lượng >1.5×.
+CONTAMINATION: NONE
