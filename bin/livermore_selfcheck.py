@@ -36,6 +36,7 @@ case "${FAKE_CLAUDE_MODE:-good}" in
   mismatch)   blk DOWN 0.30; echo "RESULT|$D|UP|0.62|HOLD" ;;
   badlevel)   blk UP 0.62; echo "RESULT|$D|UP|0.62|MAYBE" ;;
   exit1)      echo boom >&2; exit 1 ;;
+  slowgood)   sleep 2; blk UP 0.62; echo "RESULT|$D|UP|0.62|HOLD" ;;
 esac
 '''
 FAKE_NOTIFY = '#!/usr/bin/env bash\necho "$2|$1" >> "$FAKE_NOTIFY_LOG"\n'
@@ -316,6 +317,7 @@ def inner():
     os.environ["LIVERMORE_SCORE_BIN"] = badscore
     real_eval, T.evaluate = T.evaluate, (lambda a, **k: 0)
     rc = T.main([])
+    check("trigger-lock-file", os.path.exists(os.path.join(env["LIVERMORE_STATE_DIR"], "locks", "livermore_trigger.lock")))
     check("B4-scorer-rc1-báo", rc == 0 and len(alerts("scorer lỗi rc=1")) == 1, str(nlog()))
     T.main([])
     check("B4-scorer-báo-dedupe", len(alerts("scorer lỗi rc=1")) == 1)
@@ -333,6 +335,40 @@ def inner():
     T.main([])
     check("B4-state-hỏng-vẫn-báo", len(alerts("LỖI cò")) >= 1, str(nlog()))
 
+    # ── 7c. non-blocking: as_of==expected, snapshot DT5G, flock, tmp/lock ngoài kb/ ──
+    reset()
+    write_bars(walk(520), last=D(2026, 10, 23))          # có bar 10-23 nhưng phiên kỳ vọng (10-22 19:30) là 10-22
+    r = subprocess.run([sys.executable, os.path.join(BIN, "livermore_common.py"), "package", "2026-10-23", pk],
+                       capture_output=True, text=True)
+    check("as-of-≠-kỳ-vọng-bị-từ-chối(tương-lai)", r.returncode != 0 and "≠ phiên kỳ vọng" in r.stderr, r.stderr[-150:])
+    reset()
+    write_bars(closes)
+    open(env["LIVERMORE_DT5G_CSV"], "w").write("time,state\n2026-10-22,2\n")
+    os.environ["FAKE_CLAUDE_MODE"] = "good"
+    T.evaluate([], clock_fn=lambda: None)
+    ent = C.parse_entries(C.read_registry())
+    check("snapshot-dt5g-ghi-vào-entry", ent and ent[0]["dt5g"] == 2 and "- dt5g_at_asof: 2" in C.read_registry(), str(ent))
+    check("tmp-lock-ngoài-kb", not [f for f in os.listdir(os.path.dirname(reg)) if ".lock" in f or ".tmp" in f]
+          and os.path.exists(os.path.join(env["LIVERMORE_STATE_DIR"], "locks", "livermore_reads.md.lock")),
+          str(os.listdir(os.path.dirname(reg))))
+    check("tmp-dọn-sạch", not os.listdir(os.path.join(env["LIVERMORE_STATE_DIR"], "tmp")), str(os.listdir(os.path.join(env["LIVERMORE_STATE_DIR"], "tmp"))))
+    reset()
+    write_bars(closes)
+    os.remove(env["LIVERMORE_DT5G_CSV"])                 # thiếu state ⇒ NA, entry VẪN được ghi
+    T.evaluate([], clock_fn=lambda: None)
+    ent = C.parse_entries(C.read_registry())
+    check("snapshot-dt5g-thiếu-NA-vẫn-ghi", ent and ent[0]["dt5g"] is None and "- dt5g_at_asof: NA" in C.read_registry())
+    # hai run.sh chạy chồng ⇒ xếp hàng bằng flock, chỉ gọi claude 1 lần, 1 entry
+    reset()
+    write_bars(closes)
+    os.environ["FAKE_CLAUDE_MODE"] = "slowgood"
+    ps = [subprocess.Popen([os.environ["LIVERMORE_RUN_BIN"], "--as-of", "2026-10-22"], stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, text=True) for _ in range(2)]
+    outs = [(p_.communicate(), p_.returncode) for p_ in ps]
+    check("flock-run-chồng-1-claude-1-entry", cnt() == 1 and C.read_registry().count("### LVR-2026-10-22") == 1
+          and all(o[1] == 0 for o in outs), f"cnt={cnt()} rcs={[o[1] for o in outs]} {outs[0][0][1][-150:]}")
+    os.environ["FAKE_CLAUDE_MODE"] = "good"
+
     # ── 8. chấm điểm ──
     def mk_entries(specs):
         """specs: list (as_of, dir, p_up). bars phẳng 1000 trừ close[D+20] theo y."""
@@ -348,9 +384,9 @@ def inner():
             closes_[days[idx + 20]] = 1010.0 if y else 990.0
             due, cal = C.add_sessions(a_, 20)
             txt_ += (f"\n### LVR-{a_}\n- as_of: {a_}\n- created: x\n- trigger: T\n- close_asof: 1000.0\n- due: {due} "
-                     f"(calendar={cal})\n- report: r\n- forecast:\n    f\n- result: RESULT|{a_}|{dr}|{p}|HOLD\n- outcome:\n")
-            if st_:
-                dtrows.append(f"{a_},{st_}")
+                     f"(calendar={cal})\n- report: r\n- dt5g_at_asof: {st_ if st_ else 'NA'}\n- forecast:\n    f\n"
+                     f"- result: RESULT|{a_}|{dr}|{p}|HOLD\n- outcome:\n")
+            dtrows.append(f"{a_},{9 if st_ else 9}")      # bảng CỐ Ý khác snapshot: scorer không được đọc lại bảng
         C.locked_append(reg, txt_)
         with open(env["LIVERMORE_BARS_CSV"], "w") as fh:
             fh.write("time,Open,High,Low,Close,Volume\n")
@@ -413,6 +449,40 @@ def inner():
     c = S.cumulative([{"hit": 0, "brier": .5, "y": 1, "dt_hit": None, "dt_brier": None}] * 12)
     check("gate-dt5g-NA", c["dissolve"] and c["n_dt5g"] == 0)
 
+    # locked_append: 6 tiến trình ghi đồng thời (guard chậm) ⇒ KHÔNG mất dòng nào
+    reset()
+    code = ("import sys,time;sys.path.insert(0,%r);import livermore_common as C;"
+            "C.locked_append(C.REGISTRY,'### LVR-2026-02-0%%s\\n'%%sys.argv[1],guard=lambda c:time.sleep(0.3) or False)") % BIN
+    ps = [subprocess.Popen([sys.executable, "-c", code, str(i)]) for i in range(1, 7)]
+    for p_ in ps:
+        p_.wait()
+    got = C.read_registry()
+    check("flock-append-không-mất-dòng", all(f"### LVR-2026-02-0{i}" in got for i in range(1, 7)), got[-200:])
+    # hai lượt trigger chồng nhau ⇒ xếp hàng: 1 claude, 1 thông báo (không báo đôi)
+    os.environ["LIVERMORE_NOW"] = env["LIVERMORE_NOW"]
+    reset()
+    write_bars(closes)
+    os.environ["FAKE_CLAUDE_MODE"] = "slowgood"
+    code = ("import sys;sys.path.insert(0,%r);import livermore_trigger_check as T;"
+            "ev=T.evaluate;T.evaluate=lambda a:ev(a,clock_fn=lambda:None);sys.exit(T.main([]))") % BIN
+    ps = [subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) for _ in range(2)]
+    rcs = [p_.wait() for p_ in ps]
+    os.environ["FAKE_CLAUDE_MODE"] = "good"
+    check("flock-trigger-chồng-1-claude-1-báo", rcs == [10, 10] and cnt() == 1 and len([x for x in nlog() if "đọc 2026-10-22" in x]) == 1,
+          f"rcs={rcs} cnt={cnt()} {nlog()}")
+    # giải thể báo 1 lần cho mỗi n (không spam mỗi ngày)
+    days = mk_entries([(i, "DOWN" if i % 2 else "UP", 0.1 if i % 2 else 0.9, i % 2, 3) for i in range(12)])
+    S.main(["--today", str(days[60]), "--notify"])
+    raw = lambda: open(env["FAKE_NOTIFY_LOG"]).read().count("GIẢI THỂ ĐỀ XUẤT")  # noqa: E731
+    n1 = raw()
+    S.main(["--today", str(days[61]), "--notify"])
+    check("giải-thể-báo-đúng-1-lần", n1 == 1 and raw() == 1, f"{n1} {raw()}")
+    # entry baseline trong registry thật phải parse được (scorer chấm được)
+    real = os.path.join(os.path.dirname(HERE), "kb", "data_registry", "market-state", "livermore_reads.md")
+    be = [e for e in C.parse_entries(open(real, encoding="utf-8").read()) if str(e["as_of"]) == "2026-10-21"]
+    check("baseline-registry-parse-được", len(be) == 1 and be[0]["dir"] == "UP" and be[0]["p_up"] == 0.56
+          and be[0]["due"] == D(2026, 11, 18) and be[0]["close"] == 1738.67, str(be))
+
     # ── 9. append-only an toàn ──
     reset()
     check("append-ghi", C.locked_append(reg, "### LVR-2026-01-01\n", guard=lambda c_: C.has_entry(c_, D(2026, 1, 1))))
@@ -444,6 +514,13 @@ MUTANTS = [
     ("livermore_score.py", "return 20 if c.get(\"dissolve\") else 0", "return 0", "bỏ rc giải thể"),
     ("livermore_score.py", "dissolve\": n >= GATE_N and", "dissolve\": n >= 1 and", "cổng giải thể không chờ 12"),
     ("livermore_score.py", "not all(beats.values())", "not any(beats.values())", "giải thể chỉ khi thua cả 3 (sai luật)"),
+    ("livermore_run.sh", 'flock -w "${LIVERMORE_LOCK_WAIT:-1800}" 9 ||', 'true ||', "run.sh bỏ flock"),
+    ("livermore_common.py", "        fcntl.flock(lk, fcntl.LOCK_EX)\n        cur =", "        cur =", "locked_append bỏ flock"),
+    ("livermore_common.py", 'if as_of != expected_last_session() and', 'if as_of < expected_last_session() and', "as-of==kỳ vọng thành chỉ <"),
+    ("livermore_common.py", "            dt5g = get_dt5g_state(as_of)", "            dt5g = None", "bỏ snapshot DT5G"),
+    ("livermore_score.py", 'score_entry(e, bars, e["dt5g"])', 'score_entry(e, bars, C.get_dt5g_state(e["as_of"]))', "scorer đọc lại bảng DT5G"),
+    ("livermore_score.py", "prev_n != str(c[\"n\"])", "True", "giải thể spam mỗi ngày"),
+    ("livermore_trigger_check.py", "        fcntl.flock(lk, fcntl.LOCK_EX)\n        return _main_locked", "        return _main_locked", "trigger bỏ flock"),
     ("livermore_run.sh", "grep -q \"^### LVR-$AS_OF\\$\" \"$REG\"", "false", "run.sh mất idempotent"),
 ]
 

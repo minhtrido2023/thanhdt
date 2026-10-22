@@ -2,7 +2,8 @@
 """Chấm các entry Livermore đã đáo hạn (D+20 phiên) — append-only, idempotent.
 
 Mỗi entry đến hạn + đủ 20 bar sau as-of → ghi 1 dòng `SCORE|...` vào registry (entry KHÔNG bị sửa).
-Baseline: đồng xu 50% · "luôn UP" · DT5G-implied (state DT5G TẠI as-of, từ vnindex_5state_dt5g_live).
+Baseline: đồng xu 50% · "luôn UP" · DT5G-implied (state DT5G TẠI as-of — snapshot `dt5g_at_asof` do finalize
+ghi vào entry từ vnindex_5state_dt5g_live SAU khi FORECAST khoá; NA ⇒ baseline DT5G bỏ qua entry đó).
 Cổng giải thể: ≥12 entry đã chấm mà Livermore KHÔNG hơn CẢ 3 baseline (mỗi baseline: hit VÀ Brier, nghiêm ngặt)
 ⇒ in "GIẢI THỂ ĐỀ XUẤT" (rc=20). Giữ vai CHỈ KHI hơn đồng xu VÀ luôn-UP VÀ DT5G-implied; thua dù chỉ một ⇒ giải thể.
 Chỉ đề xuất — người quyết định.
@@ -137,7 +138,7 @@ def main(argv):
             continue
         bars = C.get_bars(e["as_of"], e["due"] + dt.timedelta(days=14))
         try:
-            r = score_entry(e, bars, C.get_dt5g_state(e["as_of"]))
+            r = score_entry(e, bars, e["dt5g"])          # snapshot lúc ghi entry; KHÔNG đọc lại bảng
         except RuntimeError as ex:
             print(f"[score] LỖI {ex}", file=sys.stderr)
             return 1
@@ -160,8 +161,14 @@ def main(argv):
     if not dry:
         C.atomic_write(os.path.join(C.DATA_DIR, "scoreboard.md"),
                        f"# Livermore scoreboard (sinh tự động {C.now_ict().isoformat(timespec='seconds')})\n\n```\n{table}\n```\n")
-    if "--notify" in argv and not dry and (new or c.get("dissolve")):
-        notify("Livermore — chấm " + (f"{len(new)} entry mới.\n" if new else "") + table)
+    if "--notify" in argv and not dry:
+        marker = os.path.join(C.STATE_DIR, "livermore_dissolve_notified")
+        prev_n = open(marker).read().strip() if os.path.exists(marker) else ""
+        dis_new = bool(c.get("dissolve")) and prev_n != str(c["n"])     # giải thể: báo 1 lần / mỗi n mới
+        if new or dis_new:
+            notify("Livermore — chấm " + (f"{len(new)} entry mới.\n" if new else "") + table)
+            if c.get("dissolve"):
+                C.atomic_write(marker, str(c["n"]))
     return 20 if c.get("dissolve") else 0
 
 

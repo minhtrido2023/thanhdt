@@ -3,6 +3,8 @@
 # Dựng gói OHLCV VNINDEX as-of (500 phiên, KHÔNG DT5G, KHÔNG bar sau as-of) → chạy headless agent
 # `livermore` ĐỌC MÙ → parse FORECAST/RESULT → ghi 1 entry append-only vào
 # kb/data_registry/market-state/livermore_reads.md + báo cáo data/livermore/<as_of>.md.
+# Cờ claude: --strict-mcp-config (không nạp MCP nào), --permission-prompts none (không ai trả lời prompt ⇒ từ chối),
+# --max-budget-usd (trần chi; CLI này KHÔNG có --max-turns).
 # rc: 0 ghi xong (hoặc entry đã có — idempotent) · 1 lỗi (parse hỏng / as-of lệch / claude lỗi) — KHÔNG ghi entry nửa vời.
 # Hook kiểm thử: LIVERMORE_CLAUDE_BIN (claude giả), LIVERMORE_BARS_CSV, LIVERMORE_REGISTRY, LIVERMORE_DATA_DIR.
 set -euo pipefail
@@ -23,6 +25,12 @@ while [ $# -gt 0 ]; do
 done
 die() { echo "LIVERMORE-RUN-FAIL: $*" >&2; exit 1; }
 
+# Khoá TOÀN BỘ lượt chạy (xếp hàng tối đa 30', lượt sau thấy entry EXISTS và thoát). Khoá ở state/locks, không ở kb/.
+LOCKDIR="${LIVERMORE_STATE_DIR:-$ROOT/state}/locks"
+mkdir -p "$LOCKDIR"
+exec 9>"$LOCKDIR/livermore_run.lock"
+flock -w "${LIVERMORE_LOCK_WAIT:-1800}" 9 || die "không lấy được khoá $LOCKDIR/livermore_run.lock sau ${LIVERMORE_LOCK_WAIT:-1800}s (lượt khác đang chạy?)"
+
 # Thư mục làm việc NGOÀI repo: claude không nạp CLAUDE.md của repo (chứa DT5G) vào phiên đọc mù.
 WORK="$(mktemp -d /tmp/livermore_run.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
@@ -41,8 +49,9 @@ PROMPT="$("$PY" "$COMMON" prompt "$AS_OF" "$WORK/pkg.csv")"
 set +e
 ( cd "$WORK" && timeout "${LIVERMORE_TIMEOUT:-900}" "$CLAUDE_BIN" -p --agent livermore \
     --tools "Read" --setting-sources user --no-session-persistence \
+    --strict-mcp-config --permission-prompts none --max-budget-usd "${LIVERMORE_MAX_BUDGET:-5}" \
     --disallowedTools "Read(//home/trido/thanhdt/**)" "Read(//home/trido/.claude/projects/**)" \
-    -- "$PROMPT" ) >"$WORK/report.md" 2>"$WORK/claude.err"
+    -- "$PROMPT" </dev/null ) >"$WORK/report.md" 2>"$WORK/claude.err"
 rc=$?
 set -e
 if [ $rc -ne 0 ]; then

@@ -11,6 +11,7 @@ Hook kiểm thử (chỉ có tác dụng khi LIVERMORE_TEST=1 cho đồng hồ; 
 """
 import csv
 import datetime as dt
+import errno
 import fcntl
 import io
 import os
@@ -156,21 +157,43 @@ def get_dt5g_state(day):
 
 
 # ───────────────────────── file ─────────────────────────
+def _tmp_path(path):
+    d = os.path.join(STATE_DIR, "tmp")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, f"{os.path.basename(path)}.tmp.{os.getpid()}")
+
+
+def lock_file(name):
+    d = os.path.join(STATE_DIR, "locks")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, name)
+
+
 def atomic_write(path, text):
+    """tmp + os.replace. tmp nằm ở STATE_DIR/tmp (KHÔNG ở kb/: kill giữa chừng không để rác trong cây KB);
+    khác thiết bị (EXDEV) thì rơi về tmp cạnh file đích."""
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    tmp = f"{path}.tmp.{os.getpid()}"
-    with open(tmp, "w", encoding="utf-8") as fh:
-        fh.write(text)
-        fh.flush()
-        os.fsync(fh.fileno())
-    os.replace(tmp, path)
+    tmp = _tmp_path(path)
+    for attempt in (0, 1):
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.write(text)
+            fh.flush()
+            os.fsync(fh.fileno())
+        try:
+            os.replace(tmp, path)
+            return
+        except OSError as ex:
+            if attempt or ex.errno != errno.EXDEV:
+                raise
+            os.remove(tmp)
+            tmp = f"{path}.tmp.{os.getpid()}"
 
 
 def locked_append(path, text, guard=None):
-    """Append-only an toàn: khoá flock, đọc, guard(content)->str|None (lý do từ chối), ghi atomic.
-    Trả True nếu đã ghi, False nếu guard từ chối (idempotent)."""
+    """Append-only an toàn: khoá flock (file khoá ở STATE_DIR/locks), đọc, guard(content)->bool (True = từ chối),
+    ghi atomic. Trả True nếu đã ghi, False nếu guard từ chối (idempotent)."""
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    with open(path + ".lock", "w") as lk:
+    with open(lock_file(os.path.basename(path) + ".lock"), "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
         cur = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
         if guard and guard(cur):
@@ -204,7 +227,9 @@ def parse_entries(text):
         parts = res.group(1).split("|") if res else []
         if len(parts) != 5 or not due:
             continue            # entry hỏng — scorer không đoán
+        snap = f("dt5g_at_asof")
         out.append({"as_of": dt.date.fromisoformat(m.group(1)), "trigger": f("trigger"),
+                    "dt5g": int(snap) if snap.isdigit() else None,
                     "close": float(f("close_asof")), "due": dt.date.fromisoformat(due.group(1)),
                     "calendar": due.group(2), "dir": parts[2], "p_up": float(parts[3]), "level": parts[4]})
     return out
@@ -261,11 +286,11 @@ def parse_forecast(report, as_of):
     return {"dir": d, "p_up": pu, "level": lvl, "block": block, "result": lines[0].strip()}
 
 
-def format_entry(as_of, triggers, close, due, cal, report_rel, fc, created):
+def format_entry(as_of, triggers, close, due, cal, report_rel, fc, created, dt5g=None):
     ind = "\n".join("    " + ln for ln in fc["block"].splitlines())
     return (f"\n### LVR-{as_of}\n- as_of: {as_of}\n- created: {created}\n- trigger: {','.join(triggers)}\n"
             f"- close_asof: {close}\n- due: {due} (calendar={cal})\n- report: {report_rel}\n"
-            f"- forecast:\n{ind}\n- result: {fc['result']}\n- outcome:\n")
+            f"- dt5g_at_asof: {'NA' if dt5g is None else dt5g}\n- forecast:\n{ind}\n- result: {fc['result']}\n- outcome:\n")
 
 
 # ───────────────────────── gói dữ liệu & prompt ─────────────────────────
@@ -311,8 +336,8 @@ def _cli(argv):
         if a == "-":
             a = str(expected_last_session())
         as_of = dt.date.fromisoformat(a)
-        if as_of < expected_last_session() and os.environ.get("LIVERMORE_ALLOW_PAST") != "1":
-            raise RuntimeError(f"as-of {as_of} cũ hơn phiên kỳ vọng {expected_last_session()} "
+        if as_of != expected_last_session() and os.environ.get("LIVERMORE_ALLOW_PAST") != "1":
+            raise RuntimeError(f"as-of {as_of} ≠ phiên kỳ vọng {expected_last_session()} "
                                "(đặt LIVERMORE_ALLOW_PAST=1 nếu cố ý)")
         bars = build_package(as_of, argv[3])
         print(f"{as_of} {len(bars)} bars close={bars[-1]['close']}")
@@ -331,9 +356,14 @@ def _cli(argv):
         if has_entry(read_registry(), as_of):
             print(f"EXISTS LVR-{as_of}")
             return
+        try:                                    # SAU khi FORECAST đã khoá: snapshot DT5G tại as-of vào entry
+            dt5g = get_dt5g_state(as_of)
+        except Exception as ex:                 # không có state ⇒ NA, KHÔNG chặn entry (scorer không đọc lại bảng)
+            print(f"WARN snapshot DT5G lỗi: {ex}", file=sys.stderr)
+            dt5g = None
         atomic_write(rep_path, report)          # báo cáo TRƯỚC, entry SAU: kill giữa chừng không để entry mồ côi
         entry = format_entry(as_of, [t for t in argv[4].split(",") if t] or ["MANUAL"], bars[0]["close"],
-                             due, cal, rel, fc, now_ict().isoformat(timespec="seconds"))
+                             due, cal, rel, fc, now_ict().isoformat(timespec="seconds"), dt5g)
         wrote = locked_append(REGISTRY, entry, guard=lambda c: has_entry(c, as_of))
         print(("WROTE" if wrote else "EXISTS") + f" LVR-{as_of} due={due} calendar={cal}")
     else:

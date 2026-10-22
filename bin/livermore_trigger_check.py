@@ -15,6 +15,7 @@ Cờ: --dry-run (không state/run/notify/score).  Hook test: LIVERMORE_RUN_BIN, 
 LIVERMORE_NOTIFY_BIN, LIVERMORE_STATE_DIR, và cho clock: tham số clock_fn của evaluate().
 """
 import datetime as dt
+import fcntl
 import json
 import os
 import subprocess
@@ -238,7 +239,7 @@ def evaluate(argv, clock_fn=real_clock):
     return 10
 
 
-def main(argv):
+def _main_locked(argv):
     try:
         rc = evaluate(argv)
     except Exception as ex:
@@ -250,6 +251,14 @@ def main(argv):
         if src not in (0, 20):
             alert("SCORE", f"scorer lỗi rc={src}: {tail[-250:]}")
     return rc
+
+
+def main(argv):
+    """Khoá TOÀN BỘ lượt (đọc state → run → ghi state → score): hai cron/lần tay chạy chồng sẽ xếp hàng, lượt
+    sau thấy state 'done' và no-op. Khoá ở STATE_DIR/locks (không ở kb/). Trần giữ khoá = các timeout con."""
+    with open(C.lock_file("livermore_trigger.lock"), "w") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        return _main_locked(argv)
 
 
 if __name__ == "__main__":
