@@ -46,7 +46,7 @@ import capit_episode  # noqa: E402
 import lag_rights_exit_hold as rights_hold  # noqa: E402
 from portfolio_status import (  # noqa: E402
     account_no_for, broker_positions_with_cost, count_trading_days,
-    book_lot_snapshot,
+    book_lot_snapshot, ORPHAN_PREFIX,
 )
 from trading_bot.plan import PlannedOrder  # noqa: E402
 from trading_bot.vn_market import now_ict, next_trading_day, session_phase, is_holiday  # noqa: E402
@@ -372,6 +372,8 @@ def process_account(account, plan_date, signal_date, dry_run):
         # cả hai (người duyệt cần biết CẢ 2 đường cùng chặn), không phải 1 sự kiện ghi trùng.
         # Chỉ chặn trùng lặp THẬT (cùng câu chữ — vd gọi lại `_add_blocked` 2 lần cho cùng 1 lý
         # do, ca lag_blocked/bal_blocked nếu book_lot_snapshot() trả về mã trùng).
+        if reason.startswith(ORPHAN_PREFIX):
+            book = "*"   # mã mồ côi không thuộc book nào — LAG lẫn BAL cùng trả, ghi MỘT lần (X2)
         if {"ticker": tk, "book": book, "reason": reason} in blocked_notes:
             return
         blocked_notes.append({"ticker": tk, "book": book, "reason": reason})
