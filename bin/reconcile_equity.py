@@ -89,7 +89,7 @@ def realized_pnl_from_events(events_by_date, asof, corp_actions, seed_lots=None)
         books[tk].buy(qty * corp_action_multiplier(tk, date, asof, corp_actions), qty * price, date)
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
-            m = corp_action_multiplier(tk, date, asof, corp_actions)
+            m = corp_action_multiplier(tk, date, asof, corp_actions, key=_key)
             book = books[tk]
             value = qty * price
             if side != "sell":
@@ -285,10 +285,29 @@ def main():
                 events_by_date.setdefault(fx["date"], []).append(
                     (fx["date"] + "T23:59:59", "broker-confirmed", fx["ticker"], fx["side"],
                      float(fx["qty"]), float(fx["price"])))
-        for d in events_by_date:
-            events_by_date[d].sort(key=lambda e: e[0])
         seed_lots = {tk: (float(p["qty"]), float(p["price"]), seed["date"])
                      for tk, p in seed["legacy_positions"].items()}
+    # N1: CP quyền mua USER đã khai (rights_subscription.py) — cùng sổ verify_account_snapshot đọc
+    # (giá vốn snapshot đã gồm lô quyền) ⇒ realized khi bán lô quyền dùng đúng cơ sở giá vốn.
+    import rights_subscription as rights_sub
+    rights_ev = rights_sub.fill_events(args.account, upto=asof, account_no=account_no)
+    for d, evs in rights_ev.items():
+        events_by_date.setdefault(d, []).extend(evs)
+    # NB1 (arch-review vòng 2): nộp tiền mua quyền KHÔNG chịu phí giao dịch ⇒ loại lô quyền khỏi cơ sở
+    # phí. Lô quyền về SAU lô gốc ⇒ FIFO bán sau cùng ⇒ phần còn giữ = min(KL quyền, KL đang giữ).
+    rights_q = {}
+    for evs in rights_ev.values():
+        for ev in evs:
+            rights_q.setdefault(ev[2], [0.0, 0.0])
+            rights_q[ev[2]][0] += ev[4]
+            rights_q[ev[2]][1] += ev[4] * ev[5]
+    rights_buy_value = sum(v[1] for v in rights_q.values())
+    if args.trading_fees is None and rights_q:
+        held = {p["ticker"]: float(p["qty"]) for p in snap.get("positions", [])}
+        rights_held_value = sum(min(q, held.get(tk, 0.0)) * v / q for tk, (q, v) in rights_q.items() if q)
+        fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0
+    for d in events_by_date:
+        events_by_date[d].sort(key=lambda e: e[0])
     corp = load_corp_actions()
     rz = realized_pnl_from_events(events_by_date, asof, corp, seed_lots=seed_lots)
     if seed:
@@ -353,7 +372,8 @@ def main():
 
     # Diễn giải residual (ƯỚC TÍNH) — dương = vế trái cao hơn tiền thật ⇒ chi phí chưa trừ đủ.
     turnover = rz["buy_value"] + rz["sell_value"]
-    fee_gap_est = (rz["buy_value"] * fee_buy_pct + rz["sell_value"] * fee_sell_pct) / 100.0 - fees
+    fee_gap_est = ((rz["buy_value"] - rights_buy_value) * fee_buy_pct
+                   + rz["sell_value"] * fee_sell_pct) / 100.0 - fees
     sell_tax_est = rz["sell_value"] * SELL_TAX_RATE
     margin_cum_est = margin_interest_estimate(daily_debt, start, bal_ts[:10], args.margin_rate_annual)
     margin_gap_est = max(margin_cum_est - accrued_fee, 0.0)
@@ -365,7 +385,7 @@ def main():
     print(f"Nguồn balance THẬT: {args.balance_raw} (ts={bal_ts}, kind=balances)")
     print(f"Nguồn P&L THẬT: {args.snapshot}")
     print()
-    print(f"VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):")
+    print("VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):")
     print(f"  Vốn ban đầu:           {args.starting_capital:>16,.0f}"
           + (f"  (NAV thật {seed['date']} từ account_seed_capital.json)" if seed else ""))
     for tk, bqty, rqty, px, basis in legacy_lines:
@@ -374,6 +394,9 @@ def main():
     for fx in (seed or {}).get("missing_fills_broker_confirmed", []):
         print(f"    + fill broker xác nhận dnse_raw thiếu: {fx['date']} {fx['side']} {fx['qty']} "
               f"{fx['ticker']} @{fx['price']:,} ({fx['evidence']})")
+    for d, evs in sorted(rights_ev.items()):
+        for ev in evs:
+            print(f"    + CP quyền mua user khai: {d} buy {ev[4]:,.0f} {ev[2]} @{ev[5]:,.0f} ({ev[1]}, phí 0)")
     print(f"  + Lãi/lỗ chưa thực hiện:{unrealized_pnl:>+16,.0f}")
     if args.no_realized:
         print(f"  (--no-realized: BỎ realized {rz['realized']:+,.0f} + cổ tức {div['net']:+,.0f})")
@@ -387,7 +410,7 @@ def main():
     print(f"  - Phí/lãi margin đã POST (depositFeeAmount, API thật): {-accrued_fee:>12,.0f}")
     print(f"  = VẾ TRÁI:             {lhs:>16,.0f}")
     print()
-    print(f"VẾ PHẢI  (NAV thị trường + Tiền mặt - Nợ margin, số THẬT từ broker):")
+    print("VẾ PHẢI  (NAV thị trường + Tiền mặt - Nợ margin, số THẬT từ broker):")
     print(f"  Giá trị cổ phiếu (MTM):{mtm_stock:>16,.0f}")
     print(f"  + Tiền mặt:            {cash:>16,.0f}")
     print(f"  - Nợ vay margin:       {-debt:>16,.0f}")

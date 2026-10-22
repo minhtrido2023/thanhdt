@@ -1509,7 +1509,7 @@ def part_e_flow_module(tmp):
 # ------------------------------------------------------------------ F. sandbox: CLI nhánh + cổng
 SANDBOX_FILES = ("nav_period_returns.py", "nav_unit_ledger.py", "account_cash_flows.py",
                  "report_delivery_gate.py", "wc_paths.py", "cash_identity.py", "dnse_fee_rates.py",
-                 "corp_actions.py")
+                 "corp_actions.py", "rights_subscription.py")   # N1: cash_identity đọc sổ khai báo quyền mua
 
 
 def part_f_sandbox(tmp):

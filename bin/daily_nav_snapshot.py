@@ -18,6 +18,14 @@ ghi `nav_is_estimate=True` + `nav_source`. Giá BQ lệch `marketPrice` của v�
 chấp nhận khi có bằng chứng cơ khí: marketPrice = giá phiên TRƯỚC (feed trễ, ca PVT/TCB 10/08)
 hoặc corp-action CONFIRMED ex_date sau --date mà Price/mult khớp (broker ghi có sớm, ca MSB
 27/08 ⇒ quy KL về trước sự kiện). Còn lại ⇒ rc=4, không ghi, không đoán.
+
+⚠️ Giới hạn đã biết (N4 + `--from-raw`, arch-review N1 vòng 2 NB3 — CHƯA sửa, chỉ ghi lại): ngày
+broker ghi có SỚM cổ tức CP/thưởng mà tài khoản đang có lô CP QUYỀN MUA chờ VSDC ghi nhận
+(`rights_subscription.pending_at`), phần lô chờ KHÔNG hưởng sự kiện nhưng vẫn được định giá theo giá
+CUM (`Price` trước GDKHQ) như phần còn lại ⇒ NAV dòng đó CAO hơn thật ≈ KL chờ × (giá cum − giá ex),
+chỉ trong 1 ngày (ngày sau giá ex tự đúng). Dòng vẫn là `nav_is_estimate=True`. Khi chạy
+`--from-raw` cho đúng ngày như vậy: đối chiếu tay NAV với `totalValue`/sao kê DNSE trước khi dùng
+cho báo cáo (§6), hoặc chờ dòng EOD ngày kế tiếp.
 """
 import argparse
 import csv
@@ -409,6 +417,13 @@ def net_fills_between(account, after_date, upto_date, cache=None, missing_out=No
             continue
         for _ts, _oid, tk, side, qty, _px in events or []:
             out[tk] = out.get(tk, 0.0) + (qty if side == "buy" else -qty)
+    # N1: CP quyền mua USER đã khai (rights_subscription.py) = KL về broker ngày credit_date, không
+    # qua lệnh sàn. Sổ hỏng ⇒ raise (fail-closed); khai sai KL/ngày ⇒ phần dư ≠ 0 ⇒ vẫn chặn rc=5/6.
+    import rights_subscription as rights_sub
+    for d, evs in rights_sub.fill_events(account).items():
+        if after_date < d <= upto_date:
+            for _ts, _k, tk, _side, qty, _px in evs:
+                out[tk] = out.get(tk, 0.0) + qty
     from trading_bot.vn_market import next_trading_day
     _d, _end = (next_trading_day(datetime.date.fromisoformat(after_date)),
                 datetime.date.fromisoformat(upto_date))
@@ -639,7 +654,7 @@ QTY_RATIO_TOL_PCT = 0.02     # + biên 2% ĐỘ LỚN SỰ KIỆN (phần dư), 
 # đều lấy mẫu số là ĐỘ LỚN SỰ KIỆN, không phải độ lớn vị thế.
 
 
-def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date):
+def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date, pending_rights=0.0):
     """PURE. KHỐI LƯỢNG một mã đổi bao nhiêu mà LỆNH KHỚP THẬT không giải thích được.
 
     §29 — hàm này tồn tại để thông điệp của gate khẳng định nguyên nhân bằng bằng chứng CODE ĐÃ
@@ -657,6 +672,12 @@ def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date):
     `exercise_ratio` CHỈ dùng cho sự kiện CỔ PHIẾU. Sự kiện DIV cũng mang `exercise_ratio` nhưng
     đó là tỉ lệ cổ tức trên MỆNH GIÁ (DRI 2026-09-22: 0.1 = 1.000đ/10.000đ), không phải tỉ lệ cổ
     phiếu — dùng nhầm sẽ "giải thích" khống một cú đổi KL 10%.
+
+    `pending_rights` (N4, legal-vn 22/10) = KL CP QUYỀN MUA user đã khai (`rights_subscription.py`)
+    đã nằm trong `qty_prev` nhưng đang CHỜ VSDC ghi nhận tại ex-date của sự kiện ⇒ KHÔNG vào cơ sở
+    hưởng quyền: credit kỳ vọng = (qty_prev − pending_rights) × tỉ lệ. Chỉ nới khi có bằng chứng cơ
+    học (khai báo + cửa sổ chờ); broker credit khác kỳ vọng ⇒ vẫn `qty_unexplained` (rc=5/6).
+    Mặc định 0 ⇒ phép tính y hệt bản trước.
 
     qty_prev=None ⇒ "ok": KHÔNG có cơ sở so sánh thì KHÔNG chặn (fail-open có chủ đích — gate
     này chỉ MỞ RỘNG bảo vệ, chưa từng có trước đây). ⚠️ Fail-open này chỉ còn phủ ca KHÔNG CÓ
@@ -686,8 +707,10 @@ def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date):
         except (TypeError, ValueError):
             ratio = None
     if ratio:
-        expected = qty_prev * ratio
+        expected = (qty_prev - pending_rights) * ratio if pending_rights else qty_prev * ratio
         detail.update({"exercise_ratio": ratio, "expected_residual": expected})
+        if pending_rights:
+            detail["pending_rights_qty"] = pending_rights
         if abs(resid - expected) <= max(QTY_RATIO_TOL_SHARES, abs(expected) * QTY_RATIO_TOL_PCT):
             detail["evidence"] = "residual_matches_exercise_ratio"
             return "share_event_credit", detail
@@ -1499,6 +1522,8 @@ def main():
         # kể cả ex-date cách 5 tuần. data/corp_actions.json đang giữ VHM mult 2.0 — dùng nhầm
         # là lệch 50% giá trị vị thế, ghi thẳng nav_history.
         nxt_session = next_trading_day(datetime.date.fromisoformat(args.date)).isoformat()
+        import rights_subscription as rights_sub
+        _rights_subs = rights_sub.load_subscriptions(args.account, account_no=account_no)
         for t in tickers:
             ev = held_event_next_session(ca_snap, args.date, t)
             qty_now = (positions[t] or {}).get("qty")
@@ -1516,7 +1541,11 @@ def main():
             net_fill = (net_fills_between(args.account, prev_d, args.date, fill_cache,
                                           missing_out=_miss).get(t) if prev_d else None)
             journal_gaps.update(_miss)
-            qverdict, qdetail = classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+            # N4: CP quyền mua đang chờ ghi nhận tại ex-date tối nay — không hưởng sự kiện CP
+            _pend = (rights_sub.pending_qty(args.account, t, nxt_session, prev_d, subs=_rights_subs)
+                     if prev_d else 0.0)
+            qverdict, qdetail = classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d,
+                                                      pending_rights=_pend)
             if qverdict == "qty_unexplained" and qdetail["residual"] > 0:
                 rs_ok, rs_info = rights_subscription_check(account_no, t, args.date, prev_d, qdetail)
                 if rs_ok:
@@ -1545,7 +1574,7 @@ def main():
                     # leg 2,05% ⇒ NAV +2,05% im lặng). min() chặn mọi ca mà một trong hai mẫu
                     # số chặn; NO-OP trên toàn bộ mult CONFIRMED hiện có (≤ 2,0) và trên nhánh
                     # reverse-split m<1 (residual < base ⇒ min() = residual).
-                    abs(qty_now / mult - _base) <= max(QTY_RATIO_TOL_SHARES,
+                    abs((qty_now - _pend) / mult + _pend - _base) <= max(QTY_RATIO_TOL_SHARES,
                                                        min(abs(qty_now - _base),
                                                            abs(_base)) * QTY_RATIO_TOL_PCT))
                 if args.from_raw and _mult_explains:
@@ -1559,11 +1588,13 @@ def main():
                     # TẠI. Đường cũ early_credit còn đòi đối chứng giá (`price/mult ≈ market`);
                     # "có action CONFIRMED" không là bằng chứng nào cả, và §29 dạng 2 cấm nói
                     # chữ "khớp" khi chưa đọc bằng chứng nào.
+                    # N4: lô quyền đang chờ (`_pend`) không được nhân ⇒ quy ngược chỉ phần còn lại
+                    _pre = (qty_now - _pend) / mult + _pend
                     corp_action_recovered[t] = dict(qdetail, qty_multiplier=mult,
-                                                    qty_pre_event=qty_now / mult,
+                                                    qty_pre_event=_pre,
                                                     qty_pre_event_expected=_base)
                     corp_action_adj[t] = mult
-                    positions[t]["qty"] = qty_now / mult
+                    positions[t]["qty"] = _pre
                 elif qverdict == "share_event_credit":
                     share_event_blocks.append((t, qdetail))
                 else:

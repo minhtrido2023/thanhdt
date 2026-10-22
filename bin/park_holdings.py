@@ -56,6 +56,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions, validate as validate_action   # noqa: E402
 from exdate_frame import verify_post_event_price   # noqa: E402 — §exdate_frame
+import rights_subscription as rights_sub   # noqa: E402 — N1/N4 sổ khai báo quyền mua của user
 import wc_paths  # noqa: E402
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo TZ tường minh, không tin TZ của process
@@ -504,7 +505,11 @@ class LotBook:
         pool = [l for l in self.lots if l["ticker"] == ticker]
         if not pool:
             return 0                                   # không giữ mã này — no-op, không phải lỗi
-        entitled = [l for l in pool if l["entry_date"] < ex_date]
+        # N4 (legal-vn 22/10): lô CP QUYỀN MUA đang chờ VSDC ghi nhận tại ex_date KHÔNG hưởng quyền
+        # (entry_date kế thừa lô gốc nên điều kiện entry_date < ex_date một mình sẽ nhân nhầm).
+        entitled = [l for l in pool if l["entry_date"] < ex_date
+                    and not (l.get("rights_subscription")
+                             and rights_sub.pending_at(l["rights_subscription"], ex_date))]
         if not entitled:
             self.warnings.append(
                 f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier}: đang giữ "
@@ -551,6 +556,43 @@ class LotBook:
             f"{eff:.6f} sau làm tròn mức vị thế) — tổng giá vốn không đổi")
         return len(entitled)
 
+    def rights_credit(self, sub, entitled):
+        """N1 — thêm LÔ MỚI cho CP quyền mua user đã khai (`rights_subscription.py`).
+
+        `entitled` = bản chụp các lô hưởng quyền tại GDKHQ (entry_date < GDKHQ, đang giữ ở đầu
+        phiên GDKHQ) — chụp ở đó nên lô gốc bán SAU GDKHQ vẫn là cơ sở. Chia `subscribed_qty` theo
+        tỉ lệ KL các lô đó (Hamilton, tie-break thứ tự lô — cùng quy tắc corp_action_split); mỗi lô
+        mới KẾ THỪA book/play_type/entry_date của lô gốc (phương án A, user 22/10), giá vốn = giá
+        phát hành, phí 0. Không lô hưởng quyền / khai vượt quyền tối đa ⇒ KHÔNG thêm, UNVERIFIED."""
+        tk, qty, eid = sub["ticker"], int(sub["subscribed_qty"]), sub["event_id"]
+        base = sum(l["qty"] for l in entitled)
+        cap = int(math.floor(base * sub["exercise_ratio"] + 1e-9))
+        if not entitled or qty > cap:
+            self.unverified.add(tk)
+            self.warnings.append(
+                f"{sub['credit_date']} quyền mua {tk} id={eid}: khai {qty}cp nhưng sổ chỉ có {base}cp hưởng "
+                f"quyền tại GDKHQ {sub['exright_date']} (tối đa {cap}cp) ⇒ KHÔNG thêm lô, {tk} UNVERIFIED")
+            return 0
+        raw = [l["qty"] * qty / base for l in entitled]
+        add = [int(math.floor(r + 1e-9)) for r in raw]
+        for i in sorted(range(len(entitled)), key=lambda i: (-(raw[i] - add[i]), i))[:qty - sum(add)]:
+            add[i] += 1
+        meta = {k: sub.get(k) for k in ("event_id", "exright_date", "credit_date", "registered_date",
+                                         "listing_date")}
+        n = 0
+        for l, a in zip(entitled, add):
+            if a <= 0:
+                continue
+            self.lots.append({"ticker": tk, "book": l["book"], "play_type": l.get("play_type", ""),
+                              "entry_date": l["entry_date"], "qty": a,
+                              "price": float(sub["issue_price_vnd"]),
+                              "source": f"{rights_sub.KIND}:{eid}", "rights_subscription": meta})
+            n += 1
+        self.warnings.append(
+            f"{sub['credit_date']} quyền mua {tk} id={eid}: +{qty}cp @{sub['issue_price_vnd']:,.0f} vào "
+            f"{n} lô mới (entry_date kế thừa lô gốc, GDKHQ {sub['exright_date']}, khai {sub['at']})")
+        return n
+
     def by_ticker_qty(self):
         out = {}
         for l in self.lots:
@@ -591,12 +633,14 @@ def _fill_deltas(path):
 
 
 def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR,
-                  broker=None, corp_actions=None, price_fn=None, need_price=True):
+                  broker=None, corp_actions=None, price_fn=None, need_price=True, rights_subs=None):
     """Vị thế theo book tại `asof` (mặc định hôm nay ICT).
 
     `broker` = (positions, cash, meta) truyền sẵn — chỉ dùng cho selfcheck; production để None.
     `corp_actions` = danh sách record truyền sẵn — cũng chỉ cho selfcheck; production để None
     (đọc `data/corp_actions.json`, và CHỈ record đã `CONFIRMED` — xem `mike/bin/corp_actions.py`).
+    `rights_subs` = khai báo quyền mua truyền sẵn — chỉ cho selfcheck; production để None (đọc
+    `data/lag_rights/subscriptions.json` qua `rights_subscription.load_subscriptions`, lọc account).
 
     `need_price=False`: BỎ QUA `resolve_close_prices()` (fail-closed TOÀN LƯỢT nếu thiếu giá MỘT
     mã bất kỳ — xem docstring hàm đó) VÀ khối §exdate_frame bên dưới — CHỈ dùng khi caller không
@@ -641,10 +685,38 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                 for ev in _fill_deltas(path)
                 if not (snap_ts and ev["ts"] and ev["ts"] <= snap_ts)]
     timeline += [(a["broker_effective_ts"], 1, a, "corp_actions.json") for a in acts]
+    # N1 — quyền mua user đã khai: (2) chụp lô hưởng quyền ở ĐẦU phiên GDKHQ (trước mọi fill của
+    # ngày đó: "YYYY-MM-DD" < "YYYY-MM-DDT09:.."), (3) thêm lô mới lúc CP về broker (credit_date).
+    subs = (rights_sub.load_subscriptions(account_label, account_no=account_no)
+            if rights_subs is None else [rights_sub.validate(r) for r in rights_subs])
+    subs = [r for r in subs if r["account"] == account_label and r["subscribed_qty"] > 0
+            and r["credit_date"] <= asof
+            and not (snap_ts and r["credit_date"] + rights_sub.CREDIT_TS_SUFFIX <= snap_ts)]
+    entitled_at_ex = {}
+    for r in subs:
+        if snap_ts and r["exright_date"] <= snap_ts[:10]:
+            # GDKHQ trước ngày 0: bootstrap là trạng thái sớm nhất có ⇒ chụp ngay, có cảnh báo
+            entitled_at_ex[r["event_id"]] = [dict(l) for l in book.lots if l["ticker"] == r["ticker"]
+                                             and l["entry_date"] < r["exright_date"]]
+            book.warnings.append(f"quyền mua {r['ticker']} id={r['event_id']}: GDKHQ {r['exright_date']} "
+                                 f"≤ ngày 0 bootstrap — lô hưởng quyền chụp từ bootstrap")
+        else:
+            timeline.append((r["exright_date"], 2, r, "rights_subscriptions.json"))
+        timeline.append((r["credit_date"] + rights_sub.CREDIT_TS_SUFFIX, 3, r, "rights_subscriptions.json"))
     timeline.sort(key=lambda x: (x[0], x[1]))
 
-    applied, applied_acts = [], []
+    applied, applied_acts, applied_rights = [], [], []
     for _ts, kind, ev, fname in timeline:
+        if kind == 2:
+            entitled_at_ex[ev["event_id"]] = [dict(l) for l in book.lots if l["ticker"] == ev["ticker"]
+                                              and l["entry_date"] < ev["exright_date"]]
+            continue
+        if kind == 3:
+            n = book.rights_credit(ev, entitled_at_ex.get(ev["event_id"], []))
+            applied_rights.append({"event_id": ev["event_id"], "ticker": ev["ticker"],
+                                   "subscribed_qty": ev["subscribed_qty"], "credit_date": ev["credit_date"],
+                                   "lots_added": n})
+            continue
         if kind == 1:
             n = book.corp_action_split(ev["ticker"], ev["qty_multiplier"], ev["ex_date"],
                                        ev["broker_effective_ts"], fname, ev["id"])
@@ -802,6 +874,7 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                                   "qty_multiplier": a["qty_multiplier"], "ex_date": a["ex_date"],
                                   "broker_effective_ts": a["broker_effective_ts"],
                                   "lots_adjusted": a["lots_adjusted"]} for a in applied_acts],
+        "rights_subscriptions_applied": applied_rights,
     }
 
 

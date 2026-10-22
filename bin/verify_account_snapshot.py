@@ -37,6 +37,7 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wc_paths  # noqa: E402
+import rights_subscription as rights_sub  # noqa: E402 — N1/N4 khai báo quyền mua của user
 
 # gốc cây neo theo marker `wc_env.sh` (wc_paths) — đếm cấp dirname SAI khi script chạy
 # từ worktree `mike/agents/wt-*/bin/` (sự cố 2026-09-12, chặn báo cáo nhà đầu tư).
@@ -99,7 +100,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions  # noqa: E402
 
 
-def corp_action_multiplier(ticker, fill_date, asof, actions):
+def corp_action_multiplier(ticker, fill_date, asof, actions, key=None):
     """Hệ số nhân KL cho 1 fill ngày `fill_date`, dùng để cộng dồn đúng vào raw_agg/journal_agg.
 
     Cùng quy tắc thời điểm với LotBook.corp_action_split (park_holdings.py) — lô mua TRƯỚC
@@ -112,10 +113,14 @@ def corp_action_multiplier(ticker, fill_date, asof, actions):
     Script này gộp fill theo NGÀY (không giữ lot rời như LotBook) nên không xử lý được ca bán
     xen giữa các lô có ex_date khác nhau của CÙNG mã — chưa gặp thực tế, nếu xảy ra sẽ cần
     nâng cấp lên lot-based giống park_holdings.py.
+
+    `key` = khoá fill; fill CP QUYỀN MUA (rights_subscription) đang CHỜ VSDC ghi nhận tại ex_date của
+    sự kiện ⇒ KHÔNG hưởng (N4, legal-vn 22/10) ⇒ bỏ qua sự kiện đó.
     """
     mult = 1.0
     for a in actions:
-        if a["ticker"] == ticker and fill_date < a["ex_date"] <= asof:
+        if a["ticker"] == ticker and fill_date < a["ex_date"] <= asof \
+                and not (key and rights_sub.exempt_from(key, a["ex_date"])):
             mult *= a["qty_multiplier"]
     return mult
 
@@ -186,7 +191,7 @@ def build_cost_books(events_by_date, asof, corp_actions, recover_legacy=False):
     books = defaultdict(lambda: CostBook(recover_legacy=recover_legacy))
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
-            m = corp_action_multiplier(tk, date, asof, corp_actions)
+            m = corp_action_multiplier(tk, date, asof, corp_actions, key=_key)
             if side == "sell":
                 books[tk].sell(qty * m, date)
             else:
@@ -742,6 +747,24 @@ def main():
                 journal_agg[tk][1] += bq * m
                 journal_agg[tk][2] += bv
 
+    # N1: CP quyền mua USER đã khai (rights_subscription.py) — không có lệnh sàn ở CẢ 2 nguồn, nên
+    # cộng vào CẢ HAI (không phải cross-check journal↔dnse_raw); kiểm độc lập bằng KL broker bên dưới.
+    rights_tickers = set()
+    for date, evs in sorted(rights_sub.fill_events(args.account, upto=args.asof,
+                                                   account_no=args.account_no).items()):
+        for ev in evs:
+            tk, q, px = ev[2], ev[4], ev[5]
+            m = corp_action_multiplier(tk, date, args.asof, corp_actions, key=ev[1])
+            for agg, events in ((raw_agg, raw_events), (journal_agg, journal_events)):
+                agg[tk][0] += q * m
+                agg[tk][1] += q * m
+                agg[tk][2] += q * px
+                events.setdefault(date, []).append(ev)
+                events[date].sort(key=lambda e: (e[0], str(e[1])))
+            rights_tickers.add(tk)
+            warnings.append(f"INFO {tk}: +{q:,.0f}cp quyền mua @{px:,.0f} ngày {date} (khai báo user "
+                            f"{ev[1]}) — vào giá vốn bình quân, phí 0")
+
     # Giá vốn CHÍNH THỨC: bình quân gia quyền theo LÔ ĐANG SỐNG (reset khi vị thế về 0).
     # KHÔNG dùng raw_agg[buy_value]/raw_agg[buy_qty] — xem CostBook (bug LPB 2026-08-10).
     raw_books = build_cost_books(raw_events, args.asof, corp_actions)
@@ -812,6 +835,18 @@ def main():
     if asof_positions is None:
         warnings.append(f"WARN missing broker positions snapshot for {args.asof} — "
                         "không được promote lô legacy-reopen vào P&L")
+
+    # N1: mã có khai báo quyền mua ⇒ KL dựng lại PHẢI = KL broker (nguồn độc lập thứ 3). Lệch (khai
+    # sai số / sai ngày, hoặc broker chưa ghi có) ⇒ WARN qty ⇒ verified=False (fail-closed).
+    for tk in sorted(rights_tickers):
+        if asof_positions is None:
+            warnings.append(f"WARN qty mismatch {tk}: có khai báo quyền mua nhưng thiếu vị thế broker "
+                            f"{args.asof} để kiểm")
+            continue
+        bq_ = (asof_positions.get(tk) or {}).get("qty", 0.0)
+        if abs(raw_agg[tk][0] - bq_) > 1e-6:
+            warnings.append(f"WARN qty mismatch {tk}: lệnh khớp + khai báo quyền mua = "
+                            f"{raw_agg[tk][0]:.0f} ≠ broker {bq_:.0f} — kiểm khai báo rights_subscription")
 
     tickers = sorted(raw_agg.keys())
     if not tickers:

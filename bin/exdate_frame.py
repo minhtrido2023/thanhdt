@@ -153,7 +153,7 @@ def registry_event_next_session(ticker, asof, path=None):
 
 
 def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=None,
-                                 missing_out=None, wc_root=None, notes_out=None):
+                                 missing_out=None, wc_root=None, notes_out=None, account_no=None):
     """Như `daily_nav_snapshot.net_fills_between` nhưng HỢP NHẤT thêm statement DNSE.
 
     VÌ SAO (ca thật 2026-10-21, user DUYỆT 23:53): user bán TAY DRI ngoài bot (SpaceX −1.200cp,
@@ -173,6 +173,11 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
     cho số 0 dẫn đầu, phân biệt "account khớp 0" vs "ánh xạ hỏng") với `allow_fetch=False`: đường
     sizing không tự gọi Gmail; statement do cron leg 3 EOD (19:10) / `fetch_dnse_khoplenh_email.py`
     tải sẵn.
+
+    N1 (B2 arch-review vòng 2): CP quyền mua USER đã khai (`rights_subscription.fill_events`, lọc
+    account + `account_no` §12) CỘNG THÊM vào kết quả ở credit_date — KHÔNG đưa vào phép max(journal,
+    statement): CP quyền về tài khoản không qua lệnh sàn nên không nằm ở nguồn nào trong hai nguồn
+    đó. Mirror `daily_nav_snapshot.net_fills_between`. Không có sổ khai báo ⇒ y hệt bản cũ.
 
     `missing_out`: ngày GIAO DỊCH trong cửa sổ mà CẢ journal LẪN statement đều không dùng được —
     chỉ khi đó "lệnh khớp thật" mới là suy diễn từ vắng mặt (§28). Có statement dùng được thì ngày
@@ -233,6 +238,12 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
             continue
         for (tk, side), q in per_day.items():
             out[tk] = out.get(tk, 0.0) + (q if side == "buy" else -q)
+    import rights_subscription as rights_sub
+    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():
+        if after_date < d <= upto_date:
+            for _ts, _k, tk, _side, qty, _px in evs:
+                out[tk] = out.get(tk, 0.0) + qty
+                notes.append(f"{d} {tk}: +{qty:,.0f}cp CP quyền mua user khai (rights_subscription)")
     if cache is not None:
         cache[key] = (out, missing, notes)
     if missing_out is not None:
@@ -287,6 +298,8 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
     snap = dns._corp_action_daily_snapshot(asof)
     ca_active, ca_note = dns._corp_action_gate_status(snap, asof)
     credited, blocked, fill_cache = {}, {}, {}
+    import rights_subscription as rights_sub
+    rights_subs = rights_sub.load_subscriptions(account_label, account_no=account_no)
     for tk in sorted(positions):
         p = positions[tk] or {}
         qty_now = p.get("total", p.get("qty"))
@@ -299,7 +312,7 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
         elif broker_statement:
             net_fill = net_fills_journal_and_broker(
                 account_label, prev_d, asof, fill_cache, missing_out=journal_gaps,
-                notes_out=fill_notes).get(tk)
+                notes_out=fill_notes, account_no=account_no).get(tk)
         else:
             net_fill = dns.net_fills_between(account_label, prev_d, asof, fill_cache,
                                              missing_out=journal_gaps).get(tk)
@@ -310,7 +323,11 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
             except Exception as e:   # registry hỏng ⇒ KHÔNG đoán, chặn đúng mã này (§29: lỗi thật)
                 blocked[tk] = f"không đọc được data/corp_actions.json để tra sự kiện: {e}"
                 continue
-        verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+        # N4: CP quyền mua user khai đang chờ VSDC ghi nhận tại ex-date ⇒ không hưởng sự kiện CP
+        pend = (rights_sub.pending_qty(account_label, tk, ev["date"], prev_d, subs=rights_subs)
+                if prev_d and ev and ev.get("date") else 0.0)
+        verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d,
+                                                    pending_rights=pend)
         if verdict == "qty_unexplained" and detail["residual"] > 0:
             # N3: user nộp tiền mua quyền (lệnh tay hợp lệ) — KL tăng, giá không đổi hệ ⇒ không chặn,
             # không phải "credited" (không có gì để quy đổi giá).

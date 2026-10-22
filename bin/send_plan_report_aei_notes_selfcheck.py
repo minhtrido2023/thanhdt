@@ -210,6 +210,21 @@ check("T7b: rc=0 (thiếu hẳn key 'blocked', chỉ có 'capped' — không Typ
 check("T7b: khối ⚠️ BỊ CẮT vẫn hiện đúng dù entry không có key 'blocked'",
       "BỊ CẮT" in out7b and "882cp → 600cp" in out7b)
 
+# ── T8 (N1 B1 vòng 2): `rights_locked` (CP quyền mua khoá chờ niêm yết) PHẢI hiện trong báo cáo —
+# bản N1 vòng 1 ghi note vào plan nhưng renderer chỉ đọc blocked/capped ⇒ người duyệt không thấy.
+print("\n[T8] Entry auto chỉ có rights_locked → khối ℹ️ khoá chờ niêm yết hiện ra; đối chứng không có → không in")
+AUTO_LOCKED = {"at": "2026-10-01T20:40:01+07:00", "source": "auto_exit_inject",
+               "rights_locked": [{"ticker": "SCL", "book": "LAG", "locked_qty": 5000,
+                                  "reason": "SCL book=LAG: 5000cp CP quyền mua KHOÁ chờ niêm yết (fixture)"}]}
+p8 = copy.deepcopy(SX)
+p8["auto_exit_inject_notes"] = [AUTO_LOCKED]
+out8 = run_sender(p8, "SpaceX")
+check("T8a: rc=0 và khối ℹ️ quyền mua KHOÁ hiện đúng mã/KL",
+      LAST_RC[0] == 0 and "quyền mua KHOÁ chờ niêm yết" in out8 and "SCL book=LAG: 5000cp" in out8,
+      f"rc={LAST_RC[0]}")
+check("T8b: đối chứng (T7a, không có rights_locked) không in khối khoá",
+      "quyền mua KHOÁ chờ niêm yết" not in out7a)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")
