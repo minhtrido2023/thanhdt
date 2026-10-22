@@ -18,6 +18,14 @@ ghi `nav_is_estimate=True` + `nav_source`. Giá BQ lệch `marketPrice` của v�
 chấp nhận khi có bằng chứng cơ khí: marketPrice = giá phiên TRƯỚC (feed trễ, ca PVT/TCB 10/08)
 hoặc corp-action CONFIRMED ex_date sau --date mà Price/mult khớp (broker ghi có sớm, ca MSB
 27/08 ⇒ quy KL về trước sự kiện). Còn lại ⇒ rc=4, không ghi, không đoán.
+
+⚠️ Giới hạn đã biết (N4 + `--from-raw`, arch-review N1 vòng 2 NB3 — CHƯA sửa, chỉ ghi lại): ngày
+broker ghi có SỚM cổ tức CP/thưởng mà tài khoản đang có lô CP QUYỀN MUA chờ VSDC ghi nhận
+(`rights_subscription.pending_at`), phần lô chờ KHÔNG hưởng sự kiện nhưng vẫn được định giá theo giá
+CUM (`Price` trước GDKHQ) như phần còn lại ⇒ NAV dòng đó CAO hơn thật ≈ KL chờ × (giá cum − giá ex),
+chỉ trong 1 ngày (ngày sau giá ex tự đúng). Dòng vẫn là `nav_is_estimate=True`. Khi chạy
+`--from-raw` cho đúng ngày như vậy: đối chiếu tay NAV với `totalValue`/sao kê DNSE trước khi dùng
+cho báo cáo (§6), hoặc chờ dòng EOD ngày kế tiếp.
 """
 import argparse
 import csv
