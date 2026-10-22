@@ -409,6 +409,13 @@ def net_fills_between(account, after_date, upto_date, cache=None, missing_out=No
             continue
         for _ts, _oid, tk, side, qty, _px in events or []:
             out[tk] = out.get(tk, 0.0) + (qty if side == "buy" else -qty)
+    # N1: CP quyền mua USER đã khai (rights_subscription.py) = KL về broker ngày credit_date, không
+    # qua lệnh sàn. Sổ hỏng ⇒ raise (fail-closed); khai sai KL/ngày ⇒ phần dư ≠ 0 ⇒ vẫn chặn rc=5/6.
+    import rights_subscription as rights_sub
+    for d, evs in rights_sub.fill_events(account).items():
+        if after_date < d <= upto_date:
+            for _ts, _k, tk, _side, qty, _px in evs:
+                out[tk] = out.get(tk, 0.0) + qty
     from trading_bot.vn_market import next_trading_day
     _d, _end = (next_trading_day(datetime.date.fromisoformat(after_date)),
                 datetime.date.fromisoformat(upto_date))

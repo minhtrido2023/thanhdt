@@ -109,7 +109,7 @@
     "mike/bin/preflight_order_invariants_selfcheck.py": 0,
     "mike/bin/rebuild_context_mini.py": 0,
     "mike/bin/recap_prev.py": 0,
-    "mike/bin/reconcile_equity.py": 2,
+    "mike/bin/reconcile_equity.py": 1,
     "mike/bin/render_report_html.py": 1,
     "mike/bin/report_delivery_gate.py": 0,
     "mike/bin/report_delivery_gate_selfcheck.py": 0,

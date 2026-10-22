@@ -310,11 +310,41 @@ def _cap_sellable(plan, tk, desired_qty, positions, book_tag):
     return used, warn
 
 
+def _rights_locked_split(plan, tk, qty, rights_qty, positions):
+    """N1 (luật user 22/10, phương án A): lô CP QUYỀN MUA kế thừa entry gốc nên thường "quá hạn"
+    ngay khi về sổ, nhưng CHƯA niêm yết ⇒ broker chưa cho bán (tradeQuantity loại phần đó). Phần
+    thiếu sellable ≤ KL lô quyền = KHOÁ CHỜ NIÊM YẾT, trạng thái đã biết theo khai báo của user ⇒
+    tách ra (KHÔNG báo cắt-sellable/alert mỗi tối), bán phần còn lại; tới phiên tradeQuantity tăng
+    thì tự bán (cùng cơ chế T+25). Thiếu hụt LỚN HƠN lô quyền ⇒ không tách gì, để `_cap_sellable`
+    báo như cũ. Trả (qty_bán, qty_khoá)."""
+    sellable = positions.get(tk, {}).get("sellable")
+    if not rights_qty or sellable is None:
+        return qty, 0
+    already = sum(int(o.get("qty") or 0) for o in plan.get("orders", [])
+                  if o.get("ticker") == tk and o.get("side") == "sell")
+    short = qty - max(sellable - already, 0)
+    if 0 < short <= rights_qty:
+        return qty - short, short
+    return qty, 0
+
+
 def _inject_sell(plan, positions, tk, qty, ref_price, book, play_type, note, order_id_suffix,
-                 injected, capped_notes, detail):
+                 injected, capped_notes, detail, rights_qty=0, locked_notes=None):
     """Chèn 1 lệnh SELL auto-exit vào `plan`, có ÁP TRẦN Σsell cross-book (`_cap_sellable`). Trả
     True nếu có chèn (kể cả bị cap xuống còn >0), False nếu bị cap về 0 — KHÔNG chèn gì, nhưng
-    `capped_notes` vẫn ghi lại để hiện ra cho người (§29, không lặng lẽ bỏ qua)."""
+    `capped_notes` vẫn ghi lại để hiện ra cho người (§29, không lặng lẽ bỏ qua).
+    `rights_qty` > 0 ⇒ phần CP quyền mua chưa bán được tách sang `locked_notes` (xem
+    `_rights_locked_split`), không thành cảnh báo cắt."""
+    qty, locked = _rights_locked_split(plan, tk, qty, rights_qty, positions)
+    if locked:
+        msg = (f"{tk} book={book}: {locked}cp CP quyền mua KHOÁ chờ niêm yết/chưa sellable (khai báo "
+               f"rights_subscription) — tự bán ở phiên đầu tiên broker cho bán")
+        if locked_notes is not None:
+            locked_notes.append({"ticker": tk, "book": book, "locked_qty": locked, "reason": msg})
+        print(f"  [RIGHTS-LOCKED] {msg}")
+        if qty <= 0:
+            return False
+        note = f"{note} — [{locked}cp CP quyền mua khoá chờ niêm yết, bán sau]"
     used_qty, warn = _cap_sellable(plan, tk, qty, positions, book)
     if warn:
         capped_notes.append({"ticker": tk, "book": book, "desired_qty": qty,
@@ -363,6 +393,7 @@ def process_account(account, plan_date, signal_date, dry_run):
     injected = []
     blocked_notes = []   # [{'ticker','book','reason'}] — mọi exit bị bỏ/cắt phải hiện ra (§29)
     capped_notes = []    # [{'ticker','book','desired_qty','capped_qty','reason'}]
+    locked_notes = []    # N1: CP quyền mua khoá chờ niêm yết — trạng thái đã khai, KHÔNG alert
     skipped_existing = []  # [(ticker, book)] — đã có sell sẵn trong plan, không phải "không có candidate"
 
     def _add_blocked(tk, book, reason):
@@ -420,7 +451,8 @@ def process_account(account, plan_date, signal_date, dry_run):
         if rh and rh["action"] == "RELEASE":
             note += f" — {rh['note']}"
         _inject_sell(plan, positions, tk, qty, ref_price, "LAG", "LAG_AUTO_EXIT", note,
-                     "LAG", injected, capped_notes, sessions)
+                     "LAG", injected, capped_notes, sessions,
+                     rights_qty=lag_lots.get(tk, {}).get("rights_qty", 0), locked_notes=locked_notes)
 
     # ---- BAL: T+45 cố định (pt_v23_audit_2014.py:2008) ----
     bal_lots, bal_ok, bal_reason, bal_blocked = book_lot_snapshot(account, "BAL", asof=signal_date)
@@ -444,7 +476,8 @@ def process_account(account, plan_date, signal_date, dry_run):
         note = (f"AUTO-EXIT BAL: giữ {sessions} phiên ≥ mốc cố định {rules.BAL_EXIT_SESSIONS} "
                 f"(pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ")
         _inject_sell(plan, positions, tk, qty, ref_price, "BAL", "BAL_AUTO_EXIT", note,
-                     "BAL", injected, capped_notes, sessions)
+                     "BAL", injected, capped_notes, sessions,
+                     rights_qty=bal_lots.get(tk, {}).get("rights_qty", 0), locked_notes=locked_notes)
 
     # ---- BAL: stop-loss -20% trên giá vốn (pt_v23_audit_2014.py:2008), ĐỘC LẬP mốc phiên ----
     stoploss_candidates, stoploss_qty_blocked = (_bal_stop_loss_candidates(
@@ -513,6 +546,8 @@ def process_account(account, plan_date, signal_date, dry_run):
             entry["blocked"] = blocked_notes
         if capped_notes:
             entry["capped"] = capped_notes
+        if locked_notes:
+            entry["rights_locked"] = locked_notes
         notes.append(entry)
         if not dry_run:
             _atomic_write_json(plan_path, plan)
@@ -526,6 +561,9 @@ def process_account(account, plan_date, signal_date, dry_run):
     elif skipped_existing:
         print(f"[auto-exit] {account} {plan_date}: {len(skipped_existing)} mã đã có sẵn lệnh "
               f"sell trong plan (không chèn lại) — {skipped_existing}")
+    elif locked_notes:
+        print(f"[auto-exit] {account} {plan_date}: chỉ có CP quyền mua khoá chờ niêm yết "
+              f"({len(locked_notes)} mã) — không chèn, không ghi plan.")
     else:
         print(f"[auto-exit] {account} {plan_date}: không có candidate tới mốc exit.")
     if not dry_run and not (blocked_notes or capped_notes):

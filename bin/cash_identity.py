@@ -427,6 +427,19 @@ def load_confirmed_missing_fills(account, seed_path=None):
     return out
 
 
+def load_rights_subscription_fills(account, account_no=None, path=None):
+    """N1: CP quyền mua USER đã khai (`rights_subscription.py`) — cùng dạng fill broker xác nhận,
+    `fee_free` (nộp tiền mua quyền không chịu phí giao dịch). Sổ hỏng ⇒ raise (fail-closed)."""
+    import rights_subscription as rights_sub
+    out = []
+    for d, evs in rights_sub.fill_events(account, path=path, account_no=account_no).items():
+        day = datetime.date.fromisoformat(d)
+        for _ts, key, tk, _side, qty, px in evs:
+            out.append({"moment": datetime.datetime.combine(day, SESSION_CLOSE_ICT), "symbol": tk,
+                        "side": "buy", "qty": qty, "value": qty * px, "fee_free": True, "key": key})
+    return out
+
+
 def _ack_text(rec, key, where):
     value = rec.get(key)
     if not isinstance(value, str) or not value.strip():
@@ -607,7 +620,8 @@ def build_windows(rows, raw, flows, extra_fills=(), threshold_pct=THRESHOLD_PCT,
             fx for fx in extra_fills if snap0 < fx["moment"] <= snap1]
         sell = sum(fx["value"] for fx in fills if fx["side"] == "sell")
         buy = sum(fx["value"] for fx in fills if fx["side"] == "buy")
-        fees = (buy * FEE_RATE_BUY_PCT / 100 + sell * FEE_RATE_SELL_PCT / 100
+        buy_fee_base = sum(fx["value"] for fx in fills if fx["side"] == "buy" and not fx.get("fee_free"))
+        fees = (buy_fee_base * FEE_RATE_BUY_PCT / 100 + sell * FEE_RATE_SELL_PCT / 100
                 + sell * SELL_TAX_RATE)
         recv0, recv1 = raw.receivable_at(snap0), raw.receivable_at(snap1)
         if recv0 is None or recv1 is None:
@@ -731,7 +745,9 @@ def check_account(account, asof=None, nav_dir=None, raw_dir=None, flows_path=Non
     flows = load_flows(account, flows_path=flows_path, require_file=True, today=today)
     acks, ack_error = load_acks(account, acks_path)
     credits, credit_error = load_share_credits(corp_actions_path)
-    windows = build_windows(rows, raw, flows, load_confirmed_missing_fills(account, seed_path),
+    windows = build_windows(rows, raw, flows,
+                            load_confirmed_missing_fills(account, seed_path)
+                            + load_rights_subscription_fills(account, info["account_no"]),
                             threshold_pct, acks, credits)
     by_date = {r["date"]: r for r in rows}
     drift = drift_of(windows, by_date, threshold_pct)
