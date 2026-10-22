@@ -662,6 +662,16 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
     Statement không có giờ khớp ⇒ lệnh bán tay đặt ở cuối ngày (`<ngày>T23:59:59`): sau mọi
     fill bot cùng ngày, nên không bao giờ bán trước lô mua cùng phiên.
 
+    Giới hạn đã biết (arch-review 22/10):
+      · Mã bán tay có lô ở >1 book tại thời điểm áp ⇒ replay KHÔNG áp (fail-closed, B1).
+      · N2 — bán tay và corp-action credit CÙNG tối T-1: bán tay đặt ở `T23:59:59`, sau credit
+        ⇒ trừ lô đã nhân hệ số; nếu thực tế bán trước credit thì lệch ⇒ reconcile chặn (fail-closed).
+      · N3 — mã bán tay vẫn UNVERIFIED (FIFO không tag book) tới khi dựng bootstrap snapshot mới
+        sau ngày bán (khi đó statement ngày ≤ ngày chụp bị bỏ qua) ⇒ gỡ cờ bằng bootstrap mới.
+      · N4 — cron L1/L2 cần interpreter có pandas (`load_broker_fills`); thiếu ⇒ ngày đó chỉ journal.
+      · N6 — runbook: statement tải ở EOD bước 3 (~19:10). L1/L2 chạy TRƯỚC giờ đó thì bán tay
+        trong ngày bị chặn BLOCKED_RECONCILE; hôm sau statement có mặt ⇒ tự hết.
+
     Trả (events, notes): events cùng dạng `_fill_deltas` (book="" ⇒ nhánh FIFO theo ticker).
     """
     from broker_fill_confirm import BrokerFills, load_broker_fills
@@ -812,6 +822,18 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
                      ev["play_type"])
         elif ev["side"] == "sell":
+            if ev["parent_id"] == "broker_statement":
+                # B1 (arch-review 22/10): lệnh bán tay không có book ⇒ FIFO trừ lô cũ nhất BẤT KỂ
+                # book. Mã có lô ở >1 book tại thời điểm áp (vd VPB = PARK + LAG) ⇒ không biết
+                # trừ book nào ⇒ KHÔNG áp, giữ lệch ⇒ reconcile.ok=False ⇒ BLOCKED_RECONCILE.
+                bks = {l["book"] for l in book.lots if l["ticker"] == ev["ticker"]}
+                if len(bks) > 1:
+                    book.unverified.add(ev["ticker"])
+                    book.warnings.append(
+                        f"{ev['ts'][:10]} {ev['ticker']} BÁN TAY −{ev['qty']:,}cp KHÔNG áp: lô ở "
+                        f"{len(bks)} book ({', '.join(sorted(bks))}) ⇒ không xác định book bị trừ "
+                        f"⇒ để đối soát chặn")
+                    continue
             book.sell(ev["ticker"], ev["book"], ev["qty"], ev["ts"][:10], src)
         else:
             book.unverified.add(ev["ticker"])

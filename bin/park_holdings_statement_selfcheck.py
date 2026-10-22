@@ -9,7 +9,8 @@ Kịch bản: bootstrap 2026-10-01 (chụp 2026-09-30T19:10). 20/10 bot bán FPT
 LẪN statement). 21/10 user bán tay DRI (CHỈ statement): SpaceX 800+400, ZaloPay 600.
 
 Mutant (phải bị bắt): M1 bỏ lọc tiểu khoản · M2 bỏ chống đếm đôi · M3 cho lệch dư lọt ·
-M4 thêm lô cho MUA chỉ-có-ở-statement.
+M4 coi MUA chỉ-có-ở-statement như BÁN (hardcode side sell) · M5 bỏ chống đếm đôi phần journal<statement
+(qty: b - j → b) · M6 bỏ chặn mã nhiều book.
 
 Chạy: python3 mike/bin/park_holdings_statement_selfcheck.py   (rc 0 = PASS)
 """
@@ -91,6 +92,32 @@ def dri(h):
     return sum(l["qty"] for l in h["lots"] if l["ticker"] == "DRI")
 
 
+def mixed_book(mod, ex, pl):
+    """VPB = PARK 30 + LAG 282 (2 book); user bán tay 100 ngày 21/10; broker còn 212."""
+    path = os.path.join(pl, "bootstrap_book_snapshot_ZaloPay_20261001.json")
+    bak = open(path, encoding="utf-8").read()
+    snap = json.loads(bak)
+    snap["positions"] += [{"ticker": "VPB", "book": "PARK", "qty": 30, "cost_price_vnd": 20000,
+                           "entry_date": "2025-11-20"},
+                          {"ticker": "VPB", "book": "LAG", "qty": 282, "cost_price_vnd": 25000,
+                           "entry_date": "2026-07-27"}]
+    json.dump(snap, open(path, "w"))
+    p21 = os.path.join(ex, "dnse_khoplenh_broker_confirm_21-10-2026.csv")
+    sbak = open(p21, encoding="utf-8").read()
+    write_stmt(ex, "21-10-2026", [("21/10/2026", "BÁN", "VPB", ACCTS["ZaloPay"], 100, 25000)])
+    try:
+        return run(mod, "ZaloPay", ex, pl, broker={"DRI": 1900, "FPT": 400, "VPB": 212})
+    finally:
+        open(path, "w", encoding="utf-8").write(bak)
+        open(p21, "w", encoding="utf-8").write(sbak)
+
+
+def mixed_ok(r):
+    return (not r["reconcile"]["ok"] and "VPB" in r["unverified_tickers"]
+            and [m["diff"] for m in r["reconcile"]["mismatches"] if m["ticker"] == "VPB"] == [100]
+            and any("KHÔNG áp" in w for w in r["warnings"]))
+
+
 def scenarios(mod, ex, pl, quiet=False):
     """Trả dict tên-kịch-bản → bool đạt. Dùng chung cho bản thật và mutant."""
     res = {}
@@ -105,6 +132,18 @@ def scenarios(mod, ex, pl, quiet=False):
     r3 = run(mod, "SpaceX", ex, pl, broker={"DRI": 2400, "FPT": 800})
     res["T3_residual_blocks"] = (not r3["reconcile"]["ok"]
                                  and [m["diff"] for m in r3["reconcile"]["mismatches"]] == [100])
+    # T9 (B2): bot bán FPT 200 + user bán tay thêm 300 cùng ngày (statement 500) ⇒ FPT=500
+    p20 = os.path.join(ex, "dnse_khoplenh_broker_confirm_20-10-2026.csv")
+    keep = open(p20, encoding="utf-8").read()
+    write_stmt(ex, "20-10-2026", [("20/10/2026", "BÁN", "FPT", ACCTS["SpaceX"], 500, 100000)])
+    try:
+        r9 = run(mod, "SpaceX", ex, pl, broker={"DRI": 2500, "FPT": 500})
+        res["T9_partial_journal_manual_rest"] = (
+            r9["reconcile"]["ok"] and sum(l["qty"] for l in r9["lots"] if l["ticker"] == "FPT") == 500)
+    finally:
+        open(p20, "w", encoding="utf-8").write(keep)
+    # T10 (B1): mã có lô ở 2 book (PARK+LAG) + bán tay ⇒ KHÔNG áp, reconcile chặn
+    res["T10_mixed_book_manual_sell_blocked"] = mixed_ok(mixed_book(mod, ex, pl))
     return res, h
 
 
@@ -169,7 +208,9 @@ def main():
             "M2_no_double_count_guard": ("ph", "j, b = journal_qty.get((d, tk, side), 0), int(bf.qty(tk, side))",
                                          "j, b = 0, int(bf.qty(tk, side))"),
             "M3_residual_passes": ("ph", "if lq != bq:", "if False:"),
-            "M4_apply_manual_buys": ("ph", 'elif b > j and side == "buy":', 'elif False:'),
+            "M4_buy_treated_as_sell": ("ph", 'elif b > j and side == "buy":', 'elif False:'),
+            "M5_double_count_partial": ("ph", '"qty": b - j,', '"qty": b,'),
+            "M6_no_mixed_book_guard": ("ph", "if len(bks) > 1:", "if False:"),
         }
         for name, (which, old, new) in mutants.items():
             src = bfc_src if which == "bfc" else ph_src
@@ -189,7 +230,7 @@ def main():
             try:
                 mres, _ = scenarios(target, ex, pl)
                 killed = not all(mres.values())
-                if name == "M4_apply_manual_buys":
+                if name == "M4_buy_treated_as_sell":
                     write_stmt(ex, "21-10-2026", [("21/10/2026", "MUA", "HPG", ACCTS["SpaceX"], 500, 25000)])
                     r = run(target, "SpaceX", ex, pl, broker={"DRI": 3700, "FPT": 800, "HPG": 500})
                     killed = not (not r["reconcile"]["ok"]
