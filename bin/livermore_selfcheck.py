@@ -272,6 +272,67 @@ def inner():
             check("fail-không-đặt-last_fired", not json.load(open(os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_trigger.json")))["last_fired"])
     os.environ["FAKE_CLAUDE_MODE"] = "good"
 
+    # ── 7b. B4: lỗi PHẢI báo kênh livermore, dedupe 1 lần/ngày/loại ──
+    alerts = lambda sub: [x for x in nlog() if sub in x]  # noqa: E731
+    reset()
+    write_bars(closes, last=D(2026, 10, 21))             # stale ⇒ rc3 ⇒ báo
+    T.evaluate([], clock_fn=lambda: clk())
+    T.evaluate([], clock_fn=lambda: clk())
+    check("B4-stale-báo-1-lần", len(alerts("dữ liệu VNINDEX cũ")) == 1, str(nlog()))
+    reset()
+    write_bars(walk(100))                                # thiếu bar ⇒ rc2 ⇒ báo
+    rc = T.evaluate([], clock_fn=lambda: None)
+    check("B4-thiếu-bar-rc2-báo", rc == 2 and len(alerts("LỖI dữ liệu")) == 1, f"rc={rc} {nlog()}")
+    reset()
+    write_bars(walk(300))                                # clock lệch, không kích hoạt giá ⇒ rc4 ⇒ báo
+    rc = T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-21"})
+    rc_ = T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-21"})
+    check("B4-rc4-báo-1-lần", rc == 4 and rc_ == 4 and len(alerts("DT clock không dùng được")) == 1, f"{nlog()}")
+    # timeout của run_livermore ⇒ rc11, báo TIMEOUT, state failed (không kẹt pending)
+    reset()
+    write_bars(closes)
+    slow = os.path.join(tmp, "run_slow")
+    open(slow, "w").write("#!/usr/bin/env bash\nsleep 5\n")
+    os.chmod(slow, 0o755)
+    old_run, old_to = os.environ["LIVERMORE_RUN_BIN"], T.RUN_TIMEOUT
+    os.environ["LIVERMORE_RUN_BIN"], T.RUN_TIMEOUT = slow, 1
+    rc = T.evaluate([], clock_fn=lambda: None)
+    os.environ["LIVERMORE_RUN_BIN"], T.RUN_TIMEOUT = old_run, old_to
+    stt = json.load(open(os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_trigger.json")))
+    check("B4-timeout-báo", rc == 11 and len(alerts("TIMEOUT")) == 1 and stt["runs"]["2026-10-22"]["status"] == "failed",
+          f"rc={rc} {nlog()}")
+    # pending cũ không entry (tiến trình bị giết) ⇒ báo rồi chạy lại bình thường
+    reset()
+    write_bars(closes)
+    os.makedirs(env["LIVERMORE_STATE_DIR"], exist_ok=True)
+    C.atomic_write(os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_trigger.json"), json.dumps(
+        {"last_fired": {}, "alerts": {}, "runs": {"2026-10-22": {"kinds": ["X"], "status": "pending", "notified": False, "ts": "t"}}}))
+    rc = T.evaluate([], clock_fn=lambda: None)
+    check("B4-pending-mồ-côi-báo-rồi-chạy", rc == 10 and len(alerts("dừng giữa chừng")) == 1 and "### LVR-2026-10-22" in C.read_registry(), f"rc={rc} {nlog()}")
+    # scorer rc=1 và exception của evaluate ⇒ báo
+    reset()
+    badscore = os.path.join(tmp, "score_bad.py")
+    open(badscore, "w").write("import sys\nprint('boom', file=sys.stderr)\nsys.exit(1)\n")
+    os.environ["LIVERMORE_SCORE_BIN"] = badscore
+    real_eval, T.evaluate = T.evaluate, (lambda a, **k: 0)
+    rc = T.main([])
+    check("B4-scorer-rc1-báo", rc == 0 and len(alerts("scorer lỗi rc=1")) == 1, str(nlog()))
+    T.main([])
+    check("B4-scorer-báo-dedupe", len(alerts("scorer lỗi rc=1")) == 1)
+    def boom(a, **k):
+        raise RuntimeError("bq chết")
+    T.evaluate = boom
+    rc = T.main([])
+    check("B4-exception-rc2-báo", rc == 2 and len(alerts("LỖI cò RuntimeError")) == 1, f"rc={rc} {nlog()}")
+    T.evaluate = real_eval
+    os.environ["LIVERMORE_SCORE_BIN"] = os.path.join(BIN, "livermore_score.py")
+    # state hỏng ⇒ vẫn báo (không dedupe), không nuốt
+    reset()
+    os.makedirs(env["LIVERMORE_STATE_DIR"], exist_ok=True)
+    open(os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_trigger.json"), "w").write("{hỏng")
+    T.main([])
+    check("B4-state-hỏng-vẫn-báo", len(alerts("LỖI cò")) >= 1, str(nlog()))
+
     # ── 8. chấm điểm ──
     def mk_entries(specs):
         """specs: list (as_of, dir, p_up). bars phẳng 1000 trừ close[D+20] theo y."""
@@ -368,6 +429,10 @@ MUTANTS = [
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 25, 5", "ngưỡng vào 15→25"),
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 15, 10", "ngưỡng need10 5→10"),
         ("livermore_trigger_check.py", "    if as_of < exp:", "    if False:", "bỏ kiểm as-of lệch"),
+    ("livermore_trigger_check.py", '    if st is not None and key in st["alerts"]:', "    if False:", "alert mất dedupe 1 lần/ngày"),
+    ("livermore_trigger_check.py", "        return 124, f\"TIMEOUT", "        raise RuntimeError(f\"TIMEOUT", "timeout không bắt"),
+    ("livermore_trigger_check.py", "        if src not in (0, 20):", "        if False:", "scorer rc=1 im lặng"),
+    ("livermore_trigger_check.py", '    if rc == 4 and not dry:', "    if False:", "rc4 im lặng"),
     ("livermore_trigger_check.py", 'if run0 and run0.get("status") == "done" and not dry:', "if False:", "bỏ idempotent/resume báo"),
     ("livermore_trigger_check.py", "if clock is not None and clock.get(\"asof\") == str(as_of):", "if clock is not None:", "bỏ kiểm asof của clock"),
     ("livermore_common.py", "    if rid != str(as_of):", "    if False:", "bỏ kiểm id RESULT"),

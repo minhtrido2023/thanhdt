@@ -27,6 +27,7 @@ CRISIS, EXBULL = 1, 5
 STATE_NAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EXBULL"}
 ENTER_K, EXIT_K = 15, 5
 HI_LO_WIN, BREAK_WIN = 252, 60
+RUN_TIMEOUT = int(os.environ.get("LIVERMORE_RUN_TIMEOUT") or 1200) if os.environ.get("LIVERMORE_TEST") == "1" else 1200
 MIN_GAP = 20          # phiên: khoảng cách tối thiểu TOÀN CỤC giữa mọi lần đọc (chân 20 phiên không chồng)
 STATE_FILE = lambda: os.path.join(C.STATE_DIR, "livermore_trigger.json")      # noqa: E731
 
@@ -65,11 +66,12 @@ def price_kinds(closes):
 def load_state():
     p = STATE_FILE()
     if not os.path.exists(p):
-        return {"last_fired": {}, "runs": {}}
+        return {"last_fired": {}, "runs": {}, "alerts": {}}
     with open(p, encoding="utf-8") as fh:
         st = json.load(fh)               # hỏng ⇒ raise (fail loud), không tự reset rồi bắn lặp
     st.setdefault("last_fired", {})
     st.setdefault("runs", {})
+    st.setdefault("alerts", {})
     return st
 
 
@@ -111,6 +113,27 @@ def notify(msg):
     return False
 
 
+def alert(kind, msg, st=None):
+    """Báo lỗi kênh livermore, dedupe 1 lần / ngày ICT / loại (state['alerts']). Lỗi hỏng state vẫn báo (không dedupe)."""
+    key = f"{C.today_ict()}|{kind}"
+    if st is None:
+        try:
+            st = load_state()
+        except Exception as ex:
+            print(f"[trigger] WARN state hỏng ({ex}) — báo không dedupe", file=sys.stderr)
+    if st is not None and key in st["alerts"]:
+        print(f"[trigger] alert {kind} đã báo hôm nay — bỏ qua")
+        return False
+    if not notify(f"⚠️ Livermore — {msg}"):
+        return False
+    if st is not None:
+        st["alerts"][key] = C.now_ict().isoformat(timespec="seconds")
+        for k in [k for k in st["alerts"] if k[:10] < str(C.today_ict() - dt.timedelta(days=7))]:
+            del st["alerts"][k]
+        save_state(st)
+    return True
+
+
 def entry_summary(as_of):
     for e in C.parse_entries(C.read_registry()):
         if e["as_of"] == as_of:
@@ -121,20 +144,26 @@ def entry_summary(as_of):
 
 def run_livermore(as_of, kinds):
     binp = os.environ.get("LIVERMORE_RUN_BIN") or os.path.join(C.ROOT, "bin", "livermore_run.sh")
-    r = subprocess.run([binp, "--as-of", str(as_of), "--triggers", ",".join(kinds)],
-                       capture_output=True, text=True, timeout=1200)
+    try:
+        r = subprocess.run([binp, "--as-of", str(as_of), "--triggers", ",".join(kinds)],
+                           capture_output=True, text=True, timeout=RUN_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return 124, f"TIMEOUT {RUN_TIMEOUT}s — run_livermore không xong"
     return r.returncode, (r.stdout + r.stderr).strip()[-400:]
 
 
 def run_score():
+    """→ rc của scorer (0/20 = ổn); lỗi/timeout trả (rc hoặc 124, chi tiết)."""
     binp = os.environ.get("LIVERMORE_SCORE_BIN") or os.path.join(C.ROOT, "bin", "livermore_score.py")
     try:
         r = subprocess.run([sys.executable, binp, "--notify"], capture_output=True, text=True, timeout=300)
-        print(f"[trigger] score rc={r.returncode}: " + (r.stdout.strip().splitlines() or [""])[-1][:200])
-        if r.returncode not in (0, 20):
-            print(f"[trigger] WARN score lỗi: {r.stderr.strip()[:300]}", file=sys.stderr)
     except Exception as ex:
         print(f"[trigger] WARN score lỗi: {ex}", file=sys.stderr)
+        return 124, f"{type(ex).__name__}: {ex}"
+    print(f"[trigger] score rc={r.returncode}: " + (r.stdout.strip().splitlines() or [""])[-1][:200])
+    if r.returncode not in (0, 20):
+        print(f"[trigger] WARN score lỗi: {r.stderr.strip()[:300]}", file=sys.stderr)
+    return r.returncode, r.stderr.strip()[-300:]
 
 
 def evaluate(argv, clock_fn=real_clock):
@@ -143,11 +172,13 @@ def evaluate(argv, clock_fn=real_clock):
     bars = C.get_bars(today - dt.timedelta(days=700))
     if len(bars) < HI_LO_WIN + 1:
         print(f"[trigger] LỖI chỉ có {len(bars)} bar (<{HI_LO_WIN + 1})", file=sys.stderr)
+        alert("DATA", f"LỖI dữ liệu: chỉ có {len(bars)} bar VNINDEX (<{HI_LO_WIN + 1}) — cò không chạy được (rc=2)")
         return 2
     as_of = bars[-1]["time"]
     exp = C.expected_last_session()
     if as_of < exp:
         print(f"[trigger] STALE: bar cuối {as_of} < phiên kỳ vọng {exp} — không kích hoạt")
+        alert("STALE", f"dữ liệu VNINDEX cũ: bar cuối {as_of} < phiên kỳ vọng {exp} — cò không kích hoạt (rc=3)")
         return 3
     dates = [b["time"] for b in bars]
     kinds = price_kinds([b["close"] for b in bars])
@@ -175,9 +206,14 @@ def evaluate(argv, clock_fn=real_clock):
     ok_kinds = kinds if gap else []
     print(f"[trigger] as-of={as_of} kích hoạt thô={kinds} sau khoảng-cách-{MIN_GAP}={ok_kinds} clock_ok={clock_ok}")
     rc = 0 if (clock_ok or ok_kinds) else 4
+    if rc == 4 and not dry:
+        alert("DTCLOCK", f"DT clock không dùng được cho as-of {as_of} (lỗi/lệch ngày) và không có kích hoạt giá — "
+                         "điều kiện DT KHÔNG được kiểm hôm nay (rc=4)", st)
     if not ok_kinds or dry:
         return rc
     has = C.has_entry(C.read_registry(), as_of)
+    if not has and run0 and run0.get("status") == "pending":
+        alert(f"PENDING_{as_of}", f"{as_of}: lượt đọc trước dừng giữa chừng (state 'pending', chưa có entry) — chạy lại", st)
     if not has:
         st["runs"][str(as_of)] = {"kinds": ok_kinds, "status": "pending", "notified": False,
                                   "ts": C.now_ict().isoformat(timespec="seconds")}
@@ -187,7 +223,7 @@ def evaluate(argv, clock_fn=real_clock):
         if not has:
             st["runs"][str(as_of)]["status"] = "failed"
             save_state(st)
-            notify(f"⚠️ Livermore {as_of}: kích hoạt {','.join(ok_kinds)} nhưng đọc LỖI (rc={rcr}): {tail[-250:]}")
+            alert(f"RUN_{as_of}", f"{as_of}: kích hoạt {','.join(ok_kinds)} nhưng đọc LỖI (rc={rcr}): {tail[-250:]}", st)
             return 11
     run = st["runs"].get(str(as_of)) or {"kinds": ok_kinds, "notified": False}
     run.update(status="done", kinds=run.get("kinds") or ok_kinds)
@@ -207,9 +243,12 @@ def main(argv):
         rc = evaluate(argv)
     except Exception as ex:
         print(f"[trigger] LỖI: {type(ex).__name__}: {ex}", file=sys.stderr)
+        alert("EXC", f"LỖI cò {type(ex).__name__}: {str(ex)[:250]} (rc=2)")
         rc = 2
     if "--dry-run" not in argv:
-        run_score()
+        src, tail = run_score()
+        if src not in (0, 20):
+            alert("SCORE", f"scorer lỗi rc={src}: {tail[-250:]}")
     return rc
 
 
