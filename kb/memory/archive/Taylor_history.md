@@ -1403,3 +1403,9 @@
 
 ## Archived 2026-10-22 (keep=12 days=0 require_done=False)
 - [2026-10-21T15:28:14Z] ĐANG DỞ job Taylor_20261021_151302: pilot XONG (HT1 CLEARED, SCL/VPB FLAG; commit 9ea37eaaa, nhánh feat/lag-dd-gate-20261021, worktree wt-lag-dd-gate-20261021) | NEXT: hợp đồng context_planning_mini + đề xuất cron/hook + finding 2
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:32:46Z] [lag-dd-gate 10-21] XONG job Taylor_20261021_151302: nhánh feat/lag-dd-gate-20261021 @a97873036 (worktree wt-lag-dd-gate-20261021) chờ Mike arch-review/merge trước 24/10; mở: hook 19:00 + chặn cứng tầng order chờ user duyệt
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:42:39Z] [vnindex-tr polish 10-21] XONG job Taylor_20261021_153755: nhánh fix/vnindex-tr-polish-20261021 @f0645f5e1 (wt_vnindex_tr_polish_20261021) chờ Mike arch-review/merge + áp runbook.proposed

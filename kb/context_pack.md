@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v4093)
+# Mike fleet — context pack (v4094)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-21T17:31:11] Mike/finding — daily-retro-draft-2026-10-21: {"draft": "state/retro_draft_2026-10-21.md", "incidents": 3, "patterns": 1}
 - [2026-10-21T17:32:22] Wags/finding — retro-draft-2026-10-21-verify: {"verdict": "GAPS FOUND", "gaps": ["G1: #1 bỏ sót gốc dữ liệu: BQ ticker thiếu ~19 mã lúc seal 12/10 (n=332 vs 351) -> G4 nổ 13/10 (Taylor vnindex-tr-g1-g4-rca- …
 - [2026-10-21T17:33:35] Mike/finding — daily-retro-2026-10-21: {"entry": "kb/incidents/retro/retro-2026-10-21.md", "incidents": 3, "patterns": 1, "wags": "GAPS FOUND - fixed", "measured_by": "retro finalize job Mike_2026102 …
 - [2026-10-22T00:30:31] Taylor/finding — corp-action-daily 2026-10-22 OK: {"asof": "2026-10-22", "feed_status": "FRESH", "n_track": 14, "n_held": 7, "exright_today": ["ALV", "DWC", "MCP"], "ais_today": ["HMH", "ITC", "VC3", "WTC"], "c …
 - [2026-10-22T02:40:31] Taylor/finding — rights-alert-wire-review-fix-20261022: {"branch": "feat/rights-alert-wire-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-rights-wire-20261022", "commit": "f3602417a (trên 901b2341c, chư …
+- [2026-10-22T02:57:31] Taylor/finding — lag-rights-patches-20261022 X1,X2,X3,N2,N3 xong, cho arch-review: {"branch": "feat/lag-rights-patches-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-rights-patches-20261022", "base": "27f844f16", "commits": { …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -39,7 +39,7 @@
 
 ## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
 - **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 có tin VinCons chậm trả. Chi tiết: `kb/projects/scl-dd-research-20261021.md`.
-- **Mọi mã LAG đang giữ có quyền mua trong kỳ giữ**: KHÔNG bán trước ex-date; **user TỰ thực hiện ĐẦY ĐỦ quyền mua** (bot không mua/chuyển nhượng quyền); mua quyền/KL tăng do user là HỢP LỆ, không điều tra. SCL: quyền mua 15,38% (status P, chưa giá/ngày chốt).
+- **Mã LAG giữ có quyền mua**: KHÔNG bán trước ex-date; user TỰ thực hiện ĐẦY ĐỦ (bot không mua/chuyển quyền); mua quyền/KL tăng của user HỢP LỆ. **Lô cp quyền mua KẾ THỪA entry gốc (user 22/10, phương án A)**, bán phiên đầu được phép. SCL 15,38% (P).
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
