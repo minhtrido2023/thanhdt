@@ -190,10 +190,10 @@ def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=(
             lines.append(f"  {lb}: giữ {q:,} cp ⇒ được mua {n:,} cp, tiền cần chuẩn bị {cash}{src}")
         if pos_notes:
             lines.append("  ⚠️ VỊ THẾ CÓ THỂ CŨ — tự kiểm trên DNSE (" + "; ".join(pos_notes) + ")")
-        # TODO(X1, job Taylor_20261022_022942): khi auto_exit_inject giữ lệnh thoát tới GDKHQ được merge,
-        # đổi câu dưới thành "Bot tự giữ lệnh thoát tới GDKHQ".
-        lines.append("  Bot CHƯA tự giữ lệnh thoát tới GDKHQ — nếu là mã LAG và ngày thoát T+25 rơi TRƯỚC "
-                     "GDKHQ thì phải HOLD TAY lệnh thoát. User TỰ thực hiện quyền đầy đủ (bot không "
+        # X1 (lag_rights_exit_hold.py) đã merge 22/10: auto-exit TỰ giữ lệnh thoát LAG tới GDKHQ.
+        lines.append("  Bot TỰ giữ lệnh thoát T+25 của mã LAG tới GDKHQ (nếu là mã LAG; mã non-LAG không bị giữ); "
+                     "quyền mua CHƯA có ngày thì bot vẫn giữ và đòi anh quyết hold/sell "
+                     "(lag_rights_exit_hold.py --record). User TỰ thực hiện quyền đầy đủ (bot không "
                      "mua/chuyển nhượng quyền). Sau khi nộp tiền NAV có thể chặn rc=5/6 — xử lý theo tiền "
                      "lệ MBB 08-28 (REPORT lag_rights_audit_20261022).")
         out.append({"keys": [k for _, k in todo], "stage": stage, "text": "\n".join(lines)})

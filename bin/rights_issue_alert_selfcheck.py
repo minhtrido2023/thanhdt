@@ -118,8 +118,9 @@ def inner_b(R, B):
        and "công bố 2026-09-08" in sc[0]["text"] and "2,153 cp" in sc[0]["text"], sc)
     tt = B("2025-10-10", POS, [SCL25], set(), is_hol)[0]["text"]
     ck("B4: không còn 'Luật 21/10' (máy KHÔNG áp luật)", "Luật 21/10" not in tt, tt)
-    ck("B4: nói rõ bot CHƯA giữ lệnh thoát + HOLD TAY + 'nếu là mã LAG'",
-       all(x in tt for x in ("CHƯA tự giữ lệnh thoát", "HOLD TAY", "nếu là mã LAG")), tt)
+    ck("B4 (sau X1 merge): nói bot TỰ giữ lệnh thoát LAG + nếu là mã LAG + cách ack, KHÔNG còn 'CHƯA tự giữ'/'HOLD TAY'",
+       all(x in tt for x in ("Bot TỰ giữ lệnh thoát", "nếu là mã LAG", "lag_rights_exit_hold.py --record"))
+       and "CHƯA tự giữ" not in tt and "HOLD TAY" not in tt, tt)
     # B2
     ml = {"SpaceX": {"file": "active_nav_SpaceX.json", "computed_at": "2026-10-20"},
           "ZaloPay": {"file": "active_nav_ZaloPay.json", "computed_at": "2026-10-21"}}
