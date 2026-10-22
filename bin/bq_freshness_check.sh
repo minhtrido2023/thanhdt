@@ -730,7 +730,7 @@ if [ "${MORNING:-0}" != "1" ]; then
   # rc 0 = ổn (có/không có cảnh báo). 1 = gửi thất bại (CHƯA ghi state ⇒ tối mai thử lại). 2 = không có file vị thế. 3 = đã gửi nhưng VỊ THẾ CÓ THỂ CŨ (file active_nav cũ hơn phiên trước / thiếu account live).
   if [ "$_ra_rc" -ne 0 ]; then
     [ "$_ra_rc" = "124" ] && _ra_why="treo quá ${RIGHTS_ALERT_TIMEOUT_S:-120}s (timeout); " || _ra_why=""
-    "$ROOT/bin/notify_thread.sh" "🟡 RIGHTS ALERT WARN ($TODAY $NOW_ICT): rights_issue_alert rc=$_ra_rc — ${_ra_why}$(echo "$_ra_out" | tail -2 | tr '\n' ' ' | cut -c1-300). rc=3 = tin ĐÃ gửi nhưng VỊ THẾ CÓ THỂ CŨ (active_nav cũ/thiếu account) — tự kiểm vị thế trên DNSE; rc khác: quyền mua có thể CHƯA được cảnh báo — tự kiểm tav2_bq.corporate_action." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "🟡 RIGHTS ALERT WARN ($TODAY $NOW_ICT): rights_issue_alert rc=$_ra_rc — ${_ra_why}$(echo "$_ra_out" | tail -2 | tr '\n' ' ' | cut -c1-300). rc=3 = đã chạy xong (nếu có quyền mua thì tin đã gửi) nhưng VỊ THẾ CÓ THỂ CŨ (active_nav cũ/thiếu account) — tự kiểm vị thế trên DNSE; rc khác: quyền mua có thể CHƯA được cảnh báo — tự kiểm tav2_bq.corporate_action." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
     WARNED=$((WARNED+1))
   fi
 fi
