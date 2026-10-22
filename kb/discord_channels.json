@@ -69,6 +69,11 @@
       "id": "1540662920889761883",
       "title": "VN macro watch (crisis-trigger research thread)",
       "purpose": "Topic nghien cuu chuoi crisis-trigger + VN real-estate structural risk (2026-08-31). vn_realestate_monthly_check.sh (cron ngay 6 hang thang) post ket qua interim check GSO monthly vao day."
+    },
+    "livermore": {
+      "id": "1562696521349074984",
+      "title": "Livermore",
+      "purpose": "Doc ky thuat VNINDEX song (livermore_trigger_check.py): thong bao kich hoat, FORECAST, ket qua cham +20 phien. DISPLAY-ONLY."
     }
   },
   "users": {
