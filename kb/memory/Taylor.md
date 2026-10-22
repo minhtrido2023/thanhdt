@@ -31,3 +31,5 @@
 - [2026-10-22T07:49:09Z] [livermore-live vòng 2 10-22] XONG job Taylor_20261022_072316: feat/livermore-live-20261022 B1-B4+NB chờ Mike arch-review hẹp/merge; cron đề xuất chưa cài
 - [2026-10-22T09:31:34Z] ĐANG DỞ job Taylor_20261022_093122: R&D read-only bal_loss_attribution_20261022 (phân rã lỗ BAL) | NEXT: PREREG+md5, tìm nav_history/journal/positions BAL
 - [2026-10-22T09:39:54Z] [bal-loss-attribution 10-22] XONG job Taylor_20261022_093122: BAL live = 1 lệnh VPI −21% stop; chạm cảnh báo tập trung SpaceX p4,4%; chờ Mike/quant-skeptic
+- [2026-10-22T09:50:22Z] ĐANG DỞ job Taylor_20261022_095008: R&D read-only bal_concentration_cap_20261022 (trần sizing BAL khi ít mã) | NEXT: đọc REPORT bal_loss_attribution, code sizing BAL, PREREG
+- [2026-10-22T10:01:34Z] ĐANG DỞ job Taylor_20261022_095008: 8 chân engine chạy nền (logs/ trong research/bal_concentration_cap_20261022, worktree wt-balcap-20261022) | NEXT: legs_metrics.py + bootstrap_nav, REPORT
