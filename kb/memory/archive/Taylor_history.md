@@ -1415,3 +1415,9 @@
 
 ## Archived 2026-10-22 (keep=12 days=0 require_done=False)
 - [2026-10-21T16:54:22Z] ĐANG DỞ job Taylor_20261021_165411: vá cổng khối lượng compute_active_nav đọc thêm dnse_khoplenh_broker_confirm | NEXT: worktree fix/active-nav-broker-fills-20261021
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:55:22Z] ĐANG DỞ job Taylor_20261021_165512: VIỆC A (EQ_PHAI_THU_TANG tách trả trước) + B (audit quyền mua) | NEXT: worktree wt-lag-rights-20261022, tra ticker_financial cột AR
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:55:24Z] ĐANG DỞ job Taylor_20261021_165514: LAG per-share surprise + rủi ro quyền mua (paper) | out mike/agents/Taylor/research/lag_per_share_surprise_rights_20261022 | NEXT: PREREG rồi Q1-Q4
