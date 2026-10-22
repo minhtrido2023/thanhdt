@@ -120,12 +120,16 @@ def inner():
     # ── 2. điều kiện kích hoạt ──
     base = walk(300)
     check("price-none", T.price_kinds(base) == [], str(T.price_kinds(base)))
-    up = base[:-1] + [max(base) * 0.99]
-    check("price-near-hi", "PRICE_NEAR_HI252" in T.price_kinds(up))
-    check("price-break-up", "PRICE_BREAK60_UP" in T.price_kinds(base[:-1] + [max(base) + 5]))
-    check("price-near-lo", "PRICE_NEAR_LO252" in T.price_kinds(base[:-1] + [min(base) * 1.015]))
-    check("price-break-down", "PRICE_BREAK60_DOWN" in T.price_kinds(base[:-1] + [min(base) - 5]))
-    check("price-2.1%-không-bắn", "PRICE_NEAR_HI252" not in T.price_kinds(base[:-1] + [max(base) * 0.979]))
+    check("price-gần-đỉnh-không-bắn", T.price_kinds(base[:-1] + [max(base) * 0.99]) == [])
+    check("price-break252-up", "PRICE_BREAK252_UP" in T.price_kinds(base[:-1] + [max(base) + 5]))
+    check("price-break60-up", "PRICE_BREAK60_UP" in T.price_kinds(base[:-1] + [max(base) + 5]))
+    check("price-break252-down", "PRICE_BREAK252_DOWN" in T.price_kinds(base[:-1] + [min(base) - 5]))
+    check("price-break60-down", "PRICE_BREAK60_DOWN" in T.price_kinds(base[:-1] + [min(base) - 5]))
+    # phá biên 60 nhưng KHÔNG phá 252: đỉnh 252 nằm xa trước (index 10), 60 phiên cuối thấp hơn
+    sh = [1100.0 + (i % 7) for i in range(100)] + [1500.0] + [1100.0 + (i % 7) for i in range(199)] + [1200.0]
+    k_ = T.price_kinds(sh)
+    check("price-break60-không-252", "PRICE_BREAK60_UP" in k_ and "PRICE_BREAK252_UP" not in k_, str(k_))
+    check("price-bằng-đỉnh252-không-bắn252", "PRICE_BREAK252_UP" not in T.price_kinds(base[:-1] + [max(base[-253:-1])]))
     clk = lambda **k: dict(active=True, cand=1, k=15, need=25, committed=3, asof="2026-10-22", **k)  # noqa: E731
     check("dt-enter-15", T.dt_kinds(clk()) == ["DT_ENTER_CRISIS"])
     check("dt-enter-14", T.dt_kinds({**clk(), "k": 14}) == [])
@@ -140,10 +144,16 @@ def inner():
     dates = [D(2026, 10, 1)]
     while len(dates) < 12:
         dates.append(C.next_session(dates[-1]))
-    check("cooldown-4-phiên", not T.cooled("K", dates[4], {"K": str(dates[0])}, dates))
-    check("cooldown-5-phiên", T.cooled("K", dates[5], {"K": str(dates[0])}, dates))
-    check("cooldown-chưa-từng", T.cooled("K", dates[5], {}, dates))
-    check("cooldown-cùng-ngày", not T.cooled("K", dates[5], {"K": str(dates[5])}, dates))
+    E = lambda d_: [{"as_of": d_}]       # noqa: E731
+    dates = [D(2026, 9, 1)]
+    while len(dates) < 60:
+        dates.append(C.next_session(dates[-1]))
+    check("gap-19-phiên-chặn", not T.gap_ok(dates[19], E(dates[0]), dates))
+    check("gap-20-phiên-cho", T.gap_ok(dates[20], E(dates[0]), dates))
+    check("gap-chưa-từng", T.gap_ok(dates[5], [], dates))
+    check("gap-mọi-loại-lấy-entry-gần-nhất", not T.gap_ok(dates[30], E(dates[0]) + E(dates[15]), dates))
+    check("gap-bỏ-qua-entry-sau-as-of", T.gap_ok(dates[20], E(dates[0]) + E(dates[40]), dates))
+    check("gap-entry-ngoài-bars-đếm-lịch", T.gap_ok(D(2026, 12, 1), E(D(2026, 10, 1)), dates[:2]))
 
     # ── 3. parse RESULT (fail-loud) ──
     good = "x\n<<<FORECAST\n- H20_DIR: UP\n- H20_P_UP: 0.62\n- LEVEL: 1700 HOLD\n- INVALIDATION: <1650\nFORECAST>>>\nRESULT|2026-10-22|UP|0.62|HOLD\n"
@@ -192,7 +202,7 @@ def inner():
 
     # ── 5. chuỗi đầy đủ: trigger → run.sh → claude giả → registry → notify ──
     reset()
-    closes = walk(299) + [1300.0]            # phá đỉnh ⇒ PRICE_NEAR_HI252 + PRICE_BREAK60_UP
+    closes = walk(299) + [1300.0]            # phá đỉnh ⇒ PRICE_BREAK252_UP + PRICE_BREAK60_UP
     write_bars(closes)
     os.environ["FAKE_CLAUDE_MODE"] = "good"
     rc = T.evaluate([], clock_fn=lambda: None)
@@ -232,7 +242,7 @@ def inner():
     write_bars(closes + [1310.0], last=D(2026, 10, 23))
     os.environ["LIVERMORE_NOW"] = "2026-10-23T19:30:00"
     rc4 = T.evaluate([], clock_fn=lambda: dict(active=False, committed=3, asof="2026-10-23"))
-    check("dedupe-5-phiên", rc4 == 0 and cnt() == 1, f"rc={rc4} cnt={cnt()}")
+    check("dedupe-khoảng-cách-20", rc4 == 0 and cnt() == 1, f"rc={rc4} cnt={cnt()}")
     os.environ["LIVERMORE_NOW"] = env["LIVERMORE_NOW"]
 
     # ── 6. as-of lệch / dữ liệu cũ ──
@@ -353,11 +363,11 @@ def inner():
 
 
 MUTANTS = [
-    ("livermore_trigger_check.py", "COOLDOWN = 5", "COOLDOWN = 1", "bỏ dedupe 5 phiên"),
+    ("livermore_trigger_check.py", "MIN_GAP = 20", "MIN_GAP = 1", "bỏ khoảng cách 20 phiên"),
+    ("livermore_trigger_check.py", "    if c > max(p252):", "    if c >= max(p252):", "phá 252 dùng >= (bằng đỉnh cũng bắn)"),
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 25, 5", "ngưỡng vào 15→25"),
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 15, 10", "ngưỡng need10 5→10"),
-    ("livermore_trigger_check.py", "NEAR_PCT, HI_LO_WIN, BREAK_WIN = 0.02,", "NEAR_PCT, HI_LO_WIN, BREAK_WIN = 0.05,", "biên 2%→5%"),
-    ("livermore_trigger_check.py", "    if as_of < exp:", "    if False:", "bỏ kiểm as-of lệch"),
+        ("livermore_trigger_check.py", "    if as_of < exp:", "    if False:", "bỏ kiểm as-of lệch"),
     ("livermore_trigger_check.py", 'if run0 and run0.get("status") == "done" and not dry:', "if False:", "bỏ idempotent/resume báo"),
     ("livermore_trigger_check.py", "if clock is not None and clock.get(\"asof\") == str(as_of):", "if clock is not None:", "bỏ kiểm asof của clock"),
     ("livermore_common.py", "    if rid != str(as_of):", "    if False:", "bỏ kiểm id RESULT"),

@@ -4,8 +4,8 @@
 Kích hoạt (đủ MỘT):
   (i)  DT gate candidate (dna_report.get_dt_gate_clock): need=25 với k>=15, hoặc need=10 với k>=5
        (MỌI candidate, kể cả NEUTRAL→BEAR);
-  (ii) VNINDEX đóng cửa cách đỉnh/đáy ĐÓNG CỬA 252 phiên <=2%, hoặc đóng cửa phá biên đóng cửa 60 phiên TRƯỚC.
-Dedupe: cùng (loại, as-of) chạy lại = no-op; mỗi loại tối đa 1 lần / 5 phiên (cooldown theo bar).
+  (ii) VNINDEX đóng cửa PHÁ đỉnh/đáy đóng cửa 252 phiên TRƯỚC, hoặc phá biên đóng cửa 60 phiên TRƯỚC.
+Dedupe: cùng as-of chạy lại = no-op; khoảng cách tối thiểu TOÀN CỤC 20 phiên giữa mọi lần đọc (mọi loại, đo trên registry).
 Mỗi as-of tối đa 1 lần gọi livermore_run.sh. WARN-only: lỗi ở đây KHÔNG chặn gì khác (cron độc lập).
 Cuối mỗi lượt gọi livermore_score.py --notify (chấm entry đáo hạn).
 
@@ -26,8 +26,8 @@ import livermore_common as C                                   # noqa: E402
 CRISIS, EXBULL = 1, 5
 STATE_NAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EXBULL"}
 ENTER_K, EXIT_K = 15, 5
-NEAR_PCT, HI_LO_WIN, BREAK_WIN = 0.02, 252, 60
-COOLDOWN = 5          # phiên
+HI_LO_WIN, BREAK_WIN = 252, 60
+MIN_GAP = 20          # phiên: khoảng cách tối thiểu TOÀN CỤC giữa mọi lần đọc (chân 20 phiên không chồng)
 STATE_FILE = lambda: os.path.join(C.STATE_DIR, "livermore_trigger.json")      # noqa: E731
 
 
@@ -45,19 +45,19 @@ def dt_kinds(clock):
 
 
 def price_kinds(closes):
-    """closes: list close tăng dần, phần tử cuối = as-of."""
+    """closes: list close tăng dần, phần tử cuối = as-of. Đóng cửa PHÁ đỉnh/đáy đóng cửa 252 phiên
+    TRƯỚC, hoặc phá biên đóng cửa 60 phiên TRƯỚC."""
     if len(closes) < HI_LO_WIN + 1:
         raise ValueError(f"cần >= {HI_LO_WIN + 1} bar, có {len(closes)}")
-    c, w = closes[-1], closes[-HI_LO_WIN:]
-    hi, lo, out = max(w), min(w), []
-    if (hi - c) / hi <= NEAR_PCT:
-        out.append("PRICE_NEAR_HI252")
-    if (c - lo) / lo <= NEAR_PCT:
-        out.append("PRICE_NEAR_LO252")
-    prior = closes[-BREAK_WIN - 1:-1]
-    if c > max(prior):
+    c, out = closes[-1], []
+    p252, p60 = closes[-HI_LO_WIN - 1:-1], closes[-BREAK_WIN - 1:-1]
+    if c > max(p252):
+        out.append("PRICE_BREAK252_UP")
+    if c < min(p252):
+        out.append("PRICE_BREAK252_DOWN")
+    if c > max(p60):
         out.append("PRICE_BREAK60_UP")
-    if c < min(prior):
+    if c < min(p60):
         out.append("PRICE_BREAK60_DOWN")
     return out
 
@@ -77,21 +77,19 @@ def save_state(st):
     C.atomic_write(STATE_FILE(), json.dumps(st, indent=1, sort_keys=True) + "\n")
 
 
-def cooled(kind, as_of, last_fired, dates):
-    """True nếu kind được phép bắn: chưa từng, hoặc cách lần trước >= COOLDOWN phiên (đếm theo bar)."""
-    prev = last_fired.get(kind)
+def gap_ok(as_of, entries, dates):
+    """True nếu as-of cách lần đọc gần nhất TRƯỚC nó (mọi loại, theo registry) >= MIN_GAP phiên."""
+    prev = [e["as_of"] for e in entries if e["as_of"] < as_of]
     if not prev:
         return True
-    prev = dt.date.fromisoformat(prev)
-    if prev >= as_of:
-        return False
+    prev = max(prev)
     if prev in dates:
-        return dates.index(as_of) - dates.index(prev) >= COOLDOWN
+        return dates.index(as_of) - dates.index(prev) >= MIN_GAP
     n, d = 0, prev
     while d < as_of:
         d = C.next_session(d)
         n += 1
-    return n >= COOLDOWN
+    return n >= MIN_GAP
 
 
 def real_clock():
@@ -173,8 +171,9 @@ def evaluate(argv, clock_fn=real_clock):
                 save_state(st)
         print(f"[trigger] as-of {as_of} đã đọc xong — no-op")
         return 10
-    ok_kinds = [k for k in kinds if cooled(k, as_of, st["last_fired"], dates)]
-    print(f"[trigger] as-of={as_of} kích hoạt thô={kinds} sau cooldown={ok_kinds} clock_ok={clock_ok}")
+    gap = C.has_entry(C.read_registry(), as_of) or gap_ok(as_of, C.parse_entries(C.read_registry()), dates)
+    ok_kinds = kinds if gap else []
+    print(f"[trigger] as-of={as_of} kích hoạt thô={kinds} sau khoảng-cách-{MIN_GAP}={ok_kinds} clock_ok={clock_ok}")
     rc = 0 if (clock_ok or ok_kinds) else 4
     if not ok_kinds or dry:
         return rc
