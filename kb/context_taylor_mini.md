@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v4090)
+# Mike fleet — context_taylor_mini (v4091)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-21T17:17:55] Taylor/finding — lag-per-share-surprise-rights-20261022: {"job": "Taylor_20261021_165514", "commit": "21c10df2f", "dir": "mike/agents/Taylor/research/lag_per_share_surprise_rights_20261022", "prereg_md5": "c60975e2e29 …
 - [2026-10-21T17:19:01] Taylor/finding — lag-rights-audit-eq-ar-20261022: {"branch": "feat/lag-rights-audit-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022", "commits": ["7c1fa3488 viec A", "9d88fa5d8  …
 - [2026-10-21T17:31:11] Mike/finding — daily-retro-draft-2026-10-21: {"draft": "state/retro_draft_2026-10-21.md", "incidents": 3, "patterns": 1}
 - [2026-10-21T17:32:22] Wags/finding — retro-draft-2026-10-21-verify: {"verdict": "GAPS FOUND", "gaps": ["G1: #1 bỏ sót gốc dữ liệu: BQ ticker thiếu ~19 mã lúc seal 12/10 (n=332 vs 351) -> G4 nổ 13/10 (Taylor vnindex-tr-g1-g4-rca- …
 - [2026-10-21T17:33:35] Mike/finding — daily-retro-2026-10-21: {"entry": "kb/incidents/retro/retro-2026-10-21.md", "incidents": 3, "patterns": 1, "wags": "GAPS FOUND - fixed", "measured_by": "retro finalize job Mike_2026102 …
+- [2026-10-22T00:30:31] Taylor/finding — corp-action-daily 2026-10-22 OK: {"asof": "2026-10-22", "feed_status": "FRESH", "n_track": 14, "n_held": 7, "exright_today": ["ALV", "DWC", "MCP"], "ais_today": ["HMH", "ITC", "VC3", "WTC"], "c …
 <!--RECENT-END-->
 
 ## Kill-switches
