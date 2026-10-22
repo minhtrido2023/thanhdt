@@ -60,6 +60,9 @@ if "--mutants" in sys.argv[1:]:
         ("M21 alert bỏ dòng khoá chờ niêm yết", "auto_exit_inject.py",
          "    for lk in locked_notes or []:", "    for lk in []:"),
         # <<< B1 vòng 2
+        ("M24 NB2 cash_identity đặt chân tiền ở credit_date", "cash_identity.py",
+         "                else [(s[\"payment_date\"], 0.0, qty * px), (s[\"credit_date\"], qty, 0.0)])",
+         "                else [(s[\"credit_date\"], qty, qty * px)])"),
         ("M23 NB1 reconcile tính phí cả lô quyền", "reconcile_equity.py",
          "        fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0", "        pass"),
         ("M22 B2 net_fills_journal_and_broker (đường sizing broker_statement=True) bỏ cộng lô quyền", "exdate_frame.py",
@@ -828,6 +831,14 @@ w1 = run_ci("decl", [nsub()])
 check("C1 có khai báo: cửa sổ đóng (không qty_gaps, phần dư ≈ 0 vì phí = 0)",
       not w1["qty_gaps"] and abs(w1["unexplained"]) < 1000 and not w1["kind"],
       (w1["qty_gaps"], w1["unexplained"], w1["kind"]))
+lg = CI.load_rights_subscription_fills(ACCT, ACCT_NO, path=os.path.join(ROOT_TMP, "N_C_decl", "lag_rights",
+                                                                      "subscriptions.json"))
+ndir("C_split", [dict(nsub(credit="2025-10-29"), payment_date=P)])
+lg2 = CI.load_rights_subscription_fills(ACCT, ACCT_NO)
+check("C2 NB2: payment=credit ⇒ 1 bản ghi (đối chứng); payment<credit ⇒ chân TIỀN ở payment_date, chân KL ở credit_date",
+      [(x["moment"].date().isoformat(), x["qty"], x["value"]) for x in lg] == [(P, RQ, RQ * S_PX)]
+      and sorted((x["moment"].date().isoformat(), x["qty"], x["value"]) for x in lg2)
+      == [(P, 0.0, RQ * S_PX), ("2025-10-29", RQ, 0.0)], (lg, lg2))
 
 # ================================ tổng ================================
 shutil.rmtree(ROOT_TMP, ignore_errors=True)

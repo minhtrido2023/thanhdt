@@ -432,11 +432,15 @@ def load_rights_subscription_fills(account, account_no=None, path=None):
     `fee_free` (nộp tiền mua quyền không chịu phí giao dịch). Sổ hỏng ⇒ raise (fail-closed)."""
     import rights_subscription as rights_sub
     out = []
-    for d, evs in rights_sub.fill_events(account, path=path, account_no=account_no).items():
-        day = datetime.date.fromisoformat(d)
-        for _ts, key, tk, _side, qty, px in evs:
-            out.append({"moment": datetime.datetime.combine(day, SESSION_CLOSE_ICT), "symbol": tk,
-                        "side": "buy", "qty": qty, "value": qty * px, "fee_free": True, "key": key})
+    for s in rights_sub.load_subscriptions(account, path, account_no):
+        qty, px, key = float(s["subscribed_qty"]), float(s["issue_price_vnd"]), rights_sub.event_key(s)
+        # NB2 (arch-review vòng 2): chân TIỀN ở payment_date (tiền rời tài khoản lúc nộp), chân KL ở
+        # credit_date (CP về openQuantity). Cùng ngày (mặc định) ⇒ một bản ghi như cũ.
+        legs = ([(s["credit_date"], qty, qty * px)] if s["payment_date"] == s["credit_date"]
+                else [(s["payment_date"], 0.0, qty * px), (s["credit_date"], qty, 0.0)])
+        for d, q, v in legs:
+            out.append({"moment": datetime.datetime.combine(datetime.date.fromisoformat(d), SESSION_CLOSE_ICT),
+                        "symbol": s["ticker"], "side": "buy", "qty": q, "value": v, "fee_free": True, "key": key})
     return out
 
 
