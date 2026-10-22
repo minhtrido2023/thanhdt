@@ -1512,6 +1512,7 @@ def main():
     rights_subscribed = {}       # N3: phần dư = user nộp tiền mua quyền (bước giá vốn khớp giá phát hành)
     fill_cache = {}
     journal_gaps = set()
+    fill_notes = set()           # lệch journal↔statement DNSE: nói ra trong thông điệp chặn, không nuốt
     if args.from_raw or is_today:
         from trading_bot.vn_market import next_trading_day
         # Phiên GIAO DỊCH kế tiếp `args.date` — ex-date mà broker điều chỉnh ĐÊM NAY. Neo đường
@@ -1537,10 +1538,16 @@ def main():
                 # account) và phần dư = 0,0 CHÍNH XÁC ⇒ siết lại KHÔNG sinh false-block.
                 # Giữ NGUYÊN fail-open cho prev_d is None (không có BẤT KỲ bản ghi nào trước đó).
                 qty_prev = 0.0
-            _miss = []
-            net_fill = (net_fills_between(args.account, prev_d, args.date, fill_cache,
-                                          missing_out=_miss).get(t) if prev_d else None)
+            _miss, _notes = [], []
+            # Hợp nhất fill journal bot + statement DNSE (lệnh BÁN/MUA TAY ngoài bot, ca DRI 21/10) —
+            # phần dư còn lại sau hợp nhất vẫn bị chặn y như cũ. Import lazy: exdate_frame import
+            # ngược daily_nav_snapshot.
+            from exdate_frame import net_fills_journal_and_broker
+            net_fill = (net_fills_journal_and_broker(
+                args.account, prev_d, args.date, fill_cache, missing_out=_miss,
+                notes_out=_notes, account_no=account_no).get(t) if prev_d else None)
             journal_gaps.update(_miss)
+            fill_notes.update(_notes)
             # N4: CP quyền mua đang chờ ghi nhận tại ex-date tối nay — không hưởng sự kiện CP
             _pend = (rights_sub.pending_qty(args.account, t, nxt_session, prev_d, subs=_rights_subs)
                      if prev_d else 0.0)
@@ -1655,6 +1662,8 @@ def main():
                  f"sổ ({_gaps_head}{_gaps_tail}) ⇒ 'lệnh khớp thật' phía trên có thể "
                  f"THIẾU; kiểm journal TRƯỚC khi nghi corp-action] "
                  if journal_gaps else "")
+              + (f"[lệch fill journal↔statement: {'; '.join(sorted(fill_notes))}] "
+                 if fill_notes else "")
               +
               f"Đường phục hồi cho mã ĐÃ khớp tỉ lệ: chờ corp_action_auto_confirm.py (cron 19:25) "
               f"ghi _status=CONFIRMED + qty_multiplier vào data/corp_actions.json rồi chạy lại "
@@ -1672,6 +1681,7 @@ def main():
              "corp_action_gate_v2": {
                  "active": ca_gate_active, "note": ca_gate_note,
                  "journal_gaps": sorted(journal_gaps),
+                 "fill_notes": sorted(fill_notes),
                  "share_event_blocks": [{"ticker": t, "detail": d} for t, d in share_event_blocks],
                  "qty_unexplained": [{"ticker": t, "detail": d} for t, d in qty_unexplained]}})
         return 5
