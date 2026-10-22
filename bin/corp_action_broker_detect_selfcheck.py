@@ -3315,6 +3315,9 @@ def test_C():
         fake.net_fills_between = lambda *a, **k: {}
         fake.held_event_next_session = lambda snap, asof, tk: None
         fake.classify_qty_residual = real_dns.classify_qty_residual
+        # N3 (2026-10-22): exdate_frame hỏi thêm "có phải nộp tiền mua quyền?" cho phần dư dương —
+        # stub trả "không" (không BQ trong selfcheck) ⇒ hành vi các ca C5-C10 giữ nguyên.
+        fake.rights_subscription_check = lambda *a, **k: (False, "stub selfcheck: không có quyền mua")
         sys.modules["daily_nav_snapshot"] = fake
         try:
             cr, bl = XF.classify_positions("SpaceX", A1[0], D, {"TPB": {"total": 230}})
