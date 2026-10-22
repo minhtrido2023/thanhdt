@@ -190,8 +190,8 @@ def load_all(path=REGISTRY, skipped=None):
             status = str(rec.get("_status", ""))
             etype = str(rec.get("event_type") or "").strip().upper()
             unsupported = bool(etype) and etype not in QTY_EVENT_TYPES
-            if status.upper().startswith(CONFIRMED_PREFIX) and not unsupported:
-                raise
+            if status.upper().startswith(CONFIRMED_PREFIX):
+                raise          # record CONFIRMED hỏng (kể cả loại lạ/gõ sai) VẪN raise: §29, daily_nav_snapshot.py:125-130
             info = {"idx": i, "id": rec.get("id"), "ticker": rec.get("ticker"), "status": status[:40],
                     "reason": ("loại sự kiện chưa hỗ trợ" if unsupported else "record chưa CONFIRMED hỏng")
                               + f": {e}"}

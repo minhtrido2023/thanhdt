@@ -59,9 +59,11 @@ def run_unit(CA, td):
     ck("U1b skipped nêu id + lý do 'chưa hỗ trợ'", len(sk) == 1 and sk[0]["id"] == "SCL-R"
        and "chưa hỗ trợ" in sk[0]["reason"], sk)
     ck("U1c cảnh báo stderr nêu tên record", "SCL-R" in err and "BỎ QUA" in err, err)
-    out, sk, _ = load(CA, write_reg(td, [GOOD, dict(RIGHTS, _status="CONFIRMED by user")]))
-    ck("U2 RIGHTS dù CONFIRMED ⇒ bỏ qua (loại chưa hỗ trợ), không raise toàn cục",
-       len(out) == 1 and len(sk) == 1, (out, sk))
+    p2 = write_reg(td, [GOOD, dict(RIGHTS, _status="CONFIRMED by user")])
+    ck("U2 RIGHTS ĐÃ CONFIRMED (loại chưa hỗ trợ) ⇒ VẪN raise CorpActionError (arch-review 22/10: record CONFIRMED "
+       "hỏng không được bỏ qua)", raises(lambda: CA.load_all(p2)) == "CorpActionError")
+    p3 = write_reg(td, [GOOD, dict(GOOD, id="TYPO-C", event_type="Stock dividend")])
+    ck("U2b CONFIRMED gõ sai loại ('Stock dividend') ⇒ raise, không im lặng", raises(lambda: CA.load_all(p3)) == "CorpActionError")
     out, sk, _ = load(CA, write_reg(td, [GOOD, dict(GOOD, id="BAD-P", qty_multiplier="1,30", _status="PROPOSED")]))
     ck("U3 PROPOSED loại hỗ trợ nhưng hỏng ⇒ bỏ qua + cảnh báo", len(out) == 1 and sk and sk[0]["id"] == "BAD-P"
        and "chưa CONFIRMED" in sk[0]["reason"], sk)
@@ -154,9 +156,8 @@ def run_inner():
 
 
 MUTANTS = [
-    ("if status.upper().startswith(CONFIRMED_PREFIX) and not unsupported:", "if status.upper().startswith(CONFIRMED_PREFIX):"),
-    ("if status.upper().startswith(CONFIRMED_PREFIX) and not unsupported:", "if False:"),
-    ("if status.upper().startswith(CONFIRMED_PREFIX) and not unsupported:", "if True:"),
+    ("if status.upper().startswith(CONFIRMED_PREFIX):", "if False:"),
+    ("if status.upper().startswith(CONFIRMED_PREFIX):", "if True:"),
     ('print(f"⚠️ corp_actions: BỎ QUA', 'None and print(f"⚠️ corp_actions: BỎ QUA'),
     ("                skipped.append(info)", "                pass"),
     ("unsupported = bool(etype) and etype not in QTY_EVENT_TYPES", "unsupported = False"),
