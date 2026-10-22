@@ -32,6 +32,7 @@ TẠO ĐƯỢC giá cum đã biết qua chính hệ số sự kiện — bằng 
 """
 import math
 import os
+import sys
 
 # Sai số cho phép giữa `marketPrice` broker và giá tham chiếu tự dựng `px_cum / multiplier`.
 # Hai nguồn sai số, cả hai đều NHỎ và có cận trên cơ khí:
@@ -310,6 +311,15 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
                 blocked[tk] = f"không đọc được data/corp_actions.json để tra sự kiện: {e}"
                 continue
         verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+        if verdict == "qty_unexplained" and detail["residual"] > 0:
+            # N3: user nộp tiền mua quyền (lệnh tay hợp lệ) — KL tăng, giá không đổi hệ ⇒ không chặn,
+            # không phải "credited" (không có gì để quy đổi giá).
+            rs_ok, rs_info = dns.rights_subscription_check(account_no, tk, asof, prev_d, detail)
+            if rs_ok:
+                print(f"ℹ️ [{asof}] {tk}: phần dư {detail['residual']:+,.0f} = nộp tiền mua quyền "
+                      f"({rs_info['event_id']}, giá {rs_info['issue_price']:,.0f}) — không chặn", file=sys.stderr)
+                continue
+            detail["rights_check"] = rs_info
         if verdict == "share_event_credit":
             if ev and ev.get("source"):
                 detail["event_source"] = ev["source"]
@@ -322,7 +332,9 @@ def classify_positions(account_label, account_no, asof, positions, broker_statem
                 f"{detail['residual']:+,.0f} CHƯA GIẢI THÍCH ĐƯỢC"
                 + _calendar_clause(detail, ca_active, ca_note, asof)
                 + _journal_caveat(journal_gaps, broker_statement)
-                + _fill_notes_clause(fill_notes, tk))
+                + _fill_notes_clause(fill_notes, tk)
+                + (f" [không nhận là nộp tiền quyền mua: {detail['rights_check']}]"
+                   if detail.get("rights_check") else ""))
     return credited, blocked
 
 

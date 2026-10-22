@@ -43,9 +43,10 @@ sys.path.insert(0, WC_ROOT)
 
 import auto_exit_rules as rules  # noqa: E402
 import capit_episode  # noqa: E402
+import lag_rights_exit_hold as rights_hold  # noqa: E402
 from portfolio_status import (  # noqa: E402
     account_no_for, broker_positions_with_cost, count_trading_days,
-    book_lot_snapshot,
+    book_lot_snapshot, ORPHAN_PREFIX,
 )
 from trading_bot.plan import PlannedOrder  # noqa: E402
 from trading_bot.vn_market import now_ict, next_trading_day, session_phase, is_holiday  # noqa: E402
@@ -371,6 +372,8 @@ def process_account(account, plan_date, signal_date, dry_run):
         # cả hai (người duyệt cần biết CẢ 2 đường cùng chặn), không phải 1 sự kiện ghi trùng.
         # Chỉ chặn trùng lặp THẬT (cùng câu chữ — vd gọi lại `_add_blocked` 2 lần cho cùng 1 lý
         # do, ca lag_blocked/bal_blocked nếu book_lot_snapshot() trả về mã trùng).
+        if reason.startswith(ORPHAN_PREFIX):
+            book = "*"   # mã mồ côi không thuộc book nào — LAG lẫn BAL cùng trả, ghi MỘT lần (X2)
         if {"ticker": tk, "book": book, "reason": reason} in blocked_notes:
             return
         blocked_notes.append({"ticker": tk, "book": book, "reason": reason})
@@ -395,14 +398,27 @@ def process_account(account, plan_date, signal_date, dry_run):
         if lag_ok else ([], []))
     for b in lag_qty_blocked:
         _add_blocked(b["ticker"], "LAG", b["reason"])
+    # Luật user 2026-10-21: mã LAG có QUYỀN MUA ⇒ KHÔNG bán trước GDKHQ (lag_rights_exit_hold.py).
+    # Chỉ tra BQ khi có candidate; holds_for KHÔNG raise — lỗi nguồn ⇒ HOLD + lý do thật (§29).
+    lag_rights = (rights_hold.holds_for([c[0] for c in lag_candidates], plan_date, signal_date)
+                  if lag_candidates else {})
     for tk, qty, ref_price, sessions in lag_candidates:
         existing = _already_has_sell(plan, tk, "LAG")
+        rh = lag_rights.get(tk)
+        if rh and rh["action"] == "HOLD":
+            reason = rh["reason"] + (f" — ⚠️ plan ĐÃ có SELL LAG id={existing} (không do auto-exit "
+                                     f"chèn): người duyệt phải gỡ" if existing else "")
+            print(f"  [RIGHTS-HOLD] LAG {tk}: {reason}")
+            _add_blocked(tk, "LAG", reason)
+            continue
         if existing:
             print(f"  [skip] {tk}: đã có sell LAG trong plan (id={existing})")
             skipped_existing.append((tk, "LAG"))
             continue
         note = (f"AUTO-EXIT LAG: giữ {sessions} phiên ≥ mốc cố định {rules.LAG_EXIT_SESSIONS} "
                 f"(pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ")
+        if rh and rh["action"] == "RELEASE":
+            note += f" — {rh['note']}"
         _inject_sell(plan, positions, tk, qty, ref_price, "LAG", "LAG_AUTO_EXIT", note,
                      "LAG", injected, capped_notes, sessions)
 

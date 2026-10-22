@@ -24,6 +24,7 @@ import csv
 import datetime
 import glob
 import json
+import math
 import os
 import re
 import subprocess
@@ -447,6 +448,183 @@ def confirmed_share_event_multiplier(ticker, date, ex_date=None, actions=None):
 
 
 QTY_RESIDUAL_EPS = 1e-6
+# N3 — quyền mua. Tên phương thức khớp `corp_action_lib.PRICE_ADJUSTING_ISS` (lịch daily mang
+# `issue_method_vi`), dòng BQ thô mang `issue_method_code == "Rights"`.
+RIGHTS_ISSUE_METHOD_VI = "Quyền mua CP cho Cổ đông hiện hữu"
+RIGHTS_PAY_WINDOW_DAYS = 120     # GDKHQ → ngày nộp tiền (SCL 2025: GDKHQ 10-17, nộp ~10-27)
+RIGHTS_COST_TOL_PCT = 0.005      # bước giá vốn broker phải = phần dư × giá phát hành (MBB 08-28 đo lệch < 1đ)
+RIGHTS_COST_TOL_VND = 1000.0
+
+
+def _is_rights_event(ev):
+    return bool(ev) and (ev.get("issue_method_vi") == RIGHTS_ISSUE_METHOD_VI
+                         or ev.get("issue_method_code") == "Rights")
+
+
+def raw_cost_value(account_no, ticker, date):
+    """Σ openQuantity × costPrice của `ticker` ở bản ghi positions CUỐI của account trong
+    dnse_raw_{date} (lọc account §12, gộp loan package). None nếu không có bản ghi / thiếu costPrice."""
+    path = os.path.join(EXEC_DIR, f"dnse_raw_{date}.jsonl")
+    if not os.path.exists(path):
+        return None
+    latest = None
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                rec = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            if rec.get("kind") == "positions" and rec.get("account_no") == account_no:
+                latest = rec.get("payload", {}).get("positions") or []
+    if latest is None:
+        return None
+    total, seen = 0.0, False
+    for p in latest:
+        if p.get("symbol") != ticker or float(p.get("openQuantity") or 0) <= 0:
+            continue
+        try:
+            total += float(p["openQuantity"]) * float(p["costPrice"])
+        except (KeyError, TypeError, ValueError):
+            return None
+        seen = True
+    return total if seen else None
+
+
+def classify_rights_subscription(rights_rows, asof, detail, cost_prev_value, cost_now_value):
+    """PURE. (True, info) khi phần dư KL DƯƠNG của `detail` (output classify_qty_residual) được
+    giải thích là USER NỘP TIỀN MUA QUYỀN — lệnh tay của user, hợp lệ (luật 21/10, như DRI). Đòi
+    ĐỦ mọi bit cơ khí, thiếu một ⇒ (False, lý do cụ thể) và caller giữ nguyên chặn rc=5/6:
+      1. lệnh khớp thật = 0 trong cửa sổ (không lẫn mua/bán khác — không tách được giá vốn);
+      2. có dòng quyền mua (Rights, tỉ lệ > 0, chưa huỷ) GDKHQ ≤ asof, cách asof ≤ RIGHTS_PAY_WINDOW_DAYS;
+      3. biết giá phát hành S (value_per_share, else total_value/issue_volumn);
+      4. phần dư ≤ floor(KL trước × tỉ lệ) + 1 (không mua quá số quyền);
+      5. giá vốn broker: Σcost_nay − Σcost_trước = phần dư × S (± max(0,5%, 1.000đ)) — bước giá vốn
+         ở giá PHÁT HÀNH, không phải giá thị trường (đo MBB 08-28: +1.100.000 = 110 × 10.000).
+    """
+    resid, qty_prev = detail.get("residual") or 0.0, detail.get("qty_prev") or 0.0
+    if resid <= 0:
+        return False, "phần dư không dương"
+    if abs(detail.get("net_fill") or 0.0) > QTY_RESIDUAL_EPS:
+        return False, f"có lệnh khớp {detail.get('net_fill'):+,.0f} cùng cửa sổ — không tách được bước giá vốn"
+    if cost_prev_value is None or cost_now_value is None:
+        return False, "thiếu costPrice broker (trước/nay) để kiểm bước giá vốn"
+    asof_d = datetime.date.fromisoformat(asof)
+    why = []
+    for r in rights_rows or []:
+        if not _is_rights_event(r) or r.get("issue_status_code") == "N" \
+                or r.get("event_status") == "not_executed":
+            continue
+        try:      # `or 0`/str() ⇒ chỉ còn ValueError (số/ngày hỏng hoặc chưa có ngày) — bỏ dòng đó
+            ratio = float(r.get("exercise_ratio") or 0)
+            ex = datetime.date.fromisoformat(str(r.get("exright_date") or "")[:10])
+        except ValueError:
+            continue
+        if ratio <= 0 or ex > asof_d or (asof_d - ex).days > RIGHTS_PAY_WINDOW_DAYS:
+            why.append(f"id={r.get('id')} GDKHQ {ex} ngoài cửa sổ nộp tiền")
+            continue
+        from rights_issue_alert import issue_price      # cùng công thức với cảnh báo quyền mua
+        px = issue_price(r) or 0.0
+        if px <= 0:
+            why.append(f"id={r.get('id')} chưa có giá phát hành")
+            continue
+        cap = math.floor(qty_prev * ratio + 1e-9) + 1
+        if resid > cap:
+            why.append(f"id={r.get('id')} phần dư {resid:,.0f} > quyền tối đa {cap - 1:,.0f}")
+            continue
+        step, want = cost_now_value - cost_prev_value, resid * px
+        tol = max(RIGHTS_COST_TOL_VND, want * RIGHTS_COST_TOL_PCT)
+        if abs(step - want) > tol:
+            why.append(f"id={r.get('id')} bước giá vốn {step:,.0f}đ ≠ {resid:,.0f}×{px:,.0f} = {want:,.0f}đ")
+            continue
+        return True, {"event_id": r.get("id"), "exright_date": ex.isoformat(), "exercise_ratio": ratio,
+                      "issue_price": px, "subscribed_qty": resid, "cost_step_vnd": step,
+                      "evidence": "rights_subscription_cost_step_matches_issue_price"}
+    return False, ("; ".join(why) if why else "không có quyền mua nào đã qua GDKHQ cho mã này")
+
+
+def rights_subscription_check(account_no, ticker, date, prev_date, detail, fetch=None):
+    """I/O quanh `classify_rights_subscription`: dòng Rights từ BQ corporate_action + giá vốn broker
+    ở dnse_raw (prev_date, date). Mọi lỗi ⇒ (False, lỗi thật) — caller giữ chặn (§29)."""
+    try:
+        if fetch is None:
+            from rights_issue_alert import fetch_rights as fetch
+        rows = fetch([ticker])
+    except Exception as e:  # noqa: BLE001 — lỗi BQ ⇒ không chứng minh được ⇒ vẫn chặn, nêu lỗi
+        return False, f"không đọc được tav2_bq.corporate_action: {type(e).__name__}: {str(e)[:160]}"
+    return classify_rights_subscription(rows, date, detail,
+                                        raw_cost_value(account_no, ticker, prev_date) if prev_date else None,
+                                        raw_cost_value(account_no, ticker, date))
+RIGHTS_TERP_TOL_VND = 200.0      # N2: dung sai marketPrice ≈ TERP — bước giá + làm tròn broker (SCL 10-17:
+RIGHTS_TERP_TOL_PCT = 0.005      # Close/Price 0,88674 vs TERP 0,88501 ⇒ lệch 0,2%; cùng cặp FRAME_TOL exdate_frame)
+
+
+def classify_rights_ref_gap(rights_rows, ex_date, price_ref, mkt_price):
+    """PURE. N2 (2026-10-22) — tối cum quyền mua: broker có thể hạ marketPrice về giá tham chiếu
+    điều chỉnh (TERP) cho phiên GDKHQ ngày mai, trong khi close_price hôm nay vẫn là giá CUM (còn
+    quyền) ⇒ lệch >5% CHẶN OAN rc=4 (audit B2.2). Trả:
+      ("rights_ref_confirmed", info) — có dòng Rights chưa huỷ, GDKHQ == `ex_date` (phiên kế
+          tiếp), tỉ lệ r > 0, BIẾT giá phát hành S, và |mkt − (P + r·S)/(1 + r)| ≤ dung sai.
+      ("rights_ref_unconfirmed", lý do) — có Rights GDKHQ == ex_date nhưng thiếu một bit (chưa
+          có giá phát hành / TERP không khớp) ⇒ caller GIỮ chặn rc=4, in lý do (§29).
+      (None, None) — không có quyền mua nào GDKHQ phiên kế tiếp ⇒ hành vi cũ nguyên vẹn.
+    Mark NAV vẫn dùng giá CUM (đúng hệ quy chiếu hôm nay: KL chưa đổi, quyền còn gắn vào CP)."""
+    if not price_ref or not mkt_price:
+        return None, None
+    why = []
+    for r in rights_rows or []:
+        if not _is_rights_event(r) or r.get("issue_status_code") == "N" \
+                or r.get("event_status") == "not_executed":
+            continue
+        if str(r.get("exright_date") or "")[:10] != ex_date:
+            continue
+        try:      # `or 0` ⇒ chỉ còn ValueError (chuỗi hỏng) — giữ (13y): không nuốt TypeError
+            ratio = float(r.get("exercise_ratio") or 0)
+        except ValueError:
+            ratio = 0.0
+        if ratio <= 0:
+            why.append(f"id={r.get('id')} tỉ lệ quyền mua không hợp lệ ({r.get('exercise_ratio')})")
+            continue
+        from rights_issue_alert import issue_price      # cùng công thức với cảnh báo/N3
+        px = issue_price(r)
+        if not px:
+            why.append(f"id={r.get('id')} GDKHQ {ex_date} CHƯA có giá phát hành ⇒ không tính được "
+                       f"TERP, KHÔNG nới cổng giá")
+            continue
+        terp = (price_ref + ratio * px) / (1 + ratio)
+        tol = max(RIGHTS_TERP_TOL_VND, terp * RIGHTS_TERP_TOL_PCT)
+        if abs(mkt_price - terp) > tol:
+            why.append(f"id={r.get('id')} TERP ({price_ref:,.0f}+{ratio}×{px:,.0f})/(1+{ratio}) = "
+                       f"{terp:,.0f} ≠ marketPrice {mkt_price:,.0f} (dung sai {tol:,.0f})")
+            continue
+        return "rights_ref_confirmed", {"event_id": r.get("id"), "exright_date": ex_date,
+                                        "exercise_ratio": ratio, "issue_price": px, "terp": terp,
+                                        "price_ref": price_ref, "mkt_price": mkt_price,
+                                        "evidence": "market_price_matches_rights_terp"}
+    if why:
+        return "rights_ref_unconfirmed", "; ".join(why)
+    return None, None
+
+
+def _rights_ref_note(t, d):
+    return (f"{t}: quyền mua id={d['event_id']} GDKHQ {d['exright_date']} (tỉ lệ {d['exercise_ratio']}, "
+            f"giá phát hành {d['issue_price']:,.0f}) — broker đã hạ marketPrice {d['mkt_price']:,.0f} ≈ "
+            f"TERP {d['terp']:,.0f} cho phiên GDKHQ; mark giá CUM {d['price_ref']:,.0f} (quyền còn gắn "
+            f"với CP hôm nay), KHÔNG chặn NAV.")
+
+
+def rights_ref_check(ticker, ex_date, price_ref, mkt_price, fetch=None):
+    """I/O quanh `classify_rights_ref_gap`. Lỗi đọc BQ ⇒ ("rights_ref_unconfirmed", lỗi thật):
+    caller GIỮ chặn rc=4 và in lỗi (§29) — không bao giờ nới cổng khi không đọc được bằng chứng."""
+    try:
+        if fetch is None:
+            from rights_issue_alert import fetch_rights as fetch
+        rows = fetch([ticker])
+    except Exception as e:  # noqa: BLE001
+        return ("rights_ref_unconfirmed",
+                f"không đọc được tav2_bq.corporate_action: {type(e).__name__}: {str(e)[:160]}")
+    return classify_rights_ref_gap(rows, ex_date, price_ref, mkt_price)
+
+
 QTY_RATIO_TOL_SHARES = 1.0   # broker làm tròn cổ phiếu lẻ: VIB 500 × 0,095 = 47,5 → credit 47
 # ⚠️ GIẢ ĐỊNH NỀN của sàn 1,0 (arch-review vòng 5, mục 4): DNSE làm tròn theo ĐƠN VỊ cổ phiếu
 # ⇒ sai số làm tròn δ < 1, và phần dư sau khi quy ngược = δ/m < 1/m ≤ 1,0 với mọi m ≥ 1. Sàn
@@ -496,7 +674,11 @@ def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date):
     detail = {"qty_prev": qty_prev, "qty_now": qty_now, "qty_delta": delta,
               "net_fill": net_fill or 0.0, "residual": resid, "prev_qty_date": prev_date,
               "ex_date": (ev or {}).get("date"), "event_code": (ev or {}).get("event_code")}
-    is_share_event = bool(ev and ev.get("price_adjusting") and ev.get("event_code") != "DIV")
+    # N3 (2026-10-22): QUYỀN MUA không phải sự kiện CỔ PHIẾU tự về — CP chỉ về khi user NỘP TIỀN
+    # (sau ĐKCC), nên tỉ lệ thực hiện của nó KHÔNG được "giải thích" một cú tăng KL tối cum.
+    # Ngày nộp tiền đi đường riêng: `classify_rights_subscription`.
+    is_share_event = bool(ev and ev.get("price_adjusting") and ev.get("event_code") != "DIV"
+                          and not _is_rights_event(ev))
     ratio = None
     if is_share_event and ev.get("exercise_ratio") is not None:
         try:
@@ -1304,6 +1486,7 @@ def main():
     qty_unexplained = []         # phần dư KHÔNG khớp gì ⇒ nói thẳng "chưa giải thích được"
     cash_div_confirmed = {}
     corp_action_recovered = {}   # --from-raw + corp-action ĐÃ CONFIRMED ⇒ quy ngược KL như cũ
+    rights_subscribed = {}       # N3: phần dư = user nộp tiền mua quyền (bước giá vốn khớp giá phát hành)
     fill_cache = {}
     journal_gaps = set()
     if args.from_raw or is_today:
@@ -1334,6 +1517,13 @@ def main():
                                           missing_out=_miss).get(t) if prev_d else None)
             journal_gaps.update(_miss)
             qverdict, qdetail = classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+            if qverdict == "qty_unexplained" and qdetail["residual"] > 0:
+                rs_ok, rs_info = rights_subscription_check(account_no, t, args.date, prev_d, qdetail)
+                if rs_ok:
+                    rights_subscribed[t] = dict(qdetail, **rs_info)
+                    qverdict = "ok"
+                else:
+                    qdetail["rights_check"] = rs_info
             if qverdict != "ok":
                 try:
                     mult = confirmed_share_event_multiplier(t, args.date, nxt_session)
@@ -1384,6 +1574,13 @@ def main():
                     5.0, cum_div["amount"], cum_div["tickers"], cum_div["warnings"])
                 if verdict == "cash_div_confirmed":
                     cash_div_confirmed[t] = detail
+    for t, d in sorted(rights_subscribed.items()):
+        print(f"ℹ️ [{args.date}] {t}: KL {d['qty_prev']:,.0f}→{d['qty_now']:,.0f}, phần dư "
+              f"{d['residual']:+,.0f} = user NỘP TIỀN MUA QUYỀN (sự kiện {d['event_id']}, GDKHQ "
+              f"{d['exright_date']}, tỉ lệ {d['exercise_ratio']}, giá phát hành {d['issue_price']:,.0f}; "
+              f"bước giá vốn broker {d['cost_step_vnd']:,.0f}đ khớp) — lệnh tay hợp lệ của user, KHÔNG "
+              f"chặn NAV. Sổ lô/giá vốn verify_account_snapshot CHƯA có lô quyền (N1 chờ user).",
+              file=sys.stderr)
     for t, d in sorted(corp_action_recovered.items()):
         print(f"ℹ️ [{args.date}] {t}: KL {d['qty_prev']:,.0f}→{d['qty_now']:,.0f} (lệnh khớp "
               f"{d['net_fill']:+,.0f}, phần dư {d['residual']:+,.0f}) khớp corp-action ĐÃ CONFIRMED "
@@ -1405,6 +1602,8 @@ def main():
                    f"lệ {d.get('exercise_ratio')} (kỳ vọng {d.get('expected_residual')})"
                    if d.get("ex_date") else
                    "lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp")
+            if d.get("rights_check"):
+                why += f" [không nhận là nộp tiền quyền mua: {d['rights_check']}]"
             parts.append(
                 f"{t}: KL {d['qty_prev']:,.0f}→{d['qty_now']:,.0f} (so với {d['prev_qty_date']}), "
                 f"lệnh khớp thật {d['net_fill']:+,.0f} ⇒ phần dư {d['residual']:+,.0f} CHƯA GIẢI "
@@ -1449,6 +1648,8 @@ def main():
     PRICE_XCHECK_TOLERANCE_PCT = 5.0
     mismatched = []
     raw_price_notes = []
+    rights_ref_confirmed = {}    # N2: marketPrice = TERP quyền mua phiên kế tiếp ⇒ mark giá CUM, không chặn
+    rights_ref_why = {}          # N2: có quyền mua nhưng KHÔNG xác nhận được TERP ⇒ vẫn chặn, kèm lý do
     if args.from_raw:
         for t in tickers:
             if t in corp_action_recovered:
@@ -1490,6 +1691,13 @@ def main():
                 raw_price_notes.append(f"{t}: broker ghi có corp-action sớm (Price {cp:,.0f}/{mult} ≈ "
                                        f"marketPrice {mp:,.0f}) — quy KL về trước sự kiện")
             elif kind == "unexplained":
+                rv, rinfo = rights_ref_check(t, nxt_session, cp, mp)
+                if rv == "rights_ref_confirmed":
+                    rights_ref_confirmed[t] = rinfo
+                    raw_price_notes.append(_rights_ref_note(t, rinfo))
+                    continue
+                if rv:
+                    rights_ref_why[t] = rinfo
                 mismatched.append((t, cp, mp, abs(cp - mp) / mp * 100))
     elif is_today:
         for t in tickers:
@@ -1501,6 +1709,13 @@ def main():
                 continue
             diff_pct = abs(cp - mp) / mp * 100
             if diff_pct > PRICE_XCHECK_TOLERANCE_PCT:
+                rv, rinfo = rights_ref_check(t, nxt_session, cp, mp)
+                if rv == "rights_ref_confirmed":
+                    rights_ref_confirmed[t] = rinfo
+                    print(f"ℹ️ [{args.date}] {_rights_ref_note(t, rinfo)}", file=sys.stderr)
+                    continue
+                if rv:
+                    rights_ref_why[t] = rinfo
                 mismatched.append((t, cp, mp, diff_pct))
     else:
         # Lịch sử: CHỈ đối chiếu các mã VỪA bị quy đổi corp-action ở trên. So trực tiếp
@@ -1521,7 +1736,9 @@ def main():
                 mismatched.append((t, cp_adj, mp, diff_pct))
     if mismatched:
         detail = "; ".join(f"{t}: close_price={cp:,.0f} vs vị thế broker marketPrice={mp:,.0f} "
-                           f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
+                           f"(lệch {d:.1f}%)"
+                           + (f" [quyền mua: {rights_ref_why[t]}]" if t in rights_ref_why else "")
+                           for t, cp, mp, d in mismatched)
         print(f"❌ [{args.date}] Giá close_price(G1) và marketPrice của vị thế broker LỆCH "
               f">{PRICE_XCHECK_TOLERANCE_PCT:.0f}% cho {len(mismatched)} mã — KHÔNG tính NAV "
               f"(broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, "
@@ -1681,6 +1898,7 @@ def main():
                "journal_gaps": sorted(journal_gaps),
                "share_event_blocks": [], "qty_unexplained": [],
                "cash_div_confirmed": cash_div_confirmed,
+               "rights_ref_confirmed": rights_ref_confirmed,
                "corp_action_recovered": corp_action_recovered},
            "source": "verify_account_snapshot.py (fills) + dnse_raw balances (real broker API, "
                      "chọn bản GHI CUỐI CÙNG trong ngày — balance có thể cần thời gian đối soát "

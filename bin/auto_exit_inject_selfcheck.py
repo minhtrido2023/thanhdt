@@ -39,6 +39,10 @@ import park_holdings as ph  # noqa: E402
 import corp_actions as ca  # noqa: E402
 from trading_bot.vn_market import next_trading_day  # noqa: E402
 
+# Cổng quyền mua (X1, lag_rights_exit_hold.py) có selfcheck riêng (lag_rights_exit_hold_selfcheck.py);
+# ở đây mã giả không có quyền mua — chặn tra BQ thật, giữ nguyên hành vi mọi ca cũ.
+aei.rights_hold.holds_for = lambda *a, **kw: {}
+
 PASS, FAIL = [], []
 
 
