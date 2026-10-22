@@ -16,8 +16,10 @@ LIVERMORE_NOTIFY_BIN, LIVERMORE_STATE_DIR, và cho clock: tham số clock_fn c�
 """
 import datetime as dt
 import fcntl
+import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -30,6 +32,7 @@ ENTER_K, EXIT_K = 15, 5
 HI_LO_WIN, BREAK_WIN = 252, 60
 RUN_TIMEOUT = int(os.environ.get("LIVERMORE_RUN_TIMEOUT") or 1200) if os.environ.get("LIVERMORE_TEST") == "1" else 1200
 MIN_GAP = 20          # phiên: khoảng cách tối thiểu TOÀN CỤC giữa mọi lần đọc (chân 20 phiên không chồng)
+DRY = False           # --dry-run: KHÔNG báo lỗi, KHÔNG ghi state (đặt trong evaluate)
 STATE_FILE = lambda: os.path.join(C.STATE_DIR, "livermore_trigger.json")      # noqa: E731
 
 
@@ -120,7 +123,12 @@ def notify(msg):
 
 def alert(kind, msg, st=None):
     """Báo lỗi kênh livermore, dedupe 1 lần / ngày ICT / loại (state['alerts']). Lỗi hỏng state vẫn báo (không dedupe)."""
-    key = f"{C.today_ict()}|{kind}"
+    if DRY:
+        print(f"[trigger] (dry-run) sẽ báo {kind}: {msg[:120]}")
+        return False
+    # khoá dedupe = ngày|loại|băm nguyên nhân (số/ngày bị che để cùng nguyên nhân không báo lặp, nguyên nhân KHÁC vẫn báo)
+    cause = hashlib.md5(re.sub(r"\d+", "#", msg)[:80].encode()).hexdigest()[:6]
+    key = f"{C.today_ict()}|{kind}|{cause}"
     if st is None:
         try:
             st = load_state()
@@ -172,7 +180,8 @@ def run_score():
 
 
 def evaluate(argv, clock_fn=real_clock):
-    dry = "--dry-run" in argv
+    global DRY
+    dry = DRY = "--dry-run" in argv
     today = C.today_ict()
     bars = C.get_bars(today - dt.timedelta(days=700))
     if len(bars) < HI_LO_WIN + 1:
@@ -198,6 +207,14 @@ def evaluate(argv, clock_fn=real_clock):
     elif clock is not None:
         print(f"[trigger] WARN DT clock asof={clock.get('asof')} ≠ VNINDEX as-of {as_of} — bỏ điều kiện DT")
     st = load_state()
+    reg0 = C.read_registry()
+    for d0, r0 in list(st["runs"].items()):                     # lượt 'pending' của NGÀY CŨ không bao giờ có entry
+        if (not dry and r0.get("status") == "pending" and d0 != str(as_of) and not r0.get("orphan_alerted")
+                and not C.has_entry(reg0, dt.date.fromisoformat(d0))):
+            if alert(f"ORPHAN_{d0}", f"{d0}: lượt đọc cũ dừng giữa chừng (state 'pending', chưa có entry) và as-of đã qua — "
+                                     f"chạy tay livermore_run.sh --as-of {d0} nếu còn cần", st):
+                r0["orphan_alerted"] = True
+                save_state(st)
     run0 = st["runs"].get(str(as_of))
     if run0 and run0.get("status") == "done" and not dry:       # đã đọc rồi: chỉ có thể còn thiếu bước báo
         if not run0.get("notified"):
@@ -208,7 +225,9 @@ def evaluate(argv, clock_fn=real_clock):
         print(f"[trigger] as-of {as_of} đã đọc xong — no-op")
         return 10
     gap = C.has_entry(C.read_registry(), as_of) or gap_ok(as_of, C.parse_entries(C.read_registry()), dates)
-    ok_kinds = kinds if gap else []
+    # DT_ENTER_* (candidate vào CRISIS/EX-BULL ≥15/25) VƯỢT khoảng cách: đúng điểm chuyển được lập ra để đọc,
+    # lịch sử 6/14 đợt bị câm vì một lần đọc giá đi trước (user duyệt 22/10; ~+0,4 lần đọc/năm, chân 20 phiên có thể chồng)
+    ok_kinds = [k for k in kinds if gap or k.startswith("DT_ENTER_")]
     print(f"[trigger] as-of={as_of} kích hoạt thô={kinds} sau khoảng-cách-{MIN_GAP}={ok_kinds} clock_ok={clock_ok}")
     rc = 0 if (clock_ok or ok_kinds) else 4
     if rc == 4 and not dry:

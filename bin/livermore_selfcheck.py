@@ -247,6 +247,12 @@ def inner():
     os.environ["LIVERMORE_NOW"] = "2026-10-23T19:30:00"
     rc4 = T.evaluate([], clock_fn=lambda: dict(active=False, committed=3, asof="2026-10-23"))
     check("dedupe-khoảng-cách-20", rc4 == 0 and cnt() == 1, f"rc={rc4} cnt={cnt()}")
+    # DT_MOVE trong khoảng cách vẫn bị chặn; DT_ENTER_* thì VƯỢT khoảng cách (user duyệt 22/10)
+    rc4b = T.evaluate([], clock_fn=lambda: dict(active=True, cand=2, k=6, need=10, committed=3, asof="2026-10-23"))
+    check("gap-DT_MOVE-vẫn-chặn", rc4b == 0 and cnt() == 1, f"rc={rc4b} cnt={cnt()}")
+    rc4c = T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-23"})
+    check("gap-DT_ENTER-vượt", rc4c == 10 and cnt() == 2 and "DT_ENTER_CRISIS" in C.read_registry()
+          and "### LVR-2026-10-23" in C.read_registry(), f"rc={rc4c} cnt={cnt()}")
     os.environ["LIVERMORE_NOW"] = env["LIVERMORE_NOW"]
 
     # ── 6. as-of lệch / dữ liệu cũ ──
@@ -292,6 +298,27 @@ def inner():
     rc = T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-21"})
     rc_ = T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-21"})
     check("B4-rc4-báo-1-lần", rc == 4 and rc_ == 4 and len(alerts("DT clock không dùng được")) == 1, f"{nlog()}")
+    # --dry-run: không báo lỗi, không ghi state
+    reset()
+    write_bars(closes, last=D(2026, 10, 21))
+    rc = T.evaluate(["--dry-run"], clock_fn=lambda: clk())
+    check("dry-run-không-báo-không-state", rc == 3 and not nlog()
+          and not os.path.exists(os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_trigger.json")), f"rc={rc} {nlog()}")
+    # lượt 'pending' của ngày cũ không có entry ⇒ báo ĐÚNG 1 lần
+    reset()
+    write_bars(walk(300))
+    C.atomic_write(os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_trigger.json"),
+                   json.dumps({"runs": {"2026-10-15": {"kinds": ["X"], "status": "pending", "notified": False}},
+                               "last_fired": {}, "alerts": {}}))
+    T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-21"})
+    T.evaluate([], clock_fn=lambda: {**clk(), "asof": "2026-10-21"})
+    check("orphan-pending-báo-1-lần", len(alerts("lượt đọc cũ dừng giữa chừng")) == 1, str(nlog()))
+    # dedupe theo (loại, nguyên nhân): lỗi KHÁC nguyên nhân cùng loại vẫn báo; cùng nguyên nhân không lặp
+    reset()
+    T.alert("EXC", "lỗi A xyz")
+    T.alert("EXC", "sự cố khác hẳn")
+    T.alert("EXC", "lỗi A xyz")
+    check("dedupe-theo-nguyên-nhân", len(alerts("lỗi A xyz")) == 1 and len(alerts("sự cố khác hẳn")) == 1, str(nlog()))
     # timeout của run_livermore ⇒ rc11, báo TIMEOUT, state failed (không kẹt pending)
     reset()
     write_bars(closes)
@@ -508,6 +535,11 @@ def inner():
 
 MUTANTS = [
     ("livermore_trigger_check.py", "MIN_GAP = 20", "MIN_GAP = 1", "bỏ khoảng cách 20 phiên"),
+    ("livermore_trigger_check.py", 'if gap or k.startswith("DT_ENTER_")]', 'if gap]', "DT_ENTER không vượt khoảng cách"),
+    ("livermore_trigger_check.py", 'if gap or k.startswith("DT_ENTER_")]', 'if gap or k.startswith("DT_")]', "DT_MOVE cũng vượt khoảng cách"),
+    ("livermore_trigger_check.py", "    if DRY:\n", "    if False:\n", "dry-run vẫn báo lỗi"),
+    ("livermore_trigger_check.py", 'and d0 != str(as_of) and not r0.get("orphan_alerted")', 'and False', "pending ngày cũ im lặng"),
+    ("livermore_trigger_check.py", 're.sub(r"\\d+", "#", msg)[:80]', '"x"', "dedupe nuốt lỗi khác nguyên nhân"),
     ("livermore_trigger_check.py", "    if c > max(p252):", "    if c >= max(p252):", "phá 252 dùng >= (bằng đỉnh cũng bắn)"),
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 25, 5", "ngưỡng vào 15→25"),
     ("livermore_trigger_check.py", "ENTER_K, EXIT_K = 15, 5", "ENTER_K, EXIT_K = 15, 10", "ngưỡng need10 5→10"),
