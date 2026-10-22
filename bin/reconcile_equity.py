@@ -293,6 +293,19 @@ def main():
     rights_ev = rights_sub.fill_events(args.account, upto=asof, account_no=account_no)
     for d, evs in rights_ev.items():
         events_by_date.setdefault(d, []).extend(evs)
+    # NB1 (arch-review vòng 2): nộp tiền mua quyền KHÔNG chịu phí giao dịch ⇒ loại lô quyền khỏi cơ sở
+    # phí. Lô quyền về SAU lô gốc ⇒ FIFO bán sau cùng ⇒ phần còn giữ = min(KL quyền, KL đang giữ).
+    rights_q = {}
+    for evs in rights_ev.values():
+        for ev in evs:
+            rights_q.setdefault(ev[2], [0.0, 0.0])
+            rights_q[ev[2]][0] += ev[4]
+            rights_q[ev[2]][1] += ev[4] * ev[5]
+    rights_buy_value = sum(v[1] for v in rights_q.values())
+    if args.trading_fees is None and rights_q:
+        held = {p["ticker"]: float(p["qty"]) for p in snap.get("positions", [])}
+        rights_held_value = sum(min(q, held.get(tk, 0.0)) * v / q for tk, (q, v) in rights_q.items() if q)
+        fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0
     for d in events_by_date:
         events_by_date[d].sort(key=lambda e: e[0])
     corp = load_corp_actions()
@@ -359,7 +372,8 @@ def main():
 
     # Diễn giải residual (ƯỚC TÍNH) — dương = vế trái cao hơn tiền thật ⇒ chi phí chưa trừ đủ.
     turnover = rz["buy_value"] + rz["sell_value"]
-    fee_gap_est = (rz["buy_value"] * fee_buy_pct + rz["sell_value"] * fee_sell_pct) / 100.0 - fees
+    fee_gap_est = ((rz["buy_value"] - rights_buy_value) * fee_buy_pct
+                   + rz["sell_value"] * fee_sell_pct) / 100.0 - fees
     sell_tax_est = rz["sell_value"] * SELL_TAX_RATE
     margin_cum_est = margin_interest_estimate(daily_debt, start, bal_ts[:10], args.margin_rate_annual)
     margin_gap_est = max(margin_cum_est - accrued_fee, 0.0)

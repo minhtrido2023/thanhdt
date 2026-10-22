@@ -60,6 +60,8 @@ if "--mutants" in sys.argv[1:]:
         ("M21 alert bỏ dòng khoá chờ niêm yết", "auto_exit_inject.py",
          "    for lk in locked_notes or []:", "    for lk in []:"),
         # <<< B1 vòng 2
+        ("M23 NB1 reconcile tính phí cả lô quyền", "reconcile_equity.py",
+         "        fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0", "        pass"),
         ("M22 B2 net_fills_journal_and_broker (đường sizing broker_statement=True) bỏ cộng lô quyền", "exdate_frame.py",
          "    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():",
          "    for d, evs in {}.items():"),
@@ -765,6 +767,28 @@ check("R1 reconcile_equity: hết lệch +62,5tr (|residual| < 5tr sàn), in dò
       abs(rj["residual"]) < 5e6 and "CP quyền mua user khai" in out.getvalue(), (rj["residual"], rc))
 check("R1b lô quyền vào replay realized: tổng giá trị mua = 14.000×30.000 + 5.000×12.500",
       abs(rj["fill_buy_value"] - (Q0 * COST + RQ * S_PX)) < 1, rj["fill_buy_value"])
+# NB1 vòng 2: không truyền --trading-fees ⇒ phí ước tính KHÔNG tính lên lô quyền (phí 0)
+old = (V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv)
+V.EXEC_DIR = DAR.EXEC_LOG_DIR = dV
+os.environ["MIKE_LAG_RIGHTS_DIR"] = os.path.join(dV, "lag_rights")
+sys.argv = ["reconcile_equity.py", "--account", ACCT, "--account-no", ACCT_NO, "--starting-capital",
+            "1320000000", "--snapshot", sV, "--balance-raw", os.path.join(dV, f"dnse_raw_{P}.jsonl")]
+_CA.load_corp_actions = lambda *a, **k: []
+try:
+    with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+        try:
+            RE.main()
+        except SystemExit:
+            pass
+finally:
+    V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv = old
+    _CA.load_corp_actions = _old_lca
+rj3 = json.load(_real_open(sV.replace("verified_snapshot", "reconcile_equity")))
+_fp = rj3["fee_rate_pct_used"] / 100.0
+check("R3 NB1: phí mặc định = 14.000×30.000×phí (lô quyền 5.000×12.500 phí 0); fee_gap không tính lô quyền",
+      abs(rj3["trading_fees_used"] - Q0 * COST * _fp) < 1
+      and abs(rj3["explain_fee_on_turnover_gap_est"] - (Q0 * COST * _fp - Q0 * COST * _fp)) < 1,
+      (rj3["trading_fees_used"], rj3["explain_fee_on_turnover_gap_est"], Q0 * COST * _fp))
 ev_r = RS.fill_events(ACCT, path=os.path.join(dV, "lag_rights", "subscriptions.json"))
 evs = {"2025-10-01": [("2025-10-01T09:30:00", "1", TK, "buy", Q0, COST)], **ev_r,
        "2025-11-20": [("2025-11-20T10:00:00", "2", TK, "sell", Q0 + RQ, 20000.0)]}
