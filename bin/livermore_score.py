@@ -86,18 +86,19 @@ def cumulative(rows):
     beats = {"coin": L[0] > coin[0] and L[1] < coin[1], "always_up": L[0] > up[0] and L[1] < up[1],
              "dt5g": bool(dtb and L_dt[0] > dtb[0] and L_dt[1] < dtb[1])}
     return {"n": n, "L": L, "coin": coin, "up": up, "dt5g": dtb, "L_vs_dt5g": L_dt, "n_dt5g": len(dtr),
-            "beats": beats, "dissolve": n >= GATE_N and not all(beats.values())}
+            "beats": beats, "dissolve": n >= GATE_N and bool(dtr) and not all(beats.values())}   # thiếu DT5G ⇒ chưa kết luận
 
 
 def render(c):
     if c["n"] == 0:
         return "Chưa có entry nào được chấm."
+    no_dt = '' if c['n_dt5g'] else '  ⚠ chưa có state DT5G nào ⇒ chưa kết luận, không giải thể'
     t = lambda x: "NA" if x is None else f"hit {x[0]:.1%} · Brier {x[1]:.3f}"
     out = [f"Lũy kế {c['n']} entry đã chấm (cổng giải thể cần ≥{GATE_N}):",
            f"  Livermore      : {t(c['L'])}",
            f"  Đồng xu 50%    : {t(c['coin'])}   → hơn? {'CÓ' if c['beats']['coin'] else 'KHÔNG'}",
            f"  Luôn UP        : {t(c['up'])}   → hơn? {'CÓ' if c['beats']['always_up'] else 'KHÔNG'}",
-           f"  DT5G-implied   : {t(c['dt5g'])} (n={c['n_dt5g']}; Livermore cùng tập: {t(c['L_vs_dt5g'])})"
+           f"  DT5G-implied   : {t(c['dt5g'])}{no_dt} (n={c['n_dt5g']}; Livermore cùng tập: {t(c['L_vs_dt5g'])})"
            f"   → hơn? {'CÓ' if c['beats']['dt5g'] else 'KHÔNG'}"]
     if c["dissolve"]:
         lost = [k for k, v in c["beats"].items() if not v]
@@ -117,8 +118,11 @@ def notify(msg):
         r = subprocess.run([binp, msg, chan], capture_output=True, text=True, timeout=60)
         if r.returncode != 0:
             print(f"[score] WARN notify rc={r.returncode}: {r.stderr.strip()[:200]}", file=sys.stderr)
+            return False
+        return True
     except Exception as ex:                                     # WARN-only
         print(f"[score] WARN notify lỗi: {ex}", file=sys.stderr)
+        return False
 
 
 def main(argv):
@@ -166,8 +170,8 @@ def main(argv):
         prev_n = open(marker).read().strip() if os.path.exists(marker) else ""
         dis_new = bool(c.get("dissolve")) and prev_n != str(c["n"])     # giải thể: báo 1 lần / mỗi n mới
         if new or dis_new:
-            notify("Livermore — chấm " + (f"{len(new)} entry mới.\n" if new else "") + table)
-            if c.get("dissolve"):
+            sent = notify("Livermore — chấm " + (f"{len(new)} entry mới.\n" if new else "") + table)
+            if c.get("dissolve") and sent:                      # chỉ đánh dấu đã báo khi gửi THÀNH CÔNG
                 C.atomic_write(marker, str(c["n"]))
     return 20 if c.get("dissolve") else 0
 

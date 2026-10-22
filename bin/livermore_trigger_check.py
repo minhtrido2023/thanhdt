@@ -80,9 +80,13 @@ def save_state(st):
     C.atomic_write(STATE_FILE(), json.dumps(st, indent=1, sort_keys=True) + "\n")
 
 
+# entry thủ công/baseline KHÔNG phải kích hoạt thật ⇒ không được chặn cò thật (arch-review vòng 2, B-mới)
+NON_TRIGGER_KINDS = ("LIVE-BASELINE", "MANUAL")
+
+
 def gap_ok(as_of, entries, dates):
     """True nếu as-of cách lần đọc gần nhất TRƯỚC nó (mọi loại, theo registry) >= MIN_GAP phiên."""
-    prev = [e["as_of"] for e in entries if e["as_of"] < as_of]
+    prev = [e["as_of"] for e in entries if e["as_of"] < as_of and e.get("trigger") not in NON_TRIGGER_KINDS]
     if not prev:
         return True
     prev = max(prev)

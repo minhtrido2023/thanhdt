@@ -39,7 +39,7 @@ case "${FAKE_CLAUDE_MODE:-good}" in
   slowgood)   sleep 2; blk UP 0.62; echo "RESULT|$D|UP|0.62|HOLD" ;;
 esac
 '''
-FAKE_NOTIFY = '#!/usr/bin/env bash\necho "$2|$1" >> "$FAKE_NOTIFY_LOG"\n'
+FAKE_NOTIFY = '#!/usr/bin/env bash\n[ -n "$FAKE_NOTIFY_FAIL" ] && exit 1\necho "$2|$1" >> "$FAKE_NOTIFY_LOG"\n'
 
 
 def inner():
@@ -153,6 +153,9 @@ def inner():
     check("gap-20-phiên-cho", T.gap_ok(dates[20], E(dates[0]), dates))
     check("gap-chưa-từng", T.gap_ok(dates[5], [], dates))
     check("gap-mọi-loại-lấy-entry-gần-nhất", not T.gap_ok(dates[30], E(dates[0]) + E(dates[15]), dates))
+    check("gap-baseline-không-chặn-cò-thật", T.gap_ok(dates[5], [{"as_of": dates[0], "trigger": "LIVE-BASELINE"}], dates)
+          and T.gap_ok(dates[5], [{"as_of": dates[0], "trigger": "MANUAL"}], dates)
+          and not T.gap_ok(dates[5], [{"as_of": dates[0], "trigger": "PRICE_BREAK_HI252"}], dates))
     check("gap-bỏ-qua-entry-sau-as-of", T.gap_ok(dates[20], E(dates[0]) + E(dates[40]), dates))
     check("gap-entry-ngoài-bars-đếm-lịch", T.gap_ok(D(2026, 12, 1), E(D(2026, 10, 1)), dates[:2]))
 
@@ -433,6 +436,16 @@ def inner():
     # 12 entry; Livermore sai hết, DT5G (state 3 ⇒ .7) đúng ⇒ Livermore không hơn gì cả ⇒ giải thể
     rc = gate(12, False)
     check("gate-12-sai-hết-giải-thể", rc == 20 and "GIẢI THỂ" in open(env["FAKE_NOTIFY_LOG"]).read(), f"rc={rc}")
+    # notify HỎNG ⇒ marker giải thể KHÔNG được ghi (lần sau còn báo lại); notify tốt ⇒ ghi
+    mk_ = os.path.join(env["LIVERMORE_STATE_DIR"], "livermore_dissolve_notified")
+    if os.path.exists(mk_):
+        os.remove(mk_)
+    os.environ["FAKE_NOTIFY_FAIL"] = "1"
+    gate(12, False)
+    check("gate-notify-hỏng-không-ghi-marker", not os.path.exists(mk_))
+    del os.environ["FAKE_NOTIFY_FAIL"]
+    gate(12, False)
+    check("gate-notify-tốt-ghi-marker", os.path.exists(mk_))
     rc = gate(12, True)
     check("gate-12-đúng-hết-không", rc == 0, f"rc={rc}")
     # 12 entry, y toàn 1: Livermore hơn đồng xu nhưng KHÔNG hơn "luôn UP" ⇒ giải thể (phải hơn CẢ 3)
@@ -447,7 +460,7 @@ def inner():
     c = S.cumulative(rows_)
     check("gate-hơn-cả-3-không-giải-thể", not c["dissolve"] and all(c["beats"].values()), str(c["beats"]))
     c = S.cumulative([{"hit": 0, "brier": .5, "y": 1, "dt_hit": None, "dt_brier": None}] * 12)
-    check("gate-dt5g-NA", c["dissolve"] and c["n_dt5g"] == 0)
+    check("gate-dt5g-NA-chưa-kết-luận", not c["dissolve"] and c["n_dt5g"] == 0, str(c))
 
     # locked_append: 6 tiến trình ghi đồng thời (guard chậm) ⇒ KHÔNG mất dòng nào
     reset()
@@ -513,6 +526,9 @@ MUTANTS = [
     ("livermore_score.py", "y = 1 if b20[\"close\"] > bars[i0][\"close\"] else 0", "y = 1 if b20[\"close\"] < bars[i0][\"close\"] else 0", "đảo dấu hit"),
     ("livermore_score.py", "return 20 if c.get(\"dissolve\") else 0", "return 0", "bỏ rc giải thể"),
     ("livermore_score.py", "dissolve\": n >= GATE_N and", "dissolve\": n >= 1 and", "cổng giải thể không chờ 12"),
+    ("livermore_trigger_check.py", ' and e.get("trigger") not in NON_TRIGGER_KINDS]', ']', "baseline/manual chặn cò thật"),
+    ("livermore_score.py", 'n >= GATE_N and bool(dtr) and not all', 'n >= GATE_N and not all', "thiếu DT5G vẫn giải thể"),
+    ("livermore_score.py", 'if c.get("dissolve") and sent:', 'if c.get("dissolve"):', "marker giải thể ghi dù notify hỏng"),
     ("livermore_score.py", "not all(beats.values())", "not any(beats.values())", "giải thể chỉ khi thua cả 3 (sai luật)"),
     ("livermore_run.sh", 'flock -w "${LIVERMORE_LOCK_WAIT:-1800}" 9 ||', 'true ||', "run.sh bỏ flock"),
     ("livermore_common.py", "        fcntl.flock(lk, fcntl.LOCK_EX)\n        cur =", "        cur =", "locked_append bỏ flock"),
