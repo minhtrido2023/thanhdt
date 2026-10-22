@@ -890,6 +890,24 @@ else
   fi
 fi
 
+# [pipeline-3c] cảnh báo QUYỀN MUA của mã ĐANG GIỮ (user duyệt 2026-10-22 09:27 ICT, "Duyệt việc 1"; audit
+# Taylor_20261021_165512 REPORT.md B1/B4) — WARN-only, KHÔNG chặn DollarBill, KHÔNG chạm lệnh/NAV/sizing.
+# Ba giai đoạn ANNOUNCE (kể cả trạng thái P chưa ngày/giá) / DATED / REMIND ≤3 phiên, mỗi cái dedupe riêng,
+# state ghi atomic SAU khi gửi xong (state/rights_issue_alert_state.json). Vị thế đọc từ active_nav_*.json
+# (cron 20:15 hôm trước) ⇒ rc=2 nếu không có file nào: KHÔNG kết luận "không giữ mã nào". Bỏ qua morning mode
+# (chạy tay) để không nhân đôi tin; gửi Trading Daily nên T7/CN không cần (chuỗi này chỉ chạy T2-T6).
+if [ "${MORNING:-0}" != "1" ]; then
+  echo; echo "--- [pipeline-3c] rights_issue_alert ---"
+  _ra_out="$(timeout "${RIGHTS_ALERT_TIMEOUT_S:-120}" python3 "$ROOT/bin/rights_issue_alert.py" --send 2>&1)"; _ra_rc=$?
+  echo "$_ra_out" | tail -20
+  # rc 0 = ổn (có/không có cảnh báo). 1 = gửi thất bại (CHƯA ghi state ⇒ tối mai thử lại). 2 = không có file vị thế.
+  if [ "$_ra_rc" -ne 0 ]; then
+    [ "$_ra_rc" = "124" ] && _ra_why="treo quá ${RIGHTS_ALERT_TIMEOUT_S:-120}s (timeout); " || _ra_why=""
+    "$ROOT/bin/notify_thread.sh" "🟡 RIGHTS ALERT WARN ($TODAY $NOW_ICT): rights_issue_alert rc=$_ra_rc — ${_ra_why}$(echo "$_ra_out" | tail -2 | tr '\n' ' ' | cut -c1-300). Quyền mua của mã đang giữ có thể CHƯA được cảnh báo — tự kiểm tav2_bq.corporate_action." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED+1))
+  fi
+fi
+
 # [pipeline-4] dispatch DollarBill lập plan T+1 — lặp qua MỌI account live (enabled=true,
 # mode=live, broker=dnse trong secrets/trading_bot_accounts.json), không hardcode SpaceX —
 # thêm account mới vào file đó là tự động có plan T+1, không cần sửa gì ở đây. Xem
