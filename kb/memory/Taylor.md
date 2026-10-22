@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-21T15:50:09Z] [lag-dd-gate vòng 2 10-21] XONG job Taylor_20261021_154311: nhánh feat/lag-dd-gate-20261021 @9969df217 chờ Mike arch-review vòng 3; VPB pilot đổi FLAG->CLEARED (anomaly quá TTL)
-- [2026-10-21T16:54:22Z] ĐANG DỞ job Taylor_20261021_165411: vá cổng khối lượng compute_active_nav đọc thêm dnse_khoplenh_broker_confirm | NEXT: worktree fix/active-nav-broker-fills-20261021
 - [2026-10-21T16:55:22Z] ĐANG DỞ job Taylor_20261021_165512: VIỆC A (EQ_PHAI_THU_TANG tách trả trước) + B (audit quyền mua) | NEXT: worktree wt-lag-rights-20261022, tra ticker_financial cột AR
 - [2026-10-21T16:55:24Z] ĐANG DỞ job Taylor_20261021_165514: LAG per-share surprise + rủi ro quyền mua (paper) | out mike/agents/Taylor/research/lag_per_share_surprise_rights_20261022 | NEXT: PREREG rồi Q1-Q4
 - [2026-10-21T16:59:36Z] [active-nav-broker-fills 10-21] XONG job Taylor_20261021_165411: nhánh fix/active-nav-broker-fills-20261021 @2f956fb2f (wt-active-nav-broker-fills-20261021) chờ Mike arch-review/merge; sau merge cần chạy compute_active_nav thật để làm mới active_nav. (Thay dòng ĐANG DỞ 165411.)
@@ -26,3 +24,5 @@
 - [2026-10-22T02:40:31Z] [rights-alert-wire fix 10-22] XONG job Taylor_20261022_023548: feat/rights-alert-wire-20261022 @f3602417a chờ Mike arch-review/merge
 - [2026-10-22T02:48:06Z] ĐANG DỞ job Taylor_20261022_022942 (attempt2): X1,X3,X2,N3 commit tới fee92d83a | NEXT: N2 cổng TERP daily_nav_snapshot, REPORT
 - [2026-10-22T02:57:31Z] [lag-rights-patches 10-22] XONG job Taylor_20261022_022942: feat/lag-rights-patches-20261022 @6840c070c (X1,X3,X2,N3,N2) chờ Mike arch-review/merge; N1/N4 còn treo (user/legal)
+- [2026-10-22T03:21:59Z] ĐANG DỞ job Taylor_20261022_032141: N1 sổ lô quyền mua (phương án A) + N4 expected_qty | NEXT: đọc audit lag_rights_audit_20261022, tạo worktree wt-lag-rights-n1-20261022
+- [2026-10-22T03:52:03Z] [lag-rights-n1 10-22] XONG job Taylor_20261022_032141: feat/lag-rights-n1-20261022 @63e0c11d3 (N1 9c0aa2a34 + N4) chờ Mike arch-review/merge; escalate dòng rác nav_history 10-22 10:00 (race nav_scripts_2account_selfcheck)

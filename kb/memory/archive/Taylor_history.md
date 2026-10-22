@@ -1409,3 +1409,9 @@
 
 ## Archived 2026-10-22 (keep=12 days=0 require_done=False)
 - [2026-10-21T15:42:39Z] [vnindex-tr polish 10-21] XONG job Taylor_20261021_153755: nhánh fix/vnindex-tr-polish-20261021 @f0645f5e1 (wt_vnindex_tr_polish_20261021) chờ Mike arch-review/merge + áp runbook.proposed
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:50:09Z] [lag-dd-gate vòng 2 10-21] XONG job Taylor_20261021_154311: nhánh feat/lag-dd-gate-20261021 @9969df217 chờ Mike arch-review vòng 3; VPB pilot đổi FLAG->CLEARED (anomaly quá TTL)
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:54:22Z] ĐANG DỞ job Taylor_20261021_165411: vá cổng khối lượng compute_active_nav đọc thêm dnse_khoplenh_broker_confirm | NEXT: worktree fix/active-nav-broker-fills-20261021
