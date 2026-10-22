@@ -27,3 +27,4 @@
 - [2026-10-22T05:39:29Z] [lag-price-reaction 10-22] XONG job Taylor_20261022_053319: NO-GO phản ứng giá, INCONCLUSIVE theo luật chỉ do AVOL thấp (proxy thanh khoản); chờ Mike gọi quant-skeptic
 - [2026-10-22T07:02:23Z] ĐANG DỞ job Taylor_20261022_070208: R&D read-only entry_risk_tech_20261022 (Q1 timing / Q2 tail-risk BAL+LAG) | NEXT: đọc 4 REPORT cũ + harness, viết PREREG+md5
 - [2026-10-22T07:13:14Z] [livermore-live 10-22] XONG job Taylor_20261022_070212: feat/livermore-live-20261022 @fd9bc98e1 chờ Mike arch-review/merge; cron đề xuất chưa cài
+- [2026-10-22T07:15:29Z] [entry-risk-tech 10-22] XONG job Taylor_20261022_070208: Q1 timing NO-GO, Q2 G_VOL CẢNH BÁO-ONLY (đuôi xấu, NAV không lợi); chờ Mike quyết có gọi quant-skeptic
