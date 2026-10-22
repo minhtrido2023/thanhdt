@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-21T16:59:36Z] [active-nav-broker-fills 10-21] XONG job Taylor_20261021_165411: nhánh fix/active-nav-broker-fills-20261021 @2f956fb2f (wt-active-nav-broker-fills-20261021) chờ Mike arch-review/merge; sau merge cần chạy compute_active_nav thật để làm mới active_nav. (Thay dòng ĐANG DỞ 165411.)
-- [2026-10-21T17:17:55Z] [lag-per-share-rights 10-22] XONG job Taylor_20261021_165514 (commit 21c10df2f): PS2 HI->LO -4.6pp (N=60) chờ Mike quant-skeptic; mở: full-engine test tầng PS2 nếu duyệt
 - [2026-10-21T17:19:01Z] [lag-rights-audit 10-22] XONG job Taylor_20261021_165512: nhánh feat/lag-rights-audit-20261022 (wt-lag-rights-20261022) chờ Mike arch-review; mở: N1-N4/X1-X3 cần user duyệt, rights_issue_alert chưa wire
 - [2026-10-22T02:29:51Z] ĐANG DỞ job Taylor_20261022_022942: áp patch quyền mua X1,X2,X3,N2,N3 (user duyệt 22/10) | NEXT: đọc REPORT audit, tạo worktree
 - [2026-10-22T02:38:30Z] ĐANG DỞ job Taylor_20261022_022942: X1 commit 5ef72c1f7 (nhánh feat/lag-rights-patches-20261022, wt-lag-rights-patches-20261022) | NEXT: X3 corp_actions.load_all, X2, N3, N2, REPORT
@@ -26,3 +24,5 @@
 - [2026-10-22T03:52:03Z] [lag-rights-n1 10-22] XONG job Taylor_20261022_032141: feat/lag-rights-n1-20261022 @63e0c11d3 (N1 9c0aa2a34 + N4) chờ Mike arch-review/merge; escalate dòng rác nav_history 10-22 10:00 (race nav_scripts_2account_selfcheck)
 - [2026-10-22T04:12:44Z] ĐANG DỞ job Taylor_20261022_041232: vòng 2 arch-review N1/N4 (B1 rights_locked hạn+alert, B2 broker_statement fills) trên feat/lag-rights-n1-20261022 | NEXT: đọc _rights_locked_split, net_fills_journal_and_broker
 - [2026-10-22T04:31:50Z] [lag-rights-n1 vòng 2 10-22] XONG job Taylor_20261022_041232: feat/lag-rights-n1-20261022 @fa376eda0 (B1 d25a54510, B2 7941ada71, NB1-3) chờ Mike arch-review/merge; còn treo NB2-reconcile/NB4
+- [2026-10-22T05:33:28Z] ĐANG DỞ job Taylor_20261022_053319: R&D read-only phân loại phản ứng giá LAG (lag_price_reaction_class_20261022) | NEXT: PREREG + md5, tái dùng harness lag_entry_window_width_20261021
+- [2026-10-22T05:39:29Z] [lag-price-reaction 10-22] XONG job Taylor_20261022_053319: NO-GO phản ứng giá, INCONCLUSIVE theo luật chỉ do AVOL thấp (proxy thanh khoản); chờ Mike gọi quant-skeptic
