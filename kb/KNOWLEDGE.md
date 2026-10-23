@@ -393,7 +393,7 @@ trigger = PNJ công bố BCTC Quý 3/2026 (không phải TTL theo ngày), KHÔNG
 
 **Known gap:** `daily_nav_snapshot.py` chưa tính đúng P&L cho vị thế legacy ZaloPay (thiếu lịch sử FILL nội bộ) — NAV/active_nav đúng, P&L breakdown cho báo cáo cần việc riêng.
 
-**AlphaLens Paper Portfolio** (DollarBill phụ trách): FPT@70,200 + ACB@22,650 + MBB@25,200 + HDB@25,850 (equal-weight 25%/tên), benchmark entry VNINDEX 1860.01, tracking 2026-07-01→2026-09-30, Taylor audit cuối kỳ.
+**AlphaLens Paper Portfolio** (DollarBill phụ trách): FPT@70,200 + ACB@22,650 + MBB@25,200 + HDB@25,850 (equal-weight 25%/tên), benchmark entry VNINDEX 1860.01, tracking 2026-07-01→2026-09-30, Taylor audit cuối kỳ. **ĐÃ ĐÓNG** (hết kỳ tracking; không còn việc mở).
 
 **Workflow ngày trading đầy đủ (T2-T6, ICT — giờ chuẩn tắc ở `kb/ops_runbook.md`):** 19:00 `bq_freshness_check.sh` → 21:00 `send_plan_report.sh` → 08:20 `ops_health_check.sh` (tự kiểm vận hành trước phiên) → 08:45 `preflight_check.sh` → 09:05 `run_bot.sh --auto-otp` → 11:30 nghỉ trưa → 12:45 `ops_health_check.sh` lần 2 → 13:00 resume chiều → ~14:50 ATC → 19:10 `eod_trading_report.sh` (+ `daily_nav_snapshot.py`). 3 Discord topic tách biệt: Trading Daily (vận hành sống), DollarBill plan channel (lập kế hoạch), Trading report (báo cáo tổng hợp ngày/tuần/tháng). Chi tiết đầy đủ + cron mapping: `kb/current_ops.md`.
 
