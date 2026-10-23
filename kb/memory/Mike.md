@@ -23,3 +23,4 @@
 ## Mốc
 - nav-loss-brake 11-09; review BĐS 11-26; LAG checkpoint 12-15; measurement audit ~12-27.
 
+- [2026-10-23T04:46:03Z] 23/10: AlphaLens ĐÓNG (user chốt A, commit eda93647a). Paper còn lại giữ nguyên: ORB paused, expvol ckpt 11-10, engine-room 12-01 soi V23.
