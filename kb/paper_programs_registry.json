@@ -361,7 +361,7 @@
       "objective": "4 tên Tier-1 chọn bằng lens định giá (PE vs PE_MA1Y; PB vs Gordon justified-PB) có beat VNINDEX qua 3 tháng không? Buy-and-hold, equal-weight 25%/tên.",
       "start": "2026-07-01",
       "end": "2026-09-30",
-      "end_or_trigger": "2026-09-30 (audit: Taylor)",
+      "end_or_trigger": "ĐÓNG 2026-10-23 (user chốt A, decided_by=user, thread Mike 09:45 ICT). Không wire live, không gia hạn. | TRƯỚC ĐÓ: 2026-09-30 (audit: Taylor)",
       "gate_criteria": [
         {
           "text": "Excess return dương vs VNINDEX qua full window 3 tháng",
@@ -394,7 +394,7 @@
         "mode": "static",
         "text": "**Không có giao dịch** — buy-and-hold theo thiết kế (equal-weight 25%/tên, không rebalance, giữ tới 2026-09-30)"
       },
-      "status": "review-done 2026-10-01 — chờ user quyết bước kế (KHÔNG tự wire live)"
+      "status": "closed 2026-10-23 — user chốt phương án A (decided_by: user): ĐÓNG, không wire live; không mở R&D lens trừ khi user yêu cầu"
     },
     {
       "id": "order_book_execution_shadow",
