@@ -34,7 +34,7 @@ else
 $OUT"
   "$ROOT/bin/notify_thread.sh" "$SUMMARY" "$ARCH_THREAD" 2>/dev/null \
     || "$ROOT/bin/notify_thread.sh" "$SUMMARY" "$TRADING_DAILY_THREAD" 2>/dev/null || true
-  "$ROOT/bin/notify.sh" "🩺 [cron_health_check] ${BAD_COUNT} job crontab cần chú ý hôm nay — xem Architecture channel." 2>/dev/null || true
+  "$ROOT/bin/notify.sh" "🩺 [cron_health_check] ${BAD_COUNT} job crontab cần chú ý hôm nay — chỉ lỗi MỚI báo ở Architecture, phần còn lại gom vào digest 18:00 ICT." 2>/dev/null || true
 fi
 
 
