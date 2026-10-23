@@ -1,17 +1,17 @@
-# Fleet status — 2026-10-23T11:07:03 UTC
+# Fleet status — 2026-10-23T12:07:02 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-22T12:05:46Z | 1381 |  |
-| Mike | Mike | child | dead | 2026-10-23T08:52:31Z | 134 |  |
-| Taylor | Taylor | child | dead | 2026-10-23T09:50:45Z | 76 |  |
-| Taylor_1050539 | taylor-ee | child | dead | 2026-10-21T17:10:01Z | 2517 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1445067 | taylor-bc | child | dead | 2026-10-22T02:40:01Z | 1947 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1742364 | taylor-75 | child | dead | 2026-10-22T07:10:01Z | 1677 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | dead | 2026-10-23T09:55:38Z | 71 |  |
-| tmp-6d | tmp-6d | external | dead | 2026-10-22T10:50:01Z | 1457 | interactive · cwd=/tmp |
-| tmp-6f | tmp-6f | external | dead | 2026-10-22T10:50:01Z | 1457 | interactive · cwd=/tmp |
-| tmp-8c | tmp-8c | external | dead | 2026-10-22T10:50:01Z | 1457 | interactive · cwd=/tmp |
-| tmp-a3 | tmp-a3 | external | dead | 2026-10-22T10:50:01Z | 1457 | interactive · cwd=/tmp |
-| tmp-a6 | tmp-a6 | external | dead | 2026-10-22T10:50:01Z | 1457 | interactive · cwd=/tmp |
-| tmp-f6 | tmp-f6 | external | dead | 2026-10-22T10:50:01Z | 1457 | interactive · cwd=/tmp |
+| DollarBill | DollarBill | child | working | 2026-10-23T12:06:40Z | 0 |  |
+| Mike | Mike | child | dead | 2026-10-23T08:52:31Z | 194 |  |
+| Taylor | Taylor | child | dead | 2026-10-23T09:50:45Z | 136 |  |
+| Taylor_1050539 | taylor-ee | child | dead | 2026-10-21T17:10:01Z | 2577 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_1445067 | taylor-bc | child | dead | 2026-10-22T02:40:01Z | 2007 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_1742364 | taylor-75 | child | dead | 2026-10-22T07:10:01Z | 1737 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-10-23T09:55:38Z | 131 |  |
+| tmp-6d | tmp-6d | external | dead | 2026-10-22T10:50:01Z | 1517 | interactive · cwd=/tmp |
+| tmp-6f | tmp-6f | external | dead | 2026-10-22T10:50:01Z | 1517 | interactive · cwd=/tmp |
+| tmp-8c | tmp-8c | external | dead | 2026-10-22T10:50:01Z | 1517 | interactive · cwd=/tmp |
+| tmp-a3 | tmp-a3 | external | dead | 2026-10-22T10:50:01Z | 1517 | interactive · cwd=/tmp |
+| tmp-a6 | tmp-a6 | external | dead | 2026-10-22T10:50:01Z | 1517 | interactive · cwd=/tmp |
+| tmp-f6 | tmp-f6 | external | dead | 2026-10-22T10:50:01Z | 1517 | interactive · cwd=/tmp |
