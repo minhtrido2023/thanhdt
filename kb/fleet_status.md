@@ -1,10 +1,10 @@
-# Fleet status — 2026-10-23T17:32:17 UTC
+# Fleet status — 2026-10-23T17:32:57 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-23T12:06:40Z | 325 |  |
-| Mike | Mike | child | working | 2026-10-23T17:31:22Z | 0 |  |
-| Taylor | Taylor | child | dead | 2026-10-23T09:50:45Z | 461 |  |
+| DollarBill | DollarBill | child | dead | 2026-10-23T12:06:40Z | 326 |  |
+| Mike | Mike | child | working | 2026-10-23T17:31:22Z | 1 |  |
+| Taylor | Taylor | child | dead | 2026-10-23T09:50:45Z | 462 |  |
 | Taylor_1445067 | taylor-bc | child | dead | 2026-10-22T02:40:01Z | 2332 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_1742364 | taylor-75 | child | dead | 2026-10-22T07:10:01Z | 2062 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Wags | Wags | child | working | 2026-10-23T17:32:12Z | 0 |  |

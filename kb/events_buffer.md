@@ -693,3 +693,6 @@
 
 ## Consolidation 2026-10-23T17:32:55Z
 - [2026-10-23T17:32:36Z] Mike/heartbeat — Mike_20261023_173220: {"status": "in_progress", "note": "retro finalize: viet entry"}
+
+## Consolidation 2026-10-23T17:33:11Z
+- [2026-10-23T17:33:03Z] Mike/finding — retro-2026-10-23-final: {"summary": "Retro 23/10 logged: 0 sự cố, Pattern A còn mở, Wags GAPS fixed", "file": "kb/incidents/retro/retro-2026-10-23.md"}
