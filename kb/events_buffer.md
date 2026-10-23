@@ -641,3 +641,7 @@
 - [2026-10-23T09:48:09Z] Wags/heartbeat — Wags_20261023_093002: {"status": "in_progress", "note": "annualization dispatched to Taylor (bg); waiting timing sunday/livermore"}
 - [2026-10-23T09:49:06Z] Wags/heartbeat — Wags_20261023_093002: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20261023_093002", "source": "watcher"}
 - [2026-10-23T09:50:06Z] Wags/heartbeat — Wags_20261023_093002: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20261023_093002", "source": "watcher"}
+
+## Consolidation 2026-10-23T09:51:50Z
+- [2026-10-23T09:51:06Z] Wags/heartbeat — Wags_20261023_093002: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20261023_093002", "source": "watcher"}
+- [2026-10-23T09:51:42Z] Wags/finding — wags-verify: annualization_basis selfcheck PASS sau Taylor b57d066e1: {"verified": "Wags chạy lại annualization_basis_selfcheck.py độc lập: rc=0, 491 vi phạm/249 file, PASS (không file vượt baseline)", "commit": "b57d066e1", "accepted": "6 file R&D frozen (17 sqrt-session-const)", "status": "CLOSED", "note": "selfcheck-red sweep Wags_20261023_093002: annualization đóng"}
