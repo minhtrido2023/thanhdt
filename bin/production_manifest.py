@@ -120,6 +120,16 @@ ROOT_TIER = {
     # thế broker sống + NAV, cùng lập luận plan_position_drift_check ⇒ T0. T0 chỉ CHẶT hơn, không nới ranh giới tự-sửa.
     "fund_bench_cron.sh": T0,          # vỏ cron việc quỹ bước 4 — bọc nav_sleeve --write + chốt sổ đơn vị
     "nav_loss_brake_monitor.py": T0,   # phanh lỗ cấp NAV, CHỈ CẢNH BÁO (không tạo BOT_STOP)
+    # Thêm 2026-10-23 (selfcheck-red owner sweep, job Wags_20261023_093002): 6 gốc mới 10-19..10-23
+    # (5 dòng cron + 2 slice systemd). Phân theo VAI TRÒ (docstring + comment crontab), nghiêng CHẶT khi
+    # chạm plan/NAV: sunday_plan_round chạy chuỗi plan CN (bq_freshness → injectors → send_plan_report) ⇒ T0;
+    # prefetch_dnse_statement tải statement khớp lệnh DNSE cho cổng KL NAV/park ⇒ T0 (cùng lập luận
+    # nav_loss_brake_monitor). Hai gốc còn lại không ghi lệnh/plan/NAV: rating_8l_forward_tracker PAPER-ONLY,
+    # livermore_trigger_check display-only ⇒ T1. arch_noise_gate lọc tin topic Architecture ⇒ T2.
+    "sunday_plan_round.sh": T0,         # vòng plan CN mùa BCTC (gate trong wrapper)
+    "prefetch_dnse_statement.sh": T0,   # statement khớp lệnh DNSE cho cổng KL NAV (allow_fetch=False)
+    "rating_8l_forward_tracker.py": T1,  # tracker OOS rating 8L, PAPER-ONLY, append-only data/
+    "livermore_trigger_check.py": T1,   # cò đọc kỹ thuật Livermore, display-only
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
@@ -131,6 +141,8 @@ ROOT_TIER = {
     "daily_decision_topic.py": T2, "selfcheck_red_owner_sweep.sh": T2,  # thêm 2026-10-09
     "session_start.sh": T2, "stop.sh": T2, "user_prompt_submit.sh": T2,
     "unit:ccdb-mike.service": T2, "unit:paseo.service": T2,
+    "unit:mike.slice": T2, "unit:mike-jobs.slice": T2,  # trần RAM systemd cho fleet/dispatch (2026-10-20)
+    "arch_noise_gate.py": T2,  # digest + lọc nhiễu topic Architecture (thêm 2026-10-23)
     "pkill": T0,  # dừng bot giờ trưa — không có file
 }
 # dispatch.sh = bàn giao việc cho 1 agent. Bao đóng CỦA dispatch.sh (consolidate.sh -> kb_nightly.sh
