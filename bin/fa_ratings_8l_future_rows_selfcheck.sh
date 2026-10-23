@@ -5,7 +5,9 @@ set -uo pipefail
 SRC="$(cd "$(dirname "$0")" && pwd)/refresh_fa_ratings_8l.sh"
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/bin" "$T/state" "$T/stub"
-awk '/^# Dong eff_date TUONG LAI/{f=1} f' "$SRC" | grep -v 'append_event.sh' > "$T/block.sh"
+# Trich DUNG khoi (tu comment mo dau toi `rm -f "$_fut_err"`): tu 057d22a25 dong ke tiep la "$EVENT" ... $NUM_ROWS
+# (bien cua wrapper) — khong con chu append_event.sh de grep -v loc ra nua.
+awk '/^# Dong eff_date TUONG LAI/{f=1} f{print} f&&/^rm -f "\$_fut_err"/{exit}' "$SRC" > "$T/block.sh"
 [ -s "$T/block.sh" ] || { echo "FAIL: khong trich duoc khoi tu $SRC"; exit 1; }
 NOTIFY_LOG="$T/notified"; : > "$NOTIFY_LOG"
 cat > "$T/bin/notify_thread.sh" <<EOS
@@ -22,7 +24,8 @@ EOS
 chmod +x "$T/bin/notify_thread.sh" "$T/stub/bq"
 fail=0
 run() { # $1=BQ_OUT ; env: BQ_STDERR NOTIFY_RC
-  PATH="$T/stub:$PATH" BQ_OUT="$1" MIKE="$T" PROJECT=p TABLE=t.t DISCORD_TRADING_DAILY=td \
+  # NOTIFY: khoi goi "$NOTIFY" tu 057d22a25 (truoc do goi thang $MIKE/bin/notify_thread.sh)
+  PATH="$T/stub:$PATH" BQ_OUT="$1" MIKE="$T" PROJECT=p TABLE=t.t DISCORD_TRADING_DAILY=td NOTIFY="$T/bin/notify_thread.sh" \
     bash -c 'set -uo pipefail; source "$0"' "$T/block.sh" 2>&1
 }
 ok() { if [ "$1" = 0 ]; then echo "PASS $2"; else echo "FAIL $2"; fail=1; fi; }
@@ -38,6 +41,6 @@ o="$(BQ_STDERR='WARNING: deprecated flag' run 'fut\nPMT@2026-10-18\n')"; echo "$
 rm -f "$S"; : > "$NOTIFY_LOG"
 o="$(NOTIFY_RC=1 run 'fut\nPMT@2026-10-18\n')"; [ ! -e "$S" ] && echo "$o" | grep -q "notify_thread.sh that bai"; ok $? "notify hong: KHONG ghi state"
 o="$(run 'fut\nPMT@2026-10-18\n')"; [ "$(notified)" = 1 ] && [ -e "$S" ]; ok $? "lan sau notify OK: bao lai + ghi state (khong mat canh bao)"
-PATH="$T/stub:$PATH" BQ_OUT='BigQuery error: x\n' BQ_RC=1 MIKE="$T" PROJECT=p TABLE=t.t DISCORD_TRADING_DAILY=td bash -c 'set -uo pipefail; source "$0"' "$T/block.sh" >/dev/null 2>&1
+PATH="$T/stub:$PATH" BQ_OUT='BigQuery error: x\n' BQ_RC=1 MIKE="$T" PROJECT=p TABLE=t.t DISCORD_TRADING_DAILY=td NOTIFY="$T/bin/notify_thread.sh" bash -c 'set -uo pipefail; source "$0"' "$T/block.sh" >/dev/null 2>&1
 ok $? "bq loi: khoi van rc=0 (khong lam wrapper fail)"
 echo "RESULT $([ "$fail" = 0 ] && echo PASS || echo FAIL)"; exit "$fail"

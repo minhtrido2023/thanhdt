@@ -42,7 +42,9 @@ expect(){  # name script fake want_rc [want_substr]
   run_gate "$script" "$fake"
   if [ "$G_RC" -ne "$wrc" ]; then bad "$name: rc=$G_RC want $wrc | $G_OUT"; return; fi
   if [ -n "$sub" ] && ! grep -qF -- "$sub" <<<"$G_OUT"; then bad "$name: thiếu '$sub' | $G_OUT"; return; fi
-  if [ "$wrc" -eq 3 ] && [ "${G_OUT:0:1}" != "❌" ]; then bad "$name: dòng fail không bắt đầu bằng ❌"; return; fi
+  # So TIỀN TỐ bằng pattern, không cắt ${G_OUT:0:1}: dưới LANG=C (cron, runner tuần) bash cắt 1 BYTE
+  # của ❌ (3 byte UTF-8) ⇒ luôn khác ⇒ 9 ca đỏ giả (sweep 2026-10-23). Pattern so byte, đúng mọi locale.
+  if [ "$wrc" -eq 3 ] && [[ "$G_OUT" != "❌"* ]]; then bad "$name: dòng fail không bắt đầu bằng ❌"; return; fi
   ok
 }
 suite(){  # $1 = gate script; trả về số fail thêm
