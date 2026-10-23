@@ -48,14 +48,14 @@ def bq(sql):
 BASKET = ['ACB', 'BID', 'CTG', 'DBC', 'DCM', 'DGC', 'EVF', 'HAH', 'HDB', 'HHV', 'IDC', 'LPB',
           'MBB', 'MBS', 'MSB', 'PC1', 'PVT', 'SHB', 'SHS', 'TCB', 'TPB', 'VCB', 'VGC', 'VHC',
           'VHM', 'VIB', 'VIX', 'VND', 'VPB', 'VRE']
-# Names whose last bar is STALE (stopped trading) — where the adjusted series keeps being restated
-# after the last real print, so Close/Price has drifted off 1.0. This is the failure mode the fix
-# exists for, not a hypothetical.
-STALE = ['TRT', 'VHF', 'DKC', 'BCB', 'VTS', 'DLT', 'CDG', 'DNN', 'HLY', 'STS', 'PTE', 'SSN']
-# The STALE fixture is pinned to the bars it was curated from (authoring date 2026-08-02). Read
-# "latest bar" live, names that later resume trading print Close==Price again and silently drop
-# out of the control (2026-10-16: TRT/VTS/DLT/DNN/HLY resumed -> 7/12, sweep RED).
-STALE_ASOF = "2026-08-02"
+# POSITIVE fixture = the SAME 30 members at a fixed HISTORICAL bar. Every later dividend/split
+# restates adjusted Close below raw Price there, so divergence only grows with time (measured
+# 2026-10-23: 30/30 differ >0.5%, Close/Price 0.463..0.966). Replaces a hand-curated list of
+# stale/suspended names (2026-08-02), which the vendor later re-based in place: names that never
+# traded again (PTE/SSN/STS/VHF, last bar 2026-06-18) went back to Close==Price even under the
+# as-of pin -> 5/12, selfcheck-red 2026-10-20. Membership-selected, not ratio-selected, so the
+# control is not tautological.
+POS_ASOF = "2024-01-02"
 
 
 def last_bar(tickers, asof=None):
@@ -88,17 +88,18 @@ check("NEGATIVE: current basket weights identical on both bases",
       gap_basket < 1e-12,
       f"n={len(b)}, max |Δweight| = {gap_basket:.3e} (Close==Price for every member)")
 
-s = last_bar(STALE, asof=STALE_ASOF)
+s = last_bar(BASKET, asof=POS_ASOF)
 s["ratio"] = s.Close / s.pxw
-check("POSITIVE: stale/suspended names diverge between bases",
-      (s.ratio.sub(1).abs() > 0.005).sum() >= 8,
-      f"{(s.ratio.sub(1).abs() > 0.005).sum()}/{len(s)} names differ >0.5%, "
+check("POSITIVE: historical bars diverge between bases",
+      (s.ratio.sub(1).abs() > 0.005).sum() >= 2 * len(BASKET) // 3,
+      f"{(s.ratio.sub(1).abs() > 0.005).sum()}/{len(s)} members differ >0.5% at {POS_ASOF}, "
       f"ratio range {s.ratio.min():.3f}..{s.ratio.max():.3f}")
 
 # A basket is a RELATIVE weight vector: the fix only matters if it reorders names against each
-# other. Mixing one stale name into the live basket is the realistic incident (a held member gets
-# suspended) — it must visibly move the reported weights.
-mix = pd.concat([b[["ticker", "Close", "pxw"]], s[["ticker", "Close", "pxw"]].head(3)])
+# other. Mixing a few off-basis bars into the live basket (a held member stops printing and its
+# last bar drifts) must visibly move the reported weights.
+off = s.loc[s.ratio.sub(1).abs().sort_values(ascending=False).index].head(3)
+mix = pd.concat([b[["ticker", "Close", "pxw"]], off[["ticker", "Close", "pxw"]]])
 mix["w_close"] = mix.Close / mix.Close.sum()
 mix["w_pxw"] = mix.pxw / mix.pxw.sum()
 check("POSITIVE: one suspended member deforms the whole reported weight vector",

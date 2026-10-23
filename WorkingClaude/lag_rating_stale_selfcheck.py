@@ -39,6 +39,7 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 TARGET = os.path.abspath(os.environ.get("LRS_TARGET_DIR") or HERE)
 BASE_REV = os.environ.get("LRS_BASE_REV") or "3dc35467"
+FEATURE_REV = "866d549a0"   # commit đưa cờ lag_rating_stale vào golive (con trực tiếp của BASE_REV)
 GOLIVE_REL = os.path.join("deploy_golive_dt5g_v4", "golive_recommend_v23.py")
 
 sys.path.insert(0, TARGET)
@@ -62,12 +63,13 @@ def _read(rel):
         return f.read()
 
 
-def _git_base(rel):
-    """Nội dung file ở BASE_REV. `git show <rev>:<path>` tính từ GỐC REPO (§8c) ⇒ ghép prefix."""
+def _git_base(rel, rev=None):
+    """Nội dung file ở BASE_REV (hoặc `rev`). `git show <rev>:<path>` tính từ GỐC REPO (§8c) ⇒ ghép prefix."""
+    rev = rev or BASE_REV
     try:
         prefix = subprocess.run(["git", "-C", HERE, "rev-parse", "--show-prefix"],
                                 capture_output=True, text=True, check=True).stdout.strip()
-        r = subprocess.run(["git", "-C", HERE, "show", f"{BASE_REV}:{prefix}{rel.replace(os.sep, '/')}"],
+        r = subprocess.run(["git", "-C", HERE, "show", f"{rev}:{prefix}{rel.replace(os.sep, '/')}"],
                            capture_output=True, text=True, check=True)
         return r.stdout, None
     except Exception as ex:
@@ -530,8 +532,17 @@ check("E5 golive: biến cờ được khởi tạo NGOÀI try (nguồn LAG hỏ
 if gl_base is not None:
     # bỏ dòng CHỈ-comment: commit sau được duyệt có quyền sửa chú thích (ea82525f0 đổi nhãn CCTG
     # 6M→12M trong comment) — E6 canh dòng CODE của gate khác, không canh chữ trong comment
+    # Dòng do commit SAU FEATURE_REV đã commit sửa (vd 3147ce873 neo ICT dòng `age = ...` active_nav,
+    # selfcheck-red 2026-10-18) có review riêng ⇒ miễn. Chỉ miễn thứ ĐÃ VÀO git HEAD: bản sửa chưa
+    # commit / mutant (LRS_TARGET_DIR) xoá dòng gate vẫn bị bắt vì HEAD còn dòng đó.
+    gl_feat, gl_feat_err = _git_base(GOLIVE_REL, FEATURE_REV)
+    gl_head, gl_head_err = _git_base(GOLIVE_REL, "HEAD")
+    check("E6a đọc được golive ở FEATURE_REV + HEAD từ git", gl_feat is not None and gl_head is not None,
+          f"{gl_feat_err} {gl_head_err}")
+    later = (set(gl_feat.splitlines()) - set(gl_head.splitlines())) if gl_feat and gl_head else set()
     removed = [ln for ln in gl_base.splitlines()
-               if ln.strip() and not ln.strip().startswith("#") and ln not in set(gl_new.splitlines())]
+               if ln.strip() and not ln.strip().startswith("#") and ln not in set(gl_new.splitlines())
+               and ln not in later]
     check("E6 golive: so với bản gốc chỉ MẤT đúng 1 dòng code (dòng import được viết lại)",
           removed == ["from lag_rating_filter import lag_filter_low_rating"], f"{removed}")
 

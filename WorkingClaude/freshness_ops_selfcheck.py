@@ -175,6 +175,10 @@ def build_sandbox(tmp: Path) -> dict:
       '#!/usr/bin/env bash\necho "$*" >> "$FAKE_LOG_DIR/dispatch.log"\n')
 
     w(root / "bin" / "dt5g_writer_watch.py", DT5G_WATCH_STUB)
+    # [pipeline-3c] rights_issue_alert (hook 901b2341c, 2026-10-22): script gọi
+    # `python3 $ROOT/bin/rights_issue_alert.py --send`; thiếu file trong sandbox ⇒ rc=2 ⇒ 🟡 RIGHTS
+    # ALERT WARN giả ⇒ S1/S3 đỏ (selfcheck-red 2026-10-22). Stub rc=0 = "chạy ổn, không có quyền mua".
+    w(root / "bin" / "rights_issue_alert.py", DT5G_WATCH_STUB)
 
     (workdir / "trading_bot" / "__init__.py").write_text("")
     (workdir / "trading_bot" / "vn_market.py").write_text(
