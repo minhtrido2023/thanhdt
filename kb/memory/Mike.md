@@ -25,3 +25,5 @@
 
 - [2026-10-23T04:46:03Z] 23/10: AlphaLens ĐÓNG (user chốt A, commit eda93647a). Paper còn lại giữ nguyên: ORB paused, expvol ckpt 11-10, engine-room 12-01 soi V23.
 - [2026-10-23T07:51:54Z] 23/10 TV1: user gửi sơ đồ Vu Gia–Thu Bồn; LN 2026 user ước 140 tỷ (80 hydro+40 tư vấn+?) khớp H1 57,7 + H2 ~82. Theo dõi: BCTC Q3 TV1 ~30/10, sản lượng A Vương (AVC)/SB4 làm chỉ báo sớm mùa lũ Q4; rủi ro lớn hơn là giá PPA sau 2027 (500-600đ) chứ không phải 2026.
+- [2026-10-23T08:06:40Z] 23/10 TV1/AVC: Taylor REPORT avc_tv1_hydrology_20261023 = CHƯA ĐỦ DỮ LIỆU (nghiêng KHÔNG). Hợp lưu A Vương/Bung vs SB5 CHƯA xác minh (Mike đọc từ hình, có thể sai). AVC Q3/26 ra 20/10: DT 200 (-2% yoy), LNST 101 (+5%). Mốc: BCTC Q3 TV1 ~30/10.
+- [2026-10-23T08:52:19Z] 23/10: Architecture topic lọc nhiễu LIVE (merge 1a647928c, cron digest 18:00 ICT). Theo dõi: digest đầu tiên 18:00 23/10 có post; logs/arch_digest.log; state/arch_digest/. Chưa re-review vòng 2 sau khi sửa theo arch-review.
