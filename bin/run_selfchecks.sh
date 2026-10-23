@@ -124,6 +124,10 @@ for f in "${FILES[@]}"; do
     # 170s (ALL PASS) — rc=124 dưới trần 60s là giả.
     *cli_provider_selfcheck.sh) t=240 ;;
     *deposit_fallback_direction_selfcheck.py) t=360 ;;
+    # weekly ops audit 2026-10-24: đo tay livermore 395s (36/36 mutant chết, rc=0) — rc=124 dưới trần 60s là giả.
+    *livermore_selfcheck.py) t=600 ;;
+    # cùng đợt: fa_ratings_ticker_gate 95s (ALL ENVIRONMENTS OK, chạy 3 TZ) — rc=124 giả.
+    *fa_ratings_ticker_gate_selfcheck.sh) t=240 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
