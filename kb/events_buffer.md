@@ -580,3 +580,10 @@
 - [2026-10-23T05:45:07Z] Mike/status — ops-health-check-ZaloPay-2026-10-23: {"account": "ZaloPay", "label": "Trước phiên chiều", "warn_count": 6}
 - [2026-10-23T05:45:10Z] Mike/status — preflight-SpaceX-2026-10-23: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-10-23: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.1h tuổi ≤ ngưỡng 21.3h theo phiên 2026-10-22)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-10-22 = phiên gần nhất, 204 mã ✓"]}
 - [2026-10-23T05:45:21Z] Mike/status — ops-health-check-SpaceX-2026-10-23: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 6}
+
+## Consolidation 2026-10-23T08:05:41Z
+- [2026-10-23T08:03:40Z] Taylor/heartbeat — Taylor_20261023_080330: {"status": "in_progress", "note": "bắt đầu: đọc tài liệu TV1 cũ + data_registry"}
+- [2026-10-23T08:04:31Z] Taylor/heartbeat — Taylor_20261023_080330: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261023_080330", "source": "watcher"}
+- [2026-10-23T08:04:58Z] Taylor/heartbeat — Taylor_20261023_080330: {"status": "in_progress", "note": "đã đo tương quan BQ AVC/TV1 (N=34); đang kiểm địa lý + công bố sản lượng AVC"}
+- [2026-10-23T08:05:29Z] Taylor/finding — avc-tv1-hydrology-indicator-20261023: {"verdict": "CHUA_DU_DU_LIEU_nghieng_KHONG", "corr_rev_avc_tv1_pearson": 0.522, "spearman": 0.51, "N_quarters": 34, "N_independent_years_approx": 8, "corr_np_pearson": 0.223, "avc_release_lead_days_vs_tv1": "8-14", "avc_monthly_output_found": false, "geography_verified": false, "report": "agents/Taylor/research/avc_tv1_hydrology_20261023/REPORT.md", "measured_by": "BQ tav2_bq.ticker_financial AVC/TV1 2018Q1-2026Q2; avc_tv1_ticker_financial.csv"}
+- [2026-10-23T08:05:31Z] Taylor/heartbeat — Taylor_20261023_080330: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261023_080330", "source": "watcher"}

@@ -24,3 +24,4 @@
 - nav-loss-brake 11-09; review BĐS 11-26; LAG checkpoint 12-15; measurement audit ~12-27.
 
 - [2026-10-23T04:46:03Z] 23/10: AlphaLens ĐÓNG (user chốt A, commit eda93647a). Paper còn lại giữ nguyên: ORB paused, expvol ckpt 11-10, engine-room 12-01 soi V23.
+- [2026-10-23T07:51:54Z] 23/10 TV1: user gửi sơ đồ Vu Gia–Thu Bồn; LN 2026 user ước 140 tỷ (80 hydro+40 tư vấn+?) khớp H1 57,7 + H2 ~82. Theo dõi: BCTC Q3 TV1 ~30/10, sản lượng A Vương (AVC)/SB4 làm chỉ báo sớm mùa lũ Q4; rủi ro lớn hơn là giá PPA sau 2027 (500-600đ) chứ không phải 2026.
