@@ -18,3 +18,4 @@
 ## Mốc
 - nav-loss-brake 11-09; review BĐS 11-26; LAG checkpoint 12-15; measurement audit ~12-27. AlphaLens ĐÓNG; ORB paused; expvol ckpt 11-10.
 
+- [2026-10-23T21:23:34Z] [24/10 weekly audit] Đã vá 3 bug (93cc3f91f retro topic, 6b1e3730e incidents index, 2cabd9f0e memcap). Theo dõi: 00:30 25/10 notify_thread_errors.log không còn msg=Retro; sunday_plan_round chạy lần đầu CN 25/10 + selfcheck của nó >7' cần điều tra; context_pack 44.996B sát trần 45KB cần trim; known_red deposit_fallback mục auto đã cũ cần dọn; coord-10-19 còn mở: injector TV1 chưa kẹp biên độ ngày + retro→user options.
