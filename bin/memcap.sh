@@ -7,5 +7,9 @@ set -euo pipefail
 [ "$#" -ge 2 ] || { echo "usage: memcap.sh <MAX_GB> <cmd...>" >&2; exit 2; }
 GB="$1"; shift
 [[ "$GB" =~ ^[0-9]+$ ]] || { echo "memcap: MAX_GB phải là số nguyên, nhận '$GB'" >&2; exit 2; }
+# cron / headless dispatch không có XDG_RUNTIME_DIR ⇒ `systemd-run --user` không nối được user bus và
+# thoát rc=1 ("Failed to connect to bus") — lệnh KHÔNG chạy, selfcheck "vượt trần bị giết" PASS giả
+# (weekly ops audit 2026-10-24). Tự điền khi socket user-bus có thật.
+if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -S "/run/user/$(id -u)/bus" ]; then export XDG_RUNTIME_DIR="/run/user/$(id -u)"; fi
 command -v systemd-run >/dev/null || { echo "memcap: thiếu systemd-run — từ chối chạy không trần" >&2; exit 3; }
 exec systemd-run --user --scope --quiet -p "MemoryMax=${GB}G" -p MemorySwapMax=0 -- "$@"
