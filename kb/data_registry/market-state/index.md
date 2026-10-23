@@ -16,6 +16,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`recommend_v23_bq.md`](recommend_v23_bq.md) — recommend_v23.status / .recommendations (BQ) | CANONICAL — **sổ lịch sử** của golive_v23 theo `signal_date` |
 | [`capit_episode.md`](capit_episode.md) — data/capit_episode.json | CANONICAL (quan sát thuần) — trả lời "**có đang giữ CAPIT không**" |
 | [`cap_signal_advisory_log.md`](cap_signal_advisory_log.md) — kb/data_registry/market-state/cap_signal_advisory_log.csv | CANONICAL (advisory-only, không consumer tự động) |
+| [`livermore_reads.md`](livermore_reads.md) — sổ append-only các lần đọc kỹ thuật VNINDEX của Livermore (FORECAST khoá trước, chấm +20 phiên) | CANONICAL (DISPLAY-ONLY, không sizing/gate) |
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |
 | [`dt5g_ext_2008_research.md`](dt5g_ext_2008_research.md) — agents/Taylor/research/dt5g_ext_2008_20260904/dt5g_ext_2008_full.csv (chuỗi DT5G mở rộng về 2008, ad-hoc KHÔNG cron) | RESEARCH-ONLY |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
