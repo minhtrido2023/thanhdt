@@ -121,7 +121,7 @@ thread_id="$resolved"
 # mẫu thường lệ khai báo tường minh trong gate; lỗi gate / tin lạ ⇒ gửi nguyên văn. Tắt: ARCH_GATE=off.
 if [ "${ARCH_GATE:-on}" != "off" ] && grep -A3 '"architecture"' "$ROOT/kb/discord_channels.json" 2>/dev/null | grep -q "\"$thread_id\""; then
   _gate_rc=0
-  _gate_out="$(python3 "$ROOT/bin/arch_noise_gate.py" gate "$thread_id" "$msg" 2>/dev/null)" || _gate_rc=$?
+  _gate_out="$(timeout 5 python3 "$ROOT/bin/arch_noise_gate.py" gate "$thread_id" "$msg" 2>/dev/null)" || _gate_rc=$?
   case "$_gate_rc" in
     0) echo '{"status":"buffered","topic":"architecture","note":"digest cuoi ngay"}'; exit 0 ;;
     10) msg="$_gate_out" ;;

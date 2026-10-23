@@ -14,7 +14,7 @@ Architecture:
         gom bộ đệm từ lần digest trước thành 1 tin tổng kết trong ngày.
 
 THIẾT KẾ FAIL-OPEN: chỉ chặn những mẫu thường lệ KHAI BÁO TƯỜNG MINH bên dưới (denylist hẹp).
-Tin lạ, lỗi parse, lỗi đĩa, topic khác -> rc=1 (gửi). Tắt cả cổng: ARCH_GATE=off.
+Tin lạ, lỗi parse, lỗi đĩa, topic khác -> rc=1 (gửi). Tắt cổng: ARCH_GATE=off.
 Mất tin nhắn quan trọng tệ hơn nhiều so với thừa tin thường lệ.
 """
 import json
@@ -49,14 +49,14 @@ def arch_id():
 ROUTINE = [
     ("wags_lifecycle", re.compile(r"\[wags-autofix\] Nhận issue điều phối")),
     ("wags_lifecycle", re.compile(r"\[wags-autofix\] HOÀN TẤT issue")),
-    ("wags_lifecycle", re.compile(r"Arch-review \(ad-hoc\)\*\* — finding Wags khớp 'wags-fix: ")),
+    ("wags_lifecycle", re.compile(r"Arch-review \(ad-hoc\)\*\* — finding Wags khớp 'wags-fix: [^\n]{0,160}?: \*\*CONFIRMED\*\*")),
     ("job_progress", re.compile(r"^[^\n]{0,6}\*\*\w+\*\* nhận việc \(job `")),
     ("job_progress", re.compile(r"^[^\n]{0,6}\*\*\w+\*\* job `\w+`: đã chạy \d+s")),
     ("job_progress", re.compile(r"^[^\n]{0,6}\*\*\w+\*\* vẫn đang chạy")),
-    ("job_done", re.compile(r"^[^\n]{0,6}\*\*\w+\*\* xong \(job `")),
     ("kb_nightly", re.compile(r"^🌙 KB nightly done \(")),
-    ("selfcheck_sweep", re.compile(r"^🔴 \*\*Selfcheck baseline sweep\*\*")),
 ]
+# CỐ Ý KHÔNG chặn (review 2026-10-23): "✅ X xong (job…)" = kênh giao KẾT QUẢ job cho người
+# (MIKE.md §8); "Selfcheck baseline sweep" chỉ phát khi có ĐỎ MỚI; Arch-review NEEDS_CHANGES/REFUTED.
 CRON_HEALTH = re.compile(r"^🩺 \[cron_health_check\]")
 
 
@@ -75,56 +75,80 @@ def now_ict():
 
 def _append(cat, text, extra=None):
     os.makedirs(STATE, exist_ok=True)
-    rec = {"ts": now_ict().isoformat(timespec="seconds"), "cat": cat, "text": text}
-    if extra:
-        rec.update(extra)
     with open(BUFFER, "a", encoding="utf-8") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
+        fcntl.flock(f, fcntl.LOCK_EX)          # ts lấy TRONG khoá: thứ tự file = thứ tự ts
+        rec = {"ts": now_ict().isoformat(timespec="seconds"), "cat": cat, "text": text}
+        if extra:
+            rec.update(extra)
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
-def _cron_errors(msg):
-    """{job_key: first_error_line} trong mục ERRORS_FOUND; None nếu không parse được."""
-    m = re.search(r"=== ERRORS_FOUND \((\d+)\) ===\n(.*?)(?=\n=== |\Z)", msg, re.S)
-    if not m:
-        return None if "ERRORS_FOUND" in msg else {}
-    out, key = {}, None
-    for line in m.group(2).split("\n"):
-        h = re.match(r"^  (\[[^\]]+\] \S.*)$", line)
-        if h:
-            key = h.group(1).strip()
-            out[key] = ""
-        elif key and not out[key] and line.strip():
-            out[key] = line.strip()
-    if len(out) != int(m.group(1)):
-        return None          # đếm không khớp -> không tin parser, để gửi nguyên văn
+CRON_SECTIONS = ("ERRORS_FOUND", "STALE", "LOG_MISSING", "NO_LOG_REDIRECT")
+REMIND_DAYS = 7
+
+
+def _cron_items(msg):
+    """{(section|header): chữ ký lỗi} cho cả 4 mục cần xử lý; None nếu parser không tin được."""
+    out = {}
+    for sec in CRON_SECTIONS:
+        m = re.search(rf"=== {sec} \((\d+)\) ===\n(.*?)(?=\n=== |\Z)", msg, re.S)
+        if not m:
+            if sec in msg:
+                return None
+            continue
+        n, key = 0, None
+        for line in m.group(2).split("\n"):
+            h = re.match(r"^  (\[[^\]]+\] \S.*)$", line)
+            if h:
+                key = f"{sec}|{h.group(1).strip()}"
+                out[key] = ""
+                n += 1
+            elif key and not out[key] and line.strip():
+                out[key] = re.sub(r"\d+", "#", line.strip())[:120]
+        if n != int(m.group(1)):
+            return None
     return out
 
 
 def _gate_cron(msg):
-    errs = _cron_errors(msg)
-    if errs is None:
+    items = _cron_items(msg)
+    if items is None:
         return 1, ""         # fail-open
     try:
         seen = json.load(open(CRON_SEEN, encoding="utf-8"))
     except FileNotFoundError:
         seen = {}
-    new = {k: v for k, v in errs.items() if k not in seen}
+    today = now_ict().date()
+    send, nxt = {}, {}
+    for k, sig in items.items():
+        old = seen.get(k)
+        if old is None or old.get("sig") != sig:
+            send[k] = "MỚI"
+            nxt[k] = {"first_seen": today.isoformat(), "last_sent": today.isoformat(), "sig": sig}
+        else:
+            age = (today - datetime.fromisoformat(old["last_sent"]).date()).days
+            if age >= REMIND_DAYS:
+                send[k] = f"⏰ còn từ {old['first_seen']}"
+                old = dict(old, last_sent=today.isoformat())
+            nxt[k] = old
     os.makedirs(STATE, exist_ok=True)
     tmp = CRON_SEEN + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump({k: seen.get(k) or now_ict().strftime("%Y-%m-%d") for k in errs}, f, ensure_ascii=False)
+        json.dump(nxt, f, ensure_ascii=False)
     os.replace(tmp, CRON_SEEN)
     head = (re.search(r"(\d+) job cần chú ý", msg) or [None, "?"])[1]
-    _append("cron_health", msg, {"n_attention": head, "n_err": len(errs), "n_new_err": len(new)})
-    if not new:
+    by_sec = {sec: [k.split("|", 1)[1] for k in items if k.startswith(sec + "|")] for sec in CRON_SECTIONS}
+    _append("cron_health", msg, {"n_attention": head, "n_err": len(by_sec["ERRORS_FOUND"]),
+                                 "n_stale": len(by_sec["STALE"]), "stale": [h.split()[-1].rsplit("/", 1)[-1] for h in by_sec["STALE"][:6]],
+                                 "n_missing": len(by_sec["LOG_MISSING"]), "n_sent": len(send)})
+    if not send:
         return 0, ""
-    lines = [f"🩺 [cron_health_check] {len(new)} job lỗi MỚI (tổng {len(errs)} job lỗi, {head} cần chú ý):"]
-    for k, v in list(new.items())[:8]:
-        lines.append(f"• {k}\n   {v[:220]}")
-    if len(new) > 8:
-        lines.append(f"… và {len(new) - 8} job khác")
-    lines.append("(job lỗi đã báo hôm trước chỉ vào digest cuối ngày)")
+    lines = [f"🩺 [cron_health_check] {len(send)} job cần xem (tổng {head} cần chú ý; job cũ không đổi → digest 18:00):"]
+    for k, tag in list(send.items())[:10]:
+        sec, hdr = k.split("|", 1)
+        lines.append(f"• [{sec}] {tag}: {hdr}" + (f"\n   {items[k]}" if items[k] else ""))
+    if len(send) > 10:
+        lines.append(f"… và {len(send) - 10} job khác")
     return 10, "\n".join(lines)
 
 
@@ -150,7 +174,7 @@ def _first_line(text, n=150):
     t = re.sub(r"[*`_]", "", text)
     for ln in t.split("\n"):
         ln = ln.strip()
-        if ln and not re.match(r"^\*{0,2}\d{1,2}:\d{2} ICT", ln):
+        if ln and not re.match(r"^\d{1,2}:\d{2} ICT", ln):
             return ln[:n]
     return ""
 
@@ -159,66 +183,68 @@ def build_digest(recs, today):
     by = {}
     for r in recs:
         by.setdefault(r["cat"], []).append(r)
-    lines = [f"📋 **Architecture — tổng kết {today}** (các việc đã tự xử lý/ghi nhận, không cần anh làm gì)"]
+    lines = [f"📋 **Architecture — tổng kết {today}** (việc thường lệ đã tự xử lý; cảnh báo quan trọng đã gửi riêng khi phát sinh)"]
     if not recs:
         return lines[0] + "\n• Không có việc thường lệ nào cần ghi nhận."
     if "wags_lifecycle" in by:
         issues = sorted({m for r in by["wags_lifecycle"] for m in re.findall(r"'(coord-[\w-]+)'", r["text"])})
         done = sum("HOÀN TẤT" in r["text"] for r in by["wags_lifecycle"])
-        verd = {}
-        for r in by["wags_lifecycle"]:
-            for v in re.findall(r"\*\*(CONFIRMED|NEEDS_CHANGES|REFUTED)\*\*", r["text"]):
-                verd[v] = verd.get(v, 0) + 1
-        vtxt = ", ".join(f"{k} ×{v}" for k, v in sorted(verd.items())) or "—"
-        lines.append(f"• Wags tự sửa vấn đề điều phối: {done} hoàn tất/{len(issues)} issue ({', '.join(issues) or '—'}); arch-review: {vtxt}")
-    if "job_done" in by:
-        lines.append(f"• Job agent hoàn tất: {len(by['job_done'])}")
-        for r in by["job_done"][-6:]:
-            lines.append(f"   – {_first_line(r['text'], 130)}")
+        lines.append(f"• Wags tự sửa vấn đề điều phối: {done} hoàn tất / {len(issues)} issue ({', '.join(issues) or '—'}), arch-review CONFIRMED")
     if "job_progress" in by:
-        lines.append(f"• Ping tiến độ job đã gộp: {len(by['job_progress'])} tin")
+        lines.append(f"• Ping tiến độ job đã gộp: {len(by['job_progress'])} tin (kết quả job vẫn gửi riêng)")
     if "cron_health" in by:
-        r = by["cron_health"][-1]
-        lines.append(f"• cron_health_check: {r.get('n_attention', '?')} job cần chú ý, {r.get('n_err', '?')} job lỗi "
-                     f"({r.get('n_new_err', 0)} mới, đã báo riêng); chi tiết: `python3 bin/cron_health_check.py`")
-    if "selfcheck_sweep" in by:
-        r = by["selfcheck_sweep"][-1]
-        names = re.findall(r"• `([^`]+)` — (\w+)", r["text"])
-        known = re.search(r"\((\d+) ca đỏ ĐÃ BIẾT", r["text"])
-        lines.append("• Selfcheck sweep: " + (", ".join(f"{n} {s}" for n, s in names) or "không ca đỏ mới")
-                     + (f"; {known.group(1)} ca đỏ đã biết do Wags/Taylor xử lý" if known else ""))
-    if "kb_nightly" in by:
-        lines.append(f"• KB nightly: {_first_line(by['kb_nightly'][-1]['text'], 140)}")
+        for r in by["cron_health"]:
+            stale = f"; STALE: {', '.join(r['stale'])}" if r.get("stale") else ""
+            lines.append(f"• cron_health_check: {r.get('n_attention', '?')} job cần chú ý — {r.get('n_err', 0)} lỗi, "
+                         f"{r.get('n_stale', 0)} stale, {r.get('n_missing', 0)} thiếu log; đã báo riêng {r.get('n_sent', 0)}{stale}")
+        lines.append("   chi tiết đầy đủ: `python3 bin/cron_health_check.py`")
+    for r in by.get("kb_nightly", []):
+        lines.append(f"• KB nightly: {_first_line(r['text'], 400)}")
     return "\n".join(lines)
 
 
 def digest(post, dry):
     os.makedirs(STATE, exist_ok=True)
-    cur = ""
+    off = 0
     if os.path.exists(CURSOR):
-        cur = open(CURSOR, encoding="utf-8").read().strip()
-    recs = []
+        try:
+            off = int(open(CURSOR, encoding="utf-8").read().strip() or 0)
+        except ValueError:
+            off = 0
+    recs, end = [], off
     if os.path.exists(BUFFER):
-        for ln in open(BUFFER, encoding="utf-8"):
+        with open(BUFFER, "rb") as f:
+            fcntl.flock(f, fcntl.LOCK_SH)
+            end = os.fstat(f.fileno()).st_size
+            if off > end:
+                off = 0                   # buffer bị cắt/xoay -> đọc lại từ đầu
+            f.seek(off)
+            chunk = f.read(end - off)
+        for ln in chunk.decode("utf-8", "replace").split("\n"):
             try:
-                r = json.loads(ln)
+                recs.append(json.loads(ln))
             except ValueError:
                 continue
-            if not cur or r["ts"] > cur:
-                recs.append(r)
     text = build_digest(recs, now_ict().strftime("%d/%m/%Y"))
     print(text)
     if dry or not post:
         return 0
     env = dict(os.environ, ARCH_GATE="off")   # chính digest không được bị cổng chặn
-    rc = subprocess.run([os.path.join(ROOT, "bin", "notify_thread.sh"), text, "architecture"],
-                        env=env, stdout=subprocess.DEVNULL).returncode
+    cmd = os.environ.get("ARCH_DIGEST_NOTIFY") or os.path.join(ROOT, "bin", "notify_thread.sh")
+    rc = subprocess.run([cmd, text, "architecture"], env=env, stdout=subprocess.DEVNULL).returncode
     if rc != 0:
-        print("arch_noise_gate: post digest thất bại — KHÔNG đẩy con trỏ, lần sau gom lại", file=sys.stderr)
+        print("FAIL arch_noise_gate: post digest thất bại — KHÔNG đẩy con trỏ, lần sau gom lại", file=sys.stderr)
         return rc
     tmp = CURSOR + ".tmp"
-    open(tmp, "w", encoding="utf-8").write(recs[-1]["ts"] if recs else now_ict().isoformat(timespec="seconds"))
+    open(tmp, "w", encoding="utf-8").write(str(end))
     os.replace(tmp, CURSOR)
+    # xoay buffer khi đã đọc hết và > 1MB (dưới khoá, chỉ khi chưa có ai ghi thêm)
+    if end > 1_000_000 and os.path.exists(BUFFER):
+        with open(BUFFER, "r+b") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            if os.fstat(f.fileno()).st_size == end:
+                f.truncate(0)
+                open(CURSOR, "w", encoding="utf-8").write("0")
     return 0
 
 
