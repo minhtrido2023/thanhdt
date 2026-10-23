@@ -439,11 +439,13 @@ VIỆC CỦA BẠN:
    hôm nay, KHÔNG chép nguyên văn transcript — chỉ giữ thứ ngày mai cần biết ngay để tiếp
    tục mạch việc, xoá bỏ chi tiết đã xong/không còn liên quan.
 4. Chạy bin/consolidate.sh để gộp bus→KB, đảm bảo context_pack.md tươi cho phiên ngày mai.
-5. Đăng tóm tắt ngắn (5-8 dòng, tiếng người, không jargon) vào Trading Daily
-   (topic trading_daily): số sự cố hôm nay, bao nhiêu mới/bao nhiêu tái diễn, pattern
+5. Đăng tóm tắt ngắn (5-8 dòng, tiếng người, không jargon) vào Trading Daily bằng ĐÚNG
+   lệnh: bin/notify_thread.sh \"<tóm tắt>\" trading_daily  — tên topic là THAM SỐ THỨ 2
+   BẮT BUỘC (thiếu ⇒ notify_thread.sh từ chối gửi, tin mất im lặng — đã xảy ra 10-12/10-17/10-23).
+   Nội dung: số sự cố hôm nay, bao nhiêu mới/bao nhiêu tái diễn, pattern
    xuyên suốt quan trọng nhất, có cái nào fix chưa hoàn chỉnh cần theo dõi tiếp.
 6. Xoá file '$DRAFT_FILE' (đã gắn xong vào kb/incidents/, không cần giữ nữa)." \
-    --timeout 1200 >> "$LOG" 2>&1 &
+    --thread trading_daily --timeout 1200 >> "$LOG" 2>&1 &
 
 log "Finalize job dispatched (background)."
 log "=== daily_retro DONE (draft+verify đồng bộ xong, finalize đang chạy nền) ==="
