@@ -1,16 +1,16 @@
-# Fleet status — 2026-10-24T08:20:24 UTC
+# Fleet status — 2026-10-24T08:21:37 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | working | 2026-10-24T08:20:21Z | 0 |  |
-| DollarBill_39312 | dollarbill-14 | child | busy | 2026-10-24T08:20:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
-| Mike | Mike | child | working | 2026-10-24T08:16:58Z | 3 |  |
-| Taylor | Taylor | child | dead | 2026-10-24T04:57:10Z | 203 |  |
-| Wags | Wags | child | dead | 2026-10-23T21:00:22Z | 680 |  |
-| tmp-6d | tmp-6d | external | dead | 2026-10-22T10:50:01Z | 2730 | interactive · cwd=/tmp |
-| tmp-6f | tmp-6f | external | dead | 2026-10-22T10:50:01Z | 2730 | interactive · cwd=/tmp |
-| tmp-8c | tmp-8c | external | dead | 2026-10-22T10:50:01Z | 2730 | interactive · cwd=/tmp |
-| tmp-a3 | tmp-a3 | external | dead | 2026-10-22T10:50:01Z | 2730 | interactive · cwd=/tmp |
-| tmp-a6 | tmp-a6 | external | dead | 2026-10-22T10:50:01Z | 2730 | interactive · cwd=/tmp |
-| tmp-f6 | tmp-f6 | external | dead | 2026-10-22T10:50:01Z | 2730 | interactive · cwd=/tmp |
-| workingclaude-d3 | workingclaude-d3 | child | dead | 2026-10-24T04:09:32Z | 250 |  |
+| DollarBill | DollarBill | child | working | 2026-10-24T08:21:33Z | 0 |  |
+| DollarBill_39312 | dollarbill-14 | child | busy | 2026-10-24T08:20:01Z | 1 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
+| Mike | Mike | child | working | 2026-10-24T08:16:58Z | 4 |  |
+| Taylor | Taylor | child | dead | 2026-10-24T04:57:10Z | 204 |  |
+| Wags | Wags | child | dead | 2026-10-23T21:00:22Z | 681 |  |
+| tmp-6d | tmp-6d | external | dead | 2026-10-22T10:50:01Z | 2731 | interactive · cwd=/tmp |
+| tmp-6f | tmp-6f | external | dead | 2026-10-22T10:50:01Z | 2731 | interactive · cwd=/tmp |
+| tmp-8c | tmp-8c | external | dead | 2026-10-22T10:50:01Z | 2731 | interactive · cwd=/tmp |
+| tmp-a3 | tmp-a3 | external | dead | 2026-10-22T10:50:01Z | 2731 | interactive · cwd=/tmp |
+| tmp-a6 | tmp-a6 | external | dead | 2026-10-22T10:50:01Z | 2731 | interactive · cwd=/tmp |
+| tmp-f6 | tmp-f6 | external | dead | 2026-10-22T10:50:01Z | 2731 | interactive · cwd=/tmp |
+| workingclaude-d3 | workingclaude-d3 | child | dead | 2026-10-24T04:09:32Z | 252 |  |
