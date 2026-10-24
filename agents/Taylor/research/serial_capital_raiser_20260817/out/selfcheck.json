@@ -111,7 +111,7 @@
     {
       "name": "T7b Q2a serial coefficient identical via explicit cell dummies vs within-demeaning",
       "ok": true,
-      "detail": "dummies=-0.027945654371 absorb=-0.027945654371 \u0394=4.10e-14"
+      "detail": "dummies=-0.027945654371 absorb=-0.027945654371 \u0394=5.01e-14"
     },
     {
       "name": "T8a same seed => bit-identical CI",

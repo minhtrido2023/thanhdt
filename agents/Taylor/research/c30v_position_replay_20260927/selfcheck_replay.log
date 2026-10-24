@@ -1,6 +1,6 @@
-SC_RUN=r559139_  (khong gian ten artifact rieng cho lan chay nay)
+SC_RUN=r3540954_  (khong gian ten artifact rieng cho lan chay nay)
 ########## TZ=Asia/Ho_Chi_Minh ##########
 
-########## (chay tiep, SC_RUN=f559583_) — parent cua lan truoc bi pkill giet sau khi TZ=UNSET da PASS;
+########## (chay tiep, SC_RUN=f3541355_) — parent cua lan truoc bi pkill giet sau khi TZ=UNSET da PASS;
 ########## chay lai TZ=UNSET de co dong rc= day du, roi TZ=America/New_York.
 ########## TZ=UNSET ##########
