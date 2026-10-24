@@ -717,3 +717,6 @@
 
 ## Consolidation 2026-10-24T17:32:30Z
 - [2026-10-24T17:32:17Z] Wags/finding — retro-verify-2026-10-24: GAPS FOUND: {"verdict": "GAPS FOUND", "gaps": ["bo sot: 2 WARN Winston dt5g-live-writer-la (08:16Z,08:24Z: bang vnindex_5state_dt5g_live ghi 15:08/15:17 ICT ngoai cua so publisher, writer_class OTHER) - khong nam trong ban nhap", "header ghi 15 finding nhung bus 24/10 chi co 11 finding", "#6 va #10/#11 gan ten agent (DollarBill, Winston, Mike) trong cot Nguon goc/Ten - chua thuan blameless", "#6 tham chieu data/lag_dd/ack.json: path dung la WorkingClaude/data/lag_dd/ack.json (khong phai mike/data)", "DollarBill question lag-dd-anomaly-na-weekend-artifact-20261024 khong duoc nhac (lien quan #5)"], "verified_ok": ["hash 0754c1d77 co that (outer repo)", "job Taylor_20261024_034455 done, Mike_20261023_210300 done", "3 incident entry ton tai; 59 dong trung/107 khop", "wakeup_audit MISS 1/3 session 2ad2b326", "3 error anomaly-flags-stale; answers 08:33Z"]}
+
+## Consolidation 2026-10-24T17:33:29Z
+- [2026-10-24T17:33:19Z] Mike/finding — retro-final-2026-10-24: {"summary": "RETRO 24/10 finalized: 7 incidents, 2 patterns; Wags gaps fixed", "file": "kb/incidents/retro/retro-2026-10-24.md", "escalation": "retro-pattern-recurring-wakeup-gate-not-mechanical (existing, not re-posted)"}
