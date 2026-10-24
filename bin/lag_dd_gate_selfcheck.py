@@ -183,6 +183,21 @@ def run_inner():
         ck("DSO vendor đi ngược AR thô ⇒ ghi chú dữ liệu mâu thuẫn", any("MÂU THUẪN" in n for n in
            p4["earnings_quality"]["data_notes"]), p4["earnings_quality"]["data_notes"])
         ck("tin Discord nêu ghi chú mâu thuẫn DSO", "MÂU THUẪN" in P.render_message([p4]))
+        # DT tăng mạnh hơn AR ⇒ DSO GIẢM là đúng (không mâu thuẫn); DSO TĂNG mới là mâu thuẫn (ca MSR 24/10)
+        pd1 = B(fin=fin_rows(AR_P0=150.0, Revenue_P0=200.0, DSO_P0=20.0, DSO_P4=40.0))
+        ck("AR +50% < DT +100% & DSO giảm ⇒ KHÔNG ghi chú mâu thuẫn giả",
+           not any("MÂU THUẪN" in n for n in pd1["earnings_quality"]["data_notes"]),
+           pd1["earnings_quality"]["data_notes"])
+        pd2 = B(fin=fin_rows(AR_P0=150.0, Revenue_P0=200.0, DSO_P0=60.0, DSO_P4=40.0))
+        ck("AR +50% < DT +100% mà DSO TĂNG ⇒ ghi chú mâu thuẫn",
+           any("MÂU THUẪN" in n for n in pd2["earnings_quality"]["data_notes"]),
+           pd2["earnings_quality"]["data_notes"])
+        c2 = p4["earnings_quality"]["cfo_vs_np"]
+        ck("CFO/LNST có 2 quý gần nhất (14+13 / 13+12) và tin hiện dòng đó",
+           c2.get("cfo_2q_vnd") == 27.0 and c2.get("np_2q_vnd") == 25.0
+           and "2Q gần nhất" in P.render_message([B(dd=dd_ok(adv=1.5e9))]), c2)
+        ck("CFO 2Q chỉ hiển thị: không đổi flags_hash",
+           B()["flags_hash"] == B()["flags_hash"] and "cfo_2q_vnd" not in json.dumps(B()["flags"]))
 
         # 3. cờ cơ học
         cases = [
@@ -348,6 +363,25 @@ def run_inner():
         ck("gate: gói hỏng ⇒ PACK_UNREADABLE", G("BAD") == "PACK_UNREADABLE", G("BAD"))
         P.write_atomic(P.pack_path("LIE", "2026-10-19"), dict(flagged, ticker="LIE", status="CLEARED"))
         ck("gate: status CLEARED mà có cờ ⇒ KHÔNG coi là CLEARED", G("LIE") == "FLAG_NO_ACK", G("LIE"))
+        # CLEARED không nuốt DROP/RESEARCH của user cho đúng release (gói sinh lại sạch cờ ⇒ hash đổi)
+        P.write_atomic(P.pack_path("DRP", "2026-10-19"), dict(cleared, ticker="DRP"))
+        mk = lambda **kw: dict(dict(ticker="DRP", release_date="2026-10-19", decision="DROP", decided_by="user",  # noqa: E731
+                                    at="2026-10-24T11:06:00+07:00", flags_hash="deadbeefdeadbeef",
+                                    source="selfcheck"), **kw)
+        P.write_atomic(K.ack_path(), {"acks": [mk()]})
+        ck("gate: pack CLEARED + user DROP cũ (hash khác) ⇒ ACK_DROP, KHÔNG mua", G("DRP") == "ACK_DROP", G("DRP"))
+        P.write_atomic(K.ack_path(), {"acks": [mk(decision="RESEARCH")]})
+        ck("gate: pack CLEARED + user RESEARCH ⇒ ACK_RESEARCH", G("DRP") == "ACK_RESEARCH", G("DRP"))
+        P.write_atomic(K.ack_path(), {"acks": [mk(decision="PROCEED")]})
+        ck("gate: pack CLEARED + ack PROCEED ⇒ vẫn CLEARED (PROCEED không được đọc ở nhánh CLEARED)",
+           G("DRP") == "CLEARED", G("DRP"))
+        P.write_atomic(K.ack_path(), {"acks": [mk(decided_by="agent")]})
+        ck("gate: pack CLEARED + DROP do agent ⇒ không phải quyết định user ⇒ CLEARED", G("DRP") == "CLEARED", G("DRP"))
+        P.write_atomic(K.ack_path(), {"acks": [mk(release_date="2026-07-19")]})
+        ck("gate: pack CLEARED + DROP của release KHÁC ⇒ CLEARED", G("DRP") == "CLEARED", G("DRP"))
+        open(K.ack_path(), "w").write("{hỏng")
+        ck("gate: pack CLEARED + ack.json hỏng ⇒ giữ CLEARED (hành vi cũ)", G("DRP") == "CLEARED", G("DRP"))
+        os.remove(K.ack_path())
 
         # 4b. độ tươi gói / gói NA mới hơn / gắn release ứng viên (n1)
         old_pk = dict(cleared, ticker="STL", asof="2026-10-10")
@@ -545,6 +579,15 @@ MUTANTS = [
     ("lag_dd_ack.py", '    elif a.get("flags_hash") != fh:', '    elif False:'),
     ("lag_dd_ack.py", '    if status == "CLEARED" and not fl:', '    if status == "CLEARED":'),
     ("lag_dd_ack.py", '    if decided_by != "user":', '    if False:'),
+    ("lag_dd_ack.py", 'if la and la.get("decided_by") == "user" and la.get("decision") in ("DROP", "RESEARCH"):',
+     'if False:'),
+    ("lag_dd_ack.py", 'if la and la.get("decided_by") == "user" and la.get("decision") in ("DROP", "RESEARCH"):',
+     'if la and la.get("decision") in ("DROP", "RESEARCH"):'),
+    ("lag_dd_ack.py", 'if la and la.get("decided_by") == "user" and la.get("decision") in ("DROP", "RESEARCH"):',
+     'if la and la.get("decided_by") == "user":'),
+    ("lag_dd_pack.py", "if abs(exp_) > 0.10 and abs(dd_) > 0.10 and (exp_ > 0) != (dd_ > 0):",
+     'if abs(ar["yoy"]) > 0.10 and abs(dd_) > 0.10 and (ar["yoy"] > 0) != (dd_ > 0):'),
+    ("lag_dd_pack.py", '"cfo_2q_vnd": cfo[0] + cfo[1]', '"cfo_2q_vnd": cfo[0]'),
     ("lag_dd_ack.py", "        if rel <= d0 and (d0 - rel).days <= PACK_MAX_AGE_DAYS", "        if True"),
     ("lag_plan_consistency_check.py", '            if g["state"] in BUY_OK:\n                continue',
      '            if g["state"] != "NO_PACK":\n                continue'),

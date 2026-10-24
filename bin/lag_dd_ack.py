@@ -141,6 +141,20 @@ def dd_gate(ticker, plan_date, directory=None, acks=None, release_date=None):
                                                 f"{plan_date} {age} ngày (cho phép 0..{PACK_ASOF_MAX_DAYS}) — chạy lại lag_dd_pack.py")
         return out
     if status == "CLEARED" and not fl:
+        # CLEARED không được NUỐT quyết định LOẠI/NGHIÊN CỨU của user cho đúng release này: gói sinh lại
+        # sạch cờ (vd DCF_RICH nhẹ chuyển thành warning) sẽ đổi flags_hash, nhưng DROP vẫn là DROP.
+        # Chỉ chiều AN TOÀN (chặn thêm) — PROCEED không bao giờ được đọc ở nhánh này. ack.json hỏng ở
+        # nhánh CLEARED: giữ hành vi cũ (CLEARED) vì CLEARED vốn không cần ack.
+        try:
+            la = latest_ack(load_acks(os.path.join(directory, "ack.json") if directory else None)
+                            if acks is None else acks, t, rel)
+        except (OSError, ValueError):
+            la = None
+        if la and la.get("decided_by") == "user" and la.get("decision") in ("DROP", "RESEARCH"):
+            out.update(state=f"ACK_{la['decision']}", ack=la,
+                       evidence=f"{os.path.basename(path)} nay CLEARED nhưng user {la['decision']} lúc "
+                                f"{la.get('at')} cho release này — quyết định loại vẫn hiệu lực")
+            return out
         out.update(state="CLEARED", evidence=f"{os.path.basename(path)} CLEARED (0 cờ)")
         return out
     try:

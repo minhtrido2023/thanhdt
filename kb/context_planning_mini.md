@@ -118,7 +118,7 @@ LAG nữa (đã lọc sẵn ở nguồn), nhưng NẾU thấy 1 mã rating≥4 l
 ## LAG DD pack — DCF RICH chỉ là CỜ khi RICH SÂU (user chốt 2026-10-24, `decided_by: user`)
 Cờ `DCF_RICH` (đòi `dcf_override_reason` + ack) chỉ khi biên an toàn DCF < -100% (hoặc thiếu MoS). RICH nhẹ
 (-100%..0) = `pack['warnings']` `DCF_RICH_NHE`, KHÔNG đổi status: mã LAG `CLEARED` có cảnh báo này KHÔNG được
-SKIP/loại chỉ vì "RICH nhẹ" (dòng "⚠ cần dcf_override_reason" ở báo cáo plan áp cho cả RICH nhẹ là còn sót, bỏ qua).
+SKIP/loại chỉ vì "RICH nhẹ" (dòng "⚠ cần dcf_override_reason" ở báo cáo plan nay cũng chỉ in khi MoS < -100%, từ 2026-10-24).
 Không miễn theo ROE. Căn cứ: `agents/Taylor/research/dcf_rich_outlook_20261024/` + `_rerun_20261024/`.
 
 ## CẤM field `funding_required: true` — plan phải tự SHRINK theo cash thực, không list-rồi-đợi-tiền (thêm 2026-07-27)

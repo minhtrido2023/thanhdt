@@ -880,6 +880,8 @@ buổi sáng không có đường chạy hợp lệ. Cơ chế opt-in (cron KHÔ
 
 ## Cổng DD trước plan LAG — Mike ghi ack + hợp đồng NO_PACK (thêm 2026-10-21, job Taylor_20261021_154311)
 Mã LAG (due_today/upcoming) CHỈ vào `orders[]` khi `data/lag_dd/<mã>_<release>.json` CLEARED hoặc user ack PROCEED.
+  `--gate` mới là nguồn sự thật: gói CLEARED vẫn ra `ACK_DROP`/`ACK_RESEARCH` nếu user đã loại/hoãn release đó (từ 2026-10-24);
+  gỡ DROP = user đổi ý ⇒ ghi PROCEED bằng hash của gói hiện tại (ack mới nhất thắng).
 - **Ai quyết**: CHỈ USER. Mike chỉ chép lại câu trả lời thật của user (coding_guidelines §20: `decided_by=user`).
 - **Quy trình ghi ack** (user trả lời trên Discord topic plan_approval cho tin "🧾 DD trước plan"): tin in `hash`
   của bộ cờ user đã xem. Mike chạy
