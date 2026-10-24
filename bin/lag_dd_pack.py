@@ -45,6 +45,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -98,7 +99,7 @@ FLAG_CODES = {
     "PHAP_LY_WARNING":       "cờ pháp lý (forensic flag_type pháp lý) — CHỈ WARNING, không loại (luật 27/09)",
     "RATING_8L_FAIL":        "8L rating ≥ 4 hoặc không có rating ≤ asof",
     "RATING_8L_CU":          "dòng 8L mới nhất có time < Release_Date của sự kiện (chấm bằng BCTC cũ)",
-    "DCF_RICH":              "DCF status RICH (đắt so với giá trị hợp lý)",
+    "DCF_RICH":              "DCF status RICH SÂU: biên an toàn < -100% (hoặc thiếu MoS ⇒ fail-closed); RICH nhẹ chỉ là cảnh báo, xem pack['warnings']",
     # --- Chất lượng cú bất ngờ lợi nhuận (b) ---
     "EQ_NEN_THAP":           f"NP_P4 > 0 nhưng < {EQ_BASE_LOW_RATIO:.0%} trung vị NP_P5..P7",
     "EQ_CFO_YEU":            f"ΣCF_OA 4 quý < {EQ_CFO_NP_MIN:.0%} ΣNP 4 quý (phi ngân hàng)",
@@ -428,6 +429,35 @@ def _f(code, evidence):
             "meaning": FLAG_CODES[code]}
 
 
+# user chốt 2026-10-24 (phương án A, sau Taylor dcf_rich_outlook_20261024 + rerun, quant-skeptic CONFIRMED số đo):
+# DCF RICH chỉ là CỜ (đòi dcf_override_reason / ack) khi RICH SÂU (MoS < -100%), KHÔNG miễn theo ROE;
+# RICH nhẹ (-100%..0) không mang thông tin trong nghiên cứu ⇒ chỉ cảnh báo trong pack['warnings'], không đổi status.
+DCF_RICH_DEEP_MOS = -1.0
+
+
+def _rich_deep(dcf):
+    """True nếu RICH sâu HOẶC không đọc được MoS HOẶC MoS > 0 (RICH mà MoS dương = dữ liệu mâu thuẫn).
+    Fail-closed: thiếu/lạ bằng chứng ⇒ vẫn cờ."""
+    mos = _num(dcf.get("margin_of_safety"))
+    return mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0
+
+
+def soft_warnings(ev):
+    """Cảnh báo KHÔNG đổi status/flags_hash (hiển thị cho user): RICH nhẹ kèm số."""
+    out = []
+    dcf = (ev.get("valuation") or {}).get("dcf")
+    if isinstance(dcf, dict) and dcf.get("status") == "RICH" and not _rich_deep(dcf):
+        d = ev.get("dd") or {}
+        roe = None
+        m = re.search(r"ROE5Y\s*(-?[\d.]+)%", str(d.get("fundamentals") or "")) if isinstance(d, dict) else None
+        if m:
+            roe = m.group(1)
+        out.append({"code": "DCF_RICH_NHE", "severity": "WARNING",
+                    "evidence": f"DCF RICH nhẹ: MoS {_num(dcf.get('margin_of_safety'))*100:.1f}% (ngưỡng cờ < {DCF_RICH_DEEP_MOS*100:.0f}%)"
+                                f"{', ROE5Y ' + roe + '%' if roe else ''} — nghiên cứu 24/10: RICH nhẹ không khác đối chứng về LN/drift"})
+    return out
+
+
 # ── (a) DD cơ bản → cờ ───────────────────────────────────────────────────────────────────────
 def basic_flags(ev):
     """ev = run_dd() + valuation + rating + forensic. Trả list cờ. Thuần — selfcheck gọi thẳng."""
@@ -493,7 +523,7 @@ def basic_flags(ev):
                                               f"{x.get('note')}"))
     val = ev.get("valuation") or {}
     dcf = val.get("dcf")
-    if isinstance(dcf, dict) and dcf.get("status") == "RICH":
+    if isinstance(dcf, dict) and dcf.get("status") == "RICH" and _rich_deep(dcf):
         flags.append(_f("DCF_RICH", val.get("text") or "status=RICH"))
     computed = isinstance(dcf, dict) and dcf.get("status") in ("CHEAP", "RICH", "FAIR")
     if not computed and not val.get("alt_lens"):
@@ -576,6 +606,7 @@ def build_pack(ticker, asof, cand=None, release_date=None, macro_note=None, sour
         "candidate": cand or {},
         "status": status,
         "flags": uniq, "flags_hash": flags_hash(uniq),
+        "warnings": soft_warnings(ev),
         "flag_definition": "CLEARED ⇔ flags rỗng; danh sách mã cờ = lag_dd_pack.FLAG_CODES",
         "dd_basic": _jsonable({k: ev.get(k) for k in ("dd", "adv", "adv_date", "adv_err", "insider_ok",
                                                       "corp_ok", "anomaly_rec", "anomaly_err",
@@ -650,6 +681,8 @@ def render_message(packs):
         head = f"- **{p['ticker']}** (release {p['release_date']}, vào lệnh ~{c.get('entry_date', '?')}): "
         if p["status"] == "CLEARED":
             lines.append(head + "✅ CLEARED")
+            for w in p.get("warnings") or []:
+                lines.append(f"    ⚠️ WARNING `{w['code']}` — {w['evidence'][:220]}")
             continue
         lines.append(head + f"🚩 FLAG — {len(p['flags'])} cờ, hash `{p['flags_hash']}` "
                             f"({','.join(sorted({f['code'] for f in p['flags']}))}):")
@@ -659,6 +692,8 @@ def render_message(packs):
         lines.append(f"    ➜ Trả lời trước **{_deadline(c.get('entry_date'))}**: "
                      f"(1) nghiên cứu thêm · (2) loại · (3) mua dù có cờ. Không trả lời = đứng ngoài plan. "
                      f"(Ack gắn hash `{p['flags_hash']}`; gói đổi cờ sau tin này ⇒ ack bị từ chối, sẽ hỏi lại.)")
+        for w in p.get("warnings") or []:
+            lines.append(f"    ⚠️ WARNING `{w['code']}` — {w['evidence'][:220]}")
         for note in (p.get("earnings_quality") or {}).get("data_notes") or []:
             lines.append(f"    ℹ️ {note}")
         mn = p.get("macro_note") or {}
@@ -674,7 +709,9 @@ def _state_path():
 
 
 def _nkey(p):
-    return f"{p['ticker']}|{p['release_date']}|{p['flags_hash']}|{p['status']}"
+    k = f"{p['ticker']}|{p['release_date']}|{p['flags_hash']}|{p['status']}"
+    w = sorted({x["code"] for x in p.get("warnings") or []})
+    return k + ("|W:" + ",".join(w) if w else "")          # warning mới trên gói CLEARED ⇒ gửi lại
 
 
 def notify(packs, dry_run=False):
