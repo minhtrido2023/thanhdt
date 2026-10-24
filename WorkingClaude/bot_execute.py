@@ -245,10 +245,12 @@ def _alert_funding_block(label, plan_date, verdict):
     msg = (f"⛔ FUNDING GATE — account {label}: plan {plan_date} bị TỪ CHỐI thực thi, "
            f"KHÔNG lệnh nào được đặt.\n"
            f"{verdict['reason']}\n"
-           f"Xử lý: sửa plan cho Σ orders[] ≤ sức mua thật — phần thiếu tiền chuyển sang "
+           f"Xử lý: (1) nếu thiếu vì tiền còn trong Trứng vàng — CHUYỂN Trứng vàng → cash "
+           f"(bin/egg_transfer_alert.py nhắc số tiền cần chuyển) rồi chạy "
+           f"bin/run_bot.sh --account {label} --auto-otp; (2) nếu cash + Trứng vàng vẫn không đủ — "
+           f"sửa plan cho Σ orders[] ≤ sức mua thật, phần thiếu chuyển sang "
            f"deferred_orders[] (ưu tiên giữ: LAG deadline T+1/T+2 > CAPIT top-up > "
-           f"discretionary), rồi user duyệt lại và chạy "
-           f"bin/run_bot.sh --account {label} --auto-otp.")
+           f"discretionary), user duyệt lại rồi chạy lại như trên.")
     print(msg)
     _publish_bot_event("error", "PLAN_FUNDING_GATE_BLOCK", {
         "account": label, "plan_date": plan_date, "reason": verdict["reason"],
