@@ -620,3 +620,20 @@
 
 ## Consolidation 2026-10-24T03:07:01Z
 - [2026-10-24T02:15:56Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12779}
+
+## Consolidation 2026-10-24T03:54:12Z
+- [2026-10-24T03:45:09Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "in_progress", "note": "start: đọc dcf_valuation.py + registry"}
+- [2026-10-24T03:45:56Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:46:30Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "in_progress", "note": "control MCH FV 59588 MoS -138.1% reproduced; dựng panel PIT"}
+- [2026-10-24T03:46:56Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:47:56Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:48:07Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "in_progress", "note": "build_panel.py chạy nền ~647 mã (fiinprox PIT shares)"}
+- [2026-10-24T03:48:56Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:49:57Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:50:57Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:51:47Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "in_progress", "note": "panel 7510 sự kiện/52 quý; chạy robustness (ghép ô lỏng, MoS rank trong quý, IS/OOS)"}
+- [2026-10-24T03:51:57Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:52:20Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "in_progress", "note": "robustness xong; case study MCH"}
+- [2026-10-24T03:52:57Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261024_034455", "source": "watcher"}
+- [2026-10-24T03:53:50Z] Taylor/finding — dcf-rich-outlook-20261024: {"q": "DCF RICH sâu có báo trước triển vọng LN/drift?", "verdict_earnings": "SAI — RICH_DEEP (MoS<-100%) NP yoy Q+1 cao hơn FAIR+CHEAP +12.1pp CI[+6.9,+17.6], P(NP Q+1 giảm) -6.6pp CI[-9.8,-3.3]; IS +7.2 / OOS +15.2", "verdict_drift": "ĐÚNG chỉ ở ROE thấp: sau surprise dương BHAR60 ALL -3.4..-3.8pp (CI loại 0, 3 cách ghép, OOS -3.9); ROE5Y<25% -4.5..-4.8pp CI[-7.3,-2.1]; ROE5Y>=25% +4.0..+4.6pp CI chứa 0 (n=84/44 quý, power thấp); hàng hóa -5.5pp (thăm dò); RICH nhẹ = không khác", "MCH": "control FV 59588 MoS -138.1% tái lập; RICH chủ yếu do giả định (base FCFE=0.70xNP, g_exp 5.5%, r 13.9%; giá ngầm định g 27.6%/5y, FCFE=NP vẫn cần 18.3%); LN không gãy (Q3 +15%) nhưng NP TTM 7257 tỷ < đỉnh 7749, NPM 25.6->21.8%", "proposal": "ĐỀ XUẤT (chưa sửa code): chỉ đòi dcf_override_reason khi MoS<-100% VÀ (ROE5Y<25% hoặc hàng hóa chu kỳ); còn lại hạ WARNING. Cần quant-skeptic + user duyệt", "N": "7510 sự kiện DCF-tính-được / 484 mã / 52 cụm quý; bootstrap cụm quý 2000", "report": "agents/Taylor/research/dcf_rich_outlook_20261024/REPORT.md", "measured_by": "agents/Taylor/research/dcf_rich_outlook_20261024/analyze.py + robust.py + mch_case.py (panel.csv md5 c4955278c147…, drift_robust.csv 968d76e84c5b…)"}
+- [2026-10-24T03:53:57Z] Taylor/heartbeat — Taylor_20261024_034455: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261024_034455", "source": "watcher"}

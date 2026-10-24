@@ -1,16 +1,15 @@
-# Fleet status — 2026-10-24T02:13:54 UTC
+# Fleet status — 2026-10-24T03:07:03 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-23T12:06:40Z | 847 |  |
-| Mike | Mike | child | dead | 2026-10-23T21:23:50Z | 290 |  |
-| Taylor | Taylor | child | working | 2026-10-24T02:13:50Z | 0 |  |
-| Taylor_1445067 | taylor-bc | child | dead | 2026-10-22T02:40:01Z | 2853 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1742364 | taylor-75 | child | dead | 2026-10-22T07:10:01Z | 2583 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | dead | 2026-10-23T21:00:22Z | 313 |  |
-| tmp-6d | tmp-6d | external | dead | 2026-10-22T10:50:01Z | 2363 | interactive · cwd=/tmp |
-| tmp-6f | tmp-6f | external | dead | 2026-10-22T10:50:01Z | 2363 | interactive · cwd=/tmp |
-| tmp-8c | tmp-8c | external | dead | 2026-10-22T10:50:01Z | 2363 | interactive · cwd=/tmp |
-| tmp-a3 | tmp-a3 | external | dead | 2026-10-22T10:50:01Z | 2363 | interactive · cwd=/tmp |
-| tmp-a6 | tmp-a6 | external | dead | 2026-10-22T10:50:01Z | 2363 | interactive · cwd=/tmp |
-| tmp-f6 | tmp-f6 | external | dead | 2026-10-22T10:50:01Z | 2363 | interactive · cwd=/tmp |
+| DollarBill | DollarBill | child | dead | 2026-10-23T12:06:40Z | 900 |  |
+| Mike | Mike | child | working | 2026-10-24T02:36:33Z | 30 |  |
+| Taylor | Taylor | child | dead | 2026-10-24T02:13:50Z | 53 |  |
+| Taylor_1742364 | taylor-75 | child | dead | 2026-10-22T07:10:01Z | 2637 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-10-23T21:00:22Z | 366 |  |
+| tmp-6d | tmp-6d | external | dead | 2026-10-22T10:50:01Z | 2417 | interactive · cwd=/tmp |
+| tmp-6f | tmp-6f | external | dead | 2026-10-22T10:50:01Z | 2417 | interactive · cwd=/tmp |
+| tmp-8c | tmp-8c | external | dead | 2026-10-22T10:50:01Z | 2417 | interactive · cwd=/tmp |
+| tmp-a3 | tmp-a3 | external | dead | 2026-10-22T10:50:01Z | 2417 | interactive · cwd=/tmp |
+| tmp-a6 | tmp-a6 | external | dead | 2026-10-22T10:50:01Z | 2417 | interactive · cwd=/tmp |
+| tmp-f6 | tmp-f6 | external | dead | 2026-10-22T10:50:01Z | 2417 | interactive · cwd=/tmp |
