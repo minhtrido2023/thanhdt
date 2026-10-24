@@ -400,9 +400,11 @@ def check_plan_funding(plan, broker, account_mode, execution_state=None):
                 "reason": (f"Σ lệnh MUA còn lại {total_need:,.0f}đ VƯỢT sức mua thật của broker "
                            f"{measured_bp:,.0f}đ (pp0Buy, đã gồm hạn mức vay + tiền bán chờ về "
                            f"T+0){jit_note} — tiêu thụ {measured_util*100:.1f}% sức mua. Plan "
-                           f"đang chứa lệnh dựa trên vốn CHƯA TỒN TẠI; theo luật "
-                           f"context_planning_mini.md phần thiếu phải nằm ở deferred_orders[], "
-                           f"KHÔNG phải orders[].")}
+                           f"đang chứa lệnh dựa trên vốn CHƯA TỒN TẠI. Nếu phần thiếu là tiền còn "
+                           f"nằm trong Trứng vàng: CHUYỂN Trứng vàng → cash rồi chạy lại run_bot.sh "
+                           f"(Trứng vàng là tiền, chính sách 2026-10-24). Nếu cash + Trứng vàng vẫn "
+                           f"không đủ: theo luật context_planning_mini.md phần thiếu phải nằm ở "
+                           f"deferred_orders[], KHÔNG phải orders[].")}
 
     # ── (2) mọi nhóm đo được và không vượt → OK ───────────────────────────────────────────
     if not unmeasured:
