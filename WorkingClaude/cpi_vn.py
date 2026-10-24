@@ -96,6 +96,7 @@ Documented Tier-2 proxy anchors (YoY %, headline CPI vs same month prior year):
   2024: Jan 3.4, mid ~4.4, Dec 2.9
   2025: ~3.3 flat, Dec 3.4  [→ superseded from 2025-06 by real NSO]
 """
+import sys
 import os
 
 import pandas as pd
@@ -181,7 +182,7 @@ _WARNED = set()                         # one-time warnings, keyed by message
 def _warn_once(msg):
     if msg not in _WARNED:
         _WARNED.add(msg)
-        print(f"[cpi_vn] {msg}")
+        print(f"[cpi_vn] {msg}", file=sys.stderr)   # stderr: stdout của module này bị consumer parse (send_plan_report RESULT=$(...) dòng 1 = STATUS)
 
 
 def fiinpro_cpi_series():
