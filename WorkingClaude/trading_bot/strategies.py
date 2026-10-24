@@ -163,7 +163,7 @@ def format_dcf_check(dcf, side="buy", has_override=False, ticker=None):
         # user chốt 2026-10-24 (A): chỉ RICH SÂU (MoS < -100%) mới đòi lý do override — đồng bộ ngưỡng
         # DCF_RICH_DEEP_MOS ở mike/bin/lag_dd_pack.py. RICH nhẹ chỉ hiện số, không đòi lý do.
         # MoS không đọc được / dương (RICH mà MoS>0 = dữ liệu mâu thuẫn) ⇒ fail-closed: vẫn đòi.
-        deep = not isinstance(mos, (int, float)) or mos != mos or mos < DCF_RICH_OVERRIDE_MOS or mos > 0
+        deep = not isinstance(mos, (int, float)) or isinstance(mos, bool) or mos != mos or mos < DCF_RICH_OVERRIDE_MOS or mos > 0
         if has_override:
             out += " ⚠"
         elif deep:

@@ -299,6 +299,7 @@ class TestDcfFairValueDisplay(unittest.TestCase):
         self.assertIn(need, format_dcf_check(mk(None)))              # thiếu MoS
         self.assertIn(need, format_dcf_check(mk(float("nan"))))      # NaN
         self.assertIn(need, format_dcf_check(mk(0.22)))              # RICH mà MoS>0 = mâu thuẫn
+        self.assertIn(need, format_dcf_check(mk(False)))             # bool không phải số đo
         self.assertNotIn(need, format_dcf_check(mk(-2.0), has_override=True))   # đã có lý do
         self.assertTrue(format_dcf_check(mk(-2.0), has_override=True).endswith("⚠") or "⚠" in
                         format_dcf_check(mk(-2.0), has_override=True))
