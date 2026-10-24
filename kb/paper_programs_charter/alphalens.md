@@ -6,7 +6,7 @@
 > ngày chỉ link tới, không paste lại mỗi ngày. (registry v3)
 
 - **Người phụ trách (owner):** DollarBill
-- **Trạng thái:** review-done 2026-10-01 — chờ user quyết bước kế (KHÔNG tự wire live)
+- **Trạng thái:** closed 2026-10-23 — user chốt phương án A (decided_by: user): ĐÓNG, không wire live; không mở R&D lens trừ khi user yêu cầu
 - **Bắt đầu:** 2026-07-01 · **Kết thúc dự kiến:** 2026-09-30
 
 ## 🎯 Mục đích
@@ -15,7 +15,7 @@
 
 ## 📅 Nghiệm thu / mốc kết thúc
 
-2026-09-30 (audit: Taylor)
+ĐÓNG 2026-10-23 (user chốt A, decided_by=user, thread Mike 09:45 ICT). Không wire live, không gia hạn. | TRƯỚC ĐÓ: 2026-09-30 (audit: Taylor)
 
 ## ✅ Tiêu chí GO/NO-GO
 
