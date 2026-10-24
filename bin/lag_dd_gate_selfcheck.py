@@ -208,6 +208,24 @@ def run_inner():
         for name, kw, code in cases:
             p = B(**kw)
             ck(f"cờ: {name} ⇒ {code}", p["status"] == "FLAG" and code in codes(p), codes(p))
+        # DCF RICH: chỉ SÂU (MoS < -100%) mới là cờ; RICH nhẹ = cảnh báo, không đổi status (user chốt 24/10, phương án A)
+        pm = B(val=({"status": "RICH", "margin_of_safety": -0.5}, "🔴 DCF RICH nhẹ", "", None))
+        ck("RICH nhẹ (MoS -50%) ⇒ KHÔNG cờ DCF_RICH, status CLEARED",
+           "DCF_RICH" not in codes(pm) and pm["status"] == "CLEARED", codes(pm))
+        ck("RICH nhẹ ⇒ pack['warnings'] có DCF_RICH_NHE kèm số MoS",
+           [w["code"] for w in pm.get("warnings", [])] == ["DCF_RICH_NHE"] and "-50.0%" in pm["warnings"][0]["evidence"],
+           pm.get("warnings"))
+        ck("RICH nhẹ: warnings KHÔNG vào flags_hash", pm["flags_hash"] == B()["flags_hash"])
+        ck("RICH nhẹ: tin Discord hiện WARNING dù CLEARED", "DCF_RICH_NHE" in P.render_message([pm]))
+        pd = B(val=({"status": "RICH", "margin_of_safety": -1.38}, "🔴 DCF RICH sâu", "", None))
+        ck("RICH sâu (MoS -138%) ⇒ cờ DCF_RICH, status FLAG, không warning nhẹ",
+           "DCF_RICH" in codes(pd) and pd["status"] == "FLAG" and not pd.get("warnings"), (codes(pd), pd.get("warnings")))
+        pe = B(val=({"status": "RICH", "margin_of_safety": -1.0}, "x", "", None))
+        ck("RICH đúng -100% (biên) ⇒ nhẹ, KHÔNG cờ (ngưỡng là < -100%)", "DCF_RICH" not in codes(pe), codes(pe))
+        pn = B(val=({"status": "RICH", "margin_of_safety": None}, "x", "", None))
+        ck("RICH thiếu MoS ⇒ fail-closed vẫn cờ DCF_RICH", "DCF_RICH" in codes(pn), codes(pn))
+        pf = B(val=({"status": "FAIR", "margin_of_safety": 0.05}, "x", "", None))
+        ck("FAIR/CHEAP ⇒ không cờ, không warning", "DCF_RICH" not in codes(pf) and not pf.get("warnings"), pf.get("warnings"))
         p = B(forensic={"dropped": [], "rows": [{"flag_type": "fraud_confirmed", "severity": "exclude"}], "err": None})
         w = [f for f in p["flags"] if f["code"] == "PHAP_LY_WARNING"]
         ck("pháp lý ⇒ WARNING tường minh, vẫn status FLAG", w and w[0]["severity"] == "WARNING" and p["status"] == "FLAG",
