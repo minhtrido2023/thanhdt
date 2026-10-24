@@ -288,6 +288,25 @@ class TestDcfFairValueDisplay(unittest.TestCase):
                          "DCF: NOT_COMPUTED (fcfe_negative_buildout)")
         print("  [10] backward-compat khi thiếu/None fair_value_ps: OK")
 
+    def test_10b_override_text_only_when_deep_rich(self):
+        """user 2026-10-24 (A): 'cần dcf_override_reason' chỉ khi RICH sâu (MoS<-100%); thiếu/NaN/dương ⇒ fail-closed."""
+        from trading_bot.strategies import format_dcf_check
+        need = "cần dcf_override_reason"
+        mk = lambda m: dict(DCF_RICH, margin_of_safety=m)   # noqa: E731
+        self.assertNotIn(need, format_dcf_check(mk(-0.50)))          # RICH nhẹ
+        self.assertNotIn(need, format_dcf_check(mk(-1.0)))           # đúng biên: chưa sâu
+        self.assertIn(need, format_dcf_check(mk(-1.01)))             # sâu
+        self.assertIn(need, format_dcf_check(mk(None)))              # thiếu MoS
+        self.assertIn(need, format_dcf_check(mk(float("nan"))))      # NaN
+        self.assertIn(need, format_dcf_check(mk(0.22)))              # RICH mà MoS>0 = mâu thuẫn
+        self.assertIn(need, format_dcf_check(mk(False)))             # bool không phải số đo
+        self.assertNotIn(need, format_dcf_check(mk(-2.0), has_override=True))   # đã có lý do
+        self.assertTrue(format_dcf_check(mk(-2.0), has_override=True).endswith("⚠") or "⚠" in
+                        format_dcf_check(mk(-2.0), has_override=True))
+        self.assertNotIn(need, format_dcf_check(mk(-2.0), side="sell"))          # chỉ phía mua
+        self.assertNotIn(need, format_dcf_check(dict(mk(-2.0), robust=False)))   # không robust
+        print("  [10b] text override chỉ khi RICH sâu, fail-closed khi MoS lạ: OK")
+
     def test_11_real_compute_has_fair_value_ps(self):
         """_dcf_check_for_order thật: CHEAP/RICH → fair_value_ps là số khớp MoS;
         NOT_COMPUTED → None (không crash)."""
