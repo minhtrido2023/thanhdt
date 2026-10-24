@@ -224,6 +224,16 @@ def run_inner():
         ck("RICH đúng -100% (biên) ⇒ nhẹ, KHÔNG cờ (ngưỡng là < -100%)", "DCF_RICH" not in codes(pe), codes(pe))
         pn = B(val=({"status": "RICH", "margin_of_safety": None}, "x", "", None))
         ck("RICH thiếu MoS ⇒ fail-closed vẫn cờ DCF_RICH", "DCF_RICH" in codes(pn), codes(pn))
+        for nm, bad in (("NaN", float("nan")), ("inf", float("inf")), ("'nan'", "nan"), ("chuỗi lạ", "abc")):
+            pb = B(val=({"status": "RICH", "margin_of_safety": bad}, "x", "", None))
+            ck(f"RICH MoS={nm} ⇒ fail-closed vẫn cờ DCF_RICH, không warning",
+               "DCF_RICH" in codes(pb) and not pb.get("warnings"), (codes(pb), pb.get("warnings")))
+        pk = B(val=({"status": "RICH"}, "x", "", None))
+        ck("RICH thiếu hẳn key MoS ⇒ cờ DCF_RICH", "DCF_RICH" in codes(pk), codes(pk))
+        pp = B(val=({"status": "RICH", "margin_of_safety": 0.3}, "x", "", None))
+        ck("RICH mà MoS dương (dữ liệu mâu thuẫn) ⇒ fail-closed cờ DCF_RICH", "DCF_RICH" in codes(pp), codes(pp))
+        ck("khoá notify: gói CLEARED có warning ≠ khoá không warning",
+           P._nkey(pm) != P._nkey(dict(pm, warnings=[])), (P._nkey(pm), P._nkey(dict(pm, warnings=[]))))
         pf = B(val=({"status": "FAIR", "margin_of_safety": 0.05}, "x", "", None))
         ck("FAIR/CHEAP ⇒ không cờ, không warning", "DCF_RICH" not in codes(pf) and not pf.get("warnings"), pf.get("warnings"))
         p = B(forensic={"dropped": [], "rows": [{"flag_type": "fraud_confirmed", "severity": "exclude"}], "err": None})
@@ -479,6 +489,15 @@ def run_inner():
 
 # ── mutants: mỗi cái PHẢI làm selfcheck đỏ ─────────────────────────────────────────────────────
 MUTANTS = [
+    # DCF RICH sâu/nhẹ (user chốt 24/10, arch-review: mutant NaN từng sống sót)
+    ("lag_dd_pack.py", "    return mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0",
+     "    return mos is not None and mos < DCF_RICH_DEEP_MOS"),
+    ("lag_dd_pack.py", '    mos = _num(dcf.get("margin_of_safety"))\n    return mos is None',
+     '    mos = dcf.get("margin_of_safety")\n    return mos is None'),
+    ("lag_dd_pack.py", "mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0",
+     "mos is None or mos <= DCF_RICH_DEEP_MOS or mos > 0"),
+    ("lag_dd_pack.py", "mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0",
+     "mos is None or mos < DCF_RICH_DEEP_MOS"),
     ("lag_dd_pack.py", '                            + (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n    if isinstance',
      '                            ))\n    if isinstance'),
     ("lag_dd_pack.py", '        wc["receivables"]["basis"] = AR_BASIS_NOTE', '        pass'),

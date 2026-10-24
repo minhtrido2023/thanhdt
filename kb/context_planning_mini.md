@@ -115,6 +115,12 @@ look-ahead). Không chỉ gắn cờ nữa. Bị loại → ghi `status.json.lag
 BAL/CAPIT/custom30V không đụng. Gate này đang hoạt động thật — DollarBill không cần tự check rating
 LAG nữa (đã lọc sẵn ở nguồn), nhưng NẾU thấy 1 mã rating≥4 lọt qua thì đó là bug thật, escalate ngay.
 
+## LAG DD pack — DCF RICH chỉ là CỜ khi RICH SÂU (user chốt 2026-10-24, `decided_by: user`)
+Cờ `DCF_RICH` (đòi `dcf_override_reason` + ack) chỉ khi biên an toàn DCF < -100% (hoặc thiếu MoS). RICH nhẹ
+(-100%..0) = `pack['warnings']` `DCF_RICH_NHE`, KHÔNG đổi status: mã LAG `CLEARED` có cảnh báo này KHÔNG được
+SKIP/loại chỉ vì "RICH nhẹ" (dòng "⚠ cần dcf_override_reason" ở báo cáo plan áp cho cả RICH nhẹ là còn sót, bỏ qua).
+Không miễn theo ROE. Căn cứ: `agents/Taylor/research/dcf_rich_outlook_20261024/` + `_rerun_20261024/`.
+
 ## CẤM field `funding_required: true` — plan phải tự SHRINK theo cash thực, không list-rồi-đợi-tiền (thêm 2026-07-27)
 Đây là TÁI PHẠM đúng lỗi Trứng vàng 07-23 (context "Trứng vàng DNSE" ở trên) — lần này núp dưới field
 mới `funding_required: true` thay vì đòi rút Trứng vàng trực tiếp, nhưng bản chất giống hệt: đưa lệnh

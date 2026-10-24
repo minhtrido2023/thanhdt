@@ -436,9 +436,10 @@ DCF_RICH_DEEP_MOS = -1.0
 
 
 def _rich_deep(dcf):
-    """True nếu RICH sâu HOẶC không đọc được MoS (fail-closed: thiếu bằng chứng ⇒ vẫn cờ)."""
+    """True nếu RICH sâu HOẶC không đọc được MoS HOẶC MoS > 0 (RICH mà MoS dương = dữ liệu mâu thuẫn).
+    Fail-closed: thiếu/lạ bằng chứng ⇒ vẫn cờ."""
     mos = _num(dcf.get("margin_of_safety"))
-    return mos is None or mos < DCF_RICH_DEEP_MOS
+    return mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0
 
 
 def soft_warnings(ev):
@@ -708,7 +709,9 @@ def _state_path():
 
 
 def _nkey(p):
-    return f"{p['ticker']}|{p['release_date']}|{p['flags_hash']}|{p['status']}"
+    k = f"{p['ticker']}|{p['release_date']}|{p['flags_hash']}|{p['status']}"
+    w = sorted({x["code"] for x in p.get("warnings") or []})
+    return k + ("|W:" + ",".join(w) if w else "")          # warning mới trên gói CLEARED ⇒ gửi lại
 
 
 def notify(packs, dry_run=False):
