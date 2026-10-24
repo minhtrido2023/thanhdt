@@ -709,3 +709,8 @@
 
 ## Consolidation 2026-10-24T12:07:02Z
 - [2026-10-24T11:15:57Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12779}
+
+## Consolidation 2026-10-24T17:31:31Z
+- [2026-10-24T17:30:53Z] Mike/question — retro-pattern-recurring-wakeup-gate-not-mechanical: {"summary": "Wakeup miss tái diễn 24/10 (1/3 lượt --bg, Taylor_20261024_034455) và prevention (a)(b) vẫn chưa làm sau 4 retro", "options": ["A: giao Taylor làm (a)+(b)", "B: chấp nhận rủi ro"], "recommendation": "A", "urgency": "medium", "recurring_days": 3, "topic_stable": true}
+- [2026-10-24T17:31:10Z] Mike/heartbeat — Mike_20261024_173010: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261024_173010", "source": "watcher"}
+- [2026-10-24T17:31:16Z] Mike/finding — retro-draft-2026-10-24: {"summary": "Draft RETRO 24/10: 6 sự cố (3 gap tự bổ sung), 2 pattern; Pattern A tái diễn lần 4, escalate POST", "file": "state/retro_draft_2026-10-24.md"}
