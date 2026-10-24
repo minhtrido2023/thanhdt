@@ -280,3 +280,6 @@
 
 ## Archived 2026-10-22 (keep=6 days=5 require_done=True)
 - [2026-10-16T12:04:44Z] [2026-10-16 19:xx ICT] Plan ZaloPay 10-19 XONG HOLD ALL 0 lenh (job DollarBill_20261016_120351); CAPIT du NCT73/SIP49 de xuat user; cho duyet truoc 08:45 ICT 19/10
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-09-16T12:10:52Z] Plan SpaceX 2026-09-17 XONG (job DollarBill_20260916_120754): HOLD ALL 0 lenh, load_plan() OK, Discord + bus decision da gui. Active NAV 977,18tr (egg 100,88tr). DT5G NEUTRAL. VPI (BAL, rating 4/5) fire, checkpoint signal_hold (han 09-16) DA QUA - lan nay ESCALATE bus question bal-vpi-checkpoint-resume-decision thay vi tu resume/tu hold (theo current_ops.md). Ap dung ca ZaloPay (chua lam). 0 LAG due. L1 NO_TRIM. CAPIT 39 phien giu nguyen. Cho user tra loi question + duyet plan truoc 08:45 ICT 09-17. Viec mo: cho SpaceX + ZaloPay plan 09-17 neu duoc dispatch, va cho user quyet dinh VPI/BAL.
