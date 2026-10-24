@@ -453,7 +453,7 @@ def soft_warnings(ev):
         if m:
             roe = m.group(1)
         out.append({"code": "DCF_RICH_NHE", "severity": "WARNING",
-                    "evidence": f"DCF RICH nhẹ: MoS {float(dcf['margin_of_safety'])*100:.1f}% (ngưỡng cờ < {DCF_RICH_DEEP_MOS*100:.0f}%)"
+                    "evidence": f"DCF RICH nhẹ: MoS {_num(dcf.get('margin_of_safety'))*100:.1f}% (ngưỡng cờ < {DCF_RICH_DEEP_MOS*100:.0f}%)"
                                 f"{', ROE5Y ' + roe + '%' if roe else ''} — nghiên cứu 24/10: RICH nhẹ không khác đối chứng về LN/drift"})
     return out
 

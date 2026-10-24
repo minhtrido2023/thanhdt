@@ -232,6 +232,9 @@ def run_inner():
         ck("RICH thiếu hẳn key MoS ⇒ cờ DCF_RICH", "DCF_RICH" in codes(pk), codes(pk))
         pp = B(val=({"status": "RICH", "margin_of_safety": 0.3}, "x", "", None))
         ck("RICH mà MoS dương (dữ liệu mâu thuẫn) ⇒ fail-closed cờ DCF_RICH", "DCF_RICH" in codes(pp), codes(pp))
+        ck("khoá notify không warning GIỮ ĐỊNH DẠNG CŨ (không gửi lại gói cũ)",
+           P._nkey(dict(pm, warnings=[])) == f"{pm['ticker']}|{pm['release_date']}|{pm['flags_hash']}|CLEARED",
+           P._nkey(dict(pm, warnings=[])))
         ck("khoá notify: gói CLEARED có warning ≠ khoá không warning",
            P._nkey(pm) != P._nkey(dict(pm, warnings=[])), (P._nkey(pm), P._nkey(dict(pm, warnings=[]))))
         pf = B(val=({"status": "FAIR", "margin_of_safety": 0.05}, "x", "", None))
