@@ -763,7 +763,7 @@ try:
     if _egg_vnd > 0 and _total_buy_vnd > 0:
         if _shortfall > 0:
             lines.append(
-                f"🥚 **Trứng vàng {_egg_vnd/1e6:,.1f}tr — CẦN RÚT {_shortfall/1e6:,.1f}tr trước 9:05 ICT sáng mai**"
+                f"🥚 **Trứng vàng {_egg_vnd/1e6:,.1f}tr là tiền — CHUYỂN {_shortfall/1e6:,.1f}tr sang cash trước 9:05 ICT sáng mai** (bot nhắc mỗi 15' từ 8:30 tới khi xong)"
                 f" (Tổng mua {_total_buy_vnd/1e6:,.1f}tr"
                 + (f" · JIT-bán-PARK {_jit_proceeds/1e6:,.1f}tr" if _jit_proceeds > 0 else "")
                 + f" − tiền mặt sẵn có {_cash_avail/1e6:,.1f}tr = thiếu {_shortfall/1e6:,.1f}tr)."
