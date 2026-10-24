@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-22T09:50:22Z] ĐANG DỞ job Taylor_20261022_095008: R&D read-only bal_concentration_cap_20261022 (trần sizing BAL khi ít mã) | NEXT: đọc REPORT bal_loss_attribution, code sizing BAL, PREREG
-- [2026-10-22T10:01:34Z] ĐANG DỞ job Taylor_20261022_095008: 8 chân engine chạy nền (logs/ trong research/bal_concentration_cap_20261022, worktree wt-balcap-20261022) | NEXT: legs_metrics.py + bootstrap_nav, REPORT
 - [2026-10-22T10:11:53Z] [bal-concentration-cap 10-22] XONG job Taylor_20261022_095008: NO-GO trần BAL; sizing live=backtest; đính chính 'BAL bt luôn đa dạng hoá' SAI
 - [2026-10-22T11:01:13Z] [livermore-stock-pilot 10-22] XONG job Taylor_20261022_104625: NO-GO sát biên (a đạt AUC 0,629; b hụt ΔAUC +0,024 CI chứa 0); không wire; chờ Mike
 - [2026-10-22T14:33:07Z] ĐANG DỞ job Taylor_20261022_143258: vá park_holdings.py đối soát bán tay DRI (tái dùng f0e293c30) | NEXT: đọc commit, worktree wt-park-manual-sell-20261022
@@ -26,3 +24,5 @@
 - [2026-10-24T03:53:50Z] [dcf-rich-outlook 10-24] XONG job Taylor_20261024_034455: RICH sâu KHÔNG báo LN xấu; drift xấu chỉ ở ROE<25%/hàng hóa; đề xuất hạ gate→WARNING cho ROE≥25%, chờ quant-skeptic+user
 - [2026-10-24T04:09:41Z] ĐANG DỞ job Taylor_20261024_040927: R&D lag_runup_effect_20261024 (run-up trước công bố vs drift LAG) | NEXT: đọc lag_live_schedule.py, registry LAG, dựng event set
 - [2026-10-24T04:16:08Z] [lag-runup-effect 10-24] XONG job Taylor_20261024_040927: run-up không làm yếu LAG, NO filter (DSR .56/PBO .83); giả thuyết hàng hóa×YTD>100% cần prereg
+- [2026-10-24T04:50:48Z] ĐANG DỞ job Taylor_20261024_045036: dcf_rich_outlook_rerun_20261024 (5 kiểm tra ROE ngưỡng/MDE/LAG surprise/share-change/TR bench) | NEXT: copy panel+code, control
+- [2026-10-24T04:56:54Z] [dcf-rich-rerun 10-24] XONG job Taylor_20261024_045036: ROE25% miễn trừ underpowered (MDE10pp); đề xuất B = đòi lý do chỉ MoS<-100% không miễn ROE; chờ user
