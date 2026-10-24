@@ -348,7 +348,10 @@ def earnings_quality(rows, is_bank):
         s_cfo, s_np = sum(cfo), sum(np_[:4])
         out["cfo_vs_np"] = {"cfo_4q_vnd": s_cfo, "np_4q_vnd": s_np,
                             "ratio": (s_cfo / s_np) if s_np > 0 else None,
-                            "cfo_p0_vnd": cfo[0], "np_p0_vnd": np_[0]}
+                            "cfo_p0_vnd": cfo[0], "np_p0_vnd": np_[0],
+                            # 2 quý gần nhất (chỉ hiển thị, KHÔNG sinh cờ ⇒ không đổi flags_hash): ΣCFO 4Q
+                            # có thể che 1 quý rất xấu gần đây
+                            "cfo_2q_vnd": cfo[0] + cfo[1], "np_2q_vnd": np_[0] + np_[1]}
         if s_np > 0 and s_cfo < EQ_CFO_NP_MIN * s_np:
             flags.append(_f("EQ_CFO_YEU", f"ΣCF_OA 4Q={s_cfo/1e9:,.1f} tỷ < {EQ_CFO_NP_MIN:.0%} × "
                                           f"ΣNP 4Q={s_np/1e9:,.1f} tỷ"))
@@ -412,8 +415,13 @@ def earnings_quality(rows, is_bank):
     dso = wc.get("DSO")
     if isinstance(ar, dict) and ar.get("yoy") is not None and isinstance(dso, dict) and dso["P4"]:
         dd_ = dso["P0"] / dso["P4"] - 1
-        if abs(ar["yoy"]) > 0.10 and abs(dd_) > 0.10 and (ar["yoy"] > 0) != (dd_ > 0):
-            notes.append(f"DỮ LIỆU MÂU THUẪN: phải thu thô YoY {ar['yoy']:+.0%} nhưng DSO vendor "
+        # DSO ~ AR/doanh thu ⇒ hướng DSO KỲ VỌNG = (1+AR YoY)/(1+DT YoY)-1, không phải dấu của AR YoY
+        # (AR +50% mà DT +80% thì DSO GIẢM là đúng, không phải mâu thuẫn — ca MSR 24/10)
+        exp_ = (1 + ar["yoy"]) / (1 + rev_g) - 1 if rev_g is not None and rev_g > -1 else ar["yoy"]
+        if abs(exp_) > 0.10 and abs(dd_) > 0.10 and (exp_ > 0) != (dd_ > 0):
+            rg_s = f"{rev_g:+.0%}" if rev_g is not None else "n/a"
+            notes.append(f"DỮ LIỆU MÂU THUẪN: phải thu thô YoY {ar['yoy']:+.0%} (doanh thu {rg_s}, "
+                         f"DSO kỳ vọng {exp_:+.0%}) nhưng DSO vendor "
                          f"P0 {dso['P0']:.1f} vs P4 {dso['P4']:.1f} ({dd_:+.0%}) đi NGƯỢC chiều — "
                          "kiểm tra nguồn trước khi tin cả hai")
     out["working_capital"] = wc
@@ -696,6 +704,10 @@ def render_message(packs):
             lines.append(f"    ⚠️ WARNING `{w['code']}` — {w['evidence'][:220]}")
         for note in (p.get("earnings_quality") or {}).get("data_notes") or []:
             lines.append(f"    ℹ️ {note}")
+        cn = (p.get("earnings_quality") or {}).get("cfo_vs_np")
+        if isinstance(cn, dict) and cn.get("cfo_2q_vnd") is not None:
+            lines.append(f"    ℹ️ CFO/LNST: 4Q {cn['cfo_4q_vnd']/1e9:,.1f}/{cn['np_4q_vnd']/1e9:,.1f} tỷ · "
+                         f"2Q gần nhất {cn['cfo_2q_vnd']/1e9:,.1f}/{cn['np_2q_vnd']/1e9:,.1f} tỷ")
         mn = p.get("macro_note") or {}
         if mn.get("path"):
             lines.append(f"    vĩ mô: {mn['path']}")
