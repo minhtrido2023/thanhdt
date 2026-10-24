@@ -380,7 +380,7 @@ vàng, TÁCH khỏi `availableCash`/`ppse.pp0Buy` vì cần lệnh chuyển (red
 - Trong plan ghi 1 dòng vận hành, KHÔNG phải điều kiện/quyết định: "Chuyển Trứng vàng → cash ≥ X tr trước
   09:05 ICT [ngày thực thi]" với X = Σ mua (đã gồm phí) − cash sẵn có − JIT-bán cùng plan (nêu công thức,
   rút gọn tới 0,1tr). Đây là việc user làm đều đặn; plan vẫn là `orders[]` đầy đủ, KHÔNG sang `deferred_orders[]`.
-- Cơ chế kèm theo (đã có code): 21:00 `send_plan_report.sh` in "CẦN RÚT X tr trước 9:05"; **từ 08:30 ICT ngày thực
+- Cơ chế kèm theo (đã có code): 21:00 `send_plan_report.sh` in "CHUYỂN X tr sang cash trước 9:05"; **từ 08:30 ICT ngày thực
   thi, `bin/egg_transfer_alert.py` nhắc mỗi 15 phút tới khi sức mua thật đủ** (đo bằng chính `check_plan_funding`
   của bot). Gate P0 09:05 KHÔNG đổi: chưa chuyển thì vẫn BLOCK (fail-safe đúng thiết kế).
 - Giới hạn cứng giữ nguyên: Trứng vàng KHÔNG phải trần vô hạn — vẫn chỉ tính số đang CÓ trên API. Tiền "sẽ nạp"
