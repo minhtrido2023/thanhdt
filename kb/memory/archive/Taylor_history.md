@@ -1476,3 +1476,9 @@
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-22T14:52:45Z] [park-holdings-manual-sell vòng 2 10-22] XONG job Taylor_20261022_145109: @9ccb6b0fe chờ arch-review lần cuối
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T15:39:25Z] [nav-snapshot-manual-fills 10-22] XONG job Taylor_20261022_153620: fix/nav-snapshot-manual-fills-20261022 chờ arch-review/merge rồi mới bù dòng NAV 21/10 (2 account) + chạy nav_loss_brake_monitor
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T03:45:09Z] ĐANG DỞ job Taylor_20261024_034455: R&D dcf_rich_outlook_20261024 (DCF RICH sâu có info lợi nhuận/drift?) | NEXT: đọc dcf_valuation.py, data_registry, PIT feasibility
