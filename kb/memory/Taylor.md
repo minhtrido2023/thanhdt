@@ -35,3 +35,5 @@
 - [2026-10-25T11:49:41Z] ĐANG DỞ job Taylor_20261025_114929: A=LAG capacity floor (Volume cap p 10%/5%) → agents/Taylor/research/lag_capacity_floor_20261025/; B=fix f3_particip.py Price NaN + nhãn median_part_by_value | NEXT: đọc REPORT_F1_F3/PREREG_F3/f3_particip.py
 - [2026-10-25T11:54:16Z] ĐANG DỞ job Taylor_20261025_114929: batch 20 run đang chạy nền (wt-lag-capacity-floor-20261025, logs/run_batch.log) | NEXT: verify ctl md5 537e349b/a6ba34d8, metrics, rồi việc B f3_particip
 - [2026-10-25T12:00:02Z] [ta-schools 10-25] XONG job Taylor_20261025_115318: da so TA khong edge, chi ho xu huong (A2/C2b/F3) hon F1 nhung khong hon F2; REPORT.md trong research/ta_schools_vn_20261025/, chua commit
+- [2026-10-25T12:15:35Z] ĐANG DỞ job Taylor_20261025_121521: ta-trend-entry-filter (A2/F3/F2 x LAG/BAL trên ledger R3 park=0) → agents/Taylor/research/ta_trend_entry_filter_20261025/ | NEXT: PINS.jsonl, ledger, engine.py job trước, PREREG
+- [2026-10-25T12:21:35Z] [ta-trend-entry-filter 10-25] XONG job Taylor_20261025_121521: 0/6 dat, co xu huong khong loc duoc LAG/BAL (2e965250e); BAL×F3 chi la gia thuyet
