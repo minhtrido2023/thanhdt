@@ -273,7 +273,9 @@ def merge_cpi(df, time_col="time", end="2026-06-01", pit=True):
     publishes month M's CPI at ~end of M / early M+1 — so a day early in month M must NOT see M's own
     print. Shift the series +1 month before the as-of merge, so a trading day only sees the PRIOR
     month's CPI (same fix as research/pit_filter_full_2007_2026_test.py::merge_cpi_pit, 2026-08-25).
-    The merged `time_cpi` column is the AVAILABILITY date (M+1-01), not the reference month.
+    Residual (quant-skeptic 2026-10-25, unverified calendar): if GSO releases month M on ~6th of
+    M+1 (2025+), days M+1-01..05 still see an unpublished print — 0 flips of the CAPIT 6% gate in
+    history (CPI max 5.60 since 2024-10). Precise fix = key prints at real release dates.
     pit=False = the old look-ahead behaviour, kept only to reproduce pre-fix numbers.
     """
     cpi = cpi_monthly_df(end=end)

@@ -25,7 +25,7 @@ which is exactly case 2).
 
 Usage:  python3 cpi_vn_tier15_selfcheck.py [--all-tz]
 """
-import importlib.util, os, subprocess, sys
+import contextlib, importlib.util, io, os, subprocess, sys
 
 OLD_ROOT = os.environ.get("CPI_OLD_ROOT", "/home/trido/thanhdt/WorkingClaude")
 NEW_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -296,6 +296,17 @@ def test_dcf(b):
 
 
 # =====================================================================================
+def test_merge_cpi_pit():
+    """merge_cpi(pit=True) mặc định: ngày đầu tháng M chỉ thấy CPI tháng M-1 (cq-2026-10-25)."""
+    q = NEW.pd.DataFrame({"time": ["2012-09-04"]})
+    with contextlib.redirect_stdout(io.StringIO()):
+        new = float(NEW.merge_cpi(q, end="2012-12-01")["cpi_yoy"].iloc[0])
+        old = float(NEW.merge_cpi(q, end="2012-12-01", pit=False)["cpi_yoy"].iloc[0])
+        m = NEW.cpi_monthly_df(end="2012-12-01").set_index("time")["cpi_yoy"]
+    ok(abs(new - m[NEW.pd.Timestamp("2012-08-01")]) < 1e-9, "merge_cpi pit=True 2012-09-04 = CPI tháng 8 (đã công bố)", f"{new:.2f}")
+    ok(abs(old - m[NEW.pd.Timestamp("2012-09-01")]) < 1e-9, "merge_cpi pit=False 2012-09-04 = CPI tháng 9 (look-ahead cũ)", f"{old:.2f}")
+
+
 def main():
     if "--all-tz" in sys.argv:
         base = dict(os.environ); base.pop("TZ", None)
@@ -322,6 +333,7 @@ def main():
     test_matches_published_series(b)
     chC, chB = test_regime(a, b)
     test_dcf(b)
+    test_merge_cpi_pit()
 
     print(f"\n{'='*78}")
     print(f"assertions PASSED : {N_OK}")

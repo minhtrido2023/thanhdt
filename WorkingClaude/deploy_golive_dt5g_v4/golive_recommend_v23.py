@@ -1029,7 +1029,9 @@ if not _lever_err and _gate_pass:
         # hướng thật gần nhất (2026 Q2 leo 4,65->5,60->4,69%). Với CỔNG CHẶN VAY, đánh giá
         # THẤP CPI là sai chiều fail-safe -> lấy MAX(giá trị nội suy, số NSO thật gần nhất
         # đã biết) khi ngày hỏi đã qua tháng NSO thật cuối cùng; không bao giờ hạ thấp hơn
-        # số thật gần nhất. KHÔNG sửa cpi_vn.py (module dùng chung, ngoài phạm vi job này).
+        # số thật gần nhất. Từ 2026-10-25 merge_cpi mặc định pit=True (dịch +1 tháng, bỏ
+        # look-ahead); phép so dưới đây vẫn so LATEST với tháng THAM CHIẾU NSO cuối (không phải
+        # ngày khả dụng) — lệch về phía fail-safe (chỉ nâng CPI), giữ nguyên có chủ đích.
         _real_items = sorted(cpi_vn.NSO_CPI_YOY_REAL.items())
         _last_real_date = cpi_vn.pd.to_datetime(_real_items[-1][0])
         if cpi_vn.pd.Timestamp(LATEST) > _last_real_date and not cpi_vn.pd.isna(_pit_cpi_yoy):
