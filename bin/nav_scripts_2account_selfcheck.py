@@ -73,6 +73,12 @@ EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 ACCOUNTS = ["SpaceX", "ZaloPay"]
 
 
+def _is_holiday(d):
+    sys.path.insert(0, WC_ROOT)
+    from trading_bot.vn_market import is_holiday
+    return is_holiday(d)
+
+
 def _today_ict():
     return datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d")
 
@@ -84,7 +90,8 @@ def _find_shared_date():
         date = os.path.basename(path)[len("dnse_raw_"):-len(".jsonl")]
         if date >= today:    # daily_nav_snapshot --from-raw từ chối ngày hôm nay
             continue
-        if datetime.strptime(date, "%Y-%m-%d").weekday() >= 5:   # T7/CN không có giá đóng cửa
+        d = datetime.strptime(date, "%Y-%m-%d")
+        if d.weekday() >= 5 or _is_holiday(d.date()):   # T7/CN/lễ: bot vẫn ghi raw nhưng không có giá
             continue
         seen = set()
         try:
@@ -195,13 +202,15 @@ def _real_fingerprint(exec_dir):
     """(md5 các nav_history_*.csv, tên nav_snapshot_*/verified_snapshot_*) của execution_logs THẬT — để chứng minh sandbox
     không rò."""
     md5 = {}
-    for p in sorted(glob.glob(os.path.join(exec_dir, "nav_history_*.csv"))):
-        with open(p, "rb") as f:
-            md5[os.path.basename(p)] = hashlib.md5(f.read()).hexdigest()
+    # md5 (bắt cả GHI ĐÈ file đã tồn tại, vd nav_snapshot_{acct}_{date}.json của ngày đang chạy)
+    for pat in ("nav_history_*.csv", "nav_snapshot_*.json", "nav_gate_block_*"):
+        for p in sorted(glob.glob(os.path.join(exec_dir, pat))):
+            with open(p, "rb") as f:
+                md5[os.path.basename(p)] = hashlib.md5(f.read()).hexdigest()
     # Chỉ tên file mà 3 script này có thể ghi (không lấy cả thư mục: bot/cron thật ghi dnse_raw,
     # journal... song song, sẽ gây FAIL giả).
     names = frozenset(n for n in os.listdir(exec_dir)
-                      if n.startswith(("nav_snapshot_", "verified_snapshot_")))
+                      if n.startswith(("nav_snapshot_", "nav_gate_block_", "verified_snapshot_")))
     return md5, names
 
 
@@ -298,7 +307,7 @@ def main():
                 r["reconcile_rc"] = None
                 r["reconcile_stdout"] = ""
 
-            # 3) daily_nav_snapshot.py -- MUTATES nav_history_{account}.csv, restored after.
+            # 3) daily_nav_snapshot.py -- ghi nav_history_{account}.csv — trong sandbox là bản sao; --no-sandbox thì restore sau.
             rc, stdout, stderr = _run([
                 sys.executable, os.path.join(MIKE_BIN, "daily_nav_snapshot.py"),
                 "--account", account, "--date", date,
@@ -401,8 +410,10 @@ def main():
         print(f"\n(Đã restore nav_history_*.csv + nav_snapshot_*.json về đúng trạng thái trước khi chạy.)")
 
     if not args.no_sandbox and _real_fingerprint(EXEC_DIR) != fp_before:
-        failures.append(f"SANDBOX RÒ: nav_history_*.csv hoặc danh sách file của {EXEC_DIR} đổi sau lượt "
-                        f"chạy — có script ghi thẳng vào data/ thật, kiểm tra/khôi phục thủ công.")
+        failures.append(f"SANDBOX NGHI RÒ: nav_history/nav_snapshot/nav_gate_block của {EXEC_DIR} đổi sau lượt "
+                        f"chạy. CÓ THỂ do cron NAV thật (EOD 19:10, nav_snapshot_daily 19:50, nav_sync_retry "
+                        f"mỗi 15') ghi hợp lệ trong lúc selfcheck chạy — đối chiếu log cron/mtime TRƯỚC khi "
+                        f"đụng vào dữ liệu; KHÔNG tự 'khôi phục'.")
     lock.close()
 
     print()

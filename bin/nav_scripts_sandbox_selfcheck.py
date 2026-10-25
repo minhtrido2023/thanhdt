@@ -90,8 +90,28 @@ def t_fingerprint():
         check("fingerprint: file không liên quan không làm đổi", sc._real_fingerprint(d) == f2)
         open(os.path.join(d, "nav_snapshot_A_2026-01-01.json"), "w").write("z")
         check("fingerprint: nav_snapshot mới làm đổi", sc._real_fingerprint(d) != f2)
+        sn = os.path.join(d, "nav_snapshot_A_2026-01-01.json")
+        f3 = sc._real_fingerprint(d)
+        open(sn, "w").write("zz")   # GHI ĐÈ file đã tồn tại, tên không đổi
+        check("fingerprint: ghi đè nav_snapshot đã có (cùng tên) làm đổi", sc._real_fingerprint(d) != f3)
+        f4 = sc._real_fingerprint(d)
+        open(os.path.join(d, "nav_gate_block_A_2026-01-01.json"), "w").write("q")
+        check("fingerprint: nav_gate_block mới làm đổi", sc._real_fingerprint(d) != f4)
     finally:
         shutil.rmtree(d)
+
+
+def t_holiday():
+    import glob
+    holi = [os.path.basename(p)[9:-6] for p in glob.glob(os.path.join(sc.EXEC_DIR, "dnse_raw_*.jsonl"))]
+    import datetime as _dt
+    hs = [h for h in sorted(holi) if sc._is_holiday(_dt.date.fromisoformat(h)) and _dt.date.fromisoformat(h).weekday() < 5]
+    check("holiday: có ngày lễ ngày thường trong dnse_raw để thử", bool(hs))
+    check("holiday: _is_holiday True cho ngày lễ thật, False cho ngày thường",
+          all(sc._is_holiday(_dt.date.fromisoformat(h)) for h in hs) and not sc._is_holiday(_dt.date(2026, 10, 23)))
+    chosen = sc._find_shared_date()
+    check("holiday: _find_shared_date không chọn ngày lễ/cuối tuần",
+          chosen is not None and chosen not in hs and _dt.date.fromisoformat(chosen).weekday() < 5, str(chosen))
 
 
 def t_e2e():
@@ -107,7 +127,7 @@ def t_e2e():
 
 
 if __name__ == "__main__":
-    t_backup_unique(); t_lock(); t_sandbox_isolated(); t_fingerprint()
+    t_backup_unique(); t_lock(); t_sandbox_isolated(); t_fingerprint(); t_holiday()
     if "--e2e" in sys.argv:
         t_e2e()
     print("\nALL PASS" if not fails else f"\n{len(fails)} FAIL: {fails}")
