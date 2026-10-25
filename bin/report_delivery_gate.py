@@ -283,6 +283,23 @@ def _check_benchmark_table(report: Path) -> None:
         raise RuntimeError(str(exc)) from exc
 
 
+# Livermore REPORT_BLOCK gate (2026-10-25, arch-review r1 #2, job Taylor_20261025_092234) — FAIL-CLOSED: khối Kỹ
+# thuật gắn tên Livermore phải là NGUYÊN VĂN khối đã qua kiểm số cơ học (livermore_report_block.py); có khối PASS
+# cho kỳ mà báo cáo không dán nguyên văn cũng CHẶN. Không có PASS + không gắn tên = khối người soạn tự viết (fallback).
+def _check_livermore_block(report: Path) -> None:
+    m = _CADENCE_RE.match(report.name)
+    if not m:
+        return
+    report_date = _extract_report_date(report.name)
+    if report_date is None:
+        raise RuntimeError(f"livermore-block BLOCK ({report.name}): không suy được ngày cuối kỳ từ tên file")
+    import livermore_report_block as lrb  # noqa: E402
+    why = lrb.gate_report(report.read_text(encoding="utf-8"), m.group(2), dt.date.fromisoformat(report_date))
+    if why:
+        raise RuntimeError(f"livermore-block BLOCK ({report.name}): {why}")
+    print(f"report_delivery_gate: livermore-block OK ({report.name})")
+
+
 # NAV-flow gate (FAIL-H, audit measurement-integrity 2026-09-27) — CỐ Ý FAIL-CLOSED, như
 # `_check_period_returns` ở trên (cổng đó cũng fail-closed từ 2026-10-12; nó chỉ còn bỏ qua khi báo
 # cáo không có dòng nào để so). Cổng này canh một BƯỚC NHẢY NAV không giải thích được —
@@ -461,6 +478,7 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                                  "--report", str(report)])
                     _check_period_returns(report)
                     _check_benchmark_table(report)
+                    _check_livermore_block(report)
                     _check_nav_flow_records(report)
                     _warn_cash_flows(report)
                 record["artifact_validated_at"] = now()

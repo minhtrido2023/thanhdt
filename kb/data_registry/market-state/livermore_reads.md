@@ -5,11 +5,12 @@ source: livermore (native agent, định nghĩa ~/.claude/agents/livermore.md) �
 group: market-state
 writer: Mike (orchestrator) ghi mỗi lần đọc; Livermore chỉ TRẢ KẾT QUẢ
 role: Sổ append-only các lần đọc kỹ thuật tại điểm chuyển trạng thái; mỗi dòng có FORECAST khoá trước, chấm sau +20 phiên.
-last_update: 2026-10-22 (tạo; user duyệt, tên do user đặt)
+last_update: 2026-10-25 (thêm luật REPORT_BLOCK, nhánh feat/livermore-report-block-20261025 — chưa merge)
 ---
 # Livermore reads (append-only)
 **Quy tắc:** đọc MÙ (không DT5G, không dữ liệu sau as-of) · FORECAST: H20_DIR, H20_P_UP, LEVEL HOLD/BREAK, INVALIDATION · chỉ HIỂN THỊ (không sizing/gate) · Mike chấm sau +20 phiên.
 **Kích hoạt:** DT gate candidate >=5/10 hoặc >=15/25 phiên, hoặc VNINDEX chạm biên vùng lớn. **Khoảng cách tối thiểu 20 phiên giữa mọi lần đọc (chân 20 phiên không chồng); NGOẠI LỆ user duyệt 22/10: `DT_ENTER_*` (candidate vào CRISIS/EX-BULL ≥15/25) VƯỢT khoảng cách** để không bị câm vì một lần đọc giá đi trước. Entry `LIVE-BASELINE`/`MANUAL` không tính vào khoảng cách. Cron: T2-T6 19:05 ICT `bin/livermore_trigger_check.py`. Loại `livermore` nạp sau khi khởi động lại phiên; trước đó dùng general-purpose + đọc file định nghĩa.
+**REPORT_BLOCK (user duyệt 25/10/2026, `bin/livermore_report_block.py`):** mỗi weekly/monthly Livermore viết khối Kỹ thuật (số do script tính, kiểm số lạ cơ học, fail-closed; `report_delivery_gate.py::_check_livermore_block` chặn khối gắn tên Livermore không nguyên văn). Khoảng cách của REPORT_BLOCK đo từ lần đọc có forecast gần nhất **thuộc MỌI loại, kể cả `LIVE-BASELINE`/`MANUAL`** (chặt hơn cò trigger — chân 20 phiên không chồng): <20 phiên ⇒ chỉ nhắc lại nguyên văn; ≥20 ⇒ `livermore_run.sh --triggers REPORT_BLOCK_WEEKLY|REPORT_BLOCK_MONTHLY` ghi entry như thường. Entry `REPORT_BLOCK_*` **TÍNH** vào khoảng cách của `livermore_trigger_check.py` ⇒ chặn đọc trigger 20 phiên (trừ `DT_ENTER_*`), nên mẫu cổng giải thể sẽ chủ yếu là đọc THEO LỊCH chứ không phải tại điểm chuyển. Không lập forecast lùi ngày: báo cáo soạn trễ >5 phiên, hoặc sổ đã có entry sau as-of trong vòng 20 phiên ⇒ khối ghi "không có dự báo được lập cho kỳ này".
 **Cổng giải thể:** sau >=12 lần đọc sống đã chấm, giữ vai CHỈ KHI Livermore hơn CẢ BA baseline — đồng xu, "luôn UP", DT5G-implied (mỗi baseline: hit VÀ Brier, nghiêm ngặt); thua dù chỉ MỘT baseline ⇒ đề xuất giải thể (người quyết định).
 **Thử mù lịch sử 22/10/2026:** 10/16 hit, Brier 0,231, không hơn "luôn UP" 11/16 ⇒ chưa chứng minh gì: `agents/Mike/research/livermore_blind_20261022/REPORT.md`.
 

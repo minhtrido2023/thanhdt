@@ -425,7 +425,7 @@ if _wk:
     # Biến bash được phép nội suy trong thân PROMPT; còn lại (backtick, $(…), ${khác}) là command
     # substitution âm thầm làm rơi/đổi chữ — `bash -n` không bắt được (mutation M10/M11).
     _ALLOWED = ("${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}", "${DELEGATE_STEP}",
-                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
+                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${LIVERMORE_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
     for _nm, _body in (("weekly", _wk.group(1)), ("monthly", _wk.group(2))):
         _need = ["Toàn cảnh thị trường", "Outlook", "${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}",
                  "${PORTFOLIO_STEP}", "${BENCH_STEP}"]
@@ -447,6 +447,7 @@ if _wk:
               "'rủi ro/giới hạn' là giới hạn thị trường/phương pháp" in _body)
         check(f"#25e PROMPT {_nm}: danh sách tên công khai HOSE/HNX cho nguồn",
               "HOSE/HNX" in _body)
+        check(f"#25g PROMPT {_nm}: khối Kỹ thuật lấy từ Livermore (LIVERMORE_STEP)", "${LIVERMORE_STEP}" in _body)
         check(f"#25f PROMPT {_nm}: Value Radar/DT gate lấy từ dna_report (không tự tính P/E ad-hoc)",
               "dna_report.build_value_radar_line()" in _body
               and "build_dt_gate_line()" in _body and "ad-hoc" in _body)
@@ -454,6 +455,14 @@ if _wk:
           "Paper signals" in _wk.group(2) and "TRONG FILE ZALOPAY" in _wk.group(2))
     check("#26b monthly: Paper signals KHÔNG đưa vào file SpaceX client-facing",
           "KHÔNG đưa vào file SpaceX" in _wk.group(2))
+_ls = re.search(r'^  LIVERMORE_STEP="(.*)"$', _src, re.M)
+check("#28 LIVERMORE_STEP: ensure + verify-report + fail-closed + Cơ bản giữ nguyên",
+      bool(_ls) and all(k in _ls.group(1) for k in ("livermore_report_block.py ensure", "verify-report",
+                                                     "VERBATIM", "rc≠0", "KHÔNG ghi Livermore là nguồn",
+                                                     "file SpaceX không nhắc sự cố", "Cơ bản / định giá")),
+      str(_ls and _ls.group(1)[:80]))
+check("#28b PERIOD_END suy từ PKEY (weekly=thứ Sáu, monthly=ngày cuối tháng)",
+      'weekly_*) PERIOD_END="${PKEY##*_}"' in _src and "+1 month -1 day" in _src)
 check("#27 dispatch.sh gọi với --thread \"$TRADING_REPORT_THREAD\" tường minh (M16)",
       re.search(r'dispatch\.sh"\s+Taylor\s+"\$PROMPT"\s+--thread\s+"\$TRADING_REPORT_THREAD"', _src)
       is not None)
