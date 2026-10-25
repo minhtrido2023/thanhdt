@@ -299,8 +299,10 @@ def _alert_recon_failure(label, plan_date, failures):
     """Netting reconciliation post-fill phát hiện bất nhất → BÁO LOUD, KHÔNG tự gộp.
 
     Fail-loud theo coding_guidelines §5/§6: bus error + Discord + Telegram. Không raise
-    (để account khác vẫn được audit + report). Caller KHÔNG đổi exit-code (xem main()):
-    giám sát dựa vào bus error NETTING_RECON_FAIL (ops_health_check bắt), không dựa vào rc.
+    (để account khác vẫn được audit + report). Caller KHÔNG đổi exit-code (xem main()).
+    Kênh báo THẬT: Discord Trading Daily + Telegram gửi trực tiếp (_notify_trading_daily — cả hai
+    fail-silent, độc lập nhau) + bus error NETTING_RECON_FAIL thô (KHÔNG có watcher máy:
+    ops_health_check chỉ xét event `question`; chỉ daily retro đọc lại error).
     """
     lines = "\n".join(f"  • {f['ticker']}: {f['reason']}" for f in failures)
     msg = (f"⚠️ NETTING RECON FAIL — account {label} ({plan_date}): đối soát post-fill lệnh "
@@ -324,8 +326,8 @@ def _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date):
     Đây là AUDIT read-only + ghi log atomic — process chết trước khi chạy chỉ mất audit, không
     ảnh hưởng lệnh (side-effect đã xảy ra trong phiên). ref_price_of dùng ref trước-net để định
     giá chuyển nội bộ khi NET=0 / net order khớp 0cp (không có giá khớp thật để dùng).
-    Trả list label có failures (caller chỉ in cảnh báo, KHÔNG đổi exit-code — giám sát qua bus
-    error NETTING_RECON_FAIL)."""
+    Trả list label có failures (caller chỉ in cảnh báo, KHÔNG đổi exit-code — kênh báo thật xem
+    _alert_recon_failure)."""
     failed = []
     for e in executors:
         adj = net_adjustments.get(e.label)
@@ -731,7 +733,8 @@ def main():
                 force_phase=args.force_phase)
     # Đối soát post-fill cho lệnh đã netted (fills đã chốt sau run_session). Audit + fail-loud.
     # Fail-loud = bus error NETTING_RECON_FAIL + Discord + Telegram (trong _alert_recon_failure);
-    # ops_health_check bắt event error này. Không đổi exit-code (side-effect lệnh đã xảy ra;
+    # bus error chỉ là bản ghi thô (ops_health_check KHÔNG xét event error — chỉ `question`;
+    # daily retro đọc lại). Không đổi exit-code (side-effect lệnh đã xảy ra;
     # đây là AUDIT post-hoc, không nên đổi trạng thái thoát của tầng đặt lệnh live).
     recon_failed = _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date)
     if recon_failed:
