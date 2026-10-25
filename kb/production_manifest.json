@@ -4518,6 +4518,42 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/dispatch_wakeup_hint.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [
+    "cron `*/10 * * * *` resume_pending.py",
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 2 * * 0` spend_report_weekly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 17 * * *` daily_retro.sh",
+    "cron `30 20 * * 5` weekly_ops_audit.sh",
+    "cron `30 9 * * 5` selfcheck_red_owner_sweep.sh",
+    "cron `40 0 * * 2-6` paper_checkpoint_escalation.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh",
+    "cron `52 11 * * 5` selfcheck_red_owner_sweep.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/dispatch.sh",
+   "tier_root": "cron `*/10 * * * *` resume_pending.py",
+   "via": "exec"
+  },
+  "mike/bin/dispatch_wakeup_hint_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dispatch.sh",
+    "mike/bin/dispatch_wakeup_hint.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dispatch.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/dispatch_wc_root_anchor_selfcheck.sh": {
    "blast_tier": "T3",
    "covers": [
@@ -6264,10 +6300,26 @@
    "covers": [
     "mike/bin/daily_nav_snapshot.py",
     "mike/bin/verify_account_snapshot.py",
-    "mike/bin/wc_paths.py"
+    "mike/bin/wc_paths.py",
+    "trading_bot/__init__.py",
+    "trading_bot/vn_market.py",
+    "wc_env.sh"
    ],
    "depth": null,
    "parent": "mike/bin/daily_nav_snapshot.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/nav_scripts_sandbox_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "wc_env.sh"
+   ],
+   "depth": null,
+   "parent": "wc_env.sh",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -11375,7 +11427,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-10-25T03:35:38Z",
+ "generated_at": "2026-10-25T04:14:34Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {

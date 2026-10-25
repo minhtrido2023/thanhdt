@@ -2,14 +2,14 @@
 kind: reference
 title: Production manifest ARIA — tự sinh, ĐỪNG sửa tay
 generated_by: python3 mike/bin/production_manifest.py
-generated_at: 2026-10-25T03:35:38Z
+generated_at: 2026-10-25T04:14:34Z
 ---
 
 # Production manifest (auto-generated — sửa `mike/bin/production_manifest.py`, không sửa file này)
 
 Tái sinh: `cd /home/trido/thanhdt/WorkingClaude && python3 mike/bin/production_manifest.py` · Kiểm drift: `bash mike/bin/production_manifest_selfcheck.sh` (lệch bản commit = FAIL).
 
-**645 file** — T0 money-path **168** · T1 dữ liệu/regime/paper **116** · T2 fleet-ops **79** · T3 selfcheck **282** · gốc: 134 (systemd: ok).
+**648 file** — T0 money-path **168** · T1 dữ liệu/regime/paper **116** · T2 fleet-ops **80** · T3 selfcheck **284** · gốc: 134 (systemd: ok).
 
 Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settings*.json`; đóng bao AST import + tham chiếu exec `*.py|*.sh` resolve ra file có thật, lặp tới điểm bất động. Tầng = nhỏ nhất theo các gốc với tới, KHÔNG đi xuyên entry script của gốc khác (và dispatch.sh với gốc ngoài T2) — tầng blast radius thuần nằm ở `blast_tier` trong JSON. T3 = selfcheck ngoài bao đóng import/exec trực tiếp file T0–T2. Loại trừ: mike_paseo/, wt-*/ (mọi worktree), .claude/worktrees/, venv/__pycache__/node_modules.
 
@@ -330,6 +330,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/dispatch_loop_hint.py` | T2 | 2 | exec | cron `*/10 * * * *` resume_pending.py (+10) |
 | `mike/bin/dispatch_question_hint.py` | T2 | 2 | exec | cron `*/10 * * * *` resume_pending.py (+10) |
 | `mike/bin/dispatch_round_cap.py` | T2 | 2 | exec | cron `*/10 * * * *` resume_pending.py (+10) |
+| `mike/bin/dispatch_wakeup_hint.py` | T2 | 2 | exec | cron `*/10 * * * *` resume_pending.py (+10) |
 | `mike/bin/fleet_backup.sh` | T2 | 0 | exec | cron `0 17 * * *` fleet_backup.sh |
 | `mike/bin/fleet_housekeeping.sh` | T2 | 0 | exec | cron `0 15 * * 0` fleet_housekeeping.sh |
 | `mike/bin/forensic_flag_review_check.py` | T2 | 1 | exec | cron `20 1 * * 1-5` ops_health_check.sh (+1) |
@@ -509,6 +510,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/dispatch_round_cap_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/bq_freshness_check.sh, mike/bin/check_report_cadence.sh (+8) |
 | `mike/bin/dispatch_tiny_prompt_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/dispatch.sh, mike/bin/ops_health_check.sh (+1) |
 | `mike/bin/dispatch_token_telemetry_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dispatch.sh, mike/bin/job_telemetry.py (+1) |
+| `mike/bin/dispatch_wakeup_hint_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dispatch.sh, mike/bin/dispatch_wakeup_hint.py |
 | `mike/bin/dispatch_wc_root_anchor_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/dispatch.sh, preflight_bq_cache.py (+1) |
 | `mike/bin/dividend_adjusted_return_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dividend_adjusted_return.py |
 | `mike/bin/dt5g_publisher_gate_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/bq_freshness_check.sh, mike/bin/notify.sh (+1) |
@@ -554,7 +556,8 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/nav_ledger_vault_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/nav_unit_ledger.py, trading_bot/__init__.py (+2) |
 | `mike/bin/nav_loss_brake_monitor_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/nav_loss_brake_monitor.py |
 | `mike/bin/nav_period_benchmark_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/account_cash_flows.py, mike/bin/nav_period_returns.py (+3) |
-| `mike/bin/nav_scripts_2account_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/daily_nav_snapshot.py, mike/bin/verify_account_snapshot.py (+1) |
+| `mike/bin/nav_scripts_2account_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/daily_nav_snapshot.py, mike/bin/verify_account_snapshot.py (+4) |
+| `mike/bin/nav_scripts_sandbox_selfcheck.py` | T3 | - | selfcheck | phủ: wc_env.sh |
 | `mike/bin/nav_sleeve_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/account_cash_flows.py, mike/bin/nav_sleeve.py (+1) |
 | `mike/bin/nav_snapshot_daily_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/cash_identity.py, mike/bin/compute_active_nav.py (+11) |
 | `mike/bin/nav_sync_retry_rc_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/append_event.sh, mike/bin/daily_nav_snapshot.py (+2) |
