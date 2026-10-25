@@ -431,3 +431,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-10-21 (keep=6 days=5 require_done=True)
 - [2026-10-13T03:30:00Z] [2026-10-13] measured_by gate XONG TREN NHANH feat/finding-measured-by-20261013 @3bb3597ac (wt-measuredby-1013) CHUA merge â€” cho Mike merge sau gio GD. Viec theo sau neu duoc giao: rotate bus/_measured_by_warn.jsonl trong fleet_housekeeping.sh KEM selfcheck; nit reviewer trong bus finding finding-measured-by-gate-20261013.
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-09T09:59:14Z] [2026-10-09] selfcheck-red sweep#1: 8/10 CLOSED; OPEN annualization (no moi R&D Taylor, chu Taylor) + nav_2account (SCL ban tay 30/09, question can-user). Sweep sau: 2 cau nay OPEN lan 2 => CAN USER + post Architecture.
