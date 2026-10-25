@@ -1,0 +1,8 @@
+[pin0] LAG: sum pnl ALL positions=401813479657.2228 ; TX cash=401813479671.2070
+[pin0] BAL: sum pnl ALL positions=157153678320.2433 ; TX cash=157153678308.7773
+[_pin1M] LAG: sum pnl ALL positions=472904248360.0386 ; TX cash=472904248358.5332
+[_pin1M] BAL: sum pnl ALL positions=238014786202.2519 ; TX cash=238014786201.6001
+[pin0] main N LAG=695 BAL=299 ; ind_date>signal (PIT viol)=0 ; no ind row=0
+[pin0] NaN per ind: rs60=0, rs120=1, adx14=0, di_spread=0, d_ma50=0, d_ma200=1, slope_ma200=2, hhhl=1, up60=0, r2s60=4, pos52=4, atr_ratio=2, dd120=1, vol_tr=440, knife=2
+[pin1M] main N LAG=691 BAL=301 ; ind_date>signal (PIT viol)=0 ; no ind row=0
+[pin1M] NaN per ind: rs60=0, rs120=1, adx14=0, di_spread=0, d_ma50=0, d_ma200=1, slope_ma200=2, hhhl=1, up60=0, r2s60=4, pos52=3, atr_ratio=2, dd120=1, vol_tr=442, knife=2
