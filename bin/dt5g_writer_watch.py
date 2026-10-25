@@ -178,8 +178,10 @@ def publish_runs(path=None):
 
 
 def match_publish_run(when, runs):
-    """Run của ta có cửa sổ [START−TOL, (END hoặc START+MAX)+TOL] chứa `when` (aware) ⇒ run đó, else None."""
+    """Run của ta (trừ run có END mà publish_ok=null) có cửa sổ [START−TOL, (END hoặc START+MAX)+TOL] chứa `when` (aware) ⇒ run đó, else None."""
     for r in runs:
+        if r["end"] is not None and r["publish_ok"] is None:
+            continue    # chết TRƯỚC bước publish (get_gated_state raise…) ⇒ chắc chắn không ghi bảng
         end = r["end"] if r["end"] is not None and r["end"] >= r["start"] else r["start"] + RUN_MAX_DURATION
         if r["start"] - RUN_MATCH_TOL <= when <= end + RUN_MATCH_TOL:
             return r

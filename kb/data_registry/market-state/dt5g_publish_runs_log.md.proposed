@@ -21,7 +21,8 @@ Riêng dòng END có thêm `publish_ok`: `true`/`false`, hoặc `null` nếu ch�
 `mike/bin/dt5g_writer_watch.py`. Khi `lastModifiedTime` của bảng `vnindex_5state_dt5g_live` nằm
 NGOÀI cả cửa sổ cron (18:25–19:20) lẫn cửa sổ kaffa (15:30–18:00) nhưng rơi vào khoảng
 [START−5′, END+5′] của một run (thiếu END thì lấy START+30′), watch gán nhãn `OURS_MANUAL`
-(QUIET) thay vì `OTHER` (WARN). Log chỉ đổi nhãn writer. Các cảnh báo giá trị (state lệch, trùng
+(QUIET) thay vì `OTHER` (WARN). Run có END mà `publish_ok=null` (chết trước bước publish ⇒ chắc
+chắn không ghi bảng) KHÔNG được tính. Log chỉ đổi nhãn writer. Các cảnh báo giá trị (state lệch, trùng
 `time`, NULL vùng đã chốt) vẫn chạy như cũ.
 
 ## Bẫy
