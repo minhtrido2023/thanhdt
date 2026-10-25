@@ -266,9 +266,20 @@ def cpi_monthly_df(end="2026-06-01"):
     return out
 
 
-def merge_cpi(df, time_col="time", end="2026-06-01"):
-    """as-of (backward) merge monthly cpi_yoy / cpi_yoy_chg3 onto a daily frame."""
+def merge_cpi(df, time_col="time", end="2026-06-01", pit=True):
+    """as-of (backward) merge monthly cpi_yoy / cpi_yoy_chg3 onto a daily frame.
+
+    pit=True (default, cq-2026-10-25): the monthly series is keyed at month-start M-01, but GSO only
+    publishes month M's CPI at ~end of M / early M+1 — so a day early in month M must NOT see M's own
+    print. Shift the series +1 month before the as-of merge, so a trading day only sees the PRIOR
+    month's CPI (same fix as research/pit_filter_full_2007_2026_test.py::merge_cpi_pit, 2026-08-25).
+    The merged `time_cpi` column is the AVAILABILITY date (M+1-01), not the reference month.
+    pit=False = the old look-ahead behaviour, kept only to reproduce pre-fix numbers.
+    """
     cpi = cpi_monthly_df(end=end)
+    if pit:
+        cpi = cpi.copy()
+        cpi["time"] = cpi["time"] + pd.DateOffset(months=1)
     d = df.sort_values(time_col).copy()
     d[time_col] = pd.to_datetime(d[time_col])
     return pd.merge_asof(d, cpi, left_on=time_col, right_on="time",
