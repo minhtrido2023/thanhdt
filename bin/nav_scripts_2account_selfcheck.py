@@ -14,9 +14,15 @@ CÙNG 1 ngày có dữ liệu thật, xác nhận 2 kết quả KHÁC nhau. Scri
 đúng bài kiểm đó, để chạy lại được (không phải làm tay 1 lần rồi quên) — trước khi
 sửa 1 trong 3 script trên, chạy lại cái này.
 
-AN TOÀN: `daily_nav_snapshot.py` ghi đè `nav_history_{account}.csv` (nguồn duy nhất
-mọi báo cáo dùng chung) — selfcheck BẮT BUỘC backup 2 file này trước khi chạy và
-LUÔN restore lại sau (dù pass hay fail), không bao giờ để lại thay đổi thật trên đĩa.
+AN TOÀN (sandbox hoá 2026-10-25, prevention (a) retro 2026-10-24): mặc định selfcheck chạy
+3 script trên MỘT BẢN SAO `data/execution_logs` trong thư mục tạm (WC_ROOT giả có marker
+`wc_env.sh`, mọi entry khác symlink về cây thật) và `daily_nav_snapshot.py --from-raw` (KHÔNG
+gọi broker) ⇒ không bao giờ chạm `data/` thật, kể cả khi chạy từ worktree. Sau khi chạy, so md5
+`nav_history_*.csv` + danh sách file của execution_logs THẬT trước/sau — đổi là FAIL. Cờ
+`--no-sandbox` giữ cơ chế cũ (gọi broker thật, ghi `data/` thật, backup/restore) — chỉ để
+tái hiện bug; backup mang tên DUY NHẤT (pid+uuid) và cả lượt chạy giữ flock độc quyền, hai
+selfcheck đồng thời không giẫm lên backup của nhau. Cần `--date` < hôm nay (ICT): `--from-raw`
+từ chối ngày hôm nay.
 
 PASS/FAIL chỉ dựa trên 1 tiêu chí: SpaceX và ZaloPay có ra kết quả KHÁC NHAU không (đúng
 mục tiêu §12). 2 phát hiện phụ dưới đây chỉ IN CẢNH BÁO, không làm fail selfcheck:
@@ -33,13 +39,18 @@ mục tiêu §12). 2 phát hiện phụ dưới đây chỉ IN CẢNH BÁO, khô
   nav_scripts_2account_selfcheck.py --date 2026-07-20  -> chỉ định ngày
 """
 import argparse
+import fcntl
 import glob
+import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, MIKE_BIN)
@@ -62,10 +73,19 @@ EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 ACCOUNTS = ["SpaceX", "ZaloPay"]
 
 
+def _today_ict():
+    return datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d")
+
+
 def _find_shared_date():
     """Ngày gần nhất mà dnse_raw_{date}.jsonl có bản ghi balances của CẢ 2 account."""
+    today = _today_ict()
     for path in sorted(glob.glob(os.path.join(EXEC_DIR, "dnse_raw_*.jsonl")), reverse=True):
         date = os.path.basename(path)[len("dnse_raw_"):-len(".jsonl")]
+        if date >= today:    # daily_nav_snapshot --from-raw từ chối ngày hôm nay
+            continue
+        if datetime.strptime(date, "%Y-%m-%d").weekday() >= 5:   # T7/CN không có giá đóng cửa
+            continue
         seen = set()
         try:
             with open(path, encoding="utf-8") as f:
@@ -117,14 +137,15 @@ def _fill_dates(upto_date, max_days=90):
     return sorted(out)
 
 
-def _run(cmd, cwd=WC_ROOT):
-    p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=180)
+def _run(cmd, cwd=WC_ROOT, env=None):
+    p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=180, env=env)
     return p.returncode, p.stdout, p.stderr
 
 
 def _backup(path):
+    """Backup tên DUY NHẤT (pid+uuid): hai lượt chạy đồng thời không ghi đè backup của nhau."""
     if os.path.isfile(path):
-        bak = path + ".selfcheck_bak"
+        bak = f"{path}.selfcheck_bak.{os.getpid()}.{uuid.uuid4().hex[:8]}"
         shutil.copy2(path, bak)
         return bak
     return None
@@ -138,12 +159,71 @@ def _restore(path, bak):
         os.remove(path)
 
 
+def _acquire_lock(lock_path):
+    """flock độc quyền không chặn. Trả file object đang giữ khoá (đóng = nhả), hoặc None."""
+    f = open(lock_path, "a")
+    try:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.close()
+        return None
+    return f
+
+
+def _make_sandbox(real_root, tmp_parent=None):
+    """WC_ROOT giả: marker wc_env.sh, mọi entry cấp 1 symlink về cây thật, NGOẠI TRỪ `data`
+    (cũng toàn symlink, riêng `execution_logs` là BẢN SAO thật) ⇒ ghi vào execution_logs chỉ
+    chạm bản sao. Trả đường dẫn sandbox; người gọi rmtree."""
+    sb = tempfile.mkdtemp(prefix="nav_2acct_sandbox_", dir=tmp_parent)
+    for name in os.listdir(real_root):
+        if name in ("data", "wc_env.sh"):
+            continue
+        os.symlink(os.path.join(real_root, name), os.path.join(sb, name))
+    open(os.path.join(sb, "wc_env.sh"), "w").close()
+    os.makedirs(os.path.join(sb, "data"))
+    real_data = os.path.join(real_root, "data")
+    for name in os.listdir(real_data):
+        if name == "execution_logs":
+            continue
+        os.symlink(os.path.join(real_data, name), os.path.join(sb, "data", name))
+    shutil.copytree(os.path.join(real_data, "execution_logs"),
+                    os.path.join(sb, "data", "execution_logs"), symlinks=True)
+    return sb
+
+
+def _real_fingerprint(exec_dir):
+    """(md5 các nav_history_*.csv, tên nav_snapshot_*/verified_snapshot_*) của execution_logs THẬT — để chứng minh sandbox
+    không rò."""
+    md5 = {}
+    for p in sorted(glob.glob(os.path.join(exec_dir, "nav_history_*.csv"))):
+        with open(p, "rb") as f:
+            md5[os.path.basename(p)] = hashlib.md5(f.read()).hexdigest()
+    # Chỉ tên file mà 3 script này có thể ghi (không lấy cả thư mục: bot/cron thật ghi dnse_raw,
+    # journal... song song, sẽ gây FAIL giả).
+    names = frozenset(n for n in os.listdir(exec_dir)
+                      if n.startswith(("nav_snapshot_", "verified_snapshot_")))
+    return md5, names
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=None)
+    ap.add_argument("--no-sandbox", action="store_true",
+                    help="cơ chế cũ: gọi broker thật + ghi data/ thật (backup/restore). Chỉ để tái "
+                         "hiện bug; mặc định chạy trên bản sao trong thư mục tạm.")
     args = ap.parse_args()
 
+    lock = _acquire_lock(os.path.join(tempfile.gettempdir(), "nav_2acct_selfcheck.lock"))
+    if lock is None:
+        print("FAIL: một lượt nav_scripts_2account_selfcheck khác đang chạy (flock) — "
+              "chạy song song sẽ giẫm backup/ghi chồng; thử lại sau.")
+        return 1
+
     date = args.date or _find_shared_date()
+    if date and date >= _today_ict():
+        print(f"FAIL: --date {date} >= hôm nay (ICT) — `daily_nav_snapshot.py --from-raw` từ chối "
+              f"ngày hôm nay; dùng ngày đã qua.")
+        return 1
     if not date:
         print("FAIL: không tìm được ngày nào có dữ liệu balances cho cả 2 account trong "
               f"{EXEC_DIR}/dnse_raw_*.jsonl — không thể chạy selfcheck.")
@@ -159,8 +239,19 @@ def main():
         print(f"FAIL: {balance_raw} không tồn tại.")
         return 1
 
-    nav_history_paths = {a: os.path.join(EXEC_DIR, f"nav_history_{a}.csv") for a in ACCOUNTS}
-    nav_snapshot_json_paths = {a: os.path.join(EXEC_DIR, f"nav_snapshot_{a}_{date}.json") for a in ACCOUNTS}
+    sandbox = None
+    run_root, run_env, exec_dir = WC_ROOT, None, EXEC_DIR
+    fp_before = _real_fingerprint(EXEC_DIR)
+    if not args.no_sandbox:
+        sandbox = _make_sandbox(WC_ROOT)
+        run_root = sandbox
+        run_env = dict(os.environ, WC_ROOT=sandbox)
+        exec_dir = os.path.join(sandbox, "data", "execution_logs")
+        balance_raw = os.path.join(exec_dir, f"dnse_raw_{date}.jsonl")
+        print(f"  sandbox: {sandbox} (--from-raw, không gọi broker, không chạm data/ thật)")
+
+    nav_history_paths = {a: os.path.join(exec_dir, f"nav_history_{a}.csv") for a in ACCOUNTS}
+    nav_snapshot_json_paths = {a: os.path.join(exec_dir, f"nav_snapshot_{a}_{date}.json") for a in ACCOUNTS}
     backups = {}
     snapshot_json_existed = {}
     for a in ACCOUNTS:
@@ -180,7 +271,7 @@ def main():
             rc, stdout, stderr = _run([
                 sys.executable, os.path.join(MIKE_BIN, "verify_account_snapshot.py"),
                 "--account", account, "--dates", fill_dates_arg, "--asof", date, "--out", out_path,
-            ])
+            ], cwd=run_root, env=run_env)
             r["verify_rc"] = rc
             if rc != 0 or not os.path.isfile(out_path):
                 failures.append(f"{account}: verify_account_snapshot.py rc={rc} stderr={stderr[-300:]}")
@@ -200,7 +291,7 @@ def main():
                     sys.executable, os.path.join(MIKE_BIN, "reconcile_equity.py"),
                     "--account", account, "--starting-capital", "1000000000",
                     "--snapshot", out_path, "--balance-raw", balance_raw,
-                ])
+                ], cwd=run_root, env=run_env)
                 r["reconcile_rc"] = rc
                 r["reconcile_stdout"] = stdout
             else:
@@ -211,9 +302,15 @@ def main():
             rc, stdout, stderr = _run([
                 sys.executable, os.path.join(MIKE_BIN, "daily_nav_snapshot.py"),
                 "--account", account, "--date", date,
-            ])
+            ] + ([] if args.no_sandbox else ["--from-raw"]), cwd=run_root, env=run_env)
             r["daily_nav_rc"] = rc
             r["daily_nav_stdout"] = stdout
+            if rc != 0:
+                # rc≠0 làm bước 3 PASS rỗng (stdout trống ⇒ phép so "khác nhau" bị bỏ qua) — đúng
+                # dạng selfcheck xanh giả (retro 2026-10-24 Pattern B): báo, đừng im.
+                failures.append(f"{account}: daily_nav_snapshot.py rc={rc} ngày {date} — bước 3 không "
+                                f"kiểm được gì (cuối tuần/lễ thiếu giá? thử --date khác). "
+                                f"stderr={stderr.strip()[-200:]}")
             results[account] = r
             print(f"\n--- {account} ---")
             print(f"  verify_account_snapshot.py: rc={r['verify_rc']} mtm={r.get('verify_mtm')}")
@@ -293,6 +390,8 @@ def main():
                       f"ngày-cũ nói trên, không phải bug lẫn account. KHÔNG tính là fail.")
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
+        if sandbox:
+            shutil.rmtree(sandbox, ignore_errors=True)
         for a in ACCOUNTS:
             _restore(nav_history_paths[a], backups.get(a))
             if snapshot_json_existed[a]:
@@ -300,6 +399,11 @@ def main():
             elif os.path.isfile(nav_snapshot_json_paths[a]):
                 os.remove(nav_snapshot_json_paths[a])
         print(f"\n(Đã restore nav_history_*.csv + nav_snapshot_*.json về đúng trạng thái trước khi chạy.)")
+
+    if not args.no_sandbox and _real_fingerprint(EXEC_DIR) != fp_before:
+        failures.append(f"SANDBOX RÒ: nav_history_*.csv hoặc danh sách file của {EXEC_DIR} đổi sau lượt "
+                        f"chạy — có script ghi thẳng vào data/ thật, kiểm tra/khôi phục thủ công.")
+    lock.close()
 
     print()
     if failures:
