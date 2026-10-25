@@ -16,6 +16,7 @@ Run: python deploy_golive_dt5g_v4/publish_gated_state.py
 """
 import os, sys, io, json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -35,7 +36,8 @@ from macro_state_live import get_gated_state
 PROJECT = "lithe-record-440915-m9"
 BQ_TABLE = f"{PROJECT}:tav2_bq.vnindex_5state_dt5g_live"
 WARMUP_START = "2014-01-01"     # SIGNAL_V11 state-join needs history; gate warms DT4 from 2014
-END = datetime.now().strftime("%Y-%m-%d")
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: không tin TZ host (chạy TZ khác trước 07:00 ICT ⇒ END = hôm qua)
+END = datetime.now(_ICT).strftime("%Y-%m-%d")
 LOCAL_CSV = os.path.join(WORKDIR, "data/vnindex_5state_dt5g_live.csv")
 STATE_JSON = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_state_today.json")
 
@@ -101,7 +103,9 @@ else:
     print(f"  giữ nguyên {LOCAL_CSV} (publish hỏng ⇒ CSV không được chạy trước BQ)")
 
 last = g.iloc[-1]
-prov = {"published_at": datetime.now().isoformat(timespec="seconds"),
+# published_at giữ ĐÚNG dạng cũ (giờ tường ICT, KHÔNG offset) — consumer (ops_health_check c13,
+# bq_freshness gate, dt5g_freshness) đọc chuỗi naive; chỉ neo nguồn giờ về ICT.
+prov = {"published_at": datetime.now(_ICT).replace(tzinfo=None).isoformat(timespec="seconds"),
         "as_of": str(pd.to_datetime(last["time"]).date()),
         "state": int(last["state"]),
         "base_state_dt4": int(last["base_state"]),
@@ -110,7 +114,12 @@ prov = {"published_at": datetime.now().isoformat(timespec="seconds"),
         "bq_table": BQ_TABLE.split(":")[1],
         "bq_publish_ok": publish_ok}
 os.makedirs(os.path.dirname(STATE_JSON), exist_ok=True)
-json.dump(prov, open(STATE_JSON, "w", encoding="utf-8"), indent=2)
+# §5: ghi nguyên tử (tmp cùng thư mục + os.replace) — ≥6 consumer đọc file này; bị kill giữa
+# chừng không được để lại JSON dở.
+_tmp = f"{STATE_JSON}.tmp.{os.getpid()}"
+with open(_tmp, "w", encoding="utf-8") as f:
+    json.dump(prov, f, indent=2)
+os.replace(_tmp, STATE_JSON)
 print(f"  today: as_of={prov['as_of']} state={prov['state']} source={prov['source']} "
       f"(DT4={prov['base_state_dt4']}, DT5G={prov['macro_state_dt5g']})")
 print(f"  wrote {STATE_JSON}")
