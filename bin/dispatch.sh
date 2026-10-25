@@ -1758,6 +1758,9 @@ except Exception:
   #    chỉ được chặn bằng việc Mike NHỚ làm tay. Chỉ IN RA, không tự đóng (đóng theo suy đoán
   #    văn bản = đóng oan escalation tiền thật). Im lặng khi không khớp; fail-open mọi đường lỗi.
   printf '%s' "$prompt" | timeout 25 python3 "$ROOT/bin/dispatch_question_hint.py" --to "$id" >&2 || true
+  # 5) Cảnh báo wakeup CƠ HỌC (retro 2026-10-24, prevention (b)): luôn nhắc "CHƯA đặt
+  #    ScheduleWakeup" — script không thấy được tool call của caller. Không chặn, fail-open.
+  timeout 10 python3 "$ROOT/bin/dispatch_wakeup_hint.py" --job "$job_id" --delay "${_wsugg:-}" --from "$from" >&2 || true
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
   { _dtid="$(_job_thread_id "$job_id")"
