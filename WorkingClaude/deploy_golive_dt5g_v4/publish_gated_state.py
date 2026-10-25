@@ -46,7 +46,7 @@ STATE_JSON = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_state_today.
 # tay (OURS_MANUAL), không báo writer LẠ. FAIL-OPEN: lỗi ghi log chỉ in stderr, không chặn publish.
 _RUN = {"id": f"{datetime.now(_ICT):%Y%m%dT%H%M%S}-{os.getpid()}", "publish_ok": None}
 try:
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))   # append: WORKDIR giữ ưu tiên import
     import publish_run_log as _prl
     _RUN_LOG = _prl.default_path(WORKDIR)
     _prl.log_run(_RUN_LOG, "START", _RUN["id"])
