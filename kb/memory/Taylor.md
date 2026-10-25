@@ -44,3 +44,5 @@
 - [2026-10-25T13:11:09Z] ĐANG DỞ job Taylor_20261025_131052: BAL EVEB phase2 (V0-V4 replay R3) → agents/Taylor/research/bal_eveb_phase2_20261025/ | NEXT: đọc REPORT lag_bal + skeptic, registry 2026-10-08, worktree, PREREG
 - [2026-10-25T13:15:14Z] ĐANG DỞ job Taylor_20261025_131052: batch 10 run nền (wt-bal-eveb-phase2-20261025, logs/run_batch.log), PREREG 604786eb3 | NEXT: verify ctl md5 537e349b/a6ba34d8, evaluate.py, bootstrap, REPORT
 - [2026-10-25T13:18:08Z] [trend-basics-filter 10-25] XONG job Taylor_20261025_131054 (413f67e26): 1/39 đạt (LAG×up60) = hiệu ứng mã đứng giá, không phải xu hướng; value×xu hướng không thêm — chờ quant-skeptic nếu Mike muốn
+- [2026-10-25T13:49:05Z] ĐANG DỞ job Taylor_20261025_131052: 10 run PREREG xong (0/4 đạt), đang chạy 8 run amendment A1 wv1-4 (logs/run_batch3.log, commit 04ec38d61) | NEXT: evaluate.py → REPORT.md → bus finding
+- [2026-10-25T14:05:27Z] ĐANG DỞ job Taylor_20261025_140517: lag-capacity-floor R1(KL T-1/trung vị N)/R2(bỏ ABANDONED_REFUND)/R3(noise floor park=0) trên wt-lag-capacity-floor-20261025 | NEXT: PREREG_R.md
