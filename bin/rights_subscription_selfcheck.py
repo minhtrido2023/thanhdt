@@ -67,6 +67,10 @@ if "--mutants" in sys.argv[1:]:
          "                else [(s[\"credit_date\"], qty, qty * px)])"),
         ("M23 NB1 reconcile tính phí cả lô quyền", "reconcile_equity.py",
          "        fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0", "        pass"),
+        ("M26 NB2-reconcile bỏ phải thu CP quyền đã nộp tiền", "reconcile_equity.py",
+         "args.offbook_assets + rights_receivable_value\n", "args.offbook_assets\n"),
+        ("M27 NB2-reconcile phải thu tính cả lô đã về broker", "reconcile_equity.py",
+         "and s_[\"credit_date\"] > asof]", "]"),
         ("M22 B2 net_fills_journal_and_broker (đường sizing broker_statement=True) bỏ cộng lô quyền", "exdate_frame.py",
          "    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():",
          "    for d, evs in {}.items():"),
@@ -723,7 +727,7 @@ check("E3b broker_statement=True + N4 lô chờ ⇒ credited 1.260, không chặ
 # <<< B2 vòng 2
 
 
-def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False):
+def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False, cost_now=COST_BLEND):
     d = ndir("V_" + tag, subs)
     write_raw(d, "2025-10-01", [{"kind": "orders", "ts": "2025-10-01T15:00:00", "account_no": ACCT_NO,
                                  "payload": {"orders": [{"id": 1, "accountNo": ACCT_NO, "symbol": TK, "side": "NB",
@@ -733,7 +737,7 @@ def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False):
                                                          "orderStatus": "Filled"}]}},
                                 pos_rec("2025-10-01T19:00:00", Q0, 30000), bal_rec("2025-10-01T19:00:10", CASH_BUY)])
     write_journal(d, "2025-10-01", [f"2025-10-01T09:30:00,FILL,P1,{TK},buy,C1,{int(Q0)},{COST},{int(Q0)},LAG,PEAD,"])
-    write_raw(d, P, [pos_rec(f"{P}T19:10:00", broker_qty, 20000, Q0, COST_BLEND), bal_rec(f"{P}T19:10:20", CASH_PAID)])
+    write_raw(d, P, [pos_rec(f"{P}T19:10:00", broker_qty, 20000, Q0, cost_now), bal_rec(f"{P}T19:10:20", CASH_PAID)])
     write_journal(d, P)
     kdp = os.path.join(d, "kd.json")
     with open(kdp, "w") as f:
@@ -829,6 +833,45 @@ check("R3 NB1: phí mặc định = 14.000×30.000×phí (lô quyền 5.000×12.
       abs(rj3["trading_fees_used"] - Q0 * COST * _fp) < 1
       and abs(rj3["explain_fee_on_turnover_gap_est"] - (Q0 * COST * _fp - Q0 * COST * _fp)) < 1,
       (rj3["trading_fees_used"], rj3["explain_fee_on_turnover_gap_est"], Q0 * COST * _fp))
+check("R1c ĐỐI CHỨNG credit = payment: không có phải thu (rights_paid_not_credited = 0)",
+      rj["rights_paid_not_credited"] == 0 and rj3["rights_paid_not_credited"] == 0)
+
+
+def run_re(d, snap, balance_date=P):
+    """reconcile_equity (--trading-fees cố định) trên snapshot `snap`; trả (json, stdout)."""
+    old_ = (V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv)
+    V.EXEC_DIR = DAR.EXEC_LOG_DIR = d
+    os.environ["MIKE_LAG_RIGHTS_DIR"] = os.path.join(d, "lag_rights")
+    sys.argv = ["reconcile_equity.py", "--account", ACCT, "--account-no", ACCT_NO, "--starting-capital",
+                "1320000000", "--snapshot", snap, "--balance-raw", os.path.join(d, f"dnse_raw_{balance_date}.jsonl"),
+                "--trading-fees", str(14000 * 30000 * 0.00097)]
+    _CA.load_corp_actions = lambda *a, **k: []
+    o_ = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(o_):
+            try:
+                RE.main()
+            except SystemExit:
+                pass
+    finally:
+        V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv = old_
+        _CA.load_corp_actions = _old_lca
+    return json.load(_real_open(snap.replace("verified_snapshot", "reconcile_equity"))), o_.getvalue()
+
+
+# >>> rights alert NB2-reconcile (25/10): khai credit_date > payment_date, asof nằm GIỮA ⇒ tiền đã rời
+# (balance CASH_PAID), CP chưa về broker (openQuantity 14.000) ⇒ bản cũ lệch +5.000×12.500 = +62,5tr.
+SPLIT = dict(nsub(credit="2025-10-29"), payment_date=P)
+dS, sS, rc, resS = run_vas("split_mid", [SPLIT], broker_qty=Q0, cost_now=COST)
+rjS, outS = run_re(dS, sS)
+check("R4 credit > payment, asof ở giữa: snapshot CHƯA có lô quyền (14.000) nhưng residual |.| < 5tr nhờ "
+      "phải thu 5.000×12.500 = 62,5tr ở vế phải, có dòng in",
+      resS["positions"][0]["qty"] == Q0 and abs(rjS["rights_paid_not_credited"] - RQ * S_PX) < 1
+      and abs(rjS["residual"]) < 5e6 and "Phải thu CP quyền mua đã nộp tiền" in outS,
+      (resS["positions"][0]["qty"], rjS["rights_paid_not_credited"], rjS["residual"]))
+check("R4b residual R4 ≈ residual R1 (credit = payment, cùng tiền) — cùng thực tế kinh tế, cùng kết luận",
+      abs(rjS["residual"] - rj["residual"]) < 1e6, (rjS["residual"], rj["residual"]))
+# <<< rights alert NB2-reconcile
 ev_r = RS.fill_events(ACCT, path=os.path.join(dV, "lag_rights", "subscriptions.json"))
 evs = {"2025-10-01": [("2025-10-01T09:30:00", "1", TK, "buy", Q0, COST)], **ev_r,
        "2025-11-20": [("2025-11-20T10:00:00", "2", TK, "sell", Q0 + RQ, 20000.0)]}

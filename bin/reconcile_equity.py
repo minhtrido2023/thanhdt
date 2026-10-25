@@ -306,6 +306,15 @@ def main():
         held = {p["ticker"]: float(p["qty"]) for p in snap.get("positions", [])}
         rights_held_value = sum(min(q, held.get(tk, 0.0)) * v / q for tk, (q, v) in rights_q.items() if q)
         fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0
+    # NB2 phần reconcile (rights alert 25/10): khai credit_date > payment_date ⇒ trong khoảng giữa,
+    # tiền ĐÃ rời totalCash (vế phải giảm) nhưng CP chưa về broker nên snapshot chưa có lô (vế trái
+    # không đổi) ⇒ lệch +KL×giá phát hành dù không mất đồng nào. Cộng "phải thu CP quyền đã nộp tiền"
+    # (giá vốn = tiền đã nộp, lãi/lỗ 0) vào vế phải: tiền rời ≤ ngày balance, CP chưa về ≤ asof snapshot.
+    rights_receivable = [(s_["ticker"], float(s_["subscribed_qty"]), float(s_["issue_price_vnd"]),
+                          s_["payment_date"], s_["credit_date"])
+                         for s_ in rights_sub.load_subscriptions(args.account, account_no=account_no)
+                         if s_["payment_date"] <= bal_ts[:10] and s_["credit_date"] > asof]
+    rights_receivable_value = sum(q * px for _tk, q, px, _p, _c in rights_receivable)
     for d in events_by_date:
         events_by_date[d].sort(key=lambda e: e[0])
     corp = load_corp_actions()
@@ -355,7 +364,7 @@ def main():
     # tiền vẫn của user, chỉ ngoài phạm vi balances() API, xem --offbook-assets ở trên)
     # + egg_value: Trứng vàng đọc TỰ ĐỘNG từ API (§25 chiều thứ ba) — cùng quy ước
     # daily_nav_snapshot.py:1254 / compute_active_nav.py:533.
-    rhs = mtm_stock + cash - debt + egg_value + args.offbook_assets
+    rhs = mtm_stock + cash - debt + egg_value + args.offbook_assets + rights_receivable_value
     if egg_value and args.offbook_assets:
         print(f"⚠️ CẢ HAI cùng > 0: egg.totalValue {egg_value:,.0f} (API) và --offbook-assets "
               f"{args.offbook_assets:,.0f} (user tự báo). --offbook-assets chỉ dành cho tài sản "
@@ -420,6 +429,9 @@ def main():
         print(f"  (--no-egg: BỎ Trứng vàng khỏi vế phải — tái lập bản trước 2026-09-27)")
     if args.offbook_assets:
         print(f"  + Off-book (tự báo):   {args.offbook_assets:>16,.0f}")
+    for tk, q, px, pay_d, cr_d in rights_receivable:
+        print(f"  + Phải thu CP quyền mua đã nộp tiền (user khai, chưa về broker): {tk} {q:,.0f} × {px:,.0f} "
+              f"= {q * px:,.0f} (nộp {pay_d}, CP về {cr_d})")
     print(f"  = VẾ PHẢI:             {rhs:>16,.0f}")
     print()
     print(f"CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT): {residual:>+16,.0f}  ({residual/rhs*100:+.4f}% của vế phải)")
@@ -452,6 +464,7 @@ def main():
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
         "egg_assets": egg_value, "egg_assets_auto": not args.no_egg,
         "offbook_assets_used": args.offbook_assets,
+        "rights_paid_not_credited": rights_receivable_value,
         "rhs_balance_sheet_path": rhs, "residual": residual,
         "residual_pct_of_rhs": residual / rhs * 100, "within_tolerance": within_tolerance,
         "margin_rate_annual_estimate": args.margin_rate_annual,
