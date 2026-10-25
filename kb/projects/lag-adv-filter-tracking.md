@@ -293,3 +293,11 @@ Prereg: `mike/agents/Taylor/research/lag_dynamic_threshold_prereg_20260825.md`.
   - `legs_summary.csv`, `is_oos.csv`, `bootstrap_bh.csv`, `loo_delta.csv`, `dropped_per_year.csv`
   - `diff_events.csv`, `floor_pctile_k*.csv`, `bal_candidates_per_year.csv`
 - Registry: `data/results_registry.md` mục **"2026-08-25 SÀN THANH KHOẢN LAG ĐỘNG vs TĨNH"**
+
+## 2026-10-25 — ⚠️ CẢNH BÁO CAPACITY: pin LAG @50 tỷ CHƯA chứng minh thực thi được (user duyệt ghi, 21:04 ICT)
+- **Nguồn số:** Taylor `lag-capacity-floor-20261025` A (nhánh `research/lag-capacity-floor-20261025`, commit `6724d841e`, PREREG_A md5 `26217a6a…`); quant-skeptic **CONFIRMED (medium)** 25/10 — tự tính lại CAGR khớp từng số, control 6/6 byte-identical pin `537e349b…`/`a6ba34d8…`. Báo cáo: `agents/Taylor/research/lag_capacity_floor_20261025/REPORT_A.md`.
+- **Sự thật về pin hiện hành:** **31%** giá trị mua LAG nằm ở ngày `Volume = 0` (không giao dịch được) và **~85%** vượt 10% khối lượng khớp thực cùng ngày. Pin 22,12% … 25,42% (park 0) là kết quả của mô phỏng không bị ràng buộc khối lượng.
+- **Dải thực thi dưới trần tham gia (CHỈ để tham chiếu, KHÔNG phải số pin/vận hành, CẤM trích như pin):** bỏ phần không khớp, trần 10% = 17,36 / 19,95% (−4,77 / −5,47pp); trần 5% = 15,41 / 17,92% (−6,71 / −7,50pp), IS Δ âm mọi cấu hình. Chế độ "dời" (+0,93/+0,27pp) KHÔNG phải edge — vốn bị kẹp chạy sang sự kiện LAG khác.
+- **Vì sao KHÔNG phải cận dưới cứng (quant-skeptic):** (i) trần theo KL CÙNG NGÀY = hindsight; (ii) `ABANDONED_REFUND` hoàn bán phần dư cùng ngày (16–27% giá trị mua) bất khả thi dưới T+2 — pin cũng mang hành vi này; (iii) không tác động giá; (iv) chưa trừ ~1,5pp phí/slippage, chưa DSR/PBO; sàn nhiễu park=0 chưa đo.
+- **Việc đang chạy:** Taylor job `Taylor_20261025_140517` (R1 trần theo KL T−1/trung vị trượt, R2 thay ABANDONED_REFUND, R3 sàn nhiễu park=0), user duyệt 25/10 21:04. Kết quả → bổ sung mục này.
+- **Cách dùng:** đối chiếu checkpoint **2026-12-15** và rà soát **2027-03-31** bằng fill thật. Đừng coi pin 50 tỷ là số thực thi được; neo sizing DD vẫn −25,2% (không đổi).
