@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-24T04:09:41Z] ĐANG DỞ job Taylor_20261024_040927: R&D lag_runup_effect_20261024 (run-up trước công bố vs drift LAG) | NEXT: đọc lag_live_schedule.py, registry LAG, dựng event set
-- [2026-10-24T04:16:08Z] [lag-runup-effect 10-24] XONG job Taylor_20261024_040927: run-up không làm yếu LAG, NO filter (DSR .56/PBO .83); giả thuyết hàng hóa×YTD>100% cần prereg
 - [2026-10-24T04:50:48Z] ĐANG DỞ job Taylor_20261024_045036: dcf_rich_outlook_rerun_20261024 (5 kiểm tra ROE ngưỡng/MDE/LAG surprise/share-change/TR bench) | NEXT: copy panel+code, control
 - [2026-10-24T04:56:54Z] [dcf-rich-rerun 10-24] XONG job Taylor_20261024_045036: ROE25% miễn trừ underpowered (MDE10pp); đề xuất B = đòi lý do chỉ MoS<-100% không miễn ROE; chờ user
 - [2026-10-25T02:00:28Z] [spend-routing-review 10-25] XONG job Taylor_20261025_020009: no_action (opus 48/135 job, giam so voi 59/110)
@@ -26,3 +24,5 @@
 - [2026-10-25T04:27:02Z] ĐANG DỞ job Taylor_20261025_042649: coord-2026-10-19/20 — verify injector discretionary giá vượt biên độ (TV1 19.900 plan 19/10) + gap relay retro | NEXT: đọc Wags.jsonl round2, discretionary_accumulation_inject.py
 - [2026-10-25T04:30:19Z] [coord-2026-10-19/20] XONG job Taylor_20261025_042649: injector bien do = FALSE (TV1 UPCOM), no fix; gap relay retro->user con mo, cho Mike/user chon kenh
 - [2026-10-25T04:37:52Z] ĐANG DỞ job Taylor_20261025_043744: V1 prompt DollarBill đọc lag_dd ack (hạn merge 18:30) + V2 dt5g_publish_runs.log | NEXT: worktree, đọc bq_freshness_check.sh khối LAG
+- [2026-10-25T04:46:55Z] ĐANG DỞ job Taylor_20261025_043744: V1 MERGED 591e52563; question mch-entry-date-26-vs-29 chờ Mike | NEXT V2: dt5g_publish_runs.log trong publish_gated_state.py (outer repo) + dt5g_writer_watch.py
+- [2026-10-25T04:57:34Z] [job Taylor_20261025_043744] XONG V1 (591e52563) + V2 (outer 5780167fd, mike 182a19f5e), arch CONFIRMED; CHỜ Mike: question mch-entry-date-26-vs-29, duyệt .proposed dt5g_publish_runs_log
