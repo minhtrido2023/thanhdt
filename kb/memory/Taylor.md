@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-24T04:56:54Z] [dcf-rich-rerun 10-24] XONG job Taylor_20261024_045036: ROE25% miễn trừ underpowered (MDE10pp); đề xuất B = đòi lý do chỉ MoS<-100% không miễn ROE; chờ user
 - [2026-10-25T02:00:28Z] [spend-routing-review 10-25] XONG job Taylor_20261025_020009: no_action (opus 48/135 job, giam so voi 59/110)
 - [2026-10-25T03:12:57Z] [cq-2026-10-25 autodispatch] XONG job Taylor_20261025_030917: 817eafc1b, 3 fix + 1 skip, arch APPROVED
 - [2026-10-25T03:58:28Z] ĐANG DỞ job Taylor_20261025_035815: cq hard-boundary 10-18+10-25 (cpi_vn look-ahead, publish_gated_state atomic, NAV §25 4 nơi, bot_execute docstring, dcf status) | NEXT: đọc report, worktree
@@ -26,3 +25,4 @@
 - [2026-10-25T04:46:55Z] ĐANG DỞ job Taylor_20261025_043744: V1 MERGED 591e52563; question mch-entry-date-26-vs-29 chờ Mike | NEXT V2: dt5g_publish_runs.log trong publish_gated_state.py (outer repo) + dt5g_writer_watch.py
 - [2026-10-25T04:57:34Z] [job Taylor_20261025_043744] XONG V1 (591e52563) + V2 (outer 5780167fd, mike 182a19f5e), arch CONFIRMED; CHỜ Mike: question mch-entry-date-26-vs-29, duyệt .proposed dt5g_publish_runs_log
 - [2026-10-25T06:13:00Z] ĐANG DỞ job Taylor_20261025_061240: commodity-cycle PREREG (DRI/MSR/PVT) → agents/Taylor/research/commodity_cycle_prereg_20261025/ | NEXT: data_registry feeds, map CSV, PREREG, chạy
+- [2026-10-25T06:20:21Z] [commodity-cycle 10-25] XONG job Taylor_20261025_061240: PREREG FAIL 6/6 (de76e7964); post-hoc 1.05/3M chỉ giả thuyết; CHỜ quant-skeptic (Mike) + user quyết feed APT/BDTI cho Winston
