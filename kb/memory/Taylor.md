@@ -27,3 +27,6 @@
 - [2026-10-25T06:13:00Z] ĐANG DỞ job Taylor_20261025_061240: commodity-cycle PREREG (DRI/MSR/PVT) → agents/Taylor/research/commodity_cycle_prereg_20261025/ | NEXT: data_registry feeds, map CSV, PREREG, chạy
 - [2026-10-25T06:20:21Z] [commodity-cycle 10-25] XONG job Taylor_20261025_061240: PREREG FAIL 6/6 (de76e7964); post-hoc 1.05/3M chỉ giả thuyết; CHỜ quant-skeptic (Mike) + user quyết feed APT/BDTI cho Winston
 - [2026-10-25T06:37:17Z] [commodity PREREG-2 10-25] XONG job Taylor_20261025_062825: nhanh research/commodity-prereg2-20261025 @c124266de, CHUA merge/cron — CHO Mike review + user; N=0 luc dong bang, ket qua kha di nhat 'khong phan biet duoc'
+- [2026-10-25T09:22:42Z] ĐANG DỞ job Taylor_20261025_092232: 4 cảnh báo rights alert NB (auto_exit_inject >=, send_plan_report rights, reconcile credit≠payment, N4 dividend_adjusted_return) | NEXT: tìm nguồn NB, worktree
+- [2026-10-25T09:22:49Z] ĐANG DỞ job Taylor_20261025_092234: Livermore REPORT_BLOCK cho weekly/monthly (worktree riêng, không merge) | NEXT: đọc livermore_run.sh/common.py/reads.md, check_report_cadence.sh
+- [2026-10-25T09:43:50Z] [rights-alerts-nb 10-25] job Taylor_20261025_092232 XONG: nhanh fix/rights-alerts-nb-20261025 @52d0804af, arch APPROVED, CHUA merge — cho Mike merge
