@@ -417,12 +417,20 @@ _check "ticker_prune (EOD price)"         "tav2_bq.ticker_prune"              "t
 # mình mù hoàn toàn, suýt cho DollarBill lập plan trên universe 7 mã. Đếm số mã của
 # NGÀY MỚI NHẤT: < MIN_PRUNE_NAMES ⇒ FAIL như stale (block pipeline/DollarBill).
 MIN_PRUNE_NAMES=200   # daily_refresh_v34b precheck dùng cùng ngưỡng (bình thường ~225-265)
-prune_names=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
+# §28: tách "bq lỗi/không trả số" (KHÔNG biết bảng có bị moi ruột không) khỏi "đếm được và quá ít".
+prune_out=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
   "SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS t
-   WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" \
-  2>/dev/null | tail -1 | tr -d '[:space:]')
-prune_names="${prune_names:-0}"
-if [ "$prune_names" -ge "$MIN_PRUNE_NAMES" ] 2>/dev/null; then
+   WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" 2>&1)
+prune_rc=$?
+prune_names="$(printf '%s\n' "$prune_out" | tail -1 | tr -d '[:space:]')"
+if [ $prune_rc -ne 0 ] || ! printf '%s' "$prune_names" | grep -qE '^[0-9]+$'; then
+  prune_snip="$(printf '%s' "$prune_out" | tr '\n' ' ' | cut -c1-200)"
+  depth_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): ticker_prune depth — không đếm được số mã (rc=$prune_rc: ${prune_snip}). KHÔNG kết luận được bảng có bị moi ruột hay không; kiểm tra auth/quota/network. Chặn pipeline/DollarBill (fail-closed)."
+  echo "FAIL ticker_prune depth: bq lỗi/không trả số (rc=$prune_rc, raw: ${prune_snip})"
+  "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  FAILED=1
+elif [ "$prune_names" -ge "$MIN_PRUNE_NAMES" ]; then
   [ -z "$QUIET" ] && echo "OK   ticker_prune depth: ${prune_names} mã ngày mới nhất (≥${MIN_PRUNE_NAMES})"
 else
   depth_msg="⚠️ BQ DEPTH ($TODAY $NOW_ICT): ticker_prune ngày mới nhất chỉ có ${prune_names} mã (<${MIN_PRUNE_NAMES}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột dù MAX(time) vẫn advance. Chặn pipeline/DollarBill."
@@ -998,7 +1006,7 @@ except Exception:
     CAPIT_ENTRY="$(echo "$CAPIT_STATE" | cut -d'|' -f2)"
     CAPIT_SESS="$(echo "$CAPIT_STATE" | cut -d'|' -f3)"
     CAPIT_BASKET="$(echo "$CAPIT_STATE" | cut -d'|' -f4)"
-    CAPIT_NOTE=" 📌 CAPIT (bear-washout) ĐANG GIỮ VỊ THẾ — tín hiệu breadth HÔM NAY đã tắt (capit_signal_today=false) nhưng đó chỉ là điều kiện của RIÊNG ngày chạy, KHÔNG có nghĩa đã thoát: episode vào lệnh ${CAPIT_ENTRY}, đã ${CAPIT_SESS} phiên, rổ gốc ${CAPIT_BASKET} (nguồn: capit_episode_open=true trong golive_v23_status.json + data/capit_episode.json). Trong plan: các mã CAPIT là stop-exempt và slot-exempt (KHÔNG tính vào slot BAL/LAG thường, KHÔNG áp stop -20% của BAL). TUYỆT ĐỐI KHÔNG tự sinh lệnh BÁN để 'dọn' rổ CAPIT hay để 'cân' tỷ trọng — exit CAPIT do NGƯỜI quyết định, hệ thống KHÔNG có luật tự bán CAPIT ở đường live. Nếu bạn thấy lý do phải đụng tới 1 mã CAPIT, ghi rõ đề xuất + lý do trong plan note và để user duyệt, đừng tự đưa vào orders."
+    CAPIT_NOTE=" 📌 CAPIT (bear-washout) ĐANG GIỮ VỊ THẾ — tín hiệu breadth HÔM NAY đã tắt (capit_signal_today=false) nhưng đó chỉ là điều kiện của RIÊNG ngày chạy, KHÔNG có nghĩa đã thoát: episode vào lệnh ${CAPIT_ENTRY}, đã ${CAPIT_SESS} phiên, rổ gốc ${CAPIT_BASKET} (nguồn: capit_episode_open=true trong golive_v23_status.json + data/capit_episode.json). Trong plan: các mã CAPIT là stop-exempt và slot-exempt (KHÔNG tính vào slot BAL/LAG thường, KHÔNG áp stop -20% của BAL). TUYỆT ĐỐI KHÔNG tự sinh lệnh BÁN để 'dọn' rổ CAPIT hay để 'cân' tỷ trọng — bạn KHÔNG tự tạo lệnh BÁN CAPIT. Riêng bước auto_exit_inject (chạy SAU bạn, đường live) sẽ tự CHÈN đề xuất SELL CAPIT T+60 vào bản nháp plan để user duyệt (nhắc trước ở T+55) — đừng tạo trùng. Nếu bạn thấy lý do phải đụng tới 1 mã CAPIT, ghi rõ đề xuất + lý do trong plan note và để user duyệt, đừng tự đưa vào orders."
   fi
   # HOLDS_NOTE — ranh giới tạm giữ tín hiệu (signal_holds), fix lỗi #3 RCA 2026-08-20.
   # Bơm vào prompt để DollarBill biết không mở lệnh vi phạm; gate deterministic (signal_holds.py
@@ -1009,7 +1017,7 @@ except Exception:
   # hiệu thị trường khi viết plan/summary.
   CORP_ACTION_NOTE="$(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --note "$ACCT" 2>/dev/null)"
   "$ROOT/bin/dispatch.sh" DollarBill \
-    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: ${CAL_TODAY:-$TODAY} (ICT).${MORNING_NOTE}${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/trade_plans/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: ${CAL_TODAY:-$TODAY} (ICT).${MORNING_NOTE}${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
     --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 
