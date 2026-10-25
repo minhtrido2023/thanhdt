@@ -1,0 +1,26 @@
+recheck sugar 2016-04-11 r_exp csv=0.512504 hand=0.512504
+recheck rubber 2019-04-11 r_exp csv=0.156262 hand=0.156262
+recheck urea 2025-02-11 r_exp csv=0.374222 hand=0.374222
+1.05/3M: n_ev=28 n_cl=11 mean_cl=0.1198 ev_mean=0.1310 baseline_mix=0.0201 ev-base=0.1108 t=3.62 p1=0.0024 p_bonf9=0.0212 loco_min=0.1065 lofo={'urea': np.float64(0.1726), 'DAP': np.float64(0.0938), 'sugar': np.float64(0.11), 'rubber': np.float64(0.0847), 'crude oil': np.float64(0.1251)}
+1.05/6M: n_ev=28 n_cl=11 mean_cl=0.0866 ev_mean=0.0867 baseline_mix=0.0395 ev-base=0.0472 t=1.55 p1=0.0766 p_bonf9=0.6897 loco_min=0.0593 lofo={'urea': np.float64(0.1276), 'DAP': np.float64(0.0904), 'sugar': np.float64(0.0214), 'rubber': np.float64(0.0755), 'crude oil': np.float64(0.1063)}
+1.05/12M: n_ev=28 n_cl=11 mean_cl=0.1346 ev_mean=0.1831 baseline_mix=0.1009 ev-base=0.0822 t=2.27 p1=0.0231 p_bonf9=0.2081 loco_min=0.0980 lofo={'urea': np.float64(0.16), 'DAP': np.float64(0.1202), 'sugar': np.float64(0.1007), 'rubber': np.float64(0.1224), 'crude oil': np.float64(0.1786)}
+MSR month-end close:
+time
+2025-06-30    1.00
+2025-07-31    1.11
+2025-08-31    1.11
+2025-09-30    1.24
+2025-10-31    1.24
+2025-11-30    1.38
+2025-12-31    1.31
+2026-01-31    2.17
+2026-02-28    2.34
+2026-03-31    2.75
+2026-04-30    2.05
+2026-05-31    2.11
+2026-06-30    2.09
+2026-07-31    1.96
+2026-08-31    2.51
+2026-09-30    3.00
+2026-10-31    3.45
+Freq: ME
