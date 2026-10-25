@@ -188,8 +188,11 @@ def build_digest(recs, today):
         return lines[0] + "\n• Không có việc thường lệ nào cần ghi nhận."
     if "wags_lifecycle" in by:
         issues = sorted({m for r in by["wags_lifecycle"] for m in re.findall(r"'(coord-[\w-]+)'", r["text"])})
-        done = sum("HOÀN TẤT" in r["text"] for r in by["wags_lifecycle"])
-        lines.append(f"• Wags tự sửa vấn đề điều phối: {done} hoàn tất / {len(issues)} issue ({', '.join(issues) or '—'}), arch-review CONFIRMED")
+        done_txt = [r["text"] for r in by["wags_lifecycle"] if "HOÀN TẤT" in r["text"]]
+        # LOW-RISK = pipeline BỎ QUA arch-reviewer (wags_autofix.sh) — không được nhãn "CONFIRMED".
+        low = sum("LOW-RISK" in t for t in done_txt)
+        lines.append(f"• Wags tự sửa vấn đề điều phối: {len(done_txt)} hoàn tất / {len(issues)} issue ({', '.join(issues) or '—'}): "
+                     f"{len(done_txt) - low} arch-review CONFIRMED, {low} low-risk bỏ qua review")
     if "job_progress" in by:
         lines.append(f"• Ping tiến độ job đã gộp: {len(by['job_progress'])} tin (kết quả job vẫn gửi riêng)")
     if "cron_health" in by:
