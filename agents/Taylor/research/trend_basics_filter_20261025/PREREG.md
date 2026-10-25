@@ -57,3 +57,7 @@ Mỗi ô báo: N vị thế từng nhóm, N tháng & N quý, ret TB/trung vị, 
 - Tính tay Python thuần (không numpy/pandas) `rs60`, `d_ma200`, `pos52`, `atr_ratio` (≥3 chỉ báo) cho ≥3 vị thế, khớp engine (sai số tương đối < 1e-9).
 - Σ P&L vị thế = TX cash (đọc lại từ ledger) cho cả 2 ledger.
 - Chạy lại dưới `env -u TZ` ⇒ output byte-identical.
+
+## 7. Sửa đổi TRƯỚC KHI CHẠY (commit riêng, chưa có output nào)
+- **S0 — lỗi đếm:** bảng §2 có **15 biến** (T1a,T1b,T2a,T2b,T3a,T3b,T3c,T4,T5a,T5b,T6,T7,T8,T9,T10), không phải 13. Họ chính = 15 × 2 = **30 ô**; tổng **N trials = 39** (30 + 9 tương tác), BH trên 39 (chặt hơn 35). Mọi chỗ "13"/"26"/"35" ở trên đọc theo số này.
+- **S1 — xếp hạng trong năm:** (G, năm) có < 6 vị thế (vd BAL BANK 15 lệnh/12 năm) cho phân vị suy biến (1 lệnh ⇒ phân vị 1,0 ⇒ luôn T3). Các nhóm đó gộp thành (OTHER, năm) trước khi xếp hạng. Chỉ áp cho nhánh trong năm.
