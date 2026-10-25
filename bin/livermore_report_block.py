@@ -33,6 +33,7 @@ from decimal import Decimal, InvalidOperation
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import livermore_common as C  # noqa: E402
 
+LATE_MAX = 5                 # phiên: báo cáo soạn trễ hơn mức này không được lập forecast mới (không còn là đọc sống)
 MIN_GAP = C.HORIZON          # phiên giữa 2 lần đọc CÓ forecast (chân chấm điểm 20 phiên không chồng)
 LABELS = ("Xu hướng", "Hỗ trợ/kháng cự", "Động lượng", "Thanh khoản", "Độ rộng")
 MA_TOL = 0.001               # cột MA của BQ vs SMA tự tính từ bar: lệch > 0,1% ⇒ dữ liệu không nhất quán ⇒ FAIL
@@ -59,14 +60,16 @@ def dmy(d):
     return d.strftime("%d/%m/%Y")
 
 
-_ID = re.compile(r"\b(?:MA|SMA|EMA)\s?\d+\b|\bRSI\s?\(\s?\d+\s?\)|\bMACD\s?\(\s?\d+(?:\s?,\s?\d+)*\s?\)")
+# CHỈ đúng các định danh xuất hiện trong nhãn SỐ LIỆU (arch-review r1: regex rộng cho 'EMA 1800'/'RSI(70)' đi lậu ngưỡng).
+_ID = re.compile(r"\bMA(?:20|50|200)\b|\bRSI\(14\)")
 _DATE = re.compile(r"\b(\d{1,2})/(\d{1,2})(?:/(\d{4}))?\b")
-_NUM = re.compile(r"\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?")
+_NUM = re.compile(r"(?:(?<=[\s(:;])|^)([+\u2212-])?(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)|(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)", re.M)
 
 
 def tokens(text):
-    """→ (tập ngày (dd,mm,yyyy|None), tập số đã chuẩn hoá). Định danh chỉ báo (MA20, RSI(14)) bị bỏ ở CẢ hai phía
-    để '20'/'14' không thành số hợp lệ đi lậu. Dấu bị bỏ (so độ lớn) — sai dấu là rủi ro tồn dư đã ghi."""
+    """→ (tập ngày (dd,mm,yyyy|None), tập số). Định danh MA20/MA50/MA200/RSI(14) bị bỏ ở CẢ hai phía để '20'/'14'
+    không thành số hợp lệ đi lậu. Số có dấu (+/−/- đứng sau khoảng trắng/đầu dòng) mang dấu: '+4' ≠ '-4'; số
+    không dấu là độ lớn ('abs:4'). validate(): số có dấu trong khối phải khớp CẢ dấu; số không dấu khớp độ lớn."""
     t = _ID.sub(" ", text)
     dates = set()
     for m in _DATE.finditer(t):
@@ -74,11 +77,14 @@ def tokens(text):
     t = _DATE.sub(" ", t)
     nums = set()
     for m in _NUM.finditer(t):
-        s = m.group(0).replace(".", "").replace(",", ".")
+        sign, raw = (m.group(1), m.group(2)) if m.group(2) else (None, m.group(3))
         try:
-            nums.add(str(Decimal(s).normalize()))
+            v = format(Decimal(raw.replace(".", "").replace(",", ".")).normalize(), "f")
         except InvalidOperation:
-            nums.add(m.group(0))
+            v = raw
+        nums.add(f"abs:{v}")
+        if sign:
+            nums.add(("-" if sign in "\u2212-" else "+") + v)
     return dates, nums
 
 
@@ -264,17 +270,28 @@ def forecast_entry_text(as_of):
 
 def resolve_forecast(as_of, kind, run_new=True):
     """→ dict {mode, entry_as_of, due, gap, fields}. Mù về sau: chỉ xét entry có as_of ≤ as_of kỳ."""
-    ents = [e for e in C.parse_entries(C.read_registry()) if e["as_of"] <= as_of]
+    all_e = C.parse_entries(C.read_registry())
+    ents = [e for e in all_e if e["as_of"] <= as_of]
     last = max(ents, key=lambda e: e["as_of"]) if ents else None
     gap = sessions_between(last["as_of"], as_of) if last else None
     if last is not None and gap < MIN_GAP:
         mode, ent = "REPEAT", last
     else:
+        # arch-review r1 #3: KHÔNG lập forecast lùi ngày. (a) báo cáo trễ (as_of cách phiên mới nhất > LATE_MAX) thì
+        # lần đọc không còn là đọc sống; (b) sổ đã có entry SAU as_of trong vòng 20 phiên ⇒ chân sẽ chồng. Cả hai ⇒
+        # 'không có dự báo mở', KHÔNG nhắc lại entry tương lai (lộ thông tin sau as_of).
+        late = sessions_between(as_of, C.expected_last_session())
+        fut = [e for e in all_e if e["as_of"] > as_of and sessions_between(as_of, e["as_of"]) <= MIN_GAP]
+        if late > LATE_MAX or fut:
+            why = (f"báo cáo trễ {late} phiên (> {LATE_MAX})" if late > LATE_MAX
+                   else f"sổ đã có lần đọc sau as-of trong vòng {MIN_GAP} phiên")
+            return {"mode": "NONE", "entry_as_of": None, "due": None, "gap": gap, "fields": None,
+                    "result": None, "why": why}
         if not run_new:
             raise BlockError("cần forecast MỚI nhưng run_new=False")
         env = dict(os.environ, LIVERMORE_ALLOW_PAST="1")   # as_of đã được kiểm ≤ phiên kỳ vọng ở build_facts
         r = subprocess.run(["bash", RUN_BIN, "--as-of", str(as_of), "--triggers", f"REPORT_BLOCK_{kind.upper()}"],
-                           capture_output=True, text=True, env=env, timeout=int(os.environ.get("LIVERMORE_RUN_TIMEOUT", 1500)))
+                           capture_output=True, text=True, env=env, timeout=int(os.environ.get("LIVERMORE_RUN_TIMEOUT", 3000)))   # > lock-wait 1800 + claude 900
         if r.returncode != 0:
             raise BlockError(f"livermore_run.sh rc={r.returncode}: {(r.stderr or r.stdout).strip()[-400:]}")
         ent = next((e for e in C.parse_entries(C.read_registry()) if e["as_of"] == as_of), None)
@@ -286,13 +303,16 @@ def resolve_forecast(as_of, kind, run_new=True):
 
 
 def forecast_line(fc):
+    if fc["mode"] == "NONE":
+        return "- *Dự báo đang mở:* không có dự báo được lập cho kỳ này."
     f = fc["fields"]
     d = {"UP": "TĂNG", "DOWN": "GIẢM"}[f["H20_DIR"].split()[0]]
     lvl = f["LEVEL"].split()
     lv_num, lv_kind = lvl[0], (lvl[1] if len(lvl) > 1 else "")
     lv_txt = {"HOLD": "giữ được", "BREAK": "bị phá"}.get(lv_kind, lv_kind)
     e = dt.date.fromisoformat(fc["entry_as_of"]); due = dt.date.fromisoformat(fc["due"])
-    lead = "lập mới tại kỳ này" if fc["mode"] == "NEW" else "nhắc lại nguyên văn, chưa đáo hạn"
+    lead = ("lập mới tại kỳ này" if fc["mode"] == "NEW" or fc.get("gap") == 0
+            else "nhắc lại nguyên văn từ lần lập trước, chưa đáo hạn")
     return (f"- *Dự báo đang mở ({lead}; lập ngày {dmy(e)}, chấm điểm ngày {dmy(due)}):* hướng VN-Index sau 20 phiên "
             f"so với đóng cửa ngày lập: **{d}** (xác suất tự đánh giá {f['H20_P_UP']}); mức {lv_num}: {lv_txt} trong "
             f"20 phiên; điều kiện vô hiệu: {f['INVALIDATION']}")
@@ -391,7 +411,7 @@ def assemble(facts, lines, fc):
     as_of = dt.date.fromisoformat(facts["as_of"])
     ns = n_scored()
     return "\n".join([
-        f"**Kỹ thuật (VN-Index, dữ liệu đóng cửa {dmy(as_of)}) — nhận định độc lập của Livermore:**",
+        f"**Kỹ thuật (VN-Index, dữ liệu đóng cửa {dmy(as_of)}) — {MARKER}:**",
         *lines,
         forecast_line(fc),
         "",
@@ -416,7 +436,7 @@ def verify_pass(as_of, kind):
 
 
 def ensure(kind, period_end, run_new=True):
-    """Khoá theo (as_of, kind): lượt song song (cadence chạy lại / composer gọi 2 lần) xếp hàng rồi thấy EXISTS."""
+    """Khoá theo (period_end, kind): lượt song song (cadence chạy lại / composer gọi 2 lần) xếp hàng rồi thấy EXISTS."""
     import fcntl
     with open(C.lock_file(f"report_block_{period_end}_{kind}.lock"), "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
@@ -443,13 +463,18 @@ def _ensure(kind, period_end, run_new=True):
             fb = "; ".join(errs)
         if not lines:
             raise BlockError("kiểm cơ học thất bại sau 2 lần: " + "; ".join(errs))
-    except (BlockError, subprocess.TimeoutExpired, OSError, RuntimeError) as ex:
+    except Exception as ex:                                     # MỌI lỗi ⇒ FAILED.json (r1: KeyError/ValueError từng lọt)
         C.atomic_write(fj, json.dumps({"status": "FAIL", "kind": kind, "as_of": str(as_of), "reason": str(ex),
                                        "forecast": fc, "facts": facts["facts"], "raw": raws,
                                        "created": C.now_ict().isoformat(timespec="seconds")},
                                       ensure_ascii=False, indent=1) + "\n")
         return 1, {"status": "FAIL", "reason": str(ex), "failed_json": fj}
     text = assemble(facts, lines, fc)
+    m = DENY.search(forecast_line(fc).replace("Livermore", ""))   # dòng dự báo chép nguyên văn sổ cũng không được lộ DT5G
+    if m:
+        C.atomic_write(fj, json.dumps({"status": "FAIL", "kind": kind, "as_of": str(as_of),
+                                       "reason": f"dòng dự báo từ sổ chứa từ cấm {m.group(0)!r}"}, ensure_ascii=False) + "\n")
+        return 1, {"status": "FAIL", "reason": f"dòng dự báo chứa từ cấm {m.group(0)!r}", "failed_json": fj}
     C.atomic_write(md, text)                                   # .md TRƯỚC, .json (dấu commit) SAU
     meta = {"status": "PASS", "kind": kind, "period_end": str(period_end), "as_of": str(as_of),
             "md": md, "sha256": hashlib.sha256(text.encode()).hexdigest(), "forecast": fc,
@@ -458,6 +483,23 @@ def _ensure(kind, period_end, run_new=True):
     if os.path.exists(fj):
         os.remove(fj)
     return 0, meta
+
+
+MARKER = "nhận định độc lập của Livermore"
+
+
+def gate_report(text, kind, period_end):
+    """Cổng cứng cho report_delivery_gate (arch-review r1 #2). → None (qua) hoặc chuỗi lý do CHẶN.
+    - có khối PASS cho kỳ ⇒ báo cáo PHẢI chứa nguyên văn khối đó;
+    - không có PASS ⇒ báo cáo KHÔNG được gắn tên Livermore (khối tự viết của người soạn là đường fallback hợp lệ)."""
+    as_of = period_bounds(kind, period_end)[0]
+    ok, meta = verify_pass(as_of, kind)
+    if ok:
+        block = open(meta["md"], encoding="utf-8").read().strip()
+        return None if block in text else f"có khối Livermore PASS ({meta['md']}) nhưng báo cáo không chứa NGUYÊN VĂN khối"
+    if MARKER in text:
+        return f"báo cáo gắn nguồn Livermore nhưng không có khối PASS hợp lệ cho {kind} as_of {as_of} ({meta})"
+    return None
 
 
 def verify_report(report_path, kind, period_end):

@@ -42,6 +42,13 @@ if mode == "date":
     xu += " Kể từ 30/10/2026."
 if mode == "deny":
     xu += " Theo DT5G thì ổn."
+if mode == "ema":
+    xu += " Cần vượt EMA 1800."
+if mode == "rsi70":
+    xu += " RSI(70) là vùng quá mua."
+if mode == "signflip":
+    ch = v("Thay đổi trong kỳ")
+    xu = "- *Xu hướng:* thay đổi trong kỳ " + ({"+": "\u2212", "\u2212": "+"}[ch[0]] + ch[1:]) + "."
 if mode == "s200":
     xu += " Có thể thêm 200 điểm."
 if mode == "sameday":
@@ -195,14 +202,30 @@ def inner():
           and "trigger: REPORT_BLOCK_WEEKLY" in regtxt, (meta, regtxt[-300:]))
     check("#4c NEW: dòng dự báo lấy từ entry mới (GIẢM, 1650 bị phá)", "**GIẢM**" in open(md_p).read()
           and "1650: bị phá" in open(md_p).read() and "lập mới" in open(md_p).read())
-    # 5. mù về sau: entry SAU as-of bị bỏ qua (không có entry trước ⇒ NEW), dù entry sau rất gần
+    # 5. mù về sau: entry SAU as-of KHÔNG được nhắc lại; nó nằm trong 20 phiên ⇒ không lập NEW lùi ngày ⇒ NONE
     reset([entry(after[0], "2026-12-01")])
     rc, meta = run()
-    check("#5 entry sau as-of KHÔNG được dùng làm forecast đang mở", rc == 0 and meta["forecast"]["mode"] == "NEW"
-          and meta["forecast"]["entry_as_of"] == str(AS_OF), meta.get("forecast"))
+    md5 = open(md_p).read() if os.path.exists(md_p) else ""
+    check("#5 entry sau as-of KHÔNG được dùng làm forecast đang mở (NONE, không ghi sổ, không lộ)",
+          rc == 0 and meta["forecast"]["mode"] == "NONE" and meta["forecast"]["entry_as_of"] is None
+          and "LVR-2026-10-23" not in open(env["LIVERMORE_REGISTRY"]).read()
+          and "không có dự báo được lập cho kỳ này" in md5 and "1677" not in md5, meta.get("forecast"))
+    # 5b. báo cáo trễ (> LATE_MAX phiên) ⇒ không lập forecast lùi ngày
+    reset([entry(sess_before(25), "2026-11-01")])
+    os.environ["LIVERMORE_NOW"] = "2026-11-06T20:00:00"
+    rc, meta = run()
+    os.environ["LIVERMORE_NOW"] = env["LIVERMORE_NOW"]
+    check("#5b báo cáo trễ 10 phiên ⇒ NONE, sổ không có entry lùi ngày", rc == 0 and meta["forecast"]["mode"] == "NONE"
+          and "báo cáo trễ" in meta["forecast"]["why"] and "LVR-2026-10-23" not in open(env["LIVERMORE_REGISTRY"]).read(),
+          meta.get("forecast"))
+    # 5c. dòng dự báo từ sổ chứa từ cấm ⇒ FAIL
+    reset([entry(sess_before(2), "2026-11-20").replace("hoặc bất kỳ", "theo DT5G hoặc bất kỳ")])
+    rc, meta = run()
+    check("#5c INVALIDATION trong sổ lộ DT5G ⇒ FAIL, không .md", rc == 1 and not os.path.exists(md_p), meta)
     # 6. số lạ ⇒ FAIL sau 2 lần, không PASS file
     for mode, tag in (("stray", "số lạ 1.800"), ("date", "ngày lạ 30/10"), ("deny", "từ cấm DT5G"),
-                      ("round", "làm tròn 1.774"), ("s200", "số 200 (MA200 không được cho lậu 200)"),
+                      ("round", "làm tròn 1.774"), ("ema", "ngưỡng tự đặt EMA 1800"), ("rsi70", "ngưỡng RSI(70)"),
+                      ("signflip", "sai dấu thay đổi trong kỳ"), ("s200", "số 200 (MA200 không được cho lậu 200)"),
                       ("nomarker", "thiếu dấu mốc"), ("fourlines", "thiếu dòng"), ("exit1", "claude rc≠0")):
         reset([entry(sess_before(2), "2026-11-20")], mode)
         rc, meta = run()
@@ -258,7 +281,31 @@ def inner():
           (a9, p9, s9, ps9))
     # 10. tokenizer
     _, n = B.tokens("MA20 1.774,15 RSI(14) 57,2 MA200")
-    check("#10 tokens: định danh MA20/RSI(14)/MA200 không sinh số", n == {"1774.15", "57.2"}, n)
+    check("#10 tokens: định danh MA20/RSI(14)/MA200 không sinh số", n == {"abs:1774.15", "abs:57.2"}, n)
+    _, n = B.tokens("thay đổi +4,00% (cuối kỳ trước \u22126,06) vùng 1.740-1.800")
+    check("#10b tokens: dấu giữ khi đứng sau khoảng trắng/'(', gạch nối khoảng không phải dấu",
+          n == {"abs:4", "+4", "abs:6.06", "-6.06", "abs:1740", "abs:1800"}, n)
+    # 12. cổng giao báo cáo (gate_report + report_delivery_gate._check_livermore_block)
+    reset([entry(sess_before(2), "2026-11-20")]); run()
+    blk = open(md_p).read().strip()
+    check("#12 gate: PASS + nguyên văn ⇒ qua", B.gate_report("x\n" + blk + "\ny", "weekly", AS_OF) is None)
+    check("#12b gate: PASS + khối bị sửa ⇒ CHẶN", B.gate_report(blk.replace("*Xu hướng:* ", "*Xu hướng:* đã sửa "), "weekly", AS_OF) is not None)
+    check("#12c gate: PASS + người soạn tự viết khối khác ⇒ CHẶN", B.gate_report("**Kỹ thuật** tự viết", "weekly", AS_OF) is not None)
+    os.remove(js_p)
+    check("#12d gate: không PASS + gắn tên Livermore ⇒ CHẶN", B.gate_report(blk, "weekly", AS_OF) is not None)
+    check("#12e gate: không PASS + khối tự viết không gắn tên ⇒ qua (fallback)",
+          B.gate_report("**Kỹ thuật** tự viết", "weekly", AS_OF) is None)
+    if os.path.exists(os.path.join(BIN, "report_delivery_gate.py")):
+        import report_delivery_gate as RDG
+        from pathlib import Path
+        rp = Path(tmp) / "SpaceX_weekly_report_2026-10-19_to_2026-10-23.md"
+        rp.write_text("# r\n" + blk + "\n", encoding="utf-8")
+        try:
+            RDG._check_livermore_block(rp); r12 = "pass"
+        except RuntimeError as ex:
+            r12 = str(ex)
+        check("#12f report_delivery_gate._check_livermore_block CHẶN khi gắn tên Livermore mà không có PASS",
+              "livermore-block BLOCK" in r12, r12)
     # 11. lệnh CLI dưới TZ hiện tại
     r = subprocess.run([sys.executable, os.path.join(BIN, "livermore_report_block.py"), "facts", "--kind", "weekly",
                         "--period-end", str(AS_OF)], capture_output=True, text=True, env=dict(os.environ))
@@ -280,6 +327,12 @@ MUTANTS = [
     ("M7 bỏ kiểm sha", 'meta.get("sha256") != sha or ', ""),
     ("M8 bỏ kiểm kỳ chưa đóng", "    if as_of > exp:", "    if False:"),
     ("M9 bỏ lọc định danh chỉ báo", "    t = _ID.sub(\" \", text)", "    t = text"),
+    ("M11 bỏ dấu khi so số", "        if sign:\n", "        if False:\n"),
+    ("M12 regex định danh rộng", '_ID = re.compile(r"\\bMA(?:20|50|200)\\b|\\bRSI\\(14\\)")',
+     '_ID = re.compile(r"\\b(?:MA|SMA|EMA)\\s?\\d+\\b|\\bRSI\\s?\\(\\s?\\d+\\s?\\)")'),
+    ("M13 bỏ chặn forecast lùi ngày", "        if late > LATE_MAX or fut:", "        if False:"),
+    ("M14 gate bỏ kiểm nguyên văn", "return None if block in text else", "return None if True else"),
+    ("M15 gate bỏ chặn gắn tên khi không PASS", "    if MARKER in text:", "    if False:"),
     ("M10 bỏ đối chiếu MA", "        if abs(ind[as_of][f\"MA{n}\"] / sma - 1) > MA_TOL:", "        if False:"),
 ]
 
