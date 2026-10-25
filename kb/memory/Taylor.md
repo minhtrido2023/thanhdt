@@ -39,3 +39,4 @@
 - [2026-10-25T12:21:35Z] [ta-trend-entry-filter 10-25] XONG job Taylor_20261025_121521: 0/6 dat, co xu huong khong loc duoc LAG/BAL (2e965250e); BAL×F3 chi la gia thuyet
 - [2026-10-25T12:31:27Z] ĐANG DỞ job Taylor_20261025_123115: lag-bal-discriminators (PREREG ~25 chỉ báo fundamental x LAG/BAL, tertile+Spearman, cluster bootstrap) → agents/Taylor/research/lag_bal_discriminators_20261025/ | NEXT: đọc positions.csv/analyze.py job ta_trend, PREREG
 - [2026-10-25T12:39:16Z] [lag-bal-discriminators 10-25] XONG job Taylor_20261025_123115 (db19fd74d): 4/50 đạt = value; payout không đạt; ứng viên GĐ2 duy nhất BAL×1/PCF,1/EVEB — CHỜ user duyệt + quant-skeptic
+- [2026-10-25T12:52:56Z] [lag-capacity-floor 10-25] XONG job Taylor_20261025_114929: A+B tren nhanh research/lag-capacity-floor-20261025 @6724d841e, CHUA merge; CHO Mike/user: co ghi khoi registry 'can duoi' (no_ledger, de xuat trong REPORT_A) hay khong

@@ -3,4 +3,4 @@
 - Thực nghiệm: `agents/Taylor/research/ta_schools_vn_20261025/REPORT.md`; lọc lệnh vào: `agents/Taylor/research/ta_trend_entry_filter_20261025/REPORT.md`
 - Web (độ phổ biến VN, không có khảo sát): `agents/Mike/research/ta_schools_vn_20261025/web_part.md`; đính chính skeptic (BẮT BUỘC đọc khi trích): `.../skeptic_corrections.md`
 - NO-GO đừng đề xuất lại: nến/VSA/Darvas/dòng tiền làm tín hiệu vào; cờ xu hướng làm bộ lọc LAG/BAL. Muốn mở lại BAL×52w+vol = PREREG mới + mẫu lớn hơn.
-- Mạch kế tiếp (mở 25/10): chỉ báo cơ bản phân biệt lệnh LAG/BAL (cash dividend payout…) → `agents/Taylor/research/lag_bal_discriminators_20261025/`.
+- Mạch kế (25/10): chỉ báo cơ bản phân biệt lệnh LAG/BAL → `agents/Taylor/research/lag_bal_discriminators_20261025/REPORT.md` + đính chính skeptic `agents/Mike/research/lag_bal_discriminators_20261025/skeptic_corrections.md` (REFUTED phần hành động): 46/50 ô không phân biệt; payout KHÔNG dương (LAG ngược, một phần proxy 'đắt'); chỉ LAG×value bền; BAL×dòng tiền = giả thuyết thăm dò (1/EVEB), 1/PCF ≈ lọc CFO≤0. KHÔNG mở giai đoạn 2 nếu user chưa duyệt.
