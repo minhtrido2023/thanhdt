@@ -24,6 +24,9 @@ CÁC TÍN HIỆU ĐO (tất cả đều chỉ ĐỌC)
 A. `lastModifiedTime` của bảng → giờ ICT → phân lớp writer theo cửa sổ thời gian:
      OURS         18:25–19:20  (2 lần publish của ta ở trên, có biên)
      KAFFA_KNOWN  16:30–18:00  (EOD pipeline của team dữ liệu, đã biết + user chấp nhận)
+     OURS_MANUAL  ngoài 2 cửa sổ trên NHƯNG khớp 1 lần chạy publish_gated_state.py trong
+                  `data/dt5g_publish_runs.log` (START−5' … END+5'; thiếu END ⇒ START+30') —
+                  ta chạy tay/chạy bù (job Taylor_20261025_043744). QUIET, không WARN.
      OTHER        còn lại      → writer LẠ / kaffa chạy lệch giờ / ai đó ghi tay
    Hạn chế đã biết (ghi ra để không ai hiểu nhầm số liệu này): `lastModifiedTime` chỉ giữ lần
    ghi CUỐI. Lấy mẫu lúc 19:00 sẽ luôn thấy chính ta (18:35 đè lên 17:12 của kaffa) ⇒ điểm lấy
@@ -99,6 +102,11 @@ KAFFA_WINDOW = (dt.time(15, 30), dt.time(18, 0))   # nới 2026-08-06 (job Winst
 # thúc). Không đổi cảnh báo giá trị thật (state_diff/dup_time/null_sealed) — chỉ đổi nhãn writer.
 SEAL_TAIL_SESSIONS = 25   # = seal_n của state_publish_immutable (đuôi chưa chốt)
 
+# Sổ chạy do deploy_golive_dt5g_v4/publish_run_log.py ghi (1 dòng JSON START + 1 dòng END mỗi lần).
+PUBLISH_RUNS_LOG = os.path.join(WORKDIR, "data/dt5g_publish_runs.log")
+RUN_MATCH_TOL = dt.timedelta(minutes=5)       # lastModifiedTime lệch giờ START/END của run tối đa 5'
+RUN_MAX_DURATION = dt.timedelta(minutes=30)   # thiếu END (crash/kill/đang chạy) ⇒ coi run kéo dài 30'
+
 
 def sh(cmd, timeout=180):
     try:
@@ -139,6 +147,43 @@ def classify(when):
     if KAFFA_WINDOW[0] <= t < KAFFA_WINDOW[1]:
         return "KAFFA_KNOWN"
     return "OTHER"
+
+
+def publish_runs(path=None):
+    """→ list {run_id, start, end|None, parent, parent_cmd, publish_ok} từ sổ chạy publisher.
+    Dòng hỏng / thiếu ts có múi giờ bị BỎ QUA (không raise) — monitor không được chết vì log."""
+    p = path or PUBLISH_RUNS_LOG
+    runs = {}
+    try:
+        with open(p, encoding="utf-8", errors="replace") as f:
+            lines = f.readlines()
+    except OSError:
+        return []
+    for ln in lines:
+        try:
+            r = json.loads(ln)
+            ts = dt.datetime.fromisoformat(str(r["ts"]))
+            if ts.tzinfo is None:
+                continue
+            rid = str(r["run_id"])
+        except (ValueError, KeyError, TypeError):
+            continue
+        run = runs.setdefault(rid, {"run_id": rid, "start": None, "end": None, "parent": "",
+                                    "parent_cmd": "", "publish_ok": None})
+        if r.get("event") == "START":
+            run.update(start=ts, parent=r.get("parent") or "", parent_cmd=r.get("parent_cmd") or "")
+        elif r.get("event") == "END":
+            run.update(end=ts, publish_ok=r.get("publish_ok"))
+    return [r for r in runs.values() if r["start"] is not None]
+
+
+def match_publish_run(when, runs):
+    """Run của ta có cửa sổ [START−TOL, (END hoặc START+MAX)+TOL] chứa `when` (aware) ⇒ run đó, else None."""
+    for r in runs:
+        end = r["end"] if r["end"] is not None and r["end"] >= r["start"] else r["start"] + RUN_MAX_DURATION
+        if r["start"] - RUN_MATCH_TOL <= when <= end + RUN_MATCH_TOL:
+            return r
+    return None
 
 
 def read_local_csv():
@@ -210,6 +255,13 @@ def main():
             notify("notify_thread.sh", msg, DISCORD_TRADING_DAILY)
         return 0
     wclass = classify(lastmod)
+    if wclass == "OTHER":
+        run = match_publish_run(lastmod, publish_runs())
+        if run:
+            wclass = "OURS_MANUAL"
+            say(f"  khớp sổ chạy publisher {run['run_id']} (START {run['start']:%H:%M:%S}, "
+                f"END {run['end'].strftime('%H:%M:%S') if run['end'] else 'thiếu'}, cha={run['parent'] or '?'}, "
+                f"publish_ok={run['publish_ok']}) ⇒ ta ghi ngoài cửa sổ cron, không phải writer lạ")
     say(f"  lastModifiedTime = {lastmod:%Y-%m-%d %H:%M:%S} ICT  → writer_class={wclass}")
 
     rows, err = bq_query_csv(f"""
