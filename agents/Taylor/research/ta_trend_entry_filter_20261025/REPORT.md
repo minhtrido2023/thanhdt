@@ -19,7 +19,7 @@ Ledger: **R3-park0-pin0pct-SAN md5 `537e349b5589408c994f8aceafeb9a39`** (độ n
 N vị thế mỗi ô đều ≥100 toàn kỳ (không ô nào "thiếu mẫu" theo PREREG), nhưng **cắt IS thì mỏng**: BAL IS chỉ 83 vị thế (A2 BẬT 42, F3 BẬT 25, F2 TẮT 31) ⇒ dấu IS của BAL không đáng tin. p là bootstrap cụm tháng entry (B=5000); CI 95% hiệu chỉ loại 0 ở BAL×F3 [+0,3; +14,9pp]. Contribution theo vốn cho cùng chiều với ret, không ô nào có ý nghĩa (p_contrib ≥ 0,13).
 
 ## Cảnh báo / giới hạn
-- **54% vị thế LAG (821/1.517) là ABANDONED_REFUND** (khớp dở rồi hoàn tiền), BAL 96/396 ⇒ nhánh chính chỉ còn 695 LAG / 299 BAL vị thế. Nhánh gộp chúng cho cùng kết luận (không ô nào đổi dấu từ đạt sang không đạt).
+- **54% vị thế LAG (821/1.517) là ABANDONED_REFUND** (khớp dở rồi hoàn tiền), BAL 96/396 ⇒ nhánh chính chỉ còn 695 LAG / 299 BAL vị thế. Nhánh gộp chúng: 5/6 ô cùng dấu; LAG×A2 đổi dấu (+0,62 → −0,06pp) — càng xác nhận không có tác dụng.
 - **Sai trong PREREG §1, ghi lại công khai:** tôi đã giả định ledger pin1M có cùng sổ lệnh với pin0% — SAI (7.230 vs 7.589 dòng TX: tiền nhàn rỗi có lãi đổi cỡ lệnh/lệnh khớp). Đã chạy lại toàn bộ trên ledger pin1M: cùng 0/6, cùng dấu ở cả 6 ô.
 - Sửa đổi S1 (PREREG): 1 lệnh bán ghi `holding_id` `VCR_20200427_?` (lỗi ghi của engine) được nối về holding mua duy nhất cùng tiền tố.
 - Cờ là TRẠNG THÁI tại phiên trước entry (A2 = Tenkan>Kijun & trên mây; F3 = có phá đỉnh 52 tuần+vol trong 20 phiên; F2 = Close>MA50 & MA50 dốc lên), công thức chép từ `ta_schools_vn_20261025/engine.py`. Chỉ 4 vị thế thiếu lịch sử (cờ TẮT mặc định).
