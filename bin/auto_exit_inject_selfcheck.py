@@ -629,6 +629,29 @@ def main():
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
+    # ---------------- Test 8b: mã nằm LẪN book (broker 1600 = CAPIT 900 + book khác 700) → chỉ bán
+    # phần CAPIT (900), không bán lố sang book khác (code-quality 2026-10-25) ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [])
+        write_positions(exec_dir, signal_date_str, {"VNM": (1600, 60000.0)})
+        write_plan(plan_dir, ACCOUNT, plan_date)
+        write_capit_ledger(ledger_path, {
+            "episode_id": "CAPIT-TEST8B", "status": "open", "sessions_held": 61,
+            "qty_per_account": {ACCOUNT: {"VNM": 900}}})
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        vnm = [o for o in plan["orders"] if o["book"] == "CAPIT" and o["side"] == "sell" and o["ticker"] == "VNM"]
+        check("Test8b: rc=0 và có đúng 1 lệnh sell CAPIT VNM", rc == 0 and len(vnm) == 1, f"rc={rc} n={len(vnm)}")
+        check("Test8b: qty = phần CAPIT (900), KHÔNG phải tổng broker (1600)",
+              bool(vnm) and vnm[0]["qty"] == 900, f"qty={vnm[0]['qty'] if vnm else None}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
     # ---------------- Test 9: BAL stop-loss -20% trên giá vốn (job Taylor_20260930_111053) —
     # ĐỘC LẬP mốc T+45: entry chỉ 5 phiên trước signal_date (≥min_hold=2), chưa tới T+45 ----------
     bal_recent_entry = entry_n_sessions_before(5)
