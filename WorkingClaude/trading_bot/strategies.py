@@ -21,8 +21,6 @@ _log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------- DCF check (Pha 2, 2026-07-14)
 
-_DCF_SENS_KEYS = ["r-1%", "r+1%", "g-2%", "g+2%"]
-
 DCF_HISTORY_CSV = os.path.join(WORKDIR, "data", "dcf_lens_history.csv")
 _DCF_HISTORY_COLS = ["logged_at", "as_of", "ticker", "source", "status",
                      "fair_value_ps", "price", "margin_of_safety", "robust", "conglomerate"]
@@ -72,21 +70,9 @@ def _dcf_check_for_order(ticker, price, asof):
                     "conglomerate": _dcf.is_conglomerate(ticker), "as_of": str(asof)[:10]}
 
         mos = res.get("margin_of_safety")
-        status = "CHEAP" if (mos is not None and mos > 0) else "RICH"
-
-        # robust: kiểm tra MoS không đổi dấu qua sensitivity box
-        sens = res.get("sensitivity", {})
-        robust = False
-        if mos is not None and price and price > 0:
-            mos_positive = mos > 0
-            sens_signs = []
-            for k in _DCF_SENS_KEYS:
-                s = sens.get(k, {})
-                fv_s = s.get("fv")
-                if fv_s and fv_s > 0:
-                    mos_s = (fv_s - price) / fv_s
-                    sens_signs.append(mos_s > 0)
-            robust = bool(sens_signs) and all(sg == mos_positive for sg in sens_signs)
+        # status + robust (MoS không đổi dấu qua sensitivity box): định nghĩa DUY NHẤT ở
+        # dcf_valuation.classify_dcf — không chép lại công thức ở đây.
+        status, robust = _dcf.classify_dcf(mos, res.get("sensitivity", {}), price)
 
         # fair_value_ps + price: HIỂN THỊ ONLY (user directive 2026-07-15) — neo số tuyệt đối
         # cho quyết định mua/bán + cho phép so giá dự báo vs giá thị trường sau này. KHÔNG

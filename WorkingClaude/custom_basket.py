@@ -901,16 +901,10 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
                     if res.get("ok"):
                         mos = res.get("margin_of_safety")
                         if mos is not None and pd.notna(mos):
-                            # the 4 box keys ONLY — `sensitivity` also carries a bare `base_fv_ps`
-                            # float; folding it in would add a 5th point production never counts.
-                            _sens = res.get("sensitivity") or {}
-                            signs = []
-                            for _k in ("r-1%", "r+1%", "g-2%", "g+2%"):
-                                _f = (_sens.get(_k) or {}).get("fv")
-                                if _f and _f > 0:
-                                    signs.append(((_f - px) / _f) > 0)
-                            robust = bool(signs) and all(s == (mos > 0) for s in signs)
-                            out = (("CHEAP" if mos > 0 else "RICH"), float(mos), robust)
+                            # status/robust: định nghĩa DUY NHẤT dcf_valuation.classify_dcf
+                            # (cùng hàm production strategies._dcf_check_for_order gọi).
+                            _st, robust = _dcfv.classify_dcf(mos, res.get("sensitivity") or {}, px)
+                            out = (_st, float(mos), robust)
                 except Exception:
                     out = ("NOT_COMPUTED", np.nan, False)
             _dcf_memo[key] = out

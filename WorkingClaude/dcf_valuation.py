@@ -466,6 +466,26 @@ def _print_report(res):
 _SENS_KEYS = ["r-1%", "r+1%", "g-2%", "g+2%"]
 
 
+def classify_dcf(mos, sensitivity, px):
+    """-> (status, robust) — the ONE definition of DCF status/robust (cq-2026-10-18 dcf_valuation:493;
+    was hand-copied in dcf_check, strategies._dcf_check_for_order, custom_basket.dcf_at).
+    status = CHEAP iff mos > 0, else RICH. robust = MoS keeps its sign at every one of the 4 box
+    points in `_SENS_KEYS` that has a positive fv (needs px > 0 and >=1 such point). ONLY the 4 box
+    keys — `sensitivity` also carries a bare `base_fv_ps` float that must not become a 5th point.
+    Callers keep their own NOT_COMPUTED / NaN-mos / price-missing handling."""
+    status = "CHEAP" if (mos is not None and mos > 0) else "RICH"
+    robust = False
+    if mos is not None and px and px > 0:
+        mos_positive = mos > 0
+        sens_signs = []
+        for k in _SENS_KEYS:
+            fv_s = ((sensitivity or {}).get(k) or {}).get("fv")
+            if fv_s and fv_s > 0:
+                sens_signs.append(((fv_s - px) / fv_s) > 0)
+        robust = bool(sens_signs) and all(sg == mos_positive for sg in sens_signs)
+    return status, robust
+
+
 def dcf_check(ticker, asof, price=None):
     """dcf_check dict for ANY report (informational only) — same schema as the Pha 2 production
     helper `trading_bot/strategies.py::_dcf_check_for_order` (status/margin_of_safety/robust),
@@ -491,18 +511,7 @@ def dcf_check(ticker, asof, price=None):
                     "reason": nc_reason, "as_of": str(asof)[:10]}
 
         mos = res.get("margin_of_safety")
-        status = "CHEAP" if (mos is not None and mos > 0) else "RICH"
-        sens = res.get("sensitivity", {})
-        robust = False
-        if mos is not None and px > 0:
-            mos_positive = mos > 0
-            sens_signs = []
-            for k in _SENS_KEYS:
-                s = sens.get(k, {})
-                fv_s = s.get("fv")
-                if fv_s and fv_s > 0:
-                    sens_signs.append(((fv_s - px) / fv_s) > 0)
-            robust = bool(sens_signs) and all(sg == mos_positive for sg in sens_signs)
+        status, robust = classify_dcf(mos, res.get("sensitivity", {}), px)
 
         return {"status": status,
                 "margin_of_safety": round(float(mos), 4) if mos is not None else None,
