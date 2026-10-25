@@ -707,3 +707,30 @@
 
 ## Consolidation 2026-10-25T11:07:02Z
 - [2026-10-25T10:31:23Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54019}
+
+## Consolidation 2026-10-25T12:00:15Z
+- [2026-10-25T11:16:03Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12779}
+- [2026-10-25T11:50:11Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "in_progress", "note": "doc pin hien hanh + engine ban sao, chuan bi PREREG_A"}
+- [2026-10-25T11:50:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:51:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:51:33Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "in_progress", "note": "thiet ke knob CAPA, doc data_registry Price"}
+- [2026-10-25T11:52:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:53:29Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "in_progress", "note": "bat dau: doc registry/universe, chuan bi PREREG ta_schools"}
+- [2026-10-25T11:53:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:54:17Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "in_progress", "note": "PREREG_A 26217a6a commit 78095bced; batch 20 run (2 ctl+2 TZ ctl x2 + 5 cfg x2 + 2 TZ A10d x2) dang chay"}
+- [2026-10-25T11:54:19Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261025_115318", "source": "watcher"}
+- [2026-10-25T11:54:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:55:19Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261025_115318", "source": "watcher"}
+- [2026-10-25T11:55:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:55:53Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "in_progress", "note": "PREREG.md da viet (27 cau hinh x4 horizon=108 trials); tiep: engine"}
+- [2026-10-25T11:56:19Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261025_115318", "source": "watcher"}
+- [2026-10-25T11:56:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:57:06Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "in_progress", "note": "B: f3_particip/f3_forecast/v1de/v4 bo fallback Close, rerun xong; A batch dang chay"}
+- [2026-10-25T11:57:19Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261025_115318", "source": "watcher"}
+- [2026-10-25T11:57:30Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:58:19Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261025_115318", "source": "watcher"}
+- [2026-10-25T11:58:31Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T11:58:57Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "in_progress", "note": "engine chay xong (results.csv), dang selfcheck + phan tich bo sung"}
+- [2026-10-25T11:59:20Z] Taylor/heartbeat — Taylor_20261025_115318: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261025_115318", "source": "watcher"}
+- [2026-10-25T11:59:31Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261025_114929", "source": "watcher"}
+- [2026-10-25T12:00:02Z] Taylor/finding — ta-schools-vn-20261025: da so truong phai TA khong co edge tren VN: {"verdict": "Khong cau hinh nao dat CO+vuot F2; chi A2 (Ichimoku Tenkan x Kijun tren may), C2b (VSA no-supply >MA50), F3 (52w+vol), F2 (MA50) hon F1 nhung cung ho xu huong, khong hon F2. Nen dao chieu (hammer/engulf/morning star sau downtrend, stopping vol, MFI<20), Darvas, CMF, OBV: khong edge hoac AM co y nghia. Khoi ngoai/tu doanh khong do duoc (khong co cot).", "h20": {"A2_exF1_IS_OOS_pp": "+1.27/+0.75", "A2_exF2_pp": "+0.32 (q=0.154)", "C2b_exF2_pp": "-0.21 (q=0.053)", "F3_exF1_IS_OOS_pp": "+1.24/+0.48", "D1_exF1_IS_OOS_pp": "-0.33/-0.81", "E3_exF1_IS_OOS_pp": "-0.92/-0.53", "HAM_dt_exF1_IS_OOS_pp": "-1.29/-0.77"}, "n_trials": 108, "n_in_BH": 104, "q_lt_0.10": {"positive": 12, "negative": 33}, "caveats": "Morning star/Test/Stopping vol mau mong; trung binh != trung vi; paper-only, khong de xuat wire", "selfcheck": "HPG A2 24/24 khop, R20+ctrl F1 khop 1e-9; AAA 2014-08-26 adj +5.41% vs raw -18.14%", "measured_by": "agents/Taylor/research/ta_schools_vn_20261025/results.csv (engine.py), selfcheck.py, REPORT.md"}
