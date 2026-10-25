@@ -547,8 +547,7 @@ def process_account(account, plan_date, signal_date, dry_run):
         note = (f"AUTO-EXIT BAL STOP-LOSS: lỗ {pnl_pct:.1%} ≤ mốc {rules.BAL_STOP_LOSS_PCT:.0%} "
                 f"trên giá vốn (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ")
         _inject_sell(plan, positions, tk, qty, ref_price, "BAL", "BAL_AUTO_EXIT", note,
-                     "BAL-STOPLOSS", injected, capped_notes, f"stoploss={pnl_pct:.1%}",
-                     rights_lots=bal_lots.get(tk, {}).get("rights_lots"), locked_notes=locked_notes)
+                     "BAL-STOPLOSS", injected, capped_notes, f"stoploss={pnl_pct:.1%}")
 
     # ---- CAPIT: T+60 cố định (CAPIT_HOLD, pt_v22_dt5g.py:123) + nhắc T+55 ----
     ledger = capit_episode._load(capit_episode.LEDGER_PATH)
@@ -565,23 +564,7 @@ def process_account(account, plan_date, signal_date, dry_run):
                     # nó sẽ tạo lệnh SELL khống cho cổ phiếu không còn có (quant-skeptic
                     # 2026-09-30, bug phantom-sell — mirror guard của _lag_bal_candidates).
                     continue
-                # Chỉ bán phần CAPIT: pos["qty"] là TỔNG vị thế broker, mã nằm lẫn book khác
-                # (LAG/BAL/PARK) sẽ bị bán lố sang book đó. min() với số kế hoạch của episode
-                # (vẫn giữ guard phantom-sell ở trên: pos["qty"] <= 0 đã `continue`).
-                broker_qty = int(pos["qty"])
-                qty = min(int(planned_qty or 0), broker_qty)
-                if qty <= 0:
-                    print(f"  [FAILSAFE] CAPIT {tk}: qty CAPIT của episode <= 0 — KHÔNG chèn")
-                    _add_blocked(tk, "CAPIT", f"qty CAPIT ghi nhận của episode = {planned_qty} nhưng broker còn "
-                                              f"{broker_qty}cp — không chèn lệnh bán; người duyệt xử lý phần còn lại")
-                    continue
-                if qty < broker_qty:
-                    # §29: phần dư (book khác / cổ phiếu thưởng / quyền mua không có lệnh CAPIT) KHÔNG
-                    # được bán ngầm nhưng cũng không được im lặng — quant-skeptic 2026-10-25.
-                    capped_notes.append({"ticker": tk, "book": "CAPIT", "desired_qty": broker_qty,
-                                         "capped_qty": qty,
-                                         "reason": f"CAPIT chỉ bán {qty}/{broker_qty}cp (phần còn lại thuộc "
-                                                   f"book khác hoặc CP thưởng/quyền chưa quy book CAPIT)"})
+                qty = int(pos["qty"])
                 existing = _already_has_sell(plan, tk, "CAPIT")
                 if existing:
                     print(f"  [skip] {tk}: đã có sell CAPIT trong plan (id={existing})")
@@ -593,7 +576,7 @@ def process_account(account, plan_date, signal_date, dry_run):
                     continue
                 note = (f"AUTO-EXIT CAPIT: episode {ep['episode_id']} giữ {sessions_held} phiên "
                         f"≥ mốc cố định {rules.CAPIT_EXIT_SESSIONS} (CAPIT_HOLD, "
-                        f"pt_v22_dt5g.py:123) — đề xuất thoát toàn bộ phần CAPIT của rổ")
+                        f"pt_v22_dt5g.py:123) — đề xuất thoát TOÀN BỘ rổ")
                 _inject_sell(plan, positions, tk, qty, ref_price, "CAPIT", "CAPIT_AUTO_EXIT",
                             note, "CAPIT", injected, capped_notes, sessions_held)
         elif rules.capit_should_remind(sessions_held) and not ep.get("reminder_55_sent_at"):
