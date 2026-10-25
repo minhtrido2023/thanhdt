@@ -21,3 +21,4 @@
 ## Mốc
 - nav-loss-brake 11-09; DT CRISIS commit sớm ~11/10; Livermore chấm ~19/11; review BĐS 11-26; LAG checkpoint 12-15; measurement audit ~12-27. Architecture digest 18:00 ICT.
 
+- [2026-10-25T03:36:34Z] 25/10 10:50 rà bus: đã đóng selfcheck-red production_manifest (T0 egg_transfer_alert, 8519f33de). Chờ user: ack MCH/MSR hash mới bị classifier chặn (cần user xác nhận), auto-exit-inject approval, wakeup-gate A, hard-boundary cq-10-18/10-25, coord-10-19/20 (injector TV1 clamp), dt5g writer 15:25 T7 chưa rõ nguồn, phs_flash_api selfcheck=connect timeout flashapi.phs.vn

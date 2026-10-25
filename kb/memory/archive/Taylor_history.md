@@ -1467,3 +1467,6 @@
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-22T11:01:13Z] [livermore-stock-pilot 10-22] XONG job Taylor_20261022_104625: NO-GO sát biên (a đạt AUC 0,629; b hụt ΔAUC +0,024 CI chứa 0); không wire; chờ Mike
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T14:33:07Z] ĐANG DỞ job Taylor_20261022_143258: vá park_holdings.py đối soát bán tay DRI (tái dùng f0e293c30) | NEXT: đọc commit, worktree wt-park-manual-sell-20261022
