@@ -50,3 +50,4 @@
 - [2026-10-25T14:13:07Z] [bal-eveb-phase2 10-25] XONG job Taylor_20261025_131052: 0/8 dat, NO-GO (885b2c944, nhanh research/bal-eveb-phase2-20261025, chua merge); BAL xep theo ta, khong co yieldcombo — CHO Mike/user: dong nhanh BAL x dong tien, co ghi registry no_ledger khong
 - [2026-10-25T16:00:13Z] [lag-capacity-floor R 10-25] XONG job Taylor_20261025_140517 @ce26d14e3 (chua merge): dai thuc thi 50 ty san 11,86..22,61/tran 14,74..25,40; san nhieu park0 1,57pp — CHO Mike/user
 - [2026-10-25T17:25:49Z] ĐANG DỞ job Taylor_20261025_172538: lag-capacity S1(ΔIS/ΔOOS)/S2(đọc code live defer vs bỏ)/S3(trần KL mở cửa + slippage) trên wt-lag-capacity-floor-20261025 | NEXT: đọc REPORT_R/PREREG_R/out_R_metrics.csv
+- [2026-10-25T17:34:56Z] ĐANG DỞ job Taylor_20261025_172538: S1 3cdefe417 + S2 fe910d1e5 xong (bus); S3 batch 24 run nền từ 00:33 (wt-lag-capacity-floor, logs/run_batch_S.log), PREREG_S 1e909f719 | NEXT: analyze_S.py → REPORT_S §S3 → bus S3 + 'S ket luan'
