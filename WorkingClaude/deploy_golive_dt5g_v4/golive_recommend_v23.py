@@ -28,7 +28,7 @@ Output:
 
 Point-in-time snapshot of the SAME logic as pt_v22_dt5g.py — NOT a NAV backtest.
 """
-import os, sys, io, json
+import os, sys, io, json, tempfile
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -59,6 +59,27 @@ if _PD_MAJOR != 3:
         f"Artifact canonical (data/golive_v23_status.json, out/golive_v23_recommendations_*.csv|md) "
         f"KHÔNG được ghi. Chạy lại bằng $DNA_PYEXE (/home/trido/thanhdt/wc_venv/bin/python).\n")
     sys.exit(2)
+
+def _atomic_write(path, write_fn):
+    """§5 coding_guidelines — ghi nguyên tử: artifact canonical (status.json/CSV/MD) có consumer đọc
+    riêng (bq_freshness_check, telegram report, DollarBill); kill giữa lúc ghi KHÔNG được để lại
+    file cụt đè bản tốt. Khuôn compute_active_nav.py: mkstemp CÙNG thư mục + fsync + os.replace."""
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or ".",
+                               prefix=os.path.basename(path) + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            write_fn(f)
+            f.flush()
+            os.fsync(f.fileno())
+        os.chmod(tmp, 0o644)        # mkstemp tạo 0600; file trước đây 0644 (consumer khác user/tiến trình)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 os.chdir(WORKDIR); sys.path.insert(0, WORKDIR)
@@ -1233,7 +1254,7 @@ for _r in recs:
 
 rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","weight_base","status","capit_cap_total_vnd","due_diligence"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
-rec_df.to_csv(csv_path, index=False)
+_atomic_write(csv_path, lambda f: rec_df.to_csv(f, index=False))
 
 status = {
     "date": END, "signal_date": str(LATEST.date()), "state": state_today,
@@ -1328,8 +1349,8 @@ status = {
     "anomaly_flags_generated_at": anomaly_fresh["generated_at"],
     "anomaly_flags_stale_reason": anomaly_fresh["reason"] or None,
 }
-with open(os.path.join(WORKDIR, "data", "golive_v23_status.json"), "w", encoding="utf-8") as f:
-    json.dump(status, f, ensure_ascii=False, indent=2)
+_atomic_write(os.path.join(WORKDIR, "data", "golive_v23_status.json"),
+              lambda f: json.dump(status, f, ensure_ascii=False, indent=2))
 
 L = []
 L.append(f"# V2.3 + DT5G — Daily Recommendations — {END}\n")
@@ -1526,7 +1547,7 @@ L.append(f"- LAG: KHÔNG ensemble switch (always-on), KHÔNG stop — quản tr�
 L.append(f"- State là chuỗi gated fail-safe; nếu macro feed lỗi, source = 'DT4_only'.")
 L.append(f"- CSV: `out/golive_v23_recommendations_{END}.csv` | status: `data/golive_v23_status.json`")
 md_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.md")
-open(md_path, "w", encoding="utf-8").write("\n".join(L))
+_atomic_write(md_path, lambda f: f.write("\n".join(L)))
 
 print(f"\n  state={state_today}({SNAME.get(state_today,'?')})  w_LAG tgt={w_tgt*100:.0f}%" +
       (f" cur={w_cur*100:.0f}%" if w_cur is not None else "") +

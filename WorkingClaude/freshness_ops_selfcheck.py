@@ -124,8 +124,13 @@ order = ["vnindex_5state_dt5g_live", "shares_outstanding_live", "ticker_financia
          "ticker_prune", "ticker_1m", "custom30v_8l", "custom30_8l", "risk_rating",
          "fa_ratings_8l", "fa_ratings"]
 for t in order:
-    if "tav2_bq." + t in q:
+    if "AS gap_days" in q and "tav2_bq." + t in q:     # chỉ query lag-check thật; probe lạ nhắc tên bảng KHÔNG được rơi vào đây
         print("gap_days"); print(conf["lag"].get(t, 0)); sys.exit(0)
+# Không stub nào khớp = script thật đã mọc probe/hook mới mà sandbox chưa có stub (đã xảy ra ≥3 lần:
+# 2026-08-08, 09-27→10-09, 10-22). Ghi dấu để run_gate FAIL ngay với đúng tên query, thay vì để
+# gap_days=999 chảy xuống thành một cú đỏ khó hiểu ở assert phía sau.
+open(os.path.join(os.environ["FAKE_LOG_DIR"], "unstubbed.log"), "a").write(q + "\n")
+print("UNSTUBBED QUERY: " + q, file=sys.stderr)
 print("gap_days"); print(999)
 '''
 
@@ -247,6 +252,9 @@ def run_gate(sb: dict, lag: dict, lastmod: dict, py_touch: bool):
                        capture_output=True, text=True, env=env, timeout=120)
     logread = lambda n: ((sb["logs"] / n).read_text()
                          if (sb["logs"] / n).exists() else "")
+    check("fake-bq: mọi query của script thật đều có stub (không UNSTUBBED QUERY)",
+          not (sb["logs"] / "unstubbed.log").exists(),
+          "thêm stub cho query này vào BQ_STUB: " + logread("unstubbed.log").strip()[:600])
     return (r.returncode, r.stdout + r.stderr,
             logread("notify.log"), logread("notify_thread.log"), logread("dispatch.log"))
 

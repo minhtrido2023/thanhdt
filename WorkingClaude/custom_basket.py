@@ -365,10 +365,10 @@ def _corp_action_share_events(tickers):
     cached backtest routes to DuckDB and which would fail on an absent table.
     env BASKET_CA_SNAPSHOT=<parquet> reads a frozen vintage instead (the table is upserted in
     place, so a pinned result must be able to name the vintage it was computed on)."""
-    key = tuple(tickers)
+    snap = os.environ.get("BASKET_CA_SNAPSHOT", "")
+    key = (snap, tuple(tickers))          # vintage nằm trong key: LIVE và SNAPSHOT không đè nhau
     if key in _CA_CACHE:
         return _CA_CACHE[key]
-    snap = os.environ.get("BASKET_CA_SNAPSHOT", "")
     if snap:
         ev = pd.read_parquet(snap)
         ev = ev[ev["ticker"].isin(tickers)].copy()
