@@ -1491,3 +1491,6 @@
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-24T04:16:08Z] [lag-runup-effect 10-24] XONG job Taylor_20261024_040927: run-up không làm yếu LAG, NO filter (DSR .56/PBO .83); giả thuyết hàng hóa×YTD>100% cần prereg
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T04:50:48Z] ĐANG DỞ job Taylor_20261024_045036: dcf_rich_outlook_rerun_20261024 (5 kiểm tra ROE ngưỡng/MDE/LAG surprise/share-change/TR bench) | NEXT: copy panel+code, control
