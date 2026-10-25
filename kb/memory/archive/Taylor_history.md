@@ -1461,3 +1461,6 @@
 
 ## Archived 2026-10-24 (keep=12 days=0 require_done=False)
 - [2026-10-22T10:01:34Z] ĐANG DỞ job Taylor_20261022_095008: 8 chân engine chạy nền (logs/ trong research/bal_concentration_cap_20261022, worktree wt-balcap-20261022) | NEXT: legs_metrics.py + bootstrap_nav, REPORT
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T10:11:53Z] [bal-concentration-cap 10-22] XONG job Taylor_20261022_095008: NO-GO trần BAL; sizing live=backtest; đính chính 'BAL bt luôn đa dạng hoá' SAI

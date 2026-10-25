@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-22T10:11:53Z] [bal-concentration-cap 10-22] XONG job Taylor_20261022_095008: NO-GO trần BAL; sizing live=backtest; đính chính 'BAL bt luôn đa dạng hoá' SAI
 - [2026-10-22T11:01:13Z] [livermore-stock-pilot 10-22] XONG job Taylor_20261022_104625: NO-GO sát biên (a đạt AUC 0,629; b hụt ΔAUC +0,024 CI chứa 0); không wire; chờ Mike
 - [2026-10-22T14:33:07Z] ĐANG DỞ job Taylor_20261022_143258: vá park_holdings.py đối soát bán tay DRI (tái dùng f0e293c30) | NEXT: đọc commit, worktree wt-park-manual-sell-20261022
 - [2026-10-22T14:42:41Z] [park-holdings-manual-sell 10-22] XONG job Taylor_20261022_143258: fix/park-holdings-manual-sell-20261022 @30fe3ba7b chờ arch-review/merge
@@ -26,3 +25,4 @@
 - [2026-10-24T04:16:08Z] [lag-runup-effect 10-24] XONG job Taylor_20261024_040927: run-up không làm yếu LAG, NO filter (DSR .56/PBO .83); giả thuyết hàng hóa×YTD>100% cần prereg
 - [2026-10-24T04:50:48Z] ĐANG DỞ job Taylor_20261024_045036: dcf_rich_outlook_rerun_20261024 (5 kiểm tra ROE ngưỡng/MDE/LAG surprise/share-change/TR bench) | NEXT: copy panel+code, control
 - [2026-10-24T04:56:54Z] [dcf-rich-rerun 10-24] XONG job Taylor_20261024_045036: ROE25% miễn trừ underpowered (MDE10pp); đề xuất B = đòi lý do chỉ MoS<-100% không miễn ROE; chờ user
+- [2026-10-25T02:00:28Z] [spend-routing-review 10-25] XONG job Taylor_20261025_020009: no_action (opus 48/135 job, giam so voi 59/110)
