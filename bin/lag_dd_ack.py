@@ -16,6 +16,7 @@ buộc khác rỗng (provenance, coding_guidelines §20). Gói sinh lại SAU kh
         --note "..." --source "discord <link>"
     python3 bin/lag_dd_ack.py --show
     python3 bin/lag_dd_ack.py --gate SCL --plan-date 2026-10-26     # trạng thái cổng 1 mã
+    python3 bin/lag_dd_ack.py --note-prompt --plan-date 2026-10-26  # đoạn cổng DD + quy mô cho prompt DollarBill
 
 Mã thoát: 0 OK · 1 dữ liệu vào không hợp lệ / lỗi đọc-ghi.
 """
@@ -181,6 +182,67 @@ def dd_gate(ticker, plan_date, directory=None, acks=None, release_date=None):
     return out
 
 
+_RE_TIER = re.compile(r"\b(LAG_(?:LO|HI))\b(?:\s*(\d+(?:[.,]\d+)?)\s*%)?")
+_RE_TIER_NEG = re.compile(r"\b(?:không|ko|chưa|bỏ|thay vì|not)\b[^;.]{0,20}\bLAG_(?:LO|HI)\b", re.I)
+
+
+def ack_tier(note):
+    """(tier, pct|None) user chốt trong note ack, vd 'LAG_LO 8%' ⇒ ('LAG_LO', '8'). Không nêu hoặc
+    nêu >1 tier khác nhau, hoặc tier đứng sau phủ định ('không LAG_HI') ⇒ (None, None) — mơ hồ thì
+    KHÔNG đoán."""
+    if _RE_TIER_NEG.search(str(note or "")):
+        return None, None
+    hits = _RE_TIER.findall(str(note or ""))
+    tiers = {h[0] for h in hits}
+    if len(tiers) != 1:
+        return None, None
+    pcts = {h[1].replace(",", ".") for h in hits if h[1]}
+    return tiers.pop(), (pcts.pop() if len(pcts) == 1 else None)
+
+
+def prompt_note(plan_date, directory=None):
+    """1 đoạn văn cho prompt DollarBill: trạng thái cổng DD + quy mô user chốt của MỌI mã có gói DD
+    trong cửa sổ plan_date. Sinh bằng code từ dd_gate() — DollarBill không phải tự đọc/diễn giải
+    ack.json. Mã NO_PACK (ngoài cửa sổ) bỏ qua."""
+    d = directory or dd_dir()
+    tickers = sorted({m.group(1) for m in (_RE_PACK.match(os.path.basename(p))
+                                           for p in glob.glob(os.path.join(d, "*.json"))) if m})
+    ok, bad = [], []
+    for t in tickers:
+        g = dd_gate(t, plan_date, directory)
+        st = g["state"]
+        if st == "NO_PACK":
+            continue
+        if st == "CLEARED":
+            ok.append(f"{t} (CLEARED — quy mô theo play_type trong recommend)")
+        elif st == "ACK_PROCEED":
+            a = g.get("ack") or {}
+            tier, pct = ack_tier(a.get("note"))
+            size = (f"quy mô {tier}{' ' + pct + '%' if pct else ''} DO USER CHỐT" if tier else
+                    "ack KHÔNG nêu quy mô rõ ràng — KHÔNG mặc định LAG_HI: dùng LAG_LO 8% (mức nhỏ hơn), "
+                    "đặt requires_user_approval=true và ghi rõ trong plan note để user xác nhận quy mô")
+            cond = " ".join(str(a.get("note") or "").split())
+            cond = cond if len(cond) <= 400 else cond[:400] + "…"
+            ok.append(f"{t} (user PROCEED lúc {a.get('at')}: {size}; điều kiện user: '{cond}')")
+        else:
+            bad.append(f"{t} ({st})")
+    if not ok and not bad:
+        return ""
+    return (f" CỔNG DD LAG cho plan {plan_date} (sinh bằng code từ data/lag_dd/ack.json + gói DD, "
+            f"`bin/lag_dd_ack.py --note-prompt --plan-date {plan_date}`; kiểm 1 mã: `--gate <MÃ> --plan-date {plan_date}`):"
+            " PHẠM VI: danh sách này CHỈ gate/size các mã LAG mà recommend ĐỀ XUẤT VÀO đúng phiên"
+            f" {plan_date} theo cửa sổ entry/status của recommend (vd 'UPCOMING T+1'). Nó KHÔNG thêm mã,"
+            " KHÔNG kéo ngày vào sớm (mã recommend ghi UPCOMING T+2 trở lên vẫn chờ đúng phiên), và KHÔNG"
+            " loại mã CLEARED recommend đề xuất."
+            f" ĐƯỢC PHÉP (nếu recommend đề xuất vào phiên này): {'; '.join(ok) or 'không mã nào'}."
+            f" KHÔNG ĐƯA VÀO orders[] (kể cả khi recommend đề xuất): {', '.join(bad) or 'không'}."
+            " Quy mô user chốt trong ack THẮNG play_type của CSV recommend — recommend ghi LAG_HI 10% mà ack"
+            " ghi LAG_LO 8% thì size LAG_LO 8% và ghi play_type LAG_LO trong lệnh; KHÔNG tự nâng lại LAG_HI."
+            " Mã LAG có gói DD mà ở trạng thái khác CLEARED/ACK_PROCEED (ACK_DROP, ACK_RESEARCH, FLAG_NO_ACK,"
+            " ACK_STALE, PACK_STALE...) TUYỆT ĐỐI không vào orders[] — lag_plan_consistency_check chỉ báo"
+            " đỏ trong report (chưa chặn cứng), nên tuân thủ ở bước lập plan là lớp bảo vệ chính.")
+
+
 def _parse_at(s):
     v = dt.datetime.fromisoformat(str(s))
     if v.tzinfo is None:
@@ -241,10 +303,17 @@ def main(argv=None):
     ap.add_argument("--show", action="store_true")
     ap.add_argument("--gate", metavar="TICKER")
     ap.add_argument("--plan-date")
+    ap.add_argument("--note-prompt", "--prompt-note", dest="prompt_note", action="store_true",
+                    help="in đoạn cổng DD + quy mô user chốt cho prompt DollarBill (cần --plan-date)")
     a = ap.parse_args(argv)
     try:
         if a.show:
             print(json.dumps(load_acks(), ensure_ascii=False, indent=1))
+            return 0
+        if a.prompt_note:
+            if not a.plan_date:
+                ap.error("--note-prompt cần --plan-date")
+            print(prompt_note(a.plan_date))
             return 0
         if a.gate:
             if not a.plan_date:
