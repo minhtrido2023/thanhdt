@@ -405,7 +405,12 @@ def run_inner():
         ck("ack_tier: không nêu ⇒ (None, None)", K.ack_tier("PROCEED") == (None, None))
         ck("ack_tier: LO và HI cùng lúc ⇒ mơ hồ (None, None)",
            K.ack_tier("không LAG_HI 10%, vào LAG_LO 8%") == (None, None))
+        ck("ack_tier: 2 tier không phủ định ('LAG_HI 10% hoặc LAG_LO 8%') ⇒ mơ hồ",
+           K.ack_tier("LAG_HI 10% hoặc LAG_LO 8%") == (None, None))
         ck("ack_tier: LAG_LOW không phải tier", K.ack_tier("LAG_LOW 8%") == (None, None))
+        ck("ack_tier: phủ định 'không vào LAG_HI 10%' ⇒ mơ hồ", K.ack_tier("không vào LAG_HI 10%") == (None, None))
+        ck("ack_tier: note SCL thật ⇒ LAG_LO 8", K.ack_tier("PROCEED theo đề xuất 21/10: quy mô LAG_LO 8% (~4% NAV); "
+                                                         "user tự thực hiện ĐẦY ĐỦ quyền mua") == ("LAG_LO", "8"))
         nd = os.path.join(td, "note")
         os.makedirs(nd)
         for t in ("CLR", "PRO", "AMB", "DRO", "NOA"):
@@ -418,7 +423,7 @@ def run_inner():
             mka("PRO", "PROCEED", "vào LAG_HI 10%"), mka("PRO", "PROCEED", "user chốt LAG_LO 8% (~4% NAV)"),
             mka("AMB", "PROCEED", "proceed"), mka("DRO", "DROP", "loại")]})
         nt = K.prompt_note("2026-10-26", nd)
-        ok_part, bad_part = nt.split("KHÔNG ĐƯA VÀO PLAN", 1) if "KHÔNG ĐƯA VÀO PLAN" in nt else (nt, "")
+        ok_part, bad_part = nt.split("KHÔNG ĐƯA VÀO orders[]", 1) if "KHÔNG ĐƯA VÀO orders[]" in nt else (nt, "")
         ck("note: PROCEED lấy quy mô ack MỚI NHẤT (LAG_LO 8%)", "PRO (user PROCEED" in ok_part
            and "quy mô LAG_LO 8% DO USER CHỐT" in ok_part, nt[:400])
         ck("note: CLEARED vào danh sách được vào", "CLR (CLEARED" in ok_part, nt[:300])
@@ -427,11 +432,17 @@ def run_inner():
         ck("note: DROP / FLAG chưa ack ⇒ danh sách KHÔNG vào", "DRO (ACK_DROP)" in bad_part
            and "NOA (FLAG_NO_ACK)" in bad_part and "DRO (" not in ok_part and "NOA (" not in ok_part, nt[-500:])
         ck("note: gói ngoài cửa sổ (NO_PACK) bị bỏ qua", "OLD" not in nt, nt)
+        ck("note: có câu PHẠM VI (chỉ mã recommend đề xuất đúng phiên, không kéo ngày sớm)",
+           "PHẠM VI" in nt and "KHÔNG kéo ngày vào sớm" in nt, nt[:300])
+        ck("note: không khẳng định sai 'chặn cứng' (checker chỉ cảnh báo)", "chặn cứng các mã" not in nt
+           and "chưa chặn cứng" in nt, nt[-300:])
+        ck("note: PROCEED không tier ⇒ KHÔNG mặc định LAG_HI, đòi user duyệt",
+           "KHÔNG mặc định LAG_HI" in nt and "requires_user_approval=true" in nt, nt)
         ck("note: thư mục không có gói ⇒ chuỗi rỗng", K.prompt_note("2026-10-26", os.path.join(td, "empty")) == "")
         open(os.path.join(nd, "ack.json"), "w").write("{hỏng")
         nt = K.prompt_note("2026-10-26", nd)
         ck("note: ack.json hỏng ⇒ mã FLAG rơi vào KHÔNG vào (ACK_UNREADABLE), không raise",
-           "PRO (ACK_UNREADABLE)" in nt.split("KHÔNG ĐƯA VÀO PLAN", 1)[1], nt[-400:])
+           "PRO (ACK_UNREADABLE)" in nt.split("KHÔNG ĐƯA VÀO orders[]", 1)[1], nt[-400:])
 
         # 5. checker: LAG_DD_GATE_VIOLATION + chờ DD
         def plan(orders, due, upc=()):
@@ -623,6 +634,7 @@ MUTANTS = [
     ("lag_dd_pack.py", '"cfo_2q_vnd": cfo[0] + cfo[1]', '"cfo_2q_vnd": cfo[0]'),
     ("lag_dd_ack.py", "        if rel <= d0 and (d0 - rel).days <= PACK_MAX_AGE_DAYS", "        if True"),
     ("lag_dd_ack.py", "    if len(tiers) != 1:", "    if not tiers:"),
+    ("lag_dd_ack.py", '    if _RE_TIER_NEG.search(str(note or "")):', "    if False:"),
     ("lag_dd_ack.py", '        if st == "NO_PACK":\n            continue', '        if False:\n            continue'),
     ("lag_plan_consistency_check.py", '            if g["state"] in BUY_OK:\n                continue',
      '            if g["state"] != "NO_PACK":\n                continue'),

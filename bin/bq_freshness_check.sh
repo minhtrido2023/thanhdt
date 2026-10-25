@@ -943,12 +943,15 @@ fi
 # LAG_DD_NOTE — cổng DD LAG + quy mô user chốt trong data/lag_dd/ack.json, SINH BẰNG CODE (user duyệt
 # 2026-10-25 11:36 ICT, job Taylor_20261025_043744): trước đây prompt không đọc ack ⇒ vòng plan có thể
 # sinh lại SCL LAG_HI 10% dù user chốt LAG_LO 8%. Lỗi đọc ⇒ in lỗi thật + note fail-closed (không im lặng).
-if _lagdd_out="$( { cd "$ROOT" && python3 bin/lag_dd_ack.py --note-prompt --plan-date "$NEXT_TRADING_DAY"; } 2>&1)"; then
+# stderr tách riêng: thành công thì stdout sạch vào prompt; lỗi thì in stderr thật (§29).
+_lagdd_err="$(mktemp)"
+if _lagdd_out="$( { cd "$ROOT" && python3 bin/lag_dd_ack.py --note-prompt --plan-date "$NEXT_TRADING_DAY"; } 2>"$_lagdd_err")"; then
   LAG_DD_NOTE="$_lagdd_out"
 else
-  echo "  [WARN] lag_dd_ack.py --note-prompt lỗi — Lỗi thật: $(echo "$_lagdd_out" | tail -2 | tr '\n' ' ')"
+  echo "  [WARN] lag_dd_ack.py --note-prompt lỗi — Lỗi thật: $(tail -2 "$_lagdd_err" | tr '\n' ' ')"
   LAG_DD_NOTE=" ⚠️ KHÔNG sinh được ghi chú cổng DD LAG tự động (lag_dd_ack.py lỗi). Với MỖI mã LAG trong recommend, chạy \`python3 bin/lag_dd_ack.py --gate <MÃ> --plan-date $NEXT_TRADING_DAY\`: chỉ state CLEARED/ACK_PROCEED mới vào plan; ACK_PROCEED thì size theo quy mô ghi trong ack.note (vd 'LAG_LO 8%'), KHÔNG theo play_type recommend."
 fi
+rm -f "$_lagdd_err"
 
 MORNING_NOTE=""
 if [ "${MORNING:-0}" = "1" ]; then
