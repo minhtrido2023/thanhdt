@@ -69,6 +69,7 @@ ROOT_TIER = {
     "bq_freshness_check.sh": T0,  # EOD pipeline + dispatch lập plan
     "gate_block_question.py": T0,  # sweep cron nhắc/đóng question của cổng BLOCK approval/plan-t1/delivery (T0)
     "plan_approval_reminder.sh": T0,  # tái dùng approval_block_reason() của bot_execute.py — phần của chuỗi approval-gate T0
+    "egg_transfer_alert.py": T0,  # nhắc chuyển Trứng vàng→cash trước phiên; CHỈ cảnh báo nhưng đo bằng chính check_plan_funding của bot (chuỗi funding-gate T0) — phân loại muộn, selfcheck đỏ 24/10
     # T1 — pipeline dữ liệu / regime / feed / paper
     "papertrade_daily.sh": T1, "pt_8l_daily.sh": T1, "telegram_run_daily.sh": T1,
     "daily_refresh_v34b_linux.sh": T1, "auto_update_commodity_wb.sh": T1,
