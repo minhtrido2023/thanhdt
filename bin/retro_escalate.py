@@ -341,14 +341,30 @@ def format_relay(topic, payload):
     return "\n".join(lines)
 
 
-def _last_event_id(agent, topic):
-    """event_id của question `topic` mới nhất trong inbox của `agent` (vừa được ghi)."""
+def _inbox_path(agent):
+    return os.path.join(ROOT, "bus", "inbox", f"{agent}.jsonl")
+
+
+def _inbox_size(agent):
     try:
-        with open(os.path.join(ROOT, "bus", "inbox", f"{agent}.jsonl"), encoding="utf-8") as f:
-            lines = f.readlines()[-50:]
+        return os.path.getsize(_inbox_path(agent))
+    except OSError:
+        return 0
+
+
+def _new_event_id(agent, topic, offset):
+    """event_id của question `topic` nằm SAU byte `offset` (tức do chính lần chạy này ghi).
+
+    Ràng buộc vào offset chứ không phải "câu mới nhất cùng topic": nếu lần ghi không rơi
+    vào inbox thì trả None thay vì nhặt nhầm câu CŨ (sẽ thành backfill).
+    """
+    try:
+        with open(_inbox_path(agent), "rb") as f:
+            f.seek(offset)
+            tail = f.read().decode("utf-8", "replace")
     except OSError:
         return None
-    for line in reversed(lines):
+    for line in reversed(tail.splitlines()):
         try:
             rec = json.loads(line)
         except Exception:
@@ -358,8 +374,21 @@ def _last_event_id(agent, topic):
     return None
 
 
+RELAY_KEEP_DAYS = 30
+
+
+def _relay_fail(msg):
+    # stderr (không chỉ stdout) để caller vứt stdout vẫn thấy; bus question vẫn còn nên không mất hẳn.
+    print(f"RELAY={msg}")
+    sys.stderr.write(f"retro_escalate: RELAY KHÔNG tới user — {msg}\n")
+
+
 def relay_to_user(event_id, topic, payload, now=None):
-    """True nếu đã gửi; False nếu bỏ qua/lỗi. Không bao giờ raise."""
+    """True nếu đã gửi; False nếu bỏ qua/lỗi. Không bao giờ raise.
+
+    Lỗ hổng chấp nhận: notify đã gửi (hoặc timeout sau khi gửi) rồi process chết TRƯỚC
+    os.replace ⇒ lần sau gửi trùng 1 lần. Ưu tiên gửi trùng hơn mất tin.
+    """
     try:
         now = now or dt.datetime.now(dt.timezone.utc)
         day = (now + dt.timedelta(hours=7)).strftime("%Y-%m-%d")
@@ -376,10 +405,14 @@ def relay_to_user(event_id, topic, payload, now=None):
                 print("RELAY=skip-already-relayed")
                 return False
             r = subprocess.run([_notify_cmd(), format_relay(topic, payload), RELAY_CHANNEL],
-                               capture_output=True, text=True, timeout=60)
+                               capture_output=True, text=True,
+                               timeout=int(os.environ.get("RETRO_NOTIFY_TIMEOUT") or 60))
             if r.returncode != 0:
-                print(f"RELAY=notify-failed rc={r.returncode} (sẽ thử lại lần sau)")
+                _relay_fail(f"notify-failed rc={r.returncode} (chỉ gửi lại nếu retro lần sau POST lại; "
+                            f"câu hỏi vẫn nằm trên bus)")
                 return False
+            cutoff = (now - dt.timedelta(days=RELAY_KEEP_DAYS)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            state = {k: v for k, v in state.items() if str(v) >= cutoff}
             for k in keys:
                 state[k] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
             fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".relay.")
@@ -389,7 +422,7 @@ def relay_to_user(event_id, topic, payload, now=None):
         print("RELAY=sent")
         return True
     except Exception as e:  # relay không bao giờ được làm hỏng escalation
-        print(f"RELAY=error {type(e).__name__}: {e}")
+        _relay_fail(f"error {type(e).__name__}: {e}")
         return False
 
 
@@ -434,6 +467,7 @@ def main(argv=None):
         etype, ev_topic = "status", f"{SKIP_STATUS_PREFIX}{topic}"
         payload["suppressed_reason"] = reason
 
+    offset = _inbox_size(a.agent)
     cmd = [os.path.join(ROOT, "bin", "append_event.sh"), a.agent, etype, ev_topic,
            json.dumps(payload, ensure_ascii=False)]
     if a.trace_id:
@@ -444,11 +478,11 @@ def main(argv=None):
         raise SystemExit(f"FAIL: append_event.sh rc={r.returncode} — escalation KHÔNG được ghi")
     print(f"WROTE={etype}:{ev_topic}")
     if etype == "question":
-        eid = _last_event_id(a.agent, ev_topic)
+        eid = _new_event_id(a.agent, ev_topic, offset)
         if eid:
             relay_to_user(eid, topic, payload)
         else:
-            print("RELAY=error không đọc được event_id vừa ghi")
+            _relay_fail("error không đọc được event_id vừa ghi")
     return 0
 
 
