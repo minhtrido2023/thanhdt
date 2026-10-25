@@ -400,6 +400,39 @@ def run_inner():
         ck("gate: release ứng viên khớp ⇒ CLEARED",
            K.dd_gate("HT1", "2026-10-26", release_date="2026-10-19")["state"] == "CLEARED")
 
+        # 4c. ghi chú prompt DollarBill: quy mô user chốt trong ack (job Taylor_20261025_043744)
+        ck("ack_tier: 'LAG_LO 8%' ⇒ (LAG_LO, 8)", K.ack_tier("vào LAG_LO 8% (~4% NAV)") == ("LAG_LO", "8"))
+        ck("ack_tier: không nêu ⇒ (None, None)", K.ack_tier("PROCEED") == (None, None))
+        ck("ack_tier: LO và HI cùng lúc ⇒ mơ hồ (None, None)",
+           K.ack_tier("không LAG_HI 10%, vào LAG_LO 8%") == (None, None))
+        ck("ack_tier: LAG_LOW không phải tier", K.ack_tier("LAG_LOW 8%") == (None, None))
+        nd = os.path.join(td, "note")
+        os.makedirs(nd)
+        for t in ("CLR", "PRO", "AMB", "DRO", "NOA"):
+            P.write_atomic(os.path.join(nd, f"{t}_2026-10-19.json"),
+                           dict(cleared if t == "CLR" else flagged, ticker=t))
+        P.write_atomic(os.path.join(nd, "OLD_2026-08-01.json"), dict(cleared, ticker="OLD", release_date="2026-08-01"))
+        mka = lambda t, d, n: dict(ticker=t, release_date="2026-10-19", decision=d, decided_by="user",  # noqa: E731
+                                   at="2026-10-24T11:06:00+07:00", flags_hash=flagged["flags_hash"], note=n, source="sc")
+        P.write_atomic(os.path.join(nd, "ack.json"), {"acks": [
+            mka("PRO", "PROCEED", "vào LAG_HI 10%"), mka("PRO", "PROCEED", "user chốt LAG_LO 8% (~4% NAV)"),
+            mka("AMB", "PROCEED", "proceed"), mka("DRO", "DROP", "loại")]})
+        nt = K.prompt_note("2026-10-26", nd)
+        ok_part, bad_part = nt.split("KHÔNG ĐƯA VÀO PLAN", 1) if "KHÔNG ĐƯA VÀO PLAN" in nt else (nt, "")
+        ck("note: PROCEED lấy quy mô ack MỚI NHẤT (LAG_LO 8%)", "PRO (user PROCEED" in ok_part
+           and "quy mô LAG_LO 8% DO USER CHỐT" in ok_part, nt[:400])
+        ck("note: CLEARED vào danh sách được vào", "CLR (CLEARED" in ok_part, nt[:300])
+        ck("note: PROCEED không nêu quy mô ⇒ nói rõ KHÔNG nêu, không đoán tier",
+           "AMB (user PROCEED" in ok_part and "KHÔNG nêu quy mô" in ok_part.split("AMB (", 1)[1].split(");", 1)[0], nt)
+        ck("note: DROP / FLAG chưa ack ⇒ danh sách KHÔNG vào", "DRO (ACK_DROP)" in bad_part
+           and "NOA (FLAG_NO_ACK)" in bad_part and "DRO (" not in ok_part and "NOA (" not in ok_part, nt[-500:])
+        ck("note: gói ngoài cửa sổ (NO_PACK) bị bỏ qua", "OLD" not in nt, nt)
+        ck("note: thư mục không có gói ⇒ chuỗi rỗng", K.prompt_note("2026-10-26", os.path.join(td, "empty")) == "")
+        open(os.path.join(nd, "ack.json"), "w").write("{hỏng")
+        nt = K.prompt_note("2026-10-26", nd)
+        ck("note: ack.json hỏng ⇒ mã FLAG rơi vào KHÔNG vào (ACK_UNREADABLE), không raise",
+           "PRO (ACK_UNREADABLE)" in nt.split("KHÔNG ĐƯA VÀO PLAN", 1)[1], nt[-400:])
+
         # 5. checker: LAG_DD_GATE_VIOLATION + chờ DD
         def plan(orders, due, upc=()):
             return {"account": "SpaceX", "plan_date": "2026-10-26", "orders": orders,
@@ -589,6 +622,8 @@ MUTANTS = [
      'if abs(ar["yoy"]) > 0.10 and abs(dd_) > 0.10 and (ar["yoy"] > 0) != (dd_ > 0):'),
     ("lag_dd_pack.py", '"cfo_2q_vnd": cfo[0] + cfo[1]', '"cfo_2q_vnd": cfo[0]'),
     ("lag_dd_ack.py", "        if rel <= d0 and (d0 - rel).days <= PACK_MAX_AGE_DAYS", "        if True"),
+    ("lag_dd_ack.py", "    if len(tiers) != 1:", "    if not tiers:"),
+    ("lag_dd_ack.py", '        if st == "NO_PACK":\n            continue', '        if False:\n            continue'),
     ("lag_plan_consistency_check.py", '            if g["state"] in BUY_OK:\n                continue',
      '            if g["state"] != "NO_PACK":\n                continue'),
 ]
