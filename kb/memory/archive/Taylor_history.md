@@ -1482,3 +1482,6 @@
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-24T03:45:09Z] ĐANG DỞ job Taylor_20261024_034455: R&D dcf_rich_outlook_20261024 (DCF RICH sâu có info lợi nhuận/drift?) | NEXT: đọc dcf_valuation.py, data_registry, PIT feasibility
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T03:53:50Z] [dcf-rich-outlook 10-24] XONG job Taylor_20261024_034455: RICH sâu KHÔNG báo LN xấu; drift xấu chỉ ở ROE<25%/hàng hóa; đề xuất hạ gate→WARNING cho ROE≥25%, chờ quant-skeptic+user
