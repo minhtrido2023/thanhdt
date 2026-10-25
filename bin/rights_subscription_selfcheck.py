@@ -71,6 +71,11 @@ if "--mutants" in sys.argv[1:]:
          "args.offbook_assets + rights_receivable_value\n", "args.offbook_assets\n"),
         ("M27 NB2-reconcile phải thu tính cả lô đã về broker", "reconcile_equity.py",
          "and s_[\"credit_date\"] > asof]", "]"),
+        ("M28 NB4 credit_frame bỏ pending_rights", "dividend_adjusted_return.py",
+         "                                                         pending_rights=pend)",
+         "                                                         pending_rights=0.0)"),
+        ("M29 NB4 KL hưởng quyền gồm cả lô chờ", "dividend_adjusted_return.py",
+         "float(detail[\"residual\"]) - pend\n", "float(detail[\"residual\"])\n"),
         ("M22 B2 net_fills_journal_and_broker (đường sizing broker_statement=True) bỏ cộng lô quyền", "exdate_frame.py",
          "    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():",
          "    for d, evs in {}.items():"),
@@ -784,6 +789,44 @@ m_norm = V.corp_action_multiplier(TK, "2025-10-01", "2025-11-10", acts, key="1")
 check("V3 N4: hệ số cổ tức CP không áp lô quyền đang chờ (1,0), vẫn áp lô thường (1,09)",
       m_rights == 1.0 and m_norm == 1.09, (m_rights, m_norm))
 # <<< N4
+
+# >>> rights alert NB4 (25/10): N4 wire vào dividend_adjusted_return.credit_frame — trước đây gọi
+# classify_qty_residual KHÔNG truyền pending_rights ⇒ cổ tức CP 9% credit sớm trong khoảng chờ VSDC
+# (14.000×9% = 1.260, không phải 19.000×9% = 1.710) ⇒ 'unknown' (fail-closed, §21 UNVERIFIED).
+import types as _types  # noqa: E402
+
+
+def run_cf(tag, subs, qty_now):
+    ndir("CF_" + tag, subs)                    # sổ khai báo sandbox (MIKE_LAG_RIGHTS_DIR)
+    adj = _types.SimpleNamespace(ticker=TK, last_cum_date="2025-11-05", ex_date="2025-11-06",
+                                 last_cum_price=20500.0)
+    saved = {k: getattr(D, k) for k in ("_corp_action_daily_snapshot", "raw_positions", "previous_raw_qty",
+                                        "net_fills_between", "held_event_next_session")}
+    D._corp_action_daily_snapshot = lambda day: None
+    D.raw_positions = lambda acc, day: ({TK: {"qty": qty_now, "marketPrice": 20500.0}}, f"{day}T19:00:00")
+    D.previous_raw_qty = lambda acc, tk, day: (Q0 + RQ, "2025-11-04")
+    D.net_fills_between = lambda *a, **k: {}
+    D.held_event_next_session = lambda snap, day, tk: SDIV_EV
+    try:
+        return DAR.credit_frame(ACCT, ACCT_NO, [adj])[(TK, "2025-11-05")]
+    finally:
+        for k, v in saved.items():
+            setattr(D, k, v)
+
+
+f0 = run_cf("control", [], Q0 + RQ + 1260)
+check("F0 ĐỐI CHỨNG không khai báo: 19.000→20.260 (phần dư 1.260 ≠ 19.000×9%) ⇒ unknown (fail-closed)",
+      f0["status"] == "unknown" and f0["entitled"] is None, f0)
+f1 = run_cf("pending", [nsub()], Q0 + RQ + 1260)
+check("F1 N4: lô quyền 5.000 chờ VSDC ⇒ phần dư 1.260 = 14.000×9% ⇒ pre_credit, KL hưởng quyền 14.000 (không gồm lô chờ)",
+      f1["status"] == "pre_credit" and abs(f1["entitled"] - Q0) < 1e-6 and "chờ VSDC" in f1["note"], f1)
+f2 = run_cf("registered", [nsub(registered="2025-10-29")], Q0 + RQ + 1710)
+check("F2 đối chứng: đã ghi nhận trước ex-date ⇒ pending 0 ⇒ 19.000×9% = 1.710 khớp ⇒ hưởng 19.000",
+      f2["status"] == "pre_credit" and abs(f2["entitled"] - (Q0 + RQ)) < 1e-6 and "chờ VSDC" not in f2["note"], f2)
+f3 = run_cf("pending_wrong", [nsub()], Q0 + RQ + 1710)
+check("F3 lô chờ nhưng broker credit 1.710 (cả lô quyền) ⇒ vẫn unknown (không nới khi bằng chứng ngược)",
+      f3["status"] == "unknown", f3)
+# <<< rights alert NB4
 
 # reconcile_equity trên snapshot V1
 old = (V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv, RE.__dict__.get("load_corp_actions"))
