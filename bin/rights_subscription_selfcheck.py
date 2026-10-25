@@ -52,7 +52,9 @@ if "--mutants" in sys.argv[1:]:
         ("M17 khoá không giới hạn bởi phần broker không cho bán (nuốt SELL book khác)", "auto_exit_inject.py",
          "max(int(held) - int(sellable), 0))", "int(qty))"),
         ("M18 khoá cả lô đã tới listing_date", "auto_exit_inject.py",
-         "            if ld > plan_date:", "            if True:"),
+         "            if ld >= plan_date:", "            if True:"),
+        ("M25 NB1 biên listing_date == plan_date không khoá (về '>')", "auto_exit_inject.py",
+         "            if ld >= plan_date:", "            if ld > plan_date:"),
         ("M19 khoá không hết hạn credit_date+10 phiên", "auto_exit_inject.py",
          "        elif n <= RIGHTS_LOCK_MAX_SESSIONS:", "        elif True:"),
         ("M20 cảnh báo cắt bỏ chẩn đoán lô quyền hết khoá", "auto_exit_inject.py",
@@ -471,6 +473,41 @@ l3, _st = aei._new_block_alert_lines(ACC, [], CPD, "2026-12-02", [])
 check("P17 alert: khoá báo ℹ️ 1 lần (dedup ngày sau); hết hạn ⇒ ⚠️ cắt kèm chẩn đoán",
       len(l1) == 1 and l1[0].startswith("ℹ️") and l2 == [] and len(l3) == 1 and "đã 11 phiên" in l3[0], (l1, l2, l3))
 # <<< B1 vòng 2
+# >>> rights alert NB1 (25/10, arch-review 22/10 NON-BLOCKING 1): plan_date == listing_date ⇒ VẪN khoá.
+# auto_exit chạy tối T−1 (plan_date = listing_date), broker tradeQuantity chưa gồm lô quyền ⇒ bản
+# `ld > plan_date` ra ⚠️ "đã tới ngày niêm yết… broker vẫn chưa cho bán" giả cho MỌI đợt niêm yết.
+EVE = nth(T25, 39)
+assert next_trading_day(EVE) == LIST
+r = run_exit("p18_listing_eve", EVE, (5_000, 0), fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))],
+             subs=[sub(listing=LIST)])
+check("P18 biên plan_date == listing_date (tối T−1): khoá 5.000 (ℹ️), KHÔNG ⚠️ cắt, không lệnh",
+      r["sells"] == [] and [x["locked_qty"] for x in _k(r, "rights_locked")] == [5000] and not _k(r, "capped"),
+      (r["sells"], r["notes"]))
+check("P18b biên hàm: listing_date == plan_date ⇒ khoá; == plan_date−1 phiên ⇒ hết khoá (đối chứng P12)",
+      aei._rights_lock_status([{"qty": 5000, "credit_date": PAY.isoformat(), "listing_date": LIST.isoformat()}],
+                              LIST.isoformat())[0] == 5000
+      and aei._rights_lock_status([{"qty": 5000, "credit_date": PAY.isoformat(), "listing_date": EVE.isoformat()}],
+                                  LIST.isoformat())[0] == 0)
+
+
+def _inj(plan_date, held, sellable):
+    pl_, inj_, cap_, lk_ = {"plan_date": plan_date, "orders": []}, [], [], []
+    aei._inject_sell(pl_, {TK: {"qty": held, "sellable": sellable}}, TK, 19_000, 25_400, "LAG", "LAG", "n",
+                     "X", inj_, cap_, "d", rights_lots=[{"qty": 5000, "credit_date": PAY.isoformat(),
+                                                         "listing_date": LIST.isoformat(), "event_id": EVID}],
+                     locked_notes=lk_)
+    return [o["qty"] for o in pl_["orders"]], [c["capped_qty"] for c in cap_], [x["locked_qty"] for x in lk_]
+
+
+check("P18c HÀNH VI ĐỔI (công bố): tối T−1, 1 book (held 19.000/sellable 14.000) ⇒ lệnh 14.000 — y hệt bản cũ "
+      "(cắt về sellable), chỉ đổi ⚠️→ℹ️", _inj(LIST.isoformat(), 19_000, 14_000) == ([14_000], [], [5000]),
+      _inj(LIST.isoformat(), 19_000, 14_000))
+check("P18d HÀNH VI ĐỔI (công bố): tối T−1, mã có thêm 10.000 ở book khác (held 29.000/sellable 24.000) ⇒ "
+      "lệnh LAG 14.000 (bản cũ 19.000: ăn 5.000 sellable của book kia), lô quyền bán phiên sau",
+      _inj(LIST.isoformat(), 29_000, 24_000) == ([14_000], [], [5000])
+      and _inj(nth(LIST, 1).isoformat(), 29_000, 24_000) == ([19_000], [], []),
+      (_inj(LIST.isoformat(), 29_000, 24_000), _inj(nth(LIST, 1).isoformat(), 29_000, 24_000)))
+# <<< rights alert NB1
 check("P11 không gọi subprocess thật (bus/Discord)", CALLS == [], CALLS)
 
 # ================================ N. chuỗi NAV ================================

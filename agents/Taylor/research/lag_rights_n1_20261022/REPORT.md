@@ -189,7 +189,7 @@ sổ khai báo ⇒ y hệt cũ (đối chứng E0b/E2b; `compute_active_nav_brok
    **Chưa khai thì khoá chỉ giữ tối đa 10 phiên kể từ credit_date** — sau đó plan/Discord hiện ⚠️ cắt kèm
    "đã N phiên > hạn 10 phiên — cần khai --listing-date hoặc kiểm broker". Đó là tín hiệu cần hành động, không phải lỗi.
 6. Trong thời gian khoá: báo cáo plan có dòng ℹ️ "lô CP quyền mua KHOÁ chờ niêm yết"; Discord ℹ️ một lần.
-   Tới listing_date mà broker vẫn chưa cho bán ⇒ ⚠️ cắt kèm "đã tới ngày niêm yết theo khai báo nhưng broker
+   Từ phiên SAU listing_date (plan_date > listing_date, sửa NB1 25/10 — tối T−1 vẫn khoá) mà broker vẫn chưa cho bán ⇒ ⚠️ cắt kèm "đã qua ngày niêm yết theo khai báo nhưng broker
    vẫn chưa cho bán" ⇒ kiểm DNSE.
 8. `--from-raw` cho ngày broker ghi có sớm cổ tức CP/thưởng trong lúc có lô quyền chờ VSDC: đối chiếu tay NAV
    với DNSE trước khi đưa vào báo cáo (NB3), hoặc dùng dòng EOD ngày kế tiếp.
