@@ -58,14 +58,24 @@ def expected_date(env=None):
     return r.stdout.strip()
 
 
+TODAY_ICT = subprocess.run(
+    [sys.executable, "-c", "import datetime as dt; from zoneinfo import ZoneInfo; "
+     "print(dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date())"],
+    capture_output=True, text=True).stdout.strip()
 LAST_RC = [None]  # Mblk_none_crash (vòng 5): rc entry sau cùng, để T7 phát hiện render_crashed
 
 
-def run_sender(plan, account):
+def run_sender(plan, account, extra=None):
+    """`extra` = {đường dẫn tương đối trong sandbox: nội dung | callable(ngày_ICT_hôm_nay)}."""
     td = tempfile.mkdtemp()
     try:
         for sub in ("data/trade_plans", "state"):
             os.makedirs(os.path.join(td, sub), exist_ok=True)
+        for rel, body in (extra or {}).items():
+            fp = os.path.join(td, rel.format(today=TODAY_ICT))
+            os.makedirs(os.path.dirname(fp), exist_ok=True)
+            with open(fp, "w", encoding="utf-8") as fh:
+                fh.write(body)
         os.symlink(os.path.join(WC, "trading_bot"), os.path.join(td, "trading_bot"))
         env = dict(os.environ, SEND_PLAN_WORKDIR_OVERRIDE=td,
                    SEND_PLAN_MARKER_DIR=os.path.join(td, "state", "marker"))
@@ -224,6 +234,48 @@ check("T8a: rc=0 và khối ℹ️ quyền mua KHOÁ hiện đúng mã/KL",
       f"rc={LAST_RC[0]}")
 check("T8b: đối chứng (T7a, không có rights_locked) không in khối khoá",
       "quyền mua KHOÁ chờ niêm yết" not in out7a)
+
+# ── T9 (rights alert NB 25/10): mã có CP chờ niêm yết (_lk_pending) KHÔNG được hạ MỌI cắt xuống ℹ️ —
+# chỉ khi phần cắt do khoá giải thích trọn (locked_shares.split_capped). Sandbox: positions SCL
+# open 19.000 / trade 16.000 + registry CP thưởng CONFIRMED; corp_action_lib stub ném lỗi ⇒ đường
+# fallback registry (không chạm BQ thật). Dòng ⚠️ phải in rights_diag (runbook bước 5).
+print("\n[T9] CP chờ niêm yết: cắt do lệnh book khác / lô quyền hết khoá giữ ⚠️; cắt do khoá ⇒ ℹ️")
+import datetime as _dt  # noqa: E402
+_ex = (_dt.date.fromisoformat(TODAY_ICT) - _dt.timedelta(days=20)).isoformat()
+_acc_no = str(SX.get("account_no"))
+LK_FILES = {
+    "corp_action_lib.py": "def pricing_events(*a, **k):\n    raise RuntimeError('stub selfcheck: no BQ')\n",
+    "data/corp_actions.json": json.dumps({"actions": [
+        {"ticker": "SCL", "event_type": "BONUS_ISSUE", "qty_multiplier": 1.2, "ex_date": _ex,
+         "_status": "CONFIRMED — selfcheck"}]}),
+    "data/execution_logs/dnse_raw_{today}.jsonl": json.dumps(
+        {"ts": TODAY_ICT + "T20:30:00", "kind": "positions", "account_no": _acc_no,
+         "payload": {"positions": [{"symbol": "SCL", "openQuantity": 19000, "tradeQuantity": 16000}]}}) + "\n",
+}
+CAP_SCL = {"ticker": "SCL", "book": "LAG", "desired_qty": 16000, "capped_qty": 14000, "reason": "SCL cap fixture"}
+OTHER_SCL = {"id": "SELL-SCL-PARKMERGE-X", "ticker": "SCL", "side": "sell", "qty": 2000,
+             "book": "custom30V_parking", "price": 25000}
+
+
+def _p9(capped, extra_orders=()):
+    p = copy.deepcopy(SX)
+    p["orders"] = list(p.get("orders") or []) + list(extra_orders)
+    p["auto_exit_inject_notes"] = [{"at": "2026-10-01T20:40:01+07:00", "source": "auto_exit_inject",
+                                    "capped": [capped]}]
+    return p
+
+
+out9c = run_sender(_p9(CAP_SCL), "SpaceX", LK_FILES)
+check("T9c ĐỐI CHỨNG: cắt 2.000 ≤ khoá 3.000, không lệnh book khác ⇒ ℹ️ CP chờ niêm yết, KHÔNG ⚠️ SCL",
+      LAST_RC[0] == 0 and "CP chờ niêm yết bổ sung" in out9c and "SCL 3,000cp" in out9c
+      and "16000cp → 14000cp" not in out9c, f"rc={LAST_RC[0]}")
+out9a = run_sender(_p9(CAP_SCL, [OTHER_SCL]), "SpaceX", LK_FILES)
+check("T9a: SELL book khác chiếm sellable (ca P13) ⇒ GIỮ ⚠️ BỊ CẮT SCL 16000→14000",
+      LAST_RC[0] == 0 and "BỊ CẮT" in out9a and "SCL (LAG): 16000cp → 14000cp" in out9a, f"rc={LAST_RC[0]}")
+_diag = "lô quyền mua 5000cp (event E1, credit_date 2026-11-20, CHƯA khai listing_date): đã 11 phiên > hạn 10 phiên"
+out9b = run_sender(_p9(dict(CAP_SCL, rights_diag=_diag)), "SpaceX", LK_FILES)
+check("T9b: lô quyền hết khoá (rights_diag) ⇒ GIỮ ⚠️ và dòng ⚠️ in chẩn đoán",
+      LAST_RC[0] == 0 and "SCL (LAG): 16000cp → 14000cp — " + _diag in out9b, f"rc={LAST_RC[0]}")
 
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:

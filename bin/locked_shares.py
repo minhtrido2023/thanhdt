@@ -137,6 +137,37 @@ def classify(account_no, asof, raw_dir, registry_path, bq_events=_bq_events):
     return res
 
 
+def split_capped(capped, pending, orders):
+    """Tách các mục `capped` (auto_exit_inject) thành (ℹ️ do CP chờ niêm yết, ⚠️ giữ nguyên).
+
+    Một mục chỉ hạ xuống ℹ️ khi phần BỊ CẮT được giải thích TRỌN bởi phần khoá đã có bằng chứng
+    (`pending`, xem `classify`) — không chỉ vì mã có mặt trong `pending` (rights alert NB 25/10:
+    bản cũ hạ MỌI cắt của mã đó ⇒ che ⚠️ của lý do khác). Giữ ⚠️ khi:
+      • mục có `rights_diag` (lô quyền mua đã hết khoá/đã tới ngày niêm yết mà broker chưa nhả —
+        cần người kiểm, auto_exit_inject B1 vòng 2);
+      • KL bị cắt (desired − capped) > KL khoá của mã, hoặc không đọc được số;
+      • plan có lệnh SELL cùng mã ở book KHÁC (lệnh đó cũng chiếm sellable ⇒ không tách được
+        phần cắt nào do khoá, phần nào do lệnh kia).
+    Trả `(info, warn)` — `info` = [(ticker, book, desired, capped)]; `warn` = [mục capped gốc]."""
+    info, warn = [], []
+    for c in capped:
+        tk, book = c.get("ticker"), c.get("book", "?")
+        it = pending.get(tk)
+        try:
+            short = int(c.get("desired_qty")) - int(c.get("capped_qty"))
+        except (TypeError, ValueError):
+            short = None
+        other = sum(int(o.get("qty") or 0) for o in orders or []
+                    if isinstance(o, dict) and o.get("ticker") == tk and o.get("side") == "sell"
+                    and o.get("book") != c.get("book"))
+        if (it is None or c.get("rights_diag") or short is None
+                or short > int(it.get("locked") or 0) or other > 0):
+            warn.append(c)
+        else:
+            info.append((tk, book, c.get("desired_qty", "?"), c.get("capped_qty", "?")))
+    return info, warn
+
+
 def _ddmm(d):
     try:
         return dt.date.fromisoformat(str(d)[:10]).strftime("%d/%m")
@@ -233,6 +264,32 @@ def _selfcheck():
         # BUY 05/10 nằm trong 4 file gần nhất ⇒ AAA (nếu bị khoá) phải là unexplained
         check("buy_window_covers_4_files", "AAA" in recent_buy_tickers(d, acct, "2026-10-07"))
         check("buy_window_excludes_after_asof", recent_buy_tickers(d, acct, "2026-10-04") == set())
+
+    # split_capped (rights alert NB 25/10): chỉ hạ ⚠️→ℹ️ khi phần cắt được khoá giải thích TRỌN
+    pend = {"VPB": {"locked": 312}, "SCL": {"locked": 3000}}
+    c_ok = {"ticker": "VPB", "book": "LAG", "desired_qty": 882, "capped_qty": 600}
+    c_big = {"ticker": "VPB", "book": "LAG", "desired_qty": 1000, "capped_qty": 600}
+    c_diag = {"ticker": "VPB", "book": "LAG", "desired_qty": 882, "capped_qty": 600,
+              "rights_diag": "lô quyền mua 312cp ... đã 11 phiên > hạn 10 phiên"}
+    c_p13 = {"ticker": "SCL", "book": "LAG", "desired_qty": 16000, "capped_qty": 14000}
+    c_nopend = {"ticker": "HPG", "book": "LAG", "desired_qty": 100, "capped_qty": 0}
+    c_bad = {"ticker": "VPB", "book": "LAG", "desired_qty": "?", "capped_qty": 600}
+    o_other = [{"ticker": "SCL", "side": "sell", "qty": 2000, "book": "custom30V_parking"},
+               {"ticker": "SCL", "side": "sell", "qty": 14000, "book": "LAG"}]
+    o_same = [{"ticker": "SCL", "side": "sell", "qty": 14000, "book": "LAG"},
+              {"ticker": "SCL", "side": "buy", "qty": 500, "book": "custom30V_parking"}]
+    i, w = split_capped([c_ok], pend, [])
+    check("split_ok_cap_explained_by_lock_info", i == [("VPB", "LAG", 882, 600)] and w == [], (i, w))
+    i, w = split_capped([c_big], pend, [])
+    check("split_short_gt_locked_warn", i == [] and w == [c_big], (i, w))
+    i, w = split_capped([c_diag], pend, [])
+    check("split_rights_diag_warn", i == [] and w == [c_diag], (i, w))
+    i, w = split_capped([c_p13], pend, o_other)
+    check("split_other_book_sell_warn_P13", i == [] and w == [c_p13], (i, w))
+    i, w = split_capped([c_p13], pend, o_same)
+    check("split_same_book_sell_or_other_buy_info", i == [("SCL", "LAG", 16000, 14000)] and w == [], (i, w))
+    i, w = split_capped([c_nopend, c_bad], pend, [])
+    check("split_not_pending_or_unparsable_warn", i == [] and w == [c_nopend, c_bad], (i, w))
 
     print(f"\n{'OK' if not fails else 'FAIL'} — locked_shares selfcheck "
           f"{'PASS' if not fails else str(len(fails)) + ' FAIL'}")
