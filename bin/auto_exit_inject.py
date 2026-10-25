@@ -329,7 +329,7 @@ RIGHTS_LOCK_MAX_SESSIONS = 10   # B1 vòng 2: chưa khai listing_date ⇒ khoá 
 
 def _rights_lock_status(rights_lots, plan_date):
     """B1 vòng 2 (arch-review): tách các lô CP quyền mua (từ `book_lot_snapshot`) thành phần CÒN
-    KHOÁ chờ niêm yết và phần HẾT khoá. Còn khoá ⇔ `listing_date` > plan_date, HOẶC chưa khai
+    KHOÁ chờ niêm yết và phần HẾT khoá. Còn khoá ⇔ `listing_date` ≥ plan_date, HOẶC chưa khai
     `listing_date` và plan_date chưa quá credit_date + RIGHTS_LOCK_MAX_SESSIONS phiên (lịch VN,
     `count_trading_days`). Hết khoá ⇔ đã tới listing_date, hoặc quá hạn mà chưa khai. Ngày là
     chuỗi ISO lịch ICT trong khai báo/plan — không đọc đồng hồ máy (§16).
@@ -340,11 +340,14 @@ def _rights_lock_status(rights_lots, plan_date):
         q, cd, ld = int(rl.get("qty") or 0), rl.get("credit_date"), rl.get("listing_date")
         tag = f"lô quyền mua {q}cp (event {rl.get('event_id')}, credit_date {cd}"
         if ld:
-            if ld > plan_date:
+            # `>=` (rights alert NB1 25/10): auto_exit chạy TỐI T−1 với plan_date = listing_date, lúc đó
+            # broker chưa nhả lô quyền ⇒ `>` ra ⚠️ "broker vẫn chưa cho bán" giả mỗi đợt niêm yết.
+            # Từ plan_date = listing_date + 1 phiên mới coi là hết khoá (P12/P18 selfcheck).
+            if ld >= plan_date:
                 locked += q
                 info.append(f"{tag}, listing_date khai {ld})")
             else:
-                diag.append(f"{tag}, listing_date khai {ld} ≤ plan_date {plan_date}): đã tới ngày niêm yết "
+                diag.append(f"{tag}, listing_date khai {ld} < plan_date {plan_date}): đã qua ngày niêm yết "
                             f"theo khai báo nhưng broker vẫn chưa cho bán")
             continue
         n = count_trading_days(dt.date.fromisoformat(cd), pd_) if cd else None

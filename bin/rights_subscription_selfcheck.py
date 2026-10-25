@@ -52,7 +52,9 @@ if "--mutants" in sys.argv[1:]:
         ("M17 khoá không giới hạn bởi phần broker không cho bán (nuốt SELL book khác)", "auto_exit_inject.py",
          "max(int(held) - int(sellable), 0))", "int(qty))"),
         ("M18 khoá cả lô đã tới listing_date", "auto_exit_inject.py",
-         "            if ld > plan_date:", "            if True:"),
+         "            if ld >= plan_date:", "            if True:"),
+        ("M25 NB1 biên listing_date == plan_date không khoá (về '>')", "auto_exit_inject.py",
+         "            if ld >= plan_date:", "            if ld > plan_date:"),
         ("M19 khoá không hết hạn credit_date+10 phiên", "auto_exit_inject.py",
          "        elif n <= RIGHTS_LOCK_MAX_SESSIONS:", "        elif True:"),
         ("M20 cảnh báo cắt bỏ chẩn đoán lô quyền hết khoá", "auto_exit_inject.py",
@@ -65,6 +67,15 @@ if "--mutants" in sys.argv[1:]:
          "                else [(s[\"credit_date\"], qty, qty * px)])"),
         ("M23 NB1 reconcile tính phí cả lô quyền", "reconcile_equity.py",
          "        fees = (true_cost_basis - rights_held_value) * fee_buy_pct / 100.0", "        pass"),
+        ("M26 NB2-reconcile bỏ phải thu CP quyền đã nộp tiền", "reconcile_equity.py",
+         "args.offbook_assets + rights_receivable_value\n", "args.offbook_assets\n"),
+        ("M27 NB2-reconcile phải thu tính cả lô đã về broker", "reconcile_equity.py",
+         "and s_[\"credit_date\"] > asof]", "]"),
+        ("M28 NB4 credit_frame bỏ pending_rights", "dividend_adjusted_return.py",
+         "                                                         pending_rights=pend)",
+         "                                                         pending_rights=0.0)"),
+        ("M29 NB4 KL hưởng quyền gồm cả lô chờ", "dividend_adjusted_return.py",
+         "float(detail[\"residual\"]) - pend\n", "float(detail[\"residual\"])\n"),
         ("M22 B2 net_fills_journal_and_broker (đường sizing broker_statement=True) bỏ cộng lô quyền", "exdate_frame.py",
          "    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():",
          "    for d, evs in {}.items():"),
@@ -471,6 +482,41 @@ l3, _st = aei._new_block_alert_lines(ACC, [], CPD, "2026-12-02", [])
 check("P17 alert: khoá báo ℹ️ 1 lần (dedup ngày sau); hết hạn ⇒ ⚠️ cắt kèm chẩn đoán",
       len(l1) == 1 and l1[0].startswith("ℹ️") and l2 == [] and len(l3) == 1 and "đã 11 phiên" in l3[0], (l1, l2, l3))
 # <<< B1 vòng 2
+# >>> rights alert NB1 (25/10, arch-review 22/10 NON-BLOCKING 1): plan_date == listing_date ⇒ VẪN khoá.
+# auto_exit chạy tối T−1 (plan_date = listing_date), broker tradeQuantity chưa gồm lô quyền ⇒ bản
+# `ld > plan_date` ra ⚠️ "đã tới ngày niêm yết… broker vẫn chưa cho bán" giả cho MỌI đợt niêm yết.
+EVE = nth(T25, 39)
+assert next_trading_day(EVE) == LIST
+r = run_exit("p18_listing_eve", EVE, (5_000, 0), fills=[(S26, (TK, "sell", 14_000, 25_400, "LAG"))],
+             subs=[sub(listing=LIST)])
+check("P18 biên plan_date == listing_date (tối T−1): khoá 5.000 (ℹ️), KHÔNG ⚠️ cắt, không lệnh",
+      r["sells"] == [] and [x["locked_qty"] for x in _k(r, "rights_locked")] == [5000] and not _k(r, "capped"),
+      (r["sells"], r["notes"]))
+check("P18b biên hàm: listing_date == plan_date ⇒ khoá; == plan_date−1 phiên ⇒ hết khoá (đối chứng P12)",
+      aei._rights_lock_status([{"qty": 5000, "credit_date": PAY.isoformat(), "listing_date": LIST.isoformat()}],
+                              LIST.isoformat())[0] == 5000
+      and aei._rights_lock_status([{"qty": 5000, "credit_date": PAY.isoformat(), "listing_date": EVE.isoformat()}],
+                                  LIST.isoformat())[0] == 0)
+
+
+def _inj(plan_date, held, sellable):
+    pl_, inj_, cap_, lk_ = {"plan_date": plan_date, "orders": []}, [], [], []
+    aei._inject_sell(pl_, {TK: {"qty": held, "sellable": sellable}}, TK, 19_000, 25_400, "LAG", "LAG", "n",
+                     "X", inj_, cap_, "d", rights_lots=[{"qty": 5000, "credit_date": PAY.isoformat(),
+                                                         "listing_date": LIST.isoformat(), "event_id": EVID}],
+                     locked_notes=lk_)
+    return [o["qty"] for o in pl_["orders"]], [c["capped_qty"] for c in cap_], [x["locked_qty"] for x in lk_]
+
+
+check("P18c HÀNH VI ĐỔI (công bố): tối T−1, 1 book (held 19.000/sellable 14.000) ⇒ lệnh 14.000 — y hệt bản cũ "
+      "(cắt về sellable), chỉ đổi ⚠️→ℹ️", _inj(LIST.isoformat(), 19_000, 14_000) == ([14_000], [], [5000]),
+      _inj(LIST.isoformat(), 19_000, 14_000))
+check("P18d HÀNH VI ĐỔI (công bố): tối T−1, mã có thêm 10.000 ở book khác (held 29.000/sellable 24.000) ⇒ "
+      "lệnh LAG 14.000 (bản cũ 19.000: ăn 5.000 sellable của book kia), lô quyền bán phiên sau",
+      _inj(LIST.isoformat(), 29_000, 24_000) == ([14_000], [], [5000])
+      and _inj(nth(LIST, 1).isoformat(), 29_000, 24_000) == ([19_000], [], []),
+      (_inj(LIST.isoformat(), 29_000, 24_000), _inj(nth(LIST, 1).isoformat(), 29_000, 24_000)))
+# <<< rights alert NB1
 check("P11 không gọi subprocess thật (bus/Discord)", CALLS == [], CALLS)
 
 # ================================ N. chuỗi NAV ================================
@@ -686,7 +732,7 @@ check("E3b broker_statement=True + N4 lô chờ ⇒ credited 1.260, không chặ
 # <<< B2 vòng 2
 
 
-def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False):
+def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False, cost_now=COST_BLEND):
     d = ndir("V_" + tag, subs)
     write_raw(d, "2025-10-01", [{"kind": "orders", "ts": "2025-10-01T15:00:00", "account_no": ACCT_NO,
                                  "payload": {"orders": [{"id": 1, "accountNo": ACCT_NO, "symbol": TK, "side": "NB",
@@ -696,7 +742,7 @@ def run_vas(tag, subs, broker_qty=Q0 + RQ, extra_sdiv=False):
                                                          "orderStatus": "Filled"}]}},
                                 pos_rec("2025-10-01T19:00:00", Q0, 30000), bal_rec("2025-10-01T19:00:10", CASH_BUY)])
     write_journal(d, "2025-10-01", [f"2025-10-01T09:30:00,FILL,P1,{TK},buy,C1,{int(Q0)},{COST},{int(Q0)},LAG,PEAD,"])
-    write_raw(d, P, [pos_rec(f"{P}T19:10:00", broker_qty, 20000, Q0, COST_BLEND), bal_rec(f"{P}T19:10:20", CASH_PAID)])
+    write_raw(d, P, [pos_rec(f"{P}T19:10:00", broker_qty, 20000, Q0, cost_now), bal_rec(f"{P}T19:10:20", CASH_PAID)])
     write_journal(d, P)
     kdp = os.path.join(d, "kd.json")
     with open(kdp, "w") as f:
@@ -743,6 +789,44 @@ m_norm = V.corp_action_multiplier(TK, "2025-10-01", "2025-11-10", acts, key="1")
 check("V3 N4: hệ số cổ tức CP không áp lô quyền đang chờ (1,0), vẫn áp lô thường (1,09)",
       m_rights == 1.0 and m_norm == 1.09, (m_rights, m_norm))
 # <<< N4
+
+# >>> rights alert NB4 (25/10): N4 wire vào dividend_adjusted_return.credit_frame — trước đây gọi
+# classify_qty_residual KHÔNG truyền pending_rights ⇒ cổ tức CP 9% credit sớm trong khoảng chờ VSDC
+# (14.000×9% = 1.260, không phải 19.000×9% = 1.710) ⇒ 'unknown' (fail-closed, §21 UNVERIFIED).
+import types as _types  # noqa: E402
+
+
+def run_cf(tag, subs, qty_now):
+    ndir("CF_" + tag, subs)                    # sổ khai báo sandbox (MIKE_LAG_RIGHTS_DIR)
+    adj = _types.SimpleNamespace(ticker=TK, last_cum_date="2025-11-05", ex_date="2025-11-06",
+                                 last_cum_price=20500.0)
+    saved = {k: getattr(D, k) for k in ("_corp_action_daily_snapshot", "raw_positions", "previous_raw_qty",
+                                        "net_fills_between", "held_event_next_session")}
+    D._corp_action_daily_snapshot = lambda day: None
+    D.raw_positions = lambda acc, day: ({TK: {"qty": qty_now, "marketPrice": 20500.0}}, f"{day}T19:00:00")
+    D.previous_raw_qty = lambda acc, tk, day: (Q0 + RQ, "2025-11-04")
+    D.net_fills_between = lambda *a, **k: {}
+    D.held_event_next_session = lambda snap, day, tk: SDIV_EV
+    try:
+        return DAR.credit_frame(ACCT, ACCT_NO, [adj])[(TK, "2025-11-05")]
+    finally:
+        for k, v in saved.items():
+            setattr(D, k, v)
+
+
+f0 = run_cf("control", [], Q0 + RQ + 1260)
+check("F0 ĐỐI CHỨNG không khai báo: 19.000→20.260 (phần dư 1.260 ≠ 19.000×9%) ⇒ unknown (fail-closed)",
+      f0["status"] == "unknown" and f0["entitled"] is None, f0)
+f1 = run_cf("pending", [nsub()], Q0 + RQ + 1260)
+check("F1 N4: lô quyền 5.000 chờ VSDC ⇒ phần dư 1.260 = 14.000×9% ⇒ pre_credit, KL hưởng quyền 14.000 (không gồm lô chờ)",
+      f1["status"] == "pre_credit" and abs(f1["entitled"] - Q0) < 1e-6 and "chờ VSDC" in f1["note"], f1)
+f2 = run_cf("registered", [nsub(registered="2025-10-29")], Q0 + RQ + 1710)
+check("F2 đối chứng: đã ghi nhận trước ex-date ⇒ pending 0 ⇒ 19.000×9% = 1.710 khớp ⇒ hưởng 19.000",
+      f2["status"] == "pre_credit" and abs(f2["entitled"] - (Q0 + RQ)) < 1e-6 and "chờ VSDC" not in f2["note"], f2)
+f3 = run_cf("pending_wrong", [nsub()], Q0 + RQ + 1710)
+check("F3 lô chờ nhưng broker credit 1.710 (cả lô quyền) ⇒ vẫn unknown (không nới khi bằng chứng ngược)",
+      f3["status"] == "unknown", f3)
+# <<< rights alert NB4
 
 # reconcile_equity trên snapshot V1
 old = (V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv, RE.__dict__.get("load_corp_actions"))
@@ -792,6 +876,45 @@ check("R3 NB1: phí mặc định = 14.000×30.000×phí (lô quyền 5.000×12.
       abs(rj3["trading_fees_used"] - Q0 * COST * _fp) < 1
       and abs(rj3["explain_fee_on_turnover_gap_est"] - (Q0 * COST * _fp - Q0 * COST * _fp)) < 1,
       (rj3["trading_fees_used"], rj3["explain_fee_on_turnover_gap_est"], Q0 * COST * _fp))
+check("R1c ĐỐI CHỨNG credit = payment: không có phải thu (rights_paid_not_credited = 0)",
+      rj["rights_paid_not_credited"] == 0 and rj3["rights_paid_not_credited"] == 0)
+
+
+def run_re(d, snap, balance_date=P):
+    """reconcile_equity (--trading-fees cố định) trên snapshot `snap`; trả (json, stdout)."""
+    old_ = (V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv)
+    V.EXEC_DIR = DAR.EXEC_LOG_DIR = d
+    os.environ["MIKE_LAG_RIGHTS_DIR"] = os.path.join(d, "lag_rights")
+    sys.argv = ["reconcile_equity.py", "--account", ACCT, "--account-no", ACCT_NO, "--starting-capital",
+                "1320000000", "--snapshot", snap, "--balance-raw", os.path.join(d, f"dnse_raw_{balance_date}.jsonl"),
+                "--trading-fees", str(14000 * 30000 * 0.00097)]
+    _CA.load_corp_actions = lambda *a, **k: []
+    o_ = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(o_):
+            try:
+                RE.main()
+            except SystemExit:
+                pass
+    finally:
+        V.EXEC_DIR, DAR.EXEC_LOG_DIR, sys.argv = old_
+        _CA.load_corp_actions = _old_lca
+    return json.load(_real_open(snap.replace("verified_snapshot", "reconcile_equity"))), o_.getvalue()
+
+
+# >>> rights alert NB2-reconcile (25/10): khai credit_date > payment_date, asof nằm GIỮA ⇒ tiền đã rời
+# (balance CASH_PAID), CP chưa về broker (openQuantity 14.000) ⇒ bản cũ lệch +5.000×12.500 = +62,5tr.
+SPLIT = dict(nsub(credit="2025-10-29"), payment_date=P)
+dS, sS, rc, resS = run_vas("split_mid", [SPLIT], broker_qty=Q0, cost_now=COST)
+rjS, outS = run_re(dS, sS)
+check("R4 credit > payment, asof ở giữa: snapshot CHƯA có lô quyền (14.000) nhưng residual |.| < 5tr nhờ "
+      "phải thu 5.000×12.500 = 62,5tr ở vế phải, có dòng in",
+      resS["positions"][0]["qty"] == Q0 and abs(rjS["rights_paid_not_credited"] - RQ * S_PX) < 1
+      and abs(rjS["residual"]) < 5e6 and "Phải thu CP quyền mua đã nộp tiền" in outS,
+      (resS["positions"][0]["qty"], rjS["rights_paid_not_credited"], rjS["residual"]))
+check("R4b residual R4 ≈ residual R1 (credit = payment, cùng tiền) — cùng thực tế kinh tế, cùng kết luận",
+      abs(rjS["residual"] - rj["residual"]) < 1e6, (rjS["residual"], rj["residual"]))
+# <<< rights alert NB2-reconcile
 ev_r = RS.fill_events(ACCT, path=os.path.join(dV, "lag_rights", "subscriptions.json"))
 evs = {"2025-10-01": [("2025-10-01T09:30:00", "1", TK, "buy", Q0, COST)], **ev_r,
        "2025-11-20": [("2025-11-20T10:00:00", "2", TK, "sell", Q0 + RQ, 20000.0)]}

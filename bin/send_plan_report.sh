@@ -1004,12 +1004,25 @@ if _aei_notes:
         for b in _aei_blocked[:8]:
             _tk_s = b.get("ticker") or "(book-level)"
             lines.append(f"   • {_tk_s} ({b.get('book','?')}): {str(b.get('reason') or '')[:150]}")
-    # Mã cắt do CP chờ niêm yết (bằng chứng ở _lk_pending) ⇒ chuyển sang dòng ℹ️ gộp.
+    # Mã cắt do CP chờ niêm yết (bằng chứng ở _lk_pending) ⇒ chuyển sang dòng ℹ️ gộp — CHỈ khi
+    # phần cắt được khoá giải thích trọn (locked_shares.split_capped; rights alert NB 25/10: bản
+    # cũ hạ mọi cắt của mã có mặt trong _lk_pending ⇒ che ⚠️ của lệnh book khác/lô quyền hết khoá).
+    # Lô quyền mua auto_exit đã tách khỏi lệnh (entry auto mới nhất có rights_locked) không được
+    # giải thích lại phần cắt (arch-review 25/10 NB1). Lỗi bất kỳ ⇒ giữ ⚠️ hết (fail-loud, NB3).
     _lk_exit = {}
-    for c in [c for c in _aei_capped if c.get("ticker") in _lk_pending]:
-        _lk_exit.setdefault(c.get("ticker"), []).append(
-            (c.get("book", "?"), c.get("desired_qty", "?"), c.get("capped_qty", "?")))
-    _aei_capped = [c for c in _aei_capped if c.get("ticker") not in _lk_pending]
+    if _lk_pending:
+        try:
+            _rl_qty = {}
+            for _lk in (next((_n.get("rights_locked") for _n in reversed(_aei_auto)
+                              if _n.get("rights_locked")), None) or []):
+                if isinstance(_lk, dict):
+                    _rl_qty[_lk.get("ticker")] = _rl_qty.get(_lk.get("ticker"), 0) + int(_lk.get("locked_qty") or 0)
+            _lk_info, _aei_capped = _lks.split_capped(_aei_capped, _lk_pending, plan.get("orders") or [], _rl_qty)
+        except Exception as _e:
+            _lk_info = []
+            print(f"[locked_shares] split_capped lỗi, giữ mọi ⚠️ cắt: {type(_e).__name__}: {_e}", file=sys.stderr)
+        for _tk, _bk, _want, _got in _lk_info:
+            _lk_exit.setdefault(_tk, []).append((_bk, _want, _got))
     if _lk_exit:
         lines.append(_lk_info_line(_lk_exit))
         _lk_shown = True
@@ -1017,7 +1030,8 @@ if _aei_notes:
         lines.append(f"⚠️ **{len(_aei_capped) + len(_aei_manual_capped)} mã auto-exit BỊ CẮT do trần sellable (Σ SELL mọi book):**")
         for c in _aei_capped[:8]:
             lines.append(f"   • {c.get('ticker','?')} ({c.get('book','?')}): "
-                         f"{c.get('desired_qty','?')}cp → {c.get('capped_qty','?')}cp")
+                         f"{c.get('desired_qty','?')}cp → {c.get('capped_qty','?')}cp"
+                         + (f" — {str(c['rights_diag'])[:220]}" if c.get("rights_diag") else ""))
         for c in _aei_manual_capped[:8]:
             lines.append(f"   • {c.get('ticker','?')} ({c.get('book','?')}): "
                          f"{c.get('capped_from','?')}cp → {c.get('capped_to','?')}cp (duyệt tay)")
