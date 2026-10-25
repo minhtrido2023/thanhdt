@@ -37,3 +37,5 @@
 - [2026-10-25T12:00:02Z] [ta-schools 10-25] XONG job Taylor_20261025_115318: da so TA khong edge, chi ho xu huong (A2/C2b/F3) hon F1 nhung khong hon F2; REPORT.md trong research/ta_schools_vn_20261025/, chua commit
 - [2026-10-25T12:15:35Z] ĐANG DỞ job Taylor_20261025_121521: ta-trend-entry-filter (A2/F3/F2 x LAG/BAL trên ledger R3 park=0) → agents/Taylor/research/ta_trend_entry_filter_20261025/ | NEXT: PINS.jsonl, ledger, engine.py job trước, PREREG
 - [2026-10-25T12:21:35Z] [ta-trend-entry-filter 10-25] XONG job Taylor_20261025_121521: 0/6 dat, co xu huong khong loc duoc LAG/BAL (2e965250e); BAL×F3 chi la gia thuyet
+- [2026-10-25T12:31:27Z] ĐANG DỞ job Taylor_20261025_123115: lag-bal-discriminators (PREREG ~25 chỉ báo fundamental x LAG/BAL, tertile+Spearman, cluster bootstrap) → agents/Taylor/research/lag_bal_discriminators_20261025/ | NEXT: đọc positions.csv/analyze.py job ta_trend, PREREG
+- [2026-10-25T12:39:16Z] [lag-bal-discriminators 10-25] XONG job Taylor_20261025_123115 (db19fd74d): 4/50 đạt = value; payout không đạt; ứng viên GĐ2 duy nhất BAL×1/PCF,1/EVEB — CHỜ user duyệt + quant-skeptic
