@@ -16,3 +16,4 @@
 - Nợ prevention retro: (c) cổng NAV ngoài cửa sổ EOD; (d) cổng plan-vs-lag_dd/ack.json; (e) quét script in cảnh báo ra stdout; trigger làm mới anomaly_flags T7/CN + lớp park vào sunday_plan_round.
 - context_pack ~45KB cần trim. Retro entry 25/10: kb/incidents/retro/retro-2026-10-25.md (9 mục).
 
+- [2026-10-25T18:24:13Z] 26/10 01:30 Taylor S1-S3 xong+verify, ghi tracking. Chờ user: skeptic vòng 3 cho S? hỏi DollarBill/Mafee RESIDUAL + biến thể dời 3 phiên? Nhắc egg trước 09:05 (~07:30).
