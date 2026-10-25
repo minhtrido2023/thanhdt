@@ -299,7 +299,8 @@ def _alert_recon_failure(label, plan_date, failures):
     """Netting reconciliation post-fill phát hiện bất nhất → BÁO LOUD, KHÔNG tự gộp.
 
     Fail-loud theo coding_guidelines §5/§6: bus error + Discord + Telegram. Không raise
-    (để account khác vẫn được audit + report), nhưng caller đặt exit ≠ 0 để giám sát bắt.
+    (để account khác vẫn được audit + report). Caller KHÔNG đổi exit-code (xem main()):
+    giám sát dựa vào bus error NETTING_RECON_FAIL (ops_health_check bắt), không dựa vào rc.
     """
     lines = "\n".join(f"  • {f['ticker']}: {f['reason']}" for f in failures)
     msg = (f"⚠️ NETTING RECON FAIL — account {label} ({plan_date}): đối soát post-fill lệnh "
@@ -323,7 +324,8 @@ def _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date):
     Đây là AUDIT read-only + ghi log atomic — process chết trước khi chạy chỉ mất audit, không
     ảnh hưởng lệnh (side-effect đã xảy ra trong phiên). ref_price_of dùng ref trước-net để định
     giá chuyển nội bộ khi NET=0 / net order khớp 0cp (không có giá khớp thật để dùng).
-    Trả list label có failures (caller đặt exit ≠ 0)."""
+    Trả list label có failures (caller chỉ in cảnh báo, KHÔNG đổi exit-code — giám sát qua bus
+    error NETTING_RECON_FAIL)."""
     failed = []
     for e in executors:
         adj = net_adjustments.get(e.label)
