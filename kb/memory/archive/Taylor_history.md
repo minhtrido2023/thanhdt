@@ -1470,3 +1470,6 @@
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-22T14:33:07Z] ĐANG DỞ job Taylor_20261022_143258: vá park_holdings.py đối soát bán tay DRI (tái dùng f0e293c30) | NEXT: đọc commit, worktree wt-park-manual-sell-20261022
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T14:42:41Z] [park-holdings-manual-sell 10-22] XONG job Taylor_20261022_143258: fix/park-holdings-manual-sell-20261022 @30fe3ba7b chờ arch-review/merge

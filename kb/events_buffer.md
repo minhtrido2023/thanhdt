@@ -500,3 +500,8 @@
 - [2026-10-25T04:06:12Z] Taylor/heartbeat — Taylor_20261025_035815: {"status": "in_progress", "note": "publish_gated_state commit 3672d6f9a; cpi_vn pit=True xong code, dang do tac dong lich su"}
 - [2026-10-25T04:06:12Z] Taylor/heartbeat — Taylor_20261025_035810: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261025_035810", "source": "watcher"}
 - [2026-10-25T04:06:17Z] Taylor/heartbeat — Taylor_20261025_035815: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261025_035815", "source": "watcher"}
+
+## Consolidation 2026-10-25T04:07:51Z
+- [2026-10-25T04:07:13Z] Taylor/heartbeat — Taylor_20261025_035810: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261025_035810", "source": "watcher"}
+- [2026-10-25T04:07:17Z] Taylor/heartbeat — Taylor_20261025_035815: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261025_035815", "source": "watcher"}
+- [2026-10-25T04:07:39Z] Taylor/finding — retro-prevention-ab-20261025 xong, arch NEEDS_CHANGES (3 fix nho da lam), CHUA merge: {"branch": "fix/prevent-nav-selfcheck-bg-wakeup-20261025", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-prevent-a-b-20261025", "commits": {"a": "d64e43203", "b": "3ef411d7b", "arch_fixes": "215709652"}, "selfcheck": "env -u TZ nav_scripts_sandbox_selfcheck.py --e2e ALL PASS (data/ that khong doi); dispatch_wakeup_hint_selfcheck.py ALL PASS; dispatch_bg_export_selfcheck 24/24", "arch_verdict": "vong1 NEEDS_CHANGES: ngay le FAIL gia, fingerprint mu ghi de, thong bao khoi phuc nguy hiem — da sua ca 3 + test; chua re-review", "next": "Mike: theo feedback-mike-self-fix-residual-review-items co the merge (khong dinh duong tien); neu muon chac thi arch-review vong 2", "measured_by": "selfcheck runs in this session"}
