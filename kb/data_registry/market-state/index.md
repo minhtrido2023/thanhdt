@@ -12,6 +12,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`anomaly_flags.md`](anomaly_flags.md) — data/anomaly_flags.json | CANONICAL |
 | [`insider_flags.md`](insider_flags.md) — data/insider_flags.json | CANONICAL (WATCH-only, chưa consumer) |
 | [`golive_state_today.md`](golive_state_today.md) — deploy_golive_dt5g_v4/golive_state_today.json | DERIVED |
+| [`dt5g_publish_runs_log.md`](dt5g_publish_runs_log.md) — data/dt5g_publish_runs.log (sổ chạy publisher DT5G → watch gán OURS_MANUAL) | CANONICAL |
 | [`golive_v23_recommendations.md`](golive_v23_recommendations.md) — golive_v23_recommendations_<date>.csv + data/golive_v23_status.json | DERIVED — ⚠️ status JSON là **ảnh chụp bị ghi đè mỗi phiên**, không phải lịch sử |
 | [`recommend_v23_bq.md`](recommend_v23_bq.md) — recommend_v23.status / .recommendations (BQ) | CANONICAL — **sổ lịch sử** của golive_v23 theo `signal_date` |
 | [`capit_episode.md`](capit_episode.md) — data/capit_episode.json | CANONICAL (quan sát thuần) — trả lời "**có đang giữ CAPIT không**" |
