@@ -14,7 +14,7 @@ PRECONDITIONS (run earlier in golive_daily.bat): pull_us_market -> rebuild_state
 
 Run: python deploy_golive_dt5g_v4/publish_gated_state.py
 """
-import os, sys, io, json
+import os, sys, io, json, atexit
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import pandas as pd
@@ -40,6 +40,20 @@ _ICT = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: không tin TZ host (chạy TZ khá
 END = datetime.now(_ICT).strftime("%Y-%m-%d")
 LOCAL_CSV = os.path.join(WORKDIR, "data/vnindex_5state_dt5g_live.csv")
 STATE_JSON = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_state_today.json")
+
+# Sổ chạy data/dt5g_publish_runs.log (START ngay đây, END qua atexit — mọi lối thoát kể cả exception/
+# sys.exit(1)) để mike/bin/dt5g_writer_watch.py nhận ra lần ghi bảng NGOÀI cửa sổ cron là do ta chạy
+# tay (OURS_MANUAL), không báo writer LẠ. FAIL-OPEN: lỗi ghi log chỉ in stderr, không chặn publish.
+_RUN = {"id": f"{datetime.now(_ICT):%Y%m%dT%H%M%S}-{os.getpid()}", "publish_ok": None}
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import publish_run_log as _prl
+    _RUN_LOG = _prl.default_path(WORKDIR)
+    _prl.log_run(_RUN_LOG, "START", _RUN["id"])
+    atexit.register(lambda: _prl.log_run(_RUN_LOG, "END", _RUN["id"], publish_ok=_RUN["publish_ok"]))
+except Exception as _e:                                     # noqa: BLE001 — fail-open có chủ đích
+    print(f"WARN: sổ chạy dt5g_publish_runs.log tắt ({type(_e).__name__}: {_e}) — publish vẫn chạy",
+          file=sys.stderr)
 
 print("=" * 88); print(f"  PUBLISH GATED STATE (DT5G, fail-safe)  -> {END}"); print("=" * 88)
 
@@ -91,6 +105,7 @@ except Exception as e:
     publish_ok = False
     print(f"  !!! PUBLISH FAILED (unexpected): {e}")
 
+_RUN["publish_ok"] = publish_ok
 if publish_ok:
     # CSV = ảnh chụp bảng ĐÃ CÔNG BỐ (không phải chuỗi vừa tính lại) — xem giải thích ở trên.
     try:
