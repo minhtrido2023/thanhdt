@@ -1,0 +1,33 @@
+---
+kind: script-output
+status: CANONICAL
+source: data/dt5g_publish_runs.log
+group: market-state
+writer: deploy_golive_dt5g_v4/publish_gated_state.py (qua publish_run_log.py) — mọi lần chạy, cron lẫn chạy tay
+role: sổ chạy publisher DT5G — bin/dt5g_writer_watch.py đọc để phân loại OURS_MANUAL
+---
+
+# data/dt5g_publish_runs.log
+
+**Status: CANONICAL** (từ 2026-10-25, job Taylor_20261025_043744)
+
+## Là gì
+JSONL append-only. Mỗi lần `publish_gated_state.py` chạy thì ghi 2 dòng: `START` (trước khi tính
+và publish) và `END` (ghi bằng atexit, nên có ở MỌI lối thoát, kể cả exception và `sys.exit(1)`).
+Trường: `event`, `ts` (ISO ICT có offset), `run_id`, `pid`, `ppid`, `parent`, `parent_cmd`, `argv`.
+Riêng dòng END có thêm `publish_ok`: `true`/`false`, hoặc `null` nếu chết trước bước publish.
+
+## Ai đọc
+`mike/bin/dt5g_writer_watch.py`. Khi `lastModifiedTime` của bảng `vnindex_5state_dt5g_live` nằm
+NGOÀI cả cửa sổ cron (18:25–19:20) lẫn cửa sổ kaffa (15:30–18:00) nhưng rơi vào khoảng
+[START−5′, END+5′] của một run (thiếu END thì lấy START+30′), watch gán nhãn `OURS_MANUAL`
+(QUIET) thay vì `OTHER` (WARN). Run có END mà `publish_ok=null` (chết trước bước publish ⇒ chắc
+chắn không ghi bảng) KHÔNG được tính. Log chỉ đổi nhãn writer. Các cảnh báo giá trị (state lệch, trùng
+`time`, NULL vùng đã chốt) vẫn chạy như cũ.
+
+## Bẫy
+- FAIL-OPEN: nếu ghi log lỗi thì publisher chỉ in stderr, không fail. Thiếu dòng ⇒ watch rơi về
+  `OTHER` (cảnh báo giả), không bao giờ thành im lặng sai.
+- Log không xoay vòng: mỗi phiên khoảng 4 dòng, mỗi dòng dưới 1KB, nên tăng ~1MB/năm (ước lượng).
+- Ca 24/10 15:25 ICT xảy ra TRƯỚC khi có log ⇒ case A của `dt5g_writer_watch_selfcheck.sh`
+  (đọc bảng thật) sẽ WARN cho tới lần publish cron kế tiếp.
