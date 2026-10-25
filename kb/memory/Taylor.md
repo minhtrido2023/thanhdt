@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-22T14:52:45Z] [park-holdings-manual-sell vòng 2 10-22] XONG job Taylor_20261022_145109: @9ccb6b0fe chờ arch-review lần cuối
 - [2026-10-22T15:39:25Z] [nav-snapshot-manual-fills 10-22] XONG job Taylor_20261022_153620: fix/nav-snapshot-manual-fills-20261022 chờ arch-review/merge rồi mới bù dòng NAV 21/10 (2 account) + chạy nav_loss_brake_monitor
 - [2026-10-24T03:45:09Z] ĐANG DỞ job Taylor_20261024_034455: R&D dcf_rich_outlook_20261024 (DCF RICH sâu có info lợi nhuận/drift?) | NEXT: đọc dcf_valuation.py, data_registry, PIT feasibility
 - [2026-10-24T03:53:50Z] [dcf-rich-outlook 10-24] XONG job Taylor_20261024_034455: RICH sâu KHÔNG báo LN xấu; drift xấu chỉ ở ROE<25%/hàng hóa; đề xuất hạ gate→WARNING cho ROE≥25%, chờ quant-skeptic+user
@@ -26,3 +25,4 @@
 - [2026-10-25T03:12:57Z] [cq-2026-10-25 autodispatch] XONG job Taylor_20261025_030917: 817eafc1b, 3 fix + 1 skip, arch APPROVED
 - [2026-10-25T03:58:28Z] ĐANG DỞ job Taylor_20261025_035815: cq hard-boundary 10-18+10-25 (cpi_vn look-ahead, publish_gated_state atomic, NAV §25 4 nơi, bot_execute docstring, dcf status) | NEXT: đọc report, worktree
 - [2026-10-25T04:07:39Z] [retro-prevention a+b 10-25] XONG job Taylor_20261025_035810: nhanh fix/prevent-nav-selfcheck-bg-wakeup-20261025 @215709652, arch NEEDS_CHANGES đã sửa 3 mục, CHƯA merge — chờ Mike merge/re-review
+- [2026-10-25T04:18:30Z] [cq-hard-boundary 10-25] job Taylor_20261025_035815: 4 commit đã merge main; CHỜ user duyệt merge cpi_vn pit (nhánh fix/cq-hard-boundary-20261025 d9f60d264+0fe24ff04) — khi duyệt: cherry-pick + ghi chú results_registry macro_confidence + data_registry/macro/cpi_vn.md

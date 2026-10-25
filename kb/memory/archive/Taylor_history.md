@@ -1473,3 +1473,6 @@
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-22T14:42:41Z] [park-holdings-manual-sell 10-22] XONG job Taylor_20261022_143258: fix/park-holdings-manual-sell-20261022 @30fe3ba7b chờ arch-review/merge
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T14:52:45Z] [park-holdings-manual-sell vòng 2 10-22] XONG job Taylor_20261022_145109: @9ccb6b0fe chờ arch-review lần cuối
