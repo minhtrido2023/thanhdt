@@ -44,14 +44,14 @@ AUTOFIX_COOLDOWN="${AUTOFIX_COOLDOWN:-3600}"
 _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
 # ---------- arch-review 1 finding của Wags (dùng chung cho cả 2 mode) ----------
-_arch_review() {  # $1 = topic substring để chọn finding; in verdict_json ra stdout
-  local substr="$1"
+_arch_review() {  # $1 = topic substring để chọn finding; $2 = (tuỳ chọn) mốc ISO — chỉ nhận finding ts >= mốc; in verdict_json ra stdout
+  local substr="$1" since="${2:-}"
   local inbox="$ROOT/bus/inbox/Wags.jsonl"
   [ -f "$inbox" ] || { echo '{"verdict":"INCONCLUSIVE","summary":"Wags chưa có finding nào trên bus"}'; return 1; }
   local sel
-  sel="$(python3 - "$inbox" "$substr" <<'PY'
+  sel="$(python3 - "$inbox" "$substr" "$since" <<'PY'
 import json, sys
-inbox, sub = sys.argv[1], sys.argv[2]
+inbox, sub, since = sys.argv[1], sys.argv[2], sys.argv[3]
 pick = None
 for ln in open(inbox, encoding="utf-8"):
     ln = ln.strip()
@@ -59,6 +59,9 @@ for ln in open(inbox, encoding="utf-8"):
     try: e = json.loads(ln)
     except Exception: continue
     if e.get("event_type") != "finding": continue
+    # Cùng label (coord-<ngày>) chạy nhiều vòng/ngày: không có mốc này thì vòng mà Wags
+    # KHÔNG ghi finding mới sẽ nhặt finding CŨ của vòng trước rồi báo ✅ HOÀN TẤT.
+    if since and str(e.get("ts") or "") < since: continue
     if sub and sub.lower() not in (e.get("topic","") + json.dumps(e.get("payload",""))).lower(): continue
     pick = e
 if not pick: sys.exit(3)
@@ -109,7 +112,7 @@ log/bus event), chạy đủ 7 hướng tấn công, rồi in ĐÚNG khối VERD
 # ---------- mode: review-only ----------
 if [ "${1:-}" = "--review-topic" ]; then
   substr="${2:?usage: wags_autofix.sh --review-topic <substr>}"
-  v="$(_arch_review "$substr")"
+  v="$(_arch_review "$substr" "${3:-}")"
   echo "$v"
   verdict="$(printf '%s' "$v" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("verdict","?"))')"
   summary="$(printf '%s' "$v" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("summary",""))')"
@@ -340,7 +343,7 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
   #    arch-reviewer đắt tiền, chỉ log vào hàng đợi audit lấy mẫu. Bất kỳ gì khác
   #    (đặc biệt dispatch.sh/hooks — plumbing DÙNG CHUNG toàn team) -> vẫn bắt buộc như
   #    cũ. Fail-safe mặc định "high" nếu không phân loại được (xem wags_risk_tier.py).
-  tier="$("$ROOT/bin/wags_risk_tier.py" "'"$ROOT"'/bus/inbox/Wags.jsonl" "wags-fix: $LABEL" 2>>"'"$PIPELOG"'" || echo high)"
+  tier="$("$ROOT/bin/wags_risk_tier.py" "'"$ROOT"'/bus/inbox/Wags.jsonl" "wags-fix: $LABEL" "$DISPATCH_START_ISO" 2>>"'"$PIPELOG"'" || echo high)"
 
   if [ "$tier" = "low" ]; then
     mkdir -p "'"$ROOT"'/state/autofix"
@@ -350,7 +353,7 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
   else
   # arch-review finding vừa tạo — KHÔNG tail -1 mù: chọn dòng JSON cuối có key
   # "verdict" (chống output lạ chen vào stdout, vd {"status":"sent"} của notify)
-  v="$("$ROOT/bin/wags_autofix.sh" --review-topic "wags-fix: $LABEL" 2>>"'"$PIPELOG"'" | python3 -c "import json,sys
+  v="$("$ROOT/bin/wags_autofix.sh" --review-topic "wags-fix: $LABEL" "$DISPATCH_START_ISO" 2>>"'"$PIPELOG"'" | python3 -c "import json,sys
 last={}
 for ln in sys.stdin:
     ln=ln.strip()
