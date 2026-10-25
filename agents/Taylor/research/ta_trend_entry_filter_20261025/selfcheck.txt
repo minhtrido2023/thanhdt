@@ -1,0 +1,7 @@
+LAG: sum pnl positions=401813479671.2083 ; sum(proc)-sum(cost) from TX=401813479671.2090
+BAL: sum pnl positions=157153678308.7777 ; sum(proc)-sum(cost) from TX=157153678308.7778
+AAM_20160722_504: n_buy=5 n_sell=1 entry=2016-07-22 signal=2016-07-21 ret=-0.030493 abandoned=True
+holding_id '_?' vá=1
+positions total=1912 main=994 abandoned=917 mtm/open=1
+hist_ok False (cờ có thể TẮT do thiếu lịch sử) main=4 ; no flag row=0
+signal lag (signal_date - flag_date) >0 days count main=0

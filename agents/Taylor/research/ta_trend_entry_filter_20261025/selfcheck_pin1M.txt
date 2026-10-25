@@ -1,0 +1,7 @@
+LAG: sum pnl positions=472904248358.5350 ; sum(proc)-sum(cost) from TX=472904248358.5352
+BAL: sum pnl positions=238014786201.5997 ; sum(proc)-sum(cost) from TX=238014786201.5996
+TDH_20150205_4: n_buy=5 n_sell=1 entry=2015-02-05 signal=2015-02-04 ret=-0.049535 abandoned=False
+holding_id '_?' vá=1
+positions total=1971 main=992 abandoned=978 mtm/open=1
+hist_ok False (cờ có thể TẮT do thiếu lịch sử) main=3 ; no flag row=0
+signal lag (signal_date - flag_date) >0 days count main=0

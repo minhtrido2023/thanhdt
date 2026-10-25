@@ -46,3 +46,8 @@ Nếu (a)-(c) đạt nhưng (d) hỏng ⇒ "hiệu có nhưng lọc quá nhiều
 - Đối soát tổng: Σ P&L mọi vị thế (gồm cả ABANDONED + MTM) theo book so với chênh tiền mặt từ TX (tự nhất quán trong ledger) — sai lệch phải ≈0 VND.
 - Kiểm tay 1 vị thế chia nhiều lần khớp (vd AAM_20160722_504) và cờ của 1 mã trên 1 ngày bằng tính tay độc lập.
 - Chạy 2 lần, chạy dưới `env -u TZ`: kết quả byte-identical.
+
+## Sửa đổi công khai (sau lần chạy đầu, trước khi đọc kết quả có hiệu lực)
+- S1 (2026-10-25, vệ sinh dữ liệu, không phụ thuộc kết quả): ledger có lệnh bán ghi `holding_id` dạng `<TK>_<YYYYMMDD>_?`
+  (thiếu seq; ca `VCR_20200427_?`) khiến 1 vị thế tách thành "chỉ bán" (ret=inf) + "chỉ mua". Vá: nối về holding mua DUY NHẤT
+  cùng tiền tố (assert đúng 1 ứng viên). Số ca vá in trong `selfcheck.txt`.
