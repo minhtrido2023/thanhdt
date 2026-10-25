@@ -277,6 +277,13 @@ out9b = run_sender(_p9(dict(CAP_SCL, rights_diag=_diag)), "SpaceX", LK_FILES)
 check("T9b: lô quyền hết khoá (rights_diag) ⇒ GIỮ ⚠️ và dòng ⚠️ in chẩn đoán",
       LAST_RC[0] == 0 and "SCL (LAG): 16000cp → 14000cp — " + _diag in out9b, f"rc={LAST_RC[0]}")
 
+_p9d = _p9(CAP_SCL)
+_p9d["auto_exit_inject_notes"][0]["rights_locked"] = [{"ticker": "SCL", "book": "LAG", "locked_qty": 2500,
+                                                         "reason": "SCL book=LAG: 2500cp KHOÁ fixture"}]
+out9d = run_sender(_p9d, "SpaceX", LK_FILES)
+check("T9d arch-review NB1: khoá 3.000 − 2.500 lô quyền đã tách = 500 < cắt 2.000 ⇒ GIỮ ⚠️ (không đếm khoá 2 lần)",
+      LAST_RC[0] == 0 and "SCL (LAG): 16000cp → 14000cp" in out9d, f"rc={LAST_RC[0]}")
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")

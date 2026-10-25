@@ -137,7 +137,7 @@ def classify(account_no, asof, raw_dir, registry_path, bq_events=_bq_events):
     return res
 
 
-def split_capped(capped, pending, orders):
+def split_capped(capped, pending, orders, rights_locked=None):
     """Tách các mục `capped` (auto_exit_inject) thành (ℹ️ do CP chờ niêm yết, ⚠️ giữ nguyên).
 
     Một mục chỉ hạ xuống ℹ️ khi phần BỊ CẮT được giải thích TRỌN bởi phần khoá đã có bằng chứng
@@ -147,7 +147,10 @@ def split_capped(capped, pending, orders):
         cần người kiểm, auto_exit_inject B1 vòng 2);
       • KL bị cắt (desired − capped) > KL khoá của mã, hoặc không đọc được số;
       • plan có lệnh SELL cùng mã ở book KHÁC (lệnh đó cũng chiếm sellable ⇒ không tách được
-        phần cắt nào do khoá, phần nào do lệnh kia).
+        phần cắt nào do khoá, phần nào do lệnh kia);
+      • book CAPIT — mục cắt của CAPIT là "chỉ bán phần CAPIT", phần còn lại KHÔNG tự bán phiên sau.
+    `rights_locked` = {ticker: KL lô quyền mua auto_exit ĐÃ tách khỏi lệnh (note `rights_locked`)} — phần
+    đó đã trừ khỏi desired_qty nên KHÔNG được dùng lại để giải thích phần cắt (arch-review 25/10 NB1).
     Trả `(info, warn)` — `info` = [(ticker, book, desired, capped)]; `warn` = [mục capped gốc]."""
     info, warn = [], []
     for c in capped:
@@ -160,8 +163,9 @@ def split_capped(capped, pending, orders):
         other = sum(int(o.get("qty") or 0) for o in orders or []
                     if isinstance(o, dict) and o.get("ticker") == tk and o.get("side") == "sell"
                     and o.get("book") != c.get("book"))
-        if (it is None or c.get("rights_diag") or short is None
-                or short > int(it.get("locked") or 0) or other > 0):
+        avail = int(it.get("locked") or 0) - int((rights_locked or {}).get(tk) or 0) if it else 0
+        if (it is None or c.get("rights_diag") or short is None or book == "CAPIT"
+                or short > avail or other > 0):
             warn.append(c)
         else:
             info.append((tk, book, c.get("desired_qty", "?"), c.get("capped_qty", "?")))
@@ -290,6 +294,18 @@ def _selfcheck():
     check("split_same_book_sell_or_other_buy_info", i == [("SCL", "LAG", 16000, 14000)] and w == [], (i, w))
     i, w = split_capped([c_nopend, c_bad], pend, [])
     check("split_not_pending_or_unparsable_warn", i == [] and w == [c_nopend, c_bad], (i, w))
+    # arch-review 25/10 NB1: khoá broker 8.000 gồm 5.000 lô quyền auto_exit ĐÃ trừ khỏi desired ⇒ chỉ còn
+    # 3.000 giải thích được; cắt 4.000 ⇒ ⚠️ (bản không trừ: 4.000 ≤ 8.000 ⇒ ℹ️ sai)
+    c_dbl = {"ticker": "SCL", "book": "LAG", "desired_qty": 14000, "capped_qty": 10000}
+    i, w = split_capped([c_dbl], {"SCL": {"locked": 8000}}, [], {"SCL": 5000})
+    check("split_rights_lock_not_double_counted_warn", i == [] and w == [c_dbl], (i, w))
+    i, w = split_capped([c_dbl], {"SCL": {"locked": 8000}}, [], {})
+    check("split_control_no_rights_lock_info", i == [("SCL", "LAG", 14000, 10000)], (i, w))
+    i, w = split_capped([dict(c_dbl, capped_qty=11000)], {"SCL": {"locked": 8000}}, [], {"SCL": 5000})
+    check("split_rights_lock_boundary_equal_info", i == [("SCL", "LAG", 14000, 11000)] and w == [], (i, w))
+    c_capit = {"ticker": "VPB", "book": "CAPIT", "desired_qty": 882, "capped_qty": 600}
+    i, w = split_capped([c_capit], pend, [])
+    check("split_capit_never_demoted", i == [] and w == [c_capit], (i, w))
 
     print(f"\n{'OK' if not fails else 'FAIL'} — locked_shares selfcheck "
           f"{'PASS' if not fails else str(len(fails)) + ' FAIL'}")

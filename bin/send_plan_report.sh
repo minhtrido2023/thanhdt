@@ -1007,9 +1007,20 @@ if _aei_notes:
     # Mã cắt do CP chờ niêm yết (bằng chứng ở _lk_pending) ⇒ chuyển sang dòng ℹ️ gộp — CHỈ khi
     # phần cắt được khoá giải thích trọn (locked_shares.split_capped; rights alert NB 25/10: bản
     # cũ hạ mọi cắt của mã có mặt trong _lk_pending ⇒ che ⚠️ của lệnh book khác/lô quyền hết khoá).
+    # Lô quyền mua auto_exit đã tách khỏi lệnh (entry auto mới nhất có rights_locked) không được
+    # giải thích lại phần cắt (arch-review 25/10 NB1). Lỗi bất kỳ ⇒ giữ ⚠️ hết (fail-loud, NB3).
     _lk_exit = {}
     if _lk_pending:
-        _lk_info, _aei_capped = _lks.split_capped(_aei_capped, _lk_pending, plan.get("orders") or [])
+        try:
+            _rl_qty = {}
+            for _lk in (next((_n.get("rights_locked") for _n in reversed(_aei_auto)
+                              if _n.get("rights_locked")), None) or []):
+                if isinstance(_lk, dict):
+                    _rl_qty[_lk.get("ticker")] = _rl_qty.get(_lk.get("ticker"), 0) + int(_lk.get("locked_qty") or 0)
+            _lk_info, _aei_capped = _lks.split_capped(_aei_capped, _lk_pending, plan.get("orders") or [], _rl_qty)
+        except Exception as _e:
+            _lk_info = []
+            print(f"[locked_shares] split_capped lỗi, giữ mọi ⚠️ cắt: {type(_e).__name__}: {_e}", file=sys.stderr)
         for _tk, _bk, _want, _got in _lk_info:
             _lk_exit.setdefault(_tk, []).append((_bk, _want, _got))
     if _lk_exit:
