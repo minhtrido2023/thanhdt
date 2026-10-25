@@ -26,3 +26,4 @@
 - [2026-10-25T04:57:34Z] [job Taylor_20261025_043744] XONG V1 (591e52563) + V2 (outer 5780167fd, mike 182a19f5e), arch CONFIRMED; CHỜ Mike: question mch-entry-date-26-vs-29, duyệt .proposed dt5g_publish_runs_log
 - [2026-10-25T06:13:00Z] ĐANG DỞ job Taylor_20261025_061240: commodity-cycle PREREG (DRI/MSR/PVT) → agents/Taylor/research/commodity_cycle_prereg_20261025/ | NEXT: data_registry feeds, map CSV, PREREG, chạy
 - [2026-10-25T06:20:21Z] [commodity-cycle 10-25] XONG job Taylor_20261025_061240: PREREG FAIL 6/6 (de76e7964); post-hoc 1.05/3M chỉ giả thuyết; CHỜ quant-skeptic (Mike) + user quyết feed APT/BDTI cho Winston
+- [2026-10-25T06:37:17Z] [commodity PREREG-2 10-25] XONG job Taylor_20261025_062825: nhanh research/commodity-prereg2-20261025 @c124266de, CHUA merge/cron — CHO Mike review + user; N=0 luc dong bang, ket qua kha di nhat 'khong phan biet duoc'
