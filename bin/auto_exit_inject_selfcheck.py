@@ -649,6 +649,10 @@ def main():
         check("Test8b: rc=0 và có đúng 1 lệnh sell CAPIT VNM", rc == 0 and len(vnm) == 1, f"rc={rc} n={len(vnm)}")
         check("Test8b: qty = phần CAPIT (900), KHÔNG phải tổng broker (1600)",
               bool(vnm) and vnm[0]["qty"] == 900, f"qty={vnm[0]['qty'] if vnm else None}")
+        capped = [c for n in plan.get("auto_exit_inject_notes", []) for c in n.get("capped", [])
+                  if c["ticker"] == "VNM" and c["book"] == "CAPIT"]
+        check("Test8b: phần dư 700cp được ghi vào auto_exit_inject_notes.capped (không im lặng)",
+              len(capped) == 1 and capped[0]["desired_qty"] == 1600 and capped[0]["capped_qty"] == 900, str(capped))
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
