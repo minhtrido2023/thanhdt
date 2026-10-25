@@ -1,0 +1,52 @@
+ℹ️  giá 2026-09-30: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-09-30 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 27,500 (Close 21,150), TV1 20,600 (Close 19,110)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+─────────────────────────────────────────────────
+📋 **TÌNH TRẠNG DANH MỤC — ZaloPay (2026-09-30)**
+Chiến lược: **V2.4** | Regime: **NEUTRAL** (DT5G) | Park target: **0%** idle cash
+NAV: **958.7M** | Hôm nay: **-0.68%** | Từ khi bắt đầu hoạt động: **-2.96%**
+Gate DT5G: 🟢 BÌNH THƯỜNG · candidate CRISIS 13/25 (52%, còn 12 phiên để commit, base giữ từ 2026-10-07, committed NEUTRAL) · P(CRISIS xác nhận|k=13)≈69% [44–91%, n=16] ⚠ mẫu mỏng, tham khảo  [dữ liệu tới 2026-10-23]
+   ↳ Nền xấu 19 phiên liền từ 29/09 (6 BEAR + 13 CRISIS, đổi qua lại 1 lần → bộ đếm reset, vẫn NEUTRAL) · VNINDEX −0,4% từ đầu đợt · ngưỡng xem lại: ≥15 phiên và VNINDEX ≤−5,0% — chưa chạm
+Value Radar: 🟢 24.8 RẺ (phân vị 10 năm) · P/E 11.26 (p7) · P/B 1.89 (p26) · spread EY−CCTG 12T +1.48pp (p41)  [dữ liệu tới 2026-10-23]
+─────────────────────────────────────────────────
+
+**Cơ cấu danh mục**
+
+| Sleeve | Giá trị | % NAV | Lãi/Lỗ CK | Ghi chú |
+|--------|--------:|------:|----------:|---------|
+| BAL (1 mã) | 23.7M | 2.5% | -5.0% | Momentum V11 + yieldcombo |
+| PARK custom30V (16 mã) | 475.4M | 49.6% | -7.3% | Rebal gần nhất: 2026-08-05 | kế tiếp: ~2026-12-01 (ước tính Q4) |
+| LAG (2 mã) | 48.9M | 5.1% | +12.1% | PEAD/earnings drift |
+| CAPIT (5 mã) | 184.7M | 19.3% | +7.2% | Bear-washout overflow |
+| Discretionary (2 mã) | 58.8M | 6.1% | +12.7% | Fear-buy/special situation |
+| Trứng vàng | 102.2M | 10.7% | — | DNSE bond-like (off-book) |
+| Cash | 65.4M | 6.8% | 0% | Idle |
+
+ⓘ Tỉ suất từng mã tính trên giá đóng cửa của phiên, đã cộng cổ tức tiền mặt sau thuế; cột giá trị tính trên giá do công ty chứng khoán ghi cuối ngày. Hai giá có thể lệch nhau ở mã giao dịch trên UPCOM, nên giá trị và tỉ suất của cùng một mã không quy đổi trực tiếp sang nhau.
+
+**Chi tiết BAL (1 mã)**
+  VPI 23.7M, -5.04%
+
+**Chi tiết PARK custom30V (16 mã)**
+  DGC 360.0M, -8.74% · VPB 28.4M, +10.24% · VHM 13.7M, -7.83% · BID 11.8M, -4.20% · VCB 11.6M, -4.13% · CTG 10.5M, -6.62% · TCB 8.3M, +2.97% · MBB 6.9M, -4.35% · HPG 6.0M, -9.23% · HDB 4.4M, +6.21% · ACB 4.2M, -7.05% · VIB 2.9M, -1.89% · SHB 2.3M, -5.37% · LPB 2.3M, -19.77% · MSB 2.0M, +4.86% · VIX 0.1M, -7.42%
+
+**Chi tiết LAG (2 mã)**
+  SCL 28.9M, +21.24% — ĐÃ QUA hạn cố định T+25 (34 phiên từ 2026-08-10) — tới hạn thoát · CSV 20.0M, +1.27%
+
+**Chi tiết CAPIT (5 mã)**
+  PVT 49.3M, +37.98% — episode CAPIT không xác định số phiên đã giữ · SIP 36.8M, +4.16% — episode CAPIT không xác định số phiên đã giữ · VNM 35.7M, +1.19% — episode CAPIT không xác định số phiên đã giữ · SAB 31.9M, -3.58% — episode CAPIT không xác định số phiên đã giữ · NCT 31.0M, -3.92% — episode CAPIT không xác định số phiên đã giữ
+
+**Chi tiết Discretionary (2 mã)**
+  DRI 30.2M, +25.54% — ⚠️ 33 phiên từ 2026-08-11 — chờ ý kiến PM về exit · TV1 28.6M, +1.34% — ⚠️ 31 phiên từ 2026-08-13 — chờ ý kiến PM về exit
+
+**Corp Action — 7 ngày tới** (mã đang giữ)
+| Mã | Sự kiện | Ngày | Tác động dự kiến |
+|----|---------|------|-------------------|
+| BID | AIS | 2026-10-05 | BID - Niêm yết bổ sung 498.164.263 cổ phiếu |
+
+**Cờ theo dõi**
+- PARK: rổ hiện hành chốt 2026-08-05 (chu kỳ ~quý, kế tiếp ~2026-12-01 (ước tính)).
+- LAG: đang giữ 2 mã PEAD/earnings-drift, theo dõi cửa sổ thoát.
+- ⚠️ Discretionary: DRI (33p), TV1 (31p) — chờ ý kiến PM về exit
+- CAPIT: 5 mã đang trong episode overflow.
+- LAG: 5 candidate đang trong cửa sổ upcoming (chưa vào lệnh).

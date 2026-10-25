@@ -1,0 +1,35 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+[value_radar] skipped (fail-safe): [Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/data/value_radar_series.csv.tmp' -> '/home/trido/thanhdt/WorkingClaude/data/value_radar_series.csv'
+─────────────────────────────────────────────────
+📋 **TÌNH TRẠNG DANH MỤC — ZaloPay (2026-10-23)**
+Chiến lược: **V2.4** | Regime: **NEUTRAL** (DT5G) | Park target: **0%** idle cash
+NAV: **929.0M** | Hôm nay: **-0.14%** | Từ khi bắt đầu hoạt động: **-5.96%**
+Gate DT5G: 🟢 BÌNH THƯỜNG · candidate CRISIS 13/25 (52%, còn 12 phiên để commit, base giữ từ 2026-10-07, committed NEUTRAL) · P(CRISIS xác nhận|k=13)≈69% [44–91%, n=16] ⚠ mẫu mỏng, tham khảo  [dữ liệu tới 2026-10-23]
+   ↳ Nền xấu 19 phiên liền từ 29/09 (6 BEAR + 13 CRISIS, đổi qua lại 1 lần → bộ đếm reset, vẫn NEUTRAL) · VNINDEX −0,4% từ đầu đợt · ngưỡng xem lại: ≥15 phiên và VNINDEX ≤−5,0% — chưa chạm
+─────────────────────────────────────────────────
+
+**Cơ cấu danh mục**
+
+| Sleeve | Giá trị | % NAV | Lãi/Lỗ CK | Ghi chú |
+|--------|--------:|------:|----------:|---------|
+| PARK custom30V (4 mã) | 345.8M | 37.2% | -13.2% | Rebal gần nhất: 2026-08-05 | kế tiếp: ~2026-12-01 (ước tính Q4) |
+| Discretionary (2 mã) | 45.8M | 4.9% | +7.2% | Fear-buy/special situation |
+| Trứng vàng | 535.3M | 57.6% | — | DNSE bond-like (off-book) |
+| Cash | 2.1M | 0.2% | 0% | Idle |
+
+ⓘ Tỉ suất từng mã tính trên giá đóng cửa của phiên, đã cộng cổ tức tiền mặt sau thuế; cột giá trị tính trên giá do công ty chứng khoán ghi cuối ngày. Hai giá có thể lệch nhau ở mã giao dịch trên UPCOM, nên giá trị và tỉ suất của cùng một mã không quy đổi trực tiếp sang nhau.
+
+**Chi tiết PARK custom30V (4 mã)**
+  DGC 337.0M, -13.55% · VPB 7.5M, +13.54% · MBB 1.0M, -3.47% · VIB 0.3M, +4.36%
+
+**Chi tiết Discretionary (2 mã)**
+  TV1 25.9M, -2.48% — ⚠️ 48 phiên từ 2026-08-13 — chờ ý kiến PM về exit · DRI 19.9M, +23.27% — ⚠️ 50 phiên từ 2026-08-11 — chờ ý kiến PM về exit
+
+**Corp Action — 7 ngày tới** (mã đang giữ)
+Không có corp action trong 7 ngày tới trên mã đang giữ.
+
+**Cờ theo dõi**
+- PARK: rổ hiện hành chốt 2026-08-05 (chu kỳ ~quý, kế tiếp ~2026-12-01 (ước tính)).
+- ⚠️ Discretionary: DRI (50p), TV1 (48p) — chờ ý kiến PM về exit
+- LAG: 5 candidate đang trong cửa sổ upcoming (chưa vào lệnh).
