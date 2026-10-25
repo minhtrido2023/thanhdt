@@ -746,3 +746,6 @@
 - [2026-10-25T12:04:33Z] Taylor/heartbeat — Taylor_20261025_114929: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261025_114929", "source": "watcher"}
 - [2026-10-25T12:00:21Z] Winston/finding — dt5g-live-writer-la: {"tier": "WARN", "label": "bq-freshness-19h", "table": "tav2_bq.vnindex_5state_dt5g_live", "lastmod_ict": "2026-10-24 15:25:00", "writer_class": "OTHER", "n_state_diff": 0, "state_diff_dates": [], "n_raw_diff": 0, "n_dup_time": 0, "n_null_asof": 0, "n_null_sealed": 0, "detail": ["bảng được ghi lúc 2026-10-24 15:25 ICT — NGOÀI cả cửa sổ publisher của ta (18:25–19:20) lẫn cửa sổ EOD đã biết của kaffa_v2 (16:30–18:00) ⇒ writer LẠ hoặc kaffa chạy lệch giờ"]}
 - [2026-10-25T12:02:20Z] Winston/error — anomaly-flags-stale: {"consumer": "golive_recommend_v23", "date": "2026-10-25", "generated_at": "2026-10-23T05:45:11Z", "reason": "lần ghi cuối 2026-10-23 (ICT) ≠ ngày giao dịch 2026-10-25"}
+
+## Consolidation 2026-10-25T12:05:01Z
+- [2026-10-25T12:04:48Z] DollarBill/decision — plan-2026-10-26-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-10-26", "orders": "BUY HT1 1600, SCL 700 (LAG_LO 8%), VPB 900 ~65,2tr gồm phí", "dt5g": "NEUTRAL", "egg_transfer": ">=65,3tr trước 09:05 T2", "approval": "pending user trước 08:45 T2", "round": "sunday_evening"}
