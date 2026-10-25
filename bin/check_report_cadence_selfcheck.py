@@ -73,7 +73,7 @@ def detector_block():
 
 
 def run_detector(report_files, pending_topics, today="2026-08-14", scheduled_kind="",
-                  content_by_file=None):
+                  content_by_file=None, state_text="{}"):
     """Chạy khối detector+closer thật trên một reports_dir giả.
 
     `content_by_file`: {tên file: nội dung} — mặc định "fixture" (đầy đủ, không marker TBD).
@@ -86,7 +86,7 @@ def run_detector(report_files, pending_topics, today="2026-08-14", scheduled_kin
         for fn in report_files:
             (reports / fn).write_text(content_by_file.get(fn, "fixture"), encoding="utf-8")
         state = Path(td) / "state.json"
-        state.write_text("{}", encoding="utf-8")
+        state.write_text(state_text, encoding="utf-8")
         delivery = Path(td) / "delivery.json"
         records = {}
         import hashlib
@@ -100,7 +100,8 @@ def run_detector(report_files, pending_topics, today="2026-08-14", scheduled_kin
         py = Path(td) / "block.py"
         py.write_text(detector_block(), encoding="utf-8")
         env = dict(os.environ, RC_PENDING_TOPICS="\n".join(pending_topics),
-                   REPORT_SCHEDULED_KIND=scheduled_kind)
+                   REPORT_SCHEDULED_KIND=scheduled_kind,
+                   RC_BIN_DIR=str(ROOT / "bin"))
         r = subprocess.run([sys.executable, str(py), td, today, str(state), str(delivery)],
                            capture_output=True, text=True, env=env)
         if r.returncode != 0:
@@ -410,12 +411,17 @@ check("#17 không có gì để đóng ⇒ im lặng, không gọi append_event"
 # Số hiệu #22-#25+ (các #18-#21 phía trên đã dùng cho content-completeness / vendor reason).
 _src = SRC.read_text(encoding="utf-8")
 _wk = re.search(r'if \[ "\$KIND" = "weekly" \]; then(.*?)\n  else\n(.*?)\n  fi\n', _src, re.S)
+# state hỏng/cụt (bị kill giữa chừng) không được giết detector — trước đây json.load trần ⇒ crash ⇒ cron rc=0 mù.
+_corrupt = run_detector([], [], today="2026-08-14", state_text='{"weekly_2026-08-1')
+check("#21b state JSON hỏng ⇒ detector VẪN chạy (đọc như {}), không crash",
+      "__crash__" not in _corrupt and "actions" in _corrupt, str(_corrupt)[:200])
+
 check("#22 trích được 2 nhánh PROMPT weekly/monthly từ check_report_cadence.sh", bool(_wk))
 if _wk:
     # Biến bash được phép nội suy trong thân PROMPT; còn lại (backtick, $(…), ${khác}) là command
     # substitution âm thầm làm rơi/đổi chữ — `bash -n` không bắt được (mutation M10/M11).
     _ALLOWED = ("${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}", "${DELEGATE_STEP}",
-                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${CORR_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
+                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
     for _nm, _body in (("weekly", _wk.group(1)), ("monthly", _wk.group(2))):
         _need = ["Toàn cảnh thị trường", "Outlook", "${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}",
                  "${PORTFOLIO_STEP}", "${BENCH_STEP}"]
