@@ -131,6 +131,7 @@ ROOT_TIER = {
     "prefetch_dnse_statement.sh": T0,   # statement khớp lệnh DNSE cho cổng KL NAV (allow_fetch=False)
     "rating_8l_forward_tracker.py": T1,  # tracker OOS rating 8L, PAPER-ONLY, append-only data/
     "livermore_trigger_check.py": T1,   # cò đọc kỹ thuật Livermore, display-only
+    "commodity_cycle_forward_tracker.py": T1,  # tracker OOS chu kỳ hàng hoá (PREREG-2), PAPER-ONLY, append-only data/
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,

@@ -1186,6 +1186,20 @@
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "exec"
   },
+  "deploy_golive_dt5g_v4/publish_run_log.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "deploy_golive_dt5g_v4/publish_gated_state.py",
+   "roots": [
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "deploy_golive_dt5g_v4/publish_gated_state.py",
+   "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
+   "via": "import"
+  },
   "deploy_v3_4b_package/build_v3_1_clean.py": {
    "blast_tier": "T1",
    "depth": 1,
@@ -3395,6 +3409,31 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/commodity_cycle_forward_tracker.py": {
+   "blast_tier": "T1",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `20 11 11-25 * *` commodity_cycle_forward_tracker.py"
+   ],
+   "tier": "T1",
+   "tier_parent": "(root)",
+   "tier_root": "cron `20 11 11-25 * *` commodity_cycle_forward_tracker.py",
+   "via": "exec"
+  },
+  "mike/bin/commodity_cycle_forward_tracker_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/commodity_cycle_forward_tracker.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/commodity_cycle_forward_tracker.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/compact_done_watcher.sh": {
    "blast_tier": "T2",
    "depth": 1,
@@ -4662,6 +4701,22 @@
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
   },
+  "mike/bin/dt5g_publish_runs_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "macro_state_live.py",
+    "mike/bin/dt5g_writer_watch.py",
+    "mike/bin/wc_paths.py",
+    "state_publish_immutable.py"
+   ],
+   "depth": null,
+   "parent": "macro_state_live.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/dt5g_publisher_gate_selfcheck.sh": {
    "blast_tier": "T3",
    "covers": [
@@ -5614,16 +5669,17 @@
   },
   "mike/bin/lag_dd_ack.py": {
    "blast_tier": "T0",
-   "depth": 2,
-   "parent": "mike/bin/lag_plan_consistency_check.py",
+   "depth": 1,
+   "parent": "mike/bin/bq_freshness_check.sh",
    "roots": [
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
     "cron `0 14 * * 1-5` send_plan_report.sh",
     "cron `0 16 * * 1-5` send_plan_report.sh"
    ],
    "tier": "T0",
-   "tier_parent": "mike/bin/lag_plan_consistency_check.py",
-   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
-   "via": "import"
+   "tier_parent": "mike/bin/bq_freshness_check.sh",
+   "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
+   "via": "exec"
   },
   "mike/bin/lag_dd_gate_selfcheck.py": {
    "blast_tier": "T3",
@@ -5849,27 +5905,72 @@
    "via": "selfcheck"
   },
   "mike/bin/livermore_common.py": {
-   "blast_tier": "T1",
+   "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/livermore_trigger_check.py",
    "roots": [
-    "cron `45 12 * * 1-5` livermore_trigger_check.py"
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `45 12 * * 1-5` livermore_trigger_check.py",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
-   "tier": "T1",
-   "tier_parent": "mike/bin/livermore_trigger_check.py",
-   "tier_root": "cron `45 12 * * 1-5` livermore_trigger_check.py",
+   "tier": "T0",
+   "tier_parent": "mike/bin/livermore_report_block.py",
+   "tier_root": "cron `10 12 * * 1-5` eod_trading_report.sh",
    "via": "import"
   },
+  "mike/bin/livermore_report_block.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/report_delivery_gate.py",
+   "roots": [
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/report_delivery_gate.py",
+   "tier_root": "cron `10 12 * * 1-5` eod_trading_report.sh",
+   "via": "import"
+  },
+  "mike/bin/livermore_report_block_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/livermore_common.py",
+    "mike/bin/livermore_report_block.py",
+    "mike/bin/livermore_run.sh",
+    "mike/bin/report_delivery_gate.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/livermore_common.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/livermore_run.sh": {
-   "blast_tier": "T1",
+   "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/livermore_trigger_check.py",
    "roots": [
-    "cron `45 12 * * 1-5` livermore_trigger_check.py"
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `45 12 * * 1-5` livermore_trigger_check.py",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
    ],
-   "tier": "T1",
-   "tier_parent": "mike/bin/livermore_trigger_check.py",
-   "tier_root": "cron `45 12 * * 1-5` livermore_trigger_check.py",
+   "tier": "T0",
+   "tier_parent": "mike/bin/livermore_report_block.py",
+   "tier_root": "cron `10 12 * * 1-5` eod_trading_report.sh",
    "via": "exec"
   },
   "mike/bin/livermore_score.py": {
@@ -7837,7 +7938,7 @@
     "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
-   "tier_parent": "mike/bin/daily_nav_snapshot.py",
+   "tier_parent": "mike/bin/dividend_adjusted_return.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
   },
@@ -11370,6 +11471,7 @@
     "cron `15 2 * * 6` refresh_fa_ratings.sh",
     "cron `15 8 * * 1-5` capture_upcom_vwap_eod.sh",
     "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `20 11 11-25 * *` commodity_cycle_forward_tracker.py",
     "cron `20 12 * * 1-5` pt_8l_daily.sh",
     "cron `20 13 * * 1-5` merge_park_daily.sh",
     "cron `20 17 * * 1-5` nav_loss_brake_monitor.py",
@@ -11427,7 +11529,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-10-25T04:14:34Z",
+ "generated_at": "2026-10-25T10:57:18Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -12714,6 +12816,17 @@
    "schedule": "0,15,30 7 * * 1-5",
    "script": "egg_transfer_alert.py",
    "tier": "T0"
+  },
+  {
+   "command": "cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && flock -n mike/state/commodity_cycle_forward_tracker.cron.lock timeout 600 $DNA_PYEXE mike/bin/commodity_cycle_forward_tracker.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/commodi",
+   "in_repo_files": [
+    "mike/bin/commodity_cycle_forward_tracker.py",
+    "wc_env.sh"
+   ],
+   "kind": "cron",
+   "schedule": "20 11 11-25 * *",
+   "script": "commodity_cycle_forward_tracker.py",
+   "tier": "T1"
   },
   {
    "command": "/workspace/claude-code-discord-bridge/.venv/bin/python -m claude_discord.main",
