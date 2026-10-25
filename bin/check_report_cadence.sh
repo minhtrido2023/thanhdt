@@ -505,7 +505,7 @@ PYEOF
 # Heredoc chết (traceback/import hỏng) ⇒ PLAN rỗng: trước đây `[ "$N" -eq 0 ]` lỗi, vòng while
 # không có input rồi script thoát rc=0 — cron báo xanh trong khi bộ phát hiện quá hạn đã chết.
 if ! printf '%s' "$PLAN" | python3 -c "import json,sys; json.load(sys.stdin)['actions']" 2>/dev/null; then
-  echo "check_report_cadence: LỖI — bộ phát hiện không trả PLAN JSON hợp lệ (xem traceback phía trên); KHÔNG thể kết luận có/không báo cáo quá hạn." >&2
+  echo "❌ check_report_cadence: LỖI — bộ phát hiện không trả PLAN JSON hợp lệ (xem traceback phía trên); KHÔNG thể kết luận có/không báo cáo quá hạn." >&2
   exit 1
 fi
 

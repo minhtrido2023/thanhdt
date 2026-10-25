@@ -413,8 +413,12 @@ _src = SRC.read_text(encoding="utf-8")
 _wk = re.search(r'if \[ "\$KIND" = "weekly" \]; then(.*?)\n  else\n(.*?)\n  fi\n', _src, re.S)
 # state hỏng/cụt (bị kill giữa chừng) không được giết detector — trước đây json.load trần ⇒ crash ⇒ cron rc=0 mù.
 _corrupt = run_detector([], [], today="2026-08-14", state_text='{"weekly_2026-08-1')
-check("#21b state JSON hỏng ⇒ detector VẪN chạy (đọc như {}), không crash",
+check("#21c state JSON hỏng ⇒ detector VẪN chạy (đọc như {}), không crash",
       "__crash__" not in _corrupt and "actions" in _corrupt, str(_corrupt)[:200])
+
+_g = re.search(r"if ! printf '%s' \"\$PLAN\" \| python3 -c [^\n]*actions[^\n]*\n(.*?)\nfi\n", _src, re.S)
+check("#21d guard PLAN rỗng/không JSON: có, in '❌' (cron_health_check bắt được) và exit 1",
+      bool(_g) and "❌ check_report_cadence" in _g.group(1) and "exit 1" in _g.group(1), str(_g and _g.group(1))[:200])
 
 check("#22 trích được 2 nhánh PROMPT weekly/monthly từ check_report_cadence.sh", bool(_wk))
 if _wk:

@@ -418,6 +418,7 @@ _check "ticker_prune (EOD price)"         "tav2_bq.ticker_prune"              "t
 # NGÀY MỚI NHẤT: < MIN_PRUNE_NAMES ⇒ FAIL như stale (block pipeline/DollarBill).
 MIN_PRUNE_NAMES=200   # daily_refresh_v34b precheck dùng cùng ngưỡng (bình thường ~225-265)
 # §28: tách "bq lỗi/không trả số" (KHÔNG biết bảng có bị moi ruột không) khỏi "đếm được và quá ít".
+# PRUNE_DEPTH_BEGIN (marker cho bq_freshness_check_selfcheck.py — nó trích đúng khối này)
 prune_out=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
   "SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS t
    WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" 2>&1)
@@ -425,7 +426,11 @@ prune_rc=$?
 prune_names="$(printf '%s\n' "$prune_out" | tail -1 | tr -d '[:space:]')"
 if [ $prune_rc -ne 0 ] || ! printf '%s' "$prune_names" | grep -qE '^[0-9]+$'; then
   prune_snip="$(printf '%s' "$prune_out" | tr '\n' ' ' | cut -c1-200)"
-  depth_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): ticker_prune depth — không đếm được số mã (rc=$prune_rc: ${prune_snip}). KHÔNG kết luận được bảng có bị moi ruột hay không; kiểm tra auth/quota/network. Chặn pipeline/DollarBill (fail-closed)."
+  if [ $prune_rc -ne 0 ]; then
+    depth_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): ticker_prune depth — bq lỗi kết nối/quyền (rc=$prune_rc: ${prune_snip}). KHÔNG kết luận được bảng có bị moi ruột hay không; kiểm tra auth/quota/network. Chặn pipeline/DollarBill (fail-closed)."
+  else
+    depth_msg="⚠️ BQ DATA BẤT THƯỜNG ($TODAY $NOW_ICT): ticker_prune depth — bq trả giá trị không phải số dù rc=0 (raw: ${prune_snip}). KHÔNG PHẢI lỗi kết nối BQ, đừng kiểm tra auth/quota — kiểm tra bảng/cột/schema. Chặn pipeline/DollarBill (fail-closed)."
+  fi
   echo "FAIL ticker_prune depth: bq lỗi/không trả số (rc=$prune_rc, raw: ${prune_snip})"
   "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
   "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
@@ -439,6 +444,7 @@ else
   "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   FAILED=1
 fi
+# PRUNE_DEPTH_END
 _check_price_freeze || true
 _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t.time"  $MAX_STATE_LAG  "trading"  || true
 # --- DT5G PUBLISHER-EVIDENCE gate (2026-07-31, job Winston_20260731_014953) ------------------

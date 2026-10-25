@@ -148,6 +148,14 @@ r = subprocess.run([os.path.join(HERE, "notify_thread.sh"), E2E_MSG, "architectu
 chk("notify_thread.sh e2e: rc=0 + buffered", r.returncode == 0 and "buffered" in r.stdout)
 chk("notify_thread.sh e2e: buffer +1 dòng", sum(1 for _ in open(g.BUFFER)) == n0 + 1)
 
+# digest: HOÀN TẤT LOW-RISK (bỏ qua arch-reviewer) không được gắn nhãn "CONFIRMED"
+_dg = g.build_digest([
+    {"cat": "wags_lifecycle", "text": "✅ **[wags-autofix] HOÀN TẤT issue 'coord-1'** (LOW-RISK — chỉ docs)"},
+    {"cat": "wags_lifecycle", "text": "✅ **[wags-autofix] HOÀN TẤT issue 'coord-2'** arch ok, summary nhắc LOW-RISK ngoài ngoặc"},
+], "2026-10-25")
+chk("digest tách: 1 CONFIRMED + 1 low-risk bỏ qua review (neo '(LOW-RISK —')",
+    "1 arch-review CONFIRMED, 1 low-risk bỏ qua review" in _dg)
+
 shutil.rmtree(TMP, ignore_errors=True)
 print("\nTOÀN BỘ PASS" if not FAILS else f"\n{len(FAILS)} FAIL: {FAILS}")
 sys.exit(1 if FAILS else 0)

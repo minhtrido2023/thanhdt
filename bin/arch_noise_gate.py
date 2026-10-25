@@ -190,7 +190,7 @@ def build_digest(recs, today):
         issues = sorted({m for r in by["wags_lifecycle"] for m in re.findall(r"'(coord-[\w-]+)'", r["text"])})
         done_txt = [r["text"] for r in by["wags_lifecycle"] if "HOÀN TẤT" in r["text"]]
         # LOW-RISK = pipeline BỎ QUA arch-reviewer (wags_autofix.sh) — không được nhãn "CONFIRMED".
-        low = sum("LOW-RISK" in t for t in done_txt)
+        low = sum("(LOW-RISK —" in t for t in done_txt)
         lines.append(f"• Wags tự sửa vấn đề điều phối: {len(done_txt)} hoàn tất / {len(issues)} issue ({', '.join(issues) or '—'}): "
                      f"{len(done_txt) - low} arch-review CONFIRMED, {low} low-risk bỏ qua review")
     if "job_progress" in by:

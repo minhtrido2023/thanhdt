@@ -189,6 +189,35 @@ def case_lastmod_missing_lastmodified_warns():
         check("lastmod-missing-field-does-not-block", "FAILED=0 WARNED=1" in out, extra=out)
 
 
+def extract_prune_depth():
+    lines = Path(__file__).with_name("bq_freshness_check.sh").read_text().splitlines()
+    start = next((i for i, ln in enumerate(lines) if ln.startswith("# PRUNE_DEPTH_BEGIN")), None)
+    end = next((i for i, ln in enumerate(lines) if ln.startswith("# PRUNE_DEPTH_END")), None)
+    if start is None or end is None:
+        print("FAIL: markers PRUNE_DEPTH_BEGIN/END not found — selfcheck stale", file=sys.stderr)
+        sys.exit(1)
+    return "MIN_PRUNE_NAMES=200\n" + "\n".join(lines[start:end])
+
+
+def case_prune_depth_separates_bq_error_from_gutted_table():
+    """§28: bq rc!=0 / rc=0-không-phải-số / số thấp / số OK là 4 trường hợp KHÁC nhau."""
+    def run(stub):
+        with tempfile.TemporaryDirectory() as td:
+            return run_bash(extract_prune_depth(), stub, ":", Path(td))[0]
+    out = run('echo "ERROR: auth expired"; return 1')
+    check("prune-depth rc!=0 => BQ QUERY FAILED, không nói 'moi ruột', chặn",
+          "BQ QUERY FAILED" in out and "moi ruột dù" not in out and "FAILED=1" in out, extra=out)
+    out = run('echo "f0_"; echo ""; return 0')
+    check("prune-depth rc=0 không phải số => BQ DATA BẤT THƯỜNG, KHÔNG nói auth/quota là nguyên nhân, chặn",
+          "BQ DATA BẤT THƯỜNG" in out and "KHÔNG PHẢI lỗi kết nối" in out and "FAILED=1" in out, extra=out)
+    out = run('echo "f0_"; echo "7"; return 0')
+    check("prune-depth 7 mã => BQ DEPTH (moi ruột), chặn",
+          "BQ DEPTH" in out and "moi ruột" in out and "FAILED=1" in out, extra=out)
+    out = run('echo "f0_"; echo "250"; return 0')
+    check("prune-depth 250 mã => OK, không notify, không chặn",
+          "NOTIFY" not in out and "FAILED=0" in out, extra=out)
+
+
 def extract_pipeline0():
     """Đoạn [pipeline-0] → hết cổng FAILED (trước '=== ALL FRESH'), lấy từ bản CÙNG THƯ MỤC với
     selfcheck này (không phải REAL cứng) để test được cả worktree."""
@@ -733,6 +762,7 @@ if __name__ == "__main__":
     case_warn_mode_query_fail_does_not_block()
     case_lastmod_show_fail_distinct_message()
     case_lastmod_missing_lastmodified_warns()
+    case_prune_depth_separates_bq_error_from_gutted_table()
     case_pipeline0_exdate_forecast_runs_before_failed_gate()
     case_exdate_forecast_selfcheck_green()
     print(f"\nbq_freshness_check_selfcheck: {PASS} PASS, {FAIL} FAIL")
