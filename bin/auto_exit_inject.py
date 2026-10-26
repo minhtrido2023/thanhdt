@@ -445,7 +445,8 @@ def process_account(account, plan_date, signal_date, dry_run):
         return 1
     plan.setdefault("orders", [])
 
-    positions = broker_positions_with_cost(account_no, signal_date) or {}
+    _pos_raw = broker_positions_with_cost(account_no, signal_date)
+    positions = _pos_raw or {}
     now_iso = dt.datetime.now(_ICT_TZ).isoformat(timespec="seconds")
     injected = []
     blocked_notes = []   # [{'ticker','book','reason'}] — mọi exit bị bỏ/cắt phải hiện ra (§29)
@@ -610,6 +611,24 @@ def process_account(account, plan_date, signal_date, dry_run):
     # §29: mọi exit bị CHẶN hoặc CẮT phải hiện ra cho người, không chỉ nằm trong log stdout —
     # KHÔNG ĐƯỢC in "không có candidate" khi thực ra có candidate bị chặn/cắt (arch-review vòng 2
     # mô phỏng đúng ca này: book ok=True + mọi mã unverified ⇒ lots rỗng ⇒ bản cũ im lặng).
+    # Chạy lại SAU khi lỗi kết cấu hết (vd DNSE 500 buổi tối 26/10 → park_holdings lỗi → book-level
+    # blocked): sổ lô LAG+BAL dựng được lần này ⇒ lượt này đã đánh giá lại TOÀN BỘ (LAG/BAL/CAPIT/
+    # mồ côi) và `blocked_notes` là sự thật hiện hành ⇒ các `blocked` của entry auto trước chuyển sang
+    # `blocked_superseded` (send_plan_report chỉ đọc `blocked`; vẫn giữ làm dấu vết). Không đụng
+    # `capped` (lệnh đã chèn không được sinh lại ở lượt sau) và entry thủ công (source khác).
+    superseded = 0
+    # Chỉ gỡ khi ĐỌC ĐƯỢC positions (`None` = dnse_raw chưa có bản ghi ⇒ mọi candidate bị bỏ im
+    # lặng ở `if not pos: continue` ⇒ lượt này CHƯA đánh giá lại gì — reviewer 27/10).
+    if lag_ok and bal_ok and _pos_raw is not None and not dry_run:
+        for _n in plan.get("auto_exit_inject_notes") or []:
+            if isinstance(_n, dict) and _n.get("source") == "auto_exit_inject" and _n.get("blocked"):
+                _n["blocked_superseded"] = _n.pop("blocked")
+                _n["superseded_at"] = now_iso
+                superseded += 1
+    if superseded and not (injected or blocked_notes or capped_notes or locked_notes):
+        _atomic_write_json(plan_path, plan)
+        print(f"[auto-exit] {account} {plan_date}: sổ lô dựng được lại — gỡ {superseded} cảnh báo "
+              f"'bị chặn' của lượt lỗi trước (blocked_superseded); không có candidate mới.")
     if injected or blocked_notes or capped_notes or locked_notes:
         notes = plan.setdefault("auto_exit_inject_notes", [])
         entry = {"at": now_iso, "source": "auto_exit_inject"}
@@ -647,10 +666,14 @@ def main():
     ap.add_argument("--account", required=True)
     ap.add_argument("--plan-date", default=None, help="mặc định = phiên giao dịch kế tiếp")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--signal-date", default=None,
+                    help="ngày chốt vị thế/đếm phiên (mặc định = hôm nay ICT). Bắt buộc khi chạy lại "
+                         "SAU nửa đêm cho plan của phiên kế tiếp: đi cùng --plan-date, đặt = phiên giao "
+                         "dịch vừa đóng (vd 26/10 khi lập plan 27/10 mà đã sang 27/10)")
     args = ap.parse_args()
 
     today = now_ict().date()
-    signal_date = today.isoformat()
+    signal_date = args.signal_date or today.isoformat()
     plan_date = args.plan_date or str(next_trading_day(today))
 
     if not _session_ok():
