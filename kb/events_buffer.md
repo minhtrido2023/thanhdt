@@ -1058,3 +1058,6 @@
 ## Consolidation 2026-10-26T10:29:50Z
 - [2026-10-26T10:29:05Z] Winston/heartbeat — Winston_20261026_102704: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261026_102704", "source": "watcher"}
 - [2026-10-26T10:29:38Z] Winston/finding — commodity-sunsirs-added-doc-26-10: {"rows": 343272, "codes": 134, "sunsirs": {"codes": 23, "rows": 46752, "window_40_of_40": true}, "unique_key_ok": true, "views_include_sunsirs": true, "key_overlap_with_other_sources": 0, "monitor": "23/23 OK, only tea STALE, cron 07:30 no mass alert", "rubber_weekly_cn_rmb_ton_vs_butadiene_corr": 0.93, "hog_cn_vs_vn_monthly_corr": 0.38, "still_missing": ["vonfram", "P4", "BDTI", "HRC TQ", "ca tra"], "files": ["kb/data_registry/feeds/bq_commodity_prices.md", "kb/projects/commodity-tables-eval-20261026.md"]}
+
+## Consolidation 2026-10-26T11:07:02Z
+- [2026-10-26T10:31:16Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54045}
