@@ -18,3 +18,4 @@
 
 - [2026-10-25T18:24:13Z] 26/10 01:30 Taylor S1-S3 xong+verify, ghi tracking. Chờ user: skeptic vòng 3 cho S? hỏi DollarBill/Mafee RESIDUAL + biến thể dời 3 phiên? Nhắc egg trước 09:05 (~07:30).
 - [2026-10-26T01:10:27Z] 26/10 08:1x: user duyệt DD NT2+DDV (jobs Taylor_20261026_011018 NT2, _011019 DDV, opus). Giả thuyết user ghi trong prompt. SZL (KCN, cho thuê) + NNC (chu kỳ đầu tư công, giống SCL) xếp hàng sau, chưa duyệt. Nếu QUALIFY -> fundamental-skeptic. Nhắc egg trước 09:05.
+- [2026-10-26T01:25:32Z] 26/10 08:2x: user duyệt DD SZL+NNC+SAS (Taylor opus). NT2+DDV xong, NON cả hai (báo cáo dd_NT2_20261026, dd_DDV_20261026). Nếu QUALIFY -> fundamental-skeptic.
