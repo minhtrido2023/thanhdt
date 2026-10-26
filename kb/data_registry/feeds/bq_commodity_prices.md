@@ -4,7 +4,7 @@ status: CANONICAL-WITH-TRAPS
 source: tav2_bq.commodity_prices (TABLE) + tav2_bq.commodity_prices_unified (VIEW) + tav2_bq.commodity_latest (VIEW)
 group: feeds
 cadence: daily (TE) / monthly (TE, WB) / event (GDT)
-writer: KHÔNG TÌM RA (xem mục Ai ghi)
+writer: bq_admin (user xác nhận 2026-10-26); nguồn TradingEconomics; cron làm mới chưa thấy trong repo
 verified: 2026-10-26 (job Winston_20261026_065210, đo trực tiếp BQ)
 ---
 
@@ -47,7 +47,9 @@ Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 296.
 - rubber: TE = TSR20, WB = RSS3. Chọn theo hạng hàng cần.
 
 ## Ai ghi
-**Không tìm ra writer.** Không script/cron nào trong repo, crontab, `tools/`, `discord_bot/` tham chiếu bảng; không đọc được `INFORMATION_SCHEMA.JOBS_BY_PROJECT` (thiếu `bigquery.jobs.listAll`); `bq ls -j` không lộ câu lệnh. Dấu vết: `fetched_at` 2026-10-24 17:07 → 2026-10-25 11:13 (UTC) = nạp theo đợt ngày 24–25/10, bảng tạo 2026-10-25 12:38 UTC. Nghi tạo thủ công/ngoài repo (cùng `dtienthanh@gmail.com`). **Không có cron làm mới → bảng sẽ cũ dần.** Cần user/Mike xác nhận ai nạp.
+**[CẬP NHẬT 2026-10-26, user xác nhận]** Writer = **bq_admin**, lấy từ TradingEconomics: `commodity_prices` = lịch sử, `commodity_latest` = giá mới nhất; tần suất mục tiêu cập nhật theo NGÀY, nhưng KHÔNG phải mọi mã đều có giá hằng ngày. Đo 26/10 trên TE daily (43 phiên gần nhất, 08-26→10-23): 83 mã có ≥38 phiên (gần hằng phiên); 18 mã 37 phiên (~86%: nhóm TQ — aluminum_alloy, silicon, tellurium, germanium, methanol, lithium, neodymium, indium, gallium, manganese, molybden, phosphorus, magnesium, steel, titanium, bitumen, iron_ore_cny, consume_commodity_index); 2 mã rất thưa: tea (5, cuối 10-03), salmon (8, cuối 10-16). Cron/lịch của bq_admin nằm ngoài repo này — hỏi bq_admin nếu cần SLA.
+
+(Ghi chú cũ trước khi biết writer:) **Không tìm ra writer.** Không script/cron nào trong repo, crontab, `tools/`, `discord_bot/` tham chiếu bảng; không đọc được `INFORMATION_SCHEMA.JOBS_BY_PROJECT` (thiếu `bigquery.jobs.listAll`); `bq ls -j` không lộ câu lệnh. Dấu vết: `fetched_at` 2026-10-24 17:07 → 2026-10-25 11:13 (UTC) = nạp theo đợt ngày 24–25/10, bảng tạo 2026-10-25 12:38 UTC. Nghi tạo thủ công/ngoài repo (cùng `dtienthanh@gmail.com`). Lịch làm mới do bq_admin (ngoài repo). Đã xác nhận: bq_admin.
 
 ## THIẾU so với nhu cầu fleet
 Giá heo hơi VN (đã có `data/hog_price_vn.csv`, ngoài BQ) · thủy sản VN (tôm, cá tra) · hồ tiêu · điều · thép cây nội địa · SCFI/WCI (cước container) · PTA/polyester · potash/amoniac chuỗi ngày (WB có `potassium_chloride` monthly; TE daily chưa kiểm) · chuỗi ngày chỉ từ 2016-10-25.

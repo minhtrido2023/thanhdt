@@ -32,3 +32,9 @@ Job Winston_20261026_065210. Không đổi code/cron. Registry: `kb/data_registr
 ## Giới hạn / việc mở
 - Writer của bảng không tìm ra, không cron làm mới → chưa nên thay nguồn production bằng bảng đến khi có writer rõ.
 - TE tea/salmon cập nhật thưa.
+
+## Bổ sung 26/10 chiều (Winston, job Winston_20261026_070857 — Mike/user duyệt)
+Tạo 3 file MỚI trong `data/` (không đụng canonical/cron): `bdi_daily_te_fill.csv`, `bdi_daily_te_fill_NOTES.md`, `rubber_tsr20_te_daily.csv`. Nguồn `tav2_bq.commodity_prices`, source=trading_economics, cadence=daily; mỗi dòng có `src` + `fetched_at`. **Chưa có consumer, không phải production.**
+- **BDI fill:** 10 ngày TE có mà `bdi_daily_real.csv` thiếu (05-25, 06-10, 06-17, 06-22, 07-31, 08-21, 08-28, 09-11, 10-01 + **10-23** mới). Đối chiếu 114 ngày chung: 112 khớp, 2 lệch — 07-06 (csv 2717 / TE 2797), 08-31 (csv 3186 / TE 3157). Không chọn bên. Quan sát: csv 08-31 = 3186 = đúng TE 08-28 (ngày csv thiếu) → nghi csv gán nhầm ngày; chưa kết luận.
+- **TSR20:** 2.512 dòng 2016-10-25→2026-10-23, 0 trùng ngày, unit gốc `USD Cents / Kg` ÷100. Khớp `rubber_weekly.csv` (63 ngày chung, 2026-06-19→10-16): TE/csv trung bình **+0,49%**, sd 1,96%, max |lệch| 6,70%, chỉ 2/63 ngày khớp tuyệt đối. Cùng cỡ số cũ (−0,45% ±1,9%, chiều ngược) → cùng hạng TSR20 nhưng không cùng điểm quan sát/giờ chốt.
+- **Self-check:** query lại BQ → BDI 10/10 và TSR20 2.512/2.512 giá trị trùng 100% (sai khác ≤1e-8 do float BQ); 0 ngày BDI trùng csv gốc; `git status` 2 csv canonical không đổi.
