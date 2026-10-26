@@ -568,3 +568,20 @@
 
 ## Consolidation 2026-10-26T03:07:02Z
 - [2026-10-26T02:15:02Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-26", "elapsed_s": 600, "rc": 0}
+
+## Consolidation 2026-10-26T04:55:35Z
+- [2026-10-26T04:51:06Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "in_progress", "note": "bat dau: dem nganh funnel"}
+- [2026-10-26T04:51:16Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "in_progress", "note": "doc backstop §2/2.5 + 5 REPORT"}
+- [2026-10-26T04:51:49Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "in_progress", "note": "da doc 5 REPORT + backstop; kiem tra feed hang hoa"}
+- [2026-10-26T04:51:54Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "in_progress", "note": "dem xong: bank121/BDS119/hoachat98(+56 hh); doc khung BDS co san + data_registry"}
+- [2026-10-26T04:51:54Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261026_045054", "source": "watcher"}
+- [2026-10-26T04:51:56Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261026_045056", "source": "watcher"}
+- [2026-10-26T04:52:44Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "in_progress", "note": "viet TEMPLATE.md"}
+- [2026-10-26T04:52:54Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261026_045054", "source": "watcher"}
+- [2026-10-26T04:52:56Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261026_045056", "source": "watcher"}
+- [2026-10-26T04:53:54Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261026_045054", "source": "watcher"}
+- [2026-10-26T04:53:56Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261026_045056", "source": "watcher"}
+- [2026-10-26T04:54:55Z] Taylor/heartbeat — Taylor_20261026_045054: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261026_045054", "source": "watcher"}
+- [2026-10-26T04:54:56Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "in_progress", "note": "3 agent web xong; lay BCTC BQ + commodity CSV"}
+- [2026-10-26T04:54:57Z] Taylor/heartbeat — Taylor_20261026_045056: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261026_045056", "source": "watcher"}
+- [2026-10-26T04:55:08Z] Taylor/finding — dd-template-cycle-block-20261026: {"dir": "agents/Taylor/research/dd_template_20261026/", "files": ["TEMPLATE.md", "README.md", "REGISTRY_FORMAT_PROPOSED.md"], "cycle_block": "A bien vs phan vi lich su chinh ma (>=1 chu ky, du lieu den Q-1); B gia dau ra/vao vs 5-10 nam (feed WB CMO/ONI/BDI/hog; CHUOI THIEU => cam ket luan day/dinh); C pha + co che soc cau vs chi phi, 2 bang chung ung ho + 1 chong, mac dinh 80/20; D neo chinh sach/cau truc co NGAY; E PE ex-cash tren LN chuan hoa (trung vi LNST >=1 chu ky); F 1 du bao bac bo duoc co due_date + baseline persistence", "blind_rule": "buoc 1 viet CYCLE_BLOCK.md truoc BCTC quy Q, khoa md5 + git commit truoc file buoc 2; BLIND_ATTESTATION co/khong; nguoi da doc BCTC/DD cu => giao agent moi hoac blind:no", "registry_proposed": "kb/data_registry/fundamentals/dd_cycle_reads.md (append-only, Mike ghi, CHUA TAO); cong sau >=12 su kien doc lap blind:yes vs persistence + ve-trung-vi-5Y", "appendix_5_ma": "nhan xet hoi tuong (khong mu): 0/5 verdict doi (DDV/NNC/SAS/NT2/SZL deu NON); NNC co the yeu nhan dinh phu re +32% neu pha=DINH; 5 ma deu khong o trang thai so hai => khong phai mau thu tot", "limits": "chua co bang chung khoi chu ky them alpha (backstop 9.5 N_eff~2); thieu feed luu huynh/NH3/da/Qc/khach TSN; blind tu khai + kiem thu tu commit", "needs": "Mike/user duyet duong dan so + cong; job khac chay lai mu 5 ma", "measured_by": "doc 5 dd_*_20261026/REPORT.md + calculated_fear_state_backstop.md §2/2.5/8/9.5; ls data/*_monthly.csv; md5sum dd_template_20261026/*.md"}

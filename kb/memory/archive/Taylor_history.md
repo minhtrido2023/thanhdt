@@ -1526,3 +1526,6 @@
 - [2026-10-25T12:39:16Z] [lag-bal-discriminators 10-25] XONG job Taylor_20261025_123115 (db19fd74d): 4/50 đạt = value; payout không đạt; ứng viên GĐ2 duy nhất BAL×1/PCF,1/EVEB — CHỜ user duyệt + quant-skeptic
 - [2026-10-25T12:52:56Z] [lag-capacity-floor 10-25] XONG job Taylor_20261025_114929: A+B tren nhanh research/lag-capacity-floor-20261025 @6724d841e, CHUA merge; CHO Mike/user: co ghi khoi registry 'can duoi' (no_ledger, de xuat trong REPORT_A) hay khong
 - [2026-10-25T13:11:04Z] ĐANG DỞ job Taylor_20261025_131054: trend-basics-filter (T1-T10 liên tục + tương tác value × LAG/BAL) → agents/Taylor/research/trend_basics_filter_20261025/ | NEXT: đọc analyze.py/positions.csv ta_trend + features.csv, PREREG
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:11:09Z] ĐANG DỞ job Taylor_20261025_131052: BAL EVEB phase2 (V0-V4 replay R3) → agents/Taylor/research/bal_eveb_phase2_20261025/ | NEXT: đọc REPORT lag_bal + skeptic, registry 2026-10-08, worktree, PREREG
