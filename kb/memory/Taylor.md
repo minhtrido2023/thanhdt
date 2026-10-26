@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-25T17:25:49Z] ĐANG DỞ job Taylor_20261025_172538: lag-capacity S1(ΔIS/ΔOOS)/S2(đọc code live defer vs bỏ)/S3(trần KL mở cửa + slippage) trên wt-lag-capacity-floor-20261025 | NEXT: đọc REPORT_R/PREREG_R/out_R_metrics.csv
 - [2026-10-25T17:34:56Z] ĐANG DỞ job Taylor_20261025_172538: S1 3cdefe417 + S2 fe910d1e5 xong (bus); S3 batch 24 run nền từ 00:33 (wt-lag-capacity-floor, logs/run_batch_S.log), PREREG_S 1e909f719 | NEXT: analyze_S.py → REPORT_S §S3 → bus S3 + 'S ket luan'
 - [2026-10-25T18:23:10Z] [lag-capacity-floor S 10-26] XONG job Taylor_20261025_172538 @148b84685 (chua merge): band 50 ty ~11,7-20,7/14,6-23,8, trung tam 18,5-20,7/21,2-23,8, chi phi IS -4,2..-4,4pp — CHO Mike/user: co chay bien the doi 3 phien + cong gia anchor khong
 - [2026-10-26T01:34:42Z] [dd-NNC 10-26] XONG job Taylor_20261026_012529: NON (khong fear-state, dinh chu ky, PB1,59); weighted 62,8k vs 47,6k. REPORT research/dd_NNC_20261026/. Meo: BCTC scan -> pip --target /tmp/pdflib pypdf, trich anh trang roi Read anh
@@ -26,3 +25,4 @@
 - [2026-10-26T05:10:44Z] [dd-blind-SZL 10-26] XONG job Taylor_20261026_045656: NON=NON, blind:no (WebSearch lo so Q3). Meo: chay mu phai cam WebSearch tu do o buoc 1 (tom tat tu chen so quy Q); mau E 'trung vi LN' lech xuong voi annuity — de xuat sua mau, CHO Mike
 - [2026-10-26T05:46:41Z] [dd-blind2-FPT 10-26] XONG buoc 1 job Taylor_20261026_054003: md5 3c30d4ba, du bao NP me Q3/26 >=2680 ty p0,75 cham 2026-11-07; blind:no (WebSearch lo khuyen nghi CTCK Q2). Buoc 2 = job khac
 - [2026-10-26T05:47:27Z] [dd-blind2-DRI 10-26] XONG buoc 1 job Taylor_20261026_054006: CYCLE_BLOCK md5 15bd430e khoa 12:47 ICT, blind yes; du bao bien LNST Q3/26 >=27% p0,70 cham 2026-11-09 — buoc 2 la job khac
+- [2026-10-26T05:48:22Z] [dd-blind2-TV1 10-26] buoc 1 KHOA md5 4409305f (research/dd_blind2_TV1_20261026/); F: bien gop Q3/26 <33,0% p0.65, cham 2026-11-09 — buoc 2 la job khac

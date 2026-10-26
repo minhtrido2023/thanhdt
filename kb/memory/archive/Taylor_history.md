@@ -1550,3 +1550,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T16:00:13Z] [lag-capacity-floor R 10-25] XONG job Taylor_20261025_140517 @ce26d14e3 (chua merge): dai thuc thi 50 ty san 11,86..22,61/tran 14,74..25,40; san nhieu park0 1,57pp — CHO Mike/user
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T17:25:49Z] ĐANG DỞ job Taylor_20261025_172538: lag-capacity S1(ΔIS/ΔOOS)/S2(đọc code live defer vs bỏ)/S3(trần KL mở cửa + slippage) trên wt-lag-capacity-floor-20261025 | NEXT: đọc REPORT_R/PREREG_R/out_R_metrics.csv
