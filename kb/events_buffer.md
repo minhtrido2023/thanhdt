@@ -1077,3 +1077,11 @@
 
 ## Consolidation 2026-10-26T12:07:02Z
 - [2026-10-26T12:06:57Z] DollarBill/decision — plan-ZaloPay-2026-10-27: {"summary": "ZaloPay 10-27: 2 lệnh RESIDUAL LAG ngày 2 — SCL 200cp LO 32.600, VPB 200cp LO 23.600; HT1 đã khớp đủ; tổng gồm phí 11,25tr; chuyển egg >=6,7tr trước 09:05", "caveat": "DNSE API HTTP 500 authentication failed lúc lập plan: ref price từ L2 14:44, số dư từ log 14:02-14:30, L1/L2 park chưa chạy, active_nav chưa refresh", "status": "cho user duyệt"}
+
+## Consolidation 2026-10-26T13:07:02Z
+- [2026-10-26T12:11:14Z] Mafee/error — eod-trading-report-delivery-incomplete: {"account": "ZaloPay", "plan_date": "2026-10-26", "artifact": "ZaloPay_daily_report_2026-10-26.md", "retry": "check_report_cadence", "cause": "report_delivery_gate rc=1 — dòng cuối cổng in ra: ValueError: không có bản ghi positions nào của 0001743768 ngày 2026-10-26 — CHẶN (cổng con thoát lỗi, không in khối chặn)"}
+- [2026-10-26T12:12:20Z] Mafee/error — eod-trading-report-delivery-incomplete: {"account": "SpaceX", "plan_date": "2026-10-26", "artifact": "SpaceX_daily_report_2026-10-26.md", "retry": "check_report_cadence", "cause": "report_delivery_gate rc=1 — dòng cuối cổng in ra: ValueError: không có bản ghi positions nào của 0002023347 ngày 2026-10-26 — CHẶN (cổng con thoát lỗi, không in khối chặn)"}
+- [2026-10-26T12:30:03Z] Mike/error — park-chain-park-trim-rc: {"chain": "park_trim", "plan_date": "2026-10-27", "chi_tiet": "xem Discord + log"}
+- [2026-10-26T12:30:04Z] Mike/error — park-chain-park-trim-rc: {"chain": "park_trim", "plan_date": "2026-10-27", "chi_tiet": "xem Discord + log"}
+- [2026-10-26T12:40:02Z] Mike/error — park-chain-jit-unpark-missing-l1: {"chain": "jit_unpark", "plan_date": "2026-10-27", "chi_tiet": "xem Discord + log"}
+- [2026-10-26T12:40:03Z] Mike/error — park-chain-jit-unpark-missing-l1: {"chain": "jit_unpark", "plan_date": "2026-10-27", "chi_tiet": "xem Discord + log"}
