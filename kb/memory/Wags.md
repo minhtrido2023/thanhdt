@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-09T20:53:18Z] [2026-10-10] selfcheck-red sweep#2: 0/2 dong, ca 2 CAN USER (da post Architecture). annualization: cho Taylor_20261009_205248 bao PASS rc=0 => dong cau. nav_2account: cho user A/B/C (question selfcheck-red-sweep-2026-10-09-can-user).
 - [2026-10-09T20:58:33Z] [2026-10-10T03:58:33Z] selfcheck-red sweep#2: annualization CLOSED (Taylor commit c1516450, Wags verified rc=0 PASS doc-lap). CON LAI: nav_2account CAN USER A/B/C (da post Architecture).
 - [2026-10-15T05:46:24Z] [2026-10-15] Chốt: đóng question thì answer phải GIỮ ĐÚNG topic rollup; answer topic con (plan-t1-not-ready-*) không đóng câu tổng (checker match đúng topic).
 - [2026-10-16T09:36:44Z] [2026-10-16] selfcheck-red sweep#3: 2/3 CLOSED; OPEN snapshot_corp_action (public_datetime, DDL cần user — question selfcheck-red-sweep-2026-10-16-can-user). Sweep sau: còn OPEN ⇒ CẦN USER + post Architecture.
@@ -27,3 +26,4 @@
 - [2026-10-25T03:13:44Z] ĐANG DỞ: cq-2026-10-25 10 finding đã fix+commit (44fdb739d e8d1e1baf c6bb0bd0e 5aa77a1b4 9dde202b7); chờ arch-reviewer + quant-skeptic (e8d1e1baf) | NEXT: đọc verdict, sửa nếu NEEDS_CHANGES (1 lượt), rồi bus finding topic cq-2026-10-25-wags-autodispatch + notify_thread.sh architecture
 - [2026-10-25T03:25:28Z] [2026-10-25] cq-2026-10-25: auto_exit_inject #3/#10 PARKED branch cq-2026-10-25-auto-exit-inject-pending-approval, CHỜ USER (question cq-2026-10-25-auto-exit-inject-approval) trước cron 26/10 20:40. Duyệt A => git merge branch; B/hết hạn => giữ revert. Chốt: finding autodispatch chạm sinh-lệnh SELL (auto_exit_inject) = escalate, không tự sửa.
 - [2026-10-26T01:21:37Z] [2026-10-26] Câu Mike/retro-pattern-recurring-wakeup-warning-nonblocking-still-missed CHỜ USER A/B/C (đã relay); trả lời => close_bus_question --decided-by-user. Checker sẽ còn báo tới khi user trả lời — không phải bug.
+- [2026-10-26T05:46:39Z] [2026-10-26] Winston/deposit-cctg-weekly-question (luot 26/10) da relay A/B trading_daily 05:5xZ, mac dinh A giu 7,40/7,50; user im lang toi ~27/10 03:00Z => dong bang answer mac dinh A. Cau retro wakeup van cho user.

@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-25T14:13:07Z] [bal-eveb-phase2 10-25] XONG job Taylor_20261025_131052: 0/8 dat, NO-GO (885b2c944, nhanh research/bal-eveb-phase2-20261025, chua merge); BAL xep theo ta, khong co yieldcombo — CHO Mike/user: dong nhanh BAL x dong tien, co ghi registry no_ledger khong
 - [2026-10-25T16:00:13Z] [lag-capacity-floor R 10-25] XONG job Taylor_20261025_140517 @ce26d14e3 (chua merge): dai thuc thi 50 ty san 11,86..22,61/tran 14,74..25,40; san nhieu park0 1,57pp — CHO Mike/user
 - [2026-10-25T17:25:49Z] ĐANG DỞ job Taylor_20261025_172538: lag-capacity S1(ΔIS/ΔOOS)/S2(đọc code live defer vs bỏ)/S3(trần KL mở cửa + slippage) trên wt-lag-capacity-floor-20261025 | NEXT: đọc REPORT_R/PREREG_R/out_R_metrics.csv
 - [2026-10-25T17:34:56Z] ĐANG DỞ job Taylor_20261025_172538: S1 3cdefe417 + S2 fe910d1e5 xong (bus); S3 batch 24 run nền từ 00:33 (wt-lag-capacity-floor, logs/run_batch_S.log), PREREG_S 1e909f719 | NEXT: analyze_S.py → REPORT_S §S3 → bus S3 + 'S ket luan'
@@ -26,3 +25,4 @@
 - [2026-10-26T05:04:08Z] [dd-blind-SAS 10-26] XONG job Taylor_20261026_045658: NON=NON, blind no (README §4 lo verdict); research/dd_blind_SAS_20261026/
 - [2026-10-26T05:04:47Z] [dd-blind-NNC 10-26] XONG job Taylor_20261026_045700: NON=NON, blind:no (WM+README lo verdict cu); khoi mu sot HTM/Tam Lap/MVC -> mau buoc 1 can doc CDKT BCTC Q-1 goc. research/dd_blind_NNC_20261026/
 - [2026-10-26T05:10:44Z] [dd-blind-SZL 10-26] XONG job Taylor_20261026_045656: NON=NON, blind:no (WebSearch lo so Q3). Meo: chay mu phai cam WebSearch tu do o buoc 1 (tom tat tu chen so quy Q); mau E 'trung vi LN' lech xuong voi annuity — de xuat sua mau, CHO Mike
+- [2026-10-26T05:46:41Z] [dd-blind2-FPT 10-26] XONG buoc 1 job Taylor_20261026_054003: md5 3c30d4ba, du bao NP me Q3/26 >=2680 ty p0,75 cham 2026-11-07; blind:no (WebSearch lo khuyen nghi CTCK Q2). Buoc 2 = job khac

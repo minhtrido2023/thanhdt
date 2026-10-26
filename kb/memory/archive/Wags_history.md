@@ -437,3 +437,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-09T15:46:30Z] [2026-10-09] instructions-dedup DUNG NEEDS_CHANGES: branch chore/instructions-dedup-20261009 @69b99144 (wt-instrdedup-1009) CHUA merge; bus finding instructions-dedup co 8 required_change. Cho Mike/user cho 1 luot sua hoac bo (bo: git worktree remove + xoa branch).
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-09T20:53:18Z] [2026-10-10] selfcheck-red sweep#2: 0/2 dong, ca 2 CAN USER (da post Architecture). annualization: cho Taylor_20261009_205248 bao PASS rc=0 => dong cau. nav_2account: cho user A/B/C (question selfcheck-red-sweep-2026-10-09-can-user).
