@@ -286,3 +286,6 @@
 
 ## Archived 2026-10-25 (keep=6 days=5 require_done=True)
 - [2026-10-19T12:04:08Z] [2026-10-19 19:xx ICT] Plan ZaloPay 10-20 XONG HOLD ALL 0 lenh (job DollarBill_20261019_120317); cho duyet truoc 08:45 ICT 20/10
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-01T16:20:21Z] [2026-10-01T23:2x ICT] Plan SpaceX 2026-10-02 SINH LẠI xong (job DollarBill_20261001_161054): reconcile TPB FIXED (25/25 khop, 0 mismatch) sau khi corp_actions.json duyet TPB-2026-10-02-STOCK-DIVIDEND. NHUNG L1/L2 chuyen sang BLOCKED_FRAME (gate gia price_frame.py khong tru chan co tuc tien 500d/cp) - da xac minh tay (14400-500)/1.15=12087 ~ broker 12100, kha nang gate thieu cong thuc chu khong phai loi du lieu. Plan van HOLD_ALL 0 lenh (n_bal=0, LAG=0, DT5G NEUTRAL fresh). Da escalate bus question tpb-price-frame-gate-blocked-l1l2-20261002 cho Taylor (3 options: patch cong thuc / co che xac nhan tay rieng cho gate gia / cho tu dong sau ex-date). Da gui lai Discord plan_approval qua send_plan_report.sh --second-chance 23:19 ICT. KHONG dong ZaloPay (gan nguyen plan cu co CSV/SCL/VPB LAG tay). Viec mo: cho Taylor tra loi question + user duyet plan truoc 08:45 ICT 10-02.
