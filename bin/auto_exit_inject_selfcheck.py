@@ -1334,6 +1334,30 @@ def main():
         finally:
             shutil.rmtree(td, ignore_errors=True)
 
+    # ---------------- Test 29: positions KHÔNG đọc được (dnse_raw chưa có bản ghi) dù sổ lô OK ⇒
+    # KHÔNG gỡ blocked cũ (lượt này chưa đánh giá lại gì). ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_plan(plan_dir, ACCOUNT, plan_date)   # cố ý KHÔNG write_positions
+        _pp29 = os.path.join(plan_dir, f"plan_{ACCOUNT}_{plan_date}.json")
+        _pl29 = json.load(open(_pp29, encoding="utf-8"))
+        _pl29["auto_exit_inject_notes"] = [
+            {"at": "t0", "source": "auto_exit_inject",
+             "blocked": [{"ticker": None, "book": "BAL", "reason": "park_holdings lỗi: HTTP 500"}]}]
+        json.dump(_pl29, open(_pp29, "w", encoding="utf-8"), ensure_ascii=False)
+        orig = patch_all(exec_dir, plan_dir, ledger_path, lag_lots={}, bal_lots={},
+                         lag_ok=True, bal_ok=True)
+        try:
+            aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        n29 = load_plan_raw(plan_dir, ACCOUNT, plan_date).get("auto_exit_inject_notes") or []
+        check("Test29: positions=None ⇒ blocked cũ KHÔNG bị gỡ",
+              bool(n29) and bool(n29[0].get("blocked")) and not n29[0].get("blocked_superseded"),
+              f"notes={n29}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
     # ---------------- Test 6: TZ-robustness của plan_date trong main() (§16) ----------------
     def expected_plan_date(env):
         r = subprocess.run(

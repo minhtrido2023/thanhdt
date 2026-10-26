@@ -445,7 +445,8 @@ def process_account(account, plan_date, signal_date, dry_run):
         return 1
     plan.setdefault("orders", [])
 
-    positions = broker_positions_with_cost(account_no, signal_date) or {}
+    _pos_raw = broker_positions_with_cost(account_no, signal_date)
+    positions = _pos_raw or {}
     now_iso = dt.datetime.now(_ICT_TZ).isoformat(timespec="seconds")
     injected = []
     blocked_notes = []   # [{'ticker','book','reason'}] — mọi exit bị bỏ/cắt phải hiện ra (§29)
@@ -616,7 +617,9 @@ def process_account(account, plan_date, signal_date, dry_run):
     # `blocked_superseded` (send_plan_report chỉ đọc `blocked`; vẫn giữ làm dấu vết). Không đụng
     # `capped` (lệnh đã chèn không được sinh lại ở lượt sau) và entry thủ công (source khác).
     superseded = 0
-    if lag_ok and bal_ok and not dry_run:
+    # Chỉ gỡ khi ĐỌC ĐƯỢC positions (`None` = dnse_raw chưa có bản ghi ⇒ mọi candidate bị bỏ im
+    # lặng ở `if not pos: continue` ⇒ lượt này CHƯA đánh giá lại gì — reviewer 27/10).
+    if lag_ok and bal_ok and _pos_raw is not None and not dry_run:
         for _n in plan.get("auto_exit_inject_notes") or []:
             if isinstance(_n, dict) and _n.get("source") == "auto_exit_inject" and _n.get("blocked"):
                 _n["blocked_superseded"] = _n.pop("blocked")
