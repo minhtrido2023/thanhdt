@@ -210,3 +210,20 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
 - Selfcheck: `[T13]` mới trong `send_plan_report_park_jit_selfcheck.py`, pin bằng mutation thật
   (không chỉ source-grep) — chạy `python3 bin/send_plan_report_park_jit_selfcheck.py` để xem số
   hiện hành, đừng chép số cứng vào đây.
+
+## PHẦN D — bố cục §7 ĐÃ implement 2026-10-27 (user: "đọc xong biết phần nào cần đọc")
+
+`bin/send_plan_report.sh` render theo 5 mục, **mục rỗng KHÔNG in tiêu đề** (ngày yên ổn = header + LỆNH):
+`HDR` (tiêu đề · trạng thái duyệt + số cảnh báo · NAV/regime/DT5G candidate) → `🔔 CẦN LÀM / QUYẾT ĐỊNH`
+(chuyển Trứng vàng, margin, đề xuất bán PARK cần duyệt riêng) → `🎯 LỆNH` (1 dòng/lệnh + tối đa 2 dòng
+phụ: định giá DCF, thanh khoản+FA) → `⚠️ CẢNH BÁO` → `ℹ️ GHI CHÚ` → 1 dòng `✔ Kiểm tự động không bất thường`.
+- **Bỏ hẳn (xác nhận thuần, §4)**: gate DT5G "ổn định" + P(xác nhận) + dòng badzone · CAPIT ✅ · "Tiền đâu ra: đủ tiền
+  mặt" · Trứng vàng "đủ tiền" · DD "nền YoY dương" · nguồn DT5G "(đầy đủ)" · 3 dòng ✅ (vị thế/lịch LAG/nhất quán LAG) → gộp 1 dòng cuối.
+- **Cờ theo lệnh đi vào CẢNH BÁO kèm mã** (DD n/a, thanh khoản mỏng, cờ bất thường, DCF cần override, JIT CO/BỎ); dòng
+  lệnh chỉ gắn dấu ⚠️. Cờ ĐỎ DD vẫn do `format_dd_check()` sinh (cùng đòi `dd_override_reason`).
+- **Nhóm**: PARK_TRIM thuần (note rỗng/câu mẫu "BÁN PARK gộp:") → 1 dòng "BÁN PARK_TRIM N mã Σ …"; note giống hệt ở ≥2
+  lệnh → in 1 lần "(chung cho N lệnh)". Lệnh trim có note ⚠️ riêng KHÔNG bị gộp.
+- **Note lệnh**: renderer lọc câu mẫu cố định đã biết + tham chiếu `file.py:dòng`; câu lạ GIỮ (fail-visible). Note có ⚠️ nguyên văn.
+- **`plan["notes"][]`**: chỉ note mở bằng ⚠️/🛑 lên report (hợp đồng viết note: `context_planning_mini.md`).
+- Note JIT "có thể cần Trứng vàng" bị bỏ KHI dòng 🥚 đã in (cùng nguồn số); không có dòng 🥚 ⇒ giữ.
+- Test: `send_plan_report_park_jit_selfcheck.py` [T14].

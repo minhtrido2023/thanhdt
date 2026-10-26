@@ -394,6 +394,12 @@ vàng, TÁCH khỏi `availableCash`/`ppse.pp0Buy` vì cần lệnh chuyển (red
 Lịch sử: bản 2026-08-19 coi egg "không phải sức mua hôm nay" và bắt viết lý do kiểu "thiếu availableCash NHƯNG
 egg còn Y" — ngay cả cách viết đó cũng gây báo động giả "hết tiền để mua" nên user thay bằng chính sách trên.
 
+## Viết note trong plan — report duyệt chỉ đưa lên thứ user phải biết (27/10, user: "gọn, đủ thông tin quyết định")
+- `plan["notes"][]`: CHỈ note mở bằng `⚠️`/`🛑` lên report (mục CẢNH BÁO) — dùng cho việc user phải biết/kiểm tay trước 08:45 (thiếu giá live, điều kiện hủy chưa verify, trần no-chase, corp-action feed không rõ). Mọi note khác (fill hôm qua, công thức egg, giá DNSE) là nhật ký, viết thường, nằm trong file. Mỗi việc đúng 1 note ⚠️.
+- `orders[].note`: chỉ thông tin RIÊNG của lệnh (điều kiện hủy, trần giá, lý do khác thường). KHÔNG chép câu mẫu mỗi ngày ("theo filter_lag_entry_window.py", "Nếu regime chuyển BEAR … w_LAG=0") — renderer lọc nhưng đừng viết. LAG mở note bằng `LAG_LO entry ngày N/M` để renderer dựng tag.
+- Số Trứng vàng cần chuyển do renderer tự tính từ trần đuổi giá; note vận hành "Chuyển Trứng vàng → cash ≥ X" giữ KHÔNG ⚠️ (tránh báo động đôi).
+Bố cục + luật ẩn/hiện: `kb/plan_report_style_guide.md` PHẦN D.
+
 ## "FLOOR_FAIL" — TRÍCH lăng kính ngành bằng script, không tự đọc CSV → `context_planning_ext.md`
 KHÔNG phải gate cứng LAG. Chạy `python3 mike/bin/sector_valuation_lens.py --floor-fail-only --json`,
 đừng tự diễn giải cột DD. Chi tiết đầy đủ → `context_planning_ext.md` § "FLOOR_FAIL".

@@ -59,13 +59,18 @@ def expected_date(env=None):
     return r.stdout.strip()
 
 
-def run_sender(plan, account, env_extra=None):
+def run_sender(plan, account, env_extra=None, files=None):
     """Chạy send_plan_report.sh THẬT trong sandbox; trả stdout+stderr."""
     td = tempfile.mkdtemp()
     try:
         for sub in ("data/trade_plans", "state"):
             os.makedirs(os.path.join(td, sub), exist_ok=True)
         os.symlink(os.path.join(WC, "trading_bot"), os.path.join(td, "trading_bot"))
+        for rel, content in (files or {}).items():     # fixture phụ trong sandbox (vd active_nav, golive_state)
+            fp = os.path.join(td, rel)
+            os.makedirs(os.path.dirname(fp), exist_ok=True)
+            with open(fp, "w", encoding="utf-8") as fh:
+                fh.write(content if isinstance(content, str) else json.dumps(content, ensure_ascii=False))
         env = dict(os.environ, SEND_PLAN_WORKDIR_OVERRIDE=td,
                    SEND_PLAN_MARKER_DIR=os.path.join(td, "state", "marker"))
         for k, v in (env_extra or {}).items():
@@ -136,6 +141,11 @@ def _tr(vnd):
     return f"{vnd / 1e6:.1f}tr"
 
 
+def _buy(tk, qty):
+    """Chuỗi dòng lệnh MUA theo bố cục 27/10: '**MUA DRI** 3,500cp' (qty có dấu phẩy nghìn)."""
+    return f"**MUA {tk}** {int(qty):,}cp"
+
+
 def _main_buy(plan):
     """(ticker, qty) của lệnh MUA chính trong plan — cũng suy từ artifact, vì rổ mã đổi theo
     ngày (bản cũ ghim 'SSI 3100cp'; artifact trên đĩa nay là DRI)."""
@@ -157,8 +167,8 @@ print(f"  (kỳ vọng suy từ artifact — SpaceX L1 {SX_L1_N}/{_tr(SX_L1_V)} 
 # ── T1. Plan THẬT 2026-08-07, cả 2 account: đủ 4 mục ─────────────────────────────────────
 print("\n[T1] Plan thật 2026-08-07 — 4 mục bắt buộc (orders / funding note / L1 / L2)")
 out_sx = run_sender(SX, "SpaceX")
-check("SpaceX: lệnh mua chính vẫn hiện", f"MUA {SX_TK} {SX_QTY}cp" in out_sx,
-      f"chờ MUA {SX_TK} {SX_QTY}cp")
+check("SpaceX: lệnh mua chính vẫn hiện", _buy(SX_TK, SX_QTY) in out_sx,
+      f"chờ {_buy(SX_TK, SX_QTY)}")
 check("SpaceX: funding note NGAY CẠNH lệnh mua, nói rõ bán N mã PARK tổng X",
       "Tiền đâu ra:" in out_sx
       and f"bán {SX_L2_N} mã PARK tổng {_tr(SX_L2_V)}" in out_sx,
@@ -234,7 +244,7 @@ a.update({"status": "SHRINK", "qty_final": 1200, "target_value_final_vnd": 29160
           "reason": "bán PARK không đủ bù, co còn 1200cp theo sức mua"})
 out = run_sender(p, "SpaceX")
 check("SHRINK: nói rõ lệnh bị CO từ qty_plan → qty_final + lý do",
-      f"Lệnh bị CO** {SX_QTY}cp → 1200cp" in out and "co còn 1200cp" in out,
+      f"lệnh bị CO** {SX_QTY}cp → 1200cp" in out and "co còn 1200cp" in out,
       [l.strip()[:110] for l in out.splitlines() if "bị CO" in l][:1])
 
 p = copy.deepcopy(SX)
@@ -243,7 +253,7 @@ a.update({"status": "DROP", "qty_final": 0, "target_value_final_vnd": 0.0,
           "reason": "sức mua sau bán PARK < 1 lô"})
 out = run_sender(p, "SpaceX")
 check("DROP: nói rõ lệnh bị BỎ dù đã cố bán PARK + lý do",
-      "Lệnh bị BỎ**" in out and "sức mua sau bán PARK < 1 lô" in out,
+      "lệnh bị BỎ**" in out and "sức mua sau bán PARK < 1 lô" in out,
       [l.strip()[:110] for l in out.splitlines() if "bị BỎ" in l][:1])
 
 # ── T6. TRIM khi orders[] RỖNG (đúng ca 08-05: HOLD nhưng vẫn có lệnh trim cần duyệt) ────
@@ -253,7 +263,7 @@ p["orders"] = []
 p.pop("jit_unpark_proposal", None)
 out = run_sender(p, "SpaceX")
 check("HOLD 0 lệnh nhưng vẫn hiện mục TRIM PARK (L1) — đúng lỗ hổng 08-05",
-      "GIỮ NGUYÊN (HOLD)" in out
+      "không có (HOLD)" in out
       and f"ĐỀ XUẤT TRIM PARK (L1) — {SX_L1_N} lệnh BÁN" in out)
 
 # ── T7. Tương thích ngược: plan KHÔNG có 2 field này → không thêm dòng nào ───────────────
@@ -264,7 +274,7 @@ p.pop("jit_unpark_proposal", None)
 out = run_sender(p, "SpaceX")
 check("không có 2 field → KHÔNG in mục L1/L2 nào, report vẫn render bình thường",
       "TRIM PARK" not in out and "L2/JIT" not in out and "Tiền đâu ra" not in out
-      and f"MUA {SX_TK} {SX_QTY}cp" in out)
+      and _buy(SX_TK, SX_QTY) in out)
 
 # ── T8. Artifact méo mó → fail-open, KHÔNG crash report (render_crashed = mất plan) ──────
 print("\n[T8] Artifact méo mó (kiểu sai) → fail-open, không crash")
@@ -273,7 +283,7 @@ p["park_trim_proposal"] = "TRIM"                       # str thay vì dict
 p["jit_unpark_proposal"] = {"decision": "JIT", "orders": "xxx", "buy_amendments": None}
 out = run_sender(p, "SpaceX")
 check("kiểu sai → vẫn render plan đầy đủ, không ESCALATE render_crashed",
-      "Kế hoạch giao dịch ngày mai" in out and f"MUA {SX_TK} {SX_QTY}cp" in out
+      "PLAN T+1" in out and _buy(SX_TK, SX_QTY) in out
       and "render_crashed" not in out)
 
 # ── T9. Phụ thuộc môi trường: chạy lại T1 dưới env -u TZ và TZ ngoại lai ─────────────────
@@ -285,7 +295,7 @@ for label, extra in (("env -u TZ", {"TZ": None}),
           f"bán {SX_L2_N} mã PARK tổng {_tr(SX_L2_V)}" in o
           and f"ĐỀ XUẤT TRIM PARK (L1) — {SX_L1_N} lệnh BÁN" in o
           and f"(L2/JIT) — {SX_L2_N} lệnh BÁN" in o
-          and f"MUA {SX_TK} {SX_QTY}cp" in o)
+          and _buy(SX_TK, SX_QTY) in o)
 
 # ── T10 — "Lý do (áp dụng CHUNG...): tuân thủ trần PARK X%" phải ĐỘNG theo target_park,
 # KHÔNG hardcode "80%". Bug gốc 2026-09-28: dòng per-order hardcode "80%" trong khi park
@@ -302,21 +312,27 @@ print("\n[T10] Lý do PARK_TRIM phải ĐỘNG theo target_park + gộp 1 dòng 
 p = copy.deepcopy(SX)
 p["park_trim_proposal"]["target_park"] = 0.30
 out = run_sender(p, "SpaceX")
-_reason_lines = [l.strip() for l in out.splitlines() if "↳ ℹ️ Lý do" in l]
-check("target_park=0.30 → dòng 'Lý do' tổng in đúng 'trần PARK 30%', KHÔNG hardcode 80%",
+_reason_lines = [l.strip() for l in out.splitlines() if "↳ ℹ️ cùng một lý do" in l]
+check("target_park=0.30 → dòng lý do tổng in đúng 'PARK ≤ 30% pool', KHÔNG hardcode 80%",
       len(_reason_lines) > 0
-      and all("trần PARK 30%" in l for l in _reason_lines)
-      and not any("trần PARK 80%" in l for l in _reason_lines),
+      and all("PARK ≤ 30% pool" in l for l in _reason_lines)
+      and not any("PARK ≤ 80% pool" in l for l in _reason_lines),
       _reason_lines[:1])
 check("§2 style guide — CHỈ 1 dòng 'Lý do' tổng cho cả nhóm PARK_TRIM, KHÔNG lặp theo từng "
       "lệnh (3 lệnh PARK_TRIM trong plan 08-07 ⇒ đúng 1 dòng, không phải 3)",
-      len(_reason_lines) == 1 and "áp dụng CHUNG" in _reason_lines[0],
+      len(_reason_lines) == 1 and "cùng một lý do" in _reason_lines[0],
       _reason_lines)
 p2 = copy.deepcopy(SX)  # target_park thiếu/None → fallback "?" (khớp quy ước _tgt_s) thay vì bịa số
 p2["park_trim_proposal"].pop("target_park", None)
 out2 = run_sender(p2, "SpaceX")
-check("target_park thiếu → fallback 'trần PARK ?' (không dấu %, khớp quy ước _tgt_s hiện có), KHÔNG bịa số",
-      any("↳ ℹ️ Lý do" in l and "trần PARK ? (park-trim)" in l for l in out2.splitlines()))
+check("target_park thiếu → fallback 'PARK ≤ ? pool' (không dấu %, khớp quy ước _tgt_s hiện có), KHÔNG bịa số",
+      any("↳ ℹ️ cùng một lý do" in l and "PARK ≤ ? pool" in l for l in out2.splitlines()))
+p2b = copy.deepcopy(SX)  # target_park = 0 (park TẮT) → nói thẳng "bán sạch PARK", không "≤ 0% pool"
+p2b["park_trim_proposal"]["target_park"] = 0
+out2b = run_sender(p2b, "SpaceX")
+check("target_park=0 → 'park TẮT (0%) ⇒ bán sạch PARK' (không in 'PARK ≤ 0% pool' mơ hồ)",
+      any("↳ ℹ️ cùng một lý do" in l and "park TẮT (0%)" in l for l in out2b.splitlines())
+      and not any("PARK ≤ 0% pool" in l for l in out2b.splitlines()))
 
 # ── T11 — margin_note "khối lượng tính cho X× vốn" (DENIED/sizing branch) phải ĐỘNG theo
 # CAPIT_LEVER_APPROVED_F, KHÔNG hardcode "1,3×". Bug cùng lớp với T10 (audit
@@ -362,14 +378,13 @@ def _n_sells(plan):
 SX_N_PURE_PT = _n_pure_park_trim(SX)
 SX_N_SELLS = _n_sells(SX)
 out_t12 = run_sender(SX, "SpaceX")
-_pt_reason_lines = [l.strip() for l in out_t12.splitlines()
-                    if "Lý do (áp dụng CHUNG cho" in l and "PARK_TRIM" in l]
+_pt_reason_lines = [l.strip() for l in out_t12.splitlines() if "**BÁN PARK_TRIM**" in l]
 check(f"plan 08-07: dòng tổng ghi ĐÚNG N={SX_N_PURE_PT} lệnh PARK_TRIM thuần (đếm từ artifact, "
       f"KHÔNG hardcode) — KHÔNG được là {SX_N_SELLS} (tổng mọi lệnh bán) hay gộp cả PARK_TRIM+JIT_UNPARK",
       SX_N_PURE_PT > 0
       and len(_pt_reason_lines) == 1
-      and f"cho {SX_N_PURE_PT} lệnh BÁN PARK_TRIM" in _pt_reason_lines[0]
-      and f"cho {SX_N_SELLS} lệnh" not in _pt_reason_lines[0],
+      and f"**BÁN PARK_TRIM** {SX_N_PURE_PT} mã" in _pt_reason_lines[0]
+      and f"**BÁN PARK_TRIM** {SX_N_SELLS} mã" not in _pt_reason_lines[0],
       _pt_reason_lines[:1] or [f"(kỳ vọng N={SX_N_PURE_PT})"])
 
 # Biến thể: đổi 1 lệnh PARK_TRIM+JIT_UNPARK → PARK_TRIM thuần ⇒ N phải TĂNG đúng 1, chứng minh
@@ -385,11 +400,10 @@ for o in p_t12b.get("orders") or []:
 assert _flipped, "fixture 08-07 phải có ít nhất 1 lệnh PARK_TRIM+JIT_UNPARK để flip — kiểm tra lại artifact"
 N_EXPECTED_B = SX_N_PURE_PT + 1
 out_t12b = run_sender(p_t12b, "SpaceX")
-_pt_reason_lines_b = [l.strip() for l in out_t12b.splitlines()
-                      if "Lý do (áp dụng CHUNG cho" in l and "PARK_TRIM" in l]
+_pt_reason_lines_b = [l.strip() for l in out_t12b.splitlines() if "**BÁN PARK_TRIM**" in l]
 check(f"flip 1 lệnh PARK_TRIM+JIT_UNPARK→PARK_TRIM: N tăng đúng {SX_N_PURE_PT}→{N_EXPECTED_B}",
       len(_pt_reason_lines_b) == 1
-      and f"cho {N_EXPECTED_B} lệnh BÁN PARK_TRIM" in _pt_reason_lines_b[0],
+      and f"**BÁN PARK_TRIM** {N_EXPECTED_B} mã" in _pt_reason_lines_b[0],
       _pt_reason_lines_b[:1] or [f"(kỳ vọng N={N_EXPECTED_B})"])
 
 # ── T13 — cắt boilerplate 2026-09-29 (arch-review NEEDS_CHANGES → sửa → pin lại 5 hành vi) ──
@@ -494,7 +508,7 @@ def _bl_case(blocked, notes, park_mv=9063000.0, pool=787919598.0):
 
 _o_q = _bl_case(_BL_OK, ["target_park=0 (park TẮT HẲN)"])
 check("T13h BLOCKED_ALL_NAMES chỉ vì sellable<1 lô ⇒ dòng ℹ️ gọn, KHÔNG 'BỊ CHẶN'",
-      "ℹ️ Trim PARK (L1)" in _o_q and "MBB (65cp bán được)" in _o_q and "BỊ CHẶN" not in _o_q.split("Trim PARK (L1)")[0][-200:]
+      "ℹ️ PARK còn" in _o_q and "MBB 65cp" in _o_q and "(bán được)" in _o_q
       and "TRIM PARK (L1) BỊ CHẶN" not in _o_q, _o_q[-300:])
 _o_adv = _bl_case([{"ticker": "MBB", "reason": "trần/khả năng bán < 1 lô (muốn 1,270,750đ, trần ADV 1,000đ, sellable 5,000cp)"}], [])
 check("T13h sellable ≥ 1 lô (trần ADV chặn) ⇒ vẫn in đậm BỊ CHẶN", "TRIM PARK (L1) BỊ CHẶN" in _o_adv)
@@ -588,9 +602,96 @@ _benign_order["note"] = ("Đây là note dài nhưng KHÔNG mang cảnh báo gì
 assert "⚠️" not in _benign_order["note"] and len(_benign_order["note"]) > 90
 p13k["orders"] = [_benign_order]
 out_13k = run_sender(p13k, "SpaceX")
-check("orders[].note dài KHÔNG có ⚠️ → vẫn cắt gọn ở budget=90 + '…' (không đổi hành vi cũ cho "
-      "note bình thường)",
+check("orders[].note dài KHÔNG có ⚠️ → vẫn cắt gọn + '…' (note bình thường không tràn report)",
       "…" in out_13k and _benign_order["note"] not in out_13k)
+
+
+# ── T14 — bố cục 27/10 (user: "đọc xong biết phần nào cần đọc, bỏ thông tin không liên quan") ──
+print("\n[T14] Bố cục HDR → CẦN LÀM → LỆNH → CẢNH BÁO → GHI CHÚ; mục rỗng không in tiêu đề")
+_GOLIVE_OK = {"state": 3, "as_of": "2026-10-26", "source": "DT5G_macro"}
+_SELL_NOPRICE = {"ticker": "AAA", "side": "sell", "qty": 100, "ref_price": 10000.0, "book": "LAG", "play_type": "LAG_AUTO_EXIT",
+                 "note": "AUTO-EXIT LAG: giữ 35 phiên — đề xuất thoát toàn bộ"}
+
+
+def _quiet_plan(orders):
+    q = copy.deepcopy(SX)
+    for k in ("park_trim_proposal", "jit_unpark_proposal", "auto_exit_inject_notes"):
+        q.pop(k, None)
+    q.update({"orders": orders, "notes": ["nhật ký lập plan — KHÔNG được lên report"], "state": 3,
+              "approved_by": "user", "capit_sizing": None})
+    return q
+
+
+_gl = {"deploy_golive_dt5g_v4/golive_state_today.json": _GOLIVE_OK}
+out14a = run_sender(_quiet_plan([]), "SpaceX", files=_gl)     # HOLD: không có giá để verify trong sandbox
+check("T14a ngày yên ổn: có HDR + LỆNH, KHÔNG in tiêu đề CẦN LÀM / CẢNH BÁO / GHI CHÚ",
+      "PLAN T+1" in out14a and "🎯 LỆNH — không có (HOLD)" in out14a and "ĐÃ DUYỆT" in out14a
+      and "CẦN LÀM / QUYẾT ĐỊNH" not in out14a and "⚠️ CẢNH BÁO" not in out14a
+      and "GHI CHÚ" not in out14a, out14a[-500:])
+check("T14a nhật ký plan['notes'] (không mở bằng ⚠️/🛑) KHÔNG lên report",
+      "nhật ký lập plan" not in out14a)
+
+q = _quiet_plan([_SELL_NOPRICE])
+q["notes"] = ["⚠️ KIỂM TAY giá SCL trước 08:45 — DNSE 500 lúc lập plan", "nhật ký thường không lên"]
+out14b = run_sender(q, "SpaceX", files=_gl)
+check("T14b plan['notes'] mở bằng ⚠️ → vào mục CẢNH BÁO nguyên văn; note thường vẫn không lên; "
+      "header có đếm cảnh báo",
+      "⚠️ CẢNH BÁO" in out14b and "KIỂM TAY giá SCL" in out14b
+      and out14b.index("⚠️ CẢNH BÁO") < out14b.index("KIỂM TAY giá SCL")
+      and "nhật ký thường" not in out14b and " cảnh báo" in out14b.split("\n")[1], out14b[:600])
+
+o = dict(_SELL_NOPRICE, note=("LAG_LO entry ngày 1/… theo filter_lag_entry_window.py. "
+                              "Điều kiện user (21/10): hủy nếu có tin VinCons chậm trả. "
+                              "Nếu regime chuyển BEAR, vị thế LAG bị bán theo allocator (w_LAG=0)."))
+out14c = run_sender(_quiet_plan([o]), "SpaceX", files=_gl)
+check("T14c note lệnh: câu mẫu cố định (filter_lag_entry_window / allocator w_LAG=0) bị lọc, "
+      "tag 'LAG_AUTO_EXIT ngày 1' + điều kiện riêng của lệnh GIỮ",
+      "ngày 1" in out14c and "Điều kiện user (21/10): hủy nếu có tin VinCons chậm trả" in out14c
+      and "filter_lag_entry_window" not in out14c and "allocator (w_LAG=0)" not in out14c, out14c[-500:])
+
+_long_warn = "⚠️ " + "RỦI RO thật cần user đọc hết. " * 20
+o = dict(_SELL_NOPRICE, note=_long_warn)
+out14d = run_sender(_quiet_plan([o]), "SpaceX", files=_gl)
+check("T14d note lệnh mang ⚠️ → in NGUYÊN VĂN (không cắt, không lọc nhầm; chỉ chấm câu cuối bị tỉa)",
+      _long_warn.strip().rstrip(".") in out14d)
+
+_trim = lambda tk, note=None: {"ticker": tk, "side": "sell", "qty": 100, "ref_price": 10000.0,
+                               "play_type": "PARK_TRIM", "book": "PARK",
+                               **({"note": note} if note is not None else {})}
+q = _quiet_plan([_trim("ACB"), _trim("BID", "BÁN PARK gộp: 100cp L1 park_trim. Tổng 100cp × 10,000đ"),
+                 _trim("CTG"), _trim("HDB", "⚠️ HDB: cổ tức quá hạn — kiểm tay")])
+q["park_trim_proposal"] = {"decision": "TRIM", "target_park": 0.30, "orders": [], "notes": [],
+                           "_merged_into_orders": "✅ ĐÃ MERGE vào orders[] của plan này"}
+out14e = run_sender(q, "SpaceX", files=_gl)
+check("T14e 3 lệnh PARK_TRIM thuần (note rỗng / chỉ câu mẫu 'BÁN PARK gộp:') → gộp 1 dòng; "
+      "lệnh có ⚠️ riêng KHÔNG bị gộp nuốt",
+      "**BÁN PARK_TRIM** 3 mã" in out14e and "ACB 100 · BID 100 · CTG 100" in out14e
+      and "**BÁN HDB**" in out14e and "cổ tức quá hạn" in out14e
+      and out14e.count("cùng một lý do") == 1, out14e[-700:])
+
+# egg: dòng 🥚 ở CẦN LÀM đã nói số tiền ⇒ note JIT "có thể cần Trứng vàng" không nhắc lại lần 2
+_buy = {"ticker": "SCL", "side": "buy", "qty": 300, "ref_price": 32600.0, "book": "LAG", "play_type": "LAG_LO"}
+q = _quiet_plan([_buy])
+q["jit_unpark_proposal"] = {"decision": "NO_JIT_NEEDED", "orders": [], "buy_amendments": [],
+                            "notes": [_EGG_NOTE]}
+_nav = {"egg_assets": 500e6, "cash_available_vnd": 0}
+out14f = run_sender(q, "SpaceX", files=dict(_gl, **{"data/execution_logs/active_nav_SpaceX.json": _nav}))
+check("T14f có dòng 🥚 ⇒ 'Chuyển …tr từ Trứng vàng' ở CẦN LÀM, và note JIT egg KHÔNG lặp lại ở L2",
+      "CẦN LÀM / QUYẾT ĐỊNH" in out14f and "Chuyển" in out14f and "Trứng vàng → cash" in out14f
+      and "L2 JIT unpark" not in out14f, out14f[:900])
+out14f2 = run_sender(q, "SpaceX", files=_gl)        # đối chứng: không có active_nav ⇒ không có dòng 🥚 ⇒ note JIT GIỮ
+check("T14f đối chứng: không có dòng 🥚 ⇒ note JIT egg vẫn hiện (không nuốt cảnh báo)",
+      "Trứng vàng → cash" not in out14f2 and "L2 JIT unpark: NO_JIT_NEEDED" in out14f2 and "CẦN RÚT" in out14f2)
+check("T14f mục tiêu 🥚 = Σ mua ở trần đuổi giá +4% & phí − tiền mặt (300×32.600=9,78tr → 10,2tr)",
+      "Chuyển 10.2tr" in out14f, [l for l in out14f.splitlines() if "Chuyển" in l][:1])
+
+# lệnh MUA: cờ DD đi vào mục CẢNH BÁO kèm mã, dòng lệnh chỉ gắn dấu ⚠️ (sandbox không có bq_cache ⇒ DD n/a)
+out14g = run_sender(_quiet_plan([_buy]), "SpaceX", files=_gl)
+_ol = next((l for l in out14g.splitlines() if "**MUA SCL**" in l), "")
+check("T14g cờ DD của lệnh MUA ⇒ mục CẢNH BÁO có dòng theo mã + dòng lệnh gắn ⚠️ + header đếm",
+      _ol.rstrip().endswith("⚠️") and "⚠️ CẢNH BÁO" in out14g
+      and "⚠️ SCL: DD n/a" in out14g and "cờ đỏ" in out14g and "cảnh báo" in out14g.split("\n")[1],
+      out14g[:900])
 
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:

@@ -180,7 +180,7 @@ p5.pop("auto_exit_inject_notes", None)
 out5 = run_sender(p5, "SpaceX")
 check("T5: không có field → KHÔNG in ⛔/⚠️, report vẫn render bình thường",
       "BỊ CHẶN" not in out5 and "BỊ CẮT" not in out5
-      and "Kế hoạch giao dịch ngày mai" in out5)
+      and "PLAN T+1" in out5)
 
 # ── T6: chỉ entry manual (không auto nào) + injected KHÔNG có capped_from/capped_to → không in
 # dòng ⚠️ nào (không bịa cắt khi không có).
@@ -206,7 +206,7 @@ check("T7a: rc=0 (không TypeError khi thiếu hẳn key blocked/capped)", LAST_
       f"rc={LAST_RC[0]}")
 check("T7a: render bình thường, không in ⛔/⚠️ (không có gì bị chặn/cắt)",
       "BỊ CHẶN" not in out7a and "BỊ CẮT" not in out7a
-      and "Kế hoạch giao dịch ngày mai" in out7a)
+      and "PLAN T+1" in out7a)
 
 AUTO_ONLY_CAPPED = {"at": "2026-10-01T20:40:01+07:00", "source": "auto_exit_inject",
                     "injected": [{"ticker": "VPB", "book": "LAG", "sessions_held": 45}],
