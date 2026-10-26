@@ -26,3 +26,4 @@
 - [2026-10-26T05:48:22Z] [dd-blind2-TV1 10-26] buoc 1 KHOA md5 4409305f (research/dd_blind2_TV1_20261026/); F: bien gop Q3/26 <33,0% p0.65, cham 2026-11-09 — buoc 2 la job khac
 - [2026-10-26T06:44:41Z] [dgc-q3-forecast 10-26] KHOA md5 d6ea39f4 (research/dgc_q3_forecast_20261026/): LNST me Q3/26 320 ty, 50% [270,370], 80% [215,425]; cham khi DGC cong bo (du kien 27/10-14/11)
 - [2026-10-26T07:54:05Z] ĐANG DỞ: lag-capacity-floor D job Taylor_20261026_074918 — batch run_batch_D.sh (26 run) chạy nền từ 14:53 ICT trong wt-lag-capacity-floor-20261025 | NEXT: analyze_D.py → REPORT_D.md → commit → bus finding 'lag-capacity-floor-20261025 D'
+- [2026-10-26T08:18:08Z] [commodity-te 10-26] XONG job Taylor_20261026_075337 @cff2bc5c3: TE nowcast KQKD IC 0,45 (thi truong da dinh gia), B3 13 trial khong qua cong, khong chinh model — CHO Mike/user: PREREG forward LAG surprise-decomp + xin bq_admin feed APT/xut/P4/BDTI
