@@ -1538,3 +1538,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T13:49:05Z] ĐANG DỞ job Taylor_20261025_131052: 10 run PREREG xong (0/4 đạt), đang chạy 8 run amendment A1 wv1-4 (logs/run_batch3.log, commit 04ec38d61) | NEXT: evaluate.py → REPORT.md → bus finding
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T14:05:27Z] ĐANG DỞ job Taylor_20261025_140517: lag-capacity-floor R1(KL T-1/trung vị N)/R2(bỏ ABANDONED_REFUND)/R3(noise floor park=0) trên wt-lag-capacity-floor-20261025 | NEXT: PREREG_R.md
