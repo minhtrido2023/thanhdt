@@ -4,13 +4,15 @@
 DISPLAY-ONLY: không gate, không tilt, không đổi sizing/lệnh. Nguồn nghiên cứu:
 agents/Taylor/research/commodity_cycle_te_20261026/ (REPORT.md §B2/§B4/§5).
 
-- Giá: BQ tav2_bq.commodity_prices với source='trading_economics' AND cadence='daily' TƯỜNG MINH
-  (KHÔNG dùng commodity_latest / unified — view đó trộn nguồn). Mốc thời gian = observation_date.
+- Giá: BQ tav2_bq.commodity_prices với source + cadence='daily' TƯỜNG MINH: mặc định 'trading_economics';
+  ngoại lệ duy nhất SOURCE_OVERRIDE (P4 'yellow_phosphorus' -> 'sunsirs', từ 2018; job Taylor_20261026_163838).
+  KHÔNG dùng commodity_latest / unified — view đó trộn nguồn. Mốc thời gian = observation_date.
 - c_yoy = log(giá TB quý / giá TB cùng quý năm trước) × dấu vai trò (producer +1 / consumer −1), TB theo QUÝ LỊCH,
   quý chỉ tính khi có ≥ MIN_OBS quan sát (đúng b2_nowcast.py).
 - Phân vị TB63 = tỉ lệ giá trị TB63 phiên (toàn lịch sử đến nay) ≤ giá trị mới nhất; R/MA252 = giá cuối / TB 252 quan sát.
 - Nhãn là MÔ TẢ theo ngưỡng cố định (NEUTRAL_BAND), không phải tín hiệu.
 - Độ tươi: data/commodity_freshness_state.json; STALE/FROZEN/thiếu => 'KHÔNG ĐỦ TƯƠI', không in số.
+  Series sunsirs P4 CHƯA nằm trong monitor => tự kiểm theo tuổi quan sát cuối (<= P4_MAX_AGE_D ngày), nói rõ trong dòng.
 - FAIL-OPEN: mọi lỗi => log WARN ra stderr + trả chuỗi rỗng, không bao giờ ném lỗi ra caller.
 
 Dùng: commodity_nowcast_block.py --plan-file <plan.json> | --tickers DPM,DRI,GAS
@@ -30,13 +32,30 @@ FRESH_MAX_AGE_H = 72     # file trạng thái tươi cũ hơn mức này => coi 
 BQ_TIMEOUT_S = 15
 ICT = timezone(timedelta(hours=7))
 
+SOURCE_OVERRIDE = {"yellow_phosphorus": "sunsirs"}     # key -> source khác TE
+SOURCE_FROM = {"yellow_phosphorus": "2018-01-01"}      # trước mốc này chuỗi thưa (khe tới 191 ngày) => cắt
+P4_MAX_AGE_D = 7                                       # P4 sunsirs chưa có trong monitor: tuổi quan sát cuối tối đa
+P4_KEY = "yellow_phosphorus"
+
+# Override hiển thị (KHÔNG sửa commodity_map_te.csv — md5 bị khoá bởi tracker/PREREG-4): bỏ dòng TE phosphorus (nay là quặng)
+# của DGC/PAT + lưu huỳnh của DGC/PAT (chỉ đạo user: không in lưu huỳnh), thêm P4 sunsirs tier D (chỉ mô tả).
+MAP_DROP = {("DGC", "phosphorus"), ("PAT", "phosphorus"), ("DGC", "sulfur"), ("PAT", "sulfur")}
+MAP_ADD = [("DGC", "p4_yellow"), ("PAT", "p4_yellow")]
+P4_NOTE = "P4 sunsirs (CNY/t, từ 2018) thay dòng TE phosphorus (nay là quặng); quan hệ gãy từ 2024"
+
 QUERY = ("SELECT metric_key, observation_date, value FROM tav2_bq.commodity_prices "
-         "WHERE source='trading_economics' AND cadence='daily' AND metric_key IN ({keys}) "
+         "WHERE cadence='daily' AND ((source='trading_economics' AND metric_key IN ({te_keys})) "
+         "OR (source='sunsirs' AND metric_key IN ({ss_keys}) AND observation_date >= '{ss_from}' "
+         "AND EXTRACT(DAYOFWEEK FROM observation_date) BETWEEN 2 AND 6)) "
          "ORDER BY metric_key, observation_date")
 
 FOOTER = ("_Thị trường đã định giá phần này trước ngày công bố (nowcast IC 0,44 với KQKD, ~0 với giá CP sau công bố); "
           "chỉ dùng để đọc KQKD, không phải tín hiệu mua/bán._")
 OIL_WARN = "⚠️ dầu thô: IC với LN ~0 (hợp đồng trễ)"
+P4_WARN = ("⚠️ P4: quan hệ giá P4 với LN DGC đã GÃY từ 2024 (IC 0,46-0,50 toàn mẫu 30 quý, nhưng 0,23 khi bỏ 2021Q3-2022Q4 "
+           "và -0,21 từ 2024) — chỉ mô tả, KHÔNG phải tín hiệu giao dịch, không sizing")
+DGC_LEGAL_WARN = ("⚠️ DGC pháp lý/quản trị (chỉ cảnh báo): theo hồ sơ nội bộ — kiểm toán ngoại trừ (hàng tồn kho + vụ án hình sự), "
+                  "lãnh đạo bị truy tố, diện kiểm soát; giá hàng hoá KHÔNG xoá rủi ro này")
 STALE_TXT = "KHÔNG ĐỦ TƯƠI"
 
 
@@ -53,14 +72,22 @@ def load_map(path=None):
                 continue
             out.setdefault(r["ticker"], []).append(dict(
                 family=r["family"], key=r["te_metric_key"], sign=int(r["sign"]), tier=r["tier"], note=r["note"]))
-    for rows in out.values():
+    for (t, fam) in MAP_ADD:
+        rows = out.setdefault(t, [])
+        rows[:] = [r for r in rows if (t, r["key"]) not in MAP_DROP]
+        if not any(r["key"] == P4_KEY for r in rows):
+            rows.append(dict(family=fam, key=P4_KEY, sign=1, tier="D", note=P4_NOTE))
+    for t, rows in out.items():
+        rows[:] = [r for r in rows if (t, r["key"]) not in MAP_DROP]
         rows.sort(key=lambda r: r["tier"])        # A trước B trước D
     return out
 
 
 def fetch_te(keys, runner=None):
     """-> {metric_key: [(date, value), ...]} sắp theo ngày. Ném lỗi nếu BQ chết (caller bắt)."""
-    sql = QUERY.format(keys=",".join("'%s'" % k for k in sorted(keys)))
+    q = lambda ks: ",".join("'%s'" % k for k in sorted(ks)) or "''"
+    ss = {k for k in keys if SOURCE_OVERRIDE.get(k) == "sunsirs"}
+    sql = QUERY.format(te_keys=q(set(keys) - ss), ss_keys=q(ss), ss_from=SOURCE_FROM.get(P4_KEY, "2018-01-01"))
     if runner is None:
         env = f"source {WC_ROOT}/wc_env.sh >/dev/null 2>&1; "
         cmd = env + "bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=1000000 \"$SQL\""
@@ -74,7 +101,10 @@ def fetch_te(keys, runner=None):
     series = {}
     for r in csv.DictReader(io.StringIO(text)):
         try:
-            series.setdefault(r["metric_key"], []).append((r["observation_date"][:10], float(r["value"])))
+            d = r["observation_date"][:10]
+            if r["metric_key"] in SOURCE_OVERRIDE and datetime.fromisoformat(d).weekday() >= 5:
+                continue                                  # sunsirs lặp giá T6 vào T7/CN => lệch TB; SQL đã lọc, đây là lớp 2
+            series.setdefault(r["metric_key"], []).append((d, float(r["value"])))
         except (ValueError, KeyError):
             continue
     for v in series.values():
@@ -95,9 +125,15 @@ def load_fresh(path=None, now=None):
         return {}, f"freshness_state không đọc được: {e}"
 
 
-def is_fresh(key, fresh):
-    st = fresh.get(f"{key}|trading_economics|daily")
-    return bool(st) and st.get("status") == "OK"
+def is_fresh(key, fresh, series=None, now=None):
+    src = SOURCE_OVERRIDE.get(key, "trading_economics")
+    st = fresh.get(f"{key}|{src}|daily")
+    if st:
+        return st.get("status") == "OK"
+    if key in SOURCE_OVERRIDE and series and series.get(key):       # chưa có trong monitor: tự kiểm tuổi quan sát cuối
+        last = datetime.fromisoformat(series[key][-1][0]).date()
+        return ((now or datetime.now(ICT)).date() - last).days <= P4_MAX_AGE_D
+    return False
 
 
 def _qkey(date_s):
@@ -163,7 +199,7 @@ def _fmtp(p):
     return f"{p:.2f}".replace(".", ",")
 
 
-def build_block(tickers, series, fresh, fresh_err, cmap):
+def build_block(tickers, series, fresh, fresh_err, cmap, now=None):
     """Thuần hàm (không I/O). tickers đã dedupe. Trả '' nếu không mã nào có trong map."""
     lines = []
     cache = {}
@@ -172,12 +208,17 @@ def build_block(tickers, series, fresh, fresh_err, cmap):
         if not rows:
             continue
         lines.append(f"• **{t}**")
+        if t == "DGC":
+            lines.append("    " + DGC_LEGAL_WARN)
         for r in rows:
             sign = r["sign"]
             role = "producer" if sign > 0 else "consumer (chi phí, dấu ngược)"
             head = f"  - {r['family']} [{r['key']}, {role}, nhóm {r['tier']}]: "
-            if not is_fresh(r["key"], fresh):
-                lines.append(head + f"{STALE_TXT} (nguồn TE '{r['key']}' không OK/thiếu trong freshness; không in số)")
+            if fresh_err or not is_fresh(r["key"], fresh, series, now):
+                src = "sunsirs" if r["key"] in SOURCE_OVERRIDE else "TE"
+                lines.append(head + f"{STALE_TXT} (nguồn {src} '{r['key']}' không OK/thiếu/quá cũ; không in số)")
+                if r["key"] == P4_KEY:
+                    lines.append("    " + P4_WARN)
                 continue
             m = cache.get(r["key"]) or cache.setdefault(r["key"], metrics(series.get(r["key"], [])))
             if not m:
@@ -196,9 +237,11 @@ def build_block(tickers, series, fresh, fresh_err, cmap):
             lines.append(head + txt)
             if r["family"] == "crude":
                 lines.append("    " + OIL_WARN)
+            if r["key"] == P4_KEY:
+                lines.append("    " + P4_WARN)
     if not lines:
         return ""
-    hdr = "🛢️ **Nowcast KQKD theo hàng hoá (nội bộ, display-only)** — c_yoy = log giá TB quý TE / cùng quý năm trước × dấu vai trò; nhãn = mô tả theo ngưỡng ±0,05, không phải tín hiệu"
+    hdr = "🛢️ **Nowcast KQKD theo hàng hoá (nội bộ, display-only)** — c_yoy = log giá TB quý TE/sunsirs / cùng quý năm trước × dấu vai trò; nhãn = mô tả theo ngưỡng ±0,05, không phải tín hiệu"
     if fresh_err:
         hdr += f"\n  ({STALE_TXT}: {fresh_err})"
     return "\n".join([hdr] + lines + [FOOTER])
@@ -225,7 +268,7 @@ def run(tickers, runner=None, now=None):
         fresh, ferr = load_fresh(now=now)
         keys = {r["key"] for t in tickers for r in cmap[t]}
         series = fetch_te(keys, runner=runner)
-        return build_block(tickers, series, fresh, ferr, cmap)
+        return build_block(tickers, series, fresh, ferr, cmap, now=now)
     except Exception as e:                                   # noqa: BLE001 — fail-open có chủ đích
         warn(f"{type(e).__name__}: {e}")
         return ""
