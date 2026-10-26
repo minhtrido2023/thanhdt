@@ -5,7 +5,7 @@ source: tav2_bq.commodity_prices (TABLE) + tav2_bq.commodity_prices_unified (VIE
 group: feeds
 cadence: daily (TE, sunsirs) / monthly (TE, WB) / event (GDT)
 writer: bq_admin (user xác nhận 2026-10-26); nguồn TradingEconomics; cron làm mới chưa thấy trong repo
-verified: 2026-10-26 chiều (job Winston_20261026_102704, đo trực tiếp BQ; thêm nguồn sunsirs)
+verified: 2026-10-26 đêm (job Winston_20261026_163836, đo lại BQ: P4 `yellow_phosphorus`, sulfur, bẫy tên phosphorus)
 ---
 
 # `tav2_bq.commodity_prices` (+ 2 view)
@@ -14,17 +14,17 @@ verified: 2026-10-26 chiều (job Winston_20261026_102704, đo trực tiếp BQ;
 
 ## Schema (đo 2026-10-26)
 12 cột: `metric_key` STR · `name_vn` · `name_en` · `observation_date` DATE · `value` FLOAT · `unit` STR · `change_pct` FLOAT · `cadence` STR · `source` STR · `source_url` · `fetched_at` TIMESTAMP · `extra_json` STR.
-PARTITION MONTH(`observation_date`) · CLUSTER (`metric_key`, `source`). **343.272 dòng / 134 mã** (sau khi thêm sunsirs 26/10 chiều; trước đó 296.520), 0 NULL `value`.
+PARTITION MONTH(`observation_date`) · CLUSTER (`metric_key`, `source`). **345.869 dòng / 137 mã** (đo lại 26/10 đêm; trước đó 343.272/134 sau khi thêm sunsirs 26/10 chiều — 3 mã mới: `yellow_phosphorus`, `tungsten_concentrate`, `tungsten_apt`; trước đó 296.520), 0 NULL `value`.
 Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 343.272/343.272 distinct (kiểm lại 26/10 chiều, dup=0 — khoá còn đúng sau khi thêm sunsirs). ⚠️ KHÔNG gồm `cadence` thì có trùng (281.305 distinct): TE ghi cả dòng daily lẫn monthly cùng ngày (vd phosphorus, silicon, aluminum_alloy 2026-10-22 ×2).
 `lastModifiedTime` bảng = 2026-10-25 13:16 UTC.
 
 ## 4 nguồn
 | source | cadence | số mã | phủ | mới nhất |
 |---|---|---|---|---|
-| trading_economics | daily | 103 | 2016-10-25 → | 2026-10-23 |
+| trading_economics | daily | 103 | 2016-10-25 → | 2026-10-26 (P4/vonfram) |
 | trading_economics | monthly | 103 | 1912-05 → | 2026-10-22 |
 | worldbank_cmo | monthly | 22 | 1960-01 → | 2026-09-01 (nhịp WB bình thường, ra đầu tháng sau) |
-| sunsirs | daily | 23 (CNY, spot Trung Quốc; chi tiết mục "Nguồn sunsirs") | 2013-01-07 → (mã sớm nhất) | 2026-10-23 |
+| sunsirs | daily | 26 (23 mã gốc + `yellow_phosphorus` + 2 mã vonfram `tungsten_concentrate`/`tungsten_apt` từ 2026-06-24; CNY, spot Trung Quốc; chi tiết mục "Nguồn sunsirs") | 2013-01-07 → (mã sớm nhất) | 2026-10-23 (23 mã gốc); 2026-10-26 (P4, vonfram) |
 | global_dairy_trade | event | 1 (`gdt_milk_powder`) | 2026-04-21 → (13 dòng) | 2026-10-20 |
 
 ## View
@@ -42,7 +42,7 @@ Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 343.
 3. **TE không cập nhật đều**: tea (INR/Kgs) mới nhất 2026-10-03, salmon (NOK/KG) 2026-10-16. Kiểm `MAX(observation_date)` theo mã trước khi dùng — hoặc đọc **`data/commodity_freshness_state.json`** (status theo khoá `metric_key|source|cadence`: OK/STALE/FROZEN_VALUE/LOW_SAMPLE), sinh bởi `mike/bin/commodity_freshness_monitor.py` (từ 2026-10-26; cron CHƯA cài — kiểm `ref_date` trong file trước khi tin).
 4. `fetched_at` KHÔNG phải độ trễ thật: TE daily backfill một lượt (toàn bộ `fetched_at` cùng 2026-10-25 / 10-24) → không đo được latency từng ngày.
 5. **Bẫy TE mới (user duyệt 2026-10-26; nguồn `agents/Taylor/research/commodity_cycle_te_20261026/REPORT.md` §1 + `te_key_stats.csv`; số dưới đây ĐO LẠI từ BQ `source='trading_economics', cadence='daily'` cùng ngày).** Mã TE tên nghe đúng nhưng hàng khác hàng cổ phiếu VN cần:
-   - `phosphorus` (CNY/T): median 1.027,5, khoảng 845–1.125 = **quặng photphat**, KHÔNG phải P4/phốt pho vàng (cỡ 20–30k CNY/t, `ước lượng` theo hiểu biết thị trường). Chỉ từ 2022-08-19, 1.009 phiên nhưng **43 giá trị khác nhau** (94% phiên đứng giá) → vô dụng cho DGC/PAT.
+   - ⚠️ **Bẫy tên `phosphorus` (đo lại 26/10 đêm, job Winston_20261026_163836):** TE đã ĐỔI `metric_key` `phosphorus` → **`phosphate_rock_cny`** (TE, CNY/T, 2022-08-19→2026-10-23, 1.009 phiên daily); `metric_key='phosphorus'` nay **0 dòng**. Đây là **QUẶNG photphat** (median 1.027,5; 845–1.125; 94% phiên đứng giá), KHÔNG phải P4/phốt pho vàng → vô dụng cho DGC/PAT. Tên cũ `phosphorus` còn trong `commodity_map_te.csv` vòng trước (stale) — đừng dùng. P4 thật = `yellow_phosphorus` (sunsirs), xem mục dưới.
    - `hrc_steel` (USD/T): đỉnh **1.945 ngày 2021-08-31**, median 805 = HRC **Mỹ**, không phải HRC TQ/VN (HPG).
    - `rice` (USD/cwt): median 13,03, 9,2–22,1 = gạo thô CBOT, không phải gạo VN 5%.
    - `coffee` (USd/Lbs): median 161,8, đỉnh 433 = **Arabica**; VN chủ yếu Robusta.
@@ -62,6 +62,12 @@ Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 343.
 | ngắn | butadiene_rubber 782 (2023-07) · caustic_soda 747 · paraxylene 747 (2023-09) · pet 505 (2024-09) · polysilicon 439 (2024-12) · benzene 314 (2025-07) · propylene 304 (2025-07) |
 
 Monitor `commodity_freshness_monitor.py`: 23/23 sunsirs = **OK** (median_gap 1, p90_gap 3, ngưỡng STALE 5 ngày).
+
+## Chuỗi P4 và lưu huỳnh cho nowcast nhóm hoá chất/phân bón (user duyệt 2026-10-26 23:38 ICT; nguồn `agents/Taylor/research/commodity_p4_sulfur_20261026/REPORT.md` mục B1; số ĐO LẠI từ BQ)
+- **`yellow_phosphorus` = chuỗi P4 CANONICAL** (`source='sunsirs'`, `cadence='daily'`, CNY/T, sunsirs prodetail-708). 2.365 dòng, 2012-06-11 → 2026-10-26. **Chỉ dùng từ 2018-01-02**: sau mốc đó 2.327 dòng (2.298 ngày làm việc, khe lớn nhất 4 ngày); trước 2018 chỉ **38 dòng**, khe tới 191 ngày → KHÔNG dùng. Khớp `data/phosphorus_weekly.csv` (src `sunsirs`, 28.296 CNY/T ngày 10-22 và 10-23 — chuỗi tuần của Taylor).
+- **Bẫy:** (a) **không có vintage/PIT** — toàn bộ `fetched_at` = 2026-10-26 12:23:27 UTC (backfill một lần), là bản hiện hành, không chứng minh được là bản công bố đầu → mọi backtest dùng nó chỉ là "as-of hôm nay"; (b) **43 dòng rơi T7/CN** (27 dòng trong 2026), lặp giá T6 → phải LOẠI (`EXTRACT(DAYOFWEEK ...) NOT IN (1,7)`); (c) **đứng giá ~69%** so phiên trước (523 giá trị khác nhau trên 2.298 ngày làm việc; REPORT ghi 68,5% trên cả 2.365 dòng) → nhịp thực ≈ tuần, đừng đọc như chuỗi ngày; (d) 2021-09 đỉnh 60.000 (giai đoạn cắt điện Vân Nam, `ước lượng` theo hiểu biết thị trường); 2019-07 14.800→25.500→15.867 trong 4 tuần chưa xác minh.
+- **`sulfur`** (`source='trading_economics'`, `cadence='daily'`, CNY/T): 1.777 dòng, **2020-01-02 → 2026-10-23, 0 khe >10 ngày** (khe lớn nhất 3 ngày), 0 dòng cuối tuần, **đứng giá 53,3%**. ⚠️ Lọc `cadence='daily'` — còn 356 dòng `monthly` cùng khoá `metric_key` (2019-12-30→2026-10-19). **Là proxy chu kỳ phân bón/lưu huỳnh, KHÔNG đo được như chi phí cấp nhóm** (REPORT B2: không tách được chi phí đầu vào từng nhóm cổ phiếu). Giá thật, đã xác minh (mục "Xác minh sulfur TE 2026").
+- Giá trung bình quý (REPORT, chưa đo lại): P4 Q3/25 22.592 · Q2/26 31.105 · Q3/26 27.606; lưu huỳnh Q3/25 2.521 · Q2/26 7.541 · Q3/26 8.794.
 
 ## Quy tắc chọn nguồn đề xuất (Winston, chờ Taylor/Mike xác nhận)
 - Chuỗi tháng / lịch sử / nối với các `data/*_monthly.csv` hiện có → **`source='worldbank_cmo'`** (trùng 246/246 tháng với csv brent/urea/iron_ore/dap, lệch 0,00).
