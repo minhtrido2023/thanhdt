@@ -478,6 +478,33 @@ check("BLOCKED_ALL_NAMES + note cổ tức thật → nhánh BLOCKED_* L1 cũng 
       "(không chỉ nhánh quiescent escape-hatch)",
       "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f3 and "QUÁ HẠN" in out_13f3)
 
+# T13h (27/10, user duyệt): BLOCKED_ALL_NAMES mà MỌI mã bị chặn chỉ vì sellable < 1 lô (hiện vật) ⇒
+# 1 dòng ℹ️, KHÔNG in đậm "BỊ CHẶN". Ba ca phải GIỮ in đậm: sellable ≥ 1 lô (trần ADV chặn), lý do
+# khác, note ⚠️.
+_BL_OK = [{"ticker": "MBB", "reason": "trần/khả năng bán < 1 lô (muốn 1,270,750đ, trần ADV 21,638,223,090đ, sellable 65cp)"},
+          {"ticker": "VPB", "reason": "trần/khả năng bán < 1 lô (muốn 6,749,600đ, trần ADV 36,959,880,500đ, sellable 0cp)"}]
+
+
+def _bl_case(blocked, notes, park_mv=9063000.0, pool=787919598.0):
+    q = copy.deepcopy(SX)
+    q["park_trim_proposal"].update({"decision": "BLOCKED_ALL_NAMES", "blocked": blocked, "notes": notes,
+                                    "park_mv_vnd": park_mv, "pool_vnd": pool, "orders": []})
+    return run_sender(q, "SpaceX")
+
+
+_o_q = _bl_case(_BL_OK, ["target_park=0 (park TẮT HẲN)"])
+check("T13h BLOCKED_ALL_NAMES chỉ vì sellable<1 lô ⇒ dòng ℹ️ gọn, KHÔNG 'BỊ CHẶN'",
+      "ℹ️ Trim PARK (L1)" in _o_q and "MBB (65cp bán được)" in _o_q and "BỊ CHẶN" not in _o_q.split("Trim PARK (L1)")[0][-200:]
+      and "TRIM PARK (L1) BỊ CHẶN" not in _o_q, _o_q[-300:])
+_o_adv = _bl_case([{"ticker": "MBB", "reason": "trần/khả năng bán < 1 lô (muốn 1,270,750đ, trần ADV 1,000đ, sellable 5,000cp)"}], [])
+check("T13h sellable ≥ 1 lô (trần ADV chặn) ⇒ vẫn in đậm BỊ CHẶN", "TRIM PARK (L1) BỊ CHẶN" in _o_adv)
+_o_oth = _bl_case(_BL_OK + [{"ticker": "XYZ", "reason": "ADV ≤ 0 (data 2026-10-26)"}], [])
+check("T13h có mã bị chặn vì lý do KHÁC ⇒ vẫn in đậm BỊ CHẶN", "TRIM PARK (L1) BỊ CHẶN" in _o_oth)
+_o_warn = _bl_case(_BL_OK, ["⚠️ cổ tức QUÁ HẠN"])
+check("T13h note ⚠️ ⇒ vẫn in đậm BỊ CHẶN (không nuốt cảnh báo)", "TRIM PARK (L1) BỊ CHẶN" in _o_warn)
+_o_big = _bl_case(_BL_OK, [], park_mv=60e6)
+check("T13h park >3% pool ⇒ vẫn in đậm BỊ CHẶN", "TRIM PARK (L1) BỊ CHẶN" in _o_big)
+
 p13f4 = copy.deepcopy(SX)
 p13f4["park_trim_proposal"]["notes"] = [_DIV_NOTE]  # decision=TRIM giữ nguyên từ fixture 08-07
 out_13f4 = run_sender(p13f4, "SpaceX")

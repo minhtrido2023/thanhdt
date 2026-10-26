@@ -226,7 +226,7 @@ fi
 export NOWCAST_BLOCK
 
 RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
-import sys, json, os
+import sys, json, os, re
 
 plan_file, expected_date, today, now_ict, acct = sys.argv[1:6]
 
@@ -629,6 +629,19 @@ def _as_dict(x):
 
 def _num(x):
     return float(x) if isinstance(x, (int, float)) else 0.0
+
+_PT_SELLABLE_RE = re.compile(r"khả năng bán < 1 lô .*sellable ([\d,]+)cp")
+
+
+def _pt_sellable_lt_lot(b):
+    """Số cp bán được (int) nếu lý do chặn L1 là 'trần/khả năng bán < 1 lô' VÀ sellable < 1 lô (100cp,
+    tức nguyên nhân là hiện vật chứ không phải trần ADV); ngược lại None."""
+    m = _PT_SELLABLE_RE.search(str(b.get("reason") or ""))
+    if not m:
+        return None
+    n = int(m.group(1).replace(",", ""))
+    return n if n < 100 else None
+
 
 def _tr(v):
     return f"{v/1e6:,.1f}tr"
@@ -1126,6 +1139,22 @@ try:
                      f"{_tr(_num(park_trim.get('park_mv_vnd')))} "
                      f"({_num(park_trim.get('park_mv_vnd')) / _num(park_trim.get('pool_vnd')) * 100:.2f}% pool), "
                      f"chỉ gồm {', '.join(sorted(_pt_bl_tk))} (CP chờ niêm yết / lô lẻ ở dòng ℹ️ trên).")
+    elif (pt_dec == "BLOCKED_ALL_NAMES"
+          and (_pt_bl_d := [b for b in (park_trim.get("blocked") or []) if isinstance(b, dict)])
+          and all(_pt_sellable_lt_lot(b) is not None for b in _pt_bl_d)
+          and not any("⚠️" in str(_n) for _n in (park_trim.get("notes") or []))
+          and _num(park_trim.get("pool_vnd")) > 0
+          and _num(park_trim.get("park_mv_vnd")) <= 0.03 * _num(park_trim.get("pool_vnd"))):
+        # Trạng thái, không phải việc cần làm: MỌI mã PARK còn lại đều có số cp bán được (tradeQuantity
+        # broker) < 1 lô (cp chưa giao dịch được / lô lẻ) và phần còn lại ≤3% pool ⇒ 1 dòng ℹ️ thay vì
+        # "BỊ CHẶN" in đậm lặp mỗi ngày (user duyệt 27/10). Lý do chặn khác (đối soát lệch, ADV lỗi,
+        # sellable ≥1 lô nhưng trần ADV chặn) và mọi note ⚠️ vẫn rơi xuống nhánh BLOCKED_* in đậm.
+        _pt_pct = _num(park_trim.get("park_mv_vnd")) / _num(park_trim.get("pool_vnd")) * 100
+        _pt_names = ", ".join(f"{b.get('ticker', '?')} ({_pt_sellable_lt_lot(b)}cp bán được)"
+                              for b in _pt_bl_d[:6])
+        lines.append(f"ℹ️ Trim PARK (L1): chưa bán được phần PARK còn lại "
+                     f"{_tr(_num(park_trim.get('park_mv_vnd')))} ({_pt_pct:.2f}% pool) — {_pt_names} "
+                     f"(<1 lô / chưa giao dịch được). Không cần xử lý.")
     elif pt_dec.startswith("BLOCKED_") or pt_dec in ("NO_SELL_POSSIBLE",):
         lines.append(f"🅿️ **TRIM PARK (L1) BỊ CHẶN — {pt_dec}**: "
                      + ("; ".join(_note_text(n) for n in (park_trim.get("notes") or [])[:2])
