@@ -117,7 +117,8 @@ def _notify(msg: str) -> bool:
     import subprocess
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ok = False
-    for script, extra in (("notify.sh", []), ("notify_thread.sh", [TRADING_DAILY])):
+    # Telegram (user chốt 2026-10-26): nhắc rút Trứng vàng đi Telegram như nhắc duyệt báo cáo, 15'/lần tới khi đủ sức mua.
+    for script, extra in (("notify.sh", []), ("notify_thread.sh", [TRADING_DAILY]), ("notify_telegram.sh", [])):
         p = os.path.join(root, "bin", script)
         if os.path.isfile(p):
             try:
