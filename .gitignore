@@ -143,3 +143,4 @@ WorkingClaude/.verify_a4_worktree/
 !WorkingClaude/data/pinned_ledgers/
 !WorkingClaude/data/pinned_ledgers/PINS.jsonl
 !WorkingClaude/data/pinned_ledgers/*.csv.gz
+WorkingClaude/data/raw/bdi_handybulk_*.html
