@@ -3,9 +3,9 @@ kind: bq-table
 status: CANONICAL-WITH-TRAPS
 source: tav2_bq.commodity_prices (TABLE) + tav2_bq.commodity_prices_unified (VIEW) + tav2_bq.commodity_latest (VIEW)
 group: feeds
-cadence: daily (TE) / monthly (TE, WB) / event (GDT)
+cadence: daily (TE, sunsirs) / monthly (TE, WB) / event (GDT)
 writer: bq_admin (user xác nhận 2026-10-26); nguồn TradingEconomics; cron làm mới chưa thấy trong repo
-verified: 2026-10-26 (job Winston_20261026_065210, đo trực tiếp BQ)
+verified: 2026-10-26 chiều (job Winston_20261026_102704, đo trực tiếp BQ; thêm nguồn sunsirs)
 ---
 
 # `tav2_bq.commodity_prices` (+ 2 view)
@@ -14,16 +14,17 @@ verified: 2026-10-26 (job Winston_20261026_065210, đo trực tiếp BQ)
 
 ## Schema (đo 2026-10-26)
 12 cột: `metric_key` STR · `name_vn` · `name_en` · `observation_date` DATE · `value` FLOAT · `unit` STR · `change_pct` FLOAT · `cadence` STR · `source` STR · `source_url` · `fetched_at` TIMESTAMP · `extra_json` STR.
-PARTITION MONTH(`observation_date`) · CLUSTER (`metric_key`, `source`). **296.520 dòng**, 0 NULL `value`.
-Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 296.520/296.520 distinct. ⚠️ KHÔNG gồm `cadence` thì có trùng (281.305 distinct): TE ghi cả dòng daily lẫn monthly cùng ngày (vd phosphorus, silicon, aluminum_alloy 2026-10-22 ×2).
+PARTITION MONTH(`observation_date`) · CLUSTER (`metric_key`, `source`). **343.272 dòng / 134 mã** (sau khi thêm sunsirs 26/10 chiều; trước đó 296.520), 0 NULL `value`.
+Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 343.272/343.272 distinct (kiểm lại 26/10 chiều, dup=0 — khoá còn đúng sau khi thêm sunsirs). ⚠️ KHÔNG gồm `cadence` thì có trùng (281.305 distinct): TE ghi cả dòng daily lẫn monthly cùng ngày (vd phosphorus, silicon, aluminum_alloy 2026-10-22 ×2).
 `lastModifiedTime` bảng = 2026-10-25 13:16 UTC.
 
-## 3 nguồn
+## 4 nguồn
 | source | cadence | số mã | phủ | mới nhất |
 |---|---|---|---|---|
 | trading_economics | daily | 103 | 2016-10-25 → | 2026-10-23 |
 | trading_economics | monthly | 103 | 1912-05 → | 2026-10-22 |
 | worldbank_cmo | monthly | 22 | 1960-01 → | 2026-09-01 (nhịp WB bình thường, ra đầu tháng sau) |
+| sunsirs | daily | 23 (CNY, spot Trung Quốc; chi tiết mục "Nguồn sunsirs") | 2013-01-07 → (mã sớm nhất) | 2026-10-23 |
 | global_dairy_trade | event | 1 (`gdt_milk_powder`) | 2026-04-21 → (13 dòng) | 2026-10-20 |
 
 ## View
@@ -31,6 +32,7 @@ Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 296.
 - `commodity_latest`: từ unified, mỗi `metric_key` 1 dòng, `ORDER BY observation_date DESC, fetched_at DESC`. Không có cột báo nguồn thắng ngoài `source` (có cột nhưng không cố định).
 
 ## BẪY
+0. **(26/10 chiều) sunsirs — xem BẪY 6 bên dưới.** View `unified`/`latest` đã gộp sunsirs (mọi dòng sunsirs là `daily`), 0 mã sunsirs trùng `metric_key` với nguồn khác ⇒ KHÔNG có "nguồn thắng đổi giữa các lần chạy" cho 23 mã này.
 1. **Cùng `metric_key`, hai nguồn lệch mức/đơn vị** (đo):
    - `brent` T9/2026: TE daily-avg 100,8 (TE monthly 98,0) vs WB **116,8** (−13,7%). Lưu ý TE spot 2026-10-23 = 116,72 ≈ WB T9 → WB T9 có thể không phải trung bình tháng chuẩn; CHƯA giải thích được. Lịch sử 2016-10→: TE-daily-avg vs WB trung bình |lệch| 1,7%, max 15,9%.
    - `rubber`: TE `USD Cents / Kg` (~254) = hạng **TSR20** (khớp cột tsr20 của rubber_weekly.csv: −0,45% ±1,9%), WB `$/kg` (~2,75) = **RSS3**. Khác loại hàng, không phải khác đơn vị thuần: ÷100 vẫn lệch 13–23% so với RSS3.
@@ -48,6 +50,18 @@ Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 296.
    - `soda_ash` (CNY/T): Na2CO3 (median 1.846; 1.025–3.688), KHÔNG phải xút/caustic soda (CSV).
    - `sulfur` (CNY/T): 2020 median 653 → 2026 median 7.392, đỉnh **11.084 (2026-06)**, median 2026/median 2020 = ×11,3 (REPORT ghi "×7" là so đỉnh 11.084 với trung vị toàn kỳ ≈1.477 → ×7,5; hai phép so khác nhau). Đã xác minh 2026-10-26: **THẬT**, không phải đổi đơn vị/series — chi tiết mục "Xác minh sulfur" dưới. Hiện đã hạ về 5.714 (−26%/tháng).
 
+6. **Bẫy sunsirs (đo 26/10 chiều, job Winston_20261026_102704).** (a) Đơn vị **CNY/T** (22 mã), `glass` **CNY/m2**, `live_hog_cny` **CNY/kg** — không phải USD của TE; cộng/so với cột TE/WB phải đổi tiền + đơn vị. (b) Tên gần TE nhưng **khác hàng/khác khoá**: `coke` (sunsirs, CNY/T, 2.125) ≠ TE `coking_coal` (USD/T); `wire_rod` (3.365) ≠ TE `steel` (CNY/T) ≠ `hrc_steel` (USD/T HRC Mỹ); `soybean_meal_cny` (3.326 CNY/T) ≠ WB `soybean_meal` ($/mt); `butadiene_rubber` ≈ TE `synthetic_rubber` (corr mức 0,998 trên 89 phiên 2026-06-22→10-23, sunsirs cao hơn ~1% (16.440 vs 16.267 ngày 10-23), KHÔNG phải cùng một chuỗi); `live_hog_cny` ≠ TE `lean_hogs` (USd/Lb, CME). (c) Tên khoá chỉ trùng ý nghĩa, **không có `metric_key` nào trùng** giữa sunsirs và nguồn khác (kiểm bằng query) ⇒ dedup theo khoá không bắt được; chọn nguồn thủ công. (d) `extra_json` rỗng, `source_url` = `sunsirs.com/uk/prodetail-<id>.html`; `change_pct` đã có. (e) Khoảng trống: gap lớn nhất 11 ngày = Tết 2026 (hết 2026-02-24) ở mọi mã; không có khoảng trống nào khác >10 ngày trong 1 năm; `wire_rod` gap toàn lịch sử 46 ngày (cũ). (f) `fetched_at` cả 46.752 dòng = 2026-10-26 09:38:58 UTC (backfill một lượt) ⇒ cùng bẫy số 4. (g) Lần nạp đầu (26/10, T2) dừng ở 2026-10-23 (T6) — độ trễ nạp sunsirs chưa đo được từ 1 lần nạp.
+
+## Nguồn sunsirs (thêm 2026-10-26 16:38 ICT, bq_admin)
+`source='sunsirs', cadence='daily'`, 46.752 dòng, 23 mã, tới 2026-10-23. Độ phủ **40/40 phiên** trong cửa sổ 2026-08-21→10-23 cho cả 23 mã (đo; gần hơn TE: nhóm TQ của TE 37/43). Số dòng / lịch sử đầu / đơn vị (đo BQ):
+
+| nhóm | mã (n dòng, từ) |
+|---|---|
+| dài (2013→) | coke 3.346 · glass 3.344 · pta 3.344 · rapeseed_meal 3.344 · soybean_meal_cny 3.346 · soybean_oil 3.346 · fuel_oil 3.335 · wire_rod 3.322 (đều từ 2013-01-07) |
+| trung | ferrosilicon 2.948, silicomanganese 2.948 (2014-08-08) · cotton_yarn 2.223 (2017-08) · ethylene_glycol 1.905 (2018-12) · stainless_steel 1.712 (2019-09) · lpg 1.590 (2020-03) · polyester_staple_fiber 1.462 (2020-10) · live_hog_cny 1.399 (2021-01-08) |
+| ngắn | butadiene_rubber 782 (2023-07) · caustic_soda 747 · paraxylene 747 (2023-09) · pet 505 (2024-09) · polysilicon 439 (2024-12) · benzene 314 (2025-07) · propylene 304 (2025-07) |
+
+Monitor `commodity_freshness_monitor.py`: 23/23 sunsirs = **OK** (median_gap 1, p90_gap 3, ngưỡng STALE 5 ngày).
 
 ## Quy tắc chọn nguồn đề xuất (Winston, chờ Taylor/Mike xác nhận)
 - Chuỗi tháng / lịch sử / nối với các `data/*_monthly.csv` hiện có → **`source='worldbank_cmo'`** (trùng 246/246 tháng với csv brent/urea/iron_ore/dap, lệch 0,00).
@@ -61,6 +75,8 @@ Khoá duy nhất = (`metric_key`,`source`,`cadence`,`observation_date`) → 296.
 (Ghi chú cũ trước khi biết writer:) **Không tìm ra writer.** Không script/cron nào trong repo, crontab, `tools/`, `discord_bot/` tham chiếu bảng; không đọc được `INFORMATION_SCHEMA.JOBS_BY_PROJECT` (thiếu `bigquery.jobs.listAll`); `bq ls -j` không lộ câu lệnh. Dấu vết: `fetched_at` 2026-10-24 17:07 → 2026-10-25 11:13 (UTC) = nạp theo đợt ngày 24–25/10, bảng tạo 2026-10-25 12:38 UTC. Nghi tạo thủ công/ngoài repo (cùng `dtienthanh@gmail.com`). Lịch làm mới do bq_admin (ngoài repo). Đã xác nhận: bq_admin.
 
 ## THIẾU so với nhu cầu fleet
+**[Cập nhật 26/10 chiều sau sunsirs]** ĐÃ LẤP: PTA/polyester (`pta`, `polyester_staple_fiber`, `pet`, `paraxylene`, `ethylene_glycol` — CNY), xút (`caustic_soda`, CNY/T, từ 2023-09), heo TQ (`live_hog_cny`, từ 2021-01; chỉ xu hướng TQ). VẪN THIẾU so với danh sách xin bq_admin: **vonfram**, **photpho vàng P4** (TE `phosphorus` = quặng photphat, vô dụng), **BDTI**, **HRC Trung Quốc** (`wire_rod`/TE `steel` là thép cây/dây, không phải HRC), **cá tra / thủy sản VN**; cộng các mục cũ: giá heo hơi VN (có csv ngoài BQ), hồ tiêu, điều, SCFI/WCI, potash/amoniac chuỗi ngày.
+(Danh sách cũ trước 26/10 chiều:)
 Giá heo hơi VN (đã có `data/hog_price_vn.csv`, ngoài BQ) · thủy sản VN (tôm, cá tra) · hồ tiêu · điều · thép cây nội địa · SCFI/WCI (cước container) · PTA/polyester · potash/amoniac chuỗi ngày (WB có `potassium_chloride` monthly; TE daily chưa kiểm) · chuỗi ngày chỉ từ 2016-10-25.
 Đối chiếu sâu: `kb/projects/commodity-tables-eval-20261026.md`.
 
