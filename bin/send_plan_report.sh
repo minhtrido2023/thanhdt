@@ -217,7 +217,11 @@ if [ "$ACCOUNT" = "ZaloPay" ]; then
   fi
 fi
 if [ -n "$NOWCAST_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
-  NOWCAST_BLOCK="$(timeout 20 python3 "$NOWCAST_CMD" --plan-file "$PLAN_FILE" 2>/dev/null)" || NOWCAST_BLOCK=""
+  NOWCAST_ERR="$(mktemp)"
+  NOWCAST_BLOCK="$(timeout -k 5 20 python3 "$NOWCAST_CMD" --plan-file "$PLAN_FILE" 2>"$NOWCAST_ERR")" \
+    || { echo "[nowcast] rc=$? (124=timeout) -> bỏ khối, báo cáo vẫn gửi" >&2; NOWCAST_BLOCK=""; }
+  sed 's/^/[nowcast] /' "$NOWCAST_ERR" >&2
+  rm -f "$NOWCAST_ERR"
 fi
 export NOWCAST_BLOCK
 

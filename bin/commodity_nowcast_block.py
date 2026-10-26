@@ -13,7 +13,7 @@ agents/Taylor/research/commodity_cycle_te_20261026/ (REPORT.md §B2/§B4/§5).
 - Độ tươi: data/commodity_freshness_state.json; STALE/FROZEN/thiếu => 'KHÔNG ĐỦ TƯƠI', không in số.
 - FAIL-OPEN: mọi lỗi => log WARN ra stderr + trả chuỗi rỗng, không bao giờ ném lỗi ra caller.
 
-Dùng: commodity_nowcast_block.py --plan-file <plan.json> | --tickers DPM,DRI,GAS [--asof YYYY-MM-DD]
+Dùng: commodity_nowcast_block.py --plan-file <plan.json> | --tickers DPM,DRI,GAS
 """
 import argparse, csv, io, json, math, os, subprocess, sys
 from datetime import datetime, timezone, timedelta
