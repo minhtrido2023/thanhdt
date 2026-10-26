@@ -56,3 +56,5 @@ Giá heo hơi VN (đã có `data/hog_price_vn.csv`, ngoài BQ) · thủy sản V
 Đối chiếu sâu: `kb/projects/commodity-tables-eval-20261026.md`.
 
 ↩ [Về feeds](index.md)
+
+**[bq_admin phản hồi 2026-10-26 14:1x, qua user]** Cập nhật **mỗi ngày lúc 23:00 ICT**; giá hằng ngày thay đổi theo realtime (snapshot lúc nạp). bq_admin **KHÔNG có cơ chế phát hiện mã ngưng cập nhật** — cadence không có quy luật chung: bảng lấy từ nhiều nguồn, có nguồn 1 tháng/lần, có nguồn 2 tuần/lần; riêng TE thì có mã cập nhật theo ngày, có mã theo tuần. ⇒ (1) dữ liệu 'hôm nay' chỉ có SAU 23:00 ICT, KHÔNG dùng cho tính toán trong ngày (đúng bright-line §6: same-day = DNSE, không BQ); (2) mã đứng giá ≠ giá không đổi: consumer phải tự kiểm `observation_date` của từng mã so với kỳ vọng cadence, KHÔNG tin 'dòng mới nhất' là tươi; (3) chưa có freshness-monitor theo mã — đề xuất (chưa làm, chờ duyệt): học cadence thực của từng mã từ lịch sử (median khoảng cách giữa 2 quan sát) rồi cảnh báo khi trễ > ~3× median.
