@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-10-20",
+  "updated": "2026-10-26",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -789,6 +789,42 @@
       ],
       "notes": "Job Taylor_20261025_062825. Nghiên cứu: mike/agents/Taylor/research/commodity_cycle_prereg2_20261025/. Cron CHƯA cài (Mike/user quyết). Tại lúc đóng băng N=0: cả 5 họ đang bị thời gian chết 12 tháng (rubber/urea tới 2027-03, crude 2027-04, DAP 2027-06, sugar 2027-09) và 3 sự kiện sau cửa sổ backtest (crude 2026-03, DAP 2026-05, sugar 2026-08) là PRE_FREEZE_BACKFILL counts=False.",
       "review_short": "2028-01-31 FAIL-sớm · 2031-01-31 cuối — review_script cổng ngày; N kỳ vọng 0–2 cụm tới hết 2027 (ước lượng)"
+    },
+    {
+      "id": "commodity_sue_decomp_forward",
+      "name": "Tách SUE của LAG: phần hàng hoá đã biết vs bất ngờ thật (OOS tương lai, PREREG-4)",
+      "owner": "Taylor",
+      "start": "2027-01-10",
+      "end": "2031-09-01",
+      "review_date": "2027-09-01",
+      "objective": "Kiểm forward DUY NHẤT cho giả thuyết post-hoc B2 (job Taylor_20261026_075337): SUE_res = SUE − SUE_hat(giá TB quý hàng hoá, fit expanding theo Release_Date) dự báo post60 tốt hơn SUE thô ở 25 mã tier A (8 họ). Thống kê ΔIC = IC(res,post60) − IC(raw,post60) theo mùa; S1 chính = (NP_P0−NP_P4)/Revenue_P4, S2 phụ = surprise_B_MA live; Holm ×2. Chỉ ghi nhật ký; không lệnh/plan/sizing, không đổi LAG. Thiết kế khoá ở PREREG-4.md (md5 6c5642c13ea830f464a0fd07b1be2d4c, commit 601f26ae6).",
+      "data_sources": [
+        "tav2_bq.commodity_prices source='trading_economics' cadence='daily' (feeds/bq_commodity_prices.md, CANONICAL-WITH-TRAPS — source tường minh)",
+        "data/bq_cache/ticker_financial.parquet + data/bq_cache/ticker + data/bq_cache/universe_pit (mirror BQ, T-1)",
+        "lag_live_schedule.live_lag_candidates() (data/earnings_surprise_data.pkl + earnings_events_classified.csv) — chỉ để gắn cờ lag_qualify / nhóm NO_COMMODITY",
+        "mike/bin/commodity_sue_decomp_forward_tracker.py → data/commodity_sue_decomp_forward_events.csv, data/commodity_sue_decomp_forward_outcomes.csv",
+        "mike/bin/commodity_sue_decomp_forward_review.py (verdict, cổng ngày)"
+      ],
+      "end_or_trigger": "Mốc 2027-09-01 (≈2 mùa, CHỈ kiểm toàn vẹn nhật ký + quant-skeptic) · 2028-09-01 · 2029-09-01 · 2030-09-01 (FAIL sớm: N≥8 mùa và TB ΔIC≤0) · CUỐI 2031-09-01 (PASS: N≥16 mùa + 5 điều kiện PREREG-4 §4; thiếu N ⇒ 'KHÔNG PHÂN BIỆT ĐƯỢC', đóng, không tự gia hạn). Review script từ chối chạy trước 2027-09-01.",
+      "gate_criteria": [
+        {
+          "status": "pending",
+          "text": "Tracker chạy đều sau khi Mike cài cron (cửa sổ 10/M1→15/M2 mỗi quý): mọi sự kiện tier A quý ≥2026Q4 có dòng; LATE/NOT_IN_UNIVERSE/NO_FIT_HISTORY có lý do, không im lặng"
+        },
+        {
+          "status": "pending",
+          "text": "Verdict theo PREREG-4 §4 tại mốc (2027-09-01 chỉ toàn vẹn; FAIL sớm từ 2028-09-01; PASS chỉ ở 2031-09-01)"
+        }
+      ],
+      "feature_flag": "N/A — paper-only, không có đường code production nào đọc ledger này",
+      "reporting": false,
+      "reporting_reason": "Sự kiện chỉ phát sinh 4 mùa/năm và thống kê chỉ được xem ở mốc khoá ⇒ render hằng ngày là nhiễu; paper_checkpoint_escalation.sh vẫn bắt khi quá hạn.",
+      "today_activity": {
+        "mode": "none_available",
+        "reason": "Chương trình thuần quan sát: không sinh lệnh, không có sleeve NAV. Sản phẩm = 2 ledger append-only (sự kiện + post60)."
+      },
+      "notes": "Job Taylor_20261026_095928. Nghiên cứu: mike/agents/Taylor/research/commodity_cycle_te_20261026/ (PREREG-4.md, b2_rerun.*, CRON_PROPOSAL.md). Cron CHƯA cài (Mike duyệt). Nhật ký khởi tạo 2026-10-26: 5 sự kiện tier A 2026Q3 (TRC, VOS, DDV, PVB, LAS) + 26 NO_COMMODITY, đều PRE_FREEZE_BACKFILL counts=False. Power: MDE ΔIC 0,10 ở 16 mùa; hiệu lịch sử S1 +0,043 cần ≈97 mùa ⇒ kết cục dự kiến 'KHÔNG PHÂN BIỆT ĐƯỢC' trừ khi hiệu lớn. Với S2 (biến SUE live) ΔIC lịch sử −0,012.",
+      "review_short": "2027-09-01 toàn vẹn · 2028/29/30-09-01 FAIL-sớm · 2031-09-01 cuối — review_script cổng ngày; MDE 0,10 @16 mùa (đo)"
     }
   ]
 }
