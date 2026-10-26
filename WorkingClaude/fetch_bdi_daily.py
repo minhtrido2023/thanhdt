@@ -9,8 +9,13 @@ to data/bdi_daily_real.csv, deduped by date. Schedule daily → a genuine BDI fe
 
 Run:  python fetch_bdi_daily.py
 CSV:  data/bdi_daily_real.csv  (columns: date,bdi,bci,bpi,bsi,bhsi,src,fetched)
+      fetched = real run time, ICT ISO with tz (older rows: bare date). Nobody parses it.
+Guards: if all 5 indices equal the previous row's, the page was NOT updated -> no row written,
+warning on stderr, exit 0. Raw HTML kept in data/raw/bdi_handybulk_<date_HHMM>.html (30 days).
 """
-import os, re, ssl, sys, urllib.request
+import glob, os, re, ssl, sys, time, urllib.request
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import pandas as pd
 try: sys.stdout.reconfigure(encoding="utf-8")
 except Exception: pass
@@ -19,6 +24,24 @@ OUT=os.path.join(WORKDIR,"data","bdi_daily_real.csv")
 URL="https://www.handybulk.com/baltic-dry-index/"
 MONTHS={m:i+1 for i,m in enumerate(["January","February","March","April","May","June",
     "July","August","September","October","November","December"])}
+
+ICT=ZoneInfo("Asia/Ho_Chi_Minh")
+KEYS=["bdi","bci","bpi","bsi","bhsi"]
+RAW_KEEP_DAYS=30
+
+def save_raw(html, now):
+    d=os.path.join(WORKDIR,"data","raw"); os.makedirs(d,exist_ok=True)
+    with open(os.path.join(d,f"bdi_handybulk_{now:%Y-%m-%d_%H%M}.html"),"w",encoding="utf-8") as f: f.write(html)
+    cut=time.time()-RAW_KEEP_DAYS*86400
+    for p in glob.glob(os.path.join(d,"bdi_handybulk_*.html")):
+        if os.path.getmtime(p)<cut: os.remove(p)
+
+def is_stale_copy(old,row):
+    """True if all 5 indices equal the latest older row (by date) — page not refreshed."""
+    prev=old[old["date"]<row["date"]].sort_values("date")
+    if prev.empty: return False
+    last=prev.iloc[-1]
+    return all(pd.notna(last[k]) and row[k] is not None and int(last[k])==int(row[k]) for k in KEYS)
 
 def fetch_html():
     ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
@@ -53,12 +76,17 @@ def parse(html):
     return row
 
 def main():
-    html=fetch_html(); row=parse(html); row["src"]="handybulk"
-    # fetched timestamp from the data date itself (no Date.now needed); keep simple
-    row["fetched"]=row["date"]
+    now=datetime.now(ICT)
+    html=fetch_html(); save_raw(html,now); row=parse(html); row["src"]="handybulk"
+    row["fetched"]=now.isoformat(timespec="seconds")
     new=pd.DataFrame([row])
     if os.path.exists(OUT):
         old=pd.read_csv(OUT)
+        if is_stale_copy(old,row):
+            print(f"WARN fetch_bdi_daily: {row['date']} has BDI/BCI/BPI/BSI/BHSI identical to the previous row "
+                  f"({row['bdi']}/{row['bci']}/{row['bpi']}/{row['bsi']}/{row['bhsi']}) -> source page not refreshed; "
+                  f"NOT writing a row.",file=sys.stderr)
+            return
         comb=pd.concat([old,new],ignore_index=True).drop_duplicates(subset=["date"],keep="last")
     else:
         comb=new
