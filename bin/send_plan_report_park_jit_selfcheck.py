@@ -693,6 +693,32 @@ check("T14g cờ DD của lệnh MUA ⇒ mục CẢNH BÁO có dòng theo mã + 
       and "⚠️ SCL: DD n/a" in out14g and "cờ đỏ" in out14g and "cảnh báo" in out14g.split("\n")[1],
       out14g[:900])
 
+
+# ── T14h-j (review độc lập 27/10) ──
+import re as _re14
+q = _quiet_plan([])
+q["park_trim_proposal"] = {"decision": "BLOCKED_RECONCILE", "orders": [], "notes": ["sổ lô lệch"]}
+q["jit_unpark_proposal"] = {"decision": "BLOCKED_DAYCAP", "orders": [], "buy_amendments": [], "notes": ["fail-closed"]}
+out14h = run_sender(q, "SpaceX", files=_gl)
+_secw = out14h.split("⚠️ CẢNH BÁO")[1] if "⚠️ CẢNH BÁO" in out14h else ""
+_m = _re14.search(r"(\d+) cảnh báo", out14h.split("\n")[1])
+check("T14h header đếm ĐỦ cả L1/L2 BỊ CHẶN (🅿️/💧 không bắt đầu bằng ⚠) — đếm theo mục, không theo emoji",
+      _m is not None and int(_m.group(1)) == 2 and "TRIM PARK (L1) BỊ CHẶN" in _secw and "(L2/JIT) BỊ CHẶN" in _secw,
+      out14h[:500])
+
+q = _quiet_plan([])
+q["notes"] = ["⚠ THIẾU GIÁ LIVE — cần kiểm tra tay: DNSE 500"]        # ⚠ trần (U+26A0), không variation selector
+out14i = run_sender(q, "SpaceX", files=_gl)
+check("T14i plan['notes'] mở bằng ⚠ trần (không VS16) cũng lên CẢNH BÁO",
+      "THIẾU GIÁ LIVE" in out14i and out14i.index("⚠️ CẢNH BÁO") < out14i.index("THIẾU GIÁ LIVE"))
+
+q = _quiet_plan([])
+q["park_trim_proposal"] = {"decision": "NO_TRIM_STRUCTURE", "orders": [], "notes": ["phần vượt trần ở mã chưa mua"]}
+out14j = run_sender(q, "SpaceX", files=_gl)
+check("T14j L1 NO_TRIM_STRUCTURE (không ⚠️ trong note) vào CẢNH BÁO, KHÔNG xuống GHI CHÚ 'không cần quyết định'",
+      "⚠️ CẢNH BÁO" in out14j and "NO_TRIM_STRUCTURE" in out14j.split("⚠️ CẢNH BÁO")[1]
+      and "GHI CHÚ" not in out14j)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")

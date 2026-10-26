@@ -462,6 +462,7 @@ if buy_sell_orders:
 # — máy không phân biệt được, người duyệt phân biệt được. Ngưỡng 10% > làm tròn lô điển hình
 # (<5% ở lô 100 với giá 2 chữ số) nhưng << 27% của sự cố thật.
 capit_note = ""
+capit_cov_gap = False     # rổ CAPIT có mã KHÔNG có lệnh ⇒ ✅ "khớp" KHÔNG có nghĩa đã triển khai đủ vốn
 _capit_buys = [o for o in orders if isinstance(o, dict)
                and str(o.get("book", "")).upper() == "CAPIT"
                and str(o.get("side", "")).lower() in ("buy", "mua", "b")]
@@ -511,6 +512,7 @@ if _capit_buys:
             _target = float(_slot) * len(_capit_buys)
             _dev = (_actual - _target) / _target if _target > 0 else 0.0
             _basis += _cov
+            capit_cov_gap = bool(_cov)
             if abs(_dev) > 0.10:
                 capit_note = (f"⚠️ CAPIT: Σ lệnh mua {_actual/1e6:,.0f}tr vs mục tiêu "
                               f"{_target/1e6:,.0f}tr ({len(_capit_buys)} mã × "
@@ -659,9 +661,9 @@ def _note_text(note, budget=300):
         return s
     return s if len(s) <= budget else s[:budget] + "…"
 
-def _route(txt):
-    """Dòng chẩn đoán: có ⚠️ thật ⇒ WARN (nguyên văn), còn lại ⇒ INFO."""
-    (WARN if "⚠️" in txt else INFO).append(txt)
+def _route(txt, warn=False):
+    """Dòng chẩn đoán: có ⚠️ thật HOẶC warn=True (decision không thuộc nhóm yên ổn đã biết) ⇒ WARN, còn lại ⇒ INFO."""
+    (WARN if (warn or "⚠️" in txt) else INFO).append(txt)
 
 def _o_val(o):
     """VND của 1 lệnh đề xuất. plan ZaloPay KHÔNG ghi `value_vnd` trong park_trim/jit orders
@@ -754,12 +756,13 @@ _ctx = f"NAV {nav_str} · Regime {state}"
 # 'ổn định' = xác nhận thuần ⇒ bỏ (§4). Bỏ P(xác nhận), mốc badzone: số tham khảo đổi chậm, đã có
 # trong EOD report (dna_report).
 try:
-    from dna_report import get_dt_gate_clock, STATE_MAP as _SMAP
+    from dna_report import get_dt_gate_clock, build_dt_gate_line, STATE_MAP as _SMAP
     _c = get_dt_gate_clock()
     if _c and _c.get("active"):
         _cn = _SMAP.get(_c["cand"], ("?",))[0]
-        _prog = _c["k"] / _c["need"] if _c["need"] else 0.0
-        _bd = "🔴 " if _prog >= 0.85 else ("🟡 " if _prog >= 0.70 else "")
+        # badge 🟢/🟡/🔴 lấy từ dòng chuẩn của dna_report (ngưỡng định nghĩa MỘT chỗ); 🟢 = bình thường ⇒ không hiện
+        _gl = (build_dt_gate_line(html=False) or "").split("\n")[0]
+        _bd = "🔴 " if "🔴" in _gl else ("🟡 " if "🟡" in _gl else "")
         _ctx += (f" · {_bd}DT5G candidate {_cn} {_c['k']}/{_c['need']} "
                  f"(còn {_c['need'] - _c['k']} phiên để commit)")
 except Exception:
@@ -852,7 +855,7 @@ if tday:
 # plan['notes'][]: CHỈ note DollarBill mở đầu bằng ⚠️/🛑 mới lên report (hợp đồng viết note — xem
 # kb/context_planning_mini.md "Viết note trong plan"). Phần còn lại là nhật ký lập plan, nằm trong file.
 for _pn in (plan.get("notes") or []):
-    if isinstance(_pn, str) and _pn.lstrip().startswith(("⚠️", "🛑")):
+    if isinstance(_pn, str) and _pn.lstrip().startswith(("⚠", "🛑")):
         WARN.append(_pn.strip())
 
 if orders:
@@ -904,7 +907,7 @@ if orders:
     if price_verify_note and verified_n < len(buy_sell_orders):
         WARN.append(price_verify_note)
     # capit_note: ✅ (khớp mục tiêu) = xác nhận thuần ⇒ bỏ; ⚠️ giữ NGUYÊN văn.
-    if capit_note and "⚠️" in capit_note:
+    if capit_note and (not capit_note.startswith("✅") or "⚠️" in capit_note or capit_cov_gap):
         WARN.append(capit_note)
 
     # Note của lệnh do DollarBill (LLM) viết có phần mẫu CỐ ĐỊNH mỗi ngày ("theo
@@ -1285,7 +1288,8 @@ try:
         _pt_show = _pt_warn or _pt_notes[:1]
         if not (pt_dec == "TRIM" and pt_merged and not _pt_warn):   # đã merge ⇒ lệnh + lý do nằm ở mục LỆNH
             _route(f"🅿️ L1 trim PARK: {pt_dec}"
-                       + (f" — {'; '.join(_note_text(n) for n in _pt_show[:2])}" if _pt_show else ""))
+                       + (f" — {'; '.join(_note_text(n) for n in _pt_show[:2])}" if _pt_show else ""),
+                   warn=pt_dec not in ("TRIM", "NO_TRIM", "SKIP_STATE"))   # NO_TRIM_STRUCTURE/decision lạ ⇒ WARN (§4)
 except Exception as _e:      # fail-open: một khối báo cáo không được chặn plan
     WARN.append(f"⚠️ Không render được khối L1 park_trim ({type(_e).__name__}: {_e}) — "
                  f"đọc thẳng `park_trim_proposal` trong file plan trước khi duyệt.")
@@ -1341,7 +1345,8 @@ try:
         _jt_show = _jt_warn or _jt_notes[:1]
         if jit_dec not in ("NO_JIT_NEEDED", "NO_TRIGGER") or _jt_warn:
             _route(f"💧 L2 JIT unpark: {jit_dec}"
-                   + (f" — {'; '.join(_note_text(n) for n in _jt_show[:2])}" if _jt_show else ""))
+                   + (f" — {'; '.join(_note_text(n) for n in _jt_show[:2])}" if _jt_show else ""),
+                   warn=jit_dec not in ("NO_JIT_NEEDED", "NO_TRIGGER", "JIT"))
 except Exception as _e:      # fail-open
     WARN.append(f"⚠️ Không render được khối L2 jit_unpark ({type(_e).__name__}: {_e}) — "
                  f"đọc thẳng `jit_unpark_proposal` trong file plan trước khi duyệt.")
@@ -1361,7 +1366,7 @@ for _env, _lbl in (("DRIFT_BLOCK", "vị thế sau plan"), ("LAGCAL_BLOCK", "l�
     if not _bl:
         continue
     if any(m in "\n".join(_bl) for m in ("⚠️", "⛔", "🔴")):
-        WARN.extend(_bl)
+        WARN.append("\n".join(_bl))     # cả khối = 1 cảnh báo
     else:
         if any(_x.lstrip().startswith("✅") for _x in _bl):
             _ok_checks.append(_lbl)
@@ -1379,8 +1384,7 @@ elif requires or orders:
     _status = "⏳ **CHỜ DUYỆT** — nhắn Mike để duyệt (chưa duyệt: bot KHÔNG đặt lệnh, preflight 08:45 báo RED)."
 else:
     _status = "✅ HOLD 0 lệnh — không cần duyệt."
-_nw = len([w for w in WARN if w.lstrip()[:1] in ("⚠", "⛔", "🔴", "🛑")
-           and not w.startswith("   ")])
+_nw = len([w for w in WARN if not w.startswith(" ")])    # mỗi entry WARN = 1 cảnh báo; dòng con thụt đầu dòng không đếm
 if _nw:
     _status += f" · ⚠️ **{_nw} cảnh báo** (mục CẢNH BÁO cuối)"
 HDR[HDR.index("@@STATUS@@")] = _status
