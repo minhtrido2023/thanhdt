@@ -1295,6 +1295,45 @@ def main():
         finally:
             shutil.rmtree(td, ignore_errors=True)
 
+    # ---------------- Test 28: chạy lại sau lỗi kết cấu (DNSE 500 tối 26/10) — sổ lô LAG+BAL dựng
+    # được ⇒ `blocked` của entry auto trước chuyển sang `blocked_superseded` (báo cáo chỉ đọc
+    # `blocked`), entry THỦ CÔNG không bị đụng; sổ lô vẫn lỗi ⇒ KHÔNG gỡ. ----------------
+    for _case28, _bal_ok28 in (("ok", True), ("vẫn lỗi", False)):
+        td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+        try:
+            write_positions(exec_dir, signal_date_str, {})
+            write_plan(plan_dir, ACCOUNT, plan_date)
+            _pp28 = os.path.join(plan_dir, f"plan_{ACCOUNT}_{plan_date}.json")
+            _pl28 = json.load(open(_pp28, encoding="utf-8"))
+            _pl28["auto_exit_inject_notes"] = [
+                {"at": "t0", "source": "auto_exit_inject",
+                 "blocked": [{"ticker": None, "book": "BAL", "reason": "park_holdings lỗi: HTTP 500"}]},
+                {"at": "t1", "manual": True,
+                 "blocked": [{"ticker": "MAN", "book": "BAL", "reason": "ghi tay"}]}]
+            json.dump(_pl28, open(_pp28, "w", encoding="utf-8"), ensure_ascii=False)
+            orig = patch_all(exec_dir, plan_dir, ledger_path, lag_lots={}, bal_lots={},
+                             lag_ok=True, bal_ok=_bal_ok28)
+            try:
+                rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+            finally:
+                restore_all(orig)
+            plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+            n28 = plan.get("auto_exit_inject_notes") or []
+            auto28 = [n for n in n28 if n.get("source") == "auto_exit_inject"]
+            live_blocked28 = [b for n in auto28 for b in (n.get("blocked") or [])]
+            if _bal_ok28:
+                check("Test28: sổ lô dựng lại được ⇒ blocked cũ → blocked_superseded, không còn blocked sống",
+                      rc == 0 and not live_blocked28 and bool(auto28[0].get("blocked_superseded")),
+                      f"rc={rc} notes={n28}")
+            else:
+                check("Test28: sổ BAL vẫn lỗi ⇒ KHÔNG gỡ blocked (vẫn báo ⛔)",
+                      any(b["book"] == "BAL" and b["ticker"] is None for b in live_blocked28),
+                      f"notes={n28}")
+            check(f"Test28 ({_case28}): entry thủ công giữ nguyên blocked",
+                  any(n.get("manual") and n.get("blocked") for n in n28), f"notes={n28}")
+        finally:
+            shutil.rmtree(td, ignore_errors=True)
+
     # ---------------- Test 6: TZ-robustness của plan_date trong main() (§16) ----------------
     def expected_plan_date(env):
         r = subprocess.run(
