@@ -37,9 +37,16 @@ SOURCE_FROM = {"yellow_phosphorus": "2018-01-01"}      # trước mốc này chu
 P4_MAX_AGE_D = 7                                       # P4 sunsirs chưa có trong monitor: tuổi quan sát cuối tối đa
 P4_KEY = "yellow_phosphorus"
 
+# Override hiển thị (KHÔNG sửa commodity_map_te.csv — md5 bị khoá bởi tracker/PREREG-4): bỏ dòng TE phosphorus (nay là quặng)
+# của DGC/PAT + lưu huỳnh của DGC/PAT (chỉ đạo user: không in lưu huỳnh), thêm P4 sunsirs tier D (chỉ mô tả).
+MAP_DROP = {("DGC", "phosphorus"), ("PAT", "phosphorus"), ("DGC", "sulfur"), ("PAT", "sulfur")}
+MAP_ADD = [("DGC", "p4_yellow"), ("PAT", "p4_yellow")]
+P4_NOTE = "P4 sunsirs (CNY/t, từ 2018) thay dòng TE phosphorus (nay là quặng); quan hệ gãy từ 2024"
+
 QUERY = ("SELECT metric_key, observation_date, value FROM tav2_bq.commodity_prices "
          "WHERE cadence='daily' AND ((source='trading_economics' AND metric_key IN ({te_keys})) "
-         "OR (source='sunsirs' AND metric_key IN ({ss_keys}) AND observation_date >= '{ss_from}')) "
+         "OR (source='sunsirs' AND metric_key IN ({ss_keys}) AND observation_date >= '{ss_from}' "
+         "AND EXTRACT(DAYOFWEEK FROM observation_date) BETWEEN 2 AND 6)) "
          "ORDER BY metric_key, observation_date")
 
 FOOTER = ("_Thị trường đã định giá phần này trước ngày công bố (nowcast IC 0,44 với KQKD, ~0 với giá CP sau công bố); "
@@ -65,7 +72,13 @@ def load_map(path=None):
                 continue
             out.setdefault(r["ticker"], []).append(dict(
                 family=r["family"], key=r["te_metric_key"], sign=int(r["sign"]), tier=r["tier"], note=r["note"]))
-    for rows in out.values():
+    for (t, fam) in MAP_ADD:
+        rows = out.setdefault(t, [])
+        rows[:] = [r for r in rows if (t, r["key"]) not in MAP_DROP]
+        if not any(r["key"] == P4_KEY for r in rows):
+            rows.append(dict(family=fam, key=P4_KEY, sign=1, tier="D", note=P4_NOTE))
+    for t, rows in out.items():
+        rows[:] = [r for r in rows if (t, r["key"]) not in MAP_DROP]
         rows.sort(key=lambda r: r["tier"])        # A trước B trước D
     return out
 
@@ -88,7 +101,10 @@ def fetch_te(keys, runner=None):
     series = {}
     for r in csv.DictReader(io.StringIO(text)):
         try:
-            series.setdefault(r["metric_key"], []).append((r["observation_date"][:10], float(r["value"])))
+            d = r["observation_date"][:10]
+            if r["metric_key"] in SOURCE_OVERRIDE and datetime.fromisoformat(d).weekday() >= 5:
+                continue                                  # sunsirs lặp giá T6 vào T7/CN => lệch TB; SQL đã lọc, đây là lớp 2
+            series.setdefault(r["metric_key"], []).append((d, float(r["value"])))
         except (ValueError, KeyError):
             continue
     for v in series.values():
@@ -198,7 +214,7 @@ def build_block(tickers, series, fresh, fresh_err, cmap, now=None):
             sign = r["sign"]
             role = "producer" if sign > 0 else "consumer (chi phí, dấu ngược)"
             head = f"  - {r['family']} [{r['key']}, {role}, nhóm {r['tier']}]: "
-            if not is_fresh(r["key"], fresh, series, now):
+            if fresh_err or not is_fresh(r["key"], fresh, series, now):
                 src = "sunsirs" if r["key"] in SOURCE_OVERRIDE else "TE"
                 lines.append(head + f"{STALE_TXT} (nguồn {src} '{r['key']}' không OK/thiếu/quá cũ; không in số)")
                 if r["key"] == P4_KEY:
@@ -225,7 +241,7 @@ def build_block(tickers, series, fresh, fresh_err, cmap, now=None):
                 lines.append("    " + P4_WARN)
     if not lines:
         return ""
-    hdr = "🛢️ **Nowcast KQKD theo hàng hoá (nội bộ, display-only)** — c_yoy = log giá TB quý TE / cùng quý năm trước × dấu vai trò; nhãn = mô tả theo ngưỡng ±0,05, không phải tín hiệu"
+    hdr = "🛢️ **Nowcast KQKD theo hàng hoá (nội bộ, display-only)** — c_yoy = log giá TB quý TE/sunsirs / cùng quý năm trước × dấu vai trò; nhãn = mô tả theo ngưỡng ±0,05, không phải tín hiệu"
     if fresh_err:
         hdr += f"\n  ({STALE_TXT}: {fresh_err})"
     return "\n".join([hdr] + lines + [FOOTER])

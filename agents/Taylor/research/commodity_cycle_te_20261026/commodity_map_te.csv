@@ -16,8 +16,8 @@ DPM,urea,urea,1,A,TE urea chỉ từ 2019-06 (37% phiên đứng giá) => IS ng�
 DCM,urea,urea,1,A,TE urea chỉ từ 2019-06 (37% phiên đứng giá) => IS ngắn; khí đầu vào neo dầu
 DDV,dap,di_ammonium,1,A,"TE DAP từ 2019-06, 63% phiên đứng giá (cập nhật ~tuần)"
 LAS,dap,di_ammonium,1,A,"TE DAP từ 2019-06, 63% phiên đứng giá (cập nhật ~tuần)"
-DGC,p4_yellow,yellow_phosphorus,1,D,"P4 sunsirs (CNY/t, từ 2018) thay dòng TE phosphorus (nay là quặng); quan hệ gãy từ 2024"
-PAT,p4_yellow,yellow_phosphorus,1,D,"P4 sunsirs (CNY/t, từ 2018) thay dòng TE phosphorus (nay là quặng); quan hệ gãy từ 2024"
+DGC,phosrock,phosphorus,1,D,"BẪY TÊN: TE 'phosphorus' ~1.000 CNY/t = QUẶNG photphat TQ, KHÔNG phải P4 (~20-30k CNY/t); từ 2022-08, 94% phiên đứng giá, 43 giá trị => vô dụng cho tín hiệu"
+PAT,phosrock,phosphorus,1,D,"BẪY TÊN: TE 'phosphorus' ~1.000 CNY/t = QUẶNG photphat TQ, KHÔNG phải P4 (~20-30k CNY/t); từ 2022-08, 94% phiên đứng giá, 43 giá trị => vô dụng cho tín hiệu"
 LAS,phosrock,phosphorus,1,D,"BẪY TÊN: TE 'phosphorus' ~1.000 CNY/t = QUẶNG photphat TQ, KHÔNG phải P4 (~20-30k CNY/t); từ 2022-08, 94% phiên đứng giá, 43 giá trị => vô dụng cho tín hiệu"
 DDV,sulfur,sulfur,-1,B,lưu huỳnh = đầu vào axit H2SO4 cho DAP/lân => chiều ngược; 2026 tăng x7 so 2020 (CHƯA xác minh đơn vị)
 LAS,sulfur,sulfur,-1,B,lưu huỳnh = đầu vào axit H2SO4 cho DAP/lân => chiều ngược; 2026 tăng x7 so 2020 (CHƯA xác minh đơn vị)
