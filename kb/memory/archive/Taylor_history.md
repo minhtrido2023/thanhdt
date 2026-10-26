@@ -1556,3 +1556,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T17:34:56Z] ĐANG DỞ job Taylor_20261025_172538: S1 3cdefe417 + S2 fe910d1e5 xong (bus); S3 batch 24 run nền từ 00:33 (wt-lag-capacity-floor, logs/run_batch_S.log), PREREG_S 1e909f719 | NEXT: analyze_S.py → REPORT_S §S3 → bus S3 + 'S ket luan'
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T18:23:10Z] [lag-capacity-floor S 10-26] XONG job Taylor_20261025_172538 @148b84685 (chua merge): band 50 ty ~11,7-20,7/14,6-23,8, trung tam 18,5-20,7/21,2-23,8, chi phi IS -4,2..-4,4pp — CHO Mike/user: co chay bien the doi 3 phien + cong gia anchor khong

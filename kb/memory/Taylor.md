@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-25T18:23:10Z] [lag-capacity-floor S 10-26] XONG job Taylor_20261025_172538 @148b84685 (chua merge): band 50 ty ~11,7-20,7/14,6-23,8, trung tam 18,5-20,7/21,2-23,8, chi phi IS -4,2..-4,4pp — CHO Mike/user: co chay bien the doi 3 phien + cong gia anchor khong
 - [2026-10-26T01:34:42Z] [dd-NNC 10-26] XONG job Taylor_20261026_012529: NON (khong fear-state, dinh chu ky, PB1,59); weighted 62,8k vs 47,6k. REPORT research/dd_NNC_20261026/. Meo: BCTC scan -> pip --target /tmp/pdflib pypdf, trich anh trang roi Read anh
 - [2026-10-26T04:55:12Z] [dd-template 10-26] XONG job Taylor_20261026_045054: mau DD + khoi chu ky mu o research/dd_template_20261026/ (chua commit) — CHO Mike/user duyet so dd_cycle_reads.md + cong; chay lai mu 5 ma = job khac
 - [2026-10-26T04:59:04Z] [sector-frames 10-26] XONG job Taylor_20261026_045056: khung bank/BDS/hoa chat o research/sector_frames_20261026/; CHAM du bao F-CHEM-2 <=2027-02-28, F-BANK/RE/CHEM-1 ngay 2027-05-20
@@ -26,3 +25,4 @@
 - [2026-10-26T05:47:27Z] [dd-blind2-DRI 10-26] XONG buoc 1 job Taylor_20261026_054006: CYCLE_BLOCK md5 15bd430e khoa 12:47 ICT, blind yes; du bao bien LNST Q3/26 >=27% p0,70 cham 2026-11-09 — buoc 2 la job khac
 - [2026-10-26T05:48:22Z] [dd-blind2-TV1 10-26] buoc 1 KHOA md5 4409305f (research/dd_blind2_TV1_20261026/); F: bien gop Q3/26 <33,0% p0.65, cham 2026-11-09 — buoc 2 la job khac
 - [2026-10-26T06:44:41Z] [dgc-q3-forecast 10-26] KHOA md5 d6ea39f4 (research/dgc_q3_forecast_20261026/): LNST me Q3/26 320 ty, 50% [270,370], 80% [215,425]; cham khi DGC cong bo (du kien 27/10-14/11)
+- [2026-10-26T07:54:05Z] ĐANG DỞ: lag-capacity-floor D job Taylor_20261026_074918 — batch run_batch_D.sh (26 run) chạy nền từ 14:53 ICT trong wt-lag-capacity-floor-20261025 | NEXT: analyze_D.py → REPORT_D.md → commit → bus finding 'lag-capacity-floor-20261025 D'

@@ -116,3 +116,6 @@
 
 ## Archived 2026-10-21 (keep=12 days=0 require_done=False)
 - [2026-10-20T18:03:11Z] 01:10 21/10: Taylor_20261020_162558 XONG (claimed; PREREG V1D 2c1a3a71/V1E 12daef05/V3Ap 4b52b717/V4 a210a290 khớp REPORT; control 4/4 byte-identical, 20/20 selfcheck 0 VND). V1D chặn ADV3M<=0 nhân quả: ΔCAGR +1,25..+2,03 (DƯƠNG) → phần Vol=0/ADV3M<=0 KHÔNG là nguồn lợi nhuận pin (31% giá trị mua nhưng 9-11% PnL); nhưng 41-47% giá trị mua LAG vẫn >20% giá trị khớp cùng ngày, nhóm X gánh 43% PnL (54% 2022-26) → CHƯA thể nói pin thực thi được ở 50B. ΔIS âm mọi biến thể, ΔOOS dương. V3A' không đổi nhãn. Skeptic survivorship-volzero-V1D-V1E-V3Ap-V4 chạy nền (logs/verify_survivorship_v1d_bg.log). Chờ user: stock_news.proposed; bước kế capacity (trần tham gia theo phiên).
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T18:24:13Z] 26/10 01:30 Taylor S1-S3 xong+verify, ghi tracking. Chờ user: skeptic vòng 3 cho S? hỏi DollarBill/Mafee RESIDUAL + biến thể dời 3 phiên? Nhắc egg trước 09:05 (~07:30).
