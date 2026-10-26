@@ -29,3 +29,4 @@
 - [2026-10-26T08:18:08Z] [commodity-te 10-26] XONG job Taylor_20261026_075337 @cff2bc5c3: TE nowcast KQKD IC 0,45 (thi truong da dinh gia), B3 13 trial khong qua cong, khong chinh model — CHO Mike/user: PREREG forward LAG surprise-decomp + xin bq_admin feed APT/xut/P4/BDTI
 - [2026-10-26T09:47:02Z] [lag-capacity-floor D 10-26] XONG job Taylor_20261026_074918 @456b07baf (chua merge): band 50 ty ~11,7-18,1/14,6-20,8, CHINH D3AK10 18,08/20,82; lo ro slot LAG (inflight vo hinh tran 12) ~3pp, pin cung huong -2,2/-2,6 — CHO verify live slot + ca partial SCL/VPB plan 27/10
 - [2026-10-26T10:00:45Z] ĐANG DỞ: commodity-sue-decomp PREREG-4 job Taylor_20261026_095928 trong wt-commodity-sue-decomp-20261026 | NEXT: b2_rerun (Bước 0) → PREREG-4 commit → tracker+selfcheck+review
+- [2026-10-26T10:05:01Z] [commodity-nowcast-block 10-26] XONG job Taylor_20261026_095926 @920bb4219 (wt-commodity-nowcast, chua merge) — CHO arch-reviewer + Mike merge
