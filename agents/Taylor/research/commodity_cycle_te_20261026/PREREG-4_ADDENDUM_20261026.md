@@ -1,0 +1,6 @@
+# PREREG-4 — ADDENDUM 1 (2026-10-26, Mike, sau quant-skeptic CONFIRMED medium)
+PREREG-4.md (md5 6c5642c13ea830f464a0fd07b1be2d4c) KHÔNG sửa. Addendum chỉ sửa lỗi ghi chép/thủ tục, không đổi giả thuyết, số trial, tiêu chí PASS/FAIL hay danh sách mã.
+1. §0 trích decomp post60 residual "t 1,77, CI90 [0,013; 0,191]"; số đúng theo `b2_rerun.json` là **t 1,78, CI90 [0,013; 0,188]**. Nguồn: b2_rerun.json (seed 20261027), skeptic tái chạy byte-equal.
+2. §4 câu "res và raw dùng cùng hạng trong family×quarter" KHÔNG đúng tuyệt đối: fit expanding theo Release_Date cho (a,b) khác nhau trong cùng family×quarter nên hạng có thể khác. Hệ quả: dIC không phải hiệu của hai hạng đồng nhất; vẫn đo được, không đổi tiêu chí.
+3. Lỗ hổng cổng ngày (skeptic killer objection): `commodity_sue_decomp_forward_review.py --asof` không bị chặn ở ngày hôm nay nên có thể ra verdict 'final' trên dữ liệu giữa kỳ không nhãn PEEK. ĐÃ VÁ cùng commit addendum: từ chối --asof > hôm nay (ICT) trừ khi --peek; mọi lần gọi (kể cả bị từ chối) ghi 1 dòng vào `data/commodity_sue_decomp_review_audit.csv` (giờ thật, asof, peek). Selfcheck 81 assertion, 11/11 mutant.
+4. Bổ sung kiểm toán tại mốc 2027-09-01: đối chiếu mọi dòng post60 có cửa sổ (t0,t60] chứa ex-date với một lần kéo Close điều chỉnh mới (rủi ro lag điều chỉnh corp-action bị khoá vào sổ append-only).

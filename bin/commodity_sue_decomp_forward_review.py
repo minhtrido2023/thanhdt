@@ -88,12 +88,30 @@ def load_events(data_dir):
     return ev.merge(out[T.KEY + ["post60", "note"]], on=T.KEY, how="left"), dup
 
 
+def _audit(data_dir, asof, peek):
+    """Mỗi lần gọi review ghi 1 dòng (giờ thật ICT, asof, peek) — dấu vết cho việc nhìn trộm."""
+    try:
+        p = os.path.join(data_dir, "commodity_sue_decomp_review_audit.csv")
+        new = not os.path.exists(p)
+        with open(p, "a") as f:
+            if new:
+                f.write("called_at_ict,asof,peek\n")
+            f.write(f"{dt.datetime.now(T.ICT).strftime('%Y-%m-%d %H:%M:%S')},{asof},{int(peek)}\n")
+    except Exception as e:  # không để dấu vết làm hỏng review
+        print(f"[audit] WARN không ghi được: {e}", file=sys.stderr)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", default=os.path.join(T.WC_ROOT, "data"))
     ap.add_argument("--asof", default=dt.datetime.now(T.ICT).strftime("%Y-%m-%d"))
     ap.add_argument("--peek", action="store_true")
     a = ap.parse_args(argv)
+    _audit(a.data_dir, a.asof, a.peek)   # mọi lần gọi đều để lại dấu, kể cả lần bị từ chối
+    today = dt.datetime.now(T.ICT).strftime("%Y-%m-%d")
+    if a.asof > today and not a.peek:
+        print(f"TỪ CHỐI: --asof {a.asof} > hôm nay {today} (ICT): không được chạy verdict trên ngày tương lai (PREREG-4 §4).")
+        return 3
     if a.asof < REVIEWS[0] and not a.peek:
         print(f"TỪ CHỐI: {a.asof} < mốc review đầu {REVIEWS[0]} (PREREG-4 §4).")
         return 3

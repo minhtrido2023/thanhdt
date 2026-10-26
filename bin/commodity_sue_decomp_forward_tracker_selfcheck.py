@@ -270,7 +270,11 @@ def t_review():
     R = load(os.path.join(HERE, "commodity_sue_decomp_forward_review.py"), "csd_review")
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        ok(R.main(["--asof", "2027-08-31"]) == 3, "trước 2027-09-01 ⇒ từ chối rc=3")
+        ok(R.main(["--asof", "2026-01-01", "--data-dir", tempfile.mkdtemp()]) == 3, "trước 2027-09-01 (không phải tương lai) ⇒ từ chối rc=3")
+        ok(R.main(["--asof", "2031-09-01", "--data-dir", tempfile.mkdtemp()]) == 3, "asof tương lai (không --peek) ⇒ từ chối rc=3")
+        _d = tempfile.mkdtemp()
+        R.main(["--asof", "2031-09-01", "--data-dir", _d])
+        ok(os.path.exists(os.path.join(_d, "commodity_sue_decomp_review_audit.csv")), "mỗi lần gọi review ghi dòng audit")
     ok(R.stage_of("2027-09-01") == "integrity" and R.stage_of("2028-09-01") == "mid" and R.stage_of("2031-09-01") == "final",
        "giai đoạn theo mốc")
     rng = np.random.default_rng(0)
