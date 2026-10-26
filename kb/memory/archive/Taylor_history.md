@@ -1541,3 +1541,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T14:05:27Z] ĐANG DỞ job Taylor_20261025_140517: lag-capacity-floor R1(KL T-1/trung vị N)/R2(bỏ ABANDONED_REFUND)/R3(noise floor park=0) trên wt-lag-capacity-floor-20261025 | NEXT: PREREG_R.md
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T14:09:30Z] ĐANG DỞ job Taylor_20261025_140517: 54 run R nền (wt-lag-capacity-floor, logs/run_batch_R.log), PREREG_R ddcc86747 | NEXT: analyze_R.py, verify ctl md5, REPORT_R, 3 bus finding R1/R2/R3
