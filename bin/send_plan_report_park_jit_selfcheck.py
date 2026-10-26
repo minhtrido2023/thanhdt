@@ -508,7 +508,7 @@ def _bl_case(blocked, notes, park_mv=9063000.0, pool=787919598.0):
 
 _o_q = _bl_case(_BL_OK, ["target_park=0 (park TẮT HẲN)"])
 check("T13h BLOCKED_ALL_NAMES chỉ vì sellable<1 lô ⇒ dòng ℹ️ gọn, KHÔNG 'BỊ CHẶN'",
-      "ℹ️ PARK còn" in _o_q and "MBB 65cp" in _o_q and "(bán được)" in _o_q
+      "ℹ️ PARK còn" in _o_q and "MBB[PARK] 65cp" in _o_q and "(bán được)" in _o_q
       and "TRIM PARK (L1) BỊ CHẶN" not in _o_q, _o_q[-300:])
 _o_adv = _bl_case([{"ticker": "MBB", "reason": "trần/khả năng bán < 1 lô (muốn 1,270,750đ, trần ADV 1,000đ, sellable 5,000cp)"}], [])
 check("T13h sellable ≥ 1 lô (trần ADV chặn) ⇒ vẫn in đậm BỊ CHẶN", "TRIM PARK (L1) BỊ CHẶN" in _o_adv)
@@ -690,7 +690,7 @@ out14g = run_sender(_quiet_plan([_buy]), "SpaceX", files=_gl)
 _ol = next((l for l in out14g.splitlines() if "**MUA SCL**" in l), "")
 check("T14g cờ DD của lệnh MUA ⇒ mục CẢNH BÁO có dòng theo mã + dòng lệnh gắn ⚠️ + header đếm",
       _ol.rstrip().endswith("⚠️") and "⚠️ CẢNH BÁO" in out14g
-      and "⚠️ SCL: DD n/a" in out14g and "cờ đỏ" in out14g and "cảnh báo" in out14g.split("\n")[1],
+      and "⚠️ SCL [LAG]: DD n/a" in out14g and "cờ đỏ" in out14g and "cảnh báo" in out14g.split("\n")[1],
       out14g[:900])
 
 

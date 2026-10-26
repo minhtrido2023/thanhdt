@@ -978,6 +978,8 @@ if orders:
         # note mang ⚠️ THẬT ⇒ hiện nguyên văn (không cắt — §4 style guide, ca TV1 2026-08-12).
         lines.append(f"• **{side_vn} {ticker}** {qty_s}cp @ {px}{val_s}" + (f" · {tag}" if tag else ""))
         _ord_idx, _oflag = len(lines) - 1, False
+        # Cùng mã có thể nằm ở nhiều book (VPB: LAG mua/thoát vs PARK) ⇒ mọi cảnh báo theo lệnh ghi rõ [book]
+        _tkb = f"{ticker} [{o.get('book') or o.get('play_type') or '?'}]"
         if rest and rest not in _rest_seen:
             _rest_seen.add(rest)
             _same = _rest_cnt.get(rest, 1)
@@ -1003,16 +1005,16 @@ if orders:
                     pass
                 elif _st == "SHRINK":
                     WARN.append(
-                        f"⚠️ **{ticker}: lệnh bị CO** {_a.get('qty_plan')}cp → {_a.get('qty_final')}cp "
+                        f"⚠️ **{_tkb}: lệnh bị CO** {_a.get('qty_plan')}cp → {_a.get('qty_final')}cp "
                         f"dù đã {_fp}{_net_s} — {_rs}")
                     _oflag = True
                 elif _st == "DROP":
                     WARN.append(
-                        f"⛔ **{ticker}: lệnh bị BỎ** (kế hoạch {_a.get('qty_plan')}cp) dù đã cố "
+                        f"⛔ **{_tkb}: lệnh bị BỎ** (kế hoạch {_a.get('qty_plan')}cp) dù đã cố "
                         f"bán PARK — {_rs}")
                     _oflag = True
                 elif _st:
-                    WARN.append(f"⚠️ {ticker}: JIT status={_st} — {_rs}")
+                    WARN.append(f"⚠️ {_tkb}: JIT status={_st} — {_rs}")
                     _oflag = True
         if format_dcf_check:
             dcf = o.get("dcf_check")
@@ -1027,7 +1029,7 @@ if orders:
             if dcf_s:
                 lines.append(f"    ↳ {_dcf_compact(dcf_s)}")
                 if "cần dcf_override_reason" in dcf_s:
-                    WARN.append(f"⚠️ {ticker}: DCF RICH sâu — cần dcf_override_reason trước khi mua")
+                    WARN.append(f"⚠️ {_tkb}: DCF RICH sâu — cần dcf_override_reason trước khi mua")
                     _oflag = True
                 if log_dcf_history:
                     log_dcf_history(ticker, dcf, "send_plan_report", asof=date)
@@ -1061,11 +1063,11 @@ if orders:
                 if _bits:
                     lines.append("    ↳ DD: " + " · ".join(_bits))
                 for _x in _wbits:                       # cảnh báo DD/thanh khoản/bất thường ⇒ mục CẢNH BÁO
-                    WARN.append(f"⚠️ {ticker}: " + _x.replace("⚠ ", "", 1).lstrip())
+                    WARN.append(f"⚠️ {_tkb}: " + _x.replace("⚠ ", "", 1).lstrip())
                     _oflag = True
                 _warn = format_dd_check(_dd, "buy", bool(o.get("dd_override_reason"))) if format_dd_check else ""
                 if _warn:
-                    WARN.append(f"{_warn.replace('DD cờ đỏ:', 'DD cờ đỏ ' + str(ticker) + ':', 1)}")
+                    WARN.append(f"{_warn.replace('DD cờ đỏ:', 'DD cờ đỏ ' + _tkb + ':', 1)}")
                     _oflag = True
             if o.get("dd_override_reason"):
                 lines.append(f"    ↳ lý do override DD: {str(o['dd_override_reason'])[:120]}")
@@ -1249,7 +1251,7 @@ try:
         INFO.append(f"🅿️ Trim PARK (L1): phiên này không bán được — PARK còn "
                      f"{_tr(_num(park_trim.get('park_mv_vnd')))} "
                      f"({_num(park_trim.get('park_mv_vnd')) / _num(park_trim.get('pool_vnd')) * 100:.2f}% pool), "
-                     f"chỉ gồm {', '.join(sorted(_pt_bl_tk))} (CP chờ niêm yết / lô lẻ ở dòng ℹ️ trên).")
+                     f"chỉ gồm {', '.join(t + '[PARK]' for t in sorted(_pt_bl_tk))} (CP chờ niêm yết / lô lẻ ở dòng ℹ️ trên).")
     elif (pt_dec == "BLOCKED_ALL_NAMES"
           and (_pt_bl_d := [b for b in (park_trim.get("blocked") or []) if isinstance(b, dict)])
           and all(_pt_sellable_lt_lot(b) is not None for b in _pt_bl_d)
@@ -1261,7 +1263,7 @@ try:
         # "BỊ CHẶN" in đậm lặp mỗi ngày (user duyệt 27/10). Lý do chặn khác (đối soát lệch, ADV lỗi,
         # sellable ≥1 lô nhưng trần ADV chặn) và mọi note ⚠️ vẫn rơi xuống nhánh BLOCKED_* in đậm.
         _pt_pct = _num(park_trim.get("park_mv_vnd")) / _num(park_trim.get("pool_vnd")) * 100
-        _pt_names = ", ".join(f"{b.get('ticker', '?')} {_pt_sellable_lt_lot(b)}cp"
+        _pt_names = ", ".join(f"{b.get('ticker', '?')}[PARK] {_pt_sellable_lt_lot(b)}cp"
                               for b in _pt_bl_d[:6]) + " (bán được)"
         INFO.append(f"ℹ️ PARK còn {_tr(_num(park_trim.get('park_mv_vnd')))} ({_pt_pct:.2f}% pool) chưa bán được — "
                     f"{_pt_names}, <1 lô / chưa giao dịch được. Không cần xử lý.")
