@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-25T13:15:14Z] ĐANG DỞ job Taylor_20261025_131052: batch 10 run nền (wt-bal-eveb-phase2-20261025, logs/run_batch.log), PREREG 604786eb3 | NEXT: verify ctl md5 537e349b/a6ba34d8, evaluate.py, bootstrap, REPORT
 - [2026-10-25T13:18:08Z] [trend-basics-filter 10-25] XONG job Taylor_20261025_131054 (413f67e26): 1/39 đạt (LAG×up60) = hiệu ứng mã đứng giá, không phải xu hướng; value×xu hướng không thêm — chờ quant-skeptic nếu Mike muốn
 - [2026-10-25T13:49:05Z] ĐANG DỞ job Taylor_20261025_131052: 10 run PREREG xong (0/4 đạt), đang chạy 8 run amendment A1 wv1-4 (logs/run_batch3.log, commit 04ec38d61) | NEXT: evaluate.py → REPORT.md → bus finding
 - [2026-10-25T14:05:27Z] ĐANG DỞ job Taylor_20261025_140517: lag-capacity-floor R1(KL T-1/trung vị N)/R2(bỏ ABANDONED_REFUND)/R3(noise floor park=0) trên wt-lag-capacity-floor-20261025 | NEXT: PREREG_R.md
@@ -26,3 +25,4 @@
 - [2026-10-25T18:23:10Z] [lag-capacity-floor S 10-26] XONG job Taylor_20261025_172538 @148b84685 (chua merge): band 50 ty ~11,7-20,7/14,6-23,8, trung tam 18,5-20,7/21,2-23,8, chi phi IS -4,2..-4,4pp — CHO Mike/user: co chay bien the doi 3 phien + cong gia anchor khong
 - [2026-10-26T01:34:42Z] [dd-NNC 10-26] XONG job Taylor_20261026_012529: NON (khong fear-state, dinh chu ky, PB1,59); weighted 62,8k vs 47,6k. REPORT research/dd_NNC_20261026/. Meo: BCTC scan -> pip --target /tmp/pdflib pypdf, trich anh trang roi Read anh
 - [2026-10-26T04:55:12Z] [dd-template 10-26] XONG job Taylor_20261026_045054: mau DD + khoi chu ky mu o research/dd_template_20261026/ (chua commit) — CHO Mike/user duyet so dd_cycle_reads.md + cong; chay lai mu 5 ma = job khac
+- [2026-10-26T04:59:04Z] [sector-frames 10-26] XONG job Taylor_20261026_045056: khung bank/BDS/hoa chat o research/sector_frames_20261026/; CHAM du bao F-CHEM-2 <=2027-02-28, F-BANK/RE/CHEM-1 ngay 2027-05-20

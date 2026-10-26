@@ -21,3 +21,4 @@
 - [2026-10-26T01:25:32Z] 26/10 08:2x: user duyệt DD SZL+NNC+SAS (Taylor opus). NT2+DDV xong, NON cả hai (báo cáo dd_NT2_20261026, dd_DDV_20261026). Nếu QUALIFY -> fundamental-skeptic.
 - [2026-10-26T01:48:53Z] 26/10 08:5x: egg_transfer_alert nay gửi Telegram thật (notify_telegram.sh) 15'/lần 08:30-14:30 T2-T6 tới khi FUNDED; commit đã vào master. Sáng nay SpaceX FUNDED 08:45.
 - [2026-10-26T04:50:57Z] 26/10 11:5x: user duyệt (1) mẫu DD khối chu kỳ + (2) khung ngành 1 trang 3 ngành. 2 job Taylor opus đã dispatch. BƯỚC SAU (phụ thuộc mẫu xong): chạy lại MÙ 5 mã NT2/DDV/SZL/SAS/NNC bằng job riêng (agent mới, viết khối chu kỳ TRƯỚC khi đọc BCTC/báo cáo cũ), so verdict.
+- [2026-10-26T04:57:01Z] 26/10 12:0x: mẫu DD xong (dd_template_20261026). Dispatch 5 job chạy lại MÙ NT2/DDV/SZL/SAS/NNC (dd_blind_<MÃ>_20261026). Khung ngành (job _045056) còn chạy. Sau đó: so verdict mới vs NON cũ, báo user. Đề xuất sổ dd_cycle_reads.md CHƯA tạo.

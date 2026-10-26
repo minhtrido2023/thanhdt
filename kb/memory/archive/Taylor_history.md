@@ -1529,3 +1529,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T13:11:09Z] ĐANG DỞ job Taylor_20261025_131052: BAL EVEB phase2 (V0-V4 replay R3) → agents/Taylor/research/bal_eveb_phase2_20261025/ | NEXT: đọc REPORT lag_bal + skeptic, registry 2026-10-08, worktree, PREREG
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:15:14Z] ĐANG DỞ job Taylor_20261025_131052: batch 10 run nền (wt-bal-eveb-phase2-20261025, logs/run_batch.log), PREREG 604786eb3 | NEXT: verify ctl md5 537e349b/a6ba34d8, evaluate.py, bootstrap, REPORT
