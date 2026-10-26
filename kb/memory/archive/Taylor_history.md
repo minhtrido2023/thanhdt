@@ -1532,3 +1532,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T13:15:14Z] ĐANG DỞ job Taylor_20261025_131052: batch 10 run nền (wt-bal-eveb-phase2-20261025, logs/run_batch.log), PREREG 604786eb3 | NEXT: verify ctl md5 537e349b/a6ba34d8, evaluate.py, bootstrap, REPORT
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:18:08Z] [trend-basics-filter 10-25] XONG job Taylor_20261025_131054 (413f67e26): 1/39 đạt (LAG×up60) = hiệu ứng mã đứng giá, không phải xu hướng; value×xu hướng không thêm — chờ quant-skeptic nếu Mike muốn
