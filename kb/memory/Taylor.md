@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-25T13:49:05Z] ĐANG DỞ job Taylor_20261025_131052: 10 run PREREG xong (0/4 đạt), đang chạy 8 run amendment A1 wv1-4 (logs/run_batch3.log, commit 04ec38d61) | NEXT: evaluate.py → REPORT.md → bus finding
 - [2026-10-25T14:05:27Z] ĐANG DỞ job Taylor_20261025_140517: lag-capacity-floor R1(KL T-1/trung vị N)/R2(bỏ ABANDONED_REFUND)/R3(noise floor park=0) trên wt-lag-capacity-floor-20261025 | NEXT: PREREG_R.md
 - [2026-10-25T14:09:30Z] ĐANG DỞ job Taylor_20261025_140517: 54 run R nền (wt-lag-capacity-floor, logs/run_batch_R.log), PREREG_R ddcc86747 | NEXT: analyze_R.py, verify ctl md5, REPORT_R, 3 bus finding R1/R2/R3
 - [2026-10-25T14:13:07Z] [bal-eveb-phase2 10-25] XONG job Taylor_20261025_131052: 0/8 dat, NO-GO (885b2c944, nhanh research/bal-eveb-phase2-20261025, chua merge); BAL xep theo ta, khong co yieldcombo — CHO Mike/user: dong nhanh BAL x dong tien, co ghi registry no_ledger khong
@@ -26,3 +25,4 @@
 - [2026-10-26T04:55:12Z] [dd-template 10-26] XONG job Taylor_20261026_045054: mau DD + khoi chu ky mu o research/dd_template_20261026/ (chua commit) — CHO Mike/user duyet so dd_cycle_reads.md + cong; chay lai mu 5 ma = job khac
 - [2026-10-26T04:59:04Z] [sector-frames 10-26] XONG job Taylor_20261026_045056: khung bank/BDS/hoa chat o research/sector_frames_20261026/; CHAM du bao F-CHEM-2 <=2027-02-28, F-BANK/RE/CHEM-1 ngay 2027-05-20
 - [2026-10-26T05:03:01Z] [dd-blind-DDV 10-26] XONG job Taylor_20261026_045654: NON khong doi, blind=no (mau tu lo verdict DDV) — de xuat lam sach README/TEMPLATE truoc khi chay mu lai
+- [2026-10-26T05:04:08Z] [dd-blind-SAS 10-26] XONG job Taylor_20261026_045658: NON=NON, blind no (README §4 lo verdict); research/dd_blind_SAS_20261026/

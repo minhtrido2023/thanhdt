@@ -1535,3 +1535,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T13:18:08Z] [trend-basics-filter 10-25] XONG job Taylor_20261025_131054 (413f67e26): 1/39 đạt (LAG×up60) = hiệu ứng mã đứng giá, không phải xu hướng; value×xu hướng không thêm — chờ quant-skeptic nếu Mike muốn
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:49:05Z] ĐANG DỞ job Taylor_20261025_131052: 10 run PREREG xong (0/4 đạt), đang chạy 8 run amendment A1 wv1-4 (logs/run_batch3.log, commit 04ec38d61) | NEXT: evaluate.py → REPORT.md → bus finding
