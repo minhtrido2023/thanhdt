@@ -434,3 +434,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-10-25 (keep=12 days=0 require_done=False)
 - [2026-10-09T09:59:14Z] [2026-10-09] selfcheck-red sweep#1: 8/10 CLOSED; OPEN annualization (no moi R&D Taylor, chu Taylor) + nav_2account (SCL ban tay 30/09, question can-user). Sweep sau: 2 cau nay OPEN lan 2 => CAN USER + post Architecture.
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-09T15:46:30Z] [2026-10-09] instructions-dedup DUNG NEEDS_CHANGES: branch chore/instructions-dedup-20261009 @69b99144 (wt-instrdedup-1009) CHUA merge; bus finding instructions-dedup co 8 required_change. Cho Mike/user cho 1 luot sua hoac bo (bo: git worktree remove + xoa branch).
