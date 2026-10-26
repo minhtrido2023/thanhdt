@@ -32,3 +32,4 @@
 - [2026-10-26T16:13:28Z] [p4-sulfur 10-26] XONG job Taylor_20261026_160657: research/commodity_p4_sulfur_20261026/ (chua commit) — P4 nowcast DGC gay tu 2024, 17 trial GD khong ung vien; CHO Winston sua registry key phosphorus->phosphate_rock_cny
 - [2026-10-26T16:41:53Z] [nowcast-p4 10-26] XONG job Taylor_20261026_163838 @c0ae8de0a nhánh feat/nowcast-p4-20261026 (chưa merge) — CHO Mike arch-review+merge; Winston thêm yellow_phosphorus vào freshness monitor
 - [2026-10-26T16:49:40Z] [nowcast-p4 vòng 2 10-26] XONG @ac2077912 nhánh feat/nowcast-p4-20261026 (chưa merge) — CHỜ arch-review vòng 2 + Mike merge
+- [2026-10-26T17:28:18Z] [dgc-valuation 10-27] XONG job Taylor_20261026_171735: research/dgc_valuation_20261027/ (chua commit) — FV co so 34,5k, ky vong 33,6k vs 32,1k; can doc Nghi quyet DHDCD (1600 hop nhat?) + cap nhat khi BCTC Q3 ra (net cash 30/09)
