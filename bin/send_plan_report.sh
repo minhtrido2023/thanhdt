@@ -203,6 +203,28 @@ if [ -n "$LAGCHK_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
 fi
 export LAGCHK_BLOCK
 
+# --- Nowcast KQKD theo hàng hoá cho mã producer trong plan (job Taylor_20261026_095926, user duyệt 26/10).
+# DISPLAY-ONLY, CHỈ ZaloPay (account vận hành nội bộ — cùng tiền lệ _hit_details_block() của eod_trading_report.sh;
+# SpaceX là báo cáo nhà đầu tư, KHÔNG thêm). FAIL-OPEN tuyệt đối: lỗi/treo/rỗng => không có khối, không chặn gửi,
+# không thêm phụ thuộc cho 21:00 (timeout cứng 20s). Sandbox selfcheck không chạy trừ khi cấp SEND_PLAN_NOWCAST_CMD.
+NOWCAST_BLOCK=""
+NOWCAST_CMD=""
+if [ "$ACCOUNT" = "ZaloPay" ]; then
+  if [ -n "${SEND_PLAN_NOWCAST_CMD:-}" ]; then
+    NOWCAST_CMD="$SEND_PLAN_NOWCAST_CMD"
+  elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
+    NOWCAST_CMD="$ROOT/bin/commodity_nowcast_block.py"
+  fi
+fi
+if [ -n "$NOWCAST_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
+  NOWCAST_ERR="$(mktemp)"
+  NOWCAST_BLOCK="$(timeout -k 5 20 python3 "$NOWCAST_CMD" --plan-file "$PLAN_FILE" 2>"$NOWCAST_ERR")" \
+    || { echo "[nowcast] rc=$? (124=timeout) -> bỏ khối, báo cáo vẫn gửi" >&2; NOWCAST_BLOCK=""; }
+  sed 's/^/[nowcast] /' "$NOWCAST_ERR" >&2
+  rm -f "$NOWCAST_ERR"
+fi
+export NOWCAST_BLOCK
+
 RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os
 
@@ -1208,6 +1230,11 @@ for _dl in os.environ.get("LAGCAL_BLOCK", "").splitlines():  # lịch/DD LAG kh�
 for _dl in os.environ.get("LAGCHK_BLOCK", "").splitlines():  # cổng nhất quán LAG (shell phía trên)
     if _dl.strip():
         lines.append(_dl)
+
+_nc = os.environ.get("NOWCAST_BLOCK", "").strip()   # nowcast hàng hoá (ZaloPay, display-only, shell phía trên)
+if _nc:
+    lines.append("")
+    lines.extend(_nc.splitlines())
 
 lines.append(f"_(DollarBill lập, gửi {today} {now_ict})_")
 
