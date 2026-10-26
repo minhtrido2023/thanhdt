@@ -759,18 +759,31 @@ try:
             for o in (plan.get("jit_unpark_proposal", {}).get("orders") or [])
             if isinstance(o, dict)
         )
-    _shortfall = max(0.0, _total_buy_vnd - _cash_avail - _jit_proceeds)
+    # Mức rút = giá TRẦN đuổi mua, không phải giá tham chiếu (sự cố 2026-10-26: SCL ref 31.100 khớp 32.300 +3,8%
+    # ⇒ sức mua cạn ~0,3tr trước lệnh cuối, cảnh báo thiếu tiền bật sau 13:00). Egg rút trong ngày, không phí ⇒
+    # dư vài tr chỉ tốn lãi egg 1 ngày, thiếu thì lệnh cuối không đặt được.
+    try:
+        import contextlib as _cl, io as _io          # load_config() in cảnh báo khoá lạ ra stdout — stdout này là kênh RESULT
+        from trading_bot.config import load_config as _lc
+        with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
+            _chase = float(_lc().get("chase_cap_vol_ceil", 0.04))
+    except Exception:
+        _chase = 0.04
+    _fee = 0.00097
+    _buy_ceiling = _total_buy_vnd * (1.0 + _chase) * (1.0 + _fee)
+    _shortfall_ref = max(0.0, _total_buy_vnd - _cash_avail - _jit_proceeds)
+    _shortfall = max(0.0, _buy_ceiling - _cash_avail - _jit_proceeds)
     if _egg_vnd > 0 and _total_buy_vnd > 0:
         if _shortfall > 0:
             lines.append(
                 f"🥚 **Trứng vàng {_egg_vnd/1e6:,.1f}tr là tiền — CHUYỂN {_shortfall/1e6:,.1f}tr sang cash trước 9:05 ICT sáng mai** (bot nhắc mỗi 15' từ 8:30 tới khi xong)"
-                f" (Tổng mua {_total_buy_vnd/1e6:,.1f}tr"
+                f" (Tổng mua {_total_buy_vnd/1e6:,.1f}tr theo giá ref → {_buy_ceiling/1e6:,.1f}tr nếu mọi lệnh khớp ở trần đuổi +{_chase*100:.0f}% + phí"
                 + (f" · JIT-bán-PARK {_jit_proceeds/1e6:,.1f}tr" if _jit_proceeds > 0 else "")
-                + f" − tiền mặt sẵn có {_cash_avail/1e6:,.1f}tr = thiếu {_shortfall/1e6:,.1f}tr)."
+                + f" − tiền mặt sẵn có {_cash_avail/1e6:,.1f}tr = {_shortfall/1e6:,.1f}tr; riêng giá ref thì thiếu {_shortfall_ref/1e6:,.1f}tr — phần chênh là đệm giá tăng)."
             )
         else:
             lines.append(
-                f"🥚 Trứng vàng {_egg_vnd/1e6:,.1f}tr — đủ tiền mua, không cần rút trước phiên."
+                f"🥚 Trứng vàng {_egg_vnd/1e6:,.1f}tr — đủ tiền mua kể cả khi khớp ở trần đuổi +{_chase*100:.0f}%, không cần rút trước phiên."
             )
 except Exception:
     pass
