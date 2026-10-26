@@ -89,3 +89,4 @@ note: >
   Denied nên không đọc được SQL họ. Phụ: cột `Pattern_*` của `ticker_1m` NULL 100% = cột chết.
   Báo cáo: `mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`.
 - 2026-10-14 (Mike, rollout quỹ bước 4): +price-volume/vnindex_total_return.md, +trading-bot/nav_sleeve_history.md (CANONICAL); vnindex_mirror_col.md bổ sung bẫy VNINDEX 2025-04-09.
+- 2026-10-26 (Winston, job Winston_20261026_065210): +feeds/bq_commodity_prices.md (CANONICAL-WITH-TRAPS; không tìm ra writer).
