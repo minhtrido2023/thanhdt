@@ -1553,3 +1553,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T17:25:49Z] ĐANG DỞ job Taylor_20261025_172538: lag-capacity S1(ΔIS/ΔOOS)/S2(đọc code live defer vs bỏ)/S3(trần KL mở cửa + slippage) trên wt-lag-capacity-floor-20261025 | NEXT: đọc REPORT_R/PREREG_R/out_R_metrics.csv
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T17:34:56Z] ĐANG DỞ job Taylor_20261025_172538: S1 3cdefe417 + S2 fe910d1e5 xong (bus); S3 batch 24 run nền từ 00:33 (wt-lag-capacity-floor, logs/run_batch_S.log), PREREG_S 1e909f719 | NEXT: analyze_S.py → REPORT_S §S3 → bus S3 + 'S ket luan'
