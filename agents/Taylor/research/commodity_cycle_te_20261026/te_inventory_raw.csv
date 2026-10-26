@@ -1,0 +1,104 @@
+metric_key,name_en,unit,d0,d1,n,nv
+aluminum,Aluminum,USD/T,2016-10-25,2026-10-23,2530,2051
+aluminum_alloy,Aluminum Alloy,CNY/T,2025-06-10,2026-10-23,334,259
+baltic_dry,Baltic Dry,Index Points,2016-10-28,2026-10-23,2505,1575
+barley,Barley,INR/T,2016-10-25,2026-10-23,2490,1364
+beef,Beef,BRL/15KG,2016-10-25,2026-10-23,2581,1144
+bitumen,Bitumen,CNY/T,2016-10-25,2026-10-23,2395,1269
+brent,Brent,USD/Bbl,2016-10-25,2026-10-23,2724,2246
+butter,Butter,EUR/T,2016-10-25,2026-10-23,2468,821
+canola,Canola,CAD/T,2016-10-25,2026-10-23,2518,1995
+carbon,EU Carbon Permits,EUR,2016-10-25,2026-10-23,2572,2097
+cheese,Cheese,USD/Lbs,2016-10-25,2026-10-23,2532,788
+coal,Coal,USD/T,2016-10-25,2026-10-23,2403,1377
+cobalt,Cobalt,USD/T,2016-10-25,2026-10-22,2585,354
+cobalt_hydroxide,Cobalt Hydroxide,USD/MT,2024-11-20,2026-10-23,497,367
+cocoa,Cocoa,USD/T,2016-10-25,2026-10-23,2514,1636
+coffee,Coffee,USd/Lbs,2016-10-25,2026-10-23,2517,1935
+coking_coal,Coking Coal,USD/T,2019-11-26,2026-10-22,1782,926
+consume_commodity_index,SSE Commodity Index,Index Points,2016-10-25,2026-10-23,2428,2428
+containerized_freight_index,Containerized Freight Index,Points,2016-10-25,2026-10-23,2603,499
+copper,Copper,USD/Lbs,2016-10-25,2026-10-23,2571,2173
+corn,Corn,USd/BU,2016-10-25,2026-10-23,2576,1278
+cotton,Cotton,USd/Lbs,2016-10-25,2026-10-23,2543,2069
+crb,CRB Index,Index Points,2016-10-25,2026-10-23,2596,2537
+crude_oil,Crude Oil,USD/Bbl,2016-10-25,2026-10-23,2729,2250
+di_ammonium,Di-ammonium,USD/T,2019-06-07,2026-10-23,1824,395
+eggs_ch,Eggs CH,CNY/T,2016-10-25,2026-10-23,2403,1436
+eggs_us,Eggs US,USD/Dozen,2016-10-25,2026-10-23,2579,627
+ethanol,Ethanol,USD/Gal,2016-10-25,2026-10-22,2678,707
+eu_natural_gas,EU Gas,EUR/MWh,2016-10-25,2026-10-23,2575,2525
+feeder_cattle,Feeder Cattle,USd/Lbs,2016-10-25,2026-10-23,2537,2039
+gallium,Gallium,CNY/Kg,2018-09-21,2026-10-23,2063,162
+gasoline,Gasoline,USD/Gal,2016-10-25,2026-10-23,2587,2396
+germanium,Germanium,CNY/Kg,2018-03-06,2026-10-23,2205,157
+germany_natural_gas_the,German Gas,EUR/MWh,2024-06-26,2026-10-23,599,588
+gold,Gold,USD/t.oz,2016-10-25,2026-10-23,2613,2589
+gsci,Commodity Index,Index Points,2016-10-25,2026-10-23,2621,2548
+heating_oil,Heating Oil,USD/Gal,2016-10-25,2026-10-23,2600,2442
+hrc_steel,HRC Steel,USD/T,2016-10-25,2026-10-23,2435,816
+indium,Indium,CNY/Kg,2017-11-24,2026-10-23,2278,200
+iron_ore,Iron Ore,USD/T,2016-10-25,2026-10-23,2515,2116
+iron_ore_cny,Iron Ore CNY,CNY/T,2016-10-25,2026-10-23,2437,1035
+kraft_pulp,Kraft Pulp,CNY/T,2018-11-27,2026-10-23,1917,1003
+lead,Lead,USD/T,2016-10-25,2026-10-23,2590,1995
+lean_hogs,Lean Hogs,USd/Lbs,2016-10-25,2026-10-23,2525,1562
+liquefied_natural_gas_japan_korea,LNG JKM,USD/MMBTU,2016-10-25,2026-10-23,2514,1640
+lithium,Lithium,CNY/T,2017-05-10,2026-10-23,2327,617
+live_cattle,Live Cattle,USd/Lbs,2016-10-25,2026-10-23,2529,1992
+lumber,Lumber,USD/1000 board feet,2016-10-25,2026-10-23,2516,1758
+magnesium,Magnesium,CNY/T,2016-10-25,2026-10-23,2561,335
+manganese,Manganese,CNY/mtu,2016-10-25,2026-10-23,2559,104
+methanol,Methanol,CNY/T,2016-10-25,2026-10-23,2427,1133
+milk,Milk,USD/CWT,2016-10-25,2026-10-23,2565,783
+molybden,Molybdenum,CNY/Kg,2016-10-25,2026-10-23,2560,171
+naphtha,Naphtha,USD/T,2016-10-25,2026-10-23,2514,2507
+natural_gas,Natural gas,USD/MMBtu,2016-10-25,2026-10-23,2588,1735
+neodymium,Neodymium,CNY/T,2016-10-25,2026-10-23,2560,370
+nickel,Nickel,USD/T,2016-10-25,2026-10-23,2606,2313
+nuclear,Nuclear Energy Index,USD,2016-10-25,2026-10-23,2531,1569
+oat,Oat,USd/Bu,2016-10-25,2026-10-23,2552,1177
+orange_juice,Orange Juice,USd/Lbs,2016-10-25,2026-10-23,2521,1890
+palladium,Palladium,USD/t.oz,2016-10-25,2026-10-23,2611,2251
+palm_oil,Palm Oil,MYR/T,2016-10-25,2026-10-23,2465,1630
+phosphorus,Phosphorus,CNY/T,2022-08-19,2026-10-23,1009,43
+platinum,Platinum,USD/t.oz,2016-10-25,2026-10-23,2615,2212
+polyethylene,Polyethylene,CNY/T,2016-10-25,2026-10-23,2405,1135
+polypropylene,Polypropylene,CNY/T,2016-10-25,2026-10-23,2406,1341
+polyvinyl,Polyvinyl,CNY/T,2016-10-25,2026-10-23,2401,1267
+poultry,Poultry,BRL/Kgs,2016-10-25,2026-10-23,2582,476
+propane,Propane,USD/Gal,2016-10-25,2026-10-23,2514,2264
+rapeseed_oil,Rapeseed,EUR/T,2016-10-25,2026-10-23,2570,1326
+rhodium,Rhodium,USD/t oz.,2016-10-25,2026-10-23,2565,642
+rice,Rice,USD/cwt,2016-10-25,2026-10-23,2548,1508
+rubber,Rubber,USD Cents / Kg,2016-10-25,2026-10-23,2512,971
+salmon,Salmon,NOK/KG,2016-10-28,2026-10-16,521,489
+scrap_aluminum,Scrap Aluminum,USD/T,2021-07-27,2026-10-22,1320,741
+scrap_steel,Scrap Steel,USD/T,2025-02-17,2026-10-22,426,153
+silicon,Silicon,CNY/T,2024-09-18,2026-10-23,506,319
+silver,Silver,USD/t.oz,2016-10-25,2026-10-23,2613,2313
+soda_ash,Soda Ash,CNY/T,2016-10-25,2026-10-23,2613,468
+solar,Solar Energy Index,USD,2016-10-25,2026-10-23,2527,2054
+soybeans,Soybeans,USd/Bu,2016-10-25,2026-10-23,2568,1766
+steel,Steel,CNY/T,2016-10-25,2026-10-23,2481,1262
+styrene,Styrene,CNY/MT,2018-01-02,2026-10-23,2288,952
+sugar,Sugar,USd/Lbs,2016-10-25,2026-10-23,2532,1407
+sulfur,Sulfur,CNY/T,2020-01-02,2026-10-23,1777,597
+sunflower_oil,Sunflower Oil,INR/10 kg,2016-10-25,2026-10-23,2567,800
+synthetic_rubber,Synthetic Rubber,CNY/T,2020-01-02,2026-10-23,1776,574
+te_crack_spread_index,TE Crack Spread Index,Index Points,2016-10-25,2026-10-23,2563,1751
+te_grains_index,TE Grains Index,Index Points,2016-10-25,2026-10-23,2503,2256
+te_metals_index,TE Metals Index,Index Points,2016-10-25,2026-10-23,2500,2486
+te_soft_index,TE Soft Index,Index Points,2016-10-25,2026-10-23,2479,1670
+tea,Tea,INR/Kgs,2016-10-29,2026-10-03,511,497
+tellurium,Tellurium,CNY/Kg,2017-11-24,2026-10-23,2277,160
+tin,Tin,USD/T,2016-10-25,2026-10-22,2525,2246
+titanium,Titanium,CNY/KG,2017-06-08,2026-10-23,2396,64
+uk_natural_gas,UK Gas,GBp/thm,2016-10-25,2026-10-23,2557,2364
+urals_oil,Urals Oil,USD/Bbl,2016-10-25,2026-10-22,2590,2066
+uranium,Uranium,USD/Lbs,2016-10-25,2026-10-23,2367,804
+urea,Urea,USD/T,2019-06-07,2026-10-23,1755,615
+wheat,Wheat,USd/Bu,2016-10-25,2026-10-23,2548,1401
+wind,Wind Energy Index,USD,2016-10-25,2026-10-23,2516,1339
+wool,Wool,AUD/100Kg,2016-10-25,2026-10-23,2595,503
+zinc,Zinc,USD/T,2016-10-25,2026-10-23,2530,1988
