@@ -1,0 +1,6 @@
+CYCLE_BLOCK.md md5 : 07b687cd6a3702acb96a4f8aa43534df
+khoa luc (ICT)     : 2026-10-26T12:01:00+07:00
+mtime CYCLE_BLOCK  : 2026-10-26 12:00:51.382322882 +0700
+Ghi chu: KHONG commit git (theo dispatch job Taylor_20261026_045700) — file nay thay cho commit; bang chung = md5 + mtime.
+Buoc 2 (BCTC 2026Q3, REPORT.md) chi bat dau SAU thoi diem tren; CYCLE_BLOCK.md khong duoc sua sau moc nay.
+blind: no — nhiem truoc buoc 1 qua (i) working memory Taylor (dong verdict NNC cu) va (ii) README.md cua template (bien gop Q3 57,9%, verdict cu). Chi tiet: dau CYCLE_BLOCK.md.

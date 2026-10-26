@@ -1,0 +1,83 @@
+{
+ "crosscheck_bq_vs_csv": {
+  "n": 125,
+  "from_": "2026-03-02",
+  "median_absdiff_pct": 0.0,
+  "p95_absdiff_pct": 0.108,
+  "max_absdiff_pct": 3.59
+ },
+ "inputs": {
+  "P4_Q3_26": 27606,
+  "P4_Q3_25": 22592,
+  "P4_Q2_26": 31105,
+  "c_P4_yoy": 0.2,
+  "c_P4_qoq": -0.119,
+  "S_Q3_26": 8794,
+  "S_Q3_25": 2521,
+  "c_S_yoy": 1.249,
+  "c_S_hist_max_in_fit": 1.153,
+  "DGC_Q3_25_NP_bn": 751.6,
+  "DGC_Q3_25_Rev_bn": 2818.1,
+  "DGC_Q2_26_NP_bn": 380.1,
+  "DGC_Q2_26_Rev_bn": 2420.4,
+  "NP_field": "ticker_financial.NP_P0 (ban cong bo dau)"
+ },
+ "M1_yoy_P4": {
+  "n": 30,
+  "b": [
+   0.049,
+   0.407
+  ],
+  "resid_sd": 0.187,
+  "np_d_hat": 0.13,
+  "point": 1119.0,
+  "band80": [
+   442.0,
+   1796.0
+  ]
+ },
+ "M2_yoy_P4_S": {
+  "n": 22,
+  "b": [
+   0.029,
+   0.534,
+   -0.059
+  ],
+  "resid_sd": 0.149,
+  "np_d_hat": 0.062,
+  "extrapolation": true,
+  "point": 925.0,
+  "band80": [
+   389.0,
+   1462.0
+  ]
+ },
+ "M3_qoq_P4": {
+  "n": 33,
+  "b": [
+   0.063,
+   0.088
+  ],
+  "resid_sd": 0.341,
+  "np_qd_hat": 0.052,
+  "point": 506.0,
+  "band80": [
+   -552.0,
+   1565.0
+  ]
+ },
+ "locked_forecast_ref": {
+  "file": "../dgc_q3_forecast_20261026/FORECAST.md",
+  "md5": "d6ea39f404e4058452532fec353732ad",
+  "point": 320,
+  "band50": [
+   270,
+   370
+  ],
+  "band80": [
+   215,
+   425
+  ],
+  "note": "chi doc doi chieu"
+ }
+}

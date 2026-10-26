@@ -1,0 +1,5 @@
+CYCLE_BLOCK.md md5=4409305ff745a26984325a532afda8af
+locked_at_ICT=2026-10-26T12:48:09+07:00
+job=Taylor_20261026_054005
+Q=2026Q3 (chua cong bo) data_to=2026Q2
+blind=yes (caveat: context tu nap cho biet user tung giao dich TV1; khong co so Q3/khuyen nghi)

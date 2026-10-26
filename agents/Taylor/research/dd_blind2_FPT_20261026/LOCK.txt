@@ -1,0 +1,6 @@
+file: CYCLE_BLOCK.md
+md5: 3c30d4ba1f6dc5c61f07d697d84d303a
+locked_at_ICT: 2026-10-26T12:46:28+07:00
+job: Taylor_20261026_054003
+blind: no (tom tat WebSearch lo khuyen nghi CTCK ve Q2: NHSV BUY, tieu de BSC; khong lo so Q3)
+note: chua git commit (dispatch READ-ONLY)

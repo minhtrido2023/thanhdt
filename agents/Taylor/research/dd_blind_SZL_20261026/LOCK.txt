@@ -1,0 +1,7 @@
+LOCK bước 1 — dd_blind_SZL_20261026 (job Taylor_20261026_045656)
+cycle_block_md5   : ef99ff38a77402dcff06a7bfbf4d25d6
+thoi_diem_khoa    : 2026-10-26T12:07:06+07:00 (ICT)
+cycle_block_mtime : 2026-10-26 12:06:36.981687878 +0700
+Ghi chú: KHÔNG commit git (dispatch yêu cầu); md5 + mtime thay thế cho commit. Mọi file bước 2 (REPORT.md) phải có mtime muộn hơn.
+Tác giả bước 1: subagent mới (agentId aa8d475e5b7f07f13), không đọc README/DD cũ/verdict.
+blind: no — subagent tự khai vô tình thấy số Q3/2026 (DT ~152 tỷ, LNST ~70 tỷ, cổ tức nhận ~36 tỷ) trong tóm tắt WebSearch; khai không dùng. Thêm: Taylor (người làm bước 2) đã biết verdict cũ NON qua README §4 của template.

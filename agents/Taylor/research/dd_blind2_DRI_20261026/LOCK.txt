@@ -1,0 +1,6 @@
+file: CYCLE_BLOCK.md
+md5: 15bd430e6e84a75c3547d98dc7b9e075
+locked_at_ICT: 2026-10-26T12:47:24+07:00
+job: Taylor_20261026_054006
+mode: md5-only (chua git commit)
+source_cache: /tmp/dri_src (BCTC HN Q2/2026 goc dri.com.vn, BCTN 2025)

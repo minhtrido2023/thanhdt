@@ -3556,3 +3556,79 @@ tra đại án điện (cổng TV1).**
 [Báo Pháp Luật — TV1 chi >40 tỷ cổ tức](https://doanhnhan.baophapluat.vn/tu-van-xay-dung-dien-1-tv1-chi-hon-40-ty-dong-tra-co-tuc-tien-mat-loi-nhuan-ban-nien-di-lui.html)
 
 ---
+
+### 2026-10-26 — QUÉT SÁNG THỨ HAI (job `Taylor_20261026_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 7 mã gác rà qua (4 NH + 3 ngoài NH)** · ★★ **CÓ LỆNH MUA phiên 26/10 (LAG, ĐÃ DUYỆT 25/10 22:32): HT1 / SCL / VPB trên cả 2 account — cả 3 có tin trong cửa sổ là KQKD Q3 TÍCH CỰC, 0 tin xấu ⇒ không có luận điểm nào gãy, KHÔNG có lý do RÚT** · ★ **DRC (AMBIGUOUS-yếu từ 10-19): Q3 LNST −64% YoY, chi phí QLDN ×2,4; giá 9.880→9.530 (−3,5%, đáy 6 năm) — trôi, không sập; PE 11,8 vẫn chưa qua tiêu chí #5 ⇒ giữ AMBIGUOUS-yếu**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7 --no-flags` báo **watchlist TƯƠI** (`active_nav` computed_at **2026-10-25**).
+Phiên cuối trong cache = **23/10** (thứ Sáu). Universe 243 mã (H:7 / W:240). Không có cảnh báo QUÁ HẠN.
+
+#### Việc 1 — anomaly_scan: 0 mã MỚI
+
+```
+[W] 2026-10-21 F88: IDIOCRASH | ret −6,8% (VNI +2,8%, idio −9,6%) vol 1,9× val 21,6B close 52.000   (không-phải-case từ 08-14)
+[W] 2026-10-23 PNJ: IDIOCRASH | ret −6,2% (VNI +0,8%, idio −7,0%) vol 1,5× val 422,5B close 17.450  (NON từ 09-28, excluded)
+```
+Cả 2 đã có kết luận ⇒ không xét lại. F88: `Price == Close` (BQ 16→23/10: 54.300→51.500), PE 10,8 / PB 2,92 — không có
+nỗi sợ để mua. PNJ: sau ĐHĐCĐ bất thường 21/10 (tái cấu trúc: dự phòng 7.071 tỷ, phát hành riêng lẻ ≤550 tr cp) giá
+lại rơi; chưa tìm được bài tường thuật kết quả đại hội ⇒ **giữ NON**, không phải dữ kiện đổi phân loại.
+
+#### Việc 2/3 — quét rộng: 0 case mới
+
+- **Khởi tố trong cửa sổ**: chỉ có DN **không niêm yết** (Hợp Kim 889 / Đầu tư-Thương mại 336, Phú Thọ, Đ.227 khai
+  thác tài nguyên, 18/10) và một vụ khởi tố người tung tin sai sự thật "Novaland sắp phá sản" (23/10 — NVL BANNED).
+  EEMC (cụm Gelex, đã xét 09-18) họp ĐHĐCĐ bất thường **07/11** miễn nhiệm ông Đặng Phan Tường — không dữ kiện mới.
+- **Giá sàn**: KOS sàn 5 phiên 19→23/10 + bán giải chấp cổ phiếu Chủ tịch (không-phải-case từ 09-21, không xét lại).
+- **Trái phiếu / nhóm (c)**: 0 công bố chậm trả mới của mã niêm yết trong cửa sổ (tin gần nhất NVL 14/09). 0 tin
+  Vingroup/VinFast liên quan dòng tiền/giải chấp trong 24–25/10.
+- **Nền**: VN-Index **1.774,15** (23/10, phiên tăng thứ 4 liên tiếp; tuần **+~4%** sau khi test vùng đáy 7/2026 1.650–1.680);
+  ngoại bán ròng tuần ~1.106 tỷ; CTCK nhìn 1.780–1.800 là kháng cự.
+
+#### Việc 2 — read-through 7 mã gác
+
+- **4 mã ngân hàng (MBB TPB VIB VPB)**: **0 sự kiện rủi ro** (0 kiểm soát đặc biệt / chuyển giao bắt buộc / khởi tố
+  lãnh đạo / rút tiền / sân sau / thao túng). VPB: LNTT 9T ~30.000 tỷ (+47%), Q3 >11.000 tỷ (kỷ lục 2 quý liền),
+  tổng TS >1,6 triệu tỷ (+27,8% YTD). MBB/TPB/VIB: chưa thấy KQKD Q3 trong kết quả tìm. Giá BQ 16→23/10: MBB 19.850→19.800,
+  TPB 12.000→13.000, VIB 13.850→14.200, VPB 24.500→24.100.
+- **3 mã ngoài NH (DGC DRI TV1)**: **0 sự kiện riêng lẻ**. TV1: cổ tức 15% trả **29/10** (EVN 54,34%); giá 18.500→18.400.
+  DGC: không tin tháng 10 (vẫn hạn chế giao dịch); 32.800→33.700. DRI: không tin; 15.700→15.400.
+
+#### Việc 4 — ẢNH HƯỞNG TỚI PHÍA MUA: **3 lệnh MUA LAG, 0 luận điểm gãy**
+
+`plan_SpaceX_2026-10-26` = BUY **HT1 2.700 / SCL 1.100 / VPB 1.500**; `plan_ZaloPay_2026-10-26` = BUY **HT1 1.600 / SCL 700 /
+VPB 900** (LO, ref = DNSE đóng cửa 23/10: 13.550 / 31.100 / 24.100). Cả hai `approved_by` = user 25/10 22:32 ICT.
+- **HT1**: Q3 DT ~2.269 tỷ (+22%), LNST >99 tỷ (+16%); 9T 315 tỷ (+67%), trả ~600 tỷ nợ vay ngắn hạn, đạt ~79% KH năm.
+  0 tin xấu. Giá 12.350→13.550 (+9,7% trong tuần) — đã chạy trước lệnh, không phải dấu hiệu gãy.
+- **SCL**: 9T LNST ~94 tỷ (≈2,3× cùng kỳ), vượt KH năm sau 9 tháng (CafeF 16/10 & 20/10). 0 công bố bất thường/cổ đông
+  lớn/kiểm toán trong cửa sổ. (Cờ DD `EQ_PHAI_THU_TANG` user đã ACK 21/10 — không có dữ kiện mới đổi điều đó.)
+- **VPB**: như trên — KQKD tốt, 0 tin rủi ro.
+⇒ **Không có cơ sở RÚT lệnh nào.** DRC/F88/PNJ không nằm trong vị thế hay plan.
+
+#### Việc 7 — phễu candidate hệ thống
+
+**KHÔNG có khối "PHỄU CANDIDATE HỆ THỐNG" trong dispatch lượt này** (cadence sáng thứ Hai) ⇒ không rà.
+
+**Kết luận lượt này:** **7 mã gác rà qua** + 3 mã trong plan mua (HT1, SCL, VPB) · 243 mã anomaly_scan × 7 phiên ·
+~16 truy vấn tin + 5 WebFetch + 1 truy vấn BQ + đọc 2 plan · **0 QUALIFY · 0 case mới · watchlist TƯƠI · 3 lệnh mua LAG,
+luận điểm còn nguyên ⇒ không RÚT.** Giới hạn: công cụ tìm kiếm trả rất ít bài đúng 24–25/10 — "0 tin xấu" là
+"không tìm thấy", không phải đã rà công bố HOSE/HNX trực tiếp.
+
+**Mốc phải theo, gần → xa: TV1 trả cổ tức 29/10 → BCTC Q3 các mã còn lại (MBB/TPB/VIB, DHC, PAN, PTB, KSB, CMG) cuối 10 →
+cổng SHB (vốn điều lệ, hạn tháng 10) → EEMC ĐHĐCĐ bất thường 07/11 → DRC chốt DS ĐHĐCĐ 16/11, họp sau 20/12 → kết luận
+điều tra đại án điện (cổng TV1).**
+
+**Nguồn (cửa sổ 23→26/10/2026):**
+[Vietstock Weekly 26-30/10](https://vietstock.vn/2026/10/vietstock-weekly-26-30102026-tung-buoc-cai-thien-1636-1506541.htm) ·
+[Vietstock — Góc nhìn tuần 26-30/10](https://vietstock.vn/2026/10/goc-nhin-tuan-26-3010-dung-fomo-o-vung-can-145-1506531.htm) ·
+[ASEANSC — Cơ hội đầu tư tuần 26/10](https://www.aseansc.com.vn/bao-cao-co-hoi-dau-tu-tuan-26-10-2026-30-10-2026/) ·
+[Vietstock — Nhịp đập thị trường 23/10](https://vietstock.vn/2026/10/nhip-dap-thi-truong-2310-vn-index-giu-da-phuc-hoi-khoi-ngoai-quay-lai-ban-rong-hon-470-ty-1636-1506014.htm) ·
+[CafeF — DRC công bố tài liệu, KQKD Q3](https://cafef.vn/ong-le-hoang-khanh-nhut-bi-khoi-to-doanh-nghiep-cong-bo-tai-lieu-quan-trong-188261023145645061.chn) ·
+[Báo Pháp Luật — HT1 lãi 9 tháng +67%](https://doanhnhan.baophapluat.vn/xi-mang-vicem-ha-tien-ht1-lai-9-thang-tang-67-xoa-sach-no-vay-ngan-han.html) ·
+[CafeF — SCL](https://cafef.vn/scl.html) ·
+[Mekong ASEAN — VPBank 9T gần 30.000 tỷ](https://mekongasean.vn/vpbank-dat-loi-nhuan-gan-30000-ty-dong-9-thang-tang-47-so-voi-cung-ky-60797.html) ·
+[DNSE — KOS bán giải chấp](https://www.dnse.com.vn/senses/tin-tuc/chu-tich-kosy-group-va-doanh-nghiep-lien-quan-bi-ban-giai-chap-co-phieu-kos-35289100) ·
+[Soha — Khởi tố Hợp Kim 889 (Phú Thọ)](https://soha.vn/khoi-to-bi-thu-dang-uy-chu-tich-hdnd-chu-tich-ubnd-xa-chu-tich-tong-giam-doc-pho-tong-giam-doc-doanh-nghiep-19826102309403826.htm) ·
+[BNews — Khởi tố người tung tin sai về Novaland](https://bnews.vn/khoi-to-nguoi-dang-thong-tin-sai-su-that-ve-mot-doanh-nghiep-co-nguy-co-pha-san/441706.html) ·
+[VNBusiness — PNJ trước ĐHĐCĐ bất thường](https://vnbusiness.vn/pnj-tang-tran-du-mua-hon-4-trieu-co-phieu-truoc-them-dai-hoi-co-dong-bat-thuong.html) ·
+[Viettimes — TV1 cổ tức 15%, trả 29/10](https://viettimes.vn/evn-sap-bo-tui-hang-chuc-ty-dong-co-tuc-tu-cong-ty-con-post206201.html)
+
+---

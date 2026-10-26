@@ -1,0 +1,7 @@
+LOCK bước 1 — DDV blind cycle block · job Taylor_20261026_045654
+md5sum      : cfd5bd610cd0d34316a56bfbb0f16379  CYCLE_BLOCK.md
+locked_at   : 2026-10-26T11:59:33+07:00 (ICT)
+file_mtime  : 2026-10-26 11:59:24.672478236 +0700 (ICT)
+Ghi chú: KHÔNG commit git theo chỉ định dispatch; md5 + mtime là bằng chứng thay commit.
+         Mọi đọc BCTC Q3/2026 và dd_DDV_20261026 xảy ra SAU thời điểm trên.
+blind       : no (lý do trong BLIND_ATTESTATION của CYCLE_BLOCK.md: README/TEMPLATE lộ verdict cũ + biên Q3; cột PE BQ lộ EPS Q3)

@@ -1,0 +1,6 @@
+LOCK — CYCLE_BLOCK.md (SAS, job Taylor_20261026_045658)
+md5        : 24b68526e331c7bf96f0af0d6e3e31d9
+locked_at  : 2026-10-26T12:00:59+07:00 (ICT)
+file_mtime : 2026-10-26 12:00:52.498346623 +0700 (ICT)
+note       : thay the cho git commit (dispatch READ-ONLY, khong commit). Bang chung = md5 + mtime; moi file buoc 2 (step2/*, REPORT.md) phai co mtime SAU locked_at.
+blind      : no (README.md template §4 lo verdict cu NON truoc khi viet)
