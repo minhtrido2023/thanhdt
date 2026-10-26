@@ -18,3 +18,4 @@
 - nav-loss-brake 11-09; DT CRISIS commit sớm ~11/10; Livermore chấm ~19/11; BĐS 11-26; commodity PREREG-2 cron 11-25; LAG checkpoint 12-15; measurement audit ~12-27; SUE tracker review 2027-09-01.
 - Nợ prevention retro: (c) cổng NAV ngoài cửa sổ EOD; (d) cổng plan-vs-lag_dd/ack.json; (e) quét script in cảnh báo stdout. context_pack ~45KB cần trim.
 
+- [2026-10-26T18:19:45Z] 27/10 01:15 user duyệt format plan (master 4b0ee23d5) và YÊU CẦU duyệt plan T3 27/10 SpaceX+ZaloPay, NHƯNG lệnh approve_plan_simple.sh bị classifier chặn ⇒ plan CHƯA ghi duyệt; chờ user cho phép/tự chạy. Egg: SpaceX ≥10,2tr, ZaloPay ≥11,7tr trước 09:05; kiểm tay giá SCL/VPB ZaloPay trước 08:45
