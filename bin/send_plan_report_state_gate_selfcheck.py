@@ -114,7 +114,7 @@ CASES = [
     # mất report; "lỗi ⇒ câm" làm mất dòng — cả hai mutation phải làm ca này đỏ.
     dict(name="helper nguồn cổng HỎNG                  -> report vẫn render, đúng 1 dòng 'KHÔNG kiểm được'",
          p_src=SRC_BARE, p_state=3, g_src="DT4_only", g_state=3, has_golive=True, want_block=False,
-         broken_helper=True, want_note="🧭 Thị trường:", want_gate_err_lines=1),
+         broken_helper=True, want_note="Regime ", want_gate_err_lines=1),
 ]
 
 PLAN_DATE = "2026-08-11"
