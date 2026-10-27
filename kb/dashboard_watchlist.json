@@ -1,21 +1,89 @@
 {
   "_doc": "Nguồn cho khối H/I của bin/daily_dashboard.py (bản tin 08:00). milestones = mốc review KHÔNG nằm trong kb/paper_programs_registry.json (chương trình paper lấy trực tiếp từ registry). research_backlog = đề xuất nghiên cứu còn mở, có nguồn. Thêm/xoá tay khi mốc đổi; mốc đã qua sẽ hiện 'QUÁ HẠN' cho tới khi xoá hoặc đổi status. Seed 2026-10-15 từ kb/current_ops.md + kb/projects/rnd-pipeline-tracker.md.",
   "milestones": [
-    {"date": "2026-10-21", "label": "order_book_execution_shadow nhánh opening_cycle — checkpoint SƠ BỘ (chỉ báo N tích luỹ, KHÔNG kết luận GO/NO-GO)", "source": "kb/projects/rnd-pipeline-tracker.md"},
-    {"date": "2026-10-23", "label": "fund-history-lock: mốc CORR_STEP (hàng đợi đính chính số đã công bố, Taylor)", "source": "kb/memory/Mike.md"},
-    {"date": "2026-11-05", "label": "custom30V rebalance kỳ q2m5 thứ 1 (yield_floor observe)", "source": "kb/paper_programs_registry.json yield_floor_custom30v_observe"},
-    {"date": "2026-11-09", "label": "nav-loss-brake monitor (chỉ cảnh báo) — mốc xem lại", "source": "kb/projects/nav-loss-brake-monitor-20261013.md"},
-    {"date": "2026-11-26", "label": "Review quý: Bobby refresh lead indicators BĐS + quét structural_break_watch", "source": "kb/current_ops.md"},
-    {"date": "2026-12-01", "label": "engine_room_oos — review ~6 tháng OOS", "source": "kb/paper_programs_registry.json engine_room_oos", "program_ids": ["engine_room_oos"]},
-    {"date": "2026-12-15", "label": "Checkpoint LAG ADV>0 filter + mốc xem lại corp-action broker-primary SHADOW", "source": "kb/projects/lag-adv-filter-tracking.md; kb/projects/corp-action-broker-primary-live-criteria.md"},
-    {"date": "2026-12-27", "label": "Review quý measurement-integrity audit (Taylor lặp phương pháp 09-27 + quant-skeptic)", "source": "kb/projects/measurement-integrity-audit-20260927.md"},
-    {"date": "2027-01-25", "label": "Opening-window limit-order A/B — mốc quyết định CỨNG (không kết luận sớm)", "source": "kb/projects/rnd-pipeline-tracker.md"},
-    {"date": "2027-03-31", "label": "LAG ADV filter — rà soát đầy đủ", "source": "kb/projects/lag-adv-filter-tracking.md"}
+    {
+      "date": "2026-10-21",
+      "label": "order_book_execution_shadow nhánh opening_cycle — checkpoint SƠ BỘ (chỉ báo N tích luỹ, KHÔNG kết luận GO/NO-GO)",
+      "source": "kb/projects/rnd-pipeline-tracker.md"
+    },
+    {
+      "date": "2026-10-23",
+      "label": "fund-history-lock: mốc CORR_STEP (hàng đợi đính chính số đã công bố, Taylor)",
+      "source": "kb/memory/Mike.md"
+    },
+    {
+      "date": "2026-11-05",
+      "label": "custom30V rebalance kỳ q2m5 thứ 1 (yield_floor observe)",
+      "source": "kb/paper_programs_registry.json yield_floor_custom30v_observe"
+    },
+    {
+      "date": "2026-11-09",
+      "label": "nav-loss-brake monitor (chỉ cảnh báo) — mốc xem lại",
+      "source": "kb/projects/nav-loss-brake-monitor-20261013.md"
+    },
+    {
+      "date": "2026-11-26",
+      "label": "Review quý: Bobby refresh lead indicators BĐS + quét structural_break_watch",
+      "source": "kb/current_ops.md"
+    },
+    {
+      "date": "2026-12-01",
+      "label": "engine_room_oos — review ~6 tháng OOS",
+      "source": "kb/paper_programs_registry.json engine_room_oos",
+      "program_ids": [
+        "engine_room_oos"
+      ]
+    },
+    {
+      "date": "2026-12-15",
+      "label": "Checkpoint LAG ADV>0 filter + mốc xem lại corp-action broker-primary SHADOW",
+      "source": "kb/projects/lag-adv-filter-tracking.md; kb/projects/corp-action-broker-primary-live-criteria.md"
+    },
+    {
+      "date": "2026-12-27",
+      "label": "Review quý measurement-integrity audit (Taylor lặp phương pháp 09-27 + quant-skeptic)",
+      "source": "kb/projects/measurement-integrity-audit-20260927.md"
+    },
+    {
+      "date": "2027-01-25",
+      "label": "Opening-window limit-order A/B — mốc quyết định CỨNG (không kết luận sớm)",
+      "source": "kb/projects/rnd-pipeline-tracker.md"
+    },
+    {
+      "date": "2027-03-31",
+      "label": "LAG ADV filter — rà soát đầy đủ",
+      "source": "kb/projects/lag-adv-filter-tracking.md"
+    },
+    {
+      "date": "2026-10-30",
+      "label": "DRI: BCTC Q3 ra -> chạy checklist + kịch bản GIẢM 50%/THOÁT (kb/projects/dri-triggers-20261027.md); giá >=15.100 cũng kích hoạt GIẢM 50%",
+      "source": "kb/projects/dri-triggers-20261027.md"
+    }
   ],
   "research_backlog": [
-    {"id": "screen-regen-16", "priority": 1, "idea": "Sinh lại 16 file *_screen.py + *_verdict.json/*_monthly.csv (còn số THEO BUG sort-direction; ortho_8l sai) — cần user duyệt vì chạm artifact đã pin", "source": "kb/current_ops.md § *_screen.py"},
-    {"id": "q3-lag-rating-lag", "priority": 2, "idea": "Mùa BCTC Q3: đo độ trễ rating 8L so với ngày công bố ở nhóm LAG (cổng 8L≤3 chấm bằng rating QUÝ TRƯỚC?) — kiểm cohort Q3 sau khi cửa sổ re-rate hằng ngày đóng 10/11", "source": "finding M1 Taylor_20261013_123622; bin/fa_ratings_earnings_window_daily.sh"},
-    {"id": "ftse-split-backtest", "priority": 3, "idea": "Backtest/đọc kết quả mới TÁCH trước/sau 2026-09-21 (FTSE nâng hạng đã hiệu lực) — chưa có phép đo hậu-nâng-hạng", "source": "kb/projects/ftse-upgrade-structural-break-20260921.md"},
-    {"id": "cctg-gap-history", "priority": 4, "idea": "Đo khoảng cách CCTG−Big-4 lịch sử trước khi cân nhắc đổi cổng CAPIT margin sang effective rate (trigger: CCTG ≥3 tháng dữ liệu ≈ 2027-01, hoặc effective ≥ ~8%)", "source": "kb/current_ops.md § Macro kill-switch A"}
+    {
+      "id": "screen-regen-16",
+      "priority": 1,
+      "idea": "Sinh lại 16 file *_screen.py + *_verdict.json/*_monthly.csv (còn số THEO BUG sort-direction; ortho_8l sai) — cần user duyệt vì chạm artifact đã pin",
+      "source": "kb/current_ops.md § *_screen.py"
+    },
+    {
+      "id": "q3-lag-rating-lag",
+      "priority": 2,
+      "idea": "Mùa BCTC Q3: đo độ trễ rating 8L so với ngày công bố ở nhóm LAG (cổng 8L≤3 chấm bằng rating QUÝ TRƯỚC?) — kiểm cohort Q3 sau khi cửa sổ re-rate hằng ngày đóng 10/11",
+      "source": "finding M1 Taylor_20261013_123622; bin/fa_ratings_earnings_window_daily.sh"
+    },
+    {
+      "id": "ftse-split-backtest",
+      "priority": 3,
+      "idea": "Backtest/đọc kết quả mới TÁCH trước/sau 2026-09-21 (FTSE nâng hạng đã hiệu lực) — chưa có phép đo hậu-nâng-hạng",
+      "source": "kb/projects/ftse-upgrade-structural-break-20260921.md"
+    },
+    {
+      "id": "cctg-gap-history",
+      "priority": 4,
+      "idea": "Đo khoảng cách CCTG−Big-4 lịch sử trước khi cân nhắc đổi cổng CAPIT margin sang effective rate (trigger: CCTG ≥3 tháng dữ liệu ≈ 2027-01, hoặc effective ≥ ~8%)",
+      "source": "kb/current_ops.md § Macro kill-switch A"
+    }
   ]
 }
