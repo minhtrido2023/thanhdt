@@ -719,6 +719,26 @@ check("T14j L1 NO_TRIM_STRUCTURE (không ⚠️ trong note) vào CẢNH BÁO, KH
       "⚠️ CẢNH BÁO" in out14j and "NO_TRIM_STRUCTURE" in out14j.split("⚠️ CẢNH BÁO")[1]
       and "GHI CHÚ" not in out14j)
 
+# ── T15 (27/10): dòng "Trần cứng" chuẩn, sinh từ field — 2 account cùng lệnh phải ra cùng câu ──
+_ceil_buy = dict(_buy, qty=300, ref_price=33300.0, entry_anchor_price=32700.0,
+                 note="LAG_LO entry ngày 3/3 — chỉ phần dư.")
+_ceil_buy_z = dict(_ceil_buy, qty=200, note="RESIDUAL ngày 3/3: LO ≤ 32.700, KHÔNG đuổi giá.")
+out15s = run_sender(_quiet_plan([_ceil_buy]), "SpaceX", files=_gl)
+out15z = run_sender(dict(_quiet_plan([_ceil_buy_z]), account="ZaloPay"), "ZaloPay", files=_gl)
+_c15 = lambda o: [l.strip() for l in o.splitlines() if "Trần cứng" in l]
+check("T15a cả 2 account cùng entry_anchor_price ⇒ đúng 1 dòng 'Trần cứng 32,700' mỗi bên, GIỐNG HỆT nhau "
+      "bất kể chữ note DollarBill (note SpaceX không nhắc giá, note ZaloPay có)",
+      len(_c15(out15s)) == 1 and _c15(out15s) == _c15(out15z)
+      and "32,700" in _c15(out15s)[0] and "CAO hơn trần 1.8%" in _c15(out15s)[0], (_c15(out15s), _c15(out15z)))
+out15n = run_sender(_quiet_plan([dict(_ceil_buy, ref_price=32600.0)]), "SpaceX", files=_gl)
+check("T15b giá tham chiếu ≤ trần ⇒ vẫn có dòng trần nhưng KHÔNG báo 'CAO hơn trần'",
+      len(_c15(out15n)) == 1 and "CAO hơn" not in _c15(out15n)[0])
+out15h = run_sender(_quiet_plan([dict(_ceil_buy, hard_no_chase_ceiling_vnd=32000.0)]), "SpaceX", files=_gl)
+check("T15c có cả hard_no_chase_ceiling_vnd và entry_anchor_price ⇒ lấy trần CHẶT hơn (min)",
+      len(_c15(out15h)) == 1 and "32,000" in _c15(out15h)[0])
+out15x = run_sender(_quiet_plan([_buy]), "SpaceX", files=_gl)
+check("T15d lệnh mua KHÔNG có trần ⇒ không có dòng 'Trần cứng' (không bịa)", not _c15(out15x))
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")
