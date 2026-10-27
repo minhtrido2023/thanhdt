@@ -17,3 +17,11 @@ Vị thế: SpaceX 2.500cp, ZaloPay 1.300cp (sau bán tay 21/10 @15.400). Duyệ
 - Dự báo bị trượt: DD Taylor ước LNST Q3 55–65 tỷ (thực 26); khoá mù F: LNST mẹ ≥50 tỷ (p0,70) TRƯỢT, biên LNST mẹ ≥27% (p0,70) TRƯỢT. Run-rate 221 tỷ trong DD không còn đứng.
 - ⚠️ BCTC ký 22/10 ⇒ có thể đã công bố TRƯỚC khoá mù 26/10 12:47 (DD ghi "chưa công bố, dự kiến 30/10"): cần kiểm ngày CBTT thật trước khi chấm forecast F là mù.
 - ⚠️ 9T trừ Q3 ≠ H1 đã đọc (DT lệch −3,9 tỷ, LNST mẹ lệch −4,9 tỷ): hồi tố H1 hoặc đọc scan sai — chưa xác minh.
+
+## Cập nhật 27/10 11:4x — DD cập nhật `agents/Taylor/research/dd_DRI_20261027/REPORT_Q3_UPDATE.md` (job Taylor_20261027_042354)
+- Theo kế hoạch đã duyệt: **GIỮ** (không trigger nào chạm: LNST Q3 25,98 in / 25,54 kinh tế ≥ 22; Dakruco 40 tỷ không đổi; giá 14.700 < 15.100). Hai cờ §6b BẬT: thành phẩm 64,99→138,81 tỷ; CFO 9T/LNST 9T 0,75x.
+- Miss Q3 chủ yếu do SẢN LƯỢNG BÁN (2.369 t vs DD 3.750 t; giá 55,75 tr/t đúng giả định): công ty GIỮ HÀNG (~1.717 t) + mưa; giá vốn/t 36,5 vs 33,1. KHÔNG phải mất cầu/giá. KH BLĐ Q4: bán 4.168 t @ 58,97.
+- H1 lệch = BCTC soát xét (AFC, CV 52/CV-CT 17/08) giảm LNST 4,5 tỷ (giá vốn nội bộ); phần dư còn lại do tỷ giá quy đổi LAK. Q3 "kinh tế": DT 132,08, LNST mẹ 25,54.
+- Dự báo F + DD đều trượt; F KHÔNG chấm là mù: SXKD 9T đăng 20/10 (LNTT 9T 208,21 tỷ) trước khoá mù 26/10 12:47. Bài học: nowcast quý bằng báo cáo SXKD tháng của DRI.
+- FV kỳ vọng 11.838 → **11.031 đ (−25% vs 14.700)**; FY26E LNST 181–257 (base 217), Q4 base 49,7 tỷ.
+- Ý kiến riêng Taylor+Mike (ngoài kế hoạch, CHỜ USER): giảm 50% chủ động (SpaceX −1.250, ZaloPay −650), giữ nửa còn lại tới 15.100 / BCTC Q4.
