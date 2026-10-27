@@ -978,6 +978,16 @@ if orders:
         # note mang ⚠️ THẬT ⇒ hiện nguyên văn (không cắt — §4 style guide, ca TV1 2026-08-12).
         lines.append(f"• **{side_vn} {ticker}** {qty_s}cp @ {px}{val_s}" + (f" · {tag}" if tag else ""))
         _ord_idx, _oflag = len(lines) - 1, False
+        # Trần cứng không-đuổi-giá: dòng CHUẨN sinh từ field (executor cưỡng chế qua load_plan), KHÔNG phụ thuộc
+        # chữ DollarBill viết — 2 account cùng lệnh phải hiện cùng một câu (sự cố lệch SCL 28/10).
+        if is_buy:
+            _ceil_c = [_num(o.get(k)) for k in ("hard_no_chase_ceiling_vnd", "entry_anchor_price")]
+            _ceil_c = [c for c in _ceil_c if c and c > 0]
+            if _ceil_c:
+                _ceil = min(_ceil_c)
+                _over = (f" — giá tham chiếu {price:,.0f} đang CAO hơn trần {(price/_ceil-1)*100:.1f}%"
+                         if isinstance(price, (int, float)) and price > _ceil else "")
+                lines.append(f"    ↳ 🔒 Trần cứng {_ceil:,.0f} (không đuổi giá): lệnh chỉ khớp nếu giá ≤ {_ceil:,.0f}{_over}")
         # Cùng mã có thể nằm ở nhiều book (VPB: LAG mua/thoát vs PARK) ⇒ mọi cảnh báo theo lệnh ghi rõ [book]
         _tkb = f"{ticker} [{o.get('book') or o.get('play_type') or '?'}]"
         if rest and rest not in _rest_seen:
