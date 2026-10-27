@@ -754,6 +754,20 @@ out16l = run_sender(_quiet_plan([dict(_b16, entry_anchor_price=40000.0)]), "Spac
 check("T16c trần CAO hơn ref×1,04 ⇒ vẫn bị đệm +4% chặn (min), không nâng cao hơn trước",
       len(_egg16(out16l)) == 1 and "Chuyển 1.8tr" in _egg16(out16l)[0], _egg16(out16l))
 
+_hc16 = dict(_buy, qty=300, ref_price=33300.0, hard_no_chase_ceiling_vnd=32700.0)      # CHỈ field trần, không anchor
+out16h = run_sender(_quiet_plan([_hc16]), "SpaceX", files=_f16)
+check("T16d chỉ có hard_no_chase_ceiling_vnd (không anchor) ⇒ vẫn chặn ở trần: 🥚 1,2tr",
+      len(_egg16(out16h)) == 1 and "Chuyển 1.2tr" in _egg16(out16h)[0], _egg16(out16h))
+out16m = run_sender(_quiet_plan([dict(_hc16, hard_no_chase_ceiling_vnd=34000.0)]), "SpaceX", files=_f16)
+check("T16e ref 33.300 < trần 34.000 < ref×1,04 ⇒ min chọn TRẦN: 300×34.000×(1+phí) − 8,67tr = 1,54 → 1,6tr",
+      len(_egg16(out16m)) == 1 and "Chuyển 1.6tr" in _egg16(out16m)[0], _egg16(out16m))
+out16a = run_sender(_quiet_plan([dict(_hc16, ceiling_rule="A")]), "SpaceX", files=_f16)
+check("T16f ceiling_rule=A thiếu provenance (fail-safe) ⇒ load_plan BỎ trần ⇒ báo cáo cũng bỏ: đệm +4% ⇒ 1,8tr "
+      "(không dùng nhầm số khai 32.700)",
+      len(_egg16(out16a)) == 1 and "Chuyển 1.8tr" in _egg16(out16a)[0], (_egg16(out16a), out16a[-600:]))
+check("T16g câu chữ: dòng 🥚 có trần không còn 'đệm … = <số nhỏ hơn Σ mua>' mà nói 'tối đa'",
+      "tối đa 9.8tr" in _egg16(out16)[0] and "trần cứng" in _egg16(out16)[0] and "đệm" not in _egg16(out16)[0], _egg16(out16))
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")

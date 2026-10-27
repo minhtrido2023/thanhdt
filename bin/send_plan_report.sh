@@ -577,7 +577,9 @@ if _capit_buys:
 margin_note = []
 try:
     from trading_bot.plan import preview_margin_day, margin_day_approval, CAPIT_LEVER_APPROVED_F
-    _pv = preview_margin_day(acct, date)
+    import contextlib as _cl0, io as _io0      # load_plan in '[CEILING FAIL-SAFE] …' ra stdout — stdout này là kênh RESULT (làm render_crashed)
+    with _cl0.redirect_stdout(_io0.StringIO()):
+        _pv = preview_margin_day(acct, date)
     if _pv.get("error"):
         pass                     # không đọc được plan qua load_plan ⇒ im lặng, gate 09:05 vẫn đủ
     elif not _pv["orders"] and _pv.get("reasons"):
@@ -832,25 +834,45 @@ try:
     except Exception:
         _chase = 0.04
     _fee = 0.00097
-    # Lệnh có trần cứng (hard_no_chase_ceiling_vnd / entry_anchor_price) KHÔNG đuổi quá trần ⇒ đệm +chase% bị chặn
-    # ở trần: giá tối đa = min(ref×(1+chase), trần). Cùng quy tắc `_buy_cost_price` của plan_funding_gate (gate 9:05).
+    # Lệnh có trần cứng KHÔNG đuổi quá trần ⇒ giá tối đa = min(ref×(1+chase), trần). Trần lấy từ CHÍNH hàm load_plan
+    # dùng (`resolve_buy_ceiling`: luật A / fail-safe / luật cũ) — không tự min() hai field (arch-review 27/10:
+    # luật A không kẹp theo anchor; fail-safe không anchor thì BỎ trần). Cùng quy tắc `_buy_cost_price` của plan_funding_gate.
     def _o_val(o):
         return (float(o.get("value_vnd") or o.get("est_value_vnd") or 0)
                 or float(o.get("qty") or o.get("quantity") or 0) * float(o.get("ref_price") or o.get("mtm_price_ref") or 0))
 
+    try:
+        from trading_bot.no_chase_ceiling import resolve_buy_ceiling as _rbc
+    except Exception:
+        _rbc = None                                   # không import được ⇒ coi như không có trần ⇒ đệm +chase% (an toàn: đòi nhiều hơn)
+
+    def _o_ceiling(o):
+        if _rbc is None:
+            return None
+        try:
+            with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
+                c, _ = _rbc(dict(o), plan_date=plan.get("plan_date"))
+            return c if c and c > 0 else None
+        except Exception:
+            return None
+
+    _ceil_used = []
+
     def _o_max_cost(o):
         rp = float(o.get("ref_price") or o.get("mtm_price_ref") or 0)
-        cs = [c for c in (_num(o.get("hard_no_chase_ceiling_vnd")), _num(o.get("entry_anchor_price"))) if c and c > 0]
-        if rp > 0 and cs:
-            return float(o.get("qty") or o.get("quantity") or 0) * min(rp * (1.0 + _chase), min(cs))
+        c = _o_ceiling(o)
+        if rp > 0 and c:
+            _ceil_used.append(c)
+            return float(o.get("qty") or o.get("quantity") or 0) * min(rp * (1.0 + _chase), c)
         return _o_val(o) * (1.0 + _chase)
     _buy_ceiling = sum(_o_max_cost(o) for o in _buy_orders) * (1.0 + _fee)
     _shortfall = max(0.0, _buy_ceiling - _cash_avail - _jit_proceeds)
     if _egg_vnd > 0 and _total_buy_vnd > 0 and _shortfall > 0:
         ACT.append(
             f"🥚 **Chuyển {-(-_shortfall // 100_000) / 10:,.1f}tr từ Trứng vàng → cash trước 9:05 ICT** "
-            f"(bot nhắc mỗi 15' từ 8:30). Σ mua {_total_buy_vnd/1e6:,.1f}tr + đệm đuổi giá +{_chase*100:.0f}% & phí "
-            f"= {_buy_ceiling/1e6:,.1f}tr − tiền mặt {_cash_avail/1e6:,.1f}tr"
+            f"(bot nhắc mỗi 15' từ 8:30). Σ mua {_total_buy_vnd/1e6:,.1f}tr → tối đa {_buy_ceiling/1e6:,.1f}tr "
+            f"({'giá mỗi lệnh = min(giá tham chiếu +%.0f%%, trần cứng)' % (_chase*100) if _ceil_used else 'đệm đuổi giá +%.0f%%' % (_chase*100)} & phí) "
+            f"− tiền mặt {_cash_avail/1e6:,.1f}tr"
             + (f" − JIT-bán PARK {_jit_proceeds/1e6:,.1f}tr" if _jit_proceeds > 0 else "")
             + f" · Trứng vàng hiện {_egg_vnd/1e6:,.1f}tr."
         )
