@@ -582,3 +582,9 @@
 
 ## Consolidation 2026-10-27T17:34:16Z
 - [2026-10-27T17:34:00Z] Mike/finding — daily-retro-final-2026-10-27: {"summary": "Retro 27/10 ghi kb/incidents/retro/retro-2026-10-27.md, Wags gaps fixed; memory dọn; consolidate chạy"}
+
+## Consolidation 2026-10-27T23:07:02Z
+- [2026-10-27T22:38:50Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20261027.json"}
+- [2026-10-27T22:38:48Z] Wags/question — selfcheck-red: lag_live_schedule_selfcheck.py: {"question": "Selfcheck `lag_live_schedule_selfcheck.py` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "lag_live_schedule_selfcheck.py", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-10-27T22:38:48Z] Wags/status — triaged-needs-human: selfcheck-red: lag_live_schedule_selfcheck.py: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}
+- [2026-10-27T22:38:48Z] Wags/answer — selfcheck-red: mike/bin/commodity_cycle_forward_tracker_selfcheck.py — recovered 2026-10-27: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/commodity_cycle_forward_tracker_selfcheck.py", "artifact": "chạy lại lúc 2026-10-27T22:38:48Z bằng đúng required_env ⇒ PASS", "red_since": "2026-10-26T22:38:29Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
