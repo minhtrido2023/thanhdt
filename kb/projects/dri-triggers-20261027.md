@@ -25,3 +25,6 @@ Vị thế: SpaceX 2.500cp, ZaloPay 1.300cp (sau bán tay 21/10 @15.400). Duyệ
 - Dự báo F + DD đều trượt; F KHÔNG chấm là mù: SXKD 9T đăng 20/10 (LNTT 9T 208,21 tỷ) trước khoá mù 26/10 12:47. Bài học: nowcast quý bằng báo cáo SXKD tháng của DRI.
 - FV kỳ vọng 11.838 → **11.031 đ (−25% vs 14.700)**; FY26E LNST 181–257 (base 217), Q4 base 49,7 tỷ.
 - Ý kiến riêng Taylor+Mike (ngoài kế hoạch, CHỜ USER): giảm 50% chủ động (SpaceX −1.250, ZaloPay −650), giữ nửa còn lại tới 15.100 / BCTC Q4.
+
+## 27/10 12:14 ICT — USER DUYỆT GIẢM 50% CHỦ ĐỘNG (`decided_by: user`)
+SELL DRI SpaceX 1.250 / ZaloPay 650 (còn 1.250 / 650). Đường thực thi: dòng trong `kb/current_ops.md` ⇒ DollarBill đưa SELL vào plan T+1 28/10 (user duyệt plan như thường); KHÔNG đặt lệnh trực tiếp (plan hôm nay 27/10 đã ký, Mafee plan-bound). Nếu user bán tay sớm hơn ⇒ báo Mike số KL, dùng số broker thật.
