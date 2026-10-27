@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-10-26
-Sent: 2026-10-26 19:35 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-10-27
+Sent: 2026-10-27 19:35 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -13,17 +13,17 @@ Không có signal — giữ cash cho book này.
 
 Ticker  Tier     W% Status              
 ------------------------------------------
-MCH     LAG_LO    8 UPCOMING T+3 phiên tới
-MSR     LAG_HI   10 UPCOMING T+3 phiên tới
+MCH     LAG_LO    8 UPCOMING T+2 phiên tới
+MSR     LAG_HI   10 UPCOMING T+2 phiên tới
 HT1     LAG_LO    8 WINDOW_PASSED 2026-10-26
 SCL     LAG_HI   10 WINDOW_PASSED 2026-10-26
 VPB     LAG_LO    8 WINDOW_PASSED 2026-10-26
 
 UPCOMING = vào lệnh phiên tới (T+5 sau release) · WINDOW_PASSED = cửa sổ entry đã qua, đối chiếu vị thế thực · W% trên vốn book LAG
-🧯 CAPIT v2: breadth oversold 2.4% &lt; gate 30% — dormant
+🧯 CAPIT v2: breadth oversold 2.8% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 19 mã
-  Wait/Pass/Avoid: 168 mã
+  BA-core: 0 mã | Compounder/info: 14 mã
+  Wait/Pass/Avoid: 172 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 50% / LAG 50% NAV (rebal CHỈ khi lệch &gt;10pp)
   • BAL: 0 pos × 10% book · stop -20% · hold 45d
@@ -31,12 +31,12 @@ UPCOMING = vào lệnh phiên tới (T+5 sau release) · WINDOW_PASSED = cửa s
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-10-26
+As of:   2026-10-27
 Source:  DT5G + macro overlay
 
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 143   |   transitions: 0
+Số ngày: 144   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.4 GO-LIVE paper-trade
