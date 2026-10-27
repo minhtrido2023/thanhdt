@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-26T10:05:01Z] [commodity-nowcast-block 10-26] XONG job Taylor_20261026_095926 @920bb4219 (wt-commodity-nowcast, chua merge) — CHO arch-reviewer + Mike merge
 - [2026-10-26T10:22:53Z] [commodity-sue-decomp 10-26] XONG job Taylor_20261026_095928 @a1547392c (chua merge, wt-commodity-sue-decomp-20261026): PREREG-4 md5 6c5642c1; CHO Mike goi quant-skeptic + duyet cron (CRON_PROPOSAL.md) + merge. Luu y: S2 (SUE live) dIC lich su -0,012
 - [2026-10-26T16:13:28Z] [p4-sulfur 10-26] XONG job Taylor_20261026_160657: research/commodity_p4_sulfur_20261026/ (chua commit) — P4 nowcast DGC gay tu 2024, 17 trial GD khong ung vien; CHO Winston sua registry key phosphorus->phosphate_rock_cny
 - [2026-10-26T16:41:53Z] [nowcast-p4 10-26] XONG job Taylor_20261026_163838 @c0ae8de0a nhánh feat/nowcast-p4-20261026 (chưa merge) — CHO Mike arch-review+merge; Winston thêm yellow_phosphorus vào freshness monitor
@@ -26,3 +25,4 @@
 - [2026-10-27T04:09:23Z] [dd-DRI 10-27] XONG job Taylor_20261027_040314: NON, giu qua Q3 nghieng giam, FV ky vong 11.838 vs 14.700; research/dd_DRI_20261027/ (chua commit). CHAM khi BCTC Q3 ra 30/10 theo bang 6b REPORT
 - [2026-10-27T04:37:16Z] [dri-q3 27/10] XONG job Taylor_20261027_042354: REPORT_Q3_UPDATE.md (chua commit) — GIU theo KH, de xuat rieng giam 50% cho user; CHAM tiep khi SXKD thang 10 DRI ra (~10/11); F khoa mu blind_scorable=no
 - [2026-10-27T08:49:45Z] [dri-val-supply-adj 27/10] XONG job Taylor_20261027_084046 @a0c629ed4: FV 60/40 13,7-15,7k, nhay nhat RSS3 mid; CHO Mike goi skeptic (khong tu chot)
+- [2026-10-27T09:42:35Z] [dri-val r2 27/10] XONG job Taylor_20261027_093047 @6b3c789c0: FV tam 12,5-13,9k (mid 1,97-2,075), 14.700 cao hon 6-18%; CHO Mike goi skeptic; mo: phi Lao 10% da trong thue chua, C_ref luoi cao hon GVHB/t do
