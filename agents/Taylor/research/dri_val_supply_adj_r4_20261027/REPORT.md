@@ -41,7 +41,7 @@ vườn; tiền thu gỗ thanh lý ~20,9 tr/ha (`ước lượng` từ 9T/26):
 
 - **FV trung tâm đề xuất (POST-HOC, đường TRUNG BÌNH) ≈ 9,1k – 10,1k ở mid 1,97 – 2,075.** Khoảng theo ba đường và bốn mid là 6,9k – 12,1k.
   Giá 14.400 (đóng 27/10) cao hơn FV đường TB **+79 / +59 / +43 / +30%** ở mid 1,865 / 1,97 / 2,075 / 2,18.
-  **Không ô nào trong lưới (cả tâm PREREG lẫn POST-HOC) đạt ≥ 14.400.**
+  **Không ô nào trong lưới 27 ô (cả tâm PREREG lẫn POST-HOC) đạt ≥ 14.400, nhưng điều này chỉ đúng KHI DRI thực hiện tái canh** (xem §9: nếu DRI hoãn/cắt chương trình, FV có thể vượt 14.400).
 - **Ngưỡng giá có biên ≥ 15% (FV/1,15), bản POST-HOC:**
 
 | | mid 1,865 | mid 1,97 | mid 2,075 | mid 2,18 |
@@ -54,6 +54,7 @@ vườn; tiền thu gỗ thanh lý ~20,9 tr/ha (`ước lượng` từ 9T/26):
 
   Theo tâm PREREG (không hiệu chỉnh), ngưỡng ở đường TB chỉ còn ≤ 453 / 1.252 / 2.051 / 2.850.
   ⇒ **Vùng mua r3 "≤ 9.000" chỉ còn đủ biên 15% ở đường CHẬM/TB với mid ≥ 2,075, và chỉ ở bản POST-HOC.** Với mid 1,97, ngưỡng là ~7,9k (TB).
+- **Về mid:** 1,865 và 2,075 là trung vị DANH NGHĨA của 10 năm và 5 năm. Khung thực neo **~2,18** (trung vị thực 10 năm 2,185); đọc cột mid 2,18 là cột chính theo khung thực, các cột còn lại là độ nhạy.
 - **Ba trục nhạy nhất của r4** (biên độ FV quanh tâm PREREG, mid 1,97): **L_tap** 22/27/32 năm cạo: 4.0k · **capex/ha** m 4/7/10: 3.6k ·
   **tốc độ thanh lý** 2027/29/31: 2.9k · **cách xử lý chi phí cố định**: +4,3k (công ty → theo diện tích). Cả bốn đều là [UL] hoặc [SL].
 
@@ -68,7 +69,7 @@ vườn; tiền thu gỗ thanh lý ~20,9 tr/ha (`ước lượng` từ 9T/26):
 | Tái canh | 2025: 94,56 ha [BCTN24 tr.55]; 2026: 37,77 ha [tr.46]; dự án 4.081,64 ha (NQ 01/2025) [tr.57]; thanh lý hàng loạt chờ liên doanh nhà máy gỗ [tr.39, 49] | 132,33 ha của 2025–26 thuộc dự án [UL]. Không có lịch theo năm ⇒ 3 cửa sổ 8 năm (2027/2029/2031) |
 | Phần không tái canh ~4.216 ha | Có cam kết khoanh nuôi tái sinh rừng phần đất quy hoạch Rừng bảo tồn Đông Huê Sáo khi hết chu kỳ 1 [tr.35] (diện tích không nêu) | Rời sổ không trồng lại khi tới năm mở cạo + L_tap, L_tap ∈ {22, 27, 32} |
 | Đời kinh tế | không công bố | L_tap 27 năm cạo [NỀN/UL] |
-| Capex tái canh | chăm sóc KTCB KH25: 9.542,65 tr / 387,04 ha = **24,655 tr/ha/năm** [BCTN24 tr.57] | m × 24,655 tr/ha, m ∈ {4, 7, 10} = 98,6 / 172,6 / 246,6 tr/ha, rải 7 năm [UL đối xứng]. Dự toán dự án chưa thấy |
+| Capex tái canh | chăm sóc KTCB KH25: 9.542,65 tr / 387,04 ha = **24,655 tr/ha/năm** [BCTN24 tr.57] | m × 24,655 tr/ha, m ∈ {4, 7, 10} = 98,6 / 172,6 / 246,6 tr/ha, rải 7 năm [UL đối xứng]. Dự toán dự án chưa thấy. **Đã kiểm lại với PDF BCTN 2024 tải từ dri.com.vn (`src/BCTN2024.pdf`, không commit): trang PDF 57, mục 3.3.1 "Cao su 9.542,65 triệu đồng, với diện tích 387,04 ha, chi phí đầu tư bình quân là 24.655.477 đồng/ha" — KHỚP** (9.542,65/387,04 = 24,655). Lưu ý đây là chi phí chăm sóc KTCB bình quân KH 2025 của vườn đang KTCB (nhiều tuổi), không phải dự toán trồng mới. |
 | Gỗ thanh lý | NQ giá sàn 12/2025 (không có số) [tr.59]; 9T/26 thu 1,13 tỷ trên NG 3,58 tỷ [BCTC3] | ~54 ha ⇒ ~20,9 tr/ha (`ước lượng`) |
 | Năng suất cây mới | không công bố | mở cạo năm 7 sau trồng; năm 1/2/3 = 0,9/1,2/1,5, sau đó 1,69 [UL/NỀN] |
 | Lão hoá cây cũ | — | giữ đúng r3: −2%/năm từ 2030 |
@@ -99,9 +100,15 @@ chỉ là 6,6 tỷ ⇒ r3 không hề chứa khoản tái canh cỡ này.
 | + chi phí cố định co theo diện tích | → 7.116 | → 8.135 | → 9.155 | → 10.174 |
 | + gỗ thanh lý ~20,9 tr/ha | → **8.058** | → **9.078** | → **10.097** | → **11.116** |
 - Hai bước "hết chu kỳ 1" và "thanh lý" phóng đại vì chi phí cố định ~212 tỷ/năm vẫn chạy khi sản lượng → 0. Đây chính là sai lệch (1) ở §0.
-- Ở bản POST-HOC, khi không có capex, FV đường TB là 13.261 @1,97 (out §10). Capex m7 lấy −4,2k (13.261 → 9.078); trong cầu nối tâm PREREG, sản lượng cây tái canh trả +4,2k
-  ⇒ **ở r thực 8,74% và capex [UL], tái canh gần hoà vốn NPV.** Vì vậy đường CHẬM > TB > NHANH: hoãn capex có lợi hơn mất sản
-  lượng cây cũ. Model không có rủi ro cây già sụp nhanh hơn −2%/năm.
+- **Tái canh làm mất giá trị trong model, không "gần hoà vốn"** (POST-HOC, đường TB, L27, m7, mid 1,97; out §12):
+  thanh lý khối rồi trồng lại với capex m7 là **9.078**; thanh lý khối nhưng không trồng lại là **10.939** ⇒ trồng lại mất **−1,9k**/cp.
+  Cả chương trình (thanh lý + trồng lại + capex) so với không thanh lý gì (13.096) mất **−4,0k** (13.096 → 9.078). Capex m7 một mình là −4,2k (13.261 → 9.078).
+  Lệnh gọi ban đầu ghi ~−4,3k/13.405 cho mốc "không thanh lý gì"; tôi đo được 13.096 (L27, không capex), chưa đối chiếu được cách skeptic dựng 13.405.
+  - **Mốc 2054 không phải nguyên nhân**: kéo dài tô nhượng tới 2064 chỉ +0,2k (9.078 → 9.295).
+  - **Nguyên nhân là biên mỗi ha không trả nổi capex.** Biên ròng ha cây mới trưởng thành @mid 1,97 theo hàm chi phí r3 là
+    22,9 tr/ha/năm trước thuế, 18,5 sau thuế `[SL]` (skeptic đo ~14–17). Capex m7 là 172,6 tr/ha rải 7 năm (PV 136 tr/ha ở r thực 8,74%),
+    trong khi PV biên sau thuế 22 năm cạo chỉ 108 tr/ha, và con số này đã bỏ qua 3 năm năng suất thấp nên còn là cận trên.
+  - Vì vậy đường CHẬM > TB > NHANH: hoãn capex có lợi hơn mất sản lượng cây cũ. Model không có rủi ro cây già sụp nhanh hơn −2%/năm.
 
 ## 4. Biến thể và dòng riêng (không vào tâm; out §6, §7)
 | Biến thể quanh tâm PREREG TB | mid 1,865 | mid 1,97 | mid 2,075 | mid 2,18 |
@@ -132,8 +139,8 @@ chỉ là 6,6 tỷ ⇒ r3 không hề chứa khoản tái canh cỡ này.
   kết quả ⇒ cần skeptic xét riêng từng hiệu chỉnh (a), (b) và farea.
 - Hiệu chỉnh (a) là cận trên: giả định khấu hao chu kỳ 2 tiếp tục tạo lá chắn thuế, và toàn bộ khấu hao vườn là phi tiền mặt.
   Farea cũng là cận trên: giả định toàn bộ phần f là chi phí theo ha; định phí nhà máy thực tế có tồn tại (BCTN tr.50).
-- Model không có quyền dừng hay thu hẹp bộ máy khi lỗ (giống r3). Không có phase 2 tái canh cho ~4.216 ha còn lại. Nếu DRI có phase 2
-  thì đường sản lượng sau 2040 sẽ cao hơn, nhưng capex cũng cao hơn.
+- Model không có quyền dừng hay thu hẹp bộ máy khi lỗ (giống r3). Không có phase 2 tái canh cho ~4.216 ha còn lại: **đây là giả định CÓ LỢI cho FV** (§10: thêm phase 2 làm FV giảm ~1,5k). Nếu DRI có phase 2
+  thì đường sản lượng sau 2040 cao hơn nhưng capex cao hơn nhiều, và model cho giá trị ròng âm.
 - Phân bố tuổi là suy luận từ một mốc duy nhất (2015: 80%).
 
 ## 7. Dữ liệu cần lấy (BCTC Q3 chi tiết ~30/10 hoặc hỏi DRI), xếp theo mức đổi FV
@@ -145,3 +152,74 @@ chỉ là 6,6 tỷ ⇒ r3 không hề chứa khoản tái canh cỡ này.
 4. **Văn bản tô nhượng:** thời hạn, điều kiện gia hạn, xử lý tài sản trên đất khi hết hạn.
 5. **Giá sàn gỗ (NQ 12/NQ-HĐQT 15/12/2025), kết quả đấu giá Nông trường 1, tình trạng liên doanh nhà máy gỗ / viên nén.**
 6. Biên mủ mua ngoài (giá mua tiểu điền so với giá SVR10/20); năng suất thực của vườn tái canh 2025.
+
+## 8. Cập nhật theo phản biện fundamental-skeptic (job `Taylor_20261027_154349`; code `model.py` §11–15, kết quả `out.txt`)
+Chỉ THÊM code (hàm `build3`, `capex3`, `fvph`…); không đổi hàm cũ, không đổi tâm PREREG. Self-check: `build3` mặc định tái lập PH TB
+8.058 / 9.078 / 10.097 / 11.116 đến 1e-6 (assert); phần `out.txt` cũ giữ nguyên từng byte; `out.txt` mới md5 `c455ba5a…`, giống từng byte
+dưới `env -u TZ` và `TZ=America/New_York`. Mọi số dưới đây là POST-HOC (cấu hình farea + cộng KH vườn + gỗ thanh lý), chưa qua skeptic.
+
+## 9. Trục "DRI thực hiện / hoãn / cắt chương trình tái canh 4.081 ha" (out §13)
+FV đ/cp @ mid 1,865 / 1,97 / 2,075 / 2,18 (60/40). Cột phải: 14.400 cao hơn (+) / thấp hơn (−) FV.
+
+| Kịch bản | 1,865 | 1,97 | 2,075 | 2,18 | 14.400 so FV @1,97 / @2,18 |
+|---|---|---|---|---|---|
+| T1. Thực hiện đầy đủ (TB 2029, L27, m7) | 8.058 | 9.078 | 10.097 | 11.116 | +59% / +30% |
+| T2c. Không tái canh, vườn hết đời L27 | 12.057 | 13.096 | 14.134 | 15.172 | +10% / −5% |
+| T2b. Không tái canh, GIỮ vườn q=1 (L99), KH vườn coi là chi phí duy trì | 10.145 | 11.463 | 12.782 | 14.100 | +26% / +2% |
+| T2a. Như T2b nhưng cộng lại KH vườn (không có capex thay thế) | 13.501 | 14.819 | 16.138 | 17.457 | −3% / −18% |
+| T3a. Chỉ thanh lý khối vườn thưa (q 0,5; 3.949 ha), không trồng lại, phần còn lại giữ (L99) | 13.575 | 14.734 | 15.893 | 17.052 | −2% / −16% |
+| T3b. Như T3a, phần còn lại hết đời L27 | 12.035 | 12.968 | 13.901 | 14.834 | +11% / −3% |
+
+- **Đây là đuôi trên DUY NHẤT có thể vượt 14.400.** Skeptic đo 13.225 @1,97 và 15.115 @2,18 cho "không tái canh, giữ vườn"; tôi **không tái lập
+  đúng** số đó: bản của tôi nằm trong dải T2b–T2a (11.463–14.819 @1,97; 14.100–17.457 @2,18), tuỳ KH vườn có được cộng lại hay không. Chênh lệch do cách dựng
+  (đời vườn, KH vườn, định phí theo ha); chưa đối chiếu từng bước với skeptic.
+- Kết luận có điều kiện: **"không ô nào ≥ 14.400" chỉ đúng khi DRI thực hiện tái canh.** Nếu DRI hoãn hoặc cắt chương trình và vườn cũ vẫn cho
+  1,69 t/ha với −2%/năm, FV đủ vượt giá thị trường ở mid 2,18 (và ở mid 1,97 với T2a/T3a).
+- Cảnh báo cho đuôi này: T2a/T3a (L99) giả định vườn cao su không bao giờ hết đời trong khi BCTN 2025 tr.44 nói nhiều diện tích đã phải thanh lý sớm
+  vì không đủ mật độ (§11). T2c (L27) là bản thực tế hơn của "không tái canh" và vẫn lệch đáng kể khỏi T1.
+- NQ 01/2025 đã giao 4.081,64 ha; BCTN nói trích quỹ ĐTPT 96,97 tỷ cho kế hoạch này. Hoãn hay cắt phải là quyết định mới của HĐQT, chưa có tín hiệu công bố.
+
+## 10. "Không phase 2" là giả định có lợi cho FV (out §14)
+Mô phỏng tái canh nốt phần còn lại (~4.216 ha), trồng vào năm mỗi cohort hết L_tap, cùng KTCB 7 năm và capex m7:
+
+| | 1,865 | 1,97 | 2,075 | 2,18 |
+|---|---|---|---|---|
+| TB L27, không phase 2 (tâm PH) | 8.058 | 9.078 | 10.097 | 11.116 |
+| TB L27 + phase 2 | 6.521 | 7.609 | 8.697 | 9.784 |
+| TB L22 + phase 2 | 5.176 | 6.210 | 7.245 | 8.279 |
+
+Phase 2 làm FV giảm 1,47k @1,97 và 1,33k @2,18. Tâm PH hiện tại vì vậy không bi quan hơn thực tế ở trục này.
+
+## 11. Chất lượng vườn / mật độ (q) và hai câu BCTN (out §15)
+- BCTN 2025 tr.44 (rủi ro): "nhiều diện tích phải đưa vào thanh lý sớm, do không đảm bảo mật độ khai thác" (do biến đổi khí hậu, dịch bệnh).
+- BCTN 2025 tr.10 (định hướng; BCTN 2024 tr.9 cùng ý): "Thực hiện lộ trình khai thác và trồng tái canh vườn cây cao su chu kỳ thứ hai,
+  phù hợp với hợp đồng tô nhượng đất **và chất lượng vườn cây**".
+- Hai câu cho thấy tiêu chí thanh lý là chất lượng/mật độ vườn chứ không chỉ tuổi, tức L_tap hiệu dụng có thể ngắn hơn 27 và lịch tái canh phụ thuộc vườn.
+- Cách model hoá q của tôi: năng suất/ha của cây cũ = q·1,69, diện tích cây cũ = A0/q (2026 vẫn 13.800 t); cây tái canh đạt 1,69 đầy đủ.
+  FV đường TB @1,97 (m7):
+
+| | 1,865 | 1,97 | 2,075 | 2,18 | Δ so tâm @1,97 |
+|---|---|---|---|---|---|
+| Tâm (q 1, L27) | 8.058 | 9.078 | 10.097 | 11.116 | — |
+| q 0,7, L27 | 9.539 | 10.651 | 11.762 | 12.873 | +1,57k |
+| q 1, L22 | 7.049 | 7.931 | 8.813 | 9.695 | −1,15k |
+| **q 0,7 + L22** | 8.375 | **9.315** | 10.254 | 11.193 | +0,24k |
+| q 0,5, L27 | 10.708 | 11.880 | 13.052 | 14.225 | +2,80k |
+
+  Skeptic đo q 0,7 = +1,37k, L22 = −1,15k, gộp = 9.185 @1,97. L22 khớp; q 0,7 của tôi cao hơn 0,2k và gộp cao hơn 0,13k (khác cách chia lại diện tích cây cũ).
+  Chiều tác động: vườn thưa (q thấp) làm FV TĂNG, vì cùng 13.800 t phải gánh nhiều ha hơn nên chương trình thanh lý/tái canh thay vườn kém bằng vườn đủ mật độ.
+  Bù trừ với đời vườn ngắn lại gần như triệt tiêu; gộp lại FV vẫn ~9,2–9,3k @1,97.
+
+## 12. Hiệu chỉnh đối xứng skeptic đo (CHƯA tái lập trong model này; số của skeptic, lấy từ lệnh gọi)
+Tác động lên FV @1,97 so với tâm PH:
+
+| Hiệu chỉnh | Tác động |
+|---|---|
+| Định phí nhà máy KHÔNG co theo diện tích (nới lại giả định farea) | −0,4k … −0,85k |
+| Thuế trên tiền bán gỗ | −0,28k |
+| Lá chắn thuế sau 2034 | −0,17k |
+| Chi phí bán hàng biến đổi | +0,38k |
+| Năng suất cây mới 1,9 t/ha (thay 1,69) | +0,52k |
+
+Các hiệu chỉnh ngược chiều nhau và nhỏ so với biên độ của các trục §9–11. **Kết luận: tin FV POST-HOC TB ở mức ±1k quanh 9,1k @1,97**,
+tức khoảng 8,1k–10,1k; không tin vào độ chính xác hơn mức đó, và nhớ rằng khoảng này có điều kiện "DRI thực hiện tái canh theo kế hoạch".

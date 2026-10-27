@@ -244,3 +244,114 @@ for lab in PATHS:
     print(f"   ngưỡng PH {lab:10s}: " + " · ".join(f"mid {m}: ≤{v/1.15:,.0f}" for m, v in zip(MIDS, PH[lab])))
 print("   PH đường đáy 1,60 (TB): " + " / ".join(f"{fv4('TROUGH', m, CEN, V=VT, cx=CT, farea=True, addD=D_V, wood=woodf(2029, 27)):,.0f}" for m in MIDS))
 print("   PH không capex (chỉ để thấy cỡ capex): " + " / ".join(f"{fvw4(m, V=VT, farea=True, addD=D_V, wood=woodf(2029, 27)):,.0f}" for m in MIDS))
+
+# ======================================================================================================
+# 11–16. BỔ SUNG theo phản biện fundamental-skeptic (job Taylor_20261027_154349). CHỈ THÊM; hàm/số cũ ở trên giữ nguyên.
+# ======================================================================================================
+def build3(s, Ltap, q=1.0, R_on=True, new_on=True, ph2=False, sparse=False, dense_L=None):
+    """Bản tổng quát của build(). Trả (out{năm:(V, A_eff)}, real{năm: ha thật}); A_eff = ha thực × q / (ha 2026) ⇒ fv4 (farea) thấy đúng TỈ LỆ so với 2026.
+    q: mật độ vườn cũ (năng suất/ha cây cũ = q·yold; 2026 vẫn đúng 13.800 t ⇒ diện tích cũ = A0/q).
+    ph2: tái canh nốt phần không thuộc dự án 4.081 ha, trồng vào đúng năm cohort hết L_tap (cùng KTCB/YNG).
+    sparse: khối R_LEFT là vườn THƯA (q=0.5), thanh lý theo cửa sổ s không trồng lại; phần còn lại q=1, hết đời theo dense_L (mặc định = Ltap)."""
+    out, real = {}, {}
+    pl = plantings(s, R_on) if (new_on and not sparse) else {}
+    if ph2:
+        for ts, fr in COH:
+            pl[ts+Ltap] = pl.get(ts+Ltap, 0) + fr*(A0/q - R_LEFT)       # diện tích cohort hết đời (không thuộc dự án)
+    if sparse:
+        A_sp, dens = R_LEFT, A0 - 0.5*R_LEFT; A_tot0 = dens + A_sp; dl = dense_L or Ltap
+    for y in range(2026, END+1):
+        if sparse:
+            ao = dens*(alive(y, dl) if y > 2026 else 1.0)
+            asp = A_sp - sum(A_sp/WIN for L in range(s, s+WIN) if L <= y)
+            v = ao*yold(y) + asp*0.5*yold(y); a = ao + asp; out[y] = (v, a/A_tot0*A0); real[y] = a; continue
+        oldR = R_LEFT - (sum(R_LEFT/WIN for L in range(s, s+WIN) if L <= y) if R_on else 0)
+        a_old = (oldR + A0/q - R_LEFT)*(alive(y, Ltap) if y > 2026 else 1.0)
+        v = a_old*yold(y)*q; a = a_old
+        for L, ha in pl.items():
+            i = y - (L+KTCB)
+            if i >= 0: v += ha*(YNG[i] if i < 3 else KH26_Y); a += ha
+        out[y] = (v, a*q); real[y] = a_old          # real = ha cây CŨ còn lại (để tính gỗ thanh lý; không trừ ha trồng mới)
+    return out, real
+def capex3(pl, m):
+    cx = {}
+    for L, ha in pl.items():
+        for y in range(L, L+KTCB):
+            if 2027 <= y <= END: cx[y] = cx.get(y, 0) + ha*m*CARE/KTCB/1e3
+    return cx
+def plants3(s, Ltap, q=1.0, ph2=False, R_on=True):
+    pl = plantings(s, R_on)
+    if ph2:
+        for ts, fr in COH: pl[ts+Ltap] = pl.get(ts+Ltap, 0) + fr*(A0/q - R_LEFT)
+    return pl
+def wood3(real):
+    w = {}
+    for y in range(2027, END+1):
+        da = real[y-1] - real[y]
+        if da > 1e-9: w[y] = da*wood_ha/1e3
+    return w
+PHK = dict(farea=True, addD=D_V)              # cấu hình POST-HOC (a)+farea; + wood riêng từng kịch bản
+def fvph(m, s, L, q=1.0, m_cx=7, R_on=True, new_on=True, ph2=False, sparse=False, dense_L=None, addD=D_V, scn=None):
+    V, real = build3(s, L, q, R_on, new_on, ph2, sparse, dense_L)
+    cx = capex3(plants3(s, L, q, ph2, R_on), m_cx) if (new_on and not sparse) else None
+    kw = dict(V=V, cx=cx, farea=True, addD=addD, wood=wood3(real))
+    return fv4(scn, m, CEN, **kw) if scn else fvw4(m, **kw)
+def row(lab, fn, ref=None):
+    vals = [fn(m) for m in MIDS]
+    print(f"   {lab:58s} | " + " | ".join(f"{v:7,.0f}" for v in vals)); return vals
+
+print("\n" + "="*100 + "\n11) SELFCHECK build3 ≡ build/PH (mặc định phải trùng từng số)")
+_ref = PH["TRUNG BÌNH"]
+_new = [fvph(m, 2029, 27) for m in MIDS]
+print("   PH TB cũ :", " / ".join(f"{v:,.0f}" for v in _ref)); print("   build3   :", " / ".join(f"{v:,.0f}" for v in _new))
+assert all(abs(a-b) < 1e-6 for a, b in zip(_ref, _new)), "build3 không tái lập PH TB"
+print("   PASS")
+
+print("\n12) CÁC CON SỐ CHO §3 (POST-HOC, đường TB, L27, m7; đ/cp @ mid " + " / ".join(map(str, MIDS)) + ")")
+f_full  = row("A. thanh lý khối + trồng lại, capex m7 (tâm PH)", lambda m: fvph(m, 2029, 27))
+f_nocx  = row("B. như A nhưng capex = 0 (cây mới miễn phí)", lambda m: fvw4(m, V=build3(2029, 27)[0], cx=None, farea=True, addD=D_V, wood=wood3(build3(2029, 27)[1])))
+f_liq   = row("C. thanh lý khối, KHÔNG trồng lại, không capex", lambda m: fvph(m, 2029, 27, new_on=False))
+f_none  = row("D. không thanh lý gì (R_on=False), L27, không capex", lambda m: fvph(m, 2029, 27, R_on=False, new_on=False))
+print(f"   ⇒ A−B (giá của capex) @1,97 = {f_full[1]-f_nocx[1]:+,.0f}; A−C (thanh lý+trồng lại vs thanh lý rồi bỏ) = {f_full[1]-f_liq[1]:+,.0f}; A−D (cả chương trình vs không làm gì) = {f_full[1]-f_none[1]:+,.0f}")
+_E = END
+END = 2064
+try:
+    f64 = row("A với tô nhượng tới 2064 (END=2064)", lambda m: fvph(m, 2029, 27))
+finally:
+    END = _E
+print(f"   ⇒ kéo dài tô nhượng 2054→2064 @1,97: {f64[1]-f_full[1]:+,.0f}")
+print(f"   biên/ha đo được: capex m7 = {7*CARE:.1f} tr/ha (rải {KTCB} năm); r thực = {(1+CEN['r'])/(1+PI)-1:.2%}")
+# biên ròng/ha cây mới trưởng thành (mid 1,97; hàm chi phí r3 + định phí theo ha), và NPV đơn giản 1 ha trồng lại (trước thuế/sau thuế)
+_P = price(1.97); _C = CCAL + K*(_P-P25); _rr = (1+CEN['r'])/(1+PI) - 1
+_mar = KH26_Y*_P - _C*((1-.5)*KH26_Y + .5*V0/A0)
+_pv_cx = sum(7*CARE/KTCB/(1+_rr)**t for t in range(KTCB))          # tr/ha, năm trồng = t0
+_pv_m = sum(_mar*(1-TAX9)/(1+_rr)**t for t in range(KTCB, KTCB+22))  # 22 năm cạo (L_tap 22…27 ⇒ cận hợp lý), bỏ qua giai đoạn năng suất thấp năm 1–3
+print(f"   biên ròng/ha cây mới trưởng thành @mid 1,97: {_mar:.1f} tr/ha/năm trước thuế, {_mar*(1-TAX9):.1f} sau thuế [SL, hàm chi phí r3]; "
+      f"PV(t0) capex m7 = {_pv_cx:.0f} tr/ha vs PV biên sau thuế 22 năm cạo = {_pv_m:.0f} tr/ha (bỏ qua 3 năm năng suất thấp ⇒ cận trên)")
+
+print("\n13) TRỤC 'DRI THỰC HIỆN / HOÃN / CẮT CHƯƠNG TRÌNH' (POST-HOC cấu hình A; mid 1,865/1,97/2,075/2,18)")
+ax_full = row("T1. thực hiện đầy đủ (TB 2029, L27, m7)", lambda m: fvph(m, 2029, 27))
+ax_keep = row("T2a. không tái canh, GIỮ vườn q=1 (L_tap 99), addD=KH vườn", lambda m: fvph(m, 2029, 27, R_on=False, new_on=False, **{}) if False else
+              fvw4(m, V=build3(2029, 99, R_on=False, new_on=False)[0], farea=True, addD=D_V))
+ax_keep0= row("T2b. như T2a nhưng addD=0 (KH vườn coi là chi phí duy trì)", lambda m: fvw4(m, V=build3(2029, 99, R_on=False, new_on=False)[0], farea=True, addD=0.0))
+ax_k27  = row("T2c. không tái canh, vườn hết đời L27 (đuôi dưới)", lambda m: fvph(m, 2029, 27, R_on=False, new_on=False))
+ax_sp   = row("T3a. thanh lý CHỈ khối thưa (q 0,5; 3.949 ha), không trồng lại; phần còn lại giữ (L99)",
+              lambda m: fvph(m, 2029, 27, sparse=True, dense_L=99, new_on=False))
+ax_sp27 = row("T3b. như T3a nhưng phần còn lại hết đời L27", lambda m: fvph(m, 2029, 27, sparse=True, dense_L=27, new_on=False))
+print(f"   đối chiếu skeptic (tự đo, chưa tái lập ở đây): 13.225 @1,97 / 15.115 @2,18 cho 'không tái canh giữ vườn'")
+print(f"   ô ≥ 14.400: " + "; ".join(f"{n}: " + "/".join(f"{v:,.0f}" for v in vs if v >= PX27) for n, vs in [("T2a", ax_keep), ("T2b", ax_keep0), ("T3a", ax_sp)]))
+for n, vs in [("T1", ax_full), ("T2a", ax_keep), ("T2b", ax_keep0), ("T3a", ax_sp)]:
+    print(f"   {n}: 14.400 cao/thấp hơn FV " + " / ".join(f"{PX27/v-1:+.0%}" for v in vs))
+
+print("\n14) PHASE 2: tái canh nốt phần còn lại (~4.216 ha) khi cohort hết L_tap (POST-HOC, TB, m7)")
+p2 = row("P2. TB L27 + phase 2", lambda m: fvph(m, 2029, 27, ph2=True))
+p2_22 = row("P2. TB L22 + phase 2", lambda m: fvph(m, 2029, 22, ph2=True))
+base22 = row("   (đối chiếu) TB L22 không phase 2", lambda m: fvph(m, 2029, 22))
+print(f"   ⇒ phase 2 làm FV đổi (L27) @1,97/2,18: {p2[1]-f_full[1]:+,.0f} / {p2[3]-f_full[3]:+,.0f}")
+
+print("\n15) MẬT ĐỘ q (vườn cũ; năng suất/ha cây cũ = q·1,69, diện tích cũ = A0/q) — POST-HOC, TB, m7")
+q07 = row("q 0,7, L27", lambda m: fvph(m, 2029, 27, q=0.7))
+L22 = row("q 1, L22", lambda m: fvph(m, 2029, 22))
+q07L22 = row("q 0,7 + L22", lambda m: fvph(m, 2029, 22, q=0.7))
+print(f"   ⇒ q0,7 vs tâm {q07[1]-f_full[1]:+,.0f}; L22 vs tâm {L22[1]-f_full[1]:+,.0f} @1,97 (skeptic: +1,37k; −1,15k; gộp 9.185)")
+q05 = row("q 0,5, L27", lambda m: fvph(m, 2029, 27, q=0.5))

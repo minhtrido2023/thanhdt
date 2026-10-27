@@ -109,3 +109,47 @@
    ngưỡng PH CHẬM      : mid 1.865: ≤7,744 · mid 1.97: ≤8,661 · mid 2.075: ≤9,578 · mid 2.18: ≤10,496
    PH đường đáy 1,60 (TB): 5,984 / 6,841 / 7,698 / 8,556
    PH không capex (chỉ để thấy cỡ capex): 12,242 / 13,261 / 14,281 / 15,300
+
+====================================================================================================
+11) SELFCHECK build3 ≡ build/PH (mặc định phải trùng từng số)
+   PH TB cũ : 8,058 / 9,078 / 10,097 / 11,116
+   build3   : 8,058 / 9,078 / 10,097 / 11,116
+   PASS
+
+12) CÁC CON SỐ CHO §3 (POST-HOC, đường TB, L27, m7; đ/cp @ mid 1.865 / 1.97 / 2.075 / 2.18)
+   A. thanh lý khối + trồng lại, capex m7 (tâm PH)            |   8,058 |   9,078 |  10,097 |  11,116
+   B. như A nhưng capex = 0 (cây mới miễn phí)                |  12,242 |  13,261 |  14,281 |  15,300
+   C. thanh lý khối, KHÔNG trồng lại, không capex             |  10,151 |  10,939 |  11,728 |  12,516
+   D. không thanh lý gì (R_on=False), L27, không capex        |  12,057 |  13,096 |  14,134 |  15,172
+   ⇒ A−B (giá của capex) @1,97 = -4,184; A−C (thanh lý+trồng lại vs thanh lý rồi bỏ) = -1,862; A−D (cả chương trình vs không làm gì) = -4,018
+   A với tô nhượng tới 2064 (END=2064)                        |   8,237 |   9,295 |  10,354 |  11,413
+   ⇒ kéo dài tô nhượng 2054→2064 @1,97: +218
+   biên/ha đo được: capex m7 = 172.6 tr/ha (rải 7 năm); r thực = 8.74%
+   biên ròng/ha cây mới trưởng thành @mid 1,97: 22.9 tr/ha/năm trước thuế, 18.5 sau thuế [SL, hàm chi phí r3]; PV(t0) capex m7 = 136 tr/ha vs PV biên sau thuế 22 năm cạo = 108 tr/ha (bỏ qua 3 năm năng suất thấp ⇒ cận trên)
+
+13) TRỤC 'DRI THỰC HIỆN / HOÃN / CẮT CHƯƠNG TRÌNH' (POST-HOC cấu hình A; mid 1,865/1,97/2,075/2,18)
+   T1. thực hiện đầy đủ (TB 2029, L27, m7)                    |   8,058 |   9,078 |  10,097 |  11,116
+   T2a. không tái canh, GIỮ vườn q=1 (L_tap 99), addD=KH vườn |  13,501 |  14,819 |  16,138 |  17,457
+   T2b. như T2a nhưng addD=0 (KH vườn coi là chi phí duy trì) |  10,145 |  11,463 |  12,782 |  14,100
+   T2c. không tái canh, vườn hết đời L27 (đuôi dưới)          |  12,057 |  13,096 |  14,134 |  15,172
+   T3a. thanh lý CHỈ khối thưa (q 0,5; 3.949 ha), không trồng lại; phần còn lại giữ (L99) |  13,575 |  14,734 |  15,893 |  17,052
+   T3b. như T3a nhưng phần còn lại hết đời L27                |  12,035 |  12,968 |  13,901 |  14,834
+   đối chiếu skeptic (tự đo, chưa tái lập ở đây): 13.225 @1,97 / 15.115 @2,18 cho 'không tái canh giữ vườn'
+   ô ≥ 14.400: T2a: 14,819/16,138/17,457; T2b: ; T3a: 14,734/15,893/17,052
+   T1: 14.400 cao/thấp hơn FV +79% / +59% / +43% / +30%
+   T2a: 14.400 cao/thấp hơn FV +7% / -3% / -11% / -18%
+   T2b: 14.400 cao/thấp hơn FV +42% / +26% / +13% / +2%
+   T3a: 14.400 cao/thấp hơn FV +6% / -2% / -9% / -16%
+
+14) PHASE 2: tái canh nốt phần còn lại (~4.216 ha) khi cohort hết L_tap (POST-HOC, TB, m7)
+   P2. TB L27 + phase 2                                       |   6,521 |   7,609 |   8,697 |   9,784
+   P2. TB L22 + phase 2                                       |   5,176 |   6,210 |   7,245 |   8,279
+      (đối chiếu) TB L22 không phase 2                        |   7,049 |   7,931 |   8,813 |   9,695
+   ⇒ phase 2 làm FV đổi (L27) @1,97/2,18: -1,468 / -1,332
+
+15) MẬT ĐỘ q (vườn cũ; năng suất/ha cây cũ = q·1,69, diện tích cũ = A0/q) — POST-HOC, TB, m7
+   q 0,7, L27                                                 |   9,539 |  10,651 |  11,762 |  12,873
+   q 1, L22                                                   |   7,049 |   7,931 |   8,813 |   9,695
+   q 0,7 + L22                                                |   8,375 |   9,315 |  10,254 |  11,193
+   ⇒ q0,7 vs tâm +1,573; L22 vs tâm -1,146 @1,97 (skeptic: +1,37k; −1,15k; gộp 9.185)
+   q 0,5, L27                                                 |  10,708 |  11,880 |  13,052 |  14,225
