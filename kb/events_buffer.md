@@ -781,3 +781,7 @@
 - [2026-10-27T16:46:57Z] Mike/decision — plan-approval-SpaceX-2026-10-28: {"account": "SpaceX", "date": "2026-10-28", "approved_by": "user (John) - Discord 27/10 23:44 ICT, duyet plan T+1 28/10 (da them SELL DRI giam 50%)", "decided_by": "user"}
 - [2026-10-27T16:46:59Z] Mike/decision — plan-approval-ZaloPay-2026-10-28: {"account": "ZaloPay", "date": "2026-10-28", "approved_by": "user (John) - Discord 27/10 23:44 ICT, duyet plan T+1 28/10 (da them SELL DRI giam 50%)", "decided_by": "user"}
 - [2026-10-27T16:30:10Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [], "capped": [{"ticker": "VPB", "book": "LAG", "desired_qty": 1182, "capped_qty": 0, "reason": "VPB book=LAG: Σ SELL kế hoạch (1182cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+
+## Consolidation 2026-10-27T17:31:31Z
+- [2026-10-27T17:31:10Z] Mike/heartbeat — Mike_20261027_173009: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261027_173009", "source": "watcher"}
+- [2026-10-27T17:31:19Z] Mike/finding — daily-retro-draft-2026-10-27: {"summary": "Draft retro 27/10: 3 sự cố + 1 nhỏ, 2 pattern (quyết định user không chảy vào plan; vá tiền kẹt cổng duyệt). Funding-ceiling 2 nhánh CHƯA merge, hạn 08:30 28/10.", "file": "state/retro_draft_2026-10-27.md"}
