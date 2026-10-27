@@ -295,3 +295,6 @@
 
 ## Archived 2026-10-27 (keep=12 days=0 require_done=False)
 - [2026-10-21T12:04:34Z] [2026-10-21 19:xx ICT] Plan ZaloPay 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120332); DRI -600cp ngoai lenh, cho user xac nhan; active_nav chua refresh; cho duyet truoc 08:45 ICT 22/10
+
+## Archived 2026-10-27 (keep=6 days=5 require_done=True)
+- [2026-10-21T12:04:39Z] [2026-10-21 19:xx ICT] Plan SpaceX 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120334). DRI bi ban 1200cp ngoai plan -> bus question spacex-dri-sell-ngoai-plan-20261021 + Trading Daily; active_nav chua cap nhat (compute_active_nav tu choi). Cho user xac nhan + duyet truoc 08:45 ICT 22/10
