@@ -832,11 +832,23 @@ try:
     except Exception:
         _chase = 0.04
     _fee = 0.00097
-    _buy_ceiling = _total_buy_vnd * (1.0 + _chase) * (1.0 + _fee)
+    # Lệnh có trần cứng (hard_no_chase_ceiling_vnd / entry_anchor_price) KHÔNG đuổi quá trần ⇒ đệm +chase% bị chặn
+    # ở trần: giá tối đa = min(ref×(1+chase), trần). Cùng quy tắc `_buy_cost_price` của plan_funding_gate (gate 9:05).
+    def _o_val(o):
+        return (float(o.get("value_vnd") or o.get("est_value_vnd") or 0)
+                or float(o.get("qty") or o.get("quantity") or 0) * float(o.get("ref_price") or o.get("mtm_price_ref") or 0))
+
+    def _o_max_cost(o):
+        rp = float(o.get("ref_price") or o.get("mtm_price_ref") or 0)
+        cs = [c for c in (_num(o.get("hard_no_chase_ceiling_vnd")), _num(o.get("entry_anchor_price"))) if c and c > 0]
+        if rp > 0 and cs:
+            return float(o.get("qty") or o.get("quantity") or 0) * min(rp * (1.0 + _chase), min(cs))
+        return _o_val(o) * (1.0 + _chase)
+    _buy_ceiling = sum(_o_max_cost(o) for o in _buy_orders) * (1.0 + _fee)
     _shortfall = max(0.0, _buy_ceiling - _cash_avail - _jit_proceeds)
     if _egg_vnd > 0 and _total_buy_vnd > 0 and _shortfall > 0:
         ACT.append(
-            f"🥚 **Chuyển {_shortfall/1e6:,.1f}tr từ Trứng vàng → cash trước 9:05 ICT** "
+            f"🥚 **Chuyển {-(-_shortfall // 100_000) / 10:,.1f}tr từ Trứng vàng → cash trước 9:05 ICT** "
             f"(bot nhắc mỗi 15' từ 8:30). Σ mua {_total_buy_vnd/1e6:,.1f}tr + đệm đuổi giá +{_chase*100:.0f}% & phí "
             f"= {_buy_ceiling/1e6:,.1f}tr − tiền mặt {_cash_avail/1e6:,.1f}tr"
             + (f" − JIT-bán PARK {_jit_proceeds/1e6:,.1f}tr" if _jit_proceeds > 0 else "")
