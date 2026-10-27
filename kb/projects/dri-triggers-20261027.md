@@ -28,3 +28,9 @@ Vị thế: SpaceX 2.500cp, ZaloPay 1.300cp (sau bán tay 21/10 @15.400). Duyệ
 
 ## 27/10 12:14 ICT — USER DUYỆT GIẢM 50% CHỦ ĐỘNG (`decided_by: user`)
 SELL DRI SpaceX 1.250 / ZaloPay 650 (còn 1.250 / 650). Đường thực thi: dòng trong `kb/current_ops.md` ⇒ DollarBill đưa SELL vào plan T+1 28/10 (user duyệt plan như thường); KHÔNG đặt lệnh trực tiếp (plan hôm nay 27/10 đã ký, Mafee plan-bound). Nếu user bán tay sớm hơn ⇒ báo Mike số KL, dùng số broker thật.
+
+## 27/10 16:3x — USER DUYỆT 2 VIỆC sau phản biện định giá lại (`decided_by: user`)
+Nguồn: Taylor `agents/Taylor/research/dri_val_supply_adj_20261027/REPORT.md` (FV tâm 14.301, 60/40) + fundamental-skeptic REFUTED (medium): 72% bước +3.183 là phép ghép MID↔mid 2,18-2,30 không có căn cứ; khoảng tin hơn 12-14k (tâm ~13k); 14.700 hơi đắt 5-20%; không có cơ sở đảo quyết định giảm 50%.
+1. **Giao Taylor chạy lại không ghép** (`agents/Taylor/research/dri_val_supply_adj_r2_20261027/`): mid chung 2 đường giá, giá vốn neo 31-33, sản lượng theo tuổi vườn, thuế khấu trừ Lào + haircut LAK. Xong → skeptic phản biện tiếp → báo user. Không lệnh.
+2. **THÊM trigger nowcast SXKD tháng 10 (~10/11, báo cáo SXKD tháng của DRI)**: tấn bán tháng 10 < 1.000 t HOẶC LNTT lũy kế 10T thấp hơn 9T (208,21 tỷ) ⇒ chuyển sang **GIẢM NỐT** phần còn lại (đưa qua plan/duyệt như thường, không bot tự bán). Mike báo user khi chạm. Ghi chú: ngưỡng này do Taylor đề xuất 27/10 (REPORT_Q3_UPDATE §7), skeptic ủng hộ thêm.
+- **Mike rút vùng mua 21/10 (≤13.000 / ≤11.500)** khỏi dùng cho đến khi bản chạy lại xong: skeptic chỉ ra ≤13.000 biên an toàn ~0, ≤11.500 chỉ đúng nhờ lưới có phép ghép. Mua lại chỉ khi (biên an toàn ≥15-20% và ngành không ở ĐỈNH) hoặc PB ≤1 (~10.000), và vẫn cần user duyệt từng lần.
