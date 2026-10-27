@@ -19,3 +19,4 @@
 - Nợ prevention retro: (c) cổng NAV ngoài cửa sổ EOD; (d) cổng plan-vs-lag_dd/ack.json; (e) quét script in cảnh báo stdout. context_pack ~45KB cần trim.
 
 - [2026-10-26T18:19:45Z] 27/10 01:15 user duyệt format plan (master 4b0ee23d5) và YÊU CẦU duyệt plan T3 27/10 SpaceX+ZaloPay, NHƯNG lệnh approve_plan_simple.sh bị classifier chặn ⇒ plan CHƯA ghi duyệt; chờ user cho phép/tự chạy. Egg: SpaceX ≥10,2tr, ZaloPay ≥11,7tr trước 09:05; kiểm tay giá SCL/VPB ZaloPay trước 08:45
+- [2026-10-27T01:38:44Z] 27/10 08:5x: user duyệt B wakeup gate — DONE master f16a39cb1 (dispatch.sh --bg tương tác cần --wakeup-ack|--no-followup, exit 8). Từ giờ MỌI dispatch --bg của Mike phải kèm 1 trong 2 cờ. Plan T3 27/10 vẫn chờ user cho phép approve_plan_simple.
