@@ -28,3 +28,7 @@ Nguồn: `agents/Taylor/research/fund_history_lock_20261014/D_impact/` + `kb/pro
 - Chèn dòng 06/08 cho cả 2 tài khoản (trước đó thiếu): **biến động tháng 08** đã in ZaloPay 25,58% → đúng 18,27%; SpaceX 12,37% → 12,80%.
 - Biến động tháng 07 SpaceX in 17,3% → 17,4%.
 - Tin EOD Discord SpaceX 07/08 in "+0,12% so với hôm trước" → đúng +1,098%.
+
+## ĐÃ HOÀN TẤT (rà 27/10/2026 — mốc CORR_STEP 23/10)
+- Khối "ĐÍNH CHÍNH SỐ ĐÃ CÔNG BỐ" (A mốc VN-Index 9 ô + B sổ NAV/dòng 06/08/tin EOD 07/08 +1,10%) nằm trong báo cáo tuần 12–16/10 của CẢ 2 TK (SpaceX mục 4, ZaloPay mục 4); `report_delivery_gate --status` = COMPLETE (tuần 12–16 và 19–23/10, cả 2 TK). Báo cáo tuần 19–23/10: ZaloPay ghi "không có đính chính mới", SpaceX không còn mục (đúng quy ước, ngày soạn ≥ 24/10).
+- Mốc dashboard CORR_STEP đã gỡ. Không còn đính chính chờ ghi. Không phát hành lại báo cáo cũ (theo quyết định user 14/10).

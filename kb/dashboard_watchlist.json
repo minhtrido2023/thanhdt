@@ -7,11 +7,6 @@
       "source": "kb/projects/rnd-pipeline-tracker.md"
     },
     {
-      "date": "2026-10-23",
-      "label": "fund-history-lock: mốc CORR_STEP (hàng đợi đính chính số đã công bố, Taylor)",
-      "source": "kb/memory/Mike.md"
-    },
-    {
       "date": "2026-11-05",
       "label": "custom30V rebalance kỳ q2m5 thứ 1 (yield_floor observe)",
       "source": "kb/paper_programs_registry.json yield_floor_custom30v_observe"
