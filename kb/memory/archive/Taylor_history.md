@@ -1575,3 +1575,6 @@
 
 ## Archived 2026-10-27 (keep=12 days=0 require_done=False)
 - [2026-10-26T08:18:08Z] [commodity-te 10-26] XONG job Taylor_20261026_075337 @cff2bc5c3: TE nowcast KQKD IC 0,45 (thi truong da dinh gia), B3 13 trial khong qua cong, khong chinh model — CHO Mike/user: PREREG forward LAG surprise-decomp + xin bq_admin feed APT/xut/P4/BDTI
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T09:47:02Z] [lag-capacity-floor D 10-26] XONG job Taylor_20261026_074918 @456b07baf (chua merge): band 50 ty ~11,7-18,1/14,6-20,8, CHINH D3AK10 18,08/20,82; lo ro slot LAG (inflight vo hinh tran 12) ~3pp, pin cung huong -2,2/-2,6 — CHO verify live slot + ca partial SCL/VPB plan 27/10
