@@ -203,9 +203,15 @@ FORCE_TID=""
 MAX_TURNS=""
 PROVIDER=""
 WRITE_SCOPE=""
+WAKEUP_ACK=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
+    # Cổng wakeup (user duyệt đề xuất B 2026-10-27, retro Pattern A 5 retro liên tiếp): cảnh báo stderr
+    # không chặn đã MISS tái diễn ⇒ phiên tương tác phải KHAI BÁO ý định. --wakeup-ack = "tôi sẽ đặt
+    # ScheduleWakeup làm tool call cuối của lượt"; --no-followup = "không có bước phụ thuộc kết quả".
+    --wakeup-ack) WAKEUP_ACK="ack" ;;
+    --no-followup) WAKEUP_ACK="nofollow" ;;
     # --provider: CLI nao chay job nay (claude|opencode|codex...). Bo qua => default_provider
     # trong kb/cli_providers.json (= claude) ⇒ MOI lenh dispatch cu chay y nguyen.
     # Ten sai / provider dang tat / agent khong duoc phep ⇒ HUY dispatch (exit 1), KHONG bao
@@ -240,6 +246,19 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+# CỔNG WAKEUP CƠ HỌC (exit 8) — chạy TRƯỚC mọi side effect. Chỉ chặn đúng ca đã MISS: phiên Claude
+# TƯƠNG TÁC của Mike (CLAUDECODE=1, không JOB_ID = không phải agent headless dispatch ra, DISPATCH_FROM
+# rỗng/Mike) gọi --bg mà không khai --wakeup-ack | --no-followup. Cron/script/agent headless KHÔNG bị
+# ảnh hưởng. Honour system như round-cap (`env -u CLAUDECODE` lách được). Tắt khẩn: MIKE_WAKEUP_GATE=off.
+if [ "$bg" = "--bg" ] && [ -z "$WAKEUP_ACK" ] && [ "${CLAUDECODE:-}" = "1" ] && [ -z "${JOB_ID:-}" ] \
+   && { [ -z "${DISPATCH_FROM:-}" ] || [ "${DISPATCH_FROM:-}" = "Mike" ]; } && [ "${MIKE_WAKEUP_GATE:-}" != "off" ]; then
+  echo "BLOCKED (exit 8): dispatch --bg từ phiên tương tác phải khai báo ý định về wakeup — chưa dispatch gì cả." >&2
+  echo "  --wakeup-ack    : còn bước phụ thuộc kết quả ⇒ cam kết đặt ScheduleWakeup làm tool call CUỐI của lượt này" >&2
+  echo "  --no-followup   : không có bước phụ thuộc (agent tự báo kết quả vào topic) ⇒ không cần wakeup" >&2
+  echo "  Thêm một trong hai cờ vào đúng lệnh rồi chạy lại (tắt khẩn: MIKE_WAKEUP_GATE=off; MIKE.md §8; retro 2026-10-25 Pattern A)." >&2
+  exit 8
+fi
 
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
 # DollarBill plan-T+1 jobs do 10-20+ min of real work, so the generic 600s base alone
@@ -1760,7 +1779,7 @@ except Exception:
   printf '%s' "$prompt" | timeout 25 python3 "$ROOT/bin/dispatch_question_hint.py" --to "$id" >&2 || true
   # 5) Cảnh báo wakeup CƠ HỌC (retro 2026-10-24, prevention (b)): luôn nhắc "CHƯA đặt
   #    ScheduleWakeup" — script không thấy được tool call của caller. Không chặn, fail-open.
-  timeout 10 python3 "$ROOT/bin/dispatch_wakeup_hint.py" --job "$job_id" --delay "${_wsugg:-}" --from "$from" >&2 || true
+  [ "$WAKEUP_ACK" = "nofollow" ] || timeout 10 python3 "$ROOT/bin/dispatch_wakeup_hint.py" --job "$job_id" --delay "${_wsugg:-}" --from "$from" >&2 || true
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
   { _dtid="$(_job_thread_id "$job_id")"

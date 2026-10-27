@@ -46,6 +46,8 @@ CASES = [
      f'timeout 600 {R}/dispatch.sh Taylor "việc" --bg', True),
     ("đường dẫn tương đối",
      'bin/dispatch.sh Mafee "đặt lệnh" --bg', True),
+    ("--no-followup = khai không có bước phụ thuộc ⇒ không tính là ca quên wakeup",
+     f'{R}/dispatch.sh Taylor "việc" --bg --no-followup', False),
     ("hai lệnh: 1 notify nhắc tên + 1 dispatch thật",
      f'{R}/notify_thread.sh 123 "sắp dispatch.sh --bg đây"; {R}/dispatch.sh Taylor "việc" --bg',
      True),

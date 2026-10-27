@@ -145,6 +145,10 @@ def is_bg_dispatch(cmd):
             tokens = seg.split()
         if "--bg" not in tokens:
             continue
+        # --no-followup = caller khai KHÔNG có bước phụ thuộc kết quả (dispatch.sh cổng wakeup,
+        # 2026-10-27) ⇒ không đòi ScheduleWakeup, không tính là ca quên.
+        if "--no-followup" in tokens:
+            continue
         if any(os.path.basename(t) == "dispatch.sh" for t in tokens):
             return True
     return False
