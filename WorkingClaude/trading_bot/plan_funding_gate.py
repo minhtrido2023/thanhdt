@@ -125,6 +125,23 @@ import math
 # cho gate. Thuế TNCN bán 0,1% KHÔNG nằm trong số này. Đây là phần "fee_est_vnd" trong Σ.
 FEE_RATE = 0.00097
 
+
+def _buy_cost_price(o):
+    """Giá TỐI ĐA lệnh mua có thể khớp, để tính tiền cần: `min(ref_price, hard_no_chase_ceiling_vnd)`.
+
+    `ref_price` là giá tham chiếu (vd đóng cửa live) và có thể CAO hơn trần cứng — lệnh LO bị chặn ở trần
+    nên không bao giờ tốn quá `qty × trần`. Dùng thẳng `ref_price` ⇒ đòi thừa tiền (ca SCL 28/10: ref 33.300 vs
+    trần 32.700 ⇒ gate đòi 1,4tr trong khi cần tối đa 1,2tr). Không có trần hợp lệ (>0) ⇒ `ref_price` y như cũ.
+    CHỈ hạ, không bao giờ nâng: trần > ref_price thì vẫn lấy ref_price.
+    """
+    px = o.ref_price
+    ceil = getattr(o, "hard_no_chase_ceiling_vnd", None)
+    try:
+        ceil = float(ceil)
+    except (TypeError, ValueError):
+        return px
+    return min(px, ceil) if ceil > 0 else px
+
 # Cận ngoài khi không đo được pp0Buy: bội số của (cash + tiền bán trong plan). Đòn bẩy tối đa
 # thực tế của account margin là 2× vốn tự có (initialRate 0,5) ⇒ 3,0 để lại ~50% biên an toàn,
 # đủ rộng để không chặn oan, đủ chặt để bắt cả 3 sự cố thật (14×–37×).
@@ -327,8 +344,8 @@ def check_plan_funding(plan, broker, account_mode, execution_state=None):
         lp, src = _effective_loan_package(o, broker)
         g = groups.setdefault(str(lp), {"lp": lp, "src": src, "orders": [], "need": 0.0})
         g["orders"].append(o)
-        g["need"] += remaining_qty[str(o.id)] * o.ref_price * (1.0 + FEE_RATE)
-        original_need += o.qty * o.ref_price * (1.0 + FEE_RATE)
+        g["need"] += remaining_qty[str(o.id)] * _buy_cost_price(o) * (1.0 + FEE_RATE)
+        original_need += o.qty * _buy_cost_price(o) * (1.0 + FEE_RATE)
 
     total_need = sum(g["need"] for g in groups.values())
 
