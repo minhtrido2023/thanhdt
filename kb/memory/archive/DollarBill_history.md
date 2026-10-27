@@ -292,3 +292,6 @@
 
 ## Archived 2026-10-26 (keep=6 days=5 require_done=True)
 - [2026-10-20T12:04:23Z] [2026-10-20 19:xx ICT] Plan ZaloPay 10-21 XONG HOLD ALL 0 lenh (job DollarBill_20261020_120333); LAG HT1/SCL/VPB vao ~10-26 can cash (avail chi 10,23tr, egg 515tr); cho duyet truoc 08:45 ICT 21/10
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-21T12:04:34Z] [2026-10-21 19:xx ICT] Plan ZaloPay 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120332); DRI -600cp ngoai lenh, cho user xac nhan; active_nav chua refresh; cho duyet truoc 08:45 ICT 22/10
