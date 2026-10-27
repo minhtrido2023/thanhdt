@@ -17,6 +17,7 @@ last_update_6: 2026-10-13 (Bobby — REGIME READ #2 real-time BLIND, rà soát q
 last_update_7: 2026-10-13 (Bobby — STRUCTURAL EVENT READ, BLIND: FTSE Frontier → Secondary Emerging hiệu lực 2026-09-21 ĐÃ thực thi (nguồn FTSE 06/10/2026); phân loại ĐỔI DẦN nhiều quý, biên độ nhỏ cấp thị trường, CHƯA đổi chế độ tại 13/10; mốc kiểm 19/03, 18/06, 17/09/2027)
 last_update_8: 2026-10-14 (Bobby — SECTOR READ real-time BLIND nhóm CNTT FPT/CMG/ELC: C hỗn hợp ambiguous, nghiêng B (AI giảm phát dịch vụ phần mềm toàn cầu) ở bội số ~55/45, A ở dòng vốn ngoại/lãi suất/JPY; trục 2 EXTERNAL_CYCLE; 5 chỉ báo theo dõi; không phải episode VNINDEX)
 last_update_9: 2026-10-14 (Bobby — MACRO UPDATE tài chính+BĐS sau họp BCĐ nhà ở 13/10: GIỮ STRUCTURAL_ACCUMULATION, giai đoạn sớm-giữa → GIỮA, vẫn AMBIGUOUS; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm)
+last_update_10: 2026-10-27 (Bobby — SECTOR READ real-time BLIND ngành cao su thiên nhiên VN (nền DD DRI): CYCLICAL_PEAK do cung đẩy, cầu TQ không xác nhận, trên nền cung STRUCTURAL thắt — ambiguous ~60/40; FORECAST khoá 30/90 ngày; chi tiết ở file con vn_sector_read_rubber_20261027.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1522,6 +1523,20 @@ nhân cấp NGÀNH, không phải episode thị trường — không đưa vào 
 
 **Đổi phân loại**: →B clean nếu #1 VÀ #2 cùng cột B trong 2 quý; →A clean nếu #1 cột A và #4 cho thấy FPT co
 riêng khi peer hồi. **Không phải khuyến nghị mua/bán.** Review: sau FPT 9T + Infosys/Accenture (~T12/2026).
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Cao su thiên nhiên VN, nền due diligence DRI, as-of 27/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Caller KHÔNG đưa và Bobby KHÔNG tra giá cổ phiếu/KQKD Q3/khuyến nghị CTCK của DRI. Bản đầy đủ
+(bảng giá đa proxy, cơ cấu chi phí, so sánh nhóm, 7 chỉ báo, nguồn): **`vn_sector_read_rubber_20261027.md`** (file con).
+- **Phân loại: `CYCLICAL_PEAK` do CUNG đẩy (thời tiết TL, dầu >110 USD) mà cầu TQ KHÔNG xác nhận, đặt trên nền cung
+  `STRUCTURAL` thắt (6 năm thiếu hụt, diện tích VN co) — `ambiguous` ~60/40 PEAK vs MID-tiếp diễn.** Trục 2: `EXTERNAL_CYCLE`.
+- Bằng chứng chính: TSR20 254,3¢ (23/10), đỉnh 265,4 (13/10), phân vị 99% từ 2016, +50% YoY; giá XK VN T9 2.323 USD/t
+  cao nhất ~13 năm, lượng 9T −15,8%. Ngược chiều: NK TQ T9 −20,8%, ô tô TQ −28% YoY, lốp bán thép 64% (−2,5pp),
+  Qingdao ~+45% YoY. Đuôi phải: El Niño Niño3.4 +3,3°C (IRI 19/10) ⇒ rủi ro cung T2-T5/2027.
+- **FORECAST khoá 27/10:** TSR20 (gốc 254,3) P(thấp hơn) 0,60 tại 2026-11-26, 0,55 tại 2027-01-25; spot TQ (gốc 19.408)
+  0,60/0,55. Chấm theo BQ `commodity_prices` + `rubber_weekly.csv`.
 
 ---
 
