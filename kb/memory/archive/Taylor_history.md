@@ -1584,3 +1584,6 @@
 
 ## Archived 2026-10-27 (keep=12 days=0 require_done=False)
 - [2026-10-26T10:22:53Z] [commodity-sue-decomp 10-26] XONG job Taylor_20261026_095928 @a1547392c (chua merge, wt-commodity-sue-decomp-20261026): PREREG-4 md5 6c5642c1; CHO Mike goi quant-skeptic + duyet cron (CRON_PROPOSAL.md) + merge. Luu y: S2 (SUE live) dIC lich su -0,012
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T16:13:28Z] [p4-sulfur 10-26] XONG job Taylor_20261026_160657: research/commodity_p4_sulfur_20261026/ (chua commit) — P4 nowcast DGC gay tu 2024, 17 trial GD khong ung vien; CHO Winston sua registry key phosphorus->phosphate_rock_cny

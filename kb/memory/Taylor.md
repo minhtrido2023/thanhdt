@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-26T16:13:28Z] [p4-sulfur 10-26] XONG job Taylor_20261026_160657: research/commodity_p4_sulfur_20261026/ (chua commit) — P4 nowcast DGC gay tu 2024, 17 trial GD khong ung vien; CHO Winston sua registry key phosphorus->phosphate_rock_cny
 - [2026-10-26T16:41:53Z] [nowcast-p4 10-26] XONG job Taylor_20261026_163838 @c0ae8de0a nhánh feat/nowcast-p4-20261026 (chưa merge) — CHO Mike arch-review+merge; Winston thêm yellow_phosphorus vào freshness monitor
 - [2026-10-26T16:49:40Z] [nowcast-p4 vòng 2 10-26] XONG @ac2077912 nhánh feat/nowcast-p4-20261026 (chưa merge) — CHỜ arch-review vòng 2 + Mike merge
 - [2026-10-26T17:28:18Z] [dgc-valuation 10-27] XONG job Taylor_20261026_171735: research/dgc_valuation_20261027/ (chua commit) — FV co so 34,5k, ky vong 33,6k vs 32,1k; can doc Nghi quyet DHDCD (1600 hop nhat?) + cap nhat khi BCTC Q3 ra (net cash 30/09)
@@ -26,3 +25,4 @@
 - [2026-10-27T08:49:45Z] [dri-val-supply-adj 27/10] XONG job Taylor_20261027_084046 @a0c629ed4: FV 60/40 13,7-15,7k, nhay nhat RSS3 mid; CHO Mike goi skeptic (khong tu chot)
 - [2026-10-27T09:42:35Z] [dri-val r2 27/10] XONG job Taylor_20261027_093047 @6b3c789c0: FV tam 12,5-13,9k (mid 1,97-2,075), 14.700 cao hon 6-18%; CHO Mike goi skeptic; mo: phi Lao 10% da trong thue chua, C_ref luoi cao hon GVHB/t do
 - [2026-10-27T10:15:27Z] [dri-val r3 27/10] XONG job Taylor_20261027_100801 @ad45d904e: FV tam 10,5-14,5k theo 4 mid, 14.700 cao hon 1-40%; vung mua day chi <=9.000; CHO Mike goi skeptic
+- [2026-10-27T12:46:05Z] [dri-val r4 27/10] XONG job Taylor_20261027_123420 @a851b95c5: tam PREREG sup (TB 1,4k @1,97) do chi phi co dinh+KH dem 2 lan; POST-HOC TB 9,1-10,1k, nguong 15% ~7,9-8,8k; CHO Mike goi skeptic; can co cau gia thanh/du an 4.081 ha
