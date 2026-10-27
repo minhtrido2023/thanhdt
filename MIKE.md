@@ -111,6 +111,8 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    `"<to>|<model>|<effort>"` (median_s kẹp [90s,1200s]); thiếu/hỏng file → 240s. Fan-out nhiều job
 >    → **1 lượt poll cho CẢ batch** (min delay), không phải 1 lượt/job. Job đứng riêng KHÔNG có bước
 >    kế tiếp phụ thuộc ⇒ không cần ScheduleWakeup (agent đã tự báo).
+> **Cổng cơ học (2026-10-27, user duyệt B):** `dispatch.sh --bg` từ phiên tương tác Mike thoát **exit 8** nếu thiếu
+> `--wakeup-ack` (sẽ đặt ScheduleWakeup cuối lượt) hoặc `--no-followup` (không có bước phụ thuộc). Cron/headless không bị ảnh hưởng; tắt khẩn `MIKE_WAKEUP_GATE=off`. Test: `bin/dispatch_wakeup_gate_selfcheck.sh`.
 > 2. Mọi phát ngôn trạng thái job phải kèm `jobs.sh status` chạy CÙNG lượt (kể cả "vừa xong").
 >
 > **Anti-double-reply — claim-reply NGUYÊN TỬ (GIỮ NGUYÊN, vẫn cần).** Ngay cả với 1 producer,
