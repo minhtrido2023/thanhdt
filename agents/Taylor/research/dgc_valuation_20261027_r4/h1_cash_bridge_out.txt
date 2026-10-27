@@ -1,0 +1,21 @@
+Tiền+tiền gửi 31/12/2025 13105.8 → 30/06/2026 10921.5: Δ = -2184.3
+      870.8  LNST hợp nhất 6T
+      140.1  khấu hao (Δ hao mòn TSCĐ HH 3.303,2−3.167,3 + vô hình 25,4−21,3)
+      180.7  Δ phải thu KH (651,1→470,4)
+        4.0  Δ trả trước người bán (241,9→237,9)
+        4.0  Δ phải thu khác (332,3→328,3)
+     -778.4  Δ hàng tồn kho thuần (1.681,5→2.459,9)
+      -95.8  Δ thuế GTGT khấu trừ + TS ngắn hạn khác (119,5→215,3)
+       37.0  Δ phải trả NB (203,8→240,8)
+       39.1  Δ người mua trả trước (31,5→70,6)
+     -222.7  Δ thuế phải nộp (351,8→129,1)
+      -74.6  Δ phải trả NLĐ (194,9→120,3)
+      -76.8  Δ quỹ KTPL (482,5→405,7)
+      100.0  Δ dự phòng ngắn hạn mới
+  => CFO xấp xỉ 6T (trước khoản cho vay) = 127.4
+    -1250.7  Δ phải trả khác (1.273,8→23,1) ≈ cổ tức chi H1
+      323.5  Δ vay ngắn hạn (1.546,2→1.869,7)
+     -516.1  Δ XDCB dở dang (804,8→1.320,9) ~ capex
+     -819.0  cho vay ngắn hạn mới (mã 135)
+  => Tổng dựng lại Δ = -2134.9 ; phần dư không giải thích = -49.4
+  (nếu KHÔNG có khoản cho vay 819: Δ tiền sẽ là -1365.3)

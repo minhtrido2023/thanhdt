@@ -1,0 +1,108 @@
+Net cash 30/09 dựng lại [UL] = 6063 tỷ = 15964 đ/cp ; VCSH mẹ 30/09 ≈ 13516 tỷ, BVPS ≈ 35589, P/B thật ≈ 0.90 ; NS capex còn lại ≈ 929 ; Ke = 0.149 ; PAT-CĐKKS cash 365 = 961 đ/cp
+
+Q4/2026 bridge
+    scn  rev    gm  gp  ebit  fin_inc  pbt  np_cons  np_mi  core_mi
+ thuan 2450 0.195 478   348      145  468      407    371      272
+  coso 2250 0.165 371   241      129  345      300    274      189
+nghich 2050 0.135 277   147      109  231      201    183      115
+
+Dự phóng
+    scn  year  np_mi  np_cons  rev_core  rev_p4  rev_tpa  other  gm_eff     gp  ebit_core  fin_net  ns_np  core_np_mi  fin_np_mi
+nghich  2026   1200     1318       NaN     NaN      NaN    NaN     NaN    NaN        NaN      NaN    NaN         NaN        NaN
+nghich  2027    748      825    8217.0  5194.0   1823.0 1200.0   0.145 1191.0      671.0    312.0  -30.0       526.0      252.0
+nghich  2028    848      929    8217.0  5194.0   1823.0 1200.0   0.150 1233.0      713.0    297.0   50.0       558.0      240.0
+  coso  2026   1393     1521       NaN     NaN      NaN    NaN     NaN    NaN        NaN      NaN    NaN         NaN        NaN
+  coso  2027   1101     1210    9261.0  5894.0   1967.0 1400.0   0.165 1528.0     1008.0    348.0   30.0       789.0      282.0
+  coso  2028   1651     1813    9403.0  6036.0   1967.0 1400.0   0.228 2146.0     1626.0    332.0  110.0      1273.0      268.0
+ thuan  2026   1589     1728       NaN     NaN      NaN    NaN     NaN    NaN        NaN      NaN    NaN         NaN        NaN
+ thuan  2027   1868     2053   10529.0  6712.0   2117.0 1700.0   0.227 2395.0     1875.0    369.0  100.0      1468.0      300.0
+ thuan  2028   2473     2716   10834.0  7017.0   2117.0 1700.0   0.282 3058.0     2538.0    353.0  200.0      1988.0      286.0
+
+P(1.600) {'need_h2_mi': 802, 'need_q4_mi_if_q3_base': 481, 'p_mi': 0.083, 'need_h2_cons': 729, 'need_q4_cons_if_q3_base': 379, 'p_cons': 0.313, 'p_combined_5050': 0.198, 'p_combined_6040': 0.221}
+
+(a) SOTP
+    scn  net_cash_0930  pat_mi_cash  haircut  q4_core_accr  cash_after_hc  core_np_mi_norm  core_pe  core_val  nghison_val  equity  ps_cash  ps_core  ps_ns  ps_total
+nghich           6063          365     0.29           115           4160              542        6      3252         -611    6802    10955     8563  -1608     17909
+  coso           6063          365     0.09           189           5374             1031        7      7217          -54   12537    14150    19003   -143     33011
+ thuan           6063          365     0.03           272           5799             1728        8     13824          768   20391    15269    36400   2021     53691
+
+(b) DCF
+    scn   dcf
+nghich 19441
+  coso 36671
+ thuan 52438
+
+DCF cơ sở: Ke × g
+         g=1%   g=2%   g=3%   g=4%
+12%    43760  43991  44222  44453
+13%    41149  41159  41126  41035
+14.9%  37221  36984  36671  36260
+16%    35401  35084  34684  34182
+18%    32695  32295  31814  31234
+
+DCF cơ sở: Ke × biên gộp dài hạn
+        GM=14%  GM=17%  GM=20%  GM=23%  GM=26%  GM=30%
+12%     30269   35415   40560   45706   50852   57713
+13%     28572   33239   37907   42575   47242   53466
+14.9%   26128   30107   34087   38066   42046   47351
+16%     25037   28709   32381   36054   39726   44622
+18%     23459   26687   29915   33144   36372   40676
+
+(c) Multiple {'pe_dgc10': 8.34, 'pe_peer_now': 9.100000000000001, 'pe_peer10': 10.45} 
+    scn  np_mi_norm  eps_norm  v_pe_dgc10y  v_pe_peer_now  v_pe_peer10y  v_pe_peer_used  roe_core  pb_justified  v_pb  cash_value_in_pe
+nghich         798      2101        15381          16978         19814           16978     0.085          0.47 17126              0.34
+  coso        1376      3623        28269          31022         35914           31022     0.162          1.11 32607              0.38
+ thuan        2170      5715        45935          50278         57994           50278     0.272          2.04 51313              0.40
+
+SOTP cơ sở: haircut pháp lý (đã tách PAT) × xoá sổ tồn kho bị ngoại trừ (951 tỷ)
+                     tồn kho −0  tồn kho −475  tồn kho −951
+haircut pháp lý 0%       34362         33273         32183
+9%                       33011         31923         30833
+15%                      32111         31023         29933
+30%                      29861         28773         27682
+50%                      26860         25772         24682
+
+Tổng hợp đ/cp
+    scn  sotp   dcf  v_pe_dgc10y  v_pe_peer_used  v_pb  multiple_avg   blend   w
+nghich 17909 19441        15381           16978 17126       16495.0 17948.0 0.3
+  coso 33011 36671        28269           31022 32607       30633.0 33438.0 0.5
+ thuan 53691 52438        45935           50278 51313       49175.0 51768.0 0.2
+
+Giá trị kỳ vọng (thuận 0,2 / cơ sở 0,5 / nghịch 0,3) = 32457 đ/cp vs giá 32100 ⇒ +1.1% ; vs TB 5 phiên 33.500 ⇒ -3.1%
+Trọng số thuận 0,3 / cơ sở 0,5 / nghịch 0,2 ⇒ 35839
+Hoà vốn: giá 32100 ngầm định LNST mẹ LÕI chuẩn hoá ≈ 982 tỷ/năm (so: nghịch 542.0, cơ sở 1031.0, thuận 1728.0)
+
+Phụ thuộc khai trường
+           mode                                             label   thuan    coso  nghich    ev
+          base     cơ sở-có-mở-lại ½ trong 2028 (kịch bản chính) 51768.0 33438.0 17948.0 32457
+       coso_no HIỆN TRẠNG: cơ sở KHÔNG mở lại (thuận giữ nguyên) 51768.0 28716.0 17948.0 30096
+coso_nghich_no              cơ sở+nghịch không mở lại, thuận giữ 51768.0 28716.0 17948.0 30096
+        all_no                      không mở lại Ở CẢ 3 kịch bản 38818.0 28716.0 17948.0 27506
+
+Waterfall r1→r2
+                                  step    ev   thuan    coso  nghich  delta
+                         r1 (tái lập) 33609 54184.0 34497.0 18412.0    NaN
+          +4 uplift khai trường 1.000 33102 52857.0 34013.0 18412.0 -507.0
+                           +8 rf 7,4% 32600 51997.0 33489.0 18187.0 -502.0
+              +9 PE peer hiện tại 9,1 32066 51143.0 32949.0 17875.0 -534.0
+      +12 tách PAT-CĐKKS khỏi haircut 32040 50640.0 32986.0 18063.0  -26.0
+       +13a lõi Q4/2026 cộng vào tiền 32523 51356.0 33484.0 18365.0  483.0
+            +13b MI không ăn lãi tiền 32565 51405.0 33527.0 18403.0   42.0
++13c DCF chiết khấu giữa năm từ 27/10 32909 51979.0 33889.0 18562.0  344.0
+      +13d NS capex thống nhất P/B+PE 32457 51768.0 33438.0 17948.0 -452.0
+
+r1 tái lập:
+    scn  sotp   dcf  v_pe_dgc10y  v_pe_peer_used  v_pb  multiple_avg   blend   w
+nghich 17340 18926        17360           21751 17796       18969.0 18412.0 0.3
+  coso 32814 36857        30459           38165 32838       33821.0 34497.0 0.5
+ thuan 54867 53885        48741           61072 51584       53799.0 54184.0 0.2
+
+Độ nhạy bổ sung
+                                          case    ev    coso  nghich   thuan
+                                     r2 chính 32457 33438.0 17948.0 51768.0
+             thuế lãi tiền 20% [cần legal-vn] 32348 33329.0 17846.0 51648.0
+      MI lõi 13% (Q3-forecast; Q2 thực 17,8%) 31735 32710.0 17589.0 50517.0
+                    MI lõi 17,8% (Q2 thực tế) 30585 31543.0 17028.0 48524.0
+                             PE peer 10y 10,5 32995 33982.0 18263.0 52625.0
+                                 rf 6,8% (r1) 32970 33974.0 18180.0 52644.0
+lợi suất tiền gửi 7,1% (Q2 thực) mọi kịch bản 32664 33619.0 18275.0 51860.0
