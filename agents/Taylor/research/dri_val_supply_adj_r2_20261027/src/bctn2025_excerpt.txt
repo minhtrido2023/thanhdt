@@ -1,0 +1,189 @@
+# Trích BCTN 2025 DRI (vietstock 2026/4/14, text pypdf) — dòng gốc
+## b.txt:655,700
+44
+=====P16
+KẾT QUẢ HOẠT ĐỘNG SẢN XUẤT KINH DOANH
+TÌNH HÌNH HOẠT ĐỘNG SẢN XUẤT 
+KINH DOANH NĂM 2025
+STT Chỉ tiêu ĐVT KH 2025 TH 2025 So với KH 2025
+1 Sản lượng Tấn
+1,1 Cao su Tấn 13.500 15.152,83 112,24%
+1,2 Điều Tấn 40 87,724 219,31%
+1,3 Sầu riêng Tấn 640 575,248 89,88%
+2 Giá bán Triệu đồng/tấn
+2,1 Giá bán cao su Triệu đồng/tấn 42,37 47,24 111,49%
+2,2 Giá bán điều tươi Triệu đồng/tấn 20,00 29,00 145,00%
+2,3 Sầu riêng Triệu đồng/tấn 50,06 34,93 69,77%
+3 Doanh thu Tỷ đồng 612,96 707,12 115,36%
+3,1 Cao su Tỷ đồng 572,02 661,70 115,68%
+3,2 Điều Tỷ đồng 0,80 2,544 318,00%
+3,3 Sầu riêng Tỷ đồng 32,04 20,09 62,70%
+3,4 Doanh thu khác Tỷ đồng 8,10 22,79 281,36%
+4 Giá vốn Triệu đồng/tấn
+4,1 Giá vốn cao su Triệu đồng/tấn 33,74 33,11 98,13%
+4,2 Giá vốn điều Triệu đồng/tấn 11,28 17,26 153,01%
+4,3 Sầu riêng Triệu đồng/tấn 30,60 26,60 86,93%
+5 Lợi nhuận Tỷ đồng
+5,1 Lợi nhuận trước thuế Tỷ đồng 137,38 190,013 138,31%
+5,2 Lợi nhuận sau thuế Tỷ đồng 110,38 158,164 143,29%
+6 Tỷ lệ xuất khẩu % 65% 49,13% 75,58%
+7 Thu nhập
+Triệu đồng/
+người/ tháng
+7,1 Lương BQ gián tiếp 21,66 23,27 107,43%
+7,2 Lương BQ trực tiếp 6,41 7,46 116,36%
+8 Cổ tức (dự kiến) % 9% 10% 111,11%
+ĐÁNH GIÁ THỰC HIỆN CÁC CHỈ TIÊU CHÍNH
+VỀ SẢN LƯỢNG Sản lượng mủ khai thác mủ năm 2025 là 15.152,83/13.500 
+tấn đạt 112,24% kế hoạch so với năm 2024 tăng 4.036,83 
+tấn. Để đạt được yếu tố vượt trội trên do thay đổi lãnh đạo 
+chủ chốt và sắp xếp lại tổ chức bộ máy tại Daklaoruco, 
+nhờ đó đã khởi dậy sự nỗ lực quyết tâm của toàn hệ thống, 
+công tác tổ chức sản xuất tốt, hiệu quả, công tác bảo vệ 
+sản phẩm được triển khai quyết liệt và được sự hỗ trợ tích 
+cực, nhiệt tình của chính quyền địa phương.
+15.152,83 tấn
+trên tổng số 13.500, 
+đạt 112,24% kế hoạch
+Sản lượng mủ khai thác
+## b.txt:700,720
+Sản lượng mủ khai thác
+VỀ CÔNG TÁC BÁN HÀNG
+Năm 2025, Công ty xuất bán 14.007,76 tấn mủ cao su, đạt 
+103,76% kế hoạch, tăng mạnh về sản lượng (+34,03%) và 
+doanh thu (+43,05%) nhờ đơn giá bình quân đạt 1.857,01 
+USD/tấn tăng 11,05% đơn giá bán cao su bình quân so với 
+năm 2024. Tỷ lệ XK là 49,13 % tổng lượng xuất bán chỉ đạt 
+75,58 % kế hoạch do DRI tăng lượng bán nội địa và dự trữ 
+hàng tồn kho. 
+Tổng lượng xuất bán mủ đạt chuẩn EUDR/FSC là 784,32 tấn 
+với giá bán cao hơn bình quân 130 USD/tấn so với hàng 
+Non EUDR/FSC, doanh thu gia tăng mang lại 101.961 USD.
+14.007,76 tấn
+đạt 103,76% kế hoạch
+Xuất bán
+1.857,01 USD
+tăng 11,05% so với 2024
+Đơn giá bình quân
+784,32 tấn
+cao hơn bình quân 
+130 USD/tấn với với hàng Non EUDR/FSC
+## b.txt:755,766
+Điều 3.699 0,75% 2.544 0,36%
+Chuối 2.016 0,41% 0,00%
+Sầu riêng 20.790 4,21% 20.091 2,84%
+Khác 23.256 4,70% 22.790 3,22%
+Tổng Doanh thu 494.327 100,00% 707.125 100,00%
+GIÁ VỐN 
+CAO SU
+Thực hiện 33,11 triệu đồng/tấn, bằng 98,13% so với kế hoạch. Nguyên nhân 
+chính do: sản lượng khai thác tăng 1.653 tấn tương đương vượt 12,24% KH 
+làm cho giá vốn xuất kho giảm 5,6%, trong khi đó chi phí quản lý bán hàng 
+tăng, dẫn đến giá thành hàng bán giảm 1,87% KH năm.
+VỀ LỢI NHUẬN 
+## b.txt:925,940
+Tỷ lệ góp vốn: 100%
+Địa chỉ: Bản Tha Luông, Tỉnh ChămPasắk, 
+Cộng hòa Dân chủ Nhân dân Lào
+Ngành nghề kinh doanh chính:  Trồng, 
+chăm sóc, khai thác, chế biến và tiêu thụ 
+cao su thiên nhiên
+Hiện nay Daklaoruco đang quản lý  9.276,07 
+ha gồm có 8.592,3 ha cao su; 465,67 ha điều, 
+30,48 ha sầu riêng,191,23 ha đất trống hợp thủy 
+và hành lang ven suối,... 01 nhà máy chế biến 
+mủ công suất 18.000 tấn/năm. Vườn cây sinh 
+trưởng phát triển tốt, năng suất bình quân năm 
+2025 là 1,81 tấn/ha tăng 0,47 tấn/ha so với năm 
+2024 (năm 2024 là 1,34 tấn/ha).
+Sản phẩm mủ cao su chế biến của công ty chủ yếu là SVR 3L, SVR 10, SVR 20, SVRCV50 và SVR CV60, 
+chất lượng sản phẩm tốt, các chỉ tiêu đều đạt tiêu chuẩn, đáp ứng yêu cầu khách hàng; Phòng 
+## b.txt:2570,2590
+=====P40
+ĐÁNH GIÁ KẾT QUẢ HOẠT ĐỘNG 
+SẢN XUẤT KINH DOANH
+PHÂN TÍCH TỔNG QUAN VỀ HOẠT ĐỘNG CỦA CÔNG TY SO KẾ HOẠCH
+STT Nội dung  Thực hiện năm 2024  Thực hiện năm 2025 So sánh 2025/2024
+1
+Doanh thu thuần về 
+bán hàng và CCDV
+471.071.619.679 684.334.907.235 145%
+2 Giá vốn hàng bán 281.492.627.642 422.038.619.177 150%
+3
+Doanh thu họat động 
+tài chính
+23.205.067.083 21.954.909.543 95%
+4 Chi phí tài chính 6.929.393.135 8.688.717.908 125%
+5 Chi phí bán hàng 30.531.491.942 30.626.172.374 100%
+6
+Chi phí quản lý doanh 
+nghiệp
+34.232.229.929 53.213.732.871 155%
+7 Lợi nhuận khác (1.414.555.387) (1.709.338.428) 121%
+## b.txt:2925,2940
+01 Cao su
+13.800
+tấn mủ 
+quy khô
+Khai thác
+Năng suất bình quân
+1,69 tấn/ha
+16.900 tấn
+Sản lượng tiêu thụ dự kiến
+Giá vốn bình quân
+1.759 USD/tấn
+Giá vốn hàng bán
+1.430
+USD/tấn
+(trước thuế)
+Tỷ lệ xuất khẩu
+## b.txt:3000,3010
+xây dựng đội ngũ kế thừa, tạo nguồn nhân lực ổn định, bền vững. Nghiên cứu cải tiến phát 
+huy hiệu quả các chính sách nhân sự như chính sách lương, thưởng, các chế độ phúc lợi,…
+Tiếp tục duy trì mối quan hệ với các khách hàng truyền thống và tích cực xúc tiến thương mại, 
+maketing mở rộng, khai thác các thị trường mới, nhất là đối với sản phẩm mủ cao su FSC-FM/
+CoC. Theo dõi diễn biến giá cả thị trường để có chiến lược bán hàng hợp lý, mang lại hiệu quả 
+kinh doanh cao, đảm bảo chỉ tiêu bán hàng, xuất khẩu theo nghị quyết HĐQT. Daklaoruco tích 
+cực thu mua mủ cao su nguyên liệu từ các hộ tiểu điền khoảng 2.000 tấn trong năm 2026 để 
+chế biến cao su SVR 10, SVR 20, từng bước bù đắp sản lượng thiếu hụt khi vườn cây đi vào lộ 
+trình thanh lý. Hoàn chỉnh các thủ tục pháp lý để đưa các dịch vụ mới vào hoạt động như trạm 
+bán xăng, dầu; cửa hàng nhu yếu phẩm...
+Giải pháp về kinh doanh xuất nhập khẩu
+## b.txt:3060,3067
+thị trường Trung Quốc, qua đó đóng góp tích cực vào 
+doanh thu và lợi nhuận của DRI trong các năm tới. 
+Công tác tái canh cao su tiếp tục được triển khai theo 
+lộ trình, phù hợp với thời hạn tô nhượng của dự án. 
+Trong năm 2026, Công ty thực hiện trồng tái canh 37,77 
+ha cao su, sau khi liên doanh đầu tư Nhà máy Chế biến 
+gỗ và viên nén năng lượng sẽ thực hiện lộ trình thanh 
+lý, tái canh vườn cao su theo Nghị quyết của ĐHĐCĐ.
+## b.txt:3196,3202
+đó có nguồn quỹ đầu tư phát triển nhằm đảm bảo kế hoạch tái canh vườn 
+cao su của DRI sau này và duy trì việc chia cổ tức ổn định cho các cổ đông.
+CÁC KẾ HOẠCH, ĐỊNH HƯỚNG CỦA 
+HỘI ĐỒNG QUẢN TRỊ
+Triển khai lộ trình thanh lý và tái canh cao su, trồng sầu riêng theo nghị quyết 
+ĐHĐCĐ phù hợp với thời hạn của hợp đồng tô nhượng đất với Chính phủ Lào. 
+Kiên định với mục tiêu phát triển bền vững, phát triển kinh tế trên quan điểm 
+## b.txt:2315,2322
+thời tích cực tham gia các chương trình 
+trồng cây xanh như “Tết trồng cây” tại Lào 
+và trồng cây tại khu vực xử lý nước thải của 
+nhà máy chế biến mủ.
+- Cam kết, khi kết thúc chu kỳ kinh doanh 
+đầu tiên của vườn cây cao su, sẽ khoanh 
+nuôi, tái sinh tự nhiên diện tích thuộc đất 
+quy hoạch Rừng bảo tồn quốc gia Đông 
+## b.txt:180,190
+2014
+Công ty hoàn 
+thành việc tăng 
+vốn lên thành 
+732.000.000.000 
+VNĐ.
+2015
+80% diện tích 
+vườn cây cao 
+su đã đưa vào 
+khai thác với 
