@@ -1581,3 +1581,6 @@
 
 ## Archived 2026-10-27 (keep=12 days=0 require_done=False)
 - [2026-10-26T10:05:01Z] [commodity-nowcast-block 10-26] XONG job Taylor_20261026_095926 @920bb4219 (wt-commodity-nowcast, chua merge) — CHO arch-reviewer + Mike merge
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T10:22:53Z] [commodity-sue-decomp 10-26] XONG job Taylor_20261026_095928 @a1547392c (chua merge, wt-commodity-sue-decomp-20261026): PREREG-4 md5 6c5642c1; CHO Mike goi quant-skeptic + duyet cron (CRON_PROPOSAL.md) + merge. Luu y: S2 (SUE live) dIC lich su -0,012

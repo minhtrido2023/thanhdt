@@ -119,3 +119,6 @@
 
 ## Archived 2026-10-26 (keep=12 days=0 require_done=False)
 - [2026-10-25T18:24:13Z] 26/10 01:30 Taylor S1-S3 xong+verify, ghi tracking. Chờ user: skeptic vòng 3 cho S? hỏi DollarBill/Mafee RESIDUAL + biến thể dời 3 phiên? Nhắc egg trước 09:05 (~07:30).
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T18:19:45Z] 27/10 01:15 user duyệt format plan (master 4b0ee23d5) và YÊU CẦU duyệt plan T3 27/10 SpaceX+ZaloPay, NHƯNG lệnh approve_plan_simple.sh bị classifier chặn ⇒ plan CHƯA ghi duyệt; chờ user cho phép/tự chạy. Egg: SpaceX ≥10,2tr, ZaloPay ≥11,7tr trước 09:05; kiểm tay giá SCL/VPB ZaloPay trước 08:45
