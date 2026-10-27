@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-26T08:18:08Z] [commodity-te 10-26] XONG job Taylor_20261026_075337 @cff2bc5c3: TE nowcast KQKD IC 0,45 (thi truong da dinh gia), B3 13 trial khong qua cong, khong chinh model — CHO Mike/user: PREREG forward LAG surprise-decomp + xin bq_admin feed APT/xut/P4/BDTI
 - [2026-10-26T09:47:02Z] [lag-capacity-floor D 10-26] XONG job Taylor_20261026_074918 @456b07baf (chua merge): band 50 ty ~11,7-18,1/14,6-20,8, CHINH D3AK10 18,08/20,82; lo ro slot LAG (inflight vo hinh tran 12) ~3pp, pin cung huong -2,2/-2,6 — CHO verify live slot + ca partial SCL/VPB plan 27/10
 - [2026-10-26T10:05:01Z] [commodity-nowcast-block 10-26] XONG job Taylor_20261026_095926 @920bb4219 (wt-commodity-nowcast, chua merge) — CHO arch-reviewer + Mike merge
 - [2026-10-26T10:22:53Z] [commodity-sue-decomp 10-26] XONG job Taylor_20261026_095928 @a1547392c (chua merge, wt-commodity-sue-decomp-20261026): PREREG-4 md5 6c5642c1; CHO Mike goi quant-skeptic + duyet cron (CRON_PROPOSAL.md) + merge. Luu y: S2 (SUE live) dIC lich su -0,012
@@ -26,3 +25,4 @@
 - [2026-10-26T18:05:51Z] [dgc-valuation r3 27/10] XONG job Taylor_20261026_180245: research/dgc_valuation_20261027_r3/ (chua commit) — EV 32.650; CHAY LAI khi BCTC Q3 DGC; 1600 ~70% hop nhat, khai truong khong co moc
 - [2026-10-26T18:18:07Z] [dgc-valuation r4 27/10] XONG job Taylor_20261026_181244: research/dgc_valuation_20261027_r4/ (chua commit) — EV 33.766 (ex-819: 32.628); hoi DGC/BCTC Q3: ben vay 819, du phong 100; CFO Q3 300 lac quan
 - [2026-10-27T04:09:23Z] [dd-DRI 10-27] XONG job Taylor_20261027_040314: NON, giu qua Q3 nghieng giam, FV ky vong 11.838 vs 14.700; research/dd_DRI_20261027/ (chua commit). CHAM khi BCTC Q3 ra 30/10 theo bang 6b REPORT
+- [2026-10-27T04:37:16Z] [dri-q3 27/10] XONG job Taylor_20261027_042354: REPORT_Q3_UPDATE.md (chua commit) — GIU theo KH, de xuat rieng giam 50% cho user; CHAM tiep khi SXKD thang 10 DRI ra (~10/11); F khoa mu blind_scorable=no
