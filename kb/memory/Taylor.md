@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-26T17:50:20Z] [dgc-valuation r2 27/10] XONG job Taylor_20261026_174426: research/dgc_valuation_20261027_r2/ (chua commit) — EV 32.457; CHAY LAI khi BCTC Q3 (27/10-14/11); cho Mike/legal-vn xac nhan thue lai tien gui 13%; doc Nghi quyet DHDCD (1600 me/hop nhat 50/50)
 - [2026-10-26T18:05:51Z] [dgc-valuation r3 27/10] XONG job Taylor_20261026_180245: research/dgc_valuation_20261027_r3/ (chua commit) — EV 32.650; CHAY LAI khi BCTC Q3 DGC; 1600 ~70% hop nhat, khai truong khong co moc
 - [2026-10-26T18:18:07Z] [dgc-valuation r4 27/10] XONG job Taylor_20261026_181244: research/dgc_valuation_20261027_r4/ (chua commit) — EV 33.766 (ex-819: 32.628); hoi DGC/BCTC Q3: ben vay 819, du phong 100; CFO Q3 300 lac quan
 - [2026-10-27T04:09:23Z] [dd-DRI 10-27] XONG job Taylor_20261027_040314: NON, giu qua Q3 nghieng giam, FV ky vong 11.838 vs 14.700; research/dd_DRI_20261027/ (chua commit). CHAM khi BCTC Q3 ra 30/10 theo bang 6b REPORT
@@ -26,3 +25,4 @@
 - [2026-10-28T05:24:53Z] [dd-TV2 10-28] XONG job Taylor_20261028_051709: NON @26.050, FV ky vong ~22,9k, vung <=19,5k; research/dd_TV2_20261028/ (chua commit) — CHO Mike goi fundamental-skeptic; CHAM lai khi BCTC Q4/26 (phai thu CMC 666 ty)
 - [2026-10-28T16:40:14Z] [lot-exit 10-28] XONG @24dd0a250 nhanh session/lot-exit-20261028 (wt-lot-exit-20261028, chua merge) — CHO Mike arch-review + go SELL VPB 700 khoi plan ZaloPay 10-29, chen lai 282
 - [2026-10-28T16:59:26Z] [lot-exit r2 28/10] XONG @6b51999a9 nhanh session/lot-exit-20261028 (chua merge) — CHO Mike arch-review vong 3; plan live ZaloPay 10-29 VAN co SELL VPB 700, can go + chen 282
+- [2026-10-28T18:04:15Z] [clearing G1 29/10] XONG @1c4cd492e nhanh session/clearing-shadow-20261029 (wt-clearing-shadow-20261029, chua merge) — CHO Mike arch-review + quant-skeptic; G3 can user duyet cron 20:45 + apply_book_transfers

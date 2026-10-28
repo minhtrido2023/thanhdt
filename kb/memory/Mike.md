@@ -10,3 +10,5 @@
 - Chờ USER: Wags/wags-fix-not-confirmed; DRI ghi KB r4 + Taylor sửa REPORT (BCTC Q3 30/10); DDV tái trọng số; TV2 watchlist.
 - Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; BĐS 11-26; commodity 11-25; LAG 12-15; measurement audit ~12-27.
 
+- [2026-10-28T17:34:46Z] 29/10 00:35 user DUYỆT plan T+1 29/10 cả 2 TK (SpaceX: SELL VPB 200 park-merge + MUA MCH 200; ZaloPay: SELL VPB 282 auto-exit + MUA MCH 200). Egg: SpaceX FUNDED; ZaloPay cần chuyển egg ≥17,8tr trước 09:05. Sau 09:05 kiểm fill.
+- [2026-10-28T17:41:49Z] 29/10 00:4x: user chọn A (giữ plan, bán PARK VPB 200) + giao Taylor clearing GĐ1 SHADOW (design kb/projects/book-clearing-plan-20261029.md; nhánh session/clearing-shadow-20261029). Xong → arch-review (Opus high, đụng park_holdings lõi) → báo user; KHÔNG wire cron/execute tới khi user duyệt GĐ3.
