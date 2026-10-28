@@ -17,3 +17,4 @@
 - nav-loss-brake 11-09; DT CRISIS commit sớm ~11/10; Livermore chấm ~19/11; BĐS 11-26; commodity PREREG-2 11-25; LAG 12-15; measurement audit ~12-27; DD DRI/TV1 BCTC Q3 30/10 (cron one-shot session-only); FPT 29/10.
 - Nợ prevention retro: (c) cổng NAV ngoài cửa sổ EOD; (d) plan-vs-ack; (e) quét script in cảnh báo stdout; context_pack ~45KB cần trim.
 
+- [2026-10-28T02:52:15Z] DDV: Bobby đọc mù ngành DAP xong 28/10 (B 70/30, file kb/data_registry/market-state/sector_read_fertilizer_dap_20261028.md). CHẤM forecast: S TE 2027-01-31 (TB 4.900) & 04-30 (4.400); DAP TE 01-31 (770). Chờ user duyệt: Taylor tái trọng số kịch bản DDV (Bobby nặng hơn base Taylor). Ngưỡng DDV: đợt1 ≤13.000, đợt2 ≤11.500; không mua.
