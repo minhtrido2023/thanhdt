@@ -92,16 +92,6 @@
       "escalated_utc": "2026-10-26T22:38:29Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "lag_live_schedule_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-10-27T22:38:48Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: lag_live_schedule_selfcheck.py",
-      "escalated_utc": "2026-10-27T22:38:48Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
