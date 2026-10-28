@@ -87,16 +87,51 @@ def _make_order(order_id, ticker, qty, ref_price, book, play_type, note):
     return dataclasses.asdict(o)
 
 
+def _due_lots(lot, asof_date, is_due):
+    """Quyết định exit THEO TỪNG LÔ (job Taylor_20261028_162413 — ca ZaloPay VPB: lô LAG 282cp
+    @07-27 + 900cp @10-26/27, bản cũ thử ngưỡng trên entry_date MIN rồi bán cả qty gộp ⇒ 700cp).
+    `lot` = 1 phần tử của `book_lot_snapshot()[0]`, đọc `lot['lots']` (KHÔNG đọc `qty`/`entry_date`
+    gộp để quyết định). Trả `((qty_tới_hạn, sessions_lô_cũ_nhất_tới_hạn, [lô quyền mua TỚI HẠN]),
+    None)` hoặc `(None, lý_do)` khi KHÔNG dựng được hạn từng lô — caller KHÔNG bán mã đó và phải
+    hiện lý do ra (§29). Lô quyền mua chỉ trả phần TỚI HẠN: đưa lô quyền chưa tới hạn vào
+    `_rights_locked_split` sẽ ăn mất phần khoá của lô tới hạn khác."""
+    lot_list = lot.get("lots")
+    if not isinstance(lot_list, list) or not lot_list:
+        return None, "sổ lô thiếu danh sách TỪNG LÔ (`lots`) — không xác định được lô nào tới hạn"
+    tot = sum(int(l.get("qty") or 0) for l in lot_list)
+    if tot != int(lot.get("qty") or 0):
+        return None, f"Σ qty từng lô ({tot}) ≠ qty gộp của sổ lô ({lot.get('qty')}) — sổ lô không nhất quán"
+    due_qty, sessions_max, rights = 0, None, []
+    for l in lot_list:
+        q = int(l.get("qty") or 0)
+        if q <= 0:
+            return None, f"lô qty={l.get('qty')!r} ≤ 0 (entry_date {l.get('entry_date')!r})"
+        try:
+            entry = dt.date.fromisoformat(l.get("entry_date"))
+        except (TypeError, ValueError):
+            return None, f"entry_date lỗi ({l.get('entry_date')!r}) ở lô {q}cp"
+        s = count_trading_days(entry, asof_date)
+        if s is None:
+            return None, "không tính được sessions_held (trading_bot.vn_market import lỗi)"
+        if not is_due(s):
+            continue
+        due_qty += q
+        sessions_max = s if sessions_max is None else max(sessions_max, s)
+        if l.get("rights_subscription"):
+            rights.append(dict(l["rights_subscription"], qty=q))
+    return (due_qty, sessions_max, rights), None
+
+
 def _lag_bal_candidates(asof_date, positions, book, lots, threshold_fn):
-    """([(ticker, qty, ref_price, sessions_held)], blocked) cho `book` (LAG/BAL) đã tới mốc exit.
-    `lots` = `book_lot_snapshot(account, book, asof=...)[0]` — {ticker: {qty, entry_date}} đã
-    TÁCH ĐÚNG phần thuộc `book` này qua bootstrap+FIFO lot tracking (`park_holdings()`), KHÔNG
-    phải tổng vị thế broker của mã đó (mã nằm lẫn nhiều book — vd VPB LAG+PARK cùng mã — tổng
-    broker sẽ CHO QUA sai số lượng, bán khống cả phần book khác).
-    `blocked` = [{'ticker','reason'}] cho mã bị guard qty-mismatch chặn (§29 — phải hiện ra cho
-    người, KHÔNG chỉ in stdout, vì guard này có thể đang ÉM một mã THẬT SỰ đã tới hạn exit).
-    FAIL-SAFE khác (entry_date lỗi/không tính được phiên/thiếu ref_price) vẫn chỉ in — cực hiếm
-    (entry_date luôn có dạng ISO từ FIFO replay, ref_price gần như luôn có từ broker)."""
+    """([(ticker, qty_tới_hạn, ref_price, sessions_held, rights_lots_tới_hạn)], blocked) cho `book`
+    (LAG/BAL). `lots` = `book_lot_snapshot(account, book, asof=...)[0]` — đã TÁCH ĐÚNG phần thuộc
+    `book` này qua bootstrap+FIFO lot tracking (`park_holdings()`), KHÔNG phải tổng vị thế broker
+    của mã đó (mã nằm lẫn nhiều book — vd VPB LAG+PARK cùng mã).
+    THEO TỪNG LÔ (`_due_lots`): qty = Σ qty các lô có sessions_held ≥ ngưỡng; lô chưa tới hạn KHÔNG
+    bán; sessions_held báo = của lô cũ nhất tới hạn.
+    `blocked` = [{'ticker','reason'}] cho mã bị guard qty-mismatch HOẶC không dựng được hạn từng lô
+    (§29 — phải hiện ra cho người, KHÔNG chỉ in stdout, vì có thể đang ÉM một mã THẬT SỰ tới hạn).
+    Thiếu ref_price vẫn chỉ in (ref_price gần như luôn có từ broker)."""
     out, blocked = [], []
     for tk, lot in lots.items():
         pos = positions.get(tk)
@@ -111,23 +146,30 @@ def _lag_bal_candidates(asof_date, positions, book, lots, threshold_fn):
             print(f"  [FAILSAFE] {book} {tk}: {reason}, KHÔNG chèn")
             blocked.append({"ticker": tk, "reason": reason})
             continue
-        try:
-            entry = dt.date.fromisoformat(lot["entry_date"])
-        except ValueError:
-            print(f"  [FAILSAFE] {book} {tk}: entry_date lỗi ({lot['entry_date']!r}) — bỏ qua")
+        due, err = _due_lots(lot, asof_date, threshold_fn)
+        if err:
+            print(f"  [FAILSAFE] {book} {tk}: {err} — KHÔNG chèn")
+            blocked.append({"ticker": tk, "reason": err})
             continue
-        sessions = count_trading_days(entry, asof_date)
-        if sessions is None:
-            print(f"  [FAILSAFE] {book} {tk}: không tính được sessions_held (vn_market import lỗi)")
-            continue
-        if not threshold_fn(sessions):
+        due_qty, sessions, due_rights = due
+        if due_qty <= 0:
             continue
         ref_price = pos.get("marketPrice") or pos.get("avg_cost")
         if not ref_price or ref_price <= 0:
             print(f"  [FAILSAFE] {book} {tk}: thiếu ref_price (marketPrice/avg_cost) — KHÔNG chèn")
             continue
-        out.append((tk, int(qty), float(ref_price), sessions))
+        if due_qty < qty:
+            print(f"  [LOT] {book} {tk}: {due_qty}/{qty}cp tới hạn — {qty - due_qty}cp lô chưa tới hạn giữ lại")
+        out.append((tk, int(due_qty), float(ref_price), sessions, due_rights))
     return out, blocked
+
+
+def _exit_qty_note(qty, lot):
+    """Hậu tố note lệnh: thoát toàn bộ hay chỉ phần lô tới hạn (người duyệt thấy ngay phần giữ lại)."""
+    total = int(lot.get("qty") or 0)
+    if qty >= total:
+        return "đề xuất thoát toàn bộ"
+    return f"đề xuất thoát {qty}cp lô tới hạn (giữ {total - qty}cp lô chưa tới hạn)"
 
 
 def _bal_stop_loss_candidates(asof_date, positions, lots):
@@ -136,8 +178,14 @@ def _bal_stop_loss_candidates(asof_date, positions, lots):
     ĐÃ giữ ≥ `rules.BAL_STOP_LOSS_MIN_HOLD` phiên (mirror min_hold của pin). `lots` cùng dạng/
     nguồn với `_lag_bal_candidates` — qty đã TÁCH ĐÚNG phần BAL của mã (xem docstring ở trên).
     `blocked` = [{'ticker','reason'}] cho mã bị guard qty-mismatch chặn (§29, cùng tinh thần
-    `_lag_bal_candidates`). FAIL-SAFE khác (thiếu avg_cost/marketPrice, entry_date lỗi, không
-    tính được sessions_held) vẫn chỉ in."""
+    `_lag_bal_candidates`). Thiếu avg_cost/marketPrice vẫn chỉ in.
+    THEO TỪNG LÔ (job Taylor_20261028_162413): min_hold xét trên TỪNG lô — chỉ bán Σ lô đã giữ ≥
+    `BAL_STOP_LOSS_MIN_HOLD` phiên (lô vừa mua phiên 0/1 không bị cắt, đúng ý min_hold của pin);
+    không dựng được hạn từng lô ⇒ chặn + `blocked` (§29). Trả thêm phần tử thứ 5 = lô quyền mua đủ
+    min_hold. QUYẾT ĐỊNH CÓ CHỦ Ý: pnl GIỮ trên giá vốn broker-native CẤP MÃ (avg_cost DNSE — §6),
+    KHÔNG tự tính giá vốn từng lô từ fill (sổ lô `price` là giá journal, chưa đối soát broker) —
+    giá vốn cấp mã đã là quy ước từ trước (mã lẫn book cũng chung avg_cost); đổi quy ước giá vốn
+    là việc riêng cần duyệt, không gộp vào bản vá ngày vào lệnh."""
     out, blocked = [], []
     for tk, lot in lots.items():
         pos = positions.get(tk)
@@ -155,19 +203,18 @@ def _bal_stop_loss_candidates(asof_date, positions, lots):
             print(f"  [FAILSAFE] BAL {tk}: thiếu avg_cost/marketPrice hợp lệ — "
                   f"KHÔNG tính stop-loss")
             continue
-        try:
-            entry = dt.date.fromisoformat(lot["entry_date"])
-        except ValueError:
-            print(f"  [FAILSAFE] BAL {tk}: entry_date lỗi ({lot['entry_date']!r}) — bỏ qua stop-loss")
+        due, err = _due_lots(lot, asof_date, lambda s: s >= rules.BAL_STOP_LOSS_MIN_HOLD)
+        if err:
+            print(f"  [FAILSAFE] BAL {tk}: {err} — KHÔNG tính stop-loss")
+            blocked.append({"ticker": tk, "reason": err})
             continue
-        sessions = count_trading_days(entry, asof_date)
-        if sessions is None:
-            print(f"  [FAILSAFE] BAL {tk}: không tính được sessions_held — bỏ qua stop-loss")
+        due_qty, sessions, due_rights = due
+        if due_qty <= 0:
             continue
         pnl_pct = market_price / avg_cost - 1.0
         if not rules.bal_stop_loss_hit(pnl_pct, sessions):
             continue
-        out.append((tk, int(qty), float(market_price), pnl_pct))
+        out.append((tk, int(due_qty), float(market_price), pnl_pct, due_rights))
     return out, blocked
 
 
@@ -383,7 +430,8 @@ def _inject_sell(plan, positions, tk, qty, ref_price, book, play_type, note, ord
     """Chèn 1 lệnh SELL auto-exit vào `plan`, có ÁP TRẦN Σsell cross-book (`_cap_sellable`). Trả
     True nếu có chèn (kể cả bị cap xuống còn >0), False nếu bị cap về 0 — KHÔNG chèn gì, nhưng
     `capped_notes` vẫn ghi lại để hiện ra cho người (§29, không lặng lẽ bỏ qua).
-    `rights_lots` (lô CP quyền mua, `book_lot_snapshot`) ⇒ phần CHƯA niêm yết & còn hạn tách sang
+    `rights_lots` (lô CP quyền mua TỚI HẠN của lệnh này — `_due_lots`, KHÔNG phải mọi lô quyền của
+    mã: lô quyền chưa tới hạn đưa vào đây sẽ ăn phần khoá của lô tới hạn) ⇒ phần CHƯA niêm yết & còn hạn tách sang
     `locked_notes` (xem `_rights_locked_split`); lô hết khoá ⇒ chẩn đoán gắn vào cảnh báo cắt."""
     unlisted, lock_info, lock_diag = _rights_lock_status(rights_lots, plan.get("plan_date"))
     qty, locked = _rights_locked_split(tk, qty, unlisted, positions)
@@ -491,7 +539,7 @@ def process_account(account, plan_date, signal_date, dry_run):
     # Chỉ tra BQ khi có candidate; holds_for KHÔNG raise — lỗi nguồn ⇒ HOLD + lý do thật (§29).
     lag_rights = (rights_hold.holds_for([c[0] for c in lag_candidates], plan_date, signal_date)
                   if lag_candidates else {})
-    for tk, qty, ref_price, sessions in lag_candidates:
+    for tk, qty, ref_price, sessions, due_rights in lag_candidates:
         existing = _already_has_sell(plan, tk, "LAG")
         rh = lag_rights.get(tk)
         if rh and rh["action"] == "HOLD":
@@ -505,12 +553,12 @@ def process_account(account, plan_date, signal_date, dry_run):
             skipped_existing.append((tk, "LAG"))
             continue
         note = (f"AUTO-EXIT LAG: giữ {sessions} phiên ≥ mốc cố định {rules.LAG_EXIT_SESSIONS} "
-                f"(pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ")
+                f"(pt_v23_audit_2014.py:2060) — {_exit_qty_note(qty, lag_lots[tk])}")
         if rh and rh["action"] == "RELEASE":
             note += f" — {rh['note']}"
         _inject_sell(plan, positions, tk, qty, ref_price, "LAG", "LAG_AUTO_EXIT", note,
                      "LAG", injected, capped_notes, sessions,
-                     rights_lots=lag_lots.get(tk, {}).get("rights_lots"), locked_notes=locked_notes)
+                     rights_lots=due_rights, locked_notes=locked_notes)
 
     # ---- BAL: T+45 cố định (pt_v23_audit_2014.py:2008) ----
     bal_lots, bal_ok, bal_reason, bal_blocked = book_lot_snapshot(account, "BAL", asof=signal_date)
@@ -525,34 +573,34 @@ def process_account(account, plan_date, signal_date, dry_run):
         if bal_ok else ([], []))
     for b in bal_qty_blocked:
         _add_blocked(b["ticker"], "BAL", b["reason"])
-    for tk, qty, ref_price, sessions in bal_candidates:
+    for tk, qty, ref_price, sessions, due_rights in bal_candidates:
         existing = _already_has_sell(plan, tk, "BAL")
         if existing:
             print(f"  [skip] {tk}: đã có sell BAL trong plan (id={existing})")
             skipped_existing.append((tk, "BAL"))
             continue
         note = (f"AUTO-EXIT BAL: giữ {sessions} phiên ≥ mốc cố định {rules.BAL_EXIT_SESSIONS} "
-                f"(pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ")
+                f"(pt_v23_audit_2014.py:2008) — {_exit_qty_note(qty, bal_lots[tk])}")
         _inject_sell(plan, positions, tk, qty, ref_price, "BAL", "BAL_AUTO_EXIT", note,
                      "BAL", injected, capped_notes, sessions,
-                     rights_lots=bal_lots.get(tk, {}).get("rights_lots"), locked_notes=locked_notes)
+                     rights_lots=due_rights, locked_notes=locked_notes)
 
     # ---- BAL: stop-loss -20% trên giá vốn (pt_v23_audit_2014.py:2008), ĐỘC LẬP mốc phiên ----
     stoploss_candidates, stoploss_qty_blocked = (_bal_stop_loss_candidates(
         dt.date.fromisoformat(signal_date), positions, bal_lots) if bal_ok else ([], []))
     for b in stoploss_qty_blocked:
         _add_blocked(b["ticker"], "BAL", b["reason"] + " (stop-loss)")
-    for tk, qty, ref_price, pnl_pct in stoploss_candidates:
+    for tk, qty, ref_price, pnl_pct, due_rights in stoploss_candidates:
         existing = _already_has_sell(plan, tk, "BAL")
         if existing:
             print(f"  [skip] {tk}: đã có sell BAL trong plan (id={existing})")
             skipped_existing.append((tk, "BAL"))
             continue
         note = (f"AUTO-EXIT BAL STOP-LOSS: lỗ {pnl_pct:.1%} ≤ mốc {rules.BAL_STOP_LOSS_PCT:.0%} "
-                f"trên giá vốn (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ")
+                f"trên giá vốn (pt_v23_audit_2014.py:2008) — {_exit_qty_note(qty, bal_lots[tk])}")
         _inject_sell(plan, positions, tk, qty, ref_price, "BAL", "BAL_AUTO_EXIT", note,
                      "BAL-STOPLOSS", injected, capped_notes, f"stoploss={pnl_pct:.1%}",
-                     rights_lots=bal_lots.get(tk, {}).get("rights_lots"), locked_notes=locked_notes)
+                     rights_lots=due_rights, locked_notes=locked_notes)
 
     # ---- CAPIT: T+60 cố định (CAPIT_HOLD, pt_v22_dt5g.py:123) + nhắc T+55 ----
     ledger = capit_episode._load(capit_episode.LEDGER_PATH)
