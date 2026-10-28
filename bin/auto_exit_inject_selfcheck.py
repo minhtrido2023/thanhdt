@@ -56,8 +56,11 @@ LOT_MUTANTS = {
                         "                pass\n"),
     "MA8_held_not_blocked": ("auto_exit_inject.py",
                              '            print(f"  [LOT-ORDER] {book} {tk}: {held}")\n'
-                             '            blocked.append({"ticker": tk, "reason": held})\n',
+                             '            blocked.append({"ticker": tk, "reason": held, "held_qty": held_qty})\n',
                              '            print(f"  [LOT-ORDER] {book} {tk}: {held}")\n'),
+    # Vòng 3: bước lọc blocked "held" sau gộp stop-loss (L16a) · cho lọc dù lệnh gộp bị cap cắt (L16c).
+    "MA9_no_held_filter": ("auto_exit_inject.py", "and got >= want:\n", "and False:\n"),
+    "MA10_filter_ignores_cap": ("auto_exit_inject.py", "and got >= want:\n", "and True:\n"),
     "MP1_snapshot_no_lots": ("portfolio_status.py", '        d["lots"].append(one)\n', "        pass\n"),
     "MP2_hint_all_due": ("portfolio_status.py",
                          "    due = [g for g in groups if g[2] >= LAG_EXIT_SESSIONS_FIXED]\n",
@@ -577,6 +580,24 @@ def lot_tests(signal_date, plan_date, before):
     bl = [b for b in _notes(plan, "blocked") if b["ticker"] == "BLZ"]
     check("L15 stop-loss: lô đủ min_hold nằm sau lô 1 phiên ⇒ không SELL, blocked nêu 300cp bị giữ",
           not sells and len(bl) == 1 and "giữ 300cp tới hạn" in bl[0]["reason"], (sells, bl))
+
+    # L16 — vòng 3: blocked "held" của T+45 không được mâu thuẫn với lệnh gộp stop-loss đã phủ lô đó
+    blh = _lots((300, before(50)), (200, before(10)), (100, before(60)))
+    plan, sells = _run_mock(sig, plan_date, {"BLH": (600, 20000.0, 15000.0)}, bal_lots={"BLH": blh})
+    o = sells.get(("BLH", "BAL"))
+    check("L16a BAL [300@50,200@10,100@60] lỗ −25% ⇒ SELL 600 VÀ blocked rỗng (lệnh gộp đã phủ lô giữ)",
+          o is not None and o["qty"] == 600 and not _notes(plan, "blocked"), (o, _notes(plan, "blocked")))
+    plan, sells = _run_mock(sig, plan_date, {"BLH": (600, 20000.0, 20000.0)}, bal_lots={"BLH": blh})
+    o = sells.get(("BLH", "BAL"))
+    bl = [b for b in _notes(plan, "blocked") if b["ticker"] == "BLH"]
+    check("L16b đối chứng không stop-loss ⇒ SELL 300 và blocked 'giữ 100cp' vẫn còn",
+          o is not None and o["qty"] == 300 and len(bl) == 1 and "giữ 100cp tới hạn" in bl[0]["reason"], (o, bl))
+    plan, sells = _run_mock(sig, plan_date, {"BLH": (600, 20000.0, 15000.0)}, sellable={"BLH": 500},
+                            bal_lots={"BLH": blh})
+    o = sells.get(("BLH", "BAL"))
+    bl = [b for b in _notes(plan, "blocked") if b["ticker"] == "BLH"]
+    check("L16c lệnh gộp bị cap sellable 500<600 ⇒ SELL 500 và blocked 'giữ 100cp' vẫn còn",
+          o is not None and o["qty"] == 500 and len(bl) == 1 and "giữ 100cp tới hạn" in bl[0]["reason"], (o, bl))
 
 
 def run_lot_mutants():
