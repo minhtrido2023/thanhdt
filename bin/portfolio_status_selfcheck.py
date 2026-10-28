@@ -28,6 +28,12 @@ def check(name, cond, detail=""):
         FAILS.append(name)
 
 
+def _no_lots(account, date):
+    """Thay sổ lô LAG (park_holdings gọi broker LIVE khi date = hôm nay) cho các ca chỉ kiểm KHUNG
+    của build_output — đường sổ lô thật kiểm ở 12/12b/12c + chạy tay portfolio_status."""
+    return {}, {}, "selfcheck: bỏ qua sổ lô"
+
+
 def _no_tool(account, date):
     """Thay công cụ §21 (BQ + ~2 phút) cho các ca chỉ kiểm KHUNG của build_output."""
     return {}
@@ -130,7 +136,7 @@ def run():
 
     # 6: build_output SpaceX/ZaloPay — chỉ chạy khi có NAV hôm nay (fail-soft weekend/holiday)
     if date_spacex:
-        out_sx = ps.build_output("SpaceX", date_spacex, returns_fn=_no_tool)
+        out_sx = ps.build_output("SpaceX", date_spacex, returns_fn=_no_tool, lag_lots_fn=_no_lots)
         check(f"build_output SpaceX ({date_spacex}) không None", out_sx is not None)
         check("build_output SpaceX: có header TÌNH TRẠNG DANH MỤC",
               out_sx is not None and "TÌNH TRẠNG DANH MỤC" in out_sx)
@@ -140,15 +146,15 @@ def run():
         print("[SKIP] build_output SpaceX — không có nav_history_SpaceX.csv")
 
     if date_zalopay:
-        out_zp = ps.build_output("ZaloPay", date_zalopay, returns_fn=_no_tool)
+        out_zp = ps.build_output("ZaloPay", date_zalopay, returns_fn=_no_tool, lag_lots_fn=_no_lots)
         check(f"build_output ZaloPay ({date_zalopay}) không None", out_zp is not None)
     else:
         print("[SKIP] build_output ZaloPay — không có nav_history_ZaloPay.csv")
 
     # 7: §12 sanity — 2 account cho output khác nhau (không đọc chung không lọc)
     if date_spacex and date_zalopay:
-        out_sx = ps.build_output("SpaceX", date_spacex, returns_fn=_no_tool)
-        out_zp = ps.build_output("ZaloPay", date_zalopay, returns_fn=_no_tool)
+        out_sx = ps.build_output("SpaceX", date_spacex, returns_fn=_no_tool, lag_lots_fn=_no_lots)
+        out_zp = ps.build_output("ZaloPay", date_zalopay, returns_fn=_no_tool, lag_lots_fn=_no_lots)
         check("§12: SpaceX và ZaloPay cho output KHÁC nhau (không lẫn account)",
               out_sx != out_zp)
 
@@ -157,7 +163,7 @@ def run():
     # chạy vào ngày chưa có NAV hôm đó) — nên test None phải dùng ngày TRƯỚC lịch sử, không
     # phải ngày tương lai (tương lai vẫn có "gần nhất trước" = dòng cuối cùng).
     check("build_output ngày TRƯỚC mọi lịch sử NAV → None",
-          ps.build_output("SpaceX", "2000-01-01", returns_fn=_no_tool) is None)
+          ps.build_output("SpaceX", "2000-01-01", returns_fn=_no_tool, lag_lots_fn=_no_lots) is None)
 
     # 10: count_trading_days — dùng next_trading_day thật (§16 RULE 2), không đếm lịch tay
     import datetime as _dt
@@ -167,7 +173,8 @@ def run():
     check("count_trading_days: asof <= start → 0",
           ps.count_trading_days(_dt.date(2026, 9, 29), _dt.date(2026, 9, 29)) == 0)
 
-    # 11: lag_entry_dates — quét journal, lấy FILL mua LAG ĐẦU TIÊN, bỏ qua sell + book khác
+    # 11: _first_fill_dates (nay chỉ còn disc_entry_dates dùng) — quét journal, lấy FILL mua ĐẦU
+    # TIÊN của book, bỏ qua sell + book khác. LAG KHÔNG còn đi đường này (xem 12: sổ lô từng lô).
     with tempfile.TemporaryDirectory() as td:
         old_exec_dir = ps.EXEC_DIR
         ps.EXEC_DIR = td
@@ -180,26 +187,65 @@ def run():
             with open(os.path.join(td, "exec_TESTACC_2026-01-10_journal.csv"), "w", encoding="utf-8") as f:
                 f.write("ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note\n")
                 f.write("2026-01-10T09:30:00,FILL,p4,XYZ,buy,c4,100,11.0,200,LAG,TIER1,\n")
-            entries = ps.lag_entry_dates("TESTACC")
+            entries = ps._first_fill_dates("TESTACC", "LAG")
         finally:
             ps.EXEC_DIR = old_exec_dir
-        check("lag_entry_dates: XYZ entry = FILL mua LAG SỚM NHẤT across nhiều file (01-05, không phải 01-10)",
+        check("_first_fill_dates: XYZ entry = FILL mua LAG SỚM NHẤT across nhiều file (01-05, không phải 01-10)",
               entries.get("XYZ") == "2026-01-05", str(entries))
-        check("lag_entry_dates: bỏ qua book khác (ABC/BAL không xuất hiện)",
+        check("_first_fill_dates: bỏ qua book khác (ABC/BAL không xuất hiện)",
               "ABC" not in entries, str(entries))
 
-    # 12: lag_exit_hint — trong cửa, đã qua cửa, và None khi không có entry date
-    h_in_window = ps.lag_exit_hint("SCL", {"SCL": "2026-09-08"}, "2026-09-29")  # 15 phiên
+    # 12: lag_exit_hint — đọc SỔ LÔ từng lô (`book_lot_snapshot` lots), không phải FILL đầu tiên
+    def _lots(*pairs):
+        return {"qty": sum(q for q, _ in pairs), "entry_date": min(d for _, d in pairs),
+                "lots": [{"qty": q, "entry_date": d} for q, d in pairs]}
+    h_in_window = ps.lag_exit_hint("SCL", {"SCL": _lots((100, "2026-09-08"))}, "2026-09-29")  # 15 phiên
     # Mốc CỐ ĐỊNH T+25 (khớp backtest pin `hold_days=25`, user xác nhận 2026-10-06) — kỳ vọng
     # cũ "T+14/T+20, 'còn ~'" là khoảng đã bỏ từ 2026-09-30, không có nguồn backtest.
     check("lag_exit_hint: 15 phiên → còn 10 phiên tới hạn cố định T+25",
           h_in_window is not None and "còn 10 phiên tới hạn cố định T+25" in h_in_window,
           str(h_in_window))
-    h_past = ps.lag_exit_hint("SCL", {"SCL": "2026-08-10"}, "2026-09-29")
+    h_past = ps.lag_exit_hint("SCL", {"SCL": _lots((100, "2026-08-10"))}, "2026-09-29")
     check("lag_exit_hint: đã qua T+25 → 'ĐÃ QUA hạn cố định T+25'",
           h_past is not None and "ĐÃ QUA hạn cố định T+25" in h_past, str(h_past))
     check("lag_exit_hint: không có entry date → None",
           ps.lag_exit_hint("ZZZ", {}, "2026-09-29") is None)
+    # 12b (job Taylor_20261028_162413) — ca THẬT ZaloPay 28/10: VPB lô 282cp @07-27 + 900cp @10-26/27
+    # (sổ lô park_holdings đo 28/10), SCL thoát hẳn 30/09-02/10 rồi vào lại 10-26 (+10-28).
+    vpb = _lots((282, "2026-07-27"), (100, "2026-10-26"), (200, "2026-10-26"), (200, "2026-10-26"),
+                (200, "2026-10-26"), (100, "2026-10-27"), (100, "2026-10-27"))
+    h_vpb = ps.lag_exit_hint("VPB", {"VPB": vpb}, "2026-10-28")
+    n_vpb = ps.count_trading_days(_dt.date(2026, 7, 27), _dt.date(2026, 10, 28))
+    check("lag_exit_hint VPB: nhóm lô — 282cp ĐÃ QUA T+25 (từ 07-27) + 900cp chưa tới hạn (10-26, 10-27)",
+          h_vpb == (f"282cp ĐÃ QUA hạn cố định T+25 ({n_vpb} phiên từ 2026-07-27) — tới hạn thoát; "
+                    f"900cp vào 2026-10-26, 2026-10-27, lô sớm nhất còn 23 phiên tới hạn cố định T+25"),
+          str(h_vpb))
+    scl = _lots((100, "2026-10-26"), (100, "2026-10-26"), (100, "2026-10-26"), (200, "2026-10-26"),
+                (100, "2026-10-28"), (100, "2026-10-28"))
+    h_scl = ps.lag_exit_hint("SCL", {"SCL": scl}, "2026-10-28")
+    check("lag_exit_hint SCL vào lại 10-26 sau khi thoát hẳn: KHÔNG báo 'từ 2026-08-10', không 'ĐÃ QUA'",
+          h_scl is not None and "2026-10-26" in h_scl and "2026-08-10" not in h_scl and "ĐÃ QUA" not in h_scl,
+          str(h_scl))
+    check("lag_exit_hint lỗi entry_date lô ⇒ cảnh báo ⚠️, không đoán phiên",
+          (ps.lag_exit_hint("BAD", {"BAD": {"qty": 1, "entry_date": "x", "lots": [{"qty": 1, "entry_date": "x"}]}},
+                            "2026-10-28") or "").startswith("⚠️ ngày vào lô lỗi"))
+    # 12c book_lot_snapshot THẬT (park_holdings sandbox broker=) — API ADDITIVE: `lots` từng lô +
+    # `qty`/`entry_date` gộp y cũ.
+    import park_holdings as _ph
+    _orig_snap = _ph.park_holdings
+    def _fake_ph(account, asof=None, need_price=False, **kw):
+        lot = lambda q, d, **x: dict({"ticker": "VPB", "book": "LAG", "qty": q, "entry_date": d}, **x)
+        return {"lots": [lot(282, "2026-07-27"), lot(1100, "2025-11-20", book="PARK"), lot(900, "2026-10-26")],
+                "reconcile": {"mismatches": []}, "unverified_tickers": [], "warnings": []}
+    _ph.park_holdings = _fake_ph
+    try:
+        snap, ok_s, _r, _b = ps.book_lot_snapshot("TESTACC", "LAG", asof="2026-10-28")
+    finally:
+        _ph.park_holdings = _orig_snap
+    check("book_lot_snapshot: qty/entry_date gộp GIỮ NGUYÊN + thêm `lots` từng lô (PARK không lẫn)",
+          ok_s and snap.get("VPB") == {"qty": 1182, "entry_date": "2026-07-27",
+                                       "lots": [{"qty": 282, "entry_date": "2026-07-27"},
+                                                {"qty": 900, "entry_date": "2026-10-26"}]}, str(snap))
 
     # 13: latest_recs_csv chọn theo TÊN FILE (ngày signal), không phải mtime
     with tempfile.TemporaryDirectory() as td:
@@ -269,7 +315,7 @@ def run():
     # ngày khác. Dùng ngày tương lai xa (chưa có + không thể có) để chắc chắn tái lập fallback.
     if date_zalopay:
         _future = "2099-12-31"
-        out_stale = ps.build_output("ZaloPay", _future, returns_fn=_no_tool)
+        out_stale = ps.build_output("ZaloPay", _future, returns_fn=_no_tool, lag_lots_fn=_no_lots)
         check("NAV stale: build_output không None (vẫn fallback dòng gần nhất, không crash)",
               out_stale is not None)
         if out_stale is not None:
@@ -303,7 +349,7 @@ def run():
                     _json.dump({"SpaceX": records}, fh)
                 err = _io.StringIO()
                 with _ctx.redirect_stderr(err):
-                    out = ps.build_output("SpaceX", date, returns_fn=_no_tool)
+                    out = ps.build_output("SpaceX", date, returns_fn=_no_tool, lag_lots_fn=_no_lots)
                 line = next((ln for ln in (out or "").splitlines() if ln.startswith("NAV: **")), "")
                 return line, err.getvalue()
 
@@ -413,6 +459,7 @@ def run():
     def build(returns_fn=None, **kw):
         """`build_output` trên fixture; SẬP = chuỗi "EXC:…" (một ca ĐỎ có tên, không cắt ngang)."""
         err = io.StringIO()
+        kw.setdefault("lag_lots_fn", _no_lots)
         try:
             with contextlib.redirect_stderr(err):
                 out_ = ps.build_output("ZaloPay", "2026-10-09", **(
@@ -481,7 +528,8 @@ def run():
         import auto_exit_inject as aei
         aei_pos = {"QQ4": dict(pos["QQ4"], marketPrice=7900.0), "QQ7": dict(pos["QQ7"]),
                    "QQ9": dict(pos["QQ9"])}
-        lots = {tk: {"qty": int(p["qty"]), "entry_date": "2026-06-01"} for tk, p in aei_pos.items()}
+        lots = {tk: {"qty": int(p["qty"]), "entry_date": "2026-06-01",
+                     "lots": [{"qty": int(p["qty"]), "entry_date": "2026-06-01"}]} for tk, p in aei_pos.items()}
         with contextlib.redirect_stdout(io.StringIO()):
             hit, _blocked = aei._bal_stop_loss_candidates(_dt2.date(2026, 10, 9), aei_pos, lots)
         check("F2: `broker_basis_pct` = ĐÚNG phép tính của lệnh cắt lỗ tự động "

@@ -279,13 +279,12 @@ def _first_fill_dates(account, book_label):
     return first
 
 
-def lag_entry_dates(account):
-    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=LAG."""
-    return _first_fill_dates(account, "LAG")
-
-
 def disc_entry_dates(account):
-    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=DISCRETIONARY_SPECIAL."""
+    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=DISCRETIONARY_SPECIAL.
+    ⚠️ CÙNG LỚP LỖI đã sửa cho LAG (job Taylor_20261028_162413): FILL đầu tiên của MỌI journal —
+    bỏ sót lô mua trước khi journal có cột `book` (SpaceX TV1: journal 08-11, sổ lô 07-28) và không
+    reset khi thoát hẳn rồi vào lại. CHƯA chuyển sang sổ lô vì: chỉ HIỂN THỊ (không lệnh tự động
+    nào đọc), và DRI đang unverified trong sổ lô ở cả 2 account ⇒ chuyển sẽ mất hẳn ngày vào."""
     return _first_fill_dates(account, "DISCRETIONARY_SPECIAL")
 
 
@@ -294,11 +293,13 @@ ORPHAN_PREFIX = "MỒ CÔI:"
 
 def book_lot_snapshot(account, book_label, asof=None, plan_dir=None, exec_dir=None,
                       price_fn=None, corp_actions=None, broker=None):
-    """{ticker: {'qty': int, 'entry_date': 'YYYY-MM-DD'}} cho các lô ĐANG GIỮ gắn book=`book_label`,
+    """{ticker: {'qty': int, 'entry_date': 'YYYY-MM-DD', 'lots': [{'qty', 'entry_date',
+    ('rights_subscription')}]}} cho các lô ĐANG GIỮ gắn book=`book_label` — `qty` = TỔNG, `entry_date`
+    = MIN các lô (giữ cho caller cũ); quyết định theo HẠN phải đọc `lots` từng lô,
     dựng qua `park_holdings()` (bootstrap ngày 0 đã duyệt + FIFO replay theo LÔ) thay vì chỉ quét
     journal như `_first_fill_dates` — khác biệt mấu chốt:
       1. PHỦ ĐƯỢC vị thế mua TRƯỚC khi journal có cột `book` (P0 book-tagging, `executor.py`
-         `_journal()`, 2026-08-04) — `_first_fill_dates`/`lag_entry_dates` chỉ đọc journal nên BỎ
+         `_journal()`, 2026-08-04) — `_first_fill_dates` (lag_entry_dates cũ, đã gỡ) chỉ đọc journal nên BỎ
          SÓT mọi lô mua trước mốc đó (sự cố thật: CSV/ZaloPay mua 2026-07-28 book=LAG không bao
          giờ được `auto_exit_inject.py` thấy, 44 phiên vẫn chưa tới hạn T+25 trên giấy).
       2. TÁCH ĐÚNG mã nằm lẫn NHIỀU book cùng lúc (vd VPB/ZaloPay: lô 700cp LAG_LO 2026-07-27 +
@@ -364,8 +365,15 @@ def book_lot_snapshot(account, book_label, asof=None, plan_dir=None, exec_dir=No
         if tk in unverified:
             blocked.setdefault(tk, _reason_for(tk))
             continue
-        d = out.setdefault(tk, {"qty": 0, "entry_date": lot["entry_date"]})
+        d = out.setdefault(tk, {"qty": 0, "entry_date": lot["entry_date"], "lots": []})
         d["qty"] += lot["qty"]
+        # Lô-1-1 (job Taylor_20261028_162413): `qty`/`entry_date` gộp (tổng / MIN) KHÔNG dùng để
+        # quyết định exit theo hạn — ca ZaloPay VPB 282cp@07-27 + 900cp@10-26/27 bị bán 700 thay vì
+        # 282. Quyết định theo hạn phải đọc `lots` (mỗi lô giữ qty + entry_date riêng).
+        one = {"qty": lot["qty"], "entry_date": lot["entry_date"]}
+        if lot.get("rights_subscription"):
+            one["rights_subscription"] = dict(lot["rights_subscription"])
+        d["lots"].append(one)
         if lot.get("rights_subscription"):
             # N1: phần CP quyền mua user khai — có thể CHƯA niêm yết/chưa bán được (auto_exit tách
             # phần khoá thay vì báo cắt-sellable mỗi tối). Chỉ thêm key khi có ⇒ output cũ y nguyên.
@@ -409,25 +417,62 @@ def capit_exit_hint(sessions_held):
     return f"còn {remaining} phiên tới hạn cố định T+{CAPIT_EXIT_SESSIONS_FIXED}"
 
 
-def lag_exit_hint(ticker, entry_dates, asof_date):
-    """Text cửa thoát LAG (mốc CỐ ĐỊNH T+25 phiên — khớp backtest pin) cho `ticker`, hoặc
-    None nếu không có entry date / không tính được phiên (fail-soft)."""
-    entry_str = entry_dates.get(ticker)
-    if not entry_str:
+def lag_lots_for_display(account, date):
+    """`(lots, blocked, err)` sổ lô book LAG (`book_lot_snapshot`) cho dòng EOD. stdout của bước
+    kết nối DNSE (park_holdings đọc broker LIVE khi `date` = hôm nay) chuyển sang stderr — stdout
+    của script này là NỘI DUNG báo cáo. `err` = lý do thật khi sổ lô không dựng được (§29)."""
+    with contextlib.redirect_stdout(sys.stderr):
+        lots, ok, reason, blocked = book_lot_snapshot(account, "LAG", asof=date)
+    return lots, blocked, (None if ok else (reason or "không rõ lý do"))
+
+
+def lag_exit_hint(ticker, lag_lots, asof_date):
+    """Text cửa thoát LAG (mốc CỐ ĐỊNH T+25 phiên — khớp backtest pin) cho `ticker` THEO TỪNG LÔ
+    của sổ lô (`lag_lots` = `book_lot_snapshot(account, "LAG")[0]`), hoặc None nếu mã không có lô
+    LAG / không tính được phiên (fail-soft). Trước job Taylor_20261028_162413 lấy FILL mua LAG ĐẦU
+    TIÊN trong MỌI journal ⇒ sai cả 2 chiều: SCL thoát hẳn 30/09-02/10 rồi vào lại 26/10 vẫn báo
+    "54 phiên từ 08-10"; VPB có lô 282cp từ 07-27 lại báo "vào 10-26". Lô lệch hạn ⇒ in theo nhóm
+    (nhóm đã qua T+25 / nhóm chưa tới hạn), khớp đúng phần `auto_exit_inject` sẽ bán."""
+    lot = lag_lots.get(ticker)
+    if not lot:
         return None
     try:
-        entry = _dt.date.fromisoformat(entry_str)
         asof = _dt.date.fromisoformat(asof_date)
     except ValueError:
         return None
-    sessions = count_trading_days(entry, asof)
-    if sessions is None:
+    groups = []  # (entry_date, qty, sessions)
+    for one in lot.get("lots") or []:
+        try:
+            entry = _dt.date.fromisoformat(one["entry_date"])
+        except (KeyError, TypeError, ValueError):
+            return f"⚠️ ngày vào lô lỗi ({one.get('entry_date')!r}) — không tính được hạn T+{LAG_EXIT_SESSIONS_FIXED}"
+        sessions = count_trading_days(entry, asof)
+        if sessions is None:
+            return None
+        groups.append((one["entry_date"], int(one.get("qty") or 0), sessions))
+    if not groups:
         return None
-    if sessions < LAG_EXIT_SESSIONS_FIXED:
-        remaining = LAG_EXIT_SESSIONS_FIXED - sessions
-        return f"vào {entry_str}, còn {remaining} phiên tới hạn cố định T+{LAG_EXIT_SESSIONS_FIXED}"
-    return (f"ĐÃ QUA hạn cố định T+{LAG_EXIT_SESSIONS_FIXED} ({sessions} phiên từ {entry_str}) "
-            f"— tới hạn thoát")
+    due = [g for g in groups if g[2] >= LAG_EXIT_SESSIONS_FIXED]
+    pend = [g for g in groups if g[2] < LAG_EXIT_SESSIONS_FIXED]
+
+    def _due_txt(gs):
+        return (f"ĐÃ QUA hạn cố định T+{LAG_EXIT_SESSIONS_FIXED} ({max(g[2] for g in gs)} phiên từ "
+                f"{min(g[0] for g in gs)}) — tới hạn thoát")
+
+    def _pend_txt(gs):
+        dates = sorted({g[0] for g in gs})
+        remaining = LAG_EXIT_SESSIONS_FIXED - max(g[2] for g in gs)
+        if len(dates) == 1:
+            return f"vào {dates[0]}, còn {remaining} phiên tới hạn cố định T+{LAG_EXIT_SESSIONS_FIXED}"
+        return (f"vào {', '.join(dates)}, lô sớm nhất còn {remaining} phiên tới hạn cố định "
+                f"T+{LAG_EXIT_SESSIONS_FIXED}")
+
+    if not pend:
+        return _due_txt(due)
+    if not due:
+        return _pend_txt(pend)
+    return (f"{sum(g[1] for g in due)}cp {_due_txt(due)}; "
+            f"{sum(g[1] for g in pend)}cp {_pend_txt(pend)}")
 
 
 def latest_recs_csv():
@@ -611,9 +656,10 @@ def _cash_div_impact(vps_raw):
     return f"{vps:,.0f}đ/cp cổ tức tiền mặt" if vps is not None else "cổ tức tiền mặt (chưa rõ mức)"
 
 
-def build_output(account, date, returns_fn=None):
+def build_output(account, date, returns_fn=None, lag_lots_fn=None):
     """`returns_fn(account, date) -> {mã: dòng position_returns}`; bỏ trống = công cụ §21 thật
-    (`section21_returns`). Tham số chỉ để selfcheck chạy offline."""
+    (`section21_returns`). `lag_lots_fn(account, date) -> (lots, blocked, err)`; bỏ trống =
+    `lag_lots_for_display` (sổ lô thật). Hai tham số chỉ để selfcheck chạy offline."""
     lines = []
     status = _read_json(os.path.join(WC_ROOT, "data", "golive_v23_status.json"), {}) or {}
     state_name = status.get("state_name", "?")
@@ -689,7 +735,18 @@ def build_output(account, date, returns_fn=None):
     recs_date, recs_path = latest_recs_csv()
     recs_by_book = load_recs(recs_path) if recs_path else {}
     bal_recs = recs_by_book.get("BAL", {})
-    lag_entries = lag_entry_dates(account)
+    # LAG: hạn T+25 đọc SỔ LÔ (từng lô), không đọc FILL đầu tiên của journal. Chỉ dựng khi có
+    # sleeve LAG (sổ lô gọi broker). DISCRETIONARY_SPECIAL vẫn đọc journal — chỉ hiển thị, không
+    # lệnh tự động (xem ghi chú `disc_entry_dates`).
+    lag_lots, lag_blocked, lag_err = ({}, {}, None)
+    if sleeves.get("LAG"):
+        try:
+            lag_lots, lag_blocked, lag_err = (lag_lots_fn or lag_lots_for_display)(account, date)
+        except Exception as exc:                                # noqa: BLE001
+            lag_err = f"{type(exc).__name__}: {exc}"
+        if lag_err:
+            print(f"portfolio_status: sổ lô LAG không dựng được ({account} {date}) — không tính "
+                  f"hạn T+{LAG_EXIT_SESSIONS_FIXED}: {lag_err}", file=sys.stderr)
     disc_entries = disc_entry_dates(account)
 
     dt_gate_line = value_radar_line = None
@@ -792,7 +849,12 @@ def build_output(account, date, returns_fn=None):
             pp_txt = f", {pp:+.2f}%" if pp is not None else " (chưa có tỉ suất)"
             extra = []
             if sleeve == "LAG":
-                h = lag_exit_hint(tk, lag_entries, date)
+                if lag_err:
+                    h = f"⚠️ sổ lô LAG không dựng được — không tính được hạn T+{LAG_EXIT_SESSIONS_FIXED}"
+                elif tk in lag_blocked:
+                    h = f"⚠️ sổ lô chặn mã này ({lag_blocked[tk]}) — không tính được hạn T+{LAG_EXIT_SESSIONS_FIXED}"
+                else:
+                    h = lag_exit_hint(tk, lag_lots, date)
                 if h:
                     extra.append(h)
             elif sleeve == "BAL":
