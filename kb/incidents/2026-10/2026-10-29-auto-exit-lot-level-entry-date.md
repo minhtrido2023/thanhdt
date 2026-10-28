@@ -1,0 +1,10 @@
+# 2026-10-29 — auto-exit LAG/BAL quyết định theo mã (ngày vào = MIN) thay vì theo LÔ; dòng EOD lấy FILL đầu tiên
+
+**Phát hiện:** 28/10 (user): EOD báo SCL "ĐÃ QUA T+25 (54 phiên từ 2026-08-10)" dù SCL đã thoát hẳn (SpaceX 30/09, ZaloPay 01-02/10) và vào lại 26/10.
+**Hai lỗi:**
+1. Hiển thị: `portfolio_status.lag_entry_dates` lấy FILL mua LAG đầu tiên trong mọi journal.
+2. Quyết định bán (nghiêm trọng): `book_lot_snapshot` gộp lô theo mã {qty tổng, entry_date=MIN}; `auto_exit_inject._lag_bal_candidates` thử T+25/T+45 trên ngày MIN rồi bán cả qty. Ca ZaloPay VPB: 282cp@07-27 (quá hạn) + 900cp@26-27/10 ⇒ cron 20:40 chèn SELL 700 (cắt theo sellable) thay vì 282. Plan chưa duyệt → không có lệnh sai nào được đặt.
+**Fix:** nhánh `session/lot-exit-20261028`, merge mike master `310b317be` (ae913bbf3 là commit cuối). Exit theo từng lô, chỉ bán PREFIX lô tới hạn theo thứ tự trừ của `LotBook.sell` (lô tới hạn nằm sau lô chưa tới hạn ⇒ `blocked`); BAL: hợp T+45 ∪ stop-loss; dòng EOD đọc sổ lô. Arch-review 2 vòng (vòng 1 tìm FIFO + stop-loss nuốt; vòng 2 tìm cảnh báo `held` mâu thuẫn, vá ở vòng 3). Selfcheck auto_exit 148/0, 10/10 mutant, 2 TZ.
+**Plan:** gỡ SELL-VPB-AUTOEXIT-LAG 700 khỏi plan_ZaloPay_2026-10-29, chạy lại auto-exit ⇒ 282. Backup `state/plan_redo_20261029/`.
+**Bài học vận hành:** `send_plan_report.sh --second-chance` chạy sau 00:00 ICT tính "T+1" = ngày KẾ TIẾP ⇒ báo động giả "plan 30/10 chưa sẵn sàng" + mở bus question (đã đóng tay). Không có override ngày; gửi lại plan sau nửa đêm phải tin nhắn tay vào topic plan.
+**Follow-up chưa làm (không chặn):** N1 lô quyền mua đang khoá nằm giữa prefix làm sổ gán nhầm entry_date; N2 khoá chống trùng cảnh báo `held` chứa số phiên ⇒ phát lại mỗi đêm; N3 cảnh báo khi lệnh `SELL-*-AUTOEXIT-*` có sẵn trong plan khác qty quyết định hiện tại (thay vì `[skip]` im lặng — chính chỗ này làm lệnh 700 sai không tự sửa); `disc_entry_dates` (TV1 08-11 journal vs 07-28 sổ lô) và SpaceX VPB 1.200cp LAG hiển thị dưới PARK; thêm cờ `--plan-date` cho `send_plan_report.sh`.
