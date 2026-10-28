@@ -295,7 +295,8 @@ def resolve_close_prices(tickers, asof, price_fn=None):
     return {t: float(prices[t]) for t in tickers}
 
 
-def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=None, need_price=True):
+def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=None, need_price=True,
+                         source="auto"):
     """Vị thế + tiền của broker tại `asof`.
 
     asof == hôm nay  → gọi DNSE LIVE (§6: same-day không bao giờ đọc BQ, và file
@@ -306,6 +307,10 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
     `need_price=False`: BỎ QUA `resolve_close_prices()` — `market_price` giữ nguyên giá trị khởi
     tạo (0.0 ở nhánh "hôm nay", `marketPrice` thô jsonl ở nhánh quá khứ), KHÔNG xác minh. Chỉ dùng
     khi caller không đọc field này (xem `park_holdings(need_price=)`).
+
+    `source="jsonl"`: LUÔN đọc file dnse_raw_{asof}.jsonl kể cả khi asof == hôm nay — không gọi
+    API, không ghi `_log_raw`. Dành cho công cụ CHỈ-ĐỌC chạy SHADOW (`clear_books.py`); mặc định
+    "auto" giữ nguyên hành vi cũ.
 
     Trả (positions {tk: {qty, market_price}}, cash_available, meta).
 
@@ -319,7 +324,9 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
     chỉ hiện ở totalCash. Dùng nó làm mẫu số ⇒ pool co lại ĐÚNG BẰNG lượng vừa bán ⇒ tỷ lệ
     PARK/pool gần như không giảm ⇒ vòng lặp tự kích (xem `compute_park_trim` §pool).
     """
-    if asof == today_ict():
+    if source not in ("auto", "jsonl"):
+        raise ValueError(f"read_broker_snapshot: source={source!r} không hợp lệ")
+    if asof == today_ict() and source == "auto":
         sys.path.insert(0, WC_ROOT)
         from trading_bot.brokers import DNSEBroker
         b = DNSEBroker(account_id=account_no, credentials_file=None, label=label)
@@ -436,6 +443,13 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
 
 # ─────────────────────────────────────────────────────────────── sổ lô FIFO
 
+def _held_since(lot):
+    """Ngày bắt đầu NẮM GIỮ thật của lô — cơ sở xét HƯỞNG QUYỀN (chia tách/thưởng/quyền mua).
+    Lô thường: = entry_date. Lô sinh từ BOOK_TRANSFER: entry_date là ngày vào sổ đích (đồng hồ
+    exit), còn cổ phiếu đã nằm trong tài khoản từ `holding_since` ⇒ quyền xét theo ngày đó."""
+    return lot.get("holding_since") or lot["entry_date"]
+
+
 class LotBook:
     """Sổ lô theo (ticker, book). Bán tiêu thụ FIFO TRONG CÙNG BOOK."""
 
@@ -477,6 +491,65 @@ class LotBook:
                                  f"lô đang có trong sổ book='{book or 'KHÔNG TAG'}' → {ticker} UNVERIFIED")
         return remain
 
+    def transfer(self, ticker, from_book, to_book, qty, date, ref_price, source,
+                 play_type="", transfer_id=""):
+        """BOOK_TRANSFER — chuyển NHÃN `qty`cp `ticker` từ sổ `from_book` sang `to_book`. Không
+        phải giao dịch: broker không thấy, Σ qty mỗi mã BẤT BIẾN ⇒ đối soát broker vẫn khớp.
+
+        · Trừ lô `from_book` theo ĐÚNG thứ tự và quy tắc của `sell()` (lọc (ticker, book) giữ
+          thứ tự append, tiêu thụ từ đầu) ⇒ phần bị lấy là PREFIX của các lô nguồn — cùng hợp
+          đồng prefix mà `auto_exit_inject._due_lots` dựa vào.
+        · Thêm lô `to_book` MỚI ở CUỐI sổ, MỖI phần lô nguồn một lô (giữ hạt mịn cho quyền):
+          `entry_date` = `date` (ngày hiệu lực chuyển — đồng hồ T+25/T+45 của sổ đích bắt đầu
+          từ đây; KHÔNG thừa kế ngày cũ, nếu không lô vừa vào LAG bị auto_exit bán ngay),
+          `price` = `ref_price` (P&L sổ nguồn chốt tại giá ref; giá vốn broker không đổi),
+          `holding_since` = ngày NẮM GIỮ thật của phần nguồn — chỉ dùng cho quyền
+          (`corp_action_split`/quyền mua): cổ phiếu vẫn là cổ phiếu cũ, quyền không mất khi đổi nhãn.
+        · NGUYÊN TỬ, fail-closed: thiếu qty ở sổ nguồn, tham số lạ, hoặc prefix chạm lô CP quyền
+          mua ⇒ KHÔNG chuyển gì, gắn UNVERIFIED + cảnh báo. Không chuyển một phần, không bịa.
+        Trả số cp đã chuyển (0 nếu từ chối)."""
+        qty = int(qty or 0)
+        tag = f"{date} BOOK_TRANSFER {transfer_id or '?'} {ticker} {qty}cp {from_book or '?'}→{to_book or '?'} ({source})"
+        if qty <= 0 or not from_book or not to_book or from_book == to_book \
+                or not ref_price or float(ref_price) <= 0:
+            self.unverified.add(ticker)
+            self.warnings.append(f"{tag}: tham số không hợp lệ ⇒ KHÔNG chuyển, {ticker} UNVERIFIED")
+            return 0
+        pool = [l for l in self.lots if l["ticker"] == ticker and l["book"] == from_book]
+        have = sum(l["qty"] for l in pool)
+        if have < qty:
+            self.unverified.add(ticker)
+            self.warnings.append(f"{tag}: sổ {from_book} chỉ có {have}cp < {qty}cp ⇒ KHÔNG chuyển, "
+                                 f"{ticker} UNVERIFIED")
+            return 0
+        plan, remain = [], qty
+        for lot in pool:                                  # cùng vòng tiêu thụ với sell()
+            if remain <= 0:
+                break
+            take = min(lot["qty"], remain)
+            plan.append((lot, take))
+            remain -= take
+        if any(lot.get("rights_subscription") for lot, _ in plan):
+            self.unverified.add(ticker)
+            self.warnings.append(f"{tag}: phần trừ chạm lô CP QUYỀN MUA (khoá/hạn riêng) ⇒ KHÔNG "
+                                 f"chuyển, {ticker} UNVERIFIED")
+            return 0
+        new_lots = []
+        for lot, take in plan:
+            lot["qty"] -= take
+            new_lots.append({"ticker": ticker, "book": to_book, "play_type": play_type,
+                             "entry_date": date, "qty": take, "price": float(ref_price),
+                             "source": source,
+                             "holding_since": lot.get("holding_since") or lot["entry_date"],
+                             "book_transfer": {"id": transfer_id, "from_book": from_book,
+                                               "from_entry_date": lot["entry_date"],
+                                               "from_price": lot["price"],
+                                               "from_source": lot.get("source", "")}})
+        self.lots = [l for l in self.lots if l["qty"] > 0] + new_lots
+        self.warnings.append(f"{tag}: đã chuyển nhãn {len(new_lots)} phần lô (entry_date mới {date}, "
+                             f"giá ref {float(ref_price):,.0f})")
+        return qty
+
     def corp_action_split(self, ticker, multiplier, ex_date, effective_ts, source,
                           event_id=""):
         """Sự kiện doanh nghiệp làm ĐỔI SỐ LƯỢNG (chia tách / thưởng / cổ tức cổ phiếu).
@@ -510,7 +583,7 @@ class LotBook:
             return 0                                   # không giữ mã này — no-op, không phải lỗi
         # N4 (legal-vn 22/10): lô CP QUYỀN MUA đang chờ VSDC ghi nhận tại ex_date KHÔNG hưởng quyền
         # (entry_date kế thừa lô gốc nên điều kiện entry_date < ex_date một mình sẽ nhân nhầm).
-        entitled = [l for l in pool if l["entry_date"] < ex_date
+        entitled = [l for l in pool if _held_since(l) < ex_date
                     and not (l.get("rights_subscription")
                              and rights_sub.pending_at(l["rights_subscription"], ex_date))]
         if not entitled:
@@ -633,6 +706,69 @@ def _fill_deltas(path):
                    "book": norm_book(row.get("book", "")),
                    "play_type": row.get("play_type", "") or "",
                    "qty": delta, "price": px, "parent_id": row.get("parent_id") or ""}
+
+
+BOOK_TRANSFER_EVENT = "BOOK_TRANSFER"
+
+
+def parse_transfer_note(note):
+    """`note` của dòng BOOK_TRANSFER = các cặp `khoá=giá trị` ngăn bởi `;` (vd
+    `from=PARK;to=LAG;src=clear_books`). Trả dict; khoá lặp ⇒ giữ giá trị đầu."""
+    out = {}
+    for part in (note or "").split(";"):
+        k, sep, v = part.partition("=")
+        if sep and k.strip() and k.strip() not in out:
+            out[k.strip()] = v.strip()
+    return out
+
+
+def _book_transfers(path):
+    """Sinh các dòng journal `event=BOOK_TRANSFER` — CHUYỂN NHÃN lô giữa 2 sổ, KHÔNG phải fill.
+
+    Định dạng dòng (cùng header 12 cột của journal executor):
+      ts           thời điểm hiệu lực (ICT, ISO) — entry_date lô đích = ts[:10]
+      event        BOOK_TRANSFER
+      parent_id    ID IDEMPOTENT của lần chuyển (vd XFER-SpaceX-2026-10-29-VPB-PARK-LAG)
+      ticker       mã
+      side         transfer
+      child_oid    = parent_id
+      qty          số cp chuyển — TUYỆT ĐỐI (KHÔNG tích luỹ như FILL)
+      price        giá tham chiếu (giá vốn lô đích)
+      filled_total = qty
+      book         sổ ĐÍCH (phải trùng `to=` trong note)
+      play_type    play_type của lô đích
+      note         `from=<sổ nguồn>;to=<sổ đích>[;...]`
+    Dòng hỏng (qty/giá lạ, thiếu id/from/to, `book` ≠ `to`) vẫn được sinh ra với `invalid` = lý
+    do ⇒ replay gắn UNVERIFIED thay vì lặng lẽ bỏ qua."""
+    with open(path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if (row.get("event") or "") != BOOK_TRANSFER_EVENT:
+                continue
+            kv = parse_transfer_note(row.get("note"))
+            ev = {"ts": row.get("ts") or "", "ticker": row.get("ticker") or "",
+                  "side": "transfer", "id": (row.get("parent_id") or "").strip(),
+                  "from_book": norm_book(kv.get("from")), "to_book": norm_book(kv.get("to")),
+                  "book": norm_book(row.get("book", "")),
+                  "play_type": row.get("play_type", "") or "", "qty": 0, "price": 0.0,
+                  "parent_id": (row.get("parent_id") or "").strip(), "invalid": ""}
+            try:
+                q = float(row.get("qty") or 0)
+                ev["qty"] = int(q) if q == int(q) else 0
+                ev["price"] = float(row.get("price") or 0)
+            except (TypeError, ValueError):
+                ev["invalid"] = f"qty/price không phải số ({row.get('qty')!r}/{row.get('price')!r})"
+            if not ev["invalid"]:
+                if not ev["id"]:
+                    ev["invalid"] = "thiếu parent_id (id idempotent)"
+                elif not ev["ticker"] or len(ev["ts"]) < 10:
+                    ev["invalid"] = "thiếu ticker/ts"
+                elif ev["qty"] <= 0:
+                    ev["invalid"] = f"qty={row.get('qty')!r} không phải số nguyên dương"
+                elif not ev["from_book"] or not ev["to_book"]:
+                    ev["invalid"] = f"note thiếu from=/to= ({row.get('note')!r})"
+                elif ev["book"] and ev["book"] != ev["to_book"]:
+                    ev["invalid"] = f"cột book={ev['book']} ≠ to={ev['to_book']}"
+            yield ev
 
 
 _STATEMENT_RE = re.compile(r"^dnse_khoplenh_broker_confirm_(?P<d>\d{2})-(?P<m>\d{2})-(?P<y>\d{4})\.csv$")
@@ -779,6 +915,13 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         st_events, st_notes = statement_extra_sells(account_label, jq, since, asof, exec_dir)
         timeline += [(ev["ts"], 0, ev, ev["_file"]) for ev in st_events]
         book.warnings.extend(st_notes)
+    # BOOK_TRANSFER: thêm SAU khối statement — chuyển nhãn không phải giao dịch, KHÔNG được vào
+    # `jq` (đối chiếu journal↔statement theo (ngày, mã, chiều)). Cùng lọc snapshot như FILL.
+    xfers = [(ev["ts"], 0, ev, os.path.basename(path))
+             for path in journal_files(account_label, day0, asof, exec_dir)
+             for ev in _book_transfers(path)
+             if not (snap_ts and ev["ts"] and ev["ts"] <= snap_ts)]
+    timeline += xfers
     timeline += [(a["broker_effective_ts"], 1, a, "corp_actions.json") for a in acts]
     # N1 — quyền mua user đã khai: (2) chụp lô hưởng quyền ở ĐẦU phiên GDKHQ (trước mọi fill của
     # ngày đó: "YYYY-MM-DD" < "YYYY-MM-DDT09:.."), (3) thêm lô mới lúc CP về broker (credit_date).
@@ -792,7 +935,7 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         if snap_ts and r["exright_date"] <= snap_ts[:10]:
             # GDKHQ trước ngày 0: bootstrap là trạng thái sớm nhất có ⇒ chụp ngay, có cảnh báo
             entitled_at_ex[r["event_id"]] = [dict(l) for l in book.lots if l["ticker"] == r["ticker"]
-                                             and l["entry_date"] < r["exright_date"]]
+                                             and _held_since(l) < r["exright_date"]]
             book.warnings.append(f"quyền mua {r['ticker']} id={r['event_id']}: GDKHQ {r['exright_date']} "
                                  f"≤ ngày 0 bootstrap — lô hưởng quyền chụp từ bootstrap")
         else:
@@ -801,10 +944,11 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
     timeline.sort(key=lambda x: (x[0], x[1]))
 
     applied, applied_acts, applied_rights = [], [], []
+    applied_xfers, xfer_seen = [], {}
     for _ts, kind, ev, fname in timeline:
         if kind == 2:
             entitled_at_ex[ev["event_id"]] = [dict(l) for l in book.lots if l["ticker"] == ev["ticker"]
-                                              and l["entry_date"] < ev["exright_date"]]
+                                              and _held_since(l) < ev["exright_date"]]
             continue
         if kind == 3:
             n = book.rights_credit(ev, entitled_at_ex.get(ev["event_id"], []))
@@ -818,6 +962,31 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             applied_acts.append(dict(ev, lots_adjusted=n))
             continue
         src = f"{fname}:{ev['parent_id']}"
+        if ev["side"] == "transfer":
+            if ev["invalid"]:
+                book.unverified.add(ev["ticker"])
+                book.warnings.append(f"{ev['ts'][:10]} BOOK_TRANSFER hỏng ({src}): {ev['invalid']} "
+                                     f"⇒ KHÔNG áp, {ev['ticker'] or '?'} UNVERIFIED")
+                continue
+            sig = (ev["ticker"], ev["from_book"], ev["to_book"], ev["qty"], ev["price"])
+            if ev["id"] in xfer_seen:
+                # IDEMPOTENT: cùng id chạy lại (ghi journal 2 lần) ⇒ KHÔNG nhân đôi. Cùng id mà
+                # khác nội dung ⇒ không biết bản nào đúng ⇒ UNVERIFIED, không đoán.
+                if xfer_seen[ev["id"]] != sig:
+                    book.unverified.add(ev["ticker"])
+                    book.warnings.append(f"{ev['ts'][:10]} BOOK_TRANSFER id={ev['id']} TRÙNG id nhưng KHÁC "
+                                         f"nội dung ({src}) ⇒ bỏ bản sau, {ev['ticker']} UNVERIFIED")
+                else:
+                    book.warnings.append(f"{ev['ts'][:10]} BOOK_TRANSFER id={ev['id']} lặp lại ({src}) "
+                                         f"⇒ bỏ qua (idempotent)")
+                continue
+            xfer_seen[ev["id"]] = sig
+            moved = book.transfer(ev["ticker"], ev["from_book"], ev["to_book"], ev["qty"],
+                                  ev["ts"][:10], ev["price"], src, ev["play_type"], ev["id"])
+            applied_xfers.append({"id": ev["id"], "ts": ev["ts"], "ticker": ev["ticker"],
+                                  "from_book": ev["from_book"], "to_book": ev["to_book"],
+                                  "qty": ev["qty"], "ref_price": ev["price"], "applied_qty": moved})
+            continue
         if ev["side"] == "buy":
             book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
                      ev["play_type"])
@@ -944,7 +1113,7 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
 
     park_mv = sum(l["mv_vnd"] for l in park_lots)
     park_mv_verified = sum(l["mv_vnd"] for l in park_lots if l["ticker"] not in book.unverified)
-    return {
+    out = {
         "account_label": account_label, "account_no": account_no, "asof": asof,
         "day0_date": day0, "bootstrap": os.path.basename(snap_path),
         "excluded_tickers": sorted(excluded),
@@ -983,6 +1152,11 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                                   "lots_adjusted": a["lots_adjusted"]} for a in applied_acts],
         "rights_subscriptions_applied": applied_rights,
     }
+    # Khoá chỉ xuất hiện khi journal CÓ dòng BOOK_TRANSFER ⇒ không có sự kiện thì output giữ
+    # nguyên từng byte như trước khi có tính năng (bất biến kiểm ở selfcheck + so JSON live).
+    if xfers:
+        out["book_transfers_applied"] = applied_xfers
+    return out
 
 
 def main():
