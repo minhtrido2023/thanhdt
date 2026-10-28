@@ -298,3 +298,6 @@
 
 ## Archived 2026-10-27 (keep=6 days=5 require_done=True)
 - [2026-10-21T12:04:39Z] [2026-10-21 19:xx ICT] Plan SpaceX 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120334). DRI bi ban 1200cp ngoai plan -> bus question spacex-dri-sell-ngoai-plan-20261021 + Trading Daily; active_nav chua cap nhat (compute_active_nav tu choi). Cho user xac nhan + duyet truoc 08:45 ICT 22/10
+
+## Archived 2026-10-28 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:32:27Z] 21/10: DRI bị bán là USER bán tay (xác nhận, decided_by user): SpaceX −1.200cp→2.500, ZaloPay −600cp→1.300 @15.400. KHÔNG hỏi lại/không flag bất thường/không escalate. Dùng KL mới khi lập plan. active_nav fail-closed là vấn đề code đã biết (xem current_ops), không phải do DRI bất thường.
