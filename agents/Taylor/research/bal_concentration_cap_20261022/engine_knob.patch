@@ -1,0 +1,51 @@
+diff --git a/WorkingClaude/pt_v23_audit_2014.py b/WorkingClaude/pt_v23_audit_2014.py
+index 165be1bd8..d401dc19c 100644
+--- a/WorkingClaude/pt_v23_audit_2014.py
++++ b/WorkingClaude/pt_v23_audit_2014.py
+@@ -2122,6 +2122,22 @@ BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
+               open_prices=open_prices, t1_open_exec=True,
+               entry_alt_prices=None,           # AUDIT: BQ-verifiable T+1 Open fills only
+               force_close_eod=False, **ETF_LIQ_KW)
++# R&D bal_concentration_cap_20261022 (READ-ONLY job Taylor_20261022_095008): cap each new BAL stock position at
++# BAL_WMAX_NAV of COMBINED NAV, mapped to book terms via s(t-1)=cap_bal/combined_nav of the control ledger
++# BAL_WMAX_SREF (2-pass approximation, PREREG). Unset = byte-identical.
++BAL_WMAX_NAV = float(os.environ.get("BAL_WMAX_NAV", "0") or 0)
++if BAL_WMAX_NAV > 0:
++    import gzip as _gz
++    _sref = pd.read_csv(_gz.open(os.environ["BAL_WMAX_SREF"]), low_memory=False)
++    _sref = _sref[_sref.record_type == "DAILY"]
++    _s = (_sref.cap_bal.astype(float) / _sref.combined_nav.astype(float)).values
++    _dts = pd.to_datetime(_sref.ymd).values
++    _capmap = {pd.Timestamp(_dts[i]): BAL_WMAX_NAV / _s[i - 1] for i in range(1, len(_dts))}
++    _capmap[pd.Timestamp(_dts[0])] = BAL_WMAX_NAV / _s[0]
++    BAL_KW["pos_cap_frac_by_date"] = _capmap
++    BAL_KW["pos_cap_tiers"] = set(TIER_BAL) | {t + "_W" for t in TIER_BAL}
++    assert EXP_TAG, "BAL_WMAX_NAV requires EXP_TAG (non-canonical output name, §8)"
++    print(f"  [BAL_WMAX_NAV] cap {BAL_WMAX_NAV:.3f} of combined NAV; book-frac median {np.median(list(_capmap.values())):.4f}")
+ if capit_events:
+     nav_bal0, _ = simulate(sig_f, prices, vni_dates, tier_weights=RS["tier_weights"],
+                            name="v23audit_BAL_base", **BAL_KW, **LIQ_FULL)
+diff --git a/WorkingClaude/simulate_holistic_nav.py b/WorkingClaude/simulate_holistic_nav.py
+index 0f5d4c5a4..534fbd520 100644
+--- a/WorkingClaude/simulate_holistic_nav.py
++++ b/WorkingClaude/simulate_holistic_nav.py
+@@ -461,6 +461,8 @@ def simulate(signals_df, prices, vni_dates, *,
+                                              #       worth of half-filled orders are invisible to the cap. Default False = byte-identical.
+              tier_weights=None,              # dict {play_type: fraction_of_NAV} for tier-sized positions; None → equal-weight 1/max_positions
+              tier_weights_by_state=None,     # OPTIONAL dict {state_int: {play_type: fraction}} — state-conditional tier weights; falls back to tier_weights if state not in map
++             pos_cap_frac_by_date=None,      # R&D bal_concentration_cap_20261022: {Timestamp: max frac of book NAV per new position}; None = off
++             pos_cap_tiers=None,             # set of play_types the cap applies to
+              regime_suppress_dates=None,     # OPTIONAL set of pd.Timestamp: on these dates skip the tier_weights_by_state override (use base tier_weights). Used to SUPPRESS regime_size weak-halving during capitulation windows (validated: RS-off-in-capitulation). Default None = no suppression.
+              state_by_date=None,             # optional dict {pd.Timestamp: state_int 1-5}; enables state-transition exits
+              state_exit_map=None,            # dict {state_int: fraction_to_close} e.g. {1: 1.0, 2: 1.0} = close all in CRISIS/BEAR
+@@ -1316,6 +1318,10 @@ def simulate(signals_df, prices, vni_dates, *,
+                     target_value = cur_nav * effective_tw[play_type]
+                 else:
+                     target_value = cur_nav / max_positions
++                if pos_cap_frac_by_date is not None and play_type in pos_cap_tiers:
++                    _pc = pos_cap_frac_by_date.get(today)
++                    if _pc is not None:
++                        target_value = min(target_value, cur_nav * _pc)
+                 # JIT sell ETF if cash insufficient for this BA buy (user 2026-05-23:
+                 # "cần cash thì bán etf đúng bằng lượng cần"). FIFO sell exactly the
+                 # shortfall amount. Friction at etf_rebalance_friction.

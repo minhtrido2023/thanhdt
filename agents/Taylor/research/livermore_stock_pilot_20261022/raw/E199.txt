@@ -1,0 +1,7 @@
+Giá phá vỡ nền tích lũy 92–116 kéo dài khoảng 80 phiên, gồm vùng đỉnh cũ 113–116 (i=168–170) và cú sập air-pocket i=171–176. Pha markup đứng diễn ra từ i=238 (105.4) lên i=249 (141.2), tức +34% trong 11 phiên. Khối lượng duy trì 3–7 lần median, đỉnh tại gap i=240 (7.42). Phiên i=249 biên độ rộng nhưng khối lượng giảm còn 2.73, chưa có climax đảo chiều rõ, song giá đã quá xa nền. Mua ở Open phiên kế tiếp là đuổi giá giữa pha tăng. Mức −15% (khoảng 120) nằm ngay vùng gap i=240 và cờ i=241–245 (120–123). Việc retest nền breakout là kịch bản bình thường, và cổ phiếu này từng rơi tự do khoảng 25% trong 4 phiên.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới ~120 (lấp gap i=240 / thủng đáy cờ 120.0–120.7) phá cấu trúc breakout
+CONTAMINATION: NONE

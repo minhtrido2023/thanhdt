@@ -1,0 +1,74 @@
+# Trích BCTN 2024 DRI (vietstock 2025/4/9)
+## b24.txt:805,815
+xuyên ảnh hưởng đến tỷ lệ hoàn thành kế hoạch sản lượng của Công ty. Mặc dù tỷ lệ vắng cạo năm 
+2024 có phần cải thiện hơn so với năm 2023 (17,2%) nhưng vẫn còn cao chiếm 12,86%. Tỷ lệ cạo choàng 
+chỉ chiếm 3,9%; tỷ lệ trống vườn cả năm chiếm 12,14% (trống do thiếu công nhân 3,17% và do không cạo 
+choàng được là 8,97%).
+Năm 2024, công ty đã xuất bán 10.108,24 tấn mủ cao su các loại cho khách hàng, chỉ đạt 72,2% kế hoạch do HĐQT công 
+ty giao. Đơn giá xuất bán bình quân 1.788,19 USD/ tấn (không tính hàng ngoại lệ), cao hơn giá sàn qui định của công 
+ty 93,53 USD/tấn. Giảm 30,03% về lượng, nhưng chỉ giảm 11,05% về doanh thu nhờ đơn giá bình quân tăng 26,27% so 
+với năm 2023.
+Tỷ lệ XK chiếm 68,07% tổng lượng xuất bán, tăng 10,07% so với năm 2023 (tỷ lệ XK năm 2023: 61,84%) và đạt 104,47 % 
+KH về tỷ lệ XK năm 2024 (KH 2024: 65%). 
+Hợp đồng ký năm 2023, chuyển qua giao hàng năm 2024 là: 1.559,84 tấn, với đơn giá bình quân 1.499,02 USD/tấn, trong 
+## b24.txt:850,862
+Tổng số lượng hàng EUDR đã bán
+Tổng số lượng hàng FSC đã bán
+STT Chỉ tiêu ĐVT  KH 2024  TH 2024 2024%TH/KH
+1 Khai thác/ thu hoạch    
++ Cao su Tấn khô 14.000 11.116 79,4
++ Điều Tấn tươi 137 153,42 111,98
++ Chuối Tấn quả 655,54 578,19 88,2
++ Sầu riêng Tấn quả 300 423,01 141,0
+2 Doanh thu Tỷ đồng 462,5 494,34 106,88
+3 Lợi nhuận trước thuế Tỷ đồng 74,41 139,68 187,72
+4 Tỷ lệ xuất khẩu/tổng lượng hàng bán % 65% 68,07% 104,72
+5 Giá vốn hàng bán Triệu đồng/ tấn
++ Cao su Triệu đồng/ tấn 30,336 31,980 105,42%
+## b24.txt:1000,1007
+Địa chỉ: Bản Tha Luông, Tỉnh ChamPasak, Cộng hòa Dân chủ Nhân dân Lào
+Ngành nghề kinh doanh chính: Trồng, chăm sóc, khai thác, chế biến và tiêu thụ cao su thiên nhiên
+Hiện nay Daklaoruco đang quản lý  9.276,07 ha gồm có 8.592,3 ha cao su; 501,8 ha điều, 13,35 ha vườn ươm, 
+bạch đàn và keo, 168,62 ha đất trống hợp thủy và hành lang ven suối. 01 nhà máy chế biến mủ công suất 
+18.000 tấn/năm. Vườn cây sinh trưởng phát triển tốt, năng suất bình quân năm 2024 là 1,34 tấn/ha so với 
+năm 2023 giảm 0,29 tấn/ha ( năm 2023 là 1,63 tấn/ha), nguyên nhân do thiếu lao động; thời tiết bất lợi, số 
+ngày nghỉ cạo cao và sản lượng khai thác bị thất thoát nhiều.
+Sản phẩm mủ cao su chế biến hiện nay của công ty chủ yếu là SVR 3L, SVR 10, SVR 20, SVRCV50 và SVR 
+## b24.txt:1736,1760
+Nước bạn Lào nơi công ty DRI đầu tư 100% vốn, tình hình kinh tế suy thoái, lạm phát tại Lào tăng cao, đồng tiền 
+Lào mất giá nhanh làm ảnh hưởng rất lớn đến đời sống và tư tưởng của CBCNV, đặc biệt là người lao động Việt 
+Nam tại Lào.    
+Hiện nay nước bạn Lào đang áp dụng phí chuyển lợi nhuận về nước 10%/tổng lợi nhuận chuyền về ảnh hưởng 
+đến lợi nhuận thực;
+Thời tiết diễn biến bất lợi, ảnh hưởng đến năng suất và sản lượng các sản phẩm cao su, điều và chuối tươi.
+STT Nội dung TH 2023 TH 2024 So sánh (%)
+1 Doanh thu thuần về bán hàng và CCDV  443.718.005.470  471.071.619.679 106%
+2 Giá vốn hàng bán  284.218.803.700  281.492.627.642 99%
+3 Doanh thu họat động tài chính    17.798.917.259    23.205.067.083 130%
+4 Chi phí tài chính    19.260.401.577      6.929.393.135 36%
+5 Chi phí bán hàng    34.421.706.984    30.531.491.942 89%
+6 Chi phí quản lý doanh nghiệp    26.784.815.048    34.232.229.929 128%
+7 Lợi nhuận khác    (2.882.825.571)     (1.414.555.387) 49%
+* Lợi nhuận kế toán trước thuế    93.739.049.520  139.676.388.727 149%
+8 Chi phí TNDN hiện hành    20.081.207.096    29.273.507.253 146%
+** Lợi nhuận kế toán sau thuế    73.657.842.424  110.402.881.474 150%
+STT Nội dung TH 2023 TH 2024 So sánh (%)
+1 Doanh thu thuần về bán hàng và CCDV  353.442.508.188  394.157.326.247 112%
+2 Giá vốn hàng bán  226.491.901.601  247.558.458.440 109%
+3 Doanh thu họat động tài chính      3.412.628.277      7.195.640.238 211%
+4 Chi phí tài chính    29.075.596.186      8.481.664.998 29%
+5 Chi phí bán hàng    13.214.351.634    10.299.361.197 78%
+6 Chi phí quản lý doanh nghiệp    18.324.886.404    21.412.873.097 117%
+7 Lợi nhuận khác         203.778.427     (1.051.561.875) -516%
+## b24.txt:2150,2160
+tài chính hợp nhất.
+Cao su:
+Sơ bộ kết quả kinh doanh năm 2025:
+Điều:
+Sầu riêng:
+Khai thác : 13.500 tấn mủ quy khô
+Năng suất bình quân : 1,65 tấn/ha
+Sản lượng tiêu thụ dự kiến : 13.500 tấn
+Giá bán bình quân : 1.695 USD/tấn
+Giá vốn hàng bán : 1.350 USD/tấn ( giá trước thuế)
+Tỷ lệ xuất khẩu : 65% trên tổng lượng hàng xuất báṇ

@@ -1,0 +1,9 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đang trong xu hướng tăng. Pha markup đầu tiên đẩy giá lên đỉnh 193 (i114). Sau đó giá sập 30% về 132.6 (i142) rồi tích luỹ trong biên 150–182 suốt khoảng 90 phiên. Phiên i235 bứt phá qua 182 với khối lượng 5.49x, xác nhận cầu thật. Các phiên follow-through đều đặn (1.2–2.6x) và vượt đỉnh cũ 193 dễ dàng, nên phía trên không còn cung kẹt.
+
+Tuy vậy, giá đã tăng 26% trong 16 phiên, cách vùng breakout khoảng 18%. Phiên i248 có biên độ rộng 201–218.7 với 2.64x, dấu hiệu nóng. Mức −15% từ giá vào (~183) trùng mép trên của biên cũ, đúng vùng retest điển hình. Tiền lệ i114→i142 cho thấy cổ phiếu này có thể đổ rất nhanh sau một nhịp tăng dốc.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 182 (mép trên biên tích luỹ, chân breakout i235) với khối lượng lớn thì breakout thất bại.
+CONTAMINATION: NONE

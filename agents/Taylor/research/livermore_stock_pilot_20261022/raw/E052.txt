@@ -1,0 +1,7 @@
+Cụm khối lượng khí hậu bắt đầu từ i=230 (V 74 lần median), giá bật từ vùng 175 lên đỉnh 241.55 ở i=241. Thanh i=241 đảo chiều mạnh: mở ở đỉnh rồi đóng 223, V 25. Sau đó giá rơi về 198 ở i=245, khối lượng co lại, và hồi lên 211 với V 10 ở i=249. Giá vẫn trên mép breakout 192, nhưng cung bị kẹt ở vùng 220–241 rất dày (V 30–52 các phiên 238–242). Giá vào khoảng 211 thì mức −15% là ~179.5. Mức này nằm ngay trên đỉnh range cũ 175–182, tức vùng neo trước breakout, và đã bị test ở i=235–236. Cổ phiếu thanh khoản mỏng, sau climax biến động rất lớn, nên khả năng lấp lại gap về 175–180 là đáng kể. Pha hiện tại nhiều khả năng là phân phối/range sau markup, không phải tiếp diễn.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 192 (mép breakout i=230/235) → cấu trúc markup hỏng, mục tiêu về 175.
+CONTAMINATION: NONE

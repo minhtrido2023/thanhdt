@@ -127,6 +127,17 @@ nằm ngoài tầm truncate đó (xem [`universe_pit.md`](universe_pit.md)). Đ�
 - Thiết kế đầy đủ + hạn chế + runway mở lại announcement study:
   `mike/agents/Taylor/research/corp_action_snapshot_pipeline_design_20260817.md`.
 
+## Bẫy (6) — schema drift 2026-10-14: cột `public_datetime`, vintage 14/15/16-10 MẤT, hash loại 4 cột
+Vendor thêm `public_datetime` (TIMESTAMP, cuối bảng nguồn) ⇒ run 14, 15, 16/10 fail-closed ⇒ **vintage
+2026-10-14/15/16 của `corporate_action_snapshots` MẤT VĨNH VIỄN** (insider_transaction không ảnh hưởng;
+KHÔNG backfill `--date`). Run sáng 17/10 cũng fail, nhưng vintage 17/10 được ghi tay 21:17 ICT cùng ngày
+sau khi vá. Xử lý (user duyệt A 2026-10-17, mike `b1c183b3a`): `ALTER TABLE ADD COLUMN public_datetime`
++ `HASH_EXCLUDE` = `ingested_at`, `source_news_id`, `first_disclosure_datetime`, `public_datetime`.
+- Mọi vintage ≤ 2026-10-13 mang `public_datetime = NULL` (KHÔNG phải "vendor không có"); có từ 2026-10-17.
+- Hash liên tục: vs vintage 13/10 = 36.447/36.502 dòng giống (99,85%); 55 dòng khác là amendment thật.
+- `public_datetime` = `public_date` 00:00 ICT ở hầu hết dòng, nhưng 5 dòng lệch (EVF, ALV×2, DBT, MCP:
+  vendor sửa `public_date` về sau, cột này giữ ngày gốc) — đo 2026-10-17.
+
 ## Liên quan
 [`corporate_action_bq.md`](corporate_action_bq.md) (bảng nguồn, status TRAP) ·
 [`../fundamentals/insider_transaction_snapshots.md`](../fundamentals/insider_transaction_snapshots.md)

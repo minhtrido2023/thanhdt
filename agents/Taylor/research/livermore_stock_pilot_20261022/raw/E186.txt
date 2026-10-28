@@ -1,0 +1,7 @@
+**Phân tích:** Có một pha markup dữ dội từ khoảng 224 (i=186) lên 514 (i=208), khối lượng climax 8–13 lần median ở các phiên i=202–208. Sau đó cổ phiếu chuyển sang distribution/markdown trên khối lượng vẫn rất cao. Các đỉnh thấp dần: 489/514 → 453 (i=214) → 412 (i=228) → 381 (i=241) → 368 (i=246). Các đáy cũng thấp dần: 357.9 → 326 → 321.6 → 305.7 (i=243). Hiện giá ở 340, đã cách đỉnh khoảng −34%. Biên độ mỗi phiên 5–9% nên mốc −15% (≈289) chỉ cách 2–3 phiên xấu. Nếu thủng vùng 305–320, phía dưới là khoảng trống tới vùng nền breakout 260–290 (i=194–197). Lượng cung kẹt ở 360–410 vẫn còn dày. Chưa thấy dry-up hay climax bán rõ ràng.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa dưới 305 (đáy i=243) trên khối lượng lớn thì cấu trúc phân phối được xác nhận. Kịch bản tăng chỉ đúng nếu giá vượt và giữ trên 370–382.
+CONTAMINATION: NONE

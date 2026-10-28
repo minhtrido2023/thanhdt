@@ -115,6 +115,12 @@ look-ahead). Không chỉ gắn cờ nữa. Bị loại → ghi `status.json.lag
 BAL/CAPIT/custom30V không đụng. Gate này đang hoạt động thật — DollarBill không cần tự check rating
 LAG nữa (đã lọc sẵn ở nguồn), nhưng NẾU thấy 1 mã rating≥4 lọt qua thì đó là bug thật, escalate ngay.
 
+## LAG DD pack — DCF RICH chỉ là CỜ khi RICH SÂU (user chốt 2026-10-24, `decided_by: user`)
+Cờ `DCF_RICH` (đòi `dcf_override_reason` + ack) chỉ khi biên an toàn DCF < -100% (hoặc thiếu MoS). RICH nhẹ
+(-100%..0) = `pack['warnings']` `DCF_RICH_NHE`, KHÔNG đổi status: mã LAG `CLEARED` có cảnh báo này KHÔNG được
+SKIP/loại chỉ vì "RICH nhẹ" (dòng "⚠ cần dcf_override_reason" ở báo cáo plan nay cũng chỉ in khi MoS < -100%, từ 2026-10-24).
+Không miễn theo ROE. Căn cứ: `agents/Taylor/research/dcf_rich_outlook_20261024/` + `_rerun_20261024/`.
+
 ## CẤM field `funding_required: true` — plan phải tự SHRINK theo cash thực, không list-rồi-đợi-tiền (thêm 2026-07-27)
 Đây là TÁI PHẠM đúng lỗi Trứng vàng 07-23 (context "Trứng vàng DNSE" ở trên) — lần này núp dưới field
 mới `funding_required: true` thay vì đòi rút Trứng vàng trực tiếp, nhưng bản chất giống hệt: đưa lệnh
@@ -123,8 +129,9 @@ plan SpaceX 07-28 có 7/8 lệnh `funding_required:true`, tổng 460,7M trong kh
 thiếu ~450M. CÙNG NGÀY, plan ZaloPay 07-28 xử lý ĐÚNG (chỉ giữ 1 lệnh CSV vừa đủ ppse 25,5M, tự bỏ
 EVF/PSI/VCI dù cùng nguồn `golive_recommend_v23.py`) — chứng minh 2 dispatch riêng biệt cho ra 2 kỷ
 luật khác nhau cho CÙNG một danh sách ứng viên.
-QUY TẮC: `orders[]` CHỈ được chứa lệnh mà tổng giá trị ≤ cash thực có (`available_cash_vnd`/`ppse`,
-không phải `total_cash` nếu có phần chưa settle). Lệnh không đủ tiền → KHÔNG đưa vào `orders[]`,
+QUY TẮC: `orders[]` CHỈ được chứa lệnh mà tổng giá trị ≤ **NGÂN SÁCH MUA = cash thực có
+(`available_cash_vnd`/`ppse`, không phải `total_cash` nếu có phần chưa settle) + `egg.totalValue`**
+(Trứng vàng = TIỀN — user chốt 2026-10-24, xem mục `egg.totalValue` bên dưới). Lệnh không đủ tiền → KHÔNG đưa vào `orders[]`,
 chuyển sang `deferred_orders[]` hoặc note riêng ghi rõ "DEFERRED — thiếu X VND", KHÔNG có field
 `funding_required` hay bất kỳ cách diễn đạt nào ngụ ý "cứ lên plan rồi tính". Ưu tiên khi phải chọn
 lệnh nào giữ/bỏ khi cash không đủ cho tất cả: LAG có deadline T+1/T+2 cứng > CAPIT top-up không
@@ -136,9 +143,11 @@ không tự ý khác nhau giữa 2 lần dispatch.
 136M" thay vì field. Một job khác (`DollarBill_20260728_152001`) tự bắt và sửa trước khi tới Mike.
 BÀI HỌC: lệnh cấm KHÔNG giới hạn ở tên field cụ thể — BẤT KỲ hình thức nào (field, câu văn, giả định
 ngầm) coi `orders[]` như đã được cấp vốn thêm đều VI PHẠM. Tự kiểm tra bằng 1 câu hỏi duy nhất trước
-khi hoàn tất plan: "tổng `orders[]` có ≤ cash thực CÓ SẴN NGAY BÂY GIỜ không, không giả định gì thêm?"
-— nếu câu trả lời cần bất kỳ chữ "nếu"/"khi user nạp"/"sau khi có thêm" thì lệnh đó KHÔNG được ở
-trong `orders[]`, phải nằm trong `deferred_orders[]`.
+khi hoàn tất plan: "tổng `orders[]` có ≤ (cash thực + `egg.totalValue` đọc SỐNG từ balances API) không,
+không giả định gì thêm?" — nếu câu trả lời cần bất kỳ chữ "nếu"/"khi user nạp"/"sau khi có thêm" thì
+lệnh đó KHÔNG được ở trong `orders[]`, phải nằm trong `deferred_orders[]`. (Số Trứng vàng PHẢI là số
+đọc sống từ API/`compute_active_nav.py`, không phải con số người nói, `manual_offbook_assets_vnd` hay
+ước lượng — đó đúng là kiểu "tiền chưa tồn tại" của sự cố 07-23/07-27/07-28.)
 
 ## LAG entry mới trong giai đoạn thị trường dễ vỡ — PHẢI ghi rõ rủi ro BEAR-liquidation (thêm 2026-07-27)
 Allocator đã có sẵn cơ chế w_LAG=0 khi DT5G=BEAR (toàn bộ LAG book bị bán khi rơi BEAR — xác nhận
@@ -168,8 +177,8 @@ fact mới, hỏi rõ nguồn trước khi đưa vào plan như đã xác nhận
 ⚠️ **KHÔNG nhầm với `egg.totalValue`** (mục "`egg.totalValue` (Trứng vàng)" bên dưới) — đó là
 field API riêng (live từ 2026-08-18) phản ánh số dư THẬT hiện có trong sản phẩm Trứng vàng của
 DNSE, ĐỘC LẬP với biến `manual_offbook_assets_vnd` (cơ chế nhập tay cũ, đã khoá về 0 ở mục này).
-Mục này nói "đừng ĐỀ XUẤT rút thêm ngoài kế hoạch"; mục egg nói "đừng BỎ QUA số dư egg thật đang
-có khi giải thích lý do thiếu tiền" — hai lỗi ngược chiều nhau, đọc đúng mục theo tình huống.
+Mục này nói "đừng ĐỀ XUẤT rút thêm nguồn đã đóng/không tồn tại"; mục egg nói "egg THẬT trên API là tiền,
+tính vào ngân sách mua" — hai nguồn khác nhau, đọc đúng mục theo tình huống.
 
 ## LAG entry window — CHẠY SCRIPT, KHÔNG tự lọc bằng mắt (thêm 2026-08-03, chuyển sang code 2026-08-04)
 Root cause cũ (sự cố 08-03/08-04): lọc `status` T+1 vs T+2/T+3 trong `golive_v23_recommendations_
@@ -189,6 +198,40 @@ python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
   tự suy diễn cho qua.
 - Kết quả từ script cho 2 account CÙNG 1 CSV phải cho ra CÙNG danh sách T+1 — nếu thấy khác nhau,
   đó là dấu hiệu 1 trong 2 lần chạy dùng sai `--signal-date`, dừng lại kiểm tra tham số.
+- **CẤM tự cộng T+n ra ngày vào lệnh** (thêm 2026-10-21, user duyệt; ca 24-27/07: plan SpaceX ghi
+  "entry 07-25" = THỨ BẢY rồi "cửa sổ đã đóng", ZaloPay cùng ngày coi 07-27 là phiên chuẩn ⇒ SpaceX
+  mất 4 slot). Plan PHẢI chép NGUYÊN VĂN từ output script vào `lag_analysis`:
+  `signal_date`, `source_script` (chuỗi chứa `filter_lag_entry_window`), `due_today[]` mỗi mục có
+  `ticker`, `entry_date`, `entry_window_day`, `decision` (`BUY`/`DEFER`/`SKIP`), `decision_why`;
+  `lag_upcoming_for_next_plans[]` mỗi mục có `entry_date_est` đúng như script trả. Lệnh mua LAG
+  trong `orders[]`/`deferred_orders[]` mang `entry_window_day` + `entry_anchor_date` của script.
+- **SKIP khác account kia phải khai `skip_reason_code`** ∈ `EXCLUDED_TICKER` (phải có trong
+  `excluded_tickers` của account) / `ALREADY_HELD` / `CASH_ONLY`. Khác biệt DD giữa 2 account chỉ
+  được đến từ khai báo tường minh này — DD chạy MỘT lần ở engine, cả 2 account đọc cùng ô CSV.
+- **Checker cơ học**: `python3 mike/bin/lag_plan_calendar_check.py --plan <plan.json>` (tự ghép plan
+  account kia cùng ngày). `send_plan_report.sh` tự chạy và in ✅/⛔ kèm MÃ nguyên nhân
+  (`LAG_CAL_*`, `LAG_DD_*`, `LAG_X_*` — danh sách ở docstring script) vào report duyệt. Thấy ⛔
+  = sửa plan theo code rồi gửi lại, KHÔNG giải thích cho qua. NGOẠI LỆ: CHỈ mã `LAG_DD_FLOOR_FAIL_NOT_GATE` (calendar check) là
+  HEURISTIC từ khoá (có thể báo nhầm; các mã `LAG_DD_<state>` của CỔNG DD bên dưới là CƠ HỌC, không ngoại lệ) — đọc lý do rồi mới quyết; KHÔNG đổi một quyết định đúng (vd SKIP vì
+  giá trên anchor) chỉ để checker hết đỏ, hãy ghi rõ lý do trong `decision_why`.
+- **CỔNG DD TRƯỚC PLAN** (user duyệt 2026-10-21 22:10 ICT, job Taylor_20261021_151302): ứng viên LAG
+  KHÔNG tự mặc định vào plan mua. Nguồn trạng thái DUY NHẤT = `data/lag_dd/` (gói
+  `<mã>_<release>.json` do `mike/bin/lag_dd_pack.py` sinh + `ack.json` do Mike ghi khi user trả lời) —
+  KHÔNG tự phán từ cột `due_diligence` của CSV. Tra 1 mã:
+  `python3 mike/bin/lag_dd_ack.py --gate <MÃ> --plan-date <plan_date>` ⇒ `state`.
+  - Được đưa vào `orders[]` CHỈ KHI `state` ∈ `CLEARED` (gói 0 cờ) / `ACK_PROCEED` (user chọn "mua dù có cờ").
+  - Mọi state khác (`FLAG_NO_ACK`, `NO_PACK`, `PACK_STALE` (DD asof cách plan_date >7 ngày — chạy lại gói), `ACK_RESEARCH`, `ACK_DROP`, `ACK_STALE`, ...) ⇒ mã ĐỨNG
+    NGOÀI plan: ghi vào `lag_analysis.due_today[]` với `decision: "SKIP"`, `decision_why` bắt đầu bằng
+    `LAG_DD_<state>` (vd `LAG_DD_FLAG_NO_ACK — chờ user trả lời DD`). KHÔNG dùng BUY/DEFER/WAIT_CASH/
+    RESIDUAL/ORDER cho ca này, và KHÔNG đặt lệnh (kể cả vào `deferred_orders[]`) cho mã đó (checker coi mọi
+    decision TAKE trong `due_today`, mọi lệnh mua LAG (book LAG/PEAD, hoặc lệnh thiếu `book` mà mã là ứng viên LAG; lệnh BAL/CAPIT/DISCRETIONARY của
+    cùng mã KHÔNG bị cổng), mọi mục `deferred_orders[]` LAG có qty>0 và status không phải SKIP/EXCLUDED
+    là vi phạm, và tắt đề xuất cấp vốn cho mã đó). Không có gói ≠ CLEARED.
+  - Không tự ghi `ack.json`, không tự sinh lại gói để "hết cờ". `lag_plan_consistency_check.py` (chạy
+    trong `send_plan_report.sh`) báo `LAG_DD_GATE_VIOLATION` ĐỎ cho lệnh MUA LAG sai luật này và in
+    dòng "⏳ Chờ DD" cho mã đứng ngoài — hiện CHỈ CẢNH BÁO, chưa chặn gửi. Mã `LAG_DD_<state>` của cổng
+    này là CƠ HỌC (đọc file), KHÁC ngoại lệ heuristic `LAG_DD_FLOOR_FAIL_NOT_GATE` của calendar check ⇒
+    thấy đỏ là sửa plan, không giải thích cho qua.
 
 ## `book_note`/`book_breakdown_current` — dùng bootstrap snapshot + `park_holdings.py`, KHÔNG tự đoán → `context_planning_ext.md`
 Nguồn ĐÚNG: `python3 mike/bin/park_holdings.py --account <X> --json`, field `by_book` — KHÔNG tự
@@ -332,24 +375,30 @@ nằm trong custom30V parking (case thật: PVT/SIP vừa là CAPIT vừa là pa
 hiện tại (`CAPIT-2026-07-20`, basket NCT/PVT/SAB/SIP/VNM) ở phiên 24/60, ETA chạm ngưỡng ~đầu
 10/2026 — khi lập plan quanh mốc đó, KHÔNG cần tự thêm exit logic thủ công, cơ chế đã tự chạy đúng.
 
-## `egg.totalValue` (Trứng vàng) — tiền THẬT, KHÔNG PHẢI sức mua hôm nay (thêm 2026-08-19)
-Balances API DNSE trả thêm khối `egg` (`{"egg": {"totalValue": ...}}`, live từ 2026-08-18) — đây
-CHÍNH LÀ "Trứng vàng"/tiền gửi thông minh của DNSE, một sản phẩm TÁCH RIÊNG khỏi `stock.totalCash`/
-`availableCash`/`depositInterest`. `compute_active_nav.py`/`daily_nav_snapshot.py` đã cộng nó vào
-NAV tự động (đúng — đó là vốn user sở hữu, câu hỏi "tôi sở hữu bao nhiêu" theo §25 coding_guidelines)
-NHƯNG **không cộng vào `availableCash`/`ppse.pp0Buy`** — đúng, vì tiền trong egg cần RÚT (redeem)
-trước, và theo user (2026-08-19): lệnh rút đêm nay/sáng sớm mới về `availableCash` kịp phiên sáng
-hôm sau, KHÔNG kịp phiên hôm nay.
-**Hệ quả cho việc lập plan:** khi 1 lệnh mua bị chặn/defer chỉ vì thiếu `availableCash`, TRƯỚC KHI
-ghi lý do "thiếu tiền" — đọc `egg.totalValue` (balances API, hoặc dòng "Trứng vàng" trong output
-`compute_active_nav.py --account <X>`). `egg_value` đủ bù phần thiếu → đổi cách viết lý do: "hôm
-nay thiếu `availableCash` (Xtr) NHƯNG egg còn Ytr — nếu muốn mua, cần rút egg đêm nay/sáng mai
-trước phiên" — đây là một QUYẾT ĐỊNH VỐN cần user xác nhận (có rút không), không phải một sự thật
-"tài khoản không đủ tiền". Đừng tự ý đề xuất rút egg thay user; chỉ nêu rõ lựa chọn đang có.
-Ca thật đã gây hiểu lầm: plan SpaceX/ZaloPay 2026-08-20 ghi "cash tức thời ~0" cho VPI trong khi
-egg SpaceX ~100,2tr / ZaloPay ~38,8tr — đúng về mặt `availableCash` hôm đó nhưng đọc dễ hiểu lầm là
-"tài khoản thiếu vốn", trong khi lý do THẬT user không mua VPI lần này là tín hiệu/hiệu suất BAL
-gần đây, không phải thiếu tiền (xem `kb/current_ops.md`).
+## `egg.totalValue` (Trứng vàng) — LÀ TIỀN: lập plan mua BÌNH THƯỜNG, user chuyển sang cash trước phiên (CHỐT user 2026-10-24)
+Balances API DNSE trả khối `egg` (`{"egg": {"totalValue": ...}}`, live từ 2026-08-18) = sản phẩm Trứng
+vàng, TÁCH khỏi `availableCash`/`ppse.pp0Buy` vì cần lệnh chuyển (redeem) về cash — user xác nhận về
+**TRONG NGÀY** (không phải T+1), nên chuyển sáng ngày thực thi trước 09:05 là kịp.
+**CHÍNH SÁCH (user 2026-10-24: "xem trứng vàng là tiền và lập plan mua bình thường")**:
+- **Ngân sách mua = cash thực + `egg.totalValue`** (đọc sống). KHÔNG shrink/hoãn lệnh, KHÔNG viết "thiếu
+  tiền/không đủ tiền/sức mua ~0", KHÔNG hạ LAG_HI→LAG_LO hay bỏ mã chỉ vì `availableCash` thấp mà egg đủ bù.
+  Báo "thiếu tiền" CHỈ khi cash + egg (+ JIT-bán cùng plan) vẫn không đủ — đó mới là thiếu thật.
+- Trong plan ghi 1 dòng vận hành, KHÔNG phải điều kiện/quyết định: "Chuyển Trứng vàng → cash ≥ X tr trước
+  09:05 ICT [ngày thực thi]" với X = Σ mua (đã gồm phí) − cash sẵn có − JIT-bán cùng plan (nêu công thức,
+  rút gọn tới 0,1tr). Đây là việc user làm đều đặn; plan vẫn là `orders[]` đầy đủ, KHÔNG sang `deferred_orders[]`.
+- Cơ chế kèm theo (đã có code): 21:00 `send_plan_report.sh` in "CHUYỂN X tr sang cash trước 9:05"; **từ 08:30 ICT ngày thực
+  thi, `bin/egg_transfer_alert.py` nhắc mỗi 15 phút tới khi sức mua thật đủ** (đo bằng chính `check_plan_funding`
+  của bot). Gate P0 09:05 KHÔNG đổi: chưa chuyển thì vẫn BLOCK (fail-safe đúng thiết kế).
+- Giới hạn cứng giữ nguyên: Trứng vàng KHÔNG phải trần vô hạn — vẫn chỉ tính số đang CÓ trên API. Tiền "sẽ nạp"
+  hay `manual_offbook_assets_vnd` (đã khoá 0) KHÔNG tính.
+Lịch sử: bản 2026-08-19 coi egg "không phải sức mua hôm nay" và bắt viết lý do kiểu "thiếu availableCash NHƯNG
+egg còn Y" — ngay cả cách viết đó cũng gây báo động giả "hết tiền để mua" nên user thay bằng chính sách trên.
+
+## Viết note trong plan — report duyệt chỉ đưa lên thứ user phải biết (27/10, user: "gọn, đủ thông tin quyết định")
+- `plan["notes"][]`: CHỈ note mở bằng `⚠️`/`🛑` lên report (mục CẢNH BÁO) — dùng cho việc user phải biết/kiểm tay trước 08:45 (thiếu giá live, điều kiện hủy chưa verify, trần no-chase, corp-action feed không rõ). Mọi note khác (fill hôm qua, công thức egg, giá DNSE) là nhật ký, viết thường, nằm trong file. Mỗi việc đúng 1 note ⚠️.
+- `orders[].note`: chỉ thông tin RIÊNG của lệnh (điều kiện hủy, trần giá, lý do khác thường). KHÔNG chép câu mẫu mỗi ngày ("theo filter_lag_entry_window.py", "Nếu regime chuyển BEAR … w_LAG=0") — renderer lọc nhưng đừng viết. LAG mở note bằng `LAG_LO entry ngày N/M` để renderer dựng tag.
+- Số Trứng vàng cần chuyển do renderer tự tính từ trần đuổi giá; note vận hành "Chuyển Trứng vàng → cash ≥ X" giữ KHÔNG ⚠️ (tránh báo động đôi).
+Bố cục + luật ẩn/hiện: `kb/plan_report_style_guide.md` PHẦN D.
 
 ## "FLOOR_FAIL" — TRÍCH lăng kính ngành bằng script, không tự đọc CSV → `context_planning_ext.md`
 KHÔNG phải gate cứng LAG. Chạy `python3 mike/bin/sector_valuation_lens.py --floor-fail-only --json`,

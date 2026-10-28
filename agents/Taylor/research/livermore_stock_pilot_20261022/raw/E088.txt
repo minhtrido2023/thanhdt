@@ -1,0 +1,7 @@
+**Phân tích:** Suốt khoảng 230 phiên, cổ phiếu đi ngang trong dải 90–111. Đỉnh cũ 111–113 (i140–142, climax vol 7.34) là nơi cung tầng trên bị kẹt. Từ i231 đến i236 có một nhịp markup bùng nổ, từ 93 lên 127.74, khối lượng 5–7.7×, để lại hai gap mở là 103.25→106.02 và 110.23→113.31. Thanh i236 có râu trên dài, i237 đảo chiều, cho thấy khả năng đã xảy ra buying climax. Thanh i242 (từ 123 xuống 115, vol 4.39) xác nhận có cung. Dù vậy, giá giữ được vùng 110.4–111, tức đỉnh cũ đã thành hỗ trợ, và i249 đóng sát đỉnh phiên. Khối lượng nền 2–2.5× chưa cạn hẳn, nên chưa phân định được đây là cờ tăng hay phân phối. Mốc −15% từ giá vào ~116 là ~98.6. Muốn chạm mốc này giá phải lấp cả hai gap và rơi vào air-pocket margin, khả năng thấp nhưng không nhỏ.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 110 (mép gap 110.23 / đỉnh cũ 111) kèm khối lượng >2.5× → cấu trúc breakout thất bại, mục tiêu lấp gap 103–106.
+CONTAMINATION: NONE

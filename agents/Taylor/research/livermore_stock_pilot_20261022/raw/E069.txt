@@ -1,0 +1,7 @@
+Trên thang 250 phiên, cổ phiếu tích luỹ trong vùng 104–120. Hai cú bùng nổ ở i21 và i86 (khối lượng 12.5x và 11.2x) đều thất bại: i87 gap lên 123.7 rồi bị bán ngay về 113.7. Sau đó là pha phân phối kéo dài với khối lượng cạn (i129–176, nhiều phiên dưới 0.2x). Giá thủng 101 ở i179–181 và về đáy 84.9–86.3 (i181–190). Nhịp hồi lên 113.7 ở i209 (3.7x) bị cung tại vùng range cũ chặn lại. Từ đó đỉnh thấp dần: 108.8 rồi 105 rồi 100 rồi 97.5. Giá đang bị ép xuống sàn 93.7, sàn này đã được test bốn lần (i233, 242, 245, 246). Các phiên giảm có khối lượng nhỉnh hơn (i235–236, i244 khoảng 2x), nghiêng về cung. Thủng 93.7 thì khoảng trống tới 85–86 là gần như chắc. Mức −15% là khoảng 81.8, thấp hơn đáy i190.
+
+P_HIT15: 0.27
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 93.7 kèm khối lượng >1.5x (mục tiêu 85–86); phe mua chỉ xác nhận khi vượt lại 101–105 kèm khối lượng
+CONTAMINATION: NONE

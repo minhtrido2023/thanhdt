@@ -1,0 +1,11 @@
+Cổ phiếu đã có một pha markup mạnh trên 250 phiên, từ 100 lên đỉnh 294.8 ở i175. Đỉnh này đi kèm volume climax 7.07 (i173) và 5.43 (i174). Sau đó cấu trúc chuyển sang phân phối rồi markdown, với chuỗi đỉnh thấp dần: 293 → 266 (i203) → 239 (i216) → 193.8 (i237).
+
+Đợt gãy ở i226–228 có volume 2.48 và để lại gap 185–196. Đây là vùng cung kẹt ngay phía trên. Đáy cũng thấp dần, từ 162.7 (i230) xuống 156.5 (i242), kèm phiên xả 3.25 ở i241.
+
+Hiện giá tích lũy hẹp quanh 166–177 nhưng volume chưa cạn và chưa có follow-through. Biến động ngày khoảng 4%. Mức −15% tương ứng khoảng 146.6, trùng nền cũ 142–150 (i113–127), nên vẫn nằm trong tầm với nếu đáy 156 bị thủng.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 156 (đáy i242) kèm volume lớn thì xác nhận markdown tiếp tục về nền 142–150; kịch bản tích cực chỉ được xác nhận khi đóng cửa vượt 194 (lấp gap, phá đỉnh thấp dần i237).
+CONTAMINATION: NONE

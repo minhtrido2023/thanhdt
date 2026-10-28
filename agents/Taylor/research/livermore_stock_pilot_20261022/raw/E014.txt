@@ -1,0 +1,14 @@
+**Phân tích:** Chuỗi có ba pha rõ.
+
+- **Markup và climax:** markup dốc từ i115 (~101) lên đỉnh climax i157 (H 285, đóng 248, V 8.88). Đó là thanh đảo chiều với khối lượng cực đại.
+- **Phân phối:** từ i157 đến i199, các đỉnh thấp dần (233 tại i189, 217 tại i196). Khối lượng trong pha này vẫn ở mức 3-6 lần median.
+- **Markdown:** giá giảm về đáy 129.9 tại i239, tức −55% từ đỉnh. Sau đó khối lượng cạn dần (0.3-0.8) trong nền 134-151.
+- **Phiên cuối i249:** tăng trần lên 158.18, phá mép trên nền 151. Khối lượng chỉ 1.39, khiêm tốn so với khối lượng thời phân phối.
+- **Điểm vào:** quanh 158-160, ngay dưới vùng cung kẹt 160-167 (i225-232) và 170-195 phía trên.
+- **Rủi ro:** −15% tương đương ~135, trùng vùng đáy 130-135. Biến động thực ~5%/phiên, nên khả năng retest đáy là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 140 (mất nền i240-247), tiếp theo là thủng đáy 129.9.
+CONTAMINATION: NONE

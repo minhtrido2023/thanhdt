@@ -1,0 +1,48 @@
+{'TX': 5826} {'buy': 4310, 'sell': 1516}
+LAG buys 4310 years 2014-01-27 2026-05-07 unique holdings 1516
+LAG holdings in pinned ledger crossing a rights ex-date: 10 of 1516
+     ticker         t0         t1 exright_date  exercise_ratio          K           buy
+252     CVT 2014-10-27 2014-12-02   2014-10-31        1.000000  10115.705  4.221614e+09
+788     HDA 2015-01-29 2015-03-16   2015-02-27        1.000000  10000.000  4.479359e+09
+951     ITQ 2015-05-05 2015-06-10   2015-06-10        0.537685  10000.000  3.618928e+09
+1010    L14 2018-01-29 2018-03-13   2018-03-01        1.000000  12000.000  2.058466e+09
+1116    MBS 2024-07-15 2024-08-20   2024-08-13        0.250000  10000.000  2.666085e+10
+1184    NDX 2015-10-22 2015-11-27   2015-11-25        0.500000  10000.000  5.325390e+09
+1694    TNG 2015-10-20 2015-11-25   2015-11-09        0.250000  10000.000  4.262389e+09
+1801    VC3 2019-10-21 2019-11-26   2019-11-08        1.000000  10000.000  4.457254e+09
+1909    VHL 2014-10-28 2014-11-03   2014-10-30        0.770000  10000.000  2.610161e+08
+1958    VIX 2022-01-24 2022-03-08   2022-02-24        1.000000  15000.000  1.623787e+10
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 1036, in to_datetime
+    cache_array = _maybe_cache(arg, format, cache, convert_listlike)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 254, in _maybe_cache
+    cache_dates = convert_listlike(unique_dates, format)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 435, in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/tools/datetimes.py", line 470, in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/strptime.pyx", line 563, in pandas._libs.tslibs.strptime.array_strptime
+  File "pandas/_libs/tslibs/strptime.pyx", line 511, in pandas._libs.tslibs.strptime.array_strptime
+  File "pandas/_libs/tslibs/strptime.pyx", line 617, in pandas._libs.tslibs.strptime._parse_with_format
+ValueError: time data "2014-08-05" doesn't match format "%Y-%m-%d %H:%M:%S". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+ticker         ex  pos_pct_nav  adj_pct  loss_pct_nav  cash_pct_nav
+   CVT 2014-10-31         6.14   -34.95          2.14          1.85
+   HDA 2015-02-27         7.88    -4.95          0.39          7.10
+   ITQ 2015-06-10         4.93    -3.18          0.16          2.41
+   L14 2018-03-01         1.76   -43.17          0.76          0.24
+   MBS 2024-08-13         4.92   -13.24          0.65          0.42
+   NDX 2015-11-25         6.03    -2.75          0.17          2.77
+   TNG 2015-11-09         4.99   -12.65          0.63          0.46
+   VC3 2019-11-08         3.18   -30.39          0.97          1.25
+   VHL 2014-10-30         0.35   -34.27          0.12          0.06
+   VIX 2022-02-24         5.05   -23.17          1.17          2.71
+Tổng lỗ nếu BỎ quyền: 7.16% NAV / 12.5 năm ≈ 0.574 pp/năm (ước lượng, cộng đơn)
+Tiền cần thực hiện: median 1.55% NAV, max 7.10% NAV

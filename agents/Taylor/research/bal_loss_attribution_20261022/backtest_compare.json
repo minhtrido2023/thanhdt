@@ -1,0 +1,83 @@
+{
+ "ledger_md5": "4707bcbeb7e801d49a4a851ffd91d5e7",
+ "consistency_max_abs_gap_vnd": 38198862956.15399,
+ "consistency_max_rel_gap": 0.09644272305441133,
+ "q3_trades": {
+  "n": 266,
+  "median": 0.04030008008307573,
+  "p05": -0.2532094542206279,
+  "p10": -0.21444313925039898,
+  "p25": -0.08914542208320655,
+  "mean": 0.08520546275023601,
+  "win_rate": 0.556390977443609,
+  "vpi_ret": -0.20915,
+  "vpi_percentile": 0.11278195488721804,
+  "n_stop": 32,
+  "stop_median": -0.22167679874788965,
+  "stop_min": -0.30132941152790904,
+  "frac_trades_le_minus20": 0.12406015037593984,
+  "n_by_play": {
+   "DEEP_VALUE_RECOVERY": 111,
+   "RE_BACKLOG_BUY": 70,
+   "DEEP_VALUE_RECOVERY_W": 53,
+   "RE_BACKLOG_BUY_W": 20,
+   "MOMENTUM": 9,
+   "MOMENTUM_W": 2,
+   "MEGA": 1
+  }
+ },
+ "q3_combined_maxdd": -0.14642652702283832,
+ "q3_balbook_maxdd": -0.20895624916066935,
+ "q3_21d": {
+  "n": 113,
+  "median": 0.002158000063512952,
+  "p05": -0.006958592984595207,
+  "p01": -0.03497146813718778,
+  "min": -0.042792830272504884,
+  "spacex_live": -0.01069,
+  "spacex_pct": 0.04424778761061947,
+  "zalopay_live": -0.005540000000000001,
+  "zalopay_pct": 0.08849557522123894,
+  "n_rebal_windows_dropped": 34
+ },
+ "q4": {
+  "main_-8_+2.0": {
+   "N": 25,
+   "N_dropped_rebal": 2,
+   "uncond_median_ex5": 0.00020691693762930896,
+   "uncond_median_ex1": -0.00017090039631684206,
+   "ep_median_ex5": -0.013389199577509059,
+   "ep_median_ex1": -0.015593923210224903,
+   "ep_median_bal5": 0.011149303017287782,
+   "ep_median_vni5": 0.038472059884111065,
+   "k_below_ex5": 15,
+   "k_below_ex1": 18,
+   "binom_onesided_ex5": 0.21217811107635498,
+   "binom_onesided_ex1": 0.021642625331878662,
+   "resample_pct_ex5": 0.0005,
+   "resample_pct_ex1": 0.0,
+   "ep_median_stock_frac": 0.2863288886367847,
+   "uncond_median_stock_frac": 0.22703191792452995,
+   "criterion_lag": false
+  },
+  "sens_-10_+2.5": {
+   "N": 17,
+   "N_dropped_rebal": 0,
+   "uncond_median_ex5": 0.00020691693762930896,
+   "uncond_median_ex1": -0.00017090039631684206,
+   "ep_median_ex5": -0.018936886011868825,
+   "ep_median_ex1": -0.022716613044749367,
+   "ep_median_bal5": 0.011149303017287782,
+   "ep_median_vni5": 0.04406020220588225,
+   "k_below_ex5": 13,
+   "k_below_ex1": 14,
+   "binom_onesided_ex5": 0.0245208740234375,
+   "binom_onesided_ex1": 0.0063629150390625,
+   "resample_pct_ex5": 0.0,
+   "resample_pct_ex1": 0.0,
+   "ep_median_stock_frac": 0.3977303070249276,
+   "uncond_median_stock_frac": 0.22703191792452995,
+   "criterion_lag": true
+  }
+ }
+}

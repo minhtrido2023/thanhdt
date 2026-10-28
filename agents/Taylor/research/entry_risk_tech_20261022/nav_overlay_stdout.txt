@@ -1,0 +1,86 @@
+[pin0] md5 OK 537e349b5589408c994f8aceafeb9a39 | TX 7230 | DAILY 3107 2014-01-02→2026-06-19
+[pin1M] md5 OK a6ba34d83a4d374a73293d897c0b43d9 | TX 7589 | DAILY 3107 2014-01-02→2026-06-19
+[BQ_LOCAL_CACHE] WARNING: cache verified 2028h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+[panel] 1,800,010 dòng / 608 mã
+
+[SELF-CHECK]
+  (pin0) tính lại từ DAILY: CAGR 22.1207% Sharpe 1.9329 MaxDD -16.2313% Calmar 1.3628 | METRIC pin: 22.1207% 1.9329 -16.2313% 1.3628
+  (pin0) replay NAV tổng từ 2 book ref × cap_* (Δ=0): max |err| 0.0034 VND, lệch NAV cuối -0.0026 VND
+  (pin0) [chẩn đoán, KHÔNG phải cổng] dựng lại BAL stocks = Σ cp×Close cache vs DAILY: max |err| 12,155,275,713 VND (ngày 2025-07-28), tỷ lệ ngày err>1 VND 23.79%
+  (pin0) [chẩn đoán, KHÔNG phải cổng] dựng lại LAG stocks = Σ cp×Close cache vs DAILY: max |err| 10,063,898,969 VND (ngày 2025-07-29), tỷ lệ ngày err>1 VND 19.41%
+  (pin1M) tính lại từ DAILY: CAGR 25.4196% Sharpe 2.1708 MaxDD -13.8506% Calmar 1.8353 | METRIC pin: 25.4196% 2.1708 -13.8506% 1.8353
+  (pin1M) replay NAV tổng từ 2 book ref × cap_* (Δ=0): max |err| 0.0223 VND, lệch NAV cuối 0.0204 VND
+  (pin1M) [chẩn đoán, KHÔNG phải cổng] dựng lại BAL stocks = Σ cp×Close cache vs DAILY: max |err| 17,466,139,368 VND (ngày 2025-07-28), tỷ lệ ngày err>1 VND 23.01%
+  (pin1M) [chẩn đoán, KHÔNG phải cổng] dựng lại LAG stocks = Σ cp×Close cache vs DAILY: max |err| 12,193,423,739 VND (ngày 2025-07-29), tỷ lệ ngày err>1 VND 19.54%
+  holding_id có lệnh bán thoát nhưng KHÔNG có buy (bỏ qua): 2 ['VCR_20200427_?', 'VCR_20200427_?']
+  (pin0) vị thế: BAL=300, LAG=694 | quý(cụm) BAL=40 LAG=50 | Open cache vs giá vốn ledger: |dev| median 0.00 bps, >1bps 43.2% (multi-day fill ⇒ giá TB khác Open e)
+  (pin0) overlay rỗng (Δ×0) = 0.0 VND
+  (pin1M) vị thế: BAL=302, LAG=690 | quý(cụm) BAL=39 LAG=50 | Open cache vs giá vốn ledger: |dev| median 0.00 bps, >1bps 44.0% (multi-day fill ⇒ giá TB khác Open e)
+  (pin1M) overlay rỗng (Δ×0) = 0.0 VND
+
+[ngưỡng IS] BAL: VOL60≥0.466 RUN20≥0.153 DIST52≤-0.164; LAG: VOL60≥0.593 RUN20≥0.105 DIST52≤-0.301
+
+[Q1 event-level] per vị thế, Δ = lợi suất biến thể − control (pp); CI cụm theo quý vào lệnh
+  tag book        rule   n  clusters  d_ret  ci_lo  ci_hi     p   d_IS  d_OOS  nofill  nofill_top  px_impr_bps  n_fill_moved  holm
+ pin0  BAL   R1_LIMIT2 300        40 -4.529 -7.209 -1.842 0.000 -7.120 -3.538  41.667      50.000        176.9           175  True
+ pin0  BAL R2_GAPSKIP3 300        40 -0.312 -0.877  0.191 0.278  0.285 -0.540   4.667       3.000          NaN             0 False
+ pin0  BAL R3_PULLBACK 300        40 -0.348 -0.973  0.209 0.274 -0.734 -0.200   0.000       0.000        -36.3           300 False
+ pin0  LAG   R1_LIMIT2 694        50 -2.366 -3.552 -1.253 0.000 -1.927 -2.722  51.585      44.828        146.6           336  True
+ pin0  LAG R2_GAPSKIP3 694        50 -0.508 -0.972 -0.123 0.007 -0.936 -0.160   4.899       5.603          NaN             0  True
+ pin0  LAG R3_PULLBACK 694        50  0.090 -0.339  0.483 0.709  0.392 -0.156   0.000       0.000          6.0           694 False
+pin1M  BAL   R1_LIMIT2 302        39 -5.430 -7.853 -2.853 0.000 -6.694 -4.950  42.384      55.446        180.1           174  True
+pin1M  BAL R2_GAPSKIP3 302        39 -0.076 -0.561  0.389 0.833  0.418 -0.264   3.642       1.980          NaN             0 False
+pin1M  BAL R3_PULLBACK 302        39 -0.139 -0.772  0.438 0.641 -0.406 -0.038   0.000       0.000         -7.2           302 False
+pin1M  LAG   R1_LIMIT2 690        50 -2.228 -3.418 -1.115 0.000 -2.022 -2.397  53.188      46.522        152.1           323  True
+pin1M  LAG R2_GAPSKIP3 690        50 -0.447 -0.911 -0.052 0.025 -0.911 -0.067   5.217       5.217          NaN             0 False
+pin1M  LAG R3_PULLBACK 690        50  0.033 -0.384  0.426 0.905  0.295 -0.182   0.000       0.000         -0.2           690 False
+
+[Q2 event-level ledger] ΔHIT15 = P(MAE≤−15% | nhóm) − P(còn lại); CI cụm theo quý
+  tag book  group  n_grp  n_rest  clusters  hit_grp  hit_rest  d_hit  ci_lo  ci_hi     p   d_IS  d_OOS  loyo_min  loyo_max  d_mae  p5_grp  p5_rest  ret_grp  ret_rest  holm    c1    c2    c3
+ pin0  BAL  G_VOL     73     227        40    43.84     24.67  19.17   5.02  32.79 0.010   8.02  22.83     14.54     22.70  -4.48  -26.07   -22.21     9.55      9.65  True  True  True  True
+ pin0  BAL  G_RUN     81     219        40    34.57     27.40   7.17  -3.69  20.74 0.238  15.42   4.71      4.21      9.39  -2.41  -27.64   -22.08    13.35      8.25 False False  True  True
+ pin0  BAL G_DEEP     61     239        40    31.15     28.87   2.28 -17.77  20.29 0.884  -6.77   5.77     -6.22      5.85  -0.36  -22.26   -23.01     7.10     10.27 False False False False
+ pin0  LAG  G_VOL    149     545        50    30.20     14.68  15.52   7.59  23.52 0.000  10.88  18.91     13.14     17.36  -4.23  -29.05   -14.30     4.91      6.43  True  True  True  True
+ pin0  LAG  G_RUN    122     572        50    18.03     18.01   0.03  -7.53   8.44 0.997   0.93  -0.49     -2.83      2.30   0.29  -17.23   -15.95     9.10      5.46 False False False False
+ pin0  LAG G_DEEP    172     522        50    19.19     17.62   1.56  -5.84   9.31 0.704   2.92   0.29     -0.84      3.18  -0.67  -16.57   -16.48     6.98      5.82 False False  True False
+pin1M  BAL  G_VOL     69     233        39    37.68     25.75  11.93  -3.53  26.72 0.138   3.63  14.13      7.02     16.90  -2.91  -26.43   -22.09    14.12      8.94 False False  True  True
+pin1M  BAL  G_RUN     89     213        39    32.58     26.76   5.82  -6.98  18.49 0.351  16.93   2.66      2.57     12.72  -2.38  -23.34   -22.27    13.75      8.61 False False  True  True
+pin1M  BAL G_DEEP     59     243        39    28.81     28.40   0.42 -19.43  21.43 0.998 -12.66   5.65     -9.19      3.86  -0.01  -22.30   -22.91     8.41     10.54 False False False False
+pin1M  LAG  G_VOL    151     539        50    29.14     14.66  14.48   6.79  22.06 0.000   9.74  17.76     12.35     15.88  -4.02  -28.72   -14.47     5.44      6.31  True  True  True  True
+pin1M  LAG  G_RUN    117     573        50    17.95     17.80   0.15  -8.08   9.46 0.994  -0.01   0.76     -3.40      2.70   0.17  -18.43   -15.60     9.09      5.51 False False False False
+pin1M  LAG G_DEEP    172     518        50    20.93     16.80   4.13  -3.91  12.97 0.341   5.31   2.95      0.71      6.06  -0.88  -17.54   -15.50     7.24      5.75 False False  True  True
+
+[NAV overlay] Δ so với control (cùng ledger); NAV tổng + từng book
+  (pin0) control: ALL CAGR 22.12% Sharpe 1.93 MaxDD -16.2% Calmar 1.36 | BAL CAGR 17.28% Sharpe 1.26 MaxDD -20.4% Calmar 0.85 | LAG CAGR 25.57% Sharpe 1.76 MaxDD -15.3% Calmar 1.68
+  (pin1M) control: ALL CAGR 25.42% Sharpe 2.17 MaxDD -13.9% Calmar 1.84 | BAL CAGR 21.66% Sharpe 1.49 MaxDD -18.6% Calmar 1.17 | LAG CAGR 27.93% Sharpe 1.90 MaxDD -14.4% Calmar 1.94
+  tag            variant  dCAGR  dSharpe  dMaxDD  dCalmar   CAGR   MaxDD  Calmar  book_dCAGR  book_dMaxDD  book_dCalmar  dCAGR_IS  dCAGR_OOS  dCalmar_IS  dCalmar_OOS  loyo_dCAGR_min  loyo_dCAGR_max  yrs_neg  dFinalNAV_B
+ pin0   Q1_R1_LIMIT2:BAL -2.200   -0.209  -3.005   -0.327 19.921 -19.236   1.036      -3.729       -7.323        -0.358    -4.948      0.495      -0.474        0.210          -2.957          -1.254       10     -122.212
+ pin0   Q1_R1_LIMIT2:LAG -2.721   -0.233   0.923   -0.096 19.400 -15.308   1.267      -4.304       -1.055        -0.372    -4.149     -1.335      -0.459       -0.048          -4.084          -1.538        8     -147.626
+ pin0 Q1_R2_GAPSKIP3:BAL -0.003    0.008   1.755    0.165 22.118 -14.476   1.528      -0.238       -0.649        -0.037     0.075     -0.077       0.011        0.204          -0.082           0.157        5       -0.169
+ pin0 Q1_R2_GAPSKIP3:LAG -0.354   -0.084  -0.513   -0.063 21.767 -16.744   1.300      -0.565       -1.879        -0.217    -2.021      1.264      -0.350        0.119          -0.732           0.463        5      -21.432
+ pin0 Q1_R3_PULLBACK:BAL -0.078   -0.034  -1.101   -0.091 22.043 -17.333   1.272      -0.235       -0.880        -0.046    -0.340      0.174      -0.069       -0.057          -0.247           0.185        6       -4.765
+ pin0 Q1_R3_PULLBACK:LAG -0.061    0.031   0.678    0.055 22.060 -15.553   1.418      -0.105        1.422         0.165     0.685     -0.771       0.253       -0.043          -0.267           0.326        6       -3.718
+ pin0  Q2_G_VOL_half:BAL -0.302    0.009   0.128   -0.008 21.819 -16.103   1.355      -0.937       -2.060        -0.119    -0.538     -0.075       0.080        0.007          -0.501           0.133        6      -18.308
+ pin0  Q2_G_VOL_half:LAG -0.010    0.034   0.451    0.038 22.111 -15.780   1.401       0.126        0.201         0.031    -1.358      1.296      -0.086        0.067          -0.358           0.484        6       -0.586
+ pin0  Q2_G_RUN_half:BAL -0.503   -0.000   0.905    0.048 21.617 -15.327   1.410      -1.657       -2.061        -0.152    -0.217     -0.777       0.231        0.091          -0.656           0.035        6      -30.255
+ pin0  Q2_G_RUN_half:LAG -0.647   -0.052   0.516    0.004 21.474 -15.716   1.366      -1.006       -0.004        -0.066    -1.005     -0.303      -0.129       -0.029          -0.832          -0.303        8      -38.625
+ pin0 Q2_G_DEEP_half:BAL -0.243    0.001   3.362    0.337 21.878 -12.869   1.700      -0.546       -0.636        -0.052    -0.787      0.280      -0.078        0.420          -0.435          -0.044        7      -14.783
+ pin0 Q2_G_DEEP_half:LAG -0.923   -0.077   0.017   -0.056 21.198 -16.215   1.307      -1.821       -2.265        -0.321    -2.283      0.394      -0.234        0.025          -1.336          -0.534        8      -54.396
+pin1M   Q1_R1_LIMIT2:BAL -2.742   -0.285  -1.394   -0.348 22.677 -15.244   1.488      -5.506       -6.223        -0.514    -4.728     -0.805      -0.572        0.333          -3.347          -1.864       10     -202.398
+pin1M   Q1_R1_LIMIT2:LAG -2.727   -0.206  -0.145   -0.214 22.693 -13.995   1.621      -4.162       -2.280        -0.516    -4.066     -1.427      -0.443       -0.040          -4.014          -1.552        8     -201.389
+pin1M Q1_R2_GAPSKIP3:BAL  0.060    0.017   1.074    0.159 25.480 -12.776   1.994       0.004       -0.073        -0.004     0.105      0.018       0.014        0.264           0.030           0.125        4        5.049
+pin1M Q1_R2_GAPSKIP3:LAG -0.372   -0.095  -0.886   -0.136 25.048 -14.737   1.700      -0.562       -1.188        -0.184    -2.176      1.384      -0.383        0.158          -0.768           0.456        6      -30.526
+pin1M Q1_R3_PULLBACK:BAL -0.051   -0.024  -0.399   -0.055 25.369 -14.249   1.780      -0.214       -0.547        -0.044    -0.156      0.051      -0.049       -0.052          -0.323           0.218        6       -4.215
+pin1M Q1_R3_PULLBACK:LAG  0.034    0.040   0.052    0.009 25.454 -13.799   1.845       0.041        1.081         0.161     0.706     -0.607       0.266       -0.037          -0.173           0.347        6        2.850
+pin1M  Q2_G_VOL_half:BAL -0.579   -0.017   0.088   -0.030 24.840 -13.762   1.805      -1.660       -3.059        -0.241    -0.506     -0.649       0.102       -0.034          -0.784           0.081        6      -47.117
+pin1M  Q2_G_VOL_half:LAG -0.034    0.028  -0.157   -0.023 25.386 -14.007   1.812       0.091       -1.328        -0.158    -1.403      1.293      -0.092        0.070          -0.390           0.470        6       -2.818
+pin1M  Q2_G_RUN_half:BAL -0.630    0.013   1.435    0.161 24.789 -12.415   1.997      -2.011       -2.852        -0.249    -0.200     -1.041       0.231        0.146          -0.790           0.133        6      -51.152
+pin1M  Q2_G_RUN_half:LAG -0.649   -0.046  -0.087   -0.058 24.771 -13.937   1.777      -1.009       -1.358        -0.232    -1.008     -0.303      -0.130       -0.034          -0.835          -0.299        7      -52.600
+pin1M Q2_G_DEEP_half:BAL -0.271   -0.009   0.732    0.082 25.148 -13.119   1.917      -0.625       -0.934        -0.088    -0.802      0.240      -0.102        0.339          -0.415          -0.048        8      -22.389
+pin1M Q2_G_DEEP_half:LAG -0.963   -0.078  -0.031   -0.074 24.457 -13.882   1.762      -1.887       -1.408        -0.293    -2.277      0.312      -0.230        0.018          -1.343          -0.570        9      -76.969
+
+[DSR] Δ ngày (biến thể − control, NAV tổng pin0%), N trials=12: best=Q1_R2_GAPSKIP3:BAL SR/ngày=-0.0007 (năm hoá -0.01), SR0=0.0193, T=3106, skew=1.71, kurt=48.4 → DSR=0.133
+[PBO] CSCV S=16 (12870 tổ hợp), 13 cấu hình (12 biến thể + control), metric Sharpe → PBO=0.616
+
+[ghi] positions_features.csv, q1_event_ledger.csv, q2_event_ledger.csv, nav_overlay.csv

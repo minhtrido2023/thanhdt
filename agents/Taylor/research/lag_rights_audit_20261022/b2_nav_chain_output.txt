@@ -1,0 +1,112 @@
+====================================================================================================
+A. daily_nav_snapshot.py — cổng KL (classify_qty_residual) + cổng giá + bước nhảy
+   TERP tự dựng 10-16 = 19,650 (=(22.200×14+12.500×5)/19, làm tròn 50đ)
+
+[A1_cum_evening_mp_adjusted_fromraw] rc=4
+   stderr: ❌ [2025-10-16] Giá close_price(G1) và marketPrice của vị thế broker LỆCH >5% cho 1 mã — KHÔNG tính NAV (broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, xem VHM 2026-08-05 / PVT 2026-09-08): SCL: close_price=22,200 vs vị thế broker marketPrice=19,650 (lệch 13.0%). Sẽ tự retry trong cửa sổ ngắn; nếu vẫn lệch sau đó cần kiểm tra thủ công.
+
+[A1b_cum_evening_mp_not_adjusted_fromraw] rc=0
+   NAV=1,210,392,600 mtm=310,800,000 cash=899,592,600 day_change=-5,600,000 (-0.46%) qty_adj={}
+
+[A1_live_cum_evening_mp_adjusted] rc=4
+   stderr: ❌ [2026-10-22] Giá close_price(G1) và marketPrice của vị thế broker LỆCH >5% cho 1 mã — KHÔNG tính NAV (broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, xem VHM 2026-08-05 / PVT 2026-09-08): SCL: close_price=22,200 vs vị thế broker marketPrice=19,650 (lệch 13.0%). Sẽ tự retry trong cửa sổ ngắn; nếu vẫn lệch sau đó cần kiểm tra thủ công.
+
+[A2_exdate_T0_fromraw] rc=0
+   NAV=1,203,392,600 mtm=303,800,000 cash=899,592,600 day_change=-7,000,000 (-0.58%) qty_adj={}
+
+[A3_payday_formA_no_journal_fromraw] rc=5
+   nav_gate_block: {"share_event_blocks": [], "qty_unexplained": [{"ticker": "SCL", "detail": {"qty_prev": 14000.0, "qty_now": 19000.0, "qty_delta": 5000.0, "net_fill": 0.0, "residual": 5000.0, "prev_qty_date": "2025-10-24", "ex_date": null, "event_code": null, "evidence": "residual_not_explained_by_fills_or_ratio"}}]}
+   stderr: 🚨 [2025-10-27] KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật cho 1 mã (0 khớp tỉ lệ sự kiện, 1 chưa giải thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: SCL: KL 14,000→19,000 (so với 2025-10-24), lệnh khớp thật +0 ⇒ phần dư +5,000 CHƯA GIẢI THÍCH ĐƯỢC — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp. [lịch: corp_action_daily asof=2025-10-27 status=OK usable=True feed_status='FRESH'] Đường phục hồi cho …
+
+[A3_payday_formA_manual_journal_fromraw] rc=0
+   NAV=1,217,092,600 mtm=380,000,000 cash=837,092,600 day_change=+30,500,000 (+2.57%) qty_adj={}
+
+[A3_live_payday_formA_no_journal] rc=5
+   nav_gate_block: {"share_event_blocks": [], "qty_unexplained": [{"ticker": "SCL", "detail": {"qty_prev": 14000.0, "qty_now": 19000.0, "qty_delta": 5000.0, "net_fill": 0.0, "residual": 5000.0, "prev_qty_date": "2026-10-21", "ex_date": null, "event_code": null, "evidence": "residual_not_explained_by_fills_or_ratio"}}]}
+   stderr: 🚨 [2026-10-22] KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật cho 1 mã (0 khớp tỉ lệ sự kiện, 1 chưa giải thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: SCL: KL 14,000→19,000 (so với 2026-10-21), lệnh khớp thật +0 ⇒ phần dư +5,000 CHƯA GIẢI THÍCH ĐƯỢC — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp. [lịch: corp_action_daily asof=2026-10-22 status=OK usable=True feed_status='FRESH'] Đường phục hồi cho …
+
+[A3_payday_formB_qty_unchanged_fromraw] rc=0
+   NAV=1,117,092,600 mtm=280,000,000 cash=837,092,600 day_change=-69,500,000 (-5.86%) qty_adj={}
+
+[A4_listing_formB_qty_jump_fromraw] rc=5
+   nav_gate_block: {"share_event_blocks": [], "qty_unexplained": [{"ticker": "SCL", "detail": {"qty_prev": 14000.0, "qty_now": 19000.0, "qty_delta": 5000.0, "net_fill": 0.0, "residual": 5000.0, "prev_qty_date": "2026-01-28", "ex_date": null, "event_code": null, "evidence": "residual_not_explained_by_fills_or_ratio"}}]}
+   stderr: 🚨 [2026-01-29] KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật cho 1 mã (0 khớp tỉ lệ sự kiện, 1 chưa giải thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: SCL: KL 14,000→19,000 (so với 2026-01-28), lệnh khớp thật +0 ⇒ phần dư +5,000 CHƯA GIẢI THÍCH ĐƯỢC — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp. [lịch: corp_action_daily asof=2026-01-29 status=OK usable=True feed_status='FRESH'] Đường phục hồi cho …
+
+[A4_listing_formA_only_tradeQty_changes_fromraw] rc=0
+   NAV=1,236,092,600 mtm=399,000,000 cash=837,092,600 day_change=+3,800,000 (+0.31%) qty_adj={}
+
+[A5_control_no_rights_sdiv_9pct_CONFIRMED_fromraw] rc=0
+   NAV=1,124,092,600 mtm=287,000,000 cash=837,092,600 day_change=+8,400,000 (+0.75%) qty_adj={'SCL': 1.09}
+   stderr: ℹ️ [2025-11-05] SCL: KL 14,000→15,260 (lệnh khớp +0, phần dư +1,260) khớp corp-action ĐÃ CONFIRMED trong data/corp_actions.json (qty_multiplier 1.09, ex-date = phiên kế tiếp; KL quy ngược 14,000.00 ≈ KL trước sự kiện kỳ vọng 14,000.00) — chế độ --from-raw: KHÔNG chặn, quy ngược KL về 14,000.00 như hành vi trước gate. Chế độ LIVE vẫn chặn.
+
+[A5_rights_pending_NOT_entitled_sdiv_credit1260_CONFIRMED_fromraw] rc=5
+   nav_gate_block: {"share_event_blocks": [], "qty_unexplained": [{"ticker": "SCL", "detail": {"qty_prev": 19000.0, "qty_now": 20260.0, "qty_delta": 1260.0, "net_fill": 0.0, "residual": 1260.0, "prev_qty_date": "2025-11-04", "ex_date": "2025-11-06", "event_code": "ISS", "exercise_ratio": 0.09, "expected_residual": 1710.0, "evidence": "residual_not_explained_by_fills_or_ratio"}}]}
+   stderr: 🚨 [2025-11-05] KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật cho 1 mã (0 khớp tỉ lệ sự kiện, 1 chưa giải thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: SCL: KL 19,000→20,260 (so với 2025-11-04), lệnh khớp thật +0 ⇒ phần dư +1,260 CHƯA GIẢI THÍCH ĐƯỢC — lịch có ISS ex-date 2025-11-06 nhưng phần dư KHÔNG khớp tỉ lệ 0.09 (kỳ vọng 1710.0). [lịch: corp_action_daily asof=2025-11-05 status=OK usable=True feed_status='FRESH'] Đ …
+
+[A5_rights_pending_entitled_sdiv_credit1710_CONFIRMED_fromraw] rc=0
+   NAV=1,226,592,600 mtm=389,500,000 cash=837,092,600 day_change=+11,400,000 (+0.94%) qty_adj={'SCL': 1.09}
+   stderr: ℹ️ [2025-11-05] SCL: KL 19,000→20,710 (lệnh khớp +0, phần dư +1,710) khớp corp-action ĐÃ CONFIRMED trong data/corp_actions.json (qty_multiplier 1.09, ex-date = phiên kế tiếp; KL quy ngược 19,000.00 ≈ KL trước sự kiện kỳ vọng 19,000.00) — chế độ --from-raw: KHÔNG chặn, quy ngược KL về 19,000.00 như hành vi trước gate. Chế độ LIVE vẫn chặn.
+
+[A5_rights_pending_NOT_entitled_sdiv_credit1260_NOT_confirmed_fromraw] rc=5
+   nav_gate_block: {"share_event_blocks": [], "qty_unexplained": [{"ticker": "SCL", "detail": {"qty_prev": 19000.0, "qty_now": 20260.0, "qty_delta": 1260.0, "net_fill": 0.0, "residual": 1260.0, "prev_qty_date": "2025-11-04", "ex_date": "2025-11-06", "event_code": "ISS", "exercise_ratio": 0.09, "expected_residual": 1710.0, "evidence": "residual_not_explained_by_fills_or_ratio"}}]}
+   stderr: 🚨 [2025-11-05] KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật cho 1 mã (0 khớp tỉ lệ sự kiện, 1 chưa giải thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: SCL: KL 19,000→20,260 (so với 2025-11-04), lệnh khớp thật +0 ⇒ phần dư +1,260 CHƯA GIẢI THÍCH ĐƯỢC — lịch có ISS ex-date 2025-11-06 nhưng phần dư KHÔNG khớp tỉ lệ 0.09 (kỳ vọng 1710.0). [lịch: corp_action_daily asof=2025-11-05 status=OK usable=True feed_status='FRESH'] Đ …
+
+====================================================================================================
+B. exdate_frame.classify_positions + verify_post_event_price (cổng của compute_active_nav)
+
+[B_cum_evening_rights_qty_unchanged] credited=[] blocked=[]
+
+[B_payday_formA_no_journal] credited=[] blocked=['SCL']
+   blocked: KL 14,000→19,000 (so với 2025-10-24), lệnh khớp thật +0 ⇒ phần dư +5,000 CHƯA GIẢI THÍCH ĐƯỢC — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp [lịch: corp_action_daily asof=2025-10-27 status=OK usable=True feed_status='FRESH']
+
+[B_payday_formA_manual_journal] credited=[] blocked=[]
+
+[B_listing_formB] credited=[] blocked=['SCL']
+   blocked: KL 14,000→19,000 (so với 2026-01-28), lệnh khớp thật +0 ⇒ phần dư +5,000 CHƯA GIẢI THÍCH ĐƯỢC — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp [lịch: corp_action_daily asof=2026-01-29 status=OK usable=True feed_status='FRESH']
+
+[B_sdiv_cum_rights_pending_not_entitled_1260] credited=[] blocked=['SCL']
+   blocked: KL 19,000→20,260 (so với 2025-11-04), lệnh khớp thật +0 ⇒ phần dư +1,260 CHƯA GIẢI THÍCH ĐƯỢC — lịch có ISS ex-date 2025-11-06 nhưng phần dư KHÔNG khớp tỉ lệ 0.09 (kỳ vọng 1710.0) [lịch: corp_action_daily asof=2025-11-05 status=OK usable=True feed_status='FRESH']
+
+[B_sdiv_cum_rights_pending_entitled_1710] credited=['SCL'] blocked=[]
+   credited residual=+1,710 → verify_post_event_price=18807.0 (marketPrice 18,807 = (giá cum 20,500) / hệ số 1.09 (kỳ vọng 18,807.3, lệch -0.3 ≤ dung sai 200.0))
+
+[B_HYPOTHETICAL_rights_qty_credited_on_cum_evening] credited=['SCL'] blocked=[]
+   credited residual=+5,000 → verify_post_event_price=None (marketPrice 19,650 KHÔNG tái tạo được giá cum 22,200 qua hệ số 1.35714286 (kỳ vọng 16,357.9, lệch +3,292.1 > dung sai 200.0) — hai số này KHÔNG cùng một hệ quy chiếu, có thể là ca DNSE điều chỉnh THEO …)
+
+====================================================================================================
+C. verify_account_snapshot.py — giá vốn / P&L sau ngày nộp tiền (dạng A)
+
+[C_formA_no_journal] rc=0 verified=True qty=14000.0 true_avg_cost=30000.0 unrealized=-140,000,000 (-33.33%) total_mtm=280,000,000
+   warnings: []
+   broker (dnse_raw positions): openQuantity=19,000 costPrice=25,394.74 ⇒ broker unrealized=-102,500,000
+
+[C_formA_manual_journal_no_ack] rc=1 verified=False qty=14000.0 true_avg_cost=30000.0 unrealized=-140,000,000 (-33.33%) total_mtm=280,000,000
+   warnings: ["WARN qty mismatch SCL: dnse_raw=14000 journal=19000", "WARN cost mismatch SCL: dnse_raw_avg=30,000 journal_avg=25,395 (diff 15.35%%)"]
+   broker (dnse_raw positions): openQuantity=19,000 costPrice=25,394.74 ⇒ broker unrealized=-102,500,000
+
+[C_formA_manual_journal_with_known_discrepancy] rc=0 verified=True qty=14000.0 true_avg_cost=30000.0 unrealized=-140,000,000 (-33.33%) total_mtm=280,000,000
+   warnings: ["INFO qty mismatch SCL ĐÃ KHAI BÁO (hết hiệu lực 2099-01-01): dnse_raw=14000 journal=19000 — fixture rights", "INFO cost mismatch SCL: dnse_raw_avg=30,000 journal_avg=25,395 (diff 15.35%%) (hệ quả của lệch SL đã khai báo)"]
+   broker (dnse_raw positions): openQuantity=19,000 costPrice=25,394.74 ⇒ broker unrealized=-102,500,000
+
+====================================================================================================
+D. reconcile_equity.py — đẳng thức vốn sau ngày nộp tiền (dạng A, snapshot mục C)
+[D] rc=1 lhs=1,179,592,600 rhs=1,117,092,600 residual=+62,500,000 (+5.595%) within_tolerance=False unexplained_after_estimates=+62,500,000
+   stdout: CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT): +62,500,000 (+5.5949% của vế phải)
+   stdout: DƯ SAU DIỄN GIẢI: +62,500,000 (+5.5949% NAV) — ⚠️ CHƯA GIẢI THÍCH ĐƯỢC (>0.3% NAV)
+
+====================================================================================================
+E. cash_identity.py — cửa sổ chứa ngày nộp tiền quyền mua
+[E_formA_shares_same_window] 2025-10-24→2025-10-27 delta_k=-62,500,000 unexplained=-62,500,000 (-5.267%) kind='không kết luận được' qty_gaps={'SCL': 5000.0} suspect=True
+   line: ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — không kết luận được: cửa sổ 2025-10-24 (24/10 19:05) → 2025-10-27 (27/10 19:10): số lượng cổ phiếu đổi mà lệnh đã đọc và sự kiện cổ phiếu đã ký không giải thích: SCL +5.000 cp (khoảng 100.000.000 đ theo giá thị trường); nếu đó là lệnh đặt ngoài bot ở giá thị trường thì còn +37.597.000 đ tiền vào/ra chưa giải thích. Phần dư tiền -62.500.000 đ (5,267% NAV) vì thế KHÔNG chứng minh được là không có nạp/rút. Đã đọc: tiền sở hữu đổi -62.500.000 đ; 0 lệnh khớp (bán 0 đ, mua 0 đ, phí+thuế 0 đ); cổ tức +0 đ; lãi Trứng vàng +0 đ; dnse_raw KHÔNG có bản ghi orders nào của tài khoản các ngày 2025-10-24, 2025-10-27 ⇒ lệnh đặt ngoài bot những ngày đó không được thấy ở đây.  …
+[E_formB_no_shares] 2025-10-24→2025-10-27 delta_k=-62,500,000 unexplained=-62,500,000 (-5.267%) kind='nghi nạp/rút chưa khai' qty_gaps={} suspect=True
+   line: ⚠️ DÒNG TIỀN CHỜ KHAI (SpaceX) — nghi nạp/rút chưa khai: cửa sổ 2025-10-24 (24/10 19:05) → 2025-10-27 (27/10 19:10): phần dư -62.500.000 đ (5,267% NAV) không có khoản nội bộ nào đã đọc giải thích được ⇒ nghi tiền RÚT ra mà sổ dòng tiền chưa có bản ghi khớp. Đã đọc: tiền sở hữu đổi -62.500.000 đ; 0 lệnh khớp (bán 0 đ, mua 0 đ, phí+thuế 0 đ); cổ tức +0 đ; lãi Trứng vàng +0 đ; dnse_raw KHÔNG có bản ghi orders nào của tài khoản các ngày 2025-10-24, 2025-10-27 ⇒ lệnh đặt ngoài bot những ngày đó không được thấy ở đây. Cách đóng: khai deposit/withdraw có giờ vào data/account_cash_flows.json, hoặc ghi lời xác nhận kèm bằng chứng vào data/cash_identity_acks.json với window = 2025-10-24T19:05:10 → 202 …
+[E_formA_with_seed_missing_fill_rights] 2025-10-24→2025-10-27 delta_k=-62,500,000 unexplained=+60,625 (+0.005%) kind=None qty_gaps={} suspect=False
+
+====================================================================================================
+F. dividend_adjusted_return — resolve_dividends THẬT cho SCL 2025-10-01→2025-10-31 (BQ, chỉ đọc)
+   SCL ex=2025-10-13 kind=RATIO_NOISE resolved=True mult=1.0 cash_per_share=0.0 vendor_check=unavailable note=NHIỄU tỉ số, KHÔNG phải sự kiện: vendor `corporate_action` tra được và có 0 dòng (`executed` lẫn `announced`) trong [2025-10-10, 2025-10-13]; sổ giá vốn và `cas …
+   SCL ex=2025-10-17 kind=ISS_NONFREE resolved=False mult=1.0 cash_per_share=0.0 vendor_check=vendor_only note=corporate_action: ISS tỉ lệ 0.3571 (miễn phí cho cổ đông: 0.0000)
+   SCL ex=2025-10-23 kind=UNVERIFIED resolved=False mult=1.0 cash_per_share=0.0 vendor_check=unavailable note=không có bản ghi broker khớp — chưa nắm giữ tại ngày chốt quyền, hoặc log không phủ ngày đó
+   build_position_return(14000@30000 → 20000): unverified=['2025-10-17', '2025-10-23'] div/cp=0.0 mult=1.0
+
+(sandbox: /tmp/b2_nav_chain_ynnw2xcp)

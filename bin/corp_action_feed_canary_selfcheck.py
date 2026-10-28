@@ -106,6 +106,7 @@ def status_of(results, name):
 
 def run_cases(c):
     tmp = tempfile.mkdtemp(prefix="canary_sc_")
+    ackf = os.path.join(tmp, "ack.json")   # KHÔNG BAO GIỜ để test chạm state thật
     today = _dt.date(2026, 9, 15)
     try:
         good_src = fake_source(tmp, "SELECT ticker, event_code, CAST(exright_date AS STRING) "
@@ -215,7 +216,7 @@ def run_cases(c):
 
         buf = io.StringIO()
         with redirect_stdout(buf):
-            rc = c.main([], runner=make_runner(c), notifier=notifier, today=today)
+            rc = c.main([], runner=make_runner(c), notifier=notifier, today=today, ack_file=ackf)
         out = buf.getvalue().strip().splitlines()
         check("E1. toàn PASS ⇒ rc=0, KHÔNG post, đúng 1 dòng log", rc == 0 and not sent
               and len(out) == 1 and "PASS 4/4" in out[0], (rc, sent, out))
@@ -225,27 +226,27 @@ def run_cases(c):
         with redirect_stdout(buf):
             rc = c.main([], runner=make_runner(c, raise_on={"schema": err, "values": err,
                                                             "activity": err, "pins": err}),
-                        notifier=notifier, today=today)
+                        notifier=notifier, today=today, ack_file=ackf)
         check("E2. đỏ: BQ auth hỏng ⇒ rc=2, post 1 lần, trích NGUYÊN stderr thật",
               rc == 2 and len(sent) == 1 and "Reauthentication failed" in sent[0]
               and "CANARY KHÔNG CHẠY ĐƯỢC" in sent[0], (rc, sent))
         sent.clear()
         with redirect_stdout(io.StringIO()):
             rc = c.main([], runner=make_runner(c, activity=[{"iss": "0", "ais": "0"}]),
-                        notifier=notifier, today=today)
+                        notifier=notifier, today=today, ack_file=ackf)
         check("E3. đỏ: 1 WARN ⇒ rc=1, post 1 lần có mục c.activity",
               rc == 1 and len(sent) == 1 and "c.activity WARN" in sent[0], (rc, sent))
         sent.clear()
         buf = io.StringIO()
         with redirect_stdout(buf):
             rc = c.main([], runner=make_runner(c, activity=[{"iss": "0", "ais": "0"}]),
-                        notifier=lambda m: (False, "rc=1 stderr=boom"), today=today)
+                        notifier=lambda m: (False, "rc=1 stderr=boom"), today=today, ack_file=ackf)
         check("E4. đỏ: post thất bại ⇒ rc=3 + dòng NOTIFY_FAILED có stderr",
               rc == 3 and "NOTIFY_FAILED" in buf.getvalue() and "boom" in buf.getvalue(),
               (rc, buf.getvalue()[-200:]))
         with redirect_stdout(io.StringIO()):
             rc = c.main(["--dry-run"], runner=make_runner(c, activity=[{"iss": "0", "ais": "0"}]),
-                        notifier=notifier, today=today)
+                        notifier=notifier, today=today, ack_file=ackf)
         check("E5. --dry-run ⇒ rc=1 nhưng KHÔNG post", rc == 1 and not sent, (rc, sent))
 
         calls = []
@@ -260,10 +261,114 @@ def run_cases(c):
               ok and calls and calls[0][0].endswith("notify_thread.sh")
               and calls[0][2] == "architecture", calls)
 
+        print("== (f) ack giá trị MỚI đã báo (không spam hằng ngày) ==")
+        mf = {("status", "MANUAL_FILL"): (2, 0)}
+        AK = {"status=MANUAL_FILL": {"d": "2026-09-10", "n": 2}}
+        r = c.check_values(value_rows(mf), need_c, need_s)
+        check("F1. đỏ: giá trị MỚI chưa ack ⇒ WARN, evidence CHỈ nêu vấn đề (không in bảng phân bố)",
+              r["status"] == "WARN" and "MANUAL_FILL" in r["evidence"]
+              and "code=DIV:" not in r["evidence"] and r["new_keys"] == {"status=MANUAL_FILL": 2}, r)
+        r = c.check_values(value_rows(mf), need_c, need_s, acked=AK)
+        check("F2. xanh: cùng giá trị MỚI đã ack, số dòng KHÔNG tăng ⇒ PASS + acked_note đủ",
+              r["status"] == "PASS" and "MANUAL_FILL (2 dòng, báo 2026-09-10)" in r["acked_note"]
+              and r["new_keys"] == {"status=MANUAL_FILL": 2}, r)
+        r = c.check_values(value_rows({("status", "MANUAL_FILL"): (9, 0)}), need_c, need_s, acked=AK)
+        check("F2b. đỏ: giá trị đã ack nhưng số dòng TĂNG 2→9 ⇒ báo lại, nêu cả hai số",
+              r["status"] == "WARN" and "TĂNG 2 → 9" in r["evidence"], r)
+        r = c.check_values(value_rows(mf, drop=(("code", "AIS"),)), need_c, need_s,
+                           acked={**AK, "code=AIS": {"d": "x", "n": 1}})
+        check("F3. đỏ: ack KHÔNG che hỏng thật — AIS BIẾN MẤT vẫn WARN dù ack đầy đủ",
+              r["status"] == "WARN" and "code=`AIS` code cần" in r["evidence"], r)
+        r = c.check_values(value_rows({**mf, ("status", "done"): (5, 0)}), need_c, need_s, acked=AK)
+        check("F4. đỏ: ack MANUAL_FILL không che giá trị mới KHÁC (`done`) ⇒ WARN chỉ `done`",
+              r["status"] == "WARN" and "`done`" in r["evidence"]
+              and "MANUAL_FILL" not in r["evidence"], r)
+        T = _dt.date(2026, 9, 15)
+        n = c.next_acked({"status=OLD": {"d": "2026-09-01", "n": 1}}, {"status=MANUAL_FILL": 2}, T, True)
+        check("F5. next_acked: dọn khoá biến mất (OLD), ack khoá mới khi ĐÃ post",
+              n == {"status=MANUAL_FILL": {"d": "2026-09-15", "n": 2}}, n)
+        n = c.next_acked({}, {"status=MANUAL_FILL": 2}, T, False)
+        check("F6. next_acked: post chưa đi ⇒ KHÔNG ack (mai báo lại)", n == {}, n)
+        n = c.next_acked(AK, {"status=MANUAL_FILL": 9}, T, True)
+        check("F6b. next_acked: tăng 2→9 + đã post ⇒ n=9, GIỮ ngày báo gốc",
+              n == {"status=MANUAL_FILL": {"d": "2026-09-10", "n": 9}}, n)
+        n = c.next_acked(AK, {"status=MANUAL_FILL": 9}, T, False)
+        check("F6c. next_acked: tăng nhưng post chưa đi ⇒ giữ n cũ (mai báo lại)", n == AK, n)
+
+        af = os.path.join(tmp, "ack_flow.json")
+        sent.clear()
+        mfr = lambda extra=None: make_runner(c, values=value_rows(extra))   # noqa: E731
+        with redirect_stdout(io.StringIO()):
+            rc1 = c.main([], runner=mfr(mf), notifier=notifier, today=today, ack_file=af)
+        check("F7. lượt 1: giá trị MỚI ⇒ rc=1, post 1 lần, state ack ghi khoá + n",
+              rc1 == 1 and len(sent) == 1 and c.load_acked(af).get("status=MANUAL_FILL", {}).get("n") == 2,
+              (rc1, len(sent), c.load_acked(af)))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc2 = c.main([], runner=mfr(mf), notifier=notifier, today=today, ack_file=af)
+        check("F8. lượt 2 (cùng dữ liệu): rc=0, KHÔNG post thêm, log in đủ dòng 'ĐÃ BÁO'",
+              rc2 == 0 and len(sent) == 1 and "ĐÃ BÁO" in buf.getvalue()
+              and "MANUAL_FILL (2 dòng" in buf.getvalue(), (rc2, len(sent), buf.getvalue()[-200:]))
+        with redirect_stdout(io.StringIO()):
+            rg = c.main([], runner=mfr({("status", "MANUAL_FILL"): (7, 0)}), notifier=notifier,
+                        today=today, ack_file=af)
+        check("F8b. lượt 3: số dòng tăng 2→7 ⇒ báo lại (rc=1, post lần 2), state n=7",
+              rg == 1 and len(sent) == 2 and c.load_acked(af)["status=MANUAL_FILL"]["n"] == 7,
+              (rg, len(sent), c.load_acked(af)))
+        with redirect_stdout(io.StringIO()):
+            c.main([], runner=mfr(), notifier=notifier, today=today, ack_file=af)
+        check("F9. giá trị MỚI biến mất ⇒ khoá bị dọn khỏi state", c.load_acked(af) == {},
+              c.load_acked(af))
+        with redirect_stdout(io.StringIO()):
+            rc4 = c.main([], runner=mfr(mf), notifier=notifier, today=today, ack_file=af)
+        check("F10. quay lại sau khi biến mất ⇒ BÁO LẠI (post lần 3)", rc4 == 1 and len(sent) == 3,
+              (rc4, len(sent)))
+        af2 = os.path.join(tmp, "ack_fail.json")
+        with redirect_stdout(io.StringIO()):
+            rc5 = c.main([], runner=mfr(mf), notifier=lambda m: (False, "rc=1 stderr=boom"),
+                         today=today, ack_file=af2)
+        check("F11. post THẤT BẠI ⇒ rc=3, KHÔNG ack (mai báo lại)",
+              rc5 == 3 and c.load_acked(af2) == {}, (rc5, c.load_acked(af2)))
+        af3 = os.path.join(tmp, "ack_dry.json")
+        with redirect_stdout(io.StringIO()):
+            c.main(["--dry-run"], runner=mfr(mf), notifier=notifier, today=today, ack_file=af3)
+        check("F12. --dry-run KHÔNG ghi state", not os.path.exists(af3), os.path.exists(af3))
+        with open(af3, "w") as fh:
+            fh.write("{hỏng")
+        check("F13. file state hỏng ⇒ coi như rỗng (fail-open về phía BÁO)",
+              c.load_acked(af3) == {}, c.load_acked(af3))
+        af4 = os.path.join(tmp, "ack_err.json")
+        c.save_acked(AK, af4)
+        raw = open(af4, "rb").read()
+        with redirect_stdout(io.StringIO()):
+            rc6 = c.main([], runner=make_runner(c, raise_on={"values": "bq boom"}), notifier=notifier,
+                         today=today, ack_file=af4)
+        check("F14. b.values ERROR (BQ lỗi) ⇒ rc=2 và state ack byte-identical (không bị xoá)",
+              rc6 == 2 and open(af4, "rb").read() == raw, (rc6,))
+        rep = []
+        orig_replace = c.os.replace
+        c.os.replace = lambda a_, b_: (rep.append((a_, b_)), orig_replace(a_, b_))[1]
+        try:
+            af5 = os.path.join(tmp, "ack_atomic.json")
+            c.save_acked(AK, af5)
+        finally:
+            c.os.replace = orig_replace
+        check("F15. state ghi qua tmp + os.replace (atomic), không ghi thẳng file đích",
+              len(rep) == 1 and rep[0][1] == af5 and rep[0][0] != af5 and ".tmp." in rep[0][0], rep)
+        bad = os.path.join(af5, "x", "ack.json")      # cha là FILE ⇒ OSError
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc7 = c.main([], runner=mfr(mf), notifier=notifier, today=today, ack_file=bad)
+        check("F16. ghi state lỗi ⇒ in STATE_WRITE_FAILED, rc vẫn 1 (không traceback)",
+              rc7 == 1 and "STATE_WRITE_FAILED" in buf.getvalue(), (rc7, buf.getvalue()[-200:]))
+
         with open(c.__file__, encoding="utf-8") as fh:
             src = fh.read()
         code_only = "\n".join(l for l in src.splitlines() if not l.lstrip().startswith("#"))
         body = code_only.split('"""', 2)[2]
+        # NGOẠI LỆ DUY NHẤT (user 2026-10-19): `save_acked` ghi state ack RIÊNG của canary
+        # (`state/corp_action_feed_canary_ack.json`), atomic. Mọi chỗ khác vẫn cấm ghi.
+        body = re.sub(r"def save_acked\(.*?\n\n\n", "", body, flags=re.S)
         forbidden = [w for w in ("corp_action_daily_state", "_FAILED.json", "data/corp_action_daily",
                                  "import corp_action_daily", "from corp_action_daily",
                                  "os.replace", "json.dump", ".write(")
@@ -286,7 +391,8 @@ def run_cases(c):
         log = []
         try:
             with redirect_stdout(io.StringIO()):
-                c.main(["--dry-run"], runner=make_runner(c, log=log), notifier=notifier)
+                c.main(["--dry-run"], runner=make_runner(c, log=log), notifier=notifier,
+                       ack_file=ackf)
         finally:
             c.dt = orig_dt
         vals = next(q for q in log if "canary:values" in q)
@@ -301,6 +407,13 @@ def run_cases(c):
 
 # ── mutation ──────────────────────────────────────────────────────────────────────────────
 MUTATIONS = (
+    ("ack-ignored", "            if prior is not None and n_all <= int(prior.get(\"n\", -1)):", "            if False:"),
+    ("ack-no-prune", "    nxt = {k: dict(prev[k]) for k in new_keys if k in prev}", "    nxt = dict(prev)"),
+    ("ack-ignores-growth", "            if k not in nxt or n > int(nxt[k].get(\"n\", -1)):", "            if k not in nxt:"),
+    ("ack-state-nonatomic", "    os.replace(tmp, path)       # atomic (coding_guidelines §5)", "    os.rename(tmp, path)"),
+    ("ack-before-post", "    _persist(ok)\n", "    _persist(True)\n"),
+    ("ack-evidence-histogram", "        ev = \"; \".join(probs)",
+     "        ev = \"; \".join(probs) + \" \" + \", \".join(f\"{k}={v}:{a}/{r}\" for (k, v), (a, r) in sorted(seen.items()))"),
     ("schema-missing", "        if col not in live:\n", "        if False:\n"),
     ("schema-type", "        elif live[col] != EXPECTED_TYPES[col]:", "        elif False:"),
     ("schema-unpinned", "        elif col not in EXPECTED_TYPES:",

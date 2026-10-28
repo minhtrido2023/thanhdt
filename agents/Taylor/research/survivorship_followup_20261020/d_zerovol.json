@@ -1,0 +1,46 @@
+{
+ "p30_pin0": {
+  "BAL_buy": {
+   "n": 1054,
+   "n_zero": 0,
+   "amt_share_zero": 0.0
+  },
+  "BAL_sell": {
+   "n": 410,
+   "n_zero": 1,
+   "amt_share_zero": 0.006096990885237288
+  },
+  "LAG_buy": {
+   "n": 4267,
+   "n_zero": 500,
+   "amt_share_zero": 0.3095732574555626
+  },
+  "LAG_sell": {
+   "n": 1503,
+   "n_zero": 263,
+   "amt_share_zero": 0.271865379887819
+  }
+ },
+ "p0_pin0": {
+  "BAL_buy": {
+   "n": 1008,
+   "n_zero": 0,
+   "amt_share_zero": 0.0
+  },
+  "BAL_sell": {
+   "n": 396,
+   "n_zero": 2,
+   "amt_share_zero": 0.006855790415674028
+  },
+  "LAG_buy": {
+   "n": 4310,
+   "n_zero": 498,
+   "amt_share_zero": 0.3100645284711146
+  },
+  "LAG_sell": {
+   "n": 1516,
+   "n_zero": 262,
+   "amt_share_zero": 0.27150241400381175
+  }
+ }
+}

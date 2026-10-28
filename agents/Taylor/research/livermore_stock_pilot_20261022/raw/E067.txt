@@ -1,0 +1,7 @@
+**Phân tích:** Trên thang 250 phiên đây là một range rộng 84–121. Hai lần đầu năm có nhịp giảm 16–21% (i=26→35 và i=106→115). Từ i=133 giá chuyển sang markup chậm với biên độ hẹp và khối lượng thấp. Đỉnh i=195 (120.8, KL 4.66) thất bại, sau đó gap down ở i=199. Từ i=199 đến nay giá nằm trong nền phân phối/tích luỹ 104–113, có pivot đáy ở i=213 (râu xuống 103.5 rồi hồi lại) và i=217–223 (~104–105). Phiên i=249 bật khỏi nền với KL 4.03, cao nhất từ i=199, đóng 112.83 nhưng để lại râu trên tới 114.4. Ngay phía trên là vùng cung kẹt 113–121 (i=173–198). Cổ phiếu biến động thấp, nên mức −15% (~96) nằm dưới cả hai đáy nền, cần vỡ cấu trúc thật mới chạm tới.
+
+P_HIT15: 0.12
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 103.5 (đáy i=213) với khối lượng lớn thì nền 104–113 bị phá, mở đường về vùng 96–98.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đã đi hết một vòng: markdown từ 100 xuống đáy 56 (i72), tích luỹ, rồi markup mạnh lên 151 (i244), tức tăng khoảng 165% từ đáy. Ở thang 60 phiên, nền 124–128 (i203–226) khô khối lượng, sau đó bị phá vỡ bằng phiên gap i227 với V=4.79 và có follow-through lên 151. Ở thang 20 phiên, giá đi ngang 141–151. Pha hồi i245–248 giữ được 141.4, khối lượng vừa phải (1.91 ở i248, không phải climax), và i249 đóng cửa hồi lên 145.8. Cung tại đỉnh 150–151 đã bị test hai lần (i240, i244) mà chưa xuyên qua, nên có dấu hiệu chững/phân phối nhẹ. Mức −15% tính từ giá vào khoảng 146 là quanh 124, tức đáy nền cũ. Để chạm mức này, giá phải lấp gap 128–136 và rơi sâu vào nền. Điều đó có thể xảy ra sau một đợt tăng nóng, nhưng không phải kịch bản cơ sở.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 141 (đáy pha hồi i247–248) kèm khối lượng tăng; thủng 136 (lấp gap i227) thì xác nhận breakout thất bại.
+CONTAMINATION: NONE

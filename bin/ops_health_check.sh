@@ -115,7 +115,9 @@ export OPS_HEALTH_DRY_RUN="$DRY_RUN"   # heredoc python (close_plan_approval_que
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
 
-REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" "$RUNONCE_LABEL" << 'PYEOF'
+REPORT_ERR="$(mktemp)"
+trap 'rm -f "$REPORT_ERR"' EXIT
+REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" "$RUNONCE_LABEL" 2>"$REPORT_ERR" << 'PYEOF'
 import glob, gzip, json, os, re, sys, subprocess, csv
 from collections import defaultdict
 
@@ -1323,6 +1325,8 @@ else:
 # 7. [GỠ 2026-08-01] Báo cáo tuần/tháng quá hạn — xem bin/check_report_cadence.sh (cron riêng).
 #    today_d/_date/_timedelta vẫn cần cho mục 8 + phần retro bên dưới, giữ lại định nghĩa.
 from datetime import date as _date, timedelta as _timedelta
+from datetime import datetime as _datetime
+from zoneinfo import ZoneInfo as _ZoneInfo
 today_d = _date.fromisoformat(today)
 
 # 8. Lãi suất tiết kiệm (deposit_rate_vn) freshness — WARN-only, thêm 2026-07-17 (proposal §4).
@@ -1366,7 +1370,7 @@ if dep_last is not None:
         if dep_runs:
             try:
                 dep_tail = open(dep_runs[-1], encoding="utf-8", errors="replace").read()
-                dep_run_days = (today_d - _date.fromtimestamp(os.path.getmtime(dep_runs[-1]))).days
+                dep_run_days = (today_d - _datetime.fromtimestamp(os.path.getmtime(dep_runs[-1]), _ZoneInfo("Asia/Ho_Chi_Minh")).date()).days
                 if "Escalated instead of writing a number" in dep_tail:
                     dep_hint = (f"KHÔNG phải cron hỏng: {os.path.basename(dep_runs[-1])} cho thấy job "
                                 f"đã chạy {dep_run_days} ngày trước và ESCALATE đúng thiết kế (nguồn mâu "
@@ -1396,8 +1400,9 @@ else:
 #     đã LỖI THỜI, sửa round-4, job Taylor_20261001_073836). Từ 2026-10-01 CCTG đã wired vào 5
 #     consumer LIVE (rating_8l NEUTRAL tilt + chuỗi DCF) qua deposit_rate_vn.consumer_deposit_rate()
 #     — effective_deposit_rate()'s stale_days_limit=45 là mốc HÀNH VI THẬT đổi (CCTG tự hết hạn ở
-#     NGÀY THỨ 46, age > 45, rơi về Big-4-only — KHÔNG phải "ở ngày 45"), nên WARN sớm hơn (35d) để
-#     có thời gian xác nhận số mới trước khi tới mốc đó.
+#     NGÀY THỨ 46, age > 45 — KHÔNG phải "ở ngày 45") thì số bị coi stale và GIỮ ở mức CCTG gần nhất
+#     đã biết, gắn nhãn rate_source cctg_held + WARNING (từ 13-14/10, 0b29d2d1e/024f4a15f; KHÔNG còn
+#     tụt về Big-4), nên WARN sớm hơn (35d) để xác nhận số mới trước khi số cũ bị giữ lâu hơn.
 #     Round-4 fix (job Taylor_20261001_073836, arch-review r2 follow-up) — 2 bug thật trong bản cũ:
 #     (R1) `max(_date.fromisoformat(c) for c in ceds)` ăn CẢ generator trong 1 try/except — một
 #     dòng CSV hỏng (vd "garbage,xx", effective_date không rỗng nên lọt qua filter nhưng không
@@ -1408,7 +1413,7 @@ else:
 #     (R2) hoàn toàn không kiểm cctg_rate có nằm trong khoảng hợp lệ hay không — một giá trị gõ
 #     nhầm (vd "0.074" thay vì "7.4") có effective_date hợp lệ nên checker báo "OK CSV live", trong
 #     khi production (`cctg_rate_vn.cctg_events_df()`'s range guard) RAISE trên giá trị đó ⇒
-#     `cctg_events_df()` lỗi cho MỌI asof ⇒ cả 5 consumer LIVE âm thầm rơi về Big-4-only — ngược hẳn
+#     `cctg_events_df()` lỗi cho MỌI asof ⇒ cả 5 consumer LIVE chạy bằng CCTG cũ (cctg_held) thay vì số mới — ngược hẳn
 #     với nhãn "OK" mà checker vừa báo. Sửa: validate range [0.5,30] (RATE_MIN_PCT/RATE_MAX_PCT
 #     trong cctg_rate_vn.py — hardcode lại ở đây CÓ CHỦ Ý, giống cách mục 8 Big-4 đọc anchor bằng
 #     regex thay vì import, để giữ đúng ràng buộc không-pandas; đổi 1 trong 2 nơi PHẢI đổi cả 2)
@@ -1441,7 +1446,7 @@ if os.path.exists(cctg_csv):
             _oor_msg = (f"{len(_oor)} dòng cctg_rate ngoài khoảng hợp lệ "
                         f"[{_CCTG_RATE_MIN},{_CCTG_RATE_MAX}] (vd {_oor[0]}) — "
                         f"cctg_rate_vn.cctg_events_df() RAISE trên CSV này, 5 consumer LIVE "
-                        f"đang âm thầm rơi về Big-4-only, KHÔNG phải trạng thái bình thường")
+                        f"đang chạy bằng CCTG cũ gần nhất đã biết (cctg_held) thay vì số mới, KHÔNG phải trạng thái bình thường")
             cctg_err = (cctg_err + " · " + _oor_msg) if cctg_err else _oor_msg
         if _ok_rows:
             cctg_last = max(d for d, _ in _ok_rows)
@@ -1478,8 +1483,8 @@ else:
           f"{cctg_last}, {cctg_kind}) — đã wired vào rating_8l NEUTRAL tilt + chuỗi DCF qua "
           f"deposit_rate_vn.consumer_deposit_rate() (job Taylor_20261001_054110/064225). Từ ngày "
           f"thứ {_CCTG_ARMED_D + 1} (mốc {_cctg_armed_at}), effective_deposit_rate() tự coi CCTG "
-          f"là stale và rơi về Big-4-only (hành vi ĐỔI THẬT, không chỉ cảnh báo) — xác nhận số "
-          f"CCTG mới trước mốc đó.")
+          f"là stale: số vẫn được GIỮ ở mức CCTG gần nhất đã biết (rate_source=cctg_held + WARNING, "
+          f"không tụt về Big-4) nhưng ngày càng cũ — xác nhận số CCTG mới.")
     else:
         OK(f"Lãi suất CCTG (cctg_rate_vn): mốc cuối {cctg_last} ({cctg_age} ngày, {cctg_kind}).")
 # CHECK8B_END
@@ -1578,29 +1583,31 @@ if os.path.exists(mike_mem_9b):
         _mem9b = open(mike_mem_9b, encoding="utf-8").read()
         _pending9b = _re9b.findall(r'^##\s+PENDING_DECISION:\s*(.+)', _mem9b, _re9b.MULTILINE)
         if _pending9b:
-            # Build set of open bus question topics (question posted, no answer/decision yet)
-            _open9b = set()
-            for _bd in [os.path.join(wc_root, "mike", "bus", "inbox"),
-                        os.path.join(wc_root, "mike", "bus", "archive")]:
-                if not os.path.isdir(_bd):
-                    continue
-                for _fn9b in sorted(os.listdir(_bd)):
-                    if not _fn9b.endswith(".jsonl"):
-                        continue
-                    try:
-                        for _ln9b in open(os.path.join(_bd, _fn9b), encoding="utf-8"):
+            # Open = có question mà KHÔNG có answer/decision cùng topic phát SAU nó. 2 pass theo ts
+            # (không theo thứ tự file — answer ở file agent sort trước từng bị xử lý trước câu hỏi,
+            # đúng lỗi chéo-agent check #5 đã sửa) và quét CẢ archive thật bus/inbox/archive/*.jsonl.gz.
+            import glob as _glob9b, gzip as _gzip9b
+            _inb9b = os.path.join(wc_root, "mike", "bus", "inbox")
+            _q9b, _r9b = {}, {}   # topic -> ts lớn nhất của question / answer|decision
+            for _pth9b in (sorted(_glob9b.glob(os.path.join(_inb9b, "*.jsonl")))
+                           + sorted(_glob9b.glob(os.path.join(_inb9b, "archive", "*.jsonl.gz")))):
+                try:
+                    _op9b = _gzip9b.open if _pth9b.endswith(".gz") else open
+                    with _op9b(_pth9b, "rt", encoding="utf-8") as _f9b:
+                        for _ln9b in _f9b:
                             try:
                                 _ev9b = json.loads(_ln9b.strip())
                                 _et9b = _ev9b.get("event_type", "")
                                 _tp9b = _ev9b.get("topic", "")
-                                if _et9b == "question":
-                                    _open9b.add(_tp9b)
-                                elif _et9b in ("answer", "decision"):
-                                    _open9b.discard(_tp9b)
+                                _ts9b = str(_ev9b.get("ts") or "")
+                                _dst9b = _q9b if _et9b == "question" else _r9b if _et9b in ("answer", "decision") else None
+                                if _dst9b is not None and _ts9b >= _dst9b.get(_tp9b, ""):
+                                    _dst9b[_tp9b] = _ts9b
                             except Exception:
                                 pass
-                    except Exception:
-                        pass
+                except Exception:
+                    pass
+            _open9b = {t for t, q_ts in _q9b.items() if _r9b.get(t, "") < q_ts}
             _unbacked9b = [t.strip() for t in _pending9b if t.strip() not in _open9b]
             if _unbacked9b:
                 W(f"[WARN-ONLY] check 9b: {len(_unbacked9b)} PENDING_DECISION trong working memory "
@@ -1997,13 +2004,67 @@ except Exception as _e13x:
       f"({type(_e13x).__name__}: {str(_e13x)[:160]}) — không kết luận được cổng đang ở DT5G hay DT4.")
 # CHECK13_END
 
+# LB. Phanh lỗ cấp NAV (thêm 2026-10-12, job Taylor_20261012_111422) — MỘT dòng mỗi account, đọc
+#     data/loss_brake/status.json do nav_loss_brake_monitor.py ghi tối phiên trước. Độ tươi do
+#     chính `--health-line` kiểm (PHIÊN ghi trong file so với lịch phiên — §14, không dùng mtime);
+#     ở đây chỉ đổi rc thành dòng:
+#       rc=0 ✅ · rc=1 không đo được ⇒ [WARN-ONLY] (user quyết — monitor chỉ cảnh báo, KHÔNG
+#       được route sang autofix) · rc=5 phanh CHẠM / số tạm tính vượt ngưỡng ⇒ dòng 🔴 RIÊNG, không
+#       lẫn vào đám [WARN-ONLY] thường nhật; dòng không mang ⚠️/❌ nên khối ROUTING không đẩy sang
+#       autofix (user quyết), vẫn tính 1 warn · rc=2 monitor không chạy (file thiếu/cũ/hỏng) và
+#       rc=3 monitor có chạy nhưng LỖI (tự nó hỏng / không gửi được cảnh báo) ⇒ WARN thường: lỗi
+#       VẬN HÀNH, phải tới được autofix. Autofix được và không được làm gì: kb/ops_runbook.md mục
+#       "Phanh lỗ NAV".
+# LOSSBRAKE_BEGIN
+try:
+    _lb = subprocess.run([sys.executable,
+                          os.path.join(wc_root, "mike", "bin", "nav_loss_brake_monitor.py"),
+                          "--health-line", "--account", account],
+                         capture_output=True, text=True, timeout=60)
+    _lb_out = (_lb.stdout or "").strip()
+    _lb_line = _lb_out.splitlines()[-1] if _lb_out else ""
+    if _lb.returncode == 0 and _lb_line:
+        OK(_lb_line)
+    elif _lb.returncode == 1 and _lb_line:
+        W(f"[WARN-ONLY] {_lb_line}")
+    elif _lb.returncode == 5 and _lb_line:
+        warn += 1
+        lines.append("🔴 PHANH LỖ NAV CHẠM NGƯỠNG — USER QUYẾT (không autofix): "
+                     + _lb_line.replace("⚠️", "⚠").replace("❌", "✗"))
+    elif _lb.returncode == 2 and _lb_line and runonce_label and account != runonce_label:
+        # rc=2 = lỗi cấp FLEET (status.json thiếu/cũ/hỏng) — cùng một lỗi hiện ở mọi account; chỉ lượt
+        # account đầu (cùng cổng RUNONCE) được route sang autofix, lượt sau chỉ hiển thị ⇒ 1 job/lỗi.
+        W(f"[WARN-ONLY] {_lb_line}")
+    elif _lb.returncode in (2, 3) and _lb_line:
+        W(_lb_line)
+    else:
+        _lb_err = ((_lb.stderr or "").strip()[-200:] or "(rỗng)").replace("\n", " | ")   # ROUTING grep theo dòng
+        W(f"Phanh lỗ NAV [{account}]: nav_loss_brake_monitor.py --health-line rc={_lb.returncode} "
+          f"không in dòng trạng thái nào — stderr: {_lb_err}")
+except Exception as _elb:
+    W(f"Phanh lỗ NAV [{account}]: không chạy được nav_loss_brake_monitor.py --health-line "
+      f"({type(_elb).__name__}: {str(_elb)[:160]})")
+# LOSSBRAKE_END
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF
 )"
 
+# FAILCLOSED_BEGIN — selfcheck trích khối này (ops_health_check_selfcheck.py case_failclosed_*)
 WARN_COUNT="$(echo "$REPORT" | grep -o '__WARN_COUNT__=[0-9]*' | cut -d= -f2)"
 REPORT_BODY="$(echo "$REPORT" | grep -v '__WARN_COUNT__')"
+[ -s "$REPORT_ERR" ] && cat "$REPORT_ERR" >&2
+# FAIL-CLOSED: heredoc python chết giữa chừng ⇒ không có marker __WARN_COUNT__ ⇒ KHÔNG được coi là
+# 0 cảnh báo ("mọi khâu bình thường" với thân rỗng, không autofix). Đặt WARN_COUNT=1 + 1 dòng ⚠️ không
+# gắn [WARN-ONLY] để rơi vào OTHER_WARN (ops_autofix) và hiện đuôi stderr cho người đọc.
+if [ -z "$WARN_COUNT" ]; then
+  WARN_COUNT=1
+  _py_tail="$(tail -n 3 "$REPORT_ERR" 2>/dev/null | tr '\n' ' ' | cut -c1-300)"
+  REPORT_BODY="${REPORT_BODY}
+⚠️ ops_health_check: khối python chết giữa chừng — báo cáo KHÔNG đầy đủ (stderr: ${_py_tail:-rỗng})"
+fi
+# FAILCLOSED_END
 
 # 6. Tái dùng preflight_check.sh cho phần macro_health/BQ freshness/plan approval hôm nay
 #    (chỉ chạy khi còn plan hôm nay để tránh trùng lặp báo cáo lúc chưa có gì)
@@ -2156,7 +2217,7 @@ $MSG"; then
     # Cả 2 đường chết: ghi vào chính file mà check #10 đọc, để lượt chạy sau tố cáo được.
     mkdir -p "$ROOT/logs"
     printf '%s ops_health_check: CA HAI duong bao deu that bai (Discord %s + Telegram) — bao cao %s KHONG toi tay ai.\n' \
-      "$(date -Iseconds)" "$TRADING_DAILY_THREAD" "${ACCOUNT}-${TODAY}" \
+      "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$TRADING_DAILY_THREAD" "${ACCOUNT}-${TODAY}" \
       >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
     echo "ops_health_check: CẢ Discord LẪN Telegram đều không gửi được báo cáo" >&2
   fi

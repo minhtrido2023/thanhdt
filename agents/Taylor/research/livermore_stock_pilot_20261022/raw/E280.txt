@@ -1,0 +1,11 @@
+Giá vừa có một đợt markup dốc từ 118 lên 200 (i218–246), tăng khoảng 70% trong 30 phiên. Đợt này phá vùng đỉnh cũ 147.9 (i115, i139) với khối lượng lớn ở i219 (6.19) và i223 (7.68).
+
+Thanh i247 là dấu hiệu cảnh báo chính. Khối lượng 8.53, cao nhất 250 phiên. Giá mở 195.8, rơi xuống 179 rồi đóng 183.3, ngay sau khi chạm 200 hai phiên liền mà không qua được. Đây giống climax/upthrust ở đỉnh. Hai phiên hồi i248–249 có khối lượng cạn (0.70), chưa có lực cầu xác nhận.
+
+Mỗi bước giá khoảng 2–4%, nên biến động lớn. Mức −15% tính từ giá vào khoảng 159. Mức này nằm ngay vùng nền i228–238 (159–166). Nếu vùng đó vỡ thì phía dưới là khoảng trống tới vùng 148. Rủi ro margin bị bán giải chấp sau một đợt tăng nóng là đáng kể.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 200 với khối lượng lớn hơn 3 lần median (vượt đỉnh climax) thì kịch bản phân phối bị vô hiệu; đóng cửa dưới 179 (đáy i247) thì xác nhận phân phối.
+CONTAMINATION: NONE

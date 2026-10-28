@@ -1,0 +1,9 @@
+**Phân tích.** Có một pha markup từ ~97 lên đỉnh 145.57 (i=107). Phiên i=108 có khối lượng climax 31.5, cho thấy phân phối. Sau đó giá đi ngang 115–125 suốt khoảng 140 phiên với thanh khoản cạn dần. Phiên i=182 phá lên 135.84 với khối lượng 167 nhưng thất bại ngay. Vùng 125–136 là cung kẹt phía trên.
+
+Cuối chuỗi, đáy dịch xuống dần: 114.72 (i=245), 111.70 (i=247), rồi i=248 mở cửa ở 106.68 và hồi lên 116.71. Phiên i=249 chỉ có một mức giá 122.03 với khối lượng 0, nên đây là giá ảo, không có cầu thật. Vào lệnh quanh 122 tức là mua ở mép trên của range đang suy yếu. Ngưỡng −15% nằm ở khoảng 103.7, gần đáy wick 106.68. Thanh khoản mỏng làm khả năng bị "air-pocket" là có thật.
+
+P_HIT15: 0.27
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 111.7 (đáy i=247) hoặc thủng 106.68 với khối lượng >1.5 thì range 115–125 vỡ, chuyển sang markdown.
+CONTAMINATION: NONE

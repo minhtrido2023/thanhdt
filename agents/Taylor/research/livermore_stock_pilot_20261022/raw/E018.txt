@@ -1,0 +1,7 @@
+**Đọc cấu trúc.** Ở thang 250 phiên, giá giảm từ 100 về đáy capitulation ~63 (i157–158, KL 4.41). Sau đó là pha markup hình chữ V lên ~95. Từ i188–227 giá đi ngang trong vùng 95–109 với khối lượng lớn. Thanh i227 (KL 8.34, đóng cửa giảm) giống áp lực phân phối, nhưng các phiên sau đó KL cạn dần (i230–245 chỉ 0.23–1.1) và giá giữ được 98–100, tức nguồn cung đã cạn. Từ i246–249, giá gap lên và vượt đỉnh range 109, đóng cửa i249 ở 113.09 (cao nhất 250 phiên), KL 5.64, có follow-through. Trên đầu không còn cung kẹt gần. Rủi ro chính: giá vào đã kéo xa nền khoảng 13%, nên nếu breakout thất bại, giá dễ rơi về mép gap 102–104, xa hơn là 98. Mức −15% (~96) nằm ngay dưới nền range.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 108 (quay lại trong range cũ), xác nhận thất bại nếu lấp gap dưới 102.5 với KL lớn.
+CONTAMINATION: NONE

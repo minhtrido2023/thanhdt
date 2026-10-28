@@ -33,6 +33,8 @@ mk_sandbox() {  # $1 = thời điểm UTC ISO (mặc định T2 19:50 ICT)
   printf '#!/usr/bin/env bash\nexec %s -d @%s "$@"\n' "$REAL_DATE" "$FAKE_EPOCH" > "$SB/shim/date"
   chmod +x "$SB/shim/date"
   cp "$REAL" "$SB/mike/bin/nav_snapshot_daily.sh"
+  printf '#!/usr/bin/env bash\necho "prefetch $(wc -l < "%s/calls.log" 2>/dev/null || echo 0)" >> "%s/prefetch.log"\nexit 0\n' "$SB" "$SB" > "$SB/mike/bin/prefetch_dnse_statement.sh"   # stub: wrapper phải gọi prefetch
+  chmod +x "$SB/mike/bin/prefetch_dnse_statement.sh"
   : > "$SB/wc_env.sh"
   : > "$SB/trading_bot/__init__.py"
   cat > "$SB/trading_bot/vn_market.py" <<'EOF'
@@ -132,6 +134,7 @@ run; rc=$?
 [ "$rc" = 0 ] && ok "exit 0" || bad "exit=$rc"
 [ "$(rows_today SpaceX)" = 1 ] && [ "$(rows_today ZaloPay)" = 1 ] && ok "mỗi account đúng 1 dòng $TODAY" || bad "rows SpaceX=$(rows_today SpaceX) ZaloPay=$(rows_today ZaloPay)"
 [ "$(grep -c " $TODAY$" "$SB/calls.log")" = 2 ] && ok "--date truyền vào = ngày ICT" || bad "calls: $(cat "$SB/calls.log")"
+[ "$(grep -c prefetch "$SB/prefetch.log" 2>/dev/null)" = 1 ] && grep -qx "prefetch 0" "$SB/prefetch.log" && ok "gọi prefetch statement đúng 1 lần, TRƯỚC mọi lần chụp NAV (calls.log còn 0 dòng lúc đó)" || bad "prefetch.log: $(cat "$SB/prefetch.log" 2>/dev/null)"
 grep -q "^$TODAY,400," "$SB/data/execution_logs/nav_history_SpaceX.csv" && ok "NAV SpaceX = cash−debt từ dnse_raw giả" || bad "NAV SpaceX sai"
 [ "$(nfy '^trading_daily	✅')" = 2 ] && ok "báo Trading Daily ✅ x2" || bad "notify: $(cat "$SB/notify.log")"
 [ "$(grep -c -- "--notify-snapshot $TODAY --channel trading_daily$" "$SB/ci_calls.log")" = 2 ] \
@@ -297,6 +300,17 @@ sleep 0.3
 EW=20 run
 kill "$D1" "$D2" "$D3" 2>/dev/null; wait "$D1" "$D2" "$D3" 2>/dev/null
 ! grep -q 'đã chờ EOD' "$SB/run.out" && [ "$(calls SpaceX)" = 1 ] && ok "(c) 3 tiến trình mồi không làm wrapper chờ" || bad "(c) run.out: $(tail -3 "$SB/run.out")"
+rm -rf "$SB"
+
+echo "== Ca compute_active_nav_all.sh: prefetch chạy TRƯỚC compute_active_nav.py"
+mk_sandbox
+cp "$(dirname "$REAL")/compute_active_nav_all.sh" "$SB/mike/bin/compute_active_nav_all.sh"
+cp "$SB/mike/bin/prefetch_dnse_statement.sh" "$SB/mike/bin/prefetch_dnse_statement.sh.keep"
+printf '#!/usr/bin/env bash\necho prefetch >> "%s/order.log"\nexit 0\n' "$SB" > "$SB/mike/bin/prefetch_dnse_statement.sh"
+printf 'import sys\nopen("%s/order.log","a").write("compute " + " ".join(sys.argv[1:]) + "\\n")\n' "$SB" > "$SB/mike/bin/compute_active_nav.py"
+: > "$SB/order.log"
+env -u TZ DNA_PYEXE=python3 bash "$SB/mike/bin/compute_active_nav_all.sh" > "$SB/run.out" 2>&1; rc=$?
+[ "$rc" = 0 ] && [ "$(head -1 "$SB/order.log")" = prefetch ] && [ "$(grep -c '^compute' "$SB/order.log")" = 2 ] && ok "prefetch đứng đầu, rồi compute_active_nav cho 2 account" || bad "rc=$rc order: $(cat "$SB/order.log") out: $(tail -3 "$SB/run.out")"
 rm -rf "$SB"
 
 echo "== Tổng: PASS=$PASS FAIL=$FAIL"

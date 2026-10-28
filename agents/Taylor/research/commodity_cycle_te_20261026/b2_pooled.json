@@ -1,0 +1,296 @@
+[
+ {
+  "x": "c_yoy",
+  "y": "rev_yoy",
+  "ic": 0.443,
+  "ci90": [
+   0.351,
+   0.528
+  ],
+  "p_circshift": 0.0005,
+  "n_famq": 250,
+  "n_quarters": 36,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_yoy",
+  "y": "rev_yoy",
+  "ic": 0.373,
+  "ci90": [
+   0.249,
+   0.48
+  ],
+  "p_circshift": 0.004,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "rev_yoy",
+  "ic": 0.406,
+  "ci90": [
+   0.257,
+   0.52
+  ],
+  "p_circshift": 0.0005,
+  "n_famq": 114,
+  "n_quarters": 15,
+  "n_fam": 8,
+  "split": "OOS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "gpm_d",
+  "ic": 0.233,
+  "ci90": [
+   0.122,
+   0.339
+  ],
+  "p_circshift": 0.049,
+  "n_famq": 249,
+  "n_quarters": 36,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_yoy",
+  "y": "gpm_d",
+  "ic": 0.208,
+  "ci90": [
+   0.1,
+   0.319
+  ],
+  "p_circshift": 0.1479,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "gpm_d",
+  "ic": 0.302,
+  "ci90": [
+   0.138,
+   0.444
+  ],
+  "p_circshift": 0.056,
+  "n_famq": 113,
+  "n_quarters": 15,
+  "n_fam": 8,
+  "split": "OOS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "np_d",
+  "ic": 0.45,
+  "ci90": [
+   0.324,
+   0.548
+  ],
+  "p_circshift": 0.0005,
+  "n_famq": 250,
+  "n_quarters": 36,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_yoy",
+  "y": "np_d",
+  "ic": 0.496,
+  "ci90": [
+   0.343,
+   0.608
+  ],
+  "p_circshift": 0.0005,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "np_d",
+  "ic": 0.353,
+  "ci90": [
+   0.163,
+   0.481
+  ],
+  "p_circshift": 0.005,
+  "n_famq": 114,
+  "n_quarters": 15,
+  "n_fam": 8,
+  "split": "OOS"
+ },
+ {
+  "x": "c_qoq",
+  "y": "np_qd",
+  "ic": 0.261,
+  "ci90": [
+   0.141,
+   0.374
+  ],
+  "p_circshift": 0.0005,
+  "n_famq": 249,
+  "n_quarters": 36,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_qoq",
+  "y": "np_qd",
+  "ic": 0.253,
+  "ci90": [
+   0.075,
+   0.415
+  ],
+  "p_circshift": 0.0055,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_qoq",
+  "y": "np_qd",
+  "ic": 0.243,
+  "ci90": [
+   0.108,
+   0.376
+  ],
+  "p_circshift": 0.008,
+  "n_famq": 113,
+  "n_quarters": 15,
+  "n_fam": 8,
+  "split": "OOS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "pre",
+  "ic": -0.136,
+  "ci90": [
+   -0.23,
+   -0.038
+  ],
+  "p_circshift": 0.066,
+  "n_famq": 250,
+  "n_quarters": 36,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_yoy",
+  "y": "pre",
+  "ic": -0.168,
+  "ci90": [
+   -0.29,
+   -0.024
+  ],
+  "p_circshift": 0.1079,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "pre",
+  "ic": -0.016,
+  "ci90": [
+   -0.115,
+   0.094
+  ],
+  "p_circshift": 0.8526,
+  "n_famq": 114,
+  "n_quarters": 15,
+  "n_fam": 8,
+  "split": "OOS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "ann",
+  "ic": 0.105,
+  "ci90": [
+   -0.028,
+   0.23
+  ],
+  "p_circshift": 0.097,
+  "n_famq": 249,
+  "n_quarters": 36,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_yoy",
+  "y": "ann",
+  "ic": 0.156,
+  "ci90": [
+   -0.011,
+   0.299
+  ],
+  "p_circshift": 0.1089,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "ann",
+  "ic": 0.14,
+  "ci90": [
+   0.005,
+   0.264
+  ],
+  "p_circshift": 0.1899,
+  "n_famq": 113,
+  "n_quarters": 15,
+  "n_fam": 8,
+  "split": "OOS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "post60",
+  "ic": -0.02,
+  "ci90": [
+   -0.158,
+   0.115
+  ],
+  "p_circshift": 0.7776,
+  "n_famq": 240,
+  "n_quarters": 35,
+  "n_fam": 8,
+  "split": "ALL"
+ },
+ {
+  "x": "c_yoy",
+  "y": "post60",
+  "ic": 0.009,
+  "ci90": [
+   -0.172,
+   0.19
+  ],
+  "p_circshift": 0.9225,
+  "n_famq": 136,
+  "n_quarters": 21,
+  "n_fam": 8,
+  "split": "IS"
+ },
+ {
+  "x": "c_yoy",
+  "y": "post60",
+  "ic": -0.108,
+  "ci90": [
+   -0.236,
+   0.023
+  ],
+  "p_circshift": 0.3118,
+  "n_famq": 104,
+  "n_quarters": 14,
+  "n_fam": 8,
+  "split": "OOS"
+ }
+]

@@ -1,0 +1,9 @@
+**Đọc băng.** Ở thang 250 phiên, cổ phiếu tăng giá từ ~95 lên 160 (i28–62). Sau đó phân phối trong biên 130–160 suốt i62–197, rồi giảm mạnh i198–202 (V 5.07, 3.57, 4.60) xuống khoảng 105–111. Từ i203–243 giá tích lũy hẹp 107–118, khối lượng cạn (0.07–0.7), có dấu hiệu hấp thụ.
+
+Nhịp bật i245–246 lên 129 bị từ chối ngay dưới vùng gãy 121–135, nơi cung kẹt. i249 là phiên giảm với khối lượng 2.19 (cao nhất 4 tuần), low 112.22, nên lần thoát nền này có dấu hiệu thất bại. Giá vào ~116–117 nằm giữa nền. Hỗ trợ ở 107–110, đáy wick 102.77. Mức −15% (~99) nằm dưới toàn bộ nền, chỉ chạm khi nền gãy. Thanh khoản mỏng làm khả năng trượt giá cao.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 107 (đáy nền i239–241) kèm khối lượng >1.5 thì nền tích lũy bị phá, mở đường xuống vùng 100.
+CONTAMINATION: NONE

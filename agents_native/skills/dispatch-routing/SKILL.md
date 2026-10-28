@@ -20,6 +20,7 @@ opencode chỉ còn cho `bin/second_opinion.sh` hoặc khi user chỉ định (t
 | **2 Opus medium** | `--model opus` (trần lượt tự = 80) | Việc khó: R&D/backtest theo khuôn có sẵn, due diligence, tổng hợp nhiều nguồn, lỗi chưa rõ nguyên nhân |
 | **2+ Opus high** | `--model opus --effort high` | Phản biện, chạm tiền/cổng an toàn, thiết kế backtest MỚI, lượt review toàn nhánh |
 Không chắc → tầng 1.
+**Siết 2026-10-18 (user duyệt, đo 86% chi phí tuần = Opus):** Opus CHỈ khi ≥1 dấu hiệu — phản biện/review toàn nhánh · chạm tiền/cổng an toàn · thiết kế MỚI chưa có đặc tả · lỗi chưa rõ nguyên nhân. Dựng tính năng THEO ĐẶC TẢ đã duyệt, vòng 2 áp `required_change`, sửa lỗi đã định vị, cron autofix/sweep, checkpoint paper, kiểm toán chỉ-đọc ⇒ **Sonnet/medium (omit)**. Opus/high CHỈ cho phản biện, chạm tiền/cổng an toàn, review toàn nhánh; Opus còn lại = medium. Thử tới 2026-10-25; luật + ngưỡng quay lại: `kb/mike_model_routing.md` mục "SIẾT LUẬT OPUS".
 Từ 2026-10-11 11:50 ICT (user chốt) cả 8 agent ghi alias `sonnet` trong settings ⇒ omit ≡ `--model sonnet`, kể cả DollarBill / Mafee.
 Native agent đã ghim model trong frontmatter (fleet-scout=haiku; bq-analyst/corp-scanner/data-ops/memo-optimizer=sonnet; còn lại=opus) — chỉ truyền `model` ở `Agent(...)` khi cần KHÁC tầng đã ghim.
 🧪 "Opus mặc định medium" đang THỬ tới 2026-10-25 (số nền + ngưỡng quay về `high`: đầu file `kb/mike_model_routing.md`).

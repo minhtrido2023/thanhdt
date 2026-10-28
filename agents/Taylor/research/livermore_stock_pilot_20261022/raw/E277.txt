@@ -1,0 +1,7 @@
+Cổ phiếu đang ở pha markup rõ ở cả ba thang: khoảng 250 phiên từ ~100 lên 235, khoảng 60 phiên từ vùng 140–146 lên trên 200. Vùng tích luỹ 170–218 (i230–245) vừa bị phá vỡ ở i246 (KL 5.5x). Sau đó là hai phiên gap tăng liên tiếp i247–248, với i248 có KL 8.94x, cao nhất cả chuỗi, dấu hiệu climax kiểu parabol. i249 vọt lên 244 rồi đóng 235, bỏ lại khoảng 4% so với đỉnh, nên lực mua đuổi đã chững. Giá vào ~235 cách đỉnh range cũ (~218) khoảng 7%. Hai gap 204→218→233 chưa được lấp, là air-pocket nếu margin bị bán giải chấp. Biên độ ngày 5–10% khiến mức −15% (~200) dễ bị chạm, vì nó nằm ngay trong range cũ.
+
+P_HIT15: 0.47
+RISK: HIGH
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 214 (mép gap i247 / đỉnh range cũ) với khối lượng lớn thì breakout thất bại.
+CONTAMINATION: NONE

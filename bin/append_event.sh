@@ -177,3 +177,29 @@ exec 9>>"$BUS/inbox/$id.jsonl"
 flock 9
 printf '%s\n' "$line" >&9
 echo "appended $etype/$topic for $id"
+
+# --- Cổng `measured_by` cho finding: CHỈ CẢNH BÁO (user duyệt 2026-10-13, retro Pattern G/H) ---
+# Họ lỗi: finding nêu số TRƯỚC khi đo rồi phải đính chính (retro 10-09 → 10-12, 4 ngày liền).
+# Luật cơ học + giới hạn: docstring bin/finding_measured_by.py (một nơi duy nhất, đừng chép).
+# BẤT BIẾN của khối này — script này là lõi dùng chung, executor cũng gọi trong phiên:
+#   · Đứng SAU dòng ghi bus và SAU dòng "appended": event gốc đã xong y như trước, từng byte;
+#     khối này không còn cách nào chặn/hoãn/sửa nó.
+#   · Chỉ event_type=finding. Loại khác không chạy thêm lệnh nào.
+#   · Fail-open về KẾT QUẢ: python lỗi / treo / stderr đóng ⇒ rc vẫn 0, event gốc không đổi.
+#     KHÔNG phải "nuốt hết": helper hỏng thì traceback của python vẫn có thể lọt ra stderr.
+#   · Helper VẮNG hoặc KHÔNG ĐỌC ĐƯỢC (-r) ⇒ không chạy gì, im tuyệt đối. Đây cũng là công tắc tắt TOÀN FLEET (cron và
+#     executor không nhận env của bạn): đổi tên bin/finding_measured_by.py là tắt sạch.
+#   · Trần trễ: +2s (timeout) — chỉ chạm tới khi helper treo hoặc stderr của caller là pipe đầy
+#     không ai đọc. Bình thường: xem latency_*.out trong thư mục research của cổng này.
+#   · Nhả flock và không cho helper thừa hưởng fd 9: không giữ khoá inbox lâu hơn bản cũ.
+#   · Cảnh báo đi stderr + bus/_measured_by_warn.jsonl (KHÔNG phải bus/inbox/ — cùng lý do
+#     với _rejected.jsonl ở trên): không reader nào nuốt (ngoại lệ: daily_retro.sh đếm đọc-only qua measured_by_warn_report.py), không đệ quy, không sinh question.
+# Tắt cho RIÊNG một caller: AE_MEASURED_BY_CHECK=0 (chỉ đúng chuỗi "0"; giá trị khác = vẫn bật).
+case "$etype" in finding)
+  if [ "${AE_MEASURED_BY_CHECK:-1}" != 0 ] && [ -r "$ROOT/bin/finding_measured_by.py" ]; then
+    flock -u 9 2>/dev/null || true
+    printf '%s\n' "$line" \
+      | timeout 2 python3 "$ROOT/bin/finding_measured_by.py" "$BUS/_measured_by_warn.jsonl" 9>&- \
+      || true
+  fi
+;; esac

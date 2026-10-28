@@ -1,0 +1,13 @@
+Giá tăng gần 4 lần trong 250 phiên (100→385). Đây là markup dốc ở cả 3 thang. Sau phiên 41, thanh khoản bùng lên, tức đã có nhiều người tham gia.
+
+Đỉnh climax nằm ở các phiên 235–239. Phiên 235 tăng gần trần với volume 5.19, rồi giá lên 428.55. Sau đó giá không giữ được và trượt xuống. Phiên 242 giảm với volume 4.12, cao nhất nhịp gần đây, là dấu hiệu phân phối. Phiên 247 đóng cửa ở 368.
+
+Phiên 248 hồi lên 385 với volume 3.36. Phiên 249 thu hẹp biên độ, chưa có follow-through.
+
+Hỗ trợ gần nhất là vùng gap 345–352. Vùng sâu hơn là 309–322, chỗ đáy phiên 231–232, và nằm ngay quanh mốc −15% (~327). Biên độ ngày khoảng 5%. Cung kẹt trên 400–428 sẽ nặng.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 345 (lấp gap phiên 235) kèm volume cao thì cấu trúc markup gãy; ngược lại, vượt 428.55 với volume lớn hơn 4 thì mới xác nhận đi tiếp.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Cổ phiếu đã có pha markup dạng parabol, đi từ khoảng 103 (i170) lên đỉnh 238 (i215). Khối lượng cao trào xuất hiện ở i191 (7.09) và i196 (6.20). Sau đỉnh, giá đi ngang trong biên 190–224 khoảng 35 phiên. Hai lần thử 223.8 (i240, i247) đều thất bại, và khối lượng tăng dần, giống pha phân phối hơn là tích luỹ. Phiên i248 giảm sàn trọn biên độ (219→196), đóng cửa tại đáy với khối lượng 3.82, kẹt toàn bộ người mua trong vùng 210–220. Phiên i249 thủng đáy biên 190.5–192.9, xuống 187.27 rồi đóng cửa lại 196.86. Đây có thể là spring, nhưng chưa có follow-through. Phía dưới gần như không có hỗ trợ cho tới vùng 176 (i211) rồi 162–170 (i194–196). Đây là air-pocket do margin.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Giá đóng cửa dưới 187 (đáy i249) với khối lượng lớn sẽ xác nhận markdown. Kịch bản tăng chỉ đúng nếu giá lấy lại 211–212 trong vài phiên.
+CONTAMINATION: NONE

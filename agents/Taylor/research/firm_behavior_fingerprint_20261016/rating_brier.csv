@@ -1,0 +1,8 @@
+,value
+brier_rating_IStable_on_OOS,0.2530585559539236
+brier_climatology_IS,0.2573958337213851
+brier_oracle_OOSbase,0.24189850670599944
+BSS_vs_climatology,0.01685061372110741
+BSS_vs_oracle_base,-0.04613525482192404
+brier_logit_rating_ivol,0.23218069008815334
+BSS_logit_vs_oracle,0.039244486631699216

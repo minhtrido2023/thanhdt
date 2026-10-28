@@ -1,0 +1,11 @@
+**Phân tích:** Suốt khoảng phiên 0–227, giá đi ngang rộng trong vùng 92–123. Đỉnh 122.8 ở phiên 128 và các nhịp hồi 117–118 đều bị bán lại. Phiên 228 phá vỡ vùng này với khối lượng 6.67, follow-through tốt ở các phiên 231 (6.48) và 241 (6.93). Đây là pha markup thật ở thang 20 và 60 phiên.
+
+Từ phiên 242 đến 249, giá giằng co trong vùng 139–150 với khối lượng cao (3–4.5). Phiên 246 chạm 150 rồi đóng 144.6, cho thấy cung xuất hiện nhưng chưa phải climax đảo chiều. Mỗi lần xuống 139–140 đều được đỡ.
+
+Giá đã kéo khoảng 33% chỉ trong 22 phiên nên rất căng. Mốc −15% từ giá vào khoảng 146 là quanh 124, tức đúng mép breakout cũ 122–128. Nếu nhịp chốt lời quay lại kiểm tra nền cũ thì có thể chạm mốc này, nhất là khi margin rút.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 138 (đáy vùng giằng co 139–140) với khối lượng lớn → nguy cơ rơi về vùng breakout 126–128 hoặc sâu hơn.
+CONTAMINATION: NONE

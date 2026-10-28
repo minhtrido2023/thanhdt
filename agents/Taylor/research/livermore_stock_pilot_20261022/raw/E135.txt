@@ -1,0 +1,7 @@
+Thanh khoản cực mỏng: nhiều phiên Volume 0 và nhiều phiên trần/sàn liên tiếp. Ở 250 phiên, cổ phiếu có một đợt markup (i133–142, lên 152.5), sau đó phân phối khối lượng lớn ở vùng 120–145 (i141–176, đáng chú ý i159 có V=90) rồi markdown về 84.5 (i199). Nhịp hồi lên 133.7 bị chặn, giá trôi về 110. Gần đây xuất hiện climax khối lượng: i244 (173x) và i245 (272x) đẩy giá lên 137 (i246–247), ngay dưới vùng cung đỉnh cũ 140–152. Sau đó breakout thất bại: i248 giảm, i249 giảm sàn về đúng low 123.23 với 46x khối lượng. Đây là dấu hiệu tiền nóng thoát hàng. Air-pocket xuống 110 rồi 104 là có thật. Biến động ±7%/phiên khiến mốc −15% (~105) dễ chạm.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa trên 137 với khối lượng duy trì (vượt đỉnh climax i246–247) thì luận điểm phân phối/breakout thất bại bị vô hiệu.
+CONTAMINATION: NONE

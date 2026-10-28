@@ -1,0 +1,7 @@
+Cấu trúc là pha markdown kéo dài ở cả ba thang. Sau đợt tăng trần lúc mới niêm yết, đỉnh phân phối nằm ở vùng 165–172 (i6–14, khối lượng lớn 27 và 14.6). Từ đó giá liên tục tạo đỉnh thấp dần (154 → 139 → 111 → 75 → 72 → 65.7) và đáy thấp dần, tới đáy tuyệt đối 46.91 ở i237. Hồi i120–126 thất bại ngay khi chạm 103. Gần đây thanh khoản gần như bằng 0, nhiều phiên giá phẳng với khối lượng 0.00–0.05. Phiên +6% ở i247 với khối lượng 0.05 không phải follow-through. Chưa có climax bán hay khối lượng tích luỹ nào. Mức −15% tương đương khoảng 44.2, dưới đáy 46.9 chỉ khoảng 6%. Sổ lệnh mỏng nên rủi ro rơi hẫng (air-pocket) là cao. Kháng cự gần nằm ở 55–57 rồi 62–66.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Đóng cửa trên 66 kèm khối lượng >2× median trong nhiều phiên liên tiếp (phá chuỗi đỉnh thấp dần); ngược lại, thủng 46.9 xác nhận markdown tiếp diễn.
+CONTAMINATION: NONE

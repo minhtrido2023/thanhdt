@@ -1,0 +1,9 @@
+Theo thang 250 phiên, giá tăng lên ~121 (i79), phân phối ở vùng 108–116, rồi giảm về đáy 89 (i129). Sau đó là nền tích lũy dài 97–101 với khối lượng cạn kiệt (i130–220, V thường dưới 0.5). Breakout ở i222 có khối lượng 4.05 và có follow-through lên 109. Từ đó giá đi ngang 104–110, ngay dưới vùng cung cũ 110–116. Hai lần đẩy lên 113 (i229, i246) đều thất bại và đóng cửa về 108.
+
+Gần đây biến động nở rộng. Thanh i248 có râu dưới tới 99.65 rồi hồi về 107.7, cho thấy cầu vẫn đỡ. Tuy vậy, các cú đẩy lên liên tục bị bán, nên đây là range tranh chấp chứ chưa phải markup. Mốc −15% (~90) nằm dưới cả nền 97 và gần đáy năm, nên xác suất chạm thấp.
+
+P_HIT15: 0.12
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới ~101 (mép breakout i221 / râu i248) kèm khối lượng tăng, khi đó nền bị phá và giá có thể quay về 97.
+CONTAMINATION: NONE

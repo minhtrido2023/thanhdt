@@ -1,0 +1,7 @@
+Giá đã tăng khoảng 3,4 lần trong 250 phiên, theo dạng parabol từ i≈100, và hiện ở pha markup muộn. Phiên i=235 là climax: mở cửa trần 347.57 với volume 9.58x rồi đóng cửa 317.48, đảo chiều trong phiên. Mười phiên sau đó (i=239–249) giá giằng co trong vùng 336–369 với volume 4–7x mà không có follow-through. Đỉnh 368.93 ở i=240 chưa bị vượt, đây là dấu hiệu phân phối. Phiên i=249 có râu dưới chạm 303.40 (−9.8%) rồi hồi về 339 trên volume thấp (1.87). Lực cầu bắt đáy có mặt, nhưng phạm vi dao động trong ngày rất lớn. Bên dưới là khoảng trống gap 288–305 (i=233/234) chưa lấp, một air-pocket nếu margin bị bán giải chấp. Tiền lệ i=186→195 cho thấy giá đã từng rơi −33% trong 9 phiên.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 303 (đáy i=249), mở đường lấp gap 288; ngược lại, đóng cửa trên 369 kèm volume giúp luận điểm phân phối mất hiệu lực.
+CONTAMINATION: NONE

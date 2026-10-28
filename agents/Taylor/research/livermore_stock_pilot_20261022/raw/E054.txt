@@ -1,0 +1,7 @@
+Đây là một mã cực kỳ kém thanh khoản: phần lớn các phiên có Volume = 0 và giá nhảy ±9–10% chỉ từ vài lô lẻ. Một cú pump i121–130 đưa giá lên 148.71 với volume gần như bằng 0, rồi xả trở về 81 (i149). Từ đó giá đi ngang trong vùng 77–95 suốt khoảng 100 phiên. Đỉnh range 94–95.7 bị từ chối nhiều lần (i205–223, có thanh volume 74 tại i209 đóng ở đáy). Các đáy trong range nằm ở 76.69 (i170), 77.18 (i194), 82.60 (i227) và 75.15 (i240), nghĩa là các print ngang mức −15% xuất hiện thường xuyên. Phiên i249 có volume 115 nhưng giá đứng im ở 91.27, nhiều khả năng là giao dịch thỏa thuận/khối, không phải breakout. Điểm vào nằm sát mép trên của range, nên tỷ lệ rủi ro/lợi nhuận xấu.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 96 với khối lượng thực (>30) kèm follow-through thì luận điểm range/phân phối bị vô hiệu; đóng dưới 82.6 xác nhận rơi về đáy range 75–77.
+CONTAMINATION: NONE

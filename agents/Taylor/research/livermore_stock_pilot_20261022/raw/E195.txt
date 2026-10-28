@@ -1,0 +1,11 @@
+Đây là giai đoạn markup muộn, gần như parabol. Trên khung 250 phiên, giá tăng từ đáy 58,9 (i=16) lên 312 (i=246), tức khoảng 5 lần. Khối lượng phình lên 5–13 lần median từ i=190, đặc trưng của đám đông cá nhân dùng margin.
+
+Lần rũ trước cho thấy mức độ air-pocket: giá rơi từ 287 (i=216) xuống 203,6 (i=231), khoảng −29% chỉ trong 15 phiên. Sau đó giá phục hồi lên 312 với gap tăng tại i=246.
+
+Ngay sau đỉnh, i=248 đảo chiều mạnh: khối lượng 8,44, Low 282,9. Phiên i=249 tiếp tục chạm 276,7, dấu hiệu climax hoặc breakout thất bại tiềm năng quanh vùng 300–312. Biên độ ngày 5–8% làm mốc −15% (khoảng 246) dễ bị chạm. Hỗ trợ gần là 261–268 (i=242–244), sau đó là 241.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 261 (đáy i=244) kèm khối lượng lớn thì cấu trúc markup gãy, rủi ro rơi về vùng 241/204.
+CONTAMINATION: NONE

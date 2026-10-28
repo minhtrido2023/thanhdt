@@ -1,0 +1,7 @@
+**Phân tích:** Đây là cổ phiếu thanh khoản rất mỏng. Nó tích lũy lâu ở vùng 79–92 trong khoảng i=0–188. Sau đó giá tăng thẳng đứng (markup) từ 105 lên 211 ở i=189–202 với khối lượng lớn, phổ biến 6–17 lần median. Tiếp theo là pha phân phối đi ngang 145–175 ở i=203–239. Breakdown xảy ra ở i=240 với V=10.75, kéo theo chuỗi giảm sàn do margin, xuống đáy 95.5 ở i=245 (V=7.47, có dấu hiệu climax). Hai phiên cuối i=248–249 tăng trần một giá với khối lượng gần bằng 0 (0.02 và 0.05). Đó là nâng giá trên nền thanh khoản trống, không có follow-through bằng khối lượng thật. Giá vào lệnh có thể gap lên khoảng 130–138, ngay dưới vùng cung kẹt 146–165. Biên độ dao động rất lớn, và lệnh mua đang đuổi theo một nhịp hồi kỹ thuật.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Luận điểm thận trọng sai nếu giá đóng cửa vượt 165 với khối lượng >3× median và giữ được trên 146 ở các nhịp điều chỉnh với khối lượng cạn; ngược lại, thủng 106 (đáy i=246) xác nhận tiếp diễn markdown.
+CONTAMINATION: NONE

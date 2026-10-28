@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu tích luỹ trong vùng 115–140 (khoảng i=50–198), rồi vào pha markup từ i=199. Giá đi từ khoảng 135 lên 236, tức +75% trong 50 phiên. 20 phiên gần nhất là đoạn tăng dựng đứng, nối nhau bằng các khoảng gap. Hai thanh i=243–244 tăng +5% và +6,5% nhưng khối lượng chỉ 0,84 và 0,58, nghĩa là giá tăng thiếu cung-cầu thật và để lại air-pocket từ 203 đến 226. Phiên i=249 đóng cửa tại đỉnh với khối lượng 1,90, có thể là dấu hiệu climax ban đầu. Mức −15% tính từ giá vào khoảng 236 là quanh 200, trùng với vùng gap 203–213 và đáy nền i=240–242. Một nhịp lấp gap sau đoạn parabol là kịch bản phổ biến. Đà tăng vẫn còn nên chưa loại trừ khả năng lên tiếp, nhưng tỷ lệ rủi ro/lợi nhuận đang bất lợi cho người mua.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.43
+INVALIDATION: Đóng cửa dưới 226 (đáy thanh gap i=245) mở đường lấp gap về 203–200; kịch bản mua chỉ còn hợp lệ nếu giá giữ trên 226 và khối lượng phân phối không xuất hiện.
+CONTAMINATION: NONE

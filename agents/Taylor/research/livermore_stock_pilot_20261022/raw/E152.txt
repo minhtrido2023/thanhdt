@@ -1,0 +1,7 @@
+Trên thang 250 phiên, giá giảm từ 100 xuống đáy 60 (i=72), sau đó vào pha markup lên 156 (i=243), tức gần +150%. Trên thang 60 phiên, cổ phiếu tích luỹ trong vùng 124–146 (i=194–226) rồi breakout ở i=240 với khối lượng 9.87, vượt đỉnh cũ 144–146. Phiên i=243 tạo đỉnh 156.23 với khối lượng 6.88, thanh rộng, có dấu hiệu climax. Các phiên i=246–247 giảm với khối lượng tăng (5.22), cho thấy cung xuất hiện. Phiên i=248 rút chân về 143.89 rồi đóng 150.46, nghĩa là vùng breakout 141–146 đang được giữ. Xu hướng còn nguyên nhưng giá đã căng, rủi ro test lại vùng 141 là cao. Mức −15% tương đương ~127–128, nằm ở nửa dưới vùng range cũ. Đợt điều chỉnh trước (146→119) từng sâu ~18%, nên kịch bản này khả thi nếu breakout thất bại.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 141 (thủng vùng breakout 141–146 / đáy i=239 137.7) kèm khối lượng lớn → breakout thất bại, quay về range 124–146
+CONTAMINATION: NONE

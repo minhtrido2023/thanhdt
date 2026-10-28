@@ -81,3 +81,6 @@ trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọ
 
 ## Chuyển từ current_ops 2026-10-09 (sự cố đã dọn, kb-hot-size-gate)
   ⚠️ **Sự cố phụ phát sinh khi verify vòng 5** (Mike tự gây ra): ghi lọt 1 arm giả (`ticker=VPB, note="seed"`) vào LIVE `data/discretionary_margin_arms.json` — **ĐÃ DỌN, file rỗng `[]` từ 2026-09-24 19:16** (Mike kiểm lại bằng `cat` 2026-10-08). Chi tiết: `kb/projects/corp-action-nav-chain-20260922.md`.
+
+## Chuyển nguyên văn từ current_ops.md (27/10) — chi tiết 4 call-site đã LIVE
+  · **Việc 4 `report_return_gate.py:558-573` unmatched — APPROVED, LIVE, commit `569be662`.** · **Việc 3 `verify_account_snapshot.py:307` `broker_positions_from_raw()` — APPROVED vòng 2, LIVE, commit `96ee1bb8`+`7700582d`.** · **Việc 1 `discretionary_accumulation_inject.py` `broker_filled_qty()` — APPROVED vòng 2, LIVE, commit `5e6fb9af`+`642d4f5a`.** (⚠️ **Lưu ý docstring** (chưa sửa, không chặn): câu "tự khớp" chỉ ĐÚNG TUYỆT ĐỐI khi `baseline_qty_before_program=0` (đúng cả 2 state LIVE hôm nay); `baseline>0` thì thiếu `(r−1)×baseline` cp vĩnh viễn, hướng AN TOÀN (mua thiếu, không overbuy).) · **Việc 2 `discretionary_margin_gate.py` arm_price — APPROVED vòng 12, LIVE, merge `c5247def` (12 commit vòng 3→12, từ `26ef0c58` tới `bc22bed2`).** Chi tiết từng việc: `kb/projects/corp-action-nav-chain-20260922.md`.

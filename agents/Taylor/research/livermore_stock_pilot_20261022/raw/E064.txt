@@ -1,0 +1,7 @@
+**Phân tích:** Thang 250 phiên là markup lớn từ 98 lên ~190. Thang 60 phiên đã chuyển sang phân phối hoặc đi ngang rộng 163–194. Các đỉnh tiếp tục thấp dần: 193.9 (i213/220/221), rồi 181.8 (i231/242). Chiều lên thiếu xác nhận: i242 lên 181.8 chỉ với khối lượng 0.19 và không có follow-through. Phiên i249 đóng ở sàn trên khối lượng 0.10, về đúng kệ 155 (i200–203). Đây là nền của cú breakout i204–206 (6.6/5.3/5.0). Nếu kệ này thủng, vùng đỡ kế tiếp là 136–146 (nền i138–161). Ngưỡng −15% (~131–132) nằm ngay dưới vùng đó. Thanh khoản rất mỏng, nhiều phiên khối lượng gần 0 và các khoảng trống ±5–7%, nên rủi ro air-pocket là có thật. Ủng hộ phe mua: có một lần test 150.8 (i240) và giá bật lại nhanh.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 150 (thủng kệ 155 và đáy i240) với khối lượng tăng thì luận điểm giữ nền bị vô hiệu, mục tiêu tiếp theo là 136–146.
+CONTAMINATION: NONE

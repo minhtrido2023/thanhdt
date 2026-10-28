@@ -1,0 +1,11 @@
+Giá tạo đáy ở pha markdown dài, từ 100 xuống 73 trong các phiên i0–116, với climax khối lượng 9.17 tại i96. Sau đó là nền tích luỹ 70–90 kéo dài tới i221. Cú bứt phá bắt đầu ở i222 với khối lượng 10.54. Từ i233 đến i236 giá tăng trần dựng đứng lên 142, rồi i237 là phiên blow-off: đỉnh 155.95, đóng cửa 129.53 với khối lượng 3.97. Đây là cấu trúc pump rồi phân phối.
+
+Từ i238 đến i249 là markdown: đáy và đỉnh đều thấp dần, biên độ ngày 8–15%, đã xoá gần hết cú đẩy. Phiên i249 có khối lượng cạn (0.39) và rút chân về 101. Tuy vậy chưa có follow-through, nên đây chưa phải tín hiệu cầu thật.
+
+Cung kẹt dày ở vùng 110–140. Hỗ trợ gần nhất là mép breakout 93–95 (i225–230), dưới đó là khoảng trống tới 83–86. Mức −15% tính từ giá vào khoảng 86, nằm gọn trong vùng nền cũ mà giá rất dễ quay về.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Vô hiệu hoá kịch bản giảm nếu giá đóng cửa trên 112 (đỉnh i246) kèm khối lượng >2 và giữ được trên 100. Ngược lại, đóng cửa dưới 93 xác nhận giá thủng mép breakout và nhiều khả năng về 83–86.
+CONTAMINATION: NONE

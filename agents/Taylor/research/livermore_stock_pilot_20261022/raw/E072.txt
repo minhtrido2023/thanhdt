@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu đã đi qua đủ một chu kỳ. Nền tích lũy dài kéo dài từ i0 đến i140, giá dao động 90–113. Sau đó là pha markup thẳng đứng (i143–151), lên 222 với khối lượng climax 13–14x. Tiếp theo là vùng phân phối rộng 175–224 (i151–221), khối lượng luôn ở mức 3–8x. Pha markdown bắt đầu từ i222: thủng 175 rồi thủng vùng gap 155–170.
+
+Phiên i249 đóng cửa giảm sàn (−7,3%) ngay tại đáy phiên 119, khối lượng 1,53x, và chưa có dấu hiệu climax bán. Giá đang ở mép trên vùng tích lũy cũ 113–126 (i125–140), nhưng cầu ở đây mỏng. Phía trên còn cả khối hàng kẹt ở 175–220.
+
+Mức −15% tính từ giá vào (≈100) chính là vùng nền cũ 96–110. Đó là đích hồi về tự nhiên khi lực bán do margin bị gọi còn tiếp diễn.
+
+P_HIT15: 0.48
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Giá giữ được 113 và đóng cửa lại trên 136–141 với khối lượng ≥2x mới phủ nhận pha markdown; nếu đóng cửa dưới 113 thì mục tiêu là vùng 96–103.
+CONTAMINATION: NONE

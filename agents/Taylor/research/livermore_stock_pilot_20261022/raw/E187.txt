@@ -1,0 +1,11 @@
+Cổ phiếu đang trong pha markdown sau khi phân phối. Ở thang 250 phiên, giá chạy markup từ 100 lên đỉnh 230 tại i184. Từ i184 đến i199 là vùng phân phối 210–230 với nhiều thanh rộng, khối lượng 1.3–1.8.
+
+Có ba nhịp sập bằng các phiên giảm sàn: i202–204 về 163, i220–223 về 151, và i247–249. Hai lần hồi lên 205 rồi 174 đều tạo đỉnh thấp dần.
+
+Phiên i249 đóng cửa ngay tại đáy 128.12, giảm khoảng 7%. Phiên này phá vùng đỡ 141–145 (đáy i237, i247) mà khối lượng chỉ 0.97, không phải climax bán. Có hai rủi ro: phiên mở cửa tiếp theo có thể gap xuống, và margin bị bán giải chấp gây air-pocket. Đỡ kế tiếp nằm ở nền 113–122 (i56–84); −15% từ giá vào tương ứng khoảng 108–110. Cung kẹt phía trên rất dày ở 150–175.
+
+P_HIT15: 0.48
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Giá lấy lại và đóng cửa trên 145–150 (vùng đỡ vừa bị phá) với khối lượng >1.5, không phá đáy cũ sau đó, thì nhận định markdown bị vô hiệu.
+CONTAMINATION: NONE

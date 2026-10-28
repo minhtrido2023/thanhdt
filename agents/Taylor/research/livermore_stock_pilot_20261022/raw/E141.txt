@@ -1,0 +1,7 @@
+Cổ phiếu cực kỳ kém thanh khoản: nhiều phiên khối lượng 0, giá thường khoá trần hoặc sàn. Ở thang 250 phiên, giá đi ngang trong vùng 95–130. Đợt markup thẳng đứng i208–226 đưa giá từ 105 lên 252, khối lượng dày ở i218–229. Sau đó là phân phối: i226 tạo đỉnh 252 rồi đóng 219,7, và i229 khối lượng 49 không giữ được. Tiếp theo là markdown bằng chuỗi giảm sàn i234–241, xuống tới 138,2 ở i242. Giá hồi lên 168 (i249, tăng trần, khối lượng 35) nhưng vẫn nằm dưới vùng cung kẹt 197–227. Biên dao động mỗi phiên khoảng ±7% và chuỗi sàn liên tiếp, nên mức sụt −15% là rất dễ chạm. Đáy 138 cách giá vào lệnh (ước tính khoảng 168–180) chừng 18–23%.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 138 (đáy i242) xác nhận markdown tiếp diễn; phe tăng chỉ mạnh lại nếu vượt và giữ được trên 227.
+CONTAMINATION: NONE

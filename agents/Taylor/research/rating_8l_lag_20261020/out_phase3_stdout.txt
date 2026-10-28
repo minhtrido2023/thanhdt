@@ -1,0 +1,23 @@
+  T1 = H.groupby(["era", "grp"]).apply(agg); T2 = H.groupby(["qn", "grp"]).apply(agg)
+  T1 = H.groupby(["era", "grp"]).apply(agg); T2 = H.groupby(["qn", "grp"]).apply(agg)
+                          N  rd_null  definite_peek  definite_peek_pct  early_le7  N_news  news_peek6  news_cons6  news_peek6_pct  news_cons6_pct
+era         grp                                                                                                                                  
+2014-19     bank      237.0      0.0            0.0               0.00        0.0    22.0         0.0         1.0             0.0             4.5
+            nonbank  5911.0     14.0            0.0               0.00        4.0   509.0        44.0         5.0             8.6             1.0
+2020-24     bank      442.0      0.0            0.0               0.00        0.0   102.0         0.0        25.0             0.0            24.5
+            nonbank  8095.0     75.0            0.0               0.00       10.0  1783.0       155.0       200.0             8.7            11.2
+2025Q1-26Q2 bank      144.0      0.0            0.0               0.00        5.0     0.0         0.0         0.0             0.0             0.0
+            nonbank  2377.0     39.0            7.0               0.29      122.0    11.0         2.0         0.0            18.2             0.0
+                 N  rd_null  definite_peek  definite_peek_pct  early_le7  N_news  news_peek6  news_cons6  news_peek6_pct  news_cons6_pct
+qn grp                                                                                                                                  
+Q1 bank      208.0      0.0            0.0               0.00        5.0    29.0         0.0         0.0             0.0             0.0
+   nonbank  4096.0     32.0            5.0               0.12      123.0   619.0        60.0         3.0             9.7             0.5
+Q2 bank      211.0      0.0            0.0               0.00        0.0    45.0         0.0        26.0             0.0            57.8
+   nonbank  4151.0     31.0            2.0               0.05        2.0   681.0        66.0       194.0             9.7            28.5
+Q3 bank      201.0      0.0            0.0               0.00        0.0    22.0         0.0         0.0             0.0             0.0
+   nonbank  4055.0     35.0            0.0               0.00        8.0   453.0        19.0         2.0             4.2             0.4
+Q4 bank      203.0      0.0            0.0               0.00        0.0    28.0         0.0         0.0             0.0             0.0
+   nonbank  4081.0     30.0            0.0               0.00        3.0   550.0        56.0         6.0            10.2             1.1
+definite peek theo quý (univ): {'2026Q1': 5, '2026Q2': 2}
+definite-peek univ có RD trùng đúng RD quý trước (ghi đè dòng quý trước trong fa_ratings_8l): 7 / 7
+peek_days (time - RD) definite: {'count': 7.0, '50%': 91.0, '75%': 93.5, 'max': 102.0}

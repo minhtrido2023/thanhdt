@@ -1,0 +1,14 @@
+Cổ phiếu có thanh khoản rất mỏng, nhiều phiên khối lượng gần 0 và giá nhảy theo lệnh lẻ. Suốt khoảng 250 phiên, giá đi ngang trong biên 88–106, không có pha markup hay markdown rõ ràng.
+
+- **Nền tích luỹ i145–209:** biên rất hẹp 90–94. Phiên i163 có khối lượng đột biến 320× nhưng giá không bung ra. Đây giống một giao dịch thỏa thuận hơn là climax.
+- **Từ i210:** giá nâng nền lên 93–102 và khối lượng tăng (i230–240 đạt 10–22×).
+- **Cung phía trên:** mỗi lần chạm 102–104 (i214, 233, 237, 240) giá đều bị đóng cửa trả về khoảng 96. Tức là cung tại đỉnh vẫn còn, chưa có follow-through.
+- **Hỗ trợ:** vùng 91–93 được giữ nhiều lần.
+
+Mức −15% tính ra khoảng 83, nằm xa dưới nền. Rủi ro chính là thanh khoản: giá có thể gap qua hỗ trợ khi không có bên mua.
+
+P_HIT15: 0.13
+RISK: MED
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 90 kèm khối lượng lớn (thủng nền 90–93 của i145–209)
+CONTAMINATION: NONE

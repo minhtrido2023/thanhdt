@@ -1,0 +1,9 @@
+**Phân tích:** Ở thang 250 phiên đây là xu hướng markup, giá đi từ 100 lên 165. Thang 60 phiên là một biên độ rộng và biến động mạnh, trong khoảng 130–165. Phiên 231–232 là cú rũ bỏ mạnh từ 150 xuống 130 (−13% trong 2 phiên). Sau đó giá hồi nhanh lên 165, ngang vùng đỉnh 222–223 (165.12, hai thanh volume 0, có thể là trần không có giao dịch).
+
+Điểm đáng ngại là nhịp hồi 245–249 đi trên khối lượng teo dần (0.36–0.66, phiên 249 chỉ 0.37), tức thiếu cầu ngay tại vùng cung đỉnh cũ. Chưa thấy breakout có follow-through. Thanh khoản mỏng và biên dao động lớn khiến nguy cơ có air-pocket về 140–145 (gap 241–242) hoặc 130 là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 143 (lấp gap 241–242, thủng nền 236–240) với khối lượng tăng; nếu thủng 130 thì cấu trúc tăng bị phá.
+CONTAMINATION: NONE

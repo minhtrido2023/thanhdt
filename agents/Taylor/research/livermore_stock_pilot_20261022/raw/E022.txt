@@ -1,0 +1,9 @@
+Trên thang 250 phiên, cổ phiếu tăng từ 100 lên đỉnh khoảng 252 (i205), tức markup gần 2,5 lần. Thang 60 phiên cho thấy phân phối. Đỉnh 241–252 (i202–207) có khối lượng 1.9–2.4 nhưng giá không đi tiếp. Sau đó các phiên giảm mạnh kèm khối lượng lớn: i209 (2.78), i210 (gap xuống), i217, i226 (2.14). Đáy i228 ở 156 hình thành mà không có climax rõ.
+
+Nhịp hồi lên 186–190 có khối lượng thấp (0.5–0.8). Phiên i244 khối lượng 1.81 nhưng đóng cửa ở đáy phiên, cho thấy có cung chặn. Giá đang nằm ngay dưới vùng kẹt hàng 196–245. Mức −15% tính từ giá vào khoảng 158, gần trùng đáy 156–162. Biên độ ngày của mã này rộng 4–7%, nên khả năng test lại đáy là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 156 (đáy i228) với khối lượng >1.5 thì phá nền; ngược lại, vượt 200–207 với khối lượng >1.5 và giữ được thì luận điểm phân phối sai.
+CONTAMINATION: NONE

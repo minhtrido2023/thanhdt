@@ -1,0 +1,9 @@
+**Phân tích:** Ở thang 250 phiên đây là một markdown kéo dài, giá giảm từ 100 xuống khoảng 42. Chuỗi đáy liên tục thấp hơn: 78 → 57 → 49 → 42.4 → 36.85 (i207). Ở thang 20–60 phiên, giá dao động trong khoảng 42–52. Nhịp hồi i212–221 lên 51.8 thất bại, sau đó giá trôi dần về 42 với khối lượng nhỏ. Hai phiên i248–249 bật mạnh, phiên cuối +5.9% với 2.3× khối lượng và đóng gần đỉnh. Đây là dấu hiệu cầu xuất hiện, nhưng chưa phải climax đảo chiều.
+
+Giá vào dự kiến khoảng 47–48, nằm ngay dưới vùng cung kẹt 49–51.8 (i220–228). Mức −15% tương ứng khoảng 40.2, thấp hơn đáy gần 41.96 và vẫn cao hơn đáy 36.85. Xu hướng lớn vẫn đi xuống, nên rủi ro thủng đáy là đáng kể.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 41.9 (thủng đáy range i245–247) thì thesis hồi phục bị vô hiệu; vượt 52 kèm khối lượng sẽ xác nhận đảo pha.
+CONTAMINATION: NONE

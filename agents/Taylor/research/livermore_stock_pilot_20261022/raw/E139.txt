@@ -1,0 +1,15 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đi ngang rộng trong vùng 80–111. Đáy vùng nằm ở 80–84 (các phiên i=57, 89, 130, 238). Đỉnh vùng ở 108–111 (các phiên i=150, 168–171, 187) và đã thất bại nhiều lần.
+
+Ở thang 60 phiên, giá giảm dần từ 105 về 83 trong pha markdown (i=223→238), với khối lượng cạn. Sau đó giá bật về khoảng 92. Phiên i=240 có khối lượng 7.11, là dấu hiệu cầu nhẹ tại đáy vùng.
+
+Phiên i=249 khớp ở một mức giá duy nhất 92.15 nhưng khối lượng đạt 11.81. Đây là khối lượng bất thường và chưa rõ hướng.
+
+Thanh khoản cực mỏng, nhiều phiên khối lượng 0, và biên độ nến trong ngày thường 7–10%, nên rủi ro trượt giá khi bán ra là cao.
+
+Ngưỡng −15% (khoảng 78) nằm dưới đáy vùng của cả năm. Để chạm ngưỡng này, giá cần thủng hẳn vùng 81–83. Giá đang ở nửa dưới của vùng, nên kỳ vọng lợi suất gần trung tính.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.47
+INVALIDATION: Giá đóng cửa dưới 81 (thủng đáy vùng 250 phiên) kèm khối lượng tăng.
+CONTAMINATION: NONE

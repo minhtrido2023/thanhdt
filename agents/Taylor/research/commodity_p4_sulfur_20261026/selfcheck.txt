@@ -1,0 +1,4 @@
+cP4 hand 0.280618 panel 0.280618
+np_d hand -0.159604 panel -0.159604
+release 2026-07-22
+SELFCHECK PASS

@@ -21,6 +21,9 @@ CƠ CHẾ (đúng §F2 của thiết kế):
      oldest-first + gắn cờ UNVERIFIED cho toàn bộ ticker đó. Số UNVERIFIED **CẤM** dùng làm
      cơ sở sinh lệnh trim (§21 coding_guidelines — cùng tinh thần "không đưa số chưa đối
      soát vào quyết định").
+  4b. Lệnh BÁN TAY của user (ngoài bot) chỉ có ở statement DNSE → `statement_extra_sells`
+     thêm phần statement − journal theo (ngày, mã, chiều), đi nhánh FIFO theo ticker của mục 4
+     (2026-10-22, ca DRI 21/10). MUA chỉ-có-ở-statement KHÔNG thêm lô (để đối soát chặn).
   5. park_mv = Σ(qty × GIÁ ĐÓNG CỬA đã xác minh) trên các lô book == "PARK".
      KHÔNG dùng `positions[].marketPrice` (sửa 2026-09-09): field đó không phải giá ATC —
      ca SCL 2026-08-28 đứng im 27.600 trong khi phiên đóng 27.800. Xem resolve_close_prices():
@@ -56,6 +59,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions, validate as validate_action   # noqa: E402
 from exdate_frame import verify_post_event_price   # noqa: E402 — §exdate_frame
+import rights_subscription as rights_sub   # noqa: E402 — N1/N4 sổ khai báo quyền mua của user
 import wc_paths  # noqa: E402
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo TZ tường minh, không tin TZ của process
@@ -504,7 +508,11 @@ class LotBook:
         pool = [l for l in self.lots if l["ticker"] == ticker]
         if not pool:
             return 0                                   # không giữ mã này — no-op, không phải lỗi
-        entitled = [l for l in pool if l["entry_date"] < ex_date]
+        # N4 (legal-vn 22/10): lô CP QUYỀN MUA đang chờ VSDC ghi nhận tại ex_date KHÔNG hưởng quyền
+        # (entry_date kế thừa lô gốc nên điều kiện entry_date < ex_date một mình sẽ nhân nhầm).
+        entitled = [l for l in pool if l["entry_date"] < ex_date
+                    and not (l.get("rights_subscription")
+                             and rights_sub.pending_at(l["rights_subscription"], ex_date))]
         if not entitled:
             self.warnings.append(
                 f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier}: đang giữ "
@@ -551,6 +559,43 @@ class LotBook:
             f"{eff:.6f} sau làm tròn mức vị thế) — tổng giá vốn không đổi")
         return len(entitled)
 
+    def rights_credit(self, sub, entitled):
+        """N1 — thêm LÔ MỚI cho CP quyền mua user đã khai (`rights_subscription.py`).
+
+        `entitled` = bản chụp các lô hưởng quyền tại GDKHQ (entry_date < GDKHQ, đang giữ ở đầu
+        phiên GDKHQ) — chụp ở đó nên lô gốc bán SAU GDKHQ vẫn là cơ sở. Chia `subscribed_qty` theo
+        tỉ lệ KL các lô đó (Hamilton, tie-break thứ tự lô — cùng quy tắc corp_action_split); mỗi lô
+        mới KẾ THỪA book/play_type/entry_date của lô gốc (phương án A, user 22/10), giá vốn = giá
+        phát hành, phí 0. Không lô hưởng quyền / khai vượt quyền tối đa ⇒ KHÔNG thêm, UNVERIFIED."""
+        tk, qty, eid = sub["ticker"], int(sub["subscribed_qty"]), sub["event_id"]
+        base = sum(l["qty"] for l in entitled)
+        cap = int(math.floor(base * sub["exercise_ratio"] + 1e-9))
+        if not entitled or qty > cap:
+            self.unverified.add(tk)
+            self.warnings.append(
+                f"{sub['credit_date']} quyền mua {tk} id={eid}: khai {qty}cp nhưng sổ chỉ có {base}cp hưởng "
+                f"quyền tại GDKHQ {sub['exright_date']} (tối đa {cap}cp) ⇒ KHÔNG thêm lô, {tk} UNVERIFIED")
+            return 0
+        raw = [l["qty"] * qty / base for l in entitled]
+        add = [int(math.floor(r + 1e-9)) for r in raw]
+        for i in sorted(range(len(entitled)), key=lambda i: (-(raw[i] - add[i]), i))[:qty - sum(add)]:
+            add[i] += 1
+        meta = {k: sub.get(k) for k in ("event_id", "exright_date", "credit_date", "registered_date",
+                                         "listing_date")}
+        n = 0
+        for l, a in zip(entitled, add):
+            if a <= 0:
+                continue
+            self.lots.append({"ticker": tk, "book": l["book"], "play_type": l.get("play_type", ""),
+                              "entry_date": l["entry_date"], "qty": a,
+                              "price": float(sub["issue_price_vnd"]),
+                              "source": f"{rights_sub.KIND}:{eid}", "rights_subscription": meta})
+            n += 1
+        self.warnings.append(
+            f"{sub['credit_date']} quyền mua {tk} id={eid}: +{qty}cp @{sub['issue_price_vnd']:,.0f} vào "
+            f"{n} lô mới (entry_date kế thừa lô gốc, GDKHQ {sub['exright_date']}, khai {sub['at']})")
+        return n
+
     def by_ticker_qty(self):
         out = {}
         for l in self.lots:
@@ -590,13 +635,93 @@ def _fill_deltas(path):
                    "qty": delta, "price": px, "parent_id": row.get("parent_id") or ""}
 
 
+_STATEMENT_RE = re.compile(r"^dnse_khoplenh_broker_confirm_(?P<d>\d{2})-(?P<m>\d{2})-(?P<y>\d{4})\.csv$")
+
+
+def statement_extra_sells(account_label, journal_qty, since_date, until_date, exec_dir=EXEC_DIR):
+    """Lệnh BÁN có trong statement DNSE mà journal bot KHÔNG có (lệnh đặt TAY của user).
+
+    VÌ SAO (ca thật DRI 21/10/2026, user DUYỆT 22/10 21:32): user bán tay DRI ngoài bot (SpaceX
+    −1.200cp, ZaloPay −600cp @15.400). Sổ lô chỉ replay journal executor ⇒ DRI 3.700/1.900 vs
+    broker 2.500/1.300 ⇒ reconcile.ok=False ⇒ L1/L2 BLOCKED_RECONCILE cả 2 account.
+
+    CÙNG HỢP ĐỒNG với `exdate_frame.net_fills_journal_and_broker` (f0e293c30, arch-review APPROVED):
+      · Đọc statement qua `broker_fill_confirm.load_broker_fills(allow_fetch=False)` — lọc ĐÚNG
+        tiểu khoản (§12, dtype=str giữ số 0 dẫn đầu), không tự gọi Gmail từ đường sizing.
+      · KHỬ TRÙNG theo (ngày, mã, chiều) = `max(journal, statement)`, KHÔNG cộng ⇒ phần thêm vào
+        sổ = statement − journal (>0). Fill của bot nằm ở CẢ HAI nguồn nên không bị trừ lần 2.
+      · Statement thiếu / không parse được ⇒ ngày đó giữ hành vi CŨ (chỉ journal), có ghi chú.
+
+    `journal_qty` = {(ngày, mã, chiều): KL} của CHÍNH các fill journal mà sổ đã replay (sau lọc
+    snapshot) — so với cái sổ đã áp, không với một bản đếm khác.
+
+    CHỈ chiều BÁN được áp (FIFO theo ticker, không tag book ⇒ UNVERIFIED — docstring mục 4).
+    MUA chỉ có ở statement KHÔNG được thêm lô: không có book để gán ⇒ để lệch đối soát chặn
+    (fail-closed), chỉ ghi chú. Phần lệch còn lại sau bước này vẫn làm reconcile.ok=False.
+
+    Statement không có giờ khớp ⇒ lệnh bán tay đặt ở cuối ngày (`<ngày>T23:59:59`): sau mọi
+    fill bot cùng ngày, nên không bao giờ bán trước lô mua cùng phiên.
+
+    Giới hạn đã biết (arch-review 22/10):
+      · Mã bán tay có lô ở >1 book tại thời điểm áp ⇒ replay KHÔNG áp (fail-closed, B1).
+      · N2 — bán tay và corp-action credit CÙNG tối T-1: bán tay đặt ở `T23:59:59`, sau credit
+        ⇒ trừ lô đã nhân hệ số; nếu thực tế bán trước credit thì lệch ⇒ reconcile chặn (fail-closed).
+      · N3 — mã bán tay vẫn UNVERIFIED (FIFO không tag book) tới khi dựng bootstrap snapshot mới
+        sau ngày bán (khi đó statement ngày ≤ ngày chụp bị bỏ qua) ⇒ gỡ cờ bằng bootstrap mới.
+      · N4 — cron L1/L2 cần interpreter có pandas (`load_broker_fills`); thiếu ⇒ ngày đó chỉ journal.
+      · N6 — runbook: statement tải ở EOD bước 3 (~19:10). L1/L2 chạy TRƯỚC giờ đó thì bán tay
+        trong ngày bị chặn BLOCKED_RECONCILE; hôm sau statement có mặt ⇒ tự hết.
+
+    Trả (events, notes): events cùng dạng `_fill_deltas` (book="" ⇒ nhánh FIFO theo ticker).
+    """
+    from broker_fill_confirm import BrokerFills, load_broker_fills
+    wc_root = os.path.dirname(os.path.dirname(os.path.abspath(exec_dir)))
+    days = []
+    for path in glob.glob(os.path.join(exec_dir, "dnse_khoplenh_broker_confirm_*.csv")):
+        m = _STATEMENT_RE.match(os.path.basename(path))
+        if not m:
+            continue
+        d = f"{m.group('y')}-{m.group('m')}-{m.group('d')}"
+        if since_date <= d <= until_date:
+            days.append((d, os.path.basename(path)))
+    events, notes = [], []
+    for d, fname in sorted(days):
+        try:
+            bf = load_broker_fills(d, account_label, wc_root, allow_fetch=False)
+        except Exception as e:   # dòng statement hỏng (vd khối lượng NaN) KHÔNG được làm sập sổ
+            bf = BrokerFills(False, f"không parse được: {type(e).__name__}: {e}")
+        if not bf.available:
+            notes.append(f"{d} statement DNSE KHÔNG dùng được ({bf.reason}) ⇒ ngày này chỉ journal")
+            continue
+        keys = set(bf.by_key) | {(tk, sd) for (dd, tk, sd) in journal_qty if dd == d}
+        for tk, side in sorted(keys):
+            j, b = journal_qty.get((d, tk, side), 0), int(bf.qty(tk, side))
+            if j > b:
+                notes.append(f"{d} {tk} {side}: journal {j:,} > statement {b:,} (giữ journal)")
+            elif b > j and side == "buy":
+                notes.append(f"{d} {tk} MUA +{b - j:,}cp chỉ có ở statement DNSE — không có book, "
+                             f"KHÔNG thêm lô (để đối soát chặn)")
+            elif b > j:
+                v = bf.by_key[(tk, side)]
+                events.append({"ts": f"{d}T23:59:59", "ticker": tk, "side": "sell", "book": "",
+                               "play_type": "", "qty": b - j,
+                               "price": v["value"] / v["qty"] if v["qty"] else 0.0,
+                               "parent_id": "broker_statement", "_file": fname})
+                notes.append(f"{d} {tk} BÁN +{b - j:,}cp chỉ có ở statement DNSE (ngoài journal bot) "
+                             f"⇒ trừ lô FIFO theo ticker")
+    return events, notes
+
+
 def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR,
-                  broker=None, corp_actions=None, price_fn=None, need_price=True):
+                  broker=None, corp_actions=None, price_fn=None, need_price=True, rights_subs=None,
+                  broker_statement=True):
     """Vị thế theo book tại `asof` (mặc định hôm nay ICT).
 
     `broker` = (positions, cash, meta) truyền sẵn — chỉ dùng cho selfcheck; production để None.
     `corp_actions` = danh sách record truyền sẵn — cũng chỉ cho selfcheck; production để None
     (đọc `data/corp_actions.json`, và CHỈ record đã `CONFIRMED` — xem `mike/bin/corp_actions.py`).
+    `rights_subs` = khai báo quyền mua truyền sẵn — chỉ cho selfcheck; production để None (đọc
+    `data/lag_rights/subscriptions.json` qua `rights_subscription.load_subscriptions`, lọc account).
 
     `need_price=False`: BỎ QUA `resolve_close_prices()` (fail-closed TOÀN LƯỢT nếu thiếu giá MỘT
     mã bất kỳ — xem docstring hàm đó) VÀ khối §exdate_frame bên dưới — CHỈ dùng khi caller không
@@ -606,6 +731,9 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
     `compute_jit_unpark` KHÔNG được đổi mặc định này: `park_mv` là mẫu số cấp tài khoản, một mã
     thiếu giá phải chặn CẢ LƯỢT tính pool (lý do nằm ở `resolve_close_prices` docstring), khác hẳn
     `book_lot_snapshot` — số lượng bán theo từng mã không phụ thuộc giá mã khác.
+
+    `broker_statement=True` (2026-10-22): replay thêm lệnh BÁN TAY có trong statement DNSE mà
+    journal bot không có — xem `statement_extra_sells`. False = hành vi cũ (chỉ journal).
     """
     asof = asof or today_ict()
     prof = account_profile(account_label)
@@ -640,11 +768,50 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                 for path in journal_files(account_label, day0, asof, exec_dir)
                 for ev in _fill_deltas(path)
                 if not (snap_ts and ev["ts"] and ev["ts"] <= snap_ts)]
+    if broker_statement:
+        jq = {}
+        for _ts, _k, ev, _f in timeline:
+            k = (ev["ts"][:10], ev["ticker"], ev["side"])
+            jq[k] = jq.get(k, 0) + ev["qty"]
+        # ngày chụp snapshot đã nằm trong bootstrap ⇒ statement chỉ tính từ ngày SAU đó
+        since = max(day0, (dt.date.fromisoformat(snap_ts[:10]) + dt.timedelta(days=1)).isoformat()) \
+            if snap_ts else day0
+        st_events, st_notes = statement_extra_sells(account_label, jq, since, asof, exec_dir)
+        timeline += [(ev["ts"], 0, ev, ev["_file"]) for ev in st_events]
+        book.warnings.extend(st_notes)
     timeline += [(a["broker_effective_ts"], 1, a, "corp_actions.json") for a in acts]
+    # N1 — quyền mua user đã khai: (2) chụp lô hưởng quyền ở ĐẦU phiên GDKHQ (trước mọi fill của
+    # ngày đó: "YYYY-MM-DD" < "YYYY-MM-DDT09:.."), (3) thêm lô mới lúc CP về broker (credit_date).
+    subs = (rights_sub.load_subscriptions(account_label, account_no=account_no)
+            if rights_subs is None else [rights_sub.validate(r) for r in rights_subs])
+    subs = [r for r in subs if r["account"] == account_label and r["subscribed_qty"] > 0
+            and r["credit_date"] <= asof
+            and not (snap_ts and r["credit_date"] + rights_sub.CREDIT_TS_SUFFIX <= snap_ts)]
+    entitled_at_ex = {}
+    for r in subs:
+        if snap_ts and r["exright_date"] <= snap_ts[:10]:
+            # GDKHQ trước ngày 0: bootstrap là trạng thái sớm nhất có ⇒ chụp ngay, có cảnh báo
+            entitled_at_ex[r["event_id"]] = [dict(l) for l in book.lots if l["ticker"] == r["ticker"]
+                                             and l["entry_date"] < r["exright_date"]]
+            book.warnings.append(f"quyền mua {r['ticker']} id={r['event_id']}: GDKHQ {r['exright_date']} "
+                                 f"≤ ngày 0 bootstrap — lô hưởng quyền chụp từ bootstrap")
+        else:
+            timeline.append((r["exright_date"], 2, r, "rights_subscriptions.json"))
+        timeline.append((r["credit_date"] + rights_sub.CREDIT_TS_SUFFIX, 3, r, "rights_subscriptions.json"))
     timeline.sort(key=lambda x: (x[0], x[1]))
 
-    applied, applied_acts = [], []
+    applied, applied_acts, applied_rights = [], [], []
     for _ts, kind, ev, fname in timeline:
+        if kind == 2:
+            entitled_at_ex[ev["event_id"]] = [dict(l) for l in book.lots if l["ticker"] == ev["ticker"]
+                                              and l["entry_date"] < ev["exright_date"]]
+            continue
+        if kind == 3:
+            n = book.rights_credit(ev, entitled_at_ex.get(ev["event_id"], []))
+            applied_rights.append({"event_id": ev["event_id"], "ticker": ev["ticker"],
+                                   "subscribed_qty": ev["subscribed_qty"], "credit_date": ev["credit_date"],
+                                   "lots_added": n})
+            continue
         if kind == 1:
             n = book.corp_action_split(ev["ticker"], ev["qty_multiplier"], ev["ex_date"],
                                        ev["broker_effective_ts"], fname, ev["id"])
@@ -655,6 +822,18 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
                      ev["play_type"])
         elif ev["side"] == "sell":
+            if ev["parent_id"] == "broker_statement":
+                # B1 (arch-review 22/10): lệnh bán tay không có book ⇒ FIFO trừ lô cũ nhất BẤT KỂ
+                # book. Mã có lô ở >1 book tại thời điểm áp (vd VPB = PARK + LAG) ⇒ không biết
+                # trừ book nào ⇒ KHÔNG áp, giữ lệch ⇒ reconcile.ok=False ⇒ BLOCKED_RECONCILE.
+                bks = {l["book"] for l in book.lots if l["ticker"] == ev["ticker"]}
+                if len(bks) > 1:
+                    book.unverified.add(ev["ticker"])
+                    book.warnings.append(
+                        f"{ev['ts'][:10]} {ev['ticker']} BÁN TAY −{ev['qty']:,}cp KHÔNG áp: lô ở "
+                        f"{len(bks)} book ({', '.join(sorted(bks))}) ⇒ không xác định book bị trừ "
+                        f"⇒ để đối soát chặn")
+                    continue
             book.sell(ev["ticker"], ev["book"], ev["qty"], ev["ts"][:10], src)
         else:
             book.unverified.add(ev["ticker"])
@@ -802,6 +981,7 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                                   "qty_multiplier": a["qty_multiplier"], "ex_date": a["ex_date"],
                                   "broker_effective_ts": a["broker_effective_ts"],
                                   "lots_adjusted": a["lots_adjusted"]} for a in applied_acts],
+        "rights_subscriptions_applied": applied_rights,
     }
 
 

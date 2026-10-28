@@ -1,0 +1,9 @@
+Cấu trúc: pha markup lớn từ ~85 lên ~263 (i60–134), rồi phân phối i134–231 với các đỉnh thấp dần (263 → 258 → 231). Nến i232 gãy vùng 200–206 và mở ra pha markdown: từ ~220 xuống đáy 123.6 (i242), tức −44%. Khối lượng khi giảm chỉ khoảng 0.6–0.8, không có climax bán tháo, nên chưa thấy dấu hiệu đầu hàng.
+
+Nhịp hồi i246–247 lên 171 bị chặn ngay dưới vùng nền cũ 155–185, nay đã thành cung kẹt phía trên. Sau đó i249 rơi khoảng −9.8% về 140.66, đóng cửa sát đáy phiên, cho thấy nhịp hồi đã thất bại. Biên độ ngày khoảng 10% nên −15% chỉ là 1–2 phiên xấu. Mốc −15% tính từ ~140 là ~119.6, nằm ngay dưới đáy 123.6, nên khả năng test lại rồi xuyên thủng đáy là đáng kể.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa dưới 123.6 (đáy i242) xác nhận markdown tiếp diễn; ngược lại, phe mua chỉ lấy lại thế khi vượt và giữ được trên 171 với khối lượng >1.0.
+CONTAMINATION: NONE

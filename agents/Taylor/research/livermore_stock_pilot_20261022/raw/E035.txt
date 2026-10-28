@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đã có một pha markup mạnh từ 100 lên 200 (i=0–100). Sau đó giá markdown về vùng 120–125 (i=117–121). Tiếp theo là một range rộng 145–175, có phân phối ở vùng 165–180 (i=150–191). Giá breakdown về 124 (i=209) rồi tích luỹ với khối lượng cạn kiệt cực độ, chỉ 0.10–0.25 ở i=217–223. Nhịp markup i=224–235 đi lên 167 với khối lượng lớn (2.4–3.8), nhưng thất bại ngay dưới vùng cung 165–175. Pullback hiện tại về 148–153 có khối lượng co lại (0.5–0.8), tức là chưa có áp lực bán mạnh. Hỗ trợ gần là 141–146 (đáy i=229–230 và vùng gap i=225). Mức −15% tính từ giá vào khoảng 127, nằm ngay trên nền 124–130. Biến động ngày lớn, phía trên có cung kẹt dày đặc.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 141 (thủng đáy pullback i=230 / lấp gap i=225) kèm khối lượng tăng → nhịp markup thất bại, mục tiêu về nền 124–130.
+CONTAMINATION: NONE

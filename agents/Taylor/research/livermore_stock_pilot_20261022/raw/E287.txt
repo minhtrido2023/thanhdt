@@ -1,0 +1,9 @@
+Cổ phiếu tăng mạnh từ nền thanh khoản mỏng khoảng 100 lên đỉnh 262–265 (i172–177), sau đó phân phối trong biên 215–250. Phiên i218 sập về 187 với khối lượng 12.29, gap xuống đáy 162. Từ đó giá phục hồi hình chữ V với các đáy nâng dần: 171, rồi 188 (i236), 191.65 (i240, khối lượng 14.15 bị hấp thụ), rồi kệ 213–216 (i243–248). Phiên i249 đóng cửa 226, khối lượng 5.9.
+
+Tuy vậy, giá đang quay lại đúng vùng gãy 215–235, nơi người mua kẹt từ biên phân phối cũ. Phía trên còn cung ở 235–250 và 260. Biến động ngày 3–5%, và cú sập margin vừa xảy ra, nên khả năng chạm −15% (khoảng 192) là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 213 (thủng kệ i243–248); dưới 191 thì cấu trúc phục hồi hỏng hẳn.
+CONTAMINATION: NONE

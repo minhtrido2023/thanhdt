@@ -1,0 +1,9 @@
+**Phân tích.** Ở thang 250 phiên, cổ phiếu đã giảm mạnh từ ~124 (i=16–20) xuống quanh 50–70 (pha markdown i=103–130). Sau đó giá đi ngang có xu hướng nhích xuống trong vùng 50–67 suốt ~120 phiên. Nỗ lực bật lên tại i=214–216 (vol 6.69, đỉnh 67.44) thất bại ngay ở i=217–219, vì cung kẹt ở 60–67 rất dày.
+
+Hiện tại hai phiên giảm liền: i=248 mất −6.7% (vol 2.74), i=249 gap xuống đóng sát giá sàn 48.32 (vol 1.90). Hai phiên này phá vùng đáy range 50–52 (các đáy i=156, 167–169, 230), và vùng đó giờ thành kháng cự. Giá còn cách đáy cũ thấp nhất 47.65 (i=168) chưa đến 2%. Khối lượng chưa mang dạng climax bán tháo, còn đóng cửa sát sàn thường kéo theo thêm áp lực bán phiên sau, đúng kiểu air-pocket do margin. Bên dưới không còn vùng hỗ trợ nào trong dữ liệu.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Luận điểm giảm sai nếu giá lấy lại và đóng cửa trên 52–53 (đáy range cũ) với khối lượng >2× median; thủng 47.65 xác nhận tiếp đà xuống.
+CONTAMINATION: NONE

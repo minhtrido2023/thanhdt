@@ -1,0 +1,1253 @@
+{
+ "n_tickers": 965,
+ "stat": {
+  "2026-10-19|live": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 12,
+   "num_same": 943,
+   "fired": 60
+  },
+  "2026-10-19|pit": {
+   "none_to_num": 13,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 21,
+   "num_same": 931,
+   "fired": 60
+  },
+  "2014-01-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 537,
+   "num_same": 428,
+   "fired": 0
+  },
+  "2014-02-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 536,
+   "num_same": 429,
+   "fired": 0
+  },
+  "2014-03-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 533,
+   "num_same": 432,
+   "fired": 0
+  },
+  "2014-04-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 532,
+   "num_same": 433,
+   "fired": 0
+  },
+  "2014-05-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 532,
+   "num_same": 433,
+   "fired": 0
+  },
+  "2014-06-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 531,
+   "num_same": 434,
+   "fired": 0
+  },
+  "2014-07-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 532,
+   "num_same": 433,
+   "fired": 0
+  },
+  "2014-08-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 527,
+   "num_same": 438,
+   "fired": 0
+  },
+  "2014-09-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 525,
+   "num_same": 440,
+   "fired": 0
+  },
+  "2014-10-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 522,
+   "num_same": 443,
+   "fired": 0
+  },
+  "2014-11-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 516,
+   "num_same": 449,
+   "fired": 0
+  },
+  "2014-12-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 515,
+   "num_same": 450,
+   "fired": 0
+  },
+  "2015-01-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 513,
+   "num_same": 452,
+   "fired": 0
+  },
+  "2015-02-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 512,
+   "num_same": 453,
+   "fired": 0
+  },
+  "2015-03-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 508,
+   "num_same": 457,
+   "fired": 0
+  },
+  "2015-04-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 506,
+   "num_same": 459,
+   "fired": 0
+  },
+  "2015-05-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 501,
+   "num_same": 464,
+   "fired": 0
+  },
+  "2015-06-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 497,
+   "num_same": 468,
+   "fired": 0
+  },
+  "2015-07-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 491,
+   "num_same": 474,
+   "fired": 0
+  },
+  "2015-08-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 484,
+   "num_same": 481,
+   "fired": 0
+  },
+  "2015-09-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 477,
+   "num_same": 488,
+   "fired": 0
+  },
+  "2015-10-01|pit": {
+   "none_to_num": 0,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 478,
+   "num_same": 487,
+   "fired": 0
+  },
+  "2015-11-01|pit": {
+   "none_to_num": 1,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 471,
+   "num_same": 493,
+   "fired": 2
+  },
+  "2015-12-01|pit": {
+   "none_to_num": 1,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 463,
+   "num_same": 501,
+   "fired": 3
+  },
+  "2016-01-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 456,
+   "num_same": 506,
+   "fired": 5
+  },
+  "2016-02-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 454,
+   "num_same": 508,
+   "fired": 7
+  },
+  "2016-03-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 456,
+   "num_same": 505,
+   "fired": 8
+  },
+  "2016-04-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 454,
+   "num_same": 507,
+   "fired": 8
+  },
+  "2016-05-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 443,
+   "num_same": 518,
+   "fired": 8
+  },
+  "2016-06-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 435,
+   "num_same": 526,
+   "fired": 8
+  },
+  "2016-07-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 434,
+   "num_same": 526,
+   "fired": 8
+  },
+  "2016-08-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 418,
+   "num_same": 542,
+   "fired": 9
+  },
+  "2016-09-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 415,
+   "num_same": 544,
+   "fired": 10
+  },
+  "2016-10-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 411,
+   "num_same": 548,
+   "fired": 10
+  },
+  "2016-11-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 407,
+   "num_same": 551,
+   "fired": 10
+  },
+  "2016-12-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 407,
+   "num_same": 552,
+   "fired": 9
+  },
+  "2017-01-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 403,
+   "num_same": 556,
+   "fired": 9
+  },
+  "2017-02-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 387,
+   "num_same": 572,
+   "fired": 9
+  },
+  "2017-03-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 372,
+   "num_same": 589,
+   "fired": 9
+  },
+  "2017-04-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 368,
+   "num_same": 591,
+   "fired": 10
+  },
+  "2017-05-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 366,
+   "num_same": 591,
+   "fired": 12
+  },
+  "2017-06-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 358,
+   "num_same": 604,
+   "fired": 12
+  },
+  "2017-07-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 347,
+   "num_same": 615,
+   "fired": 12
+  },
+  "2017-08-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 330,
+   "num_same": 632,
+   "fired": 12
+  },
+  "2017-09-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 320,
+   "num_same": 641,
+   "fired": 13
+  },
+  "2017-10-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 320,
+   "num_same": 641,
+   "fired": 13
+  },
+  "2017-11-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 312,
+   "num_same": 650,
+   "fired": 12
+  },
+  "2017-12-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 306,
+   "num_same": 655,
+   "fired": 13
+  },
+  "2018-01-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 303,
+   "num_same": 657,
+   "fired": 13
+  },
+  "2018-02-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 282,
+   "num_same": 679,
+   "fired": 13
+  },
+  "2018-03-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 281,
+   "num_same": 680,
+   "fired": 13
+  },
+  "2018-04-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 278,
+   "num_same": 683,
+   "fired": 13
+  },
+  "2018-05-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 275,
+   "num_same": 686,
+   "fired": 13
+  },
+  "2018-06-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 266,
+   "num_same": 695,
+   "fired": 13
+  },
+  "2018-07-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 261,
+   "num_same": 700,
+   "fired": 13
+  },
+  "2018-08-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 248,
+   "num_same": 713,
+   "fired": 14
+  },
+  "2018-09-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 243,
+   "num_same": 717,
+   "fired": 15
+  },
+  "2018-10-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 234,
+   "num_same": 724,
+   "fired": 17
+  },
+  "2018-11-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 226,
+   "num_same": 734,
+   "fired": 19
+  },
+  "2018-12-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 225,
+   "num_same": 735,
+   "fired": 20
+  },
+  "2019-01-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 223,
+   "num_same": 737,
+   "fired": 19
+  },
+  "2019-02-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 212,
+   "num_same": 748,
+   "fired": 19
+  },
+  "2019-03-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 210,
+   "num_same": 750,
+   "fired": 19
+  },
+  "2019-04-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 212,
+   "num_same": 748,
+   "fired": 19
+  },
+  "2019-05-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 211,
+   "num_same": 749,
+   "fired": 19
+  },
+  "2019-06-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 204,
+   "num_same": 757,
+   "fired": 19
+  },
+  "2019-07-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 201,
+   "num_same": 759,
+   "fired": 19
+  },
+  "2019-08-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 190,
+   "num_same": 771,
+   "fired": 19
+  },
+  "2019-09-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 192,
+   "num_same": 770,
+   "fired": 18
+  },
+  "2019-10-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 191,
+   "num_same": 770,
+   "fired": 19
+  },
+  "2019-11-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 188,
+   "num_same": 771,
+   "fired": 19
+  },
+  "2019-12-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 190,
+   "num_same": 768,
+   "fired": 20
+  },
+  "2020-01-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 189,
+   "num_same": 769,
+   "fired": 20
+  },
+  "2020-02-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 181,
+   "num_same": 777,
+   "fired": 20
+  },
+  "2020-03-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 175,
+   "num_same": 784,
+   "fired": 20
+  },
+  "2020-04-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 171,
+   "num_same": 787,
+   "fired": 21
+  },
+  "2020-05-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 170,
+   "num_same": 789,
+   "fired": 20
+  },
+  "2020-06-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 165,
+   "num_same": 793,
+   "fired": 20
+  },
+  "2020-07-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 165,
+   "num_same": 793,
+   "fired": 20
+  },
+  "2020-08-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 162,
+   "num_same": 796,
+   "fired": 20
+  },
+  "2020-09-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 159,
+   "num_same": 798,
+   "fired": 20
+  },
+  "2020-10-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 153,
+   "num_same": 803,
+   "fired": 21
+  },
+  "2020-11-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 146,
+   "num_same": 813,
+   "fired": 21
+  },
+  "2020-12-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 142,
+   "num_same": 817,
+   "fired": 21
+  },
+  "2021-01-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 140,
+   "num_same": 820,
+   "fired": 21
+  },
+  "2021-02-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 129,
+   "num_same": 831,
+   "fired": 21
+  },
+  "2021-03-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 130,
+   "num_same": 830,
+   "fired": 21
+  },
+  "2021-04-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 129,
+   "num_same": 831,
+   "fired": 21
+  },
+  "2021-05-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 120,
+   "num_same": 840,
+   "fired": 21
+  },
+  "2021-06-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 117,
+   "num_same": 842,
+   "fired": 21
+  },
+  "2021-07-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 116,
+   "num_same": 843,
+   "fired": 21
+  },
+  "2021-08-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 111,
+   "num_same": 849,
+   "fired": 21
+  },
+  "2021-09-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 107,
+   "num_same": 852,
+   "fired": 21
+  },
+  "2021-10-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 104,
+   "num_same": 854,
+   "fired": 22
+  },
+  "2021-11-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 99,
+   "num_same": 860,
+   "fired": 23
+  },
+  "2021-12-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 99,
+   "num_same": 860,
+   "fired": 23
+  },
+  "2022-01-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 100,
+   "num_same": 860,
+   "fired": 23
+  },
+  "2022-02-01|pit": {
+   "none_to_num": 5,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 94,
+   "num_same": 866,
+   "fired": 23
+  },
+  "2022-03-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 92,
+   "num_same": 870,
+   "fired": 21
+  },
+  "2022-04-01|pit": {
+   "none_to_num": 3,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 93,
+   "num_same": 869,
+   "fired": 21
+  },
+  "2022-05-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 92,
+   "num_same": 869,
+   "fired": 23
+  },
+  "2022-06-01|pit": {
+   "none_to_num": 4,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 91,
+   "num_same": 870,
+   "fired": 22
+  },
+  "2022-07-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 90,
+   "num_same": 869,
+   "fired": 24
+  },
+  "2022-08-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 83,
+   "num_same": 876,
+   "fired": 23
+  },
+  "2022-09-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 83,
+   "num_same": 876,
+   "fired": 23
+  },
+  "2022-10-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 86,
+   "num_same": 872,
+   "fired": 23
+  },
+  "2022-11-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 79,
+   "num_same": 880,
+   "fired": 25
+  },
+  "2022-12-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 2,
+   "none_both": 76,
+   "num_same": 878,
+   "fired": 30
+  },
+  "2023-01-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 2,
+   "none_both": 79,
+   "num_same": 874,
+   "fired": 31
+  },
+  "2023-02-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 2,
+   "none_both": 69,
+   "num_same": 888,
+   "fired": 32
+  },
+  "2023-03-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 72,
+   "num_same": 885,
+   "fired": 34
+  },
+  "2023-04-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 76,
+   "num_same": 879,
+   "fired": 35
+  },
+  "2023-05-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 68,
+   "num_same": 889,
+   "fired": 35
+  },
+  "2023-06-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 68,
+   "num_same": 889,
+   "fired": 37
+  },
+  "2023-07-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 72,
+   "num_same": 885,
+   "fired": 37
+  },
+  "2023-08-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 72,
+   "num_same": 887,
+   "fired": 38
+  },
+  "2023-09-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 74,
+   "num_same": 882,
+   "fired": 39
+  },
+  "2023-10-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 73,
+   "num_same": 883,
+   "fired": 40
+  },
+  "2023-11-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 67,
+   "num_same": 892,
+   "fired": 41
+  },
+  "2023-12-01|pit": {
+   "none_to_num": 6,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 68,
+   "num_same": 891,
+   "fired": 41
+  },
+  "2024-01-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 66,
+   "num_same": 892,
+   "fired": 42
+  },
+  "2024-02-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 60,
+   "num_same": 898,
+   "fired": 42
+  },
+  "2024-03-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 61,
+   "num_same": 896,
+   "fired": 43
+  },
+  "2024-04-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 64,
+   "num_same": 893,
+   "fired": 44
+  },
+  "2024-05-01|pit": {
+   "none_to_num": 8,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 62,
+   "num_same": 895,
+   "fired": 44
+  },
+  "2024-06-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 59,
+   "num_same": 897,
+   "fired": 44
+  },
+  "2024-07-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 59,
+   "num_same": 897,
+   "fired": 43
+  },
+  "2024-08-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 55,
+   "num_same": 901,
+   "fired": 44
+  },
+  "2024-09-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 58,
+   "num_same": 897,
+   "fired": 46
+  },
+  "2024-10-01|pit": {
+   "none_to_num": 11,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 57,
+   "num_same": 897,
+   "fired": 47
+  },
+  "2024-11-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 1,
+   "none_both": 48,
+   "num_same": 909,
+   "fired": 47
+  },
+  "2024-12-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 1,
+   "none_both": 50,
+   "num_same": 904,
+   "fired": 50
+  },
+  "2025-01-01|pit": {
+   "none_to_num": 12,
+   "num_to_none": 0,
+   "num_changed": 1,
+   "none_both": 47,
+   "num_same": 905,
+   "fired": 52
+  },
+  "2025-02-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 45,
+   "num_same": 911,
+   "fired": 51
+  },
+  "2025-03-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 43,
+   "num_same": 913,
+   "fired": 51
+  },
+  "2025-04-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 44,
+   "num_same": 911,
+   "fired": 52
+  },
+  "2025-05-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 46,
+   "num_same": 910,
+   "fired": 52
+  },
+  "2025-06-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 46,
+   "num_same": 909,
+   "fired": 52
+  },
+  "2025-07-01|pit": {
+   "none_to_num": 12,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 46,
+   "num_same": 907,
+   "fired": 53
+  },
+  "2025-08-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 41,
+   "num_same": 914,
+   "fired": 52
+  },
+  "2025-09-01|pit": {
+   "none_to_num": 11,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 42,
+   "num_same": 912,
+   "fired": 53
+  },
+  "2025-10-01|pit": {
+   "none_to_num": 13,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 45,
+   "num_same": 907,
+   "fired": 55
+  },
+  "2025-11-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 32,
+   "num_same": 923,
+   "fired": 57
+  },
+  "2025-12-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 35,
+   "num_same": 920,
+   "fired": 57
+  },
+  "2026-01-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 38,
+   "num_same": 917,
+   "fired": 57
+  },
+  "2026-02-01|pit": {
+   "none_to_num": 11,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 34,
+   "num_same": 920,
+   "fired": 57
+  },
+  "2026-03-01|pit": {
+   "none_to_num": 12,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 28,
+   "num_same": 925,
+   "fired": 59
+  },
+  "2026-04-01|pit": {
+   "none_to_num": 12,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 26,
+   "num_same": 927,
+   "fired": 59
+  },
+  "2026-05-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 32,
+   "num_same": 924,
+   "fired": 58
+  },
+  "2026-06-01|pit": {
+   "none_to_num": 10,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 27,
+   "num_same": 928,
+   "fired": 59
+  },
+  "2026-07-01|pit": {
+   "none_to_num": 12,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 29,
+   "num_same": 924,
+   "fired": 59
+  },
+  "2026-08-01|pit": {
+   "none_to_num": 7,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 20,
+   "num_same": 938,
+   "fired": 57
+  },
+  "2026-09-01|pit": {
+   "none_to_num": 9,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 22,
+   "num_same": 934,
+   "fired": 57
+  },
+  "2026-10-01|pit": {
+   "none_to_num": 13,
+   "num_to_none": 0,
+   "num_changed": 0,
+   "none_both": 21,
+   "num_same": 931,
+   "fired": 61
+  }
+ }
+}

@@ -1,0 +1,7 @@
+Giá vừa có pha markup thẳng đứng từ đáy ~85.5 (i221) lên 142.24 (i236), tức khoảng +65% trong 15 phiên. Khối lượng climax rất lớn: i222 là 19.4x, i223 là 25.8x, kèm gap tăng 93.67→97.60. Đà tăng chạm đúng vùng cung cũ 135–145, nơi phân phối i97–i112 từng đạt đỉnh 140.77–144.70. Ở vùng này đã có hai lần thất bại: i236 đạt 142.24 và i245 đạt 143.23, cả hai đều bị đẩy lùi. Sau đó i247–248 giảm với khối lượng 8.6x và 7.8x, là dấu hiệu churn và phân phối, không phải dry-up. Hỗ trợ gần nhất là 122.85–123.3 (i238–239). Nếu vùng này thủng thì phía dưới là air-pocket margin, không có nền giá nào tới khoảng 110–103, và mức −15% từ giá vào là ≈108.5. Cấu trúc hiện tại nghiêng về phân phối tại đỉnh cũ.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 143.5 với khối lượng lớn và giữ được 2–3 phiên, khi đó cung đỉnh cũ đã bị hấp thụ và luận điểm phân phối bị vô hiệu.
+CONTAMINATION: NONE

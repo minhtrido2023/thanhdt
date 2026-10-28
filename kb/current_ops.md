@@ -21,6 +21,17 @@
 
 - **[2026-10-03 10:34 ICT, user chốt] Định nghĩa XU HƯỚNG HẠ (chính xác hoá)**: ngay khi Big-4 điều chỉnh GIẢM lãi tiết kiệm 12 tháng HOẶC lãi chứng chỉ tiền gửi 6 tháng THẤP HƠN so với tuần thống kê trước ⇒ cảnh báo user (cron tuần `refresh_deposit_cctg_weekly.sh` + `deposit_cctg_trend_check.py`); vẫn CHỈ cảnh báo, không tự khôi phục park. User cũng DUYỆT rating_8l/DCF dùng effective rate (đã LIVE từ 10-01).
 
+## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
+- Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
+- Cổng KL `compute_active_nav.py` đã vá 22/10 (chi tiết: `kb/projects/dri-manual-sell-20261021.md`).
+
+## DRI — user DUYỆT GIẢM 50% CHỦ ĐỘNG (`decided_by: user`, 27/10 12:14 ICT) — DollarBill đưa vào PLAN T+1 28/10, KHÔNG hỏi lại
+- SELL DRI: **SpaceX 1.250cp (→1.250), ZaloPay 650cp (→650)**; bán discretionary của user (không phải auto-exit); vào plan nháp, user duyệt plan như thường. User đã bán tay trước ⇒ dùng KL broker thật. Chi tiết: `kb/projects/dri-triggers-20261027.md`.
+
+## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
+- **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 VinCons chậm trả: `kb/projects/scl-dd-research-20261021.md`.
+- **Mã LAG giữ có quyền mua**: KHÔNG bán trước ex-date; user TỰ thực hiện ĐẦY ĐỦ (bot không mua); user mua quyền HỢP LỆ. **Lô cp quyền KẾ THỪA entry gốc (user 22/10, A)**, bán phiên đầu được phép. ✅ `771daf4ea`; sau nộp tiền báo Mike số CP mua từng account (runbook: `agents/Taylor/research/lag_rights_n1_20261022/REPORT.md`). SCL 15,38% (P).
+
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
 - ✅ **CCTG + Big-4 12M có auto-fetch HÀNG TUẦN** (thứ Hai 08:05 ICT; chi tiết guard: `kb/projects/deposit-rate-effective-rate-20261001.md`). Anchor 2026-09-30 = 7,5%; không cập nhật ⇒ stale >45 ngày ⇒ **ARMED vĩnh viễn từ 2026-11-15**. Big-4 stale ≈ 2026-10-20 (cùng cơ chế fail-closed).
@@ -80,7 +91,7 @@
   ⚠️ **CÒN MỞ — 3 file khác nghi cùng lớp bug, CHƯA vá** (Taylor quan sát, arch-reviewer xác nhận 3/3 nhưng lưu ý phạm vi khác nhau): `bin/paper_corp_action_selfcheck.py:28-31` và `bin/send_plan_report_park_jit_selfcheck.py:28-30` cắn **worktree `mike/`**; `bin/due_diligence_corp_flags_selfcheck.py:19-21` cắn **worktree ngoài `mike/`** (repo `WorkingClaude` gốc — `trading_bot/due_diligence.py`), KHÔNG cắn worktree `mike/` vì module đó không tồn tại trong `mike/`. arch-review vòng 4-site (2026-09-24) tìm thêm 1 file: `bin/nav_cum_dividend_selfcheck.py:32-35` (`WC_ROOT` đếm dirname sai trong worktree lồng, **crash** `FileNotFoundError` khi chạy ngoài canonical — CHƯA vá).
 
 - **4 call-site còn lại của lớp lỗi corp-action — audit xong 2026-09-24 (dispatch `Taylor_20260924_064510`), arch-review theo TỪNG VIỆC — CẢ 4 ĐÃ LIVE, ĐÓNG HẲN CHUỖI AUDIT NÀY:**
-  · **Việc 4 `report_return_gate.py:558-573` unmatched — APPROVED, LIVE, commit `569be662`.** · **Việc 3 `verify_account_snapshot.py:307` `broker_positions_from_raw()` — APPROVED vòng 2, LIVE, commit `96ee1bb8`+`7700582d`.** · **Việc 1 `discretionary_accumulation_inject.py` `broker_filled_qty()` — APPROVED vòng 2, LIVE, commit `5e6fb9af`+`642d4f5a`.** (⚠️ **Lưu ý docstring** (chưa sửa, không chặn): câu "tự khớp" chỉ ĐÚNG TUYỆT ĐỐI khi `baseline_qty_before_program=0` (đúng cả 2 state LIVE hôm nay); `baseline>0` thì thiếu `(r−1)×baseline` cp vĩnh viễn, hướng AN TOÀN (mua thiếu, không overbuy).) · **Việc 2 `discretionary_margin_gate.py` arm_price — APPROVED vòng 12, LIVE, merge `c5247def` (12 commit vòng 3→12, từ `26ef0c58` tới `bc22bed2`).** Chi tiết từng việc: `kb/projects/corp-action-nav-chain-20260922.md`.
+  · Chi tiết 4 việc (đều APPROVED+LIVE): `kb/projects/corp-action-nav-chain-20260922.md`.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
@@ -121,3 +132,6 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
 - CASH_VENDOR gate (số cổ tức từ `tav2_bq.corporate_action` khi broker không giải được) →
   `cash-vendor-gate-tracking.md` — user chốt 2026-08-15 **giữ ĐÓNG**; mở lại chỉ khi có ≥1 sự
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
+
+## DT gate — luật đếm candidate GIỮ NGUYÊN (user chốt 2026-10-20 00:09 ICT, `decided_by: user`, phương án A)
+Taylor `dt-gate-badzone-count-review-20261019` (job `Taylor_20261019_160133`): bộ đếm đúng code (0 lệch/3190 phiên). User chọn A = giữ nguyên gate, KHÔNG đổi luật đếm (B/C là re-tune theo lịch sử), KHÔNG hạ tỷ trọng tay (D). Ngưỡng xem lại "≥15 phiên + VNINDEX ≤−5%" đã kích hoạt kiểm tra này xong. Lưu ý: nền xấu đổi BEAR↔CRISIS làm commit CRISIS sớm nhất ~10/11 (cần 25 phiên CRISIS liên tục). Báo cáo: `agents/Taylor/research/dt_badzone_count_20261019/REPORT.md`.

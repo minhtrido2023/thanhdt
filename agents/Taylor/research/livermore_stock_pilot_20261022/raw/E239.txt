@@ -1,0 +1,9 @@
+**Đọc cấu trúc.** Xu hướng 250 phiên là markup mạnh, từ khoảng 82 (i50) lên đỉnh 213 (i222). Thang 20 phiên khác hẳn. Vùng 185–200 (i222–234) là phân phối: khối lượng cao nhưng giá không đi lên. Sau đó i235–236 phá xuống 161 khi khối lượng tăng. Tiếp theo là nền 161–170 kéo dài khoảng 12 phiên, khối lượng cạn (0.5–1.2), đáy 160.86 được giữ năm lần.
+
+Phiên i249 tăng gần trần (+7.9%) với khối lượng 4.27, cho thấy cầu quay lại. Tuy vậy giá vào khoảng 179–180 nằm ngay dưới vùng cung kẹt 185–200, nên khả năng cao là sẽ được test lại. Cổ phiếu biến động mạnh, mức −15% (khoảng 152) chỉ cách đáy nền 161 khoảng 6%. Nếu mất nền thì có túi khí xuống vùng 165–170 cũ rồi 150.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 160.86 (đáy nền i236–247) kèm khối lượng tăng, khi đó nền là phân phối tiếp diễn chứ không phải tích luỹ.
+CONTAMINATION: NONE

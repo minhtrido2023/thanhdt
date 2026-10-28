@@ -1,0 +1,11 @@
+Đây là một mã cực kỳ kém thanh khoản: phần lớn các phiên có Volume = 0 và giá đứng yên. Ở thang 250 phiên, giá đi ngang trong biên 140–160 (i50–185), sau đó bước vào pha markup gần như dựng đứng từ khoảng 172 lên 295 (+70% trong khoảng 60 phiên).
+
+Hai thanh bật lên gần nhất (i241–242, V 19 và 6.5) đưa giá lên 295. Kể từ đó là 7 phiên đứng im với V = 0: không có follow-through, cũng không có cầu thật.
+
+Các râu dưới trong phiên thường sâu 10–12% (ví dụ i230 có Low 216, i242 có Low 258). Vì vậy chỉ cần một lệnh bán là có thể tạo air-pocket. Mức −15% tính từ giá vào là khoảng 251, trùng vùng nền 250–261 (i230–240). Vùng này không xa, và một cú retest về đó rất dễ xảy ra.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 249 (nền i233–240) thì cấu trúc markup bị phá, mục tiêu tiếp theo là vùng 205–210.
+CONTAMINATION: NONE

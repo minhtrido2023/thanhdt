@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu tăng giá từ 100 lên khoảng 124 (i=0–80). Sau đó là pha phân phối trong vùng 110–125 (i=81–174), với hai lần bứt phá thất bại: i=108 kéo lên 126 rồi đóng 116, i=147–149 kéo lên 125.5 rồi rơi. Đến i=175 giá gãy vùng này, khối lượng 5.21, và chuyển sang pha giảm.
+
+Thang 60 phiên cho thấy chuỗi đỉnh/đáy thấp dần: 103–105, rồi 94–97, rồi nền 88–94. Khối lượng cạn kiệt (0.1–0.3), thanh khoản mỏng. Nhịp hồi i=244 lên 96.6 (khối lượng 2.02) thất bại ngay.
+
+Phiên cuối i=249 đóng ở đáy phiên (89.77) với khối lượng 2.37, cao nhất trong 15 phiên. Đây là dấu hiệu cung đang chủ động ép nền. Hỗ trợ 87.6–88 rất gần. Nếu thủng vùng này, thanh khoản mỏng có thể tạo khoảng trống giá. Cung kẹt phía trên nằm ở 94–97 và 103–105.
+
+P_HIT15: 0.32
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 87.5 (thủng đáy nền i=235) với khối lượng tăng; ngược lại, vượt 96.6 kèm khối lượng >2 mới phủ nhận kịch bản giảm.
+CONTAMINATION: NONE

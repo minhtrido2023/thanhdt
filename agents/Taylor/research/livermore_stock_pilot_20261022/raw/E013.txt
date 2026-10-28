@@ -1,0 +1,7 @@
+The stock is coming off a long base and a strong breakout. After the crash from ~116 to 57 (i3→19), price built a ~190-session base at 63–75 with very little volume, meaning supply dried up. At i214–217 it broke out on very large volume (8–14x) and has since been accumulating in a range of 73–87.5. Within that range the lows are rising: 73.4 (i237), then 70.3–70.6 (i244–246), and each dip was bought. i249 closed at the daily ceiling of 84.36 on 6.37x volume, right below the 86–87.5 supply zone (i225/227/231). Entry is around 84–85. A −15% move means ~72, which sits only just under the range floor of 70–73. This name is thin and swings 5–7% a day, so that level is quite reachable. Above 87.5, the next target is 93 (gap i85).
+
+P_HIT15: 0.33
+RISK: MED
+P_POS: 0.53
+INVALIDATION: Close below 70.3 (low of i246, the floor of the post-breakout range) on rising volume, or failing at 86–87.5 and falling back under 78
+CONTAMINATION: NONE

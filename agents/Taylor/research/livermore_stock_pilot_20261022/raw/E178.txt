@@ -1,0 +1,7 @@
+**Đọc cấu trúc.** Pha markup dài hạn đi từ nền 100–120 (i116–173) lên đỉnh climax 212.5 tại i193–194. Phiên i193 có khối lượng 12.47, lớn nhất cả chuỗi. Sau đó là phân phối trong vùng 150–190 suốt khoảng 50 phiên, khối lượng cạn dần, kèm một breakout thất bại tại i221–224 (lên 187.5–192.5 rồi bị đẩy xuống). Từ i245–247 giá thủng đáy vùng 147.5–150. Hai phiên i248–249 đóng cố định ở 135 với khối lượng 0.08 và 0.00, nhiều khả năng là sàn trắng bên mua, cung bị kẹt chưa thoát được. Bên dưới là một khoảng trống: gap của thanh i174 (122.5→137.5) và nền cũ 105–120 hầu như không có giao dịch. Lượng hàng margin kẹt ở 160–190 vẫn còn rất nhiều.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Giá lấy lại và đóng cửa trên 150–155 (đáy vùng phân phối cũ) với khối lượng >1.5× median; ngược lại, đóng dưới 122.5 (lấp gap i174) xác nhận đã rơi về nền 105–120.
+CONTAMINATION: NONE

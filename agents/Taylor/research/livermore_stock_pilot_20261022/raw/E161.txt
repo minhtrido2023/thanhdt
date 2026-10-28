@@ -1,0 +1,11 @@
+Chuỗi 250 phiên cho thấy nền tích lũy dài quanh 97–112 (i0–170). Sau đó là pha markup thẳng đứng i171–180, gồm chuỗi trần với khối lượng mỏng (i173 0.23, i178 0.12), để lại air-pocket 165–190. Tiếp theo là nền 202–222 (i189–220) rồi lên tiếp tới đỉnh 252.9 (i235).
+
+Cú điều chỉnh i240–241 (V 1.39/1.74) đẩy đuôi xuống 224 nhưng đóng cửa thu hồi. Sau đó khối lượng cạn dần (0.68–0.98), và i249 bật lên 234.6 với V 1.32. Đây là cấu trúc đáy cao dần, chưa thấy climax phân phối rõ.
+
+Rủi ro chính: giá đã tăng khoảng 2.3 lần trong 80 phiên. Vùng −15% (~200) trùng mép dưới nền 202–205. Nếu nền này vỡ, bên dưới chỉ là khoảng trống do margin.
+
+P_HIT15: 0.33
+RISK: HIGH
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 224 (đáy i241) là cảnh báo; thủng 202–205 (nền i204–208) thì cấu trúc markup bị phá.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Biên độ dao động cực lớn và thanh khoản mỏng: nhiều phiên khối lượng gần 0, bước giá ~1,2 điểm. Chu kỳ 250 phiên gồm tích luỹ 85–100, rồi markup mạnh từ i125–141 lên 229 với khối lượng 10–15x. Tiếp theo là phân phối quanh 170–180 và sụp gãy ở i179 (V 9.36) về 104 tại i184. Nhịp hồi lên 189 (i209) thất bại. Sau đó chuỗi đỉnh thấp dần 162 → 150 → 136 và đáy 120 → 110. Thang 60 phiên đang là markdown/range xả. Phiên i248 trần với khối lượng 0.02 không có giá trị xác nhận. i249 lùi về 126.8 với V 1.53, tức có cung ở 136. Giá vào ~134, mức −15% ≈ 114, vùng này vừa bị chạm ở i244–245. Biến động ngày ~8–10% nên khả năng chạm −15% rất cao.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 109.76 (đáy i245) xác nhận markdown tiếp; phe mua chỉ đúng nếu vượt 150–162 kèm khối lượng >3x.
+CONTAMINATION: NONE

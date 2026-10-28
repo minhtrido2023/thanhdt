@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đang trong pha markdown, giảm từ vùng ~108 xuống đáy 59.86–60.54 (i177–187). Tại đáy, khối lượng cạn hẳn (0.22–0.40). Cú bùng nổ i197 (+9%, vol 6.97) thất bại: i199 bị bán mạnh (vol 3.17) và xoá gần hết thành quả. Sau đó giá đi ngang 64.6–71 với các đỉnh thấp dần (73.47 → 72.11 → 71.43). Từ i237, giá trượt xuống với khối lượng ~1.0–1.6, không phải dry-up, và đáy lùi dần về 61.22. Giá hiện tại 62.59 đang test lại nền 60–63. Thủng 59.86 sẽ mở air-pocket về râu gap 57.82 và thấp hơn. Mức −15% là ~53.2, nằm dưới mọi đáy trong 250 phiên. Thanh khoản mỏng nên rủi ro trượt giá cao.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 59.8 kèm khối lượng tăng phá nền đáy i177–187 (luận điểm giữ nền bị loại); phía tích cực chỉ được xác nhận khi đóng cửa trên 71.5 có khối lượng lớn.
+CONTAMINATION: NONE

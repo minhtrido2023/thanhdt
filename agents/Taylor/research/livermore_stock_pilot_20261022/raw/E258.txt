@@ -1,0 +1,9 @@
+Giá đang ở mức cao nhất của nền tích lũy kéo dài khoảng 120 phiên (137–168). Lực cầu tăng dần: các phiên i247–249 có khối lượng 4.5/3.8/2.5 và đóng cửa tại đỉnh 171.44. Tuy nhiên giá vừa chạm vùng cung kẹt 173.6–180.4. Đó là đỉnh i112–131, nơi phiên i132 bán tháo với khối lượng 9.12, cao nhất cả chuỗi. Người mua kẹt ở vùng này nhiều khả năng sẽ xả hàng khi giá về hòa vốn.
+
+Cấu trúc 250 phiên vẫn là xu hướng tăng với các đáy nâng dần (142 → 145 → 149 → 158). Mức −15% so với giá vào là khoảng 145.7, nằm sát đáy range i214–215. Muốn chạm mức đó, breakout phải thất bại và giá phải rơi trọn biên độ range. Khả năng này có, nhưng không phải kịch bản chính.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 158 (đáy i245) với khối lượng lớn, tức breakout thất bại và giá quay lại range 145–162.
+CONTAMINATION: NONE

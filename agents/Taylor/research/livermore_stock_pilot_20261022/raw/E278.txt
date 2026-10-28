@@ -1,0 +1,11 @@
+**Đọc băng.** Ở thang 250 phiên, cổ phiếu có một nhịp tăng mạnh lên 184 (i63) kèm khối lượng climax gấp 8 lần median. Sau đó là phân phối 150–178, rồi sụp về 78.5 (i105). Từ đáy đó giá hồi lên 141 (i192, khối lượng 7.4x) nhưng không giữ được.
+
+Ở thang 60 phiên, giá đi ngang trượt nhẹ trong vùng 108–125. Khối lượng cạn kiệt (0.1–0.5x), còn cung bán ra mỏng. Các lần thủng xuống 110.5 (i233) và 107.9 (i238) đều được mua lại. Phiên i245 tăng +7.5% với khối lượng 2.2x, và i246 có follow-through lên 125.4.
+
+Hai phiên cuối khối lượng giảm, giá lùi về 120 nhưng chưa bị đẩy lùi mạnh. Cung chờ phía trên nằm ở 125 và 130–141. Với giá vào khoảng 120, mức −15% là khoảng 102, tức dưới đáy 107.9. Lịch sử biến động lớn của mã này khiến rủi ro đuôi vẫn đáng kể.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 108 (thủng đáy i238), tức thất bại của breakout i245.
+CONTAMINATION: NONE

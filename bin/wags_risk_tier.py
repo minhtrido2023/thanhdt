@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""wags_risk_tier.py <bus_inbox_wags.jsonl> <topic_substr>
+"""wags_risk_tier.py <bus_inbox_wags.jsonl> <topic_substr> [since_iso]
 
 Cost-optimization #2 (2026-07-17): arch-reviewer's adversarial audit is correctly
 mandatory for anything that could affect the LIVE trading day (dispatch.sh core,
@@ -16,6 +16,10 @@ short, conservative low-risk allowlist. ANY of these makes the whole fix "high"
 (fail-safe default): the finding/field is missing, or any changed file falls
 outside the allowlist. Only prints "low" when every single changed file is a known
 zero/near-zero-blast-radius path.
+
+With [since_iso] only findings whose ts >= since_iso count: the label repeats across
+rounds of the same day, and a round where Wags wrote no new finding must not inherit an
+older round's files_changed (it classifies "high" instead — fail-safe).
 
 Prints exactly one line: "low" or "high".
 """
@@ -39,10 +43,11 @@ LOW_RISK_PATTERNS = [
 
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4):
         print("high")  # fail-safe on malformed invocation too
         return
     inbox, substr = sys.argv[1], sys.argv[2]
+    since = sys.argv[3] if len(sys.argv) == 4 else ""
     pick = None
     try:
         with open(inbox, encoding="utf-8") as f:
@@ -55,6 +60,8 @@ def main():
                 except Exception:
                     continue
                 if e.get("event_type") != "finding":
+                    continue
+                if since and str(e.get("ts") or "") < since:
                     continue
                 blob = e.get("topic", "") + json.dumps(e.get("payload", ""))
                 if substr.lower() not in blob.lower():

@@ -1,0 +1,78 @@
+{
+ "account_label": "SpaceX",
+ "asof": "2026-10-22",
+ "target_park": 0.0,
+ "trim_band": 0.005,
+ "orders": [],
+ "blocked": [
+  {
+   "ticker": "MBB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 1,293,500đ, trần ADV 22,187,300,000đ, sellable 65cp)"
+  },
+  {
+   "ticker": "TPB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 382,500đ, trần ADV 8,721,186,402đ, sellable 0cp)"
+  },
+  {
+   "ticker": "VIB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 660,350đ, trần ADV 6,755,803,500đ, sellable 0cp)"
+  },
+  {
+   "ticker": "VPB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 6,849,700đ, trần ADV 36,806,520,000đ, sellable 0cp)"
+  }
+ ],
+ "notes": [
+  "target_park=0 (park TẮT HẲN) ⇒ bỏ qua phân bổ theo rổ custom30V, mọi mã PARK đang giữ nhận target=0 ⇒ đề xuất bán sạch toàn bộ sổ PARK (vẫn qua trần ADV/ngày + lô + sellable T+2 như bình thường)."
+ ],
+ "at_or_below_target": [],
+ "park_mv_vnd": 9186050.0,
+ "cash_available_vnd": 21962653.0,
+ "cash_total_vnd": 25414484.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [
+  "DRI"
+ ],
+ "excluded_tickers": [
+  "PNJ"
+ ],
+ "state": {
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "date": "2026-10-22",
+  "etf_park_frac_live": 0.0
+ },
+ "cash_basis": "total_cash",
+ "cash_dividend_receiving_vnd": 3450000.0,
+ "cash_debt_vnd": 0.0,
+ "egg_assets_vnd": 851086660.0,
+ "excluded_dividend_receivable_pending_vnd": 0.0,
+ "excluded_dividend_receivable_detail": [],
+ "pool_vnd": 885687194.0,
+ "target_park_vnd": 0.0,
+ "delta_vnd": -9186050.0,
+ "threshold_vnd": 4428435.97,
+ "basket_rebal_date": "2026-08-05",
+ "basket_n": 30,
+ "etf_day_cap_vnd": 1172838684502.1667,
+ "adv_share": 0.5,
+ "live_labels": [
+  "ZaloPay",
+  "SpaceX"
+ ],
+ "basket_dropped": [],
+ "basket_dropped_weight": 0.0,
+ "basket_feasible_n": 0,
+ "target_weights": {},
+ "target_value_vnd": {},
+ "structural_excess_vnd": 9186050.0,
+ "trim_total_vnd": 9186050.0,
+ "day_cap_binding": false,
+ "day_cap_scale": 1.0,
+ "decision": "BLOCKED_ALL_NAMES",
+ "trim_proposed_vnd": 0,
+ "trim_shortfall_vnd": 9186050.0,
+ "park_mv_after_vnd": 9186050.0,
+ "park_pct_after": 0.010371664016630233,
+ "underpark_after_vnd": 0.0
+}

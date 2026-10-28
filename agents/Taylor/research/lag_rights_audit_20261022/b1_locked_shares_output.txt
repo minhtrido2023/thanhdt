@@ -1,0 +1,7 @@
+module: /home/trido/thanhdt/WorkingClaude/wt-lag-rights-20261022/bin/locked_shares.py
+2025-11-20 {"positions_ts": "2025-11-20T19:05:00+07:00", "pending": {"SCL": {"open": 18999, "locked": 4999, "events": [{"ex_date": "2025-10-17", "label": "Quyền mua CP cho Cổ đông hiện hữu 35.71%"}, {"ex_date": "2025-11-06", "label": "Trả Cổ tức bằng Cổ phiếu 9%"}]}}, "unexplained": {}, "event_source": "tav2_bq.corporate_action"}
+   describe: SCL 4,999cp (Quyền mua CP cho Cổ đông hiện hữu 35.71%, GDKHQ 17/10; Trả Cổ tức bằng Cổ phiếu 9%, GDKHQ 06/11)
+2026-01-20 {"positions_ts": "2026-01-20T19:05:00+07:00", "pending": {"SCL": {"open": 18999, "locked": 4999, "events": [{"ex_date": "2025-10-17", "label": "Quyền mua CP cho Cổ đông hiện hữu 35.71%"}, {"ex_date": "2025-11-06", "label": "Trả Cổ tức bằng Cổ phiếu 9%"}]}}, "unexplained": {}, "event_source": "tav2_bq.corporate_action"}
+   describe: SCL 4,999cp (Quyền mua CP cho Cổ đông hiện hữu 35.71%, GDKHQ 17/10; Trả Cổ tức bằng Cổ phiếu 9%, GDKHQ 06/11)
+2026-03-20 {"positions_ts": "2026-03-20T19:05:00+07:00", "pending": {"SCL": {"open": 18999, "locked": 4999, "events": [{"ex_date": "2025-11-06", "label": "Trả Cổ tức bằng Cổ phiếu 9%"}]}}, "unexplained": {}, "event_source": "tav2_bq.corporate_action"}
+   describe: SCL 4,999cp (Trả Cổ tức bằng Cổ phiếu 9%, GDKHQ 06/11)

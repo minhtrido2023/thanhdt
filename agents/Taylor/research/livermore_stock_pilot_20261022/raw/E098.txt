@@ -1,0 +1,11 @@
+Giá tăng dài hạn từ ~100 lên vùng tích luỹ 210–250 (i100–190). Sau đó có pha markup climax tại i191–211, khối lượng 2–3.7x, lập đỉnh 356.6. Tiếp theo là markdown về 210.9 ở i228 và i236–237. Đáy 211–219 được giữ hai lần (i242 vol 2.48 rồi đảo chiều ngay ở i243), cho thấy có cầu tại đáy range.
+
+i247 phá vùng 255–259 với vol 2.16. i248–249 giữ trên 258 với khối lượng giảm nhẹ: follow-through vừa phải, chưa phải climax. Phía trên còn cung kẹt dày ở 300–340 (vùng khối lượng lớn i193–211).
+
+Mức −15% từ ~267 là ≈227, vẫn nằm trong range cũ. Biên độ ngày thường 5–8%, nên nếu breakout thất bại thì giá dễ chạm mức này.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 242 (đáy thanh breakout i247), tức breakout thất bại và giá quay lại range 211–259; thủng 211 thì cấu trúc gãy hẳn.
+CONTAMINATION: NONE

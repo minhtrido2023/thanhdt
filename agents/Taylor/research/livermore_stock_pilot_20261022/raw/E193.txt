@@ -1,0 +1,12 @@
+Trong 250 phiên, cổ phiếu tăng từ 100 lên 214, gần gấp đôi, với các nhịp tăng có khối lượng mạnh ở i=113–122 và i=135–172. Từ i=172 (đỉnh 222.27) giá chuyển sang **đi ngang ở vùng cao** trong khoảng 178.8–230.7, kéo dài khoảng 78 phiên.
+
+- **Bán tháo:** i=187 có khối lượng 4.19 và i=193 lập đáy 178.80. Đó là đợt rũ bỏ, sau đó giá hồi lại.
+- **Cạn cung:** i=214–224 khối lượng chỉ 0.20–0.36 quanh 203–209. Cung yếu ở nhịp điều chỉnh này là tín hiệu tích cực.
+- **Breakout thất bại:** i=237 vượt lên 227.64 với khối lượng 4.65, nhưng không có lực theo. Giá rơi lại 213–214, nằm trong vùng giá trị cũ, dù khối lượng lúc rơi thấp.
+- **Vùng giá:** cung kẹt ở 222–230. Hỗ trợ ở 203–206, sau đó là 195, rồi 178.8. Mức −15% từ giá vào ≈182, rất sát đáy biên dưới.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 203 kèm khối lượng >1.5 thì kịch bản tích luỹ bị phá, mục tiêu tiếp theo là 195–179.
+CONTAMINATION: NONE

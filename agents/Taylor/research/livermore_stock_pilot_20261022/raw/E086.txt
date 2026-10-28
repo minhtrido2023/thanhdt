@@ -1,0 +1,7 @@
+Pha 250 phiên là đáy markdown (~44, i=72) rồi markup gần 4 lần lên ~173. Ở thang 20 phiên, giá tích lũy cao trong vùng 154–169 (i=233–245), rồi i=246–247 phá lên 175 với khối lượng 11.7× median, mức lớn nhất chuỗi. Hai thanh sau giữ được 171–173, chưa thất bại, nhưng khối lượng cực đại sau một đợt tăng dốc thường là dấu hiệu cao trào mua của nhà đầu tư cá nhân và margin. Hỗ trợ gần là mép trên vùng range, khoảng 163–165. Hỗ trợ cứng là 154 (đáy range). Mức −15% tính từ giá vào khoảng 146, nằm dưới 154, tức là vào khoảng air-pocket về vùng 140–145 (i=225–230). Biến động thanh hiện ~4–6%/phiên nên xác suất chạm mức này không nhỏ. Xu hướng vẫn lên nhưng tỷ lệ lời/lỗ kém vì giá đã kéo xa nền.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 158 (đánh mất range 154–169, breakout i=246–247 thất bại); ngược lại, giữ trên 165 với khối lượng co lại là tích cực.
+CONTAMINATION: NONE

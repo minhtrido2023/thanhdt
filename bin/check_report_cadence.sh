@@ -106,6 +106,7 @@ except Exception as e:
     # SWEEP_ATTACH_END
     GATE_OUT="$(python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" "${ATTACH_ARGS[@]}" 2>&1)"
     GATE_RC=$?
+    _RC_WHY=""   # đặt lại mỗi file: biến sống qua vòng lặp, khối GATE_BLOCK_DELIVERY không được đọc lý do của file trước
     printf '%s\n' "$GATE_OUT"
     VENDOR_RC=0
     printf '%s\n' "$GATE_OUT" | "$ROOT/bin/vendor_mismatch_alert.sh" \
@@ -194,6 +195,27 @@ except BaseException:
     raise
 "
       fi
+      # GATE_BLOCK_DELIVERY_BEGIN — question CÓ CHỦ + HẠN + LỆNH RECOVER cho file kẹt, sweep nhắc
+      # tới khi `report_delivery_gate.py --status` (sổ hash-bound của chính cổng) báo COMPLETE
+      # (retro 10-16→10-19 Pattern 1, phương án A 2026-10-20). Ngoài khối de-dup trên vì helper
+      # tự idempotent theo TÊN FILE (một câu cho cả vòng đời file kẹt, kể cả qua nhiều ngày).
+      # Chủ suy từ TAG THẬT cổng vừa in (§29), không đoán: VENDOR_* ⇒ Winston; còn lại ⇒ Taylor.
+      # Điểm dừng: 3 ngày / 20 lần nhắc ⇒ EXPIRED (1 tin cuối, câu hỏi bus vẫn mở cho người đóng tay).
+      if printf '%s\n' "$GATE_OUT" | grep -qE '^VENDOR_(MISMATCH_ALERT|LOOKUP_FAILED)\|'; then
+        _GB_OWNER="Winston (data-ops: nguồn cổ tức vendor)"
+      else
+        _GB_OWNER="Taylor (soạn/sửa báo cáo theo dòng CHẶN của cổng)"
+      fi
+      timeout 60 python3 "$ROOT/bin/gate_block_question.py" open --gate delivery \
+        --key "$FNAME" --owner "$_GB_OWNER" \
+        --deadline "$(TZ='Asia/Ho_Chi_Minh' date -d 'tomorrow' +%Y-%m-%d)T08:30" \
+        --recover "python3 $ROOT/bin/report_delivery_gate.py $f --topic $TRADING_REPORT_THREAD" \
+        --probe "python3 $ROOT/bin/report_delivery_gate.py $f --status" \
+        --reason "report_delivery_gate rc=$GATE_RC: ${_RC_WHY:-không xác định (đã báo INCOMPLETE trong ngày — xem logs/check_report_cadence.log hoặc report_delivery_gate.py --status)}" \
+        --thread "$TRADING_REPORT_THREAD" --remind-every-min 240 \
+        --expires-in-days 3 --max-reminders 20 \
+        --extra "{\"artifact\":\"${FNAME}\"}" || true
+      # GATE_BLOCK_DELIVERY_END
     fi
   fi
 done
@@ -236,6 +258,7 @@ for q in d.get("pending", []):
 ')"
 export RC_PENDING_TOPICS
 export REPORT_SCHEDULED_KIND="$SCHEDULED_KIND"
+export RC_BIN_DIR="$ROOT/bin"   # heredoc detector import report_return_gate từ đây
 
 PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" "$DELIVERY_STATE" << 'PYEOF'
 import glob, hashlib, json, os, re, sys
@@ -244,7 +267,18 @@ from datetime import date, timedelta
 wc_root, today_s, state_path, delivery_state_path = sys.argv[1:5]
 today = date.fromisoformat(today_s)
 reports_dir = os.path.join(wc_root, "mike", "reports")
-state = json.load(open(state_path))
+try:
+    state = json.load(open(state_path))
+    if not isinstance(state, dict):
+        raise ValueError("state khong phai dict: %r" % type(state).__name__)
+except FileNotFoundError:
+    state = {}
+except Exception as e:
+    # state hỏng KHÔNG được giết cả bộ phát hiện quá hạn + auto-close (writer ở cuối file đã
+    # dựng lại từ {} khi gặp state hỏng — reader phải cùng chịu được).
+    print("check_report_cadence: state cu hong (%s: %s) — doc nhu {}" % (type(e).__name__, e),
+          file=sys.stderr)
+    state = {}
 scheduled_kind = os.environ.get("REPORT_SCHEDULED_KIND", "")
 try:
     delivery_state = json.load(open(delivery_state_path))
@@ -255,9 +289,9 @@ except FileNotFoundError:
 # mục còn "[TBD" được delivery gate coi là COMPLETE và giao thật 28/08, TRƯỚC CẢ KHI tháng đóng
 # — vì report_return_gate.py cũ không có phép kiểm nội dung nào, chỉ kiểm tỉ suất NẾU có bảng để
 # kiểm. Marker khớp NGUYÊN VĂN quy ước đang dùng trong reports/*.md — mở rộng nếu thấy quy ước
-# khác, đừng đoán. Cùng danh sách với report_return_gate.py's INCOMPLETE_MARKERS (giữ đồng bộ
-# tay — 2 file khác ngôn ngữ (bash-heredoc-python vs python thuần), không import chéo được).
-INCOMPLETE_MARKERS = ("[TBD", "[chưa điền", "[chua dien", "[placeholder")
+# khác, đừng đoán. Danh sách nằm ở report_return_gate.py (nguồn duy nhất) — import, không chép tay.
+sys.path.insert(0, os.environ["RC_BIN_DIR"])
+from report_return_gate import INCOMPLETE_MARKERS  # noqa: E402
 
 def content_complete(path):
     try:
@@ -468,6 +502,13 @@ print(json.dumps({"actions": actions, "closable": closable}))
 PYEOF
 )"
 
+# Heredoc chết (traceback/import hỏng) ⇒ PLAN rỗng: trước đây `[ "$N" -eq 0 ]` lỗi, vòng while
+# không có input rồi script thoát rc=0 — cron báo xanh trong khi bộ phát hiện quá hạn đã chết.
+if ! printf '%s' "$PLAN" | python3 -c "import json,sys; json.load(sys.stdin)['actions']" 2>/dev/null; then
+  echo "❌ check_report_cadence: LỖI — bộ phát hiện không trả PLAN JSON hợp lệ (xem traceback phía trên); KHÔNG thể kết luận có/không báo cáo quá hạn." >&2
+  exit 1
+fi
+
 # ── RC_BASH_CLOSE_BEGIN — ghi answer đóng question (marker cho selfcheck) ────────────────
 # KHÔNG nuốt lỗi: chỉ in "auto-closed" khi append_event.sh THẬT SỰ exit 0. Bản cũ dùng
 # `>/dev/null 2>&1 || true` rồi echo vô điều kiện ⇒ log nói đã đóng trong khi bus không có
@@ -541,21 +582,25 @@ for a in json.load(sys.stdin)['actions']:
   # 2026-10-14 (quỹ bước 4, user duyệt): bảng 3.2 "Hiệu suất lũy kế" KHÔNG tự gõ — dán đầu ra period_table_32.py.
   # Cổng report_delivery_gate._check_benchmark_table CHẶN bảng 1 cột VN-Index cũ khi chuỗi data/benchmark/vnindex_tr_daily.csv tồn tại.
   BENCH_STEP="Bảng 3.2 'Hiệu suất lũy kế' (CẢ weekly lẫn monthly, CẢ 2 file) KHÔNG được tự gõ hay tự tính: chạy \`python3 $ROOT/bin/period_table_32.py --account SpaceX --report-date <thứ Sáu cuối kỳ hoặc ngày cuối tháng>\` cho file SpaceX và \`python3 $ROOT/bin/period_table_32.py --account ZaloPay --report-date <cùng ngày> --with-sleeve\` cho file ZaloPay, rồi DÁN NGUYÊN đầu ra (6 cột Giai đoạn | tài khoản | VN-Index (giá) | VN-Index có cổ tức | Chênh so giá | Chênh so có cổ tức, kèm chú thích cố định 'sau thuế TNCN 5% trên cổ tức'). Bảng này chỉ có các dòng Tuần/MTD/Từ khi bắt đầu — KHÔNG thêm dòng QTD/YTD vào bảng 3.2 (báo cáo tháng vẫn có bảng 3.2 như trên; QTD/YTD nếu cần nêu ở phần khác, lấy từ nav_period_returns.py). Ô nào CLI ghi 'chưa có số' thì GIỮ NGUYÊN, không thay bằng số tự tính, không in chỉ số giá vào cột có cổ tức. Cột có cổ tức 'chưa có số' ở chuỗi chính sẽ bị cổng giao báo cáo CHẶN — khi đó báo gap trong bus finding thay vì tìm cách lách."
-  # 2026-10-14 (user duyệt): ghi chú đính chính số đã công bố, 1 khối ở báo cáo TUẦN kế tiếp (tới hết 2026-10-23), không phát hành lại.
-  CORR_STEP=""
-  if [ "$(TZ=Asia/Ho_Chi_Minh date +%F)" \< "2026-10-24" ]; then
-    CORR_STEP="BẮT BUỘC (báo cáo tuần này, CẢ 2 file): thêm MỘT khối ngắn 'Đính chính số đã công bố' đọc từ $ROOT/kb/projects/report-corrections-pending-20261014.md — mục A (mốc VN-Index 'từ khi bắt đầu' của các báo cáo cũ; số đúng đã có trong bảng) và mục B (sổ NAV lịch sử). File SpaceX (client-facing): viết gọn bằng ngôn ngữ tài chính, nêu số cũ → số đúng và rằng tỉ suất của tài khoản không đổi, KHÔNG nhắc job/cổng/lỗi hệ thống. File ZaloPay: đầy đủ mục A+B. Không sửa file báo cáo cũ, không phát hành lại."
-  fi
+  # 2026-10-25 (user duyệt, job Taylor_20261025_092234): khối Kỹ thuật của 'Toàn cảnh thị trường' do
+  # Livermore viết (bin/livermore_report_block.py: số do SCRIPT tính, Livermore chỉ diễn giải, kiểm số lạ
+  # cơ học, fail-closed). Phần Cơ bản/định giá (Value Radar, DT gate §6b) GIỮ NGUYÊN — Livermore mù DT5G.
+  case "$PKEY" in
+    weekly_*) PERIOD_END="${PKEY##*_}" ;;
+    monthly_*) PERIOD_END="$(date -d "${PKEY#monthly_}-01 +1 month -1 day" +%F)" ;;
+    *) PERIOD_END="" ;;
+  esac
+  LIVERMORE_STEP="Khối '**Kỹ thuật (VN-Index ...)**' trong mục 'Toàn cảnh thị trường' (CẢ 2 file) KHÔNG tự viết nữa — do Livermore (chuyên viên kỹ thuật độc lập của đội) viết: TRƯỚC khi soạn, chạy \`python3 $ROOT/bin/livermore_report_block.py ensure --kind ${KIND} --period-end ${PERIOD_END}\` (thường 1-5 phút, tới ~45 phút nếu đến hạn lập dự báo mới ⇒ chạy NỀN bằng Bash run_in_background, soạn các mục khác trong lúc chờ, rồi đọc JSON nó in ra; idempotent + có khoá — chạy lại trả ngay khối đã có). (a) rc=0 (status PASS): DÁN NGUYÊN VĂN toàn bộ nội dung file .md mà JSON in ra trỏ tới (trường md) vào chỗ khối Kỹ thuật, KHÔNG sửa chữ/số/dòng nguồn/dòng dự báo đang mở, không thêm số kỹ thuật nào khác vào khối; sau khi ghi file chạy \`python3 $ROOT/bin/livermore_report_block.py verify-report <file> --kind ${KIND} --period-end ${PERIOD_END}\` cho TỪNG file, phải ra VERBATIM. (b) rc≠0 (FAIL): tự viết khối Kỹ thuật như trước (chỉ số liệu đã verify, nêu as-of) và KHÔNG ghi Livermore là nguồn; trong file ZaloPay thêm ngay dưới khối dòng '⚠️ Khối kỹ thuật Livermore không qua kiểm tra cơ học — khối trên do người soạn báo cáo viết. Lý do: <reason trong JSON>'; file SpaceX không nhắc sự cố; ghi reason vào bus finding. Mục 'Cơ bản / định giá' (Value Radar, DT gate) giữ nguyên cách làm hiện tại. Phần Outlook Kỹ thuật vẫn do bạn viết nhưng KHÔNG được trình bày như dự báo của Livermore, không cam kết độ chính xác."
   if [ "$KIND" = "weekly" ]; then
     MODEL="sonnet"
     EFFORT="medium"
-    PROMPT="Soạn và GỬI báo cáo TUẦN trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu, dữ liệu đã đầy đủ). ${SPLIT_STEP} Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tuần bị bỏ sót, phát hiện tự động). Dùng đúng pipeline mike/kb/coding_guidelines.md §6 (verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật, không tự bịa số). Nguồn/as-of của mỗi số và mỗi biểu đồ ghi ở caption markdown ngay dưới ảnh (report_charts.py chỉ có --title-suffix, không vẽ nguồn lên PNG). Trong file SpaceX (client-facing) nguồn ghi bằng tên công khai (HOSE/HNX, dữ liệu môi giới, tính toán nội bộ), TUYỆT ĐỐI không nêu tên bảng/hệ thống nội bộ (tav2_*, BigQuery, DNSE API, universe_pit...), và 'rủi ro/giới hạn' là giới hạn thị trường/phương pháp, không phải sự cố vận hành. Văn phong cô đọng, chuyên nghiệp theo thông lệ thư nhà đầu tư của các nhà quản lý tài sản lớn (rõ luận điểm, dữ liệu, rủi ro và giới hạn), không sao chép hoặc gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC (cả 2 file): (1) Executive summary; (2) ngay đầu báo cáo có 'Toàn cảnh thị trường' tách rõ Technical (VNINDEX: xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum nếu dữ liệu chứng minh được) và Fundamental (định giá, tăng trưởng lợi nhuận, lãi suất/vĩ mô, dòng tiền — nêu as-of/nguồn); (3) hiệu quả, attribution, exposure/risk của account; (4) biểu đồ theo chỉ dẫn biểu đồ bên dưới — mọi biểu đồ có tiêu đề, đơn vị, kỳ dữ liệu và nguồn, tạo từ dữ liệu thật; không có dữ liệu đáng tin thì nêu rõ thay vì vẽ; (5) kết luận 'Outlook kỳ tới' tách Technical/Fundamental, dạng kịch bản xác suất/điều kiện làm sai, không phải khuyến nghị chắc chắn. Format/văn phong tham khảo mẫu ĐÃ TÁCH gần nhất mike/reports/SpaceX_weekly_report_2026-08-24_to_2026-08-28.md (client-facing) và mike/reports/ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md (đầy đủ) — KHÔNG dùng mẫu gộp cũ SpaceX_ZaloPay_weekly_report_*.md nữa (deprecated, chỉ còn trên đĩa làm lịch sử). TUYỆT ĐỐI không copy nội dung hạn chế/limitation từ mẫu cũ nếu chưa kiểm tra còn đúng không. CỤ THỂ: Trứng vàng (egg.totalValue) ĐÃ đọc tự động từ DNSE API từ 2026-08-18 (field egg.totalValue trong payload.egg của balances, daily_nav_snapshot.py dòng ~450, cột egg_assets_auto=True trong nav_history CSV) — KHÔNG còn là 'không đọc được qua API DNSE' hay 'off-book manual'. Breadth (%mã > MA50): dùng tav2_mike.universe_pit (PIT thật, không dùng ticker_prune) JOIN với tav2_bq.ticker lấy MA50/Close tại ngày giao dịch mới nhất; ghi rõ số mã trong rổ ngày đó (mục này thuộc bối cảnh thị trường, có thể giữ ở CẢ 2 file vì không phải nội dung nội bộ). Phần Fundamental của 'Toàn cảnh thị trường' lấy dòng DT gate (candidate/streak) từ dna_report.build_dt_gate_line() và Value Radar từ dna_report.build_value_radar_line() (chạy từ WC_ROOT, mike/kb/coding_guidelines.md §6b), KHÔNG tự tính phân vị P/E ad-hoc. ${PORTFOLIO_STEP} ${BENCH_STEP} ${CORR_STEP} ${CHART_STEP} Value Radar (dna_report.build_value_radar_line()) vẫn giữ ở dạng text/số liệu trong báo cáo như trước, không bắt buộc render thành chart riêng. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong file ZaloPay (đầy đủ); với file SpaceX thì trình bày số liệu cuối cùng đã verify, không kể lể quá trình. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong: 2 file path (SpaceX + ZaloPay), NAV cuối kỳ 2 account, % biến động, kết luận market outlook, gap/lỗi nếu có, sha256 + trạng thái delivery gate của TỪNG file."
+    PROMPT="Soạn và GỬI báo cáo TUẦN trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu, dữ liệu đã đầy đủ). ${SPLIT_STEP} Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tuần bị bỏ sót, phát hiện tự động). Dùng đúng pipeline mike/kb/coding_guidelines.md §6 (verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật, không tự bịa số). Nguồn/as-of của mỗi số và mỗi biểu đồ ghi ở caption markdown ngay dưới ảnh (report_charts.py chỉ có --title-suffix, không vẽ nguồn lên PNG). Trong file SpaceX (client-facing) nguồn ghi bằng tên công khai (HOSE/HNX, dữ liệu môi giới, tính toán nội bộ), TUYỆT ĐỐI không nêu tên bảng/hệ thống nội bộ (tav2_*, BigQuery, DNSE API, universe_pit...), và 'rủi ro/giới hạn' là giới hạn thị trường/phương pháp, không phải sự cố vận hành. Văn phong cô đọng, chuyên nghiệp theo thông lệ thư nhà đầu tư của các nhà quản lý tài sản lớn (rõ luận điểm, dữ liệu, rủi ro và giới hạn), không sao chép hoặc gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC (cả 2 file): (1) Executive summary; (2) ngay đầu báo cáo có 'Toàn cảnh thị trường' tách rõ Technical (VNINDEX: xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum nếu dữ liệu chứng minh được) và Fundamental (định giá, tăng trưởng lợi nhuận, lãi suất/vĩ mô, dòng tiền — nêu as-of/nguồn); (3) hiệu quả, attribution, exposure/risk của account; (4) biểu đồ theo chỉ dẫn biểu đồ bên dưới — mọi biểu đồ có tiêu đề, đơn vị, kỳ dữ liệu và nguồn, tạo từ dữ liệu thật; không có dữ liệu đáng tin thì nêu rõ thay vì vẽ; (5) kết luận 'Outlook kỳ tới' tách Technical/Fundamental, dạng kịch bản xác suất/điều kiện làm sai, không phải khuyến nghị chắc chắn. Format/văn phong tham khảo mẫu ĐÃ TÁCH gần nhất mike/reports/SpaceX_weekly_report_2026-08-24_to_2026-08-28.md (client-facing) và mike/reports/ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md (đầy đủ) — KHÔNG dùng mẫu gộp cũ SpaceX_ZaloPay_weekly_report_*.md nữa (deprecated, chỉ còn trên đĩa làm lịch sử). TUYỆT ĐỐI không copy nội dung hạn chế/limitation từ mẫu cũ nếu chưa kiểm tra còn đúng không. CỤ THỂ: Trứng vàng (egg.totalValue) ĐÃ đọc tự động từ DNSE API từ 2026-08-18 (field egg.totalValue trong payload.egg của balances, daily_nav_snapshot.py dòng ~450, cột egg_assets_auto=True trong nav_history CSV) — KHÔNG còn là 'không đọc được qua API DNSE' hay 'off-book manual'. Breadth (%mã > MA50): dùng tav2_mike.universe_pit (PIT thật, không dùng ticker_prune) JOIN với tav2_bq.ticker lấy MA50/Close tại ngày giao dịch mới nhất; ghi rõ số mã trong rổ ngày đó (mục này thuộc bối cảnh thị trường, có thể giữ ở CẢ 2 file vì không phải nội dung nội bộ). Phần Fundamental của 'Toàn cảnh thị trường' lấy dòng DT gate (candidate/streak) từ dna_report.build_dt_gate_line() và Value Radar từ dna_report.build_value_radar_line() (chạy từ WC_ROOT, mike/kb/coding_guidelines.md §6b), KHÔNG tự tính phân vị P/E ad-hoc. ${LIVERMORE_STEP} ${PORTFOLIO_STEP} ${BENCH_STEP} ${CHART_STEP} Value Radar (dna_report.build_value_radar_line()) vẫn giữ ở dạng text/số liệu trong báo cáo như trước, không bắt buộc render thành chart riêng. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong file ZaloPay (đầy đủ); với file SpaceX thì trình bày số liệu cuối cùng đã verify, không kể lể quá trình. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong: 2 file path (SpaceX + ZaloPay), NAV cuối kỳ 2 account, % biến động, kết luận market outlook, gap/lỗi nếu có, sha256 + trạng thái delivery gate của TỪNG file."
   else
     # Báo cáo = việc thường ngày ⇒ Sonnet/medium cho CẢ tuần lẫn tháng (user chốt 2026-10-06;
     # trước đó tháng ghim opus/high). Nghiên cứu/coding khó mới lên Opus — kb/mike_model_routing.md.
     MODEL="sonnet"
     EFFORT="medium"
-    PROMPT="Soạn và GỬI báo cáo THÁNG trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (cả tháng). ${SPLIT_STEP} Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tháng bị bỏ sót, phát hiện tự động). Áp dụng chuẩn mực báo cáo THÁNG theo mike/kb/coding_guidelines.md §6 (MTD/QTD/YTD, so với VNINDEX, attribution sector/mã, risk metrics DD/vol, phí/chi phí, outlook) — không chỉ lặp báo cáo tuần. Nguồn/as-of của mỗi số và mỗi biểu đồ ghi ở caption markdown ngay dưới ảnh (report_charts.py chỉ có --title-suffix, không vẽ nguồn lên PNG). Trong file SpaceX (client-facing) nguồn ghi bằng tên công khai (HOSE/HNX, dữ liệu môi giới, tính toán nội bộ), TUYỆT ĐỐI không nêu tên bảng/hệ thống nội bộ (tav2_*, BigQuery, DNSE API, universe_pit...), và 'rủi ro/giới hạn' là giới hạn thị trường/phương pháp, không phải sự cố vận hành. Văn phong theo thông lệ thư nhà đầu tư chuyên nghiệp: luận điểm trước, bằng chứng sau, nêu rủi ro/giới hạn; không sao chép hay gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC ngay đầu (cả 2 file): 'Toàn cảnh thị trường' tách Technical (xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum) và Fundamental (định giá, earnings, lãi suất/vĩ mô/dòng tiền), mọi số có as-of/nguồn. Biểu đồ theo chỉ dẫn biểu đồ bên dưới, mỗi biểu đồ có tiêu đề/đơn vị/kỳ/nguồn đầy đủ; thiếu dữ liệu thì nói rõ. Kết thúc bằng 'Outlook tháng tới' tách Technical/Fundamental, trình bày kịch bản, điều kiện xác nhận/bác bỏ và rủi ro, không khẳng định chắc chắn. Format/văn phong tham khảo mẫu ĐÃ TÁCH gần nhất mike/reports/SpaceX_monthly_report_2026-08.md (client-facing) và mike/reports/ZaloPay_monthly_report_2026-08.md (đầy đủ) — KHÔNG dùng mẫu gộp cũ SpaceX_ZaloPay_monthly_report_*.md nữa (deprecated, chỉ còn trên đĩa làm lịch sử). BẮT BUỘC thêm mục 'Paper signals chạy nền — kiểm tra suy giảm theo tháng' cho extreme_regime và fill_timing (hai mục không còn in daily) TRONG FILE ZALOPAY (nội bộ) — mục này là theo dõi R&D nội bộ, KHÔNG đưa vào file SpaceX client-facing: đọc mike/kb/paper_programs_registry.json, journal data/execution_logs/exec_main_*_journal.csv và output probe/charter liên quan; so sánh tháng này với tháng trước về số phiên evidence/lệnh, marker hoặc false-trigger, reject/fail, adherence cửa sổ và fill-vs-open khi đo được, cùng trạng thái gate. Kết luận chỉ là ổn định / chưa đủ dữ liệu / có dấu hiệu suy giảm cần điều tra, nêu số liệu và giới hạn; TUYỆT ĐỐI không coi ít quan sát hay không có trigger là bằng chứng alpha. Dùng đúng pipeline verify_account_snapshot.py --account-no + nav_history_{account}.csv thật. Phần Fundamental của 'Toàn cảnh thị trường' lấy dòng DT gate (candidate/streak) từ dna_report.build_dt_gate_line() và Value Radar từ dna_report.build_value_radar_line() (chạy từ WC_ROOT, mike/kb/coding_guidelines.md §6b), KHÔNG tự tính phân vị P/E ad-hoc. ${PORTFOLIO_STEP} ${BENCH_STEP} ${CHART_STEP} Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong file ZaloPay; với file SpaceX thì trình bày số liệu cuối cùng đã verify, không kể lể quá trình vận hành. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong, gồm kết luận market outlook và kết luận monthly review của 2 paper signal (trong file ZaloPay) và sha256 + trạng thái delivery gate của TỪNG file."
+    PROMPT="Soạn và GỬI báo cáo THÁNG trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (cả tháng). ${SPLIT_STEP} Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tháng bị bỏ sót, phát hiện tự động). Áp dụng chuẩn mực báo cáo THÁNG theo mike/kb/coding_guidelines.md §6 (MTD/QTD/YTD, so với VNINDEX, attribution sector/mã, risk metrics DD/vol, phí/chi phí, outlook) — không chỉ lặp báo cáo tuần. Nguồn/as-of của mỗi số và mỗi biểu đồ ghi ở caption markdown ngay dưới ảnh (report_charts.py chỉ có --title-suffix, không vẽ nguồn lên PNG). Trong file SpaceX (client-facing) nguồn ghi bằng tên công khai (HOSE/HNX, dữ liệu môi giới, tính toán nội bộ), TUYỆT ĐỐI không nêu tên bảng/hệ thống nội bộ (tav2_*, BigQuery, DNSE API, universe_pit...), và 'rủi ro/giới hạn' là giới hạn thị trường/phương pháp, không phải sự cố vận hành. Văn phong theo thông lệ thư nhà đầu tư chuyên nghiệp: luận điểm trước, bằng chứng sau, nêu rủi ro/giới hạn; không sao chép hay gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC ngay đầu (cả 2 file): 'Toàn cảnh thị trường' tách Technical (xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum) và Fundamental (định giá, earnings, lãi suất/vĩ mô/dòng tiền), mọi số có as-of/nguồn. Biểu đồ theo chỉ dẫn biểu đồ bên dưới, mỗi biểu đồ có tiêu đề/đơn vị/kỳ/nguồn đầy đủ; thiếu dữ liệu thì nói rõ. Kết thúc bằng 'Outlook tháng tới' tách Technical/Fundamental, trình bày kịch bản, điều kiện xác nhận/bác bỏ và rủi ro, không khẳng định chắc chắn. Format/văn phong tham khảo mẫu ĐÃ TÁCH gần nhất mike/reports/SpaceX_monthly_report_2026-08.md (client-facing) và mike/reports/ZaloPay_monthly_report_2026-08.md (đầy đủ) — KHÔNG dùng mẫu gộp cũ SpaceX_ZaloPay_monthly_report_*.md nữa (deprecated, chỉ còn trên đĩa làm lịch sử). BẮT BUỘC thêm mục 'Paper signals chạy nền — kiểm tra suy giảm theo tháng' cho extreme_regime và fill_timing (hai mục không còn in daily) TRONG FILE ZALOPAY (nội bộ) — mục này là theo dõi R&D nội bộ, KHÔNG đưa vào file SpaceX client-facing: đọc mike/kb/paper_programs_registry.json, journal data/execution_logs/exec_main_*_journal.csv và output probe/charter liên quan; so sánh tháng này với tháng trước về số phiên evidence/lệnh, marker hoặc false-trigger, reject/fail, adherence cửa sổ và fill-vs-open khi đo được, cùng trạng thái gate. Kết luận chỉ là ổn định / chưa đủ dữ liệu / có dấu hiệu suy giảm cần điều tra, nêu số liệu và giới hạn; TUYỆT ĐỐI không coi ít quan sát hay không có trigger là bằng chứng alpha. BẮT BUỘC thêm TIỂU MỤC 'Shadow intraday cutloss — tích luỹ OOS' ngay dưới mục paper signals, CŨNG CHỈ trong FILE ZALOPAY (nội bộ, KHÔNG đưa vào file SpaceX client-facing): chạy lệnh python3 mike/bin/intraday_oos_monthly.py --month <YYYY-MM của kỳ báo cáo> từ WC_ROOT và chép nguyên số của nó (số phiên có log, lượt quét, crash, lỗi giá, phiên thiếu EOD_OOS, ngày có ca live, luỹ kế X/30 ngày có ca). Chỉ báo CÁC SỐ ĐẾM và tiến độ tới mốc 30 ngày có ca ADV20 ≥ 10 tỷ; số ngày có ca là cận trên (chưa lọc ADV20), KHÔNG chấm H1, KHÔNG kết luận cutloss tốt/xấu, KHÔNG đề xuất bật tự bán (cần H1 OOS SUPPORTED + quant-skeptic CONFIRMED + user duyệt). Có crash/phiên thiếu EOD_OOS thì nêu rõ. Script lỗi hoặc không có log tháng đó thì ghi 'không đọc được' kèm lý do thật, đừng tự ước lượng. Dùng đúng pipeline verify_account_snapshot.py --account-no + nav_history_{account}.csv thật. Phần Fundamental của 'Toàn cảnh thị trường' lấy dòng DT gate (candidate/streak) từ dna_report.build_dt_gate_line() và Value Radar từ dna_report.build_value_radar_line() (chạy từ WC_ROOT, mike/kb/coding_guidelines.md §6b), KHÔNG tự tính phân vị P/E ad-hoc. ${LIVERMORE_STEP} ${PORTFOLIO_STEP} ${BENCH_STEP} ${CHART_STEP} Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong file ZaloPay; với file SpaceX thì trình bày số liệu cuối cùng đã verify, không kể lể quá trình vận hành. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong, gồm kết luận market outlook và kết luận monthly review của 2 paper signal (trong file ZaloPay) và sha256 + trạng thái delivery gate của TỪNG file."
   fi
   # `--thread "$TRADING_REPORT_THREAD"` tường minh — xem chú thích cùng ngày trong
   # daily_retro.sh (B1). Đúng topic mà chính PROMPT đã yêu cầu gửi báo cáo vào.

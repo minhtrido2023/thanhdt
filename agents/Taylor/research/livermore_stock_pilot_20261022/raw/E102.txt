@@ -1,0 +1,11 @@
+**Phân tích:** Năm nay giá đã đi từ 100 lên khoảng 385, qua hai pha markup dạng cao trào. Pha đầu (i117–122) kết thúc ở đỉnh 301 trên khối lượng lớn. Sau đó giá phân phối và giảm về 173, tức −42%. Từ i219 giá markup lần hai. Từ i236 giá dốc đứng: từ 258 lên 385 (+50%) chỉ trong 13 phiên. Khối lượng cao trào xuất hiện ở i238 (17.2x), sau đó giảm dần (11→6→5).
+
+Ba phiên cuối (i247–249) dậm chân dưới 400. Phiên i248 có biên rộng, chạm đáy 367, với 7.7x khối lượng. Đây là dấu hiệu cung ra ở vùng đỉnh, đúng như pha đầu.
+
+Biên độ ngày khoảng 8%, cổ phiếu chạy bằng margin. Không có hỗ trợ gần: gap i243 ở khoảng 320, rồi vùng 255–265. Mức −15% tương đương khoảng 327, nằm gọn trong phạm vi một nhịp điều chỉnh bình thường.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Kịch bản rủi ro sai nếu giá đóng cửa vững trên 400 với khối lượng >8x và giữ được 366 (đáy i248) trong 5–10 phiên tới.
+CONTAMINATION: NONE

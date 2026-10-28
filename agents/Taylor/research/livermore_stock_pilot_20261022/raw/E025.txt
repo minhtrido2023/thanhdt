@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá markup lên 152 (i47), rồi markdown sâu về 67.6 (i210), sau đó bật hình chữ V rất dốc lên 122 (i247), tức khoảng +80% trong ~37 phiên. Khối lượng bùng nổ dần: i228 (9.1x), i233 (7.6x), và đặc biệt i246 (17.9x). Tiếp theo là gap lên 122 nhưng mở cửa ở đúng đỉnh phiên. Hai phiên i248–249 có khối lượng 7–10x nhưng giá không vượt được 122, thân nến lùi về vùng 110–116. Đây là dấu hiệu buying climax hoặc churning ngay dưới vùng cung cũ 115–125 (các phiên i25–43). Hỗ trợ gần nhất là nền 100–110 (i229–245), nằm sát mức −15% (~99). Biến động ngày lớn, nhà đầu tư dùng margin mua đuổi dễ bị kẹt.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 100 (thủng nền i229–245) trên khối lượng lớn; ngược lại, đóng cửa trên 122 với follow-through sẽ làm luận điểm climax mất hiệu lực.
+CONTAMINATION: NONE

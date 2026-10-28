@@ -1,0 +1,9 @@
+**Phân tích:** Đây là mã cực kỳ kém thanh khoản: nhiều phiên Volume bằng 0 và giá nhảy trần/sàn ±7% liên tục. Ở thang 250 phiên, giá đi qua ba pha. Pha markdown kéo từ ~105 (i34–48) xuống đáy 51.4 (i159). Tiếp theo là markup dựng đứng, có khối lượng xác nhận ở i172 (211x) và i204–210, đưa giá lên 105.9 (i211). Từ i213 đến nay giá phân phối và đi ngang trong vùng 75–89.
+
+Thanh cuối i249 mở 74.5 rồi đóng trần 85.27 chỉ với 0.46x khối lượng, không có follow-through thật. Giá vào quanh 85 nằm sát mép trên range, ngay dưới cung kẹt tại 87–93. Ngưỡng −15% là ~72.5, chỉ cách đáy range 75.4–75.8 vài phần trăm. Với biên dao động hai phiên đã ~14%, khả năng chạm ngưỡng này là cao.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 75 (thủng đáy range i221/i244) thì cấu trúc gãy, mục tiêu tiếp theo là vùng 63–68.
+CONTAMINATION: NONE

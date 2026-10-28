@@ -1,0 +1,7 @@
+**Phân tích:** Cả ba thang đều đang ở pha markup. Giá đi từ khoảng 100 lên 232, với chuỗi đỉnh và đáy cao dần: 131 (i173) → 185 (i210) → 194 (i230). Nền 194–210 (i207–239) tích luỹ với khối lượng cạn dần (0.34–0.5). Breakout ở i240–241 có khối lượng 1.8–3.0, sau đó có follow-through lên 234 mà không có climax rõ (khối lượng 0.5–1.6). Đây là cấu trúc khoẻ. Rủi ro là giá đã kéo dài khoảng 18% trên nền. Lịch sử cổ phiếu cho thấy các nhịp điều chỉnh sâu 17–24% (i70→80, i130→173). Mức −15% tính từ khoảng 232 là 197, tức đáy nền breakout, một vùng có thể bị kiểm định lại.
+
+P_HIT15: 0.33
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa thủng lại vùng 210 (mép breakout i240) với khối lượng lớn, tức breakout thất bại; thủng 194 thì cấu trúc gãy.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+Sau pha markdown dài (100→42, climax khối lượng 6.6–7.7 ở i=68–69), giá tích luỹ 55–65 trong khoảng 100 phiên. Sau đó là pha markup thẳng đứng i=185–193 lên 139, kèm climax 20.2 ở i=192. Phân phối diễn ra ngay sau đó, giá rơi về 87 với khối lượng 15.2 ở i=199.
+
+Hai lần đẩy tiếp theo đều tắc ở vùng 120–123: i=222 đạt 119.88, i=245 đạt 123.36 với khối lượng 4.05. Đây là vùng cung trên gần nhất, còn cung lớn nằm ở 125–139. Breakout i=244–245 đã thất bại: i=247 giảm về 114.85, i=249 xuống low 111.72 với khối lượng 1.6, đóng cửa yếu.
+
+Giá vào ở khoảng 113. Hỗ trợ gần là kệ 104–106 (i=227–237), mức −15% tương đương khoảng 96, chính là đáy base 94–98. Cổ phiếu biến động mạnh, thanh khoản mỏng, có rủi ro air-pocket.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 104 (thủng kệ i=227–237) là sai; ngược lại, đóng cửa trên 123.4 với khối lượng >3 xác nhận breakout.
+CONTAMINATION: NONE

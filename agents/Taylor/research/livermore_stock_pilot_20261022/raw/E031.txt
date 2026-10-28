@@ -1,0 +1,7 @@
+**Phân tích:** Ba thang đều ở pha markup. Từ ~130 (i=178) giá lên 476 (i=249), tăng khoảng +260% trong khoảng 70 phiên. Riêng 13 phiên cuối (i=236→249) tăng từ 305 lên 476, gần như dựng đứng, nhiều phiên đóng ở mức trần +7%. Khối lượng lại cạn dần trong đúng giai đoạn tăng tốc này (0.33–0.64 so với median), thấp hơn hẳn mức 1.3–2.3 hồi i=214–226. Hình thái này giống một đợt squeeze do thanh khoản mỏng, không có cầu mới xác nhận. Phiên i=249 mở thấp (462), đóng 476 nhưng không vượt đỉnh 478.6, có dấu hiệu chững lại. Dưới giá không có vùng tích lũy nào: gap/vùng trống tới 431, rồi 403, rồi 340. Giá vào đã ở mức −15% tương đương khoảng 405. Một nhịp hồi 15–25% sau đợt tăng parabol là xác suất cao.
+
+P_HIT15: 0.72
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Giá giữ trên 431 (i=245) và tích lũy đi ngang, khối lượng tăng mà không mất vùng 452–460, rồi bứt qua 479 với follow-through.
+CONTAMINATION: NONE

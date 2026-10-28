@@ -1,0 +1,35 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+─────────────────────────────────────────────────
+📋 **TÌNH TRẠNG DANH MỤC — SpaceX (2026-10-23)**
+Chiến lược: **V2.4** | Regime: **NEUTRAL** (DT5G) | Park target: **0%** idle cash
+NAV: **968.9M** | Hôm nay: **-0.04%** | Từ khi bắt đầu hoạt động: **-3.11%**
+Gate DT5G: 🟢 BÌNH THƯỜNG · candidate CRISIS 13/25 (52%, còn 12 phiên để commit, base giữ từ 2026-10-07, committed NEUTRAL) · P(CRISIS xác nhận|k=13)≈69% [44–91%, n=16] ⚠ mẫu mỏng, tham khảo  [dữ liệu tới 2026-10-23]
+   ↳ Nền xấu 19 phiên liền từ 29/09 (6 BEAR + 13 CRISIS, đổi qua lại 1 lần → bộ đếm reset, vẫn NEUTRAL) · VNINDEX −0,4% từ đầu đợt · ngưỡng xem lại: ≥15 phiên và VNINDEX ≤−5,0% — chưa chạm
+Value Radar: 🟢 24.8 RẺ (phân vị 10 năm) · P/E 11.26 (p7) · P/B 1.89 (p26) · spread EY−CCTG 12T +1.48pp (p41)  [dữ liệu tới 2026-10-23]
+─────────────────────────────────────────────────
+
+**Cơ cấu danh mục**
+
+| Sleeve | Giá trị | % NAV | Lãi/Lỗ CK | Ghi chú |
+|--------|--------:|------:|----------:|---------|
+| PARK custom30V (4 mã) | 11.4M | 1.2% | +3.9% | Rebal gần nhất: 2026-08-05 | kế tiếp: ~2026-12-01 (ước tính Q4) |
+| Discretionary (2 mã) | 80.8M | 8.3% | +8.8% | Fear-buy/special situation |
+| Trứng vàng | 873.2M | 90.1% | — | DNSE bond-like (off-book) |
+| Cash | 3.5M | 0.4% | 0% | Idle |
+
+ⓘ Tỉ suất từng mã tính trên giá đóng cửa của phiên, đã cộng cổ tức tiền mặt sau thuế; cột giá trị tính trên giá do công ty chứng khoán ghi cuối ngày. Hai giá có thể lệch nhau ở mã giao dịch trên UPCOM, nên giá trị và tỉ suất của cùng một mã không quy đổi trực tiếp sang nhau.
+
+**Chi tiết PARK custom30V (4 mã)**
+  VPB 6.9M, +9.44% · MBB 3.5M, -4.17% · VIB 0.7M, +4.26% · TPB 0.4M, -8.18%
+
+**Chi tiết Discretionary (2 mã)**
+  TV1 42.5M, -1.60% — ⚠️ 50 phiên từ 2026-08-11 — chờ ý kiến PM về exit · DRI 38.2M, +23.28% — ⚠️ 50 phiên từ 2026-08-11 — chờ ý kiến PM về exit
+
+**Corp Action — 7 ngày tới** (mã đang giữ)
+Không có corp action trong 7 ngày tới trên mã đang giữ.
+
+**Cờ theo dõi**
+- PARK: rổ hiện hành chốt 2026-08-05 (chu kỳ ~quý, kế tiếp ~2026-12-01 (ước tính)).
+- ⚠️ Discretionary: DRI (50p), TV1 (50p) — chờ ý kiến PM về exit
+- LAG: 5 candidate đang trong cửa sổ upcoming (chưa vào lệnh).

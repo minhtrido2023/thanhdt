@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá đi từ 100 lên 397 (i=227). Đoạn cuối là blow-off: gap tăng liên tiếp i=225–227, sau đó i=228 đảo chiều với khối lượng 2.49. Ở thang 20 phiên, pha markdown rất rõ. Giá mất khoảng 40% từ đỉnh xuống 238.9 (i=247, V 2.22). Các phiên giảm mạnh đều có khối lượng lớn: i=233 (3.15), i=242 (2.54), i=247 (2.22). Nhịp hồi i=248–249 chưa có follow-through, phiên 249 chỉ đóng tại 256.6 dưới đỉnh phiên 267.9. Vùng đỡ gần nhất là 238–250 (i=211–215, i=247), sâu hơn là 228.6 (i=187). Mức −15% tính từ khoảng 256 rơi vào quanh 218, tức dưới cả hai vùng này. Biên độ mỗi phiên 5–7% và rủi ro bán giải chấp margin sau blow-off khiến khả năng chạm mức này khá cao. Phía trên, vùng 280–330 là nơi lượng hàng mua đỉnh đang kẹt.
+
+P_HIT15: 0.47
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 238 (đáy i=247) với khối lượng lớn → mục tiêu vùng 228 rồi thấp hơn; ngược lại, kịch bản xấu bị phủ định nếu giá vượt và giữ trên 282 (i=243–244).
+CONTAMINATION: NONE

@@ -32,6 +32,7 @@ tính cuối ngày — factsheet HOSE-Index 03/2025).
 ## File đi kèm (cùng thư mục `data/benchmark/`)
 - `hose_membership_<vintage>.json` + `hose_membership_latest.json` — bảng sàn HOSE theo thời điểm; G7 chặn khi > 35 ngày.
 - `vnindex_tr_acks.json` — xác nhận của NGƯỜI cho G6 (cổ tức > 30% giá): `{"G6": [{"date","ticker","confirmed_by"}]}`.
+  Thêm (18/10/2026): mục `"G4": [{"date","n_prev","n","confirmed_by","reason"}]` — người xác nhận NGÀY rổ đổi >5% số mã (ca 14/10: n_prev=351, n=333 — ~100 mã kém thanh khoản KHÔNG giao dịch ngày đó nên `ticker` không có dòng; bq_admin xác nhận 19/10, KHÔNG phải lỗi nạp; G4-số-mã sẽ lặp lại mỗi khi nhiều mã không khớp lệnh — xem comment ngưỡng G4 trong `vnindex_total_return.py`). Ràng cả GIÁ TRỊ đã xem (dòng `provisional` bị dựng lại mỗi `--update`: số mã khác ⇒ G4 nổ lại). Chỉ che nhánh SỐ MÃ của đúng ngày đó; nhánh vốn hoá có mục RIÊNG `"G4_MC": [{"date","mc_prev","mc","confirmed_by","reason"}]` (vốn hoá rổ VND hai dòng liền nhau, lấy đúng số trong thông báo lỗi G4; số khác ⇒ ack vô hiệu; thêm 21/10/2026); gate khác không có ack; ngày bật lại >5% là G4 riêng cần ack riêng. `benchmark_period` trả `acked_g4_days` để báo cáo chú thích. **Tiền điều kiện trước khi ghi ack**: mã thiếu ngày D (và D+1, vì `t1_ok` làm mã rơi tiếp) không có GDKHQ cổ tức tiền trong `tav2_bq.corporate_action`. Nếu nguyên nhân là thiếu dữ liệu thật (không phải mã không giao dịch) thì ưu tiên lấp dữ liệu BQ hơn ack.
 - `benchmark_config.json` — cờ Q2: `{"report_tr_kind": "tr_net"}` (mặc định khi thiếu file, user chốt 2026-10-14)
   hoặc `"tr_gross"`; giá trị lạ ⇒ ô `chưa có số`, KHÔNG đoán. Đổi cờ ⇒ chú thích bảng 3.2 đổi theo, cổng giao báo
   cáo chặn bảng cũ tới khi render lại.
@@ -56,3 +57,5 @@ Kỳ vọng: 2023 = 1,68 · 2025 = 1,62 · 07-01→10-13 giá −7,915 / gộp �
 
 ## Dựng lần đầu trên cây thật (2026-10-14)
 BQ chạm trần 1.000.000 dòng khi `--update` kéo cả lịch sử ⇒ lần đầu phải tải panel theo từng năm vào parquet rồi `--update --from-cache <dir> --src2-csv <dnse.csv>` (DNSE cắt tới 13/10 vì BQ VNINDEX chưa có phiên 14/10 — đúng cổng G1). Từ phiên sau cron `--update` chỉ kéo từ mốc sealed nên không chạm trần. `hose_membership_refresh.py` phải gửi User-Agent (VNDirect 403 với `Python-urllib`).
+
+Đính chính + hoàn tác (thêm 21/10/2026): dòng `sealed` bất biến; đường DUY NHẤT sửa là `vnindex_total_return.py --restate-sealed DATE… --reason --confirmed-by` (và `--undo-last-restatement`), ghi sổ chỉ-thêm `data/benchmark/vnindex_tr_restatements.jsonl` (md5 trước/sau, byte cũ của dòng bị nối lại, `retry_of`/`undoes`) TRƯỚC khi thay file. `--update` giữ dòng ở `provisional` nếu G1/G4 của nó đang nổ chưa ack (`seal_blocked`, cron báo 🔒). Quy trình: `kb/ops_runbook.md` § "VN-Index có cổ tức".

@@ -1,0 +1,11 @@
+Cổ phiếu đã có một pha markup kiểu parabol từ 93 lên 209 (i13–63). Sau đó là pha markdown kèm climax bán ở i86: khối lượng 39x, đáy 127. Vùng 123–138 được giữ suốt i97–130 với khối lượng lớn, tức có lực hấp thụ. Nhịp hồi lên 168 (i169) thất bại, rồi giá trượt về 128–136 với khối lượng cạn kiệt (i200–238, phần lớn dưới 0.5x). Đây là dấu hiệu tích lũy.
+
+Ở i239–240 có breakout với khối lượng 6.6x và 8.7x, đẩy giá lên 158. Sau đó giá đi ngang 146–152 với khối lượng giảm dần, chưa thấy dấu hiệu bán tháo.
+
+Giá vào khoảng 150, nên mức −15% là khoảng 127.5. Mức này nằm dưới đáy tích lũy 128–130, vốn đã được kiểm định nhiều lần. Cung phía trên nằm ở vùng 155–170.
+
+P_HIT15: 0.18
+RISK: MED
+P_POS: 0.55
+INVALIDATION: Đóng cửa dưới 143 (lấp lại thanh breakout i239–240) với khối lượng lớn. Phá 128 là hỏng hẳn cấu trúc tích lũy.
+CONTAMINATION: NONE

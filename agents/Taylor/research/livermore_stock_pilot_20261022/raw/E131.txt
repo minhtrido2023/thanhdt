@@ -1,0 +1,7 @@
+Cổ phiếu thị giá thấp, mỗi bước giá khoảng 5% (một bước ≈3.03 điểm). Cả 250 phiên là pha giảm (markdown): từ đỉnh 112–115 (i78–80) xuống 57.6, các đáy sau thấp dần (84.8 → 75.8 → 72.7 → 69.7 → 57.6). Nền tích lũy 72.7–78.8 kéo dài khoảng 80 phiên đã gãy ở i239–243: hai phiên giảm sàn i240–241 khối lượng mỏng (người mua kẹt không thoát được), rồi i242 khối lượng 8.57 có dáng tháo chạy nhưng chưa có cú bật nào xác nhận. Từ i243 giá đi ngang 57.6–60.6 với khối lượng cạn (i249 chỉ 0.04). Đó là thiếu cầu, chưa phải tích lũy. Cung chờ phía trên dày ở 66.7–75.8. Mốc −15% chỉ cách khoảng 3 bước giá, nên dễ bị chạm.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa trên 66.7 (mép gap i240) với khối lượng >3x median thì nghiêng về đáy, ngược lại thủng 57.6 với khối lượng là tiếp tục giảm.
+CONTAMINATION: NONE

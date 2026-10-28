@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đã qua phân phối quanh 100–107, gãy ở i=47 rồi sập kiểu air-pocket. Các phiên i=116–124 là chuỗi giảm sàn, với climax khối lượng 18.2× ở i=119 và đáy 55.75 ở i=124. Lần test lại 60.28 (i=148–152) giữ được. Cú bật lên 80.49 ở i=160 (khối lượng 7.87×) thất bại ngay, để lại cung kẹt ở vùng 70–80. Gần 90 phiên qua giá đi ngang chặt trong 63–69 với khối lượng cạn (0.3–0.6×), biên độ ngày rất hẹp. Đây là một nền tích lũy tiềm năng, nhưng đỉnh phụ ở i=211 và i=224 (69.3) đều bị bán. Gần đây giá trượt nhẹ từ 66 về 62.4–64, sát mép dưới nền. Mức −15% (~54.8) nằm dưới đáy climax 55.75, nên muốn chạm thì phải phá nền. Chưa có lực cầu xác nhận.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 62.0 kèm khối lượng tăng (phá đáy nền 62–63, mở đường về 60.3/55.75).
+CONTAMINATION: NONE

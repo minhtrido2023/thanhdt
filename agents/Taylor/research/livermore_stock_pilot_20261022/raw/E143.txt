@@ -1,0 +1,9 @@
+Bốn phiên cuối (i=246–249) là chuỗi tăng trần thẳng đứng từ nền 100–105: 111.2 → 118.87 → 127.15 → 136.04. Ba phiên cuối có giá một mức, khối lượng giảm dần (1.71 → 0.81). Đây là trần khóa trên thanh khoản mỏng, không phải lực cầu rộng. Mã này đã hai lần chạy kiểu này rồi sụp. Lần đầu ở i=27, đỉnh 124 với V=129 rồi về 96. Lần hai ở i=95–97, trần liên tiếp lên 200 rồi rơi về 131 chỉ sau khoảng 6 phiên.
+
+Giá vào hiện chạm ngay vùng cung kẹt 138–150 (biên i=181–215). Phía dưới là khoảng trống không có giao dịch tới nền 100–108. Mức −15% từ khoảng 140 rơi vào 119, vẫn nằm trong vùng gap. Rủi ro sụp toàn bộ cú bơm là lớn.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Nếu đóng cửa dưới 127 (lấp gap i=248), cú bơm đã thất bại. Kịch bản tăng chỉ còn đứng khi giá giữ trên 138 và vượt 150 kèm khối lượng thật.
+CONTAMINATION: NONE

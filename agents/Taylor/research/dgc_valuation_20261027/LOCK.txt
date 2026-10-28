@@ -1,0 +1,19 @@
+# LOCK dgc_valuation_20261027 — job Taylor_20261026_171735 — 2026-10-27 00:28:05 ICT
+36c6d59ee01e288a4680af4aabdf7379  model.py
+791ee04060fe6b856c89b1f25d2a4d5e  REPORT.md
+96f6a641a83a75a6bbd58036fc468f12  data/beta.csv
+cab92b067123d1be09fcbf089d5ab089  data/dgc_fin_bq.csv
+3c4bec4de6ed30f1ad041b60f91f7937  data/peer_multiples.csv
+5ab1e06a94cbfd66d91578a14e41afc4  data/px_multiples.csv
+0c8d3ce740d6a524be664be96afb3286  data/dsc_dgc_q2_2026_extract.txt
+e5c9a9a17d7bfdc0f467df5316a94fef  out_dcf.csv
+a61cb59c6ff11680b61d3756b80494ab  out_dcf_sens_ke_g.csv
+e9c118b0cedfb1e768dfa985677a8688  out_dcf_sens_ke_gm.csv
+659eb74cd2f0f6a49fbcc232d14b8fe1  out_forecast.csv
+ea0a397e02802f408b04405dbde304a2  out_headline.csv
+df6ec19b6f655aacf9a61ea8b07a5706  out_multiples.csv
+6e3fe5b4495518231b4b5e5f6314eea2  out_q4.csv
+2a323909976a388547704a0b1b345550  out_sotp.csv
+5d20ae33ed414cdad96443b208f968e7  out_sotp_sens_haircut.csv
+0b101a5a727c1c4192f69be777f9bda0  out_summary.csv
+d6ea39f404e4058452532fec353732ad  ../dgc_q3_forecast_20261026/FORECAST.md

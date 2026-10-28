@@ -1,0 +1,5 @@
+var,leg,cagr,d_cagr_pp,d_sharpe,d_maxdd_pp,d_is_pp,d_oos_pp,selfcheck_maxerr_vnd,csv
+ctlZ,p30_pin0,23.36876855359784,0.0,0.0,0.0,0.0,0.0,6.4849853515625e-05,v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_vz_ctlZ_p30_pin0_univpit.csv
+ctlZ,p30_pin1M,25.70606725435387,0.0,0.0,0.0,0.0,0.0,9.5367431640625e-05,v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_vz_ctlZ_p30_pin1M_univpit_idledep1m.csv
+ctlZ,p0_pin0,22.120708367149188,0.0,0.0,0.0,0.0,0.0,6.103515625e-05,v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_etfcreatpit_exp_vz_ctlZ_p0_pin0_univpit.csv
+ctlZ,p0_pin1M,25.419622320387102,0.0,0.0,0.0,0.0,0.0,7.62939453125e-05,v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_etfcreatpit_exp_vz_ctlZ_p0_pin1M_univpit_idledep1m.csv

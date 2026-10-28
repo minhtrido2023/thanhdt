@@ -1,0 +1,11 @@
+Giá đi từ ~100 lên đỉnh 172–175 (i175, i196). Sau đó sập 4 phiên liên tiếp (i196–199) xuống 128, giảm khoảng 23%, đúng kiểu air-pocket do margin. Tiếp theo là nền tích luỹ 135–149 kéo dài khoảng 40 phiên, khối lượng khô dần (0.05–0.4).
+
+i248 bứt khỏi nền với nến +6.8%, khối lượng 3.73, tức có follow-through. Nhưng i249 gap lên 168.8 thì bị bán ngược, đóng 158.45, chính là vùng cung kẹt 160–172 của đỉnh cũ và điểm xuất phát cú sập. Phiên này khối lượng thấp (0.98), nên tín hiệu từ chối giá chưa rõ.
+
+Điểm vào lệnh khoảng 158. Mốc −15% rơi vào ~134.7, nằm dưới đáy nền 137.6–138. Mã này thanh khoản mỏng và từng có chuỗi giảm sàn, nên rủi ro đáng kể.
+
+P_HIT15: 0.30
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 146 (quay lại trong nền, breakout thất bại); tích cực nếu đóng trên 169 kèm khối lượng >2.
+CONTAMINATION: NONE

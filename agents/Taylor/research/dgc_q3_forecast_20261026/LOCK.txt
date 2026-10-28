@@ -1,0 +1,8 @@
+FORECAST.md md5: d6ea39f404e4058452532fec353732ad
+locked_at: 2026-10-26 13:44:27 ICT
+job: Taylor_20261026_064029
+publication_check: DGC Q3/2026 CHUA cong bo tai luc khoa —
+  (1) BQ tav2_bq.ticker_financial: DGC max quarter = 2026Q2 (Release 2026-07-22), query 2026-10-26 ~13:40 ICT;
+  (2) WebSearch x3 (26/10 ~13:38-13:44 ICT): chi thay PAT Q3 (tinnhanhchungkhoan 24/10, cafef 25/10) va du bao MBS (nguoiquansat 29/09); khong co so DGC Q3.
+Lich su Release_Date Q3 DGC (BQ): 2021-10-19, 2022-10-19, 2023-10-23, 2024-10-22, 2025-10-24.
+KHONG sua FORECAST.md sau khi khoa.

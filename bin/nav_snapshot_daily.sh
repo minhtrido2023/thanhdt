@@ -83,6 +83,9 @@ while pgrep -f "$EOD_RE" >/dev/null 2>&1 && [ "$waited" -lt "$EOD_WAIT_MAX_S" ];
 done
 [ "$waited" -gt 0 ] && log "đã chờ EOD ${waited}s."
 
+# Statement DNSE của hôm nay (cổng KL của daily_nav_snapshot đọc nó, allow_fetch=False). Không bao giờ fail.
+"$ROOT/bin/prefetch_dnse_statement.sh" || true
+
 has_row() {  # $1=account — nav_history đã có dòng TODAY?
   local f="$EXEC_DIR/nav_history_$1.csv"
   [ -f "$f" ] && awk -F, -v d="$TODAY" 'NR>1 && $1==d {found=1} END {exit !found}' "$f"

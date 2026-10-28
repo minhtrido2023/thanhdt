@@ -1,0 +1,22 @@
+events with rights ex in window: 52 | with K: 52 | release dates: 43
+(b) adj_theo % quantiles: [-31.2, -19.0, -12.6, -6.4, -3.3]
+    K/P quantiles: [0.27, 0.56, 0.86]  K>P (quyền vô giá trị): 1
+    raw Price ret on ex (median %): -12.2  adj Close ret on ex (median %): 4.4
+    corr(raw_ex_ret, adj_theo): 0.82
+(c) slot 8%: tiền cần %NAV quantiles [10,50,90,max]: [0.49, 1.8, 4.83] 10.39
+(d) slot 8%: lỗ nếu bỏ quyền %NAV quantiles [10,50,90,max]: [0.27, 1.01, 2.5] 3.46
+(e) slot 8%: tổng lỗ bỏ quyền 60.24%NAV trên 12.7 năm ⇒ ~4.727pp/năm (CHẶN TRÊN, ước lượng)
+(c) slot 10%: tiền cần %NAV quantiles [10,50,90,max]: [0.62, 2.25, 6.03] 12.99
+(d) slot 10%: lỗ nếu bỏ quyền %NAV quantiles [10,50,90,max]: [0.33, 1.26, 3.12] 4.32
+(e) slot 10%: tổng lỗ bỏ quyền 75.30%NAV trên 12.7 năm ⇒ ~5.909pp/năm (CHẶN TRÊN, ước lượng)
+cash per position (% vị thế) quantiles: [6.2, 22.5, 60.3] max 129.9
+per-year count: {2014: 2, 2015: 11, 2016: 2, 2017: 2, 2018: 4, 2019: 3, 2020: 2, 2021: 8, 2022: 4, 2023: 2, 2024: 4, 2025: 7, 2026: 1}
+ticker      entry    exright    r         K  P_prev  adj_theo  cash_per_pos
+   VND 2022-02-14 2022-03-10 1.00 10000.000 73500.0    -0.432         0.147
+   L14 2018-01-29 2018-03-01 1.00 12000.000 87800.0    -0.432         0.141
+   VND 2021-05-06 2021-06-10 1.00 14500.000 57600.0    -0.374         0.378
+   CVT 2014-10-27 2014-10-31 1.00 10115.705 33600.0    -0.349         0.324
+   VHL 2014-10-28 2014-10-30 0.77 10000.000 47100.0    -0.343         0.159
+   VIX 2021-08-09 2021-09-07 1.00 10000.000 26750.0    -0.313         0.425
+   VC3 2019-10-21 2019-11-08 1.00 10000.000 25500.0    -0.304         0.412
+   SHS 2021-08-09 2021-08-23 0.50 13500.000 50500.0    -0.244         0.152

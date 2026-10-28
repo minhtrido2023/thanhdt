@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đi ngang rộng trong vùng 70–112, có xu hướng markdown từ đỉnh 112 (i126) xuống 69–70. Hai đáy tạo ở 70.22 (i202) và 69.29 (i228), sau đó giá markup nhanh từ 73.5 lên 97.85 (khoảng +33% trong 15 phiên). Khối lượng mở rộng lên 2.4–3.6x, follow-through tốt. Tuy vậy, giá vào lệnh khoảng 98 nằm ngay dưới vùng cung dày 98–104. Đó là vùng phân phối i113–128 và i136–156, với khối lượng lớn ở các đỉnh cũ 101–103 và 112. Các lần chạm vùng này trước đây đều thất bại. Vì giá đã tăng dốc, khả năng hồi về lấp mép gap ở 83 (i238) khá thực tế. Mức 83 cũng gần ngưỡng −15%.
+
+P_HIT15: 0.35
+RISK: MED
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 83 (mép gap i238) thì cấu trúc phục hồi bị phá; ngược lại, đóng cửa trên 104 với khối lượng lớn sẽ mở đường lên 112.
+CONTAMINATION: NONE

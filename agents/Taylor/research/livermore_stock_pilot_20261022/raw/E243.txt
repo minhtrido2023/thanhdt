@@ -1,0 +1,9 @@
+Đây là mã cực kỳ kém thanh khoản: nhiều phiên Volume 0 và giá "nhảy" ±7–15% trên vài lô lẻ. Ở thang 250 phiên, giá markup từ vùng 95–100 (i0–102) lên 145–155, kích hoạt bởi các thanh khối lượng lớn ở i103–104 và i132–133. Từ khoảng i140 đến nay (khoảng 110 phiên), giá đi ngang trong vùng 142–174, trục khoảng 150–155. Các đỉnh 172–186 (i172, i185, i195) đều là bản in lẻ, không có khối lượng, nên cung phía trên vẫn còn.
+
+Phía dưới có các râu thủng sâu trên khối lượng gần 0: 127.68 ở i236, 133.80 ở i142, 138.44 ở i164. Điều này cho thấy mức −15% (khoảng 130) có thể bị chạm chỉ vì thiếu lệnh mua. Giá vào khoảng 153 nằm giữa biên độ, chưa có breakout xác nhận. Kỳ vọng lợi suất xấp xỉ trung tính, rủi ro đuôi cao do thanh khoản.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 142 (đáy vùng tích lũy) với khối lượng >5× median.
+CONTAMINATION: NONE

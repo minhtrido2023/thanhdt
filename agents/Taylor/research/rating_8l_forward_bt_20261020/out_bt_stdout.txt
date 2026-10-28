@@ -1,0 +1,15 @@
+G1 eff∈[2014-07-01,2026-07-31]: 3455 | sau luật loại ca+giá+universe: 1193 (không giá 1196, không in_universe phiên 0 1006) | giá pin tới 2026-10-01
+  self-check V1_H40_pin0_2p5B: |cash dựng lại − cash| max 0.000061 VND · |NAV dựng lại − NAV| max 0.000015 VND
+V1_H40_pin0_2p5B: NAV cuối 33.690 tỷ | {'events': 1193, 'adv_capped': 482, 'adv_zero': 8, 'adv5_filtered': 0, 'dup_ticker': 0, 'tranche_cash_short': 1658, 'tranche_skipped_small': 1814, 'tranche_no_price': 2, 'exit_deferred': 0, 'exit_forced_lastpx': 0}
+  self-check V1_H40_pin1M_2p5B: |cash dựng lại − cash| max 0.000050 VND · |NAV dựng lại − NAV| max 0.000031 VND
+V1_H40_pin1M_2p5B: NAV cuối 40.233 tỷ | {'events': 1193, 'adv_capped': 514, 'adv_zero': 8, 'adv5_filtered': 0, 'dup_ticker': 0, 'tranche_cash_short': 1604, 'tranche_skipped_small': 1812, 'tranche_no_price': 2, 'exit_deferred': 0, 'exit_forced_lastpx': 0}
+  self-check V2_H20_pin0_2p5B: |cash dựng lại − cash| max 0.000037 VND · |NAV dựng lại − NAV| max 0.000010 VND
+V2_H20_pin0_2p5B: NAV cuối 18.394 tỷ | {'events': 1193, 'adv_capped': 399, 'adv_zero': 8, 'adv5_filtered': 0, 'dup_ticker': 0, 'tranche_cash_short': 1810, 'tranche_skipped_small': 1865, 'tranche_no_price': 2, 'exit_deferred': 1, 'exit_forced_lastpx': 0}
+  self-check V2_H20_pin1M_2p5B: |cash dựng lại − cash| max 0.000040 VND · |NAV dựng lại − NAV| max 0.000011 VND
+V2_H20_pin1M_2p5B: NAV cuối 25.406 tỷ | {'events': 1193, 'adv_capped': 445, 'adv_zero': 8, 'adv5_filtered': 0, 'dup_ticker': 0, 'tranche_cash_short': 1745, 'tranche_skipped_small': 1841, 'tranche_no_price': 2, 'exit_deferred': 1, 'exit_forced_lastpx': 0}
+  self-check V3_H40_adv5_pin0_2p5B: |cash dựng lại − cash| max 0.000015 VND · |NAV dựng lại − NAV| max 0.000011 VND
+V3_H40_adv5_pin0_2p5B: NAV cuối 15.601 tỷ | {'events': 1193, 'adv_capped': 0, 'adv_zero': 0, 'adv5_filtered': 700, 'dup_ticker': 0, 'tranche_cash_short': 407, 'tranche_skipped_small': 387, 'tranche_no_price': 2, 'exit_deferred': 0, 'exit_forced_lastpx': 0}
+  self-check V3_H40_adv5_pin1M_2p5B: |cash dựng lại − cash| max 0.000078 VND · |NAV dựng lại − NAV| max 0.000011 VND
+V3_H40_adv5_pin1M_2p5B: NAV cuối 19.688 tỷ | {'events': 1193, 'adv_capped': 0, 'adv_zero': 0, 'adv5_filtered': 700, 'dup_ticker': 0, 'tranche_cash_short': 407, 'tranche_skipped_small': 386, 'tranche_no_price': 2, 'exit_deferred': 0, 'exit_forced_lastpx': 0}
+  self-check V1_H40_pin0_50B: |cash dựng lại − cash| max 0.000549 VND · |NAV dựng lại − NAV| max 0.000183 VND
+V1_H40_pin0_50B: NAV cuối 312.000 tỷ | {'events': 1193, 'adv_capped': 959, 'adv_zero': 8, 'adv5_filtered': 0, 'dup_ticker': 0, 'tranche_cash_short': 246, 'tranche_skipped_small': 1949, 'tranche_no_price': 2, 'exit_deferred': 0, 'exit_forced_lastpx': 0}

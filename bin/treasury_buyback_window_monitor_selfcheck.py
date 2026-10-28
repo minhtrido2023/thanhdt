@@ -72,7 +72,8 @@ def make_runner(events, ais_rows, raise_on=None, log=None):
     return runner
 
 
-def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=None):
+def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=None,
+             seen=None):
     sent = []
 
     def _notifier(msg):
@@ -81,7 +82,8 @@ def run_main(c, events, ais_rows, argv=("--dry-run",), notifier=None, raise_on=N
     buf = io.StringIO()
     with redirect_stdout(buf):
         rc = c.main(list(argv), runner=make_runner(events, ais_rows, raise_on),
-                    notifier=_notifier, today=TODAY)
+                    notifier=_notifier, today=TODAY,
+                    seen_file=seen or os.path.join(tempfile.mkdtemp(prefix="tbm_sc_"), "seen.json"))
     return rc, buf.getvalue(), sent
 
 
@@ -99,11 +101,15 @@ def run_cases(c):
     r = c.evaluate(TODAY, [ev("AAA", W)], [])
     check("A3. biên: tuổi đúng W ⇒ trong cửa sổ, không WARN",
           len(r["open_in_window"]) == 1 and not r["warn"], r)
-    r = c.evaluate(TODAY, [ev("AAA", M + 1)], [])
-    check("A4. tuổi M+1 chưa đóng ⇒ STALE (không phải WARN)",
+    X = c.WARN_MAX_DAYS
+    r = c.evaluate(TODAY, [ev("AAA", X + 1)], [])
+    check("A4. tuổi X+1 (X=WARN_MAX_DAYS) chưa đóng ⇒ STALE (không phải WARN)",
           len(r["stale"]) == 1 and not r["warn"], r)
-    r = c.evaluate(TODAY, [ev("AAA", M)], [])
-    check("A5. biên: tuổi đúng M ⇒ vẫn WARN", len(r["warn"]) == 1 and not r["stale"], r)
+    r = c.evaluate(TODAY, [ev("AAA", X)], [])
+    check("A5. biên: tuổi đúng X ⇒ vẫn WARN", len(r["warn"]) == 1 and not r["stale"], r)
+    r = c.evaluate(TODAY, [ev("AAA", M - 20)], [ais("AAA", 10, -5, 95)])
+    check("A6. đóng bằng AIS vẫn tìm trong M ngày dù tuổi > X (hai ngưỡng khác nhau)",
+          len(r["closed"]) == 1 and not r["stale"], r)
 
     # B. Định nghĩa step-down
     r = c.evaluate(TODAY, [ev("ELC", W + 60)], [ais("ELC", W + 110, 4_163_848, 87_453_925),
@@ -165,6 +171,64 @@ def run_cases(c):
     rc, out, sent = run_main(c, [ev("KDC", W + 28)], [], argv=("--dry-run",))
     check("D6. --dry-run ⇒ không post, rc=1", rc == 1 and not sent, (rc, sent))
 
+    # H. Dedupe "chỉ báo sự kiện mới"
+    sf = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    e1 = [ev("AAA", W + 30), ev("BBB", W + 40)]
+    rc, out, sent = run_main(c, e1, [], argv=(), seen=sf)
+    check("H1. lượt 1: 2 WARN mới ⇒ rc=1, post 1 lần, state ghi 2 khoá",
+          rc == 1 and len(sent) == 1 and len(c.load_seen(sf)) == 2, (rc, len(sent), c.load_seen(sf)))
+    rc, out, sent = run_main(c, e1, [], argv=(), seen=sf)
+    check("H2. lượt 2 cùng dữ liệu ⇒ rc=0, KHÔNG post, log nêu warn_đã_báo=2",
+          rc == 0 and not sent and "warn_đã_báo=2" in out, (rc, sent, out[-120:]))
+    rc, out, sent = run_main(c, e1 + [ev("CCC", W + 5 + 1)], [], argv=(), seen=sf)
+    msg = sent[0] if sent else ""
+    check("H3. thêm 1 sự kiện mới ⇒ post, liệt kê CHỈ CCC, tiêu đề nêu +2 đã báo",
+          rc == 1 and "• CCC" in msg and "• AAA" not in msg and "• BBB" not in msg
+          and "+2 sự kiện đã báo" in msg, (rc, msg))
+    rc, out, sent = run_main(c, [ev("BBB", W + 40)], [ais("AAA", 5, -1, 1)], argv=(), seen=sf)
+    check("H4. AAA/CCC không còn WARN ⇒ dọn khỏi state, chỉ còn BBB",
+          set(c.load_seen(sf)) == {c.warn_key({"ticker": "BBB", "date": _dt.date.fromisoformat(ago(W + 40))})},
+          c.load_seen(sf))
+    sf2 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    rc, out, sent = run_main(c, e1, [], argv=(), seen=sf2, notifier=lambda m: (False, "rc=7"))
+    check("H5. post THẤT BẠI ⇒ rc=3, KHÔNG ghi state (mai báo lại)",
+          rc == 3 and c.load_seen(sf2) == {}, (rc, c.load_seen(sf2)))
+    sf3 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    rc, out, sent = run_main(c, e1, [], argv=("--dry-run",), seen=sf3)
+    check("H6. --dry-run KHÔNG ghi state", rc == 1 and not os.path.exists(sf3), (rc,))
+    with open(sf3, "w") as fh:
+        fh.write("{hỏng")
+    check("H7. state hỏng ⇒ coi như rỗng (fail-open về phía BÁO)", c.load_seen(sf3) == {}, "")
+    d = c.next_seen({"AAA|2026-01-01": "2026-02-01"}, {"warn": [{"ticker": "AAA", "date": _dt.date(2026, 1, 1)}]},
+                    TODAY, True)
+    check("H8. next_seen giữ NGÀY báo gốc, không ghi đè", d == {"AAA|2026-01-01": "2026-02-01"}, d)
+
+    # H9+. Va chạm khoá, ghi atomic, lỗi ghi state (arch-review 2026-10-19)
+    sf4 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+    run_main(c, [ev("DUP", W + 30)], [], argv=(), seen=sf4)
+    rc, out, sent = run_main(c, [ev("DUP", W + 30), ev("DUP", W + 31)], [], argv=(), seen=sf4)
+    check("H9. cùng ticker, 2 ngày, 1 ngày đã báo ⇒ ngày kia VẪN được báo (khoá gồm cả ngày)",
+          rc == 1 and len(sent) == 1 and f"• DUP buy_done {ago(W + 31)}" in sent[0]
+          and f"• DUP buy_done {ago(W + 30)}" not in sent[0], (rc, sent))
+    rep = []
+    orig_replace = c.os.replace
+    c.os.replace = lambda a_, b_: (rep.append((a_, b_)), orig_replace(a_, b_))[1]
+    try:
+        sf5 = os.path.join(tempfile.mkdtemp(prefix="tbm_seen_"), "seen.json")
+        run_main(c, [ev("ATM", W + 30)], [], argv=(), seen=sf5)
+    finally:
+        c.os.replace = orig_replace
+    check("H10. state ghi qua tmp + os.replace (atomic), không ghi thẳng file đích",
+          len(rep) == 1 and rep[0][0] != sf5 and rep[0][1] == sf5 and ".tmp." in rep[0][0], rep)
+    bad = os.path.join(sf5, "x", "seen.json")   # cha là FILE ⇒ makedirs/open lỗi OSError
+    rc, out, sent = run_main(c, [ev("ERR", W + 30)], [], argv=(), seen=bad)
+    check("H11. ghi state lỗi ⇒ in STATE_WRITE_FAILED, rc vẫn 1 (không traceback)",
+          rc == 1 and "STATE_WRITE_FAILED" in out and len(sent) == 1, (rc, out[-200:]))
+    before = c.load_seen(sf4)
+    rc, out, sent = run_main(c, [], [], argv=(), seen=sf4, raise_on="treasury_window:events")
+    check("H12. BQ lỗi (rc=2) KHÔNG đụng state (khác rỗng, y nguyên)",
+          rc == 2 and before and c.load_seen(sf4) == before, (rc, before, c.load_seen(sf4)))
+
     # E. Lỗi
     rc, out, sent = run_main(c, [], [], argv=(), raise_on="treasury_window:ais")
     check("E1. BQ lỗi ⇒ rc=2, post kèm lỗi THẬT", rc == 2 and sent and "Access Denied" in sent[0],
@@ -180,6 +244,7 @@ def run_cases(c):
         n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
     code = "\n".join(ln for ln in body.split('"""', 2)[2].splitlines()
                      if not ln.lstrip().startswith("#"))  # bỏ docstring module + comment
+    code = re.sub(r"def save_seen\(.*?\n\n\n", "", code, flags=re.S)   # NGOẠI LỆ DUY NHẤT: state seen
     writes = re.findall(r"open\([^)]*[\"'][wax+]", code)
     forbidden = sorted(imported & {"oshares_live", "corp_action_daily", "pandas_gbq"}) + [
         w for w in ("to_gbq", "INSERT ", "UPDATE ", "DELETE ", "MERGE ", "os.replace") if w in code]
@@ -199,7 +264,8 @@ def run_cases(c):
     log = []
     try:
         with redirect_stdout(io.StringIO()):
-            c.main(["--dry-run"], runner=make_runner([], [], log=log), notifier=lambda m: (True, ""))
+            c.main(["--dry-run"], runner=make_runner([], [], log=log), notifier=lambda m: (True, ""),
+                   seen_file=os.path.join(tempfile.mkdtemp(prefix="tbm_tz_"), "seen.json"))
     finally:
         c.dt = orig
     q = next((s for s in log if "treasury_window:events" in s), "")
@@ -213,6 +279,12 @@ def run_cases(c):
 
 # ── mutation ──────────────────────────────────────────────────────────────────────────────
 MUTATIONS = (
+    ("dedupe-off", "    new = [i for i in res[\"warn\"] if warn_key(i) not in seen]",
+     "    new = list(res[\"warn\"])"),
+    ("seen-no-prune", "    nxt = {warn_key(i): prev[warn_key(i)] for i in res[\"warn\"] if warn_key(i) in prev}",
+     "    nxt = dict(prev)"),
+    ("seen-before-post", "        _persist(ok)", "        _persist(True)"),
+    ("warn-horizon", "        elif elapsed > WARN_MAX_DAYS:", "        elif elapsed > MATCH_MAX_DAYS:"),
     ("close-no-stepdown", 'close = next((a for a in seq if a["step_down"]',
      'close = next((a for a in seq if True'),
     ("close-before-date", "and 0 <= (a[\"d\"] - d).days <= MATCH_MAX_DAYS)",
@@ -223,7 +295,7 @@ MUTATIONS = (
      'a["step_down"] = (a["total"] < 10**9 if a["delta"] is not None'),
     ("stepdown-null-title", 'else "giảm niêm yết" in a["title"].lower())', "else False)"),
     ("warn-boundary", "        elif elapsed > CLOSE_WINDOW_DAYS:", "        elif elapsed >= CLOSE_WINDOW_DAYS:"),
-    ("stale-off", "        elif elapsed > MATCH_MAX_DAYS:", "        elif False:"),
+    ("stale-off", "        elif elapsed > WARN_MAX_DAYS:", "        elif False:"),
     ("scope-filter", "        if key[1] < SCOPE_START:", "        if False:"),
     ("dedup-off", "key = (r[\"ticker\"], dt.date.fromisoformat(r[\"d\"]))",
      "key = (r[\"ticker\"], dt.date.fromisoformat(r[\"d\"]), r[\"id\"])"),
@@ -232,7 +304,7 @@ MUTATIONS = (
     ("hint-excludes", "            res[\"warn\"].append(item)",
      "            (None if item[\"hint\"] else res[\"warn\"].append(item))"),
     ("warn-no-before", "AIS trước: {_fmt_ais(item['ais_before'])}", "AIS trước: ?"),
-    ("post-on-clean", "        if not res[\"warn\"]:\n            return 0", "        if False:\n            return 0"),
+    ("post-on-clean", "        if not new:\n            _persist(False)\n            return 0", "        if False:\n            return 0"),
     ("error-no-post", "        rc = 2\n", "        return 2\n"),
     ("notify-fail-ignored", "    if not ok:\n        print(f\"NOTIFY_FAILED", "    if False:\n        print(f\"NOTIFY_FAILED"),
     ("tz-naive-now", "else dt.datetime.now(ICT).date())", "else dt.datetime.now().date())"),

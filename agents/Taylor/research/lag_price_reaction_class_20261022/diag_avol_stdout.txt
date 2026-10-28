@@ -1,0 +1,11 @@
+AVOL thấp n=1392 | AVOL==0 (V[d0]=0) 671 = 48.2% nhóm thấp
+tỷ lệ in_universe_pit: nhóm thấp 21.7% | nhóm còn lại 71.0%
+Δ AVOL:loại_THẤP theo tập con:
+  toàn bộ                      n= 5361 n_thấp=1392 mùa=51 Δ=-2.98pp CI95[-4.61,-1.48] mean_thấp=2.34% mean_giữ=5.33%
+  in_universe_pit              n= 3050 n_thấp= 302 mùa=51 Δ=-1.73pp CI95[-4.08,+0.55] mean_thấp=3.76% mean_giữ=5.49%
+  in_pit · IS                  n=  973 n_thấp= 141 mùa=24 Δ=-1.11pp CI95[-3.40,+1.60] mean_thấp=2.92% mean_giữ=4.03%
+  in_pit · OOS                 n= 2077 n_thấp= 161 mùa=27 Δ=-1.63pp CI95[-5.60,+1.76] mean_thấp=4.49% mean_giữ=6.12%
+  ngoài universe_pit           n= 2311 n_thấp=1090 mùa=51 Δ=-3.01pp CI95[-4.93,-1.52] mean_thấp=1.95% mean_giữ=4.97%
+  bỏ V[d0]=0                   n= 4690 n_thấp= 721 mùa=51 Δ=-1.34pp CI95[-3.03,+0.11] mean_thấp=3.99% mean_giữ=5.33%
+  in_pit & V[d0]>0             n= 3033 n_thấp= 285 mùa=51 Δ=-1.68pp CI95[-4.30,+0.59] mean_thấp=3.80% mean_giữ=5.49%
+LOYO trong in_pit: 2014:-1.93 2015:-1.86 2016:-1.41 2017:-1.67 2018:-1.85 2019:-1.68 2020:-1.77 2021:-1.54 2022:-1.44 2023:-1.62 2024:-1.72 2025:-2.22 2026:-1.62

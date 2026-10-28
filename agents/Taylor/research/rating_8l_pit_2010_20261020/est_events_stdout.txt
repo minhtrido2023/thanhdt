@@ -1,0 +1,2 @@
+G1: IS N=330 trên 21 quý-lịch; mã·quý universe IS=6145 ⇒ rate=0.0537; 2010Q2-2014Q2: 17 quý, mã·quý=4064 ⇒ N_ước_lượng=218
+G2: IS N=330 trên 21 quý-lịch; mã·quý universe IS=6145 ⇒ rate=0.0537; 2010Q2-2014Q2: 17 quý, mã·quý=4064 ⇒ N_ước_lượng=218

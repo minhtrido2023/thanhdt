@@ -14,6 +14,31 @@ KIỂM ĐƯỢC của Q1 → Haiku, phần còn lại của Q1 → Sonnet; (b) "
 KHÔNG đổi: chính sách codex 2026-08-16, cơ chế provider + auto-fallback, cầu chì vòng, bright line
 Fable, mọi cron đang ghim Opus (kể cả `ops_autofix.sh` — xem "Đã cân nhắc và RÚT LẠI" cuối mục).
 
+**🔧 SIẾT LUẬT OPUS — user duyệt 2026-10-18 10:37 ICT (`decided_by: user`), mục này thắng mọi chỗ khác.**
+Đo 7 ngày (12→18/10, `bus/jobs`, job claude): Opus = 57 job / $278 = **86%** chi phí; Sonnet (kể cả
+omit ≡ sonnet) 51 job / $45; Haiku 0 job. Taylor/Opus riêng 46 job = 77% tổng. Taylor opus/high
+n=26, $4,87 trung vị, chạy lại 6/26 (23%); opus/medium n=20, $3,27, chạy lại 1/20 (5%) — khác loại
+việc nên không phải đối chứng, nhưng `high` không cho thấy ít chạy lại hơn. 9 job "VÒNG 2 / sửa
+theo arch-review" chạy Opus = $61 (có cái high $10-15), trong khi vòng 2 trên Sonnet $0,6-1,7/job
+và tuần qua KHÔNG có vòng 3 nào ⇒ chính Mike không áp luật "áp `required_change` ⇒ Sonnet".
+Luật mới:
+1. **Opus CHỈ khi có ≥1 dấu hiệu:** phản biện/review toàn nhánh · chạm tiền hoặc cổng an toàn ·
+   thiết kế MỚI chưa có đặc tả · lỗi chưa rõ nguyên nhân. Không có dấu hiệu nào ⇒ Sonnet/medium.
+2. **Sonnet/medium (omit) cho:** dựng tính năng THEO ĐẶC TẢ user đã duyệt (có SPEC/đề bài chốt;
+   arch-review chặn phía sau) · vòng 2 áp `required_change` · sửa lỗi đã định vị file:dòng (nhãn,
+   neo múi giờ…) · cron autofix/sweep chẩn đoán · checkpoint paper-program · kiểm toán chỉ-đọc.
+3. **Opus/high CHỈ:** phản biện, chạm tiền/cổng an toàn, lượt review toàn nhánh (chế độ B).
+   Mọi việc Opus còn lại = `medium`. Thay cho "Opus high = thiết kế backtest MỚI / mọi thứ chạm tiền"
+   ở bảng tầng bên dưới khi hai chỗ lệch nhau.
+4. **Haiku:** giữ cho native `Agent(...)` ngữ cảnh nhỏ; qua `dispatch.sh` chỉ rẻ ~4 lần ⇒ không ép.
+   Các lần gọi native không ghi vào `bus/jobs` nên "Haiku = 0" trong báo cáo có thể là điểm mù đo.
+**Thử đến 2026-10-25 (cùng mốc đợt thử Opus/medium):** QUAY LẠI luật cũ nếu job Taylor chạy Sonnet
+có `attempt>1` ≥ 45% trên ≥ 10 job, HOẶC ≥ 2 chuỗi sinh vòng 3 từ job Sonnet dựng theo đặc tả.
+Ngưỡng là phán đoán đặt trước, mẫu nhỏ. Chưa làm (hoãn tới khi thấy số tuần sau): chốt cơ học
+nhắc trong `dispatch.sh` khi `--model opus` + prompt "VÒNG 2"; hạ `wags_autofix.sh` (phần
+coordination) và `selfcheck_red_owner_sweep.sh` từ Opus xuống Sonnet. `ops_autofix.sh` giữ Opus.
+Báo cáo tuần `spend_report_weekly.py` nay có bảng "Chi phí theo tầng model / effort" (default ≡ sonnet).
+
 Alias của CLI (đo 2026-10-11, CLI 2.1.295): `haiku` → `claude-haiku-5-5`, `sonnet` →
 `claude-sonnet-5-5`, `opus` → `claude-opus-5-5`. Omit `--model` → model ghi trong
 `agents/<id>/.claude/settings.json`: **cả 8 agent ghi alias `sonnet`** (user chốt 2026-10-11 11:50

@@ -14,6 +14,9 @@ WC_ROOT="$(cd "$ROOT/.." && pwd)"
 PY="${DNA_PYEXE:-python3}"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%F %H:%M ICT')"
 
+# Statement DNSE của hôm nay cho cổng KL (allow_fetch=False). Không bao giờ fail.
+"$ROOT/bin/prefetch_dnse_statement.sh" || true
+
 LIVE_LABELS="$(cd "$WC_ROOT" && python3 -c "from trading_bot.config import live_dnse_labels; print(' '.join(live_dnse_labels()))" 2>/dev/null)"
 if [ -z "$LIVE_LABELS" ]; then
   echo "[compute_active_nav_all] $NOW_ICT — không lấy được live labels, dừng." >&2

@@ -1,0 +1,11 @@
+Giá tạo đáy ở vùng 84–86 (i234–239, có phiên rũ bỏ khối lượng 4.41) rồi đảo chiều thẳng đứng. Từ i240 đến i249 có chuỗi phiên trần liên tiếp, gồm hai phiên giá đứng một mức (i240, i241, thanh khoản cạn 0.09). Giá tăng khoảng 58% trong 10 phiên, phiên i249 gap lên 134.7–135.9 với khối lượng 3.48.
+
+Giá vừa quay lại vùng 130–152, nơi phân phối và đi ngang suốt i50–i180. Đây là cung kẹt dày từ người mua ở đỉnh cũ. Thanh i245–247 hụt hơi ở 127 trước khi bật tiếp.
+
+Mua ở Open sau một chuỗi trần là mua đuổi giữa không khí. Các mốc hỗ trợ thật nằm ở 117–118 (đáy i247) và 108 (gap i242). Mức −15% tương ứng khoảng 115–118, tức chỉ là một nhịp hồi bình thường của cú tăng thẳng đứng này.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 117 (thủng đáy i247), coi như cú bật V đã thất bại và dễ lấp gap về 108; ngược lại, đóng cửa vững trên 152 với khối lượng lớn mới xác nhận đã hấp thụ hết cung ở đỉnh cũ.
+CONTAMINATION: NONE

@@ -1,0 +1,135 @@
+{
+ "n_rows_ok": 7510,
+ "n_quarters": 52,
+ "n_tickers": 484,
+ "roe_scale": 0.01,
+ "bucket_counts": {
+  "CHEAP": 3812,
+  "RICH_DEEP": 1617,
+  "RICH_MILD": 1062,
+  "FAIR": 1019
+ },
+ "spearman_mos_vs_ey": 0.3145057686458946,
+ "median_pe_by_bucket": {
+  "RICH_DEEP": 15.3,
+  "RICH_MILD": 12.5,
+  "FAIR": 10.5,
+  "CHEAP": 8.7
+ },
+ "n_pos_surprise": 3720,
+ "n_pos_quarters": 52
+}
+              n  yoy0_med  yoy1_med  yoy2_med    p_neg1  p_decel1    p_neg2
+bucket                                                                     
+RICH_DEEP  1617     0.084     0.123     0.106  0.411965  0.453181  0.420391
+RICH_MILD  1062     0.100     0.070     0.055  0.440695  0.497877  0.439753
+FAIR       1019     0.103     0.056     0.039  0.436883  0.532037  0.465922
+CHEAP      3812     0.024     0.014     0.008  0.489298  0.495761  0.493301
+       subset      group                         vs    metric   n_a   n_b   k   diff     lo     hi
+0         ALL  RICH_DEEP                 FAIR+CHEAP      yoy1  1471  4275  51  0.121  0.069  0.176
+1         ALL  RICH_DEEP                 FAIR+CHEAP      yoy2  1432  4179  50  0.098  0.055  0.138
+2         ALL  RICH_DEEP                 FAIR+CHEAP      neg1  1471  4275  51 -0.066 -0.098 -0.033
+3         ALL  RICH_DEEP                 FAIR+CHEAP    decel1  1399  4059  51 -0.050 -0.075 -0.024
+4         ALL  RICH_DEEP                 FAIR+CHEAP       dg1  1399  4059  51  0.081  0.016  0.146
+5         ALL  RICH_MILD                 FAIR+CHEAP      yoy1   978  4275  51  0.050 -0.008  0.102
+6         ALL  RICH_MILD                 FAIR+CHEAP      yoy2   971  4179  50  0.034 -0.018  0.084
+7         ALL  RICH_MILD                 FAIR+CHEAP      neg1   978  4275  51 -0.037 -0.068 -0.005
+8         ALL  RICH_MILD                 FAIR+CHEAP    decel1   942  4059  51 -0.006 -0.036  0.029
+9         ALL  RICH_MILD                 FAIR+CHEAP       dg1   942  4059  51 -0.009 -0.067  0.049
+10     ROE_HI  RICH_DEEP                 FAIR+CHEAP      yoy1   209   778  51  0.047 -0.086  0.181
+11     ROE_HI  RICH_DEEP                 FAIR+CHEAP      yoy2   207   764  50  0.089 -0.032  0.224
+12     ROE_HI  RICH_DEEP                 FAIR+CHEAP      neg1   209   778  51 -0.072 -0.140 -0.006
+13     ROE_HI  RICH_DEEP                 FAIR+CHEAP    decel1   206   771  51 -0.039 -0.123  0.048
+14     ROE_HI  RICH_DEEP                 FAIR+CHEAP       dg1   206   771  51  0.072 -0.059  0.201
+15     ROE_HI  RICH_MILD                 FAIR+CHEAP      yoy1   252   778  50  0.079 -0.010  0.168
+16     ROE_HI  RICH_MILD                 FAIR+CHEAP      yoy2   250   764  49  0.071 -0.013  0.154
+17     ROE_HI  RICH_MILD                 FAIR+CHEAP      neg1   252   778  50 -0.073 -0.151 -0.000
+18     ROE_HI  RICH_MILD                 FAIR+CHEAP    decel1   249   771  50  0.013 -0.055  0.077
+19     ROE_HI  RICH_MILD                 FAIR+CHEAP       dg1   249   771  50 -0.004 -0.106  0.100
+20     ROE_LO  RICH_DEEP                 FAIR+CHEAP      yoy1  1262  3497  51  0.128  0.074  0.178
+21     ROE_LO  RICH_DEEP                 FAIR+CHEAP      yoy2  1225  3415  50  0.093  0.047  0.137
+22     ROE_LO  RICH_DEEP                 FAIR+CHEAP      neg1  1262  3497  51 -0.064 -0.096 -0.031
+23     ROE_LO  RICH_DEEP                 FAIR+CHEAP    decel1  1193  3288  51 -0.052 -0.077 -0.027
+24     ROE_LO  RICH_DEEP                 FAIR+CHEAP       dg1  1193  3288  51  0.084  0.016  0.150
+25     ROE_LO  RICH_MILD                 FAIR+CHEAP      yoy1   726  3497  51  0.052 -0.019  0.118
+26     ROE_LO  RICH_MILD                 FAIR+CHEAP      yoy2   721  3415  50  0.034 -0.036  0.101
+27     ROE_LO  RICH_MILD                 FAIR+CHEAP      neg1   726  3497  51 -0.028 -0.067  0.017
+28     ROE_LO  RICH_MILD                 FAIR+CHEAP    decel1   693  3288  51 -0.012 -0.050  0.027
+29     ROE_LO  RICH_MILD                 FAIR+CHEAP       dg1   693  3288  51 -0.013 -0.085  0.061
+30   CONSUMER  RICH_DEEP                 FAIR+CHEAP      yoy1   418   868  51  0.160  0.030  0.293
+31   CONSUMER  RICH_DEEP                 FAIR+CHEAP      yoy2   404   842  50  0.154  0.040  0.264
+32   CONSUMER  RICH_DEEP                 FAIR+CHEAP      neg1   418   868  51 -0.048 -0.115  0.021
+33   CONSUMER  RICH_DEEP                 FAIR+CHEAP    decel1   391   846  51 -0.043 -0.106  0.027
+34   CONSUMER  RICH_DEEP                 FAIR+CHEAP       dg1   391   846  51  0.029 -0.086  0.139
+35   CONSUMER  RICH_MILD                 FAIR+CHEAP      yoy1   273   868  51  0.046 -0.062  0.139
+36   CONSUMER  RICH_MILD                 FAIR+CHEAP      yoy2   270   842  50 -0.034 -0.135  0.077
+37   CONSUMER  RICH_MILD                 FAIR+CHEAP      neg1   273   868  51 -0.023 -0.097  0.050
+38   CONSUMER  RICH_MILD                 FAIR+CHEAP    decel1   267   846  51  0.044 -0.016  0.108
+39   CONSUMER  RICH_MILD                 FAIR+CHEAP       dg1   267   846  51 -0.041 -0.131  0.056
+40  COMMODITY  RICH_DEEP                 FAIR+CHEAP      yoy1   209   831  50  0.057 -0.060  0.181
+41  COMMODITY  RICH_DEEP                 FAIR+CHEAP      yoy2   202   816  49  0.075 -0.056  0.214
+42  COMMODITY  RICH_DEEP                 FAIR+CHEAP      neg1   209   831  50 -0.038 -0.117  0.040
+43  COMMODITY  RICH_DEEP                 FAIR+CHEAP    decel1   195   782  50 -0.031 -0.101  0.043
+44  COMMODITY  RICH_DEEP                 FAIR+CHEAP       dg1   195   782  50  0.060 -0.086  0.205
+45  COMMODITY  RICH_MILD                 FAIR+CHEAP      yoy1   153   831  47  0.119 -0.042  0.281
+46  COMMODITY  RICH_MILD                 FAIR+CHEAP      yoy2   148   816  48 -0.002 -0.166  0.147
+47  COMMODITY  RICH_MILD                 FAIR+CHEAP      neg1   153   831  47 -0.005 -0.074  0.071
+48  COMMODITY  RICH_MILD                 FAIR+CHEAP    decel1   144   782  47 -0.049 -0.133  0.039
+49  COMMODITY  RICH_MILD                 FAIR+CHEAP       dg1   144   782  47 -0.045 -0.251  0.134
+50      OTHER  RICH_DEEP                 FAIR+CHEAP      yoy1   844  2576  51  0.121  0.051  0.189
+51      OTHER  RICH_DEEP                 FAIR+CHEAP      yoy2   826  2521  50  0.075  0.017  0.133
+52      OTHER  RICH_DEEP                 FAIR+CHEAP      neg1   844  2576  51 -0.079 -0.116 -0.042
+53      OTHER  RICH_DEEP                 FAIR+CHEAP    decel1   813  2431  51 -0.055 -0.090 -0.021
+54      OTHER  RICH_DEEP                 FAIR+CHEAP       dg1   813  2431  51  0.106  0.015  0.197
+55      OTHER  RICH_MILD                 FAIR+CHEAP      yoy1   552  2576  51  0.035 -0.038  0.106
+56      OTHER  RICH_MILD                 FAIR+CHEAP      yoy2   553  2521  50  0.077 -0.009  0.159
+57      OTHER  RICH_MILD                 FAIR+CHEAP      neg1   552  2576  51 -0.050 -0.100 -0.002
+58      OTHER  RICH_MILD                 FAIR+CHEAP    decel1   531  2431  51 -0.015 -0.061  0.034
+59      OTHER  RICH_MILD                 FAIR+CHEAP       dg1   531  2431  51  0.011 -0.097  0.117
+60        ALL  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  yoy1_adj  1399  1617  51  0.104  0.056  0.153
+61     ROE_HI  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  yoy1_adj   206   224  51 -0.021 -0.125  0.086
+62     ROE_LO  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  yoy1_adj  1193  1393  51  0.126  0.076  0.172
+63   CONSUMER  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  yoy1_adj   391   470  51  0.112  0.008  0.214
+64  COMMODITY  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  yoy1_adj   195   240  50  0.018 -0.104  0.135
+65        ALL  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  neg1_adj  1399  1617  51 -0.060 -0.088 -0.033
+66     ROE_HI  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  neg1_adj   206   224  51 -0.067 -0.130 -0.003
+67     ROE_LO  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  neg1_adj  1193  1393  51 -0.059 -0.086 -0.034
+68   CONSUMER  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  neg1_adj   391   470  51 -0.055 -0.107 -0.004
+69  COMMODITY  RICH_DEEP  cell(q×yoy0_t) FAIR+CHEAP  neg1_adj   195   240  50 -0.013 -0.085  0.056
+     H     subset      group  n_a  n_b   k   diff     lo     hi  raw_bhar_mean  ctl_raw_bhar_mean
+0   20        ALL  RICH_DEEP  313  313  49 -0.008 -0.025  0.008         -0.000              0.018
+1   20        ALL  RICH_MILD  187  187  49  0.005 -0.017  0.028          0.010              0.018
+2   20     ROE_HI  RICH_DEEP   31   31  24  0.030 -0.017  0.080          0.021              0.004
+3   20     ROE_HI  RICH_MILD   38   38  26 -0.033 -0.069  0.002          0.004              0.004
+4   20     ROE_LO  RICH_DEEP  282  282  49 -0.013 -0.030  0.003         -0.004              0.021
+5   20     ROE_LO  RICH_MILD  149  149  48  0.014 -0.009  0.041          0.013              0.021
+6   20   CONSUMER  RICH_DEEP   54   54  27  0.025 -0.002  0.053         -0.013              0.015
+7   20   CONSUMER  RICH_MILD   43   43  27 -0.020 -0.050  0.013          0.007              0.015
+8   20  COMMODITY  RICH_DEEP   41   41  22 -0.016 -0.051  0.020          0.020              0.031
+9   20  COMMODITY  RICH_MILD   32   32  22  0.052 -0.003  0.140          0.035              0.031
+10  20      OTHER  RICH_DEEP  218  218  48 -0.015 -0.035  0.005          0.000              0.015
+11  20      OTHER  RICH_MILD  112  112  45  0.001 -0.027  0.029          0.006              0.015
+12  40        ALL  RICH_DEEP  313  313  49 -0.021 -0.042 -0.000          0.005              0.036
+13  40        ALL  RICH_MILD  187  187  49  0.009 -0.020  0.041          0.018              0.036
+14  40     ROE_HI  RICH_DEEP   31   31  24  0.043 -0.018  0.109          0.049              0.017
+15  40     ROE_HI  RICH_MILD   38   38  26 -0.009 -0.063  0.051          0.014              0.017
+16  40     ROE_LO  RICH_DEEP  282  282  49 -0.028 -0.051 -0.006         -0.002              0.040
+17  40     ROE_LO  RICH_MILD  149  149  48  0.013 -0.022  0.052          0.019              0.040
+18  40   CONSUMER  RICH_DEEP   54   54  27  0.050  0.001  0.110          0.009              0.030
+19  40   CONSUMER  RICH_MILD   43   43  27 -0.000 -0.043  0.045          0.019              0.030
+20  40  COMMODITY  RICH_DEEP   41   41  22 -0.028 -0.088  0.022          0.008              0.055
+21  40  COMMODITY  RICH_MILD   32   32  22  0.078 -0.026  0.237          0.042              0.055
+22  40      OTHER  RICH_DEEP  218  218  48 -0.037 -0.064 -0.011          0.003              0.032
+23  40      OTHER  RICH_MILD  112  112  45 -0.007 -0.046  0.033          0.011              0.032
+24  60        ALL  RICH_DEEP  308  308  49 -0.038 -0.064 -0.011         -0.004              0.034
+25  60        ALL  RICH_MILD  183  183  49 -0.010 -0.048  0.033         -0.002              0.034
+26  60     ROE_HI  RICH_DEEP   30   30  24  0.046 -0.042  0.145          0.061              0.020
+27  60     ROE_HI  RICH_MILD   38   38  26 -0.031 -0.094  0.039          0.004              0.020
+28  60     ROE_LO  RICH_DEEP  278  278  49 -0.048 -0.074 -0.020         -0.015              0.037
+29  60     ROE_LO  RICH_MILD  145  145  48 -0.005 -0.049  0.046         -0.004              0.037
+30  60   CONSUMER  RICH_DEEP   51   51  26  0.041 -0.020  0.125         -0.000              0.030
+31  60   CONSUMER  RICH_MILD   43   43  27 -0.037 -0.085  0.017          0.008              0.030
+32  60  COMMODITY  RICH_DEEP   41   41  22 -0.055 -0.115  0.002         -0.003              0.051
+33  60  COMMODITY  RICH_MILD   30   30  21  0.025 -0.079  0.181          0.002              0.051
+34  60      OTHER  RICH_DEEP  216  216  48 -0.054 -0.085 -0.024         -0.007              0.030
+35  60      OTHER  RICH_MILD  110  110  45 -0.010 -0.058  0.045         -0.007              0.030

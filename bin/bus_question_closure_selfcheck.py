@@ -161,6 +161,28 @@ with p.open('a',encoding='utf-8') as f:f.write(json.dumps(r,ensure_ascii=False)+
     left = topics(root)
     assert "r-live-x" not in left and "rollup-ack-gate" not in left, left
 
+    # ── substring collateral gate (coord-2026-10-20): đóng `X-recurring` KHÔNG được đóng
+    # lây `X` (matcher `q_topic in r`) — chặn rc=5, không ghi gì; có cờ ack thì mới đóng cả.
+    ts_c = "2026-08-17T05:00:00+00:00"
+    write_event(root, "Mike", event("Mike", "question", "gate-no-owner", ts_c))
+    write_event(root, "Mike", event("Mike", "question", "gate-no-owner-recurring", ts_c))
+    coll = subprocess.run([sys.executable, str(HELPER), "Mike/gate-no-owner-recurring",
+                           "--resolution", "dup", "--evidence", "dup", "--root", str(root)],
+                          capture_output=True, text=True)
+    assert coll.returncode == 5, (coll.returncode, coll.stdout, coll.stderr)
+    assert "Mike/gate-no-owner" in coll.stderr, coll.stderr
+    assert {"gate-no-owner", "gate-no-owner-recurring"} <= topics(root), topics(root)
+    # Chiều ngược KHÔNG bị chặn: đóng `X` không đụng `X-recurring` (r ⊄ q_topic).
+    base = subprocess.run([sys.executable, str(HELPER), "Mike/gate-no-owner",
+                           "--resolution", "ok", "--evidence", "ok", "--root", str(root)],
+                          capture_output=True, text=True)
+    assert base.returncode == 0 and "CLOSED" in base.stdout, (base.returncode, base.stderr)
+    assert "gate-no-owner-recurring" in topics(root), topics(root)
+    forced = subprocess.run([sys.executable, str(HELPER), "Mike/gate-no-owner-recurring",
+                             "--resolution", "dup", "--evidence", "dup", "--root", str(root)],
+                            capture_output=True, text=True)
+    assert forced.returncode == 0, (forced.returncode, forced.stderr)
+
 # Tự đếm (§16), không chép số tay: mọi `assert` của file nằm trên luồng không rẽ nhánh nên tới
 # được dòng này = tất cả đã chạy và qua. `python -O` gỡ assert ⇒ không được in PASS.
 import ast  # noqa: E402

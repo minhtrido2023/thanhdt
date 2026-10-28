@@ -1,0 +1,7 @@
+**Phân tích:** Trên khung 250 phiên, giá đi trong một range rộng khoảng 95–124. Đáy capitulation ở i=132–133 (71, khối lượng 2.22) cho thấy cổ phiếu từng có air-pocket. Ở khung 60 phiên, giá tích luỹ đi lên với các đáy nâng dần: 97.7 (i186), 100 (i200), 104.5 (i211), 104.7 (i239). Cung nằm phía trên, ở 117–124 (các đỉnh i82, i89, i167, i227–230), và vẫn chưa bị vượt. Nhịp điều chỉnh từ 118 về 105 diễn ra với khối lượng giảm dần (0.5–0.8). Năm phiên gần nhất nén chặt quanh 106–109, khối lượng nhích lên khoảng 1.1, nghiêng nhẹ về tích cực. Giá vào khoảng 108, nên mức −15% là khoảng 92. Để chạm mức đó, giá phải phá đáy range 97–100, tức là phải xuất hiện một pha markdown mới. Khả năng này có, nhưng không phải kịch bản chính.
+
+P_HIT15: 0.18
+RISK: MED
+P_POS: 0.52
+INVALIDATION: Đóng cửa dưới 104 (thủng đáy i239) với khối lượng >1.5, mở đường về vùng 97–100.
+CONTAMINATION: NONE

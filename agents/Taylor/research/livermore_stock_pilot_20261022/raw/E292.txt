@@ -1,0 +1,11 @@
+Cổ phiếu cực kém thanh khoản. Từ i=0 đến 194, giá đi ngang quanh 93–108 và rất nhiều phiên có Volume 0. Sau đó là pha markup thẳng đứng: từ 109 (i=194) lên 249 (i=209) chỉ trong khoảng 12 phiên, khối lượng bùng nổ 100–300 lần median ở i=198–204, kèm các gap trần liên tiếp.
+
+Từ i=209 giá nén ngang trong vùng 234–249 suốt 40 phiên. Khối lượng cạn dần (i=226–243), rồi bùng lại ở i=247 (126, đóng 233.56). Đây là dấu hiệu phân phối tại đỉnh hơn là tích lũy. Đỉnh 249.7 bị thử lại ba lần (i=235, 244, 248) nhưng không vượt được.
+
+Bên dưới vùng range là air-pocket vì các gap 172–233 hầu như không có cung cầu chốt giữ. Mức −15% tính từ khoảng 248 là quanh 211, nằm ngay trong vùng gap trống đó.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa vượt 250 với khối lượng lớn và giữ được trên 250 vài phiên (thoát range lên trên). Ngược lại, đóng dưới 233 coi như phá range.
+CONTAMINATION: NONE

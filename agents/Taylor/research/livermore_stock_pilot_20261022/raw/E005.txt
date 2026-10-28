@@ -1,0 +1,13 @@
+Giá đã hồi từ đáy 78.5 (i116) và tạo các đáy cao dần: 97.9 (i197), rồi 117.3–118.3 (i226–227). Hiện giá quay lại vùng đỉnh cũ 125–134.5 (i76–82). Đây là nơi cung bị kẹt, vì lần trước giá phân phối ở đây rồi sập về 78.
+
+Khối lượng gần đây có dấu hiệu bị hấp thụ, chưa phải follow-through:
+- i241 (2.53) và i245 (2.78) đều để lại râu trên.
+- i248 vượt lên 131.27 nhưng đóng cửa ở 127.70, khối lượng 1.76.
+
+Giá đang churn sát kháng cự, chưa có phiên nào đóng cửa trên 131. Xu hướng 60 phiên vẫn là markup, nhưng tỷ lệ lợi nhuận/rủi ro khi mua ngay dưới đỉnh không hấp dẫn. Nếu breakout thất bại, túi khí xuống vùng 118, rồi 110 là có thật.
+
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 117 (thủng đáy i226–233) là cấu trúc đáy cao dần bị phá; ngược lại, đóng cửa trên 135 kèm khối lượng lớn là tín hiệu tăng.
+CONTAMINATION: NONE

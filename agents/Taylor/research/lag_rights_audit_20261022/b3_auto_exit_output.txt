@@ -1,0 +1,72 @@
+E (mua LAG)=2026-10-26  T+25=2026-11-30  T0(GDKHQ)=2026-11-09
+
+== X1 trước khi CP mới về (14.000/14.000)  signal=2026-11-30 plan_date=2026-12-01
+  [inject] SELL SCL qty=14000 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] RightsAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/lag_rights_b3_hugxog3c/trade_plans/plan_RightsAcct_2026-12-01.json
+  rc=0 SELL=[('SCL', 'LAG', 14000, ' định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ')]
+  park_holdings: reconcile_ok=True mismatches=[] | book_lot_snapshot LAG lots={'SCL': {'qty': 14000, 'entry_date': '2026-10-26'}} blocked={}
+
+== X2 dạng A: CP mới về, chưa niêm yết (19.000/14.000)  signal=2026-11-30 plan_date=2026-12-01
+[auto-exit] RightsAcct: đã ghi 0 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/lag_rights_b3_v_tb2326/trade_plans/plan_RightsAcct_2026-12-01.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "RightsAcct", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=14000 broker=19000"}], "capped": []}
+  rc=0 SELL=[]
+  blocked: [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=14000 broker=19000"}]
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 14000, 'broker_qty': 19000, 'diff': -5000}] | book_lot_snapshot LAG lots={} blocked={'SCL': 'reconcile lệch broker: sổ lô=14000 broker=19000'}
+
+== X3 sau niêm yết, sổ chưa sửa (19.000/19.000)  signal=2027-01-26 plan_date=2027-01-27
+[auto-exit] RightsAcct: đã ghi 0 lệnh SELL, 1 mã bị chặn, 0 mã bị cắt vào /tmp/lag_rights_b3_omygpmpu/trade_plans/plan_RightsAcct_2027-01-27.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "RightsAcct", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=14000 broker=19000"}], "capped": []}
+  rc=0 SELL=[]
+  blocked: [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=14000 broker=19000"}]
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 14000, 'broker_qty': 19000, 'diff': -5000}] | book_lot_snapshot LAG lots={} blocked={'SCL': 'reconcile lệch broker: sổ lô=14000 broker=19000'}
+
+== X4 đã bán 14.000 lúc T+26, sau niêm yết broker còn 5.000/5.000  signal=2027-01-26 plan_date=2027-01-27
+[auto-exit] RightsAcct 2027-01-27: không có candidate tới mốc exit.
+  rc=0 SELL=[]
+  auto_exit_inject_notes: (không có — không lệnh, không cờ chặn/cắt)
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 0, 'broker_qty': 5000, 'diff': -5000}] | book_lot_snapshot LAG lots={} blocked={}
+
+== X4b như X4 nhưng 5.000 chưa niêm yết (5.000/0)  signal=2027-01-26 plan_date=2027-01-27
+[auto-exit] RightsAcct 2027-01-27: không có candidate tới mốc exit.
+  rc=0 SELL=[]
+  auto_exit_inject_notes: (không có — không lệnh, không cờ chặn/cắt)
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 0, 'broker_qty': 5000, 'diff': -5000}] | book_lot_snapshot LAG lots={} blocked={}
+
+== X5 workaround BONUS_ISSUE ×19/14, 19.000 open / 14.000 trade  signal=2026-11-30 plan_date=2026-12-01
+  [CAP] SCL book=LAG: Σ SELL kế hoạch (19000cp) > sellable 14000cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 14000cp, phần vượt KHÔNG khớp hết được phiên tới
+  [inject] SELL SCL qty=14000 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ — [CAP sellable 19000→14000cp])
+[auto-exit] RightsAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 1 mã bị cắt vào /tmp/lag_rights_b3_3meh903i/trade_plans/plan_RightsAcct_2026-12-01.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "RightsAcct", "blocked": [], "capped": [{"ticker": "SCL", "book": "LAG", "desired_qty": 19000, "capped_qty": 14000, "reason": "SCL book=LAG: Σ SELL kế hoạch (19000cp) > sellable 14000cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 14000cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+  rc=0 SELL=[('SCL', 'LAG', 14000, '2060) — đề xuất thoát toàn bộ — [CAP sellable 19000→14000cp]')]
+  capped: [{"ticker": "SCL", "book": "LAG", "desired_qty": 19000, "capped_qty": 14000, "reason": "SCL book=LAG: Σ SELL kế hoạch (19000cp) > sellable 14000cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 14000cp, phần vượt KHÔNG khớp hết được phiên tới"}]
+  park_holdings: reconcile_ok=True mismatches=[] | book_lot_snapshot LAG lots={'SCL': {'qty': 19000, 'entry_date': '2026-10-26'}} blocked={}
+
+== X5d workaround nhưng CP về SAU khi đã bán 14.000 (5.000/0)  signal=2027-01-26 plan_date=2027-01-27
+[auto-exit] RightsAcct 2027-01-27: không có candidate tới mốc exit.
+  rc=0 SELL=[]
+  auto_exit_inject_notes: (không có — không lệnh, không cờ chặn/cắt)
+  park_holdings: reconcile_ok=False mismatches=[{'ticker': 'SCL', 'ledger_qty': 0, 'broker_qty': 5000, 'diff': -5000}] | book_lot_snapshot LAG lots={} blocked={}
+
+== X5b workaround, ĐÃ bán 14.000 lúc T+26, 5.000 chưa niêm yết (5.000/0)  signal=2027-01-26 plan_date=2027-01-27
+  [CAP] SCL book=LAG: Σ SELL kế hoạch (5000cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới
+  [CAP] SCL book=LAG: hết chỗ sellable — KHÔNG chèn lệnh
+[auto-exit] RightsAcct: đã ghi 0 lệnh SELL, 0 mã bị chặn, 1 mã bị cắt vào /tmp/lag_rights_b3_a6udutbb/trade_plans/plan_RightsAcct_2027-01-27.json
+  [TEST-MODE] bỏ qua post bus/Discord thật, payload={"account": "RightsAcct", "blocked": [], "capped": [{"ticker": "SCL", "book": "LAG", "desired_qty": 5000, "capped_qty": 0, "reason": "SCL book=LAG: Σ SELL kế hoạch (5000cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]}
+  rc=0 SELL=[]
+  capped: [{"ticker": "SCL", "book": "LAG", "desired_qty": 5000, "capped_qty": 0, "reason": "SCL book=LAG: Σ SELL kế hoạch (5000cp) > sellable 0cp (tradeQuantity broker, gồm cả lệnh book khác trong plan) — cap còn 0cp, phần vượt KHÔNG khớp hết được phiên tới"}]
+  park_holdings: reconcile_ok=True mismatches=[] | book_lot_snapshot LAG lots={'SCL': {'qty': 5000, 'entry_date': '2026-10-26'}} blocked={}
+
+== X5c workaround, sau niêm yết (5.000/5.000)  signal=2027-01-26 plan_date=2027-01-27
+  [inject] SELL SCL qty=5000 book=LAG (AUTO-EXIT LAG: giữ 65 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] RightsAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/lag_rights_b3_370toidi/trade_plans/plan_RightsAcct_2027-01-27.json
+  rc=0 SELL=[('SCL', 'LAG', 5000, ' định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ')]
+  park_holdings: reconcile_ok=True mismatches=[] | book_lot_snapshot LAG lots={'SCL': {'qty': 5000, 'entry_date': '2026-10-26'}} blocked={}
+
+== X6 GDKHQ quyền=2026-12-02 SAU plan_date (bán ở đây = mất quyền)  signal=2026-11-30 plan_date=2026-12-01
+  [inject] SELL SCL qty=14000 book=LAG (AUTO-EXIT LAG: giữ 25 phiên ≥ mốc cố định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ)
+[auto-exit] RightsAcct: đã ghi 1 lệnh SELL, 0 mã bị chặn, 0 mã bị cắt vào /tmp/lag_rights_b3_2ybm3990/trade_plans/plan_RightsAcct_2026-12-01.json
+  rc=0 SELL=[('SCL', 'LAG', 14000, ' định 25 (pt_v23_audit_2014.py:2060) — đề xuất thoát toàn bộ')]
+  park_holdings: reconcile_ok=True mismatches=[] | book_lot_snapshot LAG lots={'SCL': {'qty': 14000, 'entry_date': '2026-10-26'}} blocked={}
+  plan_date < GDKHQ: True — lệnh vẫn chèn: True
+
+subprocess calls (phải rỗng/không có bus thật): []

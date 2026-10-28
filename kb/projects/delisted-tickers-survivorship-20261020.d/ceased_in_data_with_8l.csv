@@ -1,0 +1,33 @@
+ticker,last_px,ev_cat,ev_exch,ev_date,reason,r4,t4,last_rating,route
+V11,2025-05-15,khac_khong_ro,UPCOM,2025-04-23,Bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp,"4,4,4,4","2024-08,2024-11,2025-02,2025-05",4.0,REALESTATE
+EPH,2025-05-26,mat_tu_cach_DC,UPCOM,2025-05-09,Hủy tư cách là công ty đại chúng,"3,3,3,3","2024-08,2024-11,2025-02,2025-05",3.0,COMPOUNDER
+ATB,2025-06-13,mat_tu_cach_DC,UPCOM,2025-12-29,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải c,"4,4,4,4","2024-08,2024-11,2025-02,2025-05",4.0,COMPOUNDER
+L44,2025-06-13,mat_tu_cach_DC,UPCOM,2026-02-03,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2024-08,2024-11,2025-02,2025-05",4.0,COMPOUNDER
+NQT,2025-06-13,mat_tu_cach_DC,UPCOM,2025-06-09,"Hủy tư cách là công ty đại chúng | (Công ty chỉ có 9,26% số ","2,3,3,3","2024-08,2024-10,2025-01,2025-04",3.0,COMPOUNDER
+BMN,2025-06-19,mat_tu_cach_DC,UPCOM,2025-05-30,Hủy tư cách là công ty đại chúng,"4,4,4,4","2024-08,2024-11,2025-02,2025-05",4.0,COMPOUNDER
+SCY,2025-06-19,mat_tu_cach_DC,UPCOM,2025-05-29,Hủy tư cách là công ty đại chúng,"4,4,3,3","2024-08,2024-10,2025-01,2025-04",3.0,COMPOUNDER
+KCE,2025-06-30,mat_tu_cach_DC,UPCOM,2025-06-09,Hủy tư cách là công ty đại chúng | (Có vốn điều lệ đã góp dư,"4,4,4,4","2024-08,2024-11,2025-02,2025-05",4.0,COMPOUNDER
+BDB,2025-08-14,mat_tu_cach_DC,HNX,2025-07-21,Hủy tư cách là công ty đại chúng | (Công ty có vốn điều lệ d,"3,4,4,4","2024-10,2025-01,2025-04,2025-07",4.0,COMPOUNDER
+HIG,2025-08-21,mat_tu_cach_DC,UPCOM,2025-07-31,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"3,4,3,4","2024-11,2025-02,2025-05,2025-08",4.0,COMPOUNDER
+BST,2025-08-29,mat_tu_cach_DC,HNX,2025-08-04,Hủy tư cách là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ đ,"3,4,4,4","2024-10,2025-01,2025-04,2025-07",4.0,COMPOUNDER
+VTL,2025-10-09,mat_tu_cach_DC,UPCOM,2025-09-26,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải c,"4,4,4,4","2024-11,2025-02,2025-05,2025-08",4.0,COMPOUNDER
+ING,2025-10-29,mat_tu_cach_DC,UPCOM,2025-11-05,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-02,2025-04,2025-08,2025-10",4.0,COMPOUNDER
+TBX,2025-12-12,mat_tu_cach_DC,HNX,2025-12-03,Hủy tư cách là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ đ,"3,4,4,3","2025-01,2025-04,2025-07,2025-10",3.0,COMPOUNDER
+LCS,2025-12-25,mat_tu_cach_DC,UPCOM,2025-12-04,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-02,2025-05,2025-08,2025-11",4.0,COMPOUNDER
+SAP,2025-12-30,mat_tu_cach_DC,UPCOM,2026-01-07,Hủy tư cách là công ty đại chúng | (Vốn điều lệ dưới 30 tỷ đ,"4,4,4,4","2025-02,2025-05,2025-08,2025-11",4.0,COMPOUNDER
+BSC,2025-12-30,mat_tu_cach_DC,HNX,2025-12-16,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải c,"3,3,3,4","2025-01,2025-04,2025-07,2025-10",4.0,REALESTATE
+VCW,2026-01-05,mat_tu_cach_DC,UPCOM,2025-12-16,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải c,"4,4,4,4","2025-01,2025-04,2025-07,2025-10",4.0,COMPOUNDER
+BBC,2026-01-15,mat_tu_cach_DC,HOSE,2025-12-17,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải đ,"3,3,3,3","2025-02,2025-04,2025-07,2025-10",3.0,COMPOUNDER
+SQC,2026-01-15,mat_tu_cach_DC,UPCOM,2025-12-24,Hủy tư cách là công ty đại chúng | (Công ty đại chúng phải c,"4,4,4,4","2025-01,2025-04,2025-07,2025-10",4.0,COMPOUNDER
+BII,2026-01-26,mat_tu_cach_DC,UPCOM,2026-01-08,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-02,2025-05,2025-08,2025-11",4.0,REALESTATE
+VLF,2026-01-26,mat_tu_cach_DC,UPCOM,2026-01-08,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-02,2025-05,2025-08,2025-11",4.0,COMPOUNDER
+VOC,2026-01-28,mat_tu_cach_DC,UPCOM,2026-01-08,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,3,4,3","2025-01,2025-04,2025-07,2025-10",3.0,COMPOUNDER
+NS2,2026-02-12,mat_tu_cach_DC,UPCOM,2026-01-21,Hủy tư cách là công ty đại chúng | (Công ty không đáp ứng đi,"4,4,3,4","2025-04,2025-07,2025-10,2026-01",4.0,COMPOUNDER
+SVI,2026-02-13,mat_tu_cach_DC,HOSE,2026-01-15,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"3,3,3,3","2025-04,2025-07,2025-10,2026-01",3.0,COMPOUNDER
+VIH,2026-04-03,mat_tu_cach_DC,UPCOM,2026-04-09,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-05,2025-08,2025-11,2026-02",4.0,COMPOUNDER
+TLT,2026-04-06,mat_tu_cach_DC,UPCOM,2026-04-09,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-05,2025-08,2025-11,2026-02",4.0,COMPOUNDER
+VC5,2026-04-10,mat_tu_cach_DC,UPCOM,2026-04-09,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-05,2025-08,2025-11,2026-02",4.0,COMPOUNDER
+HSI,2026-04-10,mat_tu_cach_DC,UPCOM,2026-03-19,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-05,2025-08,2025-11,2026-02",4.0,COMPOUNDER
+IHK,2026-05-21,mat_tu_cach_DC,UPCOM,2026-05-06,Hủy tư cách là công ty đại chúng | (Công ty có vốn điều lệ d,,,,
+SHG,2026-05-26,mat_tu_cach_DC,UPCOM,2026-05-06,Hủy tư cách là công ty đại chúng | (Không đáp ứng điều kiện ,"4,4,4,4","2025-05,2025-08,2025-11,2026-02",4.0,COMPOUNDER
+BCB,2026-05-29,,,,,,,,

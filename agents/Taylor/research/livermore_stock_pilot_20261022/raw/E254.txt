@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu thị giá rất thấp (bước giá ≈3.7%) với nền tích luỹ dài 81–100 từ i=116 đến i=230, khối lượng cạn kiệt (V≈0.0–0.2). Từ i=231 bật lên theo kiểu bơm: 3 phiên trần liên tiếp (233–235), rồi climax V=21.65 ở 133. Nhịp chỉnh về 111–115 bị mua lại, và đẩy tiếp tới 155.56 ở i=246.
+
+Bốn phiên cuối (246–249) có biên độ rộng 133–155 với khối lượng 7–10x nhưng không vượt được 155.56. Đóng cửa lùi về 140.74, râu trên dài. Đây là dấu hiệu phân phối và cung xuất hiện sau đà tăng 65% trong 15 phiên.
+
+Giá vào ≈133–141, mức −15% ≈ 119. Vùng 111–119 (đáy nhịp chỉnh 237–239) dễ bị kiểm tra lại. Phía dưới đó là air-pocket về nền 92–100. Với loại cổ phiếu này, khả năng xả về nền là cao.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa vượt 155.56 với khối lượng lớn và giữ được trên 148 thì kịch bản phân phối bị phủ định.
+CONTAMINATION: NONE

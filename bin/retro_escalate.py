@@ -47,6 +47,7 @@ CLI:
 """
 import argparse
 import datetime as dt
+import fcntl
 import glob
 import gzip
 import json
@@ -54,6 +55,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -118,6 +120,14 @@ def stable_topic(pattern):
             "vào topic — đó chính là bug ack-topic-counter. Nếu con số là một phần của "
             "danh tính (số tài khoản, id thread) thì viết lại cho nó KHÔNG đứng cuối, "
             f"vd {_REJECT_EXAMPLE!r}.")
+    # Đuôi `-recurring` thừa (TOPIC_PREFIX đã nói "recurring") nhưng tạo topic MỚI ⇒ né
+    # dedup, mở câu trùng câu gốc đang chờ user (sự cố coord-2026-10-20: `…-recovery-path`
+    # 18/10 + `…-recovery-path-recurring` 19/10). Từ chối fail-loud như đuôi đếm.
+    if re.search(r"[-_ ]recurring$", s, re.IGNORECASE):
+        raise SystemExit(
+            f"FAIL: --pattern {str(pattern)!r} kết thúc bằng '-recurring' — thừa (tiền tố "
+            f"đã là {TOPIC_PREFIX!r}) và đẻ topic mới né dedup. Dùng ĐÚNG slug của câu "
+            "đang mở; số ngày tái diễn đi vào --days.")
     return TOPIC_PREFIX + s
 
 
@@ -295,6 +305,127 @@ def decide(topic, bus_root, now=None):
                     f"phủ (chưa triage, hoặc cửa sổ ack đã hết) — escalate lại")
 
 
+# ---- RELAY tới user (Trading Daily) -------------------------------------------------
+# Trước đây câu hỏi retro chỉ nằm trên bus (có options+recommendation) mà không code nào
+# đẩy chúng tới user. Relay ĐÚNG 1 LẦN mỗi event_id (+ mỗi topic/ngày ICT để chạy lại cùng
+# ngày không spam). Chỉ relay câu VỪA ghi bởi lần chạy này ⇒ không backfill câu cũ.
+# Notify lỗi ⇒ KHÔNG đánh dấu, KHÔNG làm hỏng escalation (bus đã ghi xong).
+RELAY_CHANNEL = "trading_daily"
+
+
+def _relay_state_path():
+    return os.environ.get("RETRO_RELAY_STATE") or os.path.join(ROOT, "state", "retro_relayed.json")
+
+
+def _notify_cmd():
+    return os.environ.get("RETRO_NOTIFY_CMD") or os.path.join(ROOT, "bin", "notify_thread.sh")
+
+
+def _opt_text(o):
+    if isinstance(o, dict):
+        return " — ".join(str(v) for v in (o.get("id") or o.get("key"), o.get("label") or
+                          o.get("desc") or o.get("text")) if v) or json.dumps(o, ensure_ascii=False)
+    return str(o)
+
+
+def format_relay(topic, payload):
+    opts = payload.get("options") or []
+    lines = [f"🔁 Retro: pattern tái diễn — {topic.replace(TOPIC_PREFIX, '', 1)}",
+             f"Vì sao: {str(payload.get('summary') or payload.get('question') or '(không có summary)')[:600]}",
+             f"Số retro liên tiếp: {payload.get('recurring_days')}", "Lựa chọn:"]
+    for i, o in enumerate(opts):
+        t = _opt_text(o)
+        lines.append(t if re.match(r"\s*[A-Za-z][\).:\-]", t) else f"{chr(65 + i % 26)}) {t}")
+    lines.append(f"Đề xuất: {payload.get('recommendation') or '(chưa có)'}")
+    lines.append("Trả lời: nhắn chọn A/B/C… vào topic này — Mike ghi decision lên bus.")
+    return "\n".join(lines)
+
+
+def _inbox_path(agent):
+    return os.path.join(ROOT, "bus", "inbox", f"{agent}.jsonl")
+
+
+def _inbox_size(agent):
+    try:
+        return os.path.getsize(_inbox_path(agent))
+    except OSError:
+        return 0
+
+
+def _new_event_id(agent, topic, offset):
+    """event_id của question `topic` nằm SAU byte `offset` (tức do chính lần chạy này ghi).
+
+    Ràng buộc vào offset chứ không phải "câu mới nhất cùng topic": nếu lần ghi không rơi
+    vào inbox thì trả None thay vì nhặt nhầm câu CŨ (sẽ thành backfill).
+    """
+    try:
+        with open(_inbox_path(agent), "rb") as f:
+            f.seek(offset)
+            tail = f.read().decode("utf-8", "replace")
+    except OSError:
+        return None
+    for line in reversed(tail.splitlines()):
+        try:
+            rec = json.loads(line)
+        except Exception:
+            continue
+        if rec.get("event_type") == "question" and rec.get("topic") == topic:
+            return rec.get("event_id")
+    return None
+
+
+RELAY_KEEP_DAYS = 30
+
+
+def _relay_fail(msg):
+    # stderr (không chỉ stdout) để caller vứt stdout vẫn thấy; bus question vẫn còn nên không mất hẳn.
+    print(f"RELAY={msg}")
+    sys.stderr.write(f"retro_escalate: RELAY KHÔNG tới user — {msg}\n")
+
+
+def relay_to_user(event_id, topic, payload, now=None):
+    """True nếu đã gửi; False nếu bỏ qua/lỗi. Không bao giờ raise.
+
+    Lỗ hổng chấp nhận: notify đã gửi (hoặc timeout sau khi gửi) rồi process chết TRƯỚC
+    os.replace ⇒ lần sau gửi trùng 1 lần. Ưu tiên gửi trùng hơn mất tin.
+    """
+    try:
+        now = now or dt.datetime.now(dt.timezone.utc)
+        day = (now + dt.timedelta(hours=7)).strftime("%Y-%m-%d")
+        keys = [f"event:{event_id}", f"topic-day:{topic}@{day}"]
+        path = _relay_state_path()
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path + ".lock", "w") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX)
+            try:
+                state = json.load(open(path, encoding="utf-8"))
+            except Exception:
+                state = {}
+            if any(k in state for k in keys):
+                print("RELAY=skip-already-relayed")
+                return False
+            r = subprocess.run([_notify_cmd(), format_relay(topic, payload), RELAY_CHANNEL],
+                               capture_output=True, text=True,
+                               timeout=int(os.environ.get("RETRO_NOTIFY_TIMEOUT") or 60))
+            if r.returncode != 0:
+                _relay_fail(f"notify-failed rc={r.returncode} (chỉ gửi lại nếu retro lần sau POST lại; "
+                            f"câu hỏi vẫn nằm trên bus)")
+                return False
+            cutoff = (now - dt.timedelta(days=RELAY_KEEP_DAYS)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            state = {k: v for k, v in state.items() if str(v) >= cutoff}
+            for k in keys:
+                state[k] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".relay.")
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(state, f, ensure_ascii=False, indent=1)
+            os.replace(tmp, path)
+        print("RELAY=sent")
+        return True
+    except Exception as e:  # relay không bao giờ được làm hỏng escalation
+        _relay_fail(f"error {type(e).__name__}: {e}")
+        return False
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--pattern", required=True,
@@ -336,6 +467,7 @@ def main(argv=None):
         etype, ev_topic = "status", f"{SKIP_STATUS_PREFIX}{topic}"
         payload["suppressed_reason"] = reason
 
+    offset = _inbox_size(a.agent)
     cmd = [os.path.join(ROOT, "bin", "append_event.sh"), a.agent, etype, ev_topic,
            json.dumps(payload, ensure_ascii=False)]
     if a.trace_id:
@@ -345,6 +477,12 @@ def main(argv=None):
     if r.returncode != 0:
         raise SystemExit(f"FAIL: append_event.sh rc={r.returncode} — escalation KHÔNG được ghi")
     print(f"WROTE={etype}:{ev_topic}")
+    if etype == "question":
+        eid = _new_event_id(a.agent, ev_topic, offset)
+        if eid:
+            relay_to_user(eid, topic, payload)
+        else:
+            _relay_fail("error không đọc được event_id vừa ghi")
     return 0
 
 

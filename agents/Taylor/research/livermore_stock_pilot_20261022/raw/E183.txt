@@ -1,0 +1,11 @@
+**Phân tích.** Ở thang 250 phiên, cổ phiếu đang trong pha markup rõ ràng, giá đi từ 100 lên khoảng 241. Ở thang 60 phiên, giá đi theo bậc thang: nền 196–236 (i190–236), rồi cú rũ i237–242 xuống 191. Cú rũ này có khối lượng giảm dần (0.50–1.09), tức lực bán cạn chứ không phải phân phối. Sau đó giá hồi kiểu chữ V và i249 phá đỉnh 236.55 với khối lượng 2.29, đóng cửa 241.37, gần đỉnh phiên.
+
+Hành vi này thuận xu hướng. Rủi ro nằm ở chỗ thanh i249 kéo rất dài: biên độ phiên khoảng 6%, giá đã tăng 23% chỉ trong 8 phiên. Lịch sử cổ phiếu cũng từng có hai cú sập khoảng 25%, ở i71→i75 và i96→i124.
+
+Mức −15% so với giá vào nằm quanh 205, ngay trong nền cũ 191–205. Nếu breakout thất bại, giá có thể rơi về vùng này một cách hợp lý.
+
+P_HIT15: 0.33
+RISK: MED
+P_POS: 0.54
+INVALIDATION: Đóng cửa dưới 231 (quay lại dưới đỉnh cũ 236 là breakout thất bại); thủng 191 thì cấu trúc tăng bị phá hẳn.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+Năm qua cổ phiếu biến động thấp: biên độ ngày khoảng 1–2%, đi ngang trong vùng 84–98 suốt khoảng 160 phiên. Pha tăng giá kéo dài từ i=166 đến i=197, khối lượng lên 2.5–5x và đạt đỉnh 111.14.
+
+Sau đó là dấu hiệu phân phối từ i=198 đến 230. Các phiên giảm có khối lượng lớn: i=224 (4.10x) và i=226 (5.06x). Giá rơi về 98–100, rồi khối lượng cạn (i=240: 0.35x) quanh 98.
+
+Hiện giá hồi lên 103.35 với khối lượng 1.80x, nhưng đang đi thẳng vào vùng cung kẹt 104–111. Hỗ trợ là vùng 98–100. Mức −15% tương đương khoảng 88, tức đáy của vùng tích lũy cũ. Với độ biến động này, khả năng chạm mức đó là thấp. Kỳ vọng lợi suất gần trung tính.
+
+P_HIT15: 0.10
+RISK: LOW
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 98 với khối lượng lớn (thủng đáy i=241 và đáy vùng phân phối) → mở đường về 92–93.
+CONTAMINATION: NONE

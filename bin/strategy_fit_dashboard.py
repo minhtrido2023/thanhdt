@@ -22,6 +22,16 @@ LUẬT CHO MỌI Ô (validate_html() cưỡng chế, selfcheck có ca đột bi�
   3. màu chỉ phản ánh nhãn/điều kiện đã có trong code nguồn;
   4. nguồn thiếu/hỏng ⇒ ô VẪN hiện "KHÔNG CÓ DỮ LIỆU" kèm lỗi thật (coding_guidelines §29).
 
+TẦNG 3 (bản hẹp, user duyệt 2026-10-12 11:01 ICT, job Taylor_20261012_040250) — "thực tế so với kỳ
+vọng", ĐÚNG 2 nhóm ô: drawdown thật từng tài khoản live, và trượt giá khớp lệnh. Ô "NAV thật so dải
+backtest" bị HOÃN có chủ đích (69 phiên live quá ngắn, chưa có ngưỡng chốt trước) — đừng thêm.
+  · Drawdown tính trên GIÁ ĐƠN VỊ QUỸ do `nav_unit_ledger.build_ledger` dựng (đã loại nạp/rút ĐÃ KHAI —
+    cùng công thức với `nav_period_returns.py`), KHÔNG tính từ cột nav thô. Riêng mức giảm trong ngày
+    còn được xét trên ΔNAV thô TRƯỚC cổng NAV-jump (cổng chặn đúng ngày rơi mạnh nhất).
+  · Ba dòng ngưỡng của ô drawdown là LUẬT TRÊN GIẤY kèm trạng thái thực thi đọc lúc chạy (crontab,
+    ngày file đầu vào, code nhắc khoá) — không viết cứng "đang chạy" hay "không chạy".
+  · Trang KHÔNG tự đo trượt giá: hiện chưa có nguồn định kỳ nào, ô chỉ hiện trạng thái thật.
+
 Chạy:  /home/trido/thanhdt/wc_venv/bin/python mike/bin/strategy_fit_dashboard.py
 Ra:    mike/reports/dashboard/strategy_fit_<YYYY-MM-DD>.html (ngày ICT); dòng cuối stdout = đường dẫn.
 Thoát: 0 = có ít nhất 1 ô DỮ LIỆU dựng được · 1 = không ô dữ liệu nào dựng được (ô book_map chỉ đọc
@@ -55,9 +65,19 @@ STATE_NAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 # Số dòng ngưỡng (có trích file:dòng) mỗi ô PHẢI mang; 0 = ô "chỉ để mô tả". validate_html() so đúng
 # con số này, nên xoá/ thêm một dòng ngưỡng mà không sửa bảng dưới đây là selfcheck đỏ.
 THR_COUNT = {"edge_ic": 3, "edge_lag": 3, "edge_capit": 2, "book_map": 0, "env_dt5g": 6,
-             "env_breadth": 0, "env_value": 0, "env_rates": 2, "env_structural": 1}
+             "env_breadth": 0, "env_value": 0, "env_rates": 2, "env_structural": 1,
+             "live_dd_spacex": 3, "live_dd_zalopay": 3, "live_slippage": 1}
+# Cụm từ MỖI dòng ngưỡng của ô phải mang (validate_html đếm): ba phanh lỗ là luật trên giấy, dòng nào
+# không nêu trạng thái thực thi là trình bày nó như phanh đang chạy.
+THR_PHRASE = {"live_dd_spacex": "Trạng thái thực thi", "live_dd_zalopay": "Trạng thái thực thi"}
 CELL_KEYS = ["edge_ic", "edge_lag", "edge_capit", "book_map",
-             "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural"]
+             "env_dt5g", "env_breadth", "env_value", "env_rates", "env_structural",
+             "live_dd_spacex", "live_dd_zalopay", "live_slippage"]
+# File chỉ được TRÍCH DẪN (đọc dòng để in file:dòng), trang không chạy/không import nó. Để trong dict vì
+# `production_manifest.py` (path_context) không coi chuỗi trong dict là cạnh phụ thuộc — viết thành biến
+# gán thẳng sẽ kéo công cụ chạy tay này vào danh sách production tầng T0 (đo 2026-10-12).
+CITE_ONLY = {"eqr": "execution_quality_review.py", "risk": "mike/agents/Spyros/risk_monitor.py"}
+LIVE_ACCOUNTS = ["SpaceX", "ZaloPay"]      # nhãn tài khoản; trang KHÔNG in số tài khoản hay số dư bằng tiền
 
 
 # ───────────────────────────────────────────────────────────────── định dạng số kiểu VN
@@ -210,6 +230,7 @@ class Cell:
     body: str = ""
     error: str = None
     touched: list = field(default_factory=list)  # ngưỡng THẬT đang chạm (text thuần)
+    sig: object = None          # dấu vân tay SỐ của ô (so hai tài khoản, §12) — không hiển thị
 
 
 def render_cell(c):
@@ -766,6 +787,362 @@ def cell_env_structural(kb_dir, ct, now):
     return c
 
 
+# ───────────────────────────────────────────────────────────────── TẦNG 3 — thực tế so với kỳ vọng
+# Lượt chụp NAV cuối ngày: cron `eod_trading_report.sh` 19:10 ICT (crontab `10 12 * * 1-5`, máy UTC).
+NAV_SNAPSHOT_ICT = (19, 10)
+# Thư mục code được QUÉT (chỉ đọc) để trả lời "có code nào nhắc tới khoá/luật này không". Để trong dict
+# cùng lý do với CITE_ONLY (không tạo cạnh phụ thuộc trong production_manifest).
+SCAN = {"dirs": ("trading_bot", "mike/bin", "mike/agents/Spyros"), "ext": (".py", ".sh")}
+
+
+def _weekday(d):
+    return d.weekday() < 5
+
+
+def drawdown_stats(ledger, is_session=_weekday):
+    """Drawdown trên GIÁ ĐƠN VỊ QUỸ. `ledger` = đầu ra `nav_unit_ledger.build_ledger` (dòng 0 = mốc
+    khởi điểm). N = số PHIÊN (sự kiện độc lập), không phải số dòng file: dòng của ngày KHÔNG có phiên
+    (nghỉ lễ, cuối tuần — `is_session(date)` sai) bị loại khỏi chuỗi và trả ở `non_session`; phiên có
+    thật mà thiếu dòng trả ở `missing` (không nội suy)."""
+    for r in ledger:
+        if not _isnum(r["unit_price"]) or float(r["unit_price"]) <= 0:
+            raise ValueError(f"giá đơn vị ngày {r['date']} không hợp lệ: {r['unit_price']!r}")
+    sess = ledger[:1] + [r for r in ledger[1:] if is_session(r["date"])]
+    if len(sess) < 2:
+        raise ValueError(f"sổ đơn vị có {len(sess) - 1 if sess else 0} phiên sau mốc khởi điểm — chưa đủ để tính")
+    peak, max_dd, max_peak, max_trough = sess[0], 0.0, sess[0], sess[0]
+    worst_day, worst_row, worst_prev = None, None, None
+    for prev, row in zip(sess, sess[1:]):
+        day = row["unit_price"] / prev["unit_price"] - 1
+        if worst_day is None or day < worst_day:
+            worst_day, worst_row, worst_prev = day, row, prev
+        if row["unit_price"] > peak["unit_price"]:
+            peak = row
+        dd = row["unit_price"] / peak["unit_price"] - 1
+        if dd < max_dd:
+            max_dd, max_peak, max_trough = dd, peak, row
+    last = sess[-1]
+    missing, d = [], sess[0]["date"]
+    have = {r["date"] for r in ledger}
+    while d < last["date"]:
+        d += timedelta(days=1)
+        if is_session(d) and d not in have:
+            missing.append(d)
+
+    def around(row):
+        """|Δ giá đơn vị| của phiên tới `row` và phiên liền sau — cỡ sai số khi `row` chụp lệch giờ."""
+        i = next(k for k, r in enumerate(sess) if r is row)
+        return [abs(sess[k]["unit_price"] / sess[k - 1]["unit_price"] - 1) for k in (i, i + 1) if 0 < k < len(sess)]
+
+    off = [r for r in (max_peak, max_trough) if r.get("snap_off")] if max_dd < 0 else []
+    return dict(n=len(sess) - 1, first=sess[0], last=last, prev=sess[-2], peak=peak,
+                cur_dd=last["unit_price"] / peak["unit_price"] - 1,
+                since_peak=sum(1 for r in sess if r["date"] > peak["date"]),
+                max_dd=max_dd, max_peak=max_peak, max_trough=max_trough,
+                max_dd_err=max((x for r in off for x in around(r)), default=None),
+                day_ret=last["unit_price"] / sess[-2]["unit_price"] - 1,
+                worst_day=worst_day, worst_row=worst_row, worst_prev=worst_prev,
+                total=last["unit_price"] / sess[0]["unit_price"] - 1,
+                est=[r for r in sess[1:] if r.get("nav_is_estimate")],
+                off=[r for r in sess[1:] if r.get("snap_off")],
+                non_session=[r for r in ledger[1:] if not is_session(r["date"])], missing=missing, series=sess)
+
+
+def _d(row):
+    return (f'{row["date"]}' + (" <i>(NAV ước tính)</i>" if row.get("nav_is_estimate") else "")
+            + (f' <i>(chụp lệch giờ: {esc(row["snap_off"])})</i>' if row.get("snap_off") else ""))
+
+
+def _pair(a, b):
+    """Nhãn cho một cặp đầu mút: chỉ gọi là «giá chốt» khi CẢ HAI chụp sau đóng cửa cùng ngày."""
+    if any(r.get("snap_off") or r.get("nav_is_estimate") for r in (a, b)):
+        return "có đầu mút KHÔNG chụp sau đóng cửa cùng ngày ⇒ coi như ước tính, không phải giá chốt → giá chốt"
+    return "NAV chụp sau đóng cửa → NAV chụp sau đóng cửa"
+
+
+def nav_expected_date(now, is_session):
+    """Ngày mà NAV chốt PHẢI đã có tại `now`: hôm nay nếu hôm nay có phiên và đã qua lượt chụp
+    19:10 ICT; ngược lại là phiên liền trước (trừ cuối tuần + nghỉ lễ). Neo ICT tường minh (§16)."""
+    n = now.astimezone(ICT)
+    d = n.date()
+    if not (is_session(d) and (n.hour, n.minute) >= NAV_SNAPSHOT_ICT):
+        d -= timedelta(days=1)
+        while not is_session(d):
+            d -= timedelta(days=1)
+    return d
+
+
+def _enforce_status(prov, data_dir):
+    """Trạng thái THỰC THI của ba phanh lỗ — CHỈ từ thứ đọc được lúc chạy (§29), không viết cứng.
+    → dict các đoạn HTML: cron (dòng risk_monitor trong crontab), eod (đầu vào của risk_monitor),
+    lim (code nhắc khoá daily_loss_limit_pct), epi (file trạng thái episode + code nhắc tới nó)."""
+    out = {}
+    try:
+        _cron = [ln for ln in prov["crontab"]().splitlines() if not ln.lstrip().startswith("#")]
+        n = sum(1 for ln in _cron if "risk_monitor" in ln)
+        n_lb = sum(1 for ln in _cron if "nav_loss_brake_monitor" in ln)
+        out["cron"] = (f"crontab của người dùng đang chạy trang có <b>{n} dòng đang bật</b> gọi <code>risk_monitor</code>"
+                       + (" ⇒ theo crontab này <b>hiện chưa có tiến trình định kỳ nào</b> đánh giá luật trên NAV live "
+                          "(trang không kiểm systemd)" if n == 0 else
+                          " ⇒ có lịch chạy; trang không kiểm lượt chạy gần nhất có thành công hay không")
+                       + (f"; ngoài ra có <b>{n_lb} dòng đang bật</b> gọi <code>nav_loss_brake_monitor</code> — monitor "
+                          "<b>chỉ cảnh báo</b> (không tạo BOT_STOP, không chặn lệnh): phanh lỗ được <b>giám sát và báo</b>, "
+                          "<b>không được cưỡng chế</b>" if n_lb else ""))
+    except Exception as e:
+        out["cron"] = (f"<b>không xác định được</b> có tiến trình định kỳ nào chạy <code>risk_monitor</code> hay không — "
+                       f"không đọc được crontab (<code>{esc(_err(e))}</code>)")
+    try:
+        eod = sorted(f[len("eod_account_"):-len(".json")] for f in os.listdir(data_dir)
+                     if f.startswith("eod_account_") and f.endswith(".json"))
+        out["eod"] = f"file mới nhất mang ngày <b>{esc(eod[-1])}</b>" if eod else "<b>không có file nào</b>"
+    except OSError as e:
+        out["eod"] = f"<b>không xác định được</b> — không liệt kê được thư mục (<code>{esc(_err(e))}</code>)"
+
+    def refs(needle, none_txt):
+        try:
+            n_files, hits = prov["code_refs"](needle)
+        except Exception as e:
+            return f"<b>không xác định được</b> có code nào nhắc tới <code>{esc(needle)}</code> — quét lỗi (<code>{esc(_err(e))}</code>)"
+        head = (f"quét {n_files} file {'/'.join(SCAN['ext'])} trong " + ", ".join(f"<code>{esc(d)}/</code>" for d in SCAN["dirs"])
+                + f": <b>{len(hits)} file</b> nhắc tới <code>{esc(needle)}</code>")
+        if not hits:
+            return head + f" ⇒ {none_txt}"
+        return (head + " (" + ", ".join(f"<code>{esc(h)}</code>" for h in hits[:4]) + ("…" if len(hits) > 4 else "")
+                + ") — trang không xác minh được các file đó có thực thi luật hay không")
+
+    out["lim"] = refs("daily_loss_limit_pct", "<b>chưa có code nào đọc khoá này</b>, luật chưa được thực thi")
+    epi_on = os.path.exists(os.path.join(data_dir, "recovery_episode_state.json"))
+    out["epi"] = (f"file trạng thái episode <code>data/recovery_episode_state.json</code>: <b>{'có' if epi_on else 'không tồn tại'}</b>"
+                  + ("" if epi_on else " (file vắng KHÔNG cho biết có episode hay không: bộ theo dõi không chạy thì cũng không có file)")
+                  + "; " + refs("recovery_episode_state", "<b>không có code nào ghi/đọc file này</b>"))
+    return out
+
+
+def _dd_source(account, flows_txt):
+    return ("giá đơn vị quỹ dựng trong bộ nhớ bởi <code>mike/bin/nav_unit_ledger.build_ledger</code> từ "
+            f"<code>nav_history_{esc(account)}.csv</code> + <code>account_cash_flows.json</code> + "
+            f"<code>account_inception.json</code> (đã loại nạp/rút ĐÃ KHAI — {flows_txt}; cùng công thức với "
+            "<code>nav_period_returns.py</code>). Sổ đơn vị trên đĩa CHƯA chốt (chính sách bước 3)")
+
+
+def cell_live_dd(account, data_dir, ct, now, prov):
+    c = Cell(f"live_dd_{account.lower()}", f"Drawdown thật — tài khoản {account}", 3,
+             source=_dd_source(account, "chưa đọc được số bản ghi"),
+             cadence="mỗi phiên, sau lượt chụp NAV 19:10 ICT; CŨ khi đã qua 19:10 ICT của ngày có phiên mà NAV "
+                     "chưa tới hôm nay, hoặc thiếu NAV của phiên liền trước (lịch nghỉ lễ theo trading_bot.vn_market)")
+    lim, lim_cite = ct.const("data/trading_rules.json", r'"daily_loss_limit_pct":\s*(-?[0-9.]+)')
+    epi, epi_cite = ct.const("data/trading_rules.json", r"recovery episode's entry point > (-[0-9.]+)")
+    ddt, ddt_cite = ct.const(CITE_ONLY["risk"], r"^DD_THRESHOLD\s*=\s*([0-9.]+)")
+    st = _enforce_status(prov, data_dir)
+    c.thr = [
+        f"Luật trên giấy: drawdown từ đỉnh NAV ≥ {vn(100 * ddt, 0) if ddt is not None else 'KHÔNG ĐỌC ĐƯỢC'}% thì HALT "
+        f"(BOT_STOP) — hằng số {ddt_cite}; luật tính trên NAV THÔ đọc từ <code>data/eod_account_*.json</code> (chưa loại "
+        f"nạp/rút), không phải trên giá đơn vị quỹ của ô này. <b>Trạng thái thực thi</b>: {st['cron']}; đầu vào của "
+        f"luật hiện có: {st['eod']}",
+        f"Luật trên giấy — phanh lỗ TRONG NGÀY (không phải drawdown từ đỉnh): NAV trong phiên giảm ≤ "
+        f"{vn(100 * lim, 1) if lim is not None else 'KHÔNG ĐỌC ĐƯỢC'}% thì HALT (dừng lệnh mới, huỷ lệnh chờ, BOT_STOP) "
+        f"— khai báo {lim_cite}. <b>Trạng thái thực thi</b>: {st['lim']}. Ô này chỉ so mức giảm của NAV chụp CUỐI NGÀY "
+        "(ΔNAV thô, xét TRƯỚC cổng NAV-jump) với ngưỡng đó; không thấy được ca chạm trong phiên rồi hồi",
+        f"Luật trên giấy — phanh episode recovery: NAV giảm quá {vn(100 * abs(epi), 0) if epi is not None else 'KHÔNG ĐỌC ĐƯỢC'}% "
+        f"tính từ điểm vào episode (KHÔNG tính từ đỉnh tài khoản) thì HALT — khai báo {epi_cite}. <b>Trạng thái thực "
+        f"thi</b>: {st['epi']}; {st['cron']}. Ô này không đánh giá luật đó",
+    ]
+    anchor_cite = ct.cite("CLAUDE.md", r"Neo sizing DD lấy ĐẦU SÀN")
+    try:
+        is_session = prov["is_session"]
+        got = prov["unit_ledger"](account, data_dir)
+        blk = got.get("block_pct")
+        c.source = _dd_source(account, f"hiện <b>{got['n_flows']} bản ghi</b> cho tài khoản này; dòng tiền nhỏ hơn "
+                                       f"{vn(blk, 0)}% NAV mà KHÔNG khai sẽ lọt qua cổng NAV-jump và bị tính thành lãi/lỗ")
+        last_date = got["ledger"][-1]["date"]
+        c.as_of = str(last_date)
+        want = nav_expected_date(now, is_session)
+        c.stale = last_date < want
+        c.stale_why = (f"NAV mới nhất {last_date}, trong khi lượt chụp 19:10 ICT của phiên {want} đã qua"
+                       if c.stale else f"NAV mới nhất {last_date} = phiên kỳ vọng {want}")
+        raw = got.get("raw_last")            # ΔNAV thô của dòng mới nhất — xét TRƯỚC cổng NAV-jump (C2)
+        raw_hit = lim is not None and raw is not None and raw["change_pct"] / 100 <= lim
+        raw_txt = ("không có (chưa đủ 2 dòng NAV)" if raw is None else
+                   f"{vn(raw['change_pct'], 2, True)}% ({raw['prev_date']} → {raw['date']})")
+        if got["jumps"]:
+            j = got["jumps"][0]
+            c.body = (f'<p>ΔNAV <b>thô</b> của dòng mới nhất (CHƯA loại dòng tiền): <b>{raw_txt}</b>'
+                      + (f' — ≤ ngưỡng phanh lỗ trong ngày {vn(100 * lim, 1)}%' if raw_hit else '') + '. Cổng NAV-jump đang '
+                      'chặn phần còn lại của ô: cần khai dòng tiền (nạp/rút) hoặc một bản ghi <code>market_only</code> có '
+                      'bằng chứng cho bước nhảy đó trong <code>data/account_cash_flows.json</code>.</p>')
+            if raw_hit:
+                c.touched.append(f"{account}: ΔNAV thô {raw['prev_date']}→{raw['date']} {vn(raw['change_pct'], 2, True)}% "
+                                 f"(chưa loại dòng tiền) ≤ phanh lỗ trong ngày {vn(100 * lim, 1)}%; cổng NAV-jump đang chặn "
+                                 f"phần còn lại của ô")
+            raise RuntimeError(
+                f"cổng NAV-jump {blk}% CHẶN: {len(got['jumps'])} bước nhảy NAV không có bản ghi dòng "
+                f"tiền (đầu tiên {j['prev_date']}→{j['date']}: {j['change_pct']:+.2f}%) — có thể là nạp/rút chưa "
+                f"khai, nên KHÔNG công bố drawdown")
+        s = drawdown_stats(got["ledger"], is_session)
+        c.sig = (s["n"], s["cur_dd"], s["max_dd"], s["total"], s["day_ret"], s["worst_day"])
+        rows = [
+            ["Số phiên live (N)", f"<b>{s['n']}</b>", f"từ mốc khởi điểm {s['first']['date']} tới {_d(s['last'])}; N đếm "
+             f"PHIÊN có dòng NAV, không đếm dòng file"],
+            ["Drawdown hiện tại từ đỉnh", f"<b>{vn(100 * s['cur_dd'], 2)}%</b>",
+             f"đỉnh giá đơn vị ngày {_d(s['peak'])}; {s['since_peak']} phiên kể từ đỉnh"],
+            ["Drawdown lớn nhất từ khi live", f"<b>{vn(100 * s['max_dd'], 2)}%</b>",
+             (f"đỉnh {_d(s['max_peak'])} → đáy {_d(s['max_trough'])}"
+              + (f"; đầu mút chụp lệch giờ ⇒ <b>sai số tới cỡ {vn(100 * s['max_dd_err'], 1)} điểm phần trăm</b> (= biến động "
+                 f"giá đơn vị lớn nhất của phiên tại đầu mút đó và phiên liền sau)" if s["max_dd_err"] is not None else ""))
+             if s["max_dd"] < 0 else "chưa có phiên nào dưới đỉnh"],
+            ["Tỉ suất từ khi live (gia quyền thời gian)", f"{vn(100 * s['total'], 2, True)}%", "tỉ số hai giá đơn vị"],
+            ["Phiên gần nhất so với phiên trước", f"{vn(100 * s['day_ret'], 2, True)}%",
+             f"giá đơn vị; {_pair(s['prev'], s['last'])}. ΔNAV thô (chưa loại dòng tiền): {raw_txt}"],
+            ["Phiên giảm mạnh nhất", f"{vn(100 * s['worst_day'], 2, True)}%",
+             f"{_d(s['worst_row'])}; {_pair(s['worst_prev'], s['worst_row'])}"],
+        ]
+        tail = ('<p class="muted">Ngưỡng duy nhất cho drawdown từ đỉnh là dòng đầu bên dưới; hai dòng còn lại là hai đại '
+                'lượng KHÁC (lỗ trong ngày; lỗ từ điểm vào episode). Cả ba đều kèm trạng thái thực thi đọc lúc sinh trang.</p>')
+        head = ""
+        if account == "ZaloPay":
+            # Chuỗi TOÀN tài khoản ⇒ KHÔNG đặt cạnh mốc backtest; caveat đứng TRƯỚC bảng, độ lớn trích từ nguồn có thật.
+            pol = "mike/kb/projects/fund-unit-performance-policy-20261010.md"
+            _, m = ct.find(pol, r"có DGC ~([0-9]+)% NAV ngoài phạm vi bot")
+            _, md = ct.find(pol, r"Hiện trạng lúc duyệt \(đo (\d{4}-\d{2}-\d{2})\)")
+            head = ('<p class="nodata-msg">Đây là chuỗi <b>TOÀN tài khoản</b>, gồm cả DGC và vị thế có sẵn nằm ngoài phạm vi '
+                    f'bot — DGC khoảng <b>{esc(m.group(1)) if m else "KHÔNG ĐỌC ĐƯỢC"}% NAV</b> (đo '
+                    f'{esc(md.group(1)) if md else "ngày không đọc được"}, '
+                    + ct.cite(pol, r"có DGC ~([0-9]+)% NAV ngoài phạm vi bot") + '); chuỗi «phần bot quản lý» chưa được dựng — '
+                    + ct.cite(pol, r"ZaloPay hai chuỗi") + '. Không so với SpaceX, không so với mốc backtest.</p>')
+        else:
+            _, m = ct.find("CLAUDE.md", r"Neo sizing DD lấy ĐẦU SÀN (−[0-9]+,[0-9]+)%")
+            anchor = m.group(1) if m else "KHÔNG ĐỌC ĐƯỢC"
+            rows.append(["Mốc tham chiếu (KHÔNG phải ngưỡng)", f"{esc(anchor)}%",
+                         f"neo sizing: phân vị 5 của bootstrap trên backtest, quy ước pin0% — {anchor_cite}"])
+            tail = ('<p class="muted">Mốc tham chiếu là con số của backtest nhiều năm, <b>không phải ngưỡng hành động</b>; '
+                    f'{s["n"]} phiên live chưa đủ để nói drawdown thật «khớp» hay «lệch» mốc đó.</p>') + tail
+        c.body = (
+            head + _table(["Chỉ số", "Giá trị", "Ghi chú"], rows)
+            + sparkline([100 * (r["unit_price"] / s["first"]["unit_price"] - 1) for r in s["series"]],
+                        f"Tỉ suất luỹ kế {account} theo giá đơn vị quỹ, {s['n']} phiên")
+            + f'<p class="cap">Tỉ suất luỹ kế theo giá đơn vị quỹ (%), {s["n"]} phiên; đường ngang = mốc khởi điểm.</p>'
+            + tail)
+        if s["off"]:
+            c.body += (f'<p class="muted">{len(s["off"])}/{s["n"]} phiên có NAV <b>chụp lệch giờ</b> (<code>balance_ts</code> '
+                       f'không nằm sau giờ đóng cửa của chính ngày đó) — coi như ngày ước tính, giữ nguyên không sửa: '
+                       + "; ".join(f'{r["date"]} ({esc(r["snap_off"])})' for r in s["off"][:12])
+                       + ("…" if len(s["off"]) > 12 else "") + ".</p>")
+        if s["est"]:
+            c.body += (f'<p class="muted">{len(s["est"])}/{s["n"]} phiên có NAV <b>ước tính</b> '
+                       f'(<code>nav_is_estimate</code>), giữ nguyên không sửa: '
+                       + ", ".join(str(r["date"]) for r in s["est"][:12]) + ("…" if len(s["est"]) > 12 else "") + ".</p>")
+        if s["non_session"]:
+            c.body += (f'<p class="muted">{len(s["non_session"])} dòng NAV rơi vào ngày KHÔNG có phiên (nghỉ lễ/cuối tuần), '
+                       f'không tính vào N và không vào chuỗi: ' + ", ".join(str(r["date"]) for r in s["non_session"][:8])
+                       + ("…" if len(s["non_session"]) > 8 else "") + ".</p>")
+        if s["missing"]:
+            c.body += (f'<p class="muted">{len(s["missing"])} PHIÊN có thật nhưng thiếu dòng NAV (đã trừ nghỉ lễ), '
+                       f'KHÔNG nội suy: ' + ", ".join(str(d) for d in s["missing"][:8])
+                       + ("…" if len(s["missing"]) > 8 else "") + ".</p>")
+        for key, label in (("pending", "TREO — chưa nằm trong tỉ suất nào"), ("dropped", "bị loại vì ≤ mốc khởi điểm")):
+            if got.get(key):
+                c.body += (f'<p class="nodata-msg">{len(got[key])} dòng tiền {label}: '
+                           + ", ".join(str(f.get("date")) for f in got[key]) + ".</p>")
+        if ddt is not None and s["cur_dd"] <= -ddt:
+            c.touched.append(f"{account}: drawdown từ đỉnh {vn(100 * s['cur_dd'], 2)}% (giá đơn vị quỹ) đã tới mức "
+                             f"{vn(100 * ddt, 0)}% của luật HALT trong risk_monitor (xem trạng thái thực thi của luật trong ô)")
+        if lim is not None and s["day_ret"] <= lim:
+            c.touched.append(f"{account}: phiên {s['last']['date']} giá đơn vị {vn(100 * s['day_ret'], 2, True)}% so với "
+                             f"phiên trước (đã loại dòng tiền đã khai), ≤ mức phanh lỗ trong ngày {vn(100 * lim, 1)}%")
+    except Exception as e:
+        c.error = _err(e)
+    return c
+
+
+def hybrid_block_buy_sessions(data_dir, account, since):
+    """Ngày (chuỗi) có ≥1 lệnh MUA HYBRID đặt TRONG BLOCK (journal PLACE, ghi chú mang nhãn `hyb:blk` do
+    trading_bot/executor.py gắn) từ `since`, trừ corp-action — đúng tiêu chí bộ đếm của registry. Lệnh
+    hybrid đặt NGOÀI block (`ft:out×N hyb`) không tính. Journal là file RIÊNG từng tài khoản (tên file
+    mang nhãn) — không đọc file dùng chung nào (§12). Đây là bộ ĐẾM phiên, không phải số đo giá."""
+    import csv
+    import glob
+    out = []
+    for f in sorted(glob.glob(os.path.join(data_dir, "execution_logs", f"exec_{account}_2*_journal.csv"))):
+        d = os.path.basename(f)[len(f"exec_{account}_"):][:10]
+        if d < since:
+            continue
+        with open(f, encoding="utf-8", newline="") as fh:
+            if any(r.get("event") == "PLACE" and str(r.get("side", "")).lower() == "buy"
+                   and r.get("book") != "CORP_ACTION" and "hyb:blk" in str(r.get("note", ""))
+                   for r in csv.DictReader(fh)):
+                out.append(d)
+    return out
+
+
+def cell_live_slippage(data_dir, kb_dir, ct, now):
+    reg, ops, eqr = "mike/kb/paper_programs_registry.json", "mike/kb/current_ops.md", CITE_ONLY["eqr"]
+    c = Cell("live_slippage", "Trượt giá khớp lệnh MUA — giá khớp so với giá mở cửa", 3,
+             source="<code>mike/kb/paper_programs_registry.json</code> (chương trình <code>fill_timing</code>, khối "
+                    "<code>progress.live_monitoring</code>) + bộ đếm phiên có lệnh MUA hybrid TRONG BLOCK từ journal từng tài khoản "
+                    "<code>data/execution_logs/exec_&lt;tài khoản&gt;_*_journal.csv</code>. Trang KHÔNG tự đo trượt giá",
+             cadence="theo luật: đo lại sau mỗi ~10 phiên live có lệnh MUA hybrid. CHƯA có cron nào sinh số này; "
+                     "CŨ khi bộ đếm ghi trong registry lệch số phiên đếm được từ journal theo cùng tiêu chí")
+    thr_bps, thr_cite = ct.const(ops, r"rollback nếu mean >\+([0-9]+)bps")
+    c.thr = [f"Trung bình giá khớp MUA so với giá mở cửa &gt; +{vn(thr_bps, 0) if thr_bps is not None else 'KHÔNG ĐỌC ĐƯỢC'} "
+             f"bps (1 bước giá), bền ⇒ rollback fill_timing HYBRID; đo mỗi ~10 phiên live có lệnh MUA hybrid — "
+             f"{thr_cite}, điều kiện ghi ở " + ct.cite(reg, r'"rollback_condition"')]
+    try:
+        with open(os.path.join(kb_dir, "paper_programs_registry.json"), encoding="utf-8") as f:
+            j = json.load(f)
+        progs = j.get("programs") if isinstance(j, dict) else j
+        p = next((x for x in progs or [] if isinstance(x, dict) and x.get("id") == "fill_timing"), None)
+        if p is None:
+            raise ValueError("registry không có chương trình id=fill_timing")
+        lm = (p.get("progress") or {}).get("live_monitoring")
+        if not isinstance(lm, dict):
+            raise ValueError("fill_timing.progress.live_monitoring không có trong registry")
+        since = lm.get("since")
+        if not (isinstance(since, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", since)):
+            raise ValueError(f"fill_timing.progress.live_monitoring.since thiếu hoặc không phải YYYY-MM-DD (đọc được: {since!r})")
+        target, cnt = lm.get("target_sessions"), lm.get("count_current_measured")
+        notes = sorted(k[5:] for k in lm if re.fullmatch(r"note_\d{4}-\d{2}-\d{2}", k))
+        c.as_of = (f"bộ đếm registry ghi {notes[-1]}" if notes else f"bộ đếm registry mở {since}, chưa ghi lần đếm nào")
+        per = {a: hybrid_block_buy_sessions(data_dir, a, since) for a in LIVE_ACCOUNTS}
+        union = sorted(set().union(*per.values()))
+        c.stale = _isnum(cnt) and len(union) != int(cnt)
+        c.stale_why = (f"registry ghi {cnt} phiên, journal đếm được {len(union)} phiên từ {since}"
+                       + (f" — ĐÃ ĐỦ {target} phiên, đến hạn đo" if _isnum(target) and len(union) >= target else ""))
+        m = re.search(r"fill-vs-open hybrid = ([+\-−]?[0-9]+,[0-9]+) bps \(se ([0-9]+,[0-9]+), n=(\d+)\)",
+                      str(p.get("review_short", "")))
+        md = re.search(r"\d{4}-\d{2}-\d{2}", str(p.get("status", "")))
+        paper = (f"{esc(m.group(1))} bps (sai số chuẩn {esc(m.group(2))}; n = {esc(m.group(3))} phiên)" if m
+                 else "không đọc được từ registry")
+        # Khoảng leave-one-out của TRUNG BÌNH: registry ghi không dấu trong ghi chú của tiêu chí gate.
+        loo = re.search(r"mean tu ([+\-−]?[0-9]+,[0-9]+) den ([+\-−]?[0-9]+,[0-9]+) bps",
+                        " ".join(str(g.get("note", "")) for g in p.get("gate_criteria") or [] if isinstance(g, dict)))
+        loo_txt = (f"khoảng leave-one-out của trung bình: {esc(loo.group(1))} … {esc(loo.group(2))} bps" if loo
+                   else "khoảng leave-one-out: không đọc được từ registry")
+        rows = [["Số đo LIVE gần nhất", "<b>chưa có</b>" if not lm.get("measured_sessions") else
+                 f"{len(lm['measured_sessions'])} phiên đã đo — xem registry", "chưa lần đo live nào được ghi vào registry"
+                 if not lm.get("measured_sessions") else esc(", ".join(map(str, lm["measured_sessions"])))],
+                ["Bộ đếm ghi trong registry", f"{esc(cnt)}/{esc(target)} phiên", f"từ {esc(since)}; lần đếm ghi gần nhất "
+                 + (notes[-1] if notes else "—")]]
+        for a in LIVE_ACCOUNTS:
+            rows.append([f"Phiên live có lệnh MUA hybrid trong block — {a}", f"{len(per[a])}", esc(", ".join(per[a]) or "—")])
+        rows += [["Hợp hai tài khoản (số phiên khác nhau)", f"<b>{len(union)}/{esc(target)}</b>", esc(", ".join(union) or "—")],
+                 ["Số đo gần nhất trên PAPER (tài khoản main, không phải live)", paper,
+                  f"ghi lúc tốt nghiệp {md.group(0) if md else '—'}; dương = mua ĐẮT hơn giá mở cửa; {loo_txt}. "
+                  f"Số PAPER, <b>không so với ngưỡng +{vn(thr_bps, 0) if thr_bps is not None else 'KHÔNG ĐỌC ĐƯỢC'} bps</b> "
+                  f"(ngưỡng đó áp cho số đo LIVE)"]]
+        c.body = (
+            '<p><b>Chưa có nguồn định kỳ</b> cho trượt giá của tài khoản live. '
+            f'<code>{eqr}</code> là công cụ chạy tay; lượt chạy tự động hằng ngày gọi nó không kèm '
+            f'<code>--account</code> nên LOẠI mọi tài khoản live — ' + ct.cite(eqr, r"EXCLUDE every configured LIVE account")
+            + '.</p>' + _table(["Chỉ số", "Giá trị", "Ghi chú"], rows, cls="wide")
+            + '<p class="muted">Bộ đếm theo đúng tiêu chí của registry — ' + ct.cite(reg, r'"criterion"')
+            + ': phiên có ít nhất một lệnh MUA hybrid bot đặt TRONG block (journal PLACE mang nhãn <code>hyb:blk</code>), '
+              'trừ corp-action; lệnh hybrid đặt NGOÀI block không tính. Đây là số phiên, không phải giá khớp. Số trượt giá '
+              'khi đo phải lấy giá khớp từ xác nhận của broker, lọc theo từng tài khoản.</p>')
+    except Exception as e:
+        c.error = _err(e)
+    return c
+
+
 # ───────────────────────────────────────────────────────────────── nguồn sống (tiêm được để test)
 def default_providers(wc_root):
     """Mọi lời gọi module production nằm ở đây — CHỈ import/đọc. Import trễ để một module hỏng
@@ -816,9 +1193,68 @@ def default_providers(wc_root):
         import edge_health_monitor
         return edge_health_monitor.neg_month_streak(d, "known_date")
 
-    return dict(gated_state=gated_state, dt_clock=dt_clock, dt_line=dt_line, value_radar=value_radar,
+    def unit_ledger(account, data_dir):
+        """Sổ đơn vị của ĐÚNG `account`, đọc từ ĐÚNG `data_dir` (3 file: nav_history_<account>.csv,
+        account_cash_flows.json, account_inception.json) — không rơi về đường dẫn mặc định của module."""
+        bin_dir = os.path.dirname(os.path.abspath(__file__))
+        if bin_dir not in sys.path:
+            sys.path.insert(0, bin_dir)
+        import account_cash_flows as acf
+        import nav_unit_ledger as nul
+        rows = nul.load_nav_history(account, os.path.join(data_dir, "execution_logs"))
+        flows = acf.load_flows(account, os.path.join(data_dir, "account_cash_flows.json"),
+                               require_file=True)              # thiếu sổ dòng tiền ⇒ TỪ CHỐI, không đoán []
+        inception = nul.load_inception(account, os.path.join(data_dir, "account_inception.json"))
+        ledger, info = nul.build_ledger(rows, flows, *nul._inception_baseline(rows, inception))
+        # N1: dòng NAV chỉ là «giá chốt» khi balance_ts nằm SAU giờ đóng cửa của CHÍNH ngày đó.
+        snap = {r[0]: r.balance_ts for r in rows}
+        for r in ledger[1:]:
+            ts = snap.get(r["date"])
+            try:
+                t = datetime.fromisoformat(ts)
+                t = t.astimezone(ICT).replace(tzinfo=None) if t.tzinfo else t
+                ok = t.date() == r["date"] and t.time() >= acf.SESSION_CLOSE_ICT
+            except (TypeError, ValueError):
+                ok = False
+            r["snap_off"] = None if ok else (f"balance_ts {ts}" if ts else "không có balance_ts")
+        raw_last = None
+        if len(rows) >= 2 and rows[-2][1]:
+            raw_last = dict(prev_date=rows[-2][0], date=rows[-1][0], change_pct=(rows[-1][1] / rows[-2][1] - 1) * 100)
+        return dict(ledger=ledger, pending=info["pending"], dropped=info["dropped"], n_flows=len(flows),
+                    raw_last=raw_last, jumps=acf.unexplained_nav_jumps(rows, flows), block_pct=acf.NAV_JUMP_BLOCK_PCT)
+
+    def is_session(d):
+        from trading_bot.vn_market import is_holiday
+        return d.weekday() < 5 and not is_holiday(d)
+
+    def crontab():
+        """Nội dung crontab của người dùng đang chạy — CHỈ ĐỌC (`crontab -l`). Không đọc được ⇒ raise."""
+        r = subprocess.run(["crontab", "-l"], capture_output=True, text=True, timeout=10)
+        if r.returncode != 0:
+            raise RuntimeError(f"crontab -l rc={r.returncode}: {(r.stderr or '').strip()[:200]}")
+        return r.stdout
+
+    def code_refs(needle):
+        """→ (số file đã quét, [đường dẫn tương đối các file nhắc tới `needle`]). Bỏ chính trang này."""
+        n, hits = 0, []
+        for d in SCAN["dirs"]:
+            top = os.path.join(wc_root, d)
+            if not os.path.isdir(top):
+                raise FileNotFoundError(f"không có thư mục {top}")
+            for base, _, files in os.walk(top):
+                for f in files:
+                    if not f.endswith(SCAN["ext"]) or f.startswith("strategy_fit_"):
+                        continue
+                    n += 1
+                    path = os.path.join(base, f)
+                    with open(path, encoding="utf-8", errors="replace") as fh:
+                        if needle in fh.read():
+                            hits.append(os.path.relpath(path, wc_root))
+        return n, sorted(hits)
+
+    return dict(is_session=is_session, crontab=crontab, code_refs=code_refs, gated_state=gated_state, dt_clock=dt_clock, dt_line=dt_line, value_radar=value_radar,
                 killswitch=killswitch, big4_rate=big4_rate, breadth=breadth, capit=capit,
-                neg_streak=neg_streak)
+                neg_streak=neg_streak, unit_ledger=unit_ledger)
 
 
 # ───────────────────────────────────────────────────────────────── trang
@@ -892,6 +1328,16 @@ def build_cells(now, wc_root=WC_ROOT, data_dir=None, kb_dir=None, providers=None
         cell_env_rates(data_dir, ct, now, prov),
         cell_env_structural(kb_dir, ct, now),
     ]
+    dd = [cell_live_dd(a, data_dir, ct, now, prov) for a in LIVE_ACCOUNTS]
+    # §12: hai tài khoản mà ra BỘ SỐ giống hệt nhau = gần như chắc chắn đọc chung một nguồn không lọc.
+    # So trên số đã tính (c.sig), không so HTML: hai ô cố ý khác bố cục (ZaloPay không có dòng mốc backtest).
+    # Cổng này KHÔNG bắt được ca đọc nhầm MỘT trong ba file (vd NAV của tài khoản kia + mốc khởi điểm đúng) —
+    # ca đó do selfcheck khẳng định trực tiếp trên provider thật (T12).
+    ok = [c for c in dd if c.error is None]
+    if len(ok) > 1 and len({c.sig for c in ok}) == 1:
+        for c in ok:
+            c.error = "hai tài khoản ra số giống hệt nhau — nghi đọc chung một nguồn không lọc tài khoản; không công bố"
+    cells += dd + [cell_live_slippage(data_dir, kb_dir, ct, now)]
     return cells, ct
 
 
@@ -908,6 +1354,7 @@ def render_page(cells, now, cite_misses=()):
     top = ("<ul>" + "".join(items) + "</ul>") if items else "<p>Không ô nào chạm ngưỡng.</p>"
     t1 = "".join(render_cell(c) for c in cells if c.tier == 1)
     t2 = "".join(render_cell(c) for c in cells if c.tier == 2)
+    t3 = "".join(render_cell(c) for c in cells if c.tier == 3)
     miss = ""
     if cite_misses:
         miss = ("<p><b>Trích dẫn không định vị được</b> (file nguồn đã đổi — cần cập nhật neo): "
@@ -919,13 +1366,15 @@ def render_page(cells, now, cite_misses=()):
         f'<style>{CSS}</style></head><body><main>'
         '<h1>Độ phù hợp của chiến lược với thị trường hiện hành</h1>'
         f'<p class="meta">Sinh lúc <b>{now:%Y-%m-%d %H:%M} ICT</b> (múi giờ Asia/Ho_Chi_Minh). '
-        'Trang CHẨN ĐOÁN: không có điểm tổng hợp, không phát tín hiệu, không số tài khoản. '
+        'Trang CHẨN ĐOÁN: không có điểm tổng hợp, không phát tín hiệu, không in số tài khoản hay số dư bằng tiền. '
         'Bốn lần thử biến các số đo này thành luật tự điều chỉnh đều đã bị bác.</p>'
         f'<div class="top"><h3>Hôm nay có gì đáng chú ý</h3>{top}'
         '<p class="muted">Chỉ liệt kê ô có ngưỡng thật trong code/KB đang bị chạm, hoặc nguồn đang cũ/thiếu.</p></div>'
         f'<h2>Tầng 1 — Độ khớp của edge</h2>{t1}'
         f'<h2>Tầng 2 — Môi trường</h2>{t2}'
-        f'<footer>{miss}<p>Huy hiệu CŨ đếm ngày Thứ 2–6, <b>không trừ nghỉ lễ</b> — sau kỳ nghỉ dài có thể báo CŨ giả. '
+        f'<h2>Tầng 3 — Thực tế so với kỳ vọng</h2>{t3}'
+        f'<footer>{miss}<p>Huy hiệu CŨ đếm ngày Thứ 2–6, <b>không trừ nghỉ lễ</b> — sau kỳ nghỉ dài có thể báo CŨ giả '
+        '(riêng hai ô drawdown tầng 3 dùng lịch phiên có trừ nghỉ lễ và mốc 19:10 ICT). '
         'Màu ở nhãn edge chỉ theo ba nhãn mà <code>edge_health_monitor.py</code> tự gắn màu (FLIPPED / DECAYED / STRENGTH); '
         'màu dải DT5G chỉ để phân biệt năm trạng thái. Sinh bởi <code>mike/bin/strategy_fit_dashboard.py</code>.</p></footer>'
         '</main></body></html>')
@@ -1029,6 +1478,11 @@ def validate_html(page, expected=CELL_KEYS):
                 out.append(f"ô {k}: có {c['thr_li']} dòng ngưỡng, bảng THR_COUNT khai {want}")
             if any(n == 0 for n in c["li_cite"]) or c["thr_cite"] == 0:
                 out.append(f"ô {k}: có dòng ngưỡng không trích được file:dòng")
+            ph = THR_PHRASE.get(k)
+            if ph and c["thr"].count(ph) < c["thr_li"]:
+                out.append(f"ô {k}: {c['thr_li']} dòng ngưỡng nhưng chỉ {c['thr'].count(ph)} dòng nêu «{ph}»")
+            if ph and "→ HALT" in c["thr"]:
+                out.append(f"ô {k}: dòng ngưỡng ghi «→ HALT» như phanh đang chạy")
     return out
 
 

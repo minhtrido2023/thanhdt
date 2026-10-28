@@ -614,3 +614,22 @@ commit. *→ docstring đầu `bin/tz_anchor_gate.py` (RULE 2).*
 khi chốt: 0 false-positive trên toàn bộ `bin/*.sh` + `hooks/*.sh` ở HEAD, và fire đúng dòng 108
 của `git show 55b3f34c^:bin/append_event.sh` (bản đúng lúc lỗi). Bỏ qua có chủ đích:
 `MIKE_DIAG_GATE=warn|off`.
+
+## 32. Job Nền Song Song PHẢI Có Trần RAM — Container 40GB, KHÔNG Swap
+
+**Sự cố 2026-10-20**: container treo ~2,5h rồi reboot 22:23 ICT; nghi cạn RAM (chưa xác nhận kernel
+— không đọc được `kern.log`). Đo thật: engine `pt_v23_audit_2014.py` đỉnh **3,2GB/tiến trình**
+(1,3GB lúc đầu, vọt ở ~30 giây cuối), 8 song song ≈ 26GB + nền 6-7GB trên trần 40GB, không swap.
+Ghi chú sự cố: `kb/incidents/2026-10/2026-10-20-container-freeze-memory-suspected.md`.
+
+**Luật** (mọi agent mở tiến trình nặng nền, đặc biệt Taylor):
+1. Trước khi mở N tiến trình song song: `N ≤ $(bin/mem_slots.sh <GB_đỉnh_mỗi_tiến_trình>)`; chưa biết đỉnh
+   thì đo 1 tiến trình (`VmHWM` trong `/proc/<pid>/status` tới hết đời) rồi mới nhân lên. Engine
+   `pt_v23_audit_2014.py`: dùng **3,5GB**, KHÔNG dùng số lúc khởi động.
+2. Bọc từng tiến trình nặng: `bin/memcap.sh <GB> <lệnh>` (vượt trần chỉ giết RIÊNG nó, exit 137).
+3. Cơ chế nền (không cần agent nhớ): `dispatch.sh --bg` bọc mỗi job trong scope `MemoryMax=18G` (đổi:
+   `DISPATCH_JOB_MEM_MAX_GB`, `0` = tắt) nằm trong `mike-jobs.slice` tổng 28G (cài bằng
+   `bin/install_mike_jobs_slice.sh`). Mọi tiến trình con của job (kể cả `nohup`/`&`) nằm trong scope.
+   Engine bị giết = job phải CHẠY LẠI với ít song song hơn, không phải tăng trần.
+4. Đường `dispatch.sh` ĐỒNG BỘ (không `--bg`) và phiên tương tác KHÔNG được bọc — vẫn phải theo (1)-(2).
+

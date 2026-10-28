@@ -677,6 +677,45 @@ T=$(mktemp -d); MIKE_LOSS_BRAKE_ALERT_SINK=$T/sink.jsonl python3 mike/bin/nav_lo
 - Bộ máy "phần bot quản lý" (chuỗi mã loại trừ, bẫy sleeve, `--correct-excluded`, công cụ backfill)
   đã gỡ; còn khôi phục được từ nhánh `backup/nav-loss-brake-r2-managed-20261012` (@e650f7ce0).
 
+## Nhận tin "🟡 CỔNG DT5G SUY GIẢM" thì làm gì
+
+**Tin này là gì.** Lượt `publish_gated_state` của chuỗi 19:00 (`bq_freshness_check.sh`
+[pipeline-1]) vừa ghi `deploy_golive_dt5g_v4/golive_state_today.json` với `source` khác
+`DT5G_macro`. Plan T+1 sẽ lập trên state đó. **Chỉ cảnh báo — pipeline và plan KHÔNG bị chặn**;
+`DT4_only` là fail-closed đúng thiết kế (bỏ macro cap, giữ base + DT 4-gate). Tin đến qua 3
+đường: Discord Trading Daily (1 tin/ngày/nguồn), bus `error` topic
+`dt5g-gate-source-degraded-<ngày>`, và dòng ⚠️ trong báo cáo plan 21:00. Sáng hôm sau check 13
+của `ops_health_check.sh` (08:20) nhắc lại nếu còn.
+
+**Bước 1 — đọc bằng chứng ngay trong tin** (không đoán nguyên nhân):
+- `dòng cổng tự in: «[get_gated_state] …»` = lý do cổng tự nêu ở chính lượt đó.
+- `data/macro_health.json: status=…, ts=…` = báo cáo sức khoẻ feed cổng đã đọc.
+- Tin ghi "không tìm thấy dòng [get_gated_state]" / "KHÔNG đọc được" ⇒ không có bằng chứng,
+  xem `mike/logs/bq_freshness.log` quanh `[pipeline-1]`.
+
+**Bước 2 — phân loại theo bằng chứng:**
+
+| Thấy gì | Nghĩa là | Làm gì |
+| --- | --- | --- |
+| `health report N min old (> 1440)` | `macro_healthcheck` không chạy/không ghi trong 24h | Winston (data-ops): xem `daily_refresh` step healthcheck + log; chạy lại healthcheck, rồi chạy lại publisher |
+| `status` khác `HEALTHY` | feed vĩ mô (SBV/VIX/SPX/breadth) bị báo không tin được | Winston sửa feed; KHÔNG ép cổng về DT5G bằng tay |
+| `DT4_STALE` | bản DT4 đang dùng cũng cũ | Coi như sự cố dữ liệu: Winston kiểm `daily_refresh` trước khi tin state |
+| nguồn lạ / thiếu trường `source` / file hỏng | publisher hoặc file state bất thường | Taylor (chủ `macro_state_live.py`) kiểm; không xác nhận được có áp macro cap hay không |
+
+**Bước 3 — quyết định về plan (của user).** Plan không bị chặn. Khác biệt thực tế chỉ có khi
+macro cap ĐANG siết: so `state` với `macro_state_dt5g` trong tin — bằng nhau ⇒ hôm nay cap không
+đổi gì; `state` cao hơn `macro_state_dt5g` ⇒ plan đang chạy tỷ trọng cao hơn mức cổng đầy đủ cho
+phép, cân nhắc khi duyệt.
+
+**KHÔNG làm:** `touch`/sửa tay `golive_state_today.json` hay `macro_health.json` (đều là bằng
+chứng của gate chặn tiền thật); không re-tune tham số cổng; không xoá
+`data/gate_source_alert.json` để "tắt" tin.
+
+**Không thấy tin dù nghi cổng suy giảm:** đọc trường `source` của `golive_state_today.json`; trong
+`mike/logs/bq_freshness.log` tìm `WARN gate-source` (đã phát hiện), `gửi … THẤT BẠI` (kênh hỏng,
+không có lượt tự gửi lại cùng ngày) hoặc `SKIP gate-source` (lượt publish không ghi file state —
+khi đó `_assert_fresh_artifact` đã chặn và báo riêng).
+
 ## Nhật ký & kinh nghiệm
 
 - Mọi sự cố ảnh hưởng workflow sống → **1 file mới** trong `kb/incidents/<YYYY-MM>/` (blameless,
@@ -810,3 +849,50 @@ buổi sáng không có đường chạy hợp lệ. Cơ chế opt-in (cron KHÔ
   end-to-end pipeline-2/3 ở morning mode lần nào — lần đầu dùng thật phải theo dõi tay.
 - Selfcheck: `bin/expected_session_selfcheck.py`, `bin/dt5g_publisher_gate_selfcheck.sh` (ca M1-M9),
   `bin/bq_freshness_morning_selfcheck.sh`, `WorkingClaude/daily_refresh_morning_selfcheck.sh`.
+
+## VN-Index có cổ tức (vnindex_total_return) — đọc 🔒, ack, đính chính, undo (áp 2026-10-21)
+
+- **🔒 "seal bị chặn"** (từ `fund_bench_cron.sh`): `--update` rc=0 nhưng cổng G1/G4 giữ dòng ở `provisional`. Đầu tin có dòng
+  "Cặp cần ack (ngày + giá trị)" — đó là thứ cần xem; bên dưới là bằng chứng (cắt 900 ký tự). Cảnh báo **lặp mỗi ngày T3-T7**
+  tới khi dòng được seal (BQ lấp dữ liệu) hoặc có ack. G1 (không nối được) KHÔNG ack được — điều tra dữ liệu.
+- **Ack G4 số mã / G4_MC** — sửa `data/benchmark/vnindex_tr_acks.json` (người xác nhận, chỉ khi mã thiếu không có GDKHQ cổ tức
+  tiền ở D và D+1). Khoá ràng NGÀY + đúng giá trị đã xem; dựng lại ra số khác ⇒ ack mất hiệu lực:
+  `"G4": [{"date":"2026-10-14","n_prev":100,"n":94,"confirmed_by":"<tên, giờ>","reason":"<lý do>"}]`
+  `"G4_MC": [{"date":"2026-10-14","mc_prev":123456789012,"mc":130000000000,"confirmed_by":"…","reason":"…"}]`
+  Mỗi mục phải là list các object; sai dạng ⇒ ValueError rõ ràng (cron báo lỗi, không seal theo giả định).
+- **Đính chính dòng sealed** (đường DUY NHẤT): `--restate-sealed DATE… --reason "<số thật>" --confirmed-by "<tên, giờ>"` (thử
+  trước bằng `--dry-run`). Từ chối nếu thiếu lý do/người, ngày không phải dòng sealed, dòng sealed khác cũng lệch, hoặc còn
+  nổ G1/G4. Sổ `vnindex_tr_restatements.jsonl` chỉ-thêm, ghi TRƯỚC khi thay file; chạy lại sau crash (cùng ngày+lý do+người)
+  được gắn `retry_of`.
+- **Undo**: `--undo-last-restatement --reason … --confirmed-by …` (`--dry-run` trước). Chỉ hoàn tác đính chính CUỐI trong sổ,
+  và chỉ khi md5 file hiện tại == `md5_after` của nó ⇒ dùng được TRƯỚC lần `--update` kế tiếp (cron T3-T7 sẽ đổi file). Ghi dòng
+  `{"kind":"undo",…,"undoes":<md5_after>}`; không undo chồng. ⚠️ Undo đưa lại **byte-exact** cả những dòng đang nổ G4/G1 trước đính chính (không chạy lại seal-guard) và `--confirmed-by` là
+  chữ tự do — chỉ người thật được điền.
+- **Undo dở dang** (chết giữa ghi sổ và `os.replace`): sổ có dòng `undo` nhưng file chưa đổi; lệnh báo "undo đã GHI SỔ nhưng file CHƯA
+  được thay" và từ chối chạy lại. Dữ liệu KHÔNG hỏng (file vẫn là bản sau đính chính, đã duyệt). Kiểm bằng md5: với `rows` = các dòng
+  sổ, `cur` = bytes file, `V._md5(V.undo_restatement(rows[-2], cur)) == rows[-1]["md5_after"]` (True ⇒ có thể hoàn tất undo). Việc hoàn tất
+  làm tay bởi Mike/Taylor (ghi tmp + `os.replace` dưới flock `vnindex_tr_daily.csv.lock`), KHÔNG xoá dòng sổ. Tương tự, đính chính chết
+  trước khi thay file: lệnh báo "CHƯA từng được áp" — chạy lại `--restate-sealed` cùng lý do/người (sẽ gắn `retry_of`).
+- Sổ restatements chỉ-thêm và có thể phình: đính chính một ngày sealed CŨ lưu toàn bộ phần sealed phía sau vào `rechained_sealed_before`
+  (hàng trăm KB/dòng) — chấp nhận vì hiếm.
+- **Dòng sổ 12:34 21/10 KHÔNG undo được bằng hàm** (ghi trước khi sổ giữ byte cũ; lệnh từ chối rõ ràng). Khôi phục từ
+  `data/benchmark/vnindex_tr_daily.csv.bak_pre_restate_20261021` — bản sao này dọn được sau 24/10.
+
+## Cổng DD trước plan LAG — Mike ghi ack + hợp đồng NO_PACK (thêm 2026-10-21, job Taylor_20261021_154311)
+Mã LAG (due_today/upcoming) CHỈ vào `orders[]` khi `data/lag_dd/<mã>_<release>.json` CLEARED hoặc user ack PROCEED.
+  `--gate` mới là nguồn sự thật: gói CLEARED vẫn ra `ACK_DROP`/`ACK_RESEARCH` nếu user đã loại/hoãn release đó (từ 2026-10-24);
+  gỡ DROP = user đổi ý ⇒ ghi PROCEED bằng hash của gói hiện tại (ack mới nhất thắng).
+- **Ai quyết**: CHỈ USER. Mike chỉ chép lại câu trả lời thật của user (coding_guidelines §20: `decided_by=user`).
+- **Quy trình ghi ack** (user trả lời trên Discord topic plan_approval cho tin "🧾 DD trước plan"): tin in `hash`
+  của bộ cờ user đã xem. Mike chạy
+  `python3 mike/bin/lag_dd_ack.py --ticker <MÃ> --release-date <D> --decision PROCEED|DROP|RESEARCH --decided-by user --at <ISO có múi giờ lúc user trả lời> --flags-hash <hash TRONG TIN user đã trả lời> --source "<link/trích tin user>"`.
+  `--flags-hash` và `--source` BẮT BUỘC; hash lệch gói hiện tại (gói đã sinh lại sau khi gửi tin) ⇒ lệnh TỪ CHỐI, KHÔNG ghi:
+  khi đó chạy lại `lag_dd_pack.py --notify`, hỏi lại user với bộ cờ mới. Kiểm: `lag_dd_ack.py --gate <MÃ> --plan-date <D>` ⇒ `ACK_PROCEED`.
+  Tuyệt đối không sửa tay `ack.json`, không lấy hash từ gói mới để "cho khớp".
+- **NO_PACK ⇒ SKIP có hiệu lực NGAY khi merge**, trong khi hook 19:00 sinh gói CHƯA cài ⇒ ứng viên LAG mới
+  đứng NGOÀI plan cho tới khi ai đó chạy `python3 mike/bin/lag_dd_pack.py [--signal-date D] --notify` (tay hoặc hook).
+  Mùa BCTC: chạy trước 19:00 ICT mỗi ngày có ứng viên mới; gói quá 7 ngày so với plan_date ⇒ `PACK_STALE` (chạy lại).
+  Gói <MÃ>_NA mới hơn gói có release thắng gói cũ (không dùng CLEARED cũ khi lần chạy mới nhất báo RELEASE_NA).
+- **Không chạy `lag_dd_pack.py` vào T7/CN, trước 08:20, hoặc khi `ops_health_check`/`anomaly_scan` chết** (arch-review vòng 2): file anomaly cũ ⇒ ANOMALY_NA hàng loạt ⇒ gói CLEARED hôm trước bị hạ FLAG, `flags_hash` đổi ⇒ ack cũ thành ACK_STALE và phải hỏi lại user. `PACK_ASOF_MAX_DAYS=7`: kỳ nghỉ dài (Tết) chắc chắn ra PACK_STALE — chạy lại pack sau khi `anomaly_scan` đã chạy phiên giao dịch gần nhất.
+
+- **Duyệt plan = chấp nhận (user chốt 2026-10-21 23:28 ICT, "Nếu tôi duyệt plan thì được phép mua. Không cần quá cứng")**: cổng DD KHÔNG chặn cứng ở tầng đặt lệnh (không thêm gate kiểu `filter_lag_rating_orders`). Khối 🔴 `LAG_DD_GATE_VIOLATION` trong báo cáo duyệt plan là cảnh báo để user thấy trước khi duyệt; user duyệt plan có khối đỏ ⇒ bot được mua như plan. Mã FLAG chưa ack vẫn mặc định đứng NGOÀI plan do DollarBill (fail-closed ở khâu lập plan); user muốn mua dù có cờ thì ghi ack PROCEED hoặc tự duyệt plan có mã đó.

@@ -1,0 +1,9 @@
+Giá tăng gần 4 lần trong 250 phiên. Từ i=144 đến 238 có một vùng tích lũy/phân phối rộng 295–382. Phiên i=239 phá lên với khối lượng 15,35x, kéo giá lên 444 (i=245) trong một nhịp gần như parabol, khối lượng 6–9x liên tục, cho thấy đám đông nhỏ lẻ đang hưng phấn. Phiên i=247 đảo chiều mạnh với khối lượng 8,87x: tạo đỉnh 432 rồi đóng cửa ở đáy 397,77, đây là cung climax. Phiên i=248 mở gap xuống 370 và chỉ hồi một phần. Giá hiện đang thử lại vùng đỉnh cũ 382–397 (i=144/214).
+
+Mức −15% tính từ giá vào khoảng 385 là quanh 327, vẫn nằm giữa vùng nền cũ. Với biên dao động ngày 5–7% và lực bán tháo margin sau climax, khả năng chạm mức này là đáng kể.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 370 (đáy i=248) với khối lượng lớn thì breakout thất bại, giá có thể về vùng nền 330–345.
+CONTAMINATION: NONE

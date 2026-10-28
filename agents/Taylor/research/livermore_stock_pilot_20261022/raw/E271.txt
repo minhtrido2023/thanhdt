@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đang trong pha markdown với chuỗi đỉnh thấp dần: 125.7 (i=28), 111.5 (i=122), 107.6 (i=151) và 98.5 (i=234). Nhịp hồi i=233–234 có khối lượng lớn (V 5.16) nhưng thất bại ngay. Sau đó giá rơi khỏi vùng nền 84–92 đã giữ suốt i=164–232. Phiên i=249 đóng cửa ở 79.50, là giá đóng thấp nhất cả chuỗi, thủng đáy i=163 (80.97). Đây là breakdown khỏi nền tích luỹ giả, khối lượng thấp (0.6–1.0), chưa có climax hay cầu hấp thụ. Bên dưới không có vùng hỗ trợ nào trong dữ liệu (air-pocket). Vùng 84–88 giờ thành cung kẹt phía trên. Mức −15% tính từ ~79.5 là khoảng 67.6.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.36
+INVALIDATION: Luận điểm giảm sai nếu giá đóng cửa lấy lại trên 88 (đáy vùng nền cũ) với khối lượng >1.5× median; ngược lại, giữ dưới 81 là xác nhận markdown tiếp diễn.
+CONTAMINATION: NONE

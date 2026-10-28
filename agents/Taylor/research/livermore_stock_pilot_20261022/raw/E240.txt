@@ -1,0 +1,7 @@
+**Phân tích:** Mã cực kém thanh khoản: rất nhiều phiên khối lượng 0. Các thanh giật hơn 7% mỗi phiên cho thấy đây nhiều khả năng là UPCoM, biên độ rộng. Pha markup đi từ i=140 (≈120) lên đỉnh climax i=157 (254, khối lượng 203x median). Sau đó là phân phối/range 175–200 suốt khoảng 90 phiên. Các nhịp hồi lên 196–201 đều thất bại (i=189, 199, 205, 234), đỉnh thấp dần. i=237–238 phá xuống 174 với khối lượng tăng (16x). i=245 chạm 166, rồi giá nằm im ở 176 với khối lượng 0. Pha 60 phiên là phân phối nghiêng xuống. Dưới đáy range 166–170 là air-pocket tới vùng 140–150, gốc của markup, gần như không có hỗ trợ khối lượng. Với biên độ rộng và thanh khoản mỏng, mức −15% (~150) hoàn toàn có thể chạm.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa trên 201 với khối lượng lớn (>20x median) thì phá cấu trúc phân phối; ngược lại, đóng dưới 166 xác nhận markdown.
+CONTAMINATION: NONE

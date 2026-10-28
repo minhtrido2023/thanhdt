@@ -1,0 +1,9 @@
+Cấu trúc ở cả ba thang đang là markdown. Giá tăng từ 76 lên 158–163 (i109–110, vol 8.22 là climax), sau đó phân phối rộng 130–158 đến i172. Đỉnh thấp dần: 142 (i172, vol 6.17), 133.7 (i208), 131 (i216). Giá thủng 120 ở i224, rồi nền 108–115 bị phá ở i245 (−7%, vol 1.90). Đây là lần phá nền thứ hai, không có cầu đỡ.
+
+Thanh i249 đóng cửa cao ở 97.6, vol 1.82, nhưng chưa phải climax bán: khối lượng giảm chỉ ở mức 1–2x, chưa có thanh nào tháo chạy với vol lớn. Hỗ trợ gần là 92.8 (i248, i1). Dưới đó là 86 rồi khoảng trống về 76–81 (nền i5–8). Mức −15% tương ứng khoảng 83, nằm trong air-pocket margin. Nền 108–115 giờ là cung kẹt phía trên.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 92.8 với vol >1.5 xác nhận markdown tiếp; ngược lại, lấy lại 108–111 với vol lớn mới hủy kịch bản giảm.
+CONTAMINATION: NONE

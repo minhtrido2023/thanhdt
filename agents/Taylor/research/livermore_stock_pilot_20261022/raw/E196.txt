@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu tăng từ 100 lên đỉnh 205 (i=106, khối lượng climax 13.55), rồi lên đỉnh thứ hai 186.6 (i=148). Sau đó thanh khoản cạn kiệt: từ i≈161 khối lượng phần lớn dưới 0.3, nhiều phiên bằng 0. Pha hiện tại là markdown trên thanh khoản rỗng. Các đỉnh thấp dần: 178.6 (i=183) → 168.8 (i=202) → 159.8 (i=210/213) → 150 (i=219) → 136.6 (i=230) → 133 (i=240) → 125 (i=244). Phiên i=248 đâm xuống 104.5 với khối lượng 1.83, cao nhất kể từ i=234, rồi đóng cửa ở 118.75. Đây có thể là một cú rũ bỏ, nhưng chưa có follow-through: i=249 chỉ có khối lượng 0.07. Biên dao động một phiên thường xuyên 10–15%, nên mức −15% (≈104) gần như nằm trong nhiễu. Không có vùng hỗ trợ khối lượng nào bên dưới 110–117. Cung kẹt dày phía trên ở vùng 133–150.
+
+P_HIT15: 0.48
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa dưới 104 (thủng đáy râu i=248) sẽ phá vỡ giả thuyết đáy. Ngược lại, chỉ khi đóng cửa trên 136 với khối lượng >1 thì cấu trúc đỉnh thấp dần mới bị phá.
+CONTAMINATION: NONE

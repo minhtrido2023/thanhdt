@@ -1,0 +1,14 @@
+Cổ phiếu đang ở pha markup trên cả ba thang, từ 100 lên 563. Mười phiên gần nhất là một cú bứt phá thẳng đứng khỏi nền 355–415 (i193–239): giá đi từ 400 lên 563, khoảng +40%. Khối lượng mang tính cao trào: 4.14 ở i240, 2.91 ở i249 với đóng cửa sát đỉnh. Thanh i242 (giảm về 410, vol 2.14) cho thấy cung vẫn có mặt.
+
+Lịch sử của mã này cho thấy sau mỗi cú tăng dốc kèm vol lớn đều có nhịp xả sâu:
+- Đỉnh 263 (i37) giảm về 155, khoảng −40%.
+- Đỉnh 364 (i156) giảm về 262, khoảng −28%.
+- Đỉnh 430 (i193/200) giảm về 354, khoảng −18%.
+
+Giá vào khả năng cao là gap ở mức ~570+, cách vùng hỗ trợ gần nhất 440–450 (mép gap i244) hơn 20%. Rủi ro hoàn toàn nằm ở việc giá đã kéo căng quá xa.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới ~480 (đáy thanh i245/i246, tức lấp vùng gap breakout) phá cấu trúc markup ngắn hạn; dưới 410 (i242) thì breakout thất bại.
+CONTAMINATION: NONE

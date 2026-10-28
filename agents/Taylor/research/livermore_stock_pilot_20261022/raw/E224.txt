@@ -1,0 +1,9 @@
+**Phân tích:** Cổ phiếu thanh khoản mỏng, bước giá khoảng 2.56. Nền tích luỹ 105–118 kéo dài từ i=167 đến 232, sau đó bứt phá có khối lượng (i=233–240, V 7–15x) lên 136. Tiếp theo là cú markup dốc lên 151 với i=247 V=37x, giống climax mua. Ngay sau đó, i=248 mở cửa ở đỉnh 156.41 rồi đạp xuống 143.59. i=249 đóng cửa 146, không có follow-through.
+
+Lịch sử mã này lặp lại kiểu pump rồi xả. Năm i=16–28 lên 136 rồi tụt về 80. Ở i=165–166, đỉnh 128 rồi trôi về 103. Giá vào ≈146 cách vùng breakout 128–136 khoảng 7–12%. Mức −15% (≈124) nằm ngay dưới vùng đó, nên một lần retest sâu là đủ chạm.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Giá giữ trên 143.6 và đóng cửa vượt 156.4 với khối lượng duy trì, xác nhận climax là tiếp diễn chứ không phải đỉnh.
+CONTAMINATION: NONE

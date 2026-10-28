@@ -1,0 +1,57 @@
+ticker,commodity,role,sensitivity,mechanism,price_series,series_file,series_status,series_start,in_primary,gap_note
+DRI,rubber,producer,HIGH,"mủ cao su là doanh thu chính; biên LN theo giá mủ",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+PHR,rubber,producer,HIGH,"mủ + thanh lý vườn/KCN (KCN làm loãng phơi nhiễm)",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+DPR,rubber,producer,HIGH,"mủ + KCN",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+TRC,rubber,producer,HIGH,"mủ thuần",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+GVR,rubber,producer,HIGH,"tập đoàn cao su; KCN + gỗ làm loãng",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+TNC,rubber,producer,HIGH,"mủ (universe_pit chỉ tới 2015-03)",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+DRG,rubber,producer,HIGH,"mủ (universe_pit chỉ 34 phiên)",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+DRC,rubber,consumer(input),MED,"lốp: cao su là CHI PHÍ ⇒ chiều NGƯỢC",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,N,chiều ngược - ngoài thử nghiệm chính
+CSM,rubber,consumer(input),MED,"lốp: chiều NGƯỢC",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,N,chiều ngược
+SRC,rubber,consumer(input),MED,"lốp: chiều NGƯỢC",Rubber RSS3 (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,N,chiều ngược
+MSR,tungsten,producer,HIGH,"vonfram (APT/WO3) + fluorspar + bismuth + đồng; vonfram chi phối doanh thu",KHÔNG CÓ,-,GAP,-,N,"KHÔNG có chuỗi giá vonfram/APT trong fleet; WB CMO không có vonfram. Cần: APT 88.5% Rotterdam/China (Fastmarkets/Argus - trả phí) hoặc SunSirs/SMM 'ammonium paratungstate' (cào web, chưa có lịch sử)"
+KSV,copper/tin,producer,HIGH,"Vimico: đồng/thiếc/vàng (universe_pit từ 2021-11)",Copper/Tin (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,N,"lịch sử universe chỉ 2021+ ⇒ không có IS; mô tả thôi"
+PVS,crude oil,upstream services,HIGH,"capex thượng nguồn theo giá dầu (trễ)",Crude oil average (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+PVD,crude oil,upstream services,HIGH,"giá thuê giàn khoan theo dầu",Crude oil average (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+PVC,crude oil,upstream services,MED,"dung dịch khoan",Crude oil average (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+PVB,crude oil,upstream services,MED,"bọc ống - theo dự án",Crude oil average (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+GAS,crude oil,producer(gas),HIGH,"giá khí neo theo dầu FO/Brent",Crude oil average (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+BSR,crude oil,refiner,MED,"crack spread + hiệu ứng tồn kho; không phải giá dầu tuyệt đối",Crude oil (WB) - proxy kém,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,"thiếu chuỗi crack spread"
+OIL,crude oil,distributor,LOW,"bán lẻ xăng dầu - giá điều tiết",Crude oil (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+PLX,crude oil,distributor,LOW,"bán lẻ xăng dầu - giá điều tiết",Crude oil (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+PVT,tanker freight,shipper,MED,"cước tàu dầu (BDTI); đệm bởi charter dài hạn (sens 0.34 ở data/freight_map.csv)",BDTI,data/freight_rates_quarterly.csv,NOT-REGISTERED/RECONSTRUCTED,2018Q1,N,"KHÔNG có chuỗi cước tàu dầu PIT: freight_rates_quarterly.csv là dựng lại thủ công theo quý 2018+, không có trong data_registry; bdi_daily_real.csv chỉ từ 2026-05. Cần: BDTI/BCTI ngày (Baltic Exchange trả phí / investing.com cào dần)"
+VIP,tanker freight,shipper,MED,"tàu xăng dầu (sens 0.53)",BDTI,data/freight_rates_quarterly.csv,NOT-REGISTERED/RECONSTRUCTED,2018Q1,N,như PVT
+GSP,tanker freight,shipper,MED,"LPG/dầu (sens 0.43)",BDTI,data/freight_rates_quarterly.csv,NOT-REGISTERED/RECONSTRUCTED,2018Q1,N,như PVT
+VTO,tanker freight,shipper,LOW,"hợp đồng cố định (sens 0.06)",BDTI,data/freight_rates_quarterly.csv,NOT-REGISTERED/RECONSTRUCTED,2018Q1,N,
+VOS,dry bulk freight,shipper,HIGH,"thuần BDI (sens 0.55)",BDI,data/bdi_daily_real.csv,CANONICAL-SHORT,2026-05,N,"BDI ngày chỉ từ 2026-05; quý dựng lại 2018+"
+VNA,dry bulk freight,shipper,HIGH,"thuần BDI (sens 0.59)",BDI,data/bdi_daily_real.csv,CANONICAL-SHORT,2026-05,N,như VOS
+HAH,container freight,shipper,MED,"SCFI/FBX (sens 0.61, trễ 2Q)",SCFI,data/freight_rates_quarterly.csv,NOT-REGISTERED/RECONSTRUCTED,2018Q1,N,"không có SCFI PIT"
+DPM,urea,producer,HIGH,"urê là doanh thu chính; khí đầu vào neo dầu (biên chịu cả hai)",Urea (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+DCM,urea,producer,HIGH,"urê",Urea (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+DDV,DAP,producer,HIGH,"DAP thuần",DAP (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+LAS,DAP,producer,MED,"lân/NPK; nối DAP lỏng",DAP (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+DGC,phosphorus(P4),producer,HIGH,"phốt pho vàng P4 + DAP/hoá chất; DAP chỉ là proxy",DAP/Phosphate rock (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,"thiếu chuỗi giá P4 (yellow phosphorus) - SunSirs có nhưng chưa cào"
+BFC,fertilizer NPK,producer,LOW,"NPK - urê/kali là chi phí lẫn giá bán",Urea/DAP (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+CSV,caustic soda,producer,HIGH,"xút - chlor-alkali",caustic_soda_monthly.csv,data/caustic_soda_monthly.csv,SYNTHETIC,2006-04,N,"caustic_soda_monthly.csv = SYNTHETIC ESTIMATE theo .SOURCE.txt ⇒ cấm dùng; cần SunSirs/CCF xút lịch sử"
+SBT,sugar,producer,HIGH,"đường; giá nội địa có thuế chống bán phá giá nhưng neo đường thế giới",Sugar world (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+LSS,sugar,producer,HIGH,"đường",Sugar world (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+SLS,sugar,producer,HIGH,"đường",Sugar world (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+QNS,sugar,producer(half),MED,"~nửa đường, nửa sữa đậu nành",Sugar world (WB CMO),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,Y,
+NBC,coal,producer,MED,"than TKV bán EVN giá thoả thuận - nối giá than nhập lỏng",Coal Australian (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,"giá than nội địa điều tiết; thiếu chuỗi giá bán TKV"
+THT,coal,producer,MED,"như NBC",Coal Australian (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+TVD,coal,producer,MED,"như NBC",Coal Australian (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+HPG,steel,producer,HIGH,"thép (HRC/thép xây dựng); quặng sắt là CHI PHÍ",Iron ore (WB) - proxy sai chiều,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,"thiếu chuỗi giá HRC/thép VN PIT (WB CMO không có thép); quặng là đầu vào"
+TLH,steel,producer,HIGH,"thép",Iron ore (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,như HPG
+SMC,steel,trader,MED,"thương mại thép - lãi/lỗ tồn kho",Iron ore (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,như HPG
+POM,steel,producer,MED,"phôi/thép",Iron ore (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,như HPG
+LTG,rice,exporter,MED,"gạo xuất khẩu; biên = chênh giá lúa mua vào",Rice Viet Namese 5% (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,N,"universe từ 2017-10; phơi nhiễm biên không rõ ⇒ ngoài chính"
+TAR,rice,exporter,MED,"gạo",Rice Viet Namese 5% (WB),data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,CANONICAL,1960,N,
+DBC,hog,producer,HIGH,"heo hơi + TACN (ngô/khô đậu là chi phí)",hog_price_vn.csv,data/hog_price_vn.csv,CANONICAL,2019-01,N,"chuỗi heo chỉ từ 2019 ⇒ không có IS 2014-19"
+MML,hog,producer,HIGH,"heo/thịt chế biến",hog_price_vn.csv,data/hog_price_vn.csv,CANONICAL,2019-01,N,như DBC
+VHC,pangasius,producer,HIGH,"cá tra xuất khẩu",KHÔNG CÓ,-,GAP,-,N,"không có chuỗi giá cá tra xuất khẩu (VASEP/Tổng cục Hải quan theo tháng - chưa cào)"
+ANV,pangasius,producer,HIGH,"cá tra",KHÔNG CÓ,-,GAP,-,N,như VHC
+IDI,pangasius,producer,HIGH,"cá tra",KHÔNG CÓ,-,GAP,-,N,như VHC
+FMC,shrimp,producer,MED,"tôm; WB 'Shrimps Mexican' là giá Mỹ - nối lỏng",Shrimps Mexican (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+MPC,shrimp,producer,MED,"tôm",Shrimps Mexican (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+CMX,shrimp,producer,MED,"tôm",Shrimps Mexican (WB) - proxy,data/_wb_cache/CMO-Historical-Data-Monthly.xlsx,PROXY,1960,N,
+KSB,construction stone,producer,LOW,"đá xây dựng - giá nội địa, không phải hàng hoá quốc tế",KHÔNG CÓ,-,GAP,-,N,

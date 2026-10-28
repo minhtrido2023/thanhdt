@@ -1,0 +1,7 @@
+Đây là pha distribution/markdown sau một đợt markup parabol. Ở thang 60–250 phiên, giá tích luỹ quanh 87–100 (i=103–145), rồi markup dốc từ i=145 đến đỉnh 335.71 (i=229). Đỉnh đi kèm khối lượng climax 9–13x (i=170, 219), sau đó vỡ cấu trúc nhanh. Phiên i=230 (V 5.89) là đảo chiều, tiếp theo là chuỗi giảm sàn (i=233, 236, 237) với khối lượng rất thấp, tức là không có cầu, đúng kiểu air-pocket do margin. Đáy tạm ở 146.94 (i=244), giảm khoảng 56% từ đỉnh. Nhịp hồi hiện tại về 184–187 có khối lượng nhỏ dần (0.66) và nằm dưới vùng cung bị kẹt 193–213 (i=238–240). Đây nhiều khả năng là nhịp hồi kỹ thuật trong markdown. Biến động ngày khoảng 7%, nên mức −15% (≈157) rất dễ chạm.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa trên 213 với khối lượng >3x thì luận điểm markdown sai; ngược lại, thủng 147 xác nhận nhịp giảm thứ hai.
+CONTAMINATION: NONE

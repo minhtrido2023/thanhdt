@@ -1,0 +1,26 @@
+# LOCK dgc_valuation_20261027_r2 — job Taylor_20261026_174426 — 2026-10-27 00:50:10 ICT
+# (model.py chạy lại với CFG_R1 tái lập đúng vòng 1: kỳ vọng 33.609)
+1954b4e09ea2da793d5358bb472c0d68  model.py
+7fc3662c3e60df954c09946ea8c0b17a  REPORT.md
+96f6a641a83a75a6bbd58036fc468f12  data/beta.csv
+cab92b067123d1be09fcbf089d5ab089  data/dgc_fin_bq.csv
+3c4bec4de6ed30f1ad041b60f91f7937  data/peer_multiples.csv
+5ab1e06a94cbfd66d91578a14e41afc4  data/px_multiples.csv
+0c8d3ce740d6a524be664be96afb3286  data/dsc_dgc_q2_2026_extract.txt
+cf745373cc894827d021157a5b3283f0  out_dcf.csv
+68ac4f9cd0c331998cbd766b2cd43a3d  out_dcf_sens_ke_g.csv
+6763c3e5a9f9441dc23d60b8ae58baef  out_dcf_sens_ke_gm.csv
+79f1ef18c7222d0a260070d77fde4c64  out_forecast.csv
+1230b64c5b774f4ea7f62c705c62b3fd  out_headline.csv
+52f50d79c7354aec84c5df05ca3fb04c  out_multiples.csv
+69a88c182c46bd230527264fee20b0e5  out_q4.csv
+8e2a19922f610eb99f75981bc3b373be  out_reopen_conditional.csv
+92ed6ba5939aa6410faba627d8990d66  out_sensitivities.csv
+29bc3c31939c531da8e4efa345ec991d  out_sotp.csv
+1a97f2488ca92242d5465b1a0077cdee  out_sotp_sens_haircut.csv
+d08825874626a782e836363b10ad9b69  out_summary.csv
+dc70d3c3f7a4ed5ccdb099c24ce4574d  out_waterfall.csv
+901fc95599d1e36554f6ce920f21a389  run_stdout.txt
+d6ea39f404e4058452532fec353732ad  ../dgc_q3_forecast_20261026/FORECAST.md
+791ee04060fe6b856c89b1f25d2a4d5e  ../dgc_valuation_20261027/REPORT.md  (r1, không sửa)
+36c6d59ee01e288a4680af4aabdf7379  ../dgc_valuation_20261027/model.py  (r1, không sửa)

@@ -1,0 +1,7 @@
+Đây là pha markdown ở cả 3 thang. Từ phiên 102, cổ phiếu gần như chỉ khớp lệnh mỗi 5 phiên (Volume 0 xen kẽ), giống diện hạn chế giao dịch. Thanh khoản đã cạn: từ i=202 hầu hết là 0. Các phiên có khớp đều gap xuống: 70.35→62.96 (i214), 58.54→50.38 (i229), 51.15→44.44 (i244), rồi 39.25 đóng cửa ở đáy 37.81 (i249). Phiên cuối có khối lượng 1.65, đóng tại Low, tức là phe bán áp đảo, không có dấu hiệu climax đảo chiều. Cung treo phía trên ở vùng 51–59 và 70. Dù muốn cắt lỗ cũng khó thoát hàng vì chỉ khớp được mỗi tuần một lần. Chưa thấy đáy nào được xác nhận.
+
+P_HIT15: 0.75
+RISK: HIGH
+P_POS: 0.20
+INVALIDATION: Có phiên khớp với khối lượng lớn đóng cửa trên 44.44 rồi giữ được trên 51 ở các phiên khớp kế tiếp.
+CONTAMINATION: NONE

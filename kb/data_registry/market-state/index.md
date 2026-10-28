@@ -12,14 +12,17 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`anomaly_flags.md`](anomaly_flags.md) — data/anomaly_flags.json | CANONICAL |
 | [`insider_flags.md`](insider_flags.md) — data/insider_flags.json | CANONICAL (WATCH-only, chưa consumer) |
 | [`golive_state_today.md`](golive_state_today.md) — deploy_golive_dt5g_v4/golive_state_today.json | DERIVED |
+| [`dt5g_publish_runs_log.md`](dt5g_publish_runs_log.md) — data/dt5g_publish_runs.log (sổ chạy publisher DT5G → watch gán OURS_MANUAL) | CANONICAL |
 | [`golive_v23_recommendations.md`](golive_v23_recommendations.md) — golive_v23_recommendations_<date>.csv + data/golive_v23_status.json | DERIVED — ⚠️ status JSON là **ảnh chụp bị ghi đè mỗi phiên**, không phải lịch sử |
 | [`recommend_v23_bq.md`](recommend_v23_bq.md) — recommend_v23.status / .recommendations (BQ) | CANONICAL — **sổ lịch sử** của golive_v23 theo `signal_date` |
 | [`capit_episode.md`](capit_episode.md) — data/capit_episode.json | CANONICAL (quan sát thuần) — trả lời "**có đang giữ CAPIT không**" |
 | [`cap_signal_advisory_log.md`](cap_signal_advisory_log.md) — kb/data_registry/market-state/cap_signal_advisory_log.csv | CANONICAL (advisory-only, không consumer tự động) |
+| [`livermore_reads.md`](livermore_reads.md) — sổ append-only các lần đọc kỹ thuật VNINDEX của Livermore (FORECAST khoá trước, chấm +20 phiên) | CANONICAL (DISPLAY-ONLY, không sizing/gate) |
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |
 | [`dt5g_ext_2008_research.md`](dt5g_ext_2008_research.md) — agents/Taylor/research/dt5g_ext_2008_20260904/dt5g_ext_2008_full.csv (chuỗi DT5G mở rộng về 2008, ad-hoc KHÔNG cron) | RESEARCH-ONLY |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
 | [`pt_v22_dt5g_open_positions.md`](pt_v22_dt5g_open_positions.md) — data/pt_v22_dt5g_open_positions.csv | DERIVED |
+| [`gate_source_alert.md`](gate_source_alert.md) — data/gate_source_alert.json (bin/gate_source_check.py) | DERIVED (cảnh báo nguồn cổng DT5G, 1 tin/ngày/nguồn) |
 | [`value_radar_series.md`](value_radar_series.md) — data/value_radar_series.csv (+ value_radar.py) | CANONICAL (DISPLAY-ONLY, cấm consumer quyết định) |
 | [`vn30f_daily.md`](vn30f_daily.md) — tav2_bq.vn30f_daily | DEAD |
 | [`vn_macro_regime_history.md`](vn_macro_regime_history.md) — sổ phân loại nguyên nhân vĩ mô episode (macro-strategist, blind-to-outcome) | CANONICAL |

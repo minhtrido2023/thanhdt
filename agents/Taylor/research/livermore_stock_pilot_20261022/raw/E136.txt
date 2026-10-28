@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, giá đi ngang khoảng 93–103 trong i0–113, sau đó tăng giá (markup) qua hai nhịp. Nhịp đầu là gap i125, kéo lên ~120. Nhịp hai bắt đầu từ breakout i203 (vol 7.6x), tăng tốc i222–230 lên đỉnh 148.79. Như vậy giá đã tăng khoảng 50% so với nền cũ.
+
+Hai mươi phiên gần nhất (i230–249) là một range rộng 127–148 với khối lượng 3–7x median nhưng giá không tiến thêm. Đây là dấu hiệu churning điển hình. Các thanh i226 (râu 141→124) và i233–234 (gap xuống 126.8) cho thấy cung lớn. Phiên i249 có vol 7.30, biên hẹp, đóng cửa 142.9 dưới vùng 146–148: nỗ lực lớn nhưng không có kết quả, nghiêng về phân phối.
+
+Mức −15% tính từ ~143 là ~121.5. Mức này nằm dưới các đáy 124–127 và rơi vào vùng breakout 117–123. Nếu thủng 127 thì phía dưới có air-pocket.
+
+P_HIT15: 0.33
+RISK: HIGH
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 131.5 (đáy i241) với khối lượng lớn → range thành phân phối; ngược lại, đóng cửa trên 149 kèm follow-through thì giả thuyết phân phối bị vô hiệu.
+CONTAMINATION: NONE

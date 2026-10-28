@@ -1,0 +1,11 @@
+Trên khung 250 phiên, cổ phiếu tăng mạnh từ 100 lên 250 và đang ở pha markup muộn. Khung 60 phiên cho thấy hai đỉnh phân phối: i189 ở 252.6 với khối lượng 3.8, và i229 gap lên 263.6 rồi thất bại. Đó là breakout hụt điển hình, kéo theo nhịp markdown nhanh từ 253 xuống 170 (i236–237, đóng 178.6, KL 1.94).
+
+Vùng 170 được test hai lần (i237, i241) và có rút chân. Nhịp hồi lên 190–193 diễn ra trên khối lượng thấp (0.38–0.83), cho thấy cầu yếu. Phía trên, cung kẹt dày ở 200–230. Phiên i249 có khối lượng 1.32 nhưng biên độ hẹp, chưa rõ hấp thụ hay phân phối.
+
+Biên độ ngày khoảng 5–8%. Ngưỡng −15% (≈161) chỉ nằm ngay dưới đáy 170, nên nếu đáy kép gãy, margin dễ tạo air-pocket.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 169 (gãy đáy kép i237/i241) với khối lượng >1.5 → mục tiêu vùng 150–160; ngược lại vượt 205 trên KL lớn mới xác nhận tích luỹ lại.
+CONTAMINATION: NONE

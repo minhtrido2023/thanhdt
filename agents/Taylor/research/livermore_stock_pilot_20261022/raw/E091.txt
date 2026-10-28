@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá từ nền ~135 (i=148) lên đỉnh 328 (i=238), tức hơn 2,4 lần trong khoảng 90 phiên. Khối lượng tăng vọt từ ~0,5 lên 10–20 lần median, đây là pha markup parabol. Ở thang 20 phiên, sau cú bùng nổ i=230 (KL 22,9) giá không đi tiếp. Các phiên 234–238 có KL lớn nhưng giá đi ngang, đỉnh 328 bị bán mạnh ngay trong phiên. Sau đó i=244 đóng tại đáy 270, i=245 rút chân sâu xuống 245 rồi hồi lên 294,7, nhưng đến i=246–249 giá bị bán lại về ~280 trong khi KL cạn dần (2,6–3,7). Cấu trúc này giống phân phối ở đỉnh. Biên độ mỗi ngày thường 5–10%. Mức −15% (~239) nằm sát đáy chân rút 245, đồng thời trùng vùng 243–252 (i=224/226). Phía dưới vùng đó là air-pocket margin kéo về ~200. Lượng cung bị kẹt tại 300–328 rất dày.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 312 với khối lượng ≥10 lần median để lấy lại vùng phân phối 300–328 (luận điểm giảm sai); thủng 245 xác nhận markdown.
+CONTAMINATION: NONE

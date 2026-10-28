@@ -1,0 +1,7 @@
+**Phân tích:** Pha 250 phiên là markup mạnh từ 100 lên 315 (i111). Sau đó là phân phối kéo dài, đỉnh thấp dần: 315 → 281 (i151) → 253 (i210) → 227 (i244). Pha 60 phiên là markdown: từ 253 rơi xuống 165.7 (i230), hồi lên 227 rồi bị bán. Phiên i245 có khối lượng 2.20 nhưng giá đứng yên, cho thấy cung chặn. Phiên i249 đóng gần đáy ngày (197) với khối lượng 1.80, không có cầu đỡ. Vùng hỗ trợ là 165–183 (đáy i128, i182, i230). Mốc −15% từ giá vào khoảng 197 là ≈167.5, nằm ngay trong vùng này. Biên độ ngày thường 5–7% nên việc test lại vùng đáy là khả năng thực tế. Nếu thủng 165, bên dưới là air-pocket do margin.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 165 với khối lượng lớn sẽ xác nhận markdown tiếp diễn. Ngược lại, đóng trên 228 với khối lượng lớn sẽ phá chuỗi đỉnh thấp dần và vô hiệu kịch bản giảm.
+CONTAMINATION: NONE

@@ -1,0 +1,8 @@
+[pin0] LAG: sum pnl positions=401813479657.2228 ; TX cash=401813479671.2070
+[pin0] BAL: sum pnl positions=157153678320.2433 ; TX cash=157153678308.7773
+[_pin1M] LAG: sum pnl positions=472904248360.0386 ; TX cash=472904248358.5332
+[_pin1M] BAL: sum pnl positions=238014786202.2519 ; TX cash=238014786201.6001
+[pin0] main N LAG=695 BAL=299 ; G counts={'NONFIN': 692, 'RE': 165, 'FINO': 101, 'BANK': 36}
+[pin0] fin row missing=0 ; eff>signal (PIT viol)=0
+[_pin1M] main N LAG=691 BAL=301 ; G counts={'NONFIN': 681, 'RE': 172, 'FINO': 102, 'BANK': 37}
+[_pin1M] fin row missing=0 ; eff>signal (PIT viol)=0

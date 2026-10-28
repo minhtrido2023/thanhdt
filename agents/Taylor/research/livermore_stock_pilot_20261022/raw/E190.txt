@@ -1,0 +1,11 @@
+Đây là mã thanh khoản cực mỏng. Phần lớn các thanh là một mức giá duy nhất (O=H=L=C), Volume 0–0.3 và nhiều phiên không khớp lệnh. Các bước nhảy giá vượt ±7%, có thể là sàn UPCoM hoặc lô lẻ, nên giá rất dễ bị đẩy.
+
+Ở thang 250 phiên, cổ phiếu đi ngang rộng trong vùng khoảng 100–160. Có một đợt tăng giá (i71–97) với volume thật, sau đó bị trả về. Đợt đẩy gần đây i233–243 lên 158–160 gần như không có khối lượng (0.14). Giá rơi ngay về 104 (i247), rồi bật lên 125.8 cũng trên 0.14.
+
+Không có follow-through hay cầu thật. Các nhịp −15% trong vài phiên là thường xuyên, ví dụ i243→247 giảm 35%. Đáy vùng 100–105 cách giá vào khoảng −17%.
+
+P_HIT15: 0.65
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 104 (đáy i247) kèm khối lượng ≥2 lần median phá vỡ đáy vùng; phía tích cực chỉ khi vượt 160 với volume thật.
+CONTAMINATION: NONE

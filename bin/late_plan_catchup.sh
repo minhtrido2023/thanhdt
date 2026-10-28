@@ -69,6 +69,10 @@ if [ "$needs_chain" = 1 ]; then
       PARK_CHAIN_PLAN_DIR="$PLAN_DIR" "$ROOT/bin/jit_unpark_daily.sh" || exit 1
       PARK_CHAIN_PLAN_DIR="$PLAN_DIR" "$ROOT/bin/merge_park_daily.sh" --write || exit 1
       "$ROOT/bin/inject_discretionary_orders.sh" || exit 1
+      # auto-exit (LAG/BAL/CAPIT) — cron 20:40 có thể đã chạy lúc DNSE lỗi (26/10: HTTP 500 ⇒ sổ lô
+      # không dựng được ⇒ ⛔ chặn). Chạy lại ở đây: idempotent (bỏ qua mã đã có sell) và gỡ ⛔ cũ khi
+      # sổ lô dựng lại được. Truyền ngày tường minh: sau nửa đêm "hôm nay" ≠ phiên vừa đóng.
+      "$ROOT/bin/auto_exit_inject_daily.sh" "--plan-date $PLAN_DATE" || exit 1
     ) || rc=1
   else
     echo "[late_plan] chain — lock held, no-op."

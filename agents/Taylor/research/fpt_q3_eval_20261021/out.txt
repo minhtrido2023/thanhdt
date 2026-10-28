@@ -1,0 +1,91 @@
+Giá live DNSE: FPT 57,500 (2026-10-21 14:29:41.241), FOX 56,900 (2026-10-21 14:35:44.295, KL phiên tới lúc đó 86,100 cp)
+
+== 1) FCF (CF_OA+CF_Invest, tỷ) theo phạm vi — 2021-25 core = hợp nhất cũ − FOX; 2026 = báo cáo mới
+      FPT_reported_H1  FOX_H1  core_H1  CFO_core_H1  CFI_core_H1  FPT_reported_FY  FOX_FY  core_FY  H1_share_core
+year                                                                                                             
+2021           -103.0  -113.0     10.0        997.0       -987.0           2929.0  1006.0   1923.0           0.01
+2022          -1000.0  -262.0   -737.0        -69.0       -669.0           1827.0   -62.0   1890.0          -0.39
+2023            -78.0   220.0   -298.0        791.0      -1089.0           5542.0  1213.0   4329.0          -0.07
+2024           1511.0  1289.0    222.0       1328.0      -1106.0           8428.0  2794.0   5635.0           0.04
+2025          -1612.0   705.0  -2317.0        319.0      -2636.0           5038.0  1957.0   3081.0          -0.75
+2026          -2482.0 -1314.0  -2482.0      -1146.0      -1336.0              NaN     NaN      NaN            NaN
+
+LNST mẹ & core (tỷ):
+       NPATMI  NPATMI_core  NPATMI_H1  NPATMI_core_H1  FCF_over_NP_core
+year                                                                   
+2021  4332.53      3501.47    1906.17         1489.11              0.55
+2022  5295.02      4312.98    2489.70         1984.65              0.44
+2023  6470.52      5383.59    3002.78         2455.82              0.80
+2024  7856.77      6576.77    3673.19         3040.66              0.86
+2025  9376.13      7815.47    4431.76         3679.04              0.39
+2026      NaN          NaN    5054.96         4197.82               NaN
+
+Cổ tức FOX→FPT ước (2.000đ × 738.8tr cp × 45,66%) = 675 tỷ; NẾU nhận trong H1/26 (giả định, ngày trả không tìm được) thì FCF core H1/26 không gồm cổ tức FOX = -3,157 tỷ (so core H1/25 -2,317)
+
+DSO core (ngày) = AR_core / Doanh thu core TTM × 365:
+quarter  AR_core  Rev_core_TTM  DSO_core  DSO_reported(mixed)
+ 2023Q1     7724         30920      91.2                 73.8
+ 2023Q2     7489         33023      82.8                 68.0
+ 2023Q3     8032         35358      82.9                 70.3
+ 2023Q4     8098         36813      80.3                 66.1
+ 2024Q1     8522         39002      79.8                 66.7
+ 2024Q2     9386         41423      82.7                 69.4
+ 2024Q3    10099         43086      85.6                 72.2
+ 2024Q4     9566         45345      77.0                 66.0
+ 2025Q1    10009         46745      78.2                 67.4
+ 2025Q2    10526         47614      80.7                 68.9
+ 2025Q3    10864         48490      81.8                 70.6
+ 2025Q4    12249         50686      88.2                 74.9
+ 2026Q1    12348         51691      87.2                 67.6
+ 2026Q2    13337         53619      90.8                 76.3
+
+== 2) FCFE gốc (tỷ): legacy hợp nhất cũ TB 2023-25 = 6,336 (control: production 6.335) | core TB 3 năm = 4,348 | core TB 2 năm = 4,358 | chuẩn hoá: tỷ lệ FCF/LNST core 2023-25 0.66 × LNST core TTM Q2/26 8,334 = 5,497
+Tăng trưởng LNST mẹ core: CAGR 2022→25 21.9% (clamp 20.0%); H1/26 vs H1/25 +14.1%; kế hoạch LNTT 2026 +15% → g_hist min/mean/max = 15.0% / 17.5% / 20.0%
+
+Thiểu số 2025 = EAT 11,232 − NPATMI 9,376 = 1,856 tỷ = 16.5% EAT (ACBS). FOX đóng góp EAT 3,482 → phần không thuộc FPT (54,34%) ≈ 1,892 ⇒ thiểu số ngoài FOX ≈ -36 tỷ (≈0, trong sai số làm tròn)
+Tiền ròng 2025 (ACBS) 19,080 trong đó FOX 29.3% → core ≈ 13,490 tỷ = 7,869 đ/cp (KHÔNG cộng vào FV: lãi tiền gửi + gửi/rút kỳ hạn đã nằm trong CF_Invest)
+
+== 3) FOX: vốn hoá @ 56,900 = 42,036 tỷ; LNST TTM Q2/26 3,647 → PE 11.5; phần 45,66% = 19,193 tỷ = 11,196 đ/cp FPT (trước chiết khấu); giá trị sổ sách LtInvest FPT Q2/26 11,131 tỷ (gồm cả khoản đầu tư khác)
+
+== 4) MA TRẬN FV (đ/cp), g_hist = mean (cơ sở) cho mọi ô; MOS so giá live 57,500
+g_T_mode                                  cpi  cpi_gdp_half   cap_rf
+scope             r_row                                             
+core+FOX_ck0      rf7.4+ERP6.5        44310.0       57124.0  62711.0
+                  rf7.4+ERP7.5        41297.0       51485.0  55700.0
+                  rf7.4+ERP8.5        38772.0       47057.0  50344.0
+                  rfMA12_6.26+ERP6.5  48547.0       65791.0  63457.0
+core+FOX_ck15     rf7.4+ERP6.5        42631.0       55444.0  61031.0
+                  rf7.4+ERP7.5        39618.0       49805.0  54021.0
+                  rf7.4+ERP8.5        37093.0       45377.0  48664.0
+                  rfMA12_6.26+ERP6.5  46867.0       64112.0  61778.0
+core+FOX_ck30     rf7.4+ERP6.5        40951.0       53765.0  59352.0
+                  rf7.4+ERP7.5        37939.0       48126.0  52342.0
+                  rf7.4+ERP8.5        35413.0       43698.0  46985.0
+                  rfMA12_6.26+ERP6.5  45188.0       62432.0  60098.0
+legacy_hopnhat_cu rf7.4+ERP6.5        48253.0       66924.0  75066.0
+                  rf7.4+ERP7.5        43863.0       58708.0  64850.0
+                  rf7.4+ERP8.5        40183.0       52255.0  57045.0
+                  rfMA12_6.26+ERP6.5  54426.0       79554.0  76153.0
+
+== 5) 3 TỔ HỢP KHAI TRƯỚC (PREREG.md) — FCFE core TB 3 năm
+     label     base   g_T     r  g_hist  g_exp  FOX_ck   core_ps    fox_ps        FV    MOS  stop<FV  FV_minus_stop_pct
+Thận trọng     TB3y 0.034 0.159   0.150  0.092    0.30 26303.311  7837.270 34140.581 -0.684    False             -0.324
+Thận trọng chuanhoa 0.034 0.159   0.150  0.092    0.30 33255.487  7837.270 41092.757 -0.399    False             -0.186
+     Cơ sở     TB3y 0.066 0.149   0.175  0.120    0.15 40288.754  9516.685 49805.439 -0.154    False             -0.014
+     Cơ sở chuanhoa 0.066 0.149   0.175  0.120    0.15 50937.394  9516.685 60454.079  0.049     True              0.197
+  Lạc quan     TB3y 0.074 0.139   0.200  0.137    0.00 54158.204 11196.100 65354.303  0.120     True              0.294
+  Lạc quan chuanhoa 0.074 0.139   0.200  0.137    0.00 68472.650 11196.100 79668.750  0.278     True              0.578
+
+== 6) PE forward 2026E (LNST mẹ, phạm vi mới — đã gồm lãi FOX theo vốn chủ)
+  plan×(NPATMI/PBT H1): 10,288 tỷ → EPS 6,001 → PE @ live 9.6
+  run-rate 8T×12/8: 10,142 tỷ → EPS 5,916 → PE @ live 9.7
+  ACBS 03/2026: 10,696 tỷ → EPS 6,239 → PE @ live 9.2
+  ELC trailing (BQ 13/10)            PE   9.8 × EPS 2026E 6,001 = 58,866
+  CMG trailing (BQ 13/10)            PE  11.4 × EPS 2026E 6,001 = 68,653
+  FOX trailing (BQ)                  PE  11.2 × EPS 2026E 6,001 = 67,109
+  PE 13                              PE  13.0 × EPS 2026E 6,001 = 78,015
+  PE 15                              PE  15.0 × EPS 2026E 6,001 = 90,018
+  FPT trung vị 5 năm (mỏ neo yếu)    PE  19.7 × EPS 2026E 6,001 = 118,223
+  SOTP: core LNST 2026E 8,456 × PE 10 + FOX ck0% = 60,524 |  SOTP: core LNST 2026E 8,456 × PE 10 + FOX ck15% = 58,844 |  SOTP: core LNST 2026E 8,456 × PE 10 + FOX ck30% = 57,165 |
+  SOTP: core LNST 2026E 8,456 × PE 12 + FOX ck0% = 70,389 |  SOTP: core LNST 2026E 8,456 × PE 12 + FOX ck15% = 68,710 |  SOTP: core LNST 2026E 8,456 × PE 12 + FOX ck30% = 67,030 |
+  SOTP: core LNST 2026E 8,456 × PE 14 + FOX ck0% = 80,255 |  SOTP: core LNST 2026E 8,456 × PE 14 + FOX ck15% = 78,575 |  SOTP: core LNST 2026E 8,456 × PE 14 + FOX ck30% = 76,896 |

@@ -1,0 +1,120 @@
+0) SELFCHECK tái lập: Bear 8,029 Base 10,878 Bull 14,339 | kỳ vọng 11,031
+   PASS (10.878 / 11.031)
+
+1) Đầu vào: RSS3 TB2025 2.183 · Q3/26 2.753 · med10 1.865 · med5 2.075 [FEED] | net cash 162.8 tỷ
+   RSS3 1.865 ⇒ P 40.35 tr/t ⇒ LNST năm (C=34,a)   37.7 | (C=34,b)   61.4 tỷ
+   RSS3 1.970 ⇒ P 42.62 tr/t ⇒ LNST năm (C=34,a)   63.7 | (C=34,b)   79.6 tỷ
+   RSS3 2.075 ⇒ P 44.90 tr/t ⇒ LNST năm (C=34,a)   89.7 | (C=34,b)   97.8 tỷ
+   RSS3 2.180 ⇒ P 47.17 tr/t ⇒ LNST năm (C=34,a)  115.7 | (C=34,b)  116.0 tỷ
+   RSS3 2.300 ⇒ P 49.76 tr/t ⇒ LNST năm (C=34,a)  145.4 | (C=34,b)  136.8 tỷ
+   RSS3 2.753 ⇒ P 59.57 tr/t ⇒ LNST năm (C=34,a)  257.7 | (C=34,b)  215.3 tỷ
+   Q4/26 LNST: Bear 13.7 · Base 49.7 · Bull 90.0
+
+2) BẢNG CHÍNH — FV kỳ vọng (đ/cp), ghép mid↔kịch bản; C=34, lương (a), Q4 Base, X=1.717 t
+   r    life |             80/20 |             60/40 |             40/60 |  PEAK-only  MID-only
+   10%  L0 |  13,879 (  +6%) |  15,692 (  -6%) |  17,504 ( -16%) |    12,066    21,130
+   10%  L1 |  14,175 (  +4%) |  16,044 (  -8%) |  17,913 ( -18%) |    12,306    21,650
+   10%  L2 |  14,471 (  +2%) |  16,396 ( -10%) |  18,321 ( -20%) |    12,546    22,170
+   12%  L0 |  12,710 ( +16%) |  14,301 (  +3%) |  15,892 (  -8%) |    11,118    19,075
+   12%  L1 |  12,858 ( +14%) |  14,478 (  +2%) |  16,097 (  -9%) |    11,238    19,336
+   12%  L2 |  13,007 ( +13%) |  14,654 (  +0%) |  16,302 ( -10%) |    11,359    19,597
+   13%  L0 |  12,226 ( +20%) |  13,726 (  +7%) |  15,226 (  -3%) |    10,726    18,226
+   13%  L1 |  12,333 ( +19%) |  13,853 (  +6%) |  15,373 (  -4%) |    10,813    18,414
+   13%  L2 |  12,440 ( +18%) |  13,980 (  +5%) |  15,521 (  -5%) |    10,899    18,602
+   (ngoặc = giá 14.700 cao hơn FV bao nhiêu %)
+   Toàn bảng: 12,226 – 18,321; chỉ L0: 12,226 – 17,504
+
+3) BẢNG PHỤ — ma trận 5 mid × 2 đường giá (r 12%, L0, C 34, a)
+   mid 1.865: PEAK   8,596 | MID  11,144
+   mid 1.970: PEAK  11,118 | MID  13,365
+   mid 2.075: PEAK  13,640 | MID  15,586
+   mid 2.180: PEAK  16,162 | MID  17,806
+   mid 2.300: PEAK  19,044 | MID  20,344
+   phân rã PEAK mid 1,97 (tỷ): q4 43.8 ops 507.7 tv 0.0 inv 79.5 cash 182.8 ni_norm 63.7 ⇒ 11,118 đ
+   phân rã MID  mid 2,18 (tỷ): q4 43.8 ops 985.9 tv 0.0 inv 90.8 cash 182.8 ni_norm 115.7 ⇒ 17,806 đ
+
+4) ĐỘ NHẠY một-trục-một-lần quanh tâm (60/40, r 12%, L0, C 34, lương a, Q4 Base, X 1.717)
+   tâm = 14,301
+   (a) RSS3 mid [1,865…2,30], 2 đường cùng mid biên độ  9,949 đ | 9,615 / 12,017 / 14,418 / 16,820 / 19,564
+   giá vốn/t [32/34/36]                       biên độ  4,664 đ | 16,633 / 14,301 / 11,969
+   trọng số [80/20…40/60]                     biên độ  3,183 đ | 12,710 / 14,301 / 15,892
+   (b) r [10/12/13%]                          biên độ  1,966 đ | 15,692 / 14,301 / 13,726
+   tồn kho X [0/1.717/3.370]                  biên độ  1,911 đ | 13,153 / 14,301 / 15,064
+   Q4/26 [Bear/Base/Bull]                     biên độ    919 đ | 13,868 / 14,301 / 14,787
+   (c) đời khai thác [L0/L1/L2]               biên độ    353 đ | 14,301 / 14,478 / 14,654
+   quỹ lương [a/b]                            biên độ    347 đ | 14,301 / 14,648
+   tổ hợp xấu nhất/tốt nhất toàn lưới (5 mid×2 đường đã ghép, 3 r, 3 life, 3 C, 2 lương, 3 trọng số, Q4 Base, X 1.717):
+   10,046 – 21,215 (n=162); trung vị 15,038; tỷ lệ ô FV ≥ 14.700: 53%
+
+5) TỒN KHO — giá trị phần vượt mức (tỷ, r 12%)
+   PEAK P2027 51.10 tr/t X 1717 sốc +0%:   83.2 tỷ (1,136 đ/cp) | NRV không
+   PEAK P2027 35.77 tr/t X 1717 sốc -30%:   61.7 tỷ (  842 đ/cp) | NRV CÓ
+   PEAK P2027 51.10 tr/t X 3370 sốc +0%:  163.2 tỷ (2,230 đ/cp) | NRV không
+   PEAK P2027 35.77 tr/t X 3370 sốc -30%:  121.0 tỷ (1,653 đ/cp) | NRV CÓ
+   MID P2027 59.57 tr/t X 1717 sốc +0%:   95.1 tỷ (1,299 đ/cp) | NRV không
+   MID P2027 41.70 tr/t X 1717 sốc -30%:   70.0 tỷ (  956 đ/cp) | NRV không
+   MID P2027 59.57 tr/t X 3370 sốc +0%:  186.6 tỷ (2,549 đ/cp) | NRV không
+   MID P2027 41.70 tr/t X 3370 sốc -30%:  137.4 tỷ (1,876 đ/cp) | NRV không
+   NRV chạm khi RSS3 ≈ 1.69 $/kg (−39% so Q3/26)
+   ca 3.370 t trừ Q4 base: LNST Q4 21.3 (vs 49.7)
+
+6) KIỂM r, TỶ GIÁ, LẠM PHÁT, HIỆU CHỈNH
+   r 10%: bù trên tiền gửi 6,8% [FEED] = +3.2%; trên 7,4% [DISPATCH] = +2.6%
+   r 12%: bù trên tiền gửi 6,8% [FEED] = +5.2%; trên 7,4% [DISPATCH] = +4.6%
+   r 13%: bù trên tiền gửi 6,8% [FEED] = +6.2%; trên 7,4% [DISPATCH] = +5.6%
+   USD/VND TB 2016 22,015 → 2025 25,987 → 2026 26,189 [FEED] (+19%); P=47,24×RSS3/2,183 dùng tỷ giá 2025 cho mọi mid ⇒ danh nghĩa, nhất quán chi phí 2025-26
+   trung vị RSS3 10 năm: danh nghĩa 1.865; USD thực 2026 2.239 [CPI Mỹ NỀN/UL]
+   giá vốn ngầm định để tái lập LNST 2025 157,4 [BQ] ở giá 47,24 với SGA/FIN/thuế Q3×4: 29.94 tr/t (BCTN 33,11)
+
+7) KIỂM CHÉO (i) PE/PB theo pha (pha = phân vị RSS3 tháng m−1 trong ≤120 tháng trước, tối thiểu 60)
+   DRI: PEAK n= 25 PB 1.49 PE   8.6 | MID n= 36 PB 1.25 PE  12.5 | TROUGH n= 53 PB 0.65 PE   9.2
+   TRC: PEAK n= 25 PB 1.00 PE  10.3 | MID n= 41 PB 0.73 PE  11.9 | TROUGH n= 88 PB 0.54 PE   7.5
+   DPR: PEAK n= 25 PB 1.04 PE  13.2 | MID n= 41 PB 0.99 PE  10.8 | TROUGH n= 88 PB 0.63 PE   7.0
+   PHR: PEAK n= 25 PB 1.94 PE  17.0 | MID n= 41 PB 2.28 PE  11.7 | TROUGH n= 88 PB 1.40 PE   7.8
+   BVPS DRI 30/09 = 9,971 đ [BCTC3]; PB hiện tại = 1.47x; pha tháng 10/2026 = PEAK
+   giá ngầm định theo PB DRI-PEAK 1.49x: 14,837 đ
+   giá ngầm định theo PB DRI-MID 1.25x: 12,493 đ
+   giá ngầm định theo PB TRC-PEAK 1.00x: 9,938 đ
+   giá ngầm định theo PB TRC-MID 0.73x: 7,280 đ
+   PE DRI-PEAK 8.6x × LNST chuẩn PEAK mid 1.97 (63.7 tỷ) + net cash: 9,951 đ
+   PE DRI-PEAK 8.6x × LNST chuẩn MID mid 2.18 (115.7 tỷ) + net cash: 16,032 đ
+   PE DRI-MID 12.5x × LNST chuẩn PEAK mid 1.97 (63.7 tỷ) + net cash: 13,388 đ
+   PE DRI-MID 12.5x × LNST chuẩn MID mid 2.18 (115.7 tỷ) + net cash: 22,272 đ
+
+8) KIỂM CHÉO (ii) cổ tức
+   chi trả/EPS năm: 2018:71% 2019:94% 2020:111% 2021:54% 2022:49% 2023:59% 2024:47% 2025:23% ⇒ trung vị 57% [BQ Dividend_1Y Q4 / ΣNP_P0]
+   mid 1.865: LNST  37.7 EPS   515 ⇒ D bền  293 đ (cổ tức 1.000 = 194% LNST) | D/r: 10%: 2,928 12%: 2,440 13%: 2,252 | D×niên kim28@12%:  2,338
+   mid 1.97: LNST  63.7 EPS   871 ⇒ D bền  494 đ (cổ tức 1.000 = 115% LNST) | D/r: 10%: 4,945 12%: 4,121 13%: 3,804 | D×niên kim28@12%:  3,948
+   mid 2.075: LNST  89.7 EPS 1,226 ⇒ D bền  696 đ (cổ tức 1.000 = 82% LNST) | D/r: 10%: 6,962 12%: 5,802 13%: 5,355 | D×niên kim28@12%:  5,559
+   mid 2.18: LNST 115.7 EPS 1,581 ⇒ D bền  898 đ (cổ tức 1.000 = 63% LNST) | D/r: 10%: 8,979 12%: 7,483 13%: 6,907 | D×niên kim28@12%:  7,169
+   mid 2.3: LNST 145.4 EPS 1,987 ⇒ D bền 1,000 đ (cổ tức 1.000 = 50% LNST) | D/r: 10%:10,000 12%: 8,333 13%: 7,692 | D×niên kim28@12%:  7,984
+   lợi suất ở 14.700 với 1.000 đ: 6.8%; LNST riêng mẹ Q2 55,70 / Q3 0,15 tỷ [GT/BCTC3]
+
+9) VÙNG MUA 21/10 [DISPATCH]: tỷ lệ ô bảng chính có FV ≥ ngưỡng
+   ≤13,000 L0: 7/9 ô FV ≥ ngưỡng (10%/40/60, 10%/60/40, 10%/80/20, 12%/40/60, 12%/60/40, 13%/40/60, 13%/60/40)
+   ≤13,000 L1: 7/9 ô FV ≥ ngưỡng (10%/40/60, 10%/60/40, 10%/80/20, 12%/40/60, 12%/60/40, 13%/40/60, 13%/60/40)
+   ≤13,000 L2: 8/9 ô FV ≥ ngưỡng (10%/40/60, 10%/60/40, 10%/80/20, 12%/40/60, 12%/60/40, 12%/80/20, 13%/40/60, 13%/60/40)
+   ≤13,000 toàn lưới mở rộng (n=162): 77% ô FV ≥ ngưỡng
+   ≤11,500 L0: 9/9 ô FV ≥ ngưỡng (10%/40/60, 10%/60/40, 10%/80/20, 12%/40/60, 12%/60/40, 12%/80/20, 13%/40/60, 13%/60/40, 13%/80/20)
+   ≤11,500 L1: 9/9 ô FV ≥ ngưỡng (10%/40/60, 10%/60/40, 10%/80/20, 12%/40/60, 12%/60/40, 12%/80/20, 13%/40/60, 13%/60/40, 13%/80/20)
+   ≤11,500 L2: 9/9 ô FV ≥ ngưỡng (10%/40/60, 10%/60/40, 10%/80/20, 12%/40/60, 12%/60/40, 12%/80/20, 13%/40/60, 13%/60/40, 13%/80/20)
+   ≤11,500 toàn lưới mở rộng (n=162): 91% ô FV ≥ ngưỡng
+
+10) CẦU NỐI từ Base cũ 10.878 (chỉ đổi từng bước, cộng dồn)
+   đường giá PEAK thay 'đỉnh 1 năm', mid 1,97, r13, C32,5, X0    +401 →  11,279
+   + tồn kho X 1.717                                           +1,082 →  12,361
+   + C 34                                                      -1,635 →  10,726
+   + r 12%                                                       +392 →  11,118
+   + PEAK trung bình mid {1,865;1,97;2,075}                        +0 →  11,118
+   + 40% MID-tiếp diễn (mid {2,18;2,30})                       +3,183 →  14,301
+
+11) BACKCAST hàm LNST (C 34, lương a, SGA/FIN/thuế Q3/26×4) vs LNST thật [BQ ΣNP_P0]
+   2021: RSS3 2.072 ⇒ model   88.9 | (C 32)  111.8 | thật   76.8
+   2022: RSS3 1.810 ⇒ model   24.1 | (C 32)   47.0 | thật   59.9
+   2023: RSS3 1.576 ⇒ model  -33.9 | (C 32)  -11.0 | thật   74.1
+   2024: RSS3 2.275 ⇒ model  139.2 | (C 32)  162.1 | thật  108.8
+   2025: RSS3 2.183 ⇒ model  116.5 | (C 32)  139.4 | thật  157.4
+
+12) POST-HOC (ngoài PREREG, chỉ để đo rủi ro mô hình): thay hàm LNST bằng OLS LNST thật ~ RSS3 năm [BQ, FEED]
+   2017–2025 (n=9): LNST = -151.8 + 124.7×RSS3 (model PREREG dốc 248) | LNST@1,97  94.0 @2,18 120.2 | FV tâm 60/40 r12 L0: 15,286 | 80/20 r13: 13,833 | 40/60 r10: 17,869
+   2021–2025 (n=5): LNST =  -82.3 +  89.6×RSS3 (model PREREG dốc 248) | LNST@1,97  94.2 @2,18 113.0 | FV tâm 60/40 r12 L0: 14,712 | 80/20 r13: 13,492 | 40/60 r10: 16,981

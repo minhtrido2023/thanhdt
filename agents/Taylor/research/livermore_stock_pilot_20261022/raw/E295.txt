@@ -1,0 +1,9 @@
+Trong 250 phiên, giá đi ngang rộng trong vùng 86–132. Tại 164 (130.4) và 207 (132.1) có hai đỉnh. Sau đó các đỉnh thấp dần: 118.9 ở phiên 222, 112.95 ở phiên 247. Ở thang 60 phiên, giá rơi từ 132 xuống 97.7 (phiên 227), tức −26%, rồi hồi lại về 110. Nhịp hồi này đi với khối lượng cạn kiệt (0.17–0.7). Cạn cung là tích cực, nhưng cũng chưa có cầu xác nhận.
+
+Giá vào khoảng 110, nằm giữa biên. Cung kẹt còn dày ở 115–125. Hỗ trợ ở 104–106, sau đó là 97.7 và 95.6. Mức −15% tương ứng khoảng 93.5, chỉ thủng khi phá đáy biên. Điều đó chưa phải kịch bản chính, nhưng cổ phiếu này từng có hai cú sập khoảng 26% trong 20 phiên.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 104 kèm khối lượng >1.0 thì cấu trúc đáy cao dần bị phá, mục tiêu về 97–95.
+CONTAMINATION: NONE

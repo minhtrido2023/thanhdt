@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu giảm mạnh xuống đáy 68.7 (i=15). Sau đó giá tích luỹ quanh 92–105 và bước vào pha markup dạng bậc thang. Các phiên đẩy giá đều có khối lượng lớn: i=111 (4.6), i=116 (5.3), i=132 (5.6), i=164 (6.8), i=183 (5.6).
+
+Nền 126–139 (i=189–237) có một cú rũ ở i=228–229, Low 118.75 nhưng khối lượng thấp và hồi ngay. Breakout xảy ra ở i=238 với khối lượng 4.4. Phiên i=239 gap lên vùng 146–150.
+
+Mười phiên gần nhất là cờ chặt 141.5–150.8, khối lượng giảm dần về khoảng 1.0–1.4. Mép gap 140.56 chưa bị lấp, nên phe mua đang giữ giá. Điểm vào khoảng 148, mức −15% là khoảng 125.6, nằm dưới cả nền cũ. Tuy vậy, cổ phiếu từng có những cú xuyên râu sâu.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.57
+INVALIDATION: Đóng cửa dưới 140.5 (lấp gap i=239, breakout thất bại) và nhất là thủng 129 (đáy nền).
+CONTAMINATION: NONE

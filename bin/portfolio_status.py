@@ -289,6 +289,9 @@ def disc_entry_dates(account):
     return _first_fill_dates(account, "DISCRETIONARY_SPECIAL")
 
 
+ORPHAN_PREFIX = "MỒ CÔI:"
+
+
 def book_lot_snapshot(account, book_label, asof=None, plan_dir=None, exec_dir=None,
                       price_fn=None, corp_actions=None, broker=None):
     """{ticker: {'qty': int, 'entry_date': 'YYYY-MM-DD'}} cho các lô ĐANG GIỮ gắn book=`book_label`,
@@ -363,8 +366,22 @@ def book_lot_snapshot(account, book_label, asof=None, plan_dir=None, exec_dir=No
             continue
         d = out.setdefault(tk, {"qty": 0, "entry_date": lot["entry_date"]})
         d["qty"] += lot["qty"]
+        if lot.get("rights_subscription"):
+            # N1: phần CP quyền mua user khai — có thể CHƯA niêm yết/chưa bán được (auto_exit tách
+            # phần khoá thay vì báo cắt-sellable mỗi tối). Chỉ thêm key khi có ⇒ output cũ y nguyên.
+            d["rights_qty"] = d.get("rights_qty", 0) + lot["qty"]
+            # B1 vòng 2: kèm ngày credit/niêm yết từng lô ⇒ auto_exit chỉ khoá phần CHƯA niêm yết, có hạn.
+            d.setdefault("rights_lots", []).append(dict(lot["rights_subscription"], qty=lot["qty"]))
         if lot["entry_date"] < d["entry_date"]:
             d["entry_date"] = lot["entry_date"]
+    # X2 (audit lag_rights_audit_20261022 F2): MỒ CÔI = broker có, sổ lô = 0 ở MỌI book (vd CP
+    # quyền mua/thưởng về SAU khi lô gốc đã bán) ⇒ không book nào "sở hữu" để exit. Trả về cho MỌI
+    # `book_label` cùng một câu (caller dedup theo (ticker, reason)) — §29: không được im lặng.
+    for m in h["reconcile"]["mismatches"]:
+        if m["ledger_qty"] == 0 and m["broker_qty"] > 0:
+            blocked.setdefault(m["ticker"], f"{ORPHAN_PREFIX} broker {m['broker_qty']}cp, sổ lô = 0 ở mọi "
+                                            f"book (CP quyền/thưởng về sau khi lô gốc đã bán?) — không book "
+                                            f"nào sở hữu ⇒ KHÔNG exit tự động; cần người gán book/xử lý")
     return out, True, None, blocked
 
 

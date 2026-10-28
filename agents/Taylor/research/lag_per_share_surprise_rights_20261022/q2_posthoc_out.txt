@@ -1,0 +1,13 @@
+HI->LO by share_src:
+               size  mean  median
+share_src                        
+explained        20 -0.77   -2.12
+ratio_missing    21 -2.63   -1.70
+unexplained      19  1.42    1.18
+HI->LO median -1.04 HI keep median 1.49 win% hl 0.47 hik 0.55
+HI->LO dil2 quantiles [1.11, 1.5, 2.03] sur prod med 0.69 sur ps2 med 0.35
+HI stay & dil>=10%: 151 5.81  HI no dil: 1830 3.66
+LOYO HI->LO vs HI keep: [(np.int32(2014), np.float64(-4.78)), (np.int32(2015), np.float64(-3.9)), (np.int32(2016), np.float64(-4.38)), (np.int32(2017), np.float64(-4.91)), (np.int32(2018), np.float64(-4.89)), (np.int32(2019), np.float64(-4.75)), (np.int32(2020), np.float64(-3.62)), (np.int32(2021), np.float64(-4.91)), (np.int32(2022), np.float64(-4.9)), (np.int32(2023), np.float64(-4.33)), (np.int32(2024), np.float64(-5.0)), (np.int32(2025), np.float64(-5.22)), (np.int32(2026), np.float64(-4.61))]
+per-year n HI->LO: {2014: 3, 2015: 8, 2016: 7, 2017: 2, 2019: 3, 2020: 3, 2021: 11, 2022: 10, 2023: 1, 2024: 5, 2025: 5, 2026: 2}
+winsor diff HI->LO − HIkeep: -2.22
+explained-only HI->LO 20 -4.66

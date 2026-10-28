@@ -1,0 +1,7 @@
+Đây là cổ phiếu biên độ hẹp: bước giá khoảng 1%, và cả năm chỉ dao động trong vùng 91–113. Pha 60 phiên là tích luỹ khô ở 92–99 (i 170–224), với khối lượng cạn dưới 0,8. Nhịp bứt phá i228–232 lên 113,58 có khối lượng 2,1–2,4, nhưng không có follow-through. Đỉnh 232 thấp hơn hoặc ngang vùng cung cũ 108–112 (i63–64). Từ đó giá trôi về 103, khối lượng giảm dần về khoảng 1,2. Đây là breakout thất bại một phần nhưng chưa thành phân phối mạnh. Thanh i248 rút chân từ 99,25 về 104,31 cho thấy mép nền 98–99 vẫn có cầu. Mức −15% tương ứng khoảng 87,8, thấp hơn đáy cả năm 91,27, và cổ phiếu có độ biến động rất thấp. Khả năng thủng −15% vì vậy thấp. Upside bị chặn ở 108–113.
+
+P_HIT15: 0.10
+RISK: LOW
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 98 (thủng nền i200–224 và chân i248) kèm khối lượng >1.5 → breakout thất bại hoàn toàn, quay lại range 92–98.
+CONTAMINATION: NONE

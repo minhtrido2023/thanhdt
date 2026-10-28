@@ -1,0 +1,105 @@
+{
+ "label": "ZaloPay",
+ "asof": "2026-10-16",
+ "price_session": "2026-10-16",
+ "positions": {
+  "DGC": {
+   "qty": 10000.0,
+   "cost_price": 39775.0,
+   "market": 32800.0,
+   "excluded": true,
+   "why": [],
+   "code": "",
+   "pct": -15.43694400837258,
+   "pl": -73750000.0,
+   "raw_cost": 47775.0,
+   "gross": 8000.0
+  },
+  "DRI": {
+   "qty": 1900.0,
+   "cost_price": 12263.1579,
+   "market": 15700.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 25.53571423589852,
+   "pl": 6434999.989999999,
+   "raw_cost": 13263.1579,
+   "gross": 1000.0
+  },
+  "MBB": {
+   "qty": 52.0,
+   "cost_price": 20511.0254,
+   "market": 19850.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": -3.2227808561925855,
+   "pl": -34373.32079999993,
+   "raw_cost": 20511.0254,
+   "gross": 0.0
+  },
+  "NCT": {
+   "qty": 73.0,
+   "cost_price": 86400.0,
+   "market": 83100.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": -3.919491525423729,
+   "pl": -270100.0,
+   "raw_cost": 94400.0,
+   "gross": 8000.0
+  },
+  "SIP": {
+   "qty": 49.0,
+   "cost_price": 47140.0534,
+   "market": 48300.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 2.460639130290003,
+   "pl": 56837.383400000144,
+   "raw_cost": 47140.0534,
+   "gross": 0.0
+  },
+  "TV1": {
+   "qty": 1400.0,
+   "cost_price": 18828.5715,
+   "market": 18500.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": -1.985242789932377,
+   "pl": -565000.0999999973,
+   "raw_cost": 20328.5715,
+   "gross": 1500.0
+  },
+  "VIB": {
+   "qty": 19.0,
+   "cost_price": 13607.3059,
+   "market": 13850.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 1.7835573168087642,
+   "pl": 4611.187900000012,
+   "raw_cost": 13607.3059,
+   "gross": 0.0
+  },
+  "VPB": {
+   "qty": 312.0,
+   "cost_price": 21225.8966,
+   "market": 24500.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 15.425041691760622,
+   "pl": 1021520.2608,
+   "raw_cost": 21225.8966,
+   "gross": 0.0
+  }
+ },
+ "mismatches": [],
+ "notes": []
+}

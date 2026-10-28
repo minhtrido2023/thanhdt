@@ -1,0 +1,5 @@
+event_code,max_lead_days,min_lead_days,n_pub_after_ex,n_pub_before_ex,n_pub_eq_ex,n_with_exright,p05_lead_days,p50_lead_days,p95_lead_days,pct_pub_not_before_ex
+DIV,375,-714,49,16160,775,16984,1,8,21,4.85
+ISS,1847,-3652,649,5936,3162,9747,-2,6,222,39.1
+NLIS,44,-53,8,6,1,15,-53,-3,44,60.0
+SUSP,-5,-97,3,0,0,3,-97,-97,-5,100.0

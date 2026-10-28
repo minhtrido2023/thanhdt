@@ -1,0 +1,21 @@
+{
+ "n_rows_ok": 7510,
+ "n_quarters": 52,
+ "n_tickers": 484,
+ "roe_scale": 0.01,
+ "bucket_counts": {
+  "CHEAP": 3812,
+  "RICH_DEEP": 1617,
+  "RICH_MILD": 1062,
+  "FAIR": 1019
+ },
+ "spearman_mos_vs_ey": 0.3145057686458946,
+ "median_pe_by_bucket": {
+  "RICH_DEEP": 15.3,
+  "RICH_MILD": 12.5,
+  "FAIR": 10.5,
+  "CHEAP": 8.7
+ },
+ "n_pos_surprise": 3720,
+ "n_pos_quarters": 52
+}

@@ -1,0 +1,11 @@
+Đây là một mã cực kỳ kém thanh khoản: hơn nửa số phiên có Volume 0, và giá in theo từng lô lẻ. Mỗi lần khớp giá nhảy khoảng ±7–10% (226→227, 229→230, 245→246). Biên độ cỡ này gợi ý sàn UPCoM.
+
+- **Cấu trúc 60–100 phiên:** đây là một vùng đi ngang rộng, khoảng 112–148, sau cú markup từ đáy 80 (phiên 143–152). Không có follow-through vượt 148 ở các phiên 152, 194 và 204.
+- **20 phiên gần nhất:** giá đi ngang trong khoảng 126–137. Mức 137,17 ở phiên 246 được tạo bởi chỉ 100 đơn vị khối lượng, gần như không có cầu thật.
+- **Rủi ro vào lệnh:** giá vào khoảng 136,6 nằm ở nửa trên của range. Mốc −15% là khoảng 116, trong khi range nhiều lần chạm 112–117 (các phiên 165, 167, 171, 183, 195). Chỉ cần vài lệnh bán là có thể khớp tới đó.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 148 với khối lượng lớn và giữ được nhiều phiên thì luận điểm range/rủi ro bị vô hiệu; ngược lại, thủng 112 thì vùng tích lũy hỏng.
+CONTAMINATION: NONE

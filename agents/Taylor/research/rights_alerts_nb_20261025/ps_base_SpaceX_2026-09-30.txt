@@ -1,0 +1,47 @@
+ℹ️  giá 2026-09-30: dùng cột `Price` (thô) thay `Close` cho mã có sự kiện ex-date SAU 2026-09-30 — `Close` của phiên đó đã bị điều chỉnh hồi tố: HDB 27,500 (Close 21,150), TPB 14,450 (Close 12,130), TV1 20,600 (Close 19,110)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+─────────────────────────────────────────────────
+📋 **TÌNH TRẠNG DANH MỤC — SpaceX (2026-09-30)**
+Chiến lược: **V2.4** | Regime: **NEUTRAL** (DT5G) | Park target: **0%** idle cash
+NAV: **981.6M** | Hôm nay: **-0.57%** | Từ khi bắt đầu hoạt động: **-1.84%**
+Gate DT5G: 🟢 BÌNH THƯỜNG · candidate CRISIS 13/25 (52%, còn 12 phiên để commit, base giữ từ 2026-10-07, committed NEUTRAL) · P(CRISIS xác nhận|k=13)≈69% [44–91%, n=16] ⚠ mẫu mỏng, tham khảo  [dữ liệu tới 2026-10-23]
+   ↳ Nền xấu 19 phiên liền từ 29/09 (6 BEAR + 13 CRISIS, đổi qua lại 1 lần → bộ đếm reset, vẫn NEUTRAL) · VNINDEX −0,4% từ đầu đợt · ngưỡng xem lại: ≥15 phiên và VNINDEX ≤−5,0% — chưa chạm
+Value Radar: 🟢 24.8 RẺ (phân vị 10 năm) · P/E 11.26 (p7) · P/B 1.89 (p26) · spread EY−CCTG 12T +1.48pp (p41)  [dữ liệu tới 2026-10-23]
+─────────────────────────────────────────────────
+
+**Cơ cấu danh mục**
+
+| Sleeve | Giá trị | % NAV | Lãi/Lỗ CK | Ghi chú |
+|--------|--------:|------:|----------:|---------|
+| BAL (1 mã) | 47.4M | 4.8% | -4.9% | Momentum V11 + yieldcombo |
+| PARK custom30V (17 mã) | 168.8M | 17.2% | -6.6% | Rebal gần nhất: 2026-08-05 | kế tiếp: ~2026-12-01 (ước tính Q4) |
+| CAPIT (5 mã) | 309.0M | 31.5% | +8.2% | Bear-washout overflow |
+| Discretionary (2 mã) | 105.8M | 10.8% | +14.2% | Fear-buy/special situation |
+| Trứng vàng | 85.5M | 8.7% | — | DNSE bond-like (off-book) |
+| Cash | 265.4M | 27.0% | 0% | Idle |
+
+ⓘ Tỉ suất từng mã tính trên giá đóng cửa của phiên, đã cộng cổ tức tiền mặt sau thuế; cột giá trị tính trên giá do công ty chứng khoán ghi cuối ngày. Hai giá có thể lệch nhau ở mã giao dịch trên UPCOM, nên giá trị và tỉ suất của cùng một mã không quy đổi trực tiếp sang nhau.
+
+**Chi tiết BAL (1 mã)**
+  VPI 47.4M, -4.93%
+
+**Chi tiết PARK custom30V (17 mã)**
+  VHM 20.6M, -8.54% · VCB 17.4M, -5.63% · BID 17.1M, -9.11% · CTG 15.0M, -11.19% · VPB 13.7M, +6.26% · MBB 13.3M, -4.88% · TCB 13.0M, -3.98% · HPG 12.1M, -9.23% · LPB 8.8M, -15.68% · ACB 8.4M, -6.87% · HDB 8.2M, +2.96% · VRE 4.9M, -4.70% · SHB 4.6M, -6.77% · VIB 3.3M, -1.98% · TPB 2.9M, -13.99% · MSB 2.8M, +4.86% · VIX 2.7M, -20.46%
+
+**Chi tiết CAPIT (5 mã)**
+  SIP 83.5M, +4.34% — episode CAPIT không xác định số phiên đã giữ · PVT 83.3M, +39.18% — episode CAPIT không xác định số phiên đã giữ · VNM 53.5M, +1.37% — episode CAPIT không xác định số phiên đã giữ · SAB 47.2M, -3.42% — episode CAPIT không xác định số phiên đã giữ · NCT 41.5M, -3.88% — episode CAPIT không xác định số phiên đã giữ
+
+**Chi tiết Discretionary (2 mã)**
+  DRI 58.8M, +25.55% — ⚠️ 33 phiên từ 2026-08-11 — chờ ý kiến PM về exit · TV1 46.9M, +2.24% — ⚠️ 33 phiên từ 2026-08-11 — chờ ý kiến PM về exit
+
+**Corp Action — 7 ngày tới** (mã đang giữ)
+| Mã | Sự kiện | Ngày | Tác động dự kiến |
+|----|---------|------|-------------------|
+| BID | AIS | 2026-10-05 | BID - Niêm yết bổ sung 498.164.263 cổ phiếu |
+
+**Cờ theo dõi**
+- PARK: rổ hiện hành chốt 2026-08-05 (chu kỳ ~quý, kế tiếp ~2026-12-01 (ước tính)).
+- ⚠️ Discretionary: DRI (33p), TV1 (33p) — chờ ý kiến PM về exit
+- CAPIT: 5 mã đang trong episode overflow.
+- LAG: 5 candidate đang trong cửa sổ upcoming (chưa vào lệnh).

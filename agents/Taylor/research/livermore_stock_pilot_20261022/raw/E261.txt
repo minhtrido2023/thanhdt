@@ -1,0 +1,7 @@
+Cổ phiếu đã tăng khoảng 9 lần trong khoảng 100 phiên (i65–170), một pha markup dạng parabol với khối lượng climax ở i141 (15.3x) và đỉnh 914 ở i171. Sau đó là pha phân phối 690–810 kéo dài khoảng 50 phiên, với các đỉnh thấp dần (813 → 755 → 745). Đáy vùng 600–630 đã bị phá ở i244–249 khi khối lượng tăng trở lại (4.38x ở i247). Riêng i249 là thanh biên độ rất rộng: chạm 625, sập về 511, đóng 534 gần đáy. Không có tín hiệu climax đảo chiều nào, nên đây là pha markdown ở thang 60 phiên. Bên dưới là khoảng trống air-pocket xuống vùng 480–510 (i147–151), sau đó đến các gap 390–470. Nguồn cung kẹt ở vùng 600–700 rất dày, và rủi ro bán giải chấp margin là đáng kể.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Đóng cửa lấy lại trên 630 với khối lượng lớn hơn 2x và giữ được vùng này (phá vỡ giả, quay lại range), luận điểm giảm bị vô hiệu.
+CONTAMINATION: NONE

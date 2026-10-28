@@ -1,0 +1,7 @@
+**Phân tích.** Ở thang 250 phiên, giá tăng từ vùng 80 lên đỉnh 117 (i103–125), phân phối trong biên 105–117, rồi gãy xuống (i175–190). Đáy phụ 76–88 tiếp tục bị phá ở i210. Pha markdown kết thúc bằng một climax bán (i214–217, KL 2–2.9x, đáy 58.28). Nhịp hồi chữ V +44% đưa giá về đúng vùng 84–88. Đây là nền cũ i199–209, nơi người mua bị kẹt trước cú sập. Phiên i244 có KL 4.23x, chạm 88.37 nhưng đóng cửa giữa thân, cho thấy cung phía trên. Sau đó là 3 phiên giảm nhẹ với KL 1.3–1.6x, tức có cung chứ không phải dry-up. Mức −15% (~71) nằm trong vùng hồi chưa được kiểm định (71–78). Đáy kiểm định gần nhất là 76.5–77.4 (i230–231). Cấu trúc hiện tại là hồi kỹ thuật vào kháng cự trong xu hướng giảm lớn.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 88.4 kèm KL lớn và giữ được (hấp thụ cung kẹt) thì quan điểm tiêu cực sai; ngược lại, thủng 76.5 mở đường về 71 và thấp hơn.
+CONTAMINATION: NONE

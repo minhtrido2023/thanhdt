@@ -39,6 +39,10 @@ import park_holdings as ph  # noqa: E402
 import corp_actions as ca  # noqa: E402
 from trading_bot.vn_market import next_trading_day  # noqa: E402
 
+# Cổng quyền mua (X1, lag_rights_exit_hold.py) có selfcheck riêng (lag_rights_exit_hold_selfcheck.py);
+# ở đây mã giả không có quyền mua — chặn tra BQ thật, giữ nguyên hành vi mọi ca cũ.
+aei.rights_hold.holds_for = lambda *a, **kw: {}
+
 PASS, FAIL = [], []
 
 
@@ -622,6 +626,33 @@ def main():
         check("Test8: VNM (còn vị thế) có lệnh sell", "VNM" in capit_sells)
         check("Test8: SAB (hết vị thế) KHÔNG có lệnh sell khống", "SAB" not in capit_sells,
               f"got={capit_sells}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 8b: mã nằm LẪN book (broker 1600 = CAPIT 900 + book khác 700) → chỉ bán
+    # phần CAPIT (900), không bán lố sang book khác (code-quality 2026-10-25) ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [])
+        write_positions(exec_dir, signal_date_str, {"VNM": (1600, 60000.0)})
+        write_plan(plan_dir, ACCOUNT, plan_date)
+        write_capit_ledger(ledger_path, {
+            "episode_id": "CAPIT-TEST8B", "status": "open", "sessions_held": 61,
+            "qty_per_account": {ACCOUNT: {"VNM": 900}}})
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        vnm = [o for o in plan["orders"] if o["book"] == "CAPIT" and o["side"] == "sell" and o["ticker"] == "VNM"]
+        check("Test8b: rc=0 và có đúng 1 lệnh sell CAPIT VNM", rc == 0 and len(vnm) == 1, f"rc={rc} n={len(vnm)}")
+        check("Test8b: qty = phần CAPIT (900), KHÔNG phải tổng broker (1600)",
+              bool(vnm) and vnm[0]["qty"] == 900, f"qty={vnm[0]['qty'] if vnm else None}")
+        capped = [c for n in plan.get("auto_exit_inject_notes", []) for c in n.get("capped", [])
+                  if c["ticker"] == "VNM" and c["book"] == "CAPIT"]
+        check("Test8b: phần dư 700cp được ghi vào auto_exit_inject_notes.capped (không im lặng)",
+              len(capped) == 1 and capped[0]["desired_qty"] == 1600 and capped[0]["capped_qty"] == 900, str(capped))
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
@@ -1263,6 +1294,69 @@ def main():
                   "ĐÚNG 1, không nhân đôi (Mbaldedup_off)", len(dup27) == 1, f"blocked={blocked27}")
         finally:
             shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 28: chạy lại sau lỗi kết cấu (DNSE 500 tối 26/10) — sổ lô LAG+BAL dựng
+    # được ⇒ `blocked` của entry auto trước chuyển sang `blocked_superseded` (báo cáo chỉ đọc
+    # `blocked`), entry THỦ CÔNG không bị đụng; sổ lô vẫn lỗi ⇒ KHÔNG gỡ. ----------------
+    for _case28, _bal_ok28 in (("ok", True), ("vẫn lỗi", False)):
+        td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+        try:
+            write_positions(exec_dir, signal_date_str, {})
+            write_plan(plan_dir, ACCOUNT, plan_date)
+            _pp28 = os.path.join(plan_dir, f"plan_{ACCOUNT}_{plan_date}.json")
+            _pl28 = json.load(open(_pp28, encoding="utf-8"))
+            _pl28["auto_exit_inject_notes"] = [
+                {"at": "t0", "source": "auto_exit_inject",
+                 "blocked": [{"ticker": None, "book": "BAL", "reason": "park_holdings lỗi: HTTP 500"}]},
+                {"at": "t1", "manual": True,
+                 "blocked": [{"ticker": "MAN", "book": "BAL", "reason": "ghi tay"}]}]
+            json.dump(_pl28, open(_pp28, "w", encoding="utf-8"), ensure_ascii=False)
+            orig = patch_all(exec_dir, plan_dir, ledger_path, lag_lots={}, bal_lots={},
+                             lag_ok=True, bal_ok=_bal_ok28)
+            try:
+                rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+            finally:
+                restore_all(orig)
+            plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+            n28 = plan.get("auto_exit_inject_notes") or []
+            auto28 = [n for n in n28 if n.get("source") == "auto_exit_inject"]
+            live_blocked28 = [b for n in auto28 for b in (n.get("blocked") or [])]
+            if _bal_ok28:
+                check("Test28: sổ lô dựng lại được ⇒ blocked cũ → blocked_superseded, không còn blocked sống",
+                      rc == 0 and not live_blocked28 and bool(auto28[0].get("blocked_superseded")),
+                      f"rc={rc} notes={n28}")
+            else:
+                check("Test28: sổ BAL vẫn lỗi ⇒ KHÔNG gỡ blocked (vẫn báo ⛔)",
+                      any(b["book"] == "BAL" and b["ticker"] is None for b in live_blocked28),
+                      f"notes={n28}")
+            check(f"Test28 ({_case28}): entry thủ công giữ nguyên blocked",
+                  any(n.get("manual") and n.get("blocked") for n in n28), f"notes={n28}")
+        finally:
+            shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 29: positions KHÔNG đọc được (dnse_raw chưa có bản ghi) dù sổ lô OK ⇒
+    # KHÔNG gỡ blocked cũ (lượt này chưa đánh giá lại gì). ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_plan(plan_dir, ACCOUNT, plan_date)   # cố ý KHÔNG write_positions
+        _pp29 = os.path.join(plan_dir, f"plan_{ACCOUNT}_{plan_date}.json")
+        _pl29 = json.load(open(_pp29, encoding="utf-8"))
+        _pl29["auto_exit_inject_notes"] = [
+            {"at": "t0", "source": "auto_exit_inject",
+             "blocked": [{"ticker": None, "book": "BAL", "reason": "park_holdings lỗi: HTTP 500"}]}]
+        json.dump(_pl29, open(_pp29, "w", encoding="utf-8"), ensure_ascii=False)
+        orig = patch_all(exec_dir, plan_dir, ledger_path, lag_lots={}, bal_lots={},
+                         lag_ok=True, bal_ok=True)
+        try:
+            aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        n29 = load_plan_raw(plan_dir, ACCOUNT, plan_date).get("auto_exit_inject_notes") or []
+        check("Test29: positions=None ⇒ blocked cũ KHÔNG bị gỡ",
+              bool(n29) and bool(n29[0].get("blocked")) and not n29[0].get("blocked_superseded"),
+              f"notes={n29}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
 
     # ---------------- Test 6: TZ-robustness của plan_date trong main() (§16) ----------------
     def expected_plan_date(env):

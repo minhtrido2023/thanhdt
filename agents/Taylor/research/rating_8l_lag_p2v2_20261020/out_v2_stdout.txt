@@ -1,0 +1,64 @@
+lịch 2013-12-31→2026-10-19 n=3191 | mã có giá 657
+kiểm điều chỉnh VHM 2026-08-07: r(Price) -0.523 r(Close) -0.053
+G0/G1/G2 trong cửa sổ eff: {'G0': 40720, 'G1': 3455, 'G2': 3374} | loại a-c: 6431 (trong đó 7-ca list khớp: 5 )
+loại theo cửa sổ: {'no_px': 17790, 'edge': 0, 'not_univ': 9916, 'sparse': 5, 'jump': 11} | còn: 13396 {'G0': 11333, 'G2': 1034, 'G1': 1029}
+SUE: có 12484 / 13396 | thiếu theo nhóm: {'G0': 772, 'G1': 77, 'G2': 63} | kiểm PIT: 0 dòng lịch sử có Release_Date > eff
+SUE trung vị theo nhóm: {'G0': 0.097, 'G1': 0.531, 'G2': -0.263}
+
+===== HỌ CHÍNH F1 (4 phép, BH riêng) =====
+               spec grp window   N  n_nocell  G    mean   ci_lo  ci_hi  p_boot  q_bh     N_eff  K_tick  p_tick
+F1 khớp SUE (CHÍNH)  G1 [2,20] 938        14 48  0.0106  0.0035 0.0178   0.008 0.032  881.1235     374  0.0073
+F1 khớp SUE (CHÍNH)  G1 [2,40] 938        14 48  0.0155  0.0022 0.0280   0.022 0.044  691.7931     374  0.0061
+F1 khớp SUE (CHÍNH)  G2 [2,20] 957        14 48 -0.0036 -0.0107 0.0033   0.294 0.392  989.4958     370  0.3661
+F1 khớp SUE (CHÍNH)  G2 [2,40] 957        14 48 -0.0015 -0.0106 0.0073   0.685 0.685 1315.2856     370  0.8036
+
+===== THĂM DÒ: cùng tập sự kiện, ô KHÔNG có SUE (BH riêng 4 phép) =====
+                    spec grp window   N  n_nocell  G    mean   ci_lo  ci_hi  p_boot  q_bh     N_eff  K_tick  p_tick
+đối chứng không khớp SUE  G1 [2,20] 950         2 48  0.0127  0.0055 0.0207   0.001 0.004  766.2148     380  0.0007
+đối chứng không khớp SUE  G1 [2,40] 950         2 48  0.0189  0.0062 0.0310   0.003 0.006  653.9045     380  0.0004
+đối chứng không khớp SUE  G2 [2,20] 971         0 48 -0.0059 -0.0121 0.0007   0.078 0.104 1013.9662     378  0.0976
+đối chứng không khớp SUE  G2 [2,40] 971         0 48 -0.0044 -0.0120 0.0034   0.266 0.266 1499.7168     378  0.4225
+
+===== TIÊU CHÍ TÁI LẬP (a)-(d) — bản CHÍNH =====
+grp window    mean  q_bh     a  IS_mean  IS_p  IS_N  OOS_mean  OOS_p  OOS_N     b                 top3  mean_drop3  ratio_drop3     c  net_cost  N_adv5  mean_adv5  net_cost_adv5     d   N     N_eff
+ G1 [2,20]  0.0106 0.032  True   0.0075 0.184   323    0.0122  0.006    615 False 2021Q1,2026Q1,2020Q1      0.0059       0.5608  True    0.0086     403     0.0180         0.0160  True 938  881.1235
+ G1 [2,40]  0.0155 0.044  True   0.0167 0.192   323    0.0149  0.050    615 False 2021Q1,2024Q1,2015Q1      0.0099       0.6368  True    0.0135     403     0.0208         0.0188  True 938  691.7931
+ G2 [2,20] -0.0036 0.392 False  -0.0074 0.035   324   -0.0016  0.716    633 False 2021Q4,2016Q3,2026Q2     -0.0009       0.2546 False    0.0016     395    -0.0082         0.0062  True 957  989.4958
+ G2 [2,40] -0.0015 0.685 False  -0.0056 0.359   324    0.0006  0.970    633 False 2026Q1,2019Q2,2026Q2      0.0022      -1.5091 False   -0.0005     395    -0.0124         0.0104 False 957 1315.2856
+
+===== tiêu chí trên bản đối chứng không-SUE (thăm dò) =====
+grp window    mean  q_bh     a     b     c    d  ratio_drop3  mean_adv5
+ G1 [2,20]  0.0127 0.004  True  True  True True       0.6307     0.0191
+ G1 [2,40]  0.0189 0.006  True  True  True True       0.6764     0.0237
+ G2 [2,20] -0.0059 0.104 False False  True True       0.5883    -0.0087
+ G2 [2,40] -0.0044 0.266 False False False True       0.3219    -0.0147
+
+===== THĂM DÒ: loại sự kiện thứ 2 cùng mã trong 40 phiên: bỏ 0 / 12484 =====
+             spec grp window   N  n_nocell  G    mean   ci_lo  ci_hi  p_boot  q_bh     N_eff  K_tick  p_tick
+dedupe40 khớp SUE  G1 [2,20] 938        14 48  0.0106  0.0035 0.0178   0.008 0.032  881.1235     374  0.0073
+dedupe40 khớp SUE  G1 [2,40] 938        14 48  0.0155  0.0022 0.0280   0.022 0.044  691.7931     374  0.0061
+dedupe40 khớp SUE  G2 [2,20] 957        14 48 -0.0036 -0.0107 0.0033   0.294 0.392  989.4958     370  0.3661
+dedupe40 khớp SUE  G2 [2,40] 957        14 48 -0.0015 -0.0106 0.0073   0.685 0.685 1315.2856     370  0.8036
+
+===== THĂM DÒ: mọi sự kiện (kể cả thiếu SUE), ô quý×mom×bank =====
+                  spec grp window    N  n_nocell  G    mean   ci_lo  ci_hi  p_boot   q_bh     N_eff  K_tick  p_tick
+mọi sự kiện, không SUE  G1 [2,20] 1027         2 48  0.0130  0.0060 0.0205  0.0005 0.0020  833.3934     404  0.0004
+mọi sự kiện, không SUE  G1 [2,40] 1027         2 48  0.0145  0.0026 0.0263  0.0160 0.0320  715.5181     404  0.0060
+mọi sự kiện, không SUE  G2 [2,20] 1033         1 48 -0.0056 -0.0112 0.0002  0.0610 0.0813 1298.1326     401  0.1062
+mọi sự kiện, không SUE  G2 [2,40] 1033         1 48 -0.0048 -0.0131 0.0035  0.2560 0.2560 1304.7022     401  0.3593
+
+----- THĂM DÒ nonbank -----
+            spec grp window   N  n_nocell  G    mean   ci_lo  ci_hi  p_boot  q_bh     N_eff  K_tick  p_tick
+nonbank khớp SUE  G1 [2,20] 929         6 48  0.0105  0.0035 0.0177   0.007 0.028  888.1984     366  0.0081
+nonbank khớp SUE  G1 [2,40] 929         6 48  0.0155  0.0020 0.0279   0.021 0.042  677.5825     366  0.0065
+nonbank khớp SUE  G2 [2,20] 953         4 48 -0.0036 -0.0107 0.0032   0.291 0.388  988.4116     366  0.3599
+nonbank khớp SUE  G2 [2,40] 953         4 48 -0.0017 -0.0110 0.0070   0.666 0.666 1297.3982     366  0.7770
+
+----- THĂM DÒ bank -----
+         spec grp window  N  n_nocell  G   mean   ci_lo  ci_hi  p_boot  q_bh  N_eff  K_tick  p_tick
+bank khớp SUE  G1 [2,20]  9         8  9 0.0183 -0.0766 0.1135   0.727 0.804    9.0       8  0.6454
+bank khớp SUE  G1 [2,40]  9         8  9 0.0145 -0.0853 0.1175   0.804 0.804    9.0       8  0.7398
+bank khớp SUE  G2 [2,20]  4        10  4 0.0110 -0.0185 0.0406   0.611 0.804    4.0       4  0.5708
+bank khớp SUE  G2 [2,40]  4        10  4 0.0483 -0.0583 0.1963   0.527 0.804    4.0       4  0.5833
+
+Số phép thử: chính F1 = 4; thăm dò: đối chứng 4 + dedupe 4 + mọi-sự-kiện 4 + bank/nonbank 8 + nửa mẫu/ADV/bỏ-3-quý (mô tả)

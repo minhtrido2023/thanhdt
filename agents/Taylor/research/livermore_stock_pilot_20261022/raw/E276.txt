@@ -1,0 +1,7 @@
+**Phân tích:** Mã mới niêm yết. Giá tích luỹ dài trong vùng 160–210 (i18–199). Sau đó là pha markup mạnh 215→365 (i199–215) với khối lượng lớn. Tiếp theo là phân phối ở 320–360 (i215–237): có bóng dưới xả mạnh (i217 V12.4) và nhiều lần gap xuống. Từ i238–244, giá giảm sàn 7 phiên liên tiếp từ 328 về 196 mà gần như không có khối lượng. Đây là air-pocket do margin, toàn bộ cung kẹt ở 300–360. i245 có climax bán (V25.75) tại 182.9 rồi kéo lên trần. Nhịp hồi chỉ lên được 228 (i247) rồi thất bại: i248–249 đóng cửa 202.9 sát đáy 200, khối lượng không cạn. Giá vào ~203, mức −15% ≈172.5. Mức này nằm dưới đáy climax 182.9 nhưng vẫn trong vùng đáy nền cũ 160–175 (i180 V19.9). Biên độ ngày ±7% khiến thủng 183 là rất khả thi.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 182.9 (đáy climax i245) là mục tiêu kế tiếp 160–175. Kịch bản tăng chỉ xác nhận khi vượt và giữ trên 228 với khối lượng.
+CONTAMINATION: NONE

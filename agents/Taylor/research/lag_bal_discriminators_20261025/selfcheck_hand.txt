@@ -1,0 +1,2 @@
+DNC_20140206_7 LAG quarter=2013Q4 eff=2014-01-21 sig=2014-01-27 | payout1Y tay=0.78629582 engine=0.78629582 | cfo_np tay=3.52262056 engine=3.52262056 | khớp=True
+HPG_20140509_1 BAL quarter=2014Q1 eff=2014-05-05 sig=2014-05-08 | payout1Y tay=0.50884849 engine=0.50884849 | cfo_np tay=1.42092854 engine=1.42092854 | khớp=True

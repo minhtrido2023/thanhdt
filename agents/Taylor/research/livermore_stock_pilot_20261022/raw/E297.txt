@@ -1,0 +1,7 @@
+**Phân tích:** Đây là cổ phiếu rất kém thanh khoản. Có nhiều phiên giá đứng yên với V=0, nhiều thanh chỉ một mức giá. Cú spike i=17–18 (V 16.47, đỉnh 127.29) đã thất bại và bị trả lại về khoảng 100. Sau đó là một nền đi ngang, nâng dần qua ba bậc. Bậc 98–106 kéo dài từ i=40 đến 94. Bậc 106–110 kéo dài từ i=105 đến 190. Từ i=191 giá giữ vùng 108–114. Đỉnh i=233 ở 113.83 trùng với 113.83 của i=121, tức là kháng cự kép. Nhịp hụt i=238 (V 6.06) không có follow-through, và giá trụ lại quanh 108.4–110.4. Biên dao động 60 phiên chỉ khoảng ±3%. Mức −15% tính từ khoảng 109.5 rơi về khoảng 93, dưới mọi đáy từ i=26. Rủi ro chính là gap thanh khoản, không phải xu hướng. Nhiều phiên đứng giá nên kết quả bằng 0 khá thường gặp, khiến P_POS bị kéo xuống.
+
+P_HIT15: 0.06
+RISK: LOW
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 106 (đáy nền i=183–196) kèm khối lượng >3 sẽ phá cấu trúc nền nâng dần.
+CONTAMINATION: NONE

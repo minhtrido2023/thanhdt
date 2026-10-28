@@ -1,0 +1,11 @@
+Chuỗi giá trải qua một chu kỳ markup lớn từ 100 lên 296 (i102), sau đó phân phối với climax khối lượng 12.3 tại i118. Tiếp theo là range 209–235, rồi gãy bằng chuỗi gap giảm sàn i180–182 xuống khoảng 165.
+
+Từ i184 đến i231, giá tích luỹ trong vùng 156–170 với khối lượng cạn dần. Phiên i232 breakout lên 177 với khối lượng 3.36 và có follow-through. Nhịp retest i243 (low 169) giữ được trên nền cũ.
+
+Phía trên, nguồn cung nằm ở 185–187 (các đỉnh i237–238), dày hơn nữa ở 202–225, tức mép gap và nhóm bị kẹt sau cú sập. Giá vào khoảng 180. Mức −15% là khoảng 153, tức phải thủng cả đáy nền i197. Biến động mạnh và thanh khoản mỏng khiến kịch bản này vẫn có thể xảy ra.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 169 (thủng low retest i243), mở đường về nền 156–160
+CONTAMINATION: NONE

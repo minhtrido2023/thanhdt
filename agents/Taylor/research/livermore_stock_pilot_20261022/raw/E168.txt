@@ -1,0 +1,11 @@
+**Đọc cấu trúc:** Ở khung 250 phiên, giá sập từ vùng ~95 xuống đáy 62.8 (i71–74). Từ i75 khối lượng bùng lên 2–5 lần median, cho thấy cung đã đổi tay (tích luỹ). Pha markup đầu tiên lên 96.8 (i144–149) thất bại, giá rơi về 82 (i153). Sau đó giá nền phẳng 85–93 trong gần 90 phiên, khối lượng co lại, đáy nâng dần (84.1 ở i220).
+
+Breakout bắt đầu từ i234–236 (vol 2.6–3.4), tiếp theo là i244 vượt vùng 96.8 với vol 4.54. Pullback i246–247 có vol cạn (0.58–0.77), rồi i249 đóng 100.5, đỉnh 1 năm. Đáng lưu ý: i249 tăng với vol chỉ 1.8, follow-through chưa mạnh.
+
+Mốc −15% (~85.5) nằm ở đáy nền, nên chỉ chạm nếu breakout thất bại hoàn toàn.
+
+P_HIT15: 0.15
+RISK: MED
+P_POS: 0.57
+INVALIDATION: Đóng cửa dưới 93 (thủng lại vùng breakout 94–96.8) với khối lượng >2× median.
+CONTAMINATION: NONE

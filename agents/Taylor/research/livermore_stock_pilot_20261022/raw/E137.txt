@@ -1,0 +1,11 @@
+Cổ phiếu tích luỹ dài ở vùng 97–110 (i=0–130), sau đó tăng giá mạnh lên 139.5 (i=156) với khối lượng cao. Nhịp chỉnh về 112.8 (i=169/172) có lực cầu đỡ, rồi giá lên đỉnh 150 (i=185). Tiếp theo là range 131–150 kéo dài khoảng 55 phiên, khối lượng nguội dần khi giá giảm.
+
+Ở i=239 có rũ đáy về 131. Sau đó giá bứt phá rõ: i=240–241 đạt KL 3.5–4.9×, i=245–246 vượt đỉnh 150 và tạo đỉnh mới 157.9 với KL khoảng 3.3×. Hai phiên 247–248 lùi nhẹ, KL giảm dần, giữ trên 149.7, tức là đỉnh cũ đang chuyển thành hỗ trợ.
+
+Giá vào khoảng 152–156 nằm xa đáy breakout, rủi ro mua đuổi. Mốc −15% (~131) trùng đáy range, nên chỉ chạm nếu breakout thất bại hoàn toàn.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 143 (thủng vùng breakout 150 và lấp lại khoảng i=242–244) với khối lượng lớn, khi đó breakout coi như thất bại.
+CONTAMINATION: NONE

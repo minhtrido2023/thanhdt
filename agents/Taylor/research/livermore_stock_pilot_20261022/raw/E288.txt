@@ -1,0 +1,11 @@
+**Đọc cấu trúc:** Cổ phiếu biến động thấp, nền 100–108 kéo dài khoảng 135 phiên. Pha markup bắt đầu ở i136–145 với khối lượng lớn (7–10x), đẩy giá lên 125.7. Sau đó giá tái tích luỹ ở vùng 113–120 (i147–180) và đi lên tiếp tới đỉnh 131.6 ở i209 nhưng không có follow-through, khối lượng chỉ 1.16.
+
+Từ i213 giá đi ngang trong biên 118–125, khối lượng cạn hẳn (0.02–0.3). Đây là dry-up chứ chưa phải phân phối. Râu dưới 112 ở i246 xuất hiện trên khối lượng rất mỏng và được hấp thụ ngay. Vùng hỗ trợ 113–118 nằm trên nền cũ.
+
+Mức −15% tương ứng khoảng 104.5, tức là phải xuyên qua toàn bộ nền markup. Rủi ro chính là thanh khoản mỏng, có thể gây trượt giá. Cung phía trên nằm ở vùng 127–131.
+
+P_HIT15: 0.10
+RISK: LOW
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 118 với khối lượng >2x, đặc biệt nếu thủng 113 (đáy vùng tái tích luỹ i161–169)
+CONTAMINATION: NONE

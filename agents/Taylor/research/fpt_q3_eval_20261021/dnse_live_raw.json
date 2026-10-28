@@ -1,0 +1,42 @@
+{
+ "FPT_G1": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 57.5,
+    "matchQtty": 10,
+    "side": "BUY",
+    "avgPrice": 57.654,
+    "totalVolumeTraded": 840610,
+    "grossTradeAmount": 484.64151,
+    "highestPrice": 58.3,
+    "lowestPrice": 56.9,
+    "openPrice": 58.3,
+    "time": "2026-10-21 14:29:41.241"
+   }
+  ]
+ },
+ "FOX_G1": {
+  "trades": [
+   {
+    "marketId": "UPX",
+    "boardId": "G1",
+    "isin": "VN000000FOX6",
+    "symbol": "FOX",
+    "matchPrice": 56.9,
+    "matchQtty": 20,
+    "side": "SELL",
+    "avgPrice": 56.682,
+    "totalVolumeTraded": 8610,
+    "grossTradeAmount": 4.8803,
+    "highestPrice": 57.5,
+    "lowestPrice": 55.6,
+    "openPrice": 55.7,
+    "time": "2026-10-21 14:35:44.295"
+   }
+  ]
+ }
+}

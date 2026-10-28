@@ -1,0 +1,9 @@
+Cấu trúc là markdown kéo dài ở cả ba thang. Giá đi từ đỉnh 125.56 (i=19, kèm khối lượng climax 17.6) xuống 36.67, tức giảm khoảng 70%. Mỗi nền tích luỹ đều bị phá xuống: vùng 55.5 (i=151–164), rồi vùng 50–52 (i=228–238). Gap xuống ở i=240 chưa được lấp. Phiên i=249 phá đáy 41.68, đóng cửa đúng tại mức thấp nhất 36.67 (−8.3%).
+
+Khối lượng cạn kiệt hẳn, chỉ còn 0.04–0.10 median, nên không có phiên bán tháo kiểu climax đánh dấu đáy. Đây là trạng thái không có người mua, chưa phải cung đã cạn. Thanh khoản mỏng như vậy cũng làm trượt giá rất lớn và gây khó khi muốn thoát lệnh. Mốc −15% từ giá vào khoảng 37 là quanh 31.5, và với nhịp giảm 5–8% mỗi tuần thì mức này hoàn toàn khả thi. Cung bị kẹt nằm dày ở các vùng 43–47 và 50–55 phía trên.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.28
+INVALIDATION: Giá đóng cửa lấy lại trên 44.5 (lấp gap i=240) với khối lượng >1.0 median, hoặc có phiên rũ bỏ khối lượng lớn rồi giữ được đáy.
+CONTAMINATION: NONE

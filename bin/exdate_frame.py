@@ -32,6 +32,7 @@ TẠO ĐƯỢC giá cum đã biết qua chính hệ số sự kiện — bằng 
 """
 import math
 import os
+import sys
 
 # Sai số cho phép giữa `marketPrice` broker và giá tham chiếu tự dựng `px_cum / multiplier`.
 # Hai nguồn sai số, cả hai đều NHỎ và có cận trên cơ khí:
@@ -151,7 +152,108 @@ def registry_event_next_session(ticker, asof, path=None):
     return None
 
 
-def classify_positions(account_label, account_no, asof, positions):
+def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=None,
+                                 missing_out=None, wc_root=None, notes_out=None, account_no=None):
+    """Như `daily_nav_snapshot.net_fills_between` nhưng HỢP NHẤT thêm statement DNSE.
+
+    VÌ SAO (ca thật 2026-10-21, user DUYỆT 23:53): user bán TAY DRI ngoài bot (SpaceX −1.200cp,
+    ZaloPay −600cp @15.400). Journal `exec_<acc>_<date>_journal.csv` chỉ ghi lệnh CỦA BOT ⇒
+    "lệnh khớp thật +0", phần dư −1.200 bị coi là KL đổi ngoài lệnh ⇒ rc=6 suốt, active_nav
+    không làm mới được. Statement `dnse_khoplenh_broker_confirm_<DD-MM-YYYY>.csv` (CANONICAL cho
+    fill THẬT — kb/data_registry/trading-bot/dnse_khoplenh_broker_email.md) liệt kê MỌI dòng
+    khớp của tiểu khoản, kể cả lệnh đặt tay trong app.
+
+    KHỬ TRÙNG theo (ngày, mã, chiều): `max(journal, statement)`, KHÔNG cộng. Fill của bot nằm ở
+    CẢ HAI nguồn; statement ⊇ journal khi cả hai đúng ⇒ max = statement. Chiều ngược (journal >
+    statement — statement thiếu dòng) thì max = journal = đúng hành vi CŨ, nên bản vá không bao giờ
+    giải thích ÍT hơn và cũng không "giải thích" được gì mà không nguồn nào ghi. Lệch hai nguồn
+    được ghi vào `notes_out` để thông điệp chặn nói ra, không nuốt.
+
+    Đọc statement qua `broker_fill_confirm.load_broker_fills` (lọc ĐÚNG tiểu khoản §12, dtype=str
+    cho số 0 dẫn đầu, phân biệt "account khớp 0" vs "ánh xạ hỏng") với `allow_fetch=False`: đường
+    sizing không tự gọi Gmail; statement do cron leg 3 EOD (19:10) / `fetch_dnse_khoplenh_email.py`
+    tải sẵn.
+
+    N1 (B2 arch-review vòng 2): CP quyền mua USER đã khai (`rights_subscription.fill_events`, lọc
+    account + `account_no` §12) CỘNG THÊM vào kết quả ở credit_date — KHÔNG đưa vào phép max(journal,
+    statement): CP quyền về tài khoản không qua lệnh sàn nên không nằm ở nguồn nào trong hai nguồn
+    đó. Mirror `daily_nav_snapshot.net_fills_between`. Không có sổ khai báo ⇒ y hệt bản cũ.
+
+    `missing_out`: ngày GIAO DỊCH trong cửa sổ mà CẢ journal LẪN statement đều không dùng được —
+    chỉ khi đó "lệnh khớp thật" mới là suy diễn từ vắng mặt (§28). Có statement dùng được thì ngày
+    đó ĐÃ có bằng chứng đầy đủ dù journal thiếu (ca 21/10: bot không chạy, chỉ có lệnh tay).
+    """
+    key = (account_label, after_date, upto_date, "journal+broker")
+    if cache is not None and key in cache:
+        out, missing, notes = cache[key]
+        if missing_out is not None:
+            missing_out[:] = missing
+        if notes_out is not None:
+            notes_out[:] = notes
+        return out
+    import datetime as _dt
+    import glob
+    import daily_nav_snapshot as dns
+    import verify_account_snapshot as vas
+    from broker_fill_confirm import BrokerFills, load_broker_fills
+    from trading_bot.vn_market import next_trading_day
+
+    wc_root = wc_root or dns.WC_ROOT
+    prefix, suffix = f"exec_{account_label}_", "_journal.csv"
+    days = set()
+    for path in glob.glob(os.path.join(vas.EXEC_DIR, prefix + "*" + suffix)):
+        d = os.path.basename(path)[len(prefix):-len(suffix)]
+        if after_date < d <= upto_date:
+            days.add(d)
+    d_, end = (next_trading_day(_dt.date.fromisoformat(after_date)),
+               _dt.date.fromisoformat(upto_date))
+    while d_ <= end:
+        days.add(d_.isoformat())
+        d_ = next_trading_day(d_)
+
+    out, missing, notes = {}, [], []
+    for d in sorted(days):
+        events, jerr = vas.journal_fill_events(account_label, d)
+        try:
+            broker = load_broker_fills(d, account_label, wc_root, allow_fetch=False)
+        except Exception as e:  # dòng statement hỏng (vd khối lượng NaN) KHÔNG được làm sập sizing
+            broker = BrokerFills(False, f"statement {d} không parse được: {type(e).__name__}: {e}")
+        jq = {}
+        for _ts, _oid, tk, side, qty, _px in events or []:
+            jq[(tk, side)] = jq.get((tk, side), 0.0) + qty
+        if broker.available:
+            per_day = {}
+            for k in set(jq) | set(broker.by_key):
+                j, b = jq.get(k, 0.0), float(broker.qty(*k))
+                per_day[k] = max(j, b)
+                if j > b:
+                    notes.append(f"{d} {k[0]} {k[1]}: journal {j:,.0f} > statement {b:,.0f}")
+                elif b > j:
+                    notes.append(f"{d} {k[0]} {k[1]}: +{b - j:,.0f}cp chỉ có ở statement DNSE "
+                                 f"(ngoài journal bot)")
+        elif events is not None:
+            per_day = jq
+        else:
+            missing.append(f"{d}: {jerr}; statement: {broker.reason}")
+            continue
+        for (tk, side), q in per_day.items():
+            out[tk] = out.get(tk, 0.0) + (q if side == "buy" else -q)
+    import rights_subscription as rights_sub
+    for d, evs in rights_sub.fill_events(account_label, account_no=account_no).items():
+        if after_date < d <= upto_date:
+            for _ts, _k, tk, _side, qty, _px in evs:
+                out[tk] = out.get(tk, 0.0) + qty
+                notes.append(f"{d} {tk}: +{qty:,.0f}cp CP quyền mua user khai (rights_subscription)")
+    if cache is not None:
+        cache[key] = (out, missing, notes)
+    if missing_out is not None:
+        missing_out[:] = missing
+    if notes_out is not None:
+        notes_out[:] = notes
+    return out
+
+
+def classify_positions(account_label, account_no, asof, positions, broker_statement=False):
     """Mã nào đang ở hệ SAU sự kiện trong khi giá đóng cửa còn ở hệ TRƯỚC.
 
     Trả `(credited, blocked)`:
@@ -172,6 +274,10 @@ def classify_positions(account_label, account_no, asof, positions):
       · JOURNAL fill — `net_fills_between(missing_out=...)` trả danh sách ngày GIAO DỊCH mà
         journal không đọc được; thiếu nó thì "lệnh khớp thật +0" cũng là suy diễn từ vắng mặt
         (đúng lỗi đã vá ở vòng 3 của `daily_nav_snapshot`, mục [N2]).
+      · `broker_statement=True` (chỉ `compute_active_nav` bật, 2026-10-21) — "lệnh khớp thật"
+        hợp nhất thêm statement DNSE (`net_fills_journal_and_broker`) để lệnh BÁN/MUA TAY của user
+        không bị coi là KL đổi ngoài lệnh. Ngưỡng/phân loại KHÔNG đổi: phần dư còn lại sau hợp
+        nhất vẫn bị chặn y hệt. Mặc định False ⇒ caller khác giữ nguyên hành vi.
 
     TÁI DÙNG NGUYÊN `daily_nav_snapshot.classify_qty_residual` và bộ plumbing quanh nó
     (`_corp_action_daily_snapshot` / `held_event_next_session` / `previous_raw_qty` /
@@ -192,16 +298,24 @@ def classify_positions(account_label, account_no, asof, positions):
     snap = dns._corp_action_daily_snapshot(asof)
     ca_active, ca_note = dns._corp_action_gate_status(snap, asof)
     credited, blocked, fill_cache = {}, {}, {}
+    import rights_subscription as rights_sub
+    rights_subs = rights_sub.load_subscriptions(account_label, account_no=account_no)
     for tk in sorted(positions):
         p = positions[tk] or {}
         qty_now = p.get("total", p.get("qty"))
         qty_prev, prev_d = dns.previous_raw_qty(account_no, tk, asof)
         if prev_d is not None and qty_prev is None:
             qty_prev = 0.0                      # [B2] bản ghi ngày trước CÓ mà vắng mã ⇒ "chưa giữ"
-        journal_gaps = []
-        net_fill = (dns.net_fills_between(account_label, prev_d, asof, fill_cache,
-                                          missing_out=journal_gaps).get(tk)
-                    if prev_d else None)
+        journal_gaps, fill_notes = [], []
+        if not prev_d:
+            net_fill = None
+        elif broker_statement:
+            net_fill = net_fills_journal_and_broker(
+                account_label, prev_d, asof, fill_cache, missing_out=journal_gaps,
+                notes_out=fill_notes, account_no=account_no).get(tk)
+        else:
+            net_fill = dns.net_fills_between(account_label, prev_d, asof, fill_cache,
+                                             missing_out=journal_gaps).get(tk)
         ev = dns.held_event_next_session(snap, asof, tk)
         if ev is None and registry_fallback_enabled():
             try:
@@ -209,7 +323,20 @@ def classify_positions(account_label, account_no, asof, positions):
             except Exception as e:   # registry hỏng ⇒ KHÔNG đoán, chặn đúng mã này (§29: lỗi thật)
                 blocked[tk] = f"không đọc được data/corp_actions.json để tra sự kiện: {e}"
                 continue
-        verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+        # N4: CP quyền mua user khai đang chờ VSDC ghi nhận tại ex-date ⇒ không hưởng sự kiện CP
+        pend = (rights_sub.pending_qty(account_label, tk, ev["date"], prev_d, subs=rights_subs)
+                if prev_d and ev and ev.get("date") else 0.0)
+        verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d,
+                                                    pending_rights=pend)
+        if verdict == "qty_unexplained" and detail["residual"] > 0:
+            # N3: user nộp tiền mua quyền (lệnh tay hợp lệ) — KL tăng, giá không đổi hệ ⇒ không chặn,
+            # không phải "credited" (không có gì để quy đổi giá).
+            rs_ok, rs_info = dns.rights_subscription_check(account_no, tk, asof, prev_d, detail)
+            if rs_ok:
+                print(f"ℹ️ [{asof}] {tk}: phần dư {detail['residual']:+,.0f} = nộp tiền mua quyền "
+                      f"({rs_info['event_id']}, giá {rs_info['issue_price']:,.0f}) — không chặn", file=sys.stderr)
+                continue
+            detail["rights_check"] = rs_info
         if verdict == "share_event_credit":
             if ev and ev.get("source"):
                 detail["event_source"] = ev["source"]
@@ -221,7 +348,10 @@ def classify_positions(account_label, account_no, asof, positions):
                 f"{detail['prev_qty_date']}), lệnh khớp thật {detail['net_fill']:+,.0f} ⇒ phần dư "
                 f"{detail['residual']:+,.0f} CHƯA GIẢI THÍCH ĐƯỢC"
                 + _calendar_clause(detail, ca_active, ca_note, asof)
-                + _journal_caveat(journal_gaps))
+                + _journal_caveat(journal_gaps, broker_statement)
+                + _fill_notes_clause(fill_notes, tk)
+                + (f" [không nhận là nộp tiền quyền mua: {detail['rights_check']}]"
+                   if detail.get("rights_check") else ""))
     return credited, blocked
 
 
@@ -245,7 +375,13 @@ def _calendar_clause(detail, ca_active, ca_note, asof):
     return why + f" [lịch: {ca_note}]"
 
 
-def _journal_caveat(gaps):
+def _fill_notes_clause(notes, tk):
+    """Lệch journal↔statement của ĐÚNG mã này (nếu có) — để người xử lý thấy nguồn fill nào nói gì."""
+    mine = [n for n in notes if f" {tk} " in n]
+    return f" [fill: {'; '.join(mine[:5])}]" if mine else ""
+
+
+def _journal_caveat(gaps, broker_statement=False):
     """Vế "journal có đọc được không" — thiếu nó thì `net_fill` +0 là suy diễn, không phải số đo.
 
     Cắt còn 5 mục đầu vì cùng lý do §29 đã ghi ở `daily_nav_snapshot`: cửa sổ dài sinh chuỗi vài
@@ -256,6 +392,7 @@ def _journal_caveat(gaps):
     g = sorted(set(gaps))
     head = "; ".join(g[:5])
     tail = f"; … và {len(g) - 5} ngày nữa" if len(g) > 5 else ""
-    return (f" [⚠️ journal KHÔNG đọc được cho {len(g)} ngày GIAO DỊCH trong cửa sổ "
+    what = "journal LẪN statement DNSE" if broker_statement else "journal"
+    return (f" [⚠️ {what} KHÔNG đọc được cho {len(g)} ngày GIAO DỊCH trong cửa sổ "
             f"({head}{tail}) ⇒ 'lệnh khớp thật' phía trên có thể THIẾU; kiểm journal TRƯỚC "
             f"khi nghi corp-action]")

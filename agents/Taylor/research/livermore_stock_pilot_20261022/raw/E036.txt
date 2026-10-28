@@ -1,0 +1,9 @@
+Sau nền dài 100–117 (i0–124), giá vào pha markup với khối lượng mạnh: i129 đạt 6.1x, i134 đạt 9.0x, rồi lên đỉnh 162 ở i175. Từ đó cổ phiếu chuyển sang range 130–158 suốt khoảng 75 phiên. Đỉnh thấp dần: 162 → 158.6 (i204) → 158.1 (i212) → 155 (i246) → 153.3 (i249). Đáy nâng dần: 130.2 (i183) → 136.5 → 142.6 (i241). Khối lượng co lại về khoảng 0.5–1x, phù hợp với tái tích luỹ.
+
+Tuy vậy, phía cung vẫn hoạt động. Phiên i246 gap lên 155 với 4.46x nhưng đóng cửa 150, tức breakout thất bại. Phiên i249 có râu trên dài tới 153. Giá vào khoảng 148, nằm giữa tam giác. Mức −15% là khoảng 126, thấp hơn đáy range 130, nên chỉ chạm nếu range gãy hẳn.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 142.5 (đáy i241) kèm khối lượng tăng → mở đường về vùng 130–134; tích cực chỉ khi đóng trên 155–158 với follow-through.
+CONTAMINATION: NONE

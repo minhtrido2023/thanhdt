@@ -60,6 +60,7 @@ CHECK11_SRC = extract_block("CHECK11")
 CHECK12_SRC = extract_block("CHECK12")
 CHECK13_SRC = extract_block("CHECK13")
 ROUTING_SRC = extract_block("ROUTING")
+FAILCLOSED_SRC = extract_block("FAILCLOSED")
 
 
 def run_check5(wc_root, now=None):
@@ -2558,7 +2559,7 @@ def case_c13_thresholds_pinned_to_gate_source():
 def case_c13_wired_into_heredoc_with_runonce_label():
     with open(SRC, encoding="utf-8") as f:
         src = f.read()
-    i_py = src.find('REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" "$RUNONCE_LABEL" << \'PYEOF\'')
+    i_py = src.find('REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" "$RUNONCE_LABEL" 2>"$REPORT_ERR" << \'PYEOF\'')
     i_lbl = src.find('RUNONCE_LABEL="$(_runonce_label)"')
     i_arg = src.find('runonce_label = sys.argv[4] if len(sys.argv) > 4 else ""')
     i_blk = src.find("# CHECK13_BEGIN")
@@ -2832,6 +2833,75 @@ def case_c5_dry_run_khong_ghi_bus():
           repr(lines[-2:]))
 
 
+def run_failclosed(report, stderr_text=""):
+    """Exec ĐÚNG khối FAILCLOSED; trả (WARN_COUNT, REPORT_BODY)."""
+    import shlex
+    import subprocess as sp
+    d = tempfile.mkdtemp(prefix="ops_health_failclosed_")
+    try:
+        ef = os.path.join(d, "err")
+        with open(ef, "w", encoding="utf-8") as f:
+            f.write(stderr_text)
+        script = ("set -uo pipefail\nREPORT=" + shlex.quote(report) + "\nREPORT_ERR=" + shlex.quote(ef)
+                  + "\n" + FAILCLOSED_SRC + "\nprintf '%s\\n' \"$WARN_COUNT\"\necho \"$REPORT_BODY\"\n")
+        r = sp.run(["bash", "-c", script], capture_output=True, text=True, timeout=30)
+        wc, _, body = r.stdout.partition("\n")
+        return wc, body
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_failclosed_python_crash_is_not_healthy():
+    wc, body = run_failclosed("", "Traceback (most recent call last):\n_csv.Error: line contains NUL\n")
+    check("failclosed: heredoc python chết (REPORT rỗng) ⇒ WARN_COUNT=1, KHÔNG phải 0",
+          wc == "1", "WARN_COUNT=%r" % wc)
+    check("failclosed: có dòng ⚠️ 'báo cáo KHÔNG đầy đủ' kèm đuôi stderr, không gắn [WARN-ONLY]",
+          "⚠️" in body and "KHÔNG đầy đủ" in body and "_csv.Error" in body and "[WARN-ONLY]" not in body, body)
+
+
+def case_failclosed_normal_report_untouched():
+    wc, body = run_failclosed("✅ ok\n__WARN_COUNT__=0")
+    check("failclosed: báo cáo bình thường giữ WARN_COUNT=0, không thêm dòng giả",
+          wc == "0" and "KHÔNG đầy đủ" not in body, "wc=%r body=%r" % (wc, body))
+    wc, body = run_failclosed("⚠️ x\n__WARN_COUNT__=3")
+    check("failclosed: WARN_COUNT=3 từ python được giữ nguyên", wc == "3", "wc=%r" % wc)
+
+
+def case_c9b_archive_and_cross_agent_order():
+    """9b: câu hỏi đã answer bởi file agent sort TRƯỚC (hoặc nằm trong archive .gz) không được tính là backing."""
+    src = open(SRC, encoding="utf-8").read()
+    i = src.index("# 9b. Pending decisions")
+    j = src.index("# 10. notify_thread.sh")
+    blk = src[i:j]
+    d = tempfile.mkdtemp(prefix="ops_health_9b_")
+    try:
+        inbox = os.path.join(d, "mike", "bus", "inbox")
+        os.makedirs(os.path.join(inbox, "archive"))
+        os.makedirs(os.path.join(d, "mike", "kb", "memory"))
+        with open(os.path.join(d, "mike", "kb", "memory", "Mike.md"), "w", encoding="utf-8") as f:
+            f.write("## PENDING_DECISION: t-answered\n## PENDING_DECISION: t-open-archived\n"
+                    "## PENDING_DECISION: t-open-hot\n")
+        # Aaa sort trước Zzz: answer ở Aaa, question (cũ hơn) ở Zzz ⇒ ĐÃ đóng ⇒ không backing.
+        write_events(os.path.join(inbox, "Aaa.jsonl"),
+                     [ev("Aaa", "answer", "t-answered", "2026-10-02T00:00:00Z")])
+        write_events(os.path.join(inbox, "Zzz.jsonl"),
+                     [ev("Zzz", "question", "t-answered", "2026-10-01T00:00:00Z"),
+                      ev("Zzz", "question", "t-open-hot", "2026-10-01T00:00:00Z")])
+        write_events(os.path.join(inbox, "archive", "Zzz_2026-09.jsonl.gz"),
+                     [ev("Zzz", "question", "t-open-archived", "2026-09-01T00:00:00Z")], gz=True)
+        out = []
+        ns = {"os": os, "json": json, "wc_root": d, "W": out.append, "OK": out.append,
+              "lines": out}
+        exec(blk, ns)
+        txt = "\n".join(map(str, out))
+        check("9b: question trong archive .gz VÀ question hot chưa answer ⇒ có backing",
+              "t-open-archived" not in txt and "t-open-hot" not in txt, txt)
+        check("9b: question đã answer (answer ở file sort trước) ⇒ KHÔNG backing, bị báo",
+              "t-answered" in txt, txt)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #8b (CCTG freshness) "
           "+ check #9 (retro freshness) "
@@ -2914,6 +2984,9 @@ def main():
                case_c13_thresholds_pinned_to_gate_source,
                case_c13_wired_into_heredoc_with_runonce_label,
                case_routing_domain_split_is_real,
+               case_failclosed_python_crash_is_not_healthy,
+               case_failclosed_normal_report_untouched,
+               case_c9b_archive_and_cross_agent_order,
                case_routing_coord_only_does_not_wake_winston,
                case_routing_red_control,
                case_deliver_discord_ok_no_telegram,
@@ -3001,6 +3074,12 @@ MUTATIONS = [
      'with open(_lp, encoding="utf-8") as _lf:', True),
     ("X21 check 13 đổi status == FAILED thành != HEALTHY (DEGRADED+DT5G_macro bị gán 'không đáng tin')",
      '_h.get("status") == "FAILED" or', '_h.get("status") != "HEALTHY" or', True),
+    ("X22 fail-closed: heredoc python chết vẫn đặt WARN_COUNT=0 (fail-open 'mọi khâu bình thường')",
+     'WARN_COUNT=1\n  _py_tail', 'WARN_COUNT=0\n  _py_tail', True),
+    ("X23 check 9b: bỏ quét archive .gz (question đã archive coi như không tồn tại)",
+     'os.path.join(_inb9b, "archive", "*.jsonl.gz")', 'os.path.join(_inb9b, "archive", "*.jsonl.gzX")', True),
+    ("X24 check 9b: answer ở file sort trước lại bị xử lý theo thứ tự file (bỏ so ts)",
+     '_open9b = {t for t, q_ts in _q9b.items() if _r9b.get(t, "") < q_ts}', '_open9b = set(_q9b)', True),
 ]
 
 

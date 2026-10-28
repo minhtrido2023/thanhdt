@@ -1,0 +1,12 @@
+Cổ phiếu từng có một cú sốt giá rất mạnh lên đỉnh 336 (i45), sau đó sập. Từ khoảng i130 trở đi, giá đi ngang rộng trong vùng 120–186.
+
+- **Đỉnh thấp dần:** 184.5 (i157), 186.6 (i216), 172.5 (i236), 157 (i246). Breakout ở i214 với khối lượng 5.16 thất bại, giá rơi về 137 (i239).
+- **Đáy được giữ:** vùng 132–137 (i196, i199, i239, i243). Gap tăng ở i245 (khối lượng 2.56) bị bán ngược ngay, giá đóng cửa 142, khối lượng cạn dần.
+- **Rủi ro:** cấu trúc là tam giác nén ngay trên vùng hỗ trợ 133. Nếu thủng 133 thì đáy kế tiếp là 119–122, gần đúng mức −15% từ giá vào khoảng 142.
+- **Biên độ:** dao động ngày 5–7% khiến việc chạm −15% trong vài tháng là khả năng thực tế.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 133 với khối lượng tăng (mất đáy range); kịch bản tích cực chỉ xác nhận khi vượt 157–160 có follow-through.
+CONTAMINATION: NONE

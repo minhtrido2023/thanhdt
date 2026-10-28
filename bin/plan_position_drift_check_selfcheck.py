@@ -647,7 +647,9 @@ def t_send_plan():
                                capture_output=True, text=True, env=env, timeout=180)
             outs[k] = p.stdout + p.stderr
         check("sendplan.drift_block_embedded", "FAKEBID 1.100→1.175" in outs["drift"], outs["drift"][-600:])
-        check("sendplan.ok_one_line", outs["ok"].count("Vị thế không đổi sau plan") == 1)
+        # 27/10: xác nhận sạch gộp vào ĐÚNG 1 dòng cuối "✔ Kiểm tự động không bất thường: …" (không còn dòng ✅ riêng)
+        check("sendplan.ok_one_line", outs["ok"].count("Vị thế không đổi sau plan") == 0
+              and outs["ok"].count("✔ Kiểm tự động không bất thường: vị thế sau plan.") == 1)
         argv = [json.loads(x) for x in open(argv_log)] if os.path.exists(argv_log) else []
         check("sendplan.argv_report_block_and_account", bool(argv) and "--report-block" in argv[0]
               and argv[0][:2] == ["--account", "SpaceX"], argv)
@@ -655,10 +657,10 @@ def t_send_plan():
               and "--no-state" in argv[0], argv)
         check("sendplan.stderr_forwarded", "[drift] drift-stderr-marker" in outs["ok"], outs["ok"][-400:])
         check("sendplan.hang_timeout_loud", "KHÔNG KIỂM ĐƯỢC" in outs["hang"] and "timeout" in outs["hang"]
-              and "Kế hoạch giao dịch" in outs["hang"], outs["hang"][-500:])
+              and "PLAN T+1" in outs["hang"], outs["hang"][-500:])
         _cl = [ln for ln in outs["crash"].splitlines() if "KHÔNG KIỂM ĐƯỢC" in ln]
         check("sendplan.crash_failsoft_loud", bool(_cl) and "boom-fake-err" in _cl[0]
-              and "Kế hoạch giao dịch" in outs["crash"], outs["crash"][-800:])
+              and "PLAN T+1" in outs["crash"], outs["crash"][-800:])
         check("sendplan.silent_not_allclear", "KHÔNG KIỂM ĐƯỢC" in outs["silent"] and
               "Vị thế không đổi" not in outs["silent"], outs["silent"][-600:])
         check("sendplan.cannot_rc2_passthrough", outs["cannot"].count("KHÔNG KIỂM ĐƯỢC") == 1 and
@@ -668,7 +670,7 @@ def t_send_plan():
         env.pop("SEND_PLAN_DRIFT_CMD", None)
         p = subprocess.run(["bash", SEND_PLAN, "--account", "SpaceX", "--dry-run"],
                            capture_output=True, text=True, env=env, timeout=180)
-        check("sendplan.sandbox_no_live_call", "sau plan" not in p.stdout.lower() and "Kế hoạch giao dịch" in p.stdout,
+        check("sendplan.sandbox_no_live_call", "sau plan" not in p.stdout.lower() and "PLAN T+1" in p.stdout,
               p.stdout[-400:])
     finally:
         shutil.rmtree(sb, ignore_errors=True)

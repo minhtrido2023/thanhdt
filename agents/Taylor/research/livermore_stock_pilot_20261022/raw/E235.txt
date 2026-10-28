@@ -1,0 +1,9 @@
+Thanh 222–241 là một đợt markup parabol: giá đi từ ~263 lên 487 chỉ trong khoảng 20 phiên, khối lượng tăng dần. Đỉnh hình thành ở thanh 241–242 (487). Thanh 243 có khối lượng 4.58, lớn nhất cả chuỗi, rút chân từ 415, đây là dấu hiệu climax/phân phối. Sau đó là ba phiên giảm liền 247–249, với khối lượng 3.4–4.2. Thanh 248 và 249 đều giảm gần 10% và đóng sát đáy phiên, chưa có dấu hiệu cạn cung hay đảo chiều.
+
+Giá 344 đã thủng nền 383–400 (vùng 232–238). Bên dưới là mép gap 313–320 (thanh 227–228), rồi đến vùng 284–292 (thanh 224–226). Mức −15% tính từ giá vào nằm khoảng 292, ngay trong túi khí do margin bị bán giải chấp. Có thể có nhịp hồi kỹ thuật, nhưng cung phía trên ở vùng 400–480 rất dày.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Giá giữ trên 313 (mép gap) với khối lượng cạn dần, rồi đóng cửa lấy lại trên 400 với khối lượng lớn.
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+Đây là sideway tích luỹ kéo dài khoảng 105–120 (i0–145). Sau đó là pha markup mạnh từ i146–147 với khối lượng nổ 6.5–9x. Giá gần như gấp đôi, lên đỉnh 253 (i223–225), nơi khối lượng climax 8.63 và 7.31 (i219) cho thấy phân phối. Tiếp theo là pha markdown: i234–236 rơi từ 236 xuống 207 với khối lượng 4.2–4.5. Nhịp hồi i240–244 tạo đỉnh thấp dần (211→209→205). Khối lượng hiện cạn (0.2–0.8) quanh vùng 195–210, tức là bên bán đã nghỉ nhưng chưa có cầu quay lại. Hỗ trợ gần là 194–195 (i239, i249). Bên dưới là khoảng trống 178–186 rồi đến vùng 163–167 (i196–200). Mức −15% (~170) nằm trong khoảng trống đó. Phía trên, cung kẹt dày ở 228–250.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 194 kèm khối lượng >2x median thì luận điểm giữ nền hỏng (mục tiêu 178→165); tích cực nếu vượt 211 với khối lượng lớn.
+CONTAMINATION: NONE

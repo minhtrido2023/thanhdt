@@ -12,7 +12,8 @@ ngày kể từ ngày thanh toán xong. Ngoại lệ: cổ phiếu mua lại t�
 Kiến trúc đã chốt: KHÔNG overlay trừ OShares, KHÔNG sửa `oshares_live.py`. Gap post-2021 phải TỰ
 ĐÓNG qua AIS "Giảm niêm yết" mới — `oshares_live.py` đã đọc đúng AIS đó. Monitor
 này chỉ canh trường hợp gap KHÔNG tự đóng. Cùng lớp với `corp_action_feed_canary.py`: chỉ ĐỌC BQ,
-in log, post topic `architecture` khi có WARN; không ghi state, không chặn cổng publish nào.
+in log, post topic `architecture` khi có WARN; không chặn cổng publish nào. Từ 2026-10-19 có MỘT
+file state riêng chỉ để nhớ sự kiện đã báo (xem CẬP NHẬT cuối docstring) — không state nào khác.
 
 LOGIC
 -----
@@ -71,17 +72,37 @@ HẠN CHẾ ĐÃ BIẾT (nói thẳng, không che)
 (H3) Tin "Đính chính"/"Công văn UBCKNN nhận được báo cáo" cũng mang action_type buy_done ⇒ một đợt
      mua có thể thành 2 dòng WARN ngày gần nhau. Không gộp tự động (không có khoá sự kiện chung).
 
-Mã thoát: 0 = không WARN (1 dòng log) · 1 = có WARN (đã post) · 2 = monitor lỗi (đã post, trích
+CẬP NHẬT 2026-10-19 (user duyệt, sau khi bảng WARN hằng tuần lặp lại nguyên 14 sự kiện):
+  (1) CHỈ BÁO SỰ KIỆN MỚI — mỗi (ticker, ngày) chỉ vào danh sách post MỘT lần (state
+      `state/treasury_buyback_window_monitor_seen.json`, ghi atomic SAU khi post thành công); các
+      tuần sau chỉ còn một con số "N sự kiện đã báo trước đó, chưa đóng" ở tiêu đề.
+  (2) `WARN_MAX_DAYS` = 180: quá 180 ngày chưa đóng ⇒ STALE (chỉ log). 180 vì 23/29 ca có
+      step-down đã đóng ≤180 ngày (đo 2026-09-17, xem trên). `MATCH_MAX_DAYS`=365 vẫn là cửa sổ
+      TÌM bằng chứng đóng — hai ngưỡng khác nhau cho hai câu hỏi khác nhau.
+  (3) ĐÃ THỬ VÀ GỠ (arch-review cùng ngày): đóng sự kiện khi `ticker_financial.OShares` giảm
+      ≥0,05% KHÔNG dùng được. OShares (BCTC) = cổ phiếu LƯU HÀNH cuối quý, loại trừ cổ phiếu quỹ ⇒
+      nó giảm vì CHÍNH lần mua, dù cổ phiếu được huỷ (đúng luật) hay giữ lại làm quỹ (đúng khoảng
+      trống monitor này canh). GLT (live BQ): AIS niêm yết 10.049.528, BCTC 11/2024 giảm 24.200 =
+      đúng lượng mua, KHÔNG BAO GIỜ có AIS giảm niêm yết — rule đó đóng cả 2 sự kiện GLT sau 15
+      ngày. 0/11 ca "đóng nhờ BCTC" có AIS step-down trong 365 ngày; 8/11 đóng trong ≤45 ngày
+      (chưa kịp post lần nào); và nó KHÔNG bớt WARN nào hôm nay (6 → 6). Spam đã được (1) giải
+      quyết. Cột này cũng là TRAP (kb/data_registry/fundamentals/ticker_financial_oshares.md).
+      ĐỪNG thêm lại bằng chứng BCTC cho việc "đóng" — nếu cần, chỉ dùng làm thông tin hiển thị.
+
+Mã thoát: 0 = không WARN (hoặc chỉ có sự kiện đã báo trước đó) (1 dòng log) · 1 = có WARN MỚI (đã post) · 2 = monitor lỗi (đã post, trích
 lỗi thật) · 3 = post Discord thất bại (`NOTIFY_FAILED`).
 
 Dùng:  python3 mike/bin/treasury_buyback_window_monitor.py [--dry-run] [--asof YYYY-MM-DD]
 Selfcheck: `treasury_buyback_window_monitor_selfcheck.py` (hermetic, không BQ).
 Registry: `mike/kb/data_registry/price-volume/treasury_news_buyback.md`.
+State: `mike/state/treasury_buyback_window_monitor_seen.json` (env TREASURY_MONITOR_SEEN_PATH) — duy
+nhất file script này ghi: atomic, tự dọn khoá hết WARN, chỉ ghi SAU khi post thành công.
 """
 from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import os
 import re
 import subprocess
@@ -109,6 +130,7 @@ SCOPE_START = dt.date(2021, 1, 1)   # hiệu lực Luật DN 2020 + Luật CK 20
 CLOSE_WINDOW_DAYS = 45              # 10 ngày luật định + đệm độ trễ niêm yết/vendor
 MATCH_MAX_DAYS = 365                # NGƯỠNG PHÁN ĐOÁN, không phải khoảng trống tự nhiên — xem
                                     # đoạn MATCH_MAX_DAYS trong docstring module
+WARN_MAX_DAYS = 180                 # quá ngưỡng này chưa đóng ⇒ STALE (log), không còn WARN
 ORIGIN_HINT_RE = re.compile(
     r"esop|người lao động|cbnv|cbcnv|cán bộ|nhân viên|nghỉ việc|thu hồi|ưu đãi|cổ phiếu lẻ"
     r"|phát sinh từ",
@@ -180,14 +202,15 @@ def evaluate(today, event_rows, ais_rows):
         close = next((a for a in seq if a["step_down"]
                       and 0 <= (a["d"] - d).days <= MATCH_MAX_DAYS), None)
         elapsed = (today - d).days
-        item = {"ticker": t, "date": d, "elapsed": elapsed, "n_news": ev["n"], "hint": ev["hint"],
+        item = {"ticker": t, "date": d, "elapsed": elapsed,
+                "n_news": ev["n"], "hint": ev["hint"],
                 "title": ev["title"],
                 "ais_before": next((a for a in reversed(seq) if a["d"] < d), None),
                 "ais_after": next((a for a in seq if a["d"] >= d), None), "close": close}
         if close is not None:
             item["lag"] = (close["d"] - d).days
             res["closed"].append(item)
-        elif elapsed > MATCH_MAX_DAYS:
+        elif elapsed > WARN_MAX_DAYS:
             res["stale"].append(item)
         elif elapsed > CLOSE_WINDOW_DAYS:
             res["warn"].append(item)
@@ -215,16 +238,22 @@ def render_warn(item):
     return s
 
 
-def render(today, res):
-    w = res["warn"]
-    head = (f"🏦 treasury_buyback_window_monitor {today}: {len(w)} sự kiện buy_done quá "
-            f"{CLOSE_WINDOW_DAYS} ngày chưa thấy AIS giảm niêm yết — phạm vi "
-            f"{res['scope_events']} sự kiện/{res['scope_tickers']} mã từ {SCOPE_START} "
-            f"(đã đóng {len(res['closed'])}, trong cửa sổ {len(res['open_in_window'])}, STALE >"
-            f"{MATCH_MAX_DAYS}d chỉ ghi log {len(res['stale'])}). "
-            f"WARN-ONLY, không chặn gì. Nguồn gốc ESOP KHÔNG phân biệt được bằng field — "
-            f"⚑ chỉ là từ khoá tiêu đề.")
-    return "\n".join([head] + [render_warn(i) for i in w])
+def warn_key(item):
+    return f"{item['ticker']}|{item['date'].isoformat()}"
+
+
+def render(today, res, new=None, carried=0):
+    """`new` = các sự kiện CHƯA từng báo (mặc định: toàn bộ WARN); `carried` = số đã báo trước đó."""
+    new = res["warn"] if new is None else new
+    head = (f"🏦 treasury_buyback_window_monitor {today}: {len(new)} sự kiện buy_done MỚI quá "
+            f"{CLOSE_WINDOW_DAYS} ngày chưa thấy AIS giảm niêm yết"
+            + (f" (+{carried} sự kiện đã báo trước đó, vẫn chưa đóng — không liệt kê lại)"
+               if carried else "")
+            + f" — phạm vi {res['scope_events']} sự kiện/{res['scope_tickers']} mã từ "
+            f"{SCOPE_START} (đã đóng {len(res['closed'])}, trong cửa sổ {len(res['open_in_window'])}, STALE >{WARN_MAX_DAYS}d chỉ ghi "
+            f"log {len(res['stale'])}). WARN-ONLY, không chặn gì. Nguồn gốc ESOP KHÔNG phân biệt "
+            f"được bằng field — ⚑ chỉ là từ khoá tiêu đề.")
+    return "\n".join([head] + [render_warn(i) for i in new])
 
 
 def summary_line(today, res):
@@ -234,8 +263,48 @@ def summary_line(today, res):
             f"{CLOSE_WINDOW_DAYS}d={len(late)}: "
             + ", ".join(f"{i['ticker']}@{i['date']}+{i['lag']}d" for i in late)
             + f"), open_in_window={len(res['open_in_window'])}, warn={len(res['warn'])}, "
-            f"stale>{MATCH_MAX_DAYS}d={len(res['stale'])}"
+            f"stale>{WARN_MAX_DAYS}d={len(res['stale'])}"
             + "".join("\n  STALE " + render_warn(i)[2:] for i in res["stale"]))
+
+
+# ── state "đã báo" (RIÊNG của monitor; ghi atomic, chỉ SAU khi post thành công) ──────────────
+def seen_path():
+    return os.environ.get("TREASURY_MONITOR_SEEN_PATH") or os.path.join(
+        HERE, "..", "state", "treasury_buyback_window_monitor_seen.json")
+
+
+def load_seen(path=None):
+    """{khoá `ticker|ngày`: ngày báo đầu tiên}. Thiếu/hỏng ⇒ {} (fail-open về phía BÁO)."""
+    try:
+        with open(path or seen_path(), encoding="utf-8") as f:
+            d = json.load(f).get("seen", {})
+        return d if isinstance(d, dict) else {}
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
+def save_seen(seen, path=None):
+    path = path or seen_path()
+    tmp = f"{path}.tmp.{os.getpid()}"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"seen": seen}, f, ensure_ascii=False, indent=1, sort_keys=True)
+    os.replace(tmp, path)
+
+
+def split_new(res, seen):
+    """(mới, đã báo) — theo khoá (ticker, ngày) của các WARN hiện tại."""
+    new = [i for i in res["warn"] if warn_key(i) not in seen]
+    return new, [i for i in res["warn"] if warn_key(i) in seen]
+
+
+def next_seen(prev, res, today, posted):
+    """Chỉ giữ khoá còn WARN (đã đóng/STALE ⇒ dọn). Khoá mới chỉ được ghi khi tin ĐÃ đi."""
+    nxt = {warn_key(i): prev[warn_key(i)] for i in res["warn"] if warn_key(i) in prev}
+    if posted:
+        for i in res["warn"]:
+            nxt.setdefault(warn_key(i), today.isoformat())
+    return nxt
 
 
 # ── chạy ─────────────────────────────────────────────────────────────────────────────────
@@ -254,13 +323,16 @@ def default_notifier(msg):
     return p.returncode == 0, f"rc={p.returncode} stderr={p.stderr.strip()[-300:]}"
 
 
-def main(argv=None, runner=default_runner, notifier=default_notifier, today=None):
+def main(argv=None, runner=default_runner, notifier=default_notifier, today=None,
+         seen_file=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--dry-run", action="store_true", help="in message, không post Discord")
     ap.add_argument("--asof", help="YYYY-MM-DD thay cho hôm nay ICT (chạy lại/kiểm thử)")
     a = ap.parse_args(argv)
     today = today or (dt.date.fromisoformat(a.asof) if a.asof
                       else dt.datetime.now(ICT).date())
+    prev = load_seen(seen_file)
+    new = carried = None
     try:
         res = evaluate(today, runner(sql_events(today)), runner(sql_ais(today)))
     except Exception as e:  # monitor tự hỏng ⇒ báo kèm lỗi thật, không đoán nguyên nhân
@@ -268,15 +340,30 @@ def main(argv=None, runner=default_runner, notifier=default_notifier, today=None
                f"{type(e).__name__}: {str(e).strip()[-600:]}")
         rc = 2
     else:
-        print(f"{dt.datetime.now(ICT):%Y-%m-%d %H:%M} " + summary_line(today, res))
-        if not res["warn"]:
+        new, old = split_new(res, prev)
+        carried = len(old)
+        print(f"{dt.datetime.now(ICT):%Y-%m-%d %H:%M} " + summary_line(today, res)
+              + f"\n  warn_new={len(new)} warn_đã_báo={carried}")
+
+        def _persist(posted):
+            nxt = next_seen(prev, res, today, posted)
+            if nxt != prev and not a.dry_run:
+                try:
+                    save_seen(nxt, seen_file)
+                except OSError as e:   # mất state ⇒ tệ nhất là mai báo lại; KHÔNG đổi rc
+                    print(f"STATE_WRITE_FAILED {seen_file or seen_path()}: {e}")
+
+        if not new:
+            _persist(False)
             return 0
-        msg, rc = render(today, res), 1
+        msg, rc = render(today, res, new, carried), 1
     print(msg)
     if a.dry_run:
         print("(dry-run: không post Discord)")
         return rc
     ok, detail = notifier(msg)
+    if new is not None:
+        _persist(ok)
     if not ok:
         print(f"NOTIFY_FAILED topic={NOTIFY_TOPIC} {detail}")
         return 3

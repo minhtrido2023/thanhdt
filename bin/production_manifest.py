@@ -67,7 +67,9 @@ ROOT_TIER = {
     "late_plan_catchup.sh": T0, "nav_sync_retry.sh": T0, "nav_snapshot_daily.sh": T0, "check_report_cadence.sh": T0,
     "corp_action_auto_confirm.py": T0, "discretionary_margin_check_exits_daily.sh": T0,
     "bq_freshness_check.sh": T0,  # EOD pipeline + dispatch lập plan
+    "gate_block_question.py": T0,  # sweep cron nhắc/đóng question của cổng BLOCK approval/plan-t1/delivery (T0)
     "plan_approval_reminder.sh": T0,  # tái dùng approval_block_reason() của bot_execute.py — phần của chuỗi approval-gate T0
+    "egg_transfer_alert.py": T0,  # nhắc chuyển Trứng vàng→cash trước phiên; CHỈ cảnh báo nhưng đo bằng chính check_plan_funding của bot (chuỗi funding-gate T0) — phân loại muộn, selfcheck đỏ 24/10
     # T1 — pipeline dữ liệu / regime / feed / paper
     "papertrade_daily.sh": T1, "pt_8l_daily.sh": T1, "telegram_run_daily.sh": T1,
     "daily_refresh_v34b_linux.sh": T1, "auto_update_commodity_wb.sh": T1,
@@ -112,6 +114,24 @@ ROOT_TIER = {
     "discretionary_candidate_funnel.py": T1,  # funnel ý tưởng 8L, đọc file đã chấm, không lệnh
     "adjfactor_drift_daily.sh": T1,         # detect-only lệch adj-factor BQ
     "refresh_deposit_cctg_weekly.sh": T1,   # feed lãi huy động/CCTG tuần (cùng họ refresh_deposit_rate_vn)
+    # Thêm 2026-10-16 (selfcheck-red owner sweep, job Wags_20261016_093002): 2 gốc cron mới 10-13..10-16.
+    # fund_bench_cron.sh là VỎ chung của 5 dòng cron (nav_sleeve --write, ledger_seal_weekly chốt sổ đơn
+    # vị quỹ, ledger_anchor_check, vnindex_total_return, hose_membership_refresh) ⇒ tầng của vỏ = tầng
+    # chặt nhất nó bọc: ghi sổ NAV/đơn vị quỹ ⇒ T0. nav_loss_brake_monitor: chỉ cảnh báo, nhưng đọc vị
+    # thế broker sống + NAV, cùng lập luận plan_position_drift_check ⇒ T0. T0 chỉ CHẶT hơn, không nới ranh giới tự-sửa.
+    "fund_bench_cron.sh": T0,          # vỏ cron việc quỹ bước 4 — bọc nav_sleeve --write + chốt sổ đơn vị
+    "nav_loss_brake_monitor.py": T0,   # phanh lỗ cấp NAV, CHỈ CẢNH BÁO (không tạo BOT_STOP)
+    # Thêm 2026-10-23 (selfcheck-red owner sweep, job Wags_20261023_093002): 6 gốc mới 10-19..10-23
+    # (5 dòng cron + 2 slice systemd). Phân theo VAI TRÒ (docstring + comment crontab), nghiêng CHẶT khi
+    # chạm plan/NAV: sunday_plan_round chạy chuỗi plan CN (bq_freshness → injectors → send_plan_report) ⇒ T0;
+    # prefetch_dnse_statement tải statement khớp lệnh DNSE cho cổng KL NAV/park ⇒ T0 (cùng lập luận
+    # nav_loss_brake_monitor). Hai gốc còn lại không ghi lệnh/plan/NAV: rating_8l_forward_tracker PAPER-ONLY,
+    # livermore_trigger_check display-only ⇒ T1. arch_noise_gate lọc tin topic Architecture ⇒ T2.
+    "sunday_plan_round.sh": T0,         # vòng plan CN mùa BCTC (gate trong wrapper)
+    "prefetch_dnse_statement.sh": T0,   # statement khớp lệnh DNSE cho cổng KL NAV (allow_fetch=False)
+    "rating_8l_forward_tracker.py": T1,  # tracker OOS rating 8L, PAPER-ONLY, append-only data/
+    "livermore_trigger_check.py": T1,   # cò đọc kỹ thuật Livermore, display-only
+    "commodity_cycle_forward_tracker.py": T1,  # tracker OOS chu kỳ hàng hoá (PREREG-2), PAPER-ONLY, append-only data/
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
@@ -123,6 +143,8 @@ ROOT_TIER = {
     "daily_decision_topic.py": T2, "selfcheck_red_owner_sweep.sh": T2,  # thêm 2026-10-09
     "session_start.sh": T2, "stop.sh": T2, "user_prompt_submit.sh": T2,
     "unit:ccdb-mike.service": T2, "unit:paseo.service": T2,
+    "unit:mike.slice": T2, "unit:mike-jobs.slice": T2,  # trần RAM systemd cho fleet/dispatch (2026-10-20)
+    "arch_noise_gate.py": T2,  # digest + lọc nhiễu topic Architecture (thêm 2026-10-23)
     "pkill": T0,  # dừng bot giờ trưa — không có file
 }
 # dispatch.sh = bàn giao việc cho 1 agent. Bao đóng CỦA dispatch.sh (consolidate.sh -> kb_nightly.sh

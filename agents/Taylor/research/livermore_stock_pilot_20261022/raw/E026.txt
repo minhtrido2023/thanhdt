@@ -1,0 +1,17 @@
+**Phân tích:** Cổ phiếu có pha markup dài ở thang 250 phiên, từ ~100 lên 264.67 (i226). Đợt tăng tốc cuối có khối lượng climax: i222 đạt 3.65, các phiên 219–229 đều >2.
+
+Đỉnh được xác nhận qua chuỗi phân phối:
+- i227 đảo chiều mạnh, đóng cửa 241.47.
+- i229–230 giảm với khối lượng 3.27 và 2.65.
+- i236 tạo đỉnh thấp hơn ở 254.57.
+- i237–241 sụp năm phiên liền với khối lượng 2–3, xuống 169.85, tức −36% từ đỉnh. Đây là dấu hiệu margin bị bán giải chấp.
+
+Nhịp hồi từ đáy 158.25 (i242) chỉ lên được 206 và thất bại ở i247. Phiên i249 đóng ở đáy phiên (179.95) với khối lượng 1.30, chưa thấy cạn cung.
+
+Biên độ ngày khoảng 7–10%. Mức −15% ≈ 153, nằm ngay dưới đáy 158 và trên nền cũ 142–150. Xác suất chạm mức này cao.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa vững trên 206 (đỉnh hồi i246–247) với khối lượng >1.5 thì kịch bản phân phối/markdown bị vô hiệu.
+CONTAMINATION: NONE

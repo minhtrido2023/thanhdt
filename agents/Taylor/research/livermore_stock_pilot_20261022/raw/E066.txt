@@ -1,0 +1,9 @@
+Cấu trúc 250 phiên là markdown về khoảng 66–70 (i19–20), sau đó markup kéo dài lên khoảng 249, tức đã tăng khoảng 3,5 lần. Từ i225 giá đi ngang trong vùng biến động rộng 200–255. Vùng cung đã lộ rõ: i232 vọt lên 254,65 rồi đóng cửa ở 227,52 với khối lượng 2,05, tiếp theo là gap-down ở i235 với khối lượng 2,88. Cầu đỡ ở 199,7–206 (các thanh i236 và i239). Phiên i249 đóng cửa ở 248,87, sát đỉnh phiên, khối lượng 2,10. Đây là lần thử thứ hai vào vùng 245–255.
+
+Nếu vượt được 255 với follow-through thì markup tiếp tục. Nếu thất bại lần nữa thì đáy range khoảng 204 chỉ cách giá vào khoảng 18%. Biến động ngày lớn (các phiên −7%, gap) nên rủi ro chạm ngưỡng −15% (khoảng 211) là đáng kể. Pha này là markup muộn, quá đà.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.52
+INVALIDATION: Breakout thất bại trên 255 và đóng cửa dưới 226 (giữa range); thủng 204 xác nhận phân phối.
+CONTAMINATION: NONE

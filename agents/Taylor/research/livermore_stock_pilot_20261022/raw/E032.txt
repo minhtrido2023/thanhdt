@@ -1,0 +1,9 @@
+Chu kỳ 250 phiên: giảm dài từ ~111 (i5–6) về đáy 74–75 (i125–156), rồi markup có khối lượng từ i157 lên 97–99 (i188, i194). Sau đó là range 89–97. Phiên i222–225 sập rất mạnh xuống 64 rồi hồi chữ V. Đợt hồi được xác nhận bằng khối lượng lớn ở i241 (6.6x) và i243 (5.6x). Tuy vậy, cả hai phiên đều để lại bóng trên và đóng cửa dưới vùng cung 97–99. Vùng này đã chặn giá ba lần (i188, i194, i243/245).
+
+Giá vào ~96 nằm ngay dưới trần, chưa có breakout. Nếu bị từ chối, vùng đỡ gần là 86–89, rồi đến khoảng trống 78–82. Cú sập i222–225 cho thấy air-pocket là có thật. Ngưỡng −15% tương đương ~81.6, chạm được nhưng cần cấu trúc thất bại.
+
+P_HIT15: 0.24
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 86 (mất đáy range 86–89) với khối lượng tăng; xác nhận tích cực chỉ khi đóng cửa trên 99.5.
+CONTAMINATION: NONE

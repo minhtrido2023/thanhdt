@@ -1,0 +1,11 @@
+**Cấu trúc 250 phiên.** Giá đỉnh 112 (i38–39) rồi giảm (markdown) về đáy 64.8 (i124). Sau đó hồi phục mạnh, có các thanh tăng khối lượng lớn ở i132–139 và i198/i209, lên vùng 96–98 (i210–221). Ngay sau đó, phiên i222 đảo chiều: gap giảm, khối lượng 5.23x, các phiên tiếp theo vẫn bán mạnh (i223, i225–226). Đây là dấu hiệu phân phối và breakout thất bại tại vùng đỉnh hồi.
+
+**Hiện tại.** Giá đi ngang trong biên 79.7–88.6, khối lượng cạn dần (0.24–0.9x) quanh đáy 78.8 (i231). Lần thử i247 lên 88.6 bị từ chối ngay. Phía trên có cung kẹt dày ở 88–97.
+
+**Kịch bản.** Nếu giá thủng 78.8, khoảng trống phía dưới mở về 72–75. Ngưỡng −15% tính từ giá vào khoảng 72.7.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 78.8 (đáy i231) kèm khối lượng tăng sẽ vô hiệu nền đi ngang và mở đường về 72–73.
+CONTAMINATION: NONE

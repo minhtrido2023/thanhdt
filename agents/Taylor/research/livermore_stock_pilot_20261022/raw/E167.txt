@@ -1,0 +1,7 @@
+Cấu trúc lớn: markup 100→~270 (i0–151), phân phối 151–184 với climax bán i154 (V 3.64) và i184 (2.62). Sau đó là range 195–220, mất dần ở các nhịp 218–242. Nhịp markdown 242–249 phá đáy range ~191, rơi từ 196 xuống 146.6, tức ~−45% từ đỉnh. Khối lượng nhịp rơi chỉ 0.8–1.34, chưa có climax đầu hàng. i249 gap xuống 152, quét 146.6 rồi đóng sát đỉnh 161.4 với V 1.03: có lực đỡ ở vùng 157–166 (cụm đáy i52–62), nhưng chưa có follow-through. Cung kẹt dày ở 175–200 cản mọi nhịp hồi. Nếu 146.6 thủng, vùng đỡ kế tiếp là 135–147 (i28–29). Mức −15% từ giá vào ~160 rơi đúng vào đó. Biến động ngày ~5–7%, rủi ro gãy do margin cao.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 146.6 (đáy i249) = rút chân thất bại, markdown tiếp diễn về 135–140
+CONTAMINATION: NONE

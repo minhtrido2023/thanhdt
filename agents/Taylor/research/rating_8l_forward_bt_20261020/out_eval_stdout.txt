@@ -1,0 +1,40 @@
+
+================ pin0 (SÀN) ================
+DSR V1 (N_trials=3): 0.9999 | SR ngày 0.0802 vs SR0 0.0121 | SR ngày 3 biến thể [0.0802 0.087  0.0597]
+chồng lấn 2014-07-02→2026-06-19 N=2989
+tương quan: {'daily_S_LAG': np.float64(0.432), 'daily_S_R3': np.float64(0.529), 'monthly_S_LAG': np.float64(0.525), 'monthly_S_R3': np.float64(0.65), 'daily_LAG_R3': np.float64(0.844)}
+FULL: R3 CAGR 0.2307 Sh 1.837 DD -0.1464 | MIX CAGR 0.2322 Sh 1.859 DD -0.1524 | ΔSh +0.0224 CI[-0.0238,+0.0675] p 0.327
+IS: R3 CAGR 0.1907 Sh 1.716 DD -0.1389 | MIX CAGR 0.1902 Sh 1.754 DD -0.1384 | ΔSh +0.0374 CI[-0.0110,+0.0944] p 0.138
+OOS: R3 CAGR 0.2660 Sh 1.935 DD -0.1408 | MIX CAGR 0.2693 Sh 1.950 DD -0.1473 | ΔSh +0.0141 CI[-0.0529,+0.0842] p 0.629
+
+================ pin1M (TRẦN) ================
+DSR V1 (N_trials=3): 0.9999 | SR ngày 0.0853 vs SR0 0.0146 | SR ngày 3 biến thể [0.0853 0.1007 0.0666]
+chồng lấn 2014-07-02→2026-06-19 N=2989
+tương quan: {'daily_S_LAG': np.float64(0.431), 'daily_S_R3': np.float64(0.526), 'monthly_S_LAG': np.float64(0.52), 'monthly_S_R3': np.float64(0.647), 'daily_LAG_R3': np.float64(0.84)}
+FULL: R3 CAGR 0.2532 Sh 2.008 DD -0.1403 | MIX CAGR 0.2546 Sh 2.030 DD -0.1396 | ΔSh +0.0226 CI[-0.0246,+0.0702] p 0.344
+IS: R3 CAGR 0.2136 Sh 1.904 DD -0.1403 | MIX CAGR 0.2133 Sh 1.946 DD -0.1396 | ΔSh +0.0421 CI[-0.0056,+0.1007] p 0.090
+OOS: R3 CAGR 0.2881 Sh 2.096 DD -0.1302 | MIX CAGR 0.2912 Sh 2.107 DD -0.1373 | ΔSh +0.0116 CI[-0.0574,+0.0851] p 0.702
+
+  idle                leg period   CAGR  Sharpe   MaxDD  ann_mean_ci_lo  ann_mean_ci_hi  p_ann_mean
+ pin0      sleeve V1_H40   FULL 0.2366  1.2729 -0.5132          0.1015          0.3644      0.0005
+ pin0      sleeve V1_H40     IS 0.1731  1.3592 -0.1390          0.0439          0.2904      0.0070
+ pin0      sleeve V1_H40    OOS 0.2911  1.2977 -0.5132          0.0593          0.5016      0.0160
+ pin0      sleeve V2_H20   FULL 0.1770  1.3814 -0.3505          0.0890          0.2515      0.0005
+ pin0      sleeve V2_H20     IS 0.1250  1.3729 -0.1111          0.0331          0.2072      0.0090
+ pin0      sleeve V2_H20    OOS 0.2212  1.4443 -0.3505          0.0755          0.3347      0.0050
+ pin0 sleeve V3_H40_adv5   FULL 0.1612  0.9476 -0.5268          0.0322          0.3017      0.0130
+ pin0 sleeve V3_H40_adv5     IS 0.0546  0.5877 -0.1383         -0.0064          0.1291      0.0810
+ pin0 sleeve V3_H40_adv5    OOS 0.2562  1.1638 -0.5268          0.0168          0.4791      0.0400
+pin1M      sleeve V1_H40   FULL 0.2546  1.3544 -0.5023          0.1162          0.3771      0.0005
+pin1M      sleeve V1_H40     IS 0.1979  1.5283 -0.1380          0.0647          0.3101      0.0020
+pin1M      sleeve V1_H40    OOS 0.3031  1.3419 -0.5023          0.0717          0.5079      0.0120
+pin1M      sleeve V2_H20   FULL 0.2084  1.5988 -0.3420          0.1155          0.2780      0.0005
+pin1M      sleeve V2_H20     IS 0.1578  1.7007 -0.1095          0.0611          0.2363      0.0020
+pin1M      sleeve V2_H20    OOS 0.2515  1.6161 -0.3420          0.0983          0.3604      0.0010
+pin1M sleeve V3_H40_adv5   FULL 0.1835  1.0572 -0.5226          0.0521          0.3198      0.0050
+pin1M sleeve V3_H40_adv5     IS 0.0819  0.8466 -0.1248          0.0198          0.1525      0.0060
+pin1M sleeve V3_H40_adv5    OOS 0.2735  1.2274 -0.5226          0.0301          0.4916      0.0270
+
+NHÃN (PREREG_BT §6, V1): không phân biệt được (thiếu N)
+pin0 {'FULL': {'dSharpe': np.float64(0.0224), 'lo': np.float64(-0.0238), 'hi': np.float64(0.0675), 'p': np.float64(0.327)}, 'IS': {'dSharpe': np.float64(0.0374), 'lo': np.float64(-0.011), 'hi': np.float64(0.0944), 'p': np.float64(0.138)}, 'OOS': {'dSharpe': np.float64(0.0141), 'lo': np.float64(-0.0529), 'hi': np.float64(0.0842), 'p': np.float64(0.629)}} DSR 0.9999
+pin1M {'FULL': {'dSharpe': np.float64(0.0226), 'lo': np.float64(-0.0246), 'hi': np.float64(0.0702), 'p': np.float64(0.344)}, 'IS': {'dSharpe': np.float64(0.0421), 'lo': np.float64(-0.0056), 'hi': np.float64(0.1007), 'p': np.float64(0.09)}, 'OOS': {'dSharpe': np.float64(0.0116), 'lo': np.float64(-0.0574), 'hi': np.float64(0.0851), 'p': np.float64(0.702)}} DSR 0.9999

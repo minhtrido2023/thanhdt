@@ -1,0 +1,11 @@
+Trên thang 250 phiên, cổ phiếu tích luỹ quanh 100–105 (i0–100), sau đó giảm mạnh (markdown) xuống đáy 69–72 (i157–163). Nhịp hồi lên có khối lượng lớn: i166 đạt 19.25, i173 đạt 17.12. Giá chạm 93.67 tại i217–219 rồi bị chặn, ngay dưới vùng gãy 93–98 (i103–121), nơi người mua cũ đang kẹt.
+
+Ba mươi phiên gần nhất đi ngang hẹp 88.8–90.8 với khối lượng cạn kiệt (0.01–0.3). Các râu dưới i244 (83.36) và i246–247 (85) được hấp thụ, chứng tỏ cầu vẫn giữ 85–88. i249 bị đẩy lên 93.85 rồi rơi về sát đáy phiên, cung trên 93 vẫn còn. Thanh khoản mỏng nên râu giá rất dài.
+
+Mức −15% (~75) nằm sâu dưới vùng đỡ 81–85 (i177–199). Muốn chạm mức đó thì cầu phải gãy hoàn toàn, khả năng này có nhưng không cao.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 83 (thủng vùng đỡ 81–85 có khối lượng) → khả năng về lại 72–75
+CONTAMINATION: NONE

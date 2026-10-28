@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đi theo chu kỳ markup lên đỉnh ~124–125 (i128–141, khối lượng climax 6–7.5). Sau đó là phân phối trong vùng 112–121 (i141–170) và markdown về ~94 (i171–184). Giá tiếp tục nền phẳng 92–98 trong khoảng 60 phiên. i243 thủng đáy nền 91–92 với khối lượng thấp (0.56). Nhịp hồi i244–248 yếu, không lấy lại 91–92. i249 lập đáy mới 82.2 với khối lượng 7.16x, mức cao nhất cả chuỗi, và đóng cửa 84.82, nửa dưới thanh. Đây chưa phải climax có đảo chiều xác nhận mà vẫn là cung bán tháo, có thể đến từ margin. Cả nền 92–98 giờ thành cung kẹt phía trên. Ngưỡng −15% tính từ ~85 là khoảng 72, nằm trong air-pocket không có hỗ trợ cũ nào.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Quan điểm giảm sai nếu giá đóng cửa lấy lại >92 (đáy nền cũ) với khối lượng >2x, hoặc giữ được trên 82.2 trong 5–10 phiên với khối lượng cạn dần (xác nhận selling climax).
+CONTAMINATION: NONE

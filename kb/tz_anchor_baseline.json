@@ -13,7 +13,6 @@
     "capit_episode.py": 2,
     "cheap_pb_floor.py": 1,
     "deploy_golive_dt5g_v4/golive_recommend.py": 3,
-    "deploy_golive_dt5g_v4/publish_gated_state.py": 2,
     "deploy_ngu_hanh.py": 2,
     "deploy_v2g_canonical.py": 1,
     "deploy_v2g_pe3_canonical.py": 1,

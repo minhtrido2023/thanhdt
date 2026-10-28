@@ -1,0 +1,9 @@
+Đây là một mã cực kỳ kém thanh khoản: phần lớn các phiên có khối lượng bằng 0, và giá nhảy từng nấc 6–10% mỗi lần có lệnh khớp. Nhịp markup từ 61.7 (i200) lên 96.6 (i221) diễn ra trên khối lượng rời rạc, sau đó giá đứng im nhiều phiên. Phiên i240 thử vượt 106 nhưng thất bại và đóng cửa ở 96, tức là cung xuất hiện ở đỉnh. Hai phiên cuối giảm liên tiếp gần sàn: i248 về 86.4, i249 về 78.0, khối lượng tăng (300). Đây là lực xả, không phải tín hiệu cạn cung.
+
+Đỡ gần nhất là vùng 72–75 (i202–209), kế đến là đáy 61.7–65.8. Ngưỡng −15% tính từ khoảng 76 rơi vào quanh 64–65, nằm trong tầm với khi mỗi lần khớp lệnh có thể kéo giá 7–10%. Ngoài ra, thanh khoản mỏng làm giá thoát hàng thực tế có thể còn tệ hơn.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Giá giữ trên 72 và đóng cửa lại trên 86.4 với khối lượng lớn (xoá được 2 phiên xả); ngược lại, thủng 65.8 (i201) thì kịch bản quay về đáy 61.7 trở xuống được xác nhận.
+CONTAMINATION: NONE

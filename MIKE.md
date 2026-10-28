@@ -111,6 +111,8 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    `"<to>|<model>|<effort>"` (median_s kẹp [90s,1200s]); thiếu/hỏng file → 240s. Fan-out nhiều job
 >    → **1 lượt poll cho CẢ batch** (min delay), không phải 1 lượt/job. Job đứng riêng KHÔNG có bước
 >    kế tiếp phụ thuộc ⇒ không cần ScheduleWakeup (agent đã tự báo).
+> **Cổng cơ học (2026-10-27, user duyệt B):** `dispatch.sh --bg` từ phiên tương tác Mike thoát **exit 8** nếu thiếu
+> `--wakeup-ack` (sẽ đặt ScheduleWakeup cuối lượt) hoặc `--no-followup` (không có bước phụ thuộc). Cron/headless không bị ảnh hưởng; tắt khẩn `MIKE_WAKEUP_GATE=off`. Test: `bin/dispatch_wakeup_gate_selfcheck.sh`.
 > 2. Mọi phát ngôn trạng thái job phải kèm `jobs.sh status` chạy CÙNG lượt (kể cả "vừa xong").
 >
 > **Anti-double-reply — claim-reply NGUYÊN TỬ (GIỮ NGUYÊN, vẫn cần).** Ngay cả với 1 producer,
@@ -269,6 +271,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 | **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
 | **fundamental-skeptic** (phản biện due-diligence cơ bản — công tố, thêm 2026-08-23) | native | `Agent(subagent_type="fundamental-skeptic")` | Trước khi chốt QUALIFY/NON case fear-buy/special-situation mới (sleeve discretionary DGC/TV1-style) |
 | **macro-strategist** (đọc vĩ mô VN độc lập — gọi là **Bobby**, KHÔNG phải công tố, thêm 2026-08-24) | native | `Agent(subagent_type="macro-strategist")` | Trước khi Taylor phân loại nguyên nhân vĩ mô một episode/khủng hoảng — dispatch Bobby TRƯỚC, KHÔNG cho biết forward-return/giả thuyết đang test (tránh đồng thuận sớm giữa người đọc vĩ mô và người chạy backtest, cùng lỗi đã cắn ở `margin-valuation-spread-20260823.md` §Đính chính) |
+| **livermore** (đọc kỹ thuật VNINDEX độc lập tại điểm chuyển trạng thái — **Livermore**, thêm 2026-10-22, user đặt tên; DISPLAY-ONLY) | native (nạp sau restart; trước đó `general-purpose` đọc `~/.claude/agents/livermore.md`) | `Agent(subagent_type="livermore")` | Khi DT gate candidate >=5/10 hoặc >=15/25 phiên, hoặc VNINDEX chạm biên vùng lớn. Đọc MÙ (không DT5G, không dữ liệu sau as-of), FORECAST khoá trước, Mike ghi `kb/data_registry/market-state/livermore_reads.md` và chấm sau +20 phiên; không sizing/gate. Thử mù 22/10: chưa hơn "luôn UP" |
 | **data-ops** (was Winston: DT5G/BQ freshness, pipeline health, feeds) | native | `Agent(subagent_type="data-ops")` / `dispatch.sh Winston "..."` | Check freshness/pipeline/corp-action |
 | **corp-scanner** (corp-action scan hẹp) | native | `Agent(subagent_type="corp-scanner")` | Quét tách/cổ tức một phiên |
 | **risk-auditor** (was Spyros: DD/concentration/leverage/recon, read-only) | native | `Agent(subagent_type="risk-auditor")` / `dispatch.sh Spyros "..."` | Review rủi ro, audit EOD, recon fill↔plan |
@@ -282,7 +285,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 > ⚠️ **Phanh lỗ cấp NAV CHƯA có tiến trình nào thực thi** (phát hiện 2026-10-12):
 > `agents/Spyros/risk_monitor.py` chưa từng được lên lịch, `daily_loss_limit_pct` không code nào
 > đọc — ĐỪNG coi đó là gate đang chạy. Monitor thay thế (chỉ cảnh báo, giá chốt, user duyệt
-> 2026-10-12) đang dựng: nhánh `feat/nav-loss-brake-monitor-20261012`. Sửa dòng này khi nó live.
+> 2026-10-12) ĐÃ LIVE từ 2026-10-13 (`bin/nav_loss_brake_monitor.py`, cron 22:05+00:20 ICT; dòng ops_health đã merge 16/10).
 
 **Khi nào dùng native agent:**
 - Task không cần working memory tích lũy của agent đó
@@ -307,8 +310,10 @@ Lịch sử gỡ daemon + bảng 2-tier cũ (nguyên văn): `MIKE_ext.md` § D�
 Quy trình đầy đủ đã tách sang `kb/mike_model_routing.md` để core này luôn dưới ngưỡng 40KB.
 Mỗi lần dispatch gọi skill `dispatch-routing` (checklist 1 phút, `~/.claude/skills/`; `dispatch.sh` tự nhắc vòng ≥3 qua `bin/dispatch_loop_hint.py`), chi tiết đọc file đó: chọn provider trước, rồi model/effort theo độ phức tạp
 của task; không gắn model cố định theo agent. Tóm tắt (đời 5.5, user duyệt 2026-10-11): chỉ-đọc
-ngắn kiểm được → haiku; việc thường ngày → sonnet/medium (omit); việc khó → opus/medium; phản
-biện, chạm tiền, thiết kế mới → opus/high; Q3 hiếm → fable/high (chỉ lên kế hoạch).
+ngắn kiểm được → haiku; việc thường ngày (kể cả dựng theo đặc tả đã duyệt, vòng 2 áp required_change)
+→ sonnet/medium (omit); Opus CHỈ khi phản biện / chạm tiền / thiết kế mới / lỗi chưa rõ nguyên nhân
+(medium; `high` chỉ phản biện, chạm tiền, review toàn nhánh) — siết 2026-10-18, user duyệt; Q3 hiếm →
+fable/high (chỉ lên kế hoạch).
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một

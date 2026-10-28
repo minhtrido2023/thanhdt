@@ -1,0 +1,11 @@
+**Phân tích:** Đây là mã thanh khoản cực mỏng. Phần lớn các phiên có volume bằng 0, giá nhảy từng nấc 8–15% mỗi phiên, vượt biên ±7% (nhiều khả năng là UPCoM). Ở cả ba thang thời gian, giá chỉ đi ngang trong vùng rộng khoảng 77–120, không có xu hướng.
+
+Các cụm volume lớn tập trung ở vùng 78–93 (i=163–187, đỉnh điểm 1296 tại i=187). Đây là vùng hấp thụ cung nhưng không tạo được follow-through: các nhịp lên 108–112 (i=193, 208, 214) đều bị bán ngược, riêng i=214 có volume 362.
+
+Ngay trước điểm vào, giá dao động hỗn loạn: i=247 có low 79.7, i=248 đóng 81.1, i=249 đóng 88.1. Giá vào khoảng 88, ở nửa dưới của range. Mức −15% tương ứng khoảng 75, chỉ thấp hơn đáy 72.7–76.8 (i=221, 169, 173) một chút. Với biên độ nhảy giá như vậy, việc chạm mức này trong vài tuần hoàn toàn khả thi. Kỳ vọng xấp xỉ trung tính.
+
+P_HIT15: 0.38
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 76.8 (đáy cụm volume i=169/173), tức là thủng vùng hấp thụ và mở air-pocket về 72.7 hoặc thấp hơn.
+CONTAMINATION: NONE

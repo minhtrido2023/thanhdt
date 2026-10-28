@@ -1,0 +1,13 @@
+**Pha 250 phiên:** cổ phiếu thanh khoản mỏng, giá tích luỹ 100→140 trong khoảng 110 phiên đầu. Từ i=161, khối lượng đổi chế độ: thường xuyên 10–50 lần median, có climax 92x ở i=177, kéo giá lên 313.
+
+**Pha 60 phiên:** cú sập i=190–192 (đáy 200), sau đó hồi lên đỉnh 330 ở i=212. Từ đó các đỉnh thấp dần: 330 → 323.9 → 313.9, tức phân phối dạng range 290–315.
+
+**Pha 20 phiên:** i=245 thủng 290 với 13.4x, xuống vùng 265–271 (đáy i=205–206, i=227). Khối lượng co về 3.2x lúc chạm hỗ trợ. Đây có thể là cạn cung, nhưng chưa có thanh cầu xác nhận.
+
+Phía trên, cung kẹt dày ở 290–315. Phía dưới 265 là khoảng trống tới 252/228/200. Biến động ngày khoảng 5%, nên mức −15% (≈234) dễ chạm trong vài tuần.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 265 với khối lượng tăng sẽ phá vùng hỗ trợ cuối (mở đường về 228–200); kịch bản tích cực chỉ hiệu lực khi vượt lại 300 với khối lượng >15x.
+CONTAMINATION: NONE

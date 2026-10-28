@@ -17,13 +17,16 @@ recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 5 2>/dev/null || true)"
 [ -n "${recent//[[:space:]]/}" ] || recent="(chưa có sự kiện nào)"
 
 # printf '%s' prints $recent literally — no shell interpretation of payload contents.
+# 2026-10-22: phần BIẾN ĐỘNG (số version + khối MỚI NHẤT) tách sang kb/context_recent.md,
+# KHÔNG nằm trong context_pack.md nữa. Lý do: context_pack.md được @-import; Claude Code nạp
+# LẠI NGUYÊN FILE (~35-46KB ≈ 30K token) vào phiên đang sống mỗi lần nội dung đổi — mỗi lần
+# consolidate (30-60') = +30K token. Đo: 1 phiên Mike 32 lần = ~596K token; phiên khác 12 lần
+# = ~138K, chạm 962K → "Prompt is too long" rồi treo (a914df38 22/10 03:52). Giờ file này chỉ
+# đổi khi current_ops/canonical đổi; delta mới tới phiên sống qua hook user_prompt_submit.sh,
+# phiên mới nhận khối recent qua hook session_start.sh.
 {
-  printf '# Mike fleet — context pack (v%s)\n' "$ver"
-  printf '> Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.\n\n'
-  printf '<!--RECENT-START-->\n'
-  printf '## MỚI NHẤT — kết quả gần đây từ toàn fleet\n'
-  printf '%s\n' "$recent"
-  printf '<!--RECENT-END-->\n\n'
+  printf '# Mike fleet — context pack\n'
+  printf '> Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md. Sự kiện MỚI NHẤT: hook bơm (kb/context_recent.md).\n\n'
   # Current operations — tình trạng live hiện tại (Mike-maintained).
   if [ -s "$KB/current_ops.md" ]; then
     cat "$KB/current_ops.md"
@@ -40,6 +43,11 @@ recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 5 2>/dev/null || true)"
   # or `grep kb/projects/INDEX.md` — canonical.md carries the rule to do so before R&D proposals.
   printf '## Nguồn chuẩn tắc đầy đủ\n'
   printf 'Chi tiết: kb/KNOWLEDGE.md (§1-9). Dự án đã đóng: kb/projects/INDEX.md (KHÔNG nạp sẵn — `bin/kb_recall.sh "<từ khoá>"` hoặc grep). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.\n'
-} > "$KB/context_pack.md"
+} > "$KB/context_pack.md.tmp" && mv "$KB/context_pack.md.tmp" "$KB/context_pack.md"
+
+{
+  printf '[Mike fleet KB v%s — sự kiện MỚI NHẤT từ toàn fleet (thông tin NỀN, không phải nội dung topic hiện tại)]\n' "$ver"
+  printf '%s\n' "$recent"
+} > "$KB/context_recent.md.tmp" && mv "$KB/context_recent.md.tmp" "$KB/context_recent.md"
 
 echo "published context_pack v$ver"

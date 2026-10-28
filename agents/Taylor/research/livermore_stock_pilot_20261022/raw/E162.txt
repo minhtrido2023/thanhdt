@@ -1,0 +1,7 @@
+**Phân tích:** Cổ phiếu mới niêm yết. Giá bị đẩy kịch trần lên 291, rồi sập liên tục bằng các phiên sàn trắng bên mua (i=17–24). Sau đó giá nằm trong vùng phân phối 150–250 suốt gần 200 phiên. Vùng 236–256 (i=212–228, khối lượng 2–4x) bị phá vỡ xuống tới 184 (i=237). Từ đó giá hồi rất nhanh: hai phiên tăng trần i=247–248, rồi i=249 mở cửa trần 251 nhưng đóng cửa 240,6 với khối lượng 4,81x. Đây là thanh từ chối (upthrust) ngay tại vùng cung kẹt 245–256, cũng là mức đỉnh i=70–73. Giá vào lệnh khoảng 240 nằm dưới vùng cung. Khoảng trống chưa lấp (gap) 219–229 và đáy range 184–200 rất gần. Biên dao động ±7% khiến mức −15% (khoảng 204) rất dễ bị chạm.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.37
+INVALIDATION: Đóng cửa trên 257 với khối lượng >2x (hấp thụ xong cung i=212–228) thì luận điểm giảm bị vô hiệu; đóng cửa dưới 229 xác nhận upthrust.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+**Phân tích:** Ở thang 250 phiên, giá giảm dài từ ~100 về ~71–72 (i=0–167). Sau đó hình thành nền 71–78 với khối lượng đột biến: i=147–151 (27–40× median) và i=172–185 (13–31×). Ở đáy, đó là dấu hiệu cung bị hấp thụ, có thể là tích luỹ.
+
+Pha markup nhẹ đẩy giá lên 85.71 (i=220), nhưng bị chặn ở vùng 83–86. Vùng này trùng cung kẹt của nền phân phối cũ ở i=72–100. Hiện giá dao động trong range 77–85, khối lượng gần như cạn (i=243–249 ≈0). Các thanh nhảy cả tick 78.7↔83 cho thấy thanh khoản rất mỏng, nên giá vào ở Open có thể trượt mạnh.
+
+Mức −15% từ ~81 là ~69, nằm dưới đáy nền 70.91. Muốn chạm mức này phải phá nền khối lượng lớn, khả năng không cao nhưng thanh khoản mỏng làm tăng rủi ro gap.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 77 kèm khối lượng tăng, rồi thủng đáy nền 71–72 (i=157–167); ngược lại vượt 86.5 với khối lượng lớn xác nhận markup
+CONTAMINATION: NONE

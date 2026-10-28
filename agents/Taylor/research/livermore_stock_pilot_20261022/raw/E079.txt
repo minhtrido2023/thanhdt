@@ -1,0 +1,11 @@
+Cấu trúc đang ở pha markdown rõ ở cả ba thang thời gian. Đỉnh phân phối nằm ở i98–124, quanh vùng 114–123. Sau đó giá đi ngang trong range 95–102 từ i135 đến i200, với khối lượng cạn kiệt (0.1–1.0). Từ i201 giá thủng range và trượt đều xuống 85, tạo đáy thấp dần, nhưng không có climax bán.
+
+Thanh i249 mở gap xuống 77.70 và quét Low 75.00. Phiên này đóng cửa ở 86.49 với khối lượng 0.71, có tín hiệu từ chối giá thấp. Tuy nhiên, khối lượng chưa đủ để gọi là climax, và cổ phiếu có tiền lệ bấc dài do thanh khoản mỏng (i144, i186).
+
+Cung phía trên rất dày: đáy range cũ 91–95 nay là kháng cự, và 95–102 là vùng nhiều người bị kẹt. Giá vào khoảng 86 thì mức −15% tương ứng khoảng 73. Mức này chỉ thấp hơn Low vừa quét khoảng 2.6%, nên dễ bị chạm lại nếu đà giảm tiếp diễn.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 75 (thủng đáy râu i249) xác nhận markdown tiếp diễn; kịch bản tăng chỉ có giá trị khi giá đóng cửa lấy lại được trên 92–95 kèm khối lượng >1.
+CONTAMINATION: NONE

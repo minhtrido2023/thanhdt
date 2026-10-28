@@ -1,0 +1,18 @@
+**Phân tích:** Ở thang 250 phiên, giá giảm mạnh từ 100 xuống đáy 51 (i109). Ở thang 60 phiên, giá đi ngang trong vùng 59–66 suốt khoảng 130 phiên.
+
+Từ i187, khối lượng tăng lên khoảng 2 lần trung vị nhưng giá không đi lên. Các lần bứt phá đều thất bại:
+- **i200–202:** lên 74 rồi rơi về 64 với khối lượng 3.76.
+- **i207–212:** bị chặn quanh 68.
+- **i245:** chạm 66.4 rồi đóng cửa lùi lại.
+
+Cung phía trên vùng 66–74 vẫn dày. Phía dưới, vùng 58–60 đã được giữ nhiều lần (i219–221, i236–237), cho thấy có lực hấp thụ.
+
+Giá vào khoảng 63.4. Mốc −15% tương ứng khoảng 53.9, nằm dưới đáy vùng đi ngang. Để chạm mốc này, giá phải thủng 58 và rơi qua vùng trống (air-pocket) về phía đáy 51. Kịch bản đó có thể xảy ra nếu khối lượng lớn trong vùng thực chất là phân phối, nhưng hiện chưa có dấu hiệu.
+
+Kỳ vọng lợi nhuận gần trung tính.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 58 kèm khối lượng lớn (thủng nền 59–60 đã giữ nhiều lần) → mở đường về 51–54.
+CONTAMINATION: NONE

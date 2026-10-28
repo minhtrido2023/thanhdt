@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu tăng khoảng 5 lần trong khoảng 130 phiên, theo hai đợt parabol: 120→378 (i121–142) và 280→601 (i178–239). Đỉnh 601 (i239) là một nhịp climax, khối lượng 5.9–7.2× ở i238–239. Sau đó giá tạo đỉnh thấp dần (598, 588) và đã rơi về 498, tức khoảng −17% từ đỉnh.
+
+Điểm tích cực là khối lượng khi điều chỉnh cạn dần (0.43–0.79 ở i246–249). Đây là dry-up, không phải bán tháo. Hỗ trợ gần là vùng nền 450–470 (i225–235), sâu hơn là mép gap ~420–430 (i215–218).
+
+Ngưỡng −15% từ giá vào (~423) chỉ hơi dưới vùng nền thứ hai. Biên độ ngày của mã này khoảng 4–6%, và sau một cú parabol thường có air-pocket do margin. Vì vậy xác suất chạm ngưỡng này là đáng kể.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 450 (đáy vùng nền i225–235) kèm khối lượng tăng >2× thì cấu trúc markup bị phá vỡ, chuyển sang distribution/markdown.
+CONTAMINATION: NONE

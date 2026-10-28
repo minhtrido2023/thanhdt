@@ -1,0 +1,12 @@
+Cổ phiếu đang ở pha markup parabol trên cả ba thang. Giá tăng từ ~88 (i=115) lên ~300, gấp khoảng 3,4 lần. Riêng 15 phiên gần nhất tăng từ 211 lên 300, gần như thẳng đứng.
+
+- **Phiên 239 là dấu hiệu climax:** gap lên, đạt đỉnh 304.62, rồi đóng tại đáy 264.81 với khối lượng 4.18. Biên độ khoảng 13%, đây là cung mạnh xuất hiện.
+- **Retest sau đó không có follow-through:** phiên 244 (khối lượng 4.27), 247 và 248 chạm 301–307. Phiên 248–249 đóng yếu hơn, khối lượng vẫn cao (~2.0). Đây là dấu hiệu phân phối sớm trong vùng 265–307.
+- **Rủi ro phía dưới:** dưới 265 là air-pocket do các gap 234–238 (236→283). Vùng hỗ trợ thực sự là 210–220.
+- **Biến động rất cao:** biên độ ngày thường 5–10%. Mốc −15% (~249) nằm ngay dưới đáy climax, nên khả năng chạm là cao.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa vượt 307 với khối lượng tăng và giữ được trên 300 vài phiên → phân phối bị phủ định, markup tiếp diễn.
+CONTAMINATION: NONE

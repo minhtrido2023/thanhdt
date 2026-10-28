@@ -1,0 +1,16 @@
+**Đọc cấu trúc:**
+
+- **Markup (i52–90):** giá đi từ ~113 lên ~186 với khối lượng lớn (6.7–9.0).
+- **Phân phối (i90–229):** ~140 phiên đi ngang trong vùng 165–192. Có nhiều lần vượt đỉnh thất bại: i154 và i156 lên ~207 rồi đóng cửa ~193; i221 cũng thất bại tương tự. Các cú quét đáy i115 và i208 được kéo lên lại, nhưng vùng trên yếu dần.
+- **Markdown (i230–233):** gãy khỏi range, đóng cửa 151 với khối lượng 3.23.
+- **Hiện tại:** nền 149–163 khô dần (V 0.15–0.6), tựa vào vùng khối lượng lớn 152–158 (i76–87).
+- **Phía trên:** cung kẹt dày ở 165–190.
+- **Phía dưới:** dưới 149 có air-pocket xuống ~140 rồi vùng gap 114–128 (i52), nơi chưa từng có giao dịch. Mức −15% tương ứng ~130.
+
+Chưa thấy climax bán hay follow-through tăng nào. Đây vẫn là nền tạm sau khi gãy, nghiêng về tiếp diễn giảm.
+
+P_HIT15: 0.32
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 148.8 (đáy i243–244) với khối lượng >1.5 thì luận điểm giữ nền bị phá; tích cực chỉ khi đóng cửa trên 165 với khối lượng lớn.
+CONTAMINATION: NONE

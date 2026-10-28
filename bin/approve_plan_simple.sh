@@ -113,6 +113,14 @@ if cash_before is None:
         div_pending = nb.get("cash_dividend_receiving_vnd") or 0
         cash_before = tcmd - div_pending
         cash_src = "nav_basis.total_cash_minus_debt_vnd − cash_dividend_receiving_vnd (§25 fallback)"
+        # Trứng vàng = TIỀN (user chốt 2026-10-24, feedback-egg-is-cash-policy): nguồn tài trợ = cash + egg.
+        # Chỉ cộng ở nhánh fallback này vì totalCash−totalDebt KHÔNG gồm egg; nhánh `available_cash_before_vnd`
+        # do DollarBill ghi đã là ngân sách theo chính sách mới ⇒ cộng nữa sẽ đếm đôi. Cổng THẬT vẫn là
+        # check_plan_funding 09:05 (sức mua broker): chưa chuyển egg → cash thì nó vẫn BLOCK.
+        egg = nb.get("egg_assets_vnd") or 0
+        if egg:
+            cash_before += egg
+            cash_src += f" + egg_assets_vnd {egg:,.0f} (Trứng vàng = tiền)"
 if cash_before is None:
     cash_before = 0
     cash_src = "KHÔNG CÓ trong plan — fallback 0 (không đoán số)"

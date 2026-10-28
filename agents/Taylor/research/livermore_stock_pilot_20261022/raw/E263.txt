@@ -1,0 +1,7 @@
+Cổ phiếu tăng mạnh từ 67 lên 140 (i20→141), rồi phân phối với khối lượng cao, rơi về 97.65 (i179–180). Nhịp hồi lên 132.5 (i230) tạo đỉnh thấp hơn 140. Sau đó giá sập: gap xuống tại i243 (105), chạm 97.3 tại i244. Đây là lần thử lại vùng đáy 97–98, tạo cấu trúc hai đáy trong biên 97–133. Nhịp hồi lên 111.7 có khối lượng giảm dần (0.81 ở i249), chưa có follow-through. Phía trên có cung kẹt dày ở 117–127 (vùng i219–240). Biến động ngày khoảng 3–5%. Ngưỡng −15% tính từ ~112 là khoảng 95, chỉ thấp hơn đáy kép 97.3 một chút. Nếu thủng đáy này sẽ có air-pocket do margin.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 97 (thủng đáy kép i179/i244) với khối lượng tăng
+CONTAMINATION: NONE

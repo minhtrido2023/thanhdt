@@ -1,0 +1,11 @@
+**Phân tích:** Đây là mã thanh khoản cực mỏng, nhiều khả năng niêm yết trên UPCoM, vì có nhiều phiên dao động vượt ±7% (ví dụ +14% ở i=3, −15% ở i=249). Nhiều phiên khối lượng bằng 0 hoặc khớp lệnh lẻ, nên giá chủ yếu là nhiễu chứ không phản ánh cung cầu thật.
+
+Ở thang 60 phiên, giá đi ngang trong vùng rộng khoảng 155–230. Đỉnh i=228–229 (260 intraday) thất bại và rơi về 159.8 chỉ sau vài phiên. Nhịp hồi i=243 (210, KL 10.7) chưa có lực theo.
+
+Phiên i=249 đóng ở 195.6 với khối lượng rất nhỏ (0.55), nằm giữa vùng. Các râu dưới về 155–162 lặp lại nhiều lần (i=221, 237, 241, 242), tức là nằm trong biên −15% so với giá vào. Giá Open phiên sau cũng có thể lệch rất xa 195.6.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa trên 231 kèm khối lượng >5 lần median và giữ được nhiều phiên thì vùng cung 230–260 bị hấp thụ, kịch bản sideway-nhiễu bị vô hiệu.
+CONTAMINATION: NONE

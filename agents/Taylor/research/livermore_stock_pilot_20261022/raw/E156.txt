@@ -1,0 +1,7 @@
+**Phân tích:** Cổ phiếu tạo đỉnh khoảng 149 (i=119). Sau đó phân phối với đỉnh thấp dần: 142,7 (i=111/154) rồi 112 (i=185). Giá đi ngang trong vùng 101–110 suốt khoảng 50 phiên (i=180–229), sau đó gãy nền từ i=230. Đợt markdown từ 103 xuống 77 đi trên khối lượng thấp (0,1–0,8), không có phiên climax bán tháo. Vì vậy chưa thấy dấu hiệu đầu hàng hay hấp thụ, mà giống thiếu cầu trên thanh khoản mỏng. Nhịp hồi 75–84 (i=240–248) yếu. Phiên i=249 đóng ở 78,7 sau khi chạm 77,04, gần đáy 75,18. Cả ba thang thời gian đều đang ở pha markdown. Vùng cung kẹt nằm ở 88–105. Nếu thủng 75 thì bên dưới là air-pocket, và mốc −15% (~67) là trong tầm với.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.36
+INVALIDATION: Kịch bản giảm bị vô hiệu nếu giá đóng cửa trên 89–90 (lấp mép gap i=239/240) với khối lượng >1,5×. Mua chỉ còn hợp lệ nếu giữ được 75; đóng cửa dưới 75 thì thoát.
+CONTAMINATION: NONE

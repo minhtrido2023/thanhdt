@@ -1,0 +1,13 @@
+**Đọc cấu trúc**
+
+- **250 phiên:** cổ phiếu đi ngang rộng trong vùng 77–105. Lần test đỉnh trước (i96–99, quanh 102–103) thất bại và giá rơi về 76.4 (i165), giảm khoảng 26% trong khoảng 65 phiên.
+- **60 phiên:** pha markup từ 82 lên 105. Breakout i199–203 có khối lượng lớn (4.27/3.98). Đợt điều chỉnh về 89–91 có khối lượng cạn.
+- **Gần nhất:** i245 phá lên 105 (V 4.06) nhưng không có follow-through. i249 đóng cửa sát đáy ngày (99.92, V 2.16), lùi lại vào trong vùng cung 100–103.
+- **Đánh giá:** khả năng đây là một breakout thất bại tại vùng đỉnh kép cũ.
+- **Hỗ trợ:** 95.5 (i235), rồi 89–91, rồi mép gap 86–87. Mức −15% (khoảng 85) nằm dưới các vùng này nhưng vẫn khả thi nếu lặp lại kịch bản i100–165.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 95.5 (đáy i235) kèm khối lượng lớn thì xác nhận breakout thất bại. Ngược lại, đóng cửa trên 105.3 kèm khối lượng thì luận điểm rủi ro bị vô hiệu.
+CONTAMINATION: NONE

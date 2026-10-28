@@ -105,6 +105,7 @@ def case_counter_slug_is_rejected():
     rejected = ["foo-bar-2days", "foo-bar-3days", "foo-bar-1day", "foo-bar-3retros",
                 "foo-bar-4", "foo-bar_5", "foo-bar-2-days", "foo-bar-5-days",
                 "2-days", "3days", "foo-bar-0001743768",
+                "foo-bar-recurring", "foo-bar_Recurring",  # coord-2026-10-20
                 RE.TOPIC_PREFIX + "foo-bar-6days", RE.TOPIC_PREFIX + "2-days"]
     bad = []
     for v in rejected:

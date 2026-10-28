@@ -1,0 +1,9 @@
+Cổ phiếu chuyển từ trạng thái gần như không thanh khoản (khối lượng ~0–1× median, vùng 105–130) sang **markup đầu cơ cực mạnh**: i193–212, khối lượng 20–120×, giá lên đỉnh climax 254.6 (i212) rồi đi ngang biến động rộng 162–224. Nhịp hồi i237→248 (162.5→235) tiến sát **vùng cung kẹt 240–255** ở đỉnh i212–213. Phiên i249 mở gap lên 242.6 nhưng bị bán xuống 223 với khối lượng 104×, ngay sau phiên 124× của i248. Đây là dạng **upthrust/breakout thất bại** tại đỉnh cũ, kèm khối lượng phân phối.
+
+Biên dao động ngày thường ~8–10%, nên vùng −15% (~190) nằm ngay giữa range cũ. Đáy gần nhất 162.5 còn cách xa hơn. Đây là pha distribution/range đầu cơ, có rủi ro margin air-pocket.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa vững trên 255 (vượt đỉnh i212) với khối lượng duy trì thì luận điểm upthrust bị vô hiệu; ngược lại, thủng 185 xác nhận chiều xuống.
+CONTAMINATION: NONE

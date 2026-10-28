@@ -1,0 +1,13 @@
+**Phân tích:** Mã này đi ngang khoảng 98–107 suốt khoảng 120 phiên, rồi vào pha markup dốc từ i≈124 tới 265, tức tăng khoảng +160% trong 125 phiên. Đây là cấu trúc mở rộng ở cả ba thang. Các điểm quan trọng:
+
+- **Vùng hỗ trợ gần:** nền 235–252 (i=234–247). Có climax cung ở i=236–237 với khối lượng ~6x, sau đó được hấp thụ.
+- **Phiên i=248:** bứt phá trần với khối lượng 8.66x, lớn nhất cả chuỗi.
+- **Phiên i=249:** gap lên 265, chạm 274 rồi đóng gần mở cửa với khối lượng 4.3x. Đây là dấu hiệu buying climax hoặc exhaustion gap tiềm năng, không phải follow-through sạch.
+- **Rủi ro rơi:** giá vào khoảng 265, mức −15% là ≈225. Mức này nằm ngay mép gap 212–225 (i=228) chưa lấp. Nếu nền 235 thủng, khoảng trống giá này và lực bán do margin dễ kéo giá xuống tới đó.
+- **Cái giá của việc mua đuổi:** mua ở đây là mua đuổi xa nền. Xu hướng vẫn còn nguyên, nhưng phân phối lợi nhuận lệch về rủi ro giảm.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 235 (đáy nền i=237/245) với khối lượng lớn → pha distribution, mục tiêu lấp gap 212–225.
+CONTAMINATION: NONE

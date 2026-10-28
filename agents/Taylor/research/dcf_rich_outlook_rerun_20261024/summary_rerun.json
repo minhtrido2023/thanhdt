@@ -1,0 +1,14 @@
+{
+ "n_ok": 7510,
+ "n_pos": 3720,
+ "n_shchg_gt2pct": 465,
+ "n_shchg_richdeep": 115,
+ "lag_qualify_by_bucket": {
+  "CHEAP": 658,
+  "RICH_DEEP": 307,
+  "RICH_MILD": 206,
+  "FAIR": 204
+ },
+ "lag_qualify_n": 1375,
+ "lag_qualify_quarters": 52
+}

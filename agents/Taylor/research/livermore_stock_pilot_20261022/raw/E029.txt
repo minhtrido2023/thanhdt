@@ -1,0 +1,12 @@
+**Phân tích:** Ở thang 250 phiên đây là pha markdown với chuỗi đỉnh thấp dần: 141 (i45), 134 (i83), 121 (i164), 104 (i215), 94 (i246). Đáy lớn nằm ở 77.8 (i109).
+
+Ở thang 60 phiên, giá trôi từ 104 xuống vùng 88–94. Đáy gần nhất là 85.5 (i233). Từ i235 đến i249 giá nén rất chặt trong biên 89–94, khối lượng cạn kiệt ở mức 0.15–0.35. Cạn cung là có, nhưng chưa thấy cầu chủ động: không có thanh tăng nào kèm khối lượng follow-through.
+
+Cung bị kẹt nằm phía trên ở 95–104 (đỉnh i215, vùng giao dịch i190–220). Thanh khoản mỏng nên một thanh bán gãy 85.5 có thể tạo air-pocket về vùng 78. Mốc −15% tính từ khoảng 92 là xấp xỉ 78, trùng đáy i109.
+
+**Kết quả:**
+P_HIT15: 0.27
+RISK: MED
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 85.5 (đáy i233) kèm khối lượng tăng thì kịch bản tích luỹ bị phá. Phe mua chỉ được xác nhận khi vượt 95–96 với khối lượng >1.0.
+CONTAMINATION: NONE

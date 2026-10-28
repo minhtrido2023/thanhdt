@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá tăng mạnh từ 100 lên 354 (đỉnh i211–212). Ở thang 60 phiên, cấu trúc chuyển sang phân phối. Biên 300–349 có các đỉnh thấp dần: 354 → 349 (i223, vol 4.23) → 334 → 319. Phiên i245 phá đáy biên 300 với khối lượng 3.37, xuống 275. Nhịp hồi i246–249 về 290–295 có khối lượng thấp (0.55–1.57), tức là đang retest mép dưới biên cũ, nơi người mua kẹt ở vùng 300–350 tạo cung phía trên. Mức −15% tính từ giá vào khoảng 295 là ≈251, trùng đáy climax i195 (245.9) và chân sóng i189. Đây là vùng hỗ trợ thật gần nhất. Cổ phiếu tăng gấp ba, lại có giá thấp với bước giá thô, nên rủi ro hụt hơi do margin là đáng kể.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 275 (đáy i245–248) kèm khối lượng >1.5 → phân phối xác nhận; luận điểm tăng chỉ đứng vững nếu đóng trên 320 với khối lượng lớn.
+CONTAMINATION: NONE

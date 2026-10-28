@@ -1,0 +1,11 @@
+Cổ phiếu đi ngang rộng khoảng 95–120 suốt khoảng 230 phiên. Phía trên có đỉnh cũ 117–119.6 (i=8–16), nơi cung bị kẹt. Từ 20 phiên trước, nền khô cạn quanh 95–101, khối lượng xuống tới 0.14–0.4.
+
+Từ i=233, giá bứt phá mạnh, bắt đầu từ khoảng 98. Thanh i=238 tăng +6.4% với khối lượng 7.55, vượt đỉnh cũ, và i=240 lên tới 125. Đây là breakout khỏi nền 250 phiên, có follow-through.
+
+Từ i=240 đến 249, giá giằng co 121.8–129.3 với khối lượng cao 3–6. Giá không tiến thêm, các bóng trên ở i=242 và i=248 cho thấy cung phân phối đang được hấp thụ. Điểm vào khoảng 124.5, nên mốc −15% là khoảng 106, tức quay lại sâu trong nền cũ. Muốn chạm mốc này, breakout phải thất bại hoàn toàn. Bên dưới có túi khí 118→111, là thân thanh i=238.
+
+P_HIT15: 0.25
+RISK: MED
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 117 (mất đỉnh cũ/thân thanh breakout i=238) → breakout thất bại, mục tiêu 110–106.
+CONTAMINATION: NONE

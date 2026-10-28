@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu đi ngang rộng trong vùng 107–132. Cung phía trên dày đặc ở 124–132, gồm đỉnh i44 (131.84, climax 12.2x khối lượng), i89 (127.86) và i233 (127.36). Cả ba lần chạm vùng này đều bị bán ngược. Ở thang 20–60 phiên, đáy đang nâng dần: 110.45 (i208), 112.44 (i226), 115.42 (i235/238). Pha tích luỹ khô cạn 180–226 (khối lượng 0.05–0.7x) đã cho cú đẩy lên i228–233. Nhịp chỉnh sau đó về 115.4 với khối lượng giảm, là dấu hiệu tốt. Nhưng giá vào ~123 nằm sát mép dưới vùng cung 124–128, tức mua ở phần trên của biên độ, lợi nhuận/rủi ro không hấp dẫn. Biến động thấp. Mốc −15% (~104.5) nằm dưới toàn bộ đáy 250 phiên, nên khả năng chạm thấp.
+
+P_HIT15: 0.12
+RISK: MED
+P_POS: 0.48
+INVALIDATION: Đóng cửa dưới 115.4 (đáy nhịp chỉnh i235/238) với khối lượng tăng, khi đó cấu trúc đáy nâng dần bị phá và giá dễ về lại 110.
+CONTAMINATION: NONE

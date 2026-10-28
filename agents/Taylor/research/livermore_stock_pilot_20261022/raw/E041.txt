@@ -1,0 +1,11 @@
+Cổ phiếu đi ngang trong biên khoảng 83–104 suốt 250 phiên và chưa có xu hướng ở cả ba thang. Ở i=209–215 giá thử vượt 104 với khối lượng lớn: i=209 đạt 5.6x, i=213 có râu lên tới 109.71. Lần thử này thất bại, i=214–215 rơi về 91–95, tức là phân phối ở mép trên biên.
+
+Giá sau đó tạo nền 92.3–93.2 (i=233–240) với khối lượng cao bất thường (i=239 đạt 2.58x) và hồi lên 96.7 trên khối lượng yếu. i=247–248 phá thủng nền xuống 90.47, i=249 kéo về 91.92 nhưng chưa lấy lại vùng 92.3–93.
+
+Hỗ trợ kế tiếp là vùng 85.7–86.9 (i=155–157), sau đó là 82.7 (đáy năm). Mức −15% tính từ ~92 là ~78, thấp hơn mọi đáy trong năm. Biến động ngày thấp nên kịch bản này khó xảy ra. Phía trên, cung chờ sẵn ở vùng 96–100.
+
+P_HIT15: 0.12
+RISK: MED
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 85.5 (thủng vùng đáy i=155–157) với khối lượng >1.5x thì cấu trúc biên bị phá, mở đường về 82.7 và thấp hơn.
+CONTAMINATION: NONE

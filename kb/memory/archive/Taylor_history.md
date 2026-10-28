@@ -1262,3 +1262,328 @@
 
 ## Archived 2026-10-16 (keep=12 days=0 require_done=False)
 - [2026-10-14T06:37:49Z] ĐANG DỞ job Taylor_20261014_060642 (quỹ bước 4 phần 2, wt-step4-1014): bước 1-3 COMMIT (b58064f4f A, a51b7cb18 B, 7aeae5999 nav_period_returns benchmark+--sleeve); byte-proof research/fund_step4_impl_20261014/byte_proof.sh 11/11 | NEXT: bước 4 bảng 3.2 + report_delivery_gate (cổng ô chỉ số = CLI, chặn weekly/monthly khi cột cổ tức chưa có số), bước 5 registry+cron (chỉ soạn), bus finding
+
+## Archived 2026-10-17 (keep=12 days=0 require_done=False)
+- [2026-10-14T06:53:21Z] [Quỹ mở bước 4 phần 2, 10-14] XONG: nhánh feat/fund-step4-benchmark-20261014 @6a60a0bbc (5 commit, wt-step4-1014), CHƯA merge/cron; finding fund-step4-impl-20261014 trace Taylor_20261014_060642; README research/fund_step4_impl_20261014/. CHỜ Mike arch-review + user (merge, sleeve_*.json thật, cron, bq_admin Q10). Sau merge: weekly bảng 3.2 cũ bị chặn khi chuỗi TR đã dựng. (Thay dòng ĐANG DỞ job 060642.)
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:12:03Z] ĐANG DỞ job Taylor_20261014_091148 (Quỹ mở bước 4 VÒNG 2: B1-B4 + N-a..e, nhánh feat/fund-step4-benchmark-20261014 wt agents/Taylor/wt-step4-1014, KHÔNG merge/cron/data thật) | NEXT: đọc diff nhánh + review a9c014c85c30499ef + /tmp/archrev_s4
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:26:36Z] ĐANG DỞ job Taylor_20261014_091148: B2 94804b24a, B1 131ea7abf, B3 xong | NEXT: B4 4 mutant (N1 N6 N9 N11) + N-a..e + verify sweep
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:29:47Z] ĐANG DỞ job Taylor_20261014_091148 attempt2: commit B2/B1/B3/B4/N-b có sẵn (10e84dd2c) | NEXT: N-a,N-c,N-d,N-e + verify (TZ, §23, harness reviewer, byte master vs nhánh) + bus
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:34:30Z] ĐANG DỞ job 091148 attempt2: TẤT CẢ B1-B4 + N-a..e đã commit (HEAD 8d39846be) | NEXT: verify (harness /tmp/archrev_s4/mut/run.py, TZ, §23, byte proof) + bus finding
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T09:46:34Z] [Quỹ bước 4 vòng 2, 10-14] XONG nhánh @246f3ba53 (B1-B4 + N-a..e), finding fund-step4-round2-20261014 trace 091148; CHỜ Mike arch-review hẹp vòng 2. Merge PHẢI kèm data/account_inception.json. Sự cố: dòng sót nav_history_ZaloPay 10-14 16:38 (cron 19:10 tự thay) — kiểm sau 19:10. (Thay dòng ĐANG DỞ job 091148.)
+
+## Archived 2026-10-18 (keep=12 days=0 require_done=False)
+- [2026-10-14T13:53:08Z] ĐANG DỞ job Taylor_20261014_135258 (đổi nhãn rate_source cctg_6m→cctg_12m, worktree riêng, KHÔNG merge): bắt đầu | NEXT: grep + tạo worktree
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-14T14:35:49Z] [rate-source-label-12m 10-14] XONG chờ arch-review: nhánh fix/rate-source-label-12m-20261014 ở CẢ 2 repo (WC ea82525f, mike 53fd6909b), CHƯA merge. (Thay dòng ĐANG DỞ job 135258.)
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T03:36:03Z] ĐANG DỞ job Taylor_20261016_033549 (cron chốt sổ đơn vị quỹ tuần, wrapper bin/ledger_seal_weekly.py, nhánh feat/ledger-seal-weekly-20261016 wt riêng, KHÔNG merge/cron/data thật): bắt đầu | NEXT: đọc nav_unit_ledger.py + ledger_anchor_check.py + sandbox mẫu
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T03:53:05Z] [ledger-seal-weekly 10-16] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/ledger-seal-weekly-20261016 @256bfcca6 (wt đã gỡ), finding ledger-seal-weekly-20261016 trace Taylor_20261016_033549. Theo dõi: vn_market thiếu Tết 2027. (Thay dòng ĐANG DỞ job 033549.)
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T04:02:25Z] ĐANG DỞ job Taylor_20261016_040211 (ledger-seal-weekly VÒNG 2: B1 NothingToSeal last>=asof, B2 so mốc, N1 N2 N4; wt agents/Taylor/wt-seal-r2, KHÔNG merge/cron/data) | NEXT: tạo wt, sửa
+
+## Archived 2026-10-19 (keep=12 days=0 require_done=False)
+- [2026-10-16T04:09:32Z] [ledger-seal-weekly vòng 2 10-16] XONG chờ Mike arch-review hẹp+merge+cron: nhánh feat/ledger-seal-weekly-20261016 @9900c56e5 (wt gỡ), finding ledger-seal-weekly-round2-20261016 trace Taylor_20261016_040211. (Thay dòng ĐANG DỞ job 040211 + dòng XONG vòng 1.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-17T02:18:27Z] [weekly 10-12→10-16] 2 file md + 6 chart XONG, delivery gate BLOCK G4 (cột VN-Index có cổ tức). CHỜ Mike/bq_admin gỡ G4 rồi chạy lại report_delivery_gate cho 2 file (sha trong bus finding weekly-...BLOCKED-G4).
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T03:16:52Z] ĐANG DỞ job Taylor_20261018_030925 (cq-2026-10-18 autodispatch, 7 finding): sửa xong 6 + F7 chỉ docstring, working tree CHƯA commit (9 file ở WorkingClaude/); arch-reviewer ae94d13e chạy nền | NEXT: nhận verdict, commit CHỈ 9 file (cấm git add -A), bus finding topic cq-2026-10-18-taylor-autodispatch, notify_thread.sh architecture
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T03:22:49Z] [cq-2026-10-18 autodispatch] XONG commit 3147ce873 (9 file), chờ Mike/arch-review vòng 2 nếu muốn; chưa merge/push. (Thay dòng ĐANG DỞ job 030925.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T17:25:58Z] ĐANG DỞ job Taylor_20261018_172548 (VN-Index TR carry-forward v2, wt riêng, KHÔNG merge/data thật) | NEXT: đọc bin/vnindex_total_return.py + registry
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T17:38:45Z] [vnindex-tr carry-forward v2 10-19] XONG chờ Mike gọi quant-skeptic rồi trình user: nhánh research/vnindex-tr-carry-forward-20261019 @37aa83657 (wt WorkingClaude/wt-Taylor_20261018_172548), finding vnindex-tr-carry-forward-v2-20261019. Mở: 1 ô ZaloPay -6,85→-6,86 nếu weekly 12-16/10 đã gửi bằng v1. (Thay dòng ĐANG DỞ job 172548.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T17:45:16Z] [sunday-plan-round 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @d570de2c9 (wt-Taylor_20261018_173105). Thêm 1 dòng: cổng macro_health CN.
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-18T18:53:56Z] [sunday-plan-round vòng 2 10-19] XONG chờ Mike arch-review+merge+cài cron: nhánh feat/sunday-plan-round-20261019 @bc6f53eab (wt-Taylor_20261018_173105). (Thay dòng XONG @d570de2c9.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T02:41:32Z] [sunday-plan-round vòng 3 10-19] XONG chờ Mike merge+cài cron: nhánh feat/sunday-plan-round-20261019 @6501e3011. (Thay dòng @bc6f53eab.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T05:21:56Z] ĐANG DỞ job Taylor_20261019_052148 (AIS chain-order rule oshares_live, wt ../wt-Taylor_20261019_052148 nhánh feat/ais-chain-order-20261019, KHÔNG merge) | NEXT: đọc oshares_live + selfcheck + registry
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T05:40:07Z] [ais-chain-order 10-19] XONG chờ Mike arch-review+quant-skeptic+merge: nhánh feat/ais-chain-order-20261019 @c22ce4c60 (wt /home/trido/thanhdt/wt-Taylor_20261019_052148), finding ais-chain-order-20261019. (Thay dòng ĐANG DỞ job 052148.)
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T16:01:43Z] ĐANG DỞ job Taylor_20261019_160133 (DT gate candidate BEAR/CRISIS recount, read-only) | NEXT: đọc get_dt_gate_clock + DT gate trong macro_state_live.py, tái dựng chuỗi 29/09-19/10
+
+## Archived 2026-10-20 (keep=12 days=0 require_done=False)
+- [2026-10-19T16:04:07Z] [dt-gate-badzone 10-19] XONG job Taylor_20261019_160133: khuyến nghị A giữ nguyên; REPORT research/dt_badzone_count_20261019/. Mốc: CRISIS 25/25 sớm nhất ~10/11 nếu không đứt. (Thay dòng ĐANG DỞ job 160133.)
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T03:14:43Z] ĐANG DỞ job Taylor_20261020_031433 (gate-block owned recovery, phương án A; wt nhánh feat/gate-block-owned-recovery-20261020, KHÔNG merge) | NEXT: kiểm kê cổng BLOCK bằng grep
+- [2026-10-20T03:17:56Z] ĐANG DỞ job Taylor_20261020_031433: wt /home/trido/thanhdt/wt-Taylor_20261020_031433 nhánh feat/gate-block-owned-recovery-20261020 | NEXT: helper bin/gate_block_question.py + wire run_bot.sh/send_plan_report.sh/check_report_cadence.sh + selfcheck
+- [2026-10-20T03:21:01Z] [vnindex-tr carry-forward vòng 2 10-20] XONG chờ Mike quant-skeptic vòng 2: nhánh research/vnindex-tr-carry-forward-20261019 (wt-Taylor_20261018_172548). Mở: báo cáo ZaloPay tuần 12-16/10 dòng 90+93 nếu gửi bằng v1; DMX/AAN/LPS thiếu giá chờ bq_admin.
+- [2026-10-20T03:22:02Z] ĐANG DỞ job Taylor_20261020_032153 (rating 8L lag phần 1+3, read-only, out agents/Taylor/research/rating_8l_lag_20261020/) | NEXT: data_registry + rating_8l_history.py
+- [2026-10-20T03:26:19Z] [gate-block-owned-recovery 10-20] XONG chờ Mike arch-review+merge+cài cron sweep: nhánh feat/gate-block-owned-recovery-20261020 @28f128801 (wt /home/trido/thanhdt/wt-Taylor_20261020_031433), finding gate-block-owned-recovery-20261020. (Thay dòng ĐANG DỞ job 031433.)
+- [2026-10-20T03:39:50Z] ĐANG DỞ job Taylor_20261020_033928 (vòng 2 gate-block-owned-recovery, B1-B4+N1-N5,N8; wt-Taylor_20261020_031433) | NEXT: đọc review + code
+- [2026-10-20T03:44:21Z] [rating-8l-lag p1+p3 10-20] XONG job Taylor_20261020_032153, REPORT research/rating_8l_lag_20261020/. Mở: 7 ca RD chép quý trước + 125 ca Q1 RD đầu 4 — đề xuất vá eff_date chờ Mike/user; Phần 2 chờ snapshot hằng ngày. (Thay dòng ĐANG DỞ job 032153.)
+- [2026-10-20T03:45:58Z] ĐANG DỞ job Taylor_20261020_034545 (rating 8L lag P2 event-study, read-only, out agents/Taylor/research/rating_8l_lag_p2_20261020/) | NEXT: đọc REPORT P1 + data_registry
+- [2026-10-20T03:55:05Z] [rating-8l-lag p2 10-20] XONG job Taylor_20261020_034545, REPORT research/rating_8l_lag_p2_20261020/. G1 drift ngan han +1.1-1.4% toi +20/40, chua tach PEAD. (Thay dong DANG DO job 034545.)
+- [2026-10-20T04:08:54Z] [gate-block vòng 2 10-20] XONG chờ Mike arch-review lại+merge+cài cron sweep: nhánh feat/gate-block-owned-recovery-20261020 @8bbb6ffe9 (wt-Taylor_20261020_031433). (Thay dòng @28f128801 + ĐANG DỞ 033928.)
+- [2026-10-20T04:52:14Z] ĐANG DỞ job Taylor_20261020_045201 (8L lag P2 vòng 2 prereg, out agents/Taylor/research/rating_8l_lag_p2v2_20261020/) | NEXT: PREREG.md + md5 trước khi tính CAR
+- [2026-10-20T04:52:34Z] ĐANG DỞ job Taylor_20261020_045223 (rating 8L eff_date guard, wt nhánh feat/rating-8l-eff-date-guard-20261020, KHÔNG merge/KHÔNG ghi fa_ratings_8l) | NEXT: đọc REPORT §3 + verify time
+- [2026-10-20T04:57:52Z] [rating-8l-lag p2v2 10-20] XONG job Taylor_20261020_045201: G1/G2 'khong co' theo PREREG (G1 truot b: IS p 0.18-0.19). REPORT research/rating_8l_lag_p2v2_20261020/. (Thay dong DANG DO 045201.)
+- [2026-10-20T05:03:08Z] [gate-block vòng 3 10-20] XONG chờ Mike arch-review vòng 3+merge+cài cron sweep+regen production_manifest: nhánh feat/gate-block-owned-recovery-20261020 @76a27add4. (Thay dòng @8bbb6ffe9.)
+- [2026-10-20T05:04:10Z] [ticker-mat-243 10-20] CHO restore tav2_bq.ticker (bq_admin/Mike) truoc 17:00 ICT; neu chua -> Mike quyet chan refresh fa_ratings_8l 17:30. Taylor khong tu tat cron.
+- [2026-10-20T05:05:53Z] ĐANG DỞ job Taylor_20261020_045223: commit db7fca931 nhánh feat/rating-8l-eff-date-guard-20261020 (wt /home/trido/thanhdt/wt-Taylor_20261020_045223); 4 chân R3 đang chạy logs/ trong research/rating_8l_eff_guard_20261020 | NEXT: md5 + pin_ledger compare + REPORT + finding
+- [2026-10-20T05:18:56Z] [rating-8l-eff-guard 10-20] XONG job Taylor_20261020_045223 chờ Mike arch-review+quant-skeptic: nhánh feat/rating-8l-eff-date-guard-20261020 @db7fca931 (wt repo ngoài). Δ R3=0. Mở: tav2_bq.ticker thiếu 243 mã (Winston); dọn wt _repin + cache _exp_r8lguard sau review. (Thay dòng ĐANG DỞ 045223.)
+- [2026-10-20T05:50:11Z] ĐANG DỞ job Taylor_20261020_054959 (rating 8L PIT 2010-2014 feasibility, read-only, out agents/Taylor/research/rating_8l_pit_2010_20261020/) | NEXT: đọc rating_8l_history.py + data_registry
+- [2026-10-20T05:50:31Z] ĐANG DỞ job Taylor_20261020_055002 (8L forward tracker B1 + costed BT B2, out agents/Taylor/research/rating_8l_forward_bt_20261020/, wt nhánh feat/rating-8l-forward-tracker-20261020, KHÔNG merge) | NEXT: đọc p2v2 REPORT + verify log
+- [2026-10-20T05:56:54Z] [rating-8l-pit-2010 10-20] XONG job Taylor_20261020_054959: DUNG DUOC CO DIEU KIEN (survivorship 100%, RD 2012-13 = qend+32 batch). Cho user quyet co dung tiep + PREREG moi. (Thay dong DANG DO Taylor_20261020_054959.)
+- [2026-10-20T06:03:56Z] ĐANG DỞ job Taylor_20261020_055002: B1 XONG (wt-Taylor_20261020_055002 @68b34b377, finding đã ghi) | NEXT: B2 kéo px pin -> control C0/C1 -> BT sleeve
+- [2026-10-20T06:12:26Z] [rating-8l forward+bt 10-20] XONG job Taylor_20261020_055002: B1 tracker nhánh feat/rating-8l-forward-tracker-20261020 @68b34b377 (wt-Taylor_20261020_055002) chờ Mike review+cron; B2 nhãn 'thiếu N'. MỞ: verdict P2v2 sai do px thiếu 113 mã — pin cho G1 đạt (a)-(d), chờ Mike/quant-skeptic. (Thay dòng ĐANG DỞ 055002.)
+- [2026-10-20T06:29:59Z] [gate-block followups 10-20] XONG chờ Mike arch-review+user duyệt merge: nhánh feat/gate-block-followups-20261020 @9534292e0 (wt-Taylor-gb-followups).
+- [2026-10-20T08:13:38Z] [rating-8l forward tracker fix 10-20] XONG chờ Mike merge+cài cron: nhánh feat/rating-8l-forward-tracker-20261020 @d3a3e04ac (wt-Taylor_20261020_055002).
+- [2026-10-20T08:17:53Z] [gate-block tests 10-20] XONG chờ Mike merge: feat/gate-block-tests-20261020 @b3ac05a69 (wt-Taylor-gb-tests).
+- [2026-10-20T08:23:26Z] ĐANG DỞ job Taylor_20261020_082308 (survivorship sensitivity, EXPLORATORY, out agents/Taylor/research/survivorship_sensitivity_20261020/) | NEXT: đọc report Winston + PREREG
+- [2026-10-20T08:30:47Z] [fa-ratings ticker-gate 10-20] XONG chờ Mike arch-review+merge+gỡ #PAUSED cron: feat/fa-ratings-ticker-gate-20261020 @057d22a25 (wt-Taylor_20261020_082306). LƯU Ý: wt/mike là SYMLINK về repo live — sửa file ở wt/bin, không qua wt/mike.
+- [2026-10-20T08:38:37Z] [survivorship-sensitivity 10-20] XONG job Taylor_20261020_082308: nhãn 'vượt sàn ở kịch bản X' (λ*≈0,16-0,55 mã/năm nắm trọn 12th); neo post-hoc λ_eff≈0,01. Mở: đề xuất đo giá ~10 mã lớn đã mất (FLC/ROS…) chờ Mike/user. (Thay dòng ĐANG DỞ 082308.)
+- [2026-10-20T08:49:07Z] [fa-ratings ticker-gate fix 10-20] XONG chờ Mike merge: feat/fa-ratings-ticker-gate-20261020 @c12bb294a (wt-Taylor_20261020_082306). Thay dòng @057d22a25.
+- [2026-10-20T09:38:01Z] [survivorship v2 10-20] XONG job Taylor_20261020_091621: lam* theo book thap hon v1 1,2-1,5x; REPORT survivorship_sensitivity_v2_20261020. Mo: gia FLC/ROS/HAI (phuong an B Winston) chua do.
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T09:42:18Z] ĐANG DỞ job Taylor_20261020_094204 (survivorship replay BAL/LAG trên mã lớn đã mất, EXPLORATORY, out agents/Taylor/research/survivorship_replay_20261020/) | NEXT: đọc Winston report + v2 REPORT + PREREG
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T10:14:00Z] [survivorship-replay 10-20] XONG job Taylor_20261020_094204 @55fdfc689: LB duoi san (MIX +0,14..+0,32pp), UB ALLOC* -1,7..-2,7pp. Mo: cach engine xu ly lo LAG mo trong BEAR chờ Mike/user. (Thay dong DANG DO 094204.)
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T11:36:59Z] ĐANG DỞ job Taylor_20261020_113646 (survivorship follow-up A-D, EXPLORATORY) | NEXT: đọc v2 overlay + replay REPORT + 2 log skeptic
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T12:12:21Z] [survivorship follow-up ABCD 10-20] XONG job Taylor_20261020_113646. Mo: Winston xac nhan BQ Volume=0 (31% gia tri mua LAG khop ngay KL=0, chua do CAGR); dong gop lo LAG mo luc BEAR can engine co cong state - cho Mike/user.
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T12:29:29Z] ĐANG DỞ job Taylor_20261020_122917 (V1 Volume=0 fill / V2 delisted enumerate / V3 LAG BEAR gate, EXPLORATORY, out agents/Taylor/research/survivorship_volzero_20261020/) | NEXT: đọc followup REPORT_BC/D + skeptic log
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T15:33:47Z] ĐANG DỞ job Taylor_20261020_153324 (tiếp 122917): kiểm kê xong — PREREG V1/V2/V3 md5 OK; ctl 4 chân + V1A EXIT=0; V1B/V1C 8 run CHẾT lúc reboot (cần chạy lại nohup); V2 replay log done 19:49 | NEXT: chạy lại V1B/V1C, V3
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T16:03:56Z] [survivorship V1/V2/V3 10-20] XONG job Taylor_20261020_153324 @4a2cf8643: V1A -0,2..-1,0pp (2/4), V2 dưới sàn, V3 +0,3..+0,5pp (2/4). Mở: quant-skeptic verify; ~44% mua LAG ở mã ADV3M<=0 bỏ trần thanh khoản — chờ Mike/user. (Thay dòng ĐANG DỞ 122917.)
+
+## Archived 2026-10-21 (keep=12 days=0 require_done=False)
+- [2026-10-20T18:01:49Z] [survivorship-volzero V1D/V1E/V3A'/V4 10-21] XONG job Taylor_20261020_162558 (REPORT_V1D_V1E.md, e8a0550b1) — chờ Mike/skeptic verify; mở: trần tham gia theo phiên nhân quả chưa đo
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T04:31:09Z] [survivorship-volzero F1-F3 10-21] XONG commit c7cef9792, chờ Mike/skeptic. Mở: phần dư OOS F2 (+39..+64 tỷ lô khớp được) chưa phân rã; F2F1 hậu kỳ cần prereg nếu dùng.
+- [2026-10-21T05:35:39Z] [vnindex-tr vòng 2 10-21] XONG job Taylor_20261021_052419: nhánh fix/vnindex-tr-restate-sealed-20261021 @577d605cd chờ Mike arch-review/merge; chuỗi thật đã đính chính 12-13/10 (md5 51cd88f4), không cần ack 14/10. (Thay dòng ĐANG DỞ 052419 + dòng mở 022501.)
+- [2026-10-21T05:49:29Z] [vnindex-tr vòng 2 arch-review 10-21] XONG job Taylor_20261021_054437, nhánh fix/vnindex-tr-restate-sealed-20261021 chờ Mike merge; hết vòng 2 — còn NEEDS_CHANGES thì dừng báo user
+- [2026-10-21T10:41:15Z] [lag-entry-window-width 10-21] XONG job Taylor_20261021_102832: giữ 3 phiên; lỗ hổng = vận hành phiên chuẩn (WAIT_CASH 58%, lỗi lịch 21%). Mở: chạy lại audit_live.py sau mùa Q3 (~11-15) — mẫu đầu tiên dưới Luật A.
+- [2026-10-21T11:51:40Z] [lag-calendar-dd 10-21] XONG job Taylor_20261021_114050: nhanh fix/lag-calendar-dd-checker-20261021 @d3020f553 (worktree wt-lag-cal-dd-20261021) cho Mike arch-review/merge truoc 24/10; mo: checker chi co, chua chan.
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:13:13Z] ĐANG DỞ job Taylor_20261021_151302: cổng DD LAG (lag_dd_pack.py + ack + checker) + thí điểm HT1/SCL/VPB | NEXT: đọc due_diligence.py, consistency_check, context_planning_mini
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:28:14Z] ĐANG DỞ job Taylor_20261021_151302: pilot XONG (HT1 CLEARED, SCL/VPB FLAG; commit 9ea37eaaa, nhánh feat/lag-dd-gate-20261021, worktree wt-lag-dd-gate-20261021) | NEXT: hợp đồng context_planning_mini + đề xuất cron/hook + finding 2
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:32:46Z] [lag-dd-gate 10-21] XONG job Taylor_20261021_151302: nhánh feat/lag-dd-gate-20261021 @a97873036 (worktree wt-lag-dd-gate-20261021) chờ Mike arch-review/merge trước 24/10; mở: hook 19:00 + chặn cứng tầng order chờ user duyệt
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:42:39Z] [vnindex-tr polish 10-21] XONG job Taylor_20261021_153755: nhánh fix/vnindex-tr-polish-20261021 @f0645f5e1 (wt_vnindex_tr_polish_20261021) chờ Mike arch-review/merge + áp runbook.proposed
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:50:09Z] [lag-dd-gate vòng 2 10-21] XONG job Taylor_20261021_154311: nhánh feat/lag-dd-gate-20261021 @9969df217 chờ Mike arch-review vòng 3; VPB pilot đổi FLAG->CLEARED (anomaly quá TTL)
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:54:22Z] ĐANG DỞ job Taylor_20261021_165411: vá cổng khối lượng compute_active_nav đọc thêm dnse_khoplenh_broker_confirm | NEXT: worktree fix/active-nav-broker-fills-20261021
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:55:22Z] ĐANG DỞ job Taylor_20261021_165512: VIỆC A (EQ_PHAI_THU_TANG tách trả trước) + B (audit quyền mua) | NEXT: worktree wt-lag-rights-20261022, tra ticker_financial cột AR
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:55:24Z] ĐANG DỞ job Taylor_20261021_165514: LAG per-share surprise + rủi ro quyền mua (paper) | out mike/agents/Taylor/research/lag_per_share_surprise_rights_20261022 | NEXT: PREREG rồi Q1-Q4
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T16:59:36Z] [active-nav-broker-fills 10-21] XONG job Taylor_20261021_165411: nhánh fix/active-nav-broker-fills-20261021 @2f956fb2f (wt-active-nav-broker-fills-20261021) chờ Mike arch-review/merge; sau merge cần chạy compute_active_nav thật để làm mới active_nav. (Thay dòng ĐANG DỞ 165411.)
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T17:17:55Z] [lag-per-share-rights 10-22] XONG job Taylor_20261021_165514 (commit 21c10df2f): PS2 HI->LO -4.6pp (N=60) chờ Mike quant-skeptic; mở: full-engine test tầng PS2 nếu duyệt
+
+## Archived 2026-10-22 (keep=12 days=0 require_done=False)
+- [2026-10-21T17:19:01Z] [lag-rights-audit 10-22] XONG job Taylor_20261021_165512: nhánh feat/lag-rights-audit-20261022 (wt-lag-rights-20261022) chờ Mike arch-review; mở: N1-N4/X1-X3 cần user duyệt, rights_issue_alert chưa wire
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-10-22T02:29:51Z] ĐANG DỞ job Taylor_20261022_022942: áp patch quyền mua X1,X2,X3,N2,N3 (user duyệt 22/10) | NEXT: đọc REPORT audit, tạo worktree
+- [2026-10-22T02:38:30Z] ĐANG DỞ job Taylor_20261022_022942: X1 commit 5ef72c1f7 (nhánh feat/lag-rights-patches-20261022, wt-lag-rights-patches-20261022) | NEXT: X3 corp_actions.load_all, X2, N3, N2, REPORT
+- [2026-10-22T02:40:31Z] [rights-alert-wire fix 10-22] XONG job Taylor_20261022_023548: feat/rights-alert-wire-20261022 @f3602417a chờ Mike arch-review/merge
+- [2026-10-22T02:48:06Z] ĐANG DỞ job Taylor_20261022_022942 (attempt2): X1,X3,X2,N3 commit tới fee92d83a | NEXT: N2 cổng TERP daily_nav_snapshot, REPORT
+- [2026-10-22T02:57:31Z] [lag-rights-patches 10-22] XONG job Taylor_20261022_022942: feat/lag-rights-patches-20261022 @6840c070c (X1,X3,X2,N3,N2) chờ Mike arch-review/merge; N1/N4 còn treo (user/legal)
+- [2026-10-22T03:21:59Z] ĐANG DỞ job Taylor_20261022_032141: N1 sổ lô quyền mua (phương án A) + N4 expected_qty | NEXT: đọc audit lag_rights_audit_20261022, tạo worktree wt-lag-rights-n1-20261022
+- [2026-10-22T03:52:03Z] [lag-rights-n1 10-22] XONG job Taylor_20261022_032141: feat/lag-rights-n1-20261022 @63e0c11d3 (N1 9c0aa2a34 + N4) chờ Mike arch-review/merge; escalate dòng rác nav_history 10-22 10:00 (race nav_scripts_2account_selfcheck)
+- [2026-10-22T04:12:44Z] ĐANG DỞ job Taylor_20261022_041232: vòng 2 arch-review N1/N4 (B1 rights_locked hạn+alert, B2 broker_statement fills) trên feat/lag-rights-n1-20261022 | NEXT: đọc _rights_locked_split, net_fills_journal_and_broker
+- [2026-10-22T04:31:50Z] [lag-rights-n1 vòng 2 10-22] XONG job Taylor_20261022_041232: feat/lag-rights-n1-20261022 @fa376eda0 (B1 d25a54510, B2 7941ada71, NB1-3) chờ Mike arch-review/merge; còn treo NB2-reconcile/NB4
+- [2026-10-22T05:33:28Z] ĐANG DỞ job Taylor_20261022_053319: R&D read-only phân loại phản ứng giá LAG (lag_price_reaction_class_20261022) | NEXT: PREREG + md5, tái dùng harness lag_entry_window_width_20261021
+- [2026-10-22T05:39:29Z] [lag-price-reaction 10-22] XONG job Taylor_20261022_053319: NO-GO phản ứng giá, INCONCLUSIVE theo luật chỉ do AVOL thấp (proxy thanh khoản); chờ Mike gọi quant-skeptic
+- [2026-10-22T07:02:23Z] ĐANG DỞ job Taylor_20261022_070208: R&D read-only entry_risk_tech_20261022 (Q1 timing / Q2 tail-risk BAL+LAG) | NEXT: đọc 4 REPORT cũ + harness, viết PREREG+md5
+- [2026-10-22T07:13:14Z] [livermore-live 10-22] XONG job Taylor_20261022_070212: feat/livermore-live-20261022 @fd9bc98e1 chờ Mike arch-review/merge; cron đề xuất chưa cài
+- [2026-10-22T07:15:29Z] [entry-risk-tech 10-22] XONG job Taylor_20261022_070208: Q1 timing NO-GO, Q2 G_VOL CẢNH BÁO-ONLY (đuôi xấu, NAV không lợi); chờ Mike quyết có gọi quant-skeptic
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-10-22T07:49:09Z] [livermore-live vòng 2 10-22] XONG job Taylor_20261022_072316: feat/livermore-live-20261022 B1-B4+NB chờ Mike arch-review hẹp/merge; cron đề xuất chưa cài
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-10-22T09:31:34Z] ĐANG DỞ job Taylor_20261022_093122: R&D read-only bal_loss_attribution_20261022 (phân rã lỗ BAL) | NEXT: PREREG+md5, tìm nav_history/journal/positions BAL
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-10-22T09:39:54Z] [bal-loss-attribution 10-22] XONG job Taylor_20261022_093122: BAL live = 1 lệnh VPI −21% stop; chạm cảnh báo tập trung SpaceX p4,4%; chờ Mike/quant-skeptic
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-10-22T09:50:22Z] ĐANG DỞ job Taylor_20261022_095008: R&D read-only bal_concentration_cap_20261022 (trần sizing BAL khi ít mã) | NEXT: đọc REPORT bal_loss_attribution, code sizing BAL, PREREG
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-10-22T10:01:34Z] ĐANG DỞ job Taylor_20261022_095008: 8 chân engine chạy nền (logs/ trong research/bal_concentration_cap_20261022, worktree wt-balcap-20261022) | NEXT: legs_metrics.py + bootstrap_nav, REPORT
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T10:11:53Z] [bal-concentration-cap 10-22] XONG job Taylor_20261022_095008: NO-GO trần BAL; sizing live=backtest; đính chính 'BAL bt luôn đa dạng hoá' SAI
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T11:01:13Z] [livermore-stock-pilot 10-22] XONG job Taylor_20261022_104625: NO-GO sát biên (a đạt AUC 0,629; b hụt ΔAUC +0,024 CI chứa 0); không wire; chờ Mike
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T14:33:07Z] ĐANG DỞ job Taylor_20261022_143258: vá park_holdings.py đối soát bán tay DRI (tái dùng f0e293c30) | NEXT: đọc commit, worktree wt-park-manual-sell-20261022
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T14:42:41Z] [park-holdings-manual-sell 10-22] XONG job Taylor_20261022_143258: fix/park-holdings-manual-sell-20261022 @30fe3ba7b chờ arch-review/merge
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T14:52:45Z] [park-holdings-manual-sell vòng 2 10-22] XONG job Taylor_20261022_145109: @9ccb6b0fe chờ arch-review lần cuối
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-22T15:39:25Z] [nav-snapshot-manual-fills 10-22] XONG job Taylor_20261022_153620: fix/nav-snapshot-manual-fills-20261022 chờ arch-review/merge rồi mới bù dòng NAV 21/10 (2 account) + chạy nav_loss_brake_monitor
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T03:45:09Z] ĐANG DỞ job Taylor_20261024_034455: R&D dcf_rich_outlook_20261024 (DCF RICH sâu có info lợi nhuận/drift?) | NEXT: đọc dcf_valuation.py, data_registry, PIT feasibility
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T03:53:50Z] [dcf-rich-outlook 10-24] XONG job Taylor_20261024_034455: RICH sâu KHÔNG báo LN xấu; drift xấu chỉ ở ROE<25%/hàng hóa; đề xuất hạ gate→WARNING cho ROE≥25%, chờ quant-skeptic+user
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T04:09:41Z] ĐANG DỞ job Taylor_20261024_040927: R&D lag_runup_effect_20261024 (run-up trước công bố vs drift LAG) | NEXT: đọc lag_live_schedule.py, registry LAG, dựng event set
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T04:16:08Z] [lag-runup-effect 10-24] XONG job Taylor_20261024_040927: run-up không làm yếu LAG, NO filter (DSR .56/PBO .83); giả thuyết hàng hóa×YTD>100% cần prereg
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T04:50:48Z] ĐANG DỞ job Taylor_20261024_045036: dcf_rich_outlook_rerun_20261024 (5 kiểm tra ROE ngưỡng/MDE/LAG surprise/share-change/TR bench) | NEXT: copy panel+code, control
+
+## Archived 2026-10-25 (keep=12 days=0 require_done=False)
+- [2026-10-24T04:56:54Z] [dcf-rich-rerun 10-24] XONG job Taylor_20261024_045036: ROE25% miễn trừ underpowered (MDE10pp); đề xuất B = đòi lý do chỉ MoS<-100% không miễn ROE; chờ user
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T02:00:28Z] [spend-routing-review 10-25] XONG job Taylor_20261025_020009: no_action (opus 48/135 job, giam so voi 59/110)
+- [2026-10-25T03:12:57Z] [cq-2026-10-25 autodispatch] XONG job Taylor_20261025_030917: 817eafc1b, 3 fix + 1 skip, arch APPROVED
+- [2026-10-25T03:58:28Z] ĐANG DỞ job Taylor_20261025_035815: cq hard-boundary 10-18+10-25 (cpi_vn look-ahead, publish_gated_state atomic, NAV §25 4 nơi, bot_execute docstring, dcf status) | NEXT: đọc report, worktree
+- [2026-10-25T04:07:39Z] [retro-prevention a+b 10-25] XONG job Taylor_20261025_035810: nhanh fix/prevent-nav-selfcheck-bg-wakeup-20261025 @215709652, arch NEEDS_CHANGES đã sửa 3 mục, CHƯA merge — chờ Mike merge/re-review
+- [2026-10-25T04:18:30Z] [cq-hard-boundary 10-25] job Taylor_20261025_035815: 4 commit đã merge main; CHỜ user duyệt merge cpi_vn pit (nhánh fix/cq-hard-boundary-20261025 d9f60d264+0fe24ff04) — khi duyệt: cherry-pick + ghi chú results_registry macro_confidence + data_registry/macro/cpi_vn.md
+- [2026-10-25T04:27:02Z] ĐANG DỞ job Taylor_20261025_042649: coord-2026-10-19/20 — verify injector discretionary giá vượt biên độ (TV1 19.900 plan 19/10) + gap relay retro | NEXT: đọc Wags.jsonl round2, discretionary_accumulation_inject.py
+- [2026-10-25T04:30:19Z] [coord-2026-10-19/20] XONG job Taylor_20261025_042649: injector bien do = FALSE (TV1 UPCOM), no fix; gap relay retro->user con mo, cho Mike/user chon kenh
+- [2026-10-25T04:37:52Z] ĐANG DỞ job Taylor_20261025_043744: V1 prompt DollarBill đọc lag_dd ack (hạn merge 18:30) + V2 dt5g_publish_runs.log | NEXT: worktree, đọc bq_freshness_check.sh khối LAG
+- [2026-10-25T04:46:55Z] ĐANG DỞ job Taylor_20261025_043744: V1 MERGED 591e52563; question mch-entry-date-26-vs-29 chờ Mike | NEXT V2: dt5g_publish_runs.log trong publish_gated_state.py (outer repo) + dt5g_writer_watch.py
+- [2026-10-25T04:57:34Z] [job Taylor_20261025_043744] XONG V1 (591e52563) + V2 (outer 5780167fd, mike 182a19f5e), arch CONFIRMED; CHỜ Mike: question mch-entry-date-26-vs-29, duyệt .proposed dt5g_publish_runs_log
+- [2026-10-25T06:13:00Z] ĐANG DỞ job Taylor_20261025_061240: commodity-cycle PREREG (DRI/MSR/PVT) → agents/Taylor/research/commodity_cycle_prereg_20261025/ | NEXT: data_registry feeds, map CSV, PREREG, chạy
+- [2026-10-25T06:20:21Z] [commodity-cycle 10-25] XONG job Taylor_20261025_061240: PREREG FAIL 6/6 (de76e7964); post-hoc 1.05/3M chỉ giả thuyết; CHỜ quant-skeptic (Mike) + user quyết feed APT/BDTI cho Winston
+- [2026-10-25T06:37:17Z] [commodity PREREG-2 10-25] XONG job Taylor_20261025_062825: nhanh research/commodity-prereg2-20261025 @c124266de, CHUA merge/cron — CHO Mike review + user; N=0 luc dong bang, ket qua kha di nhat 'khong phan biet duoc'
+- [2026-10-25T09:22:42Z] ĐANG DỞ job Taylor_20261025_092232: 4 cảnh báo rights alert NB (auto_exit_inject >=, send_plan_report rights, reconcile credit≠payment, N4 dividend_adjusted_return) | NEXT: tìm nguồn NB, worktree
+- [2026-10-25T09:22:49Z] ĐANG DỞ job Taylor_20261025_092234: Livermore REPORT_BLOCK cho weekly/monthly (worktree riêng, không merge) | NEXT: đọc livermore_run.sh/common.py/reads.md, check_report_cadence.sh
+- [2026-10-25T09:43:50Z] [rights-alerts-nb 10-25] job Taylor_20261025_092232 XONG: nhanh fix/rights-alerts-nb-20261025 @52d0804af, arch APPROVED, CHUA merge — cho Mike merge
+- [2026-10-25T09:51:18Z] [livermore-report-block 10-25] XONG job Taylor_20261025_092234: nhanh feat/livermore-report-block-20261025 @323e39b21, arch APPROVED r2, CHUA merge — CHO Mike/user: merge + chap nhan mau doc theo lich + xac nhan LVR-2026-10-21 mu
+- [2026-10-25T09:51:31Z] [livermore-report-block 10-25] XONG job Taylor_20261025_092234: nhanh feat/livermore-report-block-20261025 @323e39b21, arch APPROVED r2, CHUA merge — CHO Mike/user: merge + chap nhan mau doc theo lich + xac nhan LVR-2026-10-21 mu
+- [2026-10-25T11:49:41Z] ĐANG DỞ job Taylor_20261025_114929: A=LAG capacity floor (Volume cap p 10%/5%) → agents/Taylor/research/lag_capacity_floor_20261025/; B=fix f3_particip.py Price NaN + nhãn median_part_by_value | NEXT: đọc REPORT_F1_F3/PREREG_F3/f3_particip.py
+- [2026-10-25T11:54:16Z] ĐANG DỞ job Taylor_20261025_114929: batch 20 run đang chạy nền (wt-lag-capacity-floor-20261025, logs/run_batch.log) | NEXT: verify ctl md5 537e349b/a6ba34d8, metrics, rồi việc B f3_particip
+- [2026-10-25T12:00:02Z] [ta-schools 10-25] XONG job Taylor_20261025_115318: da so TA khong edge, chi ho xu huong (A2/C2b/F3) hon F1 nhung khong hon F2; REPORT.md trong research/ta_schools_vn_20261025/, chua commit
+- [2026-10-25T12:15:35Z] ĐANG DỞ job Taylor_20261025_121521: ta-trend-entry-filter (A2/F3/F2 x LAG/BAL trên ledger R3 park=0) → agents/Taylor/research/ta_trend_entry_filter_20261025/ | NEXT: PINS.jsonl, ledger, engine.py job trước, PREREG
+- [2026-10-25T12:21:35Z] [ta-trend-entry-filter 10-25] XONG job Taylor_20261025_121521: 0/6 dat, co xu huong khong loc duoc LAG/BAL (2e965250e); BAL×F3 chi la gia thuyet
+- [2026-10-25T12:31:27Z] ĐANG DỞ job Taylor_20261025_123115: lag-bal-discriminators (PREREG ~25 chỉ báo fundamental x LAG/BAL, tertile+Spearman, cluster bootstrap) → agents/Taylor/research/lag_bal_discriminators_20261025/ | NEXT: đọc positions.csv/analyze.py job ta_trend, PREREG
+- [2026-10-25T12:39:16Z] [lag-bal-discriminators 10-25] XONG job Taylor_20261025_123115 (db19fd74d): 4/50 đạt = value; payout không đạt; ứng viên GĐ2 duy nhất BAL×1/PCF,1/EVEB — CHỜ user duyệt + quant-skeptic
+- [2026-10-25T12:52:56Z] [lag-capacity-floor 10-25] XONG job Taylor_20261025_114929: A+B tren nhanh research/lag-capacity-floor-20261025 @6724d841e, CHUA merge; CHO Mike/user: co ghi khoi registry 'can duoi' (no_ledger, de xuat trong REPORT_A) hay khong
+- [2026-10-25T13:11:04Z] ĐANG DỞ job Taylor_20261025_131054: trend-basics-filter (T1-T10 liên tục + tương tác value × LAG/BAL) → agents/Taylor/research/trend_basics_filter_20261025/ | NEXT: đọc analyze.py/positions.csv ta_trend + features.csv, PREREG
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:11:09Z] ĐANG DỞ job Taylor_20261025_131052: BAL EVEB phase2 (V0-V4 replay R3) → agents/Taylor/research/bal_eveb_phase2_20261025/ | NEXT: đọc REPORT lag_bal + skeptic, registry 2026-10-08, worktree, PREREG
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:15:14Z] ĐANG DỞ job Taylor_20261025_131052: batch 10 run nền (wt-bal-eveb-phase2-20261025, logs/run_batch.log), PREREG 604786eb3 | NEXT: verify ctl md5 537e349b/a6ba34d8, evaluate.py, bootstrap, REPORT
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:18:08Z] [trend-basics-filter 10-25] XONG job Taylor_20261025_131054 (413f67e26): 1/39 đạt (LAG×up60) = hiệu ứng mã đứng giá, không phải xu hướng; value×xu hướng không thêm — chờ quant-skeptic nếu Mike muốn
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T13:49:05Z] ĐANG DỞ job Taylor_20261025_131052: 10 run PREREG xong (0/4 đạt), đang chạy 8 run amendment A1 wv1-4 (logs/run_batch3.log, commit 04ec38d61) | NEXT: evaluate.py → REPORT.md → bus finding
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T14:05:27Z] ĐANG DỞ job Taylor_20261025_140517: lag-capacity-floor R1(KL T-1/trung vị N)/R2(bỏ ABANDONED_REFUND)/R3(noise floor park=0) trên wt-lag-capacity-floor-20261025 | NEXT: PREREG_R.md
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T14:09:30Z] ĐANG DỞ job Taylor_20261025_140517: 54 run R nền (wt-lag-capacity-floor, logs/run_batch_R.log), PREREG_R ddcc86747 | NEXT: analyze_R.py, verify ctl md5, REPORT_R, 3 bus finding R1/R2/R3
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T14:13:07Z] [bal-eveb-phase2 10-25] XONG job Taylor_20261025_131052: 0/8 dat, NO-GO (885b2c944, nhanh research/bal-eveb-phase2-20261025, chua merge); BAL xep theo ta, khong co yieldcombo — CHO Mike/user: dong nhanh BAL x dong tien, co ghi registry no_ledger khong
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T16:00:13Z] [lag-capacity-floor R 10-25] XONG job Taylor_20261025_140517 @ce26d14e3 (chua merge): dai thuc thi 50 ty san 11,86..22,61/tran 14,74..25,40; san nhieu park0 1,57pp — CHO Mike/user
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T17:25:49Z] ĐANG DỞ job Taylor_20261025_172538: lag-capacity S1(ΔIS/ΔOOS)/S2(đọc code live defer vs bỏ)/S3(trần KL mở cửa + slippage) trên wt-lag-capacity-floor-20261025 | NEXT: đọc REPORT_R/PREREG_R/out_R_metrics.csv
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T17:34:56Z] ĐANG DỞ job Taylor_20261025_172538: S1 3cdefe417 + S2 fe910d1e5 xong (bus); S3 batch 24 run nền từ 00:33 (wt-lag-capacity-floor, logs/run_batch_S.log), PREREG_S 1e909f719 | NEXT: analyze_S.py → REPORT_S §S3 → bus S3 + 'S ket luan'
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-25T18:23:10Z] [lag-capacity-floor S 10-26] XONG job Taylor_20261025_172538 @148b84685 (chua merge): band 50 ty ~11,7-20,7/14,6-23,8, trung tam 18,5-20,7/21,2-23,8, chi phi IS -4,2..-4,4pp — CHO Mike/user: co chay bien the doi 3 phien + cong gia anchor khong
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T01:34:42Z] [dd-NNC 10-26] XONG job Taylor_20261026_012529: NON (khong fear-state, dinh chu ky, PB1,59); weighted 62,8k vs 47,6k. REPORT research/dd_NNC_20261026/. Meo: BCTC scan -> pip --target /tmp/pdflib pypdf, trich anh trang roi Read anh
+- [2026-10-26T04:55:12Z] [dd-template 10-26] XONG job Taylor_20261026_045054: mau DD + khoi chu ky mu o research/dd_template_20261026/ (chua commit) — CHO Mike/user duyet so dd_cycle_reads.md + cong; chay lai mu 5 ma = job khac
+- [2026-10-26T04:59:04Z] [sector-frames 10-26] XONG job Taylor_20261026_045056: khung bank/BDS/hoa chat o research/sector_frames_20261026/; CHAM du bao F-CHEM-2 <=2027-02-28, F-BANK/RE/CHEM-1 ngay 2027-05-20
+- [2026-10-26T05:03:01Z] [dd-blind-DDV 10-26] XONG job Taylor_20261026_045654: NON khong doi, blind=no (mau tu lo verdict DDV) — de xuat lam sach README/TEMPLATE truoc khi chay mu lai
+- [2026-10-26T05:04:08Z] [dd-blind-SAS 10-26] XONG job Taylor_20261026_045658: NON=NON, blind no (README §4 lo verdict); research/dd_blind_SAS_20261026/
+- [2026-10-26T05:04:47Z] [dd-blind-NNC 10-26] XONG job Taylor_20261026_045700: NON=NON, blind:no (WM+README lo verdict cu); khoi mu sot HTM/Tam Lap/MVC -> mau buoc 1 can doc CDKT BCTC Q-1 goc. research/dd_blind_NNC_20261026/
+- [2026-10-26T05:10:44Z] [dd-blind-SZL 10-26] XONG job Taylor_20261026_045656: NON=NON, blind:no (WebSearch lo so Q3). Meo: chay mu phai cam WebSearch tu do o buoc 1 (tom tat tu chen so quy Q); mau E 'trung vi LN' lech xuong voi annuity — de xuat sua mau, CHO Mike
+- [2026-10-26T05:46:41Z] [dd-blind2-FPT 10-26] XONG buoc 1 job Taylor_20261026_054003: md5 3c30d4ba, du bao NP me Q3/26 >=2680 ty p0,75 cham 2026-11-07; blind:no (WebSearch lo khuyen nghi CTCK Q2). Buoc 2 = job khac
+- [2026-10-26T05:47:27Z] [dd-blind2-DRI 10-26] XONG buoc 1 job Taylor_20261026_054006: CYCLE_BLOCK md5 15bd430e khoa 12:47 ICT, blind yes; du bao bien LNST Q3/26 >=27% p0,70 cham 2026-11-09 — buoc 2 la job khac
+- [2026-10-26T05:48:22Z] [dd-blind2-TV1 10-26] buoc 1 KHOA md5 4409305f (research/dd_blind2_TV1_20261026/); F: bien gop Q3/26 <33,0% p0.65, cham 2026-11-09 — buoc 2 la job khac
+- [2026-10-26T06:44:41Z] [dgc-q3-forecast 10-26] KHOA md5 d6ea39f4 (research/dgc_q3_forecast_20261026/): LNST me Q3/26 320 ty, 50% [270,370], 80% [215,425]; cham khi DGC cong bo (du kien 27/10-14/11)
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T08:18:08Z] [commodity-te 10-26] XONG job Taylor_20261026_075337 @cff2bc5c3: TE nowcast KQKD IC 0,45 (thi truong da dinh gia), B3 13 trial khong qua cong, khong chinh model — CHO Mike/user: PREREG forward LAG surprise-decomp + xin bq_admin feed APT/xut/P4/BDTI
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T09:47:02Z] [lag-capacity-floor D 10-26] XONG job Taylor_20261026_074918 @456b07baf (chua merge): band 50 ty ~11,7-18,1/14,6-20,8, CHINH D3AK10 18,08/20,82; lo ro slot LAG (inflight vo hinh tran 12) ~3pp, pin cung huong -2,2/-2,6 — CHO verify live slot + ca partial SCL/VPB plan 27/10
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T10:05:01Z] [commodity-nowcast-block 10-26] XONG job Taylor_20261026_095926 @920bb4219 (wt-commodity-nowcast, chua merge) — CHO arch-reviewer + Mike merge
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T10:22:53Z] [commodity-sue-decomp 10-26] XONG job Taylor_20261026_095928 @a1547392c (chua merge, wt-commodity-sue-decomp-20261026): PREREG-4 md5 6c5642c1; CHO Mike goi quant-skeptic + duyet cron (CRON_PROPOSAL.md) + merge. Luu y: S2 (SUE live) dIC lich su -0,012
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-26T16:13:28Z] [p4-sulfur 10-26] XONG job Taylor_20261026_160657: research/commodity_p4_sulfur_20261026/ (chua commit) — P4 nowcast DGC gay tu 2024, 17 trial GD khong ung vien; CHO Winston sua registry key phosphorus->phosphate_rock_cny

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu tích luỹ trong vùng 92–115 (i=60–170). Từ i=170 nó vào pha markup dốc, giá gần gấp đôi lên khoảng 198. Pha này đã có một cú rũ bạo lực: i=221–229 rơi từ khoảng 178 xuống low 110 (khoảng −38%), rồi hồi phục chữ V. Vùng 161–177 (i=238–247) tích luỹ ngắn với khối lượng 2.5–4.4x. Phiên i=248 phá đỉnh cũ 186.5 với khối lượng 27.6x median, cao bất thường. Phiên i=249 gap lên mở 190 và đóng cửa tại high 197.88. Đây giống climax/blow-off hơn là follow-through sạch. Giá vào sẽ quanh 198–205, cách xa mọi hỗ trợ. Mức −15% (khoảng 170) chính là đỉnh vùng nền, rất dễ bị test lại với biên dao động của mã này.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 180.7 (đóng cửa phiên climax i=248) hoặc thủng 161.6 (đáy nền i=238–247) thì cấu trúc breakout thất bại.
+CONTAMINATION: NONE

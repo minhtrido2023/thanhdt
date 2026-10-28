@@ -1,0 +1,13 @@
+**Phân tích:** Cổ phiếu thanh khoản rất mỏng: nhiều phiên Volume ≈0, giá nhảy kiểu bước, biên dao động trong phiên lớn. Sau đợt markup (i37–75: 118→178), giá đi ngang rộng trong vùng 140–178 suốt khoảng 170 phiên.
+
+- **Đáy vùng:** khoảng 140, từng bị thủng sâu xuống 116–118 ở i175–184.
+- **Cung phía trên:** vùng 173–178 là nơi bị từ chối nhiều lần (i75, i109, i111, i231).
+- **Thanh i249:** chạm 176.45 rồi đóng ở 164.74, tức đóng sát đáy phiên, với khối lượng cao nhất 20 phiên (8.43). Đây là dấu hiệu bị từ chối ngay tại cung đỉnh cũ, chưa có follow-through.
+
+Điểm vào dự kiến khoảng 160–165. Mức −15% tương ứng khoảng 138–140, chính là đáy vùng. Với biến động lớn và thanh khoản như vậy, mức này hoàn toàn có thể bị chạm trong vài tuần đến vài tháng.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 140 (thủng đáy range) → mục tiêu air-pocket về 116–125; ngược lại, đóng vững trên 178 với volume lớn sẽ vô hiệu hoá kịch bản range.
+CONTAMINATION: NONE

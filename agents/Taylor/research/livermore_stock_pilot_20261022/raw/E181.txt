@@ -1,0 +1,13 @@
+Giá nền dài 96–103 trong khoảng 130 phiên (i=0–133), thanh khoản rất mỏng. Pha markup bắt đầu ở i=134 (V 12.6) và i=142 (V 14.7), tăng tốc tại i=177–183 với climax ở i=179 (V 41.4, đóng 128.6). Sau đó giá đi ngang 122.5–136.6 suốt khoảng 65 phiên, khối lượng thưa và nhiều phiên không có giao dịch: đây là tái tích luỹ hoặc phân phối, chưa rõ bên nào.
+
+Hai lần thử đỉnh 135–136.6 đều bị từ chối:
+- i=240 (V 20.8) chỉ đóng 129.5.
+- i=248 (V 12.8) đóng ngay đáy phiên, 131.62.
+
+Cung phía trên vì vậy là có thật. Giá vào khoảng 131. Mức −15% tương ứng khoảng 111, nằm dưới đáy range 122.5, trong túi khí 110–114 (vùng i=163–176). Biến động ngày nhỏ nên xác suất chạm mức này ở mức vừa phải.
+
+P_HIT15: 0.17
+RISK: MED
+P_POS: 0.47
+INVALIDATION: Đóng cửa dưới 122.5 (đáy range i=229) với khối lượng tăng thì cấu trúc tái tích luỹ bị phá, rủi ro rơi về 110–114.
+CONTAMINATION: NONE

@@ -1,0 +1,9 @@
+**Phân tích:** Ở cả thang 60 và 250 phiên, cổ phiếu ở pha markup gần dạng parabol, tăng từ 100 lên 733 (≈7 lần) với thanh khoản rất mỏng: nhiều phiên trần hoặc sàn, Volume gần 0. Thang 20 phiên cho tín hiệu cảnh báo. Đỉnh 733 (i238) có khối lượng thấp (3.70). Sau đó giá giảm về 641 (i242) với khối lượng lớn 15.86. Lực cầu có đỡ, nhưng nhịp hồi chỉ lên 687–691 rồi bị đẩy xuống. i249 đóng ở 666, tạo đỉnh thấp hơn. Cấu trúc này giống phân phối sớm hoặc một vùng tích lũy lại hẹp.
+
+Mức −15% từ giá vào khoảng 667 là ≈567. Mức này nằm dưới vùng 588–606 (i226–233) và gần râu 560 (i223). Cổ phiếu tăng nóng, mỏng thanh khoản và nhiều người dùng margin dễ rơi qua các vùng đỡ này.
+
+P_HIT15: 0.52
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 641 (đáy i242 có khối lượng lớn), sau đó thủng vùng 588–592, sẽ xác nhận phân phối và chuyển sang markdown.
+CONTAMINATION: NONE

@@ -1,0 +1,11 @@
+Cổ phiếu tăng parabol từ 100 lên 253 (i99), sau đó phân phối ở vùng 175–205 (i118–150). Tiếp theo là pha markdown với ba phiên sàn trắng bên bán (i165–167, về 124). Sau đó giá tích luỹ trong biên 128–163 kéo dài khoảng 70 phiên, khối lượng tăng dần, nghiêng về cầu.
+
+Breakout lên 165 ở i239 (vol 3.77) rồi bị test về 149.8 (i244). Sau đó giá gap liên tiếp ở i246–248. Riêng i248 mở 189.27, đâm xuống 167.8 rồi đóng 180.8 với vol 6.38, cao nhất chuỗi. Đây là dấu hiệu churn/buying climax ngay dưới vùng cung kẹt 180–200 của đỉnh phân phối cũ. i249 không follow-through.
+
+Giá vào khoảng 178–180. Mức −15% rơi vào 151–153, đúng vùng mép breakout cũ, nơi giá vừa test cách đây năm phiên. Biên dao động ngày rất rộng, margin còn treo.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 162 (lấp gap i246–247, mất vùng breakout) phá vỡ cấu trúc tăng; ngược lại, đóng cửa trên 190 với khối lượng giảm mới xác nhận hấp thụ được cung.
+CONTAMINATION: NONE

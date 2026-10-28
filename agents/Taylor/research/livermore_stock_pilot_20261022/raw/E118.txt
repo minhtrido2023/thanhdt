@@ -1,0 +1,13 @@
+**Phân tích:** Đây là cổ phiếu penny: mỗi bước giá ≈5,9% ở mức 100, nhưng ≈9–11% ở mức hiện tại (58,82–64,71). Vì vậy chỉ cần lùi 1–2 bước giá là chạm ngưỡng −15%.
+
+- **Thang 250 phiên:** markdown rõ, từ 100 xuống 52,94.
+- **Thang 60 phiên:** phá nền 76–82 ở i=212–224, sau đó đi ngang trong vùng 52,94–64,71.
+- **Thang 20 phiên:** khối lượng tăng mạnh ở i=242 (9,95), i=244 (14,67) và i=247 (9,57). Đáy 52,94 bị test nhiều lần mà không đóng cửa dưới, gợi ý có hấp thụ cung.
+- **Cung phía trên:** lần thử 70,59 ở i=245 thất bại. Cung kẹt dày ở 70–82.
+- **Rủi ro chạm −15%:** nếu vào ở 64,71 thì chỉ cần Low 52,94 là đủ, mà mức này đã chạm 8 lần trong 26 phiên. Xác suất chạm vì thế cao.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 52,94 kèm khối lượng lớn (phá nền tích luỹ) thì kịch bản đáy bị vô hiệu. Ngược lại, đóng cửa trên 70,59 có follow-through thì xác nhận đảo chiều.
+CONTAMINATION: NONE

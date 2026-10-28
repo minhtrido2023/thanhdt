@@ -1,0 +1,7 @@
+Đây là cổ phiếu cực mỏng thanh khoản: nhiều phiên khối lượng gần 0 và nhiều thanh giá phẳng, nên giá có thể trượt mạnh mà không có lực mua đỡ. Trên khung 250 phiên, giá đi ngang rộng trong vùng 91–135. Vùng cung 127–135 đã chặn giá hai lần: lần một ở i131–153, khi đó cú bùng khối lượng 44.68 không có follow-through; lần hai ở i219–235. Sau lần chặn thứ hai, i236 giảm với khối lượng 9.0 và i237 rơi về 113.65, tức là cung vẫn đang áp đảo. Hỗ trợ gần nhất là 111–113, rồi đến air-pocket xuống 100 và 91. Tiền lệ cho thấy các cú rơi trên 15% đã xảy ra rất nhanh: 128 xuống 99.7 trong khoảng 6 phiên (i163–169), và 117 xuống 91 (i174–178). Giá vào dự kiến khoảng 121–126, nằm sát dưới trần, nên tỷ lệ lời/lỗ không thuận.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa trên 133 kèm khối lượng lớn hơn 5 lần median (thoát vùng cung 127–135); ngược lại, đóng dưới 111 thì mở đường xuống 100/91.
+CONTAMINATION: NONE

@@ -1,0 +1,84 @@
+{
+ "label": "SpaceX",
+ "asof": "2026-10-16",
+ "price_session": "2026-10-16",
+ "positions": {
+  "DRI": {
+   "qty": 3700.0,
+   "cost_price": 12262.1622,
+   "market": 15700.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 25.545139238306096,
+   "pl": 12534999.859999998,
+   "raw_cost": 13262.1622,
+   "gross": 1000.0
+  },
+  "MBB": {
+   "qty": 175.0,
+   "cost_price": 20656.7164,
+   "market": 19850.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": -3.939075549528639,
+   "pl": -146921.63865671656,
+   "raw_cost": 21313.43281791045,
+   "gross": 656.7164179104477
+  },
+  "TPB": {
+   "qty": 30.0,
+   "cost_price": 14173.913,
+   "market": 12000.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": -15.029761651874296,
+   "pl": -65869.5639130435,
+   "raw_cost": 14608.695608695652,
+   "gross": 434.7826086956522
+  },
+  "TV1": {
+   "qty": 2300.0,
+   "cost_price": 18647.8261,
+   "market": 18500.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": -1.1059560415800815,
+   "pl": -512500.02999999654,
+   "raw_cost": 20147.8261,
+   "gross": 1500.0
+  },
+  "VIB": {
+   "qty": 47.0,
+   "cost_price": 13619.744100000002,
+   "market": 13850.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 1.6906037169964028,
+   "pl": 10822.02729999992,
+   "raw_cost": 13619.744100000002,
+   "gross": 0.0
+  },
+  "VPB": {
+   "qty": 286.0,
+   "cost_price": 22020.9751,
+   "market": 24500.0,
+   "excluded": false,
+   "why": [],
+   "code": "",
+   "pct": 11.257561886984742,
+   "pl": 709001.1214000001,
+   "raw_cost": 22020.9751,
+   "gross": 0.0
+  }
+ },
+ "mismatches": [],
+ "notes": [
+  "MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ",
+  "TPB ex 2026-10-02: 500đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 1.0000 = 434.78đ/cp trên KL đang giữ"
+ ]
+}

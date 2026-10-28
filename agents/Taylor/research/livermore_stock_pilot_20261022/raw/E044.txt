@@ -1,0 +1,14 @@
+Đây là một nền đi ngang mỏng, nằm dưới kháng cự gần ở 86.8–87, sau một chu kỳ tăng rồi giảm dài.
+
+- **Thang 250 phiên:** markup lên đỉnh 151.7 (i33, khối lượng 8×), phân phối ở 113–135, rồi markdown xuống đáy 72.7 (i148).
+- **Thang 60 phiên:** biên 76–99. Cú bật i184 lên 99 thất bại. Climax 23× ở i189 không tạo được follow-through. Gap giảm i218 xuống 75.8 cho thấy air-pocket khi thanh khoản mỏng.
+- **Thang 20 phiên:** nén chặt trong 81.4–86.8, khối lượng cạn (0.13–0.7).
+- **Phiên i249:** khối lượng 1.9×, chạm 86.79 nhưng bị đẩy về 83.89. Cung tại 86.8 đã chặn ba lần (i232, i236, i249).
+
+Giá vào khoảng 84 nên ngưỡng −15% là ~71.4, thấp hơn đáy năm 72.7. Muốn chạm ngưỡng này cần thủng cả hai mức 75.8 và 72.7. Xác suất thấp-vừa, nhưng rủi ro gap là có thật.
+
+P_HIT15: 0.22
+RISK: MED
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 81.4 với khối lượng tăng (mất nền), nhất là thủng 75.8.
+CONTAMINATION: NONE

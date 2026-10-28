@@ -1,0 +1,3 @@
+park_holdings: CorpActionError (KHÔNG phải SystemExit ⇒ compute_park_trim/compute_jit_unpark không bắt): corp_actions[0].event_type='RIGHTS' không thuộc ['BONUS_ISSUE', 'SPLIT', 'STOCK_DIVIDEND'] — cổ tức tiền mặt KHÔNG đi qu
+book_lot_snapshot LAG: lots={} ok=False reason=park_holdings lỗi: corp_actions[0].event_type='RIGHTS' không thuộc ['BONUS_ISSUE', 'SPLIT', 'STOCK_DIVIDEND'] — cổ tức tiền mặt KHÔNG đi qua
+book_lot_snapshot BAL: ok=False  (⇒ auto_exit chặn CẢ book LAG lẫn BAL của account)

@@ -1,0 +1,11 @@
+**Phân tích.** Ở thang 250 phiên, giá tăng lên vùng 117 (i109), phân phối trong biên 104–117, rồi gãy bằng gap tại i190 và i193. Pha giảm kết thúc bằng climax: đáy 74.84 ở i206, khối lượng tăng vọt tại i209–211.
+
+Từ đó là pha tích luỹ chuyển sang tăng giá. Khối lượng duy trì quanh 2–5 lần median. Các đáy liên tục cao dần: 84.25 (i220), rồi 90.83 (i241). Thanh i249 đóng cửa ở 99.19, mức cao nhất phiên, với khối lượng 4.79. Thanh này vượt đỉnh i234 (98.54), tức là breakout khỏi biên 91–98.5 có khối lượng.
+
+Rủi ro nằm ngay phía trên. Giá đang đi vào vùng gap gãy 98–104.7 và tiếp đó là cung của người bị kẹt trong biên 104–110. Vì vậy khó tăng thẳng. Để chạm mức −15% (khoảng 84) thì phải thủng cả 90.8 lẫn 84.25. Kịch bản đó cần breakout thất bại hoàn toàn.
+
+P_HIT15: 0.15
+RISK: MED
+P_POS: 0.57
+INVALIDATION: Đóng cửa lại dưới 94 (quay vào biên cũ, breakout thất bại); thủng 90.8 thì cấu trúc đáy cao dần bị phá
+CONTAMINATION: NONE

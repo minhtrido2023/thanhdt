@@ -1,0 +1,24 @@
+{
+ "account_label": "ZaloPay",
+ "asof": "2026-10-22",
+ "target_park": 0.0,
+ "trim_band": 0.005,
+ "orders": [],
+ "blocked": [],
+ "notes": [
+  "sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. Lệch: [{'ticker': 'DRI', 'ledger_qty': 1900, 'broker_qty': 1300, 'diff': 600}]"
+ ],
+ "at_or_below_target": [],
+ "park_mv_vnd": 1622250.0,
+ "cash_available_vnd": 19449483.0,
+ "cash_total_vnd": 21551437.0,
+ "reconcile_ok": false,
+ "unverified_tickers": [
+  "DRI"
+ ],
+ "excluded_tickers": [
+  "DGC",
+  "PNJ"
+ ],
+ "decision": "BLOCKED_RECONCILE"
+}

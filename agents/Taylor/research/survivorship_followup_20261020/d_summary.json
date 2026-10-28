@@ -1,0 +1,526 @@
+{
+ "p30_pin0": {
+  "lag_lots": 1503,
+  "bear_lots": 107,
+  "bear_lots_cap_reenabled": 42,
+  "bear_lots_by_year": {
+   "2015": 7,
+   "2020": 5,
+   "2022": 63,
+   "2023": 32
+  },
+  "bear_ret_med": 0.0,
+  "bear_ret_min": -0.2478787878787879,
+  "bear_ret_max": 0.5144312393887946,
+  "bear_lots_maxrun_ge5": 15,
+  "bear_lots_sold_on_zero_vol": 22,
+  "bear_lots_open_at_end": 0,
+  "bear_lots_tk_stops_before_audit_end": [
+   {
+    "hid": "BBC_20230206_2439",
+    "tk_last_row": "2026-01-15",
+    "last_sell": "2023-02-10"
+   },
+   {
+    "hid": "BED_20221024_2286",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2022-11-29"
+   },
+   {
+    "hid": "BST_20221021_2282",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2022-11-28"
+   },
+   {
+    "hid": "BST_20230118_2391",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2023-03-02"
+   },
+   {
+    "hid": "PSN_20230131_2393",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-08"
+   },
+   {
+    "hid": "SAP_20230201_2411",
+    "tk_last_row": "2025-12-30",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VHF_20230201_2413",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VOC_20230131_2399",
+    "tk_last_row": "2026-01-28",
+    "last_sell": "2023-02-06"
+   }
+  ],
+  "bear_max_comb_expo_top": [
+   {
+    "hid": "CKD_20220808_2261",
+    "max_comb_expo": 0.0722,
+    "ret": 0.0094,
+    "sessions": 27
+   },
+   {
+    "hid": "SMT_20150504_207",
+    "max_comb_expo": 0.0666,
+    "ret": -0.2479,
+    "sessions": 27
+   },
+   {
+    "hid": "ABC_20220808_2253",
+    "max_comb_expo": 0.0657,
+    "ret": 0.1311,
+    "sessions": 27
+   },
+   {
+    "hid": "ANV_20220728_2245",
+    "max_comb_expo": 0.0656,
+    "ret": 0.2129,
+    "sessions": 27
+   },
+   {
+    "hid": "PRC_20150504_208",
+    "max_comb_expo": 0.0628,
+    "ret": 0.0957,
+    "sessions": 27
+   }
+  ],
+  "bear_worst5": [
+   {
+    "hid": "SMT_20150504_207",
+    "ret": -0.2479,
+    "max_comb_expo": 0.0666,
+    "max_nontrade_run": 2,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DAD_20221021_2284",
+    "ret": -0.1889,
+    "max_comb_expo": 0.0399,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "C4G_20221020_2280",
+    "ret": -0.1845,
+    "max_comb_expo": 0.0309,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DGC_20221026_2303",
+    "ret": -0.1831,
+    "max_comb_expo": 0.0547,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "ADP_20230201_2407",
+    "ret": -0.1024,
+    "max_comb_expo": 0.0,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   }
+  ],
+  "all_lag_sells_on_zero_vol": 263,
+  "all_lag_lots_sold_on_zero_vol": 263,
+  "all_lots_tk_stops_before_end": 76
+ },
+ "p30_pin1M": {
+  "lag_lots": 1545,
+  "bear_lots": 109,
+  "bear_lots_cap_reenabled": 42,
+  "bear_lots_by_year": {
+   "2015": 7,
+   "2020": 5,
+   "2022": 65,
+   "2023": 32
+  },
+  "bear_ret_med": 0.0,
+  "bear_ret_min": -0.2478787878787879,
+  "bear_ret_max": 0.5132059713957615,
+  "bear_lots_maxrun_ge5": 16,
+  "bear_lots_sold_on_zero_vol": 22,
+  "bear_lots_open_at_end": 0,
+  "bear_lots_tk_stops_before_audit_end": [
+   {
+    "hid": "BBC_20230206_2426",
+    "tk_last_row": "2026-01-15",
+    "last_sell": "2023-02-10"
+   },
+   {
+    "hid": "BED_20221024_2275",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2022-11-29"
+   },
+   {
+    "hid": "BST_20221021_2271",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2022-11-28"
+   },
+   {
+    "hid": "BST_20230118_2378",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2023-03-02"
+   },
+   {
+    "hid": "PSN_20230131_2380",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-08"
+   },
+   {
+    "hid": "SAP_20230201_2398",
+    "tk_last_row": "2025-12-30",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VHF_20230201_2400",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VOC_20230131_2386",
+    "tk_last_row": "2026-01-28",
+    "last_sell": "2023-02-06"
+   }
+  ],
+  "bear_max_comb_expo_top": [
+   {
+    "hid": "CKD_20220808_2250",
+    "max_comb_expo": 0.0722,
+    "ret": 0.0094,
+    "sessions": 27
+   },
+   {
+    "hid": "SMT_20150504_207",
+    "max_comb_expo": 0.0666,
+    "ret": -0.2479,
+    "sessions": 27
+   },
+   {
+    "hid": "ABC_20220808_2242",
+    "max_comb_expo": 0.0657,
+    "ret": 0.1311,
+    "sessions": 27
+   },
+   {
+    "hid": "ANV_20220728_2234",
+    "max_comb_expo": 0.0656,
+    "ret": 0.2129,
+    "sessions": 27
+   },
+   {
+    "hid": "PRC_20150504_208",
+    "max_comb_expo": 0.0628,
+    "ret": 0.0957,
+    "sessions": 27
+   }
+  ],
+  "bear_worst5": [
+   {
+    "hid": "SMT_20150504_207",
+    "ret": -0.2479,
+    "max_comb_expo": 0.0666,
+    "max_nontrade_run": 2,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DAD_20221021_2273",
+    "ret": -0.1889,
+    "max_comb_expo": 0.0399,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "C4G_20221020_2269",
+    "ret": -0.1845,
+    "max_comb_expo": 0.0271,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DGC_20221026_2292",
+    "ret": -0.1831,
+    "max_comb_expo": 0.0544,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "ADP_20230201_2394",
+    "ret": -0.1024,
+    "max_comb_expo": 0.0,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   }
+  ],
+  "all_lag_sells_on_zero_vol": 265,
+  "all_lag_lots_sold_on_zero_vol": 265,
+  "all_lots_tk_stops_before_end": 77
+ },
+ "p0_pin0": {
+  "lag_lots": 1516,
+  "bear_lots": 109,
+  "bear_lots_cap_reenabled": 43,
+  "bear_lots_by_year": {
+   "2015": 7,
+   "2020": 6,
+   "2022": 64,
+   "2023": 32
+  },
+  "bear_ret_med": 0.0,
+  "bear_ret_min": -0.2478787878787879,
+  "bear_ret_max": 0.5132059713957615,
+  "bear_lots_maxrun_ge5": 16,
+  "bear_lots_sold_on_zero_vol": 23,
+  "bear_lots_open_at_end": 0,
+  "bear_lots_tk_stops_before_audit_end": [
+   {
+    "hid": "BBC_20230206_2448",
+    "tk_last_row": "2026-01-15",
+    "last_sell": "2023-02-10"
+   },
+   {
+    "hid": "BED_20221024_2295",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2022-11-29"
+   },
+   {
+    "hid": "BST_20221021_2291",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2022-11-28"
+   },
+   {
+    "hid": "BST_20230118_2400",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2023-03-02"
+   },
+   {
+    "hid": "PSN_20230131_2402",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-08"
+   },
+   {
+    "hid": "SAP_20230201_2420",
+    "tk_last_row": "2025-12-30",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VHF_20230201_2422",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VOC_20230131_2408",
+    "tk_last_row": "2026-01-28",
+    "last_sell": "2023-02-06"
+   }
+  ],
+  "bear_max_comb_expo_top": [
+   {
+    "hid": "CKD_20220808_2270",
+    "max_comb_expo": 0.0723,
+    "ret": 0.0094,
+    "sessions": 27
+   },
+   {
+    "hid": "SMT_20150504_207",
+    "max_comb_expo": 0.067,
+    "ret": -0.2479,
+    "sessions": 27
+   },
+   {
+    "hid": "ABC_20220808_2262",
+    "max_comb_expo": 0.0657,
+    "ret": 0.1311,
+    "sessions": 27
+   },
+   {
+    "hid": "ANV_20220728_2254",
+    "max_comb_expo": 0.0656,
+    "ret": 0.2129,
+    "sessions": 27
+   },
+   {
+    "hid": "PRC_20150504_208",
+    "max_comb_expo": 0.0632,
+    "ret": 0.0957,
+    "sessions": 27
+   }
+  ],
+  "bear_worst5": [
+   {
+    "hid": "SMT_20150504_207",
+    "ret": -0.2479,
+    "max_comb_expo": 0.067,
+    "max_nontrade_run": 2,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DAD_20221021_2293",
+    "ret": -0.1889,
+    "max_comb_expo": 0.0399,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "C4G_20221020_2289",
+    "ret": -0.1845,
+    "max_comb_expo": 0.0289,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DGC_20221026_2312",
+    "ret": -0.1831,
+    "max_comb_expo": 0.0546,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "ADP_20230201_2416",
+    "ret": -0.1024,
+    "max_comb_expo": 0.0,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   }
+  ],
+  "all_lag_sells_on_zero_vol": 262,
+  "all_lag_lots_sold_on_zero_vol": 262,
+  "all_lots_tk_stops_before_end": 76
+ },
+ "p0_pin1M": {
+  "lag_lots": 1553,
+  "bear_lots": 110,
+  "bear_lots_cap_reenabled": 43,
+  "bear_lots_by_year": {
+   "2015": 7,
+   "2020": 6,
+   "2022": 65,
+   "2023": 32
+  },
+  "bear_ret_med": 0.0,
+  "bear_ret_min": -0.2478787878787879,
+  "bear_ret_max": 0.5132059713957615,
+  "bear_lots_maxrun_ge5": 16,
+  "bear_lots_sold_on_zero_vol": 22,
+  "bear_lots_open_at_end": 0,
+  "bear_lots_tk_stops_before_audit_end": [
+   {
+    "hid": "BBC_20230206_2421",
+    "tk_last_row": "2026-01-15",
+    "last_sell": "2023-02-10"
+   },
+   {
+    "hid": "BED_20221024_2270",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2022-11-29"
+   },
+   {
+    "hid": "BST_20221021_2266",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2022-11-28"
+   },
+   {
+    "hid": "BST_20230118_2373",
+    "tk_last_row": "2025-08-29",
+    "last_sell": "2023-03-02"
+   },
+   {
+    "hid": "PSN_20230131_2375",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-08"
+   },
+   {
+    "hid": "SAP_20230201_2393",
+    "tk_last_row": "2025-12-30",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VHF_20230201_2395",
+    "tk_last_row": "2026-06-18",
+    "last_sell": "2023-03-09"
+   },
+   {
+    "hid": "VOC_20230131_2381",
+    "tk_last_row": "2026-01-28",
+    "last_sell": "2023-02-06"
+   }
+  ],
+  "bear_max_comb_expo_top": [
+   {
+    "hid": "CKD_20220808_2245",
+    "max_comb_expo": 0.0722,
+    "ret": 0.0094,
+    "sessions": 27
+   },
+   {
+    "hid": "SMT_20150504_207",
+    "max_comb_expo": 0.067,
+    "ret": -0.2479,
+    "sessions": 27
+   },
+   {
+    "hid": "ABC_20220808_2237",
+    "max_comb_expo": 0.0657,
+    "ret": 0.1311,
+    "sessions": 27
+   },
+   {
+    "hid": "ANV_20220728_2229",
+    "max_comb_expo": 0.0656,
+    "ret": 0.2129,
+    "sessions": 27
+   },
+   {
+    "hid": "PRC_20150504_208",
+    "max_comb_expo": 0.0631,
+    "ret": 0.0957,
+    "sessions": 27
+   }
+  ],
+  "bear_worst5": [
+   {
+    "hid": "SMT_20150504_207",
+    "ret": -0.2479,
+    "max_comb_expo": 0.067,
+    "max_nontrade_run": 2,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DAD_20221021_2268",
+    "ret": -0.1889,
+    "max_comb_expo": 0.0399,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "C4G_20221020_2264",
+    "ret": -0.1845,
+    "max_comb_expo": 0.024,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "DGC_20221026_2287",
+    "ret": -0.1831,
+    "max_comb_expo": 0.0542,
+    "max_nontrade_run": 0,
+    "sold_on_zero_vol": false
+   },
+   {
+    "hid": "ADP_20230201_2389",
+    "ret": -0.1024,
+    "max_comb_expo": 0.0,
+    "max_nontrade_run": 1,
+    "sold_on_zero_vol": false
+   }
+  ],
+  "all_lag_sells_on_zero_vol": 264,
+  "all_lag_lots_sold_on_zero_vol": 264,
+  "all_lots_tk_stops_before_end": 77
+ }
+}

@@ -1,0 +1,7 @@
+Giá tăng mạnh từ ~134 (i=123) lên đỉnh 420 (i=226), tức gấp khoảng 3 lần trong 100 phiên. Giai đoạn đẩy giá có khối lượng tăng dần và kết thúc bằng các phiên cao trào: i=224–226 đạt 6.9–7.1 lần median. Ngay sau đó, i=230 bật lên lại 408 rồi đóng cửa ở 390 với khối lượng 8.29, mức lớn nhất cả chuỗi, cho thấy cung lớn đã ra. Gap xuống 333 ở i=234 được mua lại nhanh. Từ đó giá đi ngang trong vùng 343–380 với khối lượng vẫn cao (2–4 lần) nhưng không vượt được 380. Phía trên, vùng 400–420 là nơi nhiều người mua đỉnh đang kẹt. Cấu trúc này giống phân phối hoặc tích luỹ lại sau cao trào, chưa thể phân định. Mức −15% tính từ ~370 là khoảng 314. Biên độ mỗi phiên rộng và đáy pivot 333/286 còn xa, nên khả năng chạm 314 là đáng kể.
+
+P_HIT15: 0.42
+RISK: HIGH
+P_POS: 0.46
+INVALIDATION: Đóng cửa dưới 343 (đáy i=243), và nhất là thủng 331 (đáy gap i=234), thì xác nhận phân phối; ngược lại, vượt 420 kèm khối lượng thì luận điểm rủi ro yếu đi.
+CONTAMINATION: NONE

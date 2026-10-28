@@ -113,3 +113,6 @@
    được phải pin danh sách file (`family_manifest`) — CHƯA LÀM. Nguồn: `data/results_registry.md`
    mục "DSR / PBO Robustness Annex" + "2026-09-27 (bis) HẬU KIỂM SAU MERGE `a808a613`".
 
+
+## 2026-10-25 — ⚠️ CAVEAT CAPACITY gắn vào pin R3 (user duyệt ghi 21:04 ICT) — số pin KHÔNG đổi
+Pin R3 (`pin0%` 22,12% … `pin1M` 25,42% ở park 0) chạy KHÔNG ràng buộc khối lượng: 31% giá trị mua LAG ở ngày `Volume = 0`, ~85% vượt 10% KL khớp cùng ngày. Dưới trần tham gia 5–10% (bỏ phần không khớp) CAGR là 15,41–17,36% (sàn) / 17,92–19,95% (trần) — tham chiếu hindsight, KHÔNG phải pin. Nguồn: `lag-capacity-floor-20261025` A (commit `6724d841e`, quant-skeptic CONFIRMED medium); chi tiết + caveat: `kb/projects/lag-adv-filter-tracking.md` § 2026-10-25. Khi trích pin R3 cho capacity/vận hành 50 tỷ phải kèm caveat này.

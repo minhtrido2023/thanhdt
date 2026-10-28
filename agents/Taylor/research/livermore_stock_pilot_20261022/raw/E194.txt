@@ -1,0 +1,7 @@
+Cổ phiếu tăng gần 5 lần trong khoảng 115 phiên (từ ~135 lên ~509). Đây là pha markup dạng parabol, cả ba thang thời gian đều hướng lên. Khối lượng đạt đỉnh climax ở i=196 (64.7x) và i=229 (57.7x). Từ i=239 khối lượng cạn dần và giá đi ngang trong vùng 463–515, biên độ ngày 6–7%. Các phiên 246, 247, 248 đều đóng cửa gần đáy, riêng i=248 vol 13.4x mà giá bị đạp từ 515 xuống 482: dấu hiệu phân phối tại đỉnh. Lịch sử của mã cho thấy các nhịp điều chỉnh rất sâu: 412→290 (−30%) và 311→256 (−18%). Giá vào ~505 nên mức −15% là ~430, chỉ ngang vùng gap 425–440. Với biến động hiện tại, xác suất chạm mức này cao.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới vùng 463–470 (đáy i=243/247, mép gap i=238) kèm khối lượng tăng thì cấu trúc markup gãy; lực mua chỉ được xác nhận nếu đóng cửa trên 516 với khối lượng >15x.
+CONTAMINATION: NONE

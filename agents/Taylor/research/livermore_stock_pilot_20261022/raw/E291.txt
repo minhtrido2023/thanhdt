@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên đây là pha markup mạnh. Giá tích luỹ quanh 86–89 (i60–97), sau đó tăng lên 216 (+150%). Nhịp 221–222 là một cú rũ bỏ: gap xuống đáy 164.87 với khối lượng 3.58, rồi kéo lên ngay trong phiên. Tiếp theo là nền 184–199 (i227–246). Phiên 245 có khối lượng 7.05 nhưng giá chỉ giảm nhẹ về 192.48, cho thấy nguồn cung bị hấp thụ. Các phiên 247–249 phá đỉnh cũ 205 với khối lượng vừa phải (1.5–1.9): có follow-through nhưng chưa phải climax. Rủi ro là cổ phiếu đã kéo dài, biên độ phiên 3–5%, và vào lệnh sau 3 phiên tăng dốc. Mức −15% (~184) nằm ngay mép dưới nền, nên nếu breakout thất bại thì khả năng chạm là đáng kể.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 205 (breakout thất bại, quay lại nền) và đặc biệt thủng 184–186 (đáy nền i229–246).
+CONTAMINATION: NONE

@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, giá đã chạy mạnh từ 100 lên đỉnh 414.6 (i137). Sau đó là phân phối: đỉnh thấp dần 414.6 → 359.4 (i221) → 261.3 (i246). Ở thang 60 và 20 phiên, cổ phiếu đang trong pha markdown, đáy thấp dần 222 (i189) → 196 (i242). Nhịp hồi từ 196 lên 261 thất bại, và phiên 249 mở gap xuống, đóng cửa ở 212.7, thấp nhất phiên. Khối lượng giảm (0.45–0.57) nên chưa thấy climax bán. Vùng đỡ gần nhất là 196–209. Mức −15% tương đương khoảng 181, chỉ cách đáy 196 khoảng 8%. Biên độ ngày của mã này ~7%, nên khả năng chạm −15% là cao. Cung kẹt phía trên nằm ở 240–260 và 280–300.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Đóng cửa dưới 196 (đáy i242) xác nhận markdown tiếp diễn; luận điểm tích cực chỉ đứng được nếu giá vượt và giữ trên 261 với khối lượng >1.2.
+CONTAMINATION: NONE

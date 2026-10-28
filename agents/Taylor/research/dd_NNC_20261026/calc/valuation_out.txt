@@ -1,0 +1,7 @@
+mcap 1043.4 | netcash 273.0 | MVC MV 147.3 | NHC BV 14.1 | nonop 434.4 (19,820 d/cp)
+TTM NP 214.0 | PE 4.88 | core implied 608.9 -> core PE 2.85
+r=13% | deep: NP 83 -> 45,361 | bear: NP 117 -> 55,675 | base: NP 169 -> 71,638 | bull: NP 230 -> 90,450 | weighted 65,214 (+37%)
+r=14% | deep: NP 83 -> 44,008 | bear: NP 117 -> 53,777 | base: NP 169 -> 68,895 | bull: NP 230 -> 86,711 | weighted 62,811 (+32%)
+r=16% | deep: NP 83 -> 41,639 | bear: NP 117 -> 50,451 | base: NP 169 -> 64,089 | bull: NP 230 -> 80,160 | weighted 58,600 (+23%)
+Tam Lap option r=14%: NP/yr 101, PV 329 ty = 14,994 d/cp (UOC LUONG, khong vao weighted)
+Implied steady NP at 47.600 (r=14%, 17y): 96 ty/nam vs TTM 214

@@ -1,0 +1,7 @@
+Cổ phiếu tăng khoảng 5 lần, từ đáy 52.95 (i38) lên đỉnh 264.77 (i242). Pha 222–233 là markup gần như parabolic, khối lượng 1.5–3.3x. Từ i234 khối lượng tăng (3.6, 3.57, 3.05, 2.73) nhưng giá không đi lên được: vùng 245–265 là phân phối, i242 lập đỉnh mới rồi i243 đảo chiều mạnh. i248 thủng đáy vùng 231–233. i249 gap xuống rồi đóng cửa đúng mức sàn (213.71, khoảng −6.9%), đóng tại đáy phiên với khối lượng 2.54x: chưa có dấu hiệu cạn cung, mà là pha markdown bắt đầu. Cung bị kẹt ở 240–260 đè lên rất dày. Hỗ trợ gần nhất là mép gap 199–200 (i223–224), tiếp theo là nền 170–182. Mức −15% từ giá vào (khoảng 180–185) rơi đúng vùng nền này. Rủi ro air-pocket do margin là cao.
+
+P_HIT15: 0.55
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa dưới 199 (lấp mép gap i223–224) xác nhận markdown; ngược lại, kịch bản giảm chỉ bị vô hiệu nếu đóng lại trên 248 với khối lượng lớn.
+CONTAMINATION: NONE

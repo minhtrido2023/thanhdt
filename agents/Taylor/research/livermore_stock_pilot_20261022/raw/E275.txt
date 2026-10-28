@@ -1,0 +1,9 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu sập từ 100 xuống 59.28 (i49), rồi hồi chữ V lên 85. Sau đó đi ngang tích luỹ 77–85 trong khoảng 100 phiên, có một cú rũ xuống 69.65 (i135) nhưng bị hấp thụ. Pha markup bắt đầu từ i191 với khối lượng 2.29, rồi gap lên 95 (i198). Giá nền chặt 87–95 trong khoảng 50 phiên. Hai lần thủng (i200, i213) bị mua lại ngay.
+
+Từ i245 đến i249, giá đóng cửa cao dần tới 96.08 với khối lượng khoảng 2x, đang thử mép trên của nền. Ngay phía trên là cung kẹt hàng từ vùng gãy trước crash ở 95–100 (i19–26). Biến động thấp. Mức −15% tương ứng khoảng 81.7, tức phải phá nền 87 và vùng 85, nên rủi ro chạm −15% là thấp-vừa.
+
+P_HIT15: 0.14
+RISK: MED
+P_POS: 0.56
+INVALIDATION: Đóng cửa dưới 89.8 (đáy nền i210–216) với khối lượng lớn, tức breakout thất bại quay về range
+CONTAMINATION: NONE

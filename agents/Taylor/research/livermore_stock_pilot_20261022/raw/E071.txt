@@ -1,0 +1,9 @@
+Cổ phiếu ở pha markup trên cả ba khung, từ khoảng 100 lên 156. Thanh 229 bứt qua vùng đỉnh cũ 148–149 (thanh 180–181) với khối lượng 3.75x. Thanh 234 gap lên 152–158. Đỉnh 166.6 ở thanh 244 (2.79x), sau đó điều chỉnh về 156 với khối lượng cạn dần (0.79–0.81). Đây là nhịp nghỉ lành mạnh, chưa thấy phân phối.
+
+Rủi ro: thanh 185–193 cho thấy air-pocket kiểu margin, rơi 33% trong khoảng 8 phiên. Biên độ ngày 3–4%. Mức −15% tương đương khoảng 133, nằm dưới mép gap 152 và vùng breakout 141–146. Để chạm mức đó, cấu trúc phải gãy hoàn toàn. Điều này không hiếm với mã này nhưng cũng không phải kịch bản chính.
+
+P_HIT15: 0.30
+RISK: MED
+P_POS: 0.53
+INVALIDATION: Đóng cửa dưới 151 (lấp gap thanh 234) với khối lượng tăng; thủng 141 thì xem như breakout thất bại.
+CONTAMINATION: NONE

@@ -263,3 +263,38 @@
 ## Archived 2026-10-15 (keep=6 days=5 require_done=True)
 - [2026-10-08T12:04:44Z] [2026-10-08T19:0x ICT] Plan SpaceX 2026-10-09 XONG (job DollarBill_20261008_120239): plan_SpaceX_2026-10-09.json HOLD ALL 0 lenh, load_plan('2026-10-09','SpaceX') OK. DT5G NEUTRAL fresh. n_bal=0, LAG due=0, capit_signal_today=false (khong mo episode moi). Active NAV 987,34tr (egg 500,42tr, tang manh tu 347,32tr 10-02 -> theo doi). L1 park_trim=BLOCKED_ALL_NAMES (5 ma PARK con lai MBB/MSB/TPB/VIB/VPB, 10,41tr, duoi 1 lo kha thi). L2 NO_JIT_NEEDED. CAPIT episode CAPIT-2026-07-20 55 phien giu nguyen NCT/PVT/SAB/SIP/VNM, gan moc T60 - theo doi dispatch sau. corp_action_daily tuoi, khong co su kien anh huong. Da gui Discord plan thread (1521183164364754974) + bus decision. Cho user duyet truoc 08:45 ICT 09/10. ZaloPay plan 10-09 la job rieng (DollarBill_20261008_120237, dang cho/da lam truoc). Khong con viec mo cho SpaceX.
 - [2026-10-09T12:04:58Z] [2026-10-09T12:10Z] Plan ZaloPay 2026-10-12 XONG (job DollarBill_20261009_120238): plan_ZaloPay_2026-10-12.json HOLD ALL 0 lenh, load_plan() OK. Active NAV 601,39tr, egg 318,89tr (on dinh sau 2 phien tang manh 10-07->10-08). DT5G NEUTRAL. n_bal=0, LAG due=0. L1 park_trim=BLOCKED_ALL_NAMES (4 ma PARK MBB/MSB/VIB/VPB, 2,17tr, phien thu 3 lien tiep cung tinh trang). L2 NO_JIT_NEEDED. CAPIT episode 56 phien giu nguyen NCT/PVT/SAB/SIP/VNM. corp_action_daily tuoi, VPI/MSB co AIS sap toi (10-14/10-15) khong price-adjusting. Da gui Discord plan thread + bus decision. Cho user duyet truoc 08:45 ICT 12/10 (lich: 10-10/10-11 T7/CN khong GD). Khong con viec mo cho ZaloPay. SpaceX plan 10-12 la job rieng neu duoc dispatch.
+
+## Archived 2026-10-16 (keep=6 days=5 require_done=True)
+- [2026-10-09T12:05:21Z] [2026-10-09T19:05Z ICT] Plan SpaceX 2026-10-12 XONG (job DollarBill_20261009_120240): plan_SpaceX_2026-10-12.json HOLD ALL 0 lenh, load_plan() OK. DT5G NEUTRAL (state=3). n_bal=0, LAG due=0, capit_signal_today=false. Active NAV 986,70tr (egg 500,53tr, tuong doi on dinh so 10-09). L1 park_trim=BLOCKED_ALL_NAMES (5 ma PARK MBB/MSB/TPB/VIB/VPB 10,49tr duoi 1 lo - phien thu 4 lien tiep cung tinh trang). L2 NO_TRIGGER. CAPIT episode CAPIT-2026-07-20 DA 56 PHIEN - QUA MOC T60 tham chieu KB (coding_guidelines) - DA GHI NOTE trong plan de escalate theo doi, CHUA tu quyet exit (viec cua NGUOI). corp_action_daily tuoi, 2 su kien upcoming (VPI AIS 10-14, MSB AIS 10-15) deu khong price-adjusting. park_holdings reconcile OK 0 mismatch. Da gui Discord plan thread + bus decision. Cho user duyet truoc 08:45 ICT 12/10. ZaloPay plan 10-12 la job rieng (DollarBill_20261009_120238). Khong con viec mo cho SpaceX tru viec theo doi CAPIT T60.
+
+## Archived 2026-10-19 (keep=6 days=5 require_done=True)
+- [2026-10-12T12:03:35Z] [2026-10-12 19:xx ICT] Plan SpaceX 2026-10-13 XONG (job DollarBill_20261012_120252): HOLD ALL 0 lenh, NAV 986,25tr, DT5G NEUTRAL, L1 BLOCKED, CAPIT 57 phien. Cho user duyet truoc 08:45 ICT 13/10.
+
+## Archived 2026-10-20 (keep=6 days=5 require_done=True)
+- [2026-10-12T12:03:48Z] [2026-10-12 19:xx ICT] Plan ZaloPay 10-13 XONG HOLD ALL 0 lenh (job DollarBill_20261012_120250); CAPIT 57/60; cho user duyet truoc 08:45 ICT 13/10.
+
+## Archived 2026-10-21 (keep=6 days=5 require_done=True)
+- [2026-10-13T12:03:47Z] [2026-10-13 19:1x ICT] Plan SpaceX 2026-10-14 XONG (job DollarBill_20261013_120246): HOLD ALL 0 lenh, NAV 979,09tr, DT5G NEUTRAL, L1 BLOCKED, CAPIT ~58 phien. Cho user duyet truoc 08:45 ICT 14/10.
+- [2026-10-15T14:19:37Z] [2026-10-15 21:3x ICT] Plan ZaloPay 2026-10-16 XONG (job DollarBill_20261015_141833): 1 lenh BAN MSB 40cp @14.650 (L1 PARK_TRIM, merge_park_orders --write), 0 lenh mua, DT5G NEUTRAL, CAPIT 60 phien (de xuat user xem exit, khong tu ban). Active NAV 592,13tr, egg 319,34tr. File o data/trade_plans/. Cho user duyet truoc 08:45 ICT 16/10. Chua chay send_plan_report.sh (dispatch dang plan channel).
+- [2026-10-15T14:19:40Z] [2026-10-15 21:3x ICT] Plan SpaceX 10-16 XONG (job DollarBill_20261015_141835): 1 lenh SELL MSB 100cp (L1 trim), NAV 969,20tr, DT5G NEUTRAL, CAPIT ~59 phien giu nguyen. Cho user duyet truoc 08:45 ICT 16/10.
+
+## Archived 2026-10-22 (keep=6 days=5 require_done=True)
+- [2026-10-16T12:04:44Z] [2026-10-16 19:xx ICT] Plan ZaloPay 10-19 XONG HOLD ALL 0 lenh (job DollarBill_20261016_120351); CAPIT du NCT73/SIP49 de xuat user; cho duyet truoc 08:45 ICT 19/10
+
+## Archived 2026-10-24 (keep=12 days=0 require_done=False)
+- [2026-09-16T12:10:52Z] Plan SpaceX 2026-09-17 XONG (job DollarBill_20260916_120754): HOLD ALL 0 lenh, load_plan() OK, Discord + bus decision da gui. Active NAV 977,18tr (egg 100,88tr). DT5G NEUTRAL. VPI (BAL, rating 4/5) fire, checkpoint signal_hold (han 09-16) DA QUA - lan nay ESCALATE bus question bal-vpi-checkpoint-resume-decision thay vi tu resume/tu hold (theo current_ops.md). Ap dung ca ZaloPay (chua lam). 0 LAG due. L1 NO_TRIM. CAPIT 39 phien giu nguyen. Cho user tra loi question + duyet plan truoc 08:45 ICT 09-17. Viec mo: cho SpaceX + ZaloPay plan 09-17 neu duoc dispatch, va cho user quyet dinh VPI/BAL.
+
+## Archived 2026-10-25 (keep=6 days=5 require_done=True)
+- [2026-10-19T12:04:08Z] [2026-10-19 19:xx ICT] Plan ZaloPay 10-20 XONG HOLD ALL 0 lenh (job DollarBill_20261019_120317); cho duyet truoc 08:45 ICT 20/10
+
+## Archived 2026-10-26 (keep=12 days=0 require_done=False)
+- [2026-10-01T16:20:21Z] [2026-10-01T23:2x ICT] Plan SpaceX 2026-10-02 SINH LẠI xong (job DollarBill_20261001_161054): reconcile TPB FIXED (25/25 khop, 0 mismatch) sau khi corp_actions.json duyet TPB-2026-10-02-STOCK-DIVIDEND. NHUNG L1/L2 chuyen sang BLOCKED_FRAME (gate gia price_frame.py khong tru chan co tuc tien 500d/cp) - da xac minh tay (14400-500)/1.15=12087 ~ broker 12100, kha nang gate thieu cong thuc chu khong phai loi du lieu. Plan van HOLD_ALL 0 lenh (n_bal=0, LAG=0, DT5G NEUTRAL fresh). Da escalate bus question tpb-price-frame-gate-blocked-l1l2-20261002 cho Taylor (3 options: patch cong thuc / co che xac nhan tay rieng cho gate gia / cho tu dong sau ex-date). Da gui lai Discord plan_approval qua send_plan_report.sh --second-chance 23:19 ICT. KHONG dong ZaloPay (gan nguyen plan cu co CSV/SCL/VPB LAG tay). Viec mo: cho Taylor tra loi question + user duyet plan truoc 08:45 ICT 10-02.
+
+## Archived 2026-10-26 (keep=6 days=5 require_done=True)
+- [2026-10-20T12:04:23Z] [2026-10-20 19:xx ICT] Plan ZaloPay 10-21 XONG HOLD ALL 0 lenh (job DollarBill_20261020_120333); LAG HT1/SCL/VPB vao ~10-26 can cash (avail chi 10,23tr, egg 515tr); cho duyet truoc 08:45 ICT 21/10
+
+## Archived 2026-10-27 (keep=12 days=0 require_done=False)
+- [2026-10-21T12:04:34Z] [2026-10-21 19:xx ICT] Plan ZaloPay 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120332); DRI -600cp ngoai lenh, cho user xac nhan; active_nav chua refresh; cho duyet truoc 08:45 ICT 22/10
+
+## Archived 2026-10-27 (keep=6 days=5 require_done=True)
+- [2026-10-21T12:04:39Z] [2026-10-21 19:xx ICT] Plan SpaceX 10-22 XONG HOLD ALL 0 lenh (job DollarBill_20261021_120334). DRI bi ban 1200cp ngoai plan -> bus question spacex-dri-sell-ngoai-plan-20261021 + Trading Daily; active_nav chua cap nhat (compute_active_nav tu choi). Cho user xac nhan + duyet truoc 08:45 ICT 22/10

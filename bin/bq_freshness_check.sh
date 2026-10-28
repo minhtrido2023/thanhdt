@@ -6,6 +6,7 @@
 # ở 17:30 nghĩa là luôn đọc DT5G của HÔM QUA, mỗi ngày, vì bản hôm nay chưa kịp tính):
 #   → STALE: cảnh báo Telegram + Discord stale-alert channel, dừng, block DollarBill
 #   → FRESH: publish_gated_state → golive_recommend → push_to_bq → dispatch DollarBill lập plan
+#            (ngay sau publish: gate_source_check.py báo — KHÔNG chặn — khi nguồn cổng ≠ DT5G_macro)
 #
 # Tables checked (BLOCK = stale ⇒ chặn pipeline + DollarBill; WARN = alert Discord, không chặn):
 #   tav2_bq.ticker_prune              BLOCK — daily EOD price (pipeline step H)
@@ -416,12 +417,25 @@ _check "ticker_prune (EOD price)"         "tav2_bq.ticker_prune"              "t
 # mình mù hoàn toàn, suýt cho DollarBill lập plan trên universe 7 mã. Đếm số mã của
 # NGÀY MỚI NHẤT: < MIN_PRUNE_NAMES ⇒ FAIL như stale (block pipeline/DollarBill).
 MIN_PRUNE_NAMES=200   # daily_refresh_v34b precheck dùng cùng ngưỡng (bình thường ~225-265)
-prune_names=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
+# §28: tách "bq lỗi/không trả số" (KHÔNG biết bảng có bị moi ruột không) khỏi "đếm được và quá ít".
+# PRUNE_DEPTH_BEGIN (marker cho bq_freshness_check_selfcheck.py — nó trích đúng khối này)
+prune_out=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
   "SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS t
-   WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" \
-  2>/dev/null | tail -1 | tr -d '[:space:]')
-prune_names="${prune_names:-0}"
-if [ "$prune_names" -ge "$MIN_PRUNE_NAMES" ] 2>/dev/null; then
+   WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" 2>&1)
+prune_rc=$?
+prune_names="$(printf '%s\n' "$prune_out" | tail -1 | tr -d '[:space:]')"
+if [ $prune_rc -ne 0 ] || ! printf '%s' "$prune_names" | grep -qE '^[0-9]+$'; then
+  prune_snip="$(printf '%s' "$prune_out" | tr '\n' ' ' | cut -c1-200)"
+  if [ $prune_rc -ne 0 ]; then
+    depth_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): ticker_prune depth — bq lỗi kết nối/quyền (rc=$prune_rc: ${prune_snip}). KHÔNG kết luận được bảng có bị moi ruột hay không; kiểm tra auth/quota/network. Chặn pipeline/DollarBill (fail-closed)."
+  else
+    depth_msg="⚠️ BQ DATA BẤT THƯỜNG ($TODAY $NOW_ICT): ticker_prune depth — bq trả giá trị không phải số dù rc=0 (raw: ${prune_snip}). KHÔNG PHẢI lỗi kết nối BQ, đừng kiểm tra auth/quota — kiểm tra bảng/cột/schema. Chặn pipeline/DollarBill (fail-closed)."
+  fi
+  echo "FAIL ticker_prune depth: bq lỗi/không trả số (rc=$prune_rc, raw: ${prune_snip})"
+  "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  FAILED=1
+elif [ "$prune_names" -ge "$MIN_PRUNE_NAMES" ]; then
   [ -z "$QUIET" ] && echo "OK   ticker_prune depth: ${prune_names} mã ngày mới nhất (≥${MIN_PRUNE_NAMES})"
 else
   depth_msg="⚠️ BQ DEPTH ($TODAY $NOW_ICT): ticker_prune ngày mới nhất chỉ có ${prune_names} mã (<${MIN_PRUNE_NAMES}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột dù MAX(time) vẫn advance. Chặn pipeline/DollarBill."
@@ -430,6 +444,7 @@ else
   "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   FAILED=1
 fi
+# PRUNE_DEPTH_END
 _check_price_freeze || true
 _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t.time"  $MAX_STATE_LAG  "trading"  || true
 # --- DT5G PUBLISHER-EVIDENCE gate (2026-07-31, job Winston_20260731_014953) ------------------
@@ -713,6 +728,27 @@ echo; echo "--- [pipeline-0] nav_exdate_forecast (corp-action ≤1 PHIÊN, mã �
 (cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
   echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
 
+# [pipeline-3c] cảnh báo QUYỀN MUA của mã ĐANG GIỮ (user duyệt 2026-10-22 09:27 ICT, "Duyệt việc 1"; audit
+# Taylor_20261021_165512 REPORT.md B1/B4) — WARN-only, KHÔNG chặn DollarBill, KHÔNG chạm lệnh/NAV/sizing.
+# Ba giai đoạn ANNOUNCE (kể cả trạng thái P chưa ngày/giá) / DATED / REMIND ≤3 phiên, mỗi cái dedupe riêng,
+# state ghi atomic SAU khi gửi xong (state/rights_issue_alert_state.json). Vị thế đọc từ active_nav_*.json
+# (cron 20:15 hôm trước) ⇒ rc=2 nếu không có file nào: KHÔNG kết luận "không giữ mã nào". Bỏ qua morning mode
+# (chạy tay) để không nhân đôi tin; gửi Trading Daily nên T7/CN không cần (chuỗi này chỉ chạy T2-T6).
+# VỊ TRÍ (arch-review 2026-10-22 B3): ngay SAU [pipeline-0], TRƯỚC cổng FAILED/exit — cùng lý do với [pipeline-0]:
+# rights_issue_alert chỉ đọc BQ corporate_action + active_nav_*.json, không phụ thuộc BQ-fresh của chuỗi; đặt SAU
+# các `exit 1` thì ngày BQ stale mất cả REMIND (khoá REMIND chứa asof ⇒ mất hẳn, không bù được).
+if [ "${MORNING:-0}" != "1" ]; then
+  echo; echo "--- [pipeline-3c] rights_issue_alert ---"
+  _ra_out="$(timeout "${RIGHTS_ALERT_TIMEOUT_S:-120}" python3 "$ROOT/bin/rights_issue_alert.py" --send 2>&1)"; _ra_rc=$?
+  echo "$_ra_out" | tail -20
+  # rc 0 = ổn (có/không có cảnh báo). 1 = gửi thất bại (CHƯA ghi state ⇒ tối mai thử lại). 2 = không có file vị thế. 3 = đã gửi nhưng VỊ THẾ CÓ THỂ CŨ (file active_nav cũ hơn phiên trước / thiếu account live).
+  if [ "$_ra_rc" -ne 0 ]; then
+    [ "$_ra_rc" = "124" ] && _ra_why="treo quá ${RIGHTS_ALERT_TIMEOUT_S:-120}s (timeout); " || _ra_why=""
+    "$ROOT/bin/notify_thread.sh" "🟡 RIGHTS ALERT WARN ($TODAY $NOW_ICT): rights_issue_alert rc=$_ra_rc — ${_ra_why}$(echo "$_ra_out" | tail -2 | tr '\n' ' ' | cut -c1-300). rc=3 = đã chạy xong (nếu có quyền mua thì tin đã gửi) nhưng VỊ THẾ CÓ THỂ CŨ (active_nav cũ/thiếu account) — tự kiểm vị thế trên DNSE; rc khác: quyền mua có thể CHƯA được cảnh báo — tự kiểm tav2_bq.corporate_action." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED+1))
+  fi
+fi
+
 if [ "$FAILED" -ne 0 ]; then
   STALE_SUMMARY="⛔ BQ STALE $TODAY $NOW_ICT — DollarBill bị BLOCK, không lập plan hôm nay. Kiểm tra: mike/logs/bq_freshness.log"
   "$ROOT/bin/notify_thread.sh" "$STALE_SUMMARY" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
@@ -730,7 +766,35 @@ cd "$WORKDIR"
 # cùng pattern post-chain assertion của daily_refresh_v34b_linux.sh, Winston_20260711_023903.)
 PIPELINE_START_EPOCH="$(date +%s)"
 
-_run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
+# [pipeline-1] GIỮ nguyên văn stdout của CHÍNH lượt publish này (dòng `[get_gated_state] …` cổng
+# tự in) làm bằng chứng cho bước kiểm nguồn cổng ngay dưới: ghi ra FILE THƯỜNG rồi `cat` lại.
+# CỐ Ý KHÔNG dùng pipe (`| tee`, `> >(tee …)`): pipe bắt chuỗi 19:00 chờ MỌI tiến trình con cháu
+# của publisher còn giữ stdout (publisher → notify.sh → notify_discord.sh → curl; subprocess
+# timeout chỉ kill notify.sh, curl mồ côi vẫn giữ đầu ghi) — arch-review 2026-10-12 tái hiện treo.
+# File thường không có đầu đọc nào phải chờ EOF. mktemp hỏng ⇒ chạy trần y như trước khi có bước
+# kiểm. stderr của publisher KHÔNG đi qua file (ra thẳng như cũ).
+if GATE_PUB_OUT="$(mktemp)"; then
+  trap '[ "$GATE_PUB_OUT" = /dev/null ] || rm -f "$GATE_PUB_OUT"' EXIT   # cron bị kill giữa chừng không để rác /tmp
+  _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py > "$GATE_PUB_OUT"
+  cat "$GATE_PUB_OUT"
+else
+  GATE_PUB_OUT=/dev/null
+  _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
+fi
+# --- GATE-SOURCE check (retro 2026-10-11 Pattern I, user duyệt 2026-10-12 11:01 ICT) ----------
+# Bản publish VỪA XONG là bản DollarBill đọc để lập plan T+1. Nguồn khác DT5G_macro (DT4_only /
+# DT4_STALE / giá trị lạ / thiếu trường / file hỏng) ⇒ báo NGAY: 1 tin Trading Daily + 1 bus
+# error + bằng chứng cho dòng ⚠️ trong báo cáo plan 21:00 (send_plan_report.sh) — trước đây chỉ
+# check 13 của ops_health_check.sh kêu lúc 08:20 sáng hôm sau, SAU khi plan đã duyệt.
+# CHỈ CẢNH BÁO, KHÔNG CHẶN (DT4_only là fail-closed đúng thiết kế; chặn hay không là quyết định
+# của user): không đụng FAILED, không exit. Nguồn DT5G_macro ⇒ gate_source_check.py không in,
+# không ghi, không gửi gì. Đặt Ở ĐÂY chứ không ở khối publisher-evidence phía trên: khối đó đọc
+# bản publish 18:3x của daily_refresh step [12], bản mà [pipeline-1] vừa GHI ĐÈ.
+# Lượt publish không ghi file state ⇒ helper tự bỏ qua, _assert_fresh_artifact bên dưới xử.
+python3 "$ROOT/bin/gate_source_check.py" --workdir "$WORKDIR" --publish-log "$GATE_PUB_OUT" \
+  --since-epoch "$PIPELINE_START_EPOCH" --alert \
+  || echo "  [WARN] gate_source_check.py thoát rc=$? — KHÔNG kiểm được nguồn cổng lượt publish này, không chặn pipeline; kiểm tay trường source trong deploy_golive_dt5g_v4/golive_state_today.json"
+[ "$GATE_PUB_OUT" = /dev/null ] || rm -f "$GATE_PUB_OUT"
 
 # [pipeline-1a] gap-fill universe_pit/_quality cho các phiên THIẾU trước hôm nay (WARN-only, 2026-10-15).
 # Sự cố 2026-10-15: phiên 14/10 không được build (chuỗi hôm đó bị chặn) ⇒ golive_recommend_v23
@@ -839,6 +903,29 @@ _assert_fresh_artifact "golive_state_today.json (DT5G state DollarBill đọc)" 
 _assert_fresh_artifact "golive_v23_recommendations (recommend output DollarBill đọc)" \
   "$(ls -1t "$WORKDIR"/deploy_golive_dt5g_v4/out/golive_v23_recommendations_*.csv 2>/dev/null | head -1)"
 
+# [pipeline-3b] gói DD LAG trước plan (user duyệt 2026-10-21 23:28 ICT; design Taylor_20261021_151302,
+# arch-review vòng 1+2) — WARN-only, KHÔNG chặn DollarBill: thiếu gói ⇒ cổng coi là NO_PACK ⇒ mã LAG đứng
+# NGOÀI plan (fail-closed sẵn ở lag_plan_consistency_check). CHỈ chạy vòng 19:00 T2-T6 của cron:
+#  · MORNING mode (vòng CN `sunday_plan_round.sh` dùng morning+force, chạy tay buổi sáng) và T7/CN BỎ QUA —
+#    anomaly_scan chỉ chạy T2-T6 08:20 ⇒ file anomaly cũ ⇒ ANOMALY_NA hàng loạt ⇒ gói CLEARED hôm trước bị
+#    ghi đè thành FLAG và ack thành ACK_STALE (kb/ops_runbook.md § Cổng DD trước plan LAG, arch-review vòng 2).
+#    Gói thứ Sáu còn hiệu lực cho plan thứ Hai (PACK_ASOF_MAX_DAYS=7).
+_dd_dow="$(TZ='Asia/Ho_Chi_Minh' date +%u)"
+if [ "${MORNING:-0}" = "1" ] || [ "$_dd_dow" -ge 6 ]; then
+  echo; echo "--- [pipeline-3b] lag_dd_pack: BỎ QUA (morning mode hoặc T7/CN) — gói DD đã có giữ nguyên ---"
+else
+  echo; echo "--- [pipeline-3b] lag_dd_pack ---"
+  _dd_out="$(timeout "${LAG_DD_PACK_TIMEOUT_S:-420}" python3 "$ROOT/bin/lag_dd_pack.py" --notify 2>&1)"; _dd_rc=$?
+  echo "$_dd_out" | tail -20
+  # rc 0 = có gói, 2 = có mã FLAG (bình thường). Khác ⇒ cảnh báo, KHÔNG dừng chuỗi.
+  if [ "$_dd_rc" -ne 0 ] && [ "$_dd_rc" -ne 2 ]; then
+    [ "$_dd_rc" = "124" ] && _dd_why="treo quá ${LAG_DD_PACK_TIMEOUT_S:-420}s (timeout); " || _dd_why=""
+    "$ROOT/bin/notify_thread.sh" "🟡 LAG DD PACK WARN ($TODAY $NOW_ICT): lag_dd_pack rc=$_dd_rc — ${_dd_why}$(echo "$_dd_out" | tail -2 | tr '\n' ' ' | cut -c1-300). Mã LAG không có gói sẽ ĐỨNG NGOÀI plan." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED+1))
+  fi
+fi
+
+
 # [pipeline-4] dispatch DollarBill lập plan T+1 — lặp qua MỌI account live (enabled=true,
 # mode=live, broker=dnse trong secrets/trading_bot_accounts.json), không hardcode SpaceX —
 # thêm account mới vào file đó là tự động có plan T+1, không cần sửa gì ở đây. Xem
@@ -853,9 +940,22 @@ else
   FEE_NOTE="theo FEE_RATE_BUY_PCT trong mike/bin/dnse_fee_rates.py"
 fi
 
+# LAG_DD_NOTE — cổng DD LAG + quy mô user chốt trong data/lag_dd/ack.json, SINH BẰNG CODE (user duyệt
+# 2026-10-25 11:36 ICT, job Taylor_20261025_043744): trước đây prompt không đọc ack ⇒ vòng plan có thể
+# sinh lại SCL LAG_HI 10% dù user chốt LAG_LO 8%. Lỗi đọc ⇒ in lỗi thật + note fail-closed (không im lặng).
+# stderr tách riêng: thành công thì stdout sạch vào prompt; lỗi thì in stderr thật (§29).
+_lagdd_err="$(mktemp)"
+if _lagdd_out="$( { cd "$ROOT" && python3 bin/lag_dd_ack.py --note-prompt --plan-date "$NEXT_TRADING_DAY"; } 2>"$_lagdd_err")"; then
+  LAG_DD_NOTE="$_lagdd_out"
+else
+  echo "  [WARN] lag_dd_ack.py --note-prompt lỗi — Lỗi thật: $(tail -2 "$_lagdd_err" | tr '\n' ' ')"
+  LAG_DD_NOTE=" ⚠️ KHÔNG sinh được ghi chú cổng DD LAG tự động (lag_dd_ack.py lỗi). Với MỖI mã LAG trong recommend, chạy \`python3 bin/lag_dd_ack.py --gate <MÃ> --plan-date $NEXT_TRADING_DAY\`: chỉ state CLEARED/ACK_PROCEED mới vào plan; ACK_PROCEED thì size theo quy mô ghi trong ack.note (vd 'LAG_LO 8%'), KHÔNG theo play_type recommend."
+fi
+rm -f "$_lagdd_err"
+
 MORNING_NOTE=""
 if [ "${MORNING:-0}" = "1" ]; then
-  MORNING_NOTE=" ⚠️ CHẠY TAY BUỔI SÁNG (MIKE_MORNING_RUN=1): dữ liệu/DT5G/recommend là của PHIÊN $TODAY (không phải ngày lịch ${CAL_TODAY}); plan này dành cho CHÍNH ngày $NEXT_TRADING_DAY. BẮT BUỘC đặt requires_user_approval=true cho mọi lệnh và nói rõ trong summary rằng đây là plan chạy tay buổi sáng cần user duyệt trước 08:45 ICT; chuỗi inject lệnh thoát theo thời gian (auto_exit_inject) và gửi plan có thể CHƯA chạy cho ngày này."
+  MORNING_NOTE=" ⚠️ CHẠY TAY BUỔI SÁNG (MIKE_MORNING_RUN=1): dữ liệu/DT5G/recommend là của PHIÊN $TODAY (không phải ngày lịch ${CAL_TODAY}); plan này dành cho CHÍNH ngày $NEXT_TRADING_DAY. ${MIKE_MORNING_NOTE_TAIL:-BẮT BUỘC đặt requires_user_approval=true cho mọi lệnh và nói rõ trong summary rằng đây là plan chạy tay buổi sáng cần user duyệt trước 08:45 ICT; chuỗi inject lệnh thoát theo thời gian (auto_exit_inject) và gửi plan có thể CHƯA chạy cho ngày này.}"
 fi
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
@@ -891,7 +991,7 @@ print(int(p.get('manual_offbook_assets_vnd') or 0))
   # hai account áp cùng luật (context_planning_mini.md §egg.totalValue) ra hai kết quả khác nhau
   # CHỈ vì prompt khác nhau. egg.totalValue là field balances API LIVE cho MỌI account
   # (live từ 2026-08-18), không liên quan gì tới excluded_tickers/offbook.
-  EGG_NOTE=" TRỨNG VÀNG (egg.totalValue) — BẮT BUỘC KIỂM TRA cho tài khoản này TRƯỚC KHI kết luận bất kỳ mã nào 'thiếu tiền/không đủ tiền/sức mua ~0': chạy \`bin/compute_active_nav.py --account $ACCT\` và đọc dòng 'Trứng vàng'. egg.totalValue là vốn CHỦ SỞ HỮU THẬT (đã cộng vào NAV/active_nav) nhưng KHÔNG nằm trong availableCash/ppse.pp0Buy vì cần lệnh RÚT (redeem), tiền về T+1. Quy tắc diễn đạt (không được vi phạm): nếu 1 mã bị HOLD/hoãn vì availableCash thấp NHƯNG egg đủ bù phần thiếu → TUYỆT ĐỐI KHÔNG viết 'tài khoản thiếu tiền/không đủ tiền'. Viết đúng: 'availableCash tức thời thiếu Xđ NHƯNG egg còn Yđ — nếu muốn mua cần rút egg đêm nay/sáng mai, nếu không gate P0 sẽ tự HOLD (đúng thiết kế)'. ĐỪNG tự ý đề xuất rút egg thay user — chỉ NÊU RÕ lựa chọn đang có. Đây KHÔNG phải cho phép mua: quyết định mua/hoãn tuân theo signal_holds (mục dưới) và ranh giới user, egg chỉ để diễn đạt LÝ DO cho đúng."
+  EGG_NOTE=" TRỨNG VÀNG (egg.totalValue) LÀ TIỀN — CHÍNH SÁCH USER CHỐT 2026-10-24: lập plan mua BÌNH THƯỜNG. Ngân sách mua = cash thực (availableCash/ppse) + egg.totalValue đọc SỐNG: chạy \`bin/compute_active_nav.py --account $ACCT\` và đọc dòng 'Trứng vàng'. TUYỆT ĐỐI KHÔNG viết 'tài khoản thiếu tiền/không đủ tiền/sức mua ~0', KHÔNG shrink/hoãn/hạ cấp lệnh (LAG_HI→LAG_LO) chỉ vì availableCash thấp khi egg đủ bù — đó là báo động giả user đã yêu cầu bỏ. Chỉ khi cash + egg + JIT-bán-cùng-plan vẫn KHÔNG đủ mới là thiếu thật (khi đó shrink/defer theo luật cũ). Trong plan note ghi 1 dòng vận hành (không phải điều kiện): 'Chuyển Trứng vàng → cash ≥ X tr trước 09:05 ICT [ngày thực thi]' với X = Σ mua gồm phí − cash sẵn có − JIT-bán cùng plan (nêu công thức, làm tròn lên 0,1tr). Lệnh VẪN nằm trong orders[], KHÔNG sang deferred_orders[]. Hệ thống tự nhắc user mỗi 15 phút từ 08:30 sáng thực thi tới khi chuyển xong (bin/egg_transfer_alert.py); gate P0 09:05 giữ nguyên (chưa chuyển thì vẫn HOLD, đúng thiết kế). Số egg PHẢI đọc sống từ API — không dùng số người nói, manual_offbook_assets_vnd hay ước lượng."
   # CAPIT (gated-overflow bear-washout) capital-source note — user quyết định 2026-07-20
   # sau khi Taylor audit readiness (job Taylor_20260720_074025) phát hiện mâu thuẫn công
   # thức vốn (MD "size × free cash" vs paper code "NAV × capit_size", chênh ~100x) và
@@ -925,7 +1025,7 @@ except Exception:
     CAPIT_ENTRY="$(echo "$CAPIT_STATE" | cut -d'|' -f2)"
     CAPIT_SESS="$(echo "$CAPIT_STATE" | cut -d'|' -f3)"
     CAPIT_BASKET="$(echo "$CAPIT_STATE" | cut -d'|' -f4)"
-    CAPIT_NOTE=" 📌 CAPIT (bear-washout) ĐANG GIỮ VỊ THẾ — tín hiệu breadth HÔM NAY đã tắt (capit_signal_today=false) nhưng đó chỉ là điều kiện của RIÊNG ngày chạy, KHÔNG có nghĩa đã thoát: episode vào lệnh ${CAPIT_ENTRY}, đã ${CAPIT_SESS} phiên, rổ gốc ${CAPIT_BASKET} (nguồn: capit_episode_open=true trong golive_v23_status.json + data/capit_episode.json). Trong plan: các mã CAPIT là stop-exempt và slot-exempt (KHÔNG tính vào slot BAL/LAG thường, KHÔNG áp stop -20% của BAL). TUYỆT ĐỐI KHÔNG tự sinh lệnh BÁN để 'dọn' rổ CAPIT hay để 'cân' tỷ trọng — exit CAPIT do NGƯỜI quyết định, hệ thống KHÔNG có luật tự bán CAPIT ở đường live. Nếu bạn thấy lý do phải đụng tới 1 mã CAPIT, ghi rõ đề xuất + lý do trong plan note và để user duyệt, đừng tự đưa vào orders."
+    CAPIT_NOTE=" 📌 CAPIT (bear-washout) ĐANG GIỮ VỊ THẾ — tín hiệu breadth HÔM NAY đã tắt (capit_signal_today=false) nhưng đó chỉ là điều kiện của RIÊNG ngày chạy, KHÔNG có nghĩa đã thoát: episode vào lệnh ${CAPIT_ENTRY}, đã ${CAPIT_SESS} phiên, rổ gốc ${CAPIT_BASKET} (nguồn: capit_episode_open=true trong golive_v23_status.json + data/capit_episode.json). Trong plan: các mã CAPIT là stop-exempt và slot-exempt (KHÔNG tính vào slot BAL/LAG thường, KHÔNG áp stop -20% của BAL). TUYỆT ĐỐI KHÔNG tự sinh lệnh BÁN để 'dọn' rổ CAPIT hay để 'cân' tỷ trọng — bạn KHÔNG tự tạo lệnh BÁN CAPIT. Riêng bước auto_exit_inject (chạy SAU bạn, đường live) sẽ tự CHÈN đề xuất SELL CAPIT T+60 vào bản nháp plan để user duyệt (nhắc trước ở T+55) — đừng tạo trùng. Nếu bạn thấy lý do phải đụng tới 1 mã CAPIT, ghi rõ đề xuất + lý do trong plan note và để user duyệt, đừng tự đưa vào orders."
   fi
   # HOLDS_NOTE — ranh giới tạm giữ tín hiệu (signal_holds), fix lỗi #3 RCA 2026-08-20.
   # Bơm vào prompt để DollarBill biết không mở lệnh vi phạm; gate deterministic (signal_holds.py
@@ -936,7 +1036,7 @@ except Exception:
   # hiệu thị trường khi viết plan/summary.
   CORP_ACTION_NOTE="$(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --note "$ACCT" 2>/dev/null)"
   "$ROOT/bin/dispatch.sh" DollarBill \
-    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: ${CAL_TODAY:-$TODAY} (ICT).${MORNING_NOTE}${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/trade_plans/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: ${CAL_TODAY:-$TODAY} (ICT).${MORNING_NOTE}${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${LAG_DD_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
     --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 

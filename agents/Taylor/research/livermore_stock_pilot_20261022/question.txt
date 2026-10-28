@@ -1,0 +1,8 @@
+Một nhà đầu tư dự định MUA cổ phiếu này ở giá Open của phiên KẾ TIẾP sau phiên i=249, rồi nắm giữ vài tuần đến vài tháng. Bạn KHÔNG biết lý do mua. Dựa CHỈ vào cấu trúc giá+khối lượng bên dưới, trả lời.
+
+Trả lời ĐÚNG khuôn sau (5 dòng, không thêm gì khác ngoài một đoạn phân tích ngắn ≤120 từ đặt TRƯỚC khối kết quả):
+P_HIT15: <số 0.00-1.00 = xác suất trong thời gian nắm giữ giá Low chạm ≤ −15% so với giá vào>
+RISK: <LOW|MED|HIGH>
+P_POS: <số 0.00-1.00 = xác suất lợi suất giao dịch cả kỳ > 0>
+INVALIDATION: <1 dòng>
+CONTAMINATION: <nếu nhận ra chuỗi giá là cổ phiếu/giai đoạn lịch sử cụ thể nào thì nêu mã+giai đoạn; nếu không: NONE. Không dùng vào dự báo.>

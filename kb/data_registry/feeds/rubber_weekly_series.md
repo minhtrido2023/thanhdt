@@ -62,6 +62,9 @@ Telegram/DollarBill (event bus cho Taylor vẫn bắn ngay phiên đầu). Nếu
 sau fix so với `band=low tier=ALERT` trước fix. quant-skeptic CONFIRMED (high),
 log `mike/logs/verify_20260806_115406_186144.log`.
 
+## File bổ sung (26/10/2026)
+`data/rubber_tsr20_te_daily.csv`: chuỗi TSR20 TE daily 2016-10-25→2026-10-23 (2.512 dòng, USD/kg = TE USc/kg ÷100) từ `tav2_bq.commodity_prices`. **KHÔNG phải nguồn production, chưa có consumer**; không ghi đè `rubber_weekly.csv`. Khớp cột tsr20 của csv: xem `kb/projects/commodity-tables-eval-20261026.md` § Bổ sung 26/10 chiều.
+
 ## Liên quan
 - [`rubber_alert_state.md`](rubber_alert_state.md) — state chống lặp alert của chính script này
 - [`commodity_wb_cmo.md`](commodity_wb_cmo.md) — `data/rubber_monthly.csv`, nguồn ghép biên 52 tuần

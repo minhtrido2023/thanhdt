@@ -27,7 +27,9 @@ INCIDENTS_DIR = os.path.join(ROOT, "kb", "incidents")
 INDEX_FP = os.path.join(INCIDENTS_DIR, "index.md")
 
 MONTH_RE = re.compile(r"^### (\d{4}-\d{2})\s*$", re.M)
-LINK_RE = re.compile(r"\| *(\d{4}-\d{2}-\d{2}) *\| *\[(.+?)\]\((\d{4}-\d{2}/[^)]+\.md)\) *\| *(\S+) *\|")
+# Cột status cho phép KHOẢNG TRẮNG ("fixed (monitoring); ..."): bản cũ `(\S+)` không khớp các dòng đó ⇒
+# coi là THIẾU ⇒ --fix chèn lại MỖI NGÀY (2026-08-04 paper-main-netted bị nhân ~60 lần; weekly audit 2026-10-24).
+LINK_RE = re.compile(r"\| *(\d{4}-\d{2}-\d{2}) *\| *\[(.+?)\]\((\d{4}-\d{2}/[^)]+\.md)\) *\| *([^|\n]*?) *\|")
 
 
 def real_files():

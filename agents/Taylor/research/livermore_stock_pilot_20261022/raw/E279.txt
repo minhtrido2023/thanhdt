@@ -1,0 +1,7 @@
+**Phân tích:** Cổ phiếu giá thấp, mỗi bước giá khoảng 3.3%, nên biến động thô rất lớn. Ở thang 250 phiên là pha markdown kéo dài từ 107 xuống 60. Volume cạn kiệt rõ ở các phiên 191-198 (0.10-0.30), tức là có dấu hiệu tích luỹ. Sau đó là markup với climax tại i=205 (V 10.8). Nhịp hồi về 66.67 tạo đáy cao hơn. Sóng 2 lên đến 106.67 (i=236), đúng vùng cung cũ 103-107 của các phiên 9-41, rồi bị từ chối. Pha điều chỉnh hiện tại nằm trong biên 86.67-93.33, volume giảm dần (0.57, 0.91), nghĩa là chưa thấy bán tháo. Tuy vậy, giá đang ép sát mép dưới 86.67. Nếu thủng, khoảng trống gần nhất là 80-83, sau đó là 73.33. Mức −15% tương đương khoảng 76.5, nên chỉ cần thủng 80 là gần chạm.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 83.33 kèm volume >2x, tức thủng vùng nền 86.67 và mở đường về 73-76.
+CONTAMINATION: NONE

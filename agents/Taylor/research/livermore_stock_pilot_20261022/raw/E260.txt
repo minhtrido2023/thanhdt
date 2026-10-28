@@ -1,0 +1,9 @@
+**Phân tích:** Đây là một chu kỳ bơm-xả hoàn chỉnh. Giá tăng từ khoảng 90 lên đỉnh 506–538 (i103–104). Climax xuất hiện ở i98 (V 14.7) và i104–107 (V 8–9), sau đó là markdown với chuỗi giảm sàn liên tiếp về 94 (i217). Nhịp hồi lên 149 (i227/231) thất bại. Gap giảm i234–236 có volume 3.5 và 3.1, tạo đáy phụ 105.
+
+Hiện giá tích lũy hẹp trong vùng 106–118 suốt 14 phiên, volume khô (0.3–0.9), các đỉnh thấp dần 149 → 128 → 118. Chưa có follow-through tăng nào. Thang 250 phiên vẫn là markdown. Biên dao động ngày lớn khiến mức −15% (khoảng 96) nằm trong tầm với, chỉ cần thủng 105 là test lại đáy 94. Cung kẹt dày phía trên 120–150.
+
+P_HIT15: 0.50
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa dưới 105 (đáy i236) với volume tăng sẽ phá vỡ nền và mở đường về vùng 94 hoặc thấp hơn.
+CONTAMINATION: NONE

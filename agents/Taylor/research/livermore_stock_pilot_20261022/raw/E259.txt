@@ -1,0 +1,7 @@
+Ở thang 250 phiên, cổ phiếu tăng mạnh lên đỉnh 129–131 (i=25 và i=48–50, khối lượng climax 12–15x), sau đó phân phối và giảm dần về khoảng 98–100. Ở thang 60–120 phiên, giá đi ngang rộng trong vùng 88–115. Nhịp hồi lên 115 (i=178) thất bại và giá rơi lại vào giữa vùng. Ở thang 20 phiên, giá nén chặt trong 93–101, khối lượng cạn kiệt (0.02–0.5x). Phiên nào cũng có râu dưới về 93–95 rồi đóng cửa quanh 97–99, cho thấy có cầu đỡ nhưng không có follow-through. Các phiên 220–225 có khối lượng lớn (8–10x) mà giá đứng yên quanh 100, nhiều khả năng là sang tay chứ chưa phải cầu kéo giá. Hỗ trợ là vùng 88–93 (đáy i=130). Mức −15% (~83) nằm dưới vùng này, nên cần một cú phá vỡ thực sự mới chạm tới. Thanh khoản mỏng khiến rủi ro trượt giá cao, còn xu hướng dài hạn vẫn nghiêng xuống.
+
+P_HIT15: 0.20
+RISK: MED
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 88 (thủng đáy i=130) kèm khối lượng tăng, khi đó cấu trúc tích lũy bị vô hiệu.
+CONTAMINATION: NONE

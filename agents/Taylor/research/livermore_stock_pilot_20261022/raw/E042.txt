@@ -1,0 +1,11 @@
+**Phân tích:** Ở cả ba thang, cổ phiếu đang trong pha markup thẳng đứng. Giá đi từ nền tích luỹ ~69–70 (i=126–134, khối lượng tăng vọt tại i=135) lên 281, gấp khoảng 4 lần. Từ i=209 có ba phiên trần liên tiếp, phiên i=213 khối lượng 20.6x.
+
+Đoạn cuối đang tăng tốc kiểu parabol: từ 196.7 (i=239) lên 280.9 (i=249), tức +43% trong 10 phiên. Có nhiều gap lên, như i=240, 247 và 248. Phiên i=248 khối lượng 7.15x nhưng đóng cửa dưới giá mở, có dấu hiệu sắp climax.
+
+Phía dưới không có vùng đỡ gần. Đáy gap/nền gần nhất là 225–243 (i=244–246), cách giá vào khoảng 15–20%. Trên mức này chưa có thanh điều chỉnh nào kèm khối lượng cạn để kiểm chứng lực đỡ. Margin bám theo đà tăng sẽ tạo air-pocket khi đảo chiều. Vì vậy xác suất chạm −15% trong vài tuần là cao, kể cả khi xu hướng lớn chưa gãy.
+
+P_HIT15: 0.62
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới ~243 (đỉnh gap i=246) với khối lượng lớn → đà parabol gãy, mục tiêu về vùng 210–225.
+CONTAMINATION: NONE

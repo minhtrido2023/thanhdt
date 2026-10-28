@@ -1,0 +1,155 @@
+0a) SELFCHECK model_q3: Base 10,878 | kỳ vọng 11,031
+0b) SELFCHECK r1 (ghép mid, C34, k0, V phẳng): 14,301
+0c) SELFCHECK r2 tâm 60/40: 11,061 / 12,481 / 13,901 / 15,321
+   PASS (10.878 / 11.031 / 14.301 / r2 11.061-12.481-13.901-15.321)
+0d) SELFCHECK r3 tâm 60/40 (fv4 với hàm sản lượng r3): 10,521 / 11,863 / 13,206 / 14,548
+   mốc đường PHẲNG 14.000 t tới 2054 (không lão hoá): 13,967 / 15,563 / 17,159 / 18,755
+   PASS (r1–r3 tái lập; fv4 ≡ fv1 r3)
+
+1) ĐỐI CHIẾU DIỆN TÍCH (ha) — chỉ in, không chỉnh tham số
+   KH26 13.800/1,69 [BCTN25 tr.46]          8,165.7
+   2025 15.152,83/1,81 [BCTN25 tr.40]       8,371.7
+   2024 11.116/1,34 [BCTN24]                8,295.5
+   FSC 6.148,03/0,7407 [BCTN25 tr.6]        8,300.3
+   kinh doanh EUDR [BCTN24 tr.32]           8,299.8
+   khai thác KH25 [BCTN24 tr.56]            8,201.7
+   tổng cao su [BCTN25 tr.20]               8,592.3
+   ⇒ không cạo trong tổng 8.592,3: 426.6 ha (KTCB 2025–26 132,33 + phần khác)
+   tái canh còn lại R = 4.081,64 − 94,56 − 37,77 = 3,949.31 ha = 48.4% diện tích cạo; khối không tái canh 4,216.4 ha
+   vườn cây [BCTC3 5.8]: HMLK/NG 55.8%; KH năm hoá 34.9 tỷ = 6.2% NG/năm ⇒ GTCL 250.7 hết sau ~7.2 năm (~2034) ở tốc độ hiện tại [SL]
+   capex KTCB [BCTN24 tr.57] 24.655 tr/ha/năm ⇒ m 4/7/10: 98.6 / 172.6 / 246.6 tr/ha
+
+2) ĐƯỜNG SẢN LƯỢNG tự khai thác (tấn; L_tap 27) — so r3 tâm
+   năm           2026   2027   2028   2030   2032   2034   2036   2038   2040   2042   2045   2048   2051   2054  Σ2027–54
+   r3 tâm      14,000 14,000 14,000 13,720 13,177 12,655 12,154 11,672 11,210 10,766 10,133  9,537  8,976  8,449    314,023
+   NHANH       13,800 12,966 12,131 10,254  8,362  7,072  8,187  8,660  8,305  7,658  6,898  6,898  6,898  6,898    228,489
+   TRUNG BÌNH  13,800 13,800 13,800 11,889  9,933  8,136  6,854  6,991  6,636  6,434  6,804  6,898  6,898  6,898    227,906
+   CHẬM        13,800 13,800 13,800 13,524 11,503  9,645  7,858  5,658  4,968  4,765  6,172  6,898  6,898  6,898    226,884
+   TB L_tap22  13,800 13,800 13,800 11,889  9,933  5,593  2,895  2,793  3,669  5,338  6,804  6,898  6,898  6,898    196,836
+   TB L_tap32  13,800 13,800 13,800 11,889  9,933  8,136  6,854  7,942  9,375 10,818  9,486  7,545  6,898  6,898    254,900
+   capex m7 NHANH     : tổng  698.8 tỷ; đỉnh  85.2 tỷ/năm (2033)
+   capex m7 TRUNG BÌNH: tổng  698.8 tỷ; đỉnh  85.2 tỷ/năm (2035)
+   capex m7 CHẬM      : tổng  698.8 tỷ; đỉnh  85.2 tỷ/năm (2037)
+   so sánh: 10% 'tái đầu tư' r3 ở LN lõi 2030 (mid 1,97, đường TB) = 6.6 tỷ/năm
+
+3) FV r4 (đ/cp, 60/40; ngoặc = 14.700/14.400 so FV). Tâm: L_tap 27, capex m 7, các trục khác = tâm r3
+                                            | mid 1.865             | mid 1.970             | mid 2.075             | mid 2.180            
+   r3 tâm (đối chiếu)                       |  10,521 (+40%/+37%) |  11,863 (+24%/+21%) |  13,206 (+11%/ +9%) |  14,548 ( +1%/ -1%)
+   r4 NHANH (s 2027)                        |  -1,070 (FV<1.000)      |    -195 (FV<1.000)      |     680 (FV<1.000)      |   1,554 (+846%/+826%)
+   r4 TRUNG BÌNH (s 2029)                   |     521 (FV<1.000)      |   1,439 (+921%/+900%) |   2,358 (+523%/+511%) |   3,277 (+349%/+339%)
+   r4 CHẬM (s 2031)                         |   1,735 (+747%/+730%) |   2,698 (+445%/+434%) |   3,660 (+302%/+293%) |   4,623 (+218%/+211%)
+
+4) LƯỚI 3 đường × L_tap {22,27,32} × capex m {4,7,10} (27 ô/mid; phân vị lưới KHÔNG phải xác suất)
+   mid 1.865: min  -5,438 trung vị     208 max   4,617 | ô ≥ 14.700: 0/27 · ≥ 14.400: 0/27
+   mid 1.970: min  -4,730 trung vị   1,170 max   5,679 | ô ≥ 14.700: 0/27 · ≥ 14.400: 0/27
+   mid 2.075: min  -4,022 trung vị   2,133 max   6,741 | ô ≥ 14.700: 0/27 · ≥ 14.400: 0/27
+   mid 2.180: min  -3,313 trung vị   3,095 max   7,803 | ô ≥ 14.700: 0/27 · ≥ 14.400: 0/27
+   một trục quanh tâm (TB, L27, m7) — biên độ @ mỗi mid:
+     đường s 2027/2029/2031   1.865: 2,805 [-1,070/521/1,735] | 1.97: 2,893 [-195/1,439/2,698] | 2.075: 2,981 [680/2,358/3,660] | 2.18: 3,069 [1,554/3,277/4,623]
+     L_tap 22/27/32           1.865: 3,723 [-1,849/521/1,875] | 1.97: 3,997 [-1,104/1,439/2,893] | 2.075: 4,271 [-359/2,358/3,911] | 2.18: 4,544 [385/3,277/4,930]
+     capex m 4/7/10           1.865: 3,586 [2,314/521/-1,272] | 1.97: 3,586 [3,232/1,439/-354] | 2.075: 3,586 [4,151/2,358/565] | 2.18: 3,586 [5,070/3,277/1,484]
+
+5) CẦU NỐI r3 tâm → r4 tâm (đường TRUNG BÌNH; cộng dồn, mỗi mid riêng, 60/40)
+   mid 1.865: r3 10,521 | mức 14.000→13.800 (dạng r3) -376 | hết chu kỳ 1 theo cohort L27, chưa tái canh -5,090 | thanh lý khối tái canh 2029–36 -4,259 | sản lượng cây tái canh +3,908 | capex tái canh m7 -4,184 ⇒ r4 521
+   mid 1.97: r3 11,863 | mức 14.000→13.800 (dạng r3) -400 | hết chu kỳ 1 theo cohort L27, chưa tái canh -5,464 | thanh lý khối tái canh 2029–36 -4,572 | sản lượng cây tái canh +4,196 | capex tái canh m7 -4,184 ⇒ r4 1,439
+   mid 2.075: r3 13,206 | mức 14.000→13.800 (dạng r3) -424 | hết chu kỳ 1 theo cohort L27, chưa tái canh -5,838 | thanh lý khối tái canh 2029–36 -4,885 | sản lượng cây tái canh +4,483 | capex tái canh m7 -4,184 ⇒ r4 2,358
+   mid 2.18: r3 14,548 | mức 14.000→13.800 (dạng r3) -448 | hết chu kỳ 1 theo cohort L27, chưa tái canh -6,212 | thanh lý khối tái canh 2029–36 -5,198 | sản lượng cây tái canh +4,770 | capex tái canh m7 -4,184 ⇒ r4 3,277
+
+6) BIẾN THỂ quanh tâm TB (không vào tâm)
+   tâm TB                                   |     521 (FV<1.000)      |   1,439 (+921%/+900%) |   2,358 (+523%/+511%) |   3,277 (+349%/+339%)
+   quỹ ĐTPT tự tài trợ (−96,97 tiền, −96,97 capex) |      59 (FV<1.000)      |     978 (FV<1.000)      |   1,897 (+675%/+659%) |   2,815 (+422%/+411%)
+   quỹ ĐTPT trừ thẳng [ĐẾM HAI LẦN]         |    -804 (FV<1.000)      |     115 (FV<1.000)      |   1,033 (+1322%/+1293%) |   1,952 (+653%/+638%)
+   capex THAY 10% tái đầu tư (0,9→1,0)      |     646 (FV<1.000)      |   1,665 (+783%/+765%) |   2,685 (+447%/+436%) |   3,705 (+297%/+289%)
+   chi phí cố định co theo diện tích        |   4,676 (+214%/+208%) |   5,695 (+158%/+153%) |   6,714 (+119%/+114%) |   7,734 (+90%/+86%)
+
+7) DÒNG RIÊNG — KHÔNG cộng vào FV
+   mua ngoài 2.000 t/năm 2027–54, biên 0 tr/t [UL]: +0 đ/cp
+   mua ngoài 2.000 t/năm 2027–54, biên 1.5 tr/t [UL]: +226 đ/cp
+   mua ngoài 2.000 t/năm 2027–54, biên 3.0 tr/t [UL]: +452 đ/cp
+   sầu riêng Lào 238,12 ha [UL: NS 5.35 t/ha từ CNC, biên 8.581 tr/t, ra quả năm 5–7]: LN gộp đỉnh 10.9 tỷ/năm; PV +446 đ/cp; trừ capex trồng 2027–30 (178,5 tr/ha, CHƯA gồm chăm sóc KTCB) −270 ⇒ ròng +176 đ/cp
+
+8) NGƯỠNG GIÁ biên an toàn ≥15% = FV/1,15 (tâm từng đường; và min lưới 27 ô)
+   NHANH     : mid 1.865: ≤-930 · mid 1.97: ≤-170 · mid 2.075: ≤591 · mid 2.18: ≤1,352
+   TRUNG BÌNH: mid 1.865: ≤453 · mid 1.97: ≤1,252 · mid 2.075: ≤2,051 · mid 2.18: ≤2,850
+   CHẬM      : mid 1.865: ≤1,509 · mid 1.97: ≤2,346 · mid 2.075: ≤3,183 · mid 2.18: ≤4,020
+   min lưới : mid 1.865: ≤-4,729 · mid 1.97: ≤-4,113 · mid 2.075: ≤-3,497 · mid 2.18: ≤-2,881
+   ĐƯỜNG ĐÁY r3 (RSS3 2027=2028=1,60) trên đường TB tâm: mid 1.865: FV -1,553 ⇒ ≤-1,351 · mid 1.97: FV -797 ⇒ ≤-693 · mid 2.075: FV -40 ⇒ ≤-35 · mid 2.18: FV 716 ⇒ ≤623
+
+9) POST-HOC (ngoài PREREG; KHÔNG đổi tâm): chi phí cố định CO THEO DIỆN TÍCH cho cả 3 đường + lưới + ngưỡng
+   Lý do: hàm r3 giữ f·C_ref·14.000 t ≈ 212 tỷ/năm cố định cả khi diện tích rời sổ; SGA đã tách riêng ⇒ phần cố định trong GVHB chủ yếu là chi phí/ha
+   farea NHANH                              |   3,516 (+318%/+310%) |   4,499 (+227%/+220%) |   5,482 (+168%/+163%) |   6,465 (+127%/+123%)
+   farea TRUNG BÌNH                         |   4,676 (+214%/+208%) |   5,695 (+158%/+153%) |   6,714 (+119%/+114%) |   7,734 (+90%/+86%)
+   farea CHẬM                               |   5,541 (+165%/+160%) |   6,596 (+123%/+118%) |   7,651 (+92%/+88%) |   8,705 (+69%/+65%)
+   lưới farea mid 1.865: min     598 trung vị   4,588 max   7,461 | ô ≥ 14.400: 0/27 | ngưỡng FV/1,15 min lưới ≤520
+   lưới farea mid 1.970: min   1,450 trung vị   5,537 max   8,592 | ô ≥ 14.400: 0/27 | ngưỡng FV/1,15 min lưới ≤1,261
+   lưới farea mid 2.075: min   2,302 trung vị   6,516 max   9,723 | ô ≥ 14.400: 0/27 | ngưỡng FV/1,15 min lưới ≤2,002
+   lưới farea mid 2.180: min   3,154 trung vị   7,368 max  10,854 | ô ≥ 14.400: 0/27 | ngưỡng FV/1,15 min lưới ≤2,743
+   ngưỡng farea NHANH     : mid 1.865: ≤3,057 · mid 1.97: ≤3,912 · mid 2.075: ≤4,767 · mid 2.18: ≤5,622
+   ngưỡng farea TRUNG BÌNH: mid 1.865: ≤4,066 · mid 1.97: ≤4,952 · mid 2.075: ≤5,839 · mid 2.18: ≤6,725
+   ngưỡng farea CHẬM      : mid 1.865: ≤4,819 · mid 1.97: ≤5,736 · mid 2.075: ≤6,653 · mid 2.18: ≤7,570
+   farea + capex THAY 10% (cận trên hợp lý): 5,262 / 6,394 / 7,526 / 8,657
+   farea đường đáy 1,60 (TB): 2,602 / 3,459 / 4,316 / 5,173
+
+10) POST-HOC (ngoài PREREG; KHÔNG đổi tâm): hai sai lệch do CHÍNH r4 tạo ra khi thêm capex tường minh
+   (a) khấu hao vườn 34.9 tỷ/năm nằm trong C_ref như chi phí tiền mặt; capex tái canh nay trừ riêng ⇒ cộng lại (cận trên: giả định KH chu kỳ 2 thay thế lá chắn thuế)
+   (b) tiền thu gỗ thanh lý 9T/26: 1.132 tỷ / ~54 ha [SL: NG thanh lý 3,58 tỷ ÷ NG BQ 66.0 tr/ha] ≈ 20.9 tr/ha ước lượng; áp cho mọi ha thanh lý
+   (a) cộng KH, chi phí công ty — TB        |   3,877 (+279%/+271%) |   4,796 (+207%/+200%) |   5,714 (+157%/+152%) |   6,633 (+122%/+117%)
+   (a) cộng KH + farea — TB                 |   7,116 (+107%/+102%) |   8,135 (+81%/+77%) |   9,155 (+61%/+57%) |  10,174 (+44%/+42%)
+   (a)+(b) + farea — TB                     |   8,058 (+82%/+79%) |   9,078 (+62%/+59%) |  10,097 (+46%/+43%) |  11,116 (+32%/+30%)
+   ba đường với (a)+(b)+farea:
+   PH NHANH                                 |   6,920 (+112%/+108%) |   7,903 (+86%/+82%) |   8,886 (+65%/+62%) |   9,869 (+49%/+46%)
+   PH TRUNG BÌNH                            |   8,058 (+82%/+79%) |   9,078 (+62%/+59%) |  10,097 (+46%/+43%) |  11,116 (+32%/+30%)
+   PH CHẬM                                  |   8,906 (+65%/+62%) |   9,961 (+48%/+45%) |  11,015 (+33%/+31%) |  12,070 (+22%/+19%)
+   lưới PH mid 1.865: min   3,853 trung vị   7,871 max  10,926 | ô ≥ 14.400: 0/27 | min/1,15 ≤3,351
+   lưới PH mid 1.970: min   4,705 trung vị   8,919 max  12,057 | ô ≥ 14.400: 0/27 | min/1,15 ≤4,092
+   lưới PH mid 2.075: min   5,557 trung vị   9,771 max  13,188 | ô ≥ 14.400: 0/27 | min/1,15 ≤4,832
+   lưới PH mid 2.180: min   6,409 trung vị  10,623 max  14,319 | ô ≥ 14.400: 0/27 | min/1,15 ≤5,573
+   ngưỡng PH NHANH     : mid 1.865: ≤6,017 · mid 1.97: ≤6,872 · mid 2.075: ≤7,727 · mid 2.18: ≤8,582
+   ngưỡng PH TRUNG BÌNH: mid 1.865: ≤7,007 · mid 1.97: ≤7,894 · mid 2.075: ≤8,780 · mid 2.18: ≤9,666
+   ngưỡng PH CHẬM      : mid 1.865: ≤7,744 · mid 1.97: ≤8,661 · mid 2.075: ≤9,578 · mid 2.18: ≤10,496
+   PH đường đáy 1,60 (TB): 5,984 / 6,841 / 7,698 / 8,556
+   PH không capex (chỉ để thấy cỡ capex): 12,242 / 13,261 / 14,281 / 15,300
+
+====================================================================================================
+11) SELFCHECK build3 ≡ build/PH (mặc định phải trùng từng số)
+   PH TB cũ : 8,058 / 9,078 / 10,097 / 11,116
+   build3   : 8,058 / 9,078 / 10,097 / 11,116
+   PASS
+
+12) CÁC CON SỐ CHO §3 (POST-HOC, đường TB, L27, m7; đ/cp @ mid 1.865 / 1.97 / 2.075 / 2.18)
+   A. thanh lý khối + trồng lại, capex m7 (tâm PH)            |   8,058 |   9,078 |  10,097 |  11,116
+   B. như A nhưng capex = 0 (cây mới miễn phí)                |  12,242 |  13,261 |  14,281 |  15,300
+   C. thanh lý khối, KHÔNG trồng lại, không capex             |  10,151 |  10,939 |  11,728 |  12,516
+   D. không thanh lý gì (R_on=False), L27, không capex        |  12,057 |  13,096 |  14,134 |  15,172
+   ⇒ A−B (giá của capex) @1,97 = -4,184; A−C (thanh lý+trồng lại vs thanh lý rồi bỏ) = -1,862; A−D (cả chương trình vs không làm gì) = -4,018
+   A với tô nhượng tới 2064 (END=2064)                        |   8,237 |   9,295 |  10,354 |  11,413
+   ⇒ kéo dài tô nhượng 2054→2064 @1,97: +218
+   biên/ha đo được: capex m7 = 172.6 tr/ha (rải 7 năm); r thực = 8.74%
+   biên ròng/ha cây mới trưởng thành @mid 1,97: 22.9 tr/ha/năm trước thuế, 18.5 sau thuế [SL, hàm chi phí r3]; PV(t0) capex m7 = 136 tr/ha vs PV biên sau thuế 22 năm cạo = 108 tr/ha (bỏ qua 3 năm năng suất thấp ⇒ cận trên)
+
+13) TRỤC 'DRI THỰC HIỆN / HOÃN / CẮT CHƯƠNG TRÌNH' (POST-HOC cấu hình A; mid 1,865/1,97/2,075/2,18)
+   T1. thực hiện đầy đủ (TB 2029, L27, m7)                    |   8,058 |   9,078 |  10,097 |  11,116
+   T2a. không tái canh, GIỮ vườn q=1 (L_tap 99), addD=KH vườn |  13,501 |  14,819 |  16,138 |  17,457
+   T2b. như T2a nhưng addD=0 (KH vườn coi là chi phí duy trì) |  10,145 |  11,463 |  12,782 |  14,100
+   T2c. không tái canh, vườn hết đời L27 (đuôi dưới)          |  12,057 |  13,096 |  14,134 |  15,172
+   T3a. thanh lý CHỈ khối thưa (q 0,5; 3.949 ha), không trồng lại; phần còn lại giữ (L99) |  13,575 |  14,734 |  15,893 |  17,052
+   T3b. như T3a nhưng phần còn lại hết đời L27                |  12,035 |  12,968 |  13,901 |  14,834
+   đối chiếu skeptic (tự đo, chưa tái lập ở đây): 13.225 @1,97 / 15.115 @2,18 cho 'không tái canh giữ vườn'
+   ô ≥ 14.400: T2a: 14,819/16,138/17,457; T2b: ; T3a: 14,734/15,893/17,052
+   T1: 14.400 cao/thấp hơn FV +79% / +59% / +43% / +30%
+   T2a: 14.400 cao/thấp hơn FV +7% / -3% / -11% / -18%
+   T2b: 14.400 cao/thấp hơn FV +42% / +26% / +13% / +2%
+   T3a: 14.400 cao/thấp hơn FV +6% / -2% / -9% / -16%
+
+14) PHASE 2: tái canh nốt phần còn lại (~4.216 ha) khi cohort hết L_tap (POST-HOC, TB, m7)
+   P2. TB L27 + phase 2                                       |   6,521 |   7,609 |   8,697 |   9,784
+   P2. TB L22 + phase 2                                       |   5,176 |   6,210 |   7,245 |   8,279
+      (đối chiếu) TB L22 không phase 2                        |   7,049 |   7,931 |   8,813 |   9,695
+   ⇒ phase 2 làm FV đổi (L27) @1,97/2,18: -1,468 / -1,332
+
+15) MẬT ĐỘ q (vườn cũ; năng suất/ha cây cũ = q·1,69, diện tích cũ = A0/q) — POST-HOC, TB, m7
+   q 0,7, L27                                                 |   9,539 |  10,651 |  11,762 |  12,873
+   q 1, L22                                                   |   7,049 |   7,931 |   8,813 |   9,695
+   q 0,7 + L22                                                |   8,375 |   9,315 |  10,254 |  11,193
+   ⇒ q0,7 vs tâm +1,573; L22 vs tâm -1,146 @1,97 (skeptic: +1,37k; −1,15k; gộp 9.185)
+   q 0,5, L27                                                 |  10,708 |  11,880 |  13,052 |  14,225

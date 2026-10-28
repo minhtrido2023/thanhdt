@@ -1,0 +1,11 @@
+**Phân tích:** Cổ phiếu ở pha markup parabol trên cả 3 thang, tăng ~5,4 lần trong 250 phiên. Có một nền tích luỹ 380–460 kéo dài khoảng 40 phiên (i≈204–241). Phiên 242–244 bứt lên, trong đó 243–244 là hai phiên trần với khối lượng mỏng.
+
+Tuy nhiên tại i=245 xuất hiện climax: khối lượng 14,88x, mở cửa ở giá trần 573,68 nhưng đóng cửa 543,86. Phiên 246 giảm sâu xuống 509 với khối lượng 3,79x. Phiên 248 mở cửa 579,65 lập đỉnh mới nhưng bị bán ngược về 552 (5,78x). Phiên 249 chỉ đóng ở 543. Có hai lần chạm vùng 574–580 đều bị từ chối trên nền khối lượng lớn, nên đây giống phân phối hơn là follow-through.
+
+Biến động ngày thường 5–7%. Ngưỡng −15% (≈462) trùng với mép trên nền cũ 460–469, tức là vùng air-pocket. Khả năng giá về test nền này là cao.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.38
+INVALIDATION: Kịch bản tăng chỉ còn hiệu lực nếu giá đóng cửa vượt 580 với khối lượng lớn; nếu đóng cửa dưới 508 (đáy i=246) thì breakout thất bại và mục tiêu là về 460.
+CONTAMINATION: NONE

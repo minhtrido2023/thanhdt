@@ -1,0 +1,19 @@
+Đây là cổ phiếu giá rất thấp: mỗi bước giá bằng 8.33 điểm, khoảng 7% ở mức hiện tại. Từ giá vào quanh 116.67, mốc −15% nằm dưới 100. Vì vậy, chỉ cần một thanh chạm 91.67 là đã thủng −15%.
+
+**Cấu trúc**
+- **250 phiên:** nền 100–108 kéo dài khoảng 110 phiên. Sau đó là pha markup lên 216.67, kết thúc bằng phiên climax i187 với khối lượng 49.5.
+- **60 phiên:** phân phối trong vùng 150–166.
+- **20 phiên:** xuống dưới 141.67 ở i244 với khối lượng 13.8, rồi giảm liền năm phiên khối lượng lớn (i248 đạt 14.4).
+- **Chưa có tín hiệu cạn kiệt:** chưa thấy khối lượng khô lại hay phiên đảo chiều. Hai khối lượng mạnh này mang tính bán tháo, chưa phải hấp thụ.
+
+**Điểm đỡ và cản**
+- Vùng hút giá là nền cũ 100–108.33. Phần lớn đợt tăng nằm trên khoảng trống nên phía dưới gần như không có điểm đỡ.
+- Cung bị kẹt phía trên tập trung ở 141–166.
+
+**Rủi ro bước giá:** khi về đến nền 100, chỉ một bước dao động là có thể chạm 91.67.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.35
+INVALIDATION: Đóng cửa trên 141.67 kèm khối lượng follow-through, sau khi có một đợt kiểm định lại giảm và khối lượng cạn trên vùng 108.33.
+CONTAMINATION: NONE

@@ -1247,8 +1247,13 @@ def credit_frame(account_label: str, account_no: str, adjustments: list) -> dict
     `previous_raw_qty`; hàm nhận account_no nên không có đường nào gộp nhầm 2 tài khoản.
     """
     import daily_nav_snapshot as _dns
+    import rights_subscription as _rights_sub
 
     out, fill_cache = {}, {}
+    # N4 (rights alert NB4 25/10) — cùng sổ + cùng phép như daily_nav_snapshot.main: CP quyền mua user
+    # khai đang CHỜ VSDC ghi nhận tại ex-date KHÔNG vào cơ sở hưởng sự kiện CP. Không có sổ ⇒ [] ⇒
+    # pending 0 ⇒ y hệt bản cũ. Sổ lệch account_no ⇒ raise (§12, không đoán).
+    rights_subs = _rights_sub.load_subscriptions(account_label, account_no=account_no)
     by_day = {}
     for adj in adjustments:
         by_day.setdefault(adj.last_cum_date, []).append(adj)
@@ -1272,19 +1277,24 @@ def credit_frame(account_label: str, account_no: str, adjustments: list) -> dict
                         if prev_d else None)
             ev = (_dns.held_event_next_session(snap, day, tk)
                   or _ledger_event(tk, adj.ex_date))
-            verdict, detail = _dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+            pend = (_rights_sub.pending_qty(account_label, tk, adj.ex_date, prev_d, subs=rights_subs)
+                    if prev_d else 0.0)
+            verdict, detail = _dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d,
+                                                         pending_rights=pend)
 
             if verdict == "share_event_credit":
                 ratio = float(detail["exercise_ratio"])
+                entitled = float(detail["qty_now"]) - float(detail["residual"]) - pend
                 out[(tk, day)] = {
                     "status": "pre_credit",
-                    "entitled": float(detail["qty_now"]) - float(detail["residual"]),
+                    "entitled": entitled,
                     "multiplier": 1.0 + ratio,
                     "note": (f"{account_label}: broker credit sớm trong ngày cum "
                              f"({detail['qty_prev']:,.0f}→{detail['qty_now']:,.0f}, lệnh khớp "
                              f"thật {detail['net_fill']:+,.0f}, phần dư {detail['residual']:+,.0f} "
-                             f"= tỉ lệ {ratio:g}) ⇒ KL hưởng quyền "
-                             f"{float(detail['qty_now']) - float(detail['residual']):,.0f}"),
+                             f"= tỉ lệ {ratio:g}"
+                             + (f" × (KL − {pend:,.0f} CP quyền mua chờ VSDC, không hưởng)" if pend else "")
+                             + f") ⇒ KL hưởng quyền {entitled:,.0f}"),
                 }
                 continue
 

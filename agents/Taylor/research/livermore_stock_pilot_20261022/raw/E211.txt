@@ -1,0 +1,7 @@
+Đây là mã cực kém thanh khoản: nhiều chuỗi phiên Volume 0, mỗi bước giá khoảng 1.4 điểm, biến động ngày ±7–10%. Trong 250 phiên, giá đi qua hai chu kỳ bơm-xả: lên 150 (i7) rồi rơi về 83 (i174–198). Sau đó có pha markup 83→139 (i199–209) với khối lượng bùng nổ. Tiếp theo là phân phối dạng whipsaw trong vùng 90–129, với climax 651× tại i231 quanh 111–119 mà giá không đi lên. Thanh i248 mở cửa 133 rồi đóng 112.5, là một upthrust thất bại tại mép trên vùng 122–133. Giá vào lệnh khoảng 111 nằm giữa range 100–122. Ngưỡng −15% (≈94) đã bị xuyên thủng tại i220 (90.4) chỉ một tháng trước. Đáy cấu trúc ở 83–90 nằm cách giá vào khoảng 20–25%. Rủi ro thấp chạm −15% là rất cao.
+
+P_HIT15: 0.58
+RISK: HIGH
+P_POS: 0.40
+INVALIDATION: Đóng cửa trên 122 với khối lượng duy trì và giữ được trên 112 thì phân phối bị vô hiệu; mất 100 thì xác nhận markdown về vùng 83–90.
+CONTAMINATION: NONE

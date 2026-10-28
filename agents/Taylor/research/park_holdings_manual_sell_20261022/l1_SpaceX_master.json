@@ -1,0 +1,23 @@
+{
+ "account_label": "SpaceX",
+ "asof": "2026-10-22",
+ "target_park": 0.0,
+ "trim_band": 0.005,
+ "orders": [],
+ "blocked": [],
+ "notes": [
+  "sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. Lệch: [{'ticker': 'DRI', 'ledger_qty': 3700, 'broker_qty': 2500, 'diff': 1200}]"
+ ],
+ "at_or_below_target": [],
+ "park_mv_vnd": 9186050.0,
+ "cash_available_vnd": 21962653.0,
+ "cash_total_vnd": 25414484.0,
+ "reconcile_ok": false,
+ "unverified_tickers": [
+  "DRI"
+ ],
+ "excluded_tickers": [
+  "PNJ"
+ ],
+ "decision": "BLOCKED_RECONCILE"
+}

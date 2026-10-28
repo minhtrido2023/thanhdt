@@ -1,0 +1,13 @@
+**Phân tích:** Đây là một đợt markup gần như parabol, giá đi từ khoảng 100 lên đỉnh 656.6 ở phiên i238. Đó là mức tăng 6.5 lần trong một năm.
+
+- **Pha 20 phiên:** đã chuyển sang phân phối. Đỉnh 656 ở i238 có khối lượng thấp (0.45). Sau đó i240 giảm mạnh với khối lượng 1.84, và i242 gap xuống, tạo đáy 501.
+- **Hồi yếu:** nhịp hồi lên 598 (i245–247) là đỉnh thấp hơn, khối lượng chỉ 0.39–0.71, tức là cầu không theo.
+- **Hai phiên cuối:** i248–249 đều đóng cửa ở mức thấp nhất phiên. Riêng i249 đóng đúng giá sàn 495.27 (−7%), thủng đáy 501, xác lập đáy thấp hơn.
+- **Nguồn cung:** cung kẹt dày ở vùng 560–656. Margin tích luỹ sau đợt chạy dài dễ tạo air-pocket.
+- **Mức −15%:** tương đương khoảng 420, gần vùng hỗ trợ cũ 433–470 (i199–213). Biên độ ngày 5–7% nên mức này hoàn toàn có thể chạm.
+
+P_HIT15: 0.60
+RISK: HIGH
+P_POS: 0.33
+INVALIDATION: Giá đóng cửa lấy lại trên 598 (đỉnh hồi i246) kèm khối lượng >1.5 thì phá cấu trúc đỉnh thấp hơn và kịch bản phân phối bị vô hiệu.
+CONTAMINATION: NONE

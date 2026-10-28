@@ -1,0 +1,7 @@
+Cổ phiếu này có biến động rất thấp. Trong khoảng i=0–104, giá đi ngang chặt ở vùng 96–102, thanh khoản mỏng. Pha markup đầu tiên diễn ra ở i=105–112, giá lên 114 với khối lượng climax 55x tại i=112, sau đó tích luỹ lại trong vùng 105–114 đến i=209. Breakout lần hai tại i=210 (vol 6x) đưa giá lên vùng 118–127, và khối lượng nền tăng hẳn lên 4–18x. Tuy vậy, ở i=237 và i=241 khối lượng lớn (~18x) mà giá không vượt được 126–127: đây là dấu hiệu cung chặn ở đỉnh, có thể là phân phối sớm. Mốc −15% tính từ ~124 là khoảng 105.5, nằm dưới cả nền 112–113. Với biên dao động lịch sử hẹp như vậy, khả năng chạm mức này thấp.
+
+P_HIT15: 0.10
+RISK: LOW
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 117.5 (đáy nền i=214–227) kèm khối lượng lớn cho thấy breakout thất bại, giá dễ về vùng 112–113.
+CONTAMINATION: NONE

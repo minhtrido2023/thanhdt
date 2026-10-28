@@ -1,0 +1,27 @@
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/lag_runup_effect_20261024/msr_case.py:6: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.
+  print(m.tail(6).round(3).to_string(index=False))
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/lag_runup_effect_20261024/msr_case.py:16: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.
+  print(g[["quarter", "Release_Date", "NP_R", "pre_ret", "rel_ret", "post_ret"]].round(1).to_string(index=False))
+ticker quarter Release_Date      NP_R  surprise_B_MA  prior_n_good  pa_HL3   tier  qualify
+   MSR  2025Q2   2025-07-29  -101.571          1.020            12   3.026 LAG_HI    False
+   MSR  2025Q3   2025-10-27  -101.496          1.027            12   3.026 LAG_HI    False
+   MSR  2025Q4   2026-01-29  -203.079          3.084            12   3.026 LAG_HI    False
+   MSR  2026Q1   2026-04-28  -341.740          5.000            12   3.026 LAG_HI    False
+   MSR  2026Q2   2026-07-27 29414.665          5.000            12   3.026 LAG_HI    False
+   MSR  2026Q3   2026-10-22 41509.732          2.536            13   8.185 LAG_HI     True
+latest rel 2026-10-22 | bar trước công bố 2026-10-21 | YTD 160.3% (VNI -2.6%) | r60 91.2 r120 65.9 pre30 32.8 | dist_hi250 -8.1% | last 2026-10-23 YTD-now 164.0%
+MSR prior good events n=13, mean post_ret 3.56, n>0 8
+quarter Release_Date    NP_R  pre_ret  rel_ret  post_ret
+ 2017Q1   2017-05-03   289.3     -5.0      0.0       0.6
+ 2017Q4   2018-02-01  2815.7     62.3    -23.0      12.8
+ 2018Q1   2018-05-02   168.3    -15.9      2.2     -11.6
+ 2018Q2   2018-08-01   851.4     -3.7     12.1     -18.9
+ 2018Q4   2019-02-01   199.7     -7.9      4.8       5.1
+ 2019Q3   2019-10-30  1092.9    -14.7      0.6      -7.3
+ 2021Q1   2021-05-04    53.2    -13.1      0.0      10.0
+ 2021Q4   2022-01-27   467.5    -15.0      8.4      19.0
+ 2022Q2   2022-08-01  8506.5     11.4      5.2      -2.9
+ 2023Q3   2023-10-30   518.8    -16.7     -4.7       5.6
+ 2023Q4   2024-01-30   333.6     -2.1      1.5       7.9
+ 2024Q3   2024-10-25    50.4     -1.6     -1.6      -1.7
+ 2026Q2   2026-07-27 29414.7    -14.1     11.3      27.6

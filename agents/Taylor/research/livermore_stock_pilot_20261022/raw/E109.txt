@@ -1,0 +1,7 @@
+Đây là pha markup dài 250 phiên: giá đi từ ~70 (i65–81) lên đỉnh 288.77 (i190). Sau đó là cao trào phân phối với khối lượng rất lớn: i194–195 (8.08x) và i200–205 (4–5x), kéo giá về đáy 182 (i210). Phục hồi lên 266 (i233) thì gãy mạnh ở i234–235. Từ đó giá đi ngang trong biên 225–260, với đáy sau cao hơn đáy trước (182 → 225), tức biên đang co lại. Phiên i249 đóng cửa ở đỉnh phiên 259.73 với khối lượng 5.25x, có vẻ là phép thử breakout. Tuy vậy, giá vào lệnh nằm ngay mép trên của biên. Cung kẹt dày ở 263–289 (vùng i186–199 và i229–233) dễ làm breakout thất bại. Biên độ ngày 5–8% khiến mức −15% (~221) chỉ cách đáy biên 225 một chút.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.50
+INVALIDATION: Đóng cửa dưới 238 (quay lại giữa biên, breakout i249 thất bại); thủng 225 thì cấu trúc đáy cao dần bị phá.
+CONTAMINATION: NONE

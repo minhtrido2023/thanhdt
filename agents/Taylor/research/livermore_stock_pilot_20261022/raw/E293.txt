@@ -1,0 +1,7 @@
+Cổ phiếu đã tăng gần gấp sáu lần trong 250 phiên, qua nhiều nhịp markup, mỗi nhịp có khối lượng mở rộng. Ở thang 20 phiên, phía trên có hai lần bứt phá thất bại. Lần đầu ở i=224: gap lên 657 rồi đóng cửa 605, khối lượng 4.79, sau đó giá rơi về 471 ở i=229. Lần hai ở i=246–247: thanh 5.89 lần median, tiếp theo là gap lên 681 nhưng đóng cửa ở 600, một upthrust rõ. Cung kẹt tại vùng 620–680 là có thật. Hỗ trợ gần là vùng 538–553 (nền i=235–245). Tiếp theo là vùng 500–520 (đáy i=228–233), xấp xỉ mức −15% tính từ giá vào khoảng 590. Biên độ ngày 4–8% khiến mức giảm này rất dễ chạm. Xu hướng dài hạn vẫn tăng, nhưng hành vi tại đỉnh nghiêng về phân phối ngắn hạn.
+
+P_HIT15: 0.45
+RISK: HIGH
+P_POS: 0.45
+INVALIDATION: Đóng cửa dưới 538 (thủng nền i=235–245) trên khối lượng lớn mở đường về 500–470; ngược lại, đóng cửa trên 625 với khối lượng là phủ nhận upthrust.
+CONTAMINATION: NONE

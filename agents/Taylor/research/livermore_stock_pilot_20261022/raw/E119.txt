@@ -1,0 +1,7 @@
+**Phân tích:** Ở thang 250 phiên, cổ phiếu giảm từ 100 về đáy 51 (i126). Sau đó có pha markup lên 92 (i177–180) với khối lượng lớn 4–5x. Tiếp theo là phân phối: gap xuống i181–182 với khối lượng 4.6x, đáy thấp dần, rồi markdown về 57.6 (i211). Nhịp hồi lên 73.5–76.4 (i226–227) đã thất bại. Từ i228 đến nay giá đi ngang rất hẹp trong vùng 67.7–74.9, khối lượng cạn 0.3–1.0x, đỉnh thấp dần (92 → 76 → 75). Đây là nén giá chưa có phía cầu chứng minh. Cung kẹt dày ở 73–80 và 82–86. Mức −15% (~59) trùng đúng đáy i211 (57.6–59). Cổ phiếu biến động mạnh, mỗi bước giá ~2%, nên vùng này hoàn toàn trong tầm với nếu thủng 67.7.
+
+P_HIT15: 0.35
+RISK: HIGH
+P_POS: 0.44
+INVALIDATION: Đóng cửa dưới 67.7 (đáy hộp i235–246) kèm khối lượng >1.5x, mở đường về 57.6–59; tín hiệu tích cực chỉ khi đóng cửa trên 76.4 với khối lượng >2x.
+CONTAMINATION: NONE

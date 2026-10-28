@@ -63,7 +63,11 @@ if sys.argv[5]:
 print(json.dumps(d, ensure_ascii=False))
 " "$msg" "$MIKE_DISCORD_CHANNEL" "$color" "$title" "$thread_name" "$EMBED_DESC_LIMIT" 2>/dev/null) || exit 0
 
-curl -s -X POST "$MIKE_DISCORD_API/api/notify" \
+# Trần thời gian (2026-10-12, arch-review nhánh gate-source-check): thiếu nó thì bridge nhận kết
+# nối rồi im lặng = curl treo vô hạn, và mọi caller chạy script này qua pipe/capture treo theo
+# (chuỗi 19:00, daily_refresh, send_plan_report.sh). Hết trần ⇒ tin KHÔNG gửi, vẫn exit 0 như mọi
+# lỗi gửi khác của file này. MIKE_DISCORD_MAX_TIME chỉ để selfcheck rút ngắn trần.
+curl -s --connect-timeout 5 --max-time "${MIKE_DISCORD_MAX_TIME:-15}" -X POST "$MIKE_DISCORD_API/api/notify" \
   -H "Content-Type: application/json" \
   -d "$payload" \
   > /dev/null 2>&1 || true

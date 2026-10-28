@@ -1,0 +1,7 @@
+Đây là cổ phiếu cực kỳ kém thanh khoản: nhiều phiên Volume 0 hoặc 0.25, bước giá thô khoảng 1.6%, và các thanh giật ±10–15% chỉ với vài lô. Có một pha markup duy nhất có khối lượng thật, từ i=141 đến 146 (Volume 48 → 239), đẩy giá lên đỉnh 141.69. Sau đó là phân phối ở vùng 110–128 (i=147–167, gồm phiên i=167 khớp 146 ở 112.38). Tiếp theo giá trôi xuống trên nền khối lượng khô, rồi markdown xuống đáy 81.43 (i=229) và 83.06 (i=233, 237). Giá hiện ở 96.09, kẹt dưới cung 105–114 của người mua đỉnh. Ngưỡng −15% tính từ ~96 là ~81.7, chỉ sát dưới đáy vừa tạo. Với biến động kiểu i=210, 212, 227 và 229, chỉ một lệnh bán nhỏ là đủ chạm mức này.
+
+P_HIT15: 0.40
+RISK: HIGH
+P_POS: 0.42
+INVALIDATION: Đóng cửa dưới 81.4 (đáy i=229) là cấu trúc đáy bị phá, mở air-pocket về vùng 70s.
+CONTAMINATION: NONE
