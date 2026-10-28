@@ -18,6 +18,7 @@ last_update_7: 2026-10-13 (Bobby — STRUCTURAL EVENT READ, BLIND: FTSE Frontier
 last_update_8: 2026-10-14 (Bobby — SECTOR READ real-time BLIND nhóm CNTT FPT/CMG/ELC: C hỗn hợp ambiguous, nghiêng B (AI giảm phát dịch vụ phần mềm toàn cầu) ở bội số ~55/45, A ở dòng vốn ngoại/lãi suất/JPY; trục 2 EXTERNAL_CYCLE; 5 chỉ báo theo dõi; không phải episode VNINDEX)
 last_update_9: 2026-10-14 (Bobby — MACRO UPDATE tài chính+BĐS sau họp BCĐ nhà ở 13/10: GIỮ STRUCTURAL_ACCUMULATION, giai đoạn sớm-giữa → GIỮA, vẫn AMBIGUOUS; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm)
 last_update_10: 2026-10-27 (Bobby — SECTOR READ real-time BLIND ngành cao su thiên nhiên VN (nền DD DRI): CYCLICAL_PEAK do cung đẩy, cầu TQ không xác nhận, trên nền cung STRUCTURAL thắt — ambiguous ~60/40; FORECAST khoá 30/90 ngày; chi tiết ở file con vn_sector_read_rubber_20261027.md)
+last_update_11: 2026-10-28 (Bobby — SECTOR READ real-time BLIND ngành tư vấn khảo sát–thiết kế–QLDA điện VN: STRUCTURAL_UPCYCLE về nhu cầu, ADMIN_GATED về chuyển hoá doanh thu — ambiguous ~65/35; FORECAST khoá F1-F10 tới 30/06/2027; chi tiết ở file con sector_read_power_consulting_20261028.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1537,6 +1538,23 @@ riêng khi peer hồi. **Không phải khuyến nghị mua/bán.** Review: sau F
   Qingdao ~+45% YoY. Đuôi phải: El Niño Niño3.4 +3,3°C (IRI 19/10) ⇒ rủi ro cung T2-T5/2027.
 - **FORECAST khoá 27/10:** TSR20 (gốc 254,3) P(thấp hơn) 0,60 tại 2026-11-26, 0,55 tại 2027-01-25; spot TQ (gốc 19.408)
   0,60/0,55. Chấm theo BQ `commodity_prices` + `rubber_weekly.csv`.
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Tư vấn khảo sát–thiết kế–QLDA điện VN, as-of 28/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của DN tư vấn nào (kiểm toán blind ở mục 0
+file con). Bản đầy đủ (pipeline PDP8 so với thực tế, kết quả thầu tư vấn, định mức, 9 chỉ báo, checklist DD, nguồn):
+**`sector_read_power_consulting_20261028.md`** (file con).
+- **Phân loại: `STRUCTURAL_UPCYCLE` về NHU CẦU tư vấn (thiếu điện 4,3 GW năm 2027 lên 14 GW năm 2030 theo BCT 15/09/2026; neo
+  QĐ 768, NQ 70, NQ 253 + NĐ 272, IGA hạt nhân), còn chuyển hoá thành doanh thu là `ADMIN_GATED`. Độ tin cậy `ambiguous`
+  khoảng 65/35.** Trục 2: nhịp do quyết định hành chính TRONG NƯỚC chi phối, riêng LNG có thêm phần ngoại sinh (giá khí).
+- Bằng chứng chính: khoảng 45% công suất nguồn PDP8 chưa có chủ trương, chỉ khoảng 5% đã vận hành; capex EVN KH 2026 khoảng
+  123k tỷ so với thực hiện 2025 là 125,8k (đi ngang); 9T/2026 lưới khởi công 136/285 và đóng điện 131/300, trong đó 500kV khởi
+  công 2 so với KH EVNNPT 28; LNG có 16/18 dự án đã có NĐT nhưng chỉ khoảng 2-3 khởi công; ĐGNK chưa có chủ trương; NT1 chưa có
+  FS/EPC. Thầu tư vấn 500kV: 1-2 nhà thầu/gói, giảm giá 1-5% (oligopoly gốc EVN), phí KS-TK khoảng 1,1-1,2% TMĐT.
+- **FORECAST khoá 28/10:** EVN giải ngân 2026 ≥123k tỷ P=0,55; NT1 điều chỉnh chủ trương P=0,55 và ký EPC P=0,25 trước
+  30/06/2027; ĐGNK có chủ trương P=0,30; PDP8 sửa lần nữa P=0,40; tăng giá điện P=0,55; Luật Điện lực thông qua P=0,80.
 
 ---
 

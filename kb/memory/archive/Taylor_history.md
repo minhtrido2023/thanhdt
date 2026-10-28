@@ -1587,3 +1587,6 @@
 
 ## Archived 2026-10-27 (keep=12 days=0 require_done=False)
 - [2026-10-26T16:13:28Z] [p4-sulfur 10-26] XONG job Taylor_20261026_160657: research/commodity_p4_sulfur_20261026/ (chua commit) — P4 nowcast DGC gay tu 2024, 17 trial GD khong ung vien; CHO Winston sua registry key phosphorus->phosphate_rock_cny
+
+## Archived 2026-10-28 (keep=12 days=0 require_done=False)
+- [2026-10-26T16:41:53Z] [nowcast-p4 10-26] XONG job Taylor_20261026_163838 @c0ae8de0a nhánh feat/nowcast-p4-20261026 (chưa merge) — CHO Mike arch-review+merge; Winston thêm yellow_phosphorus vào freshness monitor

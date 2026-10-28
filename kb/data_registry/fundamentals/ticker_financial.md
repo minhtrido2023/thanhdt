@@ -76,3 +76,8 @@ nhánh tự tính, công thức đã xác nhận: `profit_before_tax / abs(inter
    **Quy tắc tiền xử lý dấu ở trên VẪN ĐÚNG và VẪN LÀ CÁCH DÙNG AN TOÀN** (dùng `EBITDA_P0`/`NP_P0`
    đối chiếu thay vì tin `IntCov_P0` một mình) — phát hiện này xác nhận lý do gốc rễ, không đổi
    khuyến nghị.
+
+## BẪY (2026-10-28, ca DDV — fundamental-skeptic xác nhận bằng BCTC gốc)
+- **`GPM_P0`, `NPM_P0`, `EBITM_P0`, `EBITDA_P0` là số TTM (4 quý), KHÔNG phải quý hiện tại** dù hậu tố `_P0`. Kiểm: DDV Q3/25 `NPM_P0` 0,1096 = TTM 0,1089 (theo quý 0,158). Biên gộp quý Q3/26 DDV thật 3,69% (BCTC) trong khi `GPM_P0` = 10,3%. Muốn biên QUÝ: lấy từ BCTC hoặc tính từ lãi gộp/doanh thu quý.
+- **`Cash_P0` chỉ là "tiền & tương đương tiền"**, bỏ sót tiền gửi giữ đến đáo hạn (DDV: BQ 114 tỷ vs thật 1.322 tỷ). Đừng dùng `Cash_P0 − Debt` làm net cash khi chưa đối chiếu BCTC (cũng sai cho comps như LAS).
+- `bigquery_dictionary.json` mô tả các cột này là "quý hiện tại" — cần Winston đối soát và sửa mô tả.
