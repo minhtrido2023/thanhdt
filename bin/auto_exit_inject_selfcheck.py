@@ -36,8 +36,8 @@ sys.path.insert(0, WC_ROOT)
 # của auto_exit_inject.py / portfolio_status.py (exec với __file__ GỐC để wc_paths tìm đúng WC_ROOT)
 # rồi chỉ chạy `lot_tests` — phá fix thì phải ĐỎ. Bảng đột biến: `LOT_MUTANTS` bên dưới.
 LOT_MUTANTS = {
-    "MA1_sell_all_lots": ("auto_exit_inject.py", "        if not is_due(s):\n            continue\n",
-                          "        if False:\n            continue\n"),
+    "MA1_sell_all_lots": ("auto_exit_inject.py", "        if not is_due(s):\n            if gate is None:",
+                          "        if False:\n            if gate is None:"),
     "MA2_all_rights_lots": ("auto_exit_inject.py",
                             '"LAG", injected, capped_notes, sessions,\n                     rights_lots=due_rights,',
                             '"LAG", injected, capped_notes, sessions,\n                     '
@@ -48,6 +48,16 @@ LOT_MUTANTS = {
                             "    if not lot_list:\n        lot_list = [{'qty': lot['qty'], 'entry_date': lot['entry_date']}]\n"
                             "    if False:\n"),
     "MA5_stoploss_no_minhold": ("auto_exit_inject.py", "lambda s: s >= rules.BAL_STOP_LOSS_MIN_HOLD", "lambda s: True"),
+    # Vòng 2 (job Taylor_20261028_165505): bỏ quy tắc prefix theo thứ tự sổ (L12/L15) · bỏ hợp
+    # stop-loss vào lệnh T+45 (L13) · lô bị giữ chỉ in, không vào blocked (L12b).
+    "MA6_no_prefix": ("auto_exit_inject.py", "        if gate is not None:\n            stranded.append",
+                      "        if False:\n            stranded.append"),
+    "MA7_no_sl_union": ("auto_exit_inject.py", "                qty, due_rights = sl[1], sl[4]\n",
+                        "                pass\n"),
+    "MA8_held_not_blocked": ("auto_exit_inject.py",
+                             '            print(f"  [LOT-ORDER] {book} {tk}: {held}")\n'
+                             '            blocked.append({"ticker": tk, "reason": held})\n',
+                             '            print(f"  [LOT-ORDER] {book} {tk}: {held}")\n'),
     "MP1_snapshot_no_lots": ("portfolio_status.py", '        d["lots"].append(one)\n', "        pass\n"),
     "MP2_hint_all_due": ("portfolio_status.py",
                          "    due = [g for g in groups if g[2] >= LAG_EXIT_SESSIONS_FIXED]\n",
@@ -493,6 +503,80 @@ def lot_tests(signal_date, plan_date, before):
     check("L11 EOD hint VPB: 282cp ĐÃ QUA (64 phiên) + 900cp chưa tới hạn (còn 23 phiên)",
           h is not None and h.startswith("282cp ĐÃ QUA hạn cố định T+25 (64 phiên từ ")
           and "900cp vào " in h and "còn 23 phiên" in h, h)
+
+    # L12 — FIFO lệch thứ tự (arch-review vòng 2, lỗi A; tái hiện /tmp/arch_lot/fifo_hazard.py): lô gốc
+    # A 1.000cp bán sau GDKHQ → mua lại B 500cp (3 phiên trước) → credit lô quyền R 200cp KẾ THỪA
+    # entry A (tới hạn) nhưng được THÊM VÀO SỔ SAU B. LotBook.sell THẬT trừ theo thứ tự sổ ⇒ bán 200 sẽ
+    # trừ vào B. Mô phỏng 4 đêm liên tiếp (asof tiến 1 phiên/đêm, khớp lệnh quyết định vào LotBook
+    # thật): bản vá KHÔNG được bán gì (B chưa tới hạn cả 4 đêm), R vào blocked với lý do thứ tự trừ.
+    book = ph.LotBook()
+    book.buy("XYZ", "LAG", 1000, 20000, before(40), "j")
+    book.sell("XYZ", "LAG", 1000, before(10), "j")
+    book.buy("XYZ", "LAG", 500, 21000, before(3), "j")
+    book.rights_credit({"ticker": "XYZ", "subscribed_qty": 200, "event_id": "E1", "exercise_ratio": 1.0,
+                        "credit_date": before(1), "exright_date": before(20), "issue_price_vnd": 10000,
+                        "at": "x", "listing_date": before(1)},
+                       [{"ticker": "XYZ", "book": "LAG", "entry_date": before(40), "qty": 1000, "play_type": ""}])
+    check("L12 tiền đề: sổ LotBook THẬT đặt lô quyền R (entry cũ) SAU lô mua lại B",
+          [(l["qty"], bool(l.get("rights_subscription"))) for l in book.lots] == [(500, False), (200, True)],
+          book.lots)
+    night, sold, nights, reasons = sig_d, 0, [], []
+    for _ in range(4):
+        lots_x = [{"qty": l["qty"], "entry_date": l["entry_date"],
+                   **({"rights_subscription": l["rights_subscription"]} if l.get("rights_subscription") else {})}
+                  for l in book.lots if l["ticker"] == "XYZ" and l["book"] == "LAG"]
+        snap_x = {"XYZ": {"qty": sum(l["qty"] for l in lots_x), "entry_date": min(l["entry_date"] for l in lots_x),
+                          "lots": lots_x}}
+        with contextlib.redirect_stdout(io.StringIO()):
+            c12, b12 = aei._lag_bal_candidates(
+                night, {"XYZ": {"qty": snap_x["XYZ"]["qty"], "marketPrice": 20000.0, "avg_cost": 20000.0}},
+                "LAG", snap_x, aei.rules.lag_should_exit)
+        q = sum(c[1] for c in c12)
+        nights.append(q)
+        reasons += [b["reason"] for b in b12 if b["ticker"] == "XYZ"]
+        if q:
+            book.sell("XYZ", "LAG", q, str(next_trading_day(night)), "bot")
+            sold += q
+        night = next_trading_day(night)
+    check("L12 4 đêm liên tiếp với LotBook thật: KHÔNG bán cp nào (bản cũ: 200/200/100)",
+          sold == 0 and nights == [0, 0, 0, 0], nights)
+    check("L12b lô quyền 200cp bị giữ vào blocked MỖI đêm, lý do nêu thứ tự trừ lô + lô chưa tới hạn 500cp",
+          len(reasons) == 4 and all("giữ 200cp tới hạn" in r and "thứ tự trừ lô" in r and "lô 500cp" in r
+                                    for r in reasons), reasons[:1])
+    # L12c — end-to-end process_account cùng sổ ⇒ không SELL, blocked có mã XYZ book LAG
+    xyz = _lots((500, before(3)), (200, before(40), {"event_id": "E1", "credit_date": before(1),
+                                                     "listing_date": before(1)}))
+    plan, sells = _run_mock(sig, plan_date, {"XYZ": (700, 20000.0, 20000.0)}, lag_lots={"XYZ": xyz})
+    bl = [b for b in _notes(plan, "blocked") if b["ticker"] == "XYZ"]
+    check("L12c process_account: không SELL XYZ, blocked (XYZ, LAG) nêu lô bị giữ",
+          not sells and len(bl) == 1 and bl[0]["book"] == "LAG" and "thứ tự trừ lô" in bl[0]["reason"], (sells, bl))
+
+    # L13 — lỗi B: BAL 300 @45 + 200 @10, lỗ −25% ⇒ MỘT lệnh BAL 500 (T+45 ∪ stop-loss), note nêu cả hai
+    blx = _lots((300, before(45)), (200, before(10)))
+    plan, sells = _run_mock(sig, plan_date, {"BLX": (500, 20000.0, 15000.0)}, bal_lots={"BLX": blx})
+    o = sells.get(("BLX", "BAL"))
+    n_bal = sum(1 for x in plan["orders"] if x["ticker"] == "BLX" and x["side"] == "sell")
+    check("L13 BAL 300@45 + 200@10 lỗ −25% ⇒ SELL 500 (một lệnh), note nêu T+45 + STOP-LOSS",
+          o is not None and o["qty"] == 500 and n_bal == 1 and "45" in o["note"] and "STOP-LOSS" in o["note"]
+          and "200cp lô ≥2 phiên theo stop-loss" in o["note"], o)
+    # L14 — lô T+45 + lô KHÔNG đủ điều kiện stop-loss (1 phiên < min_hold) ⇒ chỉ 300
+    bly = _lots((300, before(45)), (200, before(1)))
+    plan, sells = _run_mock(sig, plan_date, {"BLY": (500, 20000.0, 15000.0)}, bal_lots={"BLY": bly})
+    o = sells.get(("BLY", "BAL"))
+    check("L14 BAL 300@45 + 200@1 lỗ −25% ⇒ SELL 300 (lô 1 phiên chưa đủ min_hold), không blocked",
+          o is not None and o["qty"] == 300 and "STOP-LOSS" in o["note"] and not _notes(plan, "blocked"), o)
+    # L14b — lỗ chỉ −10% (không chạm stop-loss) ⇒ chỉ T+45 300, note không nhắc stop-loss
+    plan, sells = _run_mock(sig, plan_date, {"BLX": (500, 20000.0, 18000.0)}, bal_lots={"BLX": blx})
+    o = sells.get(("BLX", "BAL"))
+    check("L14b BAL 300@45 + 200@10 lỗ −10% ⇒ SELL 300 thuần T+45",
+          o is not None and o["qty"] == 300 and "STOP-LOSS" not in o["note"], o)
+    # L15 — stop-loss + thứ tự sổ: lô 200 @1 phiên ĐỨNG ĐẦU, lô 300 @10 sau, lỗ −25% ⇒ không bán,
+    # 300 vào blocked (stop-loss) — không im lặng
+    blz = _lots((200, before(1)), (300, before(10)))
+    plan, sells = _run_mock(sig, plan_date, {"BLZ": (500, 20000.0, 15000.0)}, bal_lots={"BLZ": blz})
+    bl = [b for b in _notes(plan, "blocked") if b["ticker"] == "BLZ"]
+    check("L15 stop-loss: lô đủ min_hold nằm sau lô 1 phiên ⇒ không SELL, blocked nêu 300cp bị giữ",
+          not sells and len(bl) == 1 and "giữ 300cp tới hạn" in bl[0]["reason"], (sells, bl))
 
 
 def run_lot_mutants():
