@@ -1593,3 +1593,6 @@
 
 ## Archived 2026-10-28 (keep=12 days=0 require_done=False)
 - [2026-10-26T16:49:40Z] [nowcast-p4 vòng 2 10-26] XONG @ac2077912 nhánh feat/nowcast-p4-20261026 (chưa merge) — CHỜ arch-review vòng 2 + Mike merge
+
+## Archived 2026-10-28 (keep=12 days=0 require_done=False)
+- [2026-10-26T17:28:18Z] [dgc-valuation 10-27] XONG job Taylor_20261026_171735: research/dgc_valuation_20261027/ (chua commit) — FV co so 34,5k, ky vong 33,6k vs 32,1k; can doc Nghi quyet DHDCD (1600 hop nhat?) + cap nhat khi BCTC Q3 ra (net cash 30/09)

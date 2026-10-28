@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-26T17:28:18Z] [dgc-valuation 10-27] XONG job Taylor_20261026_171735: research/dgc_valuation_20261027/ (chua commit) — FV co so 34,5k, ky vong 33,6k vs 32,1k; can doc Nghi quyet DHDCD (1600 hop nhat?) + cap nhat khi BCTC Q3 ra (net cash 30/09)
 - [2026-10-26T17:50:20Z] [dgc-valuation r2 27/10] XONG job Taylor_20261026_174426: research/dgc_valuation_20261027_r2/ (chua commit) — EV 32.457; CHAY LAI khi BCTC Q3 (27/10-14/11); cho Mike/legal-vn xac nhan thue lai tien gui 13%; doc Nghi quyet DHDCD (1600 me/hop nhat 50/50)
 - [2026-10-26T18:05:51Z] [dgc-valuation r3 27/10] XONG job Taylor_20261026_180245: research/dgc_valuation_20261027_r3/ (chua commit) — EV 32.650; CHAY LAI khi BCTC Q3 DGC; 1600 ~70% hop nhat, khai truong khong co moc
 - [2026-10-26T18:18:07Z] [dgc-valuation r4 27/10] XONG job Taylor_20261026_181244: research/dgc_valuation_20261027_r4/ (chua commit) — EV 33.766 (ex-819: 32.628); hoi DGC/BCTC Q3: ben vay 819, du phong 100; CFO Q3 300 lac quan
@@ -26,3 +25,4 @@
 - [2026-10-27T12:46:05Z] [dri-val r4 27/10] XONG job Taylor_20261027_123420 @a851b95c5: tam PREREG sup (TB 1,4k @1,97) do chi phi co dinh+KH dem 2 lan; POST-HOC TB 9,1-10,1k, nguong 15% ~7,9-8,8k; CHO Mike goi skeptic; can co cau gia thanh/du an 4.081 ha
 - [2026-10-28T05:24:53Z] [dd-TV2 10-28] XONG job Taylor_20261028_051709: NON @26.050, FV ky vong ~22,9k, vung <=19,5k; research/dd_TV2_20261028/ (chua commit) — CHO Mike goi fundamental-skeptic; CHAM lai khi BCTC Q4/26 (phai thu CMC 666 ty)
 - [2026-10-28T16:40:14Z] [lot-exit 10-28] XONG @24dd0a250 nhanh session/lot-exit-20261028 (wt-lot-exit-20261028, chua merge) — CHO Mike arch-review + go SELL VPB 700 khoi plan ZaloPay 10-29, chen lai 282
+- [2026-10-28T16:59:26Z] [lot-exit r2 28/10] XONG @6b51999a9 nhanh session/lot-exit-20261028 (chua merge) — CHO Mike arch-review vong 3; plan live ZaloPay 10-29 VAN co SELL VPB 700, can go + chen 282
