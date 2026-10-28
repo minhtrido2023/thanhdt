@@ -1,0 +1,25 @@
+BS check TA-(L+E) = 0.0 | TS NH+DH: 0.0
+Q3 NPAT giải trình 61.040.762.481 vs KQKD 61.040.762.481 -> khớp
+Q3/26: GPM 17.5% | EBIT lõi 47.5 | TC ròng 27.3 | LK 0.7 | khác 1.0 | PBT 76.4 | tỷ trọng lõi/TC/LK 62/36/1%
+Q3/25: GPM 16.0% | EBIT lõi 5.9 | TC ròng 3.4 | LK 4.5 | khác 1.0 | PBT 14.8 | tỷ trọng lõi/TC/LK 40/23/31%
+9T/26: GPM 15.7% | EBIT lõi 76.3 | TC ròng 85.6 | LK 31.3 | khác 2.3 | PBT 195.4 | tỷ trọng lõi/TC/LK 39/44/16%
+9T/25: GPM 15.5% | EBIT lõi 23.2 | TC ròng 5.7 | LK 23.9 | khác -0.4 | PBT 52.3 | tỷ trọng lõi/TC/LK 44/11/46%
+Tiền+HTM 2104.2 (đầu năm 1112.2); net cash thô 1951.4 (1031.0)
+Float ròng (tiền ứng - trả trước NCC - WIP) 2006.2 (922.8); net cash 'của cổ đông' -54.8 (108.1) (ước lượng)
+Lãi tiền gửi 9T 87.1; TC thu Q3 35.7 -> năm hoá 143 trên số dư ~2104 = 6.8%
+CFO Q3 = -125.3; CFO 9T trừ tăng tiền ứng (1432.0) = -573.4
+CMC: DT 9T 478.728, H1 244.359, Q3 234.4; phải thu 208.06->367.135->666.374; Q3 tăng 299.2; = 50% VCSH
+Erex ứng: 1843.5; tăng YTD 1416.1
+Vốn hoá 1759 tỷ; BVPS 19708; PB 1.32
+LNST TTM ~211.0 (9T mẹ 162,2 + Q4/25 BQ 48,8) -> PE 8.3; LNST 9T/KH 100 = 163%
+Bear 13870 Base 22658 Bull 37023 -> kỳ vọng 22895; 85% = 19460
+TV1: PE 3.3 PB 0.97 vốn hoá 494
+TV3: PE 7.3 PB 0.80 vốn hoá 124
+TV4: PE 5.8 PB 1.06 vốn hoá 257
+YTD: -24.4%
+từ đỉnh 02/03: -39.5%
+từ 21/05: -18.5%
+từ đáy 27/07: +10.1%
+phiên 22/05: -4.5%
+phiên 29/07: +7.0%
+phiên 27/08: +2.7%
