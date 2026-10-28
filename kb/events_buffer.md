@@ -608,3 +608,12 @@
 
 ## Consolidation 2026-10-28T03:07:01Z
 - [2026-10-28T02:15:02Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-28", "elapsed_s": 600, "rc": 0}
+
+## Consolidation 2026-10-28T03:22:30Z
+- [2026-10-28T03:18:34Z] Taylor/heartbeat — Taylor_20261028_031824: {"status": "in_progress", "note": "doc Bobby + DDV REPORT"}
+- [2026-10-28T03:19:24Z] Taylor/heartbeat — Taylor_20261028_031824: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261028_031824", "source": "watcher"}
+- [2026-10-28T03:20:25Z] Taylor/heartbeat — Taylor_20261028_031824: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261028_031824", "source": "watcher"}
+- [2026-10-28T03:20:29Z] Taylor/heartbeat — Taylor_20261028_031824: {"status": "in_progress", "note": "dang chay model GM/kich ban"}
+- [2026-10-28T03:21:25Z] Taylor/heartbeat — Taylor_20261028_031824: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261028_031824", "source": "watcher"}
+- [2026-10-28T03:22:16Z] Taylor/finding — ddv-reweight-20261028: {"verdict": "NON, nghieng xau", "weights_new": "Bear45/Base40/Bull15 (cu 30/45/25)", "EV_per_share": {"NC7583": 14510, "NC_stress5950": 12877, "old_weights_same_model": 16158}, "EV_band_slope_2.0_to_3.0": {"NC7583": "12296-17320", "NC_stress": "10663-15687"}, "price_ref_27_10": 16700, "tiers": {"dot1": "<=~12000", "dot2": "<=~10500", "catalyst_tranche": "<=~14000 sau cong dan dat QSP<=600 2 thang"}, "catalyst_old": "S<500 & GM>=8% Q4/26-Q1/27 khong kha thi (GM Q1/27 base 5.8% bull 7.4%, P<5% uoc luong); xac nhan doi sang BCTC Q2/27", "gm_quarter_bctc": {"Q3_25": 21.88, "H1_26": 11.02, "Q3_26": 3.69}, "inventory_days": {"total_cogs9T": 51.1, "total_cogsQ3": 61.9}, "net_cash_stress_per_share": "5950-6600", "hard_abandon": "Liven 217 ty khong thu / NC<600 ty / Vinachem backstop gay / GM am 2 quy + S>=800 / delisting / dinh chi nha may", "size_cap_nav": "2% (0.8+0.8+0.4)", "time_stop": "12 thang tu lenh dau (18 neu dap thap hon), moc Q2/27 ~20/07/2027", "caveat": "mo hinh GM 2 diem, trong so la uoc luong, chua qua skeptic", "report": "agents/Taylor/research/dd_DDV_reweight_20261028/REPORT.md", "measured_by": "agents/Taylor/research/dd_DDV_reweight_20261028/model.py -> out.txt; BQ tav2_bq.ticker_financial comps_fin.csv; BCTC dd_DDV_20261026/src/en_p1.txt"}
+- [2026-10-28T03:22:25Z] Taylor/heartbeat — Taylor_20261028_031824: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261028_031824", "source": "watcher"}
