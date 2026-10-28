@@ -511,7 +511,7 @@ class LotBook:
         qty = int(qty or 0)
         tag = f"{date} BOOK_TRANSFER {transfer_id or '?'} {ticker} {qty}cp {from_book or '?'}→{to_book or '?'} ({source})"
         if qty <= 0 or not from_book or not to_book or from_book == to_book \
-                or not ref_price or float(ref_price) <= 0:
+                or not ref_price or not math.isfinite(float(ref_price)) or float(ref_price) <= 0:
             self.unverified.add(ticker)
             self.warnings.append(f"{tag}: tham số không hợp lệ ⇒ KHÔNG chuyển, {ticker} UNVERIFIED")
             return 0
@@ -722,6 +722,17 @@ def parse_transfer_note(note):
     return out
 
 
+_TRANSFER_BOOKS = frozenset(BOOK_MAP.values())
+
+
+def _iso_date_ok(ts):
+    try:
+        dt.date.fromisoformat((ts or "")[:10])
+        return len(ts) >= 10
+    except ValueError:
+        return False
+
+
 def _book_transfers(path):
     """Sinh các dòng journal `event=BOOK_TRANSFER` — CHUYỂN NHÃN lô giữa 2 sổ, KHÔNG phải fill.
 
@@ -753,19 +764,24 @@ def _book_transfers(path):
                   "parent_id": (row.get("parent_id") or "").strip(), "invalid": ""}
             try:
                 q = float(row.get("qty") or 0)
+                px = float(row.get("price") or 0)
+                if not (math.isfinite(q) and math.isfinite(px) and px > 0):
+                    raise ValueError("qty/price không hữu hạn hoặc price<=0")
                 ev["qty"] = int(q) if q == int(q) else 0
-                ev["price"] = float(row.get("price") or 0)
-            except (TypeError, ValueError):
-                ev["invalid"] = f"qty/price không phải số ({row.get('qty')!r}/{row.get('price')!r})"
+                ev["price"] = px
+            except (TypeError, ValueError, OverflowError):
+                ev["invalid"] = f"qty/price không phải số hữu hạn hợp lệ ({row.get('qty')!r}/{row.get('price')!r})"
             if not ev["invalid"]:
                 if not ev["id"]:
                     ev["invalid"] = "thiếu parent_id (id idempotent)"
-                elif not ev["ticker"] or len(ev["ts"]) < 10:
-                    ev["invalid"] = "thiếu ticker/ts"
+                elif not ev["ticker"] or not _iso_date_ok(ev["ts"]):
+                    ev["invalid"] = f"thiếu ticker hoặc ts không phải ISO ({row.get('ts')!r})"
                 elif ev["qty"] <= 0:
                     ev["invalid"] = f"qty={row.get('qty')!r} không phải số nguyên dương"
                 elif not ev["from_book"] or not ev["to_book"]:
                     ev["invalid"] = f"note thiếu from=/to= ({row.get('note')!r})"
+                elif ev["from_book"] not in _TRANSFER_BOOKS or ev["to_book"] not in _TRANSFER_BOOKS:
+                    ev["invalid"] = f"sổ lạ ngoài whitelist (from={ev['from_book']}, to={ev['to_book']})"
                 elif ev["book"] and ev["book"] != ev["to_book"]:
                     ev["invalid"] = f"cột book={ev['book']} ≠ to={ev['to_book']}"
             yield ev

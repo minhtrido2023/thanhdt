@@ -35,6 +35,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 import sys
 import traceback
@@ -152,6 +153,9 @@ def analyze(plan, holdings, plan_date, banned, count_fn, missed_lookback=5, r=No
             continue
         park_sell_qty = sum(int(o["qty"]) for o in park_sells)
         px_sell = float(park_sells[0].get("ref_price") or 0)
+        if not math.isfinite(px_sell) or px_sell <= 0:
+            blocked.append({"ticker": tk, "reason": "thiếu/sai ref_price lệnh bán PARK — không tính được chân bán"})
+            continue
 
         # (c) missed — LAG/BAL đã MUA gần đây trong lúc PARK đang giữ mã này.
         recent = [l for l in lots if l["ticker"] == tk and l["book"] in TO_BOOKS
@@ -279,15 +283,23 @@ def run_account(acct, plan_date, asof, plan_dir, out_dir, missed_lookback, count
             plan = json.loads(raw)
         except ValueError as e:
             raise DataError(f"plan không parse được: {e}")
+        plan_asof = (plan.get("park_trim_proposal") or {}).get("asof")
         if asof is None:
-            asof = (plan.get("park_trim_proposal") or {}).get("asof")
+            asof = plan_asof
             if not asof:
                 raise DataError("không suy được asof (plan thiếu park_trim_proposal.asof) — truyền --asof")
+        elif plan_asof and asof != plan_asof:
+            raise DataError(f"--asof={asof} ≠ park_trim_proposal.asof={plan_asof} của plan — "
+                            "sổ lô/broker khác ngày với vị thế plan đã dựa vào")
         if asof >= plan_date:
             raise DataError(f"asof={asof} phải TRƯỚC plan_date={plan_date}")
         rep["asof"] = asof
         if count_fn is None:
             from portfolio_status import count_trading_days as count_fn
+        gap = _sessions(asof, plan_date, count_fn)
+        if gap != 1:
+            raise DataError(f"asof={asof} cách plan_date={plan_date} {gap} phiên — phải là phiên "
+                            "liền trước (sổ cũ ⇒ 'không có cơ hội' sẽ là âm tính giả)")
         banned = load_banned()
         if holdings_fn is None:
             prof = ph.account_profile(acct)

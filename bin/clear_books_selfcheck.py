@@ -130,6 +130,32 @@ def scenarios(mod):
             H([lot("VPB", "LAG", 282, "2026-07-27"), lot("VPB", "PARK", 30, "2025-11-20"),
                lot("VPB", "LAG", 600, "2026-10-26"), lot("VPB", "LAG", 300, "2026-10-27")]))
     r["X2_zalopay_nothing"] = not (x2["opportunities"] or x2["missed"] or x2["roll_candidates"] or x2["blocked"])
+
+    # R5 — giết mutant sống (vòng 2)
+    # (a) prefix T+2: lô PARK ĐẦU chưa đủ 2 phiên, lô sau đủ ⇒ phần lô sau KHÔNG chuyển được
+    ra = an(mod, base, H([lot("VPB", "PARK", 100, "2026-10-28"), lot("VPB", "PARK", 300, "2026-07-02")]))
+    r["P_prefix_t2_unsettled_first_lot"] = (not ra["opportunities"]
+                                            and any("T+2" in b["reason"] for b in ra["blocked"]))
+    # (b) m bị chặn bởi lượng PARK bán: mua 1500 / PARK bán 200 / avail 386 ⇒ m ≤ 200
+    rb = an(mod, base, H([lot("VPB", "PARK", 386, "2026-07-02")]))
+    r["P_cap_by_park_sell_qty"] = bool(rb["opportunities"]) and rb["opportunities"][0]["transfer_qty"] <= 200
+    # (c) trừ avail sau mỗi lần chuyển: 2 sổ đích, Σ chuyển ≤ sellable 300
+    rc_ = an(mod, [O("S", "VPB", "sell", 400, "PARK"), O("BL", "VPB", "buy", 200, "LAG"),
+                   O("BB", "VPB", "buy", 200, "BAL")], H([lot("VPB", "PARK", 300, "2026-07-02")]))
+    r["P_avail_decremented_across_books"] = (sum(x["transfer_qty"] for x in rc_["opportunities"]) <= 300
+                                             and [(x["to_book"], x["transfer_qty"]) for x in rc_["opportunities"]]
+                                             == [("LAG", 200), ("BAL", 100)])
+    # (d) cửa sổ lookback của missed: lô LAG mua 2026-09-01 (ngoài 5 phiên) không tính
+    rd = an(mod, [O("S", "VPB", "sell", 200, "PARK")], H(PARK_VPB + [lot("VPB", "LAG", 300, "2026-09-01")]))
+    r["P_missed_outside_lookback_ignored"] = not rd["missed"]
+    # (e) missed cần lệnh PARK bán trong plan: không có ⇒ không missed (hành vi, không phải IndexError)
+    re_ = an(mod, [O("B", "MCH", "buy", 100, "LAG", 139800.0)],
+             H(PARK_VPB + [lot("VPB", "LAG", 300, "2026-10-26")]))
+    r["P_missed_requires_park_sell"] = not re_["missed"] and not re_["opportunities"]
+    # R6 — thiếu ref_price lệnh bán PARK ⇒ chặn có lý do, không tính chân bán 0đ
+    rf = an(mod, [O("S", "VPB", "sell", 200, "PARK", px=0), O("B", "VPB", "buy", 1500, "LAG")], H(list(PARK_VPB)))
+    r["R6_sell_px_missing_blocked"] = (not rf["opportunities"]
+                                       and any("ref_price" in b["reason"] for b in rf["blocked"]))
     return r
 
 
@@ -159,6 +185,15 @@ def io_scenarios(mod):
         json.dump(plan, open(pth, "w"))
         rc, rep = mod.run_account("SBX", PD, PD, pl, out, 5, count_trading_days, good)
         r["F4_asof_not_before_rc2"] = rc == 2 and rep["status"] == "ERROR"
+        # R6: --asof truyền tay ≠ park_trim_proposal.asof ⇒ rc2 (không âm tính giả)
+        rc, rep = mod.run_account("SBX", PD, "2026-10-25", pl, out, 5, count_trading_days, good)
+        r["R6_asof_mismatch_rc2"] = rc == 2 and rep["status"] == "ERROR" and "không có cơ hội" not in rep["summary_line"]
+        # R6: asof không phải phiên liền trước plan_date (plan không khai asof) ⇒ rc2
+        plan2 = {"orders": plan["orders"]}
+        json.dump(plan2, open(pth, "w"))
+        rc, rep = mod.run_account("SBX", PD, "2026-10-27", pl, out, 5, count_trading_days, good)
+        r["R6_asof_gap2_rc2"] = rc == 2 and rep["status"] == "ERROR"
+        json.dump(plan, open(pth, "w"))
         rc, rep = mod.run_account("SBX", PD, None, pl, out, 5, count_trading_days, good)
         f = os.path.join(out, f"SBX_{PD}.json")
         disk = json.load(open(f)) if os.path.exists(f) else {}
@@ -186,7 +221,15 @@ MUTANTS = {
     "C6_dataerror_rc0": ('rep["error"] = str(e) if str(e) else type(e).__name__\n        rc = 2',
                          'rep["error"] = str(e) if str(e) else type(e).__name__\n        rc = 0'),
     "C7_missed_without_park_sell": ("        if not park_sells:\n            continue\n",
-                                    "        if False:\n            continue\n"),
+                                    "        park_sells = park_sells or [{'qty': 0, 'ref_price': 23500.0}]\n"),
+    "C8_t2_no_prefix": ("            if _sessions(l[\"entry_date\"], plan_date, count_fn) < 2:\n                break",
+                        "            if _sessions(l[\"entry_date\"], plan_date, count_fn) < 2:\n                continue"),
+    "C9_no_cap_by_park_sell": ("min(buy_qty, rem_buy, avail)", "min(buy_qty, avail)"),
+    "C10_no_avail_decrement": ("            rem_buy -= m\n            avail -= m\n", "            rem_buy -= m\n"),
+    "C11_missed_no_lookback": ("<= missed_lookback]", "<= 10**9]"),
+    "C12_no_asof_gap_check": ("        if gap != 1:", "        if False:"),
+    "C13_no_asof_mismatch_check": ("        elif plan_asof and asof != plan_asof:", "        elif False:"),
+    "C14_no_sell_px_guard": ("        if not math.isfinite(px_sell) or px_sell <= 0:", "        if False:"),
 }
 
 

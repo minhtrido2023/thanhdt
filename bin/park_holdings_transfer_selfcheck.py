@@ -18,10 +18,14 @@ LAG 500; 26/10 LAG mua VPB 1.500 (FILL tích luỹ 2 dòng).
   S8 auto_exit   — lô vừa chuyển KHÔNG tới hạn T+25 ngày 29/10 (`auto_exit_inject._due_lots`),
                    tới hạn đúng sau 25 phiên
   S9 quyền       — ×1,1 ex 29/10 (credit 30/10): lô chuyển ngày 29/10 VẪN hưởng (holding_since)
+  A_* đối kháng  — qty inf/1e400/nan, giá nan/inf/âm, ts '2026/10/29', sổ lạ FOO (from/to), cột
+                   book≠to ⇒ từ chối + UNVERIFIED, KHÔNG sập; ts ≤ snap_ts ⇒ bỏ qua như FILL cũ
+                   (S8/S8b dùng `portfolio_status.book_lot_snapshot` THẬT; entry_date snapshot = MIN lô)
   S10 prefix     — sau transfer, lô nguồn còn lại giữ thứ tự; lô bị lấy là prefix theo thứ tự sell()
 
 Mutant (phải bị bắt): M1 thừa kế entry_date cũ · M2 bỏ idempotent · M3 chuyển một phần khi thiếu ·
-M4 chèn lô đích lên ĐẦU sổ · M5 trừ LIFO · M6 bỏ holding_since · M7 bỏ chặn lô quyền.
+M4 chèn lô đích lên ĐẦU sổ · M5 trừ LIFO · M6 bỏ holding_since · M7 bỏ chặn lô quyền ·
+M8 bỏ isfinite · M9 bỏ bắt OverflowError · M10 ts chỉ kiểm độ dài · M11 bỏ whitelist sổ.
 
 Chạy: python mike/bin/park_holdings_transfer_selfcheck.py   (rc 0 = PASS)
 """
@@ -105,11 +109,25 @@ def qty(h, tk, book=None):
     return sum(l["qty"] for l in h["lots"] if l["ticker"] == tk and (book is None or l["book"] == book))
 
 
-def lag_snapshot(h, tk, book="LAG"):
-    """Dựng đúng cấu trúc `portfolio_status.book_lot_snapshot` (lọc book, GIỮ thứ tự sổ)."""
-    ls = [{"qty": l["qty"], "entry_date": l["entry_date"]} for l in h["lots"]
-          if l["ticker"] == tk and l["book"] == book]
-    return {"qty": sum(x["qty"] for x in ls), "entry_date": ls[0]["entry_date"], "lots": ls}
+def snap_of(mod, tk, book, extra=None, asof="2026-10-30", broker_qty=None):
+    """`portfolio_status.book_lot_snapshot` THẬT (không dựng tay) trên sandbox; `park_holdings`
+    mà nó import được trỏ vào `mod` (bản thật hoặc mutant) qua sys.modules."""
+    import portfolio_status as PS
+    sb, ex, pl = build(extra)
+    saved = sys.modules.get("park_holdings")
+    try:
+        mod.account_profile = lambda label: {"label": label, "account_id": "000", "excluded_tickers": []}
+        sys.modules["park_holdings"] = mod
+        bq = broker_qty or {"VPB": 1786, "FPT": 500}
+        pos = {t: {"qty": q, "market_price": 10000.0, "sellable": q} for t, q in bq.items()}
+        out, ok, reason, blocked = PS.book_lot_snapshot(
+            LABEL, book, asof=asof, plan_dir=pl, exec_dir=ex, broker=(pos, 0.0, {"source": "selfcheck"}),
+            corp_actions=[])
+        return out.get(tk), ok, reason, blocked
+    finally:
+        if saved is not None:
+            sys.modules["park_holdings"] = saved
+        shutil.rmtree(sb, ignore_errors=True)
 
 
 T29 = "2026-10-29T08:45:00"
@@ -163,7 +181,9 @@ def scenarios(mod):
     r["S7_invalid_row"] = (qty(h7, "VPB", "PARK") == 286 and "VPB" in h7["unverified_tickers"])
 
     # S8 — auto_exit per-lot: lô chuyển 29/10 không tới hạn ngày 29/10 dù lô gốc từ 07-02
-    snap = lag_snapshot(h1, "VPB")
+    snap, ok1, why1, _ = snap_of(mod, "VPB", "LAG", {"2026-10-29": [xrow(T29, XID, "VPB", 200, 23500)]})
+    r["S8_snapshot_real_ok"] = ok1 and snap is not None
+    snap = snap or {"qty": 0, "entry_date": "", "lots": []}
     is_due = RULES.lag_should_exit
     due29, err = AEI._due_lots(snap, dt.date(2026, 10, 29), is_due)
     r["S8_not_due_on_transfer_day"] = err is None and due29[0] == 0
@@ -177,7 +197,8 @@ def scenarios(mod):
     # S8b — sổ đích CHƯA có lô nào (BAL): không có lô mới đứng chắn prefix, nên lô chuyển phải tự
     # mang entry_date mới — thừa kế 07-02 thì T+45 tới hạn ngay và bị bán trong ngày.
     h8 = run(mod, {"2026-10-29": [xrow(T29, XID + "-BAL", "VPB", 200, 23500, to="BAL")]})
-    due8, err = AEI._due_lots(lag_snapshot(h8, "VPB", "BAL"), dt.date(2026, 10, 29), RULES.bal_should_exit)
+    snap8, _, _, _ = snap_of(mod, "VPB", "BAL", {"2026-10-29": [xrow(T29, XID + "-BAL", "VPB", 200, 23500, to="BAL")]})
+    due8, err = AEI._due_lots(snap8 or {"qty": 0, "entry_date": "", "lots": []}, dt.date(2026, 10, 29), RULES.bal_should_exit)
     r["S8b_bal_not_due_on_transfer_day"] = err is None and due8[0] == 0 and qty(h8, "VPB", "BAL") == 200
 
     # S9 — quyền: ex 29/10, broker credit 30/10 ×1,1 ⇒ 286 cp PARK cũ (giờ 86 PARK + 200 LAG) hưởng
@@ -193,6 +214,32 @@ def scenarios(mod):
                if not (l["ticker"] == "VPB" and l["book"] == "PARK") and not l.get("book_transfer")]
     r["S10_prefix_order"] = (others0 == others1 and [l.get("book_transfer", {}).get("from_entry_date")
                                                       for l in new] == ["2026-07-02", "2026-08-11"])
+
+    # R4 — dòng đối kháng: mỗi ca phải KHÔNG áp gì + VPB UNVERIFIED (trừ ca ts ≤ snap: bỏ qua im lặng
+    # như FILL cũ, sổ y nguyên). Không ca nào được làm sập park_holdings.
+    def bad(rows):
+        try:
+            h = run(mod, {"2026-10-29": rows})
+        except BaseException as e:      # noqa: BLE001 — sập = FAIL của kịch bản
+            return f"CRASH {type(e).__name__}: {e}"
+        return h
+
+    def rejected(h):
+        return (not isinstance(h, str) and qty(h, "VPB", "PARK") == 286 and qty(h, "VPB", "LAG") == 1500
+                and "VPB" in h["unverified_tickers"])
+    for tag, qv, pv in (("qty_inf", "inf", 23500), ("qty_1e400", "1e400", 23500), ("qty_nan", "nan", 23500),
+                        ("px_nan", 200, "nan"), ("px_inf", 200, "inf"), ("px_neg", 200, -5)):
+        r[f"A_{tag}_rejected"] = rejected(bad([xrow(T29, XID, "VPB", qv, pv)]))
+    r["A_ts_slash_rejected"] = rejected(bad([xrow("2026/10/29 08:45", XID, "VPB", 200, 23500)]))
+    r["A_to_unknown_book_rejected"] = rejected(bad([xrow(T29, XID, "VPB", 200, 23500, to="FOO")]))
+    r["A_from_unknown_book_rejected"] = rejected(bad([xrow(T29, XID, "VPB", 200, 23500, frm="FOO")]))
+    row = xrow(T29, XID, "VPB", 200, 23500)
+    row[9] = "BAL"                                          # cột book ≠ to=LAG
+    r["A_book_col_ne_to_rejected"] = rejected(bad([row]))
+    hs = bad([xrow("2026-09-29T08:45:00", XID, "VPB", 200, 23500)])   # ts ≤ snap_ts (2026-09-30T19:10)
+    r["A_ts_before_snapshot_ignored"] = (not isinstance(hs, str) and qty(hs, "VPB", "PARK") == 286
+                                         and qty(hs, "VPB", "LAG") == 1500
+                                         and "book_transfers_applied" not in hs)
     return r
 
 
@@ -229,16 +276,29 @@ MUTANTS = {
                 "for lot in reversed(pool):"),
     "M6_no_holding_since": ('return lot.get("holding_since") or lot["entry_date"]', 'return lot["entry_date"]'),
     "M7_no_rights_block": ('if any(lot.get("rights_subscription") for lot, _ in plan):', 'if False:'),
+    # M8/M9 gỡ CẢ 2 lớp phòng thủ (parser + LotBook.transfer) — gỡ một lớp thì lớp kia vẫn chặn
+    "M8_no_finite_check": ([("if not (math.isfinite(q) and math.isfinite(px) and px > 0):", "if False:"),
+                            ("or not ref_price or not math.isfinite(float(ref_price)) or float(ref_price) <= 0:",
+                             "or not ref_price:")], None),
+    "M9_no_overflow_catch": ([("if not (math.isfinite(q) and math.isfinite(px) and px > 0):", "if False:"),
+                              ("except (TypeError, ValueError, OverflowError):", "except (TypeError, ValueError):")], None),
+    "M10_ts_len_only": ('not _iso_date_ok(ev["ts"])', 'len(ev["ts"]) < 10'),
+    "M11_no_book_whitelist": ('elif ev["from_book"] not in _TRANSFER_BOOKS or ev["to_book"] not in _TRANSFER_BOOKS:',
+                              'elif False:'),
 }
 
 
 def load_mutant(name, old, new):
     src = open(os.path.join(HERE, "park_holdings.py"), encoding="utf-8").read()
-    if src.count(old) != 1:
-        raise SystemExit(f"mutant {name}: chuỗi gốc xuất hiện {src.count(old)} lần (phải đúng 1) — selfcheck lỗi thời")
+    pairs = old if isinstance(old, list) else [(old, new)]
+    for o, _ in pairs:
+        if src.count(o) != 1:
+            raise SystemExit(f"mutant {name}: chuỗi gốc xuất hiện {src.count(o)} lần (phải đúng 1) — selfcheck lỗi thời")
     d = tempfile.mkdtemp(prefix="ph_mut_")
     p = os.path.join(d, f"park_holdings_{name}.py")
-    open(p, "w", encoding="utf-8").write(src.replace(old, new))
+    for o, n in pairs:
+        src = src.replace(o, n)
+    open(p, "w", encoding="utf-8").write(src)
     spec = importlib.util.spec_from_file_location(f"park_holdings_{name}", p)
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
