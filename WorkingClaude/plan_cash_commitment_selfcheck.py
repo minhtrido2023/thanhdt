@@ -398,6 +398,10 @@ def run():
         # live, KHÔNG tự làm trong khuôn khổ vá lỗi này — đã escalate cho user/quant-skeptic
         # (bus finding job Taylor_20260814_080528).
         "priority",
+        # `hard_no_chase_ceiling_vnd` (27/10): gate hạ giá tính need về min(ref, trần). Adapter không mang
+        # trần ⇒ gate rơi về ref_price ⇒ need của injector ≥ need thật ⇒ lệch về phía CHẶT HƠN (S4c chứng
+        # minh). Mang trần vào adapter sẽ NỚI headroom injector (đổi hành vi cấp vốn live) ⇒ không tự làm.
+        "hard_no_chase_ceiling_vnd",
     }
     missing = {a for a in seen if not a.startswith("_")} - set(_GateOrder.__slots__)
     check("S3 không có attribute MỚI nào gate đọc mà adapter thiếu "
@@ -423,6 +427,17 @@ def run():
           credit_gate <= credit_real, f"adapter={credit_gate:,.0f} vs thật={credit_real:,.0f}")
     check("S4b …và ca này tín dụng thật > 0 (nếu không, S4 đúng một cách vô nghĩa)",
           credit_real > 0, f"thật={credit_real:,.0f}")
+
+    # S4c — gap `hard_no_chase_ceiling_vnd` phải lệch về phía CHẶT HƠN (need adapter ≥ need thật).
+    from trading_bot.plan_funding_gate import _buy_cost_price
+    b_real = order("SCL", 300, 33_300, oid="B2")
+    b_real.hard_no_chase_ceiling_vnd = 32_700.0
+    b_gate = _as_gate_plan(plan([b_real])).orders[0]
+    check("S4c gap trần cứng lệch về phía CHẶT HƠN: giá tính need của adapter ≥ gate thật",
+          _buy_cost_price(b_gate) >= _buy_cost_price(b_real),
+          f"adapter={_buy_cost_price(b_gate)} vs thật={_buy_cost_price(b_real)}")
+    check("S4d …và ca này giá thật THẤP hơn ref (32.700 < 33.300), nếu không S4c đúng một cách vô nghĩa",
+          _buy_cost_price(b_real) < b_real.ref_price, _buy_cost_price(b_real))
 
     print("\n" + "=" * 78)
     print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")

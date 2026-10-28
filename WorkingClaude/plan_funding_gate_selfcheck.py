@@ -707,6 +707,38 @@ check("…và docstring của nó vẫn mang cảnh báo đó (đừng xoá khi 
       "execution_state" in (__import__("trading_bot.plan_funding_gate", fromlist=["x"])
                             .funding_block_reason.__doc__ or ""))
 
+# ── Z. trần cứng không-đuổi-giá hạ giá tính tiền cần (ca SCL SpaceX 28/10: ref 33.300 > trần 32.700) ──
+print("\n[Z] hard_no_chase_ceiling_vnd hạ giá tính need; không bao giờ nâng")
+_cash_z = 8_671_974
+def _z(price, ceil, qty=300):
+    o = order("SCL", qty, price)
+    if ceil is not _MISSING_Z:
+        o.hard_no_chase_ceiling_vnd = ceil
+    return check_plan_funding(plan([o]), StubBroker({None: _cash_z}, cash=_cash_z), "live")
+_MISSING_Z = object()
+v = _z(33_300.0, 32_700.0)
+check("ref 33.300 > trần 32.700 ⇒ need = 300 × 32.700 × (1+phí), KHÔNG phải 33.300",
+      abs(v["need_vnd"] - 300 * 32_700 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+check("…và thiếu tiền (cash 8,67tr < 9,82tr) ⇒ vẫn BLOCK: chuyển Trứng vàng vẫn cần thật",
+      v["action"] == "BLOCK", v["action"])
+v = _z(33_300.0, _MISSING_Z)
+check("đối chứng: lệnh KHÔNG có field trần ⇒ need dùng ref_price y như cũ",
+      abs(v["need_vnd"] - 300 * 33_300 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+v = _z(33_300.0, None)
+check("trần None ⇒ ref_price như cũ", abs(v["need_vnd"] - 300 * 33_300 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+v = _z(33_300.0, 0)
+check("trần 0 ⇒ không hiểu là 'miễn phí' — ref_price như cũ", abs(v["need_vnd"] - 300 * 33_300 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+v = _z(33_300.0, "rác")
+check("trần rác (chuỗi) ⇒ ref_price như cũ, không nổ", abs(v["need_vnd"] - 300 * 33_300 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+v = _z(32_000.0, 32_700.0)
+check("trần CAO hơn ref ⇒ giữ ref_price (chỉ hạ, không nâng need)",
+      abs(v["need_vnd"] - 300 * 32_000 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+# số nhắc chuyển tiền (egg_transfer_alert.transfer_needed) lấy từ need này ⇒ 1,2tr thay vì 1,4tr
+v = _z(33_300.0, 32_700.0)
+_gap_z = v["need_vnd"] - _cash_z
+check("khoảng thiếu ≈ 1,15tr (làm tròn lên 0,1tr = 1,2tr), trước đây 1,33tr (→1,4tr)",
+      1_100_000 < _gap_z < 1_200_000, _gap_z)
+
 print("\n" + "=" * 78)
 print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
 print("=" * 78)
