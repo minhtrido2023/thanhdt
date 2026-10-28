@@ -738,3 +738,6 @@
 
 ## Consolidation 2026-10-28T17:33:51Z
 - [2026-10-28T17:33:50Z] Mike/heartbeat — Mike_20261028_173300: {"status": "in_progress", "note": "retro entry committed; doing memory/consolidate/notify"}
+
+## Consolidation 2026-10-28T17:34:01Z
+- [2026-10-28T17:33:52Z] Mike/finding — daily-retro-final-2026-10-28: {"summary": "Retro 28/10 finalized, Wags gaps fixed", "file": "kb/incidents/retro/retro-2026-10-28.md", "commit": "ffbf2c4c2"}
