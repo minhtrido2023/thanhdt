@@ -1590,3 +1590,6 @@
 
 ## Archived 2026-10-28 (keep=12 days=0 require_done=False)
 - [2026-10-26T16:41:53Z] [nowcast-p4 10-26] XONG job Taylor_20261026_163838 @c0ae8de0a nhánh feat/nowcast-p4-20261026 (chưa merge) — CHO Mike arch-review+merge; Winston thêm yellow_phosphorus vào freshness monitor
+
+## Archived 2026-10-28 (keep=12 days=0 require_done=False)
+- [2026-10-26T16:49:40Z] [nowcast-p4 vòng 2 10-26] XONG @ac2077912 nhánh feat/nowcast-p4-20261026 (chưa merge) — CHỜ arch-review vòng 2 + Mike merge
