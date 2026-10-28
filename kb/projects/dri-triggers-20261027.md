@@ -54,3 +54,18 @@ Nguồn: Taylor `agents/Taylor/research/dri_val_supply_adj_r4_20261027/REPORT.md
 - Lỗi diễn giải r4 đã giao Taylor sửa (job Taylor_20261027_154349): bỏ "tái canh gần hoà vốn NPV" (thực tế lỗ NPV −1,9…−4,3k/cp), thêm trục có/không tái canh, kiểm lại đơn giá KTCB 24,655 tr/ha từ BCTN 2024.
 - Không đảo giảm 50%; không nới trigger; trigger GIẢM NỐT (SXKD T10 ~10/11, Quỹ TDND) giữ nguyên. Mọi lần mua vẫn cần user duyệt từng lần, nằm ngoài §2.5.
 - **Cải chính 27/10 22:xx:** SXKD 9T (20/10) nói DRI "phấn đấu hoàn thành chuyển sang HOSE trong quý IV/2026" (hồ sơ đang nộp) — MỚI hơn BCTN 2025 (tạm dừng 07/2025). Mike từng báo "chưa có lịch" là sai theo nguồn mới.
+
+## 28/10 11:3x — CỔNG MUA THĂM DÒ DRI Ở ≤13.000 (user yêu cầu soạn; CHƯA wire, KHÔNG tự mua; mọi tranche cần user duyệt)
+Bối cảnh: user đề xuất 27/10 22:54 mua ~13k / bán >15k (HOSE + giá cao su cao). Đây là **ngoại lệ ngoài quy ước mua lại 27/10** (quy ước đó đòi biên ≥15% vs FV r4 9–11k ⇒ ≲7,9k) và ngoài §2.5; là giao dịch theo thị trường 6 tháng, EV ước ~+3% (kịch bản mạnh 30% / cơ bản 35% / yếu 35%) — chỉ chấp nhận ở quy mô thăm dò. Điều kiện: TẤT CẢ cổng dưới đây PASS tại thời điểm đặt lệnh.
+| # | Cổng | PASS khi | Nguồn kiểm |
+|---|---|---|---|
+| G0 | Uỷ quyền | User duyệt TỪNG tranche bằng văn bản; không bot tự mua; vị thế DRI (cũ+mới) ≤ 2–4% NAV/TK, trần cứng 5% | user |
+| G1 | Thông tin (thời gian) | Tranche A: sau khi đọc BCTC Q3 chi tiết (~30/10) và checklist đạt. Tranche B: sau SXKD tháng 10 (~10/11) KHÔNG chạm trigger GIẢM NỐT (bán ≥1.000 t và LNTT luỹ kế 10T ≥ 208,21 tỷ) | dri.com.vn, checklist `bctc-q3-checklist-fpt-tv1-dri-20261025.md` |
+| G2 | Cơ bản | Dakruco vay ≤40 tỷ (không tăng/gia hạn/tăng phải thu BLQ) · tiền gửi Quỹ TDND ≤70 tỷ & không ngoại trừ kiểm toán · không có sự kiện Lào · thưởng đã/ sẽ trích minh bạch, không xả tồn che LN · CFO/tồn kho không có dự phòng giảm giá | BCTC Q3 chi tiết |
+| G3 | Giá cao su | TSR20 ≥ **240¢** (mốc bán là ≤234¢; đệm ≥6¢ để không mua rồi chạm trigger bán ngay) · <2/3 chỉ báo Bobby xấu (Qingdao tăng ≥3 tuần; lốp bán thép <62%) · Bobby chưa đổi sang TROUGH | `commodity_prices`, Bobby read |
+| G4 | Cơ học giá | Lệnh LO ≤13.000, không lệnh thị trường; nếu giá rơi về 13.000 trong phiên có tin xấu (−5% 1 phiên, KL >2× TB) thì chờ 2 phiên + đọc tin trước khi mua; không mua trong phiên có ex-date cổ tức/ĐHCĐ | DNSE (cùng ngày, không dùng BQ) |
+| G5 | Chất xúc tác HOSE | Có CBTT chính thức hồ sơ chuyển sàn đã nộp/được chấp thuận. Chưa có CBTT ⇒ giảm tranche **một nửa** (luận điểm chỉ còn là giá cao su) | HNX/HOSE CBTT, dri.com.vn |
+| G6 | Quy mô | Tranche 1 ≤13.000: SpaceX ~300 cp (~0,4% NAV) / ZaloPay ~150 cp (~0,2% NAV). Tranche 2 ≤11.500: thêm cùng cỡ. Tối đa 2 tranche | — |
+| G7 | Thoát ĐI KÈM (khai trước khi vào) | Bán nửa ≥15.100, hết ≥16.500 · thoát hết nếu trigger cơ bản/Bobby/Lào/Dakruco/TDND chạm · đóng <11.800 kèm bất kỳ trigger nào ⇒ bán nốt · hết hạn ~28/04/2027: bán hết hoặc có luận điểm mới (user duyệt) | dri-triggers |
+- Mất tối đa ước tính (kịch bản yếu −17%): ~0,07% NAV SpaceX cho tranche 1 — cố ý nhỏ.
+- Chưa có cảnh báo cơ học khi giá ≤13.100; đề xuất (chờ user): script chỉ-đọc báo Telegram + chạy checklist G1–G5 khi DRI ≤13.100.
