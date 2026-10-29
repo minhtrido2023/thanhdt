@@ -816,3 +816,26 @@
 - [2026-10-29T06:14:13Z] Taylor/heartbeat — Taylor_20261029_055834: {"status": "in_progress", "note": "PDF 14 trang, kiem tra cuoi + tu kiem so lieu"}
 - [2026-10-29T06:14:38Z] Taylor/heartbeat — Taylor_20261029_055834: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261029_055834", "source": "watcher"}
 - [2026-10-29T06:15:19Z] Taylor/finding — scl-investor-report-20261029: {"dir": "agents/Taylor/research/dd_SCL_20261029/investor_report/", "md": "SCL_DD_investor_report_20261029.md", "pdf": "SCL_DD_investor_report_20261029.pdf (14 trang A4)", "html": "SCL_DD_investor_report_20261029.html (render_report_html.py, 10 anh)", "figs": "figs/fig_01..10 png+csv", "build": "build_report.py figs|pdf", "verdict": "NON; FV ~25.500 (uoc luong) vs TERP 28.612 @31.100 (-10,9%) / 27.226 @29.500 (-6,4%)", "price_2910": "29.500 DNSE latest_trade 11:29:49 ICT", "corrections_vs_REPORT": ["ESOP transfer ~11,8 ty (close 30/07 22.800) thay 14-17", "AR vs DT QoQ cung co so DT gop +14,6% (khong phai 8,6%)", "san UPCoM (DNSE marketId=UPX)"], "selfcheck": "SELFCHECK.md: skeptic-corrected claims 0 hit; no position/NAV/agent names", "status": "chua commit; chua gui email — Mike/user quyet", "measured_by": "build_report.py + python recompute trong phien; BQ ticker_financial/ticker/corporate_action keo 29/10; DNSE latest_trade/secdef"}
+
+## Consolidation 2026-10-29T07:07:02Z
+- [2026-10-29T06:54:26Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "bat dau DD PVP: doc skill, sector read, mau PVT"}
+- [2026-10-29T06:54:42Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "doc xong skill+Bobby+mau PVT; render BCTC scan"}
+- [2026-10-29T06:55:14Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T06:55:29Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "doc xong BCTC Q3 PVP 15 trang; sang ban nien kiem toan"}
+- [2026-10-29T06:56:14Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T06:56:15Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "H1 soat xet Deloitte chap nhan toan phan; doc thuyet minh cam ket Aframax, bo phan, ben lien quan"}
+- [2026-10-29T06:57:06Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "H1 xong (TT99 ngung trich dry-dock, cam ket Aframax #2/#3 116tr USD, ben lien quan 63% DT); doc Q2 de tach quy"}
+- [2026-10-29T06:57:14Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T06:57:57Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "tach quy xong: Q3 giam do van tai quoc te (LN gop 146,5->70,4); sang BQ gia/ADV/lich su LN"}
+- [2026-10-29T06:58:14Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T06:59:14Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:00:15Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:00:50Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "tai 5 CBTT (gia han DHDCD, GD ben lien quan, co tuc, nhan su); gia DNSE san 18.750"}
+- [2026-10-29T07:01:15Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:02:15Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:02:46Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "du lieu du; dung calc.py (self-check + PE vs SOTP)"}
+- [2026-10-29T07:03:15Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:04:15Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:04:17Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "in_progress", "note": "calc.py 0 FAIL; PP-A 12,2k / PP-B 23,1k / PB hist 15,5k vs gia 18.750; dang viet REPORT"}
+- [2026-10-29T07:05:16Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261029_065413", "source": "watcher"}
+- [2026-10-29T07:06:16Z] Taylor/heartbeat — Taylor_20261029_065413: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261029_065413", "source": "watcher"}
