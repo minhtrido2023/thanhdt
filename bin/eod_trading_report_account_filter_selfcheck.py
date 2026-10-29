@@ -457,16 +457,16 @@ def ma_rec(qty, status="VERIFIED"):
             "declared_at": f"{DATE}T15:01:00+07:00", "verification": v}
 
 
-def run_manual(py, ledger_actions=None, raw_ok=True, corrupt=False):
+def run_manual(py, ledger_actions=None, raw_ok=True, corrupt=False, real=500):
     accts = [{"label": a, "account_id": n} for a, n in ACCT_NO.items()]
     # FPT: plan mua 1000, state bot khớp 0, dnse_raw thấy 500 (= lệnh tay) ⇒ real−internal = 500
-    root = build_root(accts, [order_rec(ACCT_NO["SpaceX"], 1, 500)])
+    root = build_root(accts, [order_rec(ACCT_NO["SpaceX"], 1, real)])
     try:
         shutil.copy(os.path.join(HERE, "manual_actions.py"), os.path.join(root, "mike", "bin"))
         shutil.copy(os.path.join(HERE, "wc_paths.py"), os.path.join(root, "mike", "bin"))
         open(os.path.join(root, "wc_env.sh"), "w").close()
         with open(os.path.join(root, "mike", "bin", "broker_fill_confirm.py"), "w") as f:
-            f.write(BROKER_STUB_MA)
+            f.write(BROKER_STUB_MA.replace('("FPT", "buy"): 500}', '("FPT", "buy"): %d}' % real))
         ledger = os.path.join(root, "data", "user_manual_actions.json")
         if corrupt:
             open(ledger, "w").write("{không phải json")
@@ -501,11 +501,11 @@ check("leg 2 skip + leg 3 trừ phần khai: khai 500 đúng = lệch ⇒ KHÔNG
 check("… và mục ℹ️ 'Lệnh tay đã khai (đã xác nhận broker)' + reconcile_lines nhận manual_by_key",
       "ℹ️ **Lệnh tay đã khai (đã xác nhận broker)**" in M1["out"] and "RECONCILE manual=[(('FPT', 'buy'), 500)]" in M1["out"],
       M1["out"][-500:])
-M2 = run_manual(cur_py, [ma_rec(300)])
-check("khai 300 ≠ lệch 500 ⇒ leg 2 VẪN báo FPT và leg 3 VẪN escalate với broker_filled=500 "
-      "(không trừ khai lệch)",
+M2 = run_manual(cur_py, [ma_rec(500)], real=800)
+check("khai VERIFIED 500 nhưng lệch thật 800 (real−internal=800 ≠ 500) ⇒ leg 2 VẪN báo FPT và leg 3 VẪN escalate "
+      "broker_filled=800 (phần dư khác khai KHÔNG bị che) — giết mutant leg2_skip_any/leg3_skip_any",
       M2["mm"] is not None and any(m["ticker"] == "FPT" for m in M2["mm"]["mismatches"])
-      and [e["broker_filled"] for e in M2["mm"]["broker_statement_mismatches"]] == [500], M2["mm"])
+      and [e["broker_filled"] for e in M2["mm"]["broker_statement_mismatches"]] == [800], M2["mm"])
 M3 = run_manual(cur_py, [ma_rec(500, status="UNVERIFIED")])
 check("khai UNVERIFIED ⇒ không trừ gì, vẫn mismatch + tiêu đề KHÔNG nói 'đã xác nhận broker'",
       M3["mm"] is not None and "đã xác nhận broker" not in M3["out"], (M3["mm"], M3["out"][-400:]))

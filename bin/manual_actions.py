@@ -253,12 +253,55 @@ def statement_crosscheck(day, manual, statement_qty, journal_qty):
     return warns
 
 
-def emit_warnings(warns):
-    """Cảnh báo statement_crosscheck phải ra kênh người đọc được cả ở đường THÀNH CÔNG (rc=0): in
-    stderr — nơi caller (daily_nav_snapshot/compute_active_nav/park) đang đẩy các dòng ℹ️/⚠️ vào log
-    Trading Daily — thay vì chỉ nằm trong list `notes_out` mà đường rc=0 không in. Trả lại `warns`."""
+def _ops_notify(msg, day=None):
+    """Đẩy MỘT cảnh báo sang kênh VẬN HÀNH (Trading Daily). KHÔNG BAO GIỜ in stdout/stderr: stderr của
+    caller (daily_nav_snapshot…) bị eod_trading_report.sh gom vào NAV_SECTION của báo cáo SpaceX gửi nhà
+    đầu tư — cảnh báo đối soát nội bộ không được lọt ra đó. Fail-safe: lỗi gửi không làm hỏng caller.
+    Test: MIKE_MANUAL_WARN_SINK=<file> ghi nối thêm thay vì gửi; MIKE_BOT_TEST_MODE=1 ⇒ không gửi thật.
+    Dedupe 1 lần/ngày/nội dung (state/manual_actions_warned.json) — NAV/park chạy nhiều lần mỗi ngày."""
+    sink = os.environ.get("MIKE_MANUAL_WARN_SINK")
+    if sink:
+        with open(sink, "a", encoding="utf-8") as f:
+            f.write(msg + "\n")
+        return True
+    if os.environ.get("MIKE_BOT_TEST_MODE") == "1" or os.environ.get("PYTEST_CURRENT_TEST"):
+        return False
+    try:
+        import hashlib
+        import subprocess
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if os.path.basename(os.path.realpath(root)) != "mike" or os.path.basename(os.path.dirname(os.path.realpath(root))) != "WorkingClaude":
+            return False          # worktree/sandbox copy (selfcheck) ⇒ KHÔNG gửi thật; chỉ cây production gửi
+        st_path = os.path.join(root, "state", "manual_actions_warned.json")
+        key = hashlib.sha1(f"{day}|{msg}".encode("utf-8")).hexdigest()[:16]
+        try:
+            with open(st_path, encoding="utf-8") as f:
+                st = json.load(f)
+        except (OSError, ValueError):
+            st = {}
+        if key in st:
+            return False
+        script = os.path.join(root, "bin", "notify_thread.sh")
+        r = subprocess.run([script, msg, "trading_daily"], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=60)
+        if r.returncode == 0:
+            st[key] = day or ""
+            os.makedirs(os.path.dirname(st_path), exist_ok=True)
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(st_path), suffix=".tmp")
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(st, f)
+            os.replace(tmp, st_path)
+        return r.returncode == 0
+    except Exception:                                            # noqa: BLE001 — fail-safe, cảnh báo không phá NAV
+        return False
+
+
+def emit_warnings(warns, day=None):
+    """Cảnh báo statement_crosscheck phải TỚI người vận hành ở đường THÀNH CÔNG (rc=0) mà KHÔNG lọt vào
+    báo cáo nhà đầu tư: gửi kênh Trading Daily (`_ops_notify`), không in stdout/stderr. Trả lại `warns`
+    (caller vẫn đưa vào `notes` cho đường rc=5)."""
     for w in warns:
-        print(w, file=sys.stderr)
+        _ops_notify(w, day)
     return warns
 
 

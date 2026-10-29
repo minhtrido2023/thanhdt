@@ -16,6 +16,8 @@ import os
 import sys
 import tempfile
 
+os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")   # selfcheck không bao giờ gửi cảnh báo thật (§5b)
+
 BIN = os.environ.get("MA_SC_BIN") or os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BIN)
 os.environ.pop("MIKE_MANUAL_ACTIONS_FILE", None)
@@ -435,18 +437,36 @@ rl_noraw = ma.report_lines("SpaceX", SPX, D, path=s.ledger)
 check("đã xác nhận broker" not in rl_noraw[0] and "✅ broker xác nhận" not in " ".join(rl_noraw),
       "(6) VERIFIED nhưng thiếu bản sao dnse_raw ⇒ không nói 'đã xác nhận' (✅ theo bằng chứng, không theo status)")
 
-# (2) emit_warnings: cảnh báo crosscheck ra stderr cả ở đường thành công
+# (2) emit_warnings: cảnh báo crosscheck TỚI kênh vận hành ở đường thành công, KHÔNG lọt stdout/stderr
+# (stderr của caller bị eod_trading_report.sh gom vào NAV_SECTION của báo cáo SpaceX gửi nhà đầu tư)
+_sink = os.path.join(s.root, "warn_sink.txt")
+os.environ["MIKE_MANUAL_WARN_SINK"] = _sink
 s.write_ledger([rec()])
 s.statement([(SPX, "SCL", "BÁN", 500)])
-_buf = io.StringIO()
-with contextlib.redirect_stderr(_buf):
+_buf, _out = io.StringIO(), io.StringIO()
+with contextlib.redirect_stderr(_buf), contextlib.redirect_stdout(_out):
     o, n, _ = s.net("SpaceX", SPX)
-check(o.get("SCL") == -500 and "≠ statement−journal" in _buf.getvalue() and any("≠ statement−journal" in x for x in n),
-      "(2) statement lệch khai ⇒ cảnh báo RA STDERR (đường thành công) chứ không chỉ trong notes_out")
+_sink_txt = open(_sink, encoding="utf-8").read() if os.path.exists(_sink) else ""
+check(o.get("SCL") == -500 and any("≠ statement−journal" in x for x in n),
+      "(2) statement lệch khai ⇒ vẫn có trong notes (đường rc=5)")
+check("≠ statement−journal" in _sink_txt, "(2) … VÀ cảnh báo TỚI kênh vận hành (sink) ở đường thành công")
+check(_buf.getvalue() == "" and _out.getvalue() == "",
+      "(2) … và KHÔNG in stdout/stderr (không lọt NAV_SECTION báo cáo nhà đầu tư)")
+os.remove(_sink)
+_buf, _out = io.StringIO(), io.StringIO()
+with contextlib.redirect_stderr(_buf), contextlib.redirect_stdout(_out):
+    park_holdings.statement_extra_sells("SpaceX", {}, PREV, D, s.exec)
+check("≠ statement−journal" in open(_sink, encoding="utf-8").read() and _buf.getvalue() == "" and _out.getvalue() == "",
+      "(2) park: cảnh báo tới kênh vận hành, không stdout/stderr")
+os.environ.pop("MIKE_MANUAL_WARN_SINK")
+# không có sink + MIKE_BOT_TEST_MODE=1 ⇒ KHÔNG gửi thật, không in gì (selfcheck không được spam Trading Daily)
+_prev_tm = os.environ.get("MIKE_BOT_TEST_MODE")
+os.environ["MIKE_BOT_TEST_MODE"] = "1"
 _buf = io.StringIO()
 with contextlib.redirect_stderr(_buf):
-    park_holdings.statement_extra_sells("SpaceX", {}, PREV, D, s.exec)
-check("≠ statement−journal" in _buf.getvalue(), "(2) park: cảnh báo crosscheck ra stderr")
+    ma.emit_warnings(["⚠️ x"], D)
+check(_buf.getvalue() == "" and ma._ops_notify("⚠️ x", D) is False, "(2) test-mode không gửi thật")
+(os.environ.pop("MIKE_BOT_TEST_MODE") if _prev_tm is None else os.environ.__setitem__("MIKE_BOT_TEST_MODE", _prev_tm))
 os.remove(bfc.broker_csv_path(s.root, D))
 
 print(f"\n{'FAIL' if FAILS else 'OK'}: {len(FAILS)} ca hỏng" + (f" — {FAILS}" if FAILS else ""))

@@ -247,7 +247,7 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
                                  f"(ngoài journal bot)")
             if manual.get(d):
                 notes.extend(manual_actions.emit_warnings(manual_actions.statement_crosscheck(
-                    d, manual[d], {k: float(broker.qty(*k)) for k in broker.by_key}, jq)))
+                    d, manual[d], {k: float(broker.qty(*k)) for k in broker.by_key}, jq), d))
         elif events is not None or manual.get(d):
             per_day = dict(jq)
             joids = {str(_oid) for _ts, _oid, *_ in events or []}

@@ -740,6 +740,39 @@ def case_gate_source_dedupe_is_per_date_source_pair():
                   f"{day}|LA_LUNG_v9": {"discord": True, "bus": True}}, extra=str(m))
 
 
+def case_manual_note_stderr_split():
+    """MANUAL_NOTE (prompt DollarBill, 29/10): stderr của manual_actions.py note KHÔNG được lọt vào prompt
+    ở đường thành công; khi lỗi thì ra note fail-closed + 'Lỗi thật'. Đọc khối từ CHÍNH file bên cạnh
+    selfcheck (không phải REAL cứng ở master) để test được cả trong worktree."""
+    src = Path(__file__).with_name("bq_freshness_check.sh").read_text().splitlines()
+    a = next((i for i, ln in enumerate(src) if ln.strip().startswith('_manual_err="$(mktemp)"')), None)
+    b = next((i for i, ln in enumerate(src) if ln.strip() == 'rm -f "$_manual_err"'), None)
+    if a is None or b is None:
+        check("manual-note-block-extracted", False, extra="anchors _manual_err/rm -f not found — file restructured")
+        return
+    block = "\n".join(src[a:b + 1])
+    for label, body, expect_ok in (
+        ("ok", 'echo "LENH TAY NOTE"; echo "STDERR_LEAK" >&2; exit 0', True),
+        ("fail", 'echo "boom-from-stderr" >&2; exit 3', False),
+    ):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "bin").mkdir()
+            (root / "bin" / "manual_actions.py").write_text(
+                "import sys, subprocess\nsys.exit(subprocess.call(['bash','-c',%r]))\n" % body)
+            script = ('set -uo pipefail\nROOT="%s"\nACCT=SpaceX\nTODAY=2026-10-29\n%s\n'
+                      'printf "NOTE=[%%s]\\n" "$MANUAL_NOTE"\n' % (root, block))
+            r = subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=30)
+            out = r.stdout
+            note = out.split("NOTE=[", 1)[1].rsplit("]", 1)[0] if "NOTE=[" in out else ""
+            if expect_ok:
+                check("manual-note-success-no-stderr-in-prompt",
+                      note.strip() == "LENH TAY NOTE" and "STDERR_LEAK" not in out, extra=out[-300:])
+            else:
+                check("manual-note-failure-failclosed-with-real-error",
+                      "KHÔNG đọc được sổ lệnh tay" in note and "boom-from-stderr" in out, extra=out[-300:])
+
+
 if __name__ == "__main__":
     case_gate_source_mktemp_fails()
     case_gate_source_kill_cleans_tmp()
@@ -765,5 +798,6 @@ if __name__ == "__main__":
     case_prune_depth_separates_bq_error_from_gutted_table()
     case_pipeline0_exdate_forecast_runs_before_failed_gate()
     case_exdate_forecast_selfcheck_green()
+    case_manual_note_stderr_split()
     print(f"\nbq_freshness_check_selfcheck: {PASS} PASS, {FAIL} FAIL")
     sys.exit(1 if FAIL else 0)
