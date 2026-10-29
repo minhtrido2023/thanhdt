@@ -32,3 +32,4 @@
 - [2026-10-29T13:45:40Z] [dgc-ke 29/10] XONG job Taylor_20261029_133456: Ke 14,9% giua vung 12,2-16,7% (PREREG tam 15,8%, thi truong 13,1%); rf trung tam 6,75 building-block — CHO Mike/user; mo: dcf_valuation g_T=rf 7,4% can nghien cuu rieng
 - [2026-10-29T13:54:56Z] [manual-deviation vòng 2 29/10] XONG @83da1791f nhanh session/manual-deviation-20261029 (chưa merge) — CHO Mike arch-review vòng 3 + user; pageIndex=1-based là giả định chưa kiểm DNSE thật
 - [2026-10-29T14:00:47Z] [dgc r12 + investor-report-v2 29/10] XONG job Taylor_20261029_134234: research/dgc_valuation_20261029_r12/ + dd_DGC_20261029/investor_report_v2/ (23tr, chua commit) — CHO Mike doc kiem/gui email; sua vong 5 chua duoc skeptic ra lai
+- [2026-10-29T17:05:16Z] [ci-manual 30/10] XONG c0c63f6be nhanh session/ci-manual-20261030 (wt-ci-manual-20261030, chua merge) — CHO Mike arch-review + user; sau merge co the go 4 ack tam SCL 29/10 (khong bat buoc)
