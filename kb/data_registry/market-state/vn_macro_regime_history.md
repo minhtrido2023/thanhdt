@@ -19,6 +19,7 @@ last_update_8: 2026-10-14 (Bobby — SECTOR READ real-time BLIND nhóm CNTT FPT/
 last_update_9: 2026-10-14 (Bobby — MACRO UPDATE tài chính+BĐS sau họp BCĐ nhà ở 13/10: GIỮ STRUCTURAL_ACCUMULATION, giai đoạn sớm-giữa → GIỮA, vẫn AMBIGUOUS; lãi huy động chính = effective 7,4% (12/10), cách kill-switch A 0,1pp; 0/7 ngưỡng chạm)
 last_update_10: 2026-10-27 (Bobby — SECTOR READ real-time BLIND ngành cao su thiên nhiên VN (nền DD DRI): CYCLICAL_PEAK do cung đẩy, cầu TQ không xác nhận, trên nền cung STRUCTURAL thắt — ambiguous ~60/40; FORECAST khoá 30/90 ngày; chi tiết ở file con vn_sector_read_rubber_20261027.md)
 last_update_11: 2026-10-28 (Bobby — SECTOR READ real-time BLIND ngành tư vấn khảo sát–thiết kế–QLDA điện VN: STRUCTURAL_UPCYCLE về nhu cầu, ADMIN_GATED về chuyển hoá doanh thu — ambiguous ~65/35; FORECAST khoá F1-F10 tới 30/06/2027; chi tiết ở file con sector_read_power_consulting_20261028.md)
+last_update_12: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành vận tải biển chuyên dụng dầu khí VN: CYCLICAL ~0,55 (đỉnh cấp tính do Hormuz, giao ngay đã qua đỉnh 06/10, TC/giá tàu còn trễ = late-peak) / ADMIN_GATED ~0,30 (cabotage + TC nội bộ hệ sinh thái NN) / STRUCTURAL ~0,15; ambiguous ~65/35; FORECAST khoá F1-F8 + D1-D6 tới 2027-09-30; chi tiết ở file con sector_read_oil_gas_shipping_20261029.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1555,6 +1556,24 @@ file con). Bản đầy đủ (pipeline PDP8 so với thực tế, kết quả t
   FS/EPC. Thầu tư vấn 500kV: 1-2 nhà thầu/gói, giảm giá 1-5% (oligopoly gốc EVN), phí KS-TK khoảng 1,1-1,2% TMĐT.
 - **FORECAST khoá 28/10:** EVN giải ngân 2026 ≥123k tỷ P=0,55; NT1 điều chỉnh chủ trương P=0,55 và ký EPC P=0,25 trước
   30/06/2027; ĐGNK có chủ trương P=0,30; PDP8 sửa lần nữa P=0,40; tăng giá điện P=0,55; Luật Điện lực thông qua P=0,80.
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Vận tải biển chuyên dụng dầu khí VN, as-of 29/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của DN vận tải nào (kiểm toán blind ở mục 0
+file con: có lộ tiêu đề 1 ghi chú CTCK, KHÔNG mở, KHÔNG dùng số). Bản đầy đủ (pipeline cầu 2 tầng nội địa/quốc tế, cabotage,
+bảng cước đa proxy, 3 kịch bản, 20 mục DD, nguồn): **`sector_read_oil_gas_shipping_20261029.md`** (file con).
+- **Phân loại: `CYCLICAL` ~0,55 (đỉnh cấp tính do mất năng suất đội tàu vì Hormuz, không do cầu dầu) / `ADMIN_GATED` ~0,30
+  (cabotage + thuê định hạn trong hệ sinh thái NN, ít nhạy cước 2 chiều) / `STRUCTURAL` ~0,15.** Vị trí: **late-peak**, giao
+  ngay đã qua đỉnh 06/10 nhưng TC 1 năm và giá tàu cũ còn tăng tới T9; `ambiguous` ~65/35. Trục 2: `EXTERNAL_CYCLE`.
+- Bằng chứng chính: BDTI 7.171, VLCC TCE 761k, Aframax 336k (Baltic qua Optima, 23/10); Lloyd's 19/10 VLCC −13 đến −19% từ
+  đỉnh, Aframax Đại Tây Dương −39%; LR2/MR MEG–Nhật kỷ lục; BIMCO: cả 2 nhánh (mở/đóng eo) đều kéo cước về trong 2027, cung
+  tàu +5-6%. Nội địa: Dung Quất khoảng 124%, Nghi Sơn khoảng 125% (trần kỹ thuật), mở rộng Dung Quất không trước khoảng
+  2029 ⇒ khối lượng cabotage 2027 đi ngang. BQ KHÔNG có chuỗi cước tàu dầu (khoảng trống dữ liệu).
+- **FORECAST khoá 29/10:** BDTI P(<7.171) 0,78 tại 2027-03-31 (trung vị khoảng 4.200), 0,88 tại 2027-09-30 (trung vị khoảng
+  2.800); Aframax TCE P(<336k) 0,75/0,85; NK LPG 2026 tăng P=0,70; NK dầu thô 2026 giảm P=0,55; hàng lỏng qua cảng 9T/2027 tăng
+  P=0,55. **Không phải khuyến nghị mua/bán.**
 
 ---
 

@@ -1602,3 +1602,6 @@
 
 ## Archived 2026-10-28 (keep=12 days=0 require_done=False)
 - [2026-10-26T18:05:51Z] [dgc-valuation r3 27/10] XONG job Taylor_20261026_180245: research/dgc_valuation_20261027_r3/ (chua commit) — EV 32.650; CHAY LAI khi BCTC Q3 DGC; 1600 ~70% hop nhat, khai truong khong co moc
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-26T18:18:07Z] [dgc-valuation r4 27/10] XONG job Taylor_20261026_181244: research/dgc_valuation_20261027_r4/ (chua commit) — EV 33.766 (ex-819: 32.628); hoi DGC/BCTC Q3: ben vay 819, du phong 100; CFO Q3 300 lac quan

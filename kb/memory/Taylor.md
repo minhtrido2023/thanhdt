@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-26T18:18:07Z] [dgc-valuation r4 27/10] XONG job Taylor_20261026_181244: research/dgc_valuation_20261027_r4/ (chua commit) — EV 33.766 (ex-819: 32.628); hoi DGC/BCTC Q3: ben vay 819, du phong 100; CFO Q3 300 lac quan
 - [2026-10-27T04:09:23Z] [dd-DRI 10-27] XONG job Taylor_20261027_040314: NON, giu qua Q3 nghieng giam, FV ky vong 11.838 vs 14.700; research/dd_DRI_20261027/ (chua commit). CHAM khi BCTC Q3 ra 30/10 theo bang 6b REPORT
 - [2026-10-27T04:37:16Z] [dri-q3 27/10] XONG job Taylor_20261027_042354: REPORT_Q3_UPDATE.md (chua commit) — GIU theo KH, de xuat rieng giam 50% cho user; CHAM tiep khi SXKD thang 10 DRI ra (~10/11); F khoa mu blind_scorable=no
 - [2026-10-27T08:49:45Z] [dri-val-supply-adj 27/10] XONG job Taylor_20261027_084046 @a0c629ed4: FV 60/40 13,7-15,7k, nhay nhat RSS3 mid; CHO Mike goi skeptic (khong tu chot)
@@ -26,3 +25,4 @@
 - [2026-10-28T16:59:26Z] [lot-exit r2 28/10] XONG @6b51999a9 nhanh session/lot-exit-20261028 (chua merge) — CHO Mike arch-review vong 3; plan live ZaloPay 10-29 VAN co SELL VPB 700, can go + chen 282
 - [2026-10-28T18:04:15Z] [clearing G1 29/10] XONG @1c4cd492e nhanh session/clearing-shadow-20261029 (wt-clearing-shadow-20261029, chua merge) — CHO Mike arch-review + quant-skeptic; G3 can user duyet cron 20:45 + apply_book_transfers
 - [2026-10-28T18:32:35Z] [clearing G1 vong2 29/10] XONG @eb786f0fe nhanh session/clearing-shadow-20261029 (chua merge) — CHO Mike arch-review vong 3 + quant-skeptic; G3 can user duyet cron + checklist R7
+- [2026-10-29T04:05:48Z] [dd-PVT 10-29] XONG job Taylor_20261029_035644: NON @21.300 san, FV ky vong ~18,0k, rerun DD <=15,3k; research/dd_PVT_20261029/ (chua commit) — CHO Mike goi fundamental-skeptic; cau hoi #1: do lon tac dong TT99 dry-dock
