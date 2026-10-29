@@ -108,7 +108,7 @@ Ke trung tâm 15,8% (β 1,11) nằm trên dải 11,5–12,7% ⇒ báo cáo, theo
 | **Vùng thấp** (6,0 + 1,08 × 5,7) | 12,17% | 24.285 / 37.726 / 48.595 | **31.898** |
 | **Vùng cao** (7,5 + 1,14 × 8,13) | 16,74% | 20.106 / 30.756 / 38.699 | **28.869** |
 
-**Độ nhạy.** Mỗi −1pp Ke quanh 14–15% làm DCF cơ sở tăng khoảng +1.460 đ/cp, còn EV blend A chỉ tăng khoảng +330 đ/cp.
+**Độ nhạy.** Mỗi −1pp Ke quanh 14–15% làm DCF cơ sở tăng khoảng +1.460 đ/cp, còn EV blend A chỉ tăng khoảng +634 đ/cp (lưới 14%→15%: DCF 34.247−32.790; EV 30.392−29.758).
 A7 (r7 chính) ở lưới: Ke 12% → EV 34.434; 14,9% → 32.182; 16% → 31.583.
 
 **Phân rã DCF cơ sở** (`out_dcf_decomp.csv`, đ/cp):
@@ -147,7 +147,7 @@ g = 3% ≪ GDP danh nghĩa 11,25% (K6 đạt rộng).
 - **β** ≈ 1,1.
 - Theo luật khai trước, điểm là **15,8%**. Không chọn theo FV mong muốn: điểm này cho FV **thấp hơn** hiện tại, ngược với kỳ vọng của câu hỏi.
 
-**(ii) Báo Ke theo vùng 12–16,5%, không theo một điểm.** Ba mốc đọc:
+**(ii) Báo Ke theo vùng 12,2–16,7%, không theo một điểm.** Ba mốc đọc:
 - 13,1% (ERP thị trường ngầm định);
 - 14,9% (hiện hành, gần giữa vùng);
 - 15,8% (Damodaran ERP).
