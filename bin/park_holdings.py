@@ -857,9 +857,9 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
             continue
         stmt_ok.add(d)
         if manual.get(d):
-            notes.extend(manual_actions.statement_crosscheck(
+            notes.extend(manual_actions.emit_warnings(manual_actions.statement_crosscheck(
                 d, manual[d], {k: int(bf.qty(*k)) for k in bf.by_key},
-                {(tk, sd): q for (dd, tk, sd), q in journal_qty.items() if dd == d}))
+                {(tk, sd): q for (dd, tk, sd), q in journal_qty.items() if dd == d})))
         keys = set(bf.by_key) | {(tk, sd) for (dd, tk, sd) in journal_qty if dd == d}
         for tk, side in sorted(keys):
             j, b = journal_qty.get((d, tk, side), 0), int(bf.qty(tk, side))

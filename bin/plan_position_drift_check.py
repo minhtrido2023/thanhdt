@@ -401,11 +401,13 @@ def sim_read(pos, ords, sim_at):
 
 
 # ── lõi ─────────────────────────────────────────────────────────────────────────────────────
-def _apply_manual_actions(res, account, account_no, date_str):
+def _apply_manual_actions(res, account, account_no, date_str, known_oids=()):
     """Lệnh tay ĐÃ KHAI + broker xác nhận (`manual_actions`, 29/10) KHÔNG phải drift: phần KL chưa
     giải thích ĐÚNG BẰNG Σ lệnh tay khai SAU mốc ⇒ bỏ cờ KL (giữ cờ giá/lẫn hệ giá nếu có). Lệch khai
     ⇒ vẫn cờ. Sổ rỗng ⇒ không đổi gì. Selfcheck (MIKE_DRIFT_SELFCHECK=1) chỉ đọc sổ khi trỏ
-    MIKE_MANUAL_ACTIONS_FILE tường minh — không đọc sổ production."""
+    MIKE_MANUAL_ACTIONS_FILE tường minh — không đọc sổ production.
+    `known_oids`: id lệnh trong sổ lệnh DNSE mà `explained_fills` đã đếm — lệnh tay trùng id ấy đã
+    nằm trong phần "khớp lệnh" rồi, trừ lần nữa là đếm đôi (cùng luật dedupe `joids` ở exdate_frame)."""
     import manual_actions
     if os.environ.get("MIKE_DRIFT_SELFCHECK") == "1" and not os.environ.get("MIKE_MANUAL_ACTIONS_FILE"):
         return
@@ -415,6 +417,8 @@ def _apply_manual_actions(res, account, account_no, date_str):
     except manual_actions.ManualActionsError as e:
         res["notes"].append(f"sổ lệnh tay hỏng — KHÔNG trừ lệnh tay đã khai ({e})")
         return
+    known = {str(x) for x in known_oids}
+    man = [f for f in man if f["order_num"] not in known and f["broker_order_id"] not in known]
     if not man:
         return
     kept = []
@@ -518,7 +522,9 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
             it["kind"], it["base_ts"] = kind, base[0]
             res["items"].append(it)
 
-    _apply_manual_actions(res, account, account_no, date_str)
+    _apply_manual_actions(res, account, account_no, date_str, known_oids=(
+        {str(o.get("id")) for o in (final_orders or []) if isinstance(o, dict)}
+        | {str(o.get("id")) for _ts, rows in ords for o in rows if isinstance(o, dict)}))
 
     orders_map, why = plan_orders_for(P["MIKE_DRIFT_PLAN_DIR"], account, date_str)
     for it in res["items"]:

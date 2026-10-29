@@ -246,8 +246,8 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
                     notes.append(f"{d} {k[0]} {k[1]}: +{b - j:,.0f}cp chỉ có ở statement DNSE "
                                  f"(ngoài journal bot)")
             if manual.get(d):
-                notes.extend(manual_actions.statement_crosscheck(
-                    d, manual[d], {k: float(broker.qty(*k)) for k in broker.by_key}, jq))
+                notes.extend(manual_actions.emit_warnings(manual_actions.statement_crosscheck(
+                    d, manual[d], {k: float(broker.qty(*k)) for k in broker.by_key}, jq)))
         elif events is not None or manual.get(d):
             per_day = dict(jq)
             joids = {str(_oid) for _ts, _oid, *_ in events or []}

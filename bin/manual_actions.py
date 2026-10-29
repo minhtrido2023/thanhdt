@@ -118,8 +118,49 @@ def load_all(path=None):
     return obj["actions"]
 
 
-def evidence_check(rec, account_no):
-    """(ok, lý do). Dựng lại mọi bit TỪ bản ghi broker đã lưu — không tin trường tóm tắt."""
+def _canon(x):
+    return json.dumps(x, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+
+def exec_dir_for(path=None, wc_root=None):
+    """Thư mục `execution_logs` đi cùng sổ (sổ ở `<data>/user_manual_actions.json`)."""
+    return os.path.join(os.path.dirname(os.path.abspath(path or ledger_path(wc_root))),
+                        "execution_logs")
+
+
+def raw_log_path(exec_dir, date):
+    return os.path.join(exec_dir, f"dnse_raw_{date}.jsonl")
+
+
+def _raw_order_history(exec_dir, date, account_no):
+    """Mọi lệnh trong bản ghi kind=order_history của ĐÚNG tiểu khoản (§12) trong dnse_raw_<date>.jsonl."""
+    out, p = [], raw_log_path(exec_dir, date)
+    if not os.path.exists(p):
+        return out
+    with open(p, encoding="utf-8") as f:
+        for line in f:
+            try:
+                r = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            if _norm_acct(r.get("account_no", "")) != _norm_acct(account_no):   # §12 — dòng đầu tiên
+                continue
+            if r.get("kind") != "order_history":
+                continue
+            pl = r.get("payload")
+            if isinstance(pl, dict) and isinstance(pl.get("data"), list):
+                out.extend(o for o in pl["data"] if isinstance(o, dict))
+    return out
+
+
+def _filled(status):
+    return str(status or "").lower().replace("_", "").replace(" ", "") in ("filled", "partiallyfilled")
+
+
+def evidence_check(rec, account_no, exec_dir=None):
+    """(ok, lý do). Dựng lại mọi bit TỪ bản ghi broker đã lưu — không tin trường tóm tắt — và đòi
+    bản ghi đó có BẢN SAO KHỚP TỪNG BYTE trong artifact độc lập `dnse_raw_<ngày>.jsonl`
+    (kind=order_history): sửa tay sổ khai không đủ để mở cổng, phải sửa luôn log thô."""
     v = rec.get("verification") or {}
     if v.get("status") != "VERIFIED":
         return False, f"chưa xác nhận broker (status={v.get('status')})"
@@ -130,6 +171,12 @@ def evidence_check(rec, account_no):
         return False, f"tiểu khoản khai {rec['account_no']} ≠ tiểu khoản đang xét {account_no}"
     if _norm_acct(v.get("envelope_account_no", "")) != _norm_acct(rec["account_no"]):
         return False, f"order-history thuộc tiểu khoản {v.get('envelope_account_no')} (§12)"
+    if v.get("method") != "dnse_api.order_history":
+        return False, f"method={v.get('method')!r} ≠ dnse_api.order_history"
+    if not _filled(bo.get("orderStatus")):
+        return False, f"lệnh broker ở trạng thái {bo.get('orderStatus')!r}, chưa khớp"
+    if str(v.get("verified_at", ""))[:10] < str(bo.get("transDate", ""))[:10] or not v.get("verified_at"):
+        return False, f"verified_at {v.get('verified_at')} sớm hơn ngày giao dịch {bo.get('transDate')}"
     checks = (
         (str(bo.get("id")) == str(rec["broker_order_id"]), "mã lệnh"),
         (str(bo.get("symbol", "")).upper() == rec["ticker"], "mã CK"),
@@ -140,6 +187,12 @@ def evidence_check(rec, account_no):
     bad = [name for ok, name in checks if not ok]
     if bad:
         return False, f"bản ghi broker lệch khai ở: {', '.join(bad)}"
+    ed = exec_dir or exec_dir_for()
+    mine = [o for o in _raw_order_history(ed, rec["date"], rec["account_no"])
+            if str(o.get("id")) == str(rec["broker_order_id"])]
+    if not any(_canon(o) == _canon(bo) for o in mine):
+        return False, (f"không có bản sao khớp từng byte của lệnh {rec['broker_order_id']} trong "
+                       f"{os.path.basename(raw_log_path(ed, rec['date']))} (kind=order_history)")
     return True, ""
 
 
@@ -162,10 +215,11 @@ def gate_fills(account_label, account_no, after_date, upto_date, path=None, note
     của ĐÚNG account (label + account_no, §12), ngày ∈ (after_date, upto_date].
     Dòng khai của account này mà KHÔNG hợp lệ ⇒ ghi lý do vào `notes_out`, không tính."""
     out = {}
+    ed = exec_dir_for(path, wc_root)
     for rec in load_all(path or ledger_path(wc_root)):
         if rec["account"] != account_label or not (after_date < rec["date"] <= upto_date):
             continue
-        ok, why = evidence_check(rec, account_no)
+        ok, why = evidence_check(rec, account_no, ed)
         if not ok:
             if notes_out is not None:
                 notes_out.append(f"{rec['date']} {rec['ticker']} {rec['side']} {rec['qty']:,}cp "
@@ -174,7 +228,8 @@ def gate_fills(account_label, account_no, after_date, upto_date, path=None, note
         out.setdefault(rec["date"], []).append(
             {"ticker": rec["ticker"], "side": rec["side"], "qty": rec["qty"],
              "price": float(rec["price"]), "order_num": broker_order_num(rec["broker_order_id"]),
-             "id": rec["id"], "time_ict": rec["time_ict"]})
+             "id": rec["id"], "time_ict": rec["time_ict"],
+             "broker_order_id": str(rec["broker_order_id"])})
     return out
 
 
@@ -195,6 +250,15 @@ def statement_crosscheck(day, manual, statement_qty, journal_qty):
         if extra != m:
             warns.append(f"⚠️ {day} {k[0]} {k[1]}: lệnh tay đã khai {m:,}cp ≠ statement−journal "
                          f"{extra:,}cp — hai nguồn lệch, cần kiểm")
+    return warns
+
+
+def emit_warnings(warns):
+    """Cảnh báo statement_crosscheck phải ra kênh người đọc được cả ở đường THÀNH CÔNG (rc=0): in
+    stderr — nơi caller (daily_nav_snapshot/compute_active_nav/park) đang đẩy các dòng ℹ️/⚠️ vào log
+    Trading Daily — thay vì chỉ nằm trong list `notes_out` mà đường rc=0 không in. Trả lại `warns`."""
+    for w in warns:
+        print(w, file=sys.stderr)
     return warns
 
 
@@ -249,13 +313,45 @@ def add(date, time_ict, account, ticker, side, qty, price, order_id, source, not
     return rec
 
 
+ORDER_PAGE_SIZE, ORDER_MAX_PAGES = 100, 20
+
+
 def _dnse_fetch(account_no, date):
+    """order_history của `date`, đọc HẾT các trang (pageSize/pageIndex từ 1). Một trang đầy ⇒ đọc
+    tiếp; trang ngắn ⇒ hết. Trang lặp y nguyên (API lờ phân trang) hoặc chạm trần ORDER_MAX_PAGES
+    mà vẫn đầy ⇒ raise — không kết luận "không có lệnh" từ danh sách có thể cụt."""
     if WC_ROOT not in sys.path:
         sys.path.insert(0, WC_ROOT)
     from dnse_api import DNSEClient
     with contextlib.redirect_stdout(sys.stderr):
         c = DNSEClient.from_credentials_file()
-        return c.order_history(account_no, from_date=date, to_date=date)
+        rows, seen, env0 = [], set(), None
+        for page in range(1, ORDER_MAX_PAGES + 1):
+            env = c.order_history(account_no, from_date=date, to_date=date,
+                                  page_size=ORDER_PAGE_SIZE, page_index=page)
+            env0 = env0 if env0 is not None else env
+            part = env.get("data") if isinstance(env, dict) else None
+            if not isinstance(part, list):
+                return env
+            ids = [str(o.get("id")) for o in part if isinstance(o, dict)]
+            if page > 1 and ids and set(ids) <= seen:
+                raise RuntimeError(f"order_history trang {page} lặp trang trước — API lờ pageIndex")
+            seen.update(ids)
+            rows.extend(part)
+            if len(part) < ORDER_PAGE_SIZE:
+                return dict(env0, data=rows, _pages=page, _page_size=ORDER_PAGE_SIZE)
+        raise RuntimeError(f"order_history còn đầy sau {ORDER_MAX_PAGES} trang × {ORDER_PAGE_SIZE} "
+                           f"— không đọc hết được")
+
+
+def _archive_raw(exec_dir, label, date, env):
+    """Ghi NỐI-THÊM nguyên envelope order_history vào dnse_raw_<date>.jsonl (kind=order_history,
+    account_no = tiểu khoản envelope trả về — §12). Đây là artifact độc lập evidence_check đòi."""
+    rec = {"ts": _now_iso()[:19], "kind": "order_history", "account_no": str(env["accountNo"]),
+           "account_label": label, "payload": env}
+    os.makedirs(exec_dir, exist_ok=True)
+    with open(raw_log_path(exec_dir, date), "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
 def verify(date=None, account=None, path=None, fetch_fn=None, recheck=False):
@@ -266,7 +362,7 @@ def verify(date=None, account=None, path=None, fetch_fn=None, recheck=False):
     results = []
     with _locked(p):
         actions = load_all(p)
-        cache = {}
+        cache, archived, ed = {}, set(), exec_dir_for(p)
         for rec in actions:
             if (date and rec["date"] != date) or (account and rec["account"] != account):
                 continue
@@ -285,6 +381,7 @@ def verify(date=None, account=None, path=None, fetch_fn=None, recheck=False):
                 continue
             env_acct = (env or {}).get("accountNo") if isinstance(env, dict) else None
             rows = (env or {}).get("data") if isinstance(env, dict) else None
+            pages = (env or {}).get("_pages", 1) if isinstance(env, dict) else 1
             ver = {"verified_at": _now_iso(), "method": "dnse_api.order_history",
                    "envelope_account_no": str(env_acct) if env_acct is not None else None}
             if env_acct is None or _norm_acct(env_acct) != _norm_acct(rec["account_no"]):
@@ -297,12 +394,17 @@ def verify(date=None, account=None, path=None, fetch_fn=None, recheck=False):
                        and str(o.get("id")) == str(rec["broker_order_id"])]
                 if len(hit) != 1:
                     ver.update(status="REJECTED",
-                               reason=f"order-history {rec['date']} có {len(hit)} lệnh id "
+                               reason=f"order-history {rec['date']} (đã đọc {pages} trang, "
+                                      f"{len(rows)} lệnh) có {len(hit)} lệnh id "
                                       f"{rec['broker_order_id']} (cần đúng 1)")
                 else:
+                    if (rec["account_no"], rec["date"]) not in archived:
+                        _archive_raw(ed, rec["account"], rec["date"], env)
+                        archived.add((rec["account_no"], rec["date"]))
                     ver["broker_order"] = hit[0]
                     ver["status"] = "VERIFIED"
-                    ok, why = evidence_check(dict(rec, verification=ver), rec["account_no"])
+                    ver["pages_read"] = pages
+                    ok, why = evidence_check(dict(rec, verification=ver), rec["account_no"], ed)
                     if not ok:
                         ver.pop("broker_order")
                         ver.update(status="REJECTED", reason=why, broker_order_seen=hit[0])
@@ -313,10 +415,13 @@ def verify(date=None, account=None, path=None, fetch_fn=None, recheck=False):
 
 
 # ── hiển thị ─────────────────────────────────────────────────────────────────────────────────
-def _fmt(rec):
+def _fmt(rec, evidence_ok=None):
+    """`evidence_ok`: kết quả evidence_check nếu caller đã có — "✅ broker xác nhận" chỉ in khi bằng
+    chứng THỰC SỰ qua cổng, không chỉ vì status=VERIFIED trong file."""
     v = rec["verification"]
     st = v.get("status")
-    tag = "✅ broker xác nhận" if st == "VERIFIED" else f"⛔ {st}: {v.get('reason', 'chưa verify')}"
+    good = (st == "VERIFIED") if evidence_ok is None else evidence_ok
+    tag = "✅ broker xác nhận" if good else f"⛔ {st}: {v.get('reason', 'chưa verify')}"
     return (f"{rec['date']} {rec['time_ict'][:5]} {rec['account']} "
             f"{'MUA' if rec['side'] == 'buy' else 'BÁN'} {rec['ticker']} {rec['qty']:,}cp "
             f"@{rec['price']:,.0f} (lệnh {rec['broker_order_id']}) — {tag}")
@@ -327,16 +432,21 @@ def report_lines(account_label, account_no, date, path=None):
     recs = [r for r in load_all(path) if r["account"] == account_label and r["date"] == date]
     if not recs:
         return []
+    ed = exec_dir_for(path)
+    chk = [(r,) + evidence_check(r, account_no, ed) for r in recs]
+    n_ok = sum(1 for _r, ok, _w in chk if ok)
+    # Tiêu đề "(đã xác nhận broker)" chỉ khi có ÍT NHẤT 1 dòng qua cổng — toàn UNVERIFIED thì không
+    # được nói "đã xác nhận" (báo cáo gửi nhà đầu tư).
     out = ["ℹ️ **Lệnh tay đã khai (đã xác nhận broker)** — user chủ động đặt ngoài plan, "
-           "không phải sự cố:"]
-    for r in recs:
-        ok, why = evidence_check(r, account_no)
-        out.append(f"  • {_fmt(r)}" if ok else
-                   f"  • ⚠️ {_fmt(r)} — CHƯA được cổng KL chấp nhận ({why})")
+           "không phải sự cố:" if n_ok else
+           "⚠️ **Lệnh tay đã khai nhưng CHƯA có dòng nào được broker xác nhận** — chưa được cổng KL chấp nhận:"]
+    for r, ok, why in chk:
+        out.append(f"  • {_fmt(r, True)}" if ok else
+                   f"  • ⚠️ {_fmt(r, False)} — CHƯA được cổng KL chấp nhận ({why})")
     return out
 
 
-def prompt_note(account_label, date, path=None):
+def prompt_note(account_label, date, path=None, account_no=None):
     """Khối chèn prompt DollarBill: khai của `date` + phiên trước đó. Rỗng ⇒ ''."""
     if WC_ROOT not in sys.path:
         sys.path.insert(0, WC_ROOT)
@@ -345,11 +455,12 @@ def prompt_note(account_label, date, path=None):
     while d.weekday() >= 5 or is_holiday(d):
         d -= dt.timedelta(days=1)
     lo = d.isoformat()
-    acct_no = account_no_for(account_label)
+    acct_no = account_no or account_no_for(account_label)
+    ed = exec_dir_for(path)
     recs = [r for r in load_all(path) if r["account"] == account_label and lo <= r["date"] <= date]
     if not recs:
         return ""
-    ok = [r for r in recs if evidence_check(r, acct_no)[0]]
+    ok = [r for r in recs if evidence_check(r, acct_no, ed)[0]]
     bad = [r for r in recs if r not in ok]
     s = " LỆNH TAY ĐÃ KHAI HÔM NAY/PHIÊN GẦN NHẤT (data/user_manual_actions.json): "
     if ok:
