@@ -27,7 +27,7 @@
 - SELL DRI: **SpaceX 1.250cp (→1.250), ZaloPay 650cp (→650)**; bán discretionary của user (không phải auto-exit); vào plan nháp, user duyệt plan như thường. User đã bán tay trước ⇒ dùng KL broker thật. Chi tiết: `kb/projects/dri-triggers-20261027.md`.
 
 ## LAG — SCL THOÁI HẾT + CẢNH BÁO TĂNG VỐN (`decided_by: user`, 29/10 14:2x ICT) — AGENT KHÔNG HỎI LẠI
-- **SCL: THOÁI toàn bộ cả 2 TK** (KL broker thật) qua **DollarBill đưa SELL vào plan T+1 30/10** (như DRI; user duyệt plan; không chờ T+25/ex-date; không cần mua quyền). Căn cứ DD NON + phải mua CP phát hành thêm: `kb/projects/scl-dd-20261029.md`. User bán tay sớm ⇒ báo Mike KL.
+- **SCL: THOÁI toàn bộ cả 2 TK** (KL broker thật) qua **DollarBill đưa SELL vào plan T+1 30/10** (như DRI; không chờ T+25/ex-date). Căn cứ: `kb/projects/scl-dd-20261029.md`. Đã bán tay 29/10: SpaceX 800cp @29.600; còn SpaceX 300 + ZaloPay 700 (lô 28/10 bán được chiều 30/10).
 - **LUẬT MỚI**: BẤT KỲ tăng vốn nào (quyền mua, riêng lẻ/công chúng, ESOP, TPCĐ; cổ tức/thưởng CP = INFO) trong chu kỳ đầu tư của mã ⇒ **WARNING user** (không tự bán). Taylor dựng + arch-review; merge cần user. Luật 21/10 (mã LAG có quyền mua: KHÔNG bán trước ex-date, user tự mua đủ; lô quyền kế thừa entry gốc `771daf4ea`) GIỮ cho mã LAG KHÁC — SCL là ngoại lệ. Bản 21/10 của SCL: `kb/projects/scl-dd-research-20261021.md`.
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
