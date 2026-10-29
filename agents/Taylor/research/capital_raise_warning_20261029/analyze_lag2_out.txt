@@ -1,0 +1,35 @@
+ISS public_date≥2025 (bỏ not_executed): 1030; bỏ objid bulk 2024-10-11: 955
+cls   m     
+INFO  Bonus     160
+      DIV       332
+WARN  EMPL      164
+      MERGER      7
+      PP        182
+      PUBL        6
+      Rights    166
+      TRANS      13
+
+(1) vendor tạo record − public_date  [âm = vendor có record TRƯỚC ngày công bố ghi trên dòng]
+  INFO n= 471 p10=  -125 med=  -36 p90=     2
+  WARN n= 484 p10=  -210 med=  -21 p90=     6
+(2) vendor tạo record − first_disclosure
+  INFO n= 421 p10=  -130 med=  -29 p90=    14
+  WARN n= 288 p10=  -203 med=  -64 p90=    60
+(3) GDKHQ − vendor tạo record  [= số ngày cảnh báo tối đa nếu BQ thấy ngay]
+  INFO Bonus   n= 139 p10=    25 med=   50 p90=   157  ex NULL 13
+  INFO DIV     n= 276 p10=    28 med=   64 p90=   160  ex NULL 43
+  WARN EMPL    n=  88 p10=    40 med=  110 p90=   213  ex NULL 58
+  WARN MERGER  n=   4 p10=    19 med=  108 p90=   120  ex NULL 3
+  WARN PP      n=  71 p10=    -4 med=  132 p90=   266  ex NULL 92
+  WARN PUBL    n=   6 p10=   -34 med=  -29 p90=   -16  ex NULL 0
+  WARN Rights  n=  77 p10=    16 med=  157 p90=   228  ex NULL 72
+  WARN TRANS   n=  12 p10=    -9 med=   -6 p90=     2  ex NULL 1
+(4) GDKHQ − public_date
+  INFO n= 415 p10=     5 med=    8 p90=    34
+  WARN n= 258 p10=    -7 med=   -1 p90=    48
+(5) record vendor tạo ĐÚNG/SAU GDKHQ: 40/673 có ex (6%); theo cls: {'INFO': 6, 'WARN': 34}
+(6) BQ của ta thấy (snapshot) − vendor tạo, chỉ record tạo sau 2026-08-17 (không censor):
+  INFO n=  11 p10=     1 med=    1 p90=     3
+  WARN n=  19 p10=     1 med=    1 p90=     2
+  ALL n=  30 p10=     1 med=    1 p90=     2
+(7) WARN 2025-26 có ex NULL (dòng P chưa ngày) theo phương thức: {'EMPL': 58, 'MERGER': 3, 'PP': 92, 'Rights': 72, 'TRANS': 1}

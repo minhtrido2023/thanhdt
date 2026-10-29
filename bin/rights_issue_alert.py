@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Cảnh báo QUYỀN MUA (rights issue) cho mã ĐANG GIỮ — CHỈ CẢNH BÁO, không chạm lệnh/NAV/sizing.
+"""Cảnh báo TĂNG VỐN (quyền mua + MỌI phương thức phát hành) cho mã ĐANG GIỮ — CHỈ CẢNH BÁO, không chạm
+lệnh/NAV/sizing/plan.
+
+Mở rộng 29/10/2026 (user: "nên đưa warning khi có bất kỳ việc tăng vốn nào xuất hiện trong chu kỳ đầu tư";
+REPORT agents/Taylor/research/capital_raise_warning_20261029/): ngoài Rights nay báo cả WARN (riêng lẻ,
+công chúng, ESOP, chuyển đổi, sáp nhập) và INFO (cổ tức CP, thưởng) — phân loại ở bin/capital_raise_lib.py.
+Mỗi tin có % pha loãng, giá phát hành so thị giá (giá trong active_nav), khoảng cách tới ngày chốt.
+Khoá dedupe GIỮ NGUYÊN định dạng cũ (state cũ vẫn hợp lệ); REMIND chỉ cho Rights (cần user hành động).
 
 Vì sao có file này (audit 2026-10-22, agents/Taylor/research/lag_rights_audit_20261022/REPORT.md):
 `corp_action_daily.upcoming_events` chỉ thấy sự kiện khi vendor đã điền `exright_date` và nằm
@@ -50,15 +57,19 @@ for _p in (WC_ROOT, HERE):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+from capital_raise_lib import (METHOD_VI, STALE_P_DAYS, dilution, is_stale_p, is_zombie_p,  # noqa: E402,F401
+                               issue_price, live_events, severity)
+
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 REMIND_SESSIONS = 3
-STALE_P_DAYS = 183                       # dòng P/NULL cũ hơn ngần này ngày ⇒ "nghi bỏ dở" (B1)
 TRADING_DAILY_THREAD = "trading_daily"   # tên trong kb/discord_channels.json (notify_thread.sh nhận TÊN)
 STATE_PATH = os.environ.get("MIKE_RIGHTS_ALERT_STATE") or os.path.join(MIKE, "state", "rights_issue_alert_state.json")
 ACTIVE_NAV_GLOB = os.environ.get("MIKE_RIGHTS_ALERT_NAV_GLOB") or os.path.join(
     WC_ROOT, "data", "execution_logs", "active_nav_*.json")
 NO_DEADLINE = ("hạn đăng ký/nộp tiền: tav2_bq.corporate_action KHÔNG có cột này — tra thông báo "
                "VSDC/công ty hoặc DNSE")
+NO_PURPOSE = ("mục đích sử dụng vốn: nguồn KHÔNG có (event_description_vi rỗng ở 100% dòng ISS 2025-26) — "
+              "đọc NQ ĐHCĐ/phương án phát hành")
 
 
 def sessions_until(asof, ex, is_holiday):
@@ -72,18 +83,6 @@ def sessions_until(asof, ex, is_holiday):
     return n
 
 
-def issue_price(r):
-    """Giá phát hành: value_per_share nếu vendor điền, else total_value/issue_volumn; không có ⇒ None."""
-    try:
-        v = float(r.get("value_per_share") or 0)
-        if v > 0:
-            return v
-        tv, vol = float(r.get("total_value") or 0), float(r.get("issue_volumn") or 0)
-        return tv / vol if tv > 0 and vol > 0 else None
-    except (TypeError, ValueError):
-        return None
-
-
 def prev_session(asof, is_holiday):
     """Phiên giao dịch liền TRƯỚC `asof` (ISO) — mốc tươi tối thiểu của file vị thế."""
     d = dt.date.fromisoformat(asof)
@@ -91,34 +90,6 @@ def prev_session(asof, is_holiday):
         d -= dt.timedelta(days=1)
         if d.weekday() < 5 and not is_holiday(d):
             return d.isoformat()
-
-
-def _same_ratio(a, b):
-    try:
-        return abs(float(a.get("exercise_ratio") or 0) - float(b.get("exercise_ratio") or 0)) < 1e-6
-    except (TypeError, ValueError):
-        return False
-
-
-def is_zombie_p(r, rows, asof):
-    """Dòng P/NULL đã được dòng D cùng mã + cùng tỉ lệ (GDKHQ ≤ asof, sau public_date của P) thay thế."""
-    if r.get("issue_status_code") != "P" or r.get("exright_date"):
-        return False
-    pub = (r.get("public_date") or "")[:10]
-    for o in rows:
-        ex = o.get("exright_date")
-        if o is not r and o.get("ticker") == r["ticker"] and o.get("issue_status_code") == "D" \
-                and ex and ex <= asof and ex > pub and _same_ratio(o, r):
-            return True
-    return False
-
-
-def is_stale_p(r, asof):
-    """Dòng P/NULL công bố cũ hơn STALE_P_DAYS ⇒ nghi bỏ dở, không phải sự kiện sống."""
-    pub = (r.get("public_date") or "")[:10]
-    if r.get("issue_status_code") != "P" or r.get("exright_date") or not pub:
-        return False
-    return (dt.date.fromisoformat(asof) - dt.date.fromisoformat(pub)).days > STALE_P_DAYS
 
 
 def position_health(asof, meta, labels, is_holiday):
@@ -135,78 +106,117 @@ def position_health(asof, meta, labels, is_holiday):
     return notes
 
 
-def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=()):
-    """positions: {account: {ticker: qty}}; rows: dòng Rights; sent: set khoá đã gửi.
+def sessions_to(asof, d, is_holiday):
+    """Số phiên giao dịch trong (asof, d] — khoảng cách tới ngày chốt."""
+    cur, n, end = dt.date.fromisoformat(asof), 0, dt.date.fromisoformat(d)
+    while cur < end:
+        cur += dt.timedelta(days=1)
+        if cur.weekday() < 5 and not is_holiday(cur):
+            n += 1
+    return n
 
-    meta: {account: {file, computed_at, stale}} · pos_notes: lý do vị thế có thể cũ (position_health).
+
+def _price_line(r, tk, prices):
+    """Giá phát hành so thị giá (giá trong active_nav — DNSE G1 lúc tính NAV)."""
+    px, mkt = issue_price(r), (prices or {}).get(tk)
+    if not px:
+        return "giá phát hành: CHƯA CÓ (BQ chưa điền)"
+    if mkt:
+        return f"giá phát hành: {px:,.0f}đ = {px / mkt:.0%} thị giá {mkt:,.0f}đ (giá active_nav)"
+    return f"giá phát hành: {px:,.0f}đ (không có thị giá để so)"
+
+
+def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=(), prices=None, oshares=None):
+    """positions: {account: {ticker: qty}}; rows: dòng ISS (mọi phương thức); sent: set khoá đã gửi.
+
+    meta: {account: {file, computed_at, stale}} · pos_notes: lý do vị thế có thể cũ (position_health) ·
+    prices: {ticker: thị giá} · oshares: {ticker: CP lưu hành} (để tính % khi exercise_ratio = 0).
     Trả list {keys, stage, text}. Thuần — selfcheck gọi thẳng.
     """
     out, stale_rows, meta = [], [], meta or {}
-    for r in rows:
-        if r.get("issue_method_code") != "Rights" or r.get("issue_status_code") == "N" \
-                or r.get("event_status") == "not_executed":
-            continue
-        tk, ex = r["ticker"], (r.get("exright_date") or None)
-        if (r.get("public_date") or "")[:10] > asof:
-            continue                          # chưa công bố tại asof (chạy hồi cứu) — không nhìn trước
-        if ex and ex <= asof:
-            continue                          # đã GDKHQ — hết thời điểm hành động
-        if is_zombie_p(r, rows, asof):
-            continue                          # sự kiện đã thực hiện (dòng D), dòng P là xác sống (B1)
+    held = {t for p in positions.values() for t, q in p.items() if q > 0}
+    live, stale = live_events([r for r in rows if r.get("ticker") in held], asof)
+    for r in stale:
+        if f"{r['id']}|stale" not in sent:
+            stale_rows.append(r)
+    for r in live:
+        tk, ex, meth = r["ticker"], (r.get("exright_date") or None), r.get("issue_method_code")
+        rights, sev = meth == "Rights", severity(r)
         holders = [(lb, p[tk]) for lb, p in sorted(positions.items()) if p.get(tk, 0) > 0]
-        if not holders:
-            continue
-        if is_stale_p(r, asof):
-            if f"{r['id']}|stale" not in sent:
-                stale_rows.append(r)
-            continue
         stages = [("ANNOUNCE", f"{r['id']}|announce")]
         if ex:
             stages.append(("DATED", f"{r['id']}|dated|{ex}"))
             left = sessions_until(asof, ex, is_holiday)
-            if left <= REMIND_SESSIONS:
+            if rights and left <= REMIND_SESSIONS:
                 stages.append(("REMIND", f"{r['id']}|remind|{ex}|{asof}"))
         todo = [(s, k) for s, k in stages if k not in sent]
         if not todo:
             continue
         stage = todo[-1][0]                   # 1 tin/ sự kiện/ lượt: giai đoạn muộn nhất bao trùm
         ratio = float(r.get("exercise_ratio") or 0)
-        px = issue_price(r)
-        lines = [f"{'⏰' if stage == 'REMIND' else '📣'} **{tk}** QUYỀN MUA ({stage}) — tỉ lệ "
-                 f"{ratio:.2%} (CP mới / CP đang giữ), trạng thái `{r.get('issue_status_code') or '?'}`, "
+        dil = dilution(r, (oshares or {}).get(tk))
+        dil_s = f"pha loãng {dil:.2%} số CP" if dil is not None else "pha loãng CHƯA RÕ (BQ chưa có tỉ lệ/khối lượng)"
+        icon = "⏰" if stage == "REMIND" else ("📣" if sev == "WARN" else "ℹ️")
+        kind = ("QUYỀN MUA" if rights else
+                f"TĂNG VỐN {METHOD_VI.get(meth, meth)}" + (" — thu tiền/pha loãng" if sev == "WARN"
+                                                           else " — KHÔNG thu tiền"))
+        lines = [f"{icon} **{tk}** {kind} ({sev} · {stage}) — "
+                 + (f"tỉ lệ {ratio:.2%} (CP mới / CP đang giữ), " if rights else "")
+                 + f"{dil_s}, trạng thái `{r.get('issue_status_code') or '?'}`, "
                  f"công bố {(r.get('public_date') or '?')[:10]}"]
+        rec = r.get("record_date")
+        rec_s = f"{rec} (còn {sessions_to(asof, rec, is_holiday)} phiên)" if rec and rec > asof else (rec or "CHƯA CÓ")
         if ex:
-            lines.append(f"  GDKHQ {ex} (còn {sessions_until(asof, ex, is_holiday)} phiên cum), "
-                         f"ngày chốt {r.get('record_date') or 'CHƯA CÓ'}")
+            lines.append(f"  GDKHQ {ex} (còn {sessions_until(asof, ex, is_holiday)} phiên cum), ngày chốt {rec_s}")
         else:
             lines.append("  CHƯA CÓ ngày GDKHQ/chốt (vendor chưa điền) — sẽ báo lại khi có ngày")
-        lines.append(f"  giá phát hành: {f'{px:,.0f}đ' if px else 'CHƯA CÓ (BQ chưa điền)'}; {NO_DEADLINE}")
+        lines.append(f"  {_price_line(r, tk, prices)}" + (f"; {NO_DEADLINE}" if rights else ""))
+        if sev == "WARN":
+            lines.append(f"  {NO_PURPOSE}")
         for lb, q in holders:
-            n = math.floor(q * ratio + 1e-9)
-            cash = f"{n * px:,.0f}đ" if px else "chưa tính được (chưa có giá)"
             m = meta.get(lb) or {}
             src = f" [nguồn {m.get('file') or 'active_nav'} computed_at={m.get('computed_at') or '?'}" \
                   f"{' ⚠️ CŨ' if m.get('stale') else ''}]"
-            lines.append(f"  {lb}: giữ {q:,} cp ⇒ được mua {n:,} cp, tiền cần chuẩn bị {cash}{src}")
+            if rights:
+                n = math.floor(q * ratio + 1e-9)
+                px = issue_price(r)
+                cash = f"{n * px:,.0f}đ" if px else "chưa tính được (chưa có giá)"
+                lines.append(f"  {lb}: giữ {q:,} cp ⇒ được mua {n:,} cp, tiền cần chuẩn bị {cash}{src}")
+            else:
+                lines.append(f"  {lb}: giữ {q:,} cp{src}")
         if pos_notes:
             lines.append("  ⚠️ VỊ THẾ CÓ THỂ CŨ — tự kiểm trên DNSE (" + "; ".join(pos_notes) + ")")
-        # X1 (lag_rights_exit_hold.py) đã merge 22/10: auto-exit TỰ giữ lệnh thoát LAG tới GDKHQ.
-        lines.append("  Bot TỰ giữ lệnh thoát T+25 của mã LAG tới GDKHQ (nếu là mã LAG; mã non-LAG không bị giữ); "
-                     "quyền mua CHƯA có ngày thì bot vẫn giữ và đòi anh quyết hold/sell "
-                     "(lag_rights_exit_hold.py --record). User TỰ thực hiện quyền đầy đủ (bot không "
-                     "mua/chuyển nhượng quyền). Sau khi nộp tiền NAV có thể chặn rc=5/6 — xử lý theo tiền "
-                     "lệ MBB 08-28 (REPORT lag_rights_audit_20261022).")
+        if rights:
+            # X1 (lag_rights_exit_hold.py) đã merge 22/10: auto-exit TỰ giữ lệnh thoát LAG tới GDKHQ.
+            lines.append("  Bot TỰ giữ lệnh thoát T+25 của mã LAG tới GDKHQ (nếu là mã LAG; mã non-LAG không bị giữ); "
+                         "quyền mua CHƯA có ngày thì bot vẫn giữ và đòi anh quyết hold/sell "
+                         "(lag_rights_exit_hold.py --record). Việc giữ này KHÔNG cấm thoái: user vẫn có thể "
+                         "thoái bằng plan (SCL là ngoại lệ — user chốt thoát 29/10/2026). User TỰ thực hiện quyền "
+                         "đầy đủ (bot không mua/chuyển nhượng quyền). Sau khi nộp tiền NAV có thể chặn rc=5/6 — "
+                         "xử lý theo tiền lệ MBB 08-28 (REPORT lag_rights_audit_20261022).")
+        elif sev == "WARN":
+            lines.append("  CHỈ CẢNH BÁO: bot KHÔNG tự bán/không sửa plan — user quyết giữ hay thoái (bằng plan).")
+        else:
+            lines.append("  Giá sẽ điều chỉnh tại GDKHQ qua luồng corp-action sẵn có; không cần hành động.")
         out.append({"keys": [k for _, k in todo], "stage": stage, "text": "\n".join(lines)})
     if stale_rows:
-        items = "; ".join(f"{r['ticker']} (công bố {(r.get('public_date') or '?')[:10]}, tỉ lệ "
+        items = "; ".join(f"{r['ticker']} {METHOD_VI.get(r.get('issue_method_code'), r.get('issue_method_code'))} "
+                          f"(công bố {(r.get('public_date') or '?')[:10]}, tỉ lệ "
                           f"{float(r.get('exercise_ratio') or 0):.2%})" for r in stale_rows)
         out.append({"keys": [f"{r['id']}|stale" for r in stale_rows], "stage": "STALE",
-                    "text": f"🔸 Quyền mua nghi BỎ DỞ — dòng `P` không ngày, công bố > {STALE_P_DAYS} ngày, "
+                    "text": f"🔸 Tăng vốn nghi BỎ DỞ — dòng `P` không ngày, công bố > {STALE_P_DAYS} ngày, "
                             f"KHÔNG báo như sự kiện sống; kiểm VSDC/công ty nếu cần: {items}"})
     return out
 
 
 def fetch_rights(tickers):
+    """CHỈ dòng Rights — HỢP ĐỒNG với lag_rights_exit_hold.py / daily_nav_snapshot.py / rights_subscription.py
+    (họ coi mọi dòng trả về là quyền mua). KHÔNG mở rộng hàm này; cảnh báo tăng vốn dùng fetch_issuance."""
+    return [r for r in fetch_issuance(tickers) if r.get("issue_method_code") == "Rights"]
+
+
+def fetch_issuance(tickers):
+    """Mọi dòng phát hành CP (event_code ISS, mọi phương thức) của các mã — nguồn của cảnh báo tăng vốn."""
     from corp_action_lib import TABLE, bq
     tk = ",".join(f'"{t}"' for t in sorted(tickers))
     return bq(f"""
@@ -215,12 +225,23 @@ def fetch_rights(tickers):
                CAST(c.public_date AS STRING) public_date, c.exercise_ratio, c.value_per_share,
                c.total_value, c.issue_volumn
         FROM `{TABLE}` AS c
-        WHERE c.ticker IN ({tk}) AND c.event_code = "ISS" AND c.issue_method_code = "Rights"
+        WHERE c.ticker IN ({tk}) AND c.event_code = "ISS"
         ORDER BY c.ticker, c.public_date""")
 
 
-def read_positions(nav_glob=ACTIVE_NAV_GLOB):
-    """-> ({account: {ticker: qty}}, {account: {file, computed_at}})."""
+def fetch_oshares(tickers):
+    """{ticker: OShares quý mới nhất} từ tav2_bq.ticker_financial (chỉ để tính % khi exercise_ratio = 0)."""
+    from corp_action_lib import TABLE, bq
+    tk = ",".join(f'"{t}"' for t in sorted(tickers))
+    fin = TABLE.rsplit(".", 1)[0] + ".ticker_financial"
+    rows = bq(f"""
+        SELECT f.ticker, ARRAY_AGG(f.OShares ORDER BY f.time DESC LIMIT 1)[OFFSET(0)] oshares
+        FROM `{fin}` AS f WHERE f.ticker IN ({tk}) AND f.OShares > 0 GROUP BY f.ticker""")
+    return {r["ticker"]: float(r["oshares"]) for r in rows}
+
+
+def read_positions(nav_glob=ACTIVE_NAV_GLOB, prices=None):
+    """-> ({account: {ticker: qty}}, {account: {file, computed_at}}); `prices` (dict) nếu truyền ⇒ điền thị giá."""
     out, meta = {}, {}
     for path in sorted(glob.glob(nav_glob)):
         with open(path) as fh:
@@ -228,6 +249,9 @@ def read_positions(nav_glob=ACTIVE_NAV_GLOB):
         lb = d.get("account") or os.path.basename(path)
         out[lb] = {p["ticker"]: int(p.get("qty") or 0) for p in d.get("positions") or [] if p.get("ticker")}
         meta[lb] = {"file": os.path.basename(path), "computed_at": d.get("computed_at")}
+        if prices is not None:
+            prices.update({p["ticker"]: float(p["price"]) for p in d.get("positions") or []
+                           if p.get("ticker") and (p.get("price") or 0) > 0})
     return out, meta
 
 
@@ -259,7 +283,8 @@ def main():
     ap.add_argument("--nav-glob", default=ACTIVE_NAV_GLOB)
     a = ap.parse_args()
     from trading_bot.vn_market import is_holiday
-    pos, meta = read_positions(a.nav_glob)
+    prices = {}
+    pos, meta = read_positions(a.nav_glob, prices)
     if not pos:
         print(f"❌ không tìm thấy file vị thế nào khớp {a.nav_glob} — không kết luận được 'không giữ mã nào'")
         return 2
@@ -276,11 +301,16 @@ def main():
     if not tickers:
         print("không có vị thế nào trong active_nav_*.json")
         return stale_rc
-    rows = fetch_rights(tickers)
+    rows = fetch_issuance(tickers)
+    try:
+        oshares = fetch_oshares(tickers)
+    except Exception as e:                    # chỉ ảnh hưởng % pha loãng khi exercise_ratio = 0 — tin ghi "CHƯA RÕ"
+        oshares = {}
+        print(f"⚠️ không đọc được OShares (ticker_financial): {e!r} — % pha loãng chỉ từ exercise_ratio")
     sent = _load_sent(a.state) if a.send else set()
-    alerts = build_alerts(a.asof, pos, rows, sent, is_holiday, meta, notes)
+    alerts = build_alerts(a.asof, pos, rows, sent, is_holiday, meta, notes, prices, oshares)
     if not alerts:
-        print(f"[{a.asof}] không có quyền mua nào cần báo cho {len(tickers)} mã đang giữ")
+        print(f"[{a.asof}] không có sự kiện tăng vốn nào cần báo cho {len(tickers)} mã đang giữ")
     notify = shlex.split(os.environ.get("MIKE_RIGHTS_ALERT_NOTIFY") or os.path.join(MIKE, "bin", "notify_thread.sh"))
     for al in alerts:
         print(al["text"])

@@ -74,6 +74,7 @@ def sources(fin=None, dd=None, val=None, rating=None, forensic=None):
         "rating": (lambda t, a, r: rating) if not callable(rating) else rating,
         "forensic": (lambda t, a: forensic) if not callable(forensic) else forensic,
         "bank": lambda t: {"note": "fake"},
+        "capraise": lambda t, a: [],
         "macro": lambda p: {"path": p, "status": "fake"},
     }
 
@@ -106,6 +107,27 @@ def run_inner():
         p = B()
         ck("bằng chứng sạch ⇒ CLEARED, 0 cờ", p["status"] == "CLEARED" and p["flags"] == [], codes(p))
         ck("release lấy từ Release_Date dòng mới nhất", p["release_date"] == "2026-10-19", p["release_date"])
+
+        # 1b. tăng vốn (29/10, capital_raise_lib) — SCL quyền mua P 15,38% (thật) ⇒ cờ; lỗi nguồn ⇒ _NA
+        scl_p = {"id": "6a0516165b1fb4c98c3ab2a2", "ticker": "AAA", "issue_method_code": "Rights",
+                 "issue_status_code": "P", "event_status": "announced", "exright_date": None, "record_date": None,
+                 "public_date": "2026-09-08", "exercise_ratio": 0.15384615, "value_per_share": None,
+                 "total_value": 0.0, "issue_volumn": 0}
+        Bc = lambda iss, **kw: P.build_pack("AAA", "2026-10-21", cand={"entry_date": "2026-10-26"},  # noqa: E731
+                                            sources=dict(sources(**dict(GOOD, **kw)), capraise=iss))
+        p = Bc(lambda t, a: [scl_p])
+        ck("tăng vốn đang chạy ⇒ FLAG CAPITAL_RAISE_PENDING (bằng chứng có 15.38%)",
+           p["status"] == "FLAG" and codes(p) == ["CAPITAL_RAISE_PENDING"] and "15.38%" in p["flags"][0]["evidence"], codes(p))
+        p = Bc(boom)
+        ck("nguồn phát hành lỗi ⇒ CAPITAL_RAISE_NA + lỗi thật trong source_errors (§29)",
+           codes(p) == ["CAPITAL_RAISE_NA"] and "nguồn hỏng giả" in p["source_errors"].get("capital_raise", ""), (codes(p), p["source_errors"]))
+        p = Bc(lambda t, a: [dict(scl_p, issue_method_code="DIV", exercise_ratio=0.15)])
+        ck("cổ tức CP sắp tới ⇒ vẫn CLEARED, chỉ warnings CAPITAL_RAISE_INFO",
+           p["status"] == "CLEARED" and any(w["code"] == "CAPITAL_RAISE_INFO" for w in p["warnings"]), (codes(p), p["warnings"]))
+        os_rows = [dict(r, OShares=v) for r, v in zip(fin_rows(), (38_836_815, 37e6, 32e6, 24e6, 22_392_839))]
+        p = Bc(lambda t, a: [scl_p], fin=os_rows)
+        ck("cờ tăng vốn kèm số CP lưu hành 4 quý +73.4% (OShares P0/P4)",
+           any("+73.4%" in f["evidence"] for f in p["flags"] if f["code"] == "CAPITAL_RAISE_PENDING"), p["flags"])
 
         # 2. fail-closed: mỗi nguồn hỏng ⇒ cờ *_NA ⇒ FLAG
         cases = [
@@ -570,6 +592,11 @@ def run_inner():
 
 # ── mutants: mỗi cái PHẢI làm selfcheck đỏ ─────────────────────────────────────────────────────
 MUTANTS = [
+    # tăng vốn (29/10)
+    ("lag_dd_pack.py", '        flags.append(_f("CAPITAL_RAISE_NA", errors.get("capital_raise")))', "        pass"),
+    ("lag_dd_pack.py", "        flags += cr_flags\n", ""),
+    ("lag_dd_pack.py", '        "warnings": soft_warnings(ev) + cr_warn,', '        "warnings": soft_warnings(ev),'),
+    ("lag_dd_pack.py", "    g12 = os_[0] / os_[4] - 1 if len(os_) == 5 and os_[0] and os_[4] else None", "    g12 = None"),
     # DCF RICH sâu/nhẹ (user chốt 24/10, arch-review: mutant NaN từng sống sót)
     ("lag_dd_pack.py", "    return mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0",
      "    return mos is not None and mos < DCF_RICH_DEEP_MOS"),
@@ -647,7 +674,7 @@ def run_mutants():
         td = tempfile.mkdtemp()
         try:
             for f in ("lag_dd_pack.py", "lag_dd_ack.py", "lag_plan_consistency_check.py", "wc_paths.py",
-                      os.path.basename(__file__)):
+                      "capital_raise_lib.py", os.path.basename(__file__)):
                 shutil.copy(os.path.join(HERE, f), td)
             src = open(os.path.join(td, fn)).read()
             if src.count(old) != 1:
