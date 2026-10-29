@@ -1620,3 +1620,9 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-27T10:15:27Z] [dri-val r3 27/10] XONG job Taylor_20261027_100801 @ad45d904e: FV tam 10,5-14,5k theo 4 mid, 14.700 cao hon 1-40%; vung mua day chi <=9.000; CHO Mike goi skeptic
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-27T12:46:05Z] [dri-val r4 27/10] XONG job Taylor_20261027_123420 @a851b95c5: tam PREREG sup (TB 1,4k @1,97) do chi phi co dinh+KH dem 2 lan; POST-HOC TB 9,1-10,1k, nguong 15% ~7,9-8,8k; CHO Mike goi skeptic; can co cau gia thanh/du an 4.081 ha
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T05:24:53Z] [dd-TV2 10-28] XONG job Taylor_20261028_051709: NON @26.050, FV ky vong ~22,9k, vung <=19,5k; research/dd_TV2_20261028/ (chua commit) — CHO Mike goi fundamental-skeptic; CHAM lai khi BCTC Q4/26 (phai thu CMC 666 ty)
