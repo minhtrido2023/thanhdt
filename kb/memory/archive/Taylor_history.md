@@ -1617,3 +1617,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-27T09:42:35Z] [dri-val r2 27/10] XONG job Taylor_20261027_093047 @6b3c789c0: FV tam 12,5-13,9k (mid 1,97-2,075), 14.700 cao hon 6-18%; CHO Mike goi skeptic; mo: phi Lao 10% da trong thue chua, C_ref luoi cao hon GVHB/t do
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-27T10:15:27Z] [dri-val r3 27/10] XONG job Taylor_20261027_100801 @ad45d904e: FV tam 10,5-14,5k theo 4 mid, 14.700 cao hon 1-40%; vung mua day chi <=9.000; CHO Mike goi skeptic

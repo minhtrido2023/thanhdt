@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-27T10:15:27Z] [dri-val r3 27/10] XONG job Taylor_20261027_100801 @ad45d904e: FV tam 10,5-14,5k theo 4 mid, 14.700 cao hon 1-40%; vung mua day chi <=9.000; CHO Mike goi skeptic
 - [2026-10-27T12:46:05Z] [dri-val r4 27/10] XONG job Taylor_20261027_123420 @a851b95c5: tam PREREG sup (TB 1,4k @1,97) do chi phi co dinh+KH dem 2 lan; POST-HOC TB 9,1-10,1k, nguong 15% ~7,9-8,8k; CHO Mike goi skeptic; can co cau gia thanh/du an 4.081 ha
 - [2026-10-28T05:24:53Z] [dd-TV2 10-28] XONG job Taylor_20261028_051709: NON @26.050, FV ky vong ~22,9k, vung <=19,5k; research/dd_TV2_20261028/ (chua commit) — CHO Mike goi fundamental-skeptic; CHAM lai khi BCTC Q4/26 (phai thu CMC 666 ty)
 - [2026-10-28T16:40:14Z] [lot-exit 10-28] XONG @24dd0a250 nhanh session/lot-exit-20261028 (wt-lot-exit-20261028, chua merge) — CHO Mike arch-review + go SELL VPB 700 khoi plan ZaloPay 10-29, chen lai 282
@@ -26,3 +25,4 @@
 - [2026-10-29T05:37:11Z] [dgc-val r6 29/10] XONG job Taylor_20261029_053128: dai A 29.817 / B 34.695 (C 36.663 chi do nhay, D r5 40.302); cau noi KHONG dung duoc, bien r4; CHO Mike goi fundamental-skeptic; mo: du phong 200 (R1/R2), 48,23 LCTT = thanh ly TSCD
 - [2026-10-29T06:15:19Z] [scl-investor-report 29/10] XONG job Taylor_20261029_055834: research/dd_SCL_20261029/investor_report/ (md+pdf 14tr+html+figs, chua commit) — CHO Mike gui email/duyet
 - [2026-10-29T07:07:10Z] [dd-PVP 10-29] XONG job Taylor_20261029_065413: AMBIGUOUS @18.750 (san), FV 15,5-23k uoc luong, rerun <=15,5k; research/dd_PVP_20261029/ (chua commit) — CHO Mike goi fundamental-skeptic; moc: DHDCD bat thuong <=30/11 (gia mua Aframax #2)
+- [2026-10-29T07:34:08Z] [dd-PVP v2 29/10] XONG job Taylor_20261029_072547: NON @18.750, SOTP 22,4k (20,8k neu mua ca 2), san 14,9k/6,1k sau capex; research/dd_PVP_20261029/ (chua commit) — CHO Mike goi fundamental-skeptic; mo: FSO 415,8 chua hoa giai; moc DHDCD bat thuong <=30/11
