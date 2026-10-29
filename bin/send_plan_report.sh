@@ -39,11 +39,13 @@ NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 ACCOUNT="SpaceX"
 SECOND_CHANCE=0
 DRY_RUN=0
+PLAN_DATE_OVERRIDE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --account) ACCOUNT="$2"; shift 2 ;;
     --second-chance) SECOND_CHANCE=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
+    --plan-date) PLAN_DATE_OVERRIDE="$2"; shift 2 ;;   # gửi lại plan SAU nửa đêm (next_trading_day đã nhảy sang ngày kế): ép ngày plan kỳ vọng
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
@@ -58,6 +60,7 @@ from zoneinfo import ZoneInfo
 from trading_bot.vn_market import next_trading_day
 print(next_trading_day(dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()))  # §16: neo ICT, không dùng date.today() trần
 " 2>/dev/null)"
+[ -n "$PLAN_DATE_OVERRIDE" ] && EXPECTED_DATE="$PLAN_DATE_OVERRIDE"
 
 # Plan file mới nhất theo mtime (Bill ghi vào data/trade_plans/plan_<account>_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/trade_plans/plan_${ACCOUNT}_*.json 2>/dev/null | head -1)"
