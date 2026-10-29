@@ -1179,3 +1179,20 @@
 - [2026-10-29T14:45:08Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "SpaceX", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=1100 broker=300"}], "capped": []}
 - [2026-10-29T15:00:07Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=700 broker=200"}], "capped": []}
 - [2026-10-29T15:00:08Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "SpaceX", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=1100 broker=300"}], "capped": []}
+
+## Consolidation 2026-10-29T16:55:56Z
+- [2026-10-29T16:53:55Z] DollarBill/heartbeat — DollarBill_20261029_165344: {"status": "in_progress", "note": "bat dau dung lai plan SpaceX 10-30"}
+- [2026-10-29T16:53:58Z] DollarBill/heartbeat — DollarBill_20261029_165347: {"status": "in_progress", "note": "bắt đầu dựng lại plan ZaloPay 10-30"}
+- [2026-10-29T16:54:45Z] DollarBill/heartbeat — DollarBill_20261029_165344: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261029_165344", "source": "watcher"}
+- [2026-10-29T16:54:48Z] DollarBill/heartbeat — DollarBill_20261029_165347: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261029_165347", "source": "watcher"}
+- [2026-10-29T16:55:44Z] DollarBill/decision — plan-2026-10-30-SpaceX-replan: {"account": "SpaceX", "plan_date": "2026-10-30", "orders": 1, "action": "SELL SCL 300cp LAG exit (user decision 29/10), chieu 30/10 T+2", "buy_orders": 0, "egg_transfer": 0, "status": "cho user duyet", "backup": "plan_SpaceX_2026-10-30.bak_replan_20261029.json"}
+- [2026-10-29T16:55:45Z] DollarBill/heartbeat — DollarBill_20261029_165344: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261029_165344", "source": "watcher"}
+- [2026-10-29T16:55:48Z] DollarBill/heartbeat — DollarBill_20261029_165347: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261029_165347", "source": "watcher"}
+- [2026-10-29T16:55:52Z] DollarBill/decision — plan-ZaloPay-2026-10-30-replan: {"account": "ZaloPay", "plan_date": "2026-10-30", "orders": "SELL SCL 200cp LO 29.500 (thoái toàn bộ, user 29/10, chiều T+2)", "buy": "none", "dt5g": "NEUTRAL", "l1": "NO_TRIM", "status": "chờ user duyệt", "backup": "plan_ZaloPay_2026-10-30.bak_replan_20261029.json"}
+- [2026-10-29T16:46:35Z] Mike/answer — scl-ban-800cp-ngoai-plan-spacex-29-10: {"resolution": "Bán tay SCL 29/10 đã khai vào sổ lệnh tay (SpaceX 800cp lệnh 344271, ZaloPay 500cp lệnh 346911), broker xác nhận VERIFIED; cổng KL/NAV 29/10 thông rc=0 cả 2 TK; cơ chế merge master 5b03c10ae + fix b07687642.", "evidence": "data/user_manual_actions.json (2 dòng VERIFIED), kb/projects/manual-deviation-process-20261029.md, merge 5b03c10ae", "resolves": ["DollarBill/scl-ban-800cp-ngoai-plan-spacex-29-10"], "closed_by": "Mike"}
+- [2026-10-29T16:30:07Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "ZaloPay", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=700 broker=200"}], "capped": []}
+- [2026-10-29T16:30:08Z] Taylor/status — auto-exit-candidate-blocked-or-capped: {"account": "SpaceX", "blocked": [{"ticker": "SCL", "book": "LAG", "reason": "reconcile lệch broker: sổ lô=1100 broker=300"}], "capped": []}
+- [2026-10-29T16:53:16Z] Taylor/heartbeat — Taylor_20261029_165259: {"status": "in_progress", "note": "doc spec + code cash_identity/manual_actions"}
+- [2026-10-29T16:54:00Z] Taylor/heartbeat — Taylor_20261029_165259: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261029_165259", "source": "watcher"}
+- [2026-10-29T16:54:59Z] Taylor/heartbeat — Taylor_20261029_165259: {"status": "in_progress", "note": "worktree wt-ci-manual-20261030 tao xong, dang code"}
+- [2026-10-29T16:55:00Z] Taylor/heartbeat — Taylor_20261029_165259: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261029_165259", "source": "watcher"}
