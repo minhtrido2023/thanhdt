@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 213 file (109 sự cố + 103 RETRO + 1 mục open-items chung)
+entries: 219 file (110 sự cố + 108 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-10-29 | [2026-10/2026-10-29-auto-exit-lot-level-entry-date.md](2026-10/2026-10-29-auto-exit-lot-level-entry-date.md) | ? |
 | 2026-10-24 | [memcap.sh không chạy được trong cron/headless (thiếu XDG_RUNTIME_DIR) — selfcheck PASS giả 1/4](2026-10/2026-10-24-memcap-no-user-bus-in-cron.md) | fixed |
 | 2026-10-24 | [incidents_index_sync.py chèn lại cùng 1 dòng MỖI NGÀY — index.md nhân 59 bản trùng](2026-10/2026-10-24-incidents-index-sync-duplicate-row-daily.md) | fixed |
 | 2026-10-24 | [2026-10/2026-10-24-daily-retro-finalize-summary-dropped-no-topic.md](2026-10/2026-10-24-daily-retro-finalize-summary-dropped-no-topic.md) | fixed |
