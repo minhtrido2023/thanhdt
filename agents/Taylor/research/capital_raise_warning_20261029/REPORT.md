@@ -213,3 +213,10 @@ Dòng P 0,15384615 đã có trên snapshot từ 09-11 ≤ 10-23 ⇒ **không nh�
 (ngưỡng X) · `q_shares.sql`, `q_shares.csv` (OShares 4 quý) · `flag_rate.py`, `flag_rate_out.txt`.
 Code: `bin/capital_raise_lib.py` (mới), `bin/rights_issue_alert.py`, `bin/lag_dd_pack.py`, 2 selfcheck,
 `bin/bq_freshness_check.sh` (chuỗi).
+
+## 7. Cập nhật sau arch-review + quyết định user (29/10/2026 15:4x)
+arch-reviewer: NEEDS_CHANGES (lớp B đạt; lớp A đưa PENDING vào FLAG ⇒ gói DD FLAG chưa ack = đứng ngoài plan, vd VPB asof 23/10 bị FLAG vì dòng PP P 6,24%).
+**User chọn (b)**: `CAPITAL_RAISE_PENDING` và `CAPITAL_RAISE_12M` chỉ là WARNING trong `pack['warnings']` (gói vẫn CLEARED, `flags_hash` không đổi, không chặn mua),
+theo tiền lệ DCF_RICH_NHE. Chỉ `CAPITAL_RAISE_NA` (nguồn lỗi) còn là cờ fail-closed. Bỏ chuỗi cố định "SCL là ngoại lệ…" khỏi mẫu tin Rights.
+Selfcheck sau sửa: `rights_issue_alert_selfcheck` 37/37 mutant (3 TZ), `lag_dd_gate_selfcheck` 52/52 (env -u TZ + Tokyo; mutant `flags += cr_flags` thay bằng mutant `[1]→[0]`), thêm ca `flags_hash` không đổi khi có cảnh báo; 6 selfcheck lân cận PASS. Commit `87afedea3`.
+Nit còn lại (không blocker, chưa làm): tin INFO cổ tức/thưởng trùng `nav_exdate_forecast`; `fetch_oshares` không giới hạn asof (chỉ ảnh hưởng chạy hồi cứu); không báo lại khi vendor đổi tỉ lệ trên cùng id; `_f` trả 0 khi tỉ lệ hỏng.
