@@ -1020,3 +1020,33 @@
 
 ## Consolidation 2026-10-29T12:07:02Z
 - [2026-10-29T12:06:44Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "in_progress", "note": "doc skill dd-investor-report + nguon r10"}
+
+## Consolidation 2026-10-29T12:23:34Z
+- [2026-10-29T12:13:12Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-10-29", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-10-29.md"}
+- [2026-10-29T12:16:10Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-10-29", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-10-29.md"}
+- [2026-10-29T12:07:13Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "in_progress", "note": "da doc r10, BCTC Q3, nganh, phap ly; doc r7/r8 + company info"}
+- [2026-10-29T12:07:30Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261029_120629", "source": "watcher"}
+- [2026-10-29T12:08:30Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261029_120629", "source": "watcher"}
+- [2026-10-29T12:08:35Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "in_progress", "note": "du lieu xong (DNSE 33.300 14:45, BQ gia); bat dau dung figs"}
+- [2026-10-29T12:09:30Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261029_120629", "source": "watcher"}
+- [2026-10-29T12:10:30Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261029_120629", "source": "watcher"}
+- [2026-10-29T12:11:11Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "resume: kiem tra thu muc dau ra"}
+- [2026-10-29T12:11:27Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "doc errata/r10/skill xong; doc exemplar+template"}
+- [2026-10-29T12:11:37Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "doc BCTC Q3 extract + sector read"}
+- [2026-10-29T12:11:57Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:12:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:13:41Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "du lieu xong (DNSE 33.300 dong cua 29/10, BQ fin, website); dung bieu do"}
+- [2026-10-29T12:13:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:14:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:15:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:16:33Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "13 hinh da dung; kiem mat hinh roi viet md"}
+- [2026-10-29T12:16:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:17:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:18:04Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "hinh xong; dang viet md"}
+- [2026-10-29T12:18:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:19:58Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:20:59Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:22:00Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:22:15Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "in_progress", "note": "md+pdf+html dung xong; kiem mat PDF + selfcheck"}
+- [2026-10-29T12:23:00Z] Taylor/heartbeat — Taylor_20261029_121056: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261029_121056", "source": "watcher"}
+- [2026-10-29T12:23:18Z] Taylor/finding — dgc-investor-report 29/10 xong: {"dir": "agents/Taylor/research/dd_DGC_20261029/investor_report/", "files": ["DGC_DD_investor_report_20261029.md", "DGC_DD_investor_report_20261029.pdf", "DGC_DD_investor_report_20261029.html", "figs/ (13 hinh + CSV)", "build_report.py", "SELFCHECK.md"], "pdf_pages": 19, "label": "AMBIGUOUS nghieng constructive", "title": "DGC — bang can doi nhieu tien mat va P/B duoi 1, nhung gia 32.900 chua tra du cho cau hoi du phong moi truong va vu an chua co loi dap", "price_anchor_2810": 32900, "price_2910_close_dnse": 33300, "band_A7_B7": [32182, 37060], "lowest_highest_combo": ["26.117-26.558", 36880], "net_cash_per_share": [22040, 19400], "pb": 0.96, "errata_round4": "applied 7/7", "leak_grep": "empty (only month tokens T5/T8/T9)", "numbers_checked": "59/59 found in r10 REPORT/errata/BCTC extract", "email": "NOT sent (Mike sends)", "measured_by": "python3 -I build_report.py all (pages 19); grep leak + /tmp/numchk.txt in SELFCHECK.md"}

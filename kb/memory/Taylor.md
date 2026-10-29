@@ -26,3 +26,4 @@
 - [2026-10-29T11:04:03Z] [dgc-val r8 29/10] XONG job Taylor_20261029_105958: agents/Taylor/research/dgc_valuation_20261029_r8/ (chua commit) — CHO user chon nhan P1/P2 + phuong an giam tap trung ZaloPay (a-d)
 - [2026-10-29T11:47:21Z] [dgc-val r9 29/10] XONG job Taylor_20261029_113514: R2-R1 6.065 = 100% bien vinh vien (0 tu khoan 200); r8 263d/cp SAI (1.516 neu lap mai); bang N; khong base case — CHO Mike/skeptic + hoi DGC ban chat du phong
 - [2026-10-29T12:01:48Z] [dgc-val r10 29/10] XONG job Taylor_20261029_115813: research/dgc_valuation_20261029_r10/ (chua commit); 100ty/quy vinh vien=-6065; Q4 tach 217 (R2 N=0 36880, r4 32399); khong base case — CHO Mike/skeptic vong 3; mo: T7 cong ty con, khau tru thue (legal-vn)
+- [2026-10-29T12:23:18Z] [dgc-investor-report 29/10] XONG job Taylor_20261029_121056: research/dd_DGC_20261029/investor_report/ (md+pdf 19tr+html+13 figs, chua commit) — CHO Mike doc kiem/gui email
