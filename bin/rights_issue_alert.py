@@ -31,6 +31,14 @@ cũ hơn 12 tháng): vendor hiếm khi dọn dòng P sau khi sự kiện đã th
     thật luôn có ngày GDKHQ trong khoảng đó) ⇒ KHÔNG báo như sự kiện sống, gộp 1 tin "nghi bỏ dở — kiểm
     VSDC" (mỗi dòng 1 lần). Ca SCL 2026 (D 2025 tỉ lệ 35,7% + P 08/09/2026 tỉ lệ 15,38%) KHÁC tỉ lệ và
     còn mới ⇒ vẫn ANNOUNCE.
+LỌC THEO CHU KỲ NẮM GIỮ (user 29/10/2026 15:5x, `decided_by: user`): chỉ cảnh báo khi NGÀY CHỐT quyền (record_date,
+thiếu thì GDKHQ) rơi vào CHU KỲ NẮM GIỮ của một lô thuộc book LAG (T+25 phiên) hoặc BAL (T+45 phiên) — tức
+entry_date ≤ ngày chốt VÀ số phiên entry→ngày chốt ≤ hạn của book (hằng số `auto_exit_rules`). Tin nêu ĐÚNG book + lô
++ phiên thứ mấy của chu kỳ. Mã không thuộc LAG/BAL (park, CAPIT, custom30V, discretionary…) ⇒ im. Sự kiện CHƯA có ngày
+chốt ⇒ chưa thể rơi vào chu kỳ ⇒ im (đếm ra stdout; có ngày sẽ báo qua giai đoạn DATED). Nguồn lô = sổ lô
+`portfolio_status.book_lot_snapshot`. Không dựng được sổ lô (lỗi) hoặc mã bị sổ lô chặn (unverified) ⇒ FAIL-OPEN: vẫn cảnh
+báo, nói rõ "không lọc được theo chu kỳ" (thà thừa một tin hơn lỡ một đợt tăng vốn). Dòng "nghi bỏ dở" (P cũ không ngày)
+cũng im khi lọc hoạt động.
 Độ tươi vị thế (B2): tin in `computed_at` của active_nav_*.json; file cũ hơn phiên giao dịch TRƯỚC asof
 hoặc thiếu account live (trading_bot.config.live_dnse_labels) ⇒ tin ghi "VỊ THẾ CÓ THỂ CŨ" và rc=3.
 Mã thoát: 0 ổn · 1 gửi thất bại (state giữ nguyên) · 2 không có file vị thế nào · 3 đã chạy nhưng vị thế
@@ -60,8 +68,11 @@ for _p in (WC_ROOT, HERE):
 from capital_raise_lib import (METHOD_VI, STALE_P_DAYS, dilution, is_stale_p, is_zombie_p,  # noqa: E402,F401
                                issue_price, live_events, severity)
 
+from auto_exit_rules import BAL_EXIT_SESSIONS, LAG_EXIT_SESSIONS  # noqa: E402
+
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 REMIND_SESSIONS = 3
+CYCLE_BOOKS = (("LAG", LAG_EXIT_SESSIONS), ("BAL", BAL_EXIT_SESSIONS))   # (book, số phiên giữ cố định)
 TRADING_DAILY_THREAD = "trading_daily"   # tên trong kb/discord_channels.json (notify_thread.sh nhận TÊN)
 STATE_PATH = os.environ.get("MIKE_RIGHTS_ALERT_STATE") or os.path.join(MIKE, "state", "rights_issue_alert_state.json")
 ACTIVE_NAV_GLOB = os.environ.get("MIKE_RIGHTS_ALERT_NAV_GLOB") or os.path.join(
@@ -126,23 +137,75 @@ def _price_line(r, tk, prices):
     return f"giá phát hành: {px:,.0f}đ (không có thị giá để so)"
 
 
-def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=(), prices=None, oshares=None):
+def event_cycle_date(r):
+    """Ngày chốt quyền dùng để xét chu kỳ: record_date, thiếu thì GDKHQ; None nếu chưa có ngày nào."""
+    return (r.get("record_date") or r.get("exright_date") or None)
+
+
+def cycle_hits(d, lots, is_holiday):
+    """Các lô LAG/BAL mà ngày chốt `d` (YYYY-MM-DD) rơi vào chu kỳ nắm giữ. Thuần.
+
+    lots = [{'book','entry','qty'}] (lô thật) hoặc [{'book','unknown': lý_do}] (sổ lô không xác nhận được ⇒ fail-open).
+    Trả [(lô, số_phiên_entry→chốt | None, hạn_book)]. Rơi vào chu kỳ ⇔ entry ≤ d và phiên(entry→d) ≤ hạn."""
+    hits, limits = [], dict(CYCLE_BOOKS)
+    for l in lots:
+        n = limits.get(l.get("book"))
+        if n is None:
+            continue
+        if "unknown" in l:
+            hits.append((l, None, n))
+            continue
+        if l["entry"] > d:
+            continue
+        k = sessions_to(l["entry"], d, is_holiday)
+        if k <= n:
+            hits.append((l, k, n))
+    return hits
+
+
+def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=(), prices=None, oshares=None,
+                 cycles=None, diag=None, cycle_err=None):
     """positions: {account: {ticker: qty}}; rows: dòng ISS (mọi phương thức); sent: set khoá đã gửi.
 
     meta: {account: {file, computed_at, stale}} · pos_notes: lý do vị thế có thể cũ (position_health) ·
     prices: {ticker: thị giá} · oshares: {ticker: CP lưu hành} (để tính % khi exercise_ratio = 0).
+    cycles: {account: {ticker: [{'book','entry','qty'} | {'book','unknown'}]}} — sổ lô LAG/BAL; None ⇒ KHÔNG lọc
+    theo chu kỳ (hành vi cũ / fail-open khi không dựng được sổ lô). diag: list nhận dòng chẩn đoán (sự kiện bị
+    bỏ vì chưa có ngày chốt / ngoài chu kỳ). cycle_err: lý do không dựng được sổ lô (cycles=None) ⇒ tin ghi rõ không lọc.
     Trả list {keys, stage, text}. Thuần — selfcheck gọi thẳng.
     """
     out, stale_rows, meta = [], [], meta or {}
     held = {t for p in positions.values() for t, q in p.items() if q > 0}
     live, stale = live_events([r for r in rows if r.get("ticker") in held], asof)
     for r in stale:
-        if f"{r['id']}|stale" not in sent:
+        if cycles is None and f"{r['id']}|stale" not in sent:
             stale_rows.append(r)
+        elif cycles is not None and diag is not None:
+            diag.append(f"{r['ticker']}: dòng P nghi bỏ dở {r['id']} — im (lọc theo chu kỳ)")
     for r in live:
         tk, ex, meth = r["ticker"], (r.get("exright_date") or None), r.get("issue_method_code")
         rights, sev = meth == "Rights", severity(r)
         holders = [(lb, p[tk]) for lb, p in sorted(positions.items()) if p.get(tk, 0) > 0]
+        hit_lines = {}
+        if cycles is not None:
+            d = event_cycle_date(r)
+            if not d:
+                if diag is not None:
+                    diag.append(f"{tk}: {meth} {r['id']} CHƯA có ngày chốt/GDKHQ — chưa xét được chu kỳ (sẽ báo khi có ngày)")
+                continue
+            for lb, q in list(holders):
+                hs = cycle_hits(d, (cycles.get(lb) or {}).get(tk) or [], is_holiday)
+                if not hs:
+                    holders.remove((lb, q))
+                    continue
+                hit_lines[lb] = [
+                    (f"{l['book']}: KHÔNG xác định được chu kỳ — sổ lô không xác nhận ({l['unknown']})" if k is None else
+                     f"{l['book']}: ngày chốt {d} rơi phiên thứ {k}/{n} của chu kỳ {l['book']} (lô {l['qty']:,} cp, entry {l['entry']})")
+                    for l, k, n in hs]
+            if not holders:
+                if diag is not None:
+                    diag.append(f"{tk}: {meth} {r['id']} ngày chốt {d} NGOÀI chu kỳ LAG/BAL của mọi lô — im")
+                continue
         stages = [("ANNOUNCE", f"{r['id']}|announce")]
         if ex:
             stages.append(("DATED", f"{r['id']}|dated|{ex}"))
@@ -184,6 +247,10 @@ def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=(
                 lines.append(f"  {lb}: giữ {q:,} cp ⇒ được mua {n:,} cp, tiền cần chuẩn bị {cash}{src}")
             else:
                 lines.append(f"  {lb}: giữ {q:,} cp{src}")
+            for hl in hit_lines.get(lb, []):
+                lines.append(f"    ↳ {hl}")
+        if cycles is None and cycle_err:
+            lines.append(f"  ⚠️ KHÔNG lọc được theo chu kỳ LAG/BAL (fail-open, báo mọi mã đang giữ): {cycle_err}")
         if pos_notes:
             lines.append("  ⚠️ VỊ THẾ CÓ THỂ CŨ — tự kiểm trên DNSE (" + "; ".join(pos_notes) + ")")
         if rights:
@@ -255,6 +322,30 @@ def read_positions(nav_glob=ACTIVE_NAV_GLOB, prices=None):
     return out, meta
 
 
+def fetch_cycles(accounts, snapshot=None):
+    """-> ({account: {ticker: [{'book','entry','qty'} | {'book','unknown'}]}}, None) hoặc (None, lỗi).
+    Sổ lô LAG/BAL từng account qua `portfolio_status.book_lot_snapshot`. Lỗi KẾT CẤU (ok=False/raise) ⇒ (None, lỗi thật)
+    ⇒ caller FAIL-OPEN (không lọc). Mã bị sổ lô chặn (unverified/mồ côi) ⇒ lô 'unknown' ⇒ vẫn cảnh báo, nói rõ lý do."""
+    if snapshot is None:
+        from portfolio_status import book_lot_snapshot as snapshot
+    out = {}
+    for acc in sorted(accounts):
+        for book, _n in CYCLE_BOOKS:
+            try:
+                lots, ok, reason, blocked = snapshot(acc, book)
+            except Exception as e:                 # §29: lỗi thật, không đoán
+                return None, f"{acc}/{book}: {type(e).__name__}: {str(e)[:160]}"
+            if not ok:
+                return None, f"{acc}/{book}: {str(reason)[:200]}"
+            for tk, d in lots.items():
+                for l in d.get("lots") or []:
+                    out.setdefault(acc, {}).setdefault(tk, []).append(
+                        {"book": book, "entry": l["entry_date"], "qty": int(l["qty"])})
+            for tk, why in (blocked or {}).items():
+                out.setdefault(acc, {}).setdefault(tk, []).append({"book": book, "unknown": str(why)[:160]})
+    return out, None
+
+
 def live_labels():
     from trading_bot.config import live_dnse_labels
     return live_dnse_labels()
@@ -308,7 +399,13 @@ def main():
         oshares = {}
         print(f"⚠️ không đọc được OShares (ticker_financial): {e!r} — % pha loãng chỉ từ exercise_ratio")
     sent = _load_sent(a.state) if a.send else set()
-    alerts = build_alerts(a.asof, pos, rows, sent, is_holiday, meta, notes, prices, oshares)
+    cycles, cyc_err = fetch_cycles(sorted(pos))
+    if cyc_err:
+        print(f"⚠️ KHÔNG lọc được theo chu kỳ LAG/BAL (fail-open: cảnh báo mọi mã đang giữ): {cyc_err}")
+    diag = []
+    alerts = build_alerts(a.asof, pos, rows, sent, is_holiday, meta, notes, prices, oshares, cycles, diag, cyc_err)
+    for line in diag:
+        print(f"  [bỏ qua] {line}")
     if not alerts:
         print(f"[{a.asof}] không có sự kiện tăng vốn nào cần báo cho {len(tickers)} mã đang giữ")
     notify = shlex.split(os.environ.get("MIKE_RIGHTS_ALERT_NOTIFY") or os.path.join(MIKE, "bin", "notify_thread.sh"))

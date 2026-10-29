@@ -220,3 +220,13 @@ arch-reviewer: NEEDS_CHANGES (lớp B đạt; lớp A đưa PENDING vào FLAG �
 theo tiền lệ DCF_RICH_NHE. Chỉ `CAPITAL_RAISE_NA` (nguồn lỗi) còn là cờ fail-closed. Bỏ chuỗi cố định "SCL là ngoại lệ…" khỏi mẫu tin Rights.
 Selfcheck sau sửa: `rights_issue_alert_selfcheck` 37/37 mutant (3 TZ), `lag_dd_gate_selfcheck` 52/52 (env -u TZ + Tokyo; mutant `flags += cr_flags` thay bằng mutant `[1]→[0]`), thêm ca `flags_hash` không đổi khi có cảnh báo; 6 selfcheck lân cận PASS. Commit `87afedea3`.
 Nit còn lại (không blocker, chưa làm): tin INFO cổ tức/thưởng trùng `nav_exdate_forecast`; `fetch_oshares` không giới hạn asof (chỉ ảnh hưởng chạy hồi cứu); không báo lại khi vendor đổi tỉ lệ trên cùng id; `_f` trả 0 khi tỉ lệ hỏng.
+
+## 8. Lọc theo CHU KỲ NẮM GIỮ LAG/BAL (user 29/10/2026 15:5x, `decided_by: user`; Mike thực hiện)
+Yêu cầu: chỉ cảnh báo khi **ngày chốt quyền rơi vào chu kỳ nắm giữ** của book LAG (T+25 phiên) hoặc BAL (T+45), nêu đúng book. Còn lại user đồng ý merge.
+- Lớp B (`rights_issue_alert.py`) nay lọc: ngày xét = `record_date` (thiếu thì GDKHQ); lô (sổ lô `portfolio_status.book_lot_snapshot`, book LAG/BAL từng account) trúng khi
+  `entry ≤ ngày chốt` và `số phiên entry→chốt ≤ hạn` (`auto_exit_rules.LAG_EXIT_SESSIONS`=25, `BAL_EXIT_SESSIONS`=45). Tin nêu "LAG/BAL: ngày chốt … rơi phiên thứ k/N (lô q cp, entry …)".
+- Mã không thuộc LAG/BAL (park, CAPIT, custom30V, discretionary…) ⇒ im. Sự kiện CHƯA có ngày chốt/GDKHQ ⇒ im (chưa xét được; có ngày thì báo qua giai đoạn DATED). Dòng P "nghi bỏ dở" ⇒ im.
+- **FAIL-OPEN**: không dựng được sổ lô (lỗi/ok=False) hoặc mã bị sổ lô chặn ⇒ vẫn cảnh báo kèm lý do "KHÔNG lọc được/KHÔNG xác định được chu kỳ".
+- ⚠️ Hệ quả cần biết: đợt tăng vốn mà vendor KHÔNG điền ngày (như SCL quyền mua: P không ngày > 2 tháng) sẽ im cho tới khi có ngày. Đã có ngày ⇒ báo ngay nếu rơi vào chu kỳ.
+- Dry-run thật 29/10 (9 mã đang giữ): 0 tin; bỏ qua 4 dòng nghi bỏ dở + 2 dòng SCL chưa có ngày. Selfcheck 48/48 mutant, 3 TZ; lag_dd_gate 52/52.
+- Lớp A (gói DD ứng viên, WARNING) chưa lọc theo chu kỳ vì ứng viên chưa có lô; vẫn cảnh báo mọi đợt tăng vốn đang chạy của mã ứng viên.

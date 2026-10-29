@@ -81,6 +81,7 @@ def run_inner():
     ck("value_per_share có ⇒ ưu tiên", R.issue_price(dict(SCL25, value_per_share="10000")) == 10000.0)
     inner_b(R, B)
     inner_capraise(R, B)
+    inner_cycle(R, B)
     inner_main(R)
     n = sum(1 for x in RESULTS if not x)
     print("RESULT:", "PASS" if not n else "FAIL")
@@ -239,6 +240,73 @@ printf '%s\n----\n' "$1" >> "$D/log"
 """
 
 
+def inner_cycle(R, B):
+    """User 29/10 15:5x: chỉ cảnh báo khi NGÀY CHỐT rơi vào chu kỳ nắm giữ của LAG (25 phiên) / BAL (45 phiên)."""
+    rec, ex = "2026-11-10", "2026-11-09"
+    ev = dict(SCL26, exright_date=ex, record_date=rec, total_value="1.2E11", issue_volumn="6000000")
+
+    def entry_k(k, d=rec):                       # entry cách ngày d đúng k phiên (không lễ)
+        e = dt.date.fromisoformat(d)
+        while R.sessions_to(e.isoformat(), d, is_hol) < k:
+            e -= dt.timedelta(days=1)
+        return e.isoformat()
+    ck("helper entry_k: entry_k(12) cách chốt 12 phiên", R.sessions_to(entry_k(12), rec, is_hol) == 12)
+    pos = {"SpaceX": {"SCL": 1100}, "ZaloPay": {"SCL": 700}}
+    lag = lambda k, q=800: {"book": "LAG", "entry": entry_k(k), "qty": q}  # noqa: E731
+    bal = lambda k, q=300: {"book": "BAL", "entry": entry_k(k), "qty": q}  # noqa: E731
+    D = []
+    a = B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(12)]}}, diag=D)
+    t = a[0]["text"] if a else ""
+    ck("chốt rơi phiên 12/25 của lô LAG ⇒ 1 cảnh báo nêu book + lô + phiên", len(a) == 1 and "LAG: ngày chốt 2026-11-10 rơi phiên thứ 12/25" in t
+       and "lô 800 cp" in t, a)
+    ck("account không có lô trong chu kỳ (ZaloPay) ⇒ KHÔNG nêu", "ZaloPay" not in t, t)
+    ck("đúng biên: phiên 25/25 ⇒ báo", len(B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(25)]}})) == 1)
+    D = []
+    ck("phiên 26 > 25 ⇒ im + diag NGOÀI chu kỳ",
+       B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(26)]}}, diag=D) == [] and any("NGOÀI chu kỳ" in x for x in D), D)
+    ck("BAL: phiên 40 (>25 nhưng ≤45) ⇒ báo, ghi /45", "BAL: ngày chốt 2026-11-10 rơi phiên thứ 40/45" in
+       (B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [bal(40)]}})[0]["text"]))
+    ck("BAL: phiên 46 ⇒ im", B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [bal(46)]}}) == [])
+    ck("lô mua SAU ngày chốt ⇒ im", B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "LAG", "entry": "2026-11-12", "qty": 5}]}}) == [])
+    ck("mã không thuộc LAG/BAL (không có lô trong cycles; vd park/CAPIT/custom30V) ⇒ im",
+       B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {}, "ZaloPay": {}}) == [])
+    ck("lô book lạ (PARK) ⇒ không tính", B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "PARK", "entry": entry_k(3), "qty": 9}]}}) == [])
+    D = []
+    ck("sự kiện CHƯA có ngày chốt ⇒ im + diag (chưa xét được chu kỳ)",
+       B("2026-10-29", pos, [SCL26], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(3)]}}, diag=D) == [] and any("CHƯA có ngày" in x for x in D), D)
+    both = {"SpaceX": {"SCL": [lag(12), bal(30, 100)]}, "ZaloPay": {"SCL": [lag(12, 700)]}}
+    tb = B("2026-10-29", pos, [ev], set(), is_hol, cycles=both)[0]["text"]
+    ck("2 account + 2 book ⇒ 1 tin gộp, nêu cả LAG lẫn BAL của SpaceX + ZaloPay", all(x in tb for x in ("SpaceX", "ZaloPay", "LAG:", "BAL:")), tb)
+    # record_date ưu tiên hơn GDKHQ: entry cách GDKHQ 25 phiên nhưng cách ngày chốt 26 ⇒ KHÔNG báo
+    ck("ngày xét chu kỳ = record_date (ưu tiên hơn GDKHQ)",
+       B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "LAG", "entry": entry_k(25, ex), "qty": 5}]}}) == [])
+    ck("thiếu record_date ⇒ dùng GDKHQ", len(B("2026-10-29", pos, [dict(ev, record_date=None)], set(), is_hol,
+       cycles={"SpaceX": {"SCL": [{"book": "LAG", "entry": entry_k(25, ex), "qty": 5}]}})) == 1)
+    unk = B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "LAG", "unknown": "reconcile lệch broker"}]}})
+    ck("sổ lô chặn mã (unknown) ⇒ FAIL-OPEN vẫn báo + nói rõ không xác định", len(unk) == 1 and "KHÔNG xác định được chu kỳ" in unk[0]["text"]
+       and "reconcile lệch broker" in unk[0]["text"], unk)
+    fo = B("2026-10-29", pos, [ev], set(), is_hol, cycles=None, cycle_err="park_holdings lỗi: x")
+    ck("không dựng được sổ lô (cycles=None) ⇒ báo như cũ + nêu lỗi thật", len(fo) == 1 and "KHÔNG lọc được theo chu kỳ" in fo[0]["text"]
+       and "park_holdings lỗi: x" in fo[0]["text"], fo)
+    D = []
+    ck("dòng P nghi bỏ dở ⇒ im khi lọc theo chu kỳ (không còn tin STALE)",
+       B("2026-10-22", {"SpaceX": {"PAN": 10}}, [PAN_P], set(), is_hol, cycles={"SpaceX": {}}, diag=D) == [] and len(D) == 1, D)
+    # fetch_cycles với snapshot giả
+    def snap(acc, book):
+        if book == "LAG":
+            return ({"SCL": {"qty": 800, "entry_date": "2026-10-26", "lots": [{"qty": 800, "entry_date": "2026-10-26"}]}}, True, None, {"VPB": "unverified x"})
+        return ({}, True, None, {})
+    cy, err = R.fetch_cycles(["SpaceX"], snapshot=snap)
+    ck("fetch_cycles: gom lô LAG + mã bị chặn thành unknown", err is None and cy["SpaceX"]["SCL"] == [{"book": "LAG", "entry": "2026-10-26", "qty": 800}]
+       and cy["SpaceX"]["VPB"] == [{"book": "LAG", "unknown": "unverified x"}], (cy, err))
+    cy, err = R.fetch_cycles(["SpaceX"], snapshot=lambda a, b: ({}, False, "thiếu bootstrap", {}))
+    ck("fetch_cycles: ok=False ⇒ (None, lỗi thật)", cy is None and "thiếu bootstrap" in err, (cy, err))
+    def boom(a, b):
+        raise RuntimeError("broker down")
+    cy, err = R.fetch_cycles(["SpaceX"], snapshot=boom)
+    ck("fetch_cycles: raise ⇒ (None, lỗi thật §29)", cy is None and "broker down" in err, (cy, err))
+
+
 def inner_main(R):
     HPG = dict(SCL25, id="hpgtest0001", ticker="HPG", public_date="2025-10-09")
     td = tempfile.mkdtemp()
@@ -259,6 +327,7 @@ def inner_main(R):
         R.fetch_issuance = lambda tk: [HPG, SCL25]
         R.fetch_oshares = lambda tk: {}
         R.live_labels = lambda: ["SpaceX", "ZaloPay"]
+        R.fetch_cycles = lambda accs, snapshot=None: (None, "stub: không dựng sổ lô trong selfcheck")   # fail-open ⇒ hành vi cũ
 
         def run(fail_at=0, extra=(), reset=True, st=state):
             if reset:
@@ -301,6 +370,15 @@ def inner_main(R):
         wnav("ZaloPay", {"FPT": 50}, "2025-10-09")
         rc, out, cnt, log = run(st=os.path.join(td, "boom_state.json"))
         ck("main: live_dnse_labels lỗi ⇒ rc=3 + in lỗi thật (§29)", rc == 3 and "accounts.json hỏng" in out, (rc, out))
+        R.live_labels = lambda: ["SpaceX", "ZaloPay"]
+        wnav("SpaceX", {"SCL": 14000, "HPG": 1000}, "2025-10-09")
+        R.fetch_cycles = lambda accs, snapshot=None: ({"SpaceX": {"HPG": [{"book": "LAG", "entry": "2025-10-06", "qty": 1000}]}}, None)
+        rc, out, cnt, log = run(st=os.path.join(td, "cyc_state.json"))
+        ck("main + lọc chu kỳ: chỉ HPG (lô LAG, chốt trong chu kỳ) được gửi; SCL không có lô LAG/BAL ⇒ im",
+           rc == 0 and cnt == 1 and "**HPG**" in log and "LAG: ngày chốt 2025-10-20 rơi phiên thứ" in log and "**SCL**" not in log, (rc, cnt, log))
+        R.fetch_cycles = lambda accs, snapshot=None: ({"SpaceX": {}}, None)
+        rc, out, cnt, log = run(st=os.path.join(td, "cyc2_state.json"))
+        ck("main + lọc chu kỳ: không mã nào trong LAG/BAL ⇒ không gửi gì, in lý do bỏ qua", rc == 0 and cnt == 0 and "[bỏ qua]" in out, (rc, cnt, out))
         for f in os.listdir(nav):
             os.remove(os.path.join(nav, f))
         rc, out, cnt, log = run(st=os.path.join(td, "none_state.json"))
@@ -354,6 +432,17 @@ MUTANTS = [
     (RA, "        holders = [(lb, p[tk]) for lb, p in sorted(positions.items()) if p.get(tk, 0) > 0]",
      "        holders = [(lb, p.get(tk, 0)) for lb, p in sorted(positions.items())]"),
     (RA, '    held = {t for p in positions.values() for t, q in p.items() if q > 0}', '    held = {r.get("ticker") for r in rows}'),
+    (RA, '        if l["entry"] > d:\n            continue', '        if False:\n            continue'),
+    (RA, '        if k <= n:\n            hits.append((l, k, n))', '        if k < n:\n            hits.append((l, k, n))'),
+    (RA, '    return (r.get("record_date") or r.get("exright_date") or None)', '    return (r.get("exright_date") or r.get("record_date") or None)'),
+    (RA, '        if cycles is None and f"{r[\'id\']}|stale" not in sent:', '        if f"{r[\'id\']}|stale" not in sent:'),
+    (RA, '            if not d:\n                if diag is not None:', '            if False:\n                if diag is not None:'),
+    (RA, '                if not hs:\n                    holders.remove((lb, q))\n                    continue', '                if False:\n                    continue'),
+    (RA, '        if "unknown" in l:\n            hits.append((l, None, n))\n            continue', '        if False:\n            continue'),
+    (RA, '            if not ok:\n                return None, f"{acc}/{book}: {str(reason)[:200]}"', '            if False:\n                pass'),
+    (RA, '    cycles, cyc_err = fetch_cycles(sorted(pos))', '    cycles, cyc_err = None, None'),
+    (RA, '        n = limits.get(l.get("book"))\n        if n is None:\n            continue', '        n = limits.get(l.get("book"), 99)'),
+    (RA, 'CYCLE_BOOKS = (("LAG", LAG_EXIT_SESSIONS), ("BAL", BAL_EXIT_SESSIONS))', 'CYCLE_BOOKS = (("LAG", LAG_EXIT_SESSIONS), ("BAL", LAG_EXIT_SESSIONS))'),
     (RA, '    return [r for r in fetch_issuance(tickers) if r.get("issue_method_code") == "Rights"]',
      '    return fetch_issuance(tickers)'),
 ]
