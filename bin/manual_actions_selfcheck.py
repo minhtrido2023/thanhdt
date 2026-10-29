@@ -375,14 +375,14 @@ class _FakeClient:
         allrows = [order(oid=f"20261029_{i}", sym="VPB") for i in range(250)]
         if _FakeClient.mode == "ignore":
             return {"accountNo": account_no, "data": allrows[:page_size]}
-        lo = (page_index - 1) * page_size
+        lo = page_index * page_size
         return {"accountNo": account_no, "data": allrows[lo:lo + page_size]}
 
 
 import types as _types
 sys.modules["dnse_api"] = _types.SimpleNamespace(DNSEClient=_FakeClient)
 env = ma._dnse_fetch(SPX, D)
-check(len(env["data"]) == 250 and env["_pages"] == 3 and _FakeClient.calls == [1, 2, 3],
+check(len(env["data"]) == 250 and env["_pages"] == 3 and _FakeClient.calls == [0, 1, 2],
       "(6) _dnse_fetch đọc HẾT 3 trang (250 lệnh), dừng ở trang ngắn")
 _FakeClient.mode = "ignore"
 try:

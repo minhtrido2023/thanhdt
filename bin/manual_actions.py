@@ -360,7 +360,7 @@ ORDER_PAGE_SIZE, ORDER_MAX_PAGES = 100, 20
 
 
 def _dnse_fetch(account_no, date):
-    """order_history của `date`, đọc HẾT các trang (pageSize/pageIndex từ 1). Một trang đầy ⇒ đọc
+    """order_history của `date`, đọc HẾT các trang (pageIndex bắt đầu từ 0 — ĐO THẬT 29/10: pageIndex=1 trả trang rỗng). Một trang đầy ⇒ đọc
     tiếp; trang ngắn ⇒ hết. Trang lặp y nguyên (API lờ phân trang) hoặc chạm trần ORDER_MAX_PAGES
     mà vẫn đầy ⇒ raise — không kết luận "không có lệnh" từ danh sách có thể cụt."""
     if WC_ROOT not in sys.path:
@@ -369,7 +369,7 @@ def _dnse_fetch(account_no, date):
     with contextlib.redirect_stdout(sys.stderr):
         c = DNSEClient.from_credentials_file()
         rows, seen, env0 = [], set(), None
-        for page in range(1, ORDER_MAX_PAGES + 1):
+        for page in range(0, ORDER_MAX_PAGES):
             env = c.order_history(account_no, from_date=date, to_date=date,
                                   page_size=ORDER_PAGE_SIZE, page_index=page)
             env0 = env0 if env0 is not None else env
@@ -377,12 +377,12 @@ def _dnse_fetch(account_no, date):
             if not isinstance(part, list):
                 return env
             ids = [str(o.get("id")) for o in part if isinstance(o, dict)]
-            if page > 1 and ids and set(ids) <= seen:
-                raise RuntimeError(f"order_history trang {page} lặp trang trước — API lờ pageIndex")
+            if page > 0 and ids and set(ids) <= seen:
+                raise RuntimeError(f"order_history trang {page + 1} lặp trang trước — API lờ pageIndex")
             seen.update(ids)
             rows.extend(part)
             if len(part) < ORDER_PAGE_SIZE:
-                return dict(env0, data=rows, _pages=page, _page_size=ORDER_PAGE_SIZE)
+                return dict(env0, data=rows, _pages=page + 1, _page_size=ORDER_PAGE_SIZE)
         raise RuntimeError(f"order_history còn đầy sau {ORDER_MAX_PAGES} trang × {ORDER_PAGE_SIZE} "
                            f"— không đọc hết được")
 
