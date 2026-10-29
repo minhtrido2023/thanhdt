@@ -191,7 +191,7 @@ def build_alerts(asof, positions, rows, sent, is_holiday, meta=None, pos_notes=(
             lines.append("  Bot TỰ giữ lệnh thoát T+25 của mã LAG tới GDKHQ (nếu là mã LAG; mã non-LAG không bị giữ); "
                          "quyền mua CHƯA có ngày thì bot vẫn giữ và đòi anh quyết hold/sell "
                          "(lag_rights_exit_hold.py --record). Việc giữ này KHÔNG cấm thoái: user vẫn có thể "
-                         "thoái bằng plan (SCL là ngoại lệ — user chốt thoát 29/10/2026). User TỰ thực hiện quyền "
+                         "thoái bằng plan nếu muốn. User TỰ thực hiện quyền "
                          "đầy đủ (bot không mua/chuyển nhượng quyền). Sau khi nộp tiền NAV có thể chặn rc=5/6 — "
                          "xử lý theo tiền lệ MBB 08-28 (REPORT lag_rights_audit_20261022).")
         elif sev == "WARN":

@@ -4,7 +4,7 @@
 Dùng chung cho 2 lớp cảnh báo (user chốt 29/10/2026: "nên đưa warning khi có bất kỳ việc tăng vốn nào
 xuất hiện trong chu kỳ đầu tư của chúng ta"; thiết kế + số đo:
 agents/Taylor/research/capital_raise_warning_20261029/REPORT.md):
-  (A) lag_dd_pack.py     — cờ CAPITAL_RAISE_PENDING / CAPITAL_RAISE_12M TRƯỚC khi vào lệnh LAG
+  (A) lag_dd_pack.py     — WARNING CAPITAL_RAISE_PENDING / CAPITAL_RAISE_12M TRƯỚC khi vào lệnh LAG (không chặn)
   (B) rights_issue_alert — cảnh báo mã ĐANG GIỮ khi có sự kiện tăng vốn (mọi phương thức, không chỉ quyền mua)
 CHỈ CẢNH BÁO — không module nào ở đây chạm lệnh/plan/sizing.
 
@@ -139,22 +139,24 @@ def pre_entry_flags(rows, asof, oshares=None, oshares_g12=None):
 
     CAPITAL_RAISE_PENDING: có sự kiện WARN SỐNG (đã công bố, chưa GDKHQ) — như SCL quyền mua 15,38% trạng thái P.
     CAPITAL_RAISE_12M: pha loãng THU TIỀN đã thực hiện 12 tháng > RAISE_12M_X.
-    INFO sống (cổ tức CP/thưởng) và dòng nghi bỏ dở ⇒ chỉ warnings (không đổi status gói DD)."""
+    MỌI mã đều là WARNING (user chọn (b) 29/10/2026 15:4x: chỉ CẢNH BÁO, không đổi status/flags_hash của gói DD,
+    không chặn mua; arch-review: FLAG+ack sẽ đổi tập mã vào LAG). `flags` luôn rỗng — giữ chữ ký (flags, warns)
+    cho caller cũ; nguồn lỗi (CAPITAL_RAISE_NA) do lag_dd_pack tự gắn cờ fail-closed."""
     flags, warns = [], []
     live, stale = live_events(rows, asof)
     w = [r for r in live if severity(r) == "WARN"]
     if w:
-        flags.append(("CAPITAL_RAISE_PENDING", "; ".join(describe(r, oshares) for r in w)))
+        warns.append(("CAPITAL_RAISE_PENDING", "; ".join(describe(r, oshares) for r in w)))
     g, hit = cash_dilution_12m(rows, asof, oshares)
     if g > RAISE_12M_X + 1e-9:                # 1,10−1 = 0,1000…09 trong float — đúng 10% KHÔNG cờ
-        flags.append(("CAPITAL_RAISE_12M", f"pha loãng thu tiền 12 tháng {g:+.1%} > {RAISE_12M_X:.0%}: "
+        warns.append(("CAPITAL_RAISE_12M", f"pha loãng thu tiền 12 tháng {g:+.1%} > {RAISE_12M_X:.0%}: "
                       + "; ".join(describe(r, oshares) for r in hit)))
     info = [r for r in live if severity(r) == "INFO"]
     if info:
         warns.append(("CAPITAL_RAISE_INFO", "; ".join(describe(r, oshares) for r in info)))
     if stale:
         warns.append(("CAPITAL_RAISE_NGHI_BO_DO", "; ".join(describe(r, oshares) for r in stale)))
-    if flags and oshares_g12 is not None:
-        flags = [(c, e + f" | số CP lưu hành 4 quý {oshares_g12:+.1%} (ticker_financial.OShares, gồm cả CP thưởng/cổ tức)")
-                 for c, e in flags]
+    if oshares_g12 is not None:
+        warns = [(c, e + f" | số CP lưu hành 4 quý {oshares_g12:+.1%} (ticker_financial.OShares, gồm cả CP thưởng/cổ tức)")
+                 if c in ("CAPITAL_RAISE_PENDING", "CAPITAL_RAISE_12M") else (c, e) for c, e in warns]
     return flags, warns

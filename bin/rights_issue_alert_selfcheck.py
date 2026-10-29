@@ -124,8 +124,8 @@ def inner_b(R, B):
     ck("B4 (sau X1 merge): nói bot TỰ giữ lệnh thoát LAG + nếu là mã LAG + cách ack, KHÔNG còn 'CHƯA tự giữ'/'HOLD TAY'",
        all(x in tt for x in ("Bot TỰ giữ lệnh thoát", "nếu là mã LAG", "lag_rights_exit_hold.py --record"))
        and "CHƯA tự giữ" not in tt and "HOLD TAY" not in tt, tt)
-    ck("29/10 câu chữ: nêu user CÓ THỂ thoái bằng plan + SCL là ngoại lệ user chốt thoát 29/10",
-       all(x in tt for x in ("KHÔNG cấm thoái", "thoái bằng plan", "SCL là ngoại lệ", "29/10/2026")), tt)
+    ck("29/10 câu chữ: nêu user CÓ THỂ thoái bằng plan; KHÔNG cố định tên mã/ngày cụ thể trong mẫu định kỳ",
+       all(x in tt for x in ("KHÔNG cấm thoái", "thoái bằng plan")) and "SCL là ngoại lệ" not in tt and "29/10/2026" not in tt, tt)
     # B2
     ml = {"SpaceX": {"file": "active_nav_SpaceX.json", "computed_at": "2026-10-20"},
           "ZaloPay": {"file": "active_nav_ZaloPay.json", "computed_at": "2026-10-21"}}
@@ -205,22 +205,24 @@ def inner_capraise(R, B):
     ck("SCL quyền mua: 2 account trong 1 tin, 169 + 107 cp", any("169 cp" in x["text"] and "107 cp" in x["text"] for x in sc), sc)
     # Lớp A (pre-entry) — thuần
     fl, wa = L.pre_entry_flags([SCL25, SCL26], "2026-10-23", 38_836_815, 0.734)
-    ck("A: SCL 23/10 (trước vào lệnh 26/10) ⇒ CAPITAL_RAISE_PENDING, kèm OShares +73.4%",
-       [c for c, _ in fl] == ["CAPITAL_RAISE_PENDING"] and "+73.4%" in fl[0][1] and "15.38%" in fl[0][1], fl)
+    ck("A: SCL 23/10 (trước vào lệnh 26/10) ⇒ WARNING CAPITAL_RAISE_PENDING (KHÔNG cờ), kèm OShares +73.4%",
+       fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_PENDING"] and "+73.4%" in wa[0][1] and "15.38%" in wa[0][1], (fl, wa))
     fl, wa = L.pre_entry_flags([SCL25], "2025-10-16", None, None)
-    ck("A: SCL quyền mua 35,7% GDKHQ 2025-10-17 — asof 2025-10-16 chưa GDKHQ ⇒ PENDING", [c for c, _ in fl] == ["CAPITAL_RAISE_PENDING"], fl)
+    ck("A: SCL quyền mua 35,7% GDKHQ 2025-10-17 — asof 2025-10-16 chưa GDKHQ ⇒ warning PENDING, không cờ",
+       fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_PENDING"], (fl, wa))
     fl, wa = L.pre_entry_flags([SCL25], "2025-11-01", None, None)
-    ck("A: asof 2025-11-01 (đã GDKHQ 16 ngày) ⇒ CAPITAL_RAISE_12M (+35.7% > 10%)",
-       [c for c, _ in fl] == ["CAPITAL_RAISE_12M"] and "+35.7%" in fl[0][1], fl)
-    ck("A: quá 365 ngày ⇒ hết cờ 12M", L.pre_entry_flags([SCL25], "2026-10-18", None, None)[0] == [])
+    ck("A: asof 2025-11-01 (đã GDKHQ 16 ngày) ⇒ warning CAPITAL_RAISE_12M (+35.7% > 10%), không cờ",
+       fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_12M"] and "+35.7%" in wa[0][1], (fl, wa))
+    ck("A: quá 365 ngày ⇒ hết cảnh báo 12M", L.pre_entry_flags([SCL25], "2026-10-18", None, None) == ([], []))
     esop5 = dict(ESOP_SIM, issue_status_code="D", exright_date="2026-09-01")
-    ck("A: ESOP thuần 5% đã thực hiện ⇒ KHÔNG cờ 12M (ngưỡng 10%)", L.pre_entry_flags([esop5], "2026-10-01")[0] == [])
+    ck("A: ESOP thuần 5% đã thực hiện ⇒ KHÔNG cảnh báo 12M (ngưỡng 10%)", L.pre_entry_flags([esop5], "2026-10-01") == ([], []))
     ck("A: MBB cổ tức CP 15% ĐÃ thực hiện (INFO) ⇒ KHÔNG tính vào pha loãng thu tiền 12M",
        L.pre_entry_flags([MBB_DIV], "2026-10-01") == ([], []))
     b11 = dict(esop5, exercise_ratio="0.11")
-    ck("A: 11% thu tiền đã thực hiện ⇒ cờ 12M", [c for c, _ in L.pre_entry_flags([b11], "2026-10-01")[0]] == ["CAPITAL_RAISE_12M"])
+    ck("A: 11% thu tiền đã thực hiện ⇒ cảnh báo 12M (không cờ)",
+       L.pre_entry_flags([b11], "2026-10-01")[0] == [] and [c for c, _ in L.pre_entry_flags([b11], "2026-10-01")[1]] == ["CAPITAL_RAISE_12M"])
     b10 = dict(esop5, exercise_ratio="0.10")
-    ck("A: đúng 10% ⇒ KHÔNG cờ (> chứ không ≥)", L.pre_entry_flags([b10], "2026-10-01")[0] == [])
+    ck("A: đúng 10% ⇒ KHÔNG cảnh báo (> chứ không ≥)", L.pre_entry_flags([b10], "2026-10-01") == ([], []))
     fl, wa = L.pre_entry_flags([dict(MBB_DIV, exright_date="2026-11-20")], "2026-10-23")
     ck("A: cổ tức CP sắp tới ⇒ chỉ warning CAPITAL_RAISE_INFO, không cờ", fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_INFO"], (fl, wa))
     fl, wa = L.pre_entry_flags([old], "2026-10-22")

@@ -99,10 +99,9 @@ FLAG_CODES = {
     "PHAP_LY_WARNING":       "cờ pháp lý (forensic flag_type pháp lý) — CHỈ WARNING, không loại (luật 27/09)",
     "RATING_8L_FAIL":        "8L rating ≥ 4 hoặc không có rating ≤ asof",
     "RATING_8L_CU":          "dòng 8L mới nhất có time < Release_Date của sự kiện (chấm bằng BCTC cũ)",
-    "CAPITAL_RAISE_PENDING": "đợt tăng vốn THU TIỀN (quyền mua/riêng lẻ/công chúng/ESOP/chuyển đổi/sáp nhập) đã công bố, "
-                             "chưa GDKHQ (capital_raise_lib; user 29/10: cảnh báo mọi tăng vốn trong chu kỳ đầu tư)",
-    "CAPITAL_RAISE_12M":     "pha loãng THU TIỀN đã thực hiện 12 tháng > capital_raise_lib.RAISE_12M_X (10%)",
-    "CAPITAL_RAISE_NA":      "không đọc được sự kiện phát hành CP từ tav2_bq.corporate_action",
+    # CAPITAL_RAISE_PENDING / CAPITAL_RAISE_12M KHÔNG phải cờ: chỉ WARNING trong pack['warnings'] (user chọn (b) 29/10 —
+    # "đưa warning", không chặn mua; xem capital_raise_lib.pre_entry_flags). Chỉ nguồn lỗi mới là cờ (fail-closed):
+    "CAPITAL_RAISE_NA":      "không đọc được sự kiện phát hành CP từ tav2_bq.corporate_action (fail-closed)",
     "DCF_RICH":              "DCF status RICH SÂU: biên an toàn < -100% (hoặc thiếu MoS ⇒ fail-closed); RICH nhẹ chỉ là cảnh báo, xem pack['warnings']",
     # --- Chất lượng cú bất ngờ lợi nhuận (b) ---
     "EQ_NEN_THAP":           f"NP_P4 > 0 nhưng < {EQ_BASE_LOW_RATIO:.0%} trung vị NP_P5..P7",
@@ -616,8 +615,7 @@ def build_pack(ticker, asof, cand=None, release_date=None, macro_note=None, sour
         flags.append(_f("CAPITAL_RAISE_NA", errors.get("capital_raise")))
         cr_warn = []
     else:
-        cr_flags, cr_warn = capital_raise_eval(rows or [], iss, asof)
-        flags += cr_flags
+        cr_warn = capital_raise_eval(rows or [], iss, asof)[1]   # [0] (cờ) luôn rỗng: tăng vốn chỉ là WARNING (user chọn (b) 29/10)
 
     d = ev.get("dd") or {}
     icb = (d.get("yield_floor") or {}).get("icb_code") if isinstance(d, dict) else None

@@ -116,8 +116,10 @@ def run_inner():
         Bc = lambda iss, **kw: P.build_pack("AAA", "2026-10-21", cand={"entry_date": "2026-10-26"},  # noqa: E731
                                             sources=dict(sources(**dict(GOOD, **kw)), capraise=iss))
         p = Bc(lambda t, a: [scl_p])
-        ck("tăng vốn đang chạy ⇒ FLAG CAPITAL_RAISE_PENDING (bằng chứng có 15.38%)",
-           p["status"] == "FLAG" and codes(p) == ["CAPITAL_RAISE_PENDING"] and "15.38%" in p["flags"][0]["evidence"], codes(p))
+        ck("tăng vốn đang chạy ⇒ gói VẪN CLEARED, chỉ WARNING CAPITAL_RAISE_PENDING (user chọn (b): không chặn mua; bằng chứng có 15.38%)",
+           p["status"] == "CLEARED" and codes(p) == [] and
+           [w["code"] for w in p["warnings"]] == ["CAPITAL_RAISE_PENDING"] and "15.38%" in p["warnings"][0]["evidence"],
+           (codes(p), p["warnings"]))
         p = Bc(boom)
         ck("nguồn phát hành lỗi ⇒ CAPITAL_RAISE_NA + lỗi thật trong source_errors (§29)",
            codes(p) == ["CAPITAL_RAISE_NA"] and "nguồn hỏng giả" in p["source_errors"].get("capital_raise", ""), (codes(p), p["source_errors"]))
@@ -126,8 +128,11 @@ def run_inner():
            p["status"] == "CLEARED" and any(w["code"] == "CAPITAL_RAISE_INFO" for w in p["warnings"]), (codes(p), p["warnings"]))
         os_rows = [dict(r, OShares=v) for r, v in zip(fin_rows(), (38_836_815, 37e6, 32e6, 24e6, 22_392_839))]
         p = Bc(lambda t, a: [scl_p], fin=os_rows)
-        ck("cờ tăng vốn kèm số CP lưu hành 4 quý +73.4% (OShares P0/P4)",
-           any("+73.4%" in f["evidence"] for f in p["flags"] if f["code"] == "CAPITAL_RAISE_PENDING"), p["flags"])
+        ck("cảnh báo tăng vốn kèm số CP lưu hành 4 quý +73.4% (OShares P0/P4)",
+           any("+73.4%" in w["evidence"] for w in p["warnings"] if w["code"] == "CAPITAL_RAISE_PENDING"), p["warnings"])
+        p0 = Bc(lambda t, a: [])
+        ck("flags_hash KHÔNG đổi khi có cảnh báo tăng vốn (ack cũ không bị mất hiệu lực)",
+           P.flags_hash(p["flags"]) == P.flags_hash(p0["flags"]) and p["flags_hash"] == p0["flags_hash"], (p["flags_hash"], p0["flags_hash"]))
 
         # 2. fail-closed: mỗi nguồn hỏng ⇒ cờ *_NA ⇒ FLAG
         cases = [
@@ -594,7 +599,7 @@ def run_inner():
 MUTANTS = [
     # tăng vốn (29/10)
     ("lag_dd_pack.py", '        flags.append(_f("CAPITAL_RAISE_NA", errors.get("capital_raise")))', "        pass"),
-    ("lag_dd_pack.py", "        flags += cr_flags\n", ""),
+    ("lag_dd_pack.py", "capital_raise_eval(rows or [], iss, asof)[1]", "capital_raise_eval(rows or [], iss, asof)[0]"),
     ("lag_dd_pack.py", '        "warnings": soft_warnings(ev) + cr_warn,', '        "warnings": soft_warnings(ev),'),
     ("lag_dd_pack.py", "    g12 = os_[0] / os_[4] - 1 if len(os_) == 5 and os_[0] and os_[4] else None", "    g12 = None"),
     # DCF RICH sâu/nhẹ (user chốt 24/10, arch-review: mutant NaN từng sống sót)
