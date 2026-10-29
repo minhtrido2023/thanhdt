@@ -304,3 +304,6 @@
 
 ## Archived 2026-10-28 (keep=6 days=5 require_done=True)
 - [2026-10-22T12:05:22Z] [2026-10-22 19:xx ICT] Plan SpaceX 10-23 XONG HOLD ALL 0 lenh (job DollarBill_20261022_120433); LAG HT1/SCL/VPB vao ~10-26 can cash (avail 21,96tr, egg 851tr); cho duyet truoc 08:45 ICT 23/10
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-23T12:06:24Z] [2026-10-23 19:xx ICT] Plan ZaloPay 10-26 XONG HOLD ALL 0 lenh (job DollarBill_20261023_120512); LAG HT1/SCL/VPB due 10-26 DEFER (avail 3.748d, egg 535tr); cho duyet truoc 08:45 ICT 26/10
