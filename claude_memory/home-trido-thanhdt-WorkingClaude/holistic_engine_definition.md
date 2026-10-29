@@ -175,9 +175,9 @@ All system configs lose < 1/2 VNINDEX (-32.8%):
 | Defensive (DD -20%) | BestCalmar HC 10p 30d -20% | 20-24% CAGR | -18% | weekly |
 | Passive | MEGA 5p 90d -15% | 15-20% CAGR | -25% | monthly |
 
-## Final v2 (deposit rate 3%, T+1 + T+3 + tax 0.1%) + Walk-Forward Validation
+## Final v2 ([REDACTED] rate 3%, T+1 + T+3 + tax 0.1%) + Walk-Forward Validation
 
-**Cash idle yield reduced from 6% → 3%/yr** (more realistic non-term VN deposit rate).
+**Cash idle yield reduced from 6% → 3%/yr** (more realistic non-term VN [REDACTED] rate).
 Effect: -1pp CAGR for cash-heavy strategies (MEGA), minimal for fully-deployed (HIGH_CONV/BALANCED).
 
 **Walk-forward IS (2014-2019) vs OOS (2020-2026) results:**
@@ -1030,7 +1030,7 @@ Best DD across all variants (-17.3%) but CAGR -2.59pp.
 
 State-exit logic technically works but the slot-recycling benefit doesn't materialize because:
 1. New entries during CRISIS are blocked (state filter at SQL level)
-2. Capital sits in cash earning only 3%/yr deposit
+2. Capital sits in cash earning only 3%/yr [REDACTED]
 3. Original plan would've TIME-exited eventually anyway
 
 ### 2026-Q1 specific behavior (user's concern)

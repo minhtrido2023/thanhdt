@@ -31,7 +31,7 @@ Artifacts retained for future LH v3 research (multi-factor direction).
 | Sector | **All** (incl REIT + REIT_RES + KCN) | Excluding REIT cuts -5pp CAGR; KCN long-cycle alpha critical |
 | Rebal trigger | Median Release_Date + 30 days | Allow market to digest Q reports |
 | Costs | slip 0.10% in / 0.15% out, tax 0.10%, liq cap 20% ADV × 5d max fill | Same envelope as BA canonical |
-| Cash on idle | 1% annual deposit | Realistic |
+| Cash on idle | 1% annual [REDACTED] | Realistic |
 | Stop loss | **None** | Long-hold thesis; accept DD for full FA alpha capture |
 | NAV | 50B VND | Canonical |
 

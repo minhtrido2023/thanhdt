@@ -120,7 +120,7 @@ Trade-off: marginal weakening 2018-19/2020-22 in exchange for big 2023-26 gain.
 ### Why ETF in bear helps IS
 
 - IS 2014-2019 has long sideways/mild-bear periods (2014 H2, 2015-16, 2018-19)
-- During state==2 BEAR, V_PROD held idle cash (0% deposit_annual in spec)
+- During state==2 BEAR, V_PROD held idle cash (0% [REDACTED]_annual in spec)
 - C3_cons: 50% of idle cash → VN30 ETF
 - Even tracking VNI (-5 to +10% during bear/sideways), beats holding 0%
 - Recovers ~2-3pp of IS that SV_TIGHT loosening would otherwise sacrifice

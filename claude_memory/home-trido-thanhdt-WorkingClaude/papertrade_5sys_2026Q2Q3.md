@@ -24,7 +24,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 - ETF schedule: `cash_etf_states={3: 0.7}` (only NEUTRAL has ETF parking)
 - Tier weights: flat 10% × max_[REDACTED]=10 (default equal-weight)
 - LAGGED leg: NONE
-- Cost: deposit=0%, borrow=10%, TC=0.1%/side, ETF friction=0.15%/side
+- Cost: [REDACTED]=0%, borrow=10%, TC=0.1%/side, ETF friction=0.15%/side
 
 **12y backtest baseline** (from `test_rolling_m3_v121_ensemble.py` yesterday):
 - FULL CAGR: **+21.14%** / Sharpe 1.45 / MaxDD -17.82% / Wealth 10.71×

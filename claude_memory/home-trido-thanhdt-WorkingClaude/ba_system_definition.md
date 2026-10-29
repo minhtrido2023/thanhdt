@@ -134,7 +134,7 @@ VNINDEX -33% YTD, BA-system **+2.6%** YTD (essentially flat). 5-state regime cor
 ✓ Tiered exit slippage — round 10
 ✓ BL20 blacklist — round 7
 ✓ Stop -20% (kept conservative, NOT -25%) — round 14/15
-✓ **V6 ETF parking (70% of idle cash → VN30 ETF in NEUTRAL state)** — round 18 breakthrough. At realistic 1% deposit, CAGR 17.60% (vs 13.95% no-ETF), Sharpe 1.16, DD -17.4%. BEATS even 3% deposit assumption.
+✓ **V6 ETF parking (70% of idle cash → VN30 ETF in NEUTRAL state)** — round 18 breakthrough. At realistic 1% [REDACTED], CAGR 17.60% (vs 13.95% no-ETF), Sharpe 1.16, DD -17.4%. BEATS even 3% [REDACTED] assumption.
 ✓ **F1 Fresh-Q Filter (days_since_release ≤ 60 for BA-core)** — round 19. Skip BA-core entries when latest quarterly report >60 days stale. Targets Q1 (Apr-May) and Q4 (Jan-Feb) earnings season risk. Per-season: Q1 win rate 65.9% → 92.3%, Q4 56.9% → 68.9%. 11-month forward validation: CAGR +6.23pp, DD -1.63pp, win rate +9.9pp, STOPs -6/-55%.
 
 ✓ **REVERT to ORIGINAL 5-state (2026-05-17)** — v2g 5-state (deployed 2026-05-17 with claim +1.28pp standalone) was tested against BA-system stack and FAILED: -2.40pp CAGR (17.44% vs 19.84% ORIGINAL), -0.18 Sharpe, **-6.9pp DD WORSE**. Reverted via BQ table swap. Lesson: state-machine optimizations don't transfer to BA-system; smoothing in original state provides stable tier classifications. v2g archived in `vnindex_5state_v2g_archive_20260512`.

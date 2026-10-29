@@ -77,7 +77,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 - Slippage 0.10% entry / 0.15% exit
 - VN tax 0.10% on sales
 - Liquidity cap 20% ADV × 5 day max fill
-- 1% deposit on idle cash
+- 1% [REDACTED] on idle cash
 
 ### Validated metrics (LH standalone 50B, full 12y)
 - LH baseline (gated, A+B, staggered): CAGR **19.85%** / Sharpe **1.16** / MaxDD **-26.66%** / Calmar **0.74**

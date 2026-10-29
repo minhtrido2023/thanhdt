@@ -1,0 +1,43 @@
+Vietnam | Inflation Rate (CPI YoY) | monthly | vietnam/inflation-cpi
+Vietnam | Inflation Rate MoM | monthly | vietnam/inflation-rate-mom
+Vietnam | Core Inflation Rate | monthly | vietnam/core-inflation-rate
+Vietnam | GDP Annual Growth Rate (YoY) | quarterly | vietnam/gdp-growth-annual
+Vietnam | GDP (nominal) | yearly | vietnam/gdp
+Vietnam | GDP per Capita | yearly | vietnam/gdp-per-capita
+Vietnam | GDP from Construction | quarterly | vietnam/gdp-from-construction
+Vietnam | Interest Rate (SBV policy rate) | event | vietnam/interest-rate
+Vietnam | Government Bond Yield 10Y | daily | vietnam/government-bond-yield
+Vietnam | Currency USD/VND | daily | vietnam/currency
+Vietnam | Interbank Rate 3M | daily | vietnam/interbank-rate
+Vietnam | Foreign Exchange Reserves | monthly | vietnam/foreign-exchange-reserves
+Vietnam | Current Account | quarterly | vietnam/current-account
+Vietnam | Balance of Trade | monthly | vietnam/balance-of-trade
+Vietnam | Exports | monthly | vietnam/exports
+Vietnam | Imports | monthly | vietnam/imports
+Vietnam | Foreign Direct Investment | monthly | vietnam/foreign-direct-investment
+Vietnam | Manufacturing PMI | monthly | vietnam/manufacturing-pmi
+Vietnam | Industrial Production YoY | monthly | vietnam/industrial-production
+Vietnam | Retail Sales YoY | monthly | vietnam/retail-sales-annual
+Vietnam | Government Debt to GDP | yearly | vietnam/government-debt-to-gdp
+Vietnam | Government Budget (% GDP) | yearly | vietnam/government-budget
+Vietnam | Tourist Arrivals | monthly | vietnam/tourist-arrivals
+Vietnam | Car Registrations | monthly | vietnam/car-registrations
+Vietnam | Unemployment Rate | quarterly | vietnam/unemployment-rate
+Vietnam | Wages | quarterly | vietnam/wages
+Vietnam | Credit Rating | event | vietnam/rating
+United States | Government Bond Yield 10Y | daily | united-states/government-bond-yield
+United States | 2 Year Note Yield | daily | united-states/2-year-note-yield
+United States | Fed Funds Rate | event | united-states/interest-rate
+United States | Dollar Index DXY | daily | united-states/currency
+United States | VIX | daily | united-states/volatility
+United States | S&P 500 | daily | united-states/stock-market
+United States | Inflation Rate (CPI YoY) | monthly | united-states/inflation-cpi
+United States | Unemployment Rate | monthly | united-states/unemployment-rate
+United States | ISM Manufacturing PMI | monthly | united-states/business-confidence
+China | Currency USD/CNY | daily | china/currency
+Japan | Currency USD/JPY | daily | japan/currency
+China | NBS Manufacturing PMI | monthly | china/business-confidence
+China | RatingDog (ex-Caixin) Manufacturing PMI | monthly | china/manufacturing-pmi
+China | Inflation Rate (CPI YoY) | monthly | china/inflation-cpi
+China | Producer Prices Change (PPI YoY) | monthly | china/producer-prices-change
+China | GDP Annual Growth Rate | quarterly | china/gdp-growth-annual

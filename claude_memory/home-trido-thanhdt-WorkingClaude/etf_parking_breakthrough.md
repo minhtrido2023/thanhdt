@@ -1,6 +1,6 @@
 ---
 name: ETF parking — V6 breakthrough
-description: BA-system v10.1 enhancement — park 70% of idle cash in VN30 ETF during NEUTRAL state. At realistic 1% deposit rate, lifts CAGR +3.65pp to 17.60%, Sharpe to 1.16, DD better -3.9pp. Beats even 3% deposit assumption.
+description: BA-system v10.1 enhancement — park 70% of idle cash in VN30 ETF during NEUTRAL state. At realistic 1% [REDACTED] rate, lifts CAGR +3.65pp to 17.60%, Sharpe to 1.16, DD better -3.9pp. Beats even 3% [REDACTED] assumption.
 type: project
 originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 ---
@@ -32,7 +32,7 @@ originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 | **3.0% (original assumption)** | **17.01%** | **1.06** |
 | 5.0% | 17.79% | 1.11 |
 
-**At 1% deposit: CAGR drops -3.13pp** vs 3% assumption.
+**At 1% [REDACTED]: CAGR drops -3.13pp** vs 3% assumption.
 
 ### V6 ETF parking solution
 
@@ -43,7 +43,7 @@ originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 - 0.05% friction per side on rebalance (ETF spread)
 - Rebalance threshold: only when delta > 0.5% of cash pool
 
-### Test results — single-book BAL+Fin/RE-max-4 at 50B (deposit 1% realistic)
+### Test results — single-book BAL+Fin/RE-max-4 at 50B ([REDACTED] 1% realistic)
 
 | Variant | CAGR | Sharpe | DD | Calmar |
 |---|---|---|---|---|
@@ -59,14 +59,14 @@ originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 
 | Variant | CAGR | Sharpe | DD | Calmar | NAV end |
 |---|---|---|---|---|---|
-| P0 (3% deposit, no ETF) — ORIGINAL | 15.97% | 1.08 | -21.0% | 0.76 | 306.4B |
-| P1 (1% deposit, no ETF) — REALISTIC | 13.95% | 1.00 | -21.3% | 0.65 | 247.1B |
+| P0 (3% [REDACTED], no ETF) — ORIGINAL | 15.97% | 1.08 | -21.0% | 0.76 | 306.4B |
+| P1 (1% [REDACTED], no ETF) — REALISTIC | 13.95% | 1.00 | -21.3% | 0.65 | 247.1B |
 | **P2 (1% dep + V6 ETF 70% NEU)** | **17.60%** | **1.16** | **-17.4%** | **1.01** | **363.5B** |
 
 **P2 vs P1: +3.65pp CAGR, +0.16 Sharpe, DD better -3.9pp**
 **P2 vs P0: +1.63pp CAGR, +0.08 Sharpe, DD better -3.6pp**
 
-V6 ETF parking at realistic 1% deposit BEATS the original 3% deposit assumption.
+V6 ETF parking at realistic 1% [REDACTED] BEATS the original 3% [REDACTED] assumption.
 
 ### Capital allocation in P2 (avg across 12 years)
 
@@ -140,6 +140,6 @@ ETF benefit scales well — VN30 ETF has deep liquidity.
 ### Engine extension
 
 `simulate_holistic_nav.py` extended with new params (round 18):
-- `deposit_annual` — yield on idle cash (default 0.03 = 3%/yr; use 0.01 realistic)
+- `[REDACTED]_annual` — yield on idle cash (default 0.03 = 3%/yr; use 0.01 realistic)
 - `cash_etf_states` — dict {state_int: etf_fraction} (e.g., {3: 0.7} for V6)
 - `vn30_underlying` — daily VN30 close prices for ETF returns
