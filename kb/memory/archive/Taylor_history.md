@@ -1629,3 +1629,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-28T16:40:14Z] [lot-exit 10-28] XONG @24dd0a250 nhanh session/lot-exit-20261028 (wt-lot-exit-20261028, chua merge) — CHO Mike arch-review + go SELL VPB 700 khoi plan ZaloPay 10-29, chen lai 282
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T16:59:26Z] [lot-exit r2 28/10] XONG @6b51999a9 nhanh session/lot-exit-20261028 (chua merge) — CHO Mike arch-review vong 3; plan live ZaloPay 10-29 VAN co SELL VPB 700, can go + chen 282
