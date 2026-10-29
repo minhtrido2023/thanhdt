@@ -1611,3 +1611,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-27T04:37:16Z] [dri-q3 27/10] XONG job Taylor_20261027_042354: REPORT_Q3_UPDATE.md (chua commit) — GIU theo KH, de xuat rieng giam 50% cho user; CHAM tiep khi SXKD thang 10 DRI ra (~10/11); F khoa mu blind_scorable=no
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-27T08:49:45Z] [dri-val-supply-adj 27/10] XONG job Taylor_20261027_084046 @a0c629ed4: FV 60/40 13,7-15,7k, nhay nhat RSS3 mid; CHO Mike goi skeptic (khong tu chot)
