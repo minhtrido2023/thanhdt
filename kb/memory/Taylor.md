@@ -23,3 +23,4 @@
 - [2026-10-29T06:15:19Z] [scl-investor-report 29/10] XONG job Taylor_20261029_055834: research/dd_SCL_20261029/investor_report/ (md+pdf 14tr+html+figs, chua commit) — CHO Mike gui email/duyet
 - [2026-10-29T07:42:07Z] [capraise 29/10] XONG @251ebcdaf nhanh session/capraise-20261029 (wt-capraise-20261029, chua merge) — CHO Mike arch-review + user duyet merge; kb/cron_registry dong 109 can sua mo ta
 - [2026-10-29T07:50:37Z] [pvp-investor-report 29/10] XONG job Taylor_20261029_074021: research/dd_PVP_20261029/investor_report/ (md+pdf 14tr+html+10 figs, chua commit); REPORT.md v2.1 7 sua skeptic — CHO Mike doc kiem/gui email
+- [2026-10-29T09:42:45Z] [dri-investor-report 29/10] XONG job Taylor_20261029_093106: research/dd_DRI_20261027/investor_report/ (md+pdf 17tr+html+10 figs, chua commit) — CHO Mike doc kiem/gui email
