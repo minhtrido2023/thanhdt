@@ -248,6 +248,10 @@ def sleeve_parts(ticker, qty, split, unverified, ledger_err, journal_sleeve, par
         parts = [(sl, q + rest) if sl == old else (sl, q) for sl, q in parts]
         if not any(sl == old for sl, _ in parts):
             parts.append((old, rest))
+    if abs(sum(q for _, q in parts) - qty) > 1e-6:   # bất biến: không để mất/thừa cp khỏi báo cáo
+        why = f"Σ phần {sum(q for _, q in parts):g}cp ≠ broker {qty:g}cp (bug tách sleeve)"
+        print(f"portfolio_status: {ticker}: {why} ⇒ quay về classify_sleeve toàn mã", file=sys.stderr)
+        return [(old, qty)], why
     return parts, None
 
 
@@ -875,6 +879,9 @@ def build_output(account, date, returns_fn=None, lag_lots_fn=None, ledger_split_
             pnl_txt = f"{sum(pl_by_part[(sleeve, tk)][0] for tk, *_ in rows) / den * 100:+.1f}%"
         else:
             pnl_txt = "—"
+        split_in_sleeve = sorted(tk for tk, *_ in rows if tk in split_tickers)
+        if split_in_sleeve and pnl_txt != "—":
+            pnl_txt = "≈" + pnl_txt   # không phải số chính xác: có phần mã tách theo giá vốn bình quân toàn mã
         pct_nav = f"{tot_value / nav * 100:.1f}%" if nav else "—"
         note = SLEEVE_NOTE.get(sleeve) or ""
         if sleeve == "PARK":
@@ -886,6 +893,10 @@ def build_output(account, date, returns_fn=None, lag_lots_fn=None, ledger_split_
                     note += f" | kế tiếp: ~{next_date} (ước tính Q{q})"
             else:
                 note = "custom30V"
+        if split_in_sleeve:
+            note = (note + "; " if note else "") + (
+                f"≈ vì {', '.join(split_in_sleeve)} nằm lẫn nhiều sổ: phần của mã tính theo giá vốn bình quân "
+                "toàn mã × tỉ lệ cp, không phải giá vốn riêng từng lô")
         lines.append(f"| {SLEEVE_LABEL[sleeve]} ({len(rows)} mã) | {tot_value / 1e6:,.1f}M | "
                      f"{pct_nav} | {pnl_txt} | {note} |")
     egg_pct = f"{egg / nav * 100:.1f}%" if nav else "—"
@@ -923,7 +934,8 @@ def build_output(account, date, returns_fn=None, lag_lots_fn=None, ledger_split_
             if tk in split_tickers:
                 # SAU "MÃ giá_trị, ±x%" — cổng tỉ suất (`report_return_gate.POSBIT_RE`) đọc dòng vị
                 # thế theo dạng đó; chèn "(…cp)" giữa mã và giá trị sẽ khiến cổng không đọc được.
-                extra.append(f"phần {qty:,.0f}cp trong sổ này (mã nằm lẫn nhiều sổ)")
+                extra.append(f"phần {qty:,.0f}cp trong sổ này (mã nằm lẫn nhiều sổ; tỉ suất là của TOÀN MÃ "
+                             "theo giá vốn bình quân, không phải riêng phần này)")
             if sleeve == "LAG":
                 if lag_err:
                     h = f"⚠️ sổ lô LAG không dựng được — không tính được hạn T+{LAG_EXIT_SESSIONS_FIXED}"
@@ -1033,9 +1045,9 @@ def build_output(account, date, returns_fn=None, lag_lots_fn=None, ledger_split_
     n_lag_upcoming = status.get("n_lag_upcoming") or 0
     if n_lag_upcoming:
         flags.append(f"LAG: {n_lag_upcoming} candidate đang trong cửa sổ upcoming (chưa vào lệnh).")
-    stop_blind = sorted(tk for sl, rows in sleeves.items()
+    stop_blind = sorted(set(tk for sl, rows in sleeves.items()
                         if sl in STOP_LOSS_PCT_BY_SLEEVE and sl not in AUTO_STOP_SLEEVES
-                        for tk, *_ in rows if tk in no_ret)
+                        for tk, *_ in rows if tk in no_ret))
     if stop_blind:
         flags.append(f"⚠️ Chưa có tỉ suất nên KHÔNG đánh giá được khoảng cách tới ngưỡng xử lý: "
                      f"{', '.join(stop_blind)}.")

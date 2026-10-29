@@ -148,7 +148,20 @@ def ts(s: str) -> float:
     return _dt.datetime.fromisoformat(s).timestamp()
 
 
+def anti_drift(target: Path) -> None:
+    """Mọi event `_journal("…")` của executor phải nằm trong EXECUTOR_EVENTS của `target` (chống trôi)."""
+    ex = HERE.parent.parent / "trading_bot" / "executor.py"  # suy từ vị trí file: <WorkingClaude>/{mike|wt-*}/bin/ -> ../../trading_bot
+    if not ex.is_file():
+        check(False, f"anti-drift: không thấy {ex}"); return
+    emitted = set(re.findall(r'_journal\(\s*"([A-Z0-9_]+)"', ex.read_text(encoding="utf-8")))
+    m = re.search(r'EXECUTOR_EVENTS = frozenset\("""(.*?)"""', target.read_text(encoding="utf-8"), re.S)
+    allow = set(m.group(1).split()) if m else set()
+    check(bool(emitted) and bool(allow), f"anti-drift: đọc được event (executor={len(emitted)}, allowlist={len(allow)})")
+    check(not (emitted - allow), f"anti-drift: event executor thiếu trong allowlist: {sorted(emitted - allow)}")
+
+
 def core(target: Path) -> None:
+    anti_drift(target)
     T0 = "2026-10-20T09:06:00+07:00"
     # 1-3: mở + idempotent theo (gate,key) + ack triaged-needs-human (B4)
     R = mkroot()
@@ -1144,6 +1157,7 @@ MUTATIONS = [
     ("M4 NB-B chỉ ghi last_open cho expired", 'elif rec.get("status") in DONE:', 'elif rec.get("status") == "expired":'),
     ("G3a bằng chứng lại tính mọi event (BOOK_TRANSFER)", 'if (row.get("event") or "") not in EXECUTOR_EVENTS:', 'if False:'),
     ("G3b quay lại mtime", 'executor_event_since(journal, since))', '(mtime_ict(journal).isoformat(), "") if mtime_ict(journal) > since else (None, "mtime"))'),
+    ("R1 xoá WAIT_T2_SETTLEMENT khỏi allowlist", 'WAIT_T2_SETTLEMENT RULE_A_REF_BLOCK', 'RULE_A_REF_BLOCK'),
     ("G3c bỏ lọc ts > since", 'if ts > since:\n                    return ts', 'if True:\n                    return ts'),
     ("M6 NB-D không đặt closed_at", 'rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện', 'rec.update(status="closed",\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện'),
 ]

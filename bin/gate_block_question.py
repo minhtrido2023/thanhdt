@@ -485,7 +485,8 @@ def mtime_ict(p: Path) -> dt.datetime:
     return dt.datetime.fromtimestamp(p.stat().st_mtime, ICT)
 
 
-# Event do EXECUTOR ghi (mọi `self._journal("…")` trong trading_bot/executor.py, grep 2026-10-29) —
+# Event do EXECUTOR ghi (các `_journal("…")` trong trading_bot/executor.py; selfcheck chống trôi so khớp regex
+# `_journal\(\s*"([A-Z0-9_]+)"` ⇒ tập đó PHẢI ⊆ allowlist này) —
 # bằng chứng "bot đã chạy lại qua cổng". CỐ Ý allowlist, KHÔNG phải mtime: ghi khác vào cùng file
 # (vd park_holdings BOOK_TRANSFER, GĐ3 clearing) làm mtime tăng mà bot chưa chạy ⇒ phục hồi giả.
 # Event lạ/mới ⇒ không tính ⇒ fail-closed (giữ câu hỏi mở), thêm vào đây khi executor có event mới.
@@ -494,7 +495,7 @@ PLACE PLACE_FAIL PLACE_FAIL_STOPPED PLACE_BLOCK_CLEARED FILL DONE CANCEL CANCEL_
 POLL_FAIL POSITIONS_FAIL PX_HIST_FAIL STEP_FAIL SPLIT_LEG_ERROR NO_QUOTE WAIT_CASH WAIT_QUOTA
 REFRESH_SKIP HYBRID_DEFER GHOST_ORDER TICK_RETRY_OK PROBE_LINGER_START PROBE_LINGER_END
 EXTREME_PAUSE EXTREME_FLOOR_GUARD EXPVOL_SHADOW EXPVOL_SHADOW_ERR EXPVOL_PACING
-RULE_A_REF_BLOCK HARD_CEILING_BLOCK HARD_CEILING_SKIP_ATC LEVER_PACKAGE_UNAUTHORIZED
+WAIT_T2_SETTLEMENT RULE_A_REF_BLOCK HARD_CEILING_BLOCK HARD_CEILING_SKIP_ATC LEVER_PACKAGE_UNAUTHORIZED
 ATC ATC_FAIL ATC_SPLIT_SKIP ATC_AFTER_BLOCK ATC_POSTCLOSE_WAIT ATC_POSTCLOSE_TIMEOUT
 ATC_POSTCLOSE_SKIP ATC_POSTCLOSE_ERROR ATC_POSTCLOSE_DONE ATC_POSTCLOSE_ABORT
 UPCOM_SKIP_ATC ODD_LOT_SKIP_ATC

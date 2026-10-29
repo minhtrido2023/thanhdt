@@ -654,7 +654,10 @@ def run():
         lag_row = next((ln for ln in out_g.splitlines() if ln.startswith("| LAG (")), "")
         check("G3 sleeve: dòng LAG = 3 mã (MX1 chỉ phần 1.500cp, ON1, TR1) 39,0M, lãi/lỗ +8,1% (= (1,5M+0,25M+0,2M)/24M) — mã lẫn sổ "
               "không bị đếm 2 lần ở giá trị lẫn lãi/lỗ",
-              lag_row.startswith("| LAG (3 mã) | 39.0M | ") and "| +8.1% |" in lag_row, lag_row)
+              lag_row.startswith("| LAG (3 mã) | 39.0M | ") and "| ≈+8.1% |" in lag_row, lag_row)
+        check("R3 sleeve có mã tách: tổng mang ≈ + ghi chú nêu giá vốn bình quân toàn mã; dòng mã nói tỉ suất là của TOÀN MÃ",
+              "≈ vì MX1 nằm lẫn nhiều sổ" in lag_row and "giá vốn bình quân" in lag_row
+              and "tỉ suất là của TOÀN MÃ" in out_g, lag_row)
         bits_g = [(m[0], float(m[1])) for m in _rrg.POSBIT_RE.findall(out_g)]
         tmp_g = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8")
         tmp_g.write(out_g); tmp_g.close()
@@ -673,6 +676,37 @@ def run():
         parts_ok = ps.sleeve_parts("MX1", 1786.0, {"MX1": {"LAG": 1500, "PARK": 286}}, set(), None, {}, set(), set())
         check("G3 sleeve: sleeve_parts trả đúng phần theo thứ tự SLEEVE_ORDER, không fallback",
               parts_ok == ([("PARK", 286), ("LAG", 1500)], None), str(parts_ok))
+        # R2 vòng 2: mã vừa thuộc sleeve vừa có phần CORP_ACTION (dữ liệu thật 2026-10-28: SpaceX MBB
+        # PARK 65 + CORP_ACTION 110; ZaloPay MBB PARK 32 + CORP_ACTION 20) — phần kỹ thuật cộng vào sleeve
+        import inspect
+        mbb_books = {"MBB": {"PARK": 65, "CORP_ACTION": 110}}
+        mbb = ps.sleeve_parts("MBB", 175.0, mbb_books, set(), None, {"MBB": "PARK"}, {"MBB"}, set())
+        check("R2 sleeve: MBB {PARK:65, CORP_ACTION:110} ⇒ đủ 175cp trong PARK, KHÔNG fallback",
+              mbb == ([("PARK", 175)], None), str(mbb))
+        mbb2 = ps.sleeve_parts("MBB", 52.0, {"MBB": {"PARK": 32, "CORP_ACTION": 20}}, set(), None,
+                               {"MBB": "PARK"}, {"MBB"}, set())
+        check("R2 sleeve: ZaloPay MBB {PARK:32, CORP_ACTION:20} ⇒ 52cp PARK", mbb2 == ([("PARK", 52)], None), str(mbb2))
+        src_sp = inspect.getsource(ps.sleeve_parts)
+        pm1_old = "parts = [(sl, q + rest) if sl == old else (sl, q) for sl, q in parts]"
+        check("R2 mutant PM1 áp được lên mã nguồn", pm1_old in src_sp)
+        ns = dict(vars(ps))
+        exec(src_sp.replace(pm1_old, "parts = [(sl, q) for sl, q in parts]"), ns)
+        with contextlib.redirect_stderr(io.StringIO()):
+            pm1 = ns["sleeve_parts"]("MBB", 175.0, mbb_books, set(), None, {"MBB": "PARK"}, {"MBB"}, set())
+        check("R2 mutant PM1 (bỏ cộng phần kỹ thuật) bị bắt: không còn trả ([('PARK',175)], None)",
+              pm1 != ([("PARK", 175)], None) and pm1[1] is not None and "Σ phần" in pm1[1], str(pm1))
+        keep_order = ps.SLEEVE_ORDER
+        ps.SLEEVE_ORDER = ["PARK"]   # LAG có trong sổ nhưng không được liệt kê ⇒ Σ phần ≠ qty
+        err_sp = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(err_sp):
+                inv = ps.sleeve_parts("MX9", 150.0, {"MX9": {"LAG": 100, "PARK": 50}}, set(), None,
+                                      {"MX9": "LAG"}, set(), set())
+        finally:
+            ps.SLEEVE_ORDER = keep_order
+        check("R2 bất biến Σ phần ≠ qty ⇒ fallback classify_sleeve toàn mã + stderr `portfolio_status:` nêu lý do",
+              inv[0] == [("LAG", 150.0)] and inv[1] and "Σ phần" in inv[1]
+              and err_sp.getvalue().startswith("portfolio_status: MX9:"), str((inv, err_sp.getvalue())))
         ps.broker_positions_with_cost = lambda no_, d: {k: dict(v) for k, v in pos.items()}
         ps.sleeve_map_from_journal = lambda a: dict(journal)
         ps.current_park_basket = lambda: ({"QQ0"}, None)
