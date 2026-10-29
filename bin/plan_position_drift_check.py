@@ -401,6 +401,36 @@ def sim_read(pos, ords, sim_at):
 
 
 # ── lõi ─────────────────────────────────────────────────────────────────────────────────────
+def _apply_manual_actions(res, account, account_no, date_str):
+    """Lệnh tay ĐÃ KHAI + broker xác nhận (`manual_actions`, 29/10) KHÔNG phải drift: phần KL chưa
+    giải thích ĐÚNG BẰNG Σ lệnh tay khai SAU mốc ⇒ bỏ cờ KL (giữ cờ giá/lẫn hệ giá nếu có). Lệch khai
+    ⇒ vẫn cờ. Sổ rỗng ⇒ không đổi gì. Selfcheck (MIKE_DRIFT_SELFCHECK=1) chỉ đọc sổ khi trỏ
+    MIKE_MANUAL_ACTIONS_FILE tường minh — không đọc sổ production."""
+    import manual_actions
+    if os.environ.get("MIKE_DRIFT_SELFCHECK") == "1" and not os.environ.get("MIKE_MANUAL_ACTIONS_FILE"):
+        return
+    try:
+        man = manual_actions.gate_fills(account, account_no, "", date_str,
+                                        notes_out=res["notes"]).get(date_str, [])
+    except manual_actions.ManualActionsError as e:
+        res["notes"].append(f"sổ lệnh tay hỏng — KHÔNG trừ lệnh tay đã khai ({e})")
+        return
+    if not man:
+        return
+    kept = []
+    for it in res["items"]:
+        m = sum((f["qty"] if f["side"] == "buy" else -f["qty"]) for f in man
+                if f["ticker"] == it["ticker"] and f"{date_str}T{f['time_ict']}" > it["base_ts"])
+        if m and it["qty_flag"] and it["qty_unexplained"] == m:
+            it.update(qty_unexplained=0, qty_flag=False, fills_unsure=False, manual_declared=m)
+            res["notes"].append(f"ℹ️ {it['ticker']}: KL đổi {m:+,} = lệnh tay đã khai (đã xác nhận "
+                                f"broker) — không cờ")
+            if not (it["px_flag"] or it["mixed_frame_now"]):
+                continue
+        kept.append(it)
+    res["items"] = kept
+
+
 def run_check(account, account_no, date_str, P, sim_at=None, now=None):
     now = now or now_ict()
     res = {"account": account, "account_no": account_no, "date": date_str,
@@ -487,6 +517,8 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
             seen.add(it["ticker"])
             it["kind"], it["base_ts"] = kind, base[0]
             res["items"].append(it)
+
+    _apply_manual_actions(res, account, account_no, date_str)
 
     orders_map, why = plan_orders_for(P["MIKE_DRIFT_PLAN_DIR"], account, date_str)
     for it in res["items"]:

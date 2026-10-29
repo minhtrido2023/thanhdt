@@ -195,11 +195,15 @@ def load_broker_fills(date_iso, account, wc_root, allow_fetch=True, fetch_timeou
     )
 
 
-def reconcile_lines(broker, plan_by_key, state_by_key):
+def reconcile_lines(broker, plan_by_key, state_by_key, manual_by_key=None):
     """Sinh các dòng báo cáo (list[str]) cho khối đối soát leg-3. Không in, không raise.
 
     plan_by_key / state_by_key: {(ticker, side): qty}. `state_by_key` = fill nội bộ bot ghi nhận.
+    `manual_by_key`: {(ticker, side): qty} lệnh tay ĐÃ KHAI + broker xác nhận (`manual_actions`,
+    29/10). Phần broker − state ĐÚNG BẰNG KL khai ⇒ không 🚨 (dòng ℹ️ do caller in); lệch khai
+    ⇒ vẫn 🚨 như cũ. None/rỗng ⇒ y hệt bản cũ.
     """
+    manual_by_key = manual_by_key or {}
     if not broker.available:
         return [f"ℹ️ Đối soát broker-statement (leg 3): bỏ qua — {broker.reason}."]
 
@@ -213,6 +217,11 @@ def reconcile_lines(broker, plan_by_key, state_by_key):
         planned = plan_by_key.get(key, 0)
         internal = state_by_key.get(key, 0)
         real = broker.qty(ticker, side)
+        if manual_by_key.get(key) and real - internal == manual_by_key[key]:
+            # lệnh tay đã khai giải thích ĐÚNG phần statement ngoài state ⇒ so phần còn lại
+            real -= manual_by_key[key]
+            if key not in plan_by_key and real == 0:
+                continue
         if key not in plan_by_key and real > 0:
             off_plan.append((ticker, side, real))
             continue

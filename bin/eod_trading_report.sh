@@ -574,11 +574,41 @@ for oid, p in parents.items():
     if sym:
         state_filled_by_ticker[sym] = state_filled_by_ticker.get(sym, 0) + p.get('filled', 0)
 
+# Lệnh tay ĐÃ KHAI + broker xác nhận (mike/bin/manual_actions.py, 29/10): hiện ℹ️, không 🚨; chỉ
+# phần dư KHÁC khai mới escalate (leg 2 dưới đây + leg 3). Không có file sổ ⇒ không import gì, y hệt
+# bản cũ. Sổ hỏng ⇒ 1 dòng ⚠️ trung tính trong báo cáo (bản SpaceX gửi nhà đầu tư: không lộ exception),
+# lý do THẬT ra stderr ⇒ log (§29); lệnh tay khi đó hiện như lệch — fail-closed.
+_manual_key, manual_lines = {}, []
+_manual_file = (os.environ.get('MIKE_MANUAL_ACTIONS_FILE')
+                or os.path.join(wc_root, 'data', 'user_manual_actions.json'))
+try:
+    if not os.path.exists(_manual_file):
+        raise FileNotFoundError
+    sys.path.insert(0, os.path.join(wc_root, 'mike', 'bin'))
+    import manual_actions
+    from broker_fill_confirm import account_no_for
+    _acct_no = account_no_for(wc_root, account)
+    _manual_key = manual_actions.by_key(manual_actions.gate_fills(
+        account, _acct_no, '', plan_date, path=_manual_file).get(plan_date, []))
+    manual_lines = manual_actions.report_lines(account, _acct_no, plan_date, path=_manual_file)
+except FileNotFoundError:
+    pass
+except Exception as e:
+    print(f"manual_actions: KHÔNG đọc được sổ lệnh tay ({account} {plan_date}) — "
+          f"{type(e).__name__}: {e}", file=sys.stderr)
+    manual_lines = ["⚠️ Chưa đối chiếu được sổ lệnh tay đã khai hôm nay — đội vận hành đang kiểm tra; "
+                    "lệnh tay (nếu có) hiện như lệch bên dưới."]
+_manual_by_sym = {}
+for (_t, _s), _q in _manual_key.items():
+    _manual_by_sym[_t] = _manual_by_sym.get(_t, 0) + _q
+
 mismatches = []
 if reconciled:
     for sym in plan_tickers:
         real = real_filled_by_ticker.get(sym, 0)
         internal = state_filled_by_ticker.get(sym, 0)
+        if _manual_by_sym.get(sym) and real - internal == _manual_by_sym[sym]:
+            continue          # phần lệch = đúng KL lệnh tay đã khai
         if real != internal:
             mismatches.append((sym, internal, real, real - internal))
 
@@ -608,19 +638,22 @@ try:
             state_by_key[k] = state_by_key.get(k, 0) + p.get('filled', 0)
 
     _bk = load_broker_fills(plan_date, account, wc_root)
-    broker_lines = reconcile_lines(_bk, plan_by_key, state_by_key)
+    broker_lines = manual_lines + reconcile_lines(_bk, plan_by_key, state_by_key,
+                                                  *([_manual_key] if _manual_key else []))
     if _bk.available:
         # CHỈ escalate khi hai nguồn ĐỘC LẬP bất đồng (nghi bug/lệnh ngoài luồng). Khớp thiếu
         # so với kế hoạch KHÔNG escalate — đó là thanh khoản mỏng, hành vi thị trường bình
         # thường (ca TV1 2026-08-11), escalate sẽ thành báo động giả mỗi phiên.
         for k in set(plan_by_key) | set(state_by_key) | set(_bk.by_key):
             real, internal = _bk.qty(*k), state_by_key.get(k, 0)
+            if _manual_key.get(k) and real - internal == _manual_key[k]:
+                real -= _manual_key[k]
             if real != internal or (k not in plan_by_key and real > 0):
                 broker_escalate.append({'ticker': k[0], 'side': k[1],
                                         'state_filled': internal, 'broker_filled': real,
                                         'in_plan': k in plan_by_key})
 except Exception as e:
-    broker_lines = [f"ℹ️ Đối soát broker-statement (leg 3): bỏ qua — lỗi {type(e).__name__}."]
+    broker_lines = manual_lines + [f"ℹ️ Đối soát broker-statement (leg 3): bỏ qua — lỗi {type(e).__name__}."]
 
 rows = []
 tot_value_planned = 0
