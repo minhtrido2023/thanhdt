@@ -122,10 +122,10 @@ class Sandbox:
             for lab, q in rows:
                 f.write(f"29/10/2026,BÁN,SCL,{ACCTS[lab]},{q},29600,{q * 29600},0.00088,0,0,0\n")
 
-    def run(self, lab, broker=None):
+    def run(self, lab, broker=None, asof=None):
         import park_holdings as PH
         pos = {t: {"qty": q, "market_price": 30000.0} for t, q in (broker or BROKER[lab]).items()}
-        return PH.park_holdings(lab, asof=ASOF, plan_dir=self.pl, exec_dir=self.ex,
+        return PH.park_holdings(lab, asof=asof or ASOF, plan_dir=self.pl, exec_dir=self.ex,
                                 broker=(pos, 0.0, {"source": "selfcheck"}), corp_actions=[],
                                 rights_subs=[], need_price=False)
 
@@ -200,12 +200,26 @@ def main():
     r = s.run("SpaceX", broker={"SCL": 500, "FPT": 1000})
     check("SCL" in r["unverified_tickers"], "T6: statement ≠ khai ⇒ vẫn chặn")
 
+    # T9 — statement LỚN HƠN khai (900 vs khai 800 = còn 1 lệnh bán tay KHÁC chưa khai) ⇒ không coi là đã khai
+    s.ledger([rec("SpaceX")])
+    s.statement([("SpaceX", 900)])
+    r = s.run("SpaceX", broker={"SCL": 200, "FPT": 1000})
+    check("SCL" in r["unverified_tickers"], "T9: statement 900 > khai 800 ⇒ vẫn UNVERIFIED (bán tay thừa chưa khai)")
+    s.statement(None)
+
     # T7 — statement có, sổ rỗng ⇒ hành vi cũ (bán tay chỉ-statement vẫn UNVERIFIED)
     s.ledger([])
     s.statement([("SpaceX", 800)])
     r = s.run("SpaceX")
     check(not mism(r) and "SCL" in r["unverified_tickers"], "T7: statement-only, không khai ⇒ UNVERIFIED như cũ")
     s.statement(None)
+
+    # T10 — asof TRƯỚC ngày khai ⇒ lệnh tay chưa được áp (không trừ lô sớm)
+    s.ledger([rec("SpaceX")])
+    r = s.run("SpaceX", broker={"SCL": 1100, "FPT": 1000}, asof="2026-10-28")
+    check(sum(l["qty"] for l in r["lots"] if l["ticker"] == "SCL") == 1100 and clean(r),
+          "T10: asof 28/10 < ngày khai 29/10 ⇒ KHÔNG trừ lô (1100 giữ nguyên, khớp broker 1100)")
+    s.ledger([])
 
     # T8 — mã ở >1 book (SCL LAG + PARK) ⇒ không xác định book bị trừ ⇒ vẫn chặn (B1)
     s.boot(extra=[("SpaceX", "SCL", "PARK", 100, "2026-09-01")])
@@ -231,11 +245,35 @@ MUTANTS = [
      'if rec["account"] != account_label or not', 'if not'),
     ("M4 statement ≠ khai vẫn coi là đã khai", "park_holdings.py",
      '.get((tk, "sell"), 0) == b - j:', '.get((tk, "sell"), 0) >= 0:'),
+    ("M5 statement > khai vẫn coi là đã khai (== → <=)", "park_holdings.py",
+     '.get((tk, "sell"), 0) == b - j:', '.get((tk, "sell"), 0) <= b - j:'),
+    ("M6 bỏ cận ngày trên của gate_fills", "manual_actions.py",
+     'not (after_date < rec["date"] <= upto_date)', 'not (after_date < rec["date"])'),
 ]
+
+
+def _run_child(mb):
+    """Chạy selfcheck trên bản bin `mb`. WC_ROOT đặt TƯỜNG MINH (bản copy ở /tmp không có wc_env.sh ⇒
+    wc_paths rơi về /tmp và crash trước mọi assertion — crash KHÔNG phải 'mutant bị bắt')."""
+    import wc_paths
+    wc = wc_paths.find_wc_root(os.path.join(HERE, "x"))
+    env = dict(os.environ, PH_MLS_BIN=mb, WC_ROOT=wc)
+    r = subprocess.run([sys.executable, os.path.join(HERE, os.path.basename(__file__))],
+                       env=env, capture_output=True, text=True)
+    return r.returncode, r.stdout, r.stderr
 
 
 def run_mutants():
     bad = 0
+    # đối chứng: bản KHÔNG đột biến phải xanh (rc=0) qua đúng đường chạy này — nếu không thì harness hỏng
+    base = tempfile.mkdtemp(prefix="ph_mls_base_")
+    mb0 = os.path.join(base, "bin")
+    shutil.copytree(HERE, mb0, ignore=shutil.ignore_patterns("__pycache__", "*.sh"))
+    rc0, out0, err0 = _run_child(mb0)
+    shutil.rmtree(base, ignore_errors=True)
+    if rc0 != 0:
+        print(f"HARNESS-BROKEN: bản không đột biến rc={rc0}\n{out0[-400:]}\n{err0[-400:]}")
+        return 2
     for name, fn, old, new in MUTANTS:
         tmp = tempfile.mkdtemp(prefix="ph_mls_mut_")
         mb = os.path.join(tmp, "bin")
@@ -245,15 +283,17 @@ def run_mutants():
         if src.count(old) != 1:
             print(f"MUTANT-SETUP-FAIL {name}: chuỗi gốc xuất hiện {src.count(old)} lần")
             bad += 1
+            shutil.rmtree(tmp, ignore_errors=True)
             continue
         if fn == "manual_actions.py" and "M3" in name:   # §12 thứ 2: bỏ luôn so tiểu khoản ở evidence_check
             src = src.replace("if not account_no or _norm_acct(account_no) != _norm_acct(rec[\"account_no\"]):",
                               "if False:")
         open(p, "w", encoding="utf-8").write(src.replace(old, new))
-        rc = subprocess.run([sys.executable, os.path.join(HERE, os.path.basename(__file__))],
-                            env=dict(os.environ, PH_MLS_BIN=mb), capture_output=True, text=True).returncode
-        killed = rc != 0
-        print(f"{'KILLED ' if killed else 'SURVIVED'} {name} (rc={rc})")
+        rc, out, err = _run_child(mb)
+        n_fail = sum(1 for ln in out.splitlines() if ln.startswith("FAIL "))
+        killed = n_fail >= 1          # bị bắt = ít nhất 1 assertion FAIL; traceback/crash KHÔNG tính
+        print(f"{'KILLED ' if killed else 'SURVIVED'} {name} (rc={rc}, {n_fail} FAIL"
+              f"{', CRASH' if 'Traceback' in err else ''})")
         bad += not killed
         shutil.rmtree(tmp, ignore_errors=True)
     print(f"\nmutants: {len(MUTANTS) - bad}/{len(MUTANTS)} bị bắt")
