@@ -1635,3 +1635,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-28T18:04:15Z] [clearing G1 29/10] XONG @1c4cd492e nhanh session/clearing-shadow-20261029 (wt-clearing-shadow-20261029, chua merge) — CHO Mike arch-review + quant-skeptic; G3 can user duyet cron 20:45 + apply_book_transfers
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T18:32:35Z] [clearing G1 vong2 29/10] XONG @eb786f0fe nhanh session/clearing-shadow-20261029 (chua merge) — CHO Mike arch-review vong 3 + quant-skeptic; G3 can user duyet cron + checklist R7
