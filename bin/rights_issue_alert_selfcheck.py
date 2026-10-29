@@ -74,10 +74,14 @@ def run_inner():
     ck("đổi ngày GDKHQ ⇒ báo lại", len(B("2026-10-24", POS, [moved], sent | set(d[0]["keys"]), is_hol)) == 1)
     ck("không giữ mã ⇒ im", B("2025-10-10", {"SpaceX": {"FPT": 1}}, [SCL25], set(), is_hol) == [])
     ck("trạng thái N (không thực hiện) ⇒ im", B("2025-10-10", POS, [dict(SCL25, issue_status_code="N")], set(), is_hol) == [])
-    ck("không phải Rights (DIV cổ phiếu) ⇒ im", B("2025-10-10", POS, [dict(SCL25, issue_method_code="DIV")], set(), is_hol) == [])
+    dv = B("2025-10-10", POS, [dict(SCL25, issue_method_code="DIV")], set(), is_hol)
+    ck("29/10: DIV cổ phiếu ⇒ BÁO mức INFO (không còn im), không có 'được mua'",
+       len(dv) == 1 and "INFO" in dv[0]["text"] and "CỔ TỨC BẰNG CP" in dv[0]["text"] and "được mua" not in dv[0]["text"], dv)
     ck("hồi cứu: sự kiện công bố SAU asof ⇒ im (không nhìn trước)", B("2025-10-13", POS, [SCL26], set(), is_hol) == [])
     ck("value_per_share có ⇒ ưu tiên", R.issue_price(dict(SCL25, value_per_share="10000")) == 10000.0)
     inner_b(R, B)
+    inner_capraise(R, B)
+    inner_cycle(R, B)
     inner_main(R)
     n = sum(1 for x in RESULTS if not x)
     print("RESULT:", "PASS" if not n else "FAIL")
@@ -121,6 +125,8 @@ def inner_b(R, B):
     ck("B4 (sau X1 merge): nói bot TỰ giữ lệnh thoát LAG + nếu là mã LAG + cách ack, KHÔNG còn 'CHƯA tự giữ'/'HOLD TAY'",
        all(x in tt for x in ("Bot TỰ giữ lệnh thoát", "nếu là mã LAG", "lag_rights_exit_hold.py --record"))
        and "CHƯA tự giữ" not in tt and "HOLD TAY" not in tt, tt)
+    ck("29/10 câu chữ: nêu user CÓ THỂ thoái bằng plan; KHÔNG cố định tên mã/ngày cụ thể trong mẫu định kỳ",
+       all(x in tt for x in ("KHÔNG cấm thoái", "thoái bằng plan")) and "SCL là ngoại lệ" not in tt and "29/10/2026" not in tt, tt)
     # B2
     ml = {"SpaceX": {"file": "active_nav_SpaceX.json", "computed_at": "2026-10-20"},
           "ZaloPay": {"file": "active_nav_ZaloPay.json", "computed_at": "2026-10-21"}}
@@ -136,12 +142,169 @@ def inner_b(R, B):
        all(x in tm for x in ("computed_at=2025-10-01", "active_nav_SpaceX.json", "VỊ THẾ CÓ THỂ CŨ — tự kiểm trên DNSE")), tm)
 
 
+# ---- 29/10: tăng vốn MỌI phương thức (capital_raise_lib) — fixture số THẬT đọc tav2_bq.corporate_action 2026-10-29
+MBB_DIV = {"id": "mbbdiv202608", "ticker": "MBB", "issue_method_code": "DIV", "issue_status_code": "D",
+           "event_status": "executed", "exright_date": "2026-08-11", "record_date": "2026-08-12",
+           "public_date": "2026-08-06", "exercise_ratio": "0.15", "value_per_share": None,
+           "total_value": "0.0", "issue_volumn": "0"}
+MBB_RT = dict(MBB_DIV, id="mbbrt202608", issue_method_code="Rights", exercise_ratio="0.1")
+PP_SIM = {"id": "ppsim0001", "ticker": "AAA", "issue_method_code": "PP", "issue_status_code": "P",
+          "event_status": "announced", "exright_date": None, "record_date": None, "public_date": "2026-10-20",
+          "exercise_ratio": "0", "value_per_share": None, "total_value": "1.5E11", "issue_volumn": "10000000"}
+ESOP_SIM = dict(PP_SIM, id="esop0001", issue_method_code="EMPL", exercise_ratio="0.05", total_value="5.0E9",
+                issue_volumn="500000", exright_date="2026-11-10", record_date="2026-11-11")
+SCL_ESOP_P = {"id": "6a0516165b1fb4c98c3ab29f", "ticker": "SCL", "issue_method_code": "EMPL", "issue_status_code": "P",
+              "event_status": "announced", "exright_date": None, "record_date": None, "public_date": "2026-05-07",
+              "exercise_ratio": "0.021", "value_per_share": None, "total_value": "0.0", "issue_volumn": "0"}
+
+
+def inner_capraise(R, B):
+    import capital_raise_lib as L
+    saved = R.fetch_issuance
+    R.fetch_issuance = lambda tk: [MBB_DIV, MBB_RT, PP_SIM]
+    try:
+        ck("fetch_rights GIỮ hợp đồng chỉ-Rights (lag_rights_exit_hold/daily_nav_snapshot dựa vào)",
+           [r["id"] for r in R.fetch_rights({"MBB"})] == ["mbbrt202608"])
+    finally:
+        R.fetch_issuance = saved
+    pm = {"SpaceX": {"MBB": 1000}}
+    a = B("2026-08-07", pm, [MBB_DIV], set(), is_hol)
+    t = a[0]["text"] if a else ""
+    ck("MBB cổ tức CP 15% ⇒ 1 tin INFO, pha loãng 15.00%, ngày chốt còn 3 phiên", len(a) == 1 and "INFO" in t
+       and "15.00%" in t and "2026-08-12 (còn 3 phiên)" in t and "luồng corp-action" in t, t)
+    ck("INFO không bao giờ REMIND (còn 1 phiên)", all(x["stage"] != "REMIND" for x in B("2026-08-07", pm, [MBB_DIV], set(a[0]["keys"]) if a else set(), is_hol))
+       and B("2026-08-07", pm, [MBB_DIV], set(a[0]["keys"]) if a else set(), is_hol) == [])
+    r = B("2026-08-07", pm, [MBB_RT], {"mbbrt202608|announce", "mbbrt202608|dated|2026-08-11"}, is_hol)
+    ck("Rights cùng ngày VẪN REMIND (đối chứng: REMIND chỉ dành cho Rights)", len(r) == 1 and r[0]["stage"] == "REMIND", r)
+    pa = {"SpaceX": {"AAA": 2000}, "ZaloPay": {"AAA": 500}}
+    p = B("2026-10-22", pa, [PP_SIM], set(), is_hol, prices={"AAA": 20000.0}, oshares={"AAA": 50_000_000})
+    tp = p[0]["text"] if p else ""
+    ck("riêng lẻ giả lập: giữ ở 2 account ⇒ ĐÚNG 1 tin gộp, nêu cả 2", len(p) == 1 and "SpaceX: giữ 2,000" in tp
+       and "ZaloPay: giữ 500" in tp, p)
+    ck("riêng lẻ: ratio=0 ⇒ % từ issue_volumn/OShares = 20.00%; giá 15.000 = 75% thị giá 20.000; WARN",
+       all(x in tp for x in ("20.00%", "15,000đ = 75% thị giá 20,000đ", "WARN", "PHÁT HÀNH RIÊNG LẺ")), tp)
+    ck("riêng lẻ: nêu mục đích vốn KHÔNG có trong nguồn + 'bot KHÔNG tự bán'", "mục đích sử dụng vốn" in tp
+       and "bot KHÔNG tự bán" in tp and "được mua" not in tp, tp)
+    ck("không OShares + ratio 0 ⇒ 'CHƯA RÕ' (không đoán 0)", "pha loãng CHƯA RÕ" in B("2026-10-22", pa, [PP_SIM], set(), is_hol)[0]["text"])
+    e = B("2026-11-06", {"SpaceX": {"AAA": 100}}, [ESOP_SIM], {"esop0001|announce", "esop0001|dated|2026-11-10"}, is_hol)
+    ck("ESOP: đã ANNOUNCE+DATED, còn 1 phiên ⇒ im (không REMIND)", e == [], e)
+    ck("mã không giữ ⇒ im (riêng lẻ)", B("2026-10-22", {"SpaceX": {"FPT": 1}}, [PP_SIM], set(), is_hol) == [])
+    old = dict(PP_SIM, id="ppold", public_date="2026-01-02")
+    st = B("2026-10-22", pa, [old], set(), is_hol)
+    ck("riêng lẻ P xác sống > 183 ngày ⇒ chỉ STALE, không ANNOUNCE", len(st) == 1 and st[0]["stage"] == "STALE", st)
+    zp = dict(PP_SIM, id="zp")
+    zd = dict(PP_SIM, id="zd", issue_status_code="D", exright_date="2026-10-21", public_date="2026-10-21")
+    ck("zombie theo CÙNG phương thức: D riêng lẻ cùng tỉ lệ ⇒ P bị bỏ", B("2026-10-22", pa, [zp, zd], set(), is_hol) == [])
+    ck("zombie KHÁC phương thức (D là ESOP) ⇒ P riêng lẻ VẪN báo",
+       len(B("2026-10-22", pa, [zp, dict(zd, issue_method_code="EMPL")], set(), is_hol)) == 1)
+    ck("mã phương thức lạ ⇒ WARN (fail-closed)", L.severity({"issue_method_code": "NEWCODE"}) == "WARN")
+    # SCL ca thật: D 2025 tỉ lệ 35,7% + P quyền mua 15,38% (public 09-08, ingest 10-28) + P ESOP 2,1%
+    sc = B("2026-10-29", {"SpaceX": {"SCL": 1100}, "ZaloPay": {"SCL": 700}}, [SCL25, SCL26, SCL_ESOP_P], set(), is_hol)
+    stg = sorted((x["text"].split("**")[2][:12], x["stage"]) for x in sc)
+    ck("SCL 29/10: 2 tin ANNOUNCE (quyền mua + ESOP), D 2025 đã GDKHQ im", len(sc) == 2 and
+       all(x["stage"] == "ANNOUNCE" for x in sc), stg)
+    ck("SCL quyền mua: 2 account trong 1 tin, 169 + 107 cp", any("169 cp" in x["text"] and "107 cp" in x["text"] for x in sc), sc)
+    # Lớp A (pre-entry) — thuần
+    fl, wa = L.pre_entry_flags([SCL25, SCL26], "2026-10-23", 38_836_815, 0.734)
+    ck("A: SCL 23/10 (trước vào lệnh 26/10) ⇒ WARNING CAPITAL_RAISE_PENDING (KHÔNG cờ), kèm OShares +73.4%",
+       fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_PENDING"] and "+73.4%" in wa[0][1] and "15.38%" in wa[0][1], (fl, wa))
+    fl, wa = L.pre_entry_flags([SCL25], "2025-10-16", None, None)
+    ck("A: SCL quyền mua 35,7% GDKHQ 2025-10-17 — asof 2025-10-16 chưa GDKHQ ⇒ warning PENDING, không cờ",
+       fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_PENDING"], (fl, wa))
+    fl, wa = L.pre_entry_flags([SCL25], "2025-11-01", None, None)
+    ck("A: asof 2025-11-01 (đã GDKHQ 16 ngày) ⇒ warning CAPITAL_RAISE_12M (+35.7% > 10%), không cờ",
+       fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_12M"] and "+35.7%" in wa[0][1], (fl, wa))
+    ck("A: quá 365 ngày ⇒ hết cảnh báo 12M", L.pre_entry_flags([SCL25], "2026-10-18", None, None) == ([], []))
+    esop5 = dict(ESOP_SIM, issue_status_code="D", exright_date="2026-09-01")
+    ck("A: ESOP thuần 5% đã thực hiện ⇒ KHÔNG cảnh báo 12M (ngưỡng 10%)", L.pre_entry_flags([esop5], "2026-10-01") == ([], []))
+    ck("A: MBB cổ tức CP 15% ĐÃ thực hiện (INFO) ⇒ KHÔNG tính vào pha loãng thu tiền 12M",
+       L.pre_entry_flags([MBB_DIV], "2026-10-01") == ([], []))
+    b11 = dict(esop5, exercise_ratio="0.11")
+    ck("A: 11% thu tiền đã thực hiện ⇒ cảnh báo 12M (không cờ)",
+       L.pre_entry_flags([b11], "2026-10-01")[0] == [] and [c for c, _ in L.pre_entry_flags([b11], "2026-10-01")[1]] == ["CAPITAL_RAISE_12M"])
+    b10 = dict(esop5, exercise_ratio="0.10")
+    ck("A: đúng 10% ⇒ KHÔNG cảnh báo (> chứ không ≥)", L.pre_entry_flags([b10], "2026-10-01") == ([], []))
+    fl, wa = L.pre_entry_flags([dict(MBB_DIV, exright_date="2026-11-20")], "2026-10-23")
+    ck("A: cổ tức CP sắp tới ⇒ chỉ warning CAPITAL_RAISE_INFO, không cờ", fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_INFO"], (fl, wa))
+    fl, wa = L.pre_entry_flags([old], "2026-10-22")
+    ck("A: P nghi bỏ dở ⇒ chỉ warning", fl == [] and [c for c, _ in wa] == ["CAPITAL_RAISE_NGHI_BO_DO"], (fl, wa))
+    ck("A: trạng thái N ⇒ không gì", L.pre_entry_flags([dict(PP_SIM, issue_status_code="N")], "2026-10-22") == ([], []))
+    ck("A: công bố SAU asof ⇒ không nhìn trước", L.pre_entry_flags([SCL26], "2026-09-07") == ([], []))
+
+
 # ---- N1: main() end-to-end trong tmpdir (notify/state/nav đều trỏ vào tmp)
 NOTIFY_SH = """#!/bin/bash
 D="$(dirname "$0")"; n=$(cat "$D/count" 2>/dev/null || echo 0); n=$((n+1)); echo $n > "$D/count"
 [ "$n" = "${MIKE_TEST_FAIL_AT:-0}" ] && { echo "stub fail $n" >&2; exit 7; }
 printf '%s\n----\n' "$1" >> "$D/log"
 """
+
+
+def inner_cycle(R, B):
+    """User 29/10 15:5x: chỉ cảnh báo khi NGÀY CHỐT rơi vào chu kỳ nắm giữ của LAG (25 phiên) / BAL (45 phiên)."""
+    rec, ex = "2026-11-10", "2026-11-09"
+    ev = dict(SCL26, exright_date=ex, record_date=rec, total_value="1.2E11", issue_volumn="6000000")
+
+    def entry_k(k, d=rec):                       # entry cách ngày d đúng k phiên (không lễ)
+        e = dt.date.fromisoformat(d)
+        while R.sessions_to(e.isoformat(), d, is_hol) < k:
+            e -= dt.timedelta(days=1)
+        return e.isoformat()
+    ck("helper entry_k: entry_k(12) cách chốt 12 phiên", R.sessions_to(entry_k(12), rec, is_hol) == 12)
+    pos = {"SpaceX": {"SCL": 1100}, "ZaloPay": {"SCL": 700}}
+    lag = lambda k, q=800: {"book": "LAG", "entry": entry_k(k), "qty": q}  # noqa: E731
+    bal = lambda k, q=300: {"book": "BAL", "entry": entry_k(k), "qty": q}  # noqa: E731
+    D = []
+    a = B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(12)]}}, diag=D)
+    t = a[0]["text"] if a else ""
+    ck("chốt rơi phiên 12/25 của lô LAG ⇒ 1 cảnh báo nêu book + lô + phiên", len(a) == 1 and "LAG: ngày chốt 2026-11-10 rơi phiên thứ 12/25" in t
+       and "lô 800 cp" in t, a)
+    ck("account không có lô trong chu kỳ (ZaloPay) ⇒ KHÔNG nêu", "ZaloPay" not in t, t)
+    ck("đúng biên: phiên 25/25 ⇒ báo", len(B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(25)]}})) == 1)
+    D = []
+    ck("phiên 26 > 25 ⇒ im + diag NGOÀI chu kỳ",
+       B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(26)]}}, diag=D) == [] and any("NGOÀI chu kỳ" in x for x in D), D)
+    ck("BAL: phiên 40 (>25 nhưng ≤45) ⇒ báo, ghi /45", "BAL: ngày chốt 2026-11-10 rơi phiên thứ 40/45" in
+       (B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [bal(40)]}})[0]["text"]))
+    ck("BAL: phiên 46 ⇒ im", B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [bal(46)]}}) == [])
+    ck("lô mua SAU ngày chốt ⇒ im", B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "LAG", "entry": "2026-11-12", "qty": 5}]}}) == [])
+    ck("mã không thuộc LAG/BAL (không có lô trong cycles; vd park/CAPIT/custom30V) ⇒ im",
+       B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {}, "ZaloPay": {}}) == [])
+    ck("lô book lạ (PARK) ⇒ không tính", B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "PARK", "entry": entry_k(3), "qty": 9}]}}) == [])
+    D = []
+    ck("sự kiện CHƯA có ngày chốt ⇒ im + diag (chưa xét được chu kỳ)",
+       B("2026-10-29", pos, [SCL26], set(), is_hol, cycles={"SpaceX": {"SCL": [lag(3)]}}, diag=D) == [] and any("CHƯA có ngày" in x for x in D), D)
+    both = {"SpaceX": {"SCL": [lag(12), bal(30, 100)]}, "ZaloPay": {"SCL": [lag(12, 700)]}}
+    tb = B("2026-10-29", pos, [ev], set(), is_hol, cycles=both)[0]["text"]
+    ck("2 account + 2 book ⇒ 1 tin gộp, nêu cả LAG lẫn BAL của SpaceX + ZaloPay", all(x in tb for x in ("SpaceX", "ZaloPay", "LAG:", "BAL:")), tb)
+    # record_date ưu tiên hơn GDKHQ: entry cách GDKHQ 25 phiên nhưng cách ngày chốt 26 ⇒ KHÔNG báo
+    ck("ngày xét chu kỳ = record_date (ưu tiên hơn GDKHQ)",
+       B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "LAG", "entry": entry_k(25, ex), "qty": 5}]}}) == [])
+    ck("thiếu record_date ⇒ dùng GDKHQ", len(B("2026-10-29", pos, [dict(ev, record_date=None)], set(), is_hol,
+       cycles={"SpaceX": {"SCL": [{"book": "LAG", "entry": entry_k(25, ex), "qty": 5}]}})) == 1)
+    unk = B("2026-10-29", pos, [ev], set(), is_hol, cycles={"SpaceX": {"SCL": [{"book": "LAG", "unknown": "reconcile lệch broker"}]}})
+    ck("sổ lô chặn mã (unknown) ⇒ FAIL-OPEN vẫn báo + nói rõ không xác định", len(unk) == 1 and "KHÔNG xác định được chu kỳ" in unk[0]["text"]
+       and "reconcile lệch broker" in unk[0]["text"], unk)
+    fo = B("2026-10-29", pos, [ev], set(), is_hol, cycles=None, cycle_err="park_holdings lỗi: x")
+    ck("không dựng được sổ lô (cycles=None) ⇒ báo như cũ + nêu lỗi thật", len(fo) == 1 and "KHÔNG lọc được theo chu kỳ" in fo[0]["text"]
+       and "park_holdings lỗi: x" in fo[0]["text"], fo)
+    D = []
+    ck("dòng P nghi bỏ dở ⇒ im khi lọc theo chu kỳ (không còn tin STALE)",
+       B("2026-10-22", {"SpaceX": {"PAN": 10}}, [PAN_P], set(), is_hol, cycles={"SpaceX": {}}, diag=D) == [] and len(D) == 1, D)
+    # fetch_cycles với snapshot giả
+    def snap(acc, book):
+        if book == "LAG":
+            return ({"SCL": {"qty": 800, "entry_date": "2026-10-26", "lots": [{"qty": 800, "entry_date": "2026-10-26"}]}}, True, None, {"VPB": "unverified x"})
+        return ({}, True, None, {})
+    cy, err = R.fetch_cycles(["SpaceX"], snapshot=snap)
+    ck("fetch_cycles: gom lô LAG + mã bị chặn thành unknown", err is None and cy["SpaceX"]["SCL"] == [{"book": "LAG", "entry": "2026-10-26", "qty": 800}]
+       and cy["SpaceX"]["VPB"] == [{"book": "LAG", "unknown": "unverified x"}], (cy, err))
+    cy, err = R.fetch_cycles(["SpaceX"], snapshot=lambda a, b: ({}, False, "thiếu bootstrap", {}))
+    ck("fetch_cycles: ok=False ⇒ (None, lỗi thật)", cy is None and "thiếu bootstrap" in err, (cy, err))
+    def boom(a, b):
+        raise RuntimeError("broker down")
+    cy, err = R.fetch_cycles(["SpaceX"], snapshot=boom)
+    ck("fetch_cycles: raise ⇒ (None, lỗi thật §29)", cy is None and "broker down" in err, (cy, err))
 
 
 def inner_main(R):
@@ -161,8 +324,10 @@ def inner_main(R):
         open(sh, "w").write(NOTIFY_SH)
         os.chmod(sh, 0o755)
         state = os.path.join(td, "state.json")
-        R.fetch_rights = lambda tk: [HPG, SCL25]
+        R.fetch_issuance = lambda tk: [HPG, SCL25]
+        R.fetch_oshares = lambda tk: {}
         R.live_labels = lambda: ["SpaceX", "ZaloPay"]
+        R.fetch_cycles = lambda accs, snapshot=None: (None, "stub: không dựng sổ lô trong selfcheck")   # fail-open ⇒ hành vi cũ
 
         def run(fail_at=0, extra=(), reset=True, st=state):
             if reset:
@@ -205,6 +370,15 @@ def inner_main(R):
         wnav("ZaloPay", {"FPT": 50}, "2025-10-09")
         rc, out, cnt, log = run(st=os.path.join(td, "boom_state.json"))
         ck("main: live_dnse_labels lỗi ⇒ rc=3 + in lỗi thật (§29)", rc == 3 and "accounts.json hỏng" in out, (rc, out))
+        R.live_labels = lambda: ["SpaceX", "ZaloPay"]
+        wnav("SpaceX", {"SCL": 14000, "HPG": 1000}, "2025-10-09")
+        R.fetch_cycles = lambda accs, snapshot=None: ({"SpaceX": {"HPG": [{"book": "LAG", "entry": "2025-10-06", "qty": 1000}]}}, None)
+        rc, out, cnt, log = run(st=os.path.join(td, "cyc_state.json"))
+        ck("main + lọc chu kỳ: chỉ HPG (lô LAG, chốt trong chu kỳ) được gửi; SCL không có lô LAG/BAL ⇒ im",
+           rc == 0 and cnt == 1 and "**HPG**" in log and "LAG: ngày chốt 2025-10-20 rơi phiên thứ" in log and "**SCL**" not in log, (rc, cnt, log))
+        R.fetch_cycles = lambda accs, snapshot=None: ({"SpaceX": {}}, None)
+        rc, out, cnt, log = run(st=os.path.join(td, "cyc2_state.json"))
+        ck("main + lọc chu kỳ: không mã nào trong LAG/BAL ⇒ không gửi gì, in lý do bỏ qua", rc == 0 and cnt == 0 and "[bỏ qua]" in out, (rc, cnt, out))
         for f in os.listdir(nav):
             os.remove(os.path.join(nav, f))
         rc, out, cnt, log = run(st=os.path.join(td, "none_state.json"))
@@ -213,55 +387,86 @@ def inner_main(R):
         shutil.rmtree(td, ignore_errors=True)
 
 
+RA, LB = "rights_issue_alert.py", "capital_raise_lib.py"
 MUTANTS = [
-    ('        if (r.get("public_date") or "")[:10] > asof:', '        if False:'),
-    ('        if ex and ex <= asof:\n            continue', '        if ex and ex < asof:\n            continue'),
-    ("            if left <= REMIND_SESSIONS:", "            if left < REMIND_SESSIONS:"),
-    ('        stages = [("ANNOUNCE", f"{r[\'id\']}|announce")]', "        stages = []"),
-    ('            stages.append(("DATED", f"{r[\'id\']}|dated|{ex}"))', '            stages.append(("DATED", f"{r[\'id\']}|dated"))'),
-    ('f"{r[\'id\']}|remind|{ex}|{asof}"', 'f"{r[\'id\']}|remind|{ex}"'),
-    ("            n = math.floor(q * ratio + 1e-9)", "            n = round(q * ratio)"),
-    ('        if d.weekday() < 5 and not is_holiday(d):\n            n += 1', '        if d.weekday() < 5:\n            n += 1'),
-    ('or r.get("issue_status_code") == "N" \\', 'or False \\'),
-    ("        return tv / vol if tv > 0 and vol > 0 else None", "        return None"),
-    ("ex <= asof and ex > pub and _same_ratio(o, r):", "ex <= asof and ex > pub:"),
-    ("ex <= asof and ex > pub and _same_ratio(o, r):", "ex <= asof and _same_ratio(o, r):"),
-    ("    return (dt.date.fromisoformat(asof) - dt.date.fromisoformat(pub)).days > STALE_P_DAYS",
+    (LB, '        if (r.get("public_date") or "")[:10] > asof:', '        if False:'),
+    (LB, '        if ex and ex <= asof:\n            continue', '        if ex and ex < asof:\n            continue'),
+    (RA, "            if rights and left <= REMIND_SESSIONS:", "            if rights and left < REMIND_SESSIONS:"),
+    (RA, "            if rights and left <= REMIND_SESSIONS:", "            if left <= REMIND_SESSIONS:"),
+    (RA, '        stages = [("ANNOUNCE", f"{r[\'id\']}|announce")]', "        stages = []"),
+    (RA, '            stages.append(("DATED", f"{r[\'id\']}|dated|{ex}"))', '            stages.append(("DATED", f"{r[\'id\']}|dated"))'),
+    (RA, 'f"{r[\'id\']}|remind|{ex}|{asof}"', 'f"{r[\'id\']}|remind|{ex}"'),
+    (RA, "                n = math.floor(q * ratio + 1e-9)", "                n = round(q * ratio)"),
+    (RA, '        if d.weekday() < 5 and not is_holiday(d):\n            n += 1', '        if d.weekday() < 5:\n            n += 1'),
+    (LB, '    return r.get("issue_status_code") == "N" or r.get("event_status") == "not_executed"', '    return r.get("event_status") == "not_executed"'),
+    (LB, "    return tv / vol if tv > 0 and vol > 0 else None", "    return None"),
+    (LB, "ex and ex <= asof and ex > pub and _same_ratio(o, r):", "ex and ex <= asof and ex > pub:"),
+    (LB, "ex and ex <= asof and ex > pub and _same_ratio(o, r):", "ex and ex <= asof and _same_ratio(o, r):"),
+    (LB, '                and o.get("issue_method_code") == r.get("issue_method_code") \\\n', ""),
+    (LB, "    return (dt.date.fromisoformat(asof) - dt.date.fromisoformat(pub)).days > STALE_P_DAYS",
      "    return (dt.date.fromisoformat(asof) - dt.date.fromisoformat(pub)).days > 10 ** 6"),
-    ("        if is_zombie_p(r, rows, asof):", "        if False:"),
-    ('        m["stale"] = (m.get("computed_at") or "")[:10] < cutoff', '        m["stale"] = False'),
-    ("    elif [lb for lb in labels if lb not in meta]:", "    elif False:"),
-    ("    stale_rc = 3 if notes else 0", "    stale_rc = 0"),
-    ("        return 2\n    try:", "        return 0\n    try:"),
-    ("        if r.returncode != 0:", "        if False:"),
-    ('        r = subprocess.run(notify + [al["text"], TRADING_DAILY_THREAD], capture_output=True, text=True)',
+    (LB, "        if is_zombie_p(r, rows, asof):", "        if False:"),
+    (LB, '    return "INFO" if m in INFO_METHODS else "WARN"', '    return "WARN" if m in WARN_METHODS else "INFO"'),
+    (LB, "    return vol / os_ if vol > 0 and os_ > 0 else None", "    return 0.0"),
+    (LB, "    if g > RAISE_12M_X + 1e-9:", "    if g >= RAISE_12M_X:"),
+    (LB, "RAISE_12M_X = 0.10 ", "RAISE_12M_X = 0.05 "),
+    (LB, '    lo = (dt.date.fromisoformat(asof) - dt.timedelta(days=WINDOW_12M_DAYS)).isoformat()',
+     '    lo = "0000"'),
+    (LB, '        if is_dead(r) or severity(r) != "WARN" or r.get("issue_status_code") != "D" or not (lo < ex <= asof):',
+     '        if is_dead(r) or r.get("issue_status_code") != "D" or not (lo < ex <= asof):'),
+    (LB, '    w = [r for r in live if severity(r) == "WARN"]', '    w = list(live)'),
+    (RA, '        rec_s = f"{rec} (còn {sessions_to(asof, rec, is_holiday)} phiên)" if rec and rec > asof else (rec or "CHƯA CÓ")',
+     '        rec_s = rec or "CHƯA CÓ"'),
+    (RA, "        return f\"giá phát hành: {px:,.0f}đ = {px / mkt:.0%} thị giá {mkt:,.0f}đ (giá active_nav)\"",
+     "        return f\"giá phát hành: {px:,.0f}đ\""),
+    (RA, '        m["stale"] = (m.get("computed_at") or "")[:10] < cutoff', '        m["stale"] = False'),
+    (RA, "    elif [lb for lb in labels if lb not in meta]:", "    elif False:"),
+    (RA, "    stale_rc = 3 if notes else 0", "    stale_rc = 0"),
+    (RA, "        return 2\n    try:", "        return 0\n    try:"),
+    (RA, "        if r.returncode != 0:", "        if False:"),
+    (RA, '        r = subprocess.run(notify + [al["text"], TRADING_DAILY_THREAD], capture_output=True, text=True)',
      '        _save_sent(a.state, sent | set(al["keys"]))\n        r = subprocess.run(notify + [al["text"], TRADING_DAILY_THREAD], capture_output=True, text=True)'),
-    ("        _save_sent(a.state, sent)              # ghi NGAY sau mỗi lần gửi (§5)", "        pass"),
-    ("    sent = _load_sent(a.state) if a.send else set()", "    sent = set()"),
-    ("        labels = None\n", "        labels = []\n"),
-    ("        holders = [(lb, p[tk]) for lb, p in sorted(positions.items()) if p.get(tk, 0) > 0]",
+    (RA, "        _save_sent(a.state, sent)              # ghi NGAY sau mỗi lần gửi (§5)", "        pass"),
+    (RA, "    sent = _load_sent(a.state) if a.send else set()", "    sent = set()"),
+    (RA, "        labels = None\n", "        labels = []\n"),
+    (RA, "        holders = [(lb, p[tk]) for lb, p in sorted(positions.items()) if p.get(tk, 0) > 0]",
      "        holders = [(lb, p.get(tk, 0)) for lb, p in sorted(positions.items())]"),
+    (RA, '    held = {t for p in positions.values() for t, q in p.items() if q > 0}', '    held = {r.get("ticker") for r in rows}'),
+    (RA, '        if l["entry"] > d:\n            continue', '        if False:\n            continue'),
+    (RA, '        if k <= n:\n            hits.append((l, k, n))', '        if k < n:\n            hits.append((l, k, n))'),
+    (RA, '    return (r.get("record_date") or r.get("exright_date") or None)', '    return (r.get("exright_date") or r.get("record_date") or None)'),
+    (RA, '        if cycles is None and f"{r[\'id\']}|stale" not in sent:', '        if f"{r[\'id\']}|stale" not in sent:'),
+    (RA, '            if not d:\n                if diag is not None:', '            if False:\n                if diag is not None:'),
+    (RA, '                if not hs:\n                    holders.remove((lb, q))\n                    continue', '                if False:\n                    continue'),
+    (RA, '        if "unknown" in l:\n            hits.append((l, None, n))\n            continue', '        if False:\n            continue'),
+    (RA, '            if not ok:\n                return None, f"{acc}/{book}: {str(reason)[:200]}"', '            if False:\n                pass'),
+    (RA, '    cycles, cyc_err = fetch_cycles(sorted(pos))', '    cycles, cyc_err = None, None'),
+    (RA, '        n = limits.get(l.get("book"))\n        if n is None:\n            continue', '        n = limits.get(l.get("book"), 99)'),
+    (RA, 'CYCLE_BOOKS = (("LAG", LAG_EXIT_SESSIONS), ("BAL", BAL_EXIT_SESSIONS))', 'CYCLE_BOOKS = (("LAG", LAG_EXIT_SESSIONS), ("BAL", LAG_EXIT_SESSIONS))'),
+    (RA, '    return [r for r in fetch_issuance(tickers) if r.get("issue_method_code") == "Rights"]',
+     '    return fetch_issuance(tickers)'),
 ]
 
 
 def run_mutants():
     bad = 0
-    for i, (old, new) in enumerate(MUTANTS, 1):
+    for i, (fn, old, new) in enumerate(MUTANTS, 1):
         td = tempfile.mkdtemp()
         try:
-            shutil.copy(os.path.join(HERE, "rights_issue_alert.py"), td)
+            for f in (RA, LB):
+                shutil.copy(os.path.join(HERE, f), td)
             shutil.copy(os.path.abspath(__file__), td)
-            p = os.path.join(td, "rights_issue_alert.py")
+            p = os.path.join(td, fn)
             src = open(p).read()
             if src.count(old) != 1:
-                print(f"  ❌ mutant {i}: chuỗi gốc không khớp đúng 1 lần — sửa MUTANTS")
+                print(f"  ❌ mutant {i} ({fn}): chuỗi gốc không khớp đúng {src.count(old)}≠1 lần — sửa MUTANTS")
                 bad += 1
                 continue
             open(p, "w").write(src.replace(old, new))
             r = subprocess.run([sys.executable, os.path.join(td, os.path.basename(__file__)), "--inner"],
                                capture_output=True, text=True, timeout=120)
             killed = r.returncode != 0
-            print(f"  {'KILLED' if killed else 'SURVIVED'} — mutant {i}: {old.strip()[:70]!r}")
+            print(f"  {'KILLED' if killed else 'SURVIVED'} — mutant {i} ({fn}): {old.strip()[:70]!r}")
             bad += 0 if killed else 1
         finally:
             shutil.rmtree(td, ignore_errors=True)

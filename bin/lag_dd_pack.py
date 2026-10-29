@@ -99,6 +99,9 @@ FLAG_CODES = {
     "PHAP_LY_WARNING":       "cờ pháp lý (forensic flag_type pháp lý) — CHỈ WARNING, không loại (luật 27/09)",
     "RATING_8L_FAIL":        "8L rating ≥ 4 hoặc không có rating ≤ asof",
     "RATING_8L_CU":          "dòng 8L mới nhất có time < Release_Date của sự kiện (chấm bằng BCTC cũ)",
+    # CAPITAL_RAISE_PENDING / CAPITAL_RAISE_12M KHÔNG phải cờ: chỉ WARNING trong pack['warnings'] (user chọn (b) 29/10 —
+    # "đưa warning", không chặn mua; xem capital_raise_lib.pre_entry_flags). Chỉ nguồn lỗi mới là cờ (fail-closed):
+    "CAPITAL_RAISE_NA":      "không đọc được sự kiện phát hành CP từ tav2_bq.corporate_action (fail-closed)",
     "DCF_RICH":              "DCF status RICH SÂU: biên an toàn < -100% (hoặc thiếu MoS ⇒ fail-closed); RICH nhẹ chỉ là cảnh báo, xem pack['warnings']",
     # --- Chất lượng cú bất ngờ lợi nhuận (b) ---
     "EQ_NEN_THAP":           f"NP_P4 > 0 nhưng < {EQ_BASE_LOW_RATIO:.0%} trung vị NP_P5..P7",
@@ -173,6 +176,29 @@ def fetch_fin_rows(ticker, asof):
 WHERE f.ticker = '{ticker}' AND f.Release_Date <= DATE '{asof}'
 ORDER BY f.time DESC LIMIT 8""")
     return [] if df is None else df.to_dict("records")
+
+
+def fetch_issuance(ticker, asof):
+    """Mọi dòng phát hành CP (event_code ISS) của mã từ tav2_bq.corporate_action (list dict, kiểu chuỗi như
+    rights_issue_alert). Lọc 'công bố ≤ asof' làm trong capital_raise_lib (không nhìn trước)."""
+    df = _bq(f"""SELECT c.id, c.ticker, c.issue_method_code, c.issue_status_code, c.event_status,
+  CAST(c.exright_date AS STRING) exright_date, CAST(c.record_date AS STRING) record_date,
+  CAST(c.public_date AS STRING) public_date, c.exercise_ratio, c.value_per_share, c.total_value, c.issue_volumn
+FROM tav2_bq.corporate_action AS c WHERE c.ticker = '{ticker}' AND c.event_code = 'ISS'""")
+    if df is None:
+        raise RuntimeError("BQ trả None")
+    return [{k: (None if v is None or (isinstance(v, float) and math.isnan(v)) else v) for k, v in r.items()}
+            for r in df.to_dict("records")]
+
+
+def capital_raise_eval(rows, issuance, asof):
+    """(flags, warnings) lớp A. rows = ticker_financial mới → cũ (lấy OShares). Thuần — selfcheck gọi thẳng."""
+    from capital_raise_lib import pre_entry_flags
+    os_ = [_num(r.get("OShares")) for r in rows[:5]] if rows else []
+    g12 = os_[0] / os_[4] - 1 if len(os_) == 5 and os_[0] and os_[4] else None
+    fl, wa = pre_entry_flags(issuance, str(asof)[:10], os_[0] if os_ else None, g12)
+    return ([_f(c, e) for c, e in fl],
+            [{"code": c, "severity": "WARNING", "evidence": e[:500]} for c, e in wa])
 
 
 def run_dd(ticker, asof):
@@ -584,6 +610,12 @@ def build_pack(ticker, asof, cand=None, release_date=None, macro_note=None, sour
     ev["forensic"] = _try("forensic", s.get("forensic", run_forensic), ticker, asof) or \
         {"err": errors.get("forensic")}
     flags += basic_flags(ev)
+    iss = _try("capital_raise", s.get("capraise", fetch_issuance), ticker, asof)
+    if iss is None:
+        flags.append(_f("CAPITAL_RAISE_NA", errors.get("capital_raise")))
+        cr_warn = []
+    else:
+        cr_warn = capital_raise_eval(rows or [], iss, asof)[1]   # [0] (cờ) luôn rỗng: tăng vốn chỉ là WARNING (user chọn (b) 29/10)
 
     d = ev.get("dd") or {}
     icb = (d.get("yield_floor") or {}).get("icb_code") if isinstance(d, dict) else None
@@ -614,7 +646,7 @@ def build_pack(ticker, asof, cand=None, release_date=None, macro_note=None, sour
         "candidate": cand or {},
         "status": status,
         "flags": uniq, "flags_hash": flags_hash(uniq),
-        "warnings": soft_warnings(ev),
+        "warnings": soft_warnings(ev) + cr_warn,
         "flag_definition": "CLEARED ⇔ flags rỗng; danh sách mã cờ = lag_dd_pack.FLAG_CODES",
         "dd_basic": _jsonable({k: ev.get(k) for k in ("dd", "adv", "adv_date", "adv_err", "insider_ok",
                                                       "corp_ok", "anomaly_rec", "anomaly_err",

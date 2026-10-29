@@ -728,7 +728,7 @@ echo; echo "--- [pipeline-0] nav_exdate_forecast (corp-action ≤1 PHIÊN, mã �
 (cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
   echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
 
-# [pipeline-3c] cảnh báo QUYỀN MUA của mã ĐANG GIỮ (user duyệt 2026-10-22 09:27 ICT, "Duyệt việc 1"; audit
+# [pipeline-3c] cảnh báo QUYỀN MUA + TĂNG VỐN mọi phương thức (mở rộng 29/10, capital_raise_lib) của mã ĐANG GIỮ (user duyệt 2026-10-22 09:27 ICT, "Duyệt việc 1"; audit
 # Taylor_20261021_165512 REPORT.md B1/B4) — WARN-only, KHÔNG chặn DollarBill, KHÔNG chạm lệnh/NAV/sizing.
 # Ba giai đoạn ANNOUNCE (kể cả trạng thái P chưa ngày/giá) / DATED / REMIND ≤3 phiên, mỗi cái dedupe riêng,
 # state ghi atomic SAU khi gửi xong (state/rights_issue_alert_state.json). Vị thế đọc từ active_nav_*.json
@@ -744,7 +744,7 @@ if [ "${MORNING:-0}" != "1" ]; then
   # rc 0 = ổn (có/không có cảnh báo). 1 = gửi thất bại (CHƯA ghi state ⇒ tối mai thử lại). 2 = không có file vị thế. 3 = đã gửi nhưng VỊ THẾ CÓ THỂ CŨ (file active_nav cũ hơn phiên trước / thiếu account live).
   if [ "$_ra_rc" -ne 0 ]; then
     [ "$_ra_rc" = "124" ] && _ra_why="treo quá ${RIGHTS_ALERT_TIMEOUT_S:-120}s (timeout); " || _ra_why=""
-    "$ROOT/bin/notify_thread.sh" "🟡 RIGHTS ALERT WARN ($TODAY $NOW_ICT): rights_issue_alert rc=$_ra_rc — ${_ra_why}$(echo "$_ra_out" | tail -2 | tr '\n' ' ' | cut -c1-300). rc=3 = đã chạy xong (nếu có quyền mua thì tin đã gửi) nhưng VỊ THẾ CÓ THỂ CŨ (active_nav cũ/thiếu account) — tự kiểm vị thế trên DNSE; rc khác: quyền mua có thể CHƯA được cảnh báo — tự kiểm tav2_bq.corporate_action." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "🟡 RIGHTS ALERT WARN ($TODAY $NOW_ICT): rights_issue_alert rc=$_ra_rc — ${_ra_why}$(echo "$_ra_out" | tail -2 | tr '\n' ' ' | cut -c1-300). rc=3 = đã chạy xong (nếu có quyền mua thì tin đã gửi) nhưng VỊ THẾ CÓ THỂ CŨ (active_nav cũ/thiếu account) — tự kiểm vị thế trên DNSE; rc khác: quyền mua/tăng vốn có thể CHƯA được cảnh báo — tự kiểm tav2_bq.corporate_action (event_code ISS)." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
     WARNED=$((WARNED+1))
   fi
 fi

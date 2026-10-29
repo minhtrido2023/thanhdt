@@ -1,0 +1,20 @@
+tỉ lệ exercise_ratio theo phương thức (dòng D, 2025-26):
+  Bonus   n= 145 med=0.200 p90=1.000 max=12.000 0-ratio=0
+  DIV     n= 281 med=0.100 p90=0.300 max=1.500 0-ratio=0
+  EMPL    n= 102 med=0.016 p90=0.050 max=0.050 0-ratio=0
+  MERGER  n=   4 med=0.188 p90=2.402 max=3.347 0-ratio=1
+  PP      n=  86 med=0.350 p90=1.961 max=10.286 0-ratio=9
+  PUBL    n=   6 med=0.000 p90=0.106 max=0.111 0-ratio=4
+  Rights  n=  90 med=0.403 p90=1.000 max=2.500 0-ratio=0
+  TRANS   n=  12 med=0.000 p90=0.000 max=0.001 0-ratio=11
+
+mã có ≥1 sự kiện WARN thực hiện trong 12 tháng: 141; pha loãng THU TIỀN tích luỹ:
+  >2%: 107
+  >5%: 94
+  >10%: 92
+  >15%: 79
+  >20%: 74
+  >30%: 58
+  quantiles {0.5: 0.213, 0.75: 0.539, 0.9: 1.5}
+  nêu tên: {'SCL': 0.0243, 'MBB': 0.1, 'VIB': 0.0024, 'DSC': 0.0182, 'VPB': nan}
+  mã CHỈ có ESOP: n=34 max=0.050 p90=0.041
