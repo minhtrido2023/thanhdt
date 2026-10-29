@@ -1,12 +1,10 @@
-# Fleet status — 2026-10-29T01:21:29 UTC
+# Fleet status — 2026-10-29T02:05:24 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-10-28T12:06:08Z | 795 |  |
-| Mike | Mike | child | dead | 2026-10-28T18:37:51Z | 403 |  |
-| Spyros | Spyros | child | working | 2026-10-29T01:21:03Z | 0 |  |
-| Taylor | Taylor | child | working | 2026-10-29T01:21:25Z | 0 |  |
-| Wags | Wags | child | dead | 2026-10-28T17:32:54Z | 468 |  |
-| Wendy | Wendy | child | working | 2026-10-29T01:20:59Z | 0 |  |
-| Winston | Winston | child | dead | 2026-10-27T01:20:54Z | 2880 |  |
-| workingclaude-39 | workingclaude-39 | child | dead | 2026-10-27T01:22:50Z | 2878 |  |
+| DollarBill | DollarBill | child | dead | 2026-10-28T12:06:08Z | 839 |  |
+| Mike | Mike | child | working | 2026-10-29T01:43:57Z | 21 |  |
+| Spyros | Spyros | child | dead | 2026-10-29T01:21:03Z | 44 |  |
+| Taylor | taylor-88 | child | busy | 2026-10-29T02:00:01Z | 5 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-10-28T17:32:54Z | 512 |  |
+| Wendy | Wendy | child | dead | 2026-10-29T01:20:59Z | 44 |  |
