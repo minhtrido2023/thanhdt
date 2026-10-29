@@ -1626,3 +1626,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-28T05:24:53Z] [dd-TV2 10-28] XONG job Taylor_20261028_051709: NON @26.050, FV ky vong ~22,9k, vung <=19,5k; research/dd_TV2_20261028/ (chua commit) — CHO Mike goi fundamental-skeptic; CHAM lai khi BCTC Q4/26 (phai thu CMC 666 ty)
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T16:40:14Z] [lot-exit 10-28] XONG @24dd0a250 nhanh session/lot-exit-20261028 (wt-lot-exit-20261028, chua merge) — CHO Mike arch-review + go SELL VPB 700 khoi plan ZaloPay 10-29, chen lai 282
