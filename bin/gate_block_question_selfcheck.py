@@ -1073,7 +1073,7 @@ MUTATIONS = [
     ("bỏ check bus khi post lại", "    if bus_has_question(rec[\"agent\"], rec[\"topic\"], rec[\"id\"]):\n        return True\n", ""),
     ("bỏ throttle nhắc", "< dt.timedelta(minutes=rec[\"remind_every_min\"])", "< dt.timedelta(minutes=0)"),
     ("audit hỏng ⇒ coi như đã đóng", "        return None\n    return any(", "        return False\n    return any("),
-    ("probe approval bỏ check journal", "if not journal.exists() or since is None or mtime_ict(journal) <= since:", "if False:"),
+    ("probe approval bỏ check journal", "if ev_ts is None:", "if False:"),
     # harness arch-reviewer
     ("dry-run remind vẫn gửi/ghi", "    if dry:\n        return\n    # Ghi sổ TRƯỚC khi gửi", "    # Ghi sổ TRƯỚC khi gửi"),
     ("dry-run expire vẫn gửi/ghi", "    if dry:\n        return\n    # Ghi status expired", "    # Ghi status expired"),
@@ -1102,8 +1102,8 @@ MUTATIONS = [
     ("B1 expire không gửi tin cuối", "    rec[\"final_notice_delivered\"] = send(msg, rec.get(\"thread\"))", "    rec[\"final_notice_delivered\"] = False"),
     ("B1 open không bắt buộc expiry", "    if bool(a.expires_at) == (a.expires_in_days is not None):", "    if False:"),
     # B2
-    ("B2 approval bỏ so mtime journal", " or mtime_ict(journal) <= since:", ":"),
-    ("B2 approval since None vẫn OK", "if not journal.exists() or since is None or mtime_ict", "if not journal.exists() or (since is not None and mtime_ict"),
+    ("B2 approval bỏ so mốc since", "if ts > since:", "if ts > since - dt.timedelta(hours=1):"),
+    ("B2 approval since None vẫn OK", 'else (\n        (None, "không có since/OPENED_AT") if since is None else', 'else (\n        (None, "x") if False else'),
     ("B2 plan-t1 bỏ so mtime", "    if mt <= since or sent <", "    if sent <"),
     ("B2 plan-t1 bỏ so md5", "    if not cur or m.get(\"content_md5\") != cur:", "    if False:"),
     ("B2 sweep không truyền OPENED_AT", "env = dict(os.environ, GATE_BLOCK_OPENED_AT=opened_at)", "env = dict(os.environ)"),
