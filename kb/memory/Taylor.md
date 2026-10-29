@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-28T18:04:15Z] [clearing G1 29/10] XONG @1c4cd492e nhanh session/clearing-shadow-20261029 (wt-clearing-shadow-20261029, chua merge) — CHO Mike arch-review + quant-skeptic; G3 can user duyet cron 20:45 + apply_book_transfers
 - [2026-10-28T18:32:35Z] [clearing G1 vong2 29/10] XONG @eb786f0fe nhanh session/clearing-shadow-20261029 (chua merge) — CHO Mike arch-review vong 3 + quant-skeptic; G3 can user duyet cron + checklist R7
 - [2026-10-29T04:05:48Z] [dd-PVT 10-29] XONG job Taylor_20261029_035644: NON @21.300 san, FV ky vong ~18,0k, rerun DD <=15,3k; research/dd_PVT_20261029/ (chua commit) — CHO Mike goi fundamental-skeptic; cau hoi #1: do lon tac dong TT99 dry-dock
 - [2026-10-29T05:33:20Z] [dd-SCL 10-29] XONG job Taylor_20261029_052549: NON @31.100 cum (TERP 28.612), FV ~25,5k; research/dd_SCL_20261029/ (chua commit) — CHO Mike goi skeptic; user can chon xu ly quyen mua truoc 06/11
@@ -26,3 +25,4 @@
 - [2026-10-29T10:50:01Z] [dgc-val r7 29/10] XONG job Taylor_20261029_104456: NON (discriminator), A7 32.182/B7 37.060, gia 32.900 trong dai; de xuat HARD ABANDON 10.000cp ZaloPay (35,8% NAV) — CHO Mike goi skeptic vong 2 + user xac nhan doi nhan
 - [2026-10-29T10:55:25Z] [dri-investor-report-v2 29/10] XONG job Taylor_20261029_104401: research/dd_DRI_20261027/investor_report_v2/ (md+pdf 20tr+html+21 figs, subject o EMAIL_SUBJECT.txt, chua commit) — CHO Mike doc kiem/gui email
 - [2026-10-29T11:04:03Z] [dgc-val r8 29/10] XONG job Taylor_20261029_105958: agents/Taylor/research/dgc_valuation_20261029_r8/ (chua commit) — CHO user chon nhan P1/P2 + phuong an giam tap trung ZaloPay (a-d)
+- [2026-10-29T11:47:21Z] [dgc-val r9 29/10] XONG job Taylor_20261029_113514: R2-R1 6.065 = 100% bien vinh vien (0 tu khoan 200); r8 263d/cp SAI (1.516 neu lap mai); bang N; khong base case — CHO Mike/skeptic + hoi DGC ban chat du phong

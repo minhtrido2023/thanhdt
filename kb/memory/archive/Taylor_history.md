@@ -1632,3 +1632,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-28T16:59:26Z] [lot-exit r2 28/10] XONG @6b51999a9 nhanh session/lot-exit-20261028 (chua merge) — CHO Mike arch-review vong 3; plan live ZaloPay 10-29 VAN co SELL VPB 700, can go + chen 282
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T18:04:15Z] [clearing G1 29/10] XONG @1c4cd492e nhanh session/clearing-shadow-20261029 (wt-clearing-shadow-20261029, chua merge) — CHO Mike arch-review + quant-skeptic; G3 can user duyet cron 20:45 + apply_book_transfers
