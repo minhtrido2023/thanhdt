@@ -1605,3 +1605,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-26T18:18:07Z] [dgc-valuation r4 27/10] XONG job Taylor_20261026_181244: research/dgc_valuation_20261027_r4/ (chua commit) — EV 33.766 (ex-819: 32.628); hoi DGC/BCTC Q3: ben vay 819, du phong 100; CFO Q3 300 lac quan
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-27T04:09:23Z] [dd-DRI 10-27] XONG job Taylor_20261027_040314: NON, giu qua Q3 nghieng giam, FV ky vong 11.838 vs 14.700; research/dd_DRI_20261027/ (chua commit). CHAM khi BCTC Q3 ra 30/10 theo bang 6b REPORT

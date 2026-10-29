@@ -20,6 +20,7 @@ last_update_9: 2026-10-14 (Bobby — MACRO UPDATE tài chính+BĐS sau họp BC�
 last_update_10: 2026-10-27 (Bobby — SECTOR READ real-time BLIND ngành cao su thiên nhiên VN (nền DD DRI): CYCLICAL_PEAK do cung đẩy, cầu TQ không xác nhận, trên nền cung STRUCTURAL thắt — ambiguous ~60/40; FORECAST khoá 30/90 ngày; chi tiết ở file con vn_sector_read_rubber_20261027.md)
 last_update_11: 2026-10-28 (Bobby — SECTOR READ real-time BLIND ngành tư vấn khảo sát–thiết kế–QLDA điện VN: STRUCTURAL_UPCYCLE về nhu cầu, ADMIN_GATED về chuyển hoá doanh thu — ambiguous ~65/35; FORECAST khoá F1-F10 tới 30/06/2027; chi tiết ở file con sector_read_power_consulting_20261028.md)
 last_update_12: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành vận tải biển chuyên dụng dầu khí VN: CYCLICAL ~0,55 (đỉnh cấp tính do Hormuz, giao ngay đã qua đỉnh 06/10, TC/giá tàu còn trễ = late-peak) / ADMIN_GATED ~0,30 (cabotage + TC nội bộ hệ sinh thái NN) / STRUCTURAL ~0,15; ambiguous ~65/35; FORECAST khoá F1-F8 + D1-D6 tới 2027-09-30; chi tiết ở file con sector_read_oil_gas_shipping_20261029.md)
+last_update_13: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành VLXD không nung/nhẹ VN (AAC, ALC, vữa khô, keo dán gạch, phụ gia): CYCLICAL ~0,50 (giữa→muộn nhịp tăng; mở bán căn hộ gãy Q3/2026, backlog thi công đỡ tới giữa-cuối 2027) / ADMIN_GATED ~0,30 (tỷ lệ VLKN bắt buộc, NOXH/đầu tư công, đấu giá tro xỉ) / STRUCTURAL ~0,20 (tỷ lệ VLKN khoảng 28% so với mục tiêu 35-40% năm 2025) — ambiguous ~60/40; FORECAST khoá F1-F12 tới 2028-03-31; chi tiết ở file con sector_read_vlxd_nhe_aac_20261029.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1574,6 +1575,23 @@ bảng cước đa proxy, 3 kịch bản, 20 mục DD, nguồn): **`sector_read_
 - **FORECAST khoá 29/10:** BDTI P(<7.171) 0,78 tại 2027-03-31 (trung vị khoảng 4.200), 0,88 tại 2027-09-30 (trung vị khoảng
   2.800); Aframax TCE P(<336k) 0,75/0,85; NK LPG 2026 tăng P=0,70; NK dầu thô 2026 giảm P=0,55; hàng lỏng qua cảng 9T/2027 tăng
   P=0,55. **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — VLXD không nung / nhẹ VN (AAC, ALC, vữa khô, keo dán gạch, phụ gia), as-of 29/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của DN VLXD nào (kiểm toán blind ở mục 0
+file con: kết quả tìm kiếm có lộ tên 1 tổng công ty VLXD niêm yết có dây chuyền AAC/ALC 200k m³/năm và tên 4 CĐT BĐS lớn; chỉ dùng
+ở mức cấu trúc). Bản đầy đủ (pipeline cầu 4 kênh, chính sách VLKN, đầu vào tro/cát/xi măng, 12 forecast, 23 mục DD, nguồn):
+**`sector_read_vlxd_nhe_aac_20261029.md`** (file con).
+- **Phân loại: `CYCLICAL` ~0,50 / `ADMIN_GATED` ~0,30 / `STRUCTURAL` ~0,20; `ambiguous` ~60/40.** Vị trí: giữa → muộn của nhịp
+  tăng. Cầu thi công 2026 mạnh (xi măng H1 +12,2%, FDI giải ngân 9T 21,1 tỷ USD), nhưng chỉ báo dẫn kênh nhà ở đã quay xuống
+  (VARS Q3 mở bán 31.844 / giao dịch 12.520; TP.HCM tiêu thụ −66% QoQ; tồn kho 51.950 tăng). Chính sách xanh đi đúng hướng nhưng
+  thực thi yếu (VLKN khoảng 28% so với mục tiêu 35-40% năm 2025; gạch tuynel không bị cấm; NĐ 209/2026 chỉ khuyến khích). Quyền
+  định giá AAC thấp, thị trường theo vùng. Khoảng trống lớn nhất: **không có số công suất/hiệu suất AAC toàn quốc**.
+- **FORECAST khoá 29/10:** mở bán Q4/2026 ≤45.000 P=0,70; NOXH 2026 <100.000 căn P=0,80; xi măng nội địa 2026 ≥+8% P=0,65; thuế
+  XK clinker về 10% từ 01/01/2027 P=0,45; tỷ lệ VLKN chính thức <35% P=0,85; giá AAC Sở XD Q2/27 trong ±5% P=0,65; biên gộp DN thuần
+  AAC/vữa 4 quý tới không vượt nền +2pp P=0,70; dây chuyền mới đạt ≥70% trong 4 quý P=0,25. **Không phải khuyến nghị mua/bán.**
 
 ---
 
