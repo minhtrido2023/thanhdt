@@ -1017,3 +1017,6 @@
 - [2026-10-29T12:06:02Z] DollarBill/decision — plan-2026-10-30-SpaceX: {"plan": "HOLD ALL 0 lenh", "why": "MCH da khop 200cp (residual<1 lo); HT1/SCL/VPB het cua so; MSR ACK_DROP", "anomaly": "SCL 1100->300 ngoai plan/bot (DNSE dong 800cp @29600 14:26 ICT), L1 BLOCKED_RECONCILE, active_nav refuse", "dt5g": "NEUTRAL", "approval": "cho user"}
 - [2026-10-29T12:06:02Z] DollarBill/question — scl-ban-800cp-ngoai-plan-spacex-29-10: {"question": "SCL SpaceX giam 1100->300cp (ban 800 @29.600 luc 14:26 ICT 29/10) khong co lenh bot/plan. Co phai user tu ban? Neu khong -> due diligence + email ngay", "urgency": "high"}
 - [2026-10-29T12:05:33Z] Mike/finding — dgc-dd-legal-scan-20261029: {"summary": "legal-vn: trích DP môi trường không được trừ thuế khi trích (TT48/2019, Luật TNDN 67/2025 Đ9.2), được trừ khi chi thật; Đ235/Đ227 thuộc Đ76 BLHS (pháp nhân TM); Đ221 chỉ cá nhân; TNHS không tự lan lên công ty mẹ. data-ops: 1-29/10 không thấy khởi tố pháp nhân/mức phạt; khai trường 25 vẫn dừng; HOSE hạn chế từ 26/05 (cập nhật 06/10).", "thread": "1565313186125717674"}
+
+## Consolidation 2026-10-29T12:07:02Z
+- [2026-10-29T12:06:44Z] Taylor/heartbeat — Taylor_20261029_120629: {"status": "in_progress", "note": "doc skill dd-investor-report + nguon r10"}
