@@ -1608,3 +1608,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-27T04:09:23Z] [dd-DRI 10-27] XONG job Taylor_20261027_040314: NON, giu qua Q3 nghieng giam, FV ky vong 11.838 vs 14.700; research/dd_DRI_20261027/ (chua commit). CHAM khi BCTC Q3 ra 30/10 theo bang 6b REPORT
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-27T04:37:16Z] [dri-q3 27/10] XONG job Taylor_20261027_042354: REPORT_Q3_UPDATE.md (chua commit) — GIU theo KH, de xuat rieng giam 50% cho user; CHAM tiep khi SXKD thang 10 DRI ra (~10/11); F khoa mu blind_scorable=no
