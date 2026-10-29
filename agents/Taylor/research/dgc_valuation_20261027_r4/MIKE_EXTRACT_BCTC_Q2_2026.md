@@ -7,7 +7,7 @@ Mọi con số dưới đây là chép tay từ ảnh: nếu cần, mở ảnh �
 - Đầu tư nắm giữ đến đáo hạn (tiền gửi có kỳ hạn ngắn hạn) **10.884,2** (12.065,3). Lãi suất 5,0%–8,2%/năm VND (2025: 5,0%–6,5%), 0% USD. [p23]
   ⇒ Tiền + tiền gửi = 10.921,5 — KHỚP số 10.921 nguồn thứ cấp: ĐÃ XÁC NHẬN từ nguồn gốc.
 - Phải thu ngắn hạn 1.850,6 (1.220,4): phải thu khách hàng 470,4 (651,1; gồm bên liên quan Van Minh 19,1; Mitsubishi 154,0); trả trước người bán 237,9; **mã 135 "Phải thu cho vay ngắn hạn" = 819,0 (31/12/2025: 0), KHÔNG có thuyết minh số nào giải thích bên vay/lãi suất/kỳ hạn** (cột Note trống); phải thu khác 328,3 (332,3) trong đó **lãi tiền gửi phải thu 326,2 (330,9)** [p25 note 7]; dự phòng phải thu khó đòi (5,0).
-- Hàng tồn kho 2.459,9 (1.681,5): nguyên liệu 1.555,9 (1.089,0); thành phẩm 679,5 (459,6); công cụ 106,3; hàng đang đi đường 117,0; dự phòng giảm giá 292,9 (331,3). [p25 note 8]
+- Hàng tồn kho 2.459,9 (1.681,5): nguyên liệu 1.555,9 (1.089,0); thành phẩm 679,5 (459,6); công cụ 106,3; hàng đang đi đường 117,0; dự phòng giảm giá 0,29 tỷ (292.944.183 đồng; YE25 0,33 tỷ) [ĐÍNH CHÍNH 29/10: bản đầu ghi nhầm 292,9/331,3 tỷ, sai đơn vị ×1.000]. [p25 note 8]
 - Tài sản ngắn hạn khác 215,3 (119,5): VAT được khấu trừ 190,0.
 - Tài sản dài hạn 3.823,8 (3.410,9): TSCĐ hữu hình 1.827,0; XDCB dở dang **1.320,9 (804,8)** → +516,2 trong 6T; lợi thế thương mại 46,5; thuế TNDN hoãn lại 0,2.
 - Tổng tài sản 19.271,2 (19.538,1).

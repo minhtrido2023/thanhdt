@@ -1,0 +1,74 @@
+== SELF-CHECK KQKD (ty VND, sai so phai ~0) ==
+Q3_26: rev-cogs-gp=0.000000 op_id=0.000000 pbt_id=0.000000 npat_id=-0.000000 parent+nci=-0.000000
+Q3_25: rev-cogs-gp=-0.000000 op_id=0.000000 pbt_id=0.000000 npat_id=0.000000 parent+nci=0.000000
+9T_26: rev-cogs-gp=-0.000000 op_id=0.000000 pbt_id=0.000000 npat_id=0.000000 parent+nci=0.000000
+9T_25: rev-cogs-gp=-0.000000 op_id=-0.000000 pbt_id=0.000000 npat_id=0.000000 parent+nci=-0.000000
+CV983 vs KQKD Q3_26: diff=0.000000000
+CV983 vs KQKD Q3_25: diff=0.000000000
+CV983 vs KQKD 9T_26: diff=0.000000000
+CV983 vs KQKD 9T_25: diff=0.000000000
+Q3 YoY NPAT +40.23%; 9T +60.61%
+Ke hoach 2026 (LNTT 1.500 / LNST 1.200 / DT 16.500): 9T dat LNTT 132.0%, LNST HN 131.8%, DT 94.1%
+6T suy ra = 9T-Q3: LNTT 1366.8 (bao chi 1.366), DT 9915.0; Q2 DT bao chi 5.714 => Q1 DT 4201.0; Q2 LNTT 834 => Q1 LNTT 532.8
+Q3 vs Q2: DT -1.8%; LNTT -26.5%
+
+== BO PHAN (TM34) — tong kiem ==
+Q3_26: sum_rev-rev=-0.000000 sum_cogs-cogs=0.000000
+Q3_25: sum_rev-rev=0.000000 sum_cogs-cogs=0.000000
+9T_26: sum_rev-rev=0.000000 sum_cogs-cogs=0.000000
+9T_25: sum_rev-rev=-0.000000 sum_cogs-cogs=-0.000000
+van_tai    DT Q3   3515.0 vs   2503.6 (+40.4%) | LNG Q3  728.2 vs  529.3 | bien Q3 20.7% vs 21.1% | 9T DT +34.9% LNG  2219.8 vs  1434.2 (+54.8%) bien 23.2% vs 20.2%
+kho_noi    DT Q3    152.4 vs    143.5 (+6.2%) | LNG Q3   43.2 vs   39.3 | bien Q3 28.4% vs 27.4% | 9T DT -2.7% LNG   129.9 vs   179.1 (-27.5%) bien 29.9% vs 40.1%
+thuong_mai DT Q3   1678.2 vs   1209.5 (+38.8%) | LNG Q3    5.0 vs    5.4 | bien Q3 0.3% vs 0.4% | 9T DT +50.3% LNG    18.5 vs    12.3 (+50.1%) bien 0.4% vs 0.4%
+khac       DT Q3    264.5 vs    562.9 (-53.0%) | LNG Q3   17.3 vs   10.2 | bien Q3 6.5% vs 1.8% | 9T DT -24.6% LNG    30.8 vs    46.3 (-33.4%) bien 5.7% vs 6.5%
+Van tai 6T/2026 suy ra: DT 6067.5 LNG 1491.6 bien 24.6%; Q3 bien 20.7%; LNG Q3 vs TB quy 6T: -2.4%
+
+== CHAT LUONG LN 9T_26 vs 9T_25 ==
+Lai tien gui 9T 251.0 vs 157.6; Q3 96.4 vs 55.4
+Tien+HTM dau ky 4946.0 cuoi ky 6345.2; lai suat ngam 9T (nam hoa) = 5.93%
+Ty gia: lai 9T 30.3 / lo ~69.0 => rong ~-38.7 (2025: -10.2)
+Boi thuong (thu nhap khac) 9T 42.1 vs 66.0; thanh ly TSCD lai 9T ~0,05 ty (TM28) => KHONG co lai ban tau
+LNTT loi (tru lai tien gui, LDLK, khac rong) 9T: 1617.5 vs 977.4 (+65.5%); ty trong lai tien gui/LNTT 12.7%
+Hoan nhap du phong (LCTT ma 03) 9T_26 = -85,4 ty = 4.3% LNTT (phi tien te; xem TT99)
+NCI/NPAT 9T 19.6%
+
+== BCDKT (30/9/26 | 31/12/25) ==
+30/9/26: TTS-(NPT+VCSH)=0.000000; TTS-(TSNH+TSDH)=0.000000
+   tien+HTM 6345.2; vay 6964.5; NO RONG 619.3; VCSH me 9855.6; du phong dry-dock 427.1; CP sua chua lon tra truoc 391.1
+31/12/25: TTS-(NPT+VCSH)=0.000000; TTS-(TSNH+TSDH)=0.000000
+   tien+HTM 4946.0; vay 7639.5; NO RONG 2693.6; VCSH me 8673.0; du phong dry-dock 541.0; CP sua chua lon tra truoc 241.5
+Vay giam 675.0 (TM20: tong 7.639,5 -> 6.964,5)
+
+== LCTT 9T ==
+Tien dau 1901,97 + LCT 158,12 + FX 0,10 = 2060.184822 vs BCDKT 2060.184822477
+CFO 2733.4 vs 2235.4; CFO/NPAT 1.73; capex 947.0; FCF 1786.4 vs 1297.0; KH 1829.1 (capex/KH 0.52)
+EBITDA 9T_26 (LNG-BH-QL+KH) = 3837.5; nam hoa 5116.7
+
+== GIA (BQ den 2026-10-28) ==
+ADV20 171.5 ty; ADV60 143.2 ty; Close cuoi 22850.0
+YTD: dau nam 17090.0 (2026-01-05), dinh 27910.0 (2026-03-06); live 21300 = +24.6% YTD, -23.7% tu dinh
+  2026-10-20 close 24200.0
+  2026-10-27 close 23200.0
+  2026-10-28 close 22850.0
+PVT PE (BQ) 2018-: p25 7.52 med 8.54 p75 9.70; PB p25 0.82 med 0.91 p75 1.01
+
+== DINH GIA tai 21300 ==
+LNST me TTM = 9T 1272.3 + Q4/25 265.9 = 1538.2; EPS TTM 2976; PE TTM 7.16
+EPS Q3 nam hoa 2903 -> PE 7.34
+BVPS me 19066; PB 1.12; von hoa 11010 ty
+EV = von hoa + no rong 619 + NCI so sach 3007 = 14637; EV/EBITDA (9T nam hoa) 2.86
+LNST me theo nam (BQ, ty): 2018:642, 2019:681, 2020:632, 2021:669, 2022:837, 2023:970, 2024:1093, 2025:1039
+Kiem: BQ Q1+Q2/26 = 871.9; BCTC 9T-Q3 = 897.2 (lech +25.2 — dieu chinh H1 sau soat xet? khong xac dinh)
+Peers 28/10 (BQ PE/PB, PE BQ dung EPS nguon BQ):
+  VOS close 11700.0 PE 4.83 PB 0.79
+  GSP close 10250.0 PE 8.76 PB 0.80
+  VTO close 10750.0 PE 5.11 PB 0.72
+  PVP close 20150.0 PE 6.49 PB 1.00
+  PVT close 22850.0 PE 8.28 PB 0.95
+
+== KICH BAN 2027 (LNST me, PE: UOC LUONG) ==
+xau    w=0.35 LNST me 1000 -> EPS 1935 x PE 6.5 = 12,575 (-41.0% vs 21300)
+co_so  w=0.45 LNST me 1250 -> EPS 2418 x PE 8.0 = 19,345 (-9.2% vs 21300)
+tot    w=0.20 LNST me 1500 -> EPS 2902 x PE 8.5 = 24,665 (+15.8% vs 21300)
+GIA TRI KY VONG = 18,040 (-15.3%); vung mua bien an toan 15% <= 15,334
+PB tai gia ky vong 0.95; PB 1,0 = 19,066

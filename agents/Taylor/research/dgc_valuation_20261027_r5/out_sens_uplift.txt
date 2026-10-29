@@ -1,0 +1,3 @@
+uplift 1000 {'ev': 40302, 'thuan': 59873.0, 'coso': 39406.0, 'nghich': 22524.0}
+uplift 500 {'ev': 37543, 'thuan': 53475.0, 'coso': 37087.0, 'nghich': 22524.0}
+uplift 0 {'ev': 34786, 'thuan': 47076.0, 'coso': 34771.0, 'nghich': 22524.0}

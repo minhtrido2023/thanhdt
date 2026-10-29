@@ -1,0 +1,7 @@
+1bc17965592f7ba4e71d690062d01230  REPORT.md
+c8778aae32679c4d08f1b05186fc0d91  model.py
+97703777b9adc2b08a07c30e805e541d  r8_calc.py
+53c70dd1ffbd6f77d7e63e6ba2ac695a  out_r8_cfo_base_rate.csv
+75631d4f6b0194d5e97fae4266fc2489  out_r8_cfo_quarters.csv
+8107e2523fadf651afa9b1312f64cb26  out_r8_prov_R1_R2_extra.csv
+f2a6afa3f013cd862c8a869a4b0d7634  out_r8_zalopay.csv

@@ -1,0 +1,70 @@
+tái lập r6: A = 29817 (29.817) ; B = 34695 (34.695)
+
+== WATERFALL r6 → r7 ==
+tier                                                  step    ev  thuan  coso  nghich  delta
+   A                                          r6 (tái lập) 29817  41474 31216   19714    NaN
+   A        1 Nghi Sơn XDCB 1.408,8 (note 11) thay 1.352,9 29980  41636 31380   19875  163.0
+   A    2 PE peer áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj 31040  42880 32537   20651 1060.0
+   A 3 PE DGC 10y áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj 32182  44213 33778   21501 1142.0
+   B                                          r6 (tái lập) 34695  54268 35855   19714    NaN
+   B        1 Nghi Sơn XDCB 1.408,8 (note 11) thay 1.352,9 34858  54435 36017   19875  163.0
+   B    2 PE peer áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj 35918  55679 37174   20651 1060.0
+   B 3 PE DGC 10y áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj 37060  57012 38414   21501 1142.0
+
+== DẢI BIÊN ĐỐI XỨNG (A7/B7) ==
+ dpp  ev_A7  ev_B7
+  -2  29345  34223
+  -1  30763  35641
+   0  32182  37060
+   1  33603  38479
+   2  35017  39894
+
+== LƯU HUỲNH → biên 2027 cơ sở (ràng buộc cơ học, tỷ trọng S trong giá vốn là [UL]) ==
+ s_2027                             case  s_share_cogs  cogs_scale  gm_2027
+    835                giữ T10 Qatar 835          0.06      0.9957    0.156
+    835                giữ T10 Qatar 835          0.12      0.9913    0.159
+    700                     r6 cơ sở 700          0.06      0.9867    0.163
+    700                     r6 cơ sở 700          0.12      0.9733    0.175
+    615 Bobby trung vị ~650 T1 / ~580 T4          0.06      0.9810    0.168
+    615 Bobby trung vị ~650 T1 / ~580 T4          0.12      0.9620    0.184
+    500               K2 xả hàng 400-600          0.06      0.9733    0.175
+    500               K2 xả hàng 400-600          0.12      0.9467    0.197
+
+== DẢI PHÂN TẦNG r7 ==
+                                            tier    ev  thuan  coso  nghich  vs_px
+A7 = A r6 + Nghi Sơn 1.408,8 + PE lõi + cash_adj 32182  44213 33778   21501 -0.022
+                    B7 = A7 + uplift khai trường 37060  57012 38414   21501  0.126
+             C7 = B7 + biên cao r5 (chỉ độ nhạy) 39026  60767 40121   22707  0.186
+                                    A r6 (để so) 29817  41474 31216   19714 -0.094
+                                    B r6 (để so) 34695  54268 35855   19714  0.055
+
+             reading  gm27  gm28  ev_A7  ev_B7
+R1 lặp lại ~100/quý 0.152 0.165  30598  35476
+         R2 một lần 0.195 0.207  36663  41539
+
+ fund      0.0      0.5      1.0
+prov                           
+0.0   34328.0  33526.0  32723.0
+0.5   34057.0  33255.0  32453.0
+1.0   33786.0  32984.0  32182.0
+
+== Nghĩa vụ vụ án thêm (ngoài 200 đã trừ), trừ thẳng tiền ==
+ extra_liab  ev_A7  ev_B7
+          0  32182  37060
+        200  31655  36533
+        500  30865  35743
+       1000  29549  34427
+
+Tầng A7 — tổng hợp
+    scn  sotp   dcf  v_pe_dgc10y  v_pe_peer_used  v_pb  multiple_avg   blend   w
+nghich 20204 21554        23559           23980 20700       22746.0 21501.0 0.3
+  coso 32916 33072        36101           36859 33074       35345.0 33778.0 0.5
+ thuan 45032 41926        46284           47425 43334       45681.0 44213.0 0.2
+   scn  np_mi_norm  eps_norm  fin_np_mi  np_core_mi  v_pe_dgc10y  v_pe_peer_now  v_pe_peer10y  v_pe_peer_used  roe_core  pb_justified  v_pb  cash_value_in_pe
+nghich         917      2415        340         576        23559          23980         25921           23980     0.123          0.78 20700              0.34
+  coso        1318      3472        375         944        36101          36859         40045           36859     0.189          1.34 33074              0.37
+ thuan        1738      4576        396        1342        46284          47425         51968           47425     0.259          1.92 43334              0.39
+cash_value_in_pe cũ (PE DGC10y × lãi/tiền ròng) =  [0.34, 0.37, 0.39] ; r7: tiền vào PE qua cash_adj 100% (sau haircut/PAT)
+Đắk Nông note 11: 60,089 → 0 ; 'Giảm khác' 63,378 ; thu thanh lý 332,29 − NBV 284,06 = 48,23 ; 284,06 + 63,38 = 347.44 ≠ 332,29 ; 63,38 − 48,23 = 15.15
+ZaloPay DGC 10.000 cp × 32.900 = 329,0 tr / NAV 28/10 919,93 tr = 35.8% ; lỗ so giá vốn 39.775 = -17.3%
+CFO/LNST hợp nhất 9T = 755,6 / 1.369,4 = 0.55x

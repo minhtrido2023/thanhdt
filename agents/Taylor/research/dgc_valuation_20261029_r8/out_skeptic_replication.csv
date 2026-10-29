@@ -1,0 +1,8 @@
+case,ev,thuan,coso,nghich
+r5 bỏ riêng uplift,34786,47076,34771,22524
+"gốc thuần (r5 + biên r4 + w r4), CÓ uplift 500; chưa quỹ KTPL, còn WC300",36468,56112,37699,21319
+  — KHÔNG uplift,31589,43318,33060,21319
+"  + trừ quỹ KTPL 592,8: CÓ uplift",34863,54508,36095,19714
+"  + trừ quỹ KTPL 592,8: KHÔNG uplift",29985,41714,31456,19714
+r5 bỏ WC 300,40122,59633,39166,22524
+r5 + quỹ KTPL,38698,58268,37801,20920

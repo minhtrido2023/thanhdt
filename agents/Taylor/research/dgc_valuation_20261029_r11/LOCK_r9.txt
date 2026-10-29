@@ -1,0 +1,10 @@
+d1ad5662c6f6c2fb01b49a5ebdfe99d3  REPORT.md
+c8778aae32679c4d08f1b05186fc0d91  model.py
+7736471239b3a5e2b21ba39944ebf838  r9_calc.py
+79740046246d5f236aeb4725f4f5cb99  out_r9_decomp_R2_R1.csv
+f52c945e678b1be5a298bef87d87118e  out_r9_final_grid.csv
+227367ba069a62947914f5343be3dc9e  out_r9_finite_N.csv
+0b6875fe8f3d913ee59a75bdb0bd7a28  out_r9_gpm_hist_bq.csv
+f951658fb4d57ec9d85c6e371501f356  out_r9_margin_pp.csv
+45a8ac727f3ef7dc63f82e77c5d9caf3  out_r9_methods_R1_R2.csv
+0048cba1436bd76ae41e1ba8d02b63da  out_r9_perpetual.csv

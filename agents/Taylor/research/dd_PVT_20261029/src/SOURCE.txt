@@ -1,0 +1,1 @@
+Drive id 1KKH4somJiR_Z6z7f81NYN0-GiL3uFG4S (download.pdf 11.8MB, owner user); text từ Drive read_file_content, tải 29/10/2026. Tải PDF gốc >10MB không được qua connector.
