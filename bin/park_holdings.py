@@ -828,6 +828,9 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
     BÁN tay VERIFIED (bản ghi order-history DNSE, đúng tiểu khoản §12) được áp y như dòng statement
     (`T23:59:59`, FIFO theo ticker, UNVERIFIED về book); MUA tay ⇒ chỉ ghi chú, không thêm lô. Ngày
     ĐÃ có statement ⇒ statement thắng, sổ chỉ đối chiếu (lệch ⇒ ghi chú). Sổ rỗng ⇒ y hệt bản cũ.
+    30/10 (ca SCL): event bán có lệnh tay VERIFIED đứng sau mang `declared` (= id khai) — lệnh tay
+    trực tiếp, hoặc phần thêm của statement KHỚP ĐÚNG Σ KL đã khai cho (ngày, mã, bán). Replay trừ
+    event `declared` vào book DUY NHẤT của mã mà KHÔNG gắn UNVERIFIED; lệch KL vẫn chặn ở đối soát.
 
     Trả (events, notes): events cùng dạng `_fill_deltas` (book="" ⇒ nhánh FIFO theo ticker).
     """
@@ -870,10 +873,16 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
                              f"KHÔNG thêm lô (để đối soát chặn)")
             elif b > j:
                 v = bf.by_key[(tk, side)]
-                events.append({"ts": f"{d}T23:59:59", "ticker": tk, "side": "sell", "book": "",
-                               "play_type": "", "qty": b - j,
-                               "price": v["value"] / v["qty"] if v["qty"] else 0.0,
-                               "parent_id": "broker_statement", "_file": fname})
+                ev = {"ts": f"{d}T23:59:59", "ticker": tk, "side": "sell", "book": "",
+                      "play_type": "", "qty": b - j,
+                      "price": v["value"] / v["qty"] if v["qty"] else 0.0,
+                      "parent_id": "broker_statement", "_file": fname}
+                # statement thắng; chỉ khi phần thêm KHỚP ĐÚNG KL lệnh tay VERIFIED đã khai mới
+                # được coi là "đã khai" (khai ≠ thực ⇒ không gắn ⇒ UNVERIFIED như cũ)
+                if manual_actions.by_key(manual.get(d, [])).get((tk, "sell"), 0) == b - j:
+                    ev["declared"] = ",".join(m["id"] for m in manual[d]
+                                              if (m["ticker"], m["side"]) == (tk, "sell"))
+                events.append(ev)
                 notes.append(f"{d} {tk} BÁN +{b - j:,}cp chỉ có ở statement DNSE (ngoài journal bot) "
                              f"⇒ trừ lô FIFO theo ticker")
     for d in sorted(set(manual) - stmt_ok):
@@ -884,7 +893,8 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
                 continue
             events.append({"ts": f"{d}T23:59:59", "ticker": m["ticker"], "side": "sell", "book": "",
                            "play_type": "", "qty": m["qty"], "price": m["price"],
-                           "parent_id": "manual_action", "_file": "user_manual_actions.json"})
+                           "parent_id": "manual_action", "_file": "user_manual_actions.json",
+                           "declared": m["id"]})
             notes.append(f"{d} {m['ticker']} BÁN {m['qty']:,}cp lệnh tay ĐÃ KHAI + broker xác nhận "
                          f"({m['id']}; statement chưa về) ⇒ trừ lô FIFO theo ticker")
     return events, notes
@@ -1044,6 +1054,17 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                         f"{ev['ts'][:10]} {ev['ticker']} BÁN TAY −{ev['qty']:,}cp KHÔNG áp: lô ở "
                         f"{len(bks)} book ({', '.join(sorted(bks))}) ⇒ không xác định book bị trừ "
                         f"⇒ để đối soát chặn")
+                    continue
+                if ev.get("declared") and len(bks) == 1:
+                    # Lệnh tay ĐÃ KHAI + broker xác nhận (VERIFIED, đúng tiểu khoản) và mã chỉ có
+                    # lô ở MỘT book ⇒ book bị trừ xác định được: trừ FIFO lô cũ nhất của book đó,
+                    # KHÔNG gắn UNVERIFIED. Broker không quản lô; FIFO đo trên dữ liệu thật SCL
+                    # 29/10 (dnse_raw: tradeQuantity 800/500 = đúng KL bán tay, lô mua 28/10 chưa
+                    # về T+2 ⇒ phần bán chỉ có thể là lô cũ). Sai lệch KL còn lại ⇒ đối soát dưới
+                    # vẫn gắn UNVERIFIED (fail-closed). entry_date các lô còn lại giữ nguyên.
+                    (bk,) = bks
+                    book.sell(ev["ticker"], bk, ev["qty"], ev["ts"][:10], src)
+                    applied.append(ev)
                     continue
             book.sell(ev["ticker"], ev["book"], ev["qty"], ev["ts"][:10], src)
         else:
