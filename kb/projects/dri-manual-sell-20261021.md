@@ -9,3 +9,9 @@
 
 ## Chuyển nguyên văn từ current_ops.md (27/10)
 - ✅ ĐÃ VÁ 22/10 (master `f0e293c30`, user duyệt): cổng KL `compute_active_nav.py` hợp nhất fill journal bot + statement DNSE (`dnse_khoplenh_broker_confirm_*.csv`); phần dư không giải thích được vẫn chặn. Chi tiết: `kb/projects/dri-manual-sell-20261021.md`.
+
+
+## Chuyển nguyên văn từ kb/current_ops.md (29/10)
+## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
+- Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
+- Cổng KL `compute_active_nav.py` đã vá 22/10 (chi tiết: `kb/projects/dri-manual-sell-20261021.md`).

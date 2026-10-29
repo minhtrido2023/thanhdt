@@ -66,3 +66,11 @@ Số liệu nguồn của writeup ĐÚNG (skeptic đối chiếu lại BCTC hợ
 - Lịch sử 20 sự kiện LAG của chính SCL: trung bình +7,8%, trung vị +9,7%, 65% lãi, tệ nhất −25,9%.
 - **Khuyến nghị skeptic: PROCEED có điều kiện** thay vì CHỜ (CHỜ quá 26/10 = DROP không đủ lý do; tuổi nợ VinCons không về kịp và không ảnh hưởng 25 phiên): (1) quy mô theo LAG_LO 8% của book LAG (~4% NAV ≈ 39tr SpaceX, 37tr ZaloPay); (2) luật thoát: nếu ngày chốt quyền mua 15,4% rơi trong thời gian giữ ⇒ bán TRƯỚC ngày giao dịch không hưởng quyền (hoặc user tự đăng ký mua quyền), ghi vào plan; (3) HỦY vào lệnh nếu trước 26/10 có tin VinCons chậm trả hoặc công bố giá phát hành thấp kèm ngày chốt sát.
 - Việc nên làm ngoài mã (chưa làm, cần user duyệt): (i) cờ `EQ_PHAI_THU_TANG` tách phải thu KH khỏi trả trước người bán; (ii) R&D riêng: surprise LAG theo mỗi cổ phiếu có điều chỉnh cổ tức cổ phiếu + mô hình hoá rủi ro ngày không hưởng quyền của quyền mua (kèm quant-skeptic); (iii) xác nhận hệ thống cảnh báo ex-date (`nav_exdate_forecast`, `corp_action_daily`) có bắt ĐÚNG sự kiện quyền mua của mã đang giữ.
+
+
+## Chuyển nguyên văn từ kb/current_ops.md (29/10, SUPERSEDED bởi quyết định thoái SCL 29/10 14:2x)
+## (CŨ — 21/10, SCL đã bị thay bởi mục trên) LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
+- **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 VinCons chậm trả: `kb/projects/scl-dd-research-20261021.md`.
+- **Mã LAG giữ có quyền mua**: KHÔNG bán trước ex-date; user TỰ thực hiện ĐẦY ĐỦ (bot không mua); user mua quyền HỢP LỆ. **Lô cp quyền KẾ THỪA entry gốc (user 22/10, A)**, bán phiên đầu được phép. ✅ `771daf4ea`; sau nộp tiền báo Mike số CP mua từng account (runbook: `agents/Taylor/research/lag_rights_n1_20261022/REPORT.md`). SCL 15,38% (P).
+## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
+(tiêu đề gốc trong current_ops.md trước 29/10; nội dung ở khối ngay trên)

@@ -21,16 +21,14 @@
 
 - **[2026-10-03 10:34 ICT, user chốt] Định nghĩa XU HƯỚNG HẠ (chính xác hoá)**: ngay khi Big-4 điều chỉnh GIẢM lãi tiết kiệm 12 tháng HOẶC lãi chứng chỉ tiền gửi 6 tháng THẤP HƠN so với tuần thống kê trước ⇒ cảnh báo user (cron tuần `refresh_deposit_cctg_weekly.sh` + `deposit_cctg_trend_check.py`); vẫn CHỈ cảnh báo, không tự khôi phục park. User cũng DUYỆT rating_8l/DCF dùng effective rate (đã LIVE từ 10-01).
 
-## DRI — user BÁN TAY 21/10/2026 (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI
-- Bán @15.400: SpaceX −1.200cp (→2.500), ZaloPay −600cp (→1.300). KHÔNG bất thường, không điều tra, không escalate; cờ `plan-position-drift` 21/10 = đúng việc này. Chỉ hỏi lại nếu SỐ LƯỢNG broker khác số trên.
-- Cổng KL `compute_active_nav.py` đã vá 22/10 (chi tiết: `kb/projects/dri-manual-sell-20261021.md`).
+## DRI — user BÁN TAY 21/10 (đã xác nhận, KHÔNG hỏi lại; plan-position-drift 21/10 = việc này): `kb/projects/dri-manual-sell-20261021.md`
 
 ## DRI — user DUYỆT GIẢM 50% CHỦ ĐỘNG (`decided_by: user`, 27/10 12:14 ICT) — DollarBill đưa vào PLAN T+1 28/10, KHÔNG hỏi lại
 - SELL DRI: **SpaceX 1.250cp (→1.250), ZaloPay 650cp (→650)**; bán discretionary của user (không phải auto-exit); vào plan nháp, user duyệt plan như thường. User đã bán tay trước ⇒ dùng KL broker thật. Chi tiết: `kb/projects/dri-triggers-20261027.md`.
 
-## LAG — SCL PROCEED + QUYỀN MUA user tự thực hiện (`decided_by: user`, 21/10 23:52 ICT) — AGENT KHÔNG HỎI LẠI
-- **SCL ack PROCEED** (`data/lag_dd/ack.json`, hash `827ba0a2a6ce832e`): vào ~26/10 ở **LAG_LO 8% (~4% NAV), KHÔNG 10% LAG_HI**; hủy nếu trước 26/10 VinCons chậm trả: `kb/projects/scl-dd-research-20261021.md`.
-- **Mã LAG giữ có quyền mua**: KHÔNG bán trước ex-date; user TỰ thực hiện ĐẦY ĐỦ (bot không mua); user mua quyền HỢP LỆ. **Lô cp quyền KẾ THỪA entry gốc (user 22/10, A)**, bán phiên đầu được phép. ✅ `771daf4ea`; sau nộp tiền báo Mike số CP mua từng account (runbook: `agents/Taylor/research/lag_rights_n1_20261022/REPORT.md`). SCL 15,38% (P).
+## LAG — SCL THOÁI HẾT + CẢNH BÁO TĂNG VỐN (`decided_by: user`, 29/10 14:2x ICT) — AGENT KHÔNG HỎI LẠI
+- **SCL: THOÁI toàn bộ cả 2 TK** (KL broker thật) qua **DollarBill đưa SELL vào plan T+1 30/10** (như DRI; user duyệt plan; không chờ T+25/ex-date; không cần mua quyền). Căn cứ DD NON + phải mua CP phát hành thêm: `kb/projects/scl-dd-20261029.md`. User bán tay sớm ⇒ báo Mike KL.
+- **LUẬT MỚI**: BẤT KỲ tăng vốn nào (quyền mua, riêng lẻ/công chúng, ESOP, TPCĐ; cổ tức/thưởng CP = INFO) trong chu kỳ đầu tư của mã ⇒ **WARNING user** (không tự bán). Taylor dựng + arch-review; merge cần user. Luật 21/10 (mã LAG có quyền mua: KHÔNG bán trước ex-date, user tự mua đủ; lô quyền kế thừa entry gốc `771daf4ea`) GIỮ cho mã LAG KHÁC — SCL là ngoại lệ. Bản 21/10 của SCL: `kb/projects/scl-dd-research-20261021.md`.
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
