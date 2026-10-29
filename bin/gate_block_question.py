@@ -58,6 +58,7 @@ In ra một dòng `gate_block_question: <VERDICT> …` cho mỗi việc (grep đ
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
 import fcntl
 import hashlib
@@ -484,6 +485,41 @@ def mtime_ict(p: Path) -> dt.datetime:
     return dt.datetime.fromtimestamp(p.stat().st_mtime, ICT)
 
 
+# Event do EXECUTOR ghi (các `_journal("…")` trong trading_bot/executor.py; selfcheck chống trôi so khớp regex
+# `_journal\(\s*"([A-Z0-9_]+)"` ⇒ tập đó PHẢI ⊆ allowlist này) —
+# bằng chứng "bot đã chạy lại qua cổng". CỐ Ý allowlist, KHÔNG phải mtime: ghi khác vào cùng file
+# (vd park_holdings BOOK_TRANSFER, GĐ3 clearing) làm mtime tăng mà bot chưa chạy ⇒ phục hồi giả.
+# Event lạ/mới ⇒ không tính ⇒ fail-closed (giữ câu hỏi mở), thêm vào đây khi executor có event mới.
+EXECUTOR_EVENTS = frozenset("""
+PLACE PLACE_FAIL PLACE_FAIL_STOPPED PLACE_BLOCK_CLEARED FILL DONE CANCEL CANCEL_STALE CANCEL_FAIL
+POLL_FAIL POSITIONS_FAIL PX_HIST_FAIL STEP_FAIL SPLIT_LEG_ERROR NO_QUOTE WAIT_CASH WAIT_QUOTA
+REFRESH_SKIP HYBRID_DEFER GHOST_ORDER TICK_RETRY_OK PROBE_LINGER_START PROBE_LINGER_END
+EXTREME_PAUSE EXTREME_FLOOR_GUARD EXPVOL_SHADOW EXPVOL_SHADOW_ERR EXPVOL_PACING
+WAIT_T2_SETTLEMENT RULE_A_REF_BLOCK HARD_CEILING_BLOCK HARD_CEILING_SKIP_ATC LEVER_PACKAGE_UNAUTHORIZED
+ATC ATC_FAIL ATC_SPLIT_SKIP ATC_AFTER_BLOCK ATC_POSTCLOSE_WAIT ATC_POSTCLOSE_TIMEOUT
+ATC_POSTCLOSE_SKIP ATC_POSTCLOSE_ERROR ATC_POSTCLOSE_DONE ATC_POSTCLOSE_ABORT
+UPCOM_SKIP_ATC ODD_LOT_SKIP_ATC
+""".split())
+
+
+def executor_event_since(journal: Path, since: dt.datetime) -> tuple[str | None, str]:
+    """(ts dòng executor đầu tiên SAU `since` | None, lý do). Không đọc được ⇒ (None, lỗi thật)."""
+    try:
+        with open(journal, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if (row.get("event") or "") not in EXECUTOR_EVENTS:
+                    continue
+                try:
+                    ts = parse_ict(row.get("ts") or "")
+                except ValueError:
+                    continue
+                if ts > since:
+                    return ts.isoformat(timespec="seconds"), ""
+    except (OSError, UnicodeDecodeError, csv.Error) as exc:
+        return None, f"không đọc được ({type(exc).__name__}: {exc})"
+    return None, "không có event executor nào SAU lúc mở"
+
+
 def cmd_probe_approval(a) -> int:
     """Phục hồi cổng approval = plan ĐÃ duyệt (đúng hàm bot dùng để chặn) VÀ bot ĐÃ chạy lại SAU
     lúc mở câu hỏi (journal executor ghi SAU opened_at). Chỉ "đã duyệt" chưa đủ — retro 10-19:
@@ -508,12 +544,14 @@ def cmd_probe_approval(a) -> int:
         return 0
     since = opened_since(a)
     journal = WC_ROOT / "data" / "execution_logs" / f"exec_{a.account}_{a.date}_journal.csv"
-    if not journal.exists() or since is None or mtime_ict(journal) <= since:
-        print(f"probe approval: hết bị cổng chặn (approved_by={plan.approved_by!r}) nhưng {journal.name} "
-              f"{'chưa có' if not journal.exists() else 'không ghi SAU lúc mở ' + str(since)} — bot CHƯA chạy lại")
+    ev_ts, why = (None, "chưa có") if not journal.exists() else (
+        (None, "không có since/OPENED_AT") if since is None else executor_event_since(journal, since))
+    if ev_ts is None:
+        print(f"probe approval: hết bị cổng chặn (approved_by={plan.approved_by!r}) nhưng {journal.name}: "
+              f"{why} — bot CHƯA chạy lại")
         return 11
-    print(f"probe approval: OK approved_by={plan.approved_by!r}, {journal.name} ghi lúc "
-          f"{mtime_ict(journal).isoformat(timespec='seconds')} > mở {since.isoformat(timespec='seconds')}")
+    print(f"probe approval: OK approved_by={plan.approved_by!r}, {journal.name} có event executor lúc "
+          f"{ev_ts} > mở {since.isoformat(timespec='seconds')}")
     return 0
 
 

@@ -148,7 +148,20 @@ def ts(s: str) -> float:
     return _dt.datetime.fromisoformat(s).timestamp()
 
 
+def anti_drift(target: Path) -> None:
+    """Mọi event `_journal("…")` của executor phải nằm trong EXECUTOR_EVENTS của `target` (chống trôi)."""
+    ex = HERE.parent.parent / "trading_bot" / "executor.py"  # suy từ vị trí file: <WorkingClaude>/{mike|wt-*}/bin/ -> ../../trading_bot
+    if not ex.is_file():
+        check(False, f"anti-drift: không thấy {ex}"); return
+    emitted = set(re.findall(r'_journal\(\s*"([A-Z0-9_]+)"', ex.read_text(encoding="utf-8")))
+    m = re.search(r'EXECUTOR_EVENTS = frozenset\("""(.*?)"""', target.read_text(encoding="utf-8"), re.S)
+    allow = set(m.group(1).split()) if m else set()
+    check(bool(emitted) and bool(allow), f"anti-drift: đọc được event (executor={len(emitted)}, allowlist={len(allow)})")
+    check(not (emitted - allow), f"anti-drift: event executor thiếu trong allowlist: {sorted(emitted - allow)}")
+
+
 def core(target: Path) -> None:
+    anti_drift(target)
     T0 = "2026-10-20T09:06:00+07:00"
     # 1-3: mở + idempotent theo (gate,key) + ack triaged-needs-human (B4)
     R = mkroot()
@@ -479,14 +492,37 @@ def core(target: Path) -> None:
     check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 11, "probe approval: duyệt nhưng chưa có journal ⇒ 11")
     check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "hold"})[0] == 0, "probe approval: plan sửa thành HOLD (0 lệnh) ⇒ 0")
     j = R9 / "data/execution_logs/exec_SpaceX_2026-10-20_journal.csv"
-    j.parent.mkdir(parents=True); j.write_text("x")
+    HDR = "ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note\n"
+
+    def jrow(t, ev):
+        return f"{t},{ev},P-1,VPB,sell,1,100,20000,0,LAG,X,n\n"
+
+    j.parent.mkdir(parents=True); j.write_text(HDR + jrow("2026-10-20T09:05:30", "PLACE"))
     os.utime(j, (ts("2026-10-20T09:05:30+07:00"),) * 2)
     check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 11,
           "B2: journal có TRƯỚC lúc mở (lượt bot sớm) ⇒ 11, KHÔNG phục hồi")
     check(run(target, R9, *pa[:-2], extra_env={"FAKE_PLAN": "ok"})[0] == 11,
           "B2: không có since/OPENED_AT ⇒ không chứng minh được ⇒ 11")
+    # G3-hygiene: bằng chứng = event EXECUTOR sau lúc mở, KHÔNG phải mtime
+    j.write_text(HDR + jrow("2026-10-20T09:05:30", "PLACE") + jrow("2026-10-20T09:25:00", "BOOK_TRANSFER"))
     os.utime(j, (ts("2026-10-20T09:25:00+07:00"),) * 2)
-    check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 0, "probe approval: duyệt + journal SAU lúc mở ⇒ 0")
+    rc, out = run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})
+    check(rc == 11 and "CHƯA chạy lại" in out and "không có event executor" in out,
+          "G3: chỉ BOOK_TRANSFER sau lúc mở (mtime mới) ⇒ 11")
+    j.write_text(HDR + jrow("2026-10-20T09:25:00", "NOISE_EVENT"))
+    check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 11, "G3: event lạ ngoài allowlist ⇒ 11 (fail-closed)")
+    j.write_text(HDR + jrow("2026-10-20T09:05:30", "PLACE") + jrow("2026-10-20T09:25:00", "BOOK_TRANSFER"))
+    os.utime(j, (ts("2026-10-20T09:25:00+07:00"),) * 2)
+    j.write_bytes(b"\xff\xfe\x00bad")
+    rc, out = run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})
+    check(rc == 11 and "không đọc được" in out, "G3: journal hỏng ⇒ 11 + lý do thật")
+    j.write_text(HDR + jrow("2026-10-20T09:05:30", "FILL") + jrow("2026-10-20T09:25:00", "BOOK_TRANSFER"))
+    os.utime(j, (ts("2026-10-20T09:25:00+07:00"),) * 2)
+    check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 11, "G3: FILL TRƯỚC lúc mở + BOOK_TRANSFER sau ⇒ 11")
+    j.write_text(HDR + jrow("2026-10-20T09:05:30", "PLACE") + jrow("2026-10-20T09:25:00", "PLACE"))
+    check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 0, "probe approval: duyệt + PLACE SAU lúc mở ⇒ 0")
+    j.write_text(HDR + jrow("2026-10-20T09:25:00", "BOOK_TRANSFER") + jrow("2026-10-20T09:26:00", "FILL"))
+    check(run(target, R9, *pa, extra_env={"FAKE_PLAN": "ok"})[0] == 0, "G3: BOOK_TRANSFER lẫn FILL sau lúc mở ⇒ 0")
     check(run(target, R9, *pa[:-2], extra_env={"FAKE_PLAN": "ok", "GATE_BLOCK_OPENED_AT": since})[0] == 0,
           "probe approval: since lấy từ env GATE_BLOCK_OPENED_AT (sweep đặt)")
 
@@ -1050,7 +1086,7 @@ MUTATIONS = [
     ("bỏ check bus khi post lại", "    if bus_has_question(rec[\"agent\"], rec[\"topic\"], rec[\"id\"]):\n        return True\n", ""),
     ("bỏ throttle nhắc", "< dt.timedelta(minutes=rec[\"remind_every_min\"])", "< dt.timedelta(minutes=0)"),
     ("audit hỏng ⇒ coi như đã đóng", "        return None\n    return any(", "        return False\n    return any("),
-    ("probe approval bỏ check journal", "if not journal.exists() or since is None or mtime_ict(journal) <= since:", "if False:"),
+    ("probe approval bỏ check journal", "if ev_ts is None:", "if False:"),
     # harness arch-reviewer
     ("dry-run remind vẫn gửi/ghi", "    if dry:\n        return\n    # Ghi sổ TRƯỚC khi gửi", "    # Ghi sổ TRƯỚC khi gửi"),
     ("dry-run expire vẫn gửi/ghi", "    if dry:\n        return\n    # Ghi status expired", "    # Ghi status expired"),
@@ -1079,8 +1115,8 @@ MUTATIONS = [
     ("B1 expire không gửi tin cuối", "    rec[\"final_notice_delivered\"] = send(msg, rec.get(\"thread\"))", "    rec[\"final_notice_delivered\"] = False"),
     ("B1 open không bắt buộc expiry", "    if bool(a.expires_at) == (a.expires_in_days is not None):", "    if False:"),
     # B2
-    ("B2 approval bỏ so mtime journal", " or mtime_ict(journal) <= since:", ":"),
-    ("B2 approval since None vẫn OK", "if not journal.exists() or since is None or mtime_ict", "if not journal.exists() or (since is not None and mtime_ict"),
+    ("B2 approval bỏ so mốc since", "if ts > since:", "if ts > since - dt.timedelta(hours=1):"),
+    ("B2 approval since None vẫn OK", 'else (\n        (None, "không có since/OPENED_AT") if since is None else', 'else (\n        (None, "x") if False else'),
     ("B2 plan-t1 bỏ so mtime", "    if mt <= since or sent <", "    if sent <"),
     ("B2 plan-t1 bỏ so md5", "    if not cur or m.get(\"content_md5\") != cur:", "    if False:"),
     ("B2 sweep không truyền OPENED_AT", "env = dict(os.environ, GATE_BLOCK_OPENED_AT=opened_at)", "env = dict(os.environ)"),
@@ -1119,6 +1155,10 @@ MUTATIONS = [
     # reviewer arch-review vòng 3 (M1/M4/M6 sống ở ee8279538)
     ("M1 NB-D audit None ⇒ đóng nhầm", 'if still_pending(rec["agent"], rec["topic"]) is False:\n                    rec.update(', 'if not still_pending(rec["agent"], rec["topic"]):\n                    rec.update('),
     ("M4 NB-B chỉ ghi last_open cho expired", 'elif rec.get("status") in DONE:', 'elif rec.get("status") == "expired":'),
+    ("G3a bằng chứng lại tính mọi event (BOOK_TRANSFER)", 'if (row.get("event") or "") not in EXECUTOR_EVENTS:', 'if False:'),
+    ("G3b quay lại mtime", 'executor_event_since(journal, since))', '(mtime_ict(journal).isoformat(), "") if mtime_ict(journal) > since else (None, "mtime"))'),
+    ("R1 xoá WAIT_T2_SETTLEMENT khỏi allowlist", 'WAIT_T2_SETTLEMENT RULE_A_REF_BLOCK', 'RULE_A_REF_BLOCK'),
+    ("G3c bỏ lọc ts > since", 'if ts > since:\n                    return ts', 'if True:\n                    return ts'),
     ("M6 NB-D không đặt closed_at", 'rec.update(status="closed", closed_at=now.isoformat(timespec="seconds"),\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện', 'rec.update(status="closed",\n                               closed_how="bus: audit chính thống không còn thấy pending (đóng ngoài helper, phát hiện'),
 ]
 

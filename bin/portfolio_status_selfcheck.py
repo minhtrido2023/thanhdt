@@ -7,6 +7,7 @@ giống production. Vì vậy assertion phải fail-soft khi input hôm nay khô
 lễ/cuối tuần) thay vì crash CI.
 """
 import os
+import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +33,11 @@ def _no_lots(account, date):
     """Thay sổ lô LAG (park_holdings gọi broker LIVE khi date = hôm nay) cho các ca chỉ kiểm KHUNG
     của build_output — đường sổ lô thật kiểm ở 12/12b/12c + chạy tay portfolio_status."""
     return {}, {}, "selfcheck: bỏ qua sổ lô"
+
+
+def _no_ledger(account, date):
+    """Thay sổ lô (park_holdings gọi broker LIVE) — các ca KHUNG cũ chạy đường fallback nhãn FILL."""
+    return None, set(), "selfcheck: bỏ qua sổ lô"
 
 
 def _no_tool(account, date):
@@ -460,6 +466,7 @@ def run():
         """`build_output` trên fixture; SẬP = chuỗi "EXC:…" (một ca ĐỎ có tên, không cắt ngang)."""
         err = io.StringIO()
         kw.setdefault("lag_lots_fn", _no_lots)
+        kw.setdefault("ledger_split_fn", _no_ledger)
         try:
             with contextlib.redirect_stderr(err):
                 out_ = ps.build_output("ZaloPay", "2026-10-09", **(
@@ -602,6 +609,107 @@ def run():
               and "portfolio_status: công cụ tỉ suất §21 lỗi (ZaloPay 2026-10-09) — không in tỉ suất mã "
                   "nào: ValueError: không lấy được giá thô 2026-10-09 từ BQ: quota — CHẶN" in err3,
               out3 + err3)
+
+        # ---- G3-hygiene (2026-10-29): sleeve theo SỔ LÔ, không bầu chọn nhãn FILL; mã lẫn sổ tách đúng
+        import report_return_gate as _rrg
+        pos_g = {"MX1": {"qty": 1786.0, "marketPrice": 20000.0, "avg_cost": 19000.0, "sellable": 1786},  # lẫn LAG+PARK
+                 "ON1": {"qty": 500.0, "marketPrice": 10000.0, "avg_cost": 9000.0, "sellable": 500},     # 1 sổ (LAG)
+                 "TR1": {"qty": 400.0, "marketPrice": 10000.0, "avg_cost": 9000.0, "sellable": 400},     # lô BOOK_TRANSFER → LAG
+                 "UV1": {"qty": 300.0, "marketPrice": 10000.0, "avg_cost": 9000.0, "sellable": 300},     # unverified
+                 "MM1": {"qty": 300.0, "marketPrice": 10000.0, "avg_cost": 9000.0, "sellable": 300},     # lệch broker
+                 "TE1": {"qty": 100.0, "marketPrice": 10000.0, "avg_cost": 9000.0, "sellable": 100}}     # book kỹ thuật
+        ps.broker_positions_with_cost = lambda no_, d: {k: dict(v) for k, v in pos_g.items()}
+        # nhãn FILL "phổ biến nhất" của MX1/TR1/UV1/MM1 đều là PARK ⇒ cách cũ xếp trọn mã vào PARK
+        ps.sleeve_map_from_journal = lambda a: {k: "PARK" for k in pos_g}
+        ps.current_park_basket = lambda: (set(pos_g), None)
+        tool_g = {k: row(v["qty"], 10000.0, 5.0) for k, v in pos_g.items()}
+        tool_g["MX1"] = row(1786.0, 10000.0, 10.0)   # khác 5% của mã khác ⇒ đếm 2 lần/sai phần sẽ lộ ở tổng sleeve
+
+        def ledger_ok(a, d):
+            return ({"MX1": {"LAG": 1500, "PARK": 286}, "ON1": {"LAG": 500},
+                     "TR1": {"LAG": 400},                       # BOOK_TRANSFER đã ghi ⇒ lô mang nhãn đích
+                     "UV1": {"LAG": 300}, "MM1": {"LAG": 250},   # UV1 unverified; MM1 sổ 250 ≠ broker 300
+                     "TE1": {"CORP_ACTION": 100}},
+                    {"UV1"}, None)
+        out_g, err_g = build(lambda a, d: tool_g, ledger_split_fn=ledger_ok)
+        check("G3 sleeve: mã lẫn sổ ⇒ MỖI sổ đúng phần (MX1: LAG 1.500cp + PARK 286cp), không bầu chọn",
+              "MX1 30.0M, +10.00% — phần 1,500cp trong sổ này" in out_g
+              and "MX1 5.7M, +10.00% — phần 286cp trong sổ này" in out_g, out_g)
+        check("G3 sleeve: mã 1 sổ + lô BOOK_TRANSFER ⇒ theo nhãn sổ lô (LAG), dù FILL toàn PARK",
+              "ON1 5.0M, +5.00%" in out_g.split("**Chi tiết LAG")[1].split("**Chi tiết")[0]
+              and "TR1 4.0M, +5.00%" in out_g.split("**Chi tiết LAG")[1].split("**Chi tiết")[0], out_g)
+        check("G3 sleeve: unverified / lệch broker ⇒ fallback cách cũ (PARK) + lý do thật ở stderr, "
+              "KHÔNG nói trong báo cáo (nội dung công bố)",
+              "UV1 3.0M" in out_g.split("**Chi tiết PARK")[1].split("**Chi tiết")[0]
+              and "MM1 3.0M" in out_g.split("**Chi tiết PARK")[1].split("**Chi tiết")[0]
+              and "UV1 (ZaloPay 2026-10-09) phân loại sleeve theo nhãn FILL (cách cũ): sổ lô đánh dấu unverified" in err_g
+              and "MM1 (ZaloPay 2026-10-09) phân loại sleeve theo nhãn FILL (cách cũ): sổ lô 250cp ≠ broker 300cp" in err_g
+              and "unverified" not in out_g, err_g)
+        check("G3 sleeve: book kỹ thuật (CORP_ACTION) ⇒ giữ cách phân loại cũ (PARK), không crash",
+              "TE1 1.0M" in out_g.split("**Chi tiết PARK")[1].split("**Chi tiết")[0], out_g)
+        tot_g = sum(v["qty"] * v["marketPrice"] for v in pos_g.values()) / 1e6
+        got_g = sum(float(m.group(1)) for m in re.finditer(r"^\| (?:PARK|LAG|BAL)[^|]*\| ([\d.,]+)M \|", out_g, re.M))
+        check("G3 sleeve: TỔNG giá trị các sleeve = tổng vị thế broker (chỉ đổi cách xếp, không đổi tiền)",
+              abs(got_g - tot_g) < 0.15, f"{got_g} vs {tot_g}")
+        lag_row = next((ln for ln in out_g.splitlines() if ln.startswith("| LAG (")), "")
+        check("G3 sleeve: dòng LAG = 3 mã (MX1 chỉ phần 1.500cp, ON1, TR1) 39,0M, lãi/lỗ +8,1% (= (1,5M+0,25M+0,2M)/24M) — mã lẫn sổ "
+              "không bị đếm 2 lần ở giá trị lẫn lãi/lỗ",
+              lag_row.startswith("| LAG (3 mã) | 39.0M | ") and "| ≈+8.1% |" in lag_row, lag_row)
+        check("R3 sleeve có mã tách: tổng mang ≈ + ghi chú nêu giá vốn bình quân toàn mã; dòng mã nói tỉ suất là của TOÀN MÃ",
+              "≈ vì MX1 nằm lẫn nhiều sổ" in lag_row and "giá vốn bình quân" in lag_row
+              and "tỉ suất là của TOÀN MÃ" in out_g, lag_row)
+        bits_g = [(m[0], float(m[1])) for m in _rrg.POSBIT_RE.findall(out_g)]
+        tmp_g = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8")
+        tmp_g.write(out_g); tmp_g.close()
+        try:
+            gaps_g = _rrg.position_line_gaps(tmp_g.name)
+        finally:
+            os.unlink(tmp_g.name)
+        check("G3 sleeve: HỢP ĐỒNG cổng tỉ suất — dòng vị thế mã lẫn sổ vẫn đọc được, mỗi mục đủ n vị thế",
+              gaps_g == [] and sum(1 for t, _ in bits_g if t == "MX1") == 2, str(gaps_g))
+        out_n, err_n = build(lambda a, d: tool_g)       # sổ lô không dựng được (stub mặc định)
+        check("G3 sleeve: sổ lô LỖI ⇒ fallback cách cũ (cả 6 mã PARK) + cảnh báo stderr nêu lý do thật + "
+              "báo cáo nói rõ (không số mới)",
+              all(f"{k} " in out_n.split("**Chi tiết PARK")[1].split("**Chi tiết")[0] for k in pos_g)
+              and "sổ lô không dựng được (ZaloPay 2026-10-09)" in err_n and "selfcheck: bỏ qua sổ lô" in err_n
+              and "ⓘ Chưa dựng được sổ lô" in out_n and "ⓘ Chưa dựng được sổ lô" not in out_g, err_n)
+        parts_ok = ps.sleeve_parts("MX1", 1786.0, {"MX1": {"LAG": 1500, "PARK": 286}}, set(), None, {}, set(), set())
+        check("G3 sleeve: sleeve_parts trả đúng phần theo thứ tự SLEEVE_ORDER, không fallback",
+              parts_ok == ([("PARK", 286), ("LAG", 1500)], None), str(parts_ok))
+        # R2 vòng 2: mã vừa thuộc sleeve vừa có phần CORP_ACTION (dữ liệu thật 2026-10-28: SpaceX MBB
+        # PARK 65 + CORP_ACTION 110; ZaloPay MBB PARK 32 + CORP_ACTION 20) — phần kỹ thuật cộng vào sleeve
+        import inspect
+        mbb_books = {"MBB": {"PARK": 65, "CORP_ACTION": 110}}
+        mbb = ps.sleeve_parts("MBB", 175.0, mbb_books, set(), None, {"MBB": "PARK"}, {"MBB"}, set())
+        check("R2 sleeve: MBB {PARK:65, CORP_ACTION:110} ⇒ đủ 175cp trong PARK, KHÔNG fallback",
+              mbb == ([("PARK", 175)], None), str(mbb))
+        mbb2 = ps.sleeve_parts("MBB", 52.0, {"MBB": {"PARK": 32, "CORP_ACTION": 20}}, set(), None,
+                               {"MBB": "PARK"}, {"MBB"}, set())
+        check("R2 sleeve: ZaloPay MBB {PARK:32, CORP_ACTION:20} ⇒ 52cp PARK", mbb2 == ([("PARK", 52)], None), str(mbb2))
+        src_sp = inspect.getsource(ps.sleeve_parts)
+        pm1_old = "parts = [(sl, q + rest) if sl == old else (sl, q) for sl, q in parts]"
+        check("R2 mutant PM1 áp được lên mã nguồn", pm1_old in src_sp)
+        ns = dict(vars(ps))
+        exec(src_sp.replace(pm1_old, "parts = [(sl, q) for sl, q in parts]"), ns)
+        with contextlib.redirect_stderr(io.StringIO()):
+            pm1 = ns["sleeve_parts"]("MBB", 175.0, mbb_books, set(), None, {"MBB": "PARK"}, {"MBB"}, set())
+        check("R2 mutant PM1 (bỏ cộng phần kỹ thuật) bị bắt: không còn trả ([('PARK',175)], None)",
+              pm1 != ([("PARK", 175)], None) and pm1[1] is not None and "Σ phần" in pm1[1], str(pm1))
+        keep_order = ps.SLEEVE_ORDER
+        ps.SLEEVE_ORDER = ["PARK"]   # LAG có trong sổ nhưng không được liệt kê ⇒ Σ phần ≠ qty
+        err_sp = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(err_sp):
+                inv = ps.sleeve_parts("MX9", 150.0, {"MX9": {"LAG": 100, "PARK": 50}}, set(), None,
+                                      {"MX9": "LAG"}, set(), set())
+        finally:
+            ps.SLEEVE_ORDER = keep_order
+        check("R2 bất biến Σ phần ≠ qty ⇒ fallback classify_sleeve toàn mã + stderr `portfolio_status:` nêu lý do",
+              inv[0] == [("LAG", 150.0)] and inv[1] and "Σ phần" in inv[1]
+              and err_sp.getvalue().startswith("portfolio_status: MX9:"), str((inv, err_sp.getvalue())))
+        ps.broker_positions_with_cost = lambda no_, d: {k: dict(v) for k, v in pos.items()}
+        ps.sleeve_map_from_journal = lambda a: dict(journal)
+        ps.current_park_basket = lambda: ({"QQ0"}, None)
         ps.section21_returns = lambda a, d: full
         out4, _ = build()
         check("K1: không truyền `returns_fn` ⇒ mặc định gọi `section21_returns` (công cụ thật)",
