@@ -421,6 +421,104 @@ assert S["memo"] and S["isdir"] == "True" and not S["memo_alive"], (
     "MUTATION-GUARD eod_memo: khối EOD_MEMO không còn export sổ nhớ tới tiến trình con hoặc không "
     f"dọn khi thoát. Đang là: memo={S['memo']!r} isdir={S['isdir']!r} alive={S['memo_alive']!r}")
 
+# ── Lệnh tay đã khai (manual_actions) trong đoạn python REPORT= (vòng 2 arch-review, mục 5) ─────────
+# Chạy NGUYÊN đoạn python nhúng với manual_actions.py THẬT chép vào wc_root giả. Leg 2 (dnse_raw vs
+# state) bỏ qua phần lệch = KL khai; leg 3 (statement) trừ phần khai khỏi broker_escalate; sổ hỏng ⇒
+# dòng ⚠️ trung tính trong báo cáo, lý do thật ra stderr.
+print("\n[lệnh tay] leg-2 skip · leg-3 broker_escalate trừ phần khai · ⚠️ khi sổ hỏng")
+MANUAL_ORDER_ID = "20260811_555"
+BROKER_STUB_MA = '''import json, os, types
+def account_no_for(wc_root, account):
+    for a in json.load(open(os.path.join(wc_root, "secrets", "trading_bot_accounts.json")))["accounts"]:
+        if a["label"] == account:
+            return a["account_id"]
+class _BF:
+    available = True
+    by_key = {("FPT", "buy"): 500}
+    def qty(self, t, s):
+        return self.by_key.get((t, s), 0)
+def load_broker_fills(plan_date, account, wc_root):
+    return _BF()
+def reconcile_lines(bk, plan_by_key, state_by_key, manual_by_key=None):
+    return ["RECONCILE manual=%s" % sorted((manual_by_key or {}).items())]
+'''
+
+
+def ma_rec(qty, status="VERIFIED"):
+    bo = {"id": MANUAL_ORDER_ID, "symbol": "FPT", "side": "NB", "orderStatus": "Filled",
+          "quantity": 500, "fillQuantity": 500, "price": 72000, "averagePrice": 72000, "transDate": DATE}
+    v = {"status": status}
+    if status == "VERIFIED":
+        v.update(envelope_account_no=ACCT_NO["SpaceX"], method="dnse_api.order_history",
+                 verified_at=f"{DATE}T15:00:00+07:00", broker_order=bo)
+    return {"id": "MA-sc", "date": DATE, "time_ict": "10:15:00", "account": "SpaceX",
+            "account_no": ACCT_NO["SpaceX"], "ticker": "FPT", "side": "buy", "qty": qty, "price": 72000.0,
+            "broker_order_id": MANUAL_ORDER_ID, "source": "selfcheck",
+            "declared_at": f"{DATE}T15:01:00+07:00", "verification": v}
+
+
+def run_manual(py, ledger_actions=None, raw_ok=True, corrupt=False, real=500):
+    accts = [{"label": a, "account_id": n} for a, n in ACCT_NO.items()]
+    # FPT: plan mua 1000, state bot khớp 0, dnse_raw thấy 500 (= lệnh tay) ⇒ real−internal = 500
+    root = build_root(accts, [order_rec(ACCT_NO["SpaceX"], 1, real)])
+    try:
+        shutil.copy(os.path.join(HERE, "manual_actions.py"), os.path.join(root, "mike", "bin"))
+        shutil.copy(os.path.join(HERE, "wc_paths.py"), os.path.join(root, "mike", "bin"))
+        open(os.path.join(root, "wc_env.sh"), "w").close()
+        with open(os.path.join(root, "mike", "bin", "broker_fill_confirm.py"), "w") as f:
+            f.write(BROKER_STUB_MA.replace('("FPT", "buy"): 500}', '("FPT", "buy"): %d}' % real))
+        ledger = os.path.join(root, "data", "user_manual_actions.json")
+        if corrupt:
+            open(ledger, "w").write("{không phải json")
+        elif ledger_actions is not None:
+            json.dump({"schema_version": 1, "actions": ledger_actions}, open(ledger, "w"))
+            if raw_ok:
+                with open(os.path.join(root, "data", "execution_logs", f"dnse_raw_{DATE}.jsonl"), "a") as f:
+                    for a in ledger_actions:
+                        v = a["verification"]
+                        if v.get("status") == "VERIFIED":
+                            f.write(json.dumps({"ts": f"{DATE}T15:00:00", "kind": "order_history",
+                                                "account_no": v["envelope_account_no"],
+                                                "payload": {"accountNo": v["envelope_account_no"],
+                                                            "data": [v["broker_order"]]}}) + "\n")
+        r = run_report(py, root, "SpaceX")
+        mm_path = os.path.join(root, "state", f"eod_mismatch_{'SpaceX'}_{DATE}.json")
+        r["mm"] = json.load(open(mm_path)) if os.path.exists(mm_path) else None
+        return r
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+M0 = run_manual(cur_py)
+check("(đối chứng) KHÔNG sổ: leg 2 báo lệch FPT (500 vs 0) VÀ leg 3 escalate FPT broker=500",
+      M0["rc"] == 0 and M0["mm"] is not None
+      and any(m["ticker"] == "FPT" for m in M0["mm"]["mismatches"])
+      and [e["broker_filled"] for e in M0["mm"]["broker_statement_mismatches"]] == [500],
+      (M0["rc"], M0["mm"], M0["err"][-300:]))
+M1 = run_manual(cur_py, [ma_rec(500)])
+check("leg 2 skip + leg 3 trừ phần khai: khai 500 đúng = lệch ⇒ KHÔNG mismatch, KHÔNG escalate "
+      "(không file mismatch)", M1["rc"] == 0 and M1["mm"] is None, (M1["rc"], M1["mm"], M1["err"][-300:]))
+check("… và mục ℹ️ 'Lệnh tay đã khai (đã xác nhận broker)' + reconcile_lines nhận manual_by_key",
+      "ℹ️ **Lệnh tay đã khai (đã xác nhận broker)**" in M1["out"] and "RECONCILE manual=[(('FPT', 'buy'), 500)]" in M1["out"],
+      M1["out"][-500:])
+M2 = run_manual(cur_py, [ma_rec(500)], real=800)
+check("khai VERIFIED 500 nhưng lệch thật 800 (real−internal=800 ≠ 500) ⇒ leg 2 VẪN báo FPT và leg 3 VẪN escalate "
+      "broker_filled=800 (phần dư khác khai KHÔNG bị che) — giết mutant leg2_skip_any/leg3_skip_any",
+      M2["mm"] is not None and any(m["ticker"] == "FPT" for m in M2["mm"]["mismatches"])
+      and [e["broker_filled"] for e in M2["mm"]["broker_statement_mismatches"]] == [800], M2["mm"])
+M3 = run_manual(cur_py, [ma_rec(500, status="UNVERIFIED")])
+check("khai UNVERIFIED ⇒ không trừ gì, vẫn mismatch + tiêu đề KHÔNG nói 'đã xác nhận broker'",
+      M3["mm"] is not None and "đã xác nhận broker" not in M3["out"], (M3["mm"], M3["out"][-400:]))
+M4 = run_manual(cur_py, [ma_rec(500)], raw_ok=False)
+check("VERIFIED nhưng không có bản sao dnse_raw order_history ⇒ không trừ, vẫn mismatch",
+      M4["mm"] is not None and any(m["ticker"] == "FPT" for m in M4["mm"]["mismatches"]), M4["mm"])
+M5 = run_manual(cur_py, corrupt=True)
+check("sổ HỎNG ⇒ dòng ⚠️ trung tính trong báo cáo (không lộ exception), lý do thật ra stderr, lệch vẫn hiện",
+      "⚠️ Chưa đối chiếu được sổ lệnh tay đã khai" in M5["out"]
+      and "JSONDecodeError" not in M5["out"] and "ManualActionsError" not in M5["out"]
+      and "KHÔNG đọc được sổ lệnh tay" in M5["err"] and "ManualActionsError" in M5["err"]
+      and M5["mm"] is not None, (M5["out"][-400:], M5["err"][-300:]))
+
 print(f"\n[RED] CHỨNG MINH NGƯỢC trên bản trước vá {PRE_FIX_REF}: (i)/(ii) phải ĐỎ")
 if old_py is not None:
     O = scenarios(old_py)

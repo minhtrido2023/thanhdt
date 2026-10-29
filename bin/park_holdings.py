@@ -824,9 +824,15 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
       · N6 — runbook: statement tải ở EOD bước 3 (~19:10). L1/L2 chạy TRƯỚC giờ đó thì bán tay
         trong ngày bị chặn BLOCKED_RECONCILE; hôm sau statement có mặt ⇒ tự hết.
 
+    LỆNH TAY ĐÃ KHAI (29/10, `manual_actions.gate_fills`): ngày CHƯA có statement dùng được ⇒ lệnh
+    BÁN tay VERIFIED (bản ghi order-history DNSE, đúng tiểu khoản §12) được áp y như dòng statement
+    (`T23:59:59`, FIFO theo ticker, UNVERIFIED về book); MUA tay ⇒ chỉ ghi chú, không thêm lô. Ngày
+    ĐÃ có statement ⇒ statement thắng, sổ chỉ đối chiếu (lệch ⇒ ghi chú). Sổ rỗng ⇒ y hệt bản cũ.
+
     Trả (events, notes): events cùng dạng `_fill_deltas` (book="" ⇒ nhánh FIFO theo ticker).
     """
-    from broker_fill_confirm import BrokerFills, load_broker_fills
+    import manual_actions
+    from broker_fill_confirm import BrokerFills, account_no_for, load_broker_fills
     wc_root = os.path.dirname(os.path.dirname(os.path.abspath(exec_dir)))
     days = []
     for path in glob.glob(os.path.join(exec_dir, "dnse_khoplenh_broker_confirm_*.csv")):
@@ -837,6 +843,10 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
         if since_date <= d <= until_date:
             days.append((d, os.path.basename(path)))
     events, notes = [], []
+    manual = {d: fs for d, fs in manual_actions.gate_fills(
+        account_label, account_no_for(wc_root, account_label), "", until_date,
+        notes_out=notes, wc_root=wc_root).items() if d >= since_date}
+    stmt_ok = set()
     for d, fname in sorted(days):
         try:
             bf = load_broker_fills(d, account_label, wc_root, allow_fetch=False)
@@ -845,6 +855,11 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
         if not bf.available:
             notes.append(f"{d} statement DNSE KHÔNG dùng được ({bf.reason}) ⇒ ngày này chỉ journal")
             continue
+        stmt_ok.add(d)
+        if manual.get(d):
+            notes.extend(manual_actions.emit_warnings(manual_actions.statement_crosscheck(
+                d, manual[d], {k: int(bf.qty(*k)) for k in bf.by_key},
+                {(tk, sd): q for (dd, tk, sd), q in journal_qty.items() if dd == d}), d))
         keys = set(bf.by_key) | {(tk, sd) for (dd, tk, sd) in journal_qty if dd == d}
         for tk, side in sorted(keys):
             j, b = journal_qty.get((d, tk, side), 0), int(bf.qty(tk, side))
@@ -861,6 +876,17 @@ def statement_extra_sells(account_label, journal_qty, since_date, until_date, ex
                                "parent_id": "broker_statement", "_file": fname})
                 notes.append(f"{d} {tk} BÁN +{b - j:,}cp chỉ có ở statement DNSE (ngoài journal bot) "
                              f"⇒ trừ lô FIFO theo ticker")
+    for d in sorted(set(manual) - stmt_ok):
+        for m in manual[d]:
+            if m["side"] == "buy":
+                notes.append(f"{d} {m['ticker']} MUA {m['qty']:,}cp lệnh tay đã khai — không có book, "
+                             f"KHÔNG thêm lô (để đối soát chặn)")
+                continue
+            events.append({"ts": f"{d}T23:59:59", "ticker": m["ticker"], "side": "sell", "book": "",
+                           "play_type": "", "qty": m["qty"], "price": m["price"],
+                           "parent_id": "manual_action", "_file": "user_manual_actions.json"})
+            notes.append(f"{d} {m['ticker']} BÁN {m['qty']:,}cp lệnh tay ĐÃ KHAI + broker xác nhận "
+                         f"({m['id']}; statement chưa về) ⇒ trừ lô FIFO theo ticker")
     return events, notes
 
 
@@ -1007,7 +1033,7 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
                      ev["play_type"])
         elif ev["side"] == "sell":
-            if ev["parent_id"] == "broker_statement":
+            if ev["parent_id"] in ("broker_statement", "manual_action"):  # cùng luật B1
                 # B1 (arch-review 22/10): lệnh bán tay không có book ⇒ FIFO trừ lô cũ nhất BẤT KỂ
                 # book. Mã có lô ở >1 book tại thời điểm áp (vd VPB = PARK + LAG) ⇒ không biết
                 # trừ book nào ⇒ KHÔNG áp, giữ lệch ⇒ reconcile.ok=False ⇒ BLOCKED_RECONCILE.

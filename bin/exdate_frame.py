@@ -179,6 +179,14 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
     statement): CP quyền về tài khoản không qua lệnh sàn nên không nằm ở nguồn nào trong hai nguồn
     đó. Mirror `daily_nav_snapshot.net_fills_between`. Không có sổ khai báo ⇒ y hệt bản cũ.
 
+    LỆNH TAY ĐÃ KHAI (29/10, `manual_actions.gate_fills` — kb/projects/manual-deviation-process-20261029.md):
+    nguồn fill thứ 3 cho ngày CHƯA có statement. Chỉ dòng VERIFIED (bản ghi order-history DNSE lưu
+    trong sổ, dựng lại mã/chiều/KL/ngày/tiểu khoản) của ĐÚNG account (§12) được CỘNG vào journal —
+    cộng chứ không max: lệnh tay không bao giờ nằm trong journal bot; lệnh có mã số trùng một
+    child_oid journal thì bỏ qua (đã đếm). Ngày ĐÃ có statement ⇒ statement thắng (đã gồm lệnh tay),
+    sổ chỉ dùng để đối chiếu: statement − journal ≠ KL khai ⇒ ghi cảnh báo vào `notes_out`. Sổ rỗng
+    ⇒ y hệt bản cũ. Phần dư KHÁC khai vẫn bị cổng chặn như cũ.
+
     `missing_out`: ngày GIAO DỊCH trong cửa sổ mà CẢ journal LẪN statement đều không dùng được —
     chỉ khi đó "lệnh khớp thật" mới là suy diễn từ vắng mặt (§28). Có statement dùng được thì ngày
     đó ĐÃ có bằng chứng đầy đủ dù journal thiếu (ca 21/10: bot không chạy, chỉ có lệnh tay).
@@ -212,6 +220,12 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
         d_ = next_trading_day(d_)
 
     out, missing, notes = {}, [], []
+    import manual_actions
+    if account_no is None:
+        from broker_fill_confirm import account_no_for
+        account_no = account_no_for(wc_root, account_label)
+    manual = manual_actions.gate_fills(account_label, account_no, after_date, upto_date,
+                                       notes_out=notes, wc_root=wc_root)
     for d in sorted(days):
         events, jerr = vas.journal_fill_events(account_label, d)
         try:
@@ -231,8 +245,21 @@ def net_fills_journal_and_broker(account_label, after_date, upto_date, cache=Non
                 elif b > j:
                     notes.append(f"{d} {k[0]} {k[1]}: +{b - j:,.0f}cp chỉ có ở statement DNSE "
                                  f"(ngoài journal bot)")
-        elif events is not None:
-            per_day = jq
+            if manual.get(d):
+                notes.extend(manual_actions.emit_warnings(manual_actions.statement_crosscheck(
+                    d, manual[d], {k: float(broker.qty(*k)) for k in broker.by_key}, jq), d))
+        elif events is not None or manual.get(d):
+            per_day = dict(jq)
+            joids = {str(_oid) for _ts, _oid, *_ in events or []}
+            for m in manual.get(d, []):
+                if m["order_num"] in joids:
+                    continue
+                k = (m["ticker"], m["side"])
+                per_day[k] = per_day.get(k, 0.0) + m["qty"]
+                notes.append(f"{d} {m['ticker']} {m['side']}: {m['qty']:,}cp lệnh tay ĐÃ KHAI + "
+                             f"broker xác nhận ({m['id']}; statement chưa về)")
+            if events is None:
+                missing.append(f"{d}: {jerr}; statement: {broker.reason} (chỉ có lệnh tay đã khai)")
         else:
             missing.append(f"{d}: {jerr}; statement: {broker.reason}")
             continue
