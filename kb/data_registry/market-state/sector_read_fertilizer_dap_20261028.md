@@ -198,3 +198,9 @@ mua/bán bất kỳ mã nào.**
 - Argus, "China's sulphur prices set to cool", 02/12/2024 (cơ sở HPAL/tồn kho cảng): https://www.argusmedia.com/en/news-and-insights/latest-market-news/2634266-china-s-sulphur-prices-set-to-cool
 - Qcintel (Tampa NH3, các tiêu đề 2026): https://www.qcintel.com/ammonia/article/tampa-ammonia-price-flat-at-560-mt-for-november-31314.html ; ICIS ammonia: https://www.icis.com/explore/commodities/fertilizers/ammonia/
 - 24hmoney (tiền lệ lưu huỳnh 589→253 USD, khả năng 2022, năm chưa xác nhận): https://24hmoney.vn/news/gia-ure-luu-huynh-dong-loat-giam-c25a1511181
+
+
+---
+## ADDENDUM 29/10/2026 (Mike) — đính chính nguồn dữ liệu, KHÔNG sửa FORECAST/phân loại ở trên
+Dòng "BQ không có NH3" (mục Dữ liệu, bẫy 3) **hết đúng từ 28/10 16:xx ICT**: BQ có `liquid_ammonia` (sunsirs, CNY/t, **NH3 nội địa Trung Quốc**, 2018→). Đã đối chiếu trang sunsirs, khớp. Chi tiết + bẫy: `kb/data_registry/feeds/bq_commodity_prices.md` § NH3.
+Hệ quả cho bản đọc này: chuỗi mới KHÔNG phải Tampa/CFR nên **cột NH3 nhập khẩu vẫn từ web**; NH3 TQ ~2.734 CNY/t (10/2026) chỉ ≈ +22% YoY và +11% so TB 26Q3, **không tái hiện cú sốc Gulf/TTF** mà bản đọc dựa vào. Trigger phụ "NH3 Tampa" của FORECAST vẫn chấm bằng Tampa (web), không bằng chuỗi BQ.

@@ -10,6 +10,7 @@ note: >
 
 # Lịch sử biên tập Data Registry
 
+- 2026-10-29 (Mike, thread 1564443626463957113): `feeds/bq_commodity_prices.md` — thêm mục NH3 `liquid_ammonia` (sunsirs, CNY/t, NH3 nội địa TQ, vào BQ 28/10; đối chiếu trang sunsirs khớp) + bẫy "không phải Tampa/CFR nhập khẩu"; sửa dòng THIẾU. `market-state/sector_read_fertilizer_dap_20261028.md` — addendum đính chính "BQ không có NH3"; `projects/ddv-dd-20261028.md` — ghi chú +150% YoY chưa kiểm được bằng BQ.
 - 2026-10-13 (Taylor, job Taylor_20261013_125149, user duyệt 4 việc từ audit BCTC Q3): (1) `rating-8l/fa_ratings_8l.md`
   + `rating-8l/fa_ratings.md` — hết ghi "cron TẠM T3 đến 08-04" (đã xoá từ 07-14), ghi đúng cron 20:00 hằng ngày
   có gate mùa BCTC, cửa sổ mới ngày 10 tháng 1/4/7/10 → ngày 10 tháng 2/5/8/11 (L4 + M1a); (2)

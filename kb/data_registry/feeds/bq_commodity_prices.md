@@ -5,7 +5,7 @@ source: tav2_bq.commodity_prices (TABLE) + tav2_bq.commodity_prices_unified (VIE
 group: feeds
 cadence: daily (TE, sunsirs) / monthly (TE, WB) / event (GDT)
 writer: bq_admin (user xác nhận 2026-10-26); nguồn TradingEconomics; cron làm mới chưa thấy trong repo
-verified: 2026-10-26 đêm (job Winston_20261026_163836, đo lại BQ: P4 `yellow_phosphorus`, sulfur, bẫy tên phosphorus)
+verified: 2026-10-29 (Mike: thêm `liquid_ammonia`, đối chiếu sunsirs); trước đó 2026-10-26 đêm (job Winston_20261026_163836)
 ---
 
 # `tav2_bq.commodity_prices` (+ 2 view)
@@ -69,6 +69,15 @@ Monitor `commodity_freshness_monitor.py`: 23/23 sunsirs = **OK** (median_gap 1, 
 - **`sulfur`** (`source='trading_economics'`, `cadence='daily'`, CNY/T): 1.777 dòng, **2020-01-02 → 2026-10-23, 0 khe >10 ngày** (khe lớn nhất 3 ngày), 0 dòng cuối tuần, **đứng giá 53,3%**. ⚠️ Lọc `cadence='daily'` — còn 356 dòng `monthly` cùng khoá `metric_key` (2019-12-30→2026-10-19). **Là proxy chu kỳ phân bón/lưu huỳnh, KHÔNG đo được như chi phí cấp nhóm** (REPORT B2: không tách được chi phí đầu vào từng nhóm cổ phiếu). Giá thật, đã xác minh (mục "Xác minh sulfur TE 2026").
 - Giá trung bình quý (REPORT, chưa đo lại): P4 Q3/25 22.592 · Q2/26 31.105 · Q3/26 27.606; lưu huỳnh Q3/25 2.521 · Q2/26 7.541 · Q3/26 8.794.
 
+## NH3 / amoniac lỏng — `liquid_ammonia` (sunsirs, thêm vào BQ 28/10/2026; Mike kiểm 29/10)
+- **Khoá**: `metric_key='liquid_ammonia'`, `source='sunsirs'`, `cadence='daily'`, **CNY/T**, spot **Trung Quốc nội địa** (sunsirs prodetail-965, "China Liquid ammonia Spot Price"). 2.300 dòng, 2018-01-02 → 2026-10-28, 0 NULL/0, 0 dòng cuối tuần, 600 giá trị khác nhau (đứng giá theo nhịp ~3 ngày). `monitor` = OK (age 1).
+- **Đã đối chiếu nguồn**: trang sunsirs 29/10 khớp BQ (28/10 = 2.806,67; 26/10 = 2.826,67). Trang hiển thị cả T7/CN lặp giá T6, BQ đã bỏ.
+- Mức: 2018 3.200 · 2021 4.216 · **2022 4.524 (đỉnh 5.350)** · 2023 3.688 · 2024 2.912 · 2025 2.441 (đáy 2.203) · 2026 2.453. TB quý: 25Q4 2.366 · 26Q1 2.289 · **26Q2 2.524 · 26Q3 2.458** · 26Q4 (20 phiên) 2.734. 10/2026 so 10/2025 ≈ **+22% YoY** (2.734 vs ~2.237); đỉnh gần nhất 3.040 (04/2026), 3.023 (09/2026).
+- ⚠️ **BẪY CHỌN HÀNG — KHÔNG phải giá NH3 mà nhà sản xuất DAP VN nhập.** Chuỗi này là giá nội địa TQ bằng CNY (≈ 395 USD/t ở tỷ giá ~7,1 — `ước lượng`, chưa tra tỷ giá), TQ gần tự cung (than→NH3). Benchmark NH3 nhập khẩu của VN/DDV là **Tampa (USD/t CFR)** và giá Trung Đông FOB — Tampa 01/2026 585, 11/2026 560 (Qcintel/Sector read 28/10). Hai thước **không cùng động lực**: cú sốc Gulf (Qatar/Iran ngừng NH3) + khí TTF +63% đẩy Tampa/ châu Âu, trong khi NH3 TQ chỉ +22% YoY.
+  ⇒ **Dùng được cho**: (a) chiều TQ của chu kỳ NH3/phân đạm (DGC/DPM/DCM khi cần giá nội địa TQ); (b) chỉ báo hướng. **KHÔNG dùng làm** số "NH3 đầu vào +150% YoY" của DDV, KHÔNG thay Tampa trong định mức chi phí DAP (`S+NH3 ≈ 500 USD/t DAP` ở sector read 28/10). Muốn đo chi phí nhập thật vẫn cần Tampa/Qcintel (web) hoặc số mua của DDV (email IR 28/10).
+- Cùng lúc chuỗi liên quan (đo 28/10, `source` tường minh): `sulfur` TE daily 5.564 CNY/t (−25% so đỉnh 11.084) · `di_ammonium` TE 802,5 USD/t (đứng 6 tuần, basis chưa rõ) · `phosphate_rock_cny` 1.019 · `yellow_phosphorus` 28.229 CNY/t (sunsirs). Lưu ý `liquid_ammonia` KHÔNG có nguồn khác trùng khoá → dedup/`unified` an toàn.
+- Hệ số tương quan/lead-lag với lưu huỳnh, DAP và LNST DDV: **chưa đo** (chưa có chuỗi quý đủ dài; `fetched_at` backfill một lần 2026-10-28 04:29 UTC ⇒ không PIT, bẫy số 4).
+
 ## Quy tắc chọn nguồn đề xuất (Winston, chờ Taylor/Mike xác nhận)
 - Chuỗi tháng / lịch sử / nối với các `data/*_monthly.csv` hiện có → **`source='worldbank_cmo'`** (trùng 246/246 tháng với csv brent/urea/iron_ore/dap, lệch 0,00).
 - Nowcast trong tháng / tín hiệu daily → **`source='trading_economics', cadence='daily'`**, chỉ dùng ≥2016-10-25, và **không nối** với chuỗi WB thành một series (khác định nghĩa, lệch tới 15–31%).
@@ -83,7 +92,7 @@ Monitor `commodity_freshness_monitor.py`: 23/23 sunsirs = **OK** (median_gap 1, 
 ## THIẾU so với nhu cầu fleet
 **[Cập nhật 26/10 chiều sau sunsirs]** ĐÃ LẤP: PTA/polyester (`pta`, `polyester_staple_fiber`, `pet`, `paraxylene`, `ethylene_glycol` — CNY), xút (`caustic_soda`, CNY/T, từ 2023-09), heo TQ (`live_hog_cny`, từ 2021-01; chỉ xu hướng TQ). VẪN THIẾU so với danh sách xin bq_admin: **vonfram**, **photpho vàng P4** (TE `phosphorus` = quặng photphat, vô dụng), **BDTI**, **HRC Trung Quốc** (`wire_rod`/TE `steel` là thép cây/dây, không phải HRC), **cá tra / thủy sản VN**; cộng các mục cũ: giá heo hơi VN (có csv ngoài BQ), hồ tiêu, điều, SCFI/WCI, potash/amoniac chuỗi ngày.
 (Danh sách cũ trước 26/10 chiều:)
-Giá heo hơi VN (đã có `data/hog_price_vn.csv`, ngoài BQ) · thủy sản VN (tôm, cá tra) · hồ tiêu · điều · thép cây nội địa · SCFI/WCI (cước container) · PTA/polyester · potash/amoniac chuỗi ngày (WB có `potassium_chloride` monthly; TE daily chưa kiểm) · chuỗi ngày chỉ từ 2016-10-25.
+Giá heo hơi VN (đã có `data/hog_price_vn.csv`, ngoài BQ) · thủy sản VN (tôm, cá tra) · hồ tiêu · điều · thép cây nội địa · SCFI/WCI (cước container) · PTA/polyester · potash chuỗi ngày (WB có `potassium_chloride` monthly; TE daily chưa kiểm); amoniac: ĐÃ CÓ `liquid_ammonia` TQ (28/10) nhưng CHƯA có Tampa/CFR nhập khẩu · chuỗi ngày chỉ từ 2016-10-25.
 Đối chiếu sâu: `kb/projects/commodity-tables-eval-20261026.md`.
 
 ↩ [Về feeds](index.md)

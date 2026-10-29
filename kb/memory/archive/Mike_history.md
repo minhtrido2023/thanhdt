@@ -122,3 +122,9 @@
 
 ## Archived 2026-10-27 (keep=12 days=0 require_done=False)
 - [2026-10-26T18:19:45Z] 27/10 01:15 user duyệt format plan (master 4b0ee23d5) và YÊU CẦU duyệt plan T3 27/10 SpaceX+ZaloPay, NHƯNG lệnh approve_plan_simple.sh bị classifier chặn ⇒ plan CHƯA ghi duyệt; chờ user cho phép/tự chạy. Egg: SpaceX ≥10,2tr, ZaloPay ≥11,7tr trước 09:05; kiểm tay giá SCL/VPB ZaloPay trước 08:45
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T17:34:46Z] 29/10 00:35 user DUYỆT plan T+1 29/10 cả 2 TK (SpaceX: SELL VPB 200 park-merge + MUA MCH 200; ZaloPay: SELL VPB 282 auto-exit + MUA MCH 200). Egg: SpaceX FUNDED; ZaloPay cần chuyển egg ≥17,8tr trước 09:05. Sau 09:05 kiểm fill.
+
+## Archived 2026-10-29 (keep=12 days=0 require_done=False)
+- [2026-10-28T17:41:49Z] 29/10 00:4x: user chọn A (giữ plan, bán PARK VPB 200) + giao Taylor clearing GĐ1 SHADOW (design kb/projects/book-clearing-plan-20261029.md; nhánh session/clearing-shadow-20261029). Xong → arch-review (Opus high, đụng park_holdings lõi) → báo user; KHÔNG wire cron/execute tới khi user duyệt GĐ3.
