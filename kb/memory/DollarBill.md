@@ -12,3 +12,4 @@
 - [2026-10-27T12:06:59Z] [2026-10-27 19:xx ICT] Plan SpaceX 10-28 XONG: 1 lenh MUA SCL 300cp LO 32.700 (residual ngay 3/3); egg>=1,2tr; DNSE live OK; cho duyet truoc 08:45 28/10 (job DollarBill_20261027_120459)
 - [2026-10-28T12:05:43Z] [2026-10-28 19:xx ICT] Plan ZaloPay 10-29 XONG: BUY MCH 200cp LO 139.800 (~27,99tr), chuyen egg >=20,6tr truoc 09:05; cho duyet truoc 08:45 29/10 (job DollarBill_20261028_120432)
 - [2026-10-28T12:06:02Z] [2026-10-28 19:xx ICT] Plan SpaceX 10-29 XONG: MUA MCH 200cp LO 139.800 (LAG_LO 8%), MSR ACK_DROP bỏ, egg>=19,4tr; chờ duyệt trước 08:45 29/10 (job DollarBill_20261028_120434)
+- [2026-10-29T12:04:58Z] [2026-10-29 19:xx ICT] Plan ZaloPay 10-30 XONG HOLD ALL; SCL bi ban 500cp ngoai plan (chua ro nguon) -> can doi soat; cho duyet truoc 08:45 30/10 (job DollarBill_20261029_120347)
