@@ -38,6 +38,7 @@ ci.ACKS_PATH = ci.CORP_ACTIONS_PATH = ci.NOTIFY_SCRIPT = _NOWHERE
 os.environ.pop("ACCOUNT_CASH_FLOWS_PATH", None)
 os.environ.pop("PYTEST_CURRENT_TEST", None)
 os.environ["MIKE_BOT_TEST_MODE"] = "1"       # không lần gọi nào ở đây được gửi tin thật (§5b)
+os.environ["MIKE_MANUAL_ACTIONS_FILE"] = _NOWHERE   # sổ lệnh tay THẬT không được đọc
 
 N = 0
 TODAY = datetime.date(2026, 3, 31)
@@ -1472,6 +1473,194 @@ def run_checks(tmp):
     ok(g._parse_inception_return_pct("| Từ khi bắt đầu hoạt động | +2,5% |") == 2.5
        and g._parse_inception_return_pct("| Từ khi bắt đầu hoạt động | n/a |") is None
        and g._parse_inception_return_pct("không có dòng") is None, "K: hàm đọc số giữ nguyên hợp đồng cũ")
+
+    # ---- M. LỆNH TAY ĐÃ KHAI (manual_actions) giải thích phần dư — chỉ khi broker xác nhận
+    import importlib.util
+    MAN_QTY, MAN_OID = 6_000, "20260304_900001"          # bán tay 60tr ≫ ngưỡng (~0,5tr)
+
+    def broker_order(qty=MAN_QTY, avg=PRICE, oid=MAN_OID):
+        return {"id": oid, "symbol": "AAA", "side": "NS", "orderType": "LO", "orderStatus": "Filled",
+                "price": PRICE, "quantity": qty, "fillQuantity": qty, "averagePrice": avg,
+                "transDate": "2026-03-04", "modifiedDate": utc_z(at(4, "14:26"))}
+
+    def man_rec(account="SpaceX", qty=MAN_QTY, status="VERIFIED", bo=None, account_no=None, oid=MAN_OID):
+        no = account_no or ACCOUNTS[account]
+        return {"id": f"MA-20260304-{account}-AAA-SELL-{oid[-6:]}", "date": "2026-03-04", "time_ict": "14:26:00",
+                "account": account, "account_no": no, "ticker": "AAA", "side": "sell", "qty": qty,
+                "price": PRICE, "broker_order_id": oid, "source": "selfcheck", "note": "",
+                "declared_at": "2026-03-04T15:00:00+07:00",
+                "verification": {"verified_at": "2026-03-04T15:01:00+07:00", "method": "dnse_api.order_history",
+                                 "envelope_account_no": no, "broker_order": bo or broker_order(qty), "status": status}}
+
+    def manual_world(name, recs, sold=MAN_QTY, copies=None, seller="SpaceX", extra_sold=0, ledger_text=None):
+        """`seller` bán tay `sold` cp AAA lúc 04/03 14:26 (KHÔNG có bản ghi orders); `copies` =
+        [(tiểu khoản envelope, bản ghi broker)] chép vào dnse_raw kind=order_history (mặc định: bản
+        sao của mỗi dòng sổ dưới ĐÚNG tiểu khoản của nó)."""
+        wd = World(tmp, name)
+        wd.add(seller, at(4, "14:26"), "sell", "AAA", sold, log=False)
+        if extra_sold:
+            wd.add(seller, at(4, "14:40"), "sell", "AAA", extra_sold, log=False)
+        if copies is None:
+            copies = [(r["verification"]["envelope_account_no"], r["verification"]["broker_order"]) for r in recs]
+        wd.raw_lines[D(2026, 3, 4)] = [json.dumps(
+            {"ts": "2026-03-04T15:01:00", "kind": "order_history", "account_no": no, "payload": {"data": [bo]}},
+            ensure_ascii=False) for no, bo in copies]
+        wd.build()
+        (wd.dir / "manual.json").write_text(ledger_text if ledger_text is not None else
+                                            json.dumps({"schema_version": 1, "actions": recs}), encoding="utf-8")
+        return wd
+
+    def mcheck(wd, account="SpaceX", mod=ci, **kw):
+        return mod.check_account(account, **dict(dict(wd.paths, manual_actions_path=str(wd.dir / "manual.json")), **kw))
+
+    def explained(res):
+        w = window(res, 4)
+        return (not res["suspects"] and w["kind"] is None and abs(w["unexplained"]) < 1
+                and w.get("manual") == [man_rec()["id"]] and w["qty_gaps"] == {})
+
+    # M0. không có lệnh tay trong sổ ⇒ đúng là cửa sổ mở "không kết luận được" (đối chứng)
+    res = mcheck(manual_world("M0_none", []))
+    ok(open_days(res) == [4] and window(res, 4)["kind"] == ci.LABEL_QUANTITY and window(res, 4)["qty_gaps"] == {"AAA": -MAN_QTY}
+       and "manual" not in window(res, 4),
+       f"M0: bán tay KHÔNG khai ⇒ cửa sổ 04/03 mở, AAA -6000; được {open_days(res)} {window(res, 4).get('qty_gaps')}")
+    note("M0", res)
+
+    # M(a). khai VERIFIED + bản sao dnse_raw ⇒ hết suspect, giá trị tiền = KL × giá khớp − phí − thuế
+    good_world = manual_world("Ma_ok", [man_rec()])
+    res = mcheck(good_world)
+    ok(explained(res) and window(res, 4)["sell"] == MAN_QTY * PRICE
+       and abs(window(res, 4)["fees"] - MAN_QTY * PRICE * FEE_SELL) < 1e-6,
+       f"M(a): lệnh tay VERIFIED ⇒ cửa sổ đóng, bán 60tr, phí+thuế bán đúng biểu; được suspects={open_days(res)} "
+       f"w={ {k: window(res, 4).get(k) for k in ('sell', 'fees', 'unexplained', 'kind', 'manual')} }")
+    ok(any("đã tính lệnh tay đã khai AAA bán 6.000 cp" in n for n in window(res, 4)["notes"]),
+       "M(a): cửa sổ ghi chú lệnh tay đã tính (kênh vận hành)")
+    note("Ma", res)
+    rep = ci.report("SpaceX", **dict(good_world.paths, manual_actions_path=str(good_world.dir / "manual.json")))
+    ok(rep["error"] is None and rep["investor_line"] is None
+       and not any(ci.WARNING_MARKER in line for line in rep["ops_today"] + rep["ops_lines"]),
+       f"M(a)/kênh: đường THÀNH CÔNG ⇒ không dòng nhà đầu tư, không cảnh báo vận hành; được {rep}")
+    # cùng thế giới, ack cũ khoá đúng 2 mốc (phần dư trước khi có sổ) ⇒ không cần, không làm hỏng
+    good_world.ack("SpaceX", 3, 4, MAN_QTY * PRICE * (1 - FEE_SELL), acked_qty_gaps={"AAA": -MAN_QTY}).build()
+    (good_world.dir / "manual.json").write_text(json.dumps({"schema_version": 1, "actions": [man_rec()]}), encoding="utf-8")
+    res = mcheck(good_world)
+    ok(explained(res) and window(res, 4)["acked"] is None and not window(res, 4)["ack_mismatch"],
+       "M(a)/ack: lệnh tay tự giải thích ⇒ ack cũ không được dùng tới, không báo lệch")
+    res = mcheck(good_world, manual_actions_path=str(good_world.dir / "khong_co.json"))
+    ok(not res["suspects"] and window(res, 4)["acked"] is not None,
+       "M(a)/ack: bỏ sổ lệnh tay ⇒ ack cũ khớp cửa sổ VẪN hợp lệ (đóng cửa sổ như trước)")
+
+    # M(b). khai ≠ thực ⇒ vẫn suspect
+    res = mcheck(manual_world("Mb_more", [man_rec()], extra_sold=1_000))
+    ok(open_days(res) == [4] and window(res, 4)["qty_gaps"] == {"AAA": -1_000.0} and window(res, 4).get("manual"),
+       f"M(b): khai 6000 mà thực bán 7000 ⇒ vẫn mở với phần dư AAA -1000; được {window(res, 4).get('qty_gaps')}")
+    res = mcheck(manual_world("Mb_price", [man_rec(bo=broker_order(avg=9_000.0))]))
+    ok(open_days(res) == [4] and window(res, 4)["qty_gaps"] == {} and window(res, 4)["over"]
+       and abs(window(res, 4)["unexplained"] - MAN_QTY * 1_000 * (1 - FEE_SELL)) < 1,
+       f"M(b): giá khớp broker 9.000 trong khi tiền thật về theo 10.000 ⇒ phần dư 6tr vẫn cờ; được "
+       f"{window(res, 4)['unexplained']:,.0f}")
+    res = mcheck(manual_world("Mb_less", [man_rec(qty=5_000)]))
+    ok(open_days(res) == [4] and window(res, 4)["qty_gaps"] == {"AAA": -1_000.0},
+       "M(b): khai 5000 (broker xác nhận 5000) mà vị thế giảm 6000 ⇒ vẫn mở phần dư -1000")
+
+    # M(c). không VERIFIED / thiếu bằng chứng ⇒ không mở gì
+    for label, recs, copies, why in (
+            ("Mc_unverified", [man_rec(status="UNVERIFIED")], None, "chưa xác nhận broker"),
+            ("Mc_rejected", [man_rec(status="REJECTED")], None, "chưa xác nhận broker"),
+            ("Mc_nocopy", [man_rec()], [], "không có bản sao khớp từng byte"),
+            ("Mc_tampered", [man_rec()], [(ACCOUNTS["SpaceX"], dict(broker_order(), averagePrice=10_500))],
+             "không có bản sao khớp từng byte"),
+            ("Mc_qty", [dict(man_rec(), qty=6_500)], None, "KL khớp")):
+        res = mcheck(manual_world(label, recs, copies=copies))
+        ok(open_days(res) == [4] and "manual" not in window(res, 4)
+           and any("KHÔNG được tính" in n and why in n for n in window(res, 4)["notes"]),
+           f"M(c) {label}: không đủ bằng chứng ⇒ cửa sổ vẫn mở + ghi lý do '{why}'; được {open_days(res)} "
+           f"{[n for n in window(res, 4)['notes'] if 'lệnh tay' in n]}")
+    wd = manual_world("Mc_channel", [man_rec(status="UNVERIFIED")])
+    rep = ci.report("SpaceX", **dict(wd.paths, manual_actions_path=str(wd.dir / "manual.json")))
+    inv = rep["investor_line"] or ""
+    ok(ci.INVESTOR_MARKER in inv and no_signed_pct(inv)
+       and not any(x in inv for x in ("lệnh tay", "KHAI", "manual", ".json", "dnse_raw", "MA-2026"))
+       and any("KHÔNG được tính" in line for line in rep["ops_lines"]),
+       f"M(c)/kênh: khai chưa xác nhận ⇒ báo cáo nhà đầu tư chỉ một dòng trung tính, lý do nội bộ chỉ ở "
+       f"kênh vận hành; được investor={inv!r}")
+    wd = manual_world("Mc_broken", [man_rec()], ledger_text="{hỏng")
+    res = mcheck(wd)
+    rep = ci.report("SpaceX", **dict(wd.paths, manual_actions_path=str(wd.dir / "manual.json")))
+    ok(open_days(res) == [4] and any("manual.json" in e and "KHÔNG lệnh tay" in e for e in res["source_errors"])
+       and rep["error"] is None and "manual.json" not in (rep["investor_line"] or "")
+       and any("manual.json" in line for line in rep["ops_lines"]),
+       f"M(c): sổ hỏng ⇒ không giải thích gì, lỗi nêu file ở kênh vận hành, không làm gãy report; được {res['source_errors']}")
+
+    # M(d). §12 — tài khoản khác không ảnh hưởng
+    base_z = mcheck(manual_world("Md_base", []), "ZaloPay")
+    wd = manual_world("Md_other", [man_rec()])
+    ok([(w["date1"], round(w["unexplained"], 6), w["suspect"]) for w in mcheck(wd, "ZaloPay")["windows"]]
+       == [(w["date1"], round(w["unexplained"], 6), w["suspect"]) for w in base_z["windows"]],
+       "M(d): lệnh tay VERIFIED của SpaceX không chạm đẳng thức ZaloPay (cùng file dnse_raw)")
+    ok(not any(man_rec()["id"] in n for w in mcheck(wd, "ZaloPay")["windows"] for n in w["notes"]),
+       "M(d): dòng khai của SpaceX không được lọt cả ghi chú vào cửa sổ ZaloPay (§12 lọc trước khi xét)")
+    res = mcheck(manual_world("Md_label", [man_rec(account="SpaceX", account_no=ACCOUNTS["ZaloPay"])]))
+    ok(open_days(res) == [4] and "manual" not in window(res, 4),
+       "M(d): dòng khai nhãn SpaceX nhưng tiểu khoản ZaloPay (bản sao dưới ZaloPay) ⇒ KHÔNG giải thích SpaceX")
+    res = mcheck(manual_world("Md_envelope", [man_rec()], copies=[(ACCOUNTS["ZaloPay"], broker_order())]))
+    ok(open_days(res) == [4] and "manual" not in window(res, 4),
+       "M(d): bản sao order_history nằm dưới envelope tiểu khoản KHÁC ⇒ không tính (§12)")
+    res = mcheck(manual_world("Md_zalo", [man_rec(account="ZaloPay")], seller="ZaloPay"), "ZaloPay")
+    ok(not res["suspects"] and window(res, 4).get("manual"), "M(d): cùng cơ chế chạy đúng cho ZaloPay")
+
+    # M2. không đếm đôi: sao kê (fill broker xác nhận) thắng; lệnh đã nằm trong orders thì bỏ qua
+    wd = manual_world("M2_seed", [man_rec()])
+    wd.seed = {"SpaceX": {"missing_fills_broker_confirmed": [
+        {"date": "2026-03-04", "ticker": "AAA", "side": "sell", "qty": MAN_QTY, "price": PRICE}]}}
+    wd.build()
+    (wd.dir / "manual.json").write_text(json.dumps({"schema_version": 1, "actions": [man_rec()]}), encoding="utf-8")
+    res = mcheck(wd)
+    ok(not res["suspects"] and window(res, 4)["sell"] == MAN_QTY * PRICE and "manual" not in window(res, 4)
+       and any("sao kê thắng" in n for n in window(res, 4)["notes"]),
+       f"M2: sao kê đã có fill cùng ngày/mã/chiều ⇒ không cộng lệnh tay lần nữa; được bán {window(res, 4)['sell']:,.0f}")
+    wd = World(tmp, "M2_orders")
+    wd.add("SpaceX", at(4, "14:26"), "sell", "AAA", MAN_QTY, log=False)
+    wd.extra_raw[("SpaceX", D(2026, 3, 4))] = [{"kind": "orders", "account_no": ACCOUNTS["SpaceX"], "ts": "2026-03-04T14:30:00",
+                                                "payload": {"orders": [order("SpaceX", 900001, "AAA", "NS", MAN_QTY, at(4, "14:26"))]}}]
+    wd.raw_lines[D(2026, 3, 4)] = [json.dumps({"ts": "2026-03-04T15:01:00", "kind": "order_history",
+                                               "account_no": ACCOUNTS["SpaceX"], "payload": {"data": [broker_order()]}})]
+    wd.build()
+    (wd.dir / "manual.json").write_text(json.dumps({"schema_version": 1, "actions": [man_rec()]}), encoding="utf-8")
+    res = mcheck(wd)
+    ok(not res["suspects"] and window(res, 4)["sell"] == MAN_QTY * PRICE and "manual" not in window(res, 4),
+       f"M2: lệnh đã có trong bản ghi orders (cùng mã lệnh) ⇒ không đếm đôi; được bán {window(res, 4)['sell']:,.0f}")
+
+    # M3. sổ rỗng / vắng ⇒ y hệt khi chưa có tính năng
+    for label, text in (("M3_empty", json.dumps({"schema_version": 1, "actions": []})), ("M3_missing", None)):
+        wd = internal_only(World(tmp, label)).add("SpaceX", at(10, "10:30"), "external", 5_000_000.0).build()
+        if text is not None:
+            (wd.dir / "manual.json").write_text(text, encoding="utf-8")
+        a, b = mcheck(wd), wd.check("SpaceX")
+        ok(json.dumps(ci._jsonable(a), sort_keys=True) == json.dumps(ci._jsonable(b), sort_keys=True),
+           f"M3 {label}: sổ rỗng/vắng ⇒ kết quả trùng từng byte với lúc không truyền sổ")
+
+    # M4. MUTANT — bỏ trừ giá trị tiền / bỏ kiểm VERIFIED ⇒ các kiểm tra trên phải ĐỎ
+    src = Path(BIN, "cash_identity.py").read_text(encoding="utf-8")
+
+    def mutant(tag, old, new):
+        ok(src.count(old) == 1, f"M4 {tag}: chuỗi đột biến phải xuất hiện đúng 1 lần trong cash_identity.py")
+        path = Path(tmp) / f"cash_identity_mut_{tag}.py"
+        path.write_text(src.replace(old, new), encoding="utf-8")
+        spec = importlib.util.spec_from_file_location(f"cash_identity_mut_{tag}", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    mut_e = mutant("e", '"qty": qty, "value": qty * price, "manual_id"', '"qty": qty, "value": 0.0, "manual_id"')
+    res = mcheck(manual_world("M4_e", [man_rec()]), mod=mut_e)
+    ok(not explained(res) and open_days(res) == [4],
+       "M4(e): đột biến bỏ giá trị tiền của lệnh tay ⇒ M(a) phải đỏ (cửa sổ vẫn mở vì phần dư tiền 60tr)")
+    mut_f = mutant("f", "ok, why = ma.evidence_check(rec, account_no, ed) if", 'ok, why = (True, "") if')
+    res = mcheck(manual_world("M4_f", [man_rec(status="UNVERIFIED")]), mod=mut_f)
+    ok(not open_days(res),
+       "M4(f): đột biến bỏ kiểm VERIFIED ⇒ dòng UNVERIFIED mở được cửa sổ ⇒ kiểm tra M(c) phải bắt (ĐỎ)")
+    res = mcheck(manual_world("M4_f_ok", [man_rec(status="UNVERIFIED")]))
+    ok(open_days(res) == [4], "M4(f): bản thật vẫn giữ cửa sổ mở với cùng dữ liệu")
     return digest
 
 

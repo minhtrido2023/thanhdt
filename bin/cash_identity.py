@@ -23,7 +23,8 @@ xem thì hiện ra kèm bằng chứng đã đọc (§29) cho tới khi người
   bán/mua  = Σ fillQuantity × averagePrice của các lệnh trong `dnse_raw_*.jsonl` (bản ghi `orders`
       / `place_order`, bản mới nhất mỗi lệnh) có lần cập nhật cuối nằm TRONG cửa sổ, cộng các
       fill broker xác nhận mà dnse_raw thiếu (`data/account_seed_capital.json` →
-      `missing_fills_broker_confirmed`).
+      `missing_fills_broker_confirmed`), cộng LỆNH TAY ĐÃ KHAI mà broker đã xác nhận
+      (`load_manual_fills` — sổ `data/user_manual_actions.json`).
   phí/thuế = biểu phí thật `dnse_fee_rates.py` (0,097%/chiều + thuế bán 0,1%).
   cổ tức   = mức TĂNG của `cashDividendReceiving` giữa hai lần chụp (broker ghi GỘP vào totalCash
       lúc chốt quyền); mức GIẢM = đã chi trả ⇒ totalCash giảm đúng thuế TNCN 5% của phần đó.
@@ -444,6 +445,66 @@ def load_rights_subscription_fills(account, account_no=None, path=None):
     return out
 
 
+def load_manual_fills(account, account_no, raw_dir=None, path=None, seed_fills=()):
+    """LỆNH TAY ĐÃ KHAI (`manual_actions.py`, kb/projects/manual-deviation-process-20261029.md) →
+    `(list, lỗi | None)`, mỗi phần tử `{"moment", "id", "fill" | None, "why" | None}`: `fill` (cùng
+    dạng `fills_between`) khi được tính, `why` = lý do KHÔNG tính.
+
+    Chỉ tính dòng qua `manual_actions.evidence_check` với ĐÚNG `account_no` (§12): VERIFIED, bản ghi
+    lệnh broker lưu trong sổ dựng lại mã/chiều/ngày/KL khớp, và có BẢN SAO KHỚP TỪNG BYTE trong
+    `dnse_raw_<ngày>.jsonl` (kind=order_history) của `raw_dir` — nên giá trị tiền = KL × `averagePrice`
+    của chính bản sao đó (giá khớp thật, không phải giá user khai); phí + thuế bán tính chung với mọi
+    lệnh ở `build_windows`. Giờ khớp = `modifiedDate` của bản ghi broker.
+    KHÔNG tính (chỉ ghi lý do vào cửa sổ chứa giờ khai, ở kênh vận hành): khai chưa xác nhận/thiếu
+    bản sao dnse_raw; lệnh đã có trong bản ghi `orders` của dnse_raw (cùng mã lệnh — đã đếm); cùng
+    ngày + mã + chiều đã có fill broker xác nhận từ sao kê (`seed_fills` — sao kê thắng, như
+    `exdate_frame`). Sổ rỗng/vắng ⇒ `[]` (y hệt khi chưa có sổ). Sổ hỏng ⇒ `[]` + lỗi nêu file:
+    không lệnh tay nào được giải thích (phần dư của nó vẫn mở), lượt chụp NAV không gãy."""
+    import manual_actions as ma
+    ledger = path or ma.ledger_path()
+    try:
+        recs = ma.load_all(ledger)
+    except ma.ManualActionsError as exc:
+        return [], (f"{ledger} không dùng được nên KHÔNG lệnh tay đã khai nào được trừ khỏi phần dư "
+                    f"— {_err(exc)}")
+    ed = raw_dir or EXEC_DIR
+    raw = RawLog(account_no, ed)
+    out = []
+    for rec in recs:
+        if rec["account"] != account and ma._norm_acct(rec["account_no"]) != ma._norm_acct(account_no):
+            continue
+        day = datetime.date.fromisoformat(rec["date"])
+        item = {"moment": datetime.datetime.combine(day, datetime.time.fromisoformat(rec["time_ict"])),
+                "id": rec["id"], "fill": None,
+                "what": f"{rec['ticker']} {'bán' if rec['side'] == 'sell' else 'mua'} {rec['qty']:,} cp".replace(",", ".")}
+        out.append(item)
+        ok, why = ma.evidence_check(rec, account_no, ed) if rec["account"] == account else (
+            False, f"khai cho tài khoản {rec['account']} nhưng tiểu khoản {rec['account_no']}")
+        if not ok:
+            item["why"] = why
+            continue
+        bo = rec["verification"]["broker_order"]   # = bản sao dnse_raw, từng byte (evidence_check)
+        price = _num(bo.get("averagePrice"))
+        try:
+            item["moment"] = _parse_broker_utc(bo.get("modifiedDate") or bo.get("createdDate"))
+        except (TypeError, ValueError):
+            pass                                    # giữ giờ khai
+        oid = str(rec["broker_order_id"])
+        if not (price > 0):
+            item["why"] = f"bản ghi broker không có averagePrice dương ({bo.get('averagePrice')!r})"
+        elif any(str(k) in (oid, ma.broker_order_num(oid)) and o["symbol"] == rec["ticker"]
+                 for k, o in raw.day(day)["orders"].items()):
+            item["why"] = "lệnh đã có trong bản ghi orders của dnse_raw (đã đếm ở đó)"
+        elif any(fx["moment"].date() == day and fx["symbol"] == rec["ticker"] and fx["side"] == rec["side"]
+                 for fx in seed_fills):
+            item["why"] = "sao kê broker đã ghi fill cùng ngày/mã/chiều (sao kê thắng)"
+        else:
+            qty = float(rec["qty"])
+            item["fill"] = {"moment": item["moment"], "symbol": rec["ticker"], "side": rec["side"],
+                            "qty": qty, "value": qty * price, "manual_id": rec["id"]}
+    return out, None
+
+
 def _ack_text(rec, key, where):
     value = rec.get(key)
     if not isinstance(value, str) or not value.strip():
@@ -588,13 +649,14 @@ def _internal_candidates(win, prev, cur):
 
 
 def build_windows(rows, raw, flows, extra_fills=(), threshold_pct=THRESHOLD_PCT, acks=(),
-                  share_credits=()):
+                  share_credits=(), manual=()):
     """Đẳng thức tiền cho từng cặp dòng nav_history liên tiếp. Trả list dict, mỗi cửa sổ một dòng:
     date0/date1, snap0/snap1, nav0, delta_k, sell, buy, n_fills, fees, dividend, egg_interest,
     egg_out, egg_cost, residual (= delta_k − các khoản nội bộ), declared (nạp/rút đã khai rơi vào
     cửa sổ), unexplained (= residual − declared), pct_nav, over (vượt ngưỡng), qty_gaps/qty_values/
     qty_unverified (đối chiếu số lượng), kind (nhãn khi cần người xem), acked/ack_mismatch,
-    suspect (= ĐANG MỞ: cần người xem và chưa có lời xác nhận khớp), info, notes.
+    suspect (= ĐANG MỞ: cần người xem và chưa có lời xác nhận khớp), info, notes, và `manual`
+    (mã các lệnh tay đã khai được tính — chỉ có khi khác rỗng). `manual` = `load_manual_fills`.
     Cửa sổ có đầu mút không rõ lúc chụp, hoặc chạm một file dnse_raw có bản ghi không đọc được ⇒
     `checkable=False` kèm lý do, không tính số nào."""
     money = [(flow_moment(f)[0], f) for f in flows if f["kind"] != "market_only"]
@@ -622,6 +684,17 @@ def build_windows(rows, raw, flows, extra_fills=(), threshold_pct=THRESHOLD_PCT,
         snap0, snap1 = prev["snap"], cur["snap"]
         fills = raw.fills_between(snap0, snap1) + [
             fx for fx in extra_fills if snap0 < fx["moment"] <= snap1]
+        for item in manual:
+            if not snap0 < item["moment"] <= snap1:
+                continue
+            if item["fill"]:
+                fills.append(item["fill"])
+                win.setdefault("manual", []).append(item["id"])
+                win["notes"].append(f"đã tính lệnh tay đã khai {item['what']} ({item['id']}; broker "
+                                    f"xác nhận, giá khớp {_d(item['fill']['value'] / item['fill']['qty'])}/cp)")
+            else:
+                win["notes"].append(f"lệnh tay KHAI {item['what']} ({item['id']}) KHÔNG được tính — "
+                                    f"{item['why']}")
         sell = sum(fx["value"] for fx in fills if fx["side"] == "sell")
         buy = sum(fx["value"] for fx in fills if fx["side"] == "buy")
         buy_fee_base = sum(fx["value"] for fx in fills if fx["side"] == "buy" and not fx.get("fee_free"))
@@ -735,7 +808,7 @@ def drift_of(windows, rows_by_date, threshold_pct=THRESHOLD_PCT):
 
 def check_account(account, asof=None, nav_dir=None, raw_dir=None, flows_path=None,
                   inception_path=None, seed_path=None, acks_path=None, corp_actions_path=None,
-                  threshold_pct=THRESHOLD_PCT, today=None):
+                  threshold_pct=THRESHOLD_PCT, today=None, manual_actions_path=None):
     """Dựng đẳng thức tiền của `account` trên toàn bộ nav_history tới `asof` (date, gồm cả ngày đó).
     Trả `{"account", "threshold_pct", "windows", "suspects" (cửa sổ ĐANG MỞ), "uncheckable",
     "baseline", "drift", "source_errors"}`. `baseline` = cửa sổ mốc khởi điểm → dòng nav_history
@@ -749,10 +822,12 @@ def check_account(account, asof=None, nav_dir=None, raw_dir=None, flows_path=Non
     flows = load_flows(account, flows_path=flows_path, require_file=True, today=today)
     acks, ack_error = load_acks(account, acks_path)
     credits, credit_error = load_share_credits(corp_actions_path)
+    seed = load_confirmed_missing_fills(account, seed_path)
+    manual, manual_error = load_manual_fills(account, info["account_no"], raw_dir,
+                                             manual_actions_path, seed)
     windows = build_windows(rows, raw, flows,
-                            load_confirmed_missing_fills(account, seed_path)
-                            + load_rights_subscription_fills(account, info["account_no"]),
-                            threshold_pct, acks, credits)
+                            seed + load_rights_subscription_fills(account, info["account_no"]),
+                            threshold_pct, acks, credits, manual)
     by_date = {r["date"]: r for r in rows}
     drift = drift_of(windows, by_date, threshold_pct)
     if drift:                               # lượt chụp trước đã thấy chưa (để không nhắc chi tiết mỗi tối)
@@ -768,7 +843,7 @@ def check_account(account, asof=None, nav_dir=None, raw_dir=None, flows_path=Non
     return {"account": account, "threshold_pct": threshold_pct, "windows": windows,
             "suspects": [w for w in windows if w["suspect"]], "baseline": baseline,
             "uncheckable": ([baseline] if baseline else []) + [w for w in windows if not w["checkable"]],
-            "drift": drift, "source_errors": [e for e in (ack_error, credit_error) if e]}
+            "drift": drift, "source_errors": [e for e in (ack_error, credit_error, manual_error) if e]}
 
 
 def _span(win):
@@ -1003,6 +1078,7 @@ def main() -> int:
     ap.add_argument("--seed-path")
     ap.add_argument("--acks-path")
     ap.add_argument("--corp-actions-path")
+    ap.add_argument("--manual-actions-path", help="sổ lệnh tay đã khai (mặc định manual_actions.ledger_path())")
     ap.add_argument("--threshold-pct", type=float, default=THRESHOLD_PCT)
     ap.add_argument("--notify-snapshot", metavar="YYYY-MM-DD",
                     help="gửi chi tiết vận hành của lượt chụp NAV ngày này tới --channel rồi thoát")
@@ -1022,7 +1098,8 @@ def main() -> int:
             args.account, asof=datetime.date.fromisoformat(args.asof) if args.asof else None,
             nav_dir=args.nav_dir, raw_dir=args.raw_dir, flows_path=args.flows_path,
             inception_path=args.inception_path, seed_path=args.seed_path, acks_path=args.acks_path,
-            corp_actions_path=args.corp_actions_path, threshold_pct=args.threshold_pct)
+            corp_actions_path=args.corp_actions_path, threshold_pct=args.threshold_pct,
+            manual_actions_path=args.manual_actions_path)
     except (ValueError, OSError, KeyError) as exc:
         print(f"cash_identity: KHÔNG chạy được — {_err(exc)}", file=sys.stderr)
         return 1
