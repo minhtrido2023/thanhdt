@@ -170,14 +170,16 @@ for pd, files in sorted(variants.items()):
     canon_match = next((f for f in files if f[0] == canon), None)
     # Đã resolve nếu canonical khớp plan_version/orders với biến thể mới nhất — chỉ còn
     # dọn dẹp file thừa, KHÔNG phải nguy cơ chạy nhầm (khác sự cố gốc 07-06).
-    still_risky = any(f[2:] != canon_match[2:] for f in non_canon) if canon_match else True
+    # Biến thể khác nội dung nhưng CŨ HƠN canonical (vd `.bak_replan_*` lưu bản trước khi replan)
+    # cũng không phải nguy cơ: bot chỉ load canonical, và canonical đã là bản mới nhất theo mtime.
+    still_risky = any(f[2:] != canon_match[2:] and f[1] > canon_match[1] for f in non_canon) if canon_match else True
     if still_risky:
         conflict_found = True
         W(f"Plan {pd}: {len(files)} file khác nhau, canonical CHƯA khớp bản mới nhất "
           f"({', '.join(f[0] for f in files)}) — nguy cơ chạy nhầm plan cũ, xem lại NGAY.")
     else:
         lines.append(f"ℹ️ Plan {pd}: có file thừa đã resolve ({', '.join(f[0] for f in non_canon)}) "
-                     f"— canonical '{canon}' đã khớp đúng nội dung, chỉ cần dọn dẹp khi rảnh, không khẩn.")
+                     f"— canonical '{canon}' khớp nội dung hoặc MỚI HƠN mọi biến thể, chỉ cần dọn dẹp khi rảnh, không khẩn.")
 if not conflict_found:
     OK("Không phát hiện xung đột file plan (mỗi ngày chỉ 1 bản, hoặc bản cũ đã đánh dấu superseded).")
 
