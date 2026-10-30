@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-29T14:00:47Z] [dgc r12 + investor-report-v2 29/10] XONG job Taylor_20261029_134234: research/dgc_valuation_20261029_r12/ + dd_DGC_20261029/investor_report_v2/ (23tr, chua commit) — CHO Mike doc kiem/gui email; sua vong 5 chua duoc skeptic ra lai
 - [2026-10-29T17:05:16Z] [ci-manual 30/10] XONG c0c63f6be nhanh session/ci-manual-20261030 (wt-ci-manual-20261030, chua merge) — CHO Mike arch-review + user; sau merge co the go 4 ack tam SCL 29/10 (khong bat buoc)
 - [2026-10-29T17:42:49Z] [lotbook-manual 30/10] XONG b1880d189 nhanh session/lotbook-manual-20261030 (wt-lotbook-manual-20261030, chua merge) — CHO Mike arch-review + user
 - [2026-10-30T02:54:30Z] [drift-silent-exit 30/10] XONG 0027dac67 nhanh session/drift-silent-exit-20261030 (wt-drift-silent-exit-20261030, chua merge) — CHO Mike arch-review + merge; dong crontab 00:xx khong ton tai (goi tay/agent)
@@ -26,3 +25,4 @@
 - [2026-10-30T10:04:14Z] [oshares-live-dcf 30/10] XONG outer 0a1a16675 (session/oshares-live-20261030, wt /home/trido/wt-oshares-live-20261030) + mike 898b4fd17 (session/oshares-live-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live = quyet dinh rieng
 - [2026-10-30T10:08:17Z] [dgc-dd-v2.2 30/10] XONG job Taylor_20261030_094438: dd_DGC_20261029/investor_report_v2_2/ (24tr, CHANGELOG+SELFCHECK, chua commit, chua gui) — CHO Mike chay fundamental-skeptic + quyet gui email
 - [2026-10-30T10:28:44Z] [dgc-dd-v2.2-rev2 30/10] XONG job Taylor_20261030_102330 tai investor_report_v2_2 (25tr, chua commit/gui) — CHO Mike quyet gui email / rà lai
+- [2026-10-30T16:08:02Z] [oshares-r2r7 30/10] XONG outer a3c2c0600 (session/oshares-r2r7-20261030) + mike 0298dd9b1 (session/oshares-r2r7-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live can caller khai price_date truoc

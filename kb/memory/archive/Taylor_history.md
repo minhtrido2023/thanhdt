@@ -1673,3 +1673,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T13:54:56Z] [manual-deviation vòng 2 29/10] XONG @83da1791f nhanh session/manual-deviation-20261029 (chưa merge) — CHO Mike arch-review vòng 3 + user; pageIndex=1-based là giả định chưa kiểm DNSE thật
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T14:00:47Z] [dgc r12 + investor-report-v2 29/10] XONG job Taylor_20261029_134234: research/dgc_valuation_20261029_r12/ + dd_DGC_20261029/investor_report_v2/ (23tr, chua commit) — CHO Mike doc kiem/gui email; sua vong 5 chua duoc skeptic ra lai
