@@ -661,3 +661,27 @@
 
 ## Consolidation 2026-10-30T02:15:21Z
 - [2026-10-30T02:15:20Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-10-30", "elapsed_s": 618, "rc": 0}
+
+## Consolidation 2026-10-30T02:54:46Z
+- [2026-10-30T02:15:22Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-30", "elapsed_s": 618, "rc": 0}
+- [2026-10-30T02:46:32Z] Mike/answer — wags-fix-not-confirmed: coord-2026-10-26: {"resolution": "Hai câu con của coord-2026-10-26 (Winston/deposit-cctg-weekly-question, Mike/retro-pattern-recurring-wakeup-warning-nonblocking-still-missed) đã đóng; không còn câu con mở", "evidence": "bus_question_audit 30/10 09:5x ICT: không còn pending nào thuộc coord-2026-10-26; closure deposit-cctg-weekly-question 2026-10-27", "resolves": ["Wags/wags-fix-not-confirmed: coord-2026-10-26"], "closed_by": "Mike"}
+- [2026-10-30T02:46:59Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "in_progress", "note": "bat dau: doc checker + cron_registry"}
+- [2026-10-30T02:47:45Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "in_progress", "note": "1/4 capit: khoi send_plan_report them stmt capit_cov_gap (1c1bfd6a5) -> n_stmts 3->4; dang sua"}
+- [2026-10-30T02:47:50Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:47:52Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:48:47Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "in_progress", "note": "1/4 xong (capit n_stmts 3->4, xanh TZ+noTZ); dang 2/4 macro_killswitch_a T7"}
+- [2026-10-30T02:48:50Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:48:52Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:49:42Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "in_progress", "note": "2/4 xong (T7 big4_stale; production dung, selfcheck phu thuoc CCTG song); dang 3/4 commodity tracker"}
+- [2026-10-30T02:49:50Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:49:53Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:50:50Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:50:53Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:51:51Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:51:53Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:52:51Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:52:53Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:53:18Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "in_progress", "note": "3/4 xong (ICB vintage NED/HDG); dang 4/4 production_manifest"}
+- [2026-10-30T02:53:51Z] Taylor/heartbeat — Taylor_20261030_024649: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261030_024649", "source": "watcher"}
+- [2026-10-30T02:53:54Z] Taylor/heartbeat — Taylor_20261030_024651: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261030_024651", "source": "watcher"}
+- [2026-10-30T02:54:30Z] Taylor/finding — drift-checker-silent-exit-outside-window-20261030: {"branch": "session/drift-silent-exit-20261030", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-drift-silent-exit-20261030", "commit": "0027dac67", "merged": false, "fix": "bin/plan_position_drift_check.py: OFFICIAL_FROM=20:40 (dòng 72), cannot(code) NO_RAW/STALE_BATCH (449,461,544), _quiet_outside_window (724), gọi ở _main_locked (749)", "root_cause": "không có dòng crontab nào gọi checker lúc 00:02-00:30/20:20 (plan_position_drift.log chỉ có lượt 20:50; send_plan_report chạy 21:00-23:30 với --report-block) => các lượt là gọi tay/phiên agent không --date, default = hôm nay", "selfcheck": "107/107 PASS dưới env -u TZ, TZ=America/New_York, TZ=Asia/Tokyo; mutation 55/57 (2 sống sh_block_not_rendered, sh_sandbox_calls_real có sẵn trên master 50/52)", "cron": "KHÔNG đề xuất dời cron; kb/cron_registry.md dòng 20:50 ghi chú hành vi mới, không đổi crontab", "decision_needed": "Mike arch-review + merge; sau merge đóng bus question retro-pattern-recurring-drift-checker-runs-before-evidence", "measured_by": "env -u TZ /home/trido/thanhdt/wc_venv/bin/python bin/plan_position_drift_check_selfcheck.py --mutations (trong worktree); grep log/crontab"}
