@@ -1649,3 +1649,6 @@
 - [2026-10-29T09:42:45Z] [dri-investor-report 29/10] XONG job Taylor_20261029_093106: research/dd_DRI_20261027/investor_report/ (md+pdf 17tr+html+10 figs, chua commit) — CHO Mike doc kiem/gui email
 - [2026-10-29T10:50:01Z] [dgc-val r7 29/10] XONG job Taylor_20261029_104456: NON (discriminator), A7 32.182/B7 37.060, gia 32.900 trong dai; de xuat HARD ABANDON 10.000cp ZaloPay (35,8% NAV) — CHO Mike goi skeptic vong 2 + user xac nhan doi nhan
 - [2026-10-29T10:55:25Z] [dri-investor-report-v2 29/10] XONG job Taylor_20261029_104401: research/dd_DRI_20261027/investor_report_v2/ (md+pdf 20tr+html+21 figs, subject o EMAIL_SUBJECT.txt, chua commit) — CHO Mike doc kiem/gui email
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T11:04:03Z] [dgc-val r8 29/10] XONG job Taylor_20261029_105958: agents/Taylor/research/dgc_valuation_20261029_r8/ (chua commit) — CHO user chon nhan P1/P2 + phuong an giam tap trung ZaloPay (a-d)
