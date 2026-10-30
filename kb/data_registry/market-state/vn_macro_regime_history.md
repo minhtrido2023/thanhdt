@@ -21,6 +21,7 @@ last_update_10: 2026-10-27 (Bobby — SECTOR READ real-time BLIND ngành cao su 
 last_update_11: 2026-10-28 (Bobby — SECTOR READ real-time BLIND ngành tư vấn khảo sát–thiết kế–QLDA điện VN: STRUCTURAL_UPCYCLE về nhu cầu, ADMIN_GATED về chuyển hoá doanh thu — ambiguous ~65/35; FORECAST khoá F1-F10 tới 30/06/2027; chi tiết ở file con sector_read_power_consulting_20261028.md)
 last_update_12: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành vận tải biển chuyên dụng dầu khí VN: CYCLICAL ~0,55 (đỉnh cấp tính do Hormuz, giao ngay đã qua đỉnh 06/10, TC/giá tàu còn trễ = late-peak) / ADMIN_GATED ~0,30 (cabotage + TC nội bộ hệ sinh thái NN) / STRUCTURAL ~0,15; ambiguous ~65/35; FORECAST khoá F1-F8 + D1-D6 tới 2027-09-30; chi tiết ở file con sector_read_oil_gas_shipping_20261029.md)
 last_update_13: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành VLXD không nung/nhẹ VN (AAC, ALC, vữa khô, keo dán gạch, phụ gia): CYCLICAL ~0,50 (giữa→muộn nhịp tăng; mở bán căn hộ gãy Q3/2026, backlog thi công đỡ tới giữa-cuối 2027) / ADMIN_GATED ~0,30 (tỷ lệ VLKN bắt buộc, NOXH/đầu tư công, đấu giá tro xỉ) / STRUCTURAL ~0,20 (tỷ lệ VLKN khoảng 28% so với mục tiêu 35-40% năm 2025) — ambiguous ~60/40; FORECAST khoá F1-F12 tới 2028-03-31; chi tiết ở file con sector_read_vlxd_nhe_aac_20261029.md)
+last_update_14: 2026-10-30 (Bobby — SECTOR READ real-time BLIND ngành đá xây dựng Đông Nam Bộ: ADMIN_GATED ~0,45 / CYCLICAL ~0,35 / STRUCTURAL ~0,20, ambiguous ~60/40; pha ĐỈNH → bình nguyên (Long Thành/VĐ3 rút, VĐ4 mới khởi công 09-10/2026); FORECAST F1-F10 tới 2027-08-31; chi tiết ở file con sector_read_da_xay_dung_nam_bo_20261030.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1592,6 +1593,26 @@ file con: kết quả tìm kiếm có lộ tên 1 tổng công ty VLXD niêm y�
 - **FORECAST khoá 29/10:** mở bán Q4/2026 ≤45.000 P=0,70; NOXH 2026 <100.000 căn P=0,80; xi măng nội địa 2026 ≥+8% P=0,65; thuế
   XK clinker về 10% từ 01/01/2027 P=0,45; tỷ lệ VLKN chính thức <35% P=0,85; giá AAC Sở XD Q2/27 trong ±5% P=0,65; biên gộp DN thuần
   AAC/vữa 4 quý tới không vượt nền +2pp P=0,70; dây chuyền mới đạt ≥70% trong 4 quý P=0,25. **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Đá xây dựng Đông Nam Bộ (1x2, mi, 0x4, hộc), as-of 30/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của DN đá nào (kiểm toán blind ở mục 0 file
+con: snippet lộ tên khoảng 5 DN đá niêm yết và 1 dự báo CTCK cấp DN, không dùng làm bằng chứng). Bản đầy đủ (pipeline cầu, cung
+và pháp lý mỏ, mốc giá, chi phí, 10 forecast, 21 mục DD, nguồn): **`sector_read_da_xay_dung_nam_bo_20261030.md`** (file con).
+- **Phân loại: `ADMIN_GATED` ~0,45 / `CYCLICAL` ~0,35 / `STRUCTURAL` ~0,20; `ambiguous` ~60/40.** Pha: **ĐỈNH → bình nguyên**.
+  Đợt tăng giá 2025 có nguyên nhân gần nhất là đình chỉ mỏ + nghẽn thuê đất (cụm Phước Tân–Tam Phước chỉ khoảng 2 tr m³ so với cầu
+  6,4 tr m³), không phải cạn tài nguyên (Đồng Nai còn khoảng 265 tr m³, công suất thiết kế >20 tr m³/năm). Long Thành GĐ1 (bay
+  thương mại 01/12/2026) và VĐ3 đang rút; VĐ4 (207 km, khoảng 6-8 tr m³ ước lượng) mới khởi công gói lớn 30/09 và 15/10/2026.
+  Luật 147/2025 cho tỉnh cấp mỏ nhóm III thẳng cho nhà thầu; CV 2757 (06/2026) bình ổn giá ⇒ trần hành chính lên định giá phân
+  khúc dự án. Phần STRUCTURAL: mỏ gần TP.HCM cạn, cung mới ở xa 100+ km. Heating oil (BQ) +109% YoY. Khoảng trống: không có
+  chuỗi giá đá chính thức theo tháng.
+- **FORECAST khoá 30/10:** Long Thành bay thương mại ≤31/12/2026 P=0,65; giá 1x2 Sở XD Đồng Nai Q2/27 so với Q3/26 trong ±7%
+  P=0,55; giá đá phía Nam Q1/27 > Q4/26 P=0,55; ≥5/13 mỏ đá Đồng Nai có kết quả đấu giá ≤31/12/2026 P=0,35, ≤30/06/2027 P=0,60;
+  ≥1 mỏ đấu giá 2025-26 có GP khai thác ≤30/06/2027 P=0,30; NĐ sửa NĐ 193 (không đấu giá cho dự án trọng điểm) ≤31/03/2027
+  P=0,55; VĐ4 ≥20% sản lượng ≤30/06/2027 P=0,35; heating oil T3/2027 <4,0 P=0,55; giải ngân ĐTC 2026 ≥85% P=0,50.
+  **Không phải khuyến nghị mua/bán.**
 
 ---
 
