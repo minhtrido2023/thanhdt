@@ -1,0 +1,38 @@
+ticker,group,ok,reason,price,mos_L,st_L,rb_L,mos_N_lo,st_N_lo,rb_N_lo,mos_N_c,st_N_c,rb_N_c,mos_N_hi,st_N_hi,rb_N_hi
+ACB,c30V+plan-buy,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+BID,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+CTG,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+DCM,c30V,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,
+DDV,c30V,True,,16300.0,0.7663,CHEAP,True,0.7729,CHEAP,True,0.7629,CHEAP,True,0.7393,CHEAP,True
+DGC,c30V+nắm,True,,33300.0,0.562,CHEAP,True,0.5725,CHEAP,True,0.5545,CHEAP,True,0.5125,CHEAP,True
+DRI,nắm,True,,14700.0,0.2907,CHEAP,True,0.3109,CHEAP,True,0.2805,CHEAP,True,0.2088,CHEAP,True
+EVF,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+FPT,plan-buy,True,,52700.0,0.3306,CHEAP,True,0.3497,CHEAP,True,0.3209,CHEAP,True,0.2533,CHEAP,True
+HAH,c30V,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,
+HDB,c30V+plan-buy,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+HPG,c30V+plan-buy,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,
+HT1,nắm+plan-buy,True,,13300.0,0.4815,CHEAP,True,0.4963,CHEAP,True,0.474,CHEAP,True,0.4216,CHEAP,True
+IDC,c30V,True,,35600.0,0.6354,CHEAP,True,0.6458,CHEAP,True,0.6302,CHEAP,True,0.5933,CHEAP,True
+LPB,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+MBB,c30V+nắm+plan-buy,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+MCH,nắm+plan-buy,True,,137300.0,-1.3042,RICH,True,-1.246,RICH,True,-1.3419,RICH,True,-1.5663,RICH,True
+MSB,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+PAN,c30V,True,,17500.0,0.7203,CHEAP,True,0.7283,CHEAP,True,0.7163,CHEAP,True,0.688,CHEAP,True
+PNJ,c30V,True,,16050.0,0.0952,CHEAP,False,0.1207,CHEAP,False,0.0819,CHEAP,False,-0.0092,RICH,False
+PVT,c30V,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,
+SCL,nắm+plan-buy,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,
+SHB,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+TCB,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+TCM,c30V,True,,15750.0,0.3522,CHEAP,True,0.3688,CHEAP,True,0.3417,CHEAP,True,0.2783,CHEAP,True
+TPB,c30V+nắm,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+TV1,nắm,True,,18900.0,0.8541,CHEAP,True,0.8583,CHEAP,True,0.852,CHEAP,True,0.8373,CHEAP,True
+VCB,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+VGC,c30V,True,,42300.0,-0.8424,RICH,True,-0.7899,RICH,True,-0.8691,RICH,True,-1.0552,RICH,True
+VHC,c30V,True,,51500.0,0.5199,CHEAP,True,0.5335,CHEAP,True,0.5129,CHEAP,True,0.4646,CHEAP,True
+VHM,c30V,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,
+VIB,c30V+nắm,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+VIX,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+VND,c30V,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+VNM,plan-buy,True,,57700.0,0.047,CHEAP,False,0.0726,CHEAP,False,0.0323,CHEAP,False,-0.0622,RICH,False
+VPB,c30V+nắm+plan-buy,False,financial-sector (BANK/INSURANCE/SECURIT,,,,,,,,,,,,,
+VRE,c30V,False,"normalized 3y FCFE <= 0 (capex > CFO, he",,,,,,,,,,,,,

@@ -1,0 +1,71 @@
+[1] ERP ngầm định, tập robust (asof 2026-10-29 ) [BQ cache v1]:
+                  est   n    ep  roe_med  roe_ew  erp_mb  erp_mb_ew  erp_mb_g425  erp_mb_g675  erp_ma  erp_ma_pi40  erp_ma_pi45
+         E2_aggregate 334 8.291    0.107   0.148   2.993      4.255        2.705        3.258   5.791        5.541        6.041
+            E4_median 334 9.041    0.107   0.148   3.377      4.753        3.175        3.553   6.541        6.291        6.791
+      E6_agg_ex_top10 324 9.421    0.104   0.134   3.412      4.609        3.292        3.504   6.921        6.671        7.171
+    E9_agg_ex_bank_re 256 8.146    0.107   0.126   2.919      3.581        2.614        3.201   5.646        5.396        5.896
+E10_median_ex_bank_re 256 9.182    0.107   0.126   3.449      4.195        3.264        3.608   6.682        6.432        6.932
+  D1 (M-b, ROE trung vị) = 3.377 ; D1-ew (ROE trọng số vốn chủ) = 4.255 ; D1 g4,25 = 3.175 ; D1 g6,75 = 3.504
+  D2 (M-a, π 4,25) = 6.541 ; π 4,0 = 6.291 ; π 4,5 = 6.791
+[2] cửa sổ lịch sử (chân Big-4 12M; trùng byte v1 out_erp_history.csv — đã assert):
+               start         end  years  eq_cagr  rf_avg  erp_geo  erp_arith  rerating_pa
+window                                                                                   
+2011→     2011-01-04  2026-10-29  15.82   11.245   7.244    3.730      5.511       -0.247
+2014→     2013-12-31  2026-10-29  12.83   12.754   6.177    6.194      8.042       -0.496
+2016-07→  2016-07-01  2026-10-29  10.33   12.441   6.186    5.891      7.829       -1.827
+  Blume T=10: D3 theo cửa sổ [5.17, 6.559, 7.223] ⇒ 6.317 ; D4 [4.923, 6.063, 5.396] ⇒ 5.461
+    2011→: N=15.82 trọng số số học Blume = 0.393
+    2014→: N=12.83 trọng số số học Blume = 0.239
+    2016-07→: N=10.33 trọng số số học Blume = 0.035
+[3] LUẬT CHÍNH: D1=3.377 D2=6.541 D3=6.317 D4=5.461 ⇒ C = ½·TB(D1,D2) + ½·TB(D3,D4) = 5.424; dải D 3.377–6.541
+  kiểm Ke(β1) = 12.17 vs lãi cho vay TB 10.7 ⇒ ≥ (đạt)
+[4] độ nhạy (mỗi dòng đổi MỘT trục; shift = C_Rk − C):
+  k                                                               desc    D1    D2    D3    D4     C  shift  in_criterion
+ R1                                                    bỏ cửa sổ 2011→ 3.377 6.541 6.891 5.729 5.635  0.211          True
+ R2                                                    bỏ cửa sổ 2014→ 3.377 6.541 6.196 5.159 5.319 -0.106          True
+ R3                                                 bỏ cửa sổ 2016-07→ 3.377 6.541 5.865 5.493 5.319 -0.105          True
+ R4                                                     thuần hình học 3.377 6.541 5.914 5.057 5.222 -0.202          True
+ R5                                                       thuần số học 3.377 6.541 7.770 6.913 6.150  0.726          True
+ R6                                                          Blume T=5 3.377 6.541 7.124 6.268 5.827  0.403          True
+ R7                                            D1 ROE trọng số vốn chủ 4.255 6.541 6.317 5.461 5.643  0.219          True
+ R8                                                          D1 g=4,25 3.175 6.541 6.317 5.461 5.374 -0.050          True
+ R9                                                          D1 g=6,75 3.504 6.541 6.317 5.461 5.456  0.032          True
+R10                                                           D2 π=4,0 3.377 6.291 6.317 5.461 5.362 -0.062          True
+R11                                                           D2 π=4,5 3.377 6.791 6.317 5.461 5.487  0.062          True
+R12                                            luật trung vị 4 số (v1) 3.377 6.541 6.317 5.461 5.889  0.465          True
+R13                                           chỉ họ lịch sử TB(D3,D4) 3.377 6.541 6.317 5.461 5.889  0.465         False
+R14                                         chỉ họ ngầm định TB(D1,D2) 3.377 6.541 6.317 5.461 4.959 -0.465         False
+ V1 đặc tả v1 tái tạo: D3 2011→ hình học + D4 2014→ hình học, trung vị 3.377 6.541 4.471 5.621 5.046 -0.378         False
+  ĐẨY LÊN: R5 thuần số học +0.73; R12 luật trung vị 4 số (v1) +0.46; R6 Blume T=5 +0.40; R7 D1 ROE trọng số vốn chủ +0.22; R1 bỏ cửa sổ 2011→ +0.21; R11 D2 π=4,5 +0.06
+  ĐẨY XUỐNG: R4 thuần hình học -0.20; R2 bỏ cửa sổ 2014→ -0.11; R3 bỏ cửa sổ 2016-07→ -0.11; R10 D2 π=4,0 -0.06; R8 D1 g=4,25 -0.05
+  tiêu chí bền (|shift| ≤ 0,5 với R1–R12): KHÔNG ĐẠT — lớn nhất R5 (thuần số học) +0.726
+  ⇒ trung tâm KHOẢNG 5.222–6.150 (điểm luật chính 5.424)
+  giá trị đề xuất cho code = C làm tròn 0,25 = 5.50 ⇒ r = 6.75 + 5.50 = 12.25%
+  [code] tại asof: consumer_deposit_rate = 7.400, CPI5y = 3.442, GDP thực 15y = 6.222, g_T legacy = 7.400, r legacy = 13.900
+[5] bội số terminal — Gordon đúng code `_fv_per_share`: (1+g)/(r−g); cột inv_rmg = 1/(r−g) của v1 để đối chiếu:
+                               frame       r  g_T  r_minus_g  gordon_1pg  inv_rmg  gordon_vs_L_pct
+                    L legacy hôm nay 13.9000 7.40     6.5000      16.523   15.385             0.00
+R-only (r mới, g_T cap lãi huy động) 12.2500 7.40     4.8500      22.144   20.619            34.02
+   R-only (r mới, g_T cap rf_c 6,75) 12.2500 6.75     5.5000      19.409   18.182            17.47
+                    N-lo domestic_v2 11.9724 5.50     6.4724      16.300   15.450            -1.35
+                     N-c domestic_v2 12.2500 5.50     6.7500      15.630   14.815            -5.40
+                    N-hi domestic_v2 12.9002 5.50     7.4002      14.256   13.513           -13.72
+[6] kiểm g_T = 5.5: (i) GDP danh nghĩa dài hạn tại asof = CPI5y 3.442 + GDP thực 15y 6.222 = 9.664 ⇒ g_T ≤ GDP danh nghĩa
+  (ii) tăng trưởng EPS danh nghĩa trên 1 đơn vị VNINDEX (VNINDEX/VNINDEX_PE, TB 20 phiên đầu/cuối) [BQ cache v1]:
+  window  years  eps_start  eps_end  eps_cagr
+   2011→  15.82      38.93   145.02     8.669
+   2014→  12.83      41.46   145.02    10.254
+2016-07→  10.33      43.88   145.02    12.271
+  (iii) RONIC≥Ke: phi tài chính universe_pit asof N=274: ROE5Y ≥ r 12.25% ở 39.4% số mã / 42.1% vốn hoá; ROE5Y trung vị 9.75%
+      lưu ý: FCFE của code không trừ tái đầu tư theo g_T (RONIC ngầm định = ∞) ⇒ g_T cao là lạc quan có hệ thống.
+SELFCHECK A dcf nghich: 21407 vs 21407 lệch 0
+SELFCHECK A dcf coso: 32925 vs 32925 lệch 0
+SELFCHECK A dcf thuan: 41779 vs 41779 lệch 0
+SELFCHECK A ev: 29817 vs 29817 lệch 0
+[7] DGC tầng A (model_ke 29/10, β 1,11, g 3% giữ):
+               cand   erp  beta      ke  dcf_nghich  dcf_coso  dcf_thuan    ev
+       r7 hiện hành 7.500  1.00 14.9000       21407     32925      41779 29817
+        khoảng dưới 5.222  1.11 12.5468       23791     36902      47424 31542
+       luật chính C 5.424  1.11 12.7707       23516     36442      46772 31343
+ERP code (làm tròn) 5.500  1.11 12.8550       23415     36274      46533 31271
+        khoảng trên 6.150  1.11 13.5767       22619     34946      44648 30695

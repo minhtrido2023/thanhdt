@@ -1,0 +1,117 @@
+[khung] ERP lo/code/hi = 5.2224/5.50/6.1502 ⇒ r N = 11.9724/12.25/12.9002%; g_T N = min(CPI5y+GDP15y, 5,5%)
+[1] universe_pit asof 2026-10-29: 336 mã (gồm tài chính ⇒ NOT_COMPUTED)
+frame   n  n_ok  pct_cheap  pct_cheap_robust  pct_rich_robust  pct_deep_rich  n_deep_rich    r  g_T  fv_chg_med  fv_chg_p10  fv_chg_p90  flip_cheap_to_rich  flip_rich_to_cheap  robust_changed  deep_on  deep_off
+    L 336   145      66.90             57.93            28.28          18.62           27 0.14 0.07         NaN         NaN         NaN                 NaN                 NaN             NaN      NaN       NaN
+Ronly 336   145      75.17             69.66            22.76          14.48           21 0.12 0.07       34.92       33.24       34.92                 0.0                12.0            25.0      0.0       6.0
+ N_lo 336   145      68.28             60.00            28.28          17.93           26 0.12 0.06        2.94        2.46        2.94                 0.0                 2.0             3.0      0.0       1.0
+  N_c 336   145      65.52             57.93            28.97          18.62           27 0.12 0.06       -1.42       -1.68       -1.42                 2.0                 0.0             1.0      0.0       0.0
+ N_hi 336   145      60.69             55.17            30.34          22.07           32 0.13 0.06      -10.35      -10.35      -10.15                 9.0                 0.0             7.0      5.0       0.0
+  NOT_COMPUTED (L): CF_OA_3Y <= 0 (operating cash gate fails 72; financial-sector (BANK/INSURANCE/SECURIT 59; normalized 3y FCFE <= 0 (capex > CFO, he 57; insufficient financial history (<4 quart 3
+  mã lật (L→N_c) status hoặc cờ RICH SÂU: 2
+ticker  mos_L  st_L  mos_N_c st_N_c  mos_N_lo  mos_N_hi
+   CSV  0.008 CHEAP   -0.009   RICH     0.032    -0.105
+   CTR  0.004 CHEAP   -0.011   RICH     0.031    -0.110
+[2] lịch sử 2014-03-31→2026-09-30 (51 quý; IC cắt ngang Spearman MoS vs lợi suất Close điều chỉnh kỳ sau):
+frame   period  pct_cheap_mean  pct_deep_mean  ic4q_mean  ic4q_n  ic1q_mean  ic1q_n  ic4q_minus_L  ic1q_minus_L  rankcorr_vs_L_min  rankcorr_vs_L_mean
+    L      ALL          59.013         21.618      0.059      47      0.020      50           0.0           0.0                NaN                 NaN
+    L  IS≤2019          60.643         19.951      0.047      24      0.000      24           0.0           0.0                NaN                 NaN
+    L OOS≥2020          57.564         23.099      0.071      23      0.038      26           0.0           0.0                NaN                 NaN
+ N_lo      ALL          59.395         21.281      0.059      47      0.020      50           0.0           0.0                1.0                 1.0
+ N_lo  IS≤2019          61.173         19.488      0.048      24      0.001      24           0.0           0.0                1.0                 1.0
+ N_lo OOS≥2020          57.815         22.875      0.071      23      0.038      26           0.0          -0.0                1.0                 1.0
+  N_c      ALL          57.970         22.349      0.059      47      0.020      50           0.0           0.0                1.0                 1.0
+  N_c  IS≤2019          59.676         20.526      0.048      24      0.000      24           0.0           0.0                1.0                 1.0
+  N_c OOS≥2020          56.455         23.969      0.071      23      0.038      26           0.0           0.0                1.0                 1.0
+ N_hi      ALL          54.474         24.342      0.059      47      0.020      50           0.0           0.0                1.0                 1.0
+ N_hi  IS≤2019          56.317         22.452      0.047      24      0.001      24           0.0           0.0                1.0                 1.0
+ N_hi OOS≥2020          52.836         26.022      0.071      23      0.038      26           0.0           0.0                1.0                 1.0
+  %cheap theo năm (cuối Q4 hoặc quý cuối có):
+      time  pct_cheap_L  pct_cheap_N_lo  pct_cheap_N_c  pct_cheap_N_hi   r_L  gT_L
+2014-12-31       64.706          65.441         64.706          61.029 0.128 0.063
+2015-12-31       66.929          66.929         64.567          63.780 0.120 0.055
+2016-12-30       59.200          60.000         57.600          53.600 0.120 0.055
+2017-12-29       57.377          57.377         56.557          52.459 0.130 0.065
+2018-12-28       47.222          48.148         46.296          43.519 0.133 0.068
+2019-12-31       60.714          60.714         60.714          55.357 0.135 0.070
+2020-12-31       59.712          59.712         59.712          54.676 0.122 0.057
+2021-12-31       51.119          51.493         49.627          44.403 0.120 0.055
+2022-12-30       68.063          68.063         68.063          63.874 0.140 0.075
+2023-12-29       51.634          51.634         49.673          45.098 0.115 0.050
+2024-12-31       51.049          51.049         49.650          47.552 0.112 0.047
+2025-12-31       53.631          53.631         51.397          45.810 0.117 0.052
+2026-09-30       64.901          66.225         64.901          61.589 0.140 0.075
+[3] live (nắm giữ dnse_raw 2026-10-29 ∪ plan-buy 10/2026 ∪ custom30V rebal 2026-08-05): 37 mã có giá
+ticker             group                                   reason  mos_L  st_L  rb_L  mos_N_c st_N_c rb_N_c  mos_N_lo  mos_N_hi
+   ACB     c30V+plan-buy financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   BID              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   CTG              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   DCM              c30V normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   DDV              c30V                                      NaN  0.766 CHEAP  True    0.763  CHEAP   True     0.773     0.739
+   DGC          c30V+nắm                                      NaN  0.562 CHEAP  True    0.554  CHEAP   True     0.572     0.512
+   DRI               nắm                                      NaN  0.291 CHEAP  True    0.280  CHEAP   True     0.311     0.209
+   EVF              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   FPT          plan-buy                                      NaN  0.331 CHEAP  True    0.321  CHEAP   True     0.350     0.253
+   HAH              c30V normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   HDB     c30V+plan-buy financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   HPG     c30V+plan-buy normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   HT1      nắm+plan-buy                                      NaN  0.482 CHEAP  True    0.474  CHEAP   True     0.496     0.422
+   IDC              c30V                                      NaN  0.635 CHEAP  True    0.630  CHEAP   True     0.646     0.593
+   LPB              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   MBB c30V+nắm+plan-buy financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   MCH      nắm+plan-buy                                      NaN -1.304  RICH  True   -1.342   RICH   True    -1.246    -1.566
+   MSB              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   PAN              c30V                                      NaN  0.720 CHEAP  True    0.716  CHEAP   True     0.728     0.688
+   PNJ              c30V                                      NaN  0.095 CHEAP False    0.082  CHEAP  False     0.121    -0.009
+   PVT              c30V normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   SCL      nắm+plan-buy normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   SHB              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   TCB              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   TCM              c30V                                      NaN  0.352 CHEAP  True    0.342  CHEAP   True     0.369     0.278
+   TPB          c30V+nắm financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   TV1               nắm                                      NaN  0.854 CHEAP  True    0.852  CHEAP   True     0.858     0.837
+   VCB              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   VGC              c30V                                      NaN -0.842  RICH  True   -0.869   RICH   True    -0.790    -1.055
+   VHC              c30V                                      NaN  0.520 CHEAP  True    0.513  CHEAP   True     0.533     0.465
+   VHM              c30V normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   VIB          c30V+nắm financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   VIX              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   VND              c30V financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   VNM          plan-buy                                      NaN  0.047 CHEAP False    0.032  CHEAP  False     0.073    -0.062
+   VPB c30V+nắm+plan-buy financial-sector (BANK/INSURANCE/SECURIT    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+   VRE              c30V normalized 3y FCFE <= 0 (capex > CFO, he    NaN   NaN   NaN      NaN    NaN    NaN       NaN       NaN
+  N_lo: lật status 0/14; đổi robust 0; cờ RICH SÂU L 1 → 1
+  N_c: lật status 0/14; đổi robust 0; cờ RICH SÂU L 1 → 1
+  N_hi: lật status 2/14; đổi robust 0; cờ RICH SÂU L 1 → 2
+[4] lệch OShares (hệ số điều chỉnh giá 30/06→29/10 < 0,93 mà OShares tăng < 95% mức kỳ vọng): 30 mã
+        adj_factor_0630  oshares_ratio  expected_ratio
+ticker                                                
+ADS               0.895           1.00           1.117
+CLL               0.915           1.00           1.093
+D2D               0.831           1.00           1.203
+DGC               0.829           1.00           1.206
+FOC               0.866           1.00           1.155
+GHC               0.921           1.00           1.085
+HTL               0.912           1.00           1.096
+HU4               0.911           1.00           1.098
+HUB               0.881           1.05           1.135
+KSV               0.633           1.50           1.581
+LAS               0.918           1.00           1.089
+LHG               0.927           1.00           1.079
+LPT               0.870           1.00           1.149
+NBC               0.926           1.00           1.080
+NCT               0.914           1.00           1.094
+NDN               0.923           1.00           1.084
+NED               0.877           1.00           1.140
+NET               0.902           1.00           1.109
+PHC               0.881           1.00           1.134
+PMB               0.908           1.00           1.101
+PSE               0.907           1.00           1.102
+SAS               0.894           1.00           1.118
+SD5               0.907           1.00           1.103
+SGI               0.906           1.00           1.104
+SZB               0.895           1.00           1.118
+TCB               0.667           1.00           1.500
+TJC               0.872           1.00           1.147
+TV1               0.928           1.00           1.078
+VCC               0.900           1.00           1.111
+VOS               0.929           1.00           1.076
