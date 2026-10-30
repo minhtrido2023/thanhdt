@@ -138,6 +138,10 @@ ROOT_TIER = {
     "commodity_freshness_cron.sh": T1,  # vỏ cron monitor độ tươi commodity_prices, chỉ post Discord feeds_data
     "commodity_sue_decomp_forward_tracker.py": T1,  # sổ nhật ký FORWARD tách SUE (PREREG-4), PAPER-ONLY, append-only data/
     "dri_buy_gate_watch.py": T1,  # cảnh báo CHỈ-ĐỌC DRI ≤13.100 (ReadOnlyDNSE), đầu ra = Telegram + state
+    # Thêm 2026-10-31 (weekly ops audit, job Mike_20261030_211230): gốc cron mới 10-30. clear_books.py
+    # SHADOW, chỉ ghi state/clear_books_shadow/, nhưng ĐỌC data/trade_plans ⇒ nghiêng CHẶT khi chạm plan
+    # (cùng lập luận plan_position_drift_check) ⇒ T0; T0 chỉ chặt hơn, không nới ranh giới tự-sửa.
+    "clear_books_daily.sh": T0,  # vỏ cron 20:45 ICT, chạy clear_books.py shadow cho plan T+1
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
