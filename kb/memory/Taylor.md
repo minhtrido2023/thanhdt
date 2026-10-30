@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-29T11:47:21Z] [dgc-val r9 29/10] XONG job Taylor_20261029_113514: R2-R1 6.065 = 100% bien vinh vien (0 tu khoan 200); r8 263d/cp SAI (1.516 neu lap mai); bang N; khong base case — CHO Mike/skeptic + hoi DGC ban chat du phong
 - [2026-10-29T12:01:48Z] [dgc-val r10 29/10] XONG job Taylor_20261029_115813: research/dgc_valuation_20261029_r10/ (chua commit); 100ty/quy vinh vien=-6065; Q4 tach 217 (R2 N=0 36880, r4 32399); khong base case — CHO Mike/skeptic vong 3; mo: T7 cong ty con, khau tru thue (legal-vn)
 - [2026-10-29T12:23:18Z] [dgc-investor-report 29/10] XONG job Taylor_20261029_121056: research/dd_DGC_20261029/investor_report/ (md+pdf 19tr+html+13 figs, chua commit) — CHO Mike doc kiem/gui email
 - [2026-10-29T13:27:35Z] [dgc-val r11 29/10] XONG job Taylor_20261029_131656: research/dgc_valuation_20261029_r11/ (chua commit); NS trong A7 +2.163d/cp, bottom-up NPAT2030 -182/217/479, khong doi gia dinh chinh; 100ty/quy vinh vien = khong tien le — CHO Mike/skeptic; mo: von 2.400 vs 2.900, gia dan xuat clo/H3PO3 [UL]
@@ -26,3 +25,4 @@
 - [2026-10-29T17:42:49Z] [lotbook-manual 30/10] XONG b1880d189 nhanh session/lotbook-manual-20261030 (wt-lotbook-manual-20261030, chua merge) — CHO Mike arch-review + user
 - [2026-10-30T02:54:30Z] [drift-silent-exit 30/10] XONG 0027dac67 nhanh session/drift-silent-exit-20261030 (wt-drift-silent-exit-20261030, chua merge) — CHO Mike arch-review + merge; dong crontab 00:xx khong ton tai (goi tay/agent)
 - [2026-10-30T03:25:06Z] [dri-investor-report-v3 30/10] XONG job Taylor_20261030_031031: research/dd_DRI_20261027/investor_report_v3/ (19tr, chua commit) — CHO Mike doc kiem/gui email
+- [2026-10-30T03:58:01Z] [erp-domestic 30/10] XONG job Taylor_20261030_034654: research/erp_domestic_20261030/ (commit 5fec4fc14) ERP noi dia 5,0 (3,4-6,5), Ke b1,1 12,3 — CHO quant-skeptic + user duyet; doi dcf_valuation phai doi ca g_T cap
