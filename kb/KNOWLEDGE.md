@@ -3,7 +3,7 @@
 > **Nguồn sự thật của toàn đội — canonical-only, Mike biên tập thủ công.**
 > Consolidator KHÔNG ghi vào đây (raw events → `kb/events_buffer.md`). File này ổn định.
 > Agent đọc `context_pack.md` (~8KB, distilled). File này dành cho tra cứu sâu và weekly editorial.
-> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-09-19 (Mike, weekly editorial).**
+> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-10-31 (Mike, weekly editorial).**
 
 ---
 
@@ -438,6 +438,8 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 ---
 
 ## 7. Research Cổ Phiếu — Phát Hiện Đáng Nhớ
+
+> **Cập nhật 2026-10-31:** `dcf_valuation` mặc định `DCF_RATE_FRAME=domestic_v2` từ 2026-10-30 (rollback = `RATE_FRAME_DEFAULT`→`"legacy"`; tái lập số DCF cũ phải đặt `DCF_RATE_FRAME=legacy`). SCL thoái toàn bộ cả 2 TK (user 29/10, fill xong 30/10; luật mới: mọi tăng vốn trong chu kỳ giữ ⇒ WARNING user) — `kb/projects/scl-dd-20261029.md`. NNC DD xong, chờ user quyết gửi email — `kb/projects/nnc-dd-20261030.md`.
 
 **8L Rating system:**
 - 1/PE dominant factor (IC +0.125, hit 94%). Rating = binary gate ≤3, KHÔNG phải return tilt.
