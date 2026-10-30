@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-29T17:05:16Z] [ci-manual 30/10] XONG c0c63f6be nhanh session/ci-manual-20261030 (wt-ci-manual-20261030, chua merge) — CHO Mike arch-review + user; sau merge co the go 4 ack tam SCL 29/10 (khong bat buoc)
 - [2026-10-29T17:42:49Z] [lotbook-manual 30/10] XONG b1880d189 nhanh session/lotbook-manual-20261030 (wt-lotbook-manual-20261030, chua merge) — CHO Mike arch-review + user
 - [2026-10-30T02:54:30Z] [drift-silent-exit 30/10] XONG 0027dac67 nhanh session/drift-silent-exit-20261030 (wt-drift-silent-exit-20261030, chua merge) — CHO Mike arch-review + merge; dong crontab 00:xx khong ton tai (goi tay/agent)
 - [2026-10-30T03:25:06Z] [dri-investor-report-v3 30/10] XONG job Taylor_20261030_031031: research/dd_DRI_20261027/investor_report_v3/ (19tr, chua commit) — CHO Mike doc kiem/gui email
@@ -26,3 +25,4 @@
 - [2026-10-30T10:08:17Z] [dgc-dd-v2.2 30/10] XONG job Taylor_20261030_094438: dd_DGC_20261029/investor_report_v2_2/ (24tr, CHANGELOG+SELFCHECK, chua commit, chua gui) — CHO Mike chay fundamental-skeptic + quyet gui email
 - [2026-10-30T10:28:44Z] [dgc-dd-v2.2-rev2 30/10] XONG job Taylor_20261030_102330 tai investor_report_v2_2 (25tr, chua commit/gui) — CHO Mike quyet gui email / rà lai
 - [2026-10-30T16:08:02Z] [oshares-r2r7 30/10] XONG outer a3c2c0600 (session/oshares-r2r7-20261030) + mike 0298dd9b1 (session/oshares-r2r7-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live can caller khai price_date truoc
+- [2026-10-30T16:15:40Z] [dd-NNC-20261030 30/10] XONG job Taylor_20261030_160612: research/dd_NNC_20261030/REPORT.md (chua commit) ky vong 50.300 (+7%), xap xi hop ly — CHO Mike doc/quyet investor report
