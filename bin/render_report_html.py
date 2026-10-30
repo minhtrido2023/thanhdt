@@ -195,7 +195,7 @@ def render_body(md_text, base_dir=None):
             colors = {1: "#0d1b2a", 2: "#13293d", 3: "#1c2b3a", 4: "#1c2b3a"}
             out.append(f'<h{min(level,4)} style="font-size:{sizes.get(level,"14px")};'
                         f'color:{colors.get(level,"#1c2b3a")};margin:20px 0 8px 0;'
-                        f'font-family:Georgia,\'Times New Roman\',serif;">{content}</h{min(level,4)}>')
+                        f'font-family:\'Segoe UI\',\'Helvetica Neue\',Arial,Tahoma,sans-serif;">{content}</h{min(level,4)}>')
             i += 1
             continue
 
@@ -283,7 +283,7 @@ def render_html(md_text, title, base_dir=None):
     <div style="color:#9fb0c3;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;">
       ARIA &nbsp;·&nbsp; Báo cáo hiệu suất &amp; vận hành</div>
     <div style="color:#ffffff;font-size:20px;font-weight:600;margin-top:4px;
-                font-family:Georgia,'Times New Roman',serif;">{html.escape(title)}</div>
+                font-family:'Segoe UI','Helvetica Neue',Arial,Tahoma,sans-serif;">{html.escape(title)}</div>
   </div>
   <div style="padding:22px 28px;">
 {body}
