@@ -155,6 +155,13 @@ if _rf_warn:
 if RATE_FRAME == "domestic_v2" and DEFAULT_TERM_MODE != "cap_rf":
     _shout(f"DCF_TERMINAL_MODE={DEFAULT_TERM_MODE!r} bi BO QUA: domestic_v2 ep cap_rf (r va g_T phai doi cung luc)")
     DEFAULT_TERM_MODE = "cap_rf"
+# Nguồn số CP cho fair_value (job Taylor_20261030_094435, CHỜ user duyệt bật): "fin" (MẶC ĐỊNH =
+# hành vi cũ byte-identical, OShares dòng quý cuối) | "live" (oshares_dcf.oshares_for: oshares_live
+# PIT + ISS cổ tức-CP/thưởng announced đã ex, rơi về số quý mọi ca từ chối/lỗi). Giá trị lạ ⇒ "fin".
+OSHARES_SOURCE = os.environ.get("DCF_OSHARES_SOURCE", "fin")
+if OSHARES_SOURCE not in ("fin", "live"):
+    _shout(f"DCF_OSHARES_SOURCE={OSHARES_SOURCE!r} khong hop le -> dung 'fin'")
+    OSHARES_SOURCE = "fin"
 RF_DOMESTIC = 6.75             # % normalized VND risk-free (building block: target CPI 4.25 + real 2.5)
 ERP_DOMESTIC = 5.5             # % domestic ERP (research central 5.42 -> 0.25 grid; NOT robust: 5.22-6.15)
 G_T_DOMESTIC = 0.055           # target CPI 4.25 + long-run real 1.25 (decimal)
@@ -477,6 +484,12 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     if r <= g_T:                                # Gordon guard (never triggers at VN rates)
         g_T = r - 0.01
 
+    osh_live = None
+    fin_os = float(last.OShares)
+    if oshares is None and OSHARES_SOURCE == "live" and fin_os > 0:   # NaN>0 False: thiếu số quý
+        import oshares_dcf as _osd                                     # thì vẫn "OShares missing"
+        osh_live = _osd.oshares_for(ticker, a.date().isoformat(), fin_os)
+        oshares = osh_live["value"] if osh_live["value"] else fin_os
     oshares = float(last.OShares) if oshares is None else float(oshares)
     if not (oshares and oshares > 0):
         res["reason"] = "OShares missing"
@@ -491,6 +504,10 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
         "growth_points": gpts, "oshares": oshares,
         "annual_np": annual_np, "quarter": last.quarter,
     })
+    if osh_live is not None:
+        res.update({"oshares_fin": float(last.OShares), "oshares_source": osh_live["source"],
+                    "oshares_method": osh_live["method"],
+                    "oshares_announced_added": osh_live["announced_added"]})
     if price is not None and fv_ps and fv_ps > 0:
         res["margin_of_safety"] = (fv_ps - price) / fv_ps
     # sensitivity
