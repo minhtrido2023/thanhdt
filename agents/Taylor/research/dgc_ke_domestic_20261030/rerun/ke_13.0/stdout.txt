@@ -1,0 +1,69 @@
+tái lập r10/r11: A7 33514 B7 38832
+
+A1 — Nghi Sơn RÒNG trong A7 (gộp = LN NS trong mọi dòng tiền model; capex còn lại 991.2 tỷ = 2610 đ/cp):
+                        scn   w  ns_steady_npat  pe_mult  gross_ps  capex_left_ps  net_ps  model_ns_value_ps
+                     thuan 0.2           280.0      8.0      4543          -2610    1933               2009
+                      coso 0.5           165.0      7.0      2402          -2610    -208               -228
+                    nghich 0.3            70.0      6.0       822          -2610   -1788              -1744
+TB gia quyền w=0,2/0,5/0,3 1.0             NaN      NaN      2356          -2610    -254               -235
+
+Điện 110kV sản xuất: bình thường 1811 / thấp điểm 1146 / cao điểm 3266 ; phụ tải phẳng 24/7 ⇒ ~1905 đ/kWh [UL khung giờ] ; r11 dùng 2.300/2.100/2.000
+
+A2 — NPV độc lập (đ/cp, từ 29/10/26, đã trừ capex còn lại, 15 năm, ke 0.130) — ĐỘ NHẠY theo giá [UL], KHÔNG phải ước tính:
+  scn  r11_tax20  wc15  wc15_norelease  tax_legal  tax_legal_wc15  tariff110  tariff110_normal  maint0  maint72  ebitda2030  ebitda2030_tariff110  ebitda2030_tariff1811  npat2030_legal  rev2030
+thap      -3279 -3439           -3477      -3279           -3439      -3063             -3013   -2985    -3572         -22                    11                     19            -182      593
+giua       3019  2719            2649       3712            3412       3286              3408    3656     2382         431                   451                    460             271     1073
+ cao       7677  7191            7079       9364            8877       7815              7962    8314     7040         758                   768                    779             598     1699
+
+Độ nhạy giá Ca(OCl)2 (tr/t), kịch bản giữa:
+  bleach_px  npv_giua  rev2030  bleach_share_rev2030
+       5.0      1545      903                 0.094
+      10.0      2278      988                 0.172
+      15.0      3019     1073                 0.238
+      23.7      4299     1220                 0.330
+      31.6      5456     1355                 0.396
+
+A3 — cầu nối P/E-trên-NPAT ↔ DCF FCF (kịch bản giữa, đ/cp, đã trừ capex còn lại):
+                                                                  step   ps  d_vs_prev
+1 model: NPAT ổn định 165 × P/E 7 /1,149² − capex (chỉ phần ns_value) -228        NaN
+                   2 thay NPAT 165 → 217 (từ dưới lên 2030, thuế 20%)  522      750.0
+                    3 DCF 15 năm trên NPAT (không cộng KH, không VLĐ)  825      303.0
+    4 DCF FCF = EBITDA − thuế − duy tu 36 (= NPAT + KH 160 − 36): r11 3019     2194.0
+                        5 + VLĐ 15% doanh thu [UL], thu hồi cuối 2041 2719     -300.0
+                                           6 + VLĐ 15%, KHÔNG thu hồi 2649      -70.0
+                7 bước 5 + thuế lịch ưu đãi (chưa xác minh điều kiện) 3412      763.0
+  P/E 7 ≈ suất lợi nhuận 14,3% ~ ke 13.0% (vĩnh viễn, không tăng trưởng) nhưng chiết khấu thêm 2 năm; DCF cộng KH 160 − duy tu 36 = +124 tỷ/năm ⇒ chênh chính do PHƯƠNG PHÁP.
+  đưa NPAT từ dưới lên (107/135/217) vào kịch bản CƠ SỞ của model: Nghi Sơn ròng cơ sở = 745 đ/cp (r10:  -208 )
+
+B — động lực, Δ so với A7 = 33514 (đ/cp; KHÔNG xếp hạng; w = 0,2/0,5/0,3 nhóm tự đặt):
+                                                        driver lo_level hi_level d_lo_vs_A7 d_hi_vs_A7 width
+Biên gộp 2027-28 (giá P4/DAP, lưu huỳnh/NH3, quặng mua ngoài)    33731    38548        217       5034  4817
+                              Nguồn quặng: khai trường 25/19B    33514    38832          0       5318  5318
+     Tiền ròng × haircut pháp lý (cùng mức cho cả 3 kịch bản)    30274    35817      -3240       2303  5543
+        Nghi Sơn GĐ1 (LN trong model; capex còn lại luôn trừ)    29572    39267      -3942       5753  9695
+                         Dự phòng môi trường hữu hạn (nền r4)    32760    33731       -754        217   971
+              Dự phòng 100 tỷ/quý lặp vĩnh viễn (độ nhạy phụ)    27003    33514      -6511          0  6511
+             Dự phòng lặp vĩnh viễn trên nền R2 (để đối xứng)    31820    38548      -1694       5034  6728
+                         Pháp lý: phạt / khắc phục / đình chỉ     None     None       None       None  None
+
+C — quy mô tương đối:
+                                                    item          num       den       ratio                                                           src
+      TKV 2021: chi BVMT / tổng doanh thu toàn Tập đoàn 1.160000e+03  138813.0      0.0084 nhandan.vn 21/08/2022; DT: nhandan/baophapluat (qua tìm kiếm)
+          TKV 2021: chi BVMT / doanh thu thuần hợp nhất 1.160000e+03  113173.0      0.0102                                   viettimes.vn (qua tìm kiếm)
+                 DGC: 400 tỷ/năm / doanh thu 9T quy năm 4.000000e+02    9346.0      0.0428                                                  BCTC Q3/2026
+                   DGC: 400 tỷ/năm / giá vốn 9T quy năm 4.000000e+02    7411.0      0.0540                                                  BCTC Q3/2026
+                   DGC: 400 tỷ/năm / BH+QLDN 9T quy năm 4.000000e+02     530.0      0.7548                                                  BCTC Q3/2026
+             DGC: 400 tỷ/năm / LNST hợp nhất 9T quy năm 4.000000e+02    1826.0      0.2191                                                  BCTC Q3/2026
+  DGC: 200 tỷ đã trích / tồn thạch cao ~3 triệu t (đ/t) 2.000000e+11 3000000.0  66667.0000         baolaocai.vn 12/12/2021 (tồn ~3 triệu t, >600k t/năm)
+DGC: 400 tỷ/năm / thạch cao phát sinh >600k t/năm (đ/t) 4.000000e+11  600000.0 666667.0000                                       baolaocai.vn 12/12/2021
+  cường độ DGC (400/DT quy năm) ÷ TKV 2021 (chi BVMT/DT): 5.1× (tổng DT) ; 4.2× (DT thuần) — định nghĩa 'chi BVMT' của TKV không tách đầu tư/vận hành
+
+D — cổ tức (không dự báo cổ tức mới):
+                                                     item       ty
+cổ tức đã trả 9T (LCTT, MIKE_EXTRACT_BCTC_Q3_2026.md:43)  4213.00
+        trong đó đợt 25/09: 8.000 đ/cp × 379,78 triệu cp  3038.20
+                       phần còn lại (đợt trước trong 9T)  1174.80
+        tiền ròng 30/09 (tiền+gửi 9.761,2 − vay 1.391,0)  8370.20
+                      tiền ròng / cổ tức đã trả 9T (lần)     1.99
+                                      tiền ròng / cp (đ) 22040.00
+                                        LNST hợp nhất 9T  1369.40

@@ -1,12 +1,12 @@
-# DGC — CTCP Tập đoàn Hóa chất Đức Giang: tiền ròng ≈ 2/3 thị giá và Nghi Sơn chạy từ 2027, nhưng theo mô hình giá 32.900 mới ngang kịch bản khai trường đóng — chưa phản ánh phục hồi, cũng chưa có đệm cho rủi ro pháp lý
+# DGC — CTCP Tập đoàn Hóa chất Đức Giang: tiền ròng ≈ 2/3 thị giá và Nghi Sơn chạy từ 2027, nhưng giá 32.900 sát cận dưới dải mô hình, chưa có đệm cho rủi ro pháp lý
 
-**Báo cáo Due Diligence (bản 2) · 29/10/2026 · Nhóm nghiên cứu** · Sàn HOSE · Hóa chất phốt pho, phân bón, phụ gia; sắp thêm hóa chất clo-kiềm (Nghi Sơn). Báo cáo này thay thế bản gửi tối 29/10/2026.
+**Báo cáo Due Diligence (bản 2.1, đính chính) · 29/10/2026 · Nhóm nghiên cứu** · Sàn HOSE · Hóa chất phốt pho, phân bón, phụ gia; sắp thêm hóa chất clo-kiềm (Nghi Sơn). Báo cáo này (bản 2.1, đính chính) thay thế bản 2 gửi tối 29/10/2026.
 
 ![Chuỗi giá trị, lợi nhuận và mức định giá](figs/fig_00_hero.png)
 
 ## Investment Summary
 
-**Giá 32.900 đ (đóng cửa 28/10/2026) nằm TRONG vùng giá trị mà nhóm dựng được, sát cận dưới của dải mô hình 32.182–37.060.** Cận dưới (A7) là trường hợp khai trường 25/19B vẫn dừng và biên gộp 2027-28 ở nền thấp. Như vậy, theo mô hình, giá hiện tại chưa phản ánh kịch bản phục hồi nguồn quặng hay biên gộp. Ngược lại, giá cũng không có đệm rõ ràng nếu rủi ro pháp lý xấu đi: phạt, khắc phục và đình chỉ chưa định lượng được. Phần chắc nhất của luận điểm là bảng cân đối: tiền ròng 8.370 tỷ ≈ 22.040 đ/cp trước haircut, P/B 0,96.
+**Giá 32.900 đ (đóng cửa 28/10/2026) nằm TRONG vùng giá trị mà nhóm dựng được, sát cận dưới của dải mô hình 32.182–37.060.** Cận dưới (A7) là trường hợp khai trường 25/19B vẫn dừng và biên gộp 2027-28 ở nền thấp. Giá tương thích với A7 nhưng cũng tương thích với các tổ hợp khác (ví dụ khai trường mở lại cùng rủi ro pháp lý cao), nên từ vị trí của giá không suy ra được thị trường đang định giá kịch bản nào. Giá không có đệm rõ ràng nếu rủi ro pháp lý xấu đi: phạt, khắc phục và đình chỉ chưa định lượng được. Phần chắc nhất của luận điểm là bảng cân đối: tiền ròng 8.370 tỷ ≈ 22.040 đ/cp trước haircut, P/B 0,96.
 
 | Dữ liệu chính | Giá trị | Ghi chú |
 |---|---|---|
@@ -14,7 +14,7 @@
 | Giá 29/10/2026, khớp cuối 14:45:02 | 33.300 đ (+1,2%) | DNSE latest_trade, đọc 19:12 ICT; kết luận không đổi ở cả hai mức |
 | Dải mô hình A7 (khai trường dừng) – B7 (mở lại) | **32.182 – 37.060** | Ước lượng; trung bình gia quyền 3 kịch bản với w = 0,2 / 0,5 / 0,3 (trọng số do nhóm tự đặt, chủ quan) |
 | Ba kịch bản trong A7: thuận / cơ sở / nghịch | 44.213 / 33.778 / 21.501 | Ước lượng; nhóm không chọn kịch bản nào làm cơ sở |
-| Tổ hợp thấp nhất / cao nhất của các giả định đã xét | ≈ 26,1–26,6 nghìn / 36.880 | Thấp nhất có dự phòng môi trường lặp vĩnh viễn (độ nhạy phụ, mục 9) |
+| Ô thấp nhất / cao nhất của lưới biên × dự phòng (cột A7) | ≈ 26,1–26,6 nghìn / 36.880 | Thấp nhất: dự phòng môi trường lặp vĩnh viễn (độ nhạy phụ, mục 9). Cao nhất ở cột B7 (nền biên cao) là 41.757; còn có tổ hợp thấp hơn khi cộng haircut pháp lý lớn |
 | Tiền + tiền gửi · vay · tiền ròng (30/9/2026) | 9.761 · 1.391 · **8.370 tỷ** | ≈ 22.040 đ/cp trước haircut; ≈ 19.400 sau phần cổ đông thiểu số PAT và haircut 9% (ước lượng) |
 | Cổ tức đã trả 9T/2026 (LCTT) | 4.213,0 tỷ | Gồm đợt 8.000 đ/cp trả 25/09/2026 ≈ 3.038 tỷ |
 | BVPS mẹ · P/B · P/E TTM | 34.425 đ · **0,96×** · 6,6× | VCSH mẹ 13.073,9 tỷ; LNST mẹ 4 quý 1.888,8 tỷ (gồm lãi tiền gửi) |
@@ -25,7 +25,7 @@
 **Ba luận điểm (MECE):**
 
 1. **Bảng cân đối là phần chắc nhất.** Tiền ròng 8.370 tỷ ≈ 59–67% giá, còn lại sau khi đã trả 4.213 tỷ cổ tức trong 9 tháng. Tiền ròng bằng 1,99 lần mức cổ tức đã chi 9T. P/B 0,96.
-2. **Lợi nhuận lõi ở đáy nhiều năm vì chi phí đầu vào và nguồn quặng, không chỉ vì dự phòng.** Biên gộp Q3 20,5% (Q3/25: 31,1%). Khai trường 25 tạm dừng phục vụ điều tra nên công ty dùng toàn bộ quặng nhập/mua ngoài; lưu huỳnh, NH3, điện, than cốc tăng giá (giải trình 28/10/2026). Biên 2027-28 và việc mở lại khai trường là hai động lực lớn nhất có thể đo, mỗi cái ≈ 4,5–4,9 nghìn đ/cp.
+2. **Lợi nhuận lõi ở đáy nhiều năm vì chi phí đầu vào và nguồn quặng, không chỉ vì dự phòng.** Biên gộp Q3 20,5% (Q3/25: 31,1%). Khai trường 25 tạm dừng phục vụ điều tra nên công ty dùng toàn bộ quặng nhập/mua ngoài; lưu huỳnh, NH3, điện, than cốc tăng giá (giải trình 28/10/2026). Biên 2027-28 và việc mở lại khai trường là hai động lực đo được, biên độ mỗi cái ≈ 4,5–4,9 nghìn đ/cp (Nghi Sơn, haircut pháp lý và dự phòng lặp có biên độ rộng hơn nhưng bằng chứng yếu hơn).
 3. **Nghi Sơn là dự án đầu tư lớn nhất của DGC và sắp vào vận hành, nhưng giá trị của nó phụ thuộc giá bán chưa có nguồn.** Trong mô hình, phần dự án còn lại đang được định giá **thấp hơn** số vốn còn phải chi (ròng −447 đ/cp). Một phép DCF độc lập cho kết quả từ −3,2 tới +6,8 nghìn đ/cp tùy giá bán. Khoảng chênh này chủ yếu do phương pháp, không do dữ kiện mới.
 
 **Điều gì sẽ làm nhận định thay đổi.**
@@ -47,14 +47,14 @@
 **Tình huống.** DGC sản xuất phốt pho vàng và hóa chất gốc phốt pho tích hợp từ mỏ apatit ở Lào Cai; khoảng 80% doanh thu từ xuất khẩu (website công ty; 6T/2026: 84% theo BCTC). Doanh nghiệp giữ 9.761 tỷ tiền và tiền gửi tại 30/9/2026, và đang hoàn thành Tổ hợp Hóa chất Nghi Sơn giai đoạn 1 ở Thanh Hoá. Giá điều chỉnh cổ tức giảm từ khoảng 75,0 nghìn (29/10/2025) còn 32.900 (28/10/2026).
 
 **Biến chuyển.** Năm 2026 có bốn việc chồng lên nhau:
-- **Vụ án.** Ngày 17/03/2026 cơ quan điều tra khởi tố vụ án (kế toán, khai thác tài nguyên, gây ô nhiễm môi trường); khai trường 25 tạm dừng phục vụ điều tra.
+- **Vụ án.** Vụ án được công bố ngày 17/03/2026 (theo Bộ Công an, khởi tố từ 25/12/2025 và 14/03/2026; chưa tự đối chiếu): kế toán, khai thác tài nguyên, gây ô nhiễm môi trường; khai trường 25 tạm dừng phục vụ điều tra.
 - **Chi phí đầu vào.** Lưu huỳnh, NH3, điện, than cốc tăng; quặng phải nhập hoặc mua ngoài.
 - **Dự phòng môi trường.** Q2 và Q3 mỗi quý trích 100 tỷ, số dư 200 tỷ; chưa thuyết minh tổng mức hay lịch chi.
 - **Nghi Sơn.** NQ HĐQT 34 (15/10/2026) điều chỉnh dự án: thêm H3PO4/PCl3/PCl5, chạy thử Q4/2026, vận hành toàn bộ Q1/2027.
 
 **Câu hỏi.** Ở 32.900, thấp hơn giá trị sổ sách và cao hơn tiền ròng khoảng 11 nghìn đ/cp, giá đang trả cho kịch bản nào?
 
-**Trả lời.** Giá ≈ cận dưới của dải mô hình, tức theo mô hình tương đương kịch bản khai trường đóng và biên ở nền thấp (đây là đọc theo mô hình, không phải điều thị trường đã nói). Phía cao cần ít nhất một trong hai: mở lại khai trường hoặc biên hồi về run-rate 9T. Phía thấp cần các giả định bất lợi chồng lên nhau, hoặc một biến cố pháp lý chưa định lượng được. Trong mô hình, Nghi Sơn dịch dải từ −2,2 nghìn (lợi nhuận bằng 0) tới +0,5 nghìn đ/cp (dựng từ dưới lên); dự phòng môi trường là độ nhạy phụ.
+**Trả lời.** Giá ≈ cận dưới của dải mô hình, tức theo mô hình tương đương kịch bản khai trường đóng và biên ở nền thấp (đây là đọc theo mô hình, không phải điều thị trường đã nói). Phía cao cần ít nhất một trong hai: mở lại khai trường hoặc biên hồi về run-rate 9T. Phía thấp chỉ cần MỘT trong các yếu tố sau xảy ra đơn lẻ: haircut pháp lý lớn, Nghi Sơn không có lợi nhuận, biên thấp hơn nền thấp 2 điểm phần trăm hoặc dự phòng môi trường lặp; mỗi yếu tố riêng đã đưa giá trị dưới giá hiện tại. Nghi Sơn: lợi nhuận bằng 0 làm A7 giảm khoảng 2,2 nghìn; P&L "thấp" dựng từ dưới lên (có lỗ) giảm khoảng 3,7 nghìn; kịch bản giữa dựng từ dưới lên tăng khoảng 0,5 nghìn đ/cp. Dự phòng môi trường là độ nhạy phụ.
 
 ## 2. Thị trường đang định giá gì
 
@@ -87,13 +87,13 @@
 | Tiền ròng × haircut pháp lý | haircut 29% ở cả 3 kịch bản | −3.241 | haircut 3% ở cả 3 kịch bản | +2.302 | Số dư tiền chắc (BCTC 30/9); haircut là ước lượng |
 | Biên gộp 2027-28 (giá P4/DAP, lưu huỳnh, NH3, quặng mua ngoài) | nền thấp 16,5/17,5%, không trích thêm | +217 | nền cao 19,5/20,7% (9T thực 20,7%), giá vốn phẳng | +4.698 | Biên 9T chắc; hướng 2027-28 là ước lượng |
 | Nguồn quặng: khai trường 25/19B | không mở lại (A7) | 0 | mở lại (B7) | +4.878 | Chưa có quyết định mở lại |
-| Nghi Sơn GĐ1 (vốn còn lại luôn được trừ) | P&L "thấp" dựng từ dưới lên, áp cho cả 3 kịch bản | −3.742 | P&L "cao", áp cho cả 3 kịch bản | +5.364 | Công suất chắc (NQ 34); giá bán phần lớn là ước lượng |
+| Nghi Sơn GĐ1 (vốn còn lại luôn được trừ) | P&L "thấp" dựng từ dưới lên (có lỗ), áp cho cả 3 kịch bản | −3.742 | P&L "cao", áp cho cả 3 kịch bản | +5.364 | Công suất chắc (NQ 34); giá bán phần lớn là ước lượng |
 | Dự phòng môi trường hữu hạn | thêm 100 tỷ/quý × 4 quý | −743 | không trích thêm | +217 | Số dư 200 tỷ chắc; tương lai chưa phân định |
 | Dự phòng lặp vĩnh viễn (độ nhạy phụ) | nền thấp + 100 tỷ/quý vĩnh viễn (26.117–26.558) | −6.065 | A7 | 0 | Chưa phân định; xem hộp mục 9 |
 | Pháp lý: phạt, khắc phục, đình chỉ | không định lượng | | | | Mức phạt luật định không phải trần thiệt hại |
 
 **Cách đọc.**
-- Biên gộp và nguồn quặng là hai động lực lớn nhất có cơ sở đo; cả hai lệch về phía trên A7, vì A7 đã giả định khai trường dừng và biên ở nền thấp.
+- Biên gộp và nguồn quặng là hai động lực có cơ sở đo tương đối tốt; cả hai lệch về phía trên A7, vì A7 đã giả định khai trường dừng và biên ở nền thấp.
 - Tiền ròng là tài sản chắc, nhưng giá trị thuộc về cổ đông phụ thuộc phần không bị dùng cho nghĩa vụ pháp lý (haircut).
 - Nghi Sơn có biên độ rộng vì giá bán chưa có nguồn; hai đầu mút là kịch bản cực, áp đồng loạt cho cả 3 kịch bản.
 - Dự phòng môi trường là một hàng trong bảng, không phải trục chính. Cách đọc "lặp vĩnh viễn" cho mức giảm lớn nhất nhưng có bằng chứng yếu nhất về bản chất (hộp mục 9).
@@ -186,7 +186,7 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 
 **Giả định và nguồn.**
 - **Công suất:** NQ 34. **Tải kịch bản giữa:** Vietcap (04/09/2026) giả định 65% năm 2027, 70% năm 2028 — tiền lệ duy nhất có nguồn.
-- **Giá xút:** SunSirs qua cơ sở dữ liệu của nhóm. Thấp = giá nội địa TQ 28/10 (6,98 tr/t quy 100%, đáy chu kỳ); giữa = trung bình 3 năm × 1,15 (10,69 tr/t); cao = quý cao nhất 3 năm (11,47 tr/t). Đối chiếu: CFR Đông Nam Á Q1/2026 380–400 USD/t (nguồn thứ cấp).
+- **Giá xút:** SunSirs qua cơ sở dữ liệu của nhóm. Thấp = giá nội địa TQ 28/10 (6,98 tr/t quy 100%, đáy chu kỳ); giữa = trung bình 3 năm × 1,15 (10,69 tr/t); cao = quý cao nhất 3 năm (11,47 tr/t). Đối chiếu: CFR Đông Nam Á Q1/2026 380–400 USD/t (nguồn thứ cấp). Giá quy đổi từ 603 CNY/t (28/10) giả định nồng độ 32% [chưa kiểm]; hệ số ×1,15 xấp xỉ chênh giá CFR Đông Nam Á [ước lượng].
 - **Các sản phẩm khác** (HCl, Javen, Ca(OCl)2, clo lỏng, CaCl2, H3PO3): giá là ước lượng của nhóm, không có nguồn công khai đáng tin. Định phí 130–200 tỷ/năm, khấu hao 160 tỷ/năm (15 năm) cũng là ước lượng.
 - **Ca(OCl)2:** ở giá giả định 15 tr/t, sản phẩm này chiếm 23,8% doanh thu 2030 kịch bản giữa. Giá chào trên sàn B2B quốc tế cho loại 65–70% là 900–1.200 USD/t (≈ 23,7–31,6 tr/t; chỉ thấy qua kết quả tìm kiếm). Clorua vôi (30–35% clo hoạt tính) là sản phẩm rẻ hơn; nhóm không tìm được giá. DGC sản xuất cấp nào: chưa xác minh. Độ nhạy NPV kịch bản giữa theo giá Ca(OCl)2 5–31,6 tr/t: 1.183–4.741 đ/cp.
 - **Điện:** mô hình dùng 2.000–2.300 đ/kWh (gần giá bán lẻ bình quân 2.204 đ/kWh). Biểu giá sản xuất cấp 110 kV trở lên theo QĐ 1279/QĐ-BCT (09/05/2025, áp dụng từ 10/05/2025): bình thường 1.811, thấp điểm 1.146, cao điểm 3.266 đ/kWh (chưa VAT). Với phụ tải chạy đều 24/7, giá bình quân ≈ 1.905 đ/kWh (ước lượng theo khung giờ). Khi đó EBITDA 2030 kịch bản thấp đổi dấu từ −22 lên +11 tỷ; LNST vẫn âm. Nhóm chưa kiểm có quyết định giá điện mới hơn hay không.
@@ -230,7 +230,7 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 5. **Vốn 2.400 hay 2.900 tỷ;** chưa có bằng chứng đã chạy thử tới 29/10.
 6. **Ưu đãi thuế:** điều kiện chưa xác minh.
 
-**Giai đoạn 2–3 là tùy chọn dài hạn, tách riêng.** Theo VietnamFinance (17/07/2026): PVC khoảng 6.000 tỷ, soda 400.000 t khoảng 3.600 tỷ; toàn tổ hợp khoảng 12.000 tỷ. Chưa có quyết định đầu tư, nguồn vốn hay tiến độ chính thức nên nhóm **không đưa vào giá trị**. Vốn cần (≈ 9.600 tỷ) ≈ 115% tiền ròng hiện tại; nếu triển khai, nhu cầu vốn này cạnh tranh với cổ tức.
+**Giai đoạn 2–3 là tùy chọn dài hạn, tách riêng.** Theo VietnamFinance (17/07/2026): PVC khoảng 6.000 tỷ, soda 400.000 t khoảng 3.600 tỷ; toàn tổ hợp khoảng 12.000 tỷ. Chưa có quyết định đầu tư, nguồn vốn hay tiến độ chính thức nên nhóm **không đưa vào giá trị**. Vốn cần (≈ 9.600 tỷ) ≈ 115% tiền ròng hiện tại; nếu triển khai, nhu cầu vốn này có thể cạnh tranh với cổ tức.
 
 ## 7. Phân tích tài chính (bottom-up)
 
@@ -288,13 +288,13 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 
 ## 8. Định giá: giá nằm trong dải, sát cận dưới; nhóm không chọn kịch bản cơ sở
 
-**Hai giả định có thể đo chi phối dải: biên gộp 2027-28 (mỗi 1pp ≈ 1.420 đ/cp) và nguồn quặng (B7 − A7 ≈ 4.878 đ/cp). Trong mô hình, Nghi Sơn dịch dải từ −2,2 nghìn (lợi nhuận bằng 0) tới +0,5 nghìn đ/cp (dựng từ dưới lên).**
+**Hai giả định có thể đo chi phối dải: biên gộp 2027-28 (mỗi 1pp ≈ 1.420 đ/cp) và nguồn quặng (B7 − A7 ≈ 4.878 đ/cp). Nghi Sơn có biên độ rộng hơn (từ −3,7 nghìn với P&L thấp có lỗ tới +5,4 nghìn với P&L cao, áp cho cả 3 kịch bản; lợi nhuận bằng 0 là −2,2 nghìn).**
 
 **Phương pháp.**
 - Mỗi kịch bản = trung bình ba cách: SOTP, DCF và trung bình ba bội số (P/E lịch sử 10 năm, P/E nhóm so sánh, P/B). Chi phí vốn chủ 14,9%; tiền ròng cộng riêng sau haircut.
 - Ba kịch bản gộp theo **w = thuận 0,2 / cơ sở 0,5 / nghịch 0,3** — trọng số do nhóm tự đặt, chủ quan.
 - **A7** = khai trường vẫn dừng; **B7** = khai trường 25/19B mở lại.
-- **Hai nền biên đối xứng** (2027/2028): nền thấp 16,5/17,5%; nền cao 19,5/20,7% (giá vốn Q3 bỏ dự phòng, giữ phẳng dù NH3 đang tăng). Không nền nào trung tính; hai đầu là "tổ hợp thấp nhất" và "tổ hợp cao nhất" của các giả định đã xét.
+- **Hai nền biên đối xứng** (2027/2028): nền thấp 16,5/17,5%; nền cao 19,5/20,7% (giá vốn Q3 bỏ dự phòng, giữ phẳng dù NH3 đang tăng). Không nền nào trung tính; hai đầu của lưới biên × dự phòng (cột A7); cột B7 ở nền biên cao đạt 41.757, và còn tổ hợp thấp hơn khi cộng haircut pháp lý lớn.
 
 | Trường hợp (đ/cp) | A7: khai trường dừng | B7: mở lại |
 |---|---|---|
@@ -316,7 +316,7 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 
 | # | Rủi ro | Tác động theo mô hình (đ/cp) | Bằng chứng hiện có | Dấu hiệu sớm | Kiểm khi nào |
 |---|---|---|---|---|---|
-| R1 | Pháp nhân/công ty con bị truy cứu; đình chỉ; buộc khắc phục | Không định lượng; haircut 29% cả 3 kịch bản = −3.241 | Chưa khởi tố pháp nhân (Báo Pháp luật 15/08) | Quyết định khởi tố pháp nhân, kê biên, đình chỉ | Liên tục |
+| R1 | Pháp nhân/công ty con bị truy cứu; đình chỉ; buộc khắc phục | Không định lượng; haircut 29% cả 3 kịch bản = −3.241 | Chưa khởi tố pháp nhân (Báo Pháp luật 15/08; giai đoạn 16/08–30/09 chưa quét) | Quyết định khởi tố pháp nhân, kê biên, đình chỉ | Liên tục |
 | R2 | Biên gộp 2027-28 dưới nền thấp (lưu huỳnh/NH3 cao, giá P4 giảm) | ≈ −1.420 mỗi 1pp | Biên 9T 20,7%; chi phí đầu vào giảm về hướng, cao về mức | Biên quý bỏ dự phòng < 20% | Hằng quý |
 | R3 | Khai trường 25/19B không mở lại | Đã nằm trong A7; mất phần +4.878 | Tạm dừng phục vụ điều tra | Không có văn bản mốc mở lại | Hằng quý |
 | R4 | Nghi Sơn chậm, tải thấp, giá xút ở đáy | Tới −3.742 (P&L thấp cho cả 3 kịch bản) | Công suất, tiến độ có văn bản; giá bán chưa có nguồn | Không có doanh thu mới từ Q1/2027 | BCTC Q4/26, Q1/27 |
@@ -356,8 +356,8 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 
 **Tiền lệ và quy mô tương đối.** Có doanh nghiệp VN chi cho môi trường hơn 100 tỷ/quý: TKV "dành ra hơn 1.000 tỷ đồng đầu tư cho công tác bảo vệ môi trường" mỗi năm, "riêng năm 2021 chi 1.160 tỷ đồng" (nhandan.vn 21/08/2022). Vì vậy nhận định "không doanh nghiệp nào ở VN chi ở quy mô này" không đúng về dữ kiện. Nhưng xét quy mô tương đối:
 - TKV 2021: 1.160 tỷ ≈ 0,84% tổng doanh thu toàn Tập đoàn (138.813 tỷ), hoặc 1,02% doanh thu thuần hợp nhất (113.173 tỷ). Hai số doanh thu lấy qua kết quả tìm kiếm.
-- DGC: 400 tỷ/năm ≈ 4,28% doanh thu 9T quy năm (9.346 tỷ), 5,4% giá vốn, 75% chi phí bán hàng + quản lý quy năm (530 tỷ), 22% LNST hợp nhất quy năm.
-- Cường độ của DGC cao hơn TKV khoảng 4–5 lần so với doanh thu. TKV là ngành than, khác ngành, và con số của TKV có thể gồm cả đầu tư. Kết luận: so với một doanh nghiệp khác ngành, quy mô tương đối của khoản 400 tỷ/năm là cao; đây chỉ là bằng chứng tham khảo, và vẫn không chứng minh được khoản này là một lần hay lặp.
+- DGC đã ghi sổ 200 tỷ trong 9T ≈ 2,85% doanh thu 9T (7.009,5 tỷ). Nếu 100 tỷ/quý lặp lại (400 tỷ/năm, giả định): ≈ 4,28% doanh thu quy năm (9.346 tỷ), 5,4% giá vốn, 75% chi phí bán hàng + quản lý quy năm (530 tỷ), 22% LNST hợp nhất quy năm.
+- So với TKV theo doanh thu: khoản đã ghi sổ ≈ 2,8–3,4 lần; kịch bản lặp (giả định) ≈ 4–5 lần. TKV là ngành than, chỉ là một điểm so sánh, số của TKV là chi thực (có thể gồm đầu tư) còn số của DGC là dự phòng ghi sổ. Kết luận: cao hơn một điểm so sánh khác ngành; không đủ để kết luận khoản này là một lần hay lặp.
 - Vedan (~220 tỷ) và Formosa (500 triệu USD) là các khoản xử lý một lần, không phải chi thường xuyên.
 - Phép kiểm vật lý chưa làm được: thạch cao phát sinh tại Đức Giang Lào Cai hơn 600.000 t/năm, tồn khoảng 3 triệu t (Báo Lào Cai 12/12/2021), nhưng nhóm không tìm được đơn giá xử lý.
 - "Đổ thải trái phép hàng triệu tấn chất thải" là cáo buộc ban đầu của cơ quan điều tra (vneconomy 17/03/2026 dẫn Bộ Công an), chưa phải kết luận của tòa.
@@ -371,9 +371,9 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 **Phạm vi tra cứu.** Tra cứu pháp lý tham khảo ngày 29/10/2026 (không phải ý kiến luật sư; nhiều điểm ghi "chưa xác minh"). Quét tin công khai 01–29/10/2026: không thấy sự kiện không có nghĩa là không có sự kiện. Chưa đọc trực tiếp trang thông báo của HOSE. Giai đoạn 16/08–30/09/2026 chưa được quét có hệ thống.
 
 **Diễn biến vụ án.**
-- **Cảnh báo — khởi tố:** 17/03/2026 Bộ Công an khởi tố vụ án theo Điều 221, 227 và 235 BLHS, 14 bị can. Nội dung gồm đổ thải trái phép tại KCN Tằng Loỏng (Nhân Dân, BNEWS 17/03). Tên tội Đ.221 theo tra cứu tham khảo, chưa đối chiếu nguyên văn.
-- **Cảnh báo — khởi tố bổ sung:** 23/07/2026 Tổng giám đốc và một Phó tổng giám đốc bị khởi tố (Tuổi Trẻ). Khởi tố giám đốc công ty con là khởi tố cá nhân, không đồng nghĩa công ty con bị khởi tố với tư cách pháp nhân.
-- **Cảnh báo — pháp nhân:** theo Báo Pháp luật 15/08/2026, chưa khởi tố pháp nhân. Quét tin 01–29/10 không thấy sự kiện mới (không thấy không có nghĩa là không có); giai đoạn 16/08–30/09 chưa quét.
+- **Cảnh báo — khởi tố:** 17/03/2026 Bộ Công an khởi tố vụ án theo Điều 221, 227 và 235 BLHS, 14 bị can, trong đó có Chủ tịch HĐQT Đào Hữu Huyền (theo báo chí). Nội dung gồm đổ thải trái phép tại KCN Tằng Loỏng (Nhân Dân, BNEWS 17/03). Tên tội Đ.221 theo tra cứu tham khảo, chưa đối chiếu nguyên văn.
+- **Cảnh báo — khởi tố bổ sung:** 23/07/2026 báo chí đưa tin khởi tố bổ sung lãnh đạo của công ty mẹ, trong đó có Tổng giám đốc (cafef, Tuổi Trẻ 23/07; số người và chức danh giữa các nguồn chưa thống nhất: một nguồn nêu Tổng giám đốc và một Phó tổng giám đốc, nguồn khác nêu ba người). Khởi tố các cá nhân này, cũng như khởi tố giám đốc công ty con, là khởi tố cá nhân, không đồng nghĩa pháp nhân bị khởi tố.
+- **Cảnh báo — pháp nhân:** theo Báo Pháp luật 15/08/2026, chưa khởi tố pháp nhân. Quét tin 01–29/10 không thấy sự kiện mới (không thấy không có nghĩa là không có); giai đoạn 16/08–30/09 chưa quét có hệ thống (cần bổ sung).
 - **Tiền khắc phục:** 331,3 tỷ là tiền bị can và gia đình tự nguyện nộp (Kenh14 dẫn VKSND, 23/06). Một thành viên HĐQT nói đây "không phải là con số thiệt hại cuối cùng" (Viettimes 13/08).
 
 **Khung pháp lý (tham khảo).** Pháp nhân thương mại có thể bị truy cứu với Đ.227 và Đ.235; tội kế toán chỉ áp cho cá nhân. Mức phạt pháp nhân Đ.235 (bản 2025) 6–40 tỷ **không phải** trần thiệt hại: biện pháp buộc khôi phục/khắc phục (Đ.82) và bồi thường dân sự (BLDS Đ.602) không có trần; đình chỉ hoạt động là rủi ro lớn nhất. Mọi tác động đi vào BCTC hợp nhất vì công ty con sở hữu 100%.
@@ -381,7 +381,7 @@ Chủ dự án: Công ty TNHH MTV Hóa chất Đức Giang Nghi Sơn (100% DGC),
 **Giao dịch và quản trị.**
 - **Hạn chế giao dịch:** theo VietnamFinance 06/10, DGC bị hạn chế giao dịch từ 26/05/2026 vì chậm nộp BCTC kiểm toán 2025 quá 45 ngày (một nguồn), bị cảnh báo từ 30/06 do ý kiến ngoại trừ. Trạng thái sau 06/10 chưa xác nhận từ thông báo gốc HOSE. Không có nguồn nào nêu ngày gỡ.
 - **Nhân sự:** ĐHĐCĐ bất thường 08/05/2026 miễn nhiệm 3 thành viên; Chủ tịch HĐQT PAT miễn chức (hiệu lực 28/07); Ắc quy Tia Sáng đổi lãnh đạo 05–06/10.
-- **Cổ đông lớn tại 30/09** (một nguồn báo chí): ông Đào Hữu Huyền 18,38%, bà Ngô Thị Ngọc Lan 6,64%, ông Đào Hữu Kha 5,97%.
+- **Cổ đông lớn tại 30/09** (một nguồn báo chí): ông Đào Hữu Huyền 18,38% (đồng thời nằm trong số 14 bị can của vụ án; bị miễn nhiệm HĐQT tại ĐHĐCĐ bất thường 08/05/2026), bà Ngô Thị Ngọc Lan 6,64%, ông Đào Hữu Kha 5,97%.
 
 **Lịch xúc tác.**
 
@@ -484,9 +484,9 @@ Nguồn: BCTC hợp nhất Q3/2026 (ký 28/10/2026, chưa soát xét, bản scan
 
 ## Phụ lục E. Quy trình độc lập và các chỗ đã sửa
 
-Báo cáo đi qua ba lớp tách biệt: (1) đọc ngành mù bởi một nhà phân tích vĩ mô độc lập; (2) due diligence: đọc BCTC gốc từng trang và dựng định giá; (3) phản biện độc lập: một người phản biện có nhiệm vụ duy nhất là bác bỏ kết luận, đã qua **năm vòng**. Ở hai vòng cuối, người phản biện tái lập độc lập số học và xác nhận khớp.
+Báo cáo đi qua ba lớp tách biệt: (1) đọc ngành mù bởi một nhà phân tích vĩ mô độc lập; (2) due diligence: đọc BCTC gốc từng trang và dựng định giá; (3) phản biện độc lập: một người phản biện có nhiệm vụ duy nhất là bác bỏ kết luận, đã qua **sáu vòng**. Ở các vòng cuối, người phản biện tái lập độc lập số học và xác nhận khớp.
 
-**Những gì đã sửa qua năm vòng.**
+**Những gì đã sửa qua sáu vòng.**
 1. **Số sai.** "100 tỷ/quý lặp vĩnh viễn ≈ 1.516 đ/cp" thật ra là mức của 100 tỷ/năm; đúng là ≈ 6.065 đ/cp. Dự phòng giảm giá tồn kho từng ghi nhầm 292,9 tỷ (đúng 0,29 tỷ). Dấu thuế hoãn lại được sửa.
 2. **Tính đôi Q4.** Biên Q4/2026 nội suy đã ngầm chứa khoảng 100 tỷ dự phòng; các hàng "trích thêm N quý" từng trừ quý đầu hai lần (≈ 217 đ/cp). Đã tách.
 3. **VAS 18 bị bỏ.** Lập luận "VAS 18 + dự phòng ngắn hạn nên chỉ một lần" bị bỏ vì chuẩn mực không phân biệt một lần với định kỳ.
@@ -497,7 +497,9 @@ Báo cáo đi qua ba lớp tách biệt: (1) đọc ngành mù bởi một nhà 
 8. **Bảng động lực (vòng 5).** Bỏ số thứ hạng; mọi hàng chuẩn hoá về chênh lệch so với A7, có định nghĩa hai đầu mút; công bố trọng số w = 0,2/0,5/0,3.
 9. **Nhận định về tiền lệ bị bác (vòng 5).** Bản nháp từng khẳng định chưa doanh nghiệp VN nào chi môi trường thường xuyên ≥100 tỷ/quý. Người phản biện chỉ ra TKV chi hơn 1.000 tỷ/năm; câu đó đã bị bỏ và thay bằng so sánh quy mô tương đối.
 
-**Giới hạn của quy trình.** Các sửa theo vòng 5 (mục 7–9 trên và bản cấu trúc lại này) được áp sau vòng đó và **chưa** được người phản biện rà lại; số học đã được nhóm tái lập. Phần pháp lý là tra cứu tham khảo. Báo cáo này thay thế bản gửi tối 29/10/2026.
+10. **Vòng 6.** Người phản biện chỉ ra và nhóm đã sửa: mô tả khởi tố 23/07 và việc Chủ tịch HĐQT là một trong 14 bị can chưa được nêu; nhãn "tổ hợp thấp/cao nhất" sai (nay là ô thấp/cao nhất của lưới cột A7); câu "phía thấp cần giả định chồng lên nhau" mâu thuẫn với bảng (chỉ cần một yếu tố); cách gọi "hai động lực lớn nhất" và "lợi nhuận bằng 0 là đáy" của Nghi Sơn; so sánh TKV dùng số giả định 400 tỷ/năm thay vì 200 tỷ đã ghi sổ (nay nêu cả hai: 2,8–3,4 lần và 4–5 lần); suy diễn từ tiêu đề rằng giá "chưa phản ánh phục hồi" không duy nhất theo mô hình.
+
+**Giới hạn của quy trình.** Các sửa theo vòng 6 được áp sau vòng đó và **chưa** được người phản biện rà lại; số học r12 đã được người phản biện tái lập khớp từng byte. Phần pháp lý là tra cứu tham khảo. Báo cáo này (bản 2.1, đính chính) thay thế bản 2 gửi tối 29/10/2026.
 
 ## Phụ lục F. Tuyên bố miễn trừ trách nhiệm
 

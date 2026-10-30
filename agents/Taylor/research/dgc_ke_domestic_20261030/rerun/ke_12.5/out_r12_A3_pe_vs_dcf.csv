@@ -1,0 +1,8 @@
+step,ps,d_vs_prev
+"1 model: NPAT ổn định 165 × P/E 7 /1,149² − capex (chỉ phần ns_value)",-207,
+"2 thay NPAT 165 → 217 (từ dưới lên 2030, thuế 20%)",550,757.0
+"3 DCF 15 năm trên NPAT (không cộng KH, không VLĐ)",914,364.0
+4 DCF FCF = EBITDA − thuế − duy tu 36 (= NPAT + KH 160 − 36): r11,3163,2249.0
+"5 + VLĐ 15% doanh thu [UL], thu hồi cuối 2041",2866,-297.0
+"6 + VLĐ 15%, KHÔNG thu hồi",2791,-75.0
+7 bước 5 + thuế lịch ưu đãi (chưa xác minh điều kiện),3577,786.0

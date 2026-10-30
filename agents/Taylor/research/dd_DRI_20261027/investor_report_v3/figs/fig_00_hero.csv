@@ -1,0 +1,27 @@
+chi_tieu,gia_tri,nguon
+dien_tich_cao_su_ha,8592.3,BCTN 2025 tr.37
+cong_suat_nha_may_t_nam,18000.0,BCTN 2025 tr.37
+san_luong_2025_t,15152.83,BCTN 2025
+lnst_me_9T26_yoy_pct,43.6,BCTC HN Q3/26
+duong_TB_2026_t,13800.0,mô hình vòng 4 (ước lượng)
+duong_TB_2027_t,13800.0,mô hình vòng 4 (ước lượng)
+duong_TB_2028_t,13800.0,mô hình vòng 4 (ước lượng)
+duong_TB_2030_t,11889.0,mô hình vòng 4 (ước lượng)
+duong_TB_2032_t,9933.0,mô hình vòng 4 (ước lượng)
+duong_TB_2034_t,8136.0,mô hình vòng 4 (ước lượng)
+duong_TB_2036_t,6854.0,mô hình vòng 4 (ước lượng)
+duong_TB_2038_t,6991.0,mô hình vòng 4 (ước lượng)
+duong_TB_2040_t,6636.0,mô hình vòng 4 (ước lượng)
+duong_TB_2042_t,6434.0,mô hình vòng 4 (ước lượng)
+duong_TB_2045_t,6804.0,mô hình vòng 4 (ước lượng)
+duong_TB_2048_t,6898.0,mô hình vòng 4 (ước lượng)
+duong_TB_2051_t,6898.0,mô hình vòng 4 (ước lượng)
+duong_TB_2054_t,6898.0,mô hình vòng 4 (ước lượng)
+fv_tb_mid197,9078.0,vòng 4
+fv_tb_mid218,11116.0,vòng 4
+ci_lo,8000.0,phản biện
+ci_hi,12500.0,phản biện
+duoi_tren_lo,13225.0,phản biện
+duoi_tren_hi,15115.0,phản biện
+dong_cua_2910_moc,14700.0,DNSE ohlc + tav2_bq
+gia_3010_1008_dnse,14500.0,"DNSE latest_trade, chưa đóng cửa"

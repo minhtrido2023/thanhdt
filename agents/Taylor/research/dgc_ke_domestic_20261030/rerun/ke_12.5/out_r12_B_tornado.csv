@@ -1,0 +1,9 @@
+driver,lo_level,hi_level,d_lo_vs_A7,d_hi_vs_A7,width,lo_def,hi_def,evidence
+"Biên gộp 2027-28 (giá P4/DAP, lưu huỳnh/NH3, quặng mua ngoài)",34168,39095,217,5144,4927,"nền r4 biên 16,5/17,5%, Q4 ex-dự phòng, không trích thêm","nền R2 biên 19,5/20,7% (9T thực 20,7%), giá vốn phẳng, Q4 ex-dự phòng",BCTC 9T chắc; hướng 2027-28 [UL]
+Nguồn quặng: khai trường 25/19B,33951,39414,0,5463,5463,A7: không mở lại,"B7: mở lại (uplift LN gộp, cơ sở 0,5 năm 2028)",khai trường 25 tạm dừng phục vụ điều tra; chưa có quyết định mở lại
+Tiền ròng × haircut pháp lý (cùng mức cho cả 3 kịch bản),30710,36253,-3241,2302,5543,haircut 29% ở cả 3 kịch bản,haircut 3% ở cả 3 kịch bản,số dư tiền chắc (BCTC 30/09); haircut [UL]
+Nghi Sơn GĐ1 (LN trong model; capex còn lại luôn trừ),29945,39826,-4006,5875,9881,"P&L từ dưới lên 'thấp' (thuế 20%) áp cho cả 3 kịch bản, ổn định = 0 (tạm dừng)",P&L từ dưới lên 'cao' (thuế 20%) áp cho cả 3 kịch bản,công suất chắc (NQ 34); giá/biên phần lớn [UL]
+Dự phòng môi trường hữu hạn (nền r4),33194,34168,-757,217,974,thêm 100 tỷ/quý × 4 quý (trước thuế),không trích thêm (Q4 ex-dự phòng),note 19: 200 tỷ tới 30/09; chưa phân định hữu hạn/lặp
+Dự phòng 100 tỷ/quý lặp vĩnh viễn (độ nhạy phụ),27293,33951,-6658,0,6658,"nền r4 + lặp vĩnh viễn (ô thấp nhất 26.117 tuyến tính; 26,1–26,6k theo 3 cách đo)","A7 (200 tỷ đã trích, không lặp)",chưa phân định; xem phần C
+Dự phòng lặp vĩnh viễn trên nền R2 (để đối xứng),32220,39095,-1731,5144,6875,R1 = R2 + 400 tỷ/năm vĩnh viễn,R2 không trích thêm,cùng như trên
+Pháp lý: phạt / khắc phục / đình chỉ,,,,,,không định lượng,,Đ.235 phạt pháp nhân 6–40 tỷ không phải trần; Đ.82/BLDS 602 không trần; đình chỉ chưa đo

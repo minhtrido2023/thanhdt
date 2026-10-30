@@ -1,0 +1,18 @@
+MCAP 1032.4 | net cash tho 273.2 (12,461 d/cp) | net cash sau nghia vu 223.6 (10,202 d/cp)
+MVC mkt 145.2  MVC ex-vong-tron 98.4 (NNC chiem 32% von hoa MVC) | NHC 13.2
+Q4/25 rev 129.1 np 53.9 | TTM NP 214.0 EPS 9,761 | TTM core EBIT 264.3 EBITDA 300.2 (uoc luong DA)
+EV hoat dong (tru net cash sau nghia vu, MVC ex-vong-tron, NHC) 697.2
+PE TTM 4.83 | ex-cash PE core (EBIT*0.8) 3.30 | EV/EBITDA TTM 2.32
+PB 1.57 (BVPS 29,915)
+PE ex-cash tren LN trung vi 2021-25 39.3: 17.7x
+PE ex-cash tren LN TB 2021-TTM 89.8: 7.8x
+PE ex-cash tren LN 2025 147.8: 4.7x
+r=11%: tot 101,784 co_so 54,413 xau 24,955 rat_xau 18,052 | ky vong 52,887 (+12%)
+r=13%: tot 94,231 co_so 52,001 xau 24,862 rat_xau 18,051 | ky vong 50,267 (+7%)
+r=15%: tot 87,861 co_so 49,925 xau 24,771 rat_xau 18,051 | ky vong 48,036 (+2%)
+NOPAT 2027/2028 theo kich ban: {'tot': (269.3, 240.9), 'co_so': (224.5, 84.9), 'xau': (151.2, 8.9), 'rat_xau': (0.5, 0.0)}
+Do nhay (gia/m3 2028+ x san luong 2028+), d/cp, r=13%:
+ V=0.8:  31,277  32,415  36,772  42,808  49,703  56,809
+ V=1.0:  31,548  35,894  43,094  51,631  60,514  69,397
+ V=1.2:  33,155  40,364  50,039  60,666  71,325  81,984
+ V=1.4:  35,557  45,296  57,264  69,700  82,136  94,571

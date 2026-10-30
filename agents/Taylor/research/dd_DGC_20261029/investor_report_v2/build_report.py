@@ -2,9 +2,9 @@
 
 Chạy:  /home/trido/thanhdt/wc_venv/bin/python -I build_report.py [figs|pdf|all]
 Đầu vào (figs/):
-  fin_quarterly_bq.csv     — tav2_bq.ticker_financial (DGC, 2022Q1–2026Q2), kéo 29/10/2026
-  price_raw.csv            — tav2_bq.ticker (DGC Close/Price/Volume, 01/10/2025–28/10/2026) + điểm 29/10 (DNSE)
-  commodity_weekly_bq.csv  — tav2_bq.commodity_prices (TE daily sulfur, di_ammonium; TB tuần), kéo 29/10/2026
+  fin_quarterly_bq.csv     — cơ sở dữ liệu nhóm: ticker_financial (DGC, 2022Q1–2026Q2), kéo 29/10/2026
+  price_raw.csv            — cơ sở dữ liệu nhóm: ticker (DGC Close/Price/Volume, 01/10/2025–28/10/2026) + điểm 29/10 (DNSE)
+  commodity_weekly_bq.csv  — cơ sở dữ liệu nhóm: commodity_prices (TE daily sulfur, di_ammonium; TB tuần), kéo 29/10/2026
 Số định giá lấy nguyên từ ../../dgc_valuation_20261029_r10/ (REPORT.md + out_r10_*.csv, out_r9_margin_pp.csv)
 và ERRATA_r10_skeptic_round4.md (ô r4 + lặp vĩnh viễn 26.117 / 26.340 / 26.558).
 Số BCTC Q3/2026 (chưa soát xét) lấy từ r6/MIKE_EXTRACT_BCTC_Q3_2026.md. Mỗi hình kèm CSV.
@@ -28,9 +28,9 @@ R1 = 30_598              # nền R2 + lặp vĩnh viễn 100 tỷ/quý (qua mô 
 R2_N0, R4_N0 = 36_880, 32_399
 R4_PERP = (26_117, 26_340, 26_558)   # errata: ô r4 + lặp vĩnh viễn, 3 cách đo
 R12 = os.path.join(HERE, "..", "..", "dgc_valuation_20261029_r12")
-NS0_A7, NS0_B7 = 30_019, 34_896      # LN Nghi Sơn = 0 (out_r11_D_band.csv)
+NS0_A7, NS0_B7 = 30_019, 34_896      # LN Nghi Sơn = 0 (bảng của nhóm)
 R11_A7, R11_B7 = 32_690, 37_569      # Nghi Sơn từ dưới lên, thuế 20% (biến thể)
-DRIVERS = [  # out_r12_B_tornado.csv: (động lực, Δ thấp, Δ cao so với A7, định nghĩa đầu thấp, đầu cao)
+DRIVERS = [  # bảng của nhóm: (động lực, Δ thấp, Δ cao so với A7, định nghĩa đầu thấp, đầu cao)
     ("Tiền ròng × haircut pháp lý", -3241, 2302, "haircut 29% cả 3 kịch bản", "haircut 3% cả 3 kịch bản"),
     ("Biên gộp 2027-28 (P4/DAP, lưu huỳnh)", 217, 4698, "nền thấp 16,5/17,5%", "nền cao 19,5/20,7%"),
     ("Nguồn quặng: khai trường 25/19B", 0, 4878, "không mở lại (A7)", "mở lại (B7)"),
@@ -39,7 +39,7 @@ DRIVERS = [  # out_r12_B_tornado.csv: (động lực, Δ thấp, Δ cao so với
     ("Dự phòng lặp vĩnh viễn (độ nhạy phụ)", -6065, 0, "nền thấp + lặp vĩnh viễn", "A7")]
 NETCASH_PRE, NETCASH_POST = 22_040, 19_400
 BVPS = 34_425
-GRID = {  # (r4 trước thuế, r4 sau lá chắn, R2 trước thuế, R2 sau lá chắn) — out_r10_final_grid.csv
+GRID = {  # (r4 trước thuế, r4 sau lá chắn, R2 trước thuế, R2 sau lá chắn) — bảng của nhóm
     "0 quý (không trích thêm)": (32399, 32399, 36880, 36880),
     "100 tỷ × 1 quý": (32146, 32197, 36627, 36678),
     "100 tỷ × 4 quý": (31439, 31631, 35920, 36112),
@@ -144,12 +144,12 @@ def figs():
     axR.axhline(PX_ANCHOR, color=ACCENT, lw=1.6)
     axR.text(0.02, PX_ANCHOR + 350, "Giá 32,9k", fontsize=6.8, color=ACCENT, fontweight="bold")
     axR.text(0.78, (A7 + B7) / 2, "A7–B7\n32,2–37,1k", fontsize=6.2, color=NAVY, va="center")
-    axR.text(0.78, 27_500, "Mọi tổ hợp\ngiả định\n26,1–36,9k", fontsize=6.2, color="#555", va="center")
+    axR.text(0.78, 27_500, "Lưới A7\n26,1–36,9k", fontsize=6.2, color="#555", va="center")
     axR.text(0.78, 20_700, "Tiền ròng/cp\n19,4–22,0k", fontsize=6.2, color=GREEN, va="center")
     axR.yaxis.set_major_formatter(lambda v, p: f"{v/1e3:.0f}k"); axR.tick_params(labelsize=6.6)
     axR.set_title("Giá nằm TRONG dải;\ntiền ròng ≈ 59–67% giá", fontsize=7.8)
-    fig.text(0.01, 0.005, "Nguồn: công suất & tỷ trọng XK theo website ducgiangchem.vn (truy cập 29/10/2026); LNST: tav2_bq.ticker_financial + BCTC HN Q3/2026 (chưa soát xét);\n"
-             "Nghi Sơn: NQ HĐQT 34 (15/10/2026). Dải định giá: ước lượng của nhóm nghiên cứu sau 5 vòng phản biện; giá đóng cửa 28/10/2026.", fontsize=5.6, color="#666")
+    fig.text(0.01, 0.005, "Nguồn: công suất & tỷ trọng XK theo website ducgiangchem.vn (truy cập 29/10/2026); LNST: cơ sở dữ liệu nhóm: ticker_financial + BCTC HN Q3/2026 (chưa soát xét);\n"
+             "Nghi Sơn: NQ HĐQT 34 (15/10/2026). Dải định giá: ước lượng của nhóm nghiên cứu sau 6 vòng phản biện; giá đóng cửa 28/10/2026.", fontsize=5.6, color="#666")
     fig.savefig(os.path.join(FIGS, "fig_00_hero.png"), dpi=200)
     pd.DataFrame({"muc": ["LNST " + y for y in yrs] + ["A7", "B7", "thap_nhat", "cao_nhat", "tien_rong_sau", "tien_rong_truoc", "gia_2810"],
                   "gia_tri": np_y + [A7, B7, R4_PERP[0], R2_N0, NETCASH_POST, NETCASH_PRE, PX_ANCHOR]}).to_csv(os.path.join(FIGS, "fig_00_hero.csv"), index=False)
@@ -196,7 +196,7 @@ def figs():
     ax.legend(h1 + h2, l1 + l2, fontsize=7.2, frameon=False, loc="upper left")
     ax.set_title("Giá đầu ra DAP ở vùng cao 10 năm, nhưng chi phí lưu huỳnh tăng nhanh hơn")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
-    save(fig, "fig_02_sulfur_dap", "Nguồn: tav2_bq.commodity_prices, Trading Economics daily (sulfur, di_ammonium), trung bình tuần 01/2024–10/2026; kéo 29/10/2026. "
+    save(fig, "fig_02_sulfur_dap", "Nguồn: cơ sở dữ liệu nhóm: commodity_prices, Trading Economics daily (sulfur, di_ammonium), trung bình tuần 01/2024–10/2026; kéo 29/10/2026. "
          "Lưu huỳnh TE là giá nội địa TQ, không phải giá nhập của DN Việt Nam (bản đọc ngành độc lập 28/10/2026).", cm)
     plt.close(fig)
 
@@ -213,7 +213,7 @@ def figs():
     ax.legend(fontsize=7.5, frameon=False, loc="upper right")
     ax.set_title("LNST 2026 thấp nhất nhiều năm: 409 → 380 → 478 tỷ/quý")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
-    save(fig, "fig_03_rev_np_quarterly", "Nguồn: tav2_bq.ticker_financial (Revenue_P0, NP_P0; 2026Q1 khớp DT thuần BCTC 2.124,6 tỷ) tới Q2/26; Q3/26 từ BCTC HN Q3/2026 (chưa soát xét). Kéo 29/10/2026.",
+    save(fig, "fig_03_rev_np_quarterly", "Nguồn: cơ sở dữ liệu nhóm: ticker_financial (Revenue_P0, NP_P0; 2026Q1 khớp DT thuần BCTC 2.124,6 tỷ) tới Q2/26; Q3/26 từ BCTC HN Q3/2026 (chưa soát xét). Kéo 29/10/2026.",
          fin[["quarter", "Revenue_P0", "NP_P0", "src"]])
     plt.close(fig)
 
@@ -252,7 +252,7 @@ def figs():
     a2.set_xticks(range(len(br)), [str(y)[2:] for y in br["y"]], fontsize=6.8)
     a2.set_title("CFO/LNST theo năm (2015–2025)", fontsize=8.6)
     fig.tight_layout(rect=(0, 0.09, 1, 1))
-    save(fig, "fig_05_cfo", "Nguồn: tav2_bq.ticker_financial CF_OA_P0/NP_P0 (tới Q2/26), BCTC HN Q3/2026 (CFO 9T 755,6 ⇒ Q3 ≈ 996,1); tỷ lệ năm: out_r8_cfo_base_rate.csv (cùng nguồn BQ).",
+    save(fig, "fig_05_cfo", "Nguồn: cơ sở dữ liệu nhóm: ticker_financial CF_OA_P0/NP_P0 (tới Q2/26), BCTC HN Q3/2026 (CFO 9T 755,6 ⇒ Q3 ≈ 996,1); tỷ lệ năm: out_r8_cfo_base_rate.csv (cùng nguồn BQ).",
          sub[["quarter", "NP_P0", "CF_OA_P0"]].merge(br.rename(columns={"y": "quarter"}).astype({"quarter": str}), how="outer"))
     plt.close(fig)
 
@@ -298,7 +298,7 @@ def figs():
     a2.set_ylabel("KL, nghìn cp")
     a1.set_title(f"Giá điều chỉnh giảm từ ~{vn(px['Close'].iloc[0]/1e3,1)}k xuống {vn(PX_ANCHOR/1e3,1)}k (28/10); 29/10 đóng cửa {vn(PX_2910/1e3,1)}k")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
-    save(fig, "fig_07_price_12m", "Nguồn: tav2_bq.ticker (Close điều chỉnh cổ tức, Volume) 29/10/2025–28/10/2026; 29/10 từ DNSE latest_trade 14:45:02 ICT. Ngày sự kiện: báo chí/CBTT (Phụ lục C). "
+    save(fig, "fig_07_price_12m", "Nguồn: cơ sở dữ liệu nhóm: ticker (Close điều chỉnh cổ tức, Volume) 29/10/2025–28/10/2026; 29/10 từ DNSE latest_trade 14:45:02 ICT. Ngày sự kiện: báo chí/CBTT (Phụ lục C). "
          "Đường dọc chỉ đánh dấu thời điểm, không hàm ý nhân quả.", px[["time", "Close", "Price", "Volume"]])
     plt.close(fig)
     lo, hi = px["Close"].min(), px["Close"].max()
@@ -390,7 +390,7 @@ def figs():
     ax.set_xlim(-8_000, 7_500); ax.set_xlabel("Δ đ/cp so với A7 (thứ tự hàng KHÔNG phải thứ hạng)")
     ax.set_title("Động lực giá trị: chênh lệch so với A7 (định nghĩa đầu mút ở bảng mục 3)")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
-    save(fig, "fig_11_drivers", "Nguồn: out_r12_B_tornado.csv của nhóm nghiên cứu. Mọi hàng chuẩn hoá Δ so với A7 = 32.182 đ/cp; trọng số kịch bản 0,2/0,5/0,3 (chủ quan). Xám = dự phòng môi trường (độ nhạy phụ). "
+    save(fig, "fig_11_drivers", "Nguồn: bảng tính của nhóm nghiên cứu. Mọi hàng chuẩn hoá Δ so với A7 = 32.182 đ/cp; trọng số kịch bản 0,2/0,5/0,3 (chủ quan). Xám = dự phòng môi trường (độ nhạy phụ). "
          "Pháp lý (phạt/khắc phục/đình chỉ) không định lượng được nên không vẽ.", dv)
     plt.close(fig)
 
@@ -440,16 +440,16 @@ def figs():
     plt.close(fig)
 
     # 14. Quy mô tương đối chi môi trường: TKV vs DGC
-    rel = pd.DataFrame({"muc": ["TKV 2021\nchi BVMT / tổng DT", "TKV 2021\nchi BVMT / DT thuần", "DGC: 400 tỷ/năm\n/ DT quy năm", "DGC: 400 tỷ/năm\n/ giá vốn quy năm"],
-                        "ty_le_pct": [0.84, 1.02, 4.28, 5.40], "tu_so_ty": [1160, 1160, 400, 400], "mau_so_ty": [138813, 113173, 9346, 7411]})
+    rel = pd.DataFrame({"muc": ["TKV 2021\nchi BVMT / tổng DT", "TKV 2021\nchi BVMT / DT thuần", "DGC: 200 tỷ ghi sổ 9T\n/ DT 9T", "DGC nếu 100 tỷ/quý lặp\n(400 tỷ/năm) / DT quy năm"],
+                        "ty_le_pct": [0.84, 1.02, 2.85, 4.28], "tu_so_ty": [1160, 1160, 200, 400], "mau_so_ty": [138813, 113173, 7010, 9346]})
     fig, ax = plt.subplots(figsize=(7.2, 2.7))
     ax.bar(range(4), rel["ty_le_pct"], color=[GREY, GREY, NAVY, NAVY], width=0.55)
     for i, (v, a, b) in enumerate(zip(rel["ty_le_pct"], rel["tu_so_ty"], rel["mau_so_ty"])):
         ax.text(i, v + 0.12, f"{vn(v, 2)}%\n({vn(a)} / {vn(b)})", ha="center", fontsize=6.8)
-    ax.set_xticks(range(4), rel["muc"], fontsize=7.2); ax.set_ylabel("% doanh thu / giá vốn"); ax.set_ylim(0, 6.6)
-    ax.set_title("Tiền lệ tuyệt đối có (TKV ~1.000+ tỷ/năm), nhưng 400 tỷ/năm là cường độ cao hơn ~4–5 lần so với doanh thu")
+    ax.set_xticks(range(4), rel["muc"], fontsize=7.2); ax.set_ylabel("% doanh thu"); ax.set_ylim(0, 6.6)
+    ax.set_title("Chi môi trường/doanh thu: TKV (than) 0,8–1,0%; DGC 2,9% (đã ghi sổ) – 4,3% (nếu lặp)", fontsize=8.2)
     fig.tight_layout(rect=(0, 0.1, 1, 1))
-    save(fig, "fig_14_env_relative", "Nguồn: TKV chi BVMT 2021 1.160 tỷ (nhandan.vn 21/08/2022); DT TKV 2021: tổng 138.813 tỷ (nhandan/baophapluat), thuần hợp nhất 113.173 tỷ (viettimes) — qua kết quả tìm kiếm; DGC: BCTC HN Q3/2026 9T × 4/3. "
+    save(fig, "fig_14_env_relative", "Nguồn: TKV chi BVMT 2021 1.160 tỷ (nhandan.vn 21/08/2022); DT TKV 2021: tổng 138.813 tỷ (nhandan/baophapluat), thuần hợp nhất 113.173 tỷ (kinhtechungkhoan.vn) — qua kết quả tìm kiếm; DGC: BCTC HN Q3/2026 9T × 4/3. "
          "Định nghĩa 'chi BVMT' của TKV có thể gồm đầu tư; hai phạm vi không hoàn toàn cùng loại.", rel)
     plt.close(fig)
 
@@ -655,7 +655,7 @@ def pdf(md_path, pdf_path):
     for k, page in enumerate(doc):
         page.insert_font(fontname="dv", fontfile=FONT)
         page.draw_line((42, 40), (A4.width - 42, 40), color=(0.12, 0.23, 0.37), width=0.6)
-        page.insert_text((42, 34), "DGC — CTCP Tập đoàn Hóa chất Đức Giang · Báo cáo Due Diligence (bản 2) · 29/10/2026", fontname="dv", fontsize=7.5, color=(0.12, 0.23, 0.37))
+        page.insert_text((42, 34), "DGC — CTCP Tập đoàn Hóa chất Đức Giang · Báo cáo Due Diligence (bản 2.1) · 29/10/2026", fontname="dv", fontsize=7.5, color=(0.12, 0.23, 0.37))
         page.insert_text((A4.width - 175, 34), "Nhóm nghiên cứu — lưu hành hạn chế", fontname="dv", fontsize=7.5, color=(0.4, 0.4, 0.4))
         page.draw_line((42, A4.height - 36), (A4.width - 42, A4.height - 36), color=(0.75, 0.78, 0.82), width=0.5)
         page.insert_text((42, A4.height - 24), "Thông tin nghiên cứu, không phải lời khuyên đầu tư cá nhân hoá. Xem tuyên bố miễn trừ ở Phụ lục F.", fontname="dv", fontsize=6.8, color=(0.4, 0.4, 0.4))

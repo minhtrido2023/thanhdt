@@ -1,0 +1,8 @@
+driver,lo,hi,evidence,src,swing
+"(2) Biên gộp 2027-28 (giá P4/DAP, lưu huỳnh/NH3, quặng): nền r4 16,5/17,5% ↔ R2 19,5/20,7%",32399.0,36880.0,"BCTC 9T thực (biên 20,7%) vs r4; 1pp ≈ 1.420 đ/cp [r9]",out_r10_final_grid.csv,4481.0
+(3) Nguồn quặng: khai trường 25/19B mở lại (B7) vs không (A7),33118.0,38305.0,khai trường 25 tạm dừng phục vụ điều tra; mở lại chưa có quyết định,model.py CFG_A7/B7,5187.0
+(1) Tiền ròng 8.370 tỷ: haircut pháp lý 29% (nghịch) ↔ 3% (thuận) trên toàn bộ tiền ròng,-6392.0,-661.0,"BCTC 30/09: tiền+gửi 9.761,2, vay 1.391,0; haircut [UL]",model.py HC_LEGAL,5731.0
+"(5) Pháp lý: haircut tiền trong model (đã ở dòng 1) — phạt/khắc phục/đình chỉ KHÔNG có trần, chưa định lượng được",,,Đ.235 BLHS phạt pháp nhân 6–40 tỷ không phải trần; Đ.82/BLDS 602 không trần,ERRATA r10 §6,
+(4) Nghi Sơn GĐ1: LN = 0 ↔ r11 cao (thuế 0%),-2300.0,1374.0,NQ 34 công suất; giá xút BQ; phần lớn giá [UL],out_r11_D_band.csv,3674.0
+(6a) Dự phòng môi trường: 200 tỷ một lần (đã trừ trong A7) ↔ thêm 100/quý × 4 quý,-960.0,0.0,note 19: 200 tỷ tới 30/09,out_r10_final_grid.csv,960.0
+(6b) Dự phòng 100 tỷ/quý lặp VĨNH VIỄN,-6065.0,0.0,chưa có bằng chứng lặp; không tìm được tiền lệ chi môi trường thường xuyên ≥100 tỷ/quý ở VN,out_r10_perpetual.csv,6065.0
