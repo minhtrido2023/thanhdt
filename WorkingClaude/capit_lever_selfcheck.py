@@ -1471,9 +1471,10 @@ with tempfile.TemporaryDirectory() as TMP:
               detail=f"tên tự do={free}; thiếu={sorted(set(free) - ns_keys)}")
         return blk
 
-    # Khối CAPIT = `capit_note = ""` · `_capit_buys = [...]` · `if _capit_buys:` (3 statement).
+    # Khối CAPIT = `capit_note = ""` · `capit_cov_gap = False` · `_capit_buys = [...]` ·
+    # `if _capit_buys:` (4 statement; `capit_cov_gap` thêm ở 1c1bfd6a5, 2026-10-xx).
     CAPIT_NOTE_SRC = _extract_exec_block(
-        "# ── CAPIT: Σ lệnh mua thật vs VND mục tiêu đã publish", 3,
+        "# ── CAPIT: Σ lệnh mua thật vs VND mục tiêu đã publish", 4,
         lambda n: isinstance(n, ast.If) and isinstance(n.test, ast.Name)
         and n.test.id == "_capit_buys",
         {"json", "os", "acct", "orders", "_order_price"}, "H0")
