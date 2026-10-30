@@ -132,6 +132,12 @@ ROOT_TIER = {
     "rating_8l_forward_tracker.py": T1,  # tracker OOS rating 8L, PAPER-ONLY, append-only data/
     "livermore_trigger_check.py": T1,   # cò đọc kỹ thuật Livermore, display-only
     "commodity_cycle_forward_tracker.py": T1,  # tracker OOS chu kỳ hàng hoá (PREREG-2), PAPER-ONLY, append-only data/
+    # Thêm 2026-10-30 (selfcheck-red sweep, job Taylor_20261030_024651): 4 gốc mới 10-26..10-28. Kiểm CƠ HỌC:
+    # grep `place_order|PlannedOrder|trade_plans|nav_history|send_report|report_delivery` ⇒ 0 hit trên cả 4 file;
+    # đều CHỈ-ĐỌC/monitor/paper, ngoài ORDER_WRITING_ROOTS ⇒ T1 không nới ranh giới tự-sửa nào.
+    "commodity_freshness_cron.sh": T1,  # vỏ cron monitor độ tươi commodity_prices, chỉ post Discord feeds_data
+    "commodity_sue_decomp_forward_tracker.py": T1,  # sổ nhật ký FORWARD tách SUE (PREREG-4), PAPER-ONLY, append-only data/
+    "dri_buy_gate_watch.py": T1,  # cảnh báo CHỈ-ĐỌC DRI ≤13.100 (ReadOnlyDNSE), đầu ra = Telegram + state
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,

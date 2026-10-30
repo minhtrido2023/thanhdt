@@ -162,6 +162,18 @@ def t_review(T):
 def t_repro(T):
     ref = pd.read_csv(REPRO_CSV)
     mk = T.load_market()
+    # Ghim phân loại ngành về vintage baseline: load_market lấy ICB_Code `.last()` = phân loại HIỆN TẠI,
+    # nên mã bị tái phân ngành sau ngày dựng baseline kéo nhóm đối chứng trôi. Đã cắn thật 2026-10-30:
+    # NED 2357→7535 (từ 2026-01-05) và HDG 8633→7535 (từ 2026-09-07; kb/data_registry/fundamentals/
+    # rating_8l_history.md) rơi vào ngành 75 của "crude oil" ⇒ n_ctrl +1/+1/+2, X lệch ≤3,3e-3 ở 3 sự
+    # kiện (2017-10, 2021-01, 2023-10) trong khi r_exp khớp từng bit. Baseline khớp ĐÚNG với ICB tại
+    # 2025-12-31 (đo: lệch X 5e-17; cutoff 2026-09-06 vẫn lệch 6,8e-4 vì NED) — tức dựng trước đợt
+    # tái phân ngành đầu 2026. Mọi entry trong repro đều ≤ 2026-03, nên ICB PIT này là đúng, không chỉ "cho xanh".
+    import duckdb
+    _pit = duckdb.connect().sql(f"""select ticker, arg_max(ICB_Code, time) c
+        from read_parquet('{T.WC_ROOT}/data/bq_cache/ticker/*.parquet')
+        where time <= '2025-12-31' and ICB_Code is not null group by 1""").df()
+    mk.icb.update(pd.Series(_pit.c.astype(int).astype(str).str.zfill(4).values, index=_pit.ticker.values))
     wb = T.load_wb()
     rows = []
     for fam, s in wb.items():
