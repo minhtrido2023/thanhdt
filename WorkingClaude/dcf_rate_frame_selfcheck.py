@@ -11,10 +11,10 @@ quant-skeptic trước khi bật domestic_v2, logs/verify_20261030_044415_*.log)
 [3] MỘT nguồn sự thật: không launcher/cron/wc_env.sh/script nào gán biến khung; import dưới mọi kiểu khởi chạy
     (env -i kiểu cron, source wc_env.sh, python3 hệ thống, venv, TZ khác) đều thấy cùng frame = RATE_FRAME_DEFAULT.
 [4] dcf_earning_power cap_rf = production (legacy trùng float; v2 dùng cap 5,5 chứ không 5,75).
-[5] hiển thị r dưới domestic_v2 mang khoảng Ke 12,5–13,5% (β1,1).
+[5] hiển thị r dưới domestic_v2 mang khoảng Ke 12,5–13,5% (β1,1); [5b] cả CLI dcf_earning_power.
 [M] mutation: mỗi vá ở [1][2][4][5] bị gỡ ⇒ đúng check tương ứng đỏ.
 Đầu vào bất biến: bản chụp tài chính + rổ của nghiên cứu (RES). ops_health_check.sh: env DCF_RF_OPS_HEALTH (mặc định main)."""
-import os, sys, json, re, subprocess, hashlib, importlib.util, tempfile, shutil, glob, io, contextlib
+import os, sys, json, re, subprocess, hashlib, importlib.util, tempfile, shutil, glob, io, contextlib, atexit
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROD = "/home/trido/thanhdt/WorkingClaude"
@@ -27,6 +27,20 @@ OPS = os.environ.get("DCF_RF_OPS_HEALTH", os.path.join(PROD, "mike/bin/ops_healt
 VENV = "/home/trido/thanhdt/wc_venv/bin/python"
 ASOF = "2026-10-29"
 SHOUT = "!!!!! [dcf_valuation]"
+_TMPDIRS = []
+
+
+def _mkdtemp(prefix):
+    """tempfile.mkdtemp + đăng ký dọn khi thoát (kể cả sys.exit/assert giữa chừng) — trước đây rò /tmp/dcfrf_*."""
+    d = tempfile.mkdtemp(prefix=prefix)
+    _TMPDIRS.append(d)
+    return d
+
+
+@atexit.register
+def _cleanup_tmp():
+    for d in _TMPDIRS:
+        shutil.rmtree(d, ignore_errors=True)
 
 
 def _load(path, name="dcfv_under_test"):
@@ -109,7 +123,7 @@ def pj(p):
 def mutant(src_path, old, new, tag):
     s = open(src_path, encoding="utf-8").read()
     assert s.count(old) == 1, f"mutant {tag}: anchor not unique/absent"
-    d = tempfile.mkdtemp(prefix=f"dcfrf_{tag}_")
+    d = _mkdtemp(f"dcfrf_{tag}_")
     p = os.path.join(d, os.path.basename(src_path))
     open(p, "w", encoding="utf-8").write(s.replace(old, new))
     return p
@@ -144,9 +158,12 @@ def run_ops(block, wc_root, env_val=None, crontab=""):
     return warn[0], lines
 
 
-def fake_root(default_line, wc_env_extra="", sh_extra=""):
-    d = tempfile.mkdtemp(prefix="dcfrf_root_")
+def fake_root(default_line, wc_env_extra="", sh_extra="", extra=None):
+    d = _mkdtemp("dcfrf_root_")
     os.makedirs(os.path.join(d, "mike", "bin"))
+    for rel, txt in (extra or {}).items():
+        os.makedirs(os.path.dirname(os.path.join(d, rel)), exist_ok=True)
+        open(os.path.join(d, rel), "w").write(txt)
     open(os.path.join(d, "dcf_valuation.py"), "w").write(f"# DCF_RATE_FRAME knob\n{default_line}\n")
     open(os.path.join(d, "wc_env.sh"), "w").write("export TZ=Asia/Ho_Chi_Minh\n" + wc_env_extra)
     open(os.path.join(d, "mike", "bin", "x.sh"), "w").write("#!/bin/bash\n# DCF_RATE_FRAME=legacy (comment ok)\n" + sh_extra)
@@ -252,6 +269,30 @@ def main():
               and l4[0].count("crontab:") == 1, str(l4)[:160])
         w5, l5 = run_ops(blk, fake_root(f'RATE_FRAME_DEFAULT = "{dflt}"', sh_extra='cd x && DCF_RATE_FRAME=legacy python3 a.py\n'))
         check("[2i] ops_health: mike/bin/*.sh gán inline ⇒ WARN", w5 == 1 and "x.sh" in l5[0], str(l5)[:160])
+        PYSET = 'import os\nos.environ.setdefault("DCF_RATE_FRAME", "legacy")\n'
+        fr = lambda **kw: fake_root(f'RATE_FRAME_DEFAULT = "{dflt}"', **kw)
+        w7, l7 = run_ops(blk, fr(extra={"run_x.sh": "#!/bin/bash\nDCF_RATE_FRAME=legacy python3 a.py\n"}))
+        check("[2j] ops_health: WorkingClaude/*.sh gán inline ⇒ WARN", w7 == 1 and "run_x.sh" in l7[0], str(l7)[:160])
+        w8, l8 = run_ops(blk, fr(extra={"trading_bot/b.py": PYSET}))
+        check("[2l] ops_health: trading_bot/*.py setdefault biến khung ⇒ WARN", w8 == 1 and "trading_bot/b.py" in l8[0], str(l8)[:160])
+        w9, l9 = run_ops(blk, fr(extra={"trading_bot/r.sh": "export DCF_TERMINAL_MODE=cpi\n"}))
+        check("[2m] ops_health: trading_bot/*.sh export biến mode ⇒ WARN", w9 == 1 and "trading_bot/r.sh" in l9[0], str(l9)[:160])
+        w10, l10 = run_ops(blk, fr(extra={"mike/bin/p.py": 'os.environ["DCF_TERMINAL_MODE"] = "cpi"\n'}))
+        check("[2n] ops_health: mike/bin/*.py gán os.environ[...]= ⇒ WARN", w10 == 1 and "mike/bin/p.py" in l10[0], str(l10)[:160])
+        w11, l11 = run_ops(blk, fr(extra={"x_selfcheck.py": PYSET, "test_x.py": PYSET, "dcf_earning_power.py": PYSET,
+                                          "dcf_valuation.py": PYSET + "RATE_FRAME_DEFAULT = \"%s\"\n" % dflt,
+                                          "trading_bot/c.py": "# os.environ.setdefault('DCF_RATE_FRAME', 'x')\n"}))
+        check("[2o] ops_health: selfcheck/test_/dcf_earning_power/dcf_valuation + dòng comment KHÔNG gây WARN",
+              w11 == 0, str(l11)[:160])
+        bm_sh = blk.replace('glob.glob(os.path.join(wc_root, "*.sh")) + ', '', 1)
+        bm_tb = blk.replace(' + glob.glob(os.path.join(wc_root, "trading_bot", "*.py"))', '', 1)
+        bm_py = blk.replace('if not _ln.lstrip().startswith("#") and (_rf_pat_py if _is_py else _rf_pat).search(_ln)',
+                            'if not _ln.lstrip().startswith("#") and _rf_pat.search(_ln)', 1)
+        assert bm_sh != blk and bm_tb != blk and bm_py != blk, "mutation anchor trôi"
+        check("[M2j] gỡ quét WorkingClaude/*.sh ⇒ [2j] đỏ", run_ops(bm_sh, fr(extra={"run_x.sh": "DCF_RATE_FRAME=legacy x\n"}))[0] == 0)
+        check("[M2l] gỡ quét trading_bot/*.py ⇒ [2l] đỏ", run_ops(bm_tb, fr(extra={"trading_bot/b.py": PYSET}))[0] == 0)
+        check("[M2n] bỏ regex python (dùng regex shell cho .py) ⇒ [2n] đỏ",
+              run_ops(bm_py, fr(extra={"mike/bin/p.py": 'os.environ["DCF_TERMINAL_MODE"] = "cpi"\n'}))[0] == 0)
         w6, l6 = run_ops(blk, PROD)
         print(f"INFO ops_health trên cây PROD hiện tại (trước merge dcf_valuation): warn={w6} {l6}")
 
@@ -266,8 +307,8 @@ def main():
     scan += glob.glob(os.path.join(PROD, "mike", "bin", "*.sh")) + glob.glob(os.path.join(PROD, "mike", "bin", "*.py"))
     hits = []
     for f in sorted(set(scan)):
-        if "selfcheck" in os.path.basename(f) or os.path.basename(f) == "ops_health_check.sh":
-            continue
+        if "selfcheck" in os.path.basename(f) or os.path.basename(f) in ("ops_health_check.sh", "dcf_rate_robustness.py"):
+            continue                            # dcf_rate_robustness.py = nghiên cứu cố ý ghim legacy (cùng danh sách loại với ops_health)
         pat = pat_py if f.endswith(".py") else pat_sh
         for i, ln in enumerate(open(f, encoding="utf-8", errors="replace"), 1):
             if not ln.lstrip().startswith("#") and pat.search(ln):
@@ -322,6 +363,18 @@ def main():
     check("[5] CLI r dưới v2 kèm khoảng Ke 12,5–13,5% (β1,1); legacy không đổi", ok5,
           [ln.strip() for ln in a5["cli"].splitlines() if "KHOANG" in ln][:1])
 
+    def c5b(ep_path):                           # CLI dcf_earning_power: r dạng điểm phải mang khoảng Ke dưới v2
+        def cli(frame):
+            e = _env(frame); e["TZ"] = "UTC"
+            return subprocess.run([VENV, ep_path, "FPT", "--asof", ASOF, "--price", "100000", "--term", "cap_rf"],
+                                  capture_output=True, text=True, env=e, cwd=os.path.dirname(ep_path))
+        a, b = cli("domestic_v2"), cli("legacy")
+        n_r = sum("r=12.25%" in ln for ln in a.stdout.splitlines())
+        n_k = sum("KHOANG" in ln for ln in a.stdout.splitlines())
+        return (a.returncode == 0 and b.returncode == 0 and n_r == 2 and n_k == n_r and "KHOANG" not in b.stdout), (n_r, n_k, a.stderr[-120:])
+    ok5b, d5b = c5b(EPF)
+    check("[5b] dcf_earning_power CLI: mỗi dòng r= dưới v2 kèm khoảng Ke (2 basis); legacy không đổi", ok5b, str(d5b))
+
     # ---- [M] mutations: undo each fix ⇒ its check must go red -----------------------------------------
     m1 = mutant(WT, '    DEFAULT_TERM_MODE = "cap_rf"\n', "    pass\n", "m1")
     check("[M1] gỡ ép cap_rf qua env ⇒ [1a] đỏ", not c1(m1)[0])
@@ -340,7 +393,9 @@ def main():
     check("[M2k] gỡ guard hằng default ⇒ [2k] đỏ", not c2k(mkm)[0])
     epm2 = mutant(EPF, '    if D.RATE_FRAME == "domestic_v2" and mode != "cap_rf":\n', '    if False:\n', "m4c")
     check("[M4c] gỡ raise của earning_power ⇒ [4c] đỏ (legacy vẫn xanh)", c4c(WT, epm2)[0] == (True, False))
-    for p in (m1, m1b, m2, epm, m5, mk, mkm, epm2):
+    epm5 = mutant(EPF, '        if D.ke_range_note():\n            print(f"  {D.ke_range_note()}")\n', '', "m5b")
+    check("[M5b] gỡ in ke_range_note ở dcf_earning_power ⇒ [5b] đỏ", not c5b(epm5)[0])
+    for p in (m1, m1b, m2, epm, m5, mk, mkm, epm2, epm5):
         shutil.rmtree(os.path.dirname(p), ignore_errors=True)
 
     print("SELFCHECK", "OK" if not fails else f"FAIL {fails}")

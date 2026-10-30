@@ -158,7 +158,10 @@ if __name__ == "__main__":
     px = args.price if args.price is not None else D.latest_price(args.ticker, args.asof)
     print(f"\n--- terminal-g modes as-of {args.asof} ---")
     for md in TERM_MODES:
-        print(f"  {md:14s} = {terminal_growth_mode(args.asof, md):.2%}")
+        try:
+            print(f"  {md:14s} = {terminal_growth_mode(args.asof, md):.2%}")
+        except ValueError:                  # domestic_v2 chỉ nhận cap_rf — các mode khác cần DCF_RATE_FRAME=legacy
+            print(f"  {md:14s} = n/a (domestic_v2 chỉ cap_rf)")
     for basis in ("fcfe", "earning_power"):
         r = fv_experimental(args.ticker, args.asof, price=px, basis=basis, term_mode=args.term)
         print(f"\n=== {args.ticker} basis={basis} term={args.term} ===")
@@ -167,6 +170,8 @@ if __name__ == "__main__":
         print(f"  base input      : {r['base_input_vnd']/1e9:,.1f} bn VND/yr")
         print(f"  r={r['discount_rate']:.2%}  g_exp={r['g_explicit']:+.2%}  g_term={r['g_terminal']:.2%}"
               f"  {'[GORDON-CLAMPED]' if r['gordon_clamped'] else ''}")
+        if D.ke_range_note():
+            print(f"  {D.ke_range_note()}")
         print(f"  FAIR VALUE/sh   : {r['fair_value_ps']:,.0f} VND   price={px:,.0f}")
         if "margin_of_safety" in r:
             print(f"  margin of safety: {r['margin_of_safety']:+.1%}")
