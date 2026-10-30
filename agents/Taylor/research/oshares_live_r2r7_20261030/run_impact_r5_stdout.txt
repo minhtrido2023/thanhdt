@@ -1,0 +1,50 @@
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+== asof 2026-10-29: phiên giá ['2026-10-29'] | universe có giá 336 | DCF ok 145 | ok_fin!=ok_live 0
+   chân KHÔNG price_date: osh != fin ở 0 mã; method {'FRAME_FALLBACK': 145}; số dòng kêu stderr 1
+   chân price_date: FV đổi 9; >1% 7; >5% 6; lật status 3; đổi robust 1; frame_error 0
+ticker      osh_fin     osh_live  fv_ratio st_fin st_live rb_fin rb_live      method
+   PHR  135499198.0  243897799.0    0.5556  CHEAP    RICH   True    True ANCHOR_ONLY
+   HTN   89116411.0  133674437.0    0.6667  CHEAP    RICH   True   False   AIS_EXACT
+   AIG  170601298.0  196191443.0    0.8696  CHEAP    RICH  False   False   AIS_EXACT
+   TDP   93699574.0  103069382.0    0.9091   RICH    RICH   True    True ANCHOR_ONLY
+   FPT 1714326422.0 1885727648.0    0.9091  CHEAP   CHEAP   True    True ANCHOR_ONLY
+   DIG  796431191.0  844192763.0    0.9434  CHEAP   CHEAP   True    True   AIS_EXACT
+   VNZ   29726465.0   30427986.0    0.9769   RICH    RICH   True    True ANCHOR_ONLY
+   DGW  223361000.0  221320169.0    1.0092   RICH    RICH   True    True   AIS_EXACT
+   REE  622899036.0  623399036.0    0.9992   RICH    RICH  False   False ANCHOR_ONLY
+== asof 2026-07-29: phiên giá ['2026-07-29'] | universe có giá 361 | DCF ok 157 | ok_fin!=ok_live 0
+   chân KHÔNG price_date: osh != fin ở 0 mã; method {'FRAME_FALLBACK': 157}; số dòng kêu stderr 0
+   chân price_date: FV đổi 13; >1% 11; >5% 9; lật status 1; đổi robust 0; frame_error 0
+ticker      osh_fin     osh_live  fv_ratio st_fin st_live rb_fin rb_live            method
+   PSD   54027894.0   70236112.0    0.7692  CHEAP   CHEAP   True    True       ANCHOR_ONLY
+   PTB   80326084.0  100407074.0    0.8000  CHEAP   CHEAP   True    True         AIS_EXACT
+   REE  541658139.0  622899036.0    0.8696  CHEAP    RICH  False   False         AIS_EXACT
+   IDC  379498823.0  417446864.0    0.9091  CHEAP   CHEAP   True    True       ANCHOR_ONLY
+   HDG  369963035.0  406957333.0    0.9091  CHEAP   CHEAP   True    True         AIS_EXACT
+   DHC   96591206.0  106249620.0    0.9091  CHEAP   CHEAP   True    True       ANCHOR_ONLY
+   DTD   66686055.0   73353788.0    0.9091  CHEAP   CHEAP   True    True       ANCHOR_ONLY
+   VCG  646468336.0  698176245.0    0.9259  CHEAP   CHEAP   True    True       ANCHOR_ONLY
+   PCH   25409893.0   27188477.0    0.9346  CHEAP   CHEAP   True    True       ANCHOR_ONLY
+   VPL 1793300377.0 1877450377.0    0.9552   RICH    RICH   True    True ANCHOR_UNVERIFIED
+   PAN  250673166.0  258072996.0    0.9713  CHEAP   CHEAP   True    True         AIS_EXACT
+   MWG 1475765646.0 1477035294.0    0.9991  CHEAP   CHEAP   True    True         AIS_EXACT
+   PNJ  511721959.0  511891518.0    0.9997   RICH    RICH   True    True         AIS_EXACT
+== asof 2025-10-29: phiên giá ['2025-10-29'] | universe có giá 438 | DCF ok 184 | ok_fin!=ok_live 0
+   chân KHÔNG price_date: osh != fin ở 0 mã; method {'FRAME_FALLBACK': 184}; số dòng kêu stderr 0
+   chân price_date: FV đổi 7; >1% 6; >5% 4; lật status 1; đổi robust 1; frame_error 0
+ticker      osh_fin     osh_live  fv_ratio st_fin st_live rb_fin rb_live       method
+   BKC   11737728.0   23475456.0    0.5000  CHEAP   CHEAP   True    True    AIS_EXACT
+   BSR 3100499616.0 5007299686.0    0.6192  CHEAP    RICH   True   False FIN_FALLBACK
+   MST  113604220.0   83604220.0    1.3588   RICH    RICH   True    True    AIS_EXACT
+   ELC   99947436.0  110088903.0    0.9079   RICH    RICH   True    True  ANCHOR_ONLY
+   SBT  814545038.0  855112589.0    0.9526   RICH    RICH   True    True  ANCHOR_ONLY
+   GAS 2342672919.0 2412949756.0    0.9709   RICH    RICH  False   False    AIS_EXACT
+   MPC  400938300.0  401093000.0    0.9996   RICH    RICH   True    True  ANCHOR_ONLY
+== asof 2024-10-29: phiên giá ['2024-10-29'] | universe có giá 422 | DCF ok 149 | ok_fin!=ok_live 0
+   chân KHÔNG price_date: osh != fin ở 0 mã; method {'FRAME_FALLBACK': 149}; số dòng kêu stderr 0
+   chân price_date: FV đổi 4; >1% 2; >5% 1; lật status 1; đổi robust 0; frame_error 0
+ticker      osh_fin     osh_live  fv_ratio st_fin st_live rb_fin rb_live      method
+   VSC  266791284.0  286796819.0    0.9302  CHEAP   CHEAP   True    True   AIS_EXACT
+   GAS 2296739847.0 2342672919.0    0.9804  CHEAP    RICH  False   False ANCHOR_ONLY
+   PNJ  337905217.0  338074776.0    0.9995   RICH    RICH   True    True   AIS_EXACT
+   IMP  154008962.0  154042762.0    0.9998   RICH    RICH   True    True   AIS_EXACT

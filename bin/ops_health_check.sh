@@ -24,6 +24,7 @@
 #   14. Hạn rà lại cờ forensic
 #   15. Worktree chạy bản tiền-vá script giao hàng báo cáo + sổ giao hàng lạc
 #   16. DCF_RATE_FRAME một nguồn sự thật (dcf_valuation.py RATE_FRAME_DEFAULT), không launcher ghi đè
+#   17. DCF_OSHARES_SOURCE một nguồn sự thật (dcf_valuation.py OSHARES_SOURCE_DEFAULT), không launcher ghi đè
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
 # eod_trading_report.sh (19:10) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
 # Post tóm tắt vào Trading Daily (vận hành sống trong ngày), không phải Trading report
@@ -2081,6 +2082,78 @@ if runonce_label and account == runonce_label:
     except Exception as _e:
         W(f"DCF_RATE_FRAME check lỗi, không kiểm được khung lãi suất DCF: {type(_e).__name__}: {_e}")
 # CHECKDCFRF_END
+
+# 17. DCF_OSHARES_SOURCE — MỘT nguồn sự thật cho nguồn số CP của DCF (thêm 2026-10-30, job
+#     Taylor_20261030_155013, R2). Cùng mẫu mục 16: nguồn duy nhất là dòng
+#     `OSHARES_SOURCE_DEFAULT = "..."` trong dcf_valuation.py ("fin" = số quý, "live" = oshares_live có
+#     khoá khung ex-date). WARN khi: giá trị không thuộc {fin, live}; tiến trình cron mang biến môi
+#     trường DCF_OSHARES_SOURCE; hoặc crontab / wc_env.sh / *.sh / *.py production tự gán biến đó (một
+#     launcher ghi đè = bot, lag_dd_pack, send_plan_report thấy số CP KHÁC nhau cho cùng một mã). Giá
+#     trị lạ KHÔNG làm vỡ DCF (fallback fin + kêu stderr) nhưng stderr cron không ai đọc ⇒ dòng này.
+#     OK in rõ nguồn đang chạy, để lần BẬT live (đổi 1 từ, cần user duyệt) hiện ngay trên Trading Daily.
+# CHECKDCFOS_BEGIN — marker ỔN ĐỊNH: WorkingClaude/oshares_dcf_selfcheck.py trích đúng khối này.
+if runonce_label and account == runonce_label:
+    try:
+        _os_srcs = ("fin", "live")
+        _os_src = open(os.path.join(wc_root, "dcf_valuation.py"), encoding="utf-8").read()
+        _os_m = re.search(r'^OSHARES_SOURCE_DEFAULT\s*=\s*"([^"]*)"', _os_src, re.M)
+        _os_probs = []
+        if _os_m is None and "DCF_OSHARES_SOURCE" not in _os_src:
+            _os_def = None                      # knob chưa có trên cây này — không có gì để kiểm
+        elif _os_m is None:
+            _os_def = None
+            _os_probs.append("dcf_valuation.py nhắc DCF_OSHARES_SOURCE nhưng KHÔNG có dòng OSHARES_SOURCE_DEFAULT")
+        else:
+            _os_def = _os_m.group(1)
+            if _os_def not in _os_srcs:
+                _os_probs.append(f"OSHARES_SOURCE_DEFAULT trong dcf_valuation.py = {_os_def!r} không thuộc {_os_srcs} "
+                                 f"(mọi DCF đang chạy fin do fallback)")
+        _os_env = os.environ.get("DCF_OSHARES_SOURCE")
+        if _os_env not in (None, ""):
+            _os_probs.append(f"môi trường cron mang biến DCF_OSHARES_SOURCE (giá trị {_os_env!r}"
+                             + ("" if _os_env.strip() in _os_srcs else ", KHÔNG HỢP LỆ ⇒ fallback fin")
+                             + ") — nguồn sự thật là dcf_valuation.py, gỡ biến này")
+        _os_pat = re.compile(r"(^|[\s;&|(])(export\s+)?DCF_OSHARES_SOURCE=")
+        _os_pat_py = re.compile(r"environ\[\s*['\"]DCF_OSHARES_SOURCE['\"]\s*\]\s*=|"
+                                r"(setdefault|putenv)\(\s*['\"]DCF_OSHARES_SOURCE|['\"]DCF_OSHARES_SOURCE['\"]\s*:")
+        _os_hits = []
+        try:
+            _os_ct = subprocess.run(["crontab", "-l"], capture_output=True, text=True, timeout=15).stdout
+        except Exception as _e:
+            _os_ct = ""
+            _os_probs.append(f"không đọc được crontab ({type(_e).__name__}: {_e})")
+        for _ln in _os_ct.splitlines():
+            if not _ln.lstrip().startswith("#") and _os_pat.search(_ln):
+                _os_hits.append("crontab: " + _ln.strip()[:70])
+        _os_files = [os.path.join(wc_root, "wc_env.sh")] + sorted(
+            glob.glob(os.path.join(wc_root, "*.sh")) + glob.glob(os.path.join(wc_root, "trading_bot", "*.sh"))
+            + glob.glob(os.path.join(wc_root, "mike", "bin", "*.sh"))
+            + glob.glob(os.path.join(wc_root, "*.py")) + glob.glob(os.path.join(wc_root, "trading_bot", "*.py"))
+            + glob.glob(os.path.join(wc_root, "mike", "bin", "*.py")))
+        for _fp in _os_files:
+            _bn = os.path.basename(_fp)
+            if _bn == "ops_health_check.sh" or not os.path.isfile(_fp):
+                continue
+            _is_py = _bn.endswith(".py")
+            if _is_py and (_bn == "dcf_valuation.py" or "selfcheck" in _bn or _bn.startswith("test_") or _bn.endswith("_test.py")):
+                continue
+            try:
+                for _ln in open(_fp, encoding="utf-8", errors="replace"):
+                    if not _ln.lstrip().startswith("#") and (_os_pat_py if _is_py else _os_pat).search(_ln):
+                        _os_hits.append(f"{os.path.relpath(_fp, wc_root)}: {_ln.strip()[:70]}")
+            except Exception as _e:
+                _os_probs.append(f"không đọc được {_fp} ({type(_e).__name__})")
+        if _os_hits:
+            _os_probs.append(f"{len(_os_hits)} launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): "
+                             + " | ".join(_os_hits[:3]))
+        if _os_probs:
+            W("DCF_OSHARES_SOURCE: " + " · ".join(_os_probs))
+        elif _os_def is not None:
+            OK(f"DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = {_os_def} "
+               f"({'số quý' if _os_def == 'fin' else 'oshares_live + khoá khung ex-date'}); không launcher/cron nào ghi đè.")
+    except Exception as _e:
+        W(f"DCF_OSHARES_SOURCE check lỗi, không kiểm được nguồn số CP của DCF: {type(_e).__name__}: {_e}")
+# CHECKDCFOS_END
 
 # LB. Phanh lỗ cấp NAV (thêm 2026-10-12, job Taylor_20261012_111422) — MỘT dòng mỗi account, đọc
 #     data/loss_brake/status.json do nav_loss_brake_monitor.py ghi tối phiên trước. Độ tươi do
