@@ -201,6 +201,17 @@ check("pre-anchor: knob=1 rate == knob=0 rate (byte-identical)", r1h == r0h)
 print("\ndcf_valuation.py::discount_rate (direct call):")
 import dcf_valuation as DCF  # noqa: E402
 
+# DCF_RATE_FRAME (job Taylor_20261030_050926): sections 5 + 7 test the DEPOSIT -> r wiring, which only
+# exists in the "legacy" frame. Under the production default "domestic_v2", r = RF_DOMESTIC + ERP_DOMESTIC
+# is a constant BY DESIGN, so these asserts went red (4 FAIL) the moment the default flipped -- not a
+# code bug. Pin legacy for the wiring checks (module global, read at call time), and assert the v2
+# property separately: CCTG/Big-4 must NOT reach r at all.
+_FRAME_PROD = DCF.RATE_FRAME
+DCF.RATE_FRAME = "domestic_v2"
+_v2 = [with_overlay(f, lambda: DCF.discount_rate(d)) for f in ("0", "1") for d in (POST_TODAY, PRE)]
+check("domestic_v2: discount_rate constant 12.25% regardless of CCTG knob / asof (deposit not in r)",
+      _v2 == [0.1225] * 4)
+DCF.RATE_FRAME = "legacy"
 DCF._RATE_CACHE.clear()
 r_big4 = with_overlay("0", lambda: (DCF._RATE_CACHE.clear(), DCF.discount_rate(POST_TODAY))[1])
 r_eff = with_overlay("1", lambda: (DCF._RATE_CACHE.clear(), DCF.discount_rate(POST_TODAY))[1])
@@ -264,6 +275,8 @@ check("dcf_valuation.discount_rate(stale) matches the HELD CCTG leg (r does not 
       abs(dr_stale - (CCTG_PCT + DCF.ERP) / 100.0) < 1e-9)
 check("dcf_valuation.discount_rate(fresh) matches CCTG leg",
       abs(dr_fresh - (CCTG_PCT + DCF.ERP) / 100.0) < 1e-9)
+DCF.RATE_FRAME = _FRAME_PROD
+DCF._RATE_CACHE.clear()
 
 import dcf_refresh_gate as DRG  # noqa: E402
 check("dcf_refresh_gate's consumer_deposit_rate(stale) == held CCTG",

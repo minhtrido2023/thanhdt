@@ -506,8 +506,16 @@ try:
                            dep.consumer_deposit_rate_detail, dep.consumer_deposit_rate, cctg.current_cctg_rate):
                     out.append((fn.__name__, a, repr(fn(a))))
                 if a is not None:
-                    dcf._RATE_CACHE.clear()
-                    out.append(("dcf.discount_rate", a, repr(dcf.discount_rate(a))))
+                    # pin legacy (job Taylor_20261030_050926): under the production default domestic_v2
+                    # r is a constant, so "r absent == present tier2" would pass VACUOUSLY -- the deposit
+                    # leg this check guards only reaches r in the legacy frame.
+                    _fr, dcf.RATE_FRAME = dcf.RATE_FRAME, "legacy"
+                    try:
+                        dcf._RATE_CACHE.clear()
+                        out.append(("dcf.discount_rate", a, repr(dcf.discount_rate(a))))
+                    finally:
+                        dcf.RATE_FRAME = _fr
+                        dcf._RATE_CACHE.clear()
             out.append(("deposit_events_df", dep.deposit_events_df().to_csv()))
             out.append(("effective_deposit_events_df", dep.effective_deposit_events_df().to_csv()))
             out.append(("cctg_events_df", cctg.cctg_events_df().to_csv()))

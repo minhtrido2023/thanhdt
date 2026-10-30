@@ -50,8 +50,11 @@ def terminal_growth_mode(asof, mode="cpi", erp=D.ERP):
         elif mode == "cpi_gdp_half":
             g = cpi + GDP_FADE * gdp
         elif mode == "cap_rf":
-            rf = D.discount_rate(asof, erp) - erp / 100.0  # deposit rate (nominal risk-free proxy)
-            g = min(cpi + gdp, rf)
+            # Delegate to production (job Taylor_20261030_050926): the old local `rf = D.discount_rate
+            # - erp` only equals the deposit rate under DCF_RATE_FRAME=legacy; under domestic_v2 it gave
+            # 12.25-6.5 = 5.75 (neither RF_DOMESTIC 6.75 nor the G_T_DOMESTIC 5.5 cap). Legacy: identical
+            # inputs (D.terminal_growth CPI, gdp_growth_vn GDP, same deposit rf) => same float.
+            g = D.terminal_growth_mode(asof, "cap_rf", erp)
         else:
             raise ValueError(f"unknown term_mode {mode!r}")
     return g
