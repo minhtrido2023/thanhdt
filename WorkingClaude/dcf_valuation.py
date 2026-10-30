@@ -16,8 +16,15 @@ MODEL (2-stage FCFE):
     DISPLAY-realism level fix (not an alpha change) — see terminal_growth_mode() and DEFAULT_TERM_MODE.
     Override per-run via the DCF_TERMINAL_MODE env var or fair_value(..., term_mode=). Mode "cpi"
     (the prior default = 5y-avg CPI only, cpi_vn.py) is still available.
-  Discount rate (cost of equity) r = Big-4 12M deposit rate (deposit_rate_vn.py) + ERP,
-    ERP = 6.5% (empirical: VNINDEX total-return premium over Big-4 deposit, 2013-2026).
+  Discount rate (cost of equity) r: DEFAULT = RATE FRAME "domestic_v2" (user-approved 2026-10-30, job
+    Taylor_20261030_050926; quant-skeptic CONFIRMED): r = RF_DOMESTIC 6.75 + ERP_DOMESTIC 5.5 = 12.25%
+    (CONSTANT, not asof-dependent) AND terminal g cap G_T_DOMESTIC 5.5% moved TOGETHER (terminal mode
+    forced cap_rf). Shown as a Ke RANGE 12.5-13.5% (beta 1.1), not a point. See RATE_FRAME below;
+    research mike/agents/Taylor/research/erp_domestic_v2_20261030/.
+  LEGACY frame (DCF_RATE_FRAME=legacy, or flip RATE_FRAME_DEFAULT to "legacy" = one-word rollback,
+    byte-identical to the pre-knob model): r = Big-4 12M deposit rate (deposit_rate_vn.py) + ERP 6.5%
+    (empirical VNINDEX total-return premium over Big-4 deposit, 2013-2026), g_T capped at the deposit.
+    REPRODUCING any OLD pinned DCF number REQUIRES DCF_RATE_FRAME=legacy.
   FCFE (free cash flow to equity) proxy = CFO - capex = CF_OA + CF_Invest (both absolute
     VND in tav2_bq.ticker_financial; CF_Invest is negative for capex outflow; net-borrowing
     assumed ~0 = stable capital structure). Base level = normalized 3-year average FCFE
@@ -94,6 +101,76 @@ CPI_TERMINAL_YEARS = 5
 TERM_MODES = ("cpi", "cpi_gdp_full", "cpi_gdp_half", "cap_rf")
 GDP_FADE = 0.5                                          # convergence haircut for cpi_gdp_half
 DEFAULT_TERM_MODE = os.environ.get("DCF_TERMINAL_MODE", "cap_rf")
+
+# ---------------------------------------------------------------- rate FRAME (r and g_T TOGETHER)
+# "legacy": r = consumer_deposit_rate(asof) + ERP; g_T per DEFAULT_TERM_MODE ("cap_rf" caps g_T at that
+#   same deposit rate).
+# "domestic_v2" (job Taylor_20261030_041731, user-approved 2026-10-30 12:08; hardening job
+#   Taylor_20261030_050926): r = RF_DOMESTIC + ERP_DOMESTIC (+ (erp - ERP) so callers that vary `erp`
+#   still shift r) — a CONSTANT long-run rate, no longer today's deposit rate; and g_T = min(cpi + real
+#   GDP, G_T_DOMESTIC). One frame on purpose: moving r alone (keeping g_T capped at the 7.4% deposit)
+#   raised the universe median FV +35% in the research simulation; moving both changed it -1.4%
+#   (erp_domestic_v2_20261030/out_imp_asof_summary.csv). Because r and g_T must move TOGETHER,
+#   domestic_v2 FORCES terminal mode cap_rf (env DCF_TERMINAL_MODE is ignored with a loud warning; an
+#   explicit term_mode != cap_rf raises in terminal_growth_mode).
+# SINGLE SOURCE OF TRUTH = RATE_FRAME_DEFAULT below: every process (bot, lag_dd_pack, send_plan_report,
+#   eod_trading_report, dcf_refresh_gate ...) imports this file, so they all see the same frame without
+#   any launcher/cron/wc_env.sh setting. ROLLBACK = change that ONE word to "legacy" (byte-identical to
+#   the pre-knob model). Env DCF_RATE_FRAME is a research/selfcheck OVERRIDE only: any value != the
+#   default is announced on stderr, and production launchers must not set it (ops_health_check.sh
+#   WARNs if crontab / wc_env.sh / mike/bin/*.sh does). A typo'd value does NOT raise (a ValueError at
+#   import is swallowed by consumers as DCF NOT_COMPUTED -> DINH_GIA_NA on every LAG name): it falls
+#   back to "legacy" and shouts on stderr + logging.
+# dcf_refresh_gate.py stays deposit-driven: under domestic_v2 a deposit move no longer changes r, so its
+#   trigger becomes a harmless no-op recompute.
+RATE_FRAMES = ("legacy", "domestic_v2")
+RATE_FRAME_DEFAULT = "domestic_v2"
+
+
+def _resolve_rate_frame(env_val, default=RATE_FRAME_DEFAULT):
+    """(frame, warning|None). Unknown values -> "legacy" (the pre-knob model), never raise."""
+    if default not in RATE_FRAMES:
+        return "legacy", (f"RATE_FRAME_DEFAULT={default!r} KHONG HOP LE (chi nhan {RATE_FRAMES}) -> FALLBACK "
+                          f"'legacy'. Sua hang so nguon su that trong dcf_valuation.py.")
+    if env_val is None or env_val.strip() == "":
+        return default, None
+    v = env_val.strip()
+    if v not in RATE_FRAMES:
+        return "legacy", (f"DCF_RATE_FRAME={env_val!r} KHONG HOP LE (chi nhan {RATE_FRAMES}) -> FALLBACK "
+                          f"'legacy' (mac dinh nguon su that = {default!r}). Sua/bo bien moi truong nay.")
+    if v != default:
+        return v, f"DCF_RATE_FRAME={v!r} env OVERRIDE khac mac dinh nguon su that {default!r} (chi cho nghien cuu/selfcheck)"
+    return v, None
+
+
+def _shout(msg):
+    import logging
+    print(f"!!!!! [dcf_valuation] {msg} !!!!!", file=sys.stderr, flush=True)
+    logging.getLogger("dcf_valuation").warning(msg)
+
+
+RATE_FRAME, _rf_warn = _resolve_rate_frame(os.environ.get("DCF_RATE_FRAME"))
+if _rf_warn:
+    _shout(_rf_warn)
+if RATE_FRAME == "domestic_v2" and DEFAULT_TERM_MODE != "cap_rf":
+    _shout(f"DCF_TERMINAL_MODE={DEFAULT_TERM_MODE!r} bi BO QUA: domestic_v2 ep cap_rf (r va g_T phai doi cung luc)")
+    DEFAULT_TERM_MODE = "cap_rf"
+RF_DOMESTIC = 6.75             # % normalized VND risk-free (building block: target CPI 4.25 + real 2.5)
+ERP_DOMESTIC = 5.5             # % domestic ERP (research central 5.42 -> 0.25 grid; NOT robust: 5.22-6.15)
+G_T_DOMESTIC = 0.055           # target CPI 4.25 + long-run real 1.25 (decimal)
+# Ke is a RANGE, not a point (quant-skeptic 2026-10-30): ERP 5.22-6.15 at beta 1.1 => 12.5-13.5%.
+# r = 12.25 above is the beta-1 model point; every human-facing display of r under domestic_v2 must
+# carry this range (see ke_range_note()).
+KE_RANGE_BETA11 = (12.5, 13.5)
+
+
+def ke_range_note():
+    """Display suffix for r under domestic_v2 ('' under legacy). Never used in arithmetic."""
+    if RATE_FRAME != "domestic_v2":
+        return ""
+    lo, hi = KE_RANGE_BETA11
+    return (f"[domestic_v2: diem mo hinh beta1 = rf {RF_DOMESTIC:g} + ERP {ERP_DOMESTIC:g}; ERP KHONG ben "
+            f"5,22-6,15 => Ke KHOANG {lo:g}-{hi:g}% o beta 1,1 — doc theo khoang, khong theo diem]")
 
 # financial-sector ICB codes (excluded — own Gordon-P/B frameworks)
 def is_financial_icb(icb):
@@ -215,7 +292,9 @@ def is_financial(ticker, asof):
 
 
 def discount_rate(asof, erp=ERP):
-    """Cost of equity = deposit rate (as-of) + ERP, in decimal. Deposit leg wired to
+    """Cost of equity in decimal. Frame "domestic_v2" (DEFAULT since 2026-10-30): constant
+    RF_DOMESTIC + ERP_DOMESTIC = 12.25%, NOT asof/deposit dependent. Frame "legacy" (the rest of this
+    docstring): deposit rate (as-of) + ERP. Deposit leg wired to
     deposit_rate_vn.consumer_deposit_rate() 2026-10-01 (job Taylor_20261001_054110,
     user-approved) = max(Big-4 12M, Big-4 CCTG); a stale/unreadable CCTG is HELD at its last
     known value with a WARNING (2026-10-13, job Taylor_20261013_163831 -- it used to drop to
@@ -226,6 +305,8 @@ def discount_rate(asof, erp=ERP):
     for a live/today call — before this fix, this explicit-asof call site never aged CCTG out at
     all). History unaffected: CCTG's only anchor is 2026-09-30, so every asof before that date is
     byte-identical to the prior Big-4-only series. Rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0."""
+    if RATE_FRAME == "domestic_v2":
+        return (RF_DOMESTIC + ERP_DOMESTIC + (erp - ERP)) / 100.0
     a = pd.to_datetime(asof)
     key = (str(a.date()), erp)
     if key not in _RATE_CACHE:
@@ -275,6 +356,11 @@ def terminal_growth_mode(asof, mode=None, erp=ERP, with_frac=False):
     with_frac=True, so the fair_value() report/⚠ line is unchanged). Formula mirrors the research
     module dcf_earning_power.terminal_growth_mode (see DEFAULT_TERM_MODE note)."""
     mode = DEFAULT_TERM_MODE if mode is None else mode
+    if RATE_FRAME == "domestic_v2" and mode != "cap_rf":
+        # r is the constant domestic rate here; any other g_T rule would move r ALONE (e.g. cpi_gdp_full
+        # g~9.66 against r 12.25) — the exact gap quant-skeptic flagged 2026-10-30. Research callers that
+        # need another mode must run under DCF_RATE_FRAME=legacy.
+        raise ValueError(f"term_mode {mode!r} not allowed under DCF_RATE_FRAME=domestic_v2 (only 'cap_rf')")
     cpi, frac = terminal_growth(asof, with_frac=True)
     if mode == "cpi":
         g = cpi
@@ -285,6 +371,8 @@ def terminal_growth_mode(asof, mode=None, erp=ERP, with_frac=False):
             g = cpi + gdp
         elif mode == "cpi_gdp_half":
             g = cpi + GDP_FADE * gdp
+        elif mode == "cap_rf" and RATE_FRAME == "domestic_v2":
+            g = min(cpi + gdp, G_T_DOMESTIC)                # r no longer tracks the deposit rate
         elif mode == "cap_rf":
             rf = discount_rate(asof, erp) - erp / 100.0    # deposit rate (nominal risk-free proxy)
             g = min(cpi + gdp, rf)
@@ -447,6 +535,8 @@ def _print_report(res):
     print(f"  discount rate r          : {res['discount_rate']:.2%}   "
           f"terminal g = {res['g_terminal']:.2%} [{res.get('term_mode','cpi')}] "
           f"(CPI window {fr:.0%} REAL NSO / {1-fr:.0%} PROXY)")
+    if ke_range_note():
+        print(f"                             {ke_range_note()}")
     if fr < 0.15:
         print("  ⚠️ CPI window mostly proxy — refetch NSO if this becomes a recurring valuation")
     print(f"  OShares                  : {res['oshares']/1e6:,.1f} M")

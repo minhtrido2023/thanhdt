@@ -40,6 +40,11 @@ def terminal_growth_mode(asof, mode="cpi", erp=D.ERP):
       cap_rf       : min(cpi_gdp_full, nominal risk-free)  (Damodaran hard cap: g_term <= r_f)
 
     The nominal risk-free proxy = the Big-4 deposit rate = discount_rate - ERP."""
+    if D.RATE_FRAME == "domestic_v2" and mode != "cap_rf":
+        # Same rule as D.terminal_growth_mode: domestic_v2 fixes r at 12.25%, so a g_T mode other than
+        # cap_rf would move r alone (cpi_gdp_full -> g 9.66% vs r 12.25%). Raise, don't pair them silently.
+        raise ValueError(f"term_mode {mode!r} khong hop le duoi DCF_RATE_FRAME=domestic_v2 (r co dinh): "
+                         f"chi cap_rf; dung DCF_RATE_FRAME=legacy cho nghien cuu cac mode khac")
     cpi = D.terminal_growth(asof)                          # decimal, 5y-avg CPI
     if mode == "cpi":
         g = cpi
@@ -50,8 +55,11 @@ def terminal_growth_mode(asof, mode="cpi", erp=D.ERP):
         elif mode == "cpi_gdp_half":
             g = cpi + GDP_FADE * gdp
         elif mode == "cap_rf":
-            rf = D.discount_rate(asof, erp) - erp / 100.0  # deposit rate (nominal risk-free proxy)
-            g = min(cpi + gdp, rf)
+            # Delegate to production (job Taylor_20261030_050926): the old local `rf = D.discount_rate
+            # - erp` only equals the deposit rate under DCF_RATE_FRAME=legacy; under domestic_v2 it gave
+            # 12.25-6.5 = 5.75 (neither RF_DOMESTIC 6.75 nor the G_T_DOMESTIC 5.5 cap). Legacy: identical
+            # inputs (D.terminal_growth CPI, gdp_growth_vn GDP, same deposit rf) => same float.
+            g = D.terminal_growth_mode(asof, "cap_rf", erp)
         else:
             raise ValueError(f"unknown term_mode {mode!r}")
     return g
