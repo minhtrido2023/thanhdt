@@ -53,6 +53,7 @@ LIMITATIONS: DCF is notoriously sensitive to the discount rate and terminal valu
 
 Author: Taylor (quant). Job Taylor_20260714_042622. NOT wired into production trading.
 """
+import contextlib
 import os
 import sys
 import argparse
@@ -488,7 +489,8 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     fin_os = float(last.OShares)
     if oshares is None and OSHARES_SOURCE == "live" and fin_os > 0:   # NaN>0 False: thiếu số quý
         import oshares_dcf as _osd                                     # thì vẫn "OShares missing"
-        osh_live = _osd.oshares_for(ticker, a.date().isoformat(), fin_os)
+        with contextlib.redirect_stdout(sys.stderr):                   # oshares_pit/live in chẩn đoán ra STDOUT;
+            osh_live = _osd.oshares_for(ticker, a.date().isoformat(), fin_os)   # caller (send_plan_report) cần stdout sạch
         oshares = osh_live["value"] if osh_live["value"] else fin_os
     oshares = float(last.OShares) if oshares is None else float(oshares)
     if not (oshares and oshares > 0):

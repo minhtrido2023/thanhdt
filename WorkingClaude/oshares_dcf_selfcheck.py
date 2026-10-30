@@ -168,6 +168,31 @@ def c4_knob():
         r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=f2)
         check("C4 live: thiếu OShares quý -> vẫn 'OShares missing', không gọi live",
               r["reason"] == "OShares missing" and calls == [], f"{r['reason']} {calls}")
+        # R1 (arch-review 30/10): chẩn đoán KHÔNG được ra STDOUT (send_plan_report lấy dòng đầu stdout làm STATUS)
+        def _noisy(t, a, f):
+            print("[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout")
+            return {"value": None, "source": "none", "method": "ERROR", "announced_added": []}
+        osd.oshares_for = _noisy
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+        check("C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng", buf.getvalue() == "", buf.getvalue()[:80])
+        osd.oshares_for = real
+        osd._CACHE.update(tickers=frozenset(), until=None, data=None)
+        import oshares_live as _ol
+        real_fetch = _ol._fetch
+        def _boom(*a, **k):
+            raise RuntimeError("bq down (simulated)")
+        _ol._fetch = _boom
+        buf, err = io.StringIO(), io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err):
+                dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+        finally:
+            _ol._fetch = real_fetch
+            osd._CACHE.update(tickers=frozenset(), until=None, data=None)
+        check("C4 live + BQ lỗi: stdout rỗng, chẩn đoán ở stderr", buf.getvalue() == "" and "fetch_cache FAILED" in err.getvalue(),
+              f"stdout={buf.getvalue()[:60]!r} stderr={err.getvalue()[:60]!r}")
     finally:
         osd.oshares_for = real
         dv.OSHARES_SOURCE = "fin"
@@ -202,11 +227,13 @@ def _mut_div_as_share(evs):
     return [{**e, "event_code": "ISS", "issue_method_name_vi": SD} if e.get("event_code") == "DIV" else e for e in evs]
 
 
+import dcf_valuation as dv     # noqa: E402 — mutant M7 vá module này
 MUTANTS = {
     "M1 DIV coi như ISS cổ phiếu (lỗi quy tắc cũ)": (osd, "_dedup", lambda real: lambda ev: real(_mut_div_as_share(ev))),
     "M2 quyền mua tính là tạo CP": (osd, "SHARE_CREATING_ISS", lambda real: real | {RIGHTS}),
     "M3 bỏ dedup": (osd, "_dedup", lambda real: lambda ev: list(ev)),
     "M4 LAG_TOL = 0": (osd, "LAG_TOL", lambda real: 0.0),
+    "M7 bỏ redirect stdout quanh oshares_for (dcf_valuation)": (dv, "contextlib", lambda real: type("NoRedirect", (), {"redirect_stdout": staticmethod(lambda f: real.nullcontext())})),
     "M5 bỏ trần tuổi announced": (osd, "PROMOTE_MAX_AGE_DAYS", lambda real: 100000),
     "M6 bỏ lọc public_date<=asof": (osd, "_clip", lambda real: lambda c, a: real(
         (c[0], c[1], [{**x, "public_date": "0000"} for x in c[2]]), a)),

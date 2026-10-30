@@ -22,6 +22,8 @@ Job `Taylor_20261030_094435` (user duyệt 30/10). Hai việc, một module, vì
 """
 from __future__ import annotations
 
+import sys
+
 from corp_action_lib import TABLE, bq, pricing_events
 
 # ISS chắc chắn tạo CP cho cổ đông hiện hữu tại ex-date (không phụ thuộc đăng ký mua).
@@ -62,7 +64,8 @@ def fetch_cache(tickers, until):
         q, corp = _fetch(tickers, until)
         return q, corp, _fetch_announced(tickers, until)
     except Exception as e:                                  # noqa: BLE001 — fail-safe về số quý
-        print(f"[oshares_dcf] fetch_cache FAILED ({type(e).__name__}: {e}) -> dùng OShares quý")
+        # STDERR, không phải stdout: send_plan_report.sh lấy dòng đầu stdout của khối Python làm STATUS
+        print(f"[oshares_dcf] fetch_cache FAILED ({type(e).__name__}: {e}) -> dùng OShares quý", file=sys.stderr)
         return None
 
 
