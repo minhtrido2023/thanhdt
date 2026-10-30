@@ -152,7 +152,7 @@ def figs():
     axR.yaxis.set_major_formatter(lambda v, p: f"{v/1e3:.0f}k"); axR.tick_params(labelsize=6.6)
     axR.set_title("Giá ngang cận dưới dải;\ntiền ròng ≈ 59–67% giá", fontsize=7.8)
     fig.text(0.01, 0.005, "Nguồn: công suất & tỷ trọng XK theo website ducgiangchem.vn (truy cập 29/10/2026); LNST: cơ sở dữ liệu nhóm: ticker_financial + BCTC HN Q3/2026 (chưa soát xét);\n"
-             "Nghi Sơn: NQ HĐQT 34. Dải định giá: ước lượng của nhóm theo Ke nội địa 12,5–13,5% (mốc 13%), số đã tái lập độc lập (vòng 7); sửa 2.2 chưa phản biện đầy đủ. Giá 28/10/2026.", fontsize=5.6, color="#666")
+             "Nghi Sơn: NQ HĐQT 34. Dải định giá: ước lượng của nhóm theo Ke nội địa 12,5–13,5% (mốc 13%), số đã tái lập độc lập (vòng 7–8); bản rev2 đã được rà lại ở vòng 8, ba sửa nhỏ sau đó chưa. Giá 28/10/2026.", fontsize=5.6, color="#666")
     fig.savefig(os.path.join(FIGS, "fig_00_hero.png"), dpi=200)
     pd.DataFrame({"muc": ["LNST " + y for y in yrs] + ["A7", "B7", "thap_nhat", "cao_nhat", "tien_rong_sau", "tien_rong_truoc", "gia_2810"],
                   "gia_tri": np_y + [A7, B7, R4_PERP[0], R2_N0, NETCASH_POST, NETCASH_PRE, PX_ANCHOR]}).to_csv(os.path.join(FIGS, "fig_00_hero.csv"), index=False)
@@ -322,8 +322,8 @@ def figs():
         yy = len(ff) - 1 - i
         col = GREEN if i == len(ff) - 1 else (ACCENT if i in (1, 2) else NAVY)
         ax.barh(yy, r["cao"] - r["thap"], left=r["thap"], color=col, height=0.5, alpha=0.85)
-        ax.text(r["thap"] - 400, yy, vn(r["thap"] / 1e3, 1), ha="right", va="center", fontsize=7.2)
-        ax.text(r["cao"] + 400, yy, vn(r["cao"] / 1e3, 1), ha="left", va="center", fontsize=7.2)
+        ax.text(r["thap"] - 400, yy, vn(r["thap"] / 1e3, 1), ha="right", va="center", fontsize=7.2, zorder=5, bbox=dict(facecolor="white", edgecolor="none", pad=0.8, alpha=0.9))
+        ax.text(r["cao"] + 400, yy, vn(r["cao"] / 1e3, 1), ha="left", va="center", fontsize=7.2, zorder=5, bbox=dict(facecolor="white", edgecolor="none", pad=0.8, alpha=0.9))
     ax.set_yticks(range(len(ff)), ff["phuong_phap"][::-1], fontsize=7.0)
     ax.axvline(PX_ANCHOR, color=ACCENT, ls="--", lw=1.2, label="Đóng cửa 28/10: 32.900")
     ax.axvline(PX_3010, color="#555", ls=":", lw=1.1, label="Đóng cửa 29/10 và 30/10: 33.300 (DNSE)")
@@ -332,7 +332,7 @@ def figs():
     ax.xaxis.set_major_formatter(lambda v, p: f"{v/1e3:.0f}k")
     ax.set_title("Giá ngang cận dưới dải mô hình (Ke 12,5–13,5%)")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
-    save(fig, "fig_08_football_field", "Nguồn: ước lượng của nhóm nghiên cứu (Ke nội địa 12,5–13,5%; đã qua 7 vòng phản biện, các sửa sau vòng 7 chưa được rà lại). Trọng số kịch bản 0,2/0,5/0,3 do nhóm tự đặt (chủ quan). "
+    save(fig, "fig_08_football_field", "Nguồn: ước lượng của nhóm nghiên cứu (Ke nội địa 12,5–13,5%; đã qua 8 vòng phản biện; các sửa nhỏ sau vòng 8 chưa được rà lại). Trọng số kịch bản 0,2/0,5/0,3 do nhóm tự đặt (chủ quan). "
          "Thanh = khoảng giữa hai tổ hợp giả định, không phải khoảng tin cậy.", ff)
     plt.close(fig)
 
