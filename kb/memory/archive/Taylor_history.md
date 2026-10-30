@@ -1670,3 +1670,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T13:45:40Z] [dgc-ke 29/10] XONG job Taylor_20261029_133456: Ke 14,9% giua vung 12,2-16,7% (PREREG tam 15,8%, thi truong 13,1%); rf trung tam 6,75 building-block — CHO Mike/user; mo: dcf_valuation g_T=rf 7,4% can nghien cuu rieng
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T13:54:56Z] [manual-deviation vòng 2 29/10] XONG @83da1791f nhanh session/manual-deviation-20261029 (chưa merge) — CHO Mike arch-review vòng 3 + user; pageIndex=1-based là giả định chưa kiểm DNSE thật
