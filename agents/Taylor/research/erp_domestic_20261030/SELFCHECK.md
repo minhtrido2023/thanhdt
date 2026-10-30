@@ -15,7 +15,7 @@
    c1d41cc1c5665527983dda6eb81f892a  out_justify_grid.csv
    05f030da0f7d07cacb33181d5c4c1bee  out_rf_proxies.csv
    ```
-   (`run_stdout.txt` md5 2cdce7d3… ở lần chạy trước khi sửa nhãn in "D3 (2011→"; số không đổi.)
+   2cdce7d3eb6515113bf6d05e57bae169  run_stdout.txt
    Bootstrap seed cố định 20261030 ⇒ tất định.
 4. **Dữ liệu bất biến** (`data/`, kéo 30/10/2026 ~10:50 ICT bằng `fetch_data.py` [BQ] + `cache_local.py` [local]):
    ```
