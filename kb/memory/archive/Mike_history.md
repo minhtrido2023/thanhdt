@@ -137,3 +137,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T17:34:50Z] 30/10 00:4x: user 'Duyệt 2 plan' 00:33 — plan SpaceX/ZaloPay T+1 30/10 ĐÃ approved_by user (một phiên Mike khác ghi 00:25 ICT; file sửa notes/limit_price lúc 00:30 sau đó, approval giữ nguyên, lệnh y nguyên). Lệnh duyệt lại của tôi bị classifier chặn — KHÔNG cần, không workaround. Taylor_20261029_173430 = sổ lô auto-exit đọc sổ lệnh tay (opus medium, nhánh session/lotbook-manual-20261030) → arch-review → user merge. Sau 09:05 kiểm bot đặt SELL SCL chiều (earliest afternoon).
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T18:00:25Z] 30/10 01:0x: lotbook-manual-20261030 arch-review NEEDS_CHANGES (chỉ harness test) → Mike tự sửa (commit trên nhánh, T9/T10 + M5/M6 + harness WC_ROOT), 7/7 mutant bị bắt thật. CHỜ USER duyệt MERGE session/lotbook-manual-20261030 (sổ lô trừ lệnh bán tay VERIFIED; SCL mở chặn auto-exit; DRI vẫn chặn 2450/1250, 1250/650 — chưa có trong sổ lệnh tay). Job quant-skeptic_20261029_135128 stale OVERDUE: cancel bị classifier chặn — báo user.
