@@ -71,6 +71,10 @@ def probe(path, ep_path=None):
     if ep_path:
         EP = _load(ep_path, "ep_under_test")
         o["ep_cap_rf"] = EP.terminal_growth_mode(a, "cap_rf")
+        try:
+            o["ep_full"] = EP.terminal_growth_mode(a, "cpi_gdp_full")
+        except ValueError as e:
+            o["ep_full"] = f"ValueError: {e}"
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         D._print_report({"ok": True, "ticker": "X", "asof": ASOF, "quarter": "q", "base_fcfe_vnd": 1e9,
@@ -221,6 +225,12 @@ def main():
           f"rc={p2.returncode} md5={h(p2)} stderr={p2.stderr.strip().splitlines()[0][:110] if p2.stderr.strip() else ''!r}")
     p2b = pj(run(WT, " ", "--probe"))
     check("[2b] DCF_RATE_FRAME rỗng/space ⇒ mặc định nguồn sự thật", p2b["frame"] == dflt)
+    def c2k(path):
+        pr = run(path, mode="--probe")
+        return pr.returncode == 0 and pj(pr)["frame"] == "legacy" and "KHONG HOP LE" in pr.stderr, pr
+    mk = mutant(WT, 'RATE_FRAME_DEFAULT = "domestic_v2"\n', 'RATE_FRAME_DEFAULT = "domestic-v2"\n', "n1")
+    check("[2k] hằng RATE_FRAME_DEFAULT gõ sai ⇒ fallback legacy + kêu stderr (không im lặng)", c2k(mk)[0],
+          c2k(mk)[1].stderr.strip()[:110])
     blk = ops_block()
     check("[2c] ops_health_check.sh có khối CHECKDCFRF", blk is not None, OPS)
     if blk:
@@ -291,6 +301,15 @@ def main():
     check("[4a] earning_power cap_rf legacy == production (cùng float)", ok4l, f"{pl['ep_cap_rf']!r} vs {pl['g_T']!r}")
     check("[4b] earning_power cap_rf v2 == min(cpi+gdp, 5,5%) (không phải 5,75)", ok4v, f"{pv['ep_cap_rf']!r}")
 
+    def c4c(dpath, eppath):
+        pl = pj(run(dpath, "legacy", "--probe", extra=(eppath,)))
+        pv = pj(run(dpath, "domestic_v2", "--probe", extra=(eppath,)))
+        return (isinstance(pl["ep_full"], float) and abs(pl["ep_full"] - pl["cpi_gdp"]) < 1e-12,
+                isinstance(pv["ep_full"], str) and pv["ep_full"].startswith("ValueError")), pl, pv
+    (ok4cl, ok4cv), pl4, pv4 = c4c(WT, EPF)
+    check("[4c] earning_power mode≠cap_rf: legacy vẫn chạy (cpi_gdp_full), v2 ⇒ ValueError (không đổi riêng r)",
+          ok4cl and ok4cv, f"legacy={pl4['ep_full']!r} v2={str(pv4['ep_full'])[:60]!r}")
+
     # ---- [5] Ke range in display -------------------------------------------------------------------
     def c5(path):
         a, b = pj(run(path, "domestic_v2", "--probe")), pj(run(path, "legacy", "--probe"))
@@ -313,7 +332,11 @@ def main():
     m5 = mutant(WT, '    if RATE_FRAME != "domestic_v2":\n        return ""\n    lo, hi',
                 '    return ""\n    lo, hi', "m5")
     check("[M5] ke_range_note rỗng ⇒ [5] đỏ", not c5(m5)[0])
-    for p in (m1, m1b, m2, epm, m5):
+    mkm = mutant(mk, '    if default not in RATE_FRAMES:\n', '    if False:\n', "n1m")
+    check("[M2k] gỡ guard hằng default ⇒ [2k] đỏ", not c2k(mkm)[0])
+    epm2 = mutant(EPF, '    if D.RATE_FRAME == "domestic_v2" and mode != "cap_rf":\n', '    if False:\n', "m4c")
+    check("[M4c] gỡ raise của earning_power ⇒ [4c] đỏ (legacy vẫn xanh)", c4c(WT, epm2)[0] == (True, False))
+    for p in (m1, m1b, m2, epm, m5, mk, mkm, epm2):
         shutil.rmtree(os.path.dirname(p), ignore_errors=True)
 
     print("SELFCHECK", "OK" if not fails else f"FAIL {fails}")

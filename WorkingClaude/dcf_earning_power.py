@@ -40,6 +40,11 @@ def terminal_growth_mode(asof, mode="cpi", erp=D.ERP):
       cap_rf       : min(cpi_gdp_full, nominal risk-free)  (Damodaran hard cap: g_term <= r_f)
 
     The nominal risk-free proxy = the Big-4 deposit rate = discount_rate - ERP."""
+    if D.RATE_FRAME == "domestic_v2" and mode != "cap_rf":
+        # Same rule as D.terminal_growth_mode: domestic_v2 fixes r at 12.25%, so a g_T mode other than
+        # cap_rf would move r alone (cpi_gdp_full -> g 9.66% vs r 12.25%). Raise, don't pair them silently.
+        raise ValueError(f"term_mode {mode!r} khong hop le duoi DCF_RATE_FRAME=domestic_v2 (r co dinh): "
+                         f"chi cap_rf; dung DCF_RATE_FRAME=legacy cho nghien cuu cac mode khac")
     cpi = D.terminal_growth(asof)                          # decimal, 5y-avg CPI
     if mode == "cpi":
         g = cpi

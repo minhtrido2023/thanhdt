@@ -16,12 +16,15 @@ MODEL (2-stage FCFE):
     DISPLAY-realism level fix (not an alpha change) — see terminal_growth_mode() and DEFAULT_TERM_MODE.
     Override per-run via the DCF_TERMINAL_MODE env var or fair_value(..., term_mode=). Mode "cpi"
     (the prior default = 5y-avg CPI only, cpi_vn.py) is still available.
-  Discount rate (cost of equity) r = Big-4 12M deposit rate (deposit_rate_vn.py) + ERP,
-    ERP = 6.5% (empirical: VNINDEX total-return premium over Big-4 deposit, 2013-2026).
-    RATE FRAME knob DCF_RATE_FRAME (job Taylor_20261030_041731, PROPOSAL — default "legacy" = the
-    line above, byte-identical): "domestic_v2" switches r AND terminal g TOGETHER to
-    r = RF_DOMESTIC 6.75 + ERP_DOMESTIC 5.5 = 12.25% (constant) and g_T cap = G_T_DOMESTIC 5.5%.
-    See RATE_FRAME below; research mike/agents/Taylor/research/erp_domestic_v2_20261030/.
+  Discount rate (cost of equity) r: DEFAULT = RATE FRAME "domestic_v2" (user-approved 2026-10-30, job
+    Taylor_20261030_050926; quant-skeptic CONFIRMED): r = RF_DOMESTIC 6.75 + ERP_DOMESTIC 5.5 = 12.25%
+    (CONSTANT, not asof-dependent) AND terminal g cap G_T_DOMESTIC 5.5% moved TOGETHER (terminal mode
+    forced cap_rf). Shown as a Ke RANGE 12.5-13.5% (beta 1.1), not a point. See RATE_FRAME below;
+    research mike/agents/Taylor/research/erp_domestic_v2_20261030/.
+  LEGACY frame (DCF_RATE_FRAME=legacy, or flip RATE_FRAME_DEFAULT to "legacy" = one-word rollback,
+    byte-identical to the pre-knob model): r = Big-4 12M deposit rate (deposit_rate_vn.py) + ERP 6.5%
+    (empirical VNINDEX total-return premium over Big-4 deposit, 2013-2026), g_T capped at the deposit.
+    REPRODUCING any OLD pinned DCF number REQUIRES DCF_RATE_FRAME=legacy.
   FCFE (free cash flow to equity) proxy = CFO - capex = CF_OA + CF_Invest (both absolute
     VND in tav2_bq.ticker_financial; CF_Invest is negative for capex outflow; net-borrowing
     assumed ~0 = stable capital structure). Base level = normalized 3-year average FCFE
@@ -126,6 +129,9 @@ RATE_FRAME_DEFAULT = "domestic_v2"
 
 def _resolve_rate_frame(env_val, default=RATE_FRAME_DEFAULT):
     """(frame, warning|None). Unknown values -> "legacy" (the pre-knob model), never raise."""
+    if default not in RATE_FRAMES:
+        return "legacy", (f"RATE_FRAME_DEFAULT={default!r} KHONG HOP LE (chi nhan {RATE_FRAMES}) -> FALLBACK "
+                          f"'legacy'. Sua hang so nguon su that trong dcf_valuation.py.")
     if env_val is None or env_val.strip() == "":
         return default, None
     v = env_val.strip()
@@ -286,7 +292,9 @@ def is_financial(ticker, asof):
 
 
 def discount_rate(asof, erp=ERP):
-    """Cost of equity = deposit rate (as-of) + ERP, in decimal. Deposit leg wired to
+    """Cost of equity in decimal. Frame "domestic_v2" (DEFAULT since 2026-10-30): constant
+    RF_DOMESTIC + ERP_DOMESTIC = 12.25%, NOT asof/deposit dependent. Frame "legacy" (the rest of this
+    docstring): deposit rate (as-of) + ERP. Deposit leg wired to
     deposit_rate_vn.consumer_deposit_rate() 2026-10-01 (job Taylor_20261001_054110,
     user-approved) = max(Big-4 12M, Big-4 CCTG); a stale/unreadable CCTG is HELD at its last
     known value with a WARNING (2026-10-13, job Taylor_20261013_163831 -- it used to drop to
