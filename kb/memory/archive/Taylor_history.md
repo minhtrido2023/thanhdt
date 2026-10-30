@@ -1667,3 +1667,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T13:37:30Z] [manual-deviation 29/10] XONG e11fab9bd nhanh session/manual-deviation-20261029 (wt-manual-deviation-20261029, chua merge) — CHO Mike arch-review + user; sau merge seed so that (add --verify 2 lenh SCL) + chay lai NAV 29/10
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T13:45:40Z] [dgc-ke 29/10] XONG job Taylor_20261029_133456: Ke 14,9% giua vung 12,2-16,7% (PREREG tam 15,8%, thi truong 13,1%); rf trung tam 6,75 building-block — CHO Mike/user; mo: dcf_valuation g_T=rf 7,4% can nghien cuu rieng
