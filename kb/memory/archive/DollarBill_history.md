@@ -313,3 +313,9 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-24T08:20:15Z] [2026-10-24 15:2x ICT] Plan SpaceX 10-26 LAM LAI TAY XONG HOLD ALL 0 lenh (job DollarBill_20261024_081956); 3 LAG bi cong DD chan; cho user duyet truoc 08:45 ICT 26/10
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-24T08:27:31Z] [2026-10-24 15:3x ICT] Plan ZaloPay 10-26 LAM LAI XONG 3 lenh LAG (HT1/SCL/VPB, 71.4tr, chuyen egg>=71.5tr). SpaceX plan 10-26 con HOLD ALL -> lech calendar check, can sinh lai. job DollarBill_20261024_082711
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-24T08:28:46Z] [2026-10-24 ICT] Plan SpaceX 10-26 LAM LAI (egg=tien) XONG: 3 LAG HT1/SCL/VPB ~116,4tr, chuyen egg >=116,4tr truoc 09:05 T2; job DollarBill_20261024_082713; cho user duyet
