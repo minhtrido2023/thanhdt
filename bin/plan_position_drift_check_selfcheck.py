@@ -536,6 +536,57 @@ def t_report_block_fallback(capsys_out):
     check("report_block.prev_drift_shown", "kết quả lần kiểm trước" in out and "1.100→1.175" in out, out)
 
 
+# ── 13b. Lượt ngoài cửa sổ (<20:40, không --date) thiếu bằng chứng THEO GIỜ ⇒ thoát im ─────────
+def _main_nodate(*args):
+    return M.main(["--account", "SpaceX", "--account-no", SP] + list(args))
+
+
+def t_quiet_outside_window():
+    box = {}
+    # (a) 00:02 ngày đã đổi: dnse_raw hôm nay chưa tồn tại ⇒ rc 0, KHÔNG bus, KHÔNG state, KHÔNG in cờ
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 0, 2, 0)
+    M.live_read = live(None, raise_=AssertionError("không được gọi DNSE"))
+    out = capture(lambda: box.update(rc=_main_nodate()))
+    check("quiet.noraw_rc0", box["rc"] == 0, box)
+    check("quiet.noraw_no_bus_no_state", not bus_calls() and not os.path.exists(
+        os.path.join(STATE, f"SpaceX_{D}.json")), bus_calls())
+    check("quiet.noraw_stdout_empty", "KHÔNG KIỂM ĐƯỢC" not in out, out)
+    # (b) 20:20 lô chưa qua batch (modifiedDate cũ), không cờ ⇒ cũng im
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 20, 20, 0)
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("BID", 1100, 38850, STALE)]})])
+    M.live_read = live([row("BID", 1100, 38850, STALE)], [])
+    rc = _main_nodate()
+    check("quiet.stale_2020_rc0_nobus", rc == 0 and not bus_calls(), (rc, bus_calls()))
+    # (c) lượt chính thức 20:50 thiếu dnse_raw ⇒ VẪN ồn (rc 2 + bus)
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 20, 50, 0)
+    rc = _main_nodate()
+    check("quiet.official_noraw_loud", rc == 2 and len(bus_calls()) == 1, (rc, bus_calls()))
+    # (d) 20:50 lô stale ⇒ VẪN ồn
+    reset()
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("BID", 1100, 38850, STALE)]})])
+    M.live_read = live([row("BID", 1100, 38850, STALE)], [])
+    rc = _main_nodate()
+    check("quiet.official_stale_loud", rc == 2 and len(bus_calls()) == 1, (rc, bus_calls()))
+    # (e) 00:02 nhưng --date tường minh / --report-block ⇒ KHÔNG im (replay, báo cáo plan)
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 0, 2, 0)
+    rc = _main()
+    check("quiet.explicit_date_loud", rc == 2 and len(bus_calls()) == 1, (rc, bus_calls()))
+    reset()
+    out = capture(lambda: _main_nodate("--report-block", "--no-bus"))
+    check("quiet.report_block_loud", "KHÔNG KIỂM ĐƯỢC" in out, out)
+    # (f) lỗi KHÁC (DNSE chết) lúc 20:20 ⇒ không im (chỉ NO_RAW/STALE_BATCH được im)
+    reset()
+    M.now_ict = lambda: dt.datetime(2026, 10, 5, 20, 20, 0)
+    write_raw([rec("19:03:00", SP, "SpaceX", "positions", {"positions": [row("BID", 1100, 38850, STALE)]})])
+    M.live_read = live(None, raise_=ConnectionError("dnse down"))
+    rc = _main_nodate()
+    check("quiet.other_error_loud", rc == 2 and len(bus_calls()) == 1, (rc, bus_calls()))
+
+
 def capture(fn):
     import io
     import contextlib
@@ -686,7 +737,7 @@ def main_tests():
                t_stale_now, t_stale_base_daily_move, t_mixed_frame, t_fills, t_sim_guard, t_weekend,
                t_partial_stale_and_notes, t_exchange_band, t_filters, t_live_stdout, t_retention, t_tz,
                t_env_guard, t_main_bus_state, lambda: t_report_block_fallback(capture), t_replay,
-               t_send_plan):
+               t_send_plan, t_quiet_outside_window):
         try:
             fn()
         except Exception as e:
@@ -698,6 +749,11 @@ def main_tests():
 
 # ── đột biến ────────────────────────────────────────────────────────────────────────────────
 MUTANTS = [
+    ("quiet_gate_off", 'return (res["status"] == "CANNOT_CHECK" and res.get("code") in', 'return (False and res.get("code") in'),
+    ("quiet_always_hour", 'and now_ict().strftime("%H:%M:%S") < OFFICIAL_FROM)', 'and True)'),
+    ("quiet_any_code", 'res.get("code") in ("NO_RAW", "STALE_BATCH")', 'True'),
+    ("quiet_ignores_date", 'and not a.date and not sim_at', 'and not sim_at'),
+    ("quiet_ignores_report_block", 'and not a.report_block\n', '\n'),
     ("filter_account_removed", 'if str(rec.get("account_no")) != str(account_no):', 'if False:'),
     ("baseline_last_not_first", "return in_win[0], session", "return in_win[-1], session"),
     ("window_end_widened", 'PLAN_WIN_END = "19:30:00"', 'PLAN_WIN_END = "23:59:59"'),
@@ -707,7 +763,7 @@ MUTANTS = [
     ("px_thr_always_stale", 'PX_THR_FRESH if (b.get("fresh") and n.get("fresh"))', "PX_THR_FRESH if False"),
     ("px_thr_always_fresh", 'PX_THR_FRESH if (b.get("fresh") and n.get("fresh"))', "PX_THR_FRESH if True"),
     ("mixed_off", "mixed = len(n[\"px\"]) > 1 and", "mixed = False and"),
-    ("stale_now_silent", 'return cannot(why + ", chưa kết luận được")', "pass"),
+    ("stale_now_silent", 'return cannot(why + ", chưa kết luận được", "STALE_BATCH")', "pass"),
     ("fills_ignored", "exp, unsure = explained_fills(base[0], ords, final_orders)",
      "exp, unsure = {}, set()"),
     ("fills_sign_flipped", 'sign = 1 if str(o.get("side", "")).upper() in ("NB", "B", "BUY") else -1',

@@ -69,6 +69,7 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 PLAN_WIN_START = "18:50:00"   # DollarBill pipeline khởi động 19:00; chừa 10' cho EOD/park đọc sớm
 PLAN_WIN_END = "19:30:00"
 POST_CLOSE = "15:00:00"       # UPCOM liên tục + thoả thuận tới 15:00 — sau mốc này không còn khớp
+OFFICIAL_FROM = "20:40:00"    # lượt kiểm chính thức (cron 20:50, send_plan_report 21:00-23:30) chỉ hợp lệ từ mốc này
 BATCH_FRESH_FROM = "15:00:00"  # lô có modifiedDate (ICT) ≥ mốc này HÔM NAY = đã qua batch cuối ngày DNSE
 PX_THR_FRESH = 0.01           # cả 2 bản đều sau batch: giá phải đứng yên; đo VPB 09-23 19:30→19:40 22100→22050 (0,23%)
 # Mốc TRƯỚC batch: giá là của phiên trước ⇒ đổi trong biên độ sàn là biến động phiên bình thường;
@@ -443,8 +444,9 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
     if sim_at:
         res["checked_at"] = f"{date_str}T{sim_at}"
 
-    def cannot(why):
+    def cannot(why, code=None):
         res["status"], res["reason"] = "CANNOT_CHECK", why
+        res["code"] = code     # NO_RAW / STALE_BATCH: thiếu bằng chứng THEO GIỜ (xem _quiet_outside_window)
         return res
 
     d = dt.date.fromisoformat(date_str)
@@ -456,7 +458,7 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
     try:
         pos, ords, bad = load_raw(P["MIKE_DRIFT_EXEC_DIR"], date_str, account_no)
     except (OSError, FileNotFoundError) as e:
-        return cannot(f"không đọc được dnse_raw hôm nay ({e})")
+        return cannot(f"không đọc được dnse_raw hôm nay ({e})", "NO_RAW")
     if bad:
         res["notes"].append(f"{bad} dòng dnse_raw hỏng bị bỏ qua")
     plan_base, sess_base, src = pick_baselines(pos)
@@ -539,7 +541,7 @@ def run_check(account, account_no, date_str, P, sim_at=None, now=None):
         why = (f"{n_stale}/{len(now_agg)} mã có lô modifiedDate trước 15:00 hôm nay hoặc thiếu "
                f"(DNSE chưa cập nhật cuối ngày, hoặc trả dòng cũ) — credit cho các mã đó có thể CHƯA tới")
         if not res["items"]:
-            return cannot(why + ", chưa kết luận được")
+            return cannot(why + ", chưa kết luận được", "STALE_BATCH")
         res["notes"].append(why)
     res["status"] = "DRIFT" if res["items"] else "NO_DRIFT"
     return res
@@ -719,6 +721,17 @@ def main(argv=None):
     return rc
 
 
+def _quiet_outside_window(a, res, sim_at):
+    """Lượt GỌI TAY/ngoài lịch (không --date, không --sim-live-at, không --report-block) trước 20:40
+    ICT mà thiếu bằng chứng THEO GIỜ (dnse_raw hôm nay chưa tồn tại — sau 00:00 ngày đã đổi; hoặc
+    lô chưa qua batch cuối ngày) ⇒ chưa đến lúc kiểm, KHÔNG phải 'không kiểm được'. 4 retro liên tiếp
+    (26-29/10) nhận finding giả từ các lượt 00:02-00:30 và 20:20. Lượt chính thức ≥20:40 (cron 20:50,
+    send_plan_report) và mọi lỗi khác (DNSE chết, không có cơ sở…) vẫn ồn."""
+    return (res["status"] == "CANNOT_CHECK" and res.get("code") in ("NO_RAW", "STALE_BATCH")
+            and not a.date and not sim_at and not a.report_block
+            and now_ict().strftime("%H:%M:%S") < OFFICIAL_FROM)
+
+
 def _main_locked(a, P, date_str, sim_at):
     prev = None if a.no_state else read_state(P, a.account, date_str)
 
@@ -733,6 +746,10 @@ def _main_locked(a, P, date_str, sim_at):
         res = {"account": a.account, "account_no": acct_no, "date": date_str,
                "checked_at": now_ict().isoformat(timespec="seconds"), "status": "CANNOT_CHECK",
                "reason": f"script lỗi ({type(e).__name__}: {str(e)[:200]})", "items": []}
+    if _quiet_outside_window(a, res, sim_at):
+        print(f"[drift] {a.account} {date_str}: thoát im lúc {now_ict().strftime('%H:%M')} (<20:40, "
+              f"ngoài cửa sổ kiểm) — {res.get('reason')}; không ghi state/bus", file=sys.stderr)
+        return 0
     lines = render(res)
     pres = (prev or {}).get("result") or {}
     if (a.report_block and res["status"] == "CANNOT_CHECK"
