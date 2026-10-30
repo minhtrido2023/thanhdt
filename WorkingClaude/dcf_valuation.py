@@ -18,6 +18,10 @@ MODEL (2-stage FCFE):
     (the prior default = 5y-avg CPI only, cpi_vn.py) is still available.
   Discount rate (cost of equity) r = Big-4 12M deposit rate (deposit_rate_vn.py) + ERP,
     ERP = 6.5% (empirical: VNINDEX total-return premium over Big-4 deposit, 2013-2026).
+    RATE FRAME knob DCF_RATE_FRAME (job Taylor_20261030_041731, PROPOSAL — default "legacy" = the
+    line above, byte-identical): "domestic_v2" switches r AND terminal g TOGETHER to
+    r = RF_DOMESTIC 6.75 + ERP_DOMESTIC 5.5 = 12.25% (constant) and g_T cap = G_T_DOMESTIC 5.5%.
+    See RATE_FRAME below; research mike/agents/Taylor/research/erp_domestic_v2_20261030/.
   FCFE (free cash flow to equity) proxy = CFO - capex = CF_OA + CF_Invest (both absolute
     VND in tav2_bq.ticker_financial; CF_Invest is negative for capex outflow; net-borrowing
     assumed ~0 = stable capital structure). Base level = normalized 3-year average FCFE
@@ -94,6 +98,24 @@ CPI_TERMINAL_YEARS = 5
 TERM_MODES = ("cpi", "cpi_gdp_full", "cpi_gdp_half", "cap_rf")
 GDP_FADE = 0.5                                          # convergence haircut for cpi_gdp_half
 DEFAULT_TERM_MODE = os.environ.get("DCF_TERMINAL_MODE", "cap_rf")
+
+# ---------------------------------------------------------------- rate FRAME (r and g_T TOGETHER)
+# "legacy" (DEFAULT, until the user approves a switch): r = consumer_deposit_rate(asof) + ERP; g_T per
+#   DEFAULT_TERM_MODE ("cap_rf" caps g_T at that same deposit rate).
+# "domestic_v2" (proposal, job Taylor_20261030_041731): r = RF_DOMESTIC + ERP_DOMESTIC (+ (erp - ERP)
+#   so callers that vary `erp` still shift r) — a CONSTANT long-run rate, no longer today's deposit
+#   rate; and in mode "cap_rf" g_T = min(cpi + real GDP, G_T_DOMESTIC). One knob on purpose: moving r
+#   alone (keeping g_T capped at the 7.4% deposit) raised the universe median FV +35% in the research
+#   simulation; moving both changed it -1.4% (erp_domestic_v2_20261030/out_imp_asof_summary.csv).
+# Rollback = unset DCF_RATE_FRAME (or =legacy). dcf_refresh_gate.py stays deposit-driven: under
+# domestic_v2 a deposit move no longer changes r, so its trigger becomes a harmless no-op recompute.
+RATE_FRAMES = ("legacy", "domestic_v2")
+RATE_FRAME = os.environ.get("DCF_RATE_FRAME", "legacy")
+if RATE_FRAME not in RATE_FRAMES:
+    raise ValueError(f"DCF_RATE_FRAME={RATE_FRAME!r} unknown (expected one of {RATE_FRAMES})")
+RF_DOMESTIC = 6.75             # % normalized VND risk-free (building block: target CPI 4.25 + real 2.5)
+ERP_DOMESTIC = 5.5             # % domestic ERP (research central 5.42 -> 0.25 grid; NOT robust: 5.22-6.15)
+G_T_DOMESTIC = 0.055           # target CPI 4.25 + long-run real 1.25 (decimal)
 
 # financial-sector ICB codes (excluded — own Gordon-P/B frameworks)
 def is_financial_icb(icb):
@@ -226,6 +248,8 @@ def discount_rate(asof, erp=ERP):
     for a live/today call — before this fix, this explicit-asof call site never aged CCTG out at
     all). History unaffected: CCTG's only anchor is 2026-09-30, so every asof before that date is
     byte-identical to the prior Big-4-only series. Rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0."""
+    if RATE_FRAME == "domestic_v2":
+        return (RF_DOMESTIC + ERP_DOMESTIC + (erp - ERP)) / 100.0
     a = pd.to_datetime(asof)
     key = (str(a.date()), erp)
     if key not in _RATE_CACHE:
@@ -285,6 +309,8 @@ def terminal_growth_mode(asof, mode=None, erp=ERP, with_frac=False):
             g = cpi + gdp
         elif mode == "cpi_gdp_half":
             g = cpi + GDP_FADE * gdp
+        elif mode == "cap_rf" and RATE_FRAME == "domestic_v2":
+            g = min(cpi + gdp, G_T_DOMESTIC)                # r no longer tracks the deposit rate
         elif mode == "cap_rf":
             rf = discount_rate(asof, erp) - erp / 100.0    # deposit rate (nominal risk-free proxy)
             g = min(cpi + gdp, rf)
