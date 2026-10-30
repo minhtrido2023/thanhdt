@@ -1,0 +1,118 @@
+[1] rổ universe_pit 2026-10-29: 336 mã, 334 có PE/OShares [BQ]; lỗ (PE<0): 16
+                  est   n     ep  pe_equiv  roe5y_med  ke_ma  ke_mb  ke_mb_g425  ke_mb_g675  erp_ma  erp_mb
+        E1_vnindex_pe 334  8.352     11.97     0.1068 12.602  9.774       9.493      10.032   5.852   3.024
+         E2_aggregate 334  8.291     12.06     0.1068 12.541  9.743       9.455      10.008   5.791   2.993
+       E3_eqw_mean_w1 334 10.072      9.93     0.1068 14.322 10.655      10.573      10.708   7.572   3.905
+            E4_median 334  9.041     11.06     0.1068 13.291 10.127       9.925      10.303   6.541   3.377
+       E5_agg_ex_top5 329  9.369     10.67     0.1058 13.619 10.246      10.094      10.371   6.869   3.496
+      E6_agg_ex_top10 324  9.421     10.61     0.1036 13.671 10.162      10.042      10.254   6.921   3.412
+       E7_agg_ex_bank 310  6.827     14.65     0.0993 11.077  8.712       8.320       9.083   4.327   1.962
+         E8_agg_ex_re 280  9.738     10.27     0.1155 13.988 10.882      10.667      11.071   7.238   4.132
+    E9_agg_ex_bank_re 256  8.146     12.28     0.1068 12.396  9.669       9.364       9.951   5.646   2.919
+E10_median_ex_bank_re 256  9.182     10.89     0.1068 13.432 10.199      10.014      10.358   6.682   3.449
+  top-10 vốn hoá = 47.5% vốn hoá rổ, 40.3% lợi nhuận rổ; mã: VIC,VHM,VCB,BID,CTG,VGI,VPB,MBB,GAS,MCH
+  lịch sử 2014-03-31→2026-10-29 (N=52 quý có VNINDEX_PE): E2_aggregate − E1 trung vị -0.05pp, min -0.86, max +0.87
+  lịch sử 2014-03-31→2026-10-29 (N=52 quý có VNINDEX_PE): E4_median − E1 trung vị +1.32pp, min -2.46, max +4.83
+  lịch sử 2014-03-31→2026-10-29 (N=52 quý có VNINDEX_PE): E6_agg_ex_top10 − E1 trung vị +0.73pp, min -1.19, max +3.54
+  lịch sử 2014-03-31→2026-10-29 (N=52 quý có VNINDEX_PE): E9_agg_ex_bank_re − E1 trung vị -0.21pp, min -3.17, max +2.50
+  D1 (M-b, trung vị 5 ước lượng robust) = 3.377 ; D2 (M-a) = 6.541
+[2] cổ tức trước 2014 = TB y_gross 2014–2016 = 3.686%/năm [UL-ngoại suy]; y_gross theo năm [BQ]: 2013:0.00, 2014:4.01, 2015:3.68, 2016:3.36, 2017:2.94, 2018:1.93, 2019:1.96, 2020:1.84, 2021:1.22, 2022:1.50, 2023:1.68, 2024:1.87, 2025:1.62, 2026:1.66
+  VNINDEX_PE có từ 2007-12-03 [BQ]
+   window      leg  years  eq_cagr  rf_avg  erp_geo  erp_arith  rerating_pa  erp_geo_ex_rerating  boot_p5  boot_p95
+    2008→  tpcp10y  18.82    6.327   6.641   -0.294      3.467       -4.253                3.958    -6.26     12.43
+    2011→ big4_12m  15.82   11.245   7.244    3.730      5.511       -0.247                3.977    -2.10     13.08
+    2011→  tpcp10y  15.82   11.245   5.770    5.176      6.898       -0.247                5.422    -0.59     14.46
+    2014→ big4_12m  12.83   12.754   6.177    6.194      8.042       -0.496                6.690     0.11     16.03
+    2014→  tpcp10y  12.83   12.754   4.580    7.816      9.563       -0.496                8.312     1.74     17.49
+ 2016-07→ big4_12m  10.33   12.441   6.186    5.891      7.829       -1.827                7.718    -1.80     17.35
+ 2016-07→  tpcp10y  10.33   12.441   3.932    8.187     10.008       -1.827               10.013     0.56     19.36
+2008-2013  tpcp10y   6.00   -6.219  11.188  -15.655     -9.757      -12.290               -3.364      NaN       NaN
+2014-2019 big4_12m   6.00   14.706   6.532    7.672      8.711        3.457                4.216      NaN       NaN
+2014-2019  tpcp10y   6.00   14.706   6.126    8.085      9.095        3.457                4.628      NaN       NaN
+2020-2026 big4_12m   6.83   11.067   5.866    4.912      7.455       -3.968                8.880      NaN       NaN
+2020-2026  tpcp10y   6.83   11.067   3.240    7.581      9.974       -3.968               11.549      NaN       NaN
+   window      leg div_case  erp_geo
+    2008→  tpcp10y    div-1   -0.601
+    2011→ big4_12m    div-1    3.540
+    2011→  tpcp10y    div-1    4.984
+2008-2013  tpcp10y    div-1  -16.467
+    2008→  tpcp10y    div+1    0.010
+    2011→ big4_12m    div+1    3.918
+    2011→  tpcp10y    div+1    5.367
+2008-2013  tpcp10y    div+1  -14.843
+  D3-thay thế (2016-07→, cửa sổ PREREG dự kiến) = 7.154 — độ nhạy, KHÔNG vào luật
+  D3 (2011→, bỏ tái định giá, quy về rf_c) = 3.977 + (7.244 − 6.75) = 4.471
+  D4 (2014→, quy về rf_c) = 6.194 + (6.177 − 6.75) = 5.621
+[3] rf proxy:
+                                 proxy       rate_pct                                                                       source
+          building-block thấp/giữa/cao 6.00/6.75/7.50                                   π mục tiêu 4,0–4,5 + thực 2–3 [UL] (29/10)
+                     TPCP 10Y hiện tại           4.47                                        [SRC] ADB AsianBondsOnline 28/10/2026
+                 TPCP 10Y TB 2016-2025           3.95                                              9/16 điểm chuỗi chưa kiểm chứng
+                     Big-4 12M hôm nay           6.80                                            [CANONICAL-PROXY] deposit_rate_vn
+                   Big-4 12M TB 10 năm           6.01                                        deposit_rate_vn, mốc neo có hindsight
+                    Big-4 12M TB 2011→           6.99                                                       gồm giai đoạn 14% 2011
+                              CCTG 12M           7.40                                    [CANONICAL-PROXY] cctg_rate_vn 2026-10-12
+NHNN TB huy động >12T 2026-08 thấp/cao      6.10/7.60                                                   [SRC-PIT] FiinPro snapshot
+                        Lãi cho vay TB       8.3-10.7 [SRC thứ cấp] VNF 21/09/2026 (TB 08/2026 10,7%; nhóm NHTM 8,3–10,5% 07/2026)
+  kiểm: rf_c 6.75 nằm giữa TPCP 10Y 4,47 và lãi cho vay 8,3–10,7 ⇒ ĐẠT
+[4] ERP nội địa: D1=3.377, D2=6.541, D3=4.471, D4=5.621 ⇒ trung tâm (trung vị) 5.046; dải 3.377–6.541
+  Ke β=1.0: 10.13 / 11.80 / 13.29
+  Ke β=1.1: 10.46 / 12.30 / 13.95
+  Ke β=1.2: 10.80 / 12.81 / 14.60
+[5] justify: 334 mã có PE; lỗ 16; ROE5Y NULL 0; xếp 294 phi-NH + 24 NH
+  ke  pct_rich  pct_mcap_rich  pct_very_rich  pe_imp_median
+ 9.0      47.6           54.5           36.4          14.62
+ 9.5      52.0           58.8           39.5          12.80
+10.0      54.1           59.5           42.9          11.37
+10.5      56.8           65.1           45.9          10.24
+11.0      60.9           70.4           48.3           9.31
+11.5      63.3           71.3           52.0           8.53
+12.0      65.6           72.3           53.4           7.87
+12.5      68.0           74.0           55.1           7.31
+13.0      69.7           75.9           56.8           6.82
+13.5      72.4           78.7           60.2           6.40
+14.0      74.8           80.9           60.9           6.02
+14.5      76.5           81.9           63.3           5.69
+15.0      78.2           84.9           64.3           5.39
+15.5      80.3           87.5           66.7           5.12
+16.0      81.3           87.7           68.0           4.87
+16.5      82.7           87.9           69.4           4.65
+17.0      83.7           88.1           70.4           4.45
+  ke  n  pct_rich  pct_mcap_rich
+11.0 24      25.0           10.9
+12.0 24      25.0           10.9
+13.0 24      33.3           32.1
+14.0 24      37.5           33.2
+15.0 24      54.2           58.3
+16.0 24      66.7           69.3
+  PE thực trung vị phi-NH = 11.01; ROE5Y trung vị = 0.1068
+  ICC mã-lẻ phi-NH g=5.5: trung vị 9.29 (IQR 6.95–14.01); TB trọng số vốn hoá 9.75 ⇒ ERP trung vị 2.54
+  ICC mã-lẻ phi-NH g=4.25: trung vị 9.18 (IQR 6.29–13.83); TB trọng số vốn hoá 8.98 ⇒ ERP trung vị 2.43
+  ICC mã-lẻ phi-NH g=6.75: trung vị 9.77 (IQR 7.83–14.40); TB trọng số vốn hoá 10.54 ⇒ ERP trung vị 3.02
+SELFCHECK A dcf nghich: 21407 vs 21407 lệch 0
+SELFCHECK A dcf coso: 32925 vs 32925 lệch 0
+SELFCHECK A dcf thuan: 41779 vs 41779 lệch 0
+SELFCHECK A ev: 29817 vs 29817 lệch 0
+[6] DGC tầng A:
+                       cand   rf  beta  erp    ke  dcf_nghich  dcf_coso  dcf_thuan    ev
+               r7 hiện hành 7.40  1.00 7.50 14.90       21407     32925      41779 29817
+                   ERP thấp 6.75  1.00 3.38 10.13       27859     43688      57061 34462
+                   ERP thấp 6.75  1.10 3.38 10.46       27149     42504      55379 33954
+                   ERP thấp 6.75  1.11 3.38 10.50       27068     42368      55186 33896
+                   ERP thấp 6.75  1.20 3.38 10.80       26481     41388      53795 33475
+              ERP trung tâm 6.75  1.00 5.05 11.80       24811     38603      49841 32276
+              ERP trung tâm 6.75  1.10 5.05 12.30       24110     37434      48181 31772
+              ERP trung tâm 6.75  1.11 5.05 12.35       24044     37324      48024 31724
+              ERP trung tâm 6.75  1.20 5.05 12.81       23468     36363      46660 31309
+                    ERP cao 6.75  1.00 6.54 13.29       22922     35451      45365 30914
+                    ERP cao 6.75  1.10 6.54 13.95       22248     34327      43769 30427
+                    ERP cao 6.75  1.11 6.54 14.01       22190     34231      43633 30385
+                    ERP cao 6.75  1.20 6.54 14.60       21658     33343      42373 29999
+     Damodaran mature (sàn) 6.75  1.00 4.23 10.98       26150     40836      53011 33238
+     Damodaran mature (sàn) 6.75  1.10 4.23 11.40       25432     39638      51310 32722
+     Damodaran mature (sàn) 6.75  1.11 4.23 11.45       25351     39504      51119 32664
+     Damodaran mature (sàn) 6.75  1.20 4.23 11.83       24767     38530      49736 32244
+Damodaran tổng (nước ngoài) 6.75  1.00 8.13 14.88       21424     32952      41818 29829
+Damodaran tổng (nước ngoài) 6.75  1.10 8.13 15.69       20803     31918      40349 29377
+Damodaran tổng (nước ngoài) 6.75  1.11 8.13 15.77       20746     31823      40213 29336
+Damodaran tổng (nước ngoài) 6.75  1.20 8.13 16.51       20250     30995      39039 28974

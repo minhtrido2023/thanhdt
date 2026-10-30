@@ -1,0 +1,10 @@
+proxy,rate_pct,source
+building-block thấp/giữa/cao,6.00/6.75/7.50,"π mục tiêu 4,0–4,5 + thực 2–3 [UL] (29/10)"
+TPCP 10Y hiện tại,4.47,[SRC] ADB AsianBondsOnline 28/10/2026
+TPCP 10Y TB 2016-2025,3.95,9/16 điểm chuỗi chưa kiểm chứng
+Big-4 12M hôm nay,6.80,[CANONICAL-PROXY] deposit_rate_vn
+Big-4 12M TB 10 năm,6.01,"deposit_rate_vn, mốc neo có hindsight"
+Big-4 12M TB 2011→,6.99,gồm giai đoạn 14% 2011
+CCTG 12M,7.40,[CANONICAL-PROXY] cctg_rate_vn 2026-10-12
+NHNN TB huy động >12T 2026-08 thấp/cao,6.10/7.60,[SRC-PIT] FiinPro snapshot
+Lãi cho vay TB,8.3-10.7,"[SRC thứ cấp] VNF 21/09/2026 (TB 08/2026 10,7%; nhóm NHTM 8,3–10,5% 07/2026)"
