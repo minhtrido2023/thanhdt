@@ -140,3 +140,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T18:00:25Z] 30/10 01:0x: lotbook-manual-20261030 arch-review NEEDS_CHANGES (chỉ harness test) → Mike tự sửa (commit trên nhánh, T9/T10 + M5/M6 + harness WC_ROOT), 7/7 mutant bị bắt thật. CHỜ USER duyệt MERGE session/lotbook-manual-20261030 (sổ lô trừ lệnh bán tay VERIFIED; SCL mở chặn auto-exit; DRI vẫn chặn 2450/1250, 1250/650 — chưa có trong sổ lệnh tay). Job quant-skeptic_20261029_135128 stale OVERDUE: cancel bị classifier chặn — báo user.
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T18:58:18Z] 30/10 02:0x: MERGED lotbook (master 595f747a6). Đã khai DRI 21/10 vào sổ lệnh tay thật (SpaceX 1200 lệnh 20261021_438341, ZaloPay 600 lệnh 20261021_439211, VERIFIED). Kiểm: park_holdings asof 29/10 cả 2 TK reconcile OK, 0 UNVERIFIED (DRI 1250/650 khớp broker, SCL OK); nav_period_returns 0 cảnh báo. Ack cash_identity 8 mục giờ dư (giữ). Còn: sau 09:05 kiểm bot đặt SELL SCL chiều; chờ user: merge g3-hygiene, cron shadow clearing; job quant-skeptic_20261029_135128 stale (cancel bị chặn).
