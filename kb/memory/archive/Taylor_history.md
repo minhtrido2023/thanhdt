@@ -1664,3 +1664,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T13:27:35Z] [dgc-val r11 29/10] XONG job Taylor_20261029_131656: research/dgc_valuation_20261029_r11/ (chua commit); NS trong A7 +2.163d/cp, bottom-up NPAT2030 -182/217/479, khong doi gia dinh chinh; 100ty/quy vinh vien = khong tien le — CHO Mike/skeptic; mo: von 2.400 vs 2.900, gia dan xuat clo/H3PO3 [UL]
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T13:37:30Z] [manual-deviation 29/10] XONG e11fab9bd nhanh session/manual-deviation-20261029 (wt-manual-deviation-20261029, chua merge) — CHO Mike arch-review + user; sau merge seed so that (add --verify 2 lenh SCL) + chay lai NAV 29/10

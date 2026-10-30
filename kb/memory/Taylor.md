@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-29T13:37:30Z] [manual-deviation 29/10] XONG e11fab9bd nhanh session/manual-deviation-20261029 (wt-manual-deviation-20261029, chua merge) — CHO Mike arch-review + user; sau merge seed so that (add --verify 2 lenh SCL) + chay lai NAV 29/10
 - [2026-10-29T13:45:40Z] [dgc-ke 29/10] XONG job Taylor_20261029_133456: Ke 14,9% giua vung 12,2-16,7% (PREREG tam 15,8%, thi truong 13,1%); rf trung tam 6,75 building-block — CHO Mike/user; mo: dcf_valuation g_T=rf 7,4% can nghien cuu rieng
 - [2026-10-29T13:54:56Z] [manual-deviation vòng 2 29/10] XONG @83da1791f nhanh session/manual-deviation-20261029 (chưa merge) — CHO Mike arch-review vòng 3 + user; pageIndex=1-based là giả định chưa kiểm DNSE thật
 - [2026-10-29T14:00:47Z] [dgc r12 + investor-report-v2 29/10] XONG job Taylor_20261029_134234: research/dgc_valuation_20261029_r12/ + dd_DGC_20261029/investor_report_v2/ (23tr, chua commit) — CHO Mike doc kiem/gui email; sua vong 5 chua duoc skeptic ra lai
@@ -26,3 +25,4 @@
 - [2026-10-30T04:42:45Z] [erp-domestic-v2 30/10] XONG job Taylor_20261030_041731: research/erp_domestic_v2_20261030/ (37eb90ef5) ERP 5,42 khong ben (5,22-6,15); patch f3f756256 nhanh session/erp-domestic-dcf-20261030 (wt-erp-domestic-dcf-20261030, chua merge) — CHO quant-skeptic + user; truoc khi bat sua 2 selfcheck CCTG + dcf_earning_power.py:53
 - [2026-10-30T05:37:36Z] [erp-domestic-dcf-enable 30/10] XONG job Taylor_20261030_050926: aba7502d1 (session/erp-domestic-dcf-20261030) + c8d4f77d4 mike (session/erp-domestic-dcf-ops-20261030), chua merge — CHO Mike arch-review+skeptic, merge 2 nhanh cung luot; rollback = RATE_FRAME_DEFAULT -> legacy
 - [2026-10-30T07:45:57Z] [dcf-followups 30/10] XONG nhanh session/dcf-followups-20261030 (outer 35826c455, mike cfff46935, chua merge) — CHO Mike arch-review + merge 2 repo cung luot
+- [2026-10-30T10:04:14Z] [oshares-live-dcf 30/10] XONG outer 0a1a16675 (session/oshares-live-20261030, wt /home/trido/wt-oshares-live-20261030) + mike 898b4fd17 (session/oshares-live-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live = quyet dinh rieng
