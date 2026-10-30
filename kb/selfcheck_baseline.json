@@ -24,7 +24,9 @@
       "mike/bin/dispatch_discord_topic_selfcheck.sh": 240,
       "_comment_mike_bin": "Khoá = ĐƯỜNG DẪN runner thấy (cwd WorkingClaude ⇒ mike/bin/x), KHÔNG phải basename — 2 khoá trên viết basename từ 2026-08-21 nên chưa từng khớp (sửa 2026-10-23). Đo thật 2026-10-23 (DNA_PYEXE, máy có tải song song): sunday_plan_round 713s (717 assertion x3 TZ + 43 mutant), livermore 412s (3 TZ + 36 mutant) — cả hai rc=0; TIMEOUT 150s là ĐỎ GIẢ. Trần ~2x đo.",
       "mike/bin/sunday_plan_round_selfcheck.sh": 1500,
-      "mike/bin/livermore_selfcheck.py": 900
+      "mike/bin/livermore_selfcheck.py": 900,
+      "_comment_20261031": "Weekly ops audit 2026-10-31 (job Mike_20261030_211230): deposit_fallback_direction đo tay 173s ALL PASS — TIMEOUT 150s ở runner này là ĐỎ GIẢ từ 2026-10-14 (run_selfchecks.sh đã có t=360 từ 10-17, bảng này chưa đồng bộ). Trần ~2x đo.",
+      "deposit_fallback_direction_selfcheck.py": 360
     },
     "manual_only": {
       "mike/bin/orb_pt_appendonly_selfcheck.py": "Tự khai chỉ-chạy-TAY (docstring): mỗi lần gọi vnstock THẬT 4 lần. Weekly/daily baseline BỎ QUA để không đập vendor bên thứ ba mỗi đêm (bus Mike/selfcheck-baseline-checker-no-tier-orb-vnstock-daily, phương án A, 2026-10-05)."
