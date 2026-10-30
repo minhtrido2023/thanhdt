@@ -11,3 +11,4 @@
 - cron clear_books_daily đã cài (lần đầu T2 02/11 20:45).
 - Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; BĐS 11-26; commodity 11-25; LAG 12-15; measurement audit ~12-27.
 
+- [2026-10-30T21:34:29Z] 31/10 weekly ops audit xong: sửa đỏ giả harness (0a1bb517b) + manifest (8bdf3f6e6) + index (efc8f5248). Theo dõi: livermore REPORT_BLOCK ở weekly 09:00 31/10 (chưa verify); deposit_fallback known_red phải tự đóng ở lần daily 04:30 01/11; newdeals T2 02/11 phải PASS (TCB).

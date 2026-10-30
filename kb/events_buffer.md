@@ -531,3 +531,39 @@
 - [2026-10-30T20:15:30Z] Wags/answer — selfcheck-red: capit_lever_selfcheck.py — recovered 2026-10-30: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "capit_lever_selfcheck.py", "artifact": "chạy lại lúc 2026-10-30T20:15:30Z bằng đúng required_env ⇒ PASS", "red_since": "2026-10-26T22:38:29Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
 - [2026-10-30T20:15:30Z] Wags/answer — selfcheck-red: macro_killswitch_a_selfcheck.py — recovered 2026-10-30: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "macro_killswitch_a_selfcheck.py", "artifact": "chạy lại lúc 2026-10-30T20:15:30Z bằng đúng required_env ⇒ PASS", "red_since": "2026-10-26T22:38:29Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
 - [2026-10-30T20:15:30Z] Wags/answer — selfcheck-red: mike/bin/commodity_cycle_forward_tracker_selfcheck.py — recovered 2026-10-30: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/commodity_cycle_forward_tracker_selfcheck.py", "artifact": "chạy lại lúc 2026-10-30T20:15:30Z bằng đúng required_env ⇒ PASS", "red_since": "2026-10-29T22:38:30Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
+
+## Consolidation 2026-10-30T21:34:52Z
+- [2026-10-30T21:12:45Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "bat dau weekly ops audit: muc 1 cron_health_check"}
+- [2026-10-30T21:13:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:13:40Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 1: triage cron errors (NAV ok, DNSE 500 26/10 da co retro)"}
+- [2026-10-30T21:14:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:15:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:15:35Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 1: STALE/LOG_MISSING triage"}
+- [2026-10-30T21:16:25Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 1: quet log chua dang ky"}
+- [2026-10-30T21:16:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:17:16Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 2: verify 12 fix commits bang artifact"}
+- [2026-10-30T21:17:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:18:15Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 3-4: spend + kb size"}
+- [2026-10-30T21:18:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 6, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:18:55Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 5-7: incidents sync, bus backlog, retro coverage"}
+- [2026-10-30T21:19:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 7, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:20:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 8, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:21:29Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 8: selfcheck triage (manifest drift, 3 timeout rerun)"}
+- [2026-10-30T21:21:31Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 9, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:22:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 10, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:23:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 11, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:24:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 12, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:24:50Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 8: manifest fixed 8bdf3f6e6; doc ket qua 3 selfcheck timeout"}
+- [2026-10-30T21:25:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 13, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:25:45Z] Mike/heartbeat — Mike_20261030_211230: {"status": "in_progress", "note": "muc 8: dong bo timeout deposit_fallback vao baseline; cho sunday_plan_round rerun"}
+- [2026-10-30T21:26:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 14, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:27:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 15, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:28:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 16, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:29:32Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 17, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:30:33Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 18, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:31:33Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 19, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:32:33Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 20, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:33:33Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 21, "job_id": "Mike_20261030_211230", "source": "watcher"}
+- [2026-10-30T21:34:25Z] Mike/decision — weekly-ops-audit: {"date": "2026-10-31", "bugs_found": 3, "bugs_fixed": 3, "fix_commits": ["efc8f5248", "8bdf3f6e6", "0a1bb517b"], "escalated": 0, "pending_questions": 0, "pct_fable": 0, "pct_opus": 46, "kb_bytes": {"context_pack": 43807, "current_ops": 22407, "canonical": 20980, "MIKE": 33821, "coding_guidelines": 35741}, "unverified_fixes": ["323e39b21 livermore REPORT_BLOCK (weekly 09:00 31/10 la lan trigger dau)"], "notes": "no live production bug; newdeals TCB gate block self-heals Mon (dry-run PASS); phs sandbox 503 external"}
+- [2026-10-30T21:34:25Z] Mike/finding — weekly-ops-audit-2026-10-31: {"summary": "3 do gia harness/manifest da sua (deposit_fallback timeout chua dong bo 2 runner 17 ngay; sunday_plan_round/oshares_dcf timeout 60s; production_manifest drift co y); 0 bug production song; 9/12 fix tuan qua verify bang artifact", "measured_by": "cron_health_check + chay lai selfcheck voi timeout rong + dry-run newdeals gate"}
+- [2026-10-30T21:34:33Z] Mike/heartbeat — Mike_20261030_211230: {"status": "still_running", "elapsed_min": 22, "job_id": "Mike_20261030_211230", "source": "watcher"}
