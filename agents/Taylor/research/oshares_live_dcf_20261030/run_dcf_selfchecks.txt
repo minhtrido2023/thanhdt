@@ -1,0 +1,12 @@
+dcf_rate_frame_selfcheck.py [TZ=UTC] rc=0 :: PASS [M5b] gỡ in ke_range_note ở dcf_earning_power ⇒ [5b] đỏ  SELFCHECK OK 
+dcf_rate_frame_selfcheck.py [-u TZ] rc=0 :: PASS [M5b] gỡ in ke_range_note ở dcf_earning_power ⇒ [5b] đỏ  SELFCHECK OK 
+dcf_check_selfcheck.py [TZ=UTC] rc=0 ::   [19] path không ghi được → nuốt lỗi, không raise: OK   [20] _dcf_check_for_order KHÔNG tự ghi lịch sử (chỉ report gọi): OK 
+dcf_check_selfcheck.py [-u TZ] rc=0 ::   [19] path không ghi được → nuốt lỗi, không raise: OK   [20] _dcf_check_for_order KHÔNG tự ghi lịch sử (chỉ report gọi): OK 
+dcf_selector_selfcheck.py [TZ=UTC] rc=0 ::   OK    all 2 dcf_at(...) call-sites sit inside an `dcf_at is not None` guard (3 guards; unguarded lines=[]) -> OFF leaves yieldcombo untouched SELFCHECK PASS 
+dcf_selector_selfcheck.py [-u TZ] rc=0 ::   OK    all 2 dcf_at(...) call-sites sit inside an `dcf_at is not None` guard (3 guards; unguarded lines=[]) -> OFF leaves yieldcombo untouched SELFCHECK PASS 
+dcf_refresh_gate_selfcheck.py [TZ=UTC] rc=0 ::   [PASS] dry run writes no state file ALL PASS 
+dcf_refresh_gate_selfcheck.py [-u TZ] rc=0 ::   [PASS] dry run writes no state file ALL PASS 
+dcf_earning_power_test.py [TZ=UTC] rc=0 :: 
+dcf_earning_power_test.py [-u TZ] rc=0 :: 
+tz_asof_ict_dd_dcf_selfcheck.py [TZ=UTC] rc=0 :: 115/115 PASS ALL PASS 
+tz_asof_ict_dd_dcf_selfcheck.py [-u TZ] rc=0 :: 115/115 PASS ALL PASS 

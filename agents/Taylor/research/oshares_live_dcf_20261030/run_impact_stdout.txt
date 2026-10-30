@@ -1,0 +1,60 @@
+== TCB 2026-10-30: OShares quý 7,086,240,414 -> live 10,629,360,621 (ISS_ESTIMATE, ISS announced đã thêm ['2026-10-29']); hệ số FV/cp nếu tính được = 0.6667
+   fair_value[fin] ok=False reason=financial-sector (BANK/INSURANCE/SECURIT
+   fair_value[live] ok=False reason=financial-sector (BANK/INSURANCE/SECURIT
+== asof 2026-10-29: universe có giá 336 | DCF ok 145 | ok_fin!=ok_live 0
+   FV đổi: 9 mã; |ΔFV| >1%: 7, >5%: 6
+   fv_ratio min 0.5556 / median 0.9091 / max 1.0092
+   lật status 3; đổi robust 1
+   nguồn live: {'oshares_live': 137, 'ticker_financial': 8}
+ticker      osh_fin     osh_live  fv_ratio  mos_fin  mos_live st_fin st_live rb_fin rb_live      method ann_added
+   PHR  135499198.0  243897799.0    0.5556   0.3134   -0.2359  CHEAP    RICH   True    True ANCHOR_ONLY          
+   HTN   89116411.0  133674437.0    0.6667   0.2935   -0.0597  CHEAP    RICH   True   False   AIS_EXACT          
+   AIG  170601298.0  196191443.0    0.8696   0.1205   -0.0114  CHEAP    RICH  False   False   AIS_EXACT          
+   TDP   93699574.0  103069382.0    0.9091  -1.3803   -1.6183   RICH    RICH   True    True ANCHOR_ONLY          
+   FPT 1714326422.0 1885727648.0    0.9091   0.3209    0.2530  CHEAP   CHEAP   True    True ANCHOR_ONLY          
+   DIG  796431191.0  844192763.0    0.9434   0.7092    0.6918  CHEAP   CHEAP   True    True   AIS_EXACT          
+   VNZ   29726465.0   30427986.0    0.9769  -1.8674   -1.9350   RICH    RICH   True    True ANCHOR_ONLY          
+   DGW  223361000.0  221320169.0    1.0092  -4.0503   -4.0042   RICH    RICH   True    True   AIS_EXACT          
+   REE  622899036.0  623399036.0    0.9992  -0.0431   -0.0439   RICH    RICH  False   False ANCHOR_ONLY          
+== asof 2026-07-29: universe có giá 361 | DCF ok 157 | ok_fin!=ok_live 0
+   FV đổi: 13 mã; |ΔFV| >1%: 11, >5%: 9
+   fv_ratio min 0.7692 / median 0.9091 / max 0.9997
+   lật status 1; đổi robust 0
+   nguồn live: {'oshares_live': 150, 'ticker_financial': 7}
+ticker      osh_fin     osh_live  fv_ratio  mos_fin  mos_live st_fin st_live rb_fin rb_live            method ann_added
+   PSD   54027894.0   70236112.0    0.7692   0.6548    0.5512  CHEAP   CHEAP   True    True       ANCHOR_ONLY          
+   PTB   80326084.0  100407074.0    0.8000   0.4571    0.3213  CHEAP   CHEAP   True    True         AIS_EXACT          
+   REE  541658139.0  622899036.0    0.8696   0.0642   -0.0761  CHEAP    RICH  False   False         AIS_EXACT          
+   IDC  379498823.0  417446864.0    0.9091   0.5211    0.4732  CHEAP   CHEAP   True    True       ANCHOR_ONLY          
+   HDG  369963035.0  406957333.0    0.9091   0.6507    0.6157  CHEAP   CHEAP   True    True         AIS_EXACT          
+   DHC   96591206.0  106249620.0    0.9091   0.5496    0.5046  CHEAP   CHEAP   True    True       ANCHOR_ONLY          
+   DTD   66686055.0   73353788.0    0.9091   0.6140    0.5754  CHEAP   CHEAP   True    True       ANCHOR_ONLY          
+   VCG  646468336.0  698176245.0    0.9259   0.7740    0.7559  CHEAP   CHEAP   True    True       ANCHOR_ONLY          
+   PCH   25409893.0   27188477.0    0.9346   0.2129    0.1579  CHEAP   CHEAP   True    True       ANCHOR_ONLY          
+   VPL 1793300377.0 1877450377.0    0.9552  -2.8777   -3.0597   RICH    RICH   True    True ANCHOR_UNVERIFIED          
+   PAN  250673166.0  258072996.0    0.9713   0.6660    0.6561  CHEAP   CHEAP   True    True         AIS_EXACT          
+   MWG 1475765646.0 1477035294.0    0.9991   0.1436    0.1429  CHEAP   CHEAP   True    True         AIS_EXACT          
+   PNJ  511721959.0  511891518.0    0.9997  -0.8086   -0.8092   RICH    RICH   True    True         AIS_EXACT          
+== asof 2025-10-29: universe có giá 438 | DCF ok 184 | ok_fin!=ok_live 0
+   FV đổi: 7 mã; |ΔFV| >1%: 6, >5%: 4
+   fv_ratio min 0.5000 / median 0.9526 / max 1.3588
+   lật status 1; đổi robust 1
+   nguồn live: {'oshares_live': 177, 'ticker_financial': 7}
+ticker      osh_fin     osh_live  fv_ratio   mos_fin  mos_live st_fin st_live rb_fin rb_live       method ann_added
+   BKC   11737728.0   23475456.0    0.5000    0.8573    0.7147  CHEAP   CHEAP   True    True    AIS_EXACT          
+   BSR 3100499616.0 5007299686.0    0.6192    0.3221   -0.0948  CHEAP    RICH   True   False FIN_FALLBACK          
+   MST  113604220.0   83604220.0    1.3588   -1.0783   -0.5295   RICH    RICH   True    True    AIS_EXACT          
+   ELC   99947436.0  110088903.0    0.9079   -2.5289   -2.8870   RICH    RICH   True    True  ANCHOR_ONLY          
+   SBT  814545038.0  855112589.0    0.9526 -236.0001 -247.8037   RICH    RICH   True    True  ANCHOR_ONLY          
+   GAS 2342672919.0 2412949756.0    0.9709   -0.0547   -0.0864   RICH    RICH  False   False    AIS_EXACT          
+   MPC  400938300.0  401093000.0    0.9996  -11.4073  -11.4121   RICH    RICH   True    True  ANCHOR_ONLY          
+== asof 2024-10-29: universe có giá 422 | DCF ok 149 | ok_fin!=ok_live 0
+   FV đổi: 4 mã; |ΔFV| >1%: 2, >5%: 1
+   fv_ratio min 0.9302 / median 0.9899 / max 0.9998
+   lật status 1; đổi robust 0
+   nguồn live: {'oshares_live': 144, 'ticker_financial': 5}
+ticker      osh_fin     osh_live  fv_ratio  mos_fin  mos_live st_fin st_live rb_fin rb_live      method ann_added
+   VSC  266791284.0  286796819.0    0.9302   0.3299    0.2796  CHEAP   CHEAP   True    True   AIS_EXACT          
+   GAS 2296739847.0 2342672919.0    0.9804   0.0051   -0.0147  CHEAP    RICH  False   False ANCHOR_ONLY          
+   PNJ  337905217.0  338074776.0    0.9995  -5.7300   -5.7334   RICH    RICH   True    True   AIS_EXACT          
+   IMP  154008962.0  154042762.0    0.9998  -2.0703   -2.0710   RICH    RICH   True    True   AIS_EXACT          
