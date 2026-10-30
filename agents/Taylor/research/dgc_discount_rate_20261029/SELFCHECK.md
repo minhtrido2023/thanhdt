@@ -14,12 +14,16 @@
    2e7561f8d8cdfbc418e8b6aec7f1bc71  out_rf_candidates.csv
    5ff668dffd152852c9363d9ccc8188bf  run_stdout.txt
    b3d963e3ba1ccbc90329ae538f13e661  model_ke.py
-   14e8c7a620fefc2e8401d920a423d5e2  data/tpcp10y_annual.csv
+   (data/tpcp10y_annual.csv: md5 đổi do relabel cột kind/source, số liệu không đổi)
    ```
    Lệnh: `TZ=<x> /home/trido/thanhdt/wc_venv/bin/python model_ke.py` (≈47 s).
 4. PREREG commit `19d692087` TRƯỚC khi lấy số rf/ERP/β và trước khi chạy bất kỳ FV nào.
 5. β đo bằng BQ trong phiên (5Y tuần 29/10/2021–28/10/2026, Close điều chỉnh, n=259 tuần; peer = `tav2_mike.universe_pit`
    in_universe 28/10/2026 ∩ ICB 13xx, 19 mã có ≥150 tuần — KHÔNG dùng ticker_prune).
-6. Giới hạn: chuỗi TPCP 10Y theo năm phần lớn **ước lượng** (xem `data/tpcp10y_annual.csv` cột `kind`); chỉ ảnh hưởng ứng viên (b),
+6. Giới hạn: chuỗi TPCP 10Y theo năm: 9/16 điểm **chưa kiểm chứng (trí nhớ mô hình)** (`kind=chua_kiem_chung` trong `data/tpcp10y_annual.csv`; relabel 30/10 không đổi số — rerun `model_ke.py` TZ=UTC cho md5 7 file out_*/run_stdout **trùng** danh sách trên); chỉ ảnh hưởng ứng viên (b),
    KHÔNG ảnh hưởng điểm trung tâm (luật PREREG rẽ sang (c) vì chênh 3,05pp ≫ 1pp — chênh vẫn >1pp nếu (b) sai ±2pp).
 7. Không có kiểm định thống kê: N năm = 10/15 quan sát tự tương quan cao ⇒ chỉ mô tả.
+8. **Bổ sung 30/10 (job Taylor_20261030_031028):**
+   - `beta_weekly.py` → `out_beta.csv`: DGC β thô 1,195 (n 259, ρ 0,480), peer trung vị 1,143 (N 18). KHÔNG tái lập đúng 1,204/1,125; skeptic đo 1,164; độ nhạy quy ước 1,19–1,22 (REPORT mục 3). Lệnh: `/home/trido/thanhdt/wc_venv/bin/python beta_weekly.py`.
+   - `xcheck_rf_inflation_diff.py` → `out_rf_infl_diff.csv`: rf chênh lệch lạm phát 6,71/6,97/7,23% (UST10Y 5,05%, T10YIE 2,38%, FRED 28/10/2026). Kiểm chéo, không đổi luật.
+   - Phép kiểm kênh P/B: 972 + 316 + 25 = 1.313 = Δblend cơ sở ở Ke 13,08% (tính từ `out_ke_candidates.csv`).

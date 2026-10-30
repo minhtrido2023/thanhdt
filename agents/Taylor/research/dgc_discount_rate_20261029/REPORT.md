@@ -7,10 +7,14 @@ PREREG `19d692087` (khai trước) · self-check 0 đồng · tất định 2 TZ
 1. **Số đang dùng là 14,9%, không phải 14,5%.** Ke = rf 7,4% + β 1,0 × ERP 7,5% [UL]. Con số này giống nhau từ r2 đến r11 và
    trong báo cáo nhà đầu tư DGC (dòng 238: "Chi phí vốn chủ 14,9%"). Không tầng nào có 14,5%. Gần nhất là r1 với **14,3%**
    (rf 6,8% = Big-4 12M). rf 7,4% lấy từ `effective_deposit_rate` = max(Big-4 12M 6,8%, CCTG 12M 7,4%), nguồn `cctg_12m(2026-10-12)`.
-2. **User đúng về nguyên tắc.** Lãi huy động 12M là kỳ hạn 1 năm, đang ở đỉnh chu kỳ, nên không phải rf cho dòng tiền vô hạn.
-   **Nhưng sửa đúng rf chỉ hạ Ke khoảng 0,65pp.** Lý do: ở VN, lợi suất TPCP 10Y (4,47%) đang **thấp hơn** lãi huy động 12M.
-   Đây là dấu hiệu thị trường trái phiếu bị kìm (Kho bạc neo giá; phiên 30/09 chỉ trúng thầu 33%), không phải rf "sạch".
-   Theo luật đã khai trước, rf trung tâm = **6,75%** (lạm phát mục tiêu 4,25% + lãi thực 2,5%).
+2. **User đúng về nguyên tắc cho rf, nhưng Ke theo luật PREREG không giảm mà TĂNG.** Lãi huy động 12M là kỳ hạn 1 năm, đang ở đỉnh chu kỳ,
+   nên không phải rf cho dòng tiền vô hạn. Theo luật đã khai trước, rf trung tâm = **6,75%** (lạm phát mục tiêu 4,25% + lãi thực 2,5%),
+   **thấp hơn 0,65pp** so với 7,4% hiện hành. **Nhưng** ERP 7,5% của r7 đo trên lãi huy động nên không được ghép với rf mới (PREREG §3);
+   ERP bond-based theo Damodaran là 8,13% ⇒ Ke = 6,75 + 1,11 × 8,13 = **15,77%, tăng +0,87pp so với 14,9%**. Chỉ khi cho ERP về mốc thị trường
+   ngầm định 5,7% thì Ke mới giảm (13,1%). Nói "sửa rf hạ Ke 0,65pp" là sai khung: hạ rf không đủ để hạ Ke nếu ERP đổi theo.
+   Ở VN, TPCP 10Y (4,47%) đang **thấp hơn** lãi huy động 12M; dấu hiệu bị kìm (Kho bạc neo giá; phiên 30/09 chỉ trúng thầu 33%) nhưng
+   bằng chứng mỏng: **chỉ 1 điểm lợi suất (4,47%) + 1 phiên trúng thầu 33%**, và có thể là hiện tượng **cấu trúc từ 2020** (chuỗi tham khảo 2020-26
+   đều dưới 4,5%, nhưng phần lớn điểm chưa kiểm chứng nên chỉ là gợi ý) chứ không phải kìm nén nhất thời.
 3. **Mức Ke do ERP quyết định, không phải rf.** ERP 7,5% của r7 là [UL] và được đo so với lãi huy động. Hai mốc độc lập:
    Damodaran (01/2026) cho VN **8,13%** (ERP trưởng thành 4,23% + rủi ro quốc gia 3,90%), còn thị trường ngầm định
    (E/P VNINDEX + lạm phát − rf) cho khoảng **5,7%**. Hai mốc cách nhau 2,4pp, rộng gấp ~4 lần chênh lệch do rf.
@@ -20,7 +24,7 @@ PREREG `19d692087` (khai trước) · self-check 0 đồng · tất định 2 TZ
    - **14,9% hiện hành nằm trong vùng, gần giữa.** Không có cơ sở nói nó "quá cao" khi đo bằng khung dài hạn nhất quán.
 5. **Tác động lên DGC nhỏ hơn trực giác.** Ở tầng A, đổi Ke trong cả vùng 12,2–16,7% làm EV blend chạy **31.898 → 28.869**
    (gốc 29.817), còn DCF cơ sở chạy 37.726 → 30.756 (gốc 32.925). Có ba lý do:
-   - DCF chỉ chiếm 1/3 blend.
+   - DCF chỉ chiếm 1/3 blend (blend = trung bình SOTP, DCF, multiple_avg; Ke còn vào multiple_avg qua P/B hợp lý, xem mục 4: kênh này chiếm ~24% độ nhạy blend).
    - Tiền ròng là 15.234 đ/cp, tức 46% DCF cơ sở và không nhạy với Ke.
    - Terminal chỉ chiếm 29% DCF ở 14,9%.
 6. **Cảnh báo lạc quan.** Hạ Ke xuống 11% và nâng g lên 5% cùng lúc sẽ đẩy DCF cơ sở lên **41.853 (+27%)**. Đây là hai núm cùng chiều.
@@ -51,17 +55,23 @@ PREREG `19d692087` (khai trước) · self-check 0 đồng · tất định 2 TZ
 | Ứng viên | rf | Nguồn / nhãn | Đạt tiêu chí? |
 |---|---|---|---|
 | (a) TPCP 10Y hiện tại | **4,47%** | ADB AsianBondsOnline, đóng cửa 28/10/2026 [SRC] | Trượt K3 (bị kìm) |
-| (b) TPCP 10Y trung vị 2016-25 | 3,70% (TB 3,95) | **Phần lớn ước lượng** — chỉ 2019 = 4,35% có nguồn (VietnamPlus); các năm khác neo 1 phiên | Trượt K3, K4 yếu |
-| (b) TPCP 10Y trung vị 2011-25 | 4,80% | ước lượng | như trên |
+| (b) TPCP 10Y trung vị 2016-25 | 3,70% (TB 3,95) | **CHƯA KIỂM CHỨNG (trí nhớ mô hình)** — trong 16 điểm năm: 1 có nguồn (2019 = 4,35%, VietnamPlus), 5 neo 1 phiên, 1 ước lượng có mốc 12/2019, **9 là trí nhớ mô hình không nguồn** (2011-17, 2022, 2024; `kind=chua_kiem_chung`). Ứng viên (b) KHÔNG dùng làm căn cứ kết luận; chỉ giữ để cho thấy luật rf không phụ thuộc nó | Trượt K3, K4 yếu |
+| (b) TPCP 10Y trung vị 2011-25 | 4,80% | chưa kiểm chứng (trí nhớ mô hình) | như trên |
 | (c) Lạm phát mục tiêu + lãi thực: thấp / **giữa** / cao | 6,00 / **6,75** / 7,50% | CPI mục tiêu QH ~4,5% (4,0 cận dưới [UL]); lãi thực 2–3% [UL, McKinsey ~2% + đến 1pp EM] | **Đạt K1–K6** |
 | (c') Damodaran-literal (TPCP − default spread 2,56) | 1,91% | Damodaran ctryprem 05/01/2026 | Trượt K3 (thực âm) |
 | (d) Big-4 12M TB 10 năm / 15 năm | 6,01 / 6,61% | `deposit_rate_vn.py` — mốc neo hồi tố (caveat b) | Kỳ hạn 1Y nhưng đã làm mượt chu kỳ |
 | (e) GDP danh nghĩa CAGR 2021-25 | 11,25% | FiinPro snapshot, cùng vintage | Mốc TRẦN cho g, không phải rf |
 | (f) Hiện hành (đối chứng) | 7,40% | max(Big-4 12M, CCTG 12M) | Trượt K2, K3 |
+| **(g) Chênh lệch lạm phát — KIỂM CHÉO, không phải luật** | **6,71 / 6,97 / 7,23%** (π_VN 4,0 / 4,25 / 4,5) | (1+UST10Y)(1+π_VN)/(1+π_US)−1; UST10Y **5,05%** (FRED DGS10, 28/10/2026) [SRC], π_US = **2,38%** (FRED T10YIE 28/10/2026) [SRC], π_VN [UL]. `out_rf_infl_diff.csv` | Đạt K1, K2, K4; gồm phần bù kỳ hạn Mỹ, không gồm rủi ro VN |
 
 **Luật rf (PREREG §3):** |b10 3,70 − c 6,75| = 3,05pp > 1pp ⇒ rf trung tâm = **(c) 6,75%**. Luật không phụ thuộc chất lượng (b): kể cả khi (b) sai ±2pp, chênh lệch vẫn > 1pp.
 
-Ghi chú: (d) TB 10 năm của chính quy ước cũ = 6,0%, gần với (c). Điều này cho thấy 7,4% hiện tại là **đỉnh chu kỳ**, cao hơn mức bình thường hoá khoảng 0,65–1,4pp.
+**Kiểm chéo tính đôi rủi ro quốc gia (theo skeptic).** Lãi thực 2,5% của (c) đã "+đến 1pp thị trường mới nổi" [UL], trong khi ERP Damodaran đã cộng CRP 3,90 ⇒ điểm trung tâm 15,77% có thể cao ~0,5pp. Hàng (g) là phép kiểm chéo phần chồng lấn,
+**không đổi luật PREREG** (rf trung tâm vẫn 6,75%): rf theo chênh lệch lạm phát = 6,97% ở π_VN 4,25%, tức **cao hơn** (c) 0,22pp (−0,04…+0,48pp theo π_VN 4,0…4,5);
+lãi thực Mỹ ngầm định 5,05 − 2,38 = 2,67% ≈ 2,5%. Vậy kiểm chéo **không xác nhận** mức tính đôi 0,5pp ở phía rf: UST chưa chứa rủi ro VN nên CRP nằm ở ERP là hợp lý.
+Cảnh báo giữ nguyên ở dạng định tính: "+1pp EM" trong (c) là [UL] và nếu bỏ nó rf về ~5,75% thì Ke trung tâm thấp hơn ~1pp; kiểm chéo (g) cho thấy không cần bỏ. Điểm 15,77% vì thế nên đọc là **15,8% ± ~0,5pp do cách xử lý rủi ro quốc gia**, không phải điểm chính xác.
+
+Ghi chú: (d) TB 10 năm của chính quy ước cũ = 6,0%, gần với (c). Điều này cho thấy 7,4% hiện tại là **đỉnh chu kỳ của rf**, cao hơn mức bình thường hoá khoảng 0,65–1,4pp (đây là về rf, không phải về Ke).
 
 ## 3. ERP và β
 
@@ -71,11 +81,13 @@ Ghi chú: (d) TB 10 năm của chính quy ước cũ = 6,0%, gần với (c). Đ
 | ERP fleet `dcf_valuation.py` | 6,5% | Thực nghiệm: TR VNINDEX 2013-26 − Big-4 deposit TB ~6,8% (premium **trên lãi huy động**) |
 | ERP Damodaran VN 01/2026 | **8,13%** = 4,23 trưởng thành + 3,90 CRP (Ba2, DS 2,56 × σ cổ phiếu/trái phiếu) | [SRC] pages.stern.nyu.edu/~adamodar ctryprem.html |
 | ERP thị trường ngầm định | **5,70%** = (E/P 8,20% + lạm phát 4,0–4,5%) − 6,75 | E/P từ VNINDEX_PE 12,19 ngày 28/10 [BQ]; giả định tăng trưởng thực = 0 |
-| β DGC (tuần, 5Y, vs VNINDEX) | thô 1,204 → Blume **1,136** (ρ 0,47, n 259) | [BQ] |
-| β trung vị peer hoá chất | thô 1,125 → Blume **1,083** (N = 19, universe_pit ∩ ICB 13xx) | [BQ] |
+| β DGC (tuần, 5Y, vs VNINDEX) | thô 1,204 → Blume **1,136** (ρ 0,47, n 259) — số **dùng trong mô hình**, gốc không có script | [BQ] |
+| β trung vị peer hoá chất | thô 1,125 → Blume **1,083** (N = 19, universe_pit ∩ ICB 13xx) — số **dùng trong mô hình** | [BQ] |
 | β dùng | **1,11** (khoảng 1,08–1,14) | luật PREREG |
+| **β tái lập bằng script** `beta_weekly.py` (Close điều chỉnh, điểm tuần = phiên giao dịch cuối tuần ISO/Thứ Sáu, lợi suất đơn giản, 259 tuần đến 28/10/2026) | DGC thô **1,195** → Blume **1,130** (ρ 0,480); peer thô **1,143** → Blume **1,095** (N = 18, trung vị) | [BQ] `out_beta.csv` |
 
 - **Không ghép rf trái phiếu với ERP đo trên lãi huy động.** Ghép như vậy sẽ hạ Ke giả tạo. Ví dụ: (b) 3,7 + 7,5 = 11,2% là sai khung.
+- **β: không tái lập đúng 1,204/1,125.** Script mới (`beta_weekly.py`) cho 1,195 / 1,143; skeptic đo thô 1,164. Độ nhạy quy ước DGC: log-return 1,217, chỉ Thứ Sáu thật (n = 251) 1,190, cửa sổ lùi 1 tuần 1,212–1,215 ⇒ β thô nằm 1,16–1,22 tuỳ quy ước tuần. Hai số peer lệch (N = 18 vs 19; tập con khác) nên số gốc 1,125 không dựng lại được. Với số mới, β_c = (1,130 + 1,095)/2 = 1,1125 so với 1,1095: Ke trung tâm 15,79% thay vì 15,77% (+0,02pp, tính tay, **không chạy lại** `model_ke.py` để giữ nguyên các số đã tái lập). Không đổi kết luận.
 - β DGC 5Y có phần do cú sốc pháp lý 2025-26, mang tính đặc thù chứ không hệ thống. Peer 1,08 là mốc kiểm. Khoảng hẹp nên ảnh hưởng nhỏ (±0,2pp Ke).
 - **Chi phí nợ.** DGC chỉ có vay ngắn hạn 1.391 tỷ và không có nợ dài hạn; lãi vay DN VN ~6,5–8% (ước lượng, chưa đo cho DGC). Ke > Kd + 4pp ở mọi ứng viên trừ (c'), nên mốc kiểm này không ràng buộc.
 
@@ -107,6 +119,10 @@ Ke trung tâm 15,8% (β 1,11) nằm trên dải 11,5–12,7% ⇒ báo cáo, theo
 | (c') Damodaran-literal | 10,93% | 26.240 / 40.987 / 53.225 | 33.303 |
 | **Vùng thấp** (6,0 + 1,08 × 5,7) | 12,17% | 24.285 / 37.726 / 48.595 | **31.898** |
 | **Vùng cao** (7,5 + 1,14 × 8,13) | 16,74% | 20.106 / 30.756 / 38.699 | **28.869** |
+
+**Kênh Ke → P/B hợp lý (bổ sung).** Ke vào blend qua ba đường: SOTP, DCF và `multiple_avg`; trong `multiple_avg` có `v_pb` với P/B hợp lý = (ROE − g)/(Ke − g) (r7 `model.py` dòng ~400), trọng số 1/9 trong blend.
+Phép kiểm ở Ke 13,08% so với 14,9% (đ/cp, kịch bản cơ sở, `out_ke_candidates.csv`): ΔDCF 35.840 − 32.925 = 2.915 → /3 = **972**; Δv_pb 35.737 − 32.890 = 2.847 → /9 = **316**; ΔSOTP 32.844 − 32.769 = 75 → /3 = **25**; tổng **1.313** = Δblend cơ sở 32.529 − 31.216 = 1.313 (khớp 0 đồng).
+Kênh P/B chiếm 316/1.313 = **24%** độ nhạy blend. (EV có trọng số kịch bản dịch 1.266, không phải 1.313.) Kết luận "tác động nhỏ" giữ nguyên.
 
 **Độ nhạy.** Mỗi −1pp Ke quanh 14–15% làm DCF cơ sở tăng khoảng +1.460 đ/cp, còn EV blend A chỉ tăng khoảng +634 đ/cp (lưới 14%→15%: DCF 34.247−32.790; EV 30.392−29.758).
 A7 (r7 chính) ở lưới: Ke 12% → EV 34.434; 14,9% → 32.182; 16% → 31.583.
@@ -172,6 +188,7 @@ nhỏ hơn các bất định khác của DGC (biên ±2pp, dự phòng R1/R2 6.
   - g ≤ GDP danh nghĩa dài hạn;
   - RONIC ≥ Ke thì mới cho g cộng giá trị;
   - không đồng thời nâng g.
+- Không tính đôi rủi ro quốc gia: CRP đã nằm trong ERP, nên lãi thực của rf không được cộng thêm phần bù EM (xem kiểm chéo (g) ở mục 2).
 - Chiều ngược lại: giữ 7,4% chỉ vì quán tính cũng sai cơ sở (rf đỉnh chu kỳ). Còn 15,8% dựa trên CRP đo bằng USD. Đối chiếu thị trường VN ngụ ý ERP thấp hơn, nên đầu cao của vùng có thể đang khắt khe quá.
 - Không có ứng viên nào ở đây phục vụ quyết định mua/bán DGC. Kết luận "Ke không phải biến quyết định cho DGC" đứng vững ở cả hai đầu vùng.
 
@@ -182,6 +199,7 @@ nhỏ hơn các bất định khác của DGC (biên ±2pp, dự phòng R1/R2 6.
 - VBMA 11/2021; HNX 10/2023 & 02/2026; ACBS 06/2026.
 - TradingEconomics 12/2025 (trang chính trả 403, chỉ đọc được qua snippet tìm kiếm).
 - `kb/projects/vn_realestate_monthly_checks/2026-10-multiproxy.md` (TPCP 10Y 4,45–4,47%, trúng thầu 33%).
-- **Chuỗi TPCP 10Y theo năm phần lớn là ước lượng.** Không có chuỗi chính thức trong data_registry, và FiinPro đã hết hạn.
+- **Chuỗi TPCP 10Y theo năm: 9/16 điểm là trí nhớ mô hình, CHƯA KIỂM CHỨNG** (`kind=chua_kiem_chung`). Không có chuỗi chính thức trong data_registry, và FiinPro đã hết hạn.
+- [FRED DGS10](https://fred.stlouisfed.org/series/DGS10) 5,05% và [FRED T10YIE](https://fred.stlouisfed.org/series/T10YIE) 2,38% ngày 28/10/2026 (tải CSV 30/10/2026).
 - Lạm phát mục tiêu và lãi thực là [UL] theo khoảng.
 - Cổ tức VNINDEX 1,5–2% là [UL].
