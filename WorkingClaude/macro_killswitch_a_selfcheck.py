@@ -85,7 +85,12 @@ check("T6 no-data stale flag True", r6["stale"] is True)
 # T7: just-under the staleness limit -> NOT stale (boundary exclusivity, age_days == limit passes).
 r7 = dep.macro_killswitch_a_status(asof=last_anchor + pd.Timedelta(days=45), stale_days_limit=45,
                                     check_freshness=True)
-check("T7 age==limit not stale (> required, not >=)", r7["stale"] is False)
+# Boundary under test = BIG-4 age. `stale` also ORs in the CCTG overlay (cctg_note, forced-armed
+# since 2026-10-01 round-6), which reads the LIVE cctg_rate_vn_events.csv: when the newest CCTG
+# anchor (2026-10-12) is >45d before last_anchor+45 (newest Big-4 anchor 2026-10-26), CCTG is stale
+# there and `stale` is True although Big-4 age == limit. Assert the Big-4-only flag, not the OR.
+check("T7 age==limit not stale (> required, not >=)",
+      r7["age_days"] == 45 and r7["big4_stale"] is False)
 
 # T7c: DEFAULT stale_days_limit is actually 45, not some other number -- omit the kwarg entirely
 # (every other staleness test above passes stale_days_limit=45 explicitly, so none of them would
