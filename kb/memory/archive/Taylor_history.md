@@ -1658,3 +1658,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T12:01:48Z] [dgc-val r10 29/10] XONG job Taylor_20261029_115813: research/dgc_valuation_20261029_r10/ (chua commit); 100ty/quy vinh vien=-6065; Q4 tach 217 (R2 N=0 36880, r4 32399); khong base case — CHO Mike/skeptic vong 3; mo: T7 cong ty con, khau tru thue (legal-vn)
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T12:23:18Z] [dgc-investor-report 29/10] XONG job Taylor_20261029_121056: research/dd_DGC_20261029/investor_report/ (md+pdf 19tr+html+13 figs, chua commit) — CHO Mike doc kiem/gui email

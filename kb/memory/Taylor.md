@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-29T12:23:18Z] [dgc-investor-report 29/10] XONG job Taylor_20261029_121056: research/dd_DGC_20261029/investor_report/ (md+pdf 19tr+html+13 figs, chua commit) — CHO Mike doc kiem/gui email
 - [2026-10-29T13:27:35Z] [dgc-val r11 29/10] XONG job Taylor_20261029_131656: research/dgc_valuation_20261029_r11/ (chua commit); NS trong A7 +2.163d/cp, bottom-up NPAT2030 -182/217/479, khong doi gia dinh chinh; 100ty/quy vinh vien = khong tien le — CHO Mike/skeptic; mo: von 2.400 vs 2.900, gia dan xuat clo/H3PO3 [UL]
 - [2026-10-29T13:37:30Z] [manual-deviation 29/10] XONG e11fab9bd nhanh session/manual-deviation-20261029 (wt-manual-deviation-20261029, chua merge) — CHO Mike arch-review + user; sau merge seed so that (add --verify 2 lenh SCL) + chay lai NAV 29/10
 - [2026-10-29T13:45:40Z] [dgc-ke 29/10] XONG job Taylor_20261029_133456: Ke 14,9% giua vung 12,2-16,7% (PREREG tam 15,8%, thi truong 13,1%); rf trung tam 6,75 building-block — CHO Mike/user; mo: dcf_valuation g_T=rf 7,4% can nghien cuu rieng
@@ -26,3 +25,4 @@
 - [2026-10-30T03:25:06Z] [dri-investor-report-v3 30/10] XONG job Taylor_20261030_031031: research/dd_DRI_20261027/investor_report_v3/ (19tr, chua commit) — CHO Mike doc kiem/gui email
 - [2026-10-30T03:58:01Z] [erp-domestic 30/10] XONG job Taylor_20261030_034654: research/erp_domestic_20261030/ (commit 5fec4fc14) ERP noi dia 5,0 (3,4-6,5), Ke b1,1 12,3 — CHO quant-skeptic + user duyet; doi dcf_valuation phai doi ca g_T cap
 - [2026-10-30T04:42:45Z] [erp-domestic-v2 30/10] XONG job Taylor_20261030_041731: research/erp_domestic_v2_20261030/ (37eb90ef5) ERP 5,42 khong ben (5,22-6,15); patch f3f756256 nhanh session/erp-domestic-dcf-20261030 (wt-erp-domestic-dcf-20261030, chua merge) — CHO quant-skeptic + user; truoc khi bat sua 2 selfcheck CCTG + dcf_earning_power.py:53
+- [2026-10-30T05:37:36Z] [erp-domestic-dcf-enable 30/10] XONG job Taylor_20261030_050926: aba7502d1 (session/erp-domestic-dcf-20261030) + c8d4f77d4 mike (session/erp-domestic-dcf-ops-20261030), chua merge — CHO Mike arch-review+skeptic, merge 2 nhanh cung luot; rollback = RATE_FRAME_DEFAULT -> legacy
