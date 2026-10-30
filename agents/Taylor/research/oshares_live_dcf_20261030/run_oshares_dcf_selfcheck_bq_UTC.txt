@@ -1,0 +1,57 @@
+[c1_classifier]
+  PASS  C1 TCB -> OSHARES_LAG — got OSHARES_LAG 1.5
+  PASS  C1 NED -> OSHARES_LAG — got OSHARES_LAG 1.1400000000000001
+  PASS  C1 DGC -> CASH_DIV — got CASH_DIV None
+  PASS  C1 TV1 -> CASH_DIV — got CASH_DIV None
+  PASS  C1 KSV -> ISS_REFLECTED — got ISS_REFLECTED 1.5
+  PASS  C1 HUB -> ISS_REFLECTED — got ISS_REFLECTED 1.05
+  PASS  C1 chỉ quyền mua -> RIGHTS_PENDING
+  PASS  C1 thưởng CP tính như cổ tức CP
+  PASS  C1 không sự kiện, giá điều chỉnh -> UNEXPLAINED_PRICE_ADJ
+  PASS  C1 không sự kiện, giá phẳng -> NO_EVENT
+  PASS  C1 dòng ISS trùng (revision) chỉ đếm 1 lần — ISS_REFLECTED 1.5
+  PASS  C1 hai đợt khác phương thức cùng ngày đều đếm
+  PASS  C1 ISS không ratio -> ISS_UNSIZED
+  PASS  C1 biên: đúng 95% kỳ vọng -> REFLECTED
+  PASS  C1 biên: dưới 95% kỳ vọng -> LAG
+[c2_clip]
+  PASS  C2 ex<=asof & public<=asof -> thêm
+  PASS  C2 ex>asof -> không thêm (PIT)
+  PASS  C2 public_date>asof -> không thêm (PIT)
+  PASS  C2 ex quá 45 ngày -> không thêm (dòng mồ côi)
+  PASS  C2 ex đúng 45 ngày -> còn thêm
+  PASS  C2 trùng một ISS executed -> không thêm
+[c3_oshares_for]
+  PASS  C3 TCB 30/10: AIS 7.086.240.414 × 1,5 (ISS announced đã ex) — 10629360621.0 ISS_ESTIMATE oshares_live
+  PASS  C3 TCB 30/10 nguồn oshares_live + ghi announced_added
+  PASS  C3 TCB 28/10 (trước ex) = số AIS — 7086240414.0
+  PASS  C3 không ISS -> số không đổi (ca DGC/TV1) — 7086240414.0
+  PASS  C3 lỗi nguồn -> số quý, method ERROR
+[c4_knob]
+  PASS  C4 env trống -> 'fin', không import oshares_dcf, không thêm khoá — fin False []
+  PASS  C4 giá trị lạ -> 'fin' (hành vi cũ) — fin False []
+  PASS  C4 env=live -> 'live', có khoá oshares_* — live True ['oshares_announced_added', 'oshares_fin', 'oshares_method', 'oshares_source']
+  PASS  C4 live: số CP ×2 -> FV/cp ÷2 đúng — 77604.33056640488 38802.16528320244
+  PASS  C4 live: ghi oshares_fin/source
+  PASS  C4 live: oshares_for trả None -> dùng số quý
+  PASS  C4 live: caller truyền oshares= thì không gọi oshares_for
+  PASS  C4 live: thiếu OShares quý -> vẫn 'OShares missing', không gọi live — OShares missing []
+[c5_bq]
+  PASS  C5 BQ TCB -> OSHARES_LAG — OSHARES_LAG
+  PASS  C5 BQ NED -> OSHARES_LAG — OSHARES_LAG
+  PASS  C5 BQ DGC -> CASH_DIV — CASH_DIV
+  PASS  C5 BQ TV1 -> CASH_DIV — CASH_DIV
+  PASS  C5 BQ KSV -> ISS_REFLECTED — ISS_REFLECTED
+  PASS  C5 BQ HUB -> ISS_REFLECTED — ISS_REFLECTED
+  PASS  C5 BQ TCB oshares_for ≈ ×1,5 — 10629360621.0
+
+== PASS: 0 FAIL
+
+[mutation]
+  KILLED  M1 DIV coi như ISS cổ phiếu (lỗi quy tắc cũ) (4 FAIL: C1 DGC -> CASH_DIV)
+  KILLED  M2 quyền mua tính là tạo CP (1 FAIL: C1 chỉ quyền mua -> RIGHTS_PENDING)
+  KILLED  M3 bỏ dedup (1 FAIL: C1 dòng ISS trùng (revision) chỉ đếm 1 lần)
+  KILLED  M4 LAG_TOL = 0 (1 FAIL: C1 biên: đúng 95% kỳ vọng -> REFLECTED)
+  KILLED  M5 bỏ trần tuổi announced (1 FAIL: C2 ex quá 45 ngày -> không thêm (dòng mồ côi))
+  KILLED  M6 bỏ lọc public_date<=asof (1 FAIL: C2 public_date>asof -> không thêm (PIT))
+== mutation: mọi mutant bị giết
