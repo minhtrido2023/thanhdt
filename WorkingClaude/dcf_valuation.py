@@ -156,13 +156,57 @@ if _rf_warn:
 if RATE_FRAME == "domestic_v2" and DEFAULT_TERM_MODE != "cap_rf":
     _shout(f"DCF_TERMINAL_MODE={DEFAULT_TERM_MODE!r} bi BO QUA: domestic_v2 ep cap_rf (r va g_T phai doi cung luc)")
     DEFAULT_TERM_MODE = "cap_rf"
-# Nguồn số CP cho fair_value (job Taylor_20261030_094435, CHỜ user duyệt bật): "fin" (MẶC ĐỊNH =
-# hành vi cũ byte-identical, OShares dòng quý cuối) | "live" (oshares_dcf.oshares_for: oshares_live
-# PIT + ISS cổ tức-CP/thưởng announced đã ex, rơi về số quý mọi ca từ chối/lỗi). Giá trị lạ ⇒ "fin".
-OSHARES_SOURCE = os.environ.get("DCF_OSHARES_SOURCE", "fin")
-if OSHARES_SOURCE not in ("fin", "live"):
-    _shout(f"DCF_OSHARES_SOURCE={OSHARES_SOURCE!r} khong hop le -> dung 'fin'")
-    OSHARES_SOURCE = "fin"
+# Nguồn số CP cho fair_value (job Taylor_20261030_094435; R2-R7 job Taylor_20261030_155013):
+#   "fin"  = hành vi cũ byte-identical, OShares dòng quý cuối.
+#   "live" = oshares_dcf.oshares_for (chính sách oshares_pit: oshares_live PIT, rơi về số quý mọi ca
+#            từ chối/lỗi), CHỈ khi khoá được khung ex-date giá↔số CP (xem _live_oshares) — không khoá
+#            được ⇒ số quý + kêu stderr/logging.
+# NGUỒN SỰ THẬT DUY NHẤT = OSHARES_SOURCE_DEFAULT (giống RATE_FRAME_DEFAULT): bật live = đổi MỘT từ ở
+#   đây (cần user duyệt + ghi cutover-marker ở kb/data_registry/trading-bot/dcf_lens_history.md).
+#   Env DCF_OSHARES_SOURCE chỉ là OVERRIDE cho nghiên cứu/selfcheck; launcher/cron/wc_env.sh KHÔNG được
+#   gán (ops_health_check.sh khối CHECKDCFOS WARN). Giá trị lạ (env hoặc hằng số) KHÔNG raise: fallback
+#   "fin" + kêu to — một ValueError lúc import bị consumer nuốt thành DCF NOT_COMPUTED trên mọi mã.
+OSHARES_SOURCES = ("fin", "live")
+OSHARES_SOURCE_DEFAULT = "fin"
+
+
+def _resolve_oshares_source(env_val, default=OSHARES_SOURCE_DEFAULT):
+    """(source, warning|None). Mọi giá trị lạ -> "fin" (hành vi cũ), không bao giờ raise."""
+    if default not in OSHARES_SOURCES:
+        return "fin", (f"OSHARES_SOURCE_DEFAULT={default!r} KHONG HOP LE (chi nhan {OSHARES_SOURCES}) -> FALLBACK "
+                       f"'fin'. Sua hang so nguon su that trong dcf_valuation.py.")
+    if env_val is None or env_val.strip() == "":
+        return default, None
+    v = env_val.strip()
+    if v not in OSHARES_SOURCES:
+        return "fin", (f"DCF_OSHARES_SOURCE={env_val!r} KHONG HOP LE (chi nhan {OSHARES_SOURCES}) -> FALLBACK "
+                       f"'fin' (mac dinh nguon su that = {default!r}). Sua/bo bien moi truong nay.")
+    if v != default:
+        return v, f"DCF_OSHARES_SOURCE={v!r} env OVERRIDE khac mac dinh nguon su that {default!r} (chi cho nghien cuu/selfcheck)"
+    return v, None
+
+
+OSHARES_SOURCE, _os_warn = _resolve_oshares_source(os.environ.get("DCF_OSHARES_SOURCE"))
+if _os_warn:
+    _shout(_os_warn)
+
+
+def pin_oshares_source_fin(who):
+    """R3: backtest/cache nghiên cứu ghi file KHÔNG mang hậu tố nguồn số CP ⇒ ép "fin" để một
+    DCF_OSHARES_SOURCE=live rò từ môi trường không làm lẫn cache/kết quả cũ. Gọi ngay sau import."""
+    global OSHARES_SOURCE
+    if OSHARES_SOURCE != "fin":
+        _shout(f"{who}: OSHARES_SOURCE={OSHARES_SOURCE!r} bi EP ve 'fin' (output khong co hau to nguon so CP)")
+        OSHARES_SOURCE = "fin"
+
+
+_WARNED_ONCE = set()
+
+
+def _shout_once(key, msg):
+    if key not in _WARNED_ONCE:
+        _WARNED_ONCE.add(key)
+        _shout(msg)
 RF_DOMESTIC = 6.75             # % normalized VND risk-free (building block: target CPI 4.25 + real 2.5)
 ERP_DOMESTIC = 5.5             # % domestic ERP (research central 5.42 -> 0.25 grid; NOT robust: 5.22-6.15)
 G_T_DOMESTIC = 0.055           # target CPI 4.25 + long-run real 1.25 (decimal)
@@ -436,12 +480,14 @@ def recency_weighted_growth(annual_np, weights=DEFAULT_WEIGHTS):
 
 # ---------------------------------------------------------------- core valuation
 def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
-               weights=DEFAULT_WEIGHTS, fin=None, verbose=False, term_mode=None):
+               weights=DEFAULT_WEIGHTS, fin=None, verbose=False, term_mode=None, price_date=None):
     """Compute intrinsic fair-value-per-share + margin-of-safety, point-in-time as-of `asof`.
 
     Returns a dict (always) with `ok` flag and `reason` when not computable.
     `price`/`oshares` may be supplied (e.g. from a preloaded ticker frame in the backtest);
     otherwise oshares is taken from the financial row and price must be passed by the caller.
+    `price_date` = phiên mà `price` thuộc về (giá CHƯA điều chỉnh của phiên đó). Chỉ dùng khi
+    OSHARES_SOURCE == "live" để khoá khung ex-date (R5); ở "fin" bị bỏ qua hoàn toàn.
     """
     a = pd.to_datetime(asof)
     fin = _load_financials() if fin is None else fin
@@ -488,9 +534,7 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     osh_live = None
     fin_os = float(last.OShares)
     if oshares is None and OSHARES_SOURCE == "live" and fin_os > 0:   # NaN>0 False: thiếu số quý
-        import oshares_dcf as _osd                                     # thì vẫn "OShares missing"
-        with contextlib.redirect_stdout(sys.stderr):                   # oshares_pit/live in chẩn đoán ra STDOUT;
-            osh_live = _osd.oshares_for(ticker, a.date().isoformat(), fin_os)   # caller (send_plan_report) cần stdout sạch
+        osh_live = _live_oshares(ticker, a, price, price_date, fin_os)  # thì vẫn "OShares missing"
         oshares = osh_live["value"] if osh_live["value"] else fin_os
     oshares = float(last.OShares) if oshares is None else float(oshares)
     if not (oshares and oshares > 0):
@@ -509,7 +553,7 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     if osh_live is not None:
         res.update({"oshares_fin": float(last.OShares), "oshares_source": osh_live["source"],
                     "oshares_method": osh_live["method"],
-                    "oshares_announced_added": osh_live["announced_added"]})
+                    "oshares_frame_error": osh_live.get("frame_error")})
     if price is not None and fv_ps and fv_ps > 0:
         res["margin_of_safety"] = (fv_ps - price) / fv_ps
     # sensitivity
@@ -517,6 +561,39 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     if verbose:
         _print_report(res)
     return res
+
+
+def _live_oshares(ticker, a, price, price_date, fin_os):
+    """Bản ghi oshares_for đã KHOÁ KHUNG EX-DATE với giá (R5, cùng nguyên lý mike/bin/exdate_frame.py:
+    "khối lượng của ai thì giá của người đó"). MoS = (FV/cp − giá)/FV/cp chỉ có nghĩa khi số CP và
+    giá ở CÙNG hệ quy chiếu trước/sau một sự kiện CP. Số CP sống được lấy tại `asof`; giá ở
+    `price_date`. Khoá được khi: không có giá (FV ở hệ của asof, không so với gì), hoặc số CP sống ở
+    `price_date` BẰNG ở `asof` (không sự kiện CP nào nằm giữa hai ngày). Không khoá được — caller
+    không khai `price_date`, hai số khác nhau, hay lỗi ngày — ⇒ số quý (fin) + kêu stderr/logging."""
+    import oshares_dcf as _osd
+    asof = a.date().isoformat()
+    err = None
+    with contextlib.redirect_stdout(sys.stderr):                   # oshares_pit/live in chẩn đoán ra STDOUT;
+        rec = _osd.oshares_for(ticker, asof, fin_os)               # caller (send_plan_report) cần stdout sạch
+        if price is not None:
+            if price_date is None:
+                err = "caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao"
+            else:
+                try:
+                    pdt = pd.to_datetime(price_date).date().isoformat()
+                except Exception as e:                             # noqa: BLE001
+                    pdt, err = None, f"price_date={price_date!r} khong doc duoc ({type(e).__name__})"
+                if pdt is not None and pdt != asof:
+                    v_px = _osd.oshares_for(ticker, pdt, fin_os)["value"]
+                    if v_px != rec["value"]:
+                        err = (f"so CP song ngay gia {pdt} = {v_px} != ngay asof {asof} = {rec['value']} "
+                               f"-> co su kien CP giua hai ngay")
+    if err is None:
+        return rec
+    key = "no_price_date" if price_date is None else (ticker, asof, str(price_date))
+    _shout_once(key, f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: KHONG khoa duoc khung ex-date gia<->so CP "
+                     f"({err}) -> FALLBACK so quy (fin)" + (" [canh bao nay in 1 lan/tien trinh]" if price_date is None else ""))
+    return {**rec, "value": fin_os, "source": "ticker_financial", "method": "FRAME_FALLBACK", "frame_error": err}
 
 
 def _fv_per_share(base_fcfe, g_exp, g_T, r, oshares):

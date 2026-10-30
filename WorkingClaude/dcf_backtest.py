@@ -29,6 +29,7 @@ WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
 import duckdb
 import dcf_valuation as D
+D.pin_oshares_source_fin(__file__)   # R3: cache/kết quả không mang hậu tố nguồn số CP
 
 WEIGHT_SCHEMES = {
     "equal_1/3":   (1/3, 1/3, 1/3),
