@@ -1,6 +1,8 @@
 """Case MCH: phân rã DCF 2026-10-23 + quỹ đạo 8 quý (NP, biên, vốn lưu động, CFO/NP)."""
 import sys, numpy as np, pandas as pd, duckdb
 WD = "/home/trido/thanhdt/WorkingClaude"; sys.path.insert(0, WD)
+import os
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as dv
 P = 141900; A = "2026-10-23"
 r = dv.fair_value("MCH", A, price=P)

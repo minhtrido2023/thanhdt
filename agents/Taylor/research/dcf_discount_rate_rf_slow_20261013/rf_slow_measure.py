@@ -37,6 +37,7 @@ OUT = os.path.dirname(os.path.abspath(__file__))
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR)
 import duckdb                        # noqa: E402
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as D            # noqa: E402  (chdirs to WORKDIR)
 import deposit_rate_vn as dep        # noqa: E402
 import gdp_growth_vn as gdp_mod      # noqa: E402

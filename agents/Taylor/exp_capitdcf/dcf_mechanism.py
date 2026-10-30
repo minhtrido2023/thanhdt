@@ -7,6 +7,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 import numpy as np, pandas as pd
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as D
 
 pos = pd.read_csv("data/capit_selection_features.csv", parse_dates=["entry"])

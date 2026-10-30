@@ -6,6 +6,7 @@ từ close phiên kế tiếp (vs VNINDEX, Close đã điều chỉnh). Read-onl
 """
 import sys, os, numpy as np, pandas as pd, duckdb
 WD = "/home/trido/thanhdt/WorkingClaude"; sys.path.insert(0, WD)
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as dv
 OUT = os.path.dirname(os.path.abspath(__file__))
 LIMIT = int(os.environ.get("LIMIT_TICKERS", "0"))
