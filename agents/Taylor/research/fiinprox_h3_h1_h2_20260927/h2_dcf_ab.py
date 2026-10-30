@@ -7,6 +7,7 @@ os.chdir("/home/trido/thanhdt/WorkingClaude")
 import numpy as np, pandas as pd
 from pathlib import Path
 D = Path(__file__).resolve().parent
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import cpi_vn, dcf_valuation as dv
 
 ASOF = "2026-09-26"

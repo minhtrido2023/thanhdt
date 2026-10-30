@@ -244,6 +244,7 @@ def main():
     import sys
     sys.path.insert(0, "/home/trido/thanhdt/WorkingClaude")
     cwd = os.getcwd()
+    os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
     import dcf_valuation as Dv                          # chdir WORKDIR khi import — trả lại cwd ngay
     import gdp_growth_vn as _gdp
     os.chdir(cwd)

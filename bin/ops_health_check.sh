@@ -2048,13 +2048,25 @@ if runonce_label and account == runonce_label:
         for _ln in _rf_ct.splitlines():
             if not _ln.lstrip().startswith("#") and _rf_pat.search(_ln):
                 _rf_hits.append("crontab: " + _ln.strip()[:70])
-        _rf_files = [os.path.join(wc_root, "wc_env.sh")] + sorted(glob.glob(os.path.join(wc_root, "mike", "bin", "*.sh")))
+        # python gán env khung/mode (os.environ[..]=, setdefault/putenv, dict {"DCF_..": ..}) — cùng regex [3a] của selfcheck
+        _rf_pat_py = re.compile(r"environ\[\s*['\"]DCF_(RATE_FRAME|TERMINAL_MODE)['\"]\s*\]\s*=|"
+                                r"(setdefault|putenv)\(\s*['\"]DCF_(RATE_FRAME|TERMINAL_MODE)|['\"]DCF_(RATE_FRAME|TERMINAL_MODE)['\"]\s*:")
+        _rf_skip_py = ("dcf_valuation.py", "dcf_earning_power.py", "dcf_rate_robustness.py")   # nguồn sự thật / CLI cùng lớp / nghiên cứu ghim legacy
+        _rf_files = [os.path.join(wc_root, "wc_env.sh")] + sorted(
+            glob.glob(os.path.join(wc_root, "*.sh")) + glob.glob(os.path.join(wc_root, "trading_bot", "*.sh"))
+            + glob.glob(os.path.join(wc_root, "mike", "bin", "*.sh"))
+            + glob.glob(os.path.join(wc_root, "*.py")) + glob.glob(os.path.join(wc_root, "trading_bot", "*.py"))
+            + glob.glob(os.path.join(wc_root, "mike", "bin", "*.py")))
         for _fp in _rf_files:
-            if os.path.basename(_fp) == "ops_health_check.sh" or not os.path.isfile(_fp):
+            _bn = os.path.basename(_fp)
+            if _bn == "ops_health_check.sh" or not os.path.isfile(_fp):
+                continue
+            _is_py = _bn.endswith(".py")
+            if _is_py and (_bn in _rf_skip_py or "selfcheck" in _bn or _bn.startswith("test_") or _bn.endswith("_test.py")):
                 continue
             try:
                 for _ln in open(_fp, encoding="utf-8", errors="replace"):
-                    if not _ln.lstrip().startswith("#") and _rf_pat.search(_ln):
+                    if not _ln.lstrip().startswith("#") and (_rf_pat_py if _is_py else _rf_pat).search(_ln):
                         _rf_hits.append(f"{os.path.relpath(_fp, wc_root)}: {_ln.strip()[:70]}")
             except Exception as _e:
                 _rf_probs.append(f"không đọc được {_fp} ({type(_e).__name__})")

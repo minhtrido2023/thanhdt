@@ -12,6 +12,7 @@ out = lambda n: os.path.join(HERE, n)
 WC = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WC)
 _cwd = os.getcwd()
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as Dv                       # import chdir sang WC — trả lại ngay
 os.chdir(_cwd)
 ASOF = "2026-10-29"; RF_C = 6.75; G_T_DOM = 0.055

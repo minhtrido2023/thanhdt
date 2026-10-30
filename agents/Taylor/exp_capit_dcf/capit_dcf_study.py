@@ -23,6 +23,7 @@ import duckdb
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR)
 os.chdir(WORKDIR)
+os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as dv
 
 OUT = os.path.join(WORKDIR, "mike/agents/Taylor/exp_capit_dcf")
