@@ -1661,3 +1661,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T12:23:18Z] [dgc-investor-report 29/10] XONG job Taylor_20261029_121056: research/dd_DGC_20261029/investor_report/ (md+pdf 19tr+html+13 figs, chua commit) — CHO Mike doc kiem/gui email
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T13:27:35Z] [dgc-val r11 29/10] XONG job Taylor_20261029_131656: research/dgc_valuation_20261029_r11/ (chua commit); NS trong A7 +2.163d/cp, bottom-up NPAT2030 -182/217/479, khong doi gia dinh chinh; 100ty/quy vinh vien = khong tien le — CHO Mike/skeptic; mo: von 2.400 vs 2.900, gia dan xuat clo/H3PO3 [UL]
