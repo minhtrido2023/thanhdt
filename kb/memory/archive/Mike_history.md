@@ -134,3 +134,6 @@
 
 ## Archived 2026-10-29 (keep=12 days=0 require_done=False)
 - [2026-10-28T18:37:37Z] 29/10 01:4x: clearing G1 vòng 2 verified (inert byte-cmp OK, selfcheck 2TZ OK) @eb786f0fe. CHỜ USER duyệt MERGE shadow (không wire cron). Rồi: sau 09:05 kiểm fill plan 29/10.
+
+## Archived 2026-10-30 (keep=12 days=0 require_done=False)
+- [2026-10-29T17:34:50Z] 30/10 00:4x: user 'Duyệt 2 plan' 00:33 — plan SpaceX/ZaloPay T+1 30/10 ĐÃ approved_by user (một phiên Mike khác ghi 00:25 ICT; file sửa notes/limit_price lúc 00:30 sau đó, approval giữ nguyên, lệnh y nguyên). Lệnh duyệt lại của tôi bị classifier chặn — KHÔNG cần, không workaround. Taylor_20261029_173430 = sổ lô auto-exit đọc sổ lệnh tay (opus medium, nhánh session/lotbook-manual-20261030) → arch-review → user merge. Sau 09:05 kiểm bot đặt SELL SCL chiều (earliest afternoon).
