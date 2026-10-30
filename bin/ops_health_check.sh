@@ -23,6 +23,7 @@
 #   13. Cổng get_gated_state() công bố nguồn SUY GIẢM (DT4_only/DT4_STALE ⇒ không áp macro cap)
 #   14. Hạn rà lại cờ forensic
 #   15. Worktree chạy bản tiền-vá script giao hàng báo cáo + sổ giao hàng lạc
+#   16. DCF_RATE_FRAME một nguồn sự thật (dcf_valuation.py RATE_FRAME_DEFAULT), không launcher ghi đè
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
 # eod_trading_report.sh (19:10) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
 # Post tóm tắt vào Trading Daily (vận hành sống trong ngày), không phải Trading report
@@ -2005,6 +2006,69 @@ except Exception as _e13x:
     W(f"[WARN-ONLY] check 13: lỗi khi đọc trạng thái cổng get_gated_state "
       f"({type(_e13x).__name__}: {str(_e13x)[:160]}) — không kết luận được cổng đang ở DT5G hay DT4.")
 # CHECK13_END
+
+# 16. DCF_RATE_FRAME — MỘT nguồn sự thật cho khung lãi suất DCF (thêm 2026-10-30, job
+#     Taylor_20261030_050926, điều kiện quant-skeptic trước khi bật domestic_v2). Nguồn duy nhất là
+#     dòng `RATE_FRAME_DEFAULT = "..."` trong dcf_valuation.py — mọi tiến trình (bot, lag_dd_pack,
+#     send_plan_report, eod_trading_report, dcf_refresh_gate) import cùng file đó. WARN khi: giá trị
+#     không thuộc {legacy, domestic_v2}; tiến trình cron này mang biến môi trường DCF_RATE_FRAME;
+#     hoặc crontab / wc_env.sh / mike/bin/*.sh tự gán DCF_RATE_FRAME/DCF_TERMINAL_MODE (một launcher
+#     ghi đè = các tiến trình thấy khung KHÁC nhau). Gõ sai trong env KHÔNG làm vỡ DCF (dcf_valuation
+#     fallback legacy + kêu stderr) nhưng stderr cron không ai đọc ⇒ dòng này là chỗ con người thấy.
+#     Chạy 1 lần/lượt (cấp hệ thống). Pure Python (system python3 có thể thiếu pandas — xem mục 8).
+# CHECKDCFRF_BEGIN — marker ỔN ĐỊNH: WorkingClaude/dcf_rate_frame_selfcheck.py trích đúng khối này.
+if runonce_label and account == runonce_label:
+    try:
+        _rf_frames = ("legacy", "domestic_v2")
+        _rf_src = open(os.path.join(wc_root, "dcf_valuation.py"), encoding="utf-8").read()
+        _rf_m = re.search(r'^RATE_FRAME_DEFAULT\s*=\s*"([^"]*)"', _rf_src, re.M)
+        _rf_probs = []
+        if _rf_m is None and "DCF_RATE_FRAME" not in _rf_src:
+            _rf_def = None                      # knob chưa có trên cây này (trước merge) — không có gì để kiểm
+        elif _rf_m is None:
+            _rf_def = None
+            _rf_probs.append("dcf_valuation.py nhắc DCF_RATE_FRAME nhưng KHÔNG có dòng RATE_FRAME_DEFAULT")
+        else:
+            _rf_def = _rf_m.group(1)
+            if _rf_def not in _rf_frames:
+                _rf_probs.append(f"RATE_FRAME_DEFAULT trong dcf_valuation.py = {_rf_def!r} không thuộc {_rf_frames} "
+                                 f"(mọi DCF đang chạy legacy do fallback)")
+        _rf_env = os.environ.get("DCF_RATE_FRAME")
+        if _rf_env not in (None, ""):
+            _rf_probs.append(f"môi trường cron mang biến DCF_RATE_FRAME (giá trị {_rf_env!r}"
+                             + ("" if _rf_env.strip() in _rf_frames else ", KHÔNG HỢP LỆ ⇒ fallback legacy")
+                             + ") — nguồn sự thật là dcf_valuation.py, gỡ biến này")
+        _rf_pat = re.compile(r"(^|[\s;&|(])(export\s+)?DCF_(RATE_FRAME|TERMINAL_MODE)=")
+        _rf_hits = []
+        try:
+            _rf_ct = subprocess.run(["crontab", "-l"], capture_output=True, text=True, timeout=15).stdout
+        except Exception as _e:
+            _rf_ct = ""
+            _rf_probs.append(f"không đọc được crontab ({type(_e).__name__}: {_e})")
+        for _ln in _rf_ct.splitlines():
+            if not _ln.lstrip().startswith("#") and _rf_pat.search(_ln):
+                _rf_hits.append("crontab: " + _ln.strip()[:70])
+        _rf_files = [os.path.join(wc_root, "wc_env.sh")] + sorted(glob.glob(os.path.join(wc_root, "mike", "bin", "*.sh")))
+        for _fp in _rf_files:
+            if os.path.basename(_fp) == "ops_health_check.sh" or not os.path.isfile(_fp):
+                continue
+            try:
+                for _ln in open(_fp, encoding="utf-8", errors="replace"):
+                    if not _ln.lstrip().startswith("#") and _rf_pat.search(_ln):
+                        _rf_hits.append(f"{os.path.relpath(_fp, wc_root)}: {_ln.strip()[:70]}")
+            except Exception as _e:
+                _rf_probs.append(f"không đọc được {_fp} ({type(_e).__name__})")
+        if _rf_hits:
+            _rf_probs.append(f"{len(_rf_hits)} launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): "
+                             + " | ".join(_rf_hits[:3]))
+        if _rf_probs:
+            W("DCF_RATE_FRAME: " + " · ".join(_rf_probs))
+        elif _rf_def is not None:
+            OK(f"DCF_RATE_FRAME: nguồn sự thật dcf_valuation.py = {_rf_def} (rollback = đổi 1 từ về legacy); "
+               f"không launcher/cron nào ghi đè.")
+    except Exception as _e:
+        W(f"DCF_RATE_FRAME check lỗi, không kiểm được khung lãi suất DCF: {type(_e).__name__}: {_e}")
+# CHECKDCFRF_END
 
 # LB. Phanh lỗ cấp NAV (thêm 2026-10-12, job Taylor_20261012_111422) — MỘT dòng mỗi account, đọc
 #     data/loss_brake/status.json do nav_loss_brake_monitor.py ghi tối phiên trước. Độ tươi do
