@@ -166,10 +166,14 @@ def main():
     print(f"RATE_FRAME_DEFAULT (nguồn sự thật) = {dflt!r}")
 
     # ---- (a) legacy == main byte-for-byte ----------------------------------------------------------
-    base = run(MAIN); assert base.returncode == 0, base.stderr[-500:]
+    # Post-merge (30/10 12:48 ICT) main's DEFAULT is domestic_v2, so the pre-knob baseline is main under
+    # DCF_RATE_FRAME=legacy, anchored to the pinned md5 of the ORIGINAL pre-knob main output.
+    LEG_MD5 = "4c0cf6e6ee6b267937c793c7dfda9a44"
+    base = run(MAIN, "legacy"); assert base.returncode == 0, base.stderr[-500:]
     rows = json.loads(base.stdout)
     n_ok = sum(1 for r in rows if len(r) == 7)
     check("(a0) main chạy được", n_ok > 100, f"n={len(rows)} ok={n_ok} md5={h(base)}")
+    check("(a-pin) main legacy == md5 ghim của main trước khi có knob", h(base) == LEG_MD5, f"md5={h(base)}")
     leg = run(WT, "legacy")
     check("(a) worktree DCF_RATE_FRAME=legacy trùng byte main", leg.returncode == 0 and leg.stdout == base.stdout,
           f"md5={h(leg)}")
