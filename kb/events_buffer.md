@@ -1353,3 +1353,22 @@
 - [2026-10-31T14:36:37Z] Taylor/heartbeat — Taylor_20261031_142133: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261031_142133", "source": "watcher"}
 - [2026-10-31T14:37:37Z] Taylor/heartbeat — Taylor_20261031_142133: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261031_142133", "source": "watcher"}
 - [2026-10-31T14:37:57Z] Taylor/finding — dd-MBB-20261031: {"report": "agents/Taylor/research/dd_MBB_20261031/REPORT.md", "source": "BCTC goc HN+rieng Q3/26 (scan static2.vietstock), Q1-Q2/26, Q2-Q4/25, KT25, SX6T, BCTN25", "verified_mike_press": "13/13 dung; sua ban chat CKKD 41.443 = CK no TCTD (khong phai co phieu)", "LNTT_Q3": 10330, "LNTT_9T": 30518, "NIM_HN_tu_tinh": {"Q3/25": 4.02, "Q2/26": 4.16, "Q3/26": 4.07}, "nhom2_HN": {"31/12/25": 10210, "30/06/26": 11990, "30/09/26": 17014, "QoQ_Q3_pct": 42}, "nhom2_me_QoQ_pct": 67, "NPL_HN_pct": {"30/06": 1.45, "30/09": 1.67}, "bao_phu_pct": {"30/06": 93.6, "30/09": 84.7}, "credit_cost_9T_ann_pct": 1.46, "NPL_formation_ann_pct": 1.73, "funding_tang_CV": "GTCG 56%, TG KH 36%", "KKH_HN": "339.353->326.389", "BDS_pct": "13,95% (+48,3% YTD)", "Tier1_rieng_Q2": "9,02% (thu cap)", "kiem_toan": "KPMG sach 2025 + soat xet 6T", "PB": 1.24, "PE_TTM": 5.97, "vung": "18.000-26.000, tam ~22.000 (uoc luong), gia 19.300", "LNTT_2026_base_uoc_luong": 40818, "LNTT_2027_weighted_uoc_luong": 41356, "bobby_checklist": "7 co/25, 7 chua kiem", "warning_phap_ly": "khong", "chua_skeptic": true, "measured_by": "python3 -I calc/mbb_calc.py > calc/mbb_calc_out.txt ; so doc anh: calc/notes_read.md"}
+
+## Consolidation 2026-10-31T15:07:01Z
+- [2026-10-31T14:56:46Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "bat dau GAPS TCH: doc REPORT v1, tai trang hoanghuy.vn"}
+- [2026-10-31T14:57:13Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T14:58:13Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T14:58:19Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "tai 27 PDF hoanghuy.vn; doc BCTN 2025 (text), con lai scan"}
+- [2026-10-31T14:59:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T14:59:45Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "xong NQ DHDCD 2026 + BCTN 2025; dang doc QD thue, NQ BLQ, su dung von"}
+- [2026-10-31T15:00:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T15:00:26Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "QD thue 20,2 ty moi; Dragon <5% 15/06; doc BC quan tri 6T 2026"}
+- [2026-10-31T15:01:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T15:02:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T15:02:57Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "CRV illiquid (DNSE), HHS 9450; dang lam du an + anh"}
+- [2026-10-31T15:03:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T15:04:08Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "anh/logo xong; Sai Gon Tai Loc=Sacombank; doc BCTC rieng"}
+- [2026-10-31T15:04:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T15:05:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261031_145612", "source": "watcher"}
+- [2026-10-31T15:05:23Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "in_progress", "note": "lay toa do OSM, sau do viet GAPS.md"}
+- [2026-10-31T15:06:14Z] Taylor/heartbeat — Taylor_20261031_145612: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261031_145612", "source": "watcher"}
