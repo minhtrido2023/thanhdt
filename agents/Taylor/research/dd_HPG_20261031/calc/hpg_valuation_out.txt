@@ -1,0 +1,44 @@
+Ke 0.123 xau       11304 d/cp  terminal -42.4% gia tri (BV0 da tinh rieng)  BV2029 187,196
+Ke 0.123 co_so     19121 d/cp  terminal   2.5% gia tri (BV0 da tinh rieng)  BV2029 211,596
+Ke 0.123 tot       27160 d/cp  terminal  25.2% gia tri (BV0 da tinh rieng)  BV2029 227,596
+  -> trong so: 19,176 d/cp  (-8.7% vs 21000)
+Ke 0.130 xau       10189 d/cp  terminal -54.9% gia tri (BV0 da tinh rieng)  BV2029 187,196
+Ke 0.130 co_so     17233 d/cp  terminal  -6.1% gia tri (BV0 da tinh rieng)  BV2029 211,596
+Ke 0.130 tot       24457 d/cp  terminal  18.5% gia tri (BV0 da tinh rieng)  BV2029 227,596
+  -> trong so: 17,278 d/cp  (-17.7% vs 21000)
+Ke 0.134 xau        9637 d/cp  terminal -61.9% gia tri (BV0 da tinh rieng)  BV2029 187,196
+Ke 0.134 co_so     16298 d/cp  terminal -10.9% gia tri (BV0 da tinh rieng)  BV2029 211,596
+Ke 0.134 tot       23118 d/cp  terminal  14.8% gia tri (BV0 da tinh rieng)  BV2029 227,596
+  -> trong so: 16,338 d/cp  (-22.2% vs 21000)
+
+Do nhay kich ban co so: g x Ke (d/cp)
+g\Ke    0.115   0.123   0.130   0.134   0.140
+0.03    21147   19020   17444   16641   15550
+0.04    21423   19064   17350   16488   15327
+0.05    21784   19121   17233   16298   15054
+0.06    22276   19196   17083   16057   14713
+
+Do nhay ROE dai han (Ke 13%, g 5%) kich ban co so:
+0.09 9863
+0.1 11969
+0.11 14075
+0.12 16180
+0.125 17233
+0.13 18286
+0.14 20392
+0.15 22498
+0.16 24604
+
+P/B hop ly (ROE-g)/(Ke-g), g 5%:
+0.1 [0.68, 0.62, 0.6]
+0.125 [1.03, 0.94, 0.89]
+0.15 [1.37, 1.25, 1.19]
+EV/EBITDA xau EBITDA 28000 x5: 10,930 d/cp
+EV/EBITDA xau EBITDA 28000 x6: 14,247 d/cp
+EV/EBITDA xau EBITDA 28000 x7: 17,563 d/cp
+EV/EBITDA co_so EBITDA 40000 x5: 18,037 d/cp
+EV/EBITDA co_so EBITDA 40000 x6: 22,774 d/cp
+EV/EBITDA co_so EBITDA 40000 x7: 27,512 d/cp
+EV/EBITDA tot EBITDA 48000 x5: 22,774 d/cp
+EV/EBITDA tot EBITDA 48000 x6: 28,460 d/cp
+EV/EBITDA tot EBITDA 48000 x7: 34,145 d/cp

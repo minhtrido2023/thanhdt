@@ -1,0 +1,7 @@
+SpaceX lint: SẠCH
+SpaceX scan ZaloPay/0001743768/liên tài khoản (md+HTML+PDF): 0 hit | PDF trang 4
+SpaceX manifest numbers: {"wtd_pct": -0.602, "mtd_pct": -1.885, "inception_pct": -3.69, "nav1": 945141046.0, "pnl_vnd": -5770257.0, "flow_vnd": -18023489.0} | 29/10: [['29/10', '−0,30%']] | recon max |lệch|: 0.0
+ZaloPay lint: SẠCH
+ZaloPay manifest numbers: {"wtd_pct": -0.783, "mtd_pct": -3.849, "inception_pct": -6.691, "nav1": 939827062.0, "pnl_vnd": -7236966.0, "flow_vnd": 18023489.0} | 29/10: [['29/10', '+0,25%']] | recon max |lệch|: 0.0
+SpaceX {'wtd': -0.602, 'mtd': -1.885, 'inception': -3.69} nav1 945141046.0
+ZaloPay {'wtd': -0.783, 'mtd': -3.849, 'inception': -6.691} nav1 939827062.0

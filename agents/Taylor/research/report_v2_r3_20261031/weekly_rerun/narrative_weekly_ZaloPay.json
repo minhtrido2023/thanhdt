@@ -1,0 +1,7 @@
+{"headline": "Tuần 26/10–30/10 giảm 0,78%, ít hơn VN-Index giảm 1,83%; tỷ trọng cổ phiếu 46,8%",
+ "key_points": ["Hơn chỉ số +1,05 điểm % trong tuần.",
+                "Từ khi bắt đầu −6,69%, kém VN-Index −5,53%.",
+                "Khoản nạp 18.023.489 VND ngày 29/10 được tách khỏi hiệu suất."],
+ "sections": {"performance": ["Từ đầu tháng −3,85%, kém VN-Index −1,53%."]},
+ "outlook": [{"scenario": "Cơ sở", "condition": "Thị trường tích luỹ, thanh khoản thấp", "invalidation": "VN-Index phá đáy tuần với khối lượng lớn", "prob": "trung bình"}],
+ "internal": [{"title": "Ghi chú dựng lại r3", "bullets": ["Bản dựng lại bằng builder r3 (nháp rồi promote sau artifact lint), dry-run, CHƯA gửi — chờ user duyệt.", "Khoản nạp 29/10 là tiền chuyển từ tài khoản SpaceX cùng phiên, xử lý đầu ngày."]}]}

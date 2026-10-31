@@ -1,0 +1,171 @@
+import json
+B=json.load(open("blocks.json")); D=B["D"]["ZaloPay"]; TAB=B["TAB"]["ZaloPay"]; LIV=B["LIV"]; VN=B["vn"]
+L="weekly_2026-10-26_to_2026-10-30"
+md=f"""# BÁO CÁO TUẦN — TÀI KHOẢN ZALOPAY
+## Kỳ báo cáo: 26/10/2026 – 30/10/2026
+
+**Tài khoản:** ZaloPay · DNSE, số hiệu 0001743768 · V2.4 live từ 06/07/2026 (cash-only, không margin)
+**Chiến lược:** V2.4 (2 book BAL/LAG + parking custom30V tại trạng thái NEUTRAL)
+**Ngày lập báo cáo:** 31/10/2026 · **Người lập:** Taylor (Quant)
+**Đối tượng:** Kênh theo dõi nội bộ (KHÔNG gửi nhà đầu tư ngoài) — giữ minh bạch đầy đủ
+
+> 📊 Xem biểu đồ minh hoạ đính kèm trong email (NAV, lợi nhuận lũy kế so VN-Index, phân bổ danh mục);
+> bản trên kênh chat chỉ hiển thị văn bản.
+
+> **Chất lượng số liệu tuần này:** chuỗi `nav_history_ZaloPay.csv` đủ 5/5 phiên, cả 5 dòng `nav_is_estimate=False`, nguồn `live` (29/10 chụp lúc 23:45 sau khi lệnh bán tay SCL được khai vào sổ lệnh tay). **Nhưng phí/thuế 29–30/10 là ƯỚC LƯỢNG theo biểu phí** — `fetch_dnse_khoplenh_email.py --date 29/10/2026` và `--date 30/10/2026` đều trả "không tìm thấy email" lúc lập báo cáo (31/10 09:00 ICT); chỉ 26–28/10 có `dnse_khoplenh_broker_confirm_*.csv`. Ảnh hưởng ≤ vài chục nghìn đồng (ước 48.681 đ phí + 27.384 đ thuế), mọi mốc NAV đầu/cuối kỳ không phụ thuộc vào số này.
+> **Dòng tiền ngoại sinh trong tuần:** nạp 18.023.489 đ vào ZaloPay ngày 29/10 (chuyển từ SpaceX; ghi trong `data/account_cash_flows.json`). **NAV theo sổ tăng +10.786.523 đ nhưng thay đổi do đầu tư là −7.236.966 đ (−0,78%)** — mọi tỉ suất dưới đây đã loại dòng nạp này.
+
+---
+
+## 1. TÓM TẮT ĐIỀU HÀNH
+
+| Chỉ tiêu | ZaloPay |
+|---|---:|
+| NAV cuối kỳ trước (23/10) | 929.040.539 |
+| NAV cuối kỳ (30/10) | **939.827.062** |
+| Thay đổi NAV theo sổ | +10.786.523 (+1,16%) |
+| Trong đó: dòng nạp vốn 29/10 | +18.023.489 |
+| **Thay đổi do hoạt động đầu tư (đã loại dòng nạp)** | **−7.236.966 (−0,78%)** |
+| VN-Index cùng kỳ (23/10 → 30/10) | 1.774,15 → 1.741,62 (**−1,83%**) |
+| Giá trị cổ phiếu cuối kỳ | 440.069.300 (46,8% NAV; DGC 35,4%) |
+| Tiền mặt | 30.298.353 (3,2% NAV) |
+| Tiền gửi "Trứng vàng" | 469.459.409 (49,9% NAV) |
+| Số mã nắm giữ cuối kỳ | 8 |
+
+**Nhận định tuần:** VN-Index **−1,83%** (1.774,15 → 1.741,62) sau tuần +4,00%; độ rộng thị trường tụt từ 46,5% xuống 29,8% mã trên MA50 (339 mã). ZaloPay **−0,78%** (đã loại dòng nạp), tốt hơn chỉ số **1,05 điểm phần trăm**; phần bot quản lý (không gồm DGC) **−0,54%** (hơn chỉ số +1,30pp). Từ đầu tháng 10: ZaloPay **−3,85%** so với VN-Index **−1,53%** (kém 2,32pp; phần bot −1,64%, kém 0,11pp) — chênh chủ yếu do DGC (ngoài bot, 35,4% NAV). Từ khi bắt đầu hoạt động: **−6,69%** so với **−5,53%** (kém 1,17pp; phần bot −2,25%, hơn 3,28pp). Trong tuần tỷ trọng cổ phiếu tăng từ 42,2% lên 46,8% NAV nhờ 4 mã LAG/mới (HT1, VPB, SCL, MCH) trong khi bán 50% DRI (user duyệt) và thoái toàn bộ SCL (user quyết sau DD). Đóng góp giá −7,64 triệu VND: DGC −4,00 triệu, SCL −1,88 triệu (vòng mua–bán −8,3%), DRI −1,56 triệu, VPB −0,96 triệu, HT1 −0,91 triệu; TV1 +1,96 triệu. Thu nhập ngoài giá +0,40 triệu (lãi tiền gửi +0,66 triệu − phí/thuế 0,16 triệu − thuế cổ tức TV1 0,11 triệu).
+
+![NAV theo ngày, ZaloPay](assets/ZaloPay_{L}_nav.png)
+*NAV theo ngày, ZaloPay (NAV theo sổ, gồm dòng nạp 18,02 triệu VND ngày 29/10). Đơn vị: VND. Kỳ dữ liệu: 23/10–30/10/2026 (6 phiên). Nguồn: `nav_history_ZaloPay.csv` (vị thế và số dư broker DNSE chốt cuối ngày, giá đóng cửa BQ `tav2_bq.ticker`), tính toán nội bộ.*
+
+---
+
+## 2. TOÀN CẢNH THỊ TRƯỜNG
+
+{VN}
+
+*VN-Index đóng cửa hằng ngày; nguồn HOSE (BQ `tav2_bq.ticker`, ticker VNINDEX), dữ liệu tới 30/10/2026.*
+
+{LIV}
+
+**Cơ bản / định giá (dữ liệu tới 30/10/2026):**
+- *Định giá:* Value Radar (P/E, P/B và chênh lệch lợi suất lợi nhuận − CCTG 12T, phân vị 10 năm) **14,4/100 — vùng RẺ** (24,8 tuần trước); P/E 10,68 (phân vị 3), P/B 1,78 (phân vị 12), spread EY−CCTG 12T +1,97pp (phân vị 28). Nguồn `dna_report.build_value_radar_line()`; DISPLAY-ONLY, 0/17 lăng kính qua đa kiểm định — không phải tín hiệu mua/bán.
+- *Trạng thái thị trường (DT gate):* `build_dt_gate_line()` → **✓ ổn định (NEUTRAL), không có candidate đang track** [dữ liệu tới 30/10]. Tuần trước đang có candidate thận trọng 13/25 phiên; nay không còn candidate nào đang track.
+- *Tăng trưởng lợi nhuận, dòng tiền khối ngoại, diễn biến lãi suất mới trong tuần:* không có số liệu đã đối soát cho các mục này trong kỳ nên không đưa ra nhận định; chỉ dùng mặt bằng lãi suất đã phản ánh trong Value Radar.
+
+![Lợi nhuận lũy kế so với VN-Index (cơ sở 100 tại 23/10/2026)](assets/ZaloPay_{L}_adj_cumret.png)
+*Lợi nhuận lũy kế so với VN-Index (cơ sở 100 tại 23/10/2026), NAV đã loại dòng nạp 18,02 triệu VND ngày 29/10. Đơn vị: chỉ số (cơ sở 100). Kỳ dữ liệu: 23/10–30/10/2026 (6 phiên). Nguồn: `nav_history_ZaloPay.csv`, `tav2_bq.ticker` (VNINDEX), `data/account_cash_flows.json`, tính toán nội bộ.*
+
+---
+
+## 3. HIỆU QUẢ, ATTRIBUTION & RỦI RO
+
+### 3.1 NAV theo ngày
+
+{D['nav']}
+
+*Thay đổi NAV hằng ngày đã loại dòng nạp 18.023.489 đ (ghi nhận 29/10 09:04); NAV ngày 29/10 theo sổ 940.300.997. Ngày 26/10 −1,82% chủ yếu do DGC giảm từ 33.700 xuống 32.100 (−16,0 triệu VND trên 10.000 cp).*
+
+Cả tuần **−0,78%** (đã loại dòng nạp) so với VN-Index **−1,83%** — chênh lệch **+1,05 điểm phần trăm**.
+
+### 3.2 Hiệu suất lũy kế
+
+{TAB}
+
+Tài khoản bắt đầu hoạt động ngày 06/07/2026 nên QTD trùng MTD (tháng 10) và chưa có YTD độc lập.
+
+**Rủi ro (từ khi bắt đầu hoạt động, NAV chốt cuối ngày đã loại dòng tiền ngoại sinh, vốn khởi điểm 987.865.567 làm điểm đầu, 82 quan sát):** sụt giảm tối đa từ đỉnh −16,35% (đáy ngày 27/07, chưa bị vượt trong tuần); độ biến động hằng ngày 1,20% (quy năm khoảng 19,0%). Với DGC chiếm 35,4% NAV (nằm ngoài bot), biến động của tài khoản chủ yếu đến từ DGC.
+
+### 3.3 Attribution tuần (đóng góp vào NAV, VND)
+
+{D['attr']}
+
+*Đóng góp giá = giá trị cuối kỳ − giá trị đầu kỳ − giá trị mua + giá trị bán theo giá đóng cửa BQ (`tav2_bq.ticker.Price`) 23/10 và 30/10 và giá khớp thực tế từng lệnh; giá trị cổ phiếu cuối kỳ tính lại 440.069.300 = `mtm_stock` trong `nav_history` (khớp 0 đồng), đầu kỳ 391.598.600 cũng khớp. Phí/thuế 26–28/10 từ `dnse_khoplenh_broker_confirm_26/27/28-10-2026.csv` (cột phi_tra_so + phi_dnse + thue); **29–30/10 ƯỚC LƯỢNG** (HOSE 0,097%, UPCOM 0,088% — SCL, MCH là UPCOM; thuế bán 0,1%) = phí 48.681 đ + thuế 27.384 đ, vì chưa có email sao kê. Lãi Trứng vàng + lãi không kỳ hạn = phần dư của đẳng thức NAV (không tự đo riêng): Δ NAV đã loại dòng tiền (−7.236.966) − đóng góp giá (−7.640.424) + phí/thuế (155.264) + thuế cổ tức TV1 (105.000) = +663.722 đ. Đối chiếu độ lớn: lãi Trứng vàng đo từ số dư các ngày không có chuyển tiền (27→28/10, 28→29/10, 29→30/10) là 109.468 đ/ngày (≈8,5%/năm trên ≈469 triệu), 5–6 kỳ ghi lãi ⇒ 547–657 nghìn đ — phần dư 663.722 đ cùng bậc, chênh ≤ ~117 nghìn đ không tách được thêm (lãi không kỳ hạn, phí ước lượng, làm tròn). Tổng: −7.640.424 + 663.722 − 155.264 − 105.000 = −7.236.966 (khớp thay đổi NAV đã loại dòng nạp đến từng đồng).*
+
+*Phân rã tiền (mục (b), (c), (d) của quy trình):*
+- *Cổ tức TV1 1.500 đ/cp × 1.400 cp = 2,10 triệu VND (ex 07/10, thanh toán 29/10) đã nằm trong `totalCash` từ trước (`cashDividendReceiving` 23/10 = 2.100.000 → 0 ngày 30/10); khi chi trả chỉ phát sinh khấu trừ thuế 5% = 105.000 đ.* Kiểm chứng chéo cửa sổ tiền 28/10 → 29/10: Δ tiền mặt +11.989.358 so với (nạp 18.023.489 + bán VPB ròng 6.590.866 + bán tay SCL ròng 14.772.176 − mua MCH gồm phí 27.283.989 − thuế cổ tức 105.000 = +11.997.542) ⇒ lệch −8.184 đ (cùng bậc phí ước lượng 29/10 = 43.419 đ); nếu KHÔNG có khấu trừ thuế thì lệch +96.816 đ — ủng hộ giả thiết thuế đã bị khấu trừ. Cùng phép kiểm cho SpaceX: lệch −15.836 đ.
+- *Dòng nạp 18.023.489 đ ngày 29/10 là chuyển khoản tay từ SpaceX* (user thu hoạch Trứng vàng 09:04, ảnh app DNSE, xác nhận 29/10 09:57); `data/account_cash_flows.json` ghi cặp rút SpaceX / nạp ZaloPay; đối chiếu `totalCash` ZaloPay tăng ~22,70 triệu trừ bán VPB ròng ~4,68 triệu ≈ 18,02 triệu (khớp).
+- *Chuyển tiền Trứng vàng ↔ tiền mặt là thao tác TAY của chủ tài khoản — bot không có đường code nạp/rút Trứng vàng.* Số dư Trứng vàng đổi 535.336.237 → 469.459.409 (−65.876.828) trong tuần để cấp vốn cho các lệnh mua (26/10, 27/10…); số tiền từng lần chỉ suy ra từ số dư, KHÔNG có sổ nạp/rút để đối chiếu; không làm đổi NAV.
+
+### 3.4 Hoạt động trong tuần
+
+Tuần có giao dịch cả 5 phiên (30/10 chỉ bán): tổng giá trị **mua 92,86 triệu VND**, **bán 36,75 triệu VND** (giá trị khớp):
+
+{D['acts']}
+
+| Nội dung | Bên đặt | Lý do |
+|---|---|---|
+| Mua HT1 1.600, VPB 700+200, SCL 500+200 (26–28/10) | Bot (LAG, post-earnings drift) | Đến hạn T+1 sau công bố lợi nhuận; chia lệnh HYBRID (nhiều block) |
+| Mua MCH 200 (29/10) | Bot (LAG `BUY-MCH-LAG-01`) | Mã LAG mới; nguồn tiền: tiền mặt + chuyển tay từ Trứng vàng (suy ra từ số dư); cùng ngày có bán VPB park-trim |
+| Bán DRI 650 (28/10) | Bot theo plan T+1 | **User duyệt giảm 50% DRI chủ động** (27/10 12:14 ICT, discretionary, `kb/current_ops.md`) |
+| Bán VPB 282 (29/10) | Bot (`PARKMERGE-SELL-VPB`, PARK_TRIM) | Giảm tỷ trọng phần parking để lấy vốn mua MCH |
+| Bán SCL 500 (29/10) | **User bán tay** | Thoái SCL theo DD 29/10 (NON; quyền mua 100:15,4453 @12.500, ĐKCC 10/11) |
+| Bán SCL 200 (30/10) | Bot (`SELL-SCL-EXIT-01`, LAG_EXIT_USER) | Phần lô 28/10, T+2 bán được từ chiều 30/10 |
+
+**Đối soát lệnh bán tay SCL (mục (f)):** (1) sổ lệnh tay `data/user_manual_actions.json`: `MA-20261029-ZaloPay-SCL-SELL-346911`, lệnh DNSE `20261029_346911`, 500 cp @29.600, `status=VERIFIED` qua `dnse_api.order_history` (lọc đúng tiểu khoản 0001743768); (2) `dnse_raw_2026-10-29.jsonl` positions: SCL `closedQuantity` 0 lúc 09:59 → 500 lúc 16:01 (KL mở 700 → 200, lô 28/10); (3) bus/KB `scl-dd-20261029.md`: user quyết thoái SCL cả 2 TK (`decided_by: user`), bán tay SpaceX 800 + ZaloPay 500 @29.600. `exec_ZaloPay_2026-10-29_journal.csv` không có dòng FILL cho lệnh tay (như dự kiến). Kiểm tiền: xem phép đối chiếu cửa sổ 28→29/10 ở trên (lệch −8.184 đ).
+
+**Vòng mua–bán SCL:** mua 700 cp trị giá 22.660.000, bán 20.780.000 ⇒ −1.880.000 (−8,3%) — đã nằm trong đóng góp giá. LAG exit-by-user này là quyết định sau DD, không phải stop-loss tự động.
+
+**Quyền lợi cổ đông:** cổ tức tiền mặt **TV1** 1.500 đ/cp × 1.400 cp = 2,10 triệu VND thanh toán 29/10, khấu trừ TNCN 105.000 đ; đã cộng (sau thuế 5%) vào tỷ suất TV1. Quyền mua SCL (100:15,4453 @12.500; ĐKCC 10/11): vị thế SCL đã thoái về 0 ngày 30/10 ⇒ không phát sinh nghĩa vụ nộp tiền. Giá vốn broker thấp hơn giá khớp thật là kỳ vọng (DNSE trừ cổ tức tiền mặt gộp khỏi costPrice trước ex-date; kiểm bằng bước nhảy costPrice DRI 13.263,16 → 12.263,16, TV1 20.328,57 → 18.828,57 trong `dnse_raw`); bảng dùng giá vốn thô đã cộng lại cổ tức.
+
+### 3.5 Danh mục cuối kỳ (30/10/2026)
+
+{D['port']}
+
+*Giá vốn là giá vốn thô thực tế (costPrice DNSE cộng lại cổ tức tiền mặt gộp đã bị trừ); "Lãi/lỗ (%)" tính theo giá đóng cửa 30/10/2026, đã cộng cổ tức tiền mặt đối soát được với sổ DNSE (sau thuế 5%). Tổng lãi/lỗ = −67,60 triệu VND trên giá vốn thô 586,28 triệu VND (DGC −68,75 triệu trên 477,75 triệu; các mã còn lại +1,15 triệu trên 108,53 triệu). VPB 930 cp gồm 2 lô (618 cp @23.767 và 312 cp @21.226 ⇒ bình quân 22.914). Đẳng thức: 440.069.300 + 30.298.353 + 469.459.409 = 939.827.062 (chênh 0 đồng). Broker báo `totalDebt` 4.877 đ (phí/lãi nhỏ) KHÔNG nằm trong `margin_debt` của `nav_history` (=0) — bỏ qua vì <0,001% NAV.*
+
+![Phân bổ danh mục cuối kỳ](assets/ZaloPay_{L}_allocation.png)
+*Phân bổ danh mục cuối kỳ 30/10/2026, % NAV ("Cổ phiếu khác" gồm MBB, VIB, DRI, … theo nhóm nhỏ). Nguồn: vị thế và số dư broker DNSE chốt cuối ngày, giá đóng cửa BQ 30/10/2026, tính toán nội bộ.*
+
+**Ghi nhận (mục (e)):** phần bot quản lý chỉ 11,39% NAV (107,07 triệu VND), thấp hơn nhiều so với trần phân bổ NEUTRAL (70%) là **bình thường**: `data/golive_v23_status.json` ngày 30/10 cho `n_bal=0` (không có tín hiệu BAL), `n_lag_upcoming=4`, `n_lag_recent=5` , `etf_park_frac=0,0` (parking tắt), `capit_episode_basket=[]`; w_LAG hiện tại 47,94% so với mục tiêu 50% (band ±10pp, `band_breach=False`, as-of 29/10). Tiền chưa dùng nằm ở Trứng vàng và tiền mặt. DGC (35,4% NAV) nằm ngoài quản lý của bot nên không chịu quy tắc cắt lỗ/phân bổ.
+
+---
+
+## 4. OUTLOOK KỲ TỚI (02/11 – 06/11/2026)
+
+**Đối chiếu dự báo kỳ trước.** Kịch bản cơ sở kỳ trước (VN-Index tích luỹ 1.740–1.800, test MA50 1.772 / MA200 1.797) đúng về GIÁ: 5 phiên đóng cửa trong 1.741,62–1.766,65. Nhưng điều kiện làm sai về độ rộng ("lùi dưới 40%") đã bị kích hoạt từ 29/10 (38,7%) → 29,8% ngày 30/10. Kịch bản tích cực (vượt 1.797, độ rộng >50%) không xảy ra; kịch bản tiêu cực (đóng cửa <1.738 hai phiên liền) chưa xảy ra.
+
+**Kỹ thuật.** Kịch bản cơ sở (ước lượng 50%): giằng co trong 1.727–1.781 (hỗ trợ MA20 1.736,7 và đáy phiên 30/10 1.727; kháng cự 1.773–1.781); độ rộng <40% làm nhịp tăng khó bền. Tiêu cực (30%): đóng cửa <1.727 cùng khối lượng cao hơn trung bình 20 phiên (666 triệu cp) → kiểm tra 1.677–1.690. Tích cực (20%): đóng cửa >1.781 với khối lượng cải thiện và độ rộng quay lại >40% → hướng 1.795 (MA200). *Điều kiện làm sai kịch bản cơ sở:* đóng cửa ngoài 1.727–1.781 với khối lượng > trung bình 20 phiên. Các xác suất là ước lượng chủ quan của người soạn, không do Livermore đưa ra và chưa kiểm định.
+
+**Cơ bản.** Value Radar ở vùng RẺ (14,4/100, P/E 10,7) = nền trung hạn, không phải tín hiệu thời điểm; DT gate NEUTRAL, không candidate. Danh mục: 4 mã LAG đến hạn xem xét mua (`n_lag_upcoming=4`) — việc thực hiện phụ thuộc nguồn tiền (cash 30,3 triệu + Trứng vàng 469,5 triệu, chuyển tay) và quyết định chủ tài khoản. DGC (35,4% NAV) vẫn là nguồn biến động chính, ngoài bot. *Điều kiện làm sai:* DT gate xuất hiện candidate BEAR/CRISIS và được xác nhận → giảm tỷ trọng mục tiêu. Dòng tiền dự kiến: không có cổ tức/quyền mua nào chờ thanh toán đã biết tại ngày lập (quyền mua SCL không còn áp dụng).
+
+Các nhận định trên là kịch bản có điều kiện, không phải khuyến nghị đầu tư chắc chắn.
+
+---
+
+## 5. ĐÍNH CHÍNH SỐ ĐÃ CÔNG BỐ
+
+Không có đính chính mới. NAV mốc 23/10 dùng làm đầu kỳ (929.040.539) khớp đúng số đã công bố tuần 19–23/10 và `nav_history_ZaloPay.csv`. Khác biệt cần biết: tuần này có dòng nạp ngoại sinh 18.023.489 đ nên NAV theo sổ (+10.786.523) ≠ thay đổi do đầu tư (−7.236.966).
+
+---
+
+## 6. GAP / GIỚI HẠN CÒN MỞ
+
+Đã tra trước khi ghi "chưa giải thích": (a) giá vốn broker < giá khớp thật — kiểm bước nhảy costPrice (DRI, TV1) và `corporate_action`; không có ex-date nào của các mã đang giữ trong 26–30/10 (truy vấn `tav2_bq.corporate_action` theo `exright_date` 10/10–31/12 cho DRI/HT1/MBB/MCH/TPB/TV1/VIB/VPB/SCL/DGC trả rỗng); (b) `cashDividendReceiving` 2,10 → 0 triệu = TV1 đã chi trả 29/10; (c) phân rã tiền tới đồng bằng `dnse_khoplenh_broker_confirm_26/27/28-10-2026.csv` + `nav_history` + ước lượng 29–30/10; (d) mọi chuyển Trứng vàng là thao tác tay; (e) tỷ trọng cổ phiếu thấp giải thích bằng `golive_v23_status.json`; (f) lệnh bán tay SCL đối soát bằng sổ lệnh tay (VERIFIED qua order_history) + positions + KB.
+
+1. **Phí/thuế 29–30/10 là ước lượng** (email sao kê khớp lệnh 29/10, 30/10 chưa có khi lập báo cáo; `fetch_dnse_khoplenh_email.py` báo "không tìm thấy"). Chênh nhỏ (phí 48.681 đ, thuế 27.384 đ). Cần chạy lại khi email về để chốt; phần dư kiểm tiền −8.184 đ (ZaloPay) / −15.836 đ (SpaceX) có thể do đây.
+2. **`verified_snapshot_ZaloPay_2026-10-30.json` KHÔNG dùng được cho tuần này:** `verify_account_snapshot.py` dựng từ journal bot nên ghi DRI 1.250 cp (thật 650), SCL 500 cp (thật 0), MBB 32 cp (thật 52) — thiếu lệnh bán tay và bán DRI; còn cảnh báo "VPB candidate=618 snapshot=930 loại khỏi P&L (coverage chưa đầy đủ)". Vị thế cuối kỳ lấy từ `dnse_raw_2026-10-30.jsonl` positions (broker-native); giá vốn thô khớp `verify` ở các mã có đủ lịch sử (HT1 13.469, MCH 136.300, TV1 20.329, DRI 13.263, VIB 13.607).
+3. **Lãi Trứng vàng và chuyển Trứng vàng ↔ tiền mặt chỉ suy ra từ số dư** — không có sổ nạp/rút; không tách được lãi Trứng vàng khỏi lãi không kỳ hạn; phần dư lãi (+663.722 đ) lớn hơn mô hình 5 kỳ × 109.468 đ khoảng 117 nghìn đ — chưa giải thích được hết, cùng bậc với phí ước lượng và số kỳ ghi lãi (giả thuyết, chưa kiểm: kỳ ghi lãi sau cuối tuần gộp nhiều ngày).
+4. **`totalDebt` broker 4.877 đ** (ZaloPay; SpaceX 3.475 đ) không vào `margin_debt` của `nav_history`; <0,001% NAV, chưa tra nguồn gốc (nghi phí/lãi chờ trừ).
+5. VN-Index có cổ tức lấy nguyên từ `period_table_32.py`; **không kiểm lại số mã trong rổ tính chỉ số tuần này**.
+6. Tăng trưởng lợi nhuận, dòng tiền khối ngoại, diễn biến lãi suất mới trong tuần: không có số liệu đối soát nên không đưa nhận định.
+7. Track record ngắn (82 quan sát từ 07/07) — so sánh với VN-Index mang tính mô tả.
+
+---
+
+## 7. PHỤ LỤC — PHƯƠNG PHÁP LUẬN
+
+- **NAV** = cổ phiếu (giá đóng cửa BQ) + tiền mặt + Trứng vàng (`egg.totalValue`, đọc tự động qua API DNSE từ 18/08, cột `egg_assets_auto`) − nợ; đối chiếu `nav_history_ZaloPay.csv`. Đẳng thức cuối kỳ: 440.069.300 + 30.298.353 + 469.459.409 = 939.827.062 (0 đồng).
+- **Dòng tiền ngoại sinh:** nạp 18.023.489 đ ngày 29/10 (`data/account_cash_flows.json`, bằng chứng ảnh app DNSE + xác nhận user); tỉ suất tuần/MTD/từ khi bắt đầu/rủi ro đều đã loại dòng này (`period_table_32.py` lấy từ `account_cash_flows.json`; rủi ro tính lại bằng chuỗi chỉ số đã loại dòng nạp ngày 29/10).
+- **Vị thế cuối kỳ** lấy từ `dnse_raw_2026-10-30.jsonl` (positions, tiểu khoản 0001743768) — KHÔNG từ `verified_snapshot_ZaloPay_2026-10-30.json` (xem Gap 2). Lãi/lỗ: (giá + 95% × cổ tức gộp đã bị trừ − giá vốn thô) / giá vốn thô.
+- **Độ rộng:** % mã đóng cửa trên MA50, rổ `tav2_mike.universe_pit` (`in_universe`, PIT) JOIN `tav2_bq.ticker`: 30/10 29,8% (339 mã); 29/10 38,7% (336); 28/10 43,5% (338); 27/10 42,2% (339); 26/10 44,7% (340); 23/10 46,5% (342).
+- **DT gate / Value Radar:** `dna_report.build_dt_gate_line()` và `build_value_radar_line()` (chạy từ WC_ROOT, hiển thị thuần tham khảo). Khối kỹ thuật VN-Index do Livermore soạn (`livermore_report_block.py ensure --kind weekly --period-end 2026-10-30`, status PASS, dán nguyên văn, `verify-report` = VERBATIM).
+- **Chi phí:** phí 0,097%/lượt (HOSE; UPCOM 0,088%); thuế chuyển nhượng 0,1%; TNCN 5% cổ tức tiền mặt.
+- **Giá đóng cửa:** `tav2_bq.ticker.Price` (BQ, đã đồng bộ 30/10 — khớp `mtm_stock` của `nav_history` 0 đồng). Số `marketPrice` của positions intraday 19:14 ngày 30/10 là giá phiên 29/10 (trễ) nên KHÔNG dùng.
+- Mã phân rã: `agents/Taylor/research/weekly_20261026_20261030/calc.py` (→ `calc.json`), `tables.py`, `charts.py`, `gen.py`.
+- Báo cáo nội bộ — không phải khuyến nghị đầu tư.
+
+---
+
+*Báo cáo tuần 26/10–30/10/2026 (ZaloPay) — Taylor (Quant).*
+"""
+open("/home/trido/thanhdt/WorkingClaude/mike/reports/ZaloPay_weekly_report_2026-10-26_to_2026-10-30.md","w").write(md)

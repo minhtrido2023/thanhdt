@@ -1,0 +1,133 @@
+== 1. NIM hợp nhất theo quý (NII annualized / TS sinh lãi BQ đầu-cuối quý; TS sinh lãi = TG NHNN+TCTD+CKKD+CVKH gộp+mua nợ+CKĐT; tự tính, định nghĩa khác MB công bố)
+Q3/25: NII 12,991 tỷ | EA BQ 1,280,624 | NIM 4.02% | lợi suất TS 6.90% | chi phí lãi/EA 2.87% | TN lãi YoY/CP lãi YoY xem dưới
+Q4/25: NII 14,555 tỷ | EA BQ 1,434,109 | NIM 4.03% | lợi suất TS 7.23% | chi phí lãi/EA 3.20% | TN lãi YoY/CP lãi YoY xem dưới
+Q1/26: NII 14,913 tỷ | EA BQ 1,570,096 | NIM 3.85% | lợi suất TS 7.49% | chi phí lãi/EA 3.63% | TN lãi YoY/CP lãi YoY xem dưới
+Q2/26: NII 16,894 tỷ | EA BQ 1,629,980 | NIM 4.16% | lợi suất TS 8.37% | chi phí lãi/EA 4.21% | TN lãi YoY/CP lãi YoY xem dưới
+Q3/26: NII 17,836 tỷ | EA BQ 1,740,574 | NIM 4.07% | lợi suất TS 8.61% | chi phí lãi/EA 4.55% | TN lãi YoY/CP lãi YoY xem dưới
+NIM BỎ TG NHNN khỏi mẫu số (v2, theo phản biện; TG NHNN cuối năm tăng vọt 68,5k cuối 2025):
+  Q3/25: NIM ex-NHNN 4.08%
+  Q4/25: NIM ex-NHNN 4.15%
+  Q1/26: NIM ex-NHNN 3.96%
+  Q2/26: NIM ex-NHNN 4.21%
+  Q3/26: NIM ex-NHNN 4.12%
+Q3/26 vs Q3/25: TN lãi +69.7% ; CP lãi +115.2% ; NII +37.3%
+9T26 vs 9T25: TN lãi +60.1% ; CP lãi +97.4% ; NII +34.0%
+NIM 9T26 (EA BQ 4 mốc 1,655,335): 4.01%
+NIM riêng lẻ 9T26 (EA BQ 2 mốc 31/12-30/09 = 1,599,286; thô, (ước lượng) vì thiếu mốc giữa): 3.54%
+NII riêng lẻ Q3 YoY +44.5% ; CP lãi riêng lẻ Q3 YoY +112.8%
+
+== 2. Huy động / CASA / LDR (HN)
+2025-12-31: TG KH 921,368 | KKH 339,353 (36.8%) | GTCG 187,236 | TG+vay TCTD 248,017 | CV KH/TG KH 117.7% | CV/(TG KH+GTCG) 97.8%
+2026-09-30: TG KH 993,988 | KKH 326,389 (32.8%) | GTCG 302,399 | TG+vay TCTD 265,848 | CV KH/TG KH 129.6% | CV/(TG KH+GTCG) 99.4%
+Δ YTD: CV KH +18.8% (204,109 tỷ) ; TG KH +7.9% (72,620) ; GTCG +61.5% (115,163) ; vay TCTD (dòng tiền vay) 64.382→102.412 +59.1%
+Nguồn tài trợ cho 204,109 tỷ tăng CV: TG KH 36%, GTCG 56%, TG NHNN rút 26%, VCSH 11%
+KKH cá nhân/DN: BCTC không tách KKH theo đối tượng (chỉ TG theo đối tượng: TCKT 429,767 | cá nhân 564,221) -> CASA tách cá nhân/DN: CHƯA KIỂM ĐƯỢC
+KKH ngoại tệ 42.370 vs 34.899 (+21%) ; KKH VND 284.018 vs 304.454 (-6.7%)
+Lãi suất CP lãi tiền gửi 9T annualized / TG KH BQ: 4.91% (9T25 thô: 2.97% — mẫu số 9T25 (ước lượng))
+CP lãi GTCG 9T annualized / GTCG BQ: 6.22%
+
+== 3. Chất lượng tài sản (HN | NH mẹ)
+HN 2025: dư nợ 1,084,019 | nhóm2 10,210 (0.94%) | NPL 14,027 (1.29%) | nhóm 2-5 2.24% | DP 13,151 | bao phủ 93.7%
+HN 2026: dư nợ 1,288,128 | nhóm2 17,014 (1.32%) | NPL 21,474 (1.67%) | nhóm 2-5 2.99% | DP 18,182 | bao phủ 84.7%
+Mẹ 2025: dư nợ 1,031,104 | nhóm2 5,556 (0.54%) | NPL 11,690 (1.13%) | nhóm 2-5 1.67% | DP 11,632 | bao phủ 99.5%
+Mẹ 2026: dư nợ 1,231,776 | nhóm2 12,899 (1.05%) | NPL 18,915 (1.54%) | nhóm 2-5 2.58% | DP 16,430 | bao phủ 86.9%
+Công ty con (HN−mẹ; gồm MCredit, MB Cambodia, MBS margin 16.696 nhóm 1; KHÔNG gồm MBV — BCTC HN-Q3 tr.2: MBV không hợp nhất theo điểm c k.1 Đ.185 Luật TCTD 2024): dư nợ 56,353 | nhóm2 4,115 (đầu năm 4,654) | NPL 2,559 (đầu năm 2,337) | NPL/dư nợ trừ margin 6.5% | DP 1,752
+Nhóm 2 mẹ YTD +132% ; nhóm 3 mẹ +220% ; HN nhóm2 +67%
+Xoá nợ (sử dụng DP) 9T26 7,877 tỷ ; hình thành NPL mới 9T = ΔNPL + xoá = 15,324 tỷ = 1.73%/năm dư nợ BQ
+Trích DP cho vay 9T 12,909 ; chi phí tín dụng (DP KQKD 12.943) annualized/dư nợ BQ: 1.46% ; Q3: 1.65% ; 2025: 1.48%
+Nếu giữ bao phủ 93,7% như đầu năm: thiếu 1,940 tỷ DP (≈ 19% LNTT Q3)
+Lãi dự thu (lãi phí phải thu): 31/12/25 13,549 → 30/09/26 19,828 (+46%; dư nợ +19%); /TTS 1.08% (ngưỡng Bobby 2%)
+Phải thu miễn truy đòi bộ chứng từ (LC, CV 9608): 8,046 → 13,597 (+69%) = 1.06% dư nợ
+BĐS: KD BĐS 121,189 → 179,756 (+48.3%) ; tỷ trọng 11,18% → 13,95% ; xây dựng 3,98% ; hộ gia đình (gồm vay mua nhà, không tách) 22,82%
+Cho vay trung dài hạn: 50.5% (31/12/25 44.4%) ; dài hạn +34%
+
+== 4. Thu nhập, chất lượng LN (HN, tỷ)
+CIR 9T26 26.3% (9T25 27.9%) ; Q3 26.2% ; NII/TOI 9T 84.2%
+Thu nợ đã xử lý + CK (KD+ĐT) = 2,621 tỷ = 8.6% LNTT 9T (ngưỡng Bobby 25%)
+FX: giao ngay+vàng thuần 1.533 (9T25 2.329) ; phái sinh tiền tệ thuần −1.066 (9T25 −832) ; vay TCTD ngoại tệ 50.308→71.432 => phái sinh lỗ là chi phí swap tài trợ ngoại tệ (suy luận)
+Bảo hiểm (DV): thu 7.422,6 − chi KD BH 5.264,2 = 2,158 (9T25 2,197)
+Thuế hiệu dụng 9T 20.0%
+ROE 9T annualized (LNST NH / VCSH mẹ BQ 2 mốc) 21.7% ; ROA 1.89% ; đòn bẩy TTS/VCSH 11.2x
+DuPont 9T26 (/TTS BQ, annualized): NII 3.84% + ngoài lãi 0.72% − OPEX 1.20% − DP 1.00% = LNTT 2.36% ; ×(1−thuế) = ROA 1.89%
+PPOP/VCSH BQ (ROE trước DP, trước thuế) 39.6%
+
+== 5. Định giá (giá 19.300 đóng cửa 30/10/2026 [BQ]); mọi giả định tương lai = (ước lượng)
+VCSH mẹ 30/09 157,017 tỷ ; BVPS 15,594 đ ; P/B 1.24x ; LNST NH TTM (Q4/25+9T26) 32,547 tỷ ; EPS TTM 3,232 ; P/E TTM 5.97x
+Chưa tính 200 triệu CP phát hành riêng lẻ (đã duyệt ĐHCĐ, chưa phát hành theo web_facts) => pha loãng tối đa ~2,0% số CP
+PPOP Q3/26 15,571 ; Q4/25 13,298 ; Q3/25 11,051 -> Q4/25 PPOP QoQ +20%
+XẤU (w=0.35): LNTT 2026 39,018 (+13.9% YoY; 99% KH) | 2027: NII 70,406 TOI 83,575 OPEX 23,401 DP 31,091 LNTT 29,083 (-25.5%) LNST NH 22,685 | ROE27 13.0% | P/E27 8.6x
+CƠ SỞ (w=0.45): LNTT 2026 42,518 (+24.1% YoY; 108% KH) | 2027: NII 78,431 TOI 93,015 OPEX 25,114 DP 24,704 LNTT 43,197 (+1.6%) LNST NH 33,693 | ROE27 18.4% | P/E27 5.8x
+TỐT (w=0.2): LNTT 2026 45,018 (+31.4% YoY; 114% KH) | 2027: NII 84,723 TOI 100,778 OPEX 26,202 DP 19,412 LNTT 55,164 (+22.5%) LNST NH 43,028 | ROE27 22.7% | P/E27 4.5x
+LNTT 2027 kỳ vọng có trọng số 40,651 tỷ
+Vốn: CAR HN 30/06/26 10,7% (Tier1 9,9%), CAR riêng 10,28% (Tier1 9,02%) [web_facts, thứ cấp]. Tăng trưởng tự tài trợ ≈ ROE×(1−tỷ lệ chi cổ tức tiền):
+  ROE 18% trả tiền 25% -> VCSH/RWA tự tăng ~13.5%/năm
+  ROE 18% trả tiền 35% -> VCSH/RWA tự tăng ~11.7%/năm
+  ROE 20% trả tiền 25% -> VCSH/RWA tự tăng ~15.0%/năm
+  ROE 20% trả tiền 35% -> VCSH/RWA tự tăng ~13.0%/năm
+  ROE 22% trả tiền 25% -> VCSH/RWA tự tăng ~16.5%/năm
+  ROE 22% trả tiền 35% -> VCSH/RWA tự tăng ~14.3%/năm
+
+RI 3 giai đoạn: 2027-2029 tường minh + terminal Gordon RI; BV0 = VCSH mẹ cuối 2026 theo kịch bản; payout tiền 30% (ước lượng); giá trị/CP chiết khấu 2 tháng về 31/10/2026
+Ke 12.3%: XẤU 20,663 (P/B ngụ ý 1.33x; TV 19% giá trị) | CƠ SỞ 29,988 (P/B ngụ ý 1.92x; TV 38% giá trị) | TỐT 43,464 (P/B ngụ ý 2.79x; TV 53% giá trị) | có trọng số (0,35/0,45/0,20) 29,419 đ (+52% vs giá) | độ nhạy w xấu 0,45 (0,45/0,35/0,20) 28,487 đ
+Ke 12.8%: XẤU 19,010 (P/B ngụ ý 1.22x; TV 14% giá trị) | CƠ SỞ 27,228 (P/B ngụ ý 1.75x; TV 33% giá trị) | TỐT 38,696 (P/B ngụ ý 2.48x; TV 48% giá trị) | có trọng số (0,35/0,45/0,20) 26,645 đ (+38% vs giá) | độ nhạy w xấu 0,45 (0,45/0,35/0,20) 25,823 đ
+Ke 13.4%: XẤU 17,323 (P/B ngụ ý 1.11x; TV 7% giá trị) | CƠ SỞ 24,489 (P/B ngụ ý 1.57x; TV 26% giá trị) | TỐT 34,144 (P/B ngụ ý 2.19x; TV 42% giá trị) | có trọng số (0,35/0,45/0,20) 23,912 đ (+24% vs giá) | độ nhạy w xấu 0,45 (0,45/0,35/0,20) 23,196 đ
+Ke 15.0% [thị trường ngụ ý]: XẤU 13,938 (P/B ngụ ý 0.89x; TV -11% giá trị) | CƠ SỞ 19,209 (P/B ngụ ý 1.23x; TV 10% giá trị) | TỐT 25,841 (P/B ngụ ý 1.66x; TV 27% giá trị) | có trọng số (0,35/0,45/0,20) 18,691 đ (-3% vs giá) | độ nhạy w xấu 0,45 (0,45/0,35/0,20) 18,163 đ
+
+Gordon P/B=(ROE−g)/(Ke−g) — độ nhạy (P/B; × BVPS cuối 2026 cơ sở ≈ giá):
+ g=7%: ROE16%/Ke12.3%=1.70x(27,526) ROE16%/Ke13.4%=1.41x(22,758) ROE18%/Ke12.3%=2.08x(33,643) ROE18%/Ke13.4%=1.72x(27,815) ROE20%/Ke12.3%=2.45x(39,759) ROE20%/Ke13.4%=2.03x(32,872)
+ g=8%: ROE16%/Ke12.3%=1.86x(30,157) ROE16%/Ke13.4%=1.48x(23,975) ROE18%/Ke12.3%=2.33x(37,697) ROE18%/Ke13.4%=1.85x(29,969) ROE20%/Ke12.3%=2.79x(45,236) ROE20%/Ke13.4%=2.22x(35,963)
+ g=9%: ROE16%/Ke12.3%=2.12x(34,384) ROE16%/Ke13.4%=1.59x(25,746) ROE18%/Ke12.3%=2.73x(44,208) ROE18%/Ke13.4%=2.05x(33,102) ROE20%/Ke12.3%=3.33x(54,032) ROE20%/Ke13.4%=2.50x(40,458)
+Giá 19.300 ngụ ý (Ke 12,3–13,4%, g 8%): ROE bền vững = g + P/B×(Ke−g) = 13.3% – 14.7%
+
+== 6. Định giá tương đối (BQ 30/10/2026: P/B vs ROE5Y của 13 NH) + Ke ngụ ý thị trường
+  LPB: P/B 2.31 | P/E 8.9 | ROE5Y 21.9% | ADV1M 72.8 tỷ
+  STB: P/B 1.95 | P/E 81.9 | ROE5Y 14.7% | ADV1M 215.2 tỷ
+  VCB: P/B 1.89 | P/E 11.3 | ROE5Y 20.4% | ADV1M 182.4 tỷ
+  HDB: P/B 1.62 | P/E 7.6 | ROE5Y 23.8% | ADV1M 383.3 tỷ
+  BID: P/B 1.31 | P/E 8.1 | ROE5Y 17.9% | ADV1M 109.1 tỷ
+  MBB: P/B 1.24 | P/E 6.5 | ROE5Y 22.7% | ADV1M 219.1 tỷ
+  CTG: P/B 1.18 | P/E 5.9 | ROE5Y 18.1% | ADV1M 213.5 tỷ
+  ACB: P/B 1.17 | P/E 7.6 | ROE5Y 23.0% | ADV1M 193.6 tỷ
+  TCB: P/B 1.16 | P/E 5.3 | ROE5Y 17.4% | ADV1M 404.1 tỷ
+  VPB: P/B 1.15 | P/E 7.4 | ROE5Y 14.8% | ADV1M 359.1 tỷ
+  VIB: P/B 1.04 | P/E 6.7 | ROE5Y 23.6% | ADV1M 92.8 tỷ
+  TPB: P/B 0.81 | P/E 5.3 | ROE5Y 18.6% | ADV1M 181.0 tỷ
+  SHB: P/B 0.76 | P/E 4.7 | ROE5Y 17.8% | ADV1M 452.2 tỷ
+Hồi quy P/B~ROE5Y (bỏ STB, n=12): P/B = 0.23 + 5.37×ROE ; R²=0.13 (yếu) ; MBB ROE5Y 22,7% -> P/B dự báo 1.45x (22,580 đ) ; trung vị P/B (11 NH, loại MBB+STB) 1.17x (18,275 đ)
+Tâm vùng v2 = 0,5×RI có trọng số @Ke13,4% (23,912) + 0,25×hồi quy (22,580) + 0,25×P/B lịch sử 1,25x (19,493) = 22,474 đ ; v1 (1/3 mỗi phần, RI w xấu 0,30) = 22.000
+Biên dưới tham chiếu: RI xấu @13,4% 17,323 / trung vị comp 18,275 ; biên trên: RI có trọng số @12,8% 26,645 ; RI có trọng số @15% (thị trường ngụ ý) 18,691
+  Ke ngụ ý tại P/B 1.24x với ROE bền vững 16%, g 6%: 14.1%
+  Ke ngụ ý tại P/B 1.24x với ROE bền vững 16%, g 7%: 14.3%
+  Ke ngụ ý tại P/B 1.24x với ROE bền vững 18%, g 6%: 15.7%
+  Ke ngụ ý tại P/B 1.24x với ROE bền vững 18%, g 7%: 15.9%
+  Ke ngụ ý tại P/B 1.24x với ROE bền vững 20%, g 6%: 17.3%
+  Ke ngụ ý tại P/B 1.24x với ROE bền vững 20%, g 7%: 17.5%
+
+== 7. Giá & thanh khoản (BQ ticker, Close điều chỉnh)
+1 năm (từ 01/10/2025): đỉnh 23,230 (2026-02-11), đáy 18,030 (2026-07-27); giá 30/10 cách đỉnh -16.9%
+  quanh CV 9608 (18/10, CN) + KQ Q3 sơ bộ: +0.8%
+  16/10→30/10: -2.8%
+  tháng 10: -1.8%
+  YTD: -4.7%
+ADV giá trị 20 phiên 221 tỷ ; 60 phiên 234 tỷ
+Sizing: vị thế 0,5–1,0% NAV của quỹ 50–200 tỷ = 0,25–2 tỷ ≈ <1% ADV 1 phiên — không ràng buộc thanh khoản
+
+== 8. Xu hướng theo QUÝ chất lượng nợ (31/12/25 → 30/06/26 → 30/09/26)
+  HN 31/12/25: nhóm2 10,210 (0.94%) | NPL 14,027 (1.29%) | bao phủ 93.7%
+  HN 30/06/26: nhóm2 11,990 (0.98%) | NPL 17,797 (1.45%) | bao phủ 93.6%
+  HN 30/09/26: nhóm2 17,014 (1.32%) | NPL 21,474 (1.67%) | bao phủ 84.7%
+  Mẹ 31/12/25: nhóm2 5,556 (0.54%) | NPL 11,690 (1.13%) | bao phủ 99.5%
+  Mẹ 30/06/26: nhóm2 7,720 (0.66%) | NPL 15,412 (1.31%) | bao phủ n/a
+  Mẹ 30/09/26: nhóm2 12,899 (1.05%) | NPL 18,915 (1.54%) | bao phủ 86.9%
+  QoQ Q3: HN nhóm2 +42%, NPL +21% ; mẹ nhóm2 +67%, NPL +23% ; dư nợ HN QoQ +4.9%
+  H1 (6 tháng): HN nhóm2 +17% ; NPL +27% => Q3 là quý tăng tốc
+
+== 9. MBV — rủi ro NGOÀI BẢNG (không hợp nhất; tới 30/09/2026 MB chưa góp vốn) — (ước lượng)
+Sự kiện: BCTC HN-Q3 tr.2: không hợp nhất (điểm c k.1 Đ.185 Luật TCTD 2024), chưa góp vốn tại 30/09/2026.
+BCTN25 thuyết minh bên liên quan: MB phải thu bán nợ từ MBV 11.248 tỷ (31/12/2025) vs 5.853 (31/12/2024).
+WEB thứ cấp: lỗ luỹ kế MBV 15.688 (31/12/2024, Baodautu 11/04/2025); MB QĐ 14328/QĐ-MB-HS 01/10/2026 góp 3.500 tỷ (thitruongtaichinhtiente 03/10/2026); dự kiến tới 5.000.
+  góp 3.500, mất trắng: −3,500 tỷ = 2.2% VCSH mẹ 30/09 ; BVPS −348 đ ; P/B tại 19.300 → 1.27x
+  góp 5.000, mất trắng: −5,000 tỷ = 3.2% VCSH mẹ 30/09 ; BVPS −497 đ ; P/B tại 19.300 → 1.28x
+  bù toàn bộ lỗ luỹ kế 2024 15.688 (cận trên thô): −15,688 tỷ = 10.0% VCSH mẹ 30/09 ; BVPS −1,558 đ ; P/B tại 19.300 → 1.37x
+  phải thu bán nợ 11.248 mất 30%: −3,374 tỷ = 2.1% VCSH mẹ 30/09 ; BVPS −335 đ ; P/B tại 19.300 → 1.26x
+  Góp vốn là chuyển tài sản (tiền → khoản đầu tư), KHÔNG tự động giảm BV; chỉ giảm khi phải trích lập/giảm giá. Khoản góp vào TCTD khác có thể bị trừ khi tính vốn tự có (chưa kiểm).

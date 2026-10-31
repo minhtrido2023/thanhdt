@@ -1,0 +1,4 @@
+default rc=1
+unsetTZ rc=0
+newyork rc=0
+DONE

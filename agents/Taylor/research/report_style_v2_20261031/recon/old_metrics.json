@@ -1,0 +1,42 @@
+{
+ "weekly": {
+  "file": "SpaceX_weekly_report_2026-10-26_to_2026-10-30.md",
+  "words_all": 3852,
+  "words_prose": 3151,
+  "charts": 3,
+  "tables": 6,
+  "pages_a4_equiv": 6,
+  "tuple_repr": true,
+  "longest_paragraph_words": 448
+ },
+ "daily": {
+  "file": "SpaceX_daily_report_2026-10-30.md",
+  "words_all": 775,
+  "words_prose": 545,
+  "charts": 0,
+  "tables": 3,
+  "pages_a4_equiv": 1,
+  "tuple_repr": false,
+  "longest_paragraph_words": 117
+ },
+ "monthly_sep (tham chiếu cho quý)": {
+  "file": "SpaceX_monthly_report_2026-09.md",
+  "words_all": 3725,
+  "words_prose": 2222,
+  "charts": 3,
+  "tables": 12,
+  "pages_a4_equiv": 8,
+  "tuple_repr": false,
+  "longest_paragraph_words": 125
+ },
+ "weekly_ZaloPay": {
+  "file": "ZaloPay_weekly_report_2026-10-26_to_2026-10-30.md",
+  "words_all": 4718,
+  "words_prose": 3729,
+  "charts": 3,
+  "tables": 7,
+  "pages_a4_equiv": 7,
+  "tuple_repr": true,
+  "longest_paragraph_words": 448
+ }
+}

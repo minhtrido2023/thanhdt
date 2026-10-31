@@ -1,0 +1,13 @@
+name,lat,lon,kind,dx,dy,ban_do
+Trụ sở – KCN Phố Nối A (Hưng Yên),20.94,106.04,hq,-0.62,-0.14,pts_north
+KLH Hải Dương – Kinh Môn (Hải Dương cũ nay Hải Phòng),21.0,106.5,plant,-0.45,0.15,pts_north
+VP Hà Nội (66 Nguyễn Du),21.017,105.846,hq,-0.35,0.12,pts_north
+Hà Nội,21.03,105.8,market,-0.22,-0.12,pts_north
+Hải Phòng (cảng),20.86,106.68,market,0.04,-0.12,pts_north
+KLH Dung Quất (Bình Sơn - Quảng Ngãi),15.4,108.8,plant,-0.75,-0.1,pts_central
+Đà Nẵng,16.05,108.2,market,0.06,0.04,pts_central
+Long An (cũ nay Tây Ninh) – NM thép đang xây (vị trí cấp tỉnh),10.54,106.41,plant,-1.0,-0.3,pts_south
+TP.HCM,10.78,106.7,market,0.06,-0.08,pts_south
+Bình Dương (cũ),10.98,106.65,market,-0.45,0.06,pts_south
+Đồng Nai,10.95,106.82,market,0.06,0.04,pts_south
+Cần Thơ,10.03,105.78,market,0.06,0.04,pts_south

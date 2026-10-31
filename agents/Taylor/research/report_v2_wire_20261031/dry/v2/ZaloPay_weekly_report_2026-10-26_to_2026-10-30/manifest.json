@@ -1,0 +1,102 @@
+{
+ "version": 1,
+ "stem": "ZaloPay_weekly_report_2026-10-26_to_2026-10-30",
+ "cadence": "weekly",
+ "account": "ZaloPay",
+ "pdf": "ZaloPay_weekly_report_2026-10-26_to_2026-10-30.pdf",
+ "pdf_sha256": "fe51263b86fcc2c23ce0f4329611d0bcc2f0675f7f16aeb8a8d917991731cc59",
+ "html": "ZaloPay_weekly_report_2026-10-26_to_2026-10-30_email.html",
+ "html_sha256": "08f6aa9f02b393e4eac0944b9ce92750efc172745708c1a91ae61487dd41b2a1",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "6c28ab43a5e2e36705e53016a4c21501d9675d85f26f43231b2697929c98bb48"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "f80f47669c9a4e3c204434b4ecbd780baa23c794550d5113f20706189a043498"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "bd6898d93a65ad5640db3750f61bd1e7e427497d7bbd96644dcde749b1153f7d"
+  },
+  "fig14": {
+   "file": "03_attribution.png",
+   "sha256": "cea94dac4da491dd6036bac0b5d69cd570e3c54acd62bb1bd650e29f7156e098"
+  },
+  "fig22": {
+   "file": "04_allocation.png",
+   "sha256": "7684be645394e08898a3b6ff7d28a0f9306c1d9ae8ecadd04bff4ebbe1a5e5ff"
+  }
+ },
+ "pages": 4,
+ "page_cap": 5,
+ "lint": {
+  "pages": 4,
+  "words_total": 1044,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   939827062.0,
+   939827062.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   391598600.0,
+   391598600.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   440069300.0,
+   440069300.0,
+   0.0
+  ]
+ ],
+ "period": "2026-10-26_to_2026-10-30",
+ "report_date": "2026-10-30",
+ "nav_date": "2026-10-30",
+ "market_block": null,
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": null,
+ "numbers": {
+  "wtd_pct": -0.783,
+  "mtd_pct": -3.849,
+  "inception_pct": -6.691,
+  "nav1": 939827062.0,
+  "pnl_vnd": -7236966.0,
+  "flow_vnd": 18023489.0
+ },
+ "daily_rows": [
+  [
+   "26/10",
+   "−1,82%"
+  ],
+  [
+   "27/10",
+   "+0,85%"
+  ],
+  [
+   "28/10",
+   "+0,00%"
+  ],
+  [
+   "29/10",
+   "+0,25%"
+  ],
+  [
+   "30/10",
+   "−0,05%"
+  ]
+ ],
+ "narrative": false
+}

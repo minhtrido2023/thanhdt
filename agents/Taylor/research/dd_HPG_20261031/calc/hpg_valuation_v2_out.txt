@@ -1,0 +1,68 @@
+== RI theo (beta, ERP), thue terminal 20%, g 5% (xau 3%) ==
+beta_do_2y_0.84
+    Ke 10.97%: xau 10,802 / TL 22,694 / tot 32,701 -> W 22,223
+    Ke 11.43%: xau 10,128 / TL 20,896 / tot 30,085 -> W 20,501
+    Ke 11.90%: xau 9,525 / TL 19,342 / tot 27,825 -> W 19,008
+blume_0.90
+    Ke 11.23%: xau 10,415 / TL 21,653 / tot 31,187 -> W 21,227
+    Ke 11.72%: xau 9,745 / TL 19,904 / tot 28,643 -> W 19,549
+    Ke 12.22%: xau 9,148 / TL 18,396 / tot 26,450 -> W 18,098
+blume_0.93
+    Ke 11.40%: xau 10,182 / TL 21,037 / tot 30,291 -> W 20,637
+    Ke 11.91%: xau 9,516 / TL 19,318 / tot 27,791 -> W 18,986
+    Ke 12.42%: xau 8,923 / TL 17,838 / tot 25,640 -> W 17,560
+
+Ke trung tam (beta 0,915 x ERP 5,55%) = 11.83%  -> RI trong so 19,221
+Dai Ke 10.97-12.42% -> RI trong so 17,560 - 22,223
+  xau: 9,612 d/cp  BV2029 190,796  ROE terminal sau thue 20% (suy ra) 7.9%  g 0.03  P/B ngam 0.55x
+  trung_lap: 19,563 d/cp  BV2029 217,596  ROE terminal sau thue 20% (suy ra) 11.8%  g 0.05  P/B ngam 1.11x
+  tot: 28,147 d/cp  BV2029 234,396  ROE terminal sau thue 20% (suy ra) 14.3%  g 0.05  P/B ngam 1.60x
+
+-- Doi chieu: neu KHONG dua thue 20% vao terminal (roe_T/0,909) --
+  Ke 11.83%: 22,132  (lech +2,911 d/cp)
+-- Doi chieu: beta 1,1 cu (Ke 12,85%) + thue 20% -- 16,484
+
+== Do nhay trung lap: ROE terminal x Ke ==
+roe\Ke  11.25  11.83  12.42  13.00
+0.100  16,199 14,722 13,451 12,390
+0.110  19,115 17,347 15,825 14,555
+0.120  22,031 19,971 18,200 16,721
+0.130  24,947 22,596 20,574 18,886
+0.140  27,863 25,220 22,948 21,052
+0.150  30,779 27,845 25,322 23,217
+0.160  33,695 30,469 27,696 25,383
+
+== Trong so kich ban (Ke trung tam) ==
+(0.25, 0.5, 0.25) 19,221
+(0.3, 0.5, 0.2) 18,294
+(0.2, 0.5, 0.3) 20,148
+(0.15, 0.5, 0.35) 21,075
+(0.35, 0.5, 0.15) 17,368
+
+Gia 21.000 ngam ROE terminal (sau thue 20%) = 12.4% tren duong LN trung lap, Ke 11.83%
+EBITDA 2027 theo kich ban: {'xau': 37600.0, 'trung_lap': 48900.0, 'tot': 54600.0}
+
+== EV/EBITDA (no rong + phai tra nguoi ban DH 3.829 = no co tinh chat vay; tien gui cam co VAN la tai san) ==
+x5: xau 16,162 / TL 22,854 / tot 26,229 -> W 22,025
+x6: xau 20,615 / TL 28,646 / tot 32,696 -> W 27,651
+x7: xau 25,069 / TL 34,438 / tot 39,163 -> W 33,277
+EV hien tai (no dieu chinh) 228,848 ; EV/EBITDA loi TTM 5.17x ; tren EBITDA 2027 trung lap 4.68x ; P/E 2027 trung lap 6.82x
+
+== No rong / EBITDA loi TTM 44.235 ==
+  tru toan bo tien gui (can duoi): 59,607.6 -> 1.35x
+  khong tru tien gui cam co 8.294: 67,901.6 -> 1.54x
+  + phai tra nguoi ban DH 3.829: 71,730.5 -> 1.62x
+
+== Ghep: RI trung tam 19,221; EV/EBITDA 5x 22,025 / 6x 27,651 / 7x 33,277
+   Tam ghep 50/50 RI + 6x = 23,436; RI + 5x = 20,623; RI + 7x = 26,249
+   Bien RI theo dai Ke: 17,560-22,223
+
+TTM loi me v2 = 22,943 - LN khac Q3 sau thue 260 = 22,683; EPS sau trich quy 2,16% = 2,629 d; P/E loi 7.99x ; (Q4/25 bao cao co the con LN BDS van hanh nho (khong tach duoc))
+Q3/26 loi: 7.973,5 - 260 = 7,714; Q3/25 loi = 4.012,3 - 392,7 - 57,3x0,86 = 3,570; tang 116% (khong bo LN khac: 120%)
+CFO 9T 20,936.3; bo hoan VAT 5,135.7 -> 15,800.6 (0.82x loi); bo ca VAT va giam phai tra NB 4410.4 -> 20,211.0 (1.05x)
+
+== TAM v2 = (2 x RI 19,221 + EV5x 22,025)/3 = 20,156 d/cp ; gia 21000 = +4.2% so voi tam
+   can duoi (Ke 12,42% + EBITDA -10%): 18,110; can tren (Ke 10,97% + EV 5x): 22,157
+LEN: trong so 0,15/0,50/0,35 + TL [8,0k;28k;28k;29k] -> 22,124 ; chi doi trong so -> 21,075
+XUONG: trong so 0,35/0,50/0,15 + TL [5,5k;23k;23k;24k] -> 15,793 ; chi doi trong so -> 17,368
+Duoi trai TLSH: mat 50% khoan 9.915 = -587 d/cp

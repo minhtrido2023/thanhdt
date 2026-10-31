@@ -1,0 +1,71 @@
+{
+ "version": 1,
+ "stem": "SpaceX_quarterly_report_2026-Q3",
+ "cadence": "quarterly",
+ "account": "SpaceX",
+ "pdf": "SpaceX_quarterly_report_2026-Q3.pdf",
+ "pdf_sha256": "b3cb411825f2d0d42827d3c36e49a8f314c2a90092248b0c42f4897d992bf5bd",
+ "html": "SpaceX_quarterly_report_2026-Q3_email.html",
+ "html_sha256": "2ca93ea213713eabed295b621597476a8a0c1a16fda8de335e05675371f672fa",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "67df50be07a30b642efff7bb30e7aae631bab87cc616d8db9c40a16426fee2e8"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "59b47106ba3c18f3ba426208f6f5790f371f9bf9f1faf816059111c008e58cf7"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "764a72c2295e6da4e36d9221e0d417a7b9efbfc6bc787aadf025f4b217a47082"
+  },
+  "fig11": {
+   "file": "03_months.png",
+   "sha256": "6255b8eb8da24ec26c497540a9351e2f2216dfe3c7996f2598f69aa6dd7f586e"
+  },
+  "fig15": {
+   "file": "04_underwater.png",
+   "sha256": "25552bfb64b8d3b778c32d255abfbad9376e7bb65056a24b8d307da80709bf76"
+  },
+  "fig22": {
+   "file": "06_allocation.png",
+   "sha256": "9b09c21765a5f35fa6ff7fac4a61fc83c433359545ab288703c82a82e2eae60a"
+  }
+ },
+ "pages": 4,
+ "page_cap": 8,
+ "lint": {
+  "pages": 4,
+  "words_total": 964,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   981599301.0,
+   981599301.0,
+   0.0
+  ]
+ ],
+ "period": "2026-Q3",
+ "report_date": "2026-09-30",
+ "nav_date": "2026-09-30",
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": "không có dnse_raw_2026-07-01.jsonl/positions cho SpaceX",
+ "numbers": {
+  "qtd_pct": -1.84,
+  "ytd_pct": -1.84,
+  "inception_pct": -1.84,
+  "nav1": 981599301.0,
+  "pnl_vnd": -18400699.0,
+  "flow_vnd": 0.0
+ },
+ "narrative": false
+}

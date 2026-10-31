@@ -1,0 +1,144 @@
+{
+ "version": 1,
+ "stem": "SpaceX_weekly_report_2026-10-26_to_2026-10-30",
+ "cadence": "weekly",
+ "account": "SpaceX",
+ "pdf": "SpaceX_weekly_report_2026-10-26_to_2026-10-30.pdf",
+ "pdf_sha256": "cdef0999ee860c66c0e46055834130a36a2aba797fa5fb8cf1fb86364ba505b5",
+ "html": "SpaceX_weekly_report_2026-10-26_to_2026-10-30_email.html",
+ "html_sha256": "d55423dce98134da93829146f8eaf6b76c525b22108e9c4ae270ebd93b647b6e",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "04c508f36549e064aa52a90e75bbec8ca4fc2fe7e19c0a82ad716e27924a0de4"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "607aa41a774d5e45e7319825a25fbedfce19b97d6967c4900f5daae5a0375892"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "5699ef7794ed4ee1ddde41206ef85c186cbf3284b3c01c6a555eb5d09d50527b"
+  },
+  "fig14": {
+   "file": "03_attribution.png",
+   "sha256": "d607c261d69499c0e8d02bf03c4a645a661e1895046b942cb905460f18045d9e"
+  },
+  "fig22": {
+   "file": "04_allocation.png",
+   "sha256": "55ecfe7eda4099cabe670d3df74cd35d44cab8c9445c2cbb601c84793dbe6462"
+  }
+ },
+ "pages": 4,
+ "page_cap": 5,
+ "lint": {
+  "pages": 4,
+  "words_total": 1134,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   945141046.0,
+   945141046.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   92235000.0,
+   92235000.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   165674300.0,
+   165674300.0,
+   0.0
+  ]
+ ],
+ "positions": [
+  [
+   "TV1",
+   2300.0,
+   "+5,35%"
+  ],
+  [
+   "VPB",
+   1586.0,
+   "−2,79%"
+  ],
+  [
+   "HT1",
+   2700.0,
+   "−4,22%"
+  ],
+  [
+   "MCH",
+   200.0,
+   "−0,95%"
+  ],
+  [
+   "DRI",
+   1250.0,
+   "+12,73%"
+  ],
+  [
+   "MBB",
+   175.0,
+   "−6,52%"
+  ],
+  [
+   "VIB",
+   47.0,
+   "+1,32%"
+  ],
+  [
+   "TPB",
+   30.0,
+   "−10,58%"
+  ]
+ ],
+ "period": "2026-10-26_to_2026-10-30",
+ "report_date": "2026-10-30",
+ "nav_date": "2026-10-30",
+ "market_block": null,
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": null,
+ "numbers": {
+  "wtd_pct": -0.602,
+  "mtd_pct": -1.885,
+  "inception_pct": -3.69,
+  "nav1": 945141046.0,
+  "pnl_vnd": -5770257.0,
+  "flow_vnd": -18023489.0
+ },
+ "daily_rows": [
+  [
+   "26/10",
+   "−0,19%"
+  ],
+  [
+   "27/10",
+   "−0,05%"
+  ],
+  [
+   "28/10",
+   "+0,01%"
+  ],
+  [
+   "29/10",
+   "−0,30%"
+  ],
+  [
+   "30/10",
+   "−0,07%"
+  ]
+ ],
+ "narrative": true
+}

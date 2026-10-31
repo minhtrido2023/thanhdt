@@ -1,0 +1,71 @@
+{
+ "version": 1,
+ "stem": "ZaloPay_quarterly_report_2026-Q3",
+ "cadence": "quarterly",
+ "account": "ZaloPay",
+ "pdf": "ZaloPay_quarterly_report_2026-Q3.pdf",
+ "pdf_sha256": "bcd6c461c26fea7f08a0e2917a98d40b16ab1d01d3a8c0b00e5e22c08bac1370",
+ "html": "ZaloPay_quarterly_report_2026-Q3_email.html",
+ "html_sha256": "d2a01666fdac853fc65af6e02435114a1b07cb974add489ea91c3ad9e0f0b412",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "b29c0948c72a6205b83a6d7abf6df7d32914ded1bef4e6808071792cfb2c7af1"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "1cad589ae5b525141496b489e8d55fa80f9fe778d238b090226b316fd63d756a"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "7f50aee8723c0a1221882d30df21b976d832cf8b1c521b26566a4b76ed7c9999"
+  },
+  "fig11": {
+   "file": "03_months.png",
+   "sha256": "2fb339a226493dc4dfad07c19a2e6cf7712a2e9a2c2f9a5ff1955a5d21532a71"
+  },
+  "fig15": {
+   "file": "04_underwater.png",
+   "sha256": "e819f31aa1a1655921c45c686c7d722167c91c48b26a12676b47cb82db16f37f"
+  },
+  "fig22": {
+   "file": "06_allocation.png",
+   "sha256": "bb5d481db8a04d597f77fa8ef9cc52439ae043f64488c7cb33c59f7171dd2b73"
+  }
+ },
+ "pages": 4,
+ "page_cap": 8,
+ "lint": {
+  "pages": 4,
+  "words_total": 943,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   958666279.0,
+   958666279.0,
+   0.0
+  ]
+ ],
+ "period": "2026-Q3",
+ "report_date": "2026-09-30",
+ "nav_date": "2026-09-30",
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": "nav_history_ZaloPay.csv không có dòng <= 2026-07-06",
+ "numbers": {
+  "qtd_pct": -2.956,
+  "ytd_pct": -2.956,
+  "inception_pct": -2.956,
+  "nav1": 958666279.0,
+  "pnl_vnd": -29199288.0,
+  "flow_vnd": 0.0
+ },
+ "narrative": false
+}

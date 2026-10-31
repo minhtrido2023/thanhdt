@@ -1,0 +1,14 @@
+{
+ "SpaceX_weekly_26-30_10_v2": {
+  "charts_imgs_excl_banner": 5,
+  "tables_incl_kpi": 9
+ },
+ "SpaceX_daily_2026-10-30_v2": {
+  "charts_imgs_excl_banner": 1,
+  "tables_incl_kpi": 3
+ },
+ "SpaceX_quarterly_Q3_2026_v2": {
+  "charts_imgs_excl_banner": 4,
+  "tables_incl_kpi": 4
+ }
+}

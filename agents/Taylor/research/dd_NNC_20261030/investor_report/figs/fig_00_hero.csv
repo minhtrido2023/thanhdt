@@ -1,0 +1,16 @@
+chi_tieu,gia_tri,nguon
+cong_suat_nguyen_khoi_tr_m3,1.0,"BCTN25 tr.3,6"
+han_gp,2043.0,BCTN25 tr.3
+lnst_2021,38.4,BQ NP_P0 / BCTC
+lnst_2022,39.3,BQ NP_P0 / BCTC
+lnst_2023,36.6,BQ NP_P0 / BCTC
+lnst_2024,62.6,BQ NP_P0 / BCTC
+lnst_2025,147.8,BQ NP_P0 / BCTC
+lnst_TTM,214.0,BQ NP_P0 / BCTC
+fv_lo_phang,59307.0,valuation_v2
+fv_hi_thuc,79498.0,valuation_v2
+grid_p10,57617.0,valuation_v2
+grid_p90,84812.0,valuation_v2
+tieu_cuc_lo,24815.0,valuation_v2
+tieu_cuc_hi,32102.0,valuation_v2
+gia_3010,47100.0,tav2_bq.ticker

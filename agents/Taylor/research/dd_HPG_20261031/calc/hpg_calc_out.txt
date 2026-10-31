@@ -1,0 +1,29 @@
+check 9T26 - (H1+Q3): {'dtt': 0.0, 'lng': -0.1, 'dttc': -0.6, 'laivay': 0.1, 'ldlk': 0.0, 'lntt': -0.0, 'lnst': 0.1, 'me': 0.1}
+check 9T25 - (H1+Q3): {'dtt': 0.0, 'lng': -0.1, 'dttc': -3.6, 'laivay': 0.0, 'ldlk': 0, 'lntt': 0.1, 'lnst': 0.0, 'me': 0.0}
+
+Quy | DTT | LNG | GM% | DTTC | lai vay | LDLK | LNTT | LNST | me
+Q1/25 37621.7 5424.2 14.42 438.1 627.0 0 3839.8 3349.8 3344.3
+Q2/25 35910.5 6589.7 18.35 498.1 439.1 0 4972.3 4264.5 4256.5
+Q3/25 36407.4 6087.3 16.72 711.9 812.2 0 4628.3 4012.3 3988.3
+Q4/25 46176.5 6396.7 13.85 437.3 1236.6 0 4600.1 3888.3 3864.1
+Q1/26 52900.8 8365.1 15.81 5938.3 1333.4 0.3 10762.2 9055.9 8994.0
+Q2/26 55158.9 10487.8 19.01 616.7 1519.6 1.7 7184.7 6424.5 6371.0
+Q3/26 62214.2 11922.5 19.16 1188.0 1774.0 0 9108.7 8265.4 8217.3
+
+TTM LNST 27634.2 me 27446.5 EPS TTM 3251
+core 9T26 LNST (bo lai thoai von sau thue, LDLK, BDS van hanh): 19242.6  me ~ 19079.1  bds_ops 599.0
+core Q3/26 LNST ~ 7973.5
+core TTM me ~ 22943.2 EPS core 2717
+ETR 9T26 12.2 Q3/26 9.3 Q3/25 13.3 FY25 14.0
+
+Vay 105736.7 Tien+HTM 46129.1 No rong 59607.6  (dau nam: 61704.1 )
+EBITDA TTM 49170.7 core (bo one-off 4935.4 ) 44235.3  ND/EBITDA core 1.35
+Q3 KH 3063.1 EBITDA Q3 tu tinh 13945.8 (slide 14.307)
+VCSH me 148795.5 BVPS 17624
+Vay/VCSH 0.71  TS - (No+VCSH) = 0.0
+Delta TS 9T 25550.6  dNo 7202.2  dVCSH 18348.4  dVay 13562.5
+CFO 9T 20936.3 FCF (CFO-capex) 6329.1 CFO/LNST 0.88 CFO/core 1.09
+Lai tien gui Q3 nam hoa / so du binh quan ~ 6.76 %
+
+Gia 30/10 21000 Von hoa 177302.3 PE TTM 6.46 PE core TTM 7.73 PB 1.19 PE Q3 core x4 5.56
+EV (tru dau tu LK 12.664) 225018.7 EV/EBITDA core TTM 5.09

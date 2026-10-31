@@ -1,0 +1,40 @@
+VCSH me 12159.1 = truc tiep 5958.6 + qua cong ty con 6200.5
+HTK BDS: me 5551.8 | CRV 8719.1 | khac 360.0
+HTK con lai sau gia von backlog: {'me': 4458.2, 'crv': 7338.8, 'khac': 339.9} tong 12136.9
+PV he so: 1 nam 0.886 | 1,5 nam 0.834 | 2 nam 0.785 | HTK 4 nam 0.617
+tieu cuc: bien rong backlog 30.0%, thang du 15%, CK holding 30% (chi phan qua cty con), CK quan tri 15% | backlog +1088, thang du +899; truc tiep 6932 + qua con 7215 = truoc CK 14147 (14,100 d/cp) -> sau CK 10185 = 10,151 d/cp; CK hieu dung 28.0%
+co so: bien rong backlog 33.5%, thang du 40%, CK holding 20% (chi phan qua cty con), CK quan tri 10% | backlog +1215, thang du +2398; truc tiep 7684 + qua con 8088 = truoc CK 15772 (15,720 d/cp) -> sau CK 12739 = 12,697 d/cp; CK hieu dung 19.2%
+tich cuc: bien rong backlog 36.0%, thang du 55%, CK holding 10% (chi phan qua cty con), CK quan tri 5% | backlog +1306, thang du +3297; truc tiep 8143 + qua con 8619 = truoc CK 16762 (16,707 d/cp) -> sau CK 15105 = 15,055 d/cp; CK hieu dung 9.9%
+Trong so 25/50/25: 12,650 d/cp; gia 11850 lech -6.3%
+Nghieng theo doc nganh 35/45/20: 12,278 d/cp; gia lech -3.5%
+
+Do nhay Ke (co so):
+  Ke 12.3%: 12,741 d/cp
+  Ke 12.8%: 12,697 d/cp
+  Ke 13.4%: 12,654 d/cp
+
+Ma tran: thang du HTK (dong) x chiet khau tong hieu dung (cot) -> d/cp; bien rong backlog 33,5%
+s\CK      0%     10%     15%     20%     25%     30%   | CK ngam dinh trong gia 11.850
+ 10% (bien gop ~20.0%) 13,928  12,535  11,839  11,142  10,446   9,749   | 14.9%
+ 25% (bien gop ~31.4%) 14,824  13,342  12,600  11,859  11,118  10,377   | 20.1%
+ 40% (bien gop ~40.0%) 15,720  14,148  13,362  12,576  11,790  11,004   | 24.6%
+ 55% (bien gop ~46.7%) 16,616  14,955  14,124  13,293  12,462  11,631   | 28.7%
+ 70% (bien gop ~52.0%) 17,513  15,761  14,886  14,010  13,134  12,259   | 32.3%
+Quy doi thang du sau thue s <-> bien gop g (CPBH 10% DT, thue 20%): s(1-g)=0,8(g-0,1) => g=(s+0,08)/(s+0,8); bien gop 51,9% <=> s=69.7%
+
+Net cash:
+  Tien+HTM HN 3296.3 (3,285 d/cp); trong do cty me 2244.2; phan me uoc 2960 (2,950 d/cp)
+  Sau no tai chinh (phai tra NB/khac, TM36) 1.086,8 + thue phai nop 198,8: 2011 ty HN (2,004 d/cp); vay = 0
+  Sacombank (Sai Gon Tai Loc) 678,32 = 21% tien+HTM HN; 694,23 -> 678,32 (it rut)
+
+Phep thu cheo:
+  P/B cung co so BQ: BV BQ 13208 ty / 1003.3 tr cp = 13,165 d/cp; TCH P/B 0.90 vs trung vi peer 0,72 (+25%) -> gia tai 0,72x = 9,479
+  SOTP hon hop (GAPS): 11234 ty = 11,196 d/cp; + 38,19% LNST CRV 6T uoc 651 -> 11482 ty = 11,444 d/cp (+3.5% gia)
+  P/E chuan hoa 10-16x x EPS 675-775: 6,750-12,400; 13x x 729 = 9,477
+  HHS von hoa 4.082 vs phan HHS trong VCSH CRV ~51,2% x 7.579 = 3880 (uoc luong) -> thi truong chiet khau tang HHS
+
+KH FY26 (LNST HN 2.000, DT 5.000; NQ26 tr.34 'chi tieu hop nhat'):
+  DT BDS Q2 ~1752 (6T 1.954,5 - Q1 ~203 [SHS]); DT rieng cty me Q2 chi 57,61 => ~toan bo tu cty con, NC-II ~1.650-1.750 (uoc luong)
+  NMTT NC-II giam 1.033 (gom VAT) = 957 ex-VAT => ~745 DT Q2 thu luc ban giao/phai thu (uoc luong)
+  NMTT NC-II con 3.099 / toc do -1.033/quy = 3.0 quy
+  Can H2 FY26: DT 2586, LNST HN 1086; neu giu nhip DT BDS ~1.700/quy x LNST/DT Q2 38.3%: 2 quy ~ 1303

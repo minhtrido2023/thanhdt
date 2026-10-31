@@ -252,3 +252,89 @@ Không có mốc nào ở trên đã xảy ra tính tới 30/10/2026.
 | Kết luận | NON (khung fear-buy) + "rẻ về giá trị thuần" | **Hợp lý, không rẻ rõ rệt** | Khung khác (trung dung, không §2.5); và định giá cũ bỏ sót rủi ro vách sản lượng |
 
 **Kết luận đổi:** từ "rẻ ~+32%" sang "xấp xỉ hợp lý, +7% kỳ vọng với phân bố lệch hai đầu". Phần lớn chênh lệch do giả định kịch bản xấu, không do số liệu BCTC.
+
+---
+
+## §13 ĐÍNH CHÍNH 31/10/2026 (áp bản phản biện `SKEPTIC_20261031.md`, REFUTED medium) — **mục này THẮNG §0, §7, §8 #5, §9.3, §10, §11**
+
+Job `Taylor_20261031_014511`. Tính toán: `calc/valuation_v2.py` → `calc/valuation_v2_out.txt` (md5 out `3cff411d…`), CSV `calc/valuation_v2_scenarios.csv`,
+`calc/valuation_v2_3scen.csv`. `valuation.py` (30/10) giữ nguyên làm chân control: tái lập 50.267; đổi TỪNG giả định ra đúng số phản biện
+(trọng số 55.433 · +3% từ 2031 57.644 · +3% từ 2028 64.379 · chi phí ±10% 55.142/45.804 · thuê +2.657).
+
+### 13.1 Kiểm lại từng đính chính tại nguồn (ảnh trang, pymupdf 100 dpi)
+
+| # | Đính chính | Kiểm tại nguồn | Kết quả |
+|---|---|---|---|
+| E1 | Có phạt hành chính | KT25 TM 7.8 (in tr.40, pdf p.43): "Tiền phạt vi phạm hành chính" **39,37 tr (2025) / 630,43 tr (2024)**; dự phòng tiền CQKTKS 1,735 tỷ (2025); chi phí cải tạo mỏ 0,445 tỷ (2024); tiền đền bù đất 1,0 tỷ (2025) | **Phản biện ĐÚNG.** §8 #5 cũ ("KHÔNG thấy phạt") SAI. Nội dung vi phạm: CHƯA XÁC MINH |
+| E2 | Gán sai nguồn người đọc ngành | Sector read §5 bảng cầu: 2027 trũng 7–11 tr m³, 2028 8–12; §6 "đỉnh kéo dài tới 2028" là kịch bản chống; F2: P(giá Q2/27 < Q3/26 −7%) = **0,15** | **ĐÚNG.** Đường "2027 cao rồi vách 2028" là của FPTS/nhóm nghiên cứu, không phải người đọc ngành |
+| E3 | FPTS không phải xác nhận độc lập | FPTS tr.1: base case 0,8 tr m³ từ 2028; tr.17: giá 479,7k (2027F) → **237,6k (2028F) → 209,8k (2029F)**, biên gộp 30,6% (2029F) | **ĐÚNG.** Cùng đường giá/sản lượng FPTS ra 51.400, mô hình này ra ~24.900 ⇒ lệch ~2 lần; câu "FPTS gần kỳ vọng" bị XOÁ |
+| E4 | Giá danh nghĩa phẳng = giá thực −3%/năm, không công bố | `valuation.py` dòng `path()`: giá hằng, chi phí ×1,03^t, r danh nghĩa 13% | **ĐÚNG.** Đây là giả định số 1 (13.3). Lưu ý: "+3%/năm lịch sử" so 140–150k/tấn (≤2020, mỏ chung) với 177k (Đồng Nai cũ) – 240k (Bình Phước cũ) đầu 2026 ⇒ +3% đến +8%/năm tuỳ vùng, mốc ≤2020 không rõ năm |
+| E5 | Bỏ sót LN gộp cho thuê | KT25 7.1/7.2: DT dịch vụ 18,92; GV dịch vụ 7,79 ⇒ **11,13 tỷ (2025)** | **ĐÚNG.** Cộng vào, tăng 3%/năm, dừng 2043 (thận trọng: đất Núi Nhỏ chưa có quy hoạch sau đóng mỏ) |
+| E6 | Hiệu chỉnh chi phí | KT25 7.2: GV thành phẩm **178,29 (2024) / 178,59 (2025)**; DT thành phẩm 257,44 / 360,39 | **ĐÚNG.** Mô hình cũ ở 1,2 tr m³ (2025) cao hơn kiểm toán 10%; ở 1,05 tr m³ (2024) thấp 2%. Hệ số tâm 0,97 (TB 2 năm), dải ±10% (0,87–1,07) chứa hiệu chỉnh Q3/26 (1,00, đỉnh diesel). Sản lượng 2024/25 lấy từ FPTS (thứ cấp) |
+| E7 | Đối thủ hết GP sớm | FPTS tr.9: thời hạn còn lại Mũi Tàu 17 năm, Tam Lập 3 **9**, Tam Lập 2 **7** | **ĐÚNG.** Đưa vào độ nhạy (xấu hồi 1,2 × 320 từ 2035), không vào tâm |
+| E8 | Phía lạc quan | MVC ADV mỏng (BQ Volume_1M 41.280 cp × 14.100 ≈ 0,58 tỷ/phiên ngày 30/10; phản biện đo 0,39 tỷ/3T); giá "tốt" 420/400 không có ASP | **ĐÚNG.** MVC trình bày CẢ hai mức (0% / 30%), tâm 15%; giá "tốt" thấp hơn = độ nhạy |
+| E9 | NHC trong tăng trưởng Q3 | Q3 tr.28 (pdf p.29): bán NHC **12,27 (Q3/26) vs 4,39 (Q3/25)**, đã thu 2,0; phải thu 12,92. KT25 7.1: NHC 18,41 (2025) / 12,45 (2024) | **ĐÚNG.** +7,88 = 16% phần tăng DT Q3 YoY (49,22) |
+| E10 | Bỏ comp | BQ `ticker` Close 30/10 × `ticker_financial.OShares` / Σ NP_P0 Q4/25–Q3/26 | Đưa lại (13.4) |
+| E11 | LN giữ lại / cổ tức | Q3 tr.3 (pdf p.4): LNST chưa phân phối kỳ này **80,04** vs LNST 9T 160,08; quỹ ĐTPT 87,27 → **353,26** | **ĐÚNG.** ~80 tỷ LN 2026 đã rời dòng 420b trong 9T — chưa có nghị quyết công bố giải thích; 61,37% (BCTN25) vẫn CHƯA XÁC MINH |
+| E12 | Truy thu chạm mỏ lõi | Q3 V19a dự phòng CQ Mũi Tàu 0,84; KT25 7.8 dự phòng CQKTKS 1,735 (2025) | **ĐÚNG** — theo dõi |
+
+Không tìm thấy chỗ phản biện sai. Một chỗ cần nói rõ hơn: E4 "+3%/năm" là cận dưới; so riêng Bình Phước cũ (vùng Mũi Tàu) thì cao hơn (≤8%/năm) nhưng mốc ≤2020 không rõ năm, khác vùng — không dùng làm tâm.
+
+### 13.2 Bảng số cũ → mới (r = 13%)
+
+| Hạng mục | §0/§7 cũ (30/10) | §13 mới (31/10) | Lý do |
+|---|---|---|---|
+| Trọng số tốt/cơ sở/xấu/rất xấu | 20/45/25/10 | **25/50/20/5** | F2 người đọc ngành P(giá Q2/27 giảm >7%) = 0,15; xấu+rất xấu giữ 25% (> 0,15) vì thêm rủi ro vách 2028 |
+| LN gộp cho thuê Núi Nhỏ | không tính | **+11,13 tỷ/năm** (2025, +3%/năm tới 2043) | E5 |
+| Chi phí | 110k/m³ + 70 tỷ, hiệu chỉnh 1 quý | **×0,97** (GV kiểm toán 2024–25), dải 0,87–1,07 | E6 |
+| Giá danh nghĩa | phẳng (ẩn) | **4 biến thể công bố**; tâm = giữa "phẳng" và "giữ giá trị thực" | E4 |
+| MVC | 98,4 tỷ (không chiết khấu) | 98,4 / 68,9 (0% / 30%), tâm 15% | E8a |
+| Tốt / cơ sở / xấu / rất xấu (giá phẳng) | 94.200 / 52.000 / 24.900 / 18.100 | **99.800 / 57.300 / 27.200 / 18.600** | thuê + chi phí |
+| Kỳ vọng — giá phẳng | **50.300 (+7%)** | **59.300 (+26%)** (MVC −15%) | |
+| Kỳ vọng — +3%/năm từ 2031 | — | 69.100 (+47%) | |
+| Kỳ vọng — +3%/năm từ 2028 | — | 76.600 (+63%) | |
+| Kỳ vọng — giữ giá trị thực | — | **79.500 (+69%)** (MVC −15%) | |
+| Điểm giữa phẳng…thực | — | **~69.400 (+47%)** | luật 12: cả hai chiều vào dải |
+| Lưới 72 tổ hợp (4 giá × 3 chi phí × 2 MVC × 3 r) | — | min 50.700 · P10 57.600 · trung vị 70.300 · P90 84.800 · max 94.400 | |
+| Chi phí ±10% (phẳng / thực) | — | 54.600–65.600 / 74.200–86.300 | |
+| r 11/13/15% (phẳng) | 52.900 / 50.300 / 48.000 | 63.600 / 60.000 / 56.900 | |
+| 3 kịch bản cho NĐT (25/50/25; tiêu cực = xấu:rất xấu 20:5) | — | phẳng 99.100 / 56.700 / 24.800 · thực 131.100 / 77.400 / 32.100 | |
+| Định giá ngược @47.100 | "≈1,0 tr m³ × 320k" | thị trường hàm ý **P(tiêu cực) ≈ 52% (giá phẳng) – 76% (giá thực)** vs 25% ở đây | |
+| FPTS 51.400 | "gần kỳ vọng" | **xoá câu**; cùng đường giá/sản lượng lệch ~2 lần với mô hình này | E3 |
+| §8 #5 xử phạt | "KHÔNG thấy" | **CÓ phạt hành chính nhỏ** 0,63 tỷ (2024), 0,04 tỷ (2025); nội dung CHƯA XÁC MINH | E1 |
+
+### 13.3 Kết luận đã đính chính (thay §0)
+
+**Ở 47.100 (đóng cửa 30/10/2026), NNC nằm DƯỚI vùng giá trị hợp lý — nghiêng rẻ, nhưng không phải rẻ "chắc chắn".**
+Vùng giá trị hợp lý ~**59.000–79.000 đ/cp** (r 13%; cận dưới = giá đá danh nghĩa đi ngang tới 2043, tức giá thực −3%/năm; cận trên =
+giá giữ giá trị thực), điểm giữa ~69.000. Thị trường đang định giá xác suất kịch bản "vách cung–cầu 2028" ~52–76%, cao hơn 2–3 lần mức 25%
+mà bằng chứng hiện có ủng hộ. Phân bố vẫn lệch hai đầu: tiêu cực ~25.000–32.000, tích cực ~99.000–131.000.
+Kết luận không đổi ở 45.000–52.000 (P(tiêu cực) hàm ý 41–80%).
+
+| Vùng giá (đ/cp) | Đọc (thay bảng §0) |
+|---|---|
+| ≤ ~57.000 | Dưới vùng hợp lý ở mọi đường giá, trừ khi tin xác suất vách 2028 > ~40% (giá phẳng) |
+| ~57.000 – 80.000 | Trong vùng hợp lý — vị trí trong vùng phụ thuộc gần như hoàn toàn vào giả định giá danh nghĩa/thực |
+| ≥ ~80.000 | Trên vùng — cần cả giá giữ giá trị thực LẪN kịch bản tốt kéo dài |
+
+**Điều làm nhận định tiêu cực hơn** (giữ §10, bỏ ngưỡng cũ 42k/58k): giá công bố Q2/27 thấp hơn Q3/26 >7%; biên gộp quý < 45% với DT đi ngang;
+GP mỏ mới trong cụm (F6) cấp sớm; quyết định xử phạt/truy thu > 20 tỷ; thêm dòng tiền lớn với NHC; MVC ≥51% kèm thoái MVC dưới giá.
+**Điều làm tích cực hơn:** giá Q2/27 cao hơn >7% (F2 0,30); VĐ4 ≥20% khối lượng tới 06/2027; GP Tam Lập 1 khu II; công bố sản lượng m³ cho ASP ≥ 394k.
+
+### 13.4 So sánh ngang ngành (BQ 30/10/2026, LNST 4 quý Q4/25–Q3/26)
+
+| Mã | Vốn hoá (tỷ) | LNST TTM | PE TTM | Ghi chú |
+|---|---|---|---|---|
+| **NNC** | 1.032 | 214,0 | **4,83x** | LN đỉnh; 22% vốn hoá là tiền ròng sau nghĩa vụ |
+| DHA (Hoá An) | 824 | 151,7 | 5,43x | Q3/26 79,6 tỷ — đột biến chưa phân tích |
+| KSB | 1.459 | 204,6 | 7,13x | Q2/26 96,8 tỷ cao bất thường |
+| VLB | 2.434 | 666,7 | 3,65x | gồm Q2/26 374,4 tỷ (nhiều khả năng một lần); thay bằng TB 3 quý còn lại ⇒ ~6,3x (ước lượng) |
+
+Nhóm đá niêm yết giao dịch PE ~4–7x LN hiện tại — cả ngành đang được định giá như LN đỉnh. NNC rẻ nhẹ so với nhóm, không lệch ngoại lai.
+
+### 13.5 Mục §8/§9 cập nhật
+- §8 #5: **CÓ** phạt vi phạm hành chính 630,43 tr (2024) + 39,37 tr (2025) [KT25 7.8]; chi phí cải tạo mỏ 0,445 tỷ (2024); nội dung vi phạm CHƯA XÁC MINH.
+- §9 thêm: (5) **NHC chiếm 16% phần tăng DT Q3** (7,88/49,22), chỉ thu 2,0/12,27 — tăng trưởng Q3 có phần dựa vào bên liên quan nhỏ (NHC DT 28,97–30,39 tỷ/quý Q4/25–Q2/26, LNST Q2/26 −0,27 tỷ — đo lại BQ ticker_financial 31/10).
+  (6) Truy thu đã chạm mỏ lõi Mũi Tàu (dự phòng 0,84 Q3/26 sau 1,735 năm 2025).
+- §4 cổ tức: LNST chưa phân phối "kỳ này" 80,04 trên LNST 9T 160,08; quỹ ĐTPT 87,27 → 353,26 — LN giữ lại được chuyển quỹ, chưa thấy nghị quyết giải thích.
+- §0 điểm yếu #2 thay bằng: chi phí hiệu chỉnh trên GV kiểm toán 2024–25 (sản lượng FPTS, thứ cấp) — sai số ±10% ⇒ ±5–6k/cp.

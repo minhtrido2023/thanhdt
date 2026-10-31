@@ -1,0 +1,61 @@
+{
+ "rerun_identical": true,
+ "rerun_diff": [],
+ "mocks": {
+  "weekly": {
+   "pages": 5,
+   "page_cap": 5,
+   "raw_markdown_hits": [],
+   "fonts": [
+    "Be Vietnam Pro Bold",
+    "Be Vietnam Pro Regular"
+   ],
+   "non_bvp_fonts": [],
+   "internal_names": [],
+   "email_imgs": 6,
+   "email_bad_img_tags": [],
+   "email_missing_files": [],
+   "html_tuple_repr": false,
+   "recon_items": 62,
+   "recon_bad": 0,
+   "pass": true
+  },
+  "daily": {
+   "pages": 1,
+   "page_cap": 1,
+   "raw_markdown_hits": [],
+   "fonts": [
+    "Be Vietnam Pro Bold",
+    "Be Vietnam Pro Regular"
+   ],
+   "non_bvp_fonts": [],
+   "internal_names": [],
+   "email_imgs": 2,
+   "email_bad_img_tags": [],
+   "email_missing_files": [],
+   "html_tuple_repr": false,
+   "recon_items": 21,
+   "recon_bad": 0,
+   "pass": true
+  },
+  "quarterly": {
+   "pages": 3,
+   "page_cap": 8,
+   "raw_markdown_hits": [],
+   "fonts": [
+    "Be Vietnam Pro Bold",
+    "Be Vietnam Pro Regular"
+   ],
+   "non_bvp_fonts": [],
+   "internal_names": [],
+   "email_imgs": 5,
+   "email_bad_img_tags": [],
+   "email_missing_files": [],
+   "html_tuple_repr": false,
+   "recon_items": 15,
+   "recon_bad": 0,
+   "pass": true
+  }
+ },
+ "pass": true
+}

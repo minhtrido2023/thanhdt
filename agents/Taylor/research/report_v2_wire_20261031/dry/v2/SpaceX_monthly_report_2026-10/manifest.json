@@ -1,0 +1,89 @@
+{
+ "version": 1,
+ "stem": "SpaceX_monthly_report_2026-10",
+ "cadence": "monthly",
+ "account": "SpaceX",
+ "pdf": "SpaceX_monthly_report_2026-10.pdf",
+ "pdf_sha256": "4d28accd8178a242c72f149510cfde36a05be15a014d4183b5e1bce5d756bb21",
+ "html": "SpaceX_monthly_report_2026-10_email.html",
+ "html_sha256": "b13b4673a7c960aa68ff5022b8fa20b228dfa8cff5c5b4ebeca988c9727e9f32",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "fe52002432917aff3c85e233eecc91af224ec1a29b6b603a6c304acb4b91563f"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "f9f466b007236e16fdb03e440be367c61679cd8af5aa977332f83618b6e80691"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "8154623621ac9e67ce3d0c7eacd3586148a966084c5892e5733aab0423509b4c"
+  },
+  "fig11": {
+   "file": "03_months.png",
+   "sha256": "c0e0c2b26c0c3bdcdea47f7a1a984e563ad70af7f903afa1fae3bd030a009f39"
+  },
+  "fig15": {
+   "file": "04_underwater.png",
+   "sha256": "4739351c9dfb32a764d61186286795d4b6bf39a9daafefc2473aab2cf8685b66"
+  },
+  "fig19": {
+   "file": "05_attribution.png",
+   "sha256": "c36e5d2cf0d603d8715ca3c47013a1263fada3448fd7028c926a5f1bd13ecc76"
+  },
+  "fig27": {
+   "file": "06_allocation.png",
+   "sha256": "57af685b3b8898764564974783cd98b6dc142dae1d689f40fa35d670ab7b16be"
+  }
+ },
+ "pages": 4,
+ "page_cap": 6,
+ "lint": {
+  "pages": 4,
+  "words_total": 1315,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   945141046.0,
+   945141046.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   630295850.0,
+   630665850.0,
+   -370000.0
+  ],
+  [
+   "Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   165674300.0,
+   165674300.0,
+   0.0
+  ]
+ ],
+ "period": "2026-10",
+ "report_date": "2026-10-31",
+ "nav_date": "2026-10-30",
+ "market_block": null,
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": null,
+ "numbers": {
+  "mtd_pct": -1.885,
+  "qtd_pct": -1.885,
+  "ytd_pct": -3.69,
+  "inception_pct": -3.69,
+  "nav1": 945141046.0,
+  "pnl_vnd": -18434766.0,
+  "flow_vnd": -18023489.0
+ },
+ "narrative": false
+}

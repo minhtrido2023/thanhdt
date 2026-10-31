@@ -1,0 +1,8 @@
+{"headline": "Tuần 26/10–30/10 giảm 0,60%, ít hơn VN-Index giảm 1,83%; danh mục giữ phòng thủ với 17,5% cổ phiếu",
+ "key_points": ["Hơn chỉ số +1,23 điểm % trong tuần nhờ tỷ trọng cổ phiếu thấp.",
+                "Từ khi bắt đầu −3,69%, VN-Index −6,37%: vẫn hơn chỉ số +2,67pp.",
+                "Khoản rút 18.023.489 VND ngày 29/10 được tách khỏi hiệu suất."],
+ "sections": {"performance": ["Từ đầu tháng −1,89%, kém VN-Index −1,53% khoảng −0,36pp."],
+              "portfolio": ["Tỷ trọng cổ phiếu tăng từ 9,5% lên 17,5%; phần còn lại là tiền gửi và tiền mặt."]},
+ "outlook": [{"scenario": "Cơ sở", "condition": "Thị trường tích luỹ, thanh khoản thấp", "invalidation": "VN-Index phá đáy tuần với khối lượng lớn", "prob": "trung bình"},
+             {"scenario": "Tích cực", "condition": "Dòng tiền quay lại nhóm ngân hàng", "invalidation": "Thanh khoản tiếp tục suy giảm", "prob": "thấp"}]}

@@ -1,0 +1,64 @@
+# Sổ đọc ảnh — TCH (tỷ đồng, đọc từ ảnh render pymupdf zoom 1.8)
+## [Q2HN] BCTC hợp nhất giữa niên độ 01/04–30/09/2026, ký 29/10/2026 (KQKD ký "22"? /10 — dấu mờ), pdf p5-11 (in 4-10)
+BS 30/09/26 (31/03/26): Tiền 1.035,35 (1.694,17) [tiền 341,0; TĐT 694,3] · HTM NH 2.203,19 (4.228,14) · PThu KH 287,31 (305,77) · Trả trước NB 564,98 (346,11) · PThu khác NH 45,80 (654,19) · DP khó đòi -19,84 · HTK 15.261,10 gross, DP -3,43 → 15.257,68 (11.604,10) · CP trả trước NH 450,08 (423,99) · TSNH 20.021,31 (19.405,03)
+TSDH 2.195,62 (2.435,85): TSCĐ 355,23; BĐSĐT 1.438,45 (NG 1.685,93); XDCBDD 249,11 (204,04); HTM DH 57,78 (284,30); thuế HL 72,65. TTS 22.216,93 (21.840,87)
+Nợ 6.937,28 (7.475,52): PTNB 664,16 (816,72); Người mua trả trước NH 5.599,82 (6.124,75); cổ tức phải trả 24,05; thuế phải nộp 198,83 (42,63); CP phải trả 39,50; DT chờ PB 20,14; PT khác NH 365,91 (309,14); DH: PT khác 17,22 (71,93), thuế HL phải trả 1,06. KHÔNG có dòng vay (320/338 vay) — 0.
+VCSH 15.279,65 (14.365,36): vốn góp 10.033,13 (9.121,09); thặng dư -0,82 (842,75) ⇒ cp thưởng 912,04 lấy từ thặng dư ~843,6 + ?; vốn khác 237,63; LNST CPP 1.889,17 (1.294,49) [420a 1.226,03; 420b 663,14]; NCI 3.120,54 (2.869,39)
+KQKD Q2 (Q2FY25) | 6T (6T FY25): DT 1.960,89 (345,98) | 2.414,36 (736,28); giảm trừ 2,71 | 5,23; DTT 1.958,18 | 2.409,13; GVHB 1.001,86 (256,50) | 1.312,55 (534,01); LN gộp 956,32 (89,48) | 1.096,58 (202,28) ⇒ biên Q2 48,8% (25,9%); 6T 45,5% (27,5%)
+ Lãi/lỗ BĐSĐT: -5,58 | +3,26; DT TC 74,68 (40,18) | 175,46 (76,32); CP TC 1,05 | 3,15 (11,76; lãi vay 6T FY25 0,094); CPBH 77,13 (31,60) | 107,27 (67,59); QLDN 21,85 (28,44) | 40,17 (50,10); LNTT HĐKD 925,39 (69,62) | 1.124,72 (149,13)
+ LN khác 3,14 (3,08) | 4,77 (1,32); LNTT 928,53 (72,69) | 1.129,49 (150,45); thuế HH 179,91 | 218,85; HL -1,92 | -3,66; LNST 750,54 (56,34) | 914,29 (112,57)
+ **LNST mẹ 537,73 (40,21) | 663,14 (78,09); NCI 212,81 (16,13) | 251,15 (34,48)** ⇒ NCI 28,4% Q2; 27,5% 6T
+ EPS 6T 911 (116) — 911 × 1.003,31 tr cp = 914,0 = LNST HỢP NHẤT ⇒ EPS dường như tính trên LNST gồm NCI (kiểm TM34)
+LCTT 6T (6T FY25): LNTT 1.129,49; điều chỉnh -151,36 (lãi đầu tư -179,07; KH 28,04); LN trước VLĐ 978,13; ΔPThu +382,93; ΔHTK -3.653,45 (-871,00); ΔPTrả -692,90 (+2.843,00); ΔCPTT -26,13; thuế nộp -65,62; **CFO -3.078,53 (+1.559,16)**
+ CFI +2.419,73: capex -47,92; thanh lý +42,84; cho vay/mua CC nợ -2.492,37; thu hồi +4.730,35; lãi/cổ tức nhận 186,82 (FY25: góp vốn đơn vị khác -1.302,55)
+ CFF 0 (6T FY25: phát hành cp +2.004,29; vay +606,09; trả vay -319,68; cổ tức -44,13)
+ Δ tiền -658,81; tiền cuối LCTT 1.035,363 vs BS 1.035,353 ⇒ lệch 9,95 triệu đ (nhỏ, lệch đối chiếu)
+## TM 1.5 cấu trúc tập đoàn [Q2HN in 12]: vốn ĐL 10.033,128 tỷ = 1.003.312.808 cp (ĐKKD lần 22, 16/09/2026)
+CRV (Hà Nội, BĐS) lợi ích 68,02% / biểu quyết 96,72% (trực tiếp 38,19% + gián tiếp 58,53%: qua HHS 42,63% gồm 35,26% trực tiếp + 7,37% UỶ QUYỀN của 1 nhóm cổ đông khác; qua Hoàng Giang 8,44% + HHS Capital 7,47%)
+Thịnh Phát 96,33%; Thịnh Hiệp 95,84%; Tô Hiệu 99,98%; Đại Lộc 68,01% (qua CRV); HHS (ô tô) 58,31%; Đại Thịnh Vượng 68,01% (qua CRV); Hoàng Giang 58,19% (ô tô, qua HHS); Pruksa VN 52,58% (qua HHS); HHS Capital 58,31%
+## TM 2.25-2.26 [in 19-20]: chính sách DT bán hàng chung (chuyển giao rủi ro/lợi ích) — KHÔNG có POC; BĐS ghi nhận khi bàn giao. Giá vốn BĐS được TRÍCH TRƯỚC theo dự toán phân bổ theo diện tích (rủi ro: biên phụ thuộc dự toán). Thuế TNDN 20%. EPS: LN phân bổ cổ đông phổ thông sau trích quỹ KT-PL.
+## TM3 tiền [in 21-22]: tiền mặt 3,04; KKH 337,97; TĐT 694,34 (ABB 3T 7,2% 272,6; VietinBank 1T 4,75% 220,7; khác 1T 4,75% 201,0)
+## TM4 HTM [in 23-24]: NH 2.203,19 (4.228,14): ABB 130,2(729,9); "Sài Gòn Tài Lộc"(đọc ảnh; có thể là SCB/SGB) 678,3(694,2); TCB 337,3(737,7); CTG 52,4(306,1); HDB 209,6(602,0); TPB 313,7(251,9); LPB 218,9(117,8); khác 262,8(788,4); kỳ hạn 6–12T, lãi 4,8–9,8%. DH: CCTG TCB 57,8 (284,3), 12–48T, 6,2–6,7%. Không thấy thế chấp ghi tại TM4.
+## TM5 phải thu KH 287,31: Vận tải HA 16,34 (DP 100%); Ô tô Nam Việt 50,64; người mua nhà 178,82 [HH New City 7,07; New City II 90,52; Golden Land 3,61; Sở Dầu 3,91; Commerce H1 46,64; Green River 19,43; khác 7,63]; khác 41,52 (DP 3,50). Bên liên quan: 0.
+## TM6 trả trước NB 564,98 (346,11): Hòa Bình 162,48 (72,39); Thủy Ngân 103,88 (2,93); Cảng Kim Tân 73,70 (0); XD số 1 Bắc Giang 49,96; Bạch Đằng 37,02; Phương Ngọc 28,33; Hồng Điệp 17,84; XD số 1 HN 11,53; khác 80,25. Bên liên quan: 0.
+## TM7 PThu khác NH 45,80 (654,19): BQLDA ĐTXD phường Lê Chân 0,09 (360,81); Cty Đấu giá hợp danh VNA 0 (256,48) ⇒ ~617 tỷ đặt cọc/ứng (đấu giá?) đã tất toán/chuyển; đặt cọc 28,4.
+## TM8 nợ xấu 19,84 (Vận tải HA 16,34; Phúc Hưng 3,50) không đổi.
+## TM9 HTK: ô tô gross 630,19 (NVL 278,95; TP 77,51; HH 18,38; gửi bán 233,18; đi đường 22,17) [đầu năm ~491,8]; BĐS 14.630,92 (11.115,85): CPSXKDDD 13.528,58 (10.118,21); TP BĐS 1.102,34 (997,64). DP -3,43 toàn ô tô.
+## TM9(*) HTK BĐS chi tiết [in 27]: CPSXKDDD 13.528,58 (10.118,21): Commerce H2 555,53 (512,78); Green River 2.557,50 (2.363,43); **New City-II 7.390,37 (7.230,42)**; **150 Tô Hiệu 1.677,51 (4,40)**; **lô I.14/CTHH-01 cao tầng hỗn hợp 1.328,75 (0, MỚI)**; khác 18,91 (7,18). TP BĐS 1.102,34: New City 0 (4,64); Gold Tower 22,57; N01 11,54; Commerce H1 299,46 (317,52); Green River 759,57 (632,16); khác 9,20. Không DP.
+ Ghi chú: H2 (Lê Chân) xong thô, đang hoàn thiện; Green River (Thủy Nguyên) & New City-II (dọc Đỗ Mười kéo dài, Thủy Nguyên) đang thi công, một số hạng mục đã bàn giao; 150 Tô Hiệu (Lê Chân) xong chuẩn bị mặt bằng, bắt đầu thi công; CPDD gồm tiền SDĐ.
+## TM10 XDCBDD 249,11: Pruksa Town công cộng 5,93; 17B Bà Triệu (HN — nhận chuyển nhượng QSDĐ làm trụ sở/cho thuê, đang thủ tục pháp lý) 243,18 (198,12)
+## TM11 TSCĐHH NG 389,11; KH kỳ 7,59
+## TM14 CP trả trước NH 450,08: CP bán hàng BĐS chưa bàn giao 447,35 (New City-II 228,19; H1 17,21; Green River 124,87; H2 76,73) — sẽ thành CPBH khi bàn giao. DH: tiền thuê đất Pruksa An Hải 21,10 (trả 1 lần, tới 2063)
+## TM15 PTNB 664,16 (816,72): China Dongfeng Motor 305,26 (466,93) — NCC ô tô; Ecoba 113,24; Trường Hưng Thịnh 29,44; An Gia 27,26; Hùng Nguyên 23,10; Bạch Đằng 7 22,92; Phục Hưng 12,88; khác 130,06. BLQ 0.
+## TM16 NMTT NH 5.599,82 (6.124,75): H1 38,15 (53,24); **H2 617,83 (458,70)**; New City 0 (5,00); **Green River 1.837,75 (1.693,27)**; **New City-II 3.099,20 (3.905,89)**; khác 6,88. BLQ 0.
+## TM17 thuế: TNDN phải nộp kỳ 218,85, đã nộp 65,62, cuối kỳ phải nộp 189,74; **thuế nhà đất & tiền thuê đất: phải nộp kỳ 2.995,27, ĐÃ NỘP 2.992,90** (⇒ tiền SDĐ ~3.000 tỷ = đúng phần tăng HTK 150 Tô Hiệu + lô I.14 ~3.002); XNK 86,95 (ô tô nhập khẩu)
+## TM18 CP phải trả NH 39,50: trích trước XD 18,95 (Green River 6,93; New City 0,49; khác 11,53); tiền SDĐ tòa N01 7,87; hỗ trợ lãi vay KH mua căn hộ 5,64 (0,51); hoa hồng 3,92. ⇒ TRÍCH TRƯỚC GIÁ VỐN RẤT NHỎ so với 940 giá vốn BĐS 6T (không thấy dồn chi phí treo lớn)
+## TM19 PT khác NH 365,91: Pruksa International tạm ứng 59,43 (2,261 tr USD, góp vốn chưa thống nhất phương án khấu trừ); kinh phí bảo trì 134,57; nhận tiền KH theo HĐ đặt cọc 69,69; đặt cọc thuê NOXH An Hải 57,20 (chuyển từ DH); phí GCN tạm thu 0,79; khác 24,42. DH 17,22.
+## TM20 DT chờ PB NH 20,14 / DH 0 (19,67)
+## TM21 VCSH: kỳ trước tăng vốn 2.004,65 (thặng dư -0,36), "thay đổi tỷ lệ lợi ích tại công ty con" -1.302,55 (LNCPP -452,10; NCI -850,45) = tiền chi góp vốn 1.302,55 trong LCTT 6T FY25; cty con chia cổ tức NCI 44,13.
+ Kỳ này: lãi 663,14 mẹ / 251,15 NCI; phát hành cp thưởng 912,04 = thặng dư 843,57 + LNCPP 68,47 (NQ ĐHĐCĐ 01/2026 24/07/2026, tỷ lệ 10:1, hoàn tất 10/09/2026, BC 33/2026/TCH-CV).
+ Cổ đông: Đỗ Hữu Hạ 302,75 tr cp 30,18% (30,17%); CTCP HH Finance 58,32 tr cp 5,81%; khác 64,01%. CP lưu hành 1.003.312.808 = đăng ký; KHÔNG có cp quỹ.
+## TM22 ngoài BCĐKT: cho thuê HĐ tối thiểu 92,6 (≤1n), 207,7 (1-5n), 61,3 (>5n). Thuê đất: New City-II 26.664,2 m2 tới 29/11/2073 trả tiền thuê hằng năm (CRV) [phần đất thuê, phần còn lại giao đất có thu tiền SDĐ?]; 275 Nguyễn Trãi HN 6.579 m2 (Golden Land). Ngoại tệ USD 1.314,88 (29.892,87).
+## TM22d nợ khó đòi đã xử lý 6,54 (không đổi)
+## TM23 DT 6T (6T FY25): ô tô tải/đầu kéo & linh kiện 359,47 (427,83); cho thuê BĐS & DV 97,23 (87,68); **bán BĐS 1.954,52 (220,77)**; khác 3,14 ⇒ 2.414,36 (736,28)
+## TM25 GV 6T: ô tô 312,07 (368,43) ⇒ biên ô tô 13,2% (13,9%); cho thuê 57,84 (63,23) ⇒ 40,5%; **bán BĐS 940,37 (108,21) ⇒ biên BĐS 51,9% (51,0%)**; khác 2,41; hoàn nhập DP -0,13
+## TM26 thanh lý BĐSĐT 6T: DT 38,52 − GTCL 35,26 = +3,26 (Q2 riêng -5,58 ⇒ Q1 +8,85)
+## TM27 DT TC 6T 175,46: lãi tiền gửi/cho vay 173,51 (75,08); TM28 CP TC 3,15: lãi vay 0 (0,09). TM29 CPBH 107,27 (BĐS 85,72); TM30 QLDN 40,17
+## TM31 TN khác 7,18 (thanh lý TSCĐ 2,30; phạt 1,87; khác 3,01)
+## TM32 thuế HH 6T 218,85: mẹ 38,54; con 180,31 [**CRV 162,64** (18,79); Đại Lộc 8,98 (21,85); khác 8,69] ⇒ LN BĐS chủ yếu nằm ở CRV (lợi ích 68,02%)
+## TM33 TS thuế HL 72,65 (tạm nộp thuế TNDN BĐS theo tiến độ 66,60); thuế HL phải trả 1,06
+## **TM34 EPS 6T = 914,29 (LNST HỢP NHẤT, gồm NCI) / 1.003.312.808 = 911 đ; kỳ trước 78,09 (LNST MẸ) / 673.693.022 = 116** ⇒ tử số KHÔNG nhất quán giữa 2 kỳ; EPS đúng (LNST mẹ) 6T = 663,14/1.003,31 = 661 đ; kỳ trước chưa điều chỉnh hồi tố cp thưởng. Chưa trích quỹ KTPL. Không có cp tiềm năng suy giảm.
+## TM36 nợ tài chính: ≤1 năm 1.069,57; 1–5 năm 17,22 — KHÔNG có nợ vay. TM37: không có sự kiện sau kỳ trọng yếu.
+## TM38 BLQ: chỉ thù lao/lương (HĐQT 0,456; BKS 0,066; BGĐ 2,35 tỷ). KHÔNG khai giao dịch mua bán/cho vay/bảo lãnh với BLQ — mọi phải thu/trả/trả trước/NMTT đều ghi "BLQ: -"
+## TM39: số so sánh 31/03/2026 kiểm toán & 6T FY25 soát xét bởi **AASC**. BCTC 6T FY26 này KHÔNG kèm báo cáo soát xét (chỉ BC Ban TGĐ + BCTC) ⇒ bản soát xét bán niên chưa ra. Áp dụng TT 99/2025 từ 01/04/2026, có phân loại lại (Phụ lục 01).
+## Giải trình 42/2026/TCH-CV 29/10/2026: HN DT 1.960,89 (345,98, +566,76%), LNST 750,54 (56,34, +1.332,07%) ✓ khớp KQKD; RIÊNG DT 57,61 (23,01), LNST 40,14 (157,93, -74,58%) do chưa nhận cổ tức không thường xuyên từ cty con (DT TC riêng 56,85). Nguyên nhân HN: BẮT ĐẦU bàn giao New City-II. ⇒ Q1FY26 suy ra = 6T − Q2: DTT 450,95 (DT gộp 453,47), LNST 163,75, mẹ 125,42 — khớp BQ (125,4 / 453,5)
+## [KT25] BCTC HN FY25 (01/04/2025–31/03/2026) kiểm toán AASC (BC số 250626.006/BCTC.KT7, ký 25/06/2026, Nguyễn Ngọc Lân / Nguyễn Đức Trọng): **Ý KIẾN CHẤP NHẬN TOÀN PHẦN, không có đoạn nhấn mạnh** (trang in 5). BCTC lập 24/06/2026.
+KQKD FY25 (FY24): DTT 1.447,39 (4.666,99); GV 1.098,95 (2.870,25); LN gộp 348,45 (1.796,74) biên 24,1% (38,5%); DT TC 252,24 (138,51); CP TC 15,74 (9,13; lãi vay 0,11); CPBH 132,00 (251,31); QLDN 90,55 (160,41); LN HĐKD 362,39 (1.514,40); LN khác -9,42 (-92,01); LNTT 352,97 (1.422,39); thuế HH 158,48 (287,60), HL -64,71 (13,29); **LNST 259,20 (1.121,50); mẹ 211,06 (854,99); NCI 48,14 (266,50)**; EPS 261 (1.219) — tử số = LNST mẹ (211,06/261 ≈ 809 tr cp bình quân) ⇒ khác cách tính 6T FY26.
+LCTT FY25 (FY24): CFO **+2.029,98** (+1.467,69) [ΔHTK -3.005,01; ΔPTrả +5.947,14 = tiền khách ứng]; CFI -3.262,62 (capex -210,64; cho vay/HTM ròng -1.988; góp vốn -1.302,83); CFF +1.655,74 (phát hành 2.004,29; vay 619,09; trả nợ 923,50; cổ tức 44,13)
+## [Q1HN] BCTC HN Q1FY26 (01/04–30/06/2026) — đối chiếu
+TM17: thuế nhà đất & tiền thuê đất phải nộp Q1 1.325,61, đã nộp 1.326,27 ⇒ Q2 riêng = 2.995,27−1.325,61 = 1.669,66 phải nộp (đã nộp 2.992,90−1.326,27 = 1.666,63) ⇒ khớp I14 (Q1, giá đấu 1.322 theo SHS) và 150 Tô Hiệu (Q2, HTK +1.673)
+TM16 NMTT 30/06/2026: 6.492,49: H1 46,45; H2 521,61; New City 5,00; Green River 1.779,69; **New City-II 4.132,23**; khác 7,51 ⇒ Q2: NC-II −1.033,03; GR +58,06; H2 +96,23; H1 −8,30; tổng −892,67
+TM15 PTNB 30/06: 719,39 (Dongfeng 390,27)
+[WEB SHS 08/08/2026] HTK 30/06: NC-II 7.818 / GR 2.438 / H2 517 / khác 1.345; Q1FY26 DT BĐS ~203, ô tô 202, thuê 47; CFO Q1 −1.596; giá đấu I14 1.322 (Đại Lộc, giao đất 23/07/2026); 150 Tô Hiệu 16.177 m2 ~998 căn + 11 liền kề, GPMB xong 15/04/2026; HH1–HH4 2.494 căn (33 tầng) đang làm hầm; NĐTNN 9,5%; dự phóng LNST mẹ FY26/27/28 1.117/1.580/1.602; TP 17.700 (khuyến nghị bên bán, KHÔNG phải số của ta)
+## [WEB] Phạt: QĐ 1357/QĐ-XPHC 05/12/2024 UBCKNN — TCH 295 tr = 92,5 (không CBTT giải trình chênh lệch LNST BCTC riêng 2020–2021) + 65 (CBTT thiếu giao dịch BLQ trong BC quản trị 2021–2023: cổ tức CRV 320 tỷ 07/2022 + 66,5 tỷ 12/2022; DT với HHS, Thịnh Hiệp, Thịnh Phát, Pruksa VN, Hoàng Giang; góp vốn Tô Hiệu 2023) + 137,5 (HĐ thuê văn phòng với 2 cty liên quan HĐQT duyệt muộn 24/07/2023); QĐ 1358/QĐ-KPHQ buộc cải chính BCTN 2021. "380 triệu" = 295 TCH + 85 CTCP Đầu tư tổng hợp Hà Nội (QĐ 516, 06/12/2024) — CÙNG đợt, KHÔNG phải án phạt thứ hai của TCH.
+## [WEB stockanalysis, trễ] CRV 23.000 đ đóng cửa 21/10/2026, 687,40 tr cp, vốn hoá 15,81 nghìn tỷ, P/E 21,0, 52w 20.750–37.000; niêm yết HOSE 10/10/2025 tham chiếu 26.000. CRV KHÔNG có trong tav2_bq.ticker.

@@ -1,0 +1,8 @@
+PE: median 13.35 (n=9)
+PB: median 0.67 (n=9)
+EV/EBITDA: median 11.12 (n=9)
+ROE%: median 8.00 (n=7)
+HPG {'PE_rep': 6.46, 'PE_core': 7.73, 'PB': 1.19, 'EVEB_core': 5.1}
+HPG PE core vs VN median 13.35: -42% | vs regional 13.48: -43%
+HPG EV/EBITDA core 5.1 vs VN 11.12: -54% | regional 7.79: -35%
+P/B/ROE: HPG 0.061 vs regional 0.138

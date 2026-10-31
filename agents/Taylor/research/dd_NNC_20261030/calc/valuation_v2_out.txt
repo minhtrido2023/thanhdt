@@ -1,0 +1,91 @@
+GV kiem toan 2024 178.3 vs mo hinh 174.9 @ 1.05 tr m3 -> he so 1.020
+GV kiem toan 2025 178.6 vs mo hinh 196.1 @ 1.2 tr m3 -> he so 0.911
+He so chi phi tam 0.97 (Q3/26 dinh diesel = 1,00 nam trong dai +-10%: 0.87-1.07)
+
+=== Cau truc (tot / co_so / xau / rat_xau | ky vong), r=13% ===
+[0] ban 30/10: phang, k=1, khong thue, W cu                 94,231  52,001  24,862  18,051 | KV  50,267 (+7%)
+[1] + LN gop cho thue                                       97,686  55,455  26,352  18,437 | KV  52,924 (+12%)
+[2] + chi phi k=0.97                                        99,772  57,331  27,210  18,601 | KV  54,416 (+16%)
+[3] + trong so moi 25/50/20/5 (gia phang)                   99,772  57,331  27,210  18,601 | KV  59,980 (+27%)
+
+=== Gia dinh so 1: duong gia danh nghia (W moi, k tam, co thue) ===
+gia phang danh nghia (gia thuc -3%/nam)                     99,772  57,331  27,210  18,601 | KV  59,980 (+27%)
+gia +3%/nam tu 2031                                        114,709  67,085  29,780  18,601 | KV  69,106 (+47%)
+gia +3%/nam tu 2028                                        126,481  74,607  33,828  18,870 | KV  76,633 (+63%)
+gia giu gia tri thuc (+3%/nam tu 2027)                     131,726  78,091  35,867  20,405 | KV  80,171 (+70%)
+
+=== Do nhay chi phi +-10% quanh tam (W moi) ===
+flat k=0.87                                                106,724  63,581  30,713  19,818 | KV  65,605 (+39%)
+flat k=0.97                                                 99,772  57,331  27,210  18,601 | KV  59,980 (+27%)
+flat k=1.07                                                 92,819  51,080  24,735  18,054 | KV  54,594 (+16%)
+real k=0.87                                                138,678  84,342  40,962  25,309 | KV  86,298 (+83%)
+real k=0.97                                                131,726  78,091  35,867  20,405 | KV  80,171 (+70%)
+real k=1.07                                                124,773  71,841  30,773  18,239 | KV  74,180 (+57%)
+
+=== MVC chiet khau thanh khoan 0 / 30% ===
+flat MVC disc 0%                                            99,772  57,331  27,210  18,601 | KV  59,980 (+27%)
+flat MVC disc 30%                                           98,425  55,984  25,864  17,255 | KV  58,634 (+24%)
+real MVC disc 0%                                           131,726  78,091  35,867  20,405 | KV  80,171 (+70%)
+real MVC disc 30%                                          130,379  76,745  34,521  19,059 | KV  78,825 (+67%)
+
+=== Lai suat chiet khau ===
+flat r=11%                                                 108,032  60,423  27,411  18,608 | KV  63,632 (+35%)
+flat r=13%                                                  99,772  57,331  27,210  18,601 | KV  59,980 (+27%)
+flat r=15%                                                  92,818  54,693  27,020  18,594 | KV  56,885 (+21%)
+real r=11%                                                 145,943  85,063  37,440  20,645 | KV  87,538 (+86%)
+real r=13%                                                 131,726  78,091  35,867  20,405 | KV  80,171 (+70%)
+real r=15%                                                 119,995  72,345  34,557  20,207 | KV  74,093 (+57%)
+
+=== Xau co hoi phuc 1,2 x 320 tu 2035 (Tam Lap 2/3 het GP som hon 8-10 nam, FPTS tr.9) ===
+flat xau hoi phuc 2035                                      99,772  57,331  33,770  18,601 | KV  61,292 (+30%)
+real xau hoi phuc 2035                                     131,726  78,091  50,776  20,405 | KV  83,153 (+77%)
+
+=== Gia "tot" thap hon 400/380/400 ===
+flat: tot 92,612 | KV 58,190
+real: tot 123,035 | KV 77,998
+
+LUOI 4 duong gia x 3 chi phi x 2 MVC x 3 r = 72 o: min 50,685 P10 57,617 trung vi 70,318 P90 84,812 max 94,442
+Tam (r13%, k tam, MVC disc 15% = giua 0/30): phang 59,307 (+26%) .. thuc 79,498 (+69%); diem giua 69,402 (+47%)
+
+3 kich ban (bao cao NDT): gop xau+rat_xau theo trong so 20:5
+flat {'tich_cuc': 99099, 'co_so': 56657, 'tieu_cuc': 24815}
+real {'tich_cuc': 131053, 'co_so': 77418, 'tieu_cuc': 32102}
+
+Do nhay gia(2026 tien) x san luong 2028+, r=13%, k tam, 2 che do:
+ che do flat
+  V=0.8:  31,341  34,553  40,166  46,918  54,024  61,131
+  V=1.0:  32,973  39,124  47,267  56,135  65,017  73,900
+  V=1.2:  35,615  44,291  54,691  65,351  76,010  86,669
+  V=1.4:  38,735  49,742  62,131  74,567  87,003  99,439
+ che do real
+  V=0.8:  35,584  44,407  53,231  62,055  70,879  79,703
+  V=1.0:  41,832  52,862  63,892  74,921  85,951  96,981
+  V=1.2:  48,080  61,316  74,552  87,788 101,023 114,259
+  V=1.4:  54,329  69,770  85,212 100,654 116,096 131,537
+
+Comp PE TTM (BQ 30/10):
+ NNC: von hoa 1,032 ty | LNST TTM 214.0 | PE 4.83x
+ DHA: von hoa 824 ty | LNST TTM 151.7 | PE 5.43x
+ KSB: von hoa 1,459 ty | LNST TTM 204.6 | PE 7.13x
+ VLB: von hoa 2,434 ty | LNST TTM 666.7 | PE 3.65x
+ VLB neu thay Q2/26 bang TB 3 quy con lai: LNST 389.7 PE 6.25x (uoc luong)
+
+Tai lap phan bien (1 thay doi/lan, ban 30/10):
+ W 25/50/20/5: 55,433
+ +3% tu 2031: 57,644
+ +3% tu 2028: 64,379
+ gia thuc: 67,525
+ thue: 52,924
+ chi phi -10%: 55,142
+ chi phi +10%: 45,804
+ MVC -30%: 48,921
+
+Dinh gia nguoc @47.100 va gia lan can:
+ flat gia 45,000: P(tieu cuc) ham y = 56%
+ flat gia 47,100: P(tieu cuc) ham y = 52%
+ flat gia 49,350: P(tieu cuc) ham y = 47%
+ flat gia 52,000: P(tieu cuc) ham y = 41%
+ real gia 45,000: P(tieu cuc) ham y = 80%
+ real gia 47,100: P(tieu cuc) ham y = 76%
+ real gia 49,350: P(tieu cuc) ham y = 73%
+ real gia 52,000: P(tieu cuc) ham y = 69%

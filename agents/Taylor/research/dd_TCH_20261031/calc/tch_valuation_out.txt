@@ -1,0 +1,20 @@
+LNST me theo FY: {'FY21': np.float64(400.5), 'FY22': np.float64(246.0), 'FY23': np.float64(743.8), 'FY24': np.float64(855.0), 'FY25': np.float64(211.0)}
+TTM me (Q3FY25..Q2FY26) 796.0 EPS 793 P/E 14.9
+VCSH me 12159.1 BVPS 12119 P/B 0.98
+LN chuan hoa FY23-26 [FY26E thap 900] 677 EPS 675 P/E 17.6 ROE 5.6%
+LN chuan hoa FY23-26 [FY26E 1.117 (SHS)] 732 EPS 729 P/E 16.2 ROE 6.0%
+LN chuan hoa FY23-26 [FY26E 1.300] 777 EPS 775 P/E 15.3 ROE 6.4%
+TB FY21-25 491.3 ROE 4.0% P/E 24.2
+Tien+HTM 3296.3 vay 0 ; tien/cp 3285
+beta tuan 2y 1.23 Blume 1.16 n tuan 100
+DT backlog da thu ~ 5185 GV tuong ung 2593 HTK con lai 12038
+xau: backlog 947 + HTK 611 + VCSH 12159 -> NAV truoc CK 13717; CK holding/QT 30% -> 9,570 d/cp
+co so: backlog 1218 + HTK 1580 + VCSH 12159 -> NAV truoc CK 14957; CK holding/QT 20% -> 11,926 d/cp
+tot: backlog 1353 + HTK 2528 + VCSH 12159 -> NAV truoc CK 16040; CK holding/QT 10% -> 14,389 d/cp
+NAV trong so 25/50/25: 11953 so gia -0.009
+P/B trung vi 15 peer 0.72 ; TCH BQ 0.82 ; TCH tu tinh 0.98 ; gia tai P/B peer x BV me 8726
+CRV von hoa 15810 look-through 68,02% 10754 = 10719 d/cp TCH; von hoa TCH 11889
+ROE 0.06 P/B hop ly Ke12.3/13.4 g3%: 0.32 0.29
+ROE 0.08 P/B hop ly Ke12.3/13.4 g3%: 0.54 0.48
+ROE 0.1 P/B hop ly Ke12.3/13.4 g3%: 0.75 0.67
+ROE 0.12 P/B hop ly Ke12.3/13.4 g3%: 0.97 0.87

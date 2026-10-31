@@ -1,0 +1,182 @@
+⚠️  không tìm thấy checkout mike canonical (thử '') — dùng cây đang chạy '/home/trido/wt-report-v2-r3-20261031'; state dùng chung có thể bị phân mảnh
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: selfcheck — cổng §21 đã có selfcheck riêng
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: selfcheck — cổng §21 đã có selfcheck riêng
+report_v2_selfcheck: period=2026-10 TZ=America/New_York tmp=/tmp/report_v2_sc_co4m3h30
+  ok   narrative hợp lệ được nhận
+  ok   narrative 'giảm 1,89%' đúng hướng được nhận
+  ok   narrative 'nan giải' không phải token rỗng được nhận
+  ok   narrative mức (từ/xuống) không suy hướng được nhận
+  ok   narrative số nguyên trơn 0..12 được nhận
+  ok   narrative 'quá 25 từ/gạch' bị từ chối
+  ok   narrative 'quá 3 gạch' bị từ chối
+  ok   narrative 'tự viết số' bị từ chối
+  ok   narrative 'tên nội bộ' bị từ chối
+  ok   narrative 'nhắc ZaloPay (bản ngoài)' bị từ chối
+  ok   narrative 'nhắc liên tài khoản (bản ngoài)' bị từ chối
+  ok   narrative 'từ vận hành (nhà đầu tư)' bị từ chối
+  ok   narrative 'mục nội bộ ở SpaceX' bị từ chối
+  ok   narrative 'outlook > 4 kịch bản' bị từ chối
+  ok   narrative 'mục ngoài khung' bị từ chối
+  ok   narrative 'sai hướng 'tăng 1,89%' (pipeline −1,89%)' bị từ chối
+  ok   narrative 'sai dấu '+1,89%' (pipeline −1,89%)' bị từ chối
+  ok   narrative 'sai hướng 'lãi 1,53%'' bị từ chối
+  ok   narrative 'sai dấu '−0,36 điểm %' (pipeline dương)' bị từ chối
+  ok   narrative 'số nhỏ kèm % không có trong pipeline' bị từ chối
+  ok   narrative 'nan token' bị từ chối
+  ok   narrative 'nan%' bị từ chối
+  ok   narrative 'None token' bị từ chối
+  ok   narrative '** markdown' bị từ chối
+  ok   narrative 'tên riêng chữ thường (livermore)' bị từ chối
+  ok   narrative 'tên riêng chữ thường (zalopay)' bị từ chối
+  ok   narrative 'BAL' bị từ chối
+  ok   narrative 'SIGNAL_V11' bị từ chối
+  ok   N3 vượt trần trang ⇒ raise
+  ok   N3 lỗi trần trang KHÔNG để lại .md/manifest
+  ok   SpaceX monthly 2026-10 dựng rc=0 cả 2 lần
+  FAIL SpaceX monthly 2 lần dựng cùng md5 (36 file)
+    khác: ['SpaceX_monthly_report_2026-10.md', 'v2/SpaceX_monthly_report_2026-10/SpaceX_monthly_report_2026-10.pdf', 'v2/SpaceX_monthly_report_2026-10/SpaceX_monthly_report_2026-10_email.html', 'v2/SpaceX_monthly_report_2026-10/manifest.json', 'v2/draft/SpaceX_monthly_report_2026-10.md', 'v2/draft/v2/SpaceX_monthly_report_2026-10/SpaceX_monthly_report_2026-10.pdf', 'v2/draft/v2/SpaceX_monthly_report_2026-10/SpaceX_monthly_report_2026-10_email.html', 'v2/draft/v2/SpaceX_monthly_report_2026-10/manifest.json']
+  ok   SpaceX monthly mtd manifest -1.885 == nav_period_returns -1.885
+  ok   SpaceX monthly inception manifest -3.69 == nav_period_returns -3.69
+  ok   SpaceX monthly đối soát cầu NAV lệch 0 ([['Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ', 945141046.0, 945141046.0, 0.0]])
+  ok   SpaceX monthly chênh định giá tham khảo < 0,1% NAV ([('Giá trị cổ phiếu đầu kỳ theo g', -370000.0), ('Giá trị cổ phiếu cuối kỳ theo ', 0.0)])
+  ok   SpaceX monthly 4 trang ≤ trần 6
+  ok   SpaceX monthly artifact lint sạch trên bản dựng ([])
+  ok   SpaceX mutation HTML 'repr' bị lint chặn
+  ok   SpaceX mutation HTML 'repr': cổng giao raise
+  ok   SpaceX mutation HTML 'bold' bị lint chặn
+  ok   SpaceX mutation HTML 'bold': cổng giao raise
+  ok   SpaceX mutation HTML 'sep' bị lint chặn
+  ok   SpaceX mutation HTML 'sep': cổng giao raise
+  ok   SpaceX mutation HTML 'none' bị lint chặn
+  ok   SpaceX mutation HTML 'none': cổng giao raise
+  ok   SpaceX mutation HTML 'nan' bị lint chặn
+  ok   SpaceX mutation HTML 'nan': cổng giao raise
+  ok   SpaceX mutation HTML 'internal' bị lint chặn
+  ok   SpaceX mutation HTML 'internal': cổng giao raise
+  ok   SpaceX mutation HTML 'internal_file' bị lint chặn
+  ok   SpaceX mutation HTML 'internal_file': cổng giao raise
+  ok   SpaceX mutation HTML 'zalopay' bị lint chặn
+  ok   SpaceX mutation HTML 'zalopay': cổng giao raise
+  ok   SpaceX mutation HTML 'zalopay_acct' bị lint chặn
+  ok   SpaceX mutation HTML 'zalopay_acct': cổng giao raise
+  ok   SpaceX mutation HTML 'zalopay_lower' bị lint chặn
+  ok   SpaceX mutation HTML 'zalopay_lower': cổng giao raise
+  ok   SpaceX mutation HTML 'livermore_lower' bị lint chặn
+  ok   SpaceX mutation HTML 'livermore_lower': cổng giao raise
+  ok   SpaceX mutation HTML 'bal' bị lint chặn
+  ok   SpaceX mutation HTML 'bal': cổng giao raise
+  ok   SpaceX mutation HTML 'signal' bị lint chặn
+  ok   SpaceX mutation HTML 'signal': cổng giao raise
+  ok   SpaceX 'nan giải' KHÔNG bị lint chặn nhầm
+  ok   SpaceX mutation PDF font Helvetica không nhúng bị chặn
+  ok   SpaceX mutation PDF chữ markdown thô bị chặn
+  ok   SpaceX mutation sửa PDF sau khi dựng (sha lệch) bị chặn
+  ok   SpaceX mutation .md repr tuple bị chặn
+  ok   SpaceX nháp nằm ở reports/v2/draft/ (lượt quét top-level không thấy)
+  ok   SpaceX promote TỪ CHỐI ghi đè bản đã giao (rc=5)
+  ok   SpaceX promote khi chưa giao ⇒ bản chuẩn == nháp (rc=0)
+  ok   SpaceX nháp hỏng lint ⇒ rc=4, không promote (rc=4)
+  ok   SpaceX sửa tay manifest.numbers (không ký lại) bị chặn (['artifact v2 không kiểm được: ValueError: sha256 manifest.json lệch tag .md (file de830be971cf · .md khai 08925ccbe274)'])
+  ok   SpaceX tag thiếu manifest_sha256 bị chặn
+✅ Đã gửi email '[Monthly report] SpaceX_monthly_report_2026-10.md' tới b@example.invalid
+  ok   email v2: đúng 1 thư (SMTP giả)
+  ok   email v2: PDF đính kèm đúng tên
+  ok   email v2: đủ ảnh cid như manifest
+  ok   email v2: thân HTML tham chiếu mọi cid
+  ok   email v2: dòng manifest không lọt vào thân
+  ok   email v2 SpaceX_monthly_report_2026-10.md: bản nhà đầu tư KHÔNG kèm .md (PDF là bản đầy đủ)
+  ok   SpaceX weekly 2026-10-26_to_2026-10-30 dựng rc=0 cả 2 lần
+  ok   SpaceX weekly 2 lần dựng cùng md5 (28 file)
+  ok   SpaceX weekly mtd manifest -1.885 == nav_period_returns -1.885
+  ok   SpaceX weekly inception manifest -3.69 == nav_period_returns -3.69
+  ok   SpaceX tuần 26-30/10: dòng 29/10 = −0,30% ([['26/10', '−0,19%'], ['27/10', '−0,05%'], ['28/10', '+0,01%'], ['29/10', '−0,30%'], ['30/10', '−0,07%']])
+  ok   SpaceX weekly tuần -0.602 == -0.602
+  ok   SpaceX weekly đối soát cầu NAV lệch 0 ([['Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ', 945141046.0, 945141046.0, 0.0]])
+  ok   SpaceX weekly chênh định giá tham khảo < 0,1% NAV ([('Giá trị cổ phiếu đầu kỳ theo g', 0.0), ('Giá trị cổ phiếu cuối kỳ theo ', 0.0)])
+  ok   SpaceX weekly 4 trang ≤ trần 5
+  ok   SpaceX weekly artifact lint sạch trên bản dựng ([])
+  ok   SpaceX daily 2026-10-30 dựng rc=0 cả 2 lần
+  FAIL SpaceX daily 2 lần dựng cùng md5 (22 file)
+    khác: ['SpaceX_daily_report_2026-10-30.md', 'v2/SpaceX_daily_report_2026-10-30/manifest.json', 'v2/draft/SpaceX_daily_report_2026-10-30.md', 'v2/draft/v2/SpaceX_daily_report_2026-10-30/manifest.json']
+  ok   SpaceX daily mtd manifest -1.885 == nav_period_returns -1.885
+  ok   SpaceX daily inception manifest -3.69 == nav_period_returns -3.69
+  ok   SpaceX daily phiên -0.074 == -0.074
+  ok   SpaceX daily đối soát cầu NAV lệch 0 ([['Cầu NAV: đầu ngày + lãi/lỗ + nạp/rút so với NAV cuối ngày', 945141046.0, 945141046.0, 0.0]])
+  ok   SpaceX daily chênh định giá tham khảo < 0,1% NAV ([])
+  ok   SpaceX daily 1 trang ≤ trần 1
+  ok   SpaceX daily artifact lint sạch trên bản dựng ([])
+✅ Đã gửi email '[Daily report] SpaceX_daily_report_2026-10-30.md' tới b@example.invalid
+  ok   email v2: đúng 1 thư (SMTP giả)
+  ok   email v2: PDF đính kèm đúng tên
+  ok   email v2: đủ ảnh cid như manifest
+  ok   email v2: thân HTML tham chiếu mọi cid
+  ok   email v2: dòng manifest không lọt vào thân
+  ok   email v2 SpaceX_daily_report_2026-10-30.md: bản nhà đầu tư KHÔNG kèm .md (PDF là bản đầy đủ)
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: selfcheck — cổng §21 đã có selfcheck riêng
+⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: selfcheck — cổng §21 đã có selfcheck riêng
+  ok   email v2 SpaceX_daily_report_2026-10-30.md: ghi chú đính kèm ('Ghi chú selfcheck N9') có trong thân HTML
+  ok   ZaloPay monthly 2026-10 dựng rc=0 cả 2 lần
+  ok   ZaloPay monthly 2 lần dựng cùng md5 (36 file)
+  ok   ZaloPay monthly mtd manifest -3.849 == nav_period_returns -3.849
+  ok   ZaloPay monthly inception manifest -6.691 == nav_period_returns -6.691
+  ok   ZaloPay monthly đối soát cầu NAV lệch 0 ([['Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ', 939827062.0, 939827062.0, 0.0]])
+  ok   ZaloPay monthly chênh định giá tham khảo < 0,1% NAV ([('Giá trị cổ phiếu đầu kỳ theo g', -190000.0), ('Giá trị cổ phiếu cuối kỳ theo ', 0.0)])
+  ok   ZaloPay monthly 4 trang ≤ trần 6
+  ok   ZaloPay monthly artifact lint sạch trên bản dựng ([])
+  ok   ZaloPay mutation HTML 'repr' bị lint chặn
+  ok   ZaloPay mutation HTML 'repr': cổng giao raise
+  ok   ZaloPay mutation HTML 'bold' bị lint chặn
+  ok   ZaloPay mutation HTML 'bold': cổng giao raise
+  ok   ZaloPay mutation HTML 'sep' bị lint chặn
+  ok   ZaloPay mutation HTML 'sep': cổng giao raise
+  ok   ZaloPay mutation HTML 'none' bị lint chặn
+  ok   ZaloPay mutation HTML 'none': cổng giao raise
+  ok   ZaloPay mutation HTML 'nan' bị lint chặn
+  ok   ZaloPay mutation HTML 'nan': cổng giao raise
+  ok   ZaloPay 'nan giải' KHÔNG bị lint chặn nhầm
+  ok   ZaloPay mutation PDF font Helvetica không nhúng bị chặn
+  ok   ZaloPay mutation PDF chữ markdown thô bị chặn
+  ok   ZaloPay mutation sửa PDF sau khi dựng (sha lệch) bị chặn
+  ok   ZaloPay mutation .md repr tuple bị chặn
+  ok   ZaloPay nháp nằm ở reports/v2/draft/ (lượt quét top-level không thấy)
+  ok   ZaloPay promote TỪ CHỐI ghi đè bản đã giao (rc=5)
+  ok   ZaloPay promote khi chưa giao ⇒ bản chuẩn == nháp (rc=0)
+  ok   ZaloPay nháp hỏng lint ⇒ rc=4, không promote (rc=4)
+  ok   ZaloPay sửa tay manifest.numbers (không ký lại) bị chặn (['artifact v2 không kiểm được: ValueError: sha256 manifest.json lệch tag .md (file 63345eb484f0 · .md khai c1dc95cc2fcc)'])
+  ok   ZaloPay tag thiếu manifest_sha256 bị chặn
+✅ Đã gửi email '[Monthly report] ZaloPay_monthly_report_2026-10.md' tới b@example.invalid
+  ok   email v2: đúng 1 thư (SMTP giả)
+  ok   email v2: PDF đính kèm đúng tên
+  ok   email v2: đủ ảnh cid như manifest
+  ok   email v2: thân HTML tham chiếu mọi cid
+  ok   email v2: dòng manifest không lọt vào thân
+  ok   email v2 ZaloPay_monthly_report_2026-10.md: .md đính kèm không chứa comment report_v2_manifest
+  ok   ZaloPay weekly 2026-10-26_to_2026-10-30 dựng rc=0 cả 2 lần
+  ok   ZaloPay weekly 2 lần dựng cùng md5 (28 file)
+  ok   ZaloPay weekly mtd manifest -3.849 == nav_period_returns -3.849
+  ok   ZaloPay weekly inception manifest -6.691 == nav_period_returns -6.691
+  ok   ZaloPay weekly tuần -0.783 == -0.783
+  ok   ZaloPay weekly đối soát cầu NAV lệch 0 ([['Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ', 939827062.0, 939827062.0, 0.0]])
+  ok   ZaloPay weekly chênh định giá tham khảo < 0,1% NAV ([('Giá trị cổ phiếu đầu kỳ theo g', 0.0), ('Giá trị cổ phiếu cuối kỳ theo ', 0.0)])
+  ok   ZaloPay weekly 4 trang ≤ trần 5
+  ok   ZaloPay weekly artifact lint sạch trên bản dựng ([])
+  ok   ZaloPay daily 2026-10-30 dựng rc=0 cả 2 lần
+  ok   ZaloPay daily 2 lần dựng cùng md5 (22 file)
+  ok   ZaloPay daily mtd manifest -3.849 == nav_period_returns -3.849
+  ok   ZaloPay daily inception manifest -6.691 == nav_period_returns -6.691
+  ok   ZaloPay daily phiên -0.05 == -0.05
+  ok   ZaloPay daily đối soát cầu NAV lệch 0 ([['Cầu NAV: đầu ngày + lãi/lỗ + nạp/rút so với NAV cuối ngày', 939827062.0, 939827062.0, 0.0]])
+  ok   ZaloPay daily chênh định giá tham khảo < 0,1% NAV ([])
+  ok   ZaloPay daily 1 trang ≤ trần 1
+  ok   ZaloPay daily artifact lint sạch trên bản dựng ([])
+✅ Đã gửi email '[Daily report] ZaloPay_daily_report_2026-10-30.md' tới b@example.invalid
+  ok   email v2: đúng 1 thư (SMTP giả)
+  ok   email v2: PDF đính kèm đúng tên
+  ok   email v2: đủ ảnh cid như manifest
+  ok   email v2: thân HTML tham chiếu mọi cid
+  ok   email v2: dòng manifest không lọt vào thân
+  ok   email v2 ZaloPay_daily_report_2026-10-30.md: .md đính kèm không chứa comment report_v2_manifest
+  ok   email v2 ZaloPay_daily_report_2026-10-30.md: ghi chú đính kèm ('Ghi chú selfcheck N9') có trong thân HTML
+md5 .md: {"SpaceX_monthly": "a97feebd86d03cb58b67066cbf141b99", "SpaceX_weekly": "d46df257942240dbf30df71ed152eb8d", "SpaceX_daily": "e1c8b999ead1e0aabe0f0b8eef683311", "ZaloPay_monthly": "b4d380e0267413fef80c76bafcf4c535", "ZaloPay_weekly": "3e539f6e053f4caf1f820cbd861775c7", "ZaloPay_daily": "d7e31f5379af3eff4838998b660bb55b"}
+
+❌ FAIL report_v2_selfcheck (2 lỗi)
