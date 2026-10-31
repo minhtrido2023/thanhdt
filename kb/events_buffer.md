@@ -655,3 +655,11 @@
 - [2026-10-31T03:06:00Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "in_progress", "note": "copy v2, doc skill"}
 - [2026-10-31T03:06:30Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261031_025427", "source": "watcher"}
 - [2026-10-31T03:06:46Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261031_030545", "source": "watcher"}
+
+## Consolidation 2026-10-31T03:09:02Z
+- [2026-10-31T03:07:30Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:07:44Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "in_progress", "note": "2 ban do xong, lam khung anh san pham"}
+- [2026-10-31T03:07:46Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261031_030545", "source": "watcher"}
+- [2026-10-31T03:08:30Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:08:46Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261031_030545", "source": "watcher"}
+- [2026-10-31T03:08:52Z] Taylor/finding — dd-NNC-investor-report-v2-20261031: {"dir": "agents/Taylor/research/dd_NNC_20261030/investor_report_v2/", "files": "NNC_DD_investor_report_20261031_v2.{md,pdf,html}", "pages": 17, "maps": 2, "product_panels": 2, "email_dry_run": "24 ảnh, 11,1 MB, alt đúng, chưa gửi", "limits": "toạ độ xã Tân Lập và mỏ Tam Lập không tra được; số liệu không đổi", "measured_by": "build_report.py pdf; send_dd_report_email.py --dry-run; diff md gốc vs v2; SELFCHECK.md"}
