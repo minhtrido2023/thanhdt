@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-30T16:15:40Z] [dd-NNC-20261030 30/10] XONG job Taylor_20261030_160612: research/dd_NNC_20261030/REPORT.md (chua commit) ky vong 50.300 (+7%), xap xi hop ly — CHO Mike doc/quyet investor report
 - [2026-10-31T02:00:49Z] [dd-NNC-investor-31/10] XONG job Taylor_20261031_014511: REPORT.md §13 (KV 59-79k, duoi vung) + investor_report/ (14tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
 - [2026-10-31T02:15:48Z] [weekly 26-30/10 31/10] XONG job Taylor_20261031_020006: 2 report + gate COMPLETE, chua commit
 - [2026-10-31T03:31:43Z] [oshares-r8 31/10] XONG outer 7b4d43a98 (session/oshares-r8-20261031) + mike 96dcb2ce5 (session/oshares-r8-ops-20261031), chua merge — CHO arch-review+skeptic+user; MST 2025-10-29 con mo
@@ -26,3 +25,4 @@
 - [2026-10-31T08:54:00Z] [oshares-r11 31/10] XONG WC 3ad1406ef (session/oshares-r11-20261031) + mike 167036792 (session/oshares-r11-ops-20261031), chua merge — CHO arch-review+skeptic+user; plan echo 21:00 van so quy (cache T-2), can user quyet nguon Price T-1
 - [2026-10-31T09:53:53Z] [dd-HPG-20261031 31/10] XONG job Taylor_20261031_093839: research/dd_HPG_20261031/REPORT.md (chua commit) — vung 17-23k trung tam ~20k vs gia 21k, xap xi hop ly; CHO Mike doc/quyet investor report
 - [2026-10-31T10:15:08Z] [oshares-r12 31/10] XONG WC e052526b9 (session/oshares-r12-20261031) + mike caa5b03dd (session/oshares-r12-ops-20261031), chua merge — CHO arch-review+skeptic; merge mike truoc WC; plan echo = so quy den vong ref_price_session (§24)
+- [2026-10-31T10:25:24Z] [dd-HPG-gaps 31/10] XONG job Taylor_20261031_100839: research/dd_HPG_20261031/GAPS.md (chua commit) — 14 so v1 can sua, vung giu 17-23k; CHO skeptic xong roi gop vao REPORT v2

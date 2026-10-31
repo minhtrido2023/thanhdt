@@ -1712,3 +1712,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T16:08:02Z] [oshares-r2r7 30/10] XONG outer a3c2c0600 (session/oshares-r2r7-20261030) + mike 0298dd9b1 (session/oshares-r2r7-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live can caller khai price_date truoc
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T16:15:40Z] [dd-NNC-20261030 30/10] XONG job Taylor_20261030_160612: research/dd_NNC_20261030/REPORT.md (chua commit) ky vong 50.300 (+7%), xap xi hop ly — CHO Mike doc/quyet investor report
