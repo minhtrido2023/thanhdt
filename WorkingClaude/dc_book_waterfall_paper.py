@@ -743,13 +743,20 @@ def _dcf_echo_line(dc_names, last_close, asof):
         from trading_bot.strategies import (_dcf_check_for_order, format_dcf_check,
                                             log_dcf_history)
         from dcf_valuation import DCF_DISCLAIMER
+        try:                                   # R11: Close cache ⇒ khớp phiên của Price chưa điều chỉnh
+            from dcf_valuation import price_sessions_for
+            _pds = price_sessions_for([(t, last_close.get(t)) for t in dc_names
+                                       if isinstance(last_close.get(t), (int, float)) and last_close.get(t) > 0], asof)
+        except Exception:                      # WC cũ chưa có helper ⇒ hành vi trước R11 (số quý)
+            _pds = None
         parts = []
         for t in dc_names:
             px = last_close.get(t)
             if not isinstance(px, (int, float)) or px <= 0:
                 parts.append(f"{t} NOT_COMPUTED (thiếu giá close trong state)")
                 continue
-            d = _dcf_check_for_order(t, px, asof)
+            kw = {"price_date": _pds[(t, px)]} if _pds is not None and (t, px) in _pds else {}
+            d = _dcf_check_for_order(t, px, asof, **kw)
             log_dcf_history(t, d, "dc_book_waterfall_paper", asof=asof)
             # side="paper": không kích đuôi "cần dcf_override_reason" (chỉ áp cho BUY order thật)
             s = format_dcf_check(d, side="paper", ticker=t)

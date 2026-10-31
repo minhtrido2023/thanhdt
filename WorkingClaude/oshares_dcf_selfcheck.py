@@ -1188,6 +1188,129 @@ SUITE = [c1_classifier, c2_no_announced_branch, c3_oshares_for, c4_knob, c6_sour
          c20_live_below_fin]
 
 
+
+def _px_sessions(tk, asof, n):
+    """Đọc ĐỘC LẬP (pandas, không qua dcf_valuation) n phiên Price cache gần nhất <= asof, mới -> cũ."""
+    import pandas as pd
+    a = pd.Timestamp(asof)
+    df = pd.read_parquet(os.path.join(dv.WORKDIR, "data/bq_cache/ticker", f"{a.year}.parquet"),
+                         columns=["ticker", "time", "Price"], filters=[("ticker", "==", tk)])
+    df = df[pd.to_datetime(df.time) <= a].sort_values("time", ascending=False).head(n)
+    return [(pd.Timestamp(t).date().isoformat(), float(p)) for t, p in zip(df.time, df.Price)]
+
+
+def c21_price_session_r11():
+    """R11: giá caller (ref_price DNSE / Close cache) ⇒ phiên = phiên cache <= asof có Price TRÙNG giá
+    (≤ PRICE_MATCH_SESSIONS phiên); không khớp ⇒ PRICE_SESSION_UNKNOWN = số quý + tín hiệu IM (logging.info).
+    Caller chưa kiểm (None) vẫn kêu stderr. Plan echo / EOD / paper / dcf_check(price=) dùng helper."""
+    import logging
+    import pandas as pd
+    import trading_bot.strategies as st
+    tk, asof = "FPT", "2026-10-20"
+    ses = _px_sessions(tk, asof, 12)
+    psf = dv.price_session_for
+    exp = next(d for d, p in ses[:dv.PRICE_MATCH_SESSIONS] if abs(p - ses[0][1]) <= 0.5)
+    check("C21 khớp Price phiên gần nhất <= asof -> phiên đó", psf(tk, asof, ses[0][1]) == exp, f"{psf(tk, asof, ses[0][1])} vs {exp}")
+    near = {p for _, p in ses[:dv.PRICE_MATCH_SESSIONS]}
+    off = next(x for x in (ses[0][1] + 100 * k for k in range(1, 50)) if all(abs(x - p) > 1 for p in near))
+    check("C21 giá lệch mọi Price -> UNKNOWN", psf(tk, asof, off) == dv.PRICE_SESSION_UNKNOWN)
+    check("C21 giá hỏng/<=0/None -> UNKNOWN",
+          all(psf(tk, asof, x) == dv.PRICE_SESSION_UNKNOWN for x in (None, 0, -5, "abc")))
+    # không nhìn tương lai: giá của phiên SAU asof (khác mọi Price <= asof) không được khớp
+    fut = [(d, p) for d, p in _px_sessions(tk, "2026-10-30", 30) if d > asof]
+    fut = [(d, p) for d, p in fut if all(abs(p - q) > 1 for q in near)]
+    check("C21 giá chỉ có ở phiên > asof -> UNKNOWN (không look-ahead)",
+          bool(fut) and psf(tk, asof, fut[0][1]) == dv.PRICE_SESSION_UNKNOWN, str(fut[:1]))
+    old = [(d, p) for d, p in ses[dv.PRICE_MATCH_SESSIONS:] if all(abs(p - q) > 1 for q in near)]
+    check(f"C21 giá chỉ khớp phiên cũ hơn {dv.PRICE_MATCH_SESSIONS} phiên -> UNKNOWN",
+          bool(old) and psf(tk, asof, old[0][1]) == dv.PRICE_SESSION_UNKNOWN, str(old[:1]))
+    # dcf_check(price=) chuyển phiên khớp (live) / None (fin) vào fair_value
+    seen, real_fv = [], dv.fair_value
+    dv.fair_value = lambda *a, **k: (seen.append(k.get("price_date", "ABSENT")) or {"ok": False, "reason": "spy"})
+    src0 = dv.OSHARES_SOURCE
+    try:
+        dv.OSHARES_SOURCE = "live"
+        dv.dcf_check(tk, asof, price=ses[0][1]); dv.dcf_check(tk, asof, price=off)
+        dv.OSHARES_SOURCE = "fin"
+        dv.dcf_check(tk, asof, price=ses[0][1])
+    finally:
+        dv.fair_value, dv.OSHARES_SOURCE = real_fv, src0
+    check("C21 dcf_check(price=): live -> phiên khớp / UNKNOWN; fin -> None",
+          seen == [exp, dv.PRICE_SESSION_UNKNOWN, None], str(seen))
+    # UNKNOWN: số quý, 0 BQ, KHÔNG stderr, có logging.info; None: vẫn kêu stderr
+    import oshares_live as _ol
+    fin = dv._load_financials()
+    real = (osd.oshares_for, osd.fetch_cache, osd.pricing_events, _ol._fetch)
+    n = _Count()
+    recs = []
+
+    class _H(logging.Handler):
+        def emit(self, r):
+            recs.append((r.levelno, r.getMessage()))
+    h = _H(); lg = logging.getLogger("dcf_valuation"); lvl = lg.level
+    lg.addHandler(h); lg.setLevel(logging.DEBUG)
+    try:
+        dv.OSHARES_SOURCE = "live"
+        dv._WARNED_ONCE.clear()
+        osd.oshares_for = osd.fetch_cache = osd.pricing_events = _ol._fetch = n
+        e1 = io.StringIO()
+        with contextlib.redirect_stderr(e1):
+            r1 = dv.fair_value(tk, asof, price=off, fin=fin, price_date=dv.PRICE_SESSION_UNKNOWN)
+        e2 = io.StringIO()
+        with contextlib.redirect_stderr(e2):
+            r2 = dv.fair_value(tk, asof, price=off, fin=fin, price_date=None)
+    finally:
+        osd.oshares_for, osd.fetch_cache, osd.pricing_events, _ol._fetch = real
+        dv.OSHARES_SOURCE = src0
+        lg.removeHandler(h); lg.setLevel(lvl)
+    check("C21 UNKNOWN -> số quý FRAME_FALLBACK, 0 lời gọi BQ/oshares_for",
+          r1.get("oshares_method") == "FRAME_FALLBACK" and r1.get("oshares") == r1.get("oshares_fin") and n.n == 0,
+          f"{r1.get('oshares_method')} calls={n.n}")
+    check("C21 UNKNOWN -> KHÔNG kêu stderr, có logging.info",
+          "!!!!!" not in e1.getvalue() and any(l == logging.INFO and tk in m for l, m in recs),
+          f"stderr={e1.getvalue()[:100]!r} recs={recs[:2]}")
+    check("C21 None (caller chưa kiểm) -> VẪN kêu stderr", "!!!!!" in e2.getvalue() and "khong khai price_date" in e2.getvalue(),
+          e2.getvalue()[:100])
+    # price_sessions_for: prime MỘT lần, chỉ mã khớp, chỉ khi live
+    primed, real_prime = [], osd.prime
+    osd.prime = lambda t, u: primed.append((tuple(t), u))
+    try:
+        dv.OSHARES_SOURCE = "live"
+        out = dv.price_sessions_for([(tk, ses[0][1]), ("HPG", -1.0)], asof)
+        dv.OSHARES_SOURCE = "fin"
+        dv.price_sessions_for([(tk, ses[0][1])], asof)
+    finally:
+        osd.prime, dv.OSHARES_SOURCE = real_prime, src0
+    check("C21 price_sessions_for: map đúng + prime 1 lần chỉ mã khớp, không prime ở fin",
+          out == {(tk, ses[0][1]): exp, ("HPG", -1.0): dv.PRICE_SESSION_UNKNOWN} and primed == [((tk,), asof)],
+          f"{out} {primed}")
+    # caller: plan echo / EOD (mike) + paper dùng helper và chuyển price_date vào _dcf_check_for_order
+    mb = os.path.dirname(LAG_DD_PACK)
+    sp = open(os.path.join(mb, "send_plan_report.sh"), encoding="utf-8").read()
+    eod = open(os.path.join(mb, "eod_trading_report.sh"), encoding="utf-8").read()
+    pap = open(os.path.join(HERE, "dc_book_waterfall_paper.py"), encoding="utf-8").read()
+    check("C21 send_plan_report: price_sessions_for -> _dcf_check_for_order(..., price_date)",
+          "from dcf_valuation import price_sessions_for as _psf" in sp
+          and '_kw = ({"price_date": _dcf_pd[(ticker, price)]}' in sp
+          and "dcf = _dcf_check_for_order(ticker, price, date, **_kw)" in sp)
+    check("C21 eod_trading_report: price_sessions_for -> _dcf_check_for_order(..., price_date)",
+          "from dcf_valuation import price_sessions_for as _psf" in eod
+          and "_kw = ({'price_date': _dcf_pd[(o.get('ticker'), o.get('ref_price'))]}" in eod
+          and "_dcf_check_for_order(o.get('ticker'), o.get('ref_price'), plan_date, **_kw)" in eod)
+    check("C21 dc_book_waterfall_paper: price_sessions_for -> _dcf_check_for_order(..., price_date)",
+          "from dcf_valuation import price_sessions_for" in pap and "d = _dcf_check_for_order(t, px, asof, **kw)" in pap)
+    # helper vắng (merge lệch) ⇒ caller về hành vi trước R11 (không khai)
+    seen.clear()
+    dv.fair_value = lambda *a, **k: (seen.append(k.get("price_date", "ABSENT")) or {"ok": False, "reason": "spy"})
+    try:
+        st._dcf_check_for_order(tk, 1.0, asof)
+    finally:
+        dv.fair_value = real_fv
+    check("C21 _dcf_check_for_order không kw -> price_date None (đường merge lệch)", seen == [None], str(seen))
+
+
+SUITE.append(c21_price_session_r11)
+
 def run_suite(with_bq=False, quiet=False):
     FAILS.clear()
     sink = io.StringIO() if quiet else sys.stdout
@@ -1291,6 +1414,14 @@ MUTANTS = {
         lambda: ops_block().replace('for _c in _cmds:', 'for _c in []:')]),
     "M46 r10 guard Price lặp tắt im lặng": (dv, "_shout_once", lambda real: lambda k, m:
         None if isinstance(k, tuple) and k and k[0] == "price_run_skip" else real(k, m)),
+    "M47 r11 khớp giá không chặn asof (nhìn phiên tương lai)": (dv, "price_session_for", lambda real:
+        lambda t, a, p, max_sessions=5: real(t, "2099-12-31", p, max_sessions)),
+    "M48 r11 dung sai khớp giá quá rộng": (dv, "PRICE_MATCH_TOL_VND", lambda real: 1e9),
+    "M49 r11 khớp không giới hạn số phiên": (dv, "price_session_for", lambda real:
+        lambda t, a, p, max_sessions=5: real(t, a, p, 100000)),
+    "M50 r11 UNKNOWN kêu stderr như None (ồn trở lại)": (dv, "_info_once", lambda real: lambda k, m: dv._shout(m)),
+    "M51 r11 None cũng im (mất cảnh báo caller chưa kiểm)": (dv, "_shout_once", lambda real: lambda k, m: None),
+    "M52 r11 dcf_check bỏ khớp phiên": (dv, "price_session_for", lambda real: lambda *a, **k: None),
     "M42 r10 tắt guard live < quý": (dv, "LIVE_BELOW_FIN_TOL", lambda real: 1.0),
     "M43 r10 guard áp cả chiều live > quý": (dv, "LIVE_BELOW_FIN_TOL", lambda real: -1.0),
     "M44 r10 dung sai 50% (MST −26% lọt)": (dv, "LIVE_BELOW_FIN_TOL", lambda real: 0.5),

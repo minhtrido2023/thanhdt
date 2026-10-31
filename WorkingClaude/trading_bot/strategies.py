@@ -42,8 +42,10 @@ def _dcf_check_for_order(ticker, price, asof, price_date=None):
     """Tính dcf_check dict cho 1 BUY order (non-financial, informational only).
 
     price_date = phiên mà `price` THUỘC VỀ (hợp đồng ở dcf_valuation.fair_value; R8/H4). Chỉ có
-    tác dụng khi DCF_OSHARES_SOURCE=live; ở fin bị bỏ qua (output byte-identical). Không biết
-    phiên của giá (ref_price của plan, giá DNSE sống) ⇒ để None ⇒ live rơi về số quý.
+    tác dụng khi DCF_OSHARES_SOURCE=live; ở fin bị bỏ qua (output byte-identical). Giá không mang
+    phiên (ref_price của plan, Close cache) ⇒ caller lấy phiên qua dcf_valuation.price_sessions_for
+    (R11: khớp Price chưa điều chỉnh trong cache; không khớp ⇒ PRICE_SESSION_UNKNOWN = số quý, im).
+    None = caller CHƯA kiểm ⇒ số quý + kêu stderr 1 lần/tiến trình.
 
     Đọc từ data/bq_cache/ticker_financial.parquet (local parquet, không gọi BQ live).
     Fail-safe: mọi lỗi đều trả NOT_COMPUTED với reason="dcf_error:...", KHÔNG raise.

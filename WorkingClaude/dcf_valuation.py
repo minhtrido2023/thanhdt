@@ -207,6 +207,14 @@ def _shout_once(key, msg):
     if key not in _WARNED_ONCE:
         _WARNED_ONCE.add(key)
         _shout(msg)
+
+
+def _info_once(key, msg):
+    """Tín hiệu IM (logging.info, không stderr) cho fallback HỢP LỆ đã được caller kiểm (R11/việc 3)."""
+    if key not in _WARNED_ONCE:
+        _WARNED_ONCE.add(key)
+        import logging
+        logging.getLogger("dcf_valuation").info(msg)
 RF_DOMESTIC = 6.75             # % normalized VND risk-free (building block: target CPI 4.25 + real 2.5)
 ERP_DOMESTIC = 5.5             # % domestic ERP (research central 5.42 -> 0.25 grid; NOT robust: 5.22-6.15)
 G_T_DOMESTIC = 0.055           # target CPI 4.25 + long-run real 1.25 (decimal)
@@ -687,9 +695,13 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
     err, pdt = None, None
 
     def _fallback(rec, err):
-        key = "no_price_date" if price_date is None else (ticker, asof, str(price_date))
-        _shout_once(key, f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: KHONG khoa duoc khung ex-date gia<->so CP "
-                         f"({err}) -> FALLBACK so quy (fin)" + (" [canh bao nay in 1 lan/tien trinh]" if price_date is None else ""))
+        if price_date == PRICE_SESSION_UNKNOWN and rec is None:   # R11/việc 3: caller ĐÃ KIỂM (khớp giá↔phiên
+            _info_once(("price_session_unknown", ticker, asof),    # không ra) ⇒ về số quý là HỢP LỆ, không ồn
+                       f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: {err} -> so quy (fin)")
+        else:
+            key = "no_price_date" if price_date is None else (ticker, asof, str(price_date))
+            _shout_once(key, f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: KHONG khoa duoc khung ex-date gia<->so CP "
+                             f"({err}) -> FALLBACK so quy (fin)" + (" [canh bao nay in 1 lan/tien trinh]" if price_date is None else ""))
         return {**(rec or {"ticker": ticker, "rel_diff": None, "live_value": None, "reason": err}),
                 "value": fin_os, "source": "ticker_financial", "method": "FRAME_FALLBACK", "frame_error": err}
 
@@ -697,6 +709,9 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
     if price is not None:
         if price_date is None:
             return _fallback(None, "caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao")
+        if price_date == PRICE_SESSION_UNKNOWN:
+            return _fallback(None, "gia caller khong khop Price chua dieu chinh cua phien nao trong cache "
+                                   f"({PRICE_MATCH_SESSIONS} phien gan nhat <= asof) -> khong biet phien")
         try:
             pdt = pd.to_datetime(price_date).date().isoformat()
         except Exception as e:                                     # noqa: BLE001
@@ -845,15 +860,72 @@ def classify_dcf(mos, sensitivity, px):
     return status, robust
 
 
+# ---------------------------------------------------------------- R11: phiên của một giá caller
+# Caller có giá mà không biết phiên (ref_price của plan = DNSE, Close cache) ⇒ khớp với `Price` CHƯA điều
+# chỉnh trong cache ở PRICE_MATCH_SESSIONS phiên gần nhất <= asof. Khớp (|chênh| <= PRICE_MATCH_TOL_VND) ở
+# phiên s ⇒ fair_value(price=X, price_date=s) TRÙNG ĐÚNG lời gọi của caller tự đọc Price(s) (lag_dd_pack,
+# dcf_check tự đọc giá) vì đầu ra chỉ phụ thuộc CON SỐ X — dù X thật ra lấy ở đâu. Không khớp ⇒
+# PRICE_SESSION_UNKNOWN (số quý, tín hiệu im — caller đã kiểm). Chỉ đọc parquet local, 0 BQ.
+PRICE_SESSION_UNKNOWN = "unknown"
+PRICE_MATCH_SESSIONS = 5
+PRICE_MATCH_TOL_VND = 0.5
+
+
+def price_session_for(ticker, asof, price, max_sessions=PRICE_MATCH_SESSIONS):
+    """Phiên (ISO) GẦN NHẤT trong `max_sessions` phiên cache <= asof có `Price` == price (±0,5 VND), hoặc
+    PRICE_SESSION_UNKNOWN. Lỗi đọc cache/giá hỏng ⇒ PRICE_SESSION_UNKNOWN (fail-closed về số quý)."""
+    try:
+        px = float(price)
+        if not (px > 0):
+            return PRICE_SESSION_UNKNOWN
+        import duckdb
+        a = pd.to_datetime(asof).date()
+        c = duckdb.connect(":memory:")
+        try:
+            df = c.execute(
+                f"SELECT time, Price FROM read_parquet('{WORKDIR}/data/bq_cache/ticker/{a.year - 1}.parquet', "
+                f"'{WORKDIR}/data/bq_cache/ticker/{a.year}.parquet') "
+                f"WHERE ticker = ? AND time <= DATE '{a}' ORDER BY time DESC LIMIT ?",
+                [str(ticker), int(max_sessions)]).df()
+        except Exception:                                          # noqa: BLE001 — năm trước chưa có file
+            df = c.execute(
+                f"SELECT time, Price FROM read_parquet('{WORKDIR}/data/bq_cache/ticker/{a.year}.parquet') "
+                f"WHERE ticker = ? AND time <= DATE '{a}' ORDER BY time DESC LIMIT ?",
+                [str(ticker), int(max_sessions)]).df()
+        for t, p in zip(df.time, df.Price):                        # mới -> cũ
+            if pd.notna(p) and abs(float(p) - px) <= PRICE_MATCH_TOL_VND:
+                return pd.Timestamp(t).date().isoformat()
+    except Exception:                                              # noqa: BLE001
+        pass
+    return PRICE_SESSION_UNKNOWN
+
+
+def price_sessions_for(pairs, asof):
+    """{(ticker, price): price_date} cho một lô (plan echo / EOD / paper). Khi live và có mã khớp phiên ⇒
+    `oshares_dcf.prime` MỘT lần cho các mã đó (một lô BQ thay vì ~4-5 truy vấn/mã); prime lỗi thì
+    oshares_dcf tự kêu stderr và từng mã tự hỏi lại BQ / về số quý như trước."""
+    out = {(tk, px): price_session_for(tk, asof, px) for tk, px in pairs}
+    hit = sorted({tk for (tk, _), d in out.items() if d != PRICE_SESSION_UNKNOWN})
+    if hit and OSHARES_SOURCE == "live":
+        import oshares_dcf as _osd
+        with contextlib.redirect_stdout(sys.stderr):              # stdout của send_plan_report phải sạch
+            _osd.prime(hit, pd.to_datetime(asof).date().isoformat())
+    return out
+
+
 def dcf_check(ticker, asof, price=None):
     """dcf_check dict for ANY report (informational only) — same schema as the Pha 2 production
     helper `trading_bot/strategies.py::_dcf_check_for_order` (status/margin_of_safety/robust),
     so a research report and the plan-generation echo never disagree on what "robust" means.
     Fail-safe: any error -> status=NOT_COMPUTED, never raises (job Taylor_20260714_095943)."""
     try:
-        # price_date (R8/H4): chỉ khai khi TỰ đọc giá (`Price` chưa điều chỉnh của phiên đó); giá do
-        # caller truyền thì không biết thuộc phiên nào ⇒ None (live rơi về số quý).
-        px, px_date = (price, None) if price is not None else latest_price_session(ticker, asof)
+        # price_date (R8/H4): TỰ đọc giá ⇒ phiên của `Price` chưa điều chỉnh. Giá do caller truyền
+        # (converge/alphalens: Close cache) ⇒ R11 khớp với Price của phiên (price_session_for); không khớp
+        # ⇒ PRICE_SESSION_UNKNOWN (số quý, tín hiệu im).
+        if price is not None:
+            px, px_date = price, (price_session_for(ticker, asof, price) if OSHARES_SOURCE == "live" else None)
+        else:
+            px, px_date = latest_price_session(ticker, asof)
         if px is None:
             return {"status": "NOT_COMPUTED", "margin_of_safety": None, "robust": False,
                     "reason": "no_price", "as_of": str(asof)[:10]}
@@ -943,9 +1015,12 @@ if __name__ == "__main__":
     ap.add_argument("--term", default=None, choices=list(TERM_MODES),
                     help=f"terminal-growth mode (default {DEFAULT_TERM_MODE})")
     args = ap.parse_args()
-    px = args.price if args.price is not None else latest_price(args.ticker, args.asof)
     # default "today" = ICT calendar date (§16), tz-naive midnight as before
     today_ict = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None)
+    if args.price is not None:                                     # R11: giá gõ tay ⇒ khớp phiên như dcf_check
+        px, px_date = args.price, price_session_for(args.ticker, args.asof or today_ict, args.price)
+    else:
+        px, px_date = latest_price_session(args.ticker, args.asof)
     res = fair_value(args.ticker, args.asof or today_ict,
-                     price=px, erp=args.erp, term_mode=args.term)
+                     price=px, erp=args.erp, term_mode=args.term, price_date=px_date)
     _print_report(res)
