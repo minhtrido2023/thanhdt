@@ -136,13 +136,14 @@ def _subproc(code, env_extra=None, unset=()):
     return p.stdout.strip().splitlines()[-1] if p.stdout.strip() else f"ERR {p.stderr[-300:]}"
 
 
-PIN = ["sys.path.insert(0, %r); " % HERE]      # mutant hook M22: [""] = probe không ghim lại HERE
+PIN = ["sys.path.insert(0, %r); "]      # mutant hook M22: [""] = probe không ghim lại cây test (template: %r = cây)
 
 
-def probe_code(body):
-    """Mã probe subprocess: nạp dcf_valuation TỪ HERE, ghim lại HERE, chạy `body` (phải gán `out`),
+def probe_code(body, here=HERE):
+    """Mã probe subprocess: nạp dcf_valuation TỪ `here`, ghim lại `here`, chạy `body` (phải gán `out`),
     in 1 dòng JSON {out, paths: {module: thư mục đã nạp}} để kiểm cây được test là cây nào (H3)."""
-    return ("import sys, os, json; sys.path.insert(0, %r); import dcf_valuation as d; " % HERE + PIN[0] + body +
+    pin = PIN[0] % here if "%r" in PIN[0] else PIN[0]
+    return ("import sys, os, json; sys.path.insert(0, %r); import dcf_valuation as d; " % here + pin + body +
             "; print(json.dumps({'out': out, 'paths': {m: os.path.dirname(os.path.abspath(sys.modules[m].__file__)) "
             "for m in %r if m in sys.modules}}))" % (TESTED_MODS,))
 
@@ -184,6 +185,7 @@ def c4_knob():
     fin = dv._load_financials()
     real, real_fe = osd.oshares_for, osd.frame_events
     calls = []
+    _ev_fixture([])
     try:
         dv.OSHARES_SOURCE = "fin"
         base = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
@@ -215,7 +217,7 @@ def c4_knob():
         osd.oshares_for = _noisy
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+            dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)     # R9: có giá không price_date = không gọi oshares_for
         check("C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng", buf.getvalue() == "", buf.getvalue()[:80])
         osd.oshares_for = real
         osd._CACHE.update(tickers=frozenset(), until=None, data=None)
@@ -228,7 +230,7 @@ def c4_knob():
         buf, err = io.StringIO(), io.StringIO()
         try:
             with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err):
-                dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+                dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)
         finally:
             _ol._fetch = real_fetch
             osd._CACHE.update(tickers=frozenset(), until=None, data=None)
@@ -237,6 +239,7 @@ def c4_knob():
     finally:
         osd.oshares_for = real
         osd.frame_events = real_fe
+        _ev_clear()
         dv.OSHARES_SOURCE = "fin"
 
 
@@ -398,16 +401,20 @@ def c7_frame_lock():
         real_pe = osd.pricing_events
         def _ev_boom(*a, **k):
             raise RuntimeError("bq down (simulated)")
+        real_ue = osd.unexecuted_events
         osd.pricing_events = _ev_boom
+        osd.unexecuted_events = lambda t, a, **k: []  # R9: cô lập frame_events (khoá (c) đọc cùng nguồn, có check riêng C13)
         _ev_clear()                                  # frame_events THẬT phải hỏi pricing_events -> lỗi
         try:
             r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
         finally:
             osd.pricing_events = real_pe
+            osd.unexecuted_events = real_ue
         check("C7/H1 không đọc được lịch ex-date -> số quý (fail-closed)", r["oshares_method"] == "FRAME_FALLBACK"
               and "lich ex-date" in (r["oshares_frame_error"] or ""), r.get("oshares_frame_error"))
+        _ev_fixture([])
         r = dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)
-        check("C7/H1 không giá -> không đọc lịch, số sống", r["oshares_frame_error"] is None)
+        check("C7/H1 không giá -> không đọc khung [price_date, asof], số sống", r["oshares_frame_error"] is None)
     finally:
         osd.oshares_for = real
         _ev_clear()
@@ -419,6 +426,7 @@ def c10_oshares_error():
     import dcf_valuation as dv
     fin = dv._load_financials()
     real = osd.oshares_for
+    _ev_fixture([])
     try:
         dv.OSHARES_SOURCE = "fin"
         base = dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)
@@ -676,6 +684,27 @@ def c8_ops_block():
                     proc=fake_tree({"9/environ": b"PATH=/bin\0"}))
     check("C8/H6 comment/chỉ đọc ngoài cây -> 0 WARN; OK nêu số file + tiến trình đã quét",
           n == 0 and any("2 file ngoài cây + 1 tiến trình" in l for l in ln), str(ln)[:240])
+    # ---- R9/việc 6: settings JSON chỉ đọc khoá "env"; tiến trình research gắn cờ
+    perm = '{"permissions": {"allow": ["Bash(DCF_OSHARES_SOURCE=live python3 oshares_dcf_selfcheck.py)"]}, "env": {"X": "1"}}\n'
+    n, ln = run_ops(blk, fake_root(), home=fake_tree({".claude/settings.json": perm}))
+    check("C8/R9 settings.json: chuỗi QUYỀN Bash(DCF_OSHARES_SOURCE=...) không phải gán env -> 0 WARN", n == 0, str(ln)[:200])
+    root = fake_root()
+    os.makedirs(os.path.join(root, ".claude"))
+    open(os.path.join(root, ".claude", "settings.local.json"), "w").write('{"env": {"DCF_OSHARES_SOURCE": "live"}}')
+    n, ln = run_ops(blk, root)
+    check("C8/R9 settings.local.json của WC có env.DCF_OSHARES_SOURCE -> WARN", n == 1 and "env.DCF_OSHARES_SOURCE=live" in ln[0],
+          str(ln)[:200])
+    n, ln = run_ops(blk, fake_root(), home=fake_tree({".claude/settings.json": '{"env": {"DCF_OSHARES_SOURCE": '}))
+    check("C8/R9 settings.json hỏng -> WARN không đọc được (không im lặng)", n == 1 and "không đọc được" in ln[0], str(ln)[:200])
+    n, ln = run_ops(blk, fake_root(), proc=fake_tree({
+        "51/environ": b"DCF_OSHARES_SOURCE=live\0", "51/comm": "python3\n",
+        "51/cmdline": b"/home/trido/thanhdt/wc_venv/bin/python\0agents/Taylor/research/oshares_x/measure.py\0",
+        "52/environ": b"DCF_OSHARES_SOURCE=live\0", "52/comm": "python3\n", "52/cmdline": b"python3\0/x/run_bot.py\0",
+        "53/environ": b"DCF_OSHARES_SOURCE=live\0", "53/comm": "bash\n", "53/cmdline": b"bash\0/x/research/a.sh\0"}))
+    msg = ln[0] if ln else ""
+    check("C8/R9 /proc: python chạy research -> VẪN WARN nhưng gắn [research override]; khác -> [LAUNCHER]",
+          n == 1 and "3 launcher" in msg and "[research override] tiến trình 51 (python3)" in msg
+          and "[LAUNCHER] tiến trình 52 (python3)" in msg and "[LAUNCHER] tiến trình 53 (bash)" in msg, msg[:300])
 
 
 OPS_BLOCK = []      # mutant hook: [callable trả khối đã sửa]
@@ -706,8 +735,305 @@ def c9_research_pinned():
         dv.OSHARES_SOURCE = "fin"
 
 
+# ─────────────────────────────────────────────────────────────── R9 (job Taylor_20261031_042224)
+class _Count:
+    """Thay một hàm truy vấn BQ: đếm lời gọi, raise để không bao giờ chạm mạng."""
+    def __init__(self):
+        self.n = 0
+
+    def __call__(self, *a, **k):
+        self.n += 1
+        raise RuntimeError("BQ bị chặn trong selfcheck (đếm lời gọi)")
+
+
+def c13_unexecuted():
+    """Việc 1: ISS dời khung giá ex ≤ asof (lùi 90 ngày) chưa `executed` ⇒ số quý + kêu, mọi ca."""
+    import dcf_valuation as dv
+    fin = dv._load_financials()
+    real = osd.oshares_for
+    try:
+        dv.OSHARES_SOURCE = "fin"
+        base = dv.fair_value("FPT", "2026-10-30", price=None, fin=fin)
+        dv.OSHARES_SOURCE = "live"
+        dv._WARNED_ONCE.clear()
+        osd.oshares_for = _FakeOS(ex="2099-01-01")           # vendor chưa lật: số CP hai ngày = số cũ
+        _ev_fixture([iss("2026-10-20", 0.5, BON, status="announced")])
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C13 KHE H1: ISS announced ex TRƯỚC price_date (ngoài [price_date, asof]) -> số quý + kêu",
+              r["oshares"] == base["oshares"] and r["oshares_method"] == "FRAME_FALLBACK"
+              and "chua executed" in (r["oshares_frame_error"] or "") and "2026-10-20:announced" in r["oshares_frame_error"]
+              and "KHONG khoa duoc khung" in err.getvalue(), r.get("oshares_frame_error"))
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = dv.fair_value("FPT", "2026-10-30", price=None, fin=fin)
+        check("C13 ... kể cả KHÔNG có giá (số CP sống ở asof còn là số trước sự kiện)",
+              r["oshares_method"] == "FRAME_FALLBACK" and "chua executed" in (r["oshares_frame_error"] or ""))
+        osd.oshares_for = _FakeOS(ex="2026-10-20")
+        _ev_fixture([iss("2026-10-20", 0.5, BON, status="executed")])
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C13 cùng sự kiện ĐÃ executed, giá và asof cùng sau ex -> khoá OK, số sống ×1,5",
+              math.isclose(r["oshares"], base["oshares"] * 1.5) and r["oshares_frame_error"] is None, r.get("oshares_frame_error"))
+        osd.oshares_for = _FakeOS(ex="2099-01-01")
+        _ev_fixture([iss("2026-07-31", 0.5, BON, status="announced")])          # 91 ngày trước asof
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C13 announced ex NGOÀI 90 ngày lùi -> không xét (khoá OK)", r["oshares_frame_error"] is None,
+              r.get("oshares_frame_error"))
+        _ev_fixture([iss("2026-08-01", 0.5, BON, status="announced")])          # đúng 90 ngày
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C13 announced ex đúng biên 90 ngày -> số quý", r["oshares_method"] == "FRAME_FALLBACK",
+              r.get("oshares_frame_error"))
+        _ev_fixture([iss("2026-10-20", 0.0, "Phát hành riêng lẻ", status="announced"), div("2026-10-20", 0.2)])
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C13 riêng lẻ / cổ tức tiền chưa executed -> không dời khung, khoá OK", r["oshares_frame_error"] is None,
+              r.get("oshares_frame_error"))
+        _ev_fixture([iss("2026-10-20", 0.1, meth=None, status="")])
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C13 ISS không phương thức, status rỗng -> coi như chưa executed (fail-closed)",
+              r["oshares_method"] == "FRAME_FALLBACK", r.get("oshares_frame_error"))
+        real_ue = osd.unexecuted_events
+        def _boom(*a, **k):
+            raise RuntimeError("bq down (simulated)")
+        osd.unexecuted_events = _boom
+        try:
+            with contextlib.redirect_stderr(io.StringIO()):
+                r = dv.fair_value("FPT", "2026-10-30", price=None, fin=fin)
+        finally:
+            osd.unexecuted_events = real_ue
+        check("C13 không đọc được lịch chưa executed -> số quý (fail-closed)", r["oshares_method"] == "FRAME_FALLBACK"
+              and "chua executed" in (r["oshares_frame_error"] or ""), r.get("oshares_frame_error"))
+        n = _Count()
+        real_pe = osd.pricing_events
+        osd.pricing_events = n
+        _ev_clear()
+        try:
+            got = None
+            try:
+                osd.unexecuted_events("FPT", "2026-10-30")
+            except RuntimeError:
+                got = "raise"
+        finally:
+            osd.pricing_events = real_pe
+        check("C13 unexecuted_events không cache -> hỏi pricing_events, KHÔNG nuốt lỗi", n.n == 1 and got == "raise", f"{n.n} {got}")
+    finally:
+        osd.oshares_for = real
+        _ev_clear()
+        dv.OSHARES_SOURCE = "fin"
+
+
+def c14_no_bq_without_price_date():
+    """Việc 3: có giá mà price_date None/hỏng/> asof ⇒ số quý NGAY, 0 lời gọi oshares_for/BQ (plan 21:00)."""
+    import dcf_valuation as dv
+    import oshares_live as _ol
+    fin = dv._load_financials()
+    real = (osd.oshares_for, osd.fetch_cache, osd.pricing_events, _ol._fetch)
+    cnt = {"oshares_for": 0}
+    n_fc, n_pe, n_ol = _Count(), _Count(), _Count()
+    try:
+        dv.OSHARES_SOURCE = "fin"
+        base = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+        dv.OSHARES_SOURCE = "live"
+        dv._WARNED_ONCE.clear()
+        osd._CACHE.update(tickers=frozenset(), until=None, data=None)
+        _ev_clear()
+
+        def _osf(t, a, f):
+            cnt["oshares_for"] += 1
+            return real[0](t, a, f)
+        osd.oshares_for, osd.fetch_cache, osd.pricing_events, _ol._fetch = _osf, n_fc, n_pe, n_ol
+        out = []
+        with contextlib.redirect_stderr(io.StringIO()):
+            for pdt in (None, "not-a-date", "2026-10-30"):
+                out.append(dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date=pdt))
+        calls = cnt["oshares_for"] + n_fc.n + n_pe.n + n_ol.n
+        check("C14 có giá, price_date None/hỏng/>asof -> 0 lời gọi oshares_for + 0 BQ",
+              calls == 0, f"oshares_for={cnt['oshares_for']} fetch_cache={n_fc.n} pricing_events={n_pe.n} _fetch={n_ol.n}")
+        check("C14 ... và kết quả = số quý, FRAME_FALLBACK, nêu lý do",
+              all(r["oshares"] == base["oshares"] and r["oshares_method"] == "FRAME_FALLBACK" for r in out)
+              and "price_date" in out[0]["oshares_frame_error"] and "khong doc duoc" in out[1]["oshares_frame_error"]
+              and "SAU asof" in out[2]["oshares_frame_error"], str([r.get("oshares_frame_error") for r in out]))
+        r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+        check("C14 fallback không giá-ngày vẫn mang đủ khoá oshares_* (schema không đổi)",
+              {"oshares_fin", "oshares_source", "oshares_method", "oshares_frame_error"} <= set(r), str(sorted(r))[:120])
+    finally:
+        osd.oshares_for, osd.fetch_cache, osd.pricing_events, _ol._fetch = real
+        osd._CACHE.update(tickers=frozenset(), until=None, data=None)
+        dv.OSHARES_SOURCE = "fin"
+
+
+def c15_divergence():
+    """Việc 2: OShares live lệch số quý > 10% PHẢI hiện: stderr + _dcf_check_for_order + format_dcf_check + lag_dd_pack."""
+    import dcf_valuation as dv
+    import trading_bot.strategies as st
+    fin = dv._load_financials()
+    real = osd.oshares_for
+    _ev_fixture([])
+    try:
+        dv.OSHARES_SOURCE = "fin"
+        base = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
+        d_fin = st._dcf_check_for_order("FPT", 100000.0, "2026-10-29", price_date="2026-10-28")
+        check("C15 fin: _dcf_check_for_order KHÔNG thêm khoá oshares_* (byte-identical)",
+              not any(k.startswith("oshares") for k in d_fin), str(sorted(d_fin)))
+        check("C15 fin: format_dcf_check không có dòng OShares", "OShares" not in st.format_dcf_check(d_fin))
+        dv.OSHARES_SOURCE = "live"
+        dv._WARNED_ONCE.clear()
+        osd.oshares_for = _FakeOS(ex="2000-01-01", mult=0.7359)       # ca MST 2025-10-29
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-28")
+            d = st._dcf_check_for_order("FPT", 100000.0, "2026-10-29", price_date="2026-10-28")
+        e = err.getvalue()
+        check("C15 live ×0,7359: oshares_divergence ≈ −26,4%", math.isclose(r.get("oshares_divergence") or 0, -0.2641, abs_tol=1e-4)
+              and r["oshares_frame_error"] is None, str(r.get("oshares_divergence")))
+        check("C15 ... kêu stderr 'OShares live X vs quy Y (-26%)' đúng 1 lần/mã/asof",
+              e.count("!!!!! [dcf_valuation] FPT: OShares live") == 1 and "(-26%)" in e and "vs quy" in e, e[:240])
+        line = st.format_dcf_check(d)
+        check("C15 ... _dcf_check_for_order mang oshares/oshares_fin/divergence, format_dcf_check in '⚠ OShares live … (-26%)'",
+              d.get("oshares_fin") == base["oshares"] and "⚠ OShares live" in line and "(-26%)" in line, line)
+        osd.oshares_for = _FakeOS(ex="2000-01-01", mult=1.05)
+        dv._WARNED_ONCE.clear()
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            d = st._dcf_check_for_order("FPT", 100000.0, "2026-10-29", price_date="2026-10-28")
+        check("C15 lệch +5% (dưới ngưỡng 10%) -> không kêu, không in", "OShares live" not in err.getvalue()
+              and "OShares" not in st.format_dcf_check(d), err.getvalue()[:120])
+        check("C15 biên ngưỡng: |lệch| = 10% không kêu, 10,1% kêu",
+              "OShares" not in st.format_dcf_check({"status": "CHEAP", "margin_of_safety": 0.1, "oshares_divergence": -0.10,
+                                                    "oshares": 90.0, "oshares_fin": 100.0})
+              and "OShares" in st.format_dcf_check({"status": "CHEAP", "margin_of_safety": 0.1, "oshares_divergence": -0.101,
+                                                    "oshares": 89.9, "oshares_fin": 100.0}))
+        import importlib.util
+        if os.path.exists(LAG_DD_PACK):
+            spec = importlib.util.spec_from_file_location("lag_dd_pack_r9", LAG_DD_PACK)
+            m = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(m)
+            sys.path.insert(0, HERE)
+            w = m.soft_warnings({"valuation": {"dcf": {"status": "CHEAP", "oshares": 83.6e6, "oshares_fin": 113.6e6,
+                                                         "oshares_divergence": -0.2641, "oshares_source": "oshares_live",
+                                                         "oshares_method": "AIS"}}})
+            w0 = m.soft_warnings({"valuation": {"dcf": {"status": "CHEAP"}}})
+            check("C15 lag_dd_pack: WARNING OSHARES_LIVE_LECH (−26%), không có khi fin",
+                  [x["code"] for x in w] == ["OSHARES_LIVE_LECH"] and "(-26%)" in w[0]["evidence"] and w0 == [], str(w)[:200])
+        else:
+            check("C15 lag_dd_pack có ở DCF_OS_LAG_DD_PACK", False, LAG_DD_PACK)
+    finally:
+        osd.oshares_for = real
+        _ev_clear()
+        dv.OSHARES_SOURCE = "fin"
+
+
+def _series(rows):
+    return lambda t, pdt, n: [(d, p) for d, p in rows if d <= pdt][:n + 1]
+
+
+def c16_price_run():
+    """Việc 5: vendor lặp Price cũ qua ex-date ⇒ khung khoá mở về đầu chuỗi lặp. Ca tổng hợp: ISS thưởng 50%
+    ex 2026-10-28 (executed); Price đứng 60.000 từ 10-27 tới 10-29 (vendor ffill giá TRƯỚC ex); caller khai
+    price_date=10-29, asof=10-30. Không có guard: số CP 10-29 = 10-30 (cùng sau ex) và [10-29, 10-30] không có
+    ex ⇒ khoá OK sai (giá trước ex × số CP sau ex)."""
+    import dcf_valuation as dv
+    fin = dv._load_financials()
+    real, real_ps = osd.oshares_for, dv._price_series
+    _ev_fixture([iss("2026-10-28", 0.5, BON)])
+    try:
+        dv.OSHARES_SOURCE = "fin"
+        base = dv.fair_value("FPT", "2026-10-30", price=None, fin=fin)
+        dv.OSHARES_SOURCE = "live"
+        dv._WARNED_ONCE.clear()
+        osd.oshares_for = _FakeOS(ex="2026-10-28")
+        frozen = [("2026-10-29", 60000.0), ("2026-10-28", 60000.0), ("2026-10-27", 60000.0), ("2026-10-24", 58000.0)]
+        dv._price_series = _series(frozen)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            r = dv.fair_value("FPT", "2026-10-30", price=60000.0, fin=fin, price_date="2026-10-29")
+        check("C16 Price lặp qua ex (ffill vendor) -> khung mở về 10-27 -> số quý + kêu",
+              r["oshares"] == base["oshares"] and r["oshares_method"] == "FRAME_FALLBACK"
+              and "2026-10-27" in (r["oshares_frame_error"] or "") and "lap lai tu 2026-10-27" in err.getvalue(),
+              f"{r.get('oshares_frame_error')} | {err.getvalue()[:160]}")
+        r = dv.fair_value("FPT", "2026-10-30", price=61000.0, fin=fin, price_date="2026-10-29")
+        check("C16 giá caller KHÁC Price phiên đó -> không suy chuỗi, khoá trên price_date (OK)",
+              r["oshares_frame_error"] is None and math.isclose(r["oshares"], base["oshares"] * 1.5), r.get("oshares_frame_error"))
+        dv._price_series = _series([("2026-10-29", 60000.0), ("2026-10-28", 59000.0), ("2026-10-27", 40000.0)])
+        r = dv.fair_value("FPT", "2026-10-30", price=60000.0, fin=fin, price_date="2026-10-29")
+        check("C16 Price có giao dịch thật (không lặp) -> khoá OK", r["oshares_frame_error"] is None, r.get("oshares_frame_error"))
+        check("C16 trần chuỗi lặp PRICE_RUN_MAX = 20 phiên", dv.PRICE_RUN_MAX == 20, str(dv.PRICE_RUN_MAX))
+        long_run = [(f"2026-10-{29 - i:02d}", 60000.0) for i in range(21)]       # cố định, KHÔNG theo hằng số
+        dv._price_series = _series(long_run)
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = dv.fair_value("FPT", "2026-10-30", price=60000.0, fin=fin, price_date="2026-10-29")
+        check("C16 Price lặp 21 phiên (> 20) -> không xác định được phiên thật -> số quý",
+              r["oshares_method"] == "FRAME_FALLBACK" and "lap lai >" in (r["oshares_frame_error"] or ""), r.get("oshares_frame_error"))
+        exact = long_run[:20]
+        dv._price_series = _series(exact)
+        _ev_fixture([])
+        osd.oshares_for = _FakeOS(ex="2000-01-01")
+        r = dv.fair_value("FPT", "2026-10-30", price=60000.0, fin=fin, price_date="2026-10-29")
+        check("C16 lặp đúng 20 phiên, đọc hết lịch sử, không sự kiện -> khoá OK",
+              r["oshares_frame_error"] is None, r.get("oshares_frame_error"))
+        def _boom(*a, **k):
+            raise OSError("parquet missing (simulated)")
+        dv._price_series = _boom
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = dv.fair_value("FPT", "2026-10-30", price=60000.0, fin=fin, price_date="2026-10-29")
+        check("C16 không đọc được chuỗi Price -> số quý (fail-closed)", r["oshares_method"] == "FRAME_FALLBACK"
+              and "chuoi Price" in (r["oshares_frame_error"] or ""), r.get("oshares_frame_error"))
+        dv.OSHARES_SOURCE = "fin"
+        dv._price_series = _boom
+        r = dv.fair_value("FPT", "2026-10-30", price=60000.0, fin=fin, price_date="2026-10-29")
+        check("C16 knob fin: không đọc chuỗi Price", r["ok"] and "oshares_method" not in r)
+    finally:
+        osd.oshares_for, dv._price_series = real, real_ps
+        _ev_clear()
+        dv.OSHARES_SOURCE = "fin"
+
+
+CB_SRC = []      # mutant hook M33: [callable trả nguồn custom_basket đã sửa]
+
+
+def c17_custom_basket_pinned():
+    """Việc 4 (chọn (a)): custom_basket ép fin ngay sau import dcf_valuation, trước mọi fair_value(."""
+    src = CB_SRC[0]() if CB_SRC else open(os.path.join(HERE, "custom_basket.py"), encoding="utf-8").read()
+    imp, pin = "import dcf_valuation as _dcfv\n", "_dcfv.pin_oshares_source_fin(__file__)"
+    ok = imp in src and pin in src and src.index(imp) < src.index(pin) < src.index("_dcfv.fair_value(") \
+        and src.count("import dcf_valuation") == 1
+    check("C17 custom_basket: pin_oshares_source_fin ngay sau import, trước fair_value(", ok)
+
+
+def c18_probe_tree_pinned():
+    """Việc 7 / M22: dựng cây TẠM (symlink *.py + trading_bot của cây test) ≠ PROD và chạy probe trên đó —
+    probe không ghim lại cây ⇒ module sau dcf_valuation nạp từ PROD ⇒ đường dẫn lệch. Giết được M22 cả khi
+    HERE == PROD (cây canonical), vì cây tạm không bao giờ trùng PROD."""
+    out, paths = probe_on_tree(HERE)
+    check("C18 probe trên cây tạm ≠ PROD: mọi module nạp từ cây tạm (giết M22 cả trên canonical)",
+          out == "ok" and bool(paths) and "oshares_dcf" in paths and all(v == paths["dcf_valuation"] for v in paths.values())
+          and paths["dcf_valuation"] != PROD, str(paths))
+
+
+def probe_on_tree(src_tree):
+    import json
+    tmp = _mkdtemp()
+    for f in os.listdir(src_tree):
+        if f.endswith(".py") or f == "trading_bot":
+            os.symlink(os.path.join(src_tree, f), os.path.join(tmp, f))
+    body = "import oshares_dcf, oshares_pit, corp_action_lib, trading_bot.strategies; out = 'ok'"
+    p = subprocess.run([sys.executable, "-c", probe_code(body, here=tmp)], cwd=tmp, capture_output=True, text=True,
+                       timeout=300, env={k: v for k, v in os.environ.items() if k != "DCF_OSHARES_SOURCE"})
+    try:
+        j = json.loads(p.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        return f"ERR {p.stderr[-200:]}", {}
+    paths = {m: v for m, v in j["paths"].items()}
+    if "trading_bot.strategies" in paths:
+        paths["trading_bot.strategies"] = os.path.dirname(paths["trading_bot.strategies"])
+    return j["out"], {m: (tmp if v == tmp else v) for m, v in paths.items()}
+
+
 SUITE = [c1_classifier, c2_no_announced_branch, c3_oshares_for, c4_knob, c6_source_of_truth, c7_frame_lock,
-         c8_ops_block, c9_research_pinned, c10_oshares_error, c11_callers, c12_module_paths]
+         c8_ops_block, c9_research_pinned, c10_oshares_error, c11_callers, c12_module_paths,
+         c13_unexecuted, c14_no_bq_without_price_date, c15_divergence, c16_price_run, c17_custom_basket_pinned,
+         c18_probe_tree_pinned]
 
 
 def run_suite(with_bq=False, quiet=False):
@@ -766,7 +1092,38 @@ MUTANTS = {
         lambda: ops_block().replace("for _fp in _os_ext:", "for _fp in []:")]),
     "M24 H6 ops: bỏ quét môi trường tiến trình": (sys.modules[__name__], "OPS_BLOCK", lambda real: [
         lambda: ops_block().replace('os.path.join(_os_proc, "[0-9]*", "environ")', 'os.path.join(_os_proc, "nomatch")')]),
+    # ---- R9 (job Taylor_20261031_042224)
+    "M25 v1 bỏ kiểm ISS chưa executed (luôn rỗng)": (osd, "unexecuted_events", lambda real: lambda t, a, **k: []),
+    "M26 v1 lookback 0 ngày (chỉ ex == asof)": (osd, "unexecuted_events", lambda real: lambda t, a, **k: real(t, a, lookback_days=0)),
+    "M27 v1 tính cả ISS đã executed": (osd, "unexecuted_events", lambda real: lambda t, a, **k:
+        [e for e in (osd._EV_CACHE["rows"] or []) if e.get("ticker") == t and e.get("event_code") == "ISS"
+         and e.get("exright_date", "") <= a] or real(t, a, **k)),
+    "M28 v1 lỗi đọc lịch chưa executed bị nuốt": (osd, "unexecuted_events", lambda real: lambda t, a, **k: _swallow(real, t, a)),
+    "M29 v3 gọi oshares_for TRƯỚC khi kiểm price_date (thứ tự R8)": (dv, "_live_oshares", lambda real: lambda t, a, p, pdt, f:
+        (_swallow(osd.oshares_for, t, a.date().isoformat(), f), real(t, a, p, pdt, f))[1]),
+    "M30 v2 ngưỡng lệch OShares 1000%": (dv, "OSHARES_DIVERGENCE_WARN", lambda real: 10.0),
+    "M31 v2 format_dcf_check không in lệch OShares": (_st, "_format_oshares_divergence", lambda real: lambda d: ""),
+    "M32 v2 fair_value không kêu stderr khi lệch": (dv, "_shout_once", lambda real: lambda k, m:
+        None if (isinstance(k, tuple) and k[0] == "oshares_div") else real(k, m)),
+    "M33 v4 custom_basket bỏ ép fin": (sys.modules[__name__], "CB_SRC", lambda real: [
+        lambda: open(os.path.join(HERE, "custom_basket.py"), encoding="utf-8").read().replace(
+            "_dcfv.pin_oshares_source_fin(__file__)", "pass")]),
+    "M34 v5 bỏ guard Price lặp (giữ price_date)": (dv, "_price_run_start", lambda real: lambda t, pdt, p: (pdt, None)),
+    "M35 v5 chuỗi lặp vượt trần vẫn nhận": (dv, "PRICE_RUN_MAX", lambda real: 10 ** 6),
+    "M36 v5 lỗi đọc chuỗi Price bị nuốt (giữ price_date)": (dv, "_price_run_start", lambda real: lambda t, pdt, p:
+        _swallow2(real, (pdt, None), t, pdt, p)),
+    "M37 v6 ops: settings JSON đọc như văn bản (regex dòng)": (sys.modules[__name__], "OPS_BLOCK", lambda real: [
+        lambda: ops_block().replace('if _fp.endswith(".json"):', 'if False:')]),
+    "M38 v6 ops: không gắn cờ research override": (sys.modules[__name__], "OPS_BLOCK", lambda real: [
+        lambda: ops_block().replace('"[research override] " if _res else', '"[LAUNCHER] " if _res else')]),
 }
+
+
+def _swallow2(f, default, *a):
+    try:
+        return f(*a)
+    except Exception:                                # noqa: BLE001 — chính là lỗi mutant M36 mô phỏng
+        return default
 
 
 def _swallow(f, *a):

@@ -559,6 +559,11 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
         res.update({"oshares_fin": float(last.OShares), "oshares_source": osh_live["source"],
                     "oshares_method": osh_live["method"],
                     "oshares_frame_error": osh_live.get("frame_error")})
+        div = oshares_divergence(oshares, float(last.OShares))
+        res["oshares_divergence"] = div
+        if div is not None and abs(div) > OSHARES_DIVERGENCE_WARN:
+            _shout_once(("oshares_div", ticker, a.date().isoformat()), oshares_divergence_note(ticker, oshares, float(last.OShares))
+                        + f" asof={a.date().isoformat()} (nguon {osh_live['source']}, {osh_live['method']})")
     if price is not None and fv_ps and fv_ps > 0:
         res["margin_of_safety"] = (fv_ps - price) / fv_ps
     # sensitivity
@@ -566,6 +571,67 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     if verbose:
         _print_report(res)
     return res
+
+
+# R9/việc 5: vendor có thể LẶP LẠI Price cũ qua ex-date (chữ ký ffill, close_repair._lift_neighbour /
+# _band_lifted_suspect: Price đứng yên nhiều phiên liền). Khi đó "giá của phiên price_date" thật ra là giá
+# giao dịch của phiên ĐẦU chuỗi lặp — có thể TRƯỚC ex — nên khung khoá phải mở về đầu chuỗi. Chuỗi dài hơn
+# trần (không xác định được đầu chuỗi trong cửa sổ đọc) ⇒ không khoá được (fail-closed).
+PRICE_RUN_MAX = 20
+
+
+def _price_series(ticker, pdt, n):
+    """[(phiên ISO, Price)] mới→cũ, ≤ n+1 phiên, phiên ≤ pdt, từ cache ticker local (không gọi BQ)."""
+    import duckdb
+    y = int(pdt[:4])
+    files = [f for f in (f"{WORKDIR}/data/bq_cache/ticker/{yy}.parquet" for yy in (y - 1, y)) if os.path.exists(f)]
+    c = duckdb.connect(":memory:")
+    df = c.execute(
+        f"SELECT time, Price FROM read_parquet({files!r}) "
+        f"WHERE ticker = '{ticker}' AND time <= DATE '{pdt}' AND time >= DATE '{pdt}' - INTERVAL 120 DAY "
+        f"ORDER BY time DESC LIMIT {int(n) + 1}").df()
+    return [(pd.Timestamp(t).date().isoformat(), (None if pd.isna(p) else float(p))) for t, p in zip(df.time, df.Price)]
+
+
+def _price_run_start(ticker, pdt, price):
+    """(phiên ĐẦU chuỗi Price lặp kết thúc ở pdt, lỗi|None). Không có dòng của pdt hoặc Price ở pdt
+    khác `price` (giá do caller lấy từ nguồn khác) ⇒ không suy được chuỗi, giữ pdt."""
+    ser = _price_series(ticker, pdt, PRICE_RUN_MAX)
+    if not ser or ser[0][0] != pdt or ser[0][1] is None or ser[0][1] != float(price):
+        return pdt, None
+    start = pdt
+    for day, px in ser[1:]:
+        if px != ser[0][1]:
+            return start, None
+        start = day
+    if len(ser) > PRICE_RUN_MAX:
+        return start, f"Price {price:g} lap lai > {PRICE_RUN_MAX} phien den {pdt} -> khong xac dinh duoc phien giao dich that"
+    return start, None
+
+
+# R9/việc 2: số CP sống lệch số quý quá ngưỡng ⇒ PHẢI hiện ra (stderr + format_dcf_check). MST 2025-10-29
+# ×0,7359 (AIS 83,6tr vs quý 113,6tr) đổi FV/cp +36% mà trước R9 không nơi nào in. Ngưỡng 10% = đề xuất
+# của dispatch R9, không hiệu chỉnh.
+OSHARES_DIVERGENCE_WARN = 0.10
+
+
+def oshares_divergence(used, fin_os):
+    """used/fin − 1 (None khi thiếu/không dương). Thuần."""
+    try:
+        used, fin_os = float(used), float(fin_os)
+    except (TypeError, ValueError):
+        return None
+    if not (fin_os > 0 and used > 0):
+        return None
+    return used / fin_os - 1.0
+
+
+def oshares_divergence_note(ticker, used, fin_os):
+    """'OShares live 83,6tr vs quy 113,6tr (-26%)' — một định dạng cho stderr và format_dcf_check."""
+    d = oshares_divergence(used, fin_os)
+    pct = "n/a" if d is None else f"{d * 100:+.0f}%"
+    return (f"{ticker + ': ' if ticker else ''}OShares live {float(used) / 1e6:,.1f}tr vs quy "
+            f"{float(fin_os) / 1e6:,.1f}tr ({pct})").replace(",", "X").replace(".", ",").replace("X", ".")
 
 
 def _live_oshares(ticker, a, price, price_date, fin_os):
@@ -579,12 +645,35 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
           (bắt cả khi vendor chưa lật `executed` nên (a) không thấy); ex == price_date (gồm ca
           price_date == asof == ex) = không chứng minh được giá đã điều chỉnh — caller khai
           price_date=asof cho giá tham chiếu phiên trước là đúng ca này.
+    R9: (c) mọi ca (kể cả không giá): KHÔNG có ISS dời khung giá ex ≤ asof (lùi 90 ngày) mà chưa
+    `executed` (oshares_dcf.unexecuted_events) — số CP sống khi đó còn là số trước sự kiện;
+    (d) price_date được mở về đầu chuỗi Price lặp (vendor ffill qua ex, `_price_run_start`).
+    Có giá mà KHÔNG khai price_date / price_date hỏng / price_date > asof ⇒ số quý NGAY, không gọi
+    oshares_for (R9/việc 3: 0 truy vấn BQ trên đường plan 21:00).
     Không khoá được — thiếu `price_date`, price_date > asof, hai số khác, có sự kiện, lỗi ngày/lịch —
     ⇒ số quý (fin) + kêu stderr/logging. oshares_for LỖI (method ERROR/exception) ⇒ số quý + kêu
     1 lần/tiến trình/mã (R8/H2)."""
     import oshares_dcf as _osd
     asof = a.date().isoformat()
-    err = None
+    err, pdt = None, None
+
+    def _fallback(rec, err):
+        key = "no_price_date" if price_date is None else (ticker, asof, str(price_date))
+        _shout_once(key, f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: KHONG khoa duoc khung ex-date gia<->so CP "
+                         f"({err}) -> FALLBACK so quy (fin)" + (" [canh bao nay in 1 lan/tien trinh]" if price_date is None else ""))
+        return {**(rec or {"ticker": ticker, "rel_diff": None, "live_value": None, "reason": err}),
+                "value": fin_os, "source": "ticker_financial", "method": "FRAME_FALLBACK", "frame_error": err}
+
+    # R9/việc 3: kiểm price_date TRƯỚC mọi lời gọi oshares_for (mỗi lời gọi chưa prime = truy vấn BQ)
+    if price is not None:
+        if price_date is None:
+            return _fallback(None, "caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao")
+        try:
+            pdt = pd.to_datetime(price_date).date().isoformat()
+        except Exception as e:                                     # noqa: BLE001
+            return _fallback(None, f"price_date={price_date!r} khong doc duoc ({type(e).__name__})")
+        if pdt > asof:
+            return _fallback(None, f"price_date {pdt} SAU asof {asof} -> gia o tuong lai so voi so CP")
 
     def _osf(day):
         try:
@@ -601,39 +690,45 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
                         f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: oshares_for LOI ({rec.get('reason')}) "
                         f"-> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh/ma]")
             return {**rec, "value": fin_os, "source": "ticker_financial"}
-        if price is not None:
-            if price_date is None:
-                err = "caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao"
-            else:
+        try:                                                       # (c) R9/việc 1
+            stale = _osd.unexecuted_events(ticker, asof)
+        except Exception as e:                                     # noqa: BLE001 — không đọc được = không chứng minh được
+            stale, err = None, f"khong doc duoc lich ISS chua executed ({type(e).__name__}: {str(e)[:80]})"
+        if stale:
+            exs = sorted({f"{e.get('exright_date')}:{e.get('event_status')}" for e in stale})
+            err = (f"ISS doi khung gia ex<=asof chua executed ({','.join(exs)}) "
+                   f"-> so CP song co the con la so TRUOC su kien")
+        if err is None and pdt is not None:
+            try:                                                   # (d) R9/việc 5
+                run0, run_err = _price_run_start(ticker, pdt, price)
+            except Exception as e:                                 # noqa: BLE001 — không đọc được chuỗi giá = không chứng minh được
+                run0, run_err = pdt, f"khong doc duoc chuoi Price ({type(e).__name__}: {str(e)[:80]})"
+            if run_err:
+                err = run_err
+            elif run0 != pdt:
+                _shout_once(("price_run", ticker, pdt), f"DCF_OSHARES_SOURCE=live {ticker}: Price {price:g} lap lai tu "
+                                                        f"{run0} den {pdt} -> khoa khung tu {run0}")
+                pdt = run0
+        if err is None and pdt is not None:
+            if pdt != asof:
+                r_px = _osf(pdt)
+                if r_px.get("method") == "ERROR":
+                    err = f"oshares_for ngay gia {pdt} LOI ({r_px.get('reason')})"
+                elif r_px["value"] != rec["value"]:
+                    err = (f"so CP song ngay gia {pdt} = {r_px['value']} != ngay asof {asof} = {rec['value']} "
+                           f"-> co su kien CP giua hai ngay")
+            if err is None:
                 try:
-                    pdt = pd.to_datetime(price_date).date().isoformat()
-                except Exception as e:                             # noqa: BLE001
-                    pdt, err = None, f"price_date={price_date!r} khong doc duoc ({type(e).__name__})"
-                if pdt is not None and pdt > asof:
-                    err = f"price_date {pdt} SAU asof {asof} -> gia o tuong lai so voi so CP"
-                elif pdt is not None:
-                    if pdt != asof:
-                        r_px = _osf(pdt)
-                        if r_px.get("method") == "ERROR":
-                            err = f"oshares_for ngay gia {pdt} LOI ({r_px.get('reason')})"
-                        elif r_px["value"] != rec["value"]:
-                            err = (f"so CP song ngay gia {pdt} = {r_px['value']} != ngay asof {asof} = {rec['value']} "
-                                   f"-> co su kien CP giua hai ngay")
-                    if err is None:
-                        try:
-                            evs = _osd.frame_events(ticker, pdt, asof)
-                        except Exception as e:                     # noqa: BLE001 — không đọc được lịch = không chứng minh được
-                            evs, err = None, f"khong doc duoc lich ex-date ({type(e).__name__}: {str(e)[:80]})"
-                        if evs:
-                            exs = sorted({e.get("exright_date") for e in evs})
-                            err = (f"ISS doi khung gia ex {','.join(exs)} trong [price_date={pdt}, asof={asof}] "
-                                   f"-> khong chung minh duoc gia va so CP cung phia su kien")
+                    evs = _osd.frame_events(ticker, pdt, asof)
+                except Exception as e:                             # noqa: BLE001 — không đọc được lịch = không chứng minh được
+                    evs, err = None, f"khong doc duoc lich ex-date ({type(e).__name__}: {str(e)[:80]})"
+                if evs:
+                    exs = sorted({e.get("exright_date") for e in evs})
+                    err = (f"ISS doi khung gia ex {','.join(exs)} trong [price_date={pdt}, asof={asof}] "
+                           f"-> khong chung minh duoc gia va so CP cung phia su kien")
     if err is None:
         return rec
-    key = "no_price_date" if price_date is None else (ticker, asof, str(price_date))
-    _shout_once(key, f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: KHONG khoa duoc khung ex-date gia<->so CP "
-                     f"({err}) -> FALLBACK so quy (fin)" + (" [canh bao nay in 1 lan/tien trinh]" if price_date is None else ""))
-    return {**rec, "value": fin_os, "source": "ticker_financial", "method": "FRAME_FALLBACK", "frame_error": err}
+    return _fallback(rec, err)
 
 
 def _fv_per_share(base_fcfe, g_exp, g_T, r, oshares):
