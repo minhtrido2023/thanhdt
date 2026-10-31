@@ -213,6 +213,31 @@ def promote_cases(md_path, acct, tmp):
     check(any("manifest_sha256" in p for p in al.lint_v2(m3, investor_facing=investor)), f"{acct} tag thiếu manifest_sha256 bị chặn")
 
 
+def daily_return_gate_case(md_path, acct, tmp):
+    """r3 N5: cổng §21 trên bản NGÀY v2 kiểm >0 dòng (từ manifest.positions); sửa ô tỷ suất ⇒ CHẶN."""
+    import io
+    import report_return_gate as rrg
+    man, _d = al.load_v2(md_path)
+    n = len(man.get("positions") or [])
+    buf = io.StringIO()
+    rc = rrg.run_gate(md_path, out=buf)
+    got = buf.getvalue()
+    check(rc == 0 and n > 0 and f"v2: {n} dòng" in got, f"{acct} daily cổng §21 kiểm {n} dòng vị thế từ manifest (rc={rc})")
+    if not n:
+        return
+    d2 = os.path.join(tmp, f"rrg_mut_{acct}")
+    shutil.rmtree(d2, ignore_errors=True)
+    shutil.copytree(os.path.dirname(md_path), d2, ignore=shutil.ignore_patterns("draft", "mut_*", "promote_*", "manifest_tamper_*"))
+    m2 = os.path.join(d2, os.path.basename(md_path))
+    man, d = al.load_v2(m2)
+    man["positions"][0][2] = "+99,99%"
+    json.dump(man, open(os.path.join(d, "manifest.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    resign(m2)
+    buf = io.StringIO()
+    rc = rrg.run_gate(m2, out=buf)
+    check(rc != 0, f"{acct} daily: ô tỷ suất {man['positions'][0][0]} sửa thành +99,99% (ký lại) ⇒ cổng §21 CHẶN (rc={rc})")
+
+
 def write_order_case(tmp):
     """r3 N3: vượt trần trang ⇒ write_outputs raise và KHÔNG để lại .md (cũng không manifest)."""
     sys.path.insert(0, os.path.join(BIN, "report_v2"))
@@ -431,6 +456,7 @@ def main():
                 promote_cases(md_path, acct, tmp)
                 email_case(md_path, tmp)
             if cad == "daily":
+                daily_return_gate_case(md_path, acct, tmp)
                 email_case(md_path, tmp, ("--attach-note", "Ghi chú selfcheck N9"), note="Ghi chú selfcheck N9")
     print("md5 .md:", json.dumps(digests))
     if not a.keep:

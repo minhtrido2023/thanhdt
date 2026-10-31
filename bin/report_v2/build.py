@@ -91,6 +91,7 @@ class Ctx:
         self.asset_dir = os.path.join(out_dir, "v2", stem)
         os.makedirs(self.asset_dir, exist_ok=True)
         self.blocks, self.facts, self.md, self.recon = [], [], [], []
+        self.positions = []   # r3 N5: [mã, KL, ô tỷ suất ĐÚNG như in] — cổng §21 đối chiếu khi .md không có bảng
         self.meta = ACCT_META[acct]
 
     def f(self, name):
@@ -221,6 +222,7 @@ def positions_block(cx, acct, d, nav):
             tot_pl += p["pl"]; tot_cost += p["qty"] * p["raw_cost"]
         rows.append([tk, vn(p["qty"]), vn(p["raw_cost"]) if ok else "—", vn(p["market"]), vn(val),
                      pct(val / nav["nav"] * 100, 1, False), pct(p["pct"]) if ok else "—¹"])
+    cx.positions = [[r[0], pos[r[0]]["qty"], r[6]] for r in rows if r[6] not in ("—", "—¹")]
     return pr, rows, tot_val, (tot_pl / tot_cost * 100 if tot_cost else None)
 
 
@@ -252,7 +254,7 @@ def write_outputs(cx, title, kicker, sub, header_left, md_lines, extra_manifest)
            "html": os.path.basename(html), "html_sha256": sha256(html),
            "cid": {k: {"file": os.path.basename(v), "sha256": sha256(v)} for k, v in cid.items()},
            "pages": pages, "page_cap": PAGE_CAP[cx.cadence], "lint": lint,
-           "recon": [list(r) for r in cx.recon], **extra_manifest}
+           "recon": [list(r) for r in cx.recon], "positions": cx.positions, **extra_manifest}
     # N3 (r3): kiểm trần trang + lint PDF TRƯỚC khi ghi manifest/.md ⇒ lỗi không để lại .md "hợp lệ".
     if pages > PAGE_CAP[cx.cadence]:
         raise RuntimeError(f"{cx.stem}: {pages} trang > trần {PAGE_CAP[cx.cadence]}")
