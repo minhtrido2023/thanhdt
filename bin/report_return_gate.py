@@ -1254,6 +1254,9 @@ def _v2_manifest_rows(report_path: str, out) -> list:
     trước đây cổng kiểm 0 dòng. Builder ghi `positions` = [mã, KL, ô tỷ suất ĐÚNG như in] vào
     manifest.json (khoá sha256 từ .md — sửa tay ⇒ load_v2 raise). Lấy các dòng đó làm dòng bảng.
     Không phải v2 ⇒ []. v2 mà không đọc được manifest ⇒ raise (fail-closed, không PASS trên 0 dòng)."""
+    with open(report_path, encoding="utf-8") as fh:
+        if "report_v2_manifest:" not in fh.read():
+            return []  # báo cáo cũ: KHÔNG cần module report_v2 (bản sao script trong worktree giả không có nó)
     from report_v2 import artifact_lint as al  # noqa: E402
     with open(report_path, encoding="utf-8") as fh:
         if not al.parse_tag(fh.read()):
