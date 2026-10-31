@@ -48,7 +48,8 @@ def md5_tree(d):
 
 def build(acct, period, out, cadence="monthly"):
     r = subprocess.run([sys.executable, os.path.join(BIN, "report_v2", "build.py"), cadence,
-                        "--account", acct, "--period", period, "--out-dir", out],
+                        "--account", acct, "--period", period, "--out-dir", out, "--promote",
+                        "--delivery-state", os.path.join(out, "_no_state.json")],
                        capture_output=True, text=True, timeout=600)
     if r.returncode != 0:
         print(r.stdout[-2000:], r.stderr[-3000:])
@@ -76,7 +77,8 @@ def resign(md_path):
     man["pdf_sha256"] = al.sha256(os.path.join(d, man["pdf"]))
     man["html_sha256"] = al.sha256(os.path.join(d, man["html"]))
     json.dump(man, open(man_p, "w", encoding="utf-8"), ensure_ascii=False)
-    text = al.TAG_RE.sub(f"<!-- {al.MANIFEST_TAG} {man_rel} pdf_sha256={man['pdf_sha256']} pdf={pdf_rel} -->", text)
+    text = al.TAG_RE.sub(f"<!-- {al.MANIFEST_TAG} {man_rel} manifest_sha256={al.sha256(man_p)} "
+                         f"pdf_sha256={man['pdf_sha256']} pdf={pdf_rel} -->", text)
     open(md_path, "w", encoding="utf-8").write(text)
     return man, d
 
@@ -99,6 +101,10 @@ def mutations(md_path, acct, tmp):
         html_cases["internal_file"] = " thiếu dnse_raw_2026-07-01.jsonl "
         html_cases["zalopay"] = " Khoản rút chuyển sang tài khoản ZaloPay "
         html_cases["zalopay_acct"] = " số TK 0001743768 "
+        html_cases["zalopay_lower"] = " chuyển sang zalopay "
+        html_cases["livermore_lower"] = " theo livermore "
+        html_cases["bal"] = " sổ BAL "
+        html_cases["signal"] = " SIGNAL_V11 "
     for tag, inj in html_cases.items():
         m = fresh("html_" + tag)
         man, d = al.load_v2(m)
@@ -114,6 +120,15 @@ def mutations(md_path, acct, tmp):
             check(False, f"{acct} mutation HTML '{tag}': cổng giao raise")
         except RuntimeError:
             check(True, f"{acct} mutation HTML '{tag}': cổng giao raise")
+
+    # r3 N2: "nan giải" là chữ tiếng Việt, KHÔNG phải token rỗng ⇒ lint KHÔNG được chặn
+    m = fresh("html_nan_giai")
+    man, d = al.load_v2(m)
+    hp = os.path.join(d, man["html"])
+    h = open(hp, encoding="utf-8").read() + "<p>Thanh khoản là vấn đề nan giải.</p>"
+    open(hp, "w", encoding="utf-8").write(h)
+    resign(m)
+    check(not al.lint_v2(m, investor_facing=investor), f"{acct} 'nan giải' KHÔNG bị lint chặn nhầm")
 
     import pymupdf
     m = fresh("pdf_font")
@@ -150,6 +165,122 @@ def mutations(md_path, acct, tmp):
     check(bool(al.lint_md(open(m, encoding="utf-8").read())), f"{acct} mutation .md repr tuple bị chặn")
 
 
+def promote_cases(md_path, acct, tmp):
+    """r3 N4/N8: nháp → tên chuẩn chỉ khi lint sạch; không ghi đè bản đã giao; manifest bị khoá sha."""
+    sys.path.insert(0, os.path.join(BIN, "report_v2"))
+    import build as B
+    investor = acct == "SpaceX"
+    out = os.path.dirname(md_path)
+    stem = os.path.basename(md_path)[:-3]
+    draft = os.path.join(out, "v2", "draft", stem + ".md")
+    check(os.path.exists(draft), f"{acct} nháp nằm ở reports/v2/draft/ (lượt quét top-level không thấy)")
+    res = {"md": draft}
+    # (a) bản chuẩn đã giao + nội dung khác ⇒ rc=5, không ghi đè
+    with open(md_path, "a", encoding="utf-8") as fh:
+        fh.write("\n<!-- bản đã giao -->\n")
+    sent = open(md_path, "rb").read()
+    st = os.path.join(tmp, f"state_{acct}.json")
+    json.dump({"reports": {stem + ".md": {"discord": {"status": "delivered"}}}}, open(st, "w"))
+    rc, msg = B.promote(res, out, investor, st)
+    check(rc == 5 and open(md_path, "rb").read() == sent, f"{acct} promote TỪ CHỐI ghi đè bản đã giao (rc={rc})")
+    # (b) chưa giao ⇒ ghi đè được, bản chuẩn == nháp
+    rc, msg = B.promote(res, out, investor, os.path.join(tmp, "none.json"))
+    check(rc == 0 and open(md_path, "rb").read() == open(draft, "rb").read(), f"{acct} promote khi chưa giao ⇒ bản chuẩn == nháp (rc={rc})")
+    # (c) nháp hỏng lint ⇒ rc=4, bản chuẩn giữ nguyên
+    d2 = os.path.join(tmp, f"promote_lint_{acct}")
+    shutil.rmtree(d2, ignore_errors=True)
+    shutil.copytree(os.path.dirname(draft), d2)
+    m2 = os.path.join(d2, stem + ".md")
+    man, d = al.load_v2(m2)
+    hp = os.path.join(d, man["html"])
+    open(hp, "w", encoding="utf-8").write(open(hp, encoding="utf-8").read() + "<p>**thô**</p>")
+    resign(m2)
+    before = open(md_path, "rb").read()
+    rc, msg = B.promote({"md": m2}, out, investor, os.path.join(tmp, "none.json"))
+    check(rc == 4 and open(md_path, "rb").read() == before, f"{acct} nháp hỏng lint ⇒ rc=4, không promote (rc={rc})")
+    # (d) N8: sửa tay số trong manifest (inception_pct) mà không ký lại tag ⇒ CHẶN
+    d3 = os.path.join(tmp, f"manifest_tamper_{acct}")
+    shutil.rmtree(d3, ignore_errors=True)
+    shutil.copytree(out, d3, ignore=shutil.ignore_patterns("draft", "mut_*"))
+    m3 = os.path.join(d3, stem + ".md")
+    man, d = al.load_v2(m3)
+    man["numbers"]["inception_pct"] = 9.99
+    json.dump(man, open(os.path.join(d, "manifest.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    probs = al.lint_v2(m3, investor_facing=investor)
+    check(any("manifest" in p for p in probs), f"{acct} sửa tay manifest.numbers (không ký lại) bị chặn ({probs[:1]})")
+    t = open(m3, encoding="utf-8").read()
+    open(m3, "w", encoding="utf-8").write(al.TAG_RE.sub(lambda mm: mm.group(0).replace(f"manifest_sha256={mm.group(2)} ", ""), t))
+    check(any("manifest_sha256" in p for p in al.lint_v2(m3, investor_facing=investor)), f"{acct} tag thiếu manifest_sha256 bị chặn")
+
+
+def daily_return_gate_case(md_path, acct, tmp):
+    """r3 N5: cổng §21 trên bản NGÀY v2 kiểm >0 dòng (từ manifest.positions); sửa ô tỷ suất ⇒ CHẶN."""
+    import io
+    import report_return_gate as rrg
+    man, _d = al.load_v2(md_path)
+    n = len(man.get("positions") or [])
+    buf = io.StringIO()
+    rc = rrg.run_gate(md_path, out=buf)
+    got = buf.getvalue()
+    check(rc == 0 and n > 0 and f"v2: {n} dòng" in got, f"{acct} daily cổng §21 kiểm {n} dòng vị thế từ manifest (rc={rc})")
+    if not n:
+        return
+    d2 = os.path.join(tmp, f"rrg_mut_{acct}")
+    shutil.rmtree(d2, ignore_errors=True)
+    shutil.copytree(os.path.dirname(md_path), d2, ignore=shutil.ignore_patterns("draft", "mut_*", "promote_*", "manifest_tamper_*"))
+    m2 = os.path.join(d2, os.path.basename(md_path))
+    man, d = al.load_v2(m2)
+    man["positions"][0][2] = "+99,99%"
+    json.dump(man, open(os.path.join(d, "manifest.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    resign(m2)
+    buf = io.StringIO()
+    rc = rrg.run_gate(m2, out=buf)
+    check(rc != 0, f"{acct} daily: ô tỷ suất {man['positions'][0][0]} sửa thành +99,99% (ký lại) ⇒ cổng §21 CHẶN (rc={rc})")
+
+
+def write_order_case(tmp):
+    """r3 N3: vượt trần trang ⇒ write_outputs raise và KHÔNG để lại .md (cũng không manifest)."""
+    sys.path.insert(0, os.path.join(BIN, "report_v2"))
+    import build as B
+    d = os.path.join(tmp, "write_order")
+    shutil.rmtree(d, ignore_errors=True)
+    cx = B.Ctx("daily", "SpaceX", "SpaceX_daily_report_2099-01-01", d)
+    saved = (B.R.banner, B.R.build_pdf, B.R.build_email_html, B.R.lint_pdf)
+
+    def fake_pdf(blocks, pdf, **k):
+        open(pdf, "wb").write(b"%PDF-fake")
+        return 3
+
+    def fake_html(blocks, bn, title, path):
+        open(path, "w").write("<html></html>")
+        json.dump({}, open(path[:-5] + "_cid.json", "w"))
+        return path
+    B.R.banner = lambda *a, **k: a[3]
+    B.R.build_pdf, B.R.build_email_html = fake_pdf, fake_html
+    B.R.lint_pdf = lambda p: {"raw_markdown_hits": [], "non_bvp_fonts": []}
+    try:
+        B.write_outputs(cx, "t", "k", "s", "h", ["x"], {})
+        check(False, "N3 vượt trần trang ⇒ raise")
+    except RuntimeError:
+        check(True, "N3 vượt trần trang ⇒ raise")
+    finally:
+        B.R.banner, B.R.build_pdf, B.R.build_email_html, B.R.lint_pdf = saved
+    check(not os.path.exists(os.path.join(d, cx.stem + ".md")) and not os.path.exists(cx.f("manifest.json")),
+          "N3 lỗi trần trang KHÔNG để lại .md/manifest")
+
+
+def data_null_cases():
+    """r3 (arch-review B2): nan/None đứng MỘT MÌNH trên dòng (ô bảng PDF/HTML) phải bị chặn; chữ Việt thì không."""
+    import re
+    from report_v2 import vocab as V
+    rx = re.compile(V.DATA_NULL)
+    for what, txt, want in (("ô cuối hàng + dòng sau", "FPT\n1.000\n12,3%\nnan\nHPG", True),
+                            ("nan có khoảng trắng + dòng sau", " nan \n  HPG ", True),
+                            ("None cuối nhãn + dòng sau", "Lãi/lỗ None\nTiền mặt", True),
+                            ("'nan giải' là chữ Việt", "Thanh khoản là vấn đề nan giải", False)):
+        check(bool(rx.search(txt)) == want, f"DATA_NULL {what}: {'chặn' if want else 'không chặn'}")
+
+
 def narrative_cases():
     facts = "−1,89% −1,53% 945,14 tr 0,36 điểm %"
     good = {"headline": "Tháng 10 −1,89% so với VN-Index −1,53%", "key_points": ["Kém chỉ số 0,36 điểm %."],
@@ -171,7 +302,36 @@ def narrative_cases():
         "mục nội bộ ở SpaceX": {"internal": [{"title": "x", "bullets": ["y"]}]},
         "outlook > 4 kịch bản": {"outlook": [{"scenario": "a", "condition": "b", "invalidation": "c"}] * 5},
         "mục ngoài khung": {"sections": {"blabla": ["x"]}},
+        # r3 N1 — dấu/hướng: số đúng độ lớn nhưng SAI dấu phải bị chặn
+        "sai hướng 'tăng 1,89%' (pipeline −1,89%)": {"headline": "Tài khoản tăng 1,89% trong tháng"},
+        "sai dấu '+1,89%' (pipeline −1,89%)": {"headline": "Tháng 10 +1,89%"},
+        "sai hướng 'lãi 1,53%'": {"key_points": ["VN-Index lãi 1,53%."]},
+        "sai dấu '−0,36 điểm %' (pipeline dương)": {"key_points": ["Kém chỉ số −0,36 điểm %."]},
+        "số nhỏ kèm % không có trong pipeline": {"key_points": ["Giảm 2% trong tháng."]},
+        # r3 N2 — chặn sớm cùng danh sách với lint
+        "khoảng 10-15% (số sau gạch nối)": {"key_points": ["Lợi suất kỳ vọng khoảng 10-15% năm tới."]},
+        "khoảng 1,23-77,7% (số sau gạch nối)": {"key_points": ["Kịch bản 1,23-77,7% xảy ra."]},
+        "nan token": {"key_points": ["Tỷ suất nan."]},
+        "nan%": {"key_points": ["Tỷ suất nan% trong tháng."]},
+        "None token": {"key_points": ["Beta None"]},
+        "** markdown": {"key_points": ["**Đậm** thô."]},
+        "tên riêng chữ thường (livermore)": {"key_points": ["Theo livermore thị trường yếu."]},
+        "tên riêng chữ thường (zalopay)": {"key_points": ["Chuyển sang zalopay."]},
+        "BAL": {"key_points": ["Sổ BAL giữ nguyên."]},
+        "SIGNAL_V11": {"key_points": ["Tín hiệu SIGNAL_V11 mạnh."]},
     }
+    ok_cases = {
+        "'giảm 1,89%' đúng hướng": {"headline": "Tài khoản giảm 1,89% trong tháng, VN-Index giảm 1,53%"},
+        "'nan giải' không phải token rỗng": {"key_points": ["Thanh khoản thấp là vấn đề nan giải."]},
+        "mức (từ/xuống) không suy hướng": {"key_points": ["NAV giảm còn 945,14 tr."]},
+        "số nguyên trơn 0..12": {"key_points": ["3 mã mới trong 12 phiên."]},
+    }
+    for what, nar in ok_cases.items():
+        try:
+            N.validate(nar, facts, investor_facing=True, allow_internal=False)
+            check(True, f"narrative {what} được nhận")
+        except N.NarrativeError as exc:
+            check(False, f"narrative {what} được nhận ({exc})")
     for what, nar in bad.items():
         try:
             N.validate(nar, facts, investor_facing=True, allow_internal=False)
@@ -180,7 +340,7 @@ def narrative_cases():
             check(True, f"narrative '{what}' bị từ chối")
 
 
-def email_case(md_path, tmp):
+def email_case(md_path, tmp, extra_argv=(), note=None):
     """Gọi send_report_email.main() với SMTP giả — bắt thư, không gửi."""
     import smtplib
     import send_report_email as se
@@ -201,7 +361,8 @@ def email_case(md_path, tmp):
     smtplib.SMTP = Fake
     argv = sys.argv
     try:
-        sys.argv = ["send_report_email.py", md_path, "--skip-return-gate", "selfcheck — cổng §21 đã có selfcheck riêng"]
+        sys.argv = ["send_report_email.py", md_path, "--skip-return-gate", "selfcheck — cổng §21 đã có selfcheck riêng",
+                    *extra_argv]
         se.main()
     finally:
         smtplib.SMTP, sys.argv = real, argv
@@ -219,6 +380,16 @@ def email_case(md_path, tmp):
     check({p["Content-ID"].strip("<>") for p in imgs} == set(man["cid"]), "email v2: đủ ảnh cid như manifest")
     check(all(f'cid:{c}' in body for c in man["cid"]), "email v2: thân HTML tham chiếu mọi cid")
     check(al.MANIFEST_TAG not in body, "email v2: dòng manifest không lọt vào thân")
+    # r3 N9: .md đính kèm không chứa comment manifest (đường dẫn nội bộ); SpaceX không kèm .md
+    mds = [p for p in parts if (p.get_filename() or "").endswith(".md")]
+    tag = os.path.basename(md_path)
+    if "SpaceX" in tag:
+        check(not mds, f"email v2 {tag}: bản nhà đầu tư KHÔNG kèm .md (PDF là bản đầy đủ)")
+    else:
+        check(len(mds) == 1 and al.MANIFEST_TAG not in mds[0].get_payload(decode=True).decode("utf-8"),
+              f"email v2 {tag}: .md đính kèm không chứa comment report_v2_manifest")
+    if note:
+        check(note in body, f"email v2 {tag}: ghi chú đính kèm ('{note}') có trong thân HTML")
 
 
 def main():
@@ -235,6 +406,8 @@ def main():
     os.makedirs(tmp, exist_ok=True)
     print(f"report_v2_selfcheck: period={a.period} TZ={os.environ.get('TZ', '<unset>')} tmp={tmp}")
     narrative_cases()
+    data_null_cases()
+    write_order_case(tmp)
     digests = {}
     import calendar
     y, m = map(int, a.period.split("-"))
@@ -250,12 +423,20 @@ def main():
             out = os.path.join(tmp, acct, cad)
             rc1 = build(acct, per, out, cad)
             h1 = md5_tree(out)
+            run1 = out + "_run1"
+            shutil.rmtree(run1, ignore_errors=True)
+            shutil.copytree(out, run1)
             rc2 = build(acct, per, out, cad)
             h2 = md5_tree(out)
             check(rc1 == 0 and rc2 == 0, f"{acct} {cad} {per} dựng rc=0 cả 2 lần")
             check(h1 == h2 and bool(h1), f"{acct} {cad} 2 lần dựng cùng md5 ({len(h1)} file)")
             if h1 != h2:
                 print("    khác:", sorted(k for k in h1 if h1.get(k) != h2.get(k))[:8])
+                stem = f"{acct}_{cad}_report_{stem_per}"
+                for rel in (f"{stem}.md", os.path.join("v2", stem, "manifest.json")):
+                    r = subprocess.run(["diff", os.path.join(run1, rel), os.path.join(out, rel)],
+                                       capture_output=True, text=True)
+                    print(f"    diff {rel}:\n" + r.stdout[:3000])
             md_path = os.path.join(out, f"{acct}_{cad}_report_{stem_per}.md")
             if not os.path.exists(md_path):
                 check(False, f"{acct} {cad} có .md tóm tắt")
@@ -295,8 +476,11 @@ def main():
             check(not probs, f"{acct} {cad} artifact lint sạch trên bản dựng ({probs[:2]})")
             if cad == "monthly":
                 mutations(md_path, acct, tmp)
-                if acct == a.accounts.split(",")[0]:
-                    email_case(md_path, tmp)
+                promote_cases(md_path, acct, tmp)
+                email_case(md_path, tmp)
+            if cad == "daily":
+                daily_return_gate_case(md_path, acct, tmp)
+                email_case(md_path, tmp, ("--attach-note", "Ghi chú selfcheck N9"), note="Ghi chú selfcheck N9")
     print("md5 .md:", json.dumps(digests))
     if not a.keep:
         shutil.rmtree(tmp, ignore_errors=True)

@@ -1703,3 +1703,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T10:04:14Z] [oshares-live-dcf 30/10] XONG outer 0a1a16675 (session/oshares-live-20261030, wt /home/trido/wt-oshares-live-20261030) + mike 898b4fd17 (session/oshares-live-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live = quyet dinh rieng
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T10:08:17Z] [dgc-dd-v2.2 30/10] XONG job Taylor_20261030_094438: dd_DGC_20261029/investor_report_v2_2/ (24tr, CHANGELOG+SELFCHECK, chua commit, chua gui) — CHO Mike chay fundamental-skeptic + quyet gui email

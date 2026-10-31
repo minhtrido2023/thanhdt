@@ -1249,6 +1249,28 @@ def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
 
 
 # ---------------------------------------------------------------- cổng
+def _v2_manifest_rows(report_path: str, out) -> list:
+    """Báo cáo v2 (r3 N5, 31/10): bản .md ngày chỉ 3 dòng, bảng tỷ suất vị thế nằm trong PDF/HTML ⇒
+    trước đây cổng kiểm 0 dòng. Builder ghi `positions` = [mã, KL, ô tỷ suất ĐÚNG như in] vào
+    manifest.json (khoá sha256 từ .md — sửa tay ⇒ load_v2 raise). Lấy các dòng đó làm dòng bảng.
+    Không phải v2 ⇒ []. v2 mà không đọc được manifest ⇒ raise (fail-closed, không PASS trên 0 dòng)."""
+    with open(report_path, encoding="utf-8") as fh:
+        if "report_v2_manifest:" not in fh.read():
+            return []  # báo cáo cũ: KHÔNG cần module report_v2 (bản sao script trong worktree giả không có nó)
+    from report_v2 import artifact_lint as al  # noqa: E402
+    with open(report_path, encoding="utf-8") as fh:
+        if not al.parse_tag(fh.read()):
+            return []
+    man, _d = al.load_v2(report_path)
+    rows = []
+    for tk, qty, cell in man.get("positions") or []:
+        p = _pct_num(str(cell))
+        if p is not None:
+            rows.append((tk, float(qty), p))
+    print(f"(v2: {len(rows)} dòng tỷ suất vị thế lấy từ manifest.positions — bảng in trong PDF/HTML)", file=out)
+    return rows
+
+
 def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -> int:
     # Content-completeness TRƯỚC MỌI THỨ: một báo cáo còn "[TBD" không có tỉ suất nào để kiểm
     # (đó chính là cách nó lọt PASS trong rỗng ở vụ tháng 08), nên phải chặn ở đây trước khi
@@ -1296,6 +1318,8 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
               f"→ cổng KHÔNG áp dụng (không chặn).", file=out)
         return 0
     rows = parse_report_rows(report_path)
+    if not rows:
+        rows = _v2_manifest_rows(report_path, out)
     print(f"CỔNG TỈ SUẤT — {os.path.basename(report_path)} | chốt {asof} | "
           f"tài khoản {', '.join(labels)} | dung sai {tol_pp:.2f}pp", file=out)
 
