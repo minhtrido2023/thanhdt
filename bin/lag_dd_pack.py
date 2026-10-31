@@ -243,8 +243,13 @@ def run_valuation(ticker, asof):
     from trading_bot import due_diligence as dd
     from trading_bot.strategies import _dcf_check_for_order, format_dcf_check, _format_alt_lens
     try:
-        px = dd._ref_price_for(ticker, asof)
-        dcf = _dcf_check_for_order(ticker, float(px), asof) if px else None
+        # price_date (R8/H4) = phiên của `Price` mà giá tham chiếu đọc ra (None khi rơi về Close đã
+        # điều chỉnh ⇒ DCF live → số quý). getattr + kwarg có điều kiện: chạy được cả với trading_bot
+        # chưa có _ref_price_session / tham số price_date (thứ tự merge hai repo không quan trọng).
+        _rps = getattr(dd, "_ref_price_session", None)
+        px, px_date = _rps(ticker, asof) if _rps else (dd._ref_price_for(ticker, asof), None)
+        kw = {"price_date": px_date} if px_date else {}
+        dcf = _dcf_check_for_order(ticker, float(px), asof, **kw) if px else None
         alt = _format_alt_lens(ticker) or ""
         return dcf, (format_dcf_check(dcf, side="buy", ticker=ticker) if dcf else ""), alt, (
             None if px else "không có giá tham chiếu bq_cache")

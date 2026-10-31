@@ -2091,6 +2091,11 @@ if runonce_label and account == runonce_label:
 #     launcher ghi đè = bot, lag_dd_pack, send_plan_report thấy số CP KHÁC nhau cho cùng một mã). Giá
 #     trị lạ KHÔNG làm vỡ DCF (fallback fin + kêu stderr) nhưng stderr cron không ai đọc ⇒ dòng này.
 #     OK in rõ nguồn đang chạy, để lần BẬT live (đổi 1 từ, cần user duyệt) hiện ngay trên Trading Daily.
+#     R8/H6 (job Taylor_20261031_025427): thêm tầm quét NGOÀI cây — systemd user unit (+ drop-in .d/*.conf,
+#     environment.d), ccdb `.env` (bridge Discord sinh mọi phiên Claude ⇒ mọi python con thừa kế), settings
+#     Claude (`env`), shell profile, và môi trường TIẾN TRÌNH đang chạy đọc được (/proc/*/environ). Gốc
+#     MIKE_DCFOS_HOME / MIKE_DCFOS_CCDB / MIKE_DCFOS_PROC chỉ để selfcheck chạy trên cây giả.
+#     Hạn chế còn lại: /proc của user khác không đọc được (bỏ qua im lặng); launcher ngoài các gốc trên không quét.
 # CHECKDCFOS_BEGIN — marker ỔN ĐỊNH: WorkingClaude/oshares_dcf_selfcheck.py trích đúng khối này.
 if runonce_label and account == runonce_label:
     try:
@@ -2143,6 +2148,47 @@ if runonce_label and account == runonce_label:
                         _os_hits.append(f"{os.path.relpath(_fp, wc_root)}: {_ln.strip()[:70]}")
             except Exception as _e:
                 _os_probs.append(f"không đọc được {_fp} ({type(_e).__name__})")
+        # R8/H6: ngoài cây WC. Mẫu chung (gán kiểu shell/systemd/.env/JSON), bỏ dòng comment.
+        _os_home = os.environ.get("MIKE_DCFOS_HOME") or os.path.expanduser("~")
+        _os_ccdb = os.environ.get("MIKE_DCFOS_CCDB") or "/workspace/ccdb-mike"
+        _os_proc = os.environ.get("MIKE_DCFOS_PROC") or "/proc"
+        _os_pat_any = re.compile(r"(?<![A-Za-z0-9_])['\"]?DCF_OSHARES_SOURCE['\"]?\s*[=:]")
+        _os_ext = sorted(set(
+            glob.glob(os.path.join(_os_home, ".config", "systemd", "user", "*.service"))
+            + glob.glob(os.path.join(_os_home, ".config", "systemd", "user", "*.d", "*.conf"))
+            + glob.glob(os.path.join(_os_home, ".config", "environment.d", "*.conf"))
+            + [os.path.join(_os_home, f) for f in (".bashrc", ".profile", ".bash_profile", ".pam_environment")]
+            + [os.path.join(_os_home, ".claude", f) for f in ("settings.json", "settings.local.json")]
+            + glob.glob(os.path.join(wc_root, ".claude", "settings*.json"))
+            + glob.glob(os.path.join(wc_root, "mike", ".claude", "settings*.json"))
+            + [os.path.join(_os_ccdb, ".env")]))
+        _os_n_ext = 0
+        for _fp in _os_ext:
+            if not os.path.isfile(_fp):
+                continue
+            _os_n_ext += 1
+            try:
+                for _ln in open(_fp, encoding="utf-8", errors="replace"):
+                    if not _ln.lstrip().startswith("#") and _os_pat_any.search(_ln):
+                        _os_hits.append(f"{_fp}: {_ln.strip()[:70]}")
+            except Exception as _e:
+                _os_probs.append(f"không đọc được {_fp} ({type(_e).__name__})")
+        _os_n_proc = 0
+        for _pe in glob.glob(os.path.join(_os_proc, "[0-9]*", "environ")):
+            try:
+                with open(_pe, "rb") as _fh:
+                    _env_b = _fh.read()
+            except OSError:
+                continue                        # tiến trình user khác / đã thoát — không đọc được, bỏ qua
+            _os_n_proc += 1
+            for _kv in _env_b.split(b"\0"):
+                if _kv.startswith(b"DCF_OSHARES_SOURCE="):
+                    _pd = os.path.dirname(_pe)
+                    try:
+                        _cm = open(os.path.join(_pd, "comm"), encoding="utf-8", errors="replace").read().strip()
+                    except OSError:
+                        _cm = "?"
+                    _os_hits.append(f"tiến trình {os.path.basename(_pd)} ({_cm}) env {_kv.decode(errors='replace')[:40]}")
         if _os_hits:
             _os_probs.append(f"{len(_os_hits)} launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): "
                              + " | ".join(_os_hits[:3]))
@@ -2150,7 +2196,8 @@ if runonce_label and account == runonce_label:
             W("DCF_OSHARES_SOURCE: " + " · ".join(_os_probs))
         elif _os_def is not None:
             OK(f"DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = {_os_def} "
-               f"({'số quý' if _os_def == 'fin' else 'oshares_live + khoá khung ex-date'}); không launcher/cron nào ghi đè.")
+               f"({'số quý' if _os_def == 'fin' else 'oshares_live + khoá khung ex-date'}); không launcher/cron nào ghi đè "
+               f"(quét cron + cây WC + {_os_n_ext} file ngoài cây + {_os_n_proc} tiến trình đọc được).")
     except Exception as _e:
         W(f"DCF_OSHARES_SOURCE check lỗi, không kiểm được nguồn số CP của DCF: {type(_e).__name__}: {_e}")
 # CHECKDCFOS_END
