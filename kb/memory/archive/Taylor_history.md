@@ -1679,3 +1679,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T17:05:16Z] [ci-manual 30/10] XONG c0c63f6be nhanh session/ci-manual-20261030 (wt-ci-manual-20261030, chua merge) — CHO Mike arch-review + user; sau merge co the go 4 ack tam SCL 29/10 (khong bat buoc)
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-29T17:42:49Z] [lotbook-manual 30/10] XONG b1880d189 nhanh session/lotbook-manual-20261030 (wt-lotbook-manual-20261030, chua merge) — CHO Mike arch-review + user
