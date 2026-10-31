@@ -1440,20 +1440,42 @@ def c23_plan_echo_zero_bq_r12():
           isinstance(d, dict) and d.get("oshares_method") == "FRAME_FALLBACK" and abs(d.get("margin_of_safety", 0) - 0.1418) < 2e-3
           and "cơ sở plan echo" not in st.format_dcf_check(d) and "!!!!!" not in e.getvalue(),
           f"{d and {k: d.get(k) for k in ('oshares_method', 'margin_of_safety')}} {e.getvalue()[:80]!r}")
-    # trần thời gian cứng: lời gọi treo bị ngắt, báo cáo đi tiếp (dcf=None + ghi mã)
+    # trần thời gian: chạy hàm THẬT st._dcf_check_for_order (fair_value vá thành ngủ) — R12b: bản trước thay bằng
+    # lambda trần nên TimeoutError (Exception) bị chính _dcf_check_for_order nuốt mà test không thấy.
+    real_fv = dv.fair_value
     os.environ["SEND_PLAN_DCF_CALL_S"] = "1"
     try:
-        ns = {"os": os, "format_dcf_check": st.format_dcf_check,
-              "_dcf_check_for_order": lambda *a, **k: (time.sleep(2.5), {"status": "CHEAP"})[1]}
+        dv.fair_value = lambda *a, **k: (time.sleep(2.5), {"status": "CHEAP"})[1]
+        ns = {"os": os, "format_dcf_check": st.format_dcf_check, "_dcf_check_for_order": st._dcf_check_for_order}
         exec(blk, ns)
         t0 = time.monotonic()
         d2 = ns["_dcf_timed"]("HANG", 1.0, "2026-09-23")
         dt_ = time.monotonic() - t0
     finally:
+        dv.fair_value = real_fv
         os.environ.pop("SEND_PLAN_DCF_CALL_S", None)
-    check("C23 plan echo: lời gọi DCF treo bị ngắt ở trần (dcf=None, mã ghi vào _dcf_timeouts)",
+    check("C23 plan echo: lời gọi DCF treo (hàm thật _dcf_check_for_order) bị ngắt ở trần (dcf=None, _dcf_timeouts=['HANG'])",
           d2 is None and ns["_dcf_timeouts"] == ["HANG"] and dt_ < 2.0, f"{d2} {ns['_dcf_timeouts']} {dt_:.2f}s")
-    check("C23 plan echo: quá trần có dòng WARN cho người duyệt", "DCF quá trần thời gian" in src and "if _dcf_timeouts:" in src)
+    # ngân sách theo THỜI GIAN DCF, không theo giờ đồng hồ: DD giả ngủ giữa các lời gọi KHÔNG được ăn ngân sách
+    os.environ["SEND_PLAN_DCF_BUDGET_S"] = "1"
+    try:
+        dv.fair_value = lambda *a, **k: {"status": "CHEAP"}
+        ns = {"os": os, "format_dcf_check": st.format_dcf_check, "_dcf_check_for_order": lambda *a, **k: {"status": "CHEAP"}}
+        exec(blk, ns)
+        out = []
+        for tk in ("A", "B", "C", "D"):
+            out.append(ns["_dcf_timed"](tk, 1.0, "2026-09-23"))
+            time.sleep(0.6)                     # giả run_due_diligence giữa các lệnh MUA
+    finally:
+        dv.fair_value = real_fv
+        os.environ.pop("SEND_PLAN_DCF_BUDGET_S", None)
+    check("C23 plan echo: DD chạy giữa các lệnh KHÔNG ăn ngân sách DCF (4 lệnh đều có dòng DCF, 0 timeout)",
+          all(isinstance(x, dict) for x in out) and ns["_dcf_timeouts"] == [], f"{out} {ns['_dcf_timeouts']}")
+    check("C23 plan echo: ngoại lệ trần là BaseException (không bị `except Exception` nuốt)",
+          "class _DcfTimeout(BaseException)" in src and "except _DcfTimeout" in src)
+    check("C23 plan echo: quá trần có dòng WARN + dòng 'CHƯA kiểm' cho người duyệt",
+          "DCF quá trần thời gian" in src and "if _dcf_timeouts:" in src and "CHƯA kiểm DCF" in src
+          and "DCF CHƯA kiểm (quá trần thời gian)" in src)
 
 
 SUITE.append(c23_plan_echo_zero_bq_r12)
@@ -1580,6 +1602,11 @@ MUTANTS = {
                                   '_dcf_pd_kw = {"price_date": __import__("dcf_valuation").price_session_for("FPT", "2026-09-23", 66600)}')]),
     "M57 r12 plan echo bỏ trần thời gian DCF": (sys.modules[__name__], "PLAN_SRC", lambda real: [
         lambda: real[0]().replace("_sig.alarm(max(1, _DCF_CALL_S))", "_sig.alarm(0)")]),
+    "M58 r12b trần quay lại TimeoutError(Exception) (bị nuốt)": (sys.modules[__name__], "PLAN_SRC", lambda real: [
+        lambda: real[0]().replace("class _DcfTimeout(BaseException):", "class _DcfTimeout(TimeoutError):")]),
+    "M59 r12b ngân sách tính giờ đồng hồ (DD ăn ngân sách)": (sys.modules[__name__], "PLAN_SRC", lambda real: [
+        lambda: real[0]().replace("_dcf_spent[0] += _time.monotonic() - _t0", "_dcf_spent[0] = _time.monotonic() - _DCF_T00")
+                         .replace("_dcf_spent = [0.0]", "_dcf_spent = [0.0]\n    _DCF_T00 = _time.monotonic()")]),
     "M42 r10 tắt guard live < quý": (dv, "LIVE_BELOW_FIN_TOL", lambda real: 1.0),
     "M43 r10 guard áp cả chiều live > quý": (dv, "LIVE_BELOW_FIN_TOL", lambda real: -1.0),
     "M44 r10 dung sai 50% (MST −26% lọt)": (dv, "LIVE_BELOW_FIN_TOL", lambda real: 0.5),
