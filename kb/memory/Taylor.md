@@ -27,3 +27,4 @@
 - [2026-10-31T10:15:08Z] [oshares-r12 31/10] XONG WC e052526b9 (session/oshares-r12-20261031) + mike caa5b03dd (session/oshares-r12-ops-20261031), chua merge — CHO arch-review+skeptic; merge mike truoc WC; plan echo = so quy den vong ref_price_session (§24)
 - [2026-10-31T10:25:24Z] [dd-HPG-gaps 31/10] XONG job Taylor_20261031_100839: research/dd_HPG_20261031/GAPS.md (chua commit) — 14 so v1 can sua, vung giu 17-23k; CHO skeptic xong roi gop vao REPORT v2
 - [2026-10-31T10:49:05Z] [dd-HPG-investor 31/10] XONG job Taylor_20261031_102704: REPORT v2 (vung 18-22,5k tam ~20,2k) + investor_report/ (11tr, chua commit, chua gui) — CHO Mike doc kiem + gui email; dinh chinh QĐ 1959 trong sector_read_thep la viec Mike
+- [2026-10-31T12:00:48Z] [dd-HPG-gaps2 31/10] XONG job Taylor_20261031_114427: GAPS2.md (chua commit) — vung giu 18-22,5k, WARNING nang hon; 8 sua cho investor report (QD 1917 ton tai = chong lan tranh; trung dong tien; KPMG) — CHO Mike quyet sua/gui
