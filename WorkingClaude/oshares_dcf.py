@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import sys
 
-from corp_action_lib import TABLE, bq, pricing_events
+from corp_action_lib import pricing_events
 
 # ISS chắc chắn tạo CP cho cổ đông hiện hữu tại ex-date (không phụ thuộc đăng ký mua).
 SHARE_CREATING_ISS = {"Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng"}
