@@ -1,0 +1,124 @@
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[c1_classifier]
+  PASS  C1 TCB -> OSHARES_LAG — got OSHARES_LAG 1.5
+  PASS  C1 NED -> OSHARES_LAG — got OSHARES_LAG 1.1400000000000001
+  PASS  C1 DGC -> CASH_DIV — got CASH_DIV None
+  PASS  C1 TV1 -> CASH_DIV — got CASH_DIV None
+  PASS  C1 KSV -> ISS_REFLECTED — got ISS_REFLECTED 1.5
+  PASS  C1 HUB -> ISS_REFLECTED — got ISS_REFLECTED 1.05
+  PASS  C1 chỉ quyền mua -> RIGHTS_PENDING
+  PASS  C1 thưởng CP tính như cổ tức CP
+  PASS  C1 không sự kiện, giá điều chỉnh -> UNEXPLAINED_PRICE_ADJ
+  PASS  C1 không sự kiện, giá phẳng -> NO_EVENT
+  PASS  C1 dòng ISS trùng (revision) chỉ đếm 1 lần — ISS_REFLECTED 1.5
+  PASS  C1 hai đợt khác phương thức cùng ngày đều đếm
+  PASS  C1 ISS không ratio -> ISS_UNSIZED
+  PASS  C1 biên: đúng 95% kỳ vọng -> REFLECTED
+  PASS  C1 biên: dưới 95% kỳ vọng -> LAG
+[c2_no_announced_branch]
+  PASS  C2 không còn _fetch_announced/_clip/PROMOTE_MAX_AGE_DAYS
+  PASS  C2 không truy vấn event_status="announced" cho số CP
+[c3_oshares_for]
+  PASS  C3 oshares_for == oshares_pit trên cùng cache (không bổ sung gì) — 7086240414.0 AIS_EXACT vs 7086240414.0 AIS_EXACT
+  PASS  C3 không còn khoá announced_added
+  PASS  C3 lỗi nguồn -> số quý, method ERROR
+[c4_knob]
+  PASS  C4 env trống -> 'fin', không import oshares_dcf, không thêm khoá — fin False []
+  PASS  C4 giá trị lạ -> 'fin' (hành vi cũ) — fin False []
+  PASS  C4 env=live -> 'live', có khoá oshares_* (gồm oshares_frame_error) — live True ['oshares_fin', 'oshares_frame_error', 'oshares_method', 'oshares_source']
+  PASS  C4 live: số CP ×2 -> FV/cp ÷2 đúng — 77604.33056640488 38802.16528320244
+  PASS  C4 live: ghi oshares_fin/source
+  PASS  C4 live: oshares_for trả None -> dùng số quý
+  PASS  C4 live: caller truyền oshares= thì không gọi oshares_for
+  PASS  C4 live: thiếu OShares quý -> vẫn 'OShares missing', không gọi live — OShares missing []
+  PASS  C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng
+  PASS  C4 live + BQ lỗi: stdout rỗng, chẩn đoán ở stderr — stdout='' stderr='[oshares_dcf] fetch_cache FAILED (RuntimeError: bq down (sim'
+[c6_source_of_truth]
+  PASS  C6 có đúng 1 dòng OSHARES_SOURCE_DEFAULT và = 'fin' (knob TẮT) — fin
+  PASS  C6 env None/rỗng -> default
+  PASS  C6 env 'live' khác default -> 'live' + cảnh báo OVERRIDE — DCF_OSHARES_SOURCE='live' env OVERRIDE khac mac dinh nguon su that 'fin' (chi cho nghien cuu/selfcheck)
+  PASS  C6 env == default -> không cảnh báo
+  PASS  C6 env lạ 'LIVE' -> 'fin' + KHONG HOP LE (kể cả khi default=live)
+  PASS  C6 env lạ 'bogus' -> 'fin' + KHONG HOP LE (kể cả khi default=live)
+  PASS  C6 env lạ '1' -> 'fin' + KHONG HOP LE (kể cả khi default=live)
+  PASS  C6 hằng số default gõ sai -> 'fin' + kêu
+  PASS  C6 import với env lạ: không raise, 'fin', kêu stderr — KHONG HOP LE (chi nhan ('fin', 'live')) -> FALLBACK 'fin' (mac dinh nguon su that = 'fin'). Sua/bo bien moi truong nay.
+
+[c7_frame_lock]
+  PASS  C7 knob fin: price_date bị bỏ qua, byte-identical, không gọi oshares_for
+  PASS  C7 có giá, KHÔNG price_date -> số quý + frame_error
+  PASS  C7 ... và kêu stderr ĐÚNG 1 lần/tiến trình — !!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia
+  PASS  C7 price_date == asof (sau ex) -> số CP sống ×1,5, khoá OK — 2571489633.0 ['2026-10-29']
+  PASS  C7 giá TRƯỚC ex, asof SAU ex -> lệch hệ -> số quý + kêu — so CP song ngay gia 2026-10-17 = 1714326422.0 != ngay asof 2026-10-29 = 2571489633.0 -> co su kien CP giua hai ngay
+  PASS  C7 giá và asof cùng phía ex (khác ngày) -> khoá OK, số sống
+  PASS  C7 không giá -> không cần khoá, số sống ở asof
+  PASS  C7 price_date không đọc được -> số quý
+  PASS  C7 price_date kiểu Timestamp == asof -> khoá OK
+  PASS  C7 nhánh fallback không in ra STDOUT
+[c8_ops_block]
+  PASS  C8 ops_health_check.sh có khối CHECKDCFOS — /home/trido/thanhdt/WorkingClaude/wt-oshares-r2r7-ops-20261030/bin/ops_health_check.sh
+  PASS  C8 sạch (default fin, comment + selfcheck bỏ qua) -> 0 WARN, OK nêu 'fin' — ['OK DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = fin (số quý); không launcher/cron nào ghi đè.']
+  PASS  C8 default gõ sai -> WARN — ["W DCF_OSHARES_SOURCE: OSHARES_SOURCE_DEFAULT trong dcf_valuation.py = 'lvie' không thuộc ('fin', 'live') (mọi DCF đang chạy fin do fallback)"]
+  PASS  C8 nhắc knob mà thiếu dòng default -> WARN — ['W DCF_OSHARES_SOURCE: dcf_valuation.py nhắc DCF_OSHARES_SOURCE nhưng KHÔNG có dòng OSHARES_SOURCE_DEFAULT']
+  PASS  C8 env cron mang DCF_OSHARES_SOURCE -> WARN — ["W DCF_OSHARES_SOURCE: môi trường cron mang biến DCF_OSHARES_SOURCE (giá trị 'live') — nguồn sự thật là dcf_valuation.py, gỡ biến này"]
+  PASS  C8 crontab gán -> WARN (dòng comment bỏ qua) — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): crontab: 5 9 * * 1-5 DCF_OSHARES_SOURCE=live /x/run_bot.sh']
+  PASS  C8 launcher gán (wc_env export) -> WARN — ['W DCF_OSHARES_SOURCE: 2 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): wc_env.sh: export DCF_OSHARES_SOURCE=live | wc_env.sh: export DCF_OSHARES_SOURCE=live']
+  PASS  C8 launcher gán (mike/bin inline) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): mike/bin/y.sh: DCF_OSHARES_SOURCE=live python3 a.py']
+  PASS  C8 launcher gán (py environ[]=) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): trading_bot/z.py: os.environ["DCF_OSHARES_SOURCE"] = "live"']
+  PASS  C8 launcher gán (py setdefault) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): w.py: os.environ.setdefault("DCF_OSHARES_SOURCE", "live")']
+  PASS  C8 launcher gán (py dict env) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): mike/bin/v.py: subprocess.run(c, env={"DCF_OSHARES_SOURCE": "live"})']
+  PASS  C8 chỉ ĐỌC env trong .py -> không WARN — ['OK DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = fin (số quý); không launcher/cron nào ghi đè.']
+  PASS  C8 cây chưa có knob -> im lặng (0 WARN, 0 OK) — []
+[c9_research_pinned]
+  PASS  C9 dcf_backtest.py ép fin ngay sau import, trước mọi fair_value(
+  PASS  C9 dcf_rate_robustness.py ép fin ngay sau import, trước mọi fair_value(
+  PASS  C9 dcf_fv_sens_cache.py ép fin ngay sau import, trước mọi fair_value(
+  PASS  C9 pin_oshares_source_fin: live -> fin + kêu
+  PASS  C9 pin khi đã fin -> im lặng
+[c5_bq]
+  PASS  C5 BQ TCB -> OSHARES_LAG — OSHARES_LAG
+  PASS  C5 BQ NED -> OSHARES_LAG — OSHARES_LAG
+  PASS  C5 BQ DGC -> CASH_DIV — CASH_DIV
+  PASS  C5 BQ TV1 -> CASH_DIV — CASH_DIV
+  PASS  C5 BQ KSV -> ISS_REFLECTED — ISS_REFLECTED
+  PASS  C5 BQ HUB -> ISS_REFLECTED — ISS_REFLECTED
+  PASS  C5 BQ TCB oshares_for == oshares_pit (BQ thật) — 10629360621.0 ANCHOR_ONLY
+
+== PASS: 0 FAIL
+
+[mutation]
+  KILLED  M1 DIV coi như ISS cổ phiếu (lỗi quy tắc cũ) (4 FAIL: C1 DGC -> CASH_DIV)
+  KILLED  M2 quyền mua tính là tạo CP (1 FAIL: C1 chỉ quyền mua -> RIGHTS_PENDING)
+  KILLED  M3 bỏ dedup (1 FAIL: C1 dòng ISS trùng (revision) chỉ đếm 1 lần)
+  KILLED  M4 LAG_TOL = 0 (1 FAIL: C1 biên: đúng 95% kỳ vọng -> REFLECTED)
+  KILLED  M7 bỏ redirect stdout quanh oshares_for (dcf_valuation) (1 FAIL: C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng)
+  KILLED  M8 bỏ khoá khung ex-date (luôn dùng số sống) (5 FAIL: C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng)
+  KILLED  M9 khoá chỉ kiểm có price_date, không so số CP hai ngày (2 FAIL: C7 giá TRƯỚC ex, asof SAU ex -> lệch hệ -> số quý + kêu)
+  KILLED  M10 env lạ được nhận nguyên văn (5 FAIL: C6 env 'live' khác default -> 'live' + cảnh báo OVERRIDE)[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+[oshares_pit] ẩn dụ: lỗi nguồn in ra stdout
+
+  KILLED  M11 pin_oshares_source_fin no-op (1 FAIL: C9 pin_oshares_source_fin: live -> fin + kêu)
+  KILLED  M12 kêu mọi lần (bỏ dedupe) (1 FAIL: C7 ... và kêu stderr ĐÚNG 1 lần/tiến trình)
+  KILLED  M13 ops: bỏ quét .py (regex python không khớp gì) (3 FAIL: C8 launcher gán (py environ[]=) -> WARN)
+  KILLED  M14 ops: bỏ cảnh báo env cron (1 FAIL: C8 env cron mang DCF_OSHARES_SOURCE -> WARN)
+== mutation: mọi mutant bị giết
+rc=0
