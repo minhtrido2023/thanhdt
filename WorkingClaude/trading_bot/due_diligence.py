@@ -667,17 +667,25 @@ def _ref_price_for(ticker, asof):
     """Giá tham chiếu để quy ra tỉ suất = phiên gần nhất ≤ asof (KHÔNG phải ngày ex-date).
 
     COALESCE(Price, Close) — cùng quy ước với `adv_vnd()`. None nếu không đọc được."""
+    return _ref_price_session(ticker, asof)[0]
+
+
+def _ref_price_session(ticker, asof):
+    """(giá, price_date) như `_ref_price_for`, kèm phiên mà giá THUỘC VỀ (ISO) cho khoá khung ex-date
+    của DCF live (R8/H4). price_date = `time` của dòng khi dùng `Price` (chưa điều chỉnh); None khi
+    rơi về `Close` (đã điều chỉnh ngược theo sự kiện về sau ⇒ không thuộc khung phiên đó)."""
     import pandas as pd
     try:
         row = _latest_row(ticker, str(asof)[:10])
     except Exception:
-        return None
+        return None, None
     if row is None:
-        return None
+        return None, None
     px = row.get("Price")
-    if pd.isna(px):
-        px = row.get("Close")
-    return None if pd.isna(px) else float(px)
+    if not pd.isna(px):
+        return float(px), str(row.get("time"))[:10]
+    px = row.get("Close")
+    return (None if pd.isna(px) else float(px)), None
 
 
 _INSIDER_SQL = """
@@ -1028,11 +1036,16 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
                 from .strategies import _dcf_check_for_order, format_dcf_check
                 dcf = ctx.get("dcf")
                 if not dcf:
-                    px = ctx.get("price")
+                    # price_date (R8/H4): giá caller truyền ⇒ chỉ khi caller khai ctx["price_date"];
+                    # tự đọc `Price` của dòng ⇒ phiên = row.time; rơi về `Close` (đã điều chỉnh) ⇒ None.
+                    px, px_date = ctx.get("price"), ctx.get("price_date")
                     if px is None:
                         import pandas as _pd
-                        px = row.get("Price") if _pd.notna(row.get("Price")) else row.get("Close")
-                    dcf = _dcf_check_for_order(ticker, float(px), asof) if px else None
+                        if _pd.notna(row.get("Price")):
+                            px, px_date = row.get("Price"), str(row.get("time"))[:10]
+                        else:
+                            px, px_date = row.get("Close"), None
+                    dcf = _dcf_check_for_order(ticker, float(px), asof, price_date=px_date) if px else None
                 dcf_s = format_dcf_check(dcf, side="buy", ticker=ticker) if dcf else ""
             except Exception as exc:
                 _log.warning("DD valuation lỗi (%s): %s", ticker, exc)

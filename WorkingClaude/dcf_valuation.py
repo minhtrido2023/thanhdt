@@ -486,8 +486,13 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     Returns a dict (always) with `ok` flag and `reason` when not computable.
     `price`/`oshares` may be supplied (e.g. from a preloaded ticker frame in the backtest);
     otherwise oshares is taken from the financial row and price must be passed by the caller.
-    `price_date` = phiên mà `price` thuộc về (giá CHƯA điều chỉnh của phiên đó). Chỉ dùng khi
-    OSHARES_SOURCE == "live" để khoá khung ex-date (R5); ở "fin" bị bỏ qua hoàn toàn.
+    `price_date` = phiên mà `price` THUỘC VỀ (giá CHƯA điều chỉnh, giao dịch/đóng cửa ở phiên đó).
+    Chỉ dùng khi OSHARES_SOURCE == "live" để khoá khung ex-date (R5/R8); ở "fin" bị bỏ qua hoàn toàn.
+    HỢP ĐỒNG (R8/H1): giá đóng cửa phiên T-1 dùng cho asof=T ⇒ khai `price_date=T-1`, KHÔNG khai T.
+    Giá chưa điều chỉnh cho một sự kiện ex đúng ngày asof (giá tham chiếu cũ) ⇒ phải khai
+    `price_date` < ngày ex. Không biết giá thuộc phiên nào ⇒ để None (số quý). Khoá fail-closed về số
+    quý khi có ISS dời khung giá ex trong [price_date, asof] — kể cả ex == price_date, vì một giá
+    "của phiên ex" không chứng minh được là đã điều chỉnh (xem _live_oshares).
     """
     a = pd.to_datetime(asof)
     fin = _load_financials() if fin is None else fin
@@ -567,14 +572,35 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
     """Bản ghi oshares_for đã KHOÁ KHUNG EX-DATE với giá (R5, cùng nguyên lý mike/bin/exdate_frame.py:
     "khối lượng của ai thì giá của người đó"). MoS = (FV/cp − giá)/FV/cp chỉ có nghĩa khi số CP và
     giá ở CÙNG hệ quy chiếu trước/sau một sự kiện CP. Số CP sống được lấy tại `asof`; giá ở
-    `price_date`. Khoá được khi: không có giá (FV ở hệ của asof, không so với gì), hoặc số CP sống ở
-    `price_date` BẰNG ở `asof` (không sự kiện CP nào nằm giữa hai ngày). Không khoá được — caller
-    không khai `price_date`, hai số khác nhau, hay lỗi ngày — ⇒ số quý (fin) + kêu stderr/logging."""
+    `price_date`. Khoá được khi không có giá (FV ở hệ của asof, không so với gì), hoặc đồng thời:
+      (a) số CP sống ở `price_date` BẰNG ở `asof` (R5), và
+      (b) KHÔNG có ISS dời khung giá (oshares_dcf.frame_events, gồm `announced`) ex trong
+          [price_date, asof] (R8/H1). Ex trong (price_date, asof] = giá và số CP khác phía sự kiện
+          (bắt cả khi vendor chưa lật `executed` nên (a) không thấy); ex == price_date (gồm ca
+          price_date == asof == ex) = không chứng minh được giá đã điều chỉnh — caller khai
+          price_date=asof cho giá tham chiếu phiên trước là đúng ca này.
+    Không khoá được — thiếu `price_date`, price_date > asof, hai số khác, có sự kiện, lỗi ngày/lịch —
+    ⇒ số quý (fin) + kêu stderr/logging. oshares_for LỖI (method ERROR/exception) ⇒ số quý + kêu
+    1 lần/tiến trình/mã (R8/H2)."""
     import oshares_dcf as _osd
     asof = a.date().isoformat()
     err = None
+
+    def _osf(day):
+        try:
+            return _osd.oshares_for(ticker, day, fin_os)
+        except Exception as e:                                     # noqa: BLE001 — oshares_for vốn tự nuốt;
+            return {"ticker": ticker, "value": fin_os, "source": "ticker_financial",   # lưới cuối
+                    "reason": f"oshares_for raise ({type(e).__name__}: {e})", "method": "ERROR",
+                    "rel_diff": None, "live_value": None}
+
     with contextlib.redirect_stdout(sys.stderr):                   # oshares_pit/live in chẩn đoán ra STDOUT;
-        rec = _osd.oshares_for(ticker, asof, fin_os)               # caller (send_plan_report) cần stdout sạch
+        rec = _osf(asof)                                           # caller (send_plan_report) cần stdout sạch
+        if rec.get("method") == "ERROR":
+            _shout_once(("oshares_error", ticker),
+                        f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: oshares_for LOI ({rec.get('reason')}) "
+                        f"-> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh/ma]")
+            return {**rec, "value": fin_os, "source": "ticker_financial"}
         if price is not None:
             if price_date is None:
                 err = "caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao"
@@ -583,11 +609,25 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
                     pdt = pd.to_datetime(price_date).date().isoformat()
                 except Exception as e:                             # noqa: BLE001
                     pdt, err = None, f"price_date={price_date!r} khong doc duoc ({type(e).__name__})"
-                if pdt is not None and pdt != asof:
-                    v_px = _osd.oshares_for(ticker, pdt, fin_os)["value"]
-                    if v_px != rec["value"]:
-                        err = (f"so CP song ngay gia {pdt} = {v_px} != ngay asof {asof} = {rec['value']} "
-                               f"-> co su kien CP giua hai ngay")
+                if pdt is not None and pdt > asof:
+                    err = f"price_date {pdt} SAU asof {asof} -> gia o tuong lai so voi so CP"
+                elif pdt is not None:
+                    if pdt != asof:
+                        r_px = _osf(pdt)
+                        if r_px.get("method") == "ERROR":
+                            err = f"oshares_for ngay gia {pdt} LOI ({r_px.get('reason')})"
+                        elif r_px["value"] != rec["value"]:
+                            err = (f"so CP song ngay gia {pdt} = {r_px['value']} != ngay asof {asof} = {rec['value']} "
+                                   f"-> co su kien CP giua hai ngay")
+                    if err is None:
+                        try:
+                            evs = _osd.frame_events(ticker, pdt, asof)
+                        except Exception as e:                     # noqa: BLE001 — không đọc được lịch = không chứng minh được
+                            evs, err = None, f"khong doc duoc lich ex-date ({type(e).__name__}: {str(e)[:80]})"
+                        if evs:
+                            exs = sorted({e.get("exright_date") for e in evs})
+                            err = (f"ISS doi khung gia ex {','.join(exs)} trong [price_date={pdt}, asof={asof}] "
+                                   f"-> khong chung minh duoc gia va so CP cung phia su kien")
     if err is None:
         return rec
     key = "no_price_date" if price_date is None else (ticker, asof, str(price_date))
@@ -678,11 +718,13 @@ def dcf_check(ticker, asof, price=None):
     so a research report and the plan-generation echo never disagree on what "robust" means.
     Fail-safe: any error -> status=NOT_COMPUTED, never raises (job Taylor_20260714_095943)."""
     try:
-        px = price if price is not None else latest_price(ticker, asof)
+        # price_date (R8/H4): chỉ khai khi TỰ đọc giá (`Price` chưa điều chỉnh của phiên đó); giá do
+        # caller truyền thì không biết thuộc phiên nào ⇒ None (live rơi về số quý).
+        px, px_date = (price, None) if price is not None else latest_price_session(ticker, asof)
         if px is None:
             return {"status": "NOT_COMPUTED", "margin_of_safety": None, "robust": False,
                     "reason": "no_price", "as_of": str(asof)[:10]}
-        res = fair_value(ticker, asof, price=px)
+        res = fair_value(ticker, asof, price=px, price_date=px_date)
         if not res["ok"]:
             reason = res.get("reason", "unknown")
             if "financial-sector" in reason:
@@ -733,6 +775,12 @@ def dcf_line(ticker, asof, price=None):
 def latest_price(ticker, asof=None):
     """Unadjusted market price (`Price`) as-of date from the BQ cache ticker table.
     NOTE: for LIVE pre-trade sizing use DNSE, not BQ (coding_guidelines §6). Research use only here."""
+    return latest_price_session(ticker, asof)[0]
+
+
+def latest_price_session(ticker, asof=None):
+    """(price, price_date) — như latest_price, kèm phiên `price` thuộc về (ISO). price_date=None khi
+    rơi về `Close` (giá ĐÃ điều chỉnh ngược theo sự kiện về sau ⇒ không thuộc khung của phiên đó)."""
     import duckdb
     c = duckdb.connect(":memory:")
     a = "" if asof is None else f"AND time <= DATE '{pd.to_datetime(asof).date()}'"
@@ -746,9 +794,11 @@ def latest_price(ticker, asof=None):
             f"SELECT time, Price, Close FROM read_parquet('{WORKDIR}/data/bq_cache/ticker/2*.parquet') "
             f"WHERE ticker = '{ticker}' {a} ORDER BY time DESC LIMIT 1").df()
     if len(df) == 0:
-        return None
+        return None, None
     p = df.Price.iloc[0]
-    return float(p) if pd.notna(p) else (float(df.Close.iloc[0]) if pd.notna(df.Close.iloc[0]) else None)
+    if pd.notna(p):
+        return float(p), pd.Timestamp(df.time.iloc[0]).date().isoformat()
+    return (float(df.Close.iloc[0]) if pd.notna(df.Close.iloc[0]) else None), None
 
 
 if __name__ == "__main__":

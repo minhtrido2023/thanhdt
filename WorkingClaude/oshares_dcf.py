@@ -24,8 +24,9 @@ Job `Taylor_20261030_094435` (user duyệt 30/10). Hai việc, một module, vì
 from __future__ import annotations
 
 import sys
+from datetime import date, timedelta
 
-from corp_action_lib import pricing_events
+from corp_action_lib import PRICE_ADJUSTING_ISS, pricing_events
 
 # ISS chắc chắn tạo CP cho cổ đông hiện hữu tại ex-date (không phụ thuộc đăng ký mua).
 SHARE_CREATING_ISS = {"Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng"}
@@ -51,11 +52,40 @@ def fetch_cache(tickers, until):
 
 
 _CACHE = {"tickers": frozenset(), "until": None, "data": None}
+_EV_CACHE = {"tickers": frozenset(), "until": None, "rows": None}
 
 
 def prime(tickers, until):
     """Nạp sẵn cache cho một lô mã (backtest/đo toàn universe) — tránh 3 truy vấn BQ mỗi lần gọi."""
     _CACHE.update(tickers=frozenset(tickers), until=until, data=fetch_cache(tickers, until))
+    try:
+        rows = pricing_events(sorted(set(tickers)), until=until, codes=("ISS",))
+    except Exception as e:                                  # noqa: BLE001 — frame_events tự hỏi lại BQ
+        print(f"[oshares_dcf] prime pricing_events FAILED ({type(e).__name__}: {e})", file=sys.stderr)
+        rows = None
+    _EV_CACHE.update(tickers=frozenset(tickers), until=until, rows=rows)
+
+
+def frame_events(ticker, d0, d1):
+    """ISS DỜI KHUNG GIÁ của `ticker` có ex-date trong [d0, d1] (ISO, gồm hai đầu) — R8/H1.
+
+    "Dời khung giá" = `corp_action_lib.PRICE_ADJUSTING_ISS` (cổ tức CP, thưởng, quyền mua: sàn hạ giá
+    tham chiếu ở ex-date) + ISS KHÔNG ghi phương thức (không biết ⇒ coi như dời, fail-closed).
+    Đọc `pricing_events` (gồm `announced`, bỏ `not_executed`) nên bắt được cả sự kiện vendor chưa lật
+    `executed`. KHÔNG nuốt lỗi: caller (`dcf_valuation._live_oshares`) coi lỗi = không chứng minh được
+    khung giá ⇒ về số quý."""
+    if _EV_CACHE["rows"] is not None and ticker in _EV_CACHE["tickers"] and d1 <= _EV_CACHE["until"]:
+        rows = [e for e in _EV_CACHE["rows"] if e.get("ticker") == ticker]
+    else:
+        since = (date.fromisoformat(d0) - timedelta(days=1)).isoformat()      # pricing_events: since loại trừ
+        rows = pricing_events([ticker], since=since, until=d1, codes=("ISS",))
+    out = []
+    for e in rows:
+        meth = (e.get("issue_method_name_vi") or "").strip()
+        if (e.get("event_code") == "ISS" and d0 <= (e.get("exright_date") or "") <= d1
+                and (meth in PRICE_ADJUSTING_ISS or not meth)):
+            out.append(e)
+    return out
 
 
 def oshares_for(ticker, asof, fin_value):
