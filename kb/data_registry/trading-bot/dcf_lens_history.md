@@ -26,7 +26,7 @@ nhầm 2 luồng). Fail-safe: mọi lỗi ghi bị nuốt im lặng (log warning
 ## Bẫy
 
 - **CUTOVER KHUNG DCF 2026-10-30 12:48 ICT (`logged_at` < mốc này = `legacy`; ≥ mốc = `domestic_v2`).** CSV KHÔNG có cột frame ⇒ chuỗi lịch sử TRỘN hai khung: trước mốc r = lãi huy động (tới ~13,9%) + ERP 6,5%, g_T cap = lãi huy động; sau mốc r = 12,25% hằng, g_T cap 5,5%. FV trung vị đổi ~−1,4%, thứ hạng gần như không đổi (tương quan ≥0,9999) nhưng mức MoS tuyệt đối không so thẳng được qua mốc. Khi phân tích chuỗi, cắt tại mốc hoặc tính lại bằng `DCF_RATE_FRAME=legacy`.
-- **NGUỒN SỐ CP DCF (`OSHARES_SOURCE_DEFAULT` trong `dcf_valuation.py`) — CUTOVER-MARKER: ĐÃ SẴN SÀNG, CHƯA BẬT**
+- **NGUỒN SỐ CP DCF (`OSHARES_SOURCE_DEFAULT` trong `dcf_valuation.py`) — CUTOVER-MARKER: ĐÃ BẬT, CUTOVER 2026-10-31 15:2x ICT (logged_at < mốc = fin; ≥ mốc = live)**
   (R10, job `Taylor_20261031_064246`, 31/10/2026). Mọi dòng tới nay tính FV/cp bằng `fin` (OShares dòng quý
   cuối). CSV KHÔNG có cột nguồn số CP ⇒ ngày bật `live` (đổi 1 từ, cần user duyệt) PHẢI sửa dòng này thành
   `CUTOVER <YYYY-MM-DD HH:MM ICT> (logged_at < mốc = fin; ≥ mốc = live)` trong CÙNG commit bật.
