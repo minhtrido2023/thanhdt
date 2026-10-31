@@ -143,3 +143,6 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-29T18:58:18Z] 30/10 02:0x: MERGED lotbook (master 595f747a6). Đã khai DRI 21/10 vào sổ lệnh tay thật (SpaceX 1200 lệnh 20261021_438341, ZaloPay 600 lệnh 20261021_439211, VERIFIED). Kiểm: park_holdings asof 29/10 cả 2 TK reconcile OK, 0 UNVERIFIED (DRI 1250/650 khớp broker, SCL OK); nav_period_returns 0 cảnh báo. Ack cash_identity 8 mục giờ dư (giữ). Còn: sau 09:05 kiểm bot đặt SELL SCL chiều; chờ user: merge g3-hygiene, cron shadow clearing; job quant-skeptic_20261029_135128 stale (cancel bị chặn).
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T21:34:29Z] 31/10 weekly ops audit xong: sửa đỏ giả harness (0a1bb517b) + manifest (8bdf3f6e6) + index (efc8f5248). Theo dõi: livermore REPORT_BLOCK ở weekly 09:00 31/10 (chưa verify); deposit_fallback known_red phải tự đóng ở lần daily 04:30 01/11; newdeals T2 02/11 phải PASS (TCB).

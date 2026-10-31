@@ -1691,3 +1691,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T03:58:01Z] [erp-domestic 30/10] XONG job Taylor_20261030_034654: research/erp_domestic_20261030/ (commit 5fec4fc14) ERP noi dia 5,0 (3,4-6,5), Ke b1,1 12,3 — CHO quant-skeptic + user duyet; doi dcf_valuation phai doi ca g_T cap
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T04:42:45Z] [erp-domestic-v2 30/10] XONG job Taylor_20261030_041731: research/erp_domestic_v2_20261030/ (37eb90ef5) ERP 5,42 khong ben (5,22-6,15); patch f3f756256 nhanh session/erp-domestic-dcf-20261030 (wt-erp-domestic-dcf-20261030, chua merge) — CHO quant-skeptic + user; truoc khi bat sua 2 selfcheck CCTG + dcf_earning_power.py:53
