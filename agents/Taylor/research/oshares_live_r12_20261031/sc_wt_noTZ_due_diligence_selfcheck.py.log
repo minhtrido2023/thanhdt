@@ -1,0 +1,87 @@
+test_20_TMG_dead_liquidity (__main__.Integration.test_20_TMG_dead_liquidity) ... /home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live TMG: Price 64000 lap lai tu 2026-07-17 den 2026-07-21 -> khoa khung tu 2026-07-17 !!!!!
+DCF_OSHARES_SOURCE=live TMG: Price 64000 lap lai tu 2026-07-17 den 2026-07-21 -> khoa khung tu 2026-07-17
+ok
+test_21_IVS_thin_and_inflated_surprise (__main__.Integration.test_21_IVS_thin_and_inflated_surprise) ... ok
+test_22_TRC_thin_but_in_universe (__main__.Integration.test_22_TRC_thin_but_in_universe) ... ok
+test_23_clean_names_no_false_alarm (__main__.Integration.test_23_clean_names_no_false_alarm) ... ok
+test_24_DHD_case_2026_08_03 (__main__.Integration.test_24_DHD_case_2026_08_03)
+Ca thật đã lọt lưới ngày 2026-08-03: DD in đủ 2 dòng 🔴 mà không ai phải xác nhận. ... ok
+test_50_execution_path_never_reads_dd_check (__main__.NotAGate.test_50_execution_path_never_reads_dd_check)
+bot_execute.py (đường quyết định đặt lệnh) không được biết tới dd_check. ... ok
+test_51_red_flag_order_survives_plan_filters (__main__.NotAGate.test_51_red_flag_order_survives_plan_filters)
+Lệnh có cờ đỏ + KHÔNG có override vẫn đi qua cascade lọc của plan → vẫn sẽ được đặt. ... ok
+test_52_plan_roundtrip_keeps_dd_fields (__main__.NotAGate.test_52_plan_roundtrip_keeps_dd_fields)
+save→load_plan phải giữ dd_check/dd_override_reason (load_plan lọc field lạ). ... ok
+test_30_clean_no_red_flag (__main__.RedFlag.test_30_clean_no_red_flag) ... ok
+test_31_dead_liquidity_flag (__main__.RedFlag.test_31_dead_liquidity_flag) ... ok
+test_32_thin_liquidity_is_NOT_red (__main__.RedFlag.test_32_thin_liquidity_is_NOT_red)
+Mỏng (<2 tỷ) = mức ⚠ CÂN NHẮC, không phải mức phải viết lý do — giữ nguyên ngưỡng cũ. ... ok
+test_33_outside_universe_flag (__main__.RedFlag.test_33_outside_universe_flag) ... ok
+test_34_universe_unknown_is_NOT_red (__main__.RedFlag.test_34_universe_unknown_is_NOT_red)
+Không đọc được universe → "n/a", KHÔNG được kết luận NGOÀI ⇒ cũng không được cắm cờ. ... ok
+test_35_order_too_large_vs_adv (__main__.RedFlag.test_35_order_too_large_vs_adv) ... ok
+test_36_pead_inflated_surprise_flag (__main__.RedFlag.test_36_pead_inflated_surprise_flag) ... ok
+test_37_dd_cannot_run_is_red (__main__.RedFlag.test_37_dd_cannot_run_is_red)
+Mua mã mà DD không chạy được = mua mù → vẫn phải có người xác nhận. ... run_due_diligence lỗi (XXX): cache hỏng
+ok
+test_38_all_codes_documented (__main__.RedFlag.test_38_all_codes_documented)
+Mọi mã cờ sinh ra phải có mô tả trong RED_FLAG_CODES (skill + report đọc từ đây). ... ok
+test_39_warning_line_needs_override (__main__.RedFlag.test_39_warning_line_needs_override) ... ok
+test_40_dd_check_for_order_shape (__main__.RedFlag.test_40_dd_check_for_order_shape) ... ok
+test_01_liquidity_ok (__main__.Unit.test_01_liquidity_ok) ... ok
+test_02_liquidity_thin (__main__.Unit.test_02_liquidity_thin) ... ok
+test_03_liquidity_dead (__main__.Unit.test_03_liquidity_dead) ... ok
+test_04_order_vs_adv (__main__.Unit.test_04_order_vs_adv) ... ok
+test_05_outside_universe (__main__.Unit.test_05_outside_universe) ... ok
+test_05b_universe_unknown_no_fallback (__main__.Unit.test_05b_universe_unknown_no_fallback) ... ok
+test_05c_quality_flag_shown (__main__.Unit.test_05c_quality_flag_shown) ... ok
+test_06_pead_negative_base (__main__.Unit.test_06_pead_negative_base) ... ok
+test_07_pead_loss_quarter_in_base (__main__.Unit.test_07_pead_loss_quarter_in_base) ... ok
+test_08_pead_clean (__main__.Unit.test_08_pead_clean) ... ok
+test_09_pead_only_for_lag (__main__.Unit.test_09_pead_only_for_lag)
+Trục cơ học surprise chỉ có nghĩa với LAG/PEAD — không bôi vào book khác. ... ok
+test_10_anomaly_echo (__main__.Unit.test_10_anomaly_echo) ... ok
+test_11_unknown_ticker_no_raise (__main__.Unit.test_11_unknown_ticker_no_raise) ... ok
+test_12_internal_error_no_raise (__main__.Unit.test_12_internal_error_no_raise)
+Fail-safe tuyệt đối: lỗi ở tầng dữ liệu KHÔNG được ném ra report. ... run_due_diligence lỗi (XXX): cache hỏng
+ok
+test_13_as_dict (__main__.Unit.test_13_as_dict) ... ok
+test_14_missing_fields (__main__.Unit.test_14_missing_fields) ... ok
+test_60_prox_is_deposit_over_yield (__main__.YieldFloor.test_60_prox_is_deposit_over_yield)
+Bất biến neo về research (`analyze.py:347`): prox = giá/sàn ≡ lãi suất/tỉ suất. ... ok
+test_61_labels_follow_the_band (__main__.YieldFloor.test_61_labels_follow_the_band)
+Nhãn bám ĐÚNG dải [0,97; 1,03] đã prereg — và < 1 nghĩa là tỉ suất > lãi tiền gửi. ... ok
+test_62_not_stable_payer_is_no_data (__main__.YieldFloor.test_62_not_stable_payer_is_no_data)
+Thiếu 1 trong 3 cửa sổ 365 ngày ⇒ không phải stable payer ⇒ không dán nhãn sàn. ... ok
+test_63_zero_dividend_is_no_data (__main__.YieldFloor.test_63_zero_dividend_is_no_data) ... ok
+test_64_banking_excluded_even_when_qualified (__main__.YieldFloor.test_64_banking_excluded_even_when_qualified)
+Ngân hàng đủ điều kiện vẫn bị loại khỏi DIỄN GIẢI (n=3, không có ý nghĩa). ... ok
+test_65_stale_feed_is_no_data_never_raises (__main__.YieldFloor.test_65_stale_feed_is_no_data_never_raises) ... yield_floor loi (XXX): bq chết
+ok
+test_66_display_only_never_flags_never_blocks (__main__.YieldFloor.test_66_display_only_never_flags_never_blocks)
+BẤT BIẾN CHÍNH: block chỉ nằm trong dict, không sinh cờ đỏ, không vào text. ... upcoming ex-date loi (XXX): type object '_Lib' has no attribute 'pricing_events'
+recent_iss loi (XXX): 'exright_date'
+ok
+test_67_every_error_path_keeps_the_key (__main__.YieldFloor.test_67_every_error_path_keeps_the_key)
+Mọi nhánh trả sớm của run_due_diligence phải giữ khoá — caller không phải .get() mù. ... run_due_diligence lỗi (ZZZZ): nổ
+ok
+test_68_div_growth_not_stable_is_na (__main__.YieldFloor.test_68_div_growth_not_stable_is_na)
+Không phải stable payer ⇒ div_growth_signal = N/A, kể cả có div3. ... ok
+test_69_div_growth_no_history_when_div3_zero (__main__.YieldFloor.test_69_div_growth_no_history_when_div3_zero) ... ok
+test_70_div_growth_growing (__main__.YieldFloor.test_70_div_growth_growing)
+div0 gấp đôi div3 trong 3 năm ⇒ CAGR_3Y = 2^(1/3)-1 ≈ 25,99% > 5% ⇒ GROWING. ... ok
+test_71_div_growth_stable (__main__.YieldFloor.test_71_div_growth_stable)
+div0 ≈ div3 (đi ngang) ⇒ CAGR_3Y ≈ 0 ∈ [-5%; 5%] ⇒ STABLE. ... ok
+test_72_div_growth_declining (__main__.YieldFloor.test_72_div_growth_declining)
+div0 chỉ còn nửa div3 ⇒ CAGR_3Y = 0.5^(1/3)-1 ≈ -20,6% < -5% ⇒ DECLINING. ... ok
+test_73_div_growth_banking_is_na (__main__.YieldFloor.test_73_div_growth_banking_is_na)
+Ngân hàng đủ điều kiện stable + div3>0 vẫn bị ép về N/A (giống yield_floor_note). ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 98.179s
+
+OK
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']

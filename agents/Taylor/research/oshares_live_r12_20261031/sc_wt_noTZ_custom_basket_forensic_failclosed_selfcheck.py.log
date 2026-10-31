@@ -1,0 +1,11 @@
+TZ=(unset)  python=3.12.13  module=/home/trido/wt-oshares-r12-20261031/WorkingClaude/custom_basket.py
+registry canonical = /home/trido/wt-oshares-r12-20261031/WorkingClaude/data/forensic_flags.csv
+  FAIL t_canonical_fallback: AssertionError: T1: worktree LẠI có forensic_flags.csv — tiền đề của test sai, kiểm .gitignore
+  PASS t_missing_everywhere_is_fatal
+  PASS t_old_vs_new_two_sided
+  PASS t_env_empty_is_explicit_optout
+  PASS t_env_bad_path_is_fatal_no_fallback
+  PASS t_corrupt_file_is_fatal
+
+FAIL  (20 assertion, 1 test FAIL)
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence', 'custom_basket']

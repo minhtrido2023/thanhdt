@@ -1,0 +1,2 @@
+n_main 3870 n_branch 3870 keys_equal True diff_repr 0 []
+by_kind {'dcfc_px': 774, 'chk': 774, 'dcfc': 774, 'plan': 774, 'fmt': 774} by_asof {'2026-10-29': 336, '2025-10-29': 438}

@@ -112,3 +112,19 @@ Vòng R11 (job `Taylor_20261031_082449`, CHƯA merge; WC `session/oshares-r11-20
 18. Hạn chế: plan echo 21:00 thấy cache tới T−2 ⇒ ref_price (đóng cửa T−1) gần như không khớp ⇒ SpaceX/ZaloPay
     0/17 lệnh khớp (9/2026–10/2026), EOD 19:10 khớp 277/279 ⇒ plan echo (số quý) có thể ≠ EOD (live) ở mã có sự
     kiện CP (22 cặp, đều FPT paper main, thưởng CP ex 2026-09-21). Nguồn Price T−1 trước 21:00 = việc user quyết.
+    **[ĐÍNH CHÍNH R12]** R11 KHÔNG giữ được 0 BQ trên đường 21:00: khi có mã khớp (57/279), `price_sessions_for`
+    gọi `oshares_dcf.prime` ⇒ truy vấn BQ lúc 21:00 (trái bất biến R9 mục 8). R12 gỡ (xem 19).
+
+Vòng R12 (job `Taylor_20261031_092209`, CHƯA merge; WC `session/oshares-r12-20261031`, mike
+`session/oshares-r12-ops-20261031`; bằng chứng `agents/Taylor/research/oshares_live_r12_20261031/SELFCHECK_R12.md`):
+19. User chốt 31/10: plan echo TẠM GIỮ SỐ QUÝ. `send_plan_report.sh` khai `price_date=PRICE_SESSION_UNKNOWN` có
+    chủ đích, KHÔNG gọi `price_session(s)_for`/`prime` ⇒ **0 lời gọi BQ** (replay 279 lệnh MUA, C23 exec chính khối
+    code). Mỗi lời gọi DCF trần cứng `SEND_PLAN_DCF_CALL_S`=30s (SIGALRM), tổng `SEND_PLAN_DCF_BUDGET_S`=120s; quá
+    ⇒ bỏ dòng DCF + WARN, báo cáo vẫn gửi. Sau này: field có cấu trúc `ref_price_session` trong lệnh plan (§24, vòng riêng).
+20. `format_dcf_check` (EOD/paper, live) nối `· số CP quý: [STATUS ]MoS ±x% [không ]robust (cơ sở plan echo)` khi
+    status khác / robust khác / |ΔMoS| ≥ 2pp (`OSHARES_FIN_LABEL_MOS`) — theo MoS, KHÔNG theo ngưỡng
+    `oshares_divergence` (FPT lệch 9,998% lọt ngưỡng 10% mà MoS +5,6% vs +14,2%). Dict live thêm `status_fin`/`robust_fin`.
+21. `price_session_for`: lỗi ĐỌC cache/duckdb ⇒ vẫn số quý nhưng KÊU stderr 1 lần kèm lỗi thật (trước: `except: pass`
+    ⇒ im như "không khớp").
+22. EOD sau report v2: **SpaceX EOD không mang dòng DCF** (v2 rc=0 chỉ gửi bản v2, `bin/report_v2/` không có DCF);
+    ZaloPay (v2 + bản text cũ nối dưới), fallback v2 lỗi, và paper DC-book mới mang dòng DCF/nhãn.

@@ -1,0 +1,49 @@
+RATE_FRAME_DEFAULT (nguồn sự thật) = 'domestic_v2'
+PASS (a0) main chạy được n=336 ok=145 md5=4c0cf6e6ee6b267937c793c7dfda9a44
+PASS (a-pin) main legacy == md5 ghim của main trước khi có knob md5=4c0cf6e6ee6b267937c793c7dfda9a44
+PASS (a) worktree DCF_RATE_FRAME=legacy trùng byte main md5=4c0cf6e6ee6b267937c793c7dfda9a44
+PASS (a') env legacy kêu 'override' đúng khi mặc định khác legacy 
+PASS (b0) không env ⇒ trùng byte frame mặc định domestic_v2, không kêu md5=360b99e7154893a3740e4b16a496eea7
+PASS (b) domestic_v2 khớp mô phỏng nghiên cứu (MoS 4 chữ số, status, robust) n_sim=145 n_v2=145 lệch=[] md5=360b99e7154893a3740e4b16a496eea7
+PASS (b2) domestic_v2 r = 12,25% hằng, g_T ≤ 5,5% r={0.1225} g_T max=0.055
+PASS (c) DGC r7 21407/32925/41779/29817 (21407, 32925, 41779, 29817)
+PASS [1a] v2 + env DCF_TERMINAL_MODE=cpi_gdp_full ⇒ ép cap_rf (g_T như mặc định, r 12,25) + kêu stderr term_mode=cap_rf g_T=0.0550
+PASS [1b] v2 + term_mode='cpi_gdp_full' tường minh ⇒ ValueError ValueError: term_mode 'cpi_gdp_full' not allowed under DCF_RATE_FRAME=domestic_v2 (only 'c
+PASS [1c] legacy vẫn tôn trọng DCF_TERMINAL_MODE (ép chỉ áp cho v2) g_T=0.0966
+PASS [2a] DCF_RATE_FRAME='domestic' (gõ sai) ⇒ rc 0, KHÔNG NOT_COMPUTED, trùng byte legacy, kêu stderr rc=0 md5=4c0cf6e6ee6b267937c793c7dfda9a44 stderr="!!!!! [dcf_valuation] DCF_RATE_FRAME='domestic' KHONG HOP LE (chi nhan ('legacy', 'domestic_v2')) -> FALLBACK "
+PASS [2b] DCF_RATE_FRAME rỗng/space ⇒ mặc định nguồn sự thật 
+PASS [2k] hằng RATE_FRAME_DEFAULT gõ sai ⇒ fallback legacy + kêu stderr (không im lặng) !!!!! [dcf_valuation] RATE_FRAME_DEFAULT='domestic-v2' KHONG HOP LE (chi nhan ('legacy', 'domestic_v2')) -> FA
+PASS [2c] ops_health_check.sh có khối CHECKDCFRF /home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh
+PASS [2d] ops_health: sạch ⇒ 0 WARN, 1 OK nêu frame ['✅ DCF_RATE_FRAME: nguồn sự thật dcf_valuation.py = domestic_v2 (rollback = đổi 1 từ về legacy); không launcher/cron nào ghi đè.']
+PASS [2e] ops_health: env gõ sai ⇒ WARN 'KHÔNG HỢP LỆ' ["⚠️ DCF_RATE_FRAME: môi trường cron mang biến DCF_RATE_FRAME (giá trị 'domestc', KHÔNG HỢP LỆ ⇒ fallback legacy) — nguồn sự thật là dcf_valuation.py, gỡ biến n
+PASS [2f] ops_health: RATE_FRAME_DEFAULT sai giá trị ⇒ WARN ["⚠️ DCF_RATE_FRAME: RATE_FRAME_DEFAULT trong dcf_valuation.py = 'domestic-v2' không thuộc ('legacy', 'domestic_v2') (mọi DCF đang chạy legacy do fallback)"]
+PASS [2g] ops_health: wc_env.sh gán DCF_RATE_FRAME ⇒ WARN launcher ['⚠️ DCF_RATE_FRAME: 2 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): wc_env.sh: export DCF_RATE_FRAME=legacy | wc_env.sh: export DCF_RATE_FRAME=l
+PASS [2h] ops_health: crontab gán DCF_TERMINAL_MODE ⇒ WARN (dòng comment bỏ qua) ['⚠️ DCF_RATE_FRAME: 1 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): crontab: 5 2 * * 1-5 DCF_TERMINAL_MODE=cpi /x/run_bot.sh']
+PASS [2i] ops_health: mike/bin/*.sh gán inline ⇒ WARN ['⚠️ DCF_RATE_FRAME: 1 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): mike/bin/x.sh: cd x && DCF_RATE_FRAME=legacy python3 a.py']
+PASS [2j] ops_health: WorkingClaude/*.sh gán inline ⇒ WARN ['⚠️ DCF_RATE_FRAME: 1 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): run_x.sh: DCF_RATE_FRAME=legacy python3 a.py']
+PASS [2l] ops_health: trading_bot/*.py setdefault biến khung ⇒ WARN ['⚠️ DCF_RATE_FRAME: 1 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): trading_bot/b.py: os.environ.setdefault("DCF_RATE_FRAME", "legacy")']
+PASS [2m] ops_health: trading_bot/*.sh export biến mode ⇒ WARN ['⚠️ DCF_RATE_FRAME: 1 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): trading_bot/r.sh: export DCF_TERMINAL_MODE=cpi']
+PASS [2n] ops_health: mike/bin/*.py gán os.environ[...]= ⇒ WARN ['⚠️ DCF_RATE_FRAME: 1 launcher tự gán biến khung DCF (phá nguồn sự thật duy nhất): mike/bin/p.py: os.environ["DCF_TERMINAL_MODE"] = "cpi"']
+PASS [2o] ops_health: selfcheck/test_/dcf_earning_power/dcf_valuation + dòng comment KHÔNG gây WARN ['✅ DCF_RATE_FRAME: nguồn sự thật dcf_valuation.py = domestic_v2 (rollback = đổi 1 từ về legacy); không launcher/cron nào ghi đè.']
+PASS [M2j] gỡ quét WorkingClaude/*.sh ⇒ [2j] đỏ 
+PASS [M2l] gỡ quét trading_bot/*.py ⇒ [2l] đỏ 
+PASS [M2n] bỏ regex python (dùng regex shell cho .py) ⇒ [2n] đỏ 
+INFO ops_health trên cây PROD hiện tại (trước merge dcf_valuation): warn=0 ['✅ DCF_RATE_FRAME: nguồn sự thật dcf_valuation.py = domestic_v2 (rollback = đổi 1 từ về legacy); không launcher/cron nào ghi đè.']
+PASS [3a0] đối chứng dương: regex quét bắt được gán shell/crontab + python env (không thì [3a] rỗng nghĩa) 
+PASS [3a] không launcher/cron/wc_env.sh/script production nào gán DCF_RATE_FRAME/DCF_TERMINAL_MODE quét 2722 file + crontab; hits=[]
+PASS [3b] mọi kiểu khởi chạy thấy CÙNG frame = domestic_v2, không cảnh báo {"cron env -i + python3 hệ thống": ["domestic_v2", false], "cron env -i + venv": ["domestic_v2", false], "cron env -i, TZ=Pacific/Kiritimati": ["domestic_v2", false], "env phiên này (venv)": ["domestic_v2", false], "source wc_env.sh (DNA_PYEXE)": ["domestic_v2", false]}
+PASS [4a] earning_power cap_rf legacy == production (cùng float) 0.07400000000000001 vs 0.07400000000000001
+PASS [4b] earning_power cap_rf v2 == min(cpi+gdp, 5,5%) (không phải 5,75) 0.055
+PASS [4c] earning_power mode≠cap_rf: legacy vẫn chạy (cpi_gdp_full), v2 ⇒ ValueError (không đổi riêng r) legacy=0.09663948333333333 v2="ValueError: term_mode 'cpi_gdp_full' khong hop le duoi DCF_R"
+PASS [5] CLI r dưới v2 kèm khoảng Ke 12,5–13,5% (β1,1); legacy không đổi ['[domestic_v2: diem mo hinh beta1 = rf 6.75 + ERP 5.5; ERP KHONG ben 5,22-6,15 => Ke KHOANG 12.5-13.5% o beta 1,1 — doc theo khoang, khong theo diem]']
+PASS [5b] dcf_earning_power CLI: mỗi dòng r= dưới v2 kèm khoảng Ke (2 basis); legacy không đổi (2, 2, 'r, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.\n')
+PASS [M1] gỡ ép cap_rf qua env ⇒ [1a] đỏ 
+PASS [M1b] gỡ raise term_mode tường minh ⇒ [1b] đỏ 
+PASS [M2] trả lại ValueError lúc import ⇒ [2a] đỏ 
+PASS [M4] khôi phục dòng :53 cũ ⇒ [4b] đỏ ([4a] legacy vẫn xanh) 
+PASS [M5] ke_range_note rỗng ⇒ [5] đỏ 
+PASS [M2k] gỡ guard hằng default ⇒ [2k] đỏ 
+PASS [M4c] gỡ raise của earning_power ⇒ [4c] đỏ (legacy vẫn xanh) 
+PASS [M5b] gỡ in ke_range_note ở dcf_earning_power ⇒ [5b] đỏ 
+SELFCHECK OK
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']

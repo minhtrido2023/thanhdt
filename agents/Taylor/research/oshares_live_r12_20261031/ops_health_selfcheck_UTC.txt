@@ -1,0 +1,317 @@
+ops_health_check_selfcheck: check #5 (backlog question) + check #8b (CCTG freshness) + check #9 (retro freshness) + check #10 (notify_thread) + check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) + check #13 (cổng get_gated_state suy giảm DT4) + khối DELIVER (Discord→Telegram) regression
+  PASS  c8b: age=35 (đúng ngưỡng) vẫn OK, không WARN
+  PASS  c8b: age=36 (vừa qua ngưỡng 35) phải WARN
+  PASS  c8b: WARN nói đúng 'từ ngày thứ 46' (age>45), không phải 'ở 45 ngày'
+  PASS  c8b: dòng garbage -> WARN rõ (không im lặng, không mislabel CSV rỗng)
+  PASS  c8b: KHÔNG rơi nhầm vào nhánh 'anchor cứng (CSV rỗng/chưa có)' (R1 bug cũ)
+  PASS  c8b: giá trị ngoài [0.5,30] -> WARN, KHÔNG 'OK CSV live' (R2 bug cũ)
+  PASS  c8b: không có dòng OK CSV live nào lẫn vào output
+  PASS  c8b: CSV rỗng (chỉ header) -> rơi về anchor cứng, không WARN sai
+  PASS  c8b: anchor age=1d (2026-09-30→2026-10-01) -> OK, không WARN
+  PASS  c8b: không CSV, không anchor -> chỉ ℹ️ info, không WARN/OK giả
+  PASS  archive: question >30d trong archive gz VẪN hiện (cliff 30d đã bịt)
+  PASS  archive: agent lấy đúng từ tên file có hậu tố tháng
+  PASS  resolve chéo tầng+chéo agent: answer hot inbox đóng question trong archive
+  PASS  resolves explicit: decision topic khác đóng canonical Agent/topic
+  PASS  ts-order: answer CŨ hơn không pre-resolve alert lặp mới
+  PASS  dedupe: event trùng hot+archive chỉ đếm 1 lần
+  PASS  crowd-out: escalation MỚI vẫn hiện khi pool có 13 mục
+  PASS  crowd-out: mục treo LÂU nhất vẫn hiện
+  PASS  crowd-out: có nói rõ bao nhiêu mục bị giấu
+  PASS  crowd-out: mục cũ nhất không bị in 2 lần (bẫy slice [-0:])
+  PASS  crowd-out: đếm số mục bị giấu đúng (13−5−3=5)
+  PASS  pool nhỏ: in đủ 6/6 mục
+  PASS  pool nhỏ: không có WARN archive giả (bus không có thư mục archive)
+  PASS  gz hỏng: có WARN nêu rõ file không đọc được (không im lặng)
+  PASS  gz hỏng: WARN đó KHÔNG mang marker [WARN-ONLY] (là lỗi tooling, phải route Wags)
+  PASS  archive rỗng: WARN khi thư mục archive không có file *.jsonl.gz nào
+  PASS  ân hạn: question 0 phút tuổi KHÔNG vào dòng routable (không dispatch Wags)
+  PASS  ân hạn: vẫn HIỆN trong báo cáo với marker [WARN-ONLY] (không im lặng)
+  PASS  ân hạn: KHÔNG in ✅ 'không có câu hỏi nào đang chờ' khi vẫn còn câu hỏi mới
+  PASS  ân hạn: question 3h tuổi VẪN routable (kênh escalate còn sống)
+  PASS  ân hạn: question 3h tuổi KHÔNG bị xếp vào dòng 'VỪA ĐĂNG'
+  PASS  8d gap T6→T2: question 31' tuổi VẪN routable nếu không còn lượt cron trước ts+48h
+  PASS  8d gap T6→T2: KHÔNG rơi vào dòng VỪA ĐĂNG [WARN-ONLY]
+  PASS  8d T5 còn lượt cron TRƯỚC ts+48h: ân hạn vẫn giữ nguyên
+  PASS  8d T5 còn lượt cron: question chưa routable ngay
+  PASS  phân tầng: question <48h vào dòng pending (routable, dispatch Wags)
+  PASS  phân tầng: dòng pending KHÔNG mang [WARN-ONLY]
+  PASS  owner-hint: gom 2 topic cùng owner 'taylor' vào ĐÚNG 1 dòng (đếm tổng dòng, không đếm chuỗi con)
+  PASS  owner-hint: hậu tố mức-độ (-urgent) KHÔNG tách thành owner riêng — tổng đúng 2 dòng owner (taylor + DollarBill)
+  PASS  owner-hint: tên agent in ra là CASE CHUẨN của agent thật (DollarBill), không phải nguyên văn tuỳ ý người viết topic
+  PASS  owner-hint: 'needs-human' KHÔNG bị nhận là owner (đã có kênh ACK riêng)
+  PASS  owner-hint: mọi dòng owner đều mang [WARN-ONLY] (không đổi routing dispatch)
+  PASS  owner-hint: câu hỏi không khai chủ vẫn nằm ở dòng pending routable
+  PASS  owner-hint: tên agent KHÔNG bọc trong <> (lệnh mẫu copy-paste được thẳng)
+  PASS  owner-hint: câu hỏi TREO >48h (5 ngày) VẪN có dòng gợi ý chủ sở hữu
+  PASS  owner-hint aged: vẫn dùng case chuẩn agent thật ('Taylor')
+  PASS  owner-hint: owner 'restart' không khớp agent thật nào → báo rõ, KHÔNG in lệnh dispatch cho agent không tồn tại
+  PASS  owner-hint: topic theo quy ước ACK `triaged-needs-human:<Agent>/<topic>` KHÔNG sinh dòng owner-hint nào (đã có kênh ACK riêng)
+  PASS  owner-hint: KHÔNG in lệnh dispatch cho owner giả 'human:Taylor/vol'
+  PASS  owner-hint: 'needs-user/<gì đó>' cũng được chuẩn hoá về 'user' và bỏ qua
+  PASS  owner-hint aged: câu hỏi ĐÃ ack (park chờ người) KHÔNG sinh dòng owner-hint
+  PASS  owner-hint aged: câu hỏi CHƯA ai nhận VẪN sinh dòng owner-hint (đối chứng)
+  PASS  aged: câu hỏi đã ack VẪN hiện ở dòng 'TREO LÂU' (nó đang mở thật)
+  PASS  owner-hint: worktree `wt-*` KHÔNG bao giờ thành owner có lệnh dispatch
+  PASS  owner-hint: token 'wt' báo rõ là không khớp agent nào
+  PASS  wags-fix-not-confirmed: <48h: có dòng riêng, mang [WARN-ONLY]
+  PASS  wags-fix-not-confirmed: <48h: KHÔNG lẫn vào dòng pending routable
+  PASS  wags-fix-not-confirmed:: câu hỏi coordination KHÁC vẫn ở dòng pending routable
+  PASS  wags-fix-not-confirmed:: câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]
+  PASS  wags-arch-review-inconclusive: <48h: có dòng riêng, mang [WARN-ONLY]
+  PASS  wags-arch-review-inconclusive: <48h: KHÔNG lẫn vào dòng pending routable
+  PASS  wags-arch-review-inconclusive:: câu hỏi coordination KHÁC vẫn ở dòng pending routable
+  PASS  wags-arch-review-inconclusive:: câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]
+  PASS  wags-autofix-review-needed: <48h: có dòng riêng, mang [WARN-ONLY]
+  PASS  wags-autofix-review-needed: <48h: KHÔNG lẫn vào dòng pending routable
+  PASS  wags-autofix-review-needed:: câu hỏi coordination KHÁC vẫn ở dòng pending routable
+  PASS  wags-autofix-review-needed:: câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]
+  PASS  wags-arch-review-round2-unresolved: <48h: có dòng riêng, mang [WARN-ONLY]
+  PASS  wags-arch-review-round2-unresolved: <48h: KHÔNG lẫn vào dòng pending routable
+  PASS  wags-arch-review-round2-unresolved:: câu hỏi coordination KHÁC vẫn ở dòng pending routable
+  PASS  wags-arch-review-round2-unresolved:: câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]
+  PASS  substring-ở-giữa 'wags-fix-not-confirmed:': VẪN routable (không bị miễn trừ nhầm)
+  PASS  substring-ở-giữa 'wags-fix-not-confirmed:': KHÔNG rơi vào dòng WARN-ONLY wags-fix
+  PASS  substring-ở-giữa 'wags-arch-review-inconclusive:': VẪN routable (không bị miễn trừ nhầm)
+  PASS  substring-ở-giữa 'wags-arch-review-inconclusive:': KHÔNG rơi vào dòng WARN-ONLY wags-fix
+  PASS  substring-ở-giữa 'wags-autofix-review-needed:': VẪN routable (không bị miễn trừ nhầm)
+  PASS  substring-ở-giữa 'wags-autofix-review-needed:': KHÔNG rơi vào dòng WARN-ONLY wags-fix
+  PASS  substring-ở-giữa 'wags-arch-review-round2-unresolved:': VẪN routable (không bị miễn trừ nhầm)
+  PASS  substring-ở-giữa 'wags-arch-review-round2-unresolved:': KHÔNG rơi vào dòng WARN-ONLY wags-fix
+  PASS  chỉ có wags-fix-not-confirmed:: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)
+  PASS  chỉ có wags-fix-not-confirmed:: vẫn có dòng WARN-ONLY nêu rõ
+  PASS  chỉ có wags-arch-review-inconclusive:: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)
+  PASS  chỉ có wags-arch-review-inconclusive:: vẫn có dòng WARN-ONLY nêu rõ
+  PASS  chỉ có wags-autofix-review-needed:: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)
+  PASS  chỉ có wags-autofix-review-needed:: vẫn có dòng WARN-ONLY nêu rõ
+  PASS  chỉ có wags-arch-review-round2-unresolved:: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)
+  PASS  chỉ có wags-arch-review-round2-unresolved:: vẫn có dòng WARN-ONLY nêu rõ
+  PASS  ops_health_check.sh: tìm thấy khai báo WAGS_SELF_Q_PREFIXES
+  PASS  danh sách tiền tố miễn trừ: selfcheck KHỚP ops_health_check.sh
+  PASS  ack đúng: câu hỏi sang dòng riêng mang [WARN-ONLY] (không spawn wags_autofix)
+  PASS  ack đúng: câu hỏi vẫn HIỆN trong báo cáo, không bị đóng/giấu
+  PASS  ack đúng: câu hỏi đó KHÔNG còn ở dòng pending routable
+  PASS  không có ack: câu hỏi vẫn routable như cũ (fail-closed)
+  PASS  ack đăng TRƯỚC câu hỏi: KHÔNG được tắt dispatch
+  PASS  chỉ có câu hỏi đã ack: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)
+  PASS  chỉ có câu hỏi đã ack: vẫn có dòng WARN-ONLY nêu rõ
+  PASS  suppress_days=7: câu hỏi cron phát lại SAU ack vẫn được tắt dispatch
+  PASS  suppress_days=7: câu hỏi VẪN hiện trong báo cáo (không đóng/giấu)
+  PASS  không khai suppress_days: giữ nguyên hành vi cũ (vẫn routable)
+  PASS  suppress_days đã hết hạn: quay lại routable, ack không vĩnh viễn
+  PASS  suppress_days không phải số: fail-closed về cửa sổ 0 (vẫn routable)
+  PASS  rollup_of: mọi câu hỏi con đã có decision ⇒ câu hỏi TỔNG tự đóng
+  PASS  rollup_of RED CONTROL: thiếu 1 con chưa đóng ⇒ TỔNG vẫn pending (all, không any)
+  PASS  rollup_of: dạng 'Agent/topic' ĐÚNG agent vẫn khớp được con
+  PASS  rollup_of: dạng 'Agent/topic' SAI agent (Winston/con-b cho câu hỏi Mike/con-b) ⇒ KHÔNG khớp — lời khai agent phải được tôn trọng, không phải trang trí
+  PASS  rollup_of: con đóng TRƯỚC khi tổng được hỏi ⇒ KHÔNG đóng tổng (giữ ràng buộc ts)
+  PASS  rollup_of fail-closed: tong-khong-khai ⇒ giữ nguyên hành vi cũ (vẫn routable)
+  PASS  rollup_of fail-closed: tong-rollup-rong ⇒ giữ nguyên hành vi cũ (vẫn routable)
+  PASS  rollup_of fail-closed: tong-rollup-sai-kieu ⇒ giữ nguyên hành vi cũ (vẫn routable)
+  PASS  rollup_of: các câu hỏi CON vẫn tự đóng như cũ (không hồi quy)
+  PASS  rollup_of: MỘT resolver KHÔNG được thoả nhiều topic con (khớp exact, không substring)
+  PASS  rollup_of: topic con CẮT CỤT/tiền tố KHÔNG khớp resolver của câu hỏi con khác
+  PASS  rollup_of: `resolves` khai tường minh vẫn đóng được tổng bằng 1 event (không thắt chết cơ chế)
+  PASS  rollup_of TRẦN + resolves 'Agent/topic' ⇒ tổng PHẢI tự đóng
+  PASS  rollup_of 'Agent/topic' + resolves TRẦN ⇒ tổng PHẢI tự đóng (đối xứng 2 chiều)
+  PASS  ĐỐI CHỨNG false-CLOSED: 'Mike/con' KHÔNG được khớp 'Taylor/con' (khác agent)
+  PASS  PIN có chủ đích: con đóng kiểu hậu-tố trạng thái ⇒ tổng VẪN pending (rollup không nhận substring; xem MIKE.md § Escalation TỔNG)
+  PASS  ĐỐI CHỨNG: chính câu hỏi CON đó vẫn tự đóng như cũ (không hồi quy _resolved)
+  PASS  (a) topic con TỰ CHỨA '/' + resolves qualified ⇒ tổng PHẢI tự đóng (trước fix: kẹt pending vĩnh viễn — lớp câu hỏi đông nhất trên bus thật)
+  PASS  (a') chiều ngược: sub có '/' + resolves TRẦN cùng agent ⇒ cũng PHẢI đóng
+  PASS  (b) FALSE-CLOSED chéo agent: sub TRẦN của Mike KHÔNG được đóng bằng resolves ['Taylor/con-cheo'] — hướng lỗi nguy hiểm nhất
+  PASS  phần tử RỖNG trong rollup_of ⇒ fail-closed CẢ tổng, không lọc lặng rồi all() trên ít con hơn số đã khai
+  PASS  ĐỐI CHỨNG cho ca trên: cùng danh sách nhưng KHÔNG có phần tử rỗng ⇒ đóng bình thường (chứng minh (c) đỏ vì phần tử rỗng, không phải vì con không khớp)
+  PASS  DIAGNOSTIC: tổng không đóng được thì in ra CON NÀO chưa khớp (fail-closed đúng nhưng câm thì người đăng không sửa được)
+  PASS  inbox_dir không tồn tại ⇒ WARN, KHÔNG in ✅ '0 câu hỏi'
+  PASS  inbox_dir không tồn tại ⇒ nói rõ KHÔNG kiểm tra được (khác hẳn 'không có')
+  PASS  inbox_dir không tồn tại CONTROL: không dòng ✅ nào của check #5
+  PASS  suppress_days khổng lồ bị cắt trần: ack 20 ngày trước KHÔNG còn tắt dispatch
+  PASS  suppress_days=1 hết hạn (so với NOW, không phải q_ts cố định): câu hỏi KHÔNG tái phát quay lại routable
+  PASS  suppress_days=1 hết hạn: KHÔNG còn ở dòng ĐÃ TRIAGE/park
+  PASS  aged: bảng THẬT 20 mục ⇒ vào nhánh CẮT (không phải nhánh in-đủ ≤10)
+  PASS  aged: nhóm CÒN LẠI vẫn bị cắt giữa (miễn trừ chỉ áp cho lớp wags)
+  PASS  aged MIỄN CẮT: 'wags-arch-review-inconclusive: coord-2026-08-12' vẫn hiện dù nằm giữa danh sách
+  PASS  aged MIỄN CẮT: 'wags-fix-not-confirmed: coord-2026-08-12' vẫn hiện dù nằm giữa danh sách
+  PASS  aged MIỄN CẮT: 'wags-arch-review-inconclusive: coord-2026-08-13' vẫn hiện dù nằm giữa danh sách
+  PASS  aged MIỄN CẮT: 'wags-fix-not-confirmed: coord-2026-08-13' vẫn hiện dù nằm giữa danh sách
+  PASS  aged: 5 mục cũ nhất vẫn hiện (không hồi quy)
+  PASS  aged: mục MỚI nhất vẫn hiện (chống crowd-out — lý do sinh ra cắt-giữa)
+  PASS  aged: 16 mục KHÔNG thuộc tiền tố (gồm 10 selfcheck-red do Wags viết) nằm ở nhóm CÒN LẠI — miễn trừ theo TIỀN TỐ TOPIC, không theo agent_id
+  PASS  aged: mỗi mục chỉ in 1 lần (không trùng giữa 2 nhóm)
+  PASS  aged: không có mục wags ⇒ giữ NGUYÊN dòng cắt-giữa cũ (không nhắc VÒNG WAGS-FIX)
+  PASS  aged: 25 mục wags ⇒ cắt ở trần AGED_WAGS_MAX=20
+  PASS  aged: cắt trần phải NÓI RA số bị cắt (không bao giờ cắt im lặng)
+  PASS  aged: mục KHÁC vẫn hiện dù nhóm wags dài
+  PASS  check9: đủ 7 ngày ⇒ OK, 0 WARN
+  PASS  check9: thiếu hôm qua ⇒ WARN
+  PASS  check9: nói rõ nghi cron đêm qua chết
+  PASS  check9: lỗ CŨ (không phải hôm qua) vẫn được báo
+  PASS  check9: nêu đúng ngày thiếu
+  PASS  check9: phân biệt lỗ cũ với ca hôm qua
+  PASS  check9: không đòi retro trước ngày cũ nhất có thật
+  PASS  check9: thư mục retro rỗng ⇒ ℹ️, không WARN giả
+  PASS  check9 RED: đột biến áp dụng được (hằng cửa sổ chưa trôi)
+  PASS  check9 RED (cửa sổ 1 ngày): lỗ cũ bị BỎ QUA ⇒ assertion chính phân biệt được
+  PASS  check9: log CÓ dòng START ⇒ quy lỗi vào chuỗi dispatch, không đổ cho cron
+  PASS  check9: log KHÔNG có START ⇒ nói rõ cron không fire, KHÔNG phải bug script
+  PASS  check9: không đọc được log ⇒ khai KHÔNG BIẾT, không đoán bừa
+  PASS  check10: không có file log ⇒ OK, 0 WARN
+  PASS  check10: log tươi ⇒ WARN
+  PASS  check10: trích dòng CÓ timestamp, không phải dòng tràn
+  PASS  check10: WARN mang marker [WARN-ONLY] (không kéo autofix)
+  PASS  check10: CHỈ có bản ghi tự-sửa ⇒ KHÔNG nói 'TIN NHẮN ĐÃ BỊ NUỐT'
+  PASS  check10: bản ghi tự-sửa vẫn WARN (call site còn sai) và nói rõ tin ĐÃ GỬI
+  PASS  check10: bản ghi tự-sửa vẫn mang marker [WARN-ONLY]
+  PASS  check10: có lỗi THẬT lẫn bản ghi tự-sửa ⇒ vẫn báo TIN NHẮN ĐÃ BỊ NUỐT
+  PASS  check10: trích đúng dòng lỗi THẬT, không phải dòng tự-sửa
+  PASS  check10: log không có dòng timestamp ⇒ vẫn WARN, không ném exception
+  PASS  check10: không có dòng timestamp ⇒ KHÔNG khẳng định mất tin
+  PASS  check10: log cũ hơn 24h ⇒ OK (cảnh báo tự tắt)
+  PASS  check10: lỗi THẬT cũ >24h + bản ghi tự-sửa mới ⇒ KHÔNG báo 'TIN NHẮN ĐÃ BỊ NUỐT'
+  PASS  check10: bản ghi MỚI (tự-sửa) vẫn được báo đúng là tin ĐÃ GỬI
+  PASS  check10: file tươi nhưng mọi bản ghi đều cũ >24h ⇒ OK, 0 WARN
+  PASS  check10: ca đó KHÔNG bị nhầm sang nhánh 'không đọc được bản ghi'
+  PASS  check10b: không có file log ⇒ OK, 0 WARN
+  PASS  check10b: 1 reject cách đây 1h ⇒ WARN
+  PASS  check10b: WARN mang nhãn [WARN-ONLY] (user quyết, không đẻ vòng autofix)
+  PASS  check10b: reject 25h trước ⇒ ngoài cửa sổ 24h ⇒ OK, 0 WARN
+  PASS  check10b: 25h + 1h ⇒ WARN
+  PASS  check10b: đếm ĐÚNG 1 (cửa sổ per-record, không phải mtime file)
+  PASS  check10b: ts rác ⇒ GIỮ bản ghi (fail-loud), vẫn WARN
+  PASS  check10b: file cấm đọc ⇒ WARN 'KHÔNG ĐỌC ĐƯỢC', không im lặng thành OK
+  PASS  check10b RED: đột biến áp dụng được (hằng cửa sổ chưa trôi)
+  PASS  check10b RED (cửa sổ 100 ngày): reject 25h LẠI bị báo ⇒ ca 24h phân biệt được
+  PASS  check11: quét tươi + 0 đỏ ⇒ OK, không WARN
+  PASS  check11: OK nêu số file đã quét (không phải câu chữ rỗng)
+  PASS  check11: có ca đỏ chưa triage ⇒ CÓ cảnh báo cho người thấy
+  PASS  check11: mang [WARN-ONLY] (bộ quét đã escalate rồi — không dispatch lại)
+  PASS  check11: liệt kê tên file đỏ để triage ngay trong báo cáo
+  PASS  check11: TÁCH đỏ-chưa-triage (2) khỏi đỏ-đã-chấp-nhận (1) — không gộp để việc nợ chìm vào cái đã chấp nhận
+  PASS  check11 CONTROL: bộ lọc routing THẬT (grep -vF) loại đúng dòng này
+  PASS  check11: chỉ còn đỏ đã chấp nhận ⇒ không WARN nhưng vẫn nêu ra
+  PASS  check11: liệt kê ĐỦ cả 9 ca đỏ, không cắt (ca thứ 9 = guard settlement)
+  PASS  check11: không còn dấu cắt '…' trong danh sách đỏ
+  PASS  check11: số đếm khớp danh sách in ra (9 ca)
+  PASS  check11: quét ôi >36h ⇒ WARN
+  PASS  check11: WARN ôi KHÔNG mang [WARN-ONLY] (cron chết là lỗi SỬA ĐƯỢC, phải route)
+  PASS  check11: nói rõ ÔI + nghi cron chết, không lẫn với 'có ca đỏ'
+  PASS  check11: 30h (lỡ đúng 1 lần chạy) CHƯA kêu ôi
+  PASS  check11: ÔI + có đỏ ⇒ báo ÔI (routable), KHÔNG rơi vào nhánh [WARN-ONLY]
+  PASS  check11: KHÔNG có file kết quả ⇒ WARN 'chưa từng chạy', không im lặng
+  PASS  check11: có kết quả nhưng THIẾU baseline ⇒ vẫn WARN (không báo '0 đỏ')
+  PASS  check11: artifact HỎNG ⇒ WARN, không rơi về nhánh '0 đỏ'
+  PASS  check11: câu chữ nói rõ KHÔNG kết luận được (khác hẳn 'không có ca đỏ')
+  PASS  check11 CONTROL: nhánh hỏng KHÔNG in dòng ✅ nào
+  PASS  check12: journal sạch ⇒ OK, 0 WARN
+  PASS  check12: có ONE_SHOT_DROPPED ⇒ WARN
+  PASS  check12: đếm đúng số wakeup bị mất
+  PASS  check12: WARN-ONLY (không kích autofix cho việc đã mất, không sửa lại được)
+  PASS  check12 [journal rỗng hoàn toàn]: WARN chứ không im lặng
+  PASS  check12 [journal rỗng hoàn toàn]: KHÔNG in dòng ✅ nào (xanh giả là lỗi tệ nhất ở đây)
+  PASS  check12 [journal chỉ khoảng trắng]: WARN chứ không im lặng
+  PASS  check12 [journal chỉ khoảng trắng]: KHÔNG in dòng ✅ nào (xanh giả là lỗi tệ nhất ở đây)
+  PASS  check12: có gọi journalctl đúng 1 lần
+  PASS  check12: gọi đúng unit ccdb-mike
+  PASS  check12: đọc journal --user (daemon chạy dưới systemd --user, không phải system)
+  PASS  check12: cửa sổ đúng 24h như tiêu đề cảnh báo nói
+  PASS  check12: ONE_SHOT_INTERRUPTED cũng tính là mất wakeup
+  PASS  check12: INTERRUPTED không bị bỏ qua thành ✅
+  PASS  check12: đếm gộp cả 2 marker
+  PASS  check12: 'has no reachable destination' ⇒ WARN
+  PASS  check12: KHÔNG in ✅ khi có wakeup chưa giao được
+  PASS  check12: nói rõ row còn retry (khác hẳn ca MẤT hẳn)
+  PASS  check12: 2 lớp sự cố báo thành 2 dòng riêng
+  PASS  check12 [rc!=0]: WARN chứ không im lặng
+  PASS  check12 [rc!=0]: KHÔNG in dòng ✅ nào (khác hẳn 'đã kiểm và sạch')
+  PASS  check12 [thiếu journalctl]: WARN chứ không im lặng
+  PASS  check12 [thiếu journalctl]: KHÔNG in dòng ✅ nào (khác hẳn 'đã kiểm và sạch')
+  PASS  check12 [lỗi lạ]: WARN chứ không im lặng
+  PASS  check12 [lỗi lạ]: KHÔNG in dòng ✅ nào (khác hẳn 'đã kiểm và sạch')
+  PASS  check13: publish DT5G_macro + health cũ 3889' so với bây giờ (ts aware=True) ⇒ OK, 0 WARN (không báo động giả sáng thứ Hai)
+  PASS  check13: publish DT5G_macro + health cũ 3889' so với bây giờ (ts aware=False) ⇒ OK, 0 WARN (không báo động giả sáng thứ Hai)
+  PASS  check13: hai lượt cùng DT4_only khác lý do ⇒ trích đúng lượt publish (header CUỐI), không lượt cũ
+  PASS  check13: lượt publish cuối không in dòng cổng ⇒ 'không tìm thấy', KHÔNG mượn dòng lượt trước
+  PASS  check13: log cộng dồn chỉ có dòng cũ (mtime < mtime bản publish) ⇒ 'không tìm thấy'
+  PASS  check13: log refresh cũ hơn bản publish bị bỏ qua, dùng log mới hơn
+  PASS  check13: published_at theo UTC (lệch 7h) + health FAILED ghi 24' trước publish ⇒ nêu FAILED, không rơi vào 'ghi lại sau publish'
+  PASS  check13: status=DEGRADED + recommended=DT5G_macro ⇒ KHÔNG gán 'không đáng tin' (cổng chỉ loại FAILED hoặc rec khác DT5G_macro)
+  PASS  check13: ts health offset +09:00 (30' trước) ⇒ quy đổi đúng, không báo 'TƯƠNG LAI' giả
+  PASS  check13: log có byte hỏng (utf-8) ⇒ vẫn đọc được và trích dòng cổng (errors=replace)
+  PASS  check13: cả hai log đều hợp lệ ⇒ ưu tiên log refresh của ngày publish, không phải bq_freshness
+  PASS  check13: dòng xanh nêu tuổi bản publish (từ mtime) + bq_publish_ok
+  PASS  check13: exception lọt ⇒ đúng 1 dòng [WARN-ONLY] nêu lỗi thật, không ném ra ngoài
+  PASS  check13: 2 account trong một lượt ⇒ ĐÚNG 1 dòng cảnh báo
+  PASS  check13: SpaceX không còn live ⇒ account được chọn (ZaloPay) vẫn báo
+  PASS  check13: nhãn runonce rỗng ⇒ im (cùng cổng RUNONCE với 3 check chạy-một-lần khác; ca LỖI đã có dòng ⚠️ [runonce] riêng)
+  PASS  check13: DT4_only + health cũ tại lúc publish (ts aware=True) ⇒ WARN nêu ĐÚNG số phút đo được và ngưỡng 1440
+  PASS  check13: DT4_only + health cũ tại lúc publish (ts aware=False) ⇒ WARN nêu ĐÚNG số phút đo được và ngưỡng 1440
+  PASS  check13: ts health viết theo UTC (+00:00) ⇒ vẫn đúng 4321 phút (quy đổi, không ghi đè múi giờ)
+  PASS  check13: health JSON cụt ⇒ nêu lỗi parse THẬT (JSONDecodeError + thông điệp của parser)
+  PASS  check13: KHÔNG có file health ⇒ nêu FileNotFoundError thật, không nói 'cũ'
+  PASS  check13: health thiếu field ts ⇒ nêu KeyError 'ts' thật
+  PASS  check13: ts không phải ISO ⇒ nêu ValueError thật kèm giá trị hỏng
+  PASS  check13: health tươi nhưng status=FAILED rec=DT4_only ⇒ nêu đúng 2 giá trị đọc được, không nói 'cũ'
+  PASS  check13: health tươi nhưng status=DEGRADED rec=DT4_only ⇒ nêu đúng 2 giá trị đọc được, không nói 'cũ'
+  PASS  check13: health tươi nhưng status=FAILED rec=DT5G_macro ⇒ nêu đúng 2 giá trị đọc được, không nói 'cũ'
+  PASS  check13: ts health ở tương lai 125' so với bây giờ ⇒ nêu TƯƠNG LAI + số phút + mức cho lệch 5'
+  PASS  check13: ts trước bây giờ 2' (trong mức lệch 5') ⇒ KHÔNG gọi là tương lai
+  PASS  check13: health ghi lại SAU publish ⇒ nói thẳng không suy được, KHÔNG gán nguyên nhân (không 'cũ', không 'không đáng tin')
+  PASS  check13: DT4_only mà health tại lúc publish hợp lệ (186') ⇒ 'KHÔNG xác định được', không đoán
+  PASS  check13: mép ngưỡng tuổi 1440' ⇒ chưa cũ (khớp `>` của cổng)
+  PASS  check13: mép ngưỡng tuổi 1441' ⇒ CŨ (khớp `>` của cổng)
+  PASS  check13: DT4_STALE ⇒ WARN nêu engine đóng băng, KHÔNG đổ cho file health dù health cũ
+  PASS  check13: log lượt publish có dòng cổng tự in khớp nguồn ⇒ trích NGUYÊN VĂN kèm tên file
+  PASS  check13: dòng log nói nguồn KHÁC nguồn đã công bố ⇒ KHÔNG trích (không phải bằng chứng), nói rõ không tìm thấy
+  PASS  check13: không có log refresh ⇒ rơi sang bq_freshness.log
+  PASS  check13: trạng thái đã công bố JSON cụt ⇒ WARN với lỗi thật, KHÔNG bao giờ ✅
+  PASS  check13: trạng thái đã công bố thiếu field source ⇒ WARN với lỗi thật, KHÔNG bao giờ ✅
+  PASS  check13: KHÔNG có file trạng thái ⇒ WARN FileNotFoundError, không ✅
+  PASS  check13: published_at hỏng ⇒ vẫn WARN DT4_only; mốc publish lấy từ mtime nên vẫn đối chiếu được (published_at chỉ để hiển thị)
+  PASS  check13: chạy xong cây file y nguyên (không ghi, không tạo, không đổi mtime)
+  PASS  check13: khối không gọi get_gated_state / macro_state_live / subprocess / mở file để ghi
+  PASS  check13: khối khai đúng 2 hằng 1440 / 5
+  PASS  check13: ngưỡng tươi của cổng vẫn là max_health_age_min=1440
+  PASS  check13: mức lệch đồng hồ của cổng vẫn là MAX_HEALTH_FUTURE_SKEW_MIN = 5
+  PASS  check13: nhãn RUNONCE được tính TRƯỚC và truyền vào heredoc python; khối nằm trong heredoc trước dòng đếm WARN
+  PASS  routing: khối bash thật gọi ĐƯỢC cả 2 autofix (harness sống)
+  PASS  routing: label ops giữ nguyên per-account
+  PASS  routing: label wags fleet-wide theo ngày
+  PASS  routing: Winston VẪN nhận lỗi vận hành của mình (run_bot)
+  PASS  routing: Winston KHÔNG nhận triệu chứng ĐIỀU PHỐI 'câu hỏi (question)' (đã route sang Wags)
+  PASS  routing: Wags nhận 'câu hỏi (question)'
+  PASS  routing: Winston KHÔNG nhận triệu chứng ĐIỀU PHỐI 'Circuit breaker' (đã route sang Wags)
+  PASS  routing: Wags nhận 'Circuit breaker'
+  PASS  routing: Winston KHÔNG nhận triệu chứng ĐIỀU PHỐI 'Job board:' (đã route sang Wags)
+  PASS  routing: Wags nhận 'Job board:'
+  PASS  routing: Wags KHÔNG nhận lỗi vận hành của Winston
+  PASS  routing: Winston không nhận dòng [WARN-ONLY] (chỉ user quyết được)
+  PASS  routing: Winston không nhận dòng NOT_APPROVED (việc của user)
+  PASS  routing: Wags không nhận dòng [WARN-ONLY] (chỉ user quyết được)
+  PASS  routing: Wags không nhận dòng NOT_APPROVED (việc của user)
+  PASS  routing: chi tiết gửi Winston có nêu account đang chạy
+  PASS  failclosed: heredoc python chết (REPORT rỗng) ⇒ WARN_COUNT=1, KHÔNG phải 0
+  PASS  failclosed: có dòng ⚠️ 'báo cáo KHÔNG đầy đủ' kèm đuôi stderr, không gắn [WARN-ONLY]
+  PASS  failclosed: báo cáo bình thường giữ WARN_COUNT=0, không thêm dòng giả
+  PASS  failclosed: WARN_COUNT=3 từ python được giữ nguyên
+  PASS  9b: question trong archive .gz VÀ question hot chưa answer ⇒ có backing
+  PASS  9b: question đã answer (answer ở file sort trước) ⇒ KHÔNG backing, bị báo
+  PASS  routing: chỉ có triệu chứng điều phối ⇒ KHÔNG dispatch Winston
+  PASS  routing: … nhưng vẫn dispatch Wags
+  PASS  routing RED: đột biến 1 áp dụng được (chuỗi lời gọi chưa trôi)
+  PASS  routing RED#1 (quay lại $MSG): Winston LẠI nhận triệu chứng điều phối ⇒ assertion chính phân biệt được
+  PASS  routing RED: đột biến 2 áp dụng được (bộ lọc OTHER_WARN chưa trôi)
+  PASS  routing RED#2 (bỏ lọc coord khỏi OTHER_WARN): Winston LẠI nhận Circuit breaker
+  PASS  deliver: Discord OK ⇒ KHÔNG gửi Telegram (không nhân đôi tin)
+  PASS  deliver: Discord lỗi (registry hỏng) ⇒ rơi sang Telegram
+  PASS  deliver: cả 2 đường chết ⇒ ghi notify_thread_errors.log (check #10 lượt sau tố cáo)
+  PASS  check5: plan ĐÃ có approved_by ⇒ KHÔNG escalate câu hỏi 'chưa duyệt'
+  PASS  check5: vẫn NÓI RA việc bỏ qua (không im lặng nuốt khỏi backlog)
+  PASS  check5 ĐỐI CHỨNG: plan CHƯA duyệt ⇒ vẫn escalate bình thường
+  PASS  check5: lớp ops-autofix-unresolved VẪN escalate dù plan đã duyệt
+  PASS  check5 DRY-RUN: KHÔNG chạy closer (không ghi bus production)
+  PASS  check5 ĐỐI CHỨNG: chạy thật thì CÓ gọi closer (test không vô nghĩa)
+  PASS  check5: plan SpaceX duyệt KHÔNG đóng hộ câu hỏi ZaloPay
+  PASS  check5: approved_by_user cũng tính là đã duyệt ⇒ KHÔNG escalate
+
+OK: toàn bộ assertion PASS

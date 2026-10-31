@@ -76,6 +76,9 @@ Khác trong dict mà dòng hiển thị giữ nguyên: 64 (EOD) + 12 (plan echo)
 Đo được 22 cặp (plan, mã) dòng plan echo ≠ dòng EOD, đều FPT ở paper main. Ở ca có sự kiện CP, số user DUYỆT
 (21:00) có thể khác số EOD. Muốn plan echo live cần nguồn `Price` phiên T−1 trước 21:00 (BQ `tav2_bq.ticker` ingest
 ~17:2x, hoặc DNSE) — R11 KHÔNG làm vì đưa BQ lại vào đường 21:00 (R9 mục 8) và cần cổng freshness §6; để user quyết.
+**[ĐÍNH CHÍNH R12, arch-review R11]** câu trên ngụ ý đường 21:00 của R11 vẫn 0 BQ — SAI: khi có mã khớp (57/279
+lệnh replay), `price_sessions_for` gọi `oshares_dcf.prime` ⇒ truy vấn BQ ngay trên đường 21:00. R12 gỡ hẳn khớp phiên
+khỏi plan echo (khai `PRICE_SESSION_UNKNOWN` có chủ đích; đo 0 lời gọi BQ / 279 lệnh) — `../oshares_live_r12_20261031/SELFCHECK_R12.md`.
 
 Chi phí vận hành: khi có mã khớp, `price_sessions_for` gọi `oshares_dcf.prime` MỘT lô cho các mã đó (C21) thay vì
 ~4–5 truy vấn BQ/mã. EOD 19:10 nay có truy vấn BQ (trước: 0). Prime lỗi ⇒ oshares_dcf kêu stderr, từng mã tự hỏi
