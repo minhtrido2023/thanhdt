@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-30T07:45:57Z] [dcf-followups 30/10] XONG nhanh session/dcf-followups-20261030 (outer 35826c455, mike cfff46935, chua merge) — CHO Mike arch-review + merge 2 repo cung luot
 - [2026-10-30T10:04:14Z] [oshares-live-dcf 30/10] XONG outer 0a1a16675 (session/oshares-live-20261030, wt /home/trido/wt-oshares-live-20261030) + mike 898b4fd17 (session/oshares-live-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live = quyet dinh rieng
 - [2026-10-30T10:08:17Z] [dgc-dd-v2.2 30/10] XONG job Taylor_20261030_094438: dd_DGC_20261029/investor_report_v2_2/ (24tr, CHANGELOG+SELFCHECK, chua commit, chua gui) — CHO Mike chay fundamental-skeptic + quyet gui email
 - [2026-10-30T10:28:44Z] [dgc-dd-v2.2-rev2 30/10] XONG job Taylor_20261030_102330 tai investor_report_v2_2 (25tr, chua commit/gui) — CHO Mike quyet gui email / rà lai
@@ -26,3 +25,4 @@
 - [2026-10-31T04:00:21Z] [report-style-v2 31/10] XONG job Taylor_20261031_034015: research/report_style_v2_20261031/ (mock tuan/ngay/quy + chuan + module, chua commit, chua gan pipeline) — CHO user duyet chuan; 29/10 weekly -0,29 vs chuan -0,30 can quyet
 - [2026-10-31T04:48:52Z] [oshares-r9 31/10] XONG WC 63e1e4ff8 (session/oshares-r9-20261031) + mike b7242867b (session/oshares-r9-ops-20261031), chua merge, knob van fin — CHO arch-review+skeptic+user
 - [2026-10-31T05:43:28Z] [report-v2-wire 31/10] job Taylor_20261031_042009: nhanh session/report-v2-20261031 (wt /home/trido/wt-report-v2-20261031) commits 6cbd8cb1c,659fe5753,c27804f61,aefecafe0,afec43e7e — chua merge, CHO Mike arch-review + merge truoc cron thang 01/11 09:00; quy chua co lich (de xuat o doc)
+- [2026-10-31T07:28:05Z] [oshares-r10 31/10] XONG WC ce400083e (session/oshares-r10-20261031) + mike 980014bb3 (session/oshares-r10-ops-20261031), chua merge, knob van fin — CHO arch-review+skeptic+user; MST dong (live dung, quy ghi de)

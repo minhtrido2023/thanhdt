@@ -1697,3 +1697,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T05:37:36Z] [erp-domestic-dcf-enable 30/10] XONG job Taylor_20261030_050926: aba7502d1 (session/erp-domestic-dcf-20261030) + c8d4f77d4 mike (session/erp-domestic-dcf-ops-20261030), chua merge — CHO Mike arch-review+skeptic, merge 2 nhanh cung luot; rollback = RATE_FRAME_DEFAULT -> legacy
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T07:45:57Z] [dcf-followups 30/10] XONG nhanh session/dcf-followups-20261030 (outer 35826c455, mike cfff46935, chua merge) — CHO Mike arch-review + merge 2 repo cung luot
