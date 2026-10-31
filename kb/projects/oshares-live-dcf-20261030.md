@@ -101,3 +101,14 @@ Vòng R10 (job `Taylor_20261031_064246`, CHƯA merge; WC `session/oshares-r10-20
 `agents/Taylor/research/*` + `agents/Taylor/exp_capit*` gọi `fair_value`. `custom_basket.py` ép fin (R9 `pin_oshares_source_fin`); bản sao
 `data/fscore_c30v_20260801/custom_basket_fsx.py` (đóng băng) truyền giá không `price_date` ⇒ R5 ép `fin` khi live.
 Không cron mới; không đổi lịch.
+
+Vòng R11 (job `Taylor_20261031_082449`, CHƯA merge; WC `session/oshares-r11-20261031`, mike
+`session/oshares-r11-ops-20261031`; bằng chứng `agents/Taylor/research/oshares_live_r11_20261031/SELFCHECK_R11.md`):
+16. Caller có giá không mang phiên (plan echo, EOD, paper DC-book, converge/alphalens qua `dcf_check(price=)`, CLI)
+    ⇒ `dcf_valuation.price_session_for`: khớp `Price` chưa điều chỉnh của ≤5 phiên cache ≤ asof (±0,5 VND) ⇒
+    `price_date` = phiên đó (trùng đúng lời gọi tự đọc Price, đã review R8–R10); không khớp ⇒ `PRICE_SESSION_UNKNOWN`
+    ⇒ số quý + `logging.info` (im). `None` (caller chưa kiểm) VẪN kêu stderr. Khi khớp ⇒ `oshares_dcf.prime` 1 lô.
+17. GIỮ fin: `custom_basket` (BASKET_DCF_MODE) + 3 script backtest R3 (output không có hậu tố nguồn số CP).
+18. Hạn chế: plan echo 21:00 thấy cache tới T−2 ⇒ ref_price (đóng cửa T−1) gần như không khớp ⇒ SpaceX/ZaloPay
+    0/17 lệnh khớp (9/2026–10/2026), EOD 19:10 khớp 277/279 ⇒ plan echo (số quý) có thể ≠ EOD (live) ở mã có sự
+    kiện CP (22 cặp, đều FPT paper main, thưởng CP ex 2026-09-21). Nguồn Price T−1 trước 21:00 = việc user quyết.

@@ -1,0 +1,19 @@
+279 BUY (plan_date >= 2026-09-01), 11 ma
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live HT1 asof=2026-10-26: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live HT1 asof=2026-10-26: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-09-22: KHONG khoa duoc khung ex-date gia<->so CP (ISS doi khung gia ex 2026-09-21 trong [price_date=2026-09-21, asof=2026-09-22] -> khong chung minh duoc gia va so CP cung phia su kien) -> FALLBACK so quy (fin) !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-09-22: KHONG khoa duoc khung ex-date gia<->so CP (ISS doi khung gia ex 2026-09-21 trong [price_date=2026-09-21, asof=2026-09-22] -> khong chung minh duoc gia va so CP cung phia su kien) -> FALLBACK so quy (fin)
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live VNM: Price 60300 lap lai tu 2026-09-28 den 2026-09-29 -> khoa khung tu 2026-09-28 !!!!!
+DCF_OSHARES_SOURCE=live VNM: Price 60300 lap lai tu 2026-09-28 den 2026-09-29 -> khoa khung tu 2026-09-28
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT: Price 59700 lap lai tu 2026-10-07 den 2026-10-08 -> khoa khung tu 2026-10-07 !!!!!
+DCF_OSHARES_SOURCE=live FPT: Price 59700 lap lai tu 2026-10-07 den 2026-10-08 -> khoa khung tu 2026-10-07
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT: Price 57400 lap lai tu 2026-10-20 den 2026-10-21 -> khoa khung tu 2026-10-20 !!!!!
+DCF_OSHARES_SOURCE=live FPT: Price 57400 lap lai tu 2026-10-20 den 2026-10-21 -> khoa khung tu 2026-10-20
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT: Price 57400 lap lai tu 2026-10-20 den 2026-10-22 -> khoa khung tu 2026-10-20 !!!!!
+DCF_OSHARES_SOURCE=live FPT: Price 57400 lap lai tu 2026-10-20 den 2026-10-22 -> khoa khung tu 2026-10-20
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live VNM: Price 57600 lap lai tu 2026-10-23 den 2026-10-26 -> khoa khung tu 2026-10-23 !!!!!
+DCF_OSHARES_SOURCE=live VNM: Price 57600 lap lai tu 2026-10-23 den 2026-10-26 -> khoa khung tu 2026-10-23
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live VNM: Price 57600 lap lai tu 2026-10-23 den 2026-10-27 -> khoa khung tu 2026-10-23 !!!!!
+DCF_OSHARES_SOURCE=live VNM: Price 57600 lap lai tu 2026-10-23 den 2026-10-27 -> khoa khung tu 2026-10-23
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']

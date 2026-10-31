@@ -905,6 +905,20 @@ if orders:
                                             log_dcf_history)
     except Exception:
         _dcf_check_for_order = format_dcf_check = log_dcf_history = None
+    # R11: ref_price (DNSE) không mang phiên ⇒ khớp với Price chưa điều chỉnh của phiên trong cache local
+    # (dcf_valuation.price_sessions_for, 0 BQ cho bước khớp; prime một lô khi live). Lỗi/WC chưa có
+    # helper (merge lệch) ⇒ _dcf_pd=None ⇒ hành vi trước R11 (không khai, số quý).
+    _dcf_pd = None
+    if format_dcf_check and _dcf_check_for_order:
+        try:
+            from dcf_valuation import price_sessions_for as _psf
+            _dcf_pd = _psf([(o.get("ticker"), o.get("ref_price", o.get("mtm_price_ref", o.get("price"))))
+                            for o in orders
+                            if str(o.get("side", "")).lower() in ("buy", "mua", "b") and not o.get("dcf_check")
+                            and isinstance(o.get("ref_price", o.get("mtm_price_ref", o.get("price"))), (int, float))],
+                           date)
+        except Exception:
+            _dcf_pd = None
     # Due-diligence tổng hợp cho MỌI lệnh MUA (mandate user 2026-07-21) — thanh khoản/universe/
     # cơ học tín hiệu/cờ bất thường/FA thô. skip_dcf=True vì dòng DCF đã echo riêng ngay trên.
     # as_dict=True (27/10): renderer tự gộp 3 dòng DD/FA/cờ thành 1 dòng gọn; cờ ĐỎ vẫn do
@@ -1067,7 +1081,9 @@ if orders:
             dcf = o.get("dcf_check")
             if not dcf and is_buy and _dcf_check_for_order and isinstance(price, (int, float)):
                 try:
-                    dcf = _dcf_check_for_order(ticker, price, date)
+                    _kw = ({"price_date": _dcf_pd[(ticker, price)]}
+                           if _dcf_pd is not None and (ticker, price) in _dcf_pd else {})
+                    dcf = _dcf_check_for_order(ticker, price, date, **_kw)
                 except Exception:
                     dcf = None
             dcf_s = format_dcf_check(dcf, "buy" if is_buy else "sell",
