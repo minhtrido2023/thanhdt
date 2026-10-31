@@ -54,6 +54,76 @@
       "escalated_utc": "2026-10-24T22:37:06Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "dcf_selector_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:36Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: dcf_selector_selfcheck.py",
+      "escalated_utc": "2026-10-31T22:49:36Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/nav_unit_ledger_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:37Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/nav_unit_ledger_selfcheck.py",
+      "escalated_utc": "2026-10-31T22:49:37Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/production_manifest_selfcheck.sh": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:37Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/production_manifest_selfcheck.sh",
+      "escalated_utc": "2026-10-31T22:49:37Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/report_delivery_ledger_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:37Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/report_delivery_ledger_selfcheck.py",
+      "escalated_utc": "2026-10-31T22:49:37Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/report_v2_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:37Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/report_v2_selfcheck.py",
+      "escalated_utc": "2026-10-31T22:49:37Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/strategy_fit_email_attach_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:37Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/strategy_fit_email_attach_selfcheck.py",
+      "escalated_utc": "2026-10-31T22:49:37Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "oshares_dcf_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-10-31T22:49:37Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: oshares_dcf_selfcheck.py",
+      "escalated_utc": "2026-10-31T22:49:37Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
