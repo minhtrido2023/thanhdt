@@ -96,6 +96,7 @@ def mutations(md_path, acct, tmp):
                   "none": " None ", "nan": " nan "}
     if investor:
         html_cases["internal"] = " theo Livermore "
+        html_cases["internal_file"] = " thiếu dnse_raw_2026-07-01.jsonl "
     for tag, inj in html_cases.items():
         m = fresh("html_" + tag)
         man, d = al.load_v2(m)
@@ -223,6 +224,7 @@ def main():
     ap.add_argument("--cadences", default="monthly,weekly,daily")
     ap.add_argument("--week", default="2026-10-26_to_2026-10-30", help="fixture tuần (29/10 rút bod ⇒ −0,30%%)")
     ap.add_argument("--day", default="2026-10-30")
+    ap.add_argument("--quarter", default="2026-Q3", help="chỉ chạy khi --cadences có quarterly")
     ap.add_argument("--keep", help="giữ thư mục dựng ở đây (mặc định: tmp, xoá)")
     a = ap.parse_args()
     tmp = a.keep or tempfile.mkdtemp(prefix="report_v2_sc_")
@@ -236,7 +238,8 @@ def main():
     # (cadence, period CLI, stem-period, ngày cuối kỳ cho nav_period_returns)
     jobs = {"monthly": (a.period, a.period, m_end),
             "weekly": (a.week, a.week, a.week.split("_to_")[1]),
-            "daily": (a.day, a.day, a.day)}
+            "daily": (a.day, a.day, a.day),
+            "quarterly": (a.quarter, a.quarter, {"1": "03-31", "2": "06-30", "3": "09-30", "4": "12-31"}[a.quarter[-1]].join([a.quarter[:4] + "-", ""]))}
     for acct in a.accounts.split(","):
         for cad in a.cadences.split(","):
             per, stem_per, end = jobs[cad]
@@ -260,13 +263,17 @@ def main():
             if c is None:
                 check(False, f"{acct} {cad} đọc được nav_period_returns")
             else:
-                for k in ("mtd", "inception"):
+                for k in [k for k in ("mtd", "inception") if f"{k}_pct" in nums]:
                     got = (c.get(k) or {}).get("return_pct")
                     check(got is not None and abs(got - nums[f"{k}_pct"]) < 1e-9,
                           f"{acct} {cad} {k} manifest {nums[f'{k}_pct']} == nav_period_returns {got}")
                 if cad == "daily":
                     got = (c.get("day") or {}).get("return_pct")
                     check(got is not None and abs(got - nums["day_pct"]) < 1e-9, f"{acct} daily phiên {nums['day_pct']} == {got}")
+                if cad == "quarterly":
+                    led_q = c.get("inception") if a.quarter == "2026-Q3" else None   # quý khởi điểm: quý = từ đầu
+                    check(led_q is None or abs(led_q["return_pct"] - nums["qtd_pct"]) < 1e-9,
+                          f"{acct} quarterly {a.quarter} {nums['qtd_pct']} == từ đầu tới cuối quý {led_q and led_q['return_pct']}")
                 if cad == "weekly" and acct == "SpaceX" and a.week == "2026-10-26_to_2026-10-30":
                     # fixture: khoản rút 29/10 là `bod` ⇒ số chuẩn pipeline −0,30% (không phải −0,29%)
                     check(["29/10", "−0,30%"] in man.get("daily_rows", []), f"SpaceX tuần 26-30/10: dòng 29/10 = −0,30% ({man.get('daily_rows')})")
