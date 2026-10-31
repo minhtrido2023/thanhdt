@@ -201,7 +201,9 @@ def main():
     v2 = run(WT, "domestic_v2"); assert v2.returncode == 0, v2.stderr[-500:]
     dfl = run(WT); assert dfl.returncode == 0, dfl.stderr[-500:]
     check(f"(b0) không env ⇒ trùng byte frame mặc định {dflt}, không kêu",
-          dfl.stdout == (v2 if dflt == "domestic_v2" else leg).stdout and SHOUT not in dfl.stderr, f"md5={h(dfl)}")
+          dfl.stdout == (v2 if dflt == "domestic_v2" else leg).stdout
+          and not any(SHOUT in ln and "DCF_OSHARES_SOURCE" not in ln for ln in dfl.stderr.splitlines()),
+          f"md5={h(dfl)}")     # cutover oshares 31/10: caller không khai price_date kêu 1 lần/tiến trình (khung oshares, không phải khung lãi suất)
     import pandas as pd
     sim = pd.read_csv(os.path.join(RES, "out_imp_asof_per_ticker.csv")).set_index("ticker")
     got = {r[0]: r for r in json.loads(v2.stdout) if len(r) == 7}
