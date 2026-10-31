@@ -3,21 +3,27 @@
 
     python3 bin/report_v2/build.py <daily|weekly|monthly|quarterly> --account <SpaceX|ZaloPay> \
         --period <YYYY-MM-DD | YYYY-MM-DD (thứ Sáu) | YYYY-MM | YYYY-Qn> --out-dir <dir> \
-        [--narrative narrative.json] [--asof-label DD/MM/YYYY]
+        [--narrative narrative.json] [--promote]
 
-Đầu ra (KHÔNG gửi gì — gửi là việc của report_delivery_gate.py):
-  <out-dir>/<stem>.md                        TÓM TẮT cùng tên chuẩn (cadence/ledger/return gate đọc)
-  <out-dir>/v2/<stem>/<stem>.pdf              PDF A4, Be Vietnam Pro nhúng
-  <out-dir>/v2/<stem>/<stem>_email.html       HTML email, ảnh `cid:` (+ _email_cid.json)
-  <out-dir>/v2/<stem>/manifest.json           sha256 của PDF/HTML/ảnh + nguồn khối thị trường
-  <out-dir>/v2/<stem>/*.png|*.csv             chart + dữ liệu vẽ
+Đầu ra (KHÔNG gửi gì — gửi là việc của report_delivery_gate.py). Mọi lần dựng ghi vào NHÁP
+`<out-dir>/v2/draft/` (r3 N4) — lượt quét 08:30 (`reports/*_report_*.md`) không thấy nháp:
+  <out-dir>/v2/draft/<stem>.md                TÓM TẮT (tag khoá sha256 manifest + PDF)
+  <out-dir>/v2/draft/v2/<stem>/<stem>.pdf     PDF A4, Be Vietnam Pro nhúng
+  <out-dir>/v2/draft/v2/<stem>/<stem>_email.html   HTML email, ảnh `cid:` (+ _email_cid.json)
+  <out-dir>/v2/draft/v2/<stem>/manifest.json  sha256 PDF/HTML/ảnh + numbers + recon
+  <out-dir>/v2/draft/v2/<stem>/*.png|*.csv    chart + dữ liệu vẽ
+`--promote`: sau khi dựng xong, chạy artifact_lint trên nháp; sạch ⇒ đưa về tên CHUẨN
+`<out-dir>/<stem>.md` + `<out-dir>/v2/<stem>/` (thư mục trước, .md os.replace CUỐI). Bản chuẩn đã
+được giao (sổ report_delivery.json có kênh delivered) mà nội dung khác ⇒ TỪ CHỐI ghi đè (rc=5) —
+lượt dựng lại sau khi gửi (resume) không đổi sha của bản đã giao.
 <stem> = <Account>_<cadence>_report_<period> (weekly: <thứ Hai>_to_<thứ Sáu>; quý: <YYYY>-Q<n>).
 File .md ghi sha256 của PDF ⇒ sổ giao (hash của .md) bám luôn bản PDF; send_report_email.py thấy
 dòng `report_v2_manifest:` thì gửi HTML cid + đính kèm PDF thay cho render markdown.
 
 Số liệu: data_sources.py (chỉ pipeline). Phần chữ: narrative.json (narrative.py kiểm trần từ/gạch +
 cấm tự viết số). Không có narrative ⇒ câu tự động dựng từ chính số pipeline (fallback an toàn).
-rc: 0 xong · 2 narrative bị từ chối · 3 thiếu nguồn số bắt buộc · 1 lỗi khác.
+rc: 0 xong · 2 narrative bị từ chối · 3 thiếu nguồn số bắt buộc · 4 nháp không qua artifact lint
+    (không promote) · 5 bản chuẩn ĐÃ GIAO, không ghi đè · 1 lỗi khác.
 """
 import argparse
 import datetime as dt
@@ -25,6 +31,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import traceback
 
@@ -236,22 +243,24 @@ def write_outputs(cx, title, kicker, sub, header_left, md_lines, extra_manifest)
            "cid": {k: {"file": os.path.basename(v), "sha256": sha256(v)} for k, v in cid.items()},
            "pages": pages, "page_cap": PAGE_CAP[cx.cadence], "lint": lint,
            "recon": [list(r) for r in cx.recon], **extra_manifest}
-    man_path = cx.f("manifest.json")
-    with open(man_path, "w", encoding="utf-8") as fh:
-        json.dump(man, fh, ensure_ascii=False, indent=1, default=str)
-    rel_pdf = os.path.relpath(pdf, cx.out_dir)
-    rel_man = os.path.relpath(man_path, cx.out_dir)
-    md = "\n".join(md_lines).rstrip() + (
-        f"\n\n---\n📎 Bản đầy đủ (PDF A4, {pages} trang, có biểu đồ): `{os.path.basename(pdf)}` — đính kèm email.\n"
-        f"<!-- {MANIFEST_TAG} {rel_man} pdf_sha256={man['pdf_sha256']} pdf={rel_pdf} -->\n")
-    md_path = os.path.join(cx.out_dir, cx.stem + ".md")
-    with open(md_path + ".tmp", "w", encoding="utf-8") as fh:
-        fh.write(md)
-    os.replace(md_path + ".tmp", md_path)
+    # N3 (r3): kiểm trần trang + lint PDF TRƯỚC khi ghi manifest/.md ⇒ lỗi không để lại .md "hợp lệ".
     if pages > PAGE_CAP[cx.cadence]:
         raise RuntimeError(f"{cx.stem}: {pages} trang > trần {PAGE_CAP[cx.cadence]}")
     if lint["raw_markdown_hits"] or lint["non_bvp_fonts"]:
         raise RuntimeError(f"{cx.stem}: lint PDF hỏng {lint['raw_markdown_hits'][:3]} {lint['non_bvp_fonts']}")
+    man_path = cx.f("manifest.json")
+    with open(man_path + ".tmp", "w", encoding="utf-8") as fh:
+        json.dump(man, fh, ensure_ascii=False, indent=1, default=str)
+    os.replace(man_path + ".tmp", man_path)
+    rel_pdf = os.path.relpath(pdf, cx.out_dir)
+    rel_man = os.path.relpath(man_path, cx.out_dir)
+    md = "\n".join(md_lines).rstrip() + (
+        f"\n\n---\n📎 Bản đầy đủ (PDF A4, {pages} trang, có biểu đồ): `{os.path.basename(pdf)}` — đính kèm email.\n"
+        f"<!-- {MANIFEST_TAG} {rel_man} manifest_sha256={sha256(man_path)} pdf_sha256={man['pdf_sha256']} pdf={rel_pdf} -->\n")
+    md_path = os.path.join(cx.out_dir, cx.stem + ".md")
+    with open(md_path + ".tmp", "w", encoding="utf-8") as fh:
+        fh.write(md)
+    os.replace(md_path + ".tmp", md_path)   # bước CUỐI: chỉ có .md khi mọi kiểm đã qua
     return {"md": md_path, "pdf": pdf, "html": html, "manifest": man_path, "pages": pages,
             "prose_words": R.prose_words(cx.blocks, stop_at="Phụ lục"), "recon": cx.recon}
 
@@ -1088,6 +1097,47 @@ BUILDERS = {"daily": build_daily, "weekly": build_weekly, "monthly": build_month
             "quarterly": build_quarterly}
 
 
+def _delivered(stem_md, state_path):
+    """Kênh nào của <stem>.md đã 'delivered' trong sổ giao (theo tên file — khoá của sổ)."""
+    try:
+        with open(state_path, encoding="utf-8") as fh:
+            rec = (json.load(fh).get("reports") or {}).get(stem_md) or {}
+    except FileNotFoundError:
+        return []
+    return [c for c in ("discord", "email") if isinstance(rec.get(c), dict) and rec[c].get("status") == "delivered"]
+
+
+def promote(res, out_dir, investor, state_path):
+    """Nháp → tên chuẩn. → (rc, thông điệp). Không gửi gì."""
+    import artifact_lint as AL
+    draft_md = res["md"]
+    stem = os.path.basename(draft_md)[:-3]
+    probs = AL.lint_v2(draft_md, investor_facing=investor)
+    if probs:
+        return 4, "nháp KHÔNG qua artifact lint — không promote:\n  - " + "\n  - ".join(probs[:8])
+    final_md = os.path.join(out_dir, stem + ".md")
+    if os.path.exists(final_md):
+        if sha256(final_md) == sha256(draft_md):
+            return 0, f"bản chuẩn đã trùng nháp (idempotent): {final_md}"
+        done = _delivered(stem + ".md", state_path)
+        if done:
+            return 5, (f"{stem}.md ĐÃ GIAO ({'+'.join(done)}) — KHÔNG ghi đè bằng bản dựng lại; "
+                       f"nháp giữ ở {draft_md}. Muốn gửi lại bản mới = quyết định của người, đổi sổ giao tay.")
+    src = os.path.join(os.path.dirname(draft_md), "v2", stem)
+    dst = os.path.join(out_dir, "v2", stem)
+    tmp, old = dst + ".promote_tmp", dst + ".promote_old"
+    for p in (tmp, old):
+        shutil.rmtree(p, ignore_errors=True)
+    shutil.copytree(src, tmp)
+    if os.path.exists(dst):
+        os.rename(dst, old)
+    os.rename(tmp, dst)
+    shutil.rmtree(old, ignore_errors=True)
+    shutil.copyfile(draft_md, final_md + ".tmp")
+    os.replace(final_md + ".tmp", final_md)
+    return 0, f"promote → {final_md}"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("cadence", choices=("daily", "weekly", "monthly", "quarterly"))
@@ -1095,13 +1145,19 @@ def main(argv=None):
     ap.add_argument("--period", required=True)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--narrative")
+    ap.add_argument("--promote", action="store_true",
+                    help="nháp qua artifact lint ⇒ đưa về <out-dir>/<stem>.md (tên chuẩn); không ghi đè bản đã giao")
+    ap.add_argument("--delivery-state", default=os.environ.get("REPORT_DELIVERY_STATE"),
+                    help="sổ giao (mặc định <out-dir>/../state/report_delivery.json)")
     a = ap.parse_args(argv)
     if a.cadence not in BUILDERS:
         print(f"build.py: cadence {a.cadence} chưa có builder", file=sys.stderr)
         return 1
-    os.makedirs(a.out_dir, exist_ok=True)
+    out_dir = os.path.abspath(a.out_dir)
+    draft_dir = os.path.join(out_dir, "v2", "draft")
+    os.makedirs(draft_dir, exist_ok=True)
     try:
-        res = BUILDERS[a.cadence](a.account, a.period, os.path.abspath(a.out_dir), a.narrative)
+        res = BUILDERS[a.cadence](a.account, a.period, draft_dir, a.narrative)
     except N.NarrativeError as exc:
         print(f"build.py: {exc}", file=sys.stderr)
         return 2
@@ -1111,6 +1167,18 @@ def main(argv=None):
     except Exception:  # noqa: BLE001
         traceback.print_exc()
         return 1
+    res["draft"] = True
+    if a.promote:
+        state = a.delivery_state or os.path.join(os.path.dirname(out_dir), "state", "report_delivery.json")
+        rc, msg = promote(res, out_dir, ACCT_META[a.account]["investor"], state)
+        print(f"build.py: {msg}", file=sys.stderr)
+        if rc:
+            return rc
+        stem = os.path.basename(res["md"])[:-3]
+        adir = os.path.join(out_dir, "v2", stem)
+        res.update(md=os.path.join(out_dir, stem + ".md"), pdf=os.path.join(adir, os.path.basename(res["pdf"])),
+                   html=os.path.join(adir, os.path.basename(res["html"])), manifest=os.path.join(adir, "manifest.json"),
+                   draft=False)
     print(json.dumps({k: v for k, v in res.items() if k != "recon"}, ensure_ascii=False, default=str))
     return 0
 

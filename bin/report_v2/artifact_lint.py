@@ -18,7 +18,8 @@ import os
 import re
 
 MANIFEST_TAG = "report_v2_manifest:"
-TAG_RE = re.compile(r"<!--\s*report_v2_manifest:\s*(\S+)\s+pdf_sha256=([0-9a-f]{64})\s+pdf=(\S+)\s*-->")
+TAG_RE = re.compile(r"<!--\s*report_v2_manifest:\s*(\S+)\s+(?:manifest_sha256=([0-9a-f]{64})\s+)?"
+                    r"pdf_sha256=([0-9a-f]{64})\s+pdf=(\S+)\s*-->")
 REPR_MD = [r"\['\|", r"\\n\|"]
 try:
     from .vocab import INTERNAL_RE as INTERNAL, RAW_MD  # noqa: E402 (một nguồn với narrative.py)
@@ -37,7 +38,13 @@ def sha256(path):
 def parse_tag(md_text):
     """→ (manifest_rel, pdf_sha256, pdf_rel) | None."""
     m = TAG_RE.search(md_text)
-    return (m.group(1), m.group(2), m.group(3)) if m else None
+    return (m.group(1), m.group(3), m.group(4)) if m else None
+
+
+def manifest_sha_in_tag(md_text):
+    """sha256 của manifest.json khai trong tag (r3 N8) | None nếu tag cũ không có."""
+    m = TAG_RE.search(md_text)
+    return m.group(2) if m else None
 
 
 def strip_tag(md_text):
@@ -54,6 +61,13 @@ def load_v2(md_path):
         return None
     base = os.path.dirname(os.path.abspath(md_path))
     man_path = os.path.normpath(os.path.join(base, tag[0]))
+    # r3 N8: manifest (numbers.inception_pct mà cổng §31 đọc, recon, cid) cũng bị khoá sha256 từ .md —
+    # trước đó chỉ PDF/HTML/ảnh bị khoá nên sửa tay số trong manifest lọt cổng. Tag thiếu ⇒ CHẶN.
+    want = manifest_sha_in_tag(text)
+    if not want:
+        raise ValueError("tag report_v2_manifest thiếu manifest_sha256 (bản dựng trước r3 — dựng lại)")
+    if sha256(man_path) != want:
+        raise ValueError(f"sha256 manifest.json lệch tag .md (file {sha256(man_path)[:12]} · .md khai {want[:12]})")
     with open(man_path, encoding="utf-8") as fh:
         man = json.load(fh)
     d = os.path.dirname(man_path)
