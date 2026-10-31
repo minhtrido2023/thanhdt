@@ -1117,8 +1117,9 @@ if orders:
             if not dcf and is_buy and _dcf_check_for_order and isinstance(price, (int, float)):
                 try:
                     dcf = _dcf_timed(ticker, price, date)
-                except Exception:
+                except (Exception, _DcfTimeout):    # _DcfTimeout lọt qua kẽ µs giữa return và alarm(0)
                     dcf = None
+                    _dcf_timeouts.append(ticker)
                 if ticker in _dcf_timeouts:
                     lines.append("    ↳ ⚠️ DCF CHƯA kiểm (quá trần thời gian) — kiểm tay trước khi duyệt")
                     _oflag = True
