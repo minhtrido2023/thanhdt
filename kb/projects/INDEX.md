@@ -40,3 +40,4 @@
   `cash-vendor-gate-tracking.md` — user chốt 2026-08-15 **giữ ĐÓNG**; mở lại chỉ khi có ≥1 sự
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
 - [corp-action-broker-primary-live-criteria](corp-action-broker-primary-live-criteria.md) — MỞ: tiêu chí bật live nhánh broker corp-action (user chốt 2026-10-09), mốc xem lại 2026-12-15.
+- [oshares-live-dcf-20261030](oshares-live-dcf-20261030.md) — MỞ: nguồn số CP sống cho DCF (`DCF_OSHARES_SOURCE`), knob TẮT/merge 2026-10-31; bật live cần vá khoá ex-date `price_date=asof` + caller khai `price_date` + user duyệt riêng
