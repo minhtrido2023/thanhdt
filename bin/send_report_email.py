@@ -84,6 +84,16 @@ def _clean(s: str) -> str:
     return s.encode("utf-8", "surrogateescape").decode("utf-8", "replace")
 
 
+def _v2_inject_notes(html_body, lines):
+    """Chèn ghi chú đính kèm (markdown nhẹ `**x**`) vào cuối thân HTML v2, trước </body> nếu có."""
+    import html as _h
+    items = "".join("<p style=\"font-size:12px;color:#555\">"
+                    + re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", _h.escape(t)) + "</p>" for t in lines)
+    block = f"<hr><div class=\"attach-notes\">{items}</div>"
+    i = html_body.rfind("</body>")
+    return html_body[:i] + block + html_body[i:] if i >= 0 else html_body + block
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("report_path")
@@ -138,6 +148,7 @@ def main():
     # Báo cáo v2 (report-style v2, 2026-10-31): thân email = HTML builder dựng sẵn (ảnh cid), kèm PDF.
     # Artifact lint fail-closed ở ĐÂY nữa (không chỉ ở cổng giao) — gọi tay script này cũng không lọt.
     v2 = None
+    investor = False
     from report_v2 import artifact_lint as al  # noqa: E402
     if al.parse_tag(md_body):
         investor = "SpaceX" in fname and "ZaloPay" not in fname
@@ -204,6 +215,8 @@ def main():
             man, vdir = v2
             with open(os.path.join(vdir, man["html"]), encoding="utf-8") as f:
                 html_body = f.read()
+            if lines:   # r3 N9: ghi chú đính kèm (daily) không được rơi khỏi thân email v2
+                html_body = _v2_inject_notes(html_body, lines)
             inline_images = []
             for cid, meta in man.get("cid", {}).items():
                 with open(os.path.join(vdir, meta["file"]), "rb") as f:
@@ -226,10 +239,18 @@ def main():
                 pdf = MIMEApplication(f.read(), _subtype="pdf", Name=man["pdf"])
             pdf["Content-Disposition"] = f'attachment; filename="{man["pdf"]}"'
             msg.attach(pdf)
-        with open(args.report_path, "rb") as f:
-            part = MIMEApplication(f.read(), Name=fname)
-        part["Content-Disposition"] = f'attachment; filename="{fname}"'
-        msg.attach(part)
+        # r3 N9: bản v2 — .md đính kèm KHÔNG chứa comment `report_v2_manifest` (đường dẫn nội bộ);
+        # bản nhà đầu tư (SpaceX) không kèm .md (PDF là bản đầy đủ). Bản cũ: kèm nguyên .md như trước.
+        if v2:
+            if not investor:
+                part = MIMEApplication(md_body.encode("utf-8"), Name=fname)
+                part["Content-Disposition"] = f'attachment; filename="{fname}"'
+                msg.attach(part)
+        else:
+            with open(args.report_path, "rb") as f:
+                part = MIMEApplication(f.read(), Name=fname)
+            part["Content-Disposition"] = f'attachment; filename="{fname}"'
+            msg.attach(part)
         for extra in extras:
             msg.attach(extra)
         return msg

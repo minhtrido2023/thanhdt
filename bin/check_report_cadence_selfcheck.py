@@ -427,6 +427,11 @@ check("#22c V2_STEP: build.py + narrative.json + trần từ + dự phòng quy t
       all(k in _v2t for k in ("bin/report_v2/build.py ${KIND}", "--narrative", "≤25 từ", "KHÔNG tự viết số",
                               "rc=2", "QUY TRÌNH CŨ", "append_event.sh Taylor error", "${TFILE_SX}", "${TFILE_ZP}")),
       _v2t[:120])
+check("#22d V2_STEP r3: nháp ở reports/v2/draft/, chỉ lần dựng cuối --promote, rc=4/rc=5 có hướng xử lý",
+      all(k in _v2t for k in ("reports/v2/draft/", "--promote", "rc=4", "rc=5", "ĐÃ GIAO")), _v2t[:120])
+check("#22e N10: tháng --timeout 5400, tuần 3600, ngân sách nêu trong prompt",
+      "DISPATCH_TIMEOUT=5400" in _src and "DISPATCH_TIMEOUT=3600" in _src
+      and '--timeout "$DISPATCH_TIMEOUT"' in _src and "NGÂN SÁCH THỜI GIAN" in _src)
 if _wk:
     # Biến bash được phép nội suy trong thân PROMPT; còn lại (backtick, $(…), ${khác}) là command
     # substitution âm thầm làm rơi/đổi chữ — `bash -n` không bắt được (mutation M10/M11).
