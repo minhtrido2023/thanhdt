@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-30T10:28:44Z] [dgc-dd-v2.2-rev2 30/10] XONG job Taylor_20261030_102330 tai investor_report_v2_2 (25tr, chua commit/gui) — CHO Mike quyet gui email / rà lai
 - [2026-10-30T16:08:02Z] [oshares-r2r7 30/10] XONG outer a3c2c0600 (session/oshares-r2r7-20261030) + mike 0298dd9b1 (session/oshares-r2r7-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live can caller khai price_date truoc
 - [2026-10-30T16:15:40Z] [dd-NNC-20261030 30/10] XONG job Taylor_20261030_160612: research/dd_NNC_20261030/REPORT.md (chua commit) ky vong 50.300 (+7%), xap xi hop ly — CHO Mike doc/quyet investor report
 - [2026-10-31T02:00:49Z] [dd-NNC-investor-31/10] XONG job Taylor_20261031_014511: REPORT.md §13 (KV 59-79k, duoi vung) + investor_report/ (14tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
@@ -26,3 +25,4 @@
 - [2026-10-31T07:28:05Z] [oshares-r10 31/10] XONG WC ce400083e (session/oshares-r10-20261031) + mike 980014bb3 (session/oshares-r10-ops-20261031), chua merge, knob van fin — CHO arch-review+skeptic+user; MST dong (live dung, quy ghi de)
 - [2026-10-31T08:20:12Z] [report-v2-r3 31/10] XONG nhanh session/report-v2-r3-20261031 (wt /home/trido/wt-report-v2-r3-20261031, HEAD 57aac317f), chua merge — CHO Mike arch-review+merge truoc 17:30; weekly rerun cho user duyet; flaky md5 monthly SpaceX chua ro nguyen nhan
 - [2026-10-31T08:54:00Z] [oshares-r11 31/10] XONG WC 3ad1406ef (session/oshares-r11-20261031) + mike 167036792 (session/oshares-r11-ops-20261031), chua merge — CHO arch-review+skeptic+user; plan echo 21:00 van so quy (cache T-2), can user quyet nguon Price T-1
+- [2026-10-31T09:53:53Z] [dd-HPG-20261031 31/10] XONG job Taylor_20261031_093839: research/dd_HPG_20261031/REPORT.md (chua commit) — vung 17-23k trung tam ~20k vs gia 21k, xap xi hop ly; CHO Mike doc/quyet investor report
