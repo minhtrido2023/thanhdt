@@ -619,3 +619,18 @@
 - [2026-10-31T02:05:07Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261031_020006", "source": "watcher"}
 - [2026-10-31T02:05:23Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "in_progress", "note": "da co livermore PASS, calc attribution; dang tinh risk + soan 2 file"}
 - [2026-10-31T02:06:07Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+
+## Consolidation 2026-10-31T02:15:59Z
+- [2026-10-31T02:07:07Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:08:07Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:09:08Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:09:30Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "in_progress", "note": "so lieu + chart xong, dang ghi 2 file md"}
+- [2026-10-31T02:10:08Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:11:09Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:11:49Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "in_progress", "note": "2 file xong + verify VERBATIM; chay delivery gate"}
+- [2026-10-31T02:12:09Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:13:09Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:14:09Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:15:10Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261031_020006", "source": "watcher"}
+- [2026-10-31T02:15:48Z] Taylor/finding — weekly-report-2026-10-26_to_2026-10-30 xong, 2 gate COMPLETE: {"files": {"SpaceX": "reports/SpaceX_weekly_report_2026-10-26_to_2026-10-30.md", "ZaloPay": "reports/ZaloPay_weekly_report_2026-10-26_to_2026-10-30.md"}, "nav_cuoi_ky_vnd": {"SpaceX": 945141046, "ZaloPay": 939827062}, "sha256": {"SpaceX": "7e5630ea78c87bd6b1be7ba45107407a3e6d6b9e25db0a673e385d2aee1dac22", "ZaloPay": "b3435219b5964023335f03d35c0ff3f10bfecbeb96c7799d01bd96f86ae168ca"}, "delivery_gate": {"SpaceX": "COMPLETE", "ZaloPay": "COMPLETE"}, "livermore_verify_report": "VERBATIM (cả 2 file)", "measured_by": "report_delivery_gate.py từng file (rc=0); sha256sum; grep Tổng NAV trong 2 file report"}
+- [2026-10-31T02:15:57Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12846}
