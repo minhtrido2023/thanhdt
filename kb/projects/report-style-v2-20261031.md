@@ -25,7 +25,7 @@ trong .md khoá sha256 PDF; Discord nhận .md (bỏ dòng đó); email = HTML b
 ## Đã gắn
 - **Tháng/tuần**: `check_report_cadence.sh` — `V2_STEP` đứng đầu prompt dispatch; prompt cũ giữ nguyên làm DỰ PHÒNG khi build rc 1/3 (agent ghi `error report-v2-build-fail-<kỳ>` rồi soạn tay account đó).
 - **Ngày**: `eod_trading_report.sh::_deliver_eod` (chỉ nhánh có lệnh) — FAIL-OPEN 2 tầng: build lỗi/quá 600s ⇒ bản text cũ; cổng chặn bản v2 ⇒ gửi lại bản text cũ. ZaloPay: .md = 3 dòng + nguyên bản text cũ. Rollback: `EOD_REPORT_V2=0`. `_nav_section` nay chạy TRƯỚC khối REPORT (hết cảnh báo "NAV hôm nay CHƯA có" lặp).
-- **Quý**: builder có (`build.py quarterly --period 2026-Q4`, ≤8 trang; quý chứa ngày khởi điểm ⇒ đóng góp theo mã "không có"), chưa có lịch. Đề xuất: cron `check_report_cadence.sh --scheduled-quarterly` 09:00 ICT ngày 1 tháng sau quý (Q4/2026 đóng 31/12 ⇒ chạy 01/01/2027) — cần user duyệt + `kb/cron_registry.md` (§11) trước khi cài.
+- **Quý**: builder có (`build.py quarterly --period 2026-Q4`, ≤8 trang; quý chứa ngày khởi điểm ⇒ đóng góp theo mã "không có"), chưa có lịch. Đề xuất: thêm cờ `--scheduled-quarterly` (CHƯA có trong `check_report_cadence.sh`) + cron 09:00 ICT ngày 1 tháng sau quý (Q4/2026 đóng 31/12 ⇒ chạy 01/01/2027) — cần user duyệt + `kb/cron_registry.md` (§11) trước khi cài.
 
 ## Giới hạn đã biết
 - Discord (`notify_thread.sh`) không đính kèm file ⇒ PDF chỉ đi email.
