@@ -167,7 +167,7 @@ if RATE_FRAME == "domestic_v2" and DEFAULT_TERM_MODE != "cap_rf":
 #   gán (ops_health_check.sh khối CHECKDCFOS WARN). Giá trị lạ (env hoặc hằng số) KHÔNG raise: fallback
 #   "fin" + kêu to — một ValueError lúc import bị consumer nuốt thành DCF NOT_COMPUTED trên mọi mã.
 OSHARES_SOURCES = ("fin", "live")
-OSHARES_SOURCE_DEFAULT = "fin"
+OSHARES_SOURCE_DEFAULT = "live"
 
 
 def _resolve_oshares_source(env_val, default=OSHARES_SOURCE_DEFAULT):

@@ -170,9 +170,12 @@ PROBE_LIVE_OSD = ("import oshares_dcf as o; o.oshares_for = lambda t, a, f: {'va
 
 
 def c4_knob():
-    out, paths = _probe(PROBE, unset=("DCF_OSHARES_SOURCE",))
-    check("C4 env trống -> 'fin', không import oshares_dcf, không thêm khoá", out == "fin False []", out)
+    out, paths = _probe(PROBE_LIVE_OSD, unset=("DCF_OSHARES_SOURCE",))
+    check("C4 env trống -> 'live' (mặc định sau cutover 31/10), có khoá oshares_*",
+          out.startswith("live True") and "oshares_source" in out, out)
     check("C4 probe nạp dcf_valuation của cây đang test (H3)", _paths_ok(paths), str(paths))
+    out, paths = _probe(PROBE, {"DCF_OSHARES_SOURCE": "fin"})
+    check("C4 env=fin (rollback/override) -> 'fin', không import oshares_dcf, không thêm khoá", out == "fin False []", out)
     out, paths = _probe(PROBE, {"DCF_OSHARES_SOURCE": "bogus"})
     check("C4 giá trị lạ -> 'fin' (hành vi cũ)", out == "fin False []", out)
     out, paths = _probe(PROBE_LIVE_OSD, {"DCF_OSHARES_SOURCE": "live"})
@@ -262,15 +265,15 @@ def c6_source_of_truth():
     import dcf_valuation as dv
     src = open(dv.__file__, encoding="utf-8").read()
     m = re.search(r'^OSHARES_SOURCE_DEFAULT\s*=\s*"([^"]*)"', src, re.M)
-    check("C6 có đúng 1 dòng OSHARES_SOURCE_DEFAULT và = 'fin' (knob TẮT)",
-          m is not None and m.group(1) == "fin" and len(re.findall(r"^OSHARES_SOURCE_DEFAULT\s*=", src, re.M)) == 1,
+    check("C6 có đúng 1 dòng OSHARES_SOURCE_DEFAULT và = 'live' (knob BẬT, cutover 31/10/2026)",
+          m is not None and m.group(1) == "live" and len(re.findall(r"^OSHARES_SOURCE_DEFAULT\s*=", src, re.M)) == 1,
           m.group(1) if m else "none")
     R = dv._resolve_oshares_source
-    check("C6 env None/rỗng -> default", R(None) == ("fin", None) and R("  ") == ("fin", None)
-          and R(None, "live") == ("live", None))
-    v, w = R("live")
-    check("C6 env 'live' khác default -> 'live' + cảnh báo OVERRIDE", v == "live" and w and "OVERRIDE" in w, str(w))
-    check("C6 env == default -> không cảnh báo", R("fin") == ("fin", None) and R(" live ", "live") == ("live", None))
+    check("C6 env None/rỗng -> default", R(None) == ("live", None) and R("  ") == ("live", None)
+          and R(None, "fin") == ("fin", None))
+    v, w = R("fin")
+    check("C6 env 'fin' khác default -> 'fin' + cảnh báo OVERRIDE", v == "fin" and w and "OVERRIDE" in w, str(w))
+    check("C6 env == default -> không cảnh báo", R("live") == ("live", None) and R(" fin ", "fin") == ("fin", None))
     for bad in ("LIVE", "bogus", "1"):
         v, w = R(bad, "live")
         check(f"C6 env lạ {bad!r} -> 'fin' + KHONG HOP LE (kể cả khi default=live)", v == "fin" and "KHONG HOP LE" in (w or ""))
