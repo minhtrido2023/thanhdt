@@ -408,12 +408,20 @@ def main():
             out = os.path.join(tmp, acct, cad)
             rc1 = build(acct, per, out, cad)
             h1 = md5_tree(out)
+            run1 = out + "_run1"
+            shutil.rmtree(run1, ignore_errors=True)
+            shutil.copytree(out, run1)
             rc2 = build(acct, per, out, cad)
             h2 = md5_tree(out)
             check(rc1 == 0 and rc2 == 0, f"{acct} {cad} {per} dựng rc=0 cả 2 lần")
             check(h1 == h2 and bool(h1), f"{acct} {cad} 2 lần dựng cùng md5 ({len(h1)} file)")
             if h1 != h2:
                 print("    khác:", sorted(k for k in h1 if h1.get(k) != h2.get(k))[:8])
+                stem = f"{acct}_{cad}_report_{stem_per}"
+                for rel in (f"{stem}.md", os.path.join("v2", stem, "manifest.json")):
+                    r = subprocess.run(["diff", os.path.join(run1, rel), os.path.join(out, rel)],
+                                       capture_output=True, text=True)
+                    print(f"    diff {rel}:\n" + r.stdout[:3000])
             md_path = os.path.join(out, f"{acct}_{cad}_report_{stem_per}.md")
             if not os.path.exists(md_path):
                 check(False, f"{acct} {cad} có .md tóm tắt")
