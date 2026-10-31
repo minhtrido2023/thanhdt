@@ -17,16 +17,48 @@
   - R4 bỏ nhánh promote ISS `announced` (rỗng ở 1.557/1.557 hàng đo).
   - R5 khoá khung ex-date giá↔số CP (`dcf_valuation._live_oshares`): không khoá được ⇒ `fin` + kêu.
 
-## Điều kiện TRƯỚC khi bật live (chưa làm — cố ý)
-1. **Caller phải khai `price_date`.** Hiện KHÔNG caller production nào truyền ⇒ nếu bật live hôm nay,
-   mọi lời gọi có giá rơi về `fin` (kêu stderr 1 lần/tiến trình), chỉ lời gọi `price=None` đổi số.
-   Cần sửa (đường tiền, cần review riêng): `trading_bot/strategies.py::_dcf_check_for_order`
-   (gọi từ `mike/bin/lag_dd_pack.py:247` qua `dd._ref_price_for`, `trading_bot/due_diligence.py:1035`
-   qua `ctx["price"]`/`row.Price`), `custom_basket.py::dcf_at` (Price phiên `d`).
-2. Khoá R5 chỉ bắt lệch giữa ngày giá và asof; KHÔNG bắt vendor trễ lật `announced→executed`
-   (TCB ISS ex 29/10: còn `announced` 30/10 16:5x ICT, đã `executed` khi chạy selfcheck BQ 30/10 tối).
-   Lớp sai số này `fin` cũng mắc.
-3. quant-skeptic phản biện gói R7 (Mike gọi) + user duyệt.
+- Vòng R2-R7 đã MERGE 31/10 (WC `c2c817139`, mike `153d7ec24` + INDEX `97bbf64ec`).
+- Vòng R8 (job `Taylor_20261031_025427`, CHƯA merge): WC nhánh `session/oshares-r8-20261031`
+  (worktree `/home/trido/wt-oshares-r8-20261031`), mike `session/oshares-r8-ops-20261031`. Bằng chứng:
+  `agents/Taylor/research/oshares_live_r8_20261031/SELFCHECK.md`.
+
+## Điều kiện TRƯỚC khi bật live
+Đã đóng ở R8 (trên nhánh, chờ arch-review + quant-skeptic + merge):
+1. ~~Caller khai `price_date`~~ (H4). `_dcf_check_for_order(..., price_date=None)`; khai ở
+   `lag_dd_pack.run_valuation` (phiên `Price` qua `dd._ref_price_session`), trục DCF của
+   `due_diligence` (row.time khi tự đọc `Price`; `ctx["price_date"]` khi caller truyền giá),
+   `custom_basket.dcf_at` (`price_date=d`), `dcf_valuation.dcf_check` khi tự đọc giá. Rơi về `Close`
+   (đã điều chỉnh ngược) ⇒ KHÔNG khai. **CỐ Ý không khai** (không xác định được phiên của giá ⇒ live = số quý):
+   `send_plan_report.sh` / `eod_trading_report.sh` (`ref_price` của plan — nguồn tuỳ người lập plan),
+   `converge_report` (giá caller), `dc_book_waterfall_paper` (giá state, paper).
+2. ~~Khoá R5 lọt ca ex đúng asof~~ (H1). Hợp đồng `price_date` = phiên giá THUỘC VỀ (docstring
+   `fair_value`). Khoá thêm lịch: ISS dời khung giá (`PRICE_ADJUSTING_ISS` + ISS không ghi phương thức)
+   ex trong [price_date, asof], đọc `pricing_events` (gồm `announced` ⇒ bắt được một phần trễ vendor) ⇒
+   số quý + kêu; cả price_date > asof và lỗi đọc lịch ⇒ số quý.
+3. ~~ERROR im lặng~~ (H2): `oshares_for` ERROR/raise ⇒ số quý + kêu stderr 1 lần/tiến trình/mã.
+4. ~~Probe selfcheck nạp code PROD~~ (H3): `dcf_valuation.py:64` chèn WORKDIR canonical lên đầu
+   `sys.path`; probe ghim lại cây đang test + kiểm đường dẫn module (C4/C6/C12, mutant M22).
+5. ~~Launcher ngoài cây~~ (H6): mục 17 quét thêm systemd user (+drop-in, environment.d), ccdb `.env`,
+   settings Claude, shell profile, `/proc/*/environ` đọc được. 31/10: 0 lần gán (11 file + 18 tiến trình).
+   Hạn chế: /proc của user khác không đọc được; launcher ngoài các gốc này không quét.
+
+Còn lại:
+- arch-review + quant-skeptic gói R8, merge 2 nhánh, rồi user duyệt bật (đổi 1 từ + cutover-marker).
+- Vendor trễ lật `announced→executed` mà KHÔNG có dòng ISS nào (kể cả announced) ⇒ khoá không thấy;
+  `fin` cùng lỗi.
+- Mất mát đã biết của khoá lịch: phiên ex đúng ngày giá luôn về số quý (BSR 2025-10-29 ex 10-29 là ca
+  đổi số ĐÚNG bị bỏ). Bảo thủ có chủ đích.
+- quant-skeptic mục 4 (MST 2025-10-29 ×0,7359: số quý 113,6tr vs AIS 83,6tr) CHƯA kết luận — bật live
+  làm MST MẤT cờ DCF_RICH sâu của `lag_dd_pack` ở asof đó.
+
+## Ảnh hưởng nếu bật live (R8, đo qua caller thật, `out_impact_r8_*.csv`)
+- Lời gọi không khai price_date (plan approval / EOD): 0 thay đổi ở 4 asof (toàn bộ FRAME_FALLBACK).
+- `lag_dd_pack` / DD / `dcf_at` (khai phiên giá): lật CHEAP→RICH = PHR, HTN, AIG (2026-10-29), REE
+  (2026-07-29), GAS (2024-10-29) — cả 5 khớp đúng số CP thật trong `corporate_action` (H5); RICH đều
+  NHẸ ⇒ chỉ là WARNING, KHÔNG thêm cờ DCF_RICH. Cờ DCF_RICH sâu mất: MST (2025-10-29). Chạy sáng T+1
+  (giá phiên T): HHV 2025-10-30 robust False→True (số quý 547tr chứa trước đợt quyền mua ex 12-25 ⇒
+  `fin` nhìn trộm tương lai, live đúng).
+- `custom_basket.dcf_at` chỉ chạy khi `BASKET_DCF_MODE` bật — production không đặt (grep crontab/bin).
 
 ## Rollback
 Đổi `OSHARES_SOURCE_DEFAULT` về `"fin"` (1 từ). Mặc định `fin` trùng byte bản trước knob
