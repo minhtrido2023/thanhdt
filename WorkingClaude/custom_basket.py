@@ -897,7 +897,9 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
             out = ("NOT_COMPUTED", np.nan, False)
             if px and px > 0:
                 try:
-                    res = _dcfv.fair_value(tk, pd.Timestamp(d), price=px, fin=_fin)
+                    # price_date = d: px là `Price` (chưa điều chỉnh) của ĐÚNG phiên d (_px_map khoá
+                    # (ticker, time=d)); chỉ có tác dụng khi DCF_OSHARES_SOURCE=live (R8/H4).
+                    res = _dcfv.fair_value(tk, pd.Timestamp(d), price=px, fin=_fin, price_date=pd.Timestamp(d))
                     if res.get("ok"):
                         mos = res.get("margin_of_safety")
                         if mos is not None and pd.notna(mos):

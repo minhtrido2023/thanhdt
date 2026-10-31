@@ -38,8 +38,12 @@ def _dcf_is_conglomerate(ticker):
         return False
 
 
-def _dcf_check_for_order(ticker, price, asof):
+def _dcf_check_for_order(ticker, price, asof, price_date=None):
     """Tính dcf_check dict cho 1 BUY order (non-financial, informational only).
+
+    price_date = phiên mà `price` THUỘC VỀ (hợp đồng ở dcf_valuation.fair_value; R8/H4). Chỉ có
+    tác dụng khi DCF_OSHARES_SOURCE=live; ở fin bị bỏ qua (output byte-identical). Không biết
+    phiên của giá (ref_price của plan, giá DNSE sống) ⇒ để None ⇒ live rơi về số quý.
 
     Đọc từ data/bq_cache/ticker_financial.parquet (local parquet, không gọi BQ live).
     Fail-safe: mọi lỗi đều trả NOT_COMPUTED với reason="dcf_error:...", KHÔNG raise.
@@ -53,7 +57,7 @@ def _dcf_check_for_order(ticker, price, asof):
             _sys.path.insert(0, WORKDIR)
         import dcf_valuation as _dcf
 
-        res = _dcf.fair_value(ticker, asof, price=price)
+        res = _dcf.fair_value(ticker, asof, price=price, price_date=price_date)
 
         if not res["ok"]:
             reason = res.get("reason", "unknown")

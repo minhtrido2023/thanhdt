@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Selfcheck oshares_dcf + knob DCF_OSHARES_SOURCE của dcf_valuation (job Taylor_20261030_094435;
 R2-R5 job Taylor_20261030_155013: C6 nguồn sự thật OSHARES_SOURCE_DEFAULT, C7 khoá khung ex-date,
-C8 khối CHECKDCFOS của ops_health_check.sh, C9 script nghiên cứu ép fin).
+C8 khối CHECKDCFOS của ops_health_check.sh, C9 script nghiên cứu ép fin; R8 job Taylor_20261031_025427:
+C7 thêm khoá lịch ex-date [price_date, asof] (H1), C10 oshares_for LỖI kêu + về fin (H2), C4/C6/C12
+probe nạp ĐÚNG cây đang test (H3), C11 caller khai price_date (H4)).
 
   python3 oshares_dcf_selfcheck.py          # offline (fixture từ dòng corporate_action thật 30/10)
   python3 oshares_dcf_selfcheck.py --bq     # + đối chiếu BQ thật TCB/NED/DGC/TV1/KSV/HUB
@@ -22,8 +24,16 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import oshares_dcf as osd           # noqa: E402
+# H3 (R8): dcf_valuation chèn WORKDIR canonical lên ĐẦU sys.path lúc import (dcf_valuation.py:64) ⇒ mọi
+# import SAU nó (oshares_pit, oshares_live, trading_bot, ...) nạp bản PROD thay vì cây đang test. Ghim
+# HERE lên đầu lại NGAY sau import; probe subprocess làm đúng như vậy (PIN) và C12 kiểm đường dẫn nạp.
+import dcf_valuation as dv          # noqa: E402
+sys.path.insert(0, HERE)
 PROD = "/home/trido/thanhdt/WorkingClaude"
 OPS = os.environ.get("DCF_OS_OPS_HEALTH", os.path.join(PROD, "mike/bin/ops_health_check.sh"))
+LAG_DD_PACK = os.environ.get("DCF_OS_LAG_DD_PACK", os.path.join(PROD, "mike/bin/lag_dd_pack.py"))
+TESTED_MODS = ("dcf_valuation", "oshares_dcf", "oshares_pit", "oshares_live", "corp_action_lib",
+               "trading_bot.strategies", "trading_bot.due_diligence")
 
 SD, BON, RIGHTS = "Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng", "Quyền mua CP cho Cổ đông hiện hữu"
 
@@ -126,28 +136,59 @@ def _subproc(code, env_extra=None, unset=()):
     return p.stdout.strip().splitlines()[-1] if p.stdout.strip() else f"ERR {p.stderr[-300:]}"
 
 
-PROBE = ("import sys; sys.path.insert(0, %r); import dcf_valuation as d; "
-         "r = d.fair_value('FPT', '2026-10-29', price=100000.0); "
-         "print(d.OSHARES_SOURCE, 'oshares_dcf' in sys.modules, sorted(k for k in r if k.startswith('oshares_')))") % HERE
+PIN = ["sys.path.insert(0, %r); " % HERE]      # mutant hook M22: [""] = probe không ghim lại HERE
+
+
+def probe_code(body):
+    """Mã probe subprocess: nạp dcf_valuation TỪ HERE, ghim lại HERE, chạy `body` (phải gán `out`),
+    in 1 dòng JSON {out, paths: {module: thư mục đã nạp}} để kiểm cây được test là cây nào (H3)."""
+    return ("import sys, os, json; sys.path.insert(0, %r); import dcf_valuation as d; " % HERE + PIN[0] + body +
+            "; print(json.dumps({'out': out, 'paths': {m: os.path.dirname(os.path.abspath(sys.modules[m].__file__)) "
+            "for m in %r if m in sys.modules}}))" % (TESTED_MODS,))
+
+
+def _probe(body, env_extra=None, unset=()):
+    import json
+    line = _subproc(probe_code(body), env_extra, unset)
+    try:
+        j = json.loads(line)
+    except ValueError:
+        return line, {}
+    return j["out"], j["paths"]
+
+
+def _paths_ok(paths):
+    return bool(paths) and all(v == HERE for v in paths.values())
+
+
+PROBE = ("r = d.fair_value('FPT', '2026-10-29', price=100000.0); "
+         "out = ' '.join([d.OSHARES_SOURCE, str('oshares_dcf' in sys.modules), "
+         "str(sorted(k for k in r if k.startswith('oshares_')))])")
+PROBE_LIVE_OSD = ("import oshares_dcf as o; o.oshares_for = lambda t, a, f: {'value': f, 'source': 'x', 'method': 'X'}; "
+                  "o.frame_events = lambda t, a, b: []; " + PROBE)
 
 
 def c4_knob():
-    out = _subproc(PROBE, unset=("DCF_OSHARES_SOURCE",))
+    out, paths = _probe(PROBE, unset=("DCF_OSHARES_SOURCE",))
     check("C4 env trống -> 'fin', không import oshares_dcf, không thêm khoá", out == "fin False []", out)
-    out = _subproc(PROBE, {"DCF_OSHARES_SOURCE": "bogus"})
+    check("C4 probe nạp dcf_valuation của cây đang test (H3)", _paths_ok(paths), str(paths))
+    out, paths = _probe(PROBE, {"DCF_OSHARES_SOURCE": "bogus"})
     check("C4 giá trị lạ -> 'fin' (hành vi cũ)", out == "fin False []", out)
-    out = _subproc(PROBE, {"DCF_OSHARES_SOURCE": "live"})
+    out, paths = _probe(PROBE_LIVE_OSD, {"DCF_OSHARES_SOURCE": "live"})
     check("C4 env=live -> 'live', có khoá oshares_* (gồm oshares_frame_error)",
           out.startswith("live True") and "oshares_source" in out and "oshares_frame_error" in out, out)
+    check("C4 env=live: oshares_dcf/oshares_pit... nạp từ cây đang test, KHÔNG từ PROD (H3)",
+          _paths_ok(paths) and "oshares_dcf" in paths, str(paths))
 
     import dcf_valuation as dv
     fin = dv._load_financials()
-    real = osd.oshares_for
+    real, real_fe = osd.oshares_for, osd.frame_events
     calls = []
     try:
         dv.OSHARES_SOURCE = "fin"
         base = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
         dv.OSHARES_SOURCE = "live"
+        osd.frame_events = lambda t, d0, d1: []
         osd.oshares_for = lambda t, a, f: (calls.append(f) or {"value": 2 * f, "source": "oshares_live",
                                                                "method": "X"})
         dbl = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
@@ -183,6 +224,7 @@ def c4_knob():
         def _boom(*a, **k):
             raise RuntimeError("bq down (simulated)")
         _ol._fetch = _boom
+        dv._WARNED_ONCE.clear()
         buf, err = io.StringIO(), io.StringIO()
         try:
             with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err):
@@ -194,6 +236,7 @@ def c4_knob():
               f"stdout={buf.getvalue()[:60]!r} stderr={err.getvalue()[:60]!r}")
     finally:
         osd.oshares_for = real
+        osd.frame_events = real_fe
         dv.OSHARES_SOURCE = "fin"
 
 
@@ -230,10 +273,11 @@ def c6_source_of_truth():
         check(f"C6 env lạ {bad!r} -> 'fin' + KHONG HOP LE (kể cả khi default=live)", v == "fin" and "KHONG HOP LE" in (w or ""))
     v, w = R(None, "lvie")
     check("C6 hằng số default gõ sai -> 'fin' + kêu", v == "fin" and "OSHARES_SOURCE_DEFAULT" in (w or ""))
-    p = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, %r); import dcf_valuation as d; print(d.OSHARES_SOURCE)" % HERE],
+    p = subprocess.run([sys.executable, "-c", probe_code("out = d.OSHARES_SOURCE")],
                        cwd=HERE, env={**os.environ, "DCF_OSHARES_SOURCE": "bogus"}, capture_output=True, text=True, timeout=300)
-    check("C6 import với env lạ: không raise, 'fin', kêu stderr", p.returncode == 0 and p.stdout.strip().endswith("fin")
+    check("C6 import với env lạ: không raise, 'fin', kêu stderr", p.returncode == 0 and '"out": "fin"' in p.stdout
           and "KHONG HOP LE" in p.stderr, p.stderr[-120:])
+    check("C6 probe nạp dcf_valuation của cây đang test (H3)", f'"dcf_valuation": "{HERE}"' in p.stdout, p.stdout[-160:])
 
 
 class _FakeOS:
@@ -246,10 +290,21 @@ class _FakeOS:
         return {"value": f * (self.mult if a >= self.ex else 1.0), "source": "oshares_live", "method": "FAKE"}
 
 
+def _ev_fixture(rows):
+    """Nạp _EV_CACHE của oshares_dcf bằng dòng pricing_events giả (FPT) — frame_events THẬT lọc trên đó."""
+    osd._EV_CACHE.update(tickers=frozenset({"FPT"}), until="2026-12-31",
+                         rows=[{**r, "ticker": "FPT"} for r in rows])
+
+
+def _ev_clear():
+    osd._EV_CACHE.update(tickers=frozenset(), until=None, rows=None)
+
+
 def c7_frame_lock():
     import dcf_valuation as dv
     fin = dv._load_financials()
     real = osd.oshares_for
+    _ev_fixture([])
     try:
         dv.OSHARES_SOURCE = "fin"
         base = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin)
@@ -295,9 +350,208 @@ def c7_frame_lock():
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.StringIO()):
             dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-17")
         check("C7 nhánh fallback không in ra STDOUT", buf.getvalue() == "", buf.getvalue()[:60])
+
+        # ---- R8/H1: kịch bản killer của skeptic + lịch ex-date [price_date, asof]
+        fake29 = _FakeOS(ex="2026-10-29")           # vendor ĐÃ executed: số CP ×1,5 từ chính ngày asof
+        osd.oshares_for = fake29
+        _ev_fixture([iss("2026-10-29", 0.5, BON)])
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
+        check("C7/H1 KILLER: ex == asof, giá tham chiếu cũ khai price_date=asof -> số quý + kêu",
+              r["oshares"] == base["oshares"] and r["oshares_method"] == "FRAME_FALLBACK"
+              and "ISS doi khung gia ex 2026-10-29" in (r["oshares_frame_error"] or "")
+              and "KHONG khoa duoc khung" in err.getvalue(), r.get("oshares_frame_error"))
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-29")
+        check("C7/H1 ex == price_date < asof -> số quý (không chứng minh được giá phiên ex đã điều chỉnh)",
+              r["oshares_method"] == "FRAME_FALLBACK", r.get("oshares_frame_error"))
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-30")
+        check("C7/H1 ex < price_date == asof -> khoá OK, số sống ×1,5 (giá và số CP cùng SAU ex)",
+              math.isclose(r["oshares"], base["oshares"] * 1.5) and r["oshares_frame_error"] is None,
+              r.get("oshares_frame_error"))
+        r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C7/H1 giá đúng phiên T-1 (trước ex), asof = ex -> số quý (R5 hoặc lịch bắt)",
+              r["oshares_method"] == "FRAME_FALLBACK", r.get("oshares_frame_error"))
+        stale = _FakeOS(ex="2099-01-01")             # vendor CHƯA lật executed: hai ngày cùng số cũ
+        osd.oshares_for = stale
+        _ev_fixture([iss("2026-10-29", 0.5, BON, status="announced")])
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C7/H1 vendor trễ (số CP hai ngày BẰNG nhau) + ISS announced giữa hai ngày -> số quý (R5 không thấy, lịch thấy)",
+              r["oshares_method"] == "FRAME_FALLBACK" and "ISS doi khung gia" in (r["oshares_frame_error"] or ""),
+              r.get("oshares_frame_error"))
+        _ev_fixture([iss("2026-10-29", 0.0, "Phát hành riêng lẻ"), div("2026-10-29", 0.2)])
+        r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
+        check("C7/H1 riêng lẻ / cổ tức TIỀN ex == asof -> không dời khung giá, khoá OK",
+              r["oshares_frame_error"] is None, r.get("oshares_frame_error"))
+        _ev_fixture([iss("2026-10-29", 0.1, meth=None)])
+        r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
+        check("C7/H1 ISS không ghi phương thức ex == asof -> coi như dời khung (fail-closed)",
+              r["oshares_method"] == "FRAME_FALLBACK", r.get("oshares_frame_error"))
+        _ev_fixture([iss("2026-10-27", 0.5, BON), iss("2026-10-31", 0.5, BON)])
+        r = dv.fair_value("FPT", "2026-10-30", price=100000.0, fin=fin, price_date="2026-10-28")
+        check("C7/H1 sự kiện ngoài [price_date, asof] (trước và sau) -> khoá OK",
+              r["oshares_frame_error"] is None, r.get("oshares_frame_error"))
+        _ev_fixture([])
+        r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-30")
+        check("C7/H1 price_date SAU asof -> số quý", r["oshares_method"] == "FRAME_FALLBACK"
+              and "SAU asof" in (r["oshares_frame_error"] or ""), r.get("oshares_frame_error"))
+        real_pe = osd.pricing_events
+        def _ev_boom(*a, **k):
+            raise RuntimeError("bq down (simulated)")
+        osd.pricing_events = _ev_boom
+        _ev_clear()                                  # frame_events THẬT phải hỏi pricing_events -> lỗi
+        try:
+            r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
+        finally:
+            osd.pricing_events = real_pe
+        check("C7/H1 không đọc được lịch ex-date -> số quý (fail-closed)", r["oshares_method"] == "FRAME_FALLBACK"
+              and "lich ex-date" in (r["oshares_frame_error"] or ""), r.get("oshares_frame_error"))
+        r = dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)
+        check("C7/H1 không giá -> không đọc lịch, số sống", r["oshares_frame_error"] is None)
     finally:
         osd.oshares_for = real
+        _ev_clear()
         dv.OSHARES_SOURCE = "fin"
+
+
+def c10_oshares_error():
+    """R8/H2: oshares_for LỖI (method ERROR hoặc raise) -> số quý + kêu stderr 1 lần/tiến trình/MÃ."""
+    import dcf_valuation as dv
+    fin = dv._load_financials()
+    real = osd.oshares_for
+    try:
+        dv.OSHARES_SOURCE = "fin"
+        base = dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)
+        base_h = dv.fair_value("VNM", "2026-10-29", price=None, fin=fin)
+        dv.OSHARES_SOURCE = "live"
+        dv._WARNED_ONCE.clear()
+        osd.oshares_for = lambda t, a, f: {"ticker": t, "value": f, "source": "ticker_financial",
+                                           "reason": "oshares_dcf lỗi (RuntimeError: x)", "method": "ERROR"}
+        err, out = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
+            r1 = dv.fair_value("FPT", "2026-10-29", price=None, fin=fin)
+            r2 = dv.fair_value("FPT", "2026-10-28", price=None, fin=fin)
+            r3 = dv.fair_value("VNM", "2026-10-29", price=None, fin=fin)
+        e = err.getvalue()
+        check("C10 ERROR -> số quý, method ERROR", r1["oshares"] == base["oshares"] and r1["oshares_method"] == "ERROR"
+              and r3["oshares"] == base_h["oshares"], f"{r1.get('oshares_method')}")
+        check("C10 ERROR -> kêu stderr 1 lần/MÃ (FPT 2 lời gọi = 1 tiếng, VNM thêm 1)",
+              e.count("!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: oshares_for LOI") == 1
+              and e.count("!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live VNM asof=2026-10-29: oshares_for LOI") == 1
+              and e.count("!!!!! [dcf_valuation]") == 2, e[:300])
+        check("C10 ERROR -> stdout sạch", out.getvalue() == "", out.getvalue()[:60])
+
+        def _raise(t, a, f):
+            raise ValueError("boom")
+        osd.oshares_for = _raise
+        dv._WARNED_ONCE.clear()
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-29")
+        check("C10 oshares_for RAISE -> không raise, số quý + kêu", r["ok"] and r["oshares"] == base["oshares"]
+              and r["oshares_method"] == "ERROR" and "!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: oshares_for LOI"
+              in err.getvalue(), err.getvalue()[:120])
+        _ev_fixture([])
+        calls = []
+        def _err_on_px(t, a, f):
+            calls.append(a)
+            return ({"value": f, "source": "ticker_financial", "method": "ERROR", "reason": "x"} if a != "2026-10-29"
+                    else {"value": f * 1.5, "source": "oshares_live", "method": "OK"})
+        osd.oshares_for = _err_on_px
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = dv.fair_value("FPT", "2026-10-29", price=100000.0, fin=fin, price_date="2026-10-20")
+        check("C10 oshares_for LỖI ở ngày giá -> không khoá được -> số quý", r["oshares"] == base["oshares"]
+              and r["oshares_method"] == "FRAME_FALLBACK" and "LOI" in (r["oshares_frame_error"] or ""),
+              r.get("oshares_frame_error"))
+    finally:
+        osd.oshares_for = real
+        _ev_clear()
+        dv.OSHARES_SOURCE = "fin"
+
+
+def c11_callers():
+    """R8/H4: caller production khai price_date ĐÚNG phiên của giá — hoặc KHÔNG khai khi không biết."""
+    import pandas as pd
+    import dcf_valuation as dv
+    import trading_bot.strategies as st
+    import trading_bot.due_diligence as dd
+    seen = []
+    real_fv = dv.fair_value
+    dv.fair_value = lambda *a, **k: (seen.append(k.get("price_date", "ABSENT")) or real_fv(*a, **k))
+    try:
+        st._dcf_check_for_order("FPT", 100000.0, "2026-10-29", price_date="2026-10-28")
+        st._dcf_check_for_order("FPT", 100000.0, "2026-10-29")
+        check("C11 _dcf_check_for_order chuyển price_date nguyên văn (mặc định None)",
+              seen == ["2026-10-28", None], str(seen))
+        real_row = dd._latest_row
+        try:
+            dd._latest_row = lambda t, a: pd.Series({"time": pd.Timestamp("2026-10-28"), "Price": 50000.0, "Close": 49000.0})
+            check("C11 _ref_price_session: dùng Price -> phiên = time của dòng",
+                  dd._ref_price_session("FPT", "2026-10-29") == (50000.0, "2026-10-28")
+                  and dd._ref_price_for("FPT", "2026-10-29") == 50000.0)
+            dd._latest_row = lambda t, a: pd.Series({"time": pd.Timestamp("2026-10-28"), "Price": float("nan"), "Close": 49000.0})
+            check("C11 _ref_price_session: rơi về Close (đã điều chỉnh) -> price_date None",
+                  dd._ref_price_session("FPT", "2026-10-29") == (49000.0, None))
+            seen.clear()
+            dd._latest_row = lambda t, a: pd.Series({"time": pd.Timestamp("2026-10-28"), "Price": 50000.0, "Close": 49000.0,
+                                                     "ticker": "FPT"})
+            src = open(dd.__file__, encoding="utf-8").read()
+            check("C11 due_diligence DD-valuation: tự đọc Price -> price_date=row.time; ctx price -> ctx['price_date']",
+                  'px, px_date = row.get("Price"), str(row.get("time"))[:10]' in src
+                  and 'px, px_date = ctx.get("price"), ctx.get("price_date")' in src
+                  and "_dcf_check_for_order(ticker, float(px), asof, price_date=px_date)" in src)
+        finally:
+            dd._latest_row = real_row
+        src = open(os.path.join(HERE, "custom_basket.py"), encoding="utf-8").read()
+        check("C11 custom_basket.dcf_at: price_date = d (Price của đúng phiên d)",
+              "fair_value(tk, pd.Timestamp(d), price=px, fin=_fin, price_date=pd.Timestamp(d))" in src
+              and "_px_map.get(key)" in src)
+        # lag_dd_pack.run_valuation (mike repo) — gọi THẬT với dd/strategies của cây đang test
+        import importlib.util
+        if os.path.exists(LAG_DD_PACK):
+            spec = importlib.util.spec_from_file_location("lag_dd_pack_under_test", LAG_DD_PACK)
+            m = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(m)
+            sys.path.insert(0, HERE)
+            got = []
+            real_rps, real_chk = getattr(dd, "_ref_price_session", None), st._dcf_check_for_order
+            try:
+                dd._ref_price_session = lambda t, a: (50000.0, "2026-10-28")
+                st._dcf_check_for_order = lambda t, p, a, **k: (got.append(k.get("price_date")) or
+                                                               {"status": "NOT_COMPUTED", "reason": "x"})
+                m.run_valuation("FPT", "2026-10-29")
+                dd._ref_price_session = lambda t, a: (49000.0, None)
+                m.run_valuation("FPT", "2026-10-29")
+            finally:
+                if real_rps is not None:
+                    dd._ref_price_session = real_rps
+                st._dcf_check_for_order = real_chk
+            check("C11 lag_dd_pack.run_valuation: khai price_date phiên Price, không khai khi rơi về Close",
+                  got == ["2026-10-28", None], f"{got} ({LAG_DD_PACK})")
+        else:
+            check("C11 lag_dd_pack có ở DCF_OS_LAG_DD_PACK", False, LAG_DD_PACK)
+        seen.clear()
+        real_lps = dv.latest_price_session
+        dv.latest_price_session = lambda t, a=None: (50000.0, "2026-10-28")
+        try:
+            dv.dcf_check("FPT", "2026-10-29")
+            dv.dcf_check("FPT", "2026-10-29", price=51000.0)
+        finally:
+            dv.latest_price_session = real_lps
+        check("C11 dcf_valuation.dcf_check: tự đọc giá -> price_date phiên đó; giá caller -> None",
+              seen == ["2026-10-28", None], str(seen))
+    finally:
+        dv.fair_value = real_fv
+
+
+def c12_module_paths():
+    """H3: mọi module cần test nạp từ cây HERE, không phải PROD (dcf_valuation chèn WORKDIR vào sys.path)."""
+    import oshares_pit, oshares_live, corp_action_lib, trading_bot.strategies, trading_bot.due_diligence  # noqa: F401
+    paths = {m: os.path.dirname(os.path.abspath(sys.modules[m].__file__)) for m in TESTED_MODS}
+    paths["trading_bot.strategies"] = os.path.dirname(paths["trading_bot.strategies"])
+    paths["trading_bot.due_diligence"] = os.path.dirname(paths["trading_bot.due_diligence"])
+    check("C12 in-process: module nạp từ cây đang test", all(v == HERE for v in paths.values()),
+          str({k: v for k, v in paths.items() if v != HERE}))
 
 
 def pd_ts(x):
@@ -311,8 +565,12 @@ def ops_block():
     return m.group(1) if m else None
 
 
-def run_ops(block, wc_root, env_val=None, crontab=""):
+def run_ops(block, wc_root, env_val=None, crontab="", home=None, ccdb=None, proc=None):
     lines, warn = [], [0]
+    ext = {"MIKE_DCFOS_HOME": home or _mkdtemp(), "MIKE_DCFOS_CCDB": ccdb or _mkdtemp(),
+           "MIKE_DCFOS_PROC": proc or _mkdtemp()}          # R8/H6: không quét HOME//proc thật
+    old_ext = {k: os.environ.get(k) for k in ext}
+    os.environ.update(ext)
 
     class _SP:
         @staticmethod
@@ -331,7 +589,21 @@ def run_ops(block, wc_root, env_val=None, crontab=""):
         os.environ.pop("DCF_OSHARES_SOURCE", None)
         if old is not None:
             os.environ["DCF_OSHARES_SOURCE"] = old
+        for k, v in old_ext.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
     return warn[0], lines
+
+
+def fake_tree(files):
+    d = _mkdtemp()
+    for rel, txt in files.items():
+        fp = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(fp), exist_ok=True)
+        open(fp, "wb" if isinstance(txt, bytes) else "w").write(txt)
+    return d
 
 
 _TMPDIRS = []
@@ -386,6 +658,24 @@ def c8_ops_block():
     open(os.path.join(d, "dcf_valuation.py"), "w").write("# không có knob\n")
     n, ln = run_ops(blk, d)
     check("C8 cây chưa có knob -> im lặng (0 WARN, 0 OK)", n == 0 and ln == [], str(ln))
+    # ---- R8/H6: launcher ngoài cây WC
+    for home_files, tag in (({".config/systemd/user/ccdb-x.service": "[Service]\nEnvironment=DCF_OSHARES_SOURCE=live\n"}, "systemd Environment="),
+                            ({".config/systemd/user/paseo.service.d/o.conf": '[Service]\nEnvironment="DCF_OSHARES_SOURCE=live"\n'}, "systemd drop-in"),
+                            ({".config/environment.d/10-x.conf": "DCF_OSHARES_SOURCE=live\n"}, "environment.d"),
+                            ({".bashrc": "export DCF_OSHARES_SOURCE=live\n"}, "bashrc export"),
+                            ({".claude/settings.json": '{"env": {"DCF_OSHARES_SOURCE": "live"}}\n'}, "claude settings env")):
+        n, ln = run_ops(blk, fake_root(), home=fake_tree(home_files))
+        check(f"C8/H6 ngoài cây ({tag}) -> WARN", n == 1 and list(home_files)[0] in ln[0], str(ln)[:200])
+    n, ln = run_ops(blk, fake_root(), ccdb=fake_tree({".env": "MODEL=x\nDCF_OSHARES_SOURCE=live\n"}))
+    check("C8/H6 ccdb .env -> WARN", n == 1 and ".env" in ln[0], str(ln)[:200])
+    n, ln = run_ops(blk, fake_root(), proc=fake_tree({"4242/environ": b"PATH=/bin\0DCF_OSHARES_SOURCE=live\0", "4242/comm": "python3\n",
+                                                      "77/environ": b"PATH=/bin\0"}))
+    check("C8/H6 tiến trình đang chạy mang biến -> WARN (nêu pid + comm)", n == 1 and "4242 (python3)" in ln[0], str(ln)[:200])
+    n, ln = run_ops(blk, fake_root(), home=fake_tree({".config/systemd/user/a.service": "# Environment=DCF_OSHARES_SOURCE=live\n",
+                                                      ".bashrc": "echo $DCF_OSHARES_SOURCE\n"}),
+                    proc=fake_tree({"9/environ": b"PATH=/bin\0"}))
+    check("C8/H6 comment/chỉ đọc ngoài cây -> 0 WARN; OK nêu số file + tiến trình đã quét",
+          n == 0 and any("2 file ngoài cây + 1 tiến trình" in l for l in ln), str(ln)[:240])
 
 
 OPS_BLOCK = []      # mutant hook: [callable trả khối đã sửa]
@@ -417,7 +707,7 @@ def c9_research_pinned():
 
 
 SUITE = [c1_classifier, c2_no_announced_branch, c3_oshares_for, c4_knob, c6_source_of_truth, c7_frame_lock,
-         c8_ops_block, c9_research_pinned]
+         c8_ops_block, c9_research_pinned, c10_oshares_error, c11_callers, c12_module_paths]
 
 
 def run_suite(with_bq=False, quiet=False):
@@ -426,7 +716,10 @@ def run_suite(with_bq=False, quiet=False):
     with contextlib.redirect_stdout(sink):
         for f in SUITE + ([c5_bq] if with_bq else []):
             print(f"[{f.__name__}]")
-            f()
+            try:
+                f()
+            except Exception as e:                   # noqa: BLE001 — một check crash = FAIL (mutant bị giết)
+                check(f"{f.__name__} không raise", False, f"{type(e).__name__}: {str(e)[:120]}")
     return list(FAILS)
 
 
@@ -434,7 +727,8 @@ def _mut_div_as_share(evs):
     return [{**e, "event_code": "ISS", "issue_method_name_vi": SD} if e.get("event_code") == "DIV" else e for e in evs]
 
 
-import dcf_valuation as dv     # noqa: E402 — mutant M7 vá module này
+import trading_bot.strategies as _st     # noqa: E402 — mutant M20 vá module này
+import trading_bot.due_diligence as _dd  # noqa: E402 — mutant M21
 MUTANTS = {
     "M1 DIV coi như ISS cổ phiếu (lỗi quy tắc cũ)": (osd, "_dedup", lambda real: lambda ev: real(_mut_div_as_share(ev))),
     "M2 quyền mua tính là tạo CP": (osd, "SHARE_CREATING_ISS", lambda real: real | {RIGHTS}),
@@ -453,7 +747,33 @@ MUTANTS = {
         lambda: ops_block().replace('_os_pat_py if _is_py else _os_pat', 're.compile("(?!x)x") if _is_py else _os_pat')]),
     "M14 ops: bỏ cảnh báo env cron": (sys.modules[__name__], "OPS_BLOCK", lambda real: [
         lambda: ops_block().replace('if _os_env not in (None, ""):', 'if False:')]),
+    # ---- R8
+    "M15 H1 bỏ khoá lịch ex-date (frame_events luôn rỗng)": (osd, "frame_events", lambda real: lambda t, a, b: []),
+    "M16 H1 cửa sổ lịch loại trừ price_date (ex == price_date lọt)": (osd, "frame_events", lambda real: lambda t, a, b:
+        [e for e in real(t, a, b) if e["exright_date"] > a]),
+    "M17 H1 lỗi đọc lịch bị nuốt thành 'không sự kiện'": (osd, "frame_events", lambda real: lambda t, a, b:
+        _swallow(real, t, a, b)),
+    "M18 H2 ERROR không kêu": (dv, "_shout_once", lambda real: lambda k, m:
+        None if (isinstance(k, tuple) and k[0] == "oshares_error") else real(k, m)),
+    "M19 H2 dedupe toàn cục thay vì theo mã": (dv, "_shout_once", lambda real: lambda k, m:
+        real(("oshares_error",) if (isinstance(k, tuple) and k[0] == "oshares_error") else k, m)),
+    "M20 H4 _dcf_check_for_order bỏ price_date": (_st, "_dcf_check_for_order", lambda real: lambda t, p, a, price_date=None:
+        real(t, p, a)),
+    "M21 H4 _ref_price_session khai ngày cả khi rơi về Close": (_dd, "_ref_price_session", lambda real: lambda t, a:
+        (real(t, a)[0], "2026-10-28")),
+    "M22 H3 probe không ghim lại HERE sau import dcf_valuation": (sys.modules[__name__], "PIN", lambda real: [""]),
+    "M23 H6 ops: bỏ quét file ngoài cây": (sys.modules[__name__], "OPS_BLOCK", lambda real: [
+        lambda: ops_block().replace("for _fp in _os_ext:", "for _fp in []:")]),
+    "M24 H6 ops: bỏ quét môi trường tiến trình": (sys.modules[__name__], "OPS_BLOCK", lambda real: [
+        lambda: ops_block().replace('os.path.join(_os_proc, "[0-9]*", "environ")', 'os.path.join(_os_proc, "nomatch")')]),
 }
+
+
+def _swallow(f, *a):
+    try:
+        return f(*a)
+    except Exception:                                # noqa: BLE001 — chính là lỗi mutant M17 mô phỏng
+        return []
 
 
 def run_mutants():
