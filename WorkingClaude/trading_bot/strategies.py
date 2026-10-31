@@ -42,8 +42,10 @@ def _dcf_check_for_order(ticker, price, asof, price_date=None):
     """Tính dcf_check dict cho 1 BUY order (non-financial, informational only).
 
     price_date = phiên mà `price` THUỘC VỀ (hợp đồng ở dcf_valuation.fair_value; R8/H4). Chỉ có
-    tác dụng khi DCF_OSHARES_SOURCE=live; ở fin bị bỏ qua (output byte-identical). Không biết
-    phiên của giá (ref_price của plan, giá DNSE sống) ⇒ để None ⇒ live rơi về số quý.
+    tác dụng khi DCF_OSHARES_SOURCE=live; ở fin bị bỏ qua (output byte-identical). Giá không mang
+    phiên (ref_price của plan, Close cache) ⇒ caller lấy phiên qua dcf_valuation.price_sessions_for
+    (R11: khớp Price chưa điều chỉnh trong cache; không khớp ⇒ PRICE_SESSION_UNKNOWN = số quý, im).
+    None = caller CHƯA kiểm ⇒ số quý + kêu stderr 1 lần/tiến trình.
 
     Đọc từ data/bq_cache/ticker_financial.parquet (local parquet, không gọi BQ live).
     Fail-safe: mọi lỗi đều trả NOT_COMPUTED với reason="dcf_error:...", KHÔNG raise.
@@ -101,6 +103,10 @@ def _dcf_check_for_order(ticker, price, asof, price_date=None):
             **({"margin_of_safety_fin": (round(float(res["margin_of_safety_fin"]), 4)
                                          if res.get("margin_of_safety_fin") is not None else None)}
                if "oshares_source" in res else {}),
+            # R12/việc 1: status/robust trên SỐ QUÝ (chỉ live) — format_dcf_check gắn nhãn "cơ sở plan echo"
+            **(dict(zip(("status_fin", "robust_fin"),
+                        _dcf.classify_dcf(res["margin_of_safety_fin"], res.get("sensitivity_fin", {}), price)))
+               if "oshares_source" in res and res.get("margin_of_safety_fin") is not None else {}),
         }
 
     except Exception as exc:
@@ -165,7 +171,32 @@ def format_dcf_check(dcf, side="buy", has_override=False, ticker=None):
             out += " ⚠"
         elif deep:
             out += " ⚠ cần dcf_override_reason"
-    return out + cong_s + _format_oshares_divergence(dcf)
+    return out + _format_fin_basis(dcf) + cong_s + _format_oshares_divergence(dcf)
+
+
+OSHARES_FIN_LABEL_MOS = 0.02     # R12/việc 1: |MoS live − MoS số quý| ≥ 2pp ⇒ hiện nhãn số quý
+
+
+def _format_fin_basis(dcf):
+    """R12/việc 1: ' · số CP quý: MoS +14.2% robust (cơ sở plan echo)' khi DCF live khác DCF số quý
+    ĐÁNG KỂ — status khác, robust khác, HOẶC |ΔMoS| ≥ OSHARES_FIN_LABEL_MOS. Quyết định theo MoS, KHÔNG
+    theo ngưỡng oshares_divergence (FPT 2026-09: lệch số CP 9,998% lọt ngưỡng 10% mà MoS +5,6 vs +14,2).
+    Plan echo (21:00) tính trên số quý ⇒ nhãn cho người đọc EOD/paper so được với số đã duyệt.
+    dcf không có margin_of_safety_fin (fin, dict cũ) ⇒ ""."""
+    mf, m = dcf.get("margin_of_safety_fin"), dcf.get("margin_of_safety")
+    num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v == v
+    if not num(mf):
+        return ""
+    sf, rf = dcf.get("status_fin"), dcf.get("robust_fin")
+    if sf is None:
+        sf = "CHEAP" if mf > 0 else "RICH"
+    differs = (sf != dcf.get("status") or (rf is not None and bool(rf) != bool(dcf.get("robust")))
+               or not num(m) or abs(m - mf) >= OSHARES_FIN_LABEL_MOS - 1e-9)
+    if not differs:
+        return ""
+    st_s = f"{sf} " if sf != dcf.get("status") else ""
+    rb_s = "" if rf is None else (" robust" if rf else " không robust")
+    return f" · số CP quý: {st_s}MoS {mf * 100:+.1f}%{rb_s} (cơ sở plan echo)"
 
 
 def _format_oshares_divergence(dcf):
