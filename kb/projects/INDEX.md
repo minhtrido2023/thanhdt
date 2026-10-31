@@ -41,3 +41,4 @@
   kiện ISS/hỗn hợp VÀ đã qua **2026-09-13**, và vẫn cần user xác nhận lần nữa lúc đó.
 - [corp-action-broker-primary-live-criteria](corp-action-broker-primary-live-criteria.md) — MỞ: tiêu chí bật live nhánh broker corp-action (user chốt 2026-10-09), mốc xem lại 2026-12-15.
 - [oshares-live-dcf-20261030](oshares-live-dcf-20261030.md) — MỞ: nguồn số CP sống cho DCF (`DCF_OSHARES_SOURCE`), knob TẮT/merge 2026-10-31; bật live cần vá khoá ex-date `price_date=asof` + caller khai `price_date` + user duyệt riêng
+- [report-style-v2-20261031](report-style-v2-20261031.md) — MỞ: báo cáo ngày/tuần/tháng chuẩn v2 (`bin/report_v2/build.py`, PDF+HTML cid, cầu NAV, narrative.json có trần), gắn cadence + EOD (fail-open); quý chưa có lịch

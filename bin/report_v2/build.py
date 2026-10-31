@@ -234,7 +234,8 @@ def write_outputs(cx, title, kicker, sub, header_left, md_lines, extra_manifest)
            "pdf": os.path.basename(pdf), "pdf_sha256": sha256(pdf),
            "html": os.path.basename(html), "html_sha256": sha256(html),
            "cid": {k: {"file": os.path.basename(v), "sha256": sha256(v)} for k, v in cid.items()},
-           "pages": pages, "page_cap": PAGE_CAP[cx.cadence], "lint": lint, **extra_manifest}
+           "pages": pages, "page_cap": PAGE_CAP[cx.cadence], "lint": lint,
+           "recon": [list(r) for r in cx.recon], **extra_manifest}
     man_path = cx.f("manifest.json")
     with open(man_path, "w", encoding="utf-8") as fh:
         json.dump(man, fh, ensure_ascii=False, indent=1, default=str)
@@ -308,6 +309,8 @@ def build_monthly(acct, period, out_dir, nar_path=None):
     except S.Unavailable as exc:
         attr, attr_err = None, str(exc)
     br = bridge_numbers(mtd, attr)
+    cx.recon.append(("Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ", br["nav0"] + br["pnl"] + br["flow"], br["nav1"],
+                     br["nav0"] + br["pnl"] + br["flow"] - br["nav1"]))
 
     # ── KPI: hiệu suất dẫn đầu, NAV tuyệt đối thứ yếu (luật 9b) ──
     tiles = [
@@ -405,8 +408,8 @@ def build_monthly(acct, period, out_dir, nar_path=None):
         tb_cost = cx.tbl(["Khoản mục", "VND"], cost_rows, bold_rows=(4,))
         cx.fact(pct((br["fee"] + br["tax"]) / ((br["nav0"] + br["nav1"]) / 2) * 100, 2, False))
         mc = attr["mtm_check"]
-        cx.recon.append(("Σ KL×giá đầu kỳ vs mtm_stock nav_history", mc["calc0"], mc["nav0_mtm"], mc["calc0"] - mc["nav0_mtm"]))
-        cx.recon.append(("Σ KL×giá cuối kỳ vs mtm_stock nav_history", mc["calc1"], mc["nav1_mtm"], mc["calc1"] - mc["nav1_mtm"]))
+        cx.recon.append(("Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)", mc["calc0"], mc["nav0_mtm"], mc["calc0"] - mc["nav0_mtm"]))
+        cx.recon.append(("Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)", mc["calc1"], mc["nav1_mtm"], mc["calc1"] - mc["nav1_mtm"]))
     else:
         f_attr = tb_tr = tb_cost = None
 
@@ -417,7 +420,7 @@ def build_monthly(acct, period, out_dir, nar_path=None):
         rest_val = sum(float(r[4].replace(".", "").replace("−", "-")) for r in pos_rows[9:])
         show.append([f"{len(pos_rows) - 9} mã khác", "", "", "", vn(rest_val), pct(rest_val / nav1["nav"] * 100, 1, False), ""])
     tb_pos = cx.tbl(["Mã", "KL", "Giá vốn", "Giá cuối", "Giá trị (VND)", "% NAV", "Lãi/lỗ (đã cộng cổ tức)"], show,
-                    color_cols=(6,), widths=[9, 9, 12, 12, 20, 10, 28])
+                    color_cols=(6,), widths=[10, 10, 14, 14, 22, 12, 18])
     ab = asset_block_rows(nav1, len(pos_rows), stock_ret)
     tb_ab = cx.tbl(["Lớp tài sản", "Giá trị (VND)", "% NAV", "Lãi/lỗ"], ab, bold_rows=(0, len(ab) - 1), max_rows=None)
     f_al = R.chart_alloc([(f"Đầu tháng ({ddmm(nav0['date'])})", {"Cổ phiếu": nav0["mtm_stock"], "Trứng vàng": nav0["egg_assets"], "Tiền mặt": max(nav0["cash"], 0)}),
@@ -464,7 +467,7 @@ def build_monthly(acct, period, out_dir, nar_path=None):
            apply_narrative(cx, nar, "performance", [f"Chênh tháng so VN-Index giá {R.pp(ex_m)}; từ khi bắt đầu {R.pp(ex_i)}."]))
     cx.add(section(f"Rủi ro: sụt giảm tháng {pct(rk['mdd'], 2, False)} so với VN-Index {pct(rk_v['mdd'], 2, False)}"),
            tb_risk, img(f_uw),
-           apply_narrative(cx, nar, "risk", ["Beta chưa công bố: pipeline chưa có chuỗi đủ dài để ước lượng ổn định."]),
+           apply_narrative(cx, nar, "risk", ["Beta chưa công bố: lịch sử NAV chưa đủ dài để ước lượng ổn định."]),
            footnote("Độ biến động = độ lệch chuẩn tỷ suất ngày theo giá đơn vị; quy năm × căn 252. Sharpe/Sortino chưa công bố do lịch sử NAV ngắn."))
     if f_attr:
         cx.add(section(f"Đóng góp: giá cổ phiếu {R.mil(br['price'])}, phí và thuế {R.mil(-(br['fee'] + br['tax']))}"),
@@ -497,8 +500,10 @@ def build_monthly(acct, period, out_dir, nar_path=None):
            footnote(f"Mốc VN-Index kỳ từ khi bắt đầu: đóng cửa {ddmm(S.D(inc['benchmark'].get('anchor_date') or inc['from_date']))}. Đóng góp theo mã dùng giá đóng cửa chưa điều chỉnh."),
            footnote(DISCLAIMER)]
     if cx.recon:
-        app.append(table(["Đối soát", "Tính lại", "Pipeline", "Lệch"], [[a, vn(b_), vn(c), vn(d, 0, True)] for a, b_, c, d in cx.recon],
+        app.append(table(["Đối soát", "Tính lại", "Theo sổ", "Lệch"], [[a, vn(b_), vn(c), vn(d, 0, True)] for a, b_, c, d in cx.recon],
                          max_rows=None))
+        app.append(footnote("Dòng tham khảo: CTCK định giá một số mã UPCOM/HNX theo giá khác giá đóng cửa sàn; NAV và tỷ suất dùng "
+                            "định giá CTCK, phần chênh nằm trong khoản 'Cổ tức, lãi tiền gửi, khác' của cầu NAV."))
     if attr and attr["qty_flags"]:
         app.append(footnote("KL đầu + mua − bán ≠ KL cuối (thường do cổ tức bằng cổ phiếu/quyền): "
                             + "; ".join(f"{t} {a}+{b_}−{c}≠{d}" for t, a, b_, c, d in attr["qty_flags"])))
@@ -533,7 +538,330 @@ def build_monthly(acct, period, out_dir, nar_path=None):
                          hl, md, extra)
 
 
-BUILDERS = {"monthly": build_monthly}
+# ───────────────────────── NGÀY ─────────────────────────
+def build_daily(acct, period, out_dir, nar_path=None):
+    """1 trang A4: KPI (hiệu suất dẫn đầu, NAV thứ yếu) · cặp chart (tháng so VN-Index · cầu NAV ngày) ·
+    lệnh khớp trong ngày · vị thế lớn nhất · 1 dòng đối soát. eod_trading_report.sh gọi FAIL-OPEN."""
+    d = S.D(period)
+    stem = f"{acct}_daily_report_{d.isoformat()}"
+    cx = Ctx("daily", acct, stem, out_dir)
+    P = S.periods(acct, d)
+    day, mtd, inc = P["day"], P["mtd"], P["inception"]
+    if day is None or S.D(day["to_date"]) != d:
+        raise S.Unavailable(f"nav_history_{acct}.csv chưa có dòng NAV ngày {d} (kỳ ngày kết thúc "
+                            f"{(day or {}).get('to_date')})")
+    d0 = S.D(day["from_date"])
+    vnd = S.vni_close()
+    nav1 = nav_parts(acct, d)
+    br = bridge_numbers(day)
+    cx.recon.append(("Cầu NAV: đầu ngày + lãi/lỗ + nạp/rút so với NAV cuối ngày", br["nav0"] + br["pnl"] + br["flow"],
+                     br["nav1"], br["nav0"] + br["pnl"] + br["flow"] - br["nav1"]))
+    bm_d, bm_m, bm_i = day["benchmark"], mtd["benchmark"], inc["benchmark"]
+
+    def bpct(b_):
+        return pct(b_["vnindex_price_pct"]) if b_.get("vnindex_price_pct") is not None else "không có"
+
+    tiles = [
+        (f"Phiên {ddmm(d)} (đã loại nạp/rút)", pct(day["return_pct"]), f"VN-Index {bpct(bm_d)}", R.tone(day["return_pct"])),
+        ("Từ đầu tháng", pct(mtd["return_pct"]), f"VN-Index {bpct(bm_m)}", R.tone(mtd["return_pct"])),
+        (f"Từ khi bắt đầu ({ddmm(S.D(inc['from_date']))})", pct(inc["return_pct"]), f"VN-Index {bpct(bm_i)}", R.tone(inc["return_pct"])),
+        ("Lãi/lỗ đầu tư phiên", R.mil(br["pnl"]), "VND, đã loại nạp/rút", R.tone(br["pnl"])),
+        (f"NAV {ddmm(d)}", R.mil(nav1["nav"]), f"nạp/rút {R.mil(br['flow'])}" if br["flow"] else "không nạp/rút", None),
+    ]
+    kp_html = cx.kpis(tiles, per_row=5)
+
+    # chart 1: từ đầu tháng, cơ sở 100 tại phiên mốc MTD (khớp ô "Từ đầu tháng")
+    led = S.daily_window(acct, d.replace(day=1), d)
+    dates = [x[0] for x in led]
+    port = [x[1] / led[0][1] * 100 for x in led]
+    v0 = S.vni_on_or_before(vnd, dates[0])[0]
+    bench = [S.vni_on_or_before(vnd, x)[0] / v0 * 100 for x in dates]
+    f1 = R.chart_index_vs_bench(dates, port, bench, f"Từ đầu tháng: {pct(mtd['return_pct'])} so với VN-Index {bpct(bm_m)}",
+                                cx.f("01_mtd.png"), f"Cơ sở 100 = {ddmm(dates[0])}. Nguồn: CTCK lưu ký; VN-Index: HOSE.", port_label="Danh mục",
+                                size=(4.6, 2.7))
+    f2 = R.chart_waterfall(br["nav0"], [("Lãi/lỗ đầu tư", br["pnl"]), ("Nạp/rút vốn", br["flow"])], br["nav1"],
+                           f"Cầu NAV phiên {ddmm(d)}", cx.f("02_bridge.png"), "Nguồn: NAV chốt cuối ngày tại CTCK lưu ký.", size=(4.6, 2.7))
+    pair = R.side_by_side([f1, f2], cx.f("03_pair.png"))
+    fl_txt = "; ".join(flow_text(f) for f in br["flows"]) or "Không có nạp/rút trong phiên."
+    cx.fact(fl_txt)
+
+    # lệnh khớp trong phiên (order_history cuối ngày, lọc account_no §12)
+    try:
+        fl, _miss = S.fills(acct, d0, d)
+        fl = [f for f in fl if S.D(f["date"]) == d]
+        fl_err = None
+    except S.Unavailable as exc:
+        fl, fl_err = [], str(exc)
+    agg = {}
+    for f in fl:
+        a = agg.setdefault((f["ticker"], f["side"]), [0, 0.0])
+        a[0] += f["qty"]; a[1] += f["value"]
+    tr_rows = [[t, "Mua" if s == "B" else "Bán", vn(q), vn(v / q) if q else "—", vn(v)]
+               for (t, s), (q, v) in sorted(agg.items(), key=lambda kv: -kv[1][1])]
+    n_tr = len(tr_rows)
+    tb_tr = (cx.tbl(["Mã", "Chiều", "KL khớp", "Giá khớp BQ", "Giá trị (VND)"], tr_rows[:8],
+                    align=["l", "l", "r", "r", "r"], widths=[14, 12, 20, 20, 34]) if tr_rows else None)
+
+    # vị thế lớn nhất (§21)
+    try:
+        _pr, pos_rows, _tv, _sr = positions_block(cx, acct, d, nav1)
+        pos_err = None
+    except S.Unavailable as exc:
+        pos_rows, pos_err = [], str(exc)
+    show = [[r[0], r[4], r[5], r[6]] for r in pos_rows[:8]]
+    if len(pos_rows) > 8:
+        rest_val = sum(float(r[4].replace(".", "").replace("−", "-")) for r in pos_rows[8:])
+        show.append([f"{len(pos_rows) - 8} mã khác", vn(rest_val), pct(rest_val / nav1["nav"] * 100, 1, False), ""])
+    tb_pos = cx.tbl(["Mã", "Giá trị (VND)", "% NAV", "Lãi/lỗ (đã cộng cổ tức)"], show, color_cols=(3,),
+                    widths=[22, 30, 16, 32]) if show else None
+    nv = nav1["nav"]
+    alloc = (f"Cổ phiếu {pct(nav1['mtm_stock'] / nv * 100, 1, False)} · Tiền mặt {pct(nav1['cash'] / nv * 100, 1, False)} · "
+             f"Trứng vàng {pct(nav1['egg_assets'] / nv * 100, 1, False)} · Nợ ký quỹ {vn(nav1['margin_debt'])} VND")
+    cx.fact(alloc)
+
+    nar = N.validate(N.load(nar_path), "\n".join(cx.facts), investor_facing=cx.meta["investor"],
+                     allow_internal=not cx.meta["investor"])
+    rel = "so với"
+    auto_head = (f"{ddmm(d)}: danh mục {pct(day['return_pct'])} {rel} VN-Index {bpct(bm_d)}; "
+                 + (f"{n_tr} lệnh khớp" if n_tr else "không có lệnh khớp"))
+    cx.fact(auto_head)
+    title = (nar or {}).get("headline") or auto_head
+
+    cx.add(kp_html, img(pair),
+           section(f"Giao dịch phiên {ddmm(d)}: " + (f"{n_tr} mã khớp, tổng {R.mil(sum(v for _, v in agg.values()))}" if n_tr
+                                                       else "không có lệnh khớp")))
+    if tb_tr:
+        cx.add(tb_tr)
+    elif fl_err:
+        cx.add(footnote(f"Lệnh khớp: không có ({fl_err})"))
+    cx.add(section(f"Danh mục cuối phiên: {alloc}"))
+    if tb_pos:
+        cx.add(tb_pos)
+        if any(r[3] == "—¹" for r in show):
+            cx.add(footnote("¹ chưa đối chiếu xong cổ tức nên chưa công bố lãi/lỗ."))
+    elif pos_err:
+        cx.add(footnote(f"Vị thế: không có ({pos_err})"))
+    if (nar or {}).get("key_points"):
+        cx.add(section("Cần theo dõi"), bullets(nar["key_points"]))
+    cx.add(footnote(f"Cầu NAV: {fl_txt} Đối soát: đầu ngày {vn(br['nav0'])} + lãi/lỗ {vn(br['pnl'], 0, True)} + nạp/rút "
+                    f"{vn(br['flow'], 0, True)} = cuối ngày {vn(br['nav1'])} (lệch {vn(cx.recon[0][3], 0, True)}). "
+                    "Hiệu suất theo giá đơn vị, đã loại nạp/rút."))
+
+    md = [f"# {title}",
+          f"- Phiên {ddmm(d)} {pct(day['return_pct'])} (VN-Index {bpct(bm_d)}) · từ đầu tháng {pct(mtd['return_pct'])} · "
+          f"từ khi bắt đầu {pct(inc['return_pct'])} (VN-Index {bpct(bm_i)})",
+          f"- Lãi/lỗ đầu tư {R.mil(br['pnl'])} · nạp/rút {R.mil(br['flow'])} · NAV {R.mil(nv)} · "
+          + (f"{n_tr} mã khớp lệnh" if n_tr else "không có lệnh khớp")]
+    extra = {"period": d.isoformat(), "report_date": d.isoformat(), "nav_date": d.isoformat(),
+             "numbers": {"day_pct": day["return_pct"], "mtd_pct": mtd["return_pct"], "inception_pct": inc["return_pct"],
+                         "nav1": nv, "pnl_vnd": br["pnl"], "flow_vnd": br["flow"], "n_traded": n_tr},
+             "fills_error": fl_err, "positions_error": pos_err, "narrative": bool(nar)}
+    return write_outputs(cx, title, f"BÁO CÁO NGÀY {ddmmyyyy(d)}", f"Tài khoản {acct} · {cx.meta['desc']}",
+                         f"Báo cáo ngày {ddmmyyyy(d)} · {acct}", md, extra)
+
+
+# ───────────────────────── TUẦN ─────────────────────────
+def _parse_week(period):
+    """'YYYY-MM-DD_to_YYYY-MM-DD' (thứ Hai_to_thứ Sáu) hoặc 'YYYY-MM-DD' (thứ Sáu) → (thứ Hai, thứ Sáu)."""
+    if "_to_" in period:
+        a, b_ = period.split("_to_")
+        return S.D(a), S.D(b_)
+    fri = S.D(period)
+    return fri - dt.timedelta(days=fri.weekday()), fri
+
+
+def build_weekly(acct, period, out_dir, nar_path=None):
+    mon, fri = _parse_week(period)
+    stem = f"{acct}_weekly_report_{mon.isoformat()}_to_{fri.isoformat()}"
+    cx = Ctx("weekly", acct, stem, out_dir)
+    P = S.periods(acct, fri)
+    wtd, mtd, inc = P["wtd"], P["mtd"], P["inception"]
+    d1 = S.D(wtd["to_date"])
+    d0 = S.D(wtd["from_date"])
+    vnd = S.vni_close()
+    nav1, nav0 = nav_parts(acct, d1), nav_parts(acct, d0)
+    wl = f"{ddmm(mon)}–{ddmm(fri)}"
+    bw, bmm, bi = wtd["benchmark"], mtd["benchmark"], inc["benchmark"]
+    ex_w = S.excess_pp(wtd, vnd)
+
+    try:
+        attr = S.attribution(acct, d0, d1)
+        attr_err = None
+    except S.Unavailable as exc:
+        attr, attr_err = None, str(exc)
+    br = bridge_numbers(wtd, attr)
+    cx.recon.append(("Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ", br["nav0"] + br["pnl"] + br["flow"], br["nav1"],
+                     br["nav0"] + br["pnl"] + br["flow"] - br["nav1"]))
+    led = S.daily_window(acct, mon, d1)
+    dates = [x[0] for x in led]
+    port = [x[1] / led[0][1] * 100 for x in led]
+    v0 = S.vni_on_or_before(vnd, dates[0])[0]
+    bench = [S.vni_on_or_before(vnd, x)[0] / v0 * 100 for x in dates]
+    rk = S.risk_stats([(x[0], x[1]) for x in led])
+    rk_v = S.risk_stats([(x, S.vni_on_or_before(vnd, x)[0]) for x in dates])
+
+    tiles = [
+        (f"Tuần {wl} (đã loại nạp/rút)", pct(wtd["return_pct"]), f"VN-Index {pct(bw['vnindex_price_pct'])}", R.tone(wtd["return_pct"])),
+        ("Chênh so VN-Index", R.pp(ex_w), f"có cổ tức: {R.pp(bw['excess_vs_tr_pp'])}" if bw.get("excess_vs_tr_pp") is not None else "", R.tone(ex_w)),
+        ("Từ đầu tháng", pct(mtd["return_pct"]), f"VN-Index {pct(bmm['vnindex_price_pct'])}", R.tone(mtd["return_pct"])),
+        (f"Từ khi bắt đầu ({ddmm(S.D(inc['from_date']))})", pct(inc["return_pct"]), f"VN-Index {pct(bi['vnindex_price_pct'])}", R.tone(inc["return_pct"])),
+        ("Sụt giảm sâu nhất trong tuần", pct(rk["mdd"], 2, False), f"VN-Index {pct(rk_v['mdd'], 2, False)}", None),
+        ("Lãi/lỗ đầu tư tuần", R.mil(br["pnl"]), "VND, đã loại nạp/rút", R.tone(br["pnl"])),
+        ("Tỷ trọng cổ phiếu cuối tuần", pct(nav1["mtm_stock"] / nav1["nav"] * 100, 1, False), f"đầu tuần {pct(nav0['mtm_stock'] / nav0['nav'] * 100, 1, False)}", None),
+        (f"NAV cuối tuần ({ddmm(d1)})", R.mil(nav1["nav"]), f"nạp/rút {R.mil(br['flow'])}" if br["flow"] else "không nạp/rút", None),
+    ]
+    kp_html = cx.kpis(tiles)
+    auto_head = (f"Tuần {wl} {pct(wtd['return_pct'])} so với VN-Index {pct(bw['vnindex_price_pct'])}: "
+                 f"{'hơn' if ex_w > 0 else 'kém'} chỉ số {R.vn(abs(ex_w), 2)} điểm %, từ đầu {pct(inc['return_pct'])}")
+    cx.fact(auto_head, wl, ddmm(d1), ddmmyyyy(d1))
+    f1 = R.chart_index_vs_bench(dates, port, bench, f"NAV theo ngày tuần {wl} so với VN-Index (cơ sở 100 = {ddmm(dates[0])})",
+                                cx.f("01_nav_vs_vni.png"), f"{SRC_ACC} {SRC_VNI}", port_label="Danh mục (đã loại nạp/rút)",
+                                size=(7.6, 2.6))
+    png_br, tb_br, fl_txt = bridge_section(cx, br, f"tuần {wl}", "02_bridge.png")
+
+    per_rows = []
+    for lab, p in ((f"Tuần {wl}", wtd), (f"Từ đầu tháng {d1:%m/%Y}", mtd), (f"Từ khi bắt đầu ({ddmm(S.D(inc['from_date']))})", inc)):
+        b_ = p["benchmark"]
+        per_rows.append([lab, pct(p["return_pct"]), pct(b_["vnindex_price_pct"]) if b_.get("vnindex_price_pct") is not None else "không có",
+                         pct(b_["vnindex_tr_pct"]) if b_.get("vnindex_tr_pct") is not None else "không có",
+                         R.pp(b_["excess_vs_price_pp"]).replace(" điểm %", "") if b_.get("excess_vs_price_pp") is not None else "không có",
+                         R.pp(b_["excess_vs_tr_pp"]).replace(" điểm %", "") if b_.get("excess_vs_tr_pp") is not None else "không có"])
+    tb_per = cx.tbl(["Giai đoạn", cx.acct, "VN-Index", "VN-Index có cổ tức", "Chênh (điểm %)", "Chênh có cổ tức"],
+                    per_rows, color_cols=(1, 4, 5))
+    # NAV theo ngày trong tuần: tỷ suất ngày từ sổ đơn vị (đúng số pipeline; ngày có nạp/rút `bod` đã loại dòng tiền)
+    drows = []
+    for i in range(1, len(led)):
+        dd, u, nv = led[i]
+        r_ = (u / led[i - 1][1] - 1) * 100
+        vi0, vi1 = S.vni_on_or_before(vnd, led[i - 1][0])[0], S.vni_on_or_before(vnd, dd)[0]
+        drows.append([f"{ddmm(dd)}", vn(nv), pct(r_), pct((vi1 / vi0 - 1) * 100)])
+    tb_days = cx.tbl(["Ngày", "NAV theo sổ (VND)", "Danh mục, đã loại nạp/rút", "VN-Index"], drows, color_cols=(2, 3))
+
+    if attr is not None:
+        items = sorted(attr["by_ticker"].items(), key=lambda kv: -abs(kv[1]))
+        hb = items[:8] + ([("Các mã khác", sum(v for _, v in items[8:]))] if items[8:] else [])
+        hb.sort(key=lambda kv: -kv[1])
+        f_attr = R.chart_hbars(hb, f"Đóng góp giá cổ phiếu theo mã tuần {wl} (tổng {R.mil(br['price'])})",
+                               cx.f("03_attribution.png"), "Nguồn: KL vị thế và lệnh khớp tại CTCK lưu ký; giá đóng cửa HOSE/HNX/UPCoM chưa điều chỉnh.",
+                               total=("Tổng", br["price"]), size=(7.6, 2.8))
+        for k, v in hb:
+            cx.fact(vn(v, 0, True), R.mil(v))
+        agg = {}
+        for f in attr["fills"]:
+            a = agg.setdefault((f["ticker"], f["side"]), [0, 0.0])
+            a[0] += f["qty"]; a[1] += f["value"]
+        tr_rows = [[t, "Mua" if s == "B" else "Bán", vn(q), vn(v / q) if q else "—", vn(v)]
+                   for (t, s), (q, v) in sorted(agg.items(), key=lambda kv: (kv[0][1], -kv[1][1]))]
+        tb_tr = cx.tbl(["Mã", "Chiều", "KL khớp", "Giá khớp BQ", "Giá trị (VND)"], tr_rows,
+                       align=["l", "l", "r", "r", "r"], widths=[14, 12, 20, 20, 34], max_rows=12) if tr_rows else None
+        vb = sum(v for (t, s), (q, v) in agg.items() if s == "B")
+        vs = sum(v for (t, s), (q, v) in agg.items() if s == "S")
+        mc = attr["mtm_check"]
+        cx.recon.append(("Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)", mc["calc0"], mc["nav0_mtm"], mc["calc0"] - mc["nav0_mtm"]))
+        cx.recon.append(("Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)", mc["calc1"], mc["nav1_mtm"], mc["calc1"] - mc["nav1_mtm"]))
+    else:
+        f_attr = tb_tr = None
+        vb = vs = 0.0
+
+    pr, pos_rows, tot_val, stock_ret = positions_block(cx, acct, d1, nav1)
+    show = pos_rows[:9]
+    if len(pos_rows) > 9:
+        rest_val = sum(float(r[4].replace(".", "").replace("−", "-")) for r in pos_rows[9:])
+        show.append([f"{len(pos_rows) - 9} mã khác", "", "", "", vn(rest_val), pct(rest_val / nav1["nav"] * 100, 1, False), ""])
+    tb_pos = cx.tbl(["Mã", "KL", "Giá vốn", "Giá cuối", "Giá trị (VND)", "% NAV", "Lãi/lỗ (đã cộng cổ tức)"], show,
+                    color_cols=(6,), widths=[10, 10, 14, 14, 22, 12, 18])
+    ab = asset_block_rows(nav1, len(pos_rows), stock_ret)
+    tb_ab = cx.tbl(["Lớp tài sản", "Giá trị (VND)", "% NAV", "Lãi/lỗ"], ab, bold_rows=(0, len(ab) - 1), max_rows=None)
+    f_al = R.chart_alloc([(f"Đầu tuần ({ddmm(nav0['date'])})", {"Cổ phiếu": nav0["mtm_stock"], "Trứng vàng": nav0["egg_assets"], "Tiền mặt": max(nav0["cash"], 0)}),
+                          (f"Cuối tuần ({ddmm(d1)})", {"Cổ phiếu": nav1["mtm_stock"], "Trứng vàng": nav1["egg_assets"], "Tiền mặt": max(nav1["cash"], 0)})],
+                         "Phân bổ tài sản đầu và cuối tuần (% NAV)", cx.f("04_allocation.png"), SRC_ACC)
+
+    try:
+        _mm, _fx, mk_rows, rng = market_rows(cx, "weekly", fri)
+        mk_err = None
+    except Exception as exc:  # noqa: BLE001 — khối thị trường thiếu nguồn ⇒ "không có", báo cáo vẫn dựng
+        mk_rows, rng, mk_err = [["Thị trường", "không có"]], "", f"{type(exc).__name__}: {exc}"
+    rg_rows, rg_err = regime_rows(cx)
+    tb_mk = cx.tbl(["Thị trường (VN-Index)", f"Tuần {wl}"], mk_rows + rg_rows, widths=[30, 70])
+    cx.fact(rng)
+    pass_blk = S.market_pass_block("weekly", fri) if not mk_err else None
+
+    nar = N.validate(N.load(nar_path), "\n".join(cx.facts), investor_facing=cx.meta["investor"],
+                     allow_internal=not cx.meta["investor"])
+    title = (nar or {}).get("headline") or auto_head
+    key = (nar or {}).get("key_points") or [
+        f"Tuần {wl}: {pct(wtd['return_pct'])} so với VN-Index {pct(bw['vnindex_price_pct'])}.",
+        f"Lãi/lỗ đầu tư {R.mil(br['pnl'])}; nạp/rút {R.mil(br['flow'])} không tính vào hiệu suất.",
+        f"Tỷ trọng cổ phiếu {pct(nav0['mtm_stock'] / nav0['nav'] * 100, 1, False)} đầu tuần, {pct(nav1['mtm_stock'] / nav1['nav'] * 100, 1, False)} cuối tuần.",
+    ]
+    cx.add(kp_html, img(f1), section("3 điều cần biết"), bullets(key))
+    cx.add(section(f"Cầu NAV: lãi/lỗ đầu tư {R.mil(br['pnl'])}, nạp/rút {R.mil(br['flow'])}"),
+           img(png_br, 470), tb_br, footnote(fl_txt),
+           apply_narrative(cx, nar, "bridge", ["Hiệu suất tính theo giá đơn vị, đã loại nạp/rút; NAV tuyệt đối chỉ dùng trong cầu NAV."]))
+    cx.add(section(f"Hiệu suất: tuần {pct(wtd['return_pct'])}, từ đầu {pct(inc['return_pct'])}"), tb_per, tb_days,
+           apply_narrative(cx, nar, "performance", [f"Chênh tuần so VN-Index giá {R.pp(ex_w)}."]))
+    if f_attr:
+        cx.add(section(f"Đóng góp: giá cổ phiếu {R.mil(br['price'])}, phí và thuế {R.mil(-(br['fee'] + br['tax']))}"),
+               img(f_attr), apply_narrative(cx, nar, "attribution", [f"Phần còn lại {R.mil(br['other'])} gồm cổ tức, lãi tiền gửi và chênh giá đối chiếu."]))
+        cx.add(section(f"Giao dịch trong tuần: mua {R.mil(vb)}, bán {R.mil(vs)}"),
+               *([tb_tr] if tb_tr else [footnote("Không có lệnh khớp trong tuần.")]),
+               apply_narrative(cx, nar, "trades", [f"Tổng giá trị khớp {R.mil(vb + vs)} trong tuần."]))
+    else:
+        cx.add(section("Đóng góp theo mã và giao dịch: không có"), footnote(f"Không dựng được từ sổ broker: {attr_err}"))
+    cx.add(section(f"Danh mục cuối tuần ({ddmm(d1)}): cổ phiếu {pct(nav1['mtm_stock'] / nav1['nav'] * 100, 1, False)} NAV"),
+           tb_pos, tb_ab, img(f_al),
+           footnote("Lãi/lỗ từng mã: giá vốn thô (đã cộng lại phần cổ tức CTCK trừ khỏi giá vốn) và cổ tức tiền ròng sau thuế 5%. ¹ chưa đối chiếu xong cổ tức nên không công bố."),
+           apply_narrative(cx, nar, "portfolio", [f"{len(pos_rows)} mã cuối tuần."]))
+    cx.add(section("Thị trường trong tuần"), tb_mk,
+           footnote(rng + ". " + SRC_VNI) if rng else footnote(f"Khối thị trường không có: {mk_err}"),
+           apply_narrative(cx, nar, "market", ["Định giá thị trường là thông tin tham khảo, không phải tín hiệu mua/bán."]))
+    ol = (nar or {}).get("outlook")
+    if ol:
+        cx.add(section(f"Tuần tới: {len(ol)} kịch bản"),
+               table(["Kịch bản", "Điều kiện xác nhận", "Điều kiện bác bỏ", "Xác suất (ước lượng chủ quan)"],
+                     [[r["scenario"], r["condition"], r["invalidation"], r["prob"] or "—"] for r in ol],
+                     align=["l", "l", "l", "l"], widths=[22, 31, 31, 16]))
+    app = [section("Phụ lục: phương pháp và đối soát"),
+           footnote("Hiệu suất = tỷ suất theo giá đơn vị (time-weighted), loại nạp/rút theo thời điểm ghi trong sổ dòng tiền; "
+                    "ngày có rút đầu phiên tính trên NAV sau khi rút."),
+           footnote(DISCLAIMER),
+           table(["Đối soát", "Tính lại", "Theo sổ", "Lệch"], [[a, vn(b_), vn(c), vn(d_, 0, True)] for a, b_, c, d_ in cx.recon], max_rows=None),
+           footnote("Dòng tham khảo: CTCK định giá một số mã UPCOM/HNX theo giá khác giá đóng cửa sàn; NAV và tỷ suất dùng "
+                    "định giá CTCK, phần chênh nằm trong khoản 'Cổ tức, lãi tiền gửi, khác' của cầu NAV.")]
+    if attr and attr["qty_flags"]:
+        app.append(footnote("KL đầu + mua − bán ≠ KL cuối (thường do cổ tức bằng cổ phiếu/quyền): "
+                            + "; ".join(f"{t} {a}+{b_}−{c}≠{d_}" for t, a, b_, c, d_ in attr["qty_flags"])))
+    if nar and nar.get("internal"):
+        for blk in nar["internal"]:
+            app += [section("Nội bộ — " + blk["title"]), bullets(blk["bullets"], max_words=40, max_items=5)]
+    cx.add(*app)
+
+    md = [f"# {title}", "",
+          f"**Tài khoản:** {acct} · DNSE {cx.meta['no']} · {cx.meta['desc']}  ",
+          f"**Kỳ báo cáo:** tuần {ddmm(mon)} – {ddmmyyyy(fri)} (phiên cuối có NAV {ddmmyyyy(d1)})  ",
+          f"**Đối tượng:** {cx.meta['audience']}", "",
+          "## Tóm tắt", *[f"- {k}" for k in key], "",
+          *md_table(["Chỉ tiêu", "Giá trị", "So sánh"], [[t[0], t[1], t[2]] for t in tiles]), "",
+          "## Cầu NAV", *md_table(["Khoản mục", "VND"], [["NAV đầu kỳ", vn(br["nav0"])], ["Lãi/lỗ đầu tư", vn(br["pnl"], 0, True)],
+                                                        ["Nạp/rút vốn", vn(br["flow"], 0, True)], ["NAV cuối kỳ", vn(br["nav1"])]]),
+          f"_{fl_txt}_", "",
+          "## Hiệu suất lũy kế", S.period_table_md(acct, fri), "",
+          f"## Danh mục cuối tuần ({ddmmyyyy(d1)})",
+          *md_table(["Mã", "Khối lượng", "Giá vốn (đ/cp)", f"Giá đóng cửa {ddmm(d1)}", "Giá trị thị trường (đ)", "% NAV", "Lãi/lỗ chưa thực hiện (%)"], pos_rows), "",
+          *md_table(["Lớp tài sản", "Giá trị (VND)", "% NAV", "Lãi/lỗ"], ab), ""]
+    if nar and nar.get("internal"):
+        md += ["## Nội bộ"] + [f"- {blk['title']}: " + " · ".join(blk["bullets"]) for blk in nar["internal"]] + [""]
+    extra = {"period": f"{mon.isoformat()}_to_{fri.isoformat()}", "report_date": fri.isoformat(), "nav_date": d1.isoformat(),
+             "market_block": ({"md": pass_blk.get("md"), "block_sha256": pass_blk.get("block_sha256")} if pass_blk else None),
+             "market_facts_error": mk_err, "regime_error": rg_err, "attribution_error": attr_err,
+             "numbers": {"wtd_pct": wtd["return_pct"], "mtd_pct": mtd["return_pct"], "inception_pct": inc["return_pct"],
+                         "nav1": nav1["nav"], "pnl_vnd": br["pnl"], "flow_vnd": br["flow"]},
+             "daily_rows": [[r[0], r[2]] for r in drows], "narrative": bool(nar)}
+    return write_outputs(cx, title, f"BÁO CÁO TUẦN {ddmm(mon)}–{ddmmyyyy(fri)}", f"Tài khoản {acct} · {cx.meta['desc']} · dữ liệu đến {ddmmyyyy(d1)}",
+                         f"Báo cáo tuần {wl}/{fri.year} · {acct}", md, extra)
+
+
+BUILDERS = {"daily": build_daily, "weekly": build_weekly, "monthly": build_monthly}
 
 
 def main(argv=None):

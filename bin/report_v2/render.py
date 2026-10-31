@@ -86,7 +86,8 @@ def setup_mpl():
 
 def _save(fig, out_png, source, rows=None, header=None):
     """Lưu PNG + CSV dữ liệu vẽ; dòng nguồn ở chân hình."""
-    fig.text(0.012, 0.012, "\n".join(textwrap.wrap(nfc(source), 165)), fontsize=6.4, color=MUTED,
+    wrap = max(60, int(165 * fig.get_size_inches()[0] / 7.6))   # chart nhỏ (cặp 4,6") ⇒ ngắt sớm, không cụt chữ
+    fig.text(0.012, 0.012, "\n".join(textwrap.wrap(nfc(source), wrap)), fontsize=6.4, color=MUTED,
              ha="left", va="bottom")
     fig.savefig(out_png, dpi=200)
     if rows is not None:
@@ -243,13 +244,14 @@ def chart_underwater(dates, dd, title, out, source, *, bench=None, size=(7.6, 2.
     ax.plot(dates, dd, color=BAD, lw=1.3, label="Danh mục (đã loại dòng tiền)")
     if bench is not None:
         ax.plot(dates, bench, color=BENCH, lw=1.2, label="VN-Index")
-        ax.legend(loc="lower right", ncol=2)
+        # chú giải NGOÀI vùng vẽ (loc="lower right" đè đường VN-Index ở bản tháng 10/2026)
+        ax.legend(loc="lower left", bbox_to_anchor=(0, 0.99), ncol=2, borderaxespad=0, frameon=False)
     i = min(range(len(dd)), key=lambda k: dd[k])
     ax.annotate(f"{pct(dd[i], 2, False)} ({dates[i]:%d/%m})", (dates[i], dd[i]), xytext=(6, -2),
                 textcoords="offset points", fontsize=7.8, fontweight="bold", color=INK)
     ax.set_ylabel("% so với đỉnh")
     _date_axis(ax, dates)
-    ax.set_title(nfc(title))
+    ax.set_title(nfc(title), pad=16 if bench is not None else 6)
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     rows = [(d.isoformat(), round(v, 4), round(bench[k], 4) if bench else "") for k, (d, v) in enumerate(zip(dates, dd))]
     return _save(fig, out, source, rows, ["date", "dd_pct", "bench_dd_pct"])
@@ -424,7 +426,8 @@ def table(header, rows, *, align=None, total_rows=0, color_cols=(), max_rows=10,
     if max_rows is not None and len(rows) > max_rows:
         raise ValueError(f"bảng {len(rows)} hàng > trần {max_rows} — đưa vào phụ lục")
     align = align or ["l"] + ["r"] * (len(header) - 1)
-    wd = (lambda j: f' width="{widths[j]}%"' if widths else "")
+    # style= (không phải attribute width=): pymupdf.Story bỏ qua width= ⇒ cột "Giá khớp BQ" từng bị kéo rộng
+    wd = (lambda j: f' style="width:{widths[j]}%"' if widths else "")
     t = "<table><tr>" + "".join(f'<th class="{a}"{wd(j)}>{esc(h)}</th>' for j, (h, a) in enumerate(zip(header, align))) + "</tr>"
     for k, r in enumerate(rows):
         cls = ' class="tot"' if (k >= len(rows) - total_rows or k in bold_rows) else ""
@@ -556,7 +559,10 @@ def build_pdf(blocks, out_pdf, *, header_left, header_right="", footer="", archi
         if footer:
             page.insert_text((38, A4.height - 21), nfc(footer), fontname="bvp", fontsize=6.6, color=(0.4, 0.4, 0.4))
         page.insert_text((A4.width - 80, A4.height - 21), f"Trang {k + 1}/{n}", fontname="bvp", fontsize=7.2, color=(0.2, 0.2, 0.2))
-    doc.save(out_pdf, garbage=3, deflate=True)
+    # tất định (selfcheck chạy 2 lần cùng md5): metadata cố định, không sinh /ID mới
+    doc.set_metadata({"producer": "report_v2", "creator": "report_v2", "title": nfc(header_left),
+                      "creationDate": "", "modDate": ""})
+    doc.save(out_pdf, garbage=3, deflate=True, no_new_id=True)
     doc.close(); os.remove(tmp)
     return n
 

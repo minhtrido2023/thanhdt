@@ -134,6 +134,19 @@ def main():
         md_body = f.read()
 
     fname = os.path.basename(args.report_path)
+
+    # Báo cáo v2 (report-style v2, 2026-10-31): thân email = HTML builder dựng sẵn (ảnh cid), kèm PDF.
+    # Artifact lint fail-closed ở ĐÂY nữa (không chỉ ở cổng giao) — gọi tay script này cũng không lọt.
+    v2 = None
+    from report_v2 import artifact_lint as al  # noqa: E402
+    if al.parse_tag(md_body):
+        investor = "SpaceX" in fname and "ZaloPay" not in fname
+        probs = al.lint_v2(args.report_path, investor_facing=investor)
+        if probs:
+            print("❌ Artifact lint v2 CHẶN — KHÔNG gửi:\n  " + "\n  ".join(probs), file=sys.stderr)
+            sys.exit(3)
+        v2 = al.load_v2(args.report_path)
+        md_body = al.strip_tag(md_body)
     if not args.subject:
         if "daily_report" in fname:
             _prefix = "[Daily report]"
@@ -183,12 +196,21 @@ def main():
         body_md = md_body + ("\n\n---\n\n" + "\n\n".join(lines) + "\n" if lines else "")
         title_line = md_body.split("\n", 1)[0]
         title = re.sub(r"^#+\s*", "", title_line).strip() or fname
-        html_body = render_html(body_md, title, os.path.dirname(os.path.abspath(args.report_path)))
         msg = MIMEMultipart()
         msg["From"] = from_email
         msg["To"] = to_email
         msg["Subject"] = subject
-        html_body, inline_images = _collect_inline_images(html_body)
+        if v2:
+            man, vdir = v2
+            with open(os.path.join(vdir, man["html"]), encoding="utf-8") as f:
+                html_body = f.read()
+            inline_images = []
+            for cid, meta in man.get("cid", {}).items():
+                with open(os.path.join(vdir, meta["file"]), "rb") as f:
+                    inline_images.append({"cid": cid, "subtype": "png", "data": f.read()})
+        else:
+            html_body = render_html(body_md, title, os.path.dirname(os.path.abspath(args.report_path)))
+            html_body, inline_images = _collect_inline_images(html_body)
         related = MIMEMultipart("related")
         related.attach(MIMEText(html_body, "html", "utf-8"))
         for image in inline_images:
@@ -198,6 +220,12 @@ def main():
                            filename=f"{image['cid']}.{image['subtype']}")
             related.attach(img)
         msg.attach(related)
+        if v2:
+            man, vdir = v2
+            with open(os.path.join(vdir, man["pdf"]), "rb") as f:
+                pdf = MIMEApplication(f.read(), _subtype="pdf", Name=man["pdf"])
+            pdf["Content-Disposition"] = f'attachment; filename="{man["pdf"]}"'
+            msg.attach(pdf)
         with open(args.report_path, "rb") as f:
             part = MIMEApplication(f.read(), Name=fname)
         part["Content-Disposition"] = f'attachment; filename="{fname}"'
