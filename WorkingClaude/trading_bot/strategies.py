@@ -97,6 +97,10 @@ def _dcf_check_for_order(ticker, price, asof, price_date=None):
             # R9/việc 2: chỉ có khi DCF_OSHARES_SOURCE=live (fin: không thêm khoá ⇒ byte-identical)
             **({k: res[k] for k in ("oshares", "oshares_fin", "oshares_source", "oshares_method",
                                     "oshares_divergence") if k in res} if "oshares_source" in res else {}),
+            # R10/việc 1: MoS tính trên SỐ QUÝ (chỉ live) — lag_dd_pack cờ DCF_RICH nếu RICH sâu ở BẤT KỲ số nào
+            **({"margin_of_safety_fin": (round(float(res["margin_of_safety_fin"]), 4)
+                                         if res.get("margin_of_safety_fin") is not None else None)}
+               if "oshares_source" in res else {}),
         }
 
     except Exception as exc:

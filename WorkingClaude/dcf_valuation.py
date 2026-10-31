@@ -566,6 +566,13 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
                         + f" asof={a.date().isoformat()} (nguon {osh_live['source']}, {osh_live['method']})")
     if price is not None and fv_ps and fv_ps > 0:
         res["margin_of_safety"] = (fv_ps - price) / fv_ps
+    if osh_live is not None:
+        # R10/việc 1: cùng FCFE/r/g nhưng chia cho SỐ QUÝ — để cổng DCF_RICH (lag_dd_pack) đánh giá
+        # trên CẢ HAI số CP khi lệch > ngưỡng; live làm MẤT cờ RICH sâu không được bỏ qua ack người.
+        fv_fin = _fv_per_share(base_fcfe, g_exp, g_T, r, fin_os)
+        res["fair_value_ps_fin"] = fv_fin
+        if price is not None and fv_fin and fv_fin > 0:
+            res["margin_of_safety_fin"] = (fv_fin - price) / fv_fin
     # sensitivity
     res["sensitivity"] = _sensitivity(base_fcfe, g_exp, g_T, r, oshares)
     if verbose:
@@ -598,6 +605,11 @@ def _price_run_start(ticker, pdt, price):
     khác `price` (giá do caller lấy từ nguồn khác) ⇒ không suy được chuỗi, giữ pdt."""
     ser = _price_series(ticker, pdt, PRICE_RUN_MAX)
     if not ser or ser[0][0] != pdt or ser[0][1] is None or ser[0][1] != float(price):
+        # R10/việc 4: guard TẮT ở ca này — phải nói ra, không im lặng (khoá khung vẫn chạy bằng pdt)
+        why = (f"khong co dong Price phien {pdt} trong cache ticker" if not ser or ser[0][0] != pdt or ser[0][1] is None
+               else f"gia caller {float(price):g} != Price {ser[0][1]:g} phien {pdt} (nguon gia khac)")
+        _shout_once(("price_run_skip", ticker, pdt), f"DCF_OSHARES_SOURCE=live {ticker}: {why} -> KHONG kiem duoc "
+                                                     f"chuoi Price lap (vendor ffill qua ex); khoa khung tu {pdt}")
         return pdt, None
     start = pdt
     for day, px in ser[1:]:
@@ -613,6 +625,21 @@ def _price_run_start(ticker, pdt, price):
 # ×0,7359 (AIS 83,6tr vs quý 113,6tr) đổi FV/cp +36% mà trước R9 không nơi nào in. Ngưỡng 10% = đề xuất
 # của dispatch R9, không hiệu chỉnh.
 OSHARES_DIVERGENCE_WARN = 0.10
+
+
+# R10/việc 2: số CP sống THẤP hơn số quý (dòng ticker_financial time ≤ asof) ⇒ dùng SỐ QUÝ = số CP LỚN
+# hơn ⇒ FV/cp thấp hơn (bảo thủ). Không xác định được bên nào đúng, có hai nguyên nhân ngược chiều:
+#  (A) live sót CP đã phát hành KHÔNG theo tỷ lệ (riêng lẻ / ESOP / chuyển đổi TP / đấu giá) khi vendor
+#      ghi ngày trễ — live phóng đại FV/cp (lo ngại skeptic R8 mục 4);
+#  (B) dòng quý bị vendor GHI ĐÈ sau ngày công bố bằng số CP về sau (không PIT): MST Q3/2025 (công bố
+#      2025-10-22) = 113,6tr trong khi đợt riêng lẻ 30tr chốt 2025-11-24, đổi niêm yết hiệu lực
+#      2025-12-31 ⇒ ở 2025-10-29 live 83,6tr mới đúng; HHV Q3/2025 = 547,2tr đã gồm quyền mua ex 2025-12-25.
+# Đo 342 sự kiện executed 2023→: live < quý >0,5% ở 29/1.004 lần đo, 29/29 AIS_EXACT
+# (mike/agents/Taylor/research/oshares_live_r10_20261031/measure_nonprorata_out.txt, mst_hhv_timeline.txt).
+# Chọn số lớn hơn = sai về phía FV thấp (thêm RICH ⇒ cần ack người), không bao giờ về phía FV cao.
+# Chiều live > quý (thưởng/cổ tức CP BCTC chưa kịp — PHR/HTN/AIG) cũng là số lớn hơn ⇒ giữ live.
+# Dung sai 0,5% = làm tròn CP lẻ (oshares_live docstring: 0,0007%) + biên an toàn; hằng chọn tay.
+LIVE_BELOW_FIN_TOL = 0.005
 
 
 def oshares_divergence(used, fin_os):
@@ -648,6 +675,8 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
     R9: (c) mọi ca (kể cả không giá): KHÔNG có ISS dời khung giá ex ≤ asof (lùi 90 ngày) mà chưa
     `executed` (oshares_dcf.unexecuted_events) — số CP sống khi đó còn là số trước sự kiện;
     (d) price_date được mở về đầu chuỗi Price lặp (vendor ffill qua ex, `_price_run_start`).
+    R10: (e) số CP sống < số quý × (1 − LIVE_BELOW_FIN_TOL) ⇒ số quý, method LIVE_BELOW_FIN (+ kêu):
+    không biết bên nào đúng ⇒ số CP lớn hơn (bảo thủ), xem LIVE_BELOW_FIN_TOL.
     Có giá mà KHÔNG khai price_date / price_date hỏng / price_date > asof ⇒ số quý NGAY, không gọi
     oshares_for (R9/việc 3: 0 truy vấn BQ trên đường plan 21:00).
     Không khoá được — thiếu `price_date`, price_date > asof, hai số khác, có sự kiện, lỗi ngày/lịch —
@@ -690,6 +719,15 @@ def _live_oshares(ticker, a, price, price_date, fin_os):
                         f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: oshares_for LOI ({rec.get('reason')}) "
                         f"-> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh/ma]")
             return {**rec, "value": fin_os, "source": "ticker_financial"}
+        lv = rec.get("value")                                      # (e) R10/việc 2
+        if lv and lv < fin_os * (1.0 - LIVE_BELOW_FIN_TOL):
+            _shout_once(("live_below_fin", ticker, asof),
+                        f"DCF_OSHARES_SOURCE=live {ticker} asof={asof}: "
+                        + oshares_divergence_note(None, lv, fin_os)
+                        + f" < quy ({rec.get('method')}) -> khong xac dinh duoc ben nao dung (ISS khong theo ty le vendor "
+                          f"ghi tre, HOAC dong quy ghi de so CP ve sau) -> dung SO QUY (so CP lon hon, FV/cp thap, bao thu)")
+            return {**rec, "value": fin_os, "source": "ticker_financial", "method": "LIVE_BELOW_FIN",
+                    "live_value": lv, "frame_error": None}
         try:                                                       # (c) R9/việc 1
             stale = _osd.unexecuted_events(ticker, asof)
         except Exception as e:                                     # noqa: BLE001 — không đọc được = không chứng minh được
