@@ -121,9 +121,27 @@ _strategy_fit_attach_args() {
 _deliver_eod() {
   local body="$1"
   local validation_mode="${2:-full}"
+  local v2_used=0
   local artifact="$ROOT/reports/${ACCOUNT}_daily_report_${PLAN_DATE}.md"
   mkdir -p "$ROOT/reports"
   printf '%s\n' "$body" > "$artifact"
+  # Báo cáo v2 (user duyệt 2026-10-31, kb/projects/report-style-v2-20261031.md): PDF 1 trang + HTML cid,
+  # Discord nhận bản .md tóm tắt 3 dòng (ZaloPay nội bộ: + nguyên bản text cũ bên dưới). FAIL-OPEN:
+  # builder lỗi/quá giờ ⇒ ghi lại bản text cũ, báo cáo ngày không bao giờ mất. Chỉ nhánh đầy đủ (có lệnh).
+  # EOD_REPORT_V2=0 = rollback một biến (giữ nguyên đường cũ).
+  if [ "$validation_mode" = "full" ] && [ "${EOD_REPORT_V2:-1}" = "1" ]; then
+    local v2_out v2_rc
+    v2_out="$(timeout 600 python3 "$ROOT/bin/report_v2/build.py" daily --account "$ACCOUNT" \
+      --period "$PLAN_DATE" --out-dir "$ROOT/reports" 2>&1)"
+    v2_rc=$?
+    if [ "$v2_rc" -eq 0 ]; then
+      v2_used=1
+      [ "$ACCOUNT" = "SpaceX" ] || printf '\n---\n%s\n' "$body" >> "$artifact"
+    else
+      echo "eod_trading_report: report_v2 daily rc=$v2_rc — GIỮ bản text cũ. Lỗi thật: $(printf '%s\n' "$v2_out" | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')" >&2
+      printf '%s\n' "$body" > "$artifact"
+    fi
+  fi
   # Alert sớm không công bố tỉ suất/vị thế, nên return gate không áp dụng;
   # delivery gate vẫn hash-bind đủ Discord + email. Report đầy đủ chạy validation.
   local gate_args=("$artifact" --topic "$TRADING_REPORT_THREAD")
@@ -137,6 +155,14 @@ _deliver_eod() {
   local gate_out gate_rc vendor_rc=0
   gate_out="$(python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}" 2>&1)"
   gate_rc=$?
+  # FAIL-OPEN cả ở cổng: bản v2 bị cổng CHẶN lúc kiểm artifact (chưa kênh nào gửi) ⇒ gửi bản text cũ.
+  if [ "$gate_rc" -ne 0 ] && [ "${v2_used:-0}" = "1" ] && printf '%s\n' "$gate_out" | grep -qE 'BLOCK|CHẶN'; then
+    printf '%s\n' "$gate_out"
+    echo "eod_trading_report: bản v2 bị cổng chặn — gửi lại bằng bản text cũ (fail-open)" >&2
+    printf '%s\n' "$body" > "$artifact"
+    gate_out="$(python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}" 2>&1)"
+    gate_rc=$?
+  fi
   printf '%s\n' "$gate_out"
   printf '%s\n' "$gate_out" | "$ROOT/bin/vendor_mismatch_alert.sh" \
     "$(basename "$artifact")" "$TRADING_REPORT_THREAD" || vendor_rc=$?
@@ -420,6 +446,10 @@ elif [ ! -f "$STATE_FILE" ]; then
   exit $?
 fi
 # Case 4 (bình thường: có lệnh + có state) rơi xuống phần render đầy đủ bên dưới.
+
+# Chụp NAV TRƯỚC khối REPORT (2026-10-31): portfolio_status.py bên trong khối đọc nav_history_{account}.csv —
+# chụp sau thì dòng hôm nay chưa có ⇒ cảnh báo "NAV hôm nay CHƯA có" lặp mỗi ngày dù NAV vẫn ra ở cuối báo cáo.
+_nav_section
 
 REPORT="$(python3 - "$PLAN_FILE" "$STATE_FILE" "$ACCOUNT" "$PLAN_DATE" "$WC_ROOT" << 'PYEOF'
 import sys, json, os
@@ -853,8 +883,6 @@ elif os.path.exists(mismatch_file):
     os.remove(mismatch_file)  # ngày trước có lệch, hôm nay sạch -> dọn cờ cũ
 PYEOF
 )"
-
-_nav_section
 
 # DC-book NEUTRAL waterfall (paper sleeve) MOVED OUT 2026-07-07 — user mandate: mọi
 # paper-trading report gộp về MỘT nhóm (Paper Programs Daily Report,

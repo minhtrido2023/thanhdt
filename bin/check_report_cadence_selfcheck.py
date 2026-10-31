@@ -421,11 +421,18 @@ check("#21d guard PLAN rỗng/không JSON: có, in '❌' (cron_health_check bắ
       bool(_g) and "❌ check_report_cadence" in _g.group(1) and "exit 1" in _g.group(1), str(_g and _g.group(1))[:200])
 
 check("#22 trích được 2 nhánh PROMPT weekly/monthly từ check_report_cadence.sh", bool(_wk))
+_v2 = re.search(r'^  V2_STEP="(.*)"\s*$', _src, re.M)
+_v2t = _v2.group(1) if _v2 else ""
+check("#22c V2_STEP: build.py + narrative.json + trần từ + dự phòng quy trình cũ + 2 cổng giao",
+      all(k in _v2t for k in ("bin/report_v2/build.py ${KIND}", "--narrative", "≤25 từ", "KHÔNG tự viết số",
+                              "rc=2", "QUY TRÌNH CŨ", "append_event.sh Taylor error", "${TFILE_SX}", "${TFILE_ZP}")),
+      _v2t[:120])
 if _wk:
     # Biến bash được phép nội suy trong thân PROMPT; còn lại (backtick, $(…), ${khác}) là command
     # substitution âm thầm làm rơi/đổi chữ — `bash -n` không bắt được (mutation M10/M11).
     _ALLOWED = ("${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}", "${DELEGATE_STEP}",
-                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${LIVERMORE_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}")
+                "${PORTFOLIO_STEP}", "${BENCH_STEP}", "${LIVERMORE_STEP}", "${DESC}", "${TRADING_REPORT_THREAD}",
+                "${V2_STEP}")
     for _nm, _body in (("weekly", _wk.group(1)), ("monthly", _wk.group(2))):
         _need = ["Toàn cảnh thị trường", "Outlook", "${SPLIT_STEP}", "${CHART_STEP}", "${EMAIL_STEP}",
                  "${PORTFOLIO_STEP}", "${BENCH_STEP}"]
@@ -448,6 +455,8 @@ if _wk:
         check(f"#25e PROMPT {_nm}: danh sách tên công khai HOSE/HNX cho nguồn",
               "HOSE/HNX" in _body)
         check(f"#25g PROMPT {_nm}: khối Kỹ thuật lấy từ Livermore (LIVERMORE_STEP)", "${LIVERMORE_STEP}" in _body)
+        # report-style v2 (2026-10-31): quy trình chuẩn đứng ĐẦU prompt; prompt cũ còn nguyên làm dự phòng
+        check(f"#25h PROMPT {_nm}: mở đầu bằng quy trình chuẩn v2 (V2_STEP)", bool(_pm) and _pm.group(1).startswith("${V2_STEP}"))
         check(f"#25f PROMPT {_nm}: Value Radar/DT gate lấy từ dna_report (không tự tính P/E ad-hoc)",
               "dna_report.build_value_radar_line()" in _body
               and "build_dt_gate_line()" in _body and "ad-hoc" in _body)

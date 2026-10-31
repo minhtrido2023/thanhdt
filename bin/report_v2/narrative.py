@@ -1,0 +1,120 @@
+"""report_v2.narrative — nạp + KIỂM narrative.json (phần chữ duy nhất agent được viết).
+
+Luật (REPORT_STYLE_V2 §2, §7, §8; user chốt 31/10):
+  • headline ≤ 25 từ; mỗi mục ≤ 3 gạch, mỗi gạch ≤ 25 từ; outlook = bảng kịch bản ≤ 4 hàng.
+  • KHÔNG tự viết số: mọi token số trong narrative phải có NGUYÊN VĂN trong tập số builder đã
+    in từ pipeline (bảng/KPI/footnote) — trừ số nguyên 0..12 và năm 20xx. Sai ⇒ NarrativeError.
+  • Không tên nội bộ (INTERNAL_RE). File nhà đầu tư (SpaceX) cấm thêm từ vận hành (OPS_RE).
+  • Mục `internal` (CHỈ ZaloPay — kênh nội bộ): ≤ 6 khối × ≤ 5 gạch × ≤ 40 từ; số được phép
+    (chép từ script nội bộ như intraday_oos_monthly.py) nhưng được in dưới nhãn "nội bộ".
+Builder TỪ CHỐI narrative vi phạm (raise) — người gọi phải sửa narrative, không được nới luật.
+"""
+import json
+import re
+import unicodedata
+
+MAX_WORDS, MAX_ITEMS = 25, 3
+SECTIONS = ("bridge", "performance", "risk", "attribution", "trades", "portfolio", "market", "costs")
+INTERNAL_RE = re.compile(r"\b(Livermore|Taylor|Bobby|Winston|Wendy|Spyros|Mafee|DollarBill|Mike|ZaloPay|0001743768|liên tài khoản|LAG|PARK|"
+                         r"DT5G|DT4|PEAD|BAL|CAPIT|custom30V?|tav2_\w+|BigQuery|universe_pit|SIGNAL_V\d+)\b")
+OPS_RE = re.compile(r"\b(job|dispatch|gate|cron|bug|selfcheck|circuit breaker|lỗi hệ thống|bot chết)\b", re.I)
+NUM_RE = re.compile(r"\d[\d.,/]*\d|\d")
+
+
+class NarrativeError(ValueError):
+    pass
+
+
+def nfc(s):
+    return unicodedata.normalize("NFC", str(s))
+
+
+def words(s):
+    return len(re.sub(r"<[^>]+>", "", s).split())
+
+
+def num_tokens(s):
+    return [t.rstrip(".,") for t in NUM_RE.findall(nfc(s))]
+
+
+def _free_number(t):
+    if re.fullmatch(r"\d{1,2}", t) and int(t) <= 12:
+        return True
+    return bool(re.fullmatch(r"20\d\d", t))
+
+
+def load(path):
+    if not path:
+        return None
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def validate(nar, facts_text, *, investor_facing, allow_internal):
+    """nar: dict | None. facts_text: toàn bộ chữ số builder đã in. → nar đã chuẩn hoá (NFC).
+    Raise NarrativeError liệt kê MỌI vi phạm (không dừng ở lỗi đầu)."""
+    if nar is None:
+        return None
+    errs = []
+    facts = set(num_tokens(facts_text))
+    out = {"headline": nfc(nar.get("headline", "")).strip(), "key_points": [], "sections": {},
+           "outlook": [], "internal": []}
+
+    def check_text(where, s, max_words=MAX_WORDS, numbers=True, internal_ok=False):
+        s = nfc(s).strip()
+        if not s:
+            errs.append(f"{where}: rỗng")
+        if words(s) > max_words:
+            errs.append(f"{where}: {words(s)} từ > {max_words}")
+        m = None if internal_ok else INTERNAL_RE.search(s)
+        if m:
+            errs.append(f"{where}: tên nội bộ '{m.group(0)}'")
+        if investor_facing:
+            m = OPS_RE.search(s)
+            if m:
+                errs.append(f"{where}: từ vận hành '{m.group(0)}' trong báo cáo nhà đầu tư")
+        if numbers:
+            bad = [t for t in num_tokens(s) if t not in facts and not _free_number(t)]
+            if bad:
+                errs.append(f"{where}: số không có trong số liệu pipeline đã in {bad} — narrative KHÔNG được tự viết số")
+        return s
+
+    if out["headline"]:
+        check_text("headline", out["headline"])
+    kp = nar.get("key_points") or []
+    if len(kp) > MAX_ITEMS:
+        errs.append(f"key_points: {len(kp)} gạch > {MAX_ITEMS}")
+    out["key_points"] = [check_text(f"key_points[{i}]", s) for i, s in enumerate(kp[:MAX_ITEMS])]
+    for k, items in (nar.get("sections") or {}).items():
+        if k not in SECTIONS:
+            errs.append(f"sections.{k}: mục không có trong khung ({', '.join(SECTIONS)})")
+            continue
+        if len(items) > MAX_ITEMS:
+            errs.append(f"sections.{k}: {len(items)} gạch > {MAX_ITEMS}")
+        out["sections"][k] = [check_text(f"sections.{k}[{i}]", s) for i, s in enumerate(items[:MAX_ITEMS])]
+    ol = nar.get("outlook") or []
+    if len(ol) > 4:
+        errs.append(f"outlook: {len(ol)} kịch bản > 4")
+    for i, r in enumerate(ol[:4]):
+        row = {}
+        for f in ("scenario", "condition", "invalidation"):
+            row[f] = check_text(f"outlook[{i}].{f}", r.get(f, ""), max_words=20)
+        row["prob"] = nfc(r.get("prob", "")).strip()
+        if row["prob"]:
+            check_text(f"outlook[{i}].prob", row["prob"], max_words=6, numbers=False)
+        out["outlook"].append(row)
+    internal = nar.get("internal") or []
+    if internal and not allow_internal:
+        errs.append("internal: chỉ báo cáo nội bộ (ZaloPay) được có mục nội bộ")
+    if len(internal) > 6:
+        errs.append(f"internal: {len(internal)} khối > 6")
+    for i, blk in enumerate(internal[:6]):
+        its = blk.get("bullets") or []
+        if len(its) > 5:
+            errs.append(f"internal[{i}]: {len(its)} gạch > 5")
+        out["internal"].append({"title": check_text(f"internal[{i}].title", blk.get("title", ""), numbers=False, internal_ok=True),
+                                "bullets": [check_text(f"internal[{i}].bullets[{j}]", s, max_words=40, numbers=False, internal_ok=True)
+                                            for j, s in enumerate(its[:5])]})
+    if errs:
+        raise NarrativeError("narrative bị TỪ CHỐI:\n  - " + "\n  - ".join(errs))
+    return out

@@ -206,6 +206,16 @@ def _check_period_returns(report: Path) -> None:
         return
 
     cell = _inception_return_cell(text)
+    from report_v2 import artifact_lint as al  # noqa: E402
+    if cell is None and al.parse_tag(text):
+        # Báo cáo v2 không có bảng 3.2 trong .md (vd bản ngày 3 dòng): số in trong PDF/HTML là
+        # manifest.numbers.inception_pct (manifest khoá sha256 PDF) ⇒ đối chiếu số đó.
+        try:
+            man, _ = al.load_v2(report)
+            cell = f"{float(man['numbers']['inception_pct']):.3f}%"
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise RuntimeError(f"period-return BLOCK ({report.name}): báo cáo v2 nhưng không đọc được "
+                               f"numbers.inception_pct trong manifest: {type(exc).__name__}: {exc}") from exc
     if cell is None:
         print(f"report_delivery_gate: WARN period-return check — {report.name} không có dòng 'Từ "
               f"khi bắt đầu hoạt động' trong bảng Hiệu suất lũy kế, bỏ qua", file=sys.stderr)
@@ -294,10 +304,51 @@ def _check_livermore_block(report: Path) -> None:
     if report_date is None:
         raise RuntimeError(f"livermore-block BLOCK ({report.name}): không suy được ngày cuối kỳ từ tên file")
     import livermore_report_block as lrb  # noqa: E402
-    why = lrb.gate_report(report.read_text(encoding="utf-8"), m.group(2), dt.date.fromisoformat(report_date))
+    text = report.read_text(encoding="utf-8")
+    from report_v2 import artifact_lint as al  # noqa: E402
+    if al.parse_tag(text):
+        why = _livermore_v2(report, text, m.group(2), dt.date.fromisoformat(report_date), lrb, al)
+        if why:
+            raise RuntimeError(f"livermore-block BLOCK ({report.name}): {why}")
+        print(f"report_delivery_gate: livermore-block OK v2 ({report.name})")
+        return
+    why = lrb.gate_report(text, m.group(2), dt.date.fromisoformat(report_date))
     if why:
         raise RuntimeError(f"livermore-block BLOCK ({report.name}): {why}")
     print(f"report_delivery_gate: livermore-block OK ({report.name})")
+
+
+def _livermore_v2(report: Path, text: str, kind: str, period_end: dt.date, lrb, al) -> str | None:
+    """Báo cáo v2 KHÔNG dán nguyên văn khối kỹ thuật (khối mang tên nội bộ, văn xuôi dài): bảng thị trường
+    trong PDF dựng từ dữ kiện script tính của CÙNG kỳ. Ràng buộc thay cho "nguyên văn": có khối PASS cho kỳ
+    ⇒ manifest PHẢI ghi đúng sha256 khối đó (builder đã đọc nó lúc dựng); báo cáo không được gắn tên nguồn."""
+    if lrb.MARKER in text:
+        return "báo cáo v2 không được gắn tên nguồn kỹ thuật nội bộ trong .md"
+    as_of = lrb.period_bounds(kind, period_end)[0]
+    ok, meta = lrb.verify_pass(as_of, kind)
+    if not ok:
+        return None
+    try:
+        man, _ = al.load_v2(report)
+    except (OSError, ValueError, KeyError) as exc:
+        return f"không đọc được manifest v2: {exc}"
+    block = open(meta["md"], encoding="utf-8").read().strip()
+    want = hashlib.sha256(block.encode("utf-8")).hexdigest()
+    got = (man.get("market_block") or {}).get("block_sha256")
+    if got != want:
+        return (f"có khối kỹ thuật PASS ({meta['md']}, sha {want[:12]}) nhưng manifest v2 ghi "
+                f"{(got or 'không có')[:12]} — dựng lại báo cáo SAU khi khối PASS có (livermore_report_block.py ensure)")
+    return None
+
+
+# Artifact lint (report-style v2, 2026-10-31) — chặn cơ học repr tuple/markdown thô/None-nan/tên nội bộ/font
+# không nhúng. Sự cố gốc: weekly 26–30/10 lọt COMPLETE với `['| Nguồn | Đóng góp |\n…', 515443.0]`.
+def _check_artifact_lint(report: Path) -> None:
+    from report_v2 import artifact_lint as al  # noqa: E402
+    probs = al.lint_v2(report, investor_facing=_is_spacex_investor_report(report))
+    if probs:
+        raise RuntimeError(f"artifact-lint BLOCK ({report.name}): " + " | ".join(probs[:6]))
+    print(f"report_delivery_gate: artifact-lint PASS ({report.name})")
 
 
 # NAV-flow gate (FAIL-H, audit measurement-integrity 2026-09-27) — CỐ Ý FAIL-CLOSED, như
@@ -479,6 +530,7 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                     _check_period_returns(report)
                     _check_benchmark_table(report)
                     _check_livermore_block(report)
+                    _check_artifact_lint(report)
                     _check_nav_flow_records(report)
                     _warn_cash_flows(report)
                 record["artifact_validated_at"] = now()
@@ -486,6 +538,8 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
 
             if not channel_done(record, "discord", sha):
                 body = report.read_text(encoding="utf-8")
+                from report_v2 import artifact_lint as al  # noqa: E402
+                body = al.strip_tag(body)       # dòng máy đọc v2 — Discord không ẩn HTML comment
                 run_checked([str(notify_script), body, topic])
                 record["discord"] = {"status": "delivered", "delivered_at": now(),
                                      "sha256": sha, "topic": topic}
