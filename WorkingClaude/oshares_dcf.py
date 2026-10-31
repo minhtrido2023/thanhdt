@@ -5,15 +5,16 @@ Job `Taylor_20261030_094435` (user duyệt 30/10). Hai việc, một module, vì
 đã pha loãng vì một sự kiện cổ phiếu, mà `ticker_financial.OShares` đã theo kịp chưa?".
 
 1. `oshares_for(ticker, asof, fin_value)` — số CP cho `dcf_valuation.fair_value` khi bật
-   `DCF_OSHARES_SOURCE=live`. Chính sách = `oshares_pit.oshares_pit` (ưu tiên `oshares_live`,
-   rơi về số quý ở mọi ca nó từ chối, cổng biên độ ×SANITY_FACTOR), cộng ĐÚNG MỘT bổ sung:
-   ISS cổ tức-bằng-CP / thưởng CP còn `event_status="announced"` mà ex-date ĐÃ QUA được đưa vào
-   như ISS đã thực hiện. Lý do: vendor lật `announced`→`executed` trễ (TCB ISS 50% ex 2026-10-29
-   vẫn `announced` lúc 30/10 16:4x ICT, `issue_volumn=0`), và `oshares_live._fetch` chỉ đọc
-   `executed` ⇒ không có bổ sung này thì `oshares_live` trả 7.086.240.414 cho TCB y như số quý.
-   PIT: chỉ nhận dòng có `exright_date <= asof` VÀ `public_date <= asof`; chỉ 2 phương thức chắc
-   chắn tạo CP cho cổ đông hiện hữu (không nhận quyền mua — CP mới chỉ có khi được mua hết).
-   Không sửa `oshares_live` (module đã qua 4 vòng skeptic): bổ sung đi vào bằng `_cache`.
+   `DCF_OSHARES_SOURCE=live`. Chính sách = ĐÚNG `oshares_pit.oshares_pit` (ưu tiên `oshares_live`,
+   rơi về số quý ở mọi ca nó từ chối, cổng biên độ ×SANITY_FACTOR), không thêm gì.
+   Bản đầu (job Taylor_20261030_094435) có thêm nhánh đưa ISS `announced` đã ex vào cache (vendor
+   lật status trễ: TCB ISS 50% ex 2026-10-29). Đã BỎ ở R4 (job Taylor_20261030_155013): cột
+   `ann_added` RỖNG ở cả 1.557 hàng đo ảnh hưởng 4 asof (`oshares_live_dcf_20261030/out_impact_*.csv`)
+   — hai ca nó nhắm tới: TCB là ngân hàng (`fair_value` loại trước khi đọc số CP), NED không nằm
+   trong universe đo ở asof 2026-10-29 ⇒ nhánh chưa từng có hiệu lực trên một FV nào.
+   Hệ quả đã biết: trong cửa sổ vendor chưa lật status, `live` thấy số CP TRƯỚC sự kiện trong khi
+   giá đã SAU sự kiện — đúng lớp sai số mà `fin` (số quý) cũng mắc, không tệ hơn. Khoá khung ex-date
+   (R5, `dcf_valuation._live_oshares`) chỉ bắt lệch giữa ngày giá và asof, KHÔNG bắt trễ vendor.
 
 2. `classify_oshares_gap(...)` — thay quy tắc lọc `Close/Price<0,93 & OShares<95% kỳ vọng`
    (`erp_domestic_v2_20261030/impact_v2.py` mục [4]) vốn coi MỌI điều chỉnh giá là pha loãng CP
@@ -24,7 +25,7 @@ from __future__ import annotations
 
 import sys
 
-from corp_action_lib import TABLE, bq, pricing_events
+from corp_action_lib import pricing_events
 
 # ISS chắc chắn tạo CP cho cổ đông hiện hữu tại ex-date (không phụ thuộc đăng ký mua).
 SHARE_CREATING_ISS = {"Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng"}
@@ -37,57 +38,16 @@ ADJ_TRIGGER = 0.93
 
 
 # ─────────────────────────────────────────────────────────────── 1. số CP sống cho DCF
-def _fetch_announced(tickers, until):
-    tk = ",".join(f'"{t}"' for t in tickers)
-    meth = ",".join(f'"{m}"' for m in sorted(SHARE_CREATING_ISS))
-    rows = bq(f"""
-        SELECT ticker, event_code, CAST(exright_date AS STRING) exright_date,
-               CAST(effective_date AS STRING) effective_date,
-               CAST(listing_date AS STRING) listing_date,
-               exercise_ratio, issue_volumn, issue_method_name_vi, shares_delta,
-               shares_total_after, SUBSTR(event_title_vi, 1, 70) AS title,
-               CAST(public_date AS STRING) public_date
-        FROM `{TABLE}`
-        WHERE ticker IN ({tk}) AND event_status = "announced" AND event_code = "ISS"
-          AND issue_method_name_vi IN ({meth})
-          AND exright_date IS NOT NULL AND exright_date <= DATE "{until}"
-        ORDER BY ticker, exright_date
-    """)
-    return rows
-
-
 def fetch_cache(tickers, until):
-    """(quarters, corp_executed, announced) — một lần BQ cho mọi asof <= until. None nếu lỗi."""
+    """(quarters, corp_executed) — cache `oshares_live`, một lần BQ cho mọi asof <= until. None nếu lỗi."""
     from oshares_live import _fetch
     try:
         tickers = sorted(set(tickers))
-        q, corp = _fetch(tickers, until)
-        return q, corp, _fetch_announced(tickers, until)
+        return _fetch(tickers, until)
     except Exception as e:                                  # noqa: BLE001 — fail-safe về số quý
         # STDERR, không phải stdout: send_plan_report.sh lấy dòng đầu stdout của khối Python làm STATUS
         print(f"[oshares_dcf] fetch_cache FAILED ({type(e).__name__}: {e}) -> dùng OShares quý", file=sys.stderr)
         return None
-
-
-# Trễ lật status của vendor tính bằng NGÀY (reload ~22:2x ICT đêm ex-date). Dòng `announced` đã ex
-# lâu hơn ngưỡng này gần như chắc là dòng mồ côi (BKC còn 2 ISS `announced` từ 2012-04-26) ⇒ không
-# nhận: tới lúc đó AIS/dòng quý đã phải bắt kịp, và một sự kiện có thể đã huỷ không được đẩy vào cổng.
-PROMOTE_MAX_AGE_DAYS = 45
-
-
-def _clip(cache, asof):
-    """Cache `oshares_live` cho đúng `asof`: thêm ISS announced đã biết (public_date<=asof), đã ex
-    (exright<=asof) và ex chưa quá PROMOTE_MAX_AGE_DAYS; bỏ dòng trùng một ISS executed cùng
-    (mã, ex-date, phương thức). Dòng thêm vào chỉ được LĂN nếu ex sau neo — `oshares_at` quyết."""
-    from datetime import date, timedelta
-    q, corp, ann = cache
-    floor = (date.fromisoformat(asof) - timedelta(days=PROMOTE_MAX_AGE_DAYS)).isoformat()
-    have = {(c["ticker"], c["exright_date"], c.get("issue_method_name_vi"))
-            for c in corp if c["event_code"] == "ISS"}
-    extra = [a for a in ann
-             if floor <= a["exright_date"] <= asof and (a.get("public_date") or "9999") <= asof
-             and (a["ticker"], a["exright_date"], a.get("issue_method_name_vi")) not in have]
-    return q, corp + extra, extra
 
 
 _CACHE = {"tickers": frozenset(), "until": None, "data": None}
@@ -99,7 +59,7 @@ def prime(tickers, until):
 
 
 def oshares_for(ticker, asof, fin_value):
-    """Bản ghi `oshares_pit` (+ `announced_added` = ex-date các ISS announced đã đưa vào cache) cho một mã. Tổng: mọi lỗi ⇒ số quý."""
+    """Bản ghi `oshares_pit` cho một mã. Tổng: mọi lỗi ⇒ số quý."""
     from oshares_pit import oshares_pit
     asof = str(asof)[:10]
     try:
@@ -109,15 +69,11 @@ def oshares_for(ticker, asof, fin_value):
             cache = fetch_cache([ticker], asof)
         if cache is None:
             raise RuntimeError("không có cache corp-action")
-        clipped = _clip(cache, asof)
-        rec = oshares_pit([ticker], asof, {ticker: fin_value}, cache=clipped[:2])[ticker]
-        rec["announced_added"] = [e["exright_date"] for e in clipped[2] if e["ticker"] == ticker]
-        return rec
+        return oshares_pit([ticker], asof, {ticker: fin_value}, cache=cache)[ticker]
     except Exception as e:                                  # noqa: BLE001 — fail-safe về số quý
         return {"ticker": ticker, "value": fin_value, "source": "ticker_financial",
                 "reason": f"oshares_dcf lỗi ({type(e).__name__}: {e}) ⇒ giữ số quý",
-                "method": "ERROR", "rel_diff": None, "live_value": None,
-                "announced_added": []}
+                "method": "ERROR", "rel_diff": None, "live_value": None}
 
 
 # ─────────────────────────────────────────────────────────────── 2. phân loại lệch OShares

@@ -24,6 +24,7 @@ warnings.filterwarnings("ignore")
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
 import dcf_valuation as dcf
+dcf.pin_oshares_source_fin(__file__)   # R3: cache/kết quả không mang hậu tố nguồn số CP
 
 OUT = f"{WORKDIR}/mike/agents/Taylor/dcf_exp/fv_sens_releases.parquet"
 SENS_MAP = {"r-1%": "fv_r_dn", "r+1%": "fv_r_up", "g-2%": "fv_g_dn", "g+2%": "fv_g_up"}

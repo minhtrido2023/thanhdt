@@ -29,6 +29,7 @@ sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
 import duckdb
 os.environ.setdefault("DCF_RATE_FRAME", "legacy")  # pin legacy (Taylor_20261030_073001): tái lập số cũ; mặc định prod nay = domestic_v2
 import dcf_valuation as D
+D.pin_oshares_source_fin(__file__)   # R3: cache/kết quả không mang hậu tố nguồn số CP
 import deposit_rate_vn as _dep
 from dcf_backtest import spearman_ic
 
