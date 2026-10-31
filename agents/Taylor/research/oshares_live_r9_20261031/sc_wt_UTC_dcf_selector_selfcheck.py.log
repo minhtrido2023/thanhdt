@@ -1,0 +1,27 @@
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+
+[1] custom_basket.dcf_at (real code) == production _dcf_check_for_order (real samples)
+  OK    40/40 samples match production exactly (RICH=7 CHEAP=16 NOT_COMPUTED=17)
+  OK    sample covers all three statuses (test is meaningful)
+
+[2] NOT_COMPUTED = neutral pass-through (not auto-cheap, not auto-rich)
+  OK    A: NOT_COMPUTED kept in pool (not dropped)
+  OK    A: RICH+robust dropped
+  OK    A: RICH but non-robust kept (sensitivity box flipped sign)
+  OK    A: CHEAP kept
+  OK    B: NOT_COMPUTED gets neutral 0.5 mid-rank (same convention as a missing 1/PE)
+  OK    B: CHEAP ranks above the neutral mid-rank, RICH below
+  OK    B: MoS ordering monotone
+  OK    B: DCF term for NOT_COMPUTED = W*0.5 = 0.125 (constant, cancels in ordering)
+
+[2b] regression: stale ok-release must not mask a current NOT_COMPUTED
+  OK    found 474 tickers that go ok -> NOT_COMPUTED (case exists)
+  OK    YBM after its NOT_COMPUTED release -> NOT_COMPUTED (no stale-FV fallback)
+
+[3] overlay OFF by default
+  OK    BASKET_DCF_MODE defaults to '' (OFF)
+  OK    cache/price load and dcf_at are gated behind DCF_MODE (OFF -> no work, no behaviour change)
+  OK    all 2 dcf_at(...) call-sites sit inside an `dcf_at is not None` guard (3 guards; unguarded lines=[]) -> OFF leaves yieldcombo untouched
+
+SELFCHECK PASS
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence', 'custom_basket']

@@ -2168,6 +2168,15 @@ if runonce_label and account == runonce_label:
                 continue
             _os_n_ext += 1
             try:
+                if _fp.endswith(".json"):
+                    # R9/việc 6: settings Claude CHỈ gán env qua khoá "env"; regex dòng trúng nhầm chuỗi
+                    # quyền "Bash(DCF_OSHARES_SOURCE=live python3 ...)" trong permissions.allow.
+                    import json as _json
+                    _js = _json.load(open(_fp, encoding="utf-8"))
+                    _jenv = _js.get("env") if isinstance(_js, dict) else None
+                    if isinstance(_jenv, dict) and "DCF_OSHARES_SOURCE" in _jenv:
+                        _os_hits.append(f"{_fp}: env.DCF_OSHARES_SOURCE={str(_jenv['DCF_OSHARES_SOURCE'])[:20]}")
+                    continue
                 for _ln in open(_fp, encoding="utf-8", errors="replace"):
                     if not _ln.lstrip().startswith("#") and _os_pat_any.search(_ln):
                         _os_hits.append(f"{_fp}: {_ln.strip()[:70]}")
@@ -2188,7 +2197,16 @@ if runonce_label and account == runonce_label:
                         _cm = open(os.path.join(_pd, "comm"), encoding="utf-8", errors="replace").read().strip()
                     except OSError:
                         _cm = "?"
-                    _os_hits.append(f"tiến trình {os.path.basename(_pd)} ({_cm}) env {_kv.decode(errors='replace')[:40]}")
+                    # R9/việc 6: override nghiên cứu hợp lệ (python chạy script research/selfcheck) VẪN là
+                    # WARN — env của nó có thể rò sang tiến trình con ghi output tên fin — nhưng gắn cờ
+                    # "[research override]" để người/autofix không coi là launcher production.
+                    try:
+                        _cl = open(os.path.join(_pd, "cmdline"), "rb").read().replace(b"\0", b" ").decode(errors="replace")
+                    except OSError:
+                        _cl = ""
+                    _res = _cm.startswith("python") and bool(re.search(r"/research/|_selfcheck\.py|/exp_", _cl))
+                    _tag = "[research override] " if _res else "[LAUNCHER] "
+                    _os_hits.append(f"{_tag}tiến trình {os.path.basename(_pd)} ({_cm}) env {_kv.decode(errors='replace')[:40]}")
         if _os_hits:
             _os_probs.append(f"{len(_os_hits)} launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): "
                              + " | ".join(_os_hits[:3]))

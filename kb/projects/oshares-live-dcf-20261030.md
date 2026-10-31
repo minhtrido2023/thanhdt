@@ -42,8 +42,24 @@
    settings Claude, shell profile, `/proc/*/environ` đọc được. 31/10: 0 lần gán (11 file + 18 tiến trình).
    Hạn chế: /proc của user khác không đọc được; launcher ngoài các gốc này không quét.
 
+Vòng R9 (job `Taylor_20261031_042224`, CHƯA merge; WC `session/oshares-r9-20261031`, mike
+`session/oshares-r9-ops-20261031`; bằng chứng `agents/Taylor/research/oshares_live_r9_20261031/SELFCHECK_R9.md`):
+6. ~~Khe H1 ex TRƯỚC price_date~~: ISS dời khung giá ex ∈ [asof−90 ngày, asof] chưa `executed`
+   (`oshares_dcf.unexecuted_events`) ⇒ số quý + kêu, mọi ca (kể cả không giá).
+7. ~~Lệch số CP không hiện~~: |live/quý − 1| > 10% (`OSHARES_DIVERGENCE_WARN`) ⇒ stderr, `format_dcf_check`
+   (`⚠ OShares live X vs quy Y (±N%)`), `lag_dd_pack` WARNING `OSHARES_LIVE_LECH`. MST 2025-10-29 −26,4% nay hiện.
+8. ~~BQ trên đường plan 21:00~~: có giá mà không price_date ⇒ số quý trước mọi `oshares_for` (10 mã: 9 → 0 lời
+   gọi `bq` CLI).
+9. **custom_basket = ép `fin`** (lựa chọn (a)): `pin_oshares_source_fin` trong nhánh `BASKET_DCF_MODE` — output
+   basket không có hậu tố nguồn số CP (§8). Muốn đo live cho basket ⇒ script riêng có hậu tố.
+10. ~~Vendor lặp Price qua ex~~: khung khoá mở về đầu chuỗi Price lặp (`_price_run_start`, trần 20 phiên).
+11. ~~H6 settings JSON~~: chỉ đọc khoá `env`; tiến trình mang biến vẫn WARN, gắn `[research override]` khi là
+    python chạy research/selfcheck (heuristic cmdline), còn lại `[LAUNCHER]`.
+12. ~~M22 equivalent trên canonical~~: C18 probe trên cây tạm ≠ PROD.
+fin byte-identical 6.228/6.228; impact khi bật = R8 (0/38.925 ô khác).
+
 Còn lại:
-- arch-review + quant-skeptic gói R8, merge 2 nhánh, rồi user duyệt bật (đổi 1 từ + cutover-marker).
+- arch-review + quant-skeptic gói R9, merge 2 nhánh, rồi user duyệt bật (đổi 1 từ + cutover-marker).
 - Vendor trễ lật `announced→executed` mà KHÔNG có dòng ISS nào (kể cả announced) ⇒ khoá không thấy;
   `fin` cùng lỗi.
 - Mất mát đã biết của khoá lịch: phiên ex đúng ngày giá luôn về số quý (BSR 2025-10-29 ex 10-29 là ca
@@ -66,6 +82,6 @@ Còn lại:
 
 ## Script nghiên cứu đọc DCF (R3, grep 30/10)
 Ép fin: 3 file trên. Không sửa (đóng băng, kết quả đã ghim; chạy trước knob ⇒ fin, hoặc tự đặt nguồn tường minh): mọi
-`agents/Taylor/research/*` + `agents/Taylor/exp_capit*` gọi `fair_value`. `custom_basket.py` (+ bản sao
-`data/fscore_c30v_20260801/custom_basket_fsx.py`) truyền giá không `price_date` ⇒ R5 ép `fin` khi live.
+`agents/Taylor/research/*` + `agents/Taylor/exp_capit*` gọi `fair_value`. `custom_basket.py` ép fin (R9 `pin_oshares_source_fin`); bản sao
+`data/fscore_c30v_20260801/custom_basket_fsx.py` (đóng băng) truyền giá không `price_date` ⇒ R5 ép `fin` khi live.
 Không cron mới; không đổi lịch.

@@ -1,0 +1,1 @@
+OK DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = fin (số quý); không launcher/cron nào ghi đè (quét cron + cây WC + 11 file ngoài cây + 28 tiến trình đọc được).

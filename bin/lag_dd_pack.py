@@ -472,6 +472,7 @@ def _f(code, evidence):
 # DCF RICH chỉ là CỜ (đòi dcf_override_reason / ack) khi RICH SÂU (MoS < -100%), KHÔNG miễn theo ROE;
 # RICH nhẹ (-100%..0) không mang thông tin trong nghiên cứu ⇒ chỉ cảnh báo trong pack['warnings'], không đổi status.
 DCF_RICH_DEEP_MOS = -1.0
+OSHARES_DIVERGENCE_WARN = 0.10    # đồng bộ dcf_valuation.OSHARES_DIVERGENCE_WARN (R9/việc 2)
 
 
 def _rich_deep(dcf):
@@ -494,6 +495,15 @@ def soft_warnings(ev):
         out.append({"code": "DCF_RICH_NHE", "severity": "WARNING",
                     "evidence": f"DCF RICH nhẹ: MoS {_num(dcf.get('margin_of_safety'))*100:.1f}% (ngưỡng cờ < {DCF_RICH_DEEP_MOS*100:.0f}%)"
                                 f"{', ROE5Y ' + roe + '%' if roe else ''} — nghiên cứu 24/10: RICH nhẹ không khác đối chứng về LN/drift"})
+    # R9/việc 2 (oshares_live): số CP sống lệch số quý > 10% đổi FV/cp tương ứng — phải hiện (ca MST
+    # 2025-10-29 ×0,7359 làm MẤT cờ DCF_RICH sâu mà không nơi nào in). Chỉ có khi DCF_OSHARES_SOURCE=live.
+    div = dcf.get("oshares_divergence") if isinstance(dcf, dict) else None
+    if isinstance(div, (int, float)) and not isinstance(div, bool) and div == div and abs(div) > OSHARES_DIVERGENCE_WARN:
+        _tr = lambda v: "n/a" if _num(v) is None else f"{_num(v)/1e6:,.1f}tr"   # noqa: E731
+        out.append({"code": "OSHARES_LIVE_LECH", "severity": "WARNING",
+                    "evidence": f"DCF dùng OShares live {_tr(dcf.get('oshares'))} vs quý "
+                                f"{_tr(dcf.get('oshares_fin'))} ({div*100:+.0f}%) — FV/cp đổi theo; "
+                                f"nguồn {dcf.get('oshares_source')}/{dcf.get('oshares_method')}"})
     return out
 
 
