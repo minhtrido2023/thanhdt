@@ -82,6 +82,9 @@ TRADING_REPORT_THREAD="trading_report"   # tên trong kb/discord_channels.json (
 # STRATEGY_FIT_BEGIN — trích bởi strategy_fit_email_attach_selfcheck.py. Đổi/di chuyển marker ⇒ FATAL.
 _strategy_fit_attach_args() {
   STRATEGY_FIT_ARGS=()
+  # SpaceX gửi nhà đầu tư BÊN NGOÀI ⇒ KHÔNG đính dashboard nội bộ (có tên tài khoản khác + chẩn đoán chiến lược;
+  # user chốt 31/10/2026). ZaloPay (nội bộ) giữ nguyên.
+  [ "${ACCOUNT:-}" = "SpaceX" ] && return 0
   local dir="$ROOT/reports/dashboard"
   local dash="$dir/strategy_fit_${PLAN_DATE}.html"
   local tmo="${STRATEGY_FIT_TIMEOUT_S:-120}" out rc last before
