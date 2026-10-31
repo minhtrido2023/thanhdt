@@ -2176,6 +2176,21 @@ if runonce_label and account == runonce_label:
                     _jenv = _js.get("env") if isinstance(_js, dict) else None
                     if isinstance(_jenv, dict) and "DCF_OSHARES_SOURCE" in _jenv:
                         _os_hits.append(f"{_fp}: env.DCF_OSHARES_SOURCE={str(_jenv['DCF_OSHARES_SOURCE'])[:20]}")
+                    # R10/việc 4: hooks.*.command + statusLine.command là lệnh shell chạy MỖI phiên ⇒ gán
+                    # kiểu shell ở đó cũng là launcher. Quét đúng các chuỗi "command" (không phải permissions).
+                    _cmds, _stk = [], [(_js.get("hooks") if isinstance(_js, dict) else None),
+                                       (_js.get("statusLine") if isinstance(_js, dict) else None)]
+                    while _stk:
+                        _o = _stk.pop()
+                        if isinstance(_o, dict):
+                            if isinstance(_o.get("command"), str):
+                                _cmds.append(_o["command"])
+                            _stk.extend(v for v in _o.values() if isinstance(v, (dict, list)))
+                        elif isinstance(_o, list):
+                            _stk.extend(_o)
+                    for _c in _cmds:
+                        if _os_pat.search(_c):
+                            _os_hits.append(f"{_fp}: command {_c.strip()[:60]}")
                     continue
                 for _ln in open(_fp, encoding="utf-8", errors="replace"):
                     if not _ln.lstrip().startswith("#") and _os_pat_any.search(_ln):

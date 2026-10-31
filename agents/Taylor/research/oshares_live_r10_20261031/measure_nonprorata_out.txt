@@ -1,0 +1,55 @@
+n đo 1004 | sự kiện 342
+                                        n  live_below_fin  live_above_fin
+method_iss                      lag                                      
+Chuyển từ trái phiếu chuyển đổi -1     21               2               0
+                                 30    20               0               2
+                                 180   18               2               2
+Phát hành cho CBCNV             -1    198              13              29
+                                 30   198               1              35
+                                 180  161               2               8
+Phát hành riêng lẻ              -1    127               6               1
+                                 30   126               0              21
+                                 180  110               1              10
+Phát hành rộng rãi qua đấu giá  -1      2               1               0
+                                 30     2               0               0
+                                 180    3               1               0
+Phát hành để sáp nhập           -1      6               0               0
+                                 30     6               0               0
+                                 180    6               0               0
+
+live < quý > 0,5% (đầu 25):
+    ticker                       method_iss          ex  lag   fin_q        fin_os          live       meth       div
+45     HHP               Phát hành riêng lẻ  2023-02-27   -1  2022Q4  6.202381e+07  3.202381e+07  AIS_EXACT -0.483685
+508    CII  Chuyển từ trái phiếu chuyển đổi  2025-02-03   -1  2024Q4  5.479766e+08  3.197524e+08  AIS_EXACT -0.416485
+758    MST               Phát hành riêng lẻ  2025-11-24   -1  2025Q3  1.136042e+08  8.360422e+07  AIS_EXACT -0.264075
+880    NVL  Chuyển từ trái phiếu chuyển đổi  2026-03-31  180  2026Q2  3.202757e+09  2.402068e+09  AIS_EXACT -0.250000
+448    VPI  Chuyển từ trái phiếu chuyển đổi  2024-11-01   -1  2024Q3  3.200496e+08  2.903994e+08  AIS_EXACT -0.092642
+567    HHV               Phát hành riêng lẻ  2025-05-06  180  2025Q3  5.471763e+08  4.974330e+08  AIS_EXACT -0.090909
+309    CMM   Phát hành rộng rãi qua đấu giá  2024-05-02  180  2024Q3  9.790000e+07  9.185000e+07  AIS_EXACT -0.061798
+679    SSI               Phát hành riêng lẻ  2025-08-29   -1  2025Q2  2.075915e+09  1.973864e+09  AIS_EXACT -0.049159
+954    F88   Phát hành rộng rãi qua đấu giá  2026-08-07   -1  2026Q2  2.312651e+08  2.202519e+08  AIS_EXACT -0.047622
+475    MBS               Phát hành riêng lẻ  2024-11-27   -1  2024Q3  5.727829e+08  5.470800e+08  AIS_EXACT -0.044874
+336    MNB              Phát hành cho CBCNV  2024-06-06  180  2024Q3  2.000000e+07  1.911000e+07  AIS_EXACT -0.044500
+511    NAG              Phát hành cho CBCNV  2025-02-19   -1  2024Q4  3.576007e+07  3.417777e+07  AIS_EXACT -0.044248
+174    HAX              Phát hành cho CBCNV  2023-10-03   -1  2023Q2  9.342756e+07  8.992756e+07  AIS_EXACT -0.037462
+177    HAX              Phát hành cho CBCNV  2023-10-03   -1  2023Q2  9.342756e+07  8.992756e+07  AIS_EXACT -0.037462
+35     HAX  Chuyển từ trái phiếu chuyển đổi  2023-02-13  180  2023Q2  9.342756e+07  8.992756e+07  AIS_EXACT -0.037462
+872    BID               Phát hành riêng lẻ  2026-03-24   -1  2025Q4  7.280065e+09  7.021362e+09  AIS_EXACT -0.035536
+611    FTS              Phát hành cho CBCNV  2025-06-25   30  2025Q2  3.464980e+08  3.365096e+08  AIS_EXACT -0.028827
+952    HVH              Phát hành cho CBCNV  2026-08-05   -1  2026Q2  7.174243e+07  6.983775e+07  AIS_EXACT -0.026549
+90     TNH              Phát hành cho CBCNV  2023-06-16   -1  2023Q1  9.587461e+07  9.337461e+07  AIS_EXACT -0.026076
+990    DC4              Phát hành cho CBCNV  2026-09-22   -1  2026Q2  1.100285e+08  1.080587e+08  AIS_EXACT -0.017903
+529    BID               Phát hành riêng lẻ  2025-02-28   -1  2024Q4  7.021362e+09  6.897515e+09  AIS_EXACT -0.017639
+670    VDS              Phát hành cho CBCNV  2025-08-29   -1  2025Q2  2.720000e+08  2.673000e+08  AIS_EXACT -0.017279
+532    GMD              Phát hành cho CBCNV  2025-03-03   -1  2024Q4  4.201923e+08  4.139826e+08  AIS_EXACT -0.014778
+400    DTD              Phát hành cho CBCNV  2024-08-30   -1  2024Q2  5.748878e+07  5.674528e+07  AIS_EXACT -0.012933
+974    SSB              Phát hành cho CBCNV  2026-08-24   -1  2026Q2  3.468800e+09  3.428800e+09  AIS_EXACT -0.011531
+
+|div| phân bố khi live<quý: count    29.000000
+mean     -0.077310
+std       0.120563
+min      -0.483685
+25%      -0.049159
+50%      -0.037462
+75%      -0.017279
+max      -0.006908

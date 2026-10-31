@@ -130,7 +130,10 @@ for f in "${FILES[@]}"; do
     # rc=0) — khớp trần 1500 của selfcheck_baseline.json; oshares_dcf 64s (mọi mutant bị giết, rc=0).
     # Cả hai rc=124 dưới trần 60s là giả.
     *sunday_plan_round_selfcheck.sh) t=1500 ;;
-    *oshares_dcf_selfcheck.py) t=240 ;;
+    # R10 (2026-10-31, job Taylor_20261031_064246): đo tay oshares_dcf R10 170s wall một mình, 230s khi 4 tiến trình
+    # nặng song song (TZ=UTC --bq, 44/44 mutant
+    # chết, rc=0; R9 đã 150s+) — 240 sát trần ⇒ 480 (2,8× số đo một mình, 2,1× số đo song song).
+    *oshares_dcf_selfcheck.py) t=480 ;;
     # cùng đợt: fa_ratings_ticker_gate 95s (ALL ENVIRONMENTS OK, chạy 3 TZ) — rc=124 giả.
     *fa_ratings_ticker_gate_selfcheck.sh) t=240 ;;
   esac

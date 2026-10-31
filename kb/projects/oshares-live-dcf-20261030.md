@@ -1,8 +1,14 @@
 # oshares_live cho DCF (`DCF_OSHARES_SOURCE`) — knob TẮT, CHƯA bật live
 
-**CUTOVER-MARKER: CHƯA BẬT** — `OSHARES_SOURCE_DEFAULT = "fin"` trong `dcf_valuation.py`. Ngày bật
-(đổi 1 từ → `"live"`, cần user duyệt + quant-skeptic) ghi mốc ICT vào đây VÀ vào
-`kb/data_registry/trading-bot/dcf_lens_history.md` trong CÙNG commit bật.
+**CUTOVER-MARKER: ĐÃ SẴN SÀNG, CHƯA BẬT** (R10 xong 31/10/2026, job `Taylor_20261031_064246`; knob vẫn
+`OSHARES_SOURCE_DEFAULT = "fin"` trong `dcf_valuation.py`). Ngày bật (đổi 1 từ → `"live"`, cần user duyệt +
+quant-skeptic) ghi mốc ICT vào đây VÀ vào `kb/data_registry/trading-bot/dcf_lens_history.md` trong CÙNG commit bật.
+- **Deploy cùng lúc:** repo ngoài `dcf_valuation.py` + `oshares_dcf.py` + `trading_bot/strategies.py`
+  (`margin_of_safety_fin` chỉ có ở live) và mike `bin/lag_dd_pack.py` (cổng DCF_RICH trên 2 số CP). Thứ tự:
+  merge HAI repo → kiểm `oshares_dcf_selfcheck.py` trên PROD → mới đổi knob. Merge lệch (mike trước, WC sau)
+  ở live ⇒ thiếu `margin_of_safety_fin` ⇒ `lag_dd_pack` cờ DCF_RICH fail-closed mọi mã live (ồn, không hở).
+- **Rollback:** đổi `OSHARES_SOURCE_DEFAULT` về `"fin"` (1 từ), không cần revert code — fin trùng byte main
+  (R10: 4.784/4.784 kết quả, asof 2026-10-29/2025-10-29/2024-10-29).
 
 ## Đã có
 - Vòng 1 (job `Taylor_20261030_094435`, merge WC `cc257bc01` / mike `925c936fd`): `oshares_dcf.py`
@@ -42,7 +48,7 @@
    settings Claude, shell profile, `/proc/*/environ` đọc được. 31/10: 0 lần gán (11 file + 18 tiến trình).
    Hạn chế: /proc của user khác không đọc được; launcher ngoài các gốc này không quét.
 
-Vòng R9 (job `Taylor_20261031_042224`, CHƯA merge; WC `session/oshares-r9-20261031`, mike
+Vòng R9 (job `Taylor_20261031_042224`, đã MERGE 31/10: WC `336add4e7`, mike `dc8007523`; WC `session/oshares-r9-20261031`, mike
 `session/oshares-r9-ops-20261031`; bằng chứng `agents/Taylor/research/oshares_live_r9_20261031/SELFCHECK_R9.md`):
 6. ~~Khe H1 ex TRƯỚC price_date~~: ISS dời khung giá ex ∈ [asof−90 ngày, asof] chưa `executed`
    (`oshares_dcf.unexecuted_events`) ⇒ số quý + kêu, mọi ca (kể cả không giá).
@@ -59,13 +65,24 @@ Vòng R9 (job `Taylor_20261031_042224`, CHƯA merge; WC `session/oshares-r9-2026
 fin byte-identical 6.228/6.228; impact khi bật = R8 (0/38.925 ô khác).
 
 Còn lại:
-- arch-review + quant-skeptic gói R9, merge 2 nhánh, rồi user duyệt bật (đổi 1 từ + cutover-marker).
+- arch-review + quant-skeptic gói R10, merge 2 nhánh, rồi user duyệt bật (đổi 1 từ + cutover-marker).
 - Vendor trễ lật `announced→executed` mà KHÔNG có dòng ISS nào (kể cả announced) ⇒ khoá không thấy;
   `fin` cùng lỗi.
 - Mất mát đã biết của khoá lịch: phiên ex đúng ngày giá luôn về số quý (BSR 2025-10-29 ex 10-29 là ca
   đổi số ĐÚNG bị bỏ). Bảo thủ có chủ đích.
-- quant-skeptic mục 4 (MST 2025-10-29 ×0,7359: số quý 113,6tr vs AIS 83,6tr) CHƯA kết luận — bật live
-  làm MST MẤT cờ DCF_RICH sâu của `lag_dd_pack` ở asof đó.
+- ~~quant-skeptic mục 4 (MST 2025-10-29 ×0,7359)~~ — đóng ở R10 mục 14 (số quý; cờ DCF_RICH giữ nguyên).
+
+Vòng R10 (job `Taylor_20261031_064246`, CHƯA merge; WC `session/oshares-r10-20261031`, mike
+`session/oshares-r10-ops-20261031`; bằng chứng `agents/Taylor/research/oshares_live_r10_20261031/SELFCHECK_R10.md`):
+13. ~~Killer arch-review R9: live xoá cờ DCF_RICH sâu ⇒ CLEARED bỏ qua ack~~: `lag_dd_pack._rich_deep_fin` —
+    khi DCF dùng live, RICH sâu theo số live HOẶC theo số quý (`margin_of_safety_fin`, mọi mức lệch) ⇒ cờ
+    `DCF_RICH`; live thiếu MoS số quý ⇒ cờ (fail-closed).
+14. ~~MST / ISS không theo tỷ lệ~~: live < số quý >0,5% ⇒ dùng số quý (`LIVE_BELOW_FIN`, số CP LỚN hơn, bảo
+    thủ) + kêu. **Đính chính MST:** ở 2025-10-29 live 83,6tr mới ĐÚNG (riêng lẻ 30tr chốt 2025-11-24, đổi
+    niêm yết 2025-12-31); số quý Q3/2025 113,6tr là số vendor ghi đè về sau (không PIT). HHV Q3/2025 cùng
+    lớp. Không phân biệt được (A) live sót CP với (B) quý ghi đè ở thời gian thực ⇒ chọn phía FV thấp.
+15. Việc nhỏ: trần `run_selfchecks.sh` 240→480s; harness mutant đếm FAIL MỚI so baseline; mục 17 quét
+    `hooks.*.command` + `statusLine.command`; guard `_price_run_start` tắt thì kêu stderr.
 
 ## Ảnh hưởng nếu bật live (R8, đo qua caller thật, `out_impact_r8_*.csv`)
 - Lời gọi không khai price_date (plan approval / EOD): 0 thay đổi ở 4 asof (toàn bộ FRAME_FALLBACK).

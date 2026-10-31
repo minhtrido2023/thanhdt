@@ -1,0 +1,11 @@
+TZ=UTC  python=3.12.13  module=/home/trido/thanhdt/WorkingClaude/custom_basket.py
+registry canonical = /home/trido/thanhdt/WorkingClaude/data/forensic_flags.csv
+  NOTE t_canonical_fallback: đang chạy TỪ cây canonical ⇒ chỉ 1 candidate, nhánh fallback chưa được thử ở lượt này (chạy lại từ worktree để phủ nhánh đó); nhánh cây-module ĐÃ kiểm, trả đúng 8 mã.
+  PASS t_canonical_fallback
+  PASS t_missing_everywhere_is_fatal
+  PASS t_old_vs_new_two_sided
+  PASS t_env_empty_is_explicit_optout
+  PASS t_env_bad_path_is_fatal_no_fallback
+  PASS t_corrupt_file_is_fatal
+
+PASS  (22 assertion)
