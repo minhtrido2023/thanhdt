@@ -303,6 +303,6 @@ thường trượt [NỀN].
 - Nền BĐS/NOXH/đầu tư công/FDI: xem mục Nguồn của `sector_read_vlxd_nhe_aac_20261029.md` (VARS, DKRA, CBRE, BCĐ TW 13/10, Bộ XD 15/10, Bộ TC, SSI 08/10).
 
 ## ĐÍNH CHÍNH 31/10/2026 (Mike, từ DD HPG vòng 2 — dd_HPG_20261031/GAPS.md §5; KHÔNG sửa dự báo)
-- Số hiệu quyết định thuế AD HRC Trung Quốc là **QĐ 1959/QĐ-BCT (04/07/2025)**, hiệu lực 06/07/2025, 5 năm (~07/2030, ước lượng) — "QĐ 1917" ở trên KHÔNG tồn tại cho vụ này. Mức 23,10–27,83% đúng.
+- Thuế AD HRC Trung Quốc GỐC = **QĐ 1959/QĐ-BCT (04/07/2025)**, hiệu lực 06/07/2025, 5 năm (~07/2030, ước lượng), mức 23,10–27,83%. ⚠️ ĐÍNH CHÍNH LẠI (GAPS2 vòng 4, 31/10): **QĐ 1917/QĐ-BCT CÓ tồn tại** — là QĐ CHỐNG LẨN TRÁNH chính thức (27,83%, HRC TQ rộng >1.880–≤2.300 mm, hiệu lực 28/07/2026) [báo ×2, chưa mở bản gốc moit.gov.vn]; bản đính chính trước của Mike ("1917 không tồn tại") là SAI. Bobby chỉ lẫn chỗ gán 1917 cho vụ AD gốc.
 - Chống lẩn tránh tạm thời QĐ 612/QĐ-BCT (02/04/2026); rà soát hành chính lần 1 QĐ 1902/QĐ-BCT (27/07/2026) — rủi ro thực trước mốc F8 (31/03/2027), không phải hết hạn.
 - Mỹ AD thép cây chốt: nhóm Hòa Phát 128,53% (cash deposit 123,49%) + CVD 6,80%; EU AD HRC với Hòa Phát 0%.
