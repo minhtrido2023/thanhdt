@@ -34,6 +34,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`sector_read_oil_gas_shipping_20261029.md`](sector_read_oil_gas_shipping_20261029.md) — sector read BLIND vận tải biển chuyên dụng dầu khí, Bobby 2026-10-29 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_vlxd_nhe_aac_20261029.md`](sector_read_vlxd_nhe_aac_20261029.md) — sector read BLIND VLXD không nung/nhẹ (AAC/ALC), Bobby 2026-10-29 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_da_xay_dung_nam_bo_20261030.md`](sector_read_da_xay_dung_nam_bo_20261030.md) — sector read BLIND đá xây dựng Đông Nam Bộ, Bobby 2026-10-30 (parent `vn_macro_regime_history.md`) | CANONICAL |
+| [`sector_read_bds_nha_o_do_thi_phia_bac_20261031.md`](sector_read_bds_nha_o_do_thi_phia_bac_20261031.md) — sector read BLIND BĐS nhà ở/khu đô thị phía Bắc (HN, HP), Bobby 2026-10-31 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
 | [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_bq.vnindex_5state_staging / _archive_* / _v2g_* / _tam_quan_v31/v33b_clean / _baseline_* | ARCHIVE |
 | [`vnindex_5state_csv_local.md`](vnindex_5state_csv_local.md) — data/vnindex_5state.csv | TRAP |

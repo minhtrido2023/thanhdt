@@ -23,6 +23,8 @@ last_update_12: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành vận t
 last_update_13: 2026-10-29 (Bobby — SECTOR READ real-time BLIND ngành VLXD không nung/nhẹ VN (AAC, ALC, vữa khô, keo dán gạch, phụ gia): CYCLICAL ~0,50 (giữa→muộn nhịp tăng; mở bán căn hộ gãy Q3/2026, backlog thi công đỡ tới giữa-cuối 2027) / ADMIN_GATED ~0,30 (tỷ lệ VLKN bắt buộc, NOXH/đầu tư công, đấu giá tro xỉ) / STRUCTURAL ~0,20 (tỷ lệ VLKN khoảng 28% so với mục tiêu 35-40% năm 2025) — ambiguous ~60/40; FORECAST khoá F1-F12 tới 2028-03-31; chi tiết ở file con sector_read_vlxd_nhe_aac_20261029.md)
 last_update_14: 2026-10-30 (Bobby — SECTOR READ real-time BLIND ngành đá xây dựng Đông Nam Bộ: ADMIN_GATED ~0,45 / CYCLICAL ~0,35 / STRUCTURAL ~0,20, ambiguous ~60/40; pha ĐỈNH → bình nguyên (Long Thành/VĐ3 rút, VĐ4 mới khởi công 09-10/2026); FORECAST F1-F10 tới 2027-08-31; chi tiết ở file con sector_read_da_xay_dung_nam_bo_20261030.md)
 last_update_15: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành thép VN: CYCLICAL ~0,45 (khối lượng giữa→muộn nhịp tăng, spread HRC giữa chu kỳ ~250 USD/t ước lượng) / ADMIN_GATED ~0,35 (AD + chống lẩn tránh HRC TQ, giải ngân đầu tư công, EU quota 1,6 tr t/Mỹ AD thép cây ~130%) / STRUCTURAL ~0,20 (thay thế nhập khẩu HRC 28%→60%, một lần) — ambiguous ~60/40; FORECAST F1-F13 tới 2027-06-30; chi tiết ở file con sector_read_thep_20261031.md)
+last_update_16: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành ngân hàng TM VN (nhóm tư nhân lớn): ADMIN_GATED ~0,45 (room ~15%, CV 9608/9736 ép huy động −0,5pp + chế tài room 2027, TT 50 LDR 95% từ 01/12) / CYCLICAL ~0,35 (nhóm 2 tăng 2 quý, bao phủ 95→~80%) / STRUCTURAL ~0,20 (LDR ~114%, CASA 20,2%, Basel III) — ambiguous ~60/40; FORECAST F1-F12 tới 2027-04-30; chi tiết ở file con sector_read_ngan_hang_20261031.md)
+last_update_17: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành BĐS nhà ở/khu đô thị phía Bắc (HN, HP, vùng lân cận): CYCLICAL ~0,45 / STRUCTURAL ~0,35 / ADMIN_GATED ~0,20, ambiguous ~55/45; Hà Nội ĐẦU→GIỮA pha suy khối lượng, ĐẦU pha suy giá; HP trễ 2-4 quý; FORECAST F1-F14 tới 2027-08-31; chi tiết ở file con sector_read_bds_nha_o_do_thi_phia_bac_20261031.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1614,6 +1616,42 @@ và pháp lý mỏ, mốc giá, chi phí, 10 forecast, 21 mục DD, nguồn): **
   ≥1 mỏ đấu giá 2025-26 có GP khai thác ≤30/06/2027 P=0,30; NĐ sửa NĐ 193 (không đấu giá cho dự án trọng điểm) ≤31/03/2027
   P=0,55; VĐ4 ≥20% sản lượng ≤30/06/2027 P=0,35; heating oil T3/2027 <4,0 P=0,55; giải ngân ĐTC 2026 ≥85% P=0,50.
   **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Ngân hàng thương mại VN, nhóm NHTM cổ phần tư nhân lớn, as-of 31/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá, BCTC ngân hàng mục tiêu (kiểm toán blind mục 0 file con: snippet lộ số Q3
+của 3 NH quốc doanh và tiêu đề/số cấp NH của vài NH tư nhân; chỉ dùng ở mức ngành). Bản đầy đủ (bảng 5 tầng chi phí vốn, chất
+lượng tài sản, pháp lý, cạnh tranh, 12 forecast, 25 mục DD, nguồn): **`sector_read_ngan_hang_20261031.md`** (file con).
+- **Phân loại: `ADMIN_GATED` ~0,45 / `CYCLICAL` ~0,35 / `STRUCTURAL` ~0,20; `ambiguous` ~60/40.** Tín dụng +11,59% YTD / +16,69%
+  YoY (30/09) vs định hướng ~15%; CV 9608 (18/10) + 9736 (21/10) ép lãi huy động −0,5pp (chuẩn lãi BQ giao dịch mới), cho vay ưu
+  tiên −1,5-2pp, chế tài hạ room 2027, trừ LC miễn truy đòi khỏi room. Phân kỳ 5 tầng: niêm yết giảm (Big-4 quầy 12M 5,9→5,4%,
+  online giữ 6,8%) trong khi liên NH ON 2,7→4,3% và OMO lưu hành 133→95 nghìn tỷ; thực trả 12M tư nhân ~8,45% (1 nguồn) ⇒ chi phí
+  vốn biên bị NÉN hành chính, chưa giải. NPL gộp 27 NH ~2% Q2, nhóm 2 1,45%, bao phủ ~80%; Q3 NPL tuyệt đối tăng ở cả Big-4 và NH nhỏ.
+- **FORECAST khoá 31/10:** tín dụng 2026 ≥16% P=0,70 (≥18% P=0,25); Big-4 12M online ≤6,8% ngày 31/03/2027 P=0,75 (≤6,3% P=0,30);
+  CCTG Big-4 12M ≤7,4% P=0,60; lãi BQ huy động mới T3/2027 trong [5,9;6,9] P=0,65; 3M liên NH BQ T12 ≤7,5% P=0,75; NPL 27 NH
+  31/12 trong [1,8;2,3] P=0,70 (>2,0 P=0,50); bao phủ <90% P=0,80; NIM Q4 ≤ Q3 P=0,65; LNTT 2026 ≥+12% P=0,65; tăng refi trước
+  31/03/2027 P=0,15; TT 50 đúng hạn 01/12 P=0,85; tỷ giá trung tâm ≤26.000 ngày 31/03/2027 P=0,75. **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — BĐS nhà ở / khu đô thị phía Bắc (Hà Nội, Hải Phòng, vùng lân cận), as-of 31/10/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của chủ đầu tư nào (kiểm toán blind ở mục 0 file con:
+web lộ tên khoảng 4-5 chủ đầu tư lớn, chỉ dùng ở mức cấu trúc ẩn danh). Bản đầy đủ (chi phí vốn 5 tầng + tầng vay mua nhà, pipeline HN/HP,
+pháp lý, hạ tầng, cạnh tranh, 14 forecast, 25 mục DD, nguồn): **`sector_read_bds_nha_o_do_thi_phia_bac_20261031.md`** (file con).
+- **Phân loại: `CYCLICAL` ~0,45 / `STRUCTURAL` ~0,35 / `ADMIN_GATED` ~0,20; `ambiguous` ~55/45.** Trục 2: không CONTAINABLE bằng 1 hành động
+  (không trigger có tên; chậm trả TPDN 12T 0,24%). Vị trí: Hà Nội ĐẦU→GIỮA pha suy về khối lượng (căn hộ bán Q3 −48% đến −66% YoY; thấp tầng
+  hấp thụ 9%, thấp nhất 10 năm), ĐẦU pha suy về giá (thứ cấp căn hộ −8% YoY CBRE, sơ cấp dính, chiết khấu ẩn). Hải Phòng trễ 2-4 quý (H1:
+  1.359 giao dịch sơ cấp Đông HP, 1 chủ đầu tư quốc gia 47% thấp tầng; FDI 9T +64%). Nguyên nhân gần: lãi vay mua nhà cố định ~10,9%, thả nổi
+  13-15% (+3-5pp trong 12-15 tháng) trong khi Big-4 12M niêm yết đứng 6,8%. Chữ ký tích tụ: tín dụng chủ đầu tư +19,6% YTD vs người mua
+  +1,0% (31/08). Bẫy đọc số: doanh thu bàn giao 2026-đầu 2027 phản ánh bán hàng 2024-25.
+- **FORECAST khoá 31/10:** CBRE HN căn hộ bán Q4/26 ≤6.000 P=0,65; giá sơ cấp Q1/27 trong ±5% so 86 tr/m² P=0,55; thứ cấp căn hộ Q2/27 <0 YoY
+  P=0,70; Savills thấp tầng hấp thụ Q4/26 ≤20% P=0,75; thứ cấp thấp tầng Q2/27 ≤−5% YoY P=0,50; vay mua nhà cố định T12-T1 ≥10% P=0,70; tồn kho
+  BXD Q4 >51.950 P=0,65; tín dụng BĐS/tổng cuối 2026 trong 24,5-26,5% P=0,70; tín dụng người mua 2026 <5% P=0,65; Luật Đất đai sửa đổi thông qua
+  ≤31/12/2026 P=0,70; HPREA H1/27 <1.359 P=0,60; doanh thu 2026 nhóm BĐS dân cư niêm yết tăng P=0,60 và người mua trả trước cuối 2026 giảm
+  P=0,55; chậm trả TPDN 12T >0,5% P=0,30. **Không phải khuyến nghị mua/bán.**
 
 ---
 
