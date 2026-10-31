@@ -634,3 +634,24 @@
 - [2026-10-31T02:15:10Z] Taylor/heartbeat — Taylor_20261031_020006: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261031_020006", "source": "watcher"}
 - [2026-10-31T02:15:48Z] Taylor/finding — weekly-report-2026-10-26_to_2026-10-30 xong, 2 gate COMPLETE: {"files": {"SpaceX": "reports/SpaceX_weekly_report_2026-10-26_to_2026-10-30.md", "ZaloPay": "reports/ZaloPay_weekly_report_2026-10-26_to_2026-10-30.md"}, "nav_cuoi_ky_vnd": {"SpaceX": 945141046, "ZaloPay": 939827062}, "sha256": {"SpaceX": "7e5630ea78c87bd6b1be7ba45107407a3e6d6b9e25db0a673e385d2aee1dac22", "ZaloPay": "b3435219b5964023335f03d35c0ff3f10bfecbeb96c7799d01bd96f86ae168ca"}, "delivery_gate": {"SpaceX": "COMPLETE", "ZaloPay": "COMPLETE"}, "livermore_verify_report": "VERBATIM (cả 2 file)", "measured_by": "report_delivery_gate.py từng file (rc=0); sha256sum; grep Tổng NAV trong 2 file report"}
 - [2026-10-31T02:15:57Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12846}
+
+## Consolidation 2026-10-31T03:07:02Z
+- [2026-10-31T02:54:37Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "in_progress", "note": "start: doc KB + SELFCHECK"}
+- [2026-10-31T02:55:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T02:56:07Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "in_progress", "note": "worktrees tao xong; dang truy caller H4"}
+- [2026-10-31T02:56:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T02:57:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T02:57:36Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "in_progress", "note": "H4 truy caller xong (plan ref_price khong xac dinh phien; DCF_MODE khong bat production); doc selfcheck H3"}
+- [2026-10-31T02:58:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T02:59:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T02:59:48Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "in_progress", "note": "H1/H2/H4 code xong (dcf_valuation, oshares_dcf, strategies, due_diligence, custom_basket, lag_dd_pack); sang selfcheck"}
+- [2026-10-31T03:00:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:01:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:02:28Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:03:29Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:04:29Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:05:12Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "in_progress", "note": "oshares_dcf_selfcheck TZ=UTC 94 PASS 0 FAIL, 20/20 mutant KILLED; chay env -u TZ + --bq"}
+- [2026-10-31T03:05:29Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:06:00Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "in_progress", "note": "copy v2, doc skill"}
+- [2026-10-31T03:06:30Z] Taylor/heartbeat — Taylor_20261031_025427: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261031_025427", "source": "watcher"}
+- [2026-10-31T03:06:46Z] Taylor/heartbeat — Taylor_20261031_030545: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261031_030545", "source": "watcher"}
