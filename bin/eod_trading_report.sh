@@ -118,6 +118,33 @@ _strategy_fit_attach_args() {
 # artifact .md ổn định rồi đi qua cùng cổng hash-bound với weekly/monthly: Discord
 # + email đều có durable proof; report có số liệu còn phải qua return validation. Backstop
 # check_report_cadence.sh sẽ retry đúng kênh còn thiếu.
+# r3 N6: rơi về bản text cũ phải có người biết — trước đó chỉ có dòng stderr trong log cron.
+_v2_fallback_event() {  # stage(build|gate) rc reason
+  local payload
+  payload="$(python3 -c 'import json,sys; print(json.dumps({"account": sys.argv[1], "plan_date": sys.argv[2], "stage": sys.argv[3], "rc": sys.argv[4], "reason": sys.argv[5][:400], "fallback": "text-cu"}, ensure_ascii=False))' \
+    "$ACCOUNT" "$PLAN_DATE" "$1" "$2" "$3")"
+  "$ROOT/bin/append_event.sh" Mafee error "report_v2_fallback" "$payload" || \
+    echo "eod_trading_report: KHÔNG ghi được bus event report_v2_fallback ($ACCOUNT $PLAN_DATE $1 rc=$2)" >&2
+}
+
+# r3 N7: sổ giao đã ghi kênh nào 'delivered' cho ĐÚNG sha của artifact chưa (đọc thẳng sổ — không suy).
+# Không đọc được sổ ⇒ coi như ĐÃ giao (fail-safe: thà không fail-open còn hơn đăng Discord 2 lần).
+_v2_any_channel_delivered() {
+  python3 - "$1" "${REPORT_DELIVERY_STATE:-$ROOT/state/report_delivery.json}" <<'PY'
+import hashlib, json, os, sys
+art, state = sys.argv[1], sys.argv[2]
+if not os.path.exists(state):
+    sys.exit(1)
+try:
+    rec = json.load(open(state, encoding="utf-8")).get("reports", {}).get(os.path.basename(art), {})
+    sha = hashlib.sha256(open(art, "rb").read()).hexdigest()
+except Exception:
+    sys.exit(0)
+done = [c for c in ("discord", "email") if isinstance(rec.get(c), dict) and rec[c].get("status") == "delivered" and rec[c].get("sha256") == sha]
+sys.exit(0 if done else 1)
+PY
+}
+
 _deliver_eod() {
   local body="$1"
   local validation_mode="${2:-full}"
@@ -131,15 +158,21 @@ _deliver_eod() {
   # EOD_REPORT_V2=0 = rollback một biến (giữ nguyên đường cũ).
   if [ "$validation_mode" = "full" ] && [ "${EOD_REPORT_V2:-1}" = "1" ]; then
     local v2_out v2_rc
+    # --promote (r3 N4): builder dựng NHÁP ở reports/v2/draft/, chỉ ghi tên chuẩn khi nháp qua artifact
+    # lint; rc=5 = bản chuẩn đã giao trước đó ⇒ không ghi đè (rơi về text cũ như mọi rc≠0 — cổng sẽ
+    # COMPLETE idempotent nếu nội dung không đổi, không thì báo).
     v2_out="$(timeout 600 python3 "$ROOT/bin/report_v2/build.py" daily --account "$ACCOUNT" \
-      --period "$PLAN_DATE" --out-dir "$ROOT/reports" 2>&1)"
+      --period "$PLAN_DATE" --out-dir "$ROOT/reports" --promote 2>&1)"
     v2_rc=$?
     if [ "$v2_rc" -eq 0 ]; then
       v2_used=1
       [ "$ACCOUNT" = "SpaceX" ] || printf '\n---\n%s\n' "$body" >> "$artifact"
     else
-      echo "eod_trading_report: report_v2 daily rc=$v2_rc — GIỮ bản text cũ. Lỗi thật: $(printf '%s\n' "$v2_out" | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')" >&2
+      local v2_err
+      v2_err="$(printf '%s\n' "$v2_out" | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')"
+      echo "eod_trading_report: report_v2 daily rc=$v2_rc — GIỮ bản text cũ. Lỗi thật: $v2_err" >&2
       printf '%s\n' "$body" > "$artifact"
+      _v2_fallback_event build "$v2_rc" "$v2_err"
     fi
   fi
   # Alert sớm không công bố tỉ suất/vị thế, nên return gate không áp dụng;
@@ -155,11 +188,18 @@ _deliver_eod() {
   local gate_out gate_rc vendor_rc=0
   gate_out="$(python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}" 2>&1)"
   gate_rc=$?
-  # FAIL-OPEN cả ở cổng: bản v2 bị cổng CHẶN lúc kiểm artifact (chưa kênh nào gửi) ⇒ gửi bản text cũ.
-  if [ "$gate_rc" -ne 0 ] && [ "${v2_used:-0}" = "1" ] && printf '%s\n' "$gate_out" | grep -qE 'BLOCK|CHẶN'; then
+  # FAIL-OPEN cả ở cổng — CHỈ khi cổng chặn ĐÚNG ở bước artifact-lint của chính nó (chuỗi
+  # "report_delivery_gate: INCOMPLETE — artifact-lint BLOCK") VÀ sổ giao chưa ghi kênh nào delivered cho
+  # sha này (r3 N7). Trước đó grep 'BLOCK|CHẶN' bất kỳ ⇒ lỗi ở bước EMAIL sau khi Discord đã nhận cũng
+  # rơi vào đây, ghi đè artifact ⇒ sha mới ⇒ Discord nhận lần 2. Lỗi khác ⇒ không fail-open, để
+  # check_report_cadence.sh retry đúng kênh còn thiếu.
+  if [ "$gate_rc" -ne 0 ] && [ "${v2_used:-0}" = "1" ] \
+     && printf '%s\n' "$gate_out" | grep -q '^report_delivery_gate: INCOMPLETE — artifact-lint BLOCK' \
+     && ! _v2_any_channel_delivered "$artifact"; then
     printf '%s\n' "$gate_out"
     echo "eod_trading_report: bản v2 bị cổng chặn — gửi lại bằng bản text cũ (fail-open)" >&2
     printf '%s\n' "$body" > "$artifact"
+    _v2_fallback_event gate "$gate_rc" "$(printf '%s\n' "$gate_out" | grep -m1 'artifact-lint BLOCK' | cut -c1-300)"
     gate_out="$(python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}" 2>&1)"
     gate_rc=$?
   fi
