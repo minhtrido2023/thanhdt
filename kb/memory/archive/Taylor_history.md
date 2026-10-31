@@ -1688,3 +1688,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T03:25:06Z] [dri-investor-report-v3 30/10] XONG job Taylor_20261030_031031: research/dd_DRI_20261027/investor_report_v3/ (19tr, chua commit) — CHO Mike doc kiem/gui email
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T03:58:01Z] [erp-domestic 30/10] XONG job Taylor_20261030_034654: research/erp_domestic_20261030/ (commit 5fec4fc14) ERP noi dia 5,0 (3,4-6,5), Ke b1,1 12,3 — CHO quant-skeptic + user duyet; doi dcf_valuation phai doi ca g_T cap
