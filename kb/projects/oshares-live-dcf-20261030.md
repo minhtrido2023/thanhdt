@@ -119,8 +119,11 @@ Vòng R12 (job `Taylor_20261031_092209`, CHƯA merge; WC `session/oshares-r12-20
 `session/oshares-r12-ops-20261031`; bằng chứng `agents/Taylor/research/oshares_live_r12_20261031/SELFCHECK_R12.md`):
 19. User chốt 31/10: plan echo TẠM GIỮ SỐ QUÝ. `send_plan_report.sh` khai `price_date=PRICE_SESSION_UNKNOWN` có
     chủ đích, KHÔNG gọi `price_session(s)_for`/`prime` ⇒ **0 lời gọi BQ** (replay 279 lệnh MUA, C23 exec chính khối
-    code). Mỗi lời gọi DCF trần cứng `SEND_PLAN_DCF_CALL_S`=30s (SIGALRM), tổng `SEND_PLAN_DCF_BUDGET_S`=120s; quá
-    ⇒ bỏ dòng DCF + WARN, báo cáo vẫn gửi. Sau này: field có cấu trúc `ref_price_session` trong lệnh plan (§24, vòng riêng).
+    code). Mỗi lời gọi DCF có trần BEST-EFFORT `SEND_PLAN_DCF_CALL_S`=30s (SIGALRM, ngoại lệ `_DcfTimeout` là
+    BaseException để `except Exception` không nuốt), ngân sách `SEND_PLAN_DCF_BUDGET_S`=120s tính trên THỜI GIAN TIÊU
+    TRONG DCF (không phải giờ đồng hồ: DD ~18-25s/lệnh MUA không ăn ngân sách); quá ⇒ bỏ dòng DCF + dòng "DCF CHƯA kiểm
+    — kiểm tay trước khi duyệt" ở lệnh + WARN, báo cáo vẫn gửi. KHÔNG ngắt được lời đọc duckdb/parquet mức C và tầng
+    trong dùng `except BaseException` vẫn nuốt được (sửa R12b 31/10 sau arch-review + quant-skeptic). Sau này: field có cấu trúc `ref_price_session` trong lệnh plan (§24, vòng riêng).
 20. `format_dcf_check` (EOD/paper, live) nối `· số CP quý: [STATUS ]MoS ±x% [không ]robust (cơ sở plan echo)` khi
     status khác / robust khác / |ΔMoS| ≥ 2pp (`OSHARES_FIN_LABEL_MOS`) — theo MoS, KHÔNG theo ngưỡng
     `oshares_divergence` (FPT lệch 9,998% lọt ngưỡng 10% mà MoS +5,6% vs +14,2%). Dict live thêm `status_fin`/`robust_fin`.

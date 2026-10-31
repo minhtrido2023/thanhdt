@@ -14,12 +14,12 @@ dòng `[run_wt] modules ngoài WT: KHÔNG` trong mọi log).
 | Việc | Nội dung | Kết quả |
 |---|---|---|
 | 1 | `format_dcf_check` nối ` · số CP quý: [STATUS ]MoS ±x% [không ]robust (cơ sở plan echo)` khi status khác / robust khác / \|ΔMoS\| ≥ 2pp (`OSHARES_FIN_LABEL_MOS`). Quyết theo MoS, KHÔNG theo `oshares_divergence`. Dict live thêm `status_fin`/`robust_fin` (từ `sensitivity_fin` = hộp nhạy cảm trên số quý, cùng `classify_dcf`). | **PASS** — C22 (9 check) + M53/M54 KILLED |
-| 2 | `send_plan_report.sh`: plan echo khai `price_date=PRICE_SESSION_UNKNOWN` có chủ đích, gỡ `price_sessions_for`/`prime` ⇒ 0 BQ; mỗi lời gọi DCF trần cứng SIGALRM `SEND_PLAN_DCF_CALL_S`=30s, tổng `SEND_PLAN_DCF_BUDGET_S`=120s; quá ⇒ bỏ dòng DCF + 1 WARN, báo cáo vẫn gửi. Đính chính `SELFCHECK_R11.md` (sau dòng 78) + KB mục 18 (+ mục 19-22 mới). | **PASS** — C23 (6 check, exec CHÍNH khối code của script) + M56/M57 KILLED; replay 279 lệnh: **0 lời gọi BQ** |
+| 2 | `send_plan_report.sh`: plan echo khai `price_date=PRICE_SESSION_UNKNOWN` có chủ đích, gỡ `price_sessions_for`/`prime` ⇒ 0 BQ; mỗi lời gọi DCF có trần BEST-EFFORT SIGALRM `SEND_PLAN_DCF_CALL_S`=30s, ngân sách `SEND_PLAN_DCF_BUDGET_S`=120s tính trên thời gian tiêu trong DCF; quá ⇒ bỏ dòng DCF + dòng/WARN "CHƯA kiểm DCF", báo cáo vẫn gửi. [ĐÍNH CHÍNH R12b 31/10: bản đầu tính giờ đồng hồ (DD ăn ngân sách) và TimeoutError bị nuốt; đã sửa bằng BaseException `_DcfTimeout` + ngân sách theo thời gian DCF; C23 nay chạy `_dcf_check_for_order` thật.] Đính chính `SELFCHECK_R11.md` (sau dòng 78) + KB mục 18 (+ mục 19-22 mới). | **PASS** — C23 (6 check, exec CHÍNH khối code của script) + M56/M57 KILLED; replay 279 lệnh: **0 lời gọi BQ** |
 | 3 | `price_session_for`: `except Exception: pass` tách đôi — giá hỏng/không khớp ⇒ UNKNOWN IM; lỗi ĐỌC cache/duckdb ⇒ UNKNOWN + `_shout_once` stderr kèm lỗi thật + đường dẫn (§29). | **PASS** — C21 thêm 3 check (`dv.WORKDIR="/nonexistent_r12_c21"` ⇒ stderr `LOI DOC cache … /nonexistent_r12_c21`; không khớp ⇒ 0 byte stderr) + M55 KILLED |
 | 4 | Merge mike master vào nhánh R12 (sạch); chạy lại C21 + `eod_report_v2_failopen_selfcheck.sh` + `eod_delivery_wiring_selfcheck.py`; cập nhật impact EOD. | **PASS** — failopen 12/12, wiring 9/9, ở TZ=UTC và env -u TZ |
 
 Vì sao trần thời gian nằm TRONG Python chứ không `timeout 120` bọc heredoc: heredoc là toàn bộ báo cáo duyệt plan
-(~1.240 dòng) — `timeout` giết nó là mất cả báo cáo 21:00 vì một dòng DCF. SIGALRM chỉ bỏ dòng DCF của lệnh treo.
+(~1.240 dòng) — `timeout` giết nó là mất cả báo cáo 21:00 vì một dòng DCF. SIGALRM (best-effort, không ngắt được đọc duckdb/parquet mức C) chỉ bỏ dòng DCF của lệnh treo.
 Sau việc 2 khối DCF plan echo chỉ đọc parquet local; trần là lưới an toàn, không phải đường thường.
 
 ## Đo
