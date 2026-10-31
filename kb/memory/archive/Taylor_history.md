@@ -1685,3 +1685,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T02:54:30Z] [drift-silent-exit 30/10] XONG 0027dac67 nhanh session/drift-silent-exit-20261030 (wt-drift-silent-exit-20261030, chua merge) — CHO Mike arch-review + merge; dong crontab 00:xx khong ton tai (goi tay/agent)
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T03:25:06Z] [dri-investor-report-v3 30/10] XONG job Taylor_20261030_031031: research/dd_DRI_20261027/investor_report_v3/ (19tr, chua commit) — CHO Mike doc kiem/gui email
