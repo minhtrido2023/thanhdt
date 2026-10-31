@@ -31,3 +31,4 @@
 - [2026-10-31T12:58:08Z] [dd-HPG-v3 31/10] XONG job Taylor_20261031_125205: REPORT v3 + investor_report/*_v3.{md,pdf,html} (11tr, chua commit, chua gui) — CHO Mike gui email
 - [2026-10-31T14:25:38Z] ĐANG DỞ: DD TCH job Taylor_20261031_141634 — BCTC/định giá xong (calc/notes_read.md, calc/tch_valuation_out.txt), đang viết REPORT.md; chờ Bobby sector_read_bds_nha_o_do_thi_phia_bac_20261031.md | NEXT: viết REPORT, đọc Bobby, bus finding
 - [2026-10-31T14:30:38Z] [dd-TCH 31/10] XONG job Taylor_20261031_141634: research/dd_TCH_20261031/REPORT.md (chua commit) — vung 9,6-14,4k tam ~11,6-11,95k vs gia 11,85k, xap xi hop ly; moc M1 soat xet 30/11/2026; CRV khong co trong BQ ticker (de xuat Winston) — CHO Mike doc/quyet investor report
+- [2026-10-31T14:37:57Z] [dd-MBB 31/10] XONG job Taylor_20261031_142133: research/dd_MBB_20261031/REPORT.md (chua commit) — vung 18-26k tam ~22k vs 19,3k; nhom 2 HN +42% QoQ Q3 la co chinh; CHO Mike chay fundamental-skeptic
