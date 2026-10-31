@@ -99,6 +99,10 @@ def mutations(md_path, acct, tmp):
         html_cases["internal_file"] = " thiếu dnse_raw_2026-07-01.jsonl "
         html_cases["zalopay"] = " Khoản rút chuyển sang tài khoản ZaloPay "
         html_cases["zalopay_acct"] = " số TK 0001743768 "
+        html_cases["zalopay_lower"] = " chuyển sang zalopay "
+        html_cases["livermore_lower"] = " theo livermore "
+        html_cases["bal"] = " sổ BAL "
+        html_cases["signal"] = " SIGNAL_V11 "
     for tag, inj in html_cases.items():
         m = fresh("html_" + tag)
         man, d = al.load_v2(m)
@@ -114,6 +118,15 @@ def mutations(md_path, acct, tmp):
             check(False, f"{acct} mutation HTML '{tag}': cổng giao raise")
         except RuntimeError:
             check(True, f"{acct} mutation HTML '{tag}': cổng giao raise")
+
+    # r3 N2: "nan giải" là chữ tiếng Việt, KHÔNG phải token rỗng ⇒ lint KHÔNG được chặn
+    m = fresh("html_nan_giai")
+    man, d = al.load_v2(m)
+    hp = os.path.join(d, man["html"])
+    h = open(hp, encoding="utf-8").read().replace("</body>", "<p>Thanh khoản là vấn đề nan giải.</p></body>", 1)
+    open(hp, "w", encoding="utf-8").write(h)
+    resign(m)
+    check(not al.lint_v2(m, investor_facing=investor), f"{acct} 'nan giải' KHÔNG bị lint chặn nhầm")
 
     import pymupdf
     m = fresh("pdf_font")
@@ -171,7 +184,34 @@ def narrative_cases():
         "mục nội bộ ở SpaceX": {"internal": [{"title": "x", "bullets": ["y"]}]},
         "outlook > 4 kịch bản": {"outlook": [{"scenario": "a", "condition": "b", "invalidation": "c"}] * 5},
         "mục ngoài khung": {"sections": {"blabla": ["x"]}},
+        # r3 N1 — dấu/hướng: số đúng độ lớn nhưng SAI dấu phải bị chặn
+        "sai hướng 'tăng 1,89%' (pipeline −1,89%)": {"headline": "Tài khoản tăng 1,89% trong tháng"},
+        "sai dấu '+1,89%' (pipeline −1,89%)": {"headline": "Tháng 10 +1,89%"},
+        "sai hướng 'lãi 1,53%'": {"key_points": ["VN-Index lãi 1,53%."]},
+        "sai dấu '−0,36 điểm %' (pipeline dương)": {"key_points": ["Kém chỉ số −0,36 điểm %."]},
+        "số nhỏ kèm % không có trong pipeline": {"key_points": ["Giảm 2% trong tháng."]},
+        # r3 N2 — chặn sớm cùng danh sách với lint
+        "nan token": {"key_points": ["Tỷ suất nan."]},
+        "nan%": {"key_points": ["Tỷ suất nan% trong tháng."]},
+        "None token": {"key_points": ["Beta None"]},
+        "** markdown": {"key_points": ["**Đậm** thô."]},
+        "tên riêng chữ thường (livermore)": {"key_points": ["Theo livermore thị trường yếu."]},
+        "tên riêng chữ thường (zalopay)": {"key_points": ["Chuyển sang zalopay."]},
+        "BAL": {"key_points": ["Sổ BAL giữ nguyên."]},
+        "SIGNAL_V11": {"key_points": ["Tín hiệu SIGNAL_V11 mạnh."]},
     }
+    ok_cases = {
+        "'giảm 1,89%' đúng hướng": {"headline": "Tài khoản giảm 1,89% trong tháng, VN-Index giảm 1,53%"},
+        "'nan giải' không phải token rỗng": {"key_points": ["Thanh khoản thấp là vấn đề nan giải."]},
+        "mức (từ/xuống) không suy hướng": {"key_points": ["NAV giảm còn 945,14 tr."]},
+        "số nguyên trơn 0..12": {"key_points": ["3 mã mới trong 12 phiên."]},
+    }
+    for what, nar in ok_cases.items():
+        try:
+            N.validate(nar, facts, investor_facing=True, allow_internal=False)
+            check(True, f"narrative {what} được nhận")
+        except N.NarrativeError as exc:
+            check(False, f"narrative {what} được nhận ({exc})")
     for what, nar in bad.items():
         try:
             N.validate(nar, facts, investor_facing=True, allow_internal=False)
