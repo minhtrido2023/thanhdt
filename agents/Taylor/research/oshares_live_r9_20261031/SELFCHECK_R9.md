@@ -76,7 +76,7 @@ rỗng), việc 3 không đổi số (chỉ bỏ lời gọi). Lệch > 10% nay 
 | test_trading_bot | 1 | 1 | 0 | MÔI TRƯỜNG (stub `secrets/` của worktree, như R8). Config thật (symlink tạm, đã trả stub): rc=0 UTC + noTZ (`sc_wt_realcfg_*`) |
 | custom_basket_forensic_failclosed | 1 | 1 | 0 | MÔI TRƯỜNG có sẵn (R8 §3): `data/forensic_flags.csv` được track ⇒ tiền đề test sai trên mọi worktree |
 | test_multi_strategy | 1 | 1 | 1 | CÓ SẴN trên PROD: DuckDB cache thiếu `VNINDEX_RSI_Max3M` |
-`[run_wt] modules ngoài WT: KHÔNG` ở mọi log WT.
+`[run_wt] modules ngoài WT: KHÔNG` ở mọi log WT **trừ** `basket_return_leg_oshares_selfcheck.py`: nó tự nạp `custom_basket` từ `WORKDIR` PROD (`{'custom_basket': '/home/trido/thanhdt/WorkingClaude/custom_basket.py'}`, `sc_wt_UTC_basket_return_leg_oshares_selfcheck.py.log`) ⇒ hàng đó kiểm custom_basket của PROD, KHÔNG phải bản R9 (`pin_oshares_source_fin`); bản R9 chỉ được C17 kiểm. *(Đính chính R10, job Taylor_20261031_064246 — câu cũ "KHÔNG ở mọi log" sai.)*
 
 ## H6 trên máy thật (`h6_live_ops17_20261031.txt`)
 Khối mục 17 nhánh R9 chạy trên HOME//proc thật: OK, 0 gán — 11 file ngoài cây + 28 tiến trình đọc được. Hiện

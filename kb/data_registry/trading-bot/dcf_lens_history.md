@@ -26,12 +26,16 @@ nhầm 2 luồng). Fail-safe: mọi lỗi ghi bị nuốt im lặng (log warning
 ## Bẫy
 
 - **CUTOVER KHUNG DCF 2026-10-30 12:48 ICT (`logged_at` < mốc này = `legacy`; ≥ mốc = `domestic_v2`).** CSV KHÔNG có cột frame ⇒ chuỗi lịch sử TRỘN hai khung: trước mốc r = lãi huy động (tới ~13,9%) + ERP 6,5%, g_T cap = lãi huy động; sau mốc r = 12,25% hằng, g_T cap 5,5%. FV trung vị đổi ~−1,4%, thứ hạng gần như không đổi (tương quan ≥0,9999) nhưng mức MoS tuyệt đối không so thẳng được qua mốc. Khi phân tích chuỗi, cắt tại mốc hoặc tính lại bằng `DCF_RATE_FRAME=legacy`.
-- **NGUỒN SỐ CP DCF (`OSHARES_SOURCE_DEFAULT` trong `dcf_valuation.py`) — CUTOVER-MARKER: CHƯA BẬT.**
-  Mọi dòng tới nay tính FV/cp bằng `fin` (OShares dòng quý cuối). CSV KHÔNG có cột nguồn số CP ⇒ ngày
-  nào bật `live` (đổi 1 từ, cần user duyệt) PHẢI sửa dòng này thành `CUTOVER <YYYY-MM-DD HH:MM ICT>
-  (logged_at < mốc = fin; ≥ mốc = live)`, cùng commit bật. Sau mốc, mã có sự kiện CP (thưởng/cổ tức-CP)
-  mà số quý chưa theo sẽ có FV/cp thấp hơn trước mốc (đo 2026-10-29: 9/145 mã đổi FV, 6 mã >5%, 3 lật
-  CHEAP→RICH PHR/HTN/AIG) — không phải mô hình đổi ý. Chi tiết: `kb/projects/oshares-live-dcf-20261030.md`.
+- **NGUỒN SỐ CP DCF (`OSHARES_SOURCE_DEFAULT` trong `dcf_valuation.py`) — CUTOVER-MARKER: ĐÃ SẴN SÀNG, CHƯA BẬT**
+  (R10, job `Taylor_20261031_064246`, 31/10/2026). Mọi dòng tới nay tính FV/cp bằng `fin` (OShares dòng quý
+  cuối). CSV KHÔNG có cột nguồn số CP ⇒ ngày bật `live` (đổi 1 từ, cần user duyệt) PHẢI sửa dòng này thành
+  `CUTOVER <YYYY-MM-DD HH:MM ICT> (logged_at < mốc = fin; ≥ mốc = live)` trong CÙNG commit bật.
+  **Deploy:** `dcf_valuation.py` + `oshares_dcf.py` (+ `trading_bot/strategies.py`) cùng lúc ở repo ngoài và
+  `bin/lag_dd_pack.py` (cổng DCF_RICH 2 số CP) ở mike — merge HAI repo trước, bật knob sau. **Rollback:**
+  đổi `OSHARES_SOURCE_DEFAULT` về `"fin"` (1 từ) — fin trùng byte bản trước knob (R10: 4.784/4.784, 3 asof).
+  Sau mốc: mã có thưởng/cổ tức-CP mà số quý chưa theo có FV/cp THẤP hơn trước mốc (đo R9/R10 2026-10-29:
+  PHR/HTN/AIG CHEAP→RICH nhẹ); live < số quý luôn về số quý (R10 `LIVE_BELOW_FIN`) ⇒ không mã nào có FV/cp
+  CAO hơn fin quá ~0,5% (dung sai làm tròn) vì nguồn số CP. Không phải mô hình đổi ý. Chi tiết: `kb/projects/oshares-live-dcf-20261030.md`.
 - KHÔNG có consumer đọc lại file này trong pipeline sản xuất — hiện tại thuần là log tích luỹ chờ
   phân tích sau; đừng coi việc file không được ai `read_csv` là dấu hiệu file chết.
 - Không refresh/tái tạo được — mỗi dòng gắn với 1 lần tính DCF thật tại đúng thời điểm đó

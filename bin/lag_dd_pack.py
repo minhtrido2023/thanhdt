@@ -102,7 +102,7 @@ FLAG_CODES = {
     # CAPITAL_RAISE_PENDING / CAPITAL_RAISE_12M KHÔNG phải cờ: chỉ WARNING trong pack['warnings'] (user chọn (b) 29/10 —
     # "đưa warning", không chặn mua; xem capital_raise_lib.pre_entry_flags). Chỉ nguồn lỗi mới là cờ (fail-closed):
     "CAPITAL_RAISE_NA":      "không đọc được sự kiện phát hành CP từ tav2_bq.corporate_action (fail-closed)",
-    "DCF_RICH":              "DCF status RICH SÂU: biên an toàn < -100% (hoặc thiếu MoS ⇒ fail-closed); RICH nhẹ chỉ là cảnh báo, xem pack['warnings']",
+    "DCF_RICH":              "DCF status RICH SÂU: biên an toàn < -100% (hoặc thiếu MoS ⇒ fail-closed); khi DCF dùng OShares live: RICH sâu theo số live HOẶC số quý (R10); RICH nhẹ chỉ là cảnh báo, xem pack['warnings']",
     # --- Chất lượng cú bất ngờ lợi nhuận (b) ---
     "EQ_NEN_THAP":           f"NP_P4 > 0 nhưng < {EQ_BASE_LOW_RATIO:.0%} trung vị NP_P5..P7",
     "EQ_CFO_YEU":            f"ΣCF_OA 4 quý < {EQ_CFO_NP_MIN:.0%} ΣNP 4 quý (phi ngân hàng)",
@@ -482,6 +482,27 @@ def _rich_deep(dcf):
     return mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0
 
 
+def _rich_deep_fin(dcf):
+    """R10/việc 1 (killer objection arch-review R9): khi DCF dùng OShares LIVE (dict có `oshares_source`),
+    đánh giá RICH sâu thêm trên MoS tính bằng SỐ QUÝ (`margin_of_safety_fin`). Số CP live có thể XOÁ cờ
+    (MST 2025-10-29 ×0,7359: live nhỏ hơn ⇒ FV/cp cao hơn ⇒ hết RICH sâu) mà OSHARES_LIVE_LECH chỉ là
+    warning ⇒ CLEARED bỏ qua ack người. RICH sâu ở BẤT KỲ số nào ⇒ cờ. Áp mọi mức lệch (không chỉ >10%):
+    cổng không phụ thuộc ngưỡng hiển thị. Fail-closed: live mà thiếu/không đọc được MoS số quý ⇒ cờ.
+    -> (True|False, bằng chứng). fin (không có `oshares_source`) ⇒ (False, "")."""
+    if not isinstance(dcf, dict) or "oshares_source" not in dcf:
+        return False, ""
+    mos = _num(dcf.get("margin_of_safety_fin"))
+    _tr = lambda v: "n/a" if _num(v) is None else f"{_num(v)/1e6:,.1f}tr"   # noqa: E731
+    m_live = _num(dcf.get("margin_of_safety"))
+    base = (f"OShares live {_tr(dcf.get('oshares'))} vs quý {_tr(dcf.get('oshares_fin'))}, "
+            f"MoS live {'n/a' if m_live is None else f'{m_live*100:.1f}%'}")
+    if mos is None:
+        return True, f"DCF live: không đọc được MoS theo số quý ⇒ fail-closed ({base})"
+    if mos < DCF_RICH_DEEP_MOS:
+        return True, f"DCF RICH SÂU theo SỐ QUÝ: MoS {mos*100:.1f}% < {DCF_RICH_DEEP_MOS*100:.0f}% ({base})"
+    return False, ""
+
+
 def soft_warnings(ev):
     """Cảnh báo KHÔNG đổi status/flags_hash (hiển thị cho user): RICH nhẹ kèm số."""
     out = []
@@ -574,6 +595,8 @@ def basic_flags(ev):
     dcf = val.get("dcf")
     if isinstance(dcf, dict) and dcf.get("status") == "RICH" and _rich_deep(dcf):
         flags.append(_f("DCF_RICH", val.get("text") or "status=RICH"))
+    elif isinstance(dcf, dict) and _rich_deep_fin(dcf)[0]:
+        flags.append(_f("DCF_RICH", _rich_deep_fin(dcf)[1]))
     computed = isinstance(dcf, dict) and dcf.get("status") in ("CHEAP", "RICH", "FAIR")
     if not computed and not val.get("alt_lens"):
         flags.append(_f("DINH_GIA_NA", val.get("err") or val.get("text") or "dcf None, alt lens rỗng"))

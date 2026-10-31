@@ -1,0 +1,29 @@
+== 2024-10-29: 0 ô khác
+   DCF_RICH PD: R9-luật-trên-R9-số 43 | R10 43 | thêm so với R9 [] | mất []
+   DCF_RICH PDM1: R9-luật-trên-R9-số 42 | R10 42 | thêm so với R9 [] | mất []
+== 2025-10-29: 10 ô khác
+    MST.mos_PD: -0.5295 -> -1.0783
+    MST.fv_PD: 3792.0 -> 2791.0
+    MST.osh_PD: 83604220.0 -> 113604220.0
+    HHV.rb_PDM1: True -> False
+    MST.mos_PDM1: -0.5295 -> -1.0783
+    HHV.mos_PDM1: 0.1985 -> 0.1184
+    MST.fv_PDM1: 3792.0 -> 2791.0
+    HHV.fv_PDM1: 18591.0 -> 16901.0
+    MST.osh_PDM1: 83604220.0 -> 113604220.0
+    HHV.osh_PDM1: 497433003.0 -> 547176303.0
+   DCF_RICH PD: R9-luật-trên-R9-số 50 | R10 51 | thêm so với R9 ['MST'] | mất []
+   DCF_RICH PDM1: R9-luật-trên-R9-số 49 | R10 50 | thêm so với R9 ['MST'] | mất []
+== 2026-07-29: 0 ô khác
+   DCF_RICH PD: R9-luật-trên-R9-số 27 | R10 27 | thêm so với R9 [] | mất []
+   DCF_RICH PDM1: R9-luật-trên-R9-số 26 | R10 26 | thêm so với R9 [] | mất []
+== 2026-10-29: 6 ô khác
+    DGW.mos_PD: -4.0042 -> -4.0503
+    DGW.fv_PD: 8493.0 -> 8415.0
+    DGW.osh_PD: 221320169.0 -> 223361000.0
+    DGW.mos_PDM1: -4.0042 -> -4.0503
+    DGW.fv_PDM1: 8493.0 -> 8415.0
+    DGW.osh_PDM1: 221320169.0 -> 223361000.0
+   DCF_RICH PD: R9-luật-trên-R9-số 27 | R10 27 | thêm so với R9 [] | mất []
+   DCF_RICH PDM1: R9-luật-trên-R9-số 27 | R10 27 | thêm so với R9 [] | mất []
+TỔNG: 16 ô khác / 38925
