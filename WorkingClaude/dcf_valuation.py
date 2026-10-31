@@ -581,6 +581,8 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
         res["fair_value_ps_fin"] = fv_fin
         if price is not None and fv_fin and fv_fin > 0:
             res["margin_of_safety_fin"] = (fv_fin - price) / fv_fin
+        # R12/việc 1: hộp nhạy cảm trên SỐ QUÝ ⇒ status/robust "cơ sở plan echo" (format_dcf_check gắn nhãn)
+        res["sensitivity_fin"] = _sensitivity(base_fcfe, g_exp, g_T, r, fin_os)
     # sensitivity
     res["sensitivity"] = _sensitivity(base_fcfe, g_exp, g_T, r, oshares)
     if verbose:
@@ -873,11 +875,16 @@ PRICE_MATCH_TOL_VND = 0.5
 
 def price_session_for(ticker, asof, price, max_sessions=PRICE_MATCH_SESSIONS):
     """Phiên (ISO) GẦN NHẤT trong `max_sessions` phiên cache <= asof có `Price` == price (±0,5 VND), hoặc
-    PRICE_SESSION_UNKNOWN. Lỗi đọc cache/giá hỏng ⇒ PRICE_SESSION_UNKNOWN (fail-closed về số quý)."""
+    PRICE_SESSION_UNKNOWN. Giá hỏng/không khớp ⇒ PRICE_SESSION_UNKNOWN IM (caller đã kiểm, số quý hợp lệ).
+    R12/việc 3: LỖI ĐỌC cache/duckdb KHÔNG phải "không khớp" — vẫn về PRICE_SESSION_UNKNOWN (số quý,
+    fail-closed) nhưng KÊU stderr 1 lần/tiến trình kèm lỗi thật (§29), không đi kênh logging.info im."""
     try:
         px = float(price)
-        if not (px > 0):
-            return PRICE_SESSION_UNKNOWN
+    except (TypeError, ValueError):
+        return PRICE_SESSION_UNKNOWN
+    if not (px > 0):                                               # NaN > 0 False
+        return PRICE_SESSION_UNKNOWN
+    try:
         import duckdb
         a = pd.to_datetime(asof).date()
         c = duckdb.connect(":memory:")
@@ -895,8 +902,11 @@ def price_session_for(ticker, asof, price, max_sessions=PRICE_MATCH_SESSIONS):
         for t, p in zip(df.time, df.Price):                        # mới -> cũ
             if pd.notna(p) and abs(float(p) - px) <= PRICE_MATCH_TOL_VND:
                 return pd.Timestamp(t).date().isoformat()
-    except Exception:                                              # noqa: BLE001
-        pass
+    except Exception as e:                                         # noqa: BLE001 — lỗi ĐỌC, không phải không khớp
+        _shout_once(("price_session_read_error",),
+                    f"price_session_for {ticker} asof={asof}: LOI DOC cache gia {WORKDIR}/data/bq_cache/ticker "
+                    f"({type(e).__name__}: {str(e)[:160]}) -> KHONG khop duoc phien, FALLBACK so quy (fin) "
+                    f"[canh bao nay in 1 lan/tien trinh]")
     return PRICE_SESSION_UNKNOWN
 
 
