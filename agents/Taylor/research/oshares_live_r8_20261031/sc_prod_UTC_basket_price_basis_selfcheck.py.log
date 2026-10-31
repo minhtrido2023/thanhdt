@@ -1,0 +1,49 @@
+BQ_LOCAL_CACHE = data/bq_cache
+BASKET_CA_SNAPSHOT = /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet [pin mặc định]
+  vintage: 14912 dòng ISS+AIS, 1434 mã, digest=11286020451539794613
+
+T1. Đồng nhất thức (ép mcapw==mcap → phải trùng module tiền-sửa BIT-FOR-BIT)
+[BQ_LOCAL_CACHE] ready — 15 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [forensic exclude] /home/trido/thanhdt/WorkingClaude/data/forensic_flags.csv [mặc định (cây module → cây canonical)] — custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [ok] T1[recent] level trùng khít — max|Δlevel| = 0.000000e+00 trên 415 phiên
+  [ok] T1[recent] rổ trùng khít — 0 tên đổi trên 8 mốc rebal
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 7.2s (58942 rows)
+  [forensic exclude] /home/trido/thanhdt/WorkingClaude/data/forensic_flags.csv [mặc định (cây module → cây canonical)] — custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 6.8s (58942 rows)
+  [ok] T1[old] level trùng khít — max|Δlevel| = 0.000000e+00 trên 753 phiên
+  [ok] T1[old] rổ trùng khít — 0 tên đổi trên 10 mốc rebal
+
+T2. Parity tại mốc rebal MỚI NHẤT (nơi Close/Price ~1,00)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [forensic exclude] /home/trido/thanhdt/WorkingClaude/data/forensic_flags.csv [mặc định (cây module → cây canonical)] — custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 1736 dòng
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/basket_price_basis_selfcheck.py", line 513, in <module>
+    sys.exit(main())
+  File "/home/trido/thanhdt/WorkingClaude/basket_price_basis_selfcheck.py", line 426, in main
+    s_new_r, m_new_r, raw_r = run(post, bq, RECENT)
+  File "/home/trido/thanhdt/WorkingClaude/basket_price_basis_selfcheck.py", line 143, in run
+    lvl, adv, mem, raw = mod.build_pit(bq, win[0], win[1], **PROD_KW)
+  File "/home/trido/thanhdt/WorkingClaude/custom_basket.py", line 1551, in build_pit
+    bx, _osrep = apply_oshares(bq, bx, union)
+  File "/home/trido/thanhdt/WorkingClaude/custom_basket.py", line 499, in apply_oshares
+    merged = pd.merge_asof(bx.drop(columns=["OShares"]).sort_values("time"),
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/core/reshape/merge.py", line 691, in merge_asof
+    op = _AsOfMerge(
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/core/reshape/merge.py", line 2000, in __init__
+    _OrderedMerge.__init__(
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/core/reshape/merge.py", line 1912, in __init__
+    _MergeOperation.__init__(
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/core/reshape/merge.py", line 802, in __init__
+    self._maybe_require_matching_dtypes(self.left_join_keys, self.right_join_keys)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/core/reshape/merge.py", line 2125, in _maybe_require_matching_dtypes
+    _check_dtype_match(lk, rk, i)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/core/reshape/merge.py", line 2121, in _check_dtype_match
+    raise MergeError(msg)
+pandas.errors.MergeError: incompatible merge keys [1] dtype('<M8[us]') and dtype('<M8[ns]'), must be the same type

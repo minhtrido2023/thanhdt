@@ -1,0 +1,62 @@
+fixture dir: /tmp/bot_test_5jzs18es
+[paper] tài khoản ảo [testA]: cash 1,000M, 0 mã
+[paper] tài khoản ảo [testB]: cash 500M, 0 mã
+
+Plan [testA] 2026-06-12 (signal 2026-06-11, test v1, state 3=NEUTRAL)
+  NAV account 0M | paper 0.00B | scale 0.000000
+  1 SELL (60M) | 5 BUY (234M)
+    [1] SELL OLD             5,000 @~    12,000 =       60M  SYNC/ 
+    [2] BUY  XYZ             2,100 @~    40,000 =       84M  MIRROR/ 
+    [3] BUY  AAA             5,300 @~    10,000 =       53M  BAL/MOMENTUM 
+    [4] BUY  CCC             2,600 @~    20,000 =       52M  LAG/LAG_HI 
+    [5] BUY  BBB               500 @~    50,000 =       25M  BAL/MEGA 
+    [6] BUY  E1VFVN30          800 @~    25,000 =       20M  ETF/ETF_PARK 
+
+Plan [testB] 2026-06-12 (signal 2026-06-11, test v1, state 3=NEUTRAL)
+  NAV account 0M | paper 0.00B | scale 0.000000
+  0 SELL (0M) | 5 BUY (109M)
+    [2] BUY  XYZ             1,000 @~    40,000 =       40M  MIRROR/ 
+    [3] BUY  AAA             2,500 @~    10,000 =       25M  BAL/MOMENTUM 
+    [4] BUY  CCC             1,200 @~    20,000 =       24M  LAG/LAG_HI 
+    [5] BUY  BBB               200 @~    50,000 =       10M  BAL/MEGA 
+    [6] BUY  E1VFVN30          400 @~    25,000 =       10M  ETF/ETF_PARK 
+[exec:testA] plan 2026-06-12: 6 lệnh, gross 294M — broker=paper
+[exec:testB] plan 2026-06-12: 5 lệnh, gross 109M — broker=paper
+[exec:testA] report → /tmp/bot_test_5jzs18es/exec/exec_testA_2026-06-12_report.md
+[exec:testB] report → /tmp/bot_test_5jzs18es/exec/exec_testB_2026-06-12_report.md
+[exec] FLEET: plan 403M | executed 345M (86%) trên 2 account
+
+✅ TEST PASS — plan + slicing + fill + multi-account + fleet quota + DNSE mapping đều đúng
+
+--- gap-adaptive fill timing tests ---
+[paper] tài khoản ảo [gaptest]: cash 1,000M, 0 mã
+  [1a] down-gap 09:30 in-window  → mult=1.0 ✓
+  [1b] down-gap 09:50 after-window → mult=4.0 ✓
+  [2a] up-gap 09:30                → mult=4.0 (normal rule) ✓
+  [2b] feature disabled, down-gap  → mult=4.0 (normal rule) ✓
+  [3]  rvol missing → gap_z=None  → mult=4.0 (fail-safe) ✓
+  [3b] cache absent (not computed) → mult=4.0 (fail-safe) ✓
+  [4]  SELL unchanged (in=1.0 out=4.0) ✓
+
+✅ gap-adaptive fill timing: all 7 assertions PASS
+
+--- gap floor guard + journal marker tests ---
+  [5a] open at floor (9300=floor) → gap_z=None → mult=4.0 (fail-safe) ✓
+  [5b] open above floor (9500, floor=9300) gap_z=-2.50 → mult=1.0 ✓
+[paper] tài khoản ảo [gapjournal]: cash 1,000M, 0 mã
+  [5c] journal marker present: 'adp:dip(ratio=0.01%,no-hist→cross); GAP_OPEN_OVERRIDE gap_z=-3.00; ft:in-window' ✓
+  [5d] per-account config: main paper=True, DNSE live accounts=['ZaloPay', 'SpaceX', 'RocketX'] all False ✓
+
+✅ floor guard + journal marker + per-account config: all assertions PASS
+
+--- HYBRID schedule tests ---
+[paper] tài khoản ảo [hybtest]: cash 1,000M, 0 mã
+  [6a] _hybrid_active: normal→True, urgency=high→False, hybrid_off→False, master_off→False ✓
+  [6b] _hybrid_sched: 11:05→(True,5) 12:00→(False,3) 14:00→(False,0) ✓
+  [6c] _hybrid_mult: trong block=1.875 ngoài block=4.0 ✓
+  [6d] _hybrid_defer: ngoài-block→hoãn, trong-block→không, hết-cửa-sổ→tự kết thúc ✓
+  [6e] _hybrid_block_cap: giữa cửa sổ=200 (kỳ vọng 200); block cuối/sau cửa sổ→None ✓
+  [6f] _hybrid_bypass: down-gap mở cửa thắng HYBRID (không hoãn, mult=1.0, cap=None) ✓
+
+✅ HYBRID schedule: 6 nhóm assertion PASS
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']

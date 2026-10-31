@@ -1,0 +1,144 @@
+[c1_classifier]
+  PASS  C1 TCB -> OSHARES_LAG — got OSHARES_LAG 1.5
+  PASS  C1 NED -> OSHARES_LAG — got OSHARES_LAG 1.1400000000000001
+  PASS  C1 DGC -> CASH_DIV — got CASH_DIV None
+  PASS  C1 TV1 -> CASH_DIV — got CASH_DIV None
+  PASS  C1 KSV -> ISS_REFLECTED — got ISS_REFLECTED 1.5
+  PASS  C1 HUB -> ISS_REFLECTED — got ISS_REFLECTED 1.05
+  PASS  C1 chỉ quyền mua -> RIGHTS_PENDING
+  PASS  C1 thưởng CP tính như cổ tức CP
+  PASS  C1 không sự kiện, giá điều chỉnh -> UNEXPLAINED_PRICE_ADJ
+  PASS  C1 không sự kiện, giá phẳng -> NO_EVENT
+  PASS  C1 dòng ISS trùng (revision) chỉ đếm 1 lần — ISS_REFLECTED 1.5
+  PASS  C1 hai đợt khác phương thức cùng ngày đều đếm
+  PASS  C1 ISS không ratio -> ISS_UNSIZED
+  PASS  C1 biên: đúng 95% kỳ vọng -> REFLECTED
+  PASS  C1 biên: dưới 95% kỳ vọng -> LAG
+[c2_no_announced_branch]
+  PASS  C2 không còn _fetch_announced/_clip/PROMOTE_MAX_AGE_DAYS
+  PASS  C2 không truy vấn event_status="announced" cho số CP
+[c3_oshares_for]
+  PASS  C3 oshares_for == oshares_pit trên cùng cache (không bổ sung gì) — 7086240414.0 AIS_EXACT vs 7086240414.0 AIS_EXACT
+  PASS  C3 không còn khoá announced_added
+  PASS  C3 lỗi nguồn -> số quý, method ERROR
+[c4_knob]
+  PASS  C4 env trống -> 'fin', không import oshares_dcf, không thêm khoá — fin False []
+  PASS  C4 probe nạp dcf_valuation của cây đang test (H3) — {'dcf_valuation': '/home/trido/wt-oshares-r8-20261031/WorkingClaude'}
+  PASS  C4 giá trị lạ -> 'fin' (hành vi cũ) — fin False []
+  PASS  C4 env=live -> 'live', có khoá oshares_* (gồm oshares_frame_error) — live True ['oshares_fin', 'oshares_frame_error', 'oshares_method', 'oshares_source']
+  PASS  C4 env=live: oshares_dcf/oshares_pit... nạp từ cây đang test, KHÔNG từ PROD (H3) — {'dcf_valuation': '/home/trido/wt-oshares-r8-20261031/WorkingClaude', 'oshares_dcf': '/home/trido/wt-oshares-r8-20261031/WorkingClaude', 'corp_action_lib': '/home/trido/wt-oshares-r8-20261031/WorkingClaude'}
+  PASS  C4 live: số CP ×2 -> FV/cp ÷2 đúng — 69471.94791870324 34735.97395935162
+  PASS  C4 live: ghi oshares_fin/source
+  PASS  C4 live: oshares_for trả None -> dùng số quý
+  PASS  C4 live: caller truyền oshares= thì không gọi oshares_for
+  PASS  C4 live: thiếu OShares quý -> vẫn 'OShares missing', không gọi live — OShares missing []
+  PASS  C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng
+  PASS  C4 live + BQ lỗi: stdout rỗng, chẩn đoán ở stderr — stdout='' stderr='[oshares_dcf] fetch_cache FAILED (RuntimeError: bq down (sim'
+[c6_source_of_truth]
+  PASS  C6 có đúng 1 dòng OSHARES_SOURCE_DEFAULT và = 'fin' (knob TẮT) — fin
+  PASS  C6 env None/rỗng -> default
+  PASS  C6 env 'live' khác default -> 'live' + cảnh báo OVERRIDE — DCF_OSHARES_SOURCE='live' env OVERRIDE khac mac dinh nguon su that 'fin' (chi cho nghien cuu/selfcheck)
+  PASS  C6 env == default -> không cảnh báo
+  PASS  C6 env lạ 'LIVE' -> 'fin' + KHONG HOP LE (kể cả khi default=live)
+  PASS  C6 env lạ 'bogus' -> 'fin' + KHONG HOP LE (kể cả khi default=live)
+  PASS  C6 env lạ '1' -> 'fin' + KHONG HOP LE (kể cả khi default=live)
+  PASS  C6 hằng số default gõ sai -> 'fin' + kêu
+  PASS  C6 import với env lạ: không raise, 'fin', kêu stderr — KHONG HOP LE (chi nhan ('fin', 'live')) -> FALLBACK 'fin' (mac dinh nguon su that = 'fin'). Sua/bo bien moi truong nay.
+
+  PASS  C6 probe nạp dcf_valuation của cây đang test (H3) — {"out": "fin", "paths": {"dcf_valuation": "/home/trido/wt-oshares-r8-20261031/WorkingClaude"}}
+
+[c7_frame_lock]
+  PASS  C7 knob fin: price_date bị bỏ qua, byte-identical, không gọi oshares_for
+  PASS  C7 có giá, KHÔNG price_date -> số quý + frame_error
+  PASS  C7 ... và kêu stderr ĐÚNG 1 lần/tiến trình — !!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: KHONG khoa duoc khung ex-date gia
+  PASS  C7 price_date == asof (sau ex) -> số CP sống ×1,5, khoá OK — 2828591472.0 ['2026-10-29']
+  PASS  C7 giá TRƯỚC ex, asof SAU ex -> lệch hệ -> số quý + kêu — so CP song ngay gia 2026-10-17 = 1885727648.0 != ngay asof 2026-10-29 = 2828591472.0 -> co su kien CP giua hai ngay
+  PASS  C7 giá và asof cùng phía ex (khác ngày) -> khoá OK, số sống
+  PASS  C7 không giá -> không cần khoá, số sống ở asof
+  PASS  C7 price_date không đọc được -> số quý
+  PASS  C7 price_date kiểu Timestamp == asof -> khoá OK
+  PASS  C7 nhánh fallback không in ra STDOUT
+  PASS  C7/H1 KILLER: ex == asof, giá tham chiếu cũ khai price_date=asof -> số quý + kêu — ISS doi khung gia ex 2026-10-29 trong [price_date=2026-10-29, asof=2026-10-29] -> khong chung minh duoc gia va so CP cung phia su kien
+  PASS  C7/H1 ex == price_date < asof -> số quý (không chứng minh được giá phiên ex đã điều chỉnh) — ISS doi khung gia ex 2026-10-29 trong [price_date=2026-10-29, asof=2026-10-30] -> khong chung minh duoc gia va so CP cung phia su kien
+  PASS  C7/H1 ex < price_date == asof -> khoá OK, số sống ×1,5 (giá và số CP cùng SAU ex)
+  PASS  C7/H1 giá đúng phiên T-1 (trước ex), asof = ex -> số quý (R5 hoặc lịch bắt) — so CP song ngay gia 2026-10-28 = 1885727648.0 != ngay asof 2026-10-29 = 2828591472.0 -> co su kien CP giua hai ngay
+  PASS  C7/H1 vendor trễ (số CP hai ngày BẰNG nhau) + ISS announced giữa hai ngày -> số quý (R5 không thấy, lịch thấy) — ISS doi khung gia ex 2026-10-29 trong [price_date=2026-10-28, asof=2026-10-30] -> khong chung minh duoc gia va so CP cung phia su kien
+  PASS  C7/H1 riêng lẻ / cổ tức TIỀN ex == asof -> không dời khung giá, khoá OK
+  PASS  C7/H1 ISS không ghi phương thức ex == asof -> coi như dời khung (fail-closed) — ISS doi khung gia ex 2026-10-29 trong [price_date=2026-10-29, asof=2026-10-29] -> khong chung minh duoc gia va so CP cung phia su kien
+  PASS  C7/H1 sự kiện ngoài [price_date, asof] (trước và sau) -> khoá OK
+  PASS  C7/H1 price_date SAU asof -> số quý — price_date 2026-10-30 SAU asof 2026-10-29 -> gia o tuong lai so voi so CP
+  PASS  C7/H1 không đọc được lịch ex-date -> số quý (fail-closed) — khong doc duoc lich ex-date (RuntimeError: bq down (simulated))
+  PASS  C7/H1 không giá -> không đọc lịch, số sống
+[c8_ops_block]
+  PASS  C8 ops_health_check.sh có khối CHECKDCFOS — /home/trido/thanhdt/WorkingClaude/wt-oshares-r8-ops-20261031/bin/ops_health_check.sh
+  PASS  C8 sạch (default fin, comment + selfcheck bỏ qua) -> 0 WARN, OK nêu 'fin' — ['OK DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = fin (số quý); không launcher/cron nào ghi đè (quét cron + cây WC + 0 file ngoài cây + 0 tiến trình đọc được).']
+  PASS  C8 default gõ sai -> WARN — ["W DCF_OSHARES_SOURCE: OSHARES_SOURCE_DEFAULT trong dcf_valuation.py = 'lvie' không thuộc ('fin', 'live') (mọi DCF đang chạy fin do fallback)"]
+  PASS  C8 nhắc knob mà thiếu dòng default -> WARN — ['W DCF_OSHARES_SOURCE: dcf_valuation.py nhắc DCF_OSHARES_SOURCE nhưng KHÔNG có dòng OSHARES_SOURCE_DEFAULT']
+  PASS  C8 env cron mang DCF_OSHARES_SOURCE -> WARN — ["W DCF_OSHARES_SOURCE: môi trường cron mang biến DCF_OSHARES_SOURCE (giá trị 'live') — nguồn sự thật là dcf_valuation.py, gỡ biến này"]
+  PASS  C8 crontab gán -> WARN (dòng comment bỏ qua) — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): crontab: 5 9 * * 1-5 DCF_OSHARES_SOURCE=live /x/run_bot.sh']
+  PASS  C8 launcher gán (wc_env export) -> WARN — ['W DCF_OSHARES_SOURCE: 2 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): wc_env.sh: export DCF_OSHARES_SOURCE=live | wc_env.sh: export DCF_OSHARES_SOURCE=live']
+  PASS  C8 launcher gán (mike/bin inline) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): mike/bin/y.sh: DCF_OSHARES_SOURCE=live python3 a.py']
+  PASS  C8 launcher gán (py environ[]=) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): trading_bot/z.py: os.environ["DCF_OSHARES_SOURCE"] = "live"']
+  PASS  C8 launcher gán (py setdefault) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): w.py: os.environ.setdefault("DCF_OSHARES_SOURCE", "live")']
+  PASS  C8 launcher gán (py dict env) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): mike/bin/v.py: subprocess.run(c, env={"DCF_OSHARES_SOURCE": "live"})']
+  PASS  C8 chỉ ĐỌC env trong .py -> không WARN — ['OK DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = fin (số quý); không launcher/cron nào ghi đè (quét cron + cây WC + 0 file ngoài cây + 0 tiến trình đọc được).']
+  PASS  C8 cây chưa có knob -> im lặng (0 WARN, 0 OK) — []
+  PASS  C8/H6 ngoài cây (systemd Environment=) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): /tmp/dcfos_root_ktw9c4zm/.config/systemd/user/ccdb-x.service: Environment=DCF_OSHARES_SOURCE=live']
+  PASS  C8/H6 ngoài cây (systemd drop-in) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): /tmp/dcfos_root_a1zg88ol/.config/systemd/user/paseo.service.d/o.conf: Environment="DCF_OSHARES_SOURCE=live"']
+  PASS  C8/H6 ngoài cây (environment.d) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): /tmp/dcfos_root_uwi1v68y/.config/environment.d/10-x.conf: DCF_OSHARES_SOURCE=live']
+  PASS  C8/H6 ngoài cây (bashrc export) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): /tmp/dcfos_root_q2s8c1n9/.bashrc: export DCF_OSHARES_SOURCE=live']
+  PASS  C8/H6 ngoài cây (claude settings env) -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): /tmp/dcfos_root_tsc9p4yu/.claude/settings.json: {"env": {"DCF_OSHARES_SOURCE": "live"}}']
+  PASS  C8/H6 ccdb .env -> WARN — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): /tmp/dcfos_root_54uiecke/.env: DCF_OSHARES_SOURCE=live']
+  PASS  C8/H6 tiến trình đang chạy mang biến -> WARN (nêu pid + comm) — ['W DCF_OSHARES_SOURCE: 1 launcher tự gán DCF_OSHARES_SOURCE (phá nguồn sự thật duy nhất): tiến trình 4242 (python3) env DCF_OSHARES_SOURCE=live']
+  PASS  C8/H6 comment/chỉ đọc ngoài cây -> 0 WARN; OK nêu số file + tiến trình đã quét — ['OK DCF_OSHARES_SOURCE: nguồn sự thật dcf_valuation.py = fin (số quý); không launcher/cron nào ghi đè (quét cron + cây WC + 2 file ngoài cây + 1 tiến trình đọc được).']
+[c9_research_pinned]
+  PASS  C9 dcf_backtest.py ép fin ngay sau import, trước mọi fair_value(
+  PASS  C9 dcf_rate_robustness.py ép fin ngay sau import, trước mọi fair_value(
+  PASS  C9 dcf_fv_sens_cache.py ép fin ngay sau import, trước mọi fair_value(
+  PASS  C9 pin_oshares_source_fin: live -> fin + kêu
+  PASS  C9 pin khi đã fin -> im lặng
+[c10_oshares_error]
+  PASS  C10 ERROR -> số quý, method ERROR — ERROR
+  PASS  C10 ERROR -> kêu stderr 1 lần/MÃ (FPT 2 lời gọi = 1 tiếng, VNM thêm 1) — !!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: oshares_for LOI (oshares_dcf lỗi (RuntimeError: x)) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh/ma] !!!!!
+DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: oshares_for LOI (oshares_dcf lỗi (RuntimeError: x)) -> FALLBACK so 
+  PASS  C10 ERROR -> stdout sạch
+  PASS  C10 oshares_for RAISE -> không raise, số quý + kêu — !!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live FPT asof=2026-10-29: oshares_for LOI (oshares_for raise (ValueError: boom)
+  PASS  C10 oshares_for LỖI ở ngày giá -> không khoá được -> số quý — oshares_for ngay gia 2026-10-20 LOI (x)
+[c11_callers]
+  PASS  C11 _dcf_check_for_order chuyển price_date nguyên văn (mặc định None) — ['2026-10-28', None]
+  PASS  C11 _ref_price_session: dùng Price -> phiên = time của dòng
+  PASS  C11 _ref_price_session: rơi về Close (đã điều chỉnh) -> price_date None
+  PASS  C11 due_diligence DD-valuation: tự đọc Price -> price_date=row.time; ctx price -> ctx['price_date']
+  PASS  C11 custom_basket.dcf_at: price_date = d (Price của đúng phiên d)
+  PASS  C11 lag_dd_pack.run_valuation: khai price_date phiên Price, không khai khi rơi về Close — ['2026-10-28', None] (/home/trido/thanhdt/WorkingClaude/wt-oshares-r8-ops-20261031/bin/lag_dd_pack.py)
+  PASS  C11 dcf_valuation.dcf_check: tự đọc giá -> price_date phiên đó; giá caller -> None — ['2026-10-28', None]
+[c12_module_paths]
+  PASS  C12 in-process: module nạp từ cây đang test — {}
+
+== PASS: 0 FAIL
+
+[mutation]
+  KILLED  M1 DIV coi như ISS cổ phiếu (lỗi quy tắc cũ) (4 FAIL: C1 DGC -> CASH_DIV)
+  KILLED  M2 quyền mua tính là tạo CP (1 FAIL: C1 chỉ quyền mua -> RIGHTS_PENDING)
+  KILLED  M3 bỏ dedup (1 FAIL: C1 dòng ISS trùng (revision) chỉ đếm 1 lần)
+  KILLED  M4 LAG_TOL = 0 (1 FAIL: C1 biên: đúng 95% kỳ vọng -> REFLECTED)
+  KILLED  M7 bỏ redirect stdout quanh oshares_for (dcf_valuation) (1 FAIL: C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng)
+  KILLED  M8 bỏ khoá khung ex-date (luôn dùng số sống) (14 FAIL: C4 live: oshares_for in ra stdout -> stdout của fair_value vẫn rỗng)
+  KILLED  M9 khoá chỉ kiểm có price_date, không so số CP hai ngày (6 FAIL: C7 giá TRƯỚC ex, asof SAU ex -> lệch hệ -> số quý + kêu)
+  KILLED  M10 env lạ được nhận nguyên văn (5 FAIL: C6 env 'live' khác default -> 'live' + cảnh báo OVERRIDE)
+  KILLED  M11 pin_oshares_source_fin no-op (1 FAIL: C9 pin_oshares_source_fin: live -> fin + kêu)
+  KILLED  M12 kêu mọi lần (bỏ dedupe) (2 FAIL: C7 ... và kêu stderr ĐÚNG 1 lần/tiến trình)
+  KILLED  M13 ops: bỏ quét .py (regex python không khớp gì) (3 FAIL: C8 launcher gán (py environ[]=) -> WARN)
+  KILLED  M14 ops: bỏ cảnh báo env cron (1 FAIL: C8 env cron mang DCF_OSHARES_SOURCE -> WARN)
+  KILLED  M15 H1 bỏ khoá lịch ex-date (frame_events luôn rỗng) (5 FAIL: C7/H1 KILLER: ex == asof, giá tham chiếu cũ khai price_date=asof -> số quý + kêu)
+  KILLED  M16 H1 cửa sổ lịch loại trừ price_date (ex == price_date lọt) (3 FAIL: C7/H1 KILLER: ex == asof, giá tham chiếu cũ khai price_date=asof -> số quý + kêu)
+  KILLED  M17 H1 lỗi đọc lịch bị nuốt thành 'không sự kiện' (1 FAIL: C7/H1 không đọc được lịch ex-date -> số quý (fail-closed))
+  KILLED  M18 H2 ERROR không kêu (2 FAIL: C10 ERROR -> kêu stderr 1 lần/MÃ (FPT 2 lời gọi = 1 tiếng, VNM thêm 1))
+  KILLED  M19 H2 dedupe toàn cục thay vì theo mã (1 FAIL: C10 ERROR -> kêu stderr 1 lần/MÃ (FPT 2 lời gọi = 1 tiếng, VNM thêm 1))
+  KILLED  M20 H4 _dcf_check_for_order bỏ price_date (1 FAIL: C11 _dcf_check_for_order chuyển price_date nguyên văn (mặc định None))
+  KILLED  M21 H4 _ref_price_session khai ngày cả khi rơi về Close (1 FAIL: C11 _ref_price_session: rơi về Close (đã điều chỉnh) -> price_date None)
+  KILLED  M22 H3 probe không ghim lại HERE sau import dcf_valuation (1 FAIL: C4 env=live: oshares_dcf/oshares_pit... nạp từ cây đang test, KHÔNG từ PROD (H3))
+  KILLED  M23 H6 ops: bỏ quét file ngoài cây (7 FAIL: C8/H6 ngoài cây (systemd Environment=) -> WARN)
+  KILLED  M24 H6 ops: bỏ quét môi trường tiến trình (2 FAIL: C8/H6 tiến trình đang chạy mang biến -> WARN (nêu pid + comm))
+== mutation: mọi mutant bị giết
+rc=0

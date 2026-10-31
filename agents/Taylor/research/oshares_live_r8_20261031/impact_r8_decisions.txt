@@ -1,0 +1,9 @@
+Cờ DCF_RICH của lag_dd_pack = RICH và MoS < -100% (DCF_RICH_DEEP_MOS=-1.0); chỉ RICH nhẹ = WARNING
+2026-10-29 PD DCF_RICH(deep) mới: [] mất: [] | lật: [('HTN', 0.293, -0.06), ('AIG', 0.12, -0.011), ('PHR', 0.313, -0.236)]
+2026-10-29 PDM1 DCF_RICH(deep) mới: [] mất: [] | lật: [('HTN', 0.293, -0.06), ('AIG', 0.12, -0.011), ('PHR', 0.313, -0.236)]
+2026-07-29 PD DCF_RICH(deep) mới: [] mất: [] | lật: [('REE', 0.064, -0.076)]
+2026-07-29 PDM1 DCF_RICH(deep) mới: [] mất: [] | lật: []
+2025-10-29 PD DCF_RICH(deep) mới: [] mất: ['MST'] | lật: []
+2025-10-29 PDM1 DCF_RICH(deep) mới: [] mất: ['MST'] | lật: []
+2024-10-29 PD DCF_RICH(deep) mới: [] mất: [] | lật: [('GAS', 0.005, -0.015)]
+2024-10-29 PDM1 DCF_RICH(deep) mới: [] mất: [] | lật: []

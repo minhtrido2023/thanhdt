@@ -1,0 +1,18 @@
+[1] concentration scripts — mcap cross-sectional weight base
+  [PASS] NEGATIVE control kept enough live members (not silently hollowed out) — 30/30 members print on latest session 2026-10-30; excluded (stopped/suspended): []
+  [PASS] NEGATIVE: current basket weights identical on both bases — n=30, max |Δweight| = 0.000e+00 (Close==Price for every member)
+  [PASS] POSITIVE: historical bars diverge between bases — 30/30 members differ >0.5% at 2024-01-02, ratio range 0.308..0.966
+  [PASS] POSITIVE: one suspended member deforms the whole reported weight vector — max |Δweight| = 0.0247 over 33 names
+
+[2] custom30_core_select_audit.py — SELECTION leg (quarterly liquidity ranking)
+  [PASS] POSITIVE: liquidity basis reorders the selected cross-section — 269 top-30 name-slots differ across 53 quarters (5.08/quarter); top-60 pool 359
+  [PASS] in-period constancy: divergence tracks a real cross-sectional ratio spread — latest quarter ratio spread 0.240..1.011 (sd 0.0882); a flat ratio would cancel out of the ranking
+
+[3] RETURN leg must be UNTOUCHED (split by role, not blanket replace)
+  [PASS] custom30_core_select_audit.py keeps adjusted Close for returns — `cls` still built from g.Close
+  [PASS] custom30_core_select_audit.py weight base moved to raw price — `mcap` built from g.pxw
+  [PASS] basket_concentration.py mcap uses COALESCE(Price,Close)
+  [PASS] basket_scheme_concentration.py mcap uses COALESCE(Price,Close)
+
+======================================================================
+RESULT: ALL PASS
