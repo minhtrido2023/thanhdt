@@ -876,6 +876,10 @@ GROUP BY t.ticker, q""")
             raise ValueError(f"BASKET_DCF_MODE={DCF_MODE} unknown "
                              "(exclude_rich|tiebreak|placebo_random|placebo_pe)")
         import dcf_valuation as _dcfv
+        # R9/việc 4 (chọn (a)): ép số CP quý. Output basket (CSV/registry) không mang hậu tố nguồn số CP
+        # (coding_guidelines §8) và 1 lần _px_map + prime() cho mọi rebal = thêm truy vấn BQ lớn; nhánh
+        # chỉ chạy khi BASKET_DCF_MODE bật (production không đặt). Muốn đo live ⇒ script riêng có hậu tố.
+        _dcfv.pin_oshares_source_fin(__file__)
         _fin = _dcfv._load_financials()
         _rebal_in = ",".join(f"DATE '{pd.Timestamp(x).date()}'" for x in rebal_dates)
         _px = bq(f"""SELECT t.ticker, t.time, t.Price FROM tav2_bq.ticker t

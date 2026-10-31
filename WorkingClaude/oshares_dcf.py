@@ -79,13 +79,33 @@ def frame_events(ticker, d0, d1):
     else:
         since = (date.fromisoformat(d0) - timedelta(days=1)).isoformat()      # pricing_events: since loại trừ
         rows = pricing_events([ticker], since=since, until=d1, codes=("ISS",))
-    out = []
-    for e in rows:
-        meth = (e.get("issue_method_name_vi") or "").strip()
-        if (e.get("event_code") == "ISS" and d0 <= (e.get("exright_date") or "") <= d1
-                and (meth in PRICE_ADJUSTING_ISS or not meth)):
-            out.append(e)
-    return out
+    return [e for e in rows if _adjusting(e) and d0 <= (e.get("exright_date") or "") <= d1]
+
+
+# R9/việc 1: ISS dời khung giá ex ≤ asof mà vendor CHƯA lật `executed` ⇒ số CP sống ở asof (oshares_live
+# chỉ đọc `executed`) còn là số TRƯỚC sự kiện. Nhìn lùi bao xa: 90 ngày (vendor trễ đo được ở TCB/NED là
+# vài phiên; 90 ngày là trần thô, không hiệu chỉnh).
+STALE_LOOKBACK_DAYS = 90
+
+
+def _adjusting(e):
+    meth = (e.get("issue_method_name_vi") or "").strip()
+    return e.get("event_code") == "ISS" and (meth in PRICE_ADJUSTING_ISS or not meth)
+
+
+def unexecuted_events(ticker, asof, lookback_days=STALE_LOOKBACK_DAYS):
+    """ISS dời khung giá của `ticker` có ex-date trong [asof − lookback, asof] mà event_status KHÁC
+    `executed` (thường là `announced`) — R9/việc 1. Khe R8: frame_events chỉ quét [price_date, asof]
+    nên ISS ex TRƯỚC price_date mà vendor chưa lật status lọt (số CP sống = số cũ, giá đã sau ex).
+    Cùng nguồn/cache với frame_events. KHÔNG nuốt lỗi (caller về số quý)."""
+    d0 = (date.fromisoformat(asof) - timedelta(days=lookback_days)).isoformat()
+    if _EV_CACHE["rows"] is not None and ticker in _EV_CACHE["tickers"] and asof <= _EV_CACHE["until"]:
+        rows = [e for e in _EV_CACHE["rows"] if e.get("ticker") == ticker]
+    else:
+        since = (date.fromisoformat(d0) - timedelta(days=1)).isoformat()
+        rows = pricing_events([ticker], since=since, until=asof, codes=("ISS",))
+    return [e for e in rows if _adjusting(e) and d0 <= (e.get("exright_date") or "") <= asof
+            and (e.get("event_status") or "") != "executed"]
 
 
 def oshares_for(ticker, asof, fin_value):

@@ -94,6 +94,9 @@ def _dcf_check_for_order(ticker, price, asof, price_date=None):
             # status/robust/gate — y hệt fair_value_ps, thuần hiển thị.
             "conglomerate": _dcf.is_conglomerate(ticker),
             "as_of": str(asof)[:10],
+            # R9/việc 2: chỉ có khi DCF_OSHARES_SOURCE=live (fin: không thêm khoá ⇒ byte-identical)
+            **({k: res[k] for k in ("oshares", "oshares_fin", "oshares_source", "oshares_method",
+                                    "oshares_divergence") if k in res} if "oshares_source" in res else {}),
         }
 
     except Exception as exc:
@@ -158,7 +161,26 @@ def format_dcf_check(dcf, side="buy", has_override=False, ticker=None):
             out += " ⚠"
         elif deep:
             out += " ⚠ cần dcf_override_reason"
-    return out + cong_s
+    return out + cong_s + _format_oshares_divergence(dcf)
+
+
+def _format_oshares_divergence(dcf):
+    """R9/việc 2: ' ⚠ OShares live 83,6tr vs quy 113,6tr (-26%)' khi DCF dùng số CP sống lệch số quý >
+    dcf_valuation.OSHARES_DIVERGENCE_WARN. dcf ở fin (không có khoá oshares_*) ⇒ ""."""
+    div = dcf.get("oshares_divergence")
+    if not isinstance(div, (int, float)) or isinstance(div, bool) or div != div:
+        return ""
+    try:
+        import sys as _sys
+        if WORKDIR not in _sys.path:
+            _sys.path.insert(0, WORKDIR)
+        import dcf_valuation as _dcf
+        if abs(div) <= _dcf.OSHARES_DIVERGENCE_WARN:
+            return ""
+        return " ⚠ " + _dcf.oshares_divergence_note(None, dcf.get("oshares"), dcf.get("oshares_fin"))
+    except Exception as exc:
+        _log.warning("oshares divergence format lỗi: %s", exc)
+        return ""
 
 
 def log_dcf_history(ticker, dcf, source, asof=None):
