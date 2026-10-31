@@ -1709,3 +1709,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T10:28:44Z] [dgc-dd-v2.2-rev2 30/10] XONG job Taylor_20261030_102330 tai investor_report_v2_2 (25tr, chua commit/gui) — CHO Mike quyet gui email / rà lai
+
+## Archived 2026-10-31 (keep=12 days=0 require_done=False)
+- [2026-10-30T16:08:02Z] [oshares-r2r7 30/10] XONG outer a3c2c0600 (session/oshares-r2r7-20261030) + mike 0298dd9b1 (session/oshares-r2r7-ops-20261030), chua merge — CHO arch-review+skeptic+user; bat live can caller khai price_date truoc
