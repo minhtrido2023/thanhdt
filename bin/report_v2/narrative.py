@@ -15,7 +15,7 @@ import unicodedata
 
 MAX_WORDS, MAX_ITEMS = 25, 3
 SECTIONS = ("bridge", "performance", "risk", "attribution", "trades", "portfolio", "market", "costs")
-INTERNAL_RE = re.compile(r"\b(Livermore|Taylor|Bobby|Winston|Wendy|Spyros|Mafee|DollarBill|Mike|LAG|PARK|"
+INTERNAL_RE = re.compile(r"\b(Livermore|Taylor|Bobby|Winston|Wendy|Spyros|Mafee|DollarBill|Mike|ZaloPay|0001743768|liên tài khoản|LAG|PARK|"
                          r"DT5G|DT4|PEAD|BAL|CAPIT|custom30V?|tav2_\w+|BigQuery|universe_pit|SIGNAL_V\d+)\b")
 OPS_RE = re.compile(r"\b(job|dispatch|gate|cron|bug|selfcheck|circuit breaker|lỗi hệ thống|bot chết)\b", re.I)
 NUM_RE = re.compile(r"\d[\d.,/]*\d|\d")

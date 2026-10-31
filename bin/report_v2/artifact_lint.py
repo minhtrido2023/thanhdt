@@ -21,7 +21,7 @@ MANIFEST_TAG = "report_v2_manifest:"
 TAG_RE = re.compile(r"<!--\s*report_v2_manifest:\s*(\S+)\s+pdf_sha256=([0-9a-f]{64})\s+pdf=(\S+)\s*-->")
 REPR_MD = [r"\['\|", r"\\n\|"]
 RAW_MD = [r"\['\|", r"\*\*", r"^\s*\|[-:| ]+\|\s*$", r"^#{1,4} ", r"\\n\|", r"!\[", r"\bNone\b", r"\bnan\b"]
-INTERNAL = re.compile(r"\b(Livermore|Taylor|Bobby|Winston|Wendy|Spyros|Mafee|DollarBill|LAG|PARK|DT5G|DT4|PEAD|"
+INTERNAL = re.compile(r"\b(Livermore|Taylor|Bobby|Winston|Wendy|Spyros|Mafee|DollarBill|Mike|ZaloPay|0001743768|liên tài khoản|LAG|PARK|DT5G|DT4|PEAD|"
                       r"CAPIT|custom30V?|tav2_\w+|BigQuery|universe_pit|dnse_raw\w*|nav_history\w*|Traceback|"
                       r"[\w-]+\.(?:jsonl|csv|py|pkl))\b")
 

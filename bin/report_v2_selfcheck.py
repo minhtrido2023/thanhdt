@@ -97,6 +97,8 @@ def mutations(md_path, acct, tmp):
     if investor:
         html_cases["internal"] = " theo Livermore "
         html_cases["internal_file"] = " thiếu dnse_raw_2026-07-01.jsonl "
+        html_cases["zalopay"] = " Khoản rút chuyển sang tài khoản ZaloPay "
+        html_cases["zalopay_acct"] = " số TK 0001743768 "
     for tag, inj in html_cases.items():
         m = fresh("html_" + tag)
         man, d = al.load_v2(m)
@@ -163,6 +165,8 @@ def narrative_cases():
         "quá 3 gạch": {"key_points": ["a.", "b.", "c.", "d."]},
         "tự viết số": {"key_points": ["Lãi 7,77% trong tháng."]},
         "tên nội bộ": {"key_points": ["Theo Livermore thị trường yếu."]},
+        "nhắc ZaloPay (bản ngoài)": {"key_points": ["Khoản rút chuyển sang tài khoản ZaloPay."]},
+        "nhắc liên tài khoản (bản ngoài)": {"key_points": ["Nạp rút liên tài khoản trong tháng."]},
         "từ vận hành (nhà đầu tư)": {"key_points": ["Cron chạy trễ."]},
         "mục nội bộ ở SpaceX": {"internal": [{"title": "x", "bullets": ["y"]}]},
         "outlook > 4 kịch bản": {"outlook": [{"scenario": "a", "condition": "b", "invalidation": "c"}] * 5},
