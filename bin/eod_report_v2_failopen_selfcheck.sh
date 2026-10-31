@@ -14,7 +14,8 @@ cat > "$T/bin/report_v2/build.py" <<'EOF'
 import os, sys
 rc = int(os.environ.get("STUB_BUILD_RC", "0"))
 a = sys.argv; acct = a[a.index("--account") + 1]; d = a[a.index("--period") + 1]; out = a[a.index("--out-dir") + 1]
-with open(f"{out}/{acct}_daily_report_{d}.md", "w") as fh:
+if rc != 5:
+  with open(f"{out}/{acct}_daily_report_{d}.md", "w") as fh:
     fh.write("# V2 SUMMARY\n" if rc == 0 else "# HALF WRITTEN\n")
 if rc:
     print("Traceback boom", file=sys.stderr)
@@ -54,9 +55,10 @@ case_run() {  # acct build_rc gate_block mode v2flag want_first want_old want_ga
   got="$(ROOT="$T" ACCOUNT="$1" PLAN_DATE=2026-10-30 TRADING_REPORT_THREAD=x GATE_LOG="$T/gate.log" EV_LOG="$T/ev.log" \
     REPORT_DELIVERY_STATE="$T/state.json" STUB_BUILD_RC="$2" STUB_GATE_BLOCK="$3" EOD_REPORT_V2="$5" bash -c '
       _strategy_fit_attach_args() { STRATEGY_FIT_ARGS=(); }
+      f="$ROOT/reports/${ACCOUNT}_daily_report_2026-10-30.md"; rm -f "$f"
+      [ -n "${PRE:-}" ] && printf "%s\n" "$PRE" > "$f"
       eval "$1"; : > "$GATE_LOG"; : > "$EV_LOG"; _deliver_eod "OLD TEXT BODY" "$2" >/dev/null 2>&1; rc=$?
       [ "$rc" -ne 0 ] && rc=1
-      f="$ROOT/reports/${ACCOUNT}_daily_report_2026-10-30.md"
       echo "$rc|$(head -1 "$f")|$(grep -c "OLD TEXT" "$f")|$(tr "\n" " " < "$GATE_LOG")|$(grep -c "^EV:error:report_v2_fallback$" "$EV_LOG")"' _ "$fn" "$4")"
   local want="${9:-0}|$6|$7|$8|${10:-0}"
   if [ "$got" = "$want" ]; then echo "  ok   $1 build=$2 block=$3 mode=$4 v2=$5"; else
@@ -72,6 +74,10 @@ case_run SpaceX  0 2 full 1 "# V2 SUMMARY"  0 "GATE:# V2 SUMMARY " 1 0
 case_run ZaloPay 0 2 full 1 "# V2 SUMMARY"  1 "GATE:# V2 SUMMARY " 1 0
 # N7: artifact-lint BLOCK nhưng sổ giao đã có Discord delivered cho sha này ⇒ KHÔNG fail-open
 case_run SpaceX  0 3 full 1 "# V2 SUMMARY"  0 "GATE:# V2 SUMMARY " 1 0
+# r3 (arch-review): --promote rc=5 (bản chuẩn đã giao) ⇒ GIỮ NGUYÊN bản đã giao, KHÔNG ghi đè bằng text cũ,
+# không phát fallback, cổng chạy trên đúng bản đã giao (chỉ thử lại kênh còn thiếu)
+PRE="# V2 SUMMARY" case_run SpaceX  5 0 full 1 "# V2 SUMMARY"  0 "GATE:# V2 SUMMARY " 0 0
+PRE="# V2 SUMMARY" case_run ZaloPay 5 0 full 1 "# V2 SUMMARY"  0 "GATE:# V2 SUMMARY " 0 0
 case_run SpaceX  0 0 full 0 "OLD TEXT BODY" 1 "GATE:OLD TEXT BODY "
 case_run SpaceX  0 0 not_applicable 1 "OLD TEXT BODY" 1 "GATE:OLD TEXT BODY "
-[ "$fails" -eq 0 ] && echo "✅ PASS eod_report_v2_failopen_selfcheck (10/10)" || { echo "❌ FAIL $fails/10"; exit 1; }
+[ "$fails" -eq 0 ] && echo "✅ PASS eod_report_v2_failopen_selfcheck (12/12)" || { echo "❌ FAIL $fails/12"; exit 1; }

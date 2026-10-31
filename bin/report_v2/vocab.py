@@ -18,5 +18,5 @@ INTERNAL_RE = re.compile(rf"\b(?:(?i:{_NAMES})|{_CODES})\b")
 
 # token dữ liệu rỗng: KHÔNG chặn khi theo sau là một từ chữ thường (ngoại trừ đơn vị số liệu).
 _UNIT = r"(?:VND|đ|tr|điểm|lần|phiên|mã|trang)\b"
-DATA_NULL = rf"(?<![\w.])(?:nan|NaN|None|NaT)\b(?!\s+(?!{_UNIT})[^\W\d_])"
+DATA_NULL = rf"(?<![\w.])(?:nan|NaN|None|NaT)\b(?![ \t]+(?!{_UNIT})[^\W\d_])"
 RAW_MD = [r"\['\|", r"\*\*", r"^\s*\|[-:| ]+\|\s*$", r"^#{1,4} ", r"\\n\|", r"!\[", DATA_NULL]

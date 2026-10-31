@@ -151,6 +151,9 @@ _deliver_eod() {
   local v2_used=0
   local artifact="$ROOT/reports/${ACCOUNT}_daily_report_${PLAN_DATE}.md"
   mkdir -p "$ROOT/reports"
+  # r3 (arch-review): bản chuẩn đã giao (rc=5 của --promote) PHẢI còn nguyên ⇒ giữ bản cũ để khôi phục.
+  local artifact_bak=""
+  if [ -f "$artifact" ]; then artifact_bak="$(mktemp)"; cp "$artifact" "$artifact_bak"; fi
   printf '%s\n' "$body" > "$artifact"
   # Báo cáo v2 (user duyệt 2026-10-31, kb/projects/report-style-v2-20261031.md): PDF 1 trang + HTML cid,
   # Discord nhận bản .md tóm tắt 3 dòng (ZaloPay nội bộ: + nguyên bản text cũ bên dưới). FAIL-OPEN:
@@ -160,13 +163,19 @@ _deliver_eod() {
     local v2_out v2_rc
     # --promote (r3 N4): builder dựng NHÁP ở reports/v2/draft/, chỉ ghi tên chuẩn khi nháp qua artifact
     # lint; rc=5 = bản chuẩn đã giao trước đó ⇒ không ghi đè (rơi về text cũ như mọi rc≠0 — cổng sẽ
-    # COMPLETE idempotent nếu nội dung không đổi, không thì báo).
+    # COMPLETE idempotent: rc=5 giữ nguyên bản đã giao, cổng chỉ thử lại kênh còn thiếu).
     v2_out="$(timeout 600 python3 "$ROOT/bin/report_v2/build.py" daily --account "$ACCOUNT" \
       --period "$PLAN_DATE" --out-dir "$ROOT/reports" --promote 2>&1)"
     v2_rc=$?
     if [ "$v2_rc" -eq 0 ]; then
       v2_used=1
       [ "$ACCOUNT" = "SpaceX" ] || printf '\n---\n%s\n' "$body" >> "$artifact"
+    elif [ "$v2_rc" -eq 5 ] && [ -n "$artifact_bak" ]; then
+      # rc=5: bản chuẩn đã giao, nội dung dựng lại khác ⇒ KHÔNG ghi đè (ghi đè đổi sha ⇒ Discord+email gửi lần 2).
+      # Khôi phục đúng bản đã giao rồi để cổng chỉ thử lại kênh còn thiếu.
+      cp "$artifact_bak" "$artifact"
+      v2_used=1
+      echo "eod_trading_report: report_v2 daily rc=5 — bản chuẩn đã giao, GIỮ NGUYÊN (không ghi đè, không fallback)" >&2
     else
       local v2_err
       v2_err="$(printf '%s\n' "$v2_out" | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')"
@@ -175,6 +184,7 @@ _deliver_eod() {
       _v2_fallback_event build "$v2_rc" "$v2_err"
     fi
   fi
+  [ -n "$artifact_bak" ] && rm -f "$artifact_bak"
   # Alert sớm không công bố tỉ suất/vị thế, nên return gate không áp dụng;
   # delivery gate vẫn hash-bind đủ Discord + email. Report đầy đủ chạy validation.
   local gate_args=("$artifact" --topic "$TRADING_REPORT_THREAD")

@@ -269,6 +269,18 @@ def write_order_case(tmp):
           "N3 lỗi trần trang KHÔNG để lại .md/manifest")
 
 
+def data_null_cases():
+    """r3 (arch-review B2): nan/None đứng MỘT MÌNH trên dòng (ô bảng PDF/HTML) phải bị chặn; chữ Việt thì không."""
+    import re
+    from report_v2 import vocab as V
+    rx = re.compile(V.DATA_NULL)
+    for what, txt, want in (("ô cuối hàng + dòng sau", "FPT\n1.000\n12,3%\nnan\nHPG", True),
+                            ("nan có khoảng trắng + dòng sau", " nan \n  HPG ", True),
+                            ("None cuối nhãn + dòng sau", "Lãi/lỗ None\nTiền mặt", True),
+                            ("'nan giải' là chữ Việt", "Thanh khoản là vấn đề nan giải", False)):
+        check(bool(rx.search(txt)) == want, f"DATA_NULL {what}: {'chặn' if want else 'không chặn'}")
+
+
 def narrative_cases():
     facts = "−1,89% −1,53% 945,14 tr 0,36 điểm %"
     good = {"headline": "Tháng 10 −1,89% so với VN-Index −1,53%", "key_points": ["Kém chỉ số 0,36 điểm %."],
@@ -297,6 +309,8 @@ def narrative_cases():
         "sai dấu '−0,36 điểm %' (pipeline dương)": {"key_points": ["Kém chỉ số −0,36 điểm %."]},
         "số nhỏ kèm % không có trong pipeline": {"key_points": ["Giảm 2% trong tháng."]},
         # r3 N2 — chặn sớm cùng danh sách với lint
+        "khoảng 10-15% (số sau gạch nối)": {"key_points": ["Lợi suất kỳ vọng khoảng 10-15% năm tới."]},
+        "khoảng 1,23-77,7% (số sau gạch nối)": {"key_points": ["Kịch bản 1,23-77,7% xảy ra."]},
         "nan token": {"key_points": ["Tỷ suất nan."]},
         "nan%": {"key_points": ["Tỷ suất nan% trong tháng."]},
         "None token": {"key_points": ["Beta None"]},
@@ -392,6 +406,7 @@ def main():
     os.makedirs(tmp, exist_ok=True)
     print(f"report_v2_selfcheck: period={a.period} TZ={os.environ.get('TZ', '<unset>')} tmp={tmp}")
     narrative_cases()
+    data_null_cases()
     write_order_case(tmp)
     digests = {}
     import calendar

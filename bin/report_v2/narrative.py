@@ -52,11 +52,11 @@ def signed_tokens(s):
     s = nfc(s)
     out = []
     for m in SIGNED_RE.finditer(s):
-        if m.start() and (s[m.start() - 1].isdigit() or s[m.start() - 1] in ".,"):
-            continue
         sign = {"−": "-", "-": "-", "+": "+"}.get(m.group(1), "")
         if sign == "-" and m.start() and s[m.start() - 1].isalnum():
             sign = ""  # gạch nối trong từ (vd "T-1"), không phải dấu trừ
+        if m.start() and (s[m.start() - 1].isdigit() or s[m.start() - 1] in ".,"):
+            sign = ""  # "10-15%": số sau dấu gạch nối KHÔNG được bỏ qua (arch-review r3 B1) — giữ để kiểm "tự viết số"
         out.append((m.group(2).rstrip(".,"), sign, bool(m.group(3)), s[:m.start()]))
     return out
 
