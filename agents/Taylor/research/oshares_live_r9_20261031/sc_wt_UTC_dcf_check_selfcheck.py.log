@@ -1,0 +1,29 @@
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+log_dcf_history lỗi cho FPT: [Errno 2] No such file or directory: '/proc/definitely-not-writable'
+----------------------------------------------------------------------
+Ran 21 tests in 0.397s
+
+OK
+=== dcf_check_selfcheck.py ===
+  [1] PlannedOrder giữ dcf_check + dcf_override_reason: OK
+  [2] PlannedOrder backward-compat (dcf_check=None): OK
+  [3] load_plan() giữ dcf_check từ JSON: OK
+  [4] Executor state giữ dcf_check trong parents: OK
+  [5] Executor state dcf_check=None khi order không có: OK
+  [6] _sync_fills publish bus event cho RICH+robust BUY: OK
+  [7] KHÔNG publish khi status=CHEAP/NOT_COMPUTED/None: OK
+  [8] KHÔNG publish khi SELL side dù RICH: OK
+  [10] backward-compat khi thiếu/None fair_value_ps: OK
+  [10b] text override chỉ khi RICH sâu, fail-closed khi MoS lạ: OK
+  [11] compute thật FPT → 🔴 DCF: RICH (giá trị hợp lý ~77,781đ vs giá 120,000đ, MoS -54.3%, robust)
+  [12] field cũ còn nguyên (status/margin_of_safety/robust/as_of): OK
+  [9] format hiện giá trị hợp lý + giá: OK → 🟢 DCF: CHEAP (giá trị hợp lý ~85,400đ vs giá 74,200đ, MoS +35.0%, robust)
+  [13] is_conglomerate nhận diện VGC, không đụng FPT: OK
+  [14] cảnh báo đa ngành nằm ngay dòng có số: OK → 🟢 DCF: CHEAP (giá trị hợp lý ~50,000đ vs giá 40,000đ, MoS +35.0%, robust) ⚠ đa ngành — DCF gộp 1 dòng tiền, có thể không phản ánh đúng
+  [15] compute thật VGC conglomerate=True (status=RICH), FPT=False: OK
+  [16] DCF_DISCLAIMER nêu đủ: tham khảo + đa ngành + loại tài chính: OK
+  [17] append-only + header 1 lần + đủ field: OK
+  [18] NOT_COMPUTED ghi được; dcf rỗng/rác bỏ qua im lặng: OK
+  [19] path không ghi được → nuốt lỗi, không raise: OK
+  [20] _dcf_check_for_order KHÔNG tự ghi lịch sử (chỉ report gọi): OK
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']

@@ -1,0 +1,43 @@
+Loading data...
+[BQ_LOCAL_CACHE] ready — 15 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+[BQ_LOCAL_CACHE] DuckDB error: Binder Error: Values list "t" does not have a column named "VNINDEX_RSI_Max3M"
+
+LINE 24:     + CASE WHEN t.VNINDEX_RSI_Max3M > 0.65 THEN 10 ELSE 0 END
+                         ^
+[BQ_LOCAL_CACHE] Translated SQL (first 500 chars):
+
+WITH fa_dated AS (
+  SELECT f.ticker, f.time AS f_time, f.tier AS fa_tier,
+    LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_f_time
+  FROM fa_ratings AS f
+),
+fin_dated AS (
+  SELECT f.ticker, f.time AS fin_time, f.Revenue_YoY_P0,
+    LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_fin_time
+  FROM ticker_financial AS f
+),
+classified AS (
+  SELECT
+    t.ticker, t.time, t.Close,
+    (CASE WHEN t.D_RSI > 0.50 THEN 25 ELSE 0 END
+    + CASE WHEN t.Close > t.MA50 
+Traceback (most recent call last):
+  File "/home/trido/wt-oshares-r9-ops-20261031/agents/Taylor/research/oshares_live_r9_20261031/run_wt.py", line 25, in <module>
+    runpy.run_path(script, run_name="__main__")
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/trido/wt-oshares-r9-20261031/WorkingClaude/test_multi_strategy.py", line 19, in <module>
+    sig = bq(SIGNAL_QUERY.format(start=START_DATE, end=END_DATE))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/WorkingClaude/simulate_holistic_nav.py", line 202, in bq
+    return _lc.query(sql)
+           ^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/WorkingClaude/bq_local_cache.py", line 119, in query
+    result = self.conn.execute(local_sql).fetchdf()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_duckdb.BinderException: Binder Error: Values list "t" does not have a column named "VNINDEX_RSI_Max3M"
+
+LINE 24:     + CASE WHEN t.VNINDEX_RSI_Max3M > 0.65 THEN 10 ELSE 0 END
+                         ^
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']

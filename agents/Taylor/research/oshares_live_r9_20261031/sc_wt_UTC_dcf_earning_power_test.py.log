@@ -1,0 +1,125 @@
+FV cache loaded: 1046 tickers, 31821 release-points
+
+panel rows=59534  months=147  tickers=1005
+
+============================================================================================
+LEVEL IMPACT — median MoS & %cheap per variant (addresses 'DCF reads everything RICH')
+============================================================================================
+  V0_fcfe_cpi        ALL: median=+0.15 %cheap=  57%  | 2025+: median=+0.14 %cheap=  57%  n=49260
+  V1_ep_cpi          ALL: median=+0.25 %cheap=  68%  | 2025+: median=+0.15 %cheap=  62%  n=58285
+  V2_fcfe_gdphalf    ALL: median=+0.45 %cheap=  71%  | 2025+: median=+0.42 %cheap=  73%  n=49260
+  V3_fcfe_caprf      ALL: median=+0.33 %cheap=  66%  | 2025+: median=+0.34 %cheap=  67%  n=49260
+  V4_fcfe_gdpfull    ALL: median=+0.72 %cheap=  85%  | 2025+: median=+0.72 %cheap=  87%  n=49260
+  V5_ep_gdphalf      ALL: median=+0.49 %cheap=  84%  | 2025+: median=+0.43 %cheap=  82%  n=58285
+
+============================================================================================
+STUDY B — MoS forward-return IC   [OWN panel (each variant's full coverage)]
+============================================================================================
+
+  V0_fcfe_cpi  (basis=fcfe, term=cpi)   rows_valid=49260
+    ALL        1M=+0.0486(t+7.9)  2M=+0.0640(t+9.9)  3M=+0.0750(t+12.2)
+    IS 14-19   1M=+0.0439(t+4.8)  2M=+0.0560(t+5.8)  3M=+0.0749(t+7.8)
+    OOS 20-26  1M=+0.0524(t+6.3)  2M=+0.0705(t+8.1)  3M=+0.0750(t+9.3)
+
+  V1_ep_cpi  (basis=earning_power, term=cpi)   rows_valid=58285
+    ALL        1M=+0.0637(t+10.2)  2M=+0.0800(t+13.0)  3M=+0.0977(t+15.5)
+    IS 14-19   1M=+0.0511(t+5.8)  2M=+0.0590(t+7.2)  3M=+0.0683(t+8.1)
+    OOS 20-26  1M=+0.0736(t+8.4)  2M=+0.0968(t+11.3)  3M=+0.1216(t+14.6)
+
+  V2_fcfe_gdphalf  (basis=fcfe, term=cpi_gdp_half)   rows_valid=49260
+    ALL        1M=+0.0491(t+7.9)  2M=+0.0647(t+9.9)  3M=+0.0752(t+12.2)
+    IS 14-19   1M=+0.0450(t+4.8)  2M=+0.0572(t+5.8)  3M=+0.0752(t+7.9)
+    OOS 20-26  1M=+0.0524(t+6.3)  2M=+0.0707(t+8.1)  3M=+0.0751(t+9.3)
+
+  V3_fcfe_caprf  (basis=fcfe, term=cap_rf)   rows_valid=49260
+    ALL        1M=+0.0488(t+8.0)  2M=+0.0646(t+10.0)  3M=+0.0755(t+12.3)
+    IS 14-19   1M=+0.0444(t+4.9)  2M=+0.0570(t+6.0)  3M=+0.0761(t+8.1)
+    OOS 20-26  1M=+0.0523(t+6.3)  2M=+0.0706(t+8.1)  3M=+0.0749(t+9.3)
+
+  V4_fcfe_gdpfull  (basis=fcfe, term=cpi_gdp_full)   rows_valid=49260
+    ALL        1M=+0.0480(t+7.8)  2M=+0.0631(t+9.8)  3M=+0.0735(t+12.0)
+    IS 14-19   1M=+0.0423(t+4.7)  2M=+0.0542(t+5.7)  3M=+0.0720(t+7.7)
+    OOS 20-26  1M=+0.0525(t+6.3)  2M=+0.0703(t+8.1)  3M=+0.0747(t+9.2)
+
+  V5_ep_gdphalf  (basis=earning_power, term=cpi_gdp_half)   rows_valid=58285
+    ALL        1M=+0.0640(t+10.1)  2M=+0.0803(t+12.8)  3M=+0.0974(t+15.4)
+    IS 14-19   1M=+0.0521(t+5.8)  2M=+0.0600(t+7.0)  3M=+0.0682(t+8.1)
+    OOS 20-26  1M=+0.0734(t+8.4)  2M=+0.0966(t+11.3)  3M=+0.1210(t+14.6)
+
+============================================================================================
+STUDY B — MoS forward-return IC   [isolate ranking]
+   COMMON subset (all 6 variants compute): 48011 rows
+============================================================================================
+
+  V0_fcfe_cpi  (basis=fcfe, term=cpi)   rows_valid=48011
+    ALL        1M=+0.0505(t+7.9)  2M=+0.0642(t+9.6)  3M=+0.0770(t+11.5)
+    IS 14-19   1M=+0.0463(t+5.0)  2M=+0.0576(t+5.7)  3M=+0.0760(t+7.4)
+    OOS 20-26  1M=+0.0538(t+6.1)  2M=+0.0696(t+7.8)  3M=+0.0778(t+8.7)
+
+  V1_ep_cpi  (basis=earning_power, term=cpi)   rows_valid=48011
+    ALL        1M=+0.0659(t+9.9)  2M=+0.0825(t+12.1)  3M=+0.1003(t+14.3)
+    IS 14-19   1M=+0.0529(t+5.5)  2M=+0.0625(t+6.7)  3M=+0.0726(t+7.7)
+    OOS 20-26  1M=+0.0763(t+8.4)  2M=+0.0985(t+10.5)  3M=+0.1227(t+13.1)
+
+  V2_fcfe_gdphalf  (basis=fcfe, term=cpi_gdp_half)   rows_valid=48011
+    ALL        1M=+0.0508(t+7.8)  2M=+0.0645(t+9.5)  3M=+0.0768(t+11.3)
+    IS 14-19   1M=+0.0467(t+4.8)  2M=+0.0578(t+5.5)  3M=+0.0754(t+7.3)
+    OOS 20-26  1M=+0.0540(t+6.1)  2M=+0.0699(t+7.8)  3M=+0.0780(t+8.6)
+
+  V3_fcfe_caprf  (basis=fcfe, term=cap_rf)   rows_valid=48011
+    ALL        1M=+0.0507(t+8.0)  2M=+0.0648(t+9.7)  3M=+0.0775(t+11.6)
+    IS 14-19   1M=+0.0468(t+5.1)  2M=+0.0586(t+5.8)  3M=+0.0772(t+7.6)
+    OOS 20-26  1M=+0.0538(t+6.1)  2M=+0.0697(t+7.8)  3M=+0.0778(t+8.7)
+
+  V4_fcfe_gdpfull  (basis=fcfe, term=cpi_gdp_full)   rows_valid=48011
+    ALL        1M=+0.0501(t+7.8)  2M=+0.0635(t+9.5)  3M=+0.0757(t+11.3)
+    IS 14-19   1M=+0.0451(t+4.8)  2M=+0.0559(t+5.6)  3M=+0.0735(t+7.3)
+    OOS 20-26  1M=+0.0541(t+6.1)  2M=+0.0695(t+7.8)  3M=+0.0776(t+8.6)
+
+  V5_ep_gdphalf  (basis=earning_power, term=cpi_gdp_half)   rows_valid=48011
+    ALL        1M=+0.0660(t+9.7)  2M=+0.0827(t+12.0)  3M=+0.0994(t+14.2)
+    IS 14-19   1M=+0.0532(t+5.3)  2M=+0.0629(t+6.4)  3M=+0.0712(t+7.5)
+    OOS 20-26  1M=+0.0761(t+8.3)  2M=+0.0985(t+10.6)  3M=+0.1222(t+13.0)
+
+============================================================================================
+ORTHOGONALITY — does each variant's MoS survive neutralizing 1/PE? (residual IC, 2M/3M)
+   critical for earning_power: is it just 1/PE relabeled? (KNOWLEDGE.md composite trap)
+   COMMON subset: 47417 rows
+============================================================================================
+
+  V0_fcfe_cpi
+    rank-corr(MoS,1/PE) mean=+0.291   (high→collinear with 1/PE)
+    ALL        2M⟂PE=+0.0368(t+5.8)  3M⟂PE=+0.0442(t+6.9)
+    IS 14-19   2M⟂PE=+0.0298(t+3.1)  3M⟂PE=+0.0440(t+4.3)
+    OOS 20-26  2M⟂PE=+0.0424(t+5.1)  3M⟂PE=+0.0443(t+5.4)
+
+  V1_ep_cpi
+    rank-corr(MoS,1/PE) mean=+0.745   (high→collinear with 1/PE)
+    ALL        2M⟂PE=+0.0216(t+3.3)  3M⟂PE=+0.0316(t+4.7)
+    IS 14-19   2M⟂PE=-0.0054(t-0.6)  3M⟂PE=-0.0028(t-0.3)
+    OOS 20-26  2M⟂PE=+0.0433(t+5.0)  3M⟂PE=+0.0596(t+6.8)
+
+  V2_fcfe_gdphalf
+    rank-corr(MoS,1/PE) mean=+0.286   (high→collinear with 1/PE)
+    ALL        2M⟂PE=+0.0377(t+5.8)  3M⟂PE=+0.0447(t+6.9)
+    IS 14-19   2M⟂PE=+0.0321(t+3.1)  3M⟂PE=+0.0455(t+4.4)
+    OOS 20-26  2M⟂PE=+0.0421(t+5.0)  3M⟂PE=+0.0441(t+5.3)
+
+  V3_fcfe_caprf
+    rank-corr(MoS,1/PE) mean=+0.290   (high→collinear with 1/PE)
+    ALL        2M⟂PE=+0.0375(t+5.9)  3M⟂PE=+0.0449(t+7.0)
+    IS 14-19   2M⟂PE=+0.0313(t+3.2)  3M⟂PE=+0.0456(t+4.5)
+    OOS 20-26  2M⟂PE=+0.0425(t+5.1)  3M⟂PE=+0.0442(t+5.3)
+
+  V4_fcfe_gdpfull
+    rank-corr(MoS,1/PE) mean=+0.292   (high→collinear with 1/PE)
+    ALL        2M⟂PE=+0.0358(t+5.7)  3M⟂PE=+0.0428(t+6.8)
+    IS 14-19   2M⟂PE=+0.0286(t+3.0)  3M⟂PE=+0.0419(t+4.2)
+    OOS 20-26  2M⟂PE=+0.0417(t+5.0)  3M⟂PE=+0.0436(t+5.3)
+
+  V5_ep_gdphalf
+    rank-corr(MoS,1/PE) mean=+0.731   (high→collinear with 1/PE)
+    ALL        2M⟂PE=+0.0235(t+3.5)  3M⟂PE=+0.0328(t+4.9)
+    IS 14-19   2M⟂PE=-0.0006(t-0.1)  3M⟂PE=+0.0008(t+0.1)
+    OOS 20-26  2M⟂PE=+0.0429(t+5.0)  3M⟂PE=+0.0588(t+6.7)
+[run_wt] modules ngoài WT: KHÔNG | đã nạp: ['dcf_valuation', 'oshares_dcf', 'trading_bot.strategies', 'trading_bot.due_diligence']
