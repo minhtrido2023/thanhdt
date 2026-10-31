@@ -301,7 +301,7 @@ def narrative_cases():
             check(True, f"narrative '{what}' bị từ chối")
 
 
-def email_case(md_path, tmp):
+def email_case(md_path, tmp, extra_argv=(), note=None):
     """Gọi send_report_email.main() với SMTP giả — bắt thư, không gửi."""
     import smtplib
     import send_report_email as se
@@ -322,7 +322,8 @@ def email_case(md_path, tmp):
     smtplib.SMTP = Fake
     argv = sys.argv
     try:
-        sys.argv = ["send_report_email.py", md_path, "--skip-return-gate", "selfcheck — cổng §21 đã có selfcheck riêng"]
+        sys.argv = ["send_report_email.py", md_path, "--skip-return-gate", "selfcheck — cổng §21 đã có selfcheck riêng",
+                    *extra_argv]
         se.main()
     finally:
         smtplib.SMTP, sys.argv = real, argv
@@ -340,6 +341,16 @@ def email_case(md_path, tmp):
     check({p["Content-ID"].strip("<>") for p in imgs} == set(man["cid"]), "email v2: đủ ảnh cid như manifest")
     check(all(f'cid:{c}' in body for c in man["cid"]), "email v2: thân HTML tham chiếu mọi cid")
     check(al.MANIFEST_TAG not in body, "email v2: dòng manifest không lọt vào thân")
+    # r3 N9: .md đính kèm không chứa comment manifest (đường dẫn nội bộ); SpaceX không kèm .md
+    mds = [p for p in parts if (p.get_filename() or "").endswith(".md")]
+    tag = os.path.basename(md_path)
+    if "SpaceX" in tag:
+        check(not mds, f"email v2 {tag}: bản nhà đầu tư KHÔNG kèm .md (PDF là bản đầy đủ)")
+    else:
+        check(len(mds) == 1 and al.MANIFEST_TAG not in mds[0].get_payload(decode=True).decode("utf-8"),
+              f"email v2 {tag}: .md đính kèm không chứa comment report_v2_manifest")
+    if note:
+        check(note in body, f"email v2 {tag}: ghi chú đính kèm ('{note}') có trong thân HTML")
 
 
 def main():
@@ -418,8 +429,9 @@ def main():
             if cad == "monthly":
                 mutations(md_path, acct, tmp)
                 promote_cases(md_path, acct, tmp)
-                if acct == a.accounts.split(",")[0]:
-                    email_case(md_path, tmp)
+                email_case(md_path, tmp)
+            if cad == "daily":
+                email_case(md_path, tmp, ("--attach-note", "Ghi chú selfcheck N9"), note="Ghi chú selfcheck N9")
     print("md5 .md:", json.dumps(digests))
     if not a.keep:
         shutil.rmtree(tmp, ignore_errors=True)

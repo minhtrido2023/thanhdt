@@ -56,6 +56,16 @@ ACCT_META = {
 }
 
 
+# r3 N9: số tài khoản DNSE trong dòng "Tài khoản:" của .md — user CHƯA quyết bỏ; giữ mặc định (=1),
+# muốn bỏ chỉ cần REPORT_V2_SHOW_ACCOUNT_NO=0 (một cờ, không sửa code).
+SHOW_ACCOUNT_NO = os.environ.get("REPORT_V2_SHOW_ACCOUNT_NO", "1") != "0"
+
+
+def acct_line(cx):
+    no = f" · DNSE {cx.meta['no']}" if SHOW_ACCOUNT_NO else ""
+    return f"**Tài khoản:** {cx.acct}{no} · {cx.meta['desc']}  "
+
+
 def ddmm(d):
     return f"{d:%d/%m}"
 
@@ -531,7 +541,7 @@ def build_monthly(acct, period, out_dir, nar_path=None):
 
     # ── .md tóm tắt (cổng giao đọc) ──
     md = [f"# {title}", "",
-          f"**Tài khoản:** {acct} · DNSE {cx.meta['no']} · {cx.meta['desc']}  ",
+          acct_line(cx),
           f"**Kỳ báo cáo:** tháng {mlab} ({ddmm(m0)} – {ddmmyyyy(m_end)}, phiên cuối có NAV {ddmmyyyy(d1)})  ",
           f"**Đối tượng:** {cx.meta['audience']}", "",
           "## Tóm tắt", *[f"- {k}" for k in key], "",
@@ -854,7 +864,7 @@ def build_weekly(acct, period, out_dir, nar_path=None):
     cx.add(*app)
 
     md = [f"# {title}", "",
-          f"**Tài khoản:** {acct} · DNSE {cx.meta['no']} · {cx.meta['desc']}  ",
+          acct_line(cx),
           f"**Kỳ báo cáo:** tuần {ddmm(mon)} – {ddmmyyyy(fri)} (phiên cuối có NAV {ddmmyyyy(d1)})  ",
           f"**Đối tượng:** {cx.meta['audience']}", "",
           "## Tóm tắt", *[f"- {k}" for k in key], "",
@@ -1073,7 +1083,7 @@ def build_quarterly(acct, period, out_dir, nar_path=None):
             app += [section("Nội bộ — " + blk["title"]), bullets(blk["bullets"], max_words=40, max_items=5)]
     cx.add(*app)
     md = [f"# {title}", "",
-          f"**Tài khoản:** {acct} · DNSE {cx.meta['no']} · {cx.meta['desc']}  ",
+          acct_line(cx),
           f"**Kỳ báo cáo:** {ql} ({ddmm(q0)} – {ddmmyyyy(q_end)}, phiên cuối có NAV {ddmmyyyy(d1)})  ",
           f"**Đối tượng:** {cx.meta['audience']}", "",
           "## Tóm tắt", *[f"- {k}" for k in key], "",
