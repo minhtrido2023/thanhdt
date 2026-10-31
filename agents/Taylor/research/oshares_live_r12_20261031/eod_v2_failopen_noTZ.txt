@@ -1,0 +1,13 @@
+  ok   SpaceX build=0 block=0 mode=full v2=1
+  ok   ZaloPay build=0 block=0 mode=full v2=1
+  ok   SpaceX build=1 block=0 mode=full v2=1
+  ok   SpaceX build=0 block=1 mode=full v2=1
+  ok   ZaloPay build=0 block=1 mode=full v2=1
+  ok   SpaceX build=0 block=2 mode=full v2=1
+  ok   ZaloPay build=0 block=2 mode=full v2=1
+  ok   SpaceX build=0 block=3 mode=full v2=1
+  ok   SpaceX build=5 block=0 mode=full v2=1
+  ok   ZaloPay build=5 block=0 mode=full v2=1
+  ok   SpaceX build=0 block=0 mode=full v2=0
+  ok   SpaceX build=0 block=0 mode=not_applicable v2=1
+✅ PASS eod_report_v2_failopen_selfcheck (12/12)

@@ -905,6 +905,55 @@ if orders:
                                             log_dcf_history)
     except Exception:
         _dcf_check_for_order = format_dcf_check = log_dcf_history = None
+    # R12/việc 2 — plan echo 21:00 PHẢI 0 BQ (bất biến R9 mục 8). User chốt 31/10: TẠM GIỮ SỐ QUÝ cho
+    # plan echo (không dùng Price T-1, không khai price_date tự khớp) ⇒ khai PRICE_SESSION_UNKNOWN CÓ CHỦ
+    # ĐÍCH: fair_value về số quý TRƯỚC mọi lời gọi oshares_for (0 BQ, tín hiệu im). KHÔNG gọi
+    # price_session(s)_for / prime trên đường này. EOD/paper (live) gắn nhãn "· số CP quý: … (cơ sở plan
+    # echo)" khi lệch đáng kể (format_dcf_check). WC chưa có hằng (merge lệch) ⇒ {} ⇒ price_date None ⇒
+    # số quý + kêu stderr, vẫn 0 BQ (R9 việc 3: kiểm price_date trước oshares_for).
+    _dcf_pd_kw = {}
+    if format_dcf_check and _dcf_check_for_order:
+        try:
+            from dcf_valuation import PRICE_SESSION_UNKNOWN as _PSU
+            _dcf_pd_kw = {"price_date": _PSU}
+        except Exception:
+            _dcf_pd_kw = {}
+    # Trần thời gian cho khối DCF (R12/việc 2, sửa R12b 31/10 theo arch-review + quant-skeptic): mỗi lời gọi
+    # <= SEND_PLAN_DCF_CALL_S (SIGALRM), tổng thời gian ĐÃ TIÊU TRONG DCF <= SEND_PLAN_DCF_BUDGET_S (KHÔNG
+    # tính giờ đồng hồ: run_due_diligence ~18-25s/lệnh MUA chạy cùng vòng lặp không được ăn ngân sách).
+    # Ngoại lệ trần là BaseException (_DcfTimeout) để `except Exception` ở _dcf_check_for_order/fair_value
+    # không nuốt được; tầng trong dùng `except BaseException`/bare except vẫn nuốt được và SIGALRM không ngắt
+    # được lời đọc duckdb/parquet mức C ⇒ đây là trần BEST-EFFORT, không phải bảo đảm cứng. Vượt ⇒ bỏ dòng
+    # DCF của lệnh đó + WARN tường minh "chưa kiểm DCF — kiểm tay trước khi duyệt"; báo cáo VẪN gửi.
+    # Không bọc cả heredoc: timeout đó giết luôn báo cáo.
+    import signal as _sig, time as _time
+    _DCF_CALL_S = int(os.environ.get("SEND_PLAN_DCF_CALL_S", "30"))
+    _DCF_BUDGET_S = int(os.environ.get("SEND_PLAN_DCF_BUDGET_S", "120"))
+    _dcf_spent = [0.0]
+    _dcf_timeouts = []
+
+    class _DcfTimeout(BaseException):
+        pass
+
+    def _dcf_alarm(_s, _f):
+        raise _DcfTimeout("dcf_check quá trần thời gian")
+
+    def _dcf_timed(ticker, price, date):
+        if _dcf_spent[0] > _DCF_BUDGET_S:
+            _dcf_timeouts.append(ticker)
+            return None
+        _t0 = _time.monotonic()
+        _old = _sig.signal(_sig.SIGALRM, _dcf_alarm)
+        _sig.alarm(max(1, _DCF_CALL_S))
+        try:
+            return _dcf_check_for_order(ticker, price, date, **_dcf_pd_kw)
+        except _DcfTimeout:
+            _dcf_timeouts.append(ticker)
+            return None
+        finally:
+            _sig.alarm(0)
+            _sig.signal(_sig.SIGALRM, _old)
+            _dcf_spent[0] += _time.monotonic() - _t0
     # Due-diligence tổng hợp cho MỌI lệnh MUA (mandate user 2026-07-21) — thanh khoản/universe/
     # cơ học tín hiệu/cờ bất thường/FA thô. skip_dcf=True vì dòng DCF đã echo riêng ngay trên.
     # as_dict=True (27/10): renderer tự gộp 3 dòng DD/FA/cờ thành 1 dòng gọn; cờ ĐỎ vẫn do
@@ -1067,9 +1116,13 @@ if orders:
             dcf = o.get("dcf_check")
             if not dcf and is_buy and _dcf_check_for_order and isinstance(price, (int, float)):
                 try:
-                    dcf = _dcf_check_for_order(ticker, price, date)
-                except Exception:
+                    dcf = _dcf_timed(ticker, price, date)
+                except (Exception, _DcfTimeout):    # _DcfTimeout lọt qua kẽ µs giữa return và alarm(0)
                     dcf = None
+                    _dcf_timeouts.append(ticker)
+                if ticker in _dcf_timeouts:
+                    lines.append("    ↳ ⚠️ DCF CHƯA kiểm (quá trần thời gian) — kiểm tay trước khi duyệt")
+                    _oflag = True
             dcf_s = format_dcf_check(dcf, "buy" if is_buy else "sell",
                                      has_override=bool(o.get("dcf_override_reason")),
                                      ticker=ticker)
@@ -1124,6 +1177,9 @@ if orders:
         # Không có dòng nhóm (mọi lệnh PARK_TRIM đều mang note riêng) ⇒ lý do chung vẫn phải nói 1 lần.
         # KHÔNG liệt kê lại tên mã (§3 style guide) — đã có ở từng dòng "• BÁN ..." bên trên.
         lines.append(f"    ↳ ℹ️ lệnh BÁN PARK_TRIM ở trên: {_pt_why} (không liên quan tài trợ lệnh mua).")
+    if _dcf_timeouts:
+        WARN.append(f"DCF quá trần thời gian ({_DCF_CALL_S}s/lệnh, tổng {_DCF_BUDGET_S}s thời gian DCF)"
+                    f" ⇒ CHƯA kiểm DCF — kiểm tay trước khi duyệt: {', '.join(sorted(set(map(str, _dcf_timeouts))))}")
     # DCF_DISCLAIMER/DD_DISCLAIMER (giải thích PHƯƠNG PHÁP DCF/DD) bỏ khỏi report hàng ngày
     # 2026-09-29 — văn bản cố định; nội dung đầy đủ ở dcf_valuation.DCF_DISCLAIMER / due_diligence.DD_DISCLAIMER.
 else:

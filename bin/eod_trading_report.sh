@@ -536,6 +536,17 @@ try:
 except Exception:
     _dcf_check_for_order = format_dcf_check = log_dcf_history = None
     DCF_DISCLAIMER = ''
+# R11: ref_price (DNSE) không mang phiên ⇒ khớp với Price chưa điều chỉnh của phiên trong cache local
+# (dcf_valuation.price_sessions_for; prime một lô khi live). Lỗi/WC chưa có helper ⇒ hành vi trước R11.
+_dcf_pd = None
+if format_dcf_check and _dcf_check_for_order:
+    try:
+        from dcf_valuation import price_sessions_for as _psf
+        _dcf_pd = _psf([(o['ticker'], o['ref_price']) for o in orders_by_id.values()
+                        if o.get('side') == 'buy' and not o.get('dcf_check')
+                        and isinstance(o.get('ref_price'), (int, float)) and o.get('ref_price')], plan_date)
+    except Exception:
+        _dcf_pd = None
 
 def _dcf_str(o):
     if not format_dcf_check:
@@ -544,7 +555,9 @@ def _dcf_str(o):
     if not dcf and o.get('side') == 'buy' and _dcf_check_for_order \
             and isinstance(o.get('ref_price'), (int, float)) and o.get('ref_price'):
         try:
-            dcf = _dcf_check_for_order(o.get('ticker'), o.get('ref_price'), plan_date)
+            _kw = ({'price_date': _dcf_pd[(o.get('ticker'), o.get('ref_price'))]}
+                   if _dcf_pd is not None and (o.get('ticker'), o.get('ref_price')) in _dcf_pd else {})
+            dcf = _dcf_check_for_order(o.get('ticker'), o.get('ref_price'), plan_date, **_kw)
         except Exception:
             dcf = None
     s = format_dcf_check(dcf, o.get('side') or 'buy', ticker=o.get('ticker'))

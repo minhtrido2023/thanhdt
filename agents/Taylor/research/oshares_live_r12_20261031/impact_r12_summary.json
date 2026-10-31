@@ -1,0 +1,30 @@
+{
+ "n_buy": 279,
+ "plan_echo_bq_calls": 0,
+ "plan_echo_calls_by_fn": {},
+ "plan_echo_timeouts": [],
+ "plan_echo_stderr_shouts": 0,
+ "plan_echo_dict_identical_main": 279,
+ "plan_echo_line_identical_main": 279,
+ "plan_echo_line_changed_vs_r11": 4,
+ "plan_echo_changed_vs_r11_examples": [
+  "FPT 2026-10-09: r11='🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 59,700đ, MoS +15.4%, robust)' r12='🟢 DCF: CHEAP (giá trị hợp lý ~77,604đ vs giá 59,700đ, MoS +23.1%, robust)'",
+  "FPT 2026-10-20: r11='🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 57,100đ, MoS +19.1%, robust)' r12='🟢 DCF: CHEAP (giá trị hợp lý ~77,604đ vs giá 57,100đ, MoS +26.4%, robust)'",
+  "FPT 2026-10-22: r11='🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 57,400đ, MoS +18.6%, robust)' r12='🟢 DCF: CHEAP (giá trị hợp lý ~77,604đ vs giá 57,400đ, MoS +26.0%, robust)'",
+  "FPT 2026-10-23: r11='🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 57,400đ, MoS +18.6%, robust)' r12='🟢 DCF: CHEAP (giá trị hợp lý ~77,604đ vs giá 57,400đ, MoS +26.0%, robust)'"
+ ],
+ "eod_line_changed_vs_r11": 26,
+ "eod_label_rows": 26,
+ "eod_label_rows_spacex_zalopay": 0,
+ "eod_label_tickers": [
+  "FPT"
+ ],
+ "eod_changed_only_by_label": 26,
+ "eod_label_examples": [
+  "main FPT 2026-09-23: 🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 66,600đ, MoS +5.6%, không robust) · số CP quý: MoS +14.2% robust (cơ sở plan echo)",
+  "main FPT 2026-09-24: 🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 66,100đ, MoS +6.3%, không robust) · số CP quý: MoS +14.8% robust (cơ sở plan echo)",
+  "main FPT 2026-09-25: 🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 65,300đ, MoS +7.4%, không robust) · số CP quý: MoS +15.9% robust (cơ sở plan echo)",
+  "main FPT 2026-09-28: 🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 64,700đ, MoS +8.3%, không robust) · số CP quý: MoS +16.6% robust (cơ sở plan echo)"
+ ],
+ "plan_echo_vs_eod_line_differs": 26
+}

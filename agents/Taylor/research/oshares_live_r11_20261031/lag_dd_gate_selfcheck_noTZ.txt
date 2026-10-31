@@ -1,0 +1,665 @@
+  PASS — bằng chứng sạch ⇒ CLEARED, 0 cờ
+  PASS — release lấy từ Release_Date dòng mới nhất
+  PASS — tăng vốn đang chạy ⇒ gói VẪN CLEARED, chỉ WARNING CAPITAL_RAISE_PENDING (user chọn (b): không chặn mua; bằng chứng có 15.38%)
+  PASS — nguồn phát hành lỗi ⇒ CAPITAL_RAISE_NA + lỗi thật trong source_errors (§29)
+  PASS — cổ tức CP sắp tới ⇒ vẫn CLEARED, chỉ warnings CAPITAL_RAISE_INFO
+  PASS — cảnh báo tăng vốn kèm số CP lưu hành 4 quý +73.4% (OShares P0/P4)
+  PASS — flags_hash KHÔNG đổi khi có cảnh báo tăng vốn (ack cũ không bị mất hiệu lực)
+  PASS — fail-closed: ticker_financial raise ⇒ FIN_NA, FLAG
+  PASS — fail-closed: ticker_financial rỗng ⇒ RELEASE_NA, FLAG
+  PASS — fail-closed: release cũ > 60 ngày ⇒ RELEASE_NA, FLAG
+  PASS — fail-closed: run_dd raise ⇒ DD_KHONG_CHAY_DUOC, FLAG
+  PASS — fail-closed: insider không đọc được ⇒ INSIDER_NA, FLAG
+  PASS — fail-closed: feed corp-action cũ ⇒ CORP_FEED_NA, FLAG
+  PASS — fail-closed: anomaly_flags.json hỏng ⇒ ANOMALY_NA, FLAG
+  PASS — fail-closed: ADV None ⇒ ADV_NA, FLAG
+  PASS — fail-closed: universe None ⇒ UNIVERSE_NA, FLAG
+  PASS — fail-closed: rating raise ⇒ RATING_NA, FLAG
+  PASS — fail-closed: rating lỗi truy vấn ⇒ RATING_NA, FLAG
+  PASS — fail-closed: forensic raise ⇒ FORENSIC_NA, FLAG
+  PASS — fail-closed: forensic CSV hỏng ⇒ FORENSIC_NA, FLAG
+  PASS — fail-closed: định giá raise ⇒ DINH_GIA_NA, FLAG
+  PASS — fail-closed: DCF NOT_COMPUTED + không lens ⇒ DINH_GIA_NA, FLAG
+  PASS — fail-closed: thiếu CF_OA_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM/AR/Inventory = 0 mà không phải NH ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM/AR/Inventory NULL mà không phải NH ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Revenue_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Revenue_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: Revenue_P4 = 0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu AR_P0 (NH khác có số) ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Inventory_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NPM_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu EBITM_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P5 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P7 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM=0 + AR có số + thiếu Revenue_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu AR kỳ cùng kỳ năm trước ⇒ FIN_NA, FLAG
+  PASS — is_bank bắt cả NULL: EBITM/AR/Inventory NULL ⇒ FIN_NA nêu 'không xác nhận được là ngân hàng'
+  PASS — FIN_NA nêu TÊN trường thiếu
+  PASS — AR/tồn kho = 0 cả hai kỳ ⇒ 'không áp dụng', KHÔNG cờ FIN_NA/EQ
+  PASS — phải thu từ 0 lên >0 ⇒ EQ_PHAI_THU_TANG (không lọt)
+  PASS — phải thu từ 0 lên: bằng chứng cũng nói 'không tách được'
+  PASS — SCL thật: AR tổng +159% vs DT +89% ⇒ VẪN EQ_PHAI_THU_TANG (không tách được trả trước)
+  PASS — bằng chứng cờ phải thu nói rõ 'không tách được' trả trước
+  PASS — working_capital.receivables ghi cơ sở tính (tổng phải thu)
+  PASS — AdvCust (NGƯỜI MUA trả trước) lớn KHÔNG được trừ khỏi AR ⇒ vẫn cờ
+  PASS — cờ tồn kho KHÔNG kèm ghi chú phải thu
+  PASS — DSO vendor đi ngược AR thô ⇒ ghi chú dữ liệu mâu thuẫn
+  PASS — tin Discord nêu ghi chú mâu thuẫn DSO
+  PASS — AR +50% < DT +100% & DSO giảm ⇒ KHÔNG ghi chú mâu thuẫn giả
+  PASS — AR +50% < DT +100% mà DSO TĂNG ⇒ ghi chú mâu thuẫn
+  PASS — CFO/LNST có 2 quý gần nhất (14+13 / 13+12) và tin hiện dòng đó
+  PASS — CFO 2Q chỉ hiển thị: không đổi flags_hash
+  PASS — cờ: DD red flag NGOAI_UNIVERSE ⇒ NGOAI_UNIVERSE
+  PASS — cờ: DD red flag mã lạ ⇒ DD_KHONG_CHAY_DUOC
+  PASS — cờ: ADV 1,5 tỷ ⇒ THANH_KHOAN_MONG
+  PASS — cờ: quality_flag ⇒ CO_CHAT_LUONG_UNIVERSE
+  PASS — cờ: anomaly ⇒ BAT_THUONG_ANOMALY
+  PASS — cờ: insider bán ròng ⇒ INSIDER_BAN_RONG
+  PASS — cờ: ex-date ⇒ EXDATE_SAP_TOI
+  PASS — cờ: rating ≥4 ⇒ RATING_8L_FAIL
+  PASS — cờ: rating cũ ⇒ RATING_8L_CU
+  PASS — cờ: forensic exclude ⇒ FORENSIC_BANNED
+  PASS — cờ: forensic watch ⇒ FORENSIC_WATCH
+  PASS — cờ: DCF RICH ⇒ DCF_RICH
+  PASS — cờ: nền cùng kỳ thấp ⇒ EQ_NEN_THAP
+  PASS — cờ: quý lỗ trong nền ⇒ QUY_LO_TRONG_NEN
+  PASS — cờ: CFO yếu ⇒ EQ_CFO_YEU
+  PASS — cờ: NPM > EBITM ⇒ EQ_NGOAI_HOAT_DONG
+  PASS — cờ: phải thu tăng nhanh ⇒ EQ_PHAI_THU_TANG
+  PASS — cờ: tồn kho tăng nhanh ⇒ EQ_TON_KHO_TANG
+  PASS — RICH nhẹ (MoS -50%) ⇒ KHÔNG cờ DCF_RICH, status CLEARED
+  PASS — RICH nhẹ ⇒ pack['warnings'] có DCF_RICH_NHE kèm số MoS
+  PASS — RICH nhẹ: warnings KHÔNG vào flags_hash
+  PASS — RICH nhẹ: tin Discord hiện WARNING dù CLEARED
+  PASS — RICH sâu (MoS -138%) ⇒ cờ DCF_RICH, status FLAG, không warning nhẹ
+  PASS — RICH đúng -100% (biên) ⇒ nhẹ, KHÔNG cờ (ngưỡng là < -100%)
+  PASS — RICH thiếu MoS ⇒ fail-closed vẫn cờ DCF_RICH
+  PASS — RICH MoS=NaN ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS=inf ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS='nan' ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS=chuỗi lạ ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH thiếu hẳn key MoS ⇒ cờ DCF_RICH
+  PASS — RICH mà MoS dương (dữ liệu mâu thuẫn) ⇒ fail-closed cờ DCF_RICH
+  PASS — khoá notify không warning GIỮ ĐỊNH DẠNG CŨ (không gửi lại gói cũ)
+  PASS — khoá notify: gói CLEARED có warning ≠ khoá không warning
+  PASS — FAIR/CHEAP ⇒ không cờ, không warning
+  PASS — pháp lý ⇒ WARNING tường minh, vẫn status FLAG
+  PASS — nền âm: SURPRISE_PHONG_CO_HOC, không nhân đôi QUY_LO_TRONG_NEN
+  PASS — ngân hàng: CFO/vốn lưu động không áp dụng, không cờ giả ⇒ CLEARED
+  PASS — ngân hàng: có mục bank (thông tin)
+  PASS — thiếu dữ liệu ghi 'không đủ dữ liệu', không đoán 0
+  PASS — flags_hash theo MÃ cờ, không theo số bằng chứng
+  PASS — anomaly: file tươi + last_alert trong TTL ⇒ có bản ghi
+  PASS — anomaly: last_alert 33 ngày > TTL 30 ⇒ KHÔNG cờ (ok, rec=None)
+  PASS — anomaly: last_alert TƯƠNG LAI ⇒ không cờ (không look-ahead)
+  PASS — anomaly: file ghi ngày khác asof (stale) ⇒ ok=False
+  PASS — anomaly: thiếu _meta.generated_at ⇒ ok=False
+  PASS — anomaly: file không có ⇒ ok=False
+  PASS — anomaly: ok=False ⇒ pack FLAG ANOMALY_NA
+  PASS — gate: CLEARED
+  PASS — gate: FLAG chưa ack ⇒ FLAG_NO_ACK
+  PASS — gate: không có gói ⇒ NO_PACK
+  PASS — gate: gói release > 30 ngày ⇒ NO_PACK
+  PASS — gate: release SAU plan_date ⇒ NO_PACK
+  PASS — ack từ chối {'decided_by': 'mike'}
+  PASS — ack từ chối {'decision': 'MAYBE'}
+  PASS — ack từ chối {'at': '2026-10-25T18:30:00'}
+  PASS — ack từ chối {'ticker': 'ZZZ'}
+  PASS — ack từ chối {'release_date': '2026-10-20'}
+  PASS — ack từ chối {'flags_hash': '0000000000000000'}
+  PASS — ack từ chối {'flags_hash': ''}
+  PASS — ack từ chối {'source': ''}
+  PASS — ack từ chối {'source': '  '}
+  PASS — ack hỏng không ghi gì
+  PASS — gate: ack RESEARCH ⇒ không được mua
+  PASS — ack: gói sinh lại giữa tin và trả lời ⇒ record từ chối (hash cũ), không đóng dấu bộ cờ mới
+  PASS — ack: lần từ chối không ghi thêm mục
+  PASS — gate: ack PROCEED mới nhất thắng ⇒ ACK_PROCEED
+  PASS — gate: gói sinh lại ra BỘ CỜ KHÁC ⇒ ack cũ ACK_STALE
+  PASS — gate: ack decided_by≠user ⇒ ACK_NOT_USER
+  PASS — gate: ack.json hỏng ⇒ ACK_UNREADABLE (không mua)
+  PASS — gate: gói hỏng ⇒ PACK_UNREADABLE  ❌ notify rc=5:  — CHƯA ghi state, lượt sau gửi lại
+
+  PASS — gate: status CLEARED mà có cờ ⇒ KHÔNG coi là CLEARED
+  PASS — gate: pack CLEARED + user DROP cũ (hash khác) ⇒ ACK_DROP, KHÔNG mua
+  PASS — gate: pack CLEARED + user RESEARCH ⇒ ACK_RESEARCH
+  PASS — gate: pack CLEARED + ack PROCEED ⇒ vẫn CLEARED (PROCEED không được đọc ở nhánh CLEARED)
+  PASS — gate: pack CLEARED + DROP do agent ⇒ không phải quyết định user ⇒ CLEARED
+  PASS — gate: pack CLEARED + DROP của release KHÁC ⇒ CLEARED
+  PASS — gate: pack CLEARED + ack.json hỏng ⇒ giữ CLEARED (hành vi cũ)
+  PASS — gate: gói asof cách plan_date > 7 ngày ⇒ PACK_STALE (dù CLEARED)
+  PASS — gate: gói NA MỚI hơn ⇒ thắng gói CLEARED cũ (không dùng CLEARED cũ)
+  PASS — gate: gói NA CŨ hơn gói có release ⇒ dùng gói có release
+  PASS — gate: release ứng viên khác release của gói ⇒ NO_PACK
+  PASS — gate: release ứng viên khớp ⇒ CLEARED
+  PASS — ack_tier: 'LAG_LO 8%' ⇒ (LAG_LO, 8)
+  PASS — ack_tier: không nêu ⇒ (None, None)
+  PASS — ack_tier: LO và HI cùng lúc ⇒ mơ hồ (None, None)
+  PASS — ack_tier: 2 tier không phủ định ('LAG_HI 10% hoặc LAG_LO 8%') ⇒ mơ hồ
+  PASS — ack_tier: LAG_LOW không phải tier
+  PASS — ack_tier: phủ định 'không vào LAG_HI 10%' ⇒ mơ hồ
+  PASS — ack_tier: note SCL thật ⇒ LAG_LO 8
+  PASS — note: PROCEED lấy quy mô ack MỚI NHẤT (LAG_LO 8%)
+  PASS — note: CLEARED vào danh sách được vào
+  PASS — note: PROCEED không nêu quy mô ⇒ nói rõ KHÔNG nêu, không đoán tier
+  PASS — note: DROP / FLAG chưa ack ⇒ danh sách KHÔNG vào
+  PASS — note: gói ngoài cửa sổ (NO_PACK) bị bỏ qua
+  PASS — note: có câu PHẠM VI (chỉ mã recommend đề xuất đúng phiên, không kéo ngày sớm)
+  PASS — note: không khẳng định sai 'chặn cứng' (checker chỉ cảnh báo)
+  PASS — note: PROCEED không tier ⇒ KHÔNG mặc định LAG_HI, đòi user duyệt
+  PASS — note: thư mục không có gói ⇒ chuỗi rỗng
+  PASS — note: ack.json hỏng ⇒ mã FLAG rơi vào KHÔNG vào (ACK_UNREADABLE), không raise
+  PASS — checker: lệnh LAG mã CLEARED ⇒ không vi phạm
+  PASS — checker: lệnh LAG mã FLAG chưa ack ⇒ LAG_DD_FLAG_NO_ACK
+  PASS — checker: thiếu book nhưng due_today BUY ⇒ vẫn bị cổng
+  PASS — checker: lệnh BAL không bị cổng DD LAG
+  PASS — checker: qty 0 / lệnh bán không bị cổng
+  PASS — checker: thiếu lag_analysis vẫn bắt lệnh LAG không có gói
+  PASS — checker: mã FLAG ngoài plan ⇒ dòng chờ DD (cả upcoming)
+  PASS — checker: render có '⏳ Chờ DD' khi chỉ có pending
+  PASS — checker: render vi phạm ĐỎ
+  PASS — checker: tin Discord (pending=False) không chứa dòng chờ DD
+  PASS — checker: ack PROCEED (user, khớp hash) ⇒ được mua
+  PASS — checker: --no-dd-gate tắt cổng
+  PASS — checker: SCL FLAG chưa ack + due BUY + deferred WAIT_CASH ⇒ VIOLATION
+  PASS — checker: …và KHÔNG có FUNDING_ALERT cho SCL (tắt đề xuất cấp vốn cho mã bị chặn)
+  PASS — control (chân không cổng): cùng plan ⇒ CÓ FUNDING_ALERT cho SCL
+  PASS — checker: due_today decision=DEFER (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=DEFERRED (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=BUY_DEFERRED (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=WAIT_CASH (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=RESIDUAL (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=ORDER (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today SKIP ⇒ không vi phạm (chỉ chờ DD)
+  PASS — checker: deferred_orders LAG (book LAG) không có due ⇒ bị cổng
+  PASS — checker: deferred mã CLEARED / lệnh bán ⇒ không vi phạm
+  PASS — checker: book 'PEAD' nhận là LAG
+  PASS — checker: book 'LAG-PEAD' nhận là LAG
+  PASS — checker: book 'lag' nhận là LAG
+  PASS — checker: book 'LAG_BOOK' nhận là LAG
+  PASS — checker: lệnh book BAL mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book CAPIT mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book DISCRETIONARY mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book PARK mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh BAL mua mã LAG-upcoming ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh THIẾU book mua mã LAG-upcoming ⇒ vẫn bị cổng
+  PASS — checker: BAL mua SCL nhưng due_today SCL=BUY ⇒ vi phạm CHỈ vì due_today
+  PASS — checker: deferred status SKIPPED_BY_GATE (không qty) ⇒ không vi phạm
+  PASS — checker: deferred status EXCLUDED_DD ⇒ không vi phạm
+  PASS — checker: deferred WAIT_CASH qty=0 ⇒ không vi phạm
+  PASS — checker: deferred WAIT_CASH qty>0 ⇒ vi phạm
+  PASS — checker: side 'BUY' hoa ⇒ nhận là mua
+  PASS — checker: book chứa 'LAG' trong từ khác (FLAGSHIP) không bị nhận nhầm là LAG
+  PASS — notify dry-run: không gửi, không ghi state
+  PASS — notify lỗi ⇒ -1, CHƯA ghi state
+  PASS — notify: gửi 1 lần vào plan_approval, lần 2 không gửi lại
+  PASS — notify: bộ cờ đổi ⇒ gửi lại đúng mã đó
+  PASS — tin có hạn trả lời 19:00 CN trước phiên thứ Hai + mốc T6 ngoài mùa
+  PASS — hạn trả lời ngày thường = 19:00 hôm trước
+CASES: 199 pass / 0 fail
+RESULT: PASS
+  PASS — bằng chứng sạch ⇒ CLEARED, 0 cờ
+  PASS — release lấy từ Release_Date dòng mới nhất
+  PASS — tăng vốn đang chạy ⇒ gói VẪN CLEARED, chỉ WARNING CAPITAL_RAISE_PENDING (user chọn (b): không chặn mua; bằng chứng có 15.38%)
+  PASS — nguồn phát hành lỗi ⇒ CAPITAL_RAISE_NA + lỗi thật trong source_errors (§29)
+  PASS — cổ tức CP sắp tới ⇒ vẫn CLEARED, chỉ warnings CAPITAL_RAISE_INFO
+  PASS — cảnh báo tăng vốn kèm số CP lưu hành 4 quý +73.4% (OShares P0/P4)
+  PASS — flags_hash KHÔNG đổi khi có cảnh báo tăng vốn (ack cũ không bị mất hiệu lực)
+  PASS — fail-closed: ticker_financial raise ⇒ FIN_NA, FLAG
+  PASS — fail-closed: ticker_financial rỗng ⇒ RELEASE_NA, FLAG
+  PASS — fail-closed: release cũ > 60 ngày ⇒ RELEASE_NA, FLAG
+  PASS — fail-closed: run_dd raise ⇒ DD_KHONG_CHAY_DUOC, FLAG
+  PASS — fail-closed: insider không đọc được ⇒ INSIDER_NA, FLAG
+  PASS — fail-closed: feed corp-action cũ ⇒ CORP_FEED_NA, FLAG
+  PASS — fail-closed: anomaly_flags.json hỏng ⇒ ANOMALY_NA, FLAG
+  PASS — fail-closed: ADV None ⇒ ADV_NA, FLAG
+  PASS — fail-closed: universe None ⇒ UNIVERSE_NA, FLAG
+  PASS — fail-closed: rating raise ⇒ RATING_NA, FLAG
+  PASS — fail-closed: rating lỗi truy vấn ⇒ RATING_NA, FLAG
+  PASS — fail-closed: forensic raise ⇒ FORENSIC_NA, FLAG
+  PASS — fail-closed: forensic CSV hỏng ⇒ FORENSIC_NA, FLAG
+  PASS — fail-closed: định giá raise ⇒ DINH_GIA_NA, FLAG
+  PASS — fail-closed: DCF NOT_COMPUTED + không lens ⇒ DINH_GIA_NA, FLAG
+  PASS — fail-closed: thiếu CF_OA_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM/AR/Inventory = 0 mà không phải NH ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM/AR/Inventory NULL mà không phải NH ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Revenue_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Revenue_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: Revenue_P4 = 0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu AR_P0 (NH khác có số) ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Inventory_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NPM_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu EBITM_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P5 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P7 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM=0 + AR có số + thiếu Revenue_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu AR kỳ cùng kỳ năm trước ⇒ FIN_NA, FLAG
+  PASS — is_bank bắt cả NULL: EBITM/AR/Inventory NULL ⇒ FIN_NA nêu 'không xác nhận được là ngân hàng'
+  PASS — FIN_NA nêu TÊN trường thiếu
+  PASS — AR/tồn kho = 0 cả hai kỳ ⇒ 'không áp dụng', KHÔNG cờ FIN_NA/EQ
+  PASS — phải thu từ 0 lên >0 ⇒ EQ_PHAI_THU_TANG (không lọt)
+  PASS — phải thu từ 0 lên: bằng chứng cũng nói 'không tách được'
+  PASS — SCL thật: AR tổng +159% vs DT +89% ⇒ VẪN EQ_PHAI_THU_TANG (không tách được trả trước)
+  PASS — bằng chứng cờ phải thu nói rõ 'không tách được' trả trước
+  PASS — working_capital.receivables ghi cơ sở tính (tổng phải thu)
+  PASS — AdvCust (NGƯỜI MUA trả trước) lớn KHÔNG được trừ khỏi AR ⇒ vẫn cờ
+  PASS — cờ tồn kho KHÔNG kèm ghi chú phải thu
+  PASS — DSO vendor đi ngược AR thô ⇒ ghi chú dữ liệu mâu thuẫn
+  PASS — tin Discord nêu ghi chú mâu thuẫn DSO
+  PASS — AR +50% < DT +100% & DSO giảm ⇒ KHÔNG ghi chú mâu thuẫn giả
+  PASS — AR +50% < DT +100% mà DSO TĂNG ⇒ ghi chú mâu thuẫn
+  PASS — CFO/LNST có 2 quý gần nhất (14+13 / 13+12) và tin hiện dòng đó
+  PASS — CFO 2Q chỉ hiển thị: không đổi flags_hash
+  PASS — cờ: DD red flag NGOAI_UNIVERSE ⇒ NGOAI_UNIVERSE
+  PASS — cờ: DD red flag mã lạ ⇒ DD_KHONG_CHAY_DUOC
+  PASS — cờ: ADV 1,5 tỷ ⇒ THANH_KHOAN_MONG
+  PASS — cờ: quality_flag ⇒ CO_CHAT_LUONG_UNIVERSE
+  PASS — cờ: anomaly ⇒ BAT_THUONG_ANOMALY
+  PASS — cờ: insider bán ròng ⇒ INSIDER_BAN_RONG
+  PASS — cờ: ex-date ⇒ EXDATE_SAP_TOI
+  PASS — cờ: rating ≥4 ⇒ RATING_8L_FAIL
+  PASS — cờ: rating cũ ⇒ RATING_8L_CU
+  PASS — cờ: forensic exclude ⇒ FORENSIC_BANNED
+  PASS — cờ: forensic watch ⇒ FORENSIC_WATCH
+  PASS — cờ: DCF RICH ⇒ DCF_RICH
+  PASS — cờ: nền cùng kỳ thấp ⇒ EQ_NEN_THAP
+  PASS — cờ: quý lỗ trong nền ⇒ QUY_LO_TRONG_NEN
+  PASS — cờ: CFO yếu ⇒ EQ_CFO_YEU
+  PASS — cờ: NPM > EBITM ⇒ EQ_NGOAI_HOAT_DONG
+  PASS — cờ: phải thu tăng nhanh ⇒ EQ_PHAI_THU_TANG
+  PASS — cờ: tồn kho tăng nhanh ⇒ EQ_TON_KHO_TANG
+  PASS — RICH nhẹ (MoS -50%) ⇒ KHÔNG cờ DCF_RICH, status CLEARED
+  PASS — RICH nhẹ ⇒ pack['warnings'] có DCF_RICH_NHE kèm số MoS
+  PASS — RICH nhẹ: warnings KHÔNG vào flags_hash
+  PASS — RICH nhẹ: tin Discord hiện WARNING dù CLEARED
+  PASS — RICH sâu (MoS -138%) ⇒ cờ DCF_RICH, status FLAG, không warning nhẹ
+  PASS — RICH đúng -100% (biên) ⇒ nhẹ, KHÔNG cờ (ngưỡng là < -100%)
+  PASS — RICH thiếu MoS ⇒ fail-closed vẫn cờ DCF_RICH
+  PASS — RICH MoS=NaN ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS=inf ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS='nan' ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS=chuỗi lạ ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH thiếu hẳn key MoS ⇒ cờ DCF_RICH
+  PASS — RICH mà MoS dương (dữ liệu mâu thuẫn) ⇒ fail-closed cờ DCF_RICH
+  PASS — khoá notify không warning GIỮ ĐỊNH DẠNG CŨ (không gửi lại gói cũ)
+  PASS — khoá notify: gói CLEARED có warning ≠ khoá không warning
+  PASS — FAIR/CHEAP ⇒ không cờ, không warning
+  PASS — pháp lý ⇒ WARNING tường minh, vẫn status FLAG
+  PASS — nền âm: SURPRISE_PHONG_CO_HOC, không nhân đôi QUY_LO_TRONG_NEN
+  PASS — ngân hàng: CFO/vốn lưu động không áp dụng, không cờ giả ⇒ CLEARED
+  PASS — ngân hàng: có mục bank (thông tin)
+  PASS — thiếu dữ liệu ghi 'không đủ dữ liệu', không đoán 0
+  PASS — flags_hash theo MÃ cờ, không theo số bằng chứng
+  PASS — anomaly: file tươi + last_alert trong TTL ⇒ có bản ghi
+  PASS — anomaly: last_alert 33 ngày > TTL 30 ⇒ KHÔNG cờ (ok, rec=None)
+  PASS — anomaly: last_alert TƯƠNG LAI ⇒ không cờ (không look-ahead)
+  PASS — anomaly: file ghi ngày khác asof (stale) ⇒ ok=False
+  PASS — anomaly: thiếu _meta.generated_at ⇒ ok=False
+  PASS — anomaly: file không có ⇒ ok=False
+  PASS — anomaly: ok=False ⇒ pack FLAG ANOMALY_NA
+  PASS — gate: CLEARED
+  PASS — gate: FLAG chưa ack ⇒ FLAG_NO_ACK
+  PASS — gate: không có gói ⇒ NO_PACK
+  PASS — gate: gói release > 30 ngày ⇒ NO_PACK
+  PASS — gate: release SAU plan_date ⇒ NO_PACK
+  PASS — ack từ chối {'decided_by': 'mike'}
+  PASS — ack từ chối {'decision': 'MAYBE'}
+  PASS — ack từ chối {'at': '2026-10-25T18:30:00'}
+  PASS — ack từ chối {'ticker': 'ZZZ'}
+  PASS — ack từ chối {'release_date': '2026-10-20'}
+  PASS — ack từ chối {'flags_hash': '0000000000000000'}
+  PASS — ack từ chối {'flags_hash': ''}
+  PASS — ack từ chối {'source': ''}
+  PASS — ack từ chối {'source': '  '}
+  PASS — ack hỏng không ghi gì
+  PASS — gate: ack RESEARCH ⇒ không được mua
+  PASS — ack: gói sinh lại giữa tin và trả lời ⇒ record từ chối (hash cũ), không đóng dấu bộ cờ mới
+  PASS — ack: lần từ chối không ghi thêm mục
+  PASS — gate: ack PROCEED mới nhất thắng ⇒ ACK_PROCEED
+  PASS — gate: gói sinh lại ra BỘ CỜ KHÁC ⇒ ack cũ ACK_STALE
+  PASS — gate: ack decided_by≠user ⇒ ACK_NOT_USER
+  PASS — gate: ack.json hỏng ⇒ ACK_UNREADABLE (không mua)
+  PASS — gate: gói hỏng ⇒ PACK_UNREADABLE  ❌ notify rc=5:  — CHƯA ghi state, lượt sau gửi lại
+
+  PASS — gate: status CLEARED mà có cờ ⇒ KHÔNG coi là CLEARED
+  PASS — gate: pack CLEARED + user DROP cũ (hash khác) ⇒ ACK_DROP, KHÔNG mua
+  PASS — gate: pack CLEARED + user RESEARCH ⇒ ACK_RESEARCH
+  PASS — gate: pack CLEARED + ack PROCEED ⇒ vẫn CLEARED (PROCEED không được đọc ở nhánh CLEARED)
+  PASS — gate: pack CLEARED + DROP do agent ⇒ không phải quyết định user ⇒ CLEARED
+  PASS — gate: pack CLEARED + DROP của release KHÁC ⇒ CLEARED
+  PASS — gate: pack CLEARED + ack.json hỏng ⇒ giữ CLEARED (hành vi cũ)
+  PASS — gate: gói asof cách plan_date > 7 ngày ⇒ PACK_STALE (dù CLEARED)
+  PASS — gate: gói NA MỚI hơn ⇒ thắng gói CLEARED cũ (không dùng CLEARED cũ)
+  PASS — gate: gói NA CŨ hơn gói có release ⇒ dùng gói có release
+  PASS — gate: release ứng viên khác release của gói ⇒ NO_PACK
+  PASS — gate: release ứng viên khớp ⇒ CLEARED
+  PASS — ack_tier: 'LAG_LO 8%' ⇒ (LAG_LO, 8)
+  PASS — ack_tier: không nêu ⇒ (None, None)
+  PASS — ack_tier: LO và HI cùng lúc ⇒ mơ hồ (None, None)
+  PASS — ack_tier: 2 tier không phủ định ('LAG_HI 10% hoặc LAG_LO 8%') ⇒ mơ hồ
+  PASS — ack_tier: LAG_LOW không phải tier
+  PASS — ack_tier: phủ định 'không vào LAG_HI 10%' ⇒ mơ hồ
+  PASS — ack_tier: note SCL thật ⇒ LAG_LO 8
+  PASS — note: PROCEED lấy quy mô ack MỚI NHẤT (LAG_LO 8%)
+  PASS — note: CLEARED vào danh sách được vào
+  PASS — note: PROCEED không nêu quy mô ⇒ nói rõ KHÔNG nêu, không đoán tier
+  PASS — note: DROP / FLAG chưa ack ⇒ danh sách KHÔNG vào
+  PASS — note: gói ngoài cửa sổ (NO_PACK) bị bỏ qua
+  PASS — note: có câu PHẠM VI (chỉ mã recommend đề xuất đúng phiên, không kéo ngày sớm)
+  PASS — note: không khẳng định sai 'chặn cứng' (checker chỉ cảnh báo)
+  PASS — note: PROCEED không tier ⇒ KHÔNG mặc định LAG_HI, đòi user duyệt
+  PASS — note: thư mục không có gói ⇒ chuỗi rỗng
+  PASS — note: ack.json hỏng ⇒ mã FLAG rơi vào KHÔNG vào (ACK_UNREADABLE), không raise
+  PASS — checker: lệnh LAG mã CLEARED ⇒ không vi phạm
+  PASS — checker: lệnh LAG mã FLAG chưa ack ⇒ LAG_DD_FLAG_NO_ACK
+  PASS — checker: thiếu book nhưng due_today BUY ⇒ vẫn bị cổng
+  PASS — checker: lệnh BAL không bị cổng DD LAG
+  PASS — checker: qty 0 / lệnh bán không bị cổng
+  PASS — checker: thiếu lag_analysis vẫn bắt lệnh LAG không có gói
+  PASS — checker: mã FLAG ngoài plan ⇒ dòng chờ DD (cả upcoming)
+  PASS — checker: render có '⏳ Chờ DD' khi chỉ có pending
+  PASS — checker: render vi phạm ĐỎ
+  PASS — checker: tin Discord (pending=False) không chứa dòng chờ DD
+  PASS — checker: ack PROCEED (user, khớp hash) ⇒ được mua
+  PASS — checker: --no-dd-gate tắt cổng
+  PASS — checker: SCL FLAG chưa ack + due BUY + deferred WAIT_CASH ⇒ VIOLATION
+  PASS — checker: …và KHÔNG có FUNDING_ALERT cho SCL (tắt đề xuất cấp vốn cho mã bị chặn)
+  PASS — control (chân không cổng): cùng plan ⇒ CÓ FUNDING_ALERT cho SCL
+  PASS — checker: due_today decision=DEFER (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=DEFERRED (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=BUY_DEFERRED (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=WAIT_CASH (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=RESIDUAL (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=ORDER (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today SKIP ⇒ không vi phạm (chỉ chờ DD)
+  PASS — checker: deferred_orders LAG (book LAG) không có due ⇒ bị cổng
+  PASS — checker: deferred mã CLEARED / lệnh bán ⇒ không vi phạm
+  PASS — checker: book 'PEAD' nhận là LAG
+  PASS — checker: book 'LAG-PEAD' nhận là LAG
+  PASS — checker: book 'lag' nhận là LAG
+  PASS — checker: book 'LAG_BOOK' nhận là LAG
+  PASS — checker: lệnh book BAL mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book CAPIT mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book DISCRETIONARY mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book PARK mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh BAL mua mã LAG-upcoming ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh THIẾU book mua mã LAG-upcoming ⇒ vẫn bị cổng
+  PASS — checker: BAL mua SCL nhưng due_today SCL=BUY ⇒ vi phạm CHỈ vì due_today
+  PASS — checker: deferred status SKIPPED_BY_GATE (không qty) ⇒ không vi phạm
+  PASS — checker: deferred status EXCLUDED_DD ⇒ không vi phạm
+  PASS — checker: deferred WAIT_CASH qty=0 ⇒ không vi phạm
+  PASS — checker: deferred WAIT_CASH qty>0 ⇒ vi phạm
+  PASS — checker: side 'BUY' hoa ⇒ nhận là mua
+  PASS — checker: book chứa 'LAG' trong từ khác (FLAGSHIP) không bị nhận nhầm là LAG
+  PASS — notify dry-run: không gửi, không ghi state
+  PASS — notify lỗi ⇒ -1, CHƯA ghi state
+  PASS — notify: gửi 1 lần vào plan_approval, lần 2 không gửi lại
+  PASS — notify: bộ cờ đổi ⇒ gửi lại đúng mã đó
+  PASS — tin có hạn trả lời 19:00 CN trước phiên thứ Hai + mốc T6 ngoài mùa
+  PASS — hạn trả lời ngày thường = 19:00 hôm trước
+CASES: 199 pass / 0 fail
+RESULT: PASS
+  PASS — bằng chứng sạch ⇒ CLEARED, 0 cờ
+  PASS — release lấy từ Release_Date dòng mới nhất
+  PASS — tăng vốn đang chạy ⇒ gói VẪN CLEARED, chỉ WARNING CAPITAL_RAISE_PENDING (user chọn (b): không chặn mua; bằng chứng có 15.38%)
+  PASS — nguồn phát hành lỗi ⇒ CAPITAL_RAISE_NA + lỗi thật trong source_errors (§29)
+  PASS — cổ tức CP sắp tới ⇒ vẫn CLEARED, chỉ warnings CAPITAL_RAISE_INFO
+  PASS — cảnh báo tăng vốn kèm số CP lưu hành 4 quý +73.4% (OShares P0/P4)
+  PASS — flags_hash KHÔNG đổi khi có cảnh báo tăng vốn (ack cũ không bị mất hiệu lực)
+  PASS — fail-closed: ticker_financial raise ⇒ FIN_NA, FLAG
+  PASS — fail-closed: ticker_financial rỗng ⇒ RELEASE_NA, FLAG
+  PASS — fail-closed: release cũ > 60 ngày ⇒ RELEASE_NA, FLAG
+  PASS — fail-closed: run_dd raise ⇒ DD_KHONG_CHAY_DUOC, FLAG
+  PASS — fail-closed: insider không đọc được ⇒ INSIDER_NA, FLAG
+  PASS — fail-closed: feed corp-action cũ ⇒ CORP_FEED_NA, FLAG
+  PASS — fail-closed: anomaly_flags.json hỏng ⇒ ANOMALY_NA, FLAG
+  PASS — fail-closed: ADV None ⇒ ADV_NA, FLAG
+  PASS — fail-closed: universe None ⇒ UNIVERSE_NA, FLAG
+  PASS — fail-closed: rating raise ⇒ RATING_NA, FLAG
+  PASS — fail-closed: rating lỗi truy vấn ⇒ RATING_NA, FLAG
+  PASS — fail-closed: forensic raise ⇒ FORENSIC_NA, FLAG
+  PASS — fail-closed: forensic CSV hỏng ⇒ FORENSIC_NA, FLAG
+  PASS — fail-closed: định giá raise ⇒ DINH_GIA_NA, FLAG
+  PASS — fail-closed: DCF NOT_COMPUTED + không lens ⇒ DINH_GIA_NA, FLAG
+  PASS — fail-closed: thiếu CF_OA_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM/AR/Inventory = 0 mà không phải NH ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM/AR/Inventory NULL mà không phải NH ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Revenue_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Revenue_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: Revenue_P4 = 0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu AR_P0 (NH khác có số) ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu Inventory_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NPM_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu EBITM_P0 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P5 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu NP_P7 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: EBITM=0 + AR có số + thiếu Revenue_P4 ⇒ FIN_NA, FLAG
+  PASS — fail-closed: thiếu AR kỳ cùng kỳ năm trước ⇒ FIN_NA, FLAG
+  PASS — is_bank bắt cả NULL: EBITM/AR/Inventory NULL ⇒ FIN_NA nêu 'không xác nhận được là ngân hàng'
+  PASS — FIN_NA nêu TÊN trường thiếu
+  PASS — AR/tồn kho = 0 cả hai kỳ ⇒ 'không áp dụng', KHÔNG cờ FIN_NA/EQ
+  PASS — phải thu từ 0 lên >0 ⇒ EQ_PHAI_THU_TANG (không lọt)
+  PASS — phải thu từ 0 lên: bằng chứng cũng nói 'không tách được'
+  PASS — SCL thật: AR tổng +159% vs DT +89% ⇒ VẪN EQ_PHAI_THU_TANG (không tách được trả trước)
+  PASS — bằng chứng cờ phải thu nói rõ 'không tách được' trả trước
+  PASS — working_capital.receivables ghi cơ sở tính (tổng phải thu)
+  PASS — AdvCust (NGƯỜI MUA trả trước) lớn KHÔNG được trừ khỏi AR ⇒ vẫn cờ
+  PASS — cờ tồn kho KHÔNG kèm ghi chú phải thu
+  PASS — DSO vendor đi ngược AR thô ⇒ ghi chú dữ liệu mâu thuẫn
+  PASS — tin Discord nêu ghi chú mâu thuẫn DSO
+  PASS — AR +50% < DT +100% & DSO giảm ⇒ KHÔNG ghi chú mâu thuẫn giả
+  PASS — AR +50% < DT +100% mà DSO TĂNG ⇒ ghi chú mâu thuẫn
+  PASS — CFO/LNST có 2 quý gần nhất (14+13 / 13+12) và tin hiện dòng đó
+  PASS — CFO 2Q chỉ hiển thị: không đổi flags_hash
+  PASS — cờ: DD red flag NGOAI_UNIVERSE ⇒ NGOAI_UNIVERSE
+  PASS — cờ: DD red flag mã lạ ⇒ DD_KHONG_CHAY_DUOC
+  PASS — cờ: ADV 1,5 tỷ ⇒ THANH_KHOAN_MONG
+  PASS — cờ: quality_flag ⇒ CO_CHAT_LUONG_UNIVERSE
+  PASS — cờ: anomaly ⇒ BAT_THUONG_ANOMALY
+  PASS — cờ: insider bán ròng ⇒ INSIDER_BAN_RONG
+  PASS — cờ: ex-date ⇒ EXDATE_SAP_TOI
+  PASS — cờ: rating ≥4 ⇒ RATING_8L_FAIL
+  PASS — cờ: rating cũ ⇒ RATING_8L_CU
+  PASS — cờ: forensic exclude ⇒ FORENSIC_BANNED
+  PASS — cờ: forensic watch ⇒ FORENSIC_WATCH
+  PASS — cờ: DCF RICH ⇒ DCF_RICH
+  PASS — cờ: nền cùng kỳ thấp ⇒ EQ_NEN_THAP
+  PASS — cờ: quý lỗ trong nền ⇒ QUY_LO_TRONG_NEN
+  PASS — cờ: CFO yếu ⇒ EQ_CFO_YEU
+  PASS — cờ: NPM > EBITM ⇒ EQ_NGOAI_HOAT_DONG
+  PASS — cờ: phải thu tăng nhanh ⇒ EQ_PHAI_THU_TANG
+  PASS — cờ: tồn kho tăng nhanh ⇒ EQ_TON_KHO_TANG
+  PASS — RICH nhẹ (MoS -50%) ⇒ KHÔNG cờ DCF_RICH, status CLEARED
+  PASS — RICH nhẹ ⇒ pack['warnings'] có DCF_RICH_NHE kèm số MoS
+  PASS — RICH nhẹ: warnings KHÔNG vào flags_hash
+  PASS — RICH nhẹ: tin Discord hiện WARNING dù CLEARED
+  PASS — RICH sâu (MoS -138%) ⇒ cờ DCF_RICH, status FLAG, không warning nhẹ
+  PASS — RICH đúng -100% (biên) ⇒ nhẹ, KHÔNG cờ (ngưỡng là < -100%)
+  PASS — RICH thiếu MoS ⇒ fail-closed vẫn cờ DCF_RICH
+  PASS — RICH MoS=NaN ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS=inf ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS='nan' ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH MoS=chuỗi lạ ⇒ fail-closed vẫn cờ DCF_RICH, không warning
+  PASS — RICH thiếu hẳn key MoS ⇒ cờ DCF_RICH
+  PASS — RICH mà MoS dương (dữ liệu mâu thuẫn) ⇒ fail-closed cờ DCF_RICH
+  PASS — khoá notify không warning GIỮ ĐỊNH DẠNG CŨ (không gửi lại gói cũ)
+  PASS — khoá notify: gói CLEARED có warning ≠ khoá không warning
+  PASS — FAIR/CHEAP ⇒ không cờ, không warning
+  PASS — pháp lý ⇒ WARNING tường minh, vẫn status FLAG
+  PASS — nền âm: SURPRISE_PHONG_CO_HOC, không nhân đôi QUY_LO_TRONG_NEN
+  PASS — ngân hàng: CFO/vốn lưu động không áp dụng, không cờ giả ⇒ CLEARED
+  PASS — ngân hàng: có mục bank (thông tin)
+  PASS — thiếu dữ liệu ghi 'không đủ dữ liệu', không đoán 0
+  PASS — flags_hash theo MÃ cờ, không theo số bằng chứng
+  PASS — anomaly: file tươi + last_alert trong TTL ⇒ có bản ghi
+  PASS — anomaly: last_alert 33 ngày > TTL 30 ⇒ KHÔNG cờ (ok, rec=None)
+  PASS — anomaly: last_alert TƯƠNG LAI ⇒ không cờ (không look-ahead)
+  PASS — anomaly: file ghi ngày khác asof (stale) ⇒ ok=False
+  PASS — anomaly: thiếu _meta.generated_at ⇒ ok=False
+  PASS — anomaly: file không có ⇒ ok=False
+  PASS — anomaly: ok=False ⇒ pack FLAG ANOMALY_NA
+  PASS — gate: CLEARED
+  PASS — gate: FLAG chưa ack ⇒ FLAG_NO_ACK
+  PASS — gate: không có gói ⇒ NO_PACK
+  PASS — gate: gói release > 30 ngày ⇒ NO_PACK
+  PASS — gate: release SAU plan_date ⇒ NO_PACK
+  PASS — ack từ chối {'decided_by': 'mike'}
+  PASS — ack từ chối {'decision': 'MAYBE'}
+  PASS — ack từ chối {'at': '2026-10-25T18:30:00'}
+  PASS — ack từ chối {'ticker': 'ZZZ'}
+  PASS — ack từ chối {'release_date': '2026-10-20'}
+  PASS — ack từ chối {'flags_hash': '0000000000000000'}
+  PASS — ack từ chối {'flags_hash': ''}
+  PASS — ack từ chối {'source': ''}
+  PASS — ack từ chối {'source': '  '}
+  PASS — ack hỏng không ghi gì
+  PASS — gate: ack RESEARCH ⇒ không được mua
+  PASS — ack: gói sinh lại giữa tin và trả lời ⇒ record từ chối (hash cũ), không đóng dấu bộ cờ mới
+  PASS — ack: lần từ chối không ghi thêm mục
+  PASS — gate: ack PROCEED mới nhất thắng ⇒ ACK_PROCEED
+  PASS — gate: gói sinh lại ra BỘ CỜ KHÁC ⇒ ack cũ ACK_STALE
+  PASS — gate: ack decided_by≠user ⇒ ACK_NOT_USER
+  PASS — gate: ack.json hỏng ⇒ ACK_UNREADABLE (không mua)
+  PASS — gate: gói hỏng ⇒ PACK_UNREADABLE  ❌ notify rc=5:  — CHƯA ghi state, lượt sau gửi lại
+
+  PASS — gate: status CLEARED mà có cờ ⇒ KHÔNG coi là CLEARED
+  PASS — gate: pack CLEARED + user DROP cũ (hash khác) ⇒ ACK_DROP, KHÔNG mua
+  PASS — gate: pack CLEARED + user RESEARCH ⇒ ACK_RESEARCH
+  PASS — gate: pack CLEARED + ack PROCEED ⇒ vẫn CLEARED (PROCEED không được đọc ở nhánh CLEARED)
+  PASS — gate: pack CLEARED + DROP do agent ⇒ không phải quyết định user ⇒ CLEARED
+  PASS — gate: pack CLEARED + DROP của release KHÁC ⇒ CLEARED
+  PASS — gate: pack CLEARED + ack.json hỏng ⇒ giữ CLEARED (hành vi cũ)
+  PASS — gate: gói asof cách plan_date > 7 ngày ⇒ PACK_STALE (dù CLEARED)
+  PASS — gate: gói NA MỚI hơn ⇒ thắng gói CLEARED cũ (không dùng CLEARED cũ)
+  PASS — gate: gói NA CŨ hơn gói có release ⇒ dùng gói có release
+  PASS — gate: release ứng viên khác release của gói ⇒ NO_PACK
+  PASS — gate: release ứng viên khớp ⇒ CLEARED
+  PASS — ack_tier: 'LAG_LO 8%' ⇒ (LAG_LO, 8)
+  PASS — ack_tier: không nêu ⇒ (None, None)
+  PASS — ack_tier: LO và HI cùng lúc ⇒ mơ hồ (None, None)
+  PASS — ack_tier: 2 tier không phủ định ('LAG_HI 10% hoặc LAG_LO 8%') ⇒ mơ hồ
+  PASS — ack_tier: LAG_LOW không phải tier
+  PASS — ack_tier: phủ định 'không vào LAG_HI 10%' ⇒ mơ hồ
+  PASS — ack_tier: note SCL thật ⇒ LAG_LO 8
+  PASS — note: PROCEED lấy quy mô ack MỚI NHẤT (LAG_LO 8%)
+  PASS — note: CLEARED vào danh sách được vào
+  PASS — note: PROCEED không nêu quy mô ⇒ nói rõ KHÔNG nêu, không đoán tier
+  PASS — note: DROP / FLAG chưa ack ⇒ danh sách KHÔNG vào
+  PASS — note: gói ngoài cửa sổ (NO_PACK) bị bỏ qua
+  PASS — note: có câu PHẠM VI (chỉ mã recommend đề xuất đúng phiên, không kéo ngày sớm)
+  PASS — note: không khẳng định sai 'chặn cứng' (checker chỉ cảnh báo)
+  PASS — note: PROCEED không tier ⇒ KHÔNG mặc định LAG_HI, đòi user duyệt
+  PASS — note: thư mục không có gói ⇒ chuỗi rỗng
+  PASS — note: ack.json hỏng ⇒ mã FLAG rơi vào KHÔNG vào (ACK_UNREADABLE), không raise
+  PASS — checker: lệnh LAG mã CLEARED ⇒ không vi phạm
+  PASS — checker: lệnh LAG mã FLAG chưa ack ⇒ LAG_DD_FLAG_NO_ACK
+  PASS — checker: thiếu book nhưng due_today BUY ⇒ vẫn bị cổng
+  PASS — checker: lệnh BAL không bị cổng DD LAG
+  PASS — checker: qty 0 / lệnh bán không bị cổng
+  PASS — checker: thiếu lag_analysis vẫn bắt lệnh LAG không có gói
+  PASS — checker: mã FLAG ngoài plan ⇒ dòng chờ DD (cả upcoming)
+  PASS — checker: render có '⏳ Chờ DD' khi chỉ có pending
+  PASS — checker: render vi phạm ĐỎ
+  PASS — checker: tin Discord (pending=False) không chứa dòng chờ DD
+  PASS — checker: ack PROCEED (user, khớp hash) ⇒ được mua
+  PASS — checker: --no-dd-gate tắt cổng
+  PASS — checker: SCL FLAG chưa ack + due BUY + deferred WAIT_CASH ⇒ VIOLATION
+  PASS — checker: …và KHÔNG có FUNDING_ALERT cho SCL (tắt đề xuất cấp vốn cho mã bị chặn)
+  PASS — control (chân không cổng): cùng plan ⇒ CÓ FUNDING_ALERT cho SCL
+  PASS — checker: due_today decision=DEFER (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=DEFERRED (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=BUY_DEFERRED (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=WAIT_CASH (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=RESIDUAL (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today decision=ORDER (không có lệnh) ⇒ vẫn bị cổng
+  PASS — checker: due_today SKIP ⇒ không vi phạm (chỉ chờ DD)
+  PASS — checker: deferred_orders LAG (book LAG) không có due ⇒ bị cổng
+  PASS — checker: deferred mã CLEARED / lệnh bán ⇒ không vi phạm
+  PASS — checker: book 'PEAD' nhận là LAG
+  PASS — checker: book 'LAG-PEAD' nhận là LAG
+  PASS — checker: book 'lag' nhận là LAG
+  PASS — checker: book 'LAG_BOOK' nhận là LAG
+  PASS — checker: lệnh book BAL mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book CAPIT mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book DISCRETIONARY mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh book PARK mua mã LAG (due SKIP) ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh BAL mua mã LAG-upcoming ⇒ KHÔNG vi phạm
+  PASS — checker: lệnh THIẾU book mua mã LAG-upcoming ⇒ vẫn bị cổng
+  PASS — checker: BAL mua SCL nhưng due_today SCL=BUY ⇒ vi phạm CHỈ vì due_today
+  PASS — checker: deferred status SKIPPED_BY_GATE (không qty) ⇒ không vi phạm
+  PASS — checker: deferred status EXCLUDED_DD ⇒ không vi phạm
+  PASS — checker: deferred WAIT_CASH qty=0 ⇒ không vi phạm
+  PASS — checker: deferred WAIT_CASH qty>0 ⇒ vi phạm
+  PASS — checker: side 'BUY' hoa ⇒ nhận là mua
+  PASS — checker: book chứa 'LAG' trong từ khác (FLAGSHIP) không bị nhận nhầm là LAG
+  PASS — notify dry-run: không gửi, không ghi state
+  PASS — notify lỗi ⇒ -1, CHƯA ghi state
+  PASS — notify: gửi 1 lần vào plan_approval, lần 2 không gửi lại
+  PASS — notify: bộ cờ đổi ⇒ gửi lại đúng mã đó
+  PASS — tin có hạn trả lời 19:00 CN trước phiên thứ Hai + mốc T6 ngoài mùa
+  PASS — hạn trả lời ngày thường = 19:00 hôm trước
+CASES: 199 pass / 0 fail
+RESULT: PASS
+=== env -u TZ ===
+=== TZ=Pacific/Kiritimati ===
+=== TZ=America/New_York ===
+=== mutants ===
+  KILLED — mutant 1 lag_dd_pack.py: 'flags.append(_f("CAPITAL_RAISE_NA", errors.get("capital_raise")))'
+  KILLED — mutant 2 lag_dd_pack.py: 'capital_raise_eval(rows or [], iss, asof)[1]'
+  KILLED — mutant 3 lag_dd_pack.py: '"warnings": soft_warnings(ev) + cr_warn,'
+  KILLED — mutant 4 lag_dd_pack.py: 'g12 = os_[0] / os_[4] - 1 if len(os_) == 5 and os_[0] and os_[4] else '
+  KILLED — mutant 5 lag_dd_pack.py: 'return mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0'
+  KILLED — mutant 6 lag_dd_pack.py: 'mos = _num(dcf.get("margin_of_safety"))\n    return mos is None'
+  KILLED — mutant 7 lag_dd_pack.py: 'mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0'
+  KILLED — mutant 8 lag_dd_pack.py: 'mos is None or mos < DCF_RICH_DEEP_MOS or mos > 0'
+  KILLED — mutant 9 lag_dd_pack.py: '+ (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n    if isinstanc'
+  KILLED — mutant 10 lag_dd_pack.py: 'wc["receivables"]["basis"] = AR_BASIS_NOTE'
+  KILLED — mutant 11 lag_dd_pack.py: 'cur = _num(r.get(col))'
+  KILLED — mutant 12 lag_dd_pack.py: '+ (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n    if isinstanc'
+  KILLED — mutant 13 lag_dd_pack.py: '+ (f" — {AR_BASIS_NOTE}" if col == "AR_P0" else "")))\n            cont'
+  KILLED — mutant 14 lag_plan_consistency_check.py: 'return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker"'
+  KILLED — mutant 15 lag_plan_consistency_check.py: 'and not str(d.get("status") or "").strip().upper().startswith(("SKIP",'
+  KILLED — mutant 16 lag_dd_pack.py: 'status = "CLEARED" if not uniq else "FLAG"'
+  KILLED — mutant 17 lag_dd_pack.py: 'flags.append(_f("INSIDER_NA", "_insider_scan trả None (lỗi/nguồn cũ)")'
+  KILLED — mutant 18 lag_dd_pack.py: 'errors[name] = f"{type(e).__name__}: {str(e)[:200]}"\n            retur'
+  KILLED — mutant 19 lag_dd_pack.py: 'if g - rev_g > EQ_WC_GAP_PP:'
+  KILLED — mutant 20 lag_dd_pack.py: '"severity": "WARNING" if code in WARNING_ONLY else "FLAG",'
+  KILLED — mutant 21 lag_dd_pack.py: 'write_atomic(sp, {"sent": sorted(sent | {_nkey(p) for p in new})})\n   '
+  KILLED — mutant 22 lag_dd_pack.py: 'if rc != 0:'
+  KILLED — mutant 23 lag_dd_pack.py: 'if cur is None:\n            missing.append(col)'
+  KILLED — mutant 24 lag_dd_pack.py: 'missing += [n for n, v in (("Revenue_P0", rev0), ("Revenue_P4", rev4))'
+  KILLED — mutant 25 lag_dd_pack.py: 'missing += [n for n, v in (("NPM_P0", npm), ("EBITM_P0", ebm)) if v is'
+  KILLED — mutant 26 lag_dd_pack.py: 'missing += [f"NP_P{i}" for i in (5, 6, 7) if np_[i] is None]'
+  KILLED — mutant 27 lag_dd_pack.py: 'in (0, None) for c in ("EBITM_P0"'
+  KILLED — mutant 28 lag_dd_pack.py: 'if fr["is_stale"]:'
+  KILLED — mutant 29 lag_dd_pack.py: 'if ticker in ag.anomaly_excluded(asof, quiet=True) else None'
+  KILLED — mutant 30 lag_dd_ack.py: 'if str(flags_hash).strip() != pk.get("flags_hash"):'
+  KILLED — mutant 31 lag_dd_ack.py: 'if not str(source or "").strip():'
+  KILLED — mutant 32 lag_dd_ack.py: 'if age > PACK_ASOF_MAX_DAYS or age < 0:'
+  KILLED — mutant 33 lag_dd_ack.py: 'if g_na is None or g_best is None or g_na > g_best:'
+  KILLED — mutant 34 lag_dd_ack.py: 'if release_date and m.group(2) != str(release_date)[:10]:'
+  KILLED — mutant 35 lag_plan_consistency_check.py: 'for d in plan.get("deferred_orders") or []:\n        if (isinstance(d, '
+  KILLED — mutant 36 lag_plan_consistency_check.py: 'for t in take:\n        hits.setdefault(t, []).append("due_today")'
+  KILLED — mutant 37 lag_plan_consistency_check.py: 'kept = [f for f in res["findings"] if not (f["kind"] == "FUNDING_ALERT'
+  KILLED — mutant 38 lag_plan_consistency_check.py: 'return bool(_RE_LAG_BOOK.search(bk)) or (not bk and _tk(o.get("ticker"'
+  KILLED — mutant 39 lag_dd_ack.py: 'elif a.get("decided_by") != "user":'
+  KILLED — mutant 40 lag_dd_ack.py: 'elif a.get("flags_hash") != fh:'
+  KILLED — mutant 41 lag_dd_ack.py: 'if status == "CLEARED" and not fl:'
+  KILLED — mutant 42 lag_dd_ack.py: 'if decided_by != "user":'
+  KILLED — mutant 43 lag_dd_ack.py: 'if la and la.get("decided_by") == "user" and la.get("decision") in ("D'
+  KILLED — mutant 44 lag_dd_ack.py: 'if la and la.get("decided_by") == "user" and la.get("decision") in ("D'
+  KILLED — mutant 45 lag_dd_ack.py: 'if la and la.get("decided_by") == "user" and la.get("decision") in ("D'
+  KILLED — mutant 46 lag_dd_pack.py: 'if abs(exp_) > 0.10 and abs(dd_) > 0.10 and (exp_ > 0) != (dd_ > 0):'
+  KILLED — mutant 47 lag_dd_pack.py: '"cfo_2q_vnd": cfo[0] + cfo[1]'
+  KILLED — mutant 48 lag_dd_ack.py: 'if rel <= d0 and (d0 - rel).days <= PACK_MAX_AGE_DAYS'
+  KILLED — mutant 49 lag_dd_ack.py: 'if len(tiers) != 1:'
+  KILLED — mutant 50 lag_dd_ack.py: 'if _RE_TIER_NEG.search(str(note or "")):'
+  KILLED — mutant 51 lag_dd_ack.py: 'if st == "NO_PACK":\n            continue'
+  KILLED — mutant 52 lag_plan_consistency_check.py: 'if g["state"] in BUY_OK:\n                continue'
+MUTANTS: 52/52 killed
+TỔNG: PASS
+rc=0

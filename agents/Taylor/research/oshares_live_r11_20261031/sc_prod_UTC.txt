@@ -1,0 +1,14 @@
+== dcf_rate_frame_selfcheck.py rc=0 :: PASS [M5b] gỡ in ke_range_note ở dcf_earning_power ⇒ [5b] đỏ  SELFCHECK OK 
+== dcf_check_selfcheck.py rc=0 ::   [19] path không ghi được → nuốt lỗi, không raise: OK   [20] _dcf_check_for_order KHÔNG tự ghi lịch sử (chỉ report gọi): OK 
+== dcf_selector_selfcheck.py rc=1 ::   OK    all 2 dcf_at(...) call-sites sit inside an `dcf_at is not None` guard (3 guards; unguarded lines=[]) -> OFF leaves yieldcombo untouched SELFCHECK FAIL (1): ['39/40 samples match production exactly (RICH=8 CHEAP=15 NOT_COMPUTED=17)'] 
+== dcf_refresh_gate_selfcheck.py rc=0 ::   [PASS] dry run writes no state file ALL PASS 
+== dcf_earning_power_test.py rc=0 ::     ALL        2M⟂PE=+0.0358(t+5.7)  3M⟂PE=+0.0428(t+6.8)     ALL        2M⟂PE=+0.0235(t+3.5)  3M⟂PE=+0.0328(t+4.9) 
+== tz_asof_ict_dd_dcf_selfcheck.py rc=0 :: 115/115 PASS ALL PASS 
+== due_diligence_selfcheck.py rc=0 :: OK 
+== custom_basket_forensic_failclosed_selfcheck.py rc=0 ::   PASS t_corrupt_file_is_fatal PASS  (22 assertion) 
+== basket_oshares_step_exdate_selfcheck.py rc=0 ::   PASS  hướng sửa (bfill CÓ group): AAA vẫn NaN -> vẫn bị mặt nạ valid loại ra ==== 46/46 PASS ==== 
+== basket_price_basis_audit_selfcheck.py rc=0 ::   [PASS] basket_scheme_concentration.py mcap uses COALESCE(Price,Close) RESULT: ALL PASS 
+== basket_price_basis_selfcheck.py rc=0 :: KẾT QUẢ: PASS toàn bộ (T1 đồng nhất thức / T2 parity / T3 positive control / T4 cổ tức) 
+== basket_return_leg_oshares_selfcheck.py rc=0 :: KẾT QUẢ: PASS toàn bộ (R1 bất biến / R2 weight byte-identical / R3 positive control / R4 membership+mcap / R5 rollback) 
+== test_trading_bot.py rc=0 :: ✅ floor guard + journal marker + per-account config: all assertions PASS ✅ HYBRID schedule: 6 nhóm assertion PASS 
+== test_multi_strategy.py rc=1 :: 

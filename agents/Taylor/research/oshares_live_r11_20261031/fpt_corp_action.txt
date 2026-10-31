@@ -1,0 +1,10 @@
+| exright_date | record_date | event_code | issue_method_name_vi | event_status |
++--------------+-------------+------------+----------------------+--------------+
+|   2025-06-12 |  2025-06-13 | DIV        | NULL                 | executed     |
+|   2025-07-21 |  2025-07-22 | ISS        | Cổ phiếu thưởng      | executed     |
+|   2025-12-01 |  2025-12-02 | DIV        | NULL                 | executed     |
+|   2026-05-28 |  2026-05-29 | DIV        | NULL                 | executed     |
+|   2026-06-24 |  2026-06-24 | ISS        | Phát hành cho CBCNV  | executed     |
+|   2026-06-24 |  2026-06-24 | ISS        | Phát hành cho CBCNV  | executed     |
+|   2026-09-21 |  2026-09-22 | ISS        | Cổ phiếu thưởng      | executed     |
++--------------+-------------+------------+----------------------+--------------+

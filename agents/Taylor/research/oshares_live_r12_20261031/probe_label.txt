@@ -1,0 +1,10 @@
+FPT 2026-09-23 66600 2026-09-22 {'status': 'CHEAP', 'status_fin': 'CHEAP', 'margin_of_safety': 0.056, 'margin_of_safety_fin': 0.1418, 'robust': False, 'robust_fin': True, 'oshares_divergence': 0.09998167431849803}
+   LINE: 🟢 DCF: CHEAP (giá trị hợp lý ~70,551đ vs giá 66,600đ, MoS +5.6%, không robust) · số CP quý: MoS +14.2% robust (cơ sở plan echo)
+PHR 2026-09-15 31100 2026-09-14 {'status': 'RICH', 'status_fin': 'CHEAP', 'margin_of_safety': -0.1936, 'margin_of_safety_fin': 0.3369, 'robust': True, 'robust_fin': True, 'oshares_divergence': 0.7999944102990189}
+   LINE: 🔴 DCF: RICH (giá trị hợp lý ~26,055đ vs giá 31,100đ, MoS -19.4%, robust) · số CP quý: CHEAP MoS +33.7% robust (cơ sở plan echo) ⚠ OShares live 243,9tr vs quy 135,5tr (+80%)
+AIG 2026-08-06 47000 2026-08-06 {'status': 'RICH', 'status_fin': 'CHEAP', 'margin_of_safety': -0.0136, 'margin_of_safety_fin': 0.1186, 'robust': False, 'robust_fin': False, 'oshares_divergence': 0.14999970867748025}
+   LINE: 🔴 DCF: RICH (giá trị hợp lý ~46,370đ vs giá 47,000đ, MoS -1.4%, không robust) · số CP quý: CHEAP MoS +11.9% không robust (cơ sở plan echo) ⚠ OShares live 196,2tr vs quy 170,6tr (+15%)
+HT1 2026-10-29 13300.0 2026-10-29 {'status': 'CHEAP', 'status_fin': 'CHEAP', 'margin_of_safety': 0.474, 'margin_of_safety_fin': 0.474, 'robust': True, 'robust_fin': True, 'oshares_divergence': 0.0}
+   LINE: 🟢 DCF: CHEAP (giá trị hợp lý ~25,286đ vs giá 13,300đ, MoS +47.4%, robust)
+VNM 2026-10-29 57700.0 2026-10-29 {'status': 'CHEAP', 'status_fin': 'CHEAP', 'margin_of_safety': 0.0323, 'margin_of_safety_fin': 0.0323, 'robust': False, 'robust_fin': False, 'oshares_divergence': 0.0}
+   LINE: 🟢 DCF: CHEAP (giá trị hợp lý ~59,628đ vs giá 57,700đ, MoS +3.2%, không robust)
