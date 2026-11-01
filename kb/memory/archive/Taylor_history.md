@@ -1731,3 +1731,9 @@
 
 ## Archived 2026-11-01 (keep=12 days=0 require_done=False)
 - [2026-10-31T09:53:53Z] [dd-HPG-20261031 31/10] XONG job Taylor_20261031_093839: research/dd_HPG_20261031/REPORT.md (chua commit) — vung 17-23k trung tam ~20k vs gia 21k, xap xi hop ly; CHO Mike doc/quyet investor report
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T10:15:08Z] [oshares-r12 31/10] XONG WC e052526b9 (session/oshares-r12-20261031) + mike caa5b03dd (session/oshares-r12-ops-20261031), chua merge — CHO arch-review+skeptic; merge mike truoc WC; plan echo = so quy den vong ref_price_session (§24)
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T10:25:24Z] [dd-HPG-gaps 31/10] XONG job Taylor_20261031_100839: research/dd_HPG_20261031/GAPS.md (chua commit) — 14 so v1 can sua, vung giu 17-23k; CHO skeptic xong roi gop vao REPORT v2
