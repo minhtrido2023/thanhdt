@@ -44,6 +44,9 @@ Bảng theo ADV20 (<1 / 1–10 / ≥10 tỷ) và giá < 5.000đ (ở cả univer
 bán-ngay-T0; độ nhạy sổ lệnh; so luật mới vs cũ (số ca riêng chuyển gộp/hoãn-GIỮ, Δ kết quả); control PNJ
 06–09/10 chạy lại độc lập trên code mới, so với shadow log thật.
 
+> ⛔ **2026-11-01: ADDENDUM + H1 HẾT HIỆU LỰC** — user bỏ hẳn tự bán (job `Taylor_20261101_130722`, xem
+> `kb/projects/discretionary-8l-candidate-funnel-plan-20261006.md` mục ⛔ 2026-11-01). Không còn quyết định wire nào để kiểm.
+
 ## ADDENDUM — user chốt cho phép thử OOS live (09/10/2026 19:44 ICT, thread 1557920546891763755)
 Ghi TRƯỚC khi có bất kỳ dòng `EOD_OOS` live nào (shadow chạy code mới từ 12/10/2026).
 1. **Mốc đánh giá**: bỏ mốc "5 phiên ~12/10". Thay bằng: kiểm lại H1 khi có **≥30 NGÀY có ca live**
