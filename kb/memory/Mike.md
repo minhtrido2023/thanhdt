@@ -12,3 +12,4 @@
 
 - [2026-11-01T17:43:07Z] 02/11 00:45 DCF-VN: skeptic REFUTED g_T 4,5% (OShares stable→3,0% / unstable→6,5%; hiệu chuẩn trên fin-OShares, prod dùng live). Lens kỳ vọng (Taylor_20261101_165940, commit 29ac97b3b): KHÔNG xây DCF nhẹ. Chờ user chốt: rerun level grid OShares live + tách nhóm ổn định (Sonnet) rồi mới quyết vn_v3; lịch 4 mùa BCTC user đã duyệt, chưa cài cron.
 - [2026-11-01T17:57:42Z] 02/11 00:57 user DUYỆT giữ domestic_v2; giao Sonnet Taylor_20261101_175734 rerun level grid OShares live + tách ổn định/nhảy → agents/Taylor/research/dcf_level_rerun_20261102/. Lịch 4 mùa BCTC user đã duyệt, cron CHƯA cài (gộp sau rerun).
+- [2026-11-01T18:10:18Z] 02/11 01:12 DCF level rerun xong: g_T không hội tụ (phân cách 3,5pp), GIỮ domestic_v2; s=0 thắng MAE (CI loại 0) nhưng mức g_T không chốt được. Dispatch Taylor (Sonnet) cài lịch 4 mùa BCTC + cờ STALE>105d (nhánh worktree, chưa cron) → arch-review → Mike cài cron.
