@@ -23,7 +23,9 @@ def fwd(tk, d, h):
     if tk not in P.columns: return np.nan
     s = P[tk].dropna(); s = s[s.index >= pd.Timestamp(d)]
     if len(s) < 2: return np.nan
-    return s.iloc[min(h, len(s)-1)] / s.iloc[0] - 1
+    j = min(h, len(s) - 1)
+    if j < h * 0.8: return np.nan          # truncated at panel end -> drop, don't bias (same guard as build_panel.fwd)
+    return s.iloc[j] / s.iloc[0] - 1
 
 fin = D._load_financials()
 rows = []

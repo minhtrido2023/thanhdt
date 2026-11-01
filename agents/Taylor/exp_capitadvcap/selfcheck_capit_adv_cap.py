@@ -267,7 +267,7 @@ _spec = _ilu.spec_from_file_location(
 # module chạy full pipeline khi import -> chỉ trích 2 hàm thuần bằng exec có kiểm soát
 _src = open(_spec.origin, encoding="utf-8").read()
 _ns = {"os": os, "json": json, "pd": pd, "WORKDIR": WORKDIR, "ACTIVE_NAV_MAX_AGE_D": 5,
-       "print": print}
+       "NAV_HISTORY_MAX_AGE_D": int(__import__("re").search(r"^NAV_HISTORY_MAX_AGE_D\s*=\s*(\d+)", _src, __import__("re").M).group(1)), "print": print}
 _start = _src.index("def _account_nav_basis(")
 exec(_src[_start:_src.index("def capit_base(")], _ns)
 _account_nav_basis, capit_account_shares = _ns["_account_nav_basis"], _ns["capit_account_shares"]
@@ -349,7 +349,7 @@ _LBL = "_sc_navbasis"
 _ap = f"{WORKDIR}/data/execution_logs/active_nav_{_LBL}.json"
 _np_ = f"{WORKDIR}/data/execution_logs/nav_history_{_LBL}.csv"
 try:
-    open(_np_, "w").write("date,nav\n2026-07-20,777000000\n")
+    open(_np_, "w").write(f"date,nav\n{pd.Timestamp.now(tz='Asia/Ho_Chi_Minh').strftime('%Y-%m-%d')},777000000\n")   # nav_history phải TƯƠI (≤ NAV_HISTORY_MAX_AGE_D) mới được dùng
     for tag, days, want_src, want_nav in [("tươi", 0, "active_nav", 111_000_000.0),
                                           ("quá hạn", 30, "nav_history", 777_000_000.0)]:
         json.dump({"active_nav": 111_000_000.0,

@@ -15,11 +15,13 @@
 ## Stage 1 — mechanism (N=141 holdings thật, within-event demeaned rank IC)
 | axis | IC | t | n_ev |
 |---|---|---|---|
-| DCF MoS | **+0.187** | 1.40 | 13 |
+| DCF MoS | **+0.303** | 2.22 | 13 |
 | pb_z (đảo dấu) | +0.069 | 0.51 | 13 |
 
-Realized return theo bucket (demeaned): CHEAP +0.93pp (n=82) · **N/A +0.96pp (n=25)** · RICH −2.95pp (n=34).
-Event-bootstrap gap RICH vs phần còn lại: −2.95pp, **CI95 [−10.6pp, +1.2pp], P(gap<0)=0.75** → đúng dấu, KHÔNG significant.
+Realized return theo bucket (demeaned): CHEAP +1.59pp (n=62) · **N/A +0.96pp (n=25)** · RICH −2.27pp (n=54).
+Event-bootstrap gap RICH vs phần còn lại: −2.27pp, **CI95 [−11.1pp, +2.0pp], P(gap<0)=0.86** → đúng dấu, KHÔNG significant.
+
+> **ĐÍNH CHÍNH 2026-11-01 (cq-2026-11-01, job Taylor_20261101_030510):** bản đầu của Stage 1 dùng `Close` back-adjusted làm giá vào `fair_value` (chia cho OShares ngày đó ⇒ lẫn corporate action về sau = look-ahead; HPG 2014-05-09: Close 2.680 vs Price 46.200). Đã sửa sang `COALESCE(Price,Close)` chưa điều chỉnh. Số cũ: IC +0.187 (t=1.40), CHEAP +0.93pp (n=82), RICH −2.95pp (n=34), gap CI95 [−10.6,+1.2]pp, P=0.75. Số mới ở trên (cùng 141 holdings, 116 tính được). Kết luận NO-GO KHÔNG đổi (nó dựa Stage 2/LOO, vốn đã dùng Price chưa điều chỉnh qua build_panel/panelB). IC mới cao hơn nhưng vẫn n_ev=13 — đừng đọc như phát hiện mới.
 
 ➡️ **Xác nhận thực nghiệm chỉ đạo về N/A**: nhóm N/A (FCFE âm — KCN/logistics capex nặng, 25/141 =
 18% holdings) có return demeaned **ngang hệt nhóm CHEAP**. Treat N/A = reject sẽ loại nhầm nhóm
@@ -61,9 +63,9 @@ Wire 1 luật production dựa trên 1 event là đúng mẫu reshuffle-luck mà
 Wave1/H8a) yêu cầu bác.
 
 ## Hướng đáng theo tiếp (KHÔNG tự làm — cần user quyết)
-Phát hiện phụ có giá trị hơn câu hỏi gốc: **DCF MoS rank tốt hơn pb_z** trong pool (IC +0.187 vs
-+0.069). Đó là gợi ý đổi **rank chính**, không phải thêm lớp lọc phụ — thay đổi lớn hơn nhiều so
-với đề bài, và vẫn chỉ t=1.40. Nếu user muốn, đo tiếp bằng name-level IC (N lớn, có power) thay vì
+Phát hiện phụ có giá trị hơn câu hỏi gốc: **DCF MoS rank tốt hơn pb_z** trong pool (IC +0.303 vs
++0.069; số cũ +0.187 là sai do giá Close điều chỉnh, xem đính chính). Đó là gợi ý đổi **rank chính**, không phải thêm lớp lọc phụ — thay đổi lớn hơn nhiều so
+với đề bài, và chỉ t=2.22 (13 event; chưa qua hiệu chỉnh đa kiểm định). Nếu user muốn, đo tiếp bằng name-level IC (N lớn, có power) thay vì
 portfolio backtest (N=14, không có power).
 
 ## Provenance / audit

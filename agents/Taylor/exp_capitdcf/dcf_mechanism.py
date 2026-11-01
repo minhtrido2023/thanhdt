@@ -13,11 +13,21 @@ import dcf_valuation as D
 pos = pd.read_csv("data/capit_selection_features.csv", parse_dates=["entry"])
 print(f"holdings {len(pos)} | tickers {pos.ticker.nunique()} | events {pos.evidx.nunique()}")
 
-# point-in-time DCF at ENTRY date, price = entry-day Close (already in the features file)
+# point-in-time DCF at ENTRY date. price = UNADJUSTED Price on the entry day (ticker_prune), NOT the
+# back-adjusted Close (features file): fair_value divides by that day's OShares, so an adjusted Close
+# leaks later corporate actions (look-ahead). Same COALESCE(Price,Close) as build_panel/panelB.
+import duckdb
+_con = duckdb.connect(":memory:"); _con.execute("SET threads=1")
+_px = _con.execute(f"SELECT ticker, CAST(time AS DATE) AS entry, COALESCE(Price, Close) AS px_raw "
+                   f"FROM read_parquet('{WORKDIR}/data/bq_cache/ticker_prune/*.parquet')").df()
+_px["entry"] = pd.to_datetime(_px["entry"])
+pos = pos.merge(_px.drop_duplicates(["ticker", "entry"]), on=["ticker", "entry"], how="left")
+print(f"unadjusted Price joined: {pos.px_raw.notna().sum()}/{len(pos)}")
+
 fin = D._load_financials()
 rows = []
 for _, r in pos.iterrows():
-    px = r["Close"]
+    px = r["px_raw"]
     try:
         res = D.fair_value(r["ticker"], r["entry"], price=(None if pd.isna(px) else float(px)), fin=fin)
     except Exception as e:

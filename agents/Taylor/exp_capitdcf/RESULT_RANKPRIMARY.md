@@ -39,7 +39,7 @@ ngày fire — 2 trục thi đấu trên cùng tập tên.
 LOO theo năm cho thấy **bỏ đúng 1 năm 2020 là hiệu số đảo âm** (+0,055 → −0,024); 12 năm còn lại
 bỏ năm nào cũng gần như không đổi. Đây **cùng một failure mode** với job trước (toàn bộ edge nằm ở
 event COVID 2020-03-12, swap SAB→CVT). Mở rộng mẫu 8,4× **không tạo ra bằng chứng mới** — chỉ cho
-thấy rõ hơn rằng cái "edge" ban đầu (IC +0,187, t=1,40) là **một cú sốc định giá 2020 duy nhất**,
+thấy rõ hơn rằng cái "edge" ban đầu (IC +0,187, t=1,40 — số Stage-1 cũ, đã ĐÍNH CHÍNH 2026-11-01 thành +0,303, t=2,22 vì bản cũ dùng giá Close điều chỉnh; xem RESULT.md; panel A ở đây dùng Price chưa điều chỉnh nên không đổi) là **một cú sốc định giá 2020 duy nhất**,
 không phải pattern lặp lại. Dấu IS âm / OOS dương củng cố: không ổn định theo thời gian.
 
 ### Robustness (đều cùng hướng, không cứu được kết luận)
@@ -82,6 +82,8 @@ Nêu rõ theo yêu cầu: N=14 **không đủ power**, không dùng làm căn c�
 
 **Dấu đảo theo horizon** (âm ở 60/120, dương ở 250) = đặc trưng nhiễu. Và LOO: **bỏ 2020-03-12**
 → h250 sụp **+3,23pp → +0,39pp** (dcf_pool) và **+2,93pp → +0,07pp** (dcf_full). Y hệt job trước.
+
+> **Re-run 2026-11-01 (cq-2026-11-01, job Taylor_20261101_030510):** `panelB_events.fwd` thiếu guard cắt cụt horizon (build_panel có `j < 0.8*h → NaN`) nên event muộn (2026-03-09, 2025-10-20...) bị tính r250/r120 từng phần như đủ horizon. Đã thêm guard; r120 NaN 0→5, r250 NaN 0→18 hàng (cache ticker_prune nay tới 2026-10-30). Số chạy lại (h=60/120/250): dcf_pool−base −0,77/−0,44/+3,35pp (t −1,69/−1,03/+1,08, n=14/14/13); dcf_full−base +0,31/−0,07/+3,18pp (t +0,24/−0,03/+0,86). Bảng trên giữ làm bản gốc: chênh dcf_full ở h60/h120 do cả guard LẪN dữ liệu/DCF trôi từ lúc chạy đầu (không tách riêng được). LOO h250 vẫn sụp khi bỏ 2020-03-12 (+3,35→+0,28pp; +3,18→+0,09pp). Kết luận NO-GO không đổi.
 
 ## 6. DSR — **không báo, có chủ ý**
 Điều kiện tiên quyết đã pre-register (đạt (i)+(ii)+(iii)) **trượt cả ba**, và edge lại sụp về ~0
