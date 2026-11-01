@@ -10,3 +10,5 @@
 - Chờ user: DGC vòng 6, TV2 watchlist, nguồn Tampa/CFR NH3 vào BQ?, tunnel tên cố định (cần Cloudflare+domain).
 - Mốc: clear_books_daily lần đầu T2 02/11 20:45; nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; measurement audit ~12-27.
 
+- [2026-11-01T17:43:07Z] 02/11 00:45 DCF-VN: skeptic REFUTED g_T 4,5% (OShares stable→3,0% / unstable→6,5%; hiệu chuẩn trên fin-OShares, prod dùng live). Lens kỳ vọng (Taylor_20261101_165940, commit 29ac97b3b): KHÔNG xây DCF nhẹ. Chờ user chốt: rerun level grid OShares live + tách nhóm ổn định (Sonnet) rồi mới quyết vn_v3; lịch 4 mùa BCTC user đã duyệt, chưa cài cron.
+- [2026-11-01T17:57:42Z] 02/11 00:57 user DUYỆT giữ domestic_v2; giao Sonnet Taylor_20261101_175734 rerun level grid OShares live + tách ổn định/nhảy → agents/Taylor/research/dcf_level_rerun_20261102/. Lịch 4 mùa BCTC user đã duyệt, cron CHƯA cài (gộp sau rerun).
