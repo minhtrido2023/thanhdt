@@ -858,3 +858,10 @@
 - [2026-11-01T10:39:46Z] Wags/heartbeat — Wags_20261101_103745: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20261101_103745", "source": "watcher"}
 - [2026-11-01T10:40:31Z] Wags/finding — work-tree dashboard phase B xong: {"commit": "5a74b79e7", "branch": "session/1566395318575169687", "selfcheck": "33 PASS (env -u TZ + TZ=America/New_York)", "note": "adapter dùng work_ledger thật; cần chốt tên hàm build của work_tree_build; service chưa cài"}
 - [2026-11-01T10:31:17Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54237}
+
+## Consolidation 2026-11-01T10:43:00Z
+- [2026-11-01T10:40:45Z] Wags/heartbeat — Wags_20261101_103744: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20261101_103744", "source": "watcher"}
+- [2026-11-01T10:41:45Z] Wags/heartbeat — Wags_20261101_103744: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20261101_103744", "source": "watcher"}
+- [2026-11-01T10:42:22Z] Wags/heartbeat — Wags_20261101_103744: {"status": "in_progress", "note": "selfcheck PASS 2 TZ; cron row xong; build thật + báo cáo + commit"}
+- [2026-11-01T10:42:45Z] Wags/heartbeat — Wags_20261101_103744: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20261101_103744", "source": "watcher"}
+- [2026-11-01T10:42:45Z] Wags/finding — work-tree-dashboard phase A xong: {"commit": "session/1566395318575169687", "files": ["bin/work_ledger.py", "bin/work_tree_build.py", "bin/work_ledger_selfcheck.py", "kb/cron_registry.md", "kb/projects/work-tree-dashboard-phaseA-20261101.md"], "selfcheck": "51 PASS env -u TZ + TZ=America/New_York", "build": "140 item, 0.92s, proj97 paper15 busq8, secret-grep 0", "attention_format": "ids", "note": "cron 07:50 chỉ ghi registry, chưa cài crontab; chưa merge"}
