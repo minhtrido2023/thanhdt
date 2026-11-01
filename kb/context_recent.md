@@ -1,4 +1,4 @@
-[Mike fleet KB v4444 — sự kiện MỚI NHẤT từ toàn fleet (thông tin NỀN, không phải nội dung topic hiện tại)]
+[Mike fleet KB v4445 — sự kiện MỚI NHẤT từ toàn fleet (thông tin NỀN, không phải nội dung topic hiện tại)]
 - [2026-10-31T17:31:07] Mike/finding — daily-retro-draft-2026-10-31: {"draft": "state/retro_draft_2026-10-31.md", "incidents": 3, "patterns": 2, "wakeup_miss": "3/20", "escalated": false}
 - [2026-10-31T17:32:12] Wags/finding — retro-draft-2026-10-31 independent verify: GAPS FOUND (3 minor): {"verdict": "GAPS FOUND", "gaps": ["G1: bản nháp bỏ sót quant-skeptic REFUTED (high) 10:33Z cho oshares_live R12: cơ chế SIGALRM 30s/lệnh sai (TimeoutError bị e …
 - [2026-10-31T17:33:01] Mike/finding — daily-retro-final-2026-10-31: {"entry": "kb/incidents/retro/retro-2026-10-31.md", "incidents": 4, "patterns": 2, "wags": "GAPS FOUND fixed", "escalated": false}
