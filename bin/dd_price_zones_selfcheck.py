@@ -8,7 +8,11 @@ Kiểm (không mạng, không BQ/DNSE):
      (chấp nhận '47.700', '55,0k', '19,4' (nghìn), '~20k').
   3. Mọi field số khác null (zone_low/center/zone_high/price_ref/center_range) đều được ÍT NHẤT một
      evidence phủ; field null phải có null_reason (trừ price_date).
-  4. Bất biến: zone_low ≤ zone_high; center_range[0] == center; append-only key (ticker, dd_date) duy nhất.
+  4. Bất biến: zone_low ≤ zone_high; center_range[0] == center; append-only key (ticker, dd_date, rev) duy nhất.
+  5. center_kind ∈ enum; kind ≠ expected_weighted ⇒ phải có no_expected_reason (luật ưu tiên: giá trị kỳ vọng
+     trọng số khi nguồn có); center_alt phải có center_alt_kind + evidence phủ.
+  6. Đính chính append-only: rev>1 ⇒ supersedes "TICKER@dd_date#N" trỏ đúng entry rev=N đã có (N=rev−1),
+     rev liên tục từ 1; rev≥2 bắt buộc correction_reason.
 Dùng: python3 bin/dd_price_zones_selfcheck.py [--ledger PATH]   (rc 0 = PASS)
 """
 import argparse
@@ -20,12 +24,14 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC_ROOT = os.environ.get("MIKE_SRC_ROOT", "/home/trido/thanhdt/WorkingClaude/mike")
 NUM_FIELDS = ("zone_low", "center", "zone_high", "price_ref")
+CENTER_KINDS = ("expected_weighted", "base_scenario", "median", "point")
 _TOK = re.compile(r"\d+(?:[.,]\d+)*")
 
 
 def quote_numbers(q):
     """Tập giá trị (đồng) mà các token số trong quote có thể biểu diễn: 'a.bcd' = nghìn phân cách;
-    'a,b' = thập phân; mỗi số cũng được hiểu ×1000 (đơn vị k/nghìn)."""
+    'a,b' = thập phân. ×1000 (đơn vị k/nghìn) CHỈ cho token có giá trị < 1000 (19,4 / 55,0 / 20 → 19.400…);
+    token ≥1000 (vd '9.950', '2026') không bị nhân thành số lớn vô nghĩa."""
     out = set()
     for t in _TOK.findall(q):
         if "." in t and all(len(g) == 3 for g in t.split(".")[1:]) and "," not in t:
@@ -33,7 +39,8 @@ def quote_numbers(q):
         else:
             v = float(t.replace(".", "").replace(",", ".")) if t.count(",") == 1 else float(t.replace(",", ""))
         out.add(round(v, 3))
-        out.add(round(v * 1000, 3))
+        if v < 1000:
+            out.add(round(v * 1000, 3))
     return out
 
 
@@ -44,10 +51,23 @@ def check(ledger_path, src_root=SRC_ROOT):
     cache = {}
     for i, e in enumerate(d["entries"]):
         tag = f"#{i} {e.get('ticker')} {e.get('dd_date')}"
-        key = (e["ticker"], e["dd_date"])
+        rev = int(e.get("rev", 1))
+        key = (e["ticker"], e["dd_date"], rev)
         if key in seen:
-            errs.append(f"{tag}: trùng khoá (ticker, dd_date) — sổ append-only, DD mới phải khác ngày")
+            errs.append(f"{tag}: trùng khoá (ticker, dd_date, rev) — sổ append-only: DD mới khác ngày; đính chính = rev cao hơn")
+        errs += _rev_errs(tag, e, rev, d["entries"][:i])
         seen.add(key)
+        ck = e.get("center_kind")
+        if e.get("center") is not None:
+            if ck not in CENTER_KINDS:
+                errs.append(f"{tag}: center_kind={ck!r} ngoài enum {CENTER_KINDS}")
+            elif ck != "expected_weighted" and not e.get("no_expected_reason") and not any(
+                    x.get("supersedes") == f"{e['ticker']}@{e['dd_date']}#{rev}" for x in d["entries"]):
+                errs.append(f"{tag}: center_kind={ck} nhưng thiếu no_expected_reason (luật ưu tiên: kỳ vọng trọng số khi nguồn có)")
+        elif ck is not None:
+            errs.append(f"{tag}: center=null nhưng center_kind={ck!r}")
+        if e.get("center_alt") is not None and e.get("center_alt_kind") not in CENTER_KINDS:
+            errs.append(f"{tag}: center_alt thiếu/sai center_alt_kind")
         covered = set()
         for ev in e.get("evidence") or []:
             p = os.path.join(src_root, ev["file"])
@@ -68,7 +88,7 @@ def check(ledger_path, src_root=SRC_ROOT):
                     if v is None or round(float(v), 3) not in nums:
                         errs.append(f"{tag}: {fld}={v} KHÔNG có trong trích dẫn {ev['quote'][:80]!r}")
                 covered.add(fld)
-        for fld in NUM_FIELDS + ("center_range",):
+        for fld in NUM_FIELDS + ("center_range", "center_alt"):
             if e.get(fld) is not None and fld not in covered:
                 errs.append(f"{tag}: {fld}={e[fld]} không có evidence nào phủ")
         for fld in NUM_FIELDS:
@@ -85,6 +105,24 @@ def check(ledger_path, src_root=SRC_ROOT):
     return d, errs
 
 
+def _rev_errs(tag, e, rev, prior):
+    """Luật đính chính append-only (rev/supersedes)."""
+    errs = []
+    have = {int(x.get("rev", 1)) for x in prior if (x["ticker"], x["dd_date"]) == (e["ticker"], e["dd_date"])}
+    if rev == 1:
+        if e.get("supersedes"):
+            errs.append(f"{tag}: rev=1 không được có supersedes")
+        return errs
+    want = f"{e['ticker']}@{e['dd_date']}#{rev - 1}"
+    if e.get("supersedes") != want:
+        errs.append(f"{tag}: rev={rev} cần supersedes={want!r}, có {e.get('supersedes')!r}")
+    if (rev - 1) not in have:
+        errs.append(f"{tag}: rev={rev} nhưng chưa có rev={rev - 1} đứng trước trong sổ (rev phải liên tục, ghi sau)")
+    if not e.get("correction_reason"):
+        errs.append(f"{tag}: rev={rev} thiếu correction_reason")
+    return errs
+
+
 def _self_tests():
     """Mutation nhỏ trên chính bộ so số: số sai 1 chữ số phải bị bắt."""
     r = []
@@ -92,6 +130,15 @@ def _self_tests():
     n = quote_numbers(q)
     r.append(("số chuẩn có mặt", all(x in n for x in (7600, 13000, 9950, 10250, 19400, 21200, 20000, 55000, 66700))))
     r.append(("số lệch bị bắt (7.700/9.960/19.500)", not any(x in n for x in (7700, 9960, 19500))))
+    # rev / supersedes / enum — mutation nhỏ trên sổ giả
+    base = {"ticker": "AAA", "dd_date": "2026-01-01"}
+    r1 = dict(base, rev=1)
+    r.append(("rev=2 hợp lệ", not _rev_errs("t", dict(base, rev=2, supersedes="AAA@2026-01-01#1", correction_reason="x"), 2, [r1])))
+    r.append(("rev=2 thiếu supersedes bị bắt", bool(_rev_errs("t", dict(base, rev=2, correction_reason="x"), 2, [r1]))))
+    r.append(("rev=2 supersedes sai bị bắt", bool(_rev_errs("t", dict(base, rev=2, supersedes="AAA@2026-01-01#2", correction_reason="x"), 2, [r1]))))
+    r.append(("rev=3 nhảy cóc bị bắt", bool(_rev_errs("t", dict(base, rev=3, supersedes="AAA@2026-01-01#2", correction_reason="x"), 3, [r1]))))
+    r.append(("rev=2 thiếu correction_reason bị bắt", bool(_rev_errs("t", dict(base, rev=2, supersedes="AAA@2026-01-01#1"), 2, [r1]))))
+    r.append(("quote_numbers: token ≥1000 không bị ×1000", 9950000 not in quote_numbers("tâm 9.950") and 9950 in quote_numbers("tâm 9.950")))
     return r
 
 

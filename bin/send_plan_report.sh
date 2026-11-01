@@ -231,7 +231,8 @@ export NOWCAST_BLOCK
 # --- Mã DD dưới vùng giá hợp lý (user yêu cầu 2026-11-01 22:39 ICT; job Taylor_20261101_154045).
 # GHI CHÚ cho user cân nhắc đưa vào plan — KHÔNG đụng orders/sizing, KHÔNG tự thêm lệnh. Sổ
 # kb/dd_price_zones.json + giá đóng cửa DNSE chỉ-đọc (bin/dd_price_zone_watch.py). CHỈ ZaloPay (cùng tiền lệ
-# NOWCAST: một lần/tối, SpaceX là báo cáo nhà đầu tư). FAIL-OPEN: lỗi/treo/rỗng => đúng 1 dòng cảnh báo,
+# NOWCAST) để khỏi lặp một khối giống hệt 2 lần/đêm; plan report SpaceX cũng đi tới kênh duyệt plan của user
+# (không phải nhà đầu tư) — lý do duy nhất là tránh lặp. FAIL-OPEN: lỗi/treo/rỗng => đúng 1 dòng cảnh báo,
 # không chặn gửi. Sandbox selfcheck không chạy trừ khi cấp SEND_PLAN_DDZONE_CMD.
 DDZONE_BLOCK=""
 DDZONE_CMD=""

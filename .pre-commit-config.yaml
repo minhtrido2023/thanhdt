@@ -165,3 +165,16 @@ repos:
         pass_filenames: false
         verbose: true
         files: '^kb/(current_ops|canonical)\.md$'
+
+      # ------------------------------------------------------------------------
+      # dd-price-zones-gate (job Taylor_20261101_160440, arch-review 2026-11-01) — mỗi số trong
+      # kb/dd_price_zones.json phải khớp NGUYÊN VĂN trích dẫn nguồn DD; center_kind enum + luật ưu tiên
+      # kỳ vọng trọng số; đính chính append-only rev/supersedes. Không mạng/BQ/DNSE.
+      # Bỏ qua tay: SKIP=dd-price-zones-gate.
+      - id: dd-price-zones-gate
+        name: Sổ mức giá DD khớp nguồn (bin/dd_price_zones_selfcheck.py)
+        entry: python3 bin/dd_price_zones_selfcheck.py
+        language: system
+        pass_filenames: false
+        verbose: true
+        files: '^kb/dd_price_zones\.json$'
