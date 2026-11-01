@@ -52,3 +52,4 @@ agents/wt-*/
 # Phase 1 kb_nightly.sh ghi events_buffer atomic: tmp + os.replace (c9edd4c6). Bị kill giữa
 # chừng thì file tạm này nằm lại — không bao giờ commit.
 kb/events_buffer.md.tmp
+secrets/

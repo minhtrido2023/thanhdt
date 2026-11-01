@@ -1,0 +1,147 @@
+{
+ "generated_at": "2026-11-01T17:40:00+07:00",
+ "counts": {},
+ "attention": {
+  "need_user": [
+   "proj:fpt-dd"
+  ],
+  "overdue": [
+   "paper:p1"
+  ],
+  "recent": [
+   "proj:fpt-dd",
+   "user:y-tuong-1"
+  ],
+  "ideas": [
+   "user:y-tuong-1"
+  ],
+  "inbox": [
+   "user:y-tuong-1"
+  ]
+ },
+ "items": [
+  {
+   "id": "proj:fpt-dd",
+   "branch": "Research/DD cổ phiếu",
+   "title": "DD FPT",
+   "summary": "Đã DD xong, chờ anh duyệt kết luận.",
+   "detail": "Vì sao: ...\nBước kế: ...",
+   "type": "research",
+   "status": "waiting",
+   "priority": 1,
+   "owner": "Taylor",
+   "opened": "2026-10-30",
+   "updated": "2026-11-01",
+   "due": null,
+   "verdict": null,
+   "waiting_on": {
+    "who": "user",
+    "what": "duyệt",
+    "since": "2026-11-01"
+   },
+   "needs_user": true,
+   "links": [
+    {
+     "label": "Spec",
+     "path": "kb/projects/work-tree-dashboard-spec-20261101.md"
+    },
+    {
+     "label": "Mất",
+     "path": "kb/nope.md",
+     "missing": true
+    }
+   ],
+   "depends_on": [],
+   "aliases": [],
+   "notes": [],
+   "source": "curated",
+   "ack": true,
+   "confidence": "high",
+   "stale": false
+  },
+  {
+   "id": "paper:p1",
+   "branch": "Research/Paper programs",
+   "title": "Paper P1",
+   "summary": "Đang chạy thử giấy.",
+   "detail": "",
+   "type": "research",
+   "status": "active",
+   "priority": 2,
+   "owner": "Taylor",
+   "opened": "2026-09-01",
+   "updated": "2026-09-02",
+   "due": "2026-10-01",
+   "verdict": null,
+   "waiting_on": null,
+   "needs_user": false,
+   "links": [],
+   "depends_on": [],
+   "aliases": [],
+   "notes": [],
+   "source": "derived:paper",
+   "ack": true,
+   "confidence": "high",
+   "stale": true
+  },
+  {
+   "id": "proj:old-nogo",
+   "branch": "Research/Tín hiệu & chiến lược",
+   "title": "Tín hiệu X",
+   "summary": "Đã loại.",
+   "detail": "",
+   "type": "research",
+   "status": "NO-GO",
+   "priority": 3,
+   "owner": "Taylor",
+   "opened": "2026-08-01",
+   "updated": "2026-08-05",
+   "due": null,
+   "verdict": {
+    "label": "NO-GO",
+    "text": "OOS xấu"
+   },
+   "waiting_on": null,
+   "needs_user": false,
+   "links": [],
+   "depends_on": [],
+   "aliases": [],
+   "notes": [],
+   "source": "curated",
+   "ack": true,
+   "confidence": "med",
+   "stale": false
+  },
+  {
+   "id": "user:y-tuong-1",
+   "branch": "Research/Dữ liệu & PIT",
+   "title": "Ý tưởng của anh",
+   "summary": "Thử nghiệm.",
+   "detail": "",
+   "type": "research",
+   "status": "idea",
+   "priority": 3,
+   "owner": "user",
+   "opened": "2026-11-01",
+   "updated": "2026-11-01",
+   "due": null,
+   "verdict": null,
+   "waiting_on": null,
+   "needs_user": false,
+   "links": [],
+   "depends_on": [],
+   "aliases": [],
+   "notes": [],
+   "source": "user",
+   "ack": false,
+   "confidence": null,
+   "stale": false
+  }
+ ],
+ "branches": [
+  "Research/DD cổ phiếu",
+  "Research/Dữ liệu & PIT",
+  "Research/Paper programs",
+  "Research/Tín hiệu & chiến lược"
+ ]
+}
