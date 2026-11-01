@@ -203,9 +203,9 @@ class Env:
     def argv(self, i):
         return open(f"{self.rec}.argv.{i}").read().split("\0")[:-1]
 
-    def note(self, did, kind, now, summary="s", label=None, major=False):
+    def note(self, did, kind, now, summary="s", label=None, major=False, risk=None):
         a = types.SimpleNamespace(dossier=did, kind=kind, summary=summary, label=label, major_event=major,
-                                  detail_file=None, state_dir=self.tmp)
+                                  detail_file=None, state_dir=self.tmp, risk=risk)
         W.cmd_dd_note(a, now=now)
 
     def dossier(self, did):
@@ -785,7 +785,131 @@ def test_labels_and_note_day():
     e.close()
 
 
+URG = "🚨 [CỔNG GIÁ] RỦI RO"
+
+
+def _urgent(e, pat=URG):
+    return [m for m in e.sent() if pat in m["msg"]]
+
+
+def test_risk_urgent():
+    did = "XYZ_2026-10-06"
+    # --- hạn quyết (hàm thuần): trước/sau 14:15, trước giờ mở cửa, cuối tuần, lễ
+    dd = lambda d, h: W.decision_deadline(T(h, d))
+    t, m = dd("2026-10-06", "10:00")
+    check("hạn: Thứ Ba 10:00 ⇒ TRONG PHIÊN (hạn 14:15)", m == "intraday" and "TRONG PHIÊN" in t and "14:15" in t, t)
+    check("hạn: 14:14 ⇒ vẫn trong phiên", dd("2026-10-06", "14:14")[1] == "intraday")
+    t, m = dd("2026-10-06", "14:15")
+    check("hạn: 14:15 ⇒ ĐẦU PHIÊN kế tiếp = Thứ Tư 07/10/2026", m == "next" and "Thứ Tư 07/10/2026" in t, t)
+    t, m = dd("2026-10-06", "08:00")
+    check("hạn: 08:00 (trước mở cửa) ⇒ đầu phiên HÔM NAY Thứ Ba 06/10", m == "next" and "Thứ Ba 06/10/2026" in t, t)
+    t, m = dd("2026-10-09", "15:00")
+    check("hạn: Thứ Sáu 15:00 ⇒ Thứ Hai 12/10/2026", m == "next" and "Thứ Hai 12/10/2026" in t, t)
+    for d_ in ("2026-10-10", "2026-10-11"):
+        t, m = dd(d_, "10:00")
+        check(f"hạn: cuối tuần {d_} 10:00 (giờ phiên nhưng không giao dịch) ⇒ Thứ Hai 12/10/2026",
+              m == "next" and "Thứ Hai 12/10/2026" in t, t)
+    t, m = dd("2026-08-31", "15:00")
+    check("hạn: lễ 01-02/09 ⇒ phiên kế Thứ Năm 03/09/2026", m == "next" and "Thứ Năm 03/09/2026" in t, t)
+    t, m = dd("2026-09-01", "10:00")
+    check("hạn: ngày lễ 01/09 10:00 ⇒ KHÔNG coi là trong phiên", m == "next" and "03/09/2026" in t, t)
+    # --- mức bán tay (hàm thuần)
+    q = lambda last, bids, floor=90_000: {"last": last, "floor": floor, "bids": bids}
+    at = T("10:00")
+    bars = [(T("09:50"), 100_000, 1), (T("10:00"), 98_000, 1)]
+    lv, _ = W.manual_level(q(98_000, [(97_900, 5000), (97_800, 5000)]), bars, 1000, at)
+    check("mức: speed −2%/5' ⇒ 2", lv == 2, lv)
+    lv, _ = W.manual_level(q(98_000, [(97_900, 5000), (97_800, 5000)]), [(T("09:50"), 98_100, 1), (T("10:00"), 98_000, 1)], 1000, at)
+    check("mức: room>3% speed nhẹ ⇒ 1", lv == 1, lv)
+    lv, _ = W.manual_level(q(91_000, [(90_900, 5000)]), [], 1000, at)
+    check("mức: room 1,1% ⇒ 3", lv == 3, lv)
+    lv, _ = W.manual_level(q(95_000, [(94_900, 100)]), [], 1000, at)
+    check("mức: độ sâu 2 mức < KL ⇒ 3", lv == 3, lv)
+    lv, _ = W.manual_level(q(90_000, []), [], 1000, at)
+    check("mức: giá sàn không bên mua ⇒ 4", lv == 4, lv)
+    lv, why = W.manual_level({"error": "x"}, [], 1000, at)
+    check("mức: lỗi quote ⇒ nói thẳng chưa tính được", lv is None and "chưa tính được" in why, why)
+    lv, why = W.manual_level(q(95_000, [(94_900, 9999)]), [], 1000, T("16:00"))
+    check("mức: ngoài giờ ⇒ chưa tính được", lv is None and "chưa tính được" in why, why)
+    # --- luồng thật
+    for kind, major in (("quick", False), ("daily", False), ("daily", True)):
+        e = Env({"XYZ": DROP})
+        e.drive("09:15", "10:05", "2026-10-06")
+        if kind == "daily":
+            e.drive("08:30", "08:31", "2026-10-07")
+        day = "2026-10-06" if kind == "quick" else "2026-10-07"
+        e.note(did, kind, T("10:30", day), summary="khởi tố chủ tịch XYZ", major=major, risk="legal")
+        e.drive("10:31", "10:34", day)
+        u = _urgent(e)
+        tag = f"{kind}{'+major' if major else ''}"
+        check(f"risk=legal [{tag}] ⇒ KHẨN đúng 3 tin (telegram+discord+email), đúng 1 lần dù chạy lại nhiều tick",
+              sorted(m["channel"] for m in u) == ["discord", "email", "telegram"], [m["channel"] for m in u])
+        mg = u[0]["msg"] if u else ""
+        check(f"risk=legal [{tag}] nội dung: nhãn, mã, số cp, hạn quyết trong phiên, GIỮ, bảng 4 mức, giờ ICT",
+              "RỦI RO PHÁP LÝ XYZ" in mg and "1,000cp" in mg.replace("1,000cp", "1,000cp") and "SpaceX: 1,000cp" in mg
+              and "TRONG PHIÊN" in mg and "KHÔNG tự bán" in mg and "Bảng 4 MỨC" in mg and "10:30 ICT" in mg
+              and "1 Bình thường" in mg and "4 Kẹt sàn" in mg and "T+2" in mg and "MỨC ĐANG ÁP DỤNG" in mg, mg[:400])
+        check(f"risk=legal [{tag}] mention=True", all(m.get("mention", True) for m in u) and bool(u))
+        e.close()
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.note(did, "quick", T("14:20", "2026-10-06"), summary="thanh tra thuế", risk="industry")
+    e.drive("14:21", "14:23", "2026-10-06")
+    u = _urgent(e, "RỦI RO NGÀNH XYZ")
+    check("risk=industry sau 14:15 ⇒ nhãn NGÀNH + ĐẦU PHIÊN Thứ Tư 07/10/2026 (ATO)",
+          len(u) == 3 and "ĐẦU PHIÊN" in u[0]["msg"] and "Thứ Tư 07/10/2026" in u[0]["msg"], u[:1])
+    e.close()
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.note(did, "quick", T("10:30", "2026-10-06"), summary="tin nhiễu", risk="none")
+    e.drive("10:31", "10:34", "2026-10-06")
+    check("risk=none ⇒ KHÔNG gửi khẩn (tin ngày 1 thường vẫn tới)", not _urgent(e, "RỦI RO") and _n_sent(e, "TÓM TẮT NHANH NGÀY 1") == 3,
+          (len(_urgent(e, "RỦI RO")), _n_sent(e, "TÓM TẮT NHANH NGÀY 1")))
+    e.close()
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.note(did, "quick", T("10:30", "2026-10-06"), summary="không cờ")
+    e.drive("10:31", "10:34", "2026-10-06")
+    check("không truyền risk (mặc định) ⇒ KHÔNG khẩn", not _urgent(e, "RỦI RO"))
+    e.close()
+    # --- kill giữa chừng không mất tin / không trùng
+    for before in (False, True):
+        e = Env({"XYZ": DROP})
+        e.drive("09:15", "10:05", "2026-10-06")
+        e.note(did, "quick", T("10:30", "2026-10-06"), summary="khởi tố", risk="legal")
+        hit = _kill_at_dossier_save(e, lambda d: "quick.json" in d.get("relayed", []), "10:31", "10:31", "2026-10-06", before)
+        tag = "TRƯỚC" if before else "SAU"
+        if not before:
+            check("risk kill SAU save_dossier: tin KHẨN đã nằm trong outbox trên đĩa", hit and _outbox_has(e, "2026-10-06", "RỦI RO PHÁP LÝ XYZ"))
+        e.drive("10:32", "10:35", "2026-10-06")
+        check(f"risk kill {tag} save_dossier ⇒ chạy lại: KHẨN đúng 3 tin (không mất, không trùng)",
+              hit and len(_urgent(e)) == 3, len(_urgent(e)))
+        e.close()
+    # --- prompt yêu cầu đặt cờ (quick + daily), final thì không
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    pq = e.argv(1)[1]
+    check("prompt quick có --risk + tiêu chí (khởi tố, thanh tra, xử phạt, ngành)",
+          "--risk legal|industry|both|none" in pq and "khởi tố" in pq and "thanh tra" in pq and "chính sách/thuế/cấm" in pq, pq[-500:])
+    e.close()
+    dos = {"id": did, "ticker": "XYZ", "t0": "2026-10-06T10:00", "dir": "/x", "holdings": {}, "trigger": {"reason": "r", "ret": -.06, "vni_ret": 0}}
+    pd_ = W.dd_prompt(dos, "daily", "CMD", T("09:00", "2026-10-08"))
+    pf = W.dd_prompt(dos, "final", "CMD", T("09:00", "2026-10-08"))
+    check("prompt daily có cờ --risk; final KHÔNG", "--risk legal|industry|both|none" in pd_ and "--risk" not in pf)
+    # --- dd-note: giá trị lạ bị từ chối
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    try:
+        e.note(did, "quick", T("10:30", "2026-10-06"), risk="bogus")
+        ok = False
+    except SystemExit:
+        ok = True
+    check("dd-note --risk sai giá trị ⇒ từ chối", ok)
+    e.close()
+
+
 def harden_tests():
+    test_risk_urgent()
     test_final_never_stuck()
     test_save_order_kill()
     test_reminders_exact()
@@ -804,6 +928,14 @@ MUTANTS = [
     ("B5 đảo thứ tự cũ: save_dossier TRƯỚC enqueue (_conclude_unclear)",
      "    _save(deps, now.date(), st)            # outbox bền TRƯỚC, rồi mới đánh dấu hồ sơ (kill giữa chừng không mất tin)\n    save_dossier(deps.state_dir, dos)\n",
      "    save_dossier(deps.state_dir, dos)\n    _save(deps, now.date(), st)\n"),
+    ("risk: bỏ cờ (không enqueue khẩn)", 'if n.get("risk") in RISK_VN:', 'if False:'),
+    ("risk: bỏ kênh telegram", '("telegram", "discord", "email"),\n                subject=f"🚨', '("discord", "email"),\n                subject=f"🚨'),
+    ("risk: sai hạn quyết (14:15→15:15)", "INTRADAY_DEADLINE = dt.time(14, 15)", "INTRADAY_DEADLINE = dt.time(15, 15)"),
+    ("risk: bỏ loại cuối tuần/lễ", "return d.weekday() < 5 and not is_holiday(d)", "return True"),
+    ("risk: không chống trùng key", 'key=f"dd:{dos[\'id\']}:risk:{n[\'file\']}", now=now)', 'key=None, now=now)'),
+    ("risk: đảo thứ tự save_dossier TRƯỚC enqueue-state không đổi ở khối changed",
+     "            _save(deps, day, st)                 # outbox bền TRƯỚC, rồi mới ghi hồ sơ (relayed/CONCLUDED)\n            save_dossier(deps.state_dir, dos)\n        # 2b",
+     "            save_dossier(deps.state_dir, dos)\n            _save(deps, day, st)\n        # 2b"),
     ("bỏ chặn 1 nhắc/tick", "if reminded:                 #", "if False:                 #"),
 ]
 

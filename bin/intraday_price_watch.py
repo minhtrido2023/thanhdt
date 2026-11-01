@@ -40,7 +40,7 @@ ngày sau 1 job chết không ghi gì ⇒ không tự làm vấp circuit breaker
 Dùng:
   intraday_price_watch.py run [--no-dispatch] [--dry-notify] [--state-dir D]
   intraday_price_watch.py dd-note --dossier MÃ_YYYY-MM-DD --kind quick|daily|final --summary "..."
-                                  [--label BROKEN|NOISE|UNCLEAR] [--major-event] [--detail-file F.md] [--day YYYY-MM-DD]
+                                  [--label BROKEN|NOISE|UNCLEAR] [--major-event] [--risk legal|industry|both|none] [--detail-file F.md] [--day YYYY-MM-DD]
   intraday_price_watch.py status [--date YYYY-MM-DD]
 
 Cron (ĐÃ CÀI, KHÔNG đổi ở thay đổi này; host parse giờ UTC: 02-07 ⇔ 09-14 ICT, 1:30 ⇔ 08:30 ICT):
@@ -452,6 +452,12 @@ def dd_prompt(dos, kind, note_cmd, now):
               f"{tr['reason']} (ret {tr['ret']*100:+.1f}%, VNINDEX {(tr['vni_ret'] or 0)*100:+.1f}%). Đang giữ: "
               f"{held}. Quyết định user 2026-11-01: KHÔNG tự bán; DD dạng khủng hoảng trong 7 ngày, user quyết "
               f"bán, mặc định GIỮ. Hồ sơ: {dos['dir']}/DOSSIER.md (đọc các mục trước). ")
+    risk_rule = (" CỜ RỦI RO --risk (BẮT BUỘC cân nhắc, mặc định none): đặt --risk legal nếu có tin PHÁP LÝ dính "
+                 "mã (khởi tố, thanh tra, xử phạt, đình chỉ/hạn chế giao dịch, bắt lãnh đạo); --risk industry nếu "
+                 "chính sách/thuế/cấm/đổi quy định đáng kể hoặc ngành sập dính tới mã; --risk both nếu cả hai; "
+                 "none nếu không. Đặt legal/industry/both ⇒ hệ thống báo KHẨN Telegram ngay để user quyết cắt lỗ; "
+                 "đừng đặt khi chỉ là tin nhiễu/cá nhân không dính lõi."
+                 if kind in ("quick", "daily") else "")
     if kind == "quick":
         task = ("Việc NGÀY 1 — TÓM TẮT NHANH: (1) gọi Agent(subagent_type='legal-vn') đọc tin pháp lý 7 ngày "
                 f"gần nhất về {tk} (khởi tố, thanh tra, xử phạt UBCKNN, đình chỉ/hạn chế giao dịch); (2) tự tìm "
@@ -470,8 +476,8 @@ def dd_prompt(dos, kind, note_cmd, now):
                 "nguồn, rủi ro nếu giữ, điều gì sẽ đổi kết luận. Đây là tư liệu để USER QUYẾT, không phải lệnh. ")
     return (common + task + "Viết chi tiết (có nguồn, link) ra 1 file .md rồi GHI bằng đúng lệnh: "
             f"{note_cmd} --day {now.date().isoformat()} --summary 'TÓM TẮT ≤600 ký tự' --detail-file <file.md>"
-            + (" --label LABEL" if kind == "final" else "")
-            + ". KHÔNG đặt/huỷ/sửa lệnh, KHÔNG sửa plan, KHÔNG đề xuất bán tự động.")
+            + (" --label LABEL" if kind == "final" else " [--risk legal|industry|both|none]")
+            + "." + risk_rule + " KHÔNG đặt/huỷ/sửa lệnh, KHÔNG sửa plan, KHÔNG đề xuất bán tự động.")
 
 
 def dispatch_argv(prompt, kind, dispatch_bin=DISPATCH):
@@ -895,8 +901,113 @@ def _pending_work(st, deps, now):
             _save(deps, day, st)
 
 
-def _relay_note(st, dos, n, now):
+RISK_VALUES = ("legal", "industry", "both", "none")
+RISK_VN = {"legal": "PHÁP LÝ", "industry": "NGÀNH", "both": "PHÁP LÝ + NGÀNH"}
+INTRADAY_DEADLINE = dt.time(14, 15)      # sau mốc này không còn kịp khung khớp liên tục để quyết
+SESSION_OPEN = dt.time(9, 0)
+SESSION_ATC_END = dt.time(14, 45)
+
+MANUAL_TABLE = (
+    "Bảng 4 MỨC bán tay (THAM KHẢO, không phải lệnh):\n"
+    "  1 Bình thường (room tới sàn >3% và speed >−1%/5'): 3 đợt ~20 phút 50/25/25, LO tại giá mua tốt nhất, ≤30% độ sâu 2 mức.\n"
+    "  2 Nhanh (speed ≤−1%/5' hoặc room 1,5–3%): bán hết ngay, tách lệnh theo 2 mức giá mua.\n"
+    "  3 Khẩn (room ≤1,5% hoặc độ sâu 2 mức < KL bán): một lệnh LO tại giá sàn, khớp theo giá bên mua.\n"
+    "  4 Kẹt sàn (giá sàn không còn bên mua): giữ lệnh ở sàn cả phiên, 14:30 vào ATC, phiên sau ATO trước 09:15.\n"
+    "  Lưu ý T+2: cp mới mua chỉ bán được từ phiên CHIỀU ngày T+2.")
+
+
+def _is_session_day(d):
+    from trading_bot.vn_market import is_holiday
+    return d.weekday() < 5 and not is_holiday(d)
+
+
+def next_session_day(d, include_today):
+    """Ngày giao dịch gần nhất >= d (include_today) hoặc > d."""
+    if not include_today:
+        d += dt.timedelta(days=1)
+    while not _is_session_day(d):
+        d += dt.timedelta(days=1)
+    return d
+
+
+_WD = ("Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật")
+
+
+def decision_deadline(at):
+    """(text hạn quyết, 'intraday'|'next') theo giờ nhận tin `at` (ICT, naive hoặc aware)."""
+    d, t = at.date(), at.time()
+    if _is_session_day(d) and SESSION_OPEN <= t < INTRADAY_DEADLINE:
+        return ("anh quyết cut-loss TRONG PHIÊN (hạn 14:15 nếu muốn ra ngay trong khung khớp liên tục; "
+                "sau đó chuyển ATC 14:30 / phiên sau)", "intraday")
+    nd = next_session_day(d, include_today=(_is_session_day(d) and t < SESSION_OPEN))
+    return (f"anh quyết ĐẦU PHIÊN kế tiếp: {_WD[nd.weekday()]} {nd:%d/%m/%Y} (ATO 09:00 hoặc 09:15 theo giờ HOSE)",
+            "next")
+
+
+def manual_level(q, bars, qty, at):
+    """Mức bán tay đang áp dụng theo quote sống → (mức, mô tả) hoặc (None, lý do). THAM KHẢO."""
+    if not (q and not q.get("error") and q.get("last") and q.get("floor")):
+        return None, "chưa tính được mức hiện tại (không lấy được quote sống)"
+    if not (_is_session_day(at.date()) and SESSION_OPEN <= at.time() < SESSION_ATC_END):
+        return None, "chưa tính được mức hiện tại (ngoài giờ giao dịch, quote không còn sống)"
+    last, floor = q["last"], q["floor"]
+    room = (last - floor) / last * 100
+    bids = q.get("bids") or []
+    depth2 = sum(b[1] for b in bids[:2])
+    speed = None
+    try:
+        a = at.replace(tzinfo=None)
+        past = [c for (t, c, _v) in (bars or []) if t <= a - dt.timedelta(minutes=5)]
+        cur = [c for (t, c, _v) in (bars or []) if t <= a]
+        if past and cur:
+            speed = (cur[-1] / past[-1] - 1) * 100
+    except Exception:   # noqa: BLE001
+        speed = None
+    sp = f"speed {speed:+.1f}%/5'" if speed is not None else "speed chưa tính được"
+    info = f"room tới sàn {room:.1f}%, {sp}, độ sâu 2 mức mua {depth2:,}cp vs cần bán {qty:,}cp"
+    if last <= floor and not bids:
+        lv = 4
+    elif room <= 1.5 or (bids and depth2 < qty):
+        lv = 3
+    elif (speed is not None and speed <= -1) or room <= 3:
+        lv = 2
+    else:
+        lv = 1
+    return lv, info
+
+
+def _urgent_risk_msg(dos, n, now, deps):
     tk = dos["ticker"]
+    at = _p(n["at"]) if n.get("at") else now
+    deadline, _mode = decision_deadline(at)
+    held = "; ".join(f"{a}: {h['qty']:,}cp ({h['book']})" for a, h in dos["holdings"].items()) or "không giữ"
+    total = sum(h["qty"] for h in dos["holdings"].values())
+    lvl_txt = "chưa tính được mức hiện tại (không có thị trường)"
+    if deps is not None:
+        try:
+            q = deps.market.quote(tk)
+            try:
+                bars = deps.market.bars(tk, at.date())
+            except Exception:   # noqa: BLE001
+                bars = []
+            lv, info = manual_level(q, bars, total, now)
+            lvl_txt = f"MỨC ĐANG ÁP DỤNG: {lv} — {info}" if lv else info
+        except Exception as e:   # noqa: BLE001
+            lvl_txt = f"chưa tính được mức hiện tại ({type(e).__name__})"
+    return (f"🚨 [CỔNG GIÁ] RỦI RO {RISK_VN[n['risk']]} {tk}\n"
+            f"  Tin ({n.get('kind')} ngày {n.get('day')}, nhận {at:%d/%m %H:%M} ICT): {(n.get('summary') or '')[:600]}\n"
+            f"  Đang giữ {tk}: {held}.\n"
+            f"  HẠN QUYẾT: {deadline}.\n"
+            f"  MẶC ĐỊNH VẪN GIỮ — hệ thống KHÔNG tự bán; muốn bán anh ra lệnh rõ qua kênh đặt lệnh thường.\n"
+            f"  {lvl_txt}\n  {MANUAL_TABLE}\n  Hồ sơ: {dos['dir']}/DOSSIER.md")
+
+
+def _relay_note(st, dos, n, now, deps=None):
+    tk = dos["ticker"]
+    if n.get("risk") in RISK_VN:     # KHẨN: mọi kind; xếp TRƯỚC tin thường, cùng đường outbox (kill-safe)
+        enqueue(st, _urgent_risk_msg(dos, n, now, deps), ("telegram", "discord", "email"),
+                subject=f"🚨 RỦI RO {RISK_VN[n['risk']]} {tk}", mention=True,
+                key=f"dd:{dos['id']}:risk:{n['file']}", now=now)
     key = f"dd:{dos['id']}:note:{n['file']}"      # chống gửi trùng khi chạy lại (at-least-once)
     kind = n.get("kind")
     body = (n.get("summary") or "")[:600]
@@ -977,9 +1088,9 @@ def _dossier_tick(st, deps, now):
                 dos["status"] = "CONCLUDED"
                 dos["conclusion"] = {"label": n.get("label"), "source": "agent", "at": n.get("at")}
                 s["dd_concluded"] += 1
-            _relay_note(st, dos, n, now)
+            _relay_note(st, dos, n, now, deps)
             log_event(deps.state_dir, day, "DD_NOTE", now=now, dossier=dos["id"], note=n["file"],
-                      label=n.get("label"), major_event=bool(n.get("major_event")))
+                      label=n.get("label"), major_event=bool(n.get("major_event")), risk=n.get("risk"))
             changed = True
         # 2) job chết mà không có ghi chú tương ứng
         have = {n["file"] for n in read_notes(deps.state_dir, dos["id"])}
@@ -1348,6 +1459,9 @@ def cmd_dd_note(a, now=None):
         sys.exit(f"không có hồ sơ {p}")
     if a.kind not in ("quick", "daily", "final"):
         sys.exit(f"kind phải là quick|daily|final, nhận {a.kind}")
+    risk = getattr(a, "risk", None) or "none"
+    if risk not in RISK_VALUES:
+        sys.exit(f"--risk phải thuộc {RISK_VALUES}, nhận {risk}")
     if a.kind == "final" and a.label not in (E.BROKEN, E.NOISE, E.UNCLEAR):
         sys.exit(f"final cần --label BROKEN|NOISE|UNCLEAR, nhận {a.label}")
     t0 = dt.date.fromisoformat(a.dossier.rsplit("_", 1)[1])
@@ -1369,10 +1483,10 @@ def cmd_dd_note(a, now=None):
         head = {"quick": "Ngày 1 — tóm tắt nhanh", "daily": f"Ngày {n} — cập nhật",
                 "final": f"KẾT LUẬN: {E.VERDICT_VN.get(a.label, '')}"}[a.kind]
         f.write(f"\n## {head} ({now:%Y-%m-%d %H:%M} ICT)" + (" — ⚠️ SỰ KIỆN LỚN" if a.major_event else "")
-                + f"\n\n{a.summary[:1500]}\n\n{detail}\n")
+                + (f" — 🚨 RỦI RO {RISK_VN[risk]}" if risk in RISK_VN else "") + f"\n\n{a.summary[:1500]}\n\n{detail}\n")
     os.makedirs(os.path.dirname(np_), exist_ok=True)
     _atomic_json(np_, {"kind": a.kind, "day": n, "summary": a.summary[:1500], "label": a.label if a.kind == "final"
-                       else None, "major_event": bool(a.major_event), "at": _iso(now)})
+                       else None, "major_event": bool(a.major_event), "risk": risk, "at": _iso(now)})
     print(f"ghi {np_}")
 
 
@@ -1391,6 +1505,8 @@ def main(argv=None, market_factory=None, notifier=None):
     v.add_argument("--summary", required=True)
     v.add_argument("--label")
     v.add_argument("--major-event", action="store_true")
+    v.add_argument("--risk", default="none", choices=RISK_VALUES,
+                   help="legal|industry|both ⇒ báo KHẨN Telegram ngay; mặc định none")
     v.add_argument("--detail-file")
     v.add_argument("--day", help="YYYY-MM-DD ngày hồ sơ cần ghi (mặc định hôm nay ICT); ghi ĐÚNG ngày của bước, "
                                  "không phụ thuộc đồng hồ lúc agent chạy xong")
