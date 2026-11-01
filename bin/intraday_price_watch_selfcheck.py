@@ -467,16 +467,285 @@ def test_no_sell_path(lifecycle_env):
     e.close()
 
 
+# ---------------------------------------------------------------- vòng 2: arch-review 2026-11-01
+def _stub_fail(e, rc=4):
+    open(e.stub, "w").write(f"#!/bin/bash\necho 'CIRCUIT TRIPPED' >&2; exit {rc}\n")
+    os.chmod(e.stub, 0o755)
+
+
+def _stub_nojob(e):
+    open(e.stub, "w").write("#!/bin/bash\necho 'accepted'\n")
+    os.chmod(e.stub, 0o755)
+
+
+def _tick_to_final(e, until="2026-10-12"):
+    """Mở ca ngày 6/10, chạy mỗi ngày giao dịch tới `until` (ngày 7 của hồ sơ)."""
+    e.drive("09:15", "10:05", "2026-10-06")
+    for d in ("2026-10-07", "2026-10-08", "2026-10-09", "2026-10-12"):
+        e.drive("08:30", "08:31", d)
+        if d == until:
+            break
+
+
+def _concl_msgs(e):
+    return [m for m in e.sent() if "KHÔNG có báo cáo kết luận" in m["msg"]]
+
+
+def test_final_never_stuck():
+    did = "XYZ_2026-10-06"
+    # (a1) dispatch kết luận rc!=0 (circuit breaker exit 4) ⇒ đóng CHƯA RÕ no_dispatch + 3 kênh
+    e = Env({"XYZ": DROP})
+    _tick_to_final(e)
+    _stub_fail(e)
+    e.drive("08:30", "08:30", "2026-10-13")          # 1 tick: đóng NGAY, không đợi lượt sau
+    d = e.dossier(did)
+    check("final rc!=0 ⇒ CONCLUDED UNCLEAR no_dispatch", d["status"] == "CONCLUDED"
+          and d["conclusion"]["label"] == "UNCLEAR" and d["conclusion"]["source"] == "no_dispatch", d.get("conclusion"))
+    check("final rc!=0 ⇒ tin 3 kênh có lỗi thật + ANH CẦN TỰ XEM + GIỮ",
+          {m["channel"] for m in _concl_msgs(e)} == {"discord", "telegram", "email"}
+          and all("CIRCUIT TRIPPED" in m["msg"] and "ANH CẦN TỰ XEM" in m["msg"] and "GIỮ" in m["msg"]
+                  for m in _concl_msgs(e)), [m["msg"][:90] for m in _concl_msgs(e)][:1])
+    n0 = len(e.sent())
+    for day in ("2026-10-14", "2026-10-20"):
+        e.drive("08:30", "08:31", day)
+        e.drive("09:15", "09:16", day)
+    check("đóng rồi ⇒ không báo/dispatch lại", len(e.sent()) == n0 and e.n_dispatch() == 5, (len(e.sent()) - n0, e.n_dispatch()))
+    e.close()
+    # (a2) dispatch cập nhật hằng ngày rc!=0 ⇒ health_alert, hồ sơ vẫn OPEN
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    _stub_fail(e)
+    e.drive("08:30", "08:31", "2026-10-07")
+    check("daily rc!=0 ⇒ health_alert dd_dispatch (không im lặng), hồ sơ vẫn OPEN",
+          any("SỨC KHOẺ intraday-watch (dd_dispatch)" in m["msg"] and "HỎNG" in m["msg"] for m in e.sent())
+          and e.dossier(did)["status"] == "OPEN", [m["msg"][:60] for m in e.sent()][-2:])
+    e.close()
+    # (a3) job 'issued' (không parse được job id) ⇒ quá hạn FINAL_OVERDUE_H ⇒ đóng
+    e = Env({"XYZ": DROP})
+    _tick_to_final(e)
+    _stub_nojob(e)
+    e.drive("08:30", "08:31", "2026-10-13")
+    check("final 'issued' chưa quá hạn ⇒ còn OPEN", e.dossier(did)["status"] == "OPEN"
+          and e.dossier(did)["jobs"]["final"]["job"] == "issued")
+    e.drive("14:31", "14:32", "2026-10-13")
+    check("final 'issued' quá 6h ⇒ CONCLUDED no_dispatch + tin", e.dossier(did)["status"] == "CONCLUDED"
+          and e.dossier(did)["conclusion"]["source"] == "no_dispatch" and len(_concl_msgs(e)) == 3)
+    e.close()
+    # (a4) job final thật còn sống, quá hạn ⇒ đóng (job treo vô hạn không giữ hồ sơ OPEN)
+    e = Env({"XYZ": DROP})
+    _tick_to_final(e)
+    e.drive("08:30", "08:31", "2026-10-13")
+    e.jobs["Taylor_job6"] = "running"
+    e.drive("12:00", "12:01", "2026-10-13")
+    check("final job còn chạy, chưa quá hạn ⇒ OPEN", e.dossier(did)["status"] == "OPEN")
+    e.drive("14:31", "14:32", "2026-10-13")
+    check("final job treo quá 6h ⇒ đóng", e.dossier(did)["status"] == "CONCLUDED", e.dossier(did).get("conclusion"))
+    e.close()
+    # (a5) kết luận không bị trần 6 cập nhật/ngày chặn
+    e = Env({"XYZ": DROP})
+    _tick_to_final(e)
+    st = W.load_state(e.tmp, dt.date(2026, 10, 13))
+    W._stats(st)["dd_dispatches"] = W.MAX_DD_DISPATCH_PER_DAY
+    W._save(e.deps, dt.date(2026, 10, 13), st)
+    e.drive("08:30", "08:31", "2026-10-13")
+    check("chạm trần 6/ngày ⇒ hồ sơ kết luận VẪN được dispatch", "--kind final" in e.argv(e.n_dispatch())[1]
+          and e.dossier(did)["jobs"]["final"].get("job"), e.n_dispatch())
+    e.close()
+    # (b3) kill ngay sau khi lưu final_requested, trước _dd_dispatch ⇒ lượt sau tự đóng
+    e = Env({"XYZ": DROP})
+    _tick_to_final(e)
+    od = W._dd_dispatch
+
+    def kill_final(*a, **k):
+        if a[4] == "final":
+            raise W.RunKilled("SIGTERM trước dispatch final")
+        return od(*a, **k)
+    W._dd_dispatch = kill_final
+    killed = False
+    try:
+        e.drive("08:30", "08:30", "2026-10-13")
+    except W.RunKilled:
+        killed = True
+    finally:
+        W._dd_dispatch = od
+    check("kill trước dispatch final: đã kill + final_requested còn trên đĩa + chưa có job",
+          killed and e.dossier(did)["final_requested"] and "final" not in e.dossier(did)["jobs"])
+    e.drive("08:31", "08:32", "2026-10-13")
+    check("... lượt sau tự đóng CHƯA RÕ + tin 3 kênh, KHÔNG dispatch final",
+          e.dossier(did)["status"] == "CONCLUDED" and len(_concl_msgs(e)) == 3 and e.n_dispatch() == 5, e.n_dispatch())
+    e.close()
+    # (b4) kill GIỮA dispatch (đã ghi dispatch_attempted_at, chưa có job) ⇒ at-most-once + tự đóng
+    e = Env({"XYZ": DROP})
+    _tick_to_final(e)
+    odd = W.dispatch_dd
+
+    def kill_mid(dos, kind, *a, **k):
+        if kind == "final":
+            raise W.RunKilled("SIGTERM giữa dispatch final")
+        return odd(dos, kind, *a, **k)
+    W.dispatch_dd = kill_mid
+    try:
+        e.drive("08:30", "08:30", "2026-10-13")
+    except W.RunKilled:
+        pass
+    finally:
+        W.dispatch_dd = odd
+    e.drive("08:31", "08:32", "2026-10-13")
+    check("kill giữa dispatch final ⇒ lượt sau đóng, không dispatch lại (at-most-once)",
+          e.dossier(did)["status"] == "CONCLUDED" and e.n_dispatch() == 5 and len(_concl_msgs(e)) == 3, e.n_dispatch())
+    e.close()
+
+
+def test_reminders_exact():
+    did = "XYZ_2026-10-06"
+
+    def rem(e):
+        return [m for m in e.sent() if "NHẮC —" in m["msg"]]
+    # (c) vòng đời đầy đủ: ĐÚNG 2 nhắc × (discord, telegram) = 4 tin; cờ trong hồ sơ = [remind:3, remind:6]
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    for d in ("2026-10-07", "2026-10-08", "2026-10-09", "2026-10-12", "2026-10-13"):
+        e.drive("08:30", "08:31", d)
+        e.drive("09:15", "09:16", d)
+    r = rem(e)
+    check("vòng đời: đúng 4 tin nhắc (2 mốc × 2 kênh)", len(r) == 4, len(r))
+    check("vòng đời: mỗi (mốc, kênh) đúng 1 lần", sorted((("mốc 3" in m["msg"]), m["channel"]) for m in r)
+          == [(False, "discord"), (False, "telegram"), (True, "discord"), (True, "telegram")])
+    check("cờ hồ sơ reminders == [remind:3, remind:6]", e.dossier(did)["reminders"] == ["remind:3", "remind:6"],
+          e.dossier(did)["reminders"])
+    e.close()
+    # (b1) kill SAU khi tin vào hộp thư + state đã ghi, TRƯỚC khi đánh dấu hồ sơ ⇒ không mất, không gửi đôi
+    for slot in ("after_state_before_mark", "before_state"):
+        e = Env({"XYZ": DROP})
+        e.drive("09:15", "10:05", "2026-10-06")
+        e.drive("08:30", "08:31", "2026-10-07")
+        if slot == "after_state_before_mark":
+            osv, hit = W.save_dossier, {"n": 0}
+
+            def bad_dossier(sd, dos, osv=osv, hit=hit):
+                if "remind:3" in dos["reminders"] and not hit["n"]:
+                    hit["n"] = 1
+                    raise W.RunKilled("SIGTERM giữa nhắc (sau state, trước đánh dấu)")
+                return osv(sd, dos)
+            W.save_dossier = bad_dossier
+        else:
+            osv, hit = W._save, {"n": 0}
+
+            def bad_save(deps, day, st, osv=osv, hit=hit):
+                if any(m.get("key") == f"dd:{did}:remind:3" for m in st.get("outbox", [])) and not hit["n"]:
+                    hit["n"] = 1
+                    raise W.RunKilled("SIGTERM giữa nhắc (trước state)")
+                return osv(deps, day, st)
+            W._save = bad_save
+        try:
+            e.drive("08:30", "08:30", "2026-10-08")
+        except W.RunKilled:
+            pass
+        finally:
+            W.save_dossier = osv if slot == "after_state_before_mark" else W.save_dossier
+            if slot == "before_state":
+                W._save = osv
+        check(f"kill nhắc [{slot}]: đã kill", hit["n"] == 1)
+        e.drive("08:31", "08:40", "2026-10-08")
+        e.drive("09:15", "09:16", "2026-10-08")
+        m3 = [m for m in rem(e) if "mốc 3" in m["msg"]]
+        check(f"kill nhắc [{slot}]: mốc 3 tới đúng 2 kênh, mỗi kênh 1 lần, hồ sơ đã đánh dấu",
+              sorted(m["channel"] for m in m3) == ["discord", "telegram"]
+              and "remind:3" in e.dossier(did)["reminders"], [m["channel"] for m in m3])
+        e.close()
+    # (d1) nghỉ dài hơn 7 ngày: tick đầu tiên là ngày 10 ⇒ CHỈ final (không nhắc muộn), 1 dispatch
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.drive("08:30", "08:31", "2026-10-15")
+    d = e.dossier(did)
+    check("nghỉ >7 ngày: không nhắc muộn, final được xin đúng 1 lần",
+          not rem(e) and d["final_requested"] and e.n_dispatch() == 2 and "--kind final" in e.argv(2)[1], e.n_dispatch())
+    e.note(did, "final", T("09:30", "2026-10-15"), summary="x", label="NOISE")
+    e.drive("09:31", "09:32", "2026-10-15")
+    check("nghỉ >7 ngày: final ghi → CONCLUDED NOISE", e.dossier(did)["status"] == "CONCLUDED"
+          and e.dossier(did)["conclusion"]["label"] == "NOISE")
+    e.close()
+    # (d2) nghỉ tới ngày 7: cả mốc 3 và 6 đều tới hạn ⇒ KHÔNG bắn cùng tick (mốc 3 tick này, mốc 6 tick sau)
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.drive("08:30", "08:30", "2026-10-12")
+    check("tick đầu ngày 7: chỉ mốc 3", [("mốc 3" in m["msg"]) for m in rem(e)] == [True, True], len(rem(e)))
+    e.drive("08:31", "08:31", "2026-10-12")
+    check("tick sau: mốc 6, tổng 4 tin", len(rem(e)) == 4 and sum("mốc 6" in m["msg"] for m in rem(e)) == 2)
+    e.close()
+
+
+def test_labels_and_note_day():
+    e = Env({"XYZ": DROP}, uni=_uni())
+    e.mkt.by["XYZ"] = DROP
+    e.drive("09:15", "10:05", "2026-10-06")
+    check("nhãn tin = [CỔNG GIÁ], không còn [SHADOW]", e.sent() and all(m["msg"].startswith("[CỔNG GIÁ]")
+                                                                        for m in e.sent()), e.sent()[:1])
+    check("không còn câu 'bản live sẽ' trong tin T0", not any("bản live sẽ" in m["msg"] for m in e.sent()))
+    pr = e.argv(1)[1]
+    check("prompt dd-note truyền --day = ngày dispatch", "--day 2026-10-06" in pr, pr[-300:])
+    # dd-note --day tường minh: ghi đúng ngày của bước dù đồng hồ đã qua nửa đêm
+    did = "XYZ_2026-10-06"
+    a = types.SimpleNamespace(dossier=did, kind="daily", summary="s", label=None, major_event=False,
+                              detail_file=None, state_dir=e.tmp, day="2026-10-08")
+    W.cmd_dd_note(a, now=T("00:20", "2026-10-09"))
+    check("dd-note --day 2026-10-08 ⇒ daily_d3.json (không phải d4)",
+          os.path.exists(os.path.join(e.dossier(did)["dir"], "notes", "daily_d3.json")))
+    e.close()
+
+
+def harden_tests():
+    test_final_never_stuck()
+    test_reminders_exact()
+    test_labels_and_note_day()
+
+
+MUTANTS = [
+    ("bỏ dos[\"reminders\"].append", 'dos["reminders"].append(act)', "pass"),
+    ("bỏ nhánh rc!=0 của final", "if act == \"final\":\n                    _conclude_unclear(st, deps, now, dos, note)",
+     "if act == \"final\":\n                    pass"),
+    ("bỏ _stuck_final_reason", "why = _stuck_final_reason(dos, deps, now)\n        if why:", "why = None\n        if why:"),
+    ("bỏ health_alert daily hỏng", "health_alert(st, \"dd_dispatch\", f\"dispatch cập nhật hồ sơ", "(lambda *a: 0)(st, \"dd_dispatch\", f\"dispatch cập nhật hồ sơ"),
+    ("bỏ chặn 1 nhắc/tick", "if reminded:                 #", "if False:                 #"),
+]
+
+
+def run_mutants():
+    import subprocess
+    res = []
+    for name, old, new in MUTANTS:
+        d = tempfile.mkdtemp(prefix="ipw_mut_")
+        for f in ("intraday_cutloss_engine.py", "intraday_price_watch.py", "intraday_price_watch_selfcheck.py"):
+            shutil.copy(os.path.join(HERE, f), d)
+        pw = os.path.join(d, "intraday_price_watch.py")
+        src = open(pw, encoding="utf-8").read()
+        applied = src.count(old) == 1
+        open(pw, "w", encoding="utf-8").write(src.replace(old, new))
+        env = dict(os.environ, IPW_ONLY_HARDEN="1", IPW_MUTANT_RUN="1")
+        r = subprocess.run([sys.executable, "-I", os.path.join(d, "intraday_price_watch_selfcheck.py")],
+                           capture_output=True, text=True, env=env, timeout=600)
+        shutil.rmtree(d)
+        res.append((name, applied, r.returncode != 0))
+    return res
+
+
 def main():
     print("intraday_price_watch_selfcheck")
     os.fsync = lambda fd: None
-    test_trigger()
-    test_window_and_due()
-    env = test_lifecycle()
-    test_major_event_and_dead_jobs()
-    test_retrigger_marketwide_atmostonce()
-    test_eod_oos()
-    test_no_sell_path(env)
+    if os.environ.get("IPW_ONLY_HARDEN"):
+        harden_tests()
+    else:
+        test_trigger()
+        test_window_and_due()
+        env = test_lifecycle()
+        test_major_event_and_dead_jobs()
+        test_retrigger_marketwide_atmostonce()
+        test_eod_oos()
+        test_no_sell_path(env)
+        harden_tests()
+        if not os.environ.get("IPW_MUTANT_RUN") and "--no-mutants" not in sys.argv:
+            for name, applied, caught in run_mutants():
+                check(f"mutant [{name}] áp được và BỊ BẮT", applied and caught, f"applied={applied} caught={caught}")
     total = N_PASS + len(FAILS)
     print(f"\n{N_PASS}/{total} PASS" + (f" — {len(FAILS)} FAIL" if FAILS else ""))
     sys.exit(1 if FAILS else 0)
