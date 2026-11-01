@@ -252,6 +252,11 @@ def test_lifecycle():
     e.note(did, "quick", T("10:31", "2026-10-06"), summary="LẦN 2 không được ghi đè")
     check("dd-note ghi-một-lần", W._read_json(os.path.join(d["dir"], "notes", "quick.json"))["summary"]
           == "chưa thấy tin pháp lý")
+    try:
+        e.note(did, "daily", T("10:00", "2026-10-05"))
+        check("dd-note từ chối ngày trước T0", False)
+    except SystemExit:
+        check("dd-note từ chối ngày trước T0", True)
     check("DOSSIER.md có mục Ngày 1", "Ngày 1 — tóm tắt nhanh" in open(os.path.join(d["dir"], "DOSSIER.md")).read())
     e.drive("10:32", "10:34", "2026-10-06")
     q = [m for m in e.sent() if "TÓM TẮT NHANH NGÀY 1" in m["msg"]]

@@ -1302,6 +1302,8 @@ def cmd_dd_note(a, now=None):
         sys.exit(f"final cần --label BROKEN|NOISE|UNCLEAR, nhận {a.label}")
     t0 = dt.date.fromisoformat(a.dossier.rsplit("_", 1)[1])
     n = E.dd_day(t0, now.date())
+    if n < 1:
+        sys.exit(f"hồ sơ {a.dossier} mở ngày {t0} > hôm nay {now.date()} — sai --dossier?")
     np_ = os.path.join(p, "notes", note_name(a.kind, n))
     if os.path.exists(np_):
         print(f"đã có {np_} — giữ bản đầu (không ghi đè)")
