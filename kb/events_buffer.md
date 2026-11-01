@@ -875,3 +875,10 @@
 - [2026-11-01T11:04:23Z] Wags/heartbeat — Wags_20261101_110022: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20261101_110022", "source": "watcher"}
 - [2026-11-01T11:05:13Z] Wags/finding — work-tree dashboard vòng 2 xong (b6572ea8b): {"branch": "session/1566395318575169687", "worktree": "/home/trido/thanhdt/wt-1566395318575169687", "commit": "b6572ea8b", "fixed": "3 blocker (/file allowlist theo links+symlink+denylist; sanitize chỉ trường hiển thị; _rebuild gọi thẳng write_merged, bỏ adapter) + 5 major + minor + phần D", "verify": "PASS cả env -u TZ và TZ=America/New_York: work_tree_server_selfcheck 56, work_ledger 51, daily_decision_topic_wt 8, daily_dashboard 21, funnel 267; build thật 141 item, proj:*=98, id duy nhất; merged.json+ledger repo không đổi sau selfcheck", "not_done": "chưa merge, chưa cài systemd/crontab; cần arch-reviewer audit lại", "doc": "kb/projects/work-tree-dashboard-phaseB-20261101.md"}
 - [2026-11-01T11:05:23Z] Wags/heartbeat — Wags_20261101_110022: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20261101_110022", "source": "watcher"}
+
+## Consolidation 2026-11-01T12:05:50Z
+- [2026-11-01T12:05:10Z] DollarBill/heartbeat — DollarBill_20261101_120500: {"status": "in_progress", "note": "start SpaceX 11-02 plan"}
+- [2026-11-01T12:05:33Z] DollarBill/decision — plan-2026-11-02-ZaloPay: {"plan": "HOLD ALL 0 lenh", "state": "NEUTRAL", "note": "vong CN toi; MCH da giu du; DCM/PHP/PVT/TV2 FLAG_NO_ACK"}
+- [2026-11-01T12:05:41Z] DollarBill/decision — plan-2026-11-02-SpaceX: {"plan": "HOLD ALL 0 lenh", "reason": "MCH da giu 200cp (residual<1 lo); TV2/DCM/PHP/PVT cho DD (entry 04-05/11); NEUTRAL; chua duyet", "round": "sunday"}
+- [2026-11-01T11:15:55Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12846}
+- [2026-11-01T12:02:08Z] Winston/error — anomaly-flags-stale: {"consumer": "golive_recommend_v23", "date": "2026-11-01", "generated_at": "2026-10-30T05:45:10Z", "reason": "lần ghi cuối 2026-10-30 (ICT) ≠ ngày giao dịch 2026-11-01"}

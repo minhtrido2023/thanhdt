@@ -319,3 +319,9 @@
 
 ## Archived 2026-10-30 (keep=12 days=0 require_done=False)
 - [2026-10-24T08:28:46Z] [2026-10-24 ICT] Plan SpaceX 10-26 LAM LAI (egg=tien) XONG: 3 LAG HT1/SCL/VPB ~116,4tr, chuyen egg >=116,4tr truoc 09:05 T2; job DollarBill_20261024_082713; cho user duyet
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-26T12:06:34Z] [2026-10-26 19:xx ICT] Plan SpaceX 10-27 XONG: 1 lenh MUA SCL 300cp residual (HT1/VPB khop du 26/10); DNSE API auth 500 -> thieu gia live/active_nav; cho user duyet truoc 08:45 ICT 27/10; job DollarBill_20261026_120425
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-26T12:06:58Z] [2026-10-26 19:xx ICT] Plan ZaloPay 10-27 XONG: residual SCL200/VPB200 (job DollarBill_20261026_120424); DNSE API 500 auth lúc lập plan -> giá/số dư từ log, cần kiểm lại; cho user duyệt truoc 08:45 ICT 27/10
