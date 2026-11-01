@@ -25,3 +25,4 @@
 - [2026-11-01T10:14:25Z] 01/11 17:2x FPT: skeptic REFUTED (text; vùng 54-66k, conv 3 định nghĩa) → SKEPTIC_20261101.md; Taylor p2 (REPORT v2 + investor_report/) dispatched → Mike kiểm grep/PDF → email send_dd_report_email.py + ccdb-attachments + kb/projects/fpt-dd-20261101.md + nhả claim dd:FPT-20261101. Weekly limit từng chạm 11:49 (đã reset 17:00 ICT).
 - [2026-11-01T10:17:36Z] 01/11 17:2x SIP XONG: investor report đã email (kb/projects/sip-dd-20261101.md). Không còn việc mở.
 - [2026-11-01T10:21:20Z] 01/11 17:2x dashboard cây công việc: kế hoạch Fable xong (kb/projects/work-tree-dashboard-plan-20261101.md, nhánh session/1566395318575169687 trong wt-1566395318575169687, chưa merge). Chờ user trả lời 5 câu (kênh, nhánh, số liệu, !wt, backfill Haiku) rồi mới dựng Pha 1.
+- [2026-11-01T10:33:34Z] 01/11 17:4x FPT XONG: investor report đã email (kb/projects/fpt-dd-20261101.md). Không còn việc mở.
