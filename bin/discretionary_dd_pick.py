@@ -19,11 +19,16 @@ TRƯỚC khi dispatch; rc=2 ⇒ hết suất / sổ hỏng / không xác định
 """
 
 import argparse
+import contextlib
 import datetime as dt
+import fcntl
+import io
 import json
 import os
+import re
 import subprocess
 import sys
+import threading
 
 import numpy as np
 import pandas as pd
@@ -48,6 +53,7 @@ TOP_K = 8
 CAP = {True: {"light": ("day", 1), "full": ("day", 1)},        # mùa BCTC
        False: {"light": ("week", 1), "full": ("week", 2)}}     # ngoài mùa
 ESCALATE_MOS = 0.25
+LIVE_DEADLINE_S = 40              # trần cứng DCF live (cron funnel timeout 120s) — quá ⇒ fail-soft
 
 WINDOW_GATE = os.path.join(F.MIKE_ROOT, "bin", "fa_ratings_earnings_window_daily.sh")
 EXEC_DIR = os.path.join(F.DATA_DIR, "execution_logs")
@@ -63,6 +69,52 @@ LOG_COLS = ["asof", "rank", "ticker", "route", "rating", "score", "V", "E", "R",
 def pick_paths(base_dir=F.DATA_DIR):
     return {"log": os.path.join(base_dir, "discretionary_pick_log.csv"),
             "ledger": os.path.join(base_dir, "discretionary_dd_ledger.jsonl")}
+
+
+@contextlib.contextmanager
+def file_lock(path):
+    """flock độc quyền trên `<path>.lock` (file riêng, không bao giờ bị đọc như dữ liệu). Đóng fd ⇒ nhả
+    khóa kể cả khi tiến trình bị kill. Tuần tự hóa read-check-append giữa NHIỀU tiến trình."""
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    fd = os.open(path + ".lock", os.O_CREAT | os.O_RDWR, 0o644)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        os.close(fd)
+
+
+def append_atomic(path, text):
+    """Một lần os.write() lên fd O_APPEND ⇒ không xen kẽ/không dòng dở giữa các tiến trình; fsync."""
+    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+    try:
+        b = text.encode("utf-8")
+        n = os.write(fd, b)
+        if n != len(b):
+            raise OSError(f"ghi dở {n}/{len(b)} byte vào {path}")
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def with_deadline(fn, secs):
+    """Chạy fn() trong thread daemon, chờ tối đa `secs`. Quá hạn ⇒ TimeoutError (thread bỏ lại, daemon nên
+    không giữ tiến trình sống)."""
+    box = {}
+
+    def _t():
+        try:
+            box["v"] = fn()
+        except BaseException as e:                          # noqa: BLE001
+            box["e"] = e
+    th = threading.Thread(target=_t, daemon=True)
+    th.start()
+    th.join(secs)
+    if th.is_alive():
+        raise TimeoutError(f"quá trần {secs}s")
+    if "e" in box:
+        raise box["e"]
+    return box["v"]
 
 
 # ----------------------------------------------------------------------------- nguồn phụ
@@ -119,7 +171,12 @@ def read_ledger(path):
 def read_pick_log(path):
     if not os.path.exists(path):
         return pd.DataFrame(columns=LOG_COLS)
-    return pd.read_csv(path, dtype={"asof": str, "ticker": str})
+    df = pd.read_csv(path, dtype={"asof": str, "ticker": str})
+    if len(df) and "logged_at" in df:
+        # Khử trùng theo asof: nếu 1 asof bị ghi >1 lần (chạy song song cũ / lỗi), giữ ĐÚNG lô ghi đầu tiên.
+        first = df.groupby("asof")["logged_at"].transform("min")
+        df = df[df["logged_at"] == first].reset_index(drop=True)
+    return df
 
 
 def recent_dd(asof, log_df, ledger, research_dir=RESEARCH_DIR, days=DD_COOLDOWN_DAYS, upto=None):
@@ -139,14 +196,14 @@ def recent_dd(asof, log_df, ledger, research_dir=RESEARCH_DIR, days=DD_COOLDOWN_
             out.add(r["ticker"])
     if os.path.isdir(research_dir):
         for n in os.listdir(research_dir):
-            parts = n.split("_")
-            if len(parts) >= 3 and parts[0] == "dd" and len(parts[2]) == 8 and parts[2].isdigit():
+            parts = n.split("_")      # dd_X_20261015 · dd_blind2_X_20261015 · dd_X_reweight_20261015
+            if len(parts) >= 3 and parts[0] == "dd" and len(parts[-1]) == 8 and parts[-1].isdigit():
                 try:
-                    d = dt.datetime.strptime(parts[2], "%Y%m%d").date()
+                    d = dt.datetime.strptime(parts[-1], "%Y%m%d").date()
                 except ValueError:
                     continue
                 if lo <= d <= asof:
-                    out.add(parts[1])
+                    out.update(x for x in parts[1:-1] if re.fullmatch(r"[A-Z][A-Z0-9]{2,3}", x))
     return out
 
 
@@ -236,7 +293,7 @@ def score_pool(rating, fin, cands, banned, forensic, insider, held, excl, recent
 
     # E
     j = fin.reindex(df["ticker"]) if fin is not None else None
-    known = pd.to_datetime(j["known"]).to_numpy() if j is not None else np.full(len(df), np.datetime64("NaT"))
+    known = pd.to_datetime(j["known"]).to_numpy() if j is not None else np.full(len(df), np.datetime64("NaT", "ns"))   # không có tài chính ⇒ không BCTC mới ⇒ E=0 (§29)
     df["release_date"] = [None if pd.isna(k) else str(pd.Timestamp(k).date()) for k in known]
     age = (pd.Timestamp(asof) - pd.to_datetime(pd.Series(known, index=df.index))).dt.days
     p0 = j["NP_P0"].to_numpy(dtype=float) if j is not None else np.full(len(df), np.nan)
@@ -319,25 +376,27 @@ def slots(today, season, ledger):
 
 
 def claim(ticker, tier, today, base_dir=F.DATA_DIR, by="", job="", gate=WINDOW_GATE):
-    """Ghi 1 claim nếu còn suất. rc 0 = đã ghi; 2 = hết suất / sổ hỏng / tier sai (KHÔNG ghi)."""
+    """Ghi 1 claim nếu còn suất. rc 0 = đã ghi / đã claim từ trước (idempotent); 2 = hết suất / sổ hỏng /
+    tier sai (KHÔNG ghi). Read-check-append nằm trong flock ⇒ nhiều tiến trình song song không vượt trần."""
     if tier not in ("light", "full"):
         return 2, f"tier '{tier}' không hợp lệ (light|full)"
     path = pick_paths(base_dir)["ledger"]
-    try:
-        ledger = read_ledger(path)
-    except Exception as e:                                  # noqa: BLE001
-        return 2, f"sổ DD hỏng ({type(e).__name__}: {e}) — TỪ CHỐI (fail-closed), sửa {path}"
-    season, note = in_season(today, gate)
-    used, cap, unit = slots(today, season, ledger)[tier]
-    if used >= cap:
-        return 2, (f"HẾT SUẤT DD {tier}: {used}/{cap} mỗi {'ngày' if unit == 'day' else 'tuần'} ({note}) "
-                   f"— không dispatch")
-    rec = {"date": str(today), "ticker": ticker.upper(), "tier": tier, "season": season,
-           "by": by, "job": job, "at": dt.datetime.now(ICT).isoformat(timespec="seconds")}
-    with open(path, "a", encoding="utf-8") as f:            # append 1 dòng — không ghi đè lịch sử
-        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-        f.flush()
-        os.fsync(f.fileno())
+    with file_lock(path):
+        try:
+            ledger = read_ledger(path)
+        except Exception as e:                              # noqa: BLE001
+            return 2, f"sổ DD hỏng ({type(e).__name__}: {e}) — TỪ CHỐI (fail-closed), sửa {path}"
+        tk = ticker.upper()
+        if any(r["date"] == str(today) and r["ticker"] == tk and r["tier"] == tier for r in ledger):
+            return 0, f"đã claim {tk} {tier} hôm nay (không tiêu thêm suất)"
+        season, note = in_season(today, gate)
+        used, cap, unit = slots(today, season, ledger)[tier]
+        if used >= cap:
+            return 2, (f"HẾT SUẤT DD {tier}: {used}/{cap} mỗi {'ngày' if unit == 'day' else 'tuần'} ({note}) "
+                       f"— không dispatch")
+        rec = {"date": str(today), "ticker": tk, "tier": tier, "season": season,
+               "by": by, "job": job, "at": dt.datetime.now(ICT).isoformat(timespec="seconds")}
+        append_atomic(path, json.dumps(rec, ensure_ascii=False) + "\n")
     return 0, f"OK claim {rec['ticker']} {tier} ({used + 1}/{cap} mỗi {'ngày' if unit == 'day' else 'tuần'}, {note})"
 
 
@@ -384,7 +443,18 @@ def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DAT
              now=None, exec_dir=EXEC_DIR, research_dir=RESEARCH_DIR, gate=WINDOW_GATE,
              dcf_fn=None, live_fn=None, prices=None):
     """Kết quả dict cho result["dd_pick"]. Cùng asof đã có trong nhật ký ⇒ ĐỌC LẠI (không chấm lại,
-    không ghi lại) — chạy lại không đổi đề xuất đã hiện."""
+    không ghi lại) — chạy lại không đổi đề xuất đã hiện. write=True ⇒ cả bước kiểm-asof + chấm + append
+    nằm trong flock (2 tiến trình cùng asof: tiến trình sau chờ rồi ĐỌC LẠI lô của tiến trình trước)."""
+    kw = dict(base_dir=base_dir, write=write, now=now, exec_dir=exec_dir, research_dir=research_dir,
+              gate=gate, dcf_fn=dcf_fn, live_fn=live_fn, prices=prices)
+    if not write:
+        return _run_pick(rating, fin, cands, banned, forensic, insider, asof, **kw)
+    with file_lock(pick_paths(base_dir)["log"]):
+        return _run_pick(rating, fin, cands, banned, forensic, insider, asof, **kw)
+
+
+def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, write, now, exec_dir,
+              research_dir, gate, dcf_fn, live_fn, prices):
     now = now or dt.datetime.now(ICT)
     paths = pick_paths(base_dir)
     log_df = read_pick_log(paths["log"])
@@ -392,10 +462,11 @@ def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DAT
     prior = log_df[log_df["asof"] == str(asof)] if len(log_df) else log_df
     if len(prior):
         rec = [{k: _plain(v) for k, v in x.items()} for x in prior.sort_values("rank").to_dict(orient="records")]
+        _, _, rwarns = held_and_excluded(exec_dir)           # cảnh báo nguồn vẫn hiện khi đọc lại
         return {"asof": str(asof), "season": season, "season_note": snote, "replayed": True,
                 "picked": next((x for x in rec if str(x.get("picked")).lower() in ("true", "1")), None),
                 "reason": str(prior.iloc[0].get("reason") or ""),
-                "top": rec, "warnings": [],
+                "top": rec, "warnings": rwarns,
                 "prereg": PREREG}
     warns = []
     try:
@@ -423,8 +494,15 @@ def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DAT
         # Cổng lên tầng đầy đủ dùng MoS THẤP HƠN giữa số CP quý và số CP live (live ≤ quý luôn ⇒ fail-safe).
         if first["escalate_full"] and live_fn is not None:
             try:
-                lv = live_fn(first["ticker"], first["price"])
+                lv = with_deadline(lambda: live_fn(first["ticker"], first["price"], first["price_date"]),
+                                   LIVE_DEADLINE_S)
                 lm = lv.get("margin_of_safety") if lv.get("ok") else None
+            except TimeoutError:
+                # Fail-soft: giữ MoS không-live (số CP quý) nhưng gắn nhãn rõ là CHƯA xác nhận live.
+                lm = first["mos"]
+                top.loc[top.index[0], "labels"] = (first["labels"] + "|live_timeout_mos_quy_chua_xac_nhan").strip("|")
+                warns.append(f"bộ chọn: DCF live {first['ticker']} quá trần {LIVE_DEADLINE_S}s ⇒ dùng MoS "
+                             f"số quý (chưa xác nhận live)")
             except Exception as e:                          # noqa: BLE001
                 lm = None
                 warns.append(f"bộ chọn: DCF live {first['ticker']} lỗi ({type(e).__name__}) ⇒ không lên tầng đầy đủ")
@@ -442,23 +520,26 @@ def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DAT
                                             if "đang giữ" in r or "DD<" in r),
            "warnings": warns, "prereg": PREREG}
     if write and rows:
-        new = pd.DataFrame(rows, columns=LOG_COLS)
-        exists = os.path.exists(paths["log"])
-        with open(paths["log"], "a", encoding="utf-8", newline="") as f:   # append-only
-            new.to_csv(f, header=not exists, index=False)
-            f.flush()
-            os.fsync(f.fileno())
+        buf = io.StringIO()
+        pd.DataFrame(rows, columns=LOG_COLS).to_csv(buf, header=not os.path.exists(paths["log"]), index=False)
+        append_atomic(paths["log"], buf.getvalue())          # append-only, MỘT lần ghi
     return res
 
 
 def live_dcf_fn(asof):
+    """live_fn(ticker, price, price_date): price_date = PHIÊN THẬT của giá (T-1 cho asof=T), đúng hợp
+    đồng dcf_valuation.fair_value (R8/H1) — KHÔNG khai asof."""
     D = _dcf_engine()
-    return lambda t, p: D.fair_value(t, str(asof), price=p, price_date=str(asof))
+    return lambda t, p, price_date=None: D.fair_value(t, str(asof), price=p, price_date=price_date)
 
 
 # ----------------------------------------------------------------------------- dòng topic 08:00
 def _fmt_pct(x):
     return "—" if x is None or (isinstance(x, float) and np.isnan(x)) else f"{x * 100:+.0f}%"
+
+
+TOPIC_DISCLAIMER = ("xếp việc DD, KHÔNG phải tín hiệu mua — PIT 2016-26: không edge; "
+                    "ngưỡng MoS≥25% gần như không lọc")
 
 
 def topic_line(pick, today, base_dir=F.DATA_DIR, gate=WINDOW_GATE):
@@ -470,13 +551,13 @@ def topic_line(pick, today, base_dir=F.DATA_DIR, gate=WINDOW_GATE):
     p = pick.get("picked")
     if not p:
         return f"🔎 Mã DD hôm nay: không đề xuất ({pick.get('reason')}) · {sl}" + (f" · ⚠️ {w}" if w else "")
-    tier = ("ĐỀ XUẤT lên DD đầy đủ nếu tầng nhẹ sạch (MoS≥25% robust)" if str(p.get("escalate_full")).lower() == "true"
+    tier = ("có thể xét DD đầy đủ nếu tầng nhẹ sạch (MoS≥25% robust)" if str(p.get("escalate_full")).lower() == "true"
             else "chỉ DD tầng nhẹ (chưa đạt ngưỡng chênh giá)")
     why = (f"điểm {float(p['score']):.2f} = V {float(p['V']):.2f}·E {float(p['E']):.2f}·R {float(p['R']):.2f}; "
            f"MoS DCF {_fmt_pct(_f(p.get('mos')))}, rating {int(float(p['rating']))}"
            + (f", BCTC {p['release_date']} YoY {_fmt_pct(_f(p.get('g_yoy')))}" if "bctc_moi" in str(p.get("labels")) else "")
            + (f" [{p['labels']}]" if p.get("labels") and str(p.get("labels")) != "nan" else ""))
-    return (f"🔎 Mã DD hôm nay: **{p['ticker']}** — {tier}; {why} · {sl}"
+    return (f"🔎 Mã DD hôm nay: **{p['ticker']}** ({TOPIC_DISCLAIMER}) — {tier}; {why} · {sl}"
             + (f" · ⚠️ {w}" if w else "") + " · Mike quyết, KHÔNG tự dispatch; claim suất bằng "
             "`discretionary_dd_pick.py --claim <MÃ> --tier light|full` trước khi dispatch")
 

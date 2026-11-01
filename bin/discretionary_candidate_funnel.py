@@ -1211,21 +1211,8 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         "n_lane_c_seasonal": int(((cands["lane"] == "C") & cands["seasonal"].eq(True)).sum()),
         "state_pruned": pruned,
     }
-    # Bộ chọn mã DD v2 (PREREG discretionary_dd_pick_v2_20261101) — cô lập như làn C: lỗi ⇒ cảnh báo,
-    # funnel A/B/C vẫn chạy. Chỉ chạy khi state ghi được (không sanity-fail / asof không lùi): nhật ký
-    # chọn là PIT append-only, không được ghi trên dữ liệu hỏng.
     if DD_PICK:
         result["dd_pick"] = None
-    if DD_PICK and state_ok:
-        try:
-            import discretionary_dd_pick as P
-            kw = dict(pick_kw or {})
-            kw.setdefault("live_fn", P.live_dcf_fn(asof))
-            result["dd_pick"] = P.run_pick(rating, fin, cands, banned, forensic, insider, asof,
-                                           base_dir=base_dir, write=write, now=now, **kw)
-        except Exception as e:                              # noqa: BLE001 — cô lập bộ chọn
-            warnings.append(f"bộ chọn mã DD lỗi ({type(e).__name__}: {str(e)[:200]}) — KHÔNG có đề "
-                            f"xuất DD phiên này")
     if write:
         # asof đi lùi hoặc dữ liệu dưới sàn ⇒ KHÔNG đụng snapshot PIT lẫn log đo forward excess
         # của ngày cũ (ghi đè = rò rỉ tương lai vào lịch sử, arch-review r2 #1/#5).
@@ -1238,6 +1225,22 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         _atomic_write_text(paths["result"], json.dumps(result, ensure_ascii=False, indent=1))
         if state_ok:
             _atomic_write_text(paths["state"], json.dumps(new_state, ensure_ascii=False, indent=1))
+    # Bộ chọn mã DD v2 (PREREG discretionary_dd_pick_v2_20261101) — chạy SAU khi snapshot/result/state làn
+    # A/B/C đã ghi: đường ghi A/B/C không còn phụ thuộc BQ/DCF live (cron timeout 120s). Cô lập như làn C:
+    # lỗi ⇒ cảnh báo; DCF live có trần cứng (P.LIVE_DEADLINE_S) fail-soft. Chỉ chạy khi state ghi được
+    # (không sanity-fail / asof không lùi): nhật ký chọn là PIT append-only, không ghi trên dữ liệu hỏng.
+    if DD_PICK and state_ok:
+        try:
+            import discretionary_dd_pick as P
+            kw = dict(pick_kw or {})
+            kw.setdefault("live_fn", P.live_dcf_fn(asof))
+            result["dd_pick"] = P.run_pick(rating, fin, cands, banned, forensic, insider, asof,
+                                           base_dir=base_dir, write=write, now=now, **kw)
+        except Exception as e:                              # noqa: BLE001 — cô lập bộ chọn
+            warnings.append(f"bộ chọn mã DD lỗi ({type(e).__name__}: {str(e)[:200]}) — KHÔNG có đề "
+                            f"xuất DD phiên này")
+        if write:                                           # cập nhật result atomic (có dd_pick/warnings)
+            _atomic_write_text(paths["result"], json.dumps(result, ensure_ascii=False, indent=1))
     return result
 
 

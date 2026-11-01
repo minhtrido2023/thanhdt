@@ -1261,7 +1261,7 @@ def test_dd_pick_integration(tmp):
     mos = {t: 0.1 + 0.8 * i / max(1, len(tick) - 1) for i, t in enumerate(tick)}
     kw = dict(dcf_fn=lambda t, p: {"ok": True, "margin_of_safety": mos[t], "fair_value_ps": p / (1 - mos[t]),
                                    "sensitivity": {}},
-              live_fn=lambda t, p: {"ok": True, "margin_of_safety": 0.0},
+              live_fn=lambda t, p, pdt=None: {"ok": True, "margin_of_safety": 0.0},
               prices={t: (10000.0, dt.date(2026, 10, 20)) for t in tick},
               exec_dir=os.path.join(tmp, "no_exec"), research_dir=os.path.join(tmp, "no_research"), gate=gate)
     now = dt.datetime(2026, 10, 20, 19, 37, tzinfo=ICT)

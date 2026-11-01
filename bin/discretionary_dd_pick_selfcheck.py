@@ -4,9 +4,11 @@
 Chạy: python3 bin/discretionary_dd_pick_selfcheck.py   (chạy cả dưới `env -u TZ` và TZ=America/New_York)."""
 import datetime as dt
 import json
+import multiprocessing as mp
 import os
 import sys
 import tempfile
+import time
 
 import numpy as np
 import pandas as pd
@@ -33,7 +35,7 @@ NOW = dt.datetime(2026, 10, 30, 19, 37, tzinfo=ICT)
 def gate(tmp, mode):
     """Cổng mùa giả: 'RUN' / 'SKIP' / 'BROKEN' (rc 1)."""
     p = os.path.join(tmp, f"gate_{mode}.sh")
-    body = {"RUN": 'echo RUN', "SKIP": 'echo "SKIP: month=12 ngoai cua so"', "BROKEN": 'echo boom >&2; exit 1'}[mode]
+    body = {"SLOWRUN": 'sleep 0.3; echo RUN', "RUN": 'echo RUN', "SKIP": 'echo "SKIP: month=12 ngoai cua so"', "BROKEN": 'echo boom >&2; exit 1'}[mode]
     with open(p, "w") as f:
         f.write(f"#!/bin/bash\n{body}\n")
     return p
@@ -53,6 +55,9 @@ def rating_df():
         ("BNX", "BANK", 3, 0.1, 1.0, None, 50.0, 8, 0.125, None),
         ("R4", "COMPOUNDER", 4, 0.1, 1.0, None, 5.0, 3, 0.33, 1.0),    # rating 4 ⇒ ngoài vũ trụ
         ("ILQ", "COMPOUNDER", 1, 0.1, 1.0, None, 0.1, 3, 0.33, 1.0),   # thanh khoản thấp
+        ("EXC", "COMPOUNDER", 1, 0.1, 1.0, None, 5.0, 4, 0.25, 1.0),   # excluded_tickers (ZaloPay)
+        ("FOR", "COMPOUNDER", 1, 0.1, 1.0, None, 5.0, 4, 0.25, 1.0),   # forensic
+        ("INS", "COMPOUNDER", 1, 0.1, 1.0, None, 5.0, 4, 0.25, 1.0),   # insider
     ]
     df = pd.DataFrame(rows, columns=["ticker", "route", "rating", "ROE_Min3Y", "CF_OA_3Y", "redflag",
                                      "liq_bn", "PE", "earn_yield", "cfo_np"])
@@ -66,7 +71,8 @@ def fin_df():
         "AAA": (150, 120, 100, k_new), "BBB": (200, 150, 100, k_new), "CCC": (300, 200, 100, k_new),
         "HLD": (300, 200, 100, k_new), "REC": (300, 200, 100, k_new), "BAN": (300, 200, 100, k_new),
         "LOW": (500, 100, 50, k_new), "BNK": (120, 110, 100, k_old), "BNX": (130, 110, 100, k_old),
-        "R4": (100, 90, 80, k_new), "ILQ": (100, 90, 80, k_new)}
+        "R4": (100, 90, 80, k_new), "ILQ": (100, 90, 80, k_new),
+        "EXC": (300, 200, 100, k_new), "FOR": (300, 200, 100, k_new), "INS": (300, 200, 100, k_new)}
     f = pd.DataFrame([(t, "2026Q3", v[3], v[0], v[1], v[2]) for t, v in d.items()],
                      columns=["ticker", "quarter", "known", "NP_P0", "NP_P1", "NP_P4"]).set_index("ticker")
     f["season_norm"], f["seasonal"], f["season_eta2"], f["np_missing"] = 0.0, False, np.nan, False
@@ -74,7 +80,7 @@ def fin_df():
 
 
 MOS = {"AAA": 0.50, "BBB": 0.30, "CCC": 0.60, "HLD": 0.9, "REC": 0.9, "BAN": 0.9, "LOW": 0.70,
-       "R4": 0.9, "ILQ": 0.9}
+       "R4": 0.9, "ILQ": 0.9, "EXC": 0.9, "FOR": 0.9, "INS": 0.9}
 
 
 def dcf_fn(t, p):
@@ -90,7 +96,7 @@ def setup(tmp):
     ex = os.path.join(tmp, "exec")
     os.makedirs(ex, exist_ok=True)
     for a, pos, excl in (("SpaceX", [{"ticker": "HLD", "qty": 100}, {"ticker": "ZZZ", "qty": 0}], []),
-                         ("ZaloPay", [], ["CCC_NOT"])):
+                         ("ZaloPay", [], ["EXC"])):
         with open(os.path.join(ex, f"active_nav_{a}.json"), "w") as f:
             json.dump({"positions": pos, "excluded_tickers": excl}, f)
     rd = os.path.join(tmp, "research")
@@ -101,11 +107,12 @@ def setup(tmp):
     return ex, rd, base
 
 
-def run(tmp, base, ex, rd, gmode="RUN", asof=ASOF, now=NOW, live_fn=None, write=True):
+def run(tmp, base, ex, rd, gmode="RUN", asof=ASOF, now=NOW, live_fn=None, write=True, dcf=None):
     prices = {t: (10000.0, asof) for t in rating_df()["ticker"]}
     cands = pd.DataFrame({"ticker": ["CCC"], "lane": ["A"]})
-    return P.run_pick(rating_df(), fin_df(), cands, {"BAN"}, {}, {}, asof, base_dir=base, write=write,
-                      now=now, exec_dir=ex, research_dir=rd, gate=gate(tmp, gmode), dcf_fn=dcf_fn,
+    return P.run_pick(rating_df(), fin_df(), cands, {"BAN"}, {"FOR": "x"}, {"INS": "y"}, asof, base_dir=base,
+                      write=write, now=now, exec_dir=ex, research_dir=rd, gate=gate(tmp, gmode),
+                      dcf_fn=dcf or dcf_fn,
                       live_fn=live_fn, prices=prices)
 
 
@@ -114,7 +121,7 @@ def t_scoring():
         ex, rd, base = setup(tmp)
         r = run(tmp, base, ex, rd)
         tk = [x["ticker"] for x in r["top"]]
-        for bad in ("HLD", "REC", "BAN", "R4", "ILQ"):
+        for bad in ("HLD", "REC", "BAN", "R4", "ILQ", "EXC", "FOR", "INS"):
             ok(bad not in tk, f"{bad} phải bị loại khỏi pool, top={tk}")
         ok("AAA" in tk, "AAA (DD cũ > 90 ngày) KHÔNG bị chặn")
         ok(r["pool_n"] == 6, f"pool_n 6, được {r['pool_n']}")
@@ -135,6 +142,7 @@ def t_scoring():
         ok([x["score"] for x in r["top"]] == sorted([x["score"] for x in r["top"]], reverse=True), "thứ tự score")
         ok(r["picked"]["ticker"] == r["top"][0]["ticker"] and r["picked"]["picked"] is True, "pick = top-1")
         ok(sum(1 for x in r["top"] if x["picked"]) == 1, "đúng 1 picked")
+        ok("dropped_held_or_recent" in r and r["dropped_n"] == 6, f"dropped_n {r['dropped_n']} (HLD,REC,BAN,EXC,FOR,INS)")
         json.dumps(r, ensure_ascii=False)                    # serialize được (result json)
         ok(True, "json")
 
@@ -231,11 +239,11 @@ def t_live_downgrade_and_topic():
 def _t_live():
     with tempfile.TemporaryDirectory() as tmp:
         ex, rd, base = setup(tmp)
-        r0 = run(tmp, base, ex, rd, write=False, live_fn=lambda t, p: {"ok": True, "margin_of_safety": 0.9})
+        r0 = run(tmp, base, ex, rd, write=False, live_fn=lambda t, p, pdt=None: {"ok": True, "margin_of_safety": 0.9})
         ok(r0["picked"]["ticker"] == "AAA" and r0["picked"]["escalate_full"] is True, "AAA escalate khi live đạt")
     with tempfile.TemporaryDirectory() as tmp:
         ex, rd, base = setup(tmp)
-        r = run(tmp, base, ex, rd, live_fn=lambda t, p: {"ok": True, "margin_of_safety": 0.10})
+        r = run(tmp, base, ex, rd, live_fn=lambda t, p, pdt=None: {"ok": True, "margin_of_safety": 0.10})
         ok(r["picked"]["escalate_full"] is False and "live_mos_0.10" in r["picked"]["labels"],
            "MoS live < 25% ⇒ hạ tầng đầy đủ")
         line = P.topic_line(r, ASOF + dt.timedelta(days=3), base, gate(tmp, "RUN"))
@@ -249,7 +257,7 @@ def _t_live():
             raise RuntimeError("x")
         r = run(tmp, base, ex, rd, live_fn=boom)
         ok(r["picked"]["escalate_full"] is False and any("DCF live" in w for w in r["warnings"]), "live lỗi ⇒ không escalate + cảnh báo")
-        r2 = run(tmp, base, ex, rd, live_fn=lambda t, p: {"ok": True, "margin_of_safety": 0.9})
+        r2 = run(tmp, base, ex, rd, live_fn=lambda t, p, pdt=None: {"ok": True, "margin_of_safety": 0.9})
         ok(r2["replayed"], "replay")
 
 
@@ -265,6 +273,129 @@ def t_dd_after_asof():
         ok("AAA" in [x["ticker"] for x in r["top"]], "thư mục ngày tương lai không chặn")
 
 
+def _slow_dcf(t, p):
+    time.sleep(0.3)
+    return dcf_fn(t, p)
+
+
+def _w_claim(args):
+    tmp, base, tk = args
+    return P.claim(tk, "full", dt.date(2027, 1, 12), base, gate=gate(tmp, "SLOWRUN"))[0]
+
+
+def _w_pick(args):
+    tmp, base, ex, rd = args
+    r = run(tmp, base, ex, rd, dcf=_slow_dcf)
+    return (r["replayed"], r["picked"]["ticker"])
+
+
+def t_concurrency():
+    ctx = mp.get_context("fork")
+    with tempfile.TemporaryDirectory() as tmp:
+        base = os.path.join(tmp, "d")
+        os.makedirs(base)
+        with ctx.Pool(3) as pool:                            # 3 TIẾN TRÌNH claim full cùng ngày, mùa (cap 1)
+            rcs = pool.map(_w_claim, [(tmp, base, t) for t in ("m1", "m2", "m3")])
+        ok(sorted(rcs) == [0, 2, 2], f"3 tiến trình claim song song: đúng 1 rc=0, được {rcs}")
+        ok(sum(1 for _ in open(P.pick_paths(base)["ledger"])) == 1, "sổ đúng 1 dòng")
+        # claim lại cùng (date,ticker,tier) ⇒ rc=0, không tiêu thêm
+        won = [t for t, rc in zip(("m1", "m2", "m3"), rcs) if rc == 0][0]
+        rc, msg = P.claim(won, "full", dt.date(2027, 1, 12), base, gate=gate(tmp, "RUN"))
+        ok(rc == 0 and "đã claim" in msg, f"claim lại cùng bộ ba ⇒ rc=0 ({msg})")
+        ok(sum(1 for _ in open(P.pick_paths(base)["ledger"])) == 1, "claim lại không ghi thêm")
+        ok(P.claim("m9", "full", dt.date(2027, 1, 12), base, gate=gate(tmp, "RUN"))[0] == 2,
+           "claim lại không làm hở suất cho mã khác")
+    with tempfile.TemporaryDirectory() as tmp:
+        ex, rd, base = setup(tmp)
+        with ctx.Pool(2) as pool:                            # 2 run_pick song song cùng asof
+            res = pool.map(_w_pick, [(tmp, base, ex, rd)] * 2)
+        log = pd.read_csv(P.pick_paths(base)["log"], dtype={"asof": str})
+        ok(sorted(r[0] for r in res) == [False, True], f"1 run chấm + 1 run đọc lại: {res}")
+        ok(len(set(r[1] for r in res)) == 1, "2 run cùng 1 picked")
+        ok(log["asof"].nunique() == 1 and len(log) >= 5, f"1 bộ top-K, {len(log)} dòng")
+        ok(int(log["picked"].astype(str).str.lower().isin(["true", "1"]).sum()) == 1, "đúng 1 picked trong log")
+        ok(log["logged_at"].nunique() == 1, "1 lô ghi")
+        # khử trùng theo asof khi log đã có 2 lô (hỏng cũ): giữ lô đầu
+        lp = P.pick_paths(base)["log"]
+        dup = pd.read_csv(lp, dtype={"asof": str, "ticker": str})
+        dup["logged_at"] = "2099-01-01T00:00:00+07:00"
+        dup["picked"] = False
+        dup.to_csv(lp, mode="a", header=False, index=False)
+        rd2 = P.read_pick_log(lp)
+        ok(len(rd2) == len(log) and rd2["picked"].astype(str).str.lower().eq("true").sum() == 1,
+           "read_pick_log khử trùng theo asof, giữ lô đầu")
+        # append CSV = MỘT lần ghi, dòng cuối kết thúc bằng \n
+        ok(open(lp, "rb").read().endswith(b"\n"), "log kết thúc bằng newline")
+
+
+def t_price_date_and_timeout():
+    with tempfile.TemporaryDirectory() as tmp:
+        ex, rd, base = setup(tmp)
+        seen = {}
+
+        def live(t, p, pdt=None):
+            seen["pdt"] = pdt
+            return {"ok": True, "margin_of_safety": 0.9}
+        MOS["AAA"] = 0.95
+        try:
+            prices = {t: (10000.0, dt.date(2026, 10, 29)) for t in rating_df()["ticker"]}   # giá T-1
+            cands = pd.DataFrame({"ticker": ["CCC"], "lane": ["A"]})
+            P.run_pick(rating_df(), fin_df(), cands, {"BAN"}, {"FOR": "x"}, {"INS": "y"}, ASOF, base_dir=base,
+                       write=False, now=NOW, exec_dir=ex, research_dir=rd, gate=gate(tmp, "RUN"),
+                       dcf_fn=dcf_fn, live_fn=live, prices=prices)
+            ok(seen.get("pdt") == "2026-10-29", f"live nhận price_date=phiên thật T-1, không phải asof: {seen}")
+            # trần thời gian: live treo ⇒ fail-soft, nhãn rõ, cảnh báo, không ném
+            old = P.LIVE_DEADLINE_S
+            P.LIVE_DEADLINE_S = 0.2
+            try:
+                t0 = time.time()
+                r = P.run_pick(rating_df(), fin_df(), cands, {"BAN"}, {"FOR": "x"}, {"INS": "y"}, ASOF,
+                               base_dir=base, write=False, now=NOW, exec_dir=ex, research_dir=rd,
+                               gate=gate(tmp, "RUN"), dcf_fn=dcf_fn,
+                               live_fn=lambda t, p, pdt=None: time.sleep(5), prices=prices)
+                ok(time.time() - t0 < 3, "live treo bị cắt theo trần")
+            finally:
+                P.LIVE_DEADLINE_S = old
+            ok("live_timeout" in r["picked"]["labels"] and any("quá trần" in w for w in r["warnings"]),
+               f"timeout ⇒ nhãn + cảnh báo: {r['picked']['labels']}")
+        finally:
+            MOS["AAA"] = 0.50
+    D = P._dcf_engine()
+    import inspect
+    ok("price_date" in inspect.signature(D.fair_value).parameters, "dcf_valuation.fair_value còn tham số price_date")
+
+
+def t_fin_none():
+    """fin=None ⇒ không BCTC mới ⇒ E=0 cho mọi mã, không ném (nhánh NaT)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        ex, rd, base = setup(tmp)
+        prices = {t: (10000.0, ASOF) for t in rating_df()["ticker"]}
+        r = P.run_pick(rating_df(), None, pd.DataFrame({"ticker": [], "lane": []}), {"BAN"}, {}, {}, ASOF,
+                       base_dir=base, write=False, now=NOW, exec_dir=ex, research_dir=rd,
+                       gate=gate(tmp, "RUN"), dcf_fn=dcf_fn, prices=prices)
+        ok(len(r["top"]) > 0 and all(x["E"] == 0.0 for x in r["top"]), "fin=None ⇒ E=0, vẫn chọn được theo V+R")
+        ok(all("bctc_moi" not in x["labels"] for x in r["top"]), "fin=None ⇒ không nhãn bctc_moi")
+
+
+def t_recent_names_and_topic():
+    with tempfile.TemporaryDirectory() as tmp:
+        rd = os.path.join(tmp, "r")
+        for n in ("dd_blind2_BBB_20261015", "dd_CCC_reweight_20261016", "dd_AAA_20260601", "dd_HPG_20261020"):
+            os.makedirs(os.path.join(rd, n))
+        got = P.recent_dd(ASOF, pd.DataFrame(columns=P.LOG_COLS), [], rd)
+        ok(got == {"BBB", "CCC", "HPG"}, f"recent_dd bắt cả blind2/reweight: {got}")
+    with tempfile.TemporaryDirectory() as tmp:
+        ex, rd, base = setup(tmp)
+        line = P.topic_line(run(tmp, base, ex, rd), ASOF, base, gate(tmp, "RUN"))
+        ok("KHÔNG phải tín hiệu mua" in line and "không edge" in line and "ĐỀ XUẤT lên DD đầy đủ" not in line,
+           f"nhãn cố định: {line[:200]}")
+        # replay giữ warnings
+        run(tmp, base, ex, rd)
+        os.remove(os.path.join(ex, "active_nav_SpaceX.json"))
+        r3 = run(tmp, base, ex, rd)
+        ok(r3["replayed"] and any("không đọc được" in w for w in r3["warnings"]), "replay vẫn mang cảnh báo nguồn")
+
+
 def t_held_missing():
     with tempfile.TemporaryDirectory() as tmp:
         h, e, w = P.held_and_excluded(os.path.join(tmp, "nope"))
@@ -273,7 +404,8 @@ def t_held_missing():
 
 if __name__ == "__main__":
     for fn in (t_scoring, t_append_only_replay, t_offseason_week, t_claims, t_live_downgrade_and_topic,
-               t_held_missing, t_dd_after_asof):
+               t_held_missing, t_dd_after_asof, t_concurrency, t_price_date_and_timeout, t_fin_none,
+               t_recent_names_and_topic):
         fn()
     print(f"TZ={os.environ.get('TZ', '<unset>')} checks={N[0]} fails={len(FAILS)}")
     sys.exit(1 if FAILS else 0)
