@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cây công việc</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <h1>Cây công việc</h1>
+  <span id="updated" class="muted"></span>
+  <input id="q" type="search" placeholder="Tìm kiếm…" autocomplete="off">
+  <div id="chips"></div>
+</header>
+<main>
+  <section id="attention"></section>
+  <nav id="tabs"><button data-tab="tree" class="on">Cây</button><button data-tab="nogo">Thư viện NO-GO</button></nav>
+  <section id="tree"></section>
+  <section id="nogo" hidden></section>
+</main>
+<aside id="panel" hidden></aside>
+<button id="fab">＋ Đề xuất hướng nghiên cứu mới</button>
+<dialog id="newdlg">
+  <form method="dialog" id="newform">
+    <h3>Đề xuất hướng nghiên cứu mới</h3>
+    <label>Nhánh <select id="n_branch"></select></label>
+    <label>Tiêu đề <input id="n_title" maxlength="200" required></label>
+    <label>Tóm tắt (≤160 ký tự) <textarea id="n_summary" maxlength="160" rows="3"></textarea></label>
+    <div class="row"><button type="button" id="n_cancel">Huỷ</button><button type="submit" id="n_ok">Gửi</button></div>
+  </form>
+</dialog>
+<div id="toast" hidden></div>
+<script src="/app.js"></script>
+</body>
+</html>

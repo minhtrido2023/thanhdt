@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -87,6 +88,39 @@ def user_wait_section():
     return [ln.strip()[2:].strip() for ln in m.group(1).splitlines() if ln.strip().startswith("- ")]
 
 
+def work_tree_section(now, root=None):
+    """1 dòng link webapp Work-Tree + 4 con số, đọc state/work_tree/merged.json. Thiếu merged.json / token /
+    JSON hỏng ⇒ None (bỏ dòng, KHÔNG làm hỏng bản tin)."""
+    root = root or ROOT
+    try:
+        with open(os.path.join(root, "state", "work_tree", "merged.json"), encoding="utf-8") as f:
+            c = json.load(f)["counts"]
+        with open(os.path.join(root, "secrets", "work_tree_token"), encoding="utf-8") as f:
+            token = f.read().strip()
+        if not token:
+            return None
+        base = "http://192.168.100.7:8610"
+        try:
+            with open(os.path.join(root, "state", "work_tree", "public_url.txt"), encoding="utf-8") as f:
+                pub = f.read().strip()  # URL tunnel công khai (do bin/work_tree_tunnel.sh ghi, xoá khi tunnel tắt)
+            if pub.startswith("https://"):
+                base = pub
+        except Exception:
+            pass
+        try:
+            with open(os.path.join(root, "kb", "work_tree_config.json"), encoding="utf-8") as f:
+                _b = json.load(f).get("base_url")
+            if _b and not base.startswith("https://"):
+                base = _b
+        except Exception:
+            pass
+        nums = [int(c[k]) for k in ("need_user", "overdue", "recent", "inbox")]
+    except Exception:
+        return None
+    return (f"🌳 **Cây việc**: chờ anh quyết **{nums[0]}** · quá hạn **{nums[1]}** · mới 7 ngày **{nums[2]}** · "
+            f"anh đã gửi chờ xử lý **{nums[3]}** → {base.rstrip('/')}/?k={urllib.parse.quote(token, safe='')}")
+
+
 def build(now):
     pend = pending_questions()
     noise = [p for p in pend if p["topic"].startswith("selfcheck-red")]
@@ -94,6 +128,9 @@ def build(now):
     real.sort(key=lambda p: (-p["age_days"], p["topic"]))
     det = question_details(real)
     lines = [f"**Việc cần anh quyết — {now:%d.%m.%Y}**", ""]
+    wt = work_tree_section(now)
+    if wt:
+        lines += [wt, ""]
 
     wait = user_wait_section()
     if wait:
