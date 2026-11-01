@@ -28,3 +28,7 @@
 - [2026-11-01T04:27:02Z] ĐANG DỞ: DD SIP job Taylor_20261101_041613 — số đọc xong calc/notes_read.md, cbtt_facts.md, comps_bq.csv | NEXT: valuation.py, đọc Bobby KCN, REPORT/GAPS, bus
 - [2026-11-01T04:29:57Z] ĐANG DỞ: DD FPT job Taylor_20261101_042936 — research/dd_FPT_20261101/ | NEXT: đọc skill, src, PREREG cũ, tìm BCTC Q3
 - [2026-11-01T04:30:03Z] [dd-HHS-v2+investor 01/11] XONG job Taylor_20261101_041414: REPORT v2 (co so TCH, tam ≈9.960-10.230, gia -5..-8%) + investor_report/ (10tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
+- [2026-11-01T04:31:30Z] ĐANG DỞ: DD TV2 v3+investor job Taylor_20261101_043110 — research/dd_TV2_20261101/ | NEXT: đọc SKEPTIC, sửa REPORT_v3, rồi investor_report
+- [2026-11-01T04:35:22Z] ĐANG DỞ: DD TV2 job Taylor_20261101_043110 — A xong REPORT_v3 (kỳ vọng 20.700, vùng 17,1-25,3k, giá +31%) | NEXT: investor_report theo khuôn TCH
+- [2026-11-01T04:35:59Z] ĐANG DỞ: DD FPT job Taylor_20261101_042936 — calc/notes_q3_bctc.md + notes_disclosures.md xong | NEXT: spot-check CF p10, BQ/DNSE, valuation, REPORT
+- [2026-11-01T04:36:04Z] [dd-SIP 01/11] XONG job Taylor_20261101_041613: research/dd_SIP_20261101/REPORT.md + GAPS.md (chua commit) — vung hop ly 44-58k tam ~51,5k vs 48.350 nua duoi; WARNING trung binh (cho vay CTCK 4.223 khong TSDB 69%, TP T&T 1.000,7); VRG khong phai CD lon — CHO Mike skeptic/investor report

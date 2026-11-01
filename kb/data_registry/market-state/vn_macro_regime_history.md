@@ -26,6 +26,7 @@ last_update_15: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành thép V
 last_update_16: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành ngân hàng TM VN (nhóm tư nhân lớn): ADMIN_GATED ~0,45 (room ~15%, CV 9608/9736 ép huy động −0,5pp + chế tài room 2027, TT 50 LDR 95% từ 01/12) / CYCLICAL ~0,35 (nhóm 2 tăng 2 quý, bao phủ 95→~80%) / STRUCTURAL ~0,20 (LDR ~114%, CASA 20,2%, Basel III) — ambiguous ~60/40; FORECAST F1-F12 tới 2027-04-30; chi tiết ở file con sector_read_ngan_hang_20261031.md)
 last_update_17: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành BĐS nhà ở/khu đô thị phía Bắc (HN, HP, vùng lân cận): CYCLICAL ~0,45 / STRUCTURAL ~0,35 / ADMIN_GATED ~0,20, ambiguous ~55/45; Hà Nội ĐẦU→GIỮA pha suy khối lượng, ĐẦU pha suy giá; HP trễ 2-4 quý; FORECAST F1-F14 tới 2027-08-31; chi tiết ở file con sector_read_bds_nha_o_do_thi_phia_bac_20261031.md)
 last_update_18: 2026-11-01 (Bobby — SECTOR READ real-time BLIND thị trường xe tải thương mại VN: CYCLICAL ~0,50 (muộn nhịp tăng: VAMA xe thương mại H1 +28% → 9T +17%, Q3 ước −3%..0%) / ADMIN_GATED ~0,30 (đầu tư công 2027, QĐ 43/2025 khí thải mốc 01/01/2027 HN/TP.HCM, NĐ 89/2026 niên hạn, LEZ HN, NĐ 168 quá tải; không có PVTM với xe TQ) / STRUCTURAL ~0,20 — ambiguous ~55/45; FORECAST F1-F11 tới 2027-06-30; chi tiết ở file con sector_read_xe_tai_thuong_mai_vn_20261101.md)
+last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND KCN cho thuê đất & hạ tầng miền Nam: ADMIN_GATED ~0,40 / CYCLICAL ~0,40 / STRUCTURAL ~0,20, ambiguous ~55/45; giá thuê phẳng +1,5-1,7% YoY, xưởng xây sẵn hấp thụ −48%, TT 99/2025 đổi ghi nhận doanh thu từ 2026; file con sector_read_kcn_cho_thue_dat_20261101.md)
 last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND nhóm CNTT VN 3 khối: (1a) xuất khẩu phần mềm STRUCTURAL ~0,45 / CYCLICAL ~0,45 / ADMIN ~0,10 ambiguous ~50/50; (1b) CĐS nội địa ADMIN_GATED ~0,60 (giải ngân KHCN-CĐS 41,18% tại 26/10); (2a) băng rộng cố định STRUCTURAL bão hoà ~0,55 clean; (2b) TTDL ADMIN_GATED ~0,45 (giá điện TT 60/2025) / STRUCTURAL ~0,40 ambiguous; (3) giáo dục tư ADMIN_GATED ~0,55 (NQ 217/2025 miễn HP công lập, dự thảo trần ĐH tự chủ 2,5x) ambiguous ~60/40; FORECAST F1-F15 tới 2027-09-30; chi tiết ở file con sector_read_cntt_vienthong_giaoduc_vn_20261101.md)
 ---
 
@@ -1693,6 +1694,25 @@ Bản đầy đủ: **`sector_read_cntt_vienthong_giaoduc_vn_20261101.md`** (fil
   đáy ≥3% P=0,70; Tankan T12 DN lớn ≥+9% P=0,75; USD/JPY 31/03/27 ≥148 P=0,70; Fed cận trên ≥4,00% 31/03/27 P=0,60; giải ngân KHCN-CĐS 2026
   <80% P=0,70; dự toán 2027 ≥65.020 tỷ P=0,80; ký sửa TT 60 trước 30/06/27 P=0,55; không hạ gói FTTH <180k P=0,85; TTDL thiết kế ≥450 MW
   P=0,50; ký sửa NĐ 238 trần ≤2,5x trước 31/03/27 P=0,55; thí sinh 2027 ≥874.811 P=0,65; giữ miễn học phí công lập 2027-28 P=0,93.
+  **Không phải khuyến nghị mua/bán.**
+
+
+## SECTOR READ (không phải episode VNINDEX) — KCN cho thuê đất & hạ tầng miền Nam (TP.HCM mở rộng, Đồng Nai, Tây Ninh) + nhóm gắn DNNN, as-of 01/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của DN nào (kiểm toán blind mục 0 file con: web lộ tài liệu
+ĐHĐCĐ của 1 tổng công ty KCN tỉnh về TT 99 và số đền bù đất cao su cấp DN, chỉ dùng câu mô tả quy định và diện tích cấp tập đoàn). Bản đầy đủ:
+**`sector_read_kcn_cho_thue_dat_20261101.md`** (file con).
+- **Phân loại: `ADMIN_GATED` ~0,40 / `CYCLICAL` ~0,40 / `STRUCTURAL` ~0,20; `ambiguous` ~55/45.** Thị trường vật lý: giữa chu kỳ, cung đuổi kịp cầu
+  (C&W vùng KTTĐ phía Nam Q2/26: 36.063 ha, lấp đầy 76,3%, giá 186,4 USD/m²/chu kỳ +1,7% YoY từ +5,1% Q4/25; CBRE 9T: đất 163 ha +56% từ nền thấp 2025,
+  185 USD +1,5% YoY, xưởng/kho xây sẵn −48% do vắng DN TQ). Phân hoá lõi TP.HCM 86%/+6,8% vs Tây Ninh 61%/−6,8%. FDI 9T đăng ký 50,36 tỷ (+76%, quy mô
+  dự án bình quân ×2,3) nhưng giải ngân 21,07 tỷ (+12%). Thuế Mỹ: IEEPA bị huỷ 20/02/26, nay Section 301 12,5% với VN từ 24/07/26 (ngang ASEAN), 2 điều tra
+  301 nhắm VN treo. Cửa hành chính: chủ trương KCN về UBND tỉnh từ 01/03/26 (Luật 143/2025), bảng giá đất hằng năm từ 2026 (đền bù tăng), **TT 99/2025 bắt
+  phân bổ doanh thu cho thuê trả trước theo thời hạn từ 01/01/26** ⇒ gãy cấu trúc LNST/PE của chủ đầu tư KCN (báo Mike, độ tin cậy trung bình, chưa đọc
+  nguyên văn). DNNN: NQ 79-NQ/TW, QĐ 40/2026 phân loại vốn nhà nước.
+- **FORECAST khoá 01/11:** FDI thực hiện 2026 ≥29,5 tỷ P=0,80; FDI đăng ký 2026 ≥58 tỷ P=0,75; C&W giá đất Q4/26 < +4% YoY P=0,80; lấp đầy Q4/26 ≥75% P=0,60;
+  giá TP.HCM YoY > toàn vùng Q4/26 P=0,65; CBRE hấp thụ đất 2026 ≥200 ha P=0,70; xưởng+kho 2026 giảm YoY P=0,85; Long Thành khai thác thương mại thường lệ
+  ≤31/12/26 P=0,70; không có văn bản BTC cho ghi nhận một lần lại trước 30/06/27 P=0,75; Luật Đất đai sửa đổi thông qua ≤31/12/26 P=0,70; thuế bổ sung Mỹ
+  với VN ngày 31/03/27 ≤15% P=0,65; USTR hành động thuế từ điều tra dư thừa công suất/IP lên VN trước 30/04/27 P=0,40; FDI thực hiện Q1/27 ≥+5% YoY P=0,70.
   **Không phải khuyến nghị mua/bán.**
 
 ---
