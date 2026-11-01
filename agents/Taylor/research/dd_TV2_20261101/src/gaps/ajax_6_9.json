@@ -1,0 +1,1 @@
+{"sql":" SELECT *\r\n\t\t\t\t\t\tFROM downloads n, downloads_desc nd\r\n\t\t\t\t\t\tWHERE n.did=nd.did \r\n\t\t\t\t\t\tAND nd.lang='vn'\r\n\t\t\t\t\t\tAND n.display=1 \t\t\t\t\t\t\r\n\t\t\t\t\t\t and cat_id =6 AND namdwn_id=9 \r\n\t\t\t\t\t  ORDER BY d_order DESC , date_post DESC \t","items":[],"num":0,"ok":1,"mess":""}

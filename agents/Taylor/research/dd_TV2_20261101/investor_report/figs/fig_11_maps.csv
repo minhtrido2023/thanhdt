@@ -1,0 +1,2 @@
+name,map
+fig_11_maps,ghép map_south.png + map_north.png (scripts/pts_south.csv, pts_north.csv)

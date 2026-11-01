@@ -1,0 +1,23 @@
+last bar 2026-10-30 9450.0 bars 272
+ADV20 10.8 ty, ADV60 10.8 ty
+52w hi 15600 lo 8580
+2026-07-29 (Q2) close 9400.0 next 9800.0 ret5d 5.9%
+2026-08-28 (6T) close 11050.0 next 10900.0 ret5d -3.6%
+2026-10-29 (Q3) close 9490.0 next 9450.0 
+mcap 4082.3 ty
+BVPS mẹ 21188, P/B 0.446; BQ-PB basis tot_eq/sh=39075 -> 0.24
+step-up còn lại trước thuế 10104, sau thuế 8083, phần HHS 4134 (ước lượng, thuế 20%)
+BV tương đương giá gốc 5018 = 11617 đ/cp, P/B 0.81
+9T PPA qua giá vốn ~ 718 (=(2164.36-2020.76)/0.2)
+Biên gộp BĐS 9T ex-PPA ~ 54.1%
+CRV GTHL-basis ngầm định từ NCI ~ 15818 (ước lượng)
+Tiêu cực: CRV 3647 + khác 678 + ô tô 150 -> x(1-0.15) = 3803 ty = 8805 đ/cp
+Cơ sở: CRV 4828 + khác 678 + ô tô 320 -> x(1-0.1) = 5243 ty = 12137 đ/cp
+Tích cực: CRV 5999 + khác 678 + ô tô 550 -> x(1-0.05) = 6865 ty = 15892 đ/cp
+Trọng số 11889 đ/cp; giá/trọng số 0.79
+Giá hàm ý CK so NAV GTHL-basis: 55%
+P/B 0.60 x BV giá gốc -> 6970
+P/B 0.72 x BV giá gốc -> 8364
+P/B 0.90 x BV giá gốc -> 10455
+51,15% x VCSH CRV sổ riêng 31/03/26 7.579 = 3877 ty = 8974 đ/cp HHS
+# độ nhạy (tính tay từ cơ sở): haircut 10đ% = 0,10*4134*0,75*0,9/431,99 = 646 đ; CK holding 5đ% = 0,05*(8091-1654)*0,9/431,99 = 671 đ; CK quản trị 5đ% = 0,05*5826/431,99 = 674 đ; 10đ% = 1.349 đ; P/E 9T annualized = 4082/(159,09*4/3) = 19,2x

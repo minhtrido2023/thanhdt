@@ -1,0 +1,8 @@
+name,lat,lon,kind,dx,dy,vung
+Trụ sở FPT · 10 Phạm Văn Bạch,21.02708,105.7889,hq,-0.02,0.05,north
+ĐH FPT Hà Nội · Hòa Lạc (capex dở dang 247 tỷ),21.01353,105.52526,project,-0.15,-0.08,north
+FPT Complex Đà Nẵng,15.97959,108.26205,hq,-1.2,0.2,central
+ĐH FPT Đà Nẵng,15.96748,108.26036,market,-1.2,-0.25,central
+Quy Nhơn (cấp thành phố) · dở dang 61 tỷ,13.767,109.233,project,-1.9,0.2,central
+ĐH FPT TP.HCM · Khu CNC,10.84142,106.81007,market,-0.35,0.15,south
+ĐH FPT Cần Thơ,10.01349,105.73172,market,-0.25,-0.18,south

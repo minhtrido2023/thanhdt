@@ -1,0 +1,35 @@
+MCAP 11,706 tỷ | TTM LNST mẹ 1,399.0 | PE 8.37 | PB(mẹ) 2.26
+Tài sản tài chính gộp 13,808.1; vay 5,494.2; net 8,313.9; trừ CP hạ tầng phải trả 3,262.8 => 5,051.1
+Phơi nhiễm tín dụng phi ngân hàng: cho vay CTCK 4,223.4 (không TSĐB bên vay ~2,911.2) + TP DN 1,792.4 = 6,015.8 = 116% VCSH mẹ, 51% vốn hoá
+Run-rate trước thuế (EST x4/3): vận hành (trừ phân bổ đất) 1,035 | phân bổ DT đất (phi tiền mặt) 314 | tài chính ròng 521
+
+Thuế TNDN tương lai trên DT chờ PB: danh nghĩa 2,081, PV(35 năm,13%) 479 (EST; giả định thuế nộp theo phân bổ — không thấy TS thuế hoãn lại lớn trên BCĐ)
+
+[Tích cực] P=0.2 | core 7,572 (PE 10x) + tài chính ròng 4,621 − lỗ tín dụng 0 (0%) − thuế tương lai trên DT chờ PB (PV) 383 + đất còn lại 7,067 (18.0 tỷ/ha ròng, 15 năm) ; CK quản trị 0%
+   = 18,877 tỷ → 77,967 đ/cp (+61% vs 48,350) ; thực thu ~150 USD/m², ~62 ha/năm
+
+[Cơ sở] P=0.5 | core 6,815 (PE 9x) + tài chính ròng 4,621 − lỗ tín dụng 217 (5%) − thuế tương lai trên DT chờ PB (PV) 479 + đất còn lại 3,564 (12.0 tỷ/ha ròng, 22 năm) ; CK quản trị 10%
+   = 12,873 tỷ → 53,170 đ/cp (+10% vs 48,350) ; thực thu ~110-120 USD/m², ~43 ha/năm, CK quản trị 10%
+
+[Tiêu cực] P=0.3 | core 5,300 (PE 7x) + tài chính ròng 4,621 − lỗ tín dụng 1,302 (30%) − thuế tương lai trên DT chờ PB (PV) 575 + đất còn lại 1,366 (6.0 tỷ/ha ròng, 30 năm) ; CK quản trị 20%
+   = 7,528 tỷ → 31,094 đ/cp (-36% vs 48,350) ; thực thu ~90 USD/m² + đền bù tăng (bảng giá đất), ~31 ha/năm; lỗ 30% TD không bảo đảm
+
+TRỌNG SỐ: 51,506 đ/cp (+7%); đối xứng 25/50/25: 53,850
+
+Độ nhạy cơ sở theo % lỗ phần tín dụng không bảo đảm (4.340 tỷ):
+  lỗ 0%: 53,976 đ/cp
+  lỗ 10%: 52,363 đ/cp
+  lỗ 20%: 50,750 đ/cp
+  lỗ 30%: 49,136 đ/cp
+  lỗ 50%: 45,910 đ/cp
+
+PE chéo: EPS TTM mẹ 5,778; PE 7x 40,448 | 8x 46,226 | 10x 57,783 | 12x 69,340
+Trong EPS TTM: phần tài chính ròng sau thuế ≈ 1,574 đ/cp; phần phân bổ DT đất (phi tiền mặt) ≈ 950 đ/cp
+Cổ tức: 2025 = 5.000 đ/cp (50% VĐL) ⇒ lợi suất 10.3% @ 48,350; sàn KH 2026 10% = 1.000 đ ⇒ 2.1%
+
+Độ nhạy cơ sở theo tỷ/ha ròng (22 năm):
+  4 tỷ/ha: 44,337 đ/cp
+  8 tỷ/ha: 48,753 đ/cp
+  12 tỷ/ha: 53,170 đ/cp
+  16 tỷ/ha: 57,586 đ/cp
+  20 tỷ/ha: 62,002 đ/cp

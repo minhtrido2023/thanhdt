@@ -1,0 +1,105 @@
+Vốn hoá @52.700: 99,378 tỷ
+
+== Q3 suy ra (9T − 6T); cùng kỳ suy từ % tăng trưởng FPT công bố ==
+DT hợp nhất            Q3/26   13,754  Q3/25   12,271  YoY +12.1%   | 9T YoY +12.4%  6T YoY +12.6%
+LNTT                   Q3/26    3,056  Q3/25    2,657  YoY +15.0%   | 9T YoY +17.0%  6T YoY +18.1%
+LNST mẹ                Q3/26    2,723  Q3/25    2,437  YoY +11.8%   | 9T YoY +13.3%  6T YoY +14.1%
+DT CNTT NN             Q3/26    9,636  Q3/25    8,906  YoY +8.2%   | 9T YoY +11.6%  6T YoY +13.4%
+DT CNTT TN             Q3/26    2,741  Q3/25    1,918  YoY +42.9%   | 9T YoY +29.8%  6T YoY +22.5%
+LNTT CNTT TN           Q3/26      234  Q3/25      106  YoY +120.0%   | 9T YoY +108.5%  6T YoY +100.5%
+LNTT khối Công nghệ    Q3/26    1,738  Q3/25    1,498  YoY +16.0%   | 9T YoY +16.6%  6T YoY +16.9%
+Ký mới NN              Q3/26    9,799  Q3/25    9,455  YoY +3.6%   | 9T YoY +23.1%  6T YoY +32.3%
+DT CĐS NN              Q3/26    4,801  Q3/25    4,624  YoY +3.8%   | 9T YoY +16.3%  6T YoY +23.8%
+LNTT CNTT NN Q3 1,504 vs 1,391 YoY +8.1%; 9T 4.510 vs 4.073 +10.7% (p29-30)
+Hợp đồng >10tr USD: 6T 14, 9T 16 ⇒ Q3 = 2; cùng kỳ 6T25 = 14/1,273 ≈ 11, 9T25 = 16/0,842 ≈ 19 ⇒ Q3/25 ≈ 8
+Book-to-bill NN (ký mới/DT): 9T 1.27; Q3 1.02; 6T 1.39
+
+== Chất lượng LN 9T (LFL, p08) ==
+LNTT trừ LN liên kết: 6,550 vs 5,939 (+10.3%)
+Thuế/LNTT-trừ-LK: 15.2% vs 11.1%
+LNST trừ LK: 5,556 vs 5,282 (+5.2%)
+Đóng góp vào tăng LNTT +1,275: liên kết +663 (52%), Công nghệ +719
+Khối GD-ĐT-khác LNTT trừ LK: 1,499 vs 1,606 (-6.7%) — gồm lãi tiền gửi ròng, chưa tách được giáo dục thuần
+Lãi tiền gửi 9T 1.283 (p45) vs lãi vay 612 ⇒ thu nhập lãi ròng 671; CLTG ròng −111 vs +541 cùng kỳ (gốc, còn FTEL)
+
+== Dòng tiền (p10; Q2 BCTC p10) ==
+CFO Q3 = 2,097; capex Q3 692; FCF Q3 1,404; 9T CFO 952, FCF -1,077
+CFO core Q3 lịch sử (fpt_dcf_deconsol_20261014 [ĐO]): 2023 2.596 / 2024 2.585 / 2025 3.279
+CFO 9T/LNST 9T = 0.12
+  AR           30/6  10,851 → 30/9  10,847 (-4)
+  HTK          30/6   1,252 → 30/9   2,035 (+782)
+  HD_tiendo    30/6     302 → 30/9     280 (-21)
+  tratruoc_NB  30/6   1,867 → 30/9   1,462 (-405)
+  AR+HTK(dở dang)+HĐ tiến độ: 12,405 → 13,162 (+6.1%) trong khi DT Q3 ≈ Q2 (13.754 vs 13.789)
+  DSO định nghĩa PREREG (tổng phải thu NH mã 130 / DT core TTM): 86.5 ngày (Q2 ~91,9 theo PREREG; ngưỡng 90)
+  DSO chỉ mã 131 (tham khảo, KHÁC định nghĩa PREREG / DT TTM 55,098): 71.9 ngày; Q2 73.9
+
+== Tỷ lệ chuyển lãi thành tiền — định nghĩa duy nhất (CFO + lãi vay trả×(1−t) − capex)/LN lõi vận hành ==
+  FY2024 (gồm FTEL)      tử   8,942  mẫu   8,374  t 15.4%  conv +1.07
+  FY2025 (gồm FTEL)      tử   5,732  mẫu   9,628  t 14.6%  conv +0.60
+  9T/2025 (gồm FTEL)     tử   2,402  mẫu   7,133  t 14.2%  conv +0.34
+  9T/2026 (FTEL là LK)   tử    -596  mẫu   4,955  t 15.2%  conv -0.12
+  2021–2023: CHƯA ĐO trên định nghĩa này (cần LCTT gốc BCTN 2022–2023; BQ không có mã 05/06/14).
+  Tham khảo định nghĩa CŨ 14/10 (CFO−capex)/LNST mẹ, phạm vi lõi bỏ FTEL [fpt_dcf_deconsol_20261014/cashflow_scope.csv]:
+    2021 0,55 · 2022 0,44 · 2023 0,80 · 2024 0,86 · 2025 0,39  (định nghĩa KHÁC — chỉ để thấy hình dạng)
+  Số tham khảo khác gốc 9T/2026: CFO/LNST 0.12 (lệch gốc) · CFO/(LNTT − mã05 − thuế) 0.22 · (CFO + mã 27)/LNST 0.28
+  Mùa vụ: tử số Q4/2025 = FY − 9T ≈ 3,329 tỷ (phạm vi cũ)
+
+== Net cash (tiền + HTM ngắn/dài − vay) ==
+30/9/26: 28,830 − 16,596 = 12,233
+30/6/26: 28,972 − 18,448 = 10,523
+Net cash pro-forma trừ cổ tức đợt 1/2026 1,886: 10,347 = 5,487 đ/cp
+v2 dùng tiền ròng CHƯA trừ cổ tức 12,233 = 6,487 đ/cp, vì giá 52.700 gồm quyền 1.000đ
+
+== SOTP @ giá 30/10 ==
+FTEL 45,66% thị giá 18,687 tỷ (9,910 đ/cp) — FOX ADV 1T ~3,5 tỷ/phiên ⇒ thị giá mỏng
+FRT 46,54% thị giá 12,375 tỷ (6,562 đ/cp)
+LN core (trừ LK) TTM ≈ 7,466 (ước lượng); trừ lãi ròng ≈ 6,705 (ước lượng)
+Giá thị trường ngầm định cho core vận hành: 53,637 tỷ ⇒ PE core vận hành 8.0x (ước lượng)
+SOTP đ/cp — hàng PE core vận hành, cột chiết khấu FTEL (FRT ck 20%):
+  PE  6: ck0%  44,278  ck15%  42,792  ck30%  41,305
+  PE  8: ck0%  51,390  ck15%  49,903  ck30%  48,417
+  PE 10: ck0%  58,501  ck15%  57,015  ck30%  55,528
+  PE 12: ck0%  65,613  ck15%  64,126  ck30%  62,640
+  PE 14: ck0%  72,724  ck15%  71,238  ck30%  69,751
+
+== DCF FCFE core vận hành + LK thị giá có chiết khấu + net cash pro-forma ==
+Xấu    g5y 3% conv 0.40 gT 3.0% Ke 13.40% FTELck 30% P=0.35 → FV 34,057 đ/cp (-35%); TV 62%
+Cơ sở  g5y 9% conv 0.75 gT 4.0% Ke 12.85% FTELck 15% P=0.45 → FV 59,833 đ/cp (+14%); TV 69%
+Tốt    g5y 14% conv 0.85 gT 4.0% Ke 12.30% FTELck 0% P=0.20 → FV 79,581 đ/cp (+51%); TV 72%
+Kỳ vọng có trọng số: 54,761 đ/cp (+4%)
+Độ nhạy cơ sở (conv 0,75, g5y 9%): hàng gT, cột Ke
+  gT 3%: Ke10.5%  68,463 Ke12.3%  59,104 Ke12.8%  56,930 Ke13.4%  54,987 Ke14.0%  53,091 Ke15.8%  48,475
+  gT 4%: Ke10.5%  74,108 Ke12.3%  62,447 Ke12.8%  59,833 Ke13.4%  57,525 Ke14.0%  55,299 Ke15.8%  49,986
+  gT 5%: Ke10.5%  81,807 Ke12.3%  66,705 Ke12.8%  63,474 Ke13.4%  60,668 Ke14.0%  57,999 Ke15.8%  51,776
+Độ nhạy conv (cơ sở): 0.40→41,924  0.50→47,041  0.60→52,158  0.75→59,833  0.90→67,508
+
+EPS TTM 5,456 ⇒ PE 9.7; LNST mẹ 2026E 10,589 (ước lượng; KH LNTT +15%) EPS 5,615 PE 9.4
+PE lịch sử FPT (BQ weekly): 10 năm p10/p50/p90 = 10,5/15,4/23,7; 5 năm 12,7/19,3/26,5; peer VN: CMG 10,9, ELC 9,3, FOX 10,9 (BQ 30/10)
+  PE 9 × EPS 2026E = 50,537
+  PE 11 × EPS 2026E = 61,767
+  PE 13 × EPS 2026E = 72,998
+  PE 15 × EPS 2026E = 84,228
+
+RONIC ngầm định = gT/(1−conv): Xấu 5.0% · Cơ sở 16.0% · Tốt 26.7% (so Ke 12,3–13,4%; xấu < Ke = tăng trưởng huỷ giá trị, giả định cắt vĩnh viễn)
+Vùng cơ sở 1 trục (C1): lưới gT 3–5% × Ke 12,3–13,4%, conv 0,75, g5y 9% ⇒ xem bảng độ nhạy (min gT3/Ke13,4; max gT5/Ke12,3)
+Vùng 2 trục (tham khảo): conv 0,6–0,9 tại gT 4%, Ke 12,85%
+
+Lãi liên kết khác ước lượng ≈ 603 tỷ/năm (9T 2.220 − FTEL 45,66%×FOX 9T 2.884 − FRT 46,54%×(H1 629 + Q3≈Q2) , ước lượng)
+  liên kết khác theo PE 6: 3,615 tỷ vs sổ 1.500 ⇒ +1,122 đ/cp
+  liên kết khác theo PE 8: 4,821 tỷ vs sổ 1.500 ⇒ +1,761 đ/cp
+  liên kết khác theo PE 10: 6,026 tỷ vs sổ 1.500 ⇒ +2,400 đ/cp
+  tiền khách ứng trước (học phí 1.609 + người mua trả trước 761) = 2,370 tỷ = 1,257 đ/cp (nếu coi là nợ, trừ khỏi tiền ròng)
+  TPBank/FPTS: theo giá gốc 945 tỷ; thị giá chưa đo ⇒ chỉ có thể làm TĂNG (ước lượng chiều)
+
+Ngưỡng CFO cả năm 2026 (LN lõi vận hành 2026 ≈ 6,607, lãi vay trả ≈ 756, capex ≈ 2,705; ước lượng):
+  conv 0.00 ⇔ CFO ≈ 2,064 tỷ
+  conv 0.20 ⇔ CFO ≈ 3,386 tỷ
+  conv 0.40 ⇔ CFO ≈ 4,707 tỷ
+  conv 0.60 ⇔ CFO ≈ 6,028 tỷ
+  conv 0.75 ⇔ CFO ≈ 7,019 tỷ
+  conv 0.90 ⇔ CFO ≈ 8,011 tỷ
+  CFO 4.000 ⇔ conv 0.29; CFO 2.000 ⇔ conv -0.01
+
+Cầu nối: FV 14/10 49,6k → 21/10 49,8k (Ke 14–16%, mô hình cũ) → v1 01/11 58,8k → v2 cơ sở 59,833
+  cấu trúc mới nhưng Ke 15% (gần khung cũ): 52,131 ⇒ phần do đổi Ke ≈ +7,701 đ/cp; phần còn lại do SOTP thị giá + tách tiền ròng (đổi phương pháp), KHÔNG do tin Q3

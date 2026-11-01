@@ -1,0 +1,33 @@
+MCAP 11,706 tỷ | LNST mẹ TTM 1,399.0
+EPS TTM chưa trừ KTPL 5,778 (PE 8.37) | EPS TTM theo BCTC (đã trừ KTPL) 5,184 (PE 9.33)
+Tỷ lệ trích KTPL: 9T26 ước tính 9.04% | 9T25 trình bày lại 7.25%
+EPS 9T: 4.050 vs 3.838 (trình bày lại) = +5.5% | LNST mẹ 9T +7.6%
+Tài sản TC gộp 13,808.1 − vay 5,494.2 = 8,313.9; − CP hạ tầng phải trả 3,262.8 = 5,051.1; − quỹ KTPL 638.8 = 4,412.3
+  trong đó mẹ 781.1 | con (suy) 4,270.0
+Chi phí đã chi cho quỹ đất KCN còn lại (ước, loại nhà xưởng/cảng): 4,457.3
+Phơi nhiễm tín dụng phi NH 6,015.8 = 116% VCSH mẹ; không bảo đảm 4,340.0
+Run-rate trước thuế vận hành (trừ phân bổ đất, ×4/3, ước lượng) 971; LDLK sau thuế 64
+
+[Tích cực] P=0.2 | core 6,993 (PE 10x, KTPL 9.0%) + TC ròng 4,049 (NCI con 8.5%, đã trừ quỹ KTPL) − lỗ TD 0 (0%) − thuế tương lai DT chờ PB 383 + đất còn lại 6,428 (18.0 tỷ/ha toàn phần, 15 năm) + thu hồi chi phí đã chi 1,681 (90%) ; CK quản trị 0%
+   = 18,768 tỷ → 77,517 đ/cp (-37.6% giá so với giá trị) ; thực thu ~150 USD/m², ~62 ha/năm
+
+[Cơ sở] P=0.5 | core 6,294 (PE 9x, KTPL 9.0%) + TC ròng 3,558 (NCI con 20.0%, đã trừ quỹ KTPL) − lỗ TD 217 (5%) − thuế tương lai DT chờ PB 479 + đất còn lại 3,242 (12.0 tỷ/ha toàn phần, 22 năm) + thu hồi chi phí đã chi 848 (60%) ; CK quản trị 10%
+   = 11,920 tỷ → 49,235 đ/cp (-1.8% giá so với giá trị) ; thực thu ~110-120 USD/m², ~43 ha/năm
+
+[Tiêu cực] P=0.3 | core 4,895 (PE 7x, KTPL 9.0%) + TC ròng 3,089 (NCI con 31.0%, đã trừ quỹ KTPL) − lỗ TD 1,302 (30%) − thuế tương lai DT chờ PB 575 + đất còn lại 1,243 (6.0 tỷ/ha toàn phần, 30 năm) + thu hồi chi phí đã chi 325 (30%) ; CK quản trị 20%
+   = 6,139 tỷ → 25,357 đ/cp (+90.7% giá so với giá trị) ; ~90 USD/m² + đền bù tăng, ~31 ha/năm; lỗ 30% TD không bảo đảm
+
+TRỌNG SỐ 20/50/30: 47,728 đ/cp (giá +1.3% so với tâm) ; đối xứng 25/50/25: 50,336 (giá -3.9%)
+
+Độ nhạy CƠ SỞ (một biến, còn lại giữ nguyên):
+  lỗ TD không bảo đảm: 0%: 50,042 | 10%: 48,428 | 20%: 46,815 | 30%: 45,202 | 50%: 41,975 | 60%: 40,362
+  tỷ/ha toàn phần: 4: 41,202 | 8: 45,218 | 12: 49,235 | 16: 53,252 | 20: 57,268
+  NCI con: 8.5%: 51,060 | 20.0%: 49,235 | 31.0%: 47,489
+  thu hồi chi phí đã chi: 0%: 46,084 | 30%: 47,660 | 60%: 49,235 | 90%: 50,810
+  tỷ lệ KTPL: 0.00%: 52,760 | 7.25%: 49,934 | 9.04%: 49,235
+  thuế đã nộp (không trừ thuế tương lai): 51,017
+  Hộp sai số mô hình cơ sở (TD 50%/0%, tỷ/ha 8/16, NCI 31/8,5%, thu hồi 30/90%): 34,637 – 57,459
+
+PE chéo (EPS TTM theo BCTC 5,184): 7x 36,288 | 8x 41,472 | 9x 46,656 | 10x 51,840 | 12x 62,208
+Trong EPS: tài chính ròng sau thuế ≈ 1,432 đ/cp; phân bổ DT đất (phi tiền mặt) ≈ 864 đ/cp
+Cổ tức 2025 5.000 đ/cp ⇒ 10.3% (quá khứ; payout 111% LN riêng, có hoàn nhập quỹ ĐTPT 542,8→213,8 = 329.0); sàn KH 2026 1.000 đ ⇒ 2.1%

@@ -1,0 +1,8 @@
+rui_ro,xac_suat,tac_dong
+R1 Q3 bị điều chỉnh khi kiểm toán,0.4,0.4
+"R2 NC-II/I.14 bán chậm, thặng dư thấp",0.45,0.75
+R3 CRV không trả cổ tức tiền,0.5,0.5
+R4 Mảng xe giảm giá tồn kho,0.45,0.2
+R5 Thanh tra phát sinh nghĩa vụ,0.3,0.2
+R6 Giao dịch nội bộ nhóm bất lợi,0.25,0.45
+R7 Xử phạt mới trong nhóm,0.25,0.55

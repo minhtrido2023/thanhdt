@@ -1,0 +1,47 @@
+CRV GTHL 15818 - thang du PPA sau thue 8083 = CRV gia goc 7735; phan khac 678
+PV 1 nam 0.886, 4 nam 0.617 (Ke 12.85%)
+
+== Co so TCH (CHINH) ==
+Tieu cuc: CRV100% 9,176 (backlog m 30.0%, thang du 15%); o to 25x5=125; CK 35%/15% -> 7,583 d/cp
+Co so: CRV100% 10,397 (backlog m 33.5%, thang du 40%); o to 35x6=210; CK 25%/10% -> 10,160 d/cp
+Tich cuc: CRV100% 11,139 (backlog m 36.0%, thang du 55%); o to 50x8=400; CK 15%/5% -> 13,021 d/cp
+Trong so 30/50/20: 9,959; gia 9450 lech -5.1%
+
+== Co so PPA cua HHS (THAM CHIEU; haircut thang du PPA 60/40/25%, o to da sua) ==
+Tieu cuc: CRV100% 10,968 -> 8,755 d/cp
+Co so: CRV100% 12,585 -> 11,908 d/cp
+Tich cuc: CRV100% 13,797 -> 15,563 d/cp
+Trong so: 11,693; gia lech -19.2%
+Bien thang du PPA ngam dinh (CRV100% PPA haircut 40% vs TCH co so): 12,585 vs 10,397
+
+Thang du BDSDT (cận dưới, uoc luong): (2459.74-1438.45) x0,8 x51,15% = 418 ty; sau CK co so 25%/10% = +653 d/cp (KHONG dua vao tam)
+Loi suat cho thue toi thieu <=1 nam 57,20 / BDSDT 2.459,74 = 2.3%
+
+Ma tran co so (CK 25%/10%, o to 210): thang du (dong) x bien rong backlog 33,5%
+  s 10% (bien gop ~20.0%): 9,075 d/cp; gia lech +4.1%
+  s 25% (bien gop ~31.4%): 9,617 d/cp; gia lech -1.7%
+  s 40% (bien gop ~40.0%): 10,160 d/cp; gia lech -7.0%
+  s 55% (bien gop ~46.7%): 10,702 d/cp; gia lech -11.7%
+  s 70% (bien gop ~52.0%): 11,245 d/cp; gia lech -16.0%
+
+Do nhay co so: 
+  Ke 12.3%: 10,191
+  Ke 13.4%: 10,128
+  CK holding 20%: 10,714
+  CK holding 30%: 9,606
+  CK quan tri 5%: 10,724
+  CK quan tri 15%: 9,595
+  O to 25x5: 9,982
+  O to 50x8: 10,555
+  O to cu (40x8=320) thay 210: +229 d/cp
+
+Phep thu cheo:
+  0.98 x BV gia goc 11617 = 11,385 (TCH P/B VCSH me [TCH-DD])
+  0.72 x BV gia goc 11617 = 8,364 (trung vi peer BQ (chua truy nguyen))
+  51,15% x VCSH CRV rieng 31/03/26 7.579 = 8,974 d/cp
+  SOTP TCH: thay dong HHS thi truong bang tam 9,959: +128 d/cp TCH (tron co so: CRV truc tiep theo so gia goc, CRV qua HHS theo NAV TCH-basis)
+
+C10 thu moi NC-II (uoc luong): DT BDS 9T 1.875,89 x VAT 1,08 = 2,026 ; NMTT NC-II giam 354 ⇒ phan con lai 1,672 den tu tra truoc moi/phai thu
+C7 bien BDS ex-PPA Q3 = (272,38 + 127,74/0,2)/1.746,23 = 52.2%
+C2 Q2 sau soat xet: LNST 62,95-(81,96-31,60) = 12.59 ; me 43,32-(65,51-25,34) = 3.15
+CRV DNSE: dong cua cuoi 23,000 (2026-10-21); phien co khop tu 03/08: 24/24

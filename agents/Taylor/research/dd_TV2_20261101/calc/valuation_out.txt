@@ -1,0 +1,56 @@
+Von hoa @27.000: 1,823 ty; P/B 1.37
+EPS lich su tren so cp HIEN TAI (dong): {2017: 3177, 2018: 3319, 2019: 3796, 2020: 3883, 2021: 4025, 2022: 1134, 2023: 785, 2024: 958, 2025: 1401}
+2026E Q4=55: LNST 217 ty, EPS 3,217, P/E @27.000 8.4
+2026E Q4=80: LNST 242 ty, EPS 3,587, P/E @27.000 7.5
+Gia 27.000 o P/E 7x => LNST ben vung ngam dinh 260 ty
+Gia 27.000 o P/E 7.45x => LNST ben vung ngam dinh 245 ty
+Gia 27.000 o P/E 8x => LNST ben vung ngam dinh 228 ty
+Gia 27.000 o P/E 9x => LNST ben vung ngam dinh 203 ty
+Gia 27.000 o P/E 10x => LNST ben vung ngam dinh 182 ty
+Neo P/E TV2: pha LN DINH 2017-21 trung vi 7,45 (IQR 6,13-8,92, n=60); 2019-21 7,95; pha LN DAY 2022-25 trung vi 33,4 (KHONG DUNG: P/E tren LN day); 2014+ gop 8,75; 2019+ gop 10,99 (lan pha)
+  ROE 11.0% payout 40% Ke 12.5%: g 6.6% -> P/E hop ly 7.2x
+  ROE 11.0% payout 40% Ke 13.0%: g 6.6% -> P/E hop ly 6.7x
+  ROE 11.0% payout 40% Ke 13.5%: g 6.6% -> P/E hop ly 6.2x
+  ROE 12.7% payout 40% Ke 12.5%: g 7.6% -> P/E hop ly 8.8x
+  ROE 12.7% payout 40% Ke 13.0%: g 7.6% -> P/E hop ly 8.0x
+  ROE 12.7% payout 40% Ke 13.5%: g 7.6% -> P/E hop ly 7.3x
+  (luu y: gia dinh g vinh vien khong hop base rate LN sap ~70% khi het HD EPC 2022)
+KICH BAN v3:
+  Tieu cuc  p=0.25 LNST (100, 120) P/E (7.0, 8.0) -> 9,182 .. 13,032 (tam 11,033)
+  Co so     p=0.50 LNST (165, 190) P/E (7.0, 9.0) -> 17,104 .. 25,324 (tam 21,029)
+  Tich cuc  p=0.25 LNST (230, 270) P/E (7.0, 9.0) -> 23,843 .. 35,986 (tam 29,618)
+  [v3 25/50/25] gia tri ky vong 20,677; gia 27.000 = +30.6% so voi ky vong
+CACH DUNG VUNG CO SO (khai ro):
+  Goc-toi-goc (LN thap x P/E thap .. LN cao x P/E cao): 17,104 .. 25,324
+  Mot chieu P/E 7-9 tai LN tam 177,5: 18,400 .. 23,657
+  Mot chieu LN 165-190 tai P/E 8: 19,548 .. 22,510
+  Tam co so 21,029; gia 27.000 = +28.4% so tam, +6.6% so dinh vung goc-toi-goc
+  Gia 27.000 chi nam trong vung co so neu LN>=203 ty o P/E 9 (tren dinh LN co so 190)
+DO NHAY TRONG SO (P/E v3):
+  [30/50/20] gia tri ky vong 19,748; gia 27.000 = +36.7% so voi ky vong
+  [25/50/25] gia tri ky vong 20,677; gia 27.000 = +30.6% so voi ky vong
+  [20/50/30] gia tri ky vong 21,606; gia 27.000 = +25.0% so voi ky vong
+DO NHAY P/E (co so + tich cuc dung cung dai; tieu cuc giu 7-8):
+  [P/E (6.5, 8.5)] gia tri ky vong 19,557; gia 27.000 = +38.1% so voi ky vong
+  [P/E (7.0, 9.0)] gia tri ky vong 20,677; gia 27.000 = +30.6% so voi ky vong
+  [P/E (7.5, 10.0) (= dai v2, can can cu khac ngoai lich su pha dinh)] gia tri ky vong 22,357; gia 27.000 = +20.8% so voi ky vong
+  [P/E (9.0, 11.0) (trung vi 2019+ 11,0 lan pha — tham khao)] gia tri ky vong 25,157; gia 27.000 = +7.3% so voi ky vong
+Tieu cuc tam 11,033 = P/B 0.56; TV2 P/B min 2014+ 0,92, min 2017+ 1,04; comp P/B hien tai TV3 0,76 / TV4 1,00 / TV1 1,04 [BQ]
+  Neu tieu cuc dinh theo P/B (0.8, 1.0) tren BVPS sau trich lap 18,523: 14,819 .. 18,523 (tam 16,671)
+  [tieu cuc theo P/B san] gia tri ky vong 22,087; gia 27.000 = +22.2% so voi ky vong
+De ky vong = 27.000 (giu P tieu cuc 25%, P/E 7-9): P(tich cuc) can 99% > 75% kha dung => KHONG dat; tran ky vong (75% tich cuc) = 24,972
+  Neu bo han tieu cuc (0%): P(tich cuc) can 70%
+Tich cuc o P/E 10x tai LN 250: 37,023
+Do nhay gia tri/cp (nghin dong): hang = LNST ben vung, cot = P/E 6,7,7.45,8,9,10
+  100:   8.9   10.4   11.0   11.8   13.3   14.8
+  130:  11.6   13.5   14.3   15.4   17.3   19.3
+  160:  14.2   16.6   17.7   19.0   21.3   23.7
+  178:  15.8   18.5   19.6   21.1   23.7   26.4
+  190:  16.9   19.7   21.0   22.5   25.3   28.1
+  220:  19.5   22.8   24.3   26.1   29.3   32.6
+  250:  22.2   25.9   27.6   29.6   33.3   37.0
+Phoi nhiem CMC 855.0 ty = 64% VCSH me
+  Ton that 15% sau thue 20% (uoc luong): 103 ty = 1,519 d/cp
+  Ton that 30% sau thue 20% (uoc luong): 205 ty = 3,039 d/cp
+  Ton that 50% sau thue 20% (uoc luong): 342 ty = 5,065 d/cp
+CFO 9T 858.6; tru tang tien ung 1432.4 => -573.8 (gop); tru tang float rong +1.083,4 (nguoi phan bien tinh) => -224.8 (rong); float rong cuoi ky 2006.1

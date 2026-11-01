@@ -1,0 +1,43 @@
+Von hoa @27.000: 1,823 ty; VCSH me 1,331 ty; P/B 1.37
+EPS lich su tren so cp HIEN TAI (dong): {2017: 3177, 2018: 3319, 2019: 3796, 2020: 3883, 2021: 4025, 2022: 1134, 2023: 785, 2024: 958, 2025: 1401}
+2026E Q4=55: LNST 217 ty, EPS 3,217, P/E @27.000 8.4
+2026E Q4=80: LNST 242 ty, EPS 3,587, P/E @27.000 7.5
+Gia 27.000 o P/E 7x => LNST ben vung ngam dinh 260 ty
+Gia 27.000 o P/E 8x => LNST ben vung ngam dinh 228 ty
+Gia 27.000 o P/E 9x => LNST ben vung ngam dinh 203 ty
+Gia 27.000 o P/E 10x => LNST ben vung ngam dinh 182 ty
+Gia 27.000 o P/E 11x => LNST ben vung ngam dinh 166 ty
+  ROE 11.0% payout 40% Ke 12.30%: g 6.6% -> P/E hop ly 7.5x, P/B 0.82x
+  ROE 11.0% payout 40% Ke 12.85%: g 6.6% -> P/E hop ly 6.8x, P/B 0.75x
+  ROE 11.0% payout 40% Ke 13.40%: g 6.6% -> P/E hop ly 6.3x, P/B 0.69x
+  ROE 12.7% payout 40% Ke 12.30%: g 7.6% -> P/E hop ly 9.2x, P/B 1.17x
+  ROE 12.7% payout 40% Ke 12.85%: g 7.6% -> P/E hop ly 8.2x, P/B 1.05x
+  ROE 12.7% payout 40% Ke 13.40%: g 7.6% -> P/E hop ly 7.4x, P/B 0.95x
+  ROE 15.0% payout 40% Ke 12.30%: g 9.0% -> P/E hop ly 13.2x, P/B 1.98x
+  ROE 15.0% payout 40% Ke 12.85%: g 9.0% -> P/E hop ly 11.3x, P/B 1.70x
+  ROE 15.0% payout 40% Ke 13.40%: g 9.0% -> P/E hop ly 9.9x, P/B 1.49x
+Tieu cuc  p=0.25 LNST (100, 120) P/E (7.0, 8.0) -> 9,182 .. 13,032 (tam 11,033)
+Co so     p=0.50 LNST (165, 190) P/E (7.5, 10.0) -> 18,326 .. 28,137 (tam 23,000)
+Tich cuc  p=0.25 LNST (230, 270) P/E (8.0, 10.0) -> 27,249 .. 39,985 (tam 33,320)
+Gia tri ky vong co trong so: 18,271 .. 27,323, tam 22,588; gia 27.000 = +19.5% vs tam; 26.050 = +15.3%
+Vung gia tri hop ly (co so): 18,326 .. 28,137; gia 27.000 o 88% chieu rong vung
+Tham chieu (BQ ticker, thang, PE>0): TV2 PE trung vi 2014+ 8,7 / 2019+ 11,0; PB trung vi 1,81/1,77; PECC1/3/4 PE trung vi 2014+ 8,6/9,5/8,9
+Comp hien tai (BQ 29-30/10): TV1 PE 3,6 PB 1,04; TV3 PE 7,2 PB 0,76; TV4 PE 5,5 PB 1,00; TV2 PE 8,6 PB 1,37
+  Neu ap P/E comp 3.6x len LNST co so 178: 9,490 d/cp
+  Neu ap P/E comp 5.5x len LNST co so 178: 14,498 d/cp
+  Neu ap P/E comp 7.2x len LNST co so 178: 18,979 d/cp
+Do nhay gia tri/cp (nghin dong): hang = LNST ben vung, cot = P/E 6..11
+  100:   8.9   10.4   11.8   13.3   14.8   16.3
+  130:  11.6   13.5   15.4   17.3   19.3   21.2
+  160:  14.2   16.6   19.0   21.3   23.7   26.1
+  190:  16.9   19.7   22.5   25.3   28.1   31.0
+  220:  19.5   22.8   26.1   29.3   32.6   35.8
+  250:  22.2   25.9   29.6   33.3   37.0   40.7
+Phoi nhiem CMC (phai thu 657.327 + dau tu 188.6) = 845.9 ty = 64% VCSH me = 12,527 d/cp
+Phoi nhiem CMC (phai thu 666.374 + dau tu 188.6) = 855.0 ty = 64% VCSH me = 12,661 d/cp
+  Ton that 15% phoi nhiem, sau thue 20% (uoc luong): 103 ty = 1,519 d/cp
+  Ton that 30% phoi nhiem, sau thue 20% (uoc luong): 205 ty = 3,039 d/cp
+  Ton that 50% phoi nhiem, sau thue 20% (uoc luong): 342 ty = 5,065 d/cp
+Lai tien gui 9T 86,5 (me) / 87,1 (HN); co tuc nhan 9T me 13,3 [RIENG TM23]; TC rong me ~ 110.8
+Co tuc 1.000 d/cp: ty suat 3.7% @27.000; tong 67,53 ty = 71% LNST HN 2025
+ADV20 DNSE 5,66 ty/ngay (213k cp); TV1 0,82; TV3 0,04; TV4 0,05

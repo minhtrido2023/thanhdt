@@ -1,0 +1,45 @@
+{
+ "headline": "Tháng 10/2026 −1,89%, kém VN-Index −1,53% nhưng biến động và sụt giảm sâu nhất thấp hơn chỉ số",
+ "key_points": [
+  "Tháng 10/2026 −1,89% so với VN-Index −1,53%; từ đầu −3,69% so với VN-Index −6,37%.",
+  "Sụt giảm sâu nhất −2,46% so với VN-Index −4,45%; độ biến động ngày 0,28% so với 0,90%.",
+  "Tỷ trọng cổ phiếu 64,2% đầu tháng, còn 17,5% cuối tháng; phần lớn là Tiền gửi Trứng vàng."
+ ],
+ "sections": {
+  "bridge": [
+   "Lãi/lỗ đầu tư −18,43 tr; rút vốn −18,02 tr không tính vào hiệu suất."
+  ],
+  "performance": [
+   "Kém chỉ số 0,36 điểm % trong tháng; vượt chỉ số từ đầu hoạt động nhờ giữ tiền mặt cao."
+  ],
+  "risk": [
+   "Độ biến động ngày 0,28% thấp hơn nhiều so với VN-Index 0,90%."
+  ],
+  "portfolio": [
+   "Danh mục cuối tháng gồm 8 mã, 17,5% NAV; Tiền gửi Trứng vàng 79,3%, tiền mặt 3,2%, không dư nợ ký quỹ."
+  ],
+  "market": [
+   "Chi tiết kỹ thuật và cơ bản xem khối thị trường; tỷ trọng cổ phiếu tuân theo trạng thái thị trường."
+  ]
+ },
+ "outlook": [
+  {
+   "scenario": "Hồi phục kỹ thuật, dòng tiền cải thiện",
+   "condition": "Chỉ số giữ được vùng hỗ trợ gần nhất, thanh khoản cải thiện",
+   "invalidation": "Đóng cửa thủng hỗ trợ với thanh khoản lớn",
+   "prob": "trung bình"
+  },
+  {
+   "scenario": "Đi ngang, phân hoá theo cổ phiếu",
+   "condition": "Định giá hấp dẫn nhưng lợi nhuận quý chưa bứt phá",
+   "invalidation": "Lợi nhuận quý vượt kỳ vọng trên diện rộng",
+   "prob": "trung bình"
+  },
+  {
+   "scenario": "Điều chỉnh sâu hơn",
+   "condition": "Áp lực vĩ mô/tỷ giá hoặc lãi suất tăng trở lại",
+   "invalidation": "Lãi suất và tỷ giá ổn định, dòng vốn ngoại không rút ròng",
+   "prob": "thấp"
+  }
+ ]
+}

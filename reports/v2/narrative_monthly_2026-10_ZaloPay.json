@@ -1,0 +1,72 @@
+{
+ "headline": "Tháng 10/2026 −3,85%, kém VN-Index −1,53%; DGC chiếm 35,4% NAV là yếu tố chi phối",
+ "key_points": [
+  "Tháng 10/2026 −3,85% so với VN-Index −1,53%; từ đầu −6,69% so với VN-Index −5,53%.",
+  "Sụt giảm sâu nhất −4,85% so với VN-Index −4,45%; độ biến động ngày 0,71% so với 0,90%.",
+  "Tỷ trọng cổ phiếu 82,5% đầu tháng, còn 46,8% cuối tháng; DGC 35,4% NAV nằm ngoài phần bot quản lý."
+ ],
+ "sections": {
+  "bridge": [
+   "Lãi/lỗ đầu tư −36,86 tr; nạp vốn +18,02 tr không tính vào hiệu suất."
+  ],
+  "performance": [
+   "Phần bot quản lý (không gồm DGC) vượt VN-Index từ đầu hoạt động; DGC nằm ngoài bot."
+  ],
+  "risk": [
+   "Sụt giảm sâu nhất −4,85%, sát mức −4,45% của VN-Index."
+  ],
+  "portfolio": [
+   "Danh mục cuối tháng 8 mã, 46,8% NAV; Tiền gửi Trứng vàng 50,0%, tiền mặt 3,2%, nợ ký quỹ 0."
+  ],
+  "market": [
+   "Chi tiết kỹ thuật và cơ bản xem khối thị trường; tỷ trọng cổ phiếu tuân theo trạng thái thị trường."
+  ]
+ },
+ "outlook": [
+  {
+   "scenario": "Hồi phục kỹ thuật, dòng tiền cải thiện",
+   "condition": "Chỉ số giữ được vùng hỗ trợ gần nhất, thanh khoản cải thiện",
+   "invalidation": "Đóng cửa thủng hỗ trợ với thanh khoản lớn",
+   "prob": "trung bình"
+  },
+  {
+   "scenario": "Đi ngang, phân hoá theo cổ phiếu",
+   "condition": "Định giá hấp dẫn nhưng lợi nhuận quý chưa bứt phá",
+   "invalidation": "Lợi nhuận quý vượt kỳ vọng trên diện rộng",
+   "prob": "trung bình"
+  },
+  {
+   "scenario": "Điều chỉnh sâu hơn",
+   "condition": "Áp lực vĩ mô/tỷ giá hoặc lãi suất tăng trở lại",
+   "invalidation": "Lãi suất và tỷ giá ổn định, dòng vốn ngoại không rút ròng",
+   "prob": "thấp"
+  }
+ ],
+ "internal": [
+  {
+   "title": "Paper signals: extreme_regime và fill_timing",
+   "bullets": [
+    "Cả hai đã bật live từ 2026-08-22 (commit 08af2637), không còn là paper thuần.",
+    "Tháng này chưa đo lại số phiên evidence, marker hay false-trigger: ghi rõ chưa đo, không suy ra ổn định.",
+    "Kết luận: chưa đủ dữ liệu để chấm suy giảm; ít quan sát không phải bằng chứng alpha."
+   ]
+  },
+  {
+   "title": "Shadow intraday cutloss — tích luỹ OOS",
+   "bullets": [
+    "Tháng: 15 phiên có log · 225 lượt quét · 1 crash · 0 lỗi giá · 0 cảnh báo sức khoẻ · 1 dòng log hỏng.",
+    "Thiếu EOD_OOS: 2026-10-12.",
+    "Ngày có ca live trong tháng: 2026-10-23, 2026-10-28, 2026-10-29, 2026-10-30.",
+    "Luỹ kế 4/30 ngày có ca (cận trên, chưa lọc ADV20 ≥ 10 tỷ), còn thiếu ≥ 26; mã: HT1, PNJ, SCL.",
+    "Chỉ là số đếm: không chấm H1, không kết luận cutloss tốt/xấu, không đề xuất bật tự bán."
+   ]
+  },
+  {
+   "title": "Đối soát",
+   "bullets": [
+    "Cầu NAV khớp 0 đồng; giá trị cổ phiếu cuối kỳ khớp 0 đồng với định giá CTCK.",
+    "Chênh −190.000 đ ở giá trị cổ phiếu đầu kỳ so với định giá CTCK (tham khảo), chưa truy nguyên."
+   ]
+  }
+ ]
+}

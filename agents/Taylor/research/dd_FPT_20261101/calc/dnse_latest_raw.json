@@ -1,0 +1,102 @@
+{
+ "FPT": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000FPT1",
+    "symbol": "FPT",
+    "matchPrice": 52.7,
+    "matchQtty": 100,
+    "side": "SELL",
+    "avgPrice": 53.061,
+    "totalVolumeTraded": 566160,
+    "grossTradeAmount": 300.41092,
+    "highestPrice": 53.7,
+    "lowestPrice": 52.4,
+    "openPrice": 52.4,
+    "time": "2026-10-30 14:45:03.535"
+   }
+  ]
+ },
+ "CMG": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000CMG2",
+    "symbol": "CMG",
+    "matchPrice": 18.5,
+    "matchQtty": 10,
+    "side": "SELL",
+    "avgPrice": 18.678,
+    "totalVolumeTraded": 18560,
+    "grossTradeAmount": 3.46655,
+    "highestPrice": 18.95,
+    "lowestPrice": 18.5,
+    "openPrice": 18.9,
+    "time": "2026-10-30 14:45:02.409"
+   }
+  ]
+ },
+ "ELC": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000ELC9",
+    "symbol": "ELC",
+    "matchPrice": 11,
+    "matchQtty": 1130,
+    "side": "BUY",
+    "avgPrice": 10.942,
+    "totalVolumeTraded": 46840,
+    "grossTradeAmount": 5.125105,
+    "highestPrice": 11.1,
+    "lowestPrice": 10.85,
+    "openPrice": 11.1,
+    "time": "2026-10-30 14:45:03.240"
+   }
+  ]
+ },
+ "FOX": {
+  "trades": [
+   {
+    "marketId": "UPX",
+    "boardId": "G1",
+    "isin": "VN000000FOX6",
+    "symbol": "FOX",
+    "matchPrice": 55.4,
+    "matchQtty": 10,
+    "side": "BUY",
+    "avgPrice": 55.901,
+    "totalVolumeTraded": 4640,
+    "grossTradeAmount": 2.59381,
+    "highestPrice": 56.5,
+    "lowestPrice": 55.4,
+    "openPrice": 56.4,
+    "time": "2026-10-30 14:59:29.786"
+   }
+  ]
+ },
+ "FRT": {
+  "trades": [
+   {
+    "marketId": "STO",
+    "boardId": "G1",
+    "isin": "VN000000FRT7",
+    "symbol": "FRT",
+    "matchPrice": 148.7,
+    "matchQtty": 20,
+    "side": "BUY",
+    "avgPrice": 147.742,
+    "totalVolumeTraded": 58630,
+    "grossTradeAmount": 86.6214,
+    "highestPrice": 150.5,
+    "lowestPrice": 144,
+    "openPrice": 150.5,
+    "time": "2026-10-30 14:45:03.573"
+   }
+  ]
+ }
+}

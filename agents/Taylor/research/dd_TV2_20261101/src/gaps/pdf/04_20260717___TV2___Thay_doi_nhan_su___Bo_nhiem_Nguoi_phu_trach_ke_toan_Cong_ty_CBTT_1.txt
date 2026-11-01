@@ -1,0 +1,435 @@
+Stt
+No.
+Mã 
+CK/
+Securit
+ies 
+symbol
+Tên tổ chức/Cá nhân
+Name
+Tài khoản giao 
+dịch chứng khoán 
+(nếu có)/
+Securities trading 
+accounts (if 
+available)
+Chức vụ tại Công ty
+(Nếu có)/
+Position at the company
+(if available)
+Mối quan hệ đối với 
+người nội bộ/
+Relationship with the 
+company
+Loại hình Giấy 
+NSH/Type of 
+documents
+Số giấy NSH/
+NSH No.
+Ngày cấp
+Giấy NSH/
+Date of issue
+Nơi cấp/Place of issue
+Địa chỉ trụ sở chính/Địa chỉ 
+liên hệ/Address/Head office 
+address
+Số cổ phiếu sở 
+hữu cuối 
+kỳ/Number of 
+shares owned at 
+the end of the 
+period
+Tỷ lệ sở hữu cổ 
+phiếu cuối 
+kỳ/Percent age 
+of shares owned 
+at the end of the 
+period
+Thời điểm bắt 
+đầu là người có 
+liên quan của 
+công ty/người 
+nội bộ/Time the 
+person became 
+an affiliated 
+person/ internal 
+person
+Thời điểm 
+không còn là 
+người có liên 
+quan của công 
+ty/người nội 
+bộ/Time the 
+person ceased to 
+be an affiliated 
+person/ internal 
+person
+Lí do (khi phát 
+sinh thay đổi 
+liên quan đến 
+mục 13 và mục 
+14)/Reasons 
+(When arising 
+changes related 
+to sections of 13 
+and 14
+Ghi chú (về việc không 
+có số giấy NSH và các 
+ghi chú khác)/Notes (i.e. 
+not in posession of a 
+NSH No. and other 
+notes)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+1
+TV2
+Hoàng Thụy Hoài Yến
+003C060688/
+040C900011
+C029289
+006C086469
+Người phụ trách Kế toán 
+Công ty/Person in charge 
+of Accounting of the 
+Company 
+CCCD
+075180000074
+10/05/2021
+Cục CSQLHC về TTXH
+270/26/13 Phan Đình Phùng, 
+Phường Cầu Kiệu, TP.HCM
+490.776
+0,73%
+17/07/2026
+Ngày được bổ 
+nhiệm/The day of 
+appointment
+2
+TV2
+Hoàng Thị Bé
+Mẹ/Mother
+CCCD
+034142006118
+11/07/2023
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+3
+TV2
+Lưu Chánh Dân
+Bố chồng/Father in law
+CMND
+264077444
+USA
+0
+0,00%
+17/07/2026
+Định cư Mỹ/
+Immigrating to the US
+4
+TV2
+Lưu Kim Bảo
+C626086
+Chồng/Husband
+CCCD
+058077004515
+07/10/2021
+Cục CSQLHC về TTXH
+270/26/13 Phan Đình Phùng, 
+Phường Cầu Kiệu, TP.HCM
+0
+0,00%
+17/07/2026
+5
+TV2
+Lưu Hoàng Phương Uyên
+Con/Child
+CCCD
+079308038479
+23/5/2022
+Cục CSQLHC về TTXH
+270/26/13 Phan Đình Phùng, 
+Phường Cầu Kiệu, TP.HCM
+0
+0,00%
+17/07/2026
+6
+TV2
+Lưu Hoàng Long
+Con/Child
+Định danh cá 
+nhân
+079212004988
+270/26/13 Phan Đình Phùng, 
+Phường Cầu Kiệu, TP.HCM
+0
+0,00%
+17/07/2026
+Còn nhỏ/Still a child
+7
+TV2
+Hoàng Vĩnh Phúc
+Anh ruột/Brother
+Passport
+P03829233
+05/09/2025
+Cơ quan Quản lý xuất 
+nhập cảnh Bộ Công an
+USA
+0
+0,00%
+17/07/2026
+Định cư Mỹ/
+Immigrating to the US
+8
+TV2
+Hoàng Đức Lộc
+Anh ruột/Brother
+CCCD
+075065011657
+08/12/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+9
+TV2
+Hoàng Thị Tuyết Mai
+Chị ruột/Sister
+CCCD
+075165000662
+08/07/2025
+Bộ Công An
+85 Hoàng Văn Thụ, Phường 
+Cầu Kiệu, TPHCM
+0
+0,00%
+17/07/2026
+10
+TV2
+Hoàng Mình Thái
+Anh ruột/Brother
+CCCD
+075071008577
+20/08/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+11
+TV2
+Hoàng Quốc Bảo
+Anh ruột/Brother
+CCCD
+075074009111
+08/11/2024
+Bộ Công An
+Canada
+0
+0,00%
+17/07/2026
+Định cư Canada/
+Immigrating to Canada
+12
+TV2
+Hoàng Thụy Hoài Khanh
+Chị ruột/Sister
+CCCD
+075176005387
+31/08/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+13
+TV2
+Hoàng Quốc Hùng
+Anh ruột/Brother
+CCCD
+075078009252
+15/05/2026
+Bộ Công An
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+14
+TV2
+Hoàng Quốc Cường
+Em ruột/Brother
+CCCD
+075082004336
+27/08/2022
+Cục CSQLHC về TTXH
+275 Bưng Ông Thoàn, khu phố 
+45, phường Tăng Nhơn Phú, 
+TPHCM
+0
+0,00%
+17/07/2026
+15
+TV2
+Nguyễn Thị Xuân Thu
+Em dâu/Sister in law
+CCCD
+044184001133
+26/9/2024
+Bộ Công An
+275 Bưng Ông Thoàn, khu phố 
+45, phường Tăng Nhơn Phú, 
+TPHCM
+0
+0,00%
+17/07/2026
+16
+TV2
+Dương Thị Hồng Loan
+Chị dâu/Sister in law
+CCCD
+075178013225
+08/12/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+17
+TV2
+Mai Thị Diễm Thu
+Chị dâu/Sister in law
+CCCD
+075172014738
+27/01/2022
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+18
+TV2
+Nguyễn Thị Điệp
+Chị dâu/Sister in law
+CCCD
+074166005349
+08/12/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+19
+TV2
+Nguyễn Hoàng Tuấn
+Anh rể/Brother in law
+CCCD
+079058011077
+04/07/2021
+Cục CSQLHC về TTXH
+85 Hoàng Văn Thụ, Phường 
+Cầu Kiệu, TPHCM
+0
+0,00%
+17/07/2026
+20
+TV2
+Nguyễn Thị Thảo
+Chị dâu/Sister in law
+Passport
+P03829232
+05/09/2025
+Cục CSQLHC về TTXH
+USA
+0
+0,00%
+17/07/2026
+Định cư Mỹ/
+Immigrating to the US
+21
+TV2
+Nguyễn Thị Bích Liên
+Chị dâu/Sister in law
+CCCD
+075188019250
+20/08/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+22
+TV2
+Ngô Đắc Cẩm Phú
+Chị dâu/Sister in law
+Passport
+P901369FF
+02/06/2026
+Cục CSQLHC về TTXH
+Canada
+0
+0,00%
+17/07/2026
+Định cư Canada/
+Immigrating to Canada
+23
+TV2
+Phạm Đình An
+Anh rể/Brother in law
+CCCD
+075068010965
+08/02/2021
+Cục CSQLHC về TTXH
+Long Khánh, Đồng Nai
+0
+0,00%
+17/07/2026
+24
+TV2
+Công ty Cổ phần Đầu tư Năng 
+lượng tái tạo Cà Mau (CMC)/  
+Ca Mau Investment 
+Renewable Power joint stock 
+Company (CMC)
+Bà Hoàng Thụy Hoài 
+Yến làm Phó Giám 
+đốc/Ms. Hoang Thuy 
+Hoai Yen is Deputy 
+Director
+ĐKDN
+2001294821
+06/01/2026
+Sở Tài chính Tỉnh Cà 
+Mau/Ca Mau Department 
+of Finance
+HG1-23 Khu phố Thương mại 
+và Trung tâm thương mại, 
+Phường An Xuyên, tỉnh Cà 
+Mau, Việt Nam/HG1-23 
+Commercial Quarter and 
+Trade Center, An Xuyen War, 
+Ca Mau Province, Viet Nam
+0
+0,00%
+17/07/2026
+DANH SÁCH NGƯỜI CÓ LIÊN QUAN CỦA BÀ HOÀNG THỤY HOÀI YẾN
+(Đính kèm Bản cung cấp thông tin ngày 17/7/2026)
+Trang 1/ 1
