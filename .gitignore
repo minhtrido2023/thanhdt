@@ -57,3 +57,4 @@ secrets/
 # Work-tree dashboard: file khoá flock (ledger + merged.json)
 kb/work_ledger.jsonl.lock
 state/work_tree/*.lock
+agents/Taylor/research/dd_price_zone_threshold_20261101/hist_2y.csv
