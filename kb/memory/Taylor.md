@@ -58,3 +58,4 @@
 - [2026-11-01T15:52:06Z] ĐANG DỞ: DCF VN calibration job Taylor_20261101_155145 — agents/Taylor/research/dcf_vn_calibration_20261101/ | NEXT: đọc docs, PREREG
 - [2026-11-01T15:54:53Z] [dd-price-zone 01/11] XONG job Taylor_20261101_154045: nhánh feat/dd-price-zone-20261101 (ecd94e5e4, chưa merge) — chờ Mike arch-review/merge; ngưỡng 15% chờ Mike tư vấn user
 - [2026-11-01T16:10:40Z] [dd-price-zone vòng2 01/11] XONG job Taylor_20261101_160440: 634f9da84 (chưa merge) — chờ Mike merge; hỏi user DD_ALERT_BASIS + xác nhận center_kind HHS/SIP/TCH
+- [2026-11-01T16:20:09Z] [dd-price-zone vòng3 01/11] XONG job Taylor_20261101_161715: ad5a89c2d (chưa merge) — chờ Mike merge; HPG tâm 19.221 chỉ chân RI, hỏi user nếu muốn giữ 20.200
