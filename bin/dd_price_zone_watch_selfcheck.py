@@ -246,6 +246,82 @@ def cases(m):
             open(os.path.join(td, nm), "w").write("x")
         m.prune_md(td, D(2026, 11, 2), 60)
         ok("retention 60 ngày: bỏ file cũ, giữ file gần + file lạ", sorted(os.listdir(td)) == ["2026-09-10.md", "2026-11-01.md", "notes.md"])
+    # 17. (vòng 3) X1/X2 corp-action lỗi ⇒ cờ 'chưa kiểm được sự kiện quyền', không trả {} im lặng
+    import types
+    import corp_action_lib as cal
+
+    def boom(*a, **k):
+        raise RuntimeError("BQ down")
+    orig_pe = cal.pricing_events
+    cal.pricing_events = boom
+    try:
+        with contextlib.redirect_stderr(io.StringIO()):
+            ce = m.corp_events(["AAA"], {"AAA": ent("AAA")}, D(2026, 11, 4))
+    finally:
+        cal.pricing_events = orig_pe
+    ok("X2 corp_events lỗi ⇒ None (không phải {} im lặng)", ce is None)
+    with tempfile.TemporaryDirectory() as td:
+        lp = os.path.join(td, "l.json")
+        json.dump({"entries": [ent("AAA")]}, open(lp, "w"))
+        cp = os.path.join(td, "p.csv")
+        open(cp, "w").write("ticker,date,close\nAAA,2026-10-30,17000\n")
+        a = argparse.Namespace(asof="2026-10-30", ledger=lp, state=os.path.join(td, "s.json"), out_dir=td, price_csv=cp,
+                               report_block=True, no_bq=False, no_positions=True, no_state=True)
+        m.bq_newer_releases = lambda tk, qs: {}
+        m.corp_events = lambda tk, en, asof: None        # đúng hợp đồng lỗi của corp_events
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            m.run(a, now=dt.datetime(2026, 11, 2, 21, 0, tzinfo=_ICT))
+        ok("X1 run(): corp-action lỗi ⇒ đầu ra có 'chưa kiểm được sự kiện quyền'", "chưa kiểm được sự kiện quyền" in buf.getvalue())
+        m.corp_events = lambda tk, en, asof: {}          # kiểm được, không sự kiện ⇒ KHÔNG có cờ
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            m.run(a, now=dt.datetime(2026, 11, 2, 21, 0, tzinfo=_ICT))
+        ok("X1 đối chứng: kiểm được ⇒ không in cờ", "chưa kiểm được sự kiện quyền" not in buf.getvalue())
+    # 18. (vòng 3) X4/X5 DD_ALERT_BASIS=zone_low: hold_band + cột mức −15%
+    eZ = ent("AAA", c=20000, lo=18000, hi=24000)
+    m.DD_ALERT_BASIS = "zone_low"
+    cz = m.classify(16000, eZ, True)           # −11,1% so đáy, đang bật ⇒ giữ trong dải trễ
+    ok("X4 cơ sở zone_low: đang bật, 16.000 (−11,1% đáy) ⇒ GIỮ + hold_band", cz["alert"] and cz["hold_band"])
+    ok("X4 cơ sở zone_low: 15.300 (đúng −15% đáy), đang bật ⇒ alert nhưng KHÔNG hold_band", m.classify(15300, eZ, True)["alert"] and not m.classify(15300, eZ, True)["hold_band"])
+    ok("X5 cột mức −15% theo đáy vùng: 15.300 (không phải 17.000 theo tâm)", m._lvl(eZ) == 15300)
+    rZ, _, _ = m.evaluate({"entries": [eZ]}, D(2026, 11, 4), {"AAA": {"close": 16000.0}}, {}, None,
+                          {"days": {"2026-11-03": {"AAA": {"dd_date": eZ["dd_date"], "alert": True, "basis": "zone_low"}}}})
+    tZ = m.render_table(rZ, [], D(2026, 11, 4), "t")
+    ok("X5 bảng: tiêu đề 'đáy vùng' + ô mức 15.300; khối ghi 'đáy vùng'", "Mức −15% đáy vùng" in tZ and "| 15.300 |" in tZ
+       and "Dưới đáy vùng ≥15%" in m.render_block(rZ, [], D(2026, 11, 4), "t", "/tmp/x") and "giữ do trễ" in m.render_block(rZ, [], D(2026, 11, 4), "t", "/tmp/x"))
+    m.DD_ALERT_BASIS = "center"
+    ok("X5 trở lại cơ sở center: mức −15% = 17.000", m._lvl(eZ) == 17000)
+    # 19. (vòng 3) X10/X11 ghi chú asof / lịch lễ xuất hiện trong đầu ra khi không đọc được lịch lễ
+    with tempfile.TemporaryDirectory() as td:
+        lp = os.path.join(td, "l.json")
+        json.dump({"entries": [ent("AAA")]}, open(lp, "w"))
+        cp = os.path.join(td, "p.csv")
+        open(cp, "w").write("ticker,date,close\nAAA,2026-10-30,17000\n")
+        a = argparse.Namespace(asof=None, ledger=lp, state=os.path.join(td, "s.json"), out_dir=td, price_csv=cp,
+                               report_block=True, no_bq=True, no_positions=True, no_state=True)
+        fake = types.ModuleType("trading_bot.vn_market")          # thiếu is_holiday ⇒ ImportError ⇒ nhánh ghi chú
+        saved = sys.modules.get("trading_bot.vn_market")
+        sys.modules["trading_bot.vn_market"] = fake
+        try:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                m.run(a, now=dt.datetime(2026, 11, 1, 21, 0, tzinfo=_ICT))
+            nA, noteA = m.default_asof(dt.datetime(2026, 11, 1, 21, 0, tzinfo=_ICT))
+        finally:
+            if saved is None:
+                sys.modules.pop("trading_bot.vn_market", None)
+            else:
+                sys.modules["trading_bot.vn_market"] = saved
+        ok("X11 default_asof: không đọc được lịch lễ ⇒ trả ghi chú 'không đọc được lịch lễ'", "không đọc được lịch lễ" in noteA and nA == D(2026, 10, 30))
+        ok("X10 run(): ghi chú lịch lễ có trong đầu ra (không mất im lặng)", "không đọc được lịch lễ" in buf.getvalue() and "đóng cửa 30/10" in buf.getvalue())
+    # 20. (vòng 3 nit) tâm < đáy vùng được nói rõ; sổ thật: FPT (54.800 < 55.000)
+    fp = m.latest_entries(real, D(2026, 11, 2))["FPT"]
+    rFp, _, _ = m.evaluate({"entries": [fp]}, D(2026, 11, 2), {"FPT": {"close": 52700.0}}, {}, None, {})
+    ok("tâm<đáy: khối + bảng đều nêu 'tâm nằm dưới đáy vùng cơ sở'",
+       m.CENTER_BELOW_LOW in m.render_block(rFp, [], D(2026, 11, 2), "t", "/tmp/x") and m.CENTER_BELOW_LOW in m.render_table(rFp, [], D(2026, 11, 2), "t"))
+    rOk, _, _ = m.evaluate({"entries": [ent("AAA")]}, D(2026, 11, 2), {"AAA": {"close": 19000.0}}, {}, None, {})
+    ok("tâm>đáy: không in câu đó", m.CENTER_BELOW_LOW not in m.render_block(rOk, [], D(2026, 11, 2), "t", "/tmp/x"))
     # 10. không đụng Notifier/Telegram/plan
     src = open(SRC, encoding="utf-8").read()
     ok("module không gọi notify/Notifier/ghi plan", not any(k in src for k in ("notify_telegram", "Notifier(", "trade_plans", "place_order(", "send_telegram")))
@@ -281,7 +357,16 @@ MUTANTS = [
     ("bỏ cờ excluded", "if t in a[\"excluded\"]:", "if False:"),
     ("forensic bỏ PIT", "if t in fl and d.date() <= asof:", "if t in fl:"),
     ("không cảnh báo khi chưa đóng cửa", "elif asof == now.date() and now.time() < CLOSE_READY:", "elif False:"),
+    ("X1 bỏ cờ 'chưa kiểm được sự kiện quyền'", 'if corp is None and not args.no_bq:', 'if False:'),
+    ("X2 corp_events lỗi trả {} im lặng", "        return None\n\n\ndef prune_md", "        return {}\n\n\ndef prune_md"),
+    ("X4 hold_band tính theo tâm thay vì cơ sở", '"hold_band": alert and prev_alert and p * 100 > b * (100 - thr)', '"hold_band": alert and prev_alert and p * 100 > (c or b) * (100 - thr)'),
+    ("X5 cột mức −15% luôn theo tâm", "def _lvl(e):\n    b = alert_base(e)", 'def _lvl(e):\n    b = e.get("center")'),
+    ("X10 bỏ ghi chú asof khỏi đầu ra", "    if asof_note:\n        src += f\"; {asof_note}\"", "    if False:\n        src += ''"),
+    ("X11 default_asof nuốt ghi chú lịch lễ", ', f"⚠️ không đọc được lịch lễ ({type(e).__name__}) — chỉ loại T7/CN"', ', ""'),
+    ("nit: bỏ câu tâm<đáy ở bảng", "if c is not None and lo is not None and c < lo:", "if False:"),
+    ("nit: bỏ câu tâm<đáy ở khối", 'e["center"] < e["zone_low"]:\n            notes', 'False:\n            notes'),
 ]
+
 
 
 def main():

@@ -24,7 +24,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC_ROOT = os.environ.get("MIKE_SRC_ROOT", "/home/trido/thanhdt/WorkingClaude/mike")
 NUM_FIELDS = ("zone_low", "center", "zone_high", "price_ref")
-CENTER_KINDS = ("expected_weighted", "base_scenario", "median", "point")
+CENTER_KINDS = ("expected_weighted", "base_scenario", "blend", "median", "zone_midpoint", "point")
 _TOK = re.compile(r"\d+(?:[.,]\d+)*")
 
 

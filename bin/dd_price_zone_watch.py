@@ -43,7 +43,7 @@ THRESHOLD_PCT = 15          # VÀO cảnh báo: giá ≤ tâm × (1 − 15%)  �
 RELEASE_PCT = 10            # hysteresis: chỉ TẮT khi giá > cơ sở × (1 − 10%)
 DD_ALERT_BASIS = "center"   # cơ sở ngưỡng: "center" (tâm) | "zone_low" (đáy vùng) — hằng số DUY NHẤT, user chọn
 PRICE_RATIO_OK = (0.3, 3.0)  # close/price_ref ngoài khoảng này ⇒ nghi sai đơn vị, không báo động
-CENTER_KINDS = ("expected_weighted", "base_scenario", "median", "point")
+CENTER_KINDS = ("expected_weighted", "base_scenario", "blend", "median", "zone_midpoint", "point")
 KEEP_MD_DAYS = 60           # retention data/dd_price_zone/*.md
 CLOSE_READY = dt.time(15, 5)  # trước giờ này bar 1D của hôm nay chưa phải giá đóng cửa
 LEDGER = os.path.join(MIKE, "kb", "dd_price_zones.json")
@@ -227,6 +227,20 @@ def _label(r):
     return r["zone_status"]
 
 
+CENTER_BELOW_LOW = "tâm nằm dưới đáy vùng cơ sở: tâm là kỳ vọng gồm kịch bản xấu"
+
+
+def _center_note(e):
+    """Nit: tâm < đáy vùng (vd FPT: kỳ vọng trọng số 54,8k < đáy 55,0k) ⇒ nói rõ + ghi chú sổ (field notes)."""
+    c, lo = e.get("center"), e.get("zone_low")
+    parts = []
+    if c is not None and lo is not None and c < lo:
+        parts.append(CENTER_BELOW_LOW)
+    if e.get("notes"):
+        parts.append(f"sổ: {e['notes']}")
+    return "; ".join(parts)
+
+
 def _lvl(e):
     b = alert_base(e)
     return int(b * (100 - THRESHOLD_PCT) / 100) if b else None
@@ -252,7 +266,7 @@ def render_table(rows, expired, asof, src):
         L.append(f"| {r['ticker']} | {e['dd_date']} | {_f(r.get('close'))} | {z} | {_f(e.get('center'))}{ck} | "
                  f"{_pct(r.get('pct_center'))} | {_pct(r.get('pct_low'))} | {_f(_lvl(e))} | {_label(r)} | "
                  f"{_adv(r.get('adv20'))} | "
-                 f"{'; '.join(r['flags'] + r.get('frame_notes', [])) or ''} |")
+                 f"{'; '.join(r['flags'] + r.get('frame_notes', []) + ([_center_note(e)] if _center_note(e) else [])) or ''} |")
     if expired:
         L += ["", "**DD hết hạn — cần DD lại (KHÔNG báo như mức giá hiện hành):**"]
         L += [f"- {x['ticker']} (DD {x['dd_date']}): {x['why']}" for x in expired]
@@ -272,6 +286,8 @@ def render_block(rows, expired, asof, src, table_path):
     def line(r):
         e = r["entry"]
         notes = r["flags"] + r.get("frame_notes", [])
+        if e.get("center") is not None and e.get("zone_low") is not None and e["center"] < e["zone_low"]:
+            notes = notes + [CENTER_BELOW_LOW]
         fl = f" · {'; '.join(notes)}" if notes else ""
         adv = "" if r.get("adv20") is None else f" · ADV20 {r['adv20'] / 1e9:.1f} tỷ".replace(".", ",")
         return (f"  • {r['ticker']} {_f(r['close'])} — {_label(r)}; tâm {_f(e.get('center'))} ({_pct(r.get('pct_center'))})"
