@@ -1,0 +1,19 @@
+!!!!! [dcf_valuation] dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP) !!!!!
+dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP)
+Spearman(g ngầm định 2 năm, MoS S0) trung vị theo tháng = -1.0000 (−1 ⇒ cùng thông tin, chỉ đổi đơn vị)
+Live 30/10/2026: n=145; trung vị g ngầm định 2 năm -2.4%/năm; p25 -31.7%; p75 41.7%; % < 4,5% (g_T) 53.1%
+Trung vị cắt ngang theo tháng 2014-2026: min -18.8% / trung vị 5.2% / max 26.7%; hôm nay ở phân vị 23
+Lịch sử (dòng quý có NP dương 2 đầu): trung vị g ngầm định 5.3% vs NP thực 2 năm 3.4%/năm; Spearman 0.003
+ticker   Price     PE    g1s  g_impl2
+   VCS 30000.0  8.371 -0.210   -0.434
+   PNJ 15500.0  3.248  0.406    0.214
+   VNM 56900.0 10.847  0.279    0.173
+   MWG 74000.0  9.768  0.924    0.283
+   DGC 33300.0  6.695 -0.400   -0.319
+   FPT 52700.0  9.660  0.148    0.130
+   REE 45400.0 10.279  0.064    0.133
+
+=== SELFCHECK ===
+g1s/gQ2s: 200 dòng ngẫu nhiên tính tay từ ticker_financial thô, sai lệch = 0
+PE tự thân: 40 (mã, tháng) ngẫu nhiên tính lại từ cache ngày thô, sai lệch = 0
+Tái lập bài trước: %RẺ S0 (s0, g_T 4,5%) ngày 30/10/2026 = 53.1% (pin bài trước 53,1%) ⇒ KHỚP

@@ -1,0 +1,74 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_expectation_lens_20261101/q3_derate.py:206: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.
+  "x_r126", "x_r252", "dlogPE12"]].round(3).to_string(index=False))
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_expectation_lens_20261101/q3_derate.py:206: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.
+  "x_r126", "x_r252", "dlogPE12"]].round(3).to_string(index=False))
+dòng quý trong universe 2014+: 15574; dòng in_streak: 2098; E1: 477 (315 mã); E2: 1198 (381 mã)
+
+=== E1: n=477 sự kiện / 315 mã / 13 năm ===
+  metric   n   mean  median  ci_lo  ci_hi  frac_neg  mean_IS  mean_OOS
+   pre63 470 -0.013  -0.042 -0.072  0.046     0.604   -0.011    -0.015
+     r63 458 -0.008  -0.028 -0.064  0.040     0.585    0.029    -0.031
+    r126 450  0.044   0.004 -0.055  0.121     0.491    0.046     0.042
+    r252 433  0.112   0.032 -0.012  0.268     0.467    0.089     0.129
+ x_pre63 469 -0.021  -0.034 -0.044  0.008     0.588   -0.014    -0.024
+   x_r63 457  0.006  -0.022 -0.009  0.024     0.554    0.023    -0.004
+  x_r126 449  0.032  -0.004  0.001  0.064     0.503    0.038     0.028
+  x_r252 433  0.063   0.010  0.026  0.098     0.480    0.083     0.049
+ dlogPE6 384  0.069   0.056 -0.067  0.193     0.448   -0.042     0.145
+dlogPE12 326  0.095   0.043 -0.186  0.318     0.460   -0.101     0.230
+
+=== E2: n=1198 sự kiện / 381 mã / 13 năm ===
+  metric    n   mean  median  ci_lo  ci_hi  frac_neg  mean_IS  mean_OOS
+   pre63 1185  0.009  -0.027 -0.040  0.061     0.560    0.013     0.005
+     r63 1154 -0.005  -0.029 -0.058  0.041     0.576    0.019    -0.024
+    r126 1130  0.017  -0.031 -0.071  0.102     0.547    0.021     0.014
+    r252 1060  0.076  -0.021 -0.047  0.242     0.512    0.045     0.105
+ x_pre63 1184 -0.007  -0.026 -0.020  0.007     0.573   -0.003    -0.010
+   x_r63 1153  0.009  -0.012 -0.004  0.025     0.532    0.017     0.003
+  x_r126 1129  0.025  -0.022  0.001  0.053     0.545    0.025     0.025
+  x_r252 1060  0.057  -0.026  0.018  0.105     0.522    0.053     0.060
+ dlogPE6 1002  0.076   0.028 -0.009  0.172     0.473    0.007     0.138
+dlogPE12  872  0.181   0.102  0.016  0.344     0.427    0.049     0.314
+
+=== Dấu hiệu sớm: 2016 dòng in_streak có dòng kế; tỷ lệ cơ sở E1 kế tiếp = 0.242 ===
+   signal    n  share_on  P(E1|on)  P(E1|off)   AUC  fwd6_on  fwd6_off  fwd12_on  fwd12_off  AUC_IS  AUC_OOS
+  sig_acc 2016     0.410     0.260      0.230 0.520    0.017     0.048     0.065      0.116   0.519    0.526
+ sig_accS 2016     0.705     0.314      0.071 0.638    0.022     0.067     0.075      0.145   0.622    0.650
+  sig_npm 2016     0.634     0.309      0.126 0.615    0.029     0.047     0.081      0.121   0.576    0.656
+  sig_roe 2016     0.503     0.385      0.097 0.696    0.006     0.066     0.066      0.126   0.665    0.723
+ sig_pe80 1954     0.114     0.203      0.247 0.488    0.022     0.039     0.057      0.104   0.463    0.509
+sig_g1dec 2016     0.643     0.281      0.172 0.568    0.015     0.073     0.068      0.145   0.568    0.569
+
+fwd12 TB: in_streak 0.0951 | khác 0.1004
+
+=== Case: sự kiện E1/E2 của 5 mã ===
+E1
+ticker quarter       time  g1s_l1    g1s    PE0  PE_own0  pre63  r126  r252  x_r126  x_r252  dlogPE12
+   DGC  2019Q4 2020-01-20   0.802  0.074  5.621   10.000 -0.009   NaN 1.564     NaN   0.905     0.372
+   DGC  2023Q2 2023-08-01   0.459 -0.169  8.156   51.667  0.441 0.260 0.478   0.242   0.398     0.563
+   FPT  2018Q4 2019-01-31   0.498 -0.107 10.188   35.000 -0.007 0.347 0.454   0.271   0.501     0.104
+   MWG  2020Q2 2020-07-30   0.261  0.081  9.016    1.667 -0.060 0.817 1.313   0.365   0.375     0.741
+E2
+ticker quarter       time  g1s_l1    g1s    PE0  PE_own0  pre63   r126   r252  x_r126  x_r252  dlogPE12
+   DGC  2019Q3 2019-10-18   3.355  0.802  5.058    3.333 -0.216  0.045  0.910   0.261   0.944     0.348
+   DGC  2019Q4 2020-01-20   0.802  0.074  5.621   10.000 -0.009    NaN  1.564     NaN   0.905     0.372
+   DGC  2022Q4 2023-01-18   3.423  1.332  4.113    3.333 -0.143  0.225  0.575   0.010   0.433     0.988
+   DGC  2023Q1 2023-04-21   1.332  0.459  3.897    5.000 -0.117  0.753  1.392   0.505   1.017     1.352
+   DGC  2023Q2 2023-08-01   0.459 -0.169  8.156   51.667  0.441  0.260  0.478   0.242   0.398     0.563
+   FPT  2018Q4 2019-01-31   0.498 -0.107 10.188   35.000 -0.007  0.347  0.454   0.271   0.501     0.104
+   MWG  2016Q4 2017-02-02   0.680  0.472 16.295   64.516  0.159  0.202  0.511   0.106   0.237     0.108
+   MWG  2025Q2 2025-07-29   3.162  1.197 19.942   38.333  0.116  0.274  0.091   0.139   0.137    -0.645
+   MWG  2025Q3 2025-10-22   1.197  0.960 21.012   41.667  0.233 -0.020 -0.090  -0.104  -0.208    -0.766
+   VCS  2015Q2 2015-08-03   2.726  1.205  5.243   23.333  0.397  0.752  2.454   0.816   2.384     0.821
+   VCS  2015Q4 2016-01-29   1.992  0.908  6.842   48.333  0.215  0.941  1.928   0.806   2.007     0.515
+   VCS  2016Q3 2016-10-19   0.952  0.588 13.159   96.667  0.586  0.071  0.946   0.157   0.813     0.225
+   VCS  2017Q1 2017-04-19   0.671  0.470 13.157   91.667  0.213  0.849  1.096   0.539   0.920     0.139
+   VCS  2018Q2 2018-08-01   0.641  0.114 13.597   75.000 -0.318 -0.262  0.067  -0.203   0.147    -0.190

@@ -1,0 +1,4 @@
+g1s/gQ2s: 200 dòng ngẫu nhiên tính tay từ ticker_financial thô, sai lệch = 0
+PE tự thân: 40 (mã, tháng) ngẫu nhiên tính lại từ cache ngày thô, sai lệch = 0
+Tái lập bài trước: %RẺ S0 (s0, g_T 4,5%) ngày 30/10/2026 = 53.1% (pin bài trước 53,1%) ⇒ KHỚP
+rc=0

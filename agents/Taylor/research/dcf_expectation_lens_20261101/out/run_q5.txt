@@ -1,0 +1,25 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+universe phi tài chính 30/10/2026: 279 mã; có PE>0: 261; có PE tự thân: 250
+PE tự thân (60T): trung vị 18.3; % <20: 51.2%; % <33: 67.2%; % >67: 16.8%
+P/CF tự thân: n=176 trung vị 35.1; % <33: 46.0%
+DCF S0 (FCFE 3Y, g 4,5%, r 12,25%): tính được 147 mã; %RẺ (FV>P) 53.1%; trung vị P/FV 0.905
+
+=== Phân vị của giá trị hôm nay trong lịch sử tháng 2014-01 → 2026-10 (154 tháng) ===
+  med_PE        hôm nay 9.783  phân vị lịch sử 34  (min 6.681 / trung vị 10.423 / max 18.211)
+  med_PE_own    hôm nay 18.333  phân vị lịch sử 1  (min 5.128 / trung vị 59.141 / max 88.333)
+  med_PFV_S0    hôm nay 0.905  phân vị lịch sử 26  (min 0.616 / trung vị 1.050 / max 1.534)
+  pct_cheap_S0  hôm nay 0.531  phân vị lịch sử 71  (min 0.369 / trung vị 0.484 / max 0.648)
+
+=== Tách nguyên nhân (mã tính được cả DCF S0 và PE tự thân hôm nay) ===
+cheap_dcf  False  True  All
+cheap_own                  
+False         16    15   31
+True          49    55  104
+All           65    70  135
+n cặp 24T: 76; trung vị Δlog giá 24T -0.020; Δlog LN TTM 24T +0.351; Δlog base FCFE-3Y 24T +0.157
+  ⇒ trung vị Δlog PE (giá − LN) ≈ -0.418; Δlog P/base ≈ -0.292
+  tỷ lệ FCFE base / LN TTM hôm nay (trung vị, cùng mã): 0.646; 24T trước cùng phép đo ở mẫu lịch sử: 0.705
+  trung vị base FCFE-3Y / LN TTM theo năm: 2014:0.92, 2015:0.84, 2016:0.63, 2017:0.68, 2018:0.57, 2019:0.60, 2020:0.80, 2021:0.83, 2022:0.73, 2023:0.63, 2024:0.78, 2025:0.78, 2026:0.70
+(b) quý BCTC mới nhất khả dụng 30/10 trong universe: 2026Q2 56.6%, 2026Q3 43.4%
+(d) PE tự thân trung vị theo quý BCTC: 2026Q2: 21.7 (n=140), 2026Q3: 14.0 (n=110)

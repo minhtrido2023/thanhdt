@@ -1,0 +1,47 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in log
+  result = getattr(ufunc, method)(*inputs, **kwargs)
+=== Độ co giãn giá theo lợi nhuận (OLS cắt ngang, winsor 1%, TB theo tháng, t NW lag 12) ===
+    y      xs per  months  n_med  b_dE1  t_dE1  b_dE2  t_dE2  b_dEf  t_dEf
+r_b12     dE1  IS      72  200.5  0.180 10.693    NaN    NaN    NaN    NaN
+r_b12     dE1 OOS      82  285.5  0.119 10.554    NaN    NaN    NaN    NaN
+r_b12 dE1+dE2  IS      72  178.5  0.198  9.636  0.028  2.120    NaN    NaN
+r_b12 dE1+dE2 OOS      82  265.0  0.126 13.618  0.025  2.091    NaN    NaN
+r_b24 dE1+dE2  IS      72  172.0  0.307  7.825  0.241 11.644    NaN    NaN
+r_b24 dE1+dE2 OOS      82  263.5  0.199 11.859  0.187 13.036    NaN    NaN
+r_f12     dEf  IS      72  211.5    NaN    NaN    NaN    NaN  0.158  8.197
+r_f12     dEf OOS      70  291.0    NaN    NaN    NaN    NaN  0.102  8.991
+r_f12 dE1+dEf  IS      72  196.0  0.021  2.156    NaN    NaN  0.164  7.752
+r_f12 dE1+dEf OOS      70  267.0  0.017  1.435    NaN    NaN  0.108 11.446
+
+=== PE (tự thân percentile / log PE) lên streak (0-5 quý liên tiếp g1≥20%, đơn vị = mỗi quý) + hạng g1, gQ2 ===
+     y per  b_streak    b_g1  b_gQ2  t_streak    t_g1  t_gQ2
+PE_own  IS    -0.082 -44.962 -2.001    -0.122  -9.022 -1.110
+PE_own OOS    -1.555 -47.705 -1.745    -3.370 -18.612 -1.076
+ logPE  IS     0.016  -0.883  0.188     1.090  -6.801  3.269
+ logPE OOS     0.003  -0.991  0.184     0.266 -11.115  5.345
+
+=== theo streak (index: OOS?, streak) ===
+                  n  pe_own_med  r_b12_med  r_f12_med  f1_med
+t     streak                                                 
+False 0.0      6899      69.444      0.003      0.000   0.046
+      1.0      1401      53.846      0.239     -0.002   0.047
+      2.0      1073      46.667      0.282     -0.006   0.067
+      3.0       856      41.667      0.294     -0.017   0.029
+      4.0       782      34.808      0.261      0.018   0.015
+      5.0      1859      37.255      0.284     -0.015   0.067
+True  0.0     13442      75.000      0.046      0.049   0.068
+      1.0      2594      53.333      0.209      0.010   0.038
+      2.0      1900      45.200      0.229     -0.007  -0.017
+      3.0      1499      37.255      0.191     -0.014  -0.063
+      4.0      1243      31.667      0.162     -0.036  -0.099
+      5.0      2186      18.750      0.184     -0.009  -0.209
