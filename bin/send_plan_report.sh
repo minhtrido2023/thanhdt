@@ -228,6 +228,33 @@ if [ -n "$NOWCAST_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
 fi
 export NOWCAST_BLOCK
 
+# --- Mã DD dưới vùng giá hợp lý (user yêu cầu 2026-11-01 22:39 ICT; job Taylor_20261101_154045).
+# GHI CHÚ cho user cân nhắc đưa vào plan — KHÔNG đụng orders/sizing, KHÔNG tự thêm lệnh. Sổ
+# kb/dd_price_zones.json + giá đóng cửa DNSE chỉ-đọc (bin/dd_price_zone_watch.py). CHỈ ZaloPay (cùng tiền lệ
+# NOWCAST: một lần/tối, SpaceX là báo cáo nhà đầu tư). FAIL-OPEN: lỗi/treo/rỗng => đúng 1 dòng cảnh báo,
+# không chặn gửi. Sandbox selfcheck không chạy trừ khi cấp SEND_PLAN_DDZONE_CMD.
+DDZONE_BLOCK=""
+DDZONE_CMD=""
+if [ "$ACCOUNT" = "ZaloPay" ]; then
+  if [ -n "${SEND_PLAN_DDZONE_CMD:-}" ]; then
+    DDZONE_CMD="$SEND_PLAN_DDZONE_CMD"
+  elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
+    DDZONE_CMD="$ROOT/bin/dd_price_zone_watch.py"
+  fi
+fi
+if [ -n "$DDZONE_CMD" ]; then
+  DDZONE_ERR="$(mktemp)"
+  DDZONE_BLOCK="$(timeout -k 5 "${SEND_PLAN_DDZONE_TIMEOUT:-75}" python3 "$DDZONE_CMD" run --report-block 2>"$DDZONE_ERR")"
+  DDZONE_RC=$?
+  if [ "$DDZONE_RC" -ne 0 ] || [ -z "$DDZONE_BLOCK" ]; then
+    _dzerr="$(grep -v '^\s*$' "$DDZONE_ERR" | tail -1 | cut -c1-160)"
+    DDZONE_BLOCK="⚠️ Mã DD dưới vùng giá hợp lý: KHÔNG KIỂM ĐƯỢC (dd_price_zone_watch rc=$DDZONE_RC${_dzerr:+, $_dzerr}) — plan không bị ảnh hưởng."
+  fi
+  sed 's/^/[ddzone] /' "$DDZONE_ERR" >&2
+  rm -f "$DDZONE_ERR"
+fi
+export DDZONE_BLOCK
+
 RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os, re
 
@@ -1478,6 +1505,7 @@ for _env, _lbl in (("DRIFT_BLOCK", "vị thế sau plan"), ("LAGCAL_BLOCK", "l�
         INFO.extend(_x for _x in _bl if not _x.lstrip().startswith("✅"))
 
 _nc = os.environ.get("NOWCAST_BLOCK", "").strip()   # nowcast hàng hoá (ZaloPay, display-only, shell phía trên)
+_ddz = os.environ.get("DDZONE_BLOCK", "").strip()  # mã DD dưới vùng giá (ZaloPay, ghi chú, shell phía trên)
 
 # Trạng thái duyệt — LÊN ĐẦU (việc đầu tiên người đọc cần biết), kèm số cảnh báo để biết có cần cuộn xuống.
 if approved:
@@ -1504,6 +1532,8 @@ if INFO:
     out += ["", "**ℹ️ GHI CHÚ** (không cần quyết định)"] + INFO
 if _nc:
     out += [""] + _nc.splitlines()
+if _ddz:
+    out += [""] + _ddz.splitlines()
 out.append("")
 if _ok_checks:
     out.append("✔ Kiểm tự động không bất thường: " + " · ".join(_ok_checks) + ".")
