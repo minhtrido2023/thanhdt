@@ -87,6 +87,7 @@ Usage:
 import argparse
 import json
 import os
+import shutil
 import sys
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -499,14 +500,32 @@ def nav_basis(account=ACCOUNT_DEFAULT):
 # STATE I/O (atomic) + FORWARD MTM SIMULATOR
 # ======================================================================================
 
+class StateCorruptError(Exception):
+    """State file EXISTS but is unreadable — must NOT be treated as 'no state' (would re-init and
+    overwrite the paper track record via _save_state)."""
+
+
 def _load_state():
-    if os.path.exists(STATE_FILE):
+    """None only when the file is absent. Existing-but-unreadable → back up to `<STATE_FILE>.corrupt`
+    (first copy kept, never overwritten) and raise StateCorruptError instead of silently returning None."""
+    if not os.path.exists(STATE_FILE):
+        return None
+    try:
+        with open(STATE_FILE, encoding="utf-8") as f:
+            st = json.load(f)
+        if not isinstance(st, dict):
+            raise ValueError(f"state root is {type(st).__name__}, expected object")
+        return st
+    except Exception as e:
+        bak = STATE_FILE + ".corrupt"
         try:
-            with open(STATE_FILE, encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return None
-    return None
+            if not os.path.exists(bak):
+                shutil.copy2(STATE_FILE, bak)
+        except Exception as e2:
+            bak = f"(backup FAILED: {e2})"
+        print(f"!!!!! [dc_book_waterfall_paper] STATE FILE UNREADABLE {STATE_FILE}: {e!r} -> "
+              f"backup {bak}; KHONG re-init, bo qua advance. Can nguoi xu ly.", file=sys.stderr)
+        raise StateCorruptError(str(e)) from e
 
 
 def _save_state(st):
@@ -558,11 +577,16 @@ def _init_state(basis):
 
 def advance(account=ACCOUNT_DEFAULT):
     """Advance the sleeve to the freshest available close (one step). Idempotent per data_date.
-    Returns (status_str, state_dict). status ∈ {disabled, no_data, held, advanced, unchanged}."""
+    Returns (status_str, state_dict). status ∈ {disabled, no_data, held, advanced, unchanged, state_corrupt}."""
     if not sleeve_enabled(account):
         return "disabled", None
 
-    st = _load_state() or _init_state(nav_basis(account))
+    try:
+        st = _load_state()
+        if st is None:
+            st = _init_state(nav_basis(account))
+    except StateCorruptError:
+        return "state_corrupt", None               # file hỏng → KHÔNG re-init/ghi đè (đã backup .corrupt)
 
     state, state_name, bal_lag = load_trigger()
     dc_set = load_double_confirm()               # None on failure
@@ -807,6 +831,9 @@ def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
         if not sleeve_enabled(account):
             return ""   # silently absent when the paper trial isn't enabled (e.g. live accounts)
         status, st = ("skipped", _load_state()) if not do_advance else advance(account)
+        if status == "state_corrupt":
+            return ("⚠️ DC-book Waterfall (paper): FILE STATE HỎNG (không đọc được) — đã backup "
+                    "`.corrupt`, KHÔNG re-init; cần người kiểm tra.")
         if st is None:
             return "⚠️ DC-book Waterfall (paper): chưa có state (chưa advance được — thiếu dữ liệu giá)."
 
@@ -901,7 +928,11 @@ def main():
     a = ap.parse_args()
 
     if a.show:
-        st = _load_state()
+        try:
+            st = _load_state()
+        except StateCorruptError as e:
+            print(f"(state file unreadable: {e})")
+            return 1
         print(json.dumps(st, ensure_ascii=False, indent=2) if st else "(no state file)")
         return 0
     if a.section:
@@ -910,6 +941,8 @@ def main():
     # default / --update
     status, st = advance(a.account)
     print(f"[dc_book_waterfall_paper] advance → {status}")
+    if status == "state_corrupt":
+        return 1                                   # cron thấy rc!=0; file hỏng cần người xử lý
     if st and st.get("history"):
         print(json.dumps(st["history"][-1], ensure_ascii=False, indent=2))
     return 0

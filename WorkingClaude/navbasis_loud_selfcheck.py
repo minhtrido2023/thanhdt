@@ -56,12 +56,13 @@ def load_fn(ref, workdir):
     m = re.search(r"\ndef _account_nav_basis\(label\):\n(.*?)\n(?=def |\Z)", s, re.S)
     assert m, f"không thấy _account_nav_basis trong {ref or 'HEAD'} — dừng, đừng đoán"
     body = "def _account_nav_basis(label):\n" + m.group(1) + "\n"
-    g = {"os": os, "json": json, "pd": pd, "WORKDIR": workdir, "ACTIVE_NAV_MAX_AGE_D": 3}
+    g = {"os": os, "json": json, "pd": pd, "WORKDIR": workdir, "ACTIVE_NAV_MAX_AGE_D": 3,
+         "NAV_HISTORY_MAX_AGE_D": int((re.search(r"^NAV_HISTORY_MAX_AGE_D\s*=\s*(\d+)", s, re.M) or re.search(r"(0)", "0")).group(1))}   # bản CŨ không có hằng ⇒ 0 (không dùng)
     exec(textwrap.dedent(body), g)
     return g["_account_nav_basis"]
 
 
-def sandbox(active=None, hist_nav=None, active_raw=None):
+def sandbox(active=None, hist_nav=None, active_raw=None, hist_date=None):
     d = tempfile.mkdtemp(prefix="navb_")
     el = os.path.join(d, "data", "execution_logs")
     os.makedirs(el, exist_ok=True)
@@ -70,7 +71,7 @@ def sandbox(active=None, hist_nav=None, active_raw=None):
     elif active is not None:
         json.dump(active, open(os.path.join(el, "active_nav_T.json"), "w", encoding="utf-8"))
     if hist_nav is not None:
-        pd.DataFrame([{"date": "2026-09-27", "nav": hist_nav}]).to_csv(
+        pd.DataFrame([{"date": hist_date or ICT_TODAY, "nav": hist_nav}]).to_csv(
             os.path.join(el, "nav_history_T.csv"), index=False)
     return d
 
@@ -84,6 +85,7 @@ def call(ref, **kw):
     return nav, source, buf.getvalue()
 
 
+ICT_TODAY = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().strftime("%Y-%m-%d")
 TODAY = pd.Timestamp.now().normalize().strftime("%Y-%m-%d")
 OLD_DAY = (pd.Timestamp.now().normalize() - pd.Timedelta(days=30)).strftime("%Y-%m-%d")
 
@@ -132,7 +134,7 @@ def t_no_basis_at_all_is_loud():
     """Không có nguồn nào ⇒ (None, lý do) + in 🔴; bản CŨ im lặng và lý do trống rỗng."""
     nav, source, out = call(None)
     ok(nav is None, f"phải trả None, được {nav}")
-    ok("🔴" in out and "KHÔNG được chia trần %ADV" in out, f"không in cảnh báo đỏ:\n{out!r}")
+    ok("🔴" in out and "chia ĐỀU" in out, f"không in cảnh báo đỏ:\n{out!r}")
     ok("FileNotFoundError" in source, f"`source` không mang lý do thật: {source!r}")
     nav_o, source_o, out_o = call(OLD_REF)
     ok(nav_o is None and out_o == "", f"bản CŨ phải im lặng: {nav_o} {out_o!r}")
@@ -151,7 +153,32 @@ def t_age_anchored_ict_not_host_tz():
        f"active_nav ghi hôm nay (ICT {ict_today}) bị coi quá hạn dưới TZ host lệch: {nav} {source} {out!r}")
 
 
-TESTS = [t_happy_path_unchanged, t_fallback_is_loud_and_names_the_cause, t_no_basis_at_all_is_loud,
+def t_stale_nav_history_not_used():
+    """nav_history quá hạn (daily_nav_snapshot ngừng) ⇒ KHÔNG dùng: (None, lý do) + 🔴; tươi ⇒ vẫn fallback.
+    Biên: tuổi đúng NAV_HISTORY_MAX_AGE_D (7) vẫn dùng, 8 thì bỏ."""
+    ict = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None)
+    d = lambda n: (ict - pd.Timedelta(days=n)).strftime("%Y-%m-%d")
+    M = int(re.search(r"^NAV_HISTORY_MAX_AGE_D\s*=\s*(\d+)", src(), re.M).group(1))
+    ok(M >= 12, f"trần phải ≥ kỳ nghỉ Tết dài nhất (~12d), được {M}")
+    nav, source, out = call(None, hist_nav=1e9, hist_date=d(M + 30))
+    ok(nav is None, f"nav_history rất cũ phải bị bỏ, được {nav}")
+    ok("nav_history QUÁ HẠN" in source and "🔴" in out, f"thiếu lý do/cảnh báo đỏ: {source!r} {out!r}")
+    nav, _, _ = call(None, hist_nav=1e9, hist_date=d(M + 1))
+    ok(nav is None, f"tuổi M+1 phải bị bỏ, được {nav}")
+    nav, source, _ = call(None, hist_nav=1e9, hist_date=d(M))
+    ok(nav == 1e9 and source.startswith("nav_history @"), f"tuổi đúng M phải còn dùng: {nav} {source!r}")
+    nav, source, _ = call(None, hist_nav=1e9, hist_date=d(10))
+    ok(nav == 1e9, f"khoảng nghỉ Tết ~10d phải còn dùng, được {nav}")
+    nav, _, _ = call(None, hist_nav=1e9, hist_date=d(-3))
+    ok(nav is None, f"ngày TƯƠNG LAI (tuổi âm) phải bị bỏ, được {nav}")
+    # lý do active_nav vẫn được giữ cùng lý do nav_history quá hạn
+    nav, source, _ = call(None, active={"computed_at": OLD_DAY, "active_nav": 5e8}, hist_nav=1e9,
+                          hist_date=d(M + 30))
+    ok(nav is None and "active_nav QUÁ HẠN" in source and "nav_history QUÁ HẠN" in source,
+       f"phải mang đủ 2 lý do: {source!r}")
+
+
+TESTS = [t_stale_nav_history_not_used, t_happy_path_unchanged, t_fallback_is_loud_and_names_the_cause, t_no_basis_at_all_is_loud,
          t_age_anchored_ict_not_host_tz]
 
 if __name__ == "__main__":

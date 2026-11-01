@@ -451,6 +451,37 @@ ok("F5 day-2 BULL → history row records state_name=BULL",
    sF2["history"][-1]["state_name"] == "BULL")
 
 # =======================================================================================
+print("G. CORRUPT STATE FILE — never re-init over an existing-but-unreadable track record")
+fresh_state_paths(); Inject.install()
+Inject.dc_set = dict(DC5); Inject.liq = LIQ_OK(*DC5)
+Inject.basket = ({"VHM": 0.5, "VCB": 0.5}, "2026-05-05")
+Inject.trigger = (NEUTRAL, "NEUTRAL", False)
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+                  "VHM": 40000, "VCB": 60000}, "2026-08-20")
+ok("G0 missing file → _load_state() is None (init path intact)", dcw._load_state() is None)
+for label, payload in (("truncated JSON", '{"nav_vnd": 1.0e9, "history": [{"da'), ("empty file", ""),
+                       ("JSON null", "null")):
+    fresh_state_paths()
+    with open(dcw.STATE_FILE, "w", encoding="utf-8") as f:
+        f.write(payload)
+    import contextlib, io
+    with contextlib.redirect_stderr(io.StringIO()):
+        stG, sG = dcw.advance("main")
+    with open(dcw.STATE_FILE, encoding="utf-8") as f:
+        kept = f.read()
+    ok(f"G1 {label} → advance()=state_corrupt, state None", stG == "state_corrupt" and sG is None)
+    ok(f"G2 {label} → original file untouched (no overwrite)", kept == payload)
+    ok(f"G3 {label} → backup .corrupt written", os.path.exists(dcw.STATE_FILE + ".corrupt"))
+    ok(f"G4 {label} → no NAV csv row appended", not os.path.exists(dcw.NAV_CSV))
+fresh_state_paths()
+with open(dcw.STATE_FILE, "w", encoding="utf-8") as f:
+    f.write("{bad")
+with contextlib.redirect_stderr(io.StringIO()):
+    secG = dcw.generate_section("main", do_advance=True)
+ok("G5 generate_section degrades to a ⚠️ corrupt line (does not raise / not 'chưa có state')",
+   "HỎNG" in secG and "chưa có state" not in secG, secG[:80])
+
+# =======================================================================================
 print(f"\n{'='*60}\nRESULT: {len(PASS)} passed, {len(FAIL)} failed")
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

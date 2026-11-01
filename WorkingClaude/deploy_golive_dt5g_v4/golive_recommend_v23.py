@@ -344,7 +344,8 @@ ALLOC_BAND = 0.10
 LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
 CAPIT_HOLD = 60   # WASHOUT_GATE: xem khối "CAPIT UNIVERSE" bên dưới (gate ĐI KÈM mẫu số, P4)
 ADV_X, ADV_D = 0.10, 2.0   # trần %ADV/tên cho CAPIT — xem capit_adv_caps() (quy ước, KHÔNG backtest)
-ACTIVE_NAV_MAX_AGE_D = 5   # active_nav_<label>.json ghi ad-hoc (không cron) — quá hạn thì lùi nav_history
+ACTIVE_NAV_MAX_AGE_D = 5   # active_nav_<label>.json (cron 20:15 compute_active_nav_all.sh) — quá hạn thì lùi nav_history
+NAV_HISTORY_MAX_AGE_D = 14   # nav_history_<label>.csv do cron daily_nav_snapshot ghi mỗi phiên (bỏ cuối tuần+lễ); 14d lịch ≥ kỳ nghỉ Tết dài nhất (~9-12d) ⇒ quá mức này mới là snapshot chết ⇒ KHÔNG dùng
 ANOMALY_TTL_DAYS = 30   # cờ due-diligence còn hiệu lực bao lâu kể từ phiên alert cuối
 SNAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 
@@ -449,11 +450,18 @@ def _account_nav_basis(label):
     lớn hơn bị cắt trần oan.
 
     Freshness kiểm theo NỘI DUNG (`computed_at` trong chính file), KHÔNG theo mtime — mtime
-    tươi/nội dung cũ là bẫy đã gặp thật (sự cố lag_edge_health 2026-07-12). File này ghi
-    ad-hoc (không có cron), nên hết hạn là chuyện bình thường, không phải lỗi.
+    tươi/nội dung cũ là bẫy đã gặp thật (sự cố lag_edge_health 2026-07-12). Từ 2026-08-13 file
+    này có cron (compute_active_nav_all.sh, 20:15 ICT); trần tuổi ACTIVE_NAV_MAX_AGE_D.
 
     Fallback: nav_history_<label>.csv (do daily_nav_snapshot.py ghi mỗi phiên, có cột
-    `date` nên cũng dated theo nội dung) — TỔNG NAV, chưa trừ excluded_tickers.
+    `date` nên cũng dated theo nội dung) — TỔNG NAV, chưa trừ excluded_tickers. CŨNG có trần
+    tuổi NAV_HISTORY_MAX_AGE_D (14d lịch, ≥ kỳ nghỉ Tết dài nhất): quá hạn/ngày tương lai ⇒ KHÔNG dùng.
+
+    HỆ QUẢ khi trả (None, lý do) — CHẤP NHẬN có chủ đích (cq-2026-11-01, arch-review): account đó
+    (1) vào nhánh chia ĐỀU trần %ADV ở capit_account_shares (Σ share vẫn ≤ 1 ⇒ trần tổng KHÔNG nới), và
+    (2) mất slot target tiền trong `capit_targets` (`error: "không có cơ sở NAV — tầng plan phải
+    tự tính"`) ⇒ leverage bỏ qua account đó, plan report giao DollarBill tự size. Đường (2) đã tồn tại
+    từ trước cho ca "không có nguồn NAV nào"; gate tuổi chỉ làm nó đạt tới khi nav_history chết.
     """
     # ⚠️ TRƯỚC 2026-09-28 cả hai khối dưới đây là `except Exception: pass` — KHÔNG MỘT DÒNG LOG,
     # trên chính con số sinh slot target tiền thật. Hệ quả: `active_nav` hỏng/thiếu/stale thì rơi
@@ -486,20 +494,26 @@ def _account_nav_basis(label):
     try:
         r = pd.read_csv(p2).iloc[-1]
         nav2 = float(r["nav"])
-        if nav2 > 0:
+        age2 = (pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").normalize().tz_localize(None) - pd.Timestamp(r["date"])).days
+        if not 0 <= age2 <= NAV_HISTORY_MAX_AGE_D:
+            # snapshot chết ⇒ NAV cũ tuỳ ý để chia trần %ADV; không dùng → account này vào nhánh chia đều
+            reasons.append(f"nav_history QUÁ HẠN: date={r['date']} ⇒ tuổi {age2}d"
+                           f" (trần {NAV_HISTORY_MAX_AGE_D}d) — daily_nav_snapshot có thể đã ngừng")
+        elif nav2 > 0:
             why = " | ".join(reasons) or "không rõ (không có lý do nào được ghi)"
             print(f"  [nav-basis] ⚠️ {label}: PHẢI DÙNG FALLBACK `nav_history` @{r['date']} ="
                   f" TỔNG NAV, CHƯA trừ excluded_tickers ⇒ phần chia trần %ADV của account này"
                   f" LỚN hơn vốn triển khai thật. Vì: {why}")
             return nav2, (f"nav_history @{r['date']} (TỔNG NAV, chưa trừ excluded"
                           f" — FALLBACK vì: {why})")
-        reasons.append(f"nav_history nav = {nav2} ≤ 0 (@{r['date']})")
+        else:
+            reasons.append(f"nav_history nav = {nav2} ≤ 0 (@{r['date']})")
     except Exception as e:
         reasons.append(f"nav_history không đọc được ({os.path.basename(p2)}):"
                        f" {type(e).__name__}: {e}")
     why = " | ".join(reasons) or "không rõ"
-    print(f"  [nav-basis] 🔴 {label}: KHÔNG có cơ sở NAV nào dùng được ⇒ account này KHÔNG được"
-          f" chia trần %ADV. Vì: {why}")
+    print(f"  [nav-basis] 🔴 {label}: KHÔNG có cơ sở NAV nào dùng được ⇒ account này bị chia ĐỀU"
+          f" trần %ADV (Σ không nới) và KHÔNG có slot target tiền (tầng plan tự tính). Vì: {why}")
     return None, f"không có active_nav/nav_history dùng được ({why})"
 
 
