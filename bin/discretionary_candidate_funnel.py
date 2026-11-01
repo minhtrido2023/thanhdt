@@ -145,6 +145,8 @@ SEASON_MIN_PER_PAIR = 3
 SEASON_ETA2_MIN = 0.6
 QUEUE_MAX_DAYS = 30               # mã làn C xếp hàng >= 30 ngày ⇒ xoá khỏi state + cảnh báo
 PRUNE_LOG_MAX = 500               # state["prune_log"] giữ tối đa N mục gần nhất
+DD_PICK = True                    # v2 2026-11-01: bộ chọn mã DD (discretionary_dd_pick.py); selfcheck
+                                  # cũ đặt False để không chạm DCF/giá/vị thế thật
 
 
 def daily_paths(base_dir=DATA_DIR):
@@ -804,6 +806,12 @@ def context_label(drop, peer_med):
     return "NGÀNH"
 
 
+def quality_mask(df):
+    """Vũ trụ chất lượng chung (làn A/B/C + bộ chọn DD v2): rating<=3 ∧ golden floor ∧ redflag rỗng ∧ liq."""
+    return ((df["rating"] <= RATING_MAX) & (df["ROE_Min3Y"] >= 0) & (df["CF_OA_3Y"] > 0)
+            & df["redflag"].isna() & (df["liq_bn"] >= LIQ_MIN_BN))
+
+
 def build_lanes(rating, banned, forensic, insider, fin=None):
     """rating: DataFrame rating_8l.csv; fin: kết quả load_financials (None ⇒ không có làn C).
     Trả (cands, excluded):
@@ -812,8 +820,7 @@ def build_lanes(rating, banned, forensic, insider, fin=None):
                điều kiện chất lượng/PE làn C mà quý mới nhất thiếu NP (`np_missing(<quý>)`)."""
     df = growth_cols(rating, fin)
     df["golden_floor_pass"] = (df["ROE_Min3Y"] >= 0) & (df["CF_OA_3Y"] > 0)
-    quality = ((df["rating"] <= RATING_MAX) & df["golden_floor_pass"] & df["redflag"].isna()
-               & (df["liq_bn"] >= LIQ_MIN_BN))
+    quality = quality_mask(df)
 
     def _why(t):
         why = []
@@ -1122,7 +1129,7 @@ def _rec(r):
 
 
 def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
-              forensic_csv=FORENSIC_FLAGS_CSV, insider=None, fin_parquet=None):
+              forensic_csv=FORENSIC_FLAGS_CSV, insider=None, fin_parquet=None, pick_kw=None):
     """Chạy funnel 1 lần. Trả dict kết quả (đồng thời ghi file nếu write=True).
     Thứ tự ghi: snapshot → log → KẾT QUẢ → STATE SAU CÙNG — crash giữa chừng không bao giờ
     đánh dấu "đã báo" cho mã chưa nằm trong file kết quả (chạy lại cùng asof báo lại y hệt)."""
@@ -1204,6 +1211,21 @@ def run_daily(rating_csv=RATING_8L_CSV, base_dir=DATA_DIR, write=True, now=None,
         "n_lane_c_seasonal": int(((cands["lane"] == "C") & cands["seasonal"].eq(True)).sum()),
         "state_pruned": pruned,
     }
+    # Bộ chọn mã DD v2 (PREREG discretionary_dd_pick_v2_20261101) — cô lập như làn C: lỗi ⇒ cảnh báo,
+    # funnel A/B/C vẫn chạy. Chỉ chạy khi state ghi được (không sanity-fail / asof không lùi): nhật ký
+    # chọn là PIT append-only, không được ghi trên dữ liệu hỏng.
+    if DD_PICK:
+        result["dd_pick"] = None
+    if DD_PICK and state_ok:
+        try:
+            import discretionary_dd_pick as P
+            kw = dict(pick_kw or {})
+            kw.setdefault("live_fn", P.live_dcf_fn(asof))
+            result["dd_pick"] = P.run_pick(rating, fin, cands, banned, forensic, insider, asof,
+                                           base_dir=base_dir, write=write, now=now, **kw)
+        except Exception as e:                              # noqa: BLE001 — cô lập bộ chọn
+            warnings.append(f"bộ chọn mã DD lỗi ({type(e).__name__}: {str(e)[:200]}) — KHÔNG có đề "
+                            f"xuất DD phiên này")
     if write:
         # asof đi lùi hoặc dữ liệu dưới sàn ⇒ KHÔNG đụng snapshot PIT lẫn log đo forward excess
         # của ngày cũ (ghi đè = rò rỉ tương lai vào lịch sử, arch-review r2 #1/#5).
@@ -1266,7 +1288,7 @@ def candidate_line(c, reason=None, prev_pbz=None, also_c=None):
             f" · {ctx}{tag}{ctag}")
 
 
-def format_topic_block(result, today):
+def format_topic_block(result, today, pick_base_dir=DATA_DIR):
     """Khối cho daily_decision_topic.py. `result=None` ⇒ thiếu file (vẫn in, không im lặng).
     Danh sách "mới" chỉ là MỚI ở sáng ngay sau asof; T7/CN/T2 đọc lại kết quả thứ Sáu ⇒ ghi
     rõ "từ phiên <asof>"."""
@@ -1275,6 +1297,12 @@ def format_topic_block(result, today):
         return f"{head}\n⚠️ CHƯA có kết quả funnel ({daily_paths()['result']}) — cron 19:35 chưa chạy?"
     lines = [f"{head} — dữ liệu 8L ngày {result['asof']}"]
     asof = dt.date.fromisoformat(result["asof"])
+    if "dd_pick" in result:                                 # v2 2026-11-01: 1 dòng mã DD hôm nay
+        try:
+            import discretionary_dd_pick as P
+            lines.append(P.topic_line(result["dd_pick"], today, base_dir=pick_base_dir))
+        except Exception as e:                              # noqa: BLE001 — §29: in lỗi thật
+            lines.append(f"🔎 Mã DD hôm nay: ⚠️ không dựng được dòng ({type(e).__name__}: {str(e)[:160]})")
     expect = prev_trading_day(today)
     if asof < expect:
         lines.append(f"⚠️ KẾT QUẢ CŨ: asof {asof} < phiên gần nhất {expect} — funnel/pt_8l_daily "
@@ -1346,7 +1374,8 @@ def print_block(today=None, result_path=None):
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             result = json.load(f)
-    return format_topic_block(result, today)
+    base = os.path.dirname(path) if result_path else DATA_DIR
+    return format_topic_block(result, today, pick_base_dir=base)
 
 
 def format_run_report(result):
@@ -1372,6 +1401,14 @@ def format_run_report(result):
                                     c_of.get(c["ticker"]) if c["lane"] != "C" else None) + mark)
     for e in result["excluded"]:
         lines.append(f"  LOẠI {e['ticker']} (làn {e['lane']}, {e['route']}): {e['excl_reason']}")
+    pk = result.get("dd_pick")
+    if pk:
+        lines.append(f"  BỘ CHỌN DD ({'mùa' if pk['season'] else 'ngoài mùa'}{', đọc lại nhật ký' if pk.get('replayed') else ''}): "
+                     f"chọn={(pk.get('picked') or {}).get('ticker')} — {pk.get('reason')}")
+        for x in pk.get("top", []):
+            lines.append(f"    #{x['rank']} {x['ticker']:<5} score={x['score']:.3f} V={x['V']:.2f} E={x['E']:.2f} "
+                         f"R={x['R']:.2f} MoS={x['mos'] if x['mos'] is None else round(x['mos'], 3)} "
+                         f"esc={x['escalate_full']} [{x.get('labels') or ''}]")
     if "snapshot" in result:
         lines.append(f"  snapshot: {result['snapshot']['status']} {result['snapshot']['path']}")
         lines.append(f"  log: {result.get('log_rows', 'KHÔNG GHI (dưới sàn)')} dòng")
