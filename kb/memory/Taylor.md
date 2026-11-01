@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-31T15:28:22Z] [dd-TCH-v3 31/10] XONG job Taylor_20261031_151105: REPORT v2 (vung 10.150-15.050 tam 12.300-12.650 vs 11.850, trong vung nua duoi) + investor_report/ (11tr, chua commit, chua gui, email 14,8MB) — CHO Mike kiem + gui
 - [2026-11-01T03:32:32Z] ĐANG DỞ: DD HHS job Taylor_20261101_033221 — research/dd_HHS_20261101/ | NEXT: đọc src scan, tìm BCTC hợp nhất, viết REPORT
 - [2026-11-01T03:42:48Z] ĐANG DỞ: DD HHS job Taylor_20261101_033221 — số đọc xong calc/notes_read.md + valuation_out.txt | NEXT: viết REPORT.md, GAPS.md, bus finding
 - [2026-11-01T03:45:42Z] [dd-HHS 01/11] XONG job Taylor_20261101_033221: research/dd_HHS_20261101/REPORT.md + GAPS.md (chua commit) — vung 8.800-15.900 tam ~11.900 vs 9.450, nua duoi; WARNING trung binh-cao (uy quyen, HHS Capital 1.302 ty); TCH-DD ghi sai International (thuc te Dongfeng) — CHO Mike doc/quyet investor report
@@ -26,3 +25,6 @@
 - [2026-11-01T04:17:37Z] ĐANG DỞ: DD TV2 v2 job Taylor_20261101_040936 — gaps+du lieu xong (src/gaps, calc/hist_out.txt) | NEXT: calc/valuation.py, REPORT_v2.md, GAPS.md, bus finding dd-TV2-v2-20261101
 - [2026-11-01T04:19:24Z] ĐANG DỞ: DD HHS job Taylor_20261101_041414 — VIỆC 1 XONG (REPORT v2, bus dd-hhs-v2); VIỆC 2 investor_report đang làm | NEXT: copy khuôn TCH investor_report, sửa
 - [2026-11-01T04:22:08Z] [dd-TV2-v2 01/11] XONG job Taylor_20261101_040936: research/dd_TV2_20261101/REPORT_v2.md + GAPS.md (chua commit) — vung 18,3-28,1k tam ~23k vs 27.000 (trong vung nua tren); room ngoai 0%; 4 HD EPC — CHO skeptic roi investor report
+- [2026-11-01T04:27:02Z] ĐANG DỞ: DD SIP job Taylor_20261101_041613 — số đọc xong calc/notes_read.md, cbtt_facts.md, comps_bq.csv | NEXT: valuation.py, đọc Bobby KCN, REPORT/GAPS, bus
+- [2026-11-01T04:29:57Z] ĐANG DỞ: DD FPT job Taylor_20261101_042936 — research/dd_FPT_20261101/ | NEXT: đọc skill, src, PREREG cũ, tìm BCTC Q3
+- [2026-11-01T04:30:03Z] [dd-HHS-v2+investor 01/11] XONG job Taylor_20261101_041414: REPORT v2 (co so TCH, tam ≈9.960-10.230, gia -5..-8%) + investor_report/ (10tr, chua commit, chua gui) — CHO Mike doc kiem + gui email

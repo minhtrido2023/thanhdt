@@ -26,6 +26,7 @@ last_update_15: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành thép V
 last_update_16: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành ngân hàng TM VN (nhóm tư nhân lớn): ADMIN_GATED ~0,45 (room ~15%, CV 9608/9736 ép huy động −0,5pp + chế tài room 2027, TT 50 LDR 95% từ 01/12) / CYCLICAL ~0,35 (nhóm 2 tăng 2 quý, bao phủ 95→~80%) / STRUCTURAL ~0,20 (LDR ~114%, CASA 20,2%, Basel III) — ambiguous ~60/40; FORECAST F1-F12 tới 2027-04-30; chi tiết ở file con sector_read_ngan_hang_20261031.md)
 last_update_17: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành BĐS nhà ở/khu đô thị phía Bắc (HN, HP, vùng lân cận): CYCLICAL ~0,45 / STRUCTURAL ~0,35 / ADMIN_GATED ~0,20, ambiguous ~55/45; Hà Nội ĐẦU→GIỮA pha suy khối lượng, ĐẦU pha suy giá; HP trễ 2-4 quý; FORECAST F1-F14 tới 2027-08-31; chi tiết ở file con sector_read_bds_nha_o_do_thi_phia_bac_20261031.md)
 last_update_18: 2026-11-01 (Bobby — SECTOR READ real-time BLIND thị trường xe tải thương mại VN: CYCLICAL ~0,50 (muộn nhịp tăng: VAMA xe thương mại H1 +28% → 9T +17%, Q3 ước −3%..0%) / ADMIN_GATED ~0,30 (đầu tư công 2027, QĐ 43/2025 khí thải mốc 01/01/2027 HN/TP.HCM, NĐ 89/2026 niên hạn, LEZ HN, NĐ 168 quá tải; không có PVTM với xe TQ) / STRUCTURAL ~0,20 — ambiguous ~55/45; FORECAST F1-F11 tới 2027-06-30; chi tiết ở file con sector_read_xe_tai_thuong_mai_vn_20261101.md)
+last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND nhóm CNTT VN 3 khối: (1a) xuất khẩu phần mềm STRUCTURAL ~0,45 / CYCLICAL ~0,45 / ADMIN ~0,10 ambiguous ~50/50; (1b) CĐS nội địa ADMIN_GATED ~0,60 (giải ngân KHCN-CĐS 41,18% tại 26/10); (2a) băng rộng cố định STRUCTURAL bão hoà ~0,55 clean; (2b) TTDL ADMIN_GATED ~0,45 (giá điện TT 60/2025) / STRUCTURAL ~0,40 ambiguous; (3) giáo dục tư ADMIN_GATED ~0,55 (NQ 217/2025 miễn HP công lập, dự thảo trần ĐH tự chủ 2,5x) ambiguous ~60/40; FORECAST F1-F15 tới 2027-09-30; chi tiết ở file con sector_read_cntt_vienthong_giaoduc_vn_20261101.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1668,6 +1669,31 @@ pháp lý, hạ tầng, cạnh tranh, 14 forecast, 25 mục DD, nguồn): **`sec
   xe tải gốc TQ T10-T12 <2.500/tháng P=0,70; không PVTM xe tải đến 30/06/27 P=0,90; mốc 01/01/2027 QĐ 43 không lùi P=0,75; lãi cho vay BQ mới
   ≥9,0% (31/03/27) P=0,60; vận tải hàng hoá 2026 ≥+14% P=0,75; chi ĐTPT NSTW 2027 ≥700 nghìn tỷ P=0,70; chưa có văn bản Euro 6 đến 30/06/27
   P=0,85. **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — CNTT VN 3 khối: xuất khẩu phần mềm + CĐS nội địa / băng rộng cố định + TTDL / giáo dục tư nhân, as-of 01/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike** cho DD một DN đa ngành loại này. Bobby KHÔNG biết/tra mã, giá, BCTC hay giả thuyết của ai. Kiểm toán blind ở mục 0 file con:
+có đọc lại SECTOR READ 14/10 (chứa số cấp DN, KHÔNG chép lại); web lộ tên nhà vận hành TTDL trong tin giá điện, chỉ dùng ở mức ngành.
+Bản đầy đủ: **`sector_read_cntt_vienthong_giaoduc_vn_20261101.md`** (file con).
+- **Khối 1a xuất khẩu phần mềm: STRUCTURAL ~0,45 / CYCLICAL ~0,45 / ADMIN ~0,10, `ambiguous` ~50/50.** Gartner 21/10: IT services 2026 +4,4%,
+  2027 +4,9% (hạ liên tục trong năm) trong khi tổng chi IT 2027 +15%; Infosys hạ FY27 còn 1-2% cc, Cognizant hạ 2026 còn 4,0-4,4%, HCLTech nâng
+  đáy 2,5-4,0%, Accenture FY27 3-6%. Nhật đỡ: Tankan T9 đầu tư phần mềm/R&D DN lớn FY2026 +11,0%, nhưng JPY 157-159 (giả định DN 154,23).
+  Nhật nghiêng CYCLICAL, Mỹ/EU nghiêng STRUCTURAL.
+- **Khối 1b CĐS nội địa: ADMIN_GATED ~0,60 `clean` về nhãn.** NQ 57 tối thiểu 3% NSNN; giải ngân KHCN-ĐMST-CĐS **41,18%** tại 26/10/2026.
+- **Khối 2a băng rộng cố định: STRUCTURAL (bão hoà, độc quyền nhóm) ~0,55 `clean`.** 87,6% hộ có cáp quang; 3 nhà mạng tăng gói thấp nhất
+  180k → 190-195k (+5,6..8,3%) T3/2026.
+- **Khối 2b TTDL: ADMIN_GATED ~0,45 / STRUCTURAL ~0,40, `ambiguous`.** 42 TTDL, khoảng 373 MW thiết kế (05/2026) so với khoảng 100-148 MW vận
+  hành; vốn ngoại hết trần sở hữu; TT 60/2025 đẩy giá điện (một nhà vận hành +50%), đến 21/09 phần lớn điện lực về giá sản xuất, EVN HCMC chưa;
+  thiếu điện có thể từ 2027.
+- **Khối 3 giáo dục tư: ADMIN_GATED ~0,55 / STRUCTURAL ~0,35, `ambiguous` ~60/40.** Miễn học phí công lập (NQ 217/2025) ép phổ thông tư
+  giá thấp-trung; dự thảo trần ĐH công tự chủ 2,5 lần là gió thuận giá cho ĐH tư; TFR 1,93; thí sinh đăng ký nguyện vọng 2026 +3,0%.
+- **FORECAST khoá 01/11 (15 mục):** Gartner IT services 2027 ≤5,5% P=0,80; tổng IT 2027 ≥10% P=0,85; Infosys FY27 cc ≤2,5% P=0,85; Accenture giữ
+  đáy ≥3% P=0,70; Tankan T12 DN lớn ≥+9% P=0,75; USD/JPY 31/03/27 ≥148 P=0,70; Fed cận trên ≥4,00% 31/03/27 P=0,60; giải ngân KHCN-CĐS 2026
+  <80% P=0,70; dự toán 2027 ≥65.020 tỷ P=0,80; ký sửa TT 60 trước 30/06/27 P=0,55; không hạ gói FTTH <180k P=0,85; TTDL thiết kế ≥450 MW
+  P=0,50; ký sửa NĐ 238 trần ≤2,5x trước 31/03/27 P=0,55; thí sinh 2027 ≥874.811 P=0,65; giữ miễn học phí công lập 2027-28 P=0,93.
+  **Không phải khuyến nghị mua/bán.**
 
 ---
 

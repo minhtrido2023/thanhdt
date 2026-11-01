@@ -1755,3 +1755,6 @@
 
 ## Archived 2026-11-01 (keep=12 days=0 require_done=False)
 - [2026-10-31T15:21:00Z] [dd-MBB-investor 31/10] XONG job Taylor_20261031_150718: REPORT v2 (9 dinh chinh, vung 18-26k tam ~22k; Ke15% ~19,9k; MBV WARNING ngoai bang) + investor_report/ (12tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T15:28:22Z] [dd-TCH-v3 31/10] XONG job Taylor_20261031_151105: REPORT v2 (vung 10.150-15.050 tam 12.300-12.650 vs 11.850, trong vung nua duoi) + investor_report/ (11tr, chua commit, chua gui, email 14,8MB) — CHO Mike kiem + gui
