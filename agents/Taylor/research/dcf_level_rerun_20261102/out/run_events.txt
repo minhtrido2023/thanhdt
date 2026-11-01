@@ -1,0 +1,41 @@
+corp rows 4739 | shares_delta non-null: 0.39 | delta_used non-null: 0.98
+=== TOÀN BỘ bước OShares quý >10% (2014+, hai tháng liên tiếp, FV hợp lệ cả hai): n=450
+                                n  med_dlPFV  med_dlO  med_dlP  med_dbase_g
+klass                                                                      
+GIAM(restate/gop)               8     -0.073   -0.132    0.057          0.0
+PHA_LOANG(ISS/AIS khop>=80%)  171      0.224    0.182   -0.008          0.0
+TANG_giai_thich_1_phan         36      0.412    0.404    0.005          0.0
+TANG_khong_su_kien(restate?)  235      0.236    0.274   -0.020          0.0
+tất cả: median ΔlogP/FV 0.237 | median ΔlogOShares 0.24 | median ΔlogP -0.013 | median Δlog(FCFE nền+tăng trưởng) 0.0
+=== 10 sự kiện
+                     chon ticker  prev_time       time  prev_OShares      OShares  d_lO   d_lP  d_lbase_g  d_lPFV  explained                        klass                                                                                                            ev_codes
+            top|ΔlogP/FV|    SLS 2016-10-25 2017-01-20     6800000.0    8159983.0 0.182 -0.022     -3.962   4.122      2.000 PHA_LOANG(ISS/AIS khop>=80%)                                                                   ISS:Trả Cổ tức bằng Cổ:2017-01-16;AIS::2017-01-16
+            top|ΔlogP/FV|    CVT 2014-10-20 2015-01-21     8000000.0   16000000.0 0.693  0.065     -2.617   3.376      2.000 PHA_LOANG(ISS/AIS khop>=80%)                                                                   ISS:Quyền mua CP cho C:2015-01-21;AIS::2015-01-21
+            top|ΔlogP/FV|    KMR 2014-11-03 2015-02-02    34396788.0   44435434.0 0.256 -0.016     -2.415   2.656      0.805 PHA_LOANG(ISS/AIS khop>=80%)                                                                      ISS:Cổ phiếu thưởng:2015-01-22;AIS::2015-01-22
+            top|ΔlogP/FV|    HHS 2019-10-25 2020-01-22   249744063.0  274744063.0 0.095  0.202     -1.973   2.270        NaN TANG_khong_su_kien(restate?)                                                                                                                    
+            top|ΔlogP/FV|    C47 2021-10-27 2022-01-21    21529504.0   27529504.0 0.246 -0.152     -1.885   1.979      0.936 PHA_LOANG(ISS/AIS khop>=80%)                                    ISS:Cổ phiếu thưởng:2021-10-27;ISS:Trả Cổ tức bằng Cổ:2021-10-27;AIS::2021-10-27
+ngau nhien(seed 20261102)    C32 2017-05-03 2017-08-01    11200000.0   13663992.0 0.199 -0.020     -0.000   0.179        NaN TANG_khong_su_kien(restate?)                                                                                                                    
+ngau nhien(seed 20261102)    DCL 2016-07-20 2016-10-20    40237920.0   56332824.0 0.336  0.174      0.000   0.510      2.000 PHA_LOANG(ISS/AIS khop>=80%)                                                                      ISS:Cổ phiếu thưởng:2016-09-07;AIS::2016-09-07
+ngau nhien(seed 20261102)    FPT 2015-05-04 2015-08-03   343894224.0  397449264.0 0.145 -0.068      0.000   0.077      3.872 PHA_LOANG(ISS/AIS khop>=80%)                                   ISS:Trả Cổ tức bằng Cổ:2015-07-21;AIS::2015-07-13;AIS::2015-07-13;AIS::2015-07-13
+ngau nhien(seed 20261102)    FPT 2022-04-22 2022-08-01   907551649.0 1097026572.0 0.190  0.036     -0.000   0.226      2.016 PHA_LOANG(ISS/AIS khop>=80%) ISS:Phát hành cho CBCN:2022-04-01;AIS::2022-05-30;AIS::2022-05-30;ISS:Trả Cổ tức bằng Cổ:2022-07-19;AIS::2022-07-19
+ngau nhien(seed 20261102)    KDH 2016-08-01 2016-10-28   180000000.0  233999892.0 0.262 -0.264     -0.000  -0.001        NaN TANG_khong_su_kien(restate?)                                                                                                                    
+kiểm đồng nhất d_lPFV = d_lP + d_lO − d_lbase_g (max sai): 2.886579864025407e-15
+=== (A) ΔlogP/FV qua bước, đường fin vs live (median theo lớp)
+                              d_lPFV  d_lPFV_live
+klass                                            
+GIAM(restate/gop)             -0.073       -0.073
+PHA_LOANG(ISS/AIS khop>=80%)   0.224        0.008
+TANG_giai_thich_1_phan         0.412        0.130
+TANG_khong_su_kien(restate?)   0.236        0.026
+tất cả: fin 0.237 live 0.021
+=== (B) median Price/FV (live, s=0, g_T 4,5%) theo số tháng kể từ bước TĂNG OShares quý >10% gần nhất
+              n  med_lPFV_live  med_lPFV_fin  medPFV_live
+bucket                                                   
+0-3m       1455          0.475         0.468        1.608
+3-6m       1267          0.423         0.416        1.527
+6-12m      2272          0.362         0.331        1.436
+12-24m     2800          0.198         0.188        1.219
+24-36m     2010          0.113         0.105        1.120
+36-60m     3325         -0.061        -0.073        0.941
+>60m       4459         -0.141        -0.143        0.869
+chưa bước  5400         -0.194        -0.202        0.823

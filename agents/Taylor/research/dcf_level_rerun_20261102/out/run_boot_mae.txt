@@ -1,0 +1,4 @@
+K=3: n=5314  MAE s0=0.4520  s0.5=0.4711  Δ=-0.0190
+K=5: n=4293  MAE s0=0.5024  s0.5=0.5297  Δ=-0.0274
+{'K': 3, 'n': 5314, 'n_years': 14, 'MAE_s0': np.float64(0.4520480384155232), 'MAE_s05': np.float64(0.4710614685160116), 'delta_median': np.float64(-0.019013430100488393), 'ci_lo': np.float64(-0.02732364482607601), 'ci_hi': np.float64(-0.010407971135646458), 'years_s0_better': 12, 'paired_mean_d': np.float64(-0.017262830573219264), 'paired_ci_lo': np.float64(-0.02154641979100445), 'paired_ci_hi': np.float64(-0.012496903636993935)}
+{'K': 5, 'n': 4293, 'n_years': 12, 'MAE_s0': np.float64(0.5023635445244723), 'MAE_s05': np.float64(0.5297354991086708), 'delta_median': np.float64(-0.0273719545841985), 'ci_lo': np.float64(-0.04468027081085305), 'ci_hi': np.float64(-0.015843537984981695), 'years_s0_better': 10, 'paired_mean_d': np.float64(-0.026324835107897675), 'paired_ci_lo': np.float64(-0.03198459775119511), 'paired_ci_hi': np.float64(-0.01994697089690016)}

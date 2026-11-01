@@ -1,0 +1,10 @@
+AIG: OShares live 196,2tr vs quy 170,6tr (+15%) asof=2026-10-30 (nguon oshares_live, AIS_EXACT)
+HTN: OShares live 133,7tr vs quy 89,1tr (+50%) asof=2026-10-30 (nguon oshares_live, AIS_EXACT)
+PHR: OShares live 243,9tr vs quy 135,5tr (+80%) asof=2026-10-30 (nguon oshares_live, ANCHOR_ONLY)
+2026-10-30: n panel 147 | fair_value ok 147 | engine-vs-production(số CP của production) mismatch = 0 / 147 (ngưỡng 1e-9 tương đối)
+   os_live(dựng) khác số CP production ở 0 / 147 mã (|diff|>10%: 0); phương pháp production: {'ANCHOR_ONLY': 94, 'ANCHOR_UNVERIFIED': 23, 'FIN_FALLBACK': 12, 'AIS_EXACT': 9, 'AIS_UNCERTIFIED': 8, 'LIVE_BELOW_FIN': 1}
+   FV(os_live dựng)/FV(production): median 1.000000, max|lệch| 0.0000
+2025-10-31: n panel 184 | fair_value ok 184 | engine-vs-production(số CP của production) mismatch = 0 / 184 (ngưỡng 1e-9 tương đối)
+   os_live(dựng) khác số CP production ở 0 / 184 mã (|diff|>10%: 0); phương pháp production: {'ANCHOR_ONLY': 130, 'ANCHOR_UNVERIFIED': 34, 'FIN_FALLBACK': 11, 'AIS_UNCERTIFIED': 6, 'LIVE_BELOW_FIN': 2, 'AIS_EXACT': 1}
+   FV(os_live dựng)/FV(production): median 1.000000, max|lệch| 0.0000
+SELFCHECK rc = 0

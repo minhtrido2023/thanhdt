@@ -1,0 +1,3 @@
+BQ fetch 7 s; quarters 39668 corp 10388
+rows 54181 | source {'oshares_live': 52127, 'ticker_financial': 1923, 'none': 131} | R10 fallback 218
+os_live != fin: 3396 rows; |diff|>10%: 1757

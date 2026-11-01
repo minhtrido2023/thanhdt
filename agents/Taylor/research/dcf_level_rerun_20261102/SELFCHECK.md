@@ -1,0 +1,9 @@
+# SELFCHECK — dcf_level_rerun_20261102 (job Taylor_20261101_175734)
+1. **Engine = production trên đường LIVE, 0 lệch.** `selfcheck_live.py`: gọi `dcf_valuation.fair_value(..., price=Price, price_date=<phiên giá>)` với `OSHARES_SOURCE=live` (mặc định production, `osd.prime`), sau đó tính lại FV bằng engine vector (`level.fv`, s=0,5, g_T 5,5%) với CHÍNH số CP mà `fair_value` đã dùng:
+   2026-10-30: 147/147 ok, **mismatch 0** · 2025-10-31: 184/184 ok, **mismatch 0** (ngưỡng 1e-9 tương đối). Chạy 3 môi trường: TZ mặc định, `env -u TZ` (`out/selfcheck_live.txt`), `TZ=America/New_York` (`out/selfcheck_live_NY.txt`) — cùng kết quả, rc=0.
+2. **os_live dựng lịch sử == số CP production** tại 2 ngày trên: 0/147 và 0/184 mã khác (FV(os_live)/FV(production) = 1,000000, max|lệch| 0,0000). Chứng nhận đường dựng lại cho 331 cặp, KHÔNG chứng nhận các năm khác (khoá khung R5/R8/R9 không tái lập lịch sử).
+3. `level.py` dùng lại `engine.base_valid` + `variants.fv` (g_T hiệu dụng = min(g_T thô, cap)); đường fin s=0,5 cap 5,5% khớp báo cáo trước (V0 fin 147 mã, RICH 27); đường fin s=0 g_T 4,5%: FV −35,94%, RẺ 53,06%, RICH 36 = số của skeptic.
+4. `events.py`: đồng nhất ΔlogP/FV = ΔlogP + ΔlogOShares − Δlog(nền·tăng trưởng) sai số tối đa 2,9e−15.
+5. `boot_mae.py` tái lập MAE K=5: s0 0,5024 / s0,5 0,5297 (khớp 0,502/0,530 báo cáo trước).
+6. md5: panel_live.parquet 5f803a4bef0781a99503a9b869765b68 · os_live.parquet 1efd6cb4d1fb232ea0843503d63f6121 · level_gT_star.csv 03ce92442ba32b5b52a4d38f0080b951 · level_live_impact_20261030.csv cdd74bbd8ed89cb221aaea858989d0c6 · boot_mae_k.csv 41c6570d3e95df2aa8155a8abc668cb9 · events_all_steps.csv 9ffdb62f78eee9bb28d0abac777f1503. Parquet trong `data/` không commit.
+7. Không sửa file production, không đặt lệnh, không đổi cron, không chạm `profit_*`. Giới hạn đã biết: REPORT § "KHÔNG chứng minh được".

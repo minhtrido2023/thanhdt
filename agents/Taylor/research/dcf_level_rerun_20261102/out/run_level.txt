@@ -1,0 +1,48 @@
+!!!!! [dcf_valuation] dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP) !!!!!
+dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP)
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+panel rows 22988 months 155 | g_T thô min/med/max 0.0877 0.0937 0.1654
+  nhóm all: 22988 dòng-tháng (100.0%), 155 tháng, 555 mã
+  nhóm stable: 14423 dòng-tháng (62.7%), 155 tháng, 483 mã
+  nhóm unstable: 8565 dòng-tháng (37.3%), 155 tháng, 328 mã
+  nhóm ex_poststep: 21584 dòng-tháng (93.9%), 155 tháng, 555 mã
+  % dòng live != fin (>1e-9): 5.37% | nguồn: {'oshares_live': 22378, 'ticker_financial': 610}
+path   s       group  gT_full  gT_IS  gT_OOS  loyo_min  loyo_max  medPFV_at_4.5  medPFV_at_5.5  n_rows
+ fin 0.0         all   0.0450 0.0400  0.0500    0.0425    0.0475         0.9871         0.8516   22988
+ fin 0.0      stable   0.0300 0.0300  0.0375    0.0300    0.0300         0.7967         0.6873   14423
+ fin 0.0    unstable   0.0650 0.0575  0.0700    0.0625    0.0675         1.3481         1.1630    8565
+ fin 0.0 ex_poststep   0.0425 0.0350  0.0475    0.0400    0.0450         0.9524         0.8216   21584
+ fin 0.5         all   0.0325 0.0300  0.0400    0.0300    0.0350         0.8702         0.7653   22988
+ fin 0.5      stable   0.0300 0.0300  0.0300    0.0300    0.0300         0.7246         0.6372   14423
+ fin 0.5    unstable   0.0550 0.0475  0.0625    0.0525    0.0575         1.1406         1.0026    8565
+ fin 0.5 ex_poststep   0.0300 0.0300  0.0400    0.0300    0.0325         0.8466         0.7448   21584
+live 0.0         all   0.0450 0.0400  0.0500    0.0425    0.0475         0.9981         0.8611   22988
+live 0.0      stable   0.0300 0.0300  0.0375    0.0300    0.0300         0.7978         0.6882   14423
+live 0.0    unstable   0.0650 0.0600  0.0700    0.0625    0.0675         1.3797         1.1903    8565
+live 0.0 ex_poststep   0.0425 0.0375  0.0475    0.0400    0.0450         0.9645         0.8321   21584
+live 0.5         all   0.0325 0.0300  0.0425    0.0325    0.0375         0.8821         0.7757   22988
+live 0.5      stable   0.0300 0.0300  0.0300    0.0300    0.0300         0.7252         0.6377   14423
+live 0.5    unstable   0.0575 0.0500  0.0625    0.0550    0.0600         1.1690         1.0278    8565
+live 0.5 ex_poststep   0.0300 0.0300  0.0400    0.0300    0.0350         0.8586         0.7554   21584
+=== phân cách g_T* giữa nhóm nhảy (b) và ổn định (a), full-sample (pp)
+  fin s=0.0: stable 0.0300  unstable 0.0650  Δ=+3.50pp | ex_poststep 0.0425
+  fin s=0.5: stable 0.0300  unstable 0.0550  Δ=+2.50pp | ex_poststep 0.0300
+  live s=0.0: stable 0.0300  unstable 0.0650  Δ=+3.50pp | ex_poststep 0.0425
+  live s=0.5: stable 0.0300  unstable 0.0575  Δ=+2.75pp | ex_poststep 0.0300
+=== tác động live 30/10/2026
+                                    variant   n  FV_med_vs_V0live  pct_RE  RICH_sau
+            V0 live s=.5 gT5.5 (production) 147            0.0000  0.6599        27
+                          V0 fin s=.5 gT5.5 147            0.0000  0.6735        27
+      fin s=0.0 gT*=0.0450 (calib nhóm all) 147           -0.3594  0.5306        36
+   fin s=0.0 gT*=0.0300 (calib nhóm stable) 147           -0.4710  0.4762        41
+ fin s=0.0 gT*=0.0650 (calib nhóm unstable) 147           -0.1200  0.6735        28
+      fin s=0.5 gT*=0.0325 (calib nhóm all) 147           -0.2363  0.5510        35
+   fin s=0.5 gT*=0.0300 (calib nhóm stable) 147           -0.2556  0.5374        36
+ fin s=0.5 gT*=0.0550 (calib nhóm unstable) 147            0.0000  0.6735        27
+     live s=0.0 gT*=0.0450 (calib nhóm all) 147           -0.3594  0.5170        36
+  live s=0.0 gT*=0.0300 (calib nhóm stable) 147           -0.4710  0.4694        42
+live s=0.0 gT*=0.0650 (calib nhóm unstable) 147           -0.1200  0.6599        28
+     live s=0.5 gT*=0.0325 (calib nhóm all) 147           -0.2363  0.5374        35
+  live s=0.5 gT*=0.0300 (calib nhóm stable) 147           -0.2556  0.5238        36
+live s=0.5 gT*=0.0575 (calib nhóm unstable) 147            0.0363  0.6803        25
+rc=0

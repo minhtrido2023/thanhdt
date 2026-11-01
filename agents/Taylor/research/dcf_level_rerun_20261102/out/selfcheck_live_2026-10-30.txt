@@ -1,0 +1,6 @@
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live AAA asof=2026-10-30: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh] !!!!!
+DCF_OSHARES_SOURCE=live AAA asof=2026-10-30: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
+2026-10-30: n panel 147 | fair_value ok 147 | engine-vs-production(số CP của production) mismatch = 0 / 147 (ngưỡng 1e-9 tương đối)
+   os_live(dựng) khác số CP production ở 5 / 147 mã (|diff|>10%: 3); phương pháp production: {'FRAME_FALLBACK': 147}
+   FV(os_live dựng)/FV(production): median 1.000000, max|lệch| 0.4444
+SELFCHECK rc = 0
