@@ -39,3 +39,5 @@
 - [2026-11-01T04:48:03Z] ĐANG DỞ: DD SIP job Taylor_20261101_044530 — valuation v2 xong (tam trong so 47.728, co so 49.235) | NEXT: sửa REPORT.md v2, GAPS, quét pháp lý, bus; rồi investor_report
 - [2026-11-01T10:03:08Z] ĐANG DỞ: DD SIP job Taylor_20261101_100247 — VIỆC1 bổ sung REPORT §11/§10/GAPS/bus; VIỆC2 investor_report | NEXT: rà REPORT vs SKEPTIC
 - [2026-11-01T10:04:48Z] ĐANG DỞ: DD SIP job Taylor_20261101_100247 — VIỆC1 XONG; VIỆC2 investor_report | NEXT: đọc skill, copy khuôn HHS
+- [2026-11-01T10:14:47Z] ĐANG DỞ: DD FPT v2+investor job Taylor_20261101_101423 — research/dd_FPT_20261101/ | NEXT: đọc SKEPTIC, sửa REPORT+valuation.py, rồi investor_report
+- [2026-11-01T10:14:49Z] [dd-SIP-investor 01/11] XONG job Taylor_20261101_100247: REPORT v2 §11 + investor_report/ (10tr, chua commit, CHUA gui) — giá 48.350 ngang tâm 47,7–50,3k; CHO Mike doc kiem + gui email

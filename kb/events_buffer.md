@@ -804,3 +804,21 @@
 - [2026-11-01T10:05:12Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: thu thập AR25/ảnh/logo/toạ độ SIP"}
 - [2026-11-01T10:05:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261101_100247", "source": "watcher"}
 - [2026-11-01T10:06:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+
+## Consolidation 2026-11-01T10:15:09Z
+- [2026-11-01T10:07:04Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: có logo, ảnh BCTN, toạ độ OSM; lấy giá 12T"}
+- [2026-11-01T10:07:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:08:36Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: bản đồ xong; viết figs_part.py"}
+- [2026-11-01T10:08:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:09:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:10:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:10:59Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: 11 hình dựng xong, đang soát bằng mắt"}
+- [2026-11-01T10:11:48Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:12:06Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: hình xong, viết .md"}
+- [2026-11-01T10:12:49Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:13:46Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: .md xong, grep sạch; dựng banner + PDF"}
+- [2026-11-01T10:13:49Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261101_100247", "source": "watcher"}
+- [2026-11-01T10:14:16Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "in_progress", "note": "VIỆC2: PDF 10 trang xong; HTML dry-run + SELFCHECK"}
+- [2026-11-01T10:14:47Z] Taylor/heartbeat — Taylor_20261101_101423: {"status": "in_progress", "note": "bat dau: doc SKEPTIC, REPORT FPT"}
+- [2026-11-01T10:14:49Z] Taylor/finding — dd-sip-investor-report-20261101: {"ticker": "SIP", "dir": "research/dd_SIP_20261101/investor_report/", "files": ["SIP_DD_investor_report_20261101.md", ".pdf (10 trang)", ".html (dry-run)", "figs/ (11 hình + CSV)", "build_report.py", "figs_part.py", "SELFCHECK.md"], "title": "SIP: dòng lãi bền ≈1,25 nghìn tỷ/năm, nhưng 6.016 tỷ tín dụng phi NH + 635,6 tỷ tạm ứng người quản lý ⇒ giá 48.350 ngang tâm", "price": 48350, "center": "47.728–50.336", "range_narrow": "42.000–55.000", "scenarios": [77517, 49235, 25357], "ke_rows": {"12.3%": 51721, "13.0%": 49471, "13.4%": 48295}, "warning": "trung bình–cao", "body_words_ex_tables": 1015, "grep_leak": 0, "grep_label": 0, "html_img": 12, "html_img_no_alt": 0, "also_done": "VIỆC1: REPORT §10/§11, GAPS G13–G16, bus dd-sip-v2-20261101", "email": "CHƯA gửi — Mike gửi bằng send_dd_report_email.py --banner figs/title_banner.png", "measured_by": "build_report.py all (figs_part exec calc/valuation.py) + grep/word-count trong SELFCHECK.md"}
+- [2026-11-01T10:14:49Z] Taylor/heartbeat — Taylor_20261101_100247: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261101_100247", "source": "watcher"}
