@@ -122,11 +122,12 @@ function renderNogo() {
 function renderChips() {
   const c = $("#chips"); c.replaceChildren();
   const opt = (name, key, vals, lab) => { const s = el("select", {onchange:e => { F[key] = e.target.value; render(); }}, el("option", {value:""}, name), vals.map(v => el("option", {value:v}, lab ? lab(v) : v))); s.value = F[key]; return s; };
-  const roots = [...new Set((DATA.branches || []).map(b => b.split("/")[0]))];
-  const br = [...roots, ...(DATA.branches || [])].filter((v, i, a) => a.indexOf(v) === i);
+  const bl = (DATA.branches || []).map(b => typeof b === "string" ? b : b.branch).filter(Boolean);  // merged.json: object {branch,root,sub,...}
+  const roots = [...new Set(bl.map(b => b.split("/")[0]))];
+  const br = [...roots, ...bl].filter((v, i, a) => a.indexOf(v) === i);
   c.append(opt("Nhánh", "branch", br), opt("Trạng thái", "status", Object.keys(STATUS_VI), v => STATUS_VI[v]),
     opt("Owner", "owner", [...new Set(DATA.items.map(i => i.owner).filter(Boolean))].sort()), opt("Ưu tiên", "priority", ["1","2","3"], v => "P" + v));
-  const nb = $("#n_branch"); nb.replaceChildren(...(DATA.branches || []).map(b => el("option", {value:b}, b)));
+  const nb = $("#n_branch"); nb.replaceChildren(...bl.map(b => el("option", {value:b}, b)));
 }
 function render() { renderAttention(); renderTree(); renderNogo(); }
 async function load() {
