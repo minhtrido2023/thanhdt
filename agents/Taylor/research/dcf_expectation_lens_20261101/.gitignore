@@ -1,0 +1,3 @@
+data/*.parquet
+data/*.csv.gz
+__pycache__/
