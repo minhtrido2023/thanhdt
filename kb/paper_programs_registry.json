@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-10-26",
+  "updated": "2026-11-01",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -825,6 +825,40 @@
       },
       "notes": "Job Taylor_20261026_095928. Nghiên cứu: mike/agents/Taylor/research/commodity_cycle_te_20261026/ (PREREG-4.md, b2_rerun.*, CRON_PROPOSAL.md). Cron CHƯA cài (Mike duyệt). Nhật ký khởi tạo 2026-10-26: 5 sự kiện tier A 2026Q3 (TRC, VOS, DDV, PVB, LAS) + 26 NO_COMMODITY, đều PRE_FREEZE_BACKFILL counts=False. Power: MDE ΔIC 0,10 ở 16 mùa; hiệu lịch sử S1 +0,043 cần ≈97 mùa ⇒ kết cục dự kiến 'KHÔNG PHÂN BIỆT ĐƯỢC' trừ khi hiệu lớn. Với S2 (biến SUE live) ΔIC lịch sử −0,012.",
       "review_short": "2027-09-01 toàn vẹn · 2028/29/30-09-01 FAIL-sớm · 2031-09-01 cuối — review_script cổng ngày; MDE 0,10 @16 mùa (đo)"
+    },
+    {
+      "id": "discretionary_dd_pick_v2_forward",
+      "name": "Bộ chọn mã DD v2 (funnel 8L): nhật ký chọn forward — top-1 có hơn rank 2-8 không (PREREG §6)",
+      "owner": "Taylor",
+      "start": "2026-11-02",
+      "end": "2027-04-06",
+      "review_date": "2027-04-06",
+      "objective": "Mẫu forward sạch duy nhất cho bộ chọn mã DD (score=0,5V+0,3E+0,2R): data/discretionary_pick_log.csv ghi top-8 TRƯỚC kết quả, kể cả mã bỏ. Mốc 2027-04-06 đo H1: trung vị (picked − trung vị rank 2-8) fwd 3M/6M cùng asof. Chỉ MÔ TẢ + FUTILITY: nếu trung vị <0 VÀ CI95 bootstrap khối-tuần hoàn toàn <0 ⇒ bỏ trọng số, quay về xếp V thuần; không có luật 'giữ vì dương'. N≈40-60 pick (ước lượng), chồng lấn 3M ⇒ N hiệu dụng thấp hơn nhiều. Bộ chọn chỉ xếp việc DD, KHÔNG phải tín hiệu. Lịch sử PIT 2016-26 (RESULTS.md) cho thấy top-1 có xu hướng KÉM rank 2-8. Thiết kế khoá ở PREREG.md (md5 12d35014cec24767904c23dfea0a2ce5, commit cf37e8fa7); bổ sung vòng 2 ở PREREG_ADDENDUM_vong2.md.",
+      "data_sources": [
+        "data/discretionary_pick_log.csv (append-only, bin/discretionary_dd_pick.py, ghi từ cron funnel 19:35)",
+        "data/bq_cache/ticker (Close đ/c, mirror BQ T-1) — forward 63/126 phiên",
+        "agents/Taylor/research/discretionary_dd_pick_v2_20261101/ (PREREG.md, PREREG_ADDENDUM_vong2.md, RESULTS.md)"
+      ],
+      "end_or_trigger": "Mốc 2027-04-06 (PREREG §6): futility hay không. Đo bằng pha có E hoạt động (tháng 2/5/8/11 và 3/6/9/12), KHÔNG khoá vào mẫu 1/4/7/10 (E≡0 ở đó, xem RESULTS.md). Không tự gia hạn.",
+      "gate_criteria": [
+        {
+          "status": "pending",
+          "text": "Nhật ký chọn tích luỹ đều từ 2026-11-02: mỗi asof đúng 1 lô top-8, không trùng, không ghi đè"
+        },
+        {
+          "status": "pending",
+          "text": "2027-04-06: trung vị (picked − rank 2-8) fwd 3M & CI95 bootstrap khối-tuần; <0 hoàn toàn ⇒ bỏ trọng số, về xếp V thuần (PREREG §6)"
+        }
+      ],
+      "feature_flag": "N/A — paper-only; bộ chọn chỉ xếp việc DD (Mike quyết), không lệnh/plan/sizing",
+      "reporting": false,
+      "reporting_reason": "Thống kê chỉ xem ở mốc khoá 2027-04-06; render hằng ngày là nhiễu; paper_checkpoint_escalation.sh vẫn bắt khi quá hạn.",
+      "today_activity": {
+        "mode": "none_available",
+        "reason": "Chương trình thuần quan sát: sản phẩm = nhật ký chọn append-only; không sinh lệnh, không có sleeve NAV."
+      },
+      "notes": "Mốc 2027-04-06 chỉ đủ mô tả + futility (power: hiệu ứng nhỏ nhất phát hiện ≈6,6pp/quý @N=43 — RESULTS.md §3). Đăng ký vòng 3 job Taylor_20261101_135046.",
+      "review_short": "2027-04-06 futility: trung vị (top-1 − rank 2-8) fwd 3M<0 & CI95<0 ⇒ bỏ trọng số — pha có E hoạt động"
     }
   ]
 }

@@ -356,6 +356,7 @@ def t_price_date_and_timeout():
                 ok(time.time() - t0 < 3, "live treo bị cắt theo trần")
             finally:
                 P.LIVE_DEADLINE_S = old
+            ok(r["picked"]["escalate_full"] is False, "live timeout ⇒ không escalate")
             ok("live_timeout" in r["picked"]["labels"] and any("quá trần" in w for w in r["warnings"]),
                f"timeout ⇒ nhãn + cảnh báo: {r['picked']['labels']}")
         finally:
@@ -387,6 +388,7 @@ def t_recent_names_and_topic():
     with tempfile.TemporaryDirectory() as tmp:
         ex, rd, base = setup(tmp)
         line = P.topic_line(run(tmp, base, ex, rd), ASOF, base, gate(tmp, "RUN"))
+        ok("top-1 lịch sử KÉM rank 2-8" in line and "MoS DCF" in line, "cảnh báo top-1 kém cạnh MoS")
         ok("KHÔNG phải tín hiệu mua" in line and "không edge" in line and "ĐỀ XUẤT lên DD đầy đủ" not in line,
            f"nhãn cố định: {line[:200]}")
         # replay giữ warnings
@@ -394,6 +396,30 @@ def t_recent_names_and_topic():
         os.remove(os.path.join(ex, "active_nav_SpaceX.json"))
         r3 = run(tmp, base, ex, rd)
         ok(r3["replayed"] and any("không đọc được" in w for w in r3["warnings"]), "replay vẫn mang cảnh báo nguồn")
+
+
+def t_robust_gate():
+    """PREREG §5: escalate_full cần robust (MoS giữ dấu ở cả 4 điểm nhạy). MoS 95% nhưng 1 điểm nhạy
+    fv < giá ⇒ KHÔNG robust ⇒ không escalate. Bắt mutant M9 (bỏ `& df['robust']`)."""
+    def dcf_nonrobust(t, p):
+        r = dcf_fn(t, p)
+        if t == "AAA" and r.get("ok"):
+            k0 = sorted(P._dcf_engine()._SENS_KEYS)[0]
+            r["sensitivity"][k0] = {"fv": p * 0.9}          # fv < giá ⇒ dấu MoS đảo ở 1 điểm
+        return r
+    MOS["AAA"] = 0.95
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            ex, rd, base = setup(tmp)
+            c = run(tmp, base, ex, rd, write=False)
+            ok(c["picked"]["ticker"] == "AAA" and c["picked"]["escalate_full"] is True, "control: AAA robust ⇒ escalate")
+        with tempfile.TemporaryDirectory() as tmp:
+            ex, rd, base = setup(tmp)
+            r = run(tmp, base, ex, rd, write=False, dcf=dcf_nonrobust)
+            ok(r["picked"]["ticker"] == "AAA" and r["picked"]["mos"] >= P.ESCALATE_MOS, "AAA vẫn top, MoS≥25%")
+            ok(r["picked"]["escalate_full"] is False, "MoS cao nhưng KHÔNG robust ⇒ không escalate")
+    finally:
+        MOS["AAA"] = 0.50
 
 
 def t_held_missing():
@@ -405,7 +431,7 @@ def t_held_missing():
 if __name__ == "__main__":
     for fn in (t_scoring, t_append_only_replay, t_offseason_week, t_claims, t_live_downgrade_and_topic,
                t_held_missing, t_dd_after_asof, t_concurrency, t_price_date_and_timeout, t_fin_none,
-               t_recent_names_and_topic):
+               t_recent_names_and_topic, t_robust_gate):
         fn()
     print(f"TZ={os.environ.get('TZ', '<unset>')} checks={N[0]} fails={len(FAILS)}")
     sys.exit(1 if FAILS else 0)

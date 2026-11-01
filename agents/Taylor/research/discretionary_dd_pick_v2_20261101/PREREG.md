@@ -61,9 +61,3 @@ tâm ⇒ MoS < 25% nằm trong sai số mô hình; robust bắt buộc vì một
   chỉ đủ **mô tả + futility**: nếu trung vị (picked − rank2-8) 3M < 0 VÀ CI95 bootstrap theo khối tuần
   hoàn toàn < 0 ⇒ bỏ trọng số này, quay về xếp V thuần. Không có luật "giữ vì dương".
 - Không re-tune giữa chừng.
-
-## Bổ sung vòng 2 (arch-review, 2026-11-01 — KHÔNG đổi tham số §1-5)
-- Ngày lễ nằm trong mùa BCTC được coi là NGOÀI mùa (cổng `fa_ratings_earnings_window_daily.sh --check`
-  trả SKIP) ⇒ áp trần ngoài mùa (light 1/tuần, full 2/tuần); chặt hơn, chủ ý.
-- Ngưỡng MoS≥25% gần như không lọc (RESULTS.md) ⇒ dòng khối 08:00 mang nhãn cố định "xếp việc DD, KHÔNG
-  phải tín hiệu mua"; mã chọn chỉ là THỨ TỰ làm việc DD.

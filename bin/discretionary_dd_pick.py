@@ -498,11 +498,13 @@ def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, wri
                                    LIVE_DEADLINE_S)
                 lm = lv.get("margin_of_safety") if lv.get("ok") else None
             except TimeoutError:
-                # Fail-soft: giữ MoS không-live (số CP quý) nhưng gắn nhãn rõ là CHƯA xác nhận live.
+                # Fail-soft: giữ MoS không-live (số CP quý) nhưng gắn nhãn rõ là CHƯA xác nhận live,
+                # và KHÔNG lên tầng đầy đủ (cổng lấy MoS THẤP HƠN quý/live — không có live ⇒ không xác nhận).
                 lm = first["mos"]
+                top.loc[top.index[0], "escalate_full"] = False
                 top.loc[top.index[0], "labels"] = (first["labels"] + "|live_timeout_mos_quy_chua_xac_nhan").strip("|")
                 warns.append(f"bộ chọn: DCF live {first['ticker']} quá trần {LIVE_DEADLINE_S}s ⇒ dùng MoS "
-                             f"số quý (chưa xác nhận live)")
+                             f"số quý (chưa xác nhận live), KHÔNG lên tầng đầy đủ")
             except Exception as e:                          # noqa: BLE001
                 lm = None
                 warns.append(f"bộ chọn: DCF live {first['ticker']} lỗi ({type(e).__name__}) ⇒ không lên tầng đầy đủ")
@@ -554,7 +556,7 @@ def topic_line(pick, today, base_dir=F.DATA_DIR, gate=WINDOW_GATE):
     tier = ("có thể xét DD đầy đủ nếu tầng nhẹ sạch (MoS≥25% robust)" if str(p.get("escalate_full")).lower() == "true"
             else "chỉ DD tầng nhẹ (chưa đạt ngưỡng chênh giá)")
     why = (f"điểm {float(p['score']):.2f} = V {float(p['V']):.2f}·E {float(p['E']):.2f}·R {float(p['R']):.2f}; "
-           f"MoS DCF {_fmt_pct(_f(p.get('mos')))}, rating {int(float(p['rating']))}"
+           f"MoS DCF {_fmt_pct(_f(p.get('mos')))} (⚠️ top-1 lịch sử KÉM rank 2-8, PIT 2016-26), rating {int(float(p['rating']))}"
            + (f", BCTC {p['release_date']} YoY {_fmt_pct(_f(p.get('g_yoy')))}" if "bctc_moi" in str(p.get("labels")) else "")
            + (f" [{p['labels']}]" if p.get("labels") and str(p.get("labels")) != "nan" else ""))
     return (f"🔎 Mã DD hôm nay: **{p['ticker']}** ({TOPIC_DISCLAIMER}) — {tier}; {why} · {sl}"
