@@ -987,6 +987,52 @@
    "supersedes": "NNC@2026-10-31#1",
    "no_expected_reason": "nguồn nêu điểm giữa vùng 2 giả định giá đá (~69.000, ước lượng), không phải kỳ vọng xác suất; zone_midpoint = trung điểm vùng, không phải median thống kê",
    "correction_reason": "arch-review vòng 2: nhãn 'median' sai bản chất — 69.000 là trung điểm vùng ⇒ zone_midpoint"
+  },
+  {
+   "ticker": "HPG",
+   "dd_date": "2026-10-31",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 18000,
+   "center": 20200,
+   "center_kind": "blend",
+   "zone_high": 22500,
+   "center_range": null,
+   "price_ref": 21000,
+   "price_date": "2026-10-30",
+   "verdict_label": "trung dung — TRONG vùng, nửa trên; giá cao hơn tâm ghép ~4% (21.000 vs 20.200)",
+   "source_file": "agents/Taylor/research/dd_HPG_20261031/investor_report/HPG_DD_investor_report_20261031_v3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_HPG_20261031/investor_report/HPG_DD_investor_report_20261031_v3.md",
+     "quote": "Giá 21.000 đ (đóng cửa 30/10/2026) nằm TRONG vùng giá trị hợp lý 18.000–22.500 đ, cao hơn tâm ≈20.200 đ",
+     "fields": [
+      "price_ref",
+      "zone_low",
+      "zone_high",
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_HPG_20261031/investor_report/HPG_DD_investor_report_20261031_v3.md",
+     "quote": "| **Trọng số** | | | | Ke 11,83% (β đo 0,90–0,93) | **19.221** |",
+     "fields": [
+      "center_alt"
+     ]
+    }
+   ],
+   "skeptic_status": "CONFIRMED (medium; B1/B2 đã sửa; v3)",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "null_reason": null,
+   "notes": "rev3 (Mike 01/11): tâm = 20.200 là kết luận DD (nguồn dòng 12/17/150: 2/3 RI + 1/3 EV/EBITDA 5x); rev2 chọn 19.221 chỉ là chân RI nên không dùng làm tâm",
+   "recorded_at": "2026-11-01T23:35:00+07:00",
+   "center_desc": "tâm ghép 2/3 thu nhập thặng dư + 1/3 EV/EBITDA 5x (kết luận DD); 19.221 = chỉ chân RI có trọng số kịch bản = center_alt",
+   "rev": 3,
+   "supersedes": "HPG@2026-10-31#2",
+   "center_alt": 19221,
+   "center_alt_kind": "blend",
+   "correction_reason": "rev2 lấy chân RI trọng số (19.221) làm tâm — lệch kết luận DD; quy ước expected_weighted chỉ áp khi đó là GIÁ TRỊ KỲ VỌNG TOÀN PHẦN của DD",
+   "no_expected_reason": "kết luận DD là tâm ghép 2/3 RI + 1/3 EV/EBITDA (20.200); kỳ vọng trọng số chỉ có cho chân RI (19.221) nên để center_alt — không có kỳ vọng trọng số TOÀN PHẦN"
   }
  ],
  "center_kinds": [
