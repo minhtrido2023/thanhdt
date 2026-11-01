@@ -25,12 +25,14 @@ BOUNDARY (=exactly 1.0pp): treated INCLUSIVE → REFRESH. The user's phrasing wa
 This gate DECIDES + PERSISTS; it does not itself run the (cheap) DCF recompute. Intended use: a
 consumer that regenerates DCF numbers calls run_gate() first and only recomputes its fair values
 when the returned dict has refresh=True. As of 2026-10-12 NO such consumer exists — the only caller
-is this file's CLI (monthly cron, 08:10 ICT day 11), so the gate is a drift monitor: state + log
+is this file's CLI (cron `--season`, hằng ngày 08:12 ICT — xem MÙA BCTC), so the gate is a drift monitor: state + log
 only, nothing reads refresh. Fail-safe: any error → returns refresh=True (recompute rather than
 silently serve stale on a broken gate) and logs the error.
 
 MÙA BCTC (job Taylor_20261101_181016, user duyệt 2026-11-01; REPORT dcf_vn_calibration_20261101 §1):
-  `--season` THAY cron ngày 11 hằng tháng. Dưới DCF_RATE_FRAME=domestic_v2 r hằng ⇒ trigger lãi suất ở
+  `--season` THAY cron ngày 11 hằng tháng bằng MỘT cron HẰNG NGÀY (`12 1 * * *`, 08:12 ICT; ngoài cửa
+  sổ slot vẫn in JSON no_slot_in_window ra log ⇒ log luôn tươi cho cron_health_check, không báo STALE giả
+  như bản 2 dòng thưa gap 79-82 ngày; catch-up THẬT nhờ SEASON_GRACE_DAYS). Dưới DCF_RATE_FRAME=domestic_v2 r hằng ⇒ trigger lãi suất ở
   trên là no-op, nên lịch chuyển sang theo mùa công bố BCTC: 8 slot/năm, mỗi slot là MỘT lượt quét
   idempotent theo slot (state["season_done"]) — "early" 05/02 05/05 03/08 03/11 (mã đã có BCTC) và
   "full" 15/02 15/05 15/08 15/11 (sau p95 công bố + ~2 tuần vendor nạp). Chạy lại cùng ngày/cùng slot
@@ -39,7 +41,7 @@ MÙA BCTC (job Taylor_20261101_181016, user duyệt 2026-11-01; REPORT dcf_vn_ca
   theo giá mới mỗi lần dùng), KHÔNG đổi mặc định domestic_v2, KHÔNG ai đọc kết quả để chặn gì.
   Chế độ cũ (không cờ) vẫn chạy được cho mục đích soi trôi lãi suất thủ công.
 
-Run: $DNA_PYEXE dcf_refresh_gate.py --season   # lượt mùa BCTC (cron mới)
+Run: $DNA_PYEXE dcf_refresh_gate.py --season   # lượt mùa BCTC (cron hằng ngày)
      $DNA_PYEXE dcf_refresh_gate.py            # evaluate + persist + log (real)
      $DNA_PYEXE dcf_refresh_gate.py --dry      # evaluate + print only, no state/log write
      $DNA_PYEXE dcf_refresh_gate.py --show      # print current state
@@ -142,7 +144,7 @@ def run_gate(asof=None, state_path=STATE_FP, log_path=LOG_FP, dry=False):
 # ---------------------------------------------------------------------------- MÙA BCTC
 SEASON_SLOTS = ((2, 5, "early"), (2, 15, "full"), (5, 5, "early"), (5, 15, "full"),
                 (8, 3, "early"), (8, 15, "full"), (11, 3, "early"), (11, 15, "full"))
-SEASON_GRACE_DAYS = 7              # cron lỡ ⇒ bù tới 7 ngày sau slot (khoảng cách slot gần nhất = 10 ngày)
+SEASON_GRACE_DAYS = 7              # cron HẰNG NGÀY lỡ ⇒ ngày sau bù tới 7 ngày sau slot (khoảng cách slot gần nhất = 10 ngày)
 SEASON_KEEP = 8                    # giữ 8 slot gần nhất trong state
 
 
@@ -225,7 +227,11 @@ if __name__ == "__main__":
     if a.season:
         d = run_season(asof=a.asof, dry=a.dry)
         print(json.dumps(d, indent=2, ensure_ascii=False))
-        sys.exit(1 if str(d["reason"]).startswith("season_error") else 0)
+        if str(d["reason"]).startswith("season_error"):
+            # khớp ^\s*❌ trong ERROR_PATTERNS của cron_health_check (stdout JSON không đủ: pattern neo đầu dòng)
+            print(f"❌ dcf_refresh_gate --season: {d['reason']}", file=sys.stderr)
+            sys.exit(1)
+        sys.exit(0)
     d = run_gate(asof=a.asof, dry=a.dry)
     print(json.dumps(d, indent=2))
     print(("REFRESH — recompute DCF fair values" if d["refresh"]

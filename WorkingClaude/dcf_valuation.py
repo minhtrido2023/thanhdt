@@ -944,6 +944,9 @@ def dcf_check(ticker, asof, price=None):
     """dcf_check dict for ANY report (informational only) — same schema as the Pha 2 production
     helper `trading_bot/strategies.py::_dcf_check_for_order` (status/margin_of_safety/robust),
     so a research report and the plan-generation echo never disagree on what "robust" means.
+    LƯU Ý: `fin_age_days`/`stale` (cờ STALE BCTC>105d) CHỈ có ở dcf_check/dcf_line (research/display);
+    đường echo plan (`_dcf_check_for_order`, `format_dcf_check`, lag_dd_pack) CHƯA có — chạm đường điểm
+    tiền, cần user duyệt riêng. Schema hai bên đã LỆCH ở hai field này.
     Fail-safe: any error -> status=NOT_COMPUTED, never raises (job Taylor_20260714_095943)."""
     try:
         # price_date (R8/H4): TỰ đọc giá ⇒ phiên của `Price` chưa điều chỉnh. Giá do caller truyền
