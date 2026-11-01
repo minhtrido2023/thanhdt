@@ -49,3 +49,4 @@
 - [2026-11-01T13:26:07Z] [funnel-v2 01/11] XONG job Taylor_20261101_130719: nhanh feat/funnel-dd-pick-v2-20261101 (d0e37a88a, chua merge) — CHO Mike arch-review; nguong MoS25% khong loc, can user quyet neu muon PREREG moi
 - [2026-11-01T13:32:39Z] [cutloss-crisis-dd vòng2 01/11] XONG 1de536bad (chưa merge) — chờ Mike re-review; HT1 dossier đã dựng, cần merge trước 02/11 09:15
 - [2026-11-01T13:40:25Z] [funnel-v2 vòng2 01/11] XONG 3a95765f2 (chưa merge) — chờ Mike re-review; registry mốc 2027-04-06 chưa thêm
+- [2026-11-01T13:53:52Z] [funnel-v2 vòng3 01/11] XONG ae875940a (chưa merge) — chờ Mike merge; registry mốc 2027-04-06 đã thêm
