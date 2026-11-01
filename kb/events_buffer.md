@@ -579,3 +579,14 @@
 - [2026-11-01T02:04:07Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261101_020006", "source": "watcher"}
 - [2026-11-01T02:05:07Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261101_020006", "source": "watcher"}
 - [2026-11-01T02:06:07Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+
+## Consolidation 2026-11-01T02:14:47Z
+- [2026-11-01T02:07:08Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:08:08Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:09:08Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:10:08Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:11:09Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:12:09Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:13:10Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:14:10Z] Taylor/heartbeat — Taylor_20261101_020006: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261101_020006", "source": "watcher"}
+- [2026-11-01T02:14:38Z] Taylor/finding — monthly-report-2026-10-v2-delivered: {"spacex_sha256_16": "cb7ba196d38f82c2", "zalopay_sha256_16": "edae5a6ca22b4be1", "delivery_gate": "COMPLETE x2", "outlook": "3 kịch bản định tính, Livermore block PASS, forecast REPEAT H20 UP", "paper_signals": "extreme_regime+fill_timing live từ 2026-08-22; tháng này chưa đo lại evidence ⇒ chưa đủ dữ liệu", "intraday_oos": "15 phiên, 225 lượt quét, 1 crash, luỹ kế 4/30 ngày có ca", "measured_by": "report_delivery_gate.py + sha256sum + intraday_oos_monthly.py --month 2026-10"}
