@@ -1,0 +1,12 @@
+[1/4/7/10] fresh_rate=0.003 rows=4575 months=43
+  prereg   N=43 median=+1.35pp hit=0.51 CI95=[-2.80,+3.32]
+  V_only   N=43 median=-4.40pp hit=0.42 CI95=[-8.54,+2.28]
+  E_heavy  N=43 median=-0.34pp hit=0.47 CI95=[-3.97,+2.79]
+[2/5/8/11] fresh_rate=0.972 rows=4354 months=41
+  prereg   N=41 median=-4.30pp hit=0.37 CI95=[-14.95,+0.07]
+  V_only   N=41 median=-5.85pp hit=0.32 CI95=[-8.99,-0.25]
+  E_heavy  N=41 median=-1.36pp hit=0.49 CI95=[-5.77,+4.73]
+[3/6/9/12] fresh_rate=0.925 rows=4471 months=42
+  prereg   N=42 median=-2.19pp hit=0.40 CI95=[-4.48,+0.61]
+  V_only   N=42 median=-3.92pp hit=0.43 CI95=[-8.22,+5.13]
+  E_heavy  N=42 median=-3.24pp hit=0.31 CI95=[-6.30,-1.12]

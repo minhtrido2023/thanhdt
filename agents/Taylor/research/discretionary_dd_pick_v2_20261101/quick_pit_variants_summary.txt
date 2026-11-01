@@ -1,0 +1,7 @@
+ruleset=1 months=126 rows=13400
+E_heavy  d_vs_rest N_thang=126 median=-0.0170 hit=0.42 | N_quy=43 median=-0.0034 CI95=[-0.0397,+0.0279]
+E_heavy  d_vs_pool N_thang=126 median=+0.0014 hit=0.50 | N_quy=43 median=+0.0240 CI95=[-0.0202,+0.0639]
+V_only   d_vs_rest N_thang=126 median=-0.0429 hit=0.39 | N_quy=43 median=-0.0440 CI95=[-0.0854,+0.0228]
+V_only   d_vs_pool N_thang=126 median=-0.0318 hit=0.40 | N_quy=43 median=-0.0471 CI95=[-0.0944,+0.0335]
+prereg   d_vs_rest N_thang=126 median=-0.0225 hit=0.43 | N_quy=43 median=+0.0135 CI95=[-0.0280,+0.0332]
+prereg   d_vs_pool N_thang=126 median=+0.0014 hit=0.50 | N_quy=43 median=+0.0240 CI95=[-0.0260,+0.0491]

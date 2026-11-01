@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pandas as pd  # noqa: E402
 
 import discretionary_candidate_funnel as F  # noqa: E402
+F.DD_PICK = False   # bộ chọn DD v2 có selfcheck riêng; ca tích hợp: t_dd_pick_integration
 import anomaly_gate  # noqa: E402  (đường dẫn sys.path do F dựng)
 import importlib.util  # noqa: E402
 
@@ -1241,6 +1242,69 @@ def test_prune_run_daily(tmp):
     check(all(OLD_CAND <= set(c) for c in r["candidates"]), "candidate giữ đủ trường bản trước")
 
 
+def test_dd_pick_integration(tmp):
+    """v2 2026-11-01: run_daily gọi bộ chọn DD (stub DCF/giá/cổng mùa — 0 dữ liệu thật), ghi nhật ký
+    chọn, dòng khối D; lỗi bộ chọn cô lập; sanity fail ⇒ không chọn, không ghi nhật ký."""
+    import discretionary_dd_pick as PK
+    base = os.path.join(tmp, "pick_data")
+    os.makedirs(base)
+    rcsv = os.path.join(tmp, "pick_rating.csv")
+    fcsv = os.path.join(tmp, "pick_forensic.csv")
+    write_forensic(fcsv)
+    df = rating_df()
+    df.to_csv(rcsv, index=False)
+    set_mtime_ict(rcsv, 2026, 10, 20, 19, 25)
+    gate = os.path.join(tmp, "gate.sh")
+    with open(gate, "w") as f:
+        f.write("#!/bin/bash\necho RUN\n")
+    tick = sorted(df["ticker"])
+    mos = {t: 0.1 + 0.8 * i / max(1, len(tick) - 1) for i, t in enumerate(tick)}
+    kw = dict(dcf_fn=lambda t, p: {"ok": True, "margin_of_safety": mos[t], "fair_value_ps": p / (1 - mos[t]),
+                                   "sensitivity": {}},
+              live_fn=lambda t, p, pdt=None: {"ok": True, "margin_of_safety": 0.0},
+              prices={t: (10000.0, dt.date(2026, 10, 20)) for t in tick},
+              exec_dir=os.path.join(tmp, "no_exec"), research_dir=os.path.join(tmp, "no_research"), gate=gate)
+    now = dt.datetime(2026, 10, 20, 19, 37, tzinfo=ICT)
+    F.DD_PICK = True
+    try:
+        r = F.run_daily(rcsv, base, True, now, fcsv, INSIDER, pick_kw=kw)
+        pk = r.get("dd_pick")
+        check(pk and pk["picked"] and pk["season"] is True, f"run_daily phải có dd_pick: {pk and pk.get('reason')}")
+        log = PK.pick_paths(base)["log"]
+        n = len(pd.read_csv(log)) if os.path.exists(log) else 0
+        check(n == min(PK.TOP_K, pk["pool_n"]) and n >= 5, f"nhật ký chọn {n} dòng")
+        res = json.load(open(F.daily_paths(base)["result"]))
+        check(res["dd_pick"]["picked"]["ticker"] == pk["picked"]["ticker"], "result json có dd_pick")
+        blk = F.format_topic_block(res, dt.date(2026, 10, 21), pick_base_dir=base)
+        check(f"🔎 Mã DD hôm nay: **{pk['picked']['ticker']}**" in blk, f"khối D thiếu dòng DD:\n{blk[:300]}")
+        check(any("không đọc được" in w for w in pk["warnings"]), "thiếu active_nav ⇒ cảnh báo")
+        r2 = F.run_daily(rcsv, base, True, now, fcsv, INSIDER, pick_kw=kw)
+        check(r2["dd_pick"]["replayed"] and len(pd.read_csv(log)) == n, "chạy lại cùng asof: đọc lại, không ghi thêm")
+        # lỗi bộ chọn ⇒ cô lập
+        base2 = os.path.join(tmp, "pick_data2")
+        os.makedirs(base2)
+        bad = dict(kw, dcf_fn=lambda t, p: 1 / 0)
+        r3 = F.run_daily(rcsv, base2, True, now, fcsv, INSIDER, pick_kw=bad)
+        check(r3["dd_pick"] is None and any("bộ chọn mã DD lỗi" in w for w in r3["warnings"])
+              and r3["state_ok"], "lỗi bộ chọn ⇒ cảnh báo, funnel vẫn chạy")
+        check("bộ chọn KHÔNG chạy" in F.format_topic_block(r3, dt.date(2026, 10, 21), pick_base_dir=base2),
+              "khối D báo bộ chọn không chạy")
+        check(not os.path.exists(PK.pick_paths(base2)["log"]), "bộ chọn lỗi ⇒ không ghi nhật ký")
+        # sanity fail ⇒ không chọn
+        base3 = os.path.join(tmp, "pick_data3")
+        os.makedirs(base3)
+        df.head(3).to_csv(rcsv, index=False)
+        set_mtime_ict(rcsv, 2026, 10, 20, 19, 25)
+        r4 = F.run_daily(rcsv, base3, True, now, fcsv, INSIDER, pick_kw=kw)
+        check(not r4["state_ok"] and r4["dd_pick"] is None and not os.path.exists(PK.pick_paths(base3)["log"]),
+              "sanity fail ⇒ không chọn, không ghi nhật ký")
+    finally:
+        F.DD_PICK = False
+    # result cũ (trước v2, không có khoá dd_pick) ⇒ không in dòng DD
+    check("🔎" not in F.format_topic_block({k: v for k, v in res.items() if k != "dd_pick"}, dt.date(2026, 10, 21)),
+          "result cũ không có dd_pick ⇒ không in dòng")
+
+
 def run_once():
     with tempfile.TemporaryDirectory() as tmp:
         fin_default = os.path.join(tmp, "fin_default.parquet")      # F.FIN_CACHE sandbox: NP phẳng
@@ -1263,6 +1327,7 @@ def run_once():
         test_atomic(tmp)
         test_topic_section()
         test_cli(tmp)
+        test_dd_pick_integration(tmp)
     tz = os.environ.get("TZ", "<unset>")
     print(f"discretionary_candidate_funnel_selfcheck TZ={tz}: {N['ok']} PASS, {N['fail']} FAIL")
     return 1 if N["fail"] else 0

@@ -231,3 +231,29 @@ User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 
 ## USER CHỐT 2026-10-06 13:22 ICT (`decided_by: user`) — làn C mùa vụ
 - Merge `5e9c6057`: mùa vụ (η² ≥ 0,6 ⇒ QoQ so với trung vị cùng cặp quý; còn lại giữ QoQ > 0) + FIFO hàng chờ + quý mới nhất theo kỳ + dọn state.
 - **GIỮ NGUYÊN bản C1S, KHÔNG chuyển C1A** (đ/c mùa cho mọi mã: +DRI −9 mã, bằng chứng IS/OOS lệch dấu). DRI không phải mã mùa vụ theo dữ liệu (η² 0,10) ⇒ đi đường đề xuất tay có due diligence như PVT.
+
+---
+
+## v2 2026-11-01 — chọn mã DD mỗi ngày + DD 2 tầng + nhật ký chọn (user DUYỆT 2026-11-01 20:05 ICT; job `Taylor_20261101_130719`)
+
+**Quyết định user**: mùa BCTC (= cổng `fa_ratings_earnings_window_daily.sh --check`) chọn 1 mã/phiên; ngoài mùa 1 mã/tuần, trần cứng
+2 DD đầy đủ/tuần. DD 2 tầng: tầng nhẹ (DCF nhanh domestic_v2 + rà tin bán/pháp lý/insider + chênh giá) → chỉ mã vượt ngưỡng
+mới lên tầng đầy đủ (Bobby nếu cần → Taylor DD → fundamental-skeptic → investor report → email). Fear-buy hết là ưu tiên: làn A thành nhãn nền.
+
+**Dựng** (nhánh `feat/funnel-dd-pick-v2-20261101`, worktree `wt-funnel-pick-20261101`, CHƯA merge):
+- `bin/discretionary_dd_pick.py` — bộ chọn, gọi từ `run_daily` của funnel (cô lập như làn C: lỗi ⇒ cảnh báo, A/B/C vẫn chạy).
+  Tham số KHOÁ theo PREREG `agents/Taylor/research/discretionary_dd_pick_v2_20261101/PREREG.md` (commit `cf37e8fa7` TRƯỚC lần chạy đầu):
+  score = 0,50·V (phân vị MoS DCF; DCF-NA ⇒ phân vị earn_yield trong route ×0,8) + 0,30·E (BCTC ≤45 ngày: phân vị YoY × hệ số chất
+  lượng cfo_np; nền thấp/lãi một lần ⇒ ×0,3) + 0,20·R (rating 1/2/3 ⇒ 1/0,67/0,33). Loại: BANNED, forensic, insider, đang giữ,
+  excluded_tickers, đã đề xuất/DD < 90 ngày (tính tới ngày CHẠY). Lên tầng đầy đủ: MoS ≥25% ∧ robust ∧ không nền thấp
+  (mã được chọn kiểm lại MoS bằng số CP live, lấy số thấp hơn).
+- Nhật ký `data/discretionary_pick_log.csv`: top-8 mỗi asof kể cả mã không chọn, kèm V/E/R, append-only, chạy lại cùng asof ⇒ đọc lại.
+- Cổng trần: `data/discretionary_dd_ledger.jsonl` + `discretionary_dd_pick.py --claim <MÃ> --tier light|full` (rc=2 ⇒ hết suất / sổ
+  hỏng / cổng mùa lỗi ⇒ áp trần ngoài mùa). **Mike phải claim TRƯỚC khi dispatch DD.**
+- Khối D topic 08:00: dòng "🔎 Mã DD hôm nay: <MÃ> — <tầng>; <điểm/lý do> · suất DD còn …" (suất tính lúc in).
+- Cron: KHÔNG cần dòng mới — chạy trong `37 12 * * 1-5 … discretionary_candidate_funnel.py` sẵn có; đo 12 s/120 s trần.
+
+**Kết quả đo** (`RESULTS.md` cùng thư mục): sandbox asof 30/10 ⇒ pool 120, đề xuất QTP. Thử mô tả PIT 2016-2026 (43 quý):
+không biến thể nào có edge (CI chứa 0); chọn MoS cao nhất còn có xu hướng kém rank 2-8 ⇒ bộ chọn = xếp việc DD, KHÔNG phải tín hiệu.
+⚠️ Ngưỡng MoS≥25% gần như không lọc (trung vị 44% pool vượt) — ràng buộc thật là trần suất + phán quyết tầng nhẹ; muốn ngưỡng
+có tác dụng phải là PREREG mới (user quyết). Mốc đo 2027-04-06 (PREREG §6: mô tả + futility).
