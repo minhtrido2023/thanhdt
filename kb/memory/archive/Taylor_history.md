@@ -1715,3 +1715,19 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T16:15:40Z] [dd-NNC-20261030 30/10] XONG job Taylor_20261030_160612: research/dd_NNC_20261030/REPORT.md (chua commit) ky vong 50.300 (+7%), xap xi hop ly — CHO Mike doc/quyet investor report
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T02:00:49Z] [dd-NNC-investor-31/10] XONG job Taylor_20261031_014511: REPORT.md §13 (KV 59-79k, duoi vung) + investor_report/ (14tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
+- [2026-10-31T02:15:48Z] [weekly 26-30/10 31/10] XONG job Taylor_20261031_020006: 2 report + gate COMPLETE, chua commit
+- [2026-10-31T03:31:43Z] [oshares-r8 31/10] XONG outer 7b4d43a98 (session/oshares-r8-20261031) + mike 96dcb2ce5 (session/oshares-r8-ops-20261031), chua merge — CHO arch-review+skeptic+user; MST 2025-10-29 con mo
+- [2026-10-31T04:00:21Z] [report-style-v2 31/10] XONG job Taylor_20261031_034015: research/report_style_v2_20261031/ (mock tuan/ngay/quy + chuan + module, chua commit, chua gan pipeline) — CHO user duyet chuan; 29/10 weekly -0,29 vs chuan -0,30 can quyet
+- [2026-10-31T04:48:52Z] [oshares-r9 31/10] XONG WC 63e1e4ff8 (session/oshares-r9-20261031) + mike b7242867b (session/oshares-r9-ops-20261031), chua merge, knob van fin — CHO arch-review+skeptic+user
+- [2026-10-31T05:43:28Z] [report-v2-wire 31/10] job Taylor_20261031_042009: nhanh session/report-v2-20261031 (wt /home/trido/wt-report-v2-20261031) commits 6cbd8cb1c,659fe5753,c27804f61,aefecafe0,afec43e7e — chua merge, CHO Mike arch-review + merge truoc cron thang 01/11 09:00; quy chua co lich (de xuat o doc)
+- [2026-10-31T07:28:05Z] [oshares-r10 31/10] XONG WC ce400083e (session/oshares-r10-20261031) + mike 980014bb3 (session/oshares-r10-ops-20261031), chua merge, knob van fin — CHO arch-review+skeptic+user; MST dong (live dung, quy ghi de)
+- [2026-10-31T08:20:12Z] [report-v2-r3 31/10] XONG nhanh session/report-v2-r3-20261031 (wt /home/trido/wt-report-v2-r3-20261031, HEAD 57aac317f), chua merge — CHO Mike arch-review+merge truoc 17:30; weekly rerun cho user duyet; flaky md5 monthly SpaceX chua ro nguyen nhan
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T08:54:00Z] [oshares-r11 31/10] XONG WC 3ad1406ef (session/oshares-r11-20261031) + mike 167036792 (session/oshares-r11-ops-20261031), chua merge — CHO arch-review+skeptic+user; plan echo 21:00 van so quy (cache T-2), can user quyet nguon Price T-1
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T09:53:53Z] [dd-HPG-20261031 31/10] XONG job Taylor_20261031_093839: research/dd_HPG_20261031/REPORT.md (chua commit) — vung 17-23k trung tam ~20k vs gia 21k, xap xi hop ly; CHO Mike doc/quyet investor report

@@ -11,3 +11,4 @@
 - Chờ user: DGC vòng 6, TV2 watchlist, nguồn Tampa/CFR NH3 vào BQ?
 - Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; BĐS 11-26; commodity 11-25; LAG 12-15; measurement audit ~12-27; clear_books_daily lần đầu T2 02/11 20:45.
 
+- [2026-11-01T03:32:30Z] 01/11 DD HHS: Bobby xong (sector_read_xe_tai_thuong_mai_vn_20261101.md); Taylor_20261101_033221 đang DD → agents/Taylor/research/dd_HHS_20261101/REPORT.md; sau đó kiểm số + skeptic/investor report + email nếu user yêu cầu. Hợp nhất HHS chưa có — Taylor tìm.

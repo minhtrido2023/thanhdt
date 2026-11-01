@@ -25,6 +25,7 @@ last_update_14: 2026-10-30 (Bobby — SECTOR READ real-time BLIND ngành đá x�
 last_update_15: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành thép VN: CYCLICAL ~0,45 (khối lượng giữa→muộn nhịp tăng, spread HRC giữa chu kỳ ~250 USD/t ước lượng) / ADMIN_GATED ~0,35 (AD + chống lẩn tránh HRC TQ, giải ngân đầu tư công, EU quota 1,6 tr t/Mỹ AD thép cây ~130%) / STRUCTURAL ~0,20 (thay thế nhập khẩu HRC 28%→60%, một lần) — ambiguous ~60/40; FORECAST F1-F13 tới 2027-06-30; chi tiết ở file con sector_read_thep_20261031.md)
 last_update_16: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành ngân hàng TM VN (nhóm tư nhân lớn): ADMIN_GATED ~0,45 (room ~15%, CV 9608/9736 ép huy động −0,5pp + chế tài room 2027, TT 50 LDR 95% từ 01/12) / CYCLICAL ~0,35 (nhóm 2 tăng 2 quý, bao phủ 95→~80%) / STRUCTURAL ~0,20 (LDR ~114%, CASA 20,2%, Basel III) — ambiguous ~60/40; FORECAST F1-F12 tới 2027-04-30; chi tiết ở file con sector_read_ngan_hang_20261031.md)
 last_update_17: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành BĐS nhà ở/khu đô thị phía Bắc (HN, HP, vùng lân cận): CYCLICAL ~0,45 / STRUCTURAL ~0,35 / ADMIN_GATED ~0,20, ambiguous ~55/45; Hà Nội ĐẦU→GIỮA pha suy khối lượng, ĐẦU pha suy giá; HP trễ 2-4 quý; FORECAST F1-F14 tới 2027-08-31; chi tiết ở file con sector_read_bds_nha_o_do_thi_phia_bac_20261031.md)
+last_update_18: 2026-11-01 (Bobby — SECTOR READ real-time BLIND thị trường xe tải thương mại VN: CYCLICAL ~0,50 (muộn nhịp tăng: VAMA xe thương mại H1 +28% → 9T +17%, Q3 ước −3%..0%) / ADMIN_GATED ~0,30 (đầu tư công 2027, QĐ 43/2025 khí thải mốc 01/01/2027 HN/TP.HCM, NĐ 89/2026 niên hạn, LEZ HN, NĐ 168 quá tải; không có PVTM với xe TQ) / STRUCTURAL ~0,20 — ambiguous ~55/45; FORECAST F1-F11 tới 2027-06-30; chi tiết ở file con sector_read_xe_tai_thuong_mai_vn_20261101.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1652,6 +1653,21 @@ pháp lý, hạ tầng, cạnh tranh, 14 forecast, 25 mục DD, nguồn): **`sec
   BXD Q4 >51.950 P=0,65; tín dụng BĐS/tổng cuối 2026 trong 24,5-26,5% P=0,70; tín dụng người mua 2026 <5% P=0,65; Luật Đất đai sửa đổi thông qua
   ≤31/12/2026 P=0,70; HPREA H1/27 <1.359 P=0,60; doanh thu 2026 nhóm BĐS dân cư niêm yết tăng P=0,60 và người mua trả trước cuối 2026 giảm
   P=0,55; chậm trả TPDN 12T >0,5% P=0,30. **Không phải khuyến nghị mua/bán.**
+
+## SECTOR READ (không phải episode VNINDEX) — Xe tải thương mại VN (nhẹ/trung/nặng, đầu kéo, CBU/CKD, đại lý, trả góp), as-of 01/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG biết/tra mã, giá cổ phiếu, BCTC hay khuyến nghị của DN nào (kiểm toán blind mục 0 file con: web lộ tên
+1 nhà phân phối Howo và số 2025 của 2 DN niêm yết trong một bài The Investor, KHÔNG dùng). Bản đầy đủ: **`sector_read_xe_tai_thuong_mai_vn_20261101.md`** (file con).
+- **Phân loại: `CYCLICAL` ~0,50 / `ADMIN_GATED` ~0,30 / `STRUCTURAL` ~0,20; `ambiguous` ~55/45.** Pha: khối lượng muộn nhịp tăng chuyển đi ngang
+  (VAMA xe thương mại, phạm vi gồm nhập khẩu ngoài hiệp hội: H1 +28% → 9T 85.749 +17% ⇒ Q3 ước −3%..0%; Thaco xe thương mại 9T −2%; xe tải gốc TQ
+  nhập T4 2.610 → T8 1.627) trong khi cầu nền vẫn +16-18% (vận tải hàng hoá Q3 +18,1%, hàng nội địa qua cảng +28%). Tín dụng mua xe đắt dần
+  (cho vay BQ mới 9,12%, +1pp YTD; gói hãng 6% chỉ cố định 12 tháng, LTV 90%) ⇒ vùng rủi ro nợ xấu hộ vận tải ~H2/2027 [UĐ]. Xe nặng/ben tốt hơn
+  xe nhẹ nhờ đầu tư công NSTW 2027 dự kiến 757,2 nghìn tỷ (+287,2). Cửa hành chính ở phía CẦU (khí thải QĐ 43/2025, niên hạn 25 năm NĐ 89/2026,
+  LEZ HN, quá tải NĐ 168); KHÔNG có PVTM với xe TQ (khác thép).
+- **FORECAST khoá 01/11:** xe thương mại 2026 ≥+10% P=0,75; Q4/26 <+10% P=0,60; Q1/27 <+5% P=0,55; nhập khẩu ô tô vận tải 2026 ≥40.000 P=0,80;
+  xe tải gốc TQ T10-T12 <2.500/tháng P=0,70; không PVTM xe tải đến 30/06/27 P=0,90; mốc 01/01/2027 QĐ 43 không lùi P=0,75; lãi cho vay BQ mới
+  ≥9,0% (31/03/27) P=0,60; vận tải hàng hoá 2026 ≥+14% P=0,75; chi ĐTPT NSTW 2027 ≥700 nghìn tỷ P=0,70; chưa có văn bản Euro 6 đến 30/06/27
+  P=0,85. **Không phải khuyến nghị mua/bán.**
 
 ---
 
