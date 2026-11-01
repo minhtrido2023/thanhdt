@@ -43,3 +43,6 @@
 - [2026-11-01T10:14:49Z] [dd-SIP-investor 01/11] XONG job Taylor_20261101_100247: REPORT v2 §11 + investor_report/ (10tr, chua commit, CHUA gui) — giá 48.350 ngang tâm 47,7–50,3k; CHO Mike doc kiem + gui email
 - [2026-11-01T10:21:55Z] ĐANG DỞ: DD FPT job Taylor_20261101_101423 — VIỆC1 XONG (REPORT v2, bus dd-fpt-v2); VIỆC2 investor_report | NEXT: đọc skill, copy khuôn SIP/HHS
 - [2026-11-01T10:30:53Z] [dd-FPT-v2+investor 01/11] XONG job Taylor_20261101_101423: REPORT v2 + investor_report/ (10tr, chua commit, CHUA gui) — vung co so 55,0-66,7k, gia 52.700 DUOI ~4%, EV 54,8k; CHO Mike doc kiem + gui email
+- [2026-11-01T13:07:41Z] ĐANG DỞ: funnel 8L v2 job Taylor_20261101_130719 — chọn mã DD+pick log+cổng tuần | NEXT: đọc plan doc + bin/discretionary_candidate_funnel.py
+- [2026-11-01T13:07:43Z] ĐANG DỞ: TASK B cutloss->DD khủng hoảng job Taylor_20261101_130722 | NEXT: đọc intraday_price_watch.py/cutloss_engine, tạo worktree
+- [2026-11-01T13:19:48Z] [cutloss-crisis-dd 01/11] XONG job Taylor_20261101_130722: nhánh feat/cutloss-crisis-dd-20261101 (06584f605+b0471561d, CHƯA merge) — CHỜ Mike arch-review; cron vẫn chạy bản master cũ tới khi merge
