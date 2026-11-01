@@ -115,7 +115,7 @@ def run(tmp, base, ex, rd, gmode="RUN", asof=ASOF, now=NOW, live_fn=None, write=
     return P.run_pick(rating_df(), fin_df(), cands, {"BAN"}, {"FOR": "x"}, {"INS": "y"}, asof, base_dir=base,
                       write=write, now=now, exec_dir=ex, research_dir=rd, gate=gate(tmp, gmode),
                       dcf_fn=dcf or dcf_fn,
-                      live_fn=live_fn, prices=prices)
+                      live_fn=live_fn, prices=prices, kb_dir=_KB_EMPTY)
 
 
 def t_scoring():
@@ -428,6 +428,13 @@ def t_dd_skip_after_bctc():
         rel3 = dict(rel, HHS=pd.Timestamp("2026-11-02"))
         ok("HHS" not in P.recent_dd(asof, empty, [], rd, upto=run_day, release=rel3, kb_dir=kb),
            "(b) BCTC công bố 02/11 sau DD 01/11 ⇒ quay lại")
+        # picked 10-01 → DD user 10-02 → BCTC 10-25: luật BCTC thắng cooldown 90d (addendum §3) ⇒ QUAY LẠI
+        lg2 = pd.DataFrame([{"asof": "2026-10-01", "ticker": "PBD", "picked": True}])
+        os.makedirs(os.path.join(rd, "dd_PBD_20261002"))
+        got3 = P.recent_dd(asof, lg2, [], rd, upto=run_day, release={"PBD": pd.Timestamp("2026-10-25")}, kb_dir=kb)
+        ok("PBD" not in got3, f"picked→DD→BCTC mới ⇒ quay lại pool (không bị cooldown 90d): {got3}")
+        got3b = P.recent_dd(asof, lg2, [], rd, upto=run_day, release={"PBD": pd.Timestamp("2026-09-20")}, kb_dir=kb)
+        ok("PBD" in got3b, "picked→DD sau BCTC ⇒ vẫn loại")
         # claim trong sổ cũng là DD; pick-only vẫn cooldown 90d
         led = [{"date": "2026-10-28", "ticker": "LED", "tier": "light"}]
         lg = pd.DataFrame([{"asof": "2026-10-10", "ticker": "PKD", "picked": True},
@@ -450,9 +457,29 @@ def t_dd_skip_after_bctc():
         ok(P.claim("p3", "full", d0, base, gate=g)[0] == 2, "picker #3 vẫn bị trần 2/tuần")
         ok(P.claim("ZZZ", "full", d0, base, gate=g, source="user")[0] == 0, "user claim vẫn ghi được khi suất picker ĐÃ HẾT")
         ok("đầy đủ đã dùng tuần này 2" in P.slots_line(d0, base, g), "slots_line không đếm user")
+        ok("+5 do user chỉ định" in P.slots_line(d0, base, g), f"slots_line nêu số user: {P.slots_line(d0, base, g)}")
         ok(P.claim("x", "full", d0, base, gate=g, source="bogus")[0] == 2, "source sai ⇒ rc=2")
         recs = P.read_ledger(P.pick_paths(base)["ledger"])
         ok(sum(r.get("source") == "user" for r in recs) == 5 and all("source" in r for r in recs), "sổ ghi source")
+    # bản ghi KIỂU CŨ (không có trường source) PHẢI tính vào trần picker (bắt mutant default source→"user")
+    with tempfile.TemporaryDirectory() as tmp:
+        base = os.path.join(tmp, "d")
+        os.makedirs(base)
+        g = gate(tmp, "SKIP")
+        d0 = dt.date(2026, 12, 1)
+        with open(P.pick_paths(base)["ledger"], "w") as f:
+            for tk in ("OLD1", "OLD2"):
+                f.write(json.dumps({"date": str(d0), "ticker": tk, "tier": "full", "season": False,
+                                    "by": "", "job": "", "at": "x"}) + "\n")
+        rc, msg = P.claim("NEW1", "full", d0, base, gate=g)
+        ok(rc == 2 and "HẾT SUẤT" in msg, f"2 bản ghi cũ không source tính vào trần picker: {rc} {msg}")
+        ok("đầy đủ đã dùng tuần này 2" in P.slots_line(d0, base, g), "slots_line đếm bản ghi cũ")
+        # --source user bắt buộc --by
+        import io, contextlib
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc1 = P.main(["--claim", "XYZ", "--tier", "light", "--source", "user", "--out-dir", base])
+        ok(rc1 == 2 and not any(r["ticker"] == "XYZ" for r in P.read_ledger(P.pick_paths(base)["ledger"])),
+           "--source user thiếu --by ⇒ rc=2, không ghi")
     # tích hợp: run_pick dùng release=fin.known ⇒ REC (DD 10-25 sau BCTC 10-20) loại, AAA (DD 06-01) ở lại
     with tempfile.TemporaryDirectory() as tmp:
         ex, rd, base = setup(tmp)
@@ -460,6 +487,26 @@ def t_dd_skip_after_bctc():
         tk = [x["ticker"] for x in r["top"]]
         ok("REC" not in tk and "AAA" in tk, f"tích hợp run_pick: {tk}")
         ok("REC" in r["dropped_held_or_recent"], "REC nằm trong dropped_held_or_recent")
+    # M6: mã NEW có DD 09-01 (TRƯỚC BCTC 10-20, nhưng TRONG 120d fallback ⇒ nếu không dùng release sẽ bị loại) —
+    # chỉ quay lại pool nếu nhánh release=fin.known thật sự được dùng trong _run_pick
+    with tempfile.TemporaryDirectory() as tmp:
+        ex, rd, base = setup(tmp)
+        os.makedirs(os.path.join(rd, "dd_NEW_20260901"))
+        rt = rating_df()
+        rt = pd.concat([rt, rt[rt["ticker"] == "AAA"].assign(ticker="NEW")], ignore_index=True)
+        fn = fin_df()
+        fn.loc["NEW"] = fn.loc["AAA"]
+        MOS["NEW"] = 0.50
+        try:
+            prices = {t: (10000.0, ASOF) for t in rt["ticker"]}
+            cands = pd.DataFrame({"ticker": ["CCC"], "lane": ["A"]})
+            r = P.run_pick(rt, fn, cands, {"BAN"}, {"FOR": "x"}, {"INS": "y"}, ASOF, base_dir=base, write=False,
+                           now=NOW, exec_dir=ex, research_dir=rd, gate=gate(tmp, "RUN"), dcf_fn=dcf_fn,
+                           prices=prices, kb_dir=_KB_EMPTY)
+        finally:
+            MOS.pop("NEW", None)
+        ok("NEW" not in r["dropped_held_or_recent"],
+           f"M6: DD 09-01 < BCTC 10-20 ⇒ NEW quay lại pool qua fin.known: dropped={r['dropped_held_or_recent']}")
 
 
 def t_robust_gate():

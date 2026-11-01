@@ -242,6 +242,8 @@ def recent_dd(asof, log_df, ledger, research_dir=RESEARCH_DIR, days=DD_COOLDOWN_
         elif d >= pd.Timestamp(rel).date():
             out.add(t)
     for t, d in prop.items():
+        if t in dd and dd[t] >= d:      # đã có DD từ ngày đề xuất ⇒ luật BCTC ở trên quyết định, không cooldown 90d
+            continue
         if d >= asof - dt.timedelta(days=days):
             out.add(t)
     return out
@@ -457,7 +459,10 @@ def slots_line(today, base_dir=F.DATA_DIR, gate=WINDOW_GATE):
         parts.append(f"{name} còn {cap - used}/{cap} {'hôm nay' if unit == 'day' else 'tuần này'}")
     wk = sum(1 for r in ledger if r["tier"] == "full" and r.get("source", "picker") != "user"
              and iso_week(dt.date.fromisoformat(r["date"])) == iso_week(today))
-    return f"suất DD ({note}): " + ", ".join(parts) + f" · đầy đủ đã dùng tuần này {wk}"
+    nu = sum(1 for r in ledger if r.get("source", "picker") == "user"
+             and iso_week(dt.date.fromisoformat(r["date"])) == iso_week(today))
+    return (f"suất DD ({note}): " + ", ".join(parts) + f" · đầy đủ đã dùng tuần này {wk}"
+            + (f" (+{nu} do user chỉ định, không trừ suất)" if nu else ""))
 
 
 # ----------------------------------------------------------------------------- chạy + ghi
@@ -485,12 +490,12 @@ def _row(r, asof, season, picked, reason, now):
 
 def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DATA_DIR, write=True,
              now=None, exec_dir=EXEC_DIR, research_dir=RESEARCH_DIR, gate=WINDOW_GATE,
-             dcf_fn=None, live_fn=None, prices=None):
+             dcf_fn=None, live_fn=None, prices=None, kb_dir=None):
     """Kết quả dict cho result["dd_pick"]. Cùng asof đã có trong nhật ký ⇒ ĐỌC LẠI (không chấm lại,
     không ghi lại) — chạy lại không đổi đề xuất đã hiện. write=True ⇒ cả bước kiểm-asof + chấm + append
     nằm trong flock (2 tiến trình cùng asof: tiến trình sau chờ rồi ĐỌC LẠI lô của tiến trình trước)."""
     kw = dict(base_dir=base_dir, write=write, now=now, exec_dir=exec_dir, research_dir=research_dir,
-              gate=gate, dcf_fn=dcf_fn, live_fn=live_fn, prices=prices)
+              gate=gate, dcf_fn=dcf_fn, live_fn=live_fn, prices=prices, kb_dir=kb_dir)
     if not write:
         return _run_pick(rating, fin, cands, banned, forensic, insider, asof, **kw)
     with file_lock(pick_paths(base_dir)["log"]):
@@ -498,7 +503,7 @@ def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DAT
 
 
 def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, write, now, exec_dir,
-              research_dir, gate, dcf_fn, live_fn, prices):
+              research_dir, gate, dcf_fn, live_fn, prices, kb_dir=None):
     now = now or dt.datetime.now(ICT)
     paths = pick_paths(base_dir)
     log_df = read_pick_log(paths["log"])
@@ -522,7 +527,8 @@ def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, wri
     warns += w
     release = ({t: k for t, k in fin["known"].items() if pd.notna(k)}
                if fin is not None and "known" in fin else {})
-    recent = recent_dd(asof, log_df, ledger or [], research_dir, upto=now.date(), release=release)
+    recent = recent_dd(asof, log_df, ledger or [], research_dir, upto=now.date(), release=release,
+                       kb_dir=kb_dir)
     if prices is None:
         prices = prices_at(rating["ticker"], asof)
     scored, dropped = score_pool(rating, fin, cands, banned, forensic, insider, held, excl, recent,
@@ -633,6 +639,9 @@ def main(argv=None):
     if a.claim:
         if not a.tier:
             ap.error("--claim cần --tier light|full")
+        if a.source == "user" and not a.by:
+            print("--source user bắt buộc --by <ai chỉ định> (dấu vết kiểm toán)")
+            return 2
         rc, msg = claim(a.claim, a.tier, today, base, a.by, a.job, source=a.source)
         print(msg)
         return rc
