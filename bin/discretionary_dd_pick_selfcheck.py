@@ -18,6 +18,8 @@ import discretionary_dd_pick as P  # noqa: E402
 
 FAILS = []
 N = [0]
+_KB_EMPTY = tempfile.mkdtemp(prefix="kbempty_")
+P.KB_PROJECTS_DIR = _KB_EMPTY          # cô lập khỏi kb/projects thật (DD thật sẽ làm lệch fixture)
 
 
 def ok(cond, msg):
@@ -100,8 +102,8 @@ def setup(tmp):
         with open(os.path.join(ex, f"active_nav_{a}.json"), "w") as f:
             json.dump({"positions": pos, "excluded_tickers": excl}, f)
     rd = os.path.join(tmp, "research")
-    os.makedirs(os.path.join(rd, "dd_REC_20261015"), exist_ok=True)
-    os.makedirs(os.path.join(rd, "dd_AAA_20260601"), exist_ok=True)       # quá 90 ngày ⇒ không chặn
+    os.makedirs(os.path.join(rd, "dd_REC_20261025"), exist_ok=True)   # SAU BCTC 10-20 ⇒ loại
+    os.makedirs(os.path.join(rd, "dd_AAA_20260601"), exist_ok=True)       # DD TRƯỚC BCTC 10-20 ⇒ mã quay lại pool
     base = os.path.join(tmp, "data")
     os.makedirs(base, exist_ok=True)
     return ex, rd, base
@@ -383,8 +385,8 @@ def t_recent_names_and_topic():
         rd = os.path.join(tmp, "r")
         for n in ("dd_blind2_BBB_20261015", "dd_CCC_reweight_20261016", "dd_AAA_20260601", "dd_HPG_20261020"):
             os.makedirs(os.path.join(rd, n))
-        got = P.recent_dd(ASOF, pd.DataFrame(columns=P.LOG_COLS), [], rd)
-        ok(got == {"BBB", "CCC", "HPG"}, f"recent_dd bắt cả blind2/reweight: {got}")
+        got = P.recent_dd(ASOF, pd.DataFrame(columns=P.LOG_COLS), [], rd, kb_dir=_KB_EMPTY)
+        ok(got == {"BBB", "CCC", "HPG"}, f"recent_dd bắt cả blind2/reweight (fallback 120d): {got}")
     with tempfile.TemporaryDirectory() as tmp:
         ex, rd, base = setup(tmp)
         line = P.topic_line(run(tmp, base, ex, rd), ASOF, base, gate(tmp, "RUN"))
@@ -396,6 +398,68 @@ def t_recent_names_and_topic():
         os.remove(os.path.join(ex, "active_nav_SpaceX.json"))
         r3 = run(tmp, base, ex, rd)
         ok(r3["replayed"] and any("không đọc được" in w for w in r3["warnings"]), "replay vẫn mang cảnh báo nguồn")
+
+
+def t_dd_skip_after_bctc():
+    """User 2026-11-01: DD (picker HOẶC user chỉ định) có ngày ≥ ngày BCTC quý mới nhất ⇒ loại; BCTC mới
+    công bố SAU DD ⇒ quay lại; user-source không trừ suất."""
+    asof, run_day = dt.date(2026, 10, 30), dt.date(2026, 11, 2)
+    empty = pd.DataFrame(columns=P.LOG_COLS)
+    with tempfile.TemporaryDirectory() as tmp:
+        rd, kb = os.path.join(tmp, "r"), os.path.join(tmp, "kb")
+        os.makedirs(kb)
+        for n in ("dd_HHS_20261101", "dd_TV2_20261101", "dd_SIP_20261101", "dd_FPT_20261101",
+                  "dd_OLD_20260901", "dd_NRL_20260801", "dd_NRM_20260620"):
+            os.makedirs(os.path.join(rd, n))
+        open(os.path.join(kb, "scl-dd-research-20261101.md"), "w").close()
+        open(os.path.join(kb, "mbb-dd-20261031.md"), "w").close()
+        rel = {t: pd.Timestamp("2026-10-25") for t in ("HHS", "TV2", "SIP", "FPT", "SCL", "MBB")}
+        rel["OLD"] = pd.Timestamp("2026-10-20")      # BCTC mới (10-20) công bố SAU DD 09-01 ⇒ quay lại
+        # (NRL, NRM không có Release_Date ⇒ fallback 120 ngày)
+        got = P.recent_dd(asof, empty, [], rd, upto=run_day, release=rel, kb_dir=kb)
+        ok({"HHS", "TV2", "SIP", "FPT"} <= got, f"(a) 4 mã DD user 01/11 bị loại: {got}")
+        ok({"SCL", "MBB"} <= got, f"(a) DD nhận diện qua kb/projects/*-dd-*: {got}")
+        ok("OLD" not in got, f"(b) BCTC mới sau DD ⇒ quay lại pool: {got}")
+        ok("NRL" in got and "NRM" not in got, f"fallback 120d: NRL(91d) loại, NRM(132d) không: {got}")
+        # DD cùng ngày công bố BCTC: tính là SAU BCTC (>=)
+        rel2 = dict(rel, HHS=pd.Timestamp("2026-11-01"))
+        ok("HHS" in P.recent_dd(asof, empty, [], rd, upto=run_day, release=rel2, kb_dir=kb), "DD cùng ngày BCTC ⇒ loại")
+        # BCTC mới ra SAU DD (02/11 > DD 01/11) ⇒ quay lại. upto=11-02 để thấy được release (known ≤ run)
+        rel3 = dict(rel, HHS=pd.Timestamp("2026-11-02"))
+        ok("HHS" not in P.recent_dd(asof, empty, [], rd, upto=run_day, release=rel3, kb_dir=kb),
+           "(b) BCTC công bố 02/11 sau DD 01/11 ⇒ quay lại")
+        # claim trong sổ cũng là DD; pick-only vẫn cooldown 90d
+        led = [{"date": "2026-10-28", "ticker": "LED", "tier": "light"}]
+        lg = pd.DataFrame([{"asof": "2026-10-10", "ticker": "PKD", "picked": True},
+                           {"asof": "2026-06-01", "ticker": "PKO", "picked": True}])
+        got2 = P.recent_dd(asof, lg, led, rd, upto=run_day, release={"LED": pd.Timestamp("2026-10-25")}, kb_dir=kb)
+        ok("LED" in got2 and "PKD" in got2 and "PKO" not in got2, f"claim=DD; pick-only 90d: {got2}")
+        ok("LED" not in P.recent_dd(asof, empty, led, rd, upto=run_day,
+                                    release={"LED": pd.Timestamp("2026-10-29")}, kb_dir=kb), "claim trước BCTC ⇒ quay lại")
+    # (c) source=user không trừ suất; picker vẫn bị trần
+    with tempfile.TemporaryDirectory() as tmp:
+        base = os.path.join(tmp, "d")
+        os.makedirs(base)
+        g = gate(tmp, "SKIP")
+        d0 = dt.date(2026, 12, 1)                     # ngoài mùa: full 2/tuần
+        for tk in ("HHS", "TV2", "SIP", "FPT"):
+            rc, msg = P.claim(tk, "full", d0, base, gate=g, source="user")
+            ok(rc == 0 and "KHÔNG trừ suất" in msg, f"user claim {tk}: {msg}")
+        ok(P.claim("p1", "full", d0, base, gate=g)[0] == 0, "(c) sau 4 DD user, picker vẫn còn đủ suất #1")
+        ok(P.claim("p2", "full", d0, base, gate=g)[0] == 0, "(c) picker #2")
+        ok(P.claim("p3", "full", d0, base, gate=g)[0] == 2, "picker #3 vẫn bị trần 2/tuần")
+        ok(P.claim("ZZZ", "full", d0, base, gate=g, source="user")[0] == 0, "user claim vẫn ghi được khi suất picker ĐÃ HẾT")
+        ok("đầy đủ đã dùng tuần này 2" in P.slots_line(d0, base, g), "slots_line không đếm user")
+        ok(P.claim("x", "full", d0, base, gate=g, source="bogus")[0] == 2, "source sai ⇒ rc=2")
+        recs = P.read_ledger(P.pick_paths(base)["ledger"])
+        ok(sum(r.get("source") == "user" for r in recs) == 5 and all("source" in r for r in recs), "sổ ghi source")
+    # tích hợp: run_pick dùng release=fin.known ⇒ REC (DD 10-25 sau BCTC 10-20) loại, AAA (DD 06-01) ở lại
+    with tempfile.TemporaryDirectory() as tmp:
+        ex, rd, base = setup(tmp)
+        r = run(tmp, base, ex, rd, write=False)
+        tk = [x["ticker"] for x in r["top"]]
+        ok("REC" not in tk and "AAA" in tk, f"tích hợp run_pick: {tk}")
+        ok("REC" in r["dropped_held_or_recent"], "REC nằm trong dropped_held_or_recent")
 
 
 def t_robust_gate():
@@ -431,7 +495,7 @@ def t_held_missing():
 if __name__ == "__main__":
     for fn in (t_scoring, t_append_only_replay, t_offseason_week, t_claims, t_live_downgrade_and_topic,
                t_held_missing, t_dd_after_asof, t_concurrency, t_price_date_and_timeout, t_fin_none,
-               t_recent_names_and_topic, t_robust_gate):
+               t_recent_names_and_topic, t_dd_skip_after_bctc, t_robust_gate):
         fn()
     print(f"TZ={os.environ.get('TZ', '<unset>')} checks={N[0]} fails={len(FAILS)}")
     sys.exit(1 if FAILS else 0)
