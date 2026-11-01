@@ -861,7 +861,7 @@ def test_risk_urgent():
     # sàn thiếu trong quote ⇒ E.floor_price(ref, sàn GD)
     qq = q(96_000, deep, None, "HOSE"); qq["floor"] = None
     lv, info = W.manual_level(qq, [], 1000, at)
-    check("sàn thiếu ⇒ fallback E.floor_price (HOSE 93.000): last 96.000 ⇒ 3,0% ⇒ mức 2", lv == 2 and "3.0%" in info, (lv, info))
+    check("sàn thiếu ⇒ fallback E.floor_price (HOSE 93.000): last 96.000 ⇒ 3,0% ⇒ mức 2", lv == 2 and "3.00%" in info, (lv, info))
     # độ sâu rỗng/None ⇒ KHÔNG suy mức 3/4, KHÔNG in 0cp
     for b_ in ([], None):
         lv, info = W.manual_level(q(98_000, b_), [], 1000, at)
@@ -1047,19 +1047,80 @@ def test_risk_urgent():
         with open(os.path.join(sd, nm), "w") as f:
             f.write(f'#!/bin/bash\nprintf "%s|%s\\n" "{nm}" "$1" >> "{rec_}"\n')
         os.chmod(os.path.join(sd, nm), 0o755)
-    o_tg, o_th = W.NOTIFY_TG, W.NOTIFY_THREAD
+    o_tg, o_th, o_ch = W.NOTIFY_TG, W.NOTIFY_THREAD, W.CHANNELS
     W.NOTIFY_TG, W.NOTIFY_THREAD = os.path.join(sd, "tg.sh"), os.path.join(sd, "thread.sh")
+    W.CHANNELS = os.path.join(sd, "channels.json")
+    with open(W.CHANNELS, "w") as f_:
+        json.dump({"users": {"owner": {"id": "123456789"}}}, f_)
     try:
         nt = W.Notifier(dry=False)
         r_ = nt.send("🚨 RỦI RO PHÁP LÝ XYZ", ("telegram", "discord"), mention=True)
         got = open(rec_).read().splitlines()
     finally:
-        W.NOTIFY_TG, W.NOTIFY_THREAD = o_tg, o_th
+        W.NOTIFY_TG, W.NOTIFY_THREAD, W.CHANNELS = o_tg, o_th, o_ch
         shutil.rmtree(sd)
     check("Notifier telegram THẬT (stub NOTIFY_TG): nhận '[CỔNG GIÁ] 🚨 RỦI RO…' đúng 1 nhãn; discord có mention",
           r_["telegram"][0] and r_["discord"][0] and any(g == "tg.sh|[CỔNG GIÁ] 🚨 RỦI RO PHÁP LÝ XYZ" for g in got)
           and any(g.startswith("thread.sh|") and "[CỔNG GIÁ] 🚨 RỦI RO" in g for g in got)
           and all(g.count("[CỔNG GIÁ]") == 1 for g in got) and nt.sent[0]["mention"] is True, got)
+    check("discord THẬT: dòng ghi lại chứa mention thật '<@123456789>' (không chỉ cờ mention=True)",
+          any(g.startswith("thread.sh|<@123456789> ") for g in got) and not any(g.startswith("tg.sh|<@") for g in got), got)
+    # --- kill quanh _save/save_dossier trên đường GỬI TRỰC TIẾP (_urgent_now): không mất tin, không trùng
+    def _kill_direct(target, tag):
+        e_ = Env({"XYZ": DROP})
+        e_.drive("09:15", "10:05", "2026-10-06")
+        orig = getattr(W, target)
+        hit = {"n": 0}
+
+        def wrapped(*a, **k):
+            if not hit["n"]:
+                hit["n"] = 1
+                raise W.RunKilled(f"SIGTERM trước {target}")
+            return orig(*a, **k)
+        setattr(W, target, wrapped)
+        try:
+            e_.note(did, "quick", T("15:10", "2026-10-06"), summary="khởi tố", risk="legal")
+            killed = False
+        except W.RunKilled:
+            killed = True
+        finally:
+            setattr(W, target, orig)
+        n0 = len(_urgent(e_))
+        e_.note(did, "quick", T("15:12", "2026-10-06"), summary="khởi tố", risk="legal")     # chạy lại dd-note
+        e_.drive("15:13", "15:14", "2026-10-06")
+        e_.drive("08:30", "08:31", "2026-10-07")
+        e_.drive("09:00", "09:02", "2026-10-07")
+        chs = sorted(m["channel"] for m in _urgent(e_))
+        check(f"kill {tag} (đường gửi trực tiếp): đã kill thật, chưa gửi gì lúc kill; chạy lại dd-note + watcher ⇒ "
+              f"đúng 3 tin (đủ 3 kênh, không mất, không trùng)",
+              killed and n0 == 0 and chs == ["discord", "email", "telegram"], (killed, n0, chs))
+        e_.close()
+    _kill_direct("_save", "TRƯỚC _save(st)")
+    _kill_direct("save_dossier", "GIỮA _save(st) và save_dossier")
+    # --- ngày nghỉ (T7) + 1 kênh lỗi ⇒ phiên giao dịch kế (T2) gửi bù ĐÚNG kênh lỗi; state neo phiên trước, không lạc
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-09")                 # Thứ Sáu mở hồ sơ
+    e.deps.notifier = FailTG(dry=True)
+    with contextlib.redirect_stderr(io.StringIO()):
+        e.note("XYZ_2026-10-09", "daily", T("10:00", "2026-10-10"), summary="khởi tố", risk="legal")   # Thứ Bảy
+    ok_ch = sorted(m["channel"] for m in e.sent() if "RỦI RO" in m["msg"] and m["ok"])
+    check("T7 + telegram lỗi: discord+email tới ngay, telegram nằm lại outbox của state Thứ Sáu (phiên trước)",
+          ok_ch == ["discord", "email"] and _outbox_has(e, "2026-10-09", "RỦI RO PHÁP LÝ XYZ"), ok_ch)
+    check("T7: KHÔNG ghi state_2026-10-10.json lạc (flush neo ngày phiên trước)",
+          not os.path.exists(W.state_path(e.tmp, dt.date(2026, 10, 10))))
+    e.deps.notifier.fail = False
+    e.drive("08:30", "08:31", "2026-10-12")                 # Thứ Hai
+    ok_ch = sorted(m["channel"] for m in e.sent() if "RỦI RO" in m["msg"] and m["ok"])
+    check("T7: phiên Thứ Hai gửi bù đúng telegram (mỗi kênh đúng 1 lần)", ok_ch == ["discord", "email", "telegram"], ok_ch)
+    e.close()
+    # --- hiển thị room: 2 chữ số thập phân, không làm tròn lên biên 3,0%/1,5% khi xếp mức theo số thật
+    q_ = {"last": 12_800, "ref": 13_300, "floor": 12_400, "exchange": "HOSE", "bids": [(12_800, 99_999), (12_790, 99_999)]}
+    lv_, info_ = W.manual_level(q_, [], 1000, T("10:30", "2026-10-06"))      # room = 3,0075%
+    check("room 3,0075% (HT1) ⇒ mức 1 và in '3.01%', không in '3.0%'", lv_ == 1 and "3.01%" in info_ and "3.0%" not in info_, (lv_, info_))
+    q_ = {**q_, "last": 12_600, "floor": 12_400}
+    q_["last"] = 12_400 + 0.015075 * 13_300
+    lv_, info_ = W.manual_level(q_, [], 1000, T("10:30", "2026-10-06"))      # room = 1,5075%
+    check("room 1,5075% ⇒ mức 2 và in '1.51%', không in '1.5%'", lv_ == 2 and "1.51%" in info_ and "1.5%" not in info_, (lv_, info_))
     # --- dd-note: giá trị lạ bị từ chối
     e = Env({"XYZ": DROP})
     e.drive("09:15", "10:05", "2026-10-06")
@@ -1108,6 +1169,13 @@ MUTANTS = [
     ("risk: đảo thứ tự save_dossier TRƯỚC enqueue-state không đổi ở khối changed",
      "            _save(deps, day, st)                 # outbox bền TRƯỚC, rồi mới ghi hồ sơ (relayed/CONCLUDED)\n            save_dossier(deps.state_dir, dos)\n        # 2b",
      "            save_dossier(deps.state_dir, dos)\n            _save(deps, day, st)\n        # 2b"),
+    ("F: _urgent_now đảo save_dossier TRƯỚC _save(st)",
+     "        _save(deps, day, st)                    # outbox bền TRƯỚC, rồi mới đánh dấu hồ sơ\n        save_dossier(state_dir, dos)",
+     "        save_dossier(state_dir, dos)\n        _save(deps, day, st)"),
+    ("A: _urgent_now neo day = now.date() cả ngày nghỉ", "day = now.date() if _is_session_day(now.date()) else prev_trading_day(now.date())", "day = now.date()"),
+    ("A2: flush_outbox không nhận neo day từ _urgent_now", "flush_outbox(st, deps, now, day=day)", "flush_outbox(st, deps, now)"),
+    ("J: bỏ owner_mention(CHANNELS)", '(owner_mention(CHANNELS) if mention else "") + msg', "msg"),
+    ("room: in .1f thay vì .2f", 'info = f"room tới sàn {room:.2f}%', 'info = f"room tới sàn {room:.1f}%'),
     ("bỏ chặn 1 nhắc/tick", "if reminded:                 #", "if False:                 #"),
 ]
 

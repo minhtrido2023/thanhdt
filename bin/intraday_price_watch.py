@@ -666,10 +666,11 @@ def enqueue(st, msg, channels=("discord", "telegram"), subject=None, mention=Fal
     return m
 
 
-def flush_outbox(st, deps, now):
+def flush_outbox(st, deps, now, day=None):
     """Gửi mọi tin còn kênh chưa gửi. Kết quả Notifier được KIỂM: kênh OK mới gạch; kênh lỗi thử lại
-    lượt sau (≤ NOTIFY_MAX_ATTEMPTS), bỏ cuộc ⇒ cảnh báo qua kênh khác (1 lần/ngày/kênh)."""
-    day = now.date()
+    lượt sau (≤ NOTIFY_MAX_ATTEMPTS), bỏ cuộc ⇒ cảnh báo qua kênh khác (1 lần/ngày/kênh).
+    day: ngày NEO của state (mặc định now.date(); ngày nghỉ ⇒ caller truyền phiên trước, tránh state_<ngày nghỉ> lạc)."""
+    day = day or now.date()
     for m in list(st.get("outbox") or []):
         if not m["left"] or m["attempts"] >= NOTIFY_MAX_ATTEMPTS:
             continue
@@ -975,7 +976,7 @@ def manual_level(q, bars, qty, at):
     sp = f"speed {speed:+.1f}%/5'" if speed is not None else "speed chưa tính được"
     dp = (f"độ sâu 2 mức mua {depth2:,}cp vs cần bán {qty:,}cp" if depth2 is not None
           else "độ sâu chưa lấy được")
-    info = f"room tới sàn {room:.1f}%, {sp}, {dp}"
+    info = f"room tới sàn {room:.2f}%, {sp}, {dp}"
     if bids and last <= floor and not any(b[0] >= floor for b in bids):
         lv = 4
     elif room <= 1.5 or (depth2 is not None and depth2 < qty):
@@ -1528,7 +1529,7 @@ def _urgent_now(state_dir, did, n, now, market, notifier):
     if _enqueue_risk(st, dos, n, now, deps):
         _save(deps, day, st)                    # outbox bền TRƯỚC, rồi mới đánh dấu hồ sơ
         save_dossier(state_dir, dos)
-    flush_outbox(st, deps, now)
+    flush_outbox(st, deps, now, day=day)
     _save(deps, day, st)
     left = [m for m in st.get("outbox") or [] if m.get("key") == f"dd:{did}:note:{n['file']}" and m.get("left")]
     if left:
