@@ -59,3 +59,4 @@
 - [2026-11-01T15:54:53Z] [dd-price-zone 01/11] XONG job Taylor_20261101_154045: nhánh feat/dd-price-zone-20261101 (ecd94e5e4, chưa merge) — chờ Mike arch-review/merge; ngưỡng 15% chờ Mike tư vấn user
 - [2026-11-01T16:10:40Z] [dd-price-zone vòng2 01/11] XONG job Taylor_20261101_160440: 634f9da84 (chưa merge) — chờ Mike merge; hỏi user DD_ALERT_BASIS + xác nhận center_kind HHS/SIP/TCH
 - [2026-11-01T16:20:09Z] [dd-price-zone vòng3 01/11] XONG job Taylor_20261101_161715: ad5a89c2d (chưa merge) — chờ Mike merge; HPG tâm 19.221 chỉ chân RI, hỏi user nếu muốn giữ 20.200
+- [2026-11-01T16:42:33Z] [dcf-vn-calib 01/11] XONG job Taylor_20261101_155145: REPORT commit 91336200c (s=0, g_T 4,5% level fix; beta khong vao xep hang; lich 15/2-5-8-11) — CHO quant-skeptic + user quyet; chua code knob vn_v3
