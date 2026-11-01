@@ -13,7 +13,7 @@ V = `dcf_valuation.fair_value` (khung mặc định domestic_v2), E = quý mới
 
 Bộ chọn chỉ SINH ĐỀ XUẤT cho Mike (tầng nhẹ); KHÔNG dispatch DD, KHÔNG mua/size. Sổ claim
 `data/discretionary_dd_ledger.jsonl` là cổng cơ học trần DD: Mike/agent gọi
-    discretionary_dd_pick.py --claim TICKER --tier light|full [--by Mike] [--job JOB]
+    discretionary_dd_pick.py --claim TICKER --tier light|full [--by Mike] [--job JOB] [--source picker|user]
 TRƯỚC khi dispatch; rc=2 ⇒ hết suất / sổ hỏng / không xác định được ⇒ KHÔNG dispatch.
     discretionary_dd_pick.py --slots            # in suất còn lại hôm nay (ICT)
 """
@@ -48,7 +48,8 @@ CFO_NP_GOOD = 0.5
 YOY_LOW_BASE = 3.0                # YoY > 300% ⇒ nền thấp/lãi một lần
 R_SCORE = {1: 1.0, 2: 0.67, 3: 0.33}
 # --- PREREG §1, §3, §4, §5 ---
-DD_COOLDOWN_DAYS = 90
+DD_COOLDOWN_DAYS = 90             # nay chỉ còn cho mã mới ĐỀ XUẤT (chưa DD); xem recent_dd
+DD_FALLBACK_DAYS = 120            # mã không có ngày công bố BCTC ⇒ DD trong 120 ngày vẫn loại
 TOP_K = 8
 CAP = {True: {"light": ("day", 1), "full": ("day", 1)},        # mùa BCTC
        False: {"light": ("week", 1), "full": ("week", 2)}}     # ngoài mùa
@@ -59,6 +60,7 @@ WINDOW_GATE = os.path.join(F.MIKE_ROOT, "bin", "fa_ratings_earnings_window_daily
 EXEC_DIR = os.path.join(F.DATA_DIR, "execution_logs")
 ACCOUNTS = ("SpaceX", "ZaloPay")
 RESEARCH_DIR = os.path.join(F.MIKE_ROOT, "agents", "Taylor", "research")
+KB_PROJECTS_DIR = os.path.join(F.MIKE_ROOT, "kb", "projects")
 PRICE_CACHE_DIR = os.path.join(F.DATA_DIR, "bq_cache", "ticker")
 
 LOG_COLS = ["asof", "rank", "ticker", "route", "rating", "score", "V", "E", "R", "mos", "dcf_ok",
@@ -179,21 +181,24 @@ def read_pick_log(path):
     return df
 
 
-def recent_dd(asof, log_df, ledger, research_dir=RESEARCH_DIR, days=DD_COOLDOWN_DAYS, upto=None):
-    """Mã đã ĐỀ XUẤT (picked) / claim / có thư mục dd_<MÃ>_<YYYYMMDD> trong [asof − days, upto].
-    upto = ngày CHẠY (≥ asof): DD làm sau asof nhưng trước lúc chạy đã là sự thật đã biết (ca thật
-    HPG DD 31/10, asof 30/10)."""
-    lo = asof - dt.timedelta(days=days)
-    asof = max(asof, upto or asof)
-    out = set()
+def dd_events(asof, log_df, ledger, research_dir=RESEARCH_DIR, kb_dir=None, upto=None):
+    """(dd, proposed): dict mã → ngày DD MỚI NHẤT (≤ max(asof, upto)) · dict mã → ngày đề xuất mới nhất.
+    dd = thư mục dd_<MÃ>_<YYYYMMDD> (kể cả blind/reweight; do bộ chọn HOẶC user chỉ định) + kb/projects/
+    <mã>-dd-*-<YYYYMMDD>.md + claim trong sổ DD. proposed = dòng picked trong nhật ký chọn (chỉ ĐỀ XUẤT,
+    chưa chắc đã DD)."""
+    hi = max(asof, upto or asof)
+    dd, prop = {}, {}
+
+    def put(d, t, day):
+        if day <= hi and (t not in d or day > d[t]):
+            d[t] = day
+
     if len(log_df):
         p = log_df[log_df["picked"].astype(str).str.lower().isin(["true", "1"])]
         for t, a in zip(p["ticker"], p["asof"]):
-            if lo <= dt.date.fromisoformat(a) <= asof:
-                out.add(t)
+            put(prop, t, dt.date.fromisoformat(a))
     for r in ledger:
-        if lo <= dt.date.fromisoformat(r["date"]) <= asof:
-            out.add(r["ticker"])
+        put(dd, r["ticker"], dt.date.fromisoformat(r["date"]))
     if os.path.isdir(research_dir):
         for n in os.listdir(research_dir):
             parts = n.split("_")      # dd_X_20261015 · dd_blind2_X_20261015 · dd_X_reweight_20261015
@@ -202,8 +207,45 @@ def recent_dd(asof, log_df, ledger, research_dir=RESEARCH_DIR, days=DD_COOLDOWN_
                     d = dt.datetime.strptime(parts[-1], "%Y%m%d").date()
                 except ValueError:
                     continue
-                if lo <= d <= asof:
-                    out.update(x for x in parts[1:-1] if re.fullmatch(r"[A-Z][A-Z0-9]{2,3}", x))
+                for x in parts[1:-1]:
+                    if re.fullmatch(r"[A-Z][A-Z0-9]{2,3}", x):
+                        put(dd, x, d)
+    kb_dir = kb_dir or KB_PROJECTS_DIR
+    if os.path.isdir(kb_dir):
+        for n in os.listdir(kb_dir):
+            m = re.fullmatch(r"([a-z][a-z0-9]{2,3})-dd-(?:.*-)?(\d{8})\.md", n)
+            if m:
+                try:
+                    put(dd, m.group(1).upper(), dt.datetime.strptime(m.group(2), "%Y%m%d").date())
+                except ValueError:
+                    continue
+    return dd, prop
+
+
+def recent_dd(asof, log_df, ledger, research_dir=RESEARCH_DIR, days=DD_COOLDOWN_DAYS, upto=None,
+              release=None, kb_dir=None):
+    """Mã bị loại khỏi pool vì ĐÃ DD / đã đề xuất (user chốt 2026-11-01, PREREG_ADDENDUM_dd_skip):
+    · Đã có DD (do bộ chọn HOẶC user chỉ định) với ngày DD ≥ ngày công bố BCTC quý MỚI NHẤT của mã
+      (release[mã] = `known` PIT, như lane C) ⇒ loại; trở lại pool khi có BCTC quý mới công bố SAU ngày DD.
+    · Mã không có ngày công bố BCTC ⇒ fallback: DD trong DD_FALLBACK_DAYS (120) ngày trước asof.
+    · Mã chỉ mới được ĐỀ XUẤT (picked, chưa có DD) ⇒ cooldown cũ `days` (DD_COOLDOWN_DAYS = 90).
+    upto = ngày CHẠY (≥ asof): DD làm sau asof nhưng trước lúc chạy đã là sự thật đã biết (ca thật
+    HPG DD 31/10, asof 30/10)."""
+    dd, prop = dd_events(asof, log_df, ledger, research_dir, kb_dir, upto)
+    release = release or {}
+    out = set()
+    for t, d in dd.items():
+        rel = release.get(t)
+        if rel is None or pd.isna(rel):
+            if d >= asof - dt.timedelta(days=DD_FALLBACK_DAYS):
+                out.add(t)
+        elif d >= pd.Timestamp(rel).date():
+            out.add(t)
+    for t, d in prop.items():
+        if t in dd and dd[t] >= d:      # đã có DD từ ngày đề xuất ⇒ luật BCTC ở trên quyết định, không cooldown 90d
+            continue
+        if d >= asof - dt.timedelta(days=days):
+            out.add(t)
     return out
 
 
@@ -249,7 +291,7 @@ def score_pool(rating, fin, cands, banned, forensic, insider, held, excl, recent
     why = {}
     for t in df["ticker"]:
         r = [n for n, s in (("BANNED", banned), ("forensic", forensic), ("insider", insider),
-                            ("đang giữ", held), ("excluded", excl), (f"DD<{DD_COOLDOWN_DAYS}d", recent))
+                            ("đang giữ", held), ("excluded", excl), ("DD>=BCTC", recent))
              if t in s]
         if r:
             why[t] = ",".join(r)
@@ -368,18 +410,20 @@ def slots(today, season, ledger):
     """{tier: (used, cap, unit)} cho ngày `today` (ICT)."""
     out = {}
     for tier, (unit, cap) in CAP[season].items():
-        used = sum(1 for r in ledger if r["tier"] == tier and (
+        used = sum(1 for r in ledger if r["tier"] == tier and r.get("source", "picker") != "user" and (
             r["date"] == str(today) if unit == "day"
             else iso_week(dt.date.fromisoformat(r["date"])) == iso_week(today)))
         out[tier] = (used, cap, unit)
     return out
 
 
-def claim(ticker, tier, today, base_dir=F.DATA_DIR, by="", job="", gate=WINDOW_GATE):
+def claim(ticker, tier, today, base_dir=F.DATA_DIR, by="", job="", gate=WINDOW_GATE, source="picker"):
     """Ghi 1 claim nếu còn suất. rc 0 = đã ghi / đã claim từ trước (idempotent); 2 = hết suất / sổ hỏng /
     tier sai (KHÔNG ghi). Read-check-append nằm trong flock ⇒ nhiều tiến trình song song không vượt trần."""
     if tier not in ("light", "full"):
         return 2, f"tier '{tier}' không hợp lệ (light|full)"
+    if source not in ("picker", "user"):
+        return 2, f"source '{source}' không hợp lệ (picker|user)"
     path = pick_paths(base_dir)["ledger"]
     with file_lock(path):
         try:
@@ -391,12 +435,14 @@ def claim(ticker, tier, today, base_dir=F.DATA_DIR, by="", job="", gate=WINDOW_G
             return 0, f"đã claim {tk} {tier} hôm nay (không tiêu thêm suất)"
         season, note = in_season(today, gate)
         used, cap, unit = slots(today, season, ledger)[tier]
-        if used >= cap:
+        if source == "picker" and used >= cap:
             return 2, (f"HẾT SUẤT DD {tier}: {used}/{cap} mỗi {'ngày' if unit == 'day' else 'tuần'} ({note}) "
                        f"— không dispatch")
         rec = {"date": str(today), "ticker": tk, "tier": tier, "season": season,
-               "by": by, "job": job, "at": dt.datetime.now(ICT).isoformat(timespec="seconds")}
+               "by": by, "job": job, "source": source, "at": dt.datetime.now(ICT).isoformat(timespec="seconds")}
         append_atomic(path, json.dumps(rec, ensure_ascii=False) + "\n")
+    if source == "user":
+        return 0, f"OK claim {rec['ticker']} {tier} source=user (KHÔNG trừ suất bộ chọn: dùng {used}/{cap}, {note})"
     return 0, f"OK claim {rec['ticker']} {tier} ({used + 1}/{cap} mỗi {'ngày' if unit == 'day' else 'tuần'}, {note})"
 
 
@@ -411,9 +457,12 @@ def slots_line(today, base_dir=F.DATA_DIR, gate=WINDOW_GATE):
     for tier, name in (("light", "nhẹ"), ("full", "đầy đủ")):
         used, cap, unit = s[tier]
         parts.append(f"{name} còn {cap - used}/{cap} {'hôm nay' if unit == 'day' else 'tuần này'}")
-    wk = sum(1 for r in ledger if r["tier"] == "full"
+    wk = sum(1 for r in ledger if r["tier"] == "full" and r.get("source", "picker") != "user"
              and iso_week(dt.date.fromisoformat(r["date"])) == iso_week(today))
-    return f"suất DD ({note}): " + ", ".join(parts) + f" · đầy đủ đã dùng tuần này {wk}"
+    nu = sum(1 for r in ledger if r.get("source", "picker") == "user"
+             and iso_week(dt.date.fromisoformat(r["date"])) == iso_week(today))
+    return (f"suất DD ({note}): " + ", ".join(parts) + f" · đầy đủ đã dùng tuần này {wk}"
+            + (f" (+{nu} do user chỉ định, không trừ suất)" if nu else ""))
 
 
 # ----------------------------------------------------------------------------- chạy + ghi
@@ -441,12 +490,12 @@ def _row(r, asof, season, picked, reason, now):
 
 def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DATA_DIR, write=True,
              now=None, exec_dir=EXEC_DIR, research_dir=RESEARCH_DIR, gate=WINDOW_GATE,
-             dcf_fn=None, live_fn=None, prices=None):
+             dcf_fn=None, live_fn=None, prices=None, kb_dir=None):
     """Kết quả dict cho result["dd_pick"]. Cùng asof đã có trong nhật ký ⇒ ĐỌC LẠI (không chấm lại,
     không ghi lại) — chạy lại không đổi đề xuất đã hiện. write=True ⇒ cả bước kiểm-asof + chấm + append
     nằm trong flock (2 tiến trình cùng asof: tiến trình sau chờ rồi ĐỌC LẠI lô của tiến trình trước)."""
     kw = dict(base_dir=base_dir, write=write, now=now, exec_dir=exec_dir, research_dir=research_dir,
-              gate=gate, dcf_fn=dcf_fn, live_fn=live_fn, prices=prices)
+              gate=gate, dcf_fn=dcf_fn, live_fn=live_fn, prices=prices, kb_dir=kb_dir)
     if not write:
         return _run_pick(rating, fin, cands, banned, forensic, insider, asof, **kw)
     with file_lock(pick_paths(base_dir)["log"]):
@@ -454,7 +503,7 @@ def run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir=F.DAT
 
 
 def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, write, now, exec_dir,
-              research_dir, gate, dcf_fn, live_fn, prices):
+              research_dir, gate, dcf_fn, live_fn, prices, kb_dir=None):
     now = now or dt.datetime.now(ICT)
     paths = pick_paths(base_dir)
     log_df = read_pick_log(paths["log"])
@@ -476,7 +525,10 @@ def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, wri
         warns.append(f"bộ chọn: sổ DD hỏng ({type(e).__name__}) — KHÔNG đề xuất (fail-closed)")
     held, excl, w = held_and_excluded(exec_dir)
     warns += w
-    recent = recent_dd(asof, log_df, ledger or [], research_dir, upto=now.date())
+    release = ({t: k for t, k in fin["known"].items() if pd.notna(k)}
+               if fin is not None and "known" in fin else {})
+    recent = recent_dd(asof, log_df, ledger or [], research_dir, upto=now.date(), release=release,
+                       kb_dir=kb_dir)
     if prices is None:
         prices = prices_at(rating["ticker"], asof)
     scored, dropped = score_pool(rating, fin, cands, banned, forensic, insider, held, excl, recent,
@@ -519,7 +571,7 @@ def _run_pick(rating, fin, cands, banned, forensic, insider, asof, base_dir, wri
            "picked": next((x for x in rows if x["picked"]), None), "reason": why, "top": rows,
            "pool_n": int(len(scored)), "dropped_n": len(dropped),
            "dropped_held_or_recent": sorted(t for t, r in dropped.items()
-                                            if "đang giữ" in r or "DD<" in r),
+                                            if "đang giữ" in r or "DD>=BCTC" in r),
            "warnings": warns, "prereg": PREREG}
     if write and rows:
         buf = io.StringIO()
@@ -575,6 +627,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--claim", metavar="TICKER")
     ap.add_argument("--tier", choices=["light", "full"])
+    ap.add_argument("--source", choices=["picker", "user"], default="picker",
+                    help="user = DD do user chỉ định trực tiếp: ghi sổ nhưng KHÔNG trừ suất bộ chọn")
     ap.add_argument("--by", default="")
     ap.add_argument("--job", default="")
     ap.add_argument("--slots", action="store_true")
@@ -585,7 +639,10 @@ def main(argv=None):
     if a.claim:
         if not a.tier:
             ap.error("--claim cần --tier light|full")
-        rc, msg = claim(a.claim, a.tier, today, base, a.by, a.job)
+        if a.source == "user" and not a.by:
+            print("--source user bắt buộc --by <ai chỉ định> (dấu vết kiểm toán)")
+            return 2
+        rc, msg = claim(a.claim, a.tier, today, base, a.by, a.job, source=a.source)
         print(msg)
         return rc
     if a.slots:
