@@ -101,8 +101,17 @@ def work_tree_section(now, root=None):
             return None
         base = "http://192.168.100.7:8610"
         try:
+            with open(os.path.join(root, "state", "work_tree", "public_url.txt"), encoding="utf-8") as f:
+                pub = f.read().strip()  # URL tunnel công khai (do bin/work_tree_tunnel.sh ghi, xoá khi tunnel tắt)
+            if pub.startswith("https://"):
+                base = pub
+        except Exception:
+            pass
+        try:
             with open(os.path.join(root, "kb", "work_tree_config.json"), encoding="utf-8") as f:
-                base = json.load(f).get("base_url") or base
+                _b = json.load(f).get("base_url")
+            if _b and not base.startswith("https://"):
+                base = _b
         except Exception:
             pass
         nums = [int(c[k]) for k in ("need_user", "overdue", "recent", "inbox")]

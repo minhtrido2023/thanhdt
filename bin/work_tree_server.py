@@ -177,7 +177,9 @@ class H(BaseHTTPRequestHandler):
         if k and u.path == "/":
             if hmac.compare_digest(k.encode(), self.server.token.encode()):
                 return self._send(302, b"", extra=[("Location", "/"), (
-                    "Set-Cookie", "wt=%s; HttpOnly; SameSite=Strict; Path=/; Max-Age=31536000" % self.server.token)])
+                    "Set-Cookie", "wt=%s; HttpOnly; SameSite=Strict; Path=/; Max-Age=31536000%s" % (
+                        self.server.token,
+                        "; Secure" if self.headers.get("X-Forwarded-Proto") == "https" else ""))])
             return self._send(401, {"error": "unauthorized"})
         if not self._authed():
             return self._send(401, {"error": "unauthorized"})
@@ -203,6 +205,8 @@ class H(BaseHTTPRequestHandler):
 
     def _rate_ok(self):
         ip, t = self.client_address[0], time.time()
+        if ip in ("127.0.0.1", "::1"):  # sau tunnel cloudflared: IP thật nằm ở CF-Connecting-IP
+            ip = (self.headers.get("CF-Connecting-IP") or ip)[:64]
         with _rate_lock:
             if len(_rate) > 64:  # dọn IP đã im quá cửa sổ
                 for key in [x for x, q in _rate.items() if not q or t - q[-1] > RATE_WIN]:

@@ -1,0 +1,17 @@
+[Unit]
+Description=Mike Work-Tree Dashboard — Cloudflare quick tunnel
+After=network-online.target mike-work-tree.service
+Wants=mike-work-tree.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/trido/thanhdt/WorkingClaude/mike
+Environment=PATH=/home/trido/.local/bin:/usr/local/bin:/usr/bin:/bin
+NoNewPrivileges=true
+PrivateTmp=true
+ExecStart=/home/trido/thanhdt/WorkingClaude/mike/bin/work_tree_tunnel.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
