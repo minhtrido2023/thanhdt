@@ -47,3 +47,4 @@
 - [2026-11-01T13:07:43Z] ĐANG DỞ: TASK B cutloss->DD khủng hoảng job Taylor_20261101_130722 | NEXT: đọc intraday_price_watch.py/cutloss_engine, tạo worktree
 - [2026-11-01T13:19:48Z] [cutloss-crisis-dd 01/11] XONG job Taylor_20261101_130722: nhánh feat/cutloss-crisis-dd-20261101 (06584f605+b0471561d, CHƯA merge) — CHỜ Mike arch-review; cron vẫn chạy bản master cũ tới khi merge
 - [2026-11-01T13:26:07Z] [funnel-v2 01/11] XONG job Taylor_20261101_130719: nhanh feat/funnel-dd-pick-v2-20261101 (d0e37a88a, chua merge) — CHO Mike arch-review; nguong MoS25% khong loc, can user quyet neu muon PREREG moi
+- [2026-11-01T13:32:39Z] [cutloss-crisis-dd vòng2 01/11] XONG 1de536bad (chưa merge) — chờ Mike re-review; HT1 dossier đã dựng, cần merge trước 02/11 09:15
