@@ -1,9 +1,9 @@
 ---
 kind: local-dir
-status: SHADOW (chưa có consumer production)
+status: CẢNH BÁO + HỒ SƠ DD KHỦNG HOẢNG (từ 2026-11-01 KHÔNG còn tự bán/lệnh dự định bán; mặc định GIỮ; user quyết bán) — phần mô tả "cutloss 4 chế độ"/"SHADOW" bên dưới là SUPERSEDED, xem crisis_dd/ và kb/projects/discretionary-8l-candidate-funnel-plan-20261006.md
 source: "data/intraday_watch/ (gitignored) — state_<ngày>.json, shadow_<ngày>.jsonl, verdicts/<ngày>_<MÃ>.json, no_rebuy_shadow.json, watchlist.json (tay, tuỳ chọn)"
 group: trading-bot
-role: cổng giá trong phiên + điều tra + cutloss 4 chế độ — CHẾ ĐỘ SHADOW (chỉ ghi lệnh dự định)
+role: cổng giá trong phiên + hồ sơ DD khủng hoảng 7 ngày (data/intraday_watch/crisis_dd/<MÃ>_<ngày>/) — KHÔNG tự bán. (Bản cũ 2026-10: cutloss 4 chế độ SHADOW — SUPERSEDED 2026-11-01)
 writer: mike/bin/intraday_price_watch.py (cron mỗi phút 09:00-14:59 + 08:30 ICT T2-T6, ĐỀ XUẤT — chưa cài, dòng ở kb/cron_registry.md.proposed); verdicts/ do Taylor ghi qua `intraday_price_watch.py verdict`
 reader: chính nó; đánh giá sau 5 phiên shadow (người/Taylor đọc shadow_*.jsonl)
 ---
@@ -34,5 +34,5 @@ reader: chính nó; đánh giá sau 5 phiên shadow (người/Taylor đọc shad
   chế độ bán ≥2 ngay — đó là hệ quả của ngưỡng đã duyệt, không phải lỗi dữ liệu. Log
   `ALT_THRESHOLD` ghi song song ngưỡng tương đối theo biên độ (HOSE −3%, HNX −4,5%, UPCOM −7%, idio
   −3%) — CHỈ để so, không hành động.
-- Lệnh trả lời trong shadow PHẢI có tiền tố `SHADOW` — "BÁN PNJ" trần bị BỎ QUA (để phiên Mike sống
+- ~~Lệnh trả lời trong shadow PHẢI có tiền tố `SHADOW`~~ (SUPERSEDED 2026-11-01: tin nay mang nhãn `[CỔNG GIÁ]`, không còn lệnh bán tự động) — — "BÁN PNJ" trần bị BỎ QUA (để phiên Mike sống
   trong Trading Daily không nhầm thành lệnh thật và ngược lại).
