@@ -41,3 +41,5 @@
 - [2026-11-01T10:04:48Z] ĐANG DỞ: DD SIP job Taylor_20261101_100247 — VIỆC1 XONG; VIỆC2 investor_report | NEXT: đọc skill, copy khuôn HHS
 - [2026-11-01T10:14:47Z] ĐANG DỞ: DD FPT v2+investor job Taylor_20261101_101423 — research/dd_FPT_20261101/ | NEXT: đọc SKEPTIC, sửa REPORT+valuation.py, rồi investor_report
 - [2026-11-01T10:14:49Z] [dd-SIP-investor 01/11] XONG job Taylor_20261101_100247: REPORT v2 §11 + investor_report/ (10tr, chua commit, CHUA gui) — giá 48.350 ngang tâm 47,7–50,3k; CHO Mike doc kiem + gui email
+- [2026-11-01T10:21:55Z] ĐANG DỞ: DD FPT job Taylor_20261101_101423 — VIỆC1 XONG (REPORT v2, bus dd-fpt-v2); VIỆC2 investor_report | NEXT: đọc skill, copy khuôn SIP/HHS
+- [2026-11-01T10:30:53Z] [dd-FPT-v2+investor 01/11] XONG job Taylor_20261101_101423: REPORT v2 + investor_report/ (10tr, chua commit, CHUA gui) — vung co so 55,0-66,7k, gia 52.700 DUOI ~4%, EV 54,8k; CHO Mike doc kiem + gui email
