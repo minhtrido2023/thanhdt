@@ -1,4 +1,4 @@
-# Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06 — ĐÃ CHỐT, user duyệt 2026-10-06; còn: duyệt bản cutloss cuối sau 5 phiên shadow ~12/10)
+# Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06 — ĐÃ CHỐT, user duyệt 2026-10-06; cutloss tự bán ĐÃ BỎ 2026-11-01 ⇒ DD khủng hoảng 7 ngày, user quyết)
 
 ## Vì sao bỏ quét tuần
 - `fearbuy_weekly_scan.sh` (Taylor, Opus/high), 08-14→10-05: **16 lượt (8 thứ Sáu + 8 thứ Hai), 27 "case mới", 0 QUALIFY**.
@@ -97,6 +97,7 @@
   Kích hoạt khi **giá ≤ −5% so tham chiếu ∧ idio (so VNINDEX) ≤ −4%**, hoặc chạm sàn. Mỗi mã 1 lần/ngày.
   Kích hoạt ⇒ (1) Trading Daily + @user; (2) dispatch DD: legal-vn đọc tin + Taylor (Opus) kết luận
   luận điểm còn/gãy trong ~30-60'; (3) đề xuất HOLD / không mua thêm / bán phiên sau — user quyết.
+  *(2026-11-01: (2)-(3) thay bằng hồ sơ DD khủng hoảng 7 ngày — xem mục ⛔ bên dưới.)*
   Tuỳ chọn cần user duyệt riêng (chạm logic đặt lệnh): tự hoãn lệnh MUA mã đó trong phiên khi kích hoạt.
 - Ngưỡng −5/−4 bắt cả 3 ca đầu tiên (PNJ 24/09, DGC 23/07, TV1 16/07) mà không bắt DGC 22/07 (cả thị trường giảm).
   ⚠️ dùng giá ĐÁY ngày làm proxy cho giá trong phiên ⇒ là cận trên của số lần kích hoạt; chưa đo tỉ lệ báo giả trên
@@ -108,14 +109,34 @@
 
 ---
 
-## Quyết định user 2026-10-06 01:00 ICT + ĐỀ XUẤT chiến lược cutloss (CHỜ DUYỆT trước khi dựng)
+## ⛔ QUYẾT ĐỊNH USER 2026-11-01 20:05 ICT (`decided_by: user`) — BỎ HẲN TỰ BÁN, chuyển thành "DD khủng hoảng"
+Nguyên văn: *"việc cutloss không tự làm. Nếu có tín hiệu bán mạnh, chỉ cần làm due diligence dạng khủng hoảng
+lấy tin trong vòng 1 tuần xử lý là được. Tôi sẽ phải quyết bán, không thì mặc định giữ"* (job `Taylor_20261101_130722`).
+- **Không còn đường tự bán nào**, kể cả shadow-intent (GÃY=bán hết / CHƯA RÕ=bán 50%, 4 chế độ, ATO/ATC, cấm mua
+  lại 10 phiên, đọc trả lời "SHADOW GIỮ/BÁN"). Mặc định MỌI trường hợp = **GIỮ**. Bán chỉ khi user ra lệnh rõ qua
+  kênh đặt lệnh thường (DollarBill/Mafee) — watcher không đọc lệnh bán, không gọi broker ngoài whitelist chỉ-đọc.
+- **Giữ nguyên**: ngưỡng kích hoạt (ret ≤ −5% ∧ idio ≤ −4%; chạm sàn chỉ mở ca riêng khi idio đạt; gộp cả thị
+  trường 60'), báo ngay Trading Daily + Telegram (+ email), ghi `EOD_OOS` hằng ngày, 2 dòng cron hiện có.
+- **Mới — hồ sơ DD khủng hoảng 7 ngày lịch** (`data/intraday_watch/crisis_dd/<MÃ>_<ngày>/`: `dossier.json` do
+  watcher ghi, `DOSSIER.md` + `notes/` do agent ghi qua `intraday_price_watch.py dd-note`): ngày 1 tóm tắt nhanh
+  (legal-vn + tin DN/BCTC/ngành) · ngày 2..7 cập nhật hằng ngày · nhắc user ngày 3 và 6 nếu còn mở (cron chỉ chạy
+  ngày giao dịch ⇒ mốc rơi cuối tuần bắn ở lượt đầu tiên sau đó) · hết 7 ngày hoặc agent báo sự kiện lớn ⇒ báo cáo
+  kết luận **GÃY / NHIỄU / CHƯA RÕ** để user quyết · không trả lời = GIỮ · agent không ra kết luận ⇒ CHƯA RÕ, GIỮ.
+- PREREG ADDENDUM H1 (`agents/Taylor/research/intraday_cutloss_replay_v2_20261009/PREREG.md`) **hết hiệu lực**:
+  không còn quyết định "wire tự bán" nào để kiểm. `EOD_OOS` vẫn ghi (rẻ, dùng lại được cho nghiên cứu sau).
+- Các mục cutloss bên dưới (01:00, 01:12, 01:54 ICT 06/10 và mặc định (c) của 11:08) = **SUPERSEDED** — giữ làm
+  lịch sử, KHÔNG xoá, KHÔNG áp dụng.
+
+---
+
+## [SUPERSEDED 2026-11-01] Quyết định user 2026-10-06 01:00 ICT + ĐỀ XUẤT chiến lược cutloss (CHỜ DUYỆT trước khi dựng)
 
 User chốt: giữ quét thứ Hai 2 tuần song song; rating≤3; thêm làn B; hạ thanh khoản. Cổng giá trong phiên:
 mã ĐANG MUA ⇒ dừng mua nếu còn kịp; mã ĐANG GIỮ ⇒ điều tra ngay, báo Telegram + email, **không trả lời
 trong 30 phút ⇒ mặc định bán cutloss**. PVT/DRI: tăng trưởng lợi nhuận nhanh ⇒ Taylor nghiên cứu làn C
 (job `Taylor_20261005_180155`). Funnel A+B đang dựng (job `Taylor_20261005_180152`).
 
-### Chiến lược cutloss đề xuất
+### [SUPERSEDED 2026-11-01] Chiến lược cutloss đề xuất
 **Dòng thời gian** (T0 = lúc cổng giá kích hoạt, chỉ trong giờ khớp lệnh liên tục):
 | Mốc | Việc |
 |---|---|
@@ -158,7 +179,7 @@ rồi mới bật auto-bán. Chạm logic đặt lệnh ⇒ cần anh duyệt b�
 
 ---
 
-## User duyệt 2026-10-06 01:12 ICT + KỊCH BẢN BÁN KHI "GÃY" (bản cụ thể)
+## [SUPERSEDED 2026-11-01] User duyệt 2026-10-06 01:12 ICT + KỊCH BẢN BÁN KHI "GÃY" (bản cụ thể)
 
 User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 50% / NHIỄU=giữ) — "dựa trên nghiên cứu của team, không bán theo tâm lý"; **custom30V cũng theo đúng quy trình này** (thay quyết định 2026-07-20 "không stop-loss" cho trường hợp có sự kiện bất thường); discretionary chỉ tự bán khi GÃY; trả lời qua Discord.
 
@@ -204,7 +225,7 @@ User chốt: mặc định theo phán quyết (GÃY=bán hết / CHƯA RÕ=bán 
 
 ## USER CHỐT 2026-10-06 11:08 ICT (`decided_by: user`)
 - Merge cổng giá + cutloss SHADOW (`26b36f9e`) + cài 2 cron (mỗi phút 09:00-14:59, nhắc 08:30) — shadow 5 phiên.
-- **4 mặc định chốt**: (a) điều tra hết giờ/không dispatch được ⇒ GIỮ + cảnh báo lớn; (b) mã excluded/hạn chế giao dịch ⇒ chỉ báo + điều tra, không bán; (c) kích hoạt ≥14:00 hoặc hạn >14:15 ⇒ quyết định phiên sau (nhắc 08:30, áp 09:15; lệnh SHADOW tường minh vẫn áp ngay); (d) ghi song song ngưỡng tương đối HOSE −3%/HNX −4,5%/UPCOM −7%/idio −3% để so.
+- **4 mặc định chốt** *(cutloss phần (a)-(c) SUPERSEDED 2026-11-01 — nay mọi trường hợp GIỮ; (d) vẫn log)*: (a) điều tra hết giờ/không dispatch được ⇒ GIỮ + cảnh báo lớn; (b) mã excluded/hạn chế giao dịch ⇒ chỉ báo + điều tra, không bán; (c) kích hoạt ≥14:00 hoặc hạn >14:15 ⇒ quyết định phiên sau (nhắc 08:30, áp 09:15; lệnh SHADOW tường minh vẫn áp ngay); (d) ghi song song ngưỡng tương đối HOSE −3%/HNX −4,5%/UPCOM −7%/idio −3% để so.
 - **Làn C (tăng trưởng lợi nhuận) vào funnel làm NGUỒN Ý TƯỞNG** — nhãn bắt buộc "edge của rổ, không phải của mã" (quant-skeptic REFUTED cho wire/size; dùng làm ý tưởng có DD thì không bị bác).
 
 ## USER CHỐT 2026-10-06 13:22 ICT (`decided_by: user`) — làn C mùa vụ

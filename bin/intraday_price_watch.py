@@ -1,71 +1,51 @@
 #!/usr/bin/env python3
-"""intraday_price_watch.py — cổng giá TRONG PHIÊN + quy trình điều tra + cutloss tự động (SHADOW).
+"""intraday_price_watch.py — cổng giá TRONG PHIÊN ⇒ BÁO NGAY + HỒ SƠ DD KHỦNG HOẢNG 7 ngày.
 
-Đặc tả = plan user ĐÃ DUYỆT `kb/projects/discretionary-8l-candidate-funnel-plan-20261006.md`
-(Q1 + "Chiến lược cutloss đề xuất" + "4 chế độ" + duyệt 01:12/01:54 ICT 06/10). Logic thuần ở
-`bin/intraday_cutloss_engine.py`; file này chỉ là I/O.
+QUYẾT ĐỊNH USER 2026-11-01 20:05 ICT (nguyên văn): "việc cutloss không tự làm. Nếu có tín hiệu bán
+mạnh, chỉ cần làm due diligence dạng khủng hoảng lấy tin trong vòng 1 tuần xử lý là được. Tôi sẽ
+phải quyết bán, không thì mặc định giữ". (job Taylor_20261101_130722)
+⇒ KHÔNG còn đường bán nào, kể cả mô phỏng/shadow-intent (đã gỡ: phán quyết 20/30' → mặc định
+GÃY=bán hết / CHƯA RÕ=bán 50%, đọc trả lời kiểu "SHADOW GIỮ/BÁN <mã>", 4 chế độ bán, ATO/ATC, cấm mua lại).
+Mặc định MỌI trường hợp = GIỮ. Bán chỉ khi user ra lệnh rõ qua kênh đặt lệnh thường (DollarBill/
+Mafee) — watcher này KHÔNG đọc lệnh bán, KHÔNG đặt/huỷ/sửa lệnh.
 
-⚠️ SHADOW ONLY (job Taylor_20261005_185546): KHÔNG đặt/huỷ/sửa lệnh thật. DNSE chỉ được gọi qua
-`ReadOnlyDNSE` (whitelist inquiry: secdef/latest_trade/latest_quote/positions/orders/ohlc) — gọi
-bất kỳ hàm nào khác ném PermissionError. "Lệnh bán dự định" / "lệnh mua sẽ hoãn" chỉ GHI LOG
-(`data/intraday_watch/shadow_<ngày>.jsonl`) + báo. Không ghi vào `dnse_raw_*.jsonl` (file kế toán
-dùng chung, §12) — cố ý không dùng `DNSEBroker.get_quote()` vì nó log vào đó.
+Luồng:
+  1. Kích hoạt (ngưỡng GIỮ NGUYÊN: ret ≤ −5% ∧ idio ≤ −4%; chạm sàn chỉ mở ca riêng khi idio đạt;
+     gộp cả thị trường như cũ) ⇒ báo NGAY Trading Daily + Telegram (+ email) và MỞ HỒ SƠ
+     `data/intraday_watch/crisis_dd/<MÃ>_<ngày>/` (dossier.json do watcher ghi; DOSSIER.md +
+     notes/ do agent ghi qua lệnh `dd-note`). Ngày 1: dispatch tóm tắt nhanh (legal-vn + tin DN/BCTC/ngành).
+  2. Ngày 2..7 (ngày LỊCH; cron chỉ chạy ngày giao dịch): mỗi ngày 1 dispatch cập nhật hồ sơ.
+  3. Nhắc user ngày 3 và ngày 6 nếu hồ sơ còn mở (lượt đầu tiên có ngày ≥ mốc).
+  4. Hết 7 ngày hoặc agent báo SỰ KIỆN LỚN (`--major-event`) ⇒ dispatch báo cáo KẾT LUẬN GÃY / NHIỄU /
+     CHƯA RÕ để user quyết. Không trả lời = GIỮ. Agent không ra kết luận ⇒ CHƯA RÕ (no_agent), GIỮ.
+  5. Mã kích hoạt lại khi hồ sơ còn mở ⇒ chỉ báo + ghi vào hồ sơ (không mở hồ sơ thứ 2).
+  6. Từ 14:55 ghi 1 dòng EOD_OOS/ngày (vni_day + ret_close mỗi ca/mã gộp) — dữ liệu OOS rẻ, giữ.
 
-Nhịp: cron MỖI PHÚT 09:00-14:59 ICT T2-T6 (dòng đề xuất ở cuối docstring); script tự quyết:
-  - QUÉT vũ trụ 15'/lần trong [09:15, 14:30] (bỏ nghỉ trưa).
-  - Ca đang mở: mỗi phút — phán quyết/hạn chót/trả lời user/bộ máy bán.
-Vũ trụ = vị thế LIVE 2 TK (DNSE positions) + mã có lệnh MUA trong plan hôm nay + watchlist
-discretionary (state_*_<TK>.json + excluded_tickers + data/intraday_watch/watchlist.json).
-
-Sửa 3 lỗ hổng thiết kế + OOS (user duyệt 09/10/2026 18:02 ICT, job Taylor_20261009_110243; bằng chứng
-replay `agents/Taylor/research/intraday_cutloss_replay_20261009/REPORT.md` §5). Ngưỡng KHÔNG đổi.
-  (A) gộp "cả thị trường" theo số mã kích hoạt LUỸ KẾ trong cửa sổ trượt 60' GIAO DỊCH (trừ nghỉ trưa; `st["trigger_log"]`),
-      không chỉ trong 1 lượt quét. Ca RIÊNG đã mở trong cửa sổ ⇒ gắn nhãn `market_wide`, mặc định GIỮ,
-      bán mô phỏng đang chạy theo MẶC ĐỊNH dừng (STOPPED_MARKET_WIDE); lệnh user vẫn tôn trọng.
-  (B) chạm sàn chỉ mở ca riêng khi idio đạt; chạm sàn ∧ VNINDEX ≤ −2% ⇒ nhánh gộp.
-  (C) ca hoãn sang phiên sau (kích hoạt ≥14:00 hoặc hạn trả lời >14:15) ⇒ KHÔNG tự bán qua ATO:
-      mặc định GIỮ, phán quyết chỉ là GỢI Ý (`actions_suggested`), xét lại lúc mở phiên (user quyết).
-  (D) từ 14:55 ghi 1 dòng EOD_OOS/ngày (vni_day + ret_close mỗi ca/mã gộp) ⇒ bộ OOS thật.
+DNSE chỉ được gọi qua `ReadOnlyDNSE` (whitelist inquiry: secdef/latest_trade/latest_quote/positions/
+orders/ohlc) — gọi bất kỳ hàm nào khác ném PermissionError. Không ghi vào `dnse_raw_*.jsonl` (§12).
 
 Nguồn giờ: `trading_bot.vn_market.now_ict()` (§16). Tiền: chỉ dùng `total_nav` của
-`active_nav_<TK>.json` làm MẪU SỐ HIỂN THỊ %NAV (ghi rõ computed_at) — không đọc field tiền broker
-(§25). Same-day giá = DNSE, không BQ (§6). Đọc trả lời user: ccdb `/api/threads/<trading_daily>/
-messages` (chỉ tin không phải bot, đúng mã).
+`active_nav_<TK>.json` làm MẪU SỐ HIỂN THỊ %NAV (§25). Same-day giá = DNSE, không BQ (§6).
 
 Idempotency (§5): state ghi nguyên tử (tmp + os.replace); không tác động ngoài nào chạy trước khi
 ý định của nó đã nằm trên đĩa.
-  - Báo (Discord/Telegram/email): HỘP THƯ ĐI bền (`st["outbox"]`). Mỗi tin được XẾP HÀNG + ghi đĩa
-    TRƯỚC khi gửi; gửi xong kênh nào gạch kênh đó + ghi đĩa. Bị kill giữa chừng (vd `timeout 55`)
-    ⇒ lượt sau gửi nốt ⇒ at-least-once THẬT (có thể lặp 1 lần đúng kênh đang gửi dở; không mất).
-    Kênh lỗi thử lại tối đa NOTIFY_MAX_ATTEMPTS lượt, rồi cảnh báo qua kênh còn sống.
-  - Tin T0 không gửi lúc mở ca mà sau bước dispatch, để nội dung nói ĐÚNG trạng thái điều tra
-    (đang điều tra / KHÔNG có điều tra vì …). Cờ `t0_pending` trên đĩa ⇒ kill ở bất kỳ đâu giữa
-    "mở ca" và "xếp tin T0" thì lượt sau vẫn xếp tin T0.
-  - Dispatch điều tra: at-most-once — ghi `dispatch_attempted_at` TRƯỚC khi gọi; lượt sau thấy cờ
-    mà không có job ⇒ KHÔNG dispatch lại, ghi chú "không xác nhận được", báo user trong tin T0.
-  - Ngân sách thời gian mỗi lượt RUN_BUDGET_S (< `timeout 55` của cron): hết ngân sách ⇒ dừng việc
-    ngoài còn lại, để lượt sau làm tiếp (cờ trên đĩa).
+  - Báo: HỘP THƯ ĐI bền (`st["outbox"]`), at-least-once, kênh lỗi thử lại ≤ NOTIFY_MAX_ATTEMPTS.
+  - Dispatch DD: at-most-once — ghi cờ vào dossier.json TRƯỚC khi gọi; lượt sau thấy cờ mà không có
+    job ⇒ KHÔNG dispatch lại, ghi chú + báo.
+  - Ngân sách thời gian mỗi lượt RUN_BUDGET_S (< `timeout 55` của cron).
 
-Danh tính dispatch: DISPATCH_FROM=intraday_watch (KHÔNG phải tên agent ⇒ không dính chặn
-self-dispatch của dispatch.sh, không sinh auto-callback). `--retries 0` + trần mỗi lượt/mỗi ngày +
-dừng dispatch tới hết ngày sau 1 điều tra hết giờ ⇒ nguồn này không tự làm vấp circuit breaker
-Taylor (ngưỡng 3 lỗi liên tiếp) của cả fleet.
-
-MẶC ĐỊNH AN TOÀN r2 (hằng số đầu file + engine, CHỜ USER CHỐT): (a) không có phán quyết của agent
-⇒ GIỮ + cảnh báo lớn (engine.NON_AGENT_DEFAULT); (b) mã excluded_tickers / restricted.json ⇒ chỉ báo
-+ điều tra, không tự bán; (c) kích hoạt ≥ 14:00 hoặc hạn trả lời > 14:15 ⇒ mặc định (GIỮ — xem (C)
-ở trên) chỉ áp từ 09:15 phiên sau, 08:30 nhắc lại; (d) log song song ngưỡng tương đối theo biên độ sàn (không hành động).
-Trả lời user trong shadow PHẢI có tiền tố: "SHADOW GIỮ PNJ" / "SHADOW BÁN PNJ" / "SHADOW BÁN 50% PNJ".
+Danh tính dispatch: DISPATCH_FROM=intraday_watch, `--retries 0`, trần/ngày, dừng dispatch tới hết
+ngày sau 1 job chết không ghi gì ⇒ không tự làm vấp circuit breaker Taylor.
 
 Dùng:
   intraday_price_watch.py run [--no-dispatch] [--dry-notify] [--state-dir D]
-  intraday_price_watch.py verdict --date YYYY-MM-DD --ticker XXX --label BROKEN|NOISE|UNCLEAR --summary "..."
+  intraday_price_watch.py dd-note --dossier MÃ_YYYY-MM-DD --kind quick|daily|final --summary "..."
+                                  [--label BROKEN|NOISE|UNCLEAR] [--major-event] [--detail-file F.md] [--day YYYY-MM-DD]
   intraday_price_watch.py status [--date YYYY-MM-DD]
 
-Cron ĐỀ XUẤT (KHÔNG tự cài; crontab host parse giờ UTC: 02-07 ⇔ 09-14 ICT, 1:30 ⇔ 08:30 ICT):
-  * 2-7 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && TZ=Asia/Ho_Chi_Minh timeout 55 /home/trido/thanhdt/wc_venv/bin/python mike/bin/intraday_price_watch.py run >> mike/logs/intraday_price_watch.log 2>&1
-  30 1 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && TZ=Asia/Ho_Chi_Minh timeout 55 /home/trido/thanhdt/wc_venv/bin/python mike/bin/intraday_price_watch.py run >> mike/logs/intraday_price_watch.log 2>&1
-  (dòng 2 = nhắc 08:30 cho ca hoãn qua đêm; script tự nhận cửa sổ 08:25-08:59 = chỉ nhắc)
+Cron (ĐÃ CÀI, KHÔNG đổi ở thay đổi này; host parse giờ UTC: 02-07 ⇔ 09-14 ICT, 1:30 ⇔ 08:30 ICT):
+  * 2-7 * * 1-5 … intraday_price_watch.py run   (quét + hồ sơ)
+  30 1 * * 1-5 … intraday_price_watch.py run    (08:25-08:59 = chỉ việc hồ sơ: nhắc/cập nhật/kết luận)
 """
 
 import argparse
@@ -77,7 +57,6 @@ import subprocess
 import sys
 import time
 import traceback
-import urllib.request
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -95,44 +74,39 @@ PLANS_DIR = os.path.join(WC, "data", "trade_plans")
 DISC_DIR = os.path.join(PLANS_DIR, "discretionary")
 NAV_DIR = os.path.join(WC, "data", "execution_logs")
 ACCOUNTS_FILE = os.path.join(WC, "secrets", "trading_bot_accounts.json")
-BOT_STOP = os.path.join(WC, "data", "BOT_STOP")
 CHANNELS = os.path.join(MIKE, "kb", "discord_channels.json")
 NOTIFY_THREAD = os.path.join(MIKE, "bin", "notify_thread.sh")
 NOTIFY_TG = os.path.join(MIKE, "bin", "notify_telegram.sh")
 EMAIL = os.path.join(MIKE, "bin", "send_macro_note_email.py")
 DISPATCH = os.path.join(MIKE, "bin", "dispatch.sh")
-CCDB = "http://127.0.0.1:8199"
 WATCH_ACCOUNTS = ("SpaceX", "ZaloPay")
 SCAN_START, SCAN_END = dt.time(9, 15), dt.time(14, 30)
 SCAN_EVERY_MIN = 15
-TAG = "[SHADOW]"
-TERMINAL = ("DONE", "NO_POSITION")       # HOLD KHÔNG terminal: vẫn đọc trả lời user tới hết ngày
+TAG = "[CỔNG GIÁ]"
 JOBS_DIR = os.path.join(MIKE, "bus", "jobs")
 DISPATCH_FROM_ID = "intraday_watch"      # KHÔNG phải tên agent (xem docstring)
 JOB_DEAD = ("failed", "timeout", "usage_limited", "cancelled", "orphaned", "done")
+DD_DIR_NAME = "crisis_dd"
 
-# ---- vận hành / mặc định an toàn r2 (cấu hình được — CHỜ USER CHỐT) ----
-MAX_DISPATCH_PER_SCAN = 2          # điều tra tối đa mỗi lượt quét (ưu tiên vị thế lớn)
-MAX_DISPATCH_PER_DAY = 3           # điều tra tối đa mỗi ngày
-STOP_DISPATCH_AFTER_TIMEOUT = True # 1 điều tra hết giờ/hỏng không phán quyết ⇒ dừng dispatch tới hết ngày
+# ---- vận hành (cấu hình được) ----
+MAX_DISPATCH_PER_SCAN = 2          # hồ sơ MỚI dispatch tối đa mỗi lượt quét (ưu tiên vị thế lớn)
+MAX_DISPATCH_PER_DAY = 3           # hồ sơ MỚI dispatch tối đa mỗi ngày
+MAX_DD_DISPATCH_PER_DAY = 6        # dispatch cập nhật/kết luận hồ sơ cũ tối đa mỗi ngày
+STOP_DISPATCH_AFTER_TIMEOUT = True # 1 job chết không ghi gì ⇒ dừng dispatch tới hết ngày
 DISPATCH_SUBPROC_TIMEOUT = 25      # giây chờ dispatch.sh --bg trả job id
+DD_JOB_TIMEOUT_S = {"quick": 1500, "daily": 1500, "final": 1800}
 RUN_BUDGET_S = 40                  # ngân sách mỗi lượt (< timeout 55 của cron)
 NOTIFY_MAX_ATTEMPTS = 5
-LATE_TRIGGER = dt.time(14, 0)      # (c) kích hoạt từ giờ này ⇒ quyết định cho phiên sau
-NO_EOD_DEFAULT_AFTER = dt.time(14, 15)   # hạn trả lời sau giờ này ⇒ mặc định áp 09:15 phiên sau
-NEXT_SESSION_APPLY = dt.time(9, 15)
-REMINDER_WINDOW = (dt.time(8, 25), dt.time(9, 0))
+REMINDER_WINDOW = (dt.time(8, 25), dt.time(9, 0))   # 08:30: chỉ việc hồ sơ (không quét)
 EOD_SUMMARY_AT = dt.time(14, 50)
-EOD_OOS_AT = dt.time(14, 55)       # (D) ghi vni_day/ret_close mỗi ca ⇒ ca live tích luỹ thành bộ OOS thật
-EOD_OOS_ALERT_AT = dt.time(14, 58) # tới giờ này vẫn chưa ghi được ⇒ cảnh báo sức khoẻ (không mất im lặng)
+EOD_OOS_AT = dt.time(14, 55)       # (D) ghi vni_day/ret_close mỗi ca ⇒ bộ OOS thật
+EOD_OOS_ALERT_AT = dt.time(14, 58) # tới giờ này vẫn chưa ghi được ⇒ cảnh báo sức khoẻ
 QUOTE_ERR_ALERT = 0.5              # tỉ lệ lỗi lấy giá trong 1 lượt quét ⇒ cảnh báo sức khoẻ
 HEALTH_ALERT_EVERY_MIN = 60        # cảnh báo sức khoẻ cùng loại tối đa 1 lần/60'
 VNI_MAX_AGE_MIN = 5                # bar VNINDEX cuối cũ hơn ⇒ coi như không đọc được (DNSE cache theo URL)
-OPEN_GRACE_MIN = 2                 # DNSE chỉ phát bar 1 phút SAU khi phút đó đóng (đo 08/10) ⇒ lượt quét đúng
-                                   # giây mở phiên (09:15:01 / 13:00:01) chưa thể có bar của phiên đó
-REPLY_PREFIX = E.REPLY_PREFIX_SHADOW
-SHADOW_NOTE = "ĐÂY LÀ CHẠY THỬ (SHADOW), KHÔNG CÓ LỆNH THẬT"
-NO_CARRY = TERMINAL + ("HOLD",)          # sang phiên mới: ca HOLD đóng, mã được kích hoạt lại
+OPEN_GRACE_MIN = 2                 # DNSE chỉ phát bar 1 phút SAU khi phút đó đóng (đo 08/10)
+HOLD_NOTE = ("MẶC ĐỊNH GIỮ — hệ thống KHÔNG tự bán; muốn bán anh ra lệnh rõ qua kênh đặt lệnh "
+             "thường. Không trả lời = GIỮ")
 
 
 # ============================================================== DNSE chỉ-đọc
@@ -432,7 +406,7 @@ def build_universe(today, market, accounts, state_dir, errors=None):
     return uni
 
 
-# ============================================================== báo + dispatch + trả lời
+# ============================================================== báo + dispatch
 def owner_mention(path=CHANNELS):
     uid = ((_read_json(path, {}) or {}).get("users") or {}).get("owner", {}).get("id")
     return f"<@{uid}> " if uid else ""
@@ -469,40 +443,52 @@ class Notifier:
         return res
 
 
-def investigation_prompt(case, verdict_cmd):
-    tk, tr = case["ticker"], case["trigger"]
-    held = ", ".join(f"{a} {h['qty']}cp ({h['book']})" for a, h in case["holdings"].items()) or "không giữ"
-    vmin = E.INVEST_MIN_COMPRESSED if case.get("compressed") else E.INVEST_MIN
-    return (
-        f"[INTRADAY-WATCH DD — SHADOW, job cổng giá] Mã {tk} kích hoạt cổng giá trong phiên lúc "
-        f"{case['t0'][11:16]} ICT: {tr['reason']} (ret {tr['ret']*100:+.1f}%, VNINDEX "
-        f"{(tr['vni_ret'] or 0)*100:+.1f}%). Đang giữ: {held}. HẠN CỨNG {vmin} phút từ lúc kích "
-        f"hoạt — quá hạn hệ thống tự coi là CHƯA RÕ. Việc: (1) gọi Agent(subagent_type='legal-vn') "
-        f"đọc tin 48h gần nhất về {tk} (công bố thông tin, khởi tố, thanh tra, KQKD, giao dịch nội "
-        f"bộ, tin ngành); (2) kết luận đúng 1 nhãn: BROKEN (= GÃY: pháp lý dính pháp nhân/tài sản "
-        f"lõi, gian lận, KQKD sụp, mất khả năng thanh toán) / NOISE (= NHIỄU: không tìm thấy tin, "
-        f"tin cá nhân không dính lõi, cả ngành) / UNCLEAR (= CHƯA RÕ). Không bán theo tâm lý: không "
-        f"có tin thì là NOISE. (3) GHI phán quyết bằng đúng lệnh sau (sửa LABEL và SUMMARY ≤300 ký "
-        f"tự, có nguồn): {verdict_cmd} --label LABEL --summary 'SUMMARY'. KHÔNG đặt/huỷ lệnh, "
-        f"KHÔNG sửa plan — hệ thống tự áp hành động mặc định theo phán quyết. (Shadow: chạy thử.)")
+def dd_prompt(dos, kind, note_cmd, now):
+    """Prompt dispatch cho 1 bước hồ sơ DD khủng hoảng (quick = ngày 1 / daily / final)."""
+    tk, tr = dos["ticker"], dos["trigger"]
+    held = ", ".join(f"{a} {h['qty']}cp ({h['book']})" for a, h in dos["holdings"].items()) or "không giữ"
+    n = E.dd_day(dt.date.fromisoformat(dos["t0"][:10]), now.date())
+    common = (f"[CRISIS-DD {tk} — hồ sơ {dos['id']}] Mã {tk} kích hoạt cổng giá lúc {dos['t0'][:16]} ICT: "
+              f"{tr['reason']} (ret {tr['ret']*100:+.1f}%, VNINDEX {(tr['vni_ret'] or 0)*100:+.1f}%). Đang giữ: "
+              f"{held}. Quyết định user 2026-11-01: KHÔNG tự bán; DD dạng khủng hoảng trong 7 ngày, user quyết "
+              f"bán, mặc định GIỮ. Hồ sơ: {dos['dir']}/DOSSIER.md (đọc các mục trước). ")
+    if kind == "quick":
+        task = ("Việc NGÀY 1 — TÓM TẮT NHANH: (1) gọi Agent(subagent_type='legal-vn') đọc tin pháp lý 7 ngày "
+                f"gần nhất về {tk} (khởi tố, thanh tra, xử phạt UBCKNN, đình chỉ/hạn chế giao dịch); (2) tự tìm "
+                "tin DN (CBTT, giao dịch nội bộ/cổ đông lớn, bán giải chấp), BCTC/KQKD gần nhất, tin ngành; "
+                "(3) viết bản tóm tắt nhanh: chuyện gì xảy ra, có dính pháp nhân/tài sản lõi không, câu hỏi "
+                "còn mở cần theo dõi các ngày tới. Không có tin thì nói thẳng 'chưa thấy tin'. ")
+    elif kind == "daily":
+        task = (f"Việc NGÀY {n}/{E.DD_WINDOW_DAYS} — CẬP NHẬT: tìm tin MỚI kể từ mục trước trong hồ sơ "
+                "(legal-vn cho pháp lý; CBTT, BCTC, ngành), trả lời các câu hỏi còn mở. Nếu có SỰ KIỆN LỚN "
+                "(khởi tố pháp nhân/lãnh đạo chủ chốt, gian lận BCTC, mất khả năng thanh toán, đình chỉ giao "
+                "dịch, KQKD sụp) thêm cờ --major-event để hệ thống xin báo cáo kết luận ngay. ")
+    else:
+        task = ("Việc BÁO CÁO KẾT LUẬN: tổng hợp toàn bộ hồ sơ, kết luận đúng 1 nhãn — BROKEN (= GÃY: pháp lý "
+                "dính pháp nhân/tài sản lõi, gian lận, KQKD sụp, mất khả năng thanh toán) / NOISE (= NHIỄU: "
+                "không có tin, tin cá nhân không dính lõi, cả ngành) / UNCLEAR (= CHƯA RÕ); nêu bằng chứng + "
+                "nguồn, rủi ro nếu giữ, điều gì sẽ đổi kết luận. Đây là tư liệu để USER QUYẾT, không phải lệnh. ")
+    return (common + task + "Viết chi tiết (có nguồn, link) ra 1 file .md rồi GHI bằng đúng lệnh: "
+            f"{note_cmd} --day {now.date().isoformat()} --summary 'TÓM TẮT ≤600 ký tự' --detail-file <file.md>"
+            + (" --label LABEL" if kind == "final" else "")
+            + ". KHÔNG đặt/huỷ/sửa lệnh, KHÔNG sửa plan, KHÔNG đề xuất bán tự động.")
 
 
-def dispatch_argv(prompt, compressed, dispatch_bin=DISPATCH):
-    """argv THẬT gửi dispatch.sh (selfcheck chạy đúng argv này vào stub). --timeout = hạn điều tra
-    + 5' (quá hạn thì phán quyết vô dụng); --retries 0 ⇒ 1 lần hết giờ = đúng 1 lỗi ở circuit."""
-    tmo = (E.INVEST_MIN_COMPRESSED if compressed else E.INVEST_MIN) * 60 + 300
-    return [dispatch_bin, "Taylor", prompt, "--bg", "--thread", "trading_daily", "--timeout", str(tmo),
-            "--retries", "0", "--model", "opus", "--effort", "medium"]
+def dispatch_argv(prompt, kind, dispatch_bin=DISPATCH):
+    """argv THẬT gửi dispatch.sh (selfcheck chạy đúng argv này vào stub). --retries 0 ⇒ 1 lần hết giờ
+    = đúng 1 lỗi ở circuit."""
+    return [dispatch_bin, "Taylor", prompt, "--bg", "--thread", "trading_daily",
+            "--timeout", str(DD_JOB_TIMEOUT_S[kind]), "--retries", "0", "--model", "opus", "--effort", "medium"]
 
 
-def dispatch_investigation(case, verdict_cmd, dry=False, dispatch_bin=DISPATCH):
+def dispatch_dd(dos, kind, note_cmd, now, dry=False, dispatch_bin=DISPATCH):
     """→ (job | "DRY" | "issued" | None, info). None = dispatch HỎNG (info = lỗi thật)."""
-    prompt = investigation_prompt(case, verdict_cmd)
+    prompt = dd_prompt(dos, kind, note_cmd, now)
     if dry:
         return "DRY", prompt
     env = dict(os.environ, DISPATCH_FROM=DISPATCH_FROM_ID)
     try:
-        r = subprocess.run(dispatch_argv(prompt, case.get("compressed"), dispatch_bin),
+        r = subprocess.run(dispatch_argv(prompt, kind, dispatch_bin),
                            capture_output=True, text=True, env=env, timeout=DISPATCH_SUBPROC_TIMEOUT)
     except subprocess.TimeoutExpired:
         return None, (f"dispatch.sh không trả lời sau {DISPATCH_SUBPROC_TIMEOUT}s (TimeoutExpired) — "
@@ -520,23 +506,6 @@ def dispatch_investigation(case, verdict_cmd, dry=False, dispatch_bin=DISPATCH):
 def job_status(job, jobs_dir=JOBS_DIR):
     """Trạng thái job dispatch (bus/jobs/<job>.json) — None nếu không đọc được."""
     return (_read_json(os.path.join(jobs_dir, f"{job}.json"), {}) or {}).get("status")
-
-
-def fetch_messages(limit=100):
-    """Tin gần nhất của Trading Daily qua ccdb (localhost). created_at → ICT naive."""
-    sys.path.insert(0, os.path.join(MIKE, "bin"))
-    from discord_channels import resolve
-    tid = resolve("trading_daily")
-    with urllib.request.urlopen(f"{CCDB}/api/threads/{tid}/messages?limit={limit}", timeout=10) as r:
-        data = json.loads(r.read().decode())
-    out = []
-    for m in data.get("messages", []):
-        ts = m.get("created_at")
-        if ts:
-            ts = dt.datetime.fromisoformat(ts).astimezone(_ICT).replace(tzinfo=None)
-        out.append({"id": m.get("id"), "is_bot": bool(m.get("is_bot")), "content": m.get("content"),
-                    "created_at": ts, "author": m.get("author")})
-    return out
 
 
 # ============================================================== state + log
@@ -560,63 +529,98 @@ def prev_trading_day(d):
 
 
 def load_state(state_dir, day):
+    """State NGÀY (ca kích hoạt trong ngày + outbox). Ca KHÔNG carry sang phiên sau: phần sống qua
+    nhiều ngày là hồ sơ DD (crisis_dd/). Chỉ tin chưa gửi xong của phiên trước được gửi nốt."""
     st = _read_json(state_path(state_dir, day))
     if st:
         return st
     st = {"date": day.isoformat(), "last_scan": None, "cases": {}, "outbox": []}
     prev = _read_json(state_path(state_dir, prev_trading_day(day)))
-    # tin chưa gửi xong của phiên trước: gửi nốt (không mất cảnh báo qua đêm)
     st["outbox"] = [m for m in ((prev or {}).get("outbox") or []) if m.get("left")
                     and m.get("attempts", 0) < NOTIFY_MAX_ATTEMPTS]
-    for tk, c in ((prev or {}).get("cases") or {}).items():
-        if c.get("status") in NO_CARRY:
-            continue
-        c = json.loads(json.dumps(c))
-        c["carryover_from"] = prev["date"]
-        for ex in (c.get("execution") or {}).values():
-            # chỉ leo thang TRONG ngày: sang phiên mới chọn lại chế độ; lệnh chờ hết hiệu lực
-            ex.update({"mode": 0, "open": [], "ato_sent": False, "atc_sent": False})
-        c["prev_day_volume"] = None
-        st["cases"][tk] = c
     return st
 
 
-def verdict_path(state_dir, day, tk):
-    return os.path.join(state_dir, "verdicts", f"{day.isoformat()}_{tk.upper()}.json")
+# -------------------------------------------------------------- hồ sơ DD khủng hoảng
+def dd_root(state_dir):
+    return os.path.join(state_dir, DD_DIR_NAME)
 
 
-def read_verdict(state_dir, case):
-    """Phán quyết cho ca — tra ngày T0 (ca carryover vẫn tìm đúng file)."""
-    v = _read_json(verdict_path(state_dir, dt.date.fromisoformat(case["t0"][:10]), case["ticker"]))
-    if v and v.get("label") in (E.BROKEN, E.NOISE, E.UNCLEAR):
-        return v
+def dd_dir(state_dir, did):
+    return os.path.join(dd_root(state_dir), did)
+
+
+def dd_json(state_dir, did):
+    return os.path.join(dd_dir(state_dir, did), "dossier.json")
+
+
+def load_dossiers(state_dir, status=None):
+    root = dd_root(state_dir)
+    out = []
+    for did in sorted(os.listdir(root)) if os.path.isdir(root) else []:
+        d = _read_json(dd_json(state_dir, did))
+        if d and (status is None or d.get("status") == status):
+            out.append(d)
+    return out
+
+
+def open_dossier_for(state_dir, tk):
+    for d in load_dossiers(state_dir, "OPEN"):
+        if d["ticker"] == tk:
+            return d
     return None
 
 
-def write_no_rebuy(state_dir, tk, label, day, book):
-    from trading_bot.vn_market import next_trading_day
-    until = day
-    for _ in range(E.NO_REBUY_SESSIONS):
-        until = next_trading_day(until)
-    p = os.path.join(state_dir, "no_rebuy_shadow.json")
-    led = _read_json(p, {}) or {}
-    led[f"{tk}|{label}"] = {"ticker": tk, "account": label, "until": until.isoformat(),
-                            "book": book, "custom30v_excluded_until_review": book == "CUSTOM30V",
-                            "note": "SHADOW — chưa có consumer; bản live: plan T+1 tự loại"}
-    _atomic_json(p, led)
-    return until
+def save_dossier(state_dir, dos):
+    _atomic_json(dd_json(state_dir, dos["id"]), dos)
+
+
+def create_dossier(state_dir, case):
+    """Idempotent theo id = MÃ_ngàyT0. Watcher ghi dossier.json; DOSSIER.md + notes/ là của agent."""
+    did = f"{case['ticker']}_{case['t0'][:10]}"
+    d = _read_json(dd_json(state_dir, did))
+    if d:
+        return d
+    p = dd_dir(state_dir, did)
+    os.makedirs(os.path.join(p, "notes"), exist_ok=True)
+    d = {"id": did, "dir": p, "ticker": case["ticker"], "t0": case["t0"], "trigger": case["trigger"],
+         "t0_quote": case.get("t0_quote"), "holdings": case["holdings"], "status": "OPEN", "jobs": {},
+         "relayed": [], "reminders": [], "daily_requested": [], "retriggers": [], "final_requested": None,
+         "major_event": None, "conclusion": None, "default": "HOLD"}
+    md = os.path.join(p, "DOSSIER.md")
+    if not os.path.exists(md):
+        with open(md, "w", encoding="utf-8") as f:
+            f.write(f"# Hồ sơ DD khủng hoảng — {case['ticker']} (mở {case['t0'][:16]} ICT)\n\n"
+                    f"Kích hoạt: {case['trigger']['reason']} (ret {case['trigger']['ret']*100:+.1f}%).\n"
+                    f"Quyết định user 2026-11-01: KHÔNG tự bán; thu thập tin 7 ngày; user quyết bán, "
+                    f"MẶC ĐỊNH GIỮ.\n\n")
+    save_dossier(state_dir, d)
+    return d
+
+
+def note_name(kind, day_n):
+    return {"quick": "quick.json", "final": "final.json"}.get(kind, f"daily_d{day_n}.json")
+
+
+def read_notes(state_dir, did):
+    nd = os.path.join(dd_dir(state_dir, did), "notes")
+    out = []
+    for fn in sorted(os.listdir(nd)) if os.path.isdir(nd) else []:
+        if fn.endswith(".json"):
+            n = _read_json(os.path.join(nd, fn))
+            if n:
+                out.append({**n, "file": fn})
+    return out
 
 
 # ============================================================== 1 nhịp
 class Deps:
     """Gói phụ thuộc ngoài — selfcheck thay bằng giả."""
 
-    def __init__(self, market, notifier, state_dir, dispatch=True, messages=fetch_messages,
-                 accounts=None, bot_stop_path=BOT_STOP, universe=None, nav=nav_info, dispatch_watch=False,
-                 dispatch_bin=DISPATCH, job_status=job_status, budget_s=RUN_BUDGET_S):
+    def __init__(self, market, notifier, state_dir, dispatch=True, accounts=None, universe=None, nav=nav_info,
+                 dispatch_watch=False, dispatch_bin=DISPATCH, job_status=job_status, budget_s=RUN_BUDGET_S):
         self.market, self.notifier, self.state_dir = market, notifier, state_dir
-        self.dispatch_watch = dispatch_watch
-        self.dispatch, self.messages, self.bot_stop_path = dispatch, messages, bot_stop_path
+        self.dispatch_watch, self.dispatch = dispatch_watch, dispatch
         self.accounts = accounts if accounts is not None else load_accounts()
         self.universe, self.nav = universe, nav
         self.dispatch_bin, self.job_status, self.budget_s = dispatch_bin, job_status, budget_s
@@ -633,9 +637,10 @@ def _save(deps, day, st):
 def _stats(st):
     s = st.setdefault("stats", {})
     for k in ("scans", "triggers", "market_wide", "market_wide_relabel", "dispatches", "dispatch_fail",
-              "dispatch_skipped", "quotes", "quote_errors", "notify_fail", "reply_read_errors"):
+              "dispatch_skipped", "dd_dispatches", "dd_notes", "dd_reminders", "dd_concluded", "quotes",
+              "quote_errors", "notify_fail"):
         s.setdefault(k, 0)
-    for k in ("verdicts", "alt_cur", "alt_rel"):
+    for k in ("alt_cur", "alt_rel"):
         s.setdefault(k, [])
     return s
 
@@ -643,7 +648,7 @@ def _stats(st):
 # -------------------------------------------------------------- hộp thư đi (at-least-once)
 def enqueue(st, msg, channels=("discord", "telegram"), subject=None, mention=False, key=None, now=None):
     """Xếp 1 tin vào hộp thư đi trong state. Caller PHẢI ghi state trước khi flush_outbox gửi.
-    key: chống xếp trùng (vd nhắc 08:30)."""
+    key: chống xếp trùng."""
     ob = st.setdefault("outbox", [])
     if key and any(m.get("key") == key for m in ob):
         return None
@@ -734,29 +739,22 @@ def _fmt_hold(case, deps, q):
         nav, nav_at = deps.nav(lab)
         val = h["qty"] * (q.get("last") or 0)
         pnl = (q["last"] / h["cost"] - 1) * 100 if h.get("cost") and q.get("last") else None
-        lines.append(f"  • {lab}: {h['qty']:,}cp (bán được {h['sellable']:,}) ≈ {val/1e6:,.1f}tr"
+        lines.append(f"  • {lab}: {h['qty']:,}cp ≈ {val/1e6:,.1f}tr"
                      + (f" = {val/nav*100:.1f}% NAV (NAV {str(nav_at)[:16]})" if nav else "")
                      + (f", lãi/lỗ {pnl:+.1f}% (giá vốn {h['cost']:,.0f})" if pnl is not None else "")
                      + f", book {h['book']}" + (" ⚠️ book KHÔNG xác định" if h["book"] == E.UNKNOWN else "")
-                     + (f" ⛔ {h['no_auto_sell']} ⇒ KHÔNG tự bán" if h.get("no_auto_sell") else ""))
+                     + (f" ⛔ {h['no_auto_sell']}" if h.get("no_auto_sell") else ""))
     return "\n".join(lines) or "  • không giữ (watchlist / lệnh mua)"
 
 
-def _reply_cmds(tk):
-    return (f"\"{REPLY_PREFIX} GIỮ {tk}\" / \"{REPLY_PREFIX} BÁN {tk}\" / \"{REPLY_PREFIX} BÁN 50% {tk}\" "
-            f"— {SHADOW_NOTE}")
-
-
 def open_case(tk, u, tr, q, now, deps, st):
-    """Mở ca — KHÔNG tác động ngoài (dispatch + tin T0 làm ở _pending_work sau khi state đã lên đĩa)."""
+    """Ghi ca kích hoạt vào state NGÀY — KHÔNG tác động ngoài (hồ sơ/dispatch/tin T0 làm ở _pending_work
+    sau khi state đã lên đĩa)."""
     day = now.date()
     case = {"ticker": tk, "t0": _iso(now), "trigger": tr, "exchange": q.get("exchange"),
             "exchange_known": q.get("exchange_known"), "holdings": u["holdings"], "watch": u.get("watch"),
-            "compressed": E.room_of(q["last"], q["floor"], q["ref"]) is not None
-            and E.room_of(q["last"], q["floor"], q["ref"]) <= E.ROOM_COMPRESS + E.EPS,
-            "status": "INVESTIGATING", "deferred_buys": [], "execution": {},
-            "t0_quote": {k: q.get(k) for k in ("last", "ref", "floor")},
-            "late": now.time() >= LATE_TRIGGER, "t0_pending": True}
+            "deferred_buys": [], "t0_quote": {k: q.get(k) for k in ("last", "ref", "floor")},
+            "t0_pending": True}
     for b in u["buys"]:
         try:
             live = deps.market.open_buys(b["account_id"], tk)
@@ -765,51 +763,79 @@ def open_case(tk, u, tr, q, now, deps, st):
         case["deferred_buys"].append({**b, "live_orders": live,
                                       "would": "HUỶ lệnh đã ra sàn" if live else "GỠ khỏi plan trước khi bot đặt"})
     case["watch_only"] = not case["holdings"] and not case["deferred_buys"]
+    existing = open_dossier_for(deps.state_dir, tk)
     if case["watch_only"] and not deps.dispatch_watch:
-        case["status"], case["need_dispatch"] = "NO_POSITION", False
+        case["status"], case["need_dossier"] = "NO_POSITION", False
+    elif existing:
+        case["status"], case["need_dossier"], case["dossier"] = "DD_EXISTING", False, existing["id"]
     else:
-        case["need_dispatch"] = True
+        case["status"], case["need_dossier"] = "DD_OPEN", True
     st["cases"][tk] = case
     _stats(st)["triggers"] += 1
     log_event(deps.state_dir, day, "TRIGGER", now=now, ticker=tk, trigger=tr, quote=q,
-              holdings=case["holdings"], deferred_buys=case["deferred_buys"], late=case["late"])
+              holdings=case["holdings"], deferred_buys=case["deferred_buys"], status=case["status"])
     return case
 
 
 def _t0_msg(case, deps):
     tk, tr, q = case["ticker"], case["trigger"], case.get("t0_quote") or {}
     t0 = _p(case["t0"])
+    buys = "".join(f"\n  🛑 lệnh MUA {b['account']} {b.get('qty')}cp ({b.get('book')}) — "
+                   f"{'ĐÃ ra sàn' if b.get('live_orders') else 'còn trong plan'}; hệ thống KHÔNG tự huỷ/gỡ, "
+                   f"anh tự quyết" for b in case["deferred_buys"])
     inv = case.get("investigation") or {}
-    vd = E.verdict_deadline(t0, case["compressed"])
-    buys = "".join(f"\n  🛑 lệnh MUA {b['account']} {b.get('qty')}cp ({b.get('book')}) ⇒ bản live sẽ "
-                   f"{b['would']} (shadow: CHỈ ghi log)" for b in case["deferred_buys"])
     if case["status"] == "NO_POSITION":
-        inv_line = "  ℹ️ chỉ watchlist (không giữ, không lệnh mua) ⇒ KHÔNG dispatch điều tra"
+        dd = "  ℹ️ chỉ watchlist (không giữ, không lệnh mua) ⇒ KHÔNG mở hồ sơ DD"
+    elif case["status"] == "DD_EXISTING":
+        dd = (f"  📂 hồ sơ DD khủng hoảng {case['dossier']} ĐANG MỞ ⇒ ghi lần kích hoạt này vào hồ sơ, "
+              f"không mở hồ sơ mới")
     elif inv.get("job"):
-        inv_line = (f"  ⇒ đang điều tra (legal-vn + Taylor, job {inv['job']}), hạn phán quyết {vd:%H:%M}"
-                    + (" — CHẾ ĐỘ RÚT GỌN vì sát sàn" if case["compressed"] else ""))
+        dd = (f"  📂 MỞ HỒ SƠ DD KHỦNG HOẢNG {case.get('dossier')} (7 ngày; job ngày 1 {inv['job']}: tóm tắt "
+              f"nhanh legal-vn + tin DN/BCTC/ngành). Nhắc anh ngày 3 và 6; hết 7 ngày ⇒ báo cáo kết luận.")
     else:
-        inv_line = (f"  ⚠️⚠️ KHÔNG CÓ ĐIỀU TRA TỰ ĐỘNG — {inv.get('skipped') or inv.get('note') or '?'}\n"
-                    f"  ⇒ hết hạn {vd:%H:%M} hệ thống KHÔNG tự bán (mặc định GIỮ). ANH CẦN TỰ XEM TIN {tk}.")
-    late = ("\n  ⏳ kích hoạt sau 14:00 ⇒ chỉ báo + điều tra; KHÔNG tự bán qua ATO phiên sau — ca chờ XÉT LẠI "
-            "lúc mở phiên (anh/agent quyết), mặc định GIỮ; 08:30 nhắc lại" if case.get("late") else "")
+        dd = (f"  📂 mở hồ sơ {case.get('dossier')} nhưng ⚠️⚠️ KHÔNG dispatch được tóm tắt ngày 1 — "
+              f"{inv.get('skipped') or inv.get('note') or '?'}. ANH CẦN TỰ XEM TIN {tk}.")
     return (f"🚨 CỔNG GIÁ TRONG PHIÊN — {tk} {t0:%H:%M}: {tr['reason']}\n"
             f"  giá {_fmt(q.get('last'))} (TC {_fmt(q.get('ref'))}, sàn {_fmt(q.get('floor'))}) | VNINDEX "
             f"{(tr['vni_ret'] or 0)*100:+.1f}%" + (" ⚠️ không đọc được VNINDEX" if tr["vni_missing"] else "")
-            + f"\n{_fmt_hold(case, deps, q)}{buys}\n{inv_line}{late}"
-            + (f"\n  Ra lệnh sớm (tuỳ chọn): {_reply_cmds(tk)}" if case["holdings"] else f"\n  ({SHADOW_NOTE})"))
+            + f"\n{_fmt_hold(case, deps, q)}{buys}\n{dd}\n  ⇒ {HOLD_NOTE}.")
 
 
-def _dispatch_gate(st, case, deps):
+def _dispatch_gate(st, deps, new=True, key=None, final=False):
     if deps.dispatch is None:
         return False, "chạy với --no-dispatch"
     if st.get("dispatch_halted"):
         return False, f"dispatch đã DỪNG tới hết hôm nay: {st['dispatch_halted']}"
-    if _stats(st)["dispatches"] >= MAX_DISPATCH_PER_DAY:
-        return False, f"đã đủ trần {MAX_DISPATCH_PER_DAY} điều tra/ngày"
-    if (st.get("dispatch_by_scan") or {}).get(case["t0"], 0) >= MAX_DISPATCH_PER_SCAN:
-        return False, f"đã đủ trần {MAX_DISPATCH_PER_SCAN} điều tra/lượt quét"
+    s = _stats(st)
+    if new:
+        if s["dispatches"] >= MAX_DISPATCH_PER_DAY:
+            return False, f"đã đủ trần {MAX_DISPATCH_PER_DAY} hồ sơ mới/ngày"
+        if (st.get("dispatch_by_scan") or {}).get(key, 0) >= MAX_DISPATCH_PER_SCAN:
+            return False, f"đã đủ trần {MAX_DISPATCH_PER_SCAN} hồ sơ mới/lượt quét"
+    elif not final and s["dd_dispatches"] >= MAX_DD_DISPATCH_PER_DAY:   # kết luận KHÔNG bị trần cập nhật chặn
+        return False, f"đã đủ trần {MAX_DD_DISPATCH_PER_DAY} dispatch cập nhật hồ sơ/ngày"
     return True, ""
+
+
+def _note_cmd(deps, did, kind):
+    return (f"{sys.executable} {os.path.abspath(__file__)} dd-note --dossier {did} --kind {kind} "
+            f"--state-dir {deps.state_dir}")
+
+
+def _dd_dispatch(st, deps, now, dos, kind, jkey, day_n=1):
+    """Dispatch at-most-once 1 bước hồ sơ: cờ vào dossier.json TRƯỚC khi gọi. → job | None."""
+    day = now.date()
+    dos["jobs"][jkey] = {"kind": kind, "day": day_n, "dispatch_attempted_at": _iso(now)}
+    save_dossier(deps.state_dir, dos)
+    job, info = dispatch_dd(dos, kind, _note_cmd(deps, dos["id"], kind), now, dry=not deps.dispatch,
+                            dispatch_bin=deps.dispatch_bin)
+    dos["jobs"][jkey].update({"job": job, "note": None if job else info})
+    save_dossier(deps.state_dir, dos)
+    if not job:
+        _stats(st)["dispatch_fail"] += 1
+    log_event(deps.state_dir, day, "DD_DISPATCH", now=now, dossier=dos["id"], step=kind, key=jkey, job=job,
+              info=info[:3000])
+    return job
 
 
 def _case_value(case):
@@ -818,45 +844,50 @@ def _case_value(case):
 
 
 def _pending_work(st, deps, now):
-    """Dispatch (at-most-once) rồi xếp tin T0 — theo thứ tự giá trị vị thế giảm dần."""
+    """Ca MỚI: tạo hồ sơ + dispatch ngày 1 (at-most-once) rồi xếp tin T0 — vị thế lớn trước."""
     day = now.date()
     for tk, case in sorted(st["cases"].items(), key=lambda kv: -_case_value(kv[1])):
-        if not (case.get("need_dispatch") or case.get("t0_pending")):
+        if not (case.get("need_dossier") or case.get("t0_pending")):
             continue
         if deps.over_budget():
             log_event(deps.state_dir, day, "BUDGET", now=now, where="pending_work", ticker=tk)
             return
-        if case.get("need_dispatch"):
-            inv = case.get("investigation")
-            if inv is None:
-                ok, why = _dispatch_gate(st, case, deps)
+        if case.get("need_dossier"):
+            dos = create_dossier(deps.state_dir, case)
+            case["dossier"] = dos["id"]
+            jq = dos["jobs"].get("quick")
+            if jq is None:
+                ok, why = _dispatch_gate(st, deps, new=True, key=case["t0"])
                 if not ok:
                     case["investigation"] = {"skipped": why}
+                    dos["jobs"]["quick"] = {"kind": "quick", "skipped": why}
+                    save_dossier(deps.state_dir, dos)
                     _stats(st)["dispatch_skipped"] += 1
                     log_event(deps.state_dir, day, "DISPATCH_SKIPPED", now=now, ticker=tk, why=why)
                 else:
-                    case["investigation"] = {"dispatch_attempted_at": _iso(now)}
                     _stats(st)["dispatches"] += 1
                     dbs = st.setdefault("dispatch_by_scan", {})
                     dbs[case["t0"]] = dbs.get(case["t0"], 0) + 1
-                    _save(deps, day, st)                        # at-most-once: ghi TRƯỚC khi gọi
-                    cmd = (f"{sys.executable} {os.path.abspath(__file__)} verdict --date {day.isoformat()} "
-                           f"--ticker {tk} --state-dir {deps.state_dir}")
-                    job, info = dispatch_investigation(case, cmd, dry=not deps.dispatch,
-                                                       dispatch_bin=deps.dispatch_bin)
-                    case["investigation"].update({"job": job, "note": None if job else info})
-                    if not job:
-                        _stats(st)["dispatch_fail"] += 1
-                    log_event(deps.state_dir, day, "DISPATCH", now=now, ticker=tk, job=job, info=info[:3000])
-            elif not inv.get("job") and not inv.get("note") and not inv.get("skipped"):
-                # lượt trước bị cắt giữa "ghi cờ" và "nhận job" ⇒ KHÔNG dispatch lại
-                inv["note"] = ("tiến trình bị cắt giữa lúc dispatch — không xác nhận được job; KHÔNG "
-                               "dispatch lại (at-most-once)")
+                    _save(deps, day, st)
+                    job = _dd_dispatch(st, deps, now, dos, "quick", "quick")
+                    case["investigation"] = {"job": job, "note": dos["jobs"]["quick"].get("note")}
+            elif not jq.get("job") and not jq.get("note") and not jq.get("skipped"):
+                jq["note"] = ("tiến trình bị cắt giữa lúc dispatch — không xác nhận được job; KHÔNG "
+                              "dispatch lại (at-most-once)")
+                save_dossier(deps.state_dir, dos)
+                case["investigation"] = {"note": jq["note"]}
                 _stats(st)["dispatch_fail"] += 1
-                log_event(deps.state_dir, day, "DISPATCH_UNCERTAIN", now=now, ticker=tk, note=inv["note"])
-            case["need_dispatch"] = False
+                log_event(deps.state_dir, day, "DISPATCH_UNCERTAIN", now=now, ticker=tk, note=jq["note"])
+            else:
+                case["investigation"] = {k: jq.get(k) for k in ("job", "note", "skipped")}
+            case["need_dossier"] = False
             _save(deps, day, st)
         if case.get("t0_pending"):
+            if case["status"] == "DD_EXISTING":
+                dos = _read_json(dd_json(deps.state_dir, case["dossier"]))
+                if dos and not any(r.get("t0") == case["t0"] for r in dos["retriggers"]):
+                    dos["retriggers"].append({"t0": case["t0"], "trigger": case["trigger"]})
+                    save_dossier(deps.state_dir, dos)
             enqueue(st, _t0_msg(case, deps), ("discord", "telegram", "email"), subject=f"Cổng giá {tk}",
                     mention=True, now=now)
             case["t0_pending"] = False
@@ -864,250 +895,180 @@ def _pending_work(st, deps, now):
             _save(deps, day, st)
 
 
-def _snap(case, q, deps, now):
-    bars = deps.market.bars(case["ticker"], now.date())
-    px5 = None
-    for t, c, _v in bars:
-        if t <= now - dt.timedelta(minutes=5):
-            px5 = c
-    dv = q.get("day_volume")
-    prev = case.get("prev_day_volume")
-    case["prev_day_volume"] = dv
-    snap = {"last": q.get("last"), "ref": q.get("ref"), "floor": q.get("floor"), "bid": q.get("bid"),
-            "bids": [tuple(b) for b in q.get("bids") or []], "px_5m_ago": px5,
-            "dvol": (dv - prev) if (dv is not None and prev is not None) else 0}
-    # kết quả phiên định kỳ: bar 09:15 = ATO, bar 14:45 = ATC (chỉ bar ĐÃ có — không nhìn trước)
-    snap["auctions"] = {k: (c, v) for t, c, v in bars
-                        for k, hm in (("ATO", dt.time(9, 15)), ("ATC", dt.time(14, 45))) if t.time() == hm}
-    return snap
+def _relay_note(st, dos, n, now):
+    tk = dos["ticker"]
+    key = f"dd:{dos['id']}:note:{n['file']}"      # chống gửi trùng khi chạy lại (at-least-once)
+    kind = n.get("kind")
+    body = (n.get("summary") or "")[:600]
+    path = f"{dos['dir']}/DOSSIER.md"
+    if kind == "final":
+        lab = n.get("label")
+        enqueue(st, f"📋 KẾT LUẬN HỒ SƠ DD KHỦNG HOẢNG {tk} ({dos['id']}): **{E.VERDICT_VN.get(lab, lab)}**\n"
+                    f"  {body}\n  Hồ sơ: {path}\n  ⇒ ANH QUYẾT. {HOLD_NOTE}.",
+                ("discord", "telegram", "email"), subject=f"Kết luận DD khủng hoảng {tk}", mention=True, key=key, now=now)
+    elif kind == "quick":
+        enqueue(st, f"📂 DD khủng hoảng {tk} — TÓM TẮT NHANH NGÀY 1:\n  {body}\n  Hồ sơ: {path}\n  ⇒ {HOLD_NOTE}.",
+                ("discord", "telegram", "email"), subject=f"DD khủng hoảng {tk} ngày 1", mention=True, key=key, now=now)
+    elif n.get("major_event"):
+        enqueue(st, f"⚠️ DD khủng hoảng {tk} — SỰ KIỆN LỚN (ngày {n.get('day')}):\n  {body}\n  ⇒ đã xin báo "
+                    f"cáo kết luận sớm. Hồ sơ: {path}. {HOLD_NOTE}.",
+                ("discord", "telegram"), mention=True, key=key, now=now)
+    else:
+        enqueue(st, f"📂 DD khủng hoảng {tk} ngày {n.get('day')}/{E.DD_WINDOW_DAYS}: {body[:300]} (hồ sơ {path}) — mặc định GIỮ",
+                ("discord",), key=key, now=now)
 
 
-def _reply_deadline(case, now):
-    """(hạn, hoãn_sang_phiên_sau). (c): kích hoạt ≥14:00 hoặc hạn > 14:15 ⇒ 09:15 phiên sau."""
-    from trading_bot.vn_market import next_trading_day
-    rd = E.reply_deadline(now, case.get("compressed"))
-    if (case.get("late") and now.date() == _p(case["t0"]).date()) or rd.time() > NO_EOD_DEFAULT_AFTER \
-            or rd.date() > now.date():
-        return dt.datetime.combine(next_trading_day(now.date()), NEXT_SESSION_APPLY), True
-    return rd, False
+FINAL_OVERDUE_H = 6                # đã xin kết luận mà quá N giờ vẫn OPEN ⇒ đóng CHƯA RÕ (job timeout 30')
 
 
-def _no_verdict_reason(inv):
-    if inv.get("job"):
-        return f"điều tra (job {inv['job']}) hết giờ, KHÔNG có phán quyết"
-    return f"không có điều tra: {inv.get('skipped') or inv.get('note') or 'không rõ'}"
+def _conclude_unclear(st, deps, now, dos, why):
+    """Đóng hồ sơ CHƯA RÕ (source=no_dispatch) + báo 3 kênh. Idempotent (key chống trùng trong ngày)."""
+    tk = dos["ticker"]
+    dos["status"] = "CONCLUDED"
+    dos["conclusion"] = {"label": E.UNCLEAR, "source": "no_dispatch", "at": _iso(now), "why": why[:300]}
+    _stats(st)["dd_concluded"] += 1
+    log_event(deps.state_dir, now.date(), "DD_CONCLUDED_NO_DISPATCH", now=now, dossier=dos["id"], why=why[:300])
+    enqueue(st, f"📋 HỒ SƠ DD {tk} ({dos['id']}) tới hạn kết luận nhưng KHÔNG có báo cáo kết luận "
+                f"({why[:200]}) ⇒ **{E.VERDICT_VN[E.UNCLEAR]}**; ANH CẦN TỰ XEM {dos['dir']}/DOSSIER.md. "
+                f"{HOLD_NOTE}.", ("discord", "telegram", "email"), subject=f"Kết luận DD {tk}",
+            mention=True, key=f"dd:{dos['id']}:concluded", now=now)
+    _save(deps, now.date(), st)            # outbox bền TRƯỚC, rồi mới đánh dấu hồ sơ (kill giữa chừng không mất tin)
+    save_dossier(deps.state_dir, dos)
 
 
-def process_case(case, now, deps, st):
-    from trading_bot.vn_market import session_phase
-    day, tk = now.date(), case["ticker"]
-    q = deps.market.quote(tk)
-    if q.get("error") or not q.get("last"):
-        # chưa có giá khớp (trước ATO) / lỗi: vẫn chạy hạn chót + bộ máy bán (ATO không cần giá)
-        log_event(deps.state_dir, day, "QUOTE_ERROR", now=now, ticker=tk, quote=q)
-        q = {k: v for k, v in q.items() if k != "error"}
-    changed = False
-    t0 = _p(case["t0"])
+def _stuck_final_reason(dos, deps, now):
+    """Đã xin kết luận (final_requested) mà hồ sơ vẫn OPEN: có đường nào còn có thể ra kết luận không?
+    → lý do đóng (str) hoặc None (còn chờ job thật)."""
+    fr = dos.get("final_requested")
+    if not fr or dos.get("status") != "OPEN":
+        return None
+    jf = (dos.get("jobs") or {}).get("final")
+    if jf is None:
+        return "tiến trình bị cắt giữa lúc xin kết luận — chưa hề dispatch"
+    if jf.get("skipped"):
+        return f"bị chặn dispatch: {jf['skipped']}"
+    if not jf.get("job"):
+        return jf.get("note") or "dispatch kết luận không xác nhận được job (bị cắt giữa chừng, at-most-once)"
+    age_h = (now - _p(fr["at"])).total_seconds() / 3600
+    if age_h >= FINAL_OVERDUE_H:
+        return f"quá {FINAL_OVERDUE_H}h kể từ lúc xin kết luận (job {jf['job']}) vẫn không có báo cáo"
+    return None
 
-    # (a) bảo vệ khi rơi nhanh trước phán quyết
-    room = E.room_of(q.get("last"), q.get("floor"), q.get("ref"))
-    if not case.get("verdict") and not case.get("compressed") and room is not None \
-            and room <= E.ROOM_COMPRESS + E.EPS:
-        case["compressed"] = True
-        changed = True
-        log_event(deps.state_dir, day, "COMPRESSED", now=now, ticker=tk, room=room)
 
-    # (b) phán quyết (agent ghi file) hoặc hết hạn ⇒ KHÔNG có phán quyết agent
-    if not case.get("verdict"):
-        v = read_verdict(deps.state_dir, case)
-        inv = case.get("investigation") or {}
-        job = inv.get("job")
-        if v is None and job and job not in ("DRY", "issued") and not inv.get("job_dead"):
+def _dossier_tick(st, deps, now):
+    """Mọi hồ sơ OPEN: chuyển tiếp ghi chú mới · kiểm job chết · nhắc ngày 3/6 · dispatch cập nhật/kết luận.
+    Không có nhánh nào hành động lên lệnh/vị thế."""
+    day = now.date()
+    s = _stats(st)
+    for dos in load_dossiers(deps.state_dir, "OPEN"):
+        if deps.over_budget():
+            log_event(deps.state_dir, day, "BUDGET", now=now, where="dossier_tick", dossier=dos["id"])
+            return
+        tk, changed = dos["ticker"], False
+        # 1) ghi chú mới của agent ⇒ báo
+        for n in read_notes(deps.state_dir, dos["id"]):
+            if n["file"] in dos["relayed"]:
+                continue
+            dos["relayed"].append(n["file"])
+            s["dd_notes"] += 1
+            if n.get("major_event") and not dos.get("major_event"):
+                dos["major_event"] = {"at": n.get("at"), "day": n.get("day"), "summary": (n.get("summary") or "")[:300]}
+            if n.get("kind") == "final":
+                dos["status"] = "CONCLUDED"
+                dos["conclusion"] = {"label": n.get("label"), "source": "agent", "at": n.get("at")}
+                s["dd_concluded"] += 1
+            _relay_note(st, dos, n, now)
+            log_event(deps.state_dir, day, "DD_NOTE", now=now, dossier=dos["id"], note=n["file"],
+                      label=n.get("label"), major_event=bool(n.get("major_event")))
+            changed = True
+        # 2) job chết mà không có ghi chú tương ứng
+        have = {n["file"] for n in read_notes(deps.state_dir, dos["id"])}
+        for jk, j in dos["jobs"].items():
+            job = j.get("job")
+            if not job or job in ("DRY", "issued") or j.get("job_dead"):
+                continue
+            want = "final.json" if j["kind"] == "final" else ("quick.json" if j["kind"] == "quick"
+                                                              else f"daily_d{j.get('day')}.json")
+            if want in have:
+                continue
             js = deps.job_status(job)
-            if js in JOB_DEAD:
-                v = read_verdict(deps.state_dir, case)        # đọc lại: agent có thể vừa ghi xong
-                if v is None:
-                    inv["job_dead"] = js
-                    st["dispatch_halted"] = st.get("dispatch_halted") or \
-                        f"job điều tra {job} ({tk}) kết thúc '{js}' mà không có phán quyết"
-                    log_event(deps.state_dir, day, "JOB_DEAD", now=now, ticker=tk, job=job, status=js)
-                    enqueue(st, f"⚠️ Điều tra {tk} (job {job}) đã kết thúc '{js}' mà KHÔNG có phán quyết ⇒ "
-                                f"hết hạn sẽ GIỮ (không tự bán); dừng dispatch điều tra tới hết hôm nay. "
-                                f"ANH CẦN TỰ XEM TIN {tk}. ({SHADOW_NOTE})", mention=True, now=now)
-                    changed = True
-        if v or now >= E.verdict_deadline(t0, case.get("compressed")):
-            if v:
-                case["verdict"] = {"label": v["label"], "summary": v.get("summary"), "source": "agent",
-                                   "at": v.get("at")}
+            if js not in JOB_DEAD:
+                continue
+            j["job_dead"] = js
+            changed = True
+            if STOP_DISPATCH_AFTER_TIMEOUT and not st.get("dispatch_halted"):
+                st["dispatch_halted"] = f"job hồ sơ {job} ({tk}, {j['kind']}) kết thúc '{js}' không ghi chú"
+            log_event(deps.state_dir, day, "JOB_DEAD", now=now, dossier=dos["id"], job=job, step=j["kind"], status=js)
+            if j["kind"] == "final":
+                dos["status"] = "CONCLUDED"
+                dos["conclusion"] = {"label": E.UNCLEAR, "source": "no_agent", "at": _iso(now)}
+                s["dd_concluded"] += 1
+                enqueue(st, f"📋 KẾT LUẬN HỒ SƠ {tk} ({dos['id']}): **{E.VERDICT_VN[E.UNCLEAR]}** — job kết luận "
+                            f"{job} kết thúc '{js}' KHÔNG có báo cáo ⇒ ANH CẦN TỰ XEM hồ sơ {dos['dir']}/DOSSIER.md. "
+                            f"{HOLD_NOTE}.", ("discord", "telegram", "email"), subject=f"Kết luận DD {tk}",
+                        mention=True, key=f"dd:{dos['id']}:concluded", now=now)
             else:
-                src = "timeout" if job else "no_dispatch"
-                case["verdict"] = {"label": E.UNCLEAR, "summary": _no_verdict_reason(inv), "source": src,
-                                   "at": _iso(now)}
-                if src == "timeout" and STOP_DISPATCH_AFTER_TIMEOUT and not st.get("dispatch_halted"):
-                    st["dispatch_halted"] = f"điều tra {tk} hết giờ không phán quyết"
-            lat = round((now - t0).total_seconds() / 60.0, 1)
-            case["verdict"]["latency_min"] = lat
-            _stats(st)["verdicts"].append({"ticker": tk, "source": case["verdict"]["source"],
-                                           "compressed": bool(case.get("compressed")), "latency_min": lat})
-            if case["status"] not in ("INVESTIGATING", "AWAITING_REPLY"):
-                # user đã ra lệnh & ca đã chạy/xong trước phán quyết ⇒ chỉ GHI phán quyết (đánh giá shadow)
-                log_event(deps.state_dir, day, "VERDICT_LATE", now=now, ticker=tk, verdict=case["verdict"],
-                          status=case["status"])
-                enqueue(st, f"📋 Phán quyết {tk}: {E.VERDICT_VN[case['verdict']['label']]} "
-                            f"({case['verdict']['source']}) — ca đã {case['status']} theo lệnh user.", now=now)
-                _save(deps, day, st)
-                return
-            vv = case["verdict"]
-            base = {lab: E.default_action(vv["label"], h["book"], vv["source"], bool(h.get("no_auto_sell")))
-                    for lab, h in case["holdings"].items()}
-            case["report_at"] = _iso(now)
-            rd, deferred = _reply_deadline(case, now)
-            case["reply_deadline"], case["reply_deferred"] = _iso(rd), deferred
-            # (C) ca 'late' (T0 ≥ 14:00) hoặc phán quyết xử ở phiên SAU (vd lỡ các tick cuối ngày T0) ⇒ vẫn
-            # là ca hoãn: KHÔNG tự bán phiên sau dù hạn trả lời tính lại không còn "hoãn" (arch-review B1)
-            why = _hold_override_reason(case, deferred or bool(case.get("late"))
-                                        or now.date() > _p(case["t0"]).date())
-            case["actions_default"] = {lab: E.HOLD for lab in base} if why else base
-            if why and base != case["actions_default"]:
-                case["actions_suggested"], case["hold_override"] = base, why
-            case["status"] = "AWAITING_REPLY" if case["holdings"] else "NO_POSITION"
-            _save(deps, day, st)
-            log_event(deps.state_dir, day, "VERDICT", now=now, ticker=tk, verdict=vv,
-                      actions_default=case["actions_default"], actions_suggested=case.get("actions_suggested"),
-                      hold_override=case.get("hold_override"), reply_deadline=case["reply_deadline"],
-                      deferred=deferred, latency_min=lat, compressed=bool(case.get("compressed")))
-            sug = case.get("actions_suggested") or {}
-            acts = "\n".join(
-                f"  • {lab}: mặc định {E.ACTION_VN[a]} (book {case['holdings'][lab]['book']})"
-                + (f" — phán quyết gợi ý {E.ACTION_VN[sug[lab]]}, KHÔNG tự áp vì {case['hold_override']}"
-                   if sug.get(lab, a) != a else "")
-                + (f" ⛔ {case['holdings'][lab]['no_auto_sell']} ⇒ hệ thống KHÔNG đặt lệnh, kể cả theo lệnh anh"
-                   if case["holdings"][lab].get("no_auto_sell") else "")
-                for lab, a in case["actions_default"].items()) or "  • không giữ — chỉ hoãn mua"
-            warn = (f"  ⚠️⚠️ KHÔNG CÓ PHÁN QUYẾT TỪ ĐIỀU TRA ({vv['source']}) ⇒ mặc định GIỮ, KHÔNG tự bán. "
-                    f"ANH CẦN TỰ XEM {tk}.\n" if vv["source"] != "agent" else "")
-            when = (f"  ⏰ HẠN CHÓT {rd:%d/%m %H:%M} (phiên sau — mặc định chỉ áp từ 09:15; 08:30 nhắc lại)"
-                    if deferred else f"  ⏰ HẠN CHÓT {rd:%H:%M}"
-                    + (" (RÚT GỌN — sát sàn)" if case.get("compressed") else ""))
-            enqueue(st, f"📋 PHÁN QUYẾT {tk}: **{E.VERDICT_VN[vv['label']]}** ({vv['source']})\n"
-                        f"{warn}  {(vv.get('summary') or '')[:400]}\n{acts}\n{when}"
-                        f" — trả lời trong Trading Daily: {_reply_cmds(tk)}. Im lặng ⇒ mặc định.",
-                    ("discord", "telegram", "email"), subject=f"Phán quyết {tk}", mention=True, now=now)
-            changed = True
-    if case["status"] in TERMINAL:
+                enqueue(st, f"⚠️ Hồ sơ DD {tk}: job {j['kind']} {job} kết thúc '{js}' KHÔNG ghi chú ⇒ thiếu "
+                            f"{'tóm tắt ngày 1' if j['kind'] == 'quick' else 'cập nhật ngày ' + str(j.get('day'))}; "
+                            f"dừng dispatch tới hết hôm nay. ANH CẦN TỰ XEM TIN {tk}. {HOLD_NOTE}.",
+                        mention=True, key=f"dd:{dos['id']}:jobdead:{job}", now=now)
         if changed:
+            _save(deps, day, st)                 # outbox bền TRƯỚC, rồi mới ghi hồ sơ (relayed/CONCLUDED)
+            save_dossier(deps.state_dir, dos)
+        # 2b) đã xin kết luận mà không còn đường ra kết luận ⇒ đóng CHƯA RÕ (không bao giờ OPEN vô hạn)
+        why = _stuck_final_reason(dos, deps, now)
+        if why:
+            _conclude_unclear(st, deps, now, dos, why)
+            continue
+        # 3) lịch: nhắc / cập nhật / kết luận
+        n_day = E.dd_day(dt.date.fromisoformat(dos["t0"][:10]), day)
+        reminded = False
+        for act in E.dd_due(dos, day):
+            if act.startswith("remind:"):
+                if reminded:                 # mốc 3 và 6 không bắn cùng 1 tick (mốc kia ở tick sau)
+                    continue
+                reminded = True
+                last = (read_notes(deps.state_dir, dos["id"]) or [{}])[-1]
+                # at-least-once: tin có key vào hộp thư + ghi state TRƯỚC, rồi mới đánh dấu hồ sơ
+                enqueue(st, f"⏰ NHẮC — hồ sơ DD khủng hoảng {tk} ngày {n_day}/{E.DD_WINDOW_DAYS} (mốc {act[7:]}) "
+                            f"CÒN MỞ. Mới nhất: {(last.get('summary') or 'chưa có ghi chú')[:300]}\n  Hồ sơ: "
+                            f"{dos['dir']}/DOSSIER.md\n  ⇒ ANH QUYẾT. {HOLD_NOTE}.",
+                        ("discord", "telegram"), mention=True, key=f"dd:{dos['id']}:{act}", now=now)
+                _save(deps, day, st)
+                dos["reminders"].append(act)
+                save_dossier(deps.state_dir, dos)
+                s["dd_reminders"] += 1
+                log_event(deps.state_dir, day, "DD_REMIND", now=now, dossier=dos["id"], mark=act, dd_day=n_day)
+                continue
+            ok, why = _dispatch_gate(st, deps, new=False, final=(act == "final"))
+            if act == "final":
+                dos["final_requested"] = {"at": _iso(now), "why": "sự kiện lớn" if dos.get("major_event") and
+                                          n_day <= E.DD_WINDOW_DAYS else f"hết {E.DD_WINDOW_DAYS} ngày",
+                                          "skipped": None if ok else why}
+            else:
+                dos["daily_requested"].append(day.isoformat())
+            save_dossier(deps.state_dir, dos)
+            if not ok:
+                _stats(st)["dispatch_skipped"] += 1
+                log_event(deps.state_dir, day, "DISPATCH_SKIPPED", now=now, dossier=dos["id"], step=act, why=why)
+                if act == "final":
+                    _conclude_unclear(st, deps, now, dos, why)
+                else:
+                    health_alert(st, "dd_dispatch", f"không dispatch được cập nhật hồ sơ {tk} ngày {n_day}: {why}",
+                                 now, deps)
+                continue
+            s["dd_dispatches"] += 1
             _save(deps, day, st)
-        return
-
-    # (c) trả lời user (từ T0 — user ra lệnh sớm cũng được tôn trọng) — đè mặc định
-    if case["holdings"]:
-        try:
-            msgs = deps.messages()
-        except Exception as e:      # noqa: BLE001
-            msgs = []
-            _stats(st)["reply_read_errors"] += 1
-            log_event(deps.state_dir, day, "REPLY_READ_ERROR", now=now, ticker=tk, error=str(e))
-            health_alert(st, "ccdb", f"không đọc được tin Trading Daily ({type(e).__name__}: {str(e)[:150]}) "
-                                     f"⇒ lệnh trả lời của anh cho {tk} có thể KHÔNG được thấy", now, deps)
-            changed = True
-        act, msg = E.parse_reply(msgs, tk, since=t0, prefix=REPLY_PREFIX)
-        dec = case.get("decision") or {}
-        if act and str(msg.get("id")) != str(dec.get("msg_id")):
-            case["decision"] = {"source": "user", "action": act, "msg_id": msg.get("id"),
-                                "at": _iso(msg["created_at"]),
-                                "per_account": {lab: act for lab in case["holdings"]}}
-            log_event(deps.state_dir, day, "USER_REPLY", now=now, ticker=tk, action=act,
-                      content=msg.get("content"), author=msg.get("author"))
-            skipped = _apply_decision(case, now, deps)
-            enqueue(st, f"✅ Đã nhận \"{REPLY_PREFIX} {E.ACTION_VN[act]} {tk}\" từ user — áp (mô phỏng) cho mọi TK "
-                        f"đang giữ" + "".join(f"; {lab}: {why} ⇒ KHÔNG đặt lệnh, thao tác tay" for lab, why in skipped)
-                    + f". ({SHADOW_NOTE})", now=now)
-            changed = True
-
-    # (d) hết hạn, im lặng ⇒ mặc định
-    if not case.get("decision") and case.get("reply_deadline") and now >= _p(case["reply_deadline"]):
-        case["decision"] = {"source": "default", "at": _iso(now), "per_account": case["actions_default"]}
-        log_event(deps.state_dir, day, "DEFAULT_APPLIED", now=now, ticker=tk,
-                  per_account=case["actions_default"])
-        _apply_decision(case, now, deps)
-        enqueue(st, f"⏰ Hết hạn, không có trả lời ⇒ áp MẶC ĐỊNH cho {tk}: " + ", ".join(
-            f"{lab} {E.ACTION_VN[a]}" for lab, a in case["actions_default"].items()) + f" ({SHADOW_NOTE})",
-            now=now)
-        changed = True
-
-    # (e) bộ máy bán (shadow) — mỗi phút
-    if case.get("execution"):
-        hp, _ = session_phase(now)
-        phase = E.exchange_phase(hp, now, case.get("exchange"))
-        bot_stop = os.path.exists(deps.bot_stop_path)
-        snap = _snap(case, q, deps, now)
-        for lab, ex in case["execution"].items():
-            if ex["status"] != "EXECUTING":
-                continue
-            h = case["holdings"][lab]
-            try:
-                sellable = deps.market.positions(h["account_id"]).get(tk, {}).get("sellable", 0)
-            except Exception as e:  # noqa: BLE001
-                log_event(deps.state_dir, day, "POSITIONS_ERROR", now=now, ticker=tk, account=lab, error=str(e))
-                health_alert(st, "positions", f"không đọc được vị thế {lab} khi đang bán {tk}: {str(e)[:150]}",
-                             now, deps)
-                changed = True
-                continue
-            mode0 = ex["mode"]
-            intents, events = E.step_execution(ex, snap, phase, now, case.get("exchange"),
-                                               sellable, bot_stop)
-            if intents or events:
-                log_event(deps.state_dir, day, "CUTLOSS_TICK", now=now, ticker=tk, account=lab,
-                          phase=phase, snap=snap, intents=intents, events=events, sold=ex["sold"],
-                          target=ex["target"], mode=ex["mode"])
-                changed = True
-            if ex["mode"] != mode0:
-                enqueue(st, f"⚙️ {tk} {lab}: chế độ bán {E.MODE_VN.get(mode0, '-')} → "
-                            f"{E.MODE_VN[ex['mode']]} | đã bán (mô phỏng) {ex['sold']:,}/"
-                            f"{ex['target']:,}cp — lệnh dự định: " + "; ".join(
-                                f"{i['kind_effective'] if 'kind_effective' in i else i['kind']} "
-                                f"{i['qty']}@{i.get('price') or 'thị trường'}" for i in intents[:3]), now=now)
-            if ex["status"] == "DONE":
-                until = write_no_rebuy(deps.state_dir, tk, lab, day, h["book"])
-                avg = E.avg_price(ex)
-                enqueue(st, f"🏁 {tk} {lab}: XONG (mô phỏng) {ex['sold']:,}cp giá TB "
-                            f"{avg:,.0f} — cấm mua lại tới {until} (shadow ledger)", now=now)
-        if all(ex["status"] != "EXECUTING" for ex in case["execution"].values()):
-            # dừng theo lệnh GIỮ của user ⇒ HOLD (vẫn nhận "BÁN" sau đó), chỉ bán đủ hết mới DONE
-            case["status"] = "DONE" if all(ex["status"] == "DONE" for ex in case["execution"].values()) else "HOLD"
-            changed = True
-    if changed:
+            jkey = "final" if act == "final" else f"daily:{day.isoformat()}"
+            job = _dd_dispatch(st, deps, now, dos, act, jkey, day_n=n_day)
+            if not job:                      # dispatch HỎNG (rc!=0 / circuit breaker / timeout): không im lặng
+                note = dos["jobs"][jkey].get("note") or "?"
+                if act == "final":
+                    _conclude_unclear(st, deps, now, dos, note)
+                else:
+                    health_alert(st, "dd_dispatch", f"dispatch cập nhật hồ sơ {tk} ngày {n_day} HỎNG: {note[:200]} "
+                                                    f"⇒ thiếu cập nhật ngày này; ANH CẦN TỰ XEM TIN {tk}", now, deps)
         _save(deps, day, st)
-
-
-def _apply_decision(case, now, deps):
-    """→ [(TK, lý do)] các TK bị bỏ qua vì no_auto_sell (b)."""
-    per = case["decision"]["per_account"]
-    skipped = []
-    for lab, h in case["holdings"].items():
-        act = per.get(lab, E.HOLD)
-        if h.get("no_auto_sell") and act != E.HOLD:
-            skipped.append((lab, h["no_auto_sell"]))
-            log_event(deps.state_dir, now.date(), "NO_AUTO_SELL", now=now, ticker=case["ticker"], account=lab,
-                      action=act, reason=h["no_auto_sell"])
-            continue
-        tgt = E.target_qty(act, h["qty"])
-        ex = case["execution"].get(lab)
-        if ex is None:
-            if tgt > 0:
-                case["execution"][lab] = E.new_execution(tgt, now)
-            continue
-        if act == E.HOLD:                           # user GIỮ giữa chừng ⇒ dừng phần còn lại
-            ex["status"], ex["open"] = "STOPPED_BY_USER", []
-        else:
-            ex["target"] = max(tgt, ex["sold"])
-            if ex["status"] in ("STOPPED_BY_USER", "STOPPED_MARKET_WIDE"):
-                ex["status"] = "EXECUTING"
-    if case["execution"]:
-        case["status"] = "EXECUTING"
-    if not any(ex["status"] == "EXECUTING" for ex in case["execution"].values()):
-        case["status"] = "HOLD"
-    return skipped
 
 
 class RunKilled(Exception):
@@ -1191,7 +1152,7 @@ def _scan(now, deps, st):
 
 
 def _market_wide(st, now, deps, hits, reason, lone=False):
-    """Nhánh gộp: KHÔNG mở ca, KHÔNG dispatch, KHÔNG tự hành động — chỉ ghi + báo mã MỚI.
+    """Nhánh gộp: KHÔNG mở ca/hồ sơ, KHÔNG dispatch, KHÔNG tự hành động — chỉ ghi + báo mã MỚI.
     `lone` = (B) mã chạm sàn không đủ điều kiện ca riêng trong lượt KHÔNG có biến động chung."""
     day, s = now.date(), _stats(st)
     mw = st.setdefault("market_wide", {})
@@ -1220,68 +1181,41 @@ def _market_wide(st, now, deps, hits, reason, lone=False):
                 f"(tổng {len(hits)} lượt này)")
         tail = (f"mã sẽ được xét lại riêng khi cửa sổ {E.MARKET_WIDE_WINDOW_MIN}' giao dịch không còn đạt "
                 f"ngưỡng gộp")
-    enqueue(st, f"{head}\n{rows}\n  ⇒ KHÔNG dispatch điều tra từng mã, KHÔNG tự hành động; {tail}. "
-                f"Anh tự đánh giá. ({SHADOW_NOTE})", mention=True, now=now)
+    enqueue(st, f"{head}\n{rows}\n  ⇒ KHÔNG mở hồ sơ DD từng mã, KHÔNG tự hành động; {tail}. "
+                f"Anh tự đánh giá; {HOLD_NOTE}.", mention=True, now=now)
 
 
 def _relabel_market_wide(st, now, deps, reason):
-    """(A) Ca RIÊNG đã mở trong cửa sổ trượt, nay cửa sổ đạt ngưỡng gộp ⇒ gắn nhãn cả thị trường:
-    mặc định chuyển GIỮ (không tự bán); bán mô phỏng đang chạy THEO MẶC ĐỊNH dừng. Lệnh user
-    (decision source "user") vẫn tôn trọng. Ghi log MARKET_WIDE_RELABEL + báo."""
+    """(A) Ca RIÊNG đã mở trong cửa sổ trượt, nay cửa sổ đạt ngưỡng gộp ⇒ gắn nhãn cả thị trường cho ca
+    + hồ sơ DD (ngữ cảnh cho agent/user). Không có hành động nào khác (không còn đường bán để dừng)."""
     day = now.date()
     rows = []
     for tk, c in st["cases"].items():
         t0 = _p(c["t0"])
-        if c.get("market_wide") or not E.in_window(t0, now):      # carryover (khác ngày) ⇒ ngoài cửa sổ
+        if c.get("market_wide") or not E.in_window(t0, now):
             continue
         c["market_wide"] = {"at": _iso(now), "reason": reason}
-        note = []
-        pre = c.get("actions_default")
-        if pre and not c.get("decision") and any(a != E.HOLD for a in pre.values()):   # đã quyết ⇒ giữ nguyên bản ghi
-            c.setdefault("actions_suggested", dict(pre))
-            c["actions_default"] = {lab: E.HOLD for lab in pre}
-            c["hold_override"] = f"cả thị trường: {reason}"
-            note.append("mặc định → GIỮ")
-        elif not c.get("verdict"):
-            note.append("phán quyết đến sau ⇒ mặc định GIỮ")
-        dec = c.get("decision") or {}
-        for lab, ex in (c.get("execution") or {}).items():
-            if dec.get("source") == "default" and ex["status"] == "EXECUTING":
-                ex["status"], ex["open"] = "STOPPED_MARKET_WIDE", []
-                note.append(f"{lab} DỪNG bán mô phỏng ({ex['sold']:,}/{ex['target']:,}cp đã bán)")
-            elif ex["status"] == "DONE":
-                note.append(f"{lab} đã bán xong trước khi gộp")
-            elif dec.get("source") == "user" and ex["status"] == "EXECUTING":
-                note.append(f"{lab} vẫn bán theo LỆNH ANH")
-        if c.get("execution") and c["status"] == "EXECUTING" \
-                and not any(ex["status"] == "EXECUTING" for ex in c["execution"].values()):
-            c["status"] = "HOLD"
-        rows.append((tk, t0, note))
+        dos = _read_json(dd_json(deps.state_dir, c["dossier"])) if c.get("dossier") else None
+        if dos and not dos.get("market_wide"):
+            dos["market_wide"] = c["market_wide"]
+            save_dossier(deps.state_dir, dos)
+        rows.append((tk, t0))
     if not rows:
         return
     _stats(st)["market_wide_relabel"] += len(rows)
     log_event(deps.state_dir, day, "MARKET_WIDE_RELABEL", now=now, reason=reason,
-              cases={tk: {"t0": _iso(t0), "note": note} for tk, t0, note in rows})
+              cases={tk: {"t0": _iso(t0)} for tk, t0 in rows})
     enqueue(st, f"🌐 GẮN NHÃN CẢ THỊ TRƯỜNG cho ca đã mở riêng ({reason}):\n" + "\n".join(
-        f"  • {tk} (T0 {t0:%H:%M}): " + ("; ".join(note) or "ghi nhãn") for tk, t0, note in rows)
-        + f"\n  ⇒ KHÔNG tự bán các ca này; lệnh của anh vẫn được tôn trọng. ({SHADOW_NOTE})",
-        mention=True, now=now)
-
-
-def _hold_override_reason(case, deferred):
-    """(A)/(C) lý do mặc định bị ép GIỮ (thay vì theo phán quyết) → chuỗi | None."""
-    if case.get("market_wide"):
-        return f"cả thị trường: {case['market_wide']['reason']}"
-    if deferred:
-        return "hoãn sang phiên sau ⇒ KHÔNG tự bán qua ATO; xét lại lúc mở phiên (anh/agent quyết)"
-    return None
+        f"  • {tk} (T0 {t0:%H:%M}) — hồ sơ DD vẫn tiếp tục, ghi nhận bối cảnh chung" for tk, t0 in rows)
+        + f"\n  ⇒ {HOLD_NOTE}.", mention=True, now=now)
 
 
 def _eod_oos(st, now, deps):
     """(D) Từ EOD_OOS_AT: ghi 1 dòng EOD_OOS/ngày với vni_day + ret_close (giá lúc ghi / TC) cho mọi
     ca + mã gộp ⇒ ca live tích luỹ thành bộ OOS thật (chấm T+k sau từ giá ngày). At-least-once: bị
     cắt giữa log và lưu state ⇒ có thể lặp dòng — dedupe theo (ngày, mã) khi đọc. UPCOM khớp liên tục
-    tới 15:00 ⇒ giá 14:55 CHƯA phải giá đóng cửa (`close_final` = False) — chấm lại bằng giá ngày BQ."""
+    tới 15:00 ⇒ giá 14:55 CHƯA phải giá đóng cửa (`close_final` = False) — chấm lại bằng giá ngày BQ.
+    Thêm (2026-11-01): mã có hồ sơ DD đang mở (kích hoạt ngày trước) cũng được ghi (kind "dossier")."""
     if now.time() < EOD_OOS_AT or st.get("eod_oos_logged"):
         return
     day = now.date()
@@ -1289,7 +1223,10 @@ def _eod_oos(st, now, deps):
     vni_day = (vl / vr - 1) if (vl and vr) else None
     rows = []
     mw = st.get("market_wide") or {}
-    for tk in list(st["cases"]) + [t for t in mw if t not in st["cases"]]:
+    dossiers = {d["ticker"]: d for d in load_dossiers(deps.state_dir, "OPEN")}
+    order = list(st["cases"]) + [t for t in mw if t not in st["cases"]]
+    order += [t for t in dossiers if t not in order]
+    for tk in order:
         if deps.over_budget():
             log_event(deps.state_dir, day, "BUDGET", now=now, where="eod_oos", ticker=tk)
             return
@@ -1300,25 +1237,23 @@ def _eod_oos(st, now, deps):
                "close_final": (q.get("exchange") or "HOSE").upper() != "UPCOM"}
         c = st["cases"].get(tk)
         if c is not None:
-            tr, vv, dec = c.get("trigger") or {}, c.get("verdict") or {}, c.get("decision") or {}
-            row.update({"kind": "case", "t0": c["t0"], "carryover_from": c.get("carryover_from"),
-                        "trig_ret": tr.get("ret"), "trig_idio": tr.get("idio"), "trig_vni": tr.get("vni_ret"),
-                        "at_floor": tr.get("at_floor"), "market_wide": c.get("market_wide"),
-                        "late": c.get("late"), "reply_deferred": c.get("reply_deferred"),
-                        "verdict": vv.get("label"), "verdict_source": vv.get("source"),
-                        "actions_default": c.get("actions_default"),
-                        "actions_suggested": c.get("actions_suggested"),
-                        "hold_override": c.get("hold_override"), "decision_source": dec.get("source"),
-                        "status": c.get("status"),
-                        "holdings": {lab: h.get("qty") for lab, h in (c.get("holdings") or {}).items()},
-                        "execution": {lab: {"status": ex["status"], "sold": ex["sold"], "target": ex["target"],
-                                            "avg": E.avg_price(ex)} for lab, ex in (c.get("execution") or {}).items()}})
-        else:
+            tr = c.get("trigger") or {}
+            row.update({"kind": "case", "t0": c["t0"], "trig_ret": tr.get("ret"), "trig_idio": tr.get("idio"),
+                        "trig_vni": tr.get("vni_ret"), "at_floor": tr.get("at_floor"),
+                        "market_wide": c.get("market_wide"), "status": c.get("status"), "dossier": c.get("dossier"),
+                        "holdings": {lab: h.get("qty") for lab, h in (c.get("holdings") or {}).items()}})
+        elif tk in mw:
             m = mw[tk]
             row.update({"kind": "market_wide", "t0": m.get("first"), "trig_ret": m.get("ret"),
                         "trig_idio": m.get("idio"), "trig_vni": m.get("vni_ret"), "at_floor": m.get("at_floor"),
                         "market_wide": {"reason": m.get("reason")}, "not_individual": m.get("not_individual"),
                         "holdings": m.get("held")})
+        else:
+            d = dossiers[tk]
+            tr = d.get("trigger") or {}
+            row.update({"kind": "dossier", "t0": d["t0"], "dossier": d["id"], "trig_ret": tr.get("ret"),
+                        "dd_day": E.dd_day(dt.date.fromisoformat(d["t0"][:10]), day),
+                        "holdings": {lab: h.get("qty") for lab, h in (d.get("holdings") or {}).items()}})
         rows.append(row)
     log_event(deps.state_dir, day, "EOD_OOS", now=now, vni_day=vni_day, vni=[vl, vr], close_asof=_iso(now),
               rows=rows)
@@ -1329,30 +1264,22 @@ def _eod_summary(st, now, deps):
     if now.time() < EOD_SUMMARY_AT or st.get("eod_summary_sent"):
         return
     s = _stats(st)
-    vs = s["verdicts"]
-
-    def n(src, comp=None):
-        return sum(1 for v in vs if v["source"] == src and (comp is None or v["compressed"] == comp))
-    lat = sorted(v["latency_min"] for v in vs if v["source"] == "agent")
-    med = lat[len(lat) // 2] if lat else None
     crashes = 0
     p = os.path.join(deps.state_dir, f"shadow_{now.date().isoformat()}.jsonl")
     if os.path.exists(p):
         with open(p, encoding="utf-8") as f:
             crashes = sum(1 for x in f if '"kind": "CRASH"' in x)
+    n_open = len(load_dossiers(deps.state_dir, "OPEN"))
     st["eod_summary_sent"] = _iso(now)
-    enqueue(st, f"📊 Tóm tắt SHADOW intraday-watch {now:%d/%m}: {s['scans']} lượt quét · {s['triggers']} kích "
+    enqueue(st, f"📊 Tóm tắt intraday-watch {now:%d/%m}: {s['scans']} lượt quét · {s['triggers']} kích "
                 f"hoạt · {s['market_wide']} cảnh báo gộp · {s['market_wide_relabel']} ca riêng gắn nhãn gộp sau · "
-                f"{sum(1 for c in st['cases'].values() if (c.get('hold_override') or '').startswith('hoãn'))} ca "
-                f"hoãn ⇒ GIỮ · {s['dispatches']} điều tra ({s['dispatch_fail']} lỗi, "
-                f"{s['dispatch_skipped']} bị chặn) · phán quyết agent {n('agent')} / hết giờ {n('timeout')} / "
-                f"không điều tra {n('no_dispatch')} (rút gọn: agent {n('agent', True)}, hết giờ "
-                f"{n('timeout', True)}; thường: agent {n('agent', False)}, hết giờ {n('timeout', False)}) · trễ "
-                f"trung vị phán quyết agent {med if med is not None else '-'}' · ngưỡng tương đối "
-                f"{len(s['alt_rel'])} mã vs hiện hành {len(s['alt_cur'])} mã · lỗi giá {s['quote_errors']}/"
-                f"{s['quotes']} · lỗi gửi tin {s['notify_fail']} · lỗi đọc trả lời {s['reply_read_errors']} · "
-                f"crash {crashes}" + (f" · dispatch DỪNG: {st['dispatch_halted']}" if st.get("dispatch_halted")
-                                      else "") + f" ({SHADOW_NOTE})", ("discord",), now=now)
+                f"hồ sơ DD: {s['dispatches']} mở mới ({s['dispatch_fail']} lỗi dispatch, {s['dispatch_skipped']} bị "
+                f"chặn), {s['dd_dispatches']} cập nhật/kết luận, {s['dd_notes']} ghi chú, {s['dd_reminders']} nhắc, "
+                f"{s['dd_concluded']} kết luận, {n_open} đang mở · ngưỡng tương đối {len(s['alt_rel'])} mã vs hiện "
+                f"hành {len(s['alt_cur'])} mã · lỗi giá {s['quote_errors']}/{s['quotes']} · lỗi gửi tin "
+                f"{s['notify_fail']} · crash {crashes}"
+                + (f" · dispatch DỪNG: {st['dispatch_halted']}" if st.get("dispatch_halted") else ""),
+            ("discord",), now=now)
 
 
 def run_tick(now, deps):
@@ -1378,26 +1305,17 @@ def run_tick(now, deps):
 
 
 def _run_reminder(now, deps):
-    """08:25-08:59: CHỈ nhắc ca hoãn qua đêm (c) + gửi nốt tin tồn. Không quét, không bán."""
+    """08:25-08:59: CHỈ việc hồ sơ DD (nhắc ngày 3/6, cập nhật, kết luận) + gửi nốt tin tồn. Không quét."""
     day = now.date()
     st = load_state(deps.state_dir, day)
-    n = 0
-    for tk, c in st["cases"].items():
-        if c.get("reply_deferred") and not c.get("decision") and c.get("reply_deadline"):
-            acts = ", ".join(f"{lab} {E.ACTION_VN[a]}" for lab, a in (c.get("actions_default") or {}).items())
-            vv = c.get("verdict") or {}
-            sug = ", ".join(f"{lab} {E.ACTION_VN[a]}" for lab, a in (c.get("actions_suggested") or {}).items())
-            if enqueue(st, f"⏰ NHẮC 08:30 — {tk}: phán quyết {E.VERDICT_VN.get(vv.get('label'), '?')} "
-                           f"({vv.get('source')})" + (f" gợi ý [{sug}] — KHÔNG tự áp ({c.get('hold_override')}), "
-                                                      f"XÉT LẠI lúc mở phiên" if sug else "")
-                       + f"; mặc định [{acts or 'không giữ'}] sẽ áp lúc "
-                           f"{_p(c['reply_deadline']):%H:%M} nếu anh không trả lời. Lệnh: {_reply_cmds(tk)}",
-                       mention=True, key=f"remind:{tk}:{day}", now=now):
-                n += 1
+    _stats(st)
+    _save(deps, day, st)
+    flush_outbox(st, deps, now)
+    _dossier_tick(st, deps, now)
     _save(deps, day, st)
     flush_outbox(st, deps, now)
     _save(deps, day, st)
-    return {"reminded": n}
+    return {"open_dossiers": [d["id"] for d in load_dossiers(deps.state_dir, "OPEN")]}
 
 
 def _run_locked(now, deps):
@@ -1409,10 +1327,7 @@ def _run_locked(now, deps):
     flush_outbox(st, deps, now)                       # tin tồn từ lượt bị cắt
     opened = _scan(now, deps, st) if _scan_due(now, st.get("last_scan"), hp) else []
     _pending_work(st, deps, now)
-    for tk, case in list(st["cases"].items()):
-        pending_verdict = not case.get("verdict") and case.get("investigation")
-        if (case.get("status") not in TERMINAL or pending_verdict) and tk not in opened:
-            process_case(case, now, deps, st)
+    _dossier_tick(st, deps, now)
     _eod_oos(st, now, deps)
     if now.time() >= EOD_OOS_ALERT_AT and not st.get("eod_oos_logged"):
         health_alert(st, "eod_oos", f"chưa ghi được EOD_OOS (vni_day/ret_close) lúc {now:%H:%M} — hết ngân sách "
@@ -1421,20 +1336,44 @@ def _run_locked(now, deps):
     _save(deps, day, st)
     flush_outbox(st, deps, now)
     _save(deps, day, st)
-    return {"opened": opened, "open_cases": [t for t, c in st["cases"].items() if c["status"] not in TERMINAL]}
+    return {"opened": opened, "open_dossiers": [d["id"] for d in load_dossiers(deps.state_dir, "OPEN")]}
 
 
 # ============================================================== CLI
-def cmd_verdict(a):
-    if a.label not in (E.BROKEN, E.NOISE, E.UNCLEAR):
-        sys.exit(f"label phải là BROKEN|NOISE|UNCLEAR, nhận {a.label}")
-    p = verdict_path(a.state_dir, dt.date.fromisoformat(a.date), a.ticker)
-    if os.path.exists(p):
-        print(f"đã có phán quyết {p} — giữ bản đầu (không ghi đè)")
+def cmd_dd_note(a, now=None):
+    """Agent ghi 1 bước hồ sơ: notes/<kind>.json (GHI-MỘT-LẦN) + nối chi tiết vào DOSSIER.md."""
+    now = now or _now()
+    p = dd_dir(a.state_dir, a.dossier)
+    if not os.path.isdir(p):
+        sys.exit(f"không có hồ sơ {p}")
+    if a.kind not in ("quick", "daily", "final"):
+        sys.exit(f"kind phải là quick|daily|final, nhận {a.kind}")
+    if a.kind == "final" and a.label not in (E.BROKEN, E.NOISE, E.UNCLEAR):
+        sys.exit(f"final cần --label BROKEN|NOISE|UNCLEAR, nhận {a.label}")
+    t0 = dt.date.fromisoformat(a.dossier.rsplit("_", 1)[1])
+    if getattr(a, "day", None):
+        now = dt.datetime.combine(dt.date.fromisoformat(a.day), now.time(), tzinfo=now.tzinfo)
+    n = E.dd_day(t0, now.date())
+    if n < 1:
+        sys.exit(f"hồ sơ {a.dossier} mở ngày {t0} > hôm nay {now.date()} — sai --dossier?")
+    np_ = os.path.join(p, "notes", note_name(a.kind, n))
+    if os.path.exists(np_):
+        print(f"đã có {np_} — giữ bản đầu (không ghi đè)")
         return
-    _atomic_json(p, {"ticker": a.ticker.upper(), "label": a.label, "summary": a.summary[:600],
-                     "at": _iso(_now())})
-    print(f"ghi {p}")
+    detail = ""
+    if a.detail_file:
+        with open(a.detail_file, encoding="utf-8") as f:
+            detail = f.read()
+    with open(os.path.join(p, "DOSSIER.md"), "a", encoding="utf-8") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        head = {"quick": "Ngày 1 — tóm tắt nhanh", "daily": f"Ngày {n} — cập nhật",
+                "final": f"KẾT LUẬN: {E.VERDICT_VN.get(a.label, '')}"}[a.kind]
+        f.write(f"\n## {head} ({now:%Y-%m-%d %H:%M} ICT)" + (" — ⚠️ SỰ KIỆN LỚN" if a.major_event else "")
+                + f"\n\n{a.summary[:1500]}\n\n{detail}\n")
+    os.makedirs(os.path.dirname(np_), exist_ok=True)
+    _atomic_json(np_, {"kind": a.kind, "day": n, "summary": a.summary[:1500], "label": a.label if a.kind == "final"
+                       else None, "major_event": bool(a.major_event), "at": _iso(now)})
+    print(f"ghi {np_}")
 
 
 def main(argv=None, market_factory=None, notifier=None):
@@ -1444,23 +1383,28 @@ def main(argv=None, market_factory=None, notifier=None):
     r.add_argument("--no-dispatch", action="store_true")
     r.add_argument("--dry-notify", action="store_true")
     r.add_argument("--dispatch-watch", action="store_true",
-                   help="dispatch điều tra cả mã chỉ-watchlist (mặc định: chỉ báo)")
+                   help="mở hồ sơ DD cả mã chỉ-watchlist (mặc định: chỉ báo)")
     r.add_argument("--state-dir", default=STATE_DIR)
-    v = sub.add_parser("verdict")
-    v.add_argument("--date", required=True)
-    v.add_argument("--ticker", required=True)
-    v.add_argument("--label", required=True)
+    v = sub.add_parser("dd-note")
+    v.add_argument("--dossier", required=True)
+    v.add_argument("--kind", required=True)
     v.add_argument("--summary", required=True)
+    v.add_argument("--label")
+    v.add_argument("--major-event", action="store_true")
+    v.add_argument("--detail-file")
+    v.add_argument("--day", help="YYYY-MM-DD ngày hồ sơ cần ghi (mặc định hôm nay ICT); ghi ĐÚNG ngày của bước, "
+                                 "không phụ thuộc đồng hồ lúc agent chạy xong")
     v.add_argument("--state-dir", default=STATE_DIR)
     s = sub.add_parser("status")
     s.add_argument("--date")
     s.add_argument("--state-dir", default=STATE_DIR)
     a = ap.parse_args(argv)
-    if a.cmd == "verdict":
-        return cmd_verdict(a)
+    if a.cmd == "dd-note":
+        return cmd_dd_note(a)
     if a.cmd == "status":
         d = dt.date.fromisoformat(a.date) if a.date else _now().date()
-        print(json.dumps(_read_json(state_path(a.state_dir, d), {}), ensure_ascii=False, indent=1))
+        print(json.dumps({"state": _read_json(state_path(a.state_dir, d), {}),
+                          "open_dossiers": load_dossiers(a.state_dir, "OPEN")}, ensure_ascii=False, indent=1))
         return
     notifier = notifier or Notifier(dry=a.dry_notify)
     # `timeout 55` của cron gửi SIGTERM: biến thành ngoại lệ để đi qua crash_alert (không chết im lặng)

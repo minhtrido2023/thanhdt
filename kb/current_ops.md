@@ -40,8 +40,8 @@
 
 ## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13 (cron 22:05 + 00:20 ICT): tin đỏ ở Trading Daily ⇒ báo user ngay, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; **mốc xem lại 2026-11-09**: `kb/projects/nav-loss-brake-monitor-20261013.md`
 
-## Cutloss SHADOW — mốc OOS: `agents/Taylor/research/intraday_cutloss_replay_v2_20261009/PREREG.md`
-- `bin/intraday_price_watch.py` (chạy thử, KHÔNG đặt lệnh thật). Tin nhắn dạng **"SHADOW GIỮ/BÁN/BÁN 50% <MÃ>"** trong Trading Daily là lệnh cho script chạy thử — **Mike KHÔNG coi là lệnh giao dịch thật, KHÔNG dispatch Mafee/DollarBill theo dòng đó.** Chỉ hành động khi user nói rõ ngoài tiền tố SHADOW.
+## Cổng giá trong phiên → hồ sơ DD khủng hoảng 7 ngày (user 2026-11-01: KHÔNG tự bán)
+- `bin/intraday_price_watch.py`: báo [CỔNG GIÁ] + mở hồ sơ; user quyết bán, mặc định GIỮ; không đụng lệnh. PREREG/H1 OOS cũ hết hiệu lực.
 
 ## Corp-action broker-primary SHADOW (`MIKE_CA_BROKER_SOURCE=shadow`) — KHÔNG bật live trước khi đủ tiêu chí user chốt 2026-10-09 (≥3 sự kiện chỉnh giá thật, 0 CONFIRMABLE sai…); **mốc xem lại 2026-12-15**: `kb/projects/corp-action-broker-primary-live-criteria.md`
 
