@@ -596,6 +596,97 @@ def test_final_never_stuck():
     e.close()
 
 
+def _kill_at_dossier_save(e, pred, start, end, day, before=False):
+    """Mô phỏng kill đúng quanh save_dossier của hồ sơ thoả pred: sau (mặc định) hoặc TRƯỚC khi ghi đĩa."""
+    osd = W.save_dossier
+    hit = {"n": 0}
+
+    def wrapped(state_dir, dos):
+        if pred(dos) and not hit["n"]:
+            hit["n"] = 1
+            if before:
+                raise W.RunKilled("SIGTERM trước save_dossier")
+            osd(state_dir, dos)
+            raise W.RunKilled("SIGTERM sau save_dossier")
+        return osd(state_dir, dos)
+    W.save_dossier = wrapped
+    try:
+        e.drive(start, end, day)
+    except W.RunKilled:
+        pass
+    finally:
+        W.save_dossier = osd
+    return hit["n"] == 1
+
+
+def _outbox_has(e, day, pat):
+    st = W._read_json(W.state_path(e.tmp, dt.date.fromisoformat(day)))
+    return any(pat in m["msg"] for m in (st or {}).get("outbox", []))
+
+
+def _n_sent(e, pat):
+    return len([m for m in e.sent() if pat in m["msg"]])
+
+
+def test_save_order_kill():
+    did = "XYZ_2026-10-06"
+    # A) ghi chú quick đã relayed trên đĩa ⇒ tin PHẢI đã nằm trong outbox trên đĩa; chạy lại gửi đúng 1 lần/kênh
+    for before in (False, True):
+        e = Env({"XYZ": DROP})
+        e.drive("09:15", "10:05", "2026-10-06")
+        e.note(did, "quick", T("10:30", "2026-10-06"), summary="tóm tắt A")
+        hit = _kill_at_dossier_save(e, lambda d: "quick.json" in d.get("relayed", []), "10:31", "10:31", "2026-10-06", before)
+        tag = "TRƯỚC" if before else "SAU"
+        if not before:
+            check(f"B5-A kill {tag} save_dossier(note quick): đã kill + tin nằm trong outbox trên đĩa",
+                  hit and _outbox_has(e, "2026-10-06", "TÓM TẮT NHANH NGÀY 1"))
+        e.drive("10:32", "10:34", "2026-10-06")
+        check(f"B5-A kill {tag} save_dossier ⇒ chạy lại: tóm tắt ngày 1 gửi ĐÚNG 3 tin (3 kênh, không mất/không trùng)",
+              hit and _n_sent(e, "TÓM TẮT NHANH NGÀY 1") == 3, _n_sent(e, "TÓM TẮT NHANH NGÀY 1"))
+        e.close()
+    # B) ghi chú final ⇒ CONCLUDED
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.drive("08:30", "08:31", "2026-10-07")
+    e.note(did, "final", T("10:00", "2026-10-07"), summary="kết luận B", label="BROKEN")
+    hit = _kill_at_dossier_save(e, lambda d: d.get("status") == "CONCLUDED", "10:01", "10:01", "2026-10-07")
+    check("B5-B kill sau save_dossier(final note CONCLUDED): tin kết luận đã nằm trong outbox trên đĩa",
+          hit and _outbox_has(e, "2026-10-07", "KẾT LUẬN HỒ SƠ DD KHỦNG HOẢNG"))
+    e.drive("10:02", "10:04", "2026-10-07")
+    check("B5-B ... chạy lại: kết luận gửi ĐÚNG 3 tin", _n_sent(e, "KẾT LUẬN HỒ SƠ DD KHỦNG HOẢNG") == 3,
+          _n_sent(e, "KẾT LUẬN HỒ SƠ DD KHỦNG HOẢNG"))
+    e.close()
+    # C) job final chết không ghi chú
+    e = Env({"XYZ": DROP})
+    e.drive("09:15", "10:05", "2026-10-06")
+    e.drive("08:30", "08:31", "2026-10-07")
+    e.note(did, "daily", T("10:00", "2026-10-07"), summary="khởi tố", major=True)
+    e.drive("10:01", "10:02", "2026-10-07")
+    e.jobs["Taylor_job3"] = "timeout"
+    hit = _kill_at_dossier_save(e, lambda d: d.get("status") == "CONCLUDED", "10:30", "10:30", "2026-10-07")
+    check("B5-C kill sau save_dossier(job final chết): tin CHƯA RÕ nằm trong outbox trên đĩa",
+          hit and _outbox_has(e, "2026-10-07", "KHÔNG có báo cáo"))
+    e.drive("10:31", "10:33", "2026-10-07")
+    check("B5-C ... chạy lại: tin kết luận job chết gửi ĐÚNG 3 tin", _n_sent(e, "KHÔNG có báo cáo") == 3,
+          _n_sent(e, "KHÔNG có báo cáo"))
+    e.close()
+    # D) _conclude_unclear
+    for before in (False, True):
+        e = Env({"XYZ": DROP})
+        _tick_to_final(e)
+        _stub_fail(e)
+        hit = _kill_at_dossier_save(e, lambda d: (d.get("conclusion") or {}).get("source") == "no_dispatch",
+                                    "08:30", "08:30", "2026-10-13", before)
+        tag = "TRƯỚC" if before else "SAU"
+        if not before:
+            check("B5-D kill SAU save_dossier(_conclude_unclear): tin nằm trong outbox trên đĩa",
+                  hit and _outbox_has(e, "2026-10-13", "KHÔNG có báo cáo kết luận"))
+        e.drive("08:31", "08:33", "2026-10-13")
+        check(f"B5-D kill {tag} save_dossier ⇒ chạy lại: tin CHƯA RÕ gửi ĐÚNG 3 tin", hit and len(_concl_msgs(e)) == 3,
+              len(_concl_msgs(e)))
+        e.close()
+
+
 def test_reminders_exact():
     did = "XYZ_2026-10-06"
 
@@ -696,6 +787,7 @@ def test_labels_and_note_day():
 
 def harden_tests():
     test_final_never_stuck()
+    test_save_order_kill()
     test_reminders_exact()
     test_labels_and_note_day()
 
@@ -706,6 +798,12 @@ MUTANTS = [
      "if act == \"final\":\n                    pass"),
     ("bỏ _stuck_final_reason", "why = _stuck_final_reason(dos, deps, now)\n        if why:", "why = None\n        if why:"),
     ("bỏ health_alert daily hỏng", "health_alert(st, \"dd_dispatch\", f\"dispatch cập nhật hồ sơ", "(lambda *a: 0)(st, \"dd_dispatch\", f\"dispatch cập nhật hồ sơ"),
+    ("B5 đảo thứ tự cũ: save_dossier TRƯỚC _save (khối changed)",
+     "            _save(deps, day, st)                 # outbox bền TRƯỚC, rồi mới ghi hồ sơ (relayed/CONCLUDED)\n            save_dossier(deps.state_dir, dos)",
+     "            save_dossier(deps.state_dir, dos)\n            _save(deps, day, st)"),
+    ("B5 đảo thứ tự cũ: save_dossier TRƯỚC enqueue (_conclude_unclear)",
+     "    _save(deps, now.date(), st)            # outbox bền TRƯỚC, rồi mới đánh dấu hồ sơ (kill giữa chừng không mất tin)\n    save_dossier(deps.state_dir, dos)\n",
+     "    save_dossier(deps.state_dir, dos)\n    _save(deps, now.date(), st)\n"),
     ("bỏ chặn 1 nhắc/tick", "if reminded:                 #", "if False:                 #"),
 ]
 

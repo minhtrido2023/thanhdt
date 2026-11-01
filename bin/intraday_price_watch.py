@@ -897,6 +897,7 @@ def _pending_work(st, deps, now):
 
 def _relay_note(st, dos, n, now):
     tk = dos["ticker"]
+    key = f"dd:{dos['id']}:note:{n['file']}"      # chống gửi trùng khi chạy lại (at-least-once)
     kind = n.get("kind")
     body = (n.get("summary") or "")[:600]
     path = f"{dos['dir']}/DOSSIER.md"
@@ -904,17 +905,17 @@ def _relay_note(st, dos, n, now):
         lab = n.get("label")
         enqueue(st, f"📋 KẾT LUẬN HỒ SƠ DD KHỦNG HOẢNG {tk} ({dos['id']}): **{E.VERDICT_VN.get(lab, lab)}**\n"
                     f"  {body}\n  Hồ sơ: {path}\n  ⇒ ANH QUYẾT. {HOLD_NOTE}.",
-                ("discord", "telegram", "email"), subject=f"Kết luận DD khủng hoảng {tk}", mention=True, now=now)
+                ("discord", "telegram", "email"), subject=f"Kết luận DD khủng hoảng {tk}", mention=True, key=key, now=now)
     elif kind == "quick":
         enqueue(st, f"📂 DD khủng hoảng {tk} — TÓM TẮT NHANH NGÀY 1:\n  {body}\n  Hồ sơ: {path}\n  ⇒ {HOLD_NOTE}.",
-                ("discord", "telegram", "email"), subject=f"DD khủng hoảng {tk} ngày 1", mention=True, now=now)
+                ("discord", "telegram", "email"), subject=f"DD khủng hoảng {tk} ngày 1", mention=True, key=key, now=now)
     elif n.get("major_event"):
         enqueue(st, f"⚠️ DD khủng hoảng {tk} — SỰ KIỆN LỚN (ngày {n.get('day')}):\n  {body}\n  ⇒ đã xin báo "
                     f"cáo kết luận sớm. Hồ sơ: {path}. {HOLD_NOTE}.",
-                ("discord", "telegram"), mention=True, now=now)
+                ("discord", "telegram"), mention=True, key=key, now=now)
     else:
         enqueue(st, f"📂 DD khủng hoảng {tk} ngày {n.get('day')}/{E.DD_WINDOW_DAYS}: {body[:300]} (hồ sơ {path}) — mặc định GIỮ",
-                ("discord",), now=now)
+                ("discord",), key=key, now=now)
 
 
 FINAL_OVERDUE_H = 6                # đã xin kết luận mà quá N giờ vẫn OPEN ⇒ đóng CHƯA RÕ (job timeout 30')
@@ -925,14 +926,14 @@ def _conclude_unclear(st, deps, now, dos, why):
     tk = dos["ticker"]
     dos["status"] = "CONCLUDED"
     dos["conclusion"] = {"label": E.UNCLEAR, "source": "no_dispatch", "at": _iso(now), "why": why[:300]}
-    save_dossier(deps.state_dir, dos)
     _stats(st)["dd_concluded"] += 1
     log_event(deps.state_dir, now.date(), "DD_CONCLUDED_NO_DISPATCH", now=now, dossier=dos["id"], why=why[:300])
     enqueue(st, f"📋 HỒ SƠ DD {tk} ({dos['id']}) tới hạn kết luận nhưng KHÔNG có báo cáo kết luận "
                 f"({why[:200]}) ⇒ **{E.VERDICT_VN[E.UNCLEAR]}**; ANH CẦN TỰ XEM {dos['dir']}/DOSSIER.md. "
                 f"{HOLD_NOTE}.", ("discord", "telegram", "email"), subject=f"Kết luận DD {tk}",
             mention=True, key=f"dd:{dos['id']}:concluded", now=now)
-    _save(deps, now.date(), st)
+    _save(deps, now.date(), st)            # outbox bền TRƯỚC, rồi mới đánh dấu hồ sơ (kill giữa chừng không mất tin)
+    save_dossier(deps.state_dir, dos)
 
 
 def _stuck_final_reason(dos, deps, now):
@@ -1005,15 +1006,15 @@ def _dossier_tick(st, deps, now):
                 enqueue(st, f"📋 KẾT LUẬN HỒ SƠ {tk} ({dos['id']}): **{E.VERDICT_VN[E.UNCLEAR]}** — job kết luận "
                             f"{job} kết thúc '{js}' KHÔNG có báo cáo ⇒ ANH CẦN TỰ XEM hồ sơ {dos['dir']}/DOSSIER.md. "
                             f"{HOLD_NOTE}.", ("discord", "telegram", "email"), subject=f"Kết luận DD {tk}",
-                        mention=True, now=now)
+                        mention=True, key=f"dd:{dos['id']}:concluded", now=now)
             else:
                 enqueue(st, f"⚠️ Hồ sơ DD {tk}: job {j['kind']} {job} kết thúc '{js}' KHÔNG ghi chú ⇒ thiếu "
                             f"{'tóm tắt ngày 1' if j['kind'] == 'quick' else 'cập nhật ngày ' + str(j.get('day'))}; "
                             f"dừng dispatch tới hết hôm nay. ANH CẦN TỰ XEM TIN {tk}. {HOLD_NOTE}.",
-                        mention=True, now=now)
+                        mention=True, key=f"dd:{dos['id']}:jobdead:{job}", now=now)
         if changed:
+            _save(deps, day, st)                 # outbox bền TRƯỚC, rồi mới ghi hồ sơ (relayed/CONCLUDED)
             save_dossier(deps.state_dir, dos)
-            _save(deps, day, st)
         # 2b) đã xin kết luận mà không còn đường ra kết luận ⇒ đóng CHƯA RÕ (không bao giờ OPEN vô hạn)
         why = _stuck_final_reason(dos, deps, now)
         if why:
