@@ -2,19 +2,19 @@
 """Work-Tree Dashboard server (Pha 1, phần B). stdlib only, 0 dependency.
 
 Đọc state/work_tree/merged.json (do work_tree_build.py sinh), ghi qua work_ledger.py.
-Env: WT_PORT (8610) · WT_BIND (0.0.0.0) · WT_ROOT · WT_STATE_DIR · WT_LEDGER · WT_SECRETS_DIR
-(các WT_* trừ PORT/BIND chỉ để test/selfcheck cô lập).
+Env: WT_PORT (8610) · WT_BIND (mặc định: "bind" trong kb/work_tree_config.json, không có thì 0.0.0.0) ·
+WT_ROOT · WT_STATE_DIR · WT_LEDGER · WT_SECRETS_DIR · WT_BUILD_ROOT · WT_BUS_ROOT (các WT_* trừ PORT/BIND
+chỉ để test/selfcheck cô lập). Import work_ledger/work_tree_build lỗi ⇒ server chết lúc khởi động (cố ý).
 Auth: token ở secrets/work_tree_token; GET /?k=<token> đặt cookie rồi redirect.
 """
-import hmac, json, os, re, secrets as _secrets, subprocess, sys, threading, time
+import hmac, json, os, re, secrets as _secrets, sys, threading, time
 from collections import defaultdict, deque
-from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 ROOT = Path(os.environ.get("WT_ROOT") or Path(__file__).resolve().parent.parent).resolve()
-WC_ROOT = Path(os.environ.get("WT_WC_ROOT") or ROOT.parent / "WorkingClaude").resolve()
+WC_ROOT = Path(os.environ.get("WT_WC_ROOT") or (ROOT.parent if ROOT.name == "mike" else ROOT.parent / "WorkingClaude")).resolve()
 STATE_DIR = Path(os.environ.get("WT_STATE_DIR") or ROOT / "state" / "work_tree")
 MERGED = STATE_DIR / "merged.json"
 LEDGER = Path(os.environ.get("WT_LEDGER") or ROOT / "kb" / "work_ledger.jsonl")
@@ -23,6 +23,9 @@ WEB = ROOT / "webui_work_tree"
 STATUSES = {"idea", "active", "waiting", "GO", "NO-GO", "live", "closed"}
 VERDICTS = {"NO-GO", "GO", "INCONCLUSIVE", "IMPLEMENTED", "KHÔNG WIRE"}
 FILE_EXT = {".md", ".json", ".csv", ".html"}
+FILE_DIRS = ("kb/projects/", "kb/paper_programs_charter/")
+FILE_DENY = re.compile(r"token|cred|secret|otp|passw", re.I)
+STATUS_BLOCKED = ("busq:", "paper:")  # nguồn derived: chỉ note/priority, không đóng từ web
 MAX_BODY, MAX_FILE, RATE_MAX, RATE_WIN = 64 * 1024, 2 * 1024 * 1024, 30, 60
 STATIC = {"/": ("index.html", "text/html; charset=utf-8"),
           "/app.js": ("app.js", "application/javascript; charset=utf-8"),
@@ -34,18 +37,8 @@ _rate_lock = threading.Lock()
 
 if str(ROOT / "bin") not in sys.path:
     sys.path.insert(0, str(ROOT / "bin"))
-try:
-    import work_ledger as WL  # Phần A (job khác); thiếu thì dùng adapter
-except Exception:
-    WL = None
-try:
-    import work_tree_build as WB
-except Exception:
-    WB = None
-
-
-def now_iso():
-    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+import work_ledger as WL  # noqa: E402  (lỗi import ⇒ chết lúc khởi động, không im lặng)
+import work_tree_build as WB  # noqa: E402
 
 
 def load_token():
@@ -72,105 +65,27 @@ def read_merged():
                 "recent": [], "ideas": [], "inbox": []}, "items": [], "branches": []}
 
 
-def _ledger_append(rec):
-    import fcntl
-    LEDGER.parent.mkdir(parents=True, exist_ok=True)
-    with open(LEDGER, "a", encoding="utf-8") as fh:
-        fcntl.flock(fh, fcntl.LOCK_EX)
-        fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
-        fh.flush(); os.fsync(fh.fileno())
-
-
-def _fallback_rebuild():
-    """Adapter tối thiểu khi chưa có work_tree_build: gấp ledger lên merged.json cũ."""
-    m = read_merged()
-    items = {i["id"]: i for i in m.get("items", [])}
-    if LEDGER.exists():
-        for ln in LEDGER.read_text(encoding="utf-8").splitlines():
-            try:
-                r = json.loads(ln)
-            except Exception:
-                continue
-            cur = items.setdefault(r["id"], {"id": r["id"], "notes": [], "priority": 3,
-                                             "status": "idea", "needs_user": False})
-            for k, v in r.items():
-                if k in ("ts", "by"):
-                    continue
-                if k == "notes":
-                    for n in v:
-                        if n not in cur["notes"]:
-                            cur["notes"].append(n)
-                else:
-                    cur[k] = v
-    today = datetime.now().date().isoformat()
-    week = (datetime.now() - timedelta(days=7)).date().isoformat()
-    L = list(items.values())
-    ids = lambda f: [i["id"] for i in L if f(i)]
-    m["items"] = L
-    m["attention"] = {
-        "need_user": ids(lambda i: i.get("needs_user") and i.get("status") != "closed"),
-        "overdue": ids(lambda i: i.get("stale") or (i.get("due") and i["due"] < today and i.get("status") != "closed")),
-        "recent": ids(lambda i: (i.get("updated") or "")[:10] >= week),
-        "ideas": ids(lambda i: i.get("status") == "idea"),
-        "inbox": ids(lambda i: i.get("source") == "user" and not i.get("ack")),
-    }
-    m["branches"] = sorted({i["branch"] for i in L if i.get("branch")})
-    m["generated_at"] = now_iso()
-    m["counts"] = {k: len(v) for k, v in m["attention"].items()}
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
-    tmp = MERGED.with_suffix(".tmp")
-    tmp.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, MERGED)
-
-
 def _rebuild():
-    if WB is not None:
-        for name in ("build_and_write", "build_merged", "build"):
-            fn = getattr(WB, name, None)
-            if callable(fn):
-                try:
-                    fn()
-                    return
-                except TypeError:
-                    continue
-    _fallback_rebuild()
+    WB.write_merged(WB.Cfg(root=os.environ.get("WT_BUILD_ROOT") or str(ROOT), ledger=str(LEDGER), out=str(MERGED),
+                           bus_root=os.environ.get("WT_BUS_ROOT")))
 
 
 def op_note(id_, text):
-    if WL is not None:
-        return WL.add_note(id_, text, by="user")
-    _ledger_append({"id": id_, "updated": now_iso(), "notes": [{"ts": now_iso(), "by": "user", "text": text}]})
+    return WL.add_note(id_, text, by="user")
 
 
 def op_priority(id_, p):
-    if WL is not None:
-        return WL.set_priority(id_, p, by="user")
-    _ledger_append({"id": id_, "priority": p, "updated": now_iso()})
+    return WL.set_priority(id_, p, by="user")
 
 
 def op_status(id_, status, verdict):
-    if WL is not None:
-        return WL.set_status(id_, status, (verdict or {}).get("label"), (verdict or {}).get("text", ""), by="user")
-    rec = {"id": id_, "status": status, "updated": now_iso()}
-    if verdict:
-        rec["verdict"] = verdict
-    _ledger_append(rec)
-
-
-def slugify(s):
-    s = re.sub(r"[^a-z0-9]+", "-", s.lower().encode("ascii", "ignore").decode()).strip("-")
-    return s[:40] or "y-tuong"
+    if status in ("idea", "active", "waiting"):  # mở lại ⇒ xoá kết luận cũ
+        return WL.upsert(id_, by="user", status=status, verdict=None)
+    return WL.set_status(id_, status, (verdict or {}).get("label"), (verdict or {}).get("text", ""), by="user")
 
 
 def op_new(branch, title, summary):
-    if WL is not None:
-        return WL.new_user_item(branch, title, summary, by="user")["id"]
-    id_ = "user:%s-%s" % (slugify(title), datetime.now().strftime("%m%d%H%M%S"))
-    _ledger_append({"id": id_, "branch": branch, "title": title, "summary": summary, "status": "idea",
-                    "priority": 3, "type": "research", "source": "user", "ack": False,
-                    "owner": "user", "opened": now_iso()[:10], "updated": now_iso(), "needs_user": False,
-                    "notes": []})
-    return id_
+    return WL.new_user_item(branch, title, summary, by="user")["id"]
 
 
 def find_item(id_):
@@ -181,35 +96,40 @@ def find_item(id_):
 
 
 def history(id_):
+    """Lịch sử dựng từ bản ghi ledger của item (mới nhất trước): thời điểm, ai, trường đổi."""
+    skip = {"id", "ts", "by", "updated"}
     out = []
-    try:
-        r = subprocess.run(["git", "-C", str(ROOT), "log", "-n", "30", "--format=%cI|%s", "-S" + id_,
-                            "--", "kb/work_ledger.jsonl"], capture_output=True, text=True, timeout=5)
-        for ln in r.stdout.splitlines():
-            ts, _, s = ln.partition("|")
-            out.append({"ts": ts, "text": s[:200]})
-    except Exception:
-        pass
-    return out
+    for r in WL.read_records(str(LEDGER)):
+        if r.get("id") != id_:
+            continue
+        if r.get("merged_into"):
+            txt = "gộp vào " + str(r["merged_into"])
+        else:
+            ch = ["ghi chú" if k == "notes" else k for k in r if k not in skip]
+            txt = "%s đổi: %s" % (r.get("by", "?"), ", ".join(ch) or "—")
+        out.append({"ts": r.get("ts") or "", "text": txt[:200]})
+    return out[::-1][:30]
 
 
-# ---------------------------------------------------------------- file whitelist
+# ---------------------------------------------------------------- file allowlist
 def resolve_file(p):
-    if not p or "\0" in p or len(p) > 400:
+    """Chỉ serve path KHỚP CHÍNH XÁC một links[].path trong merged.json (sau normpath), trong FILE_DIRS,
+    không symlink (realpath == path chưa resolve), tên không chứa token|cred|secret|otp|passw."""
+    if not p or "\0" in p or len(p) > 400 or p.startswith("/"):
         return None
-    rel = Path(p)
-    if rel.is_absolute() or ".." in rel.parts:
+    rel = os.path.normpath(p)
+    if rel.startswith("..") or not rel.startswith(FILE_DIRS) or FILE_DENY.search(rel):
+        return None
+    allowed = {os.path.normpath(l.get("path") or "") for it in read_merged().get("items", [])
+               for l in it.get("links") or [] if isinstance(l, dict)}
+    if rel not in allowed or Path(rel).suffix.lower() not in FILE_EXT:
         return None
     for base in (ROOT, WC_ROOT):
-        try:
-            f = (base / rel).resolve()
-            f.relative_to(base)
-        except Exception:
+        cand = os.path.join(str(base), rel)
+        if os.path.realpath(cand) != cand:  # symlink ở bất kỳ cấp nào ⇒ từ chối
             continue
-        parts = f.relative_to(base).parts
-        if "secrets" in parts or any(x.startswith(".") for x in parts):
-            return None
-        if f.suffix.lower() in FILE_EXT and f.is_file() and f.stat().st_size <= MAX_FILE:
+        f = Path(cand)
+        if f.is_file() and f.stat().st_size <= MAX_FILE:
             return f
     return None
 
@@ -218,9 +138,11 @@ def resolve_file(p):
 class H(BaseHTTPRequestHandler):
     server_version = "wt/1"
     protocol_version = "HTTP/1.0"
+    timeout = 15
 
     def log_message(self, fmt, *a):
-        sys.stderr.write("%s %s\n" % (self.address_string(), fmt % a))
+        msg = re.sub(r"\?[^\s\"]*", "?***", fmt % a)  # che query (?k=token) khỏi access log
+        sys.stderr.write("%s %s\n" % (self.address_string(), msg))
 
     def _send(self, code, body=b"", ctype="application/json; charset=utf-8", extra=()):
         if isinstance(body, (dict, list)):
@@ -233,6 +155,8 @@ class H(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'")
+        self.send_header("X-Frame-Options", "DENY")
         for k, v in extra:
             self.send_header(k, v)
         self.end_headers()
@@ -242,7 +166,7 @@ class H(BaseHTTPRequestHandler):
         ck = self.headers.get("Cookie", "")
         for part in ck.split(";"):
             k, _, v = part.strip().partition("=")
-            if k == "wt" and hmac.compare_digest(v, self.server.token):
+            if k == "wt" and hmac.compare_digest(v.encode(), self.server.token.encode()):
                 return True
         return False
 
@@ -251,7 +175,7 @@ class H(BaseHTTPRequestHandler):
         q = parse_qs(u.query)
         k = (q.get("k") or [""])[0]
         if k and u.path == "/":
-            if hmac.compare_digest(k, self.server.token):
+            if hmac.compare_digest(k.encode(), self.server.token.encode()):
                 return self._send(302, b"", extra=[("Location", "/"), (
                     "Set-Cookie", "wt=%s; HttpOnly; SameSite=Strict; Path=/; Max-Age=31536000" % self.server.token)])
             return self._send(401, {"error": "unauthorized"})
@@ -280,6 +204,9 @@ class H(BaseHTTPRequestHandler):
     def _rate_ok(self):
         ip, t = self.client_address[0], time.time()
         with _rate_lock:
+            if len(_rate) > 64:  # dọn IP đã im quá cửa sổ
+                for key in [x for x, q in _rate.items() if not q or t - q[-1] > RATE_WIN]:
+                    del _rate[key]
             d = _rate[ip]
             while d and t - d[0] > RATE_WIN:
                 d.popleft()
@@ -330,6 +257,9 @@ class H(BaseHTTPRequestHandler):
                             return self._send(400, {"error": "priority ∈ 1|2|3"})
                         op_priority(new_id, p)
                     elif u.path == "/api/status":
+                        if new_id.startswith(STATUS_BLOCKED):
+                            return self._send(400, {"error": "Mục này lấy từ nguồn tự động (câu hỏi bus / paper program) "
+                                                             "nên không đóng được từ web — chỉ ghi chú hoặc đổi ưu tiên."})
                         st, v = s("status", 20), d.get("verdict")
                         if st not in STATUSES:
                             return self._send(400, {"error": "status không hợp lệ"})
@@ -358,9 +288,15 @@ def make_server(port, bind="0.0.0.0"):
 
 def main():
     port = int(os.environ.get("WT_PORT", "8610"))
-    srv = make_server(port, os.environ.get("WT_BIND", "0.0.0.0"))
-    sys.stderr.write("work-tree dashboard :%d (root=%s, ledger-adapter=%s)\n" % (
-        port, ROOT, "work_ledger" if WL else "fallback"))
+    bind = os.environ.get("WT_BIND")
+    if not bind:
+        try:
+            bind = json.loads((ROOT / "kb" / "work_tree_config.json").read_text(encoding="utf-8")).get("bind")
+        except Exception:
+            bind = None
+    bind = bind or "0.0.0.0"
+    srv = make_server(port, bind)
+    sys.stderr.write("work-tree dashboard %s:%d (root=%s)\n" % (bind, port, ROOT))
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

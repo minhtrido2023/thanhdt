@@ -29,6 +29,7 @@ function match(it) {
   if (F.q) { const h = [it.title, it.summary, it.id, it.owner, it.branch].join(" ").toLowerCase(); if (!h.includes(F.q)) return false; }
   return true;
 }
+const NO_CLOSE = id => /^(busq|paper):/.test(id || "");  // nguồn tự động: chỉ ghi chú/ưu tiên
 function badge(it) {
   const st = it.verdict && it.verdict.label === "NO-GO" ? "NO-GO" : it.status;
   return el("span", {class:"badge b-" + st}, STATUS_VI[st] || st);
@@ -45,7 +46,7 @@ function itemNode(it) {
     el("div", {class:"acts"},
       el("button", {onclick:() => addNote(it.id)}, "Ghi chú"),
       el("button", {onclick:() => setPrio(it.id, it.priority || 3)}, "Ưu tiên"),
-      el("button", {onclick:() => closeItem(it)}, "Đóng / NO-GO")));
+      NO_CLOSE(it.id) ? null : el("button", {onclick:() => closeItem(it)}, "Đóng / NO-GO")));
 }
 async function mutate(path, body, msg) {
   try { await api(path, body); toast(msg); await load(); if (!$("#panel").hidden && body.id) showPanel(body.id); }
@@ -75,7 +76,7 @@ async function showPanel(id) {
   kids.push(notes.length ? el("ul", null, notes.slice().reverse().map(n => el("li", null, hhmm(n.ts) + " · " + n.by + ": " + n.text))) : el("p", {class:"muted"}, "Chưa có."));
   const ta = el("textarea", {rows:"3", maxlength:"2000", placeholder:"Thêm ghi chú…"});
   kids.push(ta, el("div", {class:"acts"}, el("button", {onclick:() => ta.value.trim() && mutate("/api/note", {id, text:ta.value.trim()}, "Đã ghi chú")}, "Lưu ghi chú"),
-    el("button", {onclick:() => setPrio(id, it.priority || 3)}, "Ưu tiên"), el("button", {onclick:() => closeItem(it)}, "Đóng / NO-GO")));
+    el("button", {onclick:() => setPrio(id, it.priority || 3)}, "Ưu tiên"), NO_CLOSE(it.id) ? null : el("button", {onclick:() => closeItem(it)}, "Đóng / NO-GO")));
   kids.push(el("h4", null, "Lịch sử"));
   kids.push((it.history || []).length ? el("ul", null, it.history.map(h => el("li", null, hhmm(h.ts) + " · " + h.text))) : el("p", {class:"muted"}, "Chưa có."));
   p.replaceChildren(...kids);

@@ -9,6 +9,7 @@ Import được (server B gọi): upsert, add_note, set_priority, set_status, ne
 merge_ids, fold, inbox_items. Mọi mốc thời gian = ICT (ZoneInfo, luật §16).
 """
 import argparse
+import contextlib
 import fcntl
 import json
 import os
@@ -67,13 +68,23 @@ def _validate(rec):
         rec["summary"] = rec["summary"][:159] + "…"
 
 
-def append_record(rec, path=None):
-    """Ghi 1 dòng: flock trên file .lock + os.write một lần với O_APPEND."""
+@contextlib.contextmanager
+def ledger_lock(path=None):
+    """flock LOCK_EX trên <ledger>.lock (giữ qua cả fold + append khi cần đọc-rồi-ghi)."""
+    path = path or LEDGER
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path + ".lock", "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        yield
+
+
+def append_record(rec, path=None, locked=False):
+    """Ghi 1 dòng: flock trên file .lock + os.write một lần với O_APPEND.
+    locked=True: caller đã giữ ledger_lock (flock không tái nhập được giữa 2 fd → tránh deadlock)."""
     path = path or LEDGER
     os.makedirs(os.path.dirname(path), exist_ok=True)
     line = (json.dumps(rec, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
-    with open(path + ".lock", "a") as lk:
-        fcntl.flock(lk, fcntl.LOCK_EX)
+    with (contextlib.nullcontext() if locked else ledger_lock(path)):
         fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
         try:
             os.write(fd, line)
@@ -137,7 +148,7 @@ def fold(records=None, path=None):
     return items
 
 
-def upsert(item_id, by="mike", path=None, **fields):
+def upsert(item_id, by="mike", path=None, locked=False, **fields):
     rec = {"id": item_id, "ts": now_iso(), "by": by}
     for k, v in fields.items():
         if k not in FIELDS and k != "notes":
@@ -145,7 +156,7 @@ def upsert(item_id, by="mike", path=None, **fields):
         rec[k] = v
     rec.setdefault("updated", today_ict())
     _validate(rec)
-    return append_record(rec, path)
+    return append_record(rec, path, locked)
 
 
 def add_note(item_id, text, by="mike", path=None):
@@ -187,13 +198,14 @@ def new_user_item(branch, title, summary="", by="user", path=None):
     if not title or not branch.strip():
         raise ValueError("cần branch và title")
     base = "user:" + slugify(title)
-    existing = fold(path=path)
-    item_id, n = base, 2
-    while item_id in existing:
-        item_id, n = "%s-%d" % (base, n), n + 1
-    return upsert(item_id, by=by, path=path, branch=branch.strip(), title=title[:120],
-                  summary=summary.strip()[:160], type="research", status="idea", priority=3,
-                  opened=today_ict(), owner="user", source="user", ack=False, needs_user=False)
+    with ledger_lock(path):  # fold + append trong CÙNG 1 khoá: 2 POST song song không sinh id trùng
+        existing = fold(path=path)
+        item_id, n = base, 2
+        while item_id in existing:
+            item_id, n = "%s-%d" % (base, n), n + 1
+        return upsert(item_id, by=by, path=path, locked=True, branch=branch.strip(), title=title[:120],
+                      summary=summary.strip()[:160], type="research", status="idea", priority=3,
+                      opened=today_ict(), owner="user", source="user", ack=False, needs_user=False)
 
 
 def inbox_items(path=None):

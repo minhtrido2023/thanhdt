@@ -7,6 +7,9 @@ Type=simple
 WorkingDirectory=/home/trido/thanhdt/WorkingClaude/mike
 Environment=PATH=/home/trido/.local/bin:/usr/local/bin:/usr/bin:/bin
 Environment=WT_PORT=8610
+Environment=WT_BIND=0.0.0.0
+NoNewPrivileges=true
+PrivateTmp=true
 ExecStart=/usr/bin/python3 /home/trido/thanhdt/WorkingClaude/mike/bin/work_tree_server.py
 Restart=on-failure
 RestartSec=5

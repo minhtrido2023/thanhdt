@@ -53,3 +53,7 @@ agents/wt-*/
 # chừng thì file tạm này nằm lại — không bao giờ commit.
 kb/events_buffer.md.tmp
 secrets/
+
+# Work-tree dashboard: file khoá flock (ledger + merged.json)
+kb/work_ledger.jsonl.lock
+state/work_tree/*.lock

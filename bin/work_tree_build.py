@@ -12,6 +12,7 @@ Import: build(Cfg()) -> dict ; write_merged(Cfg()) -> dict
 """
 import argparse
 import difflib
+import fcntl
 import glob
 import json
 import os
@@ -42,7 +43,9 @@ SKELETON = [
 ROOT_TYPE = {"Research": "research", "Operation": "ops", "Portfolio": "portfolio", "Watch": "watch"}
 SENSITIVE = [(re.compile(r"\b000\d{7}\b"), "[tk]"),
              (re.compile(r"availableCash", re.I), "[ẩn]"),
-             (re.compile(r"\b(NAV|CAGR)\b", re.I), "[ẩn]")]
+             (re.compile(r"\b(NAV|CAGR|Sharpe)\b", re.I), "[ẩn]"),
+             # số tiền / khối lượng: 500 cp, 1,2 tỷ, 300tr, 2 tỉ, 50 triệu
+             (re.compile(r"(?<![\w.,])\d[\d.,]*\s*(?:cp|cổ phiếu|triệu|tỷ|tỉ|tr)(?!\w)", re.I), "[số tiền]")]
 DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
@@ -68,14 +71,18 @@ def sanitize(s):
     return s
 
 
-def clean(o):
-    if isinstance(o, str):
-        return sanitize(o)
-    if isinstance(o, list):
-        return [clean(x) for x in o]
-    if isinstance(o, dict):
-        return {k: clean(v) for k, v in o.items()}
-    return o
+def clean_item(it):
+    """Che CHỈ trường hiển thị. id/aliases/links/depends_on/branch là khoá tham chiếu — không đụng."""
+    for k in ("title", "summary", "detail"):
+        it[k] = sanitize(it.get(k))
+    for n in it.get("notes") or []:
+        if isinstance(n, dict):
+            n["text"] = sanitize(n.get("text"))
+    if isinstance(it.get("verdict"), dict):
+        it["verdict"]["text"] = sanitize(it["verdict"].get("text"))
+    if isinstance(it.get("waiting_on"), dict):
+        it["waiting_on"]["what"] = sanitize(it["waiting_on"].get("what"))
+    return it
 
 
 def first_date(*texts):
@@ -503,17 +510,21 @@ def build(cfg=None):
            "counts": counts, "attention": attention, "items": items, "branches": branches,
            "warnings": {"dups": dups, "other": sorted(set(warns))},
            "build_seconds": round(time.time() - t0, 2)}
-    return clean(out)
+    for it in items:
+        clean_item(it)
+    return out
 
 
 def write_merged(cfg=None):
     cfg = cfg or Cfg()
-    out = build(cfg)
     os.makedirs(os.path.dirname(cfg.out), exist_ok=True)
-    tmp = cfg.out + ".tmp.%d" % os.getpid()
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(out, f, ensure_ascii=False, indent=1)
-    os.replace(tmp, cfg.out)
+    with open(cfg.out + ".lock", "a") as lk:  # giữ suốt build + replace: cron và POST không đè nhau
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        out = build(cfg)
+        tmp = cfg.out + ".tmp.%d" % os.getpid()
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(out, f, ensure_ascii=False, indent=1)
+        os.replace(tmp, cfg.out)
     return out
 
 
