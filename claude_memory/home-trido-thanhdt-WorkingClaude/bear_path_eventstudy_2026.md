@@ -17,7 +17,7 @@ User hỏi: thứ tự state có quan trọng? CRISIS→BEAR (hồi) vs NEU/BULL
 - **Mở rộng 2007+ DT4-gate (15 events):** CRISIS→BEAR (n=3) maxDD −14.9% ≈ DOWN→BEAR (n=12) −15.1%. EDGE BIẾN MẤT.
 - **FAITHFUL DT5G macro 2008+ (13 events, bản chuẩn nhất):** CRISIS→BEAR (n=4: 2008 GFC/2011 euro/2x2022) maxDD **−14.7%** ≈ DOWN→BEAR (n=9) **−13.8%**; CRISIS→BEAR còn TỆ hơn ở T+60 (−1.8% vs −0.3%); cả hai đuôi ~−29% (2008 vs 2020). Macro reclassify 299 phiên→CRISIS (1288 vs DT4 1023). Khác biệt duy nhất còn lại = CRISIS→BEAR nhẹ hơn fwd20 (−2.5 vs −5.1) nhưng đảo ở T+60, n=4.
 
-**Cơ chế:** 2008-07-14 CRISIS→BEAR = dead-cat-bounce vào sóng sập tiếp (maxDD −29.2%/fwd60 −15%). Tín hiệu 2014-only chỉ là artifact của 2 cú 2022 lành tính. Cả hai hướng đều có đuôi thảm (DOWN worst = 2007-12-13 đỉnh bong bóng fwd60 −36.8%).
+**Cơ chế:** [REDACTED]14 CRISIS→BEAR = dead-cat-bounce vào sóng sập tiếp (maxDD −29.2%/fwd60 −15%). Tín hiệu 2014-only chỉ là artifact của 2 cú 2022 lành tính. Cả hai hướng đều có đuôi thảm (DOWN worst = 2007-12-13 đỉnh bong bóng fwd60 −36.8%).
 
 **VERDICT: KHÔNG wire path-conditioning vào allocator** — không vì N nhỏ, mà vì TĂNG N LÀM ĐẢO DẤU (fit 2022 sẽ ăn đòn trong 2008-kiểu). Giữ `BEAR→w_LAG=0` bất kể đường đến. Minh họa "robust plateau, đừng re-tune lịch sử". Path mà user quan tâm phần lớn đã nắm qua tách CRISIS-vs-BEAR + postbull_block + DT-gate bất đối xứng (xem [[server_bq_write_and_v34b_refresh_2026]] cho DT5G arch). Caveat: CRISIS→BEAR vẫn n=4 (nhỏ); bản faithful DT5G 2008+ đã xác nhận (không còn dựa DT4-no-macro). Phương pháp: tầng VNINDEX = market-danger; quyết định allocator đáng lẽ cần leg LAG/BAL nhưng N quá nhỏ để chẻ tiếp → không chạy. Hướng robust hơn để ngỏ: dùng độ-sâu-DD-lúc-vào-BEAR (biến liên tục) thay vì path (đếm episode).
 
