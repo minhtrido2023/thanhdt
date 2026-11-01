@@ -29,12 +29,23 @@ is this file's CLI (monthly cron, 08:10 ICT day 11), so the gate is a drift moni
 only, nothing reads refresh. Fail-safe: any error → returns refresh=True (recompute rather than
 silently serve stale on a broken gate) and logs the error.
 
-Run: $DNA_PYEXE dcf_refresh_gate.py            # evaluate + persist + log (real)
+MÙA BCTC (job Taylor_20261101_181016, user duyệt 2026-11-01; REPORT dcf_vn_calibration_20261101 §1):
+  `--season` THAY cron ngày 11 hằng tháng. Dưới DCF_RATE_FRAME=domestic_v2 r hằng ⇒ trigger lãi suất ở
+  trên là no-op, nên lịch chuyển sang theo mùa công bố BCTC: 8 slot/năm, mỗi slot là MỘT lượt quét
+  idempotent theo slot (state["season_done"]) — "early" 05/02 05/05 03/08 03/11 (mã đã có BCTC) và
+  "full" 15/02 15/05 15/08 15/11 (sau p95 công bố + ~2 tuần vendor nạp). Chạy lại cùng ngày/cùng slot
+  ⇒ no-op; cron lỡ ⇒ bù trong SEASON_GRACE_DAYS ngày. Lượt quét CHỈ đo (số mã theo quý BCTC mới nhất,
+  số mã STALE >105 ngày) và ghi log/state — KHÔNG tính lại FV (FV tính theo yêu cầu trong dcf_check, MoS
+  theo giá mới mỗi lần dùng), KHÔNG đổi mặc định domestic_v2, KHÔNG ai đọc kết quả để chặn gì.
+  Chế độ cũ (không cờ) vẫn chạy được cho mục đích soi trôi lãi suất thủ công.
+
+Run: $DNA_PYEXE dcf_refresh_gate.py --season   # lượt mùa BCTC (cron mới)
+     $DNA_PYEXE dcf_refresh_gate.py            # evaluate + persist + log (real)
      $DNA_PYEXE dcf_refresh_gate.py --dry      # evaluate + print only, no state/log write
      $DNA_PYEXE dcf_refresh_gate.py --show      # print current state
 """
 import os, sys, json, argparse
-from datetime import datetime
+from datetime import datetime, date
 from zoneinfo import ZoneInfo
 
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
@@ -128,14 +139,93 @@ def run_gate(asof=None, state_path=STATE_FP, log_path=LOG_FP, dry=False):
         return out
 
 
+# ---------------------------------------------------------------------------- MÙA BCTC
+SEASON_SLOTS = ((2, 5, "early"), (2, 15, "full"), (5, 5, "early"), (5, 15, "full"),
+                (8, 3, "early"), (8, 15, "full"), (11, 3, "early"), (11, 15, "full"))
+SEASON_GRACE_DAYS = 7              # cron lỡ ⇒ bù tới 7 ngày sau slot (khoảng cách slot gần nhất = 10 ngày)
+SEASON_KEEP = 8                    # giữ 8 slot gần nhất trong state
+
+
+def season_slot(today, done):
+    """Thuần (không I/O): lượt quét mùa BCTC hôm nay. `today` = date (lịch ICT), `done` = list slot id đã chạy.
+    Trả (scan_bool, slot_id|None, kind|None, reason). Slot id = 'YYYY-MM-DD:kind'. Chọn slot gần nhất
+    <= today trong SEASON_GRACE_DAYS; slot đã chạy ⇒ no-op (idempotent)."""
+    cands = [(date(today.year, m, d), k) for m, d, k in SEASON_SLOTS]
+    cands = [(sd, k) for sd, k in cands if 0 <= (today - sd).days <= SEASON_GRACE_DAYS]
+    if not cands:
+        return False, None, None, "no_slot_in_window"
+    sd, kind = max(cands)
+    sid = f"{sd.isoformat()}:{kind}"
+    if sid in (done or []):
+        return False, sid, kind, "slot_already_done"
+    return True, sid, kind, "slot_due"
+
+
+def season_stats(asof, fin_path=None):
+    """Đo chất lượng dữ liệu BCTC tại asof từ cache ticker_financial local (KHÔNG BQ): với mã có dòng
+    trong 400 ngày gần nhất — phân bố quý mới nhất và số mã STALE (tuổi > STALE_BCTC_DAYS). Thuần đọc."""
+    import pandas as pd
+    import dcf_valuation as _dv
+    fp = fin_path or f"{WORKDIR}/data/bq_cache/ticker_financial.parquet"
+    df = pd.read_parquet(fp, columns=["ticker", "time", "quarter"])
+    df["time"] = pd.to_datetime(df["time"])
+    a = pd.Timestamp(asof)
+    df = df[df.time <= a].sort_values(["ticker", "time"])
+    last = df.groupby("ticker").tail(1)
+    last = last[(a - last.time).dt.days <= 400]
+    ages = (a.normalize() - last.time.dt.normalize()).dt.days
+    return {"n_tickers": int(len(last)),
+            "n_stale": int((ages > _dv.STALE_BCTC_DAYS).sum()),
+            "stale_days": _dv.STALE_BCTC_DAYS,
+            "age_p50": float(ages.median()) if len(ages) else None,
+            "by_quarter": {str(k): int(v) for k, v in last.quarter.value_counts().head(3).items()}}
+
+
+def run_season(asof=None, state_path=STATE_FP, log_path=LOG_FP, dry=False, stats_fn=None):
+    """Lượt mùa BCTC. Idempotent theo slot; lỗi ⇒ KHÔNG đánh dấu done (lượt sau thử lại), scan=False,
+    reason='season_error:...' (rc!=0 ở CLI). Không đổi last_used_rate/last_used_date (khóa lãi suất cũ)."""
+    d = _now_ict_date(asof)
+    try:
+        state = load_state(state_path)
+        done = (state or {}).get("season_done", [])
+        scan, sid, kind, reason = season_slot(date.fromisoformat(d), done)
+        out = {"date": d, "mode": "season", "scan": scan, "slot": sid, "kind": kind, "reason": reason}
+        if scan:
+            out["stats"] = (stats_fn or season_stats)(d)
+            if not dry:
+                new_state = dict(state) if isinstance(state, dict) else {}
+                new_state["season_done"] = (list(done) + [sid])[-SEASON_KEEP:]
+                new_state["season_last_date"] = d
+                _atomic_write(state_path, new_state)
+        if not dry and (scan or reason != "no_slot_in_window"):
+            with open(log_path, "a") as f:
+                f.write(json.dumps(out, ensure_ascii=False) + "\n")
+        return out
+    except Exception as exc:
+        out = {"date": d, "mode": "season", "scan": False, "slot": None, "kind": None,
+               "reason": f"season_error: {type(exc).__name__}: {str(exc)[:120]}"}
+        if not dry:
+            try:
+                with open(log_path, "a") as f:
+                    f.write(json.dumps(out, ensure_ascii=False) + "\n")
+            except Exception:
+                pass
+        return out
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="DCF discount-rate conditional refresh gate")
     ap.add_argument("--dry", action="store_true", help="evaluate + print only, no write")
     ap.add_argument("--show", action="store_true", help="print current state and exit")
+    ap.add_argument("--season", action="store_true", help="lượt mùa BCTC (idempotent theo slot)")
     ap.add_argument("--asof", default=None, help="override as-of date (YYYY-MM-DD, tests)")
     a = ap.parse_args()
     if a.show:
         print(json.dumps(load_state() or {"state": "none"}, indent=2)); sys.exit(0)
+    if a.season:
+        d = run_season(asof=a.asof, dry=a.dry)
+        print(json.dumps(d, indent=2, ensure_ascii=False))
+        sys.exit(1 if str(d["reason"]).startswith("season_error") else 0)
     d = run_gate(asof=a.asof, dry=a.dry)
     print(json.dumps(d, indent=2))
     print(("REFRESH — recompute DCF fair values" if d["refresh"]

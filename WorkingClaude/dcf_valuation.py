@@ -487,6 +487,21 @@ def recency_weighted_growth(annual_np, weights=DEFAULT_WEIGHTS):
 
 
 # ---------------------------------------------------------------- core valuation
+# Cờ STALE (job Taylor_20261101_181016, REPORT dcf_vn_calibration_20261101 §1): tuổi BCTC = ngày lịch từ
+# dòng ticker_financial mới nhất (time ≤ asof, = ngày vendor nạp) tới asof. p99 tuổi lịch sử = 100 ngày
+# ⇒ ngưỡng 105. Cờ CHẤT LƯỢNG DỮ LIỆU hiển thị — KHÔNG đổi FV, KHÔNG đổi RICH/CHEAP, KHÔNG chặn lệnh.
+STALE_BCTC_DAYS = 105
+
+
+def fin_age_days(fin_time, asof):
+    """Ngày lịch giữa dòng BCTC mới nhất và asof (>=0). Thuần lịch, không phụ thuộc TZ tiến trình."""
+    return max(0, (pd.Timestamp(asof).normalize() - pd.Timestamp(fin_time).normalize()).days)
+
+
+def is_stale_bctc(age_days):
+    return age_days is not None and age_days > STALE_BCTC_DAYS
+
+
 def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
                weights=DEFAULT_WEIGHTS, fin=None, verbose=False, term_mode=None, price_date=None):
     """Compute intrinsic fair-value-per-share + margin-of-safety, point-in-time as-of `asof`.
@@ -562,6 +577,8 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
         "term_mode": (DEFAULT_TERM_MODE if term_mode is None else term_mode),
         "growth_points": gpts, "oshares": oshares,
         "annual_np": annual_np, "quarter": last.quarter,
+        "fin_time": str(pd.Timestamp(last.time).date()),
+        "fin_age_days": fin_age_days(last.time, a),
     })
     if osh_live is not None:
         res.update({"oshares_fin": float(last.OShares), "oshares_source": osh_live["source"],
@@ -959,6 +976,8 @@ def dcf_check(ticker, asof, price=None):
         return {"status": status,
                 "margin_of_safety": round(float(mos), 4) if mos is not None else None,
                 "robust": robust, "conglomerate": is_conglomerate(ticker),
+                "fin_age_days": res.get("fin_age_days"),
+                "stale": is_stale_bctc(res.get("fin_age_days")),
                 "as_of": str(asof)[:10]}
     except Exception as exc:
         return {"status": "NOT_COMPUTED", "margin_of_safety": None, "robust": False,
@@ -983,7 +1002,8 @@ def dcf_line(ticker, asof, price=None):
     mos = d["margin_of_safety"]
     tag = ", robust" if d["robust"] else ""
     cong = " ⚠ đa ngành" if d.get("conglomerate") else ""
-    return f"DCF: {d['status']} (MoS {mos*100:+.1f}%{tag}){cong}"
+    stale = f" ⚠ STALE BCTC {d['fin_age_days']}d" if d.get("stale") else ""
+    return f"DCF: {d['status']} (MoS {mos*100:+.1f}%{tag}){cong}{stale}"
 
 
 # ---------------------------------------------------------------- price lookup (research)
