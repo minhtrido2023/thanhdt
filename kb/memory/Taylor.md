@@ -61,3 +61,4 @@
 - [2026-11-01T16:20:09Z] [dd-price-zone vòng3 01/11] XONG job Taylor_20261101_161715: ad5a89c2d (chưa merge) — chờ Mike merge; HPG tâm 19.221 chỉ chân RI, hỏi user nếu muốn giữ 20.200
 - [2026-11-01T16:42:33Z] [dcf-vn-calib 01/11] XONG job Taylor_20261101_155145: REPORT commit 91336200c (s=0, g_T 4,5% level fix; beta khong vao xep hang; lich 15/2-5-8-11) — CHO quant-skeptic + user quyet; chua code knob vn_v3
 - [2026-11-01T16:59:53Z] ĐANG DỞ: dcf_expectation_lens job Taylor_20261101_165940 — agents/Taylor/research/dcf_expectation_lens_20261101/ | NEXT: đọc REPORT dcf_vn_calibration, viết PREREG
+- [2026-11-01T17:29:15Z] [dcf-expectation-lens 02/11] XONG job Taylor_20261101_165940: REPORT commit 29ac97b3b — khong xay DCF nhe; ung vien R&D rieng accS (so voi d_NPR LAG) CHO user quyet
