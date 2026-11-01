@@ -32,3 +32,5 @@
 - [2026-11-01T04:35:22Z] ĐANG DỞ: DD TV2 job Taylor_20261101_043110 — A xong REPORT_v3 (kỳ vọng 20.700, vùng 17,1-25,3k, giá +31%) | NEXT: investor_report theo khuôn TCH
 - [2026-11-01T04:35:59Z] ĐANG DỞ: DD FPT job Taylor_20261101_042936 — calc/notes_q3_bctc.md + notes_disclosures.md xong | NEXT: spot-check CF p10, BQ/DNSE, valuation, REPORT
 - [2026-11-01T04:36:04Z] [dd-SIP 01/11] XONG job Taylor_20261101_041613: research/dd_SIP_20261101/REPORT.md + GAPS.md (chua commit) — vung hop ly 44-58k tam ~51,5k vs 48.350 nua duoi; WARNING trung binh (cho vay CTCK 4.223 khong TSDB 69%, TP T&T 1.000,7); VRG khong phai CD lon — CHO Mike skeptic/investor report
+- [2026-11-01T04:40:18Z] ĐANG DỞ: DD FPT job Taylor_20261101_042936 — calc/valuation_out.txt xong (co so 58,8k, khoang 40-85k, gia 52,7k) | NEXT: REPORT.md, GAPS.md, bus
+- [2026-11-01T04:43:10Z] [dd-FPT 01/11] XONG job Taylor_20261101_042936: research/dd_FPT_20261101/REPORT.md + GAPS.md (chua commit) — vung co so 51-62k tam ~58,8k vs 52,7k; CFO 9T 952; ky moi Q3 +3,6%; WARNING thap-TB (FTEL/Bo CA, khoan 618,8 ty GBP) — CHO skeptic + Mike investor report
