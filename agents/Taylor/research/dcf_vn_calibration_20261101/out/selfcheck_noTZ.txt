@@ -1,0 +1,5 @@
+!!!!! [dcf_valuation] dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP) !!!!!
+dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP)
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+selfcheck: 400 cap, 189 ok, mismatch=0
+rc=0
