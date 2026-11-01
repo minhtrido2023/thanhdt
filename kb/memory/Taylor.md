@@ -14,15 +14,15 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-10-31T10:49:05Z] [dd-HPG-investor 31/10] XONG job Taylor_20261031_102704: REPORT v2 (vung 18-22,5k tam ~20,2k) + investor_report/ (11tr, chua commit, chua gui) — CHO Mike doc kiem + gui email; dinh chinh QĐ 1959 trong sector_read_thep la viec Mike
-- [2026-10-31T12:00:48Z] [dd-HPG-gaps2 31/10] XONG job Taylor_20261031_114427: GAPS2.md (chua commit) — vung giu 18-22,5k, WARNING nang hon; 8 sua cho investor report (QD 1917 ton tai = chong lan tranh; trung dong tien; KPMG) — CHO Mike quyet sua/gui
-- [2026-10-31T12:58:08Z] [dd-HPG-v3 31/10] XONG job Taylor_20261031_125205: REPORT v3 + investor_report/*_v3.{md,pdf,html} (11tr, chua commit, chua gui) — CHO Mike gui email
-- [2026-10-31T14:25:38Z] ĐANG DỞ: DD TCH job Taylor_20261031_141634 — BCTC/định giá xong (calc/notes_read.md, calc/tch_valuation_out.txt), đang viết REPORT.md; chờ Bobby sector_read_bds_nha_o_do_thi_phia_bac_20261031.md | NEXT: viết REPORT, đọc Bobby, bus finding
-- [2026-10-31T14:30:38Z] [dd-TCH 31/10] XONG job Taylor_20261031_141634: research/dd_TCH_20261031/REPORT.md (chua commit) — vung 9,6-14,4k tam ~11,6-11,95k vs gia 11,85k, xap xi hop ly; moc M1 soat xet 30/11/2026; CRV khong co trong BQ ticker (de xuat Winston) — CHO Mike doc/quyet investor report
-- [2026-10-31T15:21:00Z] [dd-MBB-investor 31/10] XONG job Taylor_20261031_150718: REPORT v2 (9 dinh chinh, vung 18-26k tam ~22k; Ke15% ~19,9k; MBV WARNING ngoai bang) + investor_report/ (12tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
 - [2026-10-31T15:28:22Z] [dd-TCH-v3 31/10] XONG job Taylor_20261031_151105: REPORT v2 (vung 10.150-15.050 tam 12.300-12.650 vs 11.850, trong vung nua duoi) + investor_report/ (11tr, chua commit, chua gui, email 14,8MB) — CHO Mike kiem + gui
 - [2026-11-01T03:32:32Z] ĐANG DỞ: DD HHS job Taylor_20261101_033221 — research/dd_HHS_20261101/ | NEXT: đọc src scan, tìm BCTC hợp nhất, viết REPORT
 - [2026-11-01T03:42:48Z] ĐANG DỞ: DD HHS job Taylor_20261101_033221 — số đọc xong calc/notes_read.md + valuation_out.txt | NEXT: viết REPORT.md, GAPS.md, bus finding
 - [2026-11-01T03:45:42Z] [dd-HHS 01/11] XONG job Taylor_20261101_033221: research/dd_HHS_20261101/REPORT.md + GAPS.md (chua commit) — vung 8.800-15.900 tam ~11.900 vs 9.450, nua duoi; WARNING trung binh-cao (uy quyen, HHS Capital 1.302 ty); TCH-DD ghi sai International (thuc te Dongfeng) — CHO Mike doc/quyet investor report
 - [2026-11-01T04:09:54Z] ĐANG DỞ: DD TV2 v2 job Taylor_20261101_040936 — research/dd_TV2_20261101/ | NEXT: đọc REPORT 28/10, gaps, REPORT_v2
 - [2026-11-01T04:11:31Z] [dd-HHS-gaps 01/11] XONG job Taylor_20261101_040247: GAPS_FILL.md (chua commit) — vung giu 8,8-15,9k; WARNING moi: KL 08/KL-TTTP (Pruksa gia NOXH) + TB 2124 (N01 CRV); HHS Capital khong ten nguoi ban — CHO Mike gop voi skeptic
+- [2026-11-01T04:14:32Z] ĐANG DỞ: DD HHS v2+investor job Taylor_20261101_041414 — research/dd_HHS_20261101/ | NEXT: đọc SKEPTIC+GAPS_FILL, sửa REPORT, rồi investor_report
+- [2026-11-01T04:16:33Z] ĐANG DỞ: DD SIP job Taylor_20261101_041613 — research/dd_SIP_20261101/ | NEXT: tải src BCTC, đọc Bobby KCN, viết REPORT
+- [2026-11-01T04:16:53Z] ĐANG DỞ: DD HHS job Taylor_20261101_041414 — calc/valuation_v2_out.txt xong (tam TCH-basis ~9.960, vung 7.600-13.000) | NEXT: viết REPORT v2, GAPS, bus; rồi investor_report
+- [2026-11-01T04:17:37Z] ĐANG DỞ: DD TV2 v2 job Taylor_20261101_040936 — gaps+du lieu xong (src/gaps, calc/hist_out.txt) | NEXT: calc/valuation.py, REPORT_v2.md, GAPS.md, bus finding dd-TV2-v2-20261101
+- [2026-11-01T04:19:24Z] ĐANG DỞ: DD HHS job Taylor_20261101_041414 — VIỆC 1 XONG (REPORT v2, bus dd-hhs-v2); VIỆC 2 investor_report đang làm | NEXT: copy khuôn TCH investor_report, sửa
+- [2026-11-01T04:22:08Z] [dd-TV2-v2 01/11] XONG job Taylor_20261101_040936: research/dd_TV2_20261101/REPORT_v2.md + GAPS.md (chua commit) — vung 18,3-28,1k tam ~23k vs 27.000 (trong vung nua tren); room ngoai 0%; 4 HD EPC — CHO skeptic roi investor report

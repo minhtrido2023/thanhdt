@@ -1737,3 +1737,21 @@
 
 ## Archived 2026-11-01 (keep=12 days=0 require_done=False)
 - [2026-10-31T10:25:24Z] [dd-HPG-gaps 31/10] XONG job Taylor_20261031_100839: research/dd_HPG_20261031/GAPS.md (chua commit) — 14 so v1 can sua, vung giu 17-23k; CHO skeptic xong roi gop vao REPORT v2
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T10:49:05Z] [dd-HPG-investor 31/10] XONG job Taylor_20261031_102704: REPORT v2 (vung 18-22,5k tam ~20,2k) + investor_report/ (11tr, chua commit, chua gui) — CHO Mike doc kiem + gui email; dinh chinh QĐ 1959 trong sector_read_thep la viec Mike
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T12:00:48Z] [dd-HPG-gaps2 31/10] XONG job Taylor_20261031_114427: GAPS2.md (chua commit) — vung giu 18-22,5k, WARNING nang hon; 8 sua cho investor report (QD 1917 ton tai = chong lan tranh; trung dong tien; KPMG) — CHO Mike quyet sua/gui
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T12:58:08Z] [dd-HPG-v3 31/10] XONG job Taylor_20261031_125205: REPORT v3 + investor_report/*_v3.{md,pdf,html} (11tr, chua commit, chua gui) — CHO Mike gui email
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T14:25:38Z] ĐANG DỞ: DD TCH job Taylor_20261031_141634 — BCTC/định giá xong (calc/notes_read.md, calc/tch_valuation_out.txt), đang viết REPORT.md; chờ Bobby sector_read_bds_nha_o_do_thi_phia_bac_20261031.md | NEXT: viết REPORT, đọc Bobby, bus finding
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T14:30:38Z] [dd-TCH 31/10] XONG job Taylor_20261031_141634: research/dd_TCH_20261031/REPORT.md (chua commit) — vung 9,6-14,4k tam ~11,6-11,95k vs gia 11,85k, xap xi hop ly; moc M1 soat xet 30/11/2026; CRV khong co trong BQ ticker (de xuat Winston) — CHO Mike doc/quyet investor report
+
+## Archived 2026-11-01 (keep=12 days=0 require_done=False)
+- [2026-10-31T15:21:00Z] [dd-MBB-investor 31/10] XONG job Taylor_20261031_150718: REPORT v2 (9 dinh chinh, vung 18-26k tam ~22k; Ke15% ~19,9k; MBV WARNING ngoai bang) + investor_report/ (12tr, chua commit, chua gui) — CHO Mike doc kiem + gui email
