@@ -14,9 +14,10 @@ MUT = [
     ("M1 không chặn mã FLAGGED", "trading_bot/plan.py",
      [('if st == "FLAGGED" and not disc:', 'if st == "FLAGGED" and False:')]),
     ("M2 chặn cả lệnh BÁN", "trading_bot/plan.py",
-     [('buys = [o for o in plan.orders if (o.side or "").lower() == "buy"\n',
-       'buys = [o for o in plan.orders if True\n'),
-      ('if ((o.side or "").lower() == "buy") else None', 'if True else None')]),
+     [('buys = [o for o in plan.orders if (o.side or "").lower() == "buy" and not _exempt(o)]',
+       'buys = [o for o in plan.orders if not _exempt(o)]'),
+      ('if ((o.side or "").lower() == "buy" and not _exempt(o)) else None)',
+       'if (not _exempt(o)) else None)')]),
     ("M3 bỏ quality_flag", "trading_bot/due_diligence.py",
      [("if qf and qf != DD_FLAG_QUALITY_OK:", "if False:")]),
     ("M4 universe n/a im lặng CLEAN", "trading_bot/due_diligence.py",
@@ -34,6 +35,16 @@ MUT = [
      [('return "UNKNOWN", [], f"DD n/a', 'return "FLAGGED", ["X"], f"DD n/a')]),
     ("M10 PROBE không miễn", "trading_bot/plan.py",
      [('DD_FLAG_EXEMPT_BOOKS = frozenset({"PROBE"})', "DD_FLAG_EXEMPT_BOOKS = frozenset()")]),
+    ("M11 PROBE miễn mọi account", "trading_bot/plan.py",
+     [('probe_ok = str(getattr(plan, "account", "") or "") in DD_FLAG_PROBE_ACCOUNTS',
+       "probe_ok = True")]),
+    ("M12 cổng chạy SAU netting (thứ tự vòng 1)", "bot_execute.py",
+     [("        plan, dd_blocked = filter_dd_flag_orders(plan)\n", "        dd_blocked = []\n"),
+      ("        plan, net_adj = net_offsetting_orders(plan)\n",
+       "        plan, net_adj = net_offsetting_orders(plan)\n"
+       "        plan, dd_blocked = filter_dd_flag_orders(plan)\n")]),
+    ("M13 không gửi tin tóm tắt", "bot_execute.py",
+     [("            _notify_dd_flag_summary(p[\"label\"], plan_date, _dd_lines)", "            pass")]),
 ]
 killed = 0
 for name, rel, reps in MUT:

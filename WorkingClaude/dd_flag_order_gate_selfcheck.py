@@ -22,7 +22,8 @@ sys.path.insert(0, CODE_ROOT)
 
 from trading_bot import plan as plan_mod                       # noqa: E402
 from trading_bot import due_diligence as dd                    # noqa: E402
-from trading_bot.plan import PlannedOrder, TradePlan, filter_dd_flag_orders  # noqa: E402
+from trading_bot.plan import (PlannedOrder, TradePlan, filter_dd_flag_orders,  # noqa: E402
+                              net_offsetting_orders)
 
 ASOF = "2026-11-03"
 PASS = FAIL = 0
@@ -38,13 +39,14 @@ def check(name, cond, detail=""):
         print(f"  FAIL  {name}  {detail}")
 
 
-def mk_plan(specs):
-    orders = [PlannedOrder(id=f"{sd.upper()}-{tk}-{i:02d}", ticker=tk, side=sd, qty=1000,
-                           ref_price=20000.0, book=bk)
-              for i, (tk, bk, sd) in enumerate(specs)]
+def mk_plan(specs, account="SELFCHECK"):
+    """specs: (ticker, book, side) hoặc (ticker, book, side, qty)."""
+    orders = [PlannedOrder(id=f"{sp[2].upper()}-{sp[0]}-{i:02d}", ticker=sp[0], side=sp[2],
+                           qty=(sp[3] if len(sp) > 3 else 1000), ref_price=20000.0, book=sp[1])
+              for i, sp in enumerate(specs)]
     return TradePlan(plan_date=ASOF, signal_date=ASOF, strategy="test", strategy_version="0",
                      state=3, state_name="NEUTRAL", nav_basis={}, orders=orders,
-                     account="SELFCHECK")
+                     account=account)
 
 
 # DD giả: dict đúng shape run_due_diligence(as_dict=True)
@@ -88,9 +90,17 @@ def use_fake():
     plan_mod._dd_flag_gate_deps = lambda: (fake_run_dd, dd.dd_flag_verdict)
 
 
-def run(specs):
+def run(specs, account="SELFCHECK"):
     CALLS.clear()
-    return filter_dd_flag_orders(mk_plan(specs))
+    return filter_dd_flag_orders(mk_plan(specs, account))
+
+
+def cascade(specs, account="SELFCHECK"):
+    """Đúng thứ tự bot_execute: cổng cờ DD → net_offsetting_orders (10b kiểm thứ tự này tĩnh)."""
+    CALLS.clear()
+    pl, out = filter_dd_flag_orders(mk_plan(specs, account))
+    pl, adj = net_offsetting_orders(pl)
+    return [(o.ticker, o.side, o.qty, o.book) for o in pl.orders], out, adj
 
 
 print("=== dd_flag_order_gate self-check ===")
@@ -135,9 +145,17 @@ pl, out = run([("ERR", "DISCRETIONARY_SPECIAL", "buy")])
 check("DISCRETIONARY lỗi DD ⇒ giữ, KHÔNG FAIL_OPEN (không phải cổng chặn ở đó)",
       len(pl.orders) == 1 and out == [], out)
 
-# 7. PROBE miễn hẳn
-pl, out = run([("TCH", "PROBE", "buy")])
-check("PROBE buy ⇒ GIỮ, không gọi DD", len(pl.orders) == 1 and out == [] and CALLS == [])
+# 7. PROBE miễn — CHỈ trên account paper `main`
+pl, out = run([("TCH", "PROBE", "buy")], account="main")
+check("PROBE buy account=main ⇒ GIỮ, không gọi DD",
+      len(pl.orders) == 1 and out == [] and CALLS == [])
+for acct in ("SpaceX", "ZaloPay", "SELFCHECK", ""):
+    pl, out = run([("TCH", "PROBE", "buy")], account=acct)
+    check(f"PROBE buy account={acct!r} (không phải main) ⇒ BLOCKED như book thường",
+          pl.orders == [] and [a["action"] for a in out] == ["BLOCKED"], out)
+pl, out = run([("TCH", "BAL", "buy")], account="main")
+check("account=main nhưng book BAL ⇒ vẫn BLOCKED (miễn trừ chỉ cho PROBE)",
+      pl.orders == [] and out[0]["action"] == "BLOCKED", out)
 
 # 8. Fail-mode
 pl, out = run([("ERR", "BAL", "buy"), ("TCH", "BAL", "buy"), ("FPT", "LAG", "buy")])
@@ -179,16 +197,45 @@ check("run_due_diligence thật, raise bên trong ⇒ verdict UNKNOWN", st[0] ==
 dd._latest_row = _orig
 check("dd_flag_verdict(None) ⇒ UNKNOWN", dd.dd_flag_verdict(None)[0] == "UNKNOWN")
 
-# 10b. Dây nối cascade: bot_execute gọi cổng SAU governance, TRƯỚC lever (tĩnh — bot_execute
-# import broker/OTP nên không chạy main() offline được)
+# 10b. Dây nối cascade: bot_execute gọi cổng SAU signal_holds, TRƯỚC pre_net_refs/netting
+# (arch-review vòng 1: cổng sau netting làm mất SELL / lọt MUA qua chuyển nội bộ). Tĩnh —
+# bot_execute import broker/OTP nên không chạy main() offline được.
 src = open(os.path.join(CODE_ROOT, "bot_execute.py"), encoding="utf-8").read()
-i_gov = src.find("plan, gov_blocked = filter_lag_governance_orders(plan)")
+i_hold = src.find("plan, holds_blocked = filter_signal_holds(plan)")
 i_dd = src.find("plan, dd_blocked = filter_dd_flag_orders(plan)")
+i_ref = src.find('pre_net_refs[p["label"]] = {o.ticker: o.ref_price for o in plan.orders}')
+i_net = src.find("plan, net_adj = net_offsetting_orders(plan)")
 i_lev = src.find("plan, lever_adj = apply_capit_lever(")
-check("bot_execute: governance < dd_flag < lever trong cascade",
-      0 < i_gov < i_dd < i_lev, (i_gov, i_dd, i_lev))
+check("bot_execute: signal_holds < dd_flag < pre_net_refs < netting < lever trong cascade",
+      0 < i_hold < i_dd < i_ref < i_net < i_lev, (i_hold, i_dd, i_ref, i_net, i_lev))
 check("bot_execute: FAIL_OPEN của cổng đi qua _notify_failopen (Telegram+Discord)",
       '_notify_failopen(p["label"], "cờ DD' in src)
+_blk = src[i_dd:i_ref]
+check("bot_execute: BLOCKED/WARN gom 1 tin tóm tắt/account qua _notify_dd_flag_summary",
+      "_notify_dd_flag_summary(p[\"label\"], plan_date, _dd_lines)" in _blk
+      and _blk.count("_dd_lines.append(") == 2, _blk[-400:])
+_i_fn = src.find("def _notify_dd_flag_summary(")
+check("_notify_dd_flag_summary gửi qua _notify_trading_daily (Discord+Telegram)",
+      _i_fn > 0 and "_notify_trading_daily(" in src[_i_fn:src.find("\ndef ", _i_fn + 10)])
+
+# 10c. Ca NETTING (gate → net đúng thứ tự cascade) — tái hiện probe arch-review vòng 1
+use_fake()
+sent, out, adj = cascade([("TCH", "BAL", "buy", 1000), ("TCH", "DISCRETIONARY_SPECIAL", "sell", 300)])
+check("NET-A: BUY BAL 1000 cờ + SELL DISCRETIONARY 300 ⇒ SELL 300 SỐNG tới broker",
+      sent == [("TCH", "sell", 300, "DISCRETIONARY_SPECIAL")]
+      and [(a["action"], a["qty_before"]) for a in out] == [("BLOCKED", 1000)], (sent, out))
+sent, out, adj = cascade([("TCH", "LAG", "buy", 300), ("TCH", "custom30V_parking", "sell", 1000)])
+check("NET-B: BUY LAG 300 cờ + SELL PARK 1000 ⇒ SELL đủ 1000, MUA không đi qua chuyển nội bộ",
+      sent == [("TCH", "sell", 1000, "custom30V_parking")] and adj == []
+      and [(a["action"], a["book"], a["qty_before"]) for a in out] == [("BLOCKED", "LAG", 300)],
+      (sent, out, adj))
+sent, out, adj = cascade([("TCH", "LAG", "buy", 500), ("TCH", "DISCRETIONARY_SPECIAL", "buy", 2000),
+                          ("TCH", "PARK", "sell", 100)])
+check("NET-C: chân LAG 500 cờ KHÔNG trốn vào lệnh NET nhãn DISCRETIONARY (NET = 2000−100)",
+      sent == [("TCH", "buy", 1900, "DISCRETIONARY_SPECIAL")]
+      and sorted((a["action"], a["book"], a["qty_before"]) for a in out)
+      == [("BLOCKED", "LAG", 500), ("WARN_DISCRETIONARY", "DISCRETIONARY_SPECIAL", 2000)],
+      (sent, out))
 
 # 11. --live: replay DD THẬT trên plan gốc 03/11 (bản có TCH)
 if "--live" in sys.argv:
@@ -215,6 +262,28 @@ if "--live" in sys.argv:
               [x for x in before if x[2] == "sell"] == [x for x in after if x[2] == "sell"])
         check(f"live {acct}: không FAIL_OPEN (nguồn DD đọc được)",
               not any(a["action"] == "FAIL_OPEN" for a in out), out)
+        # Ca TỔNG HỢP có SELL (plan .bak không có lệnh SELL ⇒ check SELL ở trên rỗng): thêm SELL
+        # mã cờ TCH + SELL mã sạch đầu tiên, DD THẬT, rồi chạy gate → net như cascade.
+        tp2 = TradePlan(plan_date=raw["plan_date"], signal_date="", strategy="replay",
+                        strategy_version="0", state=0, state_name="", nav_basis={},
+                        orders=[PlannedOrder(**{k: v for k, v in o.items()
+                                                if k in PlannedOrder.__dataclass_fields__})
+                                for o in raw["orders"]], account=acct)
+        clean = next((o.ticker for o in tp2.orders if o.ticker != "TCH"), "FPT")
+        tp2.orders += [PlannedOrder(id="SYN-SELL-TCH", ticker="TCH", side="sell", qty=100,
+                                    ref_price=20000.0, book="custom30V_parking")]
+        if clean:
+            tp2.orders += [PlannedOrder(id=f"SYN-SELL-{clean}", ticker=clean, side="sell", qty=100,
+                                        ref_price=20000.0, book="custom30V_parking")]
+        pl2, out2 = filter_dd_flag_orders(tp2)
+        sells2 = [(o.ticker, o.qty) for o in pl2.orders if o.side == "sell"]
+        pl2, _ = net_offsetting_orders(pl2)
+        sent2 = [(o.ticker, o.side, o.qty) for o in pl2.orders if o.ticker == "TCH"]
+        print(f"  [live {acct} +SELL tổng hợp] sell sau cổng {sells2}; TCH ra broker {sent2}")
+        check(f"live {acct} +SELL tổng hợp: cả SELL TCH (mã cờ) lẫn SELL {clean} sống qua cổng",
+              ("TCH", 100) in sells2 and (clean is None or (clean, 100) in sells2), sells2)
+        check(f"live {acct} +SELL tổng hợp: sau gate→net, TCH ra broker = SELL 100 nguyên vẹn",
+              sent2 == [("TCH", "sell", 100)], sent2)
 
 print(f"\n=== {PASS} PASS / {FAIL} FAIL ===")
 sys.exit(1 if FAIL else 0)

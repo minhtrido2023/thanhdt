@@ -963,10 +963,13 @@ def filter_lag_governance_orders(plan, asof=None):
 
 
 # Book MIỄN cổng cờ DD. DISCRETIONARY* = sleeve discretionary (user: cờ chỉ là WARNING ở đây).
-# PROBE = harness thực thi của account paper `main` (paper_main_probe_plan.py), không phải book
-# đầu tư/candidate — chặn nó chỉ làm hỏng phép đo thực thi.
+# PROBE = harness thực thi của account paper `main` (mike/bin/paper_main_probe_plan.py:165,
+# account="main"), không phải book đầu tư/candidate — chặn nó chỉ làm hỏng phép đo thực thi.
+# Miễn trừ RÀNG CẢ account: book="PROBE" trên plan account khác (SpaceX/ZaloPay — tiền thật) KHÔNG
+# được miễn (arch-review 2026-11-02 vòng 1: nhãn book tự viết không được là lối thoát cổng).
 DD_FLAG_EXEMPT_PREFIX = "DISCRETIONARY"
 DD_FLAG_EXEMPT_BOOKS = frozenset({"PROBE"})
+DD_FLAG_PROBE_ACCOUNTS = frozenset({"main"})
 
 
 def _dd_flag_gate_deps():
@@ -992,7 +995,8 @@ def filter_dd_flag_orders(plan, asof=None):
     mà user thấy trong golive CSV); LENH_QUA_LON_VS_ADV là cờ cỡ-lệnh, đã có cap_capit/cap_lag.
 
     PHẠM VI: chỉ side=buy. Lệnh BÁN KHÔNG BAO GIỜ bị chặn. Book DISCRETIONARY* ⇒ không chặn, trả
-    bản ghi action="WARN_DISCRETIONARY" để caller in cảnh báo. Book PROBE ⇒ bỏ qua hẳn.
+    bản ghi action="WARN_DISCRETIONARY" để caller in cảnh báo. Book PROBE ⇒ bỏ qua hẳn, CHỈ KHI
+    plan.account ∈ DD_FLAG_PROBE_ACCOUNTS ("main" paper); PROBE ở account khác bị cổng như thường.
     Live-only: không đổi backtest/số pin R3 (backtest không đi qua hàm này).
 
     FAIL-MODE (cùng khuôn filter_lag_governance_orders — không chặn sạch book vì lỗi nguồn):
@@ -1001,14 +1005,22 @@ def filter_dd_flag_orders(plan, asof=None):
         action="FAIL_OPEN" liệt kê mã, caller báo LOUD (Telegram + Trading Daily).
       · không import được lớp DD → GIỮ NGUYÊN plan + action="FAIL_OPEN".
 
-    Vị trí cascade (bot_execute.py): … → rating → governance → **dd_flag** → lever → approval.
+    Vị trí cascade (bot_execute.py): excluded → signal_holds → **dd_flag** → net_offsetting →
+    capit/lag %ADV → rating → governance → lever → approval. PHẢI đứng TRƯỚC netting: netting gán
+    lệnh NET vào book chân lớn hơn (net_offsetting_orders) ⇒ cổng chạy sau sẽ (a) xoá cả phần
+    SELL thật khi BUY thắng, (b) để lệnh MUA mã cờ lọt qua dạng chuyển nội bộ khi SELL thắng,
+    (c) để chân LAG trốn vào lệnh NET mang nhãn DISCRETIONARY (arch-review 2026-11-02 vòng 1).
     Trả (plan đã lọc, list dict {"ticker","order_id","book","codes","action","qty_before","reason"}).
     """
+    probe_ok = str(getattr(plan, "account", "") or "") in DD_FLAG_PROBE_ACCOUNTS
+
     def _bk(o):
         return (o.book or "").upper()
 
-    buys = [o for o in plan.orders if (o.side or "").lower() == "buy"
-            and _bk(o) not in DD_FLAG_EXEMPT_BOOKS]
+    def _exempt(o):
+        return probe_ok and _bk(o) in DD_FLAG_EXEMPT_BOOKS
+
+    buys = [o for o in plan.orders if (o.side or "").lower() == "buy" and not _exempt(o)]
     if not buys:
         return plan, []
     asof = str(asof or plan.plan_date)[:10]
@@ -1033,7 +1045,8 @@ def filter_dd_flag_orders(plan, asof=None):
     out, keep, unknown = [], [], []
     for o in plan.orders:
         bk = _bk(o)
-        r = res.get((o.ticker, bk)) if ((o.side or "").lower() == "buy") else None
+        r = (res.get((o.ticker, bk))
+             if ((o.side or "").lower() == "buy" and not _exempt(o)) else None)
         if r is None:
             keep.append(o)
             continue
