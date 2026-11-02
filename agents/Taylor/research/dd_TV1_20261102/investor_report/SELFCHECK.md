@@ -1,3 +1,15 @@
+# Tự kiểm — TV1_DD_investor_report_20261102 — r7 (job Taylor_20261102_112213, 02/11/2026; hiệu chuẩn peer; CHƯA gửi, CHƯA qua fundamental-skeptic)
+
+## r7 — viết lại toàn bộ như bản độc lập (luật 18) + hiệu chuẩn P/E, lợi suất yêu cầu theo peer thuỷ điện
+- Peer: `../calc/peer_study/` — SQL `q_panel_monthly.sql`, `q_fin.sql`, `q_div.sql`, `q_exch.sql` (bq CLI, stdin) → `bq_*.csv` → `/home/trido/thanhdt/wc_venv/bin/python -I peer_study.py` → `peer_study_out.txt` (md5 bb69207a…), `out_*.csv`, `peer_calib.json`.
+- Định giá: `python3 -I calc/valuation.py > calc/valuation_out.txt` (md5 4fdfa088…) khối "r7" đọc `peer_calib.json`: P/E 6,80/7,42/8,01; Ke 11,1/10,4/9,5%; vùng 18.153–21.986 (18.200–22.000), tâm 20.667 (−4%); hoà vốn 540/514/480.
+- Kiểm tay: P/E 8,55×0,868 = 7,42 ✓; 7,83×0,868 = 6,80 ✓; 9,22×0,868 = 8,00 ✓. LNST hoà vốn (205×0,540−71)×0,8+40 = 71,8 ✓ (fig_12). P/E ngầm giá trên LNST (b) 19.800/(81,6e9/26.691.319) = 6,5 ✓; (c) 8,1 ✓. Cổ tức cần 19.800×{0,0949; 0,1110} = 1.879–2.198 ✓. Bảng nhóm mục 7: P/E = trung vị mã-năm 2026 (peer_study_out "P/E theo SÀN"/"1d"), P/B/yield/ROE/payout = out_peer_universe.csv (tháng 10/2026) — nhãn "(2026, trung vị)".
+- Hình mới: fig_14_peer_pe, fig_15_peer_yield (+CSV). Vẽ lại: fig_00_hero, fig_07_football, fig_12, fig_13, fig_08 (bỏ mã R0–R8 để qua grep `\br[0-9]\b`). Banner tạo lại theo tiêu đề mới.
+- Grep luật 18 (md, HTML bỏ base64, figs/*.csv): `đính chính|thay bản|trước đây|đã sửa|vòng [0-9]|\br[0-9]\b|sai sót|bản r|REFUTED|phản biện lần|lỗi phương pháp` = **0 hit**. Grep nội bộ/fear (Taylor|Bobby|Mike|skeptic|SpaceX|ZaloPay|NAV|fear|QUALIFY|AMBIGUOUS|NON|§2.5|kiểm định|xung đột lợi ích|BANNED…) = **0 hit**.
+- PDF 14 trang; HTML dry-run 17 ảnh, 4.6M; thân bài ≈1.630 từ (không tính bảng/hình/phụ lục). Xem bằng mắt trang 1, 8 (peer), 10 (định giá); sửa nhãn hero bị tràn và nhãn hoà vốn fig_12.
+- Chưa kiểm được (ghi Giới hạn): KTPL của peer (giả định 7%); nhãn thuỷ/nhiệt tự gán theo tên DN; sàn 15 mã suy từ biên độ; KBSV 17/04/2026 bản gốc; nguyên nhân BSA KH 2026 −39%.
+- Lưu ý dùng lại: `python3 -I` hệ thống không có numpy/pandas ⇒ peer_study + build_report chạy bằng wc_venv.
+
 # Tự kiểm — TV1_DD_investor_report_20261102 — r6 (CHỐT; job Taylor_20261102_102919, 02/11/2026; thay bản gửi 15:25 và r4/r5; CHƯA gửi)
 
 ## r6 — sửa theo phản biện vòng 4 (`../SKEPTIC4_20261102.md`: B1, B2, N1–N5)

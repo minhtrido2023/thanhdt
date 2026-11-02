@@ -1,10 +1,26 @@
-# DD — TV1 (CTCP Tư vấn Xây dựng Điện 1 / EVNPECC1, UPCOM) sau BCTC Q3/2026 · as-of 02/11/2026 · **VÒNG 6 (chốt; job `Taylor_20261102_102919`) — sửa theo phản biện vòng 4 (B1, B2, N1–N5), Phụ lục E5; thay vùng r5** · VÒNG 5 (job `Taylor_20261102_100630`) — Phụ lục E4 · VÒNG 4 (job `Taylor_20261102_094407`) — dựng lại định giá theo kịch bản giá PPA Sông Bung 5 (Phụ lục E3) · job gốc `Taylor_20261102_035322` · VÒNG 2 (job `Taylor_20261102_042353`) · VÒNG 3 (job `Taylor_20261102_075340`, Phụ lục E2)
+# DD — TV1 (CTCP Tư vấn Xây dựng Điện 1 / EVNPECC1, UPCOM) sau BCTC Q3/2026 · as-of 02/11/2026 · **VÒNG 7 (job `Taylor_20261102_112213`) — hiệu chuẩn P/E và lợi suất yêu cầu theo peer thuỷ điện (§0, §8g, Phụ lục E6); THAY vùng r6** · VÒNG 6 (chốt; job `Taylor_20261102_102919`) — sửa theo phản biện vòng 4 (B1, B2, N1–N5), Phụ lục E5; thay vùng r5** · VÒNG 5 (job `Taylor_20261102_100630`) — Phụ lục E4 · VÒNG 4 (job `Taylor_20261102_094407`) — dựng lại định giá theo kịch bản giá PPA Sông Bung 5 (Phụ lục E3) · job gốc `Taylor_20261102_035322` · VÒNG 2 (job `Taylor_20261102_042353`) · VÒNG 3 (job `Taylor_20261102_075340`, Phụ lục E2)
 
 > NGHIÊN CỨU READ-ONLY. Không khuyến nghị, không lệnh, không wire. User đang/đã giao dịch TV1 ngoài book V2.4 ⇒ "giữ/thêm/giảm" là quyết định của user; báo cáo chỉ đưa vùng giá + điều kiện đổi nhận định. Vòng 1 bị fundamental-skeptic phản biện REFUTED (mức văn bản/số liệu); vòng 2 áp 12 đính chính (Phụ lục E); vòng 2 bị phản biện REFUTED (medium) với 4 BLOCKING — bản này là vòng 3, đã áp toàn bộ (Phụ lục E2). **Đã qua 4 vòng phản biện (r1–r4 = SKEPTIC 1–4); r6 CHƯA được kiểm lại sau vòng 4 ngoài bước kiểm ngắn của Mike. Bản r6 thay bản gửi 02/11 15:25 (r3) và thay r4/r5 (định giá r4 thay r3 vì bỏ quên nghiên cứu giá PPA 13/10).**
 > **Nguồn:** [Q3 tr.X] = trang PDF `src/hn_q3_2026.pdf` (BCTC HN Q3/2026, ký 29/10/2026, **chưa soát xét**, bản scan) · [ME tr.X] `src/me_q3_2026.pdf` (BCTC tổng hợp/công ty mẹ) · [GT] `src/giaitrinh_hn_q3_2026.pdf` (CV 6603/TVĐ1-P3) · [H1 tr.X] = số trang **in** của `src/hn_h1_2026.pdf` (soát xét An Việt) · [Q2 tr.1] `src/hn_q2_2026.pdf` · [FY25 tr.X] = số trang in của `src/hn_fy2025_audited.pdf` (BCTC HN 2025 kiểm toán A&C) · [LV] `LEGAL_VN_20261102.md` (tra cứu pháp lý, tham khảo — cần luật sư xác nhận) · [IR] CBTT tải từ pecc1.com.vn vào `src/ir/` · [CB] `../dd_blind2_TV1_20261026/CYCLE_BLOCK.md` (khoá md5 4409305f…, 26/10) · [BQ] `tav2_bq` (lịch sử; chưa có dòng 2026Q3 của TV1 tại 02/11) · [DNSE] `calc/dnse_raw.json` (lấy 02/11/2026 ~10:50 ICT).
 > Phép tính: `calc/valuation.py` → `calc/valuation_out.txt` (tái lập: `python3 -I calc/valuation.py`). Số tự đặt gắn **[UL]** (ước lượng). Ngành: `kb/data_registry/market-state/sector_read_power_consulting_20261028.md` (Bobby, đọc mù).
 
-## 0. Kết luận (VÒNG 6 — chốt, sửa theo phản biện vòng 4; thay kết luận r5)
+## 0. Kết luận (VÒNG 7 — hiệu chuẩn theo peer; THAY §0 r6 bên dưới)
+
+> User phê bình 02/11 18:20: P/E 4–7 (r6: 5,9–6,4 = trung vị × (1−35–40%)) và Ke 12,3–13,4% trong DDM (⇒ cổ tức cần 2.435–2.650, yield 12–13%) là **con số tự đặt, không có peer**. Vòng 7 đo peer (32 mã thuỷ điện ICB 7535, 2019–2026; `calc/peer_study/`) và để dữ liệu quyết. Kết quả: **cả hai giả định r6 lệch về phía bi quan so với thị trường thực** ⇒ giá trị dịch LÊN.
+
+**Giá 19.800 đ NẰM TRONG vùng giá trị 18.200–22.000 đ/cp, tâm ≈20.700** [UL; `calc/valuation_out.txt` khối "r7"] — giá −4% so tâm (−10%…+9% so vùng). Hai phương pháp đồng hạng, cùng 4 kịch bản giá PPA × pháp lý × mốc (xác suất giữ như r6): **(i) P/E 6,8/7,42/8,01** trên LNST hoạt động bền 2027+ cộng tiền ròng cuối 2027 ⇒ kỳ vọng 19.600 (6,8: 18.200 · 8,0: 21.000); **(ii) DDM** lợi suất yêu cầu **11,1/10,4/9,5%**, terminal = 7,42 × LNST hoạt động năm 10 + tiền ròng theo sổ ⇒ DDM27 21.500 · DDM40 22.000. **Hoà vốn giá PPA ròng (ổn, Q205, đúng mốc):** chân P/E ≈540 · tâm ≈514 · DDM40 ≈480 đ/kWh — **nằm TRONG dải lãnh đạo 500–600** (r6: 634/703/817, đều trên dải).
+
+**Căn cứ peer (mọi số: `calc/peer_study/peer_study_out.txt`, SQL `q_*.sql`, CSV `bq_*.csv`/`out_*.csv`):**
+- **P/E:** thuỷ điện 2026 YTD (trung vị mã-năm, 0<PE<60): toàn nhóm 9,22 (p25 7,89; n=32) · HOSE 9,91 · HNX 9,44 · **UPCOM 8,55 (p25 7,83; n=14)**; nhiệt điện 9,12. Thanh khoản thấp KHÔNG kéo P/E xuống (2023–26 gộp mã-tháng: ADV<0,05 tỷ 11,10 · 0,05–0,3 10,71 · >0,3 9,13). UPCOM so HOSE: −14% (2026), −8% (gộp 2023–26), −15% có điều kiện (hồi quy mô tả, hệ số −0,167; N=174 mã-năm, 32 mã, R² 0,38). **Payout thấp ⇒ P/E thấp:** mã-năm payout <50% P/E 9,13 vs toàn mẫu 10,51 ⇒ hệ số **0,868** (2024–26: 0,789). TV1 payout 27% + KTPL 20% ⇒ P/E áp = UPCOM (p25/median) và toàn nhóm median × 0,868 = **6,80/7,42/8,01**. Kiểm chéo hồi quy cho hồ sơ TV1: 7,49–8,29.
+- **Thí nghiệm tự nhiên:** 11 ca LNST giảm ≥30 điểm % so nhóm và kéo dài (2019–25): P/E TTM năm sau trung vị 23,8, P/E "biết trước" 18,2 — thị trường NHÌN XUYÊN vì đa số hồi phục (thuỷ văn/chu kỳ). **Không có ca cắt PPA vĩnh viễn được xác nhận** trong dữ liệu ⇒ không dùng làm bội số (nếu dùng sẽ nâng P/E). BSA (user nêu KH 2026 −39%, chưa đối chiếu nguyên nhân): TTM P/E 11,9 @19.800; trên KH (≈162×0,61) ≈13,3 [ước lượng].
+- **Tỷ suất cổ tức:** thuỷ điện có trả 2019–25: trung vị **7,07%**/năm (182 mã-năm); ≥10%: 39; ≥12%: 18; chuỗi ≥10% dài nhất **3 năm** (SJD), không mã nào ≥12% nhiều năm liên tục. TTM 11/2026: người trả trung vị 9,5%, 10/31 mã >10%, 3 >12% (giá ngành giảm 2026). **Lợi suất yêu cầu ngầm định:** nhóm DPS ổn định (≥6/7 năm, CV≤0,35; n=7) yield 7,8% + g 3,3% = **11,1%**; hồi quy P=b·DPS qua gốc **10,4%** (median P/DPS ⇒ 7,1%); TTM người trả **9,5%**. So: tiết kiệm 12T Big-4 online **6,8%**, CCTG 12T 7,4% (`data/deposit_rate_vn_events.csv`, `data/cctg_rate_vn_events.csv`, 02/11/2026), TPCP 10Y 4,58%. ⇒ **Ke 12,3–13,4% cao hơn mức thị trường thực đòi cho thuỷ điện cổ tức ổn định khoảng 1,5–3 điểm %**; "cổ tức cần 2.435–2.650" là sai hiệu chuẩn; theo peer: **1.880–2.200 đ**.
+- **Chưa đo được → giả định + độ nhạy:** tỷ lệ trích KTPL của peer (giả định 7% ⇒ P/E 17.200); nhãn thuỷ/nhiệt tự gán theo tên DN (ICB 7535 không tách); sàn suy từ sự kiện NLIS/MOVE + biên độ (15 mã thiếu tiêu đề, dùng biên độ).
+
+**Độ nhạy (tâm hai PP):** Ke 8% 23.200 · 13% 18.500; P/E 6,0 18.300 · 9,22 23.600; payout-adj 0,789 (P/E 6,75) 19.600; terminal P/B ≤0,6 DDM 16.500–17.000; KTPL ⇒ P/E 17.200; Q175 15.800–18.600 / Q236,6 23.600–25.500; bi quan 16.100–18.900; lạc quan 25.400–27.000. Dải hai chiều 15.800–27.000. **Đọc:** ≥≈540 đ/kWh cả hai PP > giá; <≈480 cả hai < giá. P/E ngầm của giá trên LNST bền (ổn, mid): (b) 6,5x · (c) 8,1x.
+
+**Giới hạn DDM r7:** DDM > P/E vì Ke peer 10,4% < earnings yield 13,5% ngầm của P/E 7,42 và tiền giữ lại tính đủ theo sổ; ở Ke 12–13% hai PP hội tụ (P/E 19.000–19.300 vs DDM 17.700–19.600). Phần còn lại (pháp lý, chất lượng LN Q3, đuôi truy thu N9) giữ nguyên như r6 bên dưới.
+
+## 0-r6. Kết luận VÒNG 6 — ⚠️ BỊ THAY bởi §0 r7 (giữ đối chiếu)
 
 > **Bản r6 (job `Taylor_20261102_102919`) thay bản r5 (vùng 13.900–18.100, tâm 15.900) và bản gửi 02/11 15:25 (r3).** Phản biện vòng 4 (`SKEPTIC4_20261102.md`, REFUTED medium) xác nhận HƯỚNG (giá 19.800 > giá trị cho cổ đông thiểu số trong mọi biến thể) và chỉ đòi sửa chữ + số: căn cứ P/E ngang hàng không tái lập (lẫn nhiệt điện than/phân phối điện; chiết khấu thực 29–34%, không phải 35–40%) và break-even nêu ở khung khác với kết luận. r6 sửa trong một lần, không đổi phương pháp (Phụ lục E5). **Đã qua 4 vòng phản biện; r6 CHƯA kiểm lại sau vòng 4 ngoài bước kiểm ngắn của Mike. Chưa gửi bản r4/r5/r6 nào.**
 
@@ -228,6 +244,22 @@ Ví dụ (c)/ổn/27%: PV cổ tức 3.940 + terminal 5.300 (P/B terminal 0,57).
 
 **Vùng giá trị cân bằng (r6)** = [min(P/E 5,9; DDM27); max(P/E 6,4; DDM40)] (mid) = **13.900–16.800, tâm 15.200**; giá 19.800 cao hơn +18%…+42% (tâm +30%). Giá PPA ròng hoà vốn (pháp lý ổn, Q205, đúng mốc): **chân P/E 6,15 ≈634 đ/kWh (6,5: 608 · 7,0: 576); tâm hai phương pháp ≈703; DDM40 ≈817**. Phân rã, nhạy, tổ hợp ≥19.800, SOTP và chiết khấu tiếp cận ngầm định: §0 (cùng số, `valuation_out.txt`).
 
+### 8g. Hiệu chuẩn theo peer (r7, THAY vùng §8f) [`calc/valuation_out.txt` khối "r7"; `calc/peer_study/`]
+| Đ/cp (mid, đúng mốc, Ke 10,4%) | P/E 7,42 ổn | P/E cấm thầu | DDM27 ổn | DDM40 ổn | DDM40 cấm thầu |
+|---|---|---|---|---|---|
+| (a) 975 | 39.200 | 31.400 | 38.300 | 39.300 | 32.700 |
+| (b) 600 | 22.500 | 14.700 | 24.000 | 24.500 | 17.900 |
+| (c) 500 | 18.000 | 10.200 | 20.100 | 20.600 | 14.000 |
+| (d) 340 | 10.900 | 3.100 | 14.000 | 14.300 | 7.700 |
+
+| Kỳ vọng | lo | mid | hi |
+|---|---|---|---|
+| (i) P/E | 12.400 | **19.600** (6,8: 18.200 · 8,01: 21.000) | 24.400 |
+| (ii) DDM 27% | 14.800 | **21.500** | 28.200 |
+| (ii) DDM 40% | 15.200 | **22.000** | 27.300 |
+
+**Vùng r7** = [min(P/E 6,8; DDM27); max(P/E 8,01; DDM40)] = **18.200–22.000, tâm 20.700**; giá −4% so tâm. Hoà vốn: P/E ≈540 · tâm ≈514 · DDM40 ≈480. Cổ tức cần (g=0): 1.880 (9,5%) – 2.200 (11,1%). SOTP trộn 25.900 ⇒ tâm = SOTP × 0,80 (chiết khấu 20%, trong thông lệ 20–40%). Căn cứ + độ nhạy: §0.
+
 ## 9. Thanh khoản [BQ, DNSE]
 ADV20 đến 28/10: **0,72 tỷ/ngày** trung bình, **trung vị 0,41 tỷ** [BQ `calc/bq_px.csv`]; phiên 30/10 (sau công bố Q3 tối 29/10): 156.400 cp ≈ 3,1 tỷ, +4,8% [DNSE]. Biên độ UPCOM ±15%. Vị thế lớn hơn vài trăm triệu đồng/ngày sẽ là người tạo giá.
 
@@ -382,6 +414,18 @@ Skeptic xác nhận mọi phần còn lại đúng (valuation.py tái lập byte
 | KBSV | Tìm lại bản gốc 17/04/2026 | Tìm 02/11 (kbsec.com.vn, vietstock, cafef, tìm kiếm web): không thấy bản gốc, chỉ thấy báo cáo KBSV 2024 ⇒ **giữ "chưa kiểm"** (500–600 là giá tổng hay cố định; mốc 2027) | §0, §10 |
 
 **r5 → r6 (số):** P/E 6,5/6,75/7 → 5,9/6,15/6,4; kỳ vọng P/E mid 17.600 → 16.200; DDM27/40 13.900/14.500 (không đổi); vùng 13.900–18.100 → 13.900–16.800; tâm 15.900 → 15.200; giá so tâm +25% → +30%; hoà vốn PPA 591 → 634 (chân P/E) / 703 (tâm).
+
+## Phụ lục E6 — Vòng 7 (job `Taylor_20261102_112213`): hiệu chuẩn theo peer sau phê bình của user 02/11 18:20
+| Hạng mục | r6 | r7 | Căn cứ |
+|---|---|---|---|
+| P/E | 5,9/6,15/6,4 = trung vị 9,81 × (1−35–40%) — chiết khấu TỰ ĐẶT | 6,80/7,42/8,01 = thuỷ điện UPCOM 2026 p25/median, toàn nhóm median × hệ số payout 0,868 | peer_study_out.txt §1b, §1d |
+| Lợi suất yêu cầu DDM | Ke nội địa 12,3–13,4% (khung DCF) | 9,5/10,4/11,1% đo từ cổ tức thuỷ điện | §1c |
+| Terminal DDM | P/B ≤0,6 × VCSH hoạt động (không cơ sở peer; peer P/B 2026 p25 1,41) | 7,42 × LNST hoạt động năm 10 + tiền theo sổ; P/B 0,6 ở độ nhạy | §1d |
+| Cổ tức cần có | 2.435–2.650 (yield 12–13%) | 1.880–2.200 (yield 9,5–11,1%) | ≥12% chỉ 18/182 mã-năm, không bền |
+| Vùng · tâm · giá so tâm | 13.900–16.800 · 15.200 · +30% | **18.200–22.000 · 20.700 · −4%** | valuation_out "r7" |
+| Hoà vốn PPA | 634/703/817 | 540/514/480 | |
+| Báo cáo NĐT | bản đính chính có nhắc lỗi/vòng | viết lại như bản độc lập (luật 18); thêm mục 7 peer + fig_14/15 | grep rỗng (SELFCHECK.md) |
+Chưa qua fundamental-skeptic sau r7.
 
 ## Nội bộ — việc USER quyết (N12; KHÔNG đưa vào báo cáo NĐT; KHÔNG sửa file)
 `data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json` (đọc 02/11/2026, mtime 19/10): `status=paused` (từ 19/10); vẫn ghi `thesis_source = mike/agents/Taylor/research/tv1_pecc1_sotp_20260723.md` (SOTP 23/07 — luận điểm đã bị nghiên cứu 13/10 và DD này thay); `price_band.floor_note` "downside che bởi tài sản hydro" (không còn đúng: tài sản hydro chỉ che nếu bán được, ≥5 lần đấu giá thất bại); `target_pct_active_nav = 0.05` (vượt trần sleeve discretionary 2–4% theo phản biện); `hard_expiry.conditions` không có điều kiện M0 (văn bản giá PPA ròng ≤600 / dưới hoà vốn ~590). Nếu user mở lại chương trình: cập nhật thesis_source → REPORT này, bỏ floor_note, hạ target, thêm điều kiện dừng M0; `max_no_chase_ceiling` 25.000 cao hơn vùng r6 (trần 16.800). Việc của user; Taylor không đổi.

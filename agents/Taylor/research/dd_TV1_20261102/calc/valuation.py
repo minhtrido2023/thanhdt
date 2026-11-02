@@ -623,3 +623,119 @@ print(f"  khoảng DDM {min(a, exp_term(6.15,0.40)):,.0f}–{max(exp_term(6.75,0
 # Chiết khấu thiểu số ngầm: terminal gốc vs terminal P/E 6,15 (cùng LNST + tiền)
 print("\nr6 Tóm tắt trung tâm:")
 print(f"  P/E mid (6,15) {E['pe'][1]:,.0f} | DDM27 {E['ddm27'][1]:,.0f} | DDM40 {E['ddm40'][1]:,.0f} | vùng {z_lo:,.0f}–{z_hi:,.0f} | tâm {ctr:,.0f} | giá so tâm {PX/ctr-1:+.0%}")
+
+# =====================================================================================================
+# ---------- r7 (job Taylor_20261102_112213): HIỆU CHUẨN THEO PEER (calc/peer_study/) ----------
+# User hỏi: P/E 4–7 lấy cơ sở nào? cổ tức ≥2k để biện minh 15–20k (yield 12–13%) có peer nào không?
+# Peer study (32 mã thuỷ điện ICB 7535, 2019–2026; peer_study_out.txt) cho:
+#  - P/E: lo = p25 thuỷ điện UPCOM 2026 YTD, mid = trung vị thuỷ điện UPCOM 2026 YTD, hi = trung vị toàn nhóm 2026 YTD.
+#    Thanh khoản thấp KHÔNG đi kèm P/E thấp hơn trong nhóm (bậc ADV <0,05 tỷ: 11,1 vs >0,3 tỷ: 9,1, 2023–26).
+#    Nhân hệ số payout thấp 0,868 (P/E thuỷ điện payout <50% / toàn mẫu, 2021–26) vì TV1 trả 27–40% + 20% quỹ KTPL.
+#  - Lợi suất yêu cầu (g≈0): lo-value Ke = 11,1% (yield+g nhóm DPS ổn định), mid 10,4% (hồi quy P=b·DPS),
+#    hi-value 9,5% (yield TTM trung vị người trả 2026). Ke nội địa 12,3–13,4% (khung DCF) nằm TRÊN cả dải ⇒ chỉ còn ở độ nhạy.
+#  - Terminal DDM: P/E peer × LNST hoạt động năm 10 + tiền ròng theo mệnh giá (P/B ≤0,6 cũ không có cơ sở peer:
+#    P/B thuỷ điện 2026 p25 1,41, trung vị 1,92) — P/B 0,6 giữ ở độ nhạy bảo thủ.
+# =====================================================================================================
+import json as _json, os
+_CAL = _json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "peer_study", "peer_calib.json")))
+PE7 = (_CAL["pe_lo_adj"], _CAL["pe_mid_adj"], _CAL["pe_hi_adj"])   # đã nhân hệ số payout thấp (P/E payout<50% / toàn mẫu)
+PE7_RAW = (_CAL["pe_lo"], _CAL["pe_mid"], _CAL["pe_hi"])
+KE7 = (_CAL["r_hi"], _CAL["r_mid"], _CAL["r_lo"])      # thứ tự lo/mid/hi GIÁ TRỊ ⇒ Ke cao → thấp
+print("\n" + "=" * 100 + "\nr7 — HIỆU CHUẨN THEO PEER (P/E thuỷ điện UPCOM; lợi suất yêu cầu từ cổ tức thực hiện)\n" + "=" * 100)
+print(f"P/E chưa điều chỉnh payout {PE7_RAW}; hệ số payout {_CAL['payout_adj']} (2024–26: {_CAL['payout_adj_2024']})")
+print(f"P/E lo/mid/hi = {PE7}; Ke lo/mid/hi = {tuple(round(k,4) for k in KE7)}  [peer_study/peer_calib.json]")
+def ddm7(pth, payout, ke, bv0, dps26, nc, term_pe, i_at=I_AT, pb_cap=None):
+    pv = dps26 / (1 + ke) ** 0.9
+    bvop = bv0 - NC0
+    for y, op in enumerate(pth, start=1):
+        np_ = op + i_at * nc
+        div = payout * max(np_, 0.0)
+        pv += ps(div) / (1 + ke) ** (y + 0.9)
+        nc += np_ + DANET - div - KTPL * max(np_, 0.0)
+        bvop -= DANET
+    if pb_cap is not None:
+        roe = pth[-1] / bvop if bvop > 0 else 0.0
+        term_op = pb_cap_val = max(0.0, min(pb_cap, roe / ke)) * bvop
+    else:
+        term_op = term_pe * max(pth[-1], 0.0)
+    return pv + ps(term_op + nc) / (1 + ke) ** 9.9
+def val7(k, lg, i, delay, method, payout=0.40, pe=None, ke=None, q=None, pb_cap=None, i_at=I_AT):
+    ke = ke if ke else KE7[i]; pe = pe if pe else PE7[i]
+    nc = nc_start(DPS26_5[i], lg); pth = path(k, lg, i, delay, q)
+    if method == "pe":
+        return pe5(pth, pe, ke, DPS26_5[i], nc, i_at)
+    return ddm7(pth, payout, ke, BV3[i], DPS26_5[i], nc, pe, i_at, pb_cap)
+def expv7(method, i=1, pw=P5, plb=PLB5, pdel=P_DELAY, **kw):
+    s = 0.0
+    for k, pp in pw.items():
+        for lg, pl in (("ok", 1 - plb), ("bad", plb)):
+            v0 = val7(k, lg, i, False, method, **kw)
+            v = v0 if k == "a_giu_975" else (1 - pdel) * v0 + pdel * val7(k, lg, i, True, method, **kw)
+            s += pp * pl * v
+    return s
+print("\nTheo kịch bản (mid: P/E {:.2f}, Ke {:.1%}; không mốc lùi) — đ/cp:".format(PE7[1], KE7[1]))
+print(f"  {'':10s} {'P/E ổn':>9} {'P/E xấu':>9} {'DDM27 ổn':>9} {'DDM40 ổn':>9} {'DDM40 xấu':>9}")
+SC7 = {}
+for k in PRICE_SC:
+    r = (val7(k,'ok',1,False,'pe'), val7(k,'bad',1,False,'pe'), val7(k,'ok',1,False,'ddm',0.27), val7(k,'ok',1,False,'ddm',0.40), val7(k,'bad',1,False,'ddm',0.40))
+    SC7[k] = r
+    print(f"  {k:10s} " + " ".join(f"{x:9,.0f}" for x in r))
+E7 = {"pe": [expv7("pe", i) for i in range(3)], "ddm27": [expv7("ddm", i, payout=0.27) for i in range(3)],
+      "ddm40": [expv7("ddm", i, payout=0.40) for i in range(3)]}
+print("\nKỳ vọng có trọng số r7 (lo / mid / hi; lo = P/E lo + Ke cao + đầu vào thấp):")
+for m, v in E7.items():
+    print(f"  {m:6s}: {v[0]:7,.0f} / {v[1]:7,.0f} / {v[2]:7,.0f}")
+pe_lo7 = expv7("pe", 1, pe=PE7[0]); pe_hi7 = expv7("pe", 1, pe=PE7[2])
+print(f"  P/E (mid đầu vào, mid Ke) ở bội số {PE7[0]} / {PE7[2]}: {pe_lo7:,.0f} / {pe_hi7:,.0f}")
+z7_lo = min(pe_lo7, E7['ddm27'][1]); z7_hi = max(pe_hi7, E7['ddm40'][1])
+ctr7 = (E7['pe'][1] + (E7['ddm27'][1] + E7['ddm40'][1]) / 2) / 2
+print(f"VÙNG GIÁ TRỊ r7 = [min(P/E lo-bội số, DDM27); max(P/E hi-bội số, DDM40)] (đầu vào giữa, Ke giữa) = {z7_lo:,.0f}–{z7_hi:,.0f}; tâm {ctr7:,.0f}")
+print(f"  Giá {PX:,} so vùng {PX/z7_hi-1:+.0%}…{PX/z7_lo-1:+.0%}; so tâm {PX/ctr7-1:+.0%}")
+print("\nĐộ nhạy Ke 8–13% (P/E mid {:.2f}; tâm = (P/E + TB(DDM27,DDM40))/2):".format(PE7[1]))
+KE_SENS = {}
+for ke in (0.08, 0.09, 0.0949, 0.1043, 0.111, 0.12, 0.13):
+    a, b2, c2 = expv7("pe", ke=ke), expv7("ddm", payout=0.27, ke=ke), expv7("ddm", payout=0.40, ke=ke)
+    cc = (a + (b2 + c2) / 2) / 2; KE_SENS[ke] = (a, b2, c2, cc)
+    print(f"  Ke {ke:5.1%}: P/E {a:7,.0f} | DDM27 {b2:7,.0f} | DDM40 {c2:7,.0f} | tâm {cc:7,.0f} (giá {PX/cc-1:+.0%}) | DPS cần (g=0) {PX*ke:,.0f}")
+print("\nĐộ nhạy bội số (Ke mid):")
+for pe_ in (6.0, 6.15, 6.5, 6.8, 7.0, 7.42, 8.01, 8.55, 9.22, 10.0, round(PE7_RAW[1]*_CAL["payout_adj_2024"], 2)):
+    a = expv7("pe", pe=pe_); b2 = expv7("ddm", payout=0.27, pe=pe_); c2 = expv7("ddm", payout=0.40, pe=pe_)
+    print(f"  P/E {pe_:5.2f}: P/E {a:7,.0f} | DDM27 {b2:7,.0f} | DDM40 {c2:7,.0f} | tâm {(a+(b2+c2)/2)/2:7,.0f}")
+print("\nNhạy khác (mid):")
+def both7(**kw): return f"P/E {expv7('pe', **{k:v for k,v in kw.items() if k not in ('payout','pb_cap')}):7,.0f} | DDM40 {expv7('ddm', payout=0.40, **kw):7,.0f}"
+print(f"  Terminal DDM theo P/B ≤0,6 (r6, bảo thủ): DDM27 {expv7('ddm', payout=0.27, pb_cap=0.6):,.0f} · DDM40 {expv7('ddm', payout=0.40, pb_cap=0.6):,.0f}")
+print(f"  Quỹ KTPL: áp P/E lên 80% LNST/0,93 (giả định peer trích ~7% [UL]) ⇒ bội số hiệu dụng {PE7[1]*0.8/0.93:.2f}: P/E {expv7('pe', pe=PE7[1]*0.8/0.93):,.0f}")
+print(f"  P xấu 0: {both7(plb=0.0)} · P xấu 0,40: {both7(plb=0.40)}")
+print(f"  Không mốc lùi: {both7(pdel=0.0)} · P mốc lùi 0,30: {both7(pdel=0.30)}")
+print(f"  Trọng số giá r4 (10/35/35/20) + P xấu 0,35: {both7(pw=P_PRICE, plb=0.35)}")
+print(f"  Lạc quan 25/45/25/5 + P xấu 0: {both7(pw=OPT, plb=0.0)}")
+print(f"  Bi quan 5/30/40/25 + P xấu 0,40: {both7(pw={'a_giu_975':0.05,'b_600':0.30,'c_500':0.40,'d_340':0.25}, plb=0.40)}")
+for q in (175.0, 236.6):
+    print(f"  Q giữa {q}: {both7(q=q)}")
+# Hoà vốn giá PPA ròng (pháp lý ổn, Q205, đúng mốc, mid)
+def c7(price):
+    PRICE_SC["_x"] = price
+    try:
+        return (val7("_x","ok",1,False,"pe"), val7("_x","ok",1,False,"ddm",0.27), val7("_x","ok",1,False,"ddm",0.40))
+    finally:
+        del PRICE_SC["_x"]
+be7_pe = solve(lambda p: c7(p)[0]); be7_ctr = solve(lambda p: (c7(p)[0] + (c7(p)[1] + c7(p)[2]) / 2) / 2); be7_d40 = solve(lambda p: c7(p)[2])
+print(f"\nHOÀ VỐN PPA ròng r7 (pháp lý ổn, Q205, đúng mốc, mid): chân P/E ≈{be7_pe:.0f} · tâm hai PP ≈{be7_ctr:.0f} · DDM40 ≈{be7_d40:.0f} đ/kWh")
+print("Tổ hợp ≥19.800 (mid đầu vào, Ke mid; P/E mid | DDM40):")
+for k in PRICE_SC:
+    for lg in ("ok", "bad"):
+        for dl in ((False, True) if k != "a_giu_975" else (False,)):
+            r = (val7(k, lg, 1, dl, 'pe'), val7(k, lg, 1, dl, 'ddm', 0.40))
+            print(f"  {k}/{lg}/{'mốc lùi' if dl else 'đúng mốc'}: P/E {r[0]:,.0f} | DDM40 {r[1]:,.0f}" + ("  ≥ giá" if max(r) >= PX else ""))
+print("\nCổ tức cần có để biện minh giá (g=0) theo Ke peer: " + " · ".join(f"{k:.1%}: {PX*k:,.0f}" for k in KE7) +
+      f"; Ke nội địa 12,3–13,4%: {PX*0.123:,.0f}–{PX*0.134:,.0f}")
+print("Cổ tức bền 2028+ (ổn, mid) payout 27/40/60%:")
+for k in PRICE_SC:
+    nc = nc_start(1500, 'ok'); op = npop(k, 'ok', 1)
+    np27 = op + I_AT * nc; nc2 = nc + np27 + DANET - KTPL * np27 - 0.4 * np27
+    np28 = op + I_AT * nc2
+    print(f"  {k:10s} LNST 2028 ≈{np28:6.1f}: " + " / ".join(f"{ps(np28*po):,.0f}" for po in PAYOUTS) +
+          f" | yield trên giá 19.800 ở payout 40%: {ps(np28*0.4)/PX:.1%}")
+print(f"\nSOTP trộn (r12%) {s_mix:,.0f}: tâm r7 = SOTP × {ctr7/s_mix:.2f} (chiết khấu {1-ctr7/s_mix:.0%}); giá = SOTP × {PX/s_mix:.2f}")
+print(f"P/E ngầm của GIÁ HIỆN TẠI trên LNST hoạt động bền (ổn, mid): " + " · ".join(f"{k} {ps(0)+PX/ps(npop(k,'ok',1)):.1f}x" for k in PRICE_SC))
+print(f"\nr7 Tóm tắt: P/E mid {E7['pe'][1]:,.0f} | DDM27 {E7['ddm27'][1]:,.0f} | DDM40 {E7['ddm40'][1]:,.0f} | vùng {z7_lo:,.0f}–{z7_hi:,.0f} | tâm {ctr7:,.0f} | giá so tâm {PX/ctr7-1:+.0%}")
