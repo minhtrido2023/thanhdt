@@ -682,7 +682,7 @@ for a in json.load(sys.stdin)['actions']:
   #    deferred_<PKEY> để watchdog sáng mai biết đây là hoãn CÓ CHỦ ĐÍCH (không gửi cảnh báo đỏ "quá hạn").
   #  · watchdog (OVERDUE=1): thiếu ⇒ HOÃN + bus `question` (topic report-cadence-overdue-<PKEY> để bộ đóng
   #    câu hỏi tự đóng khi báo cáo giao xong; lời lẽ "chờ NAV", không phải "quá hạn"). Trần: quá
-  #    _Q_DEFER_MAX_DAYS ngày kể từ cuối quý thì thôi hoãn (lễ ngày thường không có dòng NAV sẽ không chặn mãi).
+  #    _Q_DEFER_MAX_DAYS ngày kể từ cuối quý mà NAV vẫn thiếu/ước lượng ⇒ KHÔNG tự dispatch, chuyển sang HỎI NGƯỜI (bus question nhắc mỗi lượt watchdog tới khi giao xong; ngày lễ trùng phiên làm việc cuối quý cũng chặn tới khi có người quyết — hướng fail-safe).
   _Q_DEFER_MAX_DAYS=4
   _RESUMED_NOTE=""
   if [ "$KIND" = "quarterly" ]; then
@@ -714,7 +714,11 @@ for a in json.load(sys.stdin)['actions']:
     # nav_is_estimate=True do backfill --from-raw KHÔNG BAO GIỜ được chốt lại (daily_nav_snapshot.py), nên chờ thêm
     # vô nghĩa; tự phát hành sẽ đưa số ước lượng tới nhà đầu tư dưới nhãn "NAV đã đủ". Giữ cảnh báo + hỏi người quyết.
     if [ -n "$_NAV_MISSING" ]; then
-      _NM="🔴 **Báo cáo quý ${DESC} KHÔNG tự soạn** — đã quá ${_Q_DEFER_MAX_DAYS} ngày sau cuối quý mà NAV phiên ${_QCHK} vẫn chưa đủ/chưa chốt:${_NAV_MISSING}. Dòng NAV ước lượng (backfill) không tự chốt lại nên chờ thêm vô ích. Cần anh quyết: chốt NAV phiên đó rồi báo tôi soạn, hoặc cho soạn với phiên cuối đã chốt kèm công bố rõ."
+      # §29: câu nguyên nhân rẽ theo bit THẬT trong _NAV_MISSING (thiếu dòng ≠ dòng ước lượng), không viết cứng.
+      _WHY=""
+      case "$_NAV_MISSING" in *nav_is_estimate=True*) _WHY=" Dòng NAV ước lượng (backfill) không tự chốt lại nên chờ thêm vô ích." ;; esac
+      case "$_NAV_MISSING" in *"thiếu dòng"*) _WHY="${_WHY} Có dòng THIẾU hẳn (có thể do ngày lễ hoặc snapshot hỏng) — cần kiểm nguyên nhân." ;; esac
+      _NM="🔴 **Báo cáo quý ${DESC} KHÔNG tự soạn** — đã quá ${_Q_DEFER_MAX_DAYS} ngày sau cuối quý mà NAV phiên ${_QCHK} vẫn chưa đủ/chưa chốt:${_NAV_MISSING}.${_WHY} Cần anh quyết: chốt NAV phiên đó rồi báo tôi soạn, hoặc cho soạn với phiên cuối đã chốt kèm công bố rõ."
       echo "$_NM"
       "$ROOT/bin/notify_thread.sh" "$_NM" "$TRADING_REPORT_THREAD" 2>/dev/null || true
       "$ROOT/bin/append_event.sh" Mike question "report-cadence-overdue-${PKEY}" \
