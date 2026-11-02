@@ -25,3 +25,4 @@
 - [2026-11-02T04:00:17Z] ĐANG DỞ: crisis-DD DRI ngày1 job Taylor_20261102_040003 | NEXT: legal-vn + tin DN, viết quick note dd-note
 - [2026-11-02T04:02:33Z] [crisis-dd DRI 02/11] XONG ngày1 quick (không cờ, GIỮ) — mở: SXKD T10 ~10/11, Quỹ TDND/Dakruco BCTC Q3 chi tiết
 - [2026-11-02T04:04:02Z] [tv1-dd 02/11] XONG job Taylor_20261102_035322: REPORT commit 8fcce1711 — cho Mike chay fundamental-skeptic + investor report; mo: khoan thu nhap khac 33,8 ty chua giai
+- [2026-11-02T04:28:22Z] [tv1-dd r2 02/11] XONG job Taylor_20261102_042353 — cho Mike chay fundamental-skeptic vong 2 + investor report; ket luan moi: gia ~ngang EV da chiet khau; TV1 co ten trong 13 don vi BCA
