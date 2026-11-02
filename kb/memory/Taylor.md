@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-01T16:42:33Z] [dcf-vn-calib 01/11] XONG job Taylor_20261101_155145: REPORT commit 91336200c (s=0, g_T 4,5% level fix; beta khong vao xep hang; lich 15/2-5-8-11) — CHO quant-skeptic + user quyet; chua code knob vn_v3
 - [2026-11-01T16:59:53Z] ĐANG DỞ: dcf_expectation_lens job Taylor_20261101_165940 — agents/Taylor/research/dcf_expectation_lens_20261101/ | NEXT: đọc REPORT dcf_vn_calibration, viết PREREG
 - [2026-11-01T17:29:15Z] [dcf-expectation-lens 02/11] XONG job Taylor_20261101_165940: REPORT commit 29ac97b3b — khong xay DCF nhe; ung vien R&D rieng accS (so voi d_NPR LAG) CHO user quyet
 - [2026-11-02T01:28:21Z] ĐANG DỞ: job Taylor_20261102_012810 dcf_rate_proxy — research/dcf_rate_proxy_20261102/ | NEXT: đọc docs, PREREG
@@ -26,3 +25,4 @@
 - [2026-11-02T04:02:33Z] [crisis-dd DRI 02/11] XONG ngày1 quick (không cờ, GIỮ) — mở: SXKD T10 ~10/11, Quỹ TDND/Dakruco BCTC Q3 chi tiết
 - [2026-11-02T04:04:02Z] [tv1-dd 02/11] XONG job Taylor_20261102_035322: REPORT commit 8fcce1711 — cho Mike chay fundamental-skeptic + investor report; mo: khoan thu nhap khac 33,8 ty chua giai
 - [2026-11-02T04:28:22Z] [tv1-dd r2 02/11] XONG job Taylor_20261102_042353 — cho Mike chay fundamental-skeptic vong 2 + investor report; ket luan moi: gia ~ngang EV da chiet khau; TV1 co ten trong 13 don vi BCA
+- [2026-11-02T04:29:49Z] ĐANG DỞ: job Taylor_20261102_042930 TV1 investor report — research/dd_TV1_20261102/investor_report/ | NEXT: đọc skill dd-investor-report, TV2 build_report
