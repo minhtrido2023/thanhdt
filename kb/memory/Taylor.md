@@ -43,3 +43,6 @@
 - [2026-11-02T15:23:20Z] ĐANG DỞ: job Taylor_20261102_152306 TV1 INTRINSIC_v2 + investor_report sạch — research/dd_TV1_blind_20261102/ | NEXT: đọc SKEPTIC_BLIND, valuation_blind.py, skill luật
 - [2026-11-02T15:27:06Z] ĐANG DỞ job Taylor_20261102_152306: v2 xong (valuation_blind_v2.py tâm 18.116, P20-80 11.386-24.177) | NEXT: INTRINSIC_v2.md → investor_report/ mới (figs, md, pdf, html, SELFCHECK) → commit → bus tv1-dd-final-20261102
 - [2026-11-02T15:35:50Z] [tv1-final 02/11] XONG job Taylor_20261102_152306 commit a2a067cb8 — tam v2 18.100 (P20-80 11.400-24.200), gia 19.500 trong dai; cho Mike gui email + sua dd_price_zones
+- [2026-11-02T16:08:19Z] ĐANG DỞ: job Taylor_20261102_160806 dd-flag gate (V1 bot_execute) + DD zone candidates (V2) | NEXT: đọc kb/projects/dd-flag-rules-20261102.md
+- [2026-11-02T16:19:33Z] ĐANG DỞ job Taylor_20261102_160806: V1 XONG 8cb89c7da (feat/dd-flag-gate-20261102). NEXT V2: dd_price_zone_watch -> ung vien sleeve, nhanh rieng mike repo
+- [2026-11-02T16:26:55Z] [dd-flag-rules 02/11] XONG job Taylor_20261102_160806: V1 8cb89c7da feat/dd-flag-gate-20261102 (repo ngoai) + V2 fd9ea4acf feat/dd-zone-candidates-20261102 (mike) — cho Mike arch-review + merge (V1 truoc V2); PROBE mien cong can xac nhan
