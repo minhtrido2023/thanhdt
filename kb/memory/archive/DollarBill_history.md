@@ -325,3 +325,6 @@
 
 ## Archived 2026-11-01 (keep=12 days=0 require_done=False)
 - [2026-10-26T12:06:58Z] [2026-10-26 19:xx ICT] Plan ZaloPay 10-27 XONG: residual SCL200/VPB200 (job DollarBill_20261026_120424); DNSE API 500 auth lúc lập plan -> giá/số dư từ log, cần kiểm lại; cho user duyệt truoc 08:45 ICT 27/10
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-10-27T12:06:46Z] [2026-10-27 19:xx ICT] Plan ZaloPay 10-28 XONG: 1 lenh SCL 200cp LO<=32.700 (ngay 3/3, gia dong cua 33.300 > tran), VPB/HT1 du; khong can chuyen egg; DNSE live OK; cho duyet truoc 08:45 ICT 28/10 (job DollarBill_20261027_120457)
