@@ -1370,7 +1370,46 @@ def format_topic_block(result, today, pick_base_dir=DATA_DIR):
     return "\n".join(lines)
 
 
-def print_block(today=None, result_path=None):
+DD_ZONE_SCHEMA = "dd_zone_candidates/v1"                   # = dd_price_zone_watch.CAND_SCHEMA
+DD_ZONE_FILE = "dd_zone_candidates_latest.json"            # ghi bởi dd_price_zone_watch.py (plan tối)
+
+
+def _vnd(x):
+    return "?" if x is None else f"{x:,.0f}".replace(",", ".")
+
+
+def format_dd_zone_lines(payload, today):
+    """Khối ỨNG VIÊN sleeve từ sổ DD (quy tắc 4 user 02/11: giá ≤ tâm −15% ⇒ ĐƯỢC XÉT). CHỈ HIỂN THỊ —
+    không vào state/log funnel, không sinh lệnh. payload=None ⇒ thiếu file (nói rõ, không im lặng)."""
+    head = "**E. Ứng viên sleeve từ sổ DD** (giá ≤ tâm −15%; xét, user duyệt từng lần, KHÔNG tự mua)"
+    if payload is None:
+        return f"{head}\n⚠️ không thấy file {DD_ZONE_FILE} — dd_price_zone_watch (plan tối) chưa chạy/lỗi; KHÔNG kết luận được."
+    if payload.get("schema") != DD_ZONE_SCHEMA:
+        return f"{head}\n⚠️ file ứng viên sai schema ({payload.get('schema')!r}) — không đọc."
+    asof = dt.date.fromisoformat(payload["asof"])
+    lines = [f"{head} — đóng cửa {asof:%d/%m}"]
+    if asof < prev_trading_day(today):
+        lines.append(f"⚠️ KẾT QUẢ CŨ: asof {asof} < phiên gần nhất {prev_trading_day(today)} — danh sách dưới đây "
+                     f"KHÔNG phải của phiên gần nhất.")
+    n, m = payload.get("checked", 0), payload.get("total", 0)
+    cands = payload.get("candidates") or []
+    for c in cands:
+        pc = c.get("pct_center")
+        pcs = "—" if pc is None else f"{pc:+.1f}%".replace(".", ",")
+        w = f" · {'; '.join(c['warnings'])}" if c.get("warnings") else ""
+        lines.append(f"  • {c['ticker']} {_vnd(c.get('close'))} ({pcs} so tâm {_vnd(c.get('center'))}; "
+                     f"DD {c.get('dd_date')}){' 🆕' if c.get('new_alert') else ''}{w}")
+    if not cands:
+        lines.append(f"  0 ứng viên (kiểm được {n}/{m} mã)." if n == m and m else
+                     f"  ⚠️ 0 ứng viên trong {n}/{m} mã KIỂM ĐƯỢC — chưa kết luận được cho phần còn lại.")
+    elif n < m:
+        lines.append(f"  ⚠️ chỉ kiểm được {n}/{m} mã có giá.")
+    if payload.get("excluded"):
+        lines.append("  Không xét: " + "; ".join(f"{x['ticker']} ({x['why']})" for x in payload["excluded"]))
+    return "\n".join(lines)
+
+
+def print_block(today=None, result_path=None, dd_zone_path=None):
     today = today or dt.datetime.now(ICT).date()
     path = result_path or daily_paths()["result"]
     result = None
@@ -1378,7 +1417,15 @@ def print_block(today=None, result_path=None):
         with open(path, encoding="utf-8") as f:
             result = json.load(f)
     base = os.path.dirname(path) if result_path else DATA_DIR
-    return format_topic_block(result, today, pick_base_dir=base)
+    zp = dd_zone_path or os.environ.get("DDZ_CANDIDATES") or os.path.join(base, DD_ZONE_FILE)
+    try:
+        with open(zp, encoding="utf-8") as f:
+            zpay = json.load(f)
+    except FileNotFoundError:
+        zpay = None
+    except (OSError, ValueError) as e:                      # §29: in lỗi thật
+        zpay = {"schema": f"HỎNG ({type(e).__name__})"}
+    return format_topic_block(result, today, pick_base_dir=base) + "\n" + format_dd_zone_lines(zpay, today)
 
 
 def format_run_report(result):

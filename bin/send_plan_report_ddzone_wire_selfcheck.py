@@ -5,7 +5,7 @@ import json, os, subprocess, sys, tempfile, time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPT = os.environ.get("SEND_PLAN_SCRIPT") or os.path.join(ROOT, "bin", "send_plan_report.sh")
 MARK = "DDZONE_MARK_XYZ"
-WARN = "Mã DD dưới vùng giá hợp lý: KHÔNG KIỂM ĐƯỢC"
+WARN = "Ứng viên sleeve từ sổ DD: KHÔNG KIỂM ĐƯỢC"
 res = []
 
 
