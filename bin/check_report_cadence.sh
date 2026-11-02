@@ -53,10 +53,13 @@ TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 
 # ── QGUARD_BEGIN — --scheduled-quarterly chỉ chạy NGÀY CUỐI của tháng 3/6/9/12 (lịch ICT, TODAY đã neo
 # TZ='Asia/Ho_Chi_Minh' §16). Cron `0 14 28-31 3,6,9,12 *` bắn cả 28-31 nên ngày khác thoát rc=0 IM LẶNG
-# (không sweep, không dispatch, không ghi state). Đặt TRƯỚC delivery sweep: ngày không phải cuối quý thì
-# lượt này không có việc — sweep đã có lượt 08:30 hằng ngày lo. Chỉ phụ thuộc $TODAY (selfcheck trích khối này).
+# (không sweep, không dispatch, không ghi state). Đặt TRƯỚC delivery sweep NÊN lượt 21:00 ngày khác không
+# sweep gì — việc sweep + cứu báo cáo quý là của lượt watchdog 08:30 T2-T6 (không cờ), vòng sweep của nó
+# NAY đã gồm *_quarterly_report_*.md (trước vòng 2 thì thiếu ⇒ quý không có lưới giao bù). Chỉ phụ thuộc
+# $TODAY (selfcheck trích khối này). §16: `date -d` ghim TZ=UTC — TZ=Asia/Beirut / Atlantic/Azores làm
+# `date -d "2030-03-31 +1 day"` LỖI (DST nhảy 00:00) ⇒ _Q_NEXT_DOM rỗng ⇒ guard exit 0 IM LẶNG.
 if [ "$SCHEDULED_KIND" = "quarterly" ]; then
-  _Q_MONTH="$(date -d "$TODAY" +%m)"; _Q_NEXT_DOM="$(date -d "$TODAY +1 day" +%d)"
+  _Q_MONTH="$(TZ=UTC date -d "$TODAY" +%m)"; _Q_NEXT_DOM="$(TZ=UTC date -d "$TODAY +1 day" +%d)"
   case "$_Q_MONTH" in 03|06|09|12) _Q_QMONTH=1 ;; *) _Q_QMONTH=0 ;; esac
   if [ "$_Q_QMONTH" != "1" ] || [ "$_Q_NEXT_DOM" != "01" ]; then
     exit 0
@@ -75,13 +78,69 @@ DELIVERY_STATE="$ROOT/state/report_delivery.json"
 SWEEP_ALERTED_STATE="$ROOT/state/report_delivery_incomplete_alerted.json"
 [ -f "$SWEEP_ALERTED_STATE" ] || echo '{}' > "$SWEEP_ALERTED_STATE"
 
+# ── NAVCHECK_BEGIN — hàm thuần cho NAVGUARD quý (selfcheck trích + chạy khối này). §16: date -d ghim UTC.
+_q_nav_check_date() {   # $1=cuối quý (YYYY-MM-DD) → ngày LÀM VIỆC cuối ≤ nó (T7→-1, CN→-2). Lễ ngày thường: không xử lý ở đây.
+  case "$(TZ=UTC date -d "$1" +%u)" in
+    6) TZ=UTC date -d "$1 -1 day" +%F ;;
+    7) TZ=UTC date -d "$1 -2 days" +%F ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+_q_nav_problems() {     # $1=ngày kiểm → stdout " SpaceX(thiếu dòng) ZaloPay(nav_is_estimate=True)" (rỗng = đủ + đã chốt)
+  local d="$1" a f v out=""
+  for a in SpaceX ZaloPay; do
+    f="${NAV_DIR:-$WC_ROOT/data/execution_logs}/nav_history_${a}.csv"
+    v="$(awk -F, -v d="$d" '$1==d{r="FOUND:" $10} END{print r}' "$f" 2>/dev/null)"
+    case "$v" in
+      "") out="${out} ${a}(thiếu dòng ${d})" ;;
+      FOUND:True) out="${out} ${a}(nav_is_estimate=True ngày ${d})" ;;
+    esac
+  done
+  printf '%s' "$out"
+}
+_state_get() {          # $1=key → giá trị trong $STATE (rỗng nếu không có/đọc không được)
+  STATE_F="$STATE" KEY="$1" python3 -c "
+import json, os
+try: print(json.load(open(os.environ['STATE_F'])).get(os.environ['KEY'], ''))
+except Exception: print('')
+"
+}
+_state_set() {          # $1=key $2=value — ghi NGUYÊN TỬ (tmp + os.replace, §5)
+  STATE_F="$STATE" KEY="$1" VAL="$2" python3 -c "
+import json, os, sys, tempfile
+path = os.environ['STATE_F']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('check_report_cadence: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e), file=sys.stderr)
+    state = {}
+state[os.environ['KEY']] = os.environ['VAL']
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.report_cadence_dispatched.', suffix='.tmp')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
+"
+}
+# ── NAVCHECK_END
+
 # --- Catch-up DELIVERY sweep: cứu report đã tạo nhưng agent dừng/max-turn trước lúc gửi.
 #     Chỉ chọn file chưa có legacy email proof để không phát lại kho lịch sử khi rollout;
 #     gate mới giữ ledger hai kênh và retry riêng kênh còn thiếu.
 #     Mở rộng *_daily_report_*.md 2026-08-11 (coding_guidelines.md §6 mục 5, user yêu cầu):
 #     trước đó chỉ quét weekly/monthly — daily report (vd SpaceX_ZaloPay_daily_report_*.md) hoàn
 #     toàn không có lưới an toàn nào, chỉ tin dispatch prompt nhớ gọi send_report_email.py.
-for f in "$ROOT"/reports/*_daily_report_*.md "$ROOT"/reports/*_weekly_report_*.md "$ROOT"/reports/*_monthly_report_*.md; do
+for f in "$ROOT"/reports/*_daily_report_*.md "$ROOT"/reports/*_weekly_report_*.md "$ROOT"/reports/*_monthly_report_*.md "$ROOT"/reports/*_quarterly_report_*.md; do
   [ -e "$f" ] || continue
   FNAME="$(basename "$f")"
   # paper_programs_daily_report_*.md đã có cron+state EMAIL riêng (paper_programs_daily_report.sh
@@ -502,6 +561,19 @@ def quarterly_filenames(qk):
 def is_quarter_last_day(d):
     return d.month in (3, 6, 9, 12) and (d + timedelta(days=1)).month != d.month
 
+def recently_dispatched(pk, min_age_days=2):
+    """Chống DOUBLE-DISPATCH quý: lượt 21:00 ngày D ghi state[pk]=D; watchdog 08:30 D+1 (~11,5h sau) mà
+    `!= today` thì dispatch lần 2 khi job 1 còn chạy/pending-resume ⇒ 2 bản build khác sha ⇒ email trùng.
+    Nên chỉ cứu khi KHÔNG có state hoặc state cũ ≥ min_age_days ngày. State hỏng ⇒ coi là mới (fail-safe
+    chống trùng: trùng email nhà đầu tư tệ hơn cứu muộn 1 ngày)."""
+    v = state.get(pk)
+    if not v:
+        return False
+    try:
+        return (today - date.fromisoformat(v)).days < min_age_days
+    except (ValueError, TypeError):
+        return True
+
 target_q = None   # (year, quarter)
 if scheduled_kind == "quarterly":
     if is_quarter_last_day(today):
@@ -513,7 +585,7 @@ if target_q is not None and (target_q[0], target_q[1]) >= GO_LIVE_QUARTER:
     qk = f"{target_q[0]}-Q{target_q[1]}"
     if not quarterly_period_done(quarterly_files, qk):
         period_key = f"quarterly_{qk}"
-        if state.get(period_key) != today_s:
+        if not recently_dispatched(period_key):
             sx_f, zp_f = quarterly_filenames(qk)
             actions.append({
                 "kind": "quarterly", "period_key": period_key,
@@ -600,25 +672,47 @@ import json, sys
 for a in json.load(sys.stdin)['actions']:
     print(f\"{a['kind']}\t{a['period_key']}\t{a['desc']}\t{a['target_file_spacex']}\t{a['target_file_zalopay']}\t{a['most_recent']}\t{int(a.get('overdue', True))}\")
 " | while IFS=$'\t' read -r KIND PKEY DESC TFILE_SX TFILE_ZP MOSTRECENT OVERDUE; do
-  # ── NAVGUARD_BEGIN — lượt --scheduled-quarterly 21:00: NAV ngày cuối quý PHẢI đã có cho CẢ 2 account.
-  # Vì sao: build.py lấy dòng nav_history gần nhất ≤ cuối quý (S.nav_row_on_or_before) — thiếu dòng ngày
-  # cuối quý thì NÓ LẶNG LẼ LÙI về phiên trước và ra báo cáo "đóng quý" thiếu 1 phiên, không báo lỗi.
-  # nav_snapshot_daily chạy 19:50/20:30/21:30 T2-T6 nên 21:00 thường đã có; thiếu ⇒ HOÃN (không dispatch,
-  # KHÔNG ghi state) + báo; watchdog 08:30 hôm sau (OVERDUE=1) bắt quý vừa đóng và soạn khi NAV đã có.
-  # Cuối quý rơi T7/CN (2028-12-31, 2029-03-31…) hoặc ngày lễ: không có phiên ⇒ không đòi dòng NAV ngày đó
-  # (T7/CN) — builder dùng phiên cuối ≤ cuối quý; ngày lễ ngày thường: không có dòng ⇒ hoãn rồi watchdog soạn.
-  if [ "$KIND" = "quarterly" ] && [ "$OVERDUE" = "0" ] && [ "$(date -d "$TODAY" +%u)" -le 5 ]; then
-    _NAV_MISSING=""
-    for _a in SpaceX ZaloPay; do
-      grep -q "^${TODAY}," "${NAV_DIR:-$WC_ROOT/data/execution_logs}/nav_history_${_a}.csv" 2>/dev/null || _NAV_MISSING="${_NAV_MISSING} ${_a}"
-    done
-    if [ -n "$_NAV_MISSING" ]; then
-      _NM="⏸️ **Báo cáo quý ${DESC} HOÃN** — chưa có dòng NAV ngày ${TODAY} cho:${_NAV_MISSING}. Không dispatch (tránh báo cáo đóng quý thiếu 1 phiên). Watchdog 08:30 sáng mai sẽ tự soạn khi NAV đã có."
+  # ── NAVGUARD_BEGIN — báo cáo QUÝ: NAV của NGÀY LÀM VIỆC CUỐI ≤ cuối quý phải có + đã chốt, cho CẢ 2 account.
+  # Vì sao: build.py lấy dòng nav_history gần nhất ≤ cuối quý (S.nav_row_on_or_before) — thiếu dòng thì NÓ LẶNG
+  # LẼ LÙI về phiên trước và ra báo cáo "đóng quý" thiếu 1 phiên, không báo lỗi. Kiểm ngày làm việc cuối ≤
+  # PERIOD_END (KHÔNG phải $TODAY: quý kết thúc T7/CN thì là thứ Sáu) và kiểm nav_is_estimate=True (số ước
+  # lượng chưa chốt). CHẠY CẢ TRÊN watchdog (OVERDUE=1) — trước đây bỏ qua nên rescue sáng hôm sau soạn báo
+  # cáo từ NAV thiếu/ước lượng.
+  #  · 21:00 (OVERDUE=0): thiếu ⇒ HOÃN (không dispatch, KHÔNG ghi state dispatch) + status + ghi dấu
+  #    deferred_<PKEY> để watchdog sáng mai biết đây là hoãn CÓ CHỦ ĐÍCH (không gửi cảnh báo đỏ "quá hạn").
+  #  · watchdog (OVERDUE=1): thiếu ⇒ HOÃN + bus `question` (topic report-cadence-overdue-<PKEY> để bộ đóng
+  #    câu hỏi tự đóng khi báo cáo giao xong; lời lẽ "chờ NAV", không phải "quá hạn"). Trần: quá
+  #    _Q_DEFER_MAX_DAYS ngày kể từ cuối quý thì thôi hoãn (lễ ngày thường không có dòng NAV sẽ không chặn mãi).
+  _Q_DEFER_MAX_DAYS=4
+  _RESUMED_NOTE=""
+  if [ "$KIND" = "quarterly" ]; then
+    _qk0="${PKEY#quarterly_}"
+    _QPE="$(TZ=UTC date -d "${_qk0%-Q*}-$(printf '%02d' $((3 * ${_qk0#*-Q})))-01 +1 month -1 day" +%F)"
+    _QCHK=""; [ -n "$_QPE" ] && _QCHK="$(_q_nav_check_date "$_QPE")"
+    if [ -z "$_QCHK" ]; then
+      echo "❌ check_report_cadence: KHÔNG tính được ngày cuối quý/ngày kiểm NAV từ PKEY=${PKEY} — dừng, không dispatch." >&2
+      exit 1
+    fi
+    _NAV_MISSING="$(_q_nav_problems "$_QCHK")"
+    _QAGE=$(( ( $(TZ=UTC date -d "$TODAY" +%s) - $(TZ=UTC date -d "$_QPE" +%s) ) / 86400 ))
+    if [ -n "$_NAV_MISSING" ] && [ "$_QAGE" -le "$_Q_DEFER_MAX_DAYS" ]; then
+      if [ "$OVERDUE" = "0" ]; then
+        _NM="⏸️ **Báo cáo quý ${DESC} HOÃN** — NAV phiên ${_QCHK} chưa đủ/chưa chốt:${_NAV_MISSING}. Không dispatch (tránh báo cáo đóng quý thiếu 1 phiên). Watchdog 08:30 sáng mai sẽ tự soạn khi NAV đã có."
+        _state_set "deferred_${PKEY}" "$TODAY"
+        _EVT=status; _ETOPIC="report-cadence-quarterly-deferred-${PKEY}"
+      else
+        _NM="⏸️ **Báo cáo quý ${DESC} vẫn CHỜ NAV** (hoãn có chủ đích, không phải quá hạn) — NAV phiên ${_QCHK} chưa đủ/chưa chốt:${_NAV_MISSING}. Watchdog sẽ thử lại sáng mai (tối đa ${_Q_DEFER_MAX_DAYS} ngày sau cuối quý)."
+        _EVT=question; _ETOPIC="report-cadence-overdue-${PKEY}"
+      fi
       echo "$_NM"
       "$ROOT/bin/notify_thread.sh" "$_NM" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-      "$ROOT/bin/append_event.sh" Mike status "report-cadence-quarterly-deferred-${PKEY}" \
-        "{\"period\":\"${DESC}\",\"missing_nav\":\"${_NAV_MISSING# }\",\"asof\":\"${TODAY}\"}" 2>/dev/null || true
+      "$ROOT/bin/append_event.sh" Mike "$_EVT" "$_ETOPIC" \
+        "{\"period\":\"${DESC}\",\"missing_nav\":\"${_NAV_MISSING# }\",\"nav_date\":\"${_QCHK}\",\"asof\":\"${TODAY}\",\"question\":\"Cho NAV phien ${_QCHK} truoc khi soan bao cao quy (hoan co chu dich).\"}" 2>/dev/null || true
       continue
+    fi
+    if [ "$OVERDUE" = "1" ]; then
+      _DEFERRED="$(_state_get "deferred_${PKEY}")"
+      if [ -n "$_DEFERRED" ]; then OVERDUE=0; _RESUMED_NOTE=" (hoãn từ ${_DEFERRED} do chờ NAV, nay NAV đã đủ)"; fi
     fi
   fi
   # ── NAVGUARD_END
@@ -634,7 +728,7 @@ for a in json.load(sys.stdin)['actions']:
     TOPIC_PREFIX="report-cadence-overdue-"
     EVENT_PAYLOAD="{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file_spacex\":\"${TFILE_SX}\",\"target_file_zalopay\":\"${TFILE_ZP}\",\"question\":\"Bao cao ${KIND} qua han, da auto-dispatch Taylor. Xac nhan/theo doi.\"}"
   else
-    MSG="📊 **Đang tạo báo cáo ${KIND} theo lịch — ${DESC}** — lượt chạy đúng lịch (Thứ Bảy 09:00 / ngày 1 09:00 / 21:00 ngày cuối quý), không phải lỗi hay quá hạn. Đang dispatch Taylor soạn + gửi. File dự kiến: \`${TFILE_SX}\` + \`${TFILE_ZP}\`."
+    MSG="📊 **Đang tạo báo cáo ${KIND} theo lịch — ${DESC}** — lượt chạy đúng lịch (Thứ Bảy 09:00 / ngày 1 09:00 / 21:00 ngày cuối quý), không phải lỗi hay quá hạn${_RESUMED_NOTE}. Đang dispatch Taylor soạn + gửi. File dự kiến: \`${TFILE_SX}\` + \`${TFILE_ZP}\`."
     EVENT_TYPE="finding"
     TOPIC_PREFIX="report-cadence-scheduled-"
     EVENT_PAYLOAD="{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file_spacex\":\"${TFILE_SX}\",\"target_file_zalopay\":\"${TFILE_ZP}\"}"
@@ -669,8 +763,8 @@ for a in json.load(sys.stdin)['actions']:
   # cơ học, fail-closed). Phần Cơ bản/định giá (Value Radar, DT gate §6b) GIỮ NGUYÊN — Livermore mù DT5G.
   case "$PKEY" in
     weekly_*) PERIOD_END="${PKEY##*_}" ;;
-    monthly_*) PERIOD_END="$(date -d "${PKEY#monthly_}-01 +1 month -1 day" +%F)" ;;
-    quarterly_*) _qk="${PKEY#quarterly_}"; PERIOD_END="$(date -d "${_qk%-Q*}-$(printf '%02d' $((3 * ${_qk#*-Q})))-01 +1 month -1 day" +%F)" ;;
+    monthly_*) PERIOD_END="$(TZ=UTC date -d "${PKEY#monthly_}-01 +1 month -1 day" +%F)" ;;
+    quarterly_*) _qk="${PKEY#quarterly_}"; PERIOD_END="$(TZ=UTC date -d "${_qk%-Q*}-$(printf '%02d' $((3 * ${_qk#*-Q})))-01 +1 month -1 day" +%F)" ;;
     *) PERIOD_END="" ;;
   esac
   LIVERMORE_STEP="Khối '**Kỹ thuật (VN-Index ...)**' trong mục 'Toàn cảnh thị trường' (CẢ 2 file) KHÔNG tự viết nữa — do Livermore (chuyên viên kỹ thuật độc lập của đội) viết: TRƯỚC khi soạn, chạy \`python3 $ROOT/bin/livermore_report_block.py ensure --kind ${KIND} --period-end ${PERIOD_END}\` (thường 1-5 phút, tới ~45 phút nếu đến hạn lập dự báo mới ⇒ chạy NỀN bằng Bash run_in_background, soạn các mục khác trong lúc chờ, rồi đọc JSON nó in ra; idempotent + có khoá — chạy lại trả ngay khối đã có). (a) rc=0 (status PASS): DÁN NGUYÊN VĂN toàn bộ nội dung file .md mà JSON in ra trỏ tới (trường md) vào chỗ khối Kỹ thuật, KHÔNG sửa chữ/số/dòng nguồn/dòng dự báo đang mở, không thêm số kỹ thuật nào khác vào khối; sau khi ghi file chạy \`python3 $ROOT/bin/livermore_report_block.py verify-report <file> --kind ${KIND} --period-end ${PERIOD_END}\` cho TỪNG file, phải ra VERBATIM. (b) rc≠0 (FAIL): tự viết khối Kỹ thuật như trước (chỉ số liệu đã verify, nêu as-of) và KHÔNG ghi Livermore là nguồn; trong file ZaloPay thêm ngay dưới khối dòng '⚠️ Khối kỹ thuật Livermore không qua kiểm tra cơ học — khối trên do người soạn báo cáo viết. Lý do: <reason trong JSON>'; file SpaceX không nhắc sự cố; ghi reason vào bus finding. Mục 'Cơ bản / định giá' (Value Radar, DT gate) giữ nguyên cách làm hiện tại. Phần Outlook Kỹ thuật vẫn do bạn viết nhưng KHÔNG được trình bày như dự báo của Livermore, không cam kết độ chính xác."
@@ -704,7 +798,7 @@ for a in json.load(sys.stdin)['actions']:
     DISPATCH_TIMEOUT=5400
     MODEL="sonnet"
     EFFORT="medium"
-    PROMPT="${V2_STEP}Soạn và GỬI báo cáo QUÝ trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (dữ liệu tới hết ${PERIOD_END}; nếu ngày đó là T7/CN thì builder tự lấy phiên nav_history cuối cùng ≤ ngày đó — KHÔNG tự sửa mốc). ${SPLIT_STEP} Đây là báo cáo QUÝ chạy ĐÚNG LỊCH 21:00 ICT ngày cuối quý (hoặc watchdog 08:30 bắt quý quá hạn). Cadence quarterly dùng cùng quy trình v2 như tuần/tháng: lệnh dựng là \`build.py quarterly --account X --period ${V2_PERIOD}\`. THIẾU NAV ngày cuối quý (nav_history chưa có dòng của phiên cuối ≤ ${PERIOD_END}) ⇒ builder rc=3: KHÔNG tự bịa số — ghi bus error rồi dừng; watchdog 08:30 hôm sau sẽ chạy lại khi NAV đã có. Quý chứa ngày khởi điểm của account: builder đã xử lý ('không có' cho đóng góp theo mã) — nếu không vỡ thì giữ nguyên. Mọi mục CHỈ-ZaloPay (sự cố/gap/residual chưa giải thích) vào narrative.internal của ZaloPay, KHÔNG vào SpaceX. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} Ghi bus finding khi xong: 2 file path, NAV cuối kỳ 2 account, % QTD, sha256 + trạng thái delivery gate của TỪNG file."
+    PROMPT="${V2_STEP}Soạn và GỬI báo cáo QUÝ trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (dữ liệu tới hết ${PERIOD_END}; nếu ngày đó là T7/CN thì builder tự lấy phiên nav_history cuối cùng ≤ ngày đó — KHÔNG tự sửa mốc). ${SPLIT_STEP} Đây là báo cáo QUÝ chạy ĐÚNG LỊCH 21:00 ICT ngày cuối quý (hoặc watchdog 08:30 bắt quý quá hạn). Cadence quarterly dùng cùng quy trình v2 như tuần/tháng: lệnh dựng là \`build.py quarterly --account X --period ${V2_PERIOD}\`. Script lịch đã kiểm trước khi dispatch: nav_history của phiên làm việc cuối ≤ ${PERIOD_END} có đủ + không phải nav_is_estimate; builder LÙI IM LẶNG về dòng gần nhất ≤ ngày đó nếu thiếu (không báo lỗi) — nên nếu \`build.py\` in phiên chốt KHÁC phiên làm việc cuối ≤ ${PERIOD_END}, KHÔNG phát hành: ghi bus error rồi dừng. Quý chứa ngày khởi điểm của account: builder đã xử lý ('không có' cho đóng góp theo mã) — nếu không vỡ thì giữ nguyên. Mọi mục CHỈ-ZaloPay (sự cố/gap/residual chưa giải thích) vào narrative.internal của ZaloPay, KHÔNG vào SpaceX. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} Ghi bus finding khi xong: 2 file path, NAV cuối kỳ 2 account, % QTD, sha256 + trạng thái delivery gate của TỪNG file."
   else
     # Báo cáo = việc thường ngày ⇒ Sonnet/medium cho CẢ tuần lẫn tháng (user chốt 2026-10-06;
     # trước đó tháng ghim opus/high). Nghiên cứu/coding khó mới lên Opus — kb/mike_model_routing.md.
@@ -722,7 +816,10 @@ for a in json.load(sys.stdin)['actions']:
   # model rồi nhưng quên xét lại effort, cùng dạng lệch đã tìm thấy ở Taylor interactive
   # dispatch). Tuần=medium (templated), tháng=high (attribution/outlook thật sự phức tạp hơn).
   PROMPT="NGÂN SÁCH THỜI GIAN: phiên này bị dừng cứng sau ${DISPATCH_TIMEOUT}s. Thứ tự ưu tiên khi thiếu giờ: SpaceX trước ZaloPay; narrative ngắn (headline + key_points) thay vì bỏ báo cáo; KHÔNG chạy lại build khi đã rc=0 chỉ để trau chuốt chữ. ${PROMPT}"
-  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout "$DISPATCH_TIMEOUT" 2>&1 | tail -5
+  # Quý: --write-scope 2 file đích ⇒ dispatch.sh từ chối (exit 6) nếu job khác còn sống đang giữ cùng file
+  # (watchdog 08:30 hôm sau lúc job 21:00 còn chạy/pending-resume ⇒ không soạn lần 2 ⇒ không email trùng).
+  WS_ARGS=(); [ "$KIND" = "quarterly" ] && WS_ARGS=(--write-scope "${TFILE_SX},${TFILE_ZP}")
+  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout "$DISPATCH_TIMEOUT" ${WS_ARGS[@]+"${WS_ARGS[@]}"} 2>&1 | tail -5
 
   # Ghi NGUYÊN TỬ (tmp + os.replace, §5) — cùng khuôn 2 chỗ trên: state cụt do bị kill giữa
   # chừng từng làm ALREADY/ALREADY_ALERTED phía trên vấp; STATE này bị đọc lại bởi mọi lượt

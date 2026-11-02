@@ -63,26 +63,42 @@ def run_guard(text, today):
     return r.returncode == 0 and "REACHED" in r.stdout and r.stdout.strip() == "REACHED"
 
 
-def navguard_block(text):
-    m = re.search(r"NAVGUARD_BEGIN[^\n]*\n(.*?)  # ── NAVGUARD_END", text, re.S)
+def block(text, tag):
+    m = re.search(tag + r"_BEGIN[^\n]*\n(.*?)(?:  )?# ── " + tag + "_END", text, re.S)
     if not m:
-        print("FATAL: không trích được NAVGUARD"); sys.exit(1)
+        print(f"FATAL: không trích được {tag}"); sys.exit(1)
     return m.group(1)
 
 
-def run_navguard(text, today, nav_dates, kind="quarterly", overdue="0"):
-    """True nếu vòng lặp ĐI TIẾP TỚI bước dispatch; False nếu NAVGUARD `continue`. nav_dates: {account: [ngày]}"""
+def run_navguard(text, today, nav_rows, kind="quarterly", overdue="0", pkey="quarterly_2026-Q4", state=None):
+    """Chạy NAVCHECK (hàm) + NAVGUARD THẬT. nav_rows: {account: [(ngày, nav_is_estimate)]}.
+    Trả dict: dispatched(bool), events([(type, topic)]), state(dict sau chạy), overdue_after."""
+    import json as _j
     with tempfile.TemporaryDirectory() as td:
         nd = Path(td) / "nav"; nd.mkdir()
         for a in ACCTS:
-            (nd / f"nav_history_{a}.csv").write_text("date,nav\n" + "".join(f"{d},1\n" for d in nav_dates.get(a, [])))
+            (nd / f"nav_history_{a}.csv").write_text(
+                "date,nav,mtm_stock,cash,margin_debt,offbook_assets,egg_assets,balance_ts,cum_dividend_excl,nav_is_estimate,nav_source\n"
+                + "".join(f"{d},1,1,1,0,0,0,x,0,{est},live\n" for d, est in nav_rows.get(a, [])))
         bindir = Path(td) / "bin"; bindir.mkdir()
-        for n in ("notify_thread.sh", "append_event.sh"):
-            (bindir / n).write_text("#!/bin/bash\nexit 0\n"); (bindir / n).chmod(0o755)
-        script = (f'ROOT={td}; WC_ROOT={td}; NAV_DIR={nd}; TRADING_REPORT_THREAD=t; KIND={kind}; OVERDUE={overdue}; '
-                  f'TODAY={today}; DESC="quý X"; PKEY=quarterly_X\nfor i in 1; do\n{navguard_block(text)}\necho DISPATCH\ndone\n')
+        (bindir / "notify_thread.sh").write_text("#!/bin/bash\nexit 0\n")
+        (bindir / "append_event.sh").write_text(f'#!/bin/bash\necho "$2|$3" >> {td}/events.log\n')
+        for n in ("notify_thread.sh", "append_event.sh"): (bindir / n).chmod(0o755)
+        sf = Path(td) / "state.json"; sf.write_text(_j.dumps(state or {}))
+        script = (f'ROOT={td}; WC_ROOT={td}; NAV_DIR={nd}; STATE={sf}; TRADING_REPORT_THREAD=t; KIND={kind}; OVERDUE={overdue}; '
+                  f'TODAY={today}; DESC="quý X"; PKEY={pkey}\n{block(text, "NAVCHECK")}\n'
+                  f'for i in 1; do\n{block(text, "NAVGUARD")}\necho DISPATCH OVERDUE=$OVERDUE\ndone\n')
         r = subprocess.run(["bash", "-c", script], capture_output=True, text=True)
-        return r.returncode == 0 and "DISPATCH" in r.stdout
+        ev = Path(td) / "events.log"
+        events = [tuple(l.split("|", 1)) for l in ev.read_text().splitlines()] if ev.exists() else []
+        return {"dispatched": r.returncode == 0 and "DISPATCH" in r.stdout, "events": events,
+                "state": _j.loads(sf.read_text()), "rc": r.returncode, "out": r.stdout, "err": r.stderr[-200:]}
+
+
+def run_nav_helpers(text, fn, arg):
+    script = f'WC_ROOT=/nonexistent\n{block(text, "NAVCHECK")}\n{fn} "{arg}"\n'
+    r = subprocess.run(["bash", "-c", script], capture_output=True, text=True)
+    return r.stdout.strip()
 
 
 def done_files(qk):
@@ -117,7 +133,8 @@ def suite(text):
         chk(f"4 {d} là {'T7' if wd == 5 else 'CN'} ⇒ {q}", wd >= 5 and keys(run_detector(text, d, "quarterly")) == [f"quarterly_{q}"], f"wd={wd}")
     # 5. idempotent: state hôm nay đã dispatch ⇒ 0; ngày hôm trước ⇒ vẫn chạy (retry tự nhiên)
     chk("5 state = hôm nay ⇒ 0 (chạy 2 lần)", keys(run_detector(text, "2026-12-31", "quarterly", state={"quarterly_2026-Q4": "2026-12-31"})) == [])
-    chk("5b state = hôm qua ⇒ vẫn chạy", keys(run_detector(text, "2026-12-31", "quarterly", state={"quarterly_2026-Q4": "2026-12-30"})) == ["quarterly_2026-Q4"])
+    chk("5b state = 2 ngày trước ⇒ chạy lại (rescue)", keys(run_detector(text, "2026-12-31", "quarterly", state={"quarterly_2026-Q4": "2026-12-29"})) == ["quarterly_2026-Q4"])
+    chk("5b2 state = hôm qua ⇒ KHÔNG chạy (chống double-dispatch)", keys(run_detector(text, "2026-12-31", "quarterly", state={"quarterly_2026-Q4": "2026-12-30"})) == [])
     chk("5c cả 2 file đã giao ⇒ 0", keys(run_detector(text, "2026-12-31", "quarterly", files=done_files("2026-Q4"))) == [])
     chk("5d chỉ 1/2 file có ⇒ vẫn chạy", keys(run_detector(text, "2026-12-31", "quarterly", files=done_files("2026-Q4")[:1])) == ["quarterly_2026-Q4"])
     # 6. trước go-live (2026-Q4): Q3/2026 KHÔNG backfill; quý chứa ngày khởi điểm của builder là việc của build.py (xem phần builder)
@@ -126,6 +143,12 @@ def suite(text):
     o = run_detector(text, "2027-01-01", "")
     qa = [a for a in o["actions"] if a["kind"] == "quarterly"]
     chk("7 watchdog 01/01/2027 chưa có file ⇒ quarterly_2026-Q4 overdue=True", len(qa) == 1 and qa[0]["period_key"] == "quarterly_2026-Q4" and qa[0]["overdue"] is True, str(qa))
+    # 7f. double-dispatch: lượt 21:00 31/12 ghi state; watchdog 08:30 01/01 (~11,5h sau) KHÔNG được dispatch lần 2
+    wq = lambda today, st, files=(): [a for a in run_detector(text, today, "", files=files, state=st)["actions"] if a["kind"] == "quarterly"]
+    chk("7f watchdog sau 21:00 cùng quý (state=hôm qua) ⇒ KHÔNG rescue", wq("2027-01-01", {"quarterly_2026-Q4": "2026-12-31"}) == [])
+    chk("7g watchdog state cũ ≥2 ngày ⇒ rescue", len(wq("2027-01-02", {"quarterly_2026-Q4": "2026-12-31"})) == 1)
+    chk("7h watchdog không state ⇒ rescue", len(wq("2027-01-01", {})) == 1)
+    chk("7i state hỏng (chuỗi rác) ⇒ KHÔNG dispatch (fail-safe chống email trùng)", wq("2027-01-01", {"quarterly_2026-Q4": "rac"}) == [])
     chk("7b watchdog khi đã giao ⇒ không action quý", not [a for a in run_detector(text, "2027-01-01", "", files=done_files("2026-Q4"))["actions"] if a["kind"] == "quarterly"])
     chk("7c watchdog 31/12/2026 (quý chưa đóng) ⇒ không action quý", not [a for a in run_detector(text, "2026-12-31", "")["actions"] if a["kind"] == "quarterly"])
     chk("7d watchdog 02/11/2026 (Q3 trước go-live) ⇒ không action quý", not [a for a in run_detector(text, "2026-11-02", "")["actions"] if a["kind"] == "quarterly"])
@@ -140,14 +163,51 @@ def suite(text):
     for d, exp in (("2026-12-31", True), ("2026-12-30", False), ("2026-12-28", False), ("2027-01-31", False), ("2026-11-30", False),
                    ("2026-06-30", True), ("2028-02-29", False), ("2028-03-31", True), ("2029-03-31", True), ("2027-09-30", True), ("2027-03-30", False)):
         chk(f"9 guard {d} ⇒ {'qua' if exp else 'thoát rc=0 im lặng'}", run_guard(text, d) is exp)
-    # 10. NAVGUARD (21:00 phải có NAV ngày cuối quý của cả 2 account)
-    both = {"SpaceX": ["2026-12-31"], "ZaloPay": ["2026-12-31"]}
-    chk("10 đủ NAV cả 2 ⇒ dispatch", run_navguard(text, "2026-12-31", both) is True)
-    chk("10b thiếu ZaloPay ⇒ HOÃN", run_navguard(text, "2026-12-31", {"SpaceX": ["2026-12-31"], "ZaloPay": ["2026-12-30"]}) is False)
-    chk("10c thiếu cả 2 ⇒ HOÃN", run_navguard(text, "2026-12-31", {}) is False)
-    chk("10d cuối quý T7 (2029-03-31) không có NAV ⇒ vẫn dispatch", run_navguard(text, "2029-03-31", {}) is True)
-    chk("10e watchdog (OVERDUE=1) thiếu NAV ⇒ vẫn dispatch", run_navguard(text, "2027-01-01", {}, overdue="1") is True)
-    chk("10f kind monthly thiếu NAV ⇒ không bị chặn", run_navguard(text, "2026-12-31", {}, kind="monthly") is True)
+    # 10. NAVGUARD: kiểm NAV của NGÀY LÀM VIỆC CUỐI ≤ cuối quý (không phải $TODAY), cả watchdog, cả nav_is_estimate
+    ok = lambda d: [(d, "False")]
+    both = lambda d: {"SpaceX": ok(d), "ZaloPay": ok(d)}
+    g = lambda *a, **k: run_navguard(text, *a, **k)
+    chk("10 đủ NAV chốt cả 2 ⇒ dispatch", g("2026-12-31", both("2026-12-31"))["dispatched"])
+    r = g("2026-12-31", {"SpaceX": ok("2026-12-31"), "ZaloPay": ok("2026-12-30")})
+    chk("10b thiếu ZaloPay ⇒ HOÃN + ghi dấu deferred, KHÔNG state dispatch", not r["dispatched"] and "deferred_quarterly_2026-Q4" in r["state"]
+        and "quarterly_2026-Q4" not in r["state"] and ("status", "report-cadence-quarterly-deferred-quarterly_2026-Q4") in r["events"], str(r))
+    chk("10c thiếu cả 2 ⇒ HOÃN", not g("2026-12-31", {})["dispatched"])
+    chk("10d cuối quý T7 (2029-03-31): có NAV thứ Sáu 03-30 ⇒ dispatch", g("2029-03-31", both("2029-03-30"), pkey="quarterly_2029-Q1")["dispatched"])
+    chk("10d2 cuối quý T7: THIẾU NAV thứ Sáu ⇒ HOÃN (trước đây bỏ qua T7)", not g("2029-03-31", {}, pkey="quarterly_2029-Q1")["dispatched"])
+    chk("10d3 cuối quý CN (2028-12-31): kiểm thứ Sáu 12-29", g("2028-12-31", both("2028-12-29"), pkey="quarterly_2028-Q4")["dispatched"] and not g("2028-12-31", both("2028-12-31"), pkey="quarterly_2028-Q4")["dispatched"])
+    chk("10e nav_is_estimate=True ⇒ HOÃN", not g("2026-12-31", {"SpaceX": [("2026-12-31", "True")], "ZaloPay": ok("2026-12-31")})["dispatched"])
+    chk("10f kind monthly thiếu NAV ⇒ không bị chặn", g("2026-12-31", {}, kind="monthly", pkey="monthly_2026-12")["dispatched"])
+    # watchdog (OVERDUE=1) — trước đây bỏ qua NAVGUARD
+    r = g("2027-01-01", {}, overdue="1")
+    chk("10g watchdog thiếu NAV ⇒ HOÃN + bus QUESTION (topic overdue-<PKEY> để closer đóng)",
+        not r["dispatched"] and ("question", "report-cadence-overdue-quarterly_2026-Q4") in r["events"], str(r))
+    chk("10h watchdog đủ NAV, KHÔNG dấu deferred ⇒ dispatch, vẫn OVERDUE=1 (cảnh báo đỏ đúng nghĩa)",
+        (lambda r: r["dispatched"] and "OVERDUE=1" in r["out"])(g("2027-01-01", both("2026-12-31"), overdue="1")))
+    r = g("2027-01-01", both("2026-12-31"), overdue="1", state={"deferred_quarterly_2026-Q4": "2026-12-31"})
+    chk("10i watchdog đủ NAV + CÓ dấu hoãn từ 21:00 ⇒ dispatch với OVERDUE=0 (không đỏ 'quá hạn' giả)", r["dispatched"] and "OVERDUE=0" in r["out"], str(r))
+    chk("10j quá 4 ngày sau cuối quý vẫn thiếu NAV ⇒ thôi hoãn (không chặn mãi)", g("2027-01-06", {}, overdue="1")["dispatched"])
+    chk("10k watchdog hoãn ở hôm nay, hôm qua đã state key ⇒ không ghi nhầm state dispatch", "quarterly_2026-Q4" not in g("2027-01-01", {}, overdue="1")["state"])
+    # hàm thuần
+    chk("11 _q_nav_check_date(2029-03-31 T7)=2029-03-30", run_nav_helpers(text, "_q_nav_check_date", "2029-03-31") == "2029-03-30")
+    chk("11b CN 2028-12-31 ⇒ 2028-12-29", run_nav_helpers(text, "_q_nav_check_date", "2028-12-31") == "2028-12-29")
+    chk("11c T4 2026-12-31 ⇒ chính nó", run_nav_helpers(text, "_q_nav_check_date", "2026-12-31") == "2026-12-31")
+    # 12. §16: date -d trong script phải ghim TZ=UTC; chạy guard + helper dưới TZ chết `date -d`
+    for tz in ("Asia/Beirut", "Atlantic/Azores", "America/Sao_Paulo"):
+        old = os.environ.get("TZ"); os.environ["TZ"] = tz
+        try:
+            gq = [run_guard(text, d) for d in ("2030-03-31", "2030-06-30", "2029-03-31", "2030-03-30")]
+            hq = run_nav_helpers(text, "_q_nav_check_date", "2030-03-31")
+        finally:
+            (os.environ.__setitem__("TZ", old) if old is not None else os.environ.pop("TZ", None))
+        chk(f"12 TZ={tz}: guard 2030-03-31/06-30 qua, 03-30 không; helper đúng", gq == [True, True, True, False] and hq == "2030-03-29", f"{gq} {hq}")
+    bare = [ln for ln in text.splitlines() if re.search(r"(?<!TZ=UTC )\bdate -d\b", ln) and "TZ=" not in ln.split("date -d")[0][-30:]
+            and not ln.lstrip().startswith("#") and "Asia/Ho_Chi_Minh" not in ln]
+    chk("12b mọi `date -d` (ngoài comment/ICT) đều ghim TZ=", not bare, str(bare[:3]))
+    # 13. sweep gồm *_quarterly_report_*.md + dispatch có write-scope
+    chk("13 delivery sweep gồm *_quarterly_report_*.md", '"$ROOT"/reports/*_quarterly_report_*.md; do' in text)
+    chk("13b dispatch quý có --write-scope 2 file đích (có điều kiện KIND=quarterly)",
+        re.search(r'\[ "\$KIND" = "quarterly" \] && WS_ARGS=\(--write-scope "\$\{TFILE_SX\},\$\{TFILE_ZP\}"\)', text) is not None and "${WS_ARGS[@]+" in text)
+    chk("13c prompt không còn claim sai 'builder rc=3' cho thiếu NAV", "THIẾU NAV ngày cuối quý (nav_history chưa có dòng" not in text)
     return res
 
 
@@ -174,11 +234,18 @@ def main():
         ("M4a monthly rò sang quarterly (bỏ CẢ 2 guard, vì chúng dư thừa nhau)", None, None),
         ("M4b chỉ bỏ guard ngoài (guard trong còn chặn ⇒ mutant tương đương, phải SỐNG)", None, None),
         ("M5 go-live lùi về 2026-Q1", "GO_LIVE_QUARTER = (2026, 4)", "GO_LIVE_QUARTER = (2026, 1)"),
-        ("M6 bỏ idempotency state", 'if state.get(period_key) != today_s:\n            sx_f, zp_f = quarterly_filenames(qk)', 'if True:\n            sx_f, zp_f = quarterly_filenames(qk)'),
+        ("M6 bỏ chống double-dispatch (min_age 0)", "def recently_dispatched(pk, min_age_days=2):", "def recently_dispatched(pk, min_age_days=0):"),
         ("M7 chỉ cần 1 account giao là đủ", "    return all(\n        _delivered_any(files, lambda bn, acct=acct: bn.startswith(acct + \"_quarterly_report_\")", "    return any(\n        _delivered_any(files, lambda bn, acct=acct: bn.startswith(acct + \"_quarterly_report_\")"),
-        ("M9 NAVGUARD không continue (vẫn dispatch khi thiếu NAV)", "      continue\n    fi\n  fi\n  # ── NAVGUARD_END", "      :\n    fi\n  fi\n  # ── NAVGUARD_END"),
-        ("M10 NAVGUARD chỉ kiểm 1 account", "for _a in SpaceX ZaloPay; do", "for _a in SpaceX; do"),
-        ("M11 NAVGUARD đòi NAV cả cuối tuần", '[ "$(date -d "$TODAY" +%u)" -le 5 ]', "true"),
+        ("M9 NAVGUARD không continue (vẫn dispatch khi thiếu NAV)", "      continue\n    fi\n    if [ \"$OVERDUE\" = \"1\" ]; then", "      :\n    fi\n    if [ \"$OVERDUE\" = \"1\" ]; then"),
+        ("M10 NAVGUARD chỉ kiểm 1 account", "for a in SpaceX ZaloPay; do", "for a in SpaceX; do"),
+        ("M11 NAVGUARD kiểm $TODAY thay vì ngày làm việc cuối ≤ cuối quý", '_q_nav_problems "$_QCHK"', '_q_nav_problems "$TODAY"'),
+        ("M12 bỏ kiểm nav_is_estimate", '      FOUND:True) out=', '      FOUND:Zzz) out='),
+        ("M13 NAVGUARD bỏ qua watchdog", '[ -n "$_NAV_MISSING" ] && [ "$_QAGE" -le', '[ "$OVERDUE" = "0" ] && [ -n "$_NAV_MISSING" ] && [ "$_QAGE" -le'),
+        ("M14 watchdog không nhận dấu hoãn ⇒ đỏ 'quá hạn' giả", 'then OVERDUE=0; _RESUMED_NOTE', 'then :; _RESUMED_NOTE'),
+        ("M15 dispatch quý bỏ --write-scope", 'WS_ARGS=(); [ "$KIND" = "quarterly" ] && WS_ARGS=(--write-scope', 'WS_ARGS=(); [ "$KIND" = "never" ] && WS_ARGS=(--write-scope'),
+        ("M16 QGUARD bỏ ghim TZ=UTC", '_Q_NEXT_DOM="$(TZ=UTC date -d', '_Q_NEXT_DOM="$(date -d'),
+        ("M17 sweep không gồm quarterly", ' "$ROOT"/reports/*_quarterly_report_*.md; do', '; do'),
+        ("M18 hoãn watchdog không phát question", '_EVT=question;', '_EVT=status;'),
         ("M8 watchdog đánh dấu overdue=False", '"overdue": scheduled_kind == "",\n            })\n\n# ── RC_CLOSE_BEGIN', '"overdue": False,\n            })\n\n# ── RC_CLOSE_BEGIN'),
     ]
     caught = 0

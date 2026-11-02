@@ -165,6 +165,8 @@ def main():
             _prefix = "[Weekly report]"
         elif "monthly_report" in fname:
             _prefix = "[Monthly report]"
+        elif "quarterly_report" in fname:
+            _prefix = "[Quarterly report]"
         else:
             _prefix = "[Trading Report]"
         subject = f"{_prefix} {fname}"

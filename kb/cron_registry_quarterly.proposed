@@ -13,3 +13,8 @@ Lưu ý cú pháp: khi CẢ day-of-month và day-of-week đều khác `*` cron d
 
 ## 3) Dòng đề xuất cho kb/cron_registry.md (bảng chính, đặt theo thứ tự 21:00 ICT, cạnh send_plan_report)
 | 21:00 ICT, chỉ ngày cuối quý (31/03, 30/06, 30/09, 31/12) | `check_report_cadence.sh --scheduled-quarterly` | Quý vừa kết thúc hôm nay; dòng NAV ngày cuối quý của SpaceX + ZaloPay (nav_snapshot_daily 19:50/20:30) | Báo cáo quý Discord Trading report + email (2 file/account, qua `build.py quarterly`) | user / nhà đầu tư | cùng đêm; thiếu NAV ⇒ hoãn, watchdog 08:30 hôm sau | Cùng delivery gate hash-bound; state `quarterly_YYYY-Qn`; watchdog `check_report_cadence.sh` 08:30 là lưới rescue (quý chưa giao ⇒ overdue). Cron `0 14 28-31 3,6,9,12 *`, cờ tự thoát ngoài ngày cuối quý. |
+
+## 4) Cập nhật vòng 2 (02/11/2026, sau arch-review) — KHÔNG đổi dòng crontab ở mục 1
+- NAVGUARD kiểm NAV phiên làm việc CUỐI ≤ cuối quý (không phải ngày chạy), gồm nav_is_estimate=True, và chạy CẢ ở watchdog 08:30 (thiếu ⇒ bus `question` topic report-cadence-overdue-<PKEY>, tối đa 4 ngày sau cuối quý). Hoãn 21:00 ghi dấu `deferred_<PKEY>` trong state/report_cadence_dispatched.json ⇒ watchdog sáng sau KHÔNG gửi cảnh báo đỏ "quá hạn" giả.
+- Watchdog chỉ cứu quý khi không có state dispatch hoặc state ≥ 2 ngày; dispatch quý có `--write-scope <2 file đích>` ⇒ không soạn lần 2 khi job 21:00 còn sống (chống email trùng).
+- Delivery sweep 08:30 nay gồm *_quarterly_report_*.md; mọi `date -d` ghim TZ=UTC (§16).

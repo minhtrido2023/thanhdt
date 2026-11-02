@@ -67,6 +67,7 @@ KHÔNG được cổng này kiểm; cổng in rõ số dòng nó không phủ.
 from __future__ import annotations
 
 import argparse
+import calendar
 import datetime as _dt
 import io
 import json
@@ -1130,6 +1131,16 @@ def accounts_asof_from_name(path: str) -> tuple:
         days = sorted(f for f in os.listdir(EXEC_DIR) if f.startswith(pref))
         if days:
             return labels, days[-1][len("dnse_raw_"):-len(".jsonl")]
+    qm = re.search(r"_quarterly_report_(\d{4})-Q([1-4])\.md$", name)
+    if qm:                                        # báo cáo QUÝ → phiên cuối có log, ≤ cuối quý, trong quý
+        y, q = int(qm.group(1)), int(qm.group(2))
+        end = f"{y:04d}-{q * 3:02d}-{calendar.monthrange(y, q * 3)[1]:02d}"
+        start = f"{y:04d}-{q * 3 - 2:02d}-01"
+        days = sorted(f[len("dnse_raw_"):-len(".jsonl")] for f in os.listdir(EXEC_DIR)
+                      if f.startswith("dnse_raw_") and f.endswith(".jsonl")
+                      and start <= f[len("dnse_raw_"):-len(".jsonl")] <= end)
+        if days:
+            return labels, days[-1]
     raise ValueError(f"không suy được ngày chốt từ tên file: {name}")
 
 

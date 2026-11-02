@@ -129,6 +129,13 @@ def _is_spacex_investor_report(report: Path) -> bool:
 def _extract_report_date(name: str) -> str | None:
     """Ngày dùng làm --report-date cho nav_period_returns.py, suy từ TÊN FILE (không đọc BQ)."""
     full_dates = re.findall(r"\d{4}-\d{2}-\d{2}", name)
+    q = re.search(r"_quarterly_report_(\d{4})-Q([1-4])(?!\d)", name)
+    if q and not full_dates:
+        # báo cáo QUÝ (build_quarterly_report): ngày chốt = ngày CUỐI QUÝ lịch (đủ cho --report-date của
+        # nav_period_returns.py, vốn tự lùi về phiên có số liệu); không đọc BQ.
+        year, qn = int(q.group(1)), int(q.group(2))
+        last_day = calendar.monthrange(year, qn * 3)[1]
+        return f"{year:04d}-{qn * 3:02d}-{last_day:02d}"
     if full_dates:
         return max(full_dates)  # weekly "..._to_YYYY-MM-DD": lấy ngày cuối kỳ (so sánh chuỗi ISO OK)
     ym = re.search(r"(\d{4})-(\d{2})(?!-\d)", name)
@@ -271,11 +278,24 @@ def _check_period_returns(report: Path) -> None:
 # N-e vòng 2: báo cáo gộp cũ `SpaceX_ZaloPay_*` (deprecated nhưng vẫn có thể bị gửi bù) cũng qua cổng, mỗi
 # TK một bảng.
 _CADENCE_RE = re.compile(r"^(SpaceX_ZaloPay|SpaceX|ZaloPay)_(weekly|monthly)_report_")
+# QUÝ (2026-11-02, arch-review vòng 2): CỐ Ý KHÔNG nằm trong _CADENCE_RE — bảng 3.2 của period_table_32 và khối
+# Livermore chỉ định nghĩa cho weekly/monthly; builder quý không dựng cả hai. Bỏ qua phải IN RA (không im lặng):
+# xem `_quarterly_skip()`. Các cổng còn lại (return-gate, §31 period-return, artifact-lint, nav-flow) CHẠY cho quý.
+_QUARTERLY_RE = re.compile(r"^(SpaceX_ZaloPay|SpaceX|ZaloPay)_quarterly_report_")
+
+
+def _quarterly_skip(report: Path, gate: str) -> bool:
+    if _QUARTERLY_RE.match(report.name):
+        print(f"report_delivery_gate: {gate} SKIP có chủ đích ({report.name}): báo cáo QUÝ không có "
+              f"bảng 3.2 / khối Livermore (chỉ weekly/monthly)")
+        return True
+    return False
 
 
 def _check_benchmark_table(report: Path) -> None:
     m = _CADENCE_RE.match(report.name)
     if not m:
+        _quarterly_skip(report, "benchmark-table")
         return
     report_date = _extract_report_date(report.name)
     if report_date is None:
@@ -299,6 +319,7 @@ def _check_benchmark_table(report: Path) -> None:
 def _check_livermore_block(report: Path) -> None:
     m = _CADENCE_RE.match(report.name)
     if not m:
+        _quarterly_skip(report, "livermore-block")
         return
     report_date = _extract_report_date(report.name)
     if report_date is None:
