@@ -617,3 +617,11 @@
 - [2026-11-02T01:05:02Z] Winston/status — deposit-cctg-weekly-dispatch: {"date": "2026-11-02", "current_deposit": "6.80", "current_cctg": "7.40"}
 - [2026-11-02T01:05:11Z] Winston/heartbeat — Winston_20261102_010502: {"status": "in_progress", "note": "start"}
 - [2026-11-02T01:06:03Z] Winston/heartbeat — Winston_20261102_010502: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261102_010502", "source": "watcher"}
+
+## Consolidation 2026-11-02T01:07:33Z
+- [2026-11-02T01:07:03Z] Winston/heartbeat — Winston_20261102_010502: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261102_010502", "source": "watcher"}
+- [2026-11-02T01:07:06Z] Winston/status — deposit-cctg-weekly-done: {"series": "big4_12m", "rate": 6.8, "changed": false, "note": "Kenh14 01/11 + Thuong gia 02/11, online 6.8"}
+- [2026-11-02T01:07:06Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_12m", "rate": 7.4, "changed": false, "note": "BIDV/VietinBank 12T 7.4; VietNamNet 30/10 + Ngoisao 31/10"}
+- [2026-11-02T01:07:06Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_6m", "rate": 7.5, "changed": true, "note": "Vietcombank 6T 7.5 (BIDV/CTG 7.2 6-9T)"}
+- [2026-11-02T01:07:06Z] Winston/status — deposit-cctg-weekly-done: {"series": "sbv_policy", "status": "no_new_independent_source", "changed": false, "note": "khong tim duoc bai bao doc lap <=120 ngay neu du refi+rediscount; chi co sbv.gov.vn va tong hop GitHub tu dong"}
+- [2026-11-02T01:07:22Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_tier2", "changed": true, "note": "VPB 100tr 9.0 (184-389 ngay) OK; VPB 10tr 7.5 BI TU CHOI: rate 7.5% differs from reference(s) [9.2, 9.2] by up to 1.70pp (>= 1.0pp) — refuse to write, can manual_verify; MB 7.1 (6T, khong ro menh gia) OK; TCB Bao Loc 6T 7.6 OK (min 10tr); ACB khong co so"}
