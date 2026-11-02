@@ -1827,3 +1827,6 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T16:59:53Z] ĐANG DỞ: dcf_expectation_lens job Taylor_20261101_165940 — agents/Taylor/research/dcf_expectation_lens_20261101/ | NEXT: đọc REPORT dcf_vn_calibration, viết PREREG
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T17:29:15Z] [dcf-expectation-lens 02/11] XONG job Taylor_20261101_165940: REPORT commit 29ac97b3b — khong xay DCF nhe; ung vien R&D rieng accS (so voi d_NPR LAG) CHO user quyet

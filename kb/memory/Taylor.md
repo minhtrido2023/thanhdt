@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-01T17:29:15Z] [dcf-expectation-lens 02/11] XONG job Taylor_20261101_165940: REPORT commit 29ac97b3b — khong xay DCF nhe; ung vien R&D rieng accS (so voi d_NPR LAG) CHO user quyet
 - [2026-11-02T01:28:21Z] ĐANG DỞ: job Taylor_20261102_012810 dcf_rate_proxy — research/dcf_rate_proxy_20261102/ | NEXT: đọc docs, PREREG
 - [2026-11-02T01:40:11Z] [dcf-rate-proxy 02/11] XONG job Taylor_20261102_012810 (commit 16b3cbddf): giu r hang; de xuat hien thi them r* thi truong (15,1%) + TPCP10Y, chua wire; TPCP10Y/macro_indicator can entry data_registry truoc khi dung
 - [2026-11-02T01:54:22Z] [quarterly-report-schedule 02/11] XONG job Taylor_20261102_013823: 33eaaa4e7 nhanh feat/quarterly-report-schedule-20261102 (chua merge) — cho Mike arch-review + cai cron (de xuat kb/cron_registry_quarterly.proposed)
@@ -26,3 +25,5 @@
 - [2026-11-02T04:28:22Z] [tv1-dd r2 02/11] XONG job Taylor_20261102_042353 — cho Mike chay fundamental-skeptic vong 2 + investor report; ket luan moi: gia ~ngang EV da chiet khau; TV1 co ten trong 13 don vi BCA
 - [2026-11-02T04:29:49Z] ĐANG DỞ: job Taylor_20261102_042930 TV1 investor report — research/dd_TV1_20261102/investor_report/ | NEXT: đọc skill dd-investor-report, TV2 build_report
 - [2026-11-02T04:40:45Z] [tv1-investor 02/11] XONG job Taylor_20261102_042930 commit 958175a36 — cho Mike gui email + ghi dd_price_zones.json
+- [2026-11-02T07:53:55Z] ĐANG DỞ: job Taylor_20261102_075340 TV1 DD r3 (sửa B1-B4,N1-N10) — research/dd_TV1_20261102/ | NEXT: đọc SKEPTIC2, sửa valuation.py→REPORT→investor_report
+- [2026-11-02T08:03:59Z] [tv1-dd r3 02/11] XONG job Taylor_20261102_075340 commit 465fedbc1 — ban dinh chinh NDT cho Mike gui email + sua dd_price_zones TV1 (17.800-20.600)
