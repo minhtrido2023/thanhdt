@@ -926,3 +926,25 @@
 
 ## Consolidation 2026-11-02T10:07:01Z
 - [2026-11-02T10:06:44Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "start r5: doc SKEPTIC3"}
+
+## Consolidation 2026-11-02T10:20:32Z
+- [2026-11-02T10:07:13Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "doc xong SKEPTIC3+r4; giao web research N2/N8/N9, sua valuation.py"}
+- [2026-11-02T10:07:31Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:08:31Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:09:31Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:10:31Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:11:31Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:11:42Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "web xong (N2 KBSV khong tim duoc; N8 1.351,7 la 05/2021 khong phai 2026); viet block r5 valuation.py"}
+- [2026-11-02T10:12:31Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:13:18Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "valuation r5 xong: vung 13.900-18.100 tam 15.900; sua REPORT"}
+- [2026-11-02T10:13:32Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:14:32Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:15:32Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:15:43Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "REPORT r5 xong (§0,§8f,§10,E4,N12); sang investor_report"}
+- [2026-11-02T10:15:56Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "investor_report: sua figs + md"}
+- [2026-11-02T10:16:32Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:17:33Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:18:28Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "in_progress", "note": "investor report r5 build xong 14 trang; kiem hinh + SELFCHECK"}
+- [2026-11-02T10:18:33Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:19:33Z] Taylor/heartbeat — Taylor_20261102_100630: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261102_100630", "source": "watcher"}
+- [2026-11-02T10:20:08Z] Taylor/finding — tv1-dd-20261102-r5: {"commit": "36afd9da7", "zone_vnd": "13.900-18.100", "center_vnd": 15900, "price_vnd": 19800, "price_vs_zone": "+9%..+42%, tam +25%", "replaces": "r4 8.700-10.600 tam 9.900 (+86..+129%); ban gui NDT 15:25 (r3) — chua gui r4", "pe_mid_expected": 17600, "ddm27_40_mid": "13.900/14.500", "breakeven_ppa_net_vnd_kwh": 591, "sotp_mixed_vnd": 25939, "implied_access_discount": "39% (thong le 20-40%); gia = SOTP x0,76", "fixes": "B1 tien huong lai 5% + menh gia o terminal, P/B chi tren VCSH HD; B2 P/E 6,5-7 (trung vi thuy dien niem yet 2026 10,9 tru 35-40%), cung P/E 2 trang thai phap ly; B3 to hop dat 19.800: (a); (b) on P/E7 20.800; (b)/(c) on + moc lui; N1 P 10/45/35/10; N5 P xau 0,30, R0 0,75, M0 0,24; N6 Q205; N3 M6 0,35; N7 tien rong cuoi 2027", "unverified": "KBSV 17/04/2026 tr.4 (500-600 tong hay gia co dinh — neu co dinh, gia rong 595-695 => P/E 22.100-23.900); BCTN 2025 tr.38", "correction": "1.351,7 ty la dau gia lan 5 ngay 17/05/2021, KHONG phai 27/3/2026", "n12_user_decision": "state_TV1 SpaceX/ZaloPay (paused) van thesis_source SOTP 23/07, floor_note hydro, target 5% > tran sleeve, thieu dieu kien dung M0 — ghi REPORT noi bo, khong sua", "status": "CHUA skeptic vong 4; KHONG gui email; can Mike chay skeptic v4 + sua dd_price_zones TV1 neu chap nhan", "measured_by": "python3 -I calc/valuation.py > calc/valuation_out.txt (khoi r5); calc/bq_hydro_peer_pe.csv"}

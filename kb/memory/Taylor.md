@@ -32,3 +32,5 @@
 - [2026-11-02T09:49:21Z] ĐANG DỞ r4 TV1: valuation.py r4 XONG (vung 8.700-10.600, tam 9.900; gia 19.800 cao hon +86..+129%). NEXT: REPORT §0/§4/§8/§10/PL E3 → investor_report md+figs+pdf+html+SELFCHECK → commit → bus tv1-dd-20261102-r4
 - [2026-11-02T09:56:03Z] [tv1-dd r4 02/11] XONG job Taylor_20261102_094407 commit 79e7dee39 — vung 8.700-10.600 (gia cao hon ~2x); cho Mike skeptic v3 + sua dd_price_zones TV1 + gui email
 - [2026-11-02T10:06:44Z] ĐANG DỞ: job Taylor_20261102_100630 TV1 DD r5 (sửa B1-B3,N1-N12 theo SKEPTIC3) — research/dd_TV1_20261102/ | NEXT: đọc SKEPTIC3 + valuation.py r4
+- [2026-11-02T10:13:18Z] ĐANG DỞ r5 TV1: valuation.py r5 XONG (vùng 13.900–18.100, tâm 15.900, giá +25% so tâm). NEXT: REPORT §0/§8e/§10/E4 → investor_report → commit → bus tv1-dd-20261102-r5
+- [2026-11-02T10:20:08Z] [tv1-dd r5 02/11] XONG job Taylor_20261102_100630 commit 36afd9da7 — vùng 13.900–18.100 tâm 15.900 (giá +25%); chờ Mike skeptic v4 + sửa dd_price_zones + gửi email; N12 state_TV1 chờ user
