@@ -23,12 +23,14 @@
 
 ## DRI — user BÁN TAY 21/10 (đã xác nhận, KHÔNG hỏi lại; plan-position-drift 21/10 = việc này): `kb/projects/dri-manual-sell-20261021.md`
 
-## DRI — user DUYỆT GIẢM 50% CHỦ ĐỘNG (`decided_by: user`, 27/10 12:14 ICT) — DollarBill đưa vào PLAN T+1 28/10, KHÔNG hỏi lại
-- SELL DRI: **SpaceX 1.250cp (→1.250), ZaloPay 650cp (→650)**; bán discretionary của user (không phải auto-exit); vào plan nháp, user duyệt plan như thường. User đã bán tay trước ⇒ dùng KL broker thật. Chi tiết: `kb/projects/dri-triggers-20261027.md`.
+## DRI — giảm 50% 27/10 (user duyệt; SUPERSEDED bởi bán hết 02/11): `kb/projects/dri-triggers-20261027.md`
 
-## LAG — SCL THOÁI HẾT + CẢNH BÁO TĂNG VỐN (`decided_by: user`, 29/10 14:2x ICT) — AGENT KHÔNG HỎI LẠI
-- **SCL: THOÁI toàn bộ cả 2 TK** (KL broker thật) qua **DollarBill đưa SELL vào plan T+1 30/10** (như DRI; không chờ T+25/ex-date). Căn cứ: `kb/projects/scl-dd-20261029.md`. Đã bán tay 29/10 @29.600: SpaceX 800 + ZaloPay 500; còn SpaceX 300 + ZaloPay 200 (lô 28/10: chiều 30/10).
-- **LUẬT MỚI**: BẤT KỲ tăng vốn nào (quyền mua, riêng lẻ/công chúng, ESOP, TPCĐ; cổ tức/thưởng CP = INFO) trong chu kỳ đầu tư của mã ⇒ **WARNING user** (không tự bán). Taylor dựng + arch-review; merge cần user. Luật 21/10 (mã LAG có quyền mua: KHÔNG bán trước ex-date, user tự mua đủ; lô quyền kế thừa entry gốc `771daf4ea`) GIỮ cho mã LAG KHÁC — SCL là ngoại lệ. Bản 21/10 của SCL: `kb/projects/scl-dd-research-20261021.md`.
+## 4 QUY TẮC USER CHỐT 02/11/2026 23:01 ICT (`decided_by: user`) — KHÔNG HỎI LẠI: `kb/projects/dd-flag-rules-20261102.md`
+1. **Mã có CỜ (🔴 RED_FLAG_CODES + ⚠ quality_flag≠QUALITY_OK, gồm FLOOR_FAIL) ⇒ LOẠI khỏi candidate MỌI book khi lên plan** (đảo luật 08-04; discretionary sleeve ngoại lệ, cờ = WARNING). TCH đã bỏ khỏi plan 03/11.
+2. **DRI bán HẾT** (giá > giá hợp lý nhiều) · 3. **TV1 KHÔNG giữ** (chưa có biên an toàn) — cả hai trong plan 03/11.
+4. **Mã có DD mà giá < tâm 15% ⇒ ĐƯỢC xét làm candidate discretionary** (user duyệt từng lần, không tự mua).
+
+## LAG — SCL thoái hết + luật cảnh báo tăng vốn (user 29/10): `kb/projects/scl-dd-20261029.md`; luật: BẤT KỲ tăng vốn trong chu kỳ đầu tư ⇒ WARNING user, không tự bán
 
 ## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
 - Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4), ngưỡng `> 7,5%`. **CCTG = kỳ hạn 12 THÁNG, lấy CAO NHẤT trong các NH Big-4 có phát 12M (user chốt 2026-10-05; trước đó 6M — anchor 09-30 7,5% là 6M, REBASE 10-05 = 7,4% BIDV/VietinBank; cặp 7,5→7,4 là artifact đổi kỳ hạn, đã ack trong state trend-check). Big-4 12M: cùng NH có online lẫn quầy ⇒ lấy số CAO NHẤT.** **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.

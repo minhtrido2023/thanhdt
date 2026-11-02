@@ -77,6 +77,8 @@ và đầy đủ hơn đọc thẳng file bootstrap tĩnh) — dùng đúng `mv_
 KHÔNG tự suy "mã không nằm trong rổ compute_park_trim.py thì là phần dư ngoài PARK". Field này
 chỉ ảnh hưởng báo cáo (cosmetic), không đụng `orders[]`/executor.
 
+> ⚠️ **SUPERSEDED 02/11/2026 23:01 ICT (user)**: mã có cờ chất lượng (kể cả FLOOR_FAIL) ⇒ LOẠI khỏi candidate mọi book — xem `kb/current_ops.md` "4 QUY TẮC USER CHỐT 02/11". Phần dưới là lịch sử.
+
 ## "FLOOR_FAIL" KHÔNG phải gate cứng cho LAG — TRÍCH lăng kính ngành có sẵn, đừng đọc dở CSV (thêm 2026-08-04, đính chính + chuyển code cùng ngày)
 `FLOOR_FAIL` là chữ DollarBill tự viết để mô tả 1 mã trượt "golden floor" (ROE_Min3Y≥0 ∧ CF_OA_3Y>0)
 — KHÔNG phải gate cứng cho LAG (LAG chỉ gate cứng ở 8L rating≤3, `lag_filter_low_rating()`).
