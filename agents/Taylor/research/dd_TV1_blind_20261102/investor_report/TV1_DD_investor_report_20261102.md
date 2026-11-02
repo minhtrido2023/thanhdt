@@ -6,7 +6,7 @@
 
 ## Investment Summary
 
-**Giá 19.500 đ nằm TRONG dải giá trị nội tại chính 11.400–24.200 đ/cp, gần tâm ≈18.100 (ước lượng).** Dải rộng vì giá điện Sông Bung 5 từ 2027 chưa có văn bản; mỗi kịch bản giá điện dịch giá trị hàng chục nghìn đồng.
+**Giá 19.500 đ nằm TRONG dải giá trị nội tại chính 11.400–24.200 đ/cp, gần tâm ≈18.100 (ước lượng).** Dải rộng vì giá điện Sông Bung 5 từ 2027 chưa có văn bản; các kịch bản giá điện trải khoảng 22.000 đ/cp giữa mức thấp nhất (≈340 đ/kWh) và cao nhất (949 đ/kWh).
 
 | Dữ liệu chính | Giá trị | Ghi chú |
 |---|---|---|
@@ -16,7 +16,7 @@
 | P/E 12T · P/B · cổ tức FY2025 | 2,8x (3,3x bỏ thu nhập khác Q3) · 0,91x · 1.500 đ (7,7%) | thuỷ điện niêm yết 2026: P/E trung vị 9,2x |
 | LNST 9T/2026 · 2025 | 124,6 (+44%) · 150,2 | đều ở giá điện hiện hành ≈949 đ/kWh |
 | Hợp đồng tư vấn ký mới 2025 | **835,1** (≈+198% so 2024) | công ty công bố 01/2026 |
-| Thanh khoản 20 phiên | ≈45 nghìn cp ≈ 0,87 tỷ/phiên | biên độ UPCOM ±15% |
+| Thanh khoản 20 phiên | ≈45 nghìn cp ≈ 0,87 tỷ/phiên (bình quân; trung vị ≈0,45 tỷ) | biên độ UPCOM ±15% |
 
 ## Ba điều cần biết
 
@@ -48,7 +48,7 @@
 
 | Khung pháp lý (tham khảo) | Hàm ý |
 |---|---|
-| Luật Điện lực 61/2024 Đ.52: giá trên chi phí hợp lý + lợi nhuận hợp lý; chỉ 4 căn cứ điều chỉnh hợp đồng đã ký | EVN **không** đơn phương hạ giá |
+| Luật Điện lực 61/2024 Đ.52: giá trên chi phí hợp lý + lợi nhuận hợp lý; chỉ 4 căn cứ điều chỉnh hợp đồng đã ký | EVN **không** đơn phương hạ giá; lưu ý: dự án Luật Điện lực sửa đổi trình ngày 20/10/2026 (Đ.52 có thể đổi); nhà máy trên 30 MW có thể chỉ hưởng giá hợp đồng cho phần sản lượng hợp đồng, phần còn lại theo giá thị trường điện (chưa kiểm Sông Bung 5 có tham gia trực tiếp không) |
 | TT 12/2025: IRR ≤12% toàn đời là **trần**, không phải sàn; Đ.16 cho phép giá từng năm cao trong kỳ trả nợ, thấp sau | bậc thấp đã ký thì chủ đầu tư khó từ chối |
 | Khung giá thuỷ điện 2026 (QĐ 1127/QĐ-BCT): 0–1.110 đ/kWh | không ràng buộc ở 949 |
 
@@ -122,6 +122,7 @@
 
 - Tiền ròng điều chỉnh −64,4 tỷ gồm quỹ khen thưởng phúc lợi đã trích 40,7 tỷ và khoản vay cá nhân đang tranh chấp (127,6 tỷ gốc + lãi, đã trong sổ).
 - Quỹ khen thưởng 20% LNST; chi trả cổ tức 27% (FY2025); không trả cổ tức tiền FY2016–22.
+- **Cờ độ tin cậy số liệu kế toán:** thuyết minh Q3 ghi dự phòng phải thu khách hàng đầu năm 63,2 tỷ, lệch 26,7 tỷ so với BCTC 2025 đã kiểm toán (89,9); tổng dự phòng trên bảng cân đối (mã 136) lệch thuyết minh khoảng 15 tỷ; vốn chủ sở hữu điều chỉnh trực tiếp +8,9 tỷ ở H1. Chủ tịch HĐQT và phó phòng tài chính–kế toán bị khởi tố, trong vụ có tội danh về kế toán, nên độ tin cậy số liệu các năm 2023–25 là một rủi ro còn mở; BCTC kiểm toán FY2026 (dự kiến 03/2027) sẽ là mốc xác nhận. Nền biên tư vấn 2024–26 trùng giai đoạn dự án 500 kV mạch 3 đang được điều tra.
 
 ## 5. Định giá: tổng các phần, dựng độc lập với giá thị trường
 
@@ -131,7 +132,7 @@
 
 - Thuỷ điện: DCF dòng tiền chủ sở hữu 2027–08/2059 (hết thuê đất), sản lượng 187,5 GWh/năm (bình quân dài hạn 185–190), sau quỹ khen thưởng 20%.
 - Tư vấn: DCF 2027–32 + giá trị cuối kỳ tăng 5%/năm; vốn lưu động 49% phần doanh thu tăng thêm. Điện mặt trời lòng hồ (≈800 tỷ): **không tính** (chưa có giá bán, IRR ước ≈6,8%).
-- Ke 12,85% (dải nội địa 12,3–13,4%; β 1,1); Ke 12,3% → 19.100, 13,4% → 17.200.
+- Ke 12,85% (dải nội địa 12,3–13,4%; β 1,1); Ke 12,3% → 19.100, 13,4% → 17.200; nếu dùng mức chiết khấu thị trường chung 15,1% thì tâm ≈14.800.
 
 ![Độ nhạy](figs/fig_19_sensitivity.png)
 
@@ -141,7 +142,7 @@
 
 | Có thể chưa phản ánh | Bằng chứng | Kiểm bằng |
 |---|---|---|
-| Đường ống tư vấn đã khoá doanh thu 2026–27 | ký mới 835,1 tỷ (1,9× doanh thu tư vấn), trả trước +33%, doanh thu 9T +29% | doanh thu tư vấn FY2026 ≥500 tỷ |
+| Đường ống tư vấn đã khoá doanh thu 2026–27 | ký mới 835,1 tỷ (1,9× doanh thu tư vấn), trả trước +33%, doanh thu tư vấn 9T +29% (doanh thu hợp nhất +14%) | doanh thu tư vấn FY2026 ≥500 tỷ |
 | Mốc hạ giá có thể chậm | 2022 đã qua không hạ; EVN không đơn phương hạ | doanh thu thuỷ điện Q1/2027 |
 | Vị thế thiết kế gốc thuỷ điện mở rộng | Tuyên Quang mở rộng: dự thầu duy nhất | gói Sơn La/Lai Châu mở rộng |
 | Giả thuyết: điều chỉnh quy hoạch sinh thêm việc thiết kế lại | chưa có số | kết quả thầu 2027 |
@@ -152,10 +153,11 @@
 | Biên tư vấn không bền | âm 2022–23; cạnh tranh gay gắt; ký mới 2024 ≈280 tỷ |
 | Rủi ro pháp lý và truy thu | khởi tố lãnh đạo; truy thu tiềm năng ≈659 tỷ trước thuế |
 | Cổ đông thiểu số nhận ít | chi trả 27%, quỹ khen thưởng 20%, 7 năm không cổ tức tiền |
+| Độ tin cậy số liệu kế toán | thuyết minh Q3 lệch BCTC kiểm toán 26,7 tỷ (dự phòng phải thu đầu năm); lệch ≈15 tỷ tổng dự phòng; vốn chủ điều chỉnh +8,9 tỷ; tội danh kế toán trong vụ án; biên tư vấn 2024–26 trùng giai đoạn dự án đang điều tra |
 
 ## 7. So sánh ngành (peer) — đối chiếu sau định giá
 
-**32 mã thuỷ điện giao dịch ở P/E trung vị ≈9x, cổ tức ≈7%/năm; TV1 ≈3x trên lợi nhuận hiện hành vì lợi nhuận đó sắp đổi.**
+**32 mã thuỷ điện giao dịch ở P/E trung vị ≈9x, tỷ suất cổ tức người trả trung vị ≈7–8%/năm; TV1 ≈3x trên lợi nhuận hiện hành vì lợi nhuận đó sắp đổi.**
 
 | Nhóm / mã (02/11/2026) | P/E | P/B | Cổ tức 12T | ROE |
 |---|---|---|---|---|
@@ -168,7 +170,7 @@
 
 ![Cổ tức ngành](figs/fig_15_peer_yield.png)
 
-- Tỷ suất cổ tức ≥10% hiếm và không bền: 39/181 mã–năm 2019–25; chuỗi dài nhất 3 năm.
+- Tỷ suất cổ tức ≥10% không bền (21% số mã–năm): 39/181 mã–năm 2019–25; chuỗi dài nhất 3 năm.
 - Đối chiếu bằng bội số peer (LNST thuỷ điện 2028 kỳ vọng × 7,9–9,2x; tư vấn ≈45 tỷ × 6,0–9,2x; tiền ròng): **13.900–20.300 đ/cp**, giao với dải nội tại.
 
 ## 8. Pháp lý & quản trị — WARNING (không nằm trong tâm)
