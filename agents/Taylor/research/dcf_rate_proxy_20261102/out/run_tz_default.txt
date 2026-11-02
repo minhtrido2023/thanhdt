@@ -1,0 +1,173 @@
+!!!!! [dcf_valuation] dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP) !!!!!
+dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP)
+=== luật chọn
+  proxy  a_dir3of3  b_sens2of3  c_pit2014  pass  corr_d3m_rstar   first
+   gb10       True        True       True  True           0.047 2014-01
+  dep1m       True        True      False False           0.446 2019-02
+  dep12       True        True      False False           0.211 2014-01
+  ib_on      False        True       True False           0.168 2014-01
+te_ib3m      False        True       True False           0.155 2014-01
+  ib_3m      False        True       True False           0.141 2014-01
+  ib_1w      False        True       True False           0.123 2014-01
+ sbv_hi      False        True       True False           0.106 2014-01
+   refi      False        True       True False           0.098 2014-01
+  ib_1m      False        True       True False           0.091 2014-01
+ sbv_lo      False        True       True False           0.035 2014-01
+proxy tốt nhất: gb10
+=== episodes
+    proxy  sd_d12  E1_2022_tang_d  E2_2023_giam_d  E3_2026_tang_d  E1_2022_tang_dz  E2_2023_giam_dz  E3_2026_tang_dz
+    dep12    1.03            2.00           -2.50            1.60             1.94            -2.43             1.56
+     refi    0.76            2.00           -1.50            0.00             2.62            -1.97             0.00
+    dep1m    1.17            1.90           -2.50            0.50             1.62            -2.13             0.43
+   sbv_hi    0.88            0.90            0.70            1.20             1.02             0.80             1.36
+   sbv_lo    0.86            0.70            1.20            1.10             0.82             1.40             1.28
+    ib_on    2.50            3.71           -3.93           -0.67             1.49            -1.57            -0.27
+    ib_1w    2.48            2.67           -1.37           -3.55             1.08            -0.55            -1.43
+    ib_1m    2.35            1.79           -2.17           -1.28             0.76            -0.92            -0.55
+    ib_3m    2.30            5.81           -6.16           -1.22             2.53            -2.68            -0.53
+  te_ib3m    2.17            6.63           -5.31           -0.39             3.06            -2.45            -0.18
+     gb10    1.19            3.03           -2.70            0.45             2.54            -2.26             0.38
+    rstar    2.19            3.84           -3.76            2.79             1.75            -1.71             1.27
+rstar_g45    2.21            3.89           -3.79            2.82             1.76            -1.72             1.28
+       ey    1.38            3.53           -1.86            1.92             2.56            -1.35             1.39
+    proxy  E1_2022_tang_sign_ok_rstar  E2_2023_giam_sign_ok_rstar E3_2026_tang_sign_ok_rstar  E1_2022_tang_sign_ok_ey  E2_2023_giam_sign_ok_ey E3_2026_tang_sign_ok_ey
+    dep12                        True                        True                       True                     True                     True                    True
+     refi                        True                        True                       None                     True                     True                    None
+    dep1m                        True                        True                       True                     True                     True                    True
+   sbv_hi                        True                       False                       True                     True                    False                    True
+   sbv_lo                        True                       False                       True                     True                    False                    True
+    ib_on                        True                        True                      False                     True                     True                   False
+    ib_1w                        True                        True                      False                     True                     True                   False
+    ib_1m                        True                        True                      False                     True                     True                   False
+    ib_3m                        True                        True                      False                     True                     True                   False
+  te_ib3m                        True                        True                      False                     True                     True                   False
+     gb10                        True                        True                       True                     True                     True                    True
+    rstar                        True                        True                       True                     True                     True                    True
+rstar_g45                        True                        True                       True                     True                     True                    True
+       ey                        True                        True                       True                     True                     True                    True
+=== d3m corr
+  proxy  corr_d3m_rstar     lo    hi  n  corr_d3m_ey  lo_ey  hi_ey
+  dep12           0.211 -0.194 0.606 50        0.253 -0.291  0.590
+   refi           0.098 -0.295 0.415 50        0.190 -0.355  0.550
+  dep1m           0.446  0.280 0.601 30        0.548  0.414  0.738
+ sbv_hi           0.106 -0.154 0.359 48        0.161 -0.119  0.358
+ sbv_lo           0.035 -0.261 0.380 48        0.040 -0.200  0.313
+  ib_on           0.168  0.080 0.412 50        0.103  0.034  0.381
+  ib_1w           0.123  0.022 0.290 50        0.181  0.045  0.364
+  ib_1m           0.091 -0.058 0.280 50        0.160  0.042  0.338
+  ib_3m           0.141 -0.184 0.492 50        0.236 -0.045  0.506
+te_ib3m           0.155 -0.180 0.481 50        0.278  0.023  0.567
+   gb10           0.047 -0.456 0.611 50        0.343 -0.128  0.722
+=== leadlag CI
+  proxy target  lag  is_best   corr  ci_lo  ci_hi   n
+  dep12  rstar   -5     True  0.136 -0.014  0.197 148
+  dep12  rstar    0    False  0.013 -0.152  0.177 153
+  dep12 dlogpe   -5     True -0.139 -0.377  0.137 148
+  dep12 dlogpe    0    False -0.075 -0.246  0.138 153
+  dep12     ey   -5     True  0.149 -0.112  0.362 148
+  dep12     ey    0    False  0.100 -0.120  0.279 153
+   refi  rstar    0    False -0.004 -0.404  0.328 153
+   refi  rstar    1     True  0.315  0.090  0.450 152
+   refi dlogpe    0    False -0.110 -0.377  0.249 153
+   refi dlogpe    1     True -0.246 -0.466 -0.004 152
+   refi     ey    0    False  0.129 -0.262  0.424 153
+   refi     ey    1     True  0.292  0.019  0.533 152
+  dep1m  rstar    0     True  0.257 -0.019  0.472  91
+  dep1m dlogpe    0     True -0.345 -0.584 -0.021  91
+  dep1m     ey    0     True  0.392  0.050  0.623  91
+ sbv_hi  rstar   -1     True  0.103 -0.076  0.230 150
+ sbv_hi  rstar    0    False  0.038 -0.102  0.186 151
+ sbv_hi dlogpe   -2     True -0.171 -0.284  0.011 149
+ sbv_hi dlogpe    0    False -0.052 -0.133  0.099 151
+ sbv_hi     ey   -2     True  0.182 -0.017  0.308 149
+ sbv_hi     ey    0    False  0.046 -0.123  0.135 151
+ sbv_lo  rstar   -3     True  0.135 -0.053  0.324 148
+ sbv_lo  rstar    0    False -0.059 -0.195  0.049 151
+ sbv_lo dlogpe   -2     True -0.139 -0.314  0.054 149
+ sbv_lo dlogpe    0    False  0.053 -0.037  0.212 151
+ sbv_lo     ey   -2     True  0.152 -0.053  0.337 149
+ sbv_lo     ey    0    False -0.057 -0.225  0.034 151
+  ib_on  rstar   -6     True -0.148 -0.281  0.022 146
+  ib_on  rstar    0    False  0.095 -0.080  0.242 152
+  ib_on dlogpe   -5     True  0.192 -0.026  0.251 147
+  ib_on dlogpe    0    False -0.002 -0.095  0.132 152
+  ib_on     ey   -5     True -0.189 -0.250  0.023 147
+  ib_on     ey    0    False  0.005 -0.135  0.106 152
+  ib_1w  rstar    0    False  0.066 -0.109  0.207 152
+  ib_1w  rstar    2     True  0.152  0.038  0.266 151
+  ib_1w dlogpe    0    False -0.148 -0.195  0.002 152
+  ib_1w dlogpe    5     True -0.168 -0.290 -0.029 148
+  ib_1w     ey    0    False  0.154 -0.005  0.193 152
+  ib_1w     ey    5     True  0.159  0.008  0.283 148
+  ib_1m  rstar    0    False  0.008 -0.135  0.100 152
+  ib_1m  rstar    1     True  0.151 -0.079  0.338 152
+  ib_1m dlogpe    0     True -0.214 -0.332 -0.051 152
+  ib_1m     ey    0     True  0.233  0.053  0.357 152
+  ib_3m  rstar   -1     True  0.306  0.124  0.467 151
+  ib_3m  rstar    0    False  0.120 -0.078  0.219 152
+  ib_3m dlogpe    0     True -0.330 -0.444 -0.159 152
+  ib_3m     ey    0     True  0.343  0.155  0.450 152
+te_ib3m  rstar   -1     True  0.261  0.133  0.374 152
+te_ib3m  rstar    0    False  0.056 -0.147  0.183 153
+te_ib3m dlogpe    0     True -0.273 -0.416 -0.100 153
+te_ib3m     ey    0     True  0.289  0.097  0.430 153
+   gb10  rstar   -1     True  0.152 -0.024  0.325 152
+   gb10  rstar    0    False -0.000 -0.276  0.256 153
+   gb10 dlogpe    0     True -0.291 -0.479 -0.100 153
+   gb10     ey    0     True  0.296  0.079  0.484 153
+  ib_1m sbv_lo    0    False -0.072 -0.201  0.070 150
+  ib_1m sbv_lo    2     True  0.147  0.023  0.266 149
+  ib_1m sbv_hi    0    False -0.127 -0.304  0.099 150
+  ib_1m sbv_hi    6     True  0.277  0.061  0.389 145
+  ib_1m  dep1m    0    False  0.241 -0.070  0.392  91
+  ib_1m  dep1m    1     True  0.295 -0.009  0.461  91
+  ib_3m sbv_lo    0    False -0.118 -0.282  0.018 150
+  ib_3m sbv_lo    5     True  0.214  0.009  0.399 146
+  ib_3m sbv_hi    0    False -0.019 -0.150  0.120 150
+  ib_3m sbv_hi    6     True  0.281  0.040  0.374 145
+  ib_3m  dep1m    0    False  0.195 -0.164  0.384  91
+  ib_3m  dep1m    1     True  0.360  0.158  0.507  91
+te_ib3m sbv_lo    0    False -0.016 -0.242  0.207 151
+te_ib3m sbv_lo    6     True  0.309  0.078  0.435 145
+te_ib3m sbv_hi    0    False -0.002 -0.257  0.224 151
+te_ib3m sbv_hi    6     True  0.365  0.103  0.446 145
+te_ib3m  dep1m    0    False  0.397  0.020  0.600  91
+te_ib3m  dep1m    1     True  0.547  0.217  0.681  91
+   refi sbv_lo    0    False -0.055 -0.252  0.073 151
+   refi sbv_lo    4     True  0.259 -0.076  0.551 147
+   refi sbv_hi    0    False  0.060 -0.151  0.197 151
+   refi sbv_hi    6     True  0.268  0.091  0.394 145
+   refi  dep1m    0    False  0.368 -0.005  0.541  91
+   refi  dep1m    1     True  0.698  0.147  0.933  91
+   gb10 sbv_lo    0    False  0.057 -0.222  0.290 151
+   gb10 sbv_lo    6     True  0.264  0.053  0.409 145
+   gb10 sbv_hi    0    False  0.142 -0.190  0.439 151
+   gb10 sbv_hi    6     True  0.254  0.022  0.376 145
+   gb10  dep1m    0    False  0.423  0.160  0.545  91
+   gb10  dep1m    1     True  0.561  0.247  0.724  91
+=== ERP scen
+ proxy  erp_b  r_min  r_max  r_last  nan_filled
+  gb10  7.721  0.098  0.166   0.123           0
+sbv_lo  6.059  0.109  0.136   0.122           1
+=== today
+    scen  r_last  gT_last   n  FV_med_vs_a  pct_RE  flip_RE_to_RICH  flip_RICH_to_RE
+ a_const  0.1225   0.0550 147       0.0000  0.6599                0                0
+  b_gb10  0.1230   0.0550 147      -0.0075  0.6531                1                0
+  c_gb10  0.1230   0.0555 147      -0.0006  0.6599                0                0
+b_sbv_lo  0.1216   0.0550 147       0.0142  0.6667                0                1
+c_sbv_lo  0.1216   0.0541 147       0.0012  0.6599                0                0
+=== forecast
+    scen  spearman_pctRE_fwd12     lo    hi   n  diff_vs_a  diff_lo  diff_hi  rank_corr_min  rank_corr_med
+ a_const                 0.260 -0.084 0.655 142      0.000    0.000    0.000            NaN            NaN
+  b_gb10                 0.156 -0.302 0.524 142     -0.104   -0.768    0.329            1.0            1.0
+  c_gb10                 0.260 -0.075 0.666 142     -0.000   -0.044    0.032            1.0            1.0
+b_sbv_lo                 0.395  0.112 0.641 142      0.136   -0.151    0.331            1.0            1.0
+c_sbv_lo                 0.270 -0.061 0.647 142      0.010   -0.006    0.022            1.0            1.0
+=== keypoints %RE
+         a_const  b_gb10  c_gb10  b_sbv_lo  c_sbv_lo
+m                                                   
+2022-03    0.449   0.582   0.464     0.490     0.460
+2022-11    0.668   0.653   0.658     0.679     0.668
+2023-12    0.497   0.627   0.510     0.444     0.490
+2025-12    0.514   0.536   0.514     0.587     0.520
+2026-10    0.660   0.653   0.660     0.667     0.660

@@ -1,0 +1,12 @@
+proxy,a_dir3of3,b_sens2of3,c_pit2014,pass,corr_d3m_rstar,first
+gb10,True,True,True,True,0.04727431041712857,2014-01
+dep1m,True,True,False,False,0.44555187390332585,2019-02
+dep12,True,True,False,False,0.21097458581303016,2014-01
+ib_on,False,True,True,False,0.16756301656234637,2014-01
+te_ib3m,False,True,True,False,0.15508970396407545,2014-01
+ib_3m,False,True,True,False,0.14120544252976952,2014-01
+ib_1w,False,True,True,False,0.12339887757418257,2014-01
+sbv_hi,False,True,True,False,0.1061479725858034,2014-01
+refi,False,True,True,False,0.09800192523568288,2014-01
+ib_1m,False,True,True,False,0.09089305518132396,2014-01
+sbv_lo,False,True,True,False,0.0346308095133115,2014-01
