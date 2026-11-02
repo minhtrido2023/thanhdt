@@ -38,3 +38,5 @@
 - [2026-11-02T11:22:27Z] ĐANG DỞ: job Taylor_20261102_112213 TV1 r7 peer study (P/E, yield) + báo cáo NĐT sạch — research/dd_TV1_20261102/calc/peer_study/ | NEXT: đọc REPORT §0/§8, valuation.py, hydro_peer_pe
 - [2026-11-02T11:44:08Z] [tv1-dd r7 02/11] XONG job Taylor_20261102_112213 commit 449b89a44 — peer hieu chuan: vung 18.200–22.000 tam 20.700 (gia -4%, TRONG vung); cho Mike skeptic + sua dd_price_zones + gui email; bao cao NDT da sach luat 18
 - [2026-11-02T12:02:04Z] [tv1-dd r8 02/11] XONG job Taylor_20261102_115348 commit d349e28a2 — vung 15.800–20.600 tam 17.991 (gia +10%), hoa von ~586 (525–622); Ke khoang 9–13% tam 12%; cho Mike skeptic + sua dd_price_zones + gui email
+- [2026-11-02T14:44:04Z] ĐANG DỞ: job Taylor_20261102_144349 TV1 định giá MÙ — research/dd_TV1_blind_20261102/ | NEXT: đọc skill luật 19/18/12, LEGAL_PPA, ppa study, BCTC; KHÔNG đọc giá
+- [2026-11-02T14:56:44Z] [tv1-blind 02/11] XONG job Taylor_20261102_144349 commit 2fd1d104f — tam 27.800 (P20-P80 22.100-35.100), gia 19.500 (-30%); cho Mike phan bien (soi xac suat [UL]) truoc khi dung bao cao NDT
