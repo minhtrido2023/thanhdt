@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-01T14:12:20Z] [funnel-dd-skip 01/11] XONG job Taylor_20261101_140717: nhánh feat/funnel-dd-skip-after-bctc-20261101 (f1282ace7, chưa merge) — chờ Mike arch-review/merge
 - [2026-11-01T14:32:32Z] [dd-risk-urgent vòng2 01/11] XONG job Taylor_20261101_141958: de1fe56a9 (chưa merge) — chờ Mike re-review/merge; CẢNH BÁO: repro flow.py của reviewer D gọi Notifier thật ⇒ 1 tin test XYZ 21:28 ICT có thể đã tới user
 - [2026-11-01T15:07:38Z] [dd-risk-urgent-nits 01/11] XONG job Taylor_20261101_150156: 73ab19ec4 nhánh feat/dd-risk-urgent-nits-20261101 (chưa merge) — chờ Mike merge
 - [2026-11-01T15:41:08Z] ĐANG DỞ: TASK E dd-price-zone job Taylor_20261101_154045 — nhánh feat/dd-price-zone-20261101 | NEXT: khám phá DD files, dựng kb/dd_price_zones.json
@@ -26,3 +25,4 @@
 - [2026-11-01T16:59:53Z] ĐANG DỞ: dcf_expectation_lens job Taylor_20261101_165940 — agents/Taylor/research/dcf_expectation_lens_20261101/ | NEXT: đọc REPORT dcf_vn_calibration, viết PREREG
 - [2026-11-01T17:29:15Z] [dcf-expectation-lens 02/11] XONG job Taylor_20261101_165940: REPORT commit 29ac97b3b — khong xay DCF nhe; ung vien R&D rieng accS (so voi d_NPR LAG) CHO user quyet
 - [2026-11-02T01:28:21Z] ĐANG DỞ: job Taylor_20261102_012810 dcf_rate_proxy — research/dcf_rate_proxy_20261102/ | NEXT: đọc docs, PREREG
+- [2026-11-02T01:40:11Z] [dcf-rate-proxy 02/11] XONG job Taylor_20261102_012810 (commit 16b3cbddf): giu r hang; de xuat hien thi them r* thi truong (15,1%) + TPCP10Y, chua wire; TPCP10Y/macro_indicator can entry data_registry truoc khi dung

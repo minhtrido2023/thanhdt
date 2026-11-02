@@ -1797,3 +1797,6 @@
 - [2026-11-01T13:40:25Z] [funnel-v2 vòng2 01/11] XONG 3a95765f2 (chưa merge) — chờ Mike re-review; registry mốc 2027-04-06 chưa thêm
 - [2026-11-01T13:53:52Z] [funnel-v2 vòng3 01/11] XONG ae875940a (chưa merge) — chờ Mike merge; registry mốc 2027-04-06 đã thêm
 - [2026-11-01T14:11:01Z] [dd-risk-urgent 01/11] XONG job Taylor_20261101_140715: nhánh feat/dd-risk-urgent-20261101 (8eda749b2, chưa merge) — chờ Mike arch-review/merge
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T14:12:20Z] [funnel-dd-skip 01/11] XONG job Taylor_20261101_140717: nhánh feat/funnel-dd-skip-after-bctc-20261101 (f1282ace7, chưa merge) — chờ Mike arch-review/merge
