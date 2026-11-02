@@ -1,7 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-10-27T12:06:59Z] [2026-10-27 19:xx ICT] Plan SpaceX 10-28 XONG: 1 lenh MUA SCL 300cp LO 32.700 (residual ngay 3/3); egg>=1,2tr; DNSE live OK; cho duyet truoc 08:45 28/10 (job DollarBill_20261027_120459)
 - [2026-10-28T12:05:43Z] [2026-10-28 19:xx ICT] Plan ZaloPay 10-29 XONG: BUY MCH 200cp LO 139.800 (~27,99tr), chuyen egg >=20,6tr truoc 09:05; cho duyet truoc 08:45 29/10 (job DollarBill_20261028_120432)
 - [2026-10-28T12:06:02Z] [2026-10-28 19:xx ICT] Plan SpaceX 10-29 XONG: MUA MCH 200cp LO 139.800 (LAG_LO 8%), MSR ACK_DROP bỏ, egg>=19,4tr; chờ duyệt trước 08:45 29/10 (job DollarBill_20261028_120434)
 - [2026-10-29T12:04:58Z] [2026-10-29 19:xx ICT] Plan ZaloPay 10-30 XONG HOLD ALL; SCL bi ban 500cp ngoai plan (chua ro nguon) -> can doi soat; cho duyet truoc 08:45 30/10 (job DollarBill_20261029_120347)
@@ -13,3 +12,4 @@
 - [2026-11-01T12:05:33Z] [2026-11-01 19:xx ICT] Plan ZaloPay 11-02 (vong CN) XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 02/11 (job DollarBill_20261101_120459)
 - [2026-11-01T12:05:41Z] [2026-11-01 19:xx ICT] Plan SpaceX 11-02 (vong CN toi) XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 02/11 (job DollarBill_20261101_120500)
 - [2026-11-02T12:12:39Z] [2026-11-02 19:xx ICT] Plan SpaceX 11-03 XONG: BUY TCH 4100cp LO<=11.850 (BAL), egg>=18,6tr; chờ duyệt trước 08:45 03/11 (job DollarBill_20261102_121030)
+- [2026-11-02T12:12:52Z] [2026-11-02 19:xx ICT] Plan ZaloPay 11-03 XONG: BUY TCH 2600cp LO 11.850 (BAL, FLOOR_FAIL flagged), egg>=0.6tr; cho duyet truoc 08:45 03/11 (job DollarBill_20261102_121028)

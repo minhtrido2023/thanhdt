@@ -1043,3 +1043,6 @@
 - [2026-11-02T12:12:39Z] DollarBill/decision — plan-2026-11-03-SpaceX: {"account": "SpaceX", "plan_date": "2026-11-03", "dt5g": "NEUTRAL", "orders": "BUY TCH 4100cp LO<=11850 (BAL RE_BACKLOG_BUY, ~48,63tr gồm phí)", "egg_transfer_min_tr": 18.6, "lag": "0 mã due; MCH giữ; DCM vào 05/11 CLEARED", "risk": "TCH FLOOR_FAIL, PE 39,8, FSCORE 3", "approval": "chờ user trước 08:45 03/11"}
 - [2026-11-02T12:10:46Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-02", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-02.md"}
 - [2026-11-02T12:11:17Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-02", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-02.md"}
+
+## Consolidation 2026-11-02T12:13:05Z
+- [2026-11-02T12:12:52Z] DollarBill/decision — plan-2026-11-03-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-11-03", "dt5g": "NEUTRAL", "orders": "BUY TCH 2600cp LO 11850 (BAL RE_BACKLOG_BUY, ~30.8tr)", "egg_transfer": ">=0.6tr truoc 09:05", "note": "TCH FLOOR_FAIL flagged; LAG none due; status pending user approval"}
