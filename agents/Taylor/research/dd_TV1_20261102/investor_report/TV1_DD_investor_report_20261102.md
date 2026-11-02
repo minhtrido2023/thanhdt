@@ -1,24 +1,24 @@
-# TV1 — CTCP Tư vấn Xây dựng Điện 1 (EVNPECC1): tư vấn điện đang tăng và cổ tức 2025 đạt 7,6%, nhưng giá điện Sông Bung 5 sắp hạ bậc từ 2027 kéo lợi nhuận bền vững về ≈65–82 tỷ, nên giá 19.800 đ cao hơn vùng giá trị cân bằng 13.900–18.100 đ (≈+25% so tâm) — chỉ ngang giá trị nếu giá điện mới ≥≈590 đ/kWh
+# TV1 — CTCP Tư vấn Xây dựng Điện 1 (EVNPECC1): tư vấn điện đang tăng và cổ tức 2025 đạt 7,6%, nhưng giá điện Sông Bung 5 sắp hạ bậc từ 2027 kéo lợi nhuận bền vững về ≈65–82 tỷ, nên giá 19.800 đ cao hơn vùng giá trị cân bằng 13.900–16.800 đ (≈+30% so tâm) — chỉ ngang giá trị nếu giá điện mới ≥≈634 đ/kWh (khung P/E; ≈703 theo tâm hai phương pháp)
 
 **Báo cáo Due Diligence · 02/11/2026 · Nhóm nghiên cứu** · UPCOM · Thuỷ điện và tư vấn khảo sát–thiết kế điện · số liệu tỷ đồng trừ khi ghi khác
 
-**BẢN ĐÍNH CHÍNH LẦN 2 — thay bản đính chính gửi 02/11/2026 15:25 (bản đó thay bản 11:55).** Kết luận đổi từ “giá từ ngang đến cao hơn giá trị ≈10%, vùng 17.800–20.600 đ” sang **“giá cao hơn vùng giá trị cân bằng 13.900–18.100 đ, tâm ≈15.900”**. Lý do là lỗi phương pháp: bản trước tính lợi nhuận bền vững trên **giá điện Sông Bung 5 hiện tại**, trong khi đã có bằng chứng giá này hạ bậc từ 2027. Bản dựng lại đã qua một vòng phản biện độc lập; vòng đó chỉ ra một bản nháp nghiêng quá về phía bi quan (tiền tích luỹ bị định giá thấp, bội số chiết khấu rủi ro hai lần) — bản này đã sửa cả hai chiều và chưa qua vòng phản biện kế tiếp. Chi tiết: Phụ lục E.
+**BẢN ĐÍNH CHÍNH LẦN 2 (bản r6, chốt) — thay bản đính chính gửi 02/11/2026 15:25 (bản đó thay bản 11:55).** Kết luận đổi từ “giá từ ngang đến cao hơn giá trị ≈10%, vùng 17.800–20.600 đ” sang **“giá cao hơn vùng giá trị cân bằng 13.900–16.800 đ, tâm ≈15.200”**. Lý do là lỗi phương pháp: bản trước tính lợi nhuận bền vững trên **giá điện Sông Bung 5 hiện tại**, trong khi đã có bằng chứng giá này hạ bậc từ 2027. Bản dựng lại đã qua bốn vòng phản biện độc lập; vòng 3 chỉ ra một bản nháp nghiêng quá về phía bi quan (tiền tích luỹ bị định giá thấp, bội số chiết khấu rủi ro hai lần), vòng 4 chỉ ra căn cứ bội số P/E ngang hàng chưa tái lập được (lẫn công ty nhiệt điện và phân phối) và mức giá điện hoà vốn nêu ở một khung — bản này sửa cả hai. **Chưa được kiểm lại sau vòng 4 ngoài một bước kiểm ngắn.** Chi tiết: Phụ lục E.
 
 ![Tổng quan](figs/fig_00_hero.png)
 
 ## Investment Summary
 
-**Giá 19.800 đ (đóng cửa 30/10/2026) CAO HƠN vùng giá trị cân bằng 13.900–18.100 đ/cp (ước lượng): +9% đến +42%, so tâm ≈15.900 là +25%.** Biến quyết định là **giá bán điện Sông Bung 5 sau mốc hạ bậc 2027**, chưa có văn bản; lãnh đạo nêu 500–600 đ/kWh. Giá hiện tại ngang giá trị nếu giá điện ròng mới **≥≈590 đ/kWh và công ty không bị cấm thầu** — tức đầu trên của dải lãnh đạo nêu. Theo giá trị tài sản (thuỷ điện + tư vấn), giá hiện tại không đắt; theo dòng tiền cổ đông thiểu số thực nhận, giá cao hơn kỳ vọng.
+**Giá 19.800 đ (đóng cửa 30/10/2026) CAO HƠN vùng giá trị cân bằng 13.900–16.800 đ/cp (ước lượng): +18% đến +42%, so tâm ≈15.200 là +30%.** Biến quyết định là **giá bán điện Sông Bung 5 sau mốc hạ bậc 2027**, chưa có văn bản; lãnh đạo nêu 500–600 đ/kWh. Giá hiện tại ngang giá trị nếu giá điện ròng mới **≥≈634 đ/kWh (xét riêng phương pháp P/E) hoặc ≥≈703 đ/kWh (xét tâm hai phương pháp; riêng chiết khấu cổ tức ≈817), và công ty không bị cấm thầu** — đều cao hơn dải 500–600 lãnh đạo nêu. Theo giá trị tài sản (thuỷ điện + tư vấn), giá hiện tại không đắt; theo dòng tiền cổ đông thiểu số thực nhận, giá cao hơn kỳ vọng.
 
 | Dữ liệu chính | Giá trị | Ghi chú |
 |---|---|---|
 | Giá · vốn hoá | **19.800 đ** · 528,5 tỷ | DNSE, đóng cửa 30/10/2026; 26,69 tr cp; tham chiếu 02/11 = 20.000 đ |
-| Vùng giá trị cân bằng · tâm | **13.900–18.100 · ≈15.900 đ** | hai phương pháp đồng hạng: P/E 6,5–7x trên lợi nhuận bền 2027+ và chiết khấu cổ tức; 4 kịch bản giá điện (ước lượng) |
+| Vùng giá trị cân bằng · tâm | **13.900–16.800 · ≈15.200 đ** | hai phương pháp đồng hạng: P/E 5,9–6,4x trên lợi nhuận bền 2027+ và chiết khấu cổ tức; 4 kịch bản giá điện (ước lượng) |
 | Giá điện Sông Bung 5 ròng 2025 · sau 2027 | ≈949 đ/kWh · **chưa xác định** (lãnh đạo: 500–600; văn bản 2018: bậc sau ≈340) | thuỷ điện tạo 67% lãi gộp 2025 |
-| Giá điện hoà vốn với giá 19.800 đ | **≈590 đ/kWh** | P/E 6,75x, không cấm thầu, sản lượng 205 tr kWh |
+| Giá điện hoà vốn với giá 19.800 đ | **≈634 đ/kWh** (chân P/E) · **≈703** (tâm hai phương pháp) · ≈817 (riêng cổ tức) | P/E 6,15x, không cấm thầu, đúng mốc 2027, sản lượng 205 tr kWh |
 | LNST bền 2027+ ở giá 500–600 | **≈65–82 tỷ** (2025: 150,2; KH 2026 của công ty: 104,2) | nếu không bị cấm thầu (ước lượng) |
 | Cổ tức cần có để biện minh giá · thực trả | **2.435–2.650 đ/năm** · 1.500 đ FY2025; KH FY2026 1.000 đ | cổ tức bền 2028+ ở giá 500–600: ≈650–1.200 đ |
-| Giá trị tài sản (SOTP) kỳ vọng | ≈25.900–28.000 đ | giá 19.800 = SOTP × 0,76 (chiết khấu 24%) |
+| Giá trị tài sản (SOTP) kỳ vọng | ≈25.900–28.000 đ | giá 19.800 = SOTP × 0,76 (chiết khấu 24%); tâm 15.200 = SOTP × 0,59 |
 | Tiền + tiền gửi · vay · tiền ròng điều chỉnh | 198,5 · 129,9 · **≈ −39** | vay chủ yếu từ cá nhân (118,8) |
 | Thanh khoản 20 phiên | trung bình 0,72 · trung vị 0,41 tỷ/phiên | biên độ UPCOM ±15% |
 
@@ -41,17 +41,17 @@
 
 - **Tình huống:** 9T/2026 doanh thu 446,9 tỷ (+14%), LNST 124,6 tỷ (+44%); quý 3 lãi 66,9 tỷ, cao nhất 11 quý — tất cả ở giá điện cũ.
 - **Vấn đề:** giá điện Sông Bung 5 hạ bậc từ 2027 (mức chưa có văn bản); lợi nhuận bền sau đó ≈43–54% mức 2025; lãnh đạo bị khởi tố trong vụ án có tội danh kế toán.
-- **Trả lời:** vùng giá trị cân bằng 13.900–18.100 đ, tâm ≈15.900; giá 19.800 đ ngầm định giá điện ròng ≈590 đ/kWh và không cấm thầu.
+- **Trả lời:** vùng giá trị cân bằng 13.900–16.800 đ, tâm ≈15.200; giá 19.800 đ ngầm định giá điện ròng ≈634 đ/kWh (khung P/E; ≈703 theo tâm hai phương pháp) và không cấm thầu.
 
 ## 2. Thị trường đang định giá gì
 
-**Ở 19.800 đ, thị trường định giá như thể giá điện mới nằm ở đầu trên dải lãnh đạo nêu (≈590–600 đ/kWh) và công ty không bị cấm thầu.**
+**Ở 19.800 đ, thị trường định giá như thể giá điện mới cao hơn dải lãnh đạo nêu (500–600): ≈634 đ/kWh ở khung P/E, ≈703 theo tâm hai phương pháp — và công ty không bị cấm thầu.**
 
 | Phép định giá ngược (ước lượng) | Giá trị |
 |---|---|
-| Giá điện ròng hoà vốn (P/E 6,75x, không cấm thầu, sản lượng 205 triệu kWh, cộng tiền ròng) | **≈590 đ/kWh** (2025: ≈949) |
+| Giá điện ròng hoà vốn (không cấm thầu, đúng mốc 2027, sản lượng 205 triệu kWh, cộng tiền ròng): chân P/E 6,15x · tâm hai phương pháp · riêng cổ tức | **≈634 · ≈703 · ≈817 đ/kWh** (2025: ≈949) |
 | LNST bền 2027+ theo kịch bản giá điện 600 / 500 đ/kWh (không cấm thầu) | **≈82 / ≈65 tỷ** |
-| Giá trị theo P/E 6,75x ở 600 / 500 đ/kWh (không cấm thầu) | ≈20.100 / ≈16.200 đ |
+| Giá trị theo P/E 6,15x ở 600 / 500 đ/kWh (không cấm thầu) | ≈18.600 / ≈14.900 đ |
 | Cổ tức cần có để biện minh giá (Ke 12,3–13,4%, không tăng trưởng) | 2.435–2.650 đ/năm (tỷ lệ chi trả cần ≈80% ở giá 600; 2025 trả 1.500 đ, 27%) |
 | Giá so giá trị tài sản (SOTP trộn rủi ro pháp lý ≈25.900) | 0,76 lần — chiết khấu 24%, trong thông lệ 20–40% cho cổ đông thiểu số/holding |
 
@@ -143,24 +143,24 @@
 
 ## 7. Định giá
 
-**Hai phương pháp đồng hạng: vùng giá trị cân bằng 13.900–18.100 đ, tâm ≈15.900; giá 19.800 đ cao hơn ≈25% so tâm, ngang giá trị nếu giá điện mới ≥≈590 đ/kWh.**
+**Hai phương pháp đồng hạng: vùng giá trị cân bằng 13.900–16.800 đ, tâm ≈15.200; giá 19.800 đ cao hơn ≈30% so tâm, ngang giá trị nếu giá điện mới ≥≈634 đ/kWh (khung P/E; ≈703 theo tâm hai phương pháp).**
 
 ![LNST bền theo kịch bản giá điện](figs/fig_12_np_by_ppa.png)
 
-| Kịch bản giá điện ròng 2027+ | Xác suất (ước lượng) | Căn cứ | LNST bền (không cấm thầu / cấm thầu) | P/E 6,75x (không / có cấm thầu) | Cổ tức chiết khấu, chi trả 27% / 40% |
+| Kịch bản giá điện ròng 2027+ | Xác suất (ước lượng) | Căn cứ | LNST bền (không cấm thầu / cấm thầu) | P/E 6,15x (không / có cấm thầu) | Cổ tức chiết khấu, chi trả 27% / 40% |
 |---|---|---|---|---|---|
-| (a) giữ ≈975 đ/kWh | 10% | ngược với báo cáo thường niên 2025 và lời lãnh đạo; vay dự án đã tất toán 03/2025 | 143 / 118 | **35.100** / 28.000 | 21.700 / 22.800 |
-| (b) 600 đ/kWh | 45% | lời lãnh đạo (500–600), chưa có văn bản | 82 / 57 | **20.100** / 13.100 | 15.000 / 15.700 |
-| (c) 500 đ/kWh | 35% | như (b) | 65 / 40 | **16.200** / 9.100 | 13.200 / 13.700 |
-| (d) ≈340 đ/kWh | 10% | hồ sơ 2018: bậc sau 243,66 + vận hành ≈95; bậc này chưa từng được áp, mâu thuẫn với lời lãnh đạo mới hơn | 39 / 14 | **9.800** / 2.700 | 10.400 / 10.700 |
-| **Kỳ vọng** (cấm thầu 30%; mốc hạ lùi 2 năm 15%) | | | | **17.600** (11.600–21.000) | **13.900 / 14.500** |
+| (a) giữ ≈975 đ/kWh | 10% | ngược với báo cáo thường niên 2025 và lời lãnh đạo; vay dự án đã tất toán 03/2025 | 143 / 118 | **32.300** / 25.700 | 21.700 / 22.800 |
+| (b) 600 đ/kWh | 45% | lời lãnh đạo (500–600), chưa có văn bản | 82 / 57 | **18.600** / 12.000 | 15.000 / 15.700 |
+| (c) 500 đ/kWh | 35% | như (b) | 65 / 40 | **14.900** / 8.300 | 13.200 / 13.700 |
+| (d) ≈340 đ/kWh | 10% | hồ sơ 2018: bậc sau 243,66 + vận hành ≈95; bậc này chưa từng được áp, mâu thuẫn với lời lãnh đạo mới hơn | 39 / 14 | **9.000** / 2.400 | 10.400 / 10.700 |
+| **Kỳ vọng** (cấm thầu 30%; mốc hạ lùi 2 năm 15%) | | | | **16.200** (10.700–19.400) | **13.900 / 14.500** |
 
-- **(i) P/E 6,5–7x trên lợi nhuận bền 2027+, cộng tiền ròng cuối 2027.** Lợi nhuận đã cắt theo giá điện mới ⇒ không chiết khấu rủi ro giá điện thêm lần nữa ở bội số. Căn cứ: P/E trung vị 23 công ty thuỷ điện niêm yết 2026 ≈10,9x (2025: 12,8x); 6,5–7x = chiết khấu ≈35–40% cho thanh khoản thấp, quy mô nhỏ, mảng tư vấn theo chu kỳ. Cùng bội số cho cả hai trạng thái pháp lý: cấm thầu làm giảm lợi nhuận tư vấn (về 10–20 tỷ) và trừ một khoản nộp/bồi thường một lần ≈30 tỷ (ước lượng), không làm giảm giá trị nhà máy điện.
-- **(ii) Chiết khấu cổ tức:** 10 năm cổ tức (2026: 1.000–2.000 đ; sau đó tỷ lệ chi trả × lợi nhuận), tiền giữ lại hưởng lãi tiền gửi ≈5%/năm và được tính đủ theo giá trị sổ ở năm 10; phần kinh doanh cuối kỳ tối đa 0,6 lần vốn chủ hoạt động. Thấp hơn P/E ≈3.000–4.000 đ chỉ vì phần kinh doanh cuối kỳ được định giá thận trọng (thanh khoản thấp, cổ đông thiểu số không quyết định phân phối).
-- **Vùng giá trị cân bằng** = từ thấp đến cao của hai phương pháp (cổ tức 13.900–14.500; P/E 17.000–18.100) ⇒ **13.900–18.100 đ**, tâm ≈15.900.
-- **Kiểm tra hai chiều** (ước lượng; P/E | cổ tức): bỏ hẳn rủi ro pháp lý ⇒ 19.700 | 15.500; trọng số giá lạc quan (25/45/25/5) **và** bỏ rủi ro pháp lý ⇒ 22.700 | 17.000; trọng số bi quan (5/30/40/25) và cấm thầu 40% ⇒ 14.400 | 13.000; sản lượng 175 / 237 triệu kWh ⇒ 14.100 / 21.200 | 12.800 / 16.300; P/E 5,5x / 8x ⇒ 14.700 / 20.400; mức chiết khấu thị trường 15,1% ⇒ 17.100 | 12.600. Dải 12.600–22.700 bao quanh giá hiện tại; tâm nằm dưới giá.
-- **Tổ hợp đạt 19.800 đ (trong hai phương pháp trên):** giữ giá điện cũ; giá 600 đ/kWh + không cấm thầu ở P/E 7x (≈20.800); giá 500–600 + không cấm thầu + mốc hạ lùi 2 năm (20.500–23.800). Không tổ hợp nào ở giá ≈340 hoặc có cấm thầu ở 500–600.
-- **Giá trị tài sản (SOTP):** thuỷ điện DCF đến 2059 + tư vấn − nợ điều chỉnh: (a) 45.100–51.100 · (b) 27.700–30.800 · (c) 23.000–25.400 · (d) 15.500–16.600 đ; kỳ vọng ≈28.000 (trộn rủi ro pháp lý ≈25.900). Kịch bản (b)/(c) đều trên 19.800. Tâm 15.900 tương đương chiết khấu ≈39% so SOTP — mép trên thông lệ 20–40% cho cổ đông thiểu số/holding; áp thông lệ đó cho SOTP được 15.600–20.800. Tài sản khó hiện thực hoá: Sông Bung 5 đã đấu giá ≥5 lần không có người đăng ký (01/2019 khởi điểm 1.688 tỷ → 11/2020 1.390 tỷ → 05/2021 1.351,7 tỷ).
+- **(i) P/E 5,9–6,4x (trung tâm 6,15x) trên lợi nhuận bền 2027+, cộng tiền ròng cuối 2027.** Lợi nhuận đã cắt theo giá điện mới ⇒ không chiết khấu rủi ro giá điện thêm lần nữa ở bội số. Căn cứ: P/E trung vị **20 công ty thuỷ điện niêm yết** (loại hai công ty nhiệt điện than, một công ty phân phối điện và chính TV1): 2025 ≈13,3x; 2026 đến nay **9,81x** (phân vị 25%: 8,90x); riêng tháng 10/2026 9,35x. 6,15x = chiết khấu ≈37% so 9,81x (≈34% so tháng 10), 5,9–6,4x = 35–40%; **đây là phán đoán** cho thanh khoản thấp (UPCOM), quy mô nhỏ, 20% lợi nhuận trích quỹ khen thưởng–phúc lợi giữ lại và mảng tư vấn theo chu kỳ. Nếu dùng 6,5–7x (chiết khấu thực chỉ 29–34%, hay 25–30% so tháng 10), P/E kỳ vọng 17.000–18.100 và tâm hai phương pháp ≈15.900 (giá cao hơn ≈25%). Cùng bội số cho cả hai trạng thái pháp lý: cấm thầu làm giảm lợi nhuận tư vấn (về 10–20 tỷ) và trừ một khoản nộp/bồi thường một lần ≈30 tỷ (ước lượng), không làm giảm giá trị nhà máy điện. Giới hạn: công ty cùng ngành có thể trích quỹ ít hơn 20% ⇒ áp P/E ngành lên toàn bộ lợi nhuận thổi nhẹ giá trị.
+- **(ii) Chiết khấu cổ tức:** 10 năm cổ tức (2026: 1.000–2.000 đ; sau đó tỷ lệ chi trả × lợi nhuận), tiền giữ lại hưởng lãi tiền gửi ≈5%/năm và được tính đủ theo giá trị sổ ở năm 10; phần kinh doanh cuối kỳ tối đa 0,6 lần vốn chủ hoạt động. Cách này ngầm định giá trị cuối kỳ của phần kinh doanh chỉ bằng ≈1,2–2,6 lần lợi nhuận hoạt động năm thứ 10 (so với 6,15x ở phương pháp P/E) — thực chất là chiết khấu thiểu số ngầm ≈25–35% trên tổng giá trị năm 10 (thanh khoản thấp, cổ đông thiểu số không quyết định phân phối). Nếu thay bằng bội số 6,15–6,75x trên lợi nhuận hoạt động năm 10, cổ tức cho 16.900–18.000 và tâm hai phương pháp ≈16.700–16.900 (giá cao hơn ≈17–19%).
+- **Vùng giá trị cân bằng** = từ thấp đến cao của hai phương pháp (cổ tức 13.900–14.500; P/E 15.600–16.800) ⇒ **13.900–16.800 đ**, tâm ≈15.200.
+- **Kiểm tra hai chiều** (ước lượng; P/E | cổ tức): bỏ hẳn rủi ro pháp lý ⇒ 18.200 | 15.500; trọng số giá lạc quan (25/45/25/5) **và** bỏ rủi ro pháp lý ⇒ 21.000 | 17.000; trọng số bi quan (5/30/40/25) và cấm thầu 40% ⇒ 13.300 | 13.000; sản lượng 175 / 237 triệu kWh ⇒ 13.000 / 19.500 | 12.800 / 16.300; P/E 5,5x / 6,5x / 7x / 8x ⇒ 14.700 / 17.000 / 18.100 / 20.400; mức chiết khấu thị trường 15,1% ⇒ 15.800 | 12.600. Dải 12.600–21.000 bao quanh giá hiện tại; tâm nằm dưới giá.
+- **Tổ hợp đạt 19.800 đ (trong hai phương pháp trên, ở đầu vào giữa):** giữ giá điện cũ; giá 600 đ/kWh + không cấm thầu + mốc hạ lùi 2 năm ở P/E 6,4x (≈22.200). Ở đầu vào cao hơn (P/E 7x) giá 500 + không cấm thầu + đúng mốc chạm 19.800. Không tổ hợp nào ở giá ≈340 hoặc có cấm thầu ở 500–600.
+- **Giá trị tài sản (SOTP):** thuỷ điện DCF đến 2059 + tư vấn − nợ điều chỉnh: (a) 45.100–51.100 · (b) 27.700–30.800 · (c) 23.000–25.400 · (d) 15.500–16.600 đ; kỳ vọng ≈28.000 (trộn rủi ro pháp lý ≈25.900). Kịch bản (b)/(c) đều trên 19.800. Tâm 15.200 tương đương chiết khấu ≈41% so SOTP trộn (≈46% so SOTP không trộn) — trên mép thông lệ 20–40% cho cổ đông thiểu số/holding; áp thông lệ đó cho SOTP được 15.600–20.800. Tài sản khó hiện thực hoá: Sông Bung 5 đã đấu giá ≥5 lần không có người đăng ký (01/2019 khởi điểm 1.688 tỷ → 11/2020 1.390 tỷ → 05/2021 1.351,7 tỷ).
 - **Điện mặt trời nổi lòng hồ (46 MWp + 5 MW lưu trữ, ≈800 tỷ, kỳ vọng ≈90 tỷ doanh thu/năm theo lãnh đạo):** chưa vào quy hoạch, chưa có giá bán ⇒ **không tính** giá trị; vốn đầu tư ≈1,5 lần vốn hoá.
 
 **Bối cảnh lãi suất (tham khảo):** mức chiết khấu thị trường đang ngầm định 15,1% (147 mã, 30/10/2026; phân vị 75% từ 2014). Lợi suất trái phiếu Chính phủ 10 năm 4,58% (30/10/2026).
@@ -203,7 +203,7 @@
 
 | # | Mốc | Ngày | Chiều tích cực | Chiều tiêu cực | Xác suất tích cực |
 |---|---|---|---|---|---|
-| **M0** | **Văn bản giá điện Sông Bung 5 sau 2027** (CBTT, BCTC kiểm toán 2026, tài liệu ĐHĐCĐ 2027, hoặc doanh thu/sản lượng quý 1/2027) | ≈03–04/2027 | ≥≈600 đ/kWh ròng (hoà vốn ≈590), hoặc mốc hạ lùi ≥2 năm | <≈590 (≤500 / ≈340 là xấu hơn kịch bản trung tâm) | **≈0,25** |
+| **M0** | **Văn bản giá điện Sông Bung 5 sau 2027** (CBTT, BCTC kiểm toán 2026, tài liệu ĐHĐCĐ 2027, hoặc doanh thu/sản lượng quý 1/2027) | ≈03–04/2027 | ≥≈634 đ/kWh ròng (hoà vốn khung P/E; ≈703 theo tâm hai phương pháp), hoặc 500–600 là giá cố định chưa gồm vận hành, hoặc mốc hạ lùi ≥2 năm | <≈634 (≤500 / ≈340 là xấu hơn kịch bản trung tâm) | **≈0,25** |
 | M1 | LNST hợp nhất Q4/2026 (giá điện cũ) | ≈30/01/2027 | ≥45 tỷ | <25 tỷ | 0,50 |
 | M2 | Doanh thu thuỷ điện Q4/2026 (giá điện cũ) | ≈30/01/2027 | ≥100 tỷ | <80 tỷ | 0,45 |
 | M3 | Thuyết minh khoản 33,8 tỷ | ≈31/03/2027 | có căn cứ, giữ nguyên | bị đảo/điều chỉnh | 0,60 |
@@ -227,13 +227,12 @@
 | CFO | ≈69,8 | | 116,8 | 137,6 |
 | 30/09/26: tiền · tiền gửi đến hạn · vay · VCSH | 30,7 · 167,8 · 129,9 · 574,7 | | | |
 
-| Độ nhạy LNST bền × P/E (đ/cp) | 3x | 4x | 5x | 6x |
-|---|---|---|---|---|
-| 40 tỷ (giá ≈340) | 4.500 | 6.000 | 7.500 | 9.000 |
-| 60 tỷ (giá 500) | 6.700 | 9.000 | 11.200 | 13.500 |
-| 75 tỷ (giá 600) | 8.400 | 11.200 | 14.000 | 16.900 |
-| 95 tỷ (≈ giá 19,8k ở 5,5x) | 10.700 | 14.200 | 17.800 | 21.400 |
-| 130 tỷ (giữ giá cũ) | 14.600 | 19.500 | 24.400 | 29.200 |
+| Giá trị theo kịch bản giá điện × bội số P/E (đ/cp; không cấm thầu, đúng mốc 2027; đã cộng tiền ròng cuối 2027, cổ tức 2026, chiết khấu về 11/2026) | 5,9x | 6,15x | 6,4x | 6,5x | 7,0x |
+|---|---|---|---|---|---|
+| (d) ≈340 đ/kWh · LNST bền ≈39 tỷ | 8.700 | 9.000 | 9.300 | 9.500 | 10.100 |
+| (c) 500 đ/kWh · ≈65 tỷ | 14.400 | 14.900 | 15.400 | 15.600 | 16.700 |
+| (b) 600 đ/kWh · ≈82 tỷ | 17.900 | 18.600 | 19.200 | 19.500 | 20.800 |
+| (a) giữ giá cũ · ≈143 tỷ | 31.200 | 32.300 | 33.500 | 33.900 | 36.300 |
 
 ## Phụ lục B — Đối chiếu dữ liệu thị trường với BCTC
 
@@ -245,37 +244,45 @@
 - BCTC hợp nhất và riêng Q3/2026 (ký 29/10/2026, chưa soát xét); BCTC bán niên 2026 (An Việt soát xét); BCTC 2025 kiểm toán (A&C; thuyết minh 6 dự phòng phải thu); công văn giải trình 6603/TVĐ1-P3; CBTT hợp đồng kiểm toán 2026, cổ tức 2025, sáp nhập MTV3, tỷ lệ sở hữu nước ngoài — pecc1.com.vn.
 - Giá: DNSE (đóng cửa 30/10/2026; tham chiếu 02/11/2026). Lịch sử giá, P/E, P/B, lợi nhuận quý: cơ sở dữ liệu tài chính tổng hợp của nhóm.
 - Vụ án: VnExpress 02/07/2026, https://vnexpress.net/47-nguoi-bi-khoi-to-trong-vu-an-tai-tong-cong-ty-truyen-tai-dien-quoc-gia-5092437.html (mở lại 02/11/2026); The Investor (PECC3); BCTC bán niên 2026 thuyết minh 33. Khung pháp lý: Bộ luật Hình sự (Điều 76; Luật 86/2025), Luật Đấu thầu 22/2023, Nghị định 214/2025 — tra cứu tham khảo, cần luật sư xác nhận. Ngành: báo cáo của người đọc ngành độc lập 28/10/2026. Lãi suất: bộ dữ liệu lãi suất thị trường của nhóm (30/10/2026).
-- Giá điện Sông Bung 5: PECC1, “Báo cáo phương án bán toàn bộ tài sản NMTĐ Sông Bung 5”, 8/2018, tr.13 (pecc1.com.vn); Báo cáo thường niên 2025 tr.38 (HNX); báo cáo công ty chứng khoán KBSV 17/04/2026 tr.4 (dẫn lời lãnh đạo; nhóm chưa đọc lại được bản gốc để xác định 500–600 là giá tổng hay giá cố định); lịch sử đấu giá Sông Bung 5: báo Đấu thầu (baodauthau.vn, 17/05/2021); tiền lệ giá điện thuỷ điện khác: vnbusiness.vn; P/E ngành thuỷ điện: cơ sở dữ liệu tài chính của nhóm (23 mã, 2024–2026); BCTC hợp nhất 2025 kiểm toán, báo cáo bộ phận tr.34–35. ĐHĐCĐ 2026 và điện mặt trời lòng hồ: báo Đấu thầu 30/04/2026 và 27/06/2025 (baodauthau.vn).
+- Giá điện Sông Bung 5: PECC1, “Báo cáo phương án bán toàn bộ tài sản NMTĐ Sông Bung 5”, 8/2018, tr.13 (pecc1.com.vn); Báo cáo thường niên 2025 tr.38 in/tr.39 PDF (HNX; đã kiểm: chỉ nêu giá điện nhà máy “sụt giảm”, không nêu mức giá hay mốc 2027); báo cáo công ty chứng khoán KBSV 17/04/2026 tr.4 (dẫn lời lãnh đạo; nhóm tìm lại lần nữa vẫn chưa đọc được bản gốc để xác định 500–600 là giá tổng hay giá cố định, và mốc 2027 — chưa kiểm); lịch sử đấu giá Sông Bung 5: báo Đấu thầu (baodauthau.vn, 17/05/2021); tiền lệ giá điện thuỷ điện khác: vnbusiness.vn; P/E ngành thuỷ điện: cơ sở dữ liệu tài chính của nhóm (20 công ty thuỷ điện, 2024–2026; truy vấn lưu cùng báo cáo); BCTC hợp nhất 2025 kiểm toán, báo cáo bộ phận tr.34–35. ĐHĐCĐ 2026 và điện mặt trời lòng hồ: báo Đấu thầu 30/04/2026 và 27/06/2025 (baodauthau.vn).
 - Logo và ảnh: pecc1.com.vn (tải 02/11/2026). Toạ độ: Sông Bung 5 — Global Energy Monitor wiki (xã Mà Cooih–Thạnh Mỹ theo thông báo đấu giá); trụ sở 66 Lương Ngọc Quyến và Đà Nẵng — OpenStreetMap Nominatim 02/11/2026; ranh giới geoBoundaries VNM-ADM1 (2008). Vị trí gần đúng.
 
 ## Phụ lục D — Phương pháp và giới hạn
 
 - **Trục chính = giá điện Sông Bung 5 sau 2027**, bốn kịch bản (giữ ≈975 / 600 / 500 / ≈340 đ/kWh ròng) với xác suất 10/45/35/10% (phán đoán dựa trên chứng cứ ở mục 4, 7); kết hợp trạng thái pháp lý (cấm thầu EVN 30%) và mốc hạ (lùi 2 năm: 15%).
 - Lợi nhuận thuỷ điện = (sản lượng × giá ròng − vận hành 25 − khấu hao 38 − chi phí chung 8) × 80%; hàm hiệu chuẩn bằng báo cáo bộ phận BCTC 2025 kiểm toán. Sản lượng 175 / 205 / 210 triệu kWh. Tư vấn 30–50 tỷ (cấm thầu: 10–20, cộng khoản một lần 30 tỷ). Tiền ròng hưởng lãi 5%/năm trước thuế.
-- (i) P/E 6,5–7x trên lợi nhuận bền 2027+ cộng tiền ròng cuối 2027, quy về 11/2026 ở Ke 12,3–13,4% (khung β≈1,1; β TV1 chưa đo), cộng cổ tức 2026 (1.000–2.000 đ). (ii) Chiết khấu cổ tức 10 năm, chi trả 27/40/60%, giá trị cuối kỳ = tiền ròng theo sổ + min(0,6; ROE/Ke) × vốn chủ kinh doanh. Vùng = từ thấp đến cao của hai phương pháp (chi trả 27–40%, P/E 6,5–7x).
+- (i) P/E 5,9–6,4x (trung tâm 6,15x; chiết khấu 35–40% so trung vị ngành 9,81x — phán đoán) trên lợi nhuận bền 2027+ cộng tiền ròng cuối 2027, quy về 11/2026 ở Ke 12,3–13,4% (khung β≈1,1; β TV1 chưa đo), cộng cổ tức 2026 (1.000–2.000 đ). (ii) Chiết khấu cổ tức 10 năm, chi trả 27/40/60%, giá trị cuối kỳ = tiền ròng theo sổ + min(0,6; ROE/Ke) × vốn chủ kinh doanh. Vùng = từ thấp đến cao của hai phương pháp (chi trả 27–40%, P/E 5,9–6,4x).
 - SOTP: thuỷ điện DCF 2027–2059 (phần vận hành trong giá trượt 2,5%/năm), lãi suất 11–13%, + tư vấn 40 tỷ × 6, − tiền ròng điều chỉnh — giá trị tài sản, đối chiếu bằng chiết khấu thiểu số thông lệ 20–40%.
 - Giới hạn: **giá điện sau 2027 chưa có văn bản** (mức, mốc); hai nguồn mâu thuẫn về mức; điện mặt trời lòng hồ không định giá; BCTC quý 3 chưa soát xét và không có báo cáo bộ phận (tách mảng quý là ước lượng); tin pháp lý tra bằng công cụ tìm kiếm; xác suất kịch bản là phán đoán; khung pháp lý là tra cứu tham khảo, chưa có ý kiến luật sư.
 
 ## Phụ lục E — Quy trình độc lập và đính chính
 
-Báo cáo qua bốn bước: đọc BCTC gốc → đọc ngành độc lập (không biết mã, giá) → nhóm nghiên cứu định giá → người phản biện độc lập kiểm lại số liệu, nguồn và cân bằng lập luận. Đã qua ba vòng phản biện (vòng 1: 12 điểm; vòng 2: 4 trọng yếu + 10 nhỏ; vòng 3 — trên bản nháp dựng lại theo giá điện: 3 trọng yếu + 12 nhỏ). **Bản này (đính chính lần 2, thay bản 02/11/2026 15:25) chưa qua vòng phản biện thứ tư.**
+Báo cáo qua bốn bước: đọc BCTC gốc → đọc ngành độc lập (không biết mã, giá) → nhóm nghiên cứu định giá → người phản biện độc lập kiểm lại số liệu, nguồn và cân bằng lập luận. Đã qua bốn vòng phản biện (vòng 1: 12 điểm; vòng 2: 4 trọng yếu + 10 nhỏ; vòng 3 — trên bản nháp dựng lại theo giá điện: 3 trọng yếu + 12 nhỏ; vòng 4: 2 trọng yếu + 5 nhỏ). **Bản này (đính chính lần 2, bản r6; thay bản 02/11/2026 15:25) chưa được kiểm lại sau vòng 4 ngoài một bước kiểm ngắn.**
 
 | Đính chính lần 2 — lỗi phương pháp | Bản 15:25 | Bản này |
 |---|---|---|
 | Giá điện Sông Bung 5 | giả định giữ ≈912–950 đ/kWh, chỉ giảm 20% từ 2034; ghi “không có dấu hiệu nào theo cả hai chiều” về giá điện 2027 | **sai** — nghiên cứu sẵn có của nhóm (13/10/2026) đã có hồ sơ 2018 (bậc 569 → 244), báo cáo thường niên 2025 (“giá điện… sụt giảm”), lời lãnh đạo (500–600 từ 2027) nhưng không được dùng; nay là **trục chính** với 4 kịch bản |
 | Lợi nhuận bền | 103–172 tỷ (giá điện cũ, tài chính +5) | ≈65–82 tỷ ở 500–600 (không cấm thầu); tiền ròng tính riêng, hưởng lãi tiền gửi |
 | Phép thử cổ tức | chỉ là chú thích (cần 2.435–2.650 đ) | phương pháp **đồng hạng** với P/E |
-| Vùng giá trị · kết luận | 17.800–20.600 · “từ ngang đến cao hơn ≈10%” | **13.900–18.100, tâm ≈15.900 · giá cao hơn ≈25% so tâm** |
+| Vùng giá trị · kết luận | 17.800–20.600 · “từ ngang đến cao hơn ≈10%” | **13.900–16.800, tâm ≈15.200 · giá cao hơn ≈30% so tâm** |
 | Mốc · rủi ro | — | thêm M0/R0 giá điện tái ký, M8 điện mặt trời lòng hồ, R8 truy thu giá điện |
 
 | Vòng 3 — sửa trên bản nháp dựng lại (chưa gửi) | Bản nháp | Bản này |
 |---|---|---|
 | Tiền tích luỹ trong phép chiết khấu cổ tức | không sinh lãi, giá trị cuối kỳ 0,6 lần toàn bộ vốn chủ ⇒ tiền bị định giá thấp hơn mệnh giá | hưởng lãi ≈5%, tính đủ theo sổ; 0,6 lần chỉ áp phần vốn chủ kinh doanh |
-| Bội số P/E | 5–6x (3–4x nếu cấm thầu) — lấy từ năm thị trường đã chiết khấu rủi ro giá điện ⇒ phạt hai lần | 6,5–7x có căn cứ ngành; cấm thầu đi qua lợi nhuận tư vấn + khoản một lần |
+| Bội số P/E | 5–6x (3–4x nếu cấm thầu) — lấy từ năm thị trường đã chiết khấu rủi ro giá điện ⇒ phạt hai lần | 5,9–6,4x (chiết khấu 35–40% so trung vị ngành 9,81x; 6,5–7x ở độ nhạy); cấm thầu đi qua lợi nhuận tư vấn + khoản một lần |
 | Xác suất | giá ≈340: 20%; cấm thầu 35%; cổ tức ≥2.000 đ: 20% | 10% (bậc này chưa từng áp); 30%; 35% (tiền lệ chi vượt kế hoạch) |
 | Sản lượng giữa · tiền ròng | 192,5 tr kWh; bỏ lợi nhuận Q4/2026 và tiền ròng âm | 205 (bình quân các năm có số 2015–2025); tính cả hai |
-| Vùng · kết luận | 8.700–10.600 · giá “gần gấp đôi” | **13.900–18.100 · giá cao hơn ≈25% so tâm** |
+| Vùng · kết luận | 8.700–10.600 · giá “gần gấp đôi” | 13.900–18.100 · giá cao hơn ≈25% so tâm (bản vòng 3) |
 | Lịch sử đấu giá Sông Bung 5 | “5–6 lần 2018–21” | ≥5 lần 01/2019–05/2021, khởi điểm 1.688 → 1.351,7 tỷ (không tìm thấy thông báo bán mới năm 2026) |
+
+| Vòng 4 — sửa căn cứ bội số và hoà vốn (bản r6) | Bản vòng 3 | Bản này |
+|---|---|---|
+| Căn cứ P/E ngang hàng | trung vị 23 công ty “thuỷ điện” 2026 ≈10,9x (gồm 2 công ty nhiệt điện than, 1 công ty phân phối điện); chưa lưu truy vấn | 20 công ty thuỷ điện, trung vị 2026 đến nay 9,81x (tháng 10: 9,35x); truy vấn lưu cùng báo cáo; P/E TV1 2026 đến nay 4,01x |
+| Bội số chọn | 6,5–7x, mô tả là chiết khấu 35–40% (thực tế 29–34%) | 5,9–6,4x = chiết khấu 35–40% [phán đoán]; 6,5–7x ở độ nhạy |
+| Giá điện hoà vốn | ≈590 đ/kWh (chỉ đúng cho phương pháp P/E; mô tả “đầu trên dải lãnh đạo”) | ≈634 (P/E) · ≈703 (tâm hai phương pháp) · ≈817 (cổ tức) — đều trên dải 500–600 |
+| Giá trị cuối kỳ ở phương pháp cổ tức | giải thích “chỉ vì thận trọng” | nêu bội số ngầm định 1,2–2,6x lợi nhuận hoạt động; độ nhạy bội số 6,15–6,75x ⇒ cổ tức 16.900–18.000 |
+| Vùng · kết luận | 13.900–18.100 · tâm 15.900 · +25% | **13.900–16.800 · tâm 15.200 · +30%** |
 
 **Vòng 2 (bản 15:25):**
 

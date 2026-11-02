@@ -12,16 +12,16 @@ FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular
 FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
 
 PX = 19_800                      # đóng cửa 30/10/2026 (DNSE)
-# r5 (job Taylor_20261102_100630): số từ ../calc/valuation_out.txt khối "r5"
-FAIR = (13_900, 18_100)          # vùng giá trị cân bằng = [min(P/E 6,5; DDM27); max(P/E 7; DDM40)] (mid)
-CENTER = 15_900
-PE_EXP = (11_600, 17_600, 21_000)   # (i) P/E kỳ vọng lo/mid/hi
+# r6 (job Taylor_20261102_102919): số từ ../calc/valuation_out.txt khối "r5"/"r6"
+FAIR = (13_900, 16_800)          # vùng giá trị cân bằng = [min(P/E 5,9; DDM27); max(P/E 6,4; DDM40)] (mid)
+CENTER = 15_200
+PE_EXP = (10_700, 16_200, 19_400)   # (i) P/E kỳ vọng lo/mid/hi
 DDM_EXP = (10_500, 14_500, 16_800)  # (ii) DDM lo (payout 27%) / mid 40% / hi 40%
-# theo kịch bản giá (pháp lý ổn, mid, đúng mốc): P/E 6,75, DDM27, DDM40; LNST hoạt động ổn/cấm thầu mid
-SCN = [("(a) giữ ~975 đ/kWh · P 10%", 35_100, 21_700, 22_800, 143.1, 118.1),
-       ("(b) 600 đ/kWh · P 45%", 20_100, 15_000, 15_700, 81.6, 56.6),
-       ("(c) 500 đ/kWh · P 35%", 16_200, 13_200, 13_700, 65.2, 40.2),
-       ("(d) ~340 đ/kWh · P 10%", 9_800, 10_400, 10_700, 39.0, 14.0)]
+# theo kịch bản giá (pháp lý ổn, mid, đúng mốc): P/E 6,15, DDM27, DDM40; LNST hoạt động ổn/cấm thầu mid
+SCN = [("(a) giữ ~975 đ/kWh · P 10%", 32_300, 21_700, 22_800, 143.1, 118.1),
+       ("(b) 600 đ/kWh · P 45%", 18_600, 15_000, 15_700, 81.6, 56.6),
+       ("(c) 500 đ/kWh · P 35%", 14_900, 13_200, 13_700, 65.2, 40.2),
+       ("(d) ~340 đ/kWh · P 10%", 9_000, 10_400, 10_700, 39.0, 14.0)]
 SOTP = (15_500, 51_100)            # SOTP: (d) thấp … (a) cao; kỳ vọng ~28.000, trộn pháp lý ~25.900
 SOTP_DISC = (15_600, 20_800)       # SOTP trộn × (0,6–0,8): chiết khấu thiểu số/holding thông lệ 20–40%
 SRC = "Nguồn: BCTC hợp nhất Q3/2026 (chưa soát xét), BCTC bán niên 2026 (soát xét); tính toán của nhóm nghiên cứu."
@@ -91,8 +91,8 @@ def figs():
     axp.text(0.04, 0.05, "Minh hoạ lĩnh vực tư vấn lưới điện — ảnh:\nwebsite pecc1.com.vn", transform=axp.transAxes,
              color="white", fontsize=5.8, bbox=dict(fc="#0d1b2a", ec="none", alpha=0.75, pad=2))
     axk = fig.add_axes([0.39, 0.50, 0.60, 0.48]); axk.axis("off")
-    kpis = [("Giá 30/10/2026", "19.800 đ"), ("Vùng giá trị cân bằng (ước lượng)", "13,9–18,1k"),
-            ("LNST bền 2027+ ở 500–600 đ/kWh", "65–82 tỷ"), ("Giá điện hoà vốn với giá 19,8k", "≈590 đ/kWh"),
+    kpis = [("Giá 30/10/2026", "19.800 đ"), ("Vùng giá trị cân bằng (ước lượng)", "13,9–16,8k"),
+            ("LNST bền 2027+ ở 500–600 đ/kWh", "65–82 tỷ"), ("Giá điện hoà vốn với giá 19,8k", "≈634 đ/kWh"),
             ("P/B (Q3 · soát xét 30/6)", "0,92 · 1,04x"), ("Cổ tức 2025 · lợi suất", "1.500 đ · 7,6%")]
     for i, (k, v) in enumerate(kpis):
         x, y = (i % 3) * 0.34, 0.55 if i < 3 else 0.02
@@ -233,11 +233,11 @@ def figs():
     print("px 12m", c0, c1, hi, px.loc[px.Close.idxmax(), "date"].date())
 
     # 07 Football field (r4) -------------------------------------------------------
-    rows = [("(d) giá ~340 đ/kWh: P/E · DDM", 9_800, 10_400, ACCENT),
-            ("(c) giá 500 đ/kWh: P/E · DDM", 13_200, 16_200, NAVY),
-            ("(b) giá 600 đ/kWh: P/E · DDM", 15_000, 20_100, NAVY),
-            ("(a) giữ giá ~975 đ/kWh: P/E · DDM", 21_700, 35_100, GREEN),
-            ("(i) P/E 6,5–7x kỳ vọng (LNST bền 2027+)", PE_EXP[0], PE_EXP[2], GREY),
+    rows = [("(d) giá ~340 đ/kWh: P/E · DDM", 9_000, 10_400, ACCENT),
+            ("(c) giá 500 đ/kWh: P/E · DDM", 13_200, 14_900, NAVY),
+            ("(b) giá 600 đ/kWh: P/E · DDM", 15_000, 18_600, NAVY),
+            ("(a) giữ giá ~975 đ/kWh: P/E · DDM", 21_700, 32_300, GREEN),
+            ("(i) P/E 5,9–6,4x kỳ vọng (LNST bền 2027+)", PE_EXP[0], PE_EXP[2], GREY),
             ("(ii) DDM kỳ vọng (payout 27–40%)", DDM_EXP[0], DDM_EXP[2], GREY),
             ("Vùng giá trị cân bằng (hợp hai phương pháp)", FAIR[0], FAIR[1], NAVY),
             ("SOTP trộn × 0,6–0,8 (chiết khấu thiểu số thông lệ)", SOTP_DISC[0], SOTP_DISC[1], GOLD),
@@ -250,8 +250,8 @@ def figs():
     ax.axvline(PX, color=ACCENT, ls="--", lw=1.6); ax.text(PX + 400, len(rows) - 0.35, "giá 19,8k", color=ACCENT, fontsize=7.2, ha="left", weight="bold")
     ax.set_xlim(0, 58_000); ax.set_ylim(-0.6, len(rows) - 0.1)
     ax.set_xticks(range(0, 50_001, 10_000)); ax.set_xticklabels([f"{t//1000}k" for t in range(0, 50_001, 10_000)], fontsize=7)
-    ax.set_title("Giá 19,8k trên vùng cân bằng 13,9–18,1k; ngang giá trị nếu giá điện ≥≈590 đ/kWh", loc="right", fontsize=8.8)
-    save(fig, "fig_07_football", "Mỗi kịch bản giá điện (pháp lý ổn, giữa): khoảng giữa DDM payout 27% và P/E 6,75x trên LNST bền 2027+ cộng tiền ròng. Kỳ vọng: trọng số giá 10/45/35/10 × pháp lý ổn/cấm thầu 70/30 × mốc hạ đúng 2027/lùi 2 năm 85/15; PV về 11/2026, Ke 12,3–13,4%, cộng cổ tức 2026. SOTP = thuỷ điện DCF 2027–2059 + tư vấn − nợ điều chỉnh; cổ đông thiểu số nhận qua cổ tức hoặc bán tài sản. Ước lượng của nhóm nghiên cứu.",
+    ax.set_title("Giá 19,8k trên vùng cân bằng 13,9–16,8k; ngang giá trị nếu giá điện ≥≈634 đ/kWh (chân P/E)", loc="right", fontsize=8.8)
+    save(fig, "fig_07_football", "Mỗi kịch bản giá điện (pháp lý ổn, giữa): khoảng giữa DDM payout 27% và P/E 6,15x trên LNST bền 2027+ cộng tiền ròng. Kỳ vọng: trọng số giá 10/45/35/10 × pháp lý ổn/cấm thầu 70/30 × mốc hạ đúng 2027/lùi 2 năm 85/15; PV về 11/2026, Ke 12,3–13,4%, cộng cổ tức 2026. SOTP = thuỷ điện DCF 2027–2059 + tư vấn − nợ điều chỉnh; cổ đông thiểu số nhận qua cổ tức hoặc bán tài sản. Ước lượng của nhóm nghiên cứu.",
          pd.DataFrame(rows, columns=["phep_do", "thap", "cao", "mau"]).drop(columns="mau"))
     plt.close(fig)
 
@@ -266,8 +266,8 @@ def figs():
     for i in range(len(labs)):
         tot = hydro[i] + cons[i]
         ax.text(i, max(hydro[i], 0) + cons[i] + 4, vn(tot, 0), ha="center", fontsize=7.6, weight="bold", color="#222")
-    ax.axhline(80.1, color=ACCENT, ls="--", lw=1.2)
-    ax.text(4.35, 80.1 + 4, "LNST hoà vốn với giá 19,8k (P/E 6,75x, giá điện ≈590) ≈80", ha="right", fontsize=6.6, color=ACCENT)
+    ax.axhline(87.2, color=ACCENT, ls="--", lw=1.2)
+    ax.text(4.35, 87.2 + 4, "LNST hoà vốn với giá 19,8k (P/E 6,15x, giá điện ≈634) ≈87", ha="right", fontsize=6.6, color=ACCENT)
     ax.axhline(0, color="#555", lw=0.8)
     ax.set_xticks(x); ax.set_xticklabels(labs, fontsize=7.6); ax.set_ylabel("tỷ đồng/năm", fontsize=8); ax.set_ylim(-15, 185)
     ax.legend(fontsize=6.8, frameon=False, loc="upper right")

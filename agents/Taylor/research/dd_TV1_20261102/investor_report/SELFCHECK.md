@@ -1,3 +1,13 @@
+# Tự kiểm — TV1_DD_investor_report_20261102 — r6 (CHỐT; job Taylor_20261102_102919, 02/11/2026; thay bản gửi 15:25 và r4/r5; CHƯA gửi)
+
+## r6 — sửa theo phản biện vòng 4 (`../SKEPTIC4_20261102.md`: B1, B2, N1–N5)
+- **Chưa kiểm lại sau vòng 4 ngoài bước kiểm ngắn của Mike.** KHÔNG gửi email (dry-run only: images=15, 9,9 MB).
+- Số: `../calc/valuation_out.txt` (`python3 -I calc/valuation.py`) khối "r5"+"r6". P/E ngang hàng: `../calc/hydro_peer_pe.sql` → `bq_hydro_peer_pe_r6.csv` (=`bq_hydro_peer_pe.csv`) → `hydro_peer_pe_stats.py` (20 mã, loại PPC/QTP/KHP/TV1): 2025 13,33 · 2026 YTD 9,81 (p25 8,90) · T10/2026 9,35 · TV1 4,01.
+- Kết quả: P/E 5,9/6,15/6,4 ⇒ P/E mid 16.202; DDM27/40 13.936/14.500; vùng 13.936–16.768 (13.900–16.800), tâm 15.210 (+30%); hoà vốn PPA 634 (P/E) / 703 (tâm) / 817 (DDM40); chiết khấu ngầm so SOTP trộn 41%. Terminal DDM: P/E ngầm định phần hoạt động 1,2/2,1/2,6/4,4×; terminal P/E 6,15–6,75 ⇒ DDM 16.925–17.966, tâm 16.705–16.943.
+- Hình vẽ lại (figs_part.py hằng số r6): fig_00_hero, fig_06 (nhãn dải), fig_07_football, fig_12 (đường hoà vốn 87,2 = (205×0,634−71)×0,8+40 — hyd_np 47,2 + tư vấn 40), fig_13 không đổi. Banner tạo lại.
+- Quét: lộ nội bộ (md, figs/*.csv, HTML bỏ base64) = 0 hit; số cũ r5 (590, 6,75x, 15.900, 10,9x, 23 mã) chỉ còn ở độ nhạy/cột "Trước" Phụ lục E (cố ý). Xem bằng mắt PDF 14 trang: trang 1 (banner, hero, tear sheet) và 7.
+- Lưu ý tự kiểm: tên ngành VPD/NED/DRL/HNA/ISH tra bằng tìm kiếm web (không đối chiếu BCTN); KBSV 17/04/2026 vẫn CHƯA kiểm.
+
 # Tự kiểm — TV1_DD_investor_report_20261102 — BẢN ĐÍNH CHÍNH LẦN 2 / r5 (job Taylor_20261102_100630, 02/11/2026; thay bản 15:25 (r3, job Taylor_20261102_075340) đã gửi; bản r4 CHƯA từng gửi)
 
 ## r5 — sửa theo phản biện vòng 3 (`../SKEPTIC3_20261102.md`: B1–B3, N1–N11; N12 chỉ ở REPORT nội bộ)
