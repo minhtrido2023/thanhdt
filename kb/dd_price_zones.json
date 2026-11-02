@@ -1104,10 +1104,10 @@
    "price_ref": 19800,
    "price_date": "2026-10-30",
    "verdict_label": "trung dung — ở ĐẦU TRÊN vùng; từ ngang đến cao hơn giá trị kỳ vọng ~10% (trọng số 25/50/25: −4…+3%; nhất quán 20/45/35: +2…+11%)",
-   "source_file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+   "source_file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102_v2_sent_1525.md",
    "evidence": [
     {
-     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102_v2_sent_1525.md",
      "quote": "Giá 19.800 đ (đóng cửa 30/10/2026) ở đầu trên vùng giá trị hợp lý 17.800–20.600 đ: từ ngang đến cao hơn giá trị kỳ vọng hiện tại khoảng 10% (ước lượng).",
      "fields": [
       "price_ref",
@@ -1118,7 +1118,7 @@
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102_v2_sent_1525.md",
      "quote": "| Vùng giá trị hợp lý · vùng cơ sở | **17.800–20.600 · 13.500–29.000 đ** |",
      "fields": [
       "zone_low",
@@ -1126,7 +1126,7 @@
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102_v2_sent_1525.md",
      "quote": "**Quy về hôm nay, giá trị kỳ vọng là 17.800–20.600 đ; giá 19.800 đ từ ngang đến cao hơn khoảng 10%.**",
      "fields": [
       "center_range"
@@ -1137,7 +1137,7 @@
    "expires_on": "2027-02-28",
    "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
    "null_reason": null,
-   "notes": "rev2 (Mike 02/11 ~15:20): vùng giá trị hợp lý = min–max giá trị hôm nay trên hai bộ trọng số 25/50/25 và 20/45/35 (kỳ hạn 1–2 năm, Ke 12,3–13,4%); center = cận DƯỚI của khoảng theo quy ước; vùng cơ sở 13.500–29.000 là khoảng kịch bản cơ sở, không phải zone.",
+   "notes": "rev2 (Mike 02/11 ~15:20): vùng giá trị hợp lý = min–max giá trị hôm nay trên hai bộ trọng số 25/50/25 và 20/45/35 (kỳ hạn 1–2 năm, Ke 12,3–13,4%); center = cận DƯỚI của khoảng theo quy ước; vùng cơ sở 13.500–29.000 là khoảng kịch bản cơ sở, không phải zone. | rev2 nguồn đóng băng ở bản đã gửi 15:25 (…_v2_sent_1525.md), bản chính đã bị thay bằng r6.",
    "recorded_at": "2026-11-02T15:20:00+07:00",
    "center_desc": "PV hôm nay của giá trị kỳ vọng trọng số kịch bản (hai bộ trọng số); cận dưới của khoảng 17.800–20.600",
    "rev": 2,
@@ -1145,6 +1145,54 @@
    "center_alt": null,
    "center_alt_kind": null,
    "correction_reason": "skeptic vòng 2: trọng số Xấu 25% mâu thuẫn xác suất rủi ro 0,35 ⇒ thêm bộ nhất quán 20/45/35; vùng đổi 19.200–20.600 → 17.800–20.600; kết luận 'ngang' → 'từ ngang đến cao hơn ~10%'"
+  },
+  {
+   "ticker": "TV1",
+   "dd_date": "2026-11-02",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 13900,
+   "center": 15200,
+   "center_kind": "blend",
+   "zone_high": 16800,
+   "center_range": null,
+   "price_ref": 19800,
+   "price_date": "2026-10-30",
+   "verdict_label": "trung dung — giá CAO HƠN vùng cân bằng +18…+42%, so tâm +30%; ngang giá trị chỉ khi giá điện ròng SB5 ≥≈634 (P/E) / ≈703 (tâm 2 PP) đ/kWh",
+   "source_file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "Giá 19.800 đ (đóng cửa 30/10/2026) CAO HƠN vùng giá trị cân bằng 13.900–16.800 đ/cp (ước lượng): +18% đến +42%, so tâm ≈15.200 là +30%.",
+     "fields": [
+      "price_ref",
+      "zone_low",
+      "zone_high",
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "| Vùng giá trị cân bằng · tâm | **13.900–16.800 · ≈15.200 đ** |",
+     "fields": [
+      "zone_low",
+      "zone_high",
+      "center"
+     ]
+    }
+   ],
+   "skeptic_status": "4 vòng fundamental-skeptic (vòng 1–4 đều REFUTED mức số liệu/phương pháp, đã áp đính chính; vòng 4 nhẹ: B1 P/E ngang hàng, B2 break-even) + kiểm ngắn của Mike; bản r6 chưa qua vòng 5",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "rev3 (Mike 02/11 ~17:50): dựng lại theo kịch bản giá PPA SB5 sau hạ bậc 2027 (4 kịch bản P 0,10/0,45/0,35/0,10 [UL]) × pháp lý; vùng = min–max hai phương pháp đồng hạng: P/E 5,9–6,4 (15.600–16.800) và DDM (13.900–14.500); center = tâm ghép hai phương pháp (blend). Thay vùng rev2 17.800–20.600 (sai do dùng giá điện cũ). Mức 500–600đ/kWh và mốc 2027 chỉ từ lời lãnh đạo qua CTCK (KBSV, chưa kiểm bản gốc).",
+   "recorded_at": "2026-11-02T17:50:00+07:00",
+   "center_desc": "tâm ghép hai phương pháp đồng hạng (P/E mid 16.200 và DDM 14.200±)",
+   "rev": 3,
+   "supersedes": "TV1@2026-11-02#2",
+   "center_alt": null,
+   "center_alt_kind": null,
+   "correction_reason": "user (02/11 16:42) + skeptic vòng 3/4: LNST bền và SOTP dựng trên giá điện SB5 cũ; DD bỏ quên nghiên cứu PPA 13/10 ⇒ dựng lại theo kịch bản giá PPA, DDM đồng hạng; vùng 17.800–20.600 → 13.900–16.800; 'từ ngang đến cao hơn ~10%' → 'cao hơn ~30% so tâm'",
+   "no_expected_reason": "Nguồn có giá trị kỳ vọng trọng số kịch bản NHƯNG theo từng phương pháp (P/E mid 16.202; DDM27/40 13.936/14.500), không có một dòng kỳ vọng hợp nhất; tâm 15.200 là kết luận của báo cáo = tâm ghép hai phương pháp đồng hạng."
   }
  ],
  "center_kinds": [
