@@ -77,25 +77,30 @@ def build_rstar_cache(path=RSTAR_CACHE, panel=None):
     return out
 
 
-def _newest_cache(paths):
-    """Cache có panel_asof mới nhất trong các đường dẫn đọc được; file thiếu/hỏng bị bỏ qua. Không có -> raise."""
-    best = None
+def _newest_cache(paths, asof=None):
+    """Cache có panel_asof mới nhất trong các đường dẫn đọc được (file thiếu/hỏng bị bỏ qua). Có asof: ưu tiên cache
+    mới nhất có panel_asof <= asof (render lại ngày cũ không bị cache mới hơn chặn); không có cache nào <= asof thì
+    trả cache mới nhất (rstar_line sẽ ra NA vì age<0). Không có cache đọc được -> raise."""
+    cands = []
     for p in paths:
         try:
             c = json.load(open(p))
-            pa = str(pd.to_datetime(c["panel_asof"]).date())
+            cands.append((str(pd.to_datetime(c["panel_asof"]).date()), c))
         except Exception:
             continue
-        if best is None or pa > best[0]:
-            best = (pa, c)
-    if best is None:
+    if not cands:
         raise FileNotFoundError("không có cache r* đọc được")
-    return best[1]
+    if asof is not None:
+        ad = str(_asof_date(asof))
+        ok_ = [x for x in cands if x[0] <= ad]
+        if ok_:
+            cands = ok_
+    return max(cands, key=lambda x: x[0])[1]
 
 
 def rstar_line(asof, path=RSTAR_CACHE, live_path=RSTAR_CACHE_LIVE):
     try:
-        c = _newest_cache([path] if live_path is None else [path, live_path])
+        c = _newest_cache([path] if live_path is None else [path, live_path], asof)
         ser = pd.Series(c["series"]); ser.index = pd.PeriodIndex(ser.index, freq="M")
         pa = pd.to_datetime(c["panel_asof"]).date()
         age = (_asof_date(asof) - pa).days

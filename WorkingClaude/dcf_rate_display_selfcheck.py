@@ -25,6 +25,13 @@ def run_checks(mod):
     ok("r hằng 11.00%" in L, "r_const lấy từ cache, không hardcode: " + L)
     ok(mod._NA in mod.rstar_line("2026-12-31", cp, None), "cache stale -> NA")
     ok(mod._NA in mod.rstar_line("2026-10-01", cp, None), "asof trước panel -> NA")
+    # render lại ngày cũ: 2 cache (09-30 cũ, 10-30 mới) -> asof 10-15 phải dùng cache 09-30, không NA
+    cp_old = os.path.join(d, "old.json")
+    json.dump({"panel_asof": "2026-09-30", "n_last": 140, "r_const": 11.0, "series": {k: v for k, v in ser.items() if k <= "2026-09"}}, open(cp_old, "w"))
+    Lo = mod.rstar_line("2026-10-15", cp, cp_old)
+    ok(mod._NA not in Lo and "panel 2026-09-30" in Lo, "asof cũ chọn cache <= asof: " + Lo)
+    ok("panel 2026-10-30" in mod.rstar_line("2026-11-02", cp, cp_old), "asof mới vẫn chọn cache mới nhất")
+    ok(mod._NA in mod.rstar_line("2026-09-01", cp, cp_old), "asof trước mọi cache -> NA")
     ok(mod._NA in mod.rstar_line("2026-11-02", os.path.join(d, "nope.json"), None), "cache thiếu -> NA")
     open(cp, "w").write("{bad")
     ok(mod._NA in mod.rstar_line("2026-11-02", cp, None), "cache hỏng -> NA")
@@ -105,7 +112,10 @@ if __name__ == "__main__":
                 ("(h <= cur).mean()", "(h < cur).mean()"),
                 ("h = ser.loc[HIST_START:]", "h = ser"),
                 ('df = df.dropna(subset=["v"]).copy()', "df = df.copy()"),
-                ("if best is None or pa > best[0]:", "if best is None or pa < best[0]:"),
+                ("return max(cands, key=lambda x: x[0])[1]", "return min(cands, key=lambda x: x[0])[1]"),
+                ("ok_ = [x for x in cands if x[0] <= ad]", "ok_ = [x for x in cands if x[0] >= ad]"),
+                ("[path] if live_path is None else [path, live_path], asof)", "[path] if live_path is None else [path, live_path])"),
+                ("if ok_:\n            cands = ok_", "if False:\n            cands = ok_"),
                 ("[path] if live_path is None else [path, live_path]", "[path]"),
                 ("[path] if live_path is None else [path, live_path]", "[live_path or path]")]
         for a, b in muts:
