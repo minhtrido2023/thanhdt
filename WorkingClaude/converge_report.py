@@ -211,6 +211,14 @@ def generate_section(as_of_date=None, live_set=None):
                 dcf_str = "DCF: N/A"
             lines.append(f"- **{tk}**·{mode} — {dcf_str}")
 
+        # 2 dòng HIỂN THỊ lãi suất DCF (r* thị trường + TPCP 10Y) — display-only, không đổi FV/MoS/cờ (job Taylor_20261102_015334)
+        try:
+            from dcf_rate_display import dcf_rate_lines
+            lines.append("*DCF bối cảnh lãi suất (chỉ hiển thị, không gate):*")
+            lines.extend(f"- {x}" for x in dcf_rate_lines(dcf_asof))
+        except Exception as e:
+            lines.append(f"*DCF bối cảnh lãi suất: không có dữ liệu ({type(e).__name__})*")
+
         if adds:
             lines.append(f"🟢 ENTER (mới double-confirm, chưa trong seed): {', '.join(adds)}")
         if drops:
