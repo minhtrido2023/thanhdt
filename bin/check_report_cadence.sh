@@ -697,7 +697,7 @@ for a in json.load(sys.stdin)['actions']:
     _QAGE=$(( ( $(TZ=UTC date -d "$TODAY" +%s) - $(TZ=UTC date -d "$_QPE" +%s) ) / 86400 ))
     if [ -n "$_NAV_MISSING" ] && [ "$_QAGE" -le "$_Q_DEFER_MAX_DAYS" ]; then
       if [ "$OVERDUE" = "0" ]; then
-        _NM="⏸️ **Báo cáo quý ${DESC} HOÃN** — NAV phiên ${_QCHK} chưa đủ/chưa chốt:${_NAV_MISSING}. Không dispatch (tránh báo cáo đóng quý thiếu 1 phiên). Watchdog 08:30 sáng mai sẽ tự soạn khi NAV đã có."
+        _NM="⏸️ **Báo cáo quý ${DESC} HOÃN** — NAV phiên ${_QCHK} chưa đủ/chưa chốt:${_NAV_MISSING}. Không dispatch (tránh báo cáo đóng quý thiếu 1 phiên). Watchdog 08:30 sáng mai sẽ tự soạn khi NAV đã có; nếu NAV là ước lượng (backfill, không tự chốt) thì sau ${_Q_DEFER_MAX_DAYS} ngày sẽ hỏi anh thay vì tự phát hành."
         _state_set "deferred_${PKEY}" "$TODAY"
         _EVT=status; _ETOPIC="report-cadence-quarterly-deferred-${PKEY}"
       else
@@ -708,6 +708,17 @@ for a in json.load(sys.stdin)['actions']:
       "$ROOT/bin/notify_thread.sh" "$_NM" "$TRADING_REPORT_THREAD" 2>/dev/null || true
       "$ROOT/bin/append_event.sh" Mike "$_EVT" "$_ETOPIC" \
         "{\"period\":\"${DESC}\",\"missing_nav\":\"${_NAV_MISSING# }\",\"nav_date\":\"${_QCHK}\",\"asof\":\"${TODAY}\",\"question\":\"Cho NAV phien ${_QCHK} truoc khi soan bao cao quy (hoan co chu dich).\"}" 2>/dev/null || true
+      continue
+    fi
+    # Quá trần hoãn mà NAV VẪN thiếu/ước lượng ⇒ FAIL-SAFE: KHÔNG tự dispatch (arch-review vòng 2, 02/11). Dòng
+    # nav_is_estimate=True do backfill --from-raw KHÔNG BAO GIỜ được chốt lại (daily_nav_snapshot.py), nên chờ thêm
+    # vô nghĩa; tự phát hành sẽ đưa số ước lượng tới nhà đầu tư dưới nhãn "NAV đã đủ". Giữ cảnh báo + hỏi người quyết.
+    if [ -n "$_NAV_MISSING" ]; then
+      _NM="🔴 **Báo cáo quý ${DESC} KHÔNG tự soạn** — đã quá ${_Q_DEFER_MAX_DAYS} ngày sau cuối quý mà NAV phiên ${_QCHK} vẫn chưa đủ/chưa chốt:${_NAV_MISSING}. Dòng NAV ước lượng (backfill) không tự chốt lại nên chờ thêm vô ích. Cần anh quyết: chốt NAV phiên đó rồi báo tôi soạn, hoặc cho soạn với phiên cuối đã chốt kèm công bố rõ."
+      echo "$_NM"
+      "$ROOT/bin/notify_thread.sh" "$_NM" "$TRADING_REPORT_THREAD" 2>/dev/null || true
+      "$ROOT/bin/append_event.sh" Mike question "report-cadence-overdue-${PKEY}" \
+        "{\"period\":\"${DESC}\",\"missing_nav\":\"${_NAV_MISSING# }\",\"nav_date\":\"${_QCHK}\",\"asof\":\"${TODAY}\",\"question\":\"NAV phien ${_QCHK} van thieu/uoc luong sau ${_Q_DEFER_MAX_DAYS} ngay; khong tu soan bao cao quy. Can nguoi quyet.\"}" 2>/dev/null || true
       continue
     fi
     if [ "$OVERDUE" = "1" ]; then

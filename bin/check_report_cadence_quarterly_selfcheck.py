@@ -180,12 +180,20 @@ def suite(text):
     # watchdog (OVERDUE=1) — trước đây bỏ qua NAVGUARD
     r = g("2027-01-01", {}, overdue="1")
     chk("10g watchdog thiếu NAV ⇒ HOÃN + bus QUESTION (topic overdue-<PKEY> để closer đóng)",
-        not r["dispatched"] and ("question", "report-cadence-overdue-quarterly_2026-Q4") in r["events"], str(r))
+        not r["dispatched"] and ("question", "report-cadence-overdue-quarterly_2026-Q4") in r["events"]
+        and "vẫn CHỜ NAV" in r["out"] and "KHÔNG tự soạn" not in r["out"], str(r))
     chk("10h watchdog đủ NAV, KHÔNG dấu deferred ⇒ dispatch, vẫn OVERDUE=1 (cảnh báo đỏ đúng nghĩa)",
         (lambda r: r["dispatched"] and "OVERDUE=1" in r["out"])(g("2027-01-01", both("2026-12-31"), overdue="1")))
     r = g("2027-01-01", both("2026-12-31"), overdue="1", state={"deferred_quarterly_2026-Q4": "2026-12-31"})
     chk("10i watchdog đủ NAV + CÓ dấu hoãn từ 21:00 ⇒ dispatch với OVERDUE=0 (không đỏ 'quá hạn' giả)", r["dispatched"] and "OVERDUE=0" in r["out"], str(r))
-    chk("10j quá 4 ngày sau cuối quý vẫn thiếu NAV ⇒ thôi hoãn (không chặn mãi)", g("2027-01-06", {}, overdue="1")["dispatched"])
+    r = g("2027-01-06", {}, overdue="1")
+    chk("10j quá 4 ngày vẫn thiếu NAV ⇒ KHÔNG tự dispatch, giữ question hỏi người (fail-safe)",
+        not r["dispatched"] and ("question", "report-cadence-overdue-quarterly_2026-Q4") in r["events"] and "NAV đã đủ" not in r["out"], str(r))
+    r = g("2027-01-06", {"SpaceX": [("2026-12-31", "True")], "ZaloPay": ok("2026-12-31")}, overdue="1", state={"deferred_quarterly_2026-Q4": "2026-12-31"})
+    chk("10j2 quá 4 ngày + dấu hoãn + NAV SpaceX vẫn ước lượng ⇒ KHÔNG dispatch, KHÔNG 'NAV đã đủ', OVERDUE không bị tắt",
+        not r["dispatched"] and "NAV đã đủ" not in r["out"] and "OVERDUE=0" not in r["out"] and ("question", "report-cadence-overdue-quarterly_2026-Q4") in r["events"], str(r))
+    r = g("2027-01-06", both("2026-12-31"), overdue="1", state={"deferred_quarterly_2026-Q4": "2026-12-31"})
+    chk("10j3 quá 4 ngày nhưng NAV nay ĐỦ + có dấu hoãn ⇒ dispatch OVERDUE=0 (đường cứu vẫn chạy)", r["dispatched"] and "OVERDUE=0" in r["out"], str(r))
     chk("10k watchdog hoãn ở hôm nay, hôm qua đã state key ⇒ không ghi nhầm state dispatch", "quarterly_2026-Q4" not in g("2027-01-01", {}, overdue="1")["state"])
     # hàm thuần
     chk("11 _q_nav_check_date(2029-03-31 T7)=2029-03-30", run_nav_helpers(text, "_q_nav_check_date", "2029-03-31") == "2029-03-30")
@@ -246,6 +254,7 @@ def main():
         ("M16 QGUARD bỏ ghim TZ=UTC", '_Q_NEXT_DOM="$(TZ=UTC date -d', '_Q_NEXT_DOM="$(date -d'),
         ("M17 sweep không gồm quarterly", ' "$ROOT"/reports/*_quarterly_report_*.md; do', '; do'),
         ("M18 hoãn watchdog không phát question", '_EVT=question;', '_EVT=status;'),
+        ("M19 quá trần hoãn vẫn tự dispatch dù NAV thiếu/ước lượng (hành vi vòng 1)", '    if [ -n "$_NAV_MISSING" ]; then\n      _NM="🔴', '    if false; then\n      _NM="🔴'),
         ("M8 watchdog đánh dấu overdue=False", '"overdue": scheduled_kind == "",\n            })\n\n# ── RC_CLOSE_BEGIN', '"overdue": False,\n            })\n\n# ── RC_CLOSE_BEGIN'),
     ]
     caught = 0
