@@ -1,0 +1,109 @@
+====================================================================================================
+A. THUỶ ĐIỆN SÔNG BUNG 5 (57 MW, 100%, thuê đất đến 08/2059)
+====================================================================================================
+2025: pass-through 37.2 ⇒ giá ròng 949 đ/kWh; O&M tiền mặt 21.2 tỷ (90 đ/kWh)
+Sản lượng suy 2019, 2020 = 105 mỗi năm (từ BQ 2013–23 175,3) — rất khô; 2015–2025 BQ 187; 2021–25 BQ 215
+
+IRR dự án (không đòn bẩy, sau thuế) nếu DỪNG ở 2026 (không giá trị còn lại): 2.8%
+  IRR toàn đời 2013–2052 nếu giá ròng 2027+ = 949: 7.68%
+  IRR toàn đời 2013–2052 nếu giá ròng 2027+ = 800: 7.16%
+  IRR toàn đời 2013–2052 nếu giá ròng 2027+ = 600: 6.31%
+  IRR toàn đời 2013–2052 nếu giá ròng 2027+ = 500: 5.79%
+  IRR toàn đời 2013–2052 nếu giá ròng 2027+ = 400: 5.17%
+Giá ròng 2027–2052 để IRR toàn đời = 12% (TRẦN TT 12/2025): 3000 đ/kWh; = 10%: 1921
+  ⇒ Ở giá hiện hành ~949, IRR toàn đời ≤ 12%: trần IRR KHÔNG buộc hạ giá
+
+Giá trị còn lại (RAB) ~1/2027 ≈ 449 tỷ; đời còn 26 năm
+  Giá sàn bù chi phí + sửa chữa + lợi nhuận 8%/năm trước thuế trên RAB: 398 đ/kWh (Q195); Q175 444
+  Giá sàn bù chi phí + sửa chữa + lợi nhuận 10%/năm trước thuế trên RAB: 437 đ/kWh (Q195); Q175 487
+  Giá sàn bù chi phí + sửa chữa + lợi nhuận 12%/năm trước thuế trên RAB: 477 đ/kWh (Q195); Q175 531
+  Giá sàn bù chi phí + sửa chữa + lợi nhuận 15%/năm trước thuế trên RAB: 540 đ/kWh (Q195); Q175 602
+  Đối chiếu: dự thảo HĐ sửa đổi 05/2018 [PA2018]: bậc 243,66 + O&M 75,75×1,025^9=95 ⇒ 338 đ/kWh; nếu O&M theo định mức TT12 (nhân công 0,8% + sửa chữa lớn 1,2% TMĐT = 27.4 tỷ ⇒ 171 đ/kWh): 415
+  Hoà vốn TIỀN MẶT 140 đ/kWh; hoà vốn KẾ TOÁN (còn khấu hao đến 2039) 309 đ/kWh
+
+Kịch bản giá ròng 2027+: P1_giu_HD_949 p=0.15, P2_thoa_thuan_600 p=0.30, P3_thoa_thuan_520 p=0.35, P4_san_kinh_te_440 p=0.20 ⇒ kỳ vọng 592 đ/kWh
+
+Giá trị thuỷ điện (PV FCFE sau KTPL, 2027–08/2059, tỷ) — Ke 12,85% | 12,3% | 13,4%:
+kịch bản               LNST28 Q195     Q175     Q195     Q215     Q236  Q195 Ke12,3   Ke13,4
+P1_giu_HD_949                 92.6      694      790      887      991          819      764
+P2_thoa_thuan_600             38.2      383      444      505      571          459      431
+P3_thoa_thuan_520             25.7      312      365      418      475          377      354
+P4_san_kinh_te_440            13.2      241      286      330      379          294      278
+Kỳ vọng theo xác suất giá (Q195, Ke 12,85%): 437 tỷ = 16,363 đ/cp
+Độ nhạy dự thảo 2018 (340): Q195 181 tỷ
+Đối chiếu tài sản: AASC 2018 thẩm định 1.686 tỷ (Ke 7%); đấu giá 2019–21 khởi điểm 1.688→1.351,7 tỷ, KHÔNG có người đăng ký [PA2018; baodauthau]
+  Mỗi năm trễ hạ bậc (giữ 949 thay 600) cộng ≈ 40 tỷ = 1,505 đ/cp
+  Mỗi năm trễ hạ bậc (giữ 949 thay 520) cộng ≈ 49 tỷ = 1,851 đ/cp
+
+A3. ĐMT nổi: IRR dự án (25 năm, suy giảm 0,5%/năm, O&M 1,5%) ≈ 6.8% < Ke 12.85% ⇒ NPV@Ke -296 tỷ; KHÔNG tính (chưa vào quy hoạch Đà Nẵng mới, chưa có cơ chế giá). Chỉ có giá trị dương nếu capex ≲ 504 tỷ hoặc giá bán cao hơn.
+
+====================================================================================================
+B. TƯ VẤN KS-TK ĐIỆN — DỰNG TỪ ĐƯỜNG ỐNG
+====================================================================================================
+  2023: DT tư vấn 318.7
+  2024: DT tư vấn 346.2, LN gộp 85.7 (24.8%), EBIT sau chi phí chung 18.8 (5.4%)
+  2025: DT tư vấn 447.0, LN gộp 80.8 (18.1%), EBIT sau chi phí chung 44.8 (10.0%)
+  9T/26: DT tư vấn 324.5 (9T/25 252.3, +29%); LN gộp lõi 92.2 (28.4%); EBIT lõi 36.6–55.8 (11%–17%) [A: hoàn nhập phải thu 19,2 trong QLDN | B: không]
+  Hợp đồng ký mới 2025: 835,1 tỷ (+~198%, cao nhất lịch sử) [baodauthau post192515] vs DT tư vấn 2025 447 ⇒ book-to-bill 1.87; người mua trả trước 104,4 → 138,7 (+33%) [Q3 tr.4]
+  Định mức 2026 cho mảng 2026 KH: 641,5 − 187 = 454.5 (công ty: 'thận trọng', chỉ HĐ hiện có) [ĐHCĐ 30/04/2026]
+
+B1. Bể phí tư vấn khối EVN 2025 ≈ capex 125,778 × 1.6% = 2,012 tỷ ⇒ thị phần hiệu dụng TV1 ≈ 22% (chưa trừ khách ngoài EVN: Tanahu-Nepal, PVN/PTSC — nên thị phần trong EVN thấp hơn chút)
+
+DT tư vấn 2026E 520 [UL] | g dài hạn 5% | ΔVLĐ 40%×ΔDT | Ke 12.85%
+  C_thap  : LNST 2027  34.2 · 2030  37.4 · 2032  40.5 ⇒ giá trị    170 tỷ =   6,376 đ/cp (terminal 58%; RONIC sau KTPL 269% ≥ Ke) — capex EVN đi ngang ~123–130k (ADMIN_GATED, BOBBY F1 P=0,55); thị phần giữ; biên ~TB 2024–25
+  C_giua  : LNST 2027  49.4 · 2030  62.2 · 2032  70.5 ⇒ giá trị    328 tỷ =  12,272 đ/cp (terminal 71%; RONIC sau KTPL 370% ≥ Ke) — capex EVN ~70% KH 830k (BQ ~145k, +15% mức) + trượt giá XD 3% + dịch cơ cấu sang thuỷ điện MR/500kV; biên 2025–9T26
+  C_cao   : LNST 2027  66.3 · 2030  98.3 · 2032 117.8 ⇒ giá trị    569 tỷ =  21,314 đ/cp (terminal 77%; RONIC sau KTPL 470% ≥ Ke) — KH 830k đạt đủ + NT1 FS/khảo sát + HVDC; đòn bẩy chi phí chung; biên 9T26 trường hợp B
+  Kỳ vọng tư vấn: 329 tỷ = 12,312 đ/cp
+  Độ nhạy Ke × g (C_giua):
+    Ke 10.00%: g3%   446  g5%   529  g7%   725
+    Ke 12.30%: g3%   324  g5%   354  g7%   406
+    Ke 12.85%: g3%   304  g5%   328  g7%   367
+    Ke 13.40%: g3%   286  g5%   305  g7%   335
+    Ke 14.00%: g3%   268  g5%   283  g7%   305
+
+====================================================================================================
+C. TIỀN & BẢNG CÂN ĐỐI 30/09/2026 [Q3 tr.1-5, 21-24; H1 tr.27]
+====================================================================================================
+Tiền+HTM 198.6 − vay 129.9 (cá nhân/bên liên quan 118,8) − cổ tức phải trả 43.2 − lãi vay cá nhân phải trả 64.3 = -38.7
+Nợ tranh chấp Long+Ngãi 127,63 (gốc+lãi) ĐÃ nằm trong sổ ⇒ khấu trừ theo sổ (xác suất phải trả: vụ Ngãi phúc thẩm thua 26/08/2026; Long đang kiện) — không trừ thêm
+KTPL trên LNST 9T/26: −24.9; LNST Q4/26 sau KTPL: +40.0 [UL]
+⇒ Điều chỉnh tiền ròng cho cổ đông: -23.7 tỷ = -887 đ/cp
+  GIỚI HẠN: số dư quỹ KTPL chưa chi (trích 30,1 từ LNST 2025 trong H1/26) chưa tách được từ BCTC Q3 — nếu còn nguyên: -1,128 đ/cp
+  (A1 phụ) nếu 2019–20 = 175 thay vì 105: IRR toàn đời ở 949 = 8.01%; giá cho IRR 12% = 3000
+
+====================================================================================================
+F. SOTP — GIÁ TRỊ NỘI TẠI/CP (mù giá; KHÔNG có xác suất vụ án trong tâm)
+====================================================================================================
+giá PPA / tư vấn                  C_thap            C_giua             C_cao
+P1_giu_HD_949              937 = 35,100    1094 = 40,996    1336 = 50,038
+P2_thoa_thuan_600          591 = 22,137     748 = 28,033     990 = 37,075
+P3_thoa_thuan_520          512 = 19,165     669 = 25,061     910 = 34,104
+P4_san_kinh_te_440         432 = 16,194     590 = 22,090     831 = 31,132
+
+TÂM (kỳ vọng xác suất giá × đường ống, Q195, Ke 12.85%): 742 tỷ = 27,788 đ/cp
+Ô trung vị (P3 520 × C_giua): 25,061 đ/cp
+Phân vị 20/50/80 của lưới 12 ô (trọng số): 22,090 / 25,061 / 35,100 đ/cp
+Toàn dải lưới: 16,194 – 50,038 đ/cp
+Cấu phần tâm: thuỷ điện 16,363 + tư vấn 12,312 + tiền ròng điều chỉnh -887
+
+Độ nhạy tâm (đ/cp):
+  Ke: 10.0% 38,632  12.3% 29,329  12.8% 27,788  13.4% 26,414  14.0% 25,071
+  KTPL: 10% 31,522  15% 29,655  20% 27,788  25% 25,921
+  Sản lượng: Q175 25,531  Q195 27,788  Q215 30,045  Q237 32,482
+  Giá PPA (C_giua, Q195): 340 18,152  440 22,090  520 25,061  600 28,033  750 33,604  949 40,996
+
+GIÁ TRỊ TIẾP CẬN QUA CỔ TỨC (cổ đông thiểu số không quyết định phân phối):
+  payout 27%: PV rò rỉ do tiền bị giữ ở lãi tiền gửi ≈ 38 tỷ = 1,435 đ/cp ⇒ giá trị tiếp cận ≈ 26,353 đ/cp
+  payout 40%: PV rò rỉ do tiền bị giữ ở lãi tiền gửi ≈ 15 tỷ = 572 đ/cp ⇒ giá trị tiếp cận ≈ 27,216 đ/cp
+  payout 60%: PV rò rỉ do tiền bị giữ ở lãi tiền gửi ≈ 0 tỷ = 0 đ/cp ⇒ giá trị tiếp cận ≈ 27,788 đ/cp
+  (payout 27% = FY2025 thực; KTPL 20% đã trừ ở mọi dòng. Không áp chiết khấu thanh khoản/thiểu số tuỳ ý.)
+
+====================================================================================================
+D. ĐỘ NHẠY VỤ ÁN (TÁCH KHỎI CƠ SỞ — không vào tâm)
+====================================================================================================
+  cấm thầu EVN 3 năm: DT tư vấn −50% 2027–29: tư vấn 328 → 97 (Δ -8,626 đ/cp)
+  cấm thầu EVN 5 năm: DT −50% 2027–31: tư vấn 328 → -39 (Δ -13,741 đ/cp)
+  cấm 3 năm, mất 70% DT: tư vấn 328 → 5 (Δ -12,076 đ/cp)
+  Buộc nộp lợi bất chính/bồi thường 20 tỷ (2027): Δ -664 đ/cp
+  Buộc nộp lợi bất chính/bồi thường 50 tỷ (2027): Δ -1,660 đ/cp
+  Buộc nộp lợi bất chính/bồi thường 100 tỷ (2027): Δ -3,320 đ/cp

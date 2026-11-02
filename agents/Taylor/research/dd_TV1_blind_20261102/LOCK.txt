@@ -1,0 +1,6 @@
+INTRINSIC.md md5=0e194156785e2f37eac69436ec8327e2
+valuation_blind.py md5=e3088fc5bd77bee18b9c47db1c4a4c52
+valuation_blind_out.txt md5=b67ab192a7e0a3deb06993f90bfbb930
+locked_at=2026-11-02 21:54:32 ICT
+price_seen=no (khong truy van gia/von hoa/boi so TV1 truoc khoa)
+contamination_disclosed=yes (INTRINSIC.md §0b: working memory tu bom, README 13/10 §4-5, valuation.py dong 5)
