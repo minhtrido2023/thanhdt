@@ -1,0 +1,4 @@
+/home/trido/.local/lib/python3.10/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+r* thị trường 15.1% (panel 2026-10-30, n=147 mã; r hằng 12.25%) · percentile 75% lịch sử 2014-01→2026-10 · đỉnh 2022 15.9% (2022-12), đáy 2022–23 12.1% (2023-08) [DISPLAY-ONLY, thước đo hiển thị, KHÔNG phải tín hiệu mua/bán]
+TPCP 10Y 4.58% @2026-10-30 (trễ 3 ngày, fetch 2026-11-01) · Δ12T +0.64pp (từ 3.94% @2025-10-30) [UNVERIFIED: chưa có nguồn thứ hai khớp ≤0,2pp; vs VBMA 05–07/2026 lệch +0,13…+0,21pp]
