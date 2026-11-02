@@ -104,3 +104,83 @@ Giá 19800 ngầm định: P/E 4,0 ⇒ LNST bền 132; P/E 3,5 ⇒ 151; P/B 0.92
       140  15,735  18,358  20,981  23,603  26,226  31,471
       155  17,421  20,325  23,229  26,132  29,036  34,843
       170  19,107  22,292  25,476  28,661  31,846  38,215
+
+====================================================================================================
+r4 — ĐỊNH GIÁ DỰNG LẠI THEO KỊCH BẢN GIÁ PPA SÔNG BUNG 5 (thay toàn bộ khối kịch bản r3)
+====================================================================================================
+Hiệu chuẩn 2025: thuế TN+phí ≈37.2 (pass-through, EVN trả thêm ngoài giá) ⇒ giá ròng 949 đ/kWh; chi phí tiền mặt bộ phận ≈21.2 tỷ (DT − KQ − pass − KH)
+  (đồng nhất theo cấu tạo: Q 236.6 × 949 − O&M 21.2 − KH 38.1 = 165.1 = KQ bộ phận 165.055); r4 dùng O&M 2027 = 25 [UL] > 21,2 (trượt + tiền cấp quyền)
+
+LNST thuỷ điện 2027+ theo giá ròng × sản lượng (tỷ):
+  a_giu_975    975 đ/kWh: Q175 DT  170.6 ⇒ LNST   79.7 | Q210 DT  204.8 ⇒ LNST  107.0
+  b_600        600 đ/kWh: Q175 DT  105.0 ⇒ LNST   27.2 | Q210 DT  126.0 ⇒ LNST   44.0
+  c_500        500 đ/kWh: Q175 DT   87.5 ⇒ LNST   13.2 | Q210 DT  105.0 ⇒ LNST   27.2
+  d_340        340 đ/kWh: Q175 DT   59.5 ⇒ LNST   -9.2 | Q210 DT   71.4 ⇒ LNST    0.3
+  (2025 thực: giá ròng ≈949, Q 236.6 ⇒ LNST thuỷ điện ≈122.7)
+
+LNST tư vấn tham chiếu [FY25 tr.34-35, UL phân bổ chung]: 2025 ≈35.8; 2024 ≈15.1
+
+LNST bền cả công ty 2027+ (tỷ) — lo (Q175, tư vấn thấp) / mid (Q192,5, giữa) / hi (Q210, tư vấn cao):
+  a_giu_975 : pháp lý ổn  109.7 /  133.4 /  157.0 | cấm thầu   89.7 /  108.4 /  127.0
+  b_600     : pháp lý ổn   57.2 /   75.6 /   94.0 | cấm thầu   37.2 /   50.6 /   64.0
+  c_500     : pháp lý ổn   43.2 /   60.2 /   77.2 | cấm thầu   23.2 /   35.2 /   47.2
+  d_340     : pháp lý ổn   20.8 /   35.6 /   50.3 | cấm thầu    0.8 /   10.6 /   20.3
+  So: r3 'LNST bền cơ sở' 103–172 (giá cũ); KH ĐHĐCĐ 2026 LNST 104,2 (baodauthau 30/04/2026); LNST 2025 150,2
+
+(i) P/E — giá trị/cp (PV về 11/2026; Ke 12,3–13,4%; cổ tức FY2026 1.000–1.500 cộng tại t≈0,9):
+  a_giu_975  ok:  18,454 /  24,745 /  31,880 | bad:   9,508 /  13,336 /  17,815
+  b_600      ok:  10,049 /  14,514 /  19,630 | bad:   4,466 /   6,826 /   9,648
+  c_500      ok:   7,808 /  11,786 /  16,363 | bad:   3,121 /   5,090 /   7,470
+  d_340      ok:   4,223 /   7,421 /  11,136 | bad:     970 /   2,312 /   3,985
+
+(ii) DDM 10 năm + terminal min(0,6; ROE/Ke)×BV — giá trị/cp (mid: Ke 12,85%, BV 541, DPS26 1.250):
+  a_giu_975  ok: p27 15,361 p40 17,308 p60 20,302 | bad: p27 13,381 p40 14,962 p60 17,395
+  b_600      ok: p27 10,786 p40 11,890 p60 13,587 | bad: p27  7,948 p40  9,089 p60 10,681
+  c_500      ok: p27  9,243 p40 10,445 p60 11,797 | bad: p27  5,870 p40  6,664 p60  7,884
+  d_340      ok: p27  5,919 p40  6,720 p60  7,954 | bad: p27  2,546 p40  2,784 p60  3,150
+  ví dụ c_500/ok/payout 27%: PV cổ tức 3,940 + terminal 5,303 (P/B term 0.57)
+
+Cổ tức cần có để biện minh 19,800 (Gordon g=0, Ke 12,3–13,4%): 2,435–2,653 đ/cp/năm = 65.0–70.8 tỷ
+Cổ tức bền 2028+ (đ/cp) theo kịch bản giá × payout (pháp lý ổn, LNST mid):
+  a_giu_975  LNST  133.4: payout 27% ⇒  1,349  payout 40% ⇒  1,998  payout 60% ⇒  2,998  | payout cần ≥49%
+  b_600      LNST   75.6: payout 27% ⇒    765  payout 40% ⇒  1,133  payout 60% ⇒  1,699  | payout cần ≥86%
+  c_500      LNST   60.2: payout 27% ⇒    609  payout 40% ⇒    902  payout 60% ⇒  1,353  | payout cần ≥108%
+  d_340      LNST   35.6: payout 27% ⇒    360  payout 40% ⇒    533  payout 60% ⇒    799  | payout cần ≥183%
+  Thực trả: FY2025 1.500 (27%); KH FY2026 1.000 (10%)
+
+Kỳ vọng có trọng số (giá {'a_giu_975': 0.1, 'b_600': 0.35, 'c_500': 0.35, 'd_340': 0.2}; P(pháp lý xấu) 0.35):
+  (i) P/E: lo 7,141 / mid 10,645 / hi 14,708
+  (ii) DDM payout 27%: lo 6,172 / mid 8,664 / hi 11,142
+  (ii) DDM payout 40%: lo 7,046 / mid 9,728 / hi 12,379
+  (ii) DDM payout 60%: lo 8,242 / mid 11,232 / hi 14,249
+VÙNG GIÁ TRỊ HỢP LÝ r4 = [min(P/E mid, DDM27 mid); max(P/E mid, DDM40 mid)] = 8,664–10,645; tâm (TB hai phương pháp) 9,920
+  Giá 19,800 so vùng: +86% … +129%; so tâm +100%
+  Nhạy: trọng số giá a/b/c/d = 0,20/0,40/0,30/0,10 (lạc quan) ⇒ P/E mid 12,276; DDM40 mid 10,932
+  Theo kịch bản a_giu_975  (pháp lý ổn, mid): P/E  24,745 | DDM27  15,361 | DDM40  17,308 | DDM60  20,302
+  Theo kịch bản b_600      (pháp lý ổn, mid): P/E  14,514 | DDM27  10,786 | DDM40  11,890 | DDM60  13,587
+  Theo kịch bản c_500      (pháp lý ổn, mid): P/E  11,786 | DDM27   9,243 | DDM40  10,445 | DDM60  11,797
+  Theo kịch bản d_340      (pháp lý ổn, mid): P/E   7,421 | DDM27   5,919 | DDM40   6,720 | DDM60   7,954
+  Nếu hạ bậc trễ 2 năm (2029) ở b_600: +LNST 58 tỷ/năm × 2 ⇒ +3,829 đ/cp nếu giữ lại hết trong VCSH (P/B≈1) / +1,034 qua cổ tức 27%
+  Nếu hạ bậc trễ 2 năm (2029) ở c_500: +LNST 73 tỷ/năm × 2 ⇒ +4,851 đ/cp nếu giữ lại hết trong VCSH (P/B≈1) / +1,310 qua cổ tức 27%
+
+SOTP trần (EV thuỷ điện 2027–2059 + tư vấn 40×6 + net điều chỉnh) đ/cp, Q 192,5, r 11–13%:
+  a_giu_975 : tư vấn 0 ⇒  33,292– 38,803 | tư vấn 240 ⇒  42,284– 47,794
+  b_600     : tư vấn 0 ⇒  16,944– 19,761 | tư vấn 240 ⇒  25,935– 28,753
+  c_500     : tư vấn 0 ⇒  12,584– 14,684 | tư vấn 240 ⇒  21,576– 23,676
+  d_340     : tư vấn 0 ⇒   5,318–  6,237 | tư vấn 240 ⇒  14,310– 15,228
+  SOTP kỳ vọng theo trọng số giá (r 12%, tư vấn 240): 24,868 — TRẦN tham chiếu, cổ đông thiểu số không tiếp cận trực tiếp
+Giá 19,800 ngầm định: P/E 4 ⇒ LNST bền 132; P/E 5 ⇒ 106; P/E 6 ⇒ 88 — so LNST bền r4 b/c mid ok 76/60
+
+Nhạy kết luận (mid):
+  Bỏ hẳn rủi ro pháp lý (P xấu = 0): P/E 13,164 | DDM40 10,892 | DDM60 12,505
+  Trọng số giá rất lạc quan {'a_giu_975': 0.25, 'b_600': 0.45, 'c_500': 0.25, 'd_340': 0.05} + P xấu 0: P/E 16,035 | DDM40 12,625
+  P/E 7 (≈2024 trước vụ án 7,9) cho mọi kịch bản pháp lý ổn: kỳ vọng 16,448; riêng b_600 18,167
+  DDM40 với Ke = r* thị trường 15,1%: 8,230
+  Để P/E 5,5 (pháp lý ổn) ra 19.800 cần LNST bền ≈105 tỷ ⇒ thuỷ điện ≈65 (tư vấn 40) ⇔ giá ròng ≈789 đ/kWh ở Q 192,5
+
+r4 — Lưới LNST bền × P/E (đ/cp, chưa chiết khấu) cho báo cáo NĐT Phụ lục A:
+    40 tỷ: P/E3: 4,500  P/E4: 6,000  P/E5: 7,500  P/E6: 9,000
+    60 tỷ: P/E3: 6,700  P/E4: 9,000  P/E5: 11,200  P/E6: 13,500
+    75 tỷ: P/E3: 8,400  P/E4: 11,200  P/E5: 14,000  P/E6: 16,900
+    95 tỷ: P/E3: 10,700  P/E4: 14,200  P/E5: 17,800  P/E6: 21,400
+   130 tỷ: P/E3: 14,600  P/E4: 19,500  P/E5: 24,400  P/E6: 29,200

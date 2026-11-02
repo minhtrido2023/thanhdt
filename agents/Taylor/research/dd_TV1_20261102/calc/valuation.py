@@ -218,3 +218,175 @@ pes = (3, 3.5, 4, 4.5, 5, 6)
 print("  LNST\\PE " + " ".join(f"{p:>7}" for p in pes))
 for l in (80, 100, 125, 140, 155, 170):
     print(f"  {l:7d} " + " ".join(f"{ps(l*p):7,.0f}" for p in pes))
+
+# =====================================================================================================
+# ---------- r4 (job Taylor_20261102_094407): DỰNG LẠI — TRỤC CHÍNH = GIÁ PPA SÔNG BUNG 5 SAU MỐC HẠ BẬC ----------
+# Mọi khối r3 ở trên (kịch bản Tốt/Cơ sở/Xấu dựng trên "giá điện giữ ~912–950 đ/kWh") BỊ THAY bởi khối này.
+# Chứng cứ giá: ../../tv1_sb5_ppa_price_20261013/README.md (PECC1 PA bán SB5 8/2018 tr.13: 569,36 → 243,66 đ/kWh từ 2022 theo
+# dự thảo HĐ sửa đổi 05; BCTN 2025 tr.38 "giá điện của nhà máy TĐ Sông Bung 5 sụt giảm"; KBSV 17/04/2026 tr.4 lời lãnh đạo:
+# từ 2027 xuống 500–600 đ/kWh chưa thuế TN/phí DVMTR).
+# Hiệu chuẩn hàm chi phí bằng BÁO CÁO BỘ PHẬN BCTC 2025 KIỂM TOÁN [FY25 tr.34]: thuỷ điện DT 261,600 / KQ bộ phận 165,055 /
+# khấu hao 38,143; 2024 [FY25 tr.35]: DT 215,941 / KQ 130,108 / KH 37,542; chi phí không phân bổ 44,08 (2025), 74,88 (2024).
+# =====================================================================================================
+print("\n" + "=" * 100 + "\nr4 — ĐỊNH GIÁ DỰNG LẠI THEO KỊCH BẢN GIÁ PPA SÔNG BUNG 5 (thay toàn bộ khối kịch bản r3)\n" + "=" * 100)
+Q25, DT25, KQ25, DA25 = 236.6, 261.600, 165.055, 38.143      # sản lượng 2025 [BCTN 2025 tr.7, qua README 13/10]; [FY25 tr.34]
+TN25 = 28.66                                                 # thuế tài nguyên phát sinh 2025 [BCTN 2025 tr.24, qua README 13/10]
+DVMTR = 36.0                                                 # phí DVMTR đ/kWh [UL]
+pass25 = TN25 + Q25 * DVMTR / 1000
+p_net25 = (DT25 - pass25) / Q25 * 1000
+cash_om25 = (DT25 - KQ25) - pass25 - DA25
+print(f"Hiệu chuẩn 2025: thuế TN+phí ≈{pass25:.1f} (pass-through, EVN trả thêm ngoài giá) ⇒ giá ròng {p_net25:.0f} đ/kWh; "
+      f"chi phí tiền mặt bộ phận ≈{cash_om25:.1f} tỷ (DT − KQ − pass − KH)")
+print(f"  (đồng nhất theo cấu tạo: Q {Q25} × {p_net25:.0f} − O&M {cash_om25:.1f} − KH {DA25:.1f} = {Q25*p_net25/1000-cash_om25-DA25:.1f} = KQ bộ phận {KQ25}); r4 dùng O&M 2027 = 25 [UL] > 21,2 (trượt + tiền cấp quyền)")
+CASH_OM, DA4, OVH4 = 25.0, 38.0, 8.0     # [UL] O&M 2027 (21,4×1,025² + tiền cấp quyền), khấu hao (đến ~2039), chi phí chung phân bổ
+PRICE_SC = {"a_giu_975": 975.0, "b_600": 600.0, "c_500": 500.0, "d_340": 340.0}
+P_PRICE = {"a_giu_975": 0.10, "b_600": 0.35, "c_500": 0.35, "d_340": 0.20}    # [UL] căn cứ: §B REPORT
+QS = (175.0, 210.0)                       # sản lượng: bình quân 2013–23 (175,3) / 2021–25 (KBSV 210)
+def hyd_np(p, q):                         # LNST thuỷ điện năm bền 2027+ (tỷ); lỗ được bù trừ thuế ở cấp công ty
+    return (q * p / 1000 - CASH_OM - DA4 - OVH4) * (1 - TAX)
+print("\nLNST thuỷ điện 2027+ theo giá ròng × sản lượng (tỷ):")
+for k, p in PRICE_SC.items():
+    print(f"  {k:10s} {p:5.0f} đ/kWh: Q175 DT {175*p/1000:6.1f} ⇒ LNST {hyd_np(p,175):6.1f} | Q210 DT {210*p/1000:6.1f} ⇒ LNST {hyd_np(p,210):6.1f}")
+print(f"  (2025 thực: giá ròng ≈{p_net25:.0f}, Q {Q25} ⇒ LNST thuỷ điện ≈{hyd_np(p_net25,Q25):.1f})")
+# Tư vấn: 2025 KQ bộ phận 80,84 − (chung 44,08 − 8 phân bổ thuỷ điện) = 44,8 EBIT ⇒ ×0,8 = 35,8; 2024: 85,73 − 66,88 = 18,8 ⇒ 15,1
+cons25 = (80.841 - (44.084 - OVH4)) * 0.8; cons24 = (85.728 - (74.878 - OVH4)) * 0.8
+print(f"\nLNST tư vấn tham chiếu [FY25 tr.34-35, UL phân bổ chung]: 2025 ≈{cons25:.1f}; 2024 ≈{cons24:.1f}")
+CONS_OK, CONS_BAD = (30.0, 40.0, 50.0), (10.0, 15.0, 20.0)      # [UL] pháp lý ổn / cấm thầu EVN (về mức 2024 hoặc thấp hơn)
+TC4 = 0.0   # r4: TC ròng 9T/26 = −1,3 (lãi tiền gửi 5,7 trừ lãi vay cá nhân) ⇒ 0 [UL]; r3 dùng +5 là lạc quan
+P_LEGAL_BAD = 0.35                                               # giữ như r3 (hợp M4/M5)
+PE_OK, PE_BAD = (5.0, 5.5, 6.0), (3.0, 3.5, 4.0)                 # [UL] OK: trần = trung vị 2025 (6,0) trước vụ án; BAD: ≤ 2026 YTD 4,0
+def firm_np(p, q, cons): return hyd_np(p, q) + cons + TC4
+print("\nLNST bền cả công ty 2027+ (tỷ) — lo (Q175, tư vấn thấp) / mid (Q192,5, giữa) / hi (Q210, tư vấn cao):")
+NP = {}
+for k, p in PRICE_SC.items():
+    for lg, cons in (("ok", CONS_OK), ("bad", CONS_BAD)):
+        lo, mid, hi = firm_np(p, 175, cons[0]), firm_np(p, 192.5, cons[1]), firm_np(p, 210, cons[2])
+        NP[(k, lg)] = (lo, mid, hi)
+    print(f"  {k:10s}: pháp lý ổn {NP[(k,'ok')][0]:6.1f} / {NP[(k,'ok')][1]:6.1f} / {NP[(k,'ok')][2]:6.1f} | cấm thầu {NP[(k,'bad')][0]:6.1f} / {NP[(k,'bad')][1]:6.1f} / {NP[(k,'bad')][2]:6.1f}")
+print(f"  So: r3 'LNST bền cơ sở' 103–172 (giá cũ); KH ĐHĐCĐ 2026 LNST 104,2 (baodauthau 30/04/2026); LNST 2025 150,2")
+
+# ---- (i) P/E trên LNST bền 2027+ ----
+# Giá trị tại ~01/2028 (khi LNST 2027 công bố) = P/E × LNST; người giữ nhận cổ tức FY2026 (trả ~Q3/2027, t≈1). PV về 11/2026 với T=1,25.
+DPS26 = (1000, 1500)      # FY2026: KH ĐHĐCĐ 2026 = 10% (baodauthau 30/04/2026) … mức FY2025 15%
+T_PE = 1.25
+def pv_pe(v_ps, ke, dps26): return v_ps / (1 + ke) ** T_PE + dps26 / (1 + ke) ** 0.9
+print("\n(i) P/E — giá trị/cp (PV về 11/2026; Ke 12,3–13,4%; cổ tức FY2026 1.000–1.500 cộng tại t≈0,9):")
+PE_RES = {}
+for k in PRICE_SC:
+    out = []
+    for lg, pe in (("ok", PE_OK), ("bad", PE_BAD)):
+        n = NP[(k, lg)]
+        lo = pv_pe(ps(n[0] * pe[0]), 0.134, DPS26[0]); mid = pv_pe(ps(n[1] * pe[1]), 0.1285, sum(DPS26) / 2); hi = pv_pe(ps(n[2] * pe[2]), 0.123, DPS26[1])
+        PE_RES[(k, lg)] = (lo, mid, hi); out.append(f"{lg}: {lo:7,.0f} / {mid:7,.0f} / {hi:7,.0f}")
+    print(f"  {k:10s} " + " | ".join(out))
+
+# ---- (ii) DDM / FCFE phân phối được cho cổ đông thiểu số ----
+# DPS_t: t=1 (FY2026, trả 2027) = 1.000–1.500; t=2..10 = payout × LNST bền / SH; BV_{t+1} = BV_t + LNST × (1 − payout − 0,20 quỹ KTPL)
+# Terminal năm 10 = min(0,6 ; ROE/Ke) × BV_10 [UL bảo thủ: thanh khoản thấp, cổ đông thiểu số không quyết phân phối]
+PAYOUTS = (0.27, 0.40, 0.60)   # 27% = FY2025 thực [H1 tr.30]; 60% ≈ trần thực tế khi còn trích KTPL 20% + một phần ĐTPT
+KTPL = 0.20
+def ddm(np_, payout, ke, bv0, dps1, n=10, pb_cap=0.6):
+    pv = dps1 / (1 + ke) ** 0.9
+    bv = bv0
+    for t in range(2, n + 1):
+        pv += ps(np_ * payout) / (1 + ke) ** (t - 0.1)
+        bv += np_ * (1 - payout - KTPL)
+    roe = np_ / bv if bv > 0 else 0
+    pb = max(0.0, min(pb_cap, roe / ke))
+    term = ps(pb * bv) / (1 + ke) ** (n - 0.1)
+    return pv + term, pv, term, pb
+BV0 = (507.8, 574.7)   # VCSH soát xét 30/6 / Q3 chưa soát xét
+print("\n(ii) DDM 10 năm + terminal min(0,6; ROE/Ke)×BV — giá trị/cp (mid: Ke 12,85%, BV 541, DPS26 1.250):")
+DDM_RES = {}
+for k in PRICE_SC:
+    row = []
+    for lg in ("ok", "bad"):
+        n = NP[(k, lg)]
+        vals = {}
+        for po in PAYOUTS:
+            lo = ddm(n[0], po, 0.134, BV0[0], DPS26[0])[0]; mid = ddm(n[1], po, 0.1285, sum(BV0) / 2, sum(DPS26) / 2)[0]; hi = ddm(n[2], po, 0.123, BV0[1], DPS26[1])[0]
+            vals[po] = (lo, mid, hi)
+        DDM_RES[(k, lg)] = vals
+        row.append(f"{lg}: " + " ".join(f"p{int(po*100)} {vals[po][1]:6,.0f}" for po in PAYOUTS))
+    print(f"  {k:10s} " + " | ".join(row))
+_, d_pv, d_term, d_pb = ddm(NP[("c_500", "ok")][1], 0.27, 0.1285, 541.25, 1250)
+print(f"  ví dụ c_500/ok/payout 27%: PV cổ tức {d_pv:,.0f} + terminal {d_term:,.0f} (P/B term {d_pb:.2f})")
+
+# ---- Cổ tức cần có vs cổ tức bền ----
+need_lo, need_hi = PX * 0.123, PX * 0.134
+print(f"\nCổ tức cần có để biện minh {PX:,} (Gordon g=0, Ke 12,3–13,4%): {need_lo:,.0f}–{need_hi:,.0f} đ/cp/năm = {need_lo*SH/1e9:.1f}–{need_hi*SH/1e9:.1f} tỷ")
+print("Cổ tức bền 2028+ (đ/cp) theo kịch bản giá × payout (pháp lý ổn, LNST mid):")
+DIVTAB = {}
+for k in PRICE_SC:
+    n = NP[(k, "ok")][1]
+    DIVTAB[k] = {po: ps(n * po) for po in PAYOUTS}
+    need_po = need_lo * SH / 1e9 / n if n > 0 else float('inf')
+    print(f"  {k:10s} LNST {n:6.1f}: " + "  ".join(f"payout {int(po*100)}% ⇒ {DIVTAB[k][po]:6,.0f}" for po in PAYOUTS) + f"  | payout cần ≥{need_po:.0%}")
+print(f"  Thực trả: FY2025 1.500 (27%); KH FY2026 1.000 (10%)")
+
+# ---- Tổng hợp xác suất ----
+def wavg(res, idx):
+    s = 0.0
+    for k, pp in P_PRICE.items():
+        s += pp * ((1 - P_LEGAL_BAD) * res[(k, "ok")][idx] + P_LEGAL_BAD * res[(k, "bad")][idx])
+    return s
+pe_w = [wavg(PE_RES, i) for i in range(3)]
+ddm_w = {po: [sum(pp * ((1 - P_LEGAL_BAD) * DDM_RES[(k, 'ok')][po][i] + P_LEGAL_BAD * DDM_RES[(k, 'bad')][po][i]) for k, pp in P_PRICE.items()) for i in range(3)] for po in PAYOUTS}
+print(f"\nKỳ vọng có trọng số (giá {P_PRICE}; P(pháp lý xấu) {P_LEGAL_BAD}):")
+print(f"  (i) P/E: lo {pe_w[0]:,.0f} / mid {pe_w[1]:,.0f} / hi {pe_w[2]:,.0f}")
+for po in PAYOUTS:
+    print(f"  (ii) DDM payout {int(po*100)}%: lo {ddm_w[po][0]:,.0f} / mid {ddm_w[po][1]:,.0f} / hi {ddm_w[po][2]:,.0f}")
+# Vùng hợp lý: (i) mid và (ii) mid với payout 27–40% (nâng lên 60% chỉ là điều kiện đổi nhận định, không phải kịch bản trung tâm)
+zone_lo = min(pe_w[1], ddm_w[0.27][1]); zone_hi = max(pe_w[1], ddm_w[0.40][1])
+center = (pe_w[1] + (ddm_w[0.27][1] + ddm_w[0.40][1]) / 2) / 2
+print(f"VÙNG GIÁ TRỊ HỢP LÝ r4 = [min(P/E mid, DDM27 mid); max(P/E mid, DDM40 mid)] = {zone_lo:,.0f}–{zone_hi:,.0f}; tâm (TB hai phương pháp) {center:,.0f}")
+print(f"  Giá {PX:,} so vùng: {PX/zone_hi-1:+.0%} … {PX/zone_lo-1:+.0%}; so tâm {PX/center-1:+.0%}")
+print(f"  Nhạy: trọng số giá a/b/c/d = 0,20/0,40/0,30/0,10 (lạc quan) ⇒ P/E mid " +
+      f"{sum(w*((1-P_LEGAL_BAD)*PE_RES[(k,'ok')][1]+P_LEGAL_BAD*PE_RES[(k,'bad')][1]) for k,w in zip(PRICE_SC,(0.2,0.4,0.3,0.1))):,.0f}; " +
+      f"DDM40 mid {sum(w*((1-P_LEGAL_BAD)*DDM_RES[(k,'ok')][0.40][1]+P_LEGAL_BAD*DDM_RES[(k,'bad')][0.40][1]) for k,w in zip(PRICE_SC,(0.2,0.4,0.3,0.1))):,.0f}")
+for k in PRICE_SC:
+    print(f"  Theo kịch bản {k:10s} (pháp lý ổn, mid): P/E {PE_RES[(k,'ok')][1]:7,.0f} | DDM27 {DDM_RES[(k,'ok')][0.27][1]:7,.0f} | DDM40 {DDM_RES[(k,'ok')][0.40][1]:7,.0f} | DDM60 {DDM_RES[(k,'ok')][0.60][1]:7,.0f}")
+# Mốc trễ hạ bậc: mỗi năm giữ giá cũ thêm = chênh LNST (a − kịch bản) × payout, PV
+for k in ("b_600", "c_500"):
+    extra = (NP[("a_giu_975", "ok")][1] - NP[(k, "ok")][1])
+    print(f"  Nếu hạ bậc trễ 2 năm (2029) ở {k}: +LNST {extra:.0f} tỷ/năm × 2 ⇒ +{ps(extra*2)/1.13:,.0f} đ/cp nếu giữ lại hết trong VCSH (P/B≈1) / +{ps(extra*2*0.27)/1.13:,.0f} qua cổ tức 27%")
+
+# ---- SOTP trần (giá trị tài sản, mô hình 13/10 + net điều chỉnh −38,7 + tư vấn) ----
+OM_TAR, ESC4, CAPEX4 = 95.0, 0.025, 5.0
+def hydro_ev4(p0, q, r, life=33):
+    ev = 0.0
+    for t in range(1, life + 1):
+        g = (1 + ESC4) ** (t - 1)
+        rev = q * (p0 + OM_TAR * (g - 1)) / 1000.0
+        om = CASH_OM * g; dep = DA4 if t <= 13 else 0.0
+        tax = max(0.0, TAX * (rev - om - dep - OVH4))
+        ev += (rev - om - OVH4 - CAPEX4 * g - tax) / (1 + r) ** t
+    return ev
+print("\nSOTP trần (EV thuỷ điện 2027–2059 + tư vấn 40×6 + net điều chỉnh) đ/cp, Q 192,5, r 11–13%:")
+SOTP4 = {}
+for k, p in PRICE_SC.items():
+    v = [ps(hydro_ev4(p, 192.5, r) + 240 + net_adj) for r in (0.13, 0.11)]
+    v0 = [ps(hydro_ev4(p, 192.5, r) + net_adj) for r in (0.13, 0.11)]
+    SOTP4[k] = (v0[0], v[1])
+    print(f"  {k:10s}: tư vấn 0 ⇒ {v0[0]:7,.0f}–{v0[1]:7,.0f} | tư vấn 240 ⇒ {v[0]:7,.0f}–{v[1]:7,.0f}")
+sotp_w = sum(P_PRICE[k] * ps(hydro_ev4(PRICE_SC[k], 192.5, 0.12) + 240 + net_adj) for k in PRICE_SC)
+print(f"  SOTP kỳ vọng theo trọng số giá (r 12%, tư vấn 240): {sotp_w:,.0f} — TRẦN tham chiếu, cổ đông thiểu số không tiếp cận trực tiếp")
+print(f"Giá {PX:,} ngầm định: P/E 4 ⇒ LNST bền {mcap/4:.0f}; P/E 5 ⇒ {mcap/5:.0f}; P/E 6 ⇒ {mcap/6:.0f} — so LNST bền r4 b/c mid ok {NP[('b_600','ok')][1]:.0f}/{NP[('c_500','ok')][1]:.0f}")
+
+# ---- Nhạy: kết luận có phụ thuộc giả định khắt không? ----
+def wsum(res_fn, pw=P_PRICE, plb=P_LEGAL_BAD):
+    return sum(pp * ((1 - plb) * res_fn(k, "ok") + plb * res_fn(k, "bad")) for k, pp in pw.items())
+print("\nNhạy kết luận (mid):")
+print(f"  Bỏ hẳn rủi ro pháp lý (P xấu = 0): P/E {wsum(lambda k,l: PE_RES[(k,l)][1], plb=0):,.0f} | DDM40 {wsum(lambda k,l: DDM_RES[(k,l)][0.40][1], plb=0):,.0f} | DDM60 {wsum(lambda k,l: DDM_RES[(k,l)][0.60][1], plb=0):,.0f}")
+OPT = {"a_giu_975": 0.25, "b_600": 0.45, "c_500": 0.25, "d_340": 0.05}
+print(f"  Trọng số giá rất lạc quan {OPT} + P xấu 0: P/E {wsum(lambda k,l: PE_RES[(k,l)][1], OPT, 0):,.0f} | DDM40 {wsum(lambda k,l: DDM_RES[(k,l)][0.40][1], OPT, 0):,.0f}")
+pe_hi = {k: pv_pe(ps(NP[(k,'ok')][1]*7.0), 0.1285, 1250) for k in PRICE_SC}
+print(f"  P/E 7 (≈2024 trước vụ án 7,9) cho mọi kịch bản pháp lý ổn: kỳ vọng {sum(P_PRICE[k]*pe_hi[k] for k in PRICE_SC):,.0f}; riêng b_600 {pe_hi['b_600']:,.0f}")
+ke151 = sum(P_PRICE[k]*((1-P_LEGAL_BAD)*ddm(NP[(k,'ok')][1],0.40,0.151,541.25,1250)[0]+P_LEGAL_BAD*ddm(NP[(k,'bad')][1],0.40,0.151,541.25,1250)[0]) for k in PRICE_SC)
+print(f"  DDM40 với Ke = r* thị trường 15,1%: {ke151:,.0f}")
+# Giá 19.800 cần gì: P/E 5,5 pháp lý ổn ⇒ LNST bền cần
+need_np = (PX - 1250) * SH / 1e9 * 1.1285 ** T_PE / 5.5
+print(f"  Để P/E 5,5 (pháp lý ổn) ra 19.800 cần LNST bền ≈{need_np:.0f} tỷ ⇒ thuỷ điện ≈{need_np-40:.0f} (tư vấn 40) ⇔ giá ròng ≈{((need_np-40)/0.8+CASH_OM+DA4+OVH4)/192.5*1000:.0f} đ/kWh ở Q 192,5")
+print("\nr4 — Lưới LNST bền × P/E (đ/cp, chưa chiết khấu) cho báo cáo NĐT Phụ lục A:")
+for l in (40, 60, 75, 95, 130):
+    print(f"  {l:4d} tỷ: " + "  ".join(f"P/E{p}: {round(ps(l*p),-2):,.0f}" for p in (3, 4, 5, 6)))

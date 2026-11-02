@@ -1,4 +1,15 @@
-# Tự kiểm — TV1_DD_investor_report_20261102 — BẢN ĐÍNH CHÍNH r3 (job Taylor_20261102_075340, 02/11/2026; thay bản 11:55 của job Taylor_20261102_042930)
+# Tự kiểm — TV1_DD_investor_report_20261102 — BẢN ĐÍNH CHÍNH LẦN 2 / r4 (job Taylor_20261102_094407, 02/11/2026; thay bản 15:25 của job Taylor_20261102_075340)
+
+## r4 — dựng lại định giá theo giá PPA Sông Bung 5 (user phê bình phương pháp 02/11 16:42; ../REPORT.md Phụ lục E3)
+- **CHƯA qua phản biện vòng 3** (Mike chạy sau). KHÔNG gửi email (dry-run only).
+- Số: mọi số định giá mới từ `../calc/valuation_out.txt` khối "r4" (`python3 -I calc/valuation.py`, md5 out 9a1294b6…). Quét tự động thân bài (trước Phụ lục E) vs REPORT + valuation_out + rate_lines + `../../tv1_sb5_ppa_price_20261013/README.md`:
+  169 chuỗi số, 10 không có nguyên văn — đều có nguồn: lưới P/E Phụ lục A (10.700/14.000/14.600/21.400/24.400/29.200 — nay in ở cuối valuation_out sau khi thêm khối lưới), 198,5 = tiền 30,7 + HTM 167,8, 20.000 (tham chiếu 02/11), 20.500 (vùng giá 12T), 57,76 (Q1+Q2/26).
+- Kiểm tay: LNST thuỷ điện Q192,5: (a) (187,69−71)×0,8 = 93,4; (b) 35,6; (c) 20,2; (d) −4,4 ⇒ tổng có tư vấn 40: 133,4/75,6/60,2/35,6 ✓ khớp khối r4. P/E LNST bền (b)/(c): 528,5/75,6 = 7,0; /60,2 = 8,8 ✓. 60–76/150,2 = 40–51% ⇒ "khoảng 40–50%" ✓. Điện mặt trời 800/528,5 = 1,51× vốn hoá ✓.
+- Fig mới: fig_12_np_by_ppa (LNST bền theo kịch bản giá PPA; đường 528,5/5,5 = 96), fig_13_dividend_gap (cần 2.435–2.650 vs thực trả 1.500, KH 1.000, bền 360–1.998). Vẽ lại: fig_00_hero, fig_07_football, fig_08_risk (+R0). CSV kèm mỗi hình.
+- Nguồn mới (web 02/11): baodauthau.vn 30/04/2026 (ĐHĐCĐ 2026: KH LNST 104,2, DT 641,5, cổ tức KH 10%; điện mặt trời 46 MWp/~800 tỷ "chưa thể triển khai") và 27/06/2025 (~90 tỷ DT/năm). BCTN 2025 KHÔNG tải lại được (owa.hnx.vn lỗi chứng chỉ) — trích tr.38 lấy từ README 13/10. KBSV bản gốc không tìm lại được. BCTC 2025 kiểm toán tr.32–36 đọc ảnh: không có biểu giá PPA.
+- Đã bỏ khỏi thân bài một câu chưa kiểm chứng ("tin 03/2026 rao bán 1.351,7 tỷ" — chỉ có qua tóm tắt tìm kiếm, không ngày).
+- Lộ nội bộ/fear-buy (md, figs/*.csv, HTML bỏ base64) = 0 hit. HTML dry-run: 15 `<img`, 9,6 MB. PDF 13 trang (thân 1–10). Xem bằng mắt: montage 0,5x toàn bộ + 1,1x trang 1 và 8; đã sửa nhãn KPI bị cắt (hero).
+- Quét số cũ r3 trong thân (17.800, 20.600, 13.500, 29.000, 103–172, 20/45/35, 25/50/25, 23.900, 44.200, "từ ngang") = 0 hit ngoài dòng "BẢN ĐÍNH CHÍNH LẦN 2" nêu kết luận cũ (cố ý).
 
 ## r3 (phản biện vòng 2: 4 BLOCKING + 10 NON-BLOCKING — đã áp hết; xem ../REPORT.md Phụ lục E2)
 - Số: mọi số mới từ `../calc/valuation_out.txt` khối "r3" (python3 -I calc/valuation.py). Quét tự động thân bài (trước Phụ lục E) vs REPORT+valuation_out+rate_lines:
