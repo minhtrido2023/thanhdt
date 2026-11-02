@@ -10,8 +10,6 @@
 - Chờ user: DGC vòng 6, TV2 watchlist, nguồn Tampa/CFR NH3 vào BQ?, tunnel tên cố định (cần Cloudflare+domain).
 - Mốc: clear_books_daily lần đầu T2 02/11 20:45; nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; measurement audit ~12-27.
 
-- [2026-11-01T18:10:18Z] 02/11 01:12 DCF level rerun xong: g_T không hội tụ (phân cách 3,5pp), GIỮ domestic_v2; s=0 thắng MAE (CI loại 0) nhưng mức g_T không chốt được. Dispatch Taylor (Sonnet) cài lịch 4 mùa BCTC + cờ STALE>105d (nhánh worktree, chưa cron) → arch-review → Mike cài cron.
-- [2026-11-01T18:58:27Z] 02/11 02:00 arch-review nhánh feat/dcf-bctc-season-20261102: NEEDS_CHANGES (cron thưa→daily, selfcheck 7/8 mutant sống, season_error im lặng); STALE trong đường echo plan/LAG CHƯA nối — chờ user quyết. Vòng 2 Sonnet Taylor dispatch 02:00.
 - [2026-11-01T19:09:58Z] 02/11 02:10 nhánh feat/dcf-bctc-season-20261102 (c4b721b06; registry mike 25bc7383b) arch-review vòng 2 APPROVED. CHỜ USER: duyệt merge + cài cron '12 1 * * *' --season (gỡ '10 1 11 * *'); merge code TRƯỚC khi cài cron (gate hardcode path canonical). Và quyết nối STALE vào đường plan echo (đề xuất: KHÔNG). Mặc định domestic_v2 giữ.
 - [2026-11-02T01:18:26Z] 02/11 08:20 DCF mùa BCTC: merge WC 4a411794e + cài cron '12 1 * * *' --season (gỡ ngày 11), registry cập nhật. STALE KHÔNG nối echo plan (user duyệt đề xuất). Theo dõi: log dcf_refresh_gate.log lượt đầu 03/11 08:12 ICT (lượt sớm Q3).
 - [2026-11-02T01:30:25Z] 02/11 08:35 DGC DD 2.2 rev2 ĐÃ GỬI email (user duyệt), mục cây việc proj:dgc-dd-20261029 đã đóng.
@@ -22,3 +20,5 @@
 - [2026-11-02T04:03:15Z] 02/11 11:0x báo cáo quý: code merge master 469660ae8; CRONTAB CHƯA CÀI (harness chặn crontab -); dòng ở kb/cron_registry.md; cần user cài hoặc cấp quyền trước 31/12/2026.
 - [2026-11-02T04:43:10Z] 02/11 11:55 DD TV1 XONG: email đã gửi, sổ giá ghi (TV1@2026-11-02), pointer kb/projects/tv1-dd-20261102.md. Chưa qua skeptic vòng 2.
 - [2026-11-02T07:53:41Z] 02/11 14:55 DD TV1: skeptic vòng 2 REFUTED (4 BLOCKING) + legal-vn xong → Taylor r3 (cuối) sửa REPORT+báo cáo NĐT; sau đó Mike kiểm + gửi BẢN ĐÍNH CHÍNH email + cập nhật dd_price_zones (rev2) + hỏi user có skeptic vòng 3 không. File: SKEPTIC2_/LEGAL_VN_20261102.md
+- [2026-11-02T08:07:07Z] 02/11 15:25 DD TV1 r3 ĐÃ GỬI bản đính chính + sổ giá rev2. Chờ user: có chạy skeptic vòng 3 không.
+- [2026-11-02T09:44:09Z] 02/11 16:50 user chê định giá TV1 (cổ tức 2.435–2.650 ≠ 1.500 ⇒ giá cao; giá PPA SB5 tái ký/hạ bậc chưa xác định — DD đã bỏ quên nghiên cứu tv1_sb5_ppa_price_20261013). Taylor r4 dựng lại định giá theo kịch bản giá PPA + DDM đồng hạng → skeptic vòng 3 → gửi đính chính lần 2 + sổ giá rev3.

@@ -152,3 +152,9 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T17:57:42Z] 02/11 00:57 user DUYỆT giữ domestic_v2; giao Sonnet Taylor_20261101_175734 rerun level grid OShares live + tách ổn định/nhảy → agents/Taylor/research/dcf_level_rerun_20261102/. Lịch 4 mùa BCTC user đã duyệt, cron CHƯA cài (gộp sau rerun).
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T18:10:18Z] 02/11 01:12 DCF level rerun xong: g_T không hội tụ (phân cách 3,5pp), GIỮ domestic_v2; s=0 thắng MAE (CI loại 0) nhưng mức g_T không chốt được. Dispatch Taylor (Sonnet) cài lịch 4 mùa BCTC + cờ STALE>105d (nhánh worktree, chưa cron) → arch-review → Mike cài cron.
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T18:58:27Z] 02/11 02:00 arch-review nhánh feat/dcf-bctc-season-20261102: NEEDS_CHANGES (cron thưa→daily, selfcheck 7/8 mutant sống, season_error im lặng); STALE trong đường echo plan/LAG CHƯA nối — chờ user quyết. Vòng 2 Sonnet Taylor dispatch 02:00.
