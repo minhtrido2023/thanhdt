@@ -1824,3 +1824,6 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T16:42:33Z] [dcf-vn-calib 01/11] XONG job Taylor_20261101_155145: REPORT commit 91336200c (s=0, g_T 4,5% level fix; beta khong vao xep hang; lich 15/2-5-8-11) — CHO quant-skeptic + user quyet; chua code knob vn_v3
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T16:59:53Z] ĐANG DỞ: dcf_expectation_lens job Taylor_20261101_165940 — agents/Taylor/research/dcf_expectation_lens_20261101/ | NEXT: đọc REPORT dcf_vn_calibration, viết PREREG
