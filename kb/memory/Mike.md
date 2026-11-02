@@ -10,7 +10,6 @@
 - Chờ user: DGC vòng 6, TV2 watchlist, nguồn Tampa/CFR NH3 vào BQ?, tunnel tên cố định (cần Cloudflare+domain).
 - Mốc: clear_books_daily lần đầu T2 02/11 20:45; nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; measurement audit ~12-27.
 
-- [2026-11-01T19:09:58Z] 02/11 02:10 nhánh feat/dcf-bctc-season-20261102 (c4b721b06; registry mike 25bc7383b) arch-review vòng 2 APPROVED. CHỜ USER: duyệt merge + cài cron '12 1 * * *' --season (gỡ '10 1 11 * *'); merge code TRƯỚC khi cài cron (gate hardcode path canonical). Và quyết nối STALE vào đường plan echo (đề xuất: KHÔNG). Mặc định domestic_v2 giữ.
 - [2026-11-02T01:18:26Z] 02/11 08:20 DCF mùa BCTC: merge WC 4a411794e + cài cron '12 1 * * *' --season (gỡ ngày 11), registry cập nhật. STALE KHÔNG nối echo plan (user duyệt đề xuất). Theo dõi: log dcf_refresh_gate.log lượt đầu 03/11 08:12 ICT (lượt sớm Q3).
 - [2026-11-02T01:30:25Z] 02/11 08:35 DGC DD 2.2 rev2 ĐÃ GỬI email (user duyệt), mục cây việc proj:dgc-dd-20261029 đã đóng.
 - [2026-11-02T01:41:15Z] 02/11 08:44 DCF rate-proxy (Taylor_20261102_012810 xong, commit 16b3cbddf): GIỮ r hằng 12,25%; Big-4 huy động trễ/biên nhỏ; TPCP 10Y proxy duy nhất đạt luật (sát nút); r* thị trường hôm nay 15,1%. CHỜ USER: thêm 2 dòng hiển thị (r*, TPCP10Y Δ12T)? cần data_registry entry macro_indicator trước. Chưa cần skeptic (kết luận không đổi).
@@ -22,3 +21,4 @@
 - [2026-11-02T07:53:41Z] 02/11 14:55 DD TV1: skeptic vòng 2 REFUTED (4 BLOCKING) + legal-vn xong → Taylor r3 (cuối) sửa REPORT+báo cáo NĐT; sau đó Mike kiểm + gửi BẢN ĐÍNH CHÍNH email + cập nhật dd_price_zones (rev2) + hỏi user có skeptic vòng 3 không. File: SKEPTIC2_/LEGAL_VN_20261102.md
 - [2026-11-02T08:07:07Z] 02/11 15:25 DD TV1 r3 ĐÃ GỬI bản đính chính + sổ giá rev2. Chờ user: có chạy skeptic vòng 3 không.
 - [2026-11-02T09:44:09Z] 02/11 16:50 user chê định giá TV1 (cổ tức 2.435–2.650 ≠ 1.500 ⇒ giá cao; giá PPA SB5 tái ký/hạ bậc chưa xác định — DD đã bỏ quên nghiên cứu tv1_sb5_ppa_price_20261013). Taylor r4 dựng lại định giá theo kịch bản giá PPA + DDM đồng hạng → skeptic vòng 3 → gửi đính chính lần 2 + sổ giá rev3.
+- [2026-11-02T10:06:32Z] 02/11 17:10 skeptic vòng 3 REFUTED (hướng đúng, mức r4 quá bi quan 8.7–10.6k; skeptic dựng lại ~11.8–15k cân / 14.8–17.3k lạc quan; B1 DDM tiền không sinh lãi, B2 P/E phạt kép, B3 câu tuyệt đối). Taylor r5 sửa → Mike kiểm + skeptic vòng 4 → mới email (CHƯA gửi r4). state_TV1_*.json (paused, thesis cũ, target 5%>trần) = việc user quyết.

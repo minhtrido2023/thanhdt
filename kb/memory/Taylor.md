@@ -31,3 +31,4 @@
 - [2026-11-02T09:47:34Z] ĐANG DỞ r4 TV1: web xong (DHCD 30/04/26 KH LNST 104,2 DT 641,5 co tuc KH 2026 10%; DMT long ho 46MWp+5MW BESS ~800 ty, ky vong 90 ty DT/nam, chua vao quy hoach). NEXT: block r4 trong calc/valuation.py (gia PPA a975/b600/c500/d340 × phap ly ok/xau; P/E + DDM)
 - [2026-11-02T09:49:21Z] ĐANG DỞ r4 TV1: valuation.py r4 XONG (vung 8.700-10.600, tam 9.900; gia 19.800 cao hon +86..+129%). NEXT: REPORT §0/§4/§8/§10/PL E3 → investor_report md+figs+pdf+html+SELFCHECK → commit → bus tv1-dd-20261102-r4
 - [2026-11-02T09:56:03Z] [tv1-dd r4 02/11] XONG job Taylor_20261102_094407 commit 79e7dee39 — vung 8.700-10.600 (gia cao hon ~2x); cho Mike skeptic v3 + sua dd_price_zones TV1 + gui email
+- [2026-11-02T10:06:44Z] ĐANG DỞ: job Taylor_20261102_100630 TV1 DD r5 (sửa B1-B3,N1-N12 theo SKEPTIC3) — research/dd_TV1_20261102/ | NEXT: đọc SKEPTIC3 + valuation.py r4

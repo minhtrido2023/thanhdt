@@ -158,3 +158,6 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T18:58:27Z] 02/11 02:00 arch-review nhánh feat/dcf-bctc-season-20261102: NEEDS_CHANGES (cron thưa→daily, selfcheck 7/8 mutant sống, season_error im lặng); STALE trong đường echo plan/LAG CHƯA nối — chờ user quyết. Vòng 2 Sonnet Taylor dispatch 02:00.
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T19:09:58Z] 02/11 02:10 nhánh feat/dcf-bctc-season-20261102 (c4b721b06; registry mike 25bc7383b) arch-review vòng 2 APPROVED. CHỜ USER: duyệt merge + cài cron '12 1 * * *' --season (gỡ '10 1 11 * *'); merge code TRƯỚC khi cài cron (gate hardcode path canonical). Và quyết nối STALE vào đường plan echo (đề xuất: KHÔNG). Mặc định domestic_v2 giữ.
