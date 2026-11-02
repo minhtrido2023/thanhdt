@@ -1033,6 +1033,61 @@
    "center_alt_kind": "blend",
    "correction_reason": "rev2 lấy chân RI trọng số (19.221) làm tâm — lệch kết luận DD; quy ước expected_weighted chỉ áp khi đó là GIÁ TRỊ KỲ VỌNG TOÀN PHẦN của DD",
    "no_expected_reason": "kết luận DD là tâm ghép 2/3 RI + 1/3 EV/EBITDA (20.200); kỳ vọng trọng số chỉ có cho chân RI (19.221) nên để center_alt — không có kỳ vọng trọng số TOÀN PHẦN"
+  },
+  {
+   "ticker": "TV1",
+   "dd_date": "2026-11-02",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 13500,
+   "center": 19200,
+   "center_kind": "expected_weighted",
+   "zone_high": 29000,
+   "center_range": [
+    19200,
+    20600
+   ],
+   "price_ref": 19800,
+   "price_date": "2026-10-30",
+   "verdict_label": "trung dung — TRONG vùng, xấp xỉ ngang giá trị kỳ vọng đã chiết khấu (−4%…+3%); vùng cơ sở rất rộng",
+   "source_file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "Giá 19.800 đ (đóng cửa 30/10/2026) nằm TRONG vùng giá trị hợp lý và xấp xỉ ngang giá trị kỳ vọng hiện tại 19.200–20.600 đ",
+     "fields": [
+      "price_ref",
+      "center",
+      "center_range"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "Ba kịch bản cho giá trị kỳ vọng 2027–28 ≈21.600 đ; quy về hôm nay là 19.200–20.600 đ — ngang giá.",
+     "fields": [
+      "center_range",
+      "center_alt"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TV1_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "| Giá trị kỳ vọng hiện tại · vùng cơ sở | **19.200–20.600 · 13.500–29.000 đ** |",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    }
+   ],
+   "skeptic_status": "REFUTED vòng 1 (số liệu/văn bản) → 12/12 đính chính đã áp (r2); CHƯA qua vòng phản biện thứ hai",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "rev1 (Mike 02/11). zone 13.500–29.000 = vùng KỊCH BẢN CƠ SỞ (không phải vùng hợp lý hẹp); center = cận dưới của PV kỳ vọng trọng số 25/50/25 chiết khấu 1–2 năm (19.200–20.600) theo quy ước khoảng→cận dưới; center_alt = 21.600 là kỳ vọng CHƯA chiết khấu (giá trị 2027–28).",
+   "recorded_at": "2026-11-02T11:50:00+07:00",
+   "center_desc": "PV hôm nay của giá trị kỳ vọng trọng số kịch bản 25/50/25 (Ke 12,3–13,4%, cổ tức 1.500đ/năm); cận dưới của khoảng",
+   "rev": 1,
+   "supersedes": null,
+   "center_alt": 21600,
+   "center_alt_kind": "expected_weighted"
   }
  ],
  "center_kinds": [
