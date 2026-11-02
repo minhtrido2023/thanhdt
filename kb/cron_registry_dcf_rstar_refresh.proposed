@@ -1,0 +1,26 @@
+# ĐỀ XUẤT (§13, CHƯA CÀI — Mike cài sau arch-review) — làm mới cache r* (dòng hiển thị DCF), phương án A'
+Job Taylor_20261102_034815 · code nhánh `feat/dcf-rstar-refresh-20261102` (WorkingClaude/dcf_rstar_refresh.py, commit 33a7bc1f5, CHƯA merge) · DISPLAY-ONLY.
+Thay cho chuỗi tay 4 bước: dựng panel ở thư mục tạm bằng chính hàm của nghiên cứu (engine.build → build_live → level.load → analysis.rstar), KHÔNG ghi đè file nghiên cứu đã track; cache ra `data/cache_untracked/dcf_rstar_cache.json` (.gitignore); `dcf_rate_display` đọc cache có `panel_asof` mới nhất (tracked vs untracked).
+
+## Đo thật (control, trong phiên này)
+- `dcf_rstar_refresh.py --until 2026-10-30 --out /tmp/rstar_ctl/ctl.json --force` → tái tạo cache tracked: 155/155 tháng, **max|Δ| = 0,0000pp** (dung sai 0,05pp), n_last 147 = 147, r* cuối 15,1379 = 15,1379.
+- Thời gian **8m27s** wall (engine.build 312s là phần lớn; BQ OShares live 7s); RAM đỉnh **0,99GB** (`/usr/bin/time -v`). Host 39GB, khả dụng 26GB.
+- Không ghi đè: mtime `panel_monthly.parquet` (01/11 23:02), `panel_live.parquet`, `out/level_gT_star.csv` (02/11 01:04) giữ nguyên; `git status` mike/research chỉ còn các mục ?? không liên quan; cache tracked không đổi (worktree `git status` sạch sau khi chạy).
+- Selfcheck `dcf_rstar_refresh_selfcheck.py` 22 assert + 15/15 mutation killed; `dcf_rate_display_selfcheck.py` 32 assert + 19/19 mutation; chạy dưới `env -u TZ` và `TZ=America/Los_Angeles` đều PASS. BQ dưới `env -i` + `. wc_env.sh` đọc được.
+
+## Dòng cron đề xuất (host UTC)
+```
+23 18 12 * * cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && flock -n mike/state/dcf_rstar_refresh.cron.lock timeout 2400 mike/bin/fund_bench_cron.sh dcf_rstar_refresh /home/trido/thanhdt/wc_venv/bin/python dcf_rstar_refresh.py >> mike/logs/dcf_rstar_refresh.log 2>&1
+37 3 * * * cd /home/trido/thanhdt/WorkingClaude && . ./wc_env.sh && mike/bin/fund_bench_cron.sh dcf_rstar_expiry /home/trido/thanhdt/wc_venv/bin/python dcf_rstar_refresh.py --check-expiry >> mike/logs/dcf_rstar_refresh.log 2>&1
+```
+- Dòng 1: ngày 12 hằng tháng 18:23 UTC = 01:23 ICT ngày 13. Lý do: mùa BCTC (cửa sổ 8L đóng ngày 10 tháng 2/5/8/11, `fa_ratings_earnings_window_daily.sh`) đã xong và `ticker_financial` đã nạp; tháng lịch trước đã đóng; sau sync cache 23:45 ICT hôm trước nên `data/bq_cache` tươi. Tránh phiên giao dịch (không đua RAM/CPU với bot). Kiểm `crontab -l` 02/11: không dòng nào ở 18:xx UTC ngoài `0 19 * * *` kb_nightly (cách 37') và không dòng ngày-trong-tháng 12.
+- Dòng 2: kiểm hạn mỗi ngày 03:37 UTC (10:37 ICT; `46 3 * * 2,4` cách 9', `0 3 * * 0` cách 37' — cả hai chỉ vài giây CPU, `--check-expiry` đọc 2 file JSON). rc=5 khi còn <10 ngày hoặc đã hết hạn ⇒ Trading Daily mỗi ngày tới khi làm mới (cố ý: báo lại tới khi sửa).
+- Vỏ `fund_bench_cron.sh` (đã có): rc≠0 ⇒ Trading Daily kèm 8 dòng cuối đầu ra thật; đầu ra lệnh vào log. rc: 0 ok · 2 panel không mới hơn cache nền (vendor chưa nạp / chạy sớm — script không ghi gì) · 3 lỗi dựng/BQ (thông điệp nguyên văn `Loại lỗi: …`) · 4 control lệch >0,05pp hoặc thiếu tháng (KHÔNG ghi cache) · 5 sắp/đã hết hạn · 124 timeout 2400s.
+- `flock -n` chống chạy chồng; `timeout 2400` (đo 507s ⇒ dư ~4,7×).
+- Không có bus event (vỏ dùng Trading Daily như 3 việc quỹ); nếu muốn thêm bus `error` thì sửa vỏ chứ không trong script.
+
+## Điều cần biết
+- Lần chạy tháng 11/2026 (tháng đóng = 10/2026, panel_asof sẽ = 2026-10-30 = không mới hơn) ⇒ rc=2 là ĐÚNG; cache chỉ tiến lên khi có tháng đóng mới (chạy ngày 12/12 → panel_asof 2026-11-30 trước hạn 2026-12-14). Mốc 12/12 ≥ cron có 2 ngày đệm; nếu muốn dư hơn, dời ngày 5.
+- g_T tháng mới dùng CPI forward-fill (log `cpi_vn` đang cảnh báo coverage gap 2026-09..12) — giống hệt hành vi của cache hiện tại, không phải hồi quy; vẫn là hiển thị.
+- Control chạy MỌI lần so với cache nền mới nhất (tracked/untracked): nếu vendor sửa lại lịch sử khiến một tháng cũ lệch >0,05pp, script từ chối ghi — người đọc phải quyết (`--force` không bỏ control, chỉ bỏ rc=2).
+- Thư mục tạm `rstar_refresh_*` được dọn trong `finally`; chỉ rò rỉ nếu tiến trình bị SIGKILL/timeout (≈ vài trăm MB dưới /tmp).
