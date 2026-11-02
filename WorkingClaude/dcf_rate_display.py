@@ -6,7 +6,9 @@ DISPLAY-ONLY. KHÔNG đổi FV / MoS / classify_dcf; KHÔNG nối vào plan echo
        kèm vị trí so với lịch sử. Là THƯỚC ĐO HIỂN THỊ, KHÔNG phải tín hiệu mua/bán.
   (ii) TPCP 10Y + Δ12 tháng (tav2_bq.macro_indicator, vn_bond_10y). Thiếu/stale -> 'không có dữ liệu'.
 r* tính bằng analysis.rstar của job dcf_rate_proxy_20261102 (KHÔNG viết lại công thức) trên panel_live;
-chỉ chạy khi build cache (hàng tháng / khi đổi mùa BCTC): `python dcf_rate_display.py --build-cache`.
+chỉ chạy khi build cache. ⚠️ THỨ TỰ: phải DỰNG LẠI panel_live trước (build_live.py rồi level.py của
+research/dcf_level_rerun_20261102 → data/panel_live.parquet), RỒI MỚI `python dcf_rate_display.py --build-cache`;
+nếu không, build_rstar_cache từ chối (panel_asof không mới hơn cache cũ). Cache hết hạn sau RSTAR_MAX_AGE_DAYS.
 Đọc cache rất rẻ. Cache quá hạn (> RSTAR_MAX_AGE_DAYS so với asof) -> fail-closed.
 """
 import json
@@ -19,6 +21,7 @@ import pandas as pd
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 RSTAR_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "dcf_rstar_cache.json")  # theo checkout
 RSTAR_MAX_AGE_DAYS = 45          # panel_asof cách asof quá số ngày này -> không hiển thị
+BQ_TIMEOUT_S = 30                # trần truy vấn TPCP: BQ treo không được chặn báo cáo newdeals 06:00
 TPCP_MAX_AGE_DAYS = 7            # quan sát TPCP cuối cách asof quá số ngày này -> không hiển thị
 HIST_START = "2014-01"
 PEAK_WIN = ("2021-12", "2022-12")     # đỉnh 2022
@@ -39,6 +42,14 @@ def build_rstar_cache(path=RSTAR_CACHE):
     sys.path.insert(0, rd)
     import analysis as A                                   # noqa: E402  (đổi cwd sang engine — path dưới tuyệt đối)
     p = A.load_panel()
+    new_asof = str(p.t.max().date())
+    try:
+        old_asof = json.load(open(path)).get("panel_asof")
+    except Exception:
+        old_asof = None
+    if old_asof and new_asof <= old_asof:
+        raise RuntimeError(f"panel_live.parquet chưa được dựng lại: panel_asof {new_asof} <= cache cũ {old_asof}. "
+                           "Chạy build_live.py + level.py (dcf_level_rerun_20261102) trước --build-cache.")
     s = A.rstar(p, A.G_CAP)
     out = {"built_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
            "panel_asof": str(p.t.max().date()), "g_cap": A.G_CAP, "r_const": A.R_CONST * 100,
@@ -62,7 +73,7 @@ def rstar_line(asof, path=RSTAR_CACHE):
         h = ser.loc[HIST_START:]
         cur = float(h.iloc[-1]); pct = float((h <= cur).mean() * 100)
         pk = h.loc[PEAK_WIN[0]:PEAK_WIN[1]]; tr = h.loc[TROUGH_WIN[0]:TROUGH_WIN[1]]
-        return (f"r* thị trường {cur:.1f}% (panel {pa}, n={c.get('n_last')} mã; r hằng 12,25%) · "
+        return (f"r* thị trường {cur:.1f}% (panel {pa}, n={c.get('n_last')} mã; r hằng {float(c['r_const']):.2f}%) · "
                 f"percentile {pct:.0f}% lịch sử {HIST_START}→{h.index[-1]} · "
                 f"đỉnh 2022 {pk.max():.1f}% ({pk.idxmax()}), đáy 2022–23 {tr.min():.1f}% ({tr.idxmin()}) "
                 f"[DISPLAY-ONLY, thước đo hiển thị, KHÔNG phải tín hiệu mua/bán]")
@@ -72,6 +83,8 @@ def rstar_line(asof, path=RSTAR_CACHE):
 
 # ---------------------------------------------------------------- (ii) TPCP 10Y
 def _bq_tpcp(asof):
+    # cron production chạy /usr/bin/python3 trần, không source wc_env.sh -> tự đặt credential (mẫu corp_action_lib.py:30/86)
+    os.environ.setdefault("CLOUDSDK_CONFIG", "/home/trido/thanhdt/gcloud_dtienthanh")
     from google.cloud import bigquery
     d = _asof_date(asof)
     q = ("SELECT observation_date d, value v, fetched_at f FROM tav2_bq.macro_indicator "
@@ -79,8 +92,8 @@ def _bq_tpcp(asof):
     cfg = bigquery.QueryJobConfig(query_parameters=[
         bigquery.ScalarQueryParameter("a", "DATE", d - _dt.timedelta(days=400)),
         bigquery.ScalarQueryParameter("b", "DATE", d)])
-    df = bigquery.Client(project="lithe-record-440915-m9").query(q, job_config=cfg).to_dataframe()
-    return df
+    job = bigquery.Client(project="lithe-record-440915-m9").query(q, job_config=cfg, timeout=BQ_TIMEOUT_S)
+    return job.result(timeout=BQ_TIMEOUT_S).to_dataframe()
 
 
 def tpcp_line(asof, loader=_bq_tpcp):

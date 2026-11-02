@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Selfcheck dcf_rate_display (job Taylor_20261102_015334): 2 dòng hiển thị, fail-closed, mutation.
-Chạy: python3 dcf_rate_display_selfcheck.py [--mutate]  (--mutate: tự phá 6 chỗ, mỗi chỗ PHẢI làm test đỏ)"""
+Chạy: python3 dcf_rate_display_selfcheck.py [--mutate]  (--mutate: tự phá 10 chỗ, mỗi chỗ PHẢI làm test đỏ)"""
 import json, os, subprocess, sys, tempfile
 import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -13,13 +13,16 @@ def run_checks(mod):
         nonlocal n
         assert c, "FAIL: " + m; n += 1
     ser = {str(p): 12.0 + i * 0.01 for i, p in enumerate(pd.period_range("2014-01", "2026-10", freq="M"))}
-    ser["2022-12"] = 15.9; ser["2023-08"] = 12.1; ser["2026-10"] = 15.1
+    ser["2013-12"] = 30.0; ser["2022-12"] = 15.9; ser["2023-08"] = 12.1; ser["2026-10"] = 15.1
+    ser = dict(sorted(ser.items()))   # cache thật ghi sort_keys=True
     d = tempfile.mkdtemp(); cp = os.path.join(d, "c.json")
-    json.dump({"panel_asof": "2026-10-30", "n_last": 147, "series": ser}, open(cp, "w"))
+    json.dump({"panel_asof": "2026-10-30", "n_last": 147, "r_const": 11.0, "series": ser}, open(cp, "w"))
     L = mod.rstar_line("2026-11-02", cp)
     ok("15.1%" in L and "DISPLAY-ONLY" in L and "KHÔNG phải tín hiệu" in L, "rstar fresh: " + L)
     ok("đỉnh 2022 15.9%" in L and "đáy 2022–23 12.1%" in L, "peak/trough")
-    ok("percentile" in L, "percentile")
+    ok("percentile 99%" in L, "giá trị percentile (153/154 ≤ hiện tại): " + L)
+    ok("lịch sử 2014-01→2026-10" in L, "cắt HIST_START (2013-12=30 không được lọt vào): " + L)
+    ok("r hằng 11.00%" in L, "r_const lấy từ cache, không hardcode: " + L)
     ok(mod._NA in mod.rstar_line("2026-12-31", cp), "cache stale -> NA")
     ok(mod._NA in mod.rstar_line("2026-10-01", cp), "asof trước panel -> NA")
     ok(mod._NA in mod.rstar_line("2026-11-02", os.path.join(d, "nope.json")), "cache thiếu -> NA")
@@ -34,7 +37,12 @@ def run_checks(mod):
     ok(mod._NA in mod.tpcp_line("2026-11-02", mk([])), "tpcp rỗng -> NA")
     T2 = mod.tpcp_line("2026-11-02", mk([("2026-10-30", 4.58, None)]))
     ok("Δ12T: không có dữ liệu" in T2 and "4.58%" in T2, "thiếu mốc 12T: " + T2)
-    ok(mod._NA in mod.tpcp_line("2026-11-02", mk([("2026-10-30", None, None)])), "v NaN -> NA")
+    T3 = mod.tpcp_line("2026-11-02", mk([("2025-09-30", 3.9, None), ("2026-10-30", 4.58, None)]))
+    ok("Δ12T: không có dữ liệu" in T3 and "4.58%" in T3, "mốc cách 30 ngày ngoài cửa sổ 7 ngày -> NA: " + T3)
+    TN = mod.tpcp_line("2026-11-02", mk([("2026-10-30", None, None)]))
+    ok(TN.startswith("TPCP 10Y: " + mod._NA) and "nan" not in TN.lower(), "v NaN -> NA tiền tố, không lộ nan: " + TN)
+    TN2 = mod.tpcp_line("2026-11-02", mk([("2025-10-30", 3.9, None), ("2026-10-30", float("nan"), None)]))
+    ok("nan" not in TN2.lower() and TN2.startswith("TPCP 10Y: " + mod._NA) and "3.90" not in TN2, "NaN cuối bị bỏ -> quan sát hợp lệ cuối đã stale -> NA, không in nan/số cũ: " + TN2)
     def boom(a): raise RuntimeError("bq down")
     ok(mod._NA in mod.tpcp_line("2026-11-02", boom), "loader lỗi -> NA")
     TF = mod.tpcp_line("2026-11-02", mk(rows + [("2026-11-05", 9.99, "2026-11-06")]))
@@ -58,11 +66,15 @@ if __name__ == "__main__":
                 ("last.v - pv.v:+.2f", "pv.v - last.v:+.2f"),
                 ("return f\"r* thị trường: {_NA} ({type(e).__name__})\"", "return 'r* thị trường 12.25%'"),
                 ("[DISPLAY-ONLY, thước đo hiển thị, KHÔNG phải tín hiệu mua/bán]", ""),
-                ("df = df[df.d <= a]", "df = df[df.d <= pd.Timestamp('2099-01-01')]")]
+                ("df = df[df.d <= a]", "df = df[df.d <= pd.Timestamp('2099-01-01')]"),
+                ("(h <= cur).mean()", "(h >= cur).mean()"),
+                ('HIST_START = "2014-01"', 'HIST_START = "2013-12"'),
+                ("tgt - pd.Timedelta(days=7)", "tgt - pd.Timedelta(days=400)"),
+                ('df = df.dropna(subset=["v"]).copy()', "df = df.copy()")]
         for a, b in muts:
             assert src.count(a) == 1, "mutation target mất: " + a
             try:
                 run_checks(load(src.replace(a, b))); print("SURVIVED (xấu):", a); sys.exit(1)
             except AssertionError as e:
                 print("killed:", a[:45], "->", str(e)[:50])
-        print("MUTATION: 6/6 killed")
+        print("MUTATION: %d/%d killed" % (len(muts), len(muts)))
