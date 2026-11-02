@@ -35,14 +35,24 @@ print(f"  Phi tiền Q3 21,5 vs khác ròng 31,9 ⇒ ~{q3['tnk']-q3['cpk']-(-(Q3
 print(f"  TM10 [H1 tr.21] 30/6: KH 90,814 + khác 4,777 + trả trước NB 9,491 = {90.814+4.777+9.491:.3f}; Q3 [Q3 tr.12] KH 68,361 ⇒ dự phòng KH Q3 {68.361-90.814:+.2f} (GIẢM)")
 # biên gộp bỏ hoàn nhập HTK (VAS: hoàn nhập dự phòng HTK giảm giá vốn)
 print(f"  Biên gộp Q3 bỏ hoàn nhập HTK {rev_inv:.2f}: {(q3['gp']-rev_inv)/q3['dt']*100:.2f}% (báo cáo 38,93%)")
-# Cận trên: coi hoàn nhập là lặp lại + QLDN lõi = như Q3/25 (QLDN gấp đôi là một lần)
-core_hi_a = (q3['gp'] - q3['ql'] + q3['dttc'] - q3['cptc']) * 0.8
-core_hi_b = (q3['gp'] - q325['ql'] + q3['dttc'] - q3['cptc']) * 0.8
-# Cận dưới: bỏ HẾT hoàn nhập (HTK khỏi giá vốn, mã136 khỏi QLDN), giữ QLDN như báo cáo
-core_lo = (q3['gp'] - rev_inv - q3['ql'] - rev_ar + q3['dttc'] - q3['cptc']) * 0.8
-print(f"LNST lõi Q3 [UL, thuế 20%]: cận dưới {core_lo:.1f} (bỏ hoàn nhập {rev_ar+rev_inv:.1f}) | giữa {core_hi_a:.1f} (như báo cáo, bỏ khác ròng) | cận trên {core_hi_b:.1f} (QLDN về mức Q3/25 {q325['ql']})")
-q3_core_lo, q3_core_hi = core_lo, core_hi_b
-print(f"  9T lõi ≈ H1 soát xét {h1_lnst} + Q3 lõi ⇒ {h1_lnst+q3_core_lo:.1f} – {h1_lnst+q3_core_hi:.1f} (9T/25 lõi {(n925['gp']-n925['ql']+n925['dttc']-n925['cptc'])*0.8:.1f}) ⇒ YoY {(h1_lnst+q3_core_lo)/88.9-1:+.0%} … {(h1_lnst+q3_core_hi)/88.9-1:+.0%}")
+# r3 (B2): hai cách hạch toán LOẠI TRỪ NHAU cho hoàn nhập phải thu 19,2 — tách trường hợp, không trộn.
+h1_ql = n9['ql'] - q3['ql']                 # QLDN H1 = 9T − Q3
+ql_gross_A = q3['ql'] + rev_ar              # (A) hoàn nhập đã làm giảm QLDN ⇒ QLDN gộp trước hoàn nhập
+fin_q3 = q3['dttc'] - q3['cptc']
+core_hi = (q3['gp'] - q325['ql'] + fin_q3) * 0.8                    # chung: QLDN gấp đôi là một lần (về mức Q3/25), giữ biên báo cáo
+core_A_lo = (q3['gp'] - rev_inv - q3['ql'] - rev_ar + fin_q3) * 0.8  # (A) bỏ hoàn nhập khỏi QLDN + giá vốn
+core_B_lo = (q3['gp'] - rev_inv - q3['ql'] + fin_q3) * 0.8           # (B) phải thu đã vào thu nhập khác ⇒ QLDN báo cáo là lõi; chỉ bỏ HTK khỏi giá vốn
+mid = (q3['gp'] - q3['ql'] + fin_q3) * 0.8
+oth = q3['tnk'] - q3['cpk']; phitien = -(Q3B['lctt03_9t'] - H1R['lctt03'])
+print(f"LNST lõi Q3 [UL, thuế 20%] — 'như báo cáo, chỉ bỏ khác ròng' {mid:.1f}; cận trên chung {core_hi:.1f} (QLDN về Q3/25 {q325['ql']})")
+print(f"  (A) hoàn nhập phải thu {rev_ar:.1f} vào QLDN: lõi {core_A_lo:.1f}–{core_hi:.1f}; QLDN gộp Q3 = {ql_gross_A:.1f} = {ql_gross_A/(h1_ql/2):.1f}× bình quân quý H1 ({h1_ql/2:.1f}); "
+      f"khác ròng {oth:.1f} KHÔNG giải thích được (cả {oth:.1f})")
+print(f"  (B) hoàn nhập phải thu vào thu nhập khác: lõi {core_B_lo:.1f}–{core_hi:.1f}; phần khác ròng không xác định = {oth:.1f} − (phi tiền {phitien:.1f} − HTK {rev_inv:.1f}) = {oth-(phitien-rev_inv):.1f}")
+for lab, lo in (("A", core_A_lo), ("B", core_B_lo)):
+    print(f"  9T lõi ({lab}) = H1 soát xét {h1_lnst} + Q3 lõi ⇒ {h1_lnst+lo:.1f}–{h1_lnst+core_hi:.1f} (9T/25 lõi 88,9) ⇒ YoY {(h1_lnst+lo)/88.9-1:+.0%} … {(h1_lnst+core_hi)/88.9-1:+.0%}")
+    print(f"     phần không lặp lại/chưa giải thích của LNST Q3 {q3['lnst']}: {q3['lnst']-core_hi:.1f}–{q3['lnst']-lo:.1f} ({(q3['lnst']-core_hi)/q3['lnst']:.0%}–{(q3['lnst']-lo)/q3['lnst']:.0%})")
+print(f"  Nghiêng A: H1 TM28 trích dự phòng phải thu ròng 0,88 nằm trong QLDN [H1 TM28]. Nghiêng B: TM VI.9c Q3 trống; QLDN gộp {ql_gross_A:.1f} khó tin.")
+q3_core_lo, q3_core_hi, q3_core_B_lo = core_A_lo, core_hi, core_B_lo
 
 # ---------- 2. Tách mảng (proxy thuế tài nguyên) ----------
 tn_h1, tn_9t = 8.776, 13.227        # thuế tài nguyên phải nộp trong kỳ [H1 tr.27 TM18; Q3 tr.23 TM19]
@@ -74,7 +84,9 @@ equity = 574.723
 net_cash_raw = cash + htm - loans
 net_adj = net_cash_raw - div_pay - int_pay
 print(f"\nNet cash thô (tiền+HTM−vay) {net_cash_raw:+.1f}; trừ cổ tức phải trả & lãi vay cá nhân phải trả ⇒ {net_adj:+.1f}")
-print(f"Phải thu KH gộp {ar_gross:.1f} (30/6 378,7; 1/1 408,2), dự phòng {ar_prov:.1f} (1/1 63,2) ⇒ ròng {ar_gross-ar_prov:.1f}; ứng trước {adv:.1f}")
+AR_PROV_FY25 = 16.751 + 73.180   # 31/12/2025 BCTC KIỂM TOÁN A&C [FY25 tr.in 21 TM6]: bên liên quan 16,75 + KH khác 73,18
+print(f"Phải thu KH gộp {ar_gross:.1f} (30/6 378,7; 1/1 408,2), dự phòng {ar_prov:.1f} (1/1 {AR_PROV_FY25:.2f} theo BCTC 2025 kiểm toán) ⇒ ròng {ar_gross-ar_prov:.1f}; ứng trước {adv:.1f}")
+print(f"  Đường dự phòng KH: {AR_PROV_FY25:.1f} → 90,8 (30/6, H1 đi ngang) → {ar_prov:.1f} (Q3 giảm {ar_prov-90.814:.1f}). CỜ: cột đầu năm thuyết minh Q3 ghi 63,23 ⇒ lệch {AR_PROV_FY25-63.23:.1f} tỷ so BCTC kiểm toán")
 print(f"Dự phòng phải thu NH (mã 136): 1/1 113,10 → 30/6 {H1R['m136']:.2f} [H1 tr.5, SOÁT XÉT] → 30/9 {Q3B['m136']:.2f}; HTK: 59,56 → {H1R['m142']:.2f} → {Q3B['m142']:.2f} [Q3 tr.1]")
 print(f"  (mốc 107,73 của BCTC Q2 CHƯA soát xét KHÔNG còn dùng: soát xét H1 đã điều chỉnh)")
 print(f"P/B {mcap/equity:.2f} (VCSH Q3 chưa soát xét, gồm khoản một lần) | P/B theo VCSH soát xét 30/6 {mcap/H1R['vcsh']:.2f} | EV (vốn hoá − net điều chỉnh) {mcap-net_adj:.1f}")
@@ -82,7 +94,9 @@ ttm = 63.85 + n9['lnst']                       # Q4/25 [BQ ticker_financial] + 9
 ttm_core = ttm - (q3['tnk'] - q3['cpk'])        # r2: loại CẢ khoản khác ròng 31,9 (không trừ thuế — nhất quán: khoản này gần như không chịu thuế)
 print(f"LNST TTM {ttm:.1f} ⇒ P/E {mcap/ttm:.2f}; bỏ cả khác ròng Q3 31,9 ⇒ {ttm_core:.1f} ⇒ P/E {mcap/ttm_core:.2f}")
 ttm_core_lo = ttm - q3['lnst'] + q3_core_lo; ttm_core_hi = ttm - q3['lnst'] + q3_core_hi
-print(f"  TTM lõi hai chiều (Q3 lõi {q3_core_lo:.0f}–{q3_core_hi:.0f}): {ttm_core_lo:.1f}–{ttm_core_hi:.1f} ⇒ P/E {mcap/ttm_core_hi:.2f}–{mcap/ttm_core_lo:.2f}")
+print(f"  TTM lõi (A, Q3 lõi {q3_core_lo:.0f}–{q3_core_hi:.0f}): {ttm_core_lo:.1f}–{ttm_core_hi:.1f} ⇒ P/E {mcap/ttm_core_hi:.2f}–{mcap/ttm_core_lo:.2f}")
+ttm_B_lo = ttm - q3['lnst'] + q3_core_B_lo
+print(f"  TTM lõi (B, Q3 lõi {q3_core_B_lo:.0f}–{q3_core_hi:.0f}): {ttm_B_lo:.1f}–{ttm_core_hi:.1f} ⇒ P/E {mcap/ttm_core_hi:.2f}–{mcap/ttm_B_lo:.2f}")
 print(f"Cổ tức 2025 1.500đ/cp (CBTT 23/09/2026, trả 29/10) ⇒ lợi suất {1500/PX:.1%}; payout trên LNST 2025 150,2: {40.037/150.198:.0%}")
 cfo9 = 116.845
 print(f"CFO 9T {cfo9:.1f} (9T/25 137,6) vs LNST 9T {n9['lnst']:.1f}: CFO/LNST {cfo9/n9['lnst']:.2f}; /(LNST − khác ròng 31,9 = {n9['lnst']-31.9:.1f}) = {cfo9/(n9['lnst']-31.9):.2f}")
@@ -129,6 +143,8 @@ print(f"  So SOTP 23/07: bảo thủ 883 tỷ = 33.100 đ/cp (net debt −117 c�
 print("\nGiá trị theo dòng cổ tức (Gordon g=0) Ke 12,3–13,4%:")
 for dps in (1500, 2000, 2800):
     print(f"  DPS {dps}: " + "  ".join(f"Ke{k*100:.1f}%:{dps/k:,.0f}" for k in (0.123, 0.13, 0.134)))
+need = [PX*k for k in (0.123, 0.134)]
+print(f"  Cổ tức cần có để biện minh giá {PX}: {need[0]:,.0f}–{need[1]:,.0f} đ/năm = {need[0]*SH/1e9:.1f}–{need[1]*SH/1e9:.1f} tỷ ⇒ payout {need[0]*SH/1e9/150.198:.0%} (LNST 2025 150,2) … {need[1]*SH/1e9/134:.0%} (LNST bền cơ sở giữa 134)")
 
 # ---------- 6. Ba kịch bản — LNST bền DỰNG TỪ KHỐI (r2: #7 tái lập được) ----------
 def hyd_lnst(rev): return (rev * (1 - VAR) - FIX_Q * 4 - 8.0) * (1 - TAX)   # LNST thuỷ điện (đã trừ KH trong chi phí cố định)
@@ -144,6 +160,8 @@ for k, b in blk.items():
     l = [hyd_lnst(h) + c + TC for h, c in zip(b['hy'], CONS)]
     sc[k] = dict(p=b['p'], lnst=l, lo=l[0]*b['pe'][0], mid=l[1]*b['pe'][1], hi=l[2]*b['pe'][2])
 sc["Xấu"] = dict(p=0.25, lnst=None, lo=equity*0.5, hi=equity*0.7, mid=equity*0.6)
+eq_r = H1R['vcsh']   # N3: VCSH SOÁT XÉT 30/6 (không gồm khoản một lần Q3 chưa soát xét)
+print(f"  Xấu trên VCSH soát xét {eq_r}: P/B 0,5–0,7 ⇒ {ps(eq_r*0.5):,.0f}–{ps(eq_r*0.7):,.0f} (tâm {ps(eq_r*0.6):,.0f}); trên VCSH Q3 {equity}: {ps(equity*0.5):,.0f}–{ps(equity*0.7):,.0f}")
 print("Kịch bản (tỷ ⇒ đ/cp) — giá trị tại ~2027-28:")
 ev = 0
 for k, s_ in sc.items():
@@ -151,8 +169,8 @@ for k, s_ in sc.items():
     print(f"  {k:6s} P={s_['p']:.2f}:{ln} {ps(s_['lo']):7,.0f} – {ps(s_['hi']):7,.0f} (tâm {ps(s_['mid']):,.0f})")
     ev += s_['p'] * ps(s_['mid'])
 print(f"Kỳ vọng có trọng số (giá trị 2027-28, CHƯA chiết khấu): {ev:,.0f} đ/cp; giá {PX:,} so kỳ vọng {PX/ev-1:+.1%}")
-def ev_w(w, scale_pe=1.0):
-    m = [sc['Tốt']['mid']*scale_pe, sc['Cơ sở']['mid']*scale_pe, sc['Xấu']['mid']]
+def ev_w(w, scale_pe=1.0, eq=None):
+    m = [sc['Tốt']['mid']*scale_pe, sc['Cơ sở']['mid']*scale_pe, (eq*0.6 if eq else sc['Xấu']['mid'])]
     return sum(wi*ps(mi) for wi, mi in zip(w, m))
 for w in [(0.25,0.5,0.25),(0.2,0.5,0.3),(0.15,0.45,0.40),(0.3,0.5,0.2)]:
     print(f"  trọng số {w}: {ev_w(w):,.0f} (giá {PX/ev_w(w)-1:+.1%})")
@@ -167,6 +185,9 @@ def pv_scn(v, T, ke, dps=DPS):
     t = 1
     while t <= T + 1e-9:
         pv += dps / (1 + ke) ** t; t += 1
+    frac = T - int(T)                       # r3 (N6): cổ tức tích luỹ phần lẻ năm, nằm trong giá tại T
+    if frac > 1e-9:
+        pv += dps * frac / (1 + ke) ** T
     return pv
 print(f"\nPV hôm nay của kỳ vọng (EV chưa chiết khấu {ev:,.0f}; DPS {DPS}/năm ghi nhận tại t=1,2…≤T):")
 res = {}
@@ -178,6 +199,16 @@ for T in (1.0, 1.5, 2.0):
 for w in [(0.2,0.5,0.3),(0.15,0.45,0.40)]:
     e = ev_w(w)
     print(f"  trọng số {w} (EV {e:,.0f}): " + " | ".join(f"T={T}: {pv_scn(e,T,0.123):,.0f}–{pv_scn(e,T,0.134):,.0f}" for T in (1.0,1.5,2.0)))
+# r3 (B1+N2+N3+N5): bảng PV đầy đủ theo bộ trọng số × cơ sở VCSH kịch bản Xấu; T 1–2, Ke 12,3–13,4%
+print("\nr3 — PV hôm nay (min–max trên T∈{1;1,5;2}, Ke∈{12,3%;13,4%}); giá so PV:")
+WS = {"25/50/25": (0.25,0.5,0.25), "20/45/35 (nhất quán)": (0.2,0.45,0.35), "15/50/35": (0.15,0.5,0.35), "30/50/20": (0.3,0.5,0.2)}
+for wl, w in WS.items():
+    for eql, eq in (("VCSH Q3 574,7", None), ("VCSH soát xét 507,8", eq_r)):
+        e = ev_w(w, eq=eq)
+        v = [pv_scn(e, T, k) for T in (1.0,1.5,2.0) for k in (0.123,0.134)]
+        print(f"  {wl:22s} | {eql:20s} | EV chưa CK {e:,.0f} | PV {min(v):,.0f}–{max(v):,.0f} | giá {PX/max(v)-1:+.1%}…{PX/min(v)-1:+.1%}")
+    e = ev_w(w); v = [pv_scn(e, T, 0.151) for T in (1.0,1.5,2.0)]
+    print(f"      nhạy Ke = r* thị trường 15,1% (VCSH Q3): PV {min(v):,.0f}–{max(v):,.0f} | giá {PX/max(v)-1:+.1%}…{PX/min(v)-1:+.1%}")
 # PV riêng từng kịch bản T=1,5 Ke 12,85% để đọc đáy vùng cơ sở
 ke_m = 0.1285
 print("  PV từng kịch bản (T=1,5; Ke 12,85%): " + "; ".join(f"{k} tâm {pv_scn(ps(s_['mid']),1.5,ke_m):,.0f} (đáy {pv_scn(ps(s_['lo']),1.5,ke_m):,.0f}, trần {pv_scn(ps(s_['hi']),1.5,ke_m):,.0f})" for k, s_ in sc.items()))

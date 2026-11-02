@@ -11,8 +11,14 @@ Dự phòng giảm Q3 (H1 soát xét → 30/9): mã136 19.17 + HTK 5.72 = 24.90;
   Phi tiền Q3 21,5 vs khác ròng 31,9 ⇒ ~10.5 tỷ không xác định bằng LCTT
   TM10 [H1 tr.21] 30/6: KH 90,814 + khác 4,777 + trả trước NB 9,491 = 105.082; Q3 [Q3 tr.12] KH 68,361 ⇒ dự phòng KH Q3 -22.45 (GIẢM)
   Biên gộp Q3 bỏ hoàn nhập HTK 5.72: 35.53% (báo cáo 38,93%)
-LNST lõi Q3 [UL, thuế 20%]: cận dưới 16.1 (bỏ hoàn nhập 24.9) | giữa 36.0 (như báo cáo, bỏ khác ròng) | cận trên 44.7 (QLDN về mức Q3/25 10.585)
-  9T lõi ≈ H1 soát xét 57.759 + Q3 lõi ⇒ 73.9 – 102.5 (9T/25 lõi 88.9) ⇒ YoY -17% … +15%
+LNST lõi Q3 [UL, thuế 20%] — 'như báo cáo, chỉ bỏ khác ròng' 36.0; cận trên chung 44.7 (QLDN về Q3/25 10.585)
+  (A) hoàn nhập phải thu 19.2 vào QLDN: lõi 16.1–44.7; QLDN gộp Q3 = 40.7 = 3.9× bình quân quý H1 (10.5); khác ròng 31.9 KHÔNG giải thích được (cả 31.9)
+  (B) hoàn nhập phải thu vào thu nhập khác: lõi 31.4–44.7; phần khác ròng không xác định = 31.9 − (phi tiền 21.5 − HTK 5.7) = 16.2
+  9T lõi (A) = H1 soát xét 57.759 + Q3 lõi ⇒ 73.9–102.5 (9T/25 lõi 88,9) ⇒ YoY -17% … +15%
+     phần không lặp lại/chưa giải thích của LNST Q3 66.877: 22.1–50.8 (33%–76%)
+  9T lõi (B) = H1 soát xét 57.759 + Q3 lõi ⇒ 89.2–102.5 (9T/25 lõi 88,9) ⇒ YoY +0% … +15%
+     phần không lặp lại/chưa giải thích của LNST Q3 66.877: 22.1–35.4 (33%–53%)
+  Nghiêng A: H1 TM28 trích dự phòng phải thu ròng 0,88 nằm trong QLDN [H1 TM28]. Nghiêng B: TM VI.9c Q3 trống; QLDN gộp 40.7 khó tin.
 
 Thuỷ điện Q3/26 [UL proxy thuế TN, x0.507]: DT ~41.2 (Q3/25 ~41,6 [UL]) | LN gộp ~21.9
 Tư vấn Q3/26 [UL phần dư]: DT ~126.9 (Q3/25 ~107,7) | LN gộp ~43.6 | biên 34.3%
@@ -23,12 +29,14 @@ Thuỷ điện 9T/26 ~DT 122.4 vs 9T/25 138,3 (-11.5%); LN gộp 9T ~64.8 = 81% 
 Tư vấn 9T/26 ~DT 324.5 (9T/25 ~252,3) | LN gộp ~97.7 | trừ toàn bộ QLDN 9T ⇒ EBIT ~55.3
 
 Net cash thô (tiền+HTM−vay) +68.7; trừ cổ tức phải trả & lãi vay cá nhân phải trả ⇒ -38.7
-Phải thu KH gộp 387.5 (30/6 378,7; 1/1 408,2), dự phòng 68.4 (1/1 63,2) ⇒ ròng 319.1; ứng trước 138.7
+Phải thu KH gộp 387.5 (30/6 378,7; 1/1 408,2), dự phòng 68.4 (1/1 89.93 theo BCTC 2025 kiểm toán) ⇒ ròng 319.1; ứng trước 138.7
+  Đường dự phòng KH: 89.9 → 90,8 (30/6, H1 đi ngang) → 68.4 (Q3 giảm -22.5). CỜ: cột đầu năm thuyết minh Q3 ghi 63,23 ⇒ lệch 26.7 tỷ so BCTC kiểm toán
 Dự phòng phải thu NH (mã 136): 1/1 113,10 → 30/6 105.08 [H1 tr.5, SOÁT XÉT] → 30/9 85.91; HTK: 59,56 → 59.29 → 53.57 [Q3 tr.1]
   (mốc 107,73 của BCTC Q2 CHƯA soát xét KHÔNG còn dùng: soát xét H1 đã điều chỉnh)
 P/B 0.92 (VCSH Q3 chưa soát xét, gồm khoản một lần) | P/B theo VCSH soát xét 30/6 1.04 | EV (vốn hoá − net điều chỉnh) 567.2
 LNST TTM 188.5 ⇒ P/E 2.80; bỏ cả khác ròng Q3 31,9 ⇒ 156.6 ⇒ P/E 3.38
-  TTM lõi hai chiều (Q3 lõi 16–45): 137.7–166.3 ⇒ P/E 3.18–3.84
+  TTM lõi (A, Q3 lõi 16–45): 137.7–166.3 ⇒ P/E 3.18–3.84
+  TTM lõi (B, Q3 lõi 31–45): 153.1–166.3 ⇒ P/E 3.18–3.45
 Cổ tức 2025 1.500đ/cp (CBTT 23/09/2026, trả 29/10) ⇒ lợi suất 7.6%; payout trên LNST 2025 150,2: 27%
 CFO 9T 116.8 (9T/25 137,6) vs LNST 9T 124.6: CFO/LNST 0.94; /(LNST − khác ròng 31,9 = 92.7) = 1.26
   Q3 CFO = 9T − H1 SOÁT XÉT 47.026 [H1 tr.8 mã 20] = 69.8 (bản cũ dùng 54,38 chưa soát xét ⇒ 62,5 SAI)
@@ -50,8 +58,10 @@ Giá trị theo dòng cổ tức (Gordon g=0) Ke 12,3–13,4%:
   DPS 1500: Ke12.3%:12,195  Ke13.0%:11,538  Ke13.4%:11,194
   DPS 2000: Ke12.3%:16,260  Ke13.0%:15,385  Ke13.4%:14,925
   DPS 2800: Ke12.3%:22,764  Ke13.0%:21,538  Ke13.4%:20,896
+  Cổ tức cần có để biện minh giá 19800: 2,435–2,653 đ/năm = 65.0–70.8 tỷ ⇒ payout 43% (LNST 2025 150,2) … 53% (LNST bền cơ sở giữa 134)
 
 LNST thuỷ điện theo DT: {171: 68.1, 200: 89.0, 239: 117.0}
+  Xấu trên VCSH soát xét 507.847: P/B 0,5–0,7 ⇒ 9,513–13,319 (tâm 11,416); trên VCSH Q3 574.723: 10,766–15,073
 Kịch bản (tỷ ⇒ đ/cp) — giá trị tại ~2027-28:
   Tốt    P=0.25: LNST bền 152/162/172 |  28,481 –  38,673 (tâm 33,390)
   Cơ sở  P=0.50: LNST bền 103/134/172 |  13,517 –  29,005 (tâm 20,075)
@@ -66,11 +76,25 @@ Kỳ vọng có trọng số (giá trị 2027-28, CHƯA chiết khấu): 21,615 
 
 PV hôm nay của kỳ vọng (EV chưa chiết khấu 21,615; DPS 1500/năm ghi nhận tại t=1,2…≤T):
   T=1.0: Ke12.3%: 20,583 (giá -3.8%) | Ke13.4%: 20,384 (giá -2.9%)
-  T=1.5: Ke12.3%: 19,499 (giá +1.5%) | Ke13.4%: 19,222 (giá +3.0%)
+  T=1.5: Ke12.3%: 20,129 (giá -1.6%) | Ke13.4%: 19,843 (giá -0.2%)
   T=2.0: Ke12.3%: 19,665 (giá +0.7%) | Ke13.4%: 19,298 (giá +2.6%)
-  trọng số (0.2, 0.5, 0.3) (EV 20,591): T=1.0: 19,672–19,481 | T=1.5: 18,639–18,374 | T=2.0: 18,853–18,502
-  trọng số (0.15, 0.45, 0.4) (EV 19,210): T=1.0: 18,442–18,263 | T=1.5: 17,478–17,231 | T=2.0: 17,758–17,428
-  PV từng kịch bản (T=1,5; Ke 12,85%): Tốt tâm 29,182 (đáy 25,087, trần 33,589); Cơ sở tâm 18,075 (đáy 12,604, trần 25,524); Xấu tâm 12,106 (đáy 10,310, trần 13,902)
+  trọng số (0.2, 0.5, 0.3) (EV 20,591): T=1.0: 19,672–19,481 | T=1.5: 19,269–18,996 | T=2.0: 18,853–18,502
+  trọng số (0.15, 0.45, 0.4) (EV 19,210): T=1.0: 18,442–18,263 | T=1.5: 18,108–17,852 | T=2.0: 17,758–17,428
+
+r3 — PV hôm nay (min–max trên T∈{1;1,5;2}, Ke∈{12,3%;13,4%}); giá so PV:
+  25/50/25               | VCSH Q3 574,7        | EV chưa CK 21,615 | PV 19,298–20,583 | giá -3.8%…+2.6%
+  25/50/25               | VCSH soát xét 507,8  | EV chưa CK 21,239 | PV 19,005–20,249 | giá -2.2%…+4.2%
+      nhạy Ke = r* thị trường 15,1% (VCSH Q3): PV 18,751–20,083 | giá -1.4%…+5.6%
+  20/45/35 (nhất quán)   | VCSH Q3 574,7        | EV chưa CK 20,234 | PV 18,224–19,353 | giá +2.3%…+8.7%
+  20/45/35 (nhất quán)   | VCSH soát xét 507,8  | EV chưa CK 19,708 | PV 17,814–18,885 | giá +4.8%…+11.1%
+      nhạy Ke = r* thị trường 15,1% (VCSH Q3): PV 17,708–18,882 | giá +4.9%…+11.8%
+  15/50/35               | VCSH Q3 574,7        | EV chưa CK 19,568 | PV 17,706–18,760 | giá +5.5%…+11.8%
+  15/50/35               | VCSH soát xét 507,8  | EV chưa CK 19,042 | PV 17,297–18,292 | giá +8.2%…+14.5%
+      nhạy Ke = r* thị trường 15,1% (VCSH Q3): PV 17,206–18,304 | giá +8.2%…+15.1%
+  30/50/20               | VCSH Q3 574,7        | EV chưa CK 22,639 | PV 20,094–21,495 | giá -7.9%…-1.5%
+  30/50/20               | VCSH soát xét 507,8  | EV chưa CK 22,338 | PV 19,860–21,227 | giá -6.7%…-0.3%
+      nhạy Ke = r* thị trường 15,1% (VCSH Q3): PV 19,524–20,972 | giá -5.6%…+1.4%
+  PV từng kịch bản (T=1,5; Ke 12,85%): Tốt tâm 29,807 (đáy 25,713, trần 34,214); Cơ sở tâm 18,701 (đáy 13,230, trần 26,149); Xấu tâm 12,732 (đáy 10,935, trần 14,528)
 Giá 19800 ngầm định: P/E 4,0 ⇒ LNST bền 132; P/E 3,5 ⇒ 151; P/B 0.92
 Độ nhạy LNST × P/E (đ/cp):
   LNST\PE       3     3.5       4     4.5       5       6

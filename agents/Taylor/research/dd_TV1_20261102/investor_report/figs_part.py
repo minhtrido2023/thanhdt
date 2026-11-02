@@ -12,7 +12,9 @@ FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular
 FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
 
 PX = 19_800                      # đóng cửa 30/10/2026 (DNSE)
-PV = (19_200, 20_600)            # PV kỳ vọng 25/50/25, T=1–2 năm, Ke 12,3–13,4%
+PV = (19_300, 20_600)            # r3: PV kỳ vọng 25/50/25, T=1–2 năm, Ke 12,3–13,4% (cổ tức tích luỹ năm lẻ)
+PVC = (17_800, 19_400)           # r3: PV bộ nhất quán 20/45/35 (VCSH soát xét … VCSH Q3)
+FAIR = (17_800, 20_600)          # r3: vùng giá trị hợp lý = min–max PV hai bộ trọng số
 EVU = 21_600                     # kỳ vọng chưa chiết khấu (2027–28)
 BASE = (13_500, 29_000, 20_100)
 SCEN = {"Xấu": (10_800, 15_100, 12_900), "Cơ sở": BASE, "Tốt": (28_500, 38_700, 33_400)}
@@ -84,7 +86,7 @@ def figs():
     axp.text(0.04, 0.05, "Minh hoạ lĩnh vực tư vấn lưới điện — ảnh:\nwebsite pecc1.com.vn", transform=axp.transAxes,
              color="white", fontsize=5.8, bbox=dict(fc="#0d1b2a", ec="none", alpha=0.75, pad=2))
     axk = fig.add_axes([0.39, 0.50, 0.60, 0.48]); axk.axis("off")
-    kpis = [("Giá 30/10/2026", "19.800 đ"), ("Kỳ vọng hiện tại (ước lượng)", "19,2–20,6k"),
+    kpis = [("Giá 30/10/2026", "19.800 đ"), ("Vùng giá trị hợp lý (ước lượng)", "17,8–20,6k"),
             ("Vùng cơ sở (ước lượng)", "13,5–29,0k"), ("P/E 4 quý · bỏ một lần", "2,8x · 3,2–3,8x"),
             ("P/B (Q3 · soát xét 30/6)", "0,92 · 1,04x"), ("Cổ tức 2025 · lợi suất", "1.500 đ · 7,6%")]
     for i, (k, v) in enumerate(kpis):
@@ -94,7 +96,7 @@ def figs():
         axk.text(x + 0.02, y + 0.07, k, fontsize=5.9, color="#444", transform=axk.transAxes)
     axv = fig.add_axes([0.41, 0.17, 0.56, 0.22])
     axv.barh(0, BASE[1] - BASE[0], left=BASE[0], color=LIGHT, height=0.5)
-    axv.barh(0, PV[1] - PV[0], left=PV[0], color=NAVY, height=0.5, alpha=0.85)
+    axv.barh(0, FAIR[1] - FAIR[0], left=FAIR[0], color=NAVY, height=0.5, alpha=0.85)
     for lab, (lo, hi, c) in SCEN.items():
         axv.plot(c, 0, "o", color=GREY, ms=4.5)
         axv.text(c, -0.62, f"{lab} {vn(c/1000,1)}k", ha="center", fontsize=6.2, color="#444")
@@ -106,7 +108,7 @@ def figs():
     axv.set_xlim(8_000, 47_000); axv.set_ylim(-0.9, 0.9); axv.set_yticks([]); axv.grid(False)
     axv.spines["left"].set_visible(False)
     axv.set_xticks(range(10_000, 46_000, 5_000)); axv.set_xticklabels([f"{t//1000}k" for t in range(10_000, 46_000, 5_000)], fontsize=7)
-    axv.set_title("Giá nằm trong dải giá trị kỳ vọng hiện tại (khối đậm), đ/cp", fontsize=7.6, pad=3)
+    axv.set_title("Giá ở đầu trên vùng giá trị hợp lý (khối đậm): từ ngang đến cao hơn khoảng 10%, đ/cp", fontsize=7.6, pad=3)
     save(fig, "fig_00_hero", "Nguồn: giá DNSE (đóng cửa 30/10/2026, UPCOM); BCTC Q3/2026; tính toán của nhóm nghiên cứu (ước lượng). Ảnh: banner website pecc1.com.vn.",
          pd.DataFrame({"chi_so": [k for k, _ in kpis], "gia_tri": [v for _, v in kpis]}))
     plt.close(fig)
@@ -132,26 +134,28 @@ def figs():
          pd.DataFrame({"quy": q, "dt_thuan": rev, "lnst": np_}))
     plt.close(fig)
 
-    # 02 LNST báo cáo vs lõi -------------------------------------------------------
-    labs = ["Q3/25\nlõi", "Q3/26\nbáo cáo", "Q3/26 bỏ\nthu nhập khác", "Q3/26 lõi\nhai chiều"]
-    fig, ax = plt.subplots(figsize=(7.2, 2.7)); fig.subplots_adjust(bottom=0.24, top=0.86, left=0.09, right=0.98)
+    # 02 LNST báo cáo vs lõi (r3: tách hai trường hợp hạch toán) -------------------------
+    labs = ["Q3/25\nlõi", "Q3/26\nbáo cáo", "Q3/26 bỏ\nthu nhập khác", "lõi (A) hoàn nhập\nvào chi phí QL", "lõi (B) hoàn nhập\nvào thu nhập khác"]
+    fig, ax = plt.subplots(figsize=(7.2, 2.7)); fig.subplots_adjust(bottom=0.26, top=0.86, left=0.09, right=0.98)
     ax.bar(0, 30.7, color=GREY, width=0.55); ax.bar(1, 66.9, color=ACCENT, width=0.55); ax.bar(2, 36.0, color=NAVY, width=0.55)
     ax.bar(3, 45 - 16, bottom=16, color=NAVY, alpha=0.35, width=0.55, hatch="//", edgecolor=NAVY)
+    ax.bar(4, 45 - 31, bottom=31, color=NAVY, alpha=0.35, width=0.55, hatch="//", edgecolor=NAVY)
     for i, v in ((0, 30.7), (1, 66.9), (2, 36.0)):
         ax.text(i, v + 2, vn(v, 1), ha="center", fontsize=8, weight="bold")
     ax.text(3, 47, "16–45", ha="center", fontsize=8, weight="bold", color=NAVY)
-    ax.text(3.32, 16, "bỏ toàn bộ hoàn nhập\ndự phòng 24,9", fontsize=6.3, va="center")
-    ax.text(3.32, 45, "QLDN gấp đôi\nlà một lần", fontsize=6.3, va="center")
-    ax.set_xticks(range(4)); ax.set_xticklabels(labs, fontsize=7.4); ax.set_xlim(-0.5, 4.1); ax.set_ylim(0, 78); ax.set_ylabel("Tỷ đồng", fontsize=8)
-    ax.set_title("Lợi nhuận lõi quý 3 là một KHOẢNG 16–45 tỷ, không phải 66,9 tỷ (ước lượng)")
-    save(fig, "fig_02_core_np", "LNST lõi (ước lượng, thuế 20%): cột 3 chỉ bỏ khoản khác ròng 31,9; cột 4 hai chiều theo cách đọc chi phí quản lý và hoàn nhập dự phòng. 9T lõi 74–103 tỷ so 88,9 cùng kỳ (−17%…+15%). " + SRC,
-         pd.DataFrame({"chi_tieu": [l.replace("\n", " ") for l in labs], "thap": [30.7, 66.9, 36.0, 16], "cao": [30.7, 66.9, 36.0, 45]}))
+    ax.text(4, 47, "31–45", ha="center", fontsize=8, weight="bold", color=NAVY)
+    ax.text(3, 6, "khác 31,9 không\ngiải thích được", ha="center", fontsize=6.0, color="#444")
+    ax.text(4, 20, "còn ≈16 chưa\ngiải thích", ha="center", fontsize=6.0, color="#444")
+    ax.set_xticks(range(5)); ax.set_xticklabels(labs, fontsize=7.0); ax.set_xlim(-0.5, 4.5); ax.set_ylim(0, 78); ax.set_ylabel("Tỷ đồng", fontsize=8)
+    ax.set_title("Lãi lõi quý 3: 16–45 hoặc 31–45 tỷ tuỳ cách hạch toán hoàn nhập — không phải 66,9 (ước lượng)")
+    save(fig, "fig_02_core_np", "LNST lõi (ước lượng, thuế 20%). Hoàn nhập dự phòng phải thu 19,2 tỷ trong quý 3 chưa rõ ghi vào chi phí quản lý (A) hay thu nhập khác (B); hai trường hợp loại trừ nhau. 9T lõi: (A) −17%…+15%, (B) 0%…+15% so cùng kỳ. " + SRC,
+         pd.DataFrame({"chi_tieu": [l.replace("\n", " ") for l in labs], "thap": [30.7, 66.9, 36.0, 16, 31], "cao": [30.7, 66.9, 36.0, 45, 45]}))
     plt.close(fig)
 
     # 03 Dự phòng ------------------------------------------------------------------
-    d = ["01/01/2026", "30/06/2026\n(soát xét)", "30/09/2026\n(chưa soát xét)"]
-    ar = [113.10, 105.08, 85.91]; inv = [59.56, 59.29, 53.57]; kh = [63.2, 90.81, 68.36]
-    fig, ax = plt.subplots(figsize=(7.2, 2.7)); fig.subplots_adjust(bottom=0.24, top=0.86, left=0.09, right=0.98)
+    d = ["01/01/2026\n(kiểm toán 2025)", "30/06/2026\n(soát xét)", "30/09/2026\n(chưa soát xét)"]
+    ar = [113.10, 105.08, 85.91]; inv = [59.56, 59.29, 53.57]; kh = [89.93, 90.81, 68.36]   # r3: 01/01 = BCTC 2025 kiểm toán (16,75 + 73,18), không phải 63,2
+    fig, ax = plt.subplots(figsize=(7.2, 2.7)); fig.subplots_adjust(bottom=0.31, top=0.86, left=0.09, right=0.98)
     x = np.arange(3)
     ax.bar(x, ar, width=0.5, color=NAVY, label="Dự phòng phải thu ngắn hạn (tổng)")
     ax.bar(x, inv, bottom=ar, width=0.5, color=GREY, label="Dự phòng giảm giá tồn kho")
@@ -161,12 +165,12 @@ def figs():
     ax.plot(x, kh, "o-", color=GOLD, lw=1.6, label="trong đó: dự phòng phải thu khách hàng")
     for i in range(3):
         ax.text(i - 0.08, kh[i] + 6, vn(kh[i], 1), fontsize=7, color="#8a6d10", weight="bold", ha="right", bbox=dict(fc="white", ec="none", pad=0.6))
-    ax.annotate("−24,9 tỷ trong quý 3\n(khách hàng −22,4)", (2, 140), (1.45, 185), fontsize=7.2, color=ACCENT, weight="bold",
+    ax.annotate("−24,9 tỷ trong quý 3\n(khách hàng −22,4)", (2, 142), (1.45, 178), fontsize=7.2, color=ACCENT, weight="bold",
                 arrowprops=dict(arrowstyle="->", color=ACCENT))
-    ax.set_xticks(x); ax.set_xticklabels(d, fontsize=7.4); ax.set_ylim(0, 235); ax.set_ylabel("Tỷ đồng", fontsize=8)
+    ax.set_xticks(x); ax.set_xticklabels(d, fontsize=7.4); ax.set_ylim(0, 270); ax.set_ylabel("Tỷ đồng", fontsize=8)
     ax.legend(fontsize=6.4, frameon=False, loc="upper left", ncol=3)
-    ax.set_title("Cờ: dự phòng mà bên soát xét còn giữ ở 30/6 được hoàn nhập trong quý chưa soát xét")
-    save(fig, "fig_03_provisions", "Phải thu khách hàng gộp không giảm tương ứng (378,7 lên 387,5), nên không phải xoá sổ nợ. Dự phòng tổng 85,9 lệch thuyết minh (70,5) ≈15 tỷ, chưa giải. " + SRC,
+    ax.set_title("Cờ: dự phòng khách hàng đi ngang ở H1 (89,9 và 90,8) rồi giảm ≈22 tỷ trong quý chưa soát xét")
+    save(fig, "fig_03_provisions", "Phải thu khách hàng gộp không giảm tương ứng (378,7 lên 387,5), nên không phải xoá sổ nợ. Dự phòng tổng 85,9 lệch thuyết minh (70,5) ≈15 tỷ, chưa giải. Thuyết minh quý 3 ghi dự phòng khách hàng đầu năm 63,2 — lệch 26,7 tỷ so BCTC 2025 đã kiểm toán (89,9). " + SRC,
          pd.DataFrame({"ngay": [s.replace("\n", " ") for s in d], "du_phong_phai_thu": ar, "du_phong_htk": inv, "du_phong_kh": kh}))
     plt.close(fig)
 
@@ -213,8 +217,8 @@ def figs():
         ax.plot(r.date, r.Close, "o", color=ACCENT, ms=4.5)
         ax.annotate(lab, (r.date, r.Close), (r.date, r.Close + off), fontsize=6.2, ha="center", color=ACCENT,
                     arrowprops=dict(arrowstyle="-", color=ACCENT, lw=0.6))
-    ax.axhspan(PV[0], PV[1], color=NAVY, alpha=0.18)
-    ax.text(px.date.iloc[2], 10_500, "dải ngang = giá trị kỳ vọng hiện tại 19,2–20,6k (ước lượng)", fontsize=6.6, color=NAVY)
+    ax.axhspan(FAIR[0], FAIR[1], color=NAVY, alpha=0.18)
+    ax.text(px.date.iloc[2], 10_500, "dải ngang = vùng giá trị hợp lý 17,8–20,6k (ước lượng)", fontsize=6.6, color=NAVY)
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: vn(v)))
     ax.set_ylim(8_000, 40_000); ax.set_ylabel("đ/cp (điều chỉnh)", fontsize=8)
     c0, c1 = px.Close.iloc[0], px.Close.iloc[-1]
@@ -226,28 +230,28 @@ def figs():
     print("px 12m", c0, c1, hi, px.loc[px.Close.idxmax(), "date"].date())
 
     # 07 Football field ----------------------------------------------------------
-    rows = [("Kịch bản xấu (25%): P/B 0,5–0,7x", 10_800, 15_100, ACCENT),
-            ("Kịch bản cơ sở (50%): LN 103–172 tỷ × P/E 3,5–4,5x", 13_500, 29_000, NAVY),
-            ("Kịch bản tốt (25%): LN 152–172 tỷ × P/E 5–6x", 28_500, 38_700, GREEN),
-            ("Kỳ vọng hiện tại 25/50/25 (chiết khấu 1–2 năm)", 19_200, 20_600, NAVY),
-            ("Kỳ vọng hiện tại, trọng số xấu hơn (20/50/30; 15/45/40)", 17_200, 19_700, GREY),
+    rows = [("Kịch bản xấu (25–35%): P/B 0,5–0,7x", 9_500, 15_100, ACCENT),
+            ("Kịch bản cơ sở (45–50%): LN 103–172 tỷ × P/E 3,5–4,5x", 13_500, 29_000, NAVY),
+            ("Kịch bản tốt (20–25%): LN 152–172 tỷ × P/E 5–6x", 28_500, 38_700, GREEN),
+            ("Giá trị hôm nay, trọng số 25/50/25", PV[0], PV[1], GREY),
+            ("Giá trị hôm nay, trọng số nhất quán 20/45/35", PVC[0], PVC[1], NAVY),
             ("Dòng cổ tức 1.500–2.800 đ/năm, Ke 12,3–13,4%", 11_200, 22_800, GREY),
             ("Giá trị tài sản (SOTP) — trần tham chiếu", 23_900, 44_200, GOLD)]
-    fig, ax = plt.subplots(figsize=(7.2, 3.2)); fig.subplots_adjust(bottom=0.15, top=0.88, left=0.44, right=0.97)
+    fig, ax = plt.subplots(figsize=(7.2, 3.5)); fig.subplots_adjust(bottom=0.24, top=0.89, left=0.44, right=0.97)
     for i, (lab, lo, hi_, c) in enumerate(rows[::-1]):
         ax.barh(i, hi_ - lo, left=lo, color=c, height=0.55, alpha=0.9)
         ax.text(hi_ + 400, i, f"{vn(lo/1000,1)}–{vn(hi_/1000,1)}k", va="center", fontsize=6.6, bbox=dict(fc="white", ec="none", pad=0.5), zorder=5)
     ax.set_yticks(range(len(rows))); ax.set_yticklabels([r[0] for r in rows[::-1]], fontsize=6.8)
-    ax.axvline(PX, color=ACCENT, ls="--", lw=1.6); ax.text(PX, len(rows) - 0.35, "giá 19,8k", color=ACCENT, fontsize=7.2, ha="center", weight="bold")
+    ax.axvline(PX, color=ACCENT, ls="--", lw=1.6); ax.text(PX - 500, len(rows) - 0.35, "giá 19,8k", color=ACCENT, fontsize=7.2, ha="right", weight="bold")
     ax.set_xlim(8_000, 50_000); ax.set_ylim(-0.6, len(rows) - 0.1)
     ax.set_xticks(range(10_000, 50_001, 10_000)); ax.set_xticklabels([f"{t//1000}k" for t in range(10_000, 50_001, 10_000)], fontsize=7)
-    ax.set_title("Giá nằm trong vùng giá trị hợp lý, sát giá trị kỳ vọng hiện tại", loc="right", fontsize=8.8)
-    save(fig, "fig_07_football", "Kịch bản: giá trị tại 2027–28, chưa chiết khấu. SOTP = thuỷ điện DCF có thời hạn đến 2059 + tư vấn − nợ điều chỉnh; cổ đông thiểu số chỉ nhận qua cổ tức hoặc bán tài sản. Ước lượng của nhóm nghiên cứu.",
+    ax.set_title("Giá ở đầu trên vùng giá trị hợp lý 17,8–20,6k: từ ngang đến cao hơn khoảng 10%", loc="right", fontsize=8.8)
+    save(fig, "fig_07_football", "Kịch bản: giá trị tại 2027–28, chưa chiết khấu (xấu: 9,5k trên vốn chủ soát xét 30/6, 15,1k trên vốn chủ quý 3). Giá trị hôm nay: chiết khấu 1–2 năm, Ke 12,3–13,4%, cộng cổ tức. SOTP = thuỷ điện DCF có thời hạn đến 2059 + tư vấn − nợ điều chỉnh; cổ đông thiểu số chỉ nhận qua cổ tức hoặc bán tài sản. Ước lượng của nhóm nghiên cứu.",
          pd.DataFrame(rows, columns=["phep_do", "thap", "cao", "mau"]).drop(columns="mau"))
     plt.close(fig)
 
     # 08 Ma trận rủi ro -------------------------------------------------------------
-    risks = [("R1 Pháp nhân bị khởi tố / cấm thầu EVN", 0.35, 0.90), ("R2 Kiểm toán 2026 ngoại trừ", 0.35, 0.80),
+    risks = [("R1 Cấm thầu EVN 3–5 năm / buộc nộp lợi bất chính", 0.30, 0.90), ("R2 Kiểm toán 2026 ngoại trừ", 0.35, 0.80),
              ("R3 Khoản thu nhập khác 33,8 tỷ bị đảo", 0.40, 0.45), ("R4 El Niño cắt sản lượng thuỷ điện", 0.50, 0.55),
              ("R5 Lợi nhuận được giữ lại, cổ tức không tăng", 0.60, 0.40), ("R6 Phán quyết vay cá nhân vượt sổ", 0.20, 0.35),
              ("R7 Thanh khoản mỏng (trung vị 0,41 tỷ/phiên)", 0.85, 0.25)]
@@ -285,7 +289,7 @@ def figs():
     plt.close(fig)
 
     # 10 Khung ảnh website ---------------------------------------------------------------
-    items = [("dam", "Thuỷ điện"), ("grid", "Lưới truyền tải"), ("wind", "Điện gió · mặt trời")]
+    items = [("dam", "Thuỷ điện — minh hoạ, không phải tài sản công ty"), ("grid", "Lưới truyền tải"), ("wind", "Điện gió · mặt trời")]
     W, H, pad = 1440, 330, 8
     w = (W - pad * 4) // 3
     canvas = Image.new("RGB", (W, H + 56), "white"); dr = ImageDraw.Draw(canvas)

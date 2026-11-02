@@ -34,7 +34,7 @@ img {width: 100%;}
 
 
 IMG_W = 470
-BREAK_BEFORE = ("Ba điều", "2.", "8.", "Phụ lục A")
+BREAK_BEFORE = ("7.", "8.", "Phụ lục A")   # r3: bỏ "Ba điều", "2." — để nội dung chảy, tránh trang trống
 
 
 def md_to_html(md):

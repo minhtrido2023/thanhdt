@@ -1,4 +1,22 @@
-# Tự kiểm — TV1_DD_investor_report_20261102 (job Taylor_20261102_042930, 02/11/2026)
+# Tự kiểm — TV1_DD_investor_report_20261102 — BẢN ĐÍNH CHÍNH r3 (job Taylor_20261102_075340, 02/11/2026; thay bản 11:55 của job Taylor_20261102_042930)
+
+## r3 (phản biện vòng 2: 4 BLOCKING + 10 NON-BLOCKING — đã áp hết; xem ../REPORT.md Phụ lục E2)
+- Số: mọi số mới từ `../calc/valuation_out.txt` khối "r3" (python3 -I calc/valuation.py). Quét tự động thân bài (trước Phụ lục E) vs REPORT+valuation_out+rate_lines:
+  8 chuỗi không có nguyên văn, đều có nguồn: 19.000–19.600 (EV 15/50/35: 19.042–19.568), 22.300–22.600 (EV 30/50/20: 22.338–22.639), 19.900 (PV 30/50/20 VCSH soát xét 19.860),
+  20.000 / 20.500 / 26,69 / 57,76 như bản trước.
+- Kết luận: vùng giá trị hợp lý 17.800–20.600 = min–max PV {25/50/25, 20/45/35} × T{1;1,5;2} × Ke{12,3;13,4%} × VCSH{574,7; 507,8}; 25/50/25 ⇒ 19.300–20.600 (−3,8…+2,6%);
+  20/45/35 ⇒ 17.814–19.353 (+2,3…+11,1%). Giá tham chiếu 20.000: 20.000/20.600−1 = −2,9%; 20.000/17.800−1 = +12,4% ⇒ "−3% đến +12%".
+- B3: đã render BCTC 2025 kiểm toán trang in 21 (`../img/fy25_p22.png`): dự phòng phải thu bên liên quan 16.751.114.343 + KH khác 73.179.659.301 = 89,93 ✓; fig_03 vẽ lại 89,9 → 90,8 → 68,4.
+- B4: VnExpress 02/07/2026 mở lại 02/11 (WebFetch) — trích nguyên văn "13 công ty bị xác định có liên quan", "EVNNPT và nhà thầu đều có sai phạm trong lập, phê duyệt dự toán",
+  "Các nhà thầu khi thực hiện nhiều hạng mục cũng có vi phạm."; bài không nói pháp nhân bị khởi tố; đếm tên ~12 (ghi trong REPORT §7).
+- Quét số cũ (thân trước Phụ lục E): 19.200 / 17.200 / 20/50/30 / 15/45/40 / ≈2.800 / "thấp hơn ~10%" / "không có căn cứ" / doanhnghiephoinhap / "13 đơn vị" / "khởi tố pháp nhân" = 0 hit
+  (63,2 chỉ còn ở dòng CỜ lệch 26,7; "một nửa" chỉ còn ở "một nửa bội số" P/E — đúng; 19200 trong fig_06_price.csv là giá đóng cửa ngày 24/08 và 12/10).
+- Lộ nội bộ/fear-buy (md, figs/*.csv, HTML bỏ base64) = 0 hit. HTML dry-run: 13 `<img`, 13 alt không rỗng; 9,1 MB; KHÔNG gửi (Mike gửi).
+- Xem bằng mắt: PDF 11 trang (thân 1–9, phụ lục 10–11), montage 0,5x toàn bộ + 1,1x trang 1, 3, 6, 7. Đã sửa trong r3: dấu ~ hiển thị thành "-" trong hình (đổi "khoảng");
+  glyph mũi tên thiếu (fig_03); nhãn "giá 19,8k" đè thanh (fig_07); chú thích đè trục (fig_07, fig_03); ">" blockquote hiển thị thô; trang 2 trống nửa → bỏ ngắt trang trước
+  "Ba điều"/"2.", thêm ngắt trước "7." để tiêu đề mục 7 không mồ côi.
+
+## Bản trước (r2, giữ để đối chiếu)
 
 Lệnh tái lập (chạy từ `investor_report/`): `bash scripts/make_maps.sh` → `/home/trido/thanhdt/wc_venv/bin/python -I build_report.py all`;
 banner: `python3 ~/.claude/skills/dd-investor-report/scripts/make_title_banner.py --title "<dòng 1 .md bỏ '# '>" --ticker TV1 --kicker "Báo cáo due diligence · UPCOM: TV1" --sub "Nhóm nghiên cứu · 02/11/2026" --logo figs/logo.png --out figs/title_banner.png`;
