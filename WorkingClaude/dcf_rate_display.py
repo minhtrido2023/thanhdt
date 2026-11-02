@@ -6,7 +6,9 @@ DISPLAY-ONLY. KHÔNG đổi FV / MoS / classify_dcf; KHÔNG nối vào plan echo
        kèm vị trí so với lịch sử. Là THƯỚC ĐO HIỂN THỊ, KHÔNG phải tín hiệu mua/bán.
   (ii) TPCP 10Y + Δ12 tháng (tav2_bq.macro_indicator, vn_bond_10y). Thiếu/stale -> 'không có dữ liệu'.
 r* tính bằng analysis.rstar của job dcf_rate_proxy_20261102 (KHÔNG viết lại công thức) trên panel_live;
-chỉ chạy khi build cache. ⚠️ LÀM MỚI cache = chuỗi 4 bước, THỨ TỰ BẮT BUỘC (arch-review vòng 2):
+chỉ chạy khi build cache. LÀM MỚI cache HẰNG THÁNG = `dcf_rstar_refresh.py` (cron; dựng panel ở thư mục tạm, KHÔNG ghi đè file nghiên cứu, ghi
+cache ở data/cache_untracked/ — xem docstring script đó). Chuỗi 4 bước dưới đây chỉ còn là đường làm tay/di sản:
+⚠️ LÀM MỚI cache (tay) = chuỗi 4 bước, THỨ TỰ BẮT BUỘC (arch-review vòng 2):
   1. `engine.py build` ở research/dcf_vn_calibration_20261101 → dựng lại data/panel_monthly.parquet
      (build_live.py:13 và level.py:21 đọc file này; nó đứng yên ở t max 2026-10-30, bỏ bước này thì kẹt mãi);
   2. build_live.py, 3. level.py (research/dcf_level_rerun_20261102) → data/panel_live.parquet;
@@ -24,7 +26,9 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
-RSTAR_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "dcf_rstar_cache.json")  # theo checkout
+RSTAR_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "dcf_rstar_cache.json")  # theo checkout (TRACKED)
+# cache do dcf_rstar_refresh.py ghi (KHÔNG track, .gitignore): được ưu tiên nếu panel_asof mới hơn bản tracked
+RSTAR_CACHE_LIVE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cache_untracked", "dcf_rstar_cache.json")
 RSTAR_MAX_AGE_DAYS = 45          # panel_asof cách asof quá số ngày này -> không hiển thị
 BQ_TIMEOUT_S = 30                # trần truy vấn TPCP: BQ treo không được chặn báo cáo newdeals 06:00
 TPCP_MAX_AGE_DAYS = 7            # quan sát TPCP cuối cách asof quá số ngày này -> không hiển thị
@@ -41,12 +45,17 @@ def _asof_date(asof):
 
 
 # ---------------------------------------------------------------- (i) r*
-def build_rstar_cache(path=RSTAR_CACHE):
-    """Tính r* theo tháng bằng analysis.rstar (job dcf_rate_proxy_20261102) trên panel_live. Ghi nguyên tử."""
+def build_rstar_cache(path=RSTAR_CACHE, panel=None):
+    """Tính r* theo tháng bằng analysis.rstar (job dcf_rate_proxy_20261102) trên panel_live. Ghi nguyên tử.
+    panel=None: đọc panel_live.parquet của job nghiên cứu (đường tay). panel=DataFrame: do dcf_rstar_refresh dựng."""
     rd = os.path.join(_RESEARCH, "dcf_rate_proxy_20261102")
     sys.path.insert(0, rd)
     import analysis as A                                   # noqa: E402  (đổi cwd sang engine — path dưới tuyệt đối)
-    p = A.load_panel()
+    if panel is None:
+        p = A.load_panel()
+    else:
+        p = panel.reset_index(drop=True).copy()
+        p["m"] = p.t.dt.to_period("M")
     new_asof = str(p.t.max().date())
     try:
         old_asof = json.load(open(path)).get("panel_asof")
@@ -60,6 +69,7 @@ def build_rstar_cache(path=RSTAR_CACHE):
            "panel_asof": str(p.t.max().date()), "g_cap": A.G_CAP, "r_const": A.R_CONST * 100,
            "n_last": int((p.t == p.t.max()).sum()),
            "series": {str(k): round(float(v), 4) for k, v in s.items()}}
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
     with open(tmp, "w") as f:
         json.dump(out, f, indent=1, sort_keys=True)
@@ -67,9 +77,25 @@ def build_rstar_cache(path=RSTAR_CACHE):
     return out
 
 
-def rstar_line(asof, path=RSTAR_CACHE):
+def _newest_cache(paths):
+    """Cache có panel_asof mới nhất trong các đường dẫn đọc được; file thiếu/hỏng bị bỏ qua. Không có -> raise."""
+    best = None
+    for p in paths:
+        try:
+            c = json.load(open(p))
+            pa = str(pd.to_datetime(c["panel_asof"]).date())
+        except Exception:
+            continue
+        if best is None or pa > best[0]:
+            best = (pa, c)
+    if best is None:
+        raise FileNotFoundError("không có cache r* đọc được")
+    return best[1]
+
+
+def rstar_line(asof, path=RSTAR_CACHE, live_path=RSTAR_CACHE_LIVE):
     try:
-        c = json.load(open(path))
+        c = _newest_cache([path] if live_path is None else [path, live_path])
         ser = pd.Series(c["series"]); ser.index = pd.PeriodIndex(ser.index, freq="M")
         pa = pd.to_datetime(c["panel_asof"]).date()
         age = (_asof_date(asof) - pa).days
@@ -129,8 +155,8 @@ def tpcp_line(asof, loader=_bq_tpcp):
         return f"TPCP 10Y: {_NA} ({type(e).__name__})"
 
 
-def dcf_rate_lines(asof, rstar_path=RSTAR_CACHE, tpcp_loader=_bq_tpcp):
-    return [rstar_line(asof, rstar_path), tpcp_line(asof, tpcp_loader)]
+def dcf_rate_lines(asof, rstar_path=RSTAR_CACHE, tpcp_loader=_bq_tpcp, rstar_live_path=RSTAR_CACHE_LIVE):
+    return [rstar_line(asof, rstar_path, rstar_live_path), tpcp_line(asof, tpcp_loader)]
 
 
 if __name__ == "__main__":
