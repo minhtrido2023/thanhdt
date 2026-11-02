@@ -37,6 +37,7 @@ from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
                               filter_lag_governance_orders, filter_signal_holds,
+                              filter_dd_flag_orders,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.exdate_gate import apply_exdate_gate
@@ -590,6 +591,19 @@ def main():
             else:
                 print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
                       f"{a['kind']}) — {a['reason']}")
+        # CỔNG CỜ DD (user chốt 2026-11-02 23:01 ICT): mã có 🔴 RED_FLAG_CODES hoặc ⚠ quality_flag
+        # ≠ QUALITY_OK ⇒ LOẠI lệnh MUA mọi book trừ DISCRETIONARY* (chỉ cảnh báo) và PROBE. Lệnh
+        # BÁN không bao giờ bị chặn. Fail-OPEN + báo to khi không kết luận được cờ (lỗi nguồn).
+        plan, dd_blocked = filter_dd_flag_orders(plan)
+        for a in dd_blocked:
+            if a["action"] == "FAIL_OPEN":
+                _notify_failopen(p["label"], "cờ DD (mã có cờ ⇒ loại)", a["reason"])
+            elif a["action"] == "WARN_DISCRETIONARY":
+                print(f"[{p['label']}] ⚠ DISCRETIONARY {a['ticker']} ({a['qty_before']:,} cp, "
+                      f"book {a['book']}) có cờ {a['codes']} — chỉ cảnh báo, lệnh GIỮ")
+            else:
+                print(f"[{p['label']}] ⛔ CỜ DD BỎ lệnh MUA {a['ticker']} ({a['qty_before']:,} cp, "
+                      f"book {a['book']}) — {a['reason']}")
         # ĐÒN BẨY MARGIN sleeve CAPIT (chính sách 2026-08-03, data/trading_rules.json →
         # capit_margin_lever, MẶC ĐỊNH enabled=false). Cấp cờ vay CHỈ cho lệnh mua CAPIT khi
         # artifact golive nói active=true; đồng thời GỠ mọi cờ vay lạ mà plan tự viết vào —

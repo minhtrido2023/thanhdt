@@ -962,6 +962,105 @@ def filter_lag_governance_orders(plan, asof=None):
     return plan, blocked
 
 
+# Book MIỄN cổng cờ DD. DISCRETIONARY* = sleeve discretionary (user: cờ chỉ là WARNING ở đây).
+# PROBE = harness thực thi của account paper `main` (paper_main_probe_plan.py), không phải book
+# đầu tư/candidate — chặn nó chỉ làm hỏng phép đo thực thi.
+DD_FLAG_EXEMPT_PREFIX = "DISCRETIONARY"
+DD_FLAG_EXEMPT_BOOKS = frozenset({"PROBE"})
+
+
+def _dd_flag_gate_deps():
+    """Nguồn cho cổng cờ DD — tách riêng để self-check monkeypatch (như _governance_gate_deps).
+
+    Trả (run_due_diligence, dd_flag_verdict) — DÙNG LẠI nguyên lớp DD, không tính lại cờ.
+    """
+    from .due_diligence import run_due_diligence, dd_flag_verdict
+    return run_due_diligence, dd_flag_verdict
+
+
+def filter_dd_flag_orders(plan, asof=None):
+    """CỔNG "MÃ CÓ CỜ ⇒ LOẠI" cho lệnh MUA mọi book (trừ DISCRETIONARY*/PROBE) — TẦNG ORDER.
+
+    VÌ SAO: user chốt 2026-11-02 23:01 ICT (`decided_by: user`, kb/projects/dd-flag-rules-20261102.md
+    quy tắc 1): "mã nào có cờ thì bị loại khỏi candidate của tất cả các book" — ĐẢO luật 08-04
+    (cờ chỉ là thông tin + dd_override_reason). Ca gốc: TCH (BAL RE_BACKLOG_BUY, ⚠ FLOOR_FAIL) lọt
+    plan 03/11 chỉ kèm ghi chú DD. Plan là JSON do LLM/người viết ⇒ enforce ở đây, không tin
+    người lập plan nhớ (cùng khuôn filter_lag_rating_orders / filter_lag_governance_orders).
+
+    "Cờ" = `due_diligence.dd_flag_verdict` (🔴 RED_FLAG_CODES ∪ ⚠ quality_flag≠QUALITY_OK). DD gọi
+    với skip_dcf + skip_corp_flags và KHÔNG truyền est_value ⇒ cờ CẤP MÃ (khớp cột due_diligence
+    mà user thấy trong golive CSV); LENH_QUA_LON_VS_ADV là cờ cỡ-lệnh, đã có cap_capit/cap_lag.
+
+    PHẠM VI: chỉ side=buy. Lệnh BÁN KHÔNG BAO GIỜ bị chặn. Book DISCRETIONARY* ⇒ không chặn, trả
+    bản ghi action="WARN_DISCRETIONARY" để caller in cảnh báo. Book PROBE ⇒ bỏ qua hẳn.
+    Live-only: không đổi backtest/số pin R3 (backtest không đi qua hàm này).
+
+    FAIL-MODE (cùng khuôn filter_lag_governance_orders — không chặn sạch book vì lỗi nguồn):
+      · mã FLAGGED → LOẠI lệnh (action="BLOCKED").
+      · mã UNKNOWN (DD lỗi/thiếu dòng, universe_pit không đọc được) → GIỮ lệnh + 1 bản ghi
+        action="FAIL_OPEN" liệt kê mã, caller báo LOUD (Telegram + Trading Daily).
+      · không import được lớp DD → GIỮ NGUYÊN plan + action="FAIL_OPEN".
+
+    Vị trí cascade (bot_execute.py): … → rating → governance → **dd_flag** → lever → approval.
+    Trả (plan đã lọc, list dict {"ticker","order_id","book","codes","action","qty_before","reason"}).
+    """
+    def _bk(o):
+        return (o.book or "").upper()
+
+    buys = [o for o in plan.orders if (o.side or "").lower() == "buy"
+            and _bk(o) not in DD_FLAG_EXEMPT_BOOKS]
+    if not buys:
+        return plan, []
+    asof = str(asof or plan.plan_date)[:10]
+    keys = sorted({(o.ticker, _bk(o)) for o in buys})
+    try:
+        run_dd, verdict = _dd_flag_gate_deps()
+    except Exception as ex:
+        return plan, [{"ticker": None, "order_id": None, "book": None, "codes": [],
+                       "action": "FAIL_OPEN", "qty_before": None,
+                       "reason": f"KHÔNG nạp được lớp DD ({type(ex).__name__}: {ex}) — GIỮ NGUYÊN "
+                                 f"lệnh MUA {sorted({t for t, _ in keys})} (fail-open). CẦN NGƯỜI "
+                                 f"KIỂM TRA cờ DD trước khi tin phiên này."}]
+    res = {}
+    for tk, bk in keys:
+        try:
+            d = run_dd(tk, bk, {"asof": asof, "skip_dcf": True, "skip_corp_flags": True},
+                       as_dict=True)
+            res[(tk, bk)] = verdict(d)
+        except Exception as ex:          # run_due_diligence tự nuốt lỗi; lưới cuối
+            res[(tk, bk)] = ("UNKNOWN", [], f"{type(ex).__name__}: {str(ex)[:120]}")
+
+    out, keep, unknown = [], [], []
+    for o in plan.orders:
+        bk = _bk(o)
+        r = res.get((o.ticker, bk)) if ((o.side or "").lower() == "buy") else None
+        if r is None:
+            keep.append(o)
+            continue
+        st, codes, why = r
+        disc = bk.startswith(DD_FLAG_EXEMPT_PREFIX)
+        if st == "FLAGGED" and not disc:
+            out.append({"ticker": o.ticker, "order_id": o.id, "book": o.book, "codes": codes,
+                        "action": "BLOCKED", "qty_before": o.qty,
+                        "reason": f"{why} — luật user 2026-11-02: mã có cờ bị loại khỏi "
+                                  f"candidate mọi book (trừ sleeve discretionary)"})
+            continue
+        if st == "FLAGGED":
+            out.append({"ticker": o.ticker, "order_id": o.id, "book": o.book, "codes": codes,
+                        "action": "WARN_DISCRETIONARY", "qty_before": o.qty,
+                        "reason": f"{why} — sleeve discretionary: CHỈ CẢNH BÁO, lệnh giữ nguyên"})
+        elif st == "UNKNOWN" and not disc:
+            unknown.append(f"{o.ticker}[{o.book}]: {why}")
+        keep.append(o)
+    plan.orders = keep
+    if unknown:
+        out.append({"ticker": None, "order_id": None, "book": None, "codes": [],
+                    "action": "FAIL_OPEN", "qty_before": None,
+                    "reason": "KHÔNG kết luận được cờ DD cho: " + "; ".join(unknown)
+                              + " — GIỮ lệnh (fail-open). CẦN NGƯỜI KIỂM TRA trước khi tin phiên này."})
+    return plan, out
+
+
 # ── PHẠM VI USER DUYỆT cho đòn bẩy CAPIT (2026-08-03) — NGUỒN CHUẨN TẮC DUY NHẤT ──────────
 # Ghim ở ĐÂY, tầng thực thi, chứ không phải chỉ ở tầng sinh tín hiệu. Lý do (arch-reviewer
 # 2026-08-03, phát hiện F2): CẢ HAI file mà runtime đọc — `data/trading_rules.json` VÀ
