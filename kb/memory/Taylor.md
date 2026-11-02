@@ -47,3 +47,4 @@
 - [2026-11-02T16:19:33Z] ĐANG DỞ job Taylor_20261102_160806: V1 XONG 8cb89c7da (feat/dd-flag-gate-20261102). NEXT V2: dd_price_zone_watch -> ung vien sleeve, nhanh rieng mike repo
 - [2026-11-02T16:26:55Z] [dd-flag-rules 02/11] XONG job Taylor_20261102_160806: V1 8cb89c7da feat/dd-flag-gate-20261102 (repo ngoai) + V2 fd9ea4acf feat/dd-zone-candidates-20261102 (mike) — cho Mike arch-review + merge (V1 truoc V2); PROBE mien cong can xac nhan
 - [2026-11-02T16:47:58Z] ĐANG DỞ: job Taylor_20261102_164745 vòng2 dd-flag-gate (V1 netting order) + dd-zone (V2 vặt) | NEXT: sửa bot_execute thứ tự cổng
+- [2026-11-02T17:10:53Z] [dd-flag r2 03/11] XONG job Taylor_20261102_164745: V1 55c6883f6 + V2 2fd8ebd1d (chua merge) — cho Mike arch-review r2 + merge V1 truoc V2
