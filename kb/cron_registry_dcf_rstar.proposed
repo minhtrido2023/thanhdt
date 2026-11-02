@@ -1,0 +1,17 @@
+# ĐỀ XUẤT (§13, chưa cài) — làm mới cache r* cho dòng hiển thị DCF (vòng 3, sửa theo arch-review vòng 2)
+Cache `data/dcf_rstar_cache.json` (panel_asof 2026-10-30) HẾT HẠN 2026-12-14 (RSTAR_MAX_AGE_DAYS=45) -> dòng r* in "không có dữ liệu" (fail-closed, không lỗi).
+
+## KHUYẾN NGHỊ: phương án B (không cron) — nhắc có hạn, làm tay trong worktree riêng
+Trước 2026-12-14: (1) `engine.py build` ở research/dcf_vn_calibration_20261101 (dựng panel_monthly.parquet — build_live.py:13 và level.py:21 đọc file này, nó đứng yên ở t max 2026-10-30); (2) build_live.py; (3) level.py ở research/dcf_level_rerun_20261102; (4) `python dcf_rate_display.py --build-cache`. build_rstar_cache từ chối nếu panel_asof không mới hơn cache cũ. Không làm thì dòng r* hiển thị "không có dữ liệu" (an toàn, không ảnh hưởng FV/lệnh).
+Ghi vào kb/current_ops: mốc 2026-12-14 + chuỗi 4 bước trên.
+
+## Phương án A (cron) — KHÔNG KHẢ THI như bản đầu viết (arch-review vòng 2)
+- Thiếu bước `engine.py build` -> build_rstar_cache raise vĩnh viễn (panel đứng yên).
+- Bước 1-3 ghi đè artifact nghiên cứu đã track (out/level_gT_star.csv, out/level_live_impact_20261030.csv, data/level_LY.pkl, data/ calibration) mà REPORT.md trích dẫn (§8).
+- Cache tracked ở WorkingClaude/data/dcf_rstar_cache.json làm bẩn cây canonical mỗi tháng.
+- `>> log` chỉ áp cho lệnh cuối của chuỗi `&&`, lỗi bước trước không vào log.
+
+## Phương án A' (việc sau, cần review riêng)
+Script làm mới riêng, không ghi vào thư mục nghiên cứu, cache để ở đường dẫn KHÔNG track; rồi mới cron. Chưa làm.
+
+## Phương án C: chấp nhận không có dữ liệu sau 14/12 — user duyệt nếu chọn.

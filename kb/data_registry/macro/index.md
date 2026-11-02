@@ -19,6 +19,7 @@ title: Vĩ mô
 | [`fiinprox_rates_snapshot_20260927.md`](fiinprox_rates_snapshot_20260927.md) — lãi suất NHNN (TCTD tháng + liên ngân hàng; FiinPro-X trial, snapshot một lần 2026-09-27) | CANONICAL-PIT (phạm vi xác minh giới hạn) |
 | [`fiinprox_usd_fx_monthly.md`](fiinprox_usd_fx_monthly.md) — data/fiinprox_usd_fx_monthly_20260926.csv (USD/VND cuối tháng 2012-01→2026-09: trung tâm, VCB mua/bán, tự do, NHNN; FiinPro-X trial, snapshot một lần) | DERIVED cột VCB (khớp feed 3/3 tháng ≤20đ) · UNVERIFIED trung tâm/tự do/NHNN; `central` trước 2016 là chế độ khác |
 | [`gdp_growth_vn.md`](gdp_growth_vn.md) — gdp_growth_vn.py (GDP_ANNUAL) | CANONICAL |
+| [`macro_indicator_tpcp10y.md`](macro_indicator_tpcp10y.md) — tav2_bq.macro_indicator (vn_bond_10y TPCP 10Y, TE scrape; writer chưa xác định) | UNVERIFIED |
 | [`macro_health.md`](macro_health.md) — data/macro_health.json | CANONICAL |
 | [`sbv_refi_rate.md`](sbv_refi_rate.md) — SBV refi-rate (sbv_macro_overlay) | CANONICAL |
 | [`us_market_history.md`](us_market_history.md) — us_market_history.csv (VIX/SPX) | CANONICAL |
