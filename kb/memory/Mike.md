@@ -10,7 +10,6 @@
 - Chờ user: DGC vòng 6, TV2 watchlist, nguồn Tampa/CFR NH3 vào BQ?, tunnel tên cố định (cần Cloudflare+domain).
 - Mốc: clear_books_daily lần đầu T2 02/11 20:45; nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; measurement audit ~12-27.
 
-- [2026-11-01T17:43:07Z] 02/11 00:45 DCF-VN: skeptic REFUTED g_T 4,5% (OShares stable→3,0% / unstable→6,5%; hiệu chuẩn trên fin-OShares, prod dùng live). Lens kỳ vọng (Taylor_20261101_165940, commit 29ac97b3b): KHÔNG xây DCF nhẹ. Chờ user chốt: rerun level grid OShares live + tách nhóm ổn định (Sonnet) rồi mới quyết vn_v3; lịch 4 mùa BCTC user đã duyệt, chưa cài cron.
 - [2026-11-01T17:57:42Z] 02/11 00:57 user DUYỆT giữ domestic_v2; giao Sonnet Taylor_20261101_175734 rerun level grid OShares live + tách ổn định/nhảy → agents/Taylor/research/dcf_level_rerun_20261102/. Lịch 4 mùa BCTC user đã duyệt, cron CHƯA cài (gộp sau rerun).
 - [2026-11-01T18:10:18Z] 02/11 01:12 DCF level rerun xong: g_T không hội tụ (phân cách 3,5pp), GIỮ domestic_v2; s=0 thắng MAE (CI loại 0) nhưng mức g_T không chốt được. Dispatch Taylor (Sonnet) cài lịch 4 mùa BCTC + cờ STALE>105d (nhánh worktree, chưa cron) → arch-review → Mike cài cron.
 - [2026-11-01T18:58:27Z] 02/11 02:00 arch-review nhánh feat/dcf-bctc-season-20261102: NEEDS_CHANGES (cron thưa→daily, selfcheck 7/8 mutant sống, season_error im lặng); STALE trong đường echo plan/LAG CHƯA nối — chờ user quyết. Vòng 2 Sonnet Taylor dispatch 02:00.
@@ -22,3 +21,4 @@
 - [2026-11-02T03:48:17Z] 02/11 10:55 dcf-rate-display MERGED (WC 2b4cfe512, mike 1d3d6e412). Skill dd-investor-report luật 17 (2 dòng r*/TPCP trong DD). Cache r* hết hạn 2026-12-14: user duyệt B + nghiêng A' (script làm mới riêng, chạy khi đến hạn) → Taylor job dispatch 10:55 nhánh feat/dcf-rstar-refresh-20261102; sau đó arch-review, Mike cài cron. NHẮC: nếu A' chưa live trước 2026-12-07 thì làm tay chuỗi 4 bước (docstring dcf_rate_display.py).
 - [2026-11-02T03:53:29Z] 02/11 10:58 DD TV1: Bobby dùng lại sector_read_power_consulting_20261028 (mù); Taylor_20261102_035322 (opus) → agents/Taylor/research/dd_TV1_20261102/REPORT.md; sau đó fundamental-skeptic → dd-investor-report (PDF+HTML) → email user. Claim dd:tv1.
 - [2026-11-02T04:03:15Z] 02/11 11:0x báo cáo quý: code merge master 469660ae8; CRONTAB CHƯA CÀI (harness chặn crontab -); dòng ở kb/cron_registry.md; cần user cài hoặc cấp quyền trước 31/12/2026.
+- [2026-11-02T04:43:10Z] 02/11 11:55 DD TV1 XONG: email đã gửi, sổ giá ghi (TV1@2026-11-02), pointer kb/projects/tv1-dd-20261102.md. Chưa qua skeptic vòng 2.

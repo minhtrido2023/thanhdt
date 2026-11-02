@@ -146,3 +146,6 @@
 
 ## Archived 2026-10-31 (keep=12 days=0 require_done=False)
 - [2026-10-30T21:34:29Z] 31/10 weekly ops audit xong: sửa đỏ giả harness (0a1bb517b) + manifest (8bdf3f6e6) + index (efc8f5248). Theo dõi: livermore REPORT_BLOCK ở weekly 09:00 31/10 (chưa verify); deposit_fallback known_red phải tự đóng ở lần daily 04:30 01/11; newdeals T2 02/11 phải PASS (TCB).
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T17:43:07Z] 02/11 00:45 DCF-VN: skeptic REFUTED g_T 4,5% (OShares stable→3,0% / unstable→6,5%; hiệu chuẩn trên fin-OShares, prod dùng live). Lens kỳ vọng (Taylor_20261101_165940, commit 29ac97b3b): KHÔNG xây DCF nhẹ. Chờ user chốt: rerun level grid OShares live + tách nhóm ổn định (Sonnet) rồi mới quyết vn_v3; lịch 4 mùa BCTC user đã duyệt, chưa cài cron.
