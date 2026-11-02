@@ -1803,3 +1803,6 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T14:32:32Z] [dd-risk-urgent vòng2 01/11] XONG job Taylor_20261101_141958: de1fe56a9 (chưa merge) — chờ Mike re-review/merge; CẢNH BÁO: repro flow.py của reviewer D gọi Notifier thật ⇒ 1 tin test XYZ 21:28 ICT có thể đã tới user
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T15:07:38Z] [dd-risk-urgent-nits 01/11] XONG job Taylor_20261101_150156: 73ab19ec4 nhánh feat/dd-risk-urgent-nits-20261101 (chưa merge) — chờ Mike merge

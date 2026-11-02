@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-01T15:07:38Z] [dd-risk-urgent-nits 01/11] XONG job Taylor_20261101_150156: 73ab19ec4 nhánh feat/dd-risk-urgent-nits-20261101 (chưa merge) — chờ Mike merge
 - [2026-11-01T15:41:08Z] ĐANG DỞ: TASK E dd-price-zone job Taylor_20261101_154045 — nhánh feat/dd-price-zone-20261101 | NEXT: khám phá DD files, dựng kb/dd_price_zones.json
 - [2026-11-01T15:52:06Z] ĐANG DỞ: DCF VN calibration job Taylor_20261101_155145 — agents/Taylor/research/dcf_vn_calibration_20261101/ | NEXT: đọc docs, PREREG
 - [2026-11-01T15:54:53Z] [dd-price-zone 01/11] XONG job Taylor_20261101_154045: nhánh feat/dd-price-zone-20261101 (ecd94e5e4, chưa merge) — chờ Mike arch-review/merge; ngưỡng 15% chờ Mike tư vấn user
@@ -26,3 +25,4 @@
 - [2026-11-02T01:28:21Z] ĐANG DỞ: job Taylor_20261102_012810 dcf_rate_proxy — research/dcf_rate_proxy_20261102/ | NEXT: đọc docs, PREREG
 - [2026-11-02T01:40:11Z] [dcf-rate-proxy 02/11] XONG job Taylor_20261102_012810 (commit 16b3cbddf): giu r hang; de xuat hien thi them r* thi truong (15,1%) + TPCP10Y, chua wire; TPCP10Y/macro_indicator can entry data_registry truoc khi dung
 - [2026-11-02T01:54:22Z] [quarterly-report-schedule 02/11] XONG job Taylor_20261102_013823: 33eaaa4e7 nhanh feat/quarterly-report-schedule-20261102 (chua merge) — cho Mike arch-review + cai cron (de xuat kb/cron_registry_quarterly.proposed)
+- [2026-11-02T02:17:42Z] [quarterly-report vong2 02/11] XONG job Taylor_20261102_020151: 7bc9aa38e nhanh feat/quarterly-report-schedule-20261102 (chua merge) — cho Mike arch-review r2 + merge + cai cron
