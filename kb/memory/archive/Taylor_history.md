@@ -1818,3 +1818,6 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T16:10:40Z] [dd-price-zone vòng2 01/11] XONG job Taylor_20261101_160440: 634f9da84 (chưa merge) — chờ Mike merge; hỏi user DD_ALERT_BASIS + xác nhận center_kind HHS/SIP/TCH
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T16:20:09Z] [dd-price-zone vòng3 01/11] XONG job Taylor_20261101_161715: ad5a89c2d (chưa merge) — chờ Mike merge; HPG tâm 19.221 chỉ chân RI, hỏi user nếu muốn giữ 20.200
