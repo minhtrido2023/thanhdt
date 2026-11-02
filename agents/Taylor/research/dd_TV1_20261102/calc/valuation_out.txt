@@ -184,3 +184,78 @@ r4 — Lưới LNST bền × P/E (đ/cp, chưa chiết khấu) cho báo cáo NĐ
     75 tỷ: P/E3: 8,400  P/E4: 11,200  P/E5: 14,000  P/E6: 16,900
     95 tỷ: P/E3: 10,700  P/E4: 14,200  P/E5: 17,800  P/E6: 21,400
    130 tỷ: P/E3: 14,600  P/E4: 19,500  P/E5: 24,400  P/E6: 29,200
+
+====================================================================================================
+r5 — SỬA THEO PHẢN BIỆN VÒNG 3 (thay vùng/kết luận r4)
+====================================================================================================
+Sản lượng các năm có số 2015–2025 (thiếu 2018–20, 2024): bình quân 207.3 tr kWh (bỏ 2021 nghi vấn: 209.0); 2013–23 công ty 175,3
+Giả định r5: P giá {'a_giu_975': 0.1, 'b_600': 0.45, 'c_500': 0.35, 'd_340': 0.1}; P pháp lý xấu 0.3; P mốc lùi 2 năm|hạ bậc 0.15; Q lo/mid/hi (175.0, 205.0, 210.0); lãi tiền 5% trước thuế; một lần nếu xấu 30.0; LNST Q4/26 40.0; LNST FY26 ≈164.6; tiền ròng đầu 2027 (mid, ổn) -63.5
+
+LNST hoạt động bền 2027+ (tỷ, chưa gồm lãi tiền) lo/mid/hi:
+  a_giu_975  ổn  109.7 /  143.1 /  157.0 | xấu   89.7 /  118.1 /  127.0
+  b_600      ổn   57.2 /   81.6 /   94.0 | xấu   37.2 /   56.6 /   64.0
+  c_500      ổn   43.2 /   65.2 /   77.2 | xấu   23.2 /   40.2 /   47.2
+  d_340      ổn   20.8 /   39.0 /   50.3 | xấu    0.8 /   14.0 /   20.3
+
+Theo kịch bản (mid; không mốc lùi) — đ/cp:
+              P/E6,75 ổn      xấu  DDM27 ổn  DDM40 ổn DDM40 xấu  DDM60 ổn
+  a_giu_975     35,100    28,023    21,734    22,815    19,423    24,433
+  b_600         20,144    13,067    15,033    15,650    12,258    16,573
+  c_500         16,155     9,078    13,246    13,739    10,347    14,478
+  d_340          9,774     2,697    10,387    10,682     6,598    11,124
+  B1 phân rã (c)/ổn/27%: PV cổ tức 4,695 + terminal hoạt động 1,922 (P/B 0.60 trên VCSH HĐ) + tiền ròng năm 10 586 tỷ theo mệnh giá 6,629
+     cùng ca, tiền KHÔNG hưởng lãi: tổng 12,485
+
+Kỳ vọng có trọng số r5 (lo / mid / hi):
+  pe    :  11,597 /  17,560 /  20,983
+  ddm27 :  10,544 /  13,936 /  16,191
+  ddm40 :  10,947 /  14,500 /  16,818
+  ddm60 :  11,549 /  15,344 /  17,757
+  P/E mid ở 6,5 / 7,0: 16,994 / 18,125
+VÙNG GIÁ TRỊ r5 = [min(P/E6,5, DDM27); max(P/E7, DDM40)] (mid) = 13,936–18,125; tâm 15,889
+  Giá 19,800 so vùng +9%…+42%; so tâm +25%
+
+Nhạy (mid; P/E 6,75 | DDM40):
+  lãi tiền 0.0% trước thuế: P/E  17,634 | DDM40  13,833
+  lãi tiền 3.0% trước thuế: P/E  17,590 | DDM40  14,229
+  lãi tiền 6.5% trước thuế: P/E  17,537 | DDM40  14,707
+  P/E 5.5: P/E 14,731
+  P/E 6.0: P/E 15,863
+  P/E 8.0: P/E 20,388
+  P/E 9.0: P/E 22,651
+  Q giữa 175.0: P/E  14,125 | DDM40  12,817
+  Q giữa 190.0: P/E  15,842 | DDM40  13,658
+  Q giữa 236.6: P/E  21,177 | DDM40  16,271
+  Trọng số giá r4 (10/35/35/20) + P xấu 0,35: P/E  16,200 | DDM40  13,828
+  P xấu 0: P/E  19,683 | DDM40  15,538 · P xấu 0,40: P/E  16,852 | DDM40  14,154
+  Không mốc lùi: P/E  17,083 | DDM40  14,163 · P mốc lùi 0,30: P/E  18,036 | DDM40  14,837
+  Lạc quan a/b/c/d 25/45/25/5 + P xấu 0: P/E  22,749 | DDM40  16,985
+  Bi quan a/b/c/d 5/30/40/25 + P xấu 0,40: P/E  14,424 | DDM40  12,966
+  Terminal P/B trần 1,0 (DDM): 15,743
+  Ke = r* thị trường 15,1%: P/E  17,136 | DDM40  12,579
+
+Tổ hợp đạt ≥19.800 (mid inputs, P/E 7 / DDM40 / DDM60):
+  a_giu_975/ok/đúng mốc: P/E7 36,252 DDM40 22,815 DDM60 24,433
+  a_giu_975/bad/đúng mốc: P/E7 28,974 DDM40 19,423 DDM60 20,745
+  b_600/ok/đúng mốc: P/E7 20,801 DDM40 15,650 DDM60 16,573
+  b_600/ok/mốc lùi: P/E7 23,790 DDM40 17,766 DDM60 19,020
+  c_500/ok/mốc lùi: P/E7 20,466 DDM40 16,420 DDM60 17,577
+  Giá PPA ròng để P/E 6,75 (pháp lý ổn, Q205) = 19.800: ≈591 đ/kWh
+
+SOTP r5 (Q205, r12%): tư vấn 240 ⇒ 27,962; trộn pháp lý (xấu: tư vấn 15×6 − 30) ⇒ 25,939
+  a_giu_975  r13–11%: 45,100–51,084
+  b_600      r13–11%: 27,690–30,807
+  c_500      r13–11%: 23,048–25,399
+  d_340      r13–11%: 15,530–16,647
+  Chiết khấu tiếp cận ngầm định = 1 − tâm/SOTP: 43% (SOTP 240) / 39% (trộn) — thông lệ holding/thiểu số 20–40% ⇒ SOTP×(0,6–0,8) = 15,563–20,751
+  Giá 19,800 = SOTP trộn × 0.76 (chiết khấu 24%)
+
+Cổ tức bền 2028+ r5 (đ/cp, ổn, mid, gồm lãi tiền năm 2) payout 27/40/60%:
+  a_giu_975  LNST 2028 ≈ 144.1: 1,458 / 2,160 / 3,240 | payout cần cho 2.435: 45%
+  b_600      LNST 2028 ≈  81.6: 826 / 1,224 / 1,835 | payout cần cho 2.435: 80%
+  c_500      LNST 2028 ≈  65.0: 657 / 974 / 1,461 | payout cần cho 2.435: 100%
+  d_340      LNST 2028 ≈  38.3: 388 / 574 / 862 | payout cần cho 2.435: 170%
+N7 tách: LN Q4/26 giữ lại ≈1,808 đ/cp; tiền ròng hôm nay -1,451 đ/cp; cổ tức FY26+KTPL ra ≈2,734
+N2 giá ròng 650 (pháp lý ổn, mid, đúng mốc): P/E6,75 22,138 | DDM40 16,605
+N2 giá ròng 695 (pháp lý ổn, mid, đúng mốc): P/E6,75 23,933 | DDM40 17,465
+N9 đuôi: chênh (giá ròng 2025 949 − 340) × sản lượng 2022+2023+2025 (682,5 tr kWh, thiếu 2024/2026) ≈ 415 tỷ trước thuế ≈ 12,448 đ/cp sau thuế — CHỈ là quy mô, không đưa vào kỳ vọng

@@ -1,46 +1,52 @@
-# DD — TV1 (CTCP Tư vấn Xây dựng Điện 1 / EVNPECC1, UPCOM) sau BCTC Q3/2026 · as-of 02/11/2026 · **VÒNG 4 (job `Taylor_20261102_094407`) — DỰNG LẠI ĐỊNH GIÁ theo kịch bản giá PPA Sông Bung 5; kết luận r3 bị thay (Phụ lục E3)** · job gốc `Taylor_20261102_035322` · VÒNG 2 (job `Taylor_20261102_042353`) · **VÒNG 3 (job `Taylor_20261102_075340`) — đã áp 4 BLOCKING + 10 NON-BLOCKING của phản biện vòng 2, xem Phụ lục E2**
+# DD — TV1 (CTCP Tư vấn Xây dựng Điện 1 / EVNPECC1, UPCOM) sau BCTC Q3/2026 · as-of 02/11/2026 · **VÒNG 5 (job `Taylor_20261102_100630`) — sửa theo phản biện vòng 3 (B1–B3, N1–N12), Phụ lục E4; thay vùng r4** · VÒNG 4 (job `Taylor_20261102_094407`) — DỰNG LẠI ĐỊNH GIÁ theo kịch bản giá PPA Sông Bung 5; kết luận r3 bị thay (Phụ lục E3)** · job gốc `Taylor_20261102_035322` · VÒNG 2 (job `Taylor_20261102_042353`) · **VÒNG 3 (job `Taylor_20261102_075340`) — đã áp 4 BLOCKING + 10 NON-BLOCKING của phản biện vòng 2, xem Phụ lục E2**
 
 > NGHIÊN CỨU READ-ONLY. Không khuyến nghị, không lệnh, không wire. User đang/đã giao dịch TV1 ngoài book V2.4 ⇒ "giữ/thêm/giảm" là quyết định của user; báo cáo chỉ đưa vùng giá + điều kiện đổi nhận định. Vòng 1 bị fundamental-skeptic phản biện REFUTED (mức văn bản/số liệu); vòng 2 áp 12 đính chính (Phụ lục E); vòng 2 bị phản biện REFUTED (medium) với 4 BLOCKING — bản này là vòng 3, đã áp toàn bộ (Phụ lục E2). **Đã qua 2 vòng phản biện (r1, r2). r3 và r4 CHƯA qua vòng 3. r4 thay định giá r3 (lỗi phương pháp: bỏ quên nghiên cứu giá PPA 13/10).**
 > **Nguồn:** [Q3 tr.X] = trang PDF `src/hn_q3_2026.pdf` (BCTC HN Q3/2026, ký 29/10/2026, **chưa soát xét**, bản scan) · [ME tr.X] `src/me_q3_2026.pdf` (BCTC tổng hợp/công ty mẹ) · [GT] `src/giaitrinh_hn_q3_2026.pdf` (CV 6603/TVĐ1-P3) · [H1 tr.X] = số trang **in** của `src/hn_h1_2026.pdf` (soát xét An Việt) · [Q2 tr.1] `src/hn_q2_2026.pdf` · [FY25 tr.X] = số trang in của `src/hn_fy2025_audited.pdf` (BCTC HN 2025 kiểm toán A&C) · [LV] `LEGAL_VN_20261102.md` (tra cứu pháp lý, tham khảo — cần luật sư xác nhận) · [IR] CBTT tải từ pecc1.com.vn vào `src/ir/` · [CB] `../dd_blind2_TV1_20261026/CYCLE_BLOCK.md` (khoá md5 4409305f…, 26/10) · [BQ] `tav2_bq` (lịch sử; chưa có dòng 2026Q3 của TV1 tại 02/11) · [DNSE] `calc/dnse_raw.json` (lấy 02/11/2026 ~10:50 ICT).
 > Phép tính: `calc/valuation.py` → `calc/valuation_out.txt` (tái lập: `python3 -I calc/valuation.py`). Số tự đặt gắn **[UL]** (ước lượng). Ngành: `kb/data_registry/market-state/sector_read_power_consulting_20261028.md` (Bobby, đọc mù).
 
-## 0. Kết luận (VÒNG 4 — dựng lại định giá; thay toàn bộ kết luận r3)
+## 0. Kết luận (VÒNG 5 — sửa theo phản biện vòng 3; thay kết luận r4)
 
-> **Bản r4 thay kết luận r3 "17.800–20.600, từ ngang đến cao hơn ~10%".** Lỗi gốc của r1–r3 (user chỉ ra 02/11 16:42): LNST bền và SOTP dựng trên giả định giá điện Sông Bung 5 giữ ~912–950 đ/kWh (chỉ −20% từ 2034), trong khi nghiên cứu giá PPA của chính nhóm ngày 13/10 (`../tv1_sb5_ppa_price_20261013/`) đã có chứng cứ hạ bậc từ 2027. Đồng thời r3 tự tính "cổ tức cần có 2.435–2.650" mà không để phép thử đó tham gia kết luận. Chi tiết: Phụ lục E3. **Bản r4 CHƯA qua phản biện vòng 3.**
+> **Bản r5 (job `Taylor_20261102_100630`) thay vùng r4 "8.700–10.600, tâm 9.900, giá +86…+129% (gấp đôi)".** Phản biện vòng 3 (`SKEPTIC3_20261102.md`, REFUTED medium) xác nhận HƯỚNG (giá > giá trị trừ khi PPA giữ giá) nhưng chỉ ra MỨC r4 là đầu bi quan: DDM không cho tiền tích luỹ sinh lãi và định giá tiền dưới mệnh giá (B1); P/E 5–6 lấy từ năm thị trường đã chiết khấu rủi ro PPA rồi áp lên LNST đã cắt ⇒ phạt kép (B2); câu "không tổ hợp nào đạt 19.800" bị chính SOTP bác (B3). r5 sửa hết trong một lần (Phụ lục E4). **Chưa qua phản biện vòng 4. Thay bản 02/11 15:25 (r3) đã gửi; chưa gửi bản r4 nào.**
 
-**Giá 19.800 đ (30/10/2026) CAO HƠN vùng giá trị hợp lý: 8.700–10.600 đ/cp, tâm ~9.900** [UL; `valuation_out.txt` khối "r4"]. Giá cao hơn vùng **+86%…+129%** (gấp ~2 lần tâm). Vùng = min–max của hai phương pháp **đồng hạng**, mỗi phương pháp lấy kỳ vọng trên 4 kịch bản giá PPA × 2 trạng thái pháp lý: **(i) P/E trên LNST bền 2027+** ⇒ 10.600; **(ii) DDM cổ tức phân phối được** (payout 27–40%, 10 năm + terminal P/B ≤0,6) ⇒ 8.700–9.700. Giá trị tài sản (SOTP) kỳ vọng ~24.900 chỉ là **trần tham chiếu** — cổ đông thiểu số không tiếp cận được (dưới).
+**Giá 19.800 đ (30/10/2026) CAO HƠN vùng giá trị cân bằng 13.900–18.100 đ/cp, tâm ~15.900** [UL; `valuation_out.txt` khối "r5"] — giá cao hơn vùng **+9%…+42%, so tâm +25%**. Vùng = min–max của hai phương pháp đồng hạng, kỳ vọng trên 4 kịch bản giá PPA × 2 trạng thái pháp lý × mốc hạ bậc (đúng 2027 / lùi 2 năm): **(i) P/E 6,5–7 trên LNST hoạt động bền 2027+ cộng tiền ròng cuối 2027** ⇒ 17.000–18.100; **(ii) DDM cổ tức** (payout 27–40%; tiền giữ lại hưởng lãi 5% trước thuế, cộng theo mệnh giá ở năm 10; P/B ≤0,6 chỉ áp VCSH hoạt động) ⇒ 13.900–14.500. **Giá hiện tại ngang giá trị khi giá PPA ròng ≥~590 đ/kWh VÀ pháp lý ổn** (đầu trên dải lãnh đạo nêu 500–600).
 
-**Trục chính = giá PPA Sông Bung 5 sau mốc hạ bậc (từ 2027 [UL mốc])** — thuỷ điện tạo 67% lãi gộp 2025 [FY25 tr.34: DT 261,6, KQ bộ phận 165,1], giá ròng 2025 ≈949 đ/kWh (đã tách thuế TN + phí DVMTR ≈37,2 tỷ — khoản EVN trả thêm ngoài giá):
+**Trục chính = giá PPA Sông Bung 5 sau mốc hạ bậc** — thuỷ điện tạo 67% lãi gộp 2025 [FY25 tr.34: DT 261,6, KQ bộ phận 165,1]; giá ròng 2025 ≈949 đ/kWh (đã tách thuế TN + phí DVMTR ≈37,2 tỷ):
 
-| Kịch bản giá ròng 2027+ | P [UL] | Căn cứ | LNST thuỷ điện (Q175–210) | LNST bền cả công ty (pháp lý ổn / cấm thầu, mid) | P/E (ổn, mid) | DDM payout 27/40% (ổn) |
-|---|---|---|---|---|---|---|
-| (a) giữ ~975 | **0,10** | Chứng cứ NGƯỢC: BCTN 2025 tr.38 công ty tự nói giá SB5 "sụt giảm"; lãnh đạo nêu mốc 2027 (KBSV 17/04/2026); vay dự án tất toán 31/3/2025 (bậc giá cao gắn kỳ trả nợ — TT 57/2020 Đ.13). Chứng cứ thuận duy nhất: mốc 2022 của dự thảo 2018 đã trôi mà chưa hạ, KH 2026 bán điện 187 tỷ | 80–107 | 133 / 108 | 24.700 | 15.400 / 17.300 |
-| (b) 600 | **0,35** | Lời lãnh đạo 500–600 (KBSV) — kịch bản trung tâm, chưa có văn bản | 27–44 | 76 / 51 | 14.500 | 10.800 / 11.900 |
-| (c) 500 | **0,35** | như (b) | 13–27 | 60 / 35 | 11.800 | 9.200 / 10.400 |
-| (d) ~340 | **0,20** | Văn bản 2018 (PECC1 PA bán SB5 tr.13): bậc sau 243,66 + O&M ~95 — có cơ sở văn bản, mâu thuẫn với lời lãnh đạo | −9…0 | 36 / 11 | 7.400 | 5.900 / 6.700 |
-| **Kỳ vọng** (P pháp lý xấu 0,35) | | | | | **10.600** | **8.700 / 9.700** |
+| Kịch bản giá ròng 2027+ | P [UL] | Căn cứ | LNST hoạt động bền (ổn / cấm thầu, mid Q205) | P/E 6,75 (ổn / cấm thầu) | DDM 27 / 40% (ổn) |
+|---|---|---|---|---|---|
+| (a) giữ ~975 | **0,10** | Chứng cứ NGƯỢC: BCTN 2025 tr.38 "giá điện… sụt giảm" (trích 13/10, chưa kiểm lại); lời lãnh đạo mốc 2027 (KBSV 17/04/2026, chưa đọc được bản gốc); vay dự án tất toán 31/3/2025. Thuận: mốc 2022 của dự thảo 2018 đã trôi; KH 2026 bán điện 187 tỷ | 143 / 118 | 35.100 / 28.000 | 21.700 / 22.800 |
+| (b) 600 | **0,45** | Lời lãnh đạo 500–600 (qua KBSV) — trung tâm; tóm tắt tìm kiếm một báo cáo CTCK (nghi VCBS, chưa đọc được bản gốc): DT điện 2026–30 ~160 tỷ/năm ≈ giá ròng ~590 | 82 / 57 | 20.100 / 13.100 | 15.000 / 15.700 |
+| (c) 500 | **0,35** | như (b) | 65 / 40 | 16.200 / 9.100 | 13.200 / 13.700 |
+| (d) ~340 | **0,10** | Văn bản 2018 (PECC1 PA bán SB5 tr.13): bậc 243,66 + O&M ~95. Nhưng chưa bậc nào từng áp (giá ròng thực 2021–25 ≈870–950) và lời lãnh đạo 2026 mới hơn ⇒ hạ 0,20 → 0,10 | 39 / 14 | 9.800 / 2.700 | 10.400 / 10.700 |
+| **Kỳ vọng** (P cấm thầu 0,30; P mốc lùi 0,15) | | | | **17.600** (6,5: 17.000 · 7: 18.100) | **13.900 / 14.500** |
 
-Giả định chung [UL]: sản lượng 175 (bình quân 2013–23) – 210 (2021–25, KBSV), giữa 192,5; O&M tiền mặt 25 (2025 suy ra 21,2); khấu hao 38 (đến ~2039); chi phí chung phân bổ 8; thuế 20%; **tư vấn LNST 30/40/50 nếu pháp lý ổn, 10/15/20 nếu cấm thầu EVN** (2025 ≈35,8, 2024 ≈15,1 suy từ báo cáo bộ phận [FY25 tr.34-35]); **TC ròng 0** (9T/26 −1,3; r3 dùng +5 là lạc quan); P/E **5–6 nếu pháp lý ổn** (trần = trung vị 2025 trước vụ án 6,0), **3–4 nếu cấm thầu**; PV về 11/2026 với Ke 12,3–13,4%, cộng cổ tức FY2026 1.000 (KH ĐHĐCĐ 2026) – 1.500.
+Giả định chung [UL]: sản lượng giữa **205** tr kWh (bình quân các năm có số 2015–2025 = 207, thiếu 2018–20/2024; nhạy 175–210, 2013–23 công ty 175,3); O&M tiền mặt 25; khấu hao 38; chi phí chung phân bổ 8; thuế 20%; tư vấn LNST 30/40/50 nếu pháp lý ổn, **10/15/20 + khoản buộc nộp/bồi thường một lần 30 tỷ** nếu cấm thầu EVN (**cùng P/E** — PPA không phụ thuộc đấu thầu, không phạt hai lần); tiền ròng đầu 2027 = −38,7 (30/9) + LN Q4/2026 ở giá cũ 40 + KH−capex quý − cổ tức FY2026 − quỹ KTPL FY2026 ≈ **−63,5 tỷ**; lãi tiền 5%/năm trước thuế; cổ tức FY2026 **1.000/1.500/2.000** (KH 10%; nhưng tiền lệ KH FY2025 6% → thực trả 15%, KH LNST 2026 104,2 trong khi 9T đã 124,6); PV về 11/2026, Ke 12,3–13,4%.
 
-**Phép thử cổ tức (đồng hạng, không còn là chú thích):** cổ tức cần có để biện minh 19.800 = **2.435–2.650 đ/năm** (65–71 tỷ). Cổ tức bền 2028+ ở payout 27% thực tế: (a) 1.350 · (b) 770 · (c) 610 · (d) 360 đ. Payout cần có: (a) ≥49% · (b) ≥86% · (c) ≥108% · (d) ≥183% — chỉ kịch bản giữ giá cũ cộng nâng payout gần gấp đôi mới đủ. KH cổ tức FY2026 của chính công ty: **1.000 đ (10%)** (ĐHĐCĐ 30/04/2026, baodauthau.vn). Vì sao DDM thấp hơn P/E: luật VN chỉ cho chia cổ tức từ LNST; khấu hao 38 tỷ/năm thành tiền nằm lại công ty (FCFE ≈ LNST + 33), quỹ khen thưởng–phúc lợi 20% ra khỏi VCSH, và tiền giữ lại có ứng viên dùng sẵn: **điện mặt trời nổi lòng hồ 46 MWp + 5 MW BESS, ~800 tỷ** (baodauthau 27/06/2025, 30/04/2026: "chưa thể triển khai do những thay đổi về thủ tục pháp lý", chưa vào quy hoạch) — chưa có hợp đồng/giá bán ⇒ **không tính** giá trị.
+**Vì sao chọn P/E 6,5–7 (B2):** LNST đã CẮT theo giá PPA mới ⇒ rủi ro hạ bậc đã nằm trong mẫu số, không chiết khấu thêm ở bội số. Trung vị P/E 23 mã thuỷ điện niêm yết [BQ `calc/bq_hydro_peer_pe.csv`]: 2024 14,2 · 2025 12,8 · 2026 YTD 10,9 (p25 9,1). 6,5–7 = chiết khấu ~35–40% so trung vị 2026 cho UPCOM thanh khoản thấp (ADV ~0,4–0,7 tỷ), quy mô nhỏ, mảng tư vấn chu kỳ. P/E TV1 2025 6,0 / 2026 YTD 5,1 là bội số trên LNST **chưa cắt** — thị trường đã chiết khấu PPA ở đó ⇒ không dùng lại. Nhạy: P/E 5,5 ⇒ 14.700; 6,0 ⇒ 15.900; 8 ⇒ 20.400; 9 ⇒ 22.700.
 
-**Thị trường đang định giá gì:** ở 19.800 và P/E 5,5 (pháp lý ổn), cần LNST bền ≈105 tỷ ⇒ thuỷ điện ≈65 ⇔ **giá PPA ròng ≈790 đ/kWh** (−17% so 2025) ở sản lượng 192,5 — tức thị trường định giá như thể giá điện chỉ giảm nhẹ hoặc giữ, ngược với chính lời lãnh đạo (500–600). Ở P/E 4–6 giá ngầm định LNST bền 88–132 tỷ; LNST bền r4 ở (b)/(c) pháp lý ổn chỉ 76/60.
+**Vì sao DDM thấp hơn P/E (viết lại, B1):** sau sửa, khoảng cách còn ~3.000–4.000 đ/cp và đến từ đúng một chỗ — **phần giá trị hoạt động ở năm 10** được tính theo P/B ≤0,6 trên VCSH hoạt động (thanh khoản thấp, thiểu số không quyết phân phối), còn P/E ngầm định giá trị đó theo bội số 6,5–7 lần lợi nhuận. Tiền giữ lại **không còn bị phạt**: ví dụ (c)/ổn/payout 27% = PV cổ tức 4.700 + terminal hoạt động 1.900 + tiền ròng năm 10 (586 tỷ, theo mệnh giá) 6.600 = 13.200 (r4: 9.200). Nhạy: lãi tiền 0% ⇒ DDM40 13.800; 3% ⇒ 14.200; 6,5% ⇒ 14.700; terminal P/B trần 1,0 ⇒ 15.700.
 
-**Kết luận có phụ thuộc giả định khắt không (nhạy, mid):** bỏ hẳn rủi ro pháp lý ⇒ P/E 13.200 / DDM40 10.900; thêm trọng số giá rất lạc quan (a/b/c/d = 25/45/25/5) ⇒ 16.000 / 12.600; P/E 7 (≈2024) cho mọi kịch bản ⇒ 16.400; Ke = r\* thị trường 15,1% ⇒ DDM40 8.200; hạ bậc trễ 2 năm (2029) ⇒ +1.000–1.300 đ/cp qua cổ tức (≤+3.800–4.900 nếu toàn bộ LN giữ lại được định giá bằng sổ). **Không tổ hợp hợp lý nào ngoài "giữ giá cũ" đưa giá trị lên 19.800.** Kịch bản (a) riêng: P/E 24.700, DDM 15.400–20.300 ⇒ chỉ khi PPA giữ giá thì giá hiện tại mới nằm trong vùng.
+**Phép thử cổ tức (đồng hạng):** cổ tức cần có để biện minh 19.800 = **2.435–2.650 đ/năm** (Gordon g=0, Ke 12,3–13,4%). Cổ tức bền 2028+ ở payout 27%: (a) 1.460 · (b) 830 · (c) 660 · (d) 390 đ; payout cần: (a) 45% · (b) 80% · (c) 100% · (d) 170%. DDM vẫn cho thấy: với cổ đông thiểu số nhận tiền qua cổ tức, 19.800 chỉ đứng được nếu giá điện giữ hoặc tiền tích luỹ cuối cùng được trả ra/định giá đủ.
 
-**SOTP (trần tham chiếu, không phải kỳ vọng)** — DCF thuỷ điện 2027–2059 (mô hình 13/10 cập nhật nợ ròng điều chỉnh −38,7) + tư vấn 40×6: (a) 42.300–47.800 · (b) 25.900–28.800 · (c) 21.600–23.700 · (d) 14.300–15.200; kỳ vọng ~24.900 (r 12%). Không có tư vấn: (b) 16.900–19.800, (c) 12.600–14.700. Khoảng cách SOTP–DDM là giá trị kẹt trong công ty (payout thấp, đấu giá SB5 thất bại 5–6 lần 2018–21 — người mua đã chiết khấu bậc giá [13/10 §4]).
+**Tổ hợp đạt 19.800 — chỉ trong P/E/DDM của cổ đông thiểu số (B3):** (a) giữ giá — mọi phương pháp (P/E 7 ổn 36.300; cấm thầu 29.000; DDM40 19.400–22.800); (b) 600 + pháp lý ổn ở P/E 7 (20.800); (b)/(c) + pháp lý ổn + mốc lùi 2 năm ở P/E 7 (23.800 / 20.500). Không tổ hợp nào ở (d) hoặc ở (b)/(c) + cấm thầu. Nếu 500–600 thực ra là **giá cố định chưa gồm O&M** (N2 — chưa kiểm được bản gốc KBSV) thì giá ròng ≈595–695 ⇒ P/E 22.100–23.900, DDM40 16.600–17.500 — tức giá hiện tại nằm trong vùng.
 
-**Ngoài giá điện, phần còn lại của r3 giữ nguyên:** Q3 LNST 66,9 tỷ có 1/3–3/4 không lặp lại/chưa giải thích (thu nhập khác 33,8 tỷ, hoàn nhập dự phòng 24,9 tỷ trong quý chưa soát xét — §3); "LNST 9T/Q3 đẹp" là thuỷ điện **ở giá cũ** + tư vấn; rủi ro pháp lý (cấm thầu EVN, buộc nộp lợi bất chính) §7; tiền ròng điều chỉnh ≈ −39 tỷ §5.
+**SOTP (giá trị tài sản, không phải kỳ vọng của cổ đông thiểu số):** DCF thuỷ điện 2027–2059 (Q205) + tư vấn 40×6 + tiền ròng −38,7: (a) 45.100–51.100 · (b) 27.700–30.800 · (c) 23.000–25.400 · (d) 15.500–16.600 (r 13–11%); kỳ vọng r 12% **28.000** (trộn pháp lý 25.900). (b)/(c) đều **cao hơn** 19.800. Tâm 15.900 = SOTP trộn × 0,61 ⇒ **chiết khấu tiếp cận ngầm định ~39%** (43% so SOTP không trộn) — **ở mép trên** thông lệ holding/thiểu số 20–40% (thông lệ áp lên SOTP trộn ⇒ 15.600–20.800). Giá 19.800 = SOTP trộn × 0,76 (chiết khấu 24%, trong thông lệ). Đọc cân: theo giá trị tài sản, giá hiện tại không đắt; theo dòng tiền cổ đông thiểu số thực nhận, giá cao hơn kỳ vọng. Lịch sử bán SB5 cho thấy tài sản khó hiện thực hoá: **≥5 lần đấu giá không có người đăng ký, 01/2019 (1.688 tỷ) → 11/2020 lần 4 (1.390) → 05/2021 lần 5 (1.351,7 tỷ, chưa VAT/phí trả nợ trước hạn)** (baodauthau.vn; Công ty Đấu giá Hợp danh Quốc gia).
+
+**Nhạy kết luận (mid, P/E 6,75 | DDM40):** trọng số giá r4 (10/35/35/20) + P xấu 0,35 ⇒ 16.200 | 13.800; P xấu 0 ⇒ 19.700 | 15.500; P mốc lùi 0 / 0,30 ⇒ 17.100 / 18.000 | 14.200 / 14.800; lạc quan (25/45/25/5, P xấu 0) ⇒ 22.700 | 17.000; bi quan (5/30/40/25, P xấu 0,40) ⇒ 14.400 | 13.000; Q giữa 175 / 236,6 ⇒ 14.100 / 21.200 | 12.800 / 16.300; Ke 15,1% ⇒ 17.100 | 12.600. Dải hai chiều 12.600–22.700 bao quanh giá; **kết luận "giá cao hơn tâm" đổi chiều khi PPA ≥~590 + pháp lý ổn, hoặc sản lượng bền ≥~230, hoặc P/E ≥~8.**
+
+**N7 (tách rõ):** LN Q4/2026 ở giá cũ giữ lại ≈ +1.800 đ/cp; tiền ròng điều chỉnh hôm nay −38,7 tỷ ≈ −1.450 đ/cp; cổ tức FY2026 + quỹ KTPL ra ≈ −2.700 đ/cp (cổ tức về tay người giữ, cộng riêng).
+
+**Ngoài giá điện, phần còn lại giữ nguyên:** Q3 LNST 66,9 tỷ có 1/3–3/4 không lặp lại/chưa giải thích (§3); rủi ro pháp lý §7; đuôi xấu mới (N9, không đưa vào kỳ vọng): nếu biểu giá 2018 bị áp hồi tố, chênh 2022/2023/2025 ≈415 tỷ trước thuế (~12.400 đ/cp sau thuế) — tiền lệ Sông Bung 4A (Thanh tra Chính phủ): ký lại giá 7/2022 về trần khung 1.110 đ/kWh và yêu cầu EVN "xác định tiền lãi" phần trả vượt; **chưa thấy xác nhận truy thu hồi tố** (vnbusiness.vn) ⇒ quy mô, không phải xác suất.
 
 | | Tích cực (có chứng cứ) | Tiêu cực (có chứng cứ) |
 |---|---|---|
-| Giá PPA SB5 | Chưa có văn bản xác định mức/mốc; lịch hạ bậc 2022 của dự thảo 2018 đã không xảy ra; KH 2026 bán điện 187 tỷ | Văn bản 2018 có bậc 569,36 → 243,66; BCTN 2025 tr.38 công ty thừa nhận "sụt giảm"; lãnh đạo: từ 2027 xuống 500–600 (−40…−50%) |
-| Lợi nhuận lõi | Tư vấn 9T +29% DT [UL]; biên gộp Q3 35,5% bỏ hoàn nhập | LNST bền 2027+ ở 500–600: **60–76 tỷ** (pháp lý ổn) vs 2025 150,2; KH LNST 2026 của công ty 104,2 |
-| Cổ tức | FY2025 1.500 (7,6%) đã trả | KH FY2026 1.000; payout 27% + 20% quỹ KTPL; cổ tức bền 2028+ ở (b)/(c) 610–770 đ (payout 27%) |
-| Pháp lý, kế toán | Pháp nhân không bị truy cứu hình sự 5 tội danh theo luật hiện hành [LV] | Chủ tịch + phó phòng TCKT bị khởi tố; TV1 có tên trong 13 công ty liên quan; thu nhập khác Q3 chưa thuyết minh |
-| Định giá | P/E TTM 2,8x (giá cũ) | P/E trên LNST bền 2027+ (b/c, ổn) **7,0–8,8x**; giá ngầm định PPA ≈790 đ/kWh |
+| Giá PPA SB5 | Chưa có văn bản mức/mốc; lịch hạ bậc 2022 của dự thảo 2018 không xảy ra; KH 2026 bán điện 187 tỷ; 500–600 có thể là giá cố định chưa O&M (chưa kiểm) | Văn bản 2018 bậc 569,36 → 243,66; công ty thừa nhận "sụt giảm"; lãnh đạo: từ 2027 xuống 500–600 |
+| Lợi nhuận | Tư vấn 9T +29% DT [UL]; công ty đặt KH thấp (KH LNST 2026 104,2 < 9T 124,6) | LNST hoạt động bền (b)/(c) ổn 65–82 tỷ vs 2025 150,2 |
+| Cổ tức | FY2025 1.500 (KH chỉ 6%); tiền tích luỹ sinh lãi | KH FY2026 10%; payout 27% + 20% KTPL; cần ≥80% payout ở (b) để biện minh giá |
+| Pháp lý, kế toán | Pháp nhân không bị truy cứu hình sự 5 tội danh [LV] | Chủ tịch + phó phòng TCKT bị khởi tố; TV1 trong 13 công ty liên quan; thu nhập khác Q3 chưa thuyết minh; đuôi truy thu biểu giá (N9) |
+| Định giá | SOTP trộn 25.900 > giá (giá = chiết khấu 24%) | P/E/DDM kỳ vọng 13.900–18.100 < giá; P/E LNST bền (b)/(c) ổn 6,5–8,1x |
 
-**Điều làm nhận định TÍCH CỰC hơn:** (1) **văn bản** (CBTT/BCTN/ĐHĐCĐ/BCTC thuyết minh) xác nhận PPA giữ giá ≥~800 đ/kWh ròng sau 2027, hoặc mốc hạ bậc lùi ≥2 năm; (2) điện mặt trời lòng hồ có quyết định chủ trương + giá bán/hợp đồng, nguồn vốn không pha loãng; (3) cổ tức FY2026 ≥2.000 đ hoặc cam kết payout ≥50%; (4) bán SB5 ≥1.000 tỷ; (5) kết luận vụ án không có cấm thầu/buộc nộp lợi bất chính + kiểm toán FY2026 chấp nhận toàn phần. **Điều làm TIÊU CỰC hơn:** (1) văn bản xác nhận mức ≤500 hoặc gần 340 đ/kWh; (2) quyết định cấm thầu EVN/EVNNPT; (3) kiểm toán ngoại trừ; (4) dùng tiền giữ lại đầu tư 800 tỷ điện mặt trời bằng vay/phát hành khi chưa có giá bán; (5) cổ tức FY2026 ≤1.000.
+**Điều làm nhận định TÍCH CỰC hơn:** (1) **văn bản** xác nhận giá PPA ròng ≥~600 đ/kWh (hoặc 500–600 là giá cố định chưa O&M) hoặc mốc lùi ≥2 năm; (2) điện mặt trời lòng hồ có chủ trương + giá bán/hợp đồng, vốn không pha loãng; (3) cổ tức FY2026 ≥2.000 đ hoặc cam kết payout ≥50%; (4) bán SB5 ≥1.000 tỷ; (5) vụ án kết thúc không cấm thầu/buộc nộp + kiểm toán FY2026 chấp nhận toàn phần. **Điều làm TIÊU CỰC hơn:** (1) văn bản xác nhận ≤500 hoặc gần 340 đ/kWh; (2) quyết định cấm thầu EVN; (3) kiểm toán ngoại trừ; (4) đầu tư ~800 tỷ điện mặt trời bằng vay/phát hành khi chưa có giá bán; (5) cổ tức FY2026 thấp hơn mức thực trả FY2025 (<1.500 đ) — so với tiền lệ thực trả, không so KH; (6) văn bản truy thu phần giá trả vượt 2022–2026.
 
 ## 1. Kiểm lại số dùng lại (DD cũ, CYCLE_BLOCK, checklist)
 | Số | Nguồn cũ | Kiểm | Kết quả |
@@ -118,7 +124,7 @@ Giả định chung [UL]: sản lượng 175 (bình quân 2013–23) – 210 (20
 
 ## 8. Định giá — `calc/valuation_out.txt`
 
-> ⚠️ **r4:** §8b (SOTP r3), §8d (LNST bền 103–172) và các kịch bản Tốt/Cơ sở/Xấu r3 dựng trên **giá điện cũ** ⇒ **BỊ THAY** bởi §8e. Giữ lại để đối chiếu; không dùng để kết luận.
+> ⚠️ **r5:** §8b (SOTP r3), §8c (P/E 6–8x), §8d (LNST bền 103–172) dựng trên **giá điện cũ** ⇒ BỊ THAY; §8e (r4) **cũng bị thay** về mức bởi **§8f (r5)**. Giữ lại để đối chiếu; KHÔNG dùng để kết luận — mọi số kết luận lấy ở §0/§8f.
 ### 8a. Bội số hôm nay (giá 19.800, 26.691.319 cp)
 | | Giá trị |
 |---|---|
@@ -137,11 +143,11 @@ DCF thuỷ điện có thời hạn (2027–2059, thuê đất đến 08/2059 [C
 | 200 | 1.148 | 1.058 | 979 | 911 |
 | 239 (TB 2024–25) | 1.417 | 1.305 | 1.208 | 1.123 |
 
-Rủi ro PPA (ngày hết hạn chưa xác định; giả định −20% DT từ 2034 [UL]): DT200 r12% ⇒ 876; DT171 r13% ⇒ 676. SOTP thấp = 676 + tư vấn 0 − 38,7 = **637 tỷ = 23.900 đ/cp** (r1: 24.300); giữa = 979 + tư vấn 40×6 − 38,7 = **1.180 tỷ = 44.200 đ/cp** (r1: 44.700). Đối chiếu: SB5 rao bán 2017–18 giá khởi điểm 1.688 → 1.390 tỷ (gồm nợ), **5 lần không bán được** [SOTP 23/07].
+Rủi ro PPA (ngày hết hạn chưa xác định; giả định −20% DT từ 2034 [UL]): DT200 r12% ⇒ 876; DT171 r13% ⇒ 676. SOTP thấp = 676 + tư vấn 0 − 38,7 = **637 tỷ = 23.900 đ/cp** (r1: 24.300); giữa = 979 + tư vấn 40×6 − 38,7 = **1.180 tỷ = 44.200 đ/cp** (r1: 44.700). Đối chiếu: SB5 rao bán 2017–18 giá khởi điểm 1.688 → 1.390 tỷ (gồm nợ), ~~5 lần không bán được [SOTP 23/07]~~ [r5 thống nhất: ≥5 lần đấu giá 01/2019 → 05/2021, khởi điểm 1.688 → 1.390 (11/2020) → 1.351,7 tỷ (05/2021), đều không có người đăng ký — baodauthau.vn; mốc "2017–18" là SAI].
 
-**Vì sao không dùng SOTP làm kỳ vọng:** cổ đông thiểu số nhận giá trị qua **cổ tức** (payout 27%) hoặc **bán tài sản** (tiền sử thất bại). Phép thử dòng cổ tức (g=0, Ke 12,3–13,4%): DPS 1.500 ⇒ 11.200–12.200; 2.000 ⇒ 14.900–16.300; 2.800 ⇒ 20.900–22.800 đ/cp (cao hơn giá). **Cổ tức cần có để biện minh giá 19.800 = 19.800 × Ke = 2.435–2.650 đ/năm** (65–71 tỷ ⇒ payout ~43% LNST 2025 150,2 … ~53% LNST bền cơ sở 134). Giá 19.800 ≈ thị trường kỳ vọng payout tăng lên ~43–53% hoặc giá trị giữ lại không bị rò rỉ.
+**Vì sao không dùng SOTP làm kỳ vọng:** cổ đông thiểu số nhận giá trị qua **cổ tức** (payout 27%) hoặc **bán tài sản** (tiền sử thất bại). Phép thử dòng cổ tức (g=0, Ke 12,3–13,4%): DPS 1.500 ⇒ 11.200–12.200; 2.000 ⇒ 14.900–16.300; 2.800 ⇒ 20.900–22.800 đ/cp (cao hơn giá). **Cổ tức cần có để biện minh giá 19.800 = 19.800 × Ke = 2.435–2.650 đ/năm** (65–71 tỷ ⇒ payout ~43% LNST 2025 150,2 … ~53% LNST bền cơ sở 134). ~~Giá 19.800 ≈ thị trường kỳ vọng payout tăng lên ~43–53%…~~ [BỊ THAY r5: payout cần có theo LNST sau hạ bậc = (a) 45% · (b) 80% · (c) 100% — §8f].
 
-### 8c. Chi phí vốn, DCF vô hạn
+### 8c. Chi phí vốn, DCF vô hạn — ⚠️ BỊ THAY (r5, B2): câu "P/E hợp lý ~6–8x nếu không rủi ro pháp lý / dải 3,5–6x là chiết khấu pháp lý" không còn dùng; bội số r5 = 6,5–7 cho mọi trạng thái pháp lý, rủi ro pháp lý đi qua LNST tư vấn + khoản một lần (§8f)
 Không làm DCF vô hạn cho tư vấn: DT phụ thuộc tư cách nhà thầu EVN (chưa xác định sau vụ án) — terminal Gordon sẽ là giả định chồng giả định. Dùng P/E với Ke nội địa 12,3–13,4% (khung β≈1,1 của nhóm, β TV1 chưa đo, chưa phần bù thanh khoản — xem §0) làm phép thử: tư vấn g≈0, payout cao ⇒ P/E hợp lý ~6–8x **nếu không có rủi ro pháp lý**; dải 3,5–6x ở §0 là chiết khấu pháp lý tự đặt [UL].
 Bối cảnh lãi suất (chỉ để tham khảo, không đổi giá trị hợp lý): r\* thị trường 15,1% (panel 30/10/2026, n=147 mã; r hằng mô hình 12,25%), percentile 75% lịch sử 2014→2026, đỉnh 2022 15,9%, đáy 2022–23 12,1% · TPCP 10Y 4,58% @30/10/2026, +0,64 điểm % trong 12 tháng (nguồn chưa đối chiếu độc lập) [`calc/rate_lines.txt`].
 
@@ -157,7 +163,7 @@ Bối cảnh lãi suất (chỉ để tham khảo, không đổi giá trị hợ
 
 LNST bền cơ sở **103–172** (giữa 134) [UL] = thuỷ điện 68–117 (DT 171 → 239; công thức `(DT×0,9−68,8)×0,8`) + tư vấn 30–50 + TC 5 — bản r1 ghi "125–155 = 75–110 + 30–50 + 5" **không tái lập** từ khối của nó (bỏ nhánh thiết kế). Bảng trên là lưới LNST × P/E tham chiếu; ô cơ sở: 103×3,5 = 13.500 … 172×4,5 = 29.000. LNST 2023/24/25: 75,6 / 92,0 / 150,2 [CB E].
 
-### 8e. r4 — Định giá dựng lại theo giá PPA (THAY 8b/8d) [`valuation_out.txt` khối "r4"]
+### 8e. r4 — Định giá dựng lại theo giá PPA [`valuation_out.txt` khối "r4"] — ⚠️ MỨC BỊ THAY bởi §8f (r5); giữ để đối chiếu
 **Hiệu chuẩn** [FY25 tr.34]: thuỷ điện 2025 Q 236,6 tr kWh, DT 261,60 gồm thuế TN 28,66 + phí DVMTR ~8,5 [UL 36 đ/kWh] = 37,2 pass-through ⇒ giá ròng **949 đ/kWh**; chi phí tiền mặt bộ phận 21,2; khấu hao 38,1. Hàm LNST thuỷ điện 2027+ = (Q×p − O&M 25 − KH 38 − chung 8) × 0,8 [UL].
 
 | LNST thuỷ điện (tỷ) | Q 175 | Q 210 |
@@ -203,24 +209,43 @@ Ví dụ (c)/ổn/27%: PV cổ tức 3.940 + terminal 5.300 (P/B terminal 0,57).
 
 **SOTP trần** (EV thuỷ điện 2027–2059, Q 192,5, giá có phần O&M 95 đ trượt 2,5%, capex 5, + tư vấn 40×6, + nợ ròng điều chỉnh −38,7; r 11–13%): (a) 42.300–47.800 · (b) 25.900–28.800 · (c) 21.600–23.700 · (d) 14.300–15.200; kỳ vọng r 12% ~24.900. Đối chiếu 13/10 (nợ ròng −117, Q 210, không tư vấn): (b) 19.600–23.500, (c) 14.500–17.600 — cùng vùng sau khi chỉnh nợ/sản lượng.
 
+### 8f. r5 — Sửa định giá theo phản biện vòng 3 (THAY vùng §8e) [`valuation_out.txt` khối "r5"]
+**Thay đổi so r4:** (B1) DDM: tiền ròng tích luỹ hưởng lãi 5% trước thuế, cộng theo mệnh giá ở năm 10; P/B ≤0,6 chỉ áp VCSH hoạt động (= VCSH − tiền ròng; giảm 33/năm theo KH − capex). (B2) P/E 6,5/6,75/7 (lo/mid/hi) cho LNST hoạt động sau hạ bậc, căn cứ trung vị P/E thuỷ điện niêm yết 2026 YTD 10,9 [BQ `calc/bq_hydro_peer_pe.csv`] trừ ~35–40%; cùng bội số cho cả hai trạng thái pháp lý. (N4) cấm thầu = tư vấn 10/15/20 + một lần 30 tỷ [UL]. (N1) P giá 10/45/35/10. (N5) P cấm thầu 0,30 (= R1 = 1 − M5); P mốc lùi 2 năm 0,15 có điều kiện hạ bậc ⇒ P(hạ bậc đúng 2027) = 0,90 × 0,85 ≈ **0,77 (R0 0,75)**, P(M0 tích cực) = 0,10 + 0,135 ≈ **0,24**. (N6) Q 175/205/210. (N7) P/E cộng tiền ròng cuối 2027 (tiền ròng đầu 2027 ≈ −63,5 tỷ). (N3) cổ tức FY2026 1.000/1.500/2.000.
+
+| Đ/cp (mid, đúng mốc) | P/E 6,75 ổn | P/E cấm thầu | DDM27 ổn | DDM40 ổn | DDM40 cấm thầu | DDM60 ổn |
+|---|---|---|---|---|---|---|
+| (a) 975 | 35.100 | 28.000 | 21.700 | 22.800 | 19.400 | 24.400 |
+| (b) 600 | 20.100 | 13.100 | 15.000 | 15.700 | 12.300 | 16.600 |
+| (c) 500 | 16.200 | 9.100 | 13.200 | 13.700 | 10.300 | 14.500 |
+| (d) 340 | 9.800 | 2.700 | 10.400 | 10.700 | 6.600 | 11.100 |
+
+| Kỳ vọng | lo | mid | hi |
+|---|---|---|---|
+| (i) P/E | 11.600 | **17.600** (6,5: 17.000 · 7: 18.100) | 21.000 |
+| (ii) DDM 27% | 10.500 | **13.900** | 16.200 |
+| (ii) DDM 40% | 10.900 | **14.500** | 16.800 |
+| (ii) DDM 60% | 11.500 | 15.300 | 17.800 |
+
+**Vùng giá trị cân bằng** = [min(P/E 6,5; DDM27); max(P/E 7; DDM40)] (mid) = **13.900–18.100, tâm 15.900**; giá 19.800 cao hơn +9%…+42% (tâm +25%). Giá PPA ròng hoà vốn (P/E 6,75, ổn, Q205) ≈ **591 đ/kWh**. Phân rã B1, nhạy, tổ hợp ≥19.800, SOTP và chiết khấu tiếp cận ngầm định: §0 (cùng số, `valuation_out.txt`).
+
 ## 9. Thanh khoản [BQ, DNSE]
 ADV20 đến 28/10: **0,72 tỷ/ngày** trung bình, **trung vị 0,41 tỷ** [BQ `calc/bq_px.csv`]; phiên 30/10 (sau công bố Q3 tối 29/10): 156.400 cp ≈ 3,1 tỷ, +4,8% [DNSE]. Biên độ UPCOM ±15%. Vị thế lớn hơn vài trăm triệu đồng/ngày sẽ là người tạo giá.
 
-## 10. Mốc kiểm chứng (hai chiều; r4 — sửa theo trục giá PPA; P = ước lượng)
+## 10. Mốc kiểm chứng (hai chiều; r5 — thống nhất xác suất với mô hình; P = ước lượng)
 | # | Mốc | Ngày chấm | Chiều tích cực | Chiều tiêu cực | P(tích cực) |
 |---|---|---|---|---|---|
-| **M0** | **Văn bản giá PPA SB5 2027+** (CBTT, BCTN 2026, tài liệu ĐHĐCĐ 2027, thuyết minh BCTC kiểm toán 2026, hoặc doanh thu thuỷ điện Q1/2027 chia sản lượng) | sớm nhất BCTC kiểm toán 2026 (~03/2027) / ĐHĐCĐ (~04/2027) / BCTC Q1/2027 (~04/2027) | giá ròng ≥~800 đ/kWh hoặc mốc lùi ≥2 năm | ≤600 (≤500: xấu hơn kịch bản trung tâm; ~340: kịch bản (d)) | **0,10–0,15** [UL; = P(a) + phần mốc lùi] |
+| **M0** | **Văn bản giá PPA SB5 2027+** (CBTT, BCTN 2026, tài liệu ĐHĐCĐ 2027, thuyết minh BCTC kiểm toán 2026, hoặc doanh thu thuỷ điện Q1/2027 chia sản lượng) | sớm nhất BCTC kiểm toán 2026 (~03/2027) / ĐHĐCĐ (~04/2027) / BCTC Q1/2027 (~04/2027) | giá ròng ≥~600 đ/kWh (hoà vốn P/E ≈591), hoặc 500–600 là giá cố định chưa O&M, hoặc mốc lùi ≥2 năm | <~590 (≤500: dưới trung tâm; ~340: kịch bản (d)) | **0,24** [UL; = P(a) 0,10 + 0,90 × P(mốc lùi) 0,15 — khớp mô hình §8f; chưa tính khả năng (b) ở mép ≥600] |
 | M1 | LNST HN Q4/2026 | ~30/01/2027 | ≥45 tỷ | <25 tỷ | 0,50 (còn giá cũ — **không** đổi định giá 2027+) |
 | M2 | DT thuỷ điện Q4/2026 | ~30/01/2027 | ≥100 tỷ | <80 tỷ | 0,45 (giá cũ; chỉ ảnh hưởng tiền mặt cuối 2026) |
 | M3 | Thuyết minh thu nhập khác 33,8 tỷ (kiểm toán 2026) | ~31/03/2027 | có căn cứ, giữ | bị đảo | 0,60 |
 | M4 | Ý kiến kiểm toán FY2026 (An Việt) | ~31/03/2027 | chấp nhận toàn phần | ngoại trừ/từ chối/đổi kiểm toán | 0,65 |
-| M5 | Vụ EVNNPT/PC1 | khi có kết luận/cáo trạng/quyết định cấm thầu | không cấm thầu, không buộc nộp | cấm thầu EVN 3–5 năm / buộc nộp lớn | 0,70 [UL] |
-| M6 | Cổ tức FY2026 (ĐHĐCĐ 2027) | ~04/2027 | ≥2.000 đ hoặc cam kết payout ≥50% | ≤1.000 đ (= KH) | **0,20** (r3: 0,40 — hạ vì KH ĐHĐCĐ 2026 = 10%) |
+| M5 | Vụ EVNNPT/PC1 | khi có kết luận/cáo trạng/quyết định cấm thầu | không cấm thầu, không buộc nộp | cấm thầu EVN 3–5 năm / buộc nộp lớn | 0,70 [UL; = 1 − P cấm thầu 0,30 trong mô hình] |
+| M6 | Cổ tức FY2026 (ĐHĐCĐ 2027) | ~04/2027 | ≥2.000 đ hoặc cam kết payout ≥50% | <1.500 đ (dưới mức thực trả FY2025) | **0,35** [UL] (r4 0,20 bị phản biện là chọn lọc: KH FY2025 6% → thực 15%; KH LNST 2026 104,2 < 9T 124,6 ⇒ công ty đặt KH thấp; 2.000 đ ≈ payout 32% LNST FY2026 ~165) |
 | M7 | Phải thu KH gộp (BCTC Q4) | ~30/01/2027 | ≤390 tỷ | >430 tỷ | 0,60 |
 | M8 | Điện mặt trời lòng hồ SB5 | khi có quyết định chủ trương / quy hoạch | có chủ trương + giá bán/hợp đồng + vốn không pha loãng | đầu tư ~800 tỷ bằng vay/phát hành khi chưa có giá bán | 0,30 [UL] |
 | M9 | Đọc ngành F8 (EVN tăng giá bán lẻ ≥1 lần đến 30/06/2027) | 30/06/2027 | YES | NO | 0,55 (người đọc ngành) |
 
-**Ma trận rủi ro (r4):** R0 **giá PPA tái ký/hạ bậc ≤600 đ/kWh từ 2027** — P **0,75** [UL = P(b)+P(c)+P(d) − phần mốc lùi], tác động: LNST bền −50…−60% so 2025, giá trị −40…−55% so giá; R1 cấm thầu/buộc nộp — P 0,30–0,35 (giữ r3); R2 kiểm toán ngoại trừ — P 0,35 (giữ); R3 tiền giữ lại bị dùng cho dự án chưa có giá bán — P 0,30 [UL]; R4 El Niño Q4/2026 — chỉ ảnh hưởng 2026.
+**Ma trận rủi ro (r5):** R0 **giá PPA hạ bậc ≤600 đ/kWh đúng mốc 2027** — P **0,75** [UL = 0,90 × 0,85 = 0,77, khớp M0 0,24], tác động: LNST hoạt động bền −45…−57% so 2025 ((b)/(c) ổn), giá trị P/E (b)/(c) 16.200–20.100; R1 cấm thầu/buộc nộp — P **0,30** (= mô hình; r4 0,35 bị thống nhất); R6 (mới, N9) truy thu phần giá trả vượt biểu giá 2018 — quy mô ≈415 tỷ trước thuế, P thấp [UL, không lượng hoá; tiền lệ SB4A chỉ ký lại giá + xác định tiền lãi]; R2 kiểm toán ngoại trừ — P 0,35 (giữ); R3 tiền giữ lại bị dùng cho dự án chưa có giá bán — P 0,30 [UL]; R4 El Niño Q4/2026 — chỉ ảnh hưởng 2026.
 
 ## 11. Chấm dự báo khoá trước (CYCLE_BLOCK 26/10, md5 4409305ff745a26984325a532afda8af — đã kiểm `md5sum` khớp LOCK.txt)
 | Dự báo | Gọi | p | Thực tế Q3/2026 | Kết quả | Brier |
@@ -318,3 +343,29 @@ ADV20 đến 28/10: **0,72 tỷ/ngày** trung bình, **trung vị 0,41 tỷ** [B
 **Nguồn mới tra 02/11/2026:** BCTC HN 2025 kiểm toán tr.32–36 (báo cáo bộ phận; không có biểu giá); baodauthau.vn 30/04/2026 (ĐHĐCĐ 2026: KH LNST 104,2, cổ tức KH 10%, điện mặt trời 46 MWp/~800 tỷ vướng thủ tục); baodauthau.vn 27/06/2025 (kỳ vọng ~90 tỷ DT/năm điện mặt trời). Không tìm được văn bản PPA mới, CBTT giá, KBSV/VCBS gốc; BCTN 2025 tải lỗi (lỗi chứng chỉ owa.hnx.vn) — dùng trích dẫn 13/10.
 
 **Không điều chỉnh để ra kết quả:** các nhạy ở §0 (bỏ rủi ro pháp lý, trọng số giá rất lạc quan, P/E 7, hạ bậc trễ 2 năm) đều cho ≤16.400 đ; chỉ kịch bản (a) giữ giá mới đưa giá trị lên vùng giá hiện tại. Kết luận r3 nguyên văn: xem commit `465fedbc1` (REPORT.md §0).
+
+## Phụ lục E4 — Vòng 5: áp phản biện vòng 3 (`SKEPTIC3_20261102.md`, REFUTED medium; job `Taylor_20261102_100630`)
+Nguyên tắc: user phê bình PHƯƠNG PHÁP (02/11 16:42), không chỉ định kết quả; skeptic xác nhận HƯỚNG nhưng chỉ ra MỨC r4 dựng từ chồng giả định cùng nghiêng một phía. r5 sửa mọi điểm trong một lần, sửa CẢ hai chiều (vài sửa kéo giá trị lên — B1, B2, N1, N3, N4, N6, mốc lùi; vài sửa kéo xuống — N7 tiền ròng −38,7 + KTPL, khoản một lần 30 tỷ, N9 đuôi truy thu nêu riêng). Vùng r5 (13.900–18.100) nằm trong dải skeptic dựng lại (~11.800–15.000 cân; ~14.800–17.300 lạc quan) ở nửa trên, do r5 thêm mốc lùi (P 0,15), Q 205 và tiền Q4/2026 — mỗi thứ có nhạy riêng ở §0.
+
+| # | Phản biện | Đã làm | Ở đâu |
+|---|---|---|---|
+| B1 | DDM định giá tiền tích luỹ < mệnh giá, tiền không sinh lãi | Tiền ròng hưởng lãi 5% trước thuế (nhạy 0/3/6,5%), cộng theo mệnh giá ở năm 10; P/B ≤0,6 chỉ áp VCSH hoạt động. (c)/ổn/27%: 9.200 → 13.200. Viết lại "Vì sao DDM thấp hơn P/E" | §0, §8f, `valuation.py` `ddm5()` |
+| B2 | P/E 5–6 phạt kép rủi ro PPA | P/E 6,5–7 căn cứ trung vị thuỷ điện niêm yết 2026 YTD 10,9 [BQ] trừ 35–40%; nhạy 5,5–9; §8c đánh dấu bị thay | §0, §8c, §8f, `calc/bq_hydro_peer_pe.csv` |
+| B3 | "Không tổ hợp nào đạt 19.800" bị SOTP bác | Giới hạn câu vào P/E/DDM thiểu số; liệt kê tổ hợp đạt (a; b ổn P/E 7; b/c ổn + mốc lùi); nêu chiết khấu tiếp cận ngầm định 39–43% vs thông lệ 20–40%; giá = SOTP trộn × 0,76; bỏ "gấp đôi" | §0 |
+| N1 | P(d) 0,20 nặng | 0,10 (chuyển sang b: 0,45) | §0, §8f |
+| N2 | 500–600 là giá TỔNG hay giá cố định? | **CHƯA KIỂM được**: KBSV 17/04/2026 chỉ thấy trong danh mục simplize.vn ("Báo cáo cơ hội đầu tư", MUA, 42.400), không tải được bản gốc; không tìm thấy SSI/BSC/MBS/VND nêu mức. Một tóm tắt tìm kiếm (file trên bsc.com.vn, liên kết về vcbs — nghi VCBS; CHỈ snippet) ghi DT điện 2026–30 ~160 tỷ/năm (−31%), LN gộp ~70 tỷ (−51%) ⇒ quy ra ≈590 đ/kWh ròng [UL]. Đã thêm nhạy: nếu là giá cố định ⇒ ròng 595–695 ⇒ P/E 22.100–23.900. BCTN 2025 tr.38 vẫn **chưa kiểm** lại (owa.hnx.vn lỗi chứng chỉ; không thấy bản trên pecc1/vietstock/cafef qua tìm kiếm) — trích dẫn dựa trên đọc ngày 13/10 | §0, Nguồn |
+| N3 | M6 0,20 chọn lọc | M6 0,35; cổ tức FY2026 1.000/1.500/2.000; điều kiện tiêu cực (5) so với mức thực trả 1.500 | §0, §10 |
+| N4 | Phạt pháp lý hai lần | Cùng P/E; cấm thầu = tư vấn 10/15/20 + một lần 30 tỷ [UL] | §0, §8f |
+| N5 | Bất nhất xác suất | P cấm thầu 0,30 = R1 = 1 − M5; mốc lùi 0,15 ⇒ R0 0,75 / M0 0,24 khớp mô hình | §8f, §10 |
+| N6 | Q 192,5 thấp | Q giữa 205 (bình quân năm có số 2015–2025 = 207,3); nhạy 175/190/236,6 | §0 |
+| N7 | Bỏ sót LN 2026 và tiền ròng −38,7 | P/E cộng tiền ròng cuối 2027; tách +1.800 / −1.450 / −2.700 đ/cp | §0 |
+| N8 | Tin 27/3/2026 giá 1.351,7 tỷ; lịch sử đấu giá lệch | Kiểm: **1.351,7 tỷ là lần 5, thông báo 17/05/2021** (đấu 14/6/2021), KHÔNG phải 2026 (ghi nhầm trong `peer_hydro_prices.md` 13/10 từ tóm tắt tìm kiếm). Thống nhất: 01/2019 1.688 → 11/2020 (lần 4) 1.390 → 05/2021 (lần 5) 1.351,7; đều không có người đăng ký (baodauthau.vn post106802). Không tìm thấy thông báo bán 2026 | §0, §8b |
+| N9 | Rủi ro truy thu biểu giá 2018 | Quy mô ≈415 tỷ trước thuế (2022/23/25); tiền lệ SB4A (Thanh tra Chính phủ, ký lại 1.110 đ/kWh 7/2022, yêu cầu xác định tiền lãi; chưa xác nhận hồi tố — vnbusiness.vn); R6, điều kiện tiêu cực (6) | §0, §10 |
+| N10 | Nhãn dòng nhạy "rất lạc quan" | Ghi rõ "lạc quan (25/45/25/5) + P xấu 0" là tổ hợp cả hai | §0 |
+| N11 | Câu cũ còn sót | §8b câu payout 43–53% và "5 lần 2017–18" gạch + ghi bị thay; §8c đánh dấu; §8e đánh dấu mức bị thay; §0 r4 xoá hẳn | §8 |
+| N12 | State file TV1 | Ghi ở mục nội bộ dưới — KHÔNG sửa file | dưới |
+
+**r4 → r5:** vùng 8.700–10.600 (tâm 9.900, giá +86…+129%) → **13.900–18.100 (tâm 15.900, giá +9…+42%, tâm +25%)**. HƯỚNG giữ (giá > kỳ vọng P/E/DDM); MỨC giảm từ "gấp đôi" xuống "cao hơn ~1/4 so tâm".
+
+## Nội bộ — việc USER quyết (N12; KHÔNG đưa vào báo cáo NĐT; KHÔNG sửa file)
+`data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json` (đọc 02/11/2026, mtime 19/10): `status=paused` (từ 19/10); vẫn ghi `thesis_source = mike/agents/Taylor/research/tv1_pecc1_sotp_20260723.md` (SOTP 23/07 — luận điểm đã bị nghiên cứu 13/10 và DD này thay); `price_band.floor_note` "downside che bởi tài sản hydro" (không còn đúng: tài sản hydro chỉ che nếu bán được, ≥5 lần đấu giá thất bại); `target_pct_active_nav = 0.05` (vượt trần sleeve discretionary 2–4% theo phản biện); `hard_expiry.conditions` không có điều kiện M0 (văn bản giá PPA ròng ≤600 / dưới hoà vốn ~590). Nếu user mở lại chương trình: cập nhật thesis_source → REPORT này, bỏ floor_note, hạ target, thêm điều kiện dừng M0; `max_no_chase_ceiling` 25.000 cao hơn vùng r5 (trần 18.100). Việc của user; Taylor không đổi.

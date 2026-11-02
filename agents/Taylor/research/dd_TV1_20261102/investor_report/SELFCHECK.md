@@ -1,4 +1,14 @@
-# Tự kiểm — TV1_DD_investor_report_20261102 — BẢN ĐÍNH CHÍNH LẦN 2 / r4 (job Taylor_20261102_094407, 02/11/2026; thay bản 15:25 của job Taylor_20261102_075340)
+# Tự kiểm — TV1_DD_investor_report_20261102 — BẢN ĐÍNH CHÍNH LẦN 2 / r5 (job Taylor_20261102_100630, 02/11/2026; thay bản 15:25 (r3, job Taylor_20261102_075340) đã gửi; bản r4 CHƯA từng gửi)
+
+## r5 — sửa theo phản biện vòng 3 (`../SKEPTIC3_20261102.md`: B1–B3, N1–N11; N12 chỉ ở REPORT nội bộ)
+- **CHƯA qua phản biện vòng 4** (Mike chạy sau). KHÔNG gửi email (dry-run only).
+- Số: từ `../calc/valuation_out.txt` khối "r5" (`python3 -I calc/valuation.py`, md5 out 1e0d0a1d…). Quét tự động thân bài (trước Phụ lục E) vs REPORT + valuation_out + rate_lines + README 13/10: 291 chuỗi số, 3 không nguyên văn — đều có nguồn: 198,5 = tiền 30,7 + HTM 167,8; 20.000 (tham chiếu 02/11); 57,76 (Q1+Q2/26).
+- Kiểm tay: LNST thuỷ điện Q205 (a) (199,9−71)×0,8 = 103,1; (b) 41,6; (c) 25,2; (d) −1,0 ⇒ +40 tư vấn = 143,1/81,6/65,2/39,0 ✓ khối r5. P/E LNST bền (b)/(c) = 528,5/81,6 = 6,5; /65,2 = 8,1 ✓. 65,2–81,6/150,2 = 43–54% ✓. Hoà vốn ≈591 đ/kWh ⇒ LNST HĐ (205×0,591−71)×0,8+40 = 80,1 ✓ (fig_12). Chiết khấu ngầm định 1−15.889/25.939 = 39% ✓.
+- Hình vẽ lại: fig_00_hero (KPI + xlim 6–32k, tiêu đề rút gọn để không bị cắt), fig_07_football (thêm dòng SOTP×0,6–0,8), fig_12 (Q205, đường hoà vốn 80), fig_13 (cổ tức bền r5), fig_08 (+R8 truy thu, R5 0,50), fig_06 (nhãn dải lấy từ FAIR — trước còn chữ "17,8–20,6k" sót từ r3). Banner tiêu đề tạo lại (lệnh dưới). CSV kèm mỗi hình.
+- Lộ nội bộ (md, figs/*.csv, HTML bỏ base64; mẫu thêm Taylor|skeptic|SpaceX|ZaloPay|Mike|job|state_TV1|[UL]) = 0 hit. PDF 14 trang; HTML dry-run 15 ảnh.
+- Trung dung: tiêu đề nêu vế tốt (tư vấn tăng, cổ tức 7,6%) + vế rủi ro/giá + điều kiện đổi chiều (≥≈590 đ/kWh); bảng "điều làm nhận định đổi" hai chiều; nhạy hai chiều 12.600–22.700 bao quanh giá; SOTP trên giá được nêu rõ. Không fear-buy.
+- Chưa kiểm được (ghi trong REPORT E4): bản gốc KBSV 17/04/2026 tr.4 (500–600 là giá tổng hay giá cố định); BCTN 2025 tr.38 (dùng trích 13/10). Đính chính: "1.351,7 tỷ 27/3/2026" thực là thông báo đấu giá lần 5 ngày 17/05/2021.
+
 
 ## r4 — dựng lại định giá theo giá PPA Sông Bung 5 (user phê bình phương pháp 02/11 16:42; ../REPORT.md Phụ lục E3)
 - **CHƯA qua phản biện vòng 3** (Mike chạy sau). KHÔNG gửi email (dry-run only).
