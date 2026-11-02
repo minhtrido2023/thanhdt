@@ -40,3 +40,6 @@
 - [2026-11-02T12:02:04Z] [tv1-dd r8 02/11] XONG job Taylor_20261102_115348 commit d349e28a2 — vung 15.800–20.600 tam 17.991 (gia +10%), hoa von ~586 (525–622); Ke khoang 9–13% tam 12%; cho Mike skeptic + sua dd_price_zones + gui email
 - [2026-11-02T14:44:04Z] ĐANG DỞ: job Taylor_20261102_144349 TV1 định giá MÙ — research/dd_TV1_blind_20261102/ | NEXT: đọc skill luật 19/18/12, LEGAL_PPA, ppa study, BCTC; KHÔNG đọc giá
 - [2026-11-02T14:56:44Z] [tv1-blind 02/11] XONG job Taylor_20261102_144349 commit 2fd1d104f — tam 27.800 (P20-P80 22.100-35.100), gia 19.500 (-30%); cho Mike phan bien (soi xac suat [UL]) truoc khi dung bao cao NDT
+- [2026-11-02T15:23:20Z] ĐANG DỞ: job Taylor_20261102_152306 TV1 INTRINSIC_v2 + investor_report sạch — research/dd_TV1_blind_20261102/ | NEXT: đọc SKEPTIC_BLIND, valuation_blind.py, skill luật
+- [2026-11-02T15:27:06Z] ĐANG DỞ job Taylor_20261102_152306: v2 xong (valuation_blind_v2.py tâm 18.116, P20-80 11.386-24.177) | NEXT: INTRINSIC_v2.md → investor_report/ mới (figs, md, pdf, html, SELFCHECK) → commit → bus tv1-dd-final-20261102
+- [2026-11-02T15:35:50Z] [tv1-final 02/11] XONG job Taylor_20261102_152306 commit a2a067cb8 — tam v2 18.100 (P20-80 11.400-24.200), gia 19.500 trong dai; cho Mike gui email + sua dd_price_zones
