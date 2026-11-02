@@ -38,7 +38,15 @@ notify() {
 
 if [ "$RC" -ne 0 ]; then
   TAIL="$(tail -n 8 "$OUT")"
-  notify "🔴 **Quỹ bước 4 — $JOB lỗi (rc=$RC)** — chuỗi benchmark/bot KHÔNG được cập nhật lần này; bảng 3.2 sẽ in \"chưa có số\" nếu không sửa trước báo cáo tuần. Đầu ra thật (8 dòng cuối):
+  # Tiêu đề theo họ việc (§29: không gán nguyên nhân/hệ quả của việc khác). Mặc định = chuỗi benchmark quỹ bước 4 (NGUYÊN VĂN
+  # như trước); dcf_rstar_* = cache r* của dòng hiển thị DCF.
+  case "$JOB" in
+    dcf_rstar_*)
+      HEAD="🔴 **DCF r* — $JOB lỗi (rc=$RC)** — cache r* của dòng hiển thị DCF không được làm mới/không qua kiểm hạn (display-only, KHÔNG đổi FV/phân loại/lệnh); dòng 'r* thị trường' sẽ in \"không có dữ liệu\" khi cache quá 45 ngày. Đầu ra thật (8 dòng cuối):" ;;
+    *)
+      HEAD="🔴 **Quỹ bước 4 — $JOB lỗi (rc=$RC)** — chuỗi benchmark/bot KHÔNG được cập nhật lần này; bảng 3.2 sẽ in \"chưa có số\" nếu không sửa trước báo cáo tuần. Đầu ra thật (8 dòng cuối):" ;;
+  esac
+  notify "${HEAD}
 \`\`\`
 ${TAIL:-(lệnh không in gì)}
 \`\`\`"
