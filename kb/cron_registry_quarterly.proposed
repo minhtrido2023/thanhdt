@@ -1,0 +1,20 @@
+# ĐỀ XUẤT (CHƯA CÀI) — báo cáo quý tự động, user duyệt đặc tả 02/11/2026. Mike cài sau arch-review (§11/§13).
+
+## 1) Dòng crontab đề xuất (host UTC; 21:00 ICT = 14:00 UTC; bắn 28-31 vì cron không có "ngày cuối tháng" — cờ tự thoát rc=0 im lặng nếu không phải ngày cuối của tháng 3/6/9/12)
+0 14 28-31 3,6,9,12 * /home/trido/thanhdt/WorkingClaude/mike/bin/check_report_cadence.sh --scheduled-quarterly >> /home/trido/thanhdt/WorkingClaude/mike/logs/investor_quarterly_report.log 2>&1   # 21:00 ICT NGÀY CUỐI QUÝ — báo cáo quý investor (kỳ đầu 2026-Q4 = 31/12/2026); ngày khác thoát rc=0 im lặng; NAVGUARD hoãn nếu thiếu NAV ngày cuối quý, watchdog 08:30 rescue
+
+Lưu ý cú pháp: khi CẢ day-of-month và day-of-week đều khác `*` cron dùng OR; ở đây day-of-week = `*` nên chỉ day-of-month 28-31 × tháng 3,6,9,12 có hiệu lực (đúng ý).
+
+## 2) Kiểm xung đột (crontab -l, 02/11/2026)
+- Cùng phút 14:00 UTC chỉ có `send_plan_report.sh` (`0 14 * * 1-5`, qua for_each_live_account). Hai tiến trình độc lập (check_report_cadence chỉ sweep + dispatch --bg), không chung file/khoá ghi ⇒ không xung đột; chấp nhận đồng giờ theo đặc tả 21:00.
+- Không có dòng nào khác ở ngày 28-31 × tháng 3,6,9,12 (grep `28-31`, `3,6,9,12`): chỉ có `20 14 10-31 1,4,7,10 *` (commodity, tháng khác).
+- NAV: nav_snapshot_daily 19:50 / 20:30 (T2-T6) chạy TRƯỚC 21:00; lượt bù 21:30 chạy SAU ⇒ nếu 19:50 + 20:30 đều hụt, NAVGUARD hoãn và watchdog 08:30 hôm sau soạn bù.
+- Không chung `logs/` file với job khác (log riêng `investor_quarterly_report.log`).
+
+## 3) Dòng đề xuất cho kb/cron_registry.md (bảng chính, đặt theo thứ tự 21:00 ICT, cạnh send_plan_report)
+| 21:00 ICT, chỉ ngày cuối quý (31/03, 30/06, 30/09, 31/12) | `check_report_cadence.sh --scheduled-quarterly` | Quý vừa kết thúc hôm nay; dòng NAV ngày cuối quý của SpaceX + ZaloPay (nav_snapshot_daily 19:50/20:30) | Báo cáo quý Discord Trading report + email (2 file/account, qua `build.py quarterly`) | user / nhà đầu tư | cùng đêm; thiếu NAV ⇒ hoãn, watchdog 08:30 hôm sau | Cùng delivery gate hash-bound; state `quarterly_YYYY-Qn`; watchdog `check_report_cadence.sh` 08:30 là lưới rescue (quý chưa giao ⇒ overdue). Cron `0 14 28-31 3,6,9,12 *`, cờ tự thoát ngoài ngày cuối quý. |
+
+## 4) Cập nhật vòng 2 (02/11/2026, sau arch-review) — KHÔNG đổi dòng crontab ở mục 1
+- NAVGUARD kiểm NAV phiên làm việc CUỐI ≤ cuối quý (không phải ngày chạy), gồm nav_is_estimate=True, và chạy CẢ ở watchdog 08:30 (thiếu ⇒ bus `question` topic report-cadence-overdue-<PKEY>, tối đa 4 ngày sau cuối quý). Hoãn 21:00 ghi dấu `deferred_<PKEY>` trong state/report_cadence_dispatched.json ⇒ watchdog sáng sau KHÔNG gửi cảnh báo đỏ "quá hạn" giả.
+- Watchdog chỉ cứu quý khi không có state dispatch hoặc state ≥ 2 ngày; dispatch quý có `--write-scope <2 file đích>` ⇒ không soạn lần 2 khi job 21:00 còn sống (chống email trùng).
+- Delivery sweep 08:30 nay gồm *_quarterly_report_*.md; mọi `date -d` ghim TZ=UTC (§16).
