@@ -226,6 +226,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-11-02 | [RETRO — 2026-11-02: 3 near-miss (DD TV1 sửa 8 vòng/ngày; wakeup MISS 0/20; 4 nhánh dev cần vòng 2 sau arch-review), 1 pattern (A chốt sớm trên giả định chưa khoá). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-02.md) | logged |
 | 2026-11-01 | [RETRO — 2026-11-01: 2 sự cố/near-miss (wakeup MISS 6/26 = 23,1%, tăng 2 ngày liên tiếp; anomaly-flags-stale báo giả ngày Chủ nhật tái diễn), 1 pattern (A kiểm tra dựa tín hiệu gián tiếp thay vì điều kiện thật). Wags: CONFIRMED.](retro/retro-2026-11-01.md) | logged |
 | 2026-10-31 | [RETRO — 2026-10-31: 4 sự cố/near-miss (wakeup MISS 3/20 = 15%; hồi quy report_return_gate import v2; report_v2 monthly md5 flaky chưa rõ gốc; oshares_live R12 REFUTED bắt trước wire), 2 pattern (A cổng tin cờ khai báo/lối vào không kiểm; B chuỗi vá >3 vòng). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-10-31.md) | logged |
 | 2026-10-30 | [RETRO — 2026-10-30: 2 sự cố/near-miss (drift CANNOT_CHECK lần 5 — ĐÃ VÁ+merge 0027dac67; ops_health plan-conflict false positive ZaloPay), 1 pattern (checker kết luận không kiểm bằng chứng nền). Wakeup 0/10 thiếu. Wags: GAPS FOUND — đã sửa.](retro/retro-2026-10-30.md) | logged |
