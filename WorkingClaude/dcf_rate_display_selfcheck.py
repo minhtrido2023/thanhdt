@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Selfcheck dcf_rate_display (job Taylor_20261102_015334): 2 dòng hiển thị, fail-closed, mutation.
-Chạy: python3 dcf_rate_display_selfcheck.py [--mutate]  (--mutate: tự phá 10 chỗ, mỗi chỗ PHẢI làm test đỏ)"""
+Chạy: python3 dcf_rate_display_selfcheck.py [--mutate]  (--mutate: tự phá nhiều chỗ, mỗi chỗ PHẢI làm test đỏ)"""
 import json, os, subprocess, sys, tempfile
 import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -48,6 +48,22 @@ def run_checks(mod):
     TF = mod.tpcp_line("2026-11-02", mk(rows + [("2026-11-05", 9.99, "2026-11-06")]))
     ok("9.99" not in TF and "4.58%" in TF, "không dùng quan sát sau asof (PIT): " + TF)
     ok(len(mod.dcf_rate_lines("2026-11-02", cp, mk(rows))) == 2, "đúng 2 dòng")
+    # --- vòng 3: ghim percentile giữa dải, cửa sổ Δ12T, biên stale TPCP (arch-review vòng 2)
+    mid = {str(p): (10.0 + i * 0.01 if i < 77 else 16.0 + i * 0.01)
+           for i, p in enumerate(pd.period_range("2014-01", "2026-09", freq="M"))}
+    mid["2013-12"] = 30.0; mid["2026-10"] = 15.0
+    mid = dict(sorted(mid.items())); cp2 = os.path.join(d, "mid.json")
+    json.dump({"panel_asof": "2026-10-30", "n_last": 147, "r_const": 12.25, "series": mid}, open(cp2, "w"))
+    LM = mod.rstar_line("2026-11-02", cp2)
+    ok("percentile 51%" in LM, "percentile giữa dải = 78/154 = 50.6% -> 51 (diệt <, bỏ dòng cuối, gồm 2013-12): " + LM)
+    def one(prev_rows, asof="2026-11-02"):
+        return mod.tpcp_line(asof, mk(prev_rows + [("2026-10-30", 4.58, None)]))
+    ok("Δ12T +0.68pp" in one([("2025-10-27", 3.9, None)]), "mốc 12T lệch -3 ngày VẪN trong cửa sổ: " + one([("2025-10-27", 3.9, None)]))
+    ok("Δ12T: không có dữ liệu" in one([("2025-10-22", 3.9, None)]), "mốc lệch -8 ngày ngoài cửa sổ -> NA")
+    T4 = one([("2025-10-24", 3.0, None), ("2025-10-29", 3.9, None)])
+    ok("Δ12T +0.68pp" in T4 and "@2025-10-29" in T4, "2 dòng trong cửa sổ: lấy dòng GẦN mốc nhất, không phải đầu: " + T4)
+    ok("4.58%" in one([], "2026-11-06"), "biên stale: age=7 vẫn hiển thị")
+    ok(mod._NA in one([], "2026-11-07") and "4.58" not in one([], "2026-11-07"), "biên stale: age=8 -> NA")
     return n
 
 
@@ -62,6 +78,7 @@ if __name__ == "__main__":
     print("PASS", run_checks(load(src)), "assertions")
     if "--mutate" in sys.argv:
         muts = [("TPCP_MAX_AGE_DAYS = 7", "TPCP_MAX_AGE_DAYS = 9999"),
+                ("TPCP_MAX_AGE_DAYS = 7", "TPCP_MAX_AGE_DAYS = 10"),
                 ("RSTAR_MAX_AGE_DAYS = 45", "RSTAR_MAX_AGE_DAYS = 99999"),
                 ("last.v - pv.v:+.2f", "pv.v - last.v:+.2f"),
                 ("return f\"r* thị trường: {_NA} ({type(e).__name__})\"", "return 'r* thị trường 12.25%'"),
@@ -70,6 +87,11 @@ if __name__ == "__main__":
                 ("(h <= cur).mean()", "(h >= cur).mean()"),
                 ('HIST_START = "2014-01"', 'HIST_START = "2013-12"'),
                 ("tgt - pd.Timedelta(days=7)", "tgt - pd.Timedelta(days=400)"),
+                ("tgt - pd.Timedelta(days=7)", "tgt - pd.Timedelta(days=0)"),
+                ("tgt - pd.Timedelta(days=7)", "tgt - pd.Timedelta(days=29)"),
+                ("pv = prev.iloc[-1]", "pv = prev.iloc[0]"),
+                ("(h <= cur).mean()", "(h < cur).mean()"),
+                ("h = ser.loc[HIST_START:]", "h = ser"),
                 ('df = df.dropna(subset=["v"]).copy()', "df = df.copy()")]
         for a, b in muts:
             assert src.count(a) == 1, "mutation target mất: " + a

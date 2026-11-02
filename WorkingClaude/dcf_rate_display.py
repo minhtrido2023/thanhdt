@@ -6,9 +6,14 @@ DISPLAY-ONLY. KHÔNG đổi FV / MoS / classify_dcf; KHÔNG nối vào plan echo
        kèm vị trí so với lịch sử. Là THƯỚC ĐO HIỂN THỊ, KHÔNG phải tín hiệu mua/bán.
   (ii) TPCP 10Y + Δ12 tháng (tav2_bq.macro_indicator, vn_bond_10y). Thiếu/stale -> 'không có dữ liệu'.
 r* tính bằng analysis.rstar của job dcf_rate_proxy_20261102 (KHÔNG viết lại công thức) trên panel_live;
-chỉ chạy khi build cache. ⚠️ THỨ TỰ: phải DỰNG LẠI panel_live trước (build_live.py rồi level.py của
-research/dcf_level_rerun_20261102 → data/panel_live.parquet), RỒI MỚI `python dcf_rate_display.py --build-cache`;
-nếu không, build_rstar_cache từ chối (panel_asof không mới hơn cache cũ). Cache hết hạn sau RSTAR_MAX_AGE_DAYS.
+chỉ chạy khi build cache. ⚠️ LÀM MỚI cache = chuỗi 4 bước, THỨ TỰ BẮT BUỘC (arch-review vòng 2):
+  1. `engine.py build` ở research/dcf_vn_calibration_20261101 → dựng lại data/panel_monthly.parquet
+     (build_live.py:13 và level.py:21 đọc file này; nó đứng yên ở t max 2026-10-30, bỏ bước này thì kẹt mãi);
+  2. build_live.py, 3. level.py (research/dcf_level_rerun_20261102) → data/panel_live.parquet;
+  4. RỒI MỚI `python dcf_rate_display.py --build-cache`; nếu panel_asof không mới hơn cache cũ, build_rstar_cache từ chối.
+⚠️ Các bước 1-3 GHI ĐÈ file nghiên cứu đã track trong git (out/level_gT_star.csv, out/level_live_impact_20261030.csv,
+data/level_LY.pkl, data/ của calibration) mà REPORT.md trích dẫn (§8) — chạy tay trong worktree riêng, KHÔNG đưa vào cron
+(xem kb/cron_registry_dcf_rstar.proposed). Cache hết hạn sau RSTAR_MAX_AGE_DAYS.
 Đọc cache rất rẻ. Cache quá hạn (> RSTAR_MAX_AGE_DAYS so với asof) -> fail-closed.
 """
 import json
@@ -49,7 +54,7 @@ def build_rstar_cache(path=RSTAR_CACHE):
         old_asof = None
     if old_asof and new_asof <= old_asof:
         raise RuntimeError(f"panel_live.parquet chưa được dựng lại: panel_asof {new_asof} <= cache cũ {old_asof}. "
-                           "Chạy build_live.py + level.py (dcf_level_rerun_20261102) trước --build-cache.")
+                           "Chuỗi làm mới: engine.py build (dcf_vn_calibration_20261101) -> build_live.py -> level.py (dcf_level_rerun_20261102) -> --build-cache; xem docstring đầu file.")
     s = A.rstar(p, A.G_CAP)
     out = {"built_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
            "panel_asof": str(p.t.max().date()), "g_cap": A.G_CAP, "r_const": A.R_CONST * 100,
