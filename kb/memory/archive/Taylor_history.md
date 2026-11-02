@@ -1800,3 +1800,6 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T14:12:20Z] [funnel-dd-skip 01/11] XONG job Taylor_20261101_140717: nhánh feat/funnel-dd-skip-after-bctc-20261101 (f1282ace7, chưa merge) — chờ Mike arch-review/merge
+
+## Archived 2026-11-02 (keep=12 days=0 require_done=False)
+- [2026-11-01T14:32:32Z] [dd-risk-urgent vòng2 01/11] XONG job Taylor_20261101_141958: de1fe56a9 (chưa merge) — chờ Mike re-review/merge; CẢNH BÁO: repro flow.py của reviewer D gọi Notifier thật ⇒ 1 tin test XYZ 21:28 ICT có thể đã tới user
