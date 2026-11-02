@@ -1241,6 +1241,53 @@
    "center_alt": null,
    "center_alt_kind": null,
    "correction_reason": "user 02/11 18:20 + skeptic vòng 5: P/E và Ke phải có cơ sở peer; hiệu chuẩn theo 32 mã thuỷ điện ⇒ vùng 13.900–16.800 → 15.800–20.600, tâm 15.200 → 18.000"
+  },
+  {
+   "ticker": "TV1",
+   "dd_date": "2026-11-02",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 11400,
+   "center": 18100,
+   "center_kind": "expected_weighted",
+   "zone_high": 24200,
+   "center_range": null,
+   "price_ref": 19500,
+   "price_date": "2026-11-02",
+   "verdict_label": "trung dung — giá TRONG dải nội tại P20–P80, gần tâm (≈+8% so tâm); dải rộng vì giá điện SB5 sau 2027 chưa xác định",
+   "source_file": "agents/Taylor/research/dd_TV1_blind_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_TV1_blind_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "Giá 19.500 đ nằm TRONG dải giá trị nội tại chính 11.400–24.200 đ/cp, gần tâm ≈18.100 (ước lượng).",
+     "fields": [
+      "price_ref",
+      "zone_low",
+      "zone_high",
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TV1_blind_20261102/investor_report/TV1_DD_investor_report_20261102.md",
+     "quote": "| Giá trị nội tại: tâm · P20–P80 · toàn bộ kịch bản | **≈18.100** · **11.400–24.200** · 4.600–44.900 |",
+     "fields": [
+      "zone_low",
+      "zone_high",
+      "center"
+     ]
+    }
+   ],
+   "skeptic_status": "định giá nội tại dựng mù giá (khoá md5 trước khi so giá) + phản biện độc lập mù giá + phản biện báo cáo cuối (tái lập byte-for-byte; sửa cân bằng cờ kế toán) ",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "rev5 (Mike 02/11 ~22:55): tâm = kỳ vọng xác suất 5 kịch bản giá PPA × 4 kịch bản tư vấn (INTRINSIC_v2); vùng = P20–P80 lưới có trọng số; toàn lưới 4.600–44.900. Giá DNSE 14:34 02/11 = 19.500 (đóng cửa 30/10: 19.800). Vụ án/truy thu ngoài tâm (bảng độ nhạy). Mức giá điện 500–600 và mốc 2027 chỉ lời lãnh đạo qua CTCK (KBSV chưa kiểm).",
+   "recorded_at": "2026-11-02T22:55:00+07:00",
+   "center_desc": "kỳ vọng xác suất DCF dòng tiền chủ sở hữu (thuỷ điện 12.500 + tư vấn 8.000 − tiền ròng 2.400), Ke 12,85%",
+   "rev": 5,
+   "supersedes": "TV1@2026-11-02#4",
+   "center_alt": null,
+   "center_alt_kind": null,
+   "correction_reason": "user 02/11 21:35: định giá phải mù giá thị trường, giá điện từ kinh tế/quy định, vụ án không vào tâm, mảng tư vấn dựng từ gốc ⇒ dựng lại nội tại (INTRINSIC_v2); vùng 15.800–20.600 (tâm 18.000) → P20–P80 11.400–24.200 (tâm 18.100)"
   }
  ],
  "center_kinds": [
