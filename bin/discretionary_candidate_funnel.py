@@ -1386,7 +1386,10 @@ def format_dd_zone_lines(payload, today):
         return f"{head}\n⚠️ không thấy file {DD_ZONE_FILE} — dd_price_zone_watch (plan tối) chưa chạy/lỗi; KHÔNG kết luận được."
     if payload.get("schema") != DD_ZONE_SCHEMA:
         return f"{head}\n⚠️ file ứng viên sai schema ({payload.get('schema')!r}) — không đọc."
-    asof = dt.date.fromisoformat(payload["asof"])
+    try:
+        asof = dt.date.fromisoformat(str(payload["asof"]))
+    except (KeyError, TypeError, ValueError) as e:          # §29: in lỗi thật, không làm sập bản tin
+        return f"{head}\n⚠️ file ứng viên hỏng trường asof ({type(e).__name__}: {e}) — không đọc."
     lines = [f"{head} — đóng cửa {asof:%d/%m}"]
     if asof < prev_trading_day(today):
         lines.append(f"⚠️ KẾT QUẢ CŨ: asof {asof} < phiên gần nhất {prev_trading_day(today)} — danh sách dưới đây "
@@ -1398,7 +1401,8 @@ def format_dd_zone_lines(payload, today):
         pcs = "—" if pc is None else f"{pc:+.1f}%".replace(".", ",")
         w = f" · {'; '.join(c['warnings'])}" if c.get("warnings") else ""
         lines.append(f"  • {c['ticker']} {_vnd(c.get('close'))} ({pcs} so tâm {_vnd(c.get('center'))}; "
-                     f"DD {c.get('dd_date')}){' 🆕' if c.get('new_alert') else ''}{w}")
+                     f"DD {c.get('dd_date')}){' 🆕' if c.get('new_alert') else ''}"
+                     f"{' (giữ do trễ)' if c.get('hold_band') else ''}{w}")
     if not cands:
         lines.append(f"  0 ứng viên (kiểm được {n}/{m} mã)." if n == m and m else
                      f"  ⚠️ 0 ứng viên trong {n}/{m} mã KIỂM ĐƯỢC — chưa kết luận được cho phần còn lại.")

@@ -426,6 +426,21 @@ def cases(m):
         cj2 = os.path.join(td, "none.json")
         go3("2026-10-30", cjp="")
         ok("--candidates-json '' ⇒ không ghi file", not os.path.exists(cj2))
+        # mặc định (không truyền --candidates-json): --no-state / --price-csv KHÔNG đè file thật
+        dflt = os.path.join(td, "default_cand.json")
+        _sv_cj = m.CAND_JSON
+        m.CAND_JSON = dflt
+        try:
+            for nst in (True, False):
+                a4 = argparse.Namespace(asof="2026-10-30", ledger=lp, state=os.path.join(td, "s4.json"), out_dir=td,
+                                        price_csv=cp, report_block=True, no_bq=True, no_positions=True,
+                                        no_state=nst, candidates_json=None)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    m.run(a4, now=dt.datetime(2026, 11, 2, 21, 0, tzinfo=_ICT))
+                ok(f"mặc định + --price-csv (no_state={nst}) ⇒ KHÔNG ghi file ứng viên mặc định",
+                   not os.path.exists(dflt))
+        finally:
+            m.CAND_JSON = _sv_cj
     # 10. không đụng Notifier/Telegram/plan
     src = open(SRC, encoding="utf-8").read()
     ok("module không gọi notify/Notifier/ghi plan", not any(k in src for k in ("notify_telegram", "Notifier(", "trade_plans", "place_order(", "send_telegram")))
@@ -467,6 +482,7 @@ MUTANTS = [
     ("X5 cột mức −15% luôn theo tâm", "def _lvl(e):\n    b = alert_base(e)", 'def _lvl(e):\n    b = e.get("center")'),
     ("X10 bỏ ghi chú asof khỏi đầu ra", "    if asof_note:\n        src += f\"; {asof_note}\"", "    if False:\n        src += ''"),
     ("X11 default_asof nuốt ghi chú lịch lễ", ', f"⚠️ không đọc được lịch lễ ({type(e).__name__}) — chỉ loại T7/CN"', ', ""'),
+    ("V2a mặc định luôn ghi file ứng viên", "cjson = None if (args.no_state or args.price_csv) else CAND_JSON", "cjson = CAND_JSON"),
     ("nit: bỏ câu tâm<đáy ở bảng", "if c is not None and lo is not None and c < lo:", "if False:"),
     ("C1 bỏ loại USER_NO_HOLD", 'if nh and e["dd_date"] <= nh[0]:', 'if False:'),
     ("C2 USER_NO_HOLD vĩnh viễn (bỏ điều kiện DD mới)", 'if nh and e["dd_date"] <= nh[0]:', 'if nh:'),

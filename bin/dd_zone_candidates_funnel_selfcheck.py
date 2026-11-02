@@ -58,6 +58,23 @@ def cases(F, W):
     ok("có ứng viên nhưng kiểm thiếu ⇒ cảnh báo n/m", "chỉ kiểm được 2/3" in F.format_dd_zone_lines(dict(base, checked=2), today))
     ok("mã bị loại nêu ở 'Không xét'", "Không xét: TV1 (đã có quyết định không giữ)" in
        F.format_dd_zone_lines(dict(base, excluded=[{"ticker": "TV1", "why": "đã có quyết định không giữ"}]), today))
+    _hb = [dict(c, hold_band=(i == 0)) for i, c in enumerate(base["candidates"])]
+    _txt = F.format_dd_zone_lines(dict(base, candidates=_hb), today)
+    ok("hold_band ⇒ ứng viên đó in '(giữ do trễ)', ứng viên khác không",
+       _txt.count("(giữ do trễ)") == 1 and "(giữ do trễ)" in _txt.split("•")[1])
+    for bad in ("2026-13-45", None, 12345):
+        try:
+            _t = F.format_dd_zone_lines(dict(base, asof=bad), today)
+            _ok = "hỏng trường asof" in _t
+        except Exception:  # noqa: BLE001
+            _ok = False
+        ok(f"asof hỏng ({bad!r}) ⇒ báo hỏng, không crash", _ok)
+    _nb = {k: v for k, v in base.items() if k != "asof"}
+    try:
+        _ok = "hỏng trường asof" in F.format_dd_zone_lines(_nb, today)
+    except Exception:  # noqa: BLE001
+        _ok = False
+    ok("thiếu asof ⇒ báo hỏng, không crash", _ok)
     ok("schema 2 phía khớp (producer = consumer)", F.DD_ZONE_SCHEMA == W.CAND_SCHEMA)
     ok("tên file 2 phía khớp", os.path.basename(W.CAND_JSON) == F.DD_ZONE_FILE or "DDZ_CANDIDATES" in os.environ)
 
@@ -99,6 +116,9 @@ MUTANTS = [
     ("F6 print_block không nối khối E", "pick_base_dir=base) + \"\\n\" + format_dd_zone_lines(zpay, today)",
      "pick_base_dir=base)"),
     ("F7 file hỏng ⇒ coi như thiếu", "zpay = {\"schema\": f\"HỎNG ({type(e).__name__})\"}", "zpay = None"),
+    ("F9 bỏ nhãn giữ do trễ", "f\"{' (giữ do trễ)' if c.get('hold_band') else ''}{w}\")", "f\"{w}\")"),
+    ("F10 bỏ try quanh fromisoformat", "    except (KeyError, TypeError, ValueError) as e:          # §29",
+     "    except ZeroDivisionError as e:          # §29"),
     ("F8 đọc file ở DATA_DIR thật thay vì base", "os.path.join(base, DD_ZONE_FILE)", "os.path.join(DATA_DIR, DD_ZONE_FILE)"),
 ]
 

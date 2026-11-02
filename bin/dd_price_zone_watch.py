@@ -652,6 +652,11 @@ def run(args, now=None):
     dflags = None if (args.no_bq or not alert_t) else dd_flag_map(alert_t, asof)
     cands, excl = build_candidates(rows, held, dflags)
     cjson = getattr(args, "candidates_json", None)
+    if cjson is None:
+        # Mặc định CHỈ ghi file máy đọc khi là lượt chạy THẬT: --no-state (thử/selfcheck) hoặc
+        # --price-csv (ngày quá khứ/khẩn cấp) KHÔNG được đè file ứng viên mà bản tin 08:00 đọc
+        # (arch-review 2026-11-02). Muốn ghi trong 2 chế độ đó ⇒ truyền --candidates-json PATH.
+        cjson = None if (args.no_state or args.price_csv) else CAND_JSON
     if cjson:
         write_candidates(cjson, candidates_payload(cands, excl, rows, expired, asof, src, now))
     tpath = os.path.join(args.out_dir, f"{asof.isoformat()}.md")
@@ -680,8 +685,10 @@ def main(argv=None):
     rp.add_argument("--no-bq", action="store_true")
     rp.add_argument("--no-positions", action="store_true")
     rp.add_argument("--no-state", action="store_true")
-    rp.add_argument("--candidates-json", default=CAND_JSON,
-                    help="file ứng viên máy đọc (phễu discretionary + bản tin 08:00); '' = không ghi")
+    rp.add_argument("--candidates-json", default=None,
+                    help="file ứng viên máy đọc (phễu discretionary + bản tin 08:00); '' = không ghi; "
+                         "bỏ trống ⇒ $DDZ_CANDIDATES/data/dd_zone_candidates_latest.json, TRỪ KHI "
+                         "--no-state hoặc --price-csv (khi đó không ghi)")
     a = ap.parse_args(argv)
     try:
         return run(a)
