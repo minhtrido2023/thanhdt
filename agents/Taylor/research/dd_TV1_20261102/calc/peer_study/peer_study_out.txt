@@ -1,10 +1,10 @@
 === 1a. Danh mục (ICB 7535 + TV1, có giao dịch 2026) — n = 53
 {'thuy_dien': 32, 'nhiet_dien': 9, 'tai_tao_hon_hop': 6, 'khac': 4, 'phan_phoi': 1, 'TV1': 1}
-Sàn (thuỷ điện): {'UPCOM': 14, 'HOSE': 12, 'HNX': 6}
+Sàn (thuỷ điện): {'UPCOM': 13, 'HOSE': 13, 'HNX': 6}
   ghi chú sàn SMA_note tieu de nan vs bien do HOSE
   ghi chú sàn DRL_note tieu de nan vs bien do HOSE
-  ghi chú sàn HNA_note tieu de UPCOM vs bien do HOSE
   ghi chú sàn BTP_note tieu de nan vs bien do HOSE
+  ghi chú sàn GHC_note MOVE 2026-01-30 -> HOSE (ghi đè biên độ)
   ghi chú sàn HPD_note tieu de nan vs bien do HNX
   ghi chú sàn GSM_note tieu de nan vs bien do HNX
   ghi chú sàn TBC_note tieu de nan vs bien do HOSE
@@ -49,15 +49,15 @@ TV1 P/E theo năm: {2020: 56.35, 2021: 5.9, 2022: 23.64, 2023: 11.16, 2024: 7.82
 -- Thuỷ điện: P/E theo SÀN (trung vị mã-năm), 2019-2026 --
 exch    HNX   HOSE  UPCOM
 y                        
-2019  11.91  10.19   8.39
-2020  12.60  13.23   9.92
-2021  10.69  12.83  10.58
-2022   9.26  10.16  10.24
-2023   8.53   7.86   8.74
-2024  12.45  14.18  14.65
-2025  11.13  12.37  11.00
-2026   9.44   9.91   8.55
-số mã theo sàn: {'HNX': 6, 'HOSE': 12, 'UPCOM': 14}
+2019  11.91  10.13   8.67
+2020  12.60  13.10  11.01
+2021  10.69  12.16  10.83
+2022   9.26   9.87  10.44
+2023   8.53   7.97   8.66
+2024  12.45  14.00  14.80
+2025  11.13  11.98  11.20
+2026   9.44   9.77   8.81
+số mã theo sàn: {'HNX': 6, 'HOSE': 13, 'UPCOM': 13}
 
 -- Thuỷ điện: P/E theo bậc ADV tháng (tỷ đ), gộp mã-tháng 2023-2026 --
           n_ma_thang  n_ma  pe_med  pb_med
@@ -70,11 +70,11 @@ adv_tier
        n_ma_thang  n_ma  pe_med  pb_med  adv_med
 exch                                            
 HNX           275     6   11.10    1.94     0.01
-HOSE          530    12   10.87    1.99     0.15
-UPCOM         647    14   10.04    1.77     0.01
+HOSE          577    13   10.63    1.92     0.16
+UPCOM         600    13   10.48    1.95     0.01
 
--- Hồi quy mô tả log(PE) ~ UPCOM + HNX + log(ADV) + log(vốn hoá) + payout(năm trước) + ROE; N=174 mã-năm, 32 mã, R2=0.38
-   hệ số: {'const': np.float64(2.009), 'UPCOM': np.float64(-0.167), 'HNX': np.float64(-0.171), 'logADV': np.float64(-0.077), 'logMcap': np.float64(0.07), 'payout': np.float64(0.242), 'ROE': np.float64(-2.243)}
+-- Hồi quy mô tả log(PE) ~ UPCOM + HNX + log(ADV) + log(vốn hoá) + payout(năm trước) + ROE; N=174 mã-năm, 32 mã, R2=0.37
+   hệ số: {'const': np.float64(1.953), 'UPCOM': np.float64(-0.131), 'HNX': np.float64(-0.138), 'logADV': np.float64(-0.074), 'logMcap': np.float64(0.074), 'payout': np.float64(0.241), 'ROE': np.float64(-2.205)}
    (mã-năm không độc lập — chỉ mô tả, không suy diễn ý nghĩa thống kê)
 
 === 1c. Tỷ suất cổ tức tiền thực hiện theo năm (DPS có GDKHQ trong năm / giá TB cuối tháng trong năm) ===
@@ -119,7 +119,7 @@ ticker   san  yld_2125  g_dps  r_ngam  cv_dps  pe_2025
    DRL  HOSE     0.094 -0.030   0.065    0.27     11.3
    NTH   HNX     0.093  0.189   0.282    0.43      9.8
    CHP  HOSE     0.085  0.122   0.207    0.33     11.6
-   GHC UPCOM     0.084 -0.095  -0.011    0.26      7.2
+   GHC  HOSE     0.084 -0.095  -0.011    0.26      7.2
    SBH UPCOM     0.083  0.172   0.255    0.60     16.7
    S4A  HOSE     0.083  0.149   0.232    0.37     15.4
    ISH UPCOM     0.083  0.075   0.158    0.38     15.8
@@ -171,6 +171,47 @@ SHP (HOSE): NP 2019:216, 2020:63, 2021:265, 2022:318, 2023:275, 2024:296, 2025:2
 TMP (HOSE): NP 2019:362, 2020:178, 2021:356, 2022:576, 2023:441, 2024:350, 2025:317 | PE 2019:5.9, 2020:7.4, 2021:13.5, 2022:9.6, 2023:6.9, 2024:13.8, 2025:12.4, 2026:10.1
     TTM đến 2026Q2: NP 351.8 tỷ; P/E TTM tại giá cuối 49000 = 9.7
 
+=== r8-B1. Lợi suất yêu cầu: các ước lượng vững (mã-năm thuỷ điện có trả cổ tức) ===
+5 quan sát nặng nhất trong hồi quy qua gốc (trọng số DPS²): [('QPH', 2025, 14000, 0.408, 0.117), ('AVC', 2023, 9565, 0.199, 0.055), ('DRL', 2019, 7500, 0.143, 0.034), ('TMP', 2023, 7300, 0.129, 0.032), ('TMP', 2021, 7230, 0.163, 0.031)]
+quan sát payout>150% (cổ tức đặc biệt/trả từ lợi nhuận giữ lại) bị loại khi ước lượng vững: [('AVC', 2020, 3.09), ('AVC', 2024, 2.93), ('CHP', 2019, 2.17), ('GSM', 2024, 1.57), ('SBH', 2024, 1.97), ('TMP', 2021, 2.85)]
+  hồi quy qua gốc đủ mẫu 0.1043 | bỏ payout>150% 0.1028 | bỏ 5 quan sát nặng nhất 0.0876 | trung vị yield 0.0707 (P/DPS: 0.0707) | trung bình 0.0769
+  nhóm DPS ổn định (CV<=0,35, n=7): yield+g p25 0.074 · trung vị 0.111 · p75 0.192; dải r_ngầm min..max -0.011..0.482
+  yield TTM trung vị người trả 2026 (g=0): 0.0949
+  ⇒ Ke KHÔNG xác định được từ peer: yield thuần 7–9%, yield+g 7–21% (rơi theo mã); khung fleet domestic_v2 r=12,25%.
+
+=== r8. Lịch sử cổ tức tiền TV1 theo năm cổ tức (corporate_action DIV, đã thực hiện) ===
+{2014: 1500.0, 2015: 1050.0, 2023: 500.0, 2024: 600.0, 2025: 1500.0}
+  (DPS_FY chỉ có từ 2015 theo q_div.sql; năm vắng = không có sự kiện DIV tiền trong dữ liệu)
+
+=== r8-N2. Cách suy hệ số payout (P/E thuỷ điện theo bậc payout năm trước) ===
+           n  n_ma  pe_med
+pt0                       
+0<p<50%   15    11    7.26
+p=0       22    12   10.05
+p>=50%   137    28   11.06
+      n_all  n_low      r
+y                        
+2021   26.0    7.0  1.000
+2022   29.0    3.0  1.564
+2023   29.0   10.0  0.852
+2024   29.0    3.0  1.023
+2025   30.0    4.0  0.765
+2026   31.0   10.0  0.897
+hệ số gộp 0.868 | chuẩn hoá theo năm (trung vị các năm đủ ≥3 quan sát) 0.948 | chỉ nhóm 0<p<50% 0.690
+payout trung vị FY2025: UPCOM 0.54 vs HOSE 0.90 ⇒ P/E UPCOM đã phản ánh payout thấp một phần: chiết khấu payout chồng nhẹ (chân P/E nghiêng bảo thủ)
+
+=== r8-N4. Peer TƯ VẤN (ICB 2791): TV2, TV3, TV4 — P/E trung vị năm và E/P ===
+y       2019  2020  2021  2022  2023  2024  2025  2026
+ticker                                                
+TV2      8.5   7.1   8.5   9.9  28.7  41.5  36.0  14.8
+TV3     18.5  11.2   9.2   9.8   8.3   7.4   7.4   9.2
+TV4     10.2  10.4   7.9   8.6   7.5   8.3   8.9   6.0
+E/P 2026 YTD: {'TV2': 0.068, 'TV3': 0.109, 'TV4': 0.167} | E/P trung vị 2024-25: {'TV2': 0.026, 'TV3': 0.135, 'TV4': 0.116} (TV2 P/E 2023-25 bị méo bởi LNST thấp sau lỗ — loại khỏi trung vị)
+  E/P tư vấn (TV3, TV4; 2026 YTD & 2024-25): 0.109–0.167; TV2 2026: 0.068
+DPS tư vấn theo năm cổ tức: {'TV2': {2020: 1000.0, 2021: 1000.0, 2022: 1000.0, 2023: 1000.0, 2024: 1000.0}, 'TV3': {2018: 1000.0, 2019: 1200.0, 2020: 1000.0, 2022: 500.0, 2023: 500.0, 2024: 500.0, 2025: 500.0}, 'TV4': {2018: 400.0, 2019: 500.0, 2022: 1200.0, 2023: 1000.0, 2024: 1000.0, 2025: 1000.0}}
+GHI CHÚ NHÃN: nhóm thuỷ điện gán theo TÊN doanh nghiệp (không universe_pit); chỉ mã còn giao dịch 2026 ⇒ survivorship nhẹ cho yield 2019–25; SBA thuộc danh sách hạn chế của fleet nhưng vẫn là peer hiệu chuẩn (không phải mã khuyến nghị).
+  SBA P/E 2026 YTD 10.16; bỏ SBA khỏi mẫu 2026 YTD ⇒ trung vị nhóm 9.13 (có SBA 9.22); UPCOM p25/median 7.90/8.81
+
 -- P/E thuỷ điện theo bậc payout năm trước (mã-năm 2021-26) --
          n  n_ma  pe_med
 pt                      
@@ -178,9 +219,9 @@ pt
 50-80%  54    22    9.40
 >80%    83    27   11.73
 hệ số điều chỉnh payout <50% / toàn mẫu: 2021-26 0.868; 2024-26 0.789; payout trung vị thuỷ điện 2024 0.82, 2025 0.77
-   hồi quy ⇒ P/E dự báo cho hồ sơ TV1 (ROE 0.14): 8.29
-   hồi quy ⇒ P/E dự báo cho hồ sơ TV1 (ROE 0.185): 7.49
+   hồi quy ⇒ P/E dự báo cho hồ sơ TV1 (ROE 0.14): 8.37
+   hồi quy ⇒ P/E dự báo cho hồ sơ TV1 (ROE 0.185): 7.58
 
-=== 1d. Hiệu chuẩn === {"pe_lo": 7.83, "pe_mid": 8.55, "pe_hi": 9.22, "pe_note": "lo = p25 thuỷ điện UPCOM 2026 YTD; mid = trung vị thuỷ điện UPCOM 2026 YTD; hi = trung vị toàn nhóm thuỷ điện 2026 YTD (trung vị mã-năm, 0<PE<60)", "n_upcom": 14, "n_all": 32, "r_lo": 0.0949, "r_mid": 0.1043, "r_hi": 0.111, "r_note": "lo = yield TTM trung vị thuỷ điện có trả (cuối kỳ 2026, g=0); mid = yield ngầm hồi quy P=b·DPS (mã-năm 2019-25); hi = yield+g trung vị nhóm DPS ổn định (CV<=0,35)", "upcom_coef": -0.167, "yld_payers_med_2019_25": 0.0707, "payout_adj": 0.868, "payout_adj_2024": 0.789, "pe_lo_adj": 6.8, "pe_mid_adj": 7.42, "pe_hi_adj": 8.01}
-Thuỷ điện UPCOM 2026 YTD: n 14 p25 7.83 median 8.55 | HOSE median 9.91 | HNX 9.44
+=== 1d. Hiệu chuẩn === {"pe_lo": 7.9, "pe_mid": 8.81, "pe_hi": 9.22, "pe_note": "lo = p25 thuỷ điện UPCOM 2026 YTD; mid = trung vị thuỷ điện UPCOM 2026 YTD; hi = trung vị toàn nhóm thuỷ điện 2026 YTD (trung vị mã-năm, 0<PE<60)", "n_upcom": 13, "n_all": 32, "r_lo": 0.0949, "r_mid": 0.1043, "r_hi": 0.111, "r_note": "lo = yield TTM trung vị thuỷ điện có trả (cuối kỳ 2026, g=0); mid = yield ngầm hồi quy P=b·DPS (mã-năm 2019-25); hi = yield+g trung vị nhóm DPS ổn định (CV<=0,35)", "ke_range": [0.09, 0.13], "ke_centre": 0.12, "ke_note": "Ke = KHOẢNG chưa xác định 9–13%; tâm 12% (khung fleet domestic_v2 r=12,25% + E/P chân P/E ≈13,5% + tư vấn E/P 11–16%); peer yield thuần 7–9% là cận dưới", "r_robust_median": 0.0707, "r_robust_ex_special": 0.1028, "r_robust_ex_top5": 0.0876, "upcom_coef": -0.131, "yld_payers_med_2019_25": 0.0707, "payout_adj": 0.868, "payout_adj_2024": 0.789, "pe_lo_adj": 6.86, "pe_mid_adj": 7.65, "pe_hi_adj": 8.01}
+Thuỷ điện UPCOM 2026 YTD: n 13 p25 7.9 median 8.81 | HOSE median 9.77 | HNX 9.44
 P/B thuỷ điện 2026 (trung vị mã-năm): p25 1.41 median 1.92

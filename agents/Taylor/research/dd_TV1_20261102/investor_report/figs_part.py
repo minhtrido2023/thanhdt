@@ -12,16 +12,16 @@ FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular
 FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
 
 PX = 19_800                      # đóng cửa 30/10/2026 (DNSE)
-# số từ ../calc/valuation_out.txt khối "r7" (hiệu chuẩn peer: P/E 6,8/7,42/8,0; Ke 11,1/10,4/9,5%)
-FAIR = (18_200, 22_000)          # vùng = [min(P/E 6,8; DDM27); max(P/E 8,0; DDM40)] (đầu vào giữa)
-CENTER = 20_700
-PE_EXP = (12_400, 19_600, 24_400)   # (i) P/E kỳ vọng lo/mid/hi
-DDM_EXP = (14_800, 22_000, 27_300)  # (ii) DDM lo (payout 27%) / mid 40% / hi 40%
-# theo kịch bản giá (pháp lý ổn, mid, đúng mốc): P/E 7,42, DDM27, DDM40; LNST hoạt động ổn/cấm thầu mid
-SCN = [("(a) giữ ~975 đ/kWh · P 10%", 39_200, 38_300, 39_300, 143.1, 118.1),
-       ("(b) 600 đ/kWh · P 45%", 22_500, 24_000, 24_500, 81.6, 56.6),
-       ("(c) 500 đ/kWh · P 35%", 18_000, 20_100, 20_600, 65.2, 40.2),
-       ("(d) ~340 đ/kWh · P 10%", 10_900, 14_000, 14_300, 39.0, 14.0)]
+# số từ ../calc/valuation_out.txt khối "r8" (bội số hiệu dụng 5,9/6,58/8,01; Ke tâm 12%, khoảng 9–13%)
+FAIR = (15_800, 20_600)          # vùng = [min(P/E 5,9; DDM27); max(P/E 8,01; DDM40)] (đầu vào giữa, Ke 12%)
+CENTER = 18_000
+PE_EXP = (11_900, 17_300, 19_900)   # (i) P/E kỳ vọng lo/mid/hi (bộ đầu vào)
+DDM_EXP = (13_700, 18_900, 21_300)  # (ii) DDM lo (payout 27%) / mid 40% / hi 40%
+# theo kịch bản giá (pháp lý ổn, mid, đúng mốc): P/E 6,58, DDM27, DDM40; LNST hoạt động ổn/cấm thầu mid
+SCN = [("(a) giữ ~975 đ/kWh · P 10%", 34_600, 32_500, 33_500, 143.1, 118.1),
+       ("(b) 600 đ/kWh · P 45%", 19_900, 20_400, 21_000, 81.6, 56.6),
+       ("(c) 500 đ/kWh · P 35%", 15_900, 17_200, 17_700, 65.2, 40.2),
+       ("(d) ~340 đ/kWh · P 10%", 9_600, 12_100, 12_400, 39.0, 14.0)]
 SOTP = (15_500, 51_100)            # SOTP: (d) thấp … (a) cao; kỳ vọng ~28.000, trộn pháp lý ~25.900
 SOTP_DISC = (15_600, 20_800)       # SOTP trộn × (0,6–0,8): chiết khấu thiểu số/holding thông lệ 20–40%
 SRC = "Nguồn: BCTC hợp nhất Q3/2026 (chưa soát xét), BCTC bán niên 2026 (soát xét); tính toán của nhóm nghiên cứu."
@@ -91,9 +91,9 @@ def figs():
     axp.text(0.04, 0.05, "Minh hoạ lĩnh vực tư vấn lưới điện — ảnh:\nwebsite pecc1.com.vn", transform=axp.transAxes,
              color="white", fontsize=5.8, bbox=dict(fc="#0d1b2a", ec="none", alpha=0.75, pad=2))
     axk = fig.add_axes([0.39, 0.50, 0.60, 0.48]); axk.axis("off")
-    kpis = [("Giá 30/10/2026", "19.800 đ"), ("Vùng giá trị hợp lý (ước lượng)", "18,2–22,0k"),
-            ("LNST bền 2027+ ở 500–600 đ/kWh", "65–82 tỷ"), ("Giá điện hoà vốn với giá 19,8k (đ/kWh)", "≈515–540"),
-            ("P/E thuỷ điện UPCOM 2026 · TV1 áp", "8,6 · 7,4x"), ("Cổ tức FY2025 · lợi suất", "1.500 đ · 7,6%")]
+    kpis = [("Giá 30/10/2026", "19.800 đ"), ("Vùng giá trị hợp lý (ước lượng)", "15,8–20,6k"),
+            ("LNST bền 2027+ ở 500–600 đ/kWh", "65–82 tỷ"), ("Giá điện hoà vốn với giá 19,8k (đ/kWh)", "≈590"),
+            ("P/E thuỷ điện UPCOM 2026 · TV1 áp", "8,8 · 6,6x"), ("Cổ tức FY2025 · lợi suất", "1.500 đ · 7,6%")]
     for i, (k, v) in enumerate(kpis):
         x, y = (i % 3) * 0.34, 0.55 if i < 3 else 0.02
         axk.add_patch(plt.Rectangle((x, y), 0.31, 0.42, color="#F3F5F7", transform=axk.transAxes))
@@ -233,12 +233,12 @@ def figs():
     print("px 12m", c0, c1, hi, px.loc[px.Close.idxmax(), "date"].date())
 
     # 07 Football field -------------------------------------------------------
-    rows = [("(d) giá ~340 đ/kWh: P/E · DDM", 10_900, 14_300, ACCENT),
-            ("(c) giá 500 đ/kWh: P/E · DDM", 18_000, 20_600, NAVY),
-            ("(b) giá 600 đ/kWh: P/E · DDM", 22_500, 24_500, NAVY),
-            ("(a) giữ giá ~975 đ/kWh: P/E · DDM", 38_300, 39_300, GREEN),
-            ("(i) P/E 6,8–8,0x kỳ vọng (LNST bền 2027+)", PE_EXP[0], PE_EXP[2], GREY),
-            ("(ii) DDM kỳ vọng (payout 27–40%, Ke 9,5–11,1%)", DDM_EXP[0], DDM_EXP[2], GREY),
+    rows = [("(d) giá ~340 đ/kWh: P/E · DDM", 9_600, 12_400, ACCENT),
+            ("(c) giá 500 đ/kWh: P/E · DDM", 15_900, 17_700, NAVY),
+            ("(b) giá 600 đ/kWh: P/E · DDM", 19_900, 21_000, NAVY),
+            ("(a) giữ giá ~975 đ/kWh: P/E · DDM", 32_500, 34_600, GREEN),
+            ("(i) P/E 5,9–8,0x kỳ vọng (LNST bền 2027+)", PE_EXP[0], PE_EXP[2], GREY),
+            ("(ii) DDM kỳ vọng (payout 27–40%, Ke 12%)", DDM_EXP[0], DDM_EXP[2], GREY),
             ("Vùng giá trị hợp lý (hợp hai phương pháp)", FAIR[0], FAIR[1], NAVY),
             ("SOTP trộn × 0,6–0,8 (chiết khấu thiểu số thông lệ)", SOTP_DISC[0], SOTP_DISC[1], GOLD),
             ("Giá trị tài sản (SOTP), từ (d) đến (a)", SOTP[0], SOTP[1], GOLD)]
@@ -250,8 +250,8 @@ def figs():
     ax.axvline(PX, color=ACCENT, ls="--", lw=1.6); ax.text(PX + 400, len(rows) - 0.35, "giá 19,8k", color=ACCENT, fontsize=7.2, ha="left", weight="bold")
     ax.set_xlim(0, 58_000); ax.set_ylim(-0.6, len(rows) - 0.1)
     ax.set_xticks(range(0, 50_001, 10_000)); ax.set_xticklabels([f"{t//1000}k" for t in range(0, 50_001, 10_000)], fontsize=7)
-    ax.set_title("Giá 19,8k trong vùng giá trị 18,2–22,0k (tâm ≈20,7k); hoà vốn ở giá điện ≈515–540 đ/kWh", loc="right", fontsize=8.8)
-    save(fig, "fig_07_football", "Mỗi kịch bản giá điện (pháp lý ổn, giữa): khoảng giữa P/E 7,42x (trên LNST bền 2027+ cộng tiền ròng) và DDM payout 27–40%. Kỳ vọng: trọng số giá 10/45/35/10 × pháp lý ổn/cấm thầu 70/30 × mốc hạ đúng 2027/lùi 2 năm 85/15; PV về 11/2026, lợi suất yêu cầu 9,5–11,1% (đo từ cổ tức thuỷ điện niêm yết), cộng cổ tức 2026. P/E = thuỷ điện UPCOM 2026 × hệ số payout thấp 0,87. SOTP = thuỷ điện DCF 2027–2059 + tư vấn − nợ điều chỉnh; cổ đông thiểu số nhận qua cổ tức hoặc bán tài sản. Ước lượng của nhóm nghiên cứu.",
+    ax.set_title("Giá 19,8k trong vùng giá trị 15,8–20,6k (tâm ≈18,0k); cần giá điện ròng ≈600 đ/kWh và không cấm thầu", loc="right", fontsize=8.8)
+    save(fig, "fig_07_football", "Mỗi kịch bản giá điện (pháp lý ổn, giữa): khoảng giữa P/E hiệu dụng 6,58x (trên LNST bền 2027+ cộng tiền ròng) và DDM payout 27–40%. Kỳ vọng: trọng số giá 10/45/35/10 × pháp lý ổn/cấm thầu 70/30 × mốc hạ đúng 2027/lùi 2 năm 85/15; PV về 11/2026, lợi suất yêu cầu 12% (khoảng chưa xác định 9–13%: cổ tức thuỷ điện niêm yết 7–9% thuần, khung chiết khấu nội địa 12,25%), cộng cổ tức 2026. P/E = thuỷ điện UPCOM 2026 × hệ số payout thấp 0,87 × hệ số quỹ khen thưởng 0,86 (TV1 trích 20%, ngành giả định 7%). SOTP = thuỷ điện DCF 2027–2059 + tư vấn − nợ điều chỉnh; cổ đông thiểu số nhận qua cổ tức hoặc bán tài sản. Ước lượng của nhóm nghiên cứu.",
          pd.DataFrame(rows, columns=["phep_do", "thap", "cao", "mau"]).drop(columns="mau"))
     plt.close(fig)
 
@@ -266,7 +266,7 @@ def figs():
     for i in range(len(labs)):
         tot = hydro[i] + cons[i]
         ax.text(i, max(hydro[i], 0) + cons[i] + 4, vn(tot, 0), ha="center", fontsize=7.6, weight="bold", color="#222")
-    ax.axhline(71.8, color=ACCENT, ls="--", lw=1.2, label="LNST hoà vốn với giá 19,8k ≈72 (P/E 7,42x; giá điện ≈540)")
+    ax.axhline(79.3, color=ACCENT, ls="--", lw=1.2, label="LNST hoà vốn với giá 19,8k ≈79 (P/E 6,58x; giá điện ≈590)")
     ax.axhline(0, color="#555", lw=0.8)
     ax.set_xticks(x); ax.set_xticklabels(labs, fontsize=7.6); ax.set_ylabel("tỷ đồng/năm", fontsize=8); ax.set_ylim(-15, 185)
     ax.legend(fontsize=6.8, frameon=False, loc="upper right")
@@ -277,7 +277,7 @@ def figs():
 
     # 13 Cổ tức cần có vs thực trả / bền vững --------------------------------------
     labs = ["Cần có để\nbiện minh 19,8k", "Thực trả\nFY2025", "Kế hoạch\nFY2026", "(a) ~975", "(b) 600", "(c) 500", "(d) ~340"]
-    lo = [1_879, 1_500, 1_000, 1_458, 826, 657, 388]; hi = [2_198, 1_500, 1_000, 2_160, 1_224, 974, 574]
+    lo = [1_782, 1_500, 1_000, 1_458, 826, 657, 388]; hi = [2_574, 1_500, 1_000, 2_160, 1_224, 974, 574]
     cols = [ACCENT, NAVY, NAVY, GREEN, GREY, GREY, GREY]
     fig, ax = plt.subplots(figsize=(7.2, 2.9)); fig.subplots_adjust(bottom=0.26, top=0.87, left=0.09, right=0.98)
     x = np.arange(len(labs))
@@ -286,10 +286,10 @@ def figs():
     for i in range(len(labs)):
         t = vn(lo[i]) if lo[i] == hi[i] else f"{vn(lo[i])}–{vn(hi[i])}"
         ax.text(i, hi[i] + 60, t, ha="center", fontsize=6.8, weight="bold")
-    ax.axhspan(1_879, 2_198, color=ACCENT, alpha=0.08)
+    ax.axhspan(1_782, 2_574, color=ACCENT, alpha=0.08)
     ax.set_xticks(x); ax.set_xticklabels(labs, fontsize=7); ax.set_ylabel("đ/cổ phiếu/năm", fontsize=8); ax.set_ylim(0, 3_000)
-    ax.set_title("Chỉ trả cổ tức 27–40%: cổ tức bền ≈650–1.200 đ < 1.900–2.200 đ cần có — phần còn lại là tiền giữ lại")
-    save(fig, "fig_13_dividend_gap", "Cần có = 19.800 × lợi suất yêu cầu 9,5–11,1% (thuỷ điện niêm yết, không tăng trưởng). Phần chênh không mất đi: lợi nhuận giữ lại tích luỹ thành tiền ròng, đã tính trong DDM theo giá trị sổ ở năm 10. Bền vững 2028+: tỷ lệ chi trả 27% (thực tế FY2025) đến 40% × LNST bền giữa (gồm lãi tiền), pháp lý ổn. Kế hoạch FY2026 = 10% mệnh giá (ĐHĐCĐ 30/04/2026, báo Đấu thầu). Ước lượng của nhóm nghiên cứu.",
+    ax.set_title("Cổ tức bền (kịch bản b–c) ≈650–1.200 đ, chỉ ≈một nửa mức 1.800–2.600 đ cần có — phần còn lại là tiền giữ lại")
+    save(fig, "fig_13_dividend_gap", "Cần có = 19.800 × lợi suất yêu cầu 9–13% (khoảng chưa xác định; không tăng trưởng). Phần chênh không mất đi: lợi nhuận giữ lại tích luỹ thành tiền ròng, đã tính trong DDM theo giá trị sổ ở năm 10. Bền vững 2028+: tỷ lệ chi trả 27% (thực tế FY2025) đến 40% × LNST bền giữa (gồm lãi tiền), pháp lý ổn. Kế hoạch FY2026 = 10% mệnh giá (ĐHĐCĐ 30/04/2026, báo Đấu thầu). Ước lượng của nhóm nghiên cứu.",
          pd.DataFrame({"muc": [l.replace("\n", " ") for l in labs], "thap": lo, "cao": hi}))
     plt.close(fig)
 
@@ -298,18 +298,18 @@ def figs():
     T = pd.read_csv(os.path.join(PS, "out_pe_pb_by_group_year.csv"))
     th = T[T.nhom == "thuy_dien"].set_index("y"); tn = T[T.nhom == "nhiet_dien"].set_index("y")
     tv = {2023: 11.16, 2024: 7.82, 2025: 5.71, 2026: 4.04}   # peer_study_out.txt "TV1 P/E theo năm" (trên LNST giá điện cũ)
-    up = {2019: 8.39, 2020: 9.92, 2021: 10.58, 2022: 10.24, 2023: 8.74, 2024: 14.65, 2025: 11.00, 2026: 8.55}
+    up = {2019: 8.67, 2020: 11.01, 2021: 10.83, 2022: 10.44, 2023: 8.66, 2024: 14.80, 2025: 11.20, 2026: 8.81}
     fig, ax = plt.subplots(figsize=(7.2, 2.9)); fig.subplots_adjust(bottom=0.24, top=0.87, left=0.08, right=0.98)
     ax.fill_between(th.index, th.pe_p25, th.pe_p75, color=LIGHT, alpha=0.9, label="Thuỷ điện niêm yết: p25–p75 (32 mã)")
     ax.plot(th.index, th.pe_med, color=NAVY, lw=2, marker="o", ms=4, label="Thuỷ điện: trung vị")
-    ax.plot(list(up), list(up.values()), color=NAVY, lw=1.2, ls=":", marker=".", label="Thuỷ điện UPCOM: trung vị (14 mã)")
+    ax.plot(list(up), list(up.values()), color=NAVY, lw=1.2, ls=":", marker=".", label="Thuỷ điện UPCOM: trung vị (13 mã)")
     ax.plot(tn.index, tn.pe_med, color=GREY, lw=1.1, ls="--", label="Nhiệt điện: trung vị (9 mã)")
     ax.plot(list(tv), list(tv.values()), color=ACCENT, lw=1.6, marker="s", ms=4, label="TV1 (lợi nhuận ở giá điện cũ)")
-    ax.axhspan(6.8, 8.0, color=GOLD, alpha=0.18); ax.text(2019.05, 7.1, "dải áp cho TV1 6,8–8,0x", fontsize=6.8, color="#8a6d10")
+    ax.axhspan(5.9, 8.0, color=GOLD, alpha=0.18); ax.text(2019.05, 6.2, "dải áp cho TV1 5,9–8,0x (đã trừ chi trả thấp, quỹ khen thưởng)", fontsize=6.8, color="#8a6d10")
     for y_, v_ in ((2026, th.pe_med[2026]), (2026, up[2026])):
         ax.text(y_ + 0.08, v_, vn(v_, 1), fontsize=6.8, va="center", color=NAVY)
     ax.set_ylim(0, 24); ax.set_ylabel("P/E (lần)", fontsize=8); ax.legend(fontsize=6.4, frameon=False, ncol=2, loc="upper left")
-    ax.set_title("P/E thuỷ điện 2026: trung vị 9,2x (UPCOM 8,6x); TV1 ≈4x trên lợi nhuận ở giá điện cũ", fontsize=8.8)
+    ax.set_title("P/E thuỷ điện 2026: trung vị 9,2x (UPCOM 8,8x); TV1 ≈4x trên lợi nhuận ở giá điện cũ", fontsize=8.8)
     save(fig, "fig_14_peer_pe", "P/E trailing, trung vị theo mã–năm của các phiên cuối tháng (loại P/E ≤0 hoặc ≥60); 2026 = đến 02/11/2026. Nhóm thuỷ điện = 32 mã ngành điện truyền thống có nhà máy thuỷ điện là chính (phân loại theo tên doanh nghiệp). Nguồn: cơ sở dữ liệu thị trường của nhóm nghiên cứu; truy vấn và tính toán lưu cùng báo cáo.",
          T[T.nhom.isin(["thuy_dien", "nhiet_dien"])])
     plt.close(fig)
@@ -321,10 +321,10 @@ def figs():
     fig, ax = plt.subplots(figsize=(7.2, 2.9)); fig.subplots_adjust(bottom=0.24, top=0.87, left=0.08, right=0.98)
     ax.hist(v, bins=np.arange(0, 21, 1), color=NAVY, alpha=0.75, edgecolor="white")
     lines = [(6.8, GREEN, "Tiết kiệm 12T Big-4 6,8%"), (v.median(), NAVY, f"Trung vị {vn(v.median(),1)}%"),
-             (9.5, GOLD, "Lợi suất yêu cầu áp cho TV1 9,5–11,1%"), (12.85, ACCENT, "Ke khung DCF nội địa 12,3–13,4%")]
+             (12.0, ACCENT, "Lợi suất yêu cầu áp cho TV1: tâm 12%, khoảng 9–13%")]
     for x_, c_, l_ in lines:
         ax.axvline(x_, color=c_, ls="--", lw=1.3, label=l_)
-    ax.axvspan(9.5, 11.1, color=GOLD, alpha=0.15); ax.axvspan(12.3, 13.4, color=ACCENT, alpha=0.08)
+    ax.axvspan(9.0, 13.0, color=GOLD, alpha=0.15)
     n10 = int((yh.yld >= .10).sum()); n12 = int((yh.yld >= .12).sum())
     ax.set_xlabel("Tỷ suất cổ tức tiền thực hiện trong năm (%), 2019–2025, mã có trả (cắt ở 20%)", fontsize=7.6); ax.set_ylabel("số mã–năm", fontsize=8)
     ax.legend(fontsize=6.4, frameon=False, loc="upper right")

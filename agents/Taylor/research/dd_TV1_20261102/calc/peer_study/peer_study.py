@@ -1,4 +1,4 @@
-"""Peer study TV1 (r7, 02/11/2026) — P/E, P/B, tỷ suất cổ tức nhóm điện / thuỷ điện VN.
+"""Peer study TV1 (r7→r8, 02/11/2026) — P/E, P/B, tỷ suất cổ tức nhóm điện / thuỷ điện VN.
 
 Tái lập:  python3 -I peer_study.py   (đọc bq_*.csv cùng thư mục; SQL ở q_*.sql)
 Nguồn:    tav2_bq.ticker (panel tháng: Price chưa điều chỉnh, PE, PB, ADV), tav2_bq.ticker_financial
@@ -32,6 +32,7 @@ pm["grp"] = pm.ticker.map(GROUP).fillna("khac"); pm["y"] = pm.m.dt.year
 # ---------- sàn: tiêu đề sự kiện mới nhất, đối chiếu biên độ (HOSE ±7, HNX ±10, UPCOM ±15) ----------
 def exch_title(s):
     s = str(s).upper()
+    if " SANG " in s: s = s.split(" SANG ", 1)[1]   # "Chuyển sàn từ UPCoM sang HOSE" ⇒ sàn đích
     for k in ("UPCOM", "HOSE", "HNX"):
         if k in s: return k
     return None
@@ -43,6 +44,9 @@ EX = {t: exch_band(r) for t, r in band.items()}
 for _, r in ex.iterrows():
     if r.ex_title and r.ticker in EX and r.ex_title != EX[r.ticker]:
         EX[r.ticker + "_note"] = f"tieu de {r.ex_title} vs bien do {EX[r.ticker]}"
+    # r8 (N1): mã chuyển sàn (MOVE) từ 2025 ⇒ sàn đích theo tiêu đề sự kiện, không theo biên độ giá của giai đoạn cũ
+    if r.event_code == "MOVE" and r.ex_title and str(r.effective_date) >= "2025-01-01" and r.ticker in EX:
+        EX[r.ticker] = r.ex_title; EX[r.ticker + "_note"] = f"MOVE {r.effective_date} -> {r.ex_title} (ghi đè biên độ)"
 pm["exch"] = pm.ticker.map(EX)
 
 # ---------- cổ tức tiền: dedup (cùng mã, ngày, năm cổ tức, đợt) lấy max; các đợt khác nhau cùng ngày thì cộng ----------
@@ -297,6 +301,58 @@ ax.grid(alpha=.3); fig.tight_layout(); fig.savefig(f"{FIG}/peer_pe_vs_adv.png", 
 
 
 
+# ---------- r8: ước lượng vững của lợi suất yêu cầu (B1) ----------
+P("\n=== r8-B1. Lợi suất yêu cầu: các ước lượng vững (mã-năm thuỷ điện có trả cổ tức) ===")
+pp2 = pp.copy(); pp2["w"] = pp2.dps ** 2
+ob = pp2.assign(contrib=pp2.w / pp2.w.sum()).sort_values("contrib", ascending=False)
+P("5 quan sát nặng nhất trong hồi quy qua gốc (trọng số DPS²):", [(r.ticker, int(r.y), round(r.dps), round(r.yld, 3), round(r.contrib, 3)) for r in ob.head(5).itertuples()])
+pay_fy = {}
+for r in pp2.itertuples():   # payout theo năm cổ tức: DPS năm đó × cổ phần / LNST năm trước
+    pay_fy[(r.ticker, r.y)] = payout(r.ticker, r.y - 1)
+pp2["pay"] = [pay_fy[(a, b)] for a, b in zip(pp2.ticker, pp2.y)]
+spec = pp2[(pp2.pay > 1.5)]
+P("quan sát payout>150% (cổ tức đặc biệt/trả từ lợi nhuận giữ lại) bị loại khi ước lượng vững:", [(r.ticker, int(r.y), round(r.pay, 2)) for r in spec.itertuples()])
+q = pp2[~pp2.index.isin(spec.index)]
+b_ex = (q.px * q.dps).sum() / (q.dps ** 2).sum()
+q5 = ob.iloc[5:]; b_ex5 = (q5.px * q5.dps).sum() / (q5.dps ** 2).sum()
+r_med = float(1 / (pp.px / pp.dps).median()); r_mean = float(pp.yld.mean())
+P(f"  hồi quy qua gốc đủ mẫu {1/bslope:.4f} | bỏ payout>150% {1/b_ex:.4f} | bỏ 5 quan sát nặng nhất {1/b_ex5:.4f} | trung vị yield {pp.yld.median():.4f} (P/DPS: {r_med:.4f}) | trung bình {r_mean:.4f}")
+P(f"  nhóm DPS ổn định (CV<=0,35, n={len(lo_cv)}): yield+g p25 {lo_cv.r_ngam.quantile(.25):.3f} · trung vị {lo_cv.r_ngam.median():.3f} · p75 {lo_cv.r_ngam.quantile(.75):.3f}; dải r_ngầm min..max {S.r_ngam.min():.3f}..{S.r_ngam.max():.3f}")
+P(f"  yield TTM trung vị người trả 2026 (g=0): {ch[ch.yld_ttm>0].yld_ttm.median():.4f}")
+P("  ⇒ Ke KHÔNG xác định được từ peer: yield thuần 7–9%, yield+g 7–21% (rơi theo mã); khung fleet domestic_v2 r=12,25%.")
+P("\n=== r8. Lịch sử cổ tức tiền TV1 theo năm cổ tức (corporate_action DIV, đã thực hiện) ===")
+P({int(k[1]): float(v) for k, v in DPS_FY.items() if k[0] == "TV1"})
+P("  (DPS_FY chỉ có từ 2015 theo q_div.sql; năm vắng = không có sự kiện DIV tiền trong dữ liệu)")
+
+# ---------- r8-N2: cách suy hệ số payout ----------
+P("\n=== r8-N2. Cách suy hệ số payout (P/E thuỷ điện theo bậc payout năm trước) ===")
+padj_all = R[R.payout < .5].pe.median() / R.pe.median()
+R["pt0"] = np.where(R.payout == 0, "p=0", np.where(R.payout < .5, "0<p<50%", "p>=50%"))
+P(R.groupby("pt0").agg(n=("pe", "size"), n_ma=("ticker", "nunique"), pe_med=("pe", "median")).round(2).to_string())
+by_y = R.groupby("y").apply(lambda g: pd.Series(dict(n_all=len(g), n_low=int((g.payout < .5).sum()), r=(g[g.payout < .5].pe.median() / g.pe.median()) if (g.payout < .5).sum() >= 3 else np.nan)), include_groups=False)
+P(by_y.round(3).to_string())
+fac_year = float(by_y.r.median())
+fac_0p = float(R[(R.payout > 0) & (R.payout < .5)].pe.median() / R.pe.median())
+P(f"hệ số gộp {padj_all:.3f} | chuẩn hoá theo năm (trung vị các năm đủ ≥3 quan sát) {fac_year:.3f} | chỉ nhóm 0<p<50% {fac_0p:.3f}")
+P(f"payout trung vị FY2025: UPCOM {U[(U.nhom=='thuy_dien')&(U.san=='UPCOM')].payout_2025.median():.2f} vs HOSE {U[(U.nhom=='thuy_dien')&(U.san=='HOSE')].payout_2025.median():.2f} ⇒ P/E UPCOM đã phản ánh payout thấp một phần: chiết khấu payout chồng nhẹ (chân P/E nghiêng bảo thủ)")
+
+# ---------- r8-N4: peer tư vấn ICB 2791 (TV2/TV3/TV4) + ghi chú nhãn ----------
+P("\n=== r8-N4. Peer TƯ VẤN (ICB 2791): TV2, TV3, TV4 — P/E trung vị năm và E/P ===")
+ad = pd.read_csv(f"{H}/bq_adv.csv", parse_dates=["m", "time"]); ad["y"] = ad.m.dt.year
+adp = ad[(ad.PE > 0) & (ad.PE < 60)].groupby(["ticker", "y"]).PE.median().unstack()
+adp.round(2).to_csv(f"{H}/out_adv_peers_pe.csv")
+P(adp.round(1).to_string())
+ep26 = (1 / adp[2026]).round(3).to_dict(); ep2425 = (1 / adp[[2024, 2025]].median(axis=1)).round(3).to_dict()
+P("E/P 2026 YTD:", ep26, "| E/P trung vị 2024-25:", ep2425, "(TV2 P/E 2023-25 bị méo bởi LNST thấp sau lỗ — loại khỏi trung vị)")
+vals = [1 / adp.loc[t, 2026] for t in ("TV3", "TV4")] + [1 / adp.loc[t, [2024, 2025]].median() for t in ("TV3", "TV4")]
+P(f"  E/P tư vấn (TV3, TV4; 2026 YTD & 2024-25): {min(vals):.3f}–{max(vals):.3f}; TV2 2026: {1/adp.loc['TV2',2026]:.3f}")
+adv = pd.read_csv(f"{H}/bq_adv_div.csv", parse_dates=["exright_date"])
+P("DPS tư vấn theo năm cổ tức:", {t: g.set_index("dividend_year").dps.to_dict() for t, g in adv.groupby("ticker")})
+P("GHI CHÚ NHÃN: nhóm thuỷ điện gán theo TÊN doanh nghiệp (không universe_pit); chỉ mã còn giao dịch 2026 ⇒ survivorship nhẹ cho yield 2019–25;"
+  " SBA thuộc danh sách hạn chế của fleet nhưng vẫn là peer hiệu chuẩn (không phải mã khuyến nghị).")
+n_sba = pm[(pm.ticker == "SBA") & (pm.y == 2026) & (pm.PE > 0) & (pm.PE < 60)].PE.median()
+P(f"  SBA P/E 2026 YTD {n_sba:.2f}; bỏ SBA khỏi mẫu 2026 YTD ⇒ trung vị nhóm {SX[(SX.y==2026)&(SX.ticker!='SBA')].PE.median():.2f} (có SBA {SX[SX.y==2026].PE.median():.2f}); UPCOM p25/median {SX[(SX.y==2026)&(SX.exch=='UPCOM')&(SX.ticker!='SBA')].PE.quantile(.25):.2f}/{SX[(SX.y==2026)&(SX.exch=='UPCOM')&(SX.ticker!='SBA')].PE.median():.2f}")
+
 # ---------- 1d. Hiệu chuẩn cho TV1 (ghi peer_calib.json để valuation.py đọc) ----------
 import json
 h26 = SX[SX.y == 2026]
@@ -309,6 +365,9 @@ cal = dict(
     r_mid=round(float(1 / bslope), 4),
     r_hi=round(float(lo_cv.r_ngam.median()), 4),
     r_note="lo = yield TTM trung vị thuỷ điện có trả (cuối kỳ 2026, g=0); mid = yield ngầm hồi quy P=b·DPS (mã-năm 2019-25); hi = yield+g trung vị nhóm DPS ổn định (CV<=0,35)",
+    ke_range=[0.09, 0.13], ke_centre=0.12,
+    ke_note="Ke = KHOẢNG chưa xác định 9–13%; tâm 12% (khung fleet domestic_v2 r=12,25% + E/P chân P/E ≈13,5% + tư vấn E/P 11–16%); peer yield thuần 7–9% là cận dưới",
+    r_robust_median=round(float(pp.yld.median()), 4), r_robust_ex_special=round(float(1 / b_ex), 4), r_robust_ex_top5=round(float(1 / b_ex5), 4),
     upcom_coef=round(float(b[1]), 3), yld_payers_med_2019_25=round(float(yh[yh.dps > 0].yld.median()), 4))
 # Điều chỉnh payout: TV1 trả 27–40% LNST (+20% quỹ KTPL); thị trường trả P/E thấp hơn cho thuỷ điện payout <50%
 padj_all = R[R.payout < .5].pe.median() / R.pe.median(); padj_24 = R[(R.y >= 2024) & (R.payout < .5)].pe.median() / R[R.y >= 2024].pe.median()

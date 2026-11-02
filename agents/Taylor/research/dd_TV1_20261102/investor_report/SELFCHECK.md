@@ -1,5 +1,12 @@
 # Tự kiểm — TV1_DD_investor_report_20261102 — r7 (job Taylor_20261102_112213, 02/11/2026; hiệu chuẩn peer; CHƯA gửi, CHƯA qua fundamental-skeptic)
 
+## Bản hiện hành (job Taylor_20261102_115348) — hiệu chuẩn peer sau phản biện vòng 5
+- Tái lập: `/home/trido/thanhdt/wc_venv/bin/python -I ../calc/peer_study/peer_study.py` → `-I ../calc/valuation.py` (khối "r8") → `bash scripts/make_maps.sh` (nếu cần) → banner (lệnh bên dưới) → `/home/trido/thanhdt/wc_venv/bin/python -I build_report.py all` → HTML dry-run (lệnh bên dưới).
+- Số trong md khớp `../calc/valuation_out.txt` khối "r8": tâm P/E 17.336 · DDM27 18.375 · DDM40 18.917 · tâm 17.991 · vùng 15.783–20.603 · hoà vốn 598/586/563 (đã đối chiếu từng số khi sửa; không có script tự động so md↔out).
+- Grep luật 18 (md, HTML bỏ base64, figs/*.csv): `đính chính|thay bản|trước đây|đã sửa|vòng|\br[0-9]\b|sai sót|bản r|REFUTED|phản biện lần|lỗi phương pháp` = **0 hit**. Grep nội bộ (Taylor|Bobby|Mike|skeptic|SpaceX|ZaloPay|NAV|fear|QUALIFY|AMBIGUOUS|NON|§2.5|kiểm định|xung đột lợi ích|BANNED|Wendy|Spyros|job|state_TV1|[UL]|đang nắm giữ cổ phiếu) = **0 hit**.
+- Số cũ (18.200–22.000, 20.700, 515–540, 9,5–11,1%, 8,6x UPCOM, 14 mã, 7,42x) = 0 hit trong md (grep). PDF 14 trang; HTML dry-run 17 `<img`, 10,2 MB; KHÔNG gửi. Xem bằng mắt: fig_00_hero, fig_07_football (đã đọc); các hình còn lại (fig_12–15) và bố cục PDF **chưa xem lại bằng mắt**; số từ thân chưa đo lại.
+- Giả định gắn nhãn trong md: tỷ lệ trích quỹ khen thưởng của ngành 7% (chưa đo được); xác suất kịch bản giá điện; tâm lợi suất yêu cầu 12%.
+
 ## r7 — viết lại toàn bộ như bản độc lập (luật 18) + hiệu chuẩn P/E, lợi suất yêu cầu theo peer thuỷ điện
 - Peer: `../calc/peer_study/` — SQL `q_panel_monthly.sql`, `q_fin.sql`, `q_div.sql`, `q_exch.sql` (bq CLI, stdin) → `bq_*.csv` → `/home/trido/thanhdt/wc_venv/bin/python -I peer_study.py` → `peer_study_out.txt` (md5 bb69207a…), `out_*.csv`, `peer_calib.json`.
 - Định giá: `python3 -I calc/valuation.py > calc/valuation_out.txt` (md5 4fdfa088…) khối "r7" đọc `peer_calib.json`: P/E 6,80/7,42/8,01; Ke 11,1/10,4/9,5%; vùng 18.153–21.986 (18.200–22.000), tâm 20.667 (−4%); hoà vốn 540/514/480.

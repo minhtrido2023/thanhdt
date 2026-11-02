@@ -297,32 +297,32 @@ r6 Tóm tắt trung tâm:
 ====================================================================================================
 r7 — HIỆU CHUẨN THEO PEER (P/E thuỷ điện UPCOM; lợi suất yêu cầu từ cổ tức thực hiện)
 ====================================================================================================
-P/E chưa điều chỉnh payout (7.83, 8.55, 9.22); hệ số payout 0.868 (2024–26: 0.789)
-P/E lo/mid/hi = (6.8, 7.42, 8.01); Ke lo/mid/hi = (0.111, 0.1043, 0.0949)  [peer_study/peer_calib.json]
+P/E chưa điều chỉnh payout (7.9, 8.81, 9.22); hệ số payout 0.868 (2024–26: 0.789)
+P/E lo/mid/hi = (6.86, 7.65, 8.01); Ke lo/mid/hi = (0.111, 0.1043, 0.0949)  [peer_study/peer_calib.json]
 
-Theo kịch bản (mid: P/E 7.42, Ke 10.4%; không mốc lùi) — đ/cp:
+Theo kịch bản (mid: P/E 7.65, Ke 10.4%; không mốc lùi) — đ/cp:
                 P/E ổn   P/E xấu  DDM27 ổn  DDM40 ổn DDM40 xấu
-  a_giu_975     39,227    31,401    38,315    39,262    32,681
-  b_600         22,496    14,670    23,969    24,509    17,929
-  c_500         18,034    10,208    20,143    20,576    13,995
-  d_340         10,896     3,070    14,023    14,281     7,701
+  a_giu_975     40,316    32,300    38,777    39,723    33,062
+  b_600         23,117    15,101    24,232    24,773    18,111
+  c_500         18,531    10,514    20,354    20,786    14,125
+  d_340         11,192     3,176    14,148    14,407     7,746
 
 Kỳ vọng có trọng số r7 (lo / mid / hi; lo = P/E lo + Ke cao + đầu vào thấp):
-  pe    :  12,367 /  19,594 /  24,386
-  ddm27 :  14,832 /  21,493 /  26,748
-  ddm40 :  15,193 /  21,986 /  27,269
-  P/E (mid đầu vào, mid Ke) ở bội số 6.8 / 8.01: 18,153 / 20,966
-VÙNG GIÁ TRỊ r7 = [min(P/E lo-bội số, DDM27); max(P/E hi-bội số, DDM40)] (đầu vào giữa, Ke giữa) = 18,153–21,986; tâm 20,667
-  Giá 19,800 so vùng -10%…+9%; so tâm -4%
+  pe    :  12,462 /  20,129 /  24,386
+  ddm27 :  14,870 /  21,719 /  26,748
+  ddm40 :  15,231 /  22,213 /  27,269
+  P/E (mid đầu vào, mid Ke) ở bội số 6.86 / 8.01: 18,292 / 20,966
+VÙNG GIÁ TRỊ r7 = [min(P/E lo-bội số, DDM27); max(P/E hi-bội số, DDM40)] (đầu vào giữa, Ke giữa) = 18,292–22,213; tâm 21,048
+  Giá 19,800 so vùng -11%…+8%; so tâm -6%
 
-Độ nhạy Ke 8–13% (P/E mid 7.42; tâm = (P/E + TB(DDM27,DDM40))/2):
-  Ke  8.0%: P/E  20,141 | DDM27  25,985 | DDM40  26,370 | tâm  23,159 (giá -15%) | DPS cần (g=0) 1,584
-  Ke  9.0%: P/E  19,913 | DDM27  24,009 | DDM40  24,444 | tâm  22,070 (giá -10%) | DPS cần (g=0) 1,782
-  Ke  9.5%: P/E  19,803 | DDM27  23,108 | DDM40  23,564 | tâm  21,569 (giá -8%) | DPS cần (g=0) 1,879
-  Ke 10.4%: P/E  19,594 | DDM27  21,493 | DDM40  21,986 | tâm  20,667 (giá -4%) | DPS cần (g=0) 2,065
-  Ke 11.1%: P/E  19,448 | DDM27  20,426 | DDM40  20,942 | tâm  20,066 (giá -1%) | DPS cần (g=0) 2,198
-  Ke 12.0%: P/E  19,255 | DDM27  19,094 | DDM40  19,637 | tâm  19,310 (giá +3%) | DPS cần (g=0) 2,376
-  Ke 13.0%: P/E  19,044 | DDM27  17,740 | DDM40  18,307 | tâm  18,534 (giá +7%) | DPS cần (g=0) 2,574
+Độ nhạy Ke 8–13% (P/E mid 7.65; tâm = (P/E + TB(DDM27,DDM40))/2):
+  Ke  8.0%: P/E  20,691 | DDM27  26,267 | DDM40  26,653 | tâm  23,576 (giá -16%) | DPS cần (g=0) 1,584
+  Ke  9.0%: P/E  20,456 | DDM27  24,267 | DDM40  24,702 | tâm  22,470 (giá -12%) | DPS cần (g=0) 1,782
+  Ke  9.5%: P/E  20,343 | DDM27  23,354 | DDM40  23,811 | tâm  21,963 (giá -10%) | DPS cần (g=0) 1,879
+  Ke 10.4%: P/E  20,129 | DDM27  21,719 | DDM40  22,213 | tâm  21,048 (giá -6%) | DPS cần (g=0) 2,065
+  Ke 11.1%: P/E  19,979 | DDM27  20,639 | DDM40  21,156 | tâm  20,438 (giá -3%) | DPS cần (g=0) 2,198
+  Ke 12.0%: P/E  19,780 | DDM27  19,292 | DDM40  19,834 | tâm  19,672 (giá +1%) | DPS cần (g=0) 2,376
+  Ke 13.0%: P/E  19,564 | DDM27  17,920 | DDM40  18,488 | tâm  18,884 (giá +5%) | DPS cần (g=0) 2,574
 
 Độ nhạy bội số (Ke mid):
   P/E  6.00: P/E  16,293 | DDM27  20,093 | DDM40  20,587 | tâm  18,316
@@ -335,35 +335,35 @@ VÙNG GIÁ TRỊ r7 = [min(P/E lo-bội số, DDM27); max(P/E hi-bội số, DDM
   P/E  8.55: P/E  22,221 | DDM27  22,606 | DDM40  23,100 | tâm  22,537
   P/E  9.22: P/E  23,779 | DDM27  23,267 | DDM40  23,760 | tâm  23,646
   P/E 10.00: P/E  25,592 | DDM27  24,035 | DDM40  24,529 | tâm  24,937
-  P/E  6.75: P/E  18,037 | DDM27  20,832 | DDM40  21,326 | tâm  19,558
+  P/E  6.95: P/E  18,502 | DDM27  21,029 | DDM40  21,523 | tâm  19,889
 
 Nhạy khác (mid):
   Terminal DDM theo P/B ≤0,6 (r6, bảo thủ): DDM27 16,547 · DDM40 17,040
-  Quỹ KTPL: áp P/E lên 80% LNST/0,93 (giả định peer trích ~7% [UL]) ⇒ bội số hiệu dụng 6.38: P/E 17,183
-  P xấu 0: P/E  21,942 | DDM40  23,960 · P xấu 0,40: P/E  18,812 | DDM40  21,328
-  Không mốc lùi: P/E  19,100 | DDM40  21,611 · P mốc lùi 0,30: P/E  20,089 | DDM40  22,361
-  Trọng số giá r4 (10/35/35/20) + P xấu 0,35: P/E  18,075 | DDM40  20,659
-  Lạc quan 25/45/25/5 + P xấu 0: P/E  25,379 | DDM40  27,003
-  Bi quan 5/30/40/25 + P xấu 0,40: P/E  16,090 | DDM40  18,919
-  Q giữa 175.0: P/E  15,758 | DDM40  18,612
-  Q giữa 236.6: P/E  23,635 | DDM40  25,540
+  Quỹ KTPL: áp P/E lên 80% LNST/0,93 (giả định peer trích ~7% [UL]) ⇒ bội số hiệu dụng 6.58: P/E 17,643
+  P xấu 0: P/E  22,534 | DDM40  24,211 · P xấu 0,40: P/E  19,327 | DDM40  21,547
+  Không mốc lùi: P/E  19,634 | DDM40  21,837 · P mốc lùi 0,30: P/E  20,624 | DDM40  22,588
+  Trọng số giá r4 (10/35/35/20) + P xấu 0,35: P/E  18,568 | DDM40  20,868
+  Lạc quan 25/45/25/5 + P xấu 0: P/E  26,070 | DDM40  27,296
+  Bi quan 5/30/40/25 + P xấu 0,40: P/E  16,527 | DDM40  19,104
+  Q giữa 175.0: P/E  16,187 | DDM40  18,794
+  Q giữa 236.6: P/E  24,281 | DDM40  25,814
 
-HOÀ VỐN PPA ròng r7 (pháp lý ổn, Q205, đúng mốc, mid): chân P/E ≈540 · tâm hai PP ≈514 · DDM40 ≈480 đ/kWh
+HOÀ VỐN PPA ròng r7 (pháp lý ổn, Q205, đúng mốc, mid): chân P/E ≈528 · tâm hai PP ≈506 · DDM40 ≈475 đ/kWh
 Tổ hợp ≥19.800 (mid đầu vào, Ke mid; P/E mid | DDM40):
-  a_giu_975/ok/đúng mốc: P/E 39,227 | DDM40 39,262  ≥ giá
-  a_giu_975/bad/đúng mốc: P/E 31,401 | DDM40 32,681  ≥ giá
-  b_600/ok/đúng mốc: P/E 22,496 | DDM40 24,509  ≥ giá
-  b_600/ok/mốc lùi: P/E 25,599 | DDM40 26,864  ≥ giá
-  b_600/bad/đúng mốc: P/E 14,670 | DDM40 17,929
-  b_600/bad/mốc lùi: P/E 17,773 | DDM40 20,284  ≥ giá
-  c_500/ok/đúng mốc: P/E 18,034 | DDM40 20,576  ≥ giá
-  c_500/ok/mốc lùi: P/E 21,965 | DDM40 23,558  ≥ giá
-  c_500/bad/đúng mốc: P/E 10,208 | DDM40 13,995
-  c_500/bad/mốc lùi: P/E 14,139 | DDM40 16,978
-  d_340/ok/đúng mốc: P/E 10,896 | DDM40 14,281
-  d_340/ok/mốc lùi: P/E 16,150 | DDM40 18,269
-  d_340/bad/đúng mốc: P/E 3,070 | DDM40 7,701
-  d_340/bad/mốc lùi: P/E 8,324 | DDM40 11,688
+  a_giu_975/ok/đúng mốc: P/E 40,316 | DDM40 39,723  ≥ giá
+  a_giu_975/bad/đúng mốc: P/E 32,300 | DDM40 33,062  ≥ giá
+  b_600/ok/đúng mốc: P/E 23,117 | DDM40 24,773  ≥ giá
+  b_600/ok/mốc lùi: P/E 26,220 | DDM40 27,128  ≥ giá
+  b_600/bad/đúng mốc: P/E 15,101 | DDM40 18,111
+  b_600/bad/mốc lùi: P/E 18,204 | DDM40 20,466  ≥ giá
+  c_500/ok/đúng mốc: P/E 18,531 | DDM40 20,786  ≥ giá
+  c_500/ok/mốc lùi: P/E 22,461 | DDM40 23,769  ≥ giá
+  c_500/bad/đúng mốc: P/E 10,514 | DDM40 14,125
+  c_500/bad/mốc lùi: P/E 14,445 | DDM40 17,107
+  d_340/ok/đúng mốc: P/E 11,192 | DDM40 14,407
+  d_340/ok/mốc lùi: P/E 16,446 | DDM40 18,394
+  d_340/bad/đúng mốc: P/E 3,176 | DDM40 7,746
+  d_340/bad/mốc lùi: P/E 8,430 | DDM40 11,733
 
 Cổ tức cần có để biện minh giá (g=0) theo Ke peer: 11.1%: 2,198 · 10.4%: 2,065 · 9.5%: 1,879; Ke nội địa 12,3–13,4%: 2,435–2,653
 Cổ tức bền 2028+ (ổn, mid) payout 27/40/60%:
@@ -372,7 +372,75 @@ Cổ tức bền 2028+ (ổn, mid) payout 27/40/60%:
   c_500      LNST 2028 ≈  65.0: 657 / 974 / 1,461 | yield trên giá 19.800 ở payout 40%: 4.9%
   d_340      LNST 2028 ≈  38.3: 388 / 574 / 862 | yield trên giá 19.800 ở payout 40%: 2.9%
 
-SOTP trộn (r12%) 25,939: tâm r7 = SOTP × 0.80 (chiết khấu 20%); giá = SOTP × 0.76
+SOTP trộn (r12%) 25,939: tâm r7 = SOTP × 0.81 (chiết khấu 19%); giá = SOTP × 0.76
 P/E ngầm của GIÁ HIỆN TẠI trên LNST hoạt động bền (ổn, mid): a_giu_975 3.7x · b_600 6.5x · c_500 8.1x · d_340 13.6x
 
-r7 Tóm tắt: P/E mid 19,594 | DDM27 21,493 | DDM40 21,986 | vùng 18,153–21,986 | tâm 20,667 | giá so tâm -4%
+r7 Tóm tắt: P/E mid 20,129 | DDM27 21,719 | DDM40 22,213 | vùng 18,292–22,213 | tâm 21,048 | giá so tâm -6%
+
+====================================================================================================
+r8 — Hiệu chuẩn sau phản biện vòng 5
+====================================================================================================
+P/E peer UPCOM p25/median ×0,868 payout: (6.86, 7.65); nhóm median 8.01; hệ số KTPL 0.860 ⇒ bội số hiệu dụng lo/mid/hi = (5.9, 6.58, 6.89)
+E/P ngầm của bội số mid: 15.2% (chưa KTPL: 13.1%); Ke tâm 12%, dải 10.4%–13%
+TÂM r8 (bội số 6.58, Ke 12%, KTPL 20%): P/E 17,336 | DDM27 18,375 | DDM40 18,917 | tâm hai PP 17,991 (giá +10%)
+CẬN DƯỚI (bội số 5.9, Ke 12%): P/E 15,783 | DDM27 17,792 | DDM40 18,335
+CẬN TRÊN (bội số 8.01 chưa trừ KTPL, Ke 12%): P/E 20,603 | DDM27 19,600 | DDM40 20,143
+  góc cực đoan (không cộng vào vùng): dưới (bội số lo + Ke 13%) 15,611; trên (bội số hi + Ke 10,4%) 22,617
+VÙNG GIÁ TRỊ r8 = 15,783–20,603; tâm 17,991; giá 19,800 so tâm +10%, so vùng -4%…+25%
+
+Độ nhạy Ke × bội số hiệu dụng (tâm hai PP; ngoặc: P/E | DDM40):
+  Ke  9.0%: 5.90x ⇒ 19,422 · 6.58x ⇒ 20,606 · 7.65x ⇒ 22,470 · 8.01x ⇒ 23,097
+  Ke 10.4%: 5.90x ⇒ 18,176 · 6.58x ⇒ 19,303 · 7.65x ⇒ 21,076 · 8.01x ⇒ 21,672
+  Ke 11.0%: 5.90x ⇒ 17,686 · 6.58x ⇒ 18,790 · 7.65x ⇒ 20,527 · 8.01x ⇒ 21,111
+  Ke 12.0%: 5.90x ⇒ 16,923 · 6.58x ⇒ 17,991 · 7.65x ⇒ 19,672 · 8.01x ⇒ 20,237
+  Ke 13.0%: 5.90x ⇒ 16,221 · 6.58x ⇒ 17,256 · 7.65x ⇒ 18,884 · 8.01x ⇒ 19,432
+
+Độ nhạy tỷ lệ KTPL peer (Ke 12%): 0% ⇒ 17,269 · 3% ⇒ 17,566 · 7% ⇒ 17,992 · 10% ⇒ 18,337 · 15% ⇒ 18,965 · (không trừ KTPL, 20%=peer) 19,672
+
+Độ nhạy hệ số payout (Ke 12%, KTPL-adj): chuẩn hoá-năm 0.948 ⇒ 18,940 · gộp 0.868 ⇒ 17,988 · 2024–26 0.789 ⇒ 17,048 · 0<p<50% 0.690 ⇒ 15,869
+Ke tâm 12% vs P/E mid: giá trị theo kịch bản giá PPA (ổn, đầu vào giữa; P/E | DDM40):
+  a_giu_975 : P/E  34,639 | DDM40  33,519
+  b_600     : P/E  19,880 | DDM40  21,028
+  c_500     : P/E  15,945 | DDM40  17,697
+  d_340     : P/E   9,648 | DDM40  12,367
+
+Nhạy khác (tâm; P/E | DDM40 | tâm):
+  Không mốc lùi               :  16,854 |  18,567 |  17,583
+  P mốc lùi 0,30              :  17,819 |  19,267 |  18,399
+  P xấu 0                     :  19,438 |  20,595 |  19,866
+  P xấu 0,40                  :  16,636 |  18,358 |  17,366
+  Lạc quan 25/45/25/5         :  22,461 |  23,165 |  22,641
+  Bi quan 5/30/40/25          :  14,242 |  16,323 |  15,169
+  Trọng số giá r4 10/35/35/20 :  15,994 |  17,795 |  16,768
+
+HOÀ VỐN PPA ròng r8 (pháp lý ổn, Q205, đúng mốc, tâm): chân P/E ≈598 · tâm hai PP ≈586 · DDM40 ≈563 đ/kWh | theo bội số lo/hi (Ke 12%) ≈622/525 | theo Ke 13%/10,4% (bội số mid) ≈609/549
+Cổ tức bền 2028+ (ổn, mid) payout 27/40/60% và so mức cần có để biện minh giá (g=0):
+  a_giu_975  LNST 2028 ≈ 144.1: 1,458 / 2,160 / 3,240
+  b_600      LNST 2028 ≈  81.6: 826 / 1,224 / 1,835
+  c_500      LNST 2028 ≈  65.0: 657 / 974 / 1,461
+  d_340      LNST 2028 ≈  38.3: 388 / 574 / 862
+  Cổ tức cần có để biện minh giá 19,800 (g=0) ở Ke 9% / 10,4% / 12% / 13%: 1,782 · 2,059 · 2,376 · 2,574
+  Phân rã DDM40 (b_600, ổn, Ke 12%): PV cổ tức 10 năm 7,684 · PV terminal+tiền theo sổ 13,344 ⇒ cổ tức chiếm 37%
+
+r8 Tóm tắt: P/E 17,336 | DDM27 18,375 | DDM40 18,917 | vùng 15,783–20,603 | tâm 17,991 | giá so tâm +10% | hoà vốn tâm 586 (theo bội số 525–622; theo Ke 549–609)
+
+r8 BẢNG THEO KỊCH BẢN (mid đầu vào, Ke 12%, bội số 6.58; đ/cp): P/E ổn | P/E cấm thầu | DDM27 ổn | DDM40 ổn | DDM40 cấm thầu | LNST HĐ bền ổn/cấm thầu
+  a_giu_975   34,639 |  27,633 |  32,478 |  33,519 |  27,928 | 143.1 / 118.1
+  b_600       19,880 |  12,874 |  20,434 |  21,028 |  15,436 | 81.6 / 56.6
+  c_500       15,945 |   8,939 |  17,222 |  17,697 |  12,105 | 65.2 / 40.2
+  d_340        9,648 |   2,642 |  12,083 |  12,367 |   6,776 | 39.0 / 14.0
+r8 KỲ VỌNG theo bộ đầu vào lo/mid/hi (bội số 6,58, Ke 12%): pe: 11,901/17,336/19,945 ; ddm: 13,727/18,375/20,726 ; ddm: 14,106/18,917/21,344
+r8 LƯỚI P/E-leg theo kịch bản × bội số (ổn, đúng mốc, Ke 12%): [6.0]  [6.58]  [7.65]  [8.01]  [9.22]
+  a_giu_975   31,940 |  34,639 |  39,617 |  41,293 |  46,923
+  b_600       18,341 |  19,880 |  22,719 |  23,675 |  26,885
+  c_500       14,715 |  15,945 |  18,213 |  18,976 |  21,542
+  d_340        8,913 |   9,648 |  11,003 |  11,459 |  12,992
+r8 LNST HĐ bền tại hoà vốn tâm 586 đ/kWh: 79.3 tỷ
+r8 LNST HĐ bền tại hoà vốn chân P/E 598: 81.3 tỷ
+r8 P/E ngầm của giá trên LNST HĐ bền (ổn, mid): a_giu_975 3.7x · b_600 6.5x · c_500 8.1x · d_340 13.6x
+r8 SOTP trộn 25,939: tâm = SOTP × 0.69 (chiết khấu 31%); giá = SOTP × 0.76
+
+r8 nhạy bổ sung (tâm hai PP; P/E | DDM27 | DDM40 | tâm):
+  Q 175.0: 13,945 | 15,619 | 16,056 | 14,891
+  Q 236.6: 20,908 | 21,278 | 21,931 | 21,256
+  Terminal P/B ≤0,6 (DDM): DDM27 14,787 · DDM40 15,330; tâm với chân P/E giữ nguyên 16,197

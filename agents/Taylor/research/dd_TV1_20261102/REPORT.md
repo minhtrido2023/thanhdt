@@ -1,10 +1,35 @@
-# DD — TV1 (CTCP Tư vấn Xây dựng Điện 1 / EVNPECC1, UPCOM) sau BCTC Q3/2026 · as-of 02/11/2026 · **VÒNG 7 (job `Taylor_20261102_112213`) — hiệu chuẩn P/E và lợi suất yêu cầu theo peer thuỷ điện (§0, §8g, Phụ lục E6); THAY vùng r6** · VÒNG 6 (chốt; job `Taylor_20261102_102919`) — sửa theo phản biện vòng 4 (B1, B2, N1–N5), Phụ lục E5; thay vùng r5** · VÒNG 5 (job `Taylor_20261102_100630`) — Phụ lục E4 · VÒNG 4 (job `Taylor_20261102_094407`) — dựng lại định giá theo kịch bản giá PPA Sông Bung 5 (Phụ lục E3) · job gốc `Taylor_20261102_035322` · VÒNG 2 (job `Taylor_20261102_042353`) · VÒNG 3 (job `Taylor_20261102_075340`, Phụ lục E2)
+# DD — TV1 (CTCP Tư vấn Xây dựng Điện 1 / EVNPECC1, UPCOM) sau BCTC Q3/2026 · as-of 02/11/2026 · **VÒNG 8 (chốt; job `Taylor_20261102_115348`) — sửa hiệu chuẩn peer theo phản biện vòng 5 (SKEPTIC5): Ke khoảng 9–13% tâm 12%, KTPL vào trung tâm, vùng 15.800–20.600 tâm ≈18.000 (§0, §8h, Phụ lục E7); THAY vùng r7** · VÒNG 7 (job `Taylor_20261102_112213`) — hiệu chuẩn P/E và lợi suất yêu cầu theo peer thuỷ điện (§0, §8g, Phụ lục E6); THAY vùng r6** · VÒNG 6 (chốt; job `Taylor_20261102_102919`) — sửa theo phản biện vòng 4 (B1, B2, N1–N5), Phụ lục E5; thay vùng r5** · VÒNG 5 (job `Taylor_20261102_100630`) — Phụ lục E4 · VÒNG 4 (job `Taylor_20261102_094407`) — dựng lại định giá theo kịch bản giá PPA Sông Bung 5 (Phụ lục E3) · job gốc `Taylor_20261102_035322` · VÒNG 2 (job `Taylor_20261102_042353`) · VÒNG 3 (job `Taylor_20261102_075340`, Phụ lục E2)
 
 > NGHIÊN CỨU READ-ONLY. Không khuyến nghị, không lệnh, không wire. User đang/đã giao dịch TV1 ngoài book V2.4 ⇒ "giữ/thêm/giảm" là quyết định của user; báo cáo chỉ đưa vùng giá + điều kiện đổi nhận định. Vòng 1 bị fundamental-skeptic phản biện REFUTED (mức văn bản/số liệu); vòng 2 áp 12 đính chính (Phụ lục E); vòng 2 bị phản biện REFUTED (medium) với 4 BLOCKING — bản này là vòng 3, đã áp toàn bộ (Phụ lục E2). **Đã qua 4 vòng phản biện (r1–r4 = SKEPTIC 1–4); r6 CHƯA được kiểm lại sau vòng 4 ngoài bước kiểm ngắn của Mike. Bản r6 thay bản gửi 02/11 15:25 (r3) và thay r4/r5 (định giá r4 thay r3 vì bỏ quên nghiên cứu giá PPA 13/10).**
 > **Nguồn:** [Q3 tr.X] = trang PDF `src/hn_q3_2026.pdf` (BCTC HN Q3/2026, ký 29/10/2026, **chưa soát xét**, bản scan) · [ME tr.X] `src/me_q3_2026.pdf` (BCTC tổng hợp/công ty mẹ) · [GT] `src/giaitrinh_hn_q3_2026.pdf` (CV 6603/TVĐ1-P3) · [H1 tr.X] = số trang **in** của `src/hn_h1_2026.pdf` (soát xét An Việt) · [Q2 tr.1] `src/hn_q2_2026.pdf` · [FY25 tr.X] = số trang in của `src/hn_fy2025_audited.pdf` (BCTC HN 2025 kiểm toán A&C) · [LV] `LEGAL_VN_20261102.md` (tra cứu pháp lý, tham khảo — cần luật sư xác nhận) · [IR] CBTT tải từ pecc1.com.vn vào `src/ir/` · [CB] `../dd_blind2_TV1_20261026/CYCLE_BLOCK.md` (khoá md5 4409305f…, 26/10) · [BQ] `tav2_bq` (lịch sử; chưa có dòng 2026Q3 của TV1 tại 02/11) · [DNSE] `calc/dnse_raw.json` (lấy 02/11/2026 ~10:50 ICT).
 > Phép tính: `calc/valuation.py` → `calc/valuation_out.txt` (tái lập: `python3 -I calc/valuation.py`). Số tự đặt gắn **[UL]** (ước lượng). Ngành: `kb/data_registry/market-state/sector_read_power_consulting_20261028.md` (Bobby, đọc mù).
 
-## 0. Kết luận (VÒNG 7 — hiệu chuẩn theo peer; THAY §0 r6 bên dưới)
+## 0. Kết luận (VÒNG 8 — sửa hiệu chuẩn peer sau phản biện vòng 5; THAY §0 r7 bên dưới)
+
+> Phản biện vòng 5 (`SKEPTIC5_20261102.md`) tái lập byte-for-byte chân P/E (peer thật; nếu lệch thì lệch bảo thủ) và chỉ ra chân DDM bị chỉnh quá tay: Ke 10,4% là kết quả của MỘT hồi quy bị một quan sát cổ tức đặc biệt (QPH 2025) chiếm 11,7% trọng số, và quỹ KTPL chỉ nằm ở độ nhạy. Vòng 8 sửa đúng hai điểm đó, KHÔNG chỉnh thêm gì khác (không đổi xác suất giá PPA, sản lượng, tư vấn 30/40/50 — vẫn là trục quyết định).
+
+**Giá 19.800 đ nằm TRONG vùng giá trị 15.800–20.600 đ/cp, tâm ≈18.000** [UL; `calc/valuation_out.txt` khối "r8"] — giá cao hơn tâm ≈10%, thấp hơn cận trên 4%: **giá ≈ giá trị trong sai số của các giả định**, không đủ cơ sở nói rẻ hay đắt. Để giá khớp tâm cần **giá điện ròng Sông Bung 5 khoảng ≈600 đ/kWh (kịch bản (b)) và không bị cấm thầu** (hoà vốn tâm ≈586; theo bội số 525–622, theo Ke 549–609 đ/kWh). Hai phương pháp đồng hạng, đầu vào như r6/r7: **(i) P/E hiệu dụng 6,58** (= UPCOM median 8,81 × hệ số payout 0,868 × hệ số KTPL 0,860) trên LNST hoạt động bền 2027+ cộng tiền ròng cuối 2027 ⇒ **17.300**; **(ii) DDM Ke 12%**, terminal = 6,58 × LNST hoạt động năm 10 + tiền ròng theo sổ ⇒ DDM27 **18.400** · DDM40 **18.900**. Tâm = (P/E + TB DDM)/2 = **18.000**.
+
+**Ke là KHOẢNG chưa xác định 9–13%, tâm 12%** (không phải 9,5–11,1% như một phép đo):
+- Peer cho ước lượng KHÔNG vững: hồi quy P=b·DPS qua gốc 10,4% (QPH 2025: DPS 14.000, yield 40,8%, payout 289% — cổ tức đặc biệt); bỏ payout>150% ⇒ 10,3%; bỏ 5 quan sát nặng nhất ⇒ 8,8%; trung vị yield 7,07%, trung bình 7,69%; yield+g nhóm DPS ổn định (n=7) trung vị 11,1% nhưng p25–p75 = 7,4–19,2%. Yield TTM người trả 9,5% là một kỳ, g=0. ⇒ peer chỉ chỉ ra cận dưới ≈7–9%.
+- Tâm 12% vì: (1) khung DCF fleet domestic_v2 r = 12,25%; (2) nhất quán với chân P/E: bội số 7,65 ngầm E/P 13,1% (6,58 sau KTPL: 15,2%); (3) riêng TV1: **không trả cổ tức tiền 7 năm FY2016–FY2022** (corporate_action: chỉ FY2014 1.500, FY2015 1.050, rồi FY2023 500, FY2024 600, FY2025 1.500), 50–60% LNST là tư vấn sau hạ giá điện (peer tư vấn **TV3/TV4 E/P 10,9–16,7%**; TV2 6,8% nhưng LN còn đang hồi phục, loại khỏi trung vị), thanh khoản 0,4 tỷ đ/phiên.
+- Độ nhạy Ke (bội số hiệu dụng 6,58): 9% **20.600** · 10,4% **19.300** · 11% **18.800** · 12% **18.000** · 13% **17.300**. Cổ tức cần có để biện minh giá (g=0): 1.780 (Ke 9%) – 2.370 (12%) – 2.570 (13%) đ/cp; **cổ tức bền 2028+ chỉ 657–1.224 (kịch bản c–b, payout 40%)** ≈ một nửa mức cần ⇒ **cổ tức 10 năm chỉ chiếm 37% DDM40 (b); 63% là giá trị terminal + tiền ròng theo sổ**.
+
+**Quỹ KTPL 20% LNST vào trung tâm:** tiền chảy ra người lao động (đo được trên TV1), peer P/E tính trên toàn LNST. BQ không có cột KTPL của peer ⇒ giả định peer trích 7% **[UL]**; bội số hiệu dụng = P/E peer × (1−0,20)/(1−0,07). Độ nhạy theo tỷ lệ peer trích: 0% ⇒ 17.300 · 7% ⇒ 18.000 · 15% ⇒ 19.000; không trừ KTPL ⇒ 19.700.
+
+**Vùng r8** = [min(P/E, DDM27) ở bội số lo 5,90 (UPCOM p25 × payout × KTPL) ; max(P/E, DDM40) ở bội số nhóm 8,01 chưa trừ KTPL], Ke 12% ⇒ **15.800–20.600**. Hai góc cực đoan, KHÔNG cộng vào vùng: bội số lo + Ke 13% ⇒ 15.600; bội số 8,01 + Ke 10,4% ⇒ 22.600.
+
+**Căn cứ peer (số nguyên văn `calc/peer_study/peer_study_out.txt`):**
+- **P/E** thuỷ điện 2026 YTD (trung vị mã-năm, 0<PE<60; GHC tính HOSE từ 30/01/2026): toàn nhóm 9,22 · HOSE 9,77 · HNX 9,44 · **UPCOM 8,81 (p25 7,90; n=13)**. Bỏ SBA (mã hạn chế của fleet, vẫn là peer hiệu chuẩn): nhóm 9,13, UPCOM không đổi. Nhãn nhóm theo tên DN (không universe_pit), chỉ mã còn giao dịch 2026 ⇒ survivorship nhẹ cho yield 2019–25.
+- **Hệ số payout 0,868 — cách suy:** P/E mã-năm thuỷ điện 2021–26 theo payout năm trước: p=0 (22 quan sát) 10,05 · 0<p<50% (15) 7,26 · ≥50% (137) 11,06; nhóm payout<50% gộp 9,13 / toàn mẫu 10,51 = **0,868**. Hai lỗi triệt tiêu: nhóm p=0 một phần do cổ tức FY2025 chưa vào dữ liệu (artifact 2026), nhóm 0<p<50% nặng quan sát 2023. Biến thể: chuẩn hoá theo năm (các năm ≥3 quan sát, rất nhiễu 0,77–1,56) 0,948 · chỉ 0<p<50% 0,690 · 2024–26 0,789 ⇒ tâm 18.900 / 15.900 / 17.000. UPCOM vốn payout thấp (trung vị FY2025 54% vs HOSE 90%) nên UPCOM × 0,868 chiết khấu hơi chồng ⇒ chân P/E nghiêng bảo thủ. Hồi quy mô tả cho hồ sơ TV1: 7,6–8,4.
+- **Peer tư vấn ICB 2791** (TV2/TV3/TV4; `out_adv_peers_pe.csv`): P/E 2026 YTD 14,8 / 9,2 / 6,0; 2024–25 TV3 7,4, TV4 8,3–8,9 (TV2 28–42 do LN thấp). DPS TV3 500, TV4 1.000, TV2 1.000.
+- Thí nghiệm tự nhiên 11 ca cắt LNST loại (nếu dùng sẽ nâng P/E); peer cũng có thể sắp hạ giá điện (BSA P/E trên KH ≈13,3) ⇒ áp P/E peer lên LNST đã cắt là bảo thủ.
+
+**Độ nhạy khác (tâm; P/E | DDM40 | tâm):** không mốc lùi 17.600 · mốc lùi 30% 18.400 · P xấu 0 19.900 · P xấu 0,40 17.400 · lạc quan 22.600 · bi quan 15.200 · trọng số giá r4 16.800. Tổ hợp ≥ giá: chỉ (a) 975 (P/E 34.600) và (b) 600 pháp lý ổn đúng mốc (P/E 19.900 | DDM40 21.000). Kịch bản (c) 500: 15.900 | 17.700; (d) 340: 9.600 | 12.400.
+
+**Giới hạn:** (1) trục quyết định vẫn là giá điện ròng SB5 sau mốc 2027 — xác suất 0,10/0,45/0,35/0,10 [UL], mức 500–600 từ lời lãnh đạo qua KBSV (bản gốc chưa kiểm); (2) tỷ lệ KTPL peer 7% [UL]; (3) Ke không xác định; (4) pháp lý, chất lượng LN Q3, đuôi truy thu N9 giữ như r6 bên dưới.
+
+## 0-r7. Kết luận VÒNG 7 — ⚠️ BỊ THAY bởi §0 r8 (giữ đối chiếu)
 
 > User phê bình 02/11 18:20: P/E 4–7 (r6: 5,9–6,4 = trung vị × (1−35–40%)) và Ke 12,3–13,4% trong DDM (⇒ cổ tức cần 2.435–2.650, yield 12–13%) là **con số tự đặt, không có peer**. Vòng 7 đo peer (32 mã thuỷ điện ICB 7535, 2019–2026; `calc/peer_study/`) và để dữ liệu quyết. Kết quả: **cả hai giả định r6 lệch về phía bi quan so với thị trường thực** ⇒ giá trị dịch LÊN.
 
@@ -244,7 +269,7 @@ Ví dụ (c)/ổn/27%: PV cổ tức 3.940 + terminal 5.300 (P/B terminal 0,57).
 
 **Vùng giá trị cân bằng (r6)** = [min(P/E 5,9; DDM27); max(P/E 6,4; DDM40)] (mid) = **13.900–16.800, tâm 15.200**; giá 19.800 cao hơn +18%…+42% (tâm +30%). Giá PPA ròng hoà vốn (pháp lý ổn, Q205, đúng mốc): **chân P/E 6,15 ≈634 đ/kWh (6,5: 608 · 7,0: 576); tâm hai phương pháp ≈703; DDM40 ≈817**. Phân rã, nhạy, tổ hợp ≥19.800, SOTP và chiết khấu tiếp cận ngầm định: §0 (cùng số, `valuation_out.txt`).
 
-### 8g. Hiệu chuẩn theo peer (r7, THAY vùng §8f) [`calc/valuation_out.txt` khối "r7"; `calc/peer_study/`]
+### 8g. Hiệu chuẩn theo peer (r7) — ⚠️ BỊ THAY bởi §8h (r8: Ke tâm 12%, KTPL trung tâm); giữ đối chiếu [`calc/valuation_out.txt` khối "r7"; `calc/peer_study/`]
 | Đ/cp (mid, đúng mốc, Ke 10,4%) | P/E 7,42 ổn | P/E cấm thầu | DDM27 ổn | DDM40 ổn | DDM40 cấm thầu |
 |---|---|---|---|---|---|
 | (a) 975 | 39.200 | 31.400 | 38.300 | 39.300 | 32.700 |
@@ -259,6 +284,22 @@ Ví dụ (c)/ổn/27%: PV cổ tức 3.940 + terminal 5.300 (P/B terminal 0,57).
 | (ii) DDM 40% | 15.200 | **22.000** | 27.300 |
 
 **Vùng r7** = [min(P/E 6,8; DDM27); max(P/E 8,01; DDM40)] = **18.200–22.000, tâm 20.700**; giá −4% so tâm. Hoà vốn: P/E ≈540 · tâm ≈514 · DDM40 ≈480. Cổ tức cần (g=0): 1.880 (9,5%) – 2.200 (11,1%). SOTP trộn 25.900 ⇒ tâm = SOTP × 0,80 (chiết khấu 20%, trong thông lệ 20–40%). Căn cứ + độ nhạy: §0.
+
+### 8h. r8 — Sửa hiệu chuẩn theo phản biện vòng 5 (THAY vùng §8g) [`calc/valuation_out.txt` khối "r8"; `calc/peer_study/`]
+| Đ/cp (mid, đúng mốc, Ke 12%, bội số 6,58) | P/E ổn | DDM40 ổn |
+|---|---|---|
+| (a) 975 | 34.600 | 33.500 |
+| (b) 600 | 19.900 | 21.000 |
+| (c) 500 | 15.900 | 17.700 |
+| (d) 340 | 9.600 | 12.400 |
+
+| Kỳ vọng (Ke 12%) | bội số lo 5,90 | **tâm 6,58** | bội số nhóm 8,01 (chưa KTPL) |
+|---|---|---|---|
+| P/E | 15.800 | **17.300** | 20.600 |
+| DDM27 | 17.800 | **18.400** | 19.600 |
+| DDM40 | 18.300 | **18.900** | 20.100 |
+
+**Vùng 15.800–20.600, tâm 18.000; giá +10% so tâm.** Hoà vốn PPA ròng (ổn, Q205, đúng mốc): chân P/E ≈598 · tâm ≈586 · DDM40 ≈563; theo bội số lo/hi ≈622/525; theo Ke 13%/10,4% ≈609/549 đ/kWh. Ma trận Ke × bội số và các độ nhạy: §0.
 
 ## 9. Thanh khoản [BQ, DNSE]
 ADV20 đến 28/10: **0,72 tỷ/ngày** trung bình, **trung vị 0,41 tỷ** [BQ `calc/bq_px.csv`]; phiên 30/10 (sau công bố Q3 tối 29/10): 156.400 cp ≈ 3,1 tỷ, +4,8% [DNSE]. Biên độ UPCOM ±15%. Vị thế lớn hơn vài trăm triệu đồng/ngày sẽ là người tạo giá.
@@ -426,6 +467,19 @@ Skeptic xác nhận mọi phần còn lại đúng (valuation.py tái lập byte
 | Hoà vốn PPA | 634/703/817 | 540/514/480 | |
 | Báo cáo NĐT | bản đính chính có nhắc lỗi/vòng | viết lại như bản độc lập (luật 18); thêm mục 7 peer + fig_14/15 | grep rỗng (SELFCHECK.md) |
 Chưa qua fundamental-skeptic sau r7.
+
+## Phụ lục E7 — Vòng 8 (chốt; job `Taylor_20261102_115348`): áp phản biện vòng 5 (`SKEPTIC5_20261102.md`, REFUTED medium)
+| Hạng mục | r7 | r8 | Căn cứ |
+|---|---|---|---|
+| Ke | 9,5/10,4/11,1% như số đo | KHOẢNG chưa xác định 9–13%, tâm 12% | peer_study "r8-B1": hồi quy bị QPH 2025 kéo; bỏ top-5 ⇒ 8,8%; khung fleet 12,25% |
+| Chân P/E | 6,80/7,42/8,01 (UPCOM p25/median ×0,868) | 7,65 tâm (GHC HOSE: UPCOM median 8,81, p25 7,90) × KTPL 0,860 = **6,58** | N1 sửa sàn GHC (MOVE 30/01/2026); B2 |
+| KTPL 20% | chỉ độ nhạy | trong trung tâm (peer 7% [UL]); độ nhạy 0–15% | BQ không có KTPL peer |
+| Hệ số payout | 0,868 không giải thích | 0,868 + biến thể 0,69–0,95, ghi cách suy | N2 |
+| Peer tư vấn | không | TV2/TV3/TV4 | N4 |
+| Vùng · tâm · giá so tâm | 18.200–22.000 · 20.700 · −4% | **15.800–20.600 · 18.000 · +10%** | valuation_out "r8" |
+| Hoà vốn tâm | 514 | **586** (525–622) | |
+| Báo cáo NĐT | "thấp hơn tâm 4%", hoà vốn 515–540 | "giá ≈ giá trị; cần ≈600 đ/kWh và không bị cấm thầu"; Ke là khoảng; nhãn cổ tức bền | B3 |
+Kết quả nằm trong khoảng skeptic dự báo (tâm 17.700–19.500; hoà vốn 540–600). Không chỉnh thêm tham số nào ngoài các mục trên (tránh over-correct lần hai). Chưa qua fundamental-skeptic sau r8.
 
 ## Nội bộ — việc USER quyết (N12; KHÔNG đưa vào báo cáo NĐT; KHÔNG sửa file)
 `data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json` (đọc 02/11/2026, mtime 19/10): `status=paused` (từ 19/10); vẫn ghi `thesis_source = mike/agents/Taylor/research/tv1_pecc1_sotp_20260723.md` (SOTP 23/07 — luận điểm đã bị nghiên cứu 13/10 và DD này thay); `price_band.floor_note` "downside che bởi tài sản hydro" (không còn đúng: tài sản hydro chỉ che nếu bán được, ≥5 lần đấu giá thất bại); `target_pct_active_nav = 0.05` (vượt trần sleeve discretionary 2–4% theo phản biện); `hard_expiry.conditions` không có điều kiện M0 (văn bản giá PPA ròng ≤600 / dưới hoà vốn ~590). Nếu user mở lại chương trình: cập nhật thesis_source → REPORT này, bỏ floor_note, hạ target, thêm điều kiện dừng M0; `max_no_chase_ceiling` 25.000 cao hơn vùng r6 (trần 16.800). Việc của user; Taylor không đổi.

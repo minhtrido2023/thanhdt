@@ -739,3 +739,109 @@ for k in PRICE_SC:
 print(f"\nSOTP trộn (r12%) {s_mix:,.0f}: tâm r7 = SOTP × {ctr7/s_mix:.2f} (chiết khấu {1-ctr7/s_mix:.0%}); giá = SOTP × {PX/s_mix:.2f}")
 print(f"P/E ngầm của GIÁ HIỆN TẠI trên LNST hoạt động bền (ổn, mid): " + " · ".join(f"{k} {ps(0)+PX/ps(npop(k,'ok',1)):.1f}x" for k in PRICE_SC))
 print(f"\nr7 Tóm tắt: P/E mid {E7['pe'][1]:,.0f} | DDM27 {E7['ddm27'][1]:,.0f} | DDM40 {E7['ddm40'][1]:,.0f} | vùng {z7_lo:,.0f}–{z7_hi:,.0f} | tâm {ctr7:,.0f} | giá so tâm {PX/ctr7-1:+.0%}")
+
+# =====================================================================================================
+# ---------- r8 (job Taylor_20261102_115348): SỬA HIỆU CHUẨN THEO PHẢN BIỆN VÒNG 5 (SKEPTIC5) ----------
+# B1: Ke là KHOẢNG chưa xác định 9–13% (peer yield thuần 7–9%; yield+g rơi 7–21% theo mã; khung fleet 12,25%);
+#     TÂM = 12%. Lý do: (i) khung DCF fleet domestic_v2 r=12,25%; (ii) chân P/E ngầm E/P ≈1/7,65 = 13,1% (nhất quán);
+#     (iii) TV1 riêng: 7 năm không trả cổ tức tiền FY2016–FY2022 (corporate_action), tư vấn 50–60% LNST sau hạ giá
+#     (peer tư vấn TV3/TV4 E/P 11–17%), thanh khoản mỏng. Cận dưới 9%… dùng 10,4% (hồi quy peer đủ mẫu) làm cận trên giá trị.
+# B2: quỹ KTPL 20% LNST vào TRUNG TÂM: peer P/E tính trên toàn LNST (peer trích KTPL ≈7% [UL: BQ không có cột KTPL]),
+#     TV1 trích 20% ⇒ bội số hiệu dụng = P/E peer × (1−0,20)/(1−0,07).
+# =====================================================================================================
+_CAL8 = _json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "peer_study", "peer_calib.json")))
+PEER_KTPL = 0.07                                  # [UL] tỷ lệ trích KTPL của peer — không có dữ liệu; độ nhạy 0–15% bên dưới
+KT_ADJ = (1 - KTPL) / (1 - PEER_KTPL)             # 0,860
+PE8_RAW = (_CAL8["pe_lo_adj"], _CAL8["pe_mid_adj"], _CAL8["pe_hi_adj"])    # đã ×0,868 payout; UPCOM p25 / median; nhóm median
+PE8 = tuple(round(x * KT_ADJ, 2) for x in PE8_RAW)                          # đã ×KTPL ⇒ dùng cho P/E và terminal DDM
+KE8_C, KE8_LO, KE8_HI = 0.12, 0.13, 0.104         # tâm / cận dưới giá trị / cận trên giá trị
+print("\n" + "=" * 100 + "\nr8 — Hiệu chuẩn sau phản biện vòng 5\n" + "=" * 100)
+print(f"P/E peer UPCOM p25/median ×0,868 payout: {PE8_RAW[:2]}; nhóm median {PE8_RAW[2]}; hệ số KTPL {KT_ADJ:.3f} ⇒ bội số hiệu dụng lo/mid/hi = {PE8}")
+print(f"E/P ngầm của bội số mid: {1/PE8[1]:.1%} (chưa KTPL: {1/PE8_RAW[1]:.1%}); Ke tâm {KE8_C:.0%}, dải {KE8_HI:.1%}–{KE8_LO:.0%}")
+def e8(method, pe, ke, **kw): return expv7(method, 1, pe=pe, ke=ke, **kw)
+def leg(pe, ke):
+    return e8("pe", pe, ke), e8("ddm", pe, ke, payout=0.27), e8("ddm", pe, ke, payout=0.40)
+def ctr_of(t): return (t[0] + (t[1] + t[2]) / 2) / 2
+C8 = leg(PE8[1], KE8_C); ctr8 = ctr_of(C8)
+print(f"TÂM r8 (bội số {PE8[1]}, Ke {KE8_C:.0%}, KTPL 20%): P/E {C8[0]:,.0f} | DDM27 {C8[1]:,.0f} | DDM40 {C8[2]:,.0f} | tâm hai PP {ctr8:,.0f} (giá {PX/ctr8-1:+.0%})")
+# vùng (cùng định nghĩa r7: trục bội số, Ke Ở TÂM 12%; Ke là trục độ nhạy riêng bên dưới, không cộng dồn vào vùng):
+# cận dưới = min(chân P/E, DDM27) ở bội số lo (UPCOM p25 ×payout ×KTPL); cận trên = max(chân P/E, DDM40) ở bội số nhóm 8,01 CHƯA trừ KTPL
+LO8 = leg(PE8[0], KE8_C); HI8 = leg(PE8_RAW[2], KE8_C)
+LO8c = leg(PE8[0], KE8_LO); HI8c = leg(PE8_RAW[2], KE8_HI)   # góc cực đoan (bội số lo+Ke 13% / bội số hi+Ke 10,4%) — chỉ để tham chiếu
+z8_lo = min(LO8[0], LO8[1]); z8_hi = max(HI8[0], HI8[2])
+print(f"CẬN DƯỚI (bội số {PE8[0]}, Ke 12%): P/E {LO8[0]:,.0f} | DDM27 {LO8[1]:,.0f} | DDM40 {LO8[2]:,.0f}")
+print(f"CẬN TRÊN (bội số {PE8_RAW[2]} chưa trừ KTPL, Ke 12%): P/E {HI8[0]:,.0f} | DDM27 {HI8[1]:,.0f} | DDM40 {HI8[2]:,.0f}")
+print(f"  góc cực đoan (không cộng vào vùng): dưới (bội số lo + Ke 13%) {min(LO8c[0], LO8c[1]):,.0f}; trên (bội số hi + Ke 10,4%) {max(HI8c[0], HI8c[2]):,.0f}")
+print(f"VÙNG GIÁ TRỊ r8 = {z8_lo:,.0f}–{z8_hi:,.0f}; tâm {ctr8:,.0f}; giá {PX:,} so tâm {PX/ctr8-1:+.0%}, so vùng {PX/z8_hi-1:+.0%}…{PX/z8_lo-1:+.0%}")
+print("\nĐộ nhạy Ke × bội số hiệu dụng (tâm hai PP; ngoặc: P/E | DDM40):")
+for ke in (0.09, 0.104, 0.11, 0.12, 0.13):
+    print(f"  Ke {ke:5.1%}: " + " · ".join(f"{pe_:.2f}x ⇒ {ctr_of(leg(pe_, ke)):6,.0f}" for pe_ in (PE8[0], PE8[1], PE8_RAW[1], PE8_RAW[2])))
+print("\nĐộ nhạy tỷ lệ KTPL peer (Ke 12%): " + " · ".join(f"{pk:.0%} ⇒ {ctr_of(leg(PE8_RAW[1] * (1 - KTPL) / (1 - pk), KE8_C)):,.0f}" for pk in (0.0, 0.03, 0.07, 0.10, 0.15)) +
+      f" · (không trừ KTPL, 20%=peer) {ctr_of(leg(PE8_RAW[1], KE8_C)):,.0f}")
+print("\nĐộ nhạy hệ số payout (Ke 12%, KTPL-adj): " + " · ".join(f"{nm} {f:.3f} ⇒ {ctr_of(leg(_CAL8['pe_mid'] * f * KT_ADJ, KE8_C)):,.0f}" for nm, f in (("chuẩn hoá-năm", 0.948), ("gộp", 0.868), ("2024–26", 0.789), ("0<p<50%", 0.690))))
+print("Ke tâm 12% vs P/E mid: giá trị theo kịch bản giá PPA (ổn, đầu vào giữa; P/E | DDM40):")
+for k in PRICE_SC:
+    print(f"  {k:10s}: P/E {val7(k,'ok',1,False,'pe',pe=PE8[1],ke=KE8_C):7,.0f} | DDM40 {val7(k,'ok',1,False,'ddm',0.40,pe=PE8[1],ke=KE8_C):7,.0f}")
+print("\nNhạy khác (tâm; P/E | DDM40 | tâm):")
+for nm, kw in (("Không mốc lùi", dict(pdel=0.0)), ("P mốc lùi 0,30", dict(pdel=0.30)), ("P xấu 0", dict(plb=0.0)), ("P xấu 0,40", dict(plb=0.40)),
+               ("Lạc quan 25/45/25/5", dict(pw=OPT, plb=0.0)), ("Bi quan 5/30/40/25", dict(pw={'a_giu_975':0.05,'b_600':0.30,'c_500':0.40,'d_340':0.25}, plb=0.40)),
+               ("Trọng số giá r4 10/35/35/20", dict(pw=P_PRICE, plb=0.35))):
+    a, b2, c2 = expv7("pe", 1, pe=PE8[1], ke=KE8_C, **kw), expv7("ddm", 1, pe=PE8[1], ke=KE8_C, payout=0.27, **kw), expv7("ddm", 1, pe=PE8[1], ke=KE8_C, payout=0.40, **kw)
+    print(f"  {nm:28s}: {a:7,.0f} | {c2:7,.0f} | {(a + (b2 + c2) / 2) / 2:7,.0f}")
+def c8(price):
+    PRICE_SC["_x"] = price
+    try:
+        return tuple(val7("_x", "ok", 1, False, m, **kk) for m, kk in (("pe", dict(pe=PE8[1], ke=KE8_C)), ("ddm", dict(payout=0.27, pe=PE8[1], ke=KE8_C)), ("ddm", dict(payout=0.40, pe=PE8[1], ke=KE8_C))))
+    finally:
+        del PRICE_SC["_x"]
+be8_pe = solve(lambda p: c8(p)[0]); be8_ctr = solve(lambda p: ctr_of(c8(p))); be8_d40 = solve(lambda p: c8(p)[2])
+# hoà vốn ở các góc: cận dưới (bội số lo, Ke 13%) và cận trên (bội số hi, Ke 10,4%)
+def cx(price, pe_, ke_):
+    PRICE_SC["_x"] = price
+    try:
+        return tuple(val7("_x", "ok", 1, False, m, pe=pe_, ke=ke_, **kk) for m, kk in (("pe", {}), ("ddm", dict(payout=0.27)), ("ddm", dict(payout=0.40))))
+    finally:
+        del PRICE_SC["_x"]
+be8_lo = solve(lambda p: ctr_of(cx(p, PE8[0], KE8_C))); be8_hi = solve(lambda p: ctr_of(cx(p, PE8_RAW[2], KE8_C)))
+be8_klo = solve(lambda p: ctr_of(cx(p, PE8[1], KE8_LO))); be8_khi = solve(lambda p: ctr_of(cx(p, PE8[1], KE8_HI)))
+print(f"\nHOÀ VỐN PPA ròng r8 (pháp lý ổn, Q205, đúng mốc, tâm): chân P/E ≈{be8_pe:.0f} · tâm hai PP ≈{be8_ctr:.0f} · DDM40 ≈{be8_d40:.0f} đ/kWh | theo bội số lo/hi (Ke 12%) ≈{be8_lo:.0f}/{be8_hi:.0f} | theo Ke 13%/10,4% (bội số mid) ≈{be8_klo:.0f}/{be8_khi:.0f}")
+print("Cổ tức bền 2028+ (ổn, mid) payout 27/40/60% và so mức cần có để biện minh giá (g=0):")
+for k in PRICE_SC:
+    nc = nc_start(1500, 'ok'); op = npop(k, 'ok', 1)
+    np27 = op + I_AT * nc; nc2 = nc + np27 + DANET - KTPL * np27 - 0.4 * np27
+    np28 = op + I_AT * nc2
+    print(f"  {k:10s} LNST 2028 ≈{np28:6.1f}: " + " / ".join(f"{ps(np28*po):,.0f}" for po in PAYOUTS))
+print(f"  Cổ tức cần có để biện minh giá {PX:,} (g=0) ở Ke 9% / 10,4% / 12% / 13%: " + " · ".join(f"{PX*k:,.0f}" for k in (0.09, 0.104, 0.12, 0.13)))
+# phân rã DDM tâm: cổ tức bền vs terminal+tiền
+def ddm_split(k, lg, payout, ke, pe_):
+    nc = nc_start(DPS26_5[1], lg); pth = path(k, lg, 1, False); pv = DPS26_5[1] / (1 + ke) ** 0.9; bvop = BV3[1] - NC0
+    for y, op in enumerate(pth, start=1):
+        np_ = op + I_AT * nc; div = payout * max(np_, 0.0); pv += ps(div) / (1 + ke) ** (y + 0.9)
+        nc += np_ + DANET - div - KTPL * max(np_, 0.0)
+    tv = ps(pe_ * max(pth[-1], 0) + nc) / (1 + ke) ** 9.9
+    return pv, tv
+sp = ddm_split("b_600", "ok", 0.40, KE8_C, PE8[1])
+print(f"  Phân rã DDM40 (b_600, ổn, Ke 12%): PV cổ tức 10 năm {sp[0]:,.0f} · PV terminal+tiền theo sổ {sp[1]:,.0f} ⇒ cổ tức chiếm {sp[0]/(sum(sp)):.0%}")
+print(f"\nr8 Tóm tắt: P/E {C8[0]:,.0f} | DDM27 {C8[1]:,.0f} | DDM40 {C8[2]:,.0f} | vùng {z8_lo:,.0f}–{z8_hi:,.0f} | tâm {ctr8:,.0f} | giá so tâm {PX/ctr8-1:+.0%} | hoà vốn tâm {be8_ctr:.0f} (theo bội số {be8_hi:.0f}–{be8_lo:.0f}; theo Ke {be8_khi:.0f}–{be8_klo:.0f})")
+
+# ---------- r8: bảng cho báo cáo / hình ----------
+print("\nr8 BẢNG THEO KỊCH BẢN (mid đầu vào, Ke 12%, bội số {}; đ/cp): P/E ổn | P/E cấm thầu | DDM27 ổn | DDM40 ổn | DDM40 cấm thầu | LNST HĐ bền ổn/cấm thầu".format(PE8[1]))
+for k in PRICE_SC:
+    print(f"  {k:10s} " + " | ".join(f"{x:7,.0f}" for x in (val7(k,'ok',1,False,'pe',pe=PE8[1],ke=KE8_C), val7(k,'bad',1,False,'pe',pe=PE8[1],ke=KE8_C),
+          val7(k,'ok',1,False,'ddm',0.27,pe=PE8[1],ke=KE8_C), val7(k,'ok',1,False,'ddm',0.40,pe=PE8[1],ke=KE8_C), val7(k,'bad',1,False,'ddm',0.40,pe=PE8[1],ke=KE8_C)))
+          + f" | {npop(k,'ok',1):.1f} / {npop(k,'bad',1):.1f}")
+print("r8 KỲ VỌNG theo bộ đầu vào lo/mid/hi (bội số 6,58, Ke 12%): " + " ; ".join(
+    f"{m}: " + "/".join(f"{expv7(m, i, pe=PE8[1], ke=KE8_C, **({'payout':p} if m=='ddm' else {})):,.0f}" for i in range(3)) for m, p in (("pe", None), ("ddm", 0.27), ("ddm", 0.40))))
+print("r8 LƯỚI P/E-leg theo kịch bản × bội số (ổn, đúng mốc, Ke 12%): " + "  ".join(f"[{m}]" for m in (6.0, 6.58, 7.65, 8.01, 9.22)))
+for k in PRICE_SC:
+    print(f"  {k:10s} " + " | ".join(f"{val7(k,'ok',1,False,'pe',pe=m,ke=KE8_C):7,.0f}" for m in (6.0, 6.58, 7.65, 8.01, 9.22)))
+
+PRICE_SC["_x"] = be8_ctr; print(f"r8 LNST HĐ bền tại hoà vốn tâm {be8_ctr:.0f} đ/kWh: {npop('_x','ok',1):.1f} tỷ"); PRICE_SC["_x"] = be8_pe; print(f"r8 LNST HĐ bền tại hoà vốn chân P/E {be8_pe:.0f}: {npop('_x','ok',1):.1f} tỷ"); del PRICE_SC["_x"]
+print("r8 P/E ngầm của giá trên LNST HĐ bền (ổn, mid): " + " · ".join(f"{k} {ps(0)+PX/ps(npop(k,'ok',1)):.1f}x" for k in PRICE_SC))
+print(f"r8 SOTP trộn {s_mix:,.0f}: tâm = SOTP × {ctr8/s_mix:.2f} (chiết khấu {1-ctr8/s_mix:.0%}); giá = SOTP × {PX/s_mix:.2f}")
+print("\nr8 nhạy bổ sung (tâm hai PP; P/E | DDM27 | DDM40 | tâm):")
+for q in (175.0, 236.6):
+    t = tuple(expv7(m, 1, pe=PE8[1], ke=KE8_C, q=q, **kk) for m, kk in (("pe", {}), ("ddm", dict(payout=0.27)), ("ddm", dict(payout=0.40))))
+    print(f"  Q {q}: " + " | ".join(f"{x:,.0f}" for x in t) + f" | {ctr_of(t):,.0f}")
+t = (E7 and e8("pe", PE8[1], KE8_C), e8("ddm", PE8[1], KE8_C, payout=0.27, pb_cap=0.6), e8("ddm", PE8[1], KE8_C, payout=0.40, pb_cap=0.6))
+print(f"  Terminal P/B ≤0,6 (DDM): DDM27 {t[1]:,.0f} · DDM40 {t[2]:,.0f}; tâm với chân P/E giữ nguyên {ctr_of(t):,.0f}")
