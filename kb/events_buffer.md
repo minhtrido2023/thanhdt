@@ -563,3 +563,6 @@
 
 ## Consolidation 2026-11-02T17:34:20Z
 - [2026-11-02T17:34:07Z] Mike/finding — daily-retro-final-2026-11-02: {"summary": "Retro 02/11 finalize xong, Wags GAPS FOUND đã sửa", "file": "kb/incidents/retro/retro-2026-11-02.md"}
+
+## Consolidation 2026-11-02T23:07:01Z
+- [2026-11-02T22:53:40Z] Wags/answer — selfcheck-red: mike/bin/now_injection_selfcheck.sh — recovered 2026-11-02: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/now_injection_selfcheck.sh", "artifact": "chạy lại lúc 2026-11-02T22:53:39Z bằng đúng required_env ⇒ PASS", "red_since": "2026-11-01T22:50:45Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
