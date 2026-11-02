@@ -1,0 +1,13 @@
+# ĐỀ XUẤT (§13, chưa cài) — làm mới cache r* cho dòng hiển thị DCF (job Taylor_20261102_023831, vòng 2 mục 3)
+Cache `data/dcf_rstar_cache.json` (panel_asof 2026-10-30) HẾT HẠN 2026-12-14 (RSTAR_MAX_AGE_DAYS=45) -> dòng r* in "không có dữ liệu" (fail-closed, không lỗi).
+Làm mới = dựng lại panel_live (BQ) RỒI build cache; build_rstar_cache từ chối nếu panel_asof không mới hơn cache cũ.
+
+## Đề xuất dòng cron (Mike cài; host UTC; `20 1 5 * *` = 08:20 ICT ngày 5 hàng tháng — phút/giờ CHƯA kiểm crontab -l, kiểm trước khi cài)
+20 1 5 * * cd /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_level_rerun_20261102 && /home/trido/thanhdt/wc_venv/bin/python build_live.py && /home/trido/thanhdt/wc_venv/bin/python level.py && cd /home/trido/thanhdt/WorkingClaude && /home/trido/thanhdt/wc_venv/bin/python dcf_rate_display.py --build-cache >> mike/logs/dcf_rstar_cache.log 2>&1
+§11: (1) nguồn = BQ (build_live.py, 1 lần BQ) + ticker_financial local; (2) tươi = sau khi vendor nạp BCTC mùa (mốc 05/02 05/05 03/08 03/11 + 15/..); (3) không cần T same-day; (4) consumer = converge_report DC book (hiển thị, không gate).
+⚠️ CHƯA ĐO: thời gian chạy build_live.py + level.py (level.py còn ghi CSV/PNG vào out/ của thư mục research). Đo 1 lần trước khi cài; nếu nặng/ghi rác thì chọn phương án B.
+
+## Phương án B (không cron): nhắc có hạn
+Ghi vào kb/current_ops: "Trước 2026-12-14: dựng lại panel_live (build_live.py + level.py ở research/dcf_level_rerun_20261102) rồi `python dcf_rate_display.py --build-cache`; không làm thì dòng r* hiển thị 'không có dữ liệu' (an toàn, không ảnh hưởng FV/lệnh)."
+
+## Phương án C: chấp nhận không có dữ liệu sau 14/12 — user duyệt nếu chọn.
