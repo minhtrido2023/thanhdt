@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-02T12:02:04Z] [tv1-dd r8 02/11] XONG job Taylor_20261102_115348 commit d349e28a2 — vung 15.800–20.600 tam 17.991 (gia +10%), hoa von ~586 (525–622); Ke khoang 9–13% tam 12%; cho Mike skeptic + sua dd_price_zones + gui email
 - [2026-11-02T14:44:04Z] ĐANG DỞ: job Taylor_20261102_144349 TV1 định giá MÙ — research/dd_TV1_blind_20261102/ | NEXT: đọc skill luật 19/18/12, LEGAL_PPA, ppa study, BCTC; KHÔNG đọc giá
 - [2026-11-02T14:56:44Z] [tv1-blind 02/11] XONG job Taylor_20261102_144349 commit 2fd1d104f — tam 27.800 (P20-P80 22.100-35.100), gia 19.500 (-30%); cho Mike phan bien (soi xac suat [UL]) truoc khi dung bao cao NDT
 - [2026-11-02T15:23:20Z] ĐANG DỞ: job Taylor_20261102_152306 TV1 INTRINSIC_v2 + investor_report sạch — research/dd_TV1_blind_20261102/ | NEXT: đọc SKEPTIC_BLIND, valuation_blind.py, skill luật
@@ -26,3 +25,4 @@
 - [2026-11-02T16:47:58Z] ĐANG DỞ: job Taylor_20261102_164745 vòng2 dd-flag-gate (V1 netting order) + dd-zone (V2 vặt) | NEXT: sửa bot_execute thứ tự cổng
 - [2026-11-02T17:10:53Z] [dd-flag r2 03/11] XONG job Taylor_20261102_164745: V1 55c6883f6 + V2 2fd8ebd1d (chua merge) — cho Mike arch-review r2 + merge V1 truoc V2
 - [2026-11-03T01:30:18Z] ĐANG DỞ: crisis-DD DRI ngày2 job Taylor_20261103_013001 | NEXT: legal-vn + web tin mới + giá đóng 02/11, viết dd-note
+- [2026-11-03T01:34:33Z] [crisis-dd DRI 03/11] XONG ngày2 (không cờ, GIỮ) — mở: NQ ĐHĐCĐ BT 26/10 + giải trình Q3 PDF chưa đọc, SXKD T10 ~10/11

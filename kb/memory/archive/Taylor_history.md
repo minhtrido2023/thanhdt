@@ -1855,3 +1855,6 @@
 - [2026-11-02T10:38:22Z] [tv1-dd r6 02/11] XONG job Taylor_20261102_102919 commit 3e62a5945 — vung 13.900–16.800 tam 15.200 (+30%), hoa von 634/703/817; cho Mike skeptic/kiem ngan + sua dd_price_zones + gui email; KBSV van chua kiem
 - [2026-11-02T11:22:27Z] ĐANG DỞ: job Taylor_20261102_112213 TV1 r7 peer study (P/E, yield) + báo cáo NĐT sạch — research/dd_TV1_20261102/calc/peer_study/ | NEXT: đọc REPORT §0/§8, valuation.py, hydro_peer_pe
 - [2026-11-02T11:44:08Z] [tv1-dd r7 02/11] XONG job Taylor_20261102_112213 commit 449b89a44 — peer hieu chuan: vung 18.200–22.000 tam 20.700 (gia -4%, TRONG vung); cho Mike skeptic + sua dd_price_zones + gui email; bao cao NDT da sach luat 18
+
+## Archived 2026-11-03 (keep=12 days=0 require_done=False)
+- [2026-11-02T12:02:04Z] [tv1-dd r8 02/11] XONG job Taylor_20261102_115348 commit d349e28a2 — vung 15.800–20.600 tam 17.991 (gia +10%), hoa von ~586 (525–622); Ke khoang 9–13% tam 12%; cho Mike skeptic + sua dd_price_zones + gui email
