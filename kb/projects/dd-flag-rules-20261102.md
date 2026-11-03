@@ -15,3 +15,9 @@ Nguyên văn: "Khi lên plan, mã nào có cờ thì bị loại khỏi candidat
 - **SCL: THOÁI toàn bộ cả 2 TK** (KL broker thật) qua **DollarBill đưa SELL vào plan T+1 30/10** (như DRI; không chờ T+25/ex-date). Căn cứ: `kb/projects/scl-dd-20261029.md`. Đã bán tay 29/10 @29.600: SpaceX 800 + ZaloPay 500; còn SpaceX 300 + ZaloPay 200 (lô 28/10: chiều 30/10).
 - **LUẬT MỚI**: BẤT KỲ tăng vốn nào (quyền mua, riêng lẻ/công chúng, ESOP, TPCĐ; cổ tức/thưởng CP = INFO) trong chu kỳ đầu tư của mã ⇒ **WARNING user** (không tự bán). Taylor dựng + arch-review; merge cần user. Luật 21/10 (mã LAG có quyền mua: KHÔNG bán trước ex-date, user tự mua đủ; lô quyền kế thừa entry gốc `771daf4ea`) GIỮ cho mã LAG KHÁC — SCL là ngoại lệ. Bản 21/10 của SCL: `kb/projects/scl-dd-research-20261021.md`.
 
+
+## Vòng 3 — 03/11/2026 (`decided_by: user`): book PARK MIỄN cổng cờ
+Nguyên văn chỉ đạo: cổng cờ KHÔNG áp cho book PARK (custom30V parking) — lệnh MUA PARK qua cổng bình thường, kể cả mã FLOOR_FAIL/CTCK (VIX/VND/EVF...). Cổng VẪN áp CAPIT, BAL, LAG và book mua khác; DISCRETIONARY* vẫn WARN; lệnh BÁN không bao giờ bị chặn.
+- Cài: hằng số `DD_FLAG_EXEMPT_PARK_BOOKS = {"PARK","CUSTOM30V_PARKING"}` cạnh `DD_FLAG_EXEMPT_PREFIX`/`DD_FLAG_EXEMPT_BOOKS` trong `trading_bot/plan.py`; khớp TUYỆT ĐỐI (upper), mọi account (khác PROBE chỉ `main`).
+- Nhãn đo từ `data/trade_plans/plan_{SpaceX,ZaloPay}_*.json`: BUY park = book `custom30V_parking` (NEUTRAL_park / PARK_ENTRY / không play_type) và book `PARK` (PARK_ADD); SELL park (`merge_park_orders.py`) = book `PARK`. Cổng chạy TRƯỚC netting ⇒ nhãn luôn là nhãn gốc, lệnh NET không đổi kết quả.
+- Rủi ro đã biết: miễn theo NHÃN book — plan tự ghi nhãn "PARK" cho lệnh không phải park thì lọt cổng (cùng bản chất miễn DISCRETIONARY*); chấp nhận theo chỉ đạo, selfcheck PARK-4 khoá khớp tuyệt đối.

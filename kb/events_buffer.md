@@ -610,3 +610,28 @@
 
 ## Consolidation 2026-11-03T02:15:01Z
 - [2026-11-03T02:15:01Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-03", "elapsed_s": 599, "rc": 0}
+
+## Consolidation 2026-11-03T02:50:21Z
+- [2026-11-03T02:15:01Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-11-03", "elapsed_s": 600, "rc": 0}
+- [2026-11-03T02:41:53Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "in_progress", "note": "tra engine CAPIT trong pt_v23 + pin park0 control 537e349b"}
+- [2026-11-03T02:42:02Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "in_progress", "note": "dd-flag r3: do book PARK trong plan that (PARK, custom30V_parking); dang sua plan.py + selfcheck"}
+- [2026-11-03T02:42:20Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:42:22Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:43:20Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:43:22Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:43:59Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "in_progress", "note": "chay 2 chan control (main + patched-off), ky vong md5 537e349b"}
+- [2026-11-03T02:44:20Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:44:22Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:45:20Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:45:22Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:46:20Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:46:22Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:47:20Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:47:22Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:48:21Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:48:23Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:49:21Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261103_024119", "source": "watcher"}
+- [2026-11-03T02:49:23Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261103_024121", "source": "watcher"}
+- [2026-11-03T02:49:29Z] Taylor/heartbeat — Taylor_20261103_024119: {"status": "in_progress", "note": "selfcheck 48 PASS, mutation 17/17; dang quet §23 (25 file fail can so baseline HEAD)"}
+- [2026-11-03T02:49:52Z] Taylor/heartbeat — Taylor_20261103_024121: {"status": "in_progress", "note": "6 chan dang chay: 2 control + 4 treatment (all/floor/rating/strict)"}
+- [2026-11-03T02:50:12Z] Taylor/finding — dd-flag-gate-r3-park-exempt-20261103 xong, cho arch-review: {"branch": "feat/dd-flag-gate-20261102", "worktree": "wt-dd-flag-gate-20261102", "commit": "1bca09394 (tren 55c6883f6, chua merge)", "change": "DD_FLAG_EXEMPT_PARK_BOOKS={PARK,CUSTOM30V_PARKING} trong trading_bot/plan.py; khop tuyet doi; mien moi account; CAPIT/BAL/LAG van BLOCKED; DISCRETIONARY van WARN; SELL khong bi chan", "labels_measured": "plan_{SpaceX,ZaloPay}_*.json: BUY park = custom30V_parking (NEUTRAL_park/PARK_ENTRY/None) va PARK (PARK_ADD); SELL park = PARK (PARK_TRIM, JIT_UNPARK)", "selfcheck": "48 PASS/0 FAIL (env -u TZ, America/New_York, Pacific/Auckland)", "mutation": "17/17 killed (+M14 bo mien PARK, M15 mien nham CAPIT, M16 substring, M17 1 nhan)", "s23": "23 selfcheck import trading_bot fail dung so FAIL nhu baseline (stash) — co san, khong do nhanh", "kb": "mike/kb/projects/dd-flag-rules-20261102.md muc Vong 3 (chua commit repo mike)", "risk": "mien theo NHAN book — plan ghi nhan PARK cho lenh khong phai park thi lot (cung ban chat mien DISCRETIONARY)", "measured_by": "dd_flag_order_gate_selfcheck.py + dd_flag_order_gate_mutation.py + so sanh grep -c FAIL log nhanh vs git stash"}
