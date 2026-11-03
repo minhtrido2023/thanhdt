@@ -1967,10 +1967,10 @@
    "price_ref": 13400,
    "price_date": "2026-11-03",
    "verdict_label": "RẺ (giá ≤ P10 sau chiết khấu thanh khoản 5 tỷ = 14.125; cả 1/10 tỷ); CÓ ĐIỀU KIỆN: tái canh = NPV 0 (không thấy nghĩa vụ tô nhượng; hợp đồng 2016 chưa xác minh) — nếu tái canh bị buộc với kinh tế thận trọng ⇒ 10,7–11,7k < giá (20% chủ quan); RSS3 2027–28 về 1,60 ⇒ 13,9k ≈ giá; đời cạo 22 năm ⇒ 14,1k",
-   "source_file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+   "source_file": "agents/Taylor/research/dd_DRI_20261027/archive_internal/DRI_DD_investor_report_20261103_rev1_r4.md",
    "evidence": [
     {
-     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_DRI_20261027/archive_internal/DRI_DD_investor_report_20261103_rev1_r4.md",
      "quote": "| Vùng hợp lý (P25–P75, sau chiết khấu) | **15.540 – 18.840 đ** |",
      "fields": [
       "zone_low",
@@ -1978,21 +1978,21 @@
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_DRI_20261027/archive_internal/DRI_DD_investor_report_20261103_rev1_r4.md",
      "quote": "| Bình quân ba kịch bản theo xác suất | ~16.700 đ |",
      "fields": [
       "center"
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_DRI_20261027/archive_internal/DRI_DD_investor_report_20261103_rev1_r4.md",
      "quote": "| Giá trị trung tâm (trước → sau chiết khấu thanh khoản) | 16.950 → **16.610 đ** |",
      "fields": [
       "center_alt"
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_DRI_20261027/archive_internal/DRI_DD_investor_report_20261103_rev1_r4.md",
      "quote": "| Đóng cửa 03/11/2026 | **13.400 đ** |",
      "fields": [
       "price_ref"
@@ -2009,6 +2009,63 @@
    "rev": 1,
    "center_alt": 16610,
    "center_alt_kind": "base_scenario"
+  },
+  {
+   "ticker": "DRI",
+   "dd_date": "2026-11-03",
+   "rev": 2,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 13300,
+   "center": 14360,
+   "zone_high": 16490,
+   "center_kind": "expected_weighted",
+   "center_desc": "bình quân 2 kịch bản 80/20 (0,8 × TB lưới cơ sở NPV-0 + 0,2 × TB lưới tái canh bị buộc), sau chiết khấu thanh khoản 5 tỷ",
+   "center_alt": 15540,
+   "center_alt_kind": "base_scenario",
+   "center_range": null,
+   "price_ref": 13400,
+   "price_date": "2026-11-03",
+   "verdict_label": "HỢP LÝ, sát cận dưới (13.400 vs P25 sau CK 5 tỷ 13.301; 1 tỷ: rẻ có điều kiện, P25 13.451; 10 tỷ: hợp lý). Luật sổ mức giá (giá < tâm −15%): −13,8% so tâm cơ sở 15.543 ⇒ KHÔNG đạt; −6,7% so bình quân 14.360 ⇒ KHÔNG đạt",
+   "skeptic_status": "SKEPTIC_R4 REFUTED (medium-high) đã áp đủ 6 điểm ở r5; không còn vòng skeptic (Mike kiểm cơ học). Khoá md5 dd_DRI_20261027/r5/calc/LOCK_md5_r5.txt 23:12:56 ICT trước thanh khoản + so giá; PREREG r5 commit cee65d404 (đã biết giá + số skeptic ⇒ khoá chỉ chứng minh thứ tự chạy)",
+   "source_file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+   "evidence": [
+    {
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ],
+     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "quote": "| Vùng hợp lý (P25–P75, sau chiết khấu) | **13.300 – 16.490 đ** |"
+    },
+    {
+     "fields": [
+      "center"
+     ],
+     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "quote": "| Bình quân hai kịch bản theo xác suất | ~14.360 đ |"
+    },
+    {
+     "fields": [
+      "center_alt"
+     ],
+     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "quote": "| Giá trị trung tâm (trước → sau chiết khấu thanh khoản) | 15.860 → **15.540 đ** |"
+    },
+    {
+     "fields": [
+      "price_ref"
+     ],
+     "file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md",
+     "quote": "| Đóng cửa 03/11/2026 | **13.400 đ** |"
+    }
+   ],
+   "notes": "r5: mid RSS3 thực 2,221 $/kg (TB 2014-01..2026-09, USD 2025), lưới đối xứng P25 1,924/P75 2,432; L_tập 22/27/32 = giả định; r 13,5% neo huy động 7,40% (±100bp ⇒ ∓2,8%). Thang sau CK 5 tỷ P10 12.893 / P25 13.301 / P50 15.265 / P75 16.488 / P90 18.033. Diễn giải khác (thanh lý 2029–36 là tài sản hiện hữu, không trồng lại): tâm 13.184. Tái canh bị buộc (+XDCB): P25–P75 10.101–12.482, p=20% nhận định (p0 15.103 / p30 13.989). Số: dd_DRI_20261027/r5/calc/dri_model_r5_out.txt, liquidity_r5_out.txt; r5/REPORT.md.",
+   "null_reason": null,
+   "expires_on": "2027-03-03",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "recorded_at": "2026-11-03T23:25:00+07:00",
+   "supersedes": "DRI@2026-11-03#1",
+   "correction_reason": "SKEPTIC_R4 REFUTED (medium-high): mid RSS3 cửa sổ 2013–26 có hai đầu cao + lưới mid bất đối xứng (TB 2006–26 chứa siêu chu kỳ) ⇒ r5 đăng ký trước cửa sổ 2014-01..2026-09, lưới P25/P75 đối xứng; L_tập ghi giả định; kịch bản bị buộc cộng XDCB; kỳ vọng = hỗn hợp 80/20 trên TB lưới (bỏ dải tích cực P75–P90). Bản r4 lưu tại archive_internal/..._rev1_r4.md (file gốc bị ghi đè theo dispatch)."
   }
  ],
  "center_kinds": [

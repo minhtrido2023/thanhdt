@@ -1,0 +1,29 @@
+0) SELFCHECK PASS: engine cu 9.078/11.116 & 13.096/15.172 @r12; r4 tam 16.950 @mid 2.341 (snapshot, khong file song)
+
+1) MID RSS3 thuc USD2025/kg, cua so 2014-01..2026-09 (n=153): P25 1.924 | TB 2.221 | P75 2.432 | dx TB-P25 0.297 P75-TB 0.211
+   Q3/26 danh nghia 2.753; phan vi trong chuoi thuc cua so: 89%; cao hon TB +24.0%
+   do nhay cua so [2014-01..2026-09 (CHON)]: mid 2.221 -> tam 15,860
+   do nhay cua so [10 nam truot 2016-10..2026-09]: mid 2.201 -> tam 15,678
+   do nhay cua so [nam tron 2014-2025]: mid 2.204 -> tam 15,707
+   do nhay cua so [r4: 2013-01..2026-09]: mid 2.341 -> tam 16,950
+   do nhay cua so [day-day 2016-2023]: mid 2.142 -> tam 15,141
+
+2) TAM base (mid 2.221, L27, r13,5%): 15,860 d/cp (XDCB gia von 993)
+   DIEN GIAI KHAC 'C-thanh ly' (thanh ly 2029-36 la quyet dinh tai san hien huu, khong trong lai, + XDCB): 13,454 (-2,407) — KHONG vao base
+   KICH BAN tai canh bi buoc (T1 cu + XDCB): 11,924 (-3,937)
+   cau noi r4->r5: mid 2,341->2.221: -1,090
+   mot truc L (tam): L22 13,573 | L24 14,677 | L27 15,860 | L32 17,007
+
+3) THANG BASE: P10 13,157 / P25 13,573 / P50 15,576 / P75 16,825 / P90 18,401 | TB co trong so 15,411 | min 11,239 max 20,863
+
+3) THANG tai canh bi buoc: P10 9,340 / P25 10,307 / P50 11,924 / P75 12,737 / P90 13,755 | TB co trong so 11,624 | min 8,320 max 15,842
+
+3) THANG C-thanh ly (dien giai khac): P10 11,377 / P25 11,973 / P50 13,436 / P75 14,046 / P90 14,925 | TB co trong so 13,145 | min 10,353 max 16,542
+   mot truc quanh tam [mid]: P25 13,157 | TB 15,860 | P75 17,777  [r]: 11.5% 16,825 | 13.5% 15,860 | 15.5% 15,012
+
+4) KY VONG = (1-p) x TB luoi base + p x TB luoi bi buoc (p = NHAN DINH, khong co co so dinh luong): p0% 15,411 | p10% 15,032 | p20% 14,654 | p30% 14,275
+   stress RSS3 2027=2028=1,60 roi ve mid: 13,278
+5) beta 1.0: -100bp 16,327 (+2.9%) | -50bp 16,090 (+1.4%) | +0bp 15,860 (+0.0%) | +50bp 15,638 (-1.4%) | +100bp 15,423 (-2.8%)
+5) beta 0.5: -100bp 16,090 (+1.4%) | -50bp 15,974 (+0.7%) | +0bp 15,860 (+0.0%) | +50bp 15,748 (-0.7%) | +100bp 15,638 (-1.4%)
+
+OUT -> dri_model_r5_out.json, grid_r5.csv

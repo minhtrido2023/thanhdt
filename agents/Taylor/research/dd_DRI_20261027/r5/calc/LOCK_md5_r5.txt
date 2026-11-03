@@ -1,0 +1,12 @@
+LOCK 2026-11-03 23:12:56 ICT (TRUOC buoc thanh khoan + so gia 03/11). Trung thuc: cac vong truoc da biet gia 13.400 @03/11 va so do cua skeptic R4 => khoa chi chung minh THU TU CHAY; mo hinh khong dung gia thi truong lam dau vao.
+681620cb93916cc158dc587a4f377f26  ../PREREG_r5.md
+d8bb0442b8e45d97f419dec9f69b4f0a  dri_model_r5.py
+8dd53f92cbad5d319b5c4cb1dd1873ef  dri_model_r5_out.txt
+ca116b06e7929855376b522af29d0f3b  dri_model_r5_out.json
+dbab0fadad630b1f75c0ad80d570ebd3  grid_r5.csv
+75c6677e1e4a95e31aabcc37257ec5fc  data/fred_cpiaucsl_20261103.csv
+38938b2a1114d8b82984b638df47213b  data/macro_usdvnd_snapshot_20261103.csv
+20000b0b878b526d4a2c5eab76aea16b  data/rubber_monthly_snapshot_20261103.csv
+e0bba9b8748c6d2891e92c3fa6d7dcd0  ../../../dri_val_supply_adj_r4_20261027/model.py
+b68f3311e32df525dad9529ff5dfc94d  ../../../dri_val_supply_adj_r3_20261027/model.py
+43d6e6d0d6509cbcdcd75bb6872d3e76  ../../../dri_val_supply_adj_20261027/data/dri_peers_fin.csv
