@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-02T16:26:55Z] [dd-flag-rules 02/11] XONG job Taylor_20261102_160806: V1 8cb89c7da feat/dd-flag-gate-20261102 (repo ngoai) + V2 fd9ea4acf feat/dd-zone-candidates-20261102 (mike) — cho Mike arch-review + merge (V1 truoc V2); PROBE mien cong can xac nhan
 - [2026-11-02T16:47:58Z] ĐANG DỞ: job Taylor_20261102_164745 vòng2 dd-flag-gate (V1 netting order) + dd-zone (V2 vặt) | NEXT: sửa bot_execute thứ tự cổng
 - [2026-11-02T17:10:53Z] [dd-flag r2 03/11] XONG job Taylor_20261102_164745: V1 55c6883f6 + V2 2fd8ebd1d (chua merge) — cho Mike arch-review r2 + merge V1 truoc V2
 - [2026-11-03T01:30:18Z] ĐANG DỞ: crisis-DD DRI ngày2 job Taylor_20261103_013001 | NEXT: legal-vn + web tin mới + giá đóng 02/11, viết dd-note
@@ -26,3 +25,4 @@
 - [2026-11-03T08:26:10Z] ĐANG DỞ: DD MVC job Taylor_20261103_082601 — agents/Taylor/research/dd_MVC_20261103/ | NEXT: tải BCTC vlxdbd.com.vn
 - [2026-11-03T08:36:11Z] ĐANG DỞ DD MVC job Taylor_20261103_082601: SOTP khoa md5 calc/LOCK_md5.txt tam 19.540 | NEXT: ADV/gia BQ, viet REPORT.md, bus finding
 - [2026-11-03T08:40:43Z] [dd-MVC 03/11] XONG job Taylor_20261103_082601 commit e63ff1041 — tam 19.540 (14.600-24.500), gia 13.700 duoi tam; cho Mike goi fundamental-skeptic
+- [2026-11-03T09:04:19Z] [dd-MVC 03/11 vong2] XONG job Taylor_20261103_085129: PDF NDT 10tr + so muc gia rev1, tam 19.540 khong doi; CHUA gui email — cho user bao 'gui email' (gui 1 lan)
