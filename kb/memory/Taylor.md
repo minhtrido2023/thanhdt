@@ -14,29 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-02T01:28:21Z] ĐANG DỞ: job Taylor_20261102_012810 dcf_rate_proxy — research/dcf_rate_proxy_20261102/ | NEXT: đọc docs, PREREG
-- [2026-11-02T01:40:11Z] [dcf-rate-proxy 02/11] XONG job Taylor_20261102_012810 (commit 16b3cbddf): giu r hang; de xuat hien thi them r* thi truong (15,1%) + TPCP10Y, chua wire; TPCP10Y/macro_indicator can entry data_registry truoc khi dung
-- [2026-11-02T01:54:22Z] [quarterly-report-schedule 02/11] XONG job Taylor_20261102_013823: 33eaaa4e7 nhanh feat/quarterly-report-schedule-20261102 (chua merge) — cho Mike arch-review + cai cron (de xuat kb/cron_registry_quarterly.proposed)
-- [2026-11-02T02:17:42Z] [quarterly-report vong2 02/11] XONG job Taylor_20261102_020151: 7bc9aa38e nhanh feat/quarterly-report-schedule-20261102 (chua merge) — cho Mike arch-review r2 + merge + cai cron
-- [2026-11-02T02:31:46Z] [dcf-rate-display 02/11] XONG job Taylor_20261102_015334: code 283b0dcd6 (wt-dcf-rate-display-20261102), kb 3f0626e6b — chua merge, cho Mike arch-review; r* cache can build lai hang thang
-- [2026-11-02T04:00:17Z] ĐANG DỞ: crisis-DD DRI ngày1 job Taylor_20261102_040003 | NEXT: legal-vn + tin DN, viết quick note dd-note
-- [2026-11-02T04:02:33Z] [crisis-dd DRI 02/11] XONG ngày1 quick (không cờ, GIỮ) — mở: SXKD T10 ~10/11, Quỹ TDND/Dakruco BCTC Q3 chi tiết
-- [2026-11-02T04:04:02Z] [tv1-dd 02/11] XONG job Taylor_20261102_035322: REPORT commit 8fcce1711 — cho Mike chay fundamental-skeptic + investor report; mo: khoan thu nhap khac 33,8 ty chua giai
-- [2026-11-02T04:28:22Z] [tv1-dd r2 02/11] XONG job Taylor_20261102_042353 — cho Mike chay fundamental-skeptic vong 2 + investor report; ket luan moi: gia ~ngang EV da chiet khau; TV1 co ten trong 13 don vi BCA
-- [2026-11-02T04:29:49Z] ĐANG DỞ: job Taylor_20261102_042930 TV1 investor report — research/dd_TV1_20261102/investor_report/ | NEXT: đọc skill dd-investor-report, TV2 build_report
-- [2026-11-02T04:40:45Z] [tv1-investor 02/11] XONG job Taylor_20261102_042930 commit 958175a36 — cho Mike gui email + ghi dd_price_zones.json
-- [2026-11-02T07:53:55Z] ĐANG DỞ: job Taylor_20261102_075340 TV1 DD r3 (sửa B1-B4,N1-N10) — research/dd_TV1_20261102/ | NEXT: đọc SKEPTIC2, sửa valuation.py→REPORT→investor_report
-- [2026-11-02T08:03:59Z] [tv1-dd r3 02/11] XONG job Taylor_20261102_075340 commit 465fedbc1 — ban dinh chinh NDT cho Mike gui email + sua dd_price_zones TV1 (17.800-20.600)
-- [2026-11-02T09:44:21Z] ĐANG DỞ: job Taylor_20261102_094407 TV1 DD r4 dựng lại định giá theo kịch bản giá PPA SB5 — research/dd_TV1_20261102/ | NEXT: đọc ppa study 13/10 + valuation.py, tra web, dựng lại
-- [2026-11-02T09:47:34Z] ĐANG DỞ r4 TV1: web xong (DHCD 30/04/26 KH LNST 104,2 DT 641,5 co tuc KH 2026 10%; DMT long ho 46MWp+5MW BESS ~800 ty, ky vong 90 ty DT/nam, chua vao quy hoach). NEXT: block r4 trong calc/valuation.py (gia PPA a975/b600/c500/d340 × phap ly ok/xau; P/E + DDM)
-- [2026-11-02T09:49:21Z] ĐANG DỞ r4 TV1: valuation.py r4 XONG (vung 8.700-10.600, tam 9.900; gia 19.800 cao hon +86..+129%). NEXT: REPORT §0/§4/§8/§10/PL E3 → investor_report md+figs+pdf+html+SELFCHECK → commit → bus tv1-dd-20261102-r4
-- [2026-11-02T09:56:03Z] [tv1-dd r4 02/11] XONG job Taylor_20261102_094407 commit 79e7dee39 — vung 8.700-10.600 (gia cao hon ~2x); cho Mike skeptic v3 + sua dd_price_zones TV1 + gui email
-- [2026-11-02T10:06:44Z] ĐANG DỞ: job Taylor_20261102_100630 TV1 DD r5 (sửa B1-B3,N1-N12 theo SKEPTIC3) — research/dd_TV1_20261102/ | NEXT: đọc SKEPTIC3 + valuation.py r4
-- [2026-11-02T10:13:18Z] ĐANG DỞ r5 TV1: valuation.py r5 XONG (vùng 13.900–18.100, tâm 15.900, giá +25% so tâm). NEXT: REPORT §0/§8e/§10/E4 → investor_report → commit → bus tv1-dd-20261102-r5
-- [2026-11-02T10:20:08Z] [tv1-dd r5 02/11] XONG job Taylor_20261102_100630 commit 36afd9da7 — vùng 13.900–18.100 tâm 15.900 (giá +25%); chờ Mike skeptic v4 + sửa dd_price_zones + gửi email; N12 state_TV1 chờ user
-- [2026-11-02T10:38:22Z] [tv1-dd r6 02/11] XONG job Taylor_20261102_102919 commit 3e62a5945 — vung 13.900–16.800 tam 15.200 (+30%), hoa von 634/703/817; cho Mike skeptic/kiem ngan + sua dd_price_zones + gui email; KBSV van chua kiem
-- [2026-11-02T11:22:27Z] ĐANG DỞ: job Taylor_20261102_112213 TV1 r7 peer study (P/E, yield) + báo cáo NĐT sạch — research/dd_TV1_20261102/calc/peer_study/ | NEXT: đọc REPORT §0/§8, valuation.py, hydro_peer_pe
-- [2026-11-02T11:44:08Z] [tv1-dd r7 02/11] XONG job Taylor_20261102_112213 commit 449b89a44 — peer hieu chuan: vung 18.200–22.000 tam 20.700 (gia -4%, TRONG vung); cho Mike skeptic + sua dd_price_zones + gui email; bao cao NDT da sach luat 18
 - [2026-11-02T12:02:04Z] [tv1-dd r8 02/11] XONG job Taylor_20261102_115348 commit d349e28a2 — vung 15.800–20.600 tam 17.991 (gia +10%), hoa von ~586 (525–622); Ke khoang 9–13% tam 12%; cho Mike skeptic + sua dd_price_zones + gui email
 - [2026-11-02T14:44:04Z] ĐANG DỞ: job Taylor_20261102_144349 TV1 định giá MÙ — research/dd_TV1_blind_20261102/ | NEXT: đọc skill luật 19/18/12, LEGAL_PPA, ppa study, BCTC; KHÔNG đọc giá
 - [2026-11-02T14:56:44Z] [tv1-blind 02/11] XONG job Taylor_20261102_144349 commit 2fd1d104f — tam 27.800 (P20-P80 22.100-35.100), gia 19.500 (-30%); cho Mike phan bien (soi xac suat [UL]) truoc khi dung bao cao NDT
@@ -48,3 +25,4 @@
 - [2026-11-02T16:26:55Z] [dd-flag-rules 02/11] XONG job Taylor_20261102_160806: V1 8cb89c7da feat/dd-flag-gate-20261102 (repo ngoai) + V2 fd9ea4acf feat/dd-zone-candidates-20261102 (mike) — cho Mike arch-review + merge (V1 truoc V2); PROBE mien cong can xac nhan
 - [2026-11-02T16:47:58Z] ĐANG DỞ: job Taylor_20261102_164745 vòng2 dd-flag-gate (V1 netting order) + dd-zone (V2 vặt) | NEXT: sửa bot_execute thứ tự cổng
 - [2026-11-02T17:10:53Z] [dd-flag r2 03/11] XONG job Taylor_20261102_164745: V1 55c6883f6 + V2 2fd8ebd1d (chua merge) — cho Mike arch-review r2 + merge V1 truoc V2
+- [2026-11-03T01:30:18Z] ĐANG DỞ: crisis-DD DRI ngày2 job Taylor_20261103_013001 | NEXT: legal-vn + web tin mới + giá đóng 02/11, viết dd-note
