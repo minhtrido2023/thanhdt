@@ -1,0 +1,10 @@
+Gia 46,100 = 0.68x tam 67,596 | 0.68x P50 | P/B 1.54x | luoi < gia 0.0% (min 46,533) | gia/P10 -19.4%
+Vung (nguong dang ky truoc): RE (duoi P10)
+ROE ben ham y cua GIA (Gordon r13 g3): 18.4% | ROE chuan hoa tron Bobby 17.0%
+  nhanh STRUCTURAL: 90,742 -> gia/gia tri 0.51x
+  nhanh ADMIN_GATED: 68,446 -> gia/gia tri 0.67x
+  nhanh CYCLICAL: 53,278 -> gia/gia tri 0.87x
+Hoa von (100% hoi bien, SL 1,10/1,20): gia da 228k/m3 (tien 2026) -> bien da 27.9% o SL TB 1.18 (TB chu ky 34.3%; tran tam 250k)
+Hoa von (100% hoi bien, SL 1,40): gia da 216k/m3 (tien 2026) -> bien da 28.3% o SL TB 1.40 (TB chu ky 34.3%; tran tam 236k)
+Hoa von (100% hoi bien, SL 1,05): gia da 234k/m3 (tien 2026) -> bien da 26.8% o SL TB 1.05 (TB chu ky 34.3%; tran tam 261k)
+3 nhanh: tich cuc (STRUCTURAL) 90,742 | co so (ADMIN) 68,446 | tieu cuc (CYCLICAL) 53,278

@@ -1,17 +1,17 @@
-# NNC: một mỏ đá ở đỉnh biên lợi nhuận, giá trị nội tại ≈78.000–91.000 đ/cp; ở 46.100 cổ phiếu rẻ, với điều kiện giá đá cụm sau 2028 không về dưới đáy lịch sử
+# NNC: mỏ đá ở đỉnh chu kỳ, giá trị chuẩn hoá chu kỳ ≈67.600 đ/cp; ở 46.100 cổ phiếu rẻ nếu giá đá cụm từ 2028 giữ trên ≈228 nghìn đ/m³ (biên mỏng nếu biên về bình quân)
 
 **Báo cáo Due Diligence · dữ liệu đến 03/11/2026 · Nhóm nghiên cứu** · Sàn HOSE · Khai thác và chế biến đá xây dựng (mỏ Mũi Tàu, cụm Đồng Phú); sở hữu 10,3% CTCP Vật liệu và Xây dựng Bình Dương (MVC)
 
 ![NNC: ngành nghề, chu kỳ và định giá](figs/fig_00_hero.png)
 
-**Kết luận: giá trị kỳ vọng ≈90.700 đ/cp nếu biên đá đi theo đường cơ sở; trung vị 729 bộ tham số (gồm kịch bản biên về bình quân chu kỳ) ≈78.100; vùng hợp lý 68.100–89.200 (ước lượng). Ở giá đóng cửa 03/11/2026 (46.100 đ), NNC dưới P10 của lưới (61.200): RẺ. Biên an toàn CÓ ĐIỀU KIỆN: giá đá cụm từ 2028 giữ trên ≈217 nghìn đ/m³ (tiền 2026), tức biên gộp đá ≥≈28%, thấp hơn bình quân 2012–2025 (34%).** Biên gộp đang ở mức cao nhất 15 năm (53%): chu kỳ ở đỉnh. Kiểm tra chéo bằng lợi nhuận trên vốn chủ chuẩn hoá cho kết quả thấp hơn nhiều (26.900–50.900), nên nhận định đứng trên giả định biên đá không quay về mặt bằng 2021–2024.
+**Kết luận: giá trị kỳ vọng chuẩn hoá chu kỳ ≈67.600 đ/cp; vùng hợp lý 62.100–74.600 (ước lượng). Ở giá đóng cửa 03/11/2026 (46.100 đ), NNC dưới P10 của 1.458 bộ tham số (57.200): RẺ. Biên an toàn CÓ ĐIỀU KIỆN: giá đá cụm từ 2028 giữ trên ≈228 nghìn đ/m³ (tiền 2026), tức biên gộp đá ≈28–32% tuỳ sản lượng, dưới bình quân chu kỳ ≈34%.** Biên gộp đang ở mức cao nhất 15 năm (53%). Giá trị kỳ vọng trộn ba trạng thái biên theo phân loại của người đọc ngành độc lập: biên đỉnh bền (20%), hồi một nửa (45%), về bình quân chu kỳ (35%). Kiểm tra chéo bằng lợi nhuận trên vốn chủ chuẩn hoá (≈49.400) chỉ cao hơn giá ≈7%: biên an toàn có thật nhưng mỏng nếu biên về bình quân.
 
 | Dữ liệu chính | Giá trị | Ghi chú |
 |---|---|---|
-| Kỳ vọng · trung vị lưới · vùng hợp lý (ước lượng) | **≈90.700 · ≈78.100 · 68.100–89.200 đ/cp** | Vùng = P25–P75 của 729 bộ tham số |
-| Ngưỡng nhận định | Rẻ ≤61.200 · rẻ có điều kiện 61.200–68.100 · nghiêng đắt 89.200–99.200 · đắt ≥99.200 | P10 · P25 · P75 · P90 của lưới |
-| Ba kịch bản (25/50/25) | 125.400–144.700 · 88.900–104.000 · 32.000–38.000 | Tích cực · cơ sở · tiêu cực (đường giá tăng theo lạm phát từ 2031 → giữ giá trị thực) |
-| Kiểm tra chịu đựng | ≈63.900 · ≈55.200 · ≈72.700 | Biên cụm về bình quân chu kỳ từ 2028 · biên đá về 36% · giá đá danh nghĩa đi ngang |
+| Kỳ vọng · trung vị lưới · vùng hợp lý (ước lượng) | **≈67.600 · ≈68.000 · 62.100–74.600 đ/cp** | Vùng = P25–P75 của 1.458 bộ tham số |
+| Ngưỡng nhận định | Rẻ ≤57.200 · rẻ có điều kiện 57.200–62.100 · nghiêng đắt 74.600–80.800 · đắt ≥80.800 | P10 · P25 · P75 · P90 của lưới |
+| Ba trạng thái biên (20/45/35) | 83.800–97.700 · 62.900–74.000 · 48.500–58.000 | Biên đỉnh bền · hồi một nửa · về bình quân chu kỳ (giá tăng theo lạm phát từ 2031 → giữ giá trị thực) |
+| Giá đá hoà vốn (giá trị = giá) | ≈228 nghìn đ/m³ (tiền 2026) | Năm 2024: ≈245 nghìn danh nghĩa, sản lượng ≈1,05 tr m³, biên đá 30,7% |
 | LNST 9T/2026 | 160,1 tỷ (+70%) | Q3: 69,3 tỷ (+63%); 4 quý gần nhất 214,0 tỷ |
 | P/E · P/B tại 46.100 | 4,7× · 1,54× | EPS 4 quý 9.761 đ; vốn chủ/cp 29.915 đ |
 | Tiền ròng sau nghĩa vụ 30/9/2026 | 223,6 tỷ (10.200 đ/cp) | Sau khi trừ truy thu, quỹ khen thưởng, cổ tức phải trả, dự phòng môi trường |
@@ -19,12 +19,12 @@
 
 ## 1. Tóm tắt điều hành
 
-**Một mỏ đá có giấy phép tới 2043 đang bán ở giá đỉnh chu kỳ; ẩn sau là gần một phần ba giá trị nằm ở tiền và cổ phần.**
+**Một mỏ đá có giấy phép tới 2043 đang bán ở giá đỉnh chu kỳ; gần 40% giá trị kỳ vọng nằm ở tiền, cổ phần và vốn đã chi.**
 
 ![Khung KPI 9 tháng 2026](figs/fig_01_kpi.png)
 
-- **Câu hỏi.** Giá đá sau 2028 đi đâu khi cung mới trong cụm vào cuộc, và giá cổ phiếu đang trả cho bao nhiêu phần của mỏ?
-- **Trả lời.** Kịch bản cơ sở ≈96.400 = mỏ Mũi Tàu 67.700 + tiền ròng 10.200 + 10,3% MVC 11.400 + Tam Lập 1 khu II theo vốn đã chi 3.800 + phần khác 3.300 (đ/cp). Trừ phần tiền và cổ phần (≈26.000), giá 46.100 trả ≈20.000 cho mỏ, khoảng hai năm lợi nhuận hiện tại.
+- **Câu hỏi.** Biên đá sau 2028 về đâu khi cầu dự án trọng điểm qua đỉnh và cung mới trong cụm vào cuộc, và giá cổ phiếu đang trả cho bao nhiêu phần của mỏ?
+- **Trả lời.** Kỳ vọng ≈67.600 = mỏ Mũi Tàu 41.600 + tiền ròng 10.200 + 10,3% MVC 8.600 + Tam Lập 1 khu II theo vốn đã chi 3.400 + phần khác 3.800 (đ/cp). Trừ phần ngoài mỏ (≈26.000), giá 46.100 trả ≈20.100 cho mỏ, so với ≈41.600 kỳ vọng và ≈28.900 nếu biên về bình quân chu kỳ.
 
 **Điều đổi nhận định:** biên gộp quý dưới 45% khi doanh thu đi ngang, giá đá công bố giảm >7%, giấy phép mỏ mới trong cụm cấp sớm, hoặc tiền giữ lại được dồn vào bất động sản.
 
@@ -40,7 +40,7 @@ Vị trí gần đúng theo trung tâm tỉnh/thành; công ty không công bố
 
 - **Cầu:** dự án trọng điểm phía Nam (Long Thành, Vành đai 3; Vành đai 4 khởi công các gói lớn 30/09 và 15/10/2026, mục tiêu cuối 2028). Kênh nhà ở yếu dần.
 - **Cung:** giấy phép, thuê đất, đấu giá và đình chỉ quyết định cung hơn trữ lượng. Giá 1x2 tại mỏ ≈140–150 nghìn đ/tấn (trước 2020) lên ≈177–240 nghìn (đầu 2026). Cung mới đã biết 2028–30: hai mỏ mới của MVC và Tam Lập 1 khu II của NNC; độ lớn tác động lên giá chưa có số liệu, nên đặt ở độ nhạy.
-- **Pha chu kỳ:** người đọc ngành độc lập xếp "đỉnh, chuyển sang bình nguyên" (độ tin ≈60/40); xác suất giá công bố Q2/2027 giảm >7% là 0,15, tăng >7% là 0,30.
+- **Pha chu kỳ:** người đọc ngành độc lập xếp "đỉnh, chuyển sang bình nguyên" (độ tin ≈60/40) và phân loại nguyên nhân giá cao: nghẽn hành chính, gỡ được trong 6–18 tháng (0,45); chu kỳ dự án (0,35); cạn mỏ gần đô thị, giá sàn dâng dài hạn (0,20). Ba xác suất này là trọng số định giá ở mục 5.
 
 ## 3. Doanh nghiệp: từ đội khai thác đá 1975 thành một mỏ chủ lực
 
@@ -79,43 +79,45 @@ MVC nắm 44,07% NNC (tăng 113.900 cp trong 2026), CTCP Đầu tư Thái Bình 
 
 Cổ tức tiền 2025 chỉ ≈15% LNST; quỹ đầu tư phát triển tăng từ 87 lên 353 tỷ trong 9 tháng.
 
-## 5. Định giá: dựng từ mỏ, tiền và cổ phần, không nhìn giá thị trường
+## 5. Định giá: chuẩn hoá chu kỳ biên đá, không nhìn giá thị trường
 
 **Biên gộp là biến quyết định: ở đỉnh 15 năm, trong khi các mã đá khác không đồng loạt ở đỉnh.**
 
 ![Biên gộp các mã đá niêm yết phía Nam](figs/fig_11_margin_cycle.png)
 
-**Phương pháp.** Mỏ Mũi Tàu chiết khấu dòng tiền 2027–2043 ở 13% (dải 11–15%), không giá trị cuối kỳ; chi phí hiệu chỉnh trên giá vốn kiểm toán 2024–2025. Sản lượng cơ sở 1,40 tr m³/năm (mức 2026, bằng trần giấy phép). Giá cơ sở 380 nghìn đ/m³ (2027), trượt về 320 (2030) rồi đi theo lạm phát. Tam Lập 1 khu II ghi theo vốn đã chi, trừ chi phí trễ giấy phép có xác suất. Cổ phần MVC định giá bằng mô hình nội tại của MVC, giải sở hữu chéo đồng thời; NHC theo sổ sách.
+**Phương pháp.** Mỏ Mũi Tàu chiết khấu dòng tiền 2027–2043 ở 13% (dải 11–15%), không giá trị cuối kỳ; chi phí hiệu chỉnh trên giá vốn đá thành phẩm kiểm toán 2024–2025. Giá cơ sở 380 nghìn đ/m³ (2027), trượt về 320 (2030). Từ 2028 giá trị trộn ba trạng thái:
 
-![Kịch bản cơ sở cộng từ các phần](figs/fig_23_bridge.png)
-
-![Ba kịch bản](figs/fig_12_scenarios.png)
-
-| Kịch bản | Xác suất | Giả định | Giá trị (đ/cp) |
+| Trạng thái | Xác suất | Biên và sản lượng từ 2028 | Giá trị (đ/cp) |
 |---|---|---|---|
-| Tích cực | 25% | Vành đai 4 + đồng bằng sông Cửu Long kéo dài đỉnh; 420 nghìn đ/m³ | 125.400–144.700 |
-| Cơ sở | 50% | Sản lượng ở trần; giá trượt 380 → 320 rồi theo lạm phát | 88.900–104.000 |
-| Tiêu cực | 25% | Cung mới ép 0,8 tr m³ × 250 nghìn từ 2028 (20%); giá về mặt bằng 2023–24 (5%) | 32.000–38.000 |
+| Biên đỉnh bền | 20% | Đường giá cơ sở; sản lượng 1,40 tr m³ (trần giấy phép) | 83.800–97.700 |
+| Hồi biên một nửa | 45% | Giá đi nửa đường về giá chu kỳ; sản lượng năm thường 1,10 (2028–30) / 1,20 tr m³ | 62.900–74.000 |
+| Về bình quân chu kỳ | 35% | Giá trần ≈250 nghìn đ/m³ (tiền 2026) = biên đá 34% ở sản lượng năm thường | 48.500–58.000 |
 
-Xác suất neo vào bản đọc ngành độc lập (0,30 tăng / 0,15 giảm >7%); phần tiêu cực giữ 25% vì thêm rủi ro cung mới 2028.
+Giá chu kỳ tính từ dữ liệu: biên gộp NNC bình quân 2012–2025 là 34,2%, biên đá thành phẩm kiểm toán 2024–2025 gần như bằng biên toàn công ty. Sản lượng năm thường neo vào năm 2024: ≈1,05 tr m³ ở giá ≈245 nghìn, khoảng 74% trần. Mỗi trạng thái đã gồm bốn kịch bản giá. Tam Lập 1 khu II ghi theo vốn đã chi, trừ chi phí trễ giấy phép có xác suất. Cổ phần MVC định giá bằng mô hình nội tại, cùng logic biên và sản lượng cho mỏ Tân Lập, giải sở hữu chéo đồng thời; NHC theo sổ sách.
+
+![Giá trị kỳ vọng cộng từ các phần](figs/fig_23_bridge.png)
+
+![Ba trạng thái biên](figs/fig_12_scenarios.png)
 
 ![Các thước đo giá trị](figs/fig_13_football_field.png)
 
 ![Độ nhạy](figs/fig_14_sensitivity.png)
 
-- **Điều kiện của chữ "rẻ".** Giá trị về bằng giá khi giá đá cụm từ 2028 ≈217 nghìn đ/m³, biên gộp đá ≈28%. Mức 2021–2024 từng thấp như vậy (biên toàn công ty 21–32%).
-- **Kiểm tra chéo.** Giá 46.100 hàm ý lợi nhuận trên vốn chủ bền ≈18,4%; bình quân giai đoạn một mỏ 2021–2025 là 16,1%. Ngược lại, kỳ vọng ≈90.700 cần ≈33%, bằng mức có hai mỏ 2012–2020.
-- **Cổ phần MVC.** Nếu chỉ tính theo thị giá MVC 03/11/2026, phần này giảm ≈5.200 đ/cp.
+- **Điều kiện của chữ "rẻ".** Giá trị về bằng giá khi giá đá cụm từ 2028 ≈228 nghìn đ/m³ (tiền 2026) ở sản lượng năm thường: biên đá ≈28%, hoặc ≈32% nếu sản lượng giữ ở trần. Mức này thấp hơn giá thực hiện 2024 (≈245 nghìn danh nghĩa) và dưới bình quân chu kỳ.
+- **Biên mỏng khi biên về bình quân.** Trạng thái "về bình quân chu kỳ" cho ≈53.300 (+16% so với giá); nếu tính giá chu kỳ ở trần sản lượng ≈48.800 (+6%); thêm giá đá danh nghĩa đi ngang ≈41.700 (−10%).
+- **Kiểm tra chéo.** Lợi nhuận trên vốn chủ chuẩn hoá (gồm lãi tiền gửi) theo ba trạng thái: 29,6% · 19,3% · 14,1%, trộn theo xác suất 19,5% ⇒ ≈49.400. Giá 46.100 hàm ý ≈18,4%. Kỳ vọng ≈67.600 hàm ý ≈25,6%, nằm giữa trạng thái đỉnh và trạng thái hồi một nửa.
+- **Chiều tăng có cơ sở:** Tam Lập 2 (≈2033) và Tam Lập 3 (≈2035) hết giấy phép trong khi Mũi Tàu còn tới 2043. Nếu từ 2034 áp lực biên giảm một nửa, giá trị tăng ≈3.800.
+- **Cổ phần MVC.** Nếu chỉ tính theo thị giá MVC 03/11/2026, phần này giảm ≈2.400 đ/cp.
 
 Bối cảnh lãi suất: lãi suất chiết khấu mà giá thị trường đang ngầm định là 15,1% (phân vị 75% lịch sử 2014–2026; đỉnh 2022 15,9%), cao hơn 13% của mô hình. Lợi suất trái phiếu Chính phủ 10 năm 4,58% (02/11/2026), +0,63 điểm % trong 12 tháng (nguồn chưa đối chiếu độc lập).
 
-**Điều thị trường có thể chưa tính:** (i) gần 26.000 đ/cp là tiền, cổ phần và vốn đã chi; (ii) Tam Lập 2 và 3 hết giấy phép sau 7–9 năm, trong khi Mũi Tàu còn 17 năm; (iii) tiền thuê Núi Nhỏ. **Điều thị trường có thể đã đúng:** biên ở đỉnh, cung mới 2028–30, cổ tức thấp. Ở giá này, thị trường hàm ý xác suất kịch bản tiêu cực ≈85%, so với 25% trong mô hình.
+**Điều thị trường có thể chưa tính:** (i) ≈26.000 đ/cp là tiền, cổ phần và vốn đã chi; (ii) mỏ đối thủ hết giấy phép trước Mũi Tàu 8–10 năm; (iii) tiền thuê Núi Nhỏ. **Điều thị trường có thể đã đúng:** biên ở đỉnh, cầu dự án trọng điểm qua đỉnh 2027, cung mới 2028–30, cổ tức thấp. Ở giá này, thị trường định giá như thể biên về bình quân chu kỳ và sản lượng giảm về năm thường.
 
 ## 6. Rủi ro, quản trị và mốc theo dõi
 
 | Rủi ro | Mức | Cách đọc |
 |---|---|---|
-| Biên đá về bình quân chu kỳ từ 2028 | Cao | Giá trị ≈63.900; biên đá 36% ⇒ ≈55.200 |
+| Biên đá về bình quân chu kỳ từ 2028 | Cao | Đã có trong kỳ vọng (35%); riêng trạng thái này ≈53.300; giá đá dưới ≈228 nghìn ⇒ giá trị dưới giá |
 | Cung mới trong cụm 2028–30 | Trung bình | Chiều xuống có cơ sở; độ lớn chưa có số liệu |
 | Truy thu, phạt hành chính | Thấp–TB | Phạt 0,63 tỷ (2024), 0,04 tỷ (2025); truy thu Núi Nhỏ đã dự phòng; 0,84 tỷ chạm Mũi Tàu |
 | Sở hữu chéo với MVC | TB | MVC ≥51% có thể buộc thoái cổ phần MVC (cần ý kiến pháp lý) |
@@ -128,6 +130,7 @@ Kiểm toán 2025 (AASCs): chấp nhận toàn phần. Rủi ro pháp lý chỉ 
 | BCTC Q4/2026, Q1/2027 | ~20/01, ~20/04/2027 | Biên gộp ≥55% | Biên <45% khi doanh thu đi ngang |
 | Giá đá công bố Sở XD | Q2/2027 | Cao hơn Q3/2026 >7% | Thấp hơn >7% |
 | Vành đai 4; giấy phép mỏ đấu giá trong cụm | tới 30/06/2027 | ≥20% khối lượng; mỏ mới chậm | <20%; mỏ mới cấp sớm |
+| Phân loại ngành | giữa 2027 | Cụm Phước Tân–Tam Phước đóng, giá vẫn tăng (cạn mỏ ≥0,40) | Vành đai 4 trượt, giá Q2/2027 giảm (chu kỳ ≥0,50) |
 | Tam Lập 1 khu II; ĐHĐCĐ 2027 | chưa định ngày | Có giấy phép; cổ tức tiền cao hơn | Huỷ dự án; đầu tư bất động sản lớn |
 
 ![Lịch xúc tác](figs/fig_18_catalysts.png)
@@ -163,9 +166,9 @@ Kiểm toán 2025 (AASCs): chấp nhận toàn phần. Rủi ro pháp lý chỉ 
 
 ## Phụ lục D. Phương pháp và giới hạn
 
-**Phương pháp.** Giá trị = PV NOPAT mỏ Mũi Tàu 2027–2043 (thuế 20%, capex duy trì ≈ khấu hao, chi phí +3%/năm) + lợi nhuận gộp cho thuê Núi Nhỏ + LNST Q4/2026 ước 60 tỷ + tiền ròng sau nghĩa vụ + ký quỹ và thuế hoãn lại + Tam Lập 1 khu II theo vốn đã chi (trừ chi phí trễ giấy phép kỳ vọng 9,3 tỷ, xác suất trễ 0/1/2 năm = 0,30/0,40/0,30) + NHC sổ sách + 10,3% MVC (mô hình nội tại MVC, giải đồng thời). Lưới 729 bộ: lãi suất 11/13/15% × chi phí ±10% × 3 bộ xác suất × 3 tỷ trọng đường giá × biên cụm về bình quân chu kỳ 0/50/100% × 3 thời hạn giấy phép mỏ của MVC. Ngưỡng nhận định đăng ký trước khi so giá.
+**Phương pháp.** Giá trị = PV NOPAT mỏ Mũi Tàu 2027–2043 (thuế 20%, capex duy trì ≈ khấu hao, chi phí +3%/năm) + lợi nhuận gộp cho thuê Núi Nhỏ + LNST Q4/2026 ước 60 tỷ + tiền ròng sau nghĩa vụ + ký quỹ và thuế hoãn lại + Tam Lập 1 khu II theo vốn đã chi (trừ chi phí trễ giấy phép kỳ vọng 9,3 tỷ, xác suất trễ 0/1/2 năm = 0,30/0,40/0,30) + NHC sổ sách + 10,3% MVC (mô hình nội tại MVC, giải đồng thời). Từ 2028 trộn ba trạng thái biên 20/45/35. Giá chu kỳ (tiền 2026) = chi phí đơn vị ở sản lượng năm thường ÷ (1 − biên chu kỳ 34,3%). Lưới 1.458 bộ: lãi suất 11/13/15% × chi phí ±10% × 3 bộ xác suất kịch bản giá × 3 tỷ trọng đường giá × 3 bộ xác suất trạng thái (20/45/35; 40/35/25; 15/35/50 — hai bộ sau là điều kiện đổi phân loại của người đọc ngành) × sản lượng năm thường 1,05 / 1,10–1,20 / 1,20–1,30 × giá chu kỳ tính ở sản lượng năm thường hoặc ở trần. Ngưỡng nhận định đăng ký trước khi so giá.
 
-**Giới hạn.** Công ty không công bố sản lượng m³, nên giá × sản lượng là suy luận. Đường giá 2028+ và xác suất là nhận định. Trữ lượng còn lại và dữ liệu mỏ cạnh tranh là thứ cấp. Tam Lập 1 khu II chưa có giấy phép, trữ lượng, công suất công bố nên không cộng lợi nhuận tiềm năng. Khoản trả trước dài hạn 59,2 tỷ chưa rõ bản chất (độ nhạy +2.100). Bản đồ định vị gần đúng.
+**Giới hạn.** Công ty không công bố sản lượng m³ (2024–2025 lấy từ tài liệu thứ cấp), nên giá × sản lượng là suy luận. Biên 2012–2020 gồm cả mỏ Núi Nhỏ. Xác suất ba trạng thái là nhận định của người đọc ngành, không phải tần suất đo được. Trữ lượng còn lại và dữ liệu mỏ cạnh tranh là thứ cấp. Tam Lập 1 khu II chưa có giấy phép, trữ lượng, công suất công bố nên không cộng lợi nhuận tiềm năng. Khoản trả trước dài hạn 59,2 tỷ chưa rõ bản chất. Bản đồ định vị gần đúng.
 
 ## Phụ lục E. Quy trình độc lập
 

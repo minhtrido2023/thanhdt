@@ -1,0 +1,62 @@
+=== 0. Kiem quy doi bien / gia von (du lieu) ===
+GPM toan cong ty NNC TB 2012-25 (BQ) 0.342; peers TB 2012-25: NNC 0.341, KSB 0.404, DHA 0.260, VLB 0.247
+  2024: GPM da thanh pham kiem toan 30.7% vs toan cong ty 31.6% (chenh -0.9%); SL 1.05 -> gia 245.2k, GV 169.8k/m3 ; chi phi mo hinh cung nam 161.5k/m3
+  2025: GPM da thanh pham kiem toan 50.4% vs toan cong ty 49.4% (chenh +1.0%); SL 1.2 -> gia 300.3k, GV 148.8k/m3 ; chi phi mo hinh cung nam 158.5k/m3
+  => GPM da chu ky = 0.342 + chenh TB +0.0010 = 0.343
+  tran chu ky @ SL 1,40 (co so skeptic)               : chi phi  155.2k -> tran  236.1k/m3 (tien 2026); bien tai 242,5k = 36.0%
+  tran chu ky @ SL TB nhanh hoi bien 1,10/1,20 = 1.181: chi phi  164.2k -> tran  249.7k/m3 (tien 2026); bien tai 242,5k = 32.3%
+  tran chu ky @ SL 1,05 (nam 2024)                    : chi phi  171.4k -> tran  260.6k/m3 (tien 2026); bien tai 242,5k = 29.3%
+  tran chu ky @ SL TB 1,20/1,30 = 1.281               : chi phi  159.7k -> tran  242.9k/m3 (tien 2026); bien tai 242,5k = 34.1%
+  kiem 2024 (tien 2026): gia 260.1k o SL 1,05 -> bien mo hinh 34.1% ; tran tam @1,05 = 260.6k
+  r3 P_CYC 269.5k = bien 42.4% tren chi phi mo hinh @1,40 (nhan r3 "GPM ve TB" SAI)
+
+=== 1. TAM NNC r4 (Bobby 20/45/35; W 25/50/20/5 x PW 50/50; r13; K 0,97): 67,596 d/cp | MVC giai dong thoi 18,392
+  STRUCTURAL  w 0.20: NNC   90,742 | MVC  23,755
+  ADMIN_GATED w 0.45: NNC   68,446 | MVC  18,726
+  CYCLICAL    w 0.35: NNC   53,278 | MVC  14,898
+  STRUCTURAL  tot 135,095 co_so  96,433 xau  38,080 rat_xau  22,714
+  ADMIN_GATED tot 101,050 co_so  68,878 xau  38,045 rat_xau  22,714
+  CYCLICAL    tot  67,005 co_so  55,577 xau  38,011 rat_xau  22,714
+
+=== 2. Gordon P/B = (ROE-g)/(r-g), r13 g3, ROE CHUAN HOA (NNC tu than, nam dien hinh co_so, tien 2026) ===
+  STRUCTURAL : gia 320.0k SL 1.40 -> LNST 177.5 ty, ROE 27.1% -> P/B 2.41x   71,993
+  ADMIN_GATED: gia 284.9k SL 1.20 -> LNST 109.6 ty, ROE 16.7% -> P/B 1.37x   41,033
+  CYCLICAL   : gia 249.7k SL 1.20 -> LNST  75.9 ty, ROE 11.6% -> P/B 0.86x   25,643
+  ROE chuan hoa tron Bobby 17.0% -> P/B 1.40x -> 41,838 d/cp (Gordon vinh vien; mo huu han 2043 + tien lon => doi chieu tho)
+  ROE ben ham y cua TAM 67,596 (P/B 2.26x): 25.6%
+
+=== 3. Luoi 1458 bo: P5 54,792 P10 57,220 P25 62,065 P50 68,037 P75 74,614 P90 80,784 P95 84,458 Pmin 46,533 Pmax 98,606
+   CW=Bobby: P10 57,669 P50 67,095 P90 78,218
+   CW=nghieng STRUCT: P10 63,551 P50 73,724 P90 85,994
+   CW=nghieng CYC: P10 54,426 P50 63,285 P90 73,973
+   VR=SL 1,05: P10 55,869 P50 66,885 P90 79,546
+   VR=SL 1,10/1,20: P10 57,296 P50 68,108 P90 80,763
+   VR=SL 1,20/1,30: P10 58,550 P50 69,216 P90 81,904
+   cap=1.40: P10 55,974 P50 66,665 P90 79,366
+   cap=branch: P10 58,781 P50 69,408 P90 82,341
+NGUONG (dang ky truoc): RE <= 57,220 | RE CO DIEU KIEN 57,220-62,065 | HOP LY 62,065-74,614 | NGHIENG DAT 74,614-80,784 | DAT >= 80,784
+
+=== 4. Do nhay (so voi tam r4) ===
+  tran chu ky co so SL 1,40 (skeptic 242,5k ~ 236.1k)                                    65,037 ( -2,559)
+  trong so phan loai nghieng STRUCTURAL 40/35/25                                         73,572 ( +5,976)
+  trong so nghieng CYCLICAL 15/35/50                                                     64,206 ( -3,390)
+  chi CYCLICAL (100% hoi bien tron)                                                      53,278 (-14,319)
+  chi STRUCTURAL (= tam r3)                                                              90,742 (+23,145)
+  SL nam thuong 1,05 ca ky (quan sat 2024)                                               67,088 (   -508)
+  SL nam thuong 1,20/1,30                                                                68,096 (   +500)
+  (+) upside doi thu het GP: tu 2034 stress giam mot nua (TL2 ~2033, TL3 ~2035)          71,424 ( +3,828)
+  Tan Lap KHONG cat SL o nhanh hoi bien (giu 1,30)                                       67,726 (   +130)
+  K chi phi 0,87                                                                         74,007 ( +6,410)
+  K chi phi 1,07                                                                         61,298 ( -6,299)
+  r 11%                                                                                  72,854 ( +5,258)
+  r 15%                                                                                  63,223 ( -4,373)
+  PW g2031 70/real 30                                                                    65,378 ( -2,218)
+  PW g2031 30/real 70                                                                    69,815 ( +2,218)
+  STRESS duong gia danh nghia phang 100%                                                 53,480 (-14,116)
+  bo LN cho thue Nui Nho                                                                 64,096 ( -3,500)
+  bo doi xung BCDKT (ky quy + thue hoan lai)                                             67,172 (   -424)
+  holding MVC->NNC 15%                                                                   67,118 (   -479)
+
+  Cau noi: tam r3 90,742 -> r4 voi tran SL 1,40 65,037 -> r4 tran theo SL nhanh 67,596
+
+=== 5. V_NNC nhat quan cho MVC r7: 67,596 d/cp NNC (MVC giai dong thoi cung he 18,392 d/cp) ===

@@ -1,0 +1,10 @@
+LOCK 2026-11-03 20:24:58 ICT (TRUOC khi doc gia NNC 03/11 trong r4). Trung thuc: r1-r3 da biet gia NNC (~46-47k) va brief skeptic neu tham chieu ~66.400 => khoa chi chung minh THU TU CHAY (mo hinh r4 khong sua sau khi so gia), khong chung minh chua tung thay gia.
+c992769f86794f5d6f39b0df7e13bd91  ../../r3/calc/model_r3.py
+d3fb9637389ca6d9c7472e28f4846506  ../../../dd_MVC_20261103/r6/calc/valuation_base.py
+9fd64a26a7daca9b0244c3f62ce7dd91  ../../../dd_MVC_20261103/r6/calc/model_r5.py
+bd93107a93a7f958eea03e1a5f01eed0  ../../../dd_MVC_20261103/r6/calc/model_r6.py
+812ca351e968913e2e4787bbcff9f552  model_r4.py
+a6ee25c5a7d8d8cafe642ffaaef3ae48  model_r4_out.txt
+f5aee8310bfc565953266ee8e7dddfbd  model_r4_out.json
+8520b9a683eafb4a33b984ecfab5439d  grid_r4.csv
+e896ecfb84241240a4f1faf3ba1d90d3  ../../r3/calc/sector_gpm_roe.csv
