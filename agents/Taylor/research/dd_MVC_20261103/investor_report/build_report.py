@@ -15,6 +15,7 @@ NAVY, ACCENT, GREY, LIGHT, GREEN = "#1F3A5F", "#C8553D", "#9AA5B1", "#D9DEE4", "
 FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular.ttf"
 FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
 
+SAFE = 13_000                                   # ngưỡng RẺ CÓ BIÊN AN TOÀN: P10 lưới mở rộng 2.187 bộ (14.333) trừ cụm công nghiệp 500 tỷ thu hồi 70% = 13.033 (../r4/ext_r4_out.txt)
 PX = 13_700                                     # đóng cửa 02/11/2026 (tav2_bq.ticker) — đọc SAU khoá md5 (../r3/calc/LOCK_md5_r3.txt)
 import json as _json
 R3 = _json.load(open(os.path.join(HERE, "..", "r3", "calc", "model_r3_out.json")))
@@ -84,7 +85,7 @@ def figs():
     band = fig.add_axes([0, 0.86, 1, 0.14]); band.axis("off")
     band.add_patch(mp.Rectangle((0, 0), 1, 1, fc=NAVY, transform=band.transAxes))
     band.text(0.015, 0.5, "MVC · Đá xây dựng, gạch, BOT — Bình Dương / Đồng Phú", color="white", fontsize=10.2, fontweight="bold", va="center")
-    band.text(0.985, 0.5, "Giá 13,7k: vùng rẻ rõ", color="white", fontsize=10, fontweight="bold", va="center", ha="right",
+    band.text(0.985, 0.5, "Giá 13,7k: rẻ có điều kiện", color="white", fontsize=10, fontweight="bold", va="center", ha="right",
               bbox=dict(boxstyle="round,pad=0.3", fc=ACCENT, ec="none"))
     a = fig.add_axes([0.0, 0.15, 0.28, 0.66]); a.axis("off"); a.set_xlim(0, 3); a.set_ylim(0, 3.2)
     a.add_patch(mp.Polygon([[0.2, 0.9], [1.0, 2.4], [1.5, 1.7], [2.1, 2.6], [2.85, 0.9]], fc="#8A98A8", ec=NAVY, lw=0.8))
@@ -108,11 +109,12 @@ def figs():
         c.spines[sp].set_visible(False)
     c.set_xticks([]); c.yaxis.tick_right(); c.tick_params(labelsize=6.4)
     c.yaxis.set_major_formatter(lambda v, p: f"{v/1e3:.0f}k")
-    c.add_patch(mp.Rectangle((0.08, Z["10"]), 0.42, Z["90"] - Z["10"], fc=GREEN, alpha=0.18, ec="none"))
     c.add_patch(mp.Rectangle((0.08, Z["25"]), 0.42, Z["75"] - Z["25"], fc=GREEN, alpha=0.85, ec="none"))
     c.text(0.29, (Z["25"] + Z["75"]) / 2, f"hợp lý\n{k(Z['25'])}–\n{k(Z['75'])}", ha="center", va="center", fontsize=6.0, color="white", fontweight="bold")
-    c.add_patch(mp.Rectangle((0.08, 0), 0.42, Z["10"], fc=ACCENT, alpha=0.10, ec="none"))
-    c.text(0.29, Z["10"] / 2, f"rẻ rõ\n≤{k(Z['10'])}", ha="center", va="center", fontsize=5.8, color=ACCENT)
+    c.add_patch(mp.Rectangle((0.08, 0), 0.42, SAFE, fc=ACCENT, alpha=0.22, ec="none"))
+    c.add_patch(mp.Rectangle((0.08, SAFE), 0.42, Z["25"] - SAFE, fc=ACCENT, alpha=0.07, ec="none"))
+    c.text(0.29, SAFE / 2, f"rẻ có biên\nan toàn ≤{k(SAFE)}", ha="center", va="center", fontsize=5.6, color=ACCENT)
+    c.text(0.29, (SAFE + Z["25"]) / 2 + 900, f"rẻ có điều kiện\n{k(SAFE)}–{k(Z['25'])}", ha="center", va="center", fontsize=5.6, color=ACCENT)
     c.text(0.29, Z["90"] + 1200, f"đắt ≥{k(Z['90'])}", ha="center", va="bottom", fontsize=5.8, color="#555")
     c.axhline(PX, xmin=0.02, xmax=0.98, color=NAVY, lw=1.6)
     c.text(0.53, PX - 1200, "Giá 13,7k\n(02/11)", fontsize=6.2, color=NAVY, fontweight="bold", va="top")
@@ -245,8 +247,9 @@ def figs():
           ("SOTP: lưới tham số, P10–P90", Z["10"], Z["90"]),
           ("SOTP: vùng hợp lý (P25–P75 lưới)", Z["25"], Z["75"])]
     fig, ax = plt.subplots(figsize=(7.2, 2.7))
-    ax.axvspan(0, Z["10"], color=ACCENT, alpha=0.07); ax.axvspan(Z["90"], 58_000, color=GREY, alpha=0.12)
-    ax.text(Z["10"] / 2, len(ff) - 0.65, "RẺ RÕ", ha="center", fontsize=6.6, color=ACCENT, fontweight="bold")
+    ax.axvspan(0, SAFE, color=ACCENT, alpha=0.14); ax.axvspan(SAFE, Z["25"], color=ACCENT, alpha=0.05); ax.axvspan(Z["90"], 58_000, color=GREY, alpha=0.12)
+    ax.text(SAFE / 2, len(ff) - 0.65, "BIÊN AN TOÀN", ha="center", fontsize=5.4, color=ACCENT, fontweight="bold")
+    ax.text((SAFE + Z["25"]) / 2, len(ff) - 0.65, "RẺ CÓ ĐIỀU KIỆN", ha="center", fontsize=5.4, color=ACCENT, fontweight="bold")
     ax.text(Z["90"] + 1500, len(ff) - 0.65, "ĐẮT", ha="left", fontsize=6.6, color="#555", fontweight="bold")
     for i, (n, lo, hi) in enumerate(ff):
         ax.barh(i, hi - lo, left=lo, color=GREEN if i == 4 else NAVY, alpha=1 if i == 4 else 0.7, height=0.5)

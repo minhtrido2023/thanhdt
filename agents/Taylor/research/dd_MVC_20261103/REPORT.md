@@ -20,9 +20,9 @@ Giới hạn mù giá (thẳng thắn): giá 13.700 có trong BRIEF r1 (08:25Z) 
 
 ## 1. Kết luận r3
 - **Tâm (giá trị kỳ vọng) 20.181 đ/cp** — W kịch bản 25/50/20/5 × đường giá phẳng 10 / g2031 50 / thực 40; r 13%, holding 15%; hạng mục riêng MVC độc lập [`model_r3_out.txt` dòng 1].
-- **Ngưỡng (lưới 243 bộ tham số, đăng ký trước):** RẺ RÕ ≤ **15.261** · nghiêng rẻ 15.261–17.471 · **HỢP LÝ 17.471–22.946** · nghiêng đắt 22.946–25.383 · **ĐẮT ≥ 25.383**. Hiển thị NĐT: 15.300 / 17.500–22.900 / 25.400.
+- **Ngưỡng (lưới 243 bộ tham số, đăng ký trước):** [r4: thang mới — xem mục 8 (r4)] cũ: RẺ RÕ ≤ 15.261 · nghiêng rẻ 15.261–17.471 · **HỢP LÝ 17.471–22.946** · nghiêng đắt 22.946–25.383 · **ĐẮT ≥ 25.383**. Hiển thị NĐT: 15.300 / 17.500–22.900 / 25.400.
 - **Dải theo kịch bản (49.152 ô có trọng số):** P10 8.291 · P25 11.434 · P50 16.201 · P75 25.451 · P90 39.975 — lệch phải; dùng đo rủi ro, không làm ngưỡng.
-- **Sau khoá:** giá 13.700 = 0,68× tâm ⇒ **RẺ RÕ**; 37% kết cục có trọng số < 13.700 [`compare_r3_out.txt`].
+- **Sau khoá:** giá 13.700 = 0,68× tâm ⇒ **RẺ CÓ ĐIỀU KIỆN** (thang r4: 13.000–17.500; không còn "rẻ rõ"); 37% kết cục có trọng số < 13.700 [`compare_r3_out.txt`].
 - So r2 (tâm 19.540, vùng 14.600–24.500 = phẳng…thực): tâm +641; vùng hẹp lại (P25–P75 rộng 5,5k thay 9,9k) và có ngưỡng hai đầu.
 
 ## 2. Nghịch lý "giá đá đi ngang ⇒ MVC < giá trị phần góp NNC" — trả lời bằng số
@@ -48,7 +48,7 @@ Cầu nối kịch bản cơ sở, hạng mục riêng ở mức cơ sở [`mode
 - Kết luận nghịch lý: là hệ quả của (giá phẳng vĩnh viễn) × (mỏ mới vẫn chạy) × (đất đã chi tính là mất), không phải "MVC < NNC". Giá phẳng vĩnh viễn là stress — §3.
 
 ## 3. Đường giá đá — dữ liệu độc lập, không dùng nhãn FPTS [`price_path_out.txt`]
-Phương pháp: giá bán ngầm = (1−GPM_gốc)/(1−GPM_năm) × CPI (cpi_vn.py, bình quân năm), giả định chi phí đơn vị THỰC không đổi (ước lượng; mỏ xuống sâu ⇒ chi phí thực tăng ⇒ phép này đánh giá THẤP giá thực ⇒ thận trọng). GPM gộp quý theo doanh thu.
+Phương pháp: giá bán ngầm = (1−GPM_gốc)/(1−GPM_năm) × CPI (cpi_vn.py, bình quân năm), giả định chi phí đơn vị THỰC không đổi (ước lượng; mỏ xuống sâu ⇒ chi phí thực tăng ⇒ phép này đánh giá THẤP giá thực; nhưng chiều sai số tổng KHÔNG xác định: đòn bẩy vận hành, cơ cấu sản phẩm, 4 mã cùng vùng nên số mẫu độc lập ít). GPM gộp quý theo doanh thu.
 
 | | NNC | KSB | DHA | VLB (gốc 2016) | MVC (gốc 2017) |
 |---|---|---|---|---|---|
@@ -64,7 +64,7 @@ Mốc Bobby §3 (đọc MÙ): ≤2020 1x2 tại mỏ 140–150k/tấn → đầu
 - **flat — STRESS 10%:** danh nghĩa phẳng mãi; giá thực cơ sở 2040 ≈0,55× 2026. 1/20 cửa sổ 8 năm từng gần phẳng, 0/36 cửa sổ 4 năm giảm thực ≥25% ⇒ tần suất thực nghiệm ≈5%; lấy 10% (gấp đôi) vì sóng cung mới 2027–28 là thật.
 - **g2031 — 50%:** vách kịch bản, KHÔNG chuyển lạm phát tới 2030, +3%/năm từ 2031. Cơ sở: giá thực 2030 = 0,70×, 2031+ 0,75× 2026 — khớp hồi về TB thực 2012–25 của NNC (1,03/1,39 = 0,74×) ⇒ đường "hồi về trung bình lịch sử".
 - **real — 40%:** mức kịch bản giữ giá trị thực từ 2026: cơ sở 2028–30 0,79×, 2031+ 0,84× — dừng trên TB lịch sử (lý do: tiền cấp quyền đấu giá R%, VĐ4 2027–28). Trọng số thấp hơn g2031 vì đỉnh 2026 cao bất thường.
-- **Trọng số kịch bản W 25/50/20/5 giữ nguyên:** "tốt" ≈ không hồi về (2/5 đỉnh lịch sử) ⇒ 25–40%; lấy đầu thấp 25% vì cung đấu giá mới (gồm 2 mỏ MVC) đã công bố. Đối xứng: 15/60/20/5 −2.779; 35/50/10/5 +3.891.
+- **Trọng số kịch bản W 25/50/20/5 giữ nguyên:** "tốt" ≈ không hồi về (2/5 đỉnh lịch sử giảm <10%: −4%, −8%) ⇒ 25–40%; lấy đầu thấp 25% vì cung đấu giá mới (gồm 2 mỏ MVC) đã công bố. Đối xứng: 15/60/20/5 −2.779; 35/50/10/5 +3.891.
 - Nhãn đúng cho vách 2028 cơ sở: **giả định nhóm nghiên cứu, tham khảo kịch bản cung mới FPTS** (không phải Bobby — Bobby đặt trũng 2027, hồi 2028).
 
 ## 4. Áp M1–M7 (SKEPTIC2) — hiệu ứng đo [`model_r3_out.txt` mục 3–4]
@@ -78,7 +78,7 @@ Mốc Bobby §3 (đọc MÙ): ≤2020 1x2 tại mỏ 140–150k/tấn → đầu
 | M4 | Tiêu đề bỏ "cơ sở phẳng < giá" | phẳng = stress; cơ sở g2031 = 14.605 (kỳ vọng hạng mục riêng) / 14.249 (hạng mục riêng ở cơ sở) |
 | M5 | fig_10 tách đất mỏ | đã tách: chương trình mỏ mới −4.952 đ/cp (g2031), nợ ròng ex đất +3.153 |
 | M6 | Công bố xếp chồng lạc quan | xem dòng "Bỏ xếp chồng" |
-| M7 | r 13% cho dự án vay 75% không tính lá chắn thuế | công bố trong báo cáo NĐT §5 (nghiêng thận trọng); r 11% chỉ là cận |
+| M7 | r 13% cho dự án vay 75% không tính lá chắn thuế | công bố trong báo cáo NĐT §5 (r 13% không tính lá chắn thuế: chiều thận trọng cho phần này); r 11% chỉ là cận |
 | Chưa trong mô hình | Cụm công nghiệp ≤500 tỷ (thu hồi 70/50%) | −1.300 / −2.100 (từ r2 `calc/valuation_v2_out.txt`) |
 
 ## 5. NNC nhất quán (D1) — đầu vào cho MVC [`model_r3_out.txt` mục 5]
@@ -87,7 +87,7 @@ V_NNC = N_ex + 0,103·V_MVC, V_MVC từ mô hình (không giá thị trường).
 ## 6. Ngưỡng hành động + điều làm vùng thu hẹp
 | Vùng (đ/cp) | Nhận định | Đổi nhận định khi |
 |---|---|---|
-| ≤15.300 | RẺ RÕ (P10 lưới) | Lên: các mốc tích cực dưới. Xuống: tổ hợp tiêu cực đủ (tâm 13.864) |
+| ≤13.000 (r4; cũ 15.300 "rẻ rõ") | RẺ CÓ BIÊN AN TOÀN (P10 lưới mở rộng − cụm CN) · 13.000–17.500 RẺ CÓ ĐIỀU KIỆN | Lên: các mốc tích cực dưới. Xuống: tổ hợp tiêu cực đủ (tâm 13.864) |
 | 17.500–22.900 | HỢP LÝ (P25–P75) | |
 | ≥25.400 | ĐẮT (P90) | Chỉ hợp lý nếu tổ hợp tích cực (tâm 25.540–28.015) |
 
@@ -100,7 +100,19 @@ V_NNC = N_ex + 0,103·V_MVC, V_MVC từ mô hình (không giá thị trường).
 | Tổ hợp | Tiêu cực đủ (W15 + PW25 + capex +30%) **13.864**; nhẹ 16.048 · Tích cực đủ (W35 + PW5/35/60 + capex −30%) **28.015**; nhẹ 25.540 | |
 
 ## 7. So với giá (SAU khoá) [`compare_r3_out.txt`]
-Giá 02/11/2026 13.700 (tav2_bq.ticker Close = Price, KL 71.700) = 0,68× tâm ⇒ **RẺ RÕ**. Định giá ngược: (a) cả 100% đường phẳng vẫn 14.227 > giá ⇒ thị trường không chỉ định giá "giá đá phẳng"; (b) giữ cơ sở 50/rất xấu 5: tốt 8% / xấu 37%; (e) bỏ hẳn kịch bản tốt: xấu 16% + rất xấu 5% = tiêu cực 21%; (d) r hàm ý ≈20% (r 20% → 13.714). ⇒ Giá hiện tại hàm ý gần như KHÔNG có kịch bản tốt, hoặc chi phí vốn ~20% (chiết khấu thanh khoản/quản trị/UPCOM). Thanh khoản ADV trung vị 0,19 tỷ/phiên (r2 `calc/px_median_out.txt`) — một lý do hợp lệ cho chiết khấu.
+Giá 02/11/2026 13.700 (tav2_bq.ticker Close = Price, KL 71.700) = 0,68× tâm ⇒ **RẺ CÓ ĐIỀU KIỆN** (r4). Định giá ngược: (a) cả 100% đường phẳng vẫn 14.227 > giá ⇒ thị trường không chỉ định giá "giá đá phẳng"; (b) giữ cơ sở 50/rất xấu 5: tốt 8% / xấu 37%; (e) bỏ hẳn kịch bản tốt: xấu 16% + rất xấu 5% = tiêu cực 21%; (d) r hàm ý ≈20% (r 20% → 13.714). ⇒ Giá hiện tại hàm ý gần như KHÔNG có kịch bản tốt, hoặc chi phí vốn ~20% (chiết khấu thanh khoản/quản trị/UPCOM). Thanh khoản ADV trung vị 0,19 tỷ/phiên (r2 `calc/px_median_out.txt`) — một lý do hợp lệ cho chiết khấu.
+
+## 8 (r4). Thang ngưỡng có điều kiện — job `Taylor_20261103_095718` (skeptic vòng 3: CONFIRMED medium)
+Tính trên lưới mở rộng 2.187 bộ (243 tham số × W {15/60/20/5, 25/50/20/5, 35/50/10/5} × PW {25/50/25, 10/50/40, 5/35/60}) — `r4/ext_r4.py` → `r4/ext_r4_out.txt` (tái lập số skeptic: P10 14.333; cụm CN: 13.033):
+| | P10 | P25 | P50 | P75 | P90 |
+|---|---|---|---|---|---|
+| Lưới mở rộng 2.187 | 14.333 | 17.096 | 20.418 | 23.952 | 27.344 |
+| trừ cụm CN 500 tỷ thu hồi 70% (−1.300) | **13.033** | 15.796 | | | |
+| trừ cụm CN thu hồi 50% (−2.100) | 12.233 | 14.996 | | | |
+Tỷ trọng kết cục < 13.700: 7,2% (lưới mở rộng) · 12,8% (cụm CN 70%) · 16,8% (cụm CN 50%). Kịch bản tốt = 48,2% giá trị kỳ vọng (22,1% riêng ô tốt × giá thực).
+**Thang chốt:** RẺ CÓ BIÊN AN TOÀN ≤13.000 (≈P10 lưới mở rộng + cụm CN 70%) · RẺ CÓ ĐIỀU KIỆN 13.000–17.500 · HỢP LÝ 17.500–22.900 (P25–P75 lưới 243, giữ nguyên tâm 20.181) · ĐẮT ≥25.400 (P90 lưới 243). Giá 13.700 nằm trong vùng ĐIỀU KIỆN, cao hơn ngưỡng biên an toàn ≈5%.
+**Hai điều kiện của nhãn "rẻ có điều kiện":** (1) P(kịch bản tốt) ≥ ≈10% (giá hàm ý ≈8% vs 25% giả định); (2) vốn mỏ mới ≤1.500 tỷ và cụm công nghiệp NPV ≈ 0.
+Đính chính khác: "2/5 không giảm" → "2/5 giảm <10% (−4%, −8%)"; "nghiêng thận trọng" → "chiều sai số không xác định". Thân báo cáo NĐT 1.811 từ (không bảng/hình/phụ lục; cũ 2.211).
 
 ## Phụ lục E (nội bộ) — áp đính chính SKEPTIC2 vào r3
 | Mục skeptic | Trạng thái | Bằng chứng |

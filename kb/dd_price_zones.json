@@ -1348,11 +1348,65 @@
    "price_ref": 13700,
    "price_date": "2026-11-02",
    "verdict_label": "trung dung — giá DƯỚI vùng hợp lý, trong vùng rẻ rõ (≤15.300); đắt ≥25.400; vùng = P25–P75 lưới 243 bộ tham số; 37% kết cục có trọng số < giá (chủ yếu giá đá giảm mạnh sau 2028)",
+   "source_file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev2.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev2.md",
+     "quote": "giá trị kỳ vọng ≈20.200 đ/cp (ước lượng); vùng hợp lý 17.500–22.900; dưới 15.300 là RẺ RÕ, trên 25.400 là ĐẮT. Ở giá đóng cửa 02/11/2026 (13.700 đ)",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high",
+      "price_ref"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev2.md",
+     "quote": "| Tâm · vùng hợp lý (ước lượng) | **≈20.200 · 17.500–22.900 đ/cp** |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev2.md",
+     "quote": "| Cơ sở (50%) | Giá đá giữ 2027, giảm ≈21% từ 2028 khi cung mới vào, nhích lại từ 2031; mỏ mới chạy 50/80% | 9.800 · 14.600 · 20.200 |",
+     "fields": [
+      "center_alt"
+     ]
+    }
+   ],
+   "skeptic_status": "định giá SOTP r3 dựng mù giá (khoá md5 r3/calc/LOCK_md5_r3.txt 16:41:10 ICT trước khi đọc giá 16:41:28); áp toàn bộ đính chính fundamental-skeptic vòng 2 (SKEPTIC2_20261103.md, M1–M7, D1–D4); CHƯA chạy skeptic vòng 3 trên r3",
+   "expires_on": "2027-03-03",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "Tâm chính xác 20.181 = W kịch bản 25/50/20/5 × đường giá phẳng 10/g2031 50/thực 40 (trọng số từ GPM 2012–2026 NNC/KSB/DHA/VLB). Ngưỡng: rẻ rõ ≤15.261 (P10 lưới), hợp lý 17.471–22.946 (P25–P75), đắt ≥25.383 (P90). Dải kịch bản P10–P90 8.291–39.975. Cơ sở g2031 14.605. Cụm công nghiệp ≤500 tỷ ngoài mô hình (−1.300/−2.100). [03/11 r4: chỉ đổi con trỏ file nguồn sang bản lưu nội bộ vì báo cáo NĐT cùng tên đã dựng lại (rev 3); giá trị không đổi; bản gốc = git d18c755f3]",
+   "recorded_at": "2026-11-03T17:05:00+07:00",
+   "center_desc": "kỳ vọng xác suất SOTP (Tân Lập + NNC 44,07% sở hữu chéo giải hệ + BOT + mỏ mới − nợ), r 13%, holding 15%, 3 đường giá đá",
+   "rev": 2,
+   "supersedes": "MVC@2026-11-03#1",
+   "correction_reason": "r3 theo chỉ đạo user 03/11 16:18 + SKEPTIC2: đường giá đá dựng lại bằng dữ liệu độc lập (phẳng thành stress 10%), bỏ xếp chồng hạng mục riêng, vùng = P25–P75 lưới tham số kèm ngưỡng rẻ rõ/đắt",
+   "center_alt": 14600,
+   "center_alt_kind": "base_scenario"
+  },
+  {
+   "ticker": "MVC",
+   "dd_date": "2026-11-03",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 17500,
+   "center": 20200,
+   "center_kind": "expected_weighted",
+   "zone_high": 22900,
+   "center_range": null,
+   "price_ref": 13700,
+   "price_date": "2026-11-02",
+   "verdict_label": "trung dung — giá DƯỚI vùng hợp lý, trong vùng RẺ CÓ ĐIỀU KIỆN (13.000–17.500), chưa tới RẺ CÓ BIÊN AN TOÀN (≤13.000); đắt ≥25.400; điều kiện nhãn: P(kịch bản tốt) ≥ ≈10% (giá hàm ý ≈8%) và vốn mỏ mới ≤1.500 tỷ + cụm công nghiệp NPV ≈ 0",
    "source_file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
    "evidence": [
     {
      "file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
-     "quote": "giá trị kỳ vọng ≈20.200 đ/cp (ước lượng); vùng hợp lý 17.500–22.900; dưới 15.300 là RẺ RÕ, trên 25.400 là ĐẮT. Ở giá đóng cửa 02/11/2026 (13.700 đ)",
+     "quote": "giá trị kỳ vọng ≈20.200 đ/cp (ước lượng); vùng hợp lý 17.500–22.900. Ở giá đóng cửa 02/11/2026 (13.700 đ), MVC thấp hơn vùng hợp lý và nằm trong vùng RẺ CÓ ĐIỀU KIỆN (13.000–17.500), chưa phải RẺ CÓ BIÊN AN TOÀN (≤13.000)",
      "fields": [
       "center",
       "zone_low",
@@ -1377,18 +1431,61 @@
      ]
     }
    ],
-   "skeptic_status": "định giá SOTP r3 dựng mù giá (khoá md5 r3/calc/LOCK_md5_r3.txt 16:41:10 ICT trước khi đọc giá 16:41:28); áp toàn bộ đính chính fundamental-skeptic vòng 2 (SKEPTIC2_20261103.md, M1–M7, D1–D4); CHƯA chạy skeptic vòng 3 trên r3",
+   "skeptic_status": "định giá SOTP r3 mù giá (khoá md5 r3/calc/LOCK_md5_r3.txt); fundamental-skeptic vòng 3 CONFIRMED (medium) tâm 20.181 và vùng 17.500–22.900; r4 chỉ đổi thang nhãn (có điều kiện), số mô hình không đổi",
    "expires_on": "2027-03-03",
    "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
    "null_reason": null,
-   "notes": "Tâm chính xác 20.181 = W kịch bản 25/50/20/5 × đường giá phẳng 10/g2031 50/thực 40 (trọng số từ GPM 2012–2026 NNC/KSB/DHA/VLB). Ngưỡng: rẻ rõ ≤15.261 (P10 lưới), hợp lý 17.471–22.946 (P25–P75), đắt ≥25.383 (P90). Dải kịch bản P10–P90 8.291–39.975. Cơ sở g2031 14.605. Cụm công nghiệp ≤500 tỷ ngoài mô hình (−1.300/−2.100).",
-   "recorded_at": "2026-11-03T17:05:00+07:00",
+   "notes": "Tâm chính xác 20.181 (không đổi từ r3). Thang r4: RẺ CÓ BIÊN AN TOÀN ≤13.000 (P10 lưới mở rộng 2.187 bộ = 14.333, trừ cụm công nghiệp 500 tỷ thu hồi 70% = 13.033); RẺ CÓ ĐIỀU KIỆN 13.000–17.500; HỢP LÝ 17.500–22.900 (P25–P75 lưới 243); ĐẮT ≥25.400 (P90 lưới 243). Điều kiện nhãn rẻ: P(kịch bản tốt) ≥ ≈10% (giá 13.700 hàm ý ≈8% vs 25% giả định; 48% giá trị kỳ vọng đến từ kịch bản tốt) và vốn mỏ mới ≤1.500 tỷ + cụm công nghiệp NPV ≈ 0. Số: agents/Taylor/research/dd_MVC_20261103/r4/ext_r4_out.txt. center_alt = cơ sở g2031 14.600. Ngưỡng rẻ có biên ≈13.000 chỉ ghi ở notes (không có field số riêng).",
+   "recorded_at": "2026-11-03T17:30:00+07:00",
    "center_desc": "kỳ vọng xác suất SOTP (Tân Lập + NNC 44,07% sở hữu chéo giải hệ + BOT + mỏ mới − nợ), r 13%, holding 15%, 3 đường giá đá",
-   "rev": 2,
-   "supersedes": "MVC@2026-11-03#1",
-   "correction_reason": "r3 theo chỉ đạo user 03/11 16:18 + SKEPTIC2: đường giá đá dựng lại bằng dữ liệu độc lập (phẳng thành stress 10%), bỏ xếp chồng hạng mục riêng, vùng = P25–P75 lưới tham số kèm ngưỡng rẻ rõ/đắt",
+   "rev": 3,
+   "supersedes": "MVC@2026-11-03#2",
+   "correction_reason": "r4 theo skeptic vòng 3: bỏ nhãn \"rẻ rõ\" (P10 lưới 243 bộ quá hẹp) → thang có điều kiện trên lưới mở rộng 2.187 bộ + cụm công nghiệp; tâm/vùng hợp lý không đổi",
    "center_alt": 14600,
    "center_alt_kind": "base_scenario"
+  },
+  {
+   "ticker": "NNC",
+   "dd_date": "2026-10-31",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 62220,
+   "center": 77656,
+   "center_kind": "expected_weighted",
+   "zone_high": 86914,
+   "center_range": null,
+   "price_ref": 47100,
+   "price_date": "2026-10-30",
+   "verdict_label": "giá 47.100 DƯỚI vùng theo mô hình nhất quán 62.220–86.914 (tâm 77.656); LỆCH báo cáo NĐT NNC v2 (59.000–79.000, giữa 69.000) chưa dựng lại",
+   "source_file": "agents/Taylor/research/dd_NNC_20261030/REPORT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_NNC_20261030/REPORT.md",
+     "quote": "Kỳ vọng (W 25/50/20/5): phẳng **62.220** · g2031 **73.337** · thực **86.914** đ/cp NNC; tâm theo trọng số đường giá r3 (phẳng 10 / g2031 50 / thực 40) = **77.656**.",
+     "fields": [
+      "zone_low",
+      "zone_high",
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_NNC_20261030/investor_report_v2/NNC_DD_investor_report_20261031_v2.md",
+     "quote": "ở giá đóng cửa 30/10/2026 (47.100 đ), NNC nằm DƯỚI vùng giá trị hợp lý ~59.000–79.000 đ/cp (điểm giữa ~69.000; ước lượng)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "skeptic_status": "mô hình nhất quán MVC r3 qua skeptic vòng 3 (CONFIRMED medium, phía MVC); NNC rev 3 chưa có vòng phản biện riêng",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "null_reason": null,
+   "notes": "Rev 3 đồng bộ mô hình MVC r3 (hệ phương trình sở hữu chéo): vùng = phẳng 62.220 … thực 86.914, tâm kỳ vọng 77.656. LỆCH bản báo cáo NĐT NNC v2 (59.000–79.000, giữa 69.000, mô hình độc lập cũ) — bản đó KHÔNG dựng lại, KHÔNG gửi email. Không phải tín hiệu mua.",
+   "recorded_at": "2026-11-03T17:30:00+07:00",
+   "center_desc": "kỳ vọng xác suất theo mô hình NHẤT QUÁN với MVC (V_NNC = N_ex + 0,103·V_MVC), W 25/50/20/5, đường giá 10/50/40",
+   "rev": 3,
+   "supersedes": "NNC@2026-10-31#2",
+   "no_expected_reason": null,
+   "correction_reason": "r4 job Taylor_20261103_095718: đồng bộ tâm NNC với mô hình nhất quán MVC–NNC (NNC REPORT mục bổ sung 03/11); lệch với báo cáo NĐT NNC v2 ghi rõ"
   }
  ],
  "center_kinds": [
