@@ -4,10 +4,10 @@ lnst_2023,71.3,BQ NP_P0 + BCTC Q3/26
 lnst_2024,86.3,BQ NP_P0 + BCTC Q3/26
 lnst_2025,179.2,BQ NP_P0 + BCTC Q3/26
 lnst_TTM,306.8,BQ NP_P0 + BCTC Q3/26
-fv_lo_phang,14566.0,valuation_out
-fv_hi_thuc,24514.0,valuation_out
-grid_p10,13488.0,valuation_out
-grid_p90,26993.0,valuation_out
-tieu_cuc_lo,4914.0,valuation_out
-tieu_cuc_hi,6729.0,valuation_out
+tam,20181.0,model_r3_out.json
+grid_p10,15261.0,model_r3_out.json
+grid_p25,17471.0,model_r3_out.json
+grid_p50,20181.0,model_r3_out.json
+grid_p75,22946.0,model_r3_out.json
+grid_p90,25383.0,model_r3_out.json
 gia_0211,13700.0,tav2_bq.ticker

@@ -1,0 +1,70 @@
+=== TAM r3 (W 25/50/20/5, PW flat10/g2031 50/real40, r13, holding15, hang muc rieng doc lap): 20,181 d/cp
+  duong flat : KV  14,227 | tot  29,658 co_so   9,772 xau   8,246 rat_xau   5,549
+  duong g2031: KV  18,467 | tot  36,212 co_so  14,605 xau   9,171 rat_xau   5,549
+  duong real : KV  23,811 | tot  44,664 co_so  20,248 xau  11,064 rat_xau   6,157
+
+=== 1. CAU NOI kich ban co_so (ty dong; d/cp = x10), hang muc rieng o muc co_so ===
+[flat] TanLap 556.1 | mo_moi_PV_van_hanh 620.1 | mo_moi_PV_capex_con -933.1 | mo_moi_dat_da_chi -431.9 | CHUONG_TRINH_MO_MOI -744.9 | BOT_gach_ICD_LK_dat_Q4 343.6 | no_rong_KHONG_gom_dat_mo 315.3 | TRUC_TIEP 470.1 | phan_NNC_truoc_holding 553.5 | holding -83.0 | phan_NNC 470.5 | TONG 940.6 | TONG_dcp 9,406.1 | NNC_ex_MVC 1,159.2 | V_NNC_dcp 57,304.6
+[g2031] TanLap 692.0 | mo_moi_PV_van_hanh 869.8 | mo_moi_PV_capex_con -933.1 | mo_moi_dat_da_chi -431.9 | CHUONG_TRINH_MO_MOI -495.2 | BOT_gach_ICD_LK_dat_Q4 343.6 | no_rong_KHONG_gom_dat_mo 315.3 | TRUC_TIEP 855.7 | phan_NNC_truoc_holding 669.7 | holding -100.5 | phan_NNC 569.3 | TONG 1,424.9 | TONG_dcp 14,249.2 | NNC_ex_MVC 1,373.1 | V_NNC_dcp 69,335.0
+[real] TanLap 884.0 | mo_moi_PV_van_hanh 1,134.7 | mo_moi_PV_capex_con -933.1 | mo_moi_dat_da_chi -431.9 | CHUONG_TRINH_MO_MOI -230.3 | BOT_gach_ICD_LK_dat_Q4 343.6 | no_rong_KHONG_gom_dat_mo 315.3 | TRUC_TIEP 1,312.6 | phan_NNC_truoc_holding 801.9 | holding -120.3 | phan_NNC 681.6 | TONG 1,994.2 | TONG_dcp 19,942.4 | NNC_ex_MVC 1,614.3 | V_NNC_dcp 83,016.4
+Moc "gia tri phan gop NNC": so sach khoan dau tu NNC tren BCTC HN 30/09 (xem REPORT r2 §SOTP) va gia tri phan NNC theo mo hinh (cot phan_NNC).
+
+TONG vs phan NNC (sau holding) — 12 o, hang muc rieng theo k:
+  tot     flat : TONG  3453.8 | phan NNC  915.9 | TRUC TIEP  2537.9 | chuong trinh mo moi   132.4 | TONG<NNC? False | TRUC TIEP<NNC? False
+  tot     g2031: TONG  4239.8 | phan NNC 1068.9 | TRUC TIEP  3170.9 | chuong trinh mo moi   433.0 | TONG<NNC? False | TRUC TIEP<NNC? False
+  tot     real : TONG  5144.1 | phan NNC 1243.5 | TRUC TIEP  3900.6 | chuong trinh mo moi   821.1 | TONG<NNC? False | TRUC TIEP<NNC? False
+  co_so   flat : TONG   940.6 | phan NNC  470.5 | TRUC TIEP   470.1 | chuong trinh mo moi  -744.9 | TONG<NNC? False | TRUC TIEP<NNC? True
+  co_so   g2031: TONG  1424.9 | phan NNC  569.3 | TRUC TIEP   855.7 | chuong trinh mo moi  -495.2 | TONG<NNC? False | TRUC TIEP<NNC? False
+  co_so   real : TONG  1994.2 | phan NNC  681.6 | TRUC TIEP  1312.6 | chuong trinh mo moi  -230.3 | TONG<NNC? False | TRUC TIEP<NNC? False
+  xau     flat : TONG   556.7 | phan NNC  208.4 | TRUC TIEP   348.3 | chuong trinh mo moi  -302.3 | TONG<NNC? False | TRUC TIEP<NNC? False
+  xau     g2031: TONG   614.8 | phan NNC  231.7 | TRUC TIEP   383.0 | chuong trinh mo moi  -302.3 | TONG<NNC? False | TRUC TIEP<NNC? False
+  xau     real : TONG   770.9 | phan NNC  287.7 | TRUC TIEP   483.2 | chuong trinh mo moi  -302.3 | TONG<NNC? False | TRUC TIEP<NNC? False
+  rat_xau flat : TONG   230.0 | phan NNC  125.1 | TRUC TIEP   104.9 | chuong trinh mo moi  -302.3 | TONG<NNC? False | TRUC TIEP<NNC? True
+  rat_xau g2031: TONG   230.0 | phan NNC  125.1 | TRUC TIEP   104.9 | chuong trinh mo moi  -302.3 | TONG<NNC? False | TRUC TIEP<NNC? True
+  rat_xau real : TONG   281.1 | phan NNC  141.9 | TRUC TIEP   139.3 | chuong trinh mo moi  -302.3 | TONG<NNC? False | TRUC TIEP<NNC? True
+
+=== 2a. Phan phoi THEO TRONG SO KICH BAN (49152 o, k x duong gia x 6 hang muc doc lap): P10 8,291 P25 11,434 P50 16,201 P75 25,451 P90 39,975 | KV 20,181
+    (xep chong kieu r2, 12 o): P10 5,741 P25 7,709 P50 13,281 P75 19,942 P90 42,398 | KV 20,796
+=== 2b. Luoi tham so (243 bo: r 11/13/15 x holding 0/15/30 x capex +-30% x chi phi Tan Lap +-15% x REL 0,80/0,87/0,95 hieu chinh): P10 15,261 P25 17,471 P50 20,181 P75 22,946 P90 25,383
+NGUONG (dang ky truoc): RE RO <= 15,261 | nghieng re 15,261-17,471 | HOP LY 17,471-22,946 | nghieng dat 22,946-25,383 | DAT >= 25,383
+
+=== 3. Do nhay (so voi tam) ===
+  M1 REL 0.8 (COST_A/COST_B hieu chinh giu bien 2026)          20,890 (   +710)
+  M1 REL 0.95 (COST_A/COST_B hieu chinh giu bien 2026)         19,385 (   -795)
+  M1 REL 1.0 (COST_A/COST_B hieu chinh giu bien 2026)          18,898 ( -1,283)
+  M2 mo moi co_so tre 1 nam, vach gia KHONG lui                19,316 (   -864)
+  M2 tre 1 nam + vach gia/san luong/moc lam phat lui 1 nam     19,498 (   -683)
+  M2 (dinh nghia skeptic) CHI co_so tre 1 nam, vach KHONG lui   19,758 (   -422)
+  M2 (dinh nghia skeptic) CHI co_so tre 1 nam + vach lui 1 nam   19,982 (   -198)
+  capex mo moi con lai -30%                                    22,364 ( +2,184)
+  capex mo moi con lai +30%                                    17,997 ( -2,184)
+  chi phi mo moi 105k                                          22,521 ( +2,341)
+  chi phi mo moi 165k                                          17,846 ( -2,334)
+  chi phi Tan Lap -15% (110k)                                  21,668 ( +1,487)
+  chi phi Tan Lap +15% (150k)                                  18,725 ( -1,456)
+  holding 0%                                                   21,359 ( +1,179)
+  holding 30%                                                  19,019 ( -1,162)
+  san dung du an ap MOI kich ban                               20,912 (   +732)
+  r 11%                                                        22,922 ( +2,741)
+  r 15%                                                        17,910 ( -2,270)
+  W 15/60/20/5                                                 17,402 ( -2,779)
+  W 35/50/10/5 (doi xung)                                      24,071 ( +3,891)
+  PW flat 25/g2031 50/real 25                                  18,743 ( -1,438)
+  PW flat 5/g2031 35/real 60                                   21,461 ( +1,281)
+  PW flat 50/real 50 (cach r2)                                 19,019 ( -1,162)
+  xep chong hang muc rieng theo k (cach r2)                    20,796 (   +616)
+  bo muc "tot" cua MOI hang muc rieng (= co_so)                18,843 ( -1,338)
+  dat du an nha o = 0                                          18,620 ( -1,560)
+  han GP Tan Lap 2035 moi muc                                  18,580 ( -1,601)
+  han GP Tan Lap 2045 moi muc                                  21,440 ( +1,260)
+
+=== 4. Tu r2 sang r3 (tung buoc) ===
+  r2 tai lap (xep chong, phang/thuc 50:50)             19,540
+  + duong gia 10/50/40                                 20,796
+  + hang muc rieng doc lap (= tam r3)                  20,181
+
+=== 5. NNC nhat quan V_N = N_ex + c*V_M (d/cp NNC) ===
+  flat : KV 62,220 | tot 109,262 co_so 57,476 xau 26,639 rat_xau 16,763
+  g2031: KV 73,337 | tot 127,279 co_so 69,502 xau 29,643 rat_xau 16,763
+  real : KV 86,914 | tot 148,267 co_so 83,160 xau 36,620 rat_xau 18,853
+  tam NNC theo PW 10/50/40: 77,656

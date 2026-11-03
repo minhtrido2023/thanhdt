@@ -1,0 +1,15 @@
+Gia dong cua MVC 02/11/2026 = 13,700 | tam 20,181 | gia/tam = 0.68 (chiet khau 32%)
+Vi tri: RE RO (RE RO <= 15,261)
+Xac suat (theo trong so kich ban) gia tri < gia: 37%
+(a) KHONG DAT: ngay ca 100 pct phang = 14,227 > gia
+(b) giu co_so 50/rat_xau 5: tot = 8%, xau = 37% thi tam = gia  (dang 25/20)
+(c) xem (e)
+(d) suat chiet khau ham y (giu moi thu khac): 20.0%
+
+--- kiem bien (bisection cham bien => khong dat trong bien) ---
+PW flat 100%: 14,227
+W tot 0/co_so 50/xau 45/rat_xau 5: 10,885
+W tot 0/co_so 0/xau 95/rat_xau 5: 6,503
+r 20%: 13,714
+(e) khong co kich ban tot: xau can 16% (co_so 79%, rat_xau 5%) de tam = gia
+(f) khong co tot + PW 25/50/25: xau can 1%

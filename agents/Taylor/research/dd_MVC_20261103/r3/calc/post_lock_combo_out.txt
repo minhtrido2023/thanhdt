@@ -1,0 +1,5 @@
+TIEU CUC: Q4/26 bien gop <28% (W 15/60/20/5) + gia So XD Q2/27 <-7% (PW 25/50/25) + capex +30%         13,864 (-6,316)
+TIEU CUC nhe: chi W 15/60/20/5 + PW 25/50/25                                                           16,048 (-4,132)
+TICH CUC: bien gop >=35% (W 35/50/10/5) + So XD >+7% (PW 5/35/60) + capex -30%                         28,015 (+7,834)
+TICH CUC nhe: chi W 35/50/10/5 + PW 5/35/60                                                            25,540 (+5,359)
+Mo moi bo/dung (san dung ap moi kb) + capex khong chi                                                  20,912 (+732)

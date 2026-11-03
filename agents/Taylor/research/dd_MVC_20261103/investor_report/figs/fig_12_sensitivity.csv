@@ -1,10 +1,12 @@
-gia_dinh,giam,tang
-Xác suất tiêu cực 40% (thay vì 25%),-4160.0,0
-"Hệ số giá MVC/NNC 0,80 / 0,95",-3346.0,3853
-Mỏ mới chi phí 165k/m³,-2309.0,0
-Mỏ mới: capex +30%,-2184.0,0
-"Cụm công nghiệp 500 tỷ, thu hồi 50%",-2125.0,0
-Hạn giấy phép Tân Lập 2035 / 2045,-1837.0,457
-Đất dự án nhà ở = 0,-1560.0,0
-Chi phí mỏ cũ +15% / −15%,-1514.0,1555
-Mỏ mới trễ 1 năm (kịch bản cơ sở),-470.0,0
+gia_dinh,chieu_trai,chieu_phai
+Xác suất kịch bản 15/60/20/5 · 35/50/10/5,-2779.0,3891.0
+Mỏ mới: chi phí 165k · 105k /m³,-2334.0,2341.0
+Chiết khấu r 15% · 11%,-2270.0,2741.0
+Mỏ mới: capex còn lại +30% · −30%,-2184.0,2184.0
+Hạn giấy phép Tân Lập 2035 · 2045,-1601.0,1260.0
+Đất dự án nhà ở = 0 · dừng mỏ mới khi lỗ,-1560.0,732.0
+Chi phí Tân Lập +15% · −15%,-1456.0,1487.0
+Trọng số giá phẳng 25% · 5%,-1438.0,1281.0
+Chiết khấu holding 30% · 0%,-1162.0,1179.0
+"Hệ số giá MVC/NNC 0,95 · 0,80",-795.0,710.0
+Mỏ mới trễ 1 năm (cả vách giá lùi),-683.0,0.0

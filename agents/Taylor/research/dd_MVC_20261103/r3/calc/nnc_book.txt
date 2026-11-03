@@ -1,0 +1,1 @@
+NNC BVPS Q3/26 (BQ ticker_financial) 29914.79 x 9.659170 tr cp = 289.0 ty (so sach phan NNC theo VCSH NNC)

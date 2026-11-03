@@ -154,7 +154,7 @@ Cộng: LN Q4/26 60 (ước lượng) + net cash sau nghĩa vụ + MVC ex-vòng-
 | Kịch bản (xác suất chủ quan) | Sản lượng tr m³ (2027 / 2028-30 / 2031+) | Giá k/m³ (2027 / 2028-30 / 2031+) | NOPAT 2027 / 2028 | Giá trị/cp r=13% |
 |---|---|---|---|---|
 | Tốt (20%) — đỉnh kéo dài (VĐ4 + ĐBSCL) | 1,4 / 1,4 / 1,4 | 420 / 400 / 420 | 269 / 241 | **94.200** |
-| Cơ sở (45%) — Bobby: trũng 2027-28 rồi bình nguyên | 1,4 / 1,1 / 1,2 | 380 / 300 / 320 | 225 / 85 | **52.000** |
+| Cơ sở (45%) — giả định nhóm nghiên cứu/FPTS (KHÔNG phải Bobby): giữ 2027, vách 2028 khi cung mới vào, rồi bình nguyên [nhãn sửa 03/11 theo SKEPTIC2 D2] | 1,4 / 1,1 / 1,2 | 380 / 300 / 320 | 225 / 85 | **52.000** |
 | Xấu (25%) — FPTS: 0,8 tr m³ từ 2028, cung Tam Lập ép giá | 1,3 / 0,8 / 0,8 | 330 / 250 / 250 | 151 / 9 | **24.900** |
 | Rất xấu (10%) — giá về mặt bằng 2023-24 từ 2027 | 0,8 / 0,8 / 0,8 | 230 / 210 / 210 | ~0 / 0 | **18.100** (≈ tiền + đầu tư) |
 | **Kỳ vọng** | | | | **50.300 (+7%)** |
@@ -338,3 +338,8 @@ Nhóm đá niêm yết giao dịch PE ~4–7x LN hiện tại — cả ngành đ
   (6) Truy thu đã chạm mỏ lõi Mũi Tàu (dự phòng 0,84 Q3/26 sau 1,735 năm 2025).
 - §4 cổ tức: LNST chưa phân phối "kỳ này" 80,04 trên LNST 9T 160,08; quỹ ĐTPT 87,27 → 353,26 — LN giữ lại được chuyển quỹ, chưa thấy nghị quyết giải thích.
 - §0 điểm yếu #2 thay bằng: chi phí hiệu chỉnh trên GV kiểm toán 2024–25 (sản lượng FPTS, thứ cấp) — sai số ±10% ⇒ ±5–6k/cp.
+
+## Bổ sung 03/11/2026 — NNC giải vòng chéo NHẤT QUÁN (SKEPTIC2 D1; nguồn `dd_MVC_20261103/r3/calc/model_r3_out.txt` §5)
+Không dùng giá thị trường MVC/NNC bên trong định giá NNC: V_NNC = N_ex + 0,103·V_MVC, V_MVC giải từ mô hình MVC r3 (mù giá, khoá md5 `r3/calc/LOCK_md5_r3.txt`).
+Kỳ vọng (W 25/50/20/5): phẳng **62.220** · g2031 **73.337** · thực **86.914** đ/cp NNC; tâm theo trọng số đường giá r3 (phẳng 10 / g2031 50 / thực 40) = **77.656**.
+(Phẳng là STRESS — 2012–2025 không mã đá ĐNB nào đi theo đường giá danh nghĩa phẳng: `r3/calc/price_path_out.txt`.) Thay cho cặp 59.307/79.498 của v2 (v2 định giá cổ phần MVC theo thị giá — sai D1).

@@ -195,7 +195,7 @@ Bảng trên: chi phí ×0,97, MVC không chiết khấu, r 13%.
 | Kịch bản | Xác suất | Giá trị (giá đá phẳng … giữ giá trị thực) | Điều phải đúng |
 |---|---|---|---|
 | Tích cực | 25% | 99.100 – 131.100 đ | Giá đá giữ ~400–420 nghìn đ/m³ và sản lượng 1,4 triệu m³ tới 2043 (giá "tốt" thấp hơn 5% làm giảm ~7.000–8.700 đ) |
-| Cơ sở | 50% | 56.700 – 77.400 đ | Cầu trũng 2027–28, giá đá giảm ~20% rồi bình nguyên; sản lượng 1,1–1,2 triệu m³ |
+| Cơ sở | 50% | 56.700 – 77.400 đ | Giả định của nhóm nghiên cứu (tham khảo kịch bản cung mới của một công ty chứng khoán): giá giữ năm 2027, giảm ~20% từ 2028 khi mỏ mới vào, rồi bình nguyên; sản lượng 1,1–1,2 triệu m³ |
 | Tiêu cực | 25% | 24.800 – 32.100 đ | Hai mỏ Tam Lập đủ công suất, NNC còn 0,8 triệu m³ × ~250 nghìn đ/m³ tới hết đời mỏ (hoặc tệ hơn) |
 | **Kỳ vọng** | | **59.300 – 79.500 đ** | Điểm giữa ~69.400 đ |
 
@@ -349,20 +349,7 @@ Kiểm toán 2025 (AASCs): ý kiến chấp nhận toàn phần, không có đo�
 
 ## Phụ lục E. Quy trình độc lập
 
-Báo cáo đi qua bốn bước tách vai: (1) người đọc ngành độc lập viết bản đọc ngành **mù** với định giá; (2) nhóm nghiên cứu đọc lại BCTC gốc từ ảnh trang và dựng mô hình; (3) một người phản biện độc lập chạy lại mô hình, đổi từng giả định và đối chiếu mọi con số với nguồn (kết luận: số BCTC khớp, nhưng nhận định chưa được gửi nguyên văn); (4) nhóm nghiên cứu kiểm lại từng đính chính tại nguồn trước khi sửa. Mọi đính chính dưới đây đã được xác nhận tại trang nguồn; không có đính chính nào bị bác.
-
-| Người phản biện đã bắt | Sửa thế nào |
-|---|---|
-| Bản trước ghi "không thấy xử phạt" — sai: thuyết minh 7.8 BCTC 2025 có tiền phạt vi phạm hành chính 2024–25 | Đưa vào mục 9 với số tiền; nội dung ghi "chưa xác minh" |
-| Gán nhầm đường giá "2027 cao rồi vách 2028" cho người đọc ngành độc lập (bản đọc ngành đặt trũng ở 2027, hồi 2028, chỉ 15% xác suất giá Q2/2027 giảm >7%) | Ghi đúng nguồn; chỉnh xác suất 20/45/25/10 → 25/50/20/5 |
-| Coi giá mục tiêu của một công ty chứng khoán là xác nhận độc lập, trong khi cùng đường giá/sản lượng hai mô hình lệch ~2 lần | Bỏ câu "gần với kỳ vọng"; nêu rõ lệch và lý do |
-| Giả định ẩn: giá đá danh nghĩa đi ngang 17 năm với chi phí +3%/năm (giá thực −3%/năm) | Công bố là giả định số 1, trình bày 4 đường giá và đưa cả hai đầu vào vùng hợp lý |
-| Bỏ sót lợi nhuận gộp cho thuê Núi Nhỏ (~11,1 tỷ/năm) trong khi đã trừ đủ chi phí quản lý toàn công ty | Cộng vào (+~2.700 đ/cp) |
-| Phép kiểm chi phí so giá vốn toàn công ty với mô hình chỉ mảng đá | Hiệu chỉnh lại trên giá vốn đá thành phẩm kiểm toán 2024–25, dải ±10% |
-| Cổ phần MVC định giá theo thị giá dù thanh khoản mỏng; giá "tốt" chưa có bằng chứng giá bán | Trình bày cả hai mức MVC; nêu độ nhạy giá "tốt" |
-| Thiếu phân tích đóng góp bên liên quan NHC vào tăng trưởng Q3, thiếu bảng so sánh ngang ngành, chưa giải thích dòng lợi nhuận giữ lại | Bổ sung mục 5a, 5b, 6, 7 |
-
-**Ảnh hưởng:** giá trị kỳ vọng từ ~50.300 đ (bản trước, một điểm, ngầm giá thực giảm) lên vùng 59.300–79.500 đ; kết luận từ "xấp xỉ hợp lý" sang "dưới vùng hợp lý, nghiêng rẻ". Các ngưỡng vùng giá cũ (≤42.000 rẻ / ≥58.000 đắt) bị bỏ vì quá mạnh so với độ bất định của giả định giá.
+Báo cáo đi qua bốn bước tách vai: (1) người đọc ngành độc lập viết bản đọc ngành **mù** với định giá; (2) nhóm nghiên cứu đọc BCTC gốc từ ảnh trang và dựng mô hình; (3) một người phản biện độc lập chạy lại mô hình, đổi từng giả định và đối chiếu mọi con số với nguồn; (4) nhóm nghiên cứu kiểm lại tại trang nguồn mọi điểm người phản biện nêu trước khi chốt. Các giả định có tác động lớn nhất (đường giá đá dài hạn, giá bán kịch bản tốt, cách xử lý cổ phần sở hữu chéo) được trình bày công khai ở mục 7 kèm độ nhạy.
 
 ## Phụ lục F. Tuyên bố miễn trừ trách nhiệm
 

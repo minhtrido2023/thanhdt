@@ -1,0 +1,16 @@
+# LOCK r3 — khoa TRUOC khi doc gia thi truong (UTC 2026-11-03T09:41:10Z)
+bdcc213556fd1137bf35b477043b55fe  gpm.sql
+86d4c5ba292243f4d1fdfd9148311bea  gpm_bq.csv
+477367d196eea516afb22959933568a2  price_path.py
+ede7ce7ccc5f8cddf5f75fa0f082b26c  price_path_out.txt
+1161a121734f86b66d2fe7675ad3ad83  price_path_implied.csv
+d3fb9637389ca6d9c7472e28f4846506  valuation_base.py
+2368daadebb38421ae0ab4fabc8a9239  model_r3.py
+f501863194f7f2a59c637c3bcd0abcda  model_r3_out.txt
+9cad4fcb944c0d317576c9cd6ead936a  model_r3_out.json
+d54e1abb05d1a37fa4181adb09e853ad  grid_r3.csv
+4875a7e607950f68c4a78e8fe43ae2ba  nnc_book.txt
+# --- SAU khi doc gia (px_0211.csv doc luc 2026-11-03T09:41:28Z); cac file tren KHONG doi (md5sum -c OK) ---
+094923c19be70302b5c0422ac6689c94  px_0211.csv
+e38e75f5dc55473a977b91ccd1b37af0  compare_r3.py
+cc300b98cfaf16befe022425c26aa3d7  compare_r3_out.txt
