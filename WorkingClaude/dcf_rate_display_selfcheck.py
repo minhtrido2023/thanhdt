@@ -17,17 +17,24 @@ def run_checks(mod):
     ser = dict(sorted(ser.items()))   # cache thật ghi sort_keys=True
     d = tempfile.mkdtemp(); cp = os.path.join(d, "c.json")
     json.dump({"panel_asof": "2026-10-30", "n_last": 147, "r_const": 11.0, "series": ser}, open(cp, "w"))
-    L = mod.rstar_line("2026-11-02", cp)
+    L = mod.rstar_line("2026-11-02", cp, None)
     ok("15.1%" in L and "DISPLAY-ONLY" in L and "KHÔNG phải tín hiệu" in L, "rstar fresh: " + L)
     ok("đỉnh 2022 15.9%" in L and "đáy 2022–23 12.1%" in L, "peak/trough")
     ok("percentile 99%" in L, "giá trị percentile (153/154 ≤ hiện tại): " + L)
     ok("lịch sử 2014-01→2026-10" in L, "cắt HIST_START (2013-12=30 không được lọt vào): " + L)
     ok("r hằng 11.00%" in L, "r_const lấy từ cache, không hardcode: " + L)
-    ok(mod._NA in mod.rstar_line("2026-12-31", cp), "cache stale -> NA")
-    ok(mod._NA in mod.rstar_line("2026-10-01", cp), "asof trước panel -> NA")
-    ok(mod._NA in mod.rstar_line("2026-11-02", os.path.join(d, "nope.json")), "cache thiếu -> NA")
+    ok(mod._NA in mod.rstar_line("2026-12-31", cp, None), "cache stale -> NA")
+    ok(mod._NA in mod.rstar_line("2026-10-01", cp, None), "asof trước panel -> NA")
+    # render lại ngày cũ: 2 cache (09-30 cũ, 10-30 mới) -> asof 10-15 phải dùng cache 09-30, không NA
+    cp_old = os.path.join(d, "old.json")
+    json.dump({"panel_asof": "2026-09-30", "n_last": 140, "r_const": 11.0, "series": {k: v for k, v in ser.items() if k <= "2026-09"}}, open(cp_old, "w"))
+    Lo = mod.rstar_line("2026-10-15", cp, cp_old)
+    ok(mod._NA not in Lo and "panel 2026-09-30" in Lo, "asof cũ chọn cache <= asof: " + Lo)
+    ok("panel 2026-10-30" in mod.rstar_line("2026-11-02", cp, cp_old), "asof mới vẫn chọn cache mới nhất")
+    ok(mod._NA in mod.rstar_line("2026-09-01", cp, cp_old), "asof trước mọi cache -> NA")
+    ok(mod._NA in mod.rstar_line("2026-11-02", os.path.join(d, "nope.json"), None), "cache thiếu -> NA")
     open(cp, "w").write("{bad")
-    ok(mod._NA in mod.rstar_line("2026-11-02", cp), "cache hỏng -> NA")
+    ok(mod._NA in mod.rstar_line("2026-11-02", cp, None), "cache hỏng -> NA")
     def mk(rows): return lambda a: pd.DataFrame(rows, columns=["d", "v", "f"])
     rows = [("2025-10-30", 3.937, "2026-10-30"), ("2026-10-30", 4.58, "2026-11-01")]
     T = mod.tpcp_line("2026-11-02", mk(rows))
@@ -47,15 +54,27 @@ def run_checks(mod):
     ok(mod._NA in mod.tpcp_line("2026-11-02", boom), "loader lỗi -> NA")
     TF = mod.tpcp_line("2026-11-02", mk(rows + [("2026-11-05", 9.99, "2026-11-06")]))
     ok("9.99" not in TF and "4.58%" in TF, "không dùng quan sát sau asof (PIT): " + TF)
-    ok(len(mod.dcf_rate_lines("2026-11-02", cp, mk(rows))) == 2, "đúng 2 dòng")
+    ok(len(mod.dcf_rate_lines("2026-11-02", cp, mk(rows), None)) == 2, "đúng 2 dòng")
     # --- vòng 3: ghim percentile giữa dải, cửa sổ Δ12T, biên stale TPCP (arch-review vòng 2)
     mid = {str(p): (10.0 + i * 0.01 if i < 77 else 16.0 + i * 0.01)
            for i, p in enumerate(pd.period_range("2014-01", "2026-09", freq="M"))}
     mid["2013-12"] = 30.0; mid["2026-10"] = 15.0
     mid = dict(sorted(mid.items())); cp2 = os.path.join(d, "mid.json")
     json.dump({"panel_asof": "2026-10-30", "n_last": 147, "r_const": 12.25, "series": mid}, open(cp2, "w"))
-    LM = mod.rstar_line("2026-11-02", cp2)
+    LM = mod.rstar_line("2026-11-02", cp2, None)
     ok("percentile 51%" in LM, "percentile giữa dải = 78/154 = 50.6% -> 51 (diệt <, bỏ dòng cuối, gồm 2013-12): " + LM)
+    # --- A': cache untracked mới hơn được ưu tiên; cũ hơn/hỏng/thiếu thì không
+    newer = dict(mid); newer["2026-11"] = 17.7; newer = dict(sorted(newer.items())); cpn = os.path.join(d, "new.json")
+    json.dump({"panel_asof": "2026-11-30", "n_last": 150, "r_const": 12.25, "series": newer}, open(cpn, "w"))
+    ok("17.7%" in mod.rstar_line("2026-12-05", cp2, cpn), "cache live mới hơn thắng tracked: " + mod.rstar_line("2026-12-05", cp2, cpn))
+    ok("17.7%" in mod.rstar_line("2026-12-05", cpn, cp2), "thứ tự tham số không ảnh hưởng")
+    ok("15.0%" in mod.rstar_line("2026-11-02", cp2, os.path.join(d, "x.json")), "live thiếu -> dùng tracked")
+    open(os.path.join(d, "bad.json"), "w").write("{bad")
+    ok("15.0%" in mod.rstar_line("2026-11-02", cp2, os.path.join(d, "bad.json")), "live hỏng -> dùng tracked, không NA")
+    old = dict(mid); old2 = os.path.join(d, "old.json")
+    json.dump({"panel_asof": "2026-09-30", "n_last": 1, "r_const": 12.25, "series": {**old, "2026-10": 9.9}}, open(old2, "w"))
+    ok("9.9%" not in mod.rstar_line("2026-11-02", cp2, old2), "live CŨ hơn tracked không ghi đè")
+    ok(mod._NA in mod.rstar_line("2027-03-01", cp2, cpn), "cache newest cũng bị fail-closed 45 ngày")
     def one(prev_rows, asof="2026-11-02"):
         return mod.tpcp_line(asof, mk(prev_rows + [("2026-10-30", 4.58, None)]))
     ok("Δ12T +0.68pp" in one([("2025-10-27", 3.9, None)]), "mốc 12T lệch -3 ngày VẪN trong cửa sổ: " + one([("2025-10-27", 3.9, None)]))
@@ -92,7 +111,13 @@ if __name__ == "__main__":
                 ("pv = prev.iloc[-1]", "pv = prev.iloc[0]"),
                 ("(h <= cur).mean()", "(h < cur).mean()"),
                 ("h = ser.loc[HIST_START:]", "h = ser"),
-                ('df = df.dropna(subset=["v"]).copy()', "df = df.copy()")]
+                ('df = df.dropna(subset=["v"]).copy()', "df = df.copy()"),
+                ("return max(cands, key=lambda x: x[0])[1]", "return min(cands, key=lambda x: x[0])[1]"),
+                ("ok_ = [x for x in cands if x[0] <= ad]", "ok_ = [x for x in cands if x[0] >= ad]"),
+                ("[path] if live_path is None else [path, live_path], asof)", "[path] if live_path is None else [path, live_path])"),
+                ("if ok_:\n            cands = ok_", "if False:\n            cands = ok_"),
+                ("[path] if live_path is None else [path, live_path]", "[path]"),
+                ("[path] if live_path is None else [path, live_path]", "[live_path or path]")]
         for a, b in muts:
             assert src.count(a) == 1, "mutation target mất: " + a
             try:
