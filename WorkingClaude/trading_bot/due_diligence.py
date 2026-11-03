@@ -916,6 +916,41 @@ RED_FLAG_CODES = {
 }
 
 
+# ── "MÃ CÓ CỜ" — định nghĩa DUY NHẤT cho luật user chốt 2026-11-02 23:01 ICT ────────────────
+# "Mã nào có cờ thì bị loại khỏi candidate của tất cả các book" (kb/projects/dd-flag-rules-20261102.md).
+# Cờ = 🔴 mã thuộc RED_FLAG_CODES  HOẶC  ⚠ quality_flag ≠ QUALITY_OK (FLOOR_FAIL, RATING_FAIL,
+# BANNED, UNKNOWN_FLOOR, UNKNOWN_RATING). KHÔNG gồm (Mike chốt diễn giải, chờ user nới nếu muốn):
+# ⚠ thanh khoản mỏng, quý lỗ, anomaly tier, insider-sell, DCF RICH. Hàm THUẦN — chỉ đọc dict
+# run_due_diligence(as_dict=True) đã tính, KHÔNG tính lại logic cờ nào.
+DD_FLAG_QUALITY_OK = "QUALITY_OK"
+
+
+def dd_flag_verdict(dd):
+    """Phân loại 1 kết quả run_due_diligence(as_dict=True) → (status, codes, why).
+
+    status:
+      "FLAGGED" — có ≥1 cờ (codes = mã RED_FLAG_CODES + "QF:<quality_flag>").
+      "CLEAN"   — DD chạy đủ, không cờ.
+      "UNKNOWN" — KHÔNG kết luận được: DD lỗi/thiếu dòng (`error`, gồm DD_KHONG_CHAY_DUOC) hoặc
+                  universe_pit không đọc được (in_universe=None ⇒ quality_flag chưa hề được kiểm,
+                  nếu coi là CLEAN thì cổng im lặng mở). Caller quyết fail-mode, hàm này không.
+    Cờ đỏ ĐÃ BIẾT vẫn thắng UNKNOWN của universe (vd THANH_KHOAN_CHET + universe n/a ⇒ FLAGGED).
+    """
+    if not isinstance(dd, dict):
+        return "UNKNOWN", [], "DD không trả dict"
+    if dd.get("error"):
+        return "UNKNOWN", [], f"DD n/a ({str(dd.get('error'))[:120]})"
+    codes = [c for c in (dd.get("red_flags") or []) if c in RED_FLAG_CODES]
+    qf = dd.get("quality_flag")
+    if qf and qf != DD_FLAG_QUALITY_OK:
+        codes.append(f"QF:{qf}")
+    if codes:
+        return "FLAGGED", codes, "cờ " + ", ".join(codes)
+    if dd.get("in_universe") is None:
+        return "UNKNOWN", [], "universe_pit không đọc được — cờ chất lượng CHƯA kiểm"
+    return "CLEAN", [], ""
+
+
 def format_dd_check(dd, side="buy", has_override=False):
     """1 dòng hiển thị chuẩn cho dd_check dict — analog format_dcf_check(). Informational.
 

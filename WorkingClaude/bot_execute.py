@@ -37,6 +37,7 @@ from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
                               filter_lag_governance_orders, filter_signal_holds,
+                              filter_dd_flag_orders,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.exdate_gate import apply_exdate_gate
@@ -273,6 +274,21 @@ def _notify_failopen(label, gate, reason):
         f"⚠️ **{label} — CỔNG {gate} KHÔNG CHẠY ĐƯỢC (fail-open)**\n"
         f"{reason}\n"
         f"Lệnh VẪN ĐI RA theo plan. Cần người kiểm tra TRƯỚC khi tin kết quả phiên này.")
+
+
+def _notify_dd_flag_summary(label, plan_date, lines):
+    """Cổng cờ DD đã BỎ/CẢNH BÁO lệnh ⇒ 1 tin tóm tắt / account (cùng khuôn _notify_failopen).
+
+    stdout của run_bot chỉ nằm trong LOG; lệnh mua bị cổng loại phải đến được người (Trading
+    Daily + Telegram qua _notify_trading_daily). Fail-safe: không bao giờ raise.
+    """
+    try:
+        _notify_trading_daily(
+            f"🚩 **{label} — cổng cờ DD phiên {plan_date}: {len(lines)} lệnh**\n"
+            + "\n".join(lines)
+            + "\nLuật user 2026-11-02: mã có cờ ⇒ loại lệnh MUA mọi book (trừ DISCRETIONARY).")
+    except Exception:
+        pass
 
 
 def _notify_trading_daily(msg):
@@ -541,6 +557,30 @@ def main():
                 print(f"[{p['label']}] ⛔ signal_holds BỎ lệnh {o.ticker} ({o.side} {o.qty} cp, "
                       f"book {o.book}) — vi phạm hold [{h['scope']}={h['value']}] tới "
                       f"{h['until']}: {h['reason']}")
+        # CỔNG CỜ DD (user chốt 2026-11-02 23:01 ICT): mã có 🔴 RED_FLAG_CODES hoặc ⚠ quality_flag
+        # ≠ QUALITY_OK ⇒ LOẠI lệnh MUA mọi book trừ DISCRETIONARY* (chỉ cảnh báo) và PROBE của
+        # account paper `main`. Lệnh BÁN không bao giờ bị chặn. Fail-OPEN + báo to khi không kết
+        # luận được cờ (lỗi nguồn). PHẢI ĐỨNG TRƯỚC net_offsetting_orders: netting gán lệnh NET vào
+        # book chân lớn hơn, nên cổng chạy sau netting xoá mất SELL thật (BUY BAL 1000 + SELL
+        # DISCRETIONARY 300 ⇒ broker nhận []), để MUA mã cờ đi qua chuyển nội bộ (BUY LAG 300 +
+        # SELL PARK 1000 ⇒ SELL 700) và để chân LAG trốn vào nhãn DISCRETIONARY (arch-review vòng 1).
+        plan, dd_blocked = filter_dd_flag_orders(plan)
+        _dd_lines = []
+        for a in dd_blocked:
+            if a["action"] == "FAIL_OPEN":
+                _notify_failopen(p["label"], "cờ DD (mã có cờ ⇒ loại)", a["reason"])
+            elif a["action"] == "WARN_DISCRETIONARY":
+                print(f"[{p['label']}] ⚠ DISCRETIONARY {a['ticker']} ({a['qty_before']:,} cp, "
+                      f"book {a['book']}) có cờ {a['codes']} — chỉ cảnh báo, lệnh GIỮ")
+                _dd_lines.append(f"⚠ GIỮ {a['ticker']} {a['qty_before']:,} cp [{a['book']}] "
+                                 f"cờ {a['codes']} (sleeve discretionary — chỉ cảnh báo)")
+            else:
+                print(f"[{p['label']}] ⛔ CỜ DD BỎ lệnh MUA {a['ticker']} ({a['qty_before']:,} cp, "
+                      f"book {a['book']}) — {a['reason']}")
+                _dd_lines.append(f"⛔ BỎ MUA {a['ticker']} {a['qty_before']:,} cp [{a['book']}] "
+                                 f"cờ {a['codes']}")
+        if _dd_lines:
+            _notify_dd_flag_summary(p["label"], plan_date, _dd_lines)
         # Netting lệnh NGƯỢC CHIỀU cùng mã trong cùng plan (vd SELL park + BUY LAG cùng VPB)
         # → 1 lệnh NET ra broker; phần bù trừ là chuyển nội bộ giữa book (0 phí/spread). ĐẶT
         # SAU filter_excluded, TRƯỚC các trần %ADV — CHỦ ĐÍCH: trần đo tác động THỊ TRƯỜNG, mà
